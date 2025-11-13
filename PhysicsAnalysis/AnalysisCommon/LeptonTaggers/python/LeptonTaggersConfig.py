@@ -296,9 +296,18 @@ def DecoratePLITCfg(
     # check if Run3 (or beyond) configs should be used 
     isRun3 = (flags.GeoModel.Run >= LHCPeriod.Run3)
 
+    # Make sure the decorations have a unique name to avoid multiple tools writing the same name
+    kwargs.setdefault("acc_trk_dr_lepton","dr_lepton"+lepton_name)
+    kwargs.setdefault("acc_trk_electron_track","electron_track"+lepton_name)
+    kwargs.setdefault("acc_trk_muon_track","muon_track"+lepton_name)
+    kwargs.setdefault("acc_trk_dr_leptontrack","dr_leptontrack"+lepton_name)
+    kwargs.setdefault("dec_trk_dr_lepton","dr_lepton"+lepton_name)
+    kwargs.setdefault("dec_trk_electron_track","electron_track"+lepton_name)
+    kwargs.setdefault("dec_trk_muon_track","muon_track"+lepton_name)
+    kwargs.setdefault("dec_trk_dr_leptontrack","dr_leptontrack"+lepton_name)
+
     # path on calib area (found by path resolver
     # /cvmfs/atlas.cern.ch/repo/sw/database/GroupData/
-
     if lepton_name == 'Electrons':
         if isRun3:
             kwargs.setdefault("ConfigPath", "IsolationSelection/PLIT/2025-04-25/")
@@ -475,17 +484,6 @@ def DecoratePLITAlgsCfg(
     if lepton_type in ["", "Muons"]:
         acc.merge(DecoratePLITCfg(ConfigFlags, Tagger_name="PLIT", lepton_name="Muons"))
 
-    # Both algorithms above will be writing to the same decorations.
-    # So we need to explicitly lock them.
-    # (This is not MT-compatible.)
-    acc.addEventAlgo(CompFactory.DerivationFramework.LockDecorations
-                     ('LockPLITDecorations',
-                      Decorations = ['InDetTrackParticles.dr_lepton',
-                                     'InDetTrackParticles.electron_track',
-                                     'InDetTrackParticles.muon_track',
-                                     'InDetTrackParticles.dr_leptontrack',
-                                     ]))
-  
     return acc
 
 #------------------------------------------------------------------------------
