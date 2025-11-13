@@ -1,7 +1,7 @@
 // emacs, this is -*- C++ -*-
 
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /**  
@@ -109,7 +109,7 @@ namespace JetTiledMap {
     double  m_etarange{} ;
     double  m_halfetarange{};
     double m_rmax{};
-    size_t m_ndivX{}, m_ndivY{};
+    size_t m_ndivX=1, m_ndivY=1;
     double m_sizeX{},m_sizeY{};
     
     unsigned int m_size{};
