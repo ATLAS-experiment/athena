@@ -237,9 +237,6 @@ StatusCode TauSelectionTool::initialize()
       else if (sCut == "JetIDWP")
       {
         iSelectionCuts = iSelectionCuts | CutJetIDWP;
-        if (m_iJetIDWP == JETIDNONEUNCONFIGURED){
-          m_iJetIDWP = convertStrToJetIDWP(rEnv.GetValue("JetIDWP","JETIDNONE"));
-	} 
 	  
 	// check for possible mis-config in Tau selection
         for (const std::string& checkCut : vCuts){
@@ -594,8 +591,6 @@ std::string TauSelectionTool::convertJetIDWPToStr(int iJetIDWP) const
 {
   switch (iJetIDWP)
   {
-  case JETIDNONEUNCONFIGURED:
-    return "JETIDNONE";
   case JETIDNONE:
     return "JETIDNONE";
   case JETIDRNNVERYLOOSE:

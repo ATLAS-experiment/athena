@@ -401,9 +401,6 @@ bool TauSelectionCutJetIDWP::accept(const xAOD::TauJet& xTau,
   case JETIDNONE:
     bPass = true;
     break;
-  case JETIDNONEUNCONFIGURED:
-    bPass = true;
-    break;
   case JETIDRNNVERYLOOSE:
     if (xTau.isTau(xAOD::TauJetParameters::JetRNNSigVeryLoose)) bPass = true;
     break;
