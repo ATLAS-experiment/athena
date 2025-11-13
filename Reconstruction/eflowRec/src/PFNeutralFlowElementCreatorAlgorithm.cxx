@@ -1,4 +1,4 @@
-#include "eflowRec/PFNeutralFlowElementCreatorAlgorithm.h"
+#include "PFNeutralFlowElementCreatorAlgorithm.h"
 #include "eflowRec/eflowRecCluster.h"
 #include "eflowRec/PFClusterWidthCalculator.h"
 #include "xAODCore/ShallowCopy.h"
