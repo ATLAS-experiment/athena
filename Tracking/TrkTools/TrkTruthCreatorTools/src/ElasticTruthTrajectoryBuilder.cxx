@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // Andrei Gaponenko, 2008
@@ -113,7 +113,7 @@ ElasticTruthTrajectoryBuilder::MotherDaughter
 				}
 
 				if(num_passed_cuts==1) { // disallow hadronic pi->N*pi etc.
-					daughter = passed_cuts;
+					daughter = std::move(passed_cuts);
 				}
 
 			} 
