@@ -2582,9 +2582,9 @@ class TopoAlgoDef:
         algo_list = [
             InvMassDPhiSumETAlgoParams(MinEt1=0.7, MinEt2=0.7, DeltaPhiMin=24, MinInvMassSq=2.3, MaxInvMassSq=200 ** 2), # 23INVM400000-24DPHI32-2eTAU07
             InvMassDPhiSumETAlgoParams(MinEt1=0.6, MinEt2=0.6, DeltaPhiMin=24, MinInvMassSq=2.8, MaxInvMassSq=200 ** 2), # 28INVM400000-24DPHI32-2eTAU06
-            InvMassDPhiSumETAlgoParams(MinEt1=0.6, MinEt2=0.6, DeltaPhiMin=25, MinInvMassSq=2.3, MaxInvMassSq=200 ** 2), # 23INVM400000-25DPHI32-2eTAU06
+            InvMassDPhiSumETAlgoParams(MinEt1=0.8, MinEt2=0.8, DeltaPhiMin=25, MinInvMassSq=2.3, MaxInvMassSq=200 ** 2), # 23INVM400000-25DPHI32-2eTAU08
             InvMassDPhiSumETAlgoParams(MinEt1=0.5, MinEt2=0.5, DeltaPhiMin=25, MinInvMassSq=3.3, MaxInvMassSq=200 ** 2), # 33INVM400000-25DPHI32-2eTAU05
-            InvMassDPhiSumETAlgoParams(MinEt1=0.5, MinEt2=0.5, DeltaPhiMin=27, MinInvMassSq=2.3, MaxInvMassSq=200 ** 2), # 23INVM400000-27DPHI32-2eTAU05
+            InvMassDPhiSumETAlgoParams(MinEt1=0.7, MinEt2=0.7, DeltaPhiMin=27, MinInvMassSq=2.3, MaxInvMassSq=200 ** 2), # 23INVM400000-27DPHI32-2eTAU07
         ]
         AddInvMassDPhiSumETAlgos('eTAU', HW.eTauOutputWidthSort, algo_list)
 
