@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "G4AtlasTools/FastSimulationBase.h"
@@ -8,6 +8,7 @@
 #include "G4AutoDelete.hh"
 #include <G4Region.hh>
 #include "G4RegionStore.hh"
+#include "G4VFastSimulationModel.hh"
 
 FastSimulationBase::FastSimulationBase(const std::string& type, const std::string& name, const IInterface* parent)
   : base_class(type,name,parent)
