@@ -265,6 +265,7 @@ void FPGATrackSimKeyLayerBinDesc::writeLUTs(const FPGATrackSimBinStep &step) con
     FPGATrackSimBinUtil::StreamManager sm(keylayerName);
     sm.writeVar("r_in",r_in);
     sm.writeVar("r_out",r_out);
+    sm.writeVar("phi_offset",m_phiOffset.value());
   }
 
   if (stepIsRPhi(step)) {
