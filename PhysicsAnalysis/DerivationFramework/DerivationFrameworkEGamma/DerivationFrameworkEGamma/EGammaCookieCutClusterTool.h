@@ -44,7 +44,7 @@ namespace DerivationFramework {
         "ClusterContainerLinksName",
         "ForwardElectronCookieCutClusters_links",
         "Name of the output cluster container cell links container"
-        };;
+        };
 
     /** @brief Calorimeter description. */
     SG::ReadCondHandleKey<CaloDetDescrManager> m_caloDetDescrMgrKey {
