@@ -9,10 +9,12 @@
 #include "MuonIdHelpers/IMuonIdHelperSvc.h"
 #include "xAODMuon/MuonSegmentContainer.h"
 #include "xAODMuonSimHit/MuonSimHit.h"
+#include "xAODMeasurementBase/UncalibratedMeasurementContainer.h"
 
 #include "StoreGate/ReadHandleKey.h"
 #include "StoreGate/ReadDecorHandleKey.h"
 #include "StoreGate/WriteDecorHandleKey.h"
+#include "StoreGate/ReadDecorHandleKeyArray.h"
 
 namespace MuonR4{
     /** @brief Algorithm to match the reconstructed muon segment with the truth segment & 
@@ -45,6 +47,12 @@ namespace MuonR4{
             SG::WriteDecorHandleKey<xAOD::MuonSegmentContainer> m_segTruthSegLinkKey{this, "SegToTruthSegLinkKey", m_segmentKey, "truthSegmentLink"};
             /** @brief Output key to the associated truth particle decoration */
             SG::WriteDecorHandleKey<xAOD::MuonSegmentContainer> m_segTruthLinkKey{this, "SegTruthLinkKey", m_segmentKey, "truthParticleLink"};
+            /** @brief Decoration key of the prd -> simHit association */
+            Gaudi::Property<std::string> m_simLink{this, "SimHitLink", "simHitLink"};
+            /** @brief Key to the prd containers in the event */
+            SG::ReadHandleKeyArray<xAOD::UncalibratedMeasurementContainer> m_measKeys{this, "PrdContainer",{}};
+            /** @brief Dependency on the sim hit decoration */
+            SG::ReadDecorHandleKeyArray<xAOD::UncalibratedMeasurementContainer> m_prdLinkKeys{this, "PrdLinkKeys", {}};
     };
 }
 #endif

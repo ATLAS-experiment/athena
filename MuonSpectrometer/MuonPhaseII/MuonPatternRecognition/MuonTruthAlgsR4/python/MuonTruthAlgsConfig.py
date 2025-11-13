@@ -111,6 +111,8 @@ def RecoSegmentTruthAssocCfg(flags, **kwargs):
     result = ComponentAccumulator()
     ### Ensure that this configuration is always set externally
     kwargs.setdefault("SegmentKey", "")
+    from MuonConfig.MuonDataPrepConfig import PrimaryMeasContNamesCfg
+    kwargs.setdefault("PrdContainer", PrimaryMeasContNamesCfg(flags))
     the_alg = CompFactory.MuonR4.RecoSegToTruthAssocAlg(**kwargs)
     result.addEventAlgo(the_alg, primary = True)
     return result
