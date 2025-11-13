@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // Tile includes
@@ -104,11 +104,8 @@ StatusCode TileDigitsFlxMonitorAlgorithm::fillHistograms( const EventContext& ct
         nSamples = digits_monitored.size();
         if (nSamples>0) {
 
-          std::string channelName = moduleName[gain] + "_channel";
-          auto monitoredChannel = Monitored::Scalar<float>(channelName, channel);
-
-          std::string monPedestal = moduleName[gain] + "_Pedestal";
-          auto pedestal = Monitored::Scalar<float>(monPedestal, digits_monitored[0]);
+          auto monitoredChannel = Monitored::Scalar<float>(moduleName[gain] + "_channel", channel);
+          auto pedestal = Monitored::Scalar<float>(moduleName[gain] + "_Pedestal", digits_monitored[0]);
           fill("TileLegacyMonPed", monitoredChannel, pedestal);
 
           if (nSamples>1) {
@@ -121,8 +118,7 @@ StatusCode TileDigitsFlxMonitorAlgorithm::fillHistograms( const EventContext& ct
             sampleRMS -= sampleSum * sampleSum / nSamples;
             sampleRMS = (sampleRMS > 0.0) ? std::sqrt(sampleRMS / (nSamples - 1)) : 0.0;
 
-            std::string monHFN = moduleName[gain] + "_HFN";
-            auto hfn = Monitored::Scalar<float>(monHFN, sampleRMS);
+            auto hfn = Monitored::Scalar<float>(moduleName[gain] + "_HFN", sampleRMS);
             fill("TileLegacyMonHFN", monitoredChannel, hfn);
           }
 
@@ -146,7 +142,7 @@ StatusCode TileDigitsFlxMonitorAlgorithm::fillHistograms( const EventContext& ct
         int gain = m_tileHWID->adc(adcId);
 
         std::string sampleName = module + "_ch_" + std::to_string(channel) + gainName[gain] +  "_samples";
-        auto channelSample = Monitored::Scalar<float>(sampleName, 0.0F);
+        auto channelSample = Monitored::Scalar<float>(std::move(sampleName), 0.0F);
 
         std::vector<float> digits_monitored;
         auto it = tile_digits->samples().begin() + m_firstFelix;
@@ -162,11 +158,8 @@ StatusCode TileDigitsFlxMonitorAlgorithm::fillHistograms( const EventContext& ct
         nSamples = digits_monitored.size();
         if (nSamples>0) {
 
-          std::string channelName = moduleName[gain] + "_channel";
-          auto monitoredChannel = Monitored::Scalar<float>(channelName, channel);
-
-          std::string monPedestal = moduleName[gain] + "_Pedestal";
-          auto pedestal = Monitored::Scalar<float>(monPedestal, digits_monitored[0]);
+          auto monitoredChannel = Monitored::Scalar<float>(moduleName[gain] + "_channel", channel);
+          auto pedestal = Monitored::Scalar<float>(moduleName[gain] + "_Pedestal", digits_monitored[0]);
           fill("TileFlxMonPed", monitoredChannel, pedestal);
 
           if (nSamples>1) {
@@ -179,8 +172,7 @@ StatusCode TileDigitsFlxMonitorAlgorithm::fillHistograms( const EventContext& ct
             sampleRMS -= sampleSum * sampleSum / nSamples;
             sampleRMS = (sampleRMS > 0.0) ? std::sqrt(sampleRMS / (nSamples - 1)) : 0.0;
 
-            std::string monHFN = moduleName[gain] + "_HFN";
-            auto hfn = Monitored::Scalar<float>(monHFN, sampleRMS);
+            auto hfn = Monitored::Scalar<float>(moduleName[gain] + "_HFN", sampleRMS);
             fill("TileFlxMonHFN", monitoredChannel, hfn);
           }
 
@@ -192,12 +184,8 @@ StatusCode TileDigitsFlxMonitorAlgorithm::fillHistograms( const EventContext& ct
 
     // Compare digits from Legacy and FELIX
     for(unsigned int gain = 0; gain<TileCalibUtils::MAX_GAIN; ++gain) {
-
-      std::string channelName      = moduleName[gain] + "_channel";
-      std::string moduleSampleName = moduleName[gain] + "_samples_diff";
-
-      auto monitoredChannel = Monitored::Scalar<float>(channelName, 0.0F);
-      auto moduleSampleDiff = Monitored::Scalar<float>(moduleSampleName, 0.0F);
+      auto monitoredChannel = Monitored::Scalar<float>(moduleName[gain] + "_channel", 0.0F);
+      auto moduleSampleDiff = Monitored::Scalar<float>(moduleName[gain] + "_samples_diff", 0.0F);
 
       for(unsigned int channel = 0; channel<TileCalibUtils::MAX_CHAN; ++channel) {
 
@@ -206,7 +194,7 @@ StatusCode TileDigitsFlxMonitorAlgorithm::fillHistograms( const EventContext& ct
           monitoredChannel = channel;
 
           std::string sampleName = module + "_ch_" + std::to_string(channel) + gainName[gain] +  "_samples_diff";
-          auto channelSampleDiff = Monitored::Scalar<float>(sampleName, 0.0F);
+          auto channelSampleDiff = Monitored::Scalar<float>(std::move(sampleName), 0.0F);
 
           for (auto it1=digitsLegacy[channel][gain].begin(), it2=digitsFlx[channel][gain].begin();
                it1!=digitsLegacy[channel][gain].end() && it2!=digitsFlx[channel][gain].end(); ++it1, ++it2) {
