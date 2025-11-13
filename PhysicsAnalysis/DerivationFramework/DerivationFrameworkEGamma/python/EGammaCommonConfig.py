@@ -388,8 +388,7 @@ def EGammaCommonCfg(ConfigFlags):
     # Note: LH selectors don't need fudging since the LH is tuned to data
 
     # decorate electrons with the output of LH very loose
-    ElectronPassLHVeryLoose = acc.getPrimaryAndMerge(
-        EGElectronLikelihoodToolWrapperCfg(
+    ElectronPassLHVeryLoose = acc.addPublicTool(acc.popToolsAndMerge(EGElectronLikelihoodToolWrapperCfg(
             ConfigFlags,
             name="ElectronPassLHVeryLoose",
             EGammaElectronLikelihoodTool=ElectronLHSelectorVeryLoose,
@@ -399,11 +398,10 @@ def EGammaCommonCfg(ConfigFlags):
             ContainerName="Electrons",
             StoreTResult=False,
         )
-    )
+    ))
 
     # decorate electrons with the output of LH loose
-    ElectronPassLHLoose = acc.getPrimaryAndMerge(
-        EGElectronLikelihoodToolWrapperCfg(
+    ElectronPassLHLoose = acc.addPublicTool(acc.popToolsAndMerge(EGElectronLikelihoodToolWrapperCfg(
             ConfigFlags,
             name="ElectronPassLHLoose",
             EGammaElectronLikelihoodTool=ElectronLHSelectorLoose,
@@ -413,11 +411,10 @@ def EGammaCommonCfg(ConfigFlags):
             ContainerName="Electrons",
             StoreTResult=False,
         )
-    )
+    ))
 
     # decorate electrons with the output of LH loose+BL
-    ElectronPassLHLooseBL = acc.getPrimaryAndMerge(
-        EGElectronLikelihoodToolWrapperCfg(
+    ElectronPassLHLooseBL = acc.addPublicTool(acc.popToolsAndMerge(EGElectronLikelihoodToolWrapperCfg(
             ConfigFlags,
             name="ElectronPassLHLooseBL",
             EGammaElectronLikelihoodTool=ElectronLHSelectorLooseBL,
@@ -427,11 +424,10 @@ def EGammaCommonCfg(ConfigFlags):
             ContainerName="Electrons",
             StoreTResult=False,
         )
-    )
+    ))
 
     # decorate electrons with the output of LH medium
-    ElectronPassLHMedium = acc.getPrimaryAndMerge(
-        EGElectronLikelihoodToolWrapperCfg(
+    ElectronPassLHMedium = acc.addPublicTool(acc.popToolsAndMerge(EGElectronLikelihoodToolWrapperCfg(
             ConfigFlags,
             name="ElectronPassLHMedium",
             EGammaElectronLikelihoodTool=ElectronLHSelectorMedium,
@@ -441,11 +437,10 @@ def EGammaCommonCfg(ConfigFlags):
             ContainerName="Electrons",
             StoreTResult=False,
         )
-    )
+    ))
 
     # decorate electrons with the output of LH tight
-    ElectronPassLHTight = acc.getPrimaryAndMerge(
-        EGElectronLikelihoodToolWrapperCfg(
+    ElectronPassLHTight = acc.addPublicTool(acc.popToolsAndMerge(EGElectronLikelihoodToolWrapperCfg(
             ConfigFlags,
             name="ElectronPassLHTight",
             EGammaElectronLikelihoodTool=ElectronLHSelectorTight,
@@ -455,11 +450,10 @@ def EGammaCommonCfg(ConfigFlags):
             ContainerName="Electrons",
             StoreTResult=False,
         )
-    )
+    ))
 
     # decorate electrons with the output of DNN Loose
-    ElectronPassDNNLoose = acc.getPrimaryAndMerge(
-        EGElectronLikelihoodToolWrapperCfg(
+    ElectronPassDNNLoose = acc.addPublicTool(acc.popToolsAndMerge(EGElectronLikelihoodToolWrapperCfg(
             ConfigFlags,
             name="ElectronPassDNNLoose",
             EGammaElectronLikelihoodTool=ElectronDNNSelectorLoose,
@@ -478,11 +472,10 @@ def EGammaCommonCfg(ConfigFlags):
             ],
             StoreMultipleOutputs=True,
         )
-    )
+    ))
 
     # decorate electrons with the output of DNN Medium
-    ElectronPassDNNMedium = acc.getPrimaryAndMerge(
-        EGElectronLikelihoodToolWrapperCfg(
+    ElectronPassDNNMedium = acc.addPublicTool(acc.popToolsAndMerge(EGElectronLikelihoodToolWrapperCfg(
             ConfigFlags,
             name="ElectronPassDNNMedium",
             EGammaElectronLikelihoodTool=ElectronDNNSelectorMedium,
@@ -492,11 +485,10 @@ def EGammaCommonCfg(ConfigFlags):
             ContainerName="Electrons",
             StoreTResult=False,
         )
-    )
+    ))
 
     # decorate electrons with the output of DNN Tight
-    ElectronPassDNNTight = acc.getPrimaryAndMerge(
-        EGElectronLikelihoodToolWrapperCfg(
+    ElectronPassDNNTight = acc.addPublicTool(acc.popToolsAndMerge(EGElectronLikelihoodToolWrapperCfg(
             ConfigFlags,
             name="ElectronPassDNNTight",
             EGammaElectronLikelihoodTool=ElectronDNNSelectorTight,
@@ -506,11 +498,10 @@ def EGammaCommonCfg(ConfigFlags):
             ContainerName="Electrons",
             StoreTResult=False,
         )
-    )
+    ))
 
     # decorate electrons with the output of DNN VeryLoose97 without CF
-    ElectronPassDNNVeryLooseNoCF97 = acc.getPrimaryAndMerge(
-        EGElectronLikelihoodToolWrapperCfg(
+    ElectronPassDNNVeryLooseNoCF97 = acc.addPublicTool(acc.popToolsAndMerge(EGElectronLikelihoodToolWrapperCfg(
             ConfigFlags,
             name="ElectronPassDNNVeryLooseNoCF97",
             EGammaElectronLikelihoodTool=ElectronDNNSelectorVeryLooseNoCF97,
@@ -520,10 +511,9 @@ def EGammaCommonCfg(ConfigFlags):
             ContainerName="Electrons",
             StoreTResult=False,
         )
-    )
+    ))
     # decorate electrons with the output of DNN Loose without CF
-    ElectronPassDNNLooseNoCF = acc.getPrimaryAndMerge(
-        EGElectronLikelihoodToolWrapperCfg(
+    ElectronPassDNNLooseNoCF = acc.addPublicTool(acc.popToolsAndMerge(EGElectronLikelihoodToolWrapperCfg(
             ConfigFlags,
             name="ElectronPassDNNLooseNoCF",
             EGammaElectronLikelihoodTool=ElectronDNNSelectorLooseNoCF,
@@ -533,11 +523,10 @@ def EGammaCommonCfg(ConfigFlags):
             ContainerName="Electrons",
             StoreTResult=False,
         )
-    )
+    ))
 
     # decorate electrons with the output of DNN Medium without CF
-    ElectronPassDNNMediumNoCF = acc.getPrimaryAndMerge(
-        EGElectronLikelihoodToolWrapperCfg(
+    ElectronPassDNNMediumNoCF = acc.addPublicTool(acc.popToolsAndMerge(EGElectronLikelihoodToolWrapperCfg(
             ConfigFlags,
             name="ElectronPassDNNMediumNoCF",
             EGammaElectronLikelihoodTool=ElectronDNNSelectorMediumNoCF,
@@ -547,11 +536,10 @@ def EGammaCommonCfg(ConfigFlags):
             ContainerName="Electrons",
             StoreTResult=False,
         )
-    )
+    ))
 
     # decorate electrons with the output of DNN Tight without CF
-    ElectronPassDNNTightNoCF = acc.getPrimaryAndMerge(
-        EGElectronLikelihoodToolWrapperCfg(
+    ElectronPassDNNTightNoCF = acc.addPublicTool(acc.popToolsAndMerge(EGElectronLikelihoodToolWrapperCfg(
             ConfigFlags,
             name="ElectronPassDNNTightNoCF",
             EGammaElectronLikelihoodTool=ElectronDNNSelectorTightNoCF,
@@ -561,12 +549,11 @@ def EGammaCommonCfg(ConfigFlags):
             ContainerName="Electrons",
             StoreTResult=False,
         )
-    )
+    ))
 
     # decorate electrons with the output of ECIDS
     if ConfigFlags.Derivation.Egamma.addECIDS:
-        ElectronPassECIDS = acc.getPrimaryAndMerge(
-            EGElectronLikelihoodToolWrapperCfg(
+        ElectronPassECIDS = acc.addPublicTool(acc.popToolsAndMerge(EGElectronLikelihoodToolWrapperCfg(
                 ConfigFlags,
                 name="ElectronPassECIDS",
                 EGammaElectronLikelihoodTool=ElectronChargeIDSelector,
@@ -576,12 +563,11 @@ def EGammaCommonCfg(ConfigFlags):
                 ContainerName="Electrons",
                 StoreTResult=True,
             )
-        )
+        ))
 
     if includeFwdElectrons:
         # decorate forward electrons with the output of LH loose
-        ForwardElectronPassLHLoose = acc.getPrimaryAndMerge(
-            EGElectronLikelihoodToolWrapperCfg(
+        ForwardElectronPassLHLoose = acc.addPublicTool(acc.popToolsAndMerge(EGElectronLikelihoodToolWrapperCfg(
                 ConfigFlags,
                 name="ForwardElectronPassLHLoose",
                 EGammaElectronLikelihoodTool=ForwardElectronLHSelectorLoose,
@@ -590,11 +576,10 @@ def EGammaCommonCfg(ConfigFlags):
                 StoreGateEntryName="DFCommonForwardElectronsLHLoose",
                 ContainerName="ForwardElectrons",
             )
-        )
+        ))
 
         # decorate forward electrons with the output of LH medium
-        ForwardElectronPassLHMedium = acc.getPrimaryAndMerge(
-            EGElectronLikelihoodToolWrapperCfg(
+        ForwardElectronPassLHMedium = acc.addPublicTool(acc.popToolsAndMerge(EGElectronLikelihoodToolWrapperCfg(
                 ConfigFlags,
                 name="ForwardElectronPassLHMedium",
                 EGammaElectronLikelihoodTool=ForwardElectronLHSelectorMedium,
@@ -603,11 +588,10 @@ def EGammaCommonCfg(ConfigFlags):
                 StoreGateEntryName="DFCommonForwardElectronsLHMedium",
                 ContainerName="ForwardElectrons",
             )
-        )
+        ))
 
         # decorate forward electrons with the output of LH tight
-        ForwardElectronPassLHTight = acc.getPrimaryAndMerge(
-            EGElectronLikelihoodToolWrapperCfg(
+        ForwardElectronPassLHTight = acc.addPublicTool(acc.popToolsAndMerge(EGElectronLikelihoodToolWrapperCfg(
                 ConfigFlags,
                 name="ForwardElectronPassLHTight",
                 EGammaElectronLikelihoodTool=ForwardElectronLHSelectorTight,
@@ -616,7 +600,7 @@ def EGammaCommonCfg(ConfigFlags):
                 StoreGateEntryName="DFCommonForwardElectronsLHTight",
                 ContainerName="ForwardElectrons",
             )
-        )
+        ))
 
     # decorate photons with the output of IsEM loose
     # on MC, fudge the shower shapes before computing the ID (but the
