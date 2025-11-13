@@ -31,7 +31,9 @@ namespace MuonR4 {
         for (const auto& key : m_measKeys) {
             m_writeMarkKeys.emplace_back(key, m_writeMarker);
             m_writeSegLinkKeys.emplace_back(key, m_segLink);
+            m_prdLinkKeys.emplace_back(key, m_simLink);
         }
+        ATH_CHECK(m_prdLinkKeys.initialize());
         ATH_CHECK(m_writeMarkKeys.initialize());
         ATH_CHECK(m_writeSegLinkKeys.initialize());
         return StatusCode::SUCCESS; 
