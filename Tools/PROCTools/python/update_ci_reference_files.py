@@ -422,9 +422,9 @@ if __name__ == '__main__':
 
     print("The next step is to update the MR with the new content i.e. the References.py file and the digest files.")
     print(" IMPORTANT: before you do this, you must first make sure that the local repository is on same branch as the MR by doing:")
-    print(f" $ git fetch --no-tags {remote} {mr.source_branch}:{local_branch}")
-    print(f" $ git switch {local_branch}")
-    print(" $ git rebase upstream/main") # In case there have been any changes since the MR was created
+    print(f"   git fetch --no-tags {remote} {mr.source_branch}:{local_branch}")
+    print(f"   git switch {local_branch}")
+    print("   git rebase upstream/main") # In case there have been any changes since the MR was created
     print()
 
     msg = 'Would you like to (locally) update digest ref files and/or versions in References.py?'
@@ -447,5 +447,5 @@ if __name__ == '__main__':
         print()
         print("Finished! Before pushing, you might want to manually trigger an EOS to cvmfs copy here: https://atlas-jenkins.cern.ch/view/all/job/ART_data_eos2cvmfs/")
         print("Then commit your changes and (force) push the updated branch to the author's remote:")
-        print(" $ git commit")
-        print(f" $ git push [-f] {remote} {local_branch}:{mr.source_branch}")
+        print("   git commit")
+        print(f"   git push {remote} {local_branch}:{mr.source_branch}")
