@@ -169,10 +169,13 @@ RpdSubtractCentroidTool::SubstepStatus RpdSubtractCentroidTool::readAOD(xAOD::Zd
     return SubstepStatus::SkipEvent;
   }
 
-  static SG::ConstAccessor<float> const xposRelAcc("xposRel" + m_auxSuffix);
-  static SG::ConstAccessor<float> const yposRelAcc("yposRel" + m_auxSuffix);
-  static SG::ConstAccessor<unsigned short> const rowAcc("row" + m_auxSuffix);
-  static SG::ConstAccessor<unsigned short> const colAcc("col" + m_auxSuffix);
+  // nominally, aux suffix is added to read key, since upstream tools were probably configured to write decorations with the same suffix
+  // however, certain decorations remain unchanged in a reprocessing (e.g., those written by ZdcRecChannelToolLucrod), in which case the suffix should NOT be added
+  static SG::ConstAccessor<float> const xposRelAcc("xposRel");
+  static SG::ConstAccessor<float> const yposRelAcc("yposRel");
+  static SG::ConstAccessor<unsigned short> const rowAcc("row");
+  static SG::ConstAccessor<unsigned short> const colAcc("col");
+
   static SG::ConstAccessor<float> const rpdChannelSumAdcAcc("RPDChannelAmplitude" + m_auxSuffix);
   static SG::ConstAccessor<float> const rpdChannelSumAdcCalibAcc("RPDChannelAmplitudeCalib" + m_auxSuffix);
   static SG::ConstAccessor<float> const rpdChannelMaxADCAcc("RPDChannelMaxADC" + m_auxSuffix);
