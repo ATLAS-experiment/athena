@@ -121,7 +121,7 @@ def L1CALOCoreCfg(flags, deriv='L1CALO1', **kwargs):
                 nsamples=runinfo.streamLengths()[i]
 
     # Create SC_ET if sufficient samples in data or it is MC
-    if nsamples==6:
+    if nsamples==6 and flags.Input.ProjectName != "data23_13p6TeV":
         # first built the Supercells from the ADC
         larLATOMEBuilderAlg=CompFactory.LArLATOMEBuilderAlg("LArLATOMEBuilderAlg2")
         # for standard runs with baseline corrections
