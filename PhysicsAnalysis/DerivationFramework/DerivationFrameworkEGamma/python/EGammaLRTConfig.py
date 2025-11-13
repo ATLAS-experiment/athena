@@ -58,7 +58,7 @@ def EGammaLRTCfg(ConfigFlags):
 
     # decorate electrons with the output of ECIDS
     if ConfigFlags.Derivation.Egamma.addECIDS:
-        LRTElectronPassECIDS = acc.getPrimaryAndMerge(
+        LRTElectronPassECIDS = acc.addPublicTool(acc.popToolsAndMerge(
             EGElectronLikelihoodToolWrapperCfg(
                 ConfigFlags,
                 name="LRTElectronPassECIDS",
@@ -69,7 +69,7 @@ def EGammaLRTCfg(ConfigFlags):
                 ContainerName="LRTElectrons",
                 StoreTResult=True,
             )
-        )
+        ))
 
     # decorate some electrons with an additional ambiguity flag
     # against internal and early material conversion

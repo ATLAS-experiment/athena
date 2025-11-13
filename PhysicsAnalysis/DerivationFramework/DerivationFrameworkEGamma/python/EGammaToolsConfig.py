@@ -52,10 +52,7 @@ def EGElectronLikelihoodToolWrapperCfg(flags, name, **kwargs):
     kwargs.setdefault("decoratorMultipleOutputs", [containerName + "." + n for n in sgMultipleNames] if storeMultipleOutputs else [])
     # FIXME Would ideally do this, but currently this syntax overwrites the parent container key
     #kwargs.setdefault("decoratorMultipleOutputs", sgMultipleNames if storeMultipleOutputs else [])
-    EGElectronLikelihoodToolWrapper = (
-        CompFactory.DerivationFramework.EGElectronLikelihoodToolWrapper
-    )
-    acc.addPublicTool(EGElectronLikelihoodToolWrapper(name, **kwargs), primary=True)
+    acc.setPrivateTools(CompFactory.DerivationFramework.EGElectronLikelihoodToolWrapper(name, **kwargs))
     return acc
 
 
