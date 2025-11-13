@@ -22,7 +22,7 @@ def MaxCellDecoratorCfg(flags, **kwargs):
     electronDecorations = baseDecorations
     if hasattr(kwargs, "SGKey_egammaClusters") and kwargs["SGKey_egammaClusters"]:
         electronDecorations += ["dR"]
-    kwargs("SGKey_electrons_decorations", electronDecorations)
+    kwargs.setdefault("SGKey_electrons_decorations", electronDecorations)
     kwargs.setdefault("SGKey_photons", flags.Egamma.Keys.Output.Photons)
     acc.setPrivateTools(CompFactory.DerivationFramework.MaxCellDecorator(**kwargs))
     from LArCabling.LArCablingConfig import LArOnOffIdMappingCfg
