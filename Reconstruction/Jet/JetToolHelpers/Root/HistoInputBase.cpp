@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <iostream>
@@ -92,6 +92,5 @@ double HistoInputBase::readFromHisto(const double X, const double Y, const doubl
         return m_hist->Interpolate(X,Y,Z);
     // Shouldn't reach here due to previous checks
     throw std::runtime_error("Unexpected number of dimensions of histogram: " + std::to_string(nDim));
-    return 0;
 }
 } // namespace JetHelper
