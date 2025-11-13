@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration.
  *
  * @file HGTD_SurfaceChargesGenerator.h
  *
@@ -22,7 +22,7 @@
 
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "IHGTD_SurfaceChargesGenerator.h"
-#include "HGTD_TimingResolution.h"
+#include "HGTD_Calibration/HGTD_TimeResolutionTool.h"
 
 #include <string>
 
@@ -54,7 +54,10 @@ private:
   FloatProperty m_diffusion_constant{this, "DiffusionConstant", .007, ""};
   FloatProperty m_active_time_window{this, "ActiveTimeWindow", 1.25, "Hits within this time window are used for digitization, the rest are discarded (Given in ns)."};
   BooleanProperty m_smear_meantime{this, "SmearMeanTime", true, "Smear mean time based on radius and luminosity"};
-  ToolHandle<HGTD_TimingResolution> m_hgtd_timing_resolution_tool{this, "TimingResolutionTool", "HGTD_TimingResolution", "Tool for smearing LGAD timing based on integrated luminosity and radius"};
+  ToolHandle<HGTD_TimeResolutionTool> m_hgtd_time_resolution_tool{
+      this, "TimeResolutionTool", "HGTD_TimeResolutionTool",
+      "Tool for smearing LGAD timing based on integrated luminosity and "
+      "radius"};
 };
 
 #endif // HGTD_DIGITZATION_HGTD_SURFACECHARGESGENERATOR_H
