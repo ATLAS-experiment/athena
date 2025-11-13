@@ -1,6 +1,6 @@
 """Define methods to construct configured HGTD Digitization tools and algorithms
 
-Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 """
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -20,13 +20,6 @@ def HGTD_LastXing():
     return 0
 # NOTE: related to 3BC mode?
 
-def HGTD_TimingResolutionCfg(flags, name="HGTD_TimingResolution", **kwargs):
-    acc = ComponentAccumulator()
-
-    kwargs.setdefault("IntegratedLuminosity", 0.)
-    acc.setPrivateTools(CompFactory.HGTD_TimingResolution(name, **kwargs))
-    return acc
-
 
 def HGTD_FrontEndToolCfg(flags, name="HGTD_FrontEndTool", **kwargs):
     acc = ComponentAccumulator()
@@ -38,9 +31,12 @@ def HGTD_FrontEndToolCfg(flags, name="HGTD_FrontEndTool", **kwargs):
 def HGTD_SurfaceChargesGeneratorCfg(flags, name="HGTD_SurfaceChargesGenerator", **kwargs):
     acc = ComponentAccumulator()
 
+    from HGTD_Calibration.HGTD_CalibrationConfig import HGTD_TimeResolutionToolCfg
+
     kwargs.setdefault("ActiveTimeWindow", 1.25)
     kwargs.setdefault("SmearMeanTime", True)
-    kwargs.setdefault("TimingResolutionTool", acc.popToolsAndMerge(HGTD_TimingResolutionCfg(flags)))
+    kwargs.setdefault("TimeResolutionTool", acc.popToolsAndMerge(
+        HGTD_TimeResolutionToolCfg(flags)))
     acc.setPrivateTools(CompFactory.HGTD_SurfaceChargesGenerator(name, **kwargs))
     return acc
 
