@@ -122,8 +122,10 @@ def L1CALOCoreCfg(flags, deriv='L1CALO1', **kwargs):
                 nsamples=runinfo.streamLengths()[i]
 
     # Create SC_ET if sufficient samples in data or it is MC
-    if nsamples==6 and flags.Input.ProjectName != "data23_13p6TeV":
+    if nsamples==6:
         # first built the Supercells from the ADC
+        from LArConfiguration.LArElecCalibDBConfig import LArElecCalibDBSCCfg
+        acc.merge(LArElecCalibDBSCCfg(flags, condObjs=["DAC2uA", "HVScaleCorr", "MphysOverMcal", "OFC", "Pedestal", "Ramp", "uA2MeV"]))
         larLATOMEBuilderAlg=CompFactory.LArLATOMEBuilderAlg("LArLATOMEBuilderAlg2")
         # for standard runs with baseline corrections
         baselineCorr = True # need to find a run with no baseline corrections and the correct settings to see what to expect
