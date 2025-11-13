@@ -180,6 +180,32 @@ StatusCode EFTrackingXrtAlgorithm::initialize() {
     }
   }
 
+  for (const auto& kernelNames : m_kernelOrder) {
+    for (const auto& kernelName : kernelNames) {
+      const std::vector<std::shared_ptr<xrt::device>> devices = 
+        m_DeviceMgmtSvc->get_xrt_devices_by_kernel_name(kernelName);
+
+      ATH_CHECK(devices.size() != 0);
+
+      if (!m_kernels.contains(kernelName)) {
+        ATH_MSG_DEBUG("Creating kernel: " << kernelName);
+
+        m_kernels[kernelName] = std::make_unique<xrt::kernel>(
+          *(devices[0]),
+          devices[0]->get_xclbin_uuid(),
+          kernelName,
+          xrt::kernel::cu_access_mode::exclusive
+        );
+
+        if (!m_runs.contains(kernelName)) {
+          m_runs[kernelName] = std::make_unique<xrt::run>(*m_kernels[kernelName]);
+        }
+
+        ATH_CHECK(m_runs[kernelName].get() != nullptr);
+      }
+    }
+  }
+
   return StatusCode::SUCCESS;
 }
 
