@@ -175,7 +175,6 @@ RpdSubtractCentroidTool::SubstepStatus RpdSubtractCentroidTool::readAOD(xAOD::Zd
   static SG::ConstAccessor<float> const yposRelAcc("yposRel");
   static SG::ConstAccessor<unsigned short> const rowAcc("row");
   static SG::ConstAccessor<unsigned short> const colAcc("col");
-  
   static SG::ConstAccessor<float> const rpdChannelSumAdcAcc("RPDChannelAmplitude" + m_auxSuffix);
   static SG::ConstAccessor<float> const rpdChannelSumAdcCalibAcc("RPDChannelAmplitudeCalib" + m_auxSuffix);
   static SG::ConstAccessor<float> const rpdChannelMaxADCAcc("RPDChannelMaxADC" + m_auxSuffix);

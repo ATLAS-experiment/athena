@@ -92,10 +92,12 @@ def GenerateConfigTagDict():
     
 def SetConfigTag(flags):
 
-    run_num = flags.Input.RunNumbers[0]
-    aa = getTypeForRun(run_num)
-    aa_type = aa.getBeam1Type()
-    print('ZdcRecConfig::SetConfigTag(): Getting config for run %d: type %d' % (run_num,aa_type))    
+    aa_type = 82 # default to Pb+Pb unless a run number is provided
+    if flags.Input.RunNumbers:
+        run_num = flags.Input.RunNumbers[0]
+        aa = getTypeForRun(run_num)
+        aa_type = aa.getBeam1Type()
+    print('ZdcRecConfig::SetConfigTag(): Getting config for type %d' % (aa_type))    
     
     # terrible kludge for early 2025
     if flags.Input.ProjectName == "data25_comm" and flags.Input.TriggerStream == "calibration_ZDCCalib":
