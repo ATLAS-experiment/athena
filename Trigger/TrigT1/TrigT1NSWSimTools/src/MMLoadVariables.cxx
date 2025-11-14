@@ -2,7 +2,7 @@
   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "TrigT1NSWSimTools/MMLoadVariables.h"
+#include "MMLoadVariables.h"
 #include "GeneratorObjects/McEventCollection.h"
 #include "FourMomUtils/xAODP4Helpers.h"
 #include "TruthUtils/MagicNumbers.h"
