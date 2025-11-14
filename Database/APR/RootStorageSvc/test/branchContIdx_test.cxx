@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -31,20 +31,13 @@
 using namespace pool;
 using namespace std;
 
-const string            filename = "branchContIdx_testfile.root";    // test file name
-
-// use normal containers
-//const string            containerNameA = "ContainerA";               // container for objects A
-//const string            containerNameB = "ContainerB";               // container for objects B
-
-// use branch containes
-const string            containerNameA = "Containers(A)";            // branch container for objects A
-const string            containerNameB = "Containers(B)";            // branch container for objects B
-const string            containerNameC = "ContainerC";               // tree container for objects C
-
-
-//const pool::DbType      storageType = pool::ROOTTREE_StorageType;
-const pool::DbType      storageType = pool::ROOTTREEINDEX_StorageType;
+// branch containe names
+const string            c_gcontNameA = "Containers(A)";           // grouped container for objects A
+const string            c_gcontNameB = "Containers(B)";           // grouped container for objects B
+// standard container names
+const string            c_contNameA = "ContainerA";               // container for objects A
+const string            c_contNameB = "ContainerB";               // container for objects B
+const string            c_contNameC = "ContainerC";               // container for objects C
 
 pool::DbString       myStringA1("This is my string A1");
 pool::DbString       myStringA2("This is my string A2");
@@ -63,12 +56,23 @@ pool::DbString       myStringC2("This is my string C2");
 pool::DbString       myStringC3("This is my string C3");
 
 
-int main() {
-   cout << "Starting branchContIdx_test" << endl;
+void test(const DbType storageType, const std::string& filename) {
+   cout << endl << "Starting index test for " << storageType.storageName() << endl;
 
    // string tokens to written objects, for use when reading back
    string refA1, refA2, refA3, refA4, refA5, refA6, refA7;
    string refB1, refB2, refB3, refC1, refC2, refC3;
+
+   string containerNameA, containerNameB, containerNameC;
+   if( storageType.exactMatch(pool::ROOTRNTUPLE_StorageType) ) {
+      // RNTuple can not handle grouped containers with uneqal number of objects
+      containerNameA = c_contNameA;
+      containerNameB = c_contNameB;
+   } else {
+      containerNameA = c_gcontNameA;
+      containerNameB = c_gcontNameB;
+   }
+   containerNameC = c_contNameC;
 
    pool::IStorageSvc* storSvc = pool::createStorageSvc("StorageSvc");
    if ( ! storSvc ) {
@@ -234,9 +238,11 @@ int main() {
    if( !storSvc->endSession( sessionHandle ).isSuccess() ) {
       throw std::runtime_error( "Could not end correctly the session." );
    }
-
    storSvc->release();
-
-   return 0;
 }
 
+int main() {
+   test(ROOTTREEINDEX_StorageType, "TTreeContIdx_testfile.root");
+   test(ROOTRNTUPLE_StorageType, "RNTupleContIdx_testfile.root");
+   return 0;
+}

@@ -1066,6 +1066,7 @@ RootDatabase::getNTupleWriter(const std::string& ntuple_name, bool create)
    auto& writer = m_ntupleWriterMap[ntuple_name];
    if( !writer and create ) {
       writer = std::make_unique<RootStorageSvc::RNTupleWriterHelper>(m_file, ntuple_name, m_rntBufferedWriteEnabled, m_rntWriterMetricsEnabled);
+      ATH_MSG_DEBUG("Created new RNTuple: " << ntuple_name  << " in file: " << m_file->GetName());
    }
    if( writer and create ) {
       // treat the create flag as an indication of a new container client and count them
