@@ -89,7 +89,7 @@ namespace {
       input.type = str::match_first(type_regexes, input.name,
                                 "hits type matching");
       input.flip_sign = false;
-      config.inputs.push_back(input);
+      config.inputs.push_back(std::move(input));
     }
     return config;
   }
