@@ -35,12 +35,12 @@ namespace DerivationFramework {
     return StatusCode::SUCCESS;
   }
 
-  StatusCode UsedInVertexFitTrackDecorator::addBranches(const EventContext&) const
+  StatusCode UsedInVertexFitTrackDecorator::addBranches(const EventContext& ctx) const
   {
     ATH_MSG_DEBUG("In addBranches(...) for " << name() <<  "...");
 
     // Decorate our tracks
-    m_decoTool->decorate(); // FIXME Pass EventContext
+    m_decoTool->decorate(ctx);
 
     return StatusCode::SUCCESS;
   }

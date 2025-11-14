@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef INDETUSEDINFITTRACKDECORATORTOOL_INDETUSEDINFITTRACKDECORATORTOOL_H
@@ -38,7 +38,7 @@ namespace InDet {
     ///////////////////////////////////////////////////////////////////
     // Public methods:
     ///////////////////////////////////////////////////////////////////
-  public:
+    public:
 
     /// @name Constructor(s)/destructor(s)
     /// @{
@@ -59,35 +59,35 @@ namespace InDet {
 
     /// Function finalizing the tool
     virtual StatusCode finalize() override;
-    
+
     /// @}
-    
+
     /// @name Function(s) implementing the IInDetUsedInFitTrackDecoratorTool interface
     /// @{
 
     /// Function for decorating tracks with their used-in-fit AMVF vertices and weights
-    virtual void decorate(const xAOD::TrackParticleContainer* trkCont, const xAOD::VertexContainer* vtxCont) const override;
-    virtual void decorate() const override;
+    virtual void decorate(const xAOD::TrackParticleContainer* trkCont, const xAOD::VertexContainer* vtxCont, const EventContext& ctx) const override;
+    virtual void decorate(const EventContext& ctx) const override;
 
     /// @}
 
     ///////////////////////////////////////////////////////////////////
     // Private data:
     ///////////////////////////////////////////////////////////////////
-   private:
+  private:
 
     /// @name The properties that can be defined via the python job options
     /// @{
 
     /// Name of the per-track decoration for the AMVF fit vertices
     StringProperty m_vtxDecoName
-      {this, "AMVFVerticesDecoName", "TTVA_AMVFVertices",
-	"Name of the per-track AMVF vertices decoration"};
+    {this, "AMVFVerticesDecoName", "TTVA_AMVFVertices",
+        "Name of the per-track AMVF vertices decoration"};
 
     /// Name of the per-track decoration for the AMVF fit weights
     StringProperty m_wgtDecoName
       {this, "AMVFWeightsDecoName", "TTVA_AMVFWeights",
-	"Name of the per-track AMVF weights decoration"};
+       "Name of the per-track AMVF weights decoration"};
 
     /// Name of the track particle container (needed for container-less function calls)
     SG::ReadHandleKey<xAOD::TrackParticleContainer> m_trkContKey
