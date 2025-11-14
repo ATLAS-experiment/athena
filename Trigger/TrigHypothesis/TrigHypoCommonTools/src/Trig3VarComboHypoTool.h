@@ -7,11 +7,12 @@
 
 #include "DecisionHandling/ComboHypoToolBase.h"
 
-#include "TrigCompositeUtils/HLTIdentifier.h"
-#include "TrigCompositeUtils/TrigCompositeUtils.h"
 
-#include "AthenaMonitoringKernel/Monitored.h"
 #include "AthenaMonitoringKernel/GenericMonitoringTool.h"
+#include <vector>
+#include <cstdint> //for unit32_t etc
+#include <tuple>
+#include <limits>
 
 class Trig3VarComboHypoTool:  public ComboHypoToolBase {
 
