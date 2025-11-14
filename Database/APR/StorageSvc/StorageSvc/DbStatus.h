@@ -12,9 +12,6 @@
 #ifndef POOL_DBSTATUS_H
 #define POOL_DBSTATUS_H 1
 
-// Framework customization file
-#include "StorageSvc/DbConfig.h"
-
 /*
  *   POOL namespace declaration
  */
