@@ -38,7 +38,6 @@ def TauBuildAlgCfg(flags):
     if flags.Beam.Type is not BeamType.Cosmics and flags.Tau.doRNNTrackClass:
         tools.append( result.popToolsAndMerge(tauTools.TauTrackRNNClassifierCfg(flags)) )
 
-    tools.append( result.popToolsAndMerge(tauTools.CellVariablesCfg(flags)) )
     tools.append( result.popToolsAndMerge(tauTools.TauShotFinderCfg(flags)) )
 
     if flags.Tau.doPi0Clus:
@@ -139,6 +138,9 @@ def TauRunnerAlgCfg(flags):
         tools.append( result.popToolsAndMerge(pantau.PanTauCfg(flags)) )
 
     tools.append(result.popToolsAndMerge(tauTools.TauCombinedTESCfg(flags)) )
+
+    # this is scheduled here because it provides variables used in the MVATES evaluation
+    tools.append( result.popToolsAndMerge(tauTools.CellVariablesCfg(flags)) )
     # these tools need pantau info
     if flags.Beam.Type is not BeamType.Cosmics:
         tools.append( result.popToolsAndMerge(tauTools.MvaTESVariableDecoratorCfg(flags)) )
