@@ -391,7 +391,7 @@ TrigAccel::Work* TrigITkModuleCuda::createWork(int workType, std::shared_ptr<Tri
     
     unsigned int workId = workNum*100;
     
-    SeedMakingWorkCudaITk* w = new SeedMakingWorkCudaITk(workId, ctx, data, &m_timeLine);
+    SeedMakingWorkCudaITk* w = new SeedMakingWorkCudaITk(workId, ctx, std::move(data), &m_timeLine);
     
     return w;
   }
@@ -420,7 +420,7 @@ TrigAccel::Work* TrigITkModuleCuda::createWork(int workType, std::shared_ptr<Tri
     
     unsigned int workId = workNum*100;
     
-    SeedMakingWorkCudaManagedITk* w = new SeedMakingWorkCudaManagedITk(workId, ctx, data, &m_timeLine);
+    SeedMakingWorkCudaManagedITk* w = new SeedMakingWorkCudaManagedITk(workId, ctx, std::move(data), &m_timeLine);
     
     return w;
   }
@@ -440,7 +440,7 @@ TrigAccel::Work* TrigITkModuleCuda::createWork(int workType, std::shared_ptr<Tri
     
     unsigned int workId = workNum*100;
     
-    GbtsWorkCudaITk* w = new GbtsWorkCudaITk(workId, ctx, data, &m_timeLine);
+    GbtsWorkCudaITk* w = new GbtsWorkCudaITk(workId, ctx, std::move(data), &m_timeLine);
     
     return w;
   }
