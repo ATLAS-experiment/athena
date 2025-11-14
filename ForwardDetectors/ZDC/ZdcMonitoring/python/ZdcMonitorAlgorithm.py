@@ -102,8 +102,9 @@ def ZdcMonitoringConfig(inputFlags):
     zdcMonAlg.IsOnline = inputFlags.Common.isOnline # if running online select a subset of histograms & use coarser binnings
     zdcMonAlg.IsInjectedPulse = inputFlags.Input.TriggerStream == 'calibration_ZDCInjCalib' or inputFlags.Input.TriggerStream == 'calibration_DcmDummyProcessor'
     zdcMonAlg.IsStandalone = inputFlags.Input.TriggerStream == 'calibration_DcmDummyProcessor'
-    
-    if zdcMonAlg.IsInjectedPulse:
+    zdcMonAlg.IsCommRun = 'comm' in inputFlags.Input.ProjectName 
+
+    if zdcMonAlg.IsInjectedPulse and not zdcMonAlg.IsCommRun:
         from AthenaMonitoring.AtlasReadyFilterConfig import AtlasReadyFilterCfg
         zdcMonAlg.FilterTools.append(result.popToolsAndMerge(AtlasReadyFilterCfg(inputFlags))) # assumes that your ComponentAccumulator is "cfg"
 

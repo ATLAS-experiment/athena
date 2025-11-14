@@ -138,7 +138,8 @@ private:
     Gaudi::Property<bool> m_enableRPD {this,"EnableRPD",true};
     Gaudi::Property<bool> m_enableRPDAmp {this,"EnableRPDAmp",true};
     Gaudi::Property<bool> m_enableCentroid {this,"EnableCentroid",true};
-    
+    Gaudi::Property<bool> m_isCommRun {this,"IsCommRun",false};
+
     Gaudi::Property<std::vector<float>> m_injPulseVoltageSteps {this, "InjPulseVoltageSteps", {0.}};
     Gaudi::Property<std::vector<std::string>> m_injPulseVoltageStepsStr {this, "InjPulseVoltageStepsStr", {""}};
 
