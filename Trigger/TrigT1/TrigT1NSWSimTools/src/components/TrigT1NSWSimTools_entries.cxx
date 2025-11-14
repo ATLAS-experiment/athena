@@ -1,5 +1,5 @@
 #include "src/PadEmulatorTool.h"
-#include "TrigT1NSWSimTools/MMTriggerTool.h"
+#include "src/MMTriggerTool.h"
 #include "src/TriggerProcessorTool.h"
 
 using NSWL1::PadEmulatorTool;

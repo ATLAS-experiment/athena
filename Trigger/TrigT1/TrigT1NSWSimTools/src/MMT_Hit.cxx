@@ -2,7 +2,7 @@
  *   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
  */
 
-#include "TrigT1NSWSimTools/MMT_Hit.h"
+#include "MMT_Hit.h"
 
 MMT_Hit::MMT_Hit(const Identifier &id, const std::string& stationName,
                  const int stEta, const int stPhi, const int sectorPhi,
