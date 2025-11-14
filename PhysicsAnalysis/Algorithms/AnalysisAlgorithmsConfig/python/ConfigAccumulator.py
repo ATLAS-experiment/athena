@@ -385,7 +385,6 @@ class ConfigAccumulator :
 
     def createService (self, type, name) :
         '''create a new service and register it as the "current algorithm"'''
-        name = name + self._algPostfix
         if self._pass == 0 :
             if name in self._algorithms :
                 raise Exception ('duplicate service: ' + name)
@@ -410,7 +409,6 @@ class ConfigAccumulator :
 
     def createPublicTool (self, type, name) :
         '''create a new public tool and register it as the "current algorithm"'''
-        name = name + self._algPostfix
         if self._pass == 0 :
             if name in self._algorithms :
                 raise Exception ('duplicate public tool: ' + name)
