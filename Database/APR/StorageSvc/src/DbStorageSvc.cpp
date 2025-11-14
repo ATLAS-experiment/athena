@@ -40,8 +40,7 @@ namespace pool  {
   IStorageSvc* createStorageSvc(const string& componentName){
     return new DbStorageSvc(componentName);
   }
-  
-  typedef DbObjectHandle<DbObject> ObjHandle;
+
   typedef const DbTypeInfo    *DbTypeInfoH;
   typedef const DbDatabaseObj *DbDatabaseH;
   typedef       DbDatabaseObj *DbDatabaseHNC;

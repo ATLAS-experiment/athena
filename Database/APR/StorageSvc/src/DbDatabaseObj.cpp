@@ -18,7 +18,6 @@
 #include "DbContainerObj.h"
 
 // Public POOL include files
-#include "StorageSvc/DbIter.h"
 #include "StorageSvc/DbToken.h"
 #include "StorageSvc/DbReflex.h"
 #include "StorageSvc/DbColumn.h"
@@ -168,11 +167,10 @@ DbStatus DbDatabaseObj::makeLink(Token* pTok, Token::OID_t& refLnk) {
         }
         // Update link to use persistent oid
         link->oid().first = m_links->info()->nextRecordId() + 2; // Taking into account unsaved ##Container links
-        DbHandle<DbString> persH = new(m_links, m_string_t) DbString(link->toString());
-        if ( !m_links.save(persH, m_string_t).isSuccess() )    {
+        DbString link_string(link->toString());
+        if ( !m_links.store(&link_string, m_string_t).isSuccess() )    {
           return Error;
         }
-        persH.ptr()->~DbString(); m_links.free(persH.ptr());
         link->setDb(dbn);
         // Update the transient list of links
 	      m_linkMap.insert( LinkMap::value_type(link->contKey(), link.get()));
@@ -268,13 +266,12 @@ DbStatus DbDatabaseObj::addShape (const DbTypeInfo* pShape) {
         if ( pShape2 == m_string_t || id == m_string_t->shapeID() )   {
           return Success;
         }
-        DbHandle<DbString> persH = new(m_shapes, m_string_t) DbString(dsc);
-        if ( !m_shapes.save(persH, m_string_t).isSuccess() )  {
+        DbString shape_string(dsc);
+        if ( !m_shapes.store(&shape_string, m_string_t).isSuccess() )  {
           i = m_shapeMap.find(id);
           m_shapeMap.erase(i);
           return Error;
         }
-        persH.ptr()->~DbString(); m_shapes.free(persH.ptr());
         if ( inserted ) pShape2->addRef();
         if ( pShape2->clazz() )  {
           m_classMap.insert(std::make_pair(pShape2->clazz(), pShape2));
@@ -349,11 +346,16 @@ DbStatus DbDatabaseObj::open()   {
         m_indexMap.insert( IndexMap::value_type(l2->oid().first, m_linkVec.size()));
         m_linkVec.push_back( l2.release() );
 
+        // Internal containers use stack buffers with load() to avoid DbHeap overhead
         if ( m_shapes.open(dbH,"##Shapes",m_string_t,containerType,mode()).isSuccess() )    {
-          DbIter<DbString> it;
-          for ( it.scan(m_shapes, m_string_t); it.next().isSuccess(); ) {
-            //log << "Oid=" << (*it).oid().first << (*it).oid().second << " " << **it << endmsg;
-            const DbTypeInfo* pShape = DbTypeInfo::fromString(**it);
+          Token::OID_t oid(0, 0);
+          DbString shape_str;
+          DbObject* ptr = &shape_str;
+
+          while (static_cast<uint64_t>(oid.second) <= m_shapes.size()) {
+            auto result = m_shapes.ptr()->load(&ptr, m_string_t, oid, oid, true);
+            if (!result.isSuccess() || !ptr) break;
+            const DbTypeInfo* pShape = DbTypeInfo::fromString(shape_str);
             const DbTypeInfo::Columns& cols = pShape->columns();
             ATH_MSG_DEBUG("--->Reading Shape[" << m_shapeMap.size() << " , "
                           << pShape->shapeID().toString() << "]: "
@@ -373,22 +375,27 @@ DbStatus DbDatabaseObj::open()   {
             if ( pShape->clazz(noIdScan) )  {
                m_classMap.insert(std::make_pair(pShape->clazz(), pShape));
             }
-            it.object()->~DbString(); m_shapes.free(it.object());
+            ++oid.second;
           }
         }
 
         if ( m_links.open(dbH,"##Links",m_string_t,containerType,mode()).isSuccess() )  {
-          DbIter<DbString> it;
-          for ( it.scan(m_links, m_string_t); it.next().isSuccess(); )   {
+          Token::OID_t oid(0, 0);
+          DbString link_str;
+          DbObject* ptr = &link_str;
+
+          while (static_cast<uint64_t>(oid.second) <= m_links.size()) {
+            auto result = m_links.ptr()->load(&ptr, m_string_t, oid, oid, true);
+            if (!result.isSuccess() || !ptr) break;
             std::unique_ptr<DbToken> link(new DbToken());
-            link->fromString(**it);
+            link->fromString(link_str);
             // Update the transient list of links
             if ( s_localDb == link->dbID() ) {
               link->setDb(name());
 	      link->setLocal(true);
             }
-            ATH_MSG_DEBUG("--->Reading Assoc:" << link->dbID() 
-                << "/" << link->contID() 
+            ATH_MSG_DEBUG("--->Reading Assoc:" << link->dbID()
+                << "/" << link->contID()
                 << " [" << std::hex << link->technology() << "] "
                 << " (" << link->oid().first << " , " << link->oid().second << ")" << std::dec );
             ATH_MSG_DEBUG("---->ClassID:" << link->classID().toString());
@@ -399,17 +406,20 @@ DbStatus DbDatabaseObj::open()   {
 	    }
             m_indexMap.insert( IndexMap::value_type(link->oid().first, m_linkVec.size()));
 	    m_linkVec.push_back(link.release());
-            it.object()->~DbString(); m_links.free(it.object());
+            ++oid.second;
           }
         }
         
         if ( m_params.open(dbH,"##Params",m_string_t,containerType,mode()).isSuccess() )    {
 	  std::vector<std::string> fids;
-          DbIter<DbString> it;
-          //it.scan(m_params, m_string_t);
-          //it.next();
-          for ( it.scan(m_params, m_string_t); it.next().isSuccess(); )   {
-            std::string dsc = **it;
+          Token::OID_t oid(0, 0);
+          DbString param_str;
+          DbObject* ptr = &param_str;
+
+          while (static_cast<uint64_t>(oid.second) <= m_params.size()) {
+            auto result = m_params.ptr()->load(&ptr, m_string_t, oid, oid, true);
+            if (!result.isSuccess() || !ptr) break;
+            std::string dsc = param_str;
             size_t id1 = dsc.find("[NAME=");
             size_t id2 = dsc.find("[VALUE=");
             if ( id1 != std::string::npos && id2 != std::string::npos )  {
@@ -424,7 +434,7 @@ DbStatus DbDatabaseObj::open()   {
                 if (n == "FID") fids.emplace_back(std::move(v));
               }
             }
-            it.object()->~DbString(); m_params.free(it.object());
+            ++oid.second;
           }
 	  // We assume that the last FID is the true FID of the file...
 	  ParamMap::const_iterator fidIt = m_paramMap.find("FID");
@@ -546,12 +556,10 @@ DbStatus DbDatabaseObj::addParam(const std::string& nam, const std::string& val)
     if ( m_info )  {
       ParamMap::const_iterator i = m_paramMap.find(nam);
       if ( i == m_paramMap.end() )  {
-        std::string dsc = "[NAME=" + nam + "][VALUE=" + val + ']';
-        DbHandle<DbString> persH = new(m_params, m_string_t) DbString(dsc);
-        if ( !m_params.save(persH, m_string_t).isSuccess() )  {
+        DbString param_string("[NAME=" + nam + "][VALUE=" + val + ']');
+        if ( !m_params.store(&param_string, m_string_t).isSuccess() )  {
           return Error;
         }
-        persH.ptr()->~DbString(); m_params.free(persH.ptr());
         m_paramMap.insert(ParamMap::value_type(nam, val));
         return Success;
       }
