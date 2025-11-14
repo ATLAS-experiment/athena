@@ -7,17 +7,17 @@
 #include "TrigCompositeUtils/Combinators.h"
 #include "TrigCompositeUtils/TrigCompositeUtils.h"
 
-#include <Math/Vector4D.h>    // for LorentzVector
 #include <Math/Vector4Dfwd.h> // PtEtaPhiM typedef
-#include <Math/Vector2D.h>    // for DisplacementVector
-#include <Math/Vector2Dfwd.h> // Polar2DVectorF typedef
+#include <Math/Vector2D.h>    // for XYVectorF
 
 #include "xAODTrigMissingET/TrigMissingETContainer.h"
 #include "FourMomUtils/xAODP4Helpers.h"
+#include "AthenaMonitoringKernel/Monitored.h"
 
-#include <vector>
 #include <algorithm>
 #include <cmath>
+#include <map>
+#include <stdexcept>
 
 constexpr float invGeV = 1. / Gaudi::Units::GeV;
 
@@ -118,7 +118,7 @@ StatusCode Trig3VarComboHypoTool::initialize() {
       return StatusCode::FAILURE;
     }
 
-    m_varInfo_vec.push_back(info);
+    m_varInfo_vec.push_back(std::move(info));
   }
   ATH_MSG_DEBUG("Initialization completed successfully");
 
@@ -299,7 +299,7 @@ StatusCode Trig3VarComboHypoTool::decide(Combo::LegDecisionsMap& passingLegs, co
     // Assess the collective decision on the combination
     if (lastDecision) {
       combinationToRecord.insert(combinationToRecord.end(),extraLegs.cbegin(),extraLegs.cend());
-      passingCombinations.push_back(combinationToRecord);
+      passingCombinations.push_back(std::move(combinationToRecord));
       if (m_modeOR == true and m_enableOverride) {
         break;
       }
