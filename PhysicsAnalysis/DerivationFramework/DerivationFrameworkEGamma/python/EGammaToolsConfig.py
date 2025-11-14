@@ -13,8 +13,7 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 def PhotonsDirectionToolCfg(flags, name, **kwargs):
     """Configure the PhotonsDirectionTool"""
     acc = ComponentAccumulator()
-    PhotonsDirectionTool = CompFactory.DerivationFramework.PhotonsDirectionTool
-    acc.addPublicTool(PhotonsDirectionTool(name, **kwargs), primary=True)
+    acc.setPrivateTools(CompFactory.DerivationFramework.PhotonsDirectionTool(name, **kwargs))
     return acc
 
 
@@ -27,8 +26,7 @@ def EGSelectionToolWrapperCfg(flags, name, **kwargs):
         raise AttributeError("StoreGateEntryName not set")
     kwargs.setdefault("decoratorPass", sgName)
     kwargs.setdefault("decoratorIsEM", sgName + "IsEMValue")
-    EGSelectionToolWrapper = CompFactory.DerivationFramework.EGSelectionToolWrapper
-    acc.addPublicTool(EGSelectionToolWrapper(name, **kwargs), primary=True)
+    acc.setPrivateTools(CompFactory.DerivationFramework.EGSelectionToolWrapper(name, **kwargs))
     return acc
 
 
@@ -64,8 +62,7 @@ def EGPhotonCleaningWrapperCfg(flags, name, **kwargs):
     # Write decoration handle keys
     kwargs.setdefault("decoratorPass", sgName)
     kwargs.setdefault("decoratorPassDelayed", sgName + "NoTime")
-    EGPhotonCleaningWrapper = CompFactory.DerivationFramework.EGPhotonCleaningWrapper
-    acc.addPublicTool(EGPhotonCleaningWrapper(name, **kwargs), primary=True)
+    acc.setPrivateTools(CompFactory.DerivationFramework.EGPhotonCleaningWrapper(name, **kwargs))
     return acc
 
 
@@ -74,7 +71,7 @@ def EGElectronAmbiguityToolCfg(flags, name, **kwargs):
     """Configure the electron ambiguity tool"""
     acc = ComponentAccumulator()
     EGElectronAmbiguityTool = CompFactory.DerivationFramework.EGElectronAmbiguityTool
-    acc.addPublicTool(EGElectronAmbiguityTool(name, **kwargs), primary=True)
+    acc.setPrivateTools(EGElectronAmbiguityTool(name, **kwargs))
     return acc
 
 
@@ -82,19 +79,19 @@ def EGElectronAmbiguityToolCfg(flags, name, **kwargs):
 def BkgElectronClassificationCfg(flags, name, **kwargs):
     """Configure the background electron classification tool"""
     acc = ComponentAccumulator()
-    BkgElectronClassification = (
-        CompFactory.DerivationFramework.BkgElectronClassification
-    )
-    acc.addPublicTool(BkgElectronClassification(name, **kwargs), primary=True)
+    from MCTruthClassifier.MCTruthClassifierConfig import MCTruthClassifierCfg
+    kwargs.setdefault("MCTruthClassifierTool", acc.popToolsAndMerge(
+        MCTruthClassifierCfg(flags, name="BkgElectronMCTruthClassifier", ParticleCaloExtensionTool="")))
+    acc.setPrivateTools(CompFactory.DerivationFramework.BkgElectronClassification(name, **kwargs))
     return acc
 
 
 # Standard + LRT electron collection merger
-def ElectronMergerCfg(flags, name, **kwargs):
+def ElectronMergerCfg(flags, name, **kwargs):  # TODO Remove as, no clients??
     """Configure the track particle merger tool"""
     acc = ComponentAccumulator()
     ElectronMerger = CompFactory.DerivationFramework.ElectronMergerTool
-    acc.addPublicTool(ElectronMerger(name, **kwargs), primary=True)
+    acc.setPrivateTools(ElectronMerger(name, **kwargs))
     return acc
 
 
