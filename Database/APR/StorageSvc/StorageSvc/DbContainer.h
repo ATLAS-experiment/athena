@@ -30,7 +30,6 @@ namespace pool  {
   class DbDatabase;
   class DbTypeInfo;
   class DbContainerObj;
-  class DbTransaction;
   class DbOption;
 
   typedef const class Shape        *ShapeH;
