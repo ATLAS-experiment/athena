@@ -473,11 +473,9 @@ DbStatus RNTupleContainer::transAct(Transaction::Action action) {
   return Success;
 }
 
-/// Add single entry to container
-DbStatus RNTupleContainer::save(DbObjectHandle<DbObject>& objH) {
-  // Execute action on the base class first
-  DbStatus status = DbContainerImp::save(objH);
-  // ASM: Do we need to reset rows_written as well?
+/// Store object in location
+DbStatus RNTupleContainer::store(const void* object, DbContainer& cntH, ShapeH shape) {
+  DbStatus status = DbContainerImp::store(object, cntH, shape);
   clearDirty();
   return status;
 }

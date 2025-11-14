@@ -13,6 +13,7 @@
 
 /// Framework include files
 #include "PersistentDataModel/Token.h"
+#include "StorageSvc/pool.h"
 #include "StorageSvc/IDbContainer.h"
 #include "POOLCore/DbPrint.h"
 
@@ -128,33 +129,17 @@ namespace pool    {
 
     /// Execute Transaction Action
     virtual DbStatus transAct(Transaction::Action) override;
-    /// In place allocation of raw memory for the transient object
-    virtual void* allocate(   unsigned long siz, 
-                              DbContainer&  cntH,
-                              ShapeH shape) override;
+    /// Store object in location
+    virtual DbStatus store(      const void* object,
+                                 DbContainer&  cntH,
+                                 ShapeH shape) override;
     /// In place allocation of object location
-    virtual DbStatus allocate(DbContainer& cntH, 
+    virtual DbStatus allocate(DbContainer& cntH,
                               const void* object,
                               ShapeH shape,
                               Token::OID_t& oid) override;
-    /// In place deletion of raw memory
-    virtual DbStatus free(    void* ptr,
-                              DbContainer& cntH) override;
     /// Fetch next object address of the selection to set token
     virtual DbStatus fetch(DbSelect&      sel) override;
-    /// Add single entry to container
-    virtual DbStatus save(  DbObjectHandle<DbObject>& objH) override;
-
-    /// Save new object in the container and return its handle
-    /** @param  cntH      [IN]   Handle to container object.
-      * @param  object    [IN]   Data object
-      * @param  linkH     [OUT]  Internal OID to identify object.
-      * @return DbStatus code indicating success or failure.
-      */
-    virtual DbStatus save(DbContainer&  cntH,
-                          const void* object,
-                          ShapeH shape,
-                          Token::OID_t& linkH) override;
 
     /// Find object within the container and load it into memory
     /** @param  ptr    [IN/OUT]  ROOT-style address of the pointer to object
@@ -166,8 +151,8 @@ namespace pool    {
       *                          will differ from the preferred oid.
       * @return Status code indicating success or failure.
       */
-    virtual DbStatus load( void** ptr, ShapeH shape, 
-                           const Token::OID_t& lnkH, 
+    virtual DbStatus load( void** ptr, ShapeH shape,
+                           const Token::OID_t& lnkH,
                            Token::OID_t&       oid,
                            bool                any_next) override;
     /// Clear Transaction stack containing transaction requests
