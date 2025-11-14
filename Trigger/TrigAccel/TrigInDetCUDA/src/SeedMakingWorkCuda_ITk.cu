@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <cuda.h>
@@ -25,7 +25,7 @@ SeedMakingWorkCudaITk::SeedMakingWorkCudaITk(unsigned int id, SeedMakingDeviceCo
   WorkTimeStampQueue* TL) : 
   m_workId(id),
   m_context(ctx), 
-  m_input(data),
+  m_input(std::move(data)),
   m_timeLine(TL)
  {
   
