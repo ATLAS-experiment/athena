@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "JetTagCalibration/JetTagCalibCondData.h"
@@ -71,8 +71,7 @@ void JetTagCalibCondData::addDL1NN(const std::string&tagger, const std::string& 
 
 void JetTagCalibCondData::addChannelAlias(const std::string& channel, const std::string& alias) {
   ATH_MSG_DEBUG("#BTAG# addChannelAlias : " << channel << " : " << alias);
-  std::pair<std::string,std::string> chan = std::make_pair(channel,alias);
-  m_channelAliasesMap.insert(chan);
+  m_channelAliasesMap.emplace(channel,alias);
 }
 
 std::string JetTagCalibCondData::getChannelAlias(const std::string& originalChannel) const {
