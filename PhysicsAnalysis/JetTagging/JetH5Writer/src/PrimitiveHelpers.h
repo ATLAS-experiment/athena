@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef PRIMATIVE_HELPERS_H
 #define PRIMATIVE_HELPERS_H
@@ -8,9 +8,10 @@
 
 #include "HDF5Utils/Writer.h"
 #include "AthContainers/AuxElement.h"
-
+#include <functional> //std::function
+#include <type_traits> //std::is_pointer
+#include <cmath> //NAN
 #include <stdexcept>
-#include <cmath>
 
 // helper functions
 namespace detail {
@@ -20,7 +21,7 @@ namespace detail {
 
   // build accessor
   template <typename T, typename I, typename A, typename S=T>
-  std::function<T(I)> get(std::string source, A ass, T def) {
+  std::function<T(I)> get(const std::string & source, A ass, T def) {
     SG::AuxElement::ConstAccessor<S> acc(source);
     using rettype = decltype(ass(std::declval<I>()));
     if constexpr (std::is_pointer<rettype>::value) {
