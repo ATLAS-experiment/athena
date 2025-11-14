@@ -30,7 +30,8 @@ pool::TestDriver::TestDriver( const std::string& catname ):
   m_fileCatalog( 0 ),
   m_fileName1( "PersF.pool1.root" ),
   m_fileName2( "PersF.pool2.root" ),
-  m_events( 100 )
+  m_events( 100 ),
+  m_eventsToCommitAndHold( 10 )
 {
   std::cout << "[OVAL] Creating a file catalog" << std::endl;
   m_fileCatalog = new pool::IFileCatalog;
@@ -166,9 +167,11 @@ pool::TestDriver::write(pool::DbType storageType)
     m_tokens.push_back( token_TestClassVectors );
     m_testClassVectors.push_back( *object_TestClassVectors );
 
-    // Committing the transaction every row
-    if ( ! persistencySvc->session().transaction().commitAndHold() ) {
-      throw std::runtime_error( "Could not commitAndHold" );
+    // Commit and hold the transaction every few rows
+    if( (i+1) % m_eventsToCommitAndHold == 0 ) {
+      if( ! persistencySvc->session().transaction().commitAndHold() ) {
+        throw std::runtime_error( "Could not commit and hold the transaction." );
+      }
     }
   }
   if ( ! persistencySvc->session().transaction().commit() ) {

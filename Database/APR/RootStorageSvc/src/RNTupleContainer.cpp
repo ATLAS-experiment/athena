@@ -317,11 +317,13 @@ DbStatus RNTupleContainer::writeObject( ActionList::value_type& action )
       // fill the index field
       m_index = action.link.second;
       m_ntupleWriter->addFieldValue( "index_ref", &m_index );
+      ATH_MSG_VERBOSE("Setting index for " << dsc.fieldname << " to " << std::hex << m_index << std::dec);
       m_indexSize++;
    }
 
    if( !m_ntupleWriter->isGrouped() and m_ntupleWriter->needsCommit() ) {
       num_bytes += m_ntupleWriter->commit();
+      m_isDirty = false;
    }
 
    if ( num_bytes > 0 )  {
