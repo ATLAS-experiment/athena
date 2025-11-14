@@ -65,8 +65,7 @@ namespace FlavorTagInference {
 
     // iterate over input nodes and get their names
     for (size_t i = 0; i < m_num_inputs; i++) {
-      std::string input_name = m_session->GetInputNameAllocated(i, allocator).get();
-      m_input_node_names.push_back(input_name);
+      m_input_node_names.push_back(m_session->GetInputNameAllocated(i, allocator).get());
      }
 
     // iterate over output nodes and get their configuration
@@ -75,11 +74,9 @@ namespace FlavorTagInference {
       const auto type = m_session->GetOutputTypeInfo(i).GetTensorTypeAndShapeInfo().GetElementType();
       const int rank = m_session->GetOutputTypeInfo(i).GetTensorTypeAndShapeInfo().GetShape().size();
       if (m_onnx_model_version == SaltModelVersion::V0) {
-        const SaltModelOutput saltModelOutput(name, type, m_model_name);
-        m_output_nodes.push_back(saltModelOutput);
+        m_output_nodes.emplace_back(name, type, m_model_name);
       } else {
-        const SaltModelOutput saltModelOutput(name, type, rank);
-        m_output_nodes.push_back(saltModelOutput);
+        m_output_nodes.emplace_back(name, type, rank);
       }
     }
   }
@@ -104,8 +101,7 @@ namespace FlavorTagInference {
         const auto name = std::string(m_session->GetOutputNameAllocated(i, allocator).get());
         size_t underscore_pos = name.find('_');
         if (underscore_pos != std::string::npos) {
-          std::string substring = name.substr(0, underscore_pos);
-          model_names.insert(substring);
+          model_names.insert(name.substr(0, underscore_pos));
         } else {
           return std::string("UnknownModelName");
         }
