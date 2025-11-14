@@ -15,8 +15,8 @@
 
 //local includes
 #include "TrigT1NSWSimTools/IMMTriggerTool.h"
-#include "TrigT1NSWSimTools/MMLoadVariables.h"
-#include "TrigT1NSWSimTools/MMT_Diamond.h"
+#include "MMLoadVariables.h"
+#include "MMT_Diamond.h"
 
 #include "MuonDigitContainer/MmDigitContainer.h"
 #include "MuonDigitContainer/MmDigit.h"
