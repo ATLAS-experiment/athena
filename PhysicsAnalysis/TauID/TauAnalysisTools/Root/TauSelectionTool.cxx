@@ -61,7 +61,7 @@ StatusCode TauSelectionTool::initialize()
   if (!bConfigViaProperties and !m_vGNTauSigTransRegion.empty())         bConfigViaProperties = true;
   if (!bConfigViaProperties and !std::isnan(m_dGNTauSigTransMin.value())) bConfigViaProperties = true;
   if (!bConfigViaProperties and !std::isnan(m_dGNTauSigTransMax.value())) bConfigViaProperties = true;
-  if (!bConfigViaProperties and m_iJetIDWP != 0)              bConfigViaProperties = true;
+  if (!bConfigViaProperties and m_iJetIDWP != TauAnalysisTools::JetID::JETIDNONE) bConfigViaProperties = true;
   if (!bConfigViaProperties and !m_vEleRNNSigTransRegion.empty())     bConfigViaProperties = true;
   if (!bConfigViaProperties and !std::isnan(m_dEleRNNSigTransMin.value())) bConfigViaProperties = true;
   if (!bConfigViaProperties and !std::isnan(m_dEleRNNSigTransMax.value())) bConfigViaProperties = true;
