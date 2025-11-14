@@ -98,7 +98,7 @@ SeedMakingDeviceContext* TrigITkModuleCuda::createSeedMakingContext(int id) cons
   
   cudaMalloc((void **)&p->d_settings,    sizeof(TrigAccel::ITk::SEED_FINDER_SETTINGS));
   cudaMalloc((void **)&p->d_spacepoints, sizeof(TrigAccel::ITk::SPACEPOINT_STORAGE));
-  cudaMalloc((void **)&p->d_detmodel,    sizeof(TrigAccel::ITk::DETECTOR_MODEL));
+
   checkError();
   cudaMalloc((void **)&p->d_outputseeds, sizeof(TrigAccel::ITk::OUTPUT_SEED_STORAGE));
   cudaMalloc((void **)&p->d_doubletstorage, sizeof(DOUBLET_STORAGE_ITk));
@@ -154,7 +154,7 @@ SeedMakingManagedDeviceContext* TrigITkModuleCuda::createManagedSeedMakingContex
   cudaMallocManaged((void **)&p->m_outputseeds, sizeof(TrigAccel::ITk::OUTPUT_SEED_STORAGE));
   cudaMallocManaged((void **)&p->m_confirmedseeds, sizeof(TrigAccel::ITk::OUTPUT_SEED_STORAGE));
 
-  cudaMalloc((void **)&p->d_detmodel,    sizeof(TrigAccel::ITk::DETECTOR_MODEL));
+
   checkError();
   cudaMalloc((void **)&p->d_doubletstorage, sizeof(DOUBLET_STORAGE_ITk));
   cudaMalloc((void **)&p->d_doubletinfo, sizeof(DOUBLET_INFO_ITk));
