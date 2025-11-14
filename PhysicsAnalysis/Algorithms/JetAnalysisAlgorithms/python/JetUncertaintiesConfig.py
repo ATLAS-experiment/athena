@@ -37,8 +37,6 @@ class JetUncertaintiesConfig (ConfigBlock) :
             info="the NP reduction scheme to use for JER: All, Full, Simple. The "
             "default is Full.")
         self.addOption ('systematicsModelJMS', "Full", type=str)
-        self.addOption ('systematicsModelJMR', "Full", type=str,
-            info="the NP reduction scheme to use for JMR: Full, Simple. The default is Full.")
         self.addOption ('runJERsystematicsOnData', False, type=bool,
             info="whether to run the All/Full JER model variations also on data samples. Expert option!")
         # Uncertainties tool options
