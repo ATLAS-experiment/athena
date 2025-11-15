@@ -284,7 +284,7 @@ class ThresholdDef:
             TEThreshold('gTE%i' % thrV, 'gTE').setTE(thrV)
         
         #gTE from BC+2 (for HI anti-shadowing)
-        for thrV in [200]:
+        for thrV in [280]:
             TEThreshold('gESPRESSO%i' % thrV, 'gTE').setTE(thrV)
             
         # jXE
