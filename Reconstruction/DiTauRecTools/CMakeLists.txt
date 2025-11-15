@@ -3,11 +3,13 @@
 # Declare the package name:
 atlas_subdir( DiTauRecTools )
 
+find_package( onnxruntime )
+
 # Component(s) in the package:
 atlas_add_library( DiTauRecToolsLib
    DiTauRecTools/*.h Root/*.cxx 
    PUBLIC_HEADERS DiTauRecTools
-   LINK_LIBRARIES ${EIGEN_LIBRARIES} ${ONNXRUNTIME_LIBRARIES} tauRecToolsLib
+   LINK_LIBRARIES ${ONNXRUNTIME_LIBRARIES} tauRecToolsLib
    PRIVATE_LINK_LIBRARIES PathResolver AthContainers ) 
 
 atlas_add_dictionary( DiTauRecToolsDict
