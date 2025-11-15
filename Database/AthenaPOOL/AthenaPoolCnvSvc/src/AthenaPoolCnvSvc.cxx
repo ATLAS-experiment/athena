@@ -303,10 +303,12 @@ StatusCode AthenaPoolCnvSvc::connectOutput(const std::string& outputConnectionSp
          std::size_t equal = cont.find('='); // Used to remove leading "TTree="
          if (equal == std::string::npos) equal = 0;
          else equal++;
-         std::size_t colon = m_containerPrefixProp.value().find(':');
+         const auto& prefix = m_containerPrefixProp.value();
+         std::size_t colon = prefix.find(':');
          if (colon == std::string::npos) colon = 0; // Used to remove leading technology
          else colon++;
-         const auto& strProp = m_containerPrefixProp.value();
+         const auto defaultContName = (tech == pool::ROOTRNTUPLE_StorageType.type()) ? APRDefaults::RNTupleNames::EventData : APRDefaults::TTreeNames::EventData;
+         const auto& strProp = (prefix == "Default") ? defaultContName : prefix;
          if (merge != std::string::npos && opt == "TREE_AUTO_FLUSH" && 0 == outputConnection.compare(0, merge, file) &&cont.compare(equal, std::string::npos, strProp, colon) == 0 && data != "int" && data != "DbLonglong" && data != "double" && data != "string") {
             flush = atoi(data.c_str());
             if (flush < 0 && m_numberEventsPerWrite.value() > 0) {
