@@ -439,7 +439,7 @@ class L1Config_eTAU:
                     }
                 ],
             },
-            "ptMinToTopo": 0.6 if do_HI_tob_thresholds else 5,
+            "ptMinToTopo": 0.7 if do_HI_tob_thresholds else 5,
             "resolutionMeV": 100,
             "minIsoEt": 12,  # Minimum Et for the BDT cut, in units of GeV (internally with 16-bit resolution, in units of 100 MeV)
             "maxEt": 50,     # Maximum Et for the RCore/BDT/RHad cuts, in units of GeV
