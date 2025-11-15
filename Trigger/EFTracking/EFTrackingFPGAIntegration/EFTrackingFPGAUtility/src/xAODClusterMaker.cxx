@@ -28,6 +28,18 @@ false;
 #include "xAODInDetMeasurement/PixelClusterAuxContainer.h"
 #include "xAODInDetMeasurement/StripClusterAuxContainer.h"
 #include "AthAllocators/DataPool.h"
+#include <bit>
+
+
+namespace {
+
+uint64_t to64 (const uint32_t* x)
+{
+  struct { uint32_t a[2]; } s = {x[0], x[1]};
+  return std::bit_cast<uint64_t> (s);
+}
+
+} // anonymous namespace
 
 
 StatusCode xAODClusterMaker::initialize() {
@@ -66,15 +78,15 @@ StatusCode xAODClusterMaker::makeStripClusterContainer(
             int row = 0; // idhash
             unsigned int idHash   = stripClusters[row * EFTrackingTransient::MAX_STRIP_CLUSTERS + i + 16];
             row = 1; // id
-            uint64_t id = *(uint64_t *)&stripClusters[row * EFTrackingTransient::MAX_STRIP_CLUSTERS + i*2 + 16];
+            uint64_t id = to64 (stripClusters + row * EFTrackingTransient::MAX_STRIP_CLUSTERS + i*2 + 16);
 
             std::vector<Identifier> RDOs;
             row = 3; // rdo w1
-            unsigned long long rdo = *(uint64_t *)&stripClusters[row * EFTrackingTransient::MAX_STRIP_CLUSTERS + i*2 + 16];
+            unsigned long long rdo = to64 (stripClusters + row * EFTrackingTransient::MAX_STRIP_CLUSTERS + i*2 + 16);
             if (rdo) RDOs.push_back(Identifier(rdo));
 
             row = 5; // rdo w2
-            rdo = *(uint64_t *)& stripClusters[row * EFTrackingTransient::MAX_STRIP_CLUSTERS + i*2 + 16];
+            rdo = to64 (stripClusters + row * EFTrackingTransient::MAX_STRIP_CLUSTERS + i*2 + 16);
             if (rdo) RDOs.push_back(Identifier(rdo));
 
             row = 7; // local x
@@ -292,23 +304,23 @@ StatusCode xAODClusterMaker::makePixelClusterContainer(
             int row = 0; // idhash
             unsigned int idHash = pixelClusters[row * EFTrackingTransient::MAX_PIXEL_CLUSTERS + i + 16];
             row = 1; // id
-            unsigned long long id = *(uint64_t *)&pixelClusters[row * EFTrackingTransient::MAX_PIXEL_CLUSTERS + i*2 + 16];
+            unsigned long long id = to64 (pixelClusters + row * EFTrackingTransient::MAX_PIXEL_CLUSTERS + i*2 + 16);
 
             std::vector<Identifier> RDOs;
             row = 3; // rdo w1
-            unsigned long long rdo = *(uint64_t *)&pixelClusters[row * EFTrackingTransient::MAX_PIXEL_CLUSTERS + i*2 + 16];
+            unsigned long long rdo = to64 (pixelClusters + row * EFTrackingTransient::MAX_PIXEL_CLUSTERS + i*2 + 16);
             if (rdo) RDOs.push_back(Identifier(rdo));
 
             row = 5; // rdo w2
-            rdo = *(uint64_t *)&pixelClusters[row * EFTrackingTransient::MAX_PIXEL_CLUSTERS + i*2 + 16];
+            rdo = to64 (pixelClusters + row * EFTrackingTransient::MAX_PIXEL_CLUSTERS + i*2 + 16);
             if (rdo) RDOs.push_back(Identifier(rdo));
 
             row = 7; // rdo w3
-            rdo = *(uint64_t *)&pixelClusters[row * EFTrackingTransient::MAX_PIXEL_CLUSTERS + i*2 + 16];
+            rdo = to64 (pixelClusters + row * EFTrackingTransient::MAX_PIXEL_CLUSTERS + i*2 + 16);
             if (rdo) RDOs.push_back(Identifier(rdo));
 
             row = 9; // rdo w4
-            rdo = *(uint64_t *)&pixelClusters[row * EFTrackingTransient::MAX_PIXEL_CLUSTERS + i*2 + 16];
+            rdo = to64 (pixelClusters + row * EFTrackingTransient::MAX_PIXEL_CLUSTERS + i*2 + 16);
             if (rdo) RDOs.push_back(Identifier(rdo));
 
             Eigen::Matrix<float, 2, 1> localPosition;
