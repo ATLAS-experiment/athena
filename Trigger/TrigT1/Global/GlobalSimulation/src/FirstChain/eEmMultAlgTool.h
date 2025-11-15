@@ -151,8 +151,8 @@ namespace GlobalSim {
     Gaudi::Property<bool> m_enableDump {
       this,
       "enable_dump",
-      "False",
-      "floag to eanble debug dumps"
+      false,
+      "flag to enable debug dumps"
     };
 
 
