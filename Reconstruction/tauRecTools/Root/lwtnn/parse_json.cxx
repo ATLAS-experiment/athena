@@ -319,7 +319,7 @@ namespace {
     set_defaults(layer);
     LayerConfig forward_layer;
     LayerConfig backward_layer;
-    for(auto val: v.second){
+    for(const auto& val: v.second){
       if(val.first == "forward_layer"){
         add_component_info(forward_layer, val);
         forward_layer.architecture = get_architecture(val.second.get<std::string>("architecture"));
