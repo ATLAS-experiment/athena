@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //////////////////////////////////////////////////////////////////////////////////////////////
@@ -42,13 +42,11 @@ std::string HistoHelperRoot::baseName(const std::string& fullHistoName) {
 	sEnd = fullHistoName.find_first_of(delim, sPos);
 	if(sEnd==std::string::npos) sEnd = fullHistoName.length();
 	sLen = sEnd - sPos;
-	std::string word = fullHistoName.substr(sPos,sLen);
-	words.push_back(word);
+	words.emplace_back(fullHistoName.substr(sPos,sLen));
 	sPos = fullHistoName.find_first_not_of(delim, sEnd);
     }
     std::string base = "";
     if(words.size()>0) base = words[words.size()-1];
-    //std::cout<<"baseName: decoding "<<fullHistoName<<" --> "<<base<<std::endl;
     return base;
 }
 
@@ -231,8 +229,11 @@ void HistoHelperRoot::smoothASH2D(TH2* input2D, int m1, int m2, bool debug) {
     }
     //
     int i,j,k,l;
-    float wk1[41],wk2[41],wgt[100][100];
-    double wk[41][41],wks = 0.;
+    float wk1[41],wk2[41];
+    //avoid large stack use
+    std::vector<std::vector<float>> wgt(100, std::vector<float>(100));
+    std::vector<std::vector<float>> wk(41, std::vector<float>(41));
+    double wks = 0.;
     float ai,am1 = float(m1), am2 = float(m2);
     const float am12 = am1*am1, am22 = am2*am2;
     const float inv_am1_am2 = 1. / (am1 * am2);
@@ -250,6 +251,10 @@ void HistoHelperRoot::smoothASH2D(TH2* input2D, int m1, int m2, bool debug) {
       wk1[i] = 15./16.*(1.-ai*inv_am12)*(1.-ai*inv_am12);
       wks = wks + wk1[i];
     }
+    if (wks == 0){
+      std::cout <<"HistoHelperRoot::smoothASH2D: wks is zero! "<<std::endl;
+      return;
+    }
     const double fac1 = am1 / wks;
     for (i = lsup+1-m1;i<lsup+m1;i++) {
       wk1[i] =  wk1[i]*fac1;
@@ -259,6 +264,10 @@ void HistoHelperRoot::smoothASH2D(TH2* input2D, int m1, int m2, bool debug) {
       ai = float(i-lsup)*float(i-lsup);
       wk2[i] = 15./16.*(1.-ai*inv_am22)*(1.-ai*inv_am22);
       wks = wks + wk2[i];
+    }
+    if (wks == 0){
+      std::cout <<"HistoHelperRoot::smoothASH2D: wks is zero! "<<std::endl;
+      return;
     }
     const double fac2 = am2 / wks;
     for (i = lsup+1-m2;i<lsup+m2;i++) {
@@ -380,7 +389,9 @@ void HistoHelperRoot::smoothASH3D(TH3* input3D, int m1, int m2, int m3, bool deb
     int i,j,k,l,m,n;
     float wk1[41],wk2[41],wk3[41];
     //float wgt[100][100][100]; // Trop gros pour certaines machines !!??
-    double wk[41][41][41],wks = 0.;
+    //avoid large stack use
+    auto wk = std::vector(41,std::vector(41,std::vector<float>(41)));
+    double wks = 0.;
     float ai,am1 = float(m1), am2 = float(m2), am3 = float(m3);
     const float am12 = am1*am1, am22 = am2*am2, am32 = am3*am3;
     const float inv_am1_am2 = 1. / (am1*am2);
@@ -439,6 +450,10 @@ void HistoHelperRoot::smoothASH3D(TH3* input3D, int m1, int m2, int m3, bool deb
       wk2[i] = 15./16.*(1.-ai*inv_am22)*(1.-ai*inv_am22);
       wks = wks + wk2[i];
     }
+    if (wks == 0){
+      std::cout <<"HistoHelperRoot::smoothASH3D: wks is zero! "<<std::endl;
+      return;
+    }
     const double fac2 = am2 / wks;
     for (i = lsup+1-m2;i<lsup+m2;i++) {
       wk2[i] =  wk2[i]*fac2;
@@ -448,6 +463,10 @@ void HistoHelperRoot::smoothASH3D(TH3* input3D, int m1, int m2, int m3, bool deb
       ai = float(i-lsup)*float(i-lsup);
       wk3[i] = 15./16.*(1.-ai*inv_am32)*(1.-ai*inv_am32);
       wks = wks + wk3[i];
+    }
+    if (wks == 0){
+      std::cout <<"HistoHelperRoot::smoothASH3D: wks is zero! "<<std::endl;
+      return;
     }
     const double fac3 = am3 / wks;
     for (i = lsup+1-m3;i<lsup+m3;i++) {
