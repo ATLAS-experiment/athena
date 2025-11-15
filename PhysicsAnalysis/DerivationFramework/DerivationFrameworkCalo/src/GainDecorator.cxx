@@ -50,7 +50,9 @@ DerivationFramework::GainDecorator::initialize()
 StatusCode
 DerivationFramework::GainDecorator::addBranches(const EventContext& ctx) const
 {
-
+  ATH_MSG_DEBUG("m_gainNames.size() = " << m_gainNames.size() << ", m_layers.size() = "<< m_layers.size() );
+  const size_t limit{m_gainNames.size()*m_layers.size()};
+  if (limit == 0) { return StatusCode::FAILURE; } // FIXME Add ERROR message here
   // Photon decorations
 
   if (!m_SGKey_photons.key().empty()) {
@@ -66,24 +68,16 @@ DerivationFramework::GainDecorator::addBranches(const EventContext& ctx) const
       decorations_rnoW;
     std::vector<SG::WriteDecorHandle<xAOD::EgammaContainer, char>>
       decorations_nCells;
-    int i(0);
-    for (const auto& kv : m_gainNames) {
-      for (const auto layer : m_layers) {
-        std::pair<int, int> key(kv.first, layer);
-        decorations_E.emplace_back(
-
-                                   m_SGKey_photons_decorations[i * 3], ctx);
-        decorations_rnoW.emplace_back(
-
-                                      m_SGKey_photons_decorations[i * 3 + 1], ctx);
-        decorations_nCells.emplace_back(
-
-                                        m_SGKey_photons_decorations[i * 3 + 2], ctx);
-        i++;
-      }
+    for (unsigned int i = 0; i < limit; ++i) {
+      decorations_E.emplace_back(
+                                 m_SGKey_photons_decorations[i * 3], ctx);
+      decorations_rnoW.emplace_back(
+                                    m_SGKey_photons_decorations[i * 3 + 1], ctx);
+      decorations_nCells.emplace_back(
+                                      m_SGKey_photons_decorations[i * 3 + 2], ctx);
     }
-
     // Decorate photons
+    int i(0);
     for (const auto* photon : *importedPhotons) {
       DerivationFramework::GainDecorator::calculation res =
         decorateObject(photon);
@@ -117,24 +111,16 @@ DerivationFramework::GainDecorator::addBranches(const EventContext& ctx) const
       decorations_rnoW;
     std::vector<SG::WriteDecorHandle<xAOD::EgammaContainer, char>>
       decorations_nCells;
-    int i(0);
-    for (const auto& kv : m_gainNames) {
-      for (const auto layer : m_layers) {
-        std::pair<int, int> key(kv.first, layer);
-        decorations_E.emplace_back(
-
-                                   m_SGKey_electrons_decorations[i * 3], ctx);
-        decorations_rnoW.emplace_back(
-
-                                      m_SGKey_electrons_decorations[i * 3 + 1], ctx);
-        decorations_nCells.emplace_back(
-
-                                        m_SGKey_electrons_decorations[i * 3 + 2], ctx);
-        i++;
-      }
+    for (unsigned int i = 0; i < limit; ++i) {
+      decorations_E.emplace_back(
+                                 m_SGKey_electrons_decorations[i * 3], ctx);
+      decorations_rnoW.emplace_back(
+                                    m_SGKey_electrons_decorations[i * 3 + 1], ctx);
+      decorations_nCells.emplace_back(
+                                      m_SGKey_electrons_decorations[i * 3 + 2], ctx);
     }
-
     // Decorate electrons
+    int i(0);
     for (const auto* electron : *importedElectrons) {
       DerivationFramework::GainDecorator::calculation res =
         decorateObject(electron);

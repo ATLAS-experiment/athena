@@ -22,7 +22,9 @@ DerivationFramework::MaxCellDecorator::initialize()
   if (!m_SGKey_electrons.key().empty()) {
     ATH_MSG_INFO("Using " << m_SGKey_electrons.key() << " for electrons");
   }
-  ATH_CHECK(m_SGKey_electrons_decorations.initialize(!m_SGKey_egammaClusters.key().empty()));
+  ATH_CHECK(m_SGKey_electrons_decorations.initialize(!m_SGKey_electrons.key().empty()));
+
+  ATH_CHECK(m_SGKey_egammaClusters.initialize(SG::AllowEmpty));
 
   ATH_CHECK(m_SGKey_photons.initialize(SG::AllowEmpty));
   if (!m_SGKey_photons.key().empty()) {
@@ -92,7 +94,7 @@ DerivationFramework::MaxCellDecorator::addBranches(const EventContext& ctx) cons
 
     //
     std::optional<SG::WriteDecorHandle<xAOD::EgammaContainer, float>>  odecorationEl7;
-    const xAOD::CaloClusterContainer* egClContainer(nullptr);
+    const xAOD::CaloClusterContainer* egClContainer{};
     if (!m_SGKey_egammaClusters.key().empty()) {
       SG::ReadHandle<xAOD::CaloClusterContainer> egClContainerRH(
                                                                  m_SGKey_egammaClusters, ctx);

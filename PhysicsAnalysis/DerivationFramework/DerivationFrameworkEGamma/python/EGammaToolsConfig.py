@@ -140,11 +140,11 @@ def EGammaCookieCutClusterToolCfg(flags, name = 'EGCookieCutTool', **kwargs):
     from TileGeoModel.TileGMConfig import TileGMCfg
     acc.merge(TileGMCfg(flags))
 
-    kwargs.setdefault("ClusterContainerName", "ForwardElectronCookieCutClusters")
-    kwargs.setdefault("ClusterContainerLinksName", kwargs["ClusterContainerName"] + "_links")
+    clusterKey = kwargs.setdefault("ClusterContainerName", "ForwardElectronCookieCutClusters")
+    kwargs.setdefault("ClusterContainerLinksName", clusterKey + "_links")
     #These two properties need to be in sync
-    if kwargs["ClusterContainerLinksName"] is not kwargs["ClusterContainerName"] + "_links":
-        raise AttributeError("ClusterContainerLinksName is not syncrhonised with ClusterContainerName")
+    if kwargs["ClusterContainerLinksName"] != (clusterKey + "_links"):
+        raise AttributeError("ClusterContainerLinksName ({}) is not syncrhonised with ClusterContainerName ({})".format(kwargs["ClusterContainerLinksName"], clusterKey))
     kwargs.setdefault('StoreCookedMoments', False)
     kwargs.setdefault('StoreInputMoments', False)
     kwargs.setdefault("SGKey_electrons", flags.Egamma.Keys.Output.ForwardElectrons)

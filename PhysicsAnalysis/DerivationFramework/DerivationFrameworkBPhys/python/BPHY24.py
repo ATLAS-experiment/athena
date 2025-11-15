@@ -122,7 +122,7 @@ def BPHY24Cfg(flags):
 
     # decorate electrons with the output of LH vloose (nod0)
     from DerivationFrameworkEGamma.EGammaToolsConfig import EGElectronLikelihoodToolWrapperCfg
-    ElectronPassLHvloose = acc.addPublicTool(acc.popToolsAndMerge(EGElectronLikelihoodToolWrapperCfg(name = "ElectronPassLHvloose",
+    ElectronPassLHvloose = acc.addPublicTool(acc.popToolsAndMerge(EGElectronLikelihoodToolWrapperCfg(flags, name = "ElectronPassLHvloose",
                                             EGammaElectronLikelihoodTool = ElectronLHSelectorLHvloose,
                                             EGammaFudgeMCTool = "",
                                             CutType = "",
@@ -130,7 +130,7 @@ def BPHY24Cfg(flags):
                                             ContainerName = "Electrons",
                                             StoreTResult=False)))
 
-    ElectronPassLHvloosenod0 = acc.addPublicTool(acc.popToolsAndMerge(EGElectronLikelihoodToolWrapperCfg(name = "ElectronPassLHvloosenod0",
+    ElectronPassLHvloosenod0 = acc.addPublicTool(acc.popToolsAndMerge(EGElectronLikelihoodToolWrapperCfg(flags, name = "ElectronPassLHvloosenod0",
                                             EGammaElectronLikelihoodTool = ElectronLHSelectorLHvloose_nod0,
                                             EGammaFudgeMCTool = "",
                                             CutType = "",
