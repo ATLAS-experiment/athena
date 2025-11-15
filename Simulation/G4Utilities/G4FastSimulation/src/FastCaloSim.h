@@ -78,9 +78,6 @@ class FastCaloSim: public G4VFastSimulationModel
 
   //For PunchThrough
   bool m_doPunchThrough;
-
-  // Fast simulation FastCaloSimTool 
-  FastCaloSimTool * m_FastCaloSimTool;
 };
 
 #endif //G4FASTSIMULATION_FASTCALOSIM_H
