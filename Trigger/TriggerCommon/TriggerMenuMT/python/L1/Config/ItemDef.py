@@ -190,7 +190,7 @@ class ItemDef:
         TeATIME = Not(d.TOPO_TeATIME_jTENoSort_ParamSet0)
 
         # Item for gESPRESSO algorithm
-        gESPRESSO = Not(d.gESPRESSO200)
+        gESPRESSO = Not(d.gESPRESSO280)
 
         MenuItem('L1_EM3'       ).setLogic( d.EM3        & physcond).setTriggerType( TT.calo )
         MenuItem('L1_EM12'      ).setLogic( d.EM12       & physcond).setTriggerType( TT.calo )
@@ -1058,7 +1058,7 @@ class ItemDef:
         MenuItem('L1_TEA_TeAsymmetry-jTENoSort').setLogic(d.TOPO_TeAsymmetry_jTENoSort_ParamSet0 & TeATIME & physcond).setTriggerType(TT.calo)
         MenuItem('L1_ESP_TeAsymmetry-jTENoSort').setLogic(d.TOPO_TeAsymmetry_jTENoSort_ParamSet0 & gESPRESSO & physcond).setTriggerType(TT.calo)
         MenuItem('L1_TeATIME-jTENoSort' ).setLogic( d.TOPO_TeATIME_jTENoSort_ParamSet0 & physcond).setTriggerType(TT.calo)
-        MenuItem('L1_ESPRESSO' ).setLogic( d.gESPRESSO200 & physcond).setTriggerType(TT.calo)
+        MenuItem('L1_ESPRESSO' ).setLogic( d.gESPRESSO280 & physcond).setTriggerType(TT.calo)
 
         # additional jTE items for 2023 heavy ion runs
         MenuItem('L1_jTE3'     ).setLogic( d.jTE3  & physcond).setTriggerType(TT.calo)

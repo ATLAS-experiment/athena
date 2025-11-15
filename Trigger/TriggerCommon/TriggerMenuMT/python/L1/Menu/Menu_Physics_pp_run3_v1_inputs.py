@@ -249,7 +249,7 @@ def defineInputsMenu():
             # gTE
             ('gTE3',1), ('gTE5',1), ('gTE10',1), ('gTE200',1),
             # gESPRESSO
-            ('gESPRESSO200', 1),
+            ('gESPRESSO280', 1),
 
             # MHT
             ('gMHT500',1),
