@@ -255,7 +255,7 @@ def HIGG1D2Cfg(flags):
     
     # Add Btagging information
     from DerivationFrameworkFlavourTag.BTaggingContent import BTaggingStandardContent
-    HIGG1D2SlimmingHelper.ExtraVariables += BTaggingStandardContent("AntiKt4EMPFlowJets", flags)
+    HIGG1D2SlimmingHelper.ExtraVariables += BTaggingStandardContent(flags, "AntiKt4EMPFlowJets")
     
     # Truth containers
     if flags.Input.isMC:
