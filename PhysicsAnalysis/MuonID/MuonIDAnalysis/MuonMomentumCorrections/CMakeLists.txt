@@ -7,6 +7,7 @@ atlas_subdir( MuonMomentumCorrections )
 
 # External dependencies:
 find_package( ROOT COMPONENTS Core Tree RIO Physics )
+find_package( GTest )
 
 # Libraries in the package:
 atlas_add_library( MuonMomentumCorrectionsLib
