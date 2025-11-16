@@ -147,7 +147,7 @@ def EGammaCookieCutClusterToolCfg(flags, name = 'EGCookieCutTool', **kwargs):
         raise AttributeError("ClusterContainerLinksName ({}) is not syncrhonised with ClusterContainerName ({})".format(kwargs["ClusterContainerLinksName"], clusterKey))
     kwargs.setdefault('StoreCookedMoments', False)
     kwargs.setdefault('StoreInputMoments', False)
-    kwargs.setdefault("SGKey_electrons", flags.Egamma.Keys.Output.ForwardElectrons)
+    electronKey = kwargs.setdefault("SGKey_electrons", flags.Egamma.Keys.Output.ForwardElectrons)
     # TODO Need to keep this in sync with EGammaCookieCutClusterTool::m_vecMName (make into a property?)
     momentNames = ["SECOND_LAMBDA", "LATERAL", "LONGITUDINAL", "ENG_FRAC_MAX",
                    "SECOND_R", "CENTER_LAMBDA", "SECOND_ENG_DENS", "SIGNIFICANCE"]
@@ -155,7 +155,8 @@ def EGammaCookieCutClusterToolCfg(flags, name = 'EGCookieCutTool', **kwargs):
     originalMoments = [ "original" + moment for moment in momentNames] if kwargs['StoreInputMoments'] else []
     electronDecorations = [i for sublist in zip(cookedMoments, originalMoments) for i in sublist]
     electronDecorations += ["cookiecutClusterLink"]
-    kwargs.setdefault("SGKey_electrons_decorations", electronDecorations)
+    kwargs.setdefault("SGKey_electrons_decorations", [electronKey + "." + decor for decor in electronDecorations])
+    # FIXME The line above can be simplified once SG::WriteDecorHandleKeyArray is updated.
 
     from CaloTools.CaloNoiseCondAlgConfig import CaloNoiseCondAlgCfg
     acc.merge(CaloNoiseCondAlgCfg(flags,"totalNoise"))
