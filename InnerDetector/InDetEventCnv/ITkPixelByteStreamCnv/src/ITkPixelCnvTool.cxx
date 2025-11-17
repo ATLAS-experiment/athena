@@ -12,18 +12,13 @@ Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 #include "ITkPixelCabling/ITkPixelOnlineId.h"
 #include "InDetRawData/PixelRDO_Container.h"
 #include "ITkPixelRDO_Container.h"
-#include "ITkPixelHitSortingTool.h"
-#include "ITkPixelEncodingTool.h"
 #include "ITkPixelCabling/ITkPixelCablingData.h"
 
 
 
 
 ITkPixelCnvTool::ITkPixelCnvTool(const std::string& type,const std::string& name,const IInterface* parent)
-    : AthAlgTool(type, name, parent),
-    m_hitSortingTool("ITkPixelHitSortingTool", this),
-    m_encodingTool("ITkPixelEncodingTool", this),
-    m_byteStreamCnvSvc(this, "ByteStreamCnvSvc", "ByteStreamCnvSvc")
+    : AthAlgTool(type, name, parent)
 {}
 
 /**
@@ -37,6 +32,9 @@ StatusCode ITkPixelCnvTool::initialize(){
     ATH_CHECK(m_encodingTool.retrieve());
 
     ATH_CHECK(m_pixelCablingKey.initialize());
+
+    if (not m_dataRateMonTool.empty())
+        ATH_CHECK(m_dataRateMonTool.retrieve());
 
     return StatusCode::SUCCESS;
 
@@ -84,6 +82,11 @@ StatusCode ITkPixelCnvTool::convertToByteStream(const ContainerType* cont) const
         //we can get the information from cabling's online -> modlue Info map.
         ITkPixelCabling::ModuleInfo mi = cabling->offlineModuleInfo((onID >> 2) << 2);
         if (mi.type == ITkPixelCabling::ModuleType::MergedQuad) onID = (onID >> 2) << 2;
+
+                // passing information to the monitoring tool if initialised
+        if (not m_dataRateMonTool.empty()) {
+            m_dataRateMonTool->fill(mi.id.get_identifier32().get_compact(), encodedStream, hitMap);
+        }
 
         //At this point, the ROD identifier will be labelled with lowest two bits 00 for single
         //chips, chip 00 in unmerged quads and for entire merged quads, and with
