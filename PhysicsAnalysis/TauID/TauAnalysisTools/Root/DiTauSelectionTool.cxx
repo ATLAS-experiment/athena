@@ -215,7 +215,9 @@ StatusCode DiTauSelectionTool::initialize()
       else if (sCut == "OmniIDWP")
       {
         iSelectionCuts = iSelectionCuts | DiTauCutOmniIDWP;
-	  
+        if (m_iOmniIDWP == OMNIIDNONE){
+          m_iOmniIDWP = convertStrToOmniIDWP(rEnv.GetValue("OmniIDWP","OMNIIDNONE"));
+        }	  
 	// check for possible mis-config in Tau selection
         for (const std::string& checkCut : vCuts){
 	   if (checkCut.find("OmniScore") != std::string::npos) {
