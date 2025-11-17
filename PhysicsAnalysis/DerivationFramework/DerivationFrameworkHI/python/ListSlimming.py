@@ -7,14 +7,27 @@
 def HION2AllVariablesGeneral():
     
     variables  = []
+    variables += ["EventInfo"]
     variables += ["CaloSums"]
     variables += ["PrimaryVertices"]
+    variables += ["InDetTrackParticles"]
+    variables += ["AntiKt4HIJets"]
+    variables += ["Electrons"]
+    variables += ["GSFTrackParticles"]
+    variables += ["egammaClusters"]
+    variables += ["Muons"]
+    variables += ["ExtrapolatedMuonTrackParticles"]
+    variables += ["MuonSpectrometerTrackParticles"]
+    variables += ["CombinedMuonTrackParticles"]
+    variables += ["CaloCalTopoClusters"]
+    variables += ["HIEventShape"]
     
     return variables
 
 def HION2ExtraVariablesGeneral():
     variables  = []
-    variables += ["InDetTrackParticles.qOverP.theta.phi.TrackQuality"]
+    variables += ["InDetTrackParticles.qOverP.theta.phi.d0.z0.vz.chiSquared.numberDoF.TrackQuality.Chi2ToPV.VertexIndex.CovD0.CovZ0.CovTheta"]
+    variables += ["CaloSums.Summary"] # Need to be passed explicitelly
     
     return variables
 
