@@ -108,19 +108,18 @@ StatusCode FixHepMC::execute() {
     auto old_momentum = evt->momentum_unit();
     auto old_length = evt->length_unit();
     evt->set_units(
-	m_forced_momentum != "" ? HepMC3::Units::momentum_unit(m_forced_momentum): old_momentum,
-	m_forced_length != "" ? HepMC3::Units::length_unit(m_forced_length): old_length);
-	if ( m_forced_momentum != "" && m_forced_momentum != HepMC3::Units::name(old_momentum) ) ATH_MSG_WARNING("Updated momentum units " <<  HepMC3::Units::name(old_momentum) << "->" << m_forced_momentum);
-	if ( m_forced_length != "" && m_forced_length != HepMC3::Units::name(old_length) ) ATH_MSG_WARNING("Updated length units " <<  HepMC3::Units::name(old_length) << "->" << m_forced_length);
+        m_forced_momentum != "" ? HepMC3::Units::momentum_unit(m_forced_momentum): old_momentum,
+        m_forced_length != "" ? HepMC3::Units::length_unit(m_forced_length): old_length);
+    if ( m_forced_momentum != "" && m_forced_momentum != HepMC3::Units::name(old_momentum) ) ATH_MSG_WARNING("Updated momentum units " <<  HepMC3::Units::name(old_momentum) << "->" << m_forced_momentum);
+    if ( m_forced_length != "" && m_forced_length != HepMC3::Units::name(old_length) ) ATH_MSG_WARNING("Updated length units " <<  HepMC3::Units::name(old_length) << "->" << m_forced_length);
 #else
     std::string old_momentum = (evt->momentum_unit() == HepMC::Units::MomentumUnit::MEV ? "MEV" : "GEV" );
     std::string old_length = (evt->length_unit() == HepMC::Units::LengthUnit::MM ? "MM" : "CM" );
     evt->define_units(
-	m_forced_momentum != "" ? m_forced_momentum: old_momentum,
-	m_forced_length != "" ? m_forced_length: old_length
-	);
-	if ( m_forced_momentum != "" && m_forced_momentum != old_momentum ) ATH_MSG_WARNING("Updated momentum units " <<  old_momentum << "->" << m_forced_momentum);
-	if ( m_forced_length != "" && m_forced_length != old_length ) ATH_MSG_WARNING("Updated length units " <<  old_length << "->" << m_forced_length);
+        m_forced_momentum != "" ? m_forced_momentum: old_momentum,
+        m_forced_length != "" ? m_forced_length: old_length);
+    if ( m_forced_momentum != "" && m_forced_momentum != old_momentum ) ATH_MSG_WARNING("Updated momentum units " <<  old_momentum << "->" << m_forced_momentum);
+    if ( m_forced_length != "" && m_forced_length != old_length ) ATH_MSG_WARNING("Updated length units " <<  old_length << "->" << m_forced_length);
 #endif
     if (!m_pidmap.empty()) {
       for (auto ip: *evt) {
@@ -129,6 +128,8 @@ StatusCode FixHepMC::execute() {
          auto newpid = m_pidmap.find(ip->pdg_id());
          if (newpid == m_pidmap.end()) continue;
          ip->set_pdg_id(newpid->second);
+         // Increment the counter for replaced PDG IDs
+         ++m_replacedPIDs;
       }
     }
 #ifdef HEPMC3
@@ -557,7 +558,7 @@ StatusCode FixHepMC::finalize() {
   if (m_killPDG0   ) ATH_MSG_INFO( "Removed " <<   m_pdg0Killed << " of " << m_totalSeen << " particles because of PDG ID 0." );
   if (m_cleanDecays) ATH_MSG_INFO( "Removed " << m_decayCleaned << " of " << m_totalSeen << " particles while cleaning decay chains." );
   if(m_purgeUnstableWithoutEndVtx) ATH_MSG_INFO( "Removed " << m_unstablePurged << " of " << m_totalSeen << " unstable particles because they had no decay vertex." );
-  if (!m_pidmap.empty()) ATH_MSG_INFO( "Replaced " << m_replacedPIDs << "PIDs of particles." );
+  if (!m_pidmap.empty()) ATH_MSG_INFO( "Replaced " << m_replacedPIDs << " PIDs of particles." );
   return StatusCode::SUCCESS;
 }
 
