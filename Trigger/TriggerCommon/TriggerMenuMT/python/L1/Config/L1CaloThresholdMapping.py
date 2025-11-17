@@ -34,7 +34,7 @@ threshold_mapping = {
     },
     'eTAU': {
         # in pp menu (doHeavyIonTobThresholds=False) ptMinToTopo value is assigined to eTAU1 and eTAU2
-        1:0.5,
+        1:0.7,
         2:2.7,
         12:7.7,
         20:10.1,

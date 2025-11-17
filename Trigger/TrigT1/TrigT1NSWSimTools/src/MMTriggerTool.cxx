@@ -2,7 +2,7 @@
   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "TrigT1NSWSimTools/MMTriggerTool.h"
+#include "MMTriggerTool.h"
 
 namespace NSWL1 {
 

@@ -190,7 +190,7 @@ class ItemDef:
         TeATIME = Not(d.TOPO_TeATIME_jTENoSort_ParamSet0)
 
         # Item for gESPRESSO algorithm
-        gESPRESSO = Not(d.gESPRESSO200)
+        gESPRESSO = Not(d.gESPRESSO280)
 
         MenuItem('L1_EM3'       ).setLogic( d.EM3        & physcond).setTriggerType( TT.calo )
         MenuItem('L1_EM12'      ).setLogic( d.EM12       & physcond).setTriggerType( TT.calo )
@@ -1058,7 +1058,7 @@ class ItemDef:
         MenuItem('L1_TEA_TeAsymmetry-jTENoSort').setLogic(d.TOPO_TeAsymmetry_jTENoSort_ParamSet0 & TeATIME & physcond).setTriggerType(TT.calo)
         MenuItem('L1_ESP_TeAsymmetry-jTENoSort').setLogic(d.TOPO_TeAsymmetry_jTENoSort_ParamSet0 & gESPRESSO & physcond).setTriggerType(TT.calo)
         MenuItem('L1_TeATIME-jTENoSort' ).setLogic( d.TOPO_TeATIME_jTENoSort_ParamSet0 & physcond).setTriggerType(TT.calo)
-        MenuItem('L1_ESPRESSO' ).setLogic( d.gESPRESSO200 & physcond).setTriggerType(TT.calo)
+        MenuItem('L1_ESPRESSO' ).setLogic( d.gESPRESSO280 & physcond).setTriggerType(TT.calo)
 
         # additional jTE items for 2023 heavy ion runs
         MenuItem('L1_jTE3'     ).setLogic( d.jTE3  & physcond).setTriggerType(TT.calo)
@@ -2250,14 +2250,14 @@ class ItemDef:
 
             # ATR-30728
             MenuItem('L1_23INVM-24DPHI-2eTAU1_VjTE200').setLogic(d.TOPO_23INVM400000_24DPHI32_2eTAU07s & Not(d.jTE200) & physcond)
-            MenuItem('L1_28INVM-24DPHI-2eTAU1_VjTE200').setLogic(d.TOPO_28INVM400000_24DPHI32_2eTAU06s & Not(d.jTE200) & physcond)
-            MenuItem('L1_23INVM-25DPHI-2eTAU1_VjTE200').setLogic(d.TOPO_23INVM400000_25DPHI32_2eTAU06s & Not(d.jTE200) & physcond)
-            MenuItem('L1_33INVM-25DPHI-2eTAU1_VjTE200').setLogic(d.TOPO_33INVM400000_25DPHI32_2eTAU05s & Not(d.jTE200) & physcond)
-            MenuItem('L1_23INVM-27DPHI-2eTAU1_VjTE200').setLogic(d.TOPO_23INVM400000_27DPHI32_2eTAU05s & Not(d.jTE200) & physcond)
+            MenuItem('L1_28INVM-24DPHI-2eTAU1_VjTE200').setLogic(d.TOPO_28INVM400000_24DPHI32_2eTAU07s & Not(d.jTE200) & physcond)
+            MenuItem('L1_23INVM-25DPHI-2eTAU1_VjTE200').setLogic(d.TOPO_23INVM400000_25DPHI32_2eTAU08s & Not(d.jTE200) & physcond)
+            MenuItem('L1_33INVM-25DPHI-2eTAU1_VjTE200').setLogic(d.TOPO_33INVM400000_25DPHI32_2eTAU07s & Not(d.jTE200) & physcond)
+            MenuItem('L1_23INVM-27DPHI-2eTAU1_VjTE200').setLogic(d.TOPO_23INVM400000_27DPHI32_2eTAU07s & Not(d.jTE200) & physcond)
 
-            MenuItem('L1_23INVM-27DPHI-2eTAU1_VjTE200_EMPTY'           ).setLogic( d.TOPO_23INVM400000_27DPHI32_2eTAU05s & Not(d.jTE200) & cosmiccond)
-            MenuItem('L1_23INVM-27DPHI-2eTAU1_VjTE200_UNPAIRED_ISO'    ).setLogic( d.TOPO_23INVM400000_27DPHI32_2eTAU05s & Not(d.jTE200) & unpaired_isocond)
-            MenuItem('L1_23INVM-27DPHI-2eTAU1_VjTE200_UNPAIRED_NONISO' ).setLogic( d.TOPO_23INVM400000_27DPHI32_2eTAU05s & Not(d.jTE200) & unpaired_nonisocond)
+            MenuItem('L1_23INVM-27DPHI-2eTAU1_VjTE200_EMPTY'           ).setLogic( d.TOPO_23INVM400000_27DPHI32_2eTAU07s & Not(d.jTE200) & cosmiccond)
+            MenuItem('L1_23INVM-27DPHI-2eTAU1_VjTE200_UNPAIRED_ISO'    ).setLogic( d.TOPO_23INVM400000_27DPHI32_2eTAU07s & Not(d.jTE200) & unpaired_isocond)
+            MenuItem('L1_23INVM-27DPHI-2eTAU1_VjTE200_UNPAIRED_NONISO' ).setLogic( d.TOPO_23INVM400000_27DPHI32_2eTAU07s & Not(d.jTE200) & unpaired_nonisocond)
 
             # g-2 tau (ATR-30638)
             MenuItem('L1_2cTAU50M_DPHI-2eTAU50').setLogic(d.cTAU50M.x(2) & d.TOPO_30DPHI32_2eTAU50s & physcond)

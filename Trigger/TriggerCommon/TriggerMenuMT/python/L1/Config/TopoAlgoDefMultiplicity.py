@@ -191,7 +191,7 @@ class TopoAlgoDefMultiplicity:
 
             'jXEC100', 'jTE200', 'jTEC200', 'jTEFWD100', 'jTEFWDA100', 'jTEFWDC100', 
             'gTE3', 'gTE5', 'gTE10', 'gTE200', 
-            'gESPRESSO200',
+            'gESPRESSO280',
             # additional jTE thresholds needed for heavy ion runs
             'jTE3','jTE4','jTE5', 'jTE10', 'jTE20','jTE50',
             'jTE100', 'jTE600', 'jTE1500', 'jTE4000', 'jTE6500',
