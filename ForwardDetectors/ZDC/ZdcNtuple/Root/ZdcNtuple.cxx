@@ -865,11 +865,13 @@ void ZdcNtuple::processZdcNtupleFromModules()
       ANA_MSG_DEBUG( "accessing ZdcSums" );
       for (const auto zdcSum : *zdcSums)
 	{
-	  if (zdcSum->zdcSide()==0 && enableCentroid && t_centroidDecorationsAvailable)
-	    {
-	      // new global sum
-	      t_centroidEventValid = centroidEventValidAcc(*zdcSum);
-	      t_cosDeltaReactionPlaneAngle = cosDeltaReactionPlaneAngleAcc(*zdcSum);
+	  if (zdcSum->zdcSide()==0) {
+	      // trap new global sum
+	      if (enableCentroid && t_centroidDecorationsAvailable) {
+	        t_centroidEventValid = centroidEventValidAcc(*zdcSum);
+	        t_cosDeltaReactionPlaneAngle = cosDeltaReactionPlaneAngleAcc(*zdcSum);
+	      }
+	      // no other branches are filled from global sum - skip to the real sides (C=-1 and A=1)
 	      continue;
 	    }
 	  int iside = 0;
