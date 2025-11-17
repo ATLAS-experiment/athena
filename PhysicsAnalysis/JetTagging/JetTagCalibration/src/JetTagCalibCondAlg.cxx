@@ -829,6 +829,13 @@ void JetTagCalibCondAlg::smoothASH2D(TH2* input2D, int m1, int m2) {
     }
     if (wks == 0){
       ATH_MSG_WARNING("JetTagCalibCondAlg::wks is zero !");
+      //cleanup
+      for (int i = 0; i < nx-1; ++i) {
+        delete[] h[i];
+        delete[] res[i];
+      }
+      delete[] h;
+      delete[] res;
       return;
     }
     const double fac1 = am1 / wks;
@@ -843,6 +850,13 @@ void JetTagCalibCondAlg::smoothASH2D(TH2* input2D, int m1, int m2) {
     }
     if (wks == 0){
       ATH_MSG_WARNING("JetTagCalibCondAlg::wks is zero !");
+      //cleanup
+      for (int i = 0; i < nx-1; ++i) {
+        delete[] h[i];
+        delete[] res[i];
+      }
+      delete[] h;
+      delete[] res;
       return;
     }
     const double fac2 = am2 / wks;
