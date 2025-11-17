@@ -255,7 +255,7 @@ StatusCode GepCellsHandlerAlg::execute(const EventContext& ctx) const {
   
     // Fill cells into map according to FEB  
     auto feb_itr = gepCellsPerFEB.find(caloCell.FEB);
-    if (feb_itr != gepCellsPerFEB.end()) feb_itr->second.push_back(caloCell);
+    if (feb_itr != gepCellsPerFEB.end()) feb_itr->second.push_back(std::move(caloCell));
     else {
 	std::vector<Gep::GepCaloCell> cellsThisFEB;
 	cellsThisFEB.push_back(caloCell);
