@@ -6,8 +6,7 @@
 #include "StoreGate/ReadCondHandle.h"
 
 ITkPixelEncodingAlg::ITkPixelEncodingAlg(const std::string& name, ISvcLocator* pSvcLocator) :
-  AthReentrantAlgorithm(name, pSvcLocator),
-  m_cnvTool("ITkPixelCnvTool", this)
+  AthReentrantAlgorithm(name, pSvcLocator)
 {
   
 }
