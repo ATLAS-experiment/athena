@@ -19,7 +19,7 @@
 #include <string>
 #include <memory>
 #include <tuple>
-
+#include <functional>
 
 class ATLAS_NOT_THREAD_SAFE ZDCPulseAnalyzer
 {
@@ -75,8 +75,6 @@ private:
 
   //  Static data
   //
-  bool m_quietFits;
-  bool m_saveFitFunc;
   
   static TH1* s_undelayedFitHist;
   static TH1* s_delayedFitHist;
@@ -98,6 +96,9 @@ private:
   unsigned int m_LGMode{LGModeNormal};
   float m_tmin{};
   float m_tmax{};
+
+  bool m_quietFits{true};
+  bool m_saveFitFunc{false};
 
   std::string m_fitFunction;
   size_t m_2ndDerivStep{1};
@@ -143,7 +144,11 @@ private:
 
   float m_chisqDivAmpCutLG{}; // maximum good LG chisq / amplitude
   float m_chisqDivAmpCutHG{}; // maximum good HG chisq / amplitude
-
+  float m_chisqDivAmpOffsetLG{}; // maximum good LG chisq / amplitude
+  float m_chisqDivAmpOffsetHG{}; // maximum good HG chisq / amplitude
+  float m_chisqDivAmpPowerLG{}; // maximum good LG chisq / amplitude
+  float m_chisqDivAmpPowerHG{}; // maximum good HG chisq / amplitude
+  
   float m_T0CutLowLG{};  // minimum good corrected time for LG fits
   float m_T0CutHighLG{}; // maximum good corrected time for LG fits
 
@@ -392,13 +397,14 @@ private:
 
   bool ScanAndSubtractSamples();
 
+  using ChisqCutLambdatype = std::function<bool(float,float,float)>;
   bool AnalyzeData(size_t nSamples, size_t preSample,
                    const std::vector<float>& samples,        // The samples used for this event
 		   const std::vector<bool>& useSamples,        // The samples used for this event
                    float peak2ndDerivMinThresh,
                    float noiseSig,                           // The "resolution" on the ADC value
                    const std::vector<float>& toCorrParams,   // The parameters used to correct the t0
-                   float maxChisqDivAmp,                     // The maximum chisq / amplitude ratio
+                   ChisqCutLambdatype chisqCutLambda, // Lambda to apply chisq cut
                    float minT0Corr, float maxT0Corr          // The minimum and maximum corrected T0 values
                   );
 
