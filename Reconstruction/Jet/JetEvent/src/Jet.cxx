@@ -1082,7 +1082,7 @@ const std::vector<Jet::mkey_t>& Jet::getAssociationKeys() const
 
 const Jet::assoc_t* Jet::getAssociationBase(const mkey_t& key) const
 {
-  return getObject<assoc_t,assostore_t>(key, m_assocStore, JetKeyConstants::AssoCat, false);
+  return getObject<assoc_t,assostore_t>(key, m_assocStore, JetKeyConstants::AssoCat);
 }
 
 
