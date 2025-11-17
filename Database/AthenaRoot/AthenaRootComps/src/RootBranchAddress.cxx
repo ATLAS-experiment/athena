@@ -190,7 +190,7 @@ RootBranchAddress::setBranchAddress(const RootType& rflx_type)
       if (t != rflx_type && !t.Id()) {
         t = rflx_type;
       }
-      m_type = t;
+      m_type = std::move(t);
       m_ptr = &addr;
       return;
 
