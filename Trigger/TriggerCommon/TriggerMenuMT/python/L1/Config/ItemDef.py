@@ -1686,7 +1686,18 @@ class ItemDef:
         MenuItem('L1_TEA_ZDC_XOR_jJ5_VjTE200'                ).setLogic( ZDC_XOR            & TeATIME & d.jJ5         & Not(d.jTE200) & physcond)
         MenuItem('L1_TEA_ZDC_XOR_jJ5p30ETA49_VjTE200'        ).setLogic( ZDC_XOR            & TeATIME & d.jJ530ETA49  & Not(d.jTE200) & physcond)
 
-        # UPC HMT with TeAsymmetry for 2025
+        # jJ + ZDC + gESPRESSO for 2025
+        MenuItem('L1_ESP_1ZDC_NZDC_jJ10_VjTE200'             ).setLogic( PHYS_1ZDC_NZDC     & gESPRESSO & d.jJ10        & Not(d.jTE200) & physcond)
+        MenuItem('L1_ESP_5ZDC_A_5ZDC_C_jJ10_VjTE200'         ).setLogic( PHYS_5ZDC_A_5ZDC_C & gESPRESSO & d.jJ10        & Not(d.jTE200) & physcond)
+        MenuItem('L1_ESP_VZDC_A_VZDC_C_jJ10_VjTE200'         ).setLogic( PHYS_VZDC_A_VZDC_C & gESPRESSO & d.jJ10        & Not(d.jTE200) & physcond)
+        MenuItem('L1_ESP_VZDC_A_VZDC_C_jJ10p30ETA49_VjTE200' ).setLogic( PHYS_VZDC_A_VZDC_C & gESPRESSO & d.jJ1030ETA49 & Not(d.jTE200) & physcond)
+        MenuItem('L1_ESP_VZDC_A_VZDC_C_jJ5p30ETA49_VjTE200'  ).setLogic( PHYS_VZDC_A_VZDC_C & gESPRESSO & d.jJ530ETA49  & Not(d.jTE200) & physcond)
+        MenuItem('L1_ESP_ZDC_5XOR_jJ10_VjTE200'              ).setLogic( PHYS_ZDC_5XOR      & gESPRESSO & d.jJ10        & Not(d.jTE200) & physcond)
+        MenuItem('L1_ESP_ZDC_XOR_jJ10_VjTE200'               ).setLogic( ZDC_XOR            & gESPRESSO & d.jJ10        & Not(d.jTE200) & physcond)
+        MenuItem('L1_ESP_ZDC_XOR_jJ10p30ETA49_VjTE200'       ).setLogic( ZDC_XOR            & gESPRESSO & d.jJ1030ETA49 & Not(d.jTE200) & physcond)
+        MenuItem('L1_ESP_ZDC_XOR_jJ5p30ETA49_VjTE200'        ).setLogic( ZDC_XOR            & gESPRESSO & d.jJ530ETA49  & Not(d.jTE200) & physcond)
+
+        # UPC HMT with TeAsymmetry and TeATIME for 2025
         MenuItem('L1_TEA_ASYM0_TRT_ZDC_XOR_VjTE200' ).setLogic( d.TOPO_TeAsymmetry_jTENoSort_ParamSet0 & d.NIMTRT & ZDC_XOR & TeATIME & Not(d.jTE200) & physcond)
         MenuItem('L1_TEA_ASYM1_TRT_ZDC_XOR_VjTE200' ).setLogic( d.TOPO_TeAsymmetry_jTENoSort_ParamSet1 & d.NIMTRT & ZDC_XOR & TeATIME & Not(d.jTE200) & physcond)
         MenuItem('L1_TEA_ASYM2_TRT_ZDC_XOR_VjTE200' ).setLogic( d.TOPO_TeAsymmetry_jTENoSort_ParamSet2 & d.NIMTRT & ZDC_XOR & TeATIME & Not(d.jTE200) & physcond)
@@ -1697,14 +1708,28 @@ class ItemDef:
         MenuItem('L1_TEA_ASYM2_ZDC_XOR_VjTE200' ).setLogic( d.TOPO_TeAsymmetry_jTENoSort_ParamSet2 & ZDC_XOR & TeATIME & Not(d.jTE200) & physcond)
         MenuItem('L1_TEA_ASYM3_ZDC_XOR_VjTE200' ).setLogic( d.TOPO_TeAsymmetry_jTENoSort_ParamSet3 & ZDC_XOR & TeATIME & Not(d.jTE200) & physcond)
 
+        # UPC HMT with TeAsymmetry and TeATIME for 2025
+        MenuItem('L1_ESP_ASYM0_TRT_ZDC_XOR_VjTE200' ).setLogic( d.TOPO_TeAsymmetry_jTENoSort_ParamSet0 & d.NIMTRT & ZDC_XOR & gESPRESSO & Not(d.jTE200) & physcond)
+        MenuItem('L1_ESP_ASYM1_TRT_ZDC_XOR_VjTE200' ).setLogic( d.TOPO_TeAsymmetry_jTENoSort_ParamSet1 & d.NIMTRT & ZDC_XOR & gESPRESSO & Not(d.jTE200) & physcond)
+        MenuItem('L1_ESP_ASYM2_TRT_ZDC_XOR_VjTE200' ).setLogic( d.TOPO_TeAsymmetry_jTENoSort_ParamSet2 & d.NIMTRT & ZDC_XOR & gESPRESSO & Not(d.jTE200) & physcond)
+        MenuItem('L1_ESP_ASYM3_TRT_ZDC_XOR_VjTE200' ).setLogic( d.TOPO_TeAsymmetry_jTENoSort_ParamSet3 & d.NIMTRT & ZDC_XOR & gESPRESSO & Not(d.jTE200) & physcond)
+
+        MenuItem('L1_ESP_ASYM0_ZDC_XOR_VjTE200' ).setLogic( d.TOPO_TeAsymmetry_jTENoSort_ParamSet0 & ZDC_XOR & gESPRESSO & Not(d.jTE200) & physcond)
+        MenuItem('L1_ESP_ASYM1_ZDC_XOR_VjTE200' ).setLogic( d.TOPO_TeAsymmetry_jTENoSort_ParamSet1 & ZDC_XOR & gESPRESSO & Not(d.jTE200) & physcond)
+        MenuItem('L1_ESP_ASYM2_ZDC_XOR_VjTE200' ).setLogic( d.TOPO_TeAsymmetry_jTENoSort_ParamSet2 & ZDC_XOR & gESPRESSO & Not(d.jTE200) & physcond)
+        MenuItem('L1_ESP_ASYM3_ZDC_XOR_VjTE200' ).setLogic( d.TOPO_TeAsymmetry_jTENoSort_ParamSet3 & ZDC_XOR & gESPRESSO & Not(d.jTE200) & physcond)
+
         # Ditaus for 2025
         MenuItem('L1_eEM2_TRT_VZDC_A_VZDC_C_VjTE200'  ).setLogic( d.eEM2  & d.NIMTRT & PHYS_VZDC_A_VZDC_C & Not(d.jTE200) & physcond)
         MenuItem('L1_eEM2_TRT_ZDC_OR_VjTE200'         ).setLogic( d.eEM2  & d.NIMTRT & ZDC_OR             & Not(d.jTE200) & physcond)
         MenuItem('L1_eTAU2_TRT_VZDC_A_VZDC_C_VjTE200' ).setLogic( d.eTAU2 & d.NIMTRT & PHYS_VZDC_A_VZDC_C & Not(d.jTE200) & physcond)
         MenuItem('L1_eTAU2_TRT_ZDC_OR_VjTE200'        ).setLogic( d.eTAU2 & d.NIMTRT & ZDC_OR             & Not(d.jTE200) & physcond)
 
-        MenuItem('L1_TEA_eEM2_VjTE200'  ).setLogic( d.eEM2  & TeATIME & Not(d.jTE200) & physcond)
-        MenuItem('L1_TEA_eTAU2_VjTE200' ).setLogic( d.eTAU2 & TeATIME & Not(d.jTE200) & physcond)
+        # Items for further TeATIME tuning - possibly non-spike'y
+        MenuItem('L1_CALMTEA_eEM2'          ).setLogic( d.eEM2  & Not(d.TOPO_TeATIME_jTENoSort_ParamSet1) & physcond)
+        MenuItem('L1_CALMTEA_eTAU2'         ).setLogic( d.eTAU2 & Not(d.TOPO_TeATIME_jTENoSort_ParamSet1) & physcond)
+        MenuItem('L1_CALMTEA_eEM2_VjTE200'  ).setLogic( d.eEM2  & Not(d.TOPO_TeATIME_jTENoSort_ParamSet1) & Not(d.jTE200) & physcond)
+        MenuItem('L1_CALMTEA_eTAU2_VjTE200' ).setLogic( d.eTAU2 & Not(d.TOPO_TeATIME_jTENoSort_ParamSet1) & Not(d.jTE200) & physcond)
 
         # ATR-30727
         MenuItem('L1_eTAU1_jJ5_VjTE200' ).setLogic( d.eTAU1 & d.jJ5 & Not(d.jTE200)   & physcond)

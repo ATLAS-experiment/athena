@@ -1784,7 +1784,7 @@ class TopoAlgoDef:
         {  
             "algoname"     : "TeATIME-jTENoSort",
             "teFlavor"     : [2,1,1,3], # 0 = off, 1 = full jTE, 2 = central jTE, 3 = forward jTE (A+C side)
-            "combination"  : [0,1,2,1], # 0 = require both, 1 = require factor, 2 = require offset, 3 = require any of the two criteria
+            "combination"  : [0,0,2,1], # 0 = require both, 1 = require factor, 2 = require offset, 3 = require any of the two criteria
             "nextBcOffset" : [-2.5,10,10,10], # offset added to upcoming BC's jTE (in GeV, fractional values down to 100 MeV are possible). 
                                               # The 'offset' criterion is considered as passed if this sum exceeds the current BC's jTE value,
                                               # i.e., to require a minimum *increase* in jTE in the next BC this should be a *negative* value!
