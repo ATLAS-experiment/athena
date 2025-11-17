@@ -85,10 +85,7 @@ class FeatureHandler:
         
         #setup the varType prefixes
         # they are passed to the feature extractor later on - avoids errors due to typos
-        self.m_VarTypeName_Sum          = "Sum"
         self.m_VarTypeName_Ratio        = "Ratio"
-        self.m_VarTypeName_Isolation    = "Isolation"
-        self.m_VarTypeName_Num          = "Num"
         self.m_VarTypeName_Mean         = "Mean"
         self.m_VarTypeName_StdDev       = "StdDev"
         self.m_VarTypeName_HLV          = "HLV"
@@ -102,10 +99,7 @@ class FeatureHandler:
         
         #setup the default values for the different variable types
         self.m_DefaultValues = {}
-        self.m_DefaultValues[self.m_VarTypeName_Sum]          = -4000.0
         self.m_DefaultValues[self.m_VarTypeName_Ratio]        = -0.2
-        self.m_DefaultValues[self.m_VarTypeName_Isolation]    = -0.2
-        self.m_DefaultValues[self.m_VarTypeName_Num]          = -5.0
         self.m_DefaultValues[self.m_VarTypeName_Mean]         = -0.2
         self.m_DefaultValues[self.m_VarTypeName_StdDev]       = -0.2
         self.m_DefaultValues[self.m_VarTypeName_HLV]          = -4000.0
