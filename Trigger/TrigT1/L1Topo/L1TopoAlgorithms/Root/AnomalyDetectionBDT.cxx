@@ -440,8 +440,7 @@ TCS::AnomalyDetectionBDT::initialize() {
    m_mu2_phimax = bdt_config["variable_float_ranges"]["flat_dimu_mu2_phi_2pi"]["max"];
 
    for (auto& [treeName, tree] : bdt_config["trees"].items()) {
-      Tree t = Tree(tree, m_nVar);
-      m_trees.push_back(t);
+      m_trees.emplace_back(tree, m_nVar);
    }
 
    TRG_MSG_DEBUG("In initialize. There are " << m_trees.size() << " trees for AnomalyDetectionBDT.");
