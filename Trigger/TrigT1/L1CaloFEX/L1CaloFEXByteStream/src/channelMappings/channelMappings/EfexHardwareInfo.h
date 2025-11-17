@@ -1,15 +1,20 @@
+/*
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+*/
 #ifndef EFEX_HARDWARE_INFO_H
 #define EFEX_HARDWARE_INFO_H
+
+#include <string>
 
 class EfexHardwareInfo {
     public:
         //Blank Invalid Constructor
         EfexHardwareInfo();
         //Constructor
-        EfexHardwareInfo(std::string efexlabel,
+        EfexHardwareInfo(const std::string & efexlabel,
                         int fibre,
                         int inputconnector,
-                        std::string mpod
+                        const std::string & mpod
                         );
         // Get methods
         std::string     getEFEXLabel() const;

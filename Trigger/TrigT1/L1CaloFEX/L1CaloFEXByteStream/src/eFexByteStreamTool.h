@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //***************************************************************************
@@ -63,7 +63,7 @@ class eFexByteStreamTool : public extends<AthAlgTool, IL1TriggerByteStreamTool> 
         /// Create a class to override logging interface in underlying decoder tool
           class MonitoredLogging : public L1CaloBsDecoderRun3::Logging {
             public:
-              MonitoredLogging(ToolHandle<GenericMonitoringTool> tool) : m_monTool(tool) { }
+              MonitoredLogging(const ToolHandle<GenericMonitoringTool> & tool) : m_monTool(tool) { }
               virtual ~MonitoredLogging() = default;
               virtual void err(const std::string& location, const std::string& title, const std::string& detail) const override;
               ToolHandle<GenericMonitoringTool> m_monTool;
