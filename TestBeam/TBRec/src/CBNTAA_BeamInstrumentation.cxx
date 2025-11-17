@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CBNTAA_BeamInstrumentation.h"
@@ -75,8 +75,8 @@ StatusCode CBNTAA_BeamInstrumentation::CBNT_initialize()
   const unsigned nScint=m_scint_names.size();  
   addBranch("Beam_sNames",m_scint_ntnames);
   for (unsigned i=0;i<nScint;i++) {
-    const std::string ADCItemName=add_name("scint_",m_scint_names[i]);
-    m_scint_ntnames->push_back(ADCItemName);
+    std::string ADCItemName=add_name("scint_",m_scint_names[i]);
+    m_scint_ntnames->push_back(std::move(ADCItemName));
   }
   addBranch("Beam_sADC",m_scint_adc);
   addBranch("Beam_sTDC",m_scint_tdc);
@@ -84,8 +84,8 @@ StatusCode CBNTAA_BeamInstrumentation::CBNT_initialize()
   const unsigned nBPCs=m_bpc_names.size();
   addBranch("Beam_bNames",m_bpc_ntnames);
   for (unsigned i=0;i<nBPCs;i++) {
-    const std::string BPCName=add_name("bpc_",m_bpc_names[i]);
-    m_bpc_ntnames->push_back(BPCName);
+    std::string BPCName=add_name("bpc_",m_bpc_names[i]);
+    m_bpc_ntnames->push_back(std::move(BPCName));
   }
   addBranch("Beam_bpcX",m_bpc_x);
   addBranch("Beam_bpcY",m_bpc_y);
