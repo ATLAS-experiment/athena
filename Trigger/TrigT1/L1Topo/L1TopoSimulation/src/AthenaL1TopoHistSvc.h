@@ -15,7 +15,7 @@
 
 class AthenaL1TopoHistSvc : public IL1TopoHistSvc {
 public:
-   AthenaL1TopoHistSvc(ServiceHandle<ITHistSvc> histSvc);
+   AthenaL1TopoHistSvc(const ServiceHandle<ITHistSvc> &histSvc);
    virtual ~AthenaL1TopoHistSvc();
    
    virtual void registerHist(TH1 * h) override;
