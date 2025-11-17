@@ -249,7 +249,7 @@ def defineInputsMenu():
             # gTE
             ('gTE3',1), ('gTE5',1), ('gTE10',1), ('gTE200',1),
             # gESPRESSO
-            ('gESPRESSO200', 1),
+            ('gESPRESSO280', 1),
 
             # MHT
             ('gMHT500',1),
@@ -414,10 +414,10 @@ def defineInputsMenu():
                     TopoMenuDef( 'INVM_DR_2MU3VFab',          outputbits = (2,3), outputlines = ['2INVM9-0DR15-2MU3VFab',
                                                                                                  '7INVM11-25DR99-2MU3VFab'] ), # BLS, ATR-21566
                     TopoMenuDef( '23INVM400000-24DPHI32-2eTAU07s', outputbits = 4 ), # HI, ATR-30728
-                    TopoMenuDef( '28INVM400000-24DPHI32-2eTAU06s', outputbits = 5 ), # HI, ATR-30728
-                    TopoMenuDef( '23INVM400000-25DPHI32-2eTAU06s', outputbits = 6 ), # HI, ATR-30728
-                    TopoMenuDef( '33INVM400000-25DPHI32-2eTAU05s', outputbits = 7 ), # HI, ATR-30728
-                    TopoMenuDef( '23INVM400000-27DPHI32-2eTAU05s', outputbits = 8 ), # HI, ATR-30728
+                    TopoMenuDef( '28INVM400000-24DPHI32-2eTAU07s', outputbits = 5 ), # HI, ATR-30728
+                    TopoMenuDef( '23INVM400000-25DPHI32-2eTAU08s', outputbits = 6 ), # HI, ATR-30728
+                    TopoMenuDef( '33INVM400000-25DPHI32-2eTAU07s', outputbits = 7 ), # HI, ATR-30728
+                    TopoMenuDef( '23INVM400000-27DPHI32-2eTAU07s', outputbits = 8 ), # HI, ATR-30728
                     TopoMenuDef( 'ADBDT-MU0s',outputbits = (13,14), outputlines=['ADBDT-3MU0s-Tight',
                                                                               'ADBDT-3MU0s-Loose']),
                 ]
