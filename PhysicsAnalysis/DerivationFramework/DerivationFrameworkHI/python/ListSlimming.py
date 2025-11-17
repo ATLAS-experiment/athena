@@ -397,6 +397,7 @@ def HION7AllVarContent():
     variables  = []
     variables += ["CaloSums"]
     variables += ["ZdcModules"]
+    variables += ["ZdcSums"]
     variables += ["PrimaryVertices"]
     variables += ["EventInfo"]
 
@@ -521,7 +522,8 @@ def makeHIJetBranchList():
         'TrackWidthPt4000',
         'Width',
         'MaxConstituentET',
-        'MaxOverMean']
+        'MaxOverMean',
+        'JvtMatched']
     return c
 
 def HION7BasicJetVars(JetColl):
