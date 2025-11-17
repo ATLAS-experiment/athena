@@ -2224,6 +2224,7 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
       ATH_CHECK( m_isoCorrTool.setProperty( "IsMC", !isData()) );
       ATH_CHECK( m_isoCorrTool.setProperty( "AFII_corr", isAtlfast()) );
       ATH_CHECK( m_isoCorrTool.setProperty( "Apply_SC_leakcorr", false) );
+      ATH_CHECK( m_isoCorrTool.setProperty( "FixTimingIssueInCore", true) ); // Similar to https://gitlab.cern.ch/atlas/athena/-/merge_requests/83939
       ATH_CHECK( m_isoCorrTool.setProperty( "CorrFile", "IsolationCorrections/v6/isolation_ptcorrections_rel22_mc20.root") );
       ATH_CHECK( m_isoCorrTool.setProperty( "OutputLevel", this->msg().level()) );
       ATH_CHECK( m_isoCorrTool.retrieve() );
