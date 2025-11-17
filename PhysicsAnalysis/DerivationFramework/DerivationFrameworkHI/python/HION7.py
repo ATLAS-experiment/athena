@@ -138,10 +138,33 @@ def HION7GlobalAugmentationToolCfg(flags):
                                                                                  doTopoClusDec = doTopoClus,
                                                                                  CaloClusterKey = caloClusterKey
                                                                                 )
-
     acc.addPublicTool(augmentation_tool, primary=True)
 
     return acc
+
+
+def HION7JetAugmentationToolCfg(flags):
+    """Configure the example augmentation tool"""
+    acc = ComponentAccumulator()
+    
+    # Configure the augmentation tool
+    # This adds FCalEtA, FCalEtC, ...
+    jvtTool = CompFactory.JetVertexTaggerTool(name="JVTToolEMTopo",
+                                              JetContainer="AntiKt4EMTopoJets")
+                                            
+
+    augmentation_tool = CompFactory.DerivationFramework.HIJetAugmentationTool(name="HION7JetAugmentationTool",
+                                                                                 DeltaRJetMatching = 0.3,
+                                                                                 HIJetContainerKey="DFAntiKt4HIJets",
+                                                                                 CaloJetContainerKey = "AntiKt4EMTopoJets",
+                                                                                 JVTToolEMTopo = jvtTool
+                                                                                 )
+    acc.addPublicTool(jvtTool)
+    acc.addPublicTool(augmentation_tool, primary=True)
+
+    return acc
+
+#########################################################################################
 
 
 def HION7KernelCfg(flags, name='HION7Kernel', **kwargs):
@@ -206,7 +229,8 @@ def HION7KernelCfg(flags, name='HION7Kernel', **kwargs):
 #########################################################################################
     skimmingTool = acc.getPrimaryAndMerge(HION7SkimmingToolCfg(flags))
     globalAugmentationTool = acc.getPrimaryAndMerge(HION7GlobalAugmentationToolCfg(flags))
-    augmentationTool=[globalAugmentationTool]
+    jetAugmentationTool = acc.getPrimaryAndMerge(HION7JetAugmentationToolCfg(flags))
+    augmentationTool=[globalAugmentationTool,jetAugmentationTool]
 
     acc.addEventAlgo(CompFactory.DerivationFramework.DerivationKernel(name,ThinningTools = thinningTools, SkimmingTools = [skimmingTool], AugmentationTools=augmentationTool),sequenceName="HION7Sequence")
 
