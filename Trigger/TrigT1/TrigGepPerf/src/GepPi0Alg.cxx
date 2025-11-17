@@ -1,5 +1,5 @@
 /*
- *   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+ *   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
  */
 
 /*
@@ -336,7 +336,7 @@ GepPi0Alg::twinpeaks_strategy(const CaloCell* seed,
 
   auto peaks_end = std::partition(neigh_cells.begin(),
 				  neigh_cells.end(),
-				  is_local_max);
+				  std::move(is_local_max));
 
 
   auto n_peaks = peaks_end - neigh_cells.begin();
@@ -532,7 +532,7 @@ GepPi0Alg::crawl_strategy(const CaloCell* seed,
     std::transform(phi_starts.cbegin(),
 		   phi_starts.cend(),
 		   std::back_inserter(paths_hash),
-		   calc_phihashes);
+		   std::move(calc_phihashes));
   };
 
    ATH_MSG_DEBUG("crawl - number of 1-dim paths (hashes) "
@@ -551,7 +551,7 @@ GepPi0Alg::crawl_strategy(const CaloCell* seed,
 		   std::back_inserter(path),
 		   [&laremCells](const auto& hash){
 		     return laremCells.at(hash);});
-    paths_cell.push_back(path);
+    paths_cell.push_back(std::move(path));
   }
 
 
@@ -580,7 +580,7 @@ GepPi0Alg::crawl_strategy(const CaloCell* seed,
 		   p_c.cend(),
 		   std::back_inserter(path_signif),
 		   signif);
-    paths_signif.push_back(path_signif);
+    paths_signif.push_back(std::move(path_signif));
   }
 
   for (const auto& p_s: paths_signif) {
@@ -607,7 +607,7 @@ GepPi0Alg::crawl_strategy(const CaloCell* seed,
 	}
       }
 
-      paths_pat.push_back(pat);
+      paths_pat.push_back(std::move(pat));
     }
   }
   
