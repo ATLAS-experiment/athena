@@ -14,7 +14,7 @@ def HICaloGeoExtractCfg(flags, **kwargs):
     inputTowers = towerMaker.TowerContainerName
 
     kwargs.setdefault("InputTowerKey", inputTowers)
-    kwargs.setdefault("CaloClusterContainerKey", "AllCalo")
+    kwargs.setdefault("CaloCellContainerKey", "AllCalo")
     kwargs.setdefault("HistStream", "CALOGEOEXTRACTSTREAM")
     extractCGC = CompFactory.ExtractCaloGeoConstants("ExtractCaloGeoConstants", **kwargs)
     acc.addEventAlgo(extractCGC)
