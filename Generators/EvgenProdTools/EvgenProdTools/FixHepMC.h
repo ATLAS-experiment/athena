@@ -53,6 +53,8 @@ private:
   bool m_cleanDecays; // Clean decays?
   bool m_purgeUnstableWithoutEndVtx; // Remove unstable particles without decay vertex?
   bool m_ignoreSemiDisconnected; // Ignore semi-disconnected particles (normal in Sherpa)
+  std::string m_forced_momentum{""}; // Force momentum unit for the event
+  std::string m_forced_length{""}; // Force length unit for the event
   //@}
 
   /// @name Cleaned-particle counters
@@ -63,8 +65,6 @@ private:
   long m_unstablePurged;
   long m_totalSeen;
   long m_replacedPIDs;
-  std::string m_forced_momentum{""};
-  std::string m_forced_length{""};
   //@}
    
   std::map<int,int> m_pidmap; //!< map of pids to change.
