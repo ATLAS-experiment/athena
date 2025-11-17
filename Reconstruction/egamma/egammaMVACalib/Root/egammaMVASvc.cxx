@@ -27,6 +27,14 @@ StatusCode egammaMVASvc::initialize()
     m_mvaElectron.disable();
   }
 
+  if (!m_mvaFwdElectron.empty()) {
+    ATH_MSG_DEBUG("Retrieving mvaFwdElectron");
+    ATH_CHECK(m_mvaFwdElectron.retrieve());
+  } else {
+    ATH_MSG_DEBUG("Disabling mvaFwdElectron");
+    m_mvaFwdElectron.disable();
+  }
+
   if (!m_mvaUnconvertedPhoton.empty()) {
     ATH_MSG_DEBUG("Retrieving mvaUnconvertedPhoton");
     ATH_CHECK(m_mvaUnconvertedPhoton.retrieve());
@@ -96,7 +104,8 @@ bool egammaMVASvc::isConvCalib(const xAOD::Photon& ph) const
 
 StatusCode egammaMVASvc::getEnergy(const xAOD::CaloCluster& cluster,
                                    const xAOD::Egamma& eg,
-                                   double& mvaE) const
+                                   double& mvaE,
+				   const egammaMVACalib::GlobalEventInfo& gei) const
 {
 
   ATH_MSG_DEBUG("calling egammaMVASvc::getEnergy with cluster and eg");
@@ -105,9 +114,16 @@ StatusCode egammaMVASvc::getEnergy(const xAOD::CaloCluster& cluster,
 
   if (xAOD::EgammaHelpers::isElectron(&eg)) {
     if (!m_mvaElectron.empty()) {
-      mvaE = m_mvaElectron->getEnergy(cluster, &eg);
+      mvaE = m_mvaElectron->getEnergy(cluster, &eg, gei);
     } else {
       ATH_MSG_FATAL("Trying to calibrate an electron, but disabled");
+      return StatusCode::FAILURE;
+    }
+  } else if (xAOD::EgammaHelpers::isFwdElectron(&eg)) {
+    if (!m_mvaFwdElectron.empty()) {
+      mvaE = m_mvaFwdElectron->getEnergy(cluster, &eg, gei);
+    } else {
+      ATH_MSG_FATAL("Trying to calibrate a forward electron, but disabled");
       return StatusCode::FAILURE;
     }
   } else if (xAOD::EgammaHelpers::isPhoton(&eg)) {
@@ -115,14 +131,14 @@ StatusCode egammaMVASvc::getEnergy(const xAOD::CaloCluster& cluster,
     const bool is_conv_calib = isConvCalib(*ph);
     if (is_conv_calib) {
       if (!m_mvaConvertedPhoton.empty()) {
-        mvaE = m_mvaConvertedPhoton->getEnergy(cluster, &eg);
+        mvaE = m_mvaConvertedPhoton->getEnergy(cluster, &eg, gei);
       } else {
         ATH_MSG_FATAL("Trying to calibrate a converted photon, but disabled");
         return StatusCode::FAILURE;
       }
     } else {
       if (!m_mvaUnconvertedPhoton.empty()) {
-        mvaE = m_mvaUnconvertedPhoton->getEnergy(cluster, &eg);
+        mvaE = m_mvaUnconvertedPhoton->getEnergy(cluster, &eg, gei);
       } else {
         ATH_MSG_FATAL("Trying to calibrate an unconverted photon, but disabled");
         return StatusCode::FAILURE;
@@ -139,7 +155,8 @@ StatusCode egammaMVASvc::getEnergy(const xAOD::CaloCluster& cluster,
 
 StatusCode egammaMVASvc::getEnergy(const xAOD::CaloCluster& cluster,
                                    const xAOD::EgammaParameters::EgammaType egType,
-                                   double& mvaE) const
+                                   double& mvaE,
+				   const egammaMVACalib::GlobalEventInfo& gei) const
 {
 
   ATH_MSG_DEBUG("calling egammaMVASvc::getEnergy with cluster and egType (" << egType <<")");
@@ -148,9 +165,17 @@ StatusCode egammaMVASvc::getEnergy(const xAOD::CaloCluster& cluster,
   switch (egType) {
   case xAOD::EgammaParameters::electron:
     if (!m_mvaElectron.empty()) {
-      mvaE = m_mvaElectron->getEnergy(cluster,nullptr);
+      mvaE = m_mvaElectron->getEnergy(cluster,nullptr, gei);
     } else {
       ATH_MSG_FATAL("Trying to calibrate an electron, but disabled");
+      return StatusCode::FAILURE;
+    }
+    break;
+  case xAOD::EgammaParameters::forwardelectron:
+    if (!m_mvaFwdElectron.empty()) {
+      mvaE = m_mvaFwdElectron->getEnergy(cluster,nullptr, gei);
+    } else {
+      ATH_MSG_FATAL("Trying to calibrate a forward electron, but disabled");
       return StatusCode::FAILURE;
     }
     break;
@@ -158,14 +183,14 @@ StatusCode egammaMVASvc::getEnergy(const xAOD::CaloCluster& cluster,
   case xAOD::EgammaParameters::unconvertedPhoton:
     // treat converted photons like unconverted photons since don't have access to vertex
     if (!m_mvaUnconvertedPhoton.empty()) {
-      mvaE = m_mvaUnconvertedPhoton->getEnergy(cluster,nullptr);
+      mvaE = m_mvaUnconvertedPhoton->getEnergy(cluster,nullptr, gei);
     } else {
       ATH_MSG_FATAL("Trying to calibrate an unconverted photon, but disabled");
       return StatusCode::FAILURE;
     }
     break;
   default:
-    ATH_MSG_FATAL("Egamma object is of unsupported type");
+    ATH_MSG_FATAL("Egamma object " << egType << " is of unsupported type");
     return StatusCode::FAILURE;
   }
 
@@ -175,11 +200,12 @@ StatusCode egammaMVASvc::getEnergy(const xAOD::CaloCluster& cluster,
 
 
 StatusCode egammaMVASvc::execute(xAOD::CaloCluster& cluster,
-                                 const xAOD::Egamma& eg) const
+                                 const xAOD::Egamma& eg,
+				 const egammaMVACalib::GlobalEventInfo& gei) const
 {
   double mvaE = 0.;
 
-  ATH_CHECK(getEnergy(cluster, eg, mvaE));
+  ATH_CHECK(getEnergy(cluster, eg, mvaE, gei));
 
   if (mvaE > eg.m()) {
     cluster.setCalE(mvaE);
@@ -193,12 +219,13 @@ StatusCode egammaMVASvc::execute(xAOD::CaloCluster& cluster,
 }
 
 StatusCode egammaMVASvc::execute(xAOD::CaloCluster& cluster,
-                                 const xAOD::EgammaParameters::EgammaType egType) const
+                                 const xAOD::EgammaParameters::EgammaType egType,
+				 const egammaMVACalib::GlobalEventInfo& gei) const
 {
 
   double mvaE = 0.;
 
-  ATH_CHECK(getEnergy(cluster, egType, mvaE));
+  ATH_CHECK(getEnergy(cluster, egType, mvaE, gei));
 
   if (mvaE > 0) {
     cluster.setCalE(mvaE);
