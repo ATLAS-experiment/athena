@@ -14,7 +14,10 @@ import time
 import functools
 print = functools.partial(print, flush=True)
 
+
 def ELG_prun(sample) :
+    # Important: only return as integer 1 if the creation of the tarball was unsuccesful as the PrunDriver
+    # relies on that to stop the submission if tarball creation was unsuccesful 
 
     try:
         from pandatools import PandaToolsPkgInfo  # noqa: F401
@@ -114,6 +117,8 @@ def ELG_prun(sample) :
     if sample.meta().castDouble('nc_showCmd', 0, SH.MetaObject.CAST_NOCAST_DEFAULT) != 0 :
         print (cmd)
 
+    # If tarball is not existing create it 
+    # In case of tarball creation issue return 1 
     if not os.path.isfile('jobcontents.tgz') : 
         import copy
         dummycmd = copy.deepcopy(cmd)
@@ -143,19 +148,38 @@ def ELG_prun(sample) :
                 try:
                     out = subprocess.check_output(dummycmd, stderr=subprocess.STDOUT, encoding="utf-8")
                 except subprocess.CalledProcessError as e_take2:
+                    # Failed to create tarball thus returning 1 
                     print ("Command:")
                     print (e_take2.cmd)
                     print ("failed with return code " , e_take2.returncode)
                     print ("output was:")
                     print (e_take2.output)
                     return 1
+                except Exception as e:
+                    # Catch any other exception
+                    # Failed to create tarball thus returning 1 
+                    print ("Command:")
+                    print (dummycmd)
+                    print ("failed and output was:")
+                    print (e)
+                    return 1
             else:
+                # Failed to create tarball thus returning 1 
                 print ("Command:")
                 print (e.cmd)
                 print ("failed with return code " , e.returncode)
                 print ("output was:")
                 print (e.output)
                 return 1
+        
+        except Exception as e:
+            # Catch any other exception
+            # Failed to create tarball thus returning 1 
+            print ("Command:")
+            print (dummycmd)
+            print ("failed and output was:")
+            print (e)
+            return 1
 
     cmd += ["--inTarBall=jobcontents.tgz"]
     
@@ -174,7 +198,7 @@ def ELG_prun(sample) :
     
     listErrorsMessagesTries = []
     while (iTry < nSubmitTries) and (not successSubmission):
-        if iTry > 1:
+        if iTry > 0:
             # Wait for 2 seconds as issue occured on the past try
             # and it could be due to a transient issue
             time.sleep(2)
@@ -196,8 +220,24 @@ def ELG_prun(sample) :
             errorMsg += f"{e.output}\n"
             
             # Add error message to the list of error messages 
-            listErrorsMessagesTries.append(errorMsg) 
-            print("Failed")
+            listErrorsMessagesTries.append(errorMsg)
+            # Increase index tries 
+            iTry += 1
+        
+        except Exception as e:
+            # Catch any other exception 
+            # Failed to submit job  
+            # Keep track of error messages
+            errorMsg = ""
+            errorMsg += "-"*60 + "\n"
+            errorMsg += f"iTry={iTry+1} out of nTries={nSubmitTries}\n"
+            errorMsg += "-"*60 + "\n"
+            errorMsg += "Command:\n"
+            errorMsg += f"{cmd}\n"
+            errorMsg += f"failed and output was:\n"
+            errorMsg += f"{e}"
+            # Add error message to the list of error messages 
+            listErrorsMessagesTries.append(errorMsg)
             # Increase index tries 
             iTry += 1
     
