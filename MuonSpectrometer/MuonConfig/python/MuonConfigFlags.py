@@ -148,6 +148,7 @@ def createMuonConfigFlags():
     # configuration of the DESDM_MCP output format 
 
     mcf.addFlag("Muon.DESDM_MCP.doAlignmentFormat", False) # Flag to stear the DESDM_MCP format which switches to a looser event selection for toroid off runs used for alignment. 
+    mcf.addFlag("Muon.DESDM_MCP.doExtendedAlignmentContent", False) # Flag to enable electron, photon and jet containers in DESDM_MCP for dedicate studies of the toroid off data. 
 
     # configuration to write out RPC RDO for trigger timing calibration
     mcf.addFlag("Muon.doWriteRpcRDO", True)
