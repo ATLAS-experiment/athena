@@ -30,8 +30,8 @@ if __name__ == "__main__":
     flags.ITk.Geometry.AllLocal = False
 
     # for debugging
-    from AthenaCommon.Constants import INFO
-    flags.Exec.OutputLevel=INFO
+    #from AthenaCommon.Constants import DEBUG
+    #flags.Exec.OutputLevel=DEBUG
     
     flags.lock()
 
@@ -66,4 +66,4 @@ if __name__ == "__main__":
                                  inputKey="McEventInfo",
                                  outputKey="EventInfo"))
     
-    acc.run(maxEvents=2)
+    acc.run(maxEvents=1)
