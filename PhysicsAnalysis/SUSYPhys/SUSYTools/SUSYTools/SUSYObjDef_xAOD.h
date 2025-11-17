@@ -350,7 +350,7 @@ namespace ST {
     float GetTrigPrescale(const std::string&) const override final;
     const Trig::ChainGroup* GetTrigChainGroup(const std::string&) const override final;
     std::vector<std::string> GetTriggerOR(const std::string& trigExpr) const;
-    void GetTriggerTokens(std::string, std::vector<std::string>& , std::vector<std::string>& , std::vector<std::string>& , std::vector<std::string>& ,std::vector<std::string>& ) const;
+    void GetTriggerTokens(std::string, std::vector<std::string>& , std::vector<std::string>& , std::vector<std::string>& , std::vector<std::string>& ,std::vector<std::string>&  ,std::vector<std::string>& ,std::vector<std::string>&) const;
     Trig::FeatureContainer GetTriggerFeatures(const std::string& chainName = "EF_.*", unsigned int condition = TrigDefs::Physics) const;
 
     const xAOD::EventInfo* GetEventInfo() const override final;
@@ -454,12 +454,16 @@ namespace ST {
     std::vector<std::string> m_v_trigs17_cache_singleEle;
     std::vector<std::string> m_v_trigs18_cache_singleEle;
     std::vector<std::string> m_v_trigs22_cache_singleEle;
+    std::vector<std::string> m_v_trigs23_cache_singleEle;
+    std::vector<std::string> m_v_trigs24_cache_singleEle;
 
     std::vector<std::string> m_v_trigs15_cache_singleLep;
     std::vector<std::string> m_v_trigs16_cache_singleLep;
     std::vector<std::string> m_v_trigs17_cache_singleLep;
     std::vector<std::string> m_v_trigs18_cache_singleLep;
     std::vector<std::string> m_v_trigs22_cache_singleLep;
+    std::vector<std::string> m_v_trigs23_cache_singleLep;
+    std::vector<std::string> m_v_trigs24_cache_singleLep;
 
     std::vector<std::string> m_v_trigs15_cache_diLep;
     std::vector<std::string> m_v_trigs16_cache_diLep;
@@ -935,6 +939,8 @@ namespace ST {
     std::string m_trig2017combination_singleLep;
     std::string m_trig2018combination_singleLep;
     std::string m_trig2022combination_singleLep;
+    std::string m_trig2023combination_singleLep;
+    std::string m_trig2024combination_singleLep;
     //
     int m_trigNToys_diLep;
     std::string m_trig2015combination_diLep;
