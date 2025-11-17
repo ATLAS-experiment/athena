@@ -63,6 +63,8 @@ private:
   long m_unstablePurged;
   long m_totalSeen;
   long m_replacedPIDs;
+  std::string m_forced_momentum{""};
+  std::string m_forced_length{""};
   //@}
    
   std::map<int,int> m_pidmap; //!< map of pids to change.
