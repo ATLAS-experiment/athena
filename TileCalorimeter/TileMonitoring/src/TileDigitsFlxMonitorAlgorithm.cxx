@@ -89,7 +89,7 @@ StatusCode TileDigitsFlxMonitorAlgorithm::fillHistograms( const EventContext& ct
         int gain = m_tileHWID->adc(adcId);
 
         std::string sampleName = module + "_ch_" + std::to_string(channel) + gainName[gain] +  "_samples";
-        auto channelSample = Monitored::Scalar<float>(sampleName, 0.0F);
+        auto channelSample = Monitored::Scalar<float>(std::move(sampleName), 0.0F);
 
         std::vector<float> digits_monitored;
         auto it = tile_digits->samples().begin() + m_firstSample;
