@@ -79,7 +79,7 @@ std::unique_ptr<IdDictField> make_field (const std::string& field_name,
   std::vector<int> vvalues (values);
   if (vlabels.size() != vvalues.size()) std::abort();
   for (size_t i = 0; i < vlabels.size(); ++i) {
-    f->add_label (new IdDictLabel (vlabels[i], vvalues[i]));
+    f->add_label (std::make_unique<IdDictLabel> (vlabels[i], vvalues[i]));
   }
   return f;
 }
@@ -89,42 +89,42 @@ std::unique_ptr<IdDictRegion> make_region (const std::string& name,
                                            const std::string& modlab)
 {
   auto r = std::make_unique<IdDictRegion>(name, group_name, "");
-  r->add_entry (make_range ("subdet", "LArCalorimeter").release());
-  r->add_entry (make_range ("part", "LArFCAL").release());
+  r->add_entry (make_range ("subdet", "LArCalorimeter"));
+  r->add_entry (make_range ("part", "LArFCAL"));
   r->add_entry (make_range ("barrel-endcap",
-                            { "negative-endcap-outer-wheel", "positive-endcap-outer-wheel"}).release());
-  r->add_entry (make_range ("module", modlab.substr(0, 1)).release());
+                            { "negative-endcap-outer-wheel", "positive-endcap-outer-wheel"}));
+  r->add_entry (make_range ("module", modlab.substr(0, 1)));
 
   if (modlab == "1") {
-    r->add_entry (make_range ("eta-fcal", 0, 62).release());
-    r->add_entry (make_range ("phi-fcal", 0, 15).release());
+    r->add_entry (make_range ("eta-fcal", 0, 62));
+    r->add_entry (make_range ("phi-fcal", 0, 15));
   }
   else if (modlab == "2a") {
-    r->add_entry (make_range ("eta-fcal", 0, 29).release());
-    r->add_entry (make_range ("phi-fcal", {"0", "7", "8", "15"}).release());
+    r->add_entry (make_range ("eta-fcal", 0, 29));
+    r->add_entry (make_range ("phi-fcal", {"0", "7", "8", "15"}));
   }
   else if (modlab == "2b") {
-    r->add_entry (make_range ("eta-fcal", 0, 30).release());
-    r->add_entry (make_range ("phi-fcal", {"3", "4", "11", "12"}).release());
+    r->add_entry (make_range ("eta-fcal", 0, 30));
+    r->add_entry (make_range ("phi-fcal", {"3", "4", "11", "12"}));
   }
   else if (modlab == "2c") {
-    r->add_entry (make_range ("eta-fcal", 0, 31).release());
-    r->add_entry (make_range ("phi-fcal", {"1", "2", "5", "6", "9", "10", "13", "14"}).release());
+    r->add_entry (make_range ("eta-fcal", 0, 31));
+    r->add_entry (make_range ("phi-fcal", {"1", "2", "5", "6", "9", "10", "13", "14"}));
   }
   else if (modlab == "3a") {
-    r->add_entry (make_range ("eta-fcal", 0, 14).release());
-    r->add_entry (make_range ("phi-fcal", {"2", "10"}).release());
+    r->add_entry (make_range ("eta-fcal", 0, 14));
+    r->add_entry (make_range ("phi-fcal", {"2", "10"}));
   }
   else if (modlab == "3b") {
-    r->add_entry (make_range ("eta-fcal", 14, 14).release());
-    r->add_entry (make_range ("phi-fcal", { "0", "1", "3", "4", "5", "6", "7", "8", "9", "11", "12", "13", "14", "15"}).release());
+    r->add_entry (make_range ("eta-fcal", 14, 14));
+    r->add_entry (make_range ("phi-fcal", { "0", "1", "3", "4", "5", "6", "7", "8", "9", "11", "12", "13", "14", "15"}));
   }
   else if (modlab == "3c") {
-    r->add_entry (make_range ("eta-fcal", 15, 15).release());
-    r->add_entry (make_range ("phi-fcal", { "0", "1", "2", "3", "4", "6", "7", "8", "9", "10", "11", "12", "14", "15"}).release());
+    r->add_entry (make_range ("eta-fcal", 15, 15));
+    r->add_entry (make_range ("phi-fcal", { "0", "1", "2", "3", "4", "6", "7", "8", "9", "10", "11", "12", "14", "15"}));
   }
 
-  r->add_entry (make_range ("is-slar-fcal", "cell").release());
+  r->add_entry (make_range ("is-slar-fcal", "cell"));
   return r;
 }
 
@@ -201,7 +201,7 @@ BOOST_AUTO_TEST_CASE(Unpack)
                                      "LArHighVoltage",
                                      "LArElectrode",
                                      "ForwardDetectors"},
-                                    {2, 4, 5, 7, 10, 11, 12, 13}).release());
+                                    {2, 4, 5, 7, 10, 11, 12, 13}));
   dictionary.add_field (make_field ("part",
                                     {"LArEM",
                                      "LArHEC",
@@ -211,35 +211,35 @@ BOOST_AUTO_TEST_CASE(Unpack)
                                      "LArEMdisc",
                                      "LArHECdisc",
                                      "LArFCALdisc"},
-                                    {1, 2, 3, 4, 5, -1, -2, -3}).release());
+                                    {1, 2, 3, 4, 5, -1, -2, -3}));
 
   dictionary.add_field (make_field ("barrel-endcap",
                                     {"negative-endcap-outer-wheel",
                                      "positive-endcap-outer-wheel",
                                     },
-                                    {-2, 2}).release());
+                                    {-2, 2}));
   dictionary.add_field (make_field ("is-slar-fcal",
                                     {"cell", "slar"},
-                                    {0, 1}).release());
+                                    {0, 1}));
 
 
-  dictionary.add_dictentry (make_region ("LArFCAL-1", "1").release());
-  dictionary.add_dictentry (make_region ("LArFCAL-2a", "2a").release());
-  dictionary.add_dictentry (make_region ("LArFCAL-2b", "2b").release());
-  dictionary.add_dictentry (make_region ("LArFCAL-2c", "2c").release());
-  dictionary.add_dictentry (make_region ("LArFCAL-3a", "3a").release());
-  dictionary.add_dictentry (make_region ("LArFCAL-3b", "3b").release());
-  dictionary.add_dictentry (make_region ("LArFCAL-3c", "3c").release());
+  dictionary.add_dictentry (make_region ("LArFCAL-1", "1"));
+  dictionary.add_dictentry (make_region ("LArFCAL-2a", "2a"));
+  dictionary.add_dictentry (make_region ("LArFCAL-2b", "2b"));
+  dictionary.add_dictentry (make_region ("LArFCAL-2c", "2c"));
+  dictionary.add_dictentry (make_region ("LArFCAL-3a", "3a"));
+  dictionary.add_dictentry (make_region ("LArFCAL-3b", "3b"));
+  dictionary.add_dictentry (make_region ("LArFCAL-3c", "3c"));
 
-  auto dummy = new IdDictRegion ("dummy", group_name, "");
-  dummy->add_entry (make_range ("subdet", dictionary).release());
-  dummy->add_entry (make_range ("part", dictionary).release());
-  dummy->add_entry (make_range ("barrel-endcap", dictionary).release());
-  dummy->add_entry (make_range ("module", 1, 3).release());
-  dummy->add_entry (make_range ("eta-fcal", 0, 63).release());
-  dummy->add_entry (make_range ("phi-fcal", 0, 15).release());
-  dummy->add_entry (make_range ("is-slar-fcal", dictionary).release());
-  dictionary.add_dictentry (dummy);
+  auto dummy = std::make_unique<IdDictRegion> ("dummy", group_name, "");
+  dummy->add_entry (make_range ("subdet", dictionary));
+  dummy->add_entry (make_range ("part", dictionary));
+  dummy->add_entry (make_range ("barrel-endcap", dictionary));
+  dummy->add_entry (make_range ("module", 1, 3));
+  dummy->add_entry (make_range ("eta-fcal", 0, 63));
+  dummy->add_entry (make_range ("phi-fcal", 0, 15));
+  dummy->add_entry (make_range ("is-slar-fcal", dictionary));
+  dictionary.add_dictentry (std::move(dummy));
 
   dictionary.resolve_references (idd);
   dictionary.generate_implementation (idd, "");

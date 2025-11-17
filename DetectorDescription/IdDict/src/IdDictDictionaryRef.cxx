@@ -65,13 +65,13 @@ void IdDictDictionaryRef::generate_implementation(const IdDictMgr& idd,
 
         // Save a vector of entries to prepend, inverting their order
         std::vector<IdDictRegionEntry*> prepend_entries;
-        for (IdDictRegionEntry* entry : region.entries()) {
-          if (this == entry) break; // end when we get to the dictionary (this)
+        for (const std::unique_ptr<IdDictRegionEntry>& entry : region.entries()) {
+          if (this == entry.get()) break; // end when we get to the dictionary (this)
           // If this is a range entry, add a duplicate to all
           // regions in the subdictionary
-          IdDictRange* range = dynamic_cast<IdDictRange*> (entry);
+          IdDictRange* range = dynamic_cast<IdDictRange*> (entry.get());
           if (range) {
-            prepend_entries.insert(prepend_entries.begin(), entry);
+            prepend_entries.insert(prepend_entries.begin(), entry.get());
           }
         }
 
@@ -83,7 +83,7 @@ void IdDictDictionaryRef::generate_implementation(const IdDictMgr& idd,
           for (IdDictRegionEntry* entry : prepend_entries) {
             IdDictRange* range = dynamic_cast<IdDictRange*> (entry);
             if (range) {
-              region2->prepend_entry(new IdDictRangeRef (*range));
+              region2->prepend_entry(std::make_unique<IdDictRangeRef> (*range));
             }
           }
         }
@@ -97,25 +97,25 @@ void IdDictDictionaryRef::generate_implementation(const IdDictMgr& idd,
 
           // Loop over all regions of current dict, add to ref dict (m_dictionary)
           for (IdDictRegion* region3 : dictionary.all_regions()) {
-            IdDictRegion* new_region = new IdDictRegion ("dummy", "dummy", "");
+            auto new_region = std::make_unique<IdDictRegion> ("dummy", "dummy", "");
 
             new_region->set_index (region_number++);
 
-            // to all region vectors
-            m_dictionary->add_region(new_region);
-            // to the entries of the dictionary
-            m_dictionary->add_dictentry(new_region);
-
             // Now add in only the ranges
             size_t i = 0;
-            for (IdDictRegionEntry* entry : region3->entries()) {
+            for (const std::unique_ptr<IdDictRegionEntry>& entry : region3->entries()) {
               if (i++ >= prepend_entries.size()) continue;
 
-              IdDictRange* range = dynamic_cast<IdDictRange*> (entry);
+              IdDictRange* range = dynamic_cast<IdDictRange*> (entry.get());
               if (range) {
-                new_region->add_entry(new IdDictRangeRef (*range));
+                new_region->add_entry(std::make_unique<IdDictRangeRef> (*range));
               }
             }
+
+            // to all region vectors
+            m_dictionary->add_region(new_region.get());
+            // to the entries of the dictionary
+            m_dictionary->add_dictentry(std::move(new_region));
           }
         }
         m_propagated_information = true;

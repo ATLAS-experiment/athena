@@ -59,15 +59,15 @@ IdDictGroup::build_multirange() const {
 }
 
 void
-IdDictGroup::add_dictentry(IdDictDictEntry* region) {
-  m_entries.push_back(region);
+IdDictGroup::add_dictentry(std::unique_ptr<IdDictDictEntry> region) {
+  m_entries.push_back(std::move(region));
 }
 
 void
 IdDictGroup::resolve_references(IdDictMgr& idd,
                                 IdDictDictionary& dictionary,
                                 size_t& index) {
-  for (IdDictDictEntry* ent : m_entries) {
+  for (auto& ent : m_entries) {
     ent->set_index(index);
     index++;
 
@@ -86,14 +86,14 @@ IdDictGroup::generate_implementation(const IdDictMgr& idd,
   if (!m_generated_implementation) {
     // Loop over entries and fill regions vec with selected region
     // (AltRegions have a selection)
-    for (IdDictDictEntry* ent : m_entries) {
+    for (auto& ent : m_entries) {
       ent->generate_implementation(idd, dictionary, tag);
       // Get region and save in m_regions
-      IdDictRegion* region = dynamic_cast<IdDictRegion*> (ent);
+      IdDictRegion* region = dynamic_cast<IdDictRegion*> (ent.get());
       if (region) {
         m_regions.push_back(region);
       } else {
-        IdDictAltRegions* altregions = dynamic_cast<IdDictAltRegions*> (ent);
+        IdDictAltRegions* altregions = dynamic_cast<IdDictAltRegions*> (ent.get());
         if (altregions) {
           m_regions.push_back(altregions->selected_region());
         }
@@ -114,7 +114,7 @@ void
 IdDictGroup::reset_implementation() {
   if (m_generated_implementation) {
     m_regions.clear();
-    for (IdDictDictEntry* ent : m_entries) {
+    for (auto& ent : m_entries) {
       ent->reset_implementation();
     }
     m_generated_implementation = false;
@@ -137,41 +137,37 @@ IdDictGroup::verify() const {
  **/
 
 void IdDictGroup::sort() {
-  std::map< ExpandedIdentifier, IdDictDictEntry* > regions;
+  std::map< ExpandedIdentifier, std::unique_ptr<IdDictDictEntry> > regions;
 
-  for (IdDictRegion* region : m_regions) {
+  assert (m_regions.size() == m_entries.size());
+  for (size_t ientry = 0; IdDictRegion* region : m_regions) {
     Range range = region->build_range();
     RangeIterator itr(range);
     auto first = itr.begin();
     auto last = itr.end();
     if (first != last) {
-      regions[*first] = region;
+      regions[*first] = std::move(m_entries[ientry++]);
     } else {
       std::cout << "IdDictDictionary::sort - WARNING empty region cannot sort "
                 << std::endl;
     }
   }
-  if (regions.size() == m_regions.size()) {
-    // Reorder the regions
-    std::vector<IdDictRegion*>::size_type vecIt = 0;
-    for (auto& p : regions) {
-      m_entries[vecIt++] = p.second;
-    }
-  } else {
+  if (regions.size() != m_regions.size()) {
     std::cout << "IdDictGroup::sort - WARNING region map size is NOT the same as the vector size. Map size "
               << regions.size() << " vector size " << m_regions.size()
               << std::endl;
+  }
+  // Reorder the regions
+  m_entries.resize (regions.size());
+  for (size_t vecIt = 0; auto& p : regions) {
+    m_entries[vecIt++] = std::move(p.second);
   }
 }
 
 void
 IdDictGroup::clear() {
-  for (IdDictDictEntry* region : m_entries) {
-    region->clear();
-    delete region;
-  }
-
   m_entries.clear();
+  m_regions.clear();
   m_region_tree.clear();
 }
 

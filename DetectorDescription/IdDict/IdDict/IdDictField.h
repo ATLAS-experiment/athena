@@ -8,6 +8,7 @@
 #include "Identifier/ExpandedIdentifier.h"
 #include <string>
 #include <vector>
+#include <memory>
 
 class IdDictLabel;
 class IdDictMgr;
@@ -19,6 +20,12 @@ public:
     // @{
 
     IdDictField (const std::string& name);
+    IdDictField (IdDictField&&);
+    ~IdDictField();
+    IdDictField& operator= (IdDictField&&);
+
+    IdDictField (const IdDictField&) = delete;
+    IdDictField& operator= (const IdDictField&) = delete;
 
 
     // @}
@@ -40,7 +47,7 @@ public:
     //** @name Methods used to initialize the object.
     // @{
 
-    void add_label (const IdDictLabel* label);
+    void add_label (std::unique_ptr<const IdDictLabel> label);
     void set_index (size_t index);
     bool verify () const;  
     void clear ();
@@ -51,7 +58,7 @@ public:
 
 private:
     std::string                      m_name;
-    std::vector <const IdDictLabel*> m_labels;
+    std::vector <std::unique_ptr<const IdDictLabel> > m_labels;
     size_t                           m_index{};
 }; 
 

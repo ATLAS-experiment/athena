@@ -17,6 +17,10 @@ IdDictRegion::IdDictRegion (const std::string& name,
     m_tag (tag)
 {
 }
+IdDictRegion::~IdDictRegion () = default;
+
+IdDictRegion::IdDictRegion (IdDictRegion&&) = default;
+IdDictRegion& IdDictRegion::operator= (IdDictRegion&&) = default;
 
 
 std::string
@@ -44,14 +48,14 @@ IdDictRegion::set_index(size_t index) {
 
 /// Add entry to the end of the list.
 void
-IdDictRegion::add_entry(IdDictRegionEntry* entry) {
-  m_entries.push_back(entry);
+IdDictRegion::add_entry(std::unique_ptr<IdDictRegionEntry> entry) {
+  m_entries.push_back(std::move(entry));
 }
 
 /// Add entry to the start of the list.
 void
-IdDictRegion::prepend_entry(IdDictRegionEntry* entry) {
-  m_entries.insert(m_entries.begin(), entry);
+IdDictRegion::prepend_entry(std::unique_ptr<IdDictRegionEntry> entry) {
+  m_entries.insert(m_entries.begin(), std::move(entry));
 }
 
 
@@ -125,9 +129,7 @@ void IdDictRegion::set_is_empty()
 
 void
 IdDictRegion::resolve_references(IdDictMgr& idd, IdDictDictionary& dictionary) {
-  std::vector<IdDictRegionEntry*>::iterator it;
-  for (it = m_entries.begin(); it != m_entries.end(); ++it) {
-    IdDictRegionEntry* entry = *it;
+  for (auto& entry : m_entries) {
     entry->resolve_references(idd, dictionary, *this);
   }
 }
@@ -140,9 +142,7 @@ IdDictRegion::generate_implementation(const IdDictMgr& idd,
     std::cout << "IdDictRegion::generate_implementation>" << std::endl;
   }
   if (!m_generated_implementation) {
-    std::vector<IdDictRegionEntry*>::iterator it;
-    for (it = m_entries.begin(); it != m_entries.end(); ++it) {
-      IdDictRegionEntry* entry = *it;
+    for (auto& entry : m_entries) {
       entry->generate_implementation(idd, dictionary, *this, tag);
     }
     m_generated_implementation = true;
@@ -200,9 +200,7 @@ void
 IdDictRegion::reset_implementation() {
   if (m_generated_implementation) {
     m_implementation.clear();  // remove implementation
-    std::vector<IdDictRegionEntry*>::iterator it;
-    for (it = m_entries.begin(); it != m_entries.end(); ++it) {
-      IdDictRegionEntry* entry = *it;
+    for (auto& entry : m_entries) {
       entry->reset_implementation();
     }
     // reset neighbours
@@ -223,12 +221,6 @@ bool IdDictRegion::verify() const {
 
 void
 IdDictRegion::clear() {
-  std::vector<IdDictRegionEntry*>::iterator it;
-  for (it = m_entries.begin(); it != m_entries.end(); ++it) {
-    IdDictRegionEntry* entry = *it;
-    entry->clear();
-    delete entry;
-  }
   m_entries.clear();
 }
 
@@ -265,10 +257,8 @@ Range
 IdDictRegion::build_range() const {
   Range result;
 
-  std::vector <IdDictRegionEntry*>::const_iterator it;
-  for (it = m_entries.begin(); it != m_entries.end(); ++it) {
-    const IdDictRegionEntry& entry = *(*it);
-    Range r = entry.build_range();
+  for (auto& entry : m_entries) {
+    Range r = entry->build_range();
     result.add(std::move(r));
   }
   return(result);
