@@ -237,7 +237,9 @@ StatusCode TauSelectionTool::initialize()
       else if (sCut == "JetIDWP")
       {
         iSelectionCuts = iSelectionCuts | CutJetIDWP;
-	  
+        if (m_iJetIDWP == JETIDNONE){
+          m_iJetIDWP = convertStrToJetIDWP(rEnv.GetValue("JetIDWP","JETIDNONE"));
+        }	  
 	// check for possible mis-config in Tau selection
         for (const std::string& checkCut : vCuts){
 	   if (checkCut.find("SigTrans") != std::string::npos) {
