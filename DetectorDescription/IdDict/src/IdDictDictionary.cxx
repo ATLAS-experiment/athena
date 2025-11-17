@@ -59,7 +59,7 @@ const IdDictField* IdDictDictionary::find_field(const std::string& name) const {
     }
   }
 
-  return it->second;
+  return it->second.get();
 }
 
 IdDictField* IdDictDictionary::find_field(const std::string& name) {
@@ -77,7 +77,7 @@ IdDictField* IdDictDictionary::find_field(const std::string& name) {
     }
   }
 
-  return it->second;
+  return it->second.get();
 }
 
 const IdDictLabel*
@@ -98,21 +98,16 @@ int IdDictDictionary::get_label_value(const std::string& field, const std::strin
   return(0);
 }
 
-void IdDictDictionary::add_field(IdDictField* field) {
-  if (field == 0) return;
-
-  m_fields[field->name()] = field;
+IdDictField* IdDictDictionary::add_field(std::unique_ptr<IdDictField> field) {
+  if (!field) return nullptr;
+  return m_fields.emplace (field->name(), std::move(field)).first->second.get();
 }
 
 IdDictSubRegion*
 IdDictDictionary::find_subregion(const std::string& name) {
-  std::map <std::string, IdDictSubRegion*>::const_iterator it;
-
-  it = m_subregions.find(name);
-
-  if (it == m_subregions.end()) return(0);
-
-  return((*it).second);
+  auto it = m_subregions.find(name);
+  if (it == m_subregions.end()) return nullptr;
+  return it->second.get();
 }
 
 const IdDictRegion*
@@ -144,23 +139,24 @@ IdDictDictionary::find_region(const std::string& region_name, const std::string&
 
 IdDictGroup*
 IdDictDictionary::find_group(const std::string& group_name) {
-  for (IdDictGroup* g : m_groups) {
-    if (g && g->name() == group_name) return g;
+  for (auto& g : m_groups) {
+    if (g && g->name() == group_name) return g.get();
   }
   return nullptr;
 }
 
 const IdDictGroup*
 IdDictDictionary::find_group(const std::string& group_name) const {
-  for (const IdDictGroup* g : m_groups) {
-    if (g && g->name() == group_name) return g;
+  for (const auto& g : m_groups) {
+    if (g && g->name() == group_name) return g.get();
   }
   return nullptr;
 }
 
-void IdDictDictionary::add_subregion(IdDictSubRegion* subregion) {
-  if (subregion == 0) return;
-  m_subregions[subregion->name()] = subregion;
+IdDictSubRegion*
+IdDictDictionary::add_subregion(std::unique_ptr<IdDictSubRegion> subregion) {
+  if (!subregion) return nullptr;
+  return m_subregions.emplace (subregion->name(), std::move(subregion)).first->second.get();
 }
 
 void IdDictDictionary::add_subdictionary_name(const std::string& name) {
@@ -172,15 +168,15 @@ void IdDictDictionary::set_parent_dict (IdDictDictionary* parent_dict)
   m_parent_dict = parent_dict;
 }
 
-void IdDictDictionary::add_dictentry(IdDictDictEntry* region) {
+void IdDictDictionary::add_dictentry(std::unique_ptr<IdDictDictEntry> region) {
   // Add region to corresponding group
   IdDictGroup* group = find_group(region->group_name());
 
   if (0 == group) {
-    group = new IdDictGroup(region->group_name());
-    m_groups.push_back(group);
+    m_groups.push_back(std::make_unique<IdDictGroup>(region->group_name()));
+    group = m_groups.back().get();
   }
-  group->add_dictentry(region);
+  group->add_dictentry(std::move(region));
 }
 
 void IdDictDictionary::add_region(IdDictRegion* region) {
@@ -188,19 +184,12 @@ void IdDictDictionary::add_region(IdDictRegion* region) {
 }
 
 void IdDictDictionary::resolve_references(IdDictMgr& idd) {
-  {
-    std::map<std::string, IdDictSubRegion*>::iterator it;
-
-    for (it = m_subregions.begin(); it != m_subregions.end(); ++it) {
-      IdDictSubRegion* subregion = (*it).second;
-      subregion->resolve_references(idd, *this);
-    }
+  for (auto& p : m_subregions) {
+    p.second->resolve_references(idd, *this);
   }
-  {
-    size_t index = 0;
-    for (IdDictGroup* g : m_groups) {
-      g->resolve_references(idd, *this, index);
-    }
+
+  for (size_t index = 0; auto& g : m_groups) {
+    g->resolve_references(idd, *this, index);
   }
 }
 
@@ -213,7 +202,7 @@ void IdDictDictionary::generate_implementation(const IdDictMgr& idd,
   if (!m_generated_implementation) {
     // Propagate to each region and copy their generation into the
     // dict's vector.
-    for (IdDictGroup* g : m_groups) {
+    for (auto& g : m_groups) {
       g->generate_implementation(idd, *this, tag);
       // Get regions from group and save in m_regions
       for (IdDictRegion* re : g->regions()) {
@@ -223,7 +212,7 @@ void IdDictDictionary::generate_implementation(const IdDictMgr& idd,
 
     // Loop again over groups and set the bit-packing - starting at
     // level 0
-    for (IdDictGroup* g : m_groups) {
+    for (auto& g : m_groups) {
       // Copy to temporary vector all regions in the group. And
       // look for regions in local m_regions vector for any
       // regions "dummy", which come from reference
@@ -237,7 +226,7 @@ void IdDictDictionary::generate_implementation(const IdDictMgr& idd,
     // Set integral over the number of bits
     integrate_bits();
 
-    for (IdDictGroup* g : m_groups) {
+    for (auto& g : m_groups) {
       g->build_region_tree();
     }
 
@@ -254,9 +243,8 @@ void IdDictDictionary::generate_implementation(const IdDictMgr& idd,
 void IdDictDictionary::reset_implementation() {
   if (m_generated_implementation) {
     m_regions.clear();
-    IdDictDictionary::groups_it it;
-    for (it = m_groups.begin(); it != m_groups.end(); ++it) {
-      (*it)->reset_implementation();
+    for (auto& g : m_groups) {
+      g->reset_implementation();
     }
     m_generated_implementation = false;
   }
@@ -321,12 +309,8 @@ IdDictDictionary::integrate_bits() {
 MultiRange IdDictDictionary::build_multirange() const {
   MultiRange result;
 
-  IdDictDictionary::groups_const_it it;
-
-  for (it = m_groups.begin(); it != m_groups.end(); ++it) {
-    const IdDictGroup& group = *(*it);
-
-    MultiRange group_mr = group.build_multirange();
+  for (auto& group : m_groups) {
+    MultiRange group_mr = group->build_multirange();
 
     for (unsigned int i = 0; i < group_mr.size(); ++i) {
       const Range& range = group_mr[i];
@@ -1066,10 +1050,8 @@ void IdDictDictionary::sort() {
   if (verify()) {
     std::map< ExpandedIdentifier, IdDictDictEntry* > regions;
 
-    IdDictDictionary::groups_it it;
-
-    for (it = m_groups.begin(); it != m_groups.end(); ++it) {
-      (*it)->sort();
+    for (auto& g : m_groups) {
+      g->sort();
     }
   } else {
     std::cout << "IdDictDictionary::sort - WARNING verify is FALSE - cannot sort "
@@ -1078,41 +1060,9 @@ void IdDictDictionary::sort() {
 }
 
 void IdDictDictionary::clear() {
-  {
-    std::map<std::string, IdDictSubRegion*>::iterator it;
-
-    for (it = m_subregions.begin(); it != m_subregions.end(); ++it) {
-      IdDictSubRegion* subregion = (*it).second;
-      subregion->clear();
-      delete subregion;
-    }
-
-    m_subregions.clear();
-  }
-
-  {
-    std::map<std::string, IdDictField*>::iterator it;
-
-    for (it = m_fields.begin(); it != m_fields.end(); ++it) {
-      IdDictField* field = (*it).second;
-      field->clear();
-      delete field;
-    }
-
-    m_fields.clear();
-  }
-
-  {
-    IdDictDictionary::groups_it it;
-
-    for (it = m_groups.begin(); it != m_groups.end(); ++it) {
-      IdDictGroup* group = *it;
-      group->clear();
-      delete group;
-    }
-
-    m_groups.clear();
-  }
+  m_subregions.clear();
+  m_fields.clear();
+  m_groups.clear();
 }
 
 
@@ -1121,7 +1071,7 @@ IdDictDictionary::dump() const
 {
   std::cout << "=== IdDictDictionary " << m_name << " " << m_version << " "
             << m_date << " " << m_author << "\n";
-  for (const IdDictGroup* g : m_groups) {
+  for (const auto& g : m_groups) {
     g->dump();
   }
   std::cout.flush();

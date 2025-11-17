@@ -12,6 +12,7 @@
 
 #include <vector>
 #include <string>
+#include <memory>
 
 
 class IdDictField;
@@ -103,9 +104,9 @@ public:
     /// Non-const access to vector of all regions.
     const std::vector<IdDictRegion*>& all_regions();
 
-    void add_field (IdDictField* field);  
-    void add_subregion (IdDictSubRegion* subregion);  
-    void add_dictentry (IdDictDictEntry* entry);
+    IdDictField* add_field (std::unique_ptr<IdDictField> field);
+    IdDictSubRegion*  add_subregion (std::unique_ptr<IdDictSubRegion> subregion);
+    void add_dictentry (std::unique_ptr<IdDictDictEntry> entry);
     void add_region (IdDictRegion* region);
     void add_subdictionary_name (const std::string& name);  
     void set_parent_dict (IdDictDictionary* parent_dict);
@@ -310,11 +311,11 @@ private:
     using groups_it = groups_type::iterator;
     using groups_const_it = groups_type::const_iterator;
 
-    std::map<std::string, IdDictField*>   m_fields;  
-    std::map<std::string, IdDictSubRegion*> m_subregions;  
+    std::map<std::string, std::unique_ptr<IdDictField> >   m_fields;
+    std::map<std::string, std::unique_ptr<IdDictSubRegion> > m_subregions;
     std::vector<IdDictRegion*>            m_regions;  // corresponding regions for REs
     std::vector<IdDictRegion*>            m_all_regions;  // all regions
-    std::vector<IdDictGroup*>             m_groups;    
+    std::vector<std::unique_ptr<IdDictGroup> > m_groups;
     std::vector<std::string>              m_subdictionary_names; 
     IdDictDictionary*                     m_parent_dict{nullptr};
 

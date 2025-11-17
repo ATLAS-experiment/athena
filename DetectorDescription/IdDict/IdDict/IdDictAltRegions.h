@@ -9,6 +9,7 @@
 
 #include <string>
 #include <map>
+#include <memory>
 
 class Range;
 class IdDictMgr;
@@ -45,7 +46,7 @@ public:
     // @{
 
     /// Add a new region, with key given by the tag.
-    void add_region (IdDictRegion* region);
+    void add_region (std::unique_ptr<IdDictRegion> region);
 
     /// Select the named region.
     void select_region (const std::string& name);
@@ -67,7 +68,7 @@ public:
 
 
 private:
-    using map_type = std::map<std::string, IdDictRegion* >;
+    using map_type = std::map<std::string, std::unique_ptr<IdDictRegion> >;
     using map_iterator = map_type::iterator;
     using value_type = map_type::value_type;
 
