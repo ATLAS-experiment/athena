@@ -957,13 +957,13 @@ StatusCode TEvent::getNames(const std::string& targetClassName,
         return StatusCode::FAILURE;
       }
       const std::string objClassName = element->GetClassName();
-      const std::string key = obj->GetName();
+      std::string key = obj->GetName();
       ATH_MSG_VERBOSE("Inspecting \"" << objClassName << "\" / \"" << key
                                       << "\"");
       if (objClassName == targetClassName) {
         ATH_MSG_DEBUG("Matched \"" << targetClassName << "\" to key \"" << key
                                    << "\"");
-        keys.insert(key);
+        keys.insert(std::move(key));
       }
     }
   }
@@ -1002,13 +1002,13 @@ StatusCode TEvent::getNames(const std::string& targetClassName,
         return StatusCode::FAILURE;
       }
       const std::string objClassName = element->GetClassName();
-      const std::string key = obj->GetName();
+      std::string key = obj->GetName();
       ATH_MSG_VERBOSE("Inspecting \"" << objClassName << "\" / \"" << key
                                       << "\"");
       if (objClassName == targetClassName) {
         ATH_MSG_DEBUG("Matched \"" << targetClassName << "\" to key \"" << key
                                    << "\"");
-        keys.insert(key);
+        keys.insert(std::move(key));
       }
     }
   }
