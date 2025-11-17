@@ -251,8 +251,15 @@ void HistoHelperRoot::smoothASH2D(TH2* input2D, int m1, int m2, bool debug) {
       wk1[i] = 15./16.*(1.-ai*inv_am12)*(1.-ai*inv_am12);
       wks = wks + wk1[i];
     }
-    if (wks == 0){
+    if (wks == 0)[[unlikely]]{
       std::cout <<"HistoHelperRoot::smoothASH2D: wks is zero! "<<std::endl;
+      for (int i = 0; i < nx-1; ++i) {
+        delete[] h[i];
+        delete[] res[i];
+      }
+
+      delete[] h;
+      delete[] res;
       return;
     }
     const double fac1 = am1 / wks;
@@ -265,8 +272,15 @@ void HistoHelperRoot::smoothASH2D(TH2* input2D, int m1, int m2, bool debug) {
       wk2[i] = 15./16.*(1.-ai*inv_am22)*(1.-ai*inv_am22);
       wks = wks + wk2[i];
     }
-    if (wks == 0){
+    if (wks == 0)[[unlikely]]{
       std::cout <<"HistoHelperRoot::smoothASH2D: wks is zero! "<<std::endl;
+      for (int i = 0; i < nx-1; ++i) {
+        delete[] h[i];
+        delete[] res[i];
+      }
+      delete[] h;
+      delete[] res;
+
       return;
     }
     const double fac2 = am2 / wks;
