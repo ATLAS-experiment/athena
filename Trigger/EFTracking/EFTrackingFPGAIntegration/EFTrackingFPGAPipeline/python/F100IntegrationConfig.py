@@ -139,12 +139,10 @@ def F110StreamIntegrationCfg(flags, name = 'F110StreamIntegrationAlg', **kwarg):
     kwarg.setdefault('bdfID', flags.FPGADataPrep.bdfID) # On the testbed
     kwarg.setdefault('xclbin', flags.FPGADataPrep.xclbin)
     kwarg.setdefault('PixelStartClusterKernelName','pixelLoader')
-    kwarg.setdefault('PixelEndClusterKernelName','pixelUnloader')
+    kwarg.setdefault('PixelEndClusterKernelName','PixelEDMWriter')
 
     kwarg.setdefault('StripStartClusterKernelName','stripLoader')
-    kwarg.setdefault('StripEndClusterKernelName','stripUnloader')
-    kwarg.setdefault('PixelEDMPrepKernelName', 'PixelEDMPrep')
-    kwarg.setdefault('StripEDMPrepKernelName', 'StripEDMPrep')
+    kwarg.setdefault('StripEndClusterKernelName','StripEDMWriter')
 
     if ("isRoI_Seeded" in kwarg) and kwarg["isRoI_Seeded"]:
         if 'RegSelTool' not in kwarg:
