@@ -142,7 +142,7 @@ StatusCode CompactHardTruth::execute() {
 
   // Signal event is first (only?) event; front() is from DataVector
   const HepMC::GenEvent* mcEvt = mcEvts->front();
-  auto wtCont = mcEvt->weights();
+  const auto &wtCont = mcEvt->weights();
   if (!wtCont.empty()) {
   } else {
     ATH_MSG_WARNING("Weights not found for mc collection [" << m_mcEventsName << "]");
@@ -286,7 +286,7 @@ StatusCode CompactHardTruth::execute() {
       if (vpar) removePV.push_back(vpPair(vpar, pout));
       HepMC::GenVertexPtr vend = pout->end_vertex();
       if (vend) removePV.push_back(vpPair(vend, pout));
-      deleteP.push_back(pout);
+      deleteP.push_back(std::move(pout));
     }
   }
 #else
@@ -859,7 +859,7 @@ StatusCode CompactHardTruth::execute() {
       if (doDebug) ATH_MSG_VERBOSE("Removing v,p " << v << " " << p);
 #ifdef HEPMC3
       v->remove_particle_in(p);
-      v->remove_particle_out(p);
+      v->remove_particle_out(std::move(p));
 #else      
       v->remove_particle(p);
 #endif
@@ -871,7 +871,7 @@ StatusCode CompactHardTruth::execute() {
       HepMC::GenVertexPtr v = addoutPV[i].first;
       HepMC::GenParticlePtr p = addoutPV[i].second;
       if (doDebug) ATH_MSG_VERBOSE("Adding v,p " << v << " " << p);
-      v->add_particle_out(p);
+      v->add_particle_out(std::move(p));
     }
 
     // Actually implement changes -- change momenta
@@ -1076,7 +1076,7 @@ StatusCode CompactHardTruth::execute() {
     HepMC::GenVertexPtr pvtx = p->production_vertex();
     if (pvtx) pvtx->remove_particle_out(p);
     HepMC::GenVertexPtr evtx = p->end_vertex();
-    if (evtx) evtx->remove_particle_in(p);
+    if (evtx) evtx->remove_particle_in(std::move(p));
    }
 #else
 
