@@ -38,7 +38,7 @@ class EvgenExecutor(athenaExecutor):
 
         def expand_if_archive(filename):
             "Function to expand a file if it is a zip archive or tarball"
-            if ".tar" in filename:
+            if ".tar" in filename or ".tgz" in filename:
                 import tarfile
                 with tarfile.open(filename) as tf:
                     tf.extractall()
@@ -47,7 +47,12 @@ class EvgenExecutor(athenaExecutor):
                 zf = zipfile.ZipFile(filename)
                 zf.extractall()
                 zf.close()
-
+            elif ".gz" in filename:
+                import gzip
+                with gzip.open(filename, 'rb') as f_in:
+                    lfilename=os.path.basename(filename)
+                    with open(lfilename[:-3], 'wb') as f_out:
+                        shutil.copyfileobj(f_in, f_out)
         def get_immediate_subdirectories(a_dir):
             return [name for name in os.listdir(a_dir)
                     if os.path.isdir(os.path.join(a_dir, name))]
