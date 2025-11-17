@@ -587,10 +587,6 @@ def addHeavyIonP1Signatures(chains):
         ChainProp(name='HLT_j0_pf_jes_ftf_preselj20_beamspotVtx_L1VZDC_A_VZDC_C_jTE10_VjTE200' , l1SeedThresholds=['FSNOSEED'], stream=['DISCARD'], groups=['RATE:DISCARD',  'BW:DISCARD', 'RATE:CPS_VZDC_A_VZDC_C_jTE10_VjTE200']+SupportPhIGroup),
         ChainProp(name='HLT_j0_pf_jes_ftf_preselj20_beamspotVtx_L1ZDC_XOR_jTE10_VjTE200' , l1SeedThresholds=['FSNOSEED'], stream=['DISCARD'], groups=['RATE:DISCARD',  'BW:DISCARD', 'RATE:CPS_ZDC_XOR_jTE10_VjTE200']+SupportPhIGroup),
         ChainProp(name='HLT_j0_pf_jes_ftf_preselj20_beamspotVtx_L11ZDC_NZDC_jTE10_VjTE200' , l1SeedThresholds=['FSNOSEED'], stream=['DISCARD'], groups=['RATE:DISCARD',  'BW:DISCARD', 'RATE:CPS_1ZDC_NZDC_jTE10_VjTE200']+SupportPhIGroup),
-        # jJ5
-        ChainProp(name='HLT_j0_pf_jes_ftf_preselj20_beamspotVtx_L1VZDC_A_VZDC_C_jJ5_VjTE200' , l1SeedThresholds=['FSNOSEED'], stream=['DISCARD'], groups=['RATE:DISCARD',  'BW:DISCARD', 'RATE:CPS_VZDC_A_VZDC_C_jJ5_VjTE200']+SupportPhIGroup),
-        ChainProp(name='HLT_j0_pf_jes_ftf_preselj20_beamspotVtx_L1ZDC_XOR_jJ5_VjTE200' , l1SeedThresholds=['FSNOSEED'], stream=['DISCARD'], groups=['RATE:DISCARD',  'BW:DISCARD', 'RATE:CPS_ZDC_XOR_jJ5_VjTE200']+SupportPhIGroup),
-        ChainProp(name='HLT_j0_pf_jes_ftf_preselj20_beamspotVtx_L11ZDC_NZDC_jJ5_VjTE200' , l1SeedThresholds=['FSNOSEED'], stream=['DISCARD'], groups=['RATE:DISCARD',  'BW:DISCARD', 'RATE:CPS_1ZDC_NZDC_jJ5_VjTE200']+SupportPhIGroup),
         # jJ10
         ChainProp(name='HLT_j0_pf_jes_ftf_preselj20_beamspotVtx_L1VZDC_A_VZDC_C_jJ10_VjTE200' , l1SeedThresholds=['FSNOSEED'], stream=['DISCARD'], groups=['RATE:DISCARD',  'BW:DISCARD', 'RATE:CPS_VZDC_A_VZDC_C_jJ10_VjTE200']+SupportPhIGroup),
         ChainProp(name='HLT_j0_pf_jes_ftf_preselj20_beamspotVtx_L1ZDC_XOR_jJ10_VjTE200' , l1SeedThresholds=['FSNOSEED'], stream=['DISCARD'], groups=['RATE:DISCARD',  'BW:DISCARD', 'RATE:CPS_ZDC_XOR_jJ10_VjTE200']+SupportPhIGroup),
@@ -605,6 +601,11 @@ def addHeavyIonP1Signatures(chains):
         ChainProp(name='HLT_j0_pf_jes_ftf_preselj20_beamspotVtx_L1TEA_ZDC_XOR_jJ10_VjTE200' , l1SeedThresholds=['FSNOSEED'], stream=['DISCARD'], groups=['RATE:DISCARD',  'BW:DISCARD', 'RATE:CPS_TEA_ZDC_XOR_jJ10_VjTE200']+SupportPhIGroup),
         ChainProp(name='HLT_j0_pf_jes_ftf_preselj20_beamspotVtx_L1TEA_1ZDC_NZDC_jJ10_VjTE200' , l1SeedThresholds=['FSNOSEED'], stream=['DISCARD'], groups=['RATE:DISCARD',  'BW:DISCARD', 'RATE:CPS_TEA_1ZDC_NZDC_jJ10_VjTE200']+SupportPhIGroup),
         ChainProp(name='HLT_j0_pf_jes_ftf_preselj20_beamspotVtx_L1TEA_5ZDC_A_5ZDC_C_jJ10_VjTE200' , l1SeedThresholds=['FSNOSEED'], stream=['DISCARD'], groups=['RATE:DISCARD',  'BW:DISCARD', 'RATE:CPS_TEA_5ZDC_A_5ZDC_C_jJ10_VjTE200']+SupportPhIGroup),
+        # jJ10 + gESPRESSO
+        ChainProp(name='HLT_j0_pf_jes_ftf_preselj20_beamspotVtx_L1ESP_VZDC_A_VZDC_C_jJ10_VjTE200' , l1SeedThresholds=['FSNOSEED'], stream=['DISCARD'], groups=['RATE:DISCARD',  'BW:DISCARD', 'RATE:CPS_ESP_VZDC_A_VZDC_C_jJ10_VjTE200']+SupportPhIGroup),
+        ChainProp(name='HLT_j0_pf_jes_ftf_preselj20_beamspotVtx_L1ESP_ZDC_XOR_jJ10_VjTE200' , l1SeedThresholds=['FSNOSEED'], stream=['DISCARD'], groups=['RATE:DISCARD',  'BW:DISCARD', 'RATE:CPS_ESP_ZDC_XOR_jJ10_VjTE200']+SupportPhIGroup),
+        ChainProp(name='HLT_j0_pf_jes_ftf_preselj20_beamspotVtx_L1ESP_1ZDC_NZDC_jJ10_VjTE200' , l1SeedThresholds=['FSNOSEED'], stream=['DISCARD'], groups=['RATE:DISCARD',  'BW:DISCARD', 'RATE:CPS_ESP_1ZDC_NZDC_jJ10_VjTE200']+SupportPhIGroup),
+        ChainProp(name='HLT_j0_pf_jes_ftf_preselj20_beamspotVtx_L1ESP_5ZDC_A_5ZDC_C_jJ10_VjTE200' , l1SeedThresholds=['FSNOSEED'], stream=['DISCARD'], groups=['RATE:DISCARD',  'BW:DISCARD', 'RATE:CPS_ESP_5ZDC_A_5ZDC_C_jJ10_VjTE200']+SupportPhIGroup),
     ]
     chainsP1['Jet'] = [
         # BeamspotPEB chains -- only run preselection without tracking, write PEB data
@@ -617,10 +618,6 @@ def addHeavyIonP1Signatures(chains):
         ChainProp(name='HLT_j0_pf_jes_ftf_preselj20_BeamSpotPEB_L1VZDC_A_VZDC_C_jTE10_VjTE200' , l1SeedThresholds=['FSNOSEED'], stream=['BeamSpot'], groups=['RATE:BeamSpot', 'BW:BeamSpot', 'RATE:CPS_VZDC_A_VZDC_C_jTE10_VjTE200']+SupportPhIGroup),
         ChainProp(name='HLT_j0_pf_jes_ftf_preselj20_BeamSpotPEB_L1ZDC_XOR_jTE10_VjTE200' , l1SeedThresholds=['FSNOSEED'], stream=['BeamSpot'], groups=['RATE:BeamSpot', 'BW:BeamSpot', 'RATE:CPS_ZDC_XOR_jTE10_VjTE200']+SupportPhIGroup),
         ChainProp(name='HLT_j0_pf_jes_ftf_preselj20_BeamSpotPEB_L11ZDC_NZDC_jTE10_VjTE200' , l1SeedThresholds=['FSNOSEED'], stream=['BeamSpot'], groups=['RATE:BeamSpot', 'BW:BeamSpot', 'RATE:CPS_1ZDC_NZDC_jTE10_VjTE200']+SupportPhIGroup),
-        # jJ5
-        ChainProp(name='HLT_j0_pf_jes_ftf_preselj20_BeamSpotPEB_L1VZDC_A_VZDC_C_jJ5_VjTE200', l1SeedThresholds=['FSNOSEED'], stream=['BeamSpot'], groups=['RATE:BeamSpot', 'BW:BeamSpot', 'RATE:CPS_VZDC_A_VZDC_C_jJ5_VjTE200']+SupportPhIGroup),
-        ChainProp(name='HLT_j0_pf_jes_ftf_preselj20_BeamSpotPEB_L1ZDC_XOR_jJ5_VjTE200',       l1SeedThresholds=['FSNOSEED'], stream=['BeamSpot'], groups=['RATE:BeamSpot', 'BW:BeamSpot', 'RATE:CPS_ZDC_XOR_jJ5_VjTE200']+SupportPhIGroup),
-        ChainProp(name='HLT_j0_pf_jes_ftf_preselj20_BeamSpotPEB_L11ZDC_NZDC_jJ5_VjTE200',     l1SeedThresholds=['FSNOSEED'], stream=['BeamSpot'], groups=['RATE:BeamSpot', 'BW:BeamSpot', 'RATE:CPS_1ZDC_NZDC_jJ5_VjTE200']+SupportPhIGroup),
         # jJ10
         ChainProp(name='HLT_j0_pf_jes_ftf_preselj20_BeamSpotPEB_L1VZDC_A_VZDC_C_jJ10_VjTE200', l1SeedThresholds=['FSNOSEED'], stream=['BeamSpot'], groups=['RATE:BeamSpot', 'BW:BeamSpot', 'RATE:CPS_VZDC_A_VZDC_C_jJ10_VjTE200']+SupportPhIGroup),
         ChainProp(name='HLT_j0_pf_jes_ftf_preselj20_BeamSpotPEB_L1ZDC_XOR_jJ10_VjTE200',       l1SeedThresholds=['FSNOSEED'], stream=['BeamSpot'], groups=['RATE:BeamSpot', 'BW:BeamSpot', 'RATE:CPS_ZDC_XOR_jJ10_VjTE200']+SupportPhIGroup),
@@ -635,6 +632,11 @@ def addHeavyIonP1Signatures(chains):
         ChainProp(name='HLT_j0_pf_jes_ftf_preselj20_BeamSpotPEB_L1TEA_ZDC_XOR_jJ10_VjTE200',       l1SeedThresholds=['FSNOSEED'], stream=['BeamSpot'], groups=['RATE:BeamSpot', 'BW:BeamSpot', 'RATE:CPS_TEA_ZDC_XOR_jJ10_VjTE200']+SupportPhIGroup),
         ChainProp(name='HLT_j0_pf_jes_ftf_preselj20_BeamSpotPEB_L1TEA_1ZDC_NZDC_jJ10_VjTE200',     l1SeedThresholds=['FSNOSEED'], stream=['BeamSpot'], groups=['RATE:BeamSpot', 'BW:BeamSpot', 'RATE:CPS_TEA_1ZDC_NZDC_jJ10_VjTE200']+SupportPhIGroup),
         ChainProp(name='HLT_j0_pf_jes_ftf_preselj20_BeamSpotPEB_L1TEA_5ZDC_A_5ZDC_C_jJ10_VjTE200', l1SeedThresholds=['FSNOSEED'], stream=['BeamSpot'], groups=['RATE:BeamSpot', 'BW:BeamSpot', 'RATE:CPS_TEA_5ZDC_A_5ZDC_C_jJ10_VjTE200']+SupportPhIGroup),
+        # jJ10 + gESPRESSO
+        ChainProp(name='HLT_j0_pf_jes_ftf_preselj20_BeamSpotPEB_L1ESP_VZDC_A_VZDC_C_jJ10_VjTE200', l1SeedThresholds=['FSNOSEED'], stream=['BeamSpot'], groups=['RATE:BeamSpot', 'BW:BeamSpot', 'RATE:CPS_ESP_VZDC_A_VZDC_C_jJ10_VjTE200']+SupportPhIGroup),
+        ChainProp(name='HLT_j0_pf_jes_ftf_preselj20_BeamSpotPEB_L1ESP_ZDC_XOR_jJ10_VjTE200',       l1SeedThresholds=['FSNOSEED'], stream=['BeamSpot'], groups=['RATE:BeamSpot', 'BW:BeamSpot', 'RATE:CPS_ESP_ZDC_XOR_jJ10_VjTE200']+SupportPhIGroup),
+        ChainProp(name='HLT_j0_pf_jes_ftf_preselj20_BeamSpotPEB_L1ESP_1ZDC_NZDC_jJ10_VjTE200',     l1SeedThresholds=['FSNOSEED'], stream=['BeamSpot'], groups=['RATE:BeamSpot', 'BW:BeamSpot', 'RATE:CPS_ESP_1ZDC_NZDC_jJ10_VjTE200']+SupportPhIGroup),
+        ChainProp(name='HLT_j0_pf_jes_ftf_preselj20_BeamSpotPEB_L1ESP_5ZDC_A_5ZDC_C_jJ10_VjTE200', l1SeedThresholds=['FSNOSEED'], stream=['BeamSpot'], groups=['RATE:BeamSpot', 'BW:BeamSpot', 'RATE:CPS_ESP_5ZDC_A_5ZDC_C_jJ10_VjTE200']+SupportPhIGroup),
     ]
 
     chainsP1['Calib'] = [
@@ -643,10 +645,6 @@ def addHeavyIonP1Signatures(chains):
         ChainProp(name='HLT_idcalib_trk4_IDCalibPEB_L1VZDC_A_VZDC_C_jTE10_VjTE200', stream=['IDCalib'], groups=SupportPhIGroup+['RATE:Calibration','BW:Detector'], l1SeedThresholds=['FSNOSEED']),
         ChainProp(name='HLT_idcalib_trk4_IDCalibPEB_L1ZDC_XOR_jTE10_VjTE200', stream=['IDCalib'], groups=SupportPhIGroup+['RATE:Calibration','BW:Detector'], l1SeedThresholds=['FSNOSEED']),
         ChainProp(name='HLT_idcalib_trk4_IDCalibPEB_L11ZDC_NZDC_jTE10_VjTE200', stream=['IDCalib'], groups=SupportPhIGroup+['RATE:Calibration','BW:Detector'], l1SeedThresholds=['FSNOSEED']),
-        # jJ5
-        ChainProp(name='HLT_idcalib_trk4_IDCalibPEB_L1VZDC_A_VZDC_C_jJ5_VjTE200', stream=['IDCalib'], groups=SupportPhIGroup+['RATE:Calibration','BW:Detector'], l1SeedThresholds=['FSNOSEED']),
-        ChainProp(name='HLT_idcalib_trk4_IDCalibPEB_L1ZDC_XOR_jJ5_VjTE200',       stream=['IDCalib'], groups=SupportPhIGroup+['RATE:Calibration','BW:Detector'], l1SeedThresholds=['FSNOSEED']),
-        ChainProp(name='HLT_idcalib_trk4_IDCalibPEB_L11ZDC_NZDC_jJ5_VjTE200',     stream=['IDCalib'], groups=SupportPhIGroup+['RATE:Calibration','BW:Detector'], l1SeedThresholds=['FSNOSEED']),
         # jJ10
         ChainProp(name='HLT_idcalib_trk4_IDCalibPEB_L1VZDC_A_VZDC_C_jJ10_VjTE200', stream=['IDCalib'], groups=SupportPhIGroup+['RATE:Calibration','BW:Detector'], l1SeedThresholds=['FSNOSEED']),
         ChainProp(name='HLT_idcalib_trk4_IDCalibPEB_L1ZDC_XOR_jJ10_VjTE200',       stream=['IDCalib'], groups=SupportPhIGroup+['RATE:Calibration','BW:Detector'], l1SeedThresholds=['FSNOSEED']),
@@ -661,6 +659,11 @@ def addHeavyIonP1Signatures(chains):
         ChainProp(name='HLT_idcalib_trk4_IDCalibPEB_L1TEA_ZDC_XOR_jJ10_VjTE200',       stream=['IDCalib'], groups=SupportPhIGroup+['RATE:Calibration','BW:Detector'], l1SeedThresholds=['FSNOSEED']),
         ChainProp(name='HLT_idcalib_trk4_IDCalibPEB_L1TEA_1ZDC_NZDC_jJ10_VjTE200',     stream=['IDCalib'], groups=SupportPhIGroup+['RATE:Calibration','BW:Detector'], l1SeedThresholds=['FSNOSEED']),
         ChainProp(name='HLT_idcalib_trk4_IDCalibPEB_L1TEA_5ZDC_A_5ZDC_C_jJ10_VjTE200', stream=['IDCalib'], groups=SupportPhIGroup+['RATE:Calibration','BW:Detector'], l1SeedThresholds=['FSNOSEED']),
+        # jJ10 + gESPRESSO
+        ChainProp(name='HLT_idcalib_trk4_IDCalibPEB_L1ESP_VZDC_A_VZDC_C_jJ10_VjTE200', stream=['IDCalib'], groups=SupportPhIGroup+['RATE:Calibration','BW:Detector'], l1SeedThresholds=['FSNOSEED']),
+        ChainProp(name='HLT_idcalib_trk4_IDCalibPEB_L1ESP_ZDC_XOR_jJ10_VjTE200',       stream=['IDCalib'], groups=SupportPhIGroup+['RATE:Calibration','BW:Detector'], l1SeedThresholds=['FSNOSEED']),
+        ChainProp(name='HLT_idcalib_trk4_IDCalibPEB_L1ESP_1ZDC_NZDC_jJ10_VjTE200',     stream=['IDCalib'], groups=SupportPhIGroup+['RATE:Calibration','BW:Detector'], l1SeedThresholds=['FSNOSEED']),
+        ChainProp(name='HLT_idcalib_trk4_IDCalibPEB_L1ESP_5ZDC_A_5ZDC_C_jJ10_VjTE200', stream=['IDCalib'], groups=SupportPhIGroup+['RATE:Calibration','BW:Detector'], l1SeedThresholds=['FSNOSEED']),
 
         # # 'ZDCCalib' stream
         # ChainProp(name='HLT_noalg_ZDCPEB_L1ZDC_OR_LHCF', l1SeedThresholds=['FSNOSEED'], stream=["ZDCCalib"], groups=['RATE:Calibration','BW:Detector']),
