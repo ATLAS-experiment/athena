@@ -67,12 +67,12 @@ PixelClusteringTool::PixelClusteringTool(
 {}
 
 StatusCode
-PixelClusteringTool::makeCluster(const EventContext& ctx,
-				 PixelClusteringTool::Cluster &cluster,
+PixelClusteringTool::makeCluster(PixelClusteringTool::Cluster &cluster,
 				 const InDetDD::SiDetectorElement* element,
 				 const InDetDD::PixelModuleDesign& design,
 				 const PixelChargeCalibCondData *calibData,
 				 const PixelChargeCalibCondData::CalibrationStrategy calibStrategy,
+				 const double lorentz_shift,
 				 xAOD::PixelCluster& xaodcluster) const
 { 
 
@@ -196,9 +196,8 @@ PixelClusteringTool::makeCluster(const EventContext& ctx,
   double phiWidth = rowmax_diode.xPhiMax() - rowmin_diode.xPhiMin(); // design.widthFromColumnRange(colmin, colmax);
 
   // ask for Lorentz correction, get global position
-  double shift = m_pixelLorentzAngleTool->getLorentzShift(moduleHash, ctx);
   const Amg::Vector2D localPos = pos_acc;
-  Amg::Vector2D locpos(localPos[Trk::locX]+shift, localPos[Trk::locY]);
+  Amg::Vector2D locpos(localPos[Trk::locX]+lorentz_shift, localPos[Trk::locY]);
   // find global position of element
   const Amg::Transform3D& T = element->surface().transform();
   double Ax[3] = {T(0,0),T(1,0),T(2,0)};
@@ -298,15 +297,17 @@ PixelClusteringTool::makeClusters(const EventContext& ctx,
   // Get the calibration strategy for this module. 
   // Default to RD53 if the calibData is not available. That is fine because it won't be used anyway
   auto calibrationStrategy = calibData ? calibData->getCalibrationStrategy(element.identifyHash()) : PixelChargeCalibCondData::CalibrationStrategy::RD53;
+
+  double lorentz_shift = m_pixelLorentzAngleTool->getLorentzShift(element.identifyHash(), ctx);
   
   for (typename IPixelClusteringTool::Cluster& cl : clusters) {
     xAOD::PixelCluster* xaodCluster = *itrContainer;
-    ATH_CHECK(makeCluster(ctx,
-			  cl,
+    ATH_CHECK(makeCluster(cl,
 			  &element,
 			  design,
 			  calibData,
 			  calibrationStrategy,
+			  lorentz_shift,
 			  *xaodCluster));
     ++itrContainer;
   }

@@ -45,12 +45,12 @@ private:
     // N.B. the cluster is added to the container
     // and the tots and charges vectors will be moved to the xAOD object
   
-  StatusCode makeCluster(const EventContext& ctx,
-			 PixelClusteringTool::Cluster &cluster,
+  StatusCode makeCluster(PixelClusteringTool::Cluster &cluster,
 			 const InDetDD::SiDetectorElement* element,
 			 const InDetDD::PixelModuleDesign& design,
 			 const PixelChargeCalibCondData *calibData,
 			 const PixelChargeCalibCondData::CalibrationStrategy calibStrategy,
+			 double lorentz_shift,
 			 xAOD::PixelCluster& container) const;
 
   typename IPixelClusteringTool::CellCollection
