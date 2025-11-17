@@ -280,6 +280,9 @@ def TauReconstructionCfg(flags):
     minimalghosts = ["Track","MuonSegment","Truth"]
 
     #Check if the specific jet collection is needed based on flags
+    if flags.Tau.TauRec.SeedJetCollection == "AntiKt4EMPFlowMLJets":
+        from JetRecConfig.StandardSmallRJets import AntiKt4EMPFlowML
+        result.merge(JetRecCfg(flags, AntiKt4EMPFlowML))
     if flags.Tau.TauRec.SeedJetCollection == "AntiKt4EMPFlow10GeVCutTauSeedJets":
         AntiKt4EMPFlow10GeVCutTauSeed = JetDefinition("AntiKt",0.4,cst.GPFlow,
                                       infix = "10GeVCutTauSeed",
