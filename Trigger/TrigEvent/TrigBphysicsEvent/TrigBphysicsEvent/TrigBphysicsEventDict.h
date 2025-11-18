@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -9,9 +9,10 @@
 #include "TrigBphysicsEvent/TrigJpsi.h"
 #include "TrigBphysicsEvent/TrigJpsiContainer.h"
 #include "AthContainers/DataVector.h"
+//coverity[pass_by_value]
 void dummyTriggerForTrigPartTypedefs(TrigJpsiContainer& a, DataVector<TrigJpsi> b){
 	TrigJpsiContainer aa = a;
-	DataVector<TrigJpsi> bb = b;
+	DataVector<TrigJpsi> bb = std::move(b);
 }
 
 template class std::vector<TrigJpsi*>;
