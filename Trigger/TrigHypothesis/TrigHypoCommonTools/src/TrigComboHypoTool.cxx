@@ -15,7 +15,6 @@
 #include "xAODTrigMissingET/TrigMissingETContainer.h"
 #include "FourMomUtils/xAODP4Helpers.h"
 
-#include <vector>
 #include <algorithm>
 #include <cmath>
 
@@ -119,7 +118,7 @@ StatusCode TrigComboHypoTool::initialize()
       return StatusCode::FAILURE;
     }
 
-    m_varInfo_vec.push_back(info);
+    m_varInfo_vec.push_back(std::move(info));
   }
   ATH_MSG_DEBUG("Initialization completed successfully");
   
@@ -288,7 +287,7 @@ StatusCode TrigComboHypoTool::decide(Combo::LegDecisionsMap& passingLegs, const 
     // Assess the collective decision on the combination
     if (lastDecision) {
       combinationToRecord.insert(combinationToRecord.end(),extraLegs.cbegin(),extraLegs.cend());
-      passingCombinations.push_back(combinationToRecord);
+      passingCombinations.push_back(std::move(combinationToRecord));
       if (m_modeOR == true and m_enableOverride) {
         break;
       }
