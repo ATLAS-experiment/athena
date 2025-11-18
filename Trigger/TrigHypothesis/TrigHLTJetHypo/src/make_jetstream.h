@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGHLTJETHYPO_MAKE_JETSTREAM_H
@@ -53,7 +53,7 @@ make_jetstream(std::vector<std::vector<std::size_t>> indices,
   repeats.pop_back();
   
   auto n_sid = sid;
-  auto right_stream =  make_jetstream(indices, repeats, ++n_sid);
+  auto right_stream =  make_jetstream(std::move(indices), std::move(repeats), ++n_sid);
   auto stream = std::unique_ptr<IJetStream>(nullptr);
   if (repeat == 1) {
     stream.reset(new SimpleJetStream(inds,
