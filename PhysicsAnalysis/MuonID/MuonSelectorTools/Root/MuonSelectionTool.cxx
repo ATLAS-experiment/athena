@@ -1777,7 +1777,7 @@ namespace CP {
         );
 
         AthInfer::OutputDataMap outputData;
-        outputData["TightNNScore"] = std::make_pair(
+        outputData["sequential"] = std::make_pair(
             std::vector<int64_t>{1, 1}, std::vector<float>{}
         );
 
@@ -1785,7 +1785,7 @@ namespace CP {
             ATH_MSG_WARNING("ONNX inference failed!");
             return -999.;
         }
-        const auto& variant = outputData["TightNNScore"].second;
+        const auto& variant = outputData["sequential"].second;
         if (std::holds_alternative<std::vector<float>>(variant)) {
             const auto& vec = std::get<std::vector<float>>(variant);
             if (!vec.empty()) score = vec[0];
