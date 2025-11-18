@@ -159,7 +159,7 @@ case $ArtProcess in
 
     # Run Simulation
     run Sim_tf.py \
-	--conditionsTag "default:${condition}" \
+	--conditionsTag "default:${conditionsTag}" \
 	--simulator 'FullG4MT' \
 	--preExec "default:flags.Output.HISTFileName='${dcubemon_sim}';" \
 	--postInclude 'default:PyJobTransforms.UseFrontier' 'HitAnalysis.PostIncludes.ITkHitAnalysis'\
@@ -177,7 +177,7 @@ case $ArtProcess in
 
         # Run digitization + RDOAnalysis
         run Digi_tf.py \
-	    --conditionsTag "default:${condition}" \
+	    --conditionsTag "default:${conditionsTag}" \
 	    --digiSeedOffset1 170 --digiSeedOffset2 170 \
 	    --geometryVersion "default:${geometry}" \
 	    --inputHITSFile $hits \
