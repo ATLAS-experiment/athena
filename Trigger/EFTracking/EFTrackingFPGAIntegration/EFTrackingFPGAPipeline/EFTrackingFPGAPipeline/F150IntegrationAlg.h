@@ -105,12 +105,23 @@ namespace EFTrackingFPGAIntegration
         std::vector<cl::Buffer> m_pixelClusterEDMOutputBufferList;
         std::vector<cl::Buffer> m_stripClusterEDMOutputBufferList;
         // L2G
+        std::vector<cl::Buffer> m_stripL2GInputBufferList;
+        std::vector<cl::Buffer> m_stripL2GEDMInputBufferList;
         std::vector<cl::Buffer> m_stripL2GOutputBufferList;
         std::vector<cl::Buffer> m_stripL2GEDMOutputBufferList;
+
+        // EDM prep
+        std::vector<cl::Buffer> m_edmPixelInputBufferList;
+        std::vector<cl::Buffer> m_edmStripInputBufferList;
         std::vector<cl::Buffer> m_edmPixelOutputBufferList;
         std::vector<cl::Buffer> m_edmStripOutputBufferList;
 
+        // Slicing
+        std::vector<cl::Buffer> m_slicingEngineInputBufferList;
         std::vector<cl::Buffer> m_slicingEngineOutputBufferList;
+
+        // insideout
+        std::vector<cl::Buffer> m_insideOutInputBufferList;
         std::vector<cl::Buffer> m_insideOutOutputBufferList;
 
         // Command queue

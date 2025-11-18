@@ -30,7 +30,7 @@ usage () {
 }
 
 # Defaults
-#inputRDO="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/RDO/ATLAS-P2-RUN4-03-00-00/mc21_14TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.recon.RDO.e8481_s4149_r14700/RDO.33629020._000047.pool.root.1"
+# inputRDO="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/RDO/ATLAS-P2-RUN4-03-00-00/mc21_14TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.recon.RDO.e8481_s4149_r14700/RDO.33629020._000047.pool.root.1"
 inputRDO="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/EFTracking/ATLAS-P2-RUN4-03-00-00/RDO/reg34_singlemu.root"
 outputAOD="AOD.root"
 nEvents="-1"
@@ -41,7 +41,7 @@ writeAdditionalOutputData="0"
 regionList="34"
 keepHitsStrategy="-1"   # NEW: user-settable via -g/--keepHitsStrategy
 doGNN="0"
-xclbinPath="/eos/project/a/atlas-eftracking/FPGA_compilation/FPGA_compilation_hw/F110/kernels.hw.xclbin"
+xclbinPath="/eos/project/a/atlas-eftracking/FPGA_compilation/FPGA_compilation_hw/F150/kernels.hw.xclbin"
 bdfid="0000:c3:00.1"
 ## parsing flags
 while [ $# -ge 1 ]; do
@@ -117,7 +117,8 @@ fi
 
 preExecFlags="${preExecFlags}flags.Trigger.FPGATrackSim.Hough.genScan=True;flags.Trigger.FPGATrackSim.sampleType='skipTruth';"
 preExecFlags="${preExecFlags}flags.Trigger.FPGATrackSim.runF150hw=True;"
-preExecFlags="${preExecFlags}flags.FPGADataPrep.bdfID=\"${bdfid}\";flags.FPGADataPrep.xclbin=\"${xclbinPath}\""
+preExecFlags="${preExecFlags}flags.FPGADataPrep.bdfID=\"${bdfid}\";flags.FPGADataPrep.xclbin=\"${xclbinPath}\";"
+preExecFlags="${preExecFlags}flags.Trigger.FPGATrackSim.doOverlapRemoval=False;flags.Trigger.FPGATrackSim.doOverlapRemovalBetweenRegions=False;"
 
 
 

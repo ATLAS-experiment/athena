@@ -86,8 +86,6 @@ else
 fi
 
 
-
-
 ATHENA_CORE_NUMBER=${threads} Reco_tf.py --CA \
     --maxEvents ${nEvents} \
     --skipEvents ${skipEvents} \
