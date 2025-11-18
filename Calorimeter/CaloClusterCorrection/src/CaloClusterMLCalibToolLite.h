@@ -34,7 +34,7 @@ public:
     // Perform batch-inference for a CaloClusterContainer
     virtual StatusCode inference(const xAOD::CaloClusterContainer &clusters,
                                  int nPrimVtx,
-                                 double avgMu,
+                                 float avgMu,
                                  std::vector<double> &clusterE_ML_vec,
                                  std::vector<double> &clusterE_ML_Unc_vec) const override;
 
