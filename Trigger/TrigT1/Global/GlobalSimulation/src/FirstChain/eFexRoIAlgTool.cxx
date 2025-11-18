@@ -1,13 +1,11 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "./eFexRoIAlgTool.h"
 #include "L1TopoEvent/eEmTOB.h"
 
-#include <numbers>
-
-#include <sstream>
+#include <cmath> //for abs
 
 namespace GlobalSim {
   
@@ -47,13 +45,13 @@ namespace GlobalSim {
      */
     
  
-    auto roiSelector = [etMin=m_etMin](const auto& roi) {
+    auto roiSelector = [&etMin=m_etMin](const auto& roi) {
 
       // fiducial cut values
       constexpr double eta_out_fid{1.4};
       constexpr double eta_in_fid{0.2};
       
-      auto abs_eta = abs(roi->eta());
+      auto abs_eta = std::abs(roi->eta());
       return (eta_in_fid <= abs_eta) and
 	(abs_eta < eta_out_fid) and
 	(roi->et() > etMin);
@@ -62,16 +60,15 @@ namespace GlobalSim {
     std::copy_if((*eFexEMRoIContainer).begin(),
 		 (*eFexEMRoIContainer).end(),
 		 std::back_inserter(selectedRoIs),
-		 roiSelector);
+		 std::move(roiSelector));
     
     return StatusCode::SUCCESS;
   }
 
   std::string eFexRoIAlgTool::toString() const {
-    std::stringstream ss;
-    ss << "eFexRoIAlgTool: name" << name() << '\n'
-       << m_eEmRoIKey << '\n';
-    return ss.str();
+    std::string s = "eFexRoIAlgTool: name" + name() + '\n'
+       + m_eEmRoIKey.key() + '\n';
+    return s;
   }
 }
 
