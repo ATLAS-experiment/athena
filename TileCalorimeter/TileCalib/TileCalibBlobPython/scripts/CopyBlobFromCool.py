@@ -24,10 +24,11 @@ def usage():
     print ("-r, --run=      specify run  number, by default uses latest iov")
     print ("-l, --lumi=     specify lumi block number, default is 0")
     print ("-c, --channel=  specify COOL channel, by default COOL channels 0-275 and 1000 are used")
+    print ("-f, --full      if sqlite file doesn't contain everything, try to find missing COOL channels in Oracle DB")
     print ("-o, --output=   specify the prefix for output json file")
 
-letters = "hS:s:d:t:f:r:l:c:o:"
-keywords = ["help","server=","schema=","dbname=","tag=","folder=","run=","lumi=","channel=","output="]
+letters = "hS:s:d:t:f:r:l:c:o:f"
+keywords = ["help","server=","schema=","dbname=","tag=","folder=","run=","lumi=","channel=","output=","full"]
 
 try:
     opts, extraparams = getopt.getopt(sys.argv[1:],letters,keywords)
@@ -46,6 +47,7 @@ dbName = 'CONDBR2'
 tag    = 'UPD4'
 channels = list(range(276)) + [1000]
 output = ""
+full = False
 
 for o, a in opts:
     a = a.strip()
@@ -67,6 +69,8 @@ for o, a in opts:
         channels = [int(a)]
     elif o in ("-o","--output"):
         output = a
+    elif o in ("-f","--full"):
+        full = True
     elif o in ("-h","--help"):
         usage()
         sys.exit(2)
@@ -78,9 +82,7 @@ import base64
 import cppyy
 from PyCool import cool
 from TileCalibBlobPython import TileCalibTools
-from TileCalibBlobPython import TileBchTools
-from TileCalibBlobPython.TileCalibTools import MAXRUN, MAXLBK
-from TileCalibBlobObjs.Classes import TileCalibUtils, TileCalibDrawerCmt
+from TileCalibBlobObjs.Classes import TileCalibDrawerCmt
 
 Blob = cppyy.gbl.coral.Blob
 
@@ -122,8 +124,19 @@ suff = ""
 since = (run<<32)+lumi
 maxSince = 0
 jdata={}
-for chan in channels:
-    try:
+missingChannels = []
+if full and 'sqlite' in schema:
+    maxIter = 2
+else:
+    maxIter = 1
+for iter in range(maxIter):
+    if missingChannels:
+        dbOra = TileCalibTools.openDbOracle(server, schema, folderPath)
+        folder = dbOra.getFolder(folderPath)
+        channels = missingChannels
+        missingChannels = []
+    for chan in channels:
+      try:
         obj = folder.findObject( since, chan, folderTag )
         objsince = obj.since()
         objuntil = obj.until()
@@ -145,8 +158,19 @@ for chan in channels:
             cmt1 = TileCalibDrawerCmt.getInstance(coralblob)
             fullcmt1 = cmt1.getFullComment()
             if(fullcmt!=fullcmt1): log.error(fullcmt1+"\n")
-    except Exception:
-        log.warning( "Warning: can not read COOL channel %d from input DB" , chan)
+      except Exception:
+        if iter==1:
+            log.warning( "Warning: can not read COOL channel %d from Oracle" , chan)
+        else:
+            if maxIter==2:
+                log.info( "Info: COOL channel %d is missing in input DB, it will be taken from Oracle" , chan)
+            else:
+                log.warning( "Warning: can not read COOL channel %d from input DB" , chan)
+        missingChannels.append(chan)
+    if len(missingChannels)==0:
+        break
+if iter>0:
+    jdata = dict(sorted(jdata.items(), key=lambda item: int(item[0])))
 
 if output=="":
     output = folderTag
