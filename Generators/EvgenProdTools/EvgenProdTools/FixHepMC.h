@@ -68,6 +68,7 @@ private:
   //@}
    
   std::map<int,int> m_pidmap; //!< map of pids to change.
+  std::map<int,int> m_replacedpid_counts; //!< map of counters of replacements.
 
 
   MC::Loops<HepMC::GenEvent,HepMC::ConstGenParticlePtr,HepMC::ConstGenVertexPtr> m_looper; //!< member to detect loops
