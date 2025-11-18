@@ -17,7 +17,7 @@ def F150IntegrationCfg(flags, name = 'F1X0IntegrationAlg', **kwarg):
     kwarg.setdefault('StripEDMPrepKernelName', 'StripEDMPrep')
     kwarg.setdefault('SlicingEngineInputName', 'configurableLengthWideLoader') 
     kwarg.setdefault('SlicingEngineOutputName', 'dynamicLengthWideUnloader') 
-    kwarg.setdefault('InsideOutInputName', 'mem_read') 
+    kwarg.setdefault('InsideOutInputName', 'krnl_mm2s') 
     kwarg.setdefault('InsideOutOutputName', 'mem_write') 
     
     # Set up Chrono service
@@ -31,7 +31,17 @@ def F150IntegrationCfg(flags, name = 'F1X0IntegrationAlg', **kwarg):
 
     return acc
 
+def F150EDMConversionCfg(flags, name = 'F150EDMConversionAlg', **kwarg):
+    acc = ComponentAccumulator()
 
+    kwarg.setdefault('FPGAOutputTrackKey', "FPGATrackOutput")
+    kwarg.setdefault('FPGASpacePointsKey', "FPGAPixelSpacePoints")
+    kwarg.setdefault('OutputSeeds', "ActsValidateF150PixelSeeds")
+
+    alg = CompFactory.EFTrackingFPGAIntegration.F150EDMConversionAlg(name, **kwarg)
+    acc.addEventAlgo(alg)
+
+    return acc
 
 def FPGA150Pipeline(flags, runStandalone=False): # thsi is used to run the F100 through Reco_tf
     kwargs = {}
@@ -45,6 +55,8 @@ def FPGA150Pipeline(flags, runStandalone=False): # thsi is used to run the F100 
     acc.merge(F100EDMConversionCfg(flags))
     acc.merge(FPGAClusterSortingCfg(flags,**{'sortedxAODPixelClusterContainer': 'SortedFPGAPixelClusters' if runStandalone else 'ITkPixelClusters',
                                              'sortedxAODStripClusterContainer': 'SortedFPGAStripClusters' if runStandalone else 'ITkStripClusters'}))
+
+    acc.merge(F150EDMConversionCfg(flags))
 
     if(not runStandalone):
         if(not flags.FPGADataPrep.ForTiming): 

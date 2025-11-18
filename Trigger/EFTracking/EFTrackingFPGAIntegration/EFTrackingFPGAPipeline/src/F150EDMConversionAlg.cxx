@@ -72,7 +72,7 @@ namespace EFTrackingFPGAIntegration
 
                     auto Ghit_w2 = FPGADataFormatUtilities::get_bitfields_GHITZ_w2(trackOutput->at(++i));
                     auto identifierHashW2 = Ghit_w2.cluster1;
-                    
+
                     // find in the multimap the SP that matches this globalPosition
                     auto range = spacePointMap.equal_range(identifierHashW2);
                     for (auto it = range.first; it != range.second; ++it) {
@@ -108,7 +108,7 @@ namespace EFTrackingFPGAIntegration
 
         }
 
-        ATH_MSG_DEBUG("Recorded " << seeds->size() << " seeds");
+        ATH_MSG_INFO("HW Recorded " << seeds->size() << " seeds");
 
         return StatusCode::SUCCESS;
     }

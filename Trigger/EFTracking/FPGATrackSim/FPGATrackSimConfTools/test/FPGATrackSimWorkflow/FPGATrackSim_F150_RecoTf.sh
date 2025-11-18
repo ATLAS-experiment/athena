@@ -115,6 +115,7 @@ fi
 
 if [ "$doGNN" == "0" ]; then # Do GenScan Pixel Seeding
     preExecFlags="${preExecFlags}flags.Trigger.FPGATrackSim.Hough.genScan=True;flags.Trigger.FPGATrackSim.sampleType='skipTruth';"
+    preExecFlags="${preExecFlags}flags.Trigger.FPGATrackSim.doOverlapRemoval=False;flags.Trigger.FPGATrackSim.doOverlapRemovalBetweenRegions=False;"
 else # Do GNN Pixel Seeding
     preExecFlags="${preExecFlags}flags.Trigger.FPGATrackSim.Hough.genScan=False;\
                     flags.Trigger.FPGATrackSim.Hough.GNN=True;\
