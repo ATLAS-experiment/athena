@@ -37,6 +37,12 @@ class Amplifier {
   // Set routines
   void SetTriggerElectron(double el);      // set threshold in fractions of triggerelectrons
   void SetIntegrationWindow(double win);   // set size integration windos
+  void SetIntegrationWindowNs(double win_ns);
+  
+  // Set Wilkinson ADC response parameters
+  void SetAdcOffset(double offset);
+  void SetAdcFactor(double factor);
+  void SetAdcFraction(double fraction);
   
   // initialize response and signal, needs to be done before using amplifier!
   void   InitResponse(unsigned int bins, double binsize); 
@@ -55,6 +61,7 @@ class Amplifier {
   double m_triggerElectron;                  // trigger electron 
   double m_threshold;                        // threshold 
   int    m_integrationWindow;                // integration window in bins
+  double m_integrationWindowNs = 0.0;              // integration window in ns
 
   // maximum of the single electron response
   double m_responseMax;
@@ -101,6 +108,19 @@ inline void  Amplifier::SetTriggerElectron(double el) {
 }
 inline void  Amplifier::SetIntegrationWindow(double win) { 
   m_integrationWindow = (int)(win/m_binsize)-1; 
+}
+inline void  Amplifier::SetIntegrationWindowNs(double win_ns) { 
+  m_integrationWindowNs = win_ns; 
+}
+
+inline void  Amplifier::SetAdcOffset(double offset) { 
+  m_adcOffset = offset;
+}
+inline void  Amplifier::SetAdcFactor(double factor) { 
+  m_adcFactor = factor;
+}
+inline void  Amplifier::SetAdcFraction(double frac) { 
+  m_adcFraction = frac;
 }
 inline bool  Amplifier::PassedThreshold() const { 
   return m_signal.begin() != m_signal_th; 
