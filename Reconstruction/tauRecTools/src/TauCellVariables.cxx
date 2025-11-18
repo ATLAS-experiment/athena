@@ -17,16 +17,12 @@ TauCellVariables::TauCellVariables(const std::string& name) :
 
 StatusCode TauCellVariables::execute(xAOD::TauJet& pTau) const {
 
-  int numStripCell = 0;
-
   double sumCellET = 0.;
   double sumCellET01 = 0;
   double sumCellET12 = 0.;
   double sumStripET = 0.;
   double sumEMCellET = 0.;
   double sumHadCellET = 0.;
-  double stripEta = 0.;
-  double stripEta2 = 0.;
   double EMRadius = 0.;
   double HadRadius = 0.;
 
@@ -93,9 +89,6 @@ StatusCode TauCellVariables::execute(xAOD::TauJet& pTau) const {
           // Strip layer: EMB1 and EME1 
           if (isStripLayer(calo) && (std::abs(cellEta) < 2.5)) {
             sumStripET += cellET;
-            stripEta += cellEta * cellET;
-            stripEta2 += pow(cellEta, 2) * cellET;
-            if (cellEnergy > m_stripEthr) numStripCell += 1;
           } 
         } // end of EM cells
         else { 
@@ -117,7 +110,6 @@ StatusCode TauCellVariables::execute(xAOD::TauJet& pTau) const {
   ATH_MSG_DEBUG(numCells << " cells in seed");
   
   pTau.setDetail(xAOD::TauJetParameters::numCells ,  static_cast<int>  (numCells));
-  pTau.setDetail(xAOD::TauJetParameters::nStrip , numStripCell );
   pTau.setDetail(xAOD::TauJetParameters::etEMAtEMScale , static_cast<float>( sumEMCellET ));
   pTau.setDetail(xAOD::TauJetParameters::etHadAtEMScale , static_cast<float>( sumHadCellET ));
   pTau.setDetail(xAOD::TauJetParameters::cellBasedEnergyRing1 , static_cast<float>( cellRingEnergys[0] ));
@@ -138,18 +130,6 @@ StatusCode TauCellVariables::execute(xAOD::TauJet& pTau) const {
     pTau.setDetail(xAOD::TauJetParameters::centFrac , static_cast<float>( 0.0 ));
     pTau.setDetail(xAOD::TauJetParameters::isolFrac , static_cast<float>( -1.0 ));
   }
-  
-  // -- width of strip cells
-  double stripWidth2 = 0.0;
-  if (std::abs(sumStripET) > 1e-6) {
-    stripEta = stripEta / sumStripET;
-    stripEta2 = stripEta2 / sumStripET;
-    stripWidth2 = stripEta2 - stripEta * stripEta;
-  } 
-  else {
-    stripWidth2 = -1.0;
-  }
-  pTau.setDetail(xAOD::TauJetParameters::stripWidth2 , static_cast<float>( stripWidth2));
   
   // -- cell weighted radius of EM cells
   if (std::abs(sumEMCellET) > 1e-6) {
