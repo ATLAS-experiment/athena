@@ -1,9 +1,9 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef CALORINGERTOOLS_CALORINGERREADERUTILS_ICC
-#define CALORINGERTOOLS_CALORINGERREADERUTILS_ICC
+#ifndef CALORINGERTOOLS_CALORINGERREADERJETUTILS_ICC
+#define CALORINGERTOOLS_CALORINGERREADERJETUTILS_ICC
 
 
 // Kernel includes:
@@ -28,9 +28,9 @@ namespace Ringer {
 
 // =====================================================================================
 template<typename container_t>
-StatusCode BuildCaloRingsFctor<container_t>::prepareToLoopFor( std::size_t nParticles ) {
+StatusCode BuildCaloRingsJetFctor<container_t>::prepareJetToLoopFor( std::size_t nParticles ) {
   // Call overridden method
-  ATH_CHECK( base_t::prepareToLoopFor( nParticles ) );
+  ATH_CHECK( base_t::prepareJetToLoopFor( nParticles ) );
   // Make the decorator key
   m_decor = new decor_t( m_decorKey );
   return StatusCode::SUCCESS;
@@ -38,9 +38,9 @@ StatusCode BuildCaloRingsFctor<container_t>::prepareToLoopFor( std::size_t nPart
 
 // =====================================================================================
 template<typename container_t>
-void BuildCaloRingsFctor<container_t>::checkRelease() {
+void BuildCaloRingsJetFctor<container_t>::checkJetRelease() {
   // Call overridden method
-  base_t::checkRelease();
+  base_t::checkJetRelease();
   if ( m_part_counter == m_part_size ) {
     delete m_decor; m_decor = nullptr;
   }
@@ -48,89 +48,55 @@ void BuildCaloRingsFctor<container_t>::checkRelease() {
 
 // =====================================================================================
 template<typename container_t>
-void BuildCaloRingsFctor<container_t>::displayLoopingMessage() const {
+void BuildCaloRingsJetFctor<container_t>::displayLoopingMessage() const {
   if (msgLvl(MSG::DEBUG)) {
-    std::string str = ((m_particle_has_cluster)?"(with cluster access)":
-                                                "(without cluster access)");
     msg() << MSG::DEBUG << " ---------- Reading "
-          << m_particle_name << " " << str << " candidate "
-          << this->m_part_counter << "/" << this->m_part_size
-          << " ----------- " << endmsg;
+          <<  endmsg;
   }
 }
 
 
 // =====================================================================================
 template< typename container_t >
-void BuildCaloRingsFctor<container_t>::operator() ( const particle_t *part )
+void BuildCaloRingsJetFctor<container_t>::operator() ( const particle_t *part )
 {
 
   auto ringsELReader = xAOD::getCaloRingsReader();
   const xAOD::CaloRingsLinks *caloRingsLinks(nullptr);
-
-  if (ringsELReader.isAvailable(*part)) {
+  
+  try { 
     caloRingsLinks = &(ringsELReader(*part)); 
-  } else {
-    ATH_MSG_DEBUG("Couldn't retrieve CaloRingsELVec.");
+  } catch ( const std::exception &e) { 
+    ATH_MSG_DEBUG("Couldn't retrieve CaloRingsELVec. Reason: " << e.what()); 
   }
 
   incrementCounter(); displayLoopingMessage();
 
-  // Retrieve clusters element links:
-  const auto &clustersLinks = part->caloClusterLinks();
-
   // Make CaloRings ElementLink Holder:
   xAOD::CaloRingsLinks clRingsLinks;
-
-  if ( m_particle_has_cluster ) {
-    // We'll assume to have one CaloRings for each cluster, reserve memory for
-    // it:
-    clRingsLinks.reserve( clustersLinks.size() );
-
-    unsigned int cl_counter = 0;
-
-    // Loop over them to build CaloRings:
-    for ( const auto& clusLink : clustersLinks) {
-
-      ATH_MSG_DEBUG("Reading particle cluster " << ++cl_counter << "/"
-                    << clustersLinks.size());
-
-      // This cluster CaloRings:
-      ElementLink<xAOD::CaloRingsContainer> ringsEL;
-
-      if (this->m_builder->execute( **clusLink, ringsEL ).isFailure()){
-        throw std::runtime_error("Error while executing CaloRings builder.");
-      }
-
-      // Push it back:
-      clRingsLinks.push_back( ringsEL );
-
-    }
-
-  } else {
 
     // The CaloRings ElementLink:
     ElementLink<xAOD::CaloRingsContainer> ringsEL;
 
-    if (m_builder->execute( *part, ringsEL ).isFailure()){
-      throw std::runtime_error("Error while executing CaloRings builder.");
-    }
-
-    // Push it back:
-    clRingsLinks.push_back( ringsEL );
+  if (m_builder->execute( *part, ringsEL ).isFailure()){
+    throw std::runtime_error("Error while executing CaloRings builder.");
   }
+
+  // Push it back:
+  clRingsLinks.push_back( ringsEL );
+  
 
   if(!caloRingsLinks){
     // Decorate particle with CaloRings:
     m_decor->operator()( *part ) = clRingsLinks;
   }
 
-  checkRelease();
+  checkJetRelease();
 }
 
 // =====================================================================================
 template<typename container_t>
-StatusCode BuildCaloRingsFctor<container_t>::initialize()
+StatusCode BuildCaloRingsJetFctor<container_t>::initialize()
 {
   ATH_CHECK( m_decorKey.initialize() );
   m_decorKey.owner()->declare(m_decorKey);
