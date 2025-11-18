@@ -9,6 +9,8 @@
 #include "CaloEvent/CaloCellContainer.h"
 #include "CaloUtils/CaloClusterStoreHelper.h"
 
+#include "xAODEgamma/EgammaxAODHelpers.h"
+
 namespace {
   constexpr float cellEtaSize = 0.1;
   constexpr float cellPhiSize = 0.1;
@@ -42,6 +44,7 @@ DerivationFramework::EGammaCookieCutClusterTool::initialize()
   m_CookieCutPars.maxDelEta = m_maxDelEtaCells * cellEtaSize * 0.5;
   m_CookieCutPars.maxDelPhi = m_maxDelPhiCells * cellPhiSize * 0.5;
   m_CookieCutPars.maxDelR2  = m_maxDelR * m_maxDelR;
+  m_CookieCutPars.fixCellWeights = m_fixCellWeights;
 
   // Retrieve cluster moment maker in case we cookie cut and want to recompute
   if (!m_clusterCorrectionTools.empty()) {
@@ -209,12 +212,8 @@ DerivationFramework::EGammaCookieCutClusterTool::addBranches(const EventContext&
       iel = 0;
       for (const auto* electron : *electronContainer.ptr()) {
         const xAOD::CaloCluster *cluster = nullptr;
-        if (success[iel] && cookClusLinkAcc.isAvailable(*electron)) {
-          const ElementLink< xAOD::CaloClusterContainer >& link =
-            cookClusLinkAcc(*electron);
-          if (link.isValid()) {
-            cluster = *link;
-          }
+        if (success[iel]) {
+	  cluster = xAOD::EgammaHelpers::getCluster(electron);
         }
         if (success[iel] && cluster == nullptr) {
           ATH_MSG_WARNING("CookieCut cluster was build successfully, but"
@@ -238,6 +237,7 @@ DerivationFramework::EGammaCookieCutClusterTool::addBranches(const EventContext&
                           << " = " << m << " (decoration index = " << indexDecor
                           << " key = " << decoM[indexDecor].decorKey() << ")");
         }
+	iel++;
       }
     }
   }
