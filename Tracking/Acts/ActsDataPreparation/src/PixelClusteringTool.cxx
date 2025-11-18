@@ -49,7 +49,6 @@ StatusCode PixelClusteringTool::initialize()
   ATH_MSG_DEBUG("   " << m_checkGanged );
     
   ATH_CHECK(m_pixelLorentzAngleTool.retrieve());
-  ATH_CHECK(m_pixelReadout.retrieve());
 
   ATH_CHECK(m_chargeDataKey.initialize(not m_chargeDataKey.empty()));
 
@@ -117,17 +116,15 @@ PixelClusteringTool::makeCluster(PixelClusteringTool::Cluster &cluster,
     InDetDD::PixelDiodeTree::DiodeProxyWithPosition si_param ( design.diodeProxyFromIdxCachePosition(diode_idx));
 
     if (calibData) {
+      // Retrieving the calibration only depends on FE and not per cell (can be further optimized)
+      // Single FE modules could have an optimized getCharge function where the calib constants are cached
+      std::uint32_t feValue = design.getFE(si_param);
+      auto diode_type = design.getDiodeType(si_param);
       if (m_isITk){
         if (design.getReadoutTechnology() != InDetDD::PixelReadoutTechnology::RD53) {
     ATH_MSG_ERROR("Chip type is not recognized!");
     return StatusCode::FAILURE;
         }
-
-        // The calibration strategy is updated for each element
-        // Retrieving the calibration only depends on FE and not per cell (can be further optimized)
-        // Single FE modules could have an optimized getCharge function where the calib constants are cached
-        std::uint32_t feValue = design.getFE(si_param);
-        auto diode_type = design.getDiodeType(si_param);
 
         charge = calibData->getCharge(diode_type,
               calibStrategy,
@@ -136,11 +133,9 @@ PixelClusteringTool::makeCluster(PixelClusteringTool::Cluster &cluster,
               tot);
         chargeList.push_back(charge);
       } else {
-        Identifier moduleID = m_pixelID->wafer_id(id);
-        IdentifierHash moduleHash = m_pixelID->wafer_hash(moduleID);
-        charge = calibData->getCharge(m_pixelReadout->getDiodeType(id),
+        charge = calibData->getCharge(diode_type,
                                       moduleHash,
-                                      m_pixelReadout->getFE(id, moduleID),
+                                      feValue,
                                       tot);
 
         // These numbers are taken from the Cluster Maker Tool
