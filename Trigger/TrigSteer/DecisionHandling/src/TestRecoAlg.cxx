@@ -1,8 +1,7 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-#include <iostream>
 #include <fstream>
 #include <xAODTrigger/TrigCompositeAuxContainer.h>
 #include <TrigSteeringEvent/TrigRoiDescriptorCollection.h>
@@ -63,9 +62,9 @@ namespace HLTTest {
 	  object.push_back( std::make_pair( trim ( keyval[0] ), std::stof(keyval[1]) ) );	
 	}
 	if ( object.size() != 0 ) 
-	  event.push_back(object);
+	  event.push_back(std::move(object));
       }
-      m_data.push_back(event);
+      m_data.push_back(std::move(event));
     }
     ATH_MSG_DEBUG( "Loaded " << m_data.size() << " pseudo events" );
     if ( m_data.size() == 0 ) {
@@ -106,7 +105,7 @@ namespace HLTTest {
       	// create new outpu objects and add the properties
       	if (objects.size() > output->size()) {  	   
           // attaching the correct object form input data:
-          for (auto object: objects){              	        
+          for (const auto & object: objects){              	        
             auto eta = object[0].second;
             auto phi = object[1].second;
             // check eta and phi
