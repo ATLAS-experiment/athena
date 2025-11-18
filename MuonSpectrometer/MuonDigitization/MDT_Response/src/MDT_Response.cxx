@@ -29,6 +29,19 @@ MDT_Response::MDT_Response(double timewindow, double binsize) :
   InitdEdxTable(); 
 }
 			
+MDT_Response::MDT_Response(bool doUpdatedMdtDigi)
+  : m_rhit(0.0),
+    m_xhit(0.0),
+    m_pathLength(0.0),
+    m_rtParameters(nullptr),
+    m_t0(0.0),
+    m_DoUpdatedMdtDigi(doUpdatedMdtDigi)
+{
+  InitTubeParameters(); 
+  InitClusters(200., 0.2);
+  InitdEdxTable();
+}
+
 MDT_Response::~MDT_Response() 
 {
   delete[] m_rtParameters; m_rtParameters=0;
@@ -47,16 +60,34 @@ void MDT_Response::InitClusters(double timewindow, double binsize)
 
 void MDT_Response::InitTubeParameters()
 {
+  // set the default values for central MDT digitization
   m_radius = 14.6275;        // tube radius in atlas
-  m_clusterDensity = 8.5;           // clusters per mm
+  m_clusterDensity = 8.5;           // clusters per mm for 100 GeV muon
   m_attLength = 30000.;   // mm
   m_signalSpeed = 300.;   // mm/ns
   m_rtMode = 2;
   m_difSmearing = 10.;   
-  m_integrationWindow = 20.;
+  m_integrationWindow = 20.; // ns
   m_triggerElectron = 20.;
+  m_integrationWindow = 20.; // ns
+  m_amp_adcOffset = 30.;
+  m_amp_adcFactor = 90.;
+  m_amp_adcFraction = 10.;
+
+  if (m_DoUpdatedMdtDigi) {
+    m_attLength = 30000.;   // mm
+    m_clusterDensity    = 10.;
+    m_integrationWindow = 18.5; // ns
+    m_amp_adcOffset     = 35.; 
+    m_amp_adcFactor     = 150.;
+  }
   m_amplifier.SetTriggerElectron(m_triggerElectron);
   m_amplifier.SetIntegrationWindow(m_integrationWindow);
+  m_amplifier.SetIntegrationWindowNs(m_integrationWindow);
+  m_amplifier.SetAdcOffset(m_amp_adcOffset);
+  m_amplifier.SetAdcFactor(m_amp_adcFactor);
+  m_amplifier.SetAdcFraction(m_amp_adcFraction);
+
   InitRt();
     
 }
@@ -85,10 +116,19 @@ void MDT_Response::InitdEdxTable()
 	40.540,40.564,40.582,40.596,40.606,40.614,40.620,40.624,40.627,40.629,40.631,40.632,40.633,40.634,40.635,
 	40.635,40.635,40.635,40.635,40.636,40.636,40.636,40.636,40.636,40.636,40.636,40.636,40.636,40.636,40.636,
 	40.636,40.636,40.636,40.636,40.636,40.636,40.636,40.636};	
+
+  // only used when flag DoUpdatedMdtDigi option enabled
+	double numberOfClustersPerMm[] = {188.7333, 160.5230, 135.5958, 115.2599, 98.1318, 83.4168, 70.8906, 60.3481, 51.4957, 44.0192, 37.6769, 
+  32.36505, 27.9281, 24.1556, 21.0378, 18.4179, 16.2422, 14.4153, 12.9175, 11.6626, 10.6435, 9.8294, 9.1667, 8.6551, 8.2926, 7.9775, 
+  7.7862, 7.656, 7.5869, 7.5707, 7.6145, 7.6727, 7.7725, 7.8923, 8.0268, 8.2013, 8.3624, 8.5358, 8.7236, 8.9275, 9.1214, 9.2668, 9.3918, 9.5144, 
+  9.6032, 9.6733, 9.7272, 9.7535, 9.7837, 9.8438, 9.8365, 9.8620, 9.8892, 9.9119, 9.9063, 9.9235, 9.9267, 9.9175, 9.9299, 9.9409, 9.9269, 9.9437, 
+  9.9463, 9.9532, 9.9531, 9.9576, 9.9635, 9.9623, 9.9214, 9.9636, 9.9377, 9.9508, 9.9591, 9.9694, 9.937, 9.9606, 9.9611, 9.9481, 9.9492, 9.9469,
+  9.9401, 9.9232, 9.9566, 9.9532, 9.9514, 9.9550, 9.9714, 9.9504, 9.9726, 9.9381, 9.9259, 9.9633, 9.9455, 9.9560, 9.9693, 9.9516};
 	
 	for( int ik = 0; ik < 96; ++ik ) {
 		m_gammaFactorVec.push_back( gammaFactor[ik] );
 		m_numberOfClustersPerCmVec.push_back( numberOfClustersPerCm[ik] );
+    m_numberOfClustersPerMmVec.push_back( numberOfClustersPerMm[ik] );
         }
 }
 
@@ -199,9 +239,14 @@ void MDT_Response::DoStepping(double ParticleCharge,double ParticleGamma, CLHEP:
 				kmm=km;
 			}
 		}
-		correctedClusterDensity=(8.5/40.636)*(m_numberOfClustersPerCmVec.at(kmm));
+		if (m_DoUpdatedMdtDigi) {
+      correctedClusterDensity = m_numberOfClustersPerMmVec.at(kmm);
+    }
+    else {
+      correctedClusterDensity=(8.5/40.636)*(m_numberOfClustersPerCmVec.at(kmm));
+    }
 	}else{
-		correctedClusterDensity=8.5;
+		correctedClusterDensity = m_clusterDensity; // response plateaus: default to value for 100 GeV muon;
 	}
 	
   //double propDelay = PropagationDelay(m_xhit);
@@ -214,9 +259,9 @@ void MDT_Response::DoStepping(double ParticleCharge,double ParticleGamma, CLHEP:
     while(cl < m_pathLength){ 
 
     if(fabs(ParticleCharge)!=1.){ 	 
-      cl += 8.5/(correctedClusterDensity*pow(ParticleCharge,2))*DoStep(rndmEngine);                // Do step along track
+      cl += m_clusterDensity/(correctedClusterDensity*pow(ParticleCharge,2))*DoStep(rndmEngine);                // Do step along track
 	}else{  
-      cl += 8.5/(correctedClusterDensity)*DoStep(rndmEngine);                // Do step along track
+      cl += m_clusterDensity/(correctedClusterDensity)*DoStep(rndmEngine);                // Do step along track
 	}  
 	  
       double r = sqrt(cl*cl + r2); // calculate corresponding r

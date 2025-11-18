@@ -409,6 +409,8 @@ bool MdtDigitizationTool::handleMDTSimhit(const TimedHitPtr<MDTSimHit>& phit, CL
 
     // get distance to readout
     double distRO(0.);
+    // total distance from the hit to the tube endplug
+    double distanceToRO = 0.;
 
     // find the detector element associated to the hit
     const MuonGM::MdtReadoutElement* element = m_MuonGeoMgr->getMdtReadoutElement(DigitId);
@@ -418,6 +420,12 @@ bool MdtDigitizationTool::handleMDTSimhit(const TimedHitPtr<MDTSimHit>& phit, CL
         return false;
     } else {
         distRO = element->tubeFrame_localROPos(multilayer, layer, tube).z();
+        if (distRO < 0. && hit.localPosition().z() > 0.) {
+            distanceToRO = -distRO + hit.localPosition().z();
+        }
+        else {
+            distanceToRO = distRO - hit.localPosition().z();
+        }
     }
 
     if (m_useDeformations) {
@@ -455,7 +463,7 @@ bool MdtDigitizationTool::handleMDTSimhit(const TimedHitPtr<MDTSimHit>& phit, CL
     driftRadius *= trackingSign;
 
     //+Implementation for RT_Relation_DB_Tool
-    MdtDigiToolInput digiInput(std::abs(driftRadius), distRO, 0., 0., 0., 0.);
+    MdtDigiToolInput digiInput(std::abs(driftRadius), m_DoUpdatedMdtDigi ? distanceToRO : distRO, 0., 0., 0., 0.);
     double qcharge = 1.;
     double qgamma = -9999.;
 
@@ -465,19 +473,20 @@ bool MdtDigitizationTool::handleMDTSimhit(const TimedHitPtr<MDTSimHit>& phit, CL
         qgamma = particleGamma(hit, phit.eventId());
         qcharge = chargeCalculator(hit, phit.eventId());
 
-        MdtDigiToolInput digiInput1(std::abs(driftRadius), distRO, 0., 0., qcharge, qgamma);
+        // always do "updated" MDT digi for BSM particles
+        MdtDigiToolInput digiInput1(std::abs(driftRadius), distanceToRO, 0., 0., qcharge, qgamma);
         digiInput = digiInput1;
 
         if (m_digiTool.name() == "RT_Relation_DB_DigiTool") {
-            MdtDigiToolInput digiInput2(std::abs(driftRadius), distRO, 0., 0., qcharge, qgamma, DigitId);
+            MdtDigiToolInput digiInput2(std::abs(driftRadius), distanceToRO, 0., 0., qcharge, qgamma, DigitId);
             digiInput = digiInput2;
         }
     } else {
-        MdtDigiToolInput digiInput1(std::abs(driftRadius), distRO, 0., 0., 0., 0.);
+        MdtDigiToolInput digiInput1(std::abs(driftRadius), distanceToRO, 0., 0., 0., 0.);
         digiInput = digiInput1;
 
         if (m_digiTool.name() == "RT_Relation_DB_DigiTool") {
-            MdtDigiToolInput digiInput2(std::abs(driftRadius), distRO, 0., 0., 0., 0., DigitId);
+            MdtDigiToolInput digiInput2(std::abs(driftRadius), distanceToRO, 0., 0., 0., 0., DigitId);
             digiInput = digiInput2;
         }
     }

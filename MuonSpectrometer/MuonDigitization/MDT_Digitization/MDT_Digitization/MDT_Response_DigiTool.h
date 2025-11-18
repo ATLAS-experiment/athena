@@ -44,6 +44,7 @@ private:
 
     const MdtIdHelper* m_idHelper;
     bool m_DoQballGamma;
+    bool m_DoUpdatedMdtDigi;
 };
 
 #endif
