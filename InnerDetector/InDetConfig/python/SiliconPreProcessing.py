@@ -133,7 +133,7 @@ def ITkRecPreProcessingSiliconCfg(flags,
         if flags.Tracking.ActiveConfig.doFPGATrackSim:
             from FPGATrackSimConfTools.FPGATrackSimDataPrepConfig import FPGATrackSimClusteringCfg
             acc.merge(FPGATrackSimClusteringCfg(flags))
-        else:
+        elif "F100" in flags.Tracking.ActiveConfig.extension:
             from EFTrackingFPGAPipeline.F100IntegrationConfig import FPGADataPreparation
             acc.merge(FPGADataPreparation(flags))
         

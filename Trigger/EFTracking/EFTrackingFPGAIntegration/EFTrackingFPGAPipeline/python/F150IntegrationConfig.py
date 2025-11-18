@@ -4,7 +4,7 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 
 
-def F150IntegrationCfg(flags, name = 'F1X0IntegrationAlg', **kwarg):
+def F150IntegrationAlgCfg(flags, name = 'F150IntegrationAlg', **kwarg):
     acc = ComponentAccumulator()
 
     kwarg.setdefault('bdfID', flags.FPGADataPrep.bdfID) # On the testbed
@@ -33,14 +33,14 @@ def F150IntegrationCfg(flags, name = 'F1X0IntegrationAlg', **kwarg):
 
 
 
-def FPGA150Pipeline(flags, runStandalone=False): # thsi is used to run the F100 through Reco_tf
+def FPGA150Pipeline(flags, runStandalone=False): # this is used to run the F150 through Reco_tf
     kwargs = {}
     kwargs.setdefault('FPGAThreads', flags.Concurrency.NumThreads)
     acc = ComponentAccumulator()
     from EFTrackingFPGAPipeline.F100IntegrationConfig import F100DataEncodingCfg, F100EDMConversionCfg, FPGAClusterSortingCfg
     acc.merge(F100DataEncodingCfg(flags))
     
-    acc.merge(F150IntegrationCfg(flags, "F150IntegrationAlg", **kwargs))
+    acc.merge(F150IntegrationAlgCfg(flags, "F150IntegrationAlg", **kwargs))
 
     acc.merge(F100EDMConversionCfg(flags))
     acc.merge(FPGAClusterSortingCfg(flags,**{'sortedxAODPixelClusterContainer': 'SortedFPGAPixelClusters' if runStandalone else 'ITkPixelClusters',

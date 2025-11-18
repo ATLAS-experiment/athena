@@ -91,13 +91,13 @@ fi
 ATHENA_CORE_NUMBER=${threads} Reco_tf.py --CA \
     --maxEvents ${nEvents} \
     --skipEvents ${skipEvents} \
-    --preInclude 'InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsValidateF100Flags,FPGATrackSimConfTools.FPGATrackSimDataPrepConfig.FPGATrackSimDataPrepFlagCfg,EFTrackingFPGAPipeline.F100IntegrationConfig.F100FlagsCfg' \
-    --preExec "flags.Tracking.ITkActsValidateF100Pass.doFPGATrackSim=False;\
+    --preInclude 'InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsValidateF150Flags' \
+    --preExec "flags.Tracking.ITkActsValidateF150Pass.doFPGATrackSim=False;\
                 flags.Tracking.doPixelDigitalClustering=True;\
-                flags.Concurrency.NumConcurrentEvents=${threads}; flags.Concurrency.NumThreads=${threads};\
-                flags.Tracking.ITkActsValidateF100Pass.storeTrackSeeds=${doSeeds};\
+                flags.Concurrency.NumConcurrentEvents=${threads};flags.Concurrency.NumThreads=${threads};\
+                flags.Tracking.ITkActsValidateF150Pass.storeTrackSeeds=${doSeeds};\
                 flags.Acts.EDM.PersistifyClusters=${storeClusters};flags.Acts.EDM.PersistifySpacePoints=${storeClusters};\
-                flags.FPGADataPrep.doCodeType=\"${doCodeType}\";flags.FPGADataPrep.doF110=${runF110};flags.FPGADataPrep.bdfID=\"${bdfid}\";flags.FPGADataPrep.xclbin=\"${xclbinPath}\"" \
+                flags.FPGADataPrep.doCodeType=\"${doCodeType}\";flags.FPGADataPrep.bdfID=\"${bdfid}\";flags.FPGADataPrep.xclbin=\"${xclbinPath}\""\
     --postInclude "ActsConfig.ActsPostIncludes.ACTSClusterPostInclude" \
     --steering 'doRAWtoALL' \
     --inputRDOFile ${inputRDO_arg} \
