@@ -38,6 +38,11 @@ StatusCode AthenaPoolCnvSvc::initialize() {
    ATH_CHECK(dmcsvc.retrieve());
    // Retrieve PoolSvc
    ATH_CHECK(m_poolSvc.retrieve());
+   StringProperty defContainerType("DefaultContainerType", "ROOTTREEINDEX");
+   if(IProperty* propertyServer = dynamic_cast<IProperty*>(m_poolSvc.get())) {
+      propertyServer->getProperty(&defContainerType).ignore();
+   }
+   m_defContainerType = defContainerType.value();
    // Retrieve ClassIDSvc
    ATH_CHECK(m_clidSvc.retrieve());
    // Register this service for 'I/O' events
@@ -520,13 +525,13 @@ StatusCode AthenaPoolCnvSvc::decodeOutputSpec(std::string& fileSpec, int& output
       // This will be used for event data and its data header
       // First we look for an exact file name match
       // If that fails, we look for a wildcard ("*") match
-      // If that also fails, we use the hardcoded default value
+      // If that also fails, we use the default value from PoolSvc
       if (auto it = m_storageTechMap.find(fileName); it != m_storageTechMap.end()) {
          outputTech = it->second;
       } else if (it = m_storageTechMap.find("*"); it != m_storageTechMap.end()) {
          outputTech = it->second;
       } else {
-         outputTech = pool::ROOTTREEINDEX_StorageType.type();
+         outputTech = pool::DbType::getType(m_defContainerType).type();
       }
    }
    return StatusCode::SUCCESS;
