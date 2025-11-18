@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "L1CaloFEXSim/eFEXSuperCellTowerIdProvider.h"
@@ -131,7 +131,7 @@ StatusCode LVL1::eFEXSuperCellTowerIdProvider::loadcsv()
           }
         }
         else if (i == 2) {
-          each_scid = tem_string;
+          each_scid = std::move(tem_string);
         }
         else {
           ATH_MSG_ERROR("Invalid input in " << m_csvaddress << ". Too many columns.");
