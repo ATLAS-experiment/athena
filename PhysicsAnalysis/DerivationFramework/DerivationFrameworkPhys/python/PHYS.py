@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 #====================================================================
 # DAOD_PHYS.py
 # This defines DAOD_PHYS, an unskimmed DAOD format for Run 3.
@@ -210,7 +210,7 @@ def PHYSCoreCfg(flags, name_tag='PHYS', StreamName='StreamDAOD_PHYS', TriggerLis
         AddRun3TrigNavSlimmingCollectionsToSlimmingHelper(PHYSSlimmingHelper)
 
     # L1 trigger objects
-    from DerivationFrameworkPhys.TriggerMatchingCommonConfig import getDataYear
+    from Campaigns.Utils import getDataYear
     if getDataYear(flags) >= 2024:
         # Run 3 with Phase I jet RoIs.
         from DerivationFrameworkPhys.TriggerMatchingCommonConfig import AddjFexRoIsToSlimmingHelper
