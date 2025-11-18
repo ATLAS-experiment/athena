@@ -412,8 +412,8 @@ class MonitorDef:
                     "L1_1ZDC_NZDC_jTE10_VjTE200",
                     "L1_TRT_VZDC_A_VZDC_C_jTE5_VjTE200", "L1_TRT_ZDC_XOR_jTE5_VjTE200",
                     #
-                    "L1_ZDC_XOR_jJ5_VjTE200", "L1_ZDC_XOR_jJ10_VjTE200", "L1_1ZDC_NZDC_jJ5_VjTE200",
-                    "L1_1ZDC_NZDC_jJ10_VjTE200", "L1_VZDC_A_VZDC_C_jJ5_VjTE200", "L1_VZDC_A_VZDC_C_jJ10_VjTE200",
+                    # "L1_ZDC_XOR_jJ5_VjTE200", "L1_VZDC_A_VZDC_C_jJ5_VjTE200", "L1_1ZDC_NZDC_jJ5_VjTE200",
+                    "L1_1ZDC_NZDC_jJ10_VjTE200", "L1_ZDC_XOR_jJ10_VjTE200", "L1_VZDC_A_VZDC_C_jJ10_VjTE200",
                     #
                     "L1_ZDC_HELT20_jTEFWD2600",
                     "L1_ZDC_HELT35_jTEFWD2600",
@@ -454,15 +454,38 @@ class MonitorDef:
                     'L1_TEA_ASYM2_ZDC_XOR_VjTE200',
                     'L1_TEA_ASYM3_ZDC_XOR_VjTE200',
                     #
-                    'L1_TEA_eEM2_VjTE200',
-                    'L1_TEA_eTAU2_VjTE200',
-                    #
                     'L1_TeATIME-jTENoSort',
                     'L1_ESPRESSO',
                     'L1_TeAsymmetry-jTENoSort',
                     'L1_TeAsymmetry1-jTENoSort',
                     'L1_TeAsymmetry2-jTENoSort',
                     'L1_TeAsymmetry3-jTENoSort',
+
+                    'L1_CALMTEA_eEM2',
+                    'L1_CALMTEA_eTAU2',
+
+                    'L1_CALMTEA_eEM2_VjTE200',
+                    'L1_CALMTEA_eTAU2_VjTE200',
+
+                    'L1_ESP_1ZDC_NZDC_jJ10_VjTE200',
+                    'L1_ESP_5ZDC_A_5ZDC_C_jJ10_VjTE200',
+                    'L1_ESP_VZDC_A_VZDC_C_jJ10_VjTE200',
+                    'L1_ESP_VZDC_A_VZDC_C_jJ10p30ETA49_VjTE200',
+                    'L1_ESP_VZDC_A_VZDC_C_jJ5p30ETA49_VjTE200',
+                    'L1_ESP_ZDC_5XOR_jJ10_VjTE200',
+                    'L1_ESP_ZDC_XOR_jJ10_VjTE200',
+                    'L1_ESP_ZDC_XOR_jJ10p30ETA49_VjTE200',
+                    'L1_ESP_ZDC_XOR_jJ5p30ETA49_VjTE200',
+
+                    'L1_ESP_ASYM0_TRT_ZDC_XOR_VjTE200',
+                    'L1_ESP_ASYM1_TRT_ZDC_XOR_VjTE200',
+                    'L1_ESP_ASYM2_TRT_ZDC_XOR_VjTE200',
+                    'L1_ESP_ASYM3_TRT_ZDC_XOR_VjTE200',
+
+                    'L1_ESP_ASYM0_ZDC_XOR_VjTE200',
+                    'L1_ESP_ASYM1_ZDC_XOR_VjTE200',
+                    'L1_ESP_ASYM2_ZDC_XOR_VjTE200',
+                    'L1_ESP_ASYM3_ZDC_XOR_VjTE200',
                 ])
 
                 # HI HLT menu: Add triggers that are not in the MC menu

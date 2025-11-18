@@ -1,3 +1,6 @@
+/*
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+*/
 #ifndef CSV_TABLES_H
 #define CSV_TABLES_H
 #include <array>
@@ -8,7 +11,7 @@ class CSVTablesBase{
     public:
         std::shared_ptr<CSVWrapper> GetTable(int table_num);
    protected:
-        CSVTablesBase(std::string subsystem);
+        CSVTablesBase(const std::string & subsystem);
     private:
         CSVTablesBase(CSVTablesBase const&) = delete;
         void operator=(CSVTablesBase const&)  = delete;
