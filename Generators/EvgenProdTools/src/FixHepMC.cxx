@@ -130,6 +130,7 @@ StatusCode FixHepMC::execute() {
          ip->set_pdg_id(newpid->second);
          // Increment the counter for replaced PDG IDs
          ++m_replacedPIDs;
+         m_replacedpid_counts[ip->pdg_id()]++;
       }
     }
 #ifdef HEPMC3
@@ -558,7 +559,10 @@ StatusCode FixHepMC::finalize() {
   if (m_killPDG0   ) ATH_MSG_INFO( "Removed " <<   m_pdg0Killed << " of " << m_totalSeen << " particles because of PDG ID 0." );
   if (m_cleanDecays) ATH_MSG_INFO( "Removed " << m_decayCleaned << " of " << m_totalSeen << " particles while cleaning decay chains." );
   if(m_purgeUnstableWithoutEndVtx) ATH_MSG_INFO( "Removed " << m_unstablePurged << " of " << m_totalSeen << " unstable particles because they had no decay vertex." );
-  if (!m_pidmap.empty()) ATH_MSG_INFO( "Replaced " << m_replacedPIDs << " PIDs of particles." );
+  if (!m_pidmap.empty()) {
+    ATH_MSG_INFO( "Replaced " << m_replacedPIDs << " PIDs of particles." );
+    for (const auto& p: m_replacedpid_counts) ATH_MSG_INFO( "Replaced " << p.first << " PIDs " << p.second << "times." );
+  }  
   return StatusCode::SUCCESS;
 }
 
