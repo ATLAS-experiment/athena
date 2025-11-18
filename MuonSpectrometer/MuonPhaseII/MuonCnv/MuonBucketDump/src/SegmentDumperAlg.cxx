@@ -6,6 +6,7 @@
 #include "SegmentDumperAlg.h"
 
 #include "StoreGate/ReadHandle.h"
+#include "MuonTesterTree/EventHashBranch.h"
 #include "MuonSpacePoint/SpacePointPerLayerSorter.h"
 #include "xAODMuon/MuonSegment.h"
 #include "xAODTruth/TruthParticle.h"
@@ -51,6 +52,7 @@ StatusCode SegmentDumperAlg::initialize() {
   ATH_CHECK(m_truthDecorKeys.initialize());
 
   ATH_CHECK(m_geoCtxKey.initialize());
+  m_tree.addBranch(std::make_shared<MuonVal::EventHashBranch>(m_tree.tree()));
   ATH_CHECK(m_tree.init(this));
   return StatusCode::SUCCESS;
 }
@@ -94,6 +96,7 @@ StatusCode SegmentDumperAlg::execute() {
       m_bucket_layers      = countLayersInBucket(*bucket);
 
       const auto it = segPerBucket.find(bucket);
+      m_bucket_segments = (it != segPerBucket.end()) ? static_cast<uint16_t>(it->second.size()) : 0;
       if (it != segPerBucket.end()) {
         for (const xAOD::MuonSegment* seg : it->second) {
           // Reco-level outputs (always aligned to segments)

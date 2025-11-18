@@ -59,6 +59,8 @@ private:
       m_tree.newScalar<uint8_t>("bucket_chamberIndex", 0)};
   MuonVal::ScalarBranch<uint8_t>& m_bucket_sector{
       m_tree.newScalar<uint8_t>("bucket_sector", 0)};
+  MuonVal::ScalarBranch<uint16_t>& m_bucket_segments{
+      m_tree.newScalar<uint16_t>("bucket_segments", 0)};
 
   // Per-segment (reco) vectors
   MuonVal::ThreeVectorBranch m_segmentPos{m_tree, "segmentPosition"};
