@@ -14,15 +14,26 @@
 
 #include "FlavorTagInference/SaltModelGraphConfig.h"
 #include "FlavorTagInference/SaltModelOutput.h"
+#include "nlohmann/json.hpp"
 #include <memory>
+#include <map>
+#include <vector>
+#include <string>
 
 namespace FlavorTagInference {
+
+  enum class SaltModelVersion{UNKNOWN, V0, V1, V2};
+
+  NLOHMANN_JSON_SERIALIZE_ENUM( SaltModelVersion , {
+    { SaltModelVersion::UNKNOWN, "" },
+    { SaltModelVersion::V0, "v0" },
+    { SaltModelVersion::V1, "v1" },
+    { SaltModelVersion::V2, "v2" },
+  })
 
   // Inputs: the first element is the input data, the second is the shape
   using Inputs = std::pair<std::vector<float>, std::vector<int64_t>>;
   using OutputConfig = std::vector<SaltModelOutput>;
-
-  enum class SaltModelVersion{UNKNOWN, V0, V1, V2};
 
   struct InferenceOutput {
     std::map<std::string, float> singleFloat;
