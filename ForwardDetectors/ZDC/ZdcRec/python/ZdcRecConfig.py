@@ -96,7 +96,8 @@ def SetConfigTag(flags):
     if flags.Input.RunNumbers:
         run_num = flags.Input.RunNumbers[0]
         aa = getTypeForRun(run_num)
-        aa_type = aa.getBeam1Type()
+        if aa is not None:
+            aa_type = aa.getBeam1Type()
     print('ZdcRecConfig::SetConfigTag(): Getting config for type %d' % (aa_type))    
     
     # terrible kludge for early 2025

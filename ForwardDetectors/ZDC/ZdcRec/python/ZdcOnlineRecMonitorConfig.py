@@ -22,6 +22,19 @@ import ispy
 from AthenaCommon.Logging import logging
 log = logging.getLogger("ZdcOnlineRecMonitorConfig")
 
+from AthenaCommon.Constants import DEBUG, INFO
+
+# -------------------------------- LOG LEVEL --------------------------------
+def SetLogLevel():
+    # boolean that indicates if debug mode is on (False if environmental variable BOOL_DEBUG_MODE not set)
+    debugModeOn = (os.getenv("BOOL_DEBUG_MODE") == "True") 
+    
+    if debugModeOn:
+        log.setLevel(DEBUG)  # Set to DEBUG to see all messages
+    else:
+        log.setLevel(INFO)  # Only print level info/above messages
+
+    return debugModeOn
 
 # -------------------------------- PARTITION & ENVIRONMENT --------------------------------
 def PartitionAndEnvironmentConfig():
@@ -54,8 +67,12 @@ def PartitionAndEnvironmentConfig():
 
     return partition, isTestbed
 
+# -------------------------------- Define global variables --------------------------------
+
+partition, isTestbed = PartitionAndEnvironmentConfig()
+
 # -------------------------------- CONFIGURATION FLAGS SETTING --------------------------------
-def ZdcOnlineConfigFlagsSetting(flags, partition):
+def ZdcOnlineConfigFlagsSetting(flags):
     '''Set additional configuration flags for online environment'''
     
     log.debug ('Setting additional flags for online environment')
@@ -92,7 +109,7 @@ def ZdcOnlineConfigFlagsSetting(flags, partition):
             flags.addFlag('DQ.Steering.' + flag, False)
 
     # ------------------------------- turn off trigger flags for online environment -------------------------------
-    _triggerFlags = ['CostMonitoring.doCostMonitoring', 'CostMonitoring.monitorROBs', 'DecisionMakerValidation.Execute', 'Jet.fastbtagPFlow', 'Jet.fastbtagVertex', 'enableL1CaloPhase1', 'enableL1MuonPhase1', 'L1.doMuon', 'L1.doCalo', 'L1.doTopo', 'L1MuonSim.NSWVetoMode', 'L1MuonSim.doBIS78', 'L1MuonSim.doMMTrigger', 'L1MuonSim.doPadTrigger', 'doLVL1', 'doHLT', 'doMuon', 'doNavigationSlimming', 'enableL1CaloLegacy', 'endOfEventProcessing.Enabled', 'fastMenuGeneration', 'Online.BFieldAutoConfig']
+    _triggerFlags = ['CostMonitoring.doCostMonitoring', 'CostMonitoring.monitorROBs', 'DecisionMakerValidation.Execute', 'Jet.fastbtagPFlow', 'Jet.fastbtagVertex', 'enableL1CaloPhase1', 'enableL1MuonPhase1', 'L1.doMuon', 'L1.doCalo', 'L1.doTopo', 'L1MuonSim.NSWVetoMode', 'L1MuonSim.doBIS78', 'L1MuonSim.doMMTrigger', 'L1MuonSim.doPadTrigger', 'doLVL1', 'doHLT', 'doCalo', 'doID', 'doMuon', 'doNavigationSlimming', 'enableL1CaloLegacy', 'endOfEventProcessing.Enabled', 'fastMenuGeneration', 'Online.BFieldAutoConfig']
 
     for flag in _triggerFlags:
         if flags.hasFlag('Trigger.' + flag):
@@ -115,9 +132,20 @@ def ZdcOnlineConfigFlagsSetting(flags, partition):
             flags.addFlag('Detector.Geometry' + flag, False)
 
 
+# -------------------------------- Online project name manual setting for testbed & injected pulse --------------------------------
+def ZdcOnlineRunNumberManualSetting(flags):    
+
+    if isTestbed and os.getenv("ZDC_STREAM_NAME") == "ZDCInjCalib": # testbed & injected pulse: set run number from OKS variable
+        flags.Input.OverrideRunNumber = True
+        if os.getenv("RUN_NUMBER") is None:
+            log.warning("Running on testbed and on injected-pulse stream data, yet RUN_NUMBER is NOT set!")
+            log.warning("Setting to be 488824 by default.")
+            flags.Input.RunNumbers = [488824]
+        else:
+            flags.Input.RunNumbers = [int(os.getenv("RUN_NUMBER"))]
 
 # -------------------------------- Online project name manual setting for testbed --------------------------------
-def ZdcOnlineProjectNameManualSetting(flags, isTestbed):
+def ZdcOnlineProjectNameManualSetting(flags):
     '''If running on testbed, manually set Input.ProjectName flag from the OKS variable ZDC_PROJECT_NAME processed as an environmental variable
     If running at P1, check for project name and set to default if not properly set
     Necessary since ZdcStreamDependentFlagSetting will throw ValueError is ProjectName is not set'''
@@ -139,7 +167,7 @@ def ZdcOnlineProjectNameManualSetting(flags, isTestbed):
 
 
 # -------------------------------- Online trigger-stream flag manual setting --------------------------------
-def ZdcOnlineTriggerStreamManualSetting(flags, partition, isTestbed):
+def ZdcOnlineTriggerStreamManualSetting(flags):
     '''manually set Input.TriggerStream flag from the OKS variable ZDC_STREAM_NAME processed as an environmental variable
     Should only be called in the online environment (do NOT overwrite the TriggerStream info from offline metadata)'''
 
@@ -173,6 +201,27 @@ def ZdcOnlineTriggerStreamManualSetting(flags, partition, isTestbed):
         elif os.getenv("ZDC_STREAM_NAME") == "express":
             flags.Input.TriggerStream = "express_express"
     
+
+# -------------------------------- DATATYPE CONFIGURATION FOR ZDCSTANDALONE --------------------------------
+def ZdcStandaloneDataTypeSetting(flags):
+    if partition.name() == "zdcStandalone":
+        zdcStreamName = os.getenv("ZDC_STREAM_NAME","").lower()
+        if ("led" in zdcStreamName):
+            standaloneDataType = "led"
+        elif ("inj" in zdcStreamName):
+            standaloneDataType = "inj"
+        else:
+            log.warning("Warning: The partition is zdcStandalone but ZDC_STREAM_NAME, lowered, contains neither led nor inj!")
+            log.warning("Warning: ZDC_STREAM_NAME value: %s", zdcStreamName)
+            log.warning("Warning: Set default mode as inj")
+            standaloneDataType = "inj"
+
+        if flags.hasFlag("runInjForStandaloneData"):
+            flags._set("runInjForStandaloneData", standaloneDataType)
+        else:
+            flags.addFlag("runInjForStandaloneData", standaloneDataType)
+
+
 # -------------------------------- OUTPUTTING DEGUG MESSAGES --------------------------------
 def ZdcOnlinePrintDebugMsgs():
     '''Prints debug messages (for now, always on)'''
@@ -190,7 +239,7 @@ def ZdcOnlinePrintDebugMsgs():
 
 # -------------------------------- BYTE STREAM EMON INPUT SERVICE --------------------------------
 
-def ZdcOnlineByteStreamCfg(flags, partition, isTestbed):
+def ZdcOnlineByteStreamCfg(flags):
     '''Configure byte-stream input service using environmental (OKS) variables'''
 
     acc = ComponentAccumulator()
@@ -256,7 +305,7 @@ def ZdcOnlineRecoFlagSettings(flags):
         log.info('the auto-configured globaltag is: %s', flags.IOVDb.GlobalTag)
 
         # additional online config flag settings
-        ZdcOnlineConfigFlagsSetting(flags, partition)
+        ZdcOnlineConfigFlagsSetting(flags)
     else: # offline
         flags.Output.AODFileName="AOD.pool.root"
         flags.Output.HISTFileName="HIST.root"
@@ -265,10 +314,13 @@ def ZdcOnlineRecoFlagSettings(flags):
     # Manually set the Input.TriggerStream flag based on the environmental variable ZDC_STREAM_NAME
     # Must preceed calling PhysStreamAdditionalFlagSetting and ZdcStreamDependentFlagSetting
     if partition.isValid():
-        ZdcOnlineProjectNameManualSetting(flags, isTestbed)
-        ZdcOnlineTriggerStreamManualSetting(flags, partition, isTestbed)
+        ZdcOnlineProjectNameManualSetting(flags)
+        ZdcOnlineRunNumberManualSetting(flags)
+        ZdcOnlineTriggerStreamManualSetting(flags)
     
     PhysStreamAdditionalFlagSetting(flags)
+
+    ZdcStandaloneDataTypeSetting(flags)
 
     # stream-dependent flag setting
     isLED, isInj, isCalib, pn = ZdcStreamDependentFlagSetting(flags)
@@ -317,19 +369,7 @@ def RunZdcOnlineMonitorCfg(flags, isLED, isInj, isCalib):
 
 if __name__ == '__main__':
 
-    # boolean that indicates if debug mode is on (False if environmental variable BOOL_DEBUG_MODE not set)
-    debugModeOn = (os.getenv("BOOL_DEBUG_MODE") == "True") 
-    from AthenaCommon.Constants import DEBUG, INFO
-    if debugModeOn:
-        log.setLevel(DEBUG)  # Set to DEBUG to see all messages
-    else:
-        log.setLevel(INFO)  # Only print level info/above messages
-
-    partition, isTestbed = PartitionAndEnvironmentConfig()
-
-    # if not partition.isValid(): #uncomment the followig lines to turn on DEBUG messages for offline environment
-    #     log.setLevel(DEBUG)
-    #     debugModeOn = True
+    debugModeOn = SetLogLevel()
 
     if partition.isValid():
         ZdcOnlinePrintDebugMsgs()
@@ -350,7 +390,7 @@ if __name__ == '__main__':
 
     # configuration byte stream emon service
     if partition.isValid():
-        acc.merge(ZdcOnlineByteStreamCfg(flags, partition, isTestbed))
+        acc.merge(ZdcOnlineByteStreamCfg(flags))
     else:
         log.info("Running Offline on %d files", len(flags.Input.Files))
 
