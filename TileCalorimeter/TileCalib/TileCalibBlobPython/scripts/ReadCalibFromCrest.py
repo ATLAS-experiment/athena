@@ -157,17 +157,14 @@ for o, a in opts:
 
 
 from TileCalibBlobPython import TileCalibCrest
-from TileCalibBlobPython import TileCalibTools
-from TileCalibBlobPython.TileCalibTools import MAXRUN, MAXLBK
 from TileCalibBlobObjs.Classes import TileCalibUtils, TileCalibType
-
 
 from TileCalibBlobPython.TileCalibLogger import getLogger
 log = getLogger("ReadCalibFrCrest")
 import logging
 logLevel=logging.DEBUG
 log.setLevel(logLevel)
-log1 = getLogger("TileCalibTools")
+log1 = getLogger("TileCalibCrest")
 log1.setLevel(logLevel)
 
 #=== check ROS and module numbers
@@ -193,8 +190,16 @@ if iov:
     run=end
     lumi=0
 
+if tag.upper().endswith('HEAD'):
+    tag=tag.upper()
+if len(tag)==0 or tag.endswith('HEAD'):
+    folderPath=folderPath.replace('OFL02','ONL01')
+    log.info("tag is %s, using %s folder", tag if tag else 'empty', folderPath)
+    if tag=='HEAD':
+        tag=''
+
 folderTag = tag
-if folderTag.startswith("Tile") or folderTag.startswith("CALO") :
+if folderTag.upper().startswith("TILE") or folderTag.upper().startswith("CALO") :
     folderPath=""
 log.info("Initializing folder %s with tag %s", folderPath, folderTag)
 
@@ -300,6 +305,7 @@ if iov:
         if iovonly or IOVONLY:
             alliovs={}
             allmods={}
+            zeroiovs={}
             nmod=0
             for ros in range(rosmin,rosmax):
                 for mod in range(modmin, min(modmax,TileCalibUtils.getMaxDrawer(ros))):
@@ -308,20 +314,33 @@ if iov:
             for since in iovList:
                 iov="(%s,%s)" % since
                 allmod=""
+                missmod=""
+                zeromod=""
+                zero=0
                 miss=0
                 for ros in range(rosmin,rosmax):
                     for mod in range(modmin, min(modmax,TileCalibUtils.getMaxDrawer(ros))):
                         flt = blobReader.getDrawer(ros, mod, since, False, False)
-                        if flt:
-                            mod = TileCalibUtils.getDrawerString(ros,mod)
-                            allmod += " " + mod
-                            allmods[mod] += " " + iov
+                        mod = TileCalibUtils.getDrawerString(ros,mod)
+                        if flt is not None:
+                            if flt==0:
+                                zero += 1
+                                zeromod += " " + mod
+                                allmod += " " + mod + "_zero"
+                                allmods[mod] += " " + iov + "_zero"
+                            else:
+                                allmod += " " + mod
+                                allmods[mod] += " " + iov
                         else:
                             miss+=1
+                            missmod += " " + mod
                 if miss==0 and nmod>1:
                     alliovs[iov] = " All %d modules" % nmod
+                elif miss>0 and miss<10:
+                    alliovs[iov] = " %d modules present, %d modules missing:%s" % (nmod-miss,miss,missmod)
                 else:
-                    alliovs[iov] = allmod
+                    alliovs[iov] = "%s ; %d modules present, %d modules missing" % (allmod,nmod-miss,miss)
+                zeroiovs[iov] = (zero,zeromod)
             print("")
             if len(iovList)>0:
                 if iovonly:
@@ -333,7 +352,13 @@ if iov:
                     for key,value in alliovs.items():
                         if value=="":
                             value=" None"
-                        print("%s\t%s" % (key,value))
+                        if zeroiovs[key] and zeroiovs[key][0]>0:
+                            if "_zero" not in value:
+                                print("%s\t%s ; zero-sized blobs for %d modules:%s" % (key,value,zeroiovs[key][0],zeroiovs[key][1]))
+                            else:
+                                print("%s\t%s ; zero-sized blobs for %d modules" % (key,value,zeroiovs[key][0]))
+                        else:
+                            print("%s\t%s" % (key,value))
             else:
                 print("No IOVs found")
             sys.exit(0)

@@ -82,7 +82,7 @@ def fetch_calib_data(server, tag, run, lumi, channels):
     try:
         log.info("Initializing TileBlobReaderCrest...")
         folderTag = tag
-        if folderTag.startswith("Tile") or folderTag.startswith("CALO"):
+        if folderTag.upper().startswith("TILE") or folderTag.upper().startswith("CALO") :
            folderPath = ""
 
         # Create the TileBlobReaderCrest object and pass the relevant arguments

@@ -5,13 +5,14 @@
 # WriteCalibToCrest.py
 # modified Siarhei Harkusha 2025-05-19
 # modified Laura Sargsyan 2025-09-16
+# various fixes Sanya Solodkov 2025-10-17
 
 import getopt,sys,os,bisect
 os.environ['TERM'] = 'linux'
 
 def usage():
     print ("Usage: ",sys.argv[0]," [OPTION] ... ")
-    print ("Update TileCal calibration constants in COOL")
+    print ("Update TileCal calibration constants in CREST")
     print ("")
     print ("-h, --help      shows this help")
     print ("-f, --folder=   specify folder to use f.i. /TILE/OFL02/CALIB/CIS/LIN or /TILE/OFL02/TIME/CHANNELOFFSET/GAP/LAS")
@@ -27,8 +28,8 @@ def usage():
     print ("-A, --adjust    in multi-iov mode adjust iov boundaries to nearest iov available in DB, default is False")
     print ("-D, --module=   specify module to use in multi-IOV update, default is all")
     print ("-c, --channel   if present, means that one constant per channel is expected (i.e. no gain field)")
-    print ("-d, --default   if present, means that also default values stored in AUX01-AUX20 should be updated")
-    print ("-a, --all       if present, means that all drawers are saved, otherwise only those which were updated")
+    print ("-d, --default   if present, means that default values stored in AUX01-AUX20 will NOT be saved")
+    print ("-a, --all       if present, means that NOT all drawers are saved, but only those which were updated")
     print ("-z, --zero      if present, means that zero-sized blob is written for missing drawers")
     print ("-Z, --allzero   if present, means that zero-sized blob is created for all drawers which are not present in input file")
     print ("-C, --nchannel= specify number of channels to store to DB, default is 0 - means the same as in input DB")
@@ -41,11 +42,11 @@ def usage():
     print ("-U, --user=     specify username for comment")
     print ("-p, --prefix=   specify prefix which is expected on every line in input file, default - no prefix")
     print ("-k, --keep=     field numbers or channel numbers to ignore, e.g. '0,2,3,EBch0,EBch1,EBch12,EBch13,EBspD4ch18,EBspD4ch19,EBspC10ch4,EBspC10ch5' ")
-    print ("-i, --inschema=   specify the input schema to use, default is 'COOLOFL_TILE/CONDBR2'")
-    print ("-o, --outschema=  specify the output schema to use, default is 'sqlite://;schema=tileSqlite.db;dbname=CONDBR2'")
+    print ("-i, --inschema=   specify name of input JSON file or CREST_SERVER_PATH")
+    print ("-o, --outschema=  specify name of output JSON file, default is tileCalib.json")
     print ("-s, --schema=     specify input/output schema to use when both input and output schemas are the same")
-    print ("-S, --server=     specify server - ORACLE or FRONTIER, default is FRONTIER")
-    print ("-u  --update      set this flag if output sqlite file should be updated, otherwise it'll be recreated")
+    #print ("-S, --server=     specify server - ORACLE or FRONTIER, default is FRONTIER")
+    #print ("-u  --update      set this flag if output sqlite file should be updated, otherwise it'll be recreated")
     print ("-w, --swap=       specify pair of modules which will be swapped in multi-IOV update, e.g. swap=EBA61,EBA63")
 
 letters = "hr:l:R:L:b:e:AD:S:s:i:o:t:T:f:F:C:G:n:v:x:m:M:U:p:dcazZuw:k:"
@@ -72,9 +73,9 @@ tag = "UPD1"
 outfolderPath = None
 outtag = None
 readGain=True
-rosmin = 1
+rosmin = 0
 rosmax = 5
-all=False
+all=True
 zero=False
 allzero=False
 nchan = 0
@@ -131,11 +132,11 @@ for o, a in opts:
     elif o in ("-v","--version"):
         blobVersion = int(a)
     elif o in ("-d","--default"):
-        rosmin = 0
+        rosmin = 1
     elif o in ("-c","--channel"):
         readGain = False
     elif o in ("-a","--all"):
-        all = True
+        all = False
     elif o in ("-z","--zero"):
         zero = True
     elif o in ("-Z","--allzero"):
@@ -186,11 +187,11 @@ if len(swap)>0:
     if len(swap)!=2:
         RuntimeError("wrong module list for swap option")
     else:
-        from TileCalibBlobPython import TileBchTools
+        from TileCalibBlobPython import TileBchCrest
         for i in range(2):
             m1=swap[i]
             m2=swap[1-i]
-            moduleSwap[m1]=TileBchTools.TileBchMgr.decodeModule(None,m2)
+            moduleSwap[m1]=TileBchCrest.TileBchMgr.decodeModule(None,m2)
 else:
     swap=False
 
@@ -209,6 +210,8 @@ elif tag=='UPD5' and outfolderPath!=folderPath:
     sys.exit(2)
 if outtag is None:
     outtag = tag
+if tag=='UPD5':
+   tag='UPD4'
 
 import cppyy
 
@@ -216,10 +219,10 @@ from TileCalibBlobPython import TileCalibCrest
 from TileCalibBlobPython import TileCalibTools
 from TileCalibBlobObjs.Classes import TileCalibUtils, TileCalibType
 
-if iov and end >= TileCalibTools.MAXRUN:
-    end = TileCalibTools.MAXRUN
-    lumi2 = TileCalibTools.MAXLBK
-until = (TileCalibTools.MAXRUN,TileCalibTools.MAXLBK)
+if iov and end >= TileCalibCrest.MAXRUN:
+    end = TileCalibCrest.MAXRUN
+    lumi2 = TileCalibCrest.MAXLBK
+until = (TileCalibCrest.MAXRUN,TileCalibCrest.MAXLBK)
 
 from TileCalibBlobPython.TileCalibLogger import getLogger
 log = getLogger("WriteCalibToCrest")
@@ -231,10 +234,6 @@ else:
 
 #=== set database
 folderTag = tag
-if outfolderPath==folderPath and outtag==tag:
-    outfolderTag = folderTag
-else:
-    outfolderTag = outtag
 log.info("Initializing folder %s with tag %s", folderPath, folderTag)
 
 iovAll = []
@@ -243,13 +242,33 @@ iovUntil = []
 iovListMOD = []
 iovListCMT = []
 iovUntilCMT = []
-blobReader = TileCalibCrest.TileBlobReaderCrest(inSchema,folderPath, folderTag, run, lumi,
+
+inRun=run
+inLumi=lumi
+if inRun<0:
+    if "UPD4" in outtag:
+        inRun=TileCalibTools.getPromptCalibRunNumber()
+    else:
+        inRun=TileCalibTools.getLastRunNumber()
+    if inRun<0:
+        log.error( "Bad run number" )
+        sys.exit(2)
+blobReader = TileCalibCrest.TileBlobReaderCrest(inSchema,folderPath, folderTag, inRun, inLumi,
     TileCalibUtils.getDrawerIdx(max(rosmin,0),max(modmin,0)),
     TileCalibUtils.getDrawerIdx(min(rosmax-1,4),max(0,min(modmax-1,TileCalibUtils.getMaxDrawer(min(rosmax-1,4))-1))))
+if outtag=='UPD5':
+    folderTag = blobReader.getFolderTag(outfolderPath,None,'UPD4')
+    tag2=folderTag.split('-')
+    tag2[len(tag2)-1]="%02d"%(int(tag2[len(tag2)-1])+1)
+    outfolderTag="-".join(tag2)
+else:
+    outfolderTag = blobReader.getFolderTag(outfolderPath,None,outtag)
+
 blobWriter2 = None
 if iov:
     #=== filling the iovList
     log.info( "Looking for IOVs" )
+    iovMod = blobReader.getIovs()
     if moduleList!=['CMT']:
         for ros in range(rosmin,5):
             for mod in range(min(64,TileCalibUtils.getMaxDrawer(ros))):
@@ -257,7 +276,6 @@ if iov:
                 if len(moduleList)>0 and modName not in moduleList and 'ALL' not in moduleList:
                     iovAll+=[[]]
                 else:
-                    iovMod = blobReader.getIOVsWithinRange(ros,mod)
                     iovAll+=[iovMod]
                     iovList+=iovMod
         if 'ALL' in moduleList:
@@ -267,7 +285,7 @@ if iov:
             iovAll+=[[]]*min(64,TileCalibUtils.getMaxDrawer(ros))
     if 'CMT' in moduleList:
         iovListMOD = iovList
-        iovListCMT = blobReader.getIOVsWithinRange(-1,1000)
+        iovListCMT = iovMod
         if len(iovList)==0:
             iovList = iovListCMT
             iovAll+=[iovListCMT]
@@ -655,7 +673,7 @@ if (mval!=0 or Comment is not None) and (len(comment)>0 or len(txtFile)>0):
 
         untilMod = iovUntil[io]
         untilCmt = iovUntilCMT[io]
-        appendCmt = (untilCmt < (TileCalibTools.MAXRUN,TileCalibTools.MAXLBK)) or iov
+        appendCmt = (untilCmt < (TileCalibCrest.MAXRUN,TileCalibCrest.MAXLBK)) or iov
 
         if since==untilMod: # empty IOV
             if since==untilCmt:
@@ -727,7 +745,7 @@ if (mval!=0 or Comment is not None) and (len(comment)>0 or len(txtFile)>0):
             else:
                 comment="Update for run,lumi %i,%i - undoing changes done for %i,%i from file %s" % (run2,lumi2,begin[0],begin[1],txtFile)
             blobWriter2.setComment(user,comment)
-        blobWriter2.register((run2,lumi2), until, outfolderTag)
+        blobWriter2.register((run2,lumi2), outfolderTag)
     elif run2>=0 and (run2<begin[0] or (run2==begin[0] and lumi2<begin[1]) and lumi2!=0):
         log.warning("(run2,lumi2)=(%i,%i) is smaller than (run,lumi)=(%i,%i) - will not create second IOV", run2,lumi2,begin[0],begin[1])
 else:
