@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // KFLUT.h
@@ -10,12 +10,11 @@
 #ifndef L1TopoSimulationUtils_KFLUT
 #define L1TopoSimulationUtils_KFLUT
 
-#include <iostream>
 #include <vector>
 
 namespace TCS {
 
-using namespace std;
+
 
  class KFLUT {
 
@@ -33,10 +32,10 @@ using namespace std;
    private:
 
       void fillLUT();
-      vector<unsigned int> etlimits;
-      vector<double> etalimits;
+      std::vector<unsigned int> etlimits;
+      std::vector<double> etalimits;
      
-      vector<vector<double>> LUTKF;
+      std::vector<std::vector<double>> LUTKF;
 
  };
 
