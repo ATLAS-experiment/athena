@@ -93,6 +93,14 @@ namespace DerivationFramework {
       "Cone size to collect cells around hottest-cell FCAL"
     };
 
+    /** @brief if true, use cell weights = 1 for cookie-cut cluster */
+    Gaudi::Property<bool> m_fixCellWeights{
+      this,
+      "FixCellWeights",
+      false,
+      "Fix cell weights to one for the cookie-cut cluster"
+    };
+
     /** @brief Decide whether or not to store input cluster moments */
     Gaudi::Property<bool> m_storeOrigMom{
       this,
@@ -114,6 +122,9 @@ namespace DerivationFramework {
     mutable std::once_flag m_Seen;
     unsigned short m_nDecor = 0;
     const std::vector<xAOD::CaloCluster::MomentType> m_vecM{
+      xAOD::CaloCluster::CENTER_X,
+      xAOD::CaloCluster::CENTER_Y,
+      xAOD::CaloCluster::CENTER_Z,
       xAOD::CaloCluster::SECOND_LAMBDA,
       xAOD::CaloCluster::LATERAL,
       xAOD::CaloCluster::LONGITUDINAL,
@@ -124,6 +135,9 @@ namespace DerivationFramework {
       xAOD::CaloCluster::SIGNIFICANCE
     };
     const std::vector<std::string> m_vecMName{
+      "CENTER_X",
+      "CENTER_Y",
+      "CENTER_Z",
       "SECOND_LAMBDA",
       "LATERAL",
       "LONGITUDINAL",
