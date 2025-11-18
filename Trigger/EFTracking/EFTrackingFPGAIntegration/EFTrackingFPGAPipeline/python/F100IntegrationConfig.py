@@ -179,13 +179,17 @@ def F100DataEncodingCfg(flags, name = 'F100DataEncodingAlg', **kwarg):
 def F100EDMConversionCfg(flags, name = 'F100EDMConversionAlg', **kwarg):
     acc = ComponentAccumulator()
     
+    from ActsConfig.ActsUtilities import extractChildKwargs
+    
     # Set up Cluster maker tool
     if("xAODClusterMaker" not in kwarg):
         from EFTrackingFPGAPipeline.DataPrepConfig import xAODClusterMakerCfg
-        clusterMakerTool = acc.popToolsAndMerge(xAODClusterMakerCfg(flags))
-        kwarg.setdefault('xAODClusterMaker', clusterMakerTool)
+        clusterMakerTool = acc.popToolsAndMerge(xAODClusterMakerCfg(flags,name="xAODClusterMakerTool",
+                                                                    **extractChildKwargs(prefix="xAODClusterMakerTool.", **kwarg)))
+        kwarg.setdefault('F100EDMConversionAlg.xAODClusterMaker', clusterMakerTool)
 
-    acc.addEventAlgo(CompFactory.EFTrackingFPGAIntegration.F100EDMConversionAlg(name, **kwarg))
+    acc.addEventAlgo(CompFactory.EFTrackingFPGAIntegration.F100EDMConversionAlg(name,
+                                                                                **extractChildKwargs(prefix="F100EDMConversionAlg.", **kwarg)))
 
     return acc
 
@@ -226,9 +230,17 @@ def FPGADataPreparation(flags,runStandalone=False): # thsi is used to run the F1
         print("Code Type is not recognized")
         exit(1)
 
-    acc.merge(F100EDMConversionCfg(flags))
-    acc.merge(FPGAClusterSortingCfg(flags,**{'sortedxAODPixelClusterContainer': 'SortedFPGAPixelClusters' if runStandalone else 'ITkPixelClusters',
-                                             'sortedxAODStripClusterContainer': 'SortedFPGAStripClusters' if runStandalone else 'ITkStripClusters'}))
+    acc.merge(F100EDMConversionCfg(flags,
+                                   **{'xAODClusterMakerTool.PixelClusterContainerKey':
+                                       'FPGAPixelClusters' if flags.FPGADataPrep.DoClusterSorting else'ITkPixelClusters',
+                                      'xAODClusterMakerTool.StripClusterContainerKey':
+                                          'FPGAStripClusters' if flags.FPGADataPrep.DoClusterSorting else 'ITkStripClusters'}))
+    if(flags.FPGADataPrep.DoClusterSorting):
+        acc.merge(FPGAClusterSortingCfg(flags,
+                                        **{'sortedxAODPixelClusterContainer':
+                                            'SortedFPGAPixelClusters' if runStandalone else  'ITkPixelClusters',
+                                           'sortedxAODStripClusterContainer':
+                                            'SortedFPGAStripClusters' if runStandalone else 'ITkStripClusters'}))
 
     if(not runStandalone):
         if(not flags.FPGADataPrep.ForTiming): 
