@@ -118,10 +118,6 @@ namespace FlavorTagInference {
     return SaltModelGraphConfig::parse_json_graph(m_metadata);
   }
 
-  const nlohmann::json& SaltModel::getMetadata() const {
-    return m_metadata;
-  }
-
   const OutputConfig& SaltModel::getOutputConfig() const {
     return m_output_nodes;
   }
