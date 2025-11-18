@@ -62,6 +62,9 @@ public:
   StatusCode execute();
   StatusCode finalize();
   std::string xmlpath(void);
+#ifdef HEPMC3
+  struct ParticleIdCompare {bool operator()(const HepMC::GenParticlePtr& a,const HepMC::GenParticlePtr& b) const {return a->id() < b->id();}};
+#endif
 private:
 
   /// @name Features for derived classes to use internally
@@ -75,7 +78,7 @@ private:
   StatusCode traverseDecayTree(HepMC::GenParticlePtr p,
                                bool isToBeRemoved,
                                std::set<HepMC::GenVertexPtr>& visited,
-                               std::set<HepMC::GenParticlePtr>& toBeDecayed);
+                               std::set<HepMC::GenParticlePtr,ParticleIdCompare>& toBeDecayed);
 #else
   StatusCode traverseDecayTree(HepMC::GenParticlePtr p,
                                bool isToBeRemoved,
@@ -96,13 +99,12 @@ private:
   // Utility functions to print HepMC record for debugging with optional
   // coloring by status code and highlighting of particles in a specific list of barcodes
 #ifdef HEPMC3
-  void printHepMC(HepMC::GenEvent* hepMC, std::set<HepMC::GenParticlePtr>* barcodeList = nullptr);
-  unsigned int printTree(HepMC::GenParticlePtr p, std::set<HepMC::GenVertexPtr>& visited, int level, std::set<HepMC::GenParticlePtr>* barcodeList = nullptr);
-  std::string pdgName(HepMC::ConstGenParticlePtr p, bool statusHighlighting = false, std::set<HepMC::GenParticlePtr>* barcodeList = nullptr);
+  void printHepMC(HepMC::GenEvent* hepMC, std::set<HepMC::GenParticlePtr,ParticleIdCompare>* barcodeList = nullptr);
+  unsigned int printTree(HepMC::GenParticlePtr p, std::set<HepMC::GenVertexPtr>& visited, int level, std::set<HepMC::GenParticlePtr,ParticleIdCompare>* barcodeList = nullptr);
+  std::string pdgName(HepMC::ConstGenParticlePtr p, bool statusHighlighting = false, std::set<HepMC::GenParticlePtr,ParticleIdCompare>* barcodeList = nullptr);
 #else
   void printHepMC(HepMC::GenEvent* hepMC, std::set<int>* barcodeList = nullptr);
-  unsigned int printTree(HepMC::GenParticlePtr p, std::set<HepMC::GenVertexPtr>& visited,
-                         int level, std::set<int>* barcodeList = 0);
+  unsigned int printTree(HepMC::GenParticlePtr p, std::set<HepMC::GenVertexPtr>& visited,int level, std::set<int>* barcodeList = nullptr);
   std::string pdgName(HepMC::ConstGenParticlePtr p, bool statusHighlighting = false, std::set<int>* barcodeList = nullptr);
 #endif
 
