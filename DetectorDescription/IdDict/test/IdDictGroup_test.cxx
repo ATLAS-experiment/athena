@@ -53,6 +53,7 @@ std::unique_ptr<IdDictRange> make_range (const std::string& field_name,
                                          const IdDictDictionary& d)
 {
   const IdDictField* f = d.find_field (field_name);
+  if (!f) std::abort();
   std::vector<std::string> labels;
   for (size_t i = 0; i < f->get_label_number(); ++i) {
     labels.push_back (f->get_label (i));
