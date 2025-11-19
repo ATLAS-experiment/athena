@@ -67,6 +67,14 @@ int main ATLAS_NOT_THREAD_SAFE ( int argc, char* argv[] )
     TauAnalysisTools::CutJetIDWP |
     TauAnalysisTools::CutMuonOLR
   )));
+  // in this case, each cut is settled via property and not through config file
+  ANA_CHECK(AthAnalysisHelper::setProperty( TauSelTool, "ConfigPath", ""));
+  ANA_CHECK(AthAnalysisHelper::setProperty( TauSelTool, "PtMin", 20));
+  std::vector<float> vAbsEtaRegion{0.0, 1.37, 1.52, 2.5};
+  ANA_CHECK(AthAnalysisHelper::setProperty( TauSelTool, "AbsEtaRegion", vAbsEtaRegion ));
+  ANA_CHECK(AthAnalysisHelper::setProperty( TauSelTool, "AbsCharge", 1));
+  std::vector<unsigned> vecNTracks{1,3};
+  ANA_CHECK(AthAnalysisHelper::setProperty( TauSelTool, "NTracks", vecNTracks));
   ANA_CHECK(AthAnalysisHelper::setProperty( TauSelTool, "JetIDWP", int(TauAnalysisTools::JETIDRNNLOOSE))); 
   ANA_CHECK(AthAnalysisHelper::setProperty( TauSelTool, "MuonOLR", true));
   ANA_CHECK(TauSelTool.retrieve()); //this will cause the tool to be created and initialized

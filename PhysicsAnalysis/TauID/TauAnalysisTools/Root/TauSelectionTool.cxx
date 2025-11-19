@@ -70,10 +70,8 @@ StatusCode TauSelectionTool::initialize()
 
   if (bConfigViaConfigFile and bConfigViaProperties)
   {
-    ATH_MSG_WARNING("Configured tool via setProperty and configuration file, which may lead to unexpected configuration.");
-    ATH_MSG_WARNING("In doubt check the configuration that is printed when the tool is initialized and the message level is set to debug");
-    ATH_MSG_WARNING("For further details please refer to the documentation:");
-    ATH_MSG_WARNING("https://gitlab.cern.ch/atlas/athena/blob/main/PhysicsAnalysis/TauID/TauAnalysisTools/doc/README-TauSelectionTool.rst");
+    ATH_MSG_ERROR("Configured tool via setProperty and configuration file, which may lead to unexpected configuration. Please setup the TauSelectionTool using only one of the two methods. For further details please refer to the documentation https://gitlab.cern.ch/atlas/athena/blob/main/PhysicsAnalysis/TauID/TauAnalysisTools/doc/README-TauSelectionTool.rst or contact the TauCP group.");
+    return StatusCode::FAILURE;
   }
   if (!bConfigViaConfigFile and !bConfigViaProperties)
   {
