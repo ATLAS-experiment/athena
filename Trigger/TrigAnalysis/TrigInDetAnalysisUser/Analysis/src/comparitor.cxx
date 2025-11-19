@@ -210,7 +210,7 @@ T* Get( TFile& f, const std::string& n, const std::string& dir="",
     }
   }
 
-  if ( saved ) saved->push_back( name );
+  if ( saved ) saved->push_back( std::move(name) );
 
   if ( h ) h->SetDirectory(0);
 
@@ -542,7 +542,7 @@ double chi2( TH1* h0, TH1* h1 ) {
   return c2;
 }
 
-
+//coverity[root_function]
 int main(int argc, char** argv) { 
 
   std::cout << "\n---------------------------------\n";

@@ -5,7 +5,7 @@
  **     @author  mark sutton
  **     @date    Thu 30 Apr 2015 14:06:56 CEST 
  **
- **     Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+ **     Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
  **/
 
 
@@ -62,7 +62,7 @@ void ChainString::parse( std::string s ) {
 	if ( postkeys ) { key += "-post"; m_postcount++; }
 	else keycount++;
 	m_keys.push_back( tolower(key) );
-	m_values.push_back( f );
+	m_values.push_back( std::move(f) );
       }
     }
 
@@ -117,7 +117,7 @@ void ChainString::parse( std::string s ) {
 
     if ( postcount() ) raw += ":post:" + m_post; 
 
-    m_raw = raw;
+    m_raw = std::move(raw);
 
 }
 

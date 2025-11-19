@@ -287,7 +287,7 @@ public:
       pos = sc.find(t);
     }
     
-    tags.push_back(sc);
+    tags.push_back(std::move(sc));
     
     return tags;
   } 
@@ -614,7 +614,7 @@ public:
 	  char meanc[64];
 	  std::sprintf( meanc, " <t> = %3.2f #pm %3.2f ms", mutest.mean(), mutest.error() );
 	  
-	  std::string dkey = key;
+	  std::string dkey = std::move(key);
 	  
 	  std::string remove[7] = { "TIME_", "Time_", "All_", "Algorithm_", "Class_", "HLT_", "Chain_HLT_" };
 	  
@@ -1052,8 +1052,9 @@ public:
 
       double lo = limits[0];
       double hi = limits[1];
-
+      //coverity[dead_error_condition]
       if ( first ) { 
+      //coverity[dead_error_begin]
 	v[0] = lo;
 	v[1] = hi;
       }

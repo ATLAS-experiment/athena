@@ -99,16 +99,17 @@ namespace JiveXML {
       }
 
     DataMap myDataMap;
-    myDataMap["phi"] = phi;
+    const auto nPhi = phi.size();
+    myDataMap["phi"] = std::move(phi);
     myDataMap["eta"] = eta;
     myDataMap["energy"] = energy;
     myDataMap["roiWord"] = roiWord;
     myDataMap["thrNumber"] = thrNumber;
     myDataMap["thrName"] = thrName;
     myDataMap["thrValue"] = thrValue;
-    myDataMap["energy"] = energy;
+    myDataMap["energy"] = std::move(energy);
 
-    if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG) << dataTypeName() << ": "<< phi.size()
+    if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG) << dataTypeName() << ": "<< nPhi
 					    << " from: " << m_sgKey << endmsg;
 
     //forward data to formating tool
