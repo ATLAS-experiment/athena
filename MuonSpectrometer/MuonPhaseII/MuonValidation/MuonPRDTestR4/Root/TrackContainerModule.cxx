@@ -26,7 +26,7 @@ namespace MuonValR4{
         if (!SG::get(tracks, m_key, ctx)) {
             return false;
         }
-        for (const auto& track : *tracks) {
+        for (const auto track : *tracks) {
             const Amg::Vector3D trkP4 = ActsTrk::convertMomFromActs(track.fourMomentum()).first;
             const double chi2 = track.chi2();
             const int q = sign(track.qOverP());
