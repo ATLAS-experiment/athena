@@ -581,7 +581,6 @@ def addHeavyIonP1Signatures(chains):
         #jTE5
         ChainProp(name='HLT_j0_pf_jes_ftf_preselj20_beamspotVtx_L1VZDC_A_VZDC_C_jTE5_VjTE200' , l1SeedThresholds=['FSNOSEED'], stream=['DISCARD'], groups=['RATE:DISCARD',  'BW:DISCARD', 'RATE:CPS_VZDC_A_VZDC_C_jTE5_VjTE200']+SupportPhIGroup),
         ChainProp(name='HLT_j0_pf_jes_ftf_preselj20_beamspotVtx_L1ZDC_XOR_jTE5_VjTE200' , l1SeedThresholds=['FSNOSEED'], stream=['DISCARD'], groups=['RATE:DISCARD',  'BW:DISCARD', 'RATE:CPS_ZDC_XOR_jTE5_VjTE200']+SupportPhIGroup),
-        ChainProp(name='HLT_j0_pf_jes_ftf_preselj20_beamspotVtx_L11ZDC_NZDC_jTE5_VjTE200' , l1SeedThresholds=['FSNOSEED'], stream=['DISCARD'], groups=['RATE:DISCARD',  'BW:DISCARD', 'RATE:CPS_1ZDC_NZDC_jTE5_VjTE200']+SupportPhIGroup),
         ChainProp(name='HLT_j0_pf_jes_ftf_preselj20_beamspotVtx_L15ZDC_A_5ZDC_C_jTE5_VjTE200' , l1SeedThresholds=['FSNOSEED'], stream=['DISCARD'], groups=['RATE:DISCARD',  'BW:DISCARD', 'RATE:CPS_5ZDC_A_5ZDC_C_jTE5_VjTE200']+SupportPhIGroup),
         # jTE10
         ChainProp(name='HLT_j0_pf_jes_ftf_preselj20_beamspotVtx_L1VZDC_A_VZDC_C_jTE10_VjTE200' , l1SeedThresholds=['FSNOSEED'], stream=['DISCARD'], groups=['RATE:DISCARD',  'BW:DISCARD', 'RATE:CPS_VZDC_A_VZDC_C_jTE10_VjTE200']+SupportPhIGroup),
@@ -612,7 +611,6 @@ def addHeavyIonP1Signatures(chains):
         #jTE5
         ChainProp(name='HLT_j0_pf_jes_ftf_preselj20_BeamSpotPEB_L1VZDC_A_VZDC_C_jTE5_VjTE200' , l1SeedThresholds=['FSNOSEED'], stream=['BeamSpot'], groups=['RATE:BeamSpot', 'BW:BeamSpot', 'RATE:CPS_VZDC_A_VZDC_C_jTE5_VjTE200']+SupportPhIGroup),
         ChainProp(name='HLT_j0_pf_jes_ftf_preselj20_BeamSpotPEB_L1ZDC_XOR_jTE5_VjTE200' , l1SeedThresholds=['FSNOSEED'], stream=['BeamSpot'], groups=['RATE:BeamSpot', 'BW:BeamSpot', 'RATE:CPS_ZDC_XOR_jTE5_VjTE200']+SupportPhIGroup),
-        ChainProp(name='HLT_j0_pf_jes_ftf_preselj20_BeamSpotPEB_L11ZDC_NZDC_jTE5_VjTE200' , l1SeedThresholds=['FSNOSEED'], stream=['BeamSpot'], groups=['RATE:BeamSpot', 'BW:BeamSpot', 'RATE:CPS_1ZDC_NZDC_jTE5_VjTE200']+SupportPhIGroup),
         ChainProp(name='HLT_j0_pf_jes_ftf_preselj20_BeamSpotPEB_L15ZDC_A_5ZDC_C_jTE5_VjTE200' , l1SeedThresholds=['FSNOSEED'], stream=['BeamSpot'], groups=['RATE:BeamSpot', 'BW:BeamSpot', 'RATE:CPS_5ZDC_A_5ZDC_C_jTE5_VjTE200']+SupportPhIGroup),
         # jTE10
         ChainProp(name='HLT_j0_pf_jes_ftf_preselj20_BeamSpotPEB_L1VZDC_A_VZDC_C_jTE10_VjTE200' , l1SeedThresholds=['FSNOSEED'], stream=['BeamSpot'], groups=['RATE:BeamSpot', 'BW:BeamSpot', 'RATE:CPS_VZDC_A_VZDC_C_jTE10_VjTE200']+SupportPhIGroup),
