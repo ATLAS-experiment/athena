@@ -22,8 +22,6 @@
 #include "StoreGate/WriteHandleKey.h"
 #include "StoreGate/WriteDecorHandleKey.h"
 
-using xAOD::EgammaHelpers::summaryValueInt;
-
 
 namespace DerivationFramework {
   class EGammaGSFCalo : public extends<AthAlgTool, IAugmentationTool> {
@@ -95,7 +93,7 @@ namespace DerivationFramework {
     void copySummaryValue(const xAOD::TrackParticle& src,
                           xAOD::TrackParticle& dest,
                           const xAOD::SummaryType& information) const {
-      uint8_t value = summaryValueInt(src, information, 0);
+      uint8_t value = xAOD::EgammaHelpers::summaryValueInt(src, information, 0);
       dest.setSummaryValue(value, information);
     }
   };
