@@ -173,7 +173,7 @@ void LVL1::eFEXtauBDT::initBDTVars() {
       pointersToSCells.push_back(ptr);
     }
 
-    m_bdtVarComputeSCellPointers.push_back(pointersToSCells);
+    m_bdtVarComputeSCellPointers.push_back(std::move(pointersToSCells));
   }
 }
 
