@@ -158,10 +158,12 @@ def TauRunnerAlgCfg(flags):
   
     if flags.Tau.doTauDiscriminant:
         tools.append( result.popToolsAndMerge(tauTools.TauIDVarCalculatorCfg(flags)) )
-        tools.append( result.popToolsAndMerge(tauTools.TauJetRNNEvaluatorCfg(flags)) )
-        tools.append( result.popToolsAndMerge(tauTools.TauWPDecoratorJetRNNCfg(flags)) )
-        tools.append( result.popToolsAndMerge(tauTools.TauEleRNNEvaluatorCfg(flags)) )
-        tools.append( result.popToolsAndMerge(tauTools.TauWPDecoratorEleRNNCfg(flags)) )
+        # do not schedule RNNID and eVeto for Run4
+        if flags.GeoModel.Run <= LHCPeriod.Run3:
+            tools.append( result.popToolsAndMerge(tauTools.TauJetRNNEvaluatorCfg(flags)) )
+            tools.append( result.popToolsAndMerge(tauTools.TauWPDecoratorJetRNNCfg(flags)) )
+            tools.append( result.popToolsAndMerge(tauTools.TauEleRNNEvaluatorCfg(flags)) )
+            tools.append( result.popToolsAndMerge(tauTools.TauWPDecoratorEleRNNCfg(flags)) )
         tools.append( result.popToolsAndMerge(tauTools.TauDecayModeNNClassifierCfg(flags)) )
         # added for offline tau trigger monitoring at T0, not needed for TauJets_EleRM
         if not flags.Tau.ActiveConfig.inTauEleRM:
