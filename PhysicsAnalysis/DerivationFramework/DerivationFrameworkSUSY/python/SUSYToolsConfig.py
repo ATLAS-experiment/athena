@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 #==============================================================================
 # Provides configs for the tools used for SUSY Derivations
@@ -19,7 +19,7 @@ def SUSY20EventCleaningToolCfg(flags, cleaningLevel = "TightBad"):
   JetCleaningTool = acc.popToolsAndMerge(JetCleaningToolCfg(
     flags, 
     name           = "SUSY20JetCleaningTool_" + cleaningLevel + "_EMTopo",
-    jetdef         = "AntiKt4EMTopo", 
+    jetdef         = "AntiKt4EMTopoJets",
     cleaningLevel  = cleaningLevel, 
     useDecorations = False
   ))
