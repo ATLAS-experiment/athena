@@ -298,6 +298,7 @@ struct RAuxStore::impl {
           // Skip this entry if it refers to a base class.
           if (typeName.starts_with("xAOD::") ||
               typeName.starts_with("SG::") ||
+              typeName.starts_with("DMTest::") ||
               typeName.starts_with("ILockable")) {
             continue;
           }
