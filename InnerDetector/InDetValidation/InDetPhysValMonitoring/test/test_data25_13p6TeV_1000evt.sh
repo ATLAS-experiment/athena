@@ -13,7 +13,7 @@
 exec 2>&1
 run() { (set -x; exec "$@") }
 
-relname="r24.0.109"
+relname="r25.0.46"
 
 artdata=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art
 inputBS=${artdata}/RecJobTransformTests/data25_13p6TeV/data25_13p6TeV.00509891.physics_Main.daq.RAW/data25_13p6TeV.00509891.physics_Main.daq.RAW._lb0843._SFO-18._0001.data
