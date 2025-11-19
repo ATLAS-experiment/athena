@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+ * Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
  */
 
 #include "GTowersFromGCaloTowers.h"
@@ -168,7 +168,7 @@ namespace LVL1
       decIndexBehind(*newTower) = SIZE_MAX;
       decNextEtaIndex(*newTower) = nextEtaIndex;
       decPreviousEtaIndex(*newTower) = previousEtaIndex;
-      decMergedIndices(*newTower) = mergedIndices;
+      decMergedIndices(*newTower) = std::move(mergedIndices);
     }
 
     // Remap the relational indices

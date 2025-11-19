@@ -102,8 +102,8 @@ namespace LVL1 {
   void LVL1::jFEXForwardElecAlgo::setFPGAEnergy(
     std::unordered_map<int,std::vector<int> > etmapEM,
     std::unordered_map<int,std::vector<int> > etmapHAD) {
-    m_map_Etvalues_EM=etmapEM; 
-    m_map_Etvalues_HAD=etmapHAD;
+    m_map_Etvalues_EM=std::move(etmapEM); 
+    m_map_Etvalues_HAD=std::move(etmapHAD);
   }
   
   
@@ -344,7 +344,7 @@ namespace LVL1 {
           }
 
           // save this cluster in the list
-          clusterList[ttID] = elCluster;
+          clusterList[ttID] = std::move(elCluster);
         }//eta
       }//phi
     }// 3 regions
@@ -387,7 +387,7 @@ namespace LVL1 {
         
         // rest of TTs that need to be checked
         elements.erase(elements.begin());
-        fillingMap[TTID] = elements;        
+        fillingMap[TTID] = std::move(elements);        
     }
     myfile.close();
 

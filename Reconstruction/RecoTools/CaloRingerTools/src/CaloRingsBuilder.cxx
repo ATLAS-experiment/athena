@@ -301,6 +301,19 @@ StatusCode CaloRingsBuilder::getRingSetSeed(
 }
 
 // =================================================================================
+// StatusCode CaloRingsBuilder::getRingSetSeed(
+//   const xAOD::RingSetConf::RawConf &/*rawConf*/,
+//   const xAOD::Jet_v1 &jet,
+//   AtlasGeoPoint &seed)
+// {
+
+//   seed.setEta( jet.eta() );
+//   seed.setPhi( jet.phi() );
+
+// return StatusCode::SUCCESS;
+// }
+
+// =================================================================================
 StatusCode CaloRingsBuilder::buildRingSet(
     const xAOD::RingSetConf::RawConf &rawConf,
     const AtlasGeoPoint &seed,

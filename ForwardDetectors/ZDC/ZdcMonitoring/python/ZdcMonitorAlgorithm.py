@@ -805,10 +805,17 @@ def ZdcMonitoringConfig(inputFlags):
 
     # ---------------------------- ZDC-module amplitudes & amplitude fractions ---------------------------- 
 
-    zdcModuleMonToolArr.defineHistogram('zdcModuleAmp',title=';Module Amplitude [ADC Counts];Events',
-                            path='/SHIFT/ZDC/ZdcModule/ModuleAmp',
-                            opt='kAlwaysCreate', # always create for shift-needed histograms
-                            xbins=n_fpga_bins * 2,xmin=0.0,xmax=module_amp_xmax)
+    if (zdcMonAlg.IsInjectedPulse and zdcMonAlg.IsOnline): # if injcalib && online: impose minimum input-voltage requirement on amplitude histogram for low-amp-percentage DQ check to be meaningful
+        zdcModuleMonToolArr.defineHistogram('zdcModuleAmp',title=';Module Amplitude [ADC Counts];Events',
+                                cutmask='zdcInjInputVoltagePassMinThrsh',
+                                path='/SHIFT/ZDC/ZdcModule/ModuleAmp',
+                                opt='kAlwaysCreate', # always create for shift-needed histograms
+                                xbins=n_fpga_bins * 2,xmin=0.0,xmax=module_amp_xmax)
+    else:
+        zdcModuleMonToolArr.defineHistogram('zdcModuleAmp',title=';Module Amplitude [ADC Counts];Events',
+                                path='/SHIFT/ZDC/ZdcModule/ModuleAmp',
+                                opt='kAlwaysCreate', # always create for shift-needed histograms
+                                xbins=n_fpga_bins * 2,xmin=0.0,xmax=module_amp_xmax)
 
     zdcModuleMonToolArr.defineHistogram('zdcModuleMaxADC',title=';Module Max ADC;Events',
                             path='/EXPERT/ZDC/ZdcModule/ModuleMaxADC',
@@ -856,6 +863,7 @@ def ZdcMonitoringConfig(inputFlags):
     
     if (zdcMonAlg.IsInjectedPulse): # no real energy deposit --> do not require minimum ZDC energy
         zdcModuleMonToolArr.defineHistogram('zdcModuleFract',title=';Module Amplitude Fraction;Events',
+                                cutmask='zdcModuleMaskCurSide', # require per-arm module mask: pulses injected, not physical; all four modules must have "good" pulses for energy fraction to be sensible
                                 path='/SHIFT/ZDC/ZdcModule/ModuleFraction',
                                 opt='kAlwaysCreate', # always create for shift-needed histograms
                                 xbins=n_mod_fraction_bins_default,xmin=0.0,xmax=1.)
