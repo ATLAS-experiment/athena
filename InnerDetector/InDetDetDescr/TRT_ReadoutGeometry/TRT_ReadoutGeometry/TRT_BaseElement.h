@@ -214,6 +214,8 @@ namespace InDetDD {
     CxxUtils::CachedValue<std::vector<const Trk::Surface*>> m_surfaces;
     CxxUtils::CachedValue<SurfaceCache> m_surfaceCache;
 
+    // Helper function for the use by derived classes
+    const Amg::Vector3D& center(const Identifier& id, GeoAlignmentStore* alignStore) const;
   };
 
 }
