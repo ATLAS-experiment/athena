@@ -62,9 +62,8 @@ TBAlgoSequencer::initialize()
       if ( ! registerAlgs.isFailure() && theAlgo != 0 )
 	{
 	  // store sub-algo
-	  std::string myName             = theAlgItem.name(); 
 	  m_subAlgos[acceptedAlgos]      = theAlgo;
-	  m_algoNameStore[acceptedAlgos] = std::move(myName);
+	  m_algoNameStore[acceptedAlgos] = theAlgItem.name(); 
 	  ATH_MSG_INFO
             ( "Subalgorithm ("
 	      << std::setw(2)

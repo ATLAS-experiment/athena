@@ -75,8 +75,7 @@ StatusCode CBNTAA_BeamInstrumentation::CBNT_initialize()
   const unsigned nScint=m_scint_names.size();  
   addBranch("Beam_sNames",m_scint_ntnames);
   for (unsigned i=0;i<nScint;i++) {
-    std::string ADCItemName=add_name("scint_",m_scint_names[i]);
-    m_scint_ntnames->push_back(std::move(ADCItemName));
+    m_scint_ntnames->push_back(add_name("scint_",m_scint_names[i]));
   }
   addBranch("Beam_sADC",m_scint_adc);
   addBranch("Beam_sTDC",m_scint_tdc);
@@ -84,8 +83,7 @@ StatusCode CBNTAA_BeamInstrumentation::CBNT_initialize()
   const unsigned nBPCs=m_bpc_names.size();
   addBranch("Beam_bNames",m_bpc_ntnames);
   for (unsigned i=0;i<nBPCs;i++) {
-    std::string BPCName=add_name("bpc_",m_bpc_names[i]);
-    m_bpc_ntnames->push_back(std::move(BPCName));
+    m_bpc_ntnames->push_back(add_name("bpc_",m_bpc_names[i]));
   }
   addBranch("Beam_bpcX",m_bpc_x);
   addBranch("Beam_bpcY",m_bpc_y);

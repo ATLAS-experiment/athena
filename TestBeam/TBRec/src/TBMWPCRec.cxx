@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -51,7 +51,7 @@ TBMWPCRec::execute()
   }else {
     ATH_MSG_DEBUG ( "TBMWPCRec : Retrieval of "<<m_SGkey<<" succeed : cont size=" << mwpcrawCont->size());
     
-    TBMWPCCont * mwpcCont = new TBMWPCCont();
+    auto mwpcCont = std::make_unique<TBMWPCCont>();
 
     // Loop over MWPC
     for (const TBMWPCRaw* mwpcraw : *mwpcrawCont) {
@@ -69,7 +69,6 @@ TBMWPCRec::execute()
       }
 
       // build new MWPC
-      TBMWPC * mwpc = new TBMWPC(name);
       
       std::vector<int> cwireno = mwpcraw->getCwireno();
       std::vector<int> nwires = mwpcraw->getNwires();
@@ -104,17 +103,18 @@ TBMWPCRec::execute()
 
       }
 
+      auto mwpc = std::make_unique<TBMWPC>(name);
       mwpc->setCPos(cluspos);
       mwpc->setClusterSizeC(clussize);
       mwpc->setXchambers(mwpcraw->isX());
 
       mwpc->setOverflow(mwpcraw->isOverflow());
 
-      mwpcCont->push_back(mwpc);
+      mwpcCont->push_back(std::move(mwpc));
     }
 
     ATH_MSG_DEBUG ( " recording "<<m_SGrecordkey);
-    sc = evtStore()->record(mwpcCont,m_SGrecordkey);
+    sc = evtStore()->record(std::move(mwpcCont),m_SGrecordkey);
     if ( sc.isFailure( ) ) {
       ATH_MSG_FATAL ( "Cannot record MWPCCont" );
     }
