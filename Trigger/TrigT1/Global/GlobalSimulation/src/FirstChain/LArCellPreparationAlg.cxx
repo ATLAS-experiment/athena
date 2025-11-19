@@ -174,10 +174,9 @@ namespace GlobalSim {
 
         // Fill cells into map according to FEB  
         auto feb2_itr = gblLArCellsPerFEB2.find(gblLArCell.getFEB2());
-        if (feb2_itr != gblLArCellsPerFEB2.end()) feb2_itr->second.push_back(gblLArCell);
+        if (feb2_itr != gblLArCellsPerFEB2.end()) feb2_itr->second.push_back(std::move(gblLArCell));
         else {
-            std::vector<GlobalSim::GlobalLArCell> cellsThisFEB;
-            cellsThisFEB.push_back(gblLArCell);
+            std::vector<GlobalSim::GlobalLArCell> cellsThisFEB(1, gblLArCell);
             gblLArCellsPerFEB2.insert(std::pair<std::string,std::vector<GlobalSim::GlobalLArCell>>(gblLArCell.getFEB2(),cellsThisFEB));
         }
     }
