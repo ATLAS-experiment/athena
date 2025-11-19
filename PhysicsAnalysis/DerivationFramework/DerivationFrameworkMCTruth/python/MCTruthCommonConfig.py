@@ -99,7 +99,7 @@ def TruthClassificationAugmentationsCfg(flags, **kwargs):
 
     from DerivationFrameworkMCTruth.TruthDerivationToolsConfig import DFCommonTruthClassificationToolCfg
     acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation(name ="MCTruthClassificationKernel",
-                                                                        AugmentationTools = [ acc.getPrimaryAndMerge(DFCommonTruthClassificationToolCfg(flags)) ]))
+                                                                        AugmentationTools = [ acc.addPublicTool(acc.popToolsAndMerge(DFCommonTruthClassificationToolCfg(flags))) ]))
 
     return acc
 
@@ -154,7 +154,7 @@ def PostJetMCTruthAugmentationsCfg(flags, **kwargs):
     from DerivationFrameworkMCTruth.GenFilterToolConfig import GenFilterToolCfg
     # schedule the special truth building tools and add them to a common augmentation; note taus are handled separately below
     from DerivationFrameworkMCTruth.TruthDerivationToolsConfig import DFCommonTruthDressedWZQGLabelToolCfg
-    augmentationToolsList += [ acc.getPrimaryAndMerge(GenFilterToolCfg(flags)) ,
+    augmentationToolsList += [ acc.addPublicTool(acc.popToolsAndMerge(GenFilterToolCfg(flags))),
                                acc.getPrimaryAndMerge(DFCommonTruthDressedWZQGLabelToolCfg(flags))]
 
     # SUSY signal decorations
