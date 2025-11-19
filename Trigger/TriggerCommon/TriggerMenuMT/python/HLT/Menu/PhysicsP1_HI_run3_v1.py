@@ -597,6 +597,7 @@ def getPhysicsHISignatures():
         ChainProp(name='HLT_mb_sp_vpix30_hi_FgapAC5_L12eEM1_VjTE200', l1SeedThresholds=['FSNOSEED']*2,stream=[UPCStream],groups=MinBiasGroup+SupportPhIGroup),
         ChainProp(name='HLT_mb_excl_1trk5_pt1_hi_FgapAC5_L12eEM1_VjTE200', l1SeedThresholds=['FSNOSEED']*2,stream=[UPCStream],groups=MinBiasGroup+SupportPhIGroup),
         ChainProp(name='HLT_mb_sp_vpix60_hi_FgapAC5_L1eEM5_VjTE200', l1SeedThresholds=['FSNOSEED']*2,stream=[UPCStream],groups=MinBiasGroup+SupportPhIGroup),
+        ChainProp(name='HLT_mb_sp_vpix60_hi_FgapAC5_L1MATCHA_eEM5_VjTE200', l1SeedThresholds=['FSNOSEED']*2,stream=[UPCStream],groups=MinBiasGroup+SupportPhIGroup),
 
         ChainProp(name='HLT_mb_sp_vpix15_hi_FgapAC5_L12eTAU2_VjTE200', l1SeedThresholds=['FSNOSEED']*2,stream=[UPCStream],groups=MinBiasGroup+SupportPhIGroup),
         ChainProp(name='HLT_mb_sp_vpix30_hi_FgapAC5_L12eTAU2_VjTE200', l1SeedThresholds=['FSNOSEED']*2,stream=[UPCStream, 'express'],groups=MinBiasGroup+SupportPhIGroup, monGroups=['mbMon:t0']),
@@ -618,6 +619,10 @@ def getPhysicsHISignatures():
         ChainProp(name='HLT_mb_sp_vpix60_hi_FgapAC5_L1eTAU2_VjTE200_EMPTY', l1SeedThresholds=['FSNOSEED']*2,stream=[UPCStream],groups=MinBiasGroup+SupportPhIGroup),
         ChainProp(name='HLT_mb_sp_vpix60_hi_FgapAC5_L1eEM2_VjTE200_EMPTY',  l1SeedThresholds=['FSNOSEED']*2,stream=[UPCStream],groups=MinBiasGroup+SupportPhIGroup),
         ChainProp(name='HLT_mb_sp_vpix60_hi_FgapAC5_L1eEM5_VjTE200_EMPTY',  l1SeedThresholds=['FSNOSEED']*2,stream=[UPCStream],groups=MinBiasGroup+SupportPhIGroup),
+
+        ChainProp(name='HLT_mb_sp_vpix60_hi_FgapAC5_L1MATCHA_eTAU2_VjTE200_EMPTY', l1SeedThresholds=['FSNOSEED']*2,stream=[UPCStream],groups=MinBiasGroup+SupportPhIGroup),
+        ChainProp(name='HLT_mb_sp_vpix60_hi_FgapAC5_L1MATCHA_eEM2_VjTE200_EMPTY',  l1SeedThresholds=['FSNOSEED']*2,stream=[UPCStream],groups=MinBiasGroup+SupportPhIGroup),
+        ChainProp(name='HLT_mb_sp_vpix60_hi_FgapAC5_L1MATCHA_eEM5_VjTE200_EMPTY',  l1SeedThresholds=['FSNOSEED']*2,stream=[UPCStream],groups=MinBiasGroup+SupportPhIGroup),
 
         #----------- UPC ditaus - Phase-1
         #primary
@@ -710,6 +715,9 @@ def getPhysicsHISignatures():
         ChainProp(name='HLT_mb_excl_1trk5_pt1_hi_FgapAC5_L1CALMTEA_eEM2_VjTE200',  l1SeedThresholds=['FSNOSEED']*2, stream=[UPCStream], groups=MinBiasGroup+SupportPhIGroup),
         ChainProp(name='HLT_mb_excl_1trk5_pt1_hi_FgapAC5_L1CALMTEA_eTAU2_VjTE200', l1SeedThresholds=['FSNOSEED']*2, stream=[UPCStream], groups=MinBiasGroup+SupportPhIGroup),
 
+        ChainProp(name='HLT_mb_excl_1trk5_pt1_hi_FgapAC5_L1MATCHA_eEM2_VjTE200',  l1SeedThresholds=['FSNOSEED']*2, stream=[UPCStream], groups=MinBiasGroup+SupportPhIGroup),
+        ChainProp(name='HLT_mb_excl_1trk5_pt1_hi_FgapAC5_L1MATCHA_eTAU2_VjTE200', l1SeedThresholds=['FSNOSEED']*2, stream=[UPCStream], groups=MinBiasGroup+SupportPhIGroup),
+
         # UPC egamma
         ChainProp(name='HLT_mb_sp_vpix60_hi_FgapAC5_L1CALMTEA_eEM2_VjTE200',  l1SeedThresholds=['FSNOSEED']*2, stream=[UPCStream], groups=MinBiasGroup+SupportPhIGroup),
         ChainProp(name='HLT_mb_sp_vpix60_hi_FgapAC5_L1CALMTEA_eTAU2_VjTE200', l1SeedThresholds=['FSNOSEED']*2, stream=[UPCStream], groups=MinBiasGroup+SupportPhIGroup),
@@ -719,6 +727,15 @@ def getPhysicsHISignatures():
 
         ChainProp(name='HLT_mb_sp_vpix60_hi_FgapAC5_2g0_etcut_25dphiCC_L1CALMTEA_eEM2_VjTE200',  l1SeedThresholds=['FSNOSEED']*2+['eEM2'],  stream=[UPCStream], groups=MinBiasGroup+SupportPhIGroup),
         ChainProp(name='HLT_mb_sp_vpix60_hi_FgapAC5_2g0_etcut_25dphiCC_L1CALMTEA_eTAU2_VjTE200', l1SeedThresholds=['FSNOSEED']*2+['eTAU2'], stream=[UPCStream], groups=MinBiasGroup+SupportPhIGroup),
+
+        ChainProp(name='HLT_mb_sp_vpix60_hi_FgapAC5_L1MATCHA_eEM2_VjTE200',  l1SeedThresholds=['FSNOSEED']*2, stream=[UPCStream], groups=MinBiasGroup+SupportPhIGroup),
+        ChainProp(name='HLT_mb_sp_vpix60_hi_FgapAC5_L1MATCHA_eTAU2_VjTE200', l1SeedThresholds=['FSNOSEED']*2, stream=[UPCStream], groups=MinBiasGroup+SupportPhIGroup),
+
+        ChainProp(name='HLT_mb_sp_vpix60_hi_FgapAC5_2g0_etcut_L1MATCHA_eEM2_VjTE200',  l1SeedThresholds=['FSNOSEED']*2+['eEM2'],  stream=[UPCStream], groups=MinBiasGroup+SupportPhIGroup),
+        ChainProp(name='HLT_mb_sp_vpix60_hi_FgapAC5_2g0_etcut_L1MATCHA_eTAU2_VjTE200', l1SeedThresholds=['FSNOSEED']*2+['eTAU2'], stream=[UPCStream], groups=MinBiasGroup+SupportPhIGroup),
+
+        ChainProp(name='HLT_mb_sp_vpix60_hi_FgapAC5_2g0_etcut_25dphiCC_L1MATCHA_eEM2_VjTE200',  l1SeedThresholds=['FSNOSEED']*2+['eEM2'],  stream=[UPCStream], groups=MinBiasGroup+SupportPhIGroup),
+        ChainProp(name='HLT_mb_sp_vpix60_hi_FgapAC5_2g0_etcut_25dphiCC_L1MATCHA_eTAU2_VjTE200', l1SeedThresholds=['FSNOSEED']*2+['eTAU2'], stream=[UPCStream], groups=MinBiasGroup+SupportPhIGroup),
     ]
 
 

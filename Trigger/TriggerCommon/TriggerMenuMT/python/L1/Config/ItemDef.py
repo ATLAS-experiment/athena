@@ -1731,6 +1731,20 @@ class ItemDef:
         MenuItem('L1_CALMTEA_eEM2_VjTE200'  ).setLogic( d.eEM2  & Not(d.TOPO_TeATIME_jTENoSort_ParamSet1) & Not(d.jTE200) & physcond)
         MenuItem('L1_CALMTEA_eTAU2_VjTE200' ).setLogic( d.eTAU2 & Not(d.TOPO_TeATIME_jTENoSort_ParamSet1) & Not(d.jTE200) & physcond)
 
+        # Items for further TeATIME tuning - possibly non-spike'y
+        MenuItem('L1_MATCHA_eEM2'          ).setLogic( d.eEM2  & Not(d.TOPO_TeATIME_jTENoSort_ParamSet2) & physcond)
+        MenuItem('L1_MATCHA_eTAU2'         ).setLogic( d.eTAU2 & Not(d.TOPO_TeATIME_jTENoSort_ParamSet2) & physcond)
+        MenuItem('L1_MATCHA_eEM2_VjTE200'  ).setLogic( d.eEM2  & Not(d.TOPO_TeATIME_jTENoSort_ParamSet2) & Not(d.jTE200) & physcond)
+        MenuItem('L1_MATCHA_eTAU2_VjTE200' ).setLogic( d.eTAU2 & Not(d.TOPO_TeATIME_jTENoSort_ParamSet2) & Not(d.jTE200) & physcond)
+
+        MenuItem('L1_MATCHA_eEM2_EMPTY'          ).setLogic( d.eEM2  & Not(d.TOPO_TeATIME_jTENoSort_ParamSet2) & cosmiccond)
+        MenuItem('L1_MATCHA_eTAU2_EMPTY'         ).setLogic( d.eTAU2 & Not(d.TOPO_TeATIME_jTENoSort_ParamSet2) & cosmiccond)
+        MenuItem('L1_MATCHA_eEM2_VjTE200_EMPTY'  ).setLogic( d.eEM2  & Not(d.TOPO_TeATIME_jTENoSort_ParamSet2) & Not(d.jTE200) & cosmiccond)
+        MenuItem('L1_MATCHA_eTAU2_VjTE200_EMPTY' ).setLogic( d.eTAU2 & Not(d.TOPO_TeATIME_jTENoSort_ParamSet2) & Not(d.jTE200) & cosmiccond)
+
+        MenuItem('L1_MATCHA_eEM5_VjTE200'       ).setLogic( d.eEM5  & Not(d.TOPO_TeATIME_jTENoSort_ParamSet2) & Not(d.jTE200) & physcond)
+        MenuItem('L1_MATCHA_eEM5_VjTE200_EMPTY' ).setLogic( d.eEM5  & Not(d.TOPO_TeATIME_jTENoSort_ParamSet2) & Not(d.jTE200) & cosmiccond)
+
         # ATR-30727
         MenuItem('L1_eTAU1_jJ5_VjTE200' ).setLogic( d.eTAU1 & d.jJ5 & Not(d.jTE200)   & physcond)
         MenuItem('L1_jJ5_TRT_VjTE200' ).setLogic( d.jJ5 & d.NIMTRT & Not(d.jTE200)   & physcond)
