@@ -41,8 +41,6 @@ namespace {
 EventSelectorByteStream::EventSelectorByteStream(const std::string &name,
                                                  ISvcLocator *svcloc)
     : base_class(name, svcloc) {
-  declareProperty("HelperTools", m_helperTools);
-
   // RunNumber, OldRunNumber and OverrideRunNumberFromInput are used
   // to override the run number coming in on the input stream
   m_runNo.verifier().setLower(0);
@@ -92,15 +90,12 @@ StatusCode EventSelectorByteStream::initialize() {
       ATH_MSG_DEBUG("Initializing " << name());
    }
 
-   if (!::AthService::initialize().isSuccess()) {
-      ATH_MSG_FATAL("Cannot initialize AthService base class.");
-      return(StatusCode::FAILURE);
-   }
+   ATH_CHECK(::AthService::initialize());
 
    // Check for input setting
    if (m_filebased && m_inputCollectionsProp.value().empty()) {
      ATH_MSG_FATAL("Unable to retrieve valid input list");
-     return(StatusCode::FAILURE);
+     return StatusCode::FAILURE;
    }
    m_skipEventSequence = m_skipEventSequenceProp.value();
    std::sort(m_skipEventSequence.begin(), m_skipEventSequence.end());
@@ -109,49 +104,35 @@ StatusCode EventSelectorByteStream::initialize() {
    m_eventSource = serviceLocator()->service(m_eventSourceName.value());
    if (!m_eventSource) {
       ATH_MSG_FATAL("Cannot get ByteStreamInputSvc");
-      return(StatusCode::FAILURE);
+      return StatusCode::FAILURE;
    }
 
    // Get CounterTool (if configured)
    if (!m_counterTool.empty()) {
-      if (!m_counterTool.retrieve().isSuccess()) {
-         ATH_MSG_FATAL("Cannot get CounterTool.");
-         return(StatusCode::FAILURE);
-      }
+      ATH_CHECK(m_counterTool.retrieve());
    }
    // Get HelperTools
    if (!m_helperTools.empty()) {
-      if (!m_helperTools.retrieve().isSuccess()) {
-         ATH_MSG_FATAL("Cannot get " << m_helperTools);
-         return(StatusCode::FAILURE);
-      }
+      ATH_CHECK(m_helperTools.retrieve());
    }
    // Get SharedMemoryTool (if configured)
-   if (!m_eventStreamingTool.empty() && !m_eventStreamingTool.retrieve().isSuccess()) {
-      ATH_MSG_FATAL("Cannot get AthenaSharedMemoryTool");
-      return(StatusCode::FAILURE);
+   if (!m_eventStreamingTool.empty()) {
+      ATH_CHECK(m_eventStreamingTool.retrieve());
    }
 
    // Register this service for 'I/O' events
    ServiceHandle<IIoComponentMgr> iomgr("IoComponentMgr", name());
-   if (!iomgr.retrieve().isSuccess()) {
-      ATH_MSG_FATAL("Cannot retrieve IoComponentMgr.");
-      return(StatusCode::FAILURE);
-   }
-   if (!iomgr->io_register(this).isSuccess()) {
-      ATH_MSG_FATAL("Cannot register myself with the IoComponentMgr.");
-      return(StatusCode::FAILURE);
-   }
+   ATH_CHECK(iomgr.retrieve());
+   ATH_CHECK(iomgr->io_register(this));
 
    // Register the input files with the iomgr
    bool allGood = true;
-   const std::vector<std::string>& incol = m_inputCollectionsProp.value();
-   for (std::size_t icol = 0, imax = incol.size(); icol != imax; ++icol) {
-      if (!iomgr->io_register(this, IIoComponentMgr::IoMode::READ, incol[icol]).isSuccess()) {
-         ATH_MSG_FATAL("could not register [" << incol[icol] << "] for output !");
+   for (const std::string& input : m_inputCollectionsProp.value()) {
+      if (!iomgr->io_register(this, IIoComponentMgr::IoMode::READ, input).isSuccess()) {
+         ATH_MSG_FATAL("could not register [" << input << "] for output !");
          allGood = false;
       } else {
-         ATH_MSG_VERBOSE("io_register[" << this->name() << "](" << incol[icol] << ") [ok]");
+         ATH_MSG_VERBOSE("io_register[" << this->name() << "](" << input << ") [ok]");
       }
    }
    if (!allGood) {
@@ -207,15 +188,12 @@ StatusCode EventSelectorByteStream::reinit(lock_t& lock) {
       }
 
       // try to open a file
-      if (this->openNewRun(lock).isFailure()) {
-         ATH_MSG_FATAL("Unable to open any file in initialize");
-         return(StatusCode::FAILURE);
-      }
+      ATH_CHECK(this->openNewRun(lock));
       // should be in openNewRun, but see comment there
       m_beginFileFired = true;
    }
 
-   return(StatusCode::SUCCESS);
+   return StatusCode::SUCCESS;
 }
 
 //________________________________________________________________________________
@@ -227,7 +205,7 @@ StatusCode EventSelectorByteStream::start() {
    // Increment to get the new event in.
    m_endIter   =  new EventContextByteStream(0);
 
-   return(StatusCode::SUCCESS);
+   return StatusCode::SUCCESS;
 }
 
 //________________________________________________________________________________
@@ -242,7 +220,7 @@ StatusCode EventSelectorByteStream::stop() {
          m_incidentSvc->fireIncident(endInputFileIncident);
       }
    }
-   return(StatusCode::SUCCESS);
+   return StatusCode::SUCCESS;
 }
 
 //__________________________________________________________________________
@@ -257,25 +235,11 @@ StatusCode EventSelectorByteStream::finalize() {
          ATH_MSG_WARNING("Failed to preFinalize() " << tool->name());
       }
    }
-   delete m_beginIter; m_beginIter = 0;
-   delete m_endIter; m_endIter = 0;
-   // Release AthenaSharedMemoryTool
-   if (!m_eventStreamingTool.empty() && !m_eventStreamingTool.release().isSuccess()) {
-      ATH_MSG_WARNING("Cannot release AthenaSharedMemoryTool");
-   }
-   // Release CounterTool
-   if (!m_counterTool.empty()) {
-      if (!m_counterTool.release().isSuccess()) {
-         ATH_MSG_WARNING("Cannot release CounterTool.");
-      }
-   }
-   // Release HelperTools
-   if (!m_helperTools.release().isSuccess()) {
-      ATH_MSG_WARNING("Cannot release " << m_helperTools);
-   }
+   delete m_beginIter; m_beginIter = nullptr;
+   delete m_endIter; m_endIter = nullptr;
    if (m_eventSource) m_eventSource->release();
    // Finalize the Service base class.
-   return(AthService::finalize());
+   return AthService::finalize();
 }
 
 void EventSelectorByteStream::nextFile(lock_t& /*lock*/) const {
@@ -289,16 +253,15 @@ StatusCode EventSelectorByteStream::openNewRun(lock_t& lock) const {
    // Should be protected upstream, but this is further protection
    if (!m_filebased) {
       ATH_MSG_ERROR("cannot open new run for non-filebased inputs");
-      return(StatusCode::FAILURE);
+      return StatusCode::FAILURE;
    }
    // Check for end of file list
    if (m_inputCollectionsIterator == m_inputCollectionsProp.value().end()) {
       ATH_MSG_INFO("End of input file list reached");
-      return(StatusCode::FAILURE);
+      return StatusCode::FAILURE;
    }
    std::string blockname = *m_inputCollectionsIterator;
-   // try to open a file, if failure go to next FIXME: PVG: silent failure?
-   //long nev = m_eventSource->getBlockIterator(blockname);
+   // try to open a file
    auto nevguid = m_eventSource->getBlockIterator(blockname);
    long nev = nevguid.first;
    if (nev == -1) {
@@ -332,12 +295,12 @@ StatusCode EventSelectorByteStream::openNewRun(lock_t& lock) const {
    m_firstEvt[m_fileCount] = m_NumEvents;
    m_numEvt[m_fileCount] = nev;
 
-   return(StatusCode::SUCCESS);
+   return StatusCode::SUCCESS;
 }
 
 StatusCode EventSelectorByteStream::createContext(IEvtSelector::Context*& it) const {
    it = new EventContextByteStream(this);
-   return(StatusCode::SUCCESS);
+   return StatusCode::SUCCESS;
 }
 
 StatusCode EventSelectorByteStream::next(IEvtSelector::Context& it) const {
@@ -350,14 +313,11 @@ StatusCode EventSelectorByteStream::nextImpl(IEvtSelector::Context& it,
     static std::atomic<int> n_bad_events = 0;   // cross loop counter of bad events
    // Check if this is an athenaMP client process
    if (!m_eventStreamingTool.empty() && m_eventStreamingTool->isClient()) {
-      void* source = 0;
+      void* source = nullptr;
       unsigned int status = 0;
-      if (!m_eventStreamingTool->getLockedEvent(&source, status).isSuccess()) {
-         ATH_MSG_FATAL("Cannot get NextEvent from AthenaSharedMemoryTool");
-         return(StatusCode::FAILURE);
-      }
+      ATH_CHECK(m_eventStreamingTool->getLockedEvent(&source, status));
       m_eventSource->setEvent(static_cast<char*>(source), status);
-      return(StatusCode::SUCCESS);
+      return StatusCode::SUCCESS;
    }
    // Call all selector tool preNext before starting loop
    for (const ToolHandle<IAthenaSelectorTool>& tool : m_helperTools) {
@@ -469,12 +429,9 @@ StatusCode EventSelectorByteStream::nextImpl(IEvtSelector::Context& it,
                                 m_eventSource->currentEventStatus())).isRecoverable() ) {
          usleep(1000);
       }
-      if (!sc.isSuccess()) {
-         ATH_MSG_ERROR("Cannot put Event " << m_NumEvents - 1 << " to AthenaSharedMemoryTool");
-         return(StatusCode::FAILURE);
-      }
+      ATH_CHECK(sc);
    }
-   return(StatusCode::SUCCESS);
+   return StatusCode::SUCCESS;
 }
 
 //________________________________________________________________________________
@@ -494,18 +451,16 @@ EventSelectorByteStream::nextImpl(IEvtSelector::Context& ctxt,
          unsigned int cntr = m_NumEvents;
          // In case NumEvents increments multiple times in a single next call
          while (m_NumEvents+1 <= cntr + jump) {
-            if (!nextImpl(ctxt, lock).isSuccess()) {
-               return(StatusCode::FAILURE);
-            }
+            ATH_CHECK(nextImpl(ctxt, lock));
          }
       }
       else ATH_MSG_DEBUG("Jump covered by skip event " << m_skipEvents.value());
-      return(StatusCode::SUCCESS);
+      return StatusCode::SUCCESS;
    }
    else {
       ATH_MSG_WARNING("Called jump next with non-multiple jump");
    }
-   return(StatusCode::SUCCESS);
+   return StatusCode::SUCCESS;
 }
 
 //________________________________________________________________________________
@@ -616,7 +571,7 @@ StatusCode EventSelectorByteStream::previous(IEvtSelector::Context& ctxt) const
 StatusCode EventSelectorByteStream::previousImpl(IEvtSelector::Context& /*ctxt*/,
                                                  lock_t& /*lock*/) const {
     ATH_MSG_DEBUG(" ... previous");
-    const RawEvent* pre = 0;
+    const RawEvent* pre = nullptr;
     bool badEvent(false);
     // if event source not ready from init, try next file
     if (m_eventSource->ready()) {
@@ -638,24 +593,21 @@ StatusCode EventSelectorByteStream::previousImpl(IEvtSelector::Context& /*ctxt*/
        // Check whether a RawEvent has actually been provided
        if (pre == 0) {
           ATH_MSG_ERROR("No event built");
- 	 //it = *m_endIter;
- 	 return(StatusCode::FAILURE);
+          return StatusCode::FAILURE;
        }
     }
     else {
        ATH_MSG_FATAL("Attempt to read previous data on invalid reader");
-       return(StatusCode::FAILURE);
+       return StatusCode::FAILURE;
     }
     // increment that an event was found
-    //++m_NumEvents;
 
     // check bad event flag and handle as configured
     if (badEvent) {
        ATH_MSG_ERROR("Called previous for bad event");
        if (!m_procBadEvent) {
           // End of file
-          //it = *m_endIter;
-          return(StatusCode::FAILURE);
+          return StatusCode::FAILURE;
        }
        ATH_MSG_WARNING("Continue with bad event");
     }
@@ -681,31 +633,29 @@ EventSelectorByteStream::previousImpl(IEvtSelector::Context& ctxt,
 {
    if (jump > 0) {
       for (int i = 0; i < jump; i++) {
-         if (!previousImpl(ctxt, lock).isSuccess()) {
-            return(StatusCode::FAILURE);
-         }
+         ATH_CHECK(previousImpl(ctxt, lock));
       }
-      return(StatusCode::SUCCESS);
+      return StatusCode::SUCCESS;
    }
-   return(StatusCode::FAILURE);
+   return StatusCode::FAILURE;
 }
 //________________________________________________________________________________
 StatusCode EventSelectorByteStream::last(IEvtSelector::Context& it)const {
    if (it.identifier() == m_endIter->identifier()) {
       ATH_MSG_DEBUG("last(): Last event in InputStream.");
-      return(StatusCode::SUCCESS);
+      return StatusCode::SUCCESS;
    }
-   return(StatusCode::FAILURE);
+   return StatusCode::FAILURE;
 }
 //________________________________________________________________________________
 StatusCode EventSelectorByteStream::rewind(IEvtSelector::Context& /*it*/) const {
    ATH_MSG_ERROR("rewind() not implemented");
-   return(StatusCode::FAILURE);
+   return StatusCode::FAILURE;
 }
 
 //________________________________________________________________________________
 StatusCode EventSelectorByteStream::resetCriteria(const std::string& /*criteria*/, IEvtSelector::Context& /*ctxt*/) const {
-   return(StatusCode::SUCCESS);
+   return StatusCode::SUCCESS;
 }
 
 //__________________________________________________________________________
@@ -724,7 +674,7 @@ StatusCode EventSelectorByteStream::seek(Context& /* it */, int evtNum) const {
    // if unable to locate file, exit
    if (fileNum == -1) {
       ATH_MSG_INFO("seek: Reached end of Input.");
-      return(StatusCode::RECOVERABLE);
+      return StatusCode::RECOVERABLE;
    }
    // check if it is the current file
    if (fileNum != m_fileCount) { // event in different file
@@ -743,7 +693,7 @@ StatusCode EventSelectorByteStream::seek(Context& /* it */, int evtNum) const {
       int delta = evtNum - m_firstEvt[m_fileCount];
       if (delta > 0) {
         EventContextByteStream* beginIter ATLAS_THREAD_SAFE = m_beginIter;
-        if (nextImpl(*beginIter,delta, lock).isFailure()) return StatusCode::FAILURE;
+        ATH_CHECK(nextImpl(*beginIter,delta, lock));
       }
    }
    // event in current file
@@ -755,11 +705,11 @@ StatusCode EventSelectorByteStream::seek(Context& /* it */, int evtNum) const {
       }
       else if ( delta > 0 ) { // forward
          EventContextByteStream* beginIter ATLAS_THREAD_SAFE = m_beginIter;
-         if ( this->nextImpl(*beginIter, delta, lock).isFailure() ) return StatusCode::FAILURE;
+         ATH_CHECK(this->nextImpl(*beginIter, delta, lock));
       }
       else if ( delta < 0 ) { // backward
          EventContextByteStream* beginIter ATLAS_THREAD_SAFE = m_beginIter;
-         if ( this->previousImpl(*beginIter, -1*delta, lock).isFailure() ) return(StatusCode::FAILURE);
+         ATH_CHECK(this->previousImpl(*beginIter, -1*delta, lock));
       }
    }
    return StatusCode::SUCCESS;
@@ -776,14 +726,8 @@ StatusCode EventSelectorByteStream::recordAttributeListImpl(lock_t& lock) const
 
    if (eventStore()->contains<AthenaAttributeList>(listName)) {
       const AthenaAttributeList* oldAttrList = nullptr;
-      if (!eventStore()->retrieve(oldAttrList, listName).isSuccess()) {
-         ATH_MSG_ERROR("Cannot retrieve old AttributeList from StoreGate.");
-         return(StatusCode::FAILURE);
-      }
-      if (!eventStore()->removeDataAndProxy(oldAttrList).isSuccess()) {
-         ATH_MSG_ERROR("Cannot remove old AttributeList from StoreGate.");
-         return(StatusCode::FAILURE);
-      }
+      ATH_CHECK(eventStore()->retrieve(oldAttrList, listName));
+      ATH_CHECK(eventStore()->removeDataAndProxy(oldAttrList));
    }
 
    // build the new attr list
@@ -793,9 +737,7 @@ StatusCode EventSelectorByteStream::recordAttributeListImpl(lock_t& lock) const
    ATH_CHECK(fillAttributeListImpl(attrList.get(), "", false, lock));
 
    // put result in event store
-   if (eventStore()->record(std::move(attrList), listName).isFailure()) {
-      return StatusCode::FAILURE;
-   }
+   ATH_CHECK(eventStore()->record(std::move(attrList), listName));
 
    return StatusCode::SUCCESS;
 }
@@ -899,7 +841,6 @@ StatusCode EventSelectorByteStream::fillAttributeListImpl(coral::AttributeList *
 //__________________________________________________________________________
 int EventSelectorByteStream::findEvent(int evtNum, lock_t& /*lock*/) const {
    // Loop over file event counts
-   //ATH_MSG_INFO("try to find evnum = " << evtNum << " in " << m_numEvt.size() << " files");
    for (size_t i = 0; i < m_inputCollectionsProp.value().size(); i++) {
       if (m_inputCollectionsProp.value().size() != m_numEvt.size()) {
          ATH_MSG_ERROR("vector size incompatibility");
@@ -926,12 +867,12 @@ int EventSelectorByteStream::findEvent(int evtNum, lock_t& /*lock*/) const {
       // if sought event is in this file, then return the index of that file
       if (evtNum >= m_firstEvt[i] && evtNum < m_firstEvt[i] + m_numEvt[i]) {
          ATH_MSG_INFO("found " << evtNum << " in file " << i);
-         return(i);
+         return i;
       }
    }
    ATH_MSG_INFO("did not find ev " << evtNum);
    // return file not found marker
-   return(-1);
+   return -1;
 }
 
 //__________________________________________________________________________
@@ -950,26 +891,26 @@ int EventSelectorByteStream::size (Context& /*it*/) const {
 StatusCode EventSelectorByteStream::makeServer(int /*num*/) {
    lock_t lock (m_mutex);
    if (m_eventStreamingTool.empty()) {
-      return(StatusCode::FAILURE);
+      return StatusCode::FAILURE;
    }
-   return(m_eventStreamingTool->makeServer(1, ""));
+   return m_eventStreamingTool->makeServer(1, "");
 }
 
 //________________________________________________________________________________
 StatusCode EventSelectorByteStream::makeClient(int /*num*/) {
    lock_t lock (m_mutex);
    if (m_eventStreamingTool.empty()) {
-      return(StatusCode::FAILURE);
+      return StatusCode::FAILURE;
    }
    std::string dummyStr;
-   return(m_eventStreamingTool->makeClient(0, dummyStr));
+   return m_eventStreamingTool->makeClient(0, dummyStr);
 }
 
 //________________________________________________________________________________
 StatusCode EventSelectorByteStream::share(int evtNum) {
    lock_t lock (m_mutex);
    if (m_eventStreamingTool.empty()) {
-      return(StatusCode::FAILURE);
+      return StatusCode::FAILURE;
    }
    if (m_eventStreamingTool->isClient()) {
       StatusCode sc = m_eventStreamingTool->lockEvent(evtNum);
@@ -977,9 +918,9 @@ StatusCode EventSelectorByteStream::share(int evtNum) {
          usleep(1000);
          sc = m_eventStreamingTool->lockEvent(evtNum);
       }
-      return(sc);
+      return sc;
    }
-   return(StatusCode::FAILURE);
+   return StatusCode::FAILURE;
 }
 
 //________________________________________________________________________________
@@ -987,11 +928,11 @@ StatusCode EventSelectorByteStream::readEvent(int maxevt) {
    lock_t lock (m_mutex);
    if (m_eventStreamingTool.empty()) {
       ATH_MSG_ERROR("No AthenaSharedMemoryTool configured for readEvent()");
-      return(StatusCode::FAILURE);
+      return StatusCode::FAILURE;
    }
    ATH_MSG_VERBOSE("Called read Event " << maxevt);
    for (int i = 0; i < maxevt || maxevt == -1; ++i) {
-      const RawEvent* pre = 0;
+      const RawEvent* pre = nullptr;
       if (this->nextImpl(*m_beginIter, lock).isSuccess()) {
          pre = m_eventSource->currentEvent();
       } else {
@@ -1000,7 +941,7 @@ StatusCode EventSelectorByteStream::readEvent(int maxevt) {
             break;
          }
          ATH_MSG_ERROR("Unable to retrieve next event for " << i << "/" << maxevt);
-         return(StatusCode::FAILURE);
+         return StatusCode::FAILURE;
       }
       if (m_eventStreamingTool->isServer()) {
          StatusCode sc;
@@ -1011,10 +952,7 @@ StatusCode EventSelectorByteStream::readEvent(int maxevt) {
                                    m_eventSource->currentEventStatus())).isRecoverable() ) {
             usleep(1000);
          }
-         if (!sc.isSuccess()) {
-            ATH_MSG_ERROR("Cannot put Event " << m_NumEvents - 1 << " to AthenaSharedMemoryTool");
-            return(StatusCode::FAILURE);
-         }
+         ATH_CHECK(sc);
       }
    }
    // End of file, wait for last event to be taken
@@ -1022,11 +960,8 @@ StatusCode EventSelectorByteStream::readEvent(int maxevt) {
    while ( (sc = putEvent_ST(*m_eventStreamingTool, 0, 0, 0, 0)).isRecoverable() ) {
       usleep(1000);
    }
-   if (!sc.isSuccess()) {
-      ATH_MSG_ERROR("Cannot put last Event marker to AthenaSharedMemoryTool");
-      return(StatusCode::FAILURE);
-   }
-   return(StatusCode::SUCCESS);
+   ATH_CHECK(sc);
+   return StatusCode::SUCCESS;
 }
 
 //________________________________________________________________________________
@@ -1035,17 +970,17 @@ StatusCode EventSelectorByteStream::createAddress(const IEvtSelector::Context& /
    SG::DataProxy* proxy = eventStore()->proxy(ClassID_traits<DataHeader>::ID(),"ByteStreamDataHeader");
    if (proxy !=0) {
      iop = proxy->address();
-     return(StatusCode::SUCCESS);
+     return StatusCode::SUCCESS;
    } else {
      iop = 0;
-     return(StatusCode::FAILURE);
+     return StatusCode::FAILURE;
    }
 }
 
 //________________________________________________________________________________
 StatusCode
 EventSelectorByteStream::releaseContext(IEvtSelector::Context*& /*it*/) const {
-   return(StatusCode::SUCCESS);
+   return StatusCode::SUCCESS;
 }
 
 //________________________________________________________________________________
@@ -1053,13 +988,10 @@ StatusCode EventSelectorByteStream::io_reinit() {
    lock_t lock (m_mutex);
    ATH_MSG_INFO("I/O reinitialization...");
       ServiceHandle<IIoComponentMgr> iomgr("IoComponentMgr", name());
-   if (!iomgr.retrieve().isSuccess()) {
-      ATH_MSG_FATAL("Could not retrieve IoComponentMgr !");
-      return(StatusCode::FAILURE);
-   }
+   ATH_CHECK(iomgr.retrieve());
    if (!iomgr->io_hasitem(this)) {
       ATH_MSG_FATAL("IoComponentMgr does not know about myself !");
-      return(StatusCode::FAILURE);
+      return StatusCode::FAILURE;
    }
    std::vector<std::string> inputCollections = m_inputCollectionsProp.value();
    for (std::size_t i = 0, imax = inputCollections.size(); i != imax; ++i) {
@@ -1067,12 +999,9 @@ StatusCode EventSelectorByteStream::io_reinit() {
       std::string &fname = inputCollections[i];
       if (!iomgr->io_contains(this, fname)) {
          ATH_MSG_ERROR("IoComponentMgr does not know about [" << fname << "] !");
-         return(StatusCode::FAILURE);
+         return StatusCode::FAILURE;
       }
-      if (!iomgr->io_retrieve(this, fname).isSuccess()) {
-         ATH_MSG_FATAL("Could not retrieve new value for [" << fname << "] !");
-         return(StatusCode::FAILURE);
-      }
+      ATH_CHECK(iomgr->io_retrieve(this, fname));
    }
    // all good... copy over.
    m_beginFileFired = false;
@@ -1087,7 +1016,7 @@ StatusCode EventSelectorByteStream::io_reinit() {
    m_inputCollectionsProp = inputCollections;
    m_inputCollectionsProp.declareUpdateHandler (std::move(old_cb));
 
-   return(this->reinit(lock));
+   return this->reinit(lock);
 }
 
 //__________________________________________________________________________

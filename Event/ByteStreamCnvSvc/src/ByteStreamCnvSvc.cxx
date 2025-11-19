@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ByteStreamCnvSvc.h"
@@ -32,16 +32,8 @@ namespace {
 
 /// Standard constructor
 ByteStreamCnvSvc::ByteStreamCnvSvc(const std::string& name, ISvcLocator* pSvcLocator)
-  : base_class(name, pSvcLocator),
-    m_evtStore ("StoreGateSvc", name)
+  : base_class(name, pSvcLocator)
 {
-  declareProperty("ByteStreamOutputSvc",     m_ioSvcName);
-  declareProperty("UserType",      m_userType     = "RawEvent");
-  declareProperty("EventStore",    m_evtStore);
-}
-
-/// Standard Destructor
-ByteStreamCnvSvc::~ByteStreamCnvSvc() {
 }
 
 FullEventAssemblerBase* ByteStreamCnvSvc::findFullEventAssembler(const std::string& name) const
@@ -61,18 +53,15 @@ StatusCode ByteStreamCnvSvc::storeFullEventAssembler(std::unique_ptr<FullEventAs
 
 /// Initialize the service.
 StatusCode ByteStreamCnvSvc::initialize() {
-   if (!ByteStreamCnvSvcBase::initialize().isSuccess()) {
-      ATH_MSG_FATAL("ByteStreamCnvSvcBase::initialize() failed");
-      return(StatusCode::FAILURE);
-   }
+   ATH_CHECK(ByteStreamCnvSvcBase::initialize());
 
-   ATH_CHECK( m_evtStore.retrieve() );
+   ATH_CHECK(m_evtStore.retrieve());
 
    // get ready for output
    std::vector<std::string> ioSvcNames = m_ioSvcNameList.value();
    if (!m_ioSvcName.empty()) {
       // add ioSvcName if ioSvcNameList is missing it
-      std::vector<std::string>::iterator it = find(ioSvcNames.begin(), ioSvcNames.end(), m_ioSvcName);
+      auto it = find(ioSvcNames.begin(), ioSvcNames.end(), m_ioSvcName);
       if (it == ioSvcNames.end()) {
          ioSvcNames.push_back(m_ioSvcName);
       }
@@ -83,7 +72,7 @@ StatusCode ByteStreamCnvSvc::initialize() {
          ATH_MSG_DEBUG("Retrieving " << svcName);
          // get service
          SmartIF<IByteStreamOutputSvc> ioSvc{service(svcName)};
-         ATH_CHECK( ioSvc.isValid() );
+         ATH_CHECK(ioSvc.isValid());
 
          // get stream name
          std::string bsOutputStreamName;
@@ -94,15 +83,15 @@ StatusCode ByteStreamCnvSvc::initialize() {
          m_ioSvcMap[bsOutputStreamName] = ioSvc;
       }
    }
-   return(StatusCode::SUCCESS);
+   return StatusCode::SUCCESS;
 }
 
 StatusCode ByteStreamCnvSvc::finalize() {
-   return(ByteStreamCnvSvcBase::finalize());
+   return ByteStreamCnvSvcBase::finalize();
 }
 
 StatusCode ByteStreamCnvSvc::connectOutput(const std::string& t, const std::string& /*mode*/) {
-   return(connectOutput(t));
+   return connectOutput(t);
 }
 
 StatusCode ByteStreamCnvSvc::connectOutput(const std::string& /*t*/) {
@@ -188,7 +177,7 @@ StatusCode ByteStreamCnvSvc::connectOutput(const std::string& /*t*/) {
       re->event_filter_info(efPP.size(), slot.m_efBuff.data());
    }
 
-   return(StatusCode::SUCCESS);
+   return StatusCode::SUCCESS;
 }
 
 StatusCode ByteStreamCnvSvc::commitOutput(const std::string& outputConnection, bool /*b*/) {
@@ -198,8 +187,8 @@ StatusCode ByteStreamCnvSvc::commitOutput(const std::string& outputConnection, b
    SlotData& slot = *m_slots.get(ctx);
 
    if (m_ioSvcMap.size() == 0) {
-      ATH_MSG_ERROR("ByteStreamCnvSvc not configure for output");
-      return(StatusCode::FAILURE);
+      ATH_MSG_ERROR("ByteStreamCnvSvc not configured for output");
+      return StatusCode::FAILURE;
    }
 
    writeFEA (slot);
@@ -211,7 +200,7 @@ StatusCode ByteStreamCnvSvc::commitOutput(const std::string& outputConnection, b
    uint32_t count = eformat::write::copy(*(re->bind()), buffer.data(), rawSize);
    if (count != rawSize) {
       ATH_MSG_ERROR("Memcopy failed");
-      return(StatusCode::FAILURE);
+      return StatusCode::FAILURE;
    }
    RawEvent rawEvent(buffer.data());
    // check validity
@@ -219,7 +208,7 @@ StatusCode ByteStreamCnvSvc::commitOutput(const std::string& outputConnection, b
       rawEvent.check_tree();
    } catch (...) {
       ATH_MSG_ERROR("commitOutput failed, because FullEventFragment invalid");
-      return(StatusCode::FAILURE);
+      return StatusCode::FAILURE;
    }
    ATH_MSG_DEBUG("commitOutput: Size of Event (words) = " << rawEvent.fragment_size_word());
    // put event to OutputSvc
@@ -232,12 +221,12 @@ StatusCode ByteStreamCnvSvc::commitOutput(const std::string& outputConnection, b
       // put
       if (!itSvc->second->putEvent(&rawEvent)) {
          ATH_MSG_ERROR("commitOutput failed to send output");
-         return(StatusCode::FAILURE);
+         return StatusCode::FAILURE;
       }
    }
    // Clear slot-specific data.
    slot.clear();
-   return(StatusCode::SUCCESS);
+   return StatusCode::SUCCESS;
 }
 
 void ByteStreamCnvSvc::writeFEA (SlotData& slot)

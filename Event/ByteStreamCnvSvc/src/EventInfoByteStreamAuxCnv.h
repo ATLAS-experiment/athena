@@ -1,9 +1,9 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef EVENTINFOBYTESTREAMAUXCNV_H
-#define EVENTINFOBYTESTREAMAUXCNV_H
+#ifndef BYTESTREAMCNVSVC_EVENTINFOBYTESTREAMAUXCNV_H
+#define BYTESTREAMCNVSVC_EVENTINFOBYTESTREAMAUXCNV_H
 
 /**
  * @file EventInfoByteStreamAuxCnv.h
@@ -30,7 +30,7 @@ class EventInfoByteStreamAuxCnv : public Converter, public AthMessaging
 {
  public:
   EventInfoByteStreamAuxCnv(ISvcLocator* svcloc);
-  virtual ~EventInfoByteStreamAuxCnv() override {}
+  virtual ~EventInfoByteStreamAuxCnv() override = default;
   
   virtual StatusCode initialize() override;
   virtual StatusCode finalize() override;
@@ -56,4 +56,4 @@ class EventInfoByteStreamAuxCnv : public Converter, public AthMessaging
   bool m_isCalibration;
 };
 
-#endif
+#endif // BYTESTREAMCNVSVC_EVENTINFOBYTESTREAMAUXCNV_H

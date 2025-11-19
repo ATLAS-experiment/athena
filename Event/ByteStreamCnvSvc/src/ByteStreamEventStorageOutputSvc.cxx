@@ -263,12 +263,9 @@ ByteStreamEventStorageOutputSvc::io_reinit() {
     std::string &fname = outputFile;
     if (!m_ioMgr->io_contains(this, fname)) {
       ATH_MSG_ERROR("IoComponentMgr does not know about [" << fname << "] !");
-      return(StatusCode::FAILURE);
+      return StatusCode::FAILURE;
     }
-    if (!m_ioMgr->io_retrieve(this, fname).isSuccess()) {
-      ATH_MSG_FATAL("Could not retrieve new value for [" << fname << "] !");
-      return(StatusCode::FAILURE);
-    }
+    ATH_CHECK(m_ioMgr->io_retrieve(this, fname));
     // all good... copy over.
     // modify directory
     m_inputDir.setValue(outputFile.substr(0, outputFile.find_last_of("/")));
