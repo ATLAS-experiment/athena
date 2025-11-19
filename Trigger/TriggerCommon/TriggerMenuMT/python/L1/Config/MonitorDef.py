@@ -399,8 +399,6 @@ class MonitorDef:
                     #
                     "L1_MBTS_2_VZDC_A_ZDC_C_VjTE200_GAP_A", "L1_MBTS_2_1ZDC_NZDC_VjTE200_GAP_A",
                     "L1_MBTS_2_ZDC_A_VZDC_C_VjTE200_GAP_C", "L1_MBTS_2_1ZDC_NZDC_VjTE200_GAP_C",
-                    "L1_MBTS_1_VZDC_A_ZDC_C_jTE3_VjTE200", "L1_MBTS_1_ZDC_A_VZDC_C_jTE3_VjTE200",
-                    "L1_MBTS_1_1ZDC_NZDC_jTE3_VjTE200",
                     "L1_MBTS_1_VZDC_A_ZDC_C_jTE3_VjTE200_GAP_A", "L1_MBTS_1_1ZDC_NZDC_jTE3_VjTE200_GAP_A",
                     "L1_MBTS_1_ZDC_A_VZDC_C_jTE3_VjTE200_GAP_C", "L1_MBTS_1_1ZDC_NZDC_jTE3_VjTE200_GAP_C",
                     #
@@ -408,7 +406,7 @@ class MonitorDef:
                     "L1_ZDC_XOR_VjTE200",
                     "L1_VZDC_A_VZDC_C_jTE10_VjTE200", "L1_ZDC_XOR_jTE10_VjTE200",
                     "L1_1ZDC_NZDC_jTE10_VjTE200",
-                    "L1_TRT_VZDC_A_VZDC_C_jTE5_VjTE200", "L1_TRT_ZDC_XOR_jTE5_VjTE200",
+                    "L1_TRT_ZDC_XOR_jTE5_VjTE200",
                     #
                     # "L1_ZDC_XOR_jJ5_VjTE200", "L1_VZDC_A_VZDC_C_jJ5_VjTE200", "L1_1ZDC_NZDC_jJ5_VjTE200",
                     "L1_1ZDC_NZDC_jJ10_VjTE200", "L1_ZDC_XOR_jJ10_VjTE200", "L1_VZDC_A_VZDC_C_jJ10_VjTE200",
@@ -498,6 +496,20 @@ class MonitorDef:
 
                     'L1_MATCHA_eEM2_VjTE200_EMPTY',
                     'L1_MATCHA_eTAU2_VjTE200_EMPTY',
+
+                    'L1_23INVM-27DPHI-2eTAU1_VjTE200',
+
+                    'L1_CALMTEA_DPHI-2eTAU1_VjTE200',
+                    'L1_CALMTEA_DPHI-2eTAU1_VjTE200_EMPTY',
+
+                    'L1_MATCHA_DPHI-2eTAU1_VjTE200',
+                    'L1_MATCHA_DPHI-2eTAU1_VjTE200_EMPTY',
+
+                    'L1_CALMTEA_23INVM-27DPHI-2eTAU1_VjTE200',
+                    'L1_CALMTEA_23INVM-27DPHI-2eTAU1_VjTE200_EMPTY',
+
+                    'L1_MATCHA_23INVM-27DPHI-2eTAU1_VjTE200',
+                    'L1_MATCHA_23INVM-27DPHI-2eTAU1_VjTE200_EMPTY',
                 ])
 
                 # HI HLT menu: Add triggers that are not in the MC menu
