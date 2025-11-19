@@ -20,7 +20,6 @@ StatusCode TauCellVariables::execute(xAOD::TauJet& pTau) const {
   double sumCellET = 0.;
   double sumCellET01 = 0;
   double sumCellET12 = 0.;
-  double sumStripET = 0.;
   double sumEMCellET = 0.;
   double sumHadCellET = 0.;
   double EMRadius = 0.;
@@ -85,11 +84,6 @@ StatusCode TauCellVariables::execute(xAOD::TauJet& pTau) const {
         if (isEMLayer(calo)) {
           EMRadius += dR*cellET;
           sumEMCellET += cellET;
-
-          // Strip layer: EMB1 and EME1 
-          if (isStripLayer(calo) && (std::abs(cellEta) < 2.5)) {
-            sumStripET += cellET;
-          } 
         } // end of EM cells
         else { 
             HadRadius += dR*cellET;
