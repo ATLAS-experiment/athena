@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigJiveXML/MuonROIRetriever.h"
@@ -67,7 +67,8 @@ namespace JiveXML {
     }
 
     DataMap myDataMap;
-    myDataMap["phi"] = phi;
+    const auto nPhi = phi.size();
+    myDataMap["phi"] = std::move(phi);
     myDataMap["eta"] = eta;
     myDataMap["roiWord"] = roiWord;
     myDataMap["thrNumber"] = thrNumber;
@@ -75,7 +76,7 @@ namespace JiveXML {
     myDataMap["thrValue"] = thrValue;
     myDataMap["energy"] = energy;
 
-    if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG) << dataTypeName() << ": "<< phi.size() << endmsg;
+    if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG) << dataTypeName() << ": "<< nPhi << endmsg;
 
     //forward data to formating tool
     return FormatTool->AddToEvent(dataTypeName(), m_sgKey, &myDataMap);

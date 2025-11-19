@@ -5,7 +5,7 @@
  **     @author  mark sutton
  **     @date    Fri 11 Jan 2019 07:41:26 CET 
  **
- **     Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+ **     Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
  **/
 
 
@@ -74,7 +74,7 @@ int main(int argc, char** argv ) {
       else            return usage( std::cout, argc, argv );
     }
 
-    else args.push_back(arg);
+    else args.push_back(std::move(arg));
   } 
 
   std::vector<std::string> labels;
@@ -183,9 +183,9 @@ void descend( TDirectory* d, int level, int maxdepth, const std::vector<std::str
           
           if ( th && std::string(th->GetName()) == histogram ) { 
  
-            double d = hsum( th );
+            double ddd = hsum( th );
 	    
-	    std::cout << "\t" << d << std::endl;
+	    std::cout << "\t" << ddd << std::endl;
 
 	    displayed = false;
 
