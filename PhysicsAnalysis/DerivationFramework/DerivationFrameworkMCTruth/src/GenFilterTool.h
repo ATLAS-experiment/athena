@@ -69,7 +69,7 @@ namespace DerivationFramework {
     Gaudi::Property<float> m_MinLepPt{this,"MinLeptonPt", 25.*Gaudi::Units::GeV};  //!< Min pT for the truth leptons
     Gaudi::Property<float> m_MaxLepEta{this, "MaxLeptonEta", 2.5}; //!< Max eta for the truth leptons
 
-    PublicToolHandle<IMCTruthClassifier> m_classif{this, "TruthClassifier", "MCTruthClassifier/DFCommonTruthClassifier"};
+    PublicToolHandle<IMCTruthClassifier> m_classif{this, "TruthClassifier", ""};
   }; /// class
 
 } /// namespace

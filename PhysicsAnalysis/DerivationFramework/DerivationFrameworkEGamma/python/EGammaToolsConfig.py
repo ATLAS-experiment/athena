@@ -79,9 +79,9 @@ def EGElectronAmbiguityToolCfg(flags, name, **kwargs):
 def BkgElectronClassificationCfg(flags, name, **kwargs):
     """Configure the background electron classification tool"""
     acc = ComponentAccumulator()
-    from MCTruthClassifier.MCTruthClassifierConfig import MCTruthClassifierCfg
+    from MCTruthClassifier.MCTruthClassifierConfig import DFCommonMCTruthClassifierCfg
     kwargs.setdefault("MCTruthClassifierTool", acc.popToolsAndMerge(
-        MCTruthClassifierCfg(flags, name="BkgElectronMCTruthClassifier", ParticleCaloExtensionTool="")))
+        DFCommonMCTruthClassifierCfg(flags)))
     acc.setPrivateTools(CompFactory.DerivationFramework.BkgElectronClassification(name, **kwargs))
     return acc
 
