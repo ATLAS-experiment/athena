@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigConfJobOptData/JobOption.h"
@@ -323,7 +323,7 @@ namespace {
       // the last entries in the loop
       if(s!="") {
          s.erase(s.end()-1); // erase last comma
-         split.push_back( s );
+         split.push_back( std::move(s) );
       }
       
       return split;

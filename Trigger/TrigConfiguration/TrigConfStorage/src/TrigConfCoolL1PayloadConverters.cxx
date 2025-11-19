@@ -499,7 +499,7 @@ TrigConfCoolL1PayloadConverters::createLvl1Threshold( const coral::AttributeList
    int    cableEnd       = lexical_cast<int,std::string>(cableDefV[4]);
    thr->setCableName     ( cableName );
    thr->setCableCtpin    ( cableCtpin);
-   string ctpin(cableCtpin);
+   string ctpin(std::move(cableCtpin));
    boost::to_lower(ctpin);
    if( ctpin == "ctpcore" ) {
       thr->setInput( "ctpcore" );
