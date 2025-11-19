@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file PixelConditionsAlgorithms/PixelChargeLUTCalibCondAlg.h
@@ -46,7 +46,7 @@ class PixelChargeLUTCalibCondAlg : public AthReentrantAlgorithm {
     {this, "PixelModuleData", "PixelModuleData", "Pixel module data"};
 
     SG::ReadCondHandleKey<CondAttrListCollection> m_readKey
-    {this, "ReadKey", "/PIXEL/ChargeCalibration", "Iput charge calibration folder"};
+    {this, "ReadKey", "/PIXEL/ChargeCalibration", "Input charge calibration folder"};
 
     SG::WriteCondHandleKey<PixelChargeCalibCondData> m_writeKey
     {this, "WriteKey", "PixelChargeCalibCondData", "Output charge caliblation data"};
