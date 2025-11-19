@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TBPlaneTrackingAlgo.h"
@@ -274,6 +274,7 @@ bool TBPlaneTrackingAlgo::fitHits(const std::vector<double> & v_u,
     return false;
   }
 
+  // coverity[divide_by_zero]
   const double inv_denom = 1. / denom;
   a1 = (m_su*m_sww - m_sw*m_suw) * inv_denom;
   a2 = (m_s*m_suw - m_su*m_sw) * inv_denom;
