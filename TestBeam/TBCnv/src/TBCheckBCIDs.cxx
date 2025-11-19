@@ -1,7 +1,7 @@
 //Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -70,10 +70,10 @@ StatusCode TBCheckBCIDs::execute()
   
   //Get ROB fragements from the raw event. 
   const size_t MAX_ROBFRAGMENTS = 2048*1024;
-  OFFLINE_FRAGMENTS_NAMESPACE::PointerType robF[MAX_ROBFRAGMENTS];
+  std::vector<OFFLINE_FRAGMENTS_NAMESPACE::PointerType> robF(MAX_ROBFRAGMENTS);
   OFFLINE_FRAGMENTS_NAMESPACE::PointerType rePointer;
   re->start(rePointer);
-  size_t robcount = re->children(robF,MAX_ROBFRAGMENTS);
+  size_t robcount = re->children(robF.data(),MAX_ROBFRAGMENTS);
   if (robcount == MAX_ROBFRAGMENTS)
     {
       ATH_MSG_FATAL( "ROB buffer overflow"  );
