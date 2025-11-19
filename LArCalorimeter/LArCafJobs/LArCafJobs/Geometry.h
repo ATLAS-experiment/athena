@@ -25,7 +25,7 @@ namespace LArSamples {
    
     public:
             
-      static TString feedThroughName(PartitionId part, short feedThrough);
+      static const char* feedThroughName(PartitionId part, short feedThrough);
       static TH2D* partitionHist(PartitionId part, const TString& name, const TString& title);
       static TProfile2D* partitionProfileHist(PartitionId part, const TString& name, const TString& title);
       static bool setBinLabels(TH2* hist, PartitionId part);
