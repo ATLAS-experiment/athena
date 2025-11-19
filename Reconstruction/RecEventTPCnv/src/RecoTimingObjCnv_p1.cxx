@@ -1,9 +1,10 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 
 #include "RecEventTPCnv/RecoTimingObjCnv_p1.h"
+#include "CxxUtils/read_athena_statm.h"
 
 #include <malloc.h>
 
@@ -78,17 +79,10 @@ void RecoTimingObjCnv_p1::transToPers( const RecoTimingObj* trans,
 	{
 	  if(m_pagesize==0)
 	    m_pagesize=sysconf(_SC_PAGESIZE);
-	  unsigned long a0(-1);
-	  unsigned long a1(-1);
-	  unsigned long a2(-1);
-	  FILE *proc = fopen("/proc/self/statm","r");
-	  if (proc) {
-	    fscanf(proc, "%80lu %80lu %80lu", &a0, &a1, &a2);
-            fclose(proc);
-          }
-	  f0=float(a0*m_pagesize)-f0;
-	  f1=float(a1*m_pagesize)-f1;
-	  f2=float(a2*m_pagesize)-f2;
+          athena_statm statm = read_athena_statm();
+	  f0=float(statm.vm_pages*m_pagesize)-f0;
+	  f1=float(statm.rss_pages*m_pagesize)-f1;
+	  f2=float(statm.shr_pages*m_pagesize)-f2;
 	}
       pers->timings.push_back( f0 );
       if ( ! pers->m_isTimings )
