@@ -496,13 +496,17 @@ bool DigitMonitor::residualParams(int lwb, int upb, CovMatrix& k, TVectorD& mean
     }
   }
 
-  sumA /= n;
+  if (n > 0) {
+    sumA /= n;
+  }
   k.ResizeTo(lwb, upb);
   means.ResizeTo(lwb, upb);
   
   for (int i1 = lwb; i1 <= upb; i1++) {
-    sum(i1)   = sum(i1)/n;    
-    sumN(i1)  = sumN(i1)/n;
+    if (n > 0) {
+      sum(i1)   = sum(i1)/n;
+      sumN(i1)  = sumN(i1)/n;
+    }
     means(i1) = sum(i1);
   }
 
