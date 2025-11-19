@@ -2,8 +2,8 @@
   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef EVENTSELECTORBYTESTREAM_H
-#define EVENTSELECTORBYTESTREAM_H
+#ifndef BYTESTREAMCNVSVC_EVENTSELECTORBYTESTREAM_H
+#define BYTESTREAMCNVSVC_EVENTSELECTORBYTESTREAM_H
 
 /**  @class  EventSelectorByteStream
      @brief  concrete implementation of IEvtSelector for ByteStream
@@ -58,18 +58,18 @@ public:
    // IEventSelector
    /// @brief create context
    virtual StatusCode createContext(Context*& it) const override;
-   /// @param it [IN/OUT] current event context is interated to next event.
+   /// @param it [IN/OUT] current event context is iterated to next event.
    virtual StatusCode next(Context& it) const override;
-   /// @param it [IN/OUT] current event context is interated to next event.
+   /// @param it [IN/OUT] current event context is iterated to next event.
    /// @param jump [IN] number of events to jump (currently not supported).
    virtual StatusCode next(Context& it, int jump) const override;
-   /// @param it [IN/OUT] current event context is interated to previous event.
+   /// @param it [IN/OUT] current event context is iterated to previous event.
    virtual StatusCode previous(Context& it) const override;
-   /// @param it [IN/OUT] current event context is interated to previous event.
+   /// @param it [IN/OUT] current event context is iterated to previous event.
    /// @param jump [IN] number of events to jump (currently not supported).
    virtual StatusCode previous(Context& it, int jump) const override;
 
-   /// @param it [IN/OUT] current event context is interated to last event.
+   /// @param it [IN/OUT] current event context is iterated to last event.
    virtual StatusCode last(Context& it) const override;
    /// @param it [IN/OUT] current event context is rewound to first event.
    virtual StatusCode rewind(Context& it) const override;
@@ -123,8 +123,8 @@ public:
    virtual StatusCode io_reinit() override;
 
 protected:
-   typedef std::recursive_mutex mutex_t;
-   typedef std::lock_guard<mutex_t> lock_t;
+   using mutex_t = std::recursive_mutex;
+   using lock_t = std::lock_guard<mutex_t>;
 
    //-------------------------------------------------
    // ISecondaryEventSelector
@@ -197,7 +197,7 @@ private: // properties
    bool m_beginFileFired{};
 
    /// HelperTools, vector of names of AlgTools that are executed by the EventSelector
-   ToolHandleArray<IAthenaSelectorTool> m_helperTools{this};
+   ToolHandleArray<IAthenaSelectorTool> m_helperTools{this, "HelperTools", {}, "Helper tools executed by EventSelector"};
    ToolHandle<IAthenaSelectorTool>      m_counterTool{this, "CounterTool", "", ""};
 
    /// The following are included for compatibility with McEventSelector and are not really used.
@@ -215,4 +215,4 @@ private: // properties
    Gaudi::Property<uint32_t> m_timeStampInterval{this, "TimeStampInterval", 0, ""};
 };
 
-#endif
+#endif // BYTESTREAMCNVSVC_EVENTSELECTORBYTESTREAM_H

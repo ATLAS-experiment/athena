@@ -2,8 +2,8 @@
   Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef EVENTCONTEXTBYTESTREAM_H
-#define EVENTCONTEXTBYTESTREAM_H
+#ifndef BYTESTREAMCNVSVC_EVENTCONTEXTBYTESTREAM_H
+#define BYTESTREAMCNVSVC_EVENTCONTEXTBYTESTREAM_H
 
 /** @file EventContextByteStream.h
  *  @brief This file contains the class definition for the EventContextByteStream class.
@@ -35,4 +35,4 @@ private:
    const IEvtSelector* m_evtSelector;
 };
 
-#endif
+#endif // BYTESTREAMCNVSVC_EVENTCONTEXTBYTESTREAM_H

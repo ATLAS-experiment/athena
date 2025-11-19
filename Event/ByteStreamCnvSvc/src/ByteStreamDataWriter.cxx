@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ByteStreamDataWriter.h"
@@ -48,7 +48,7 @@ public:
                                 EventStorage::CompressionType compression,
                                 unsigned int compLevel);
 
-    virtual ~ByteStreamDataWriterCurrent() {}
+    virtual ~ByteStreamDataWriterCurrent() = default;
 
     // abstract class cannot be copied
     ByteStreamDataWriterCurrent(const ByteStreamDataWriterCurrent&) = delete;

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //===================================================================
@@ -26,7 +26,7 @@ StatusCode ByteStreamRDP_OutputSvc::initialize() {
    // Retrieve ROBDataProviderSvc
    ATH_CHECK( m_robProvider.retrieve() );
 
-   return(StatusCode::SUCCESS);
+   return StatusCode::SUCCESS;
 }
 
 // Receive the next event without explicit context

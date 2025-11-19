@@ -2,8 +2,8 @@
   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef BYTESTREAMOUTPUTSTREAMCOPYTOOL_H
-#define BYTESTREAMOUTPUTSTREAMCOPYTOOL_H
+#ifndef BYTESTREAMCNVSVC_BYTESTREAMOUTPUTSTREAMCOPYTOOL_H
+#define BYTESTREAMCNVSVC_BYTESTREAMOUTPUTSTREAMCOPYTOOL_H
 /**
  * @file ByteStreamOutputStreamCopyTool.h
  *
@@ -79,4 +79,4 @@ private:
    ServiceHandle<IByteStreamInputSvc> m_inputSvc{this, "ByteStreamInputSvc", "ByteStreamEventStorageInputSvc"};
 };
 
-#endif
+#endif // BYTESTREAMCNVSVC_BYTESTREAMOUTPUTSTREAMCOPYTOOL_H
