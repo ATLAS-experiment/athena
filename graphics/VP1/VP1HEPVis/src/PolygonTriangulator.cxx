@@ -2024,7 +2024,7 @@ void  PolygonTriangulator::Polygon::triangulateMonotone(internal_poltrig::Monopo
 		  v[1]=stack2Point.id;
 		  v[2]=stack1Point.id;
 		  sort(v.begin(),v.end());//TK
-		  m_triangles.push_back(v);
+		  m_triangles.push_back(std::move(v));
 		  spoint.pop();
 	    	} else break;
 	    }
@@ -2049,7 +2049,7 @@ void  PolygonTriangulator::Polygon::triangulateMonotone(internal_poltrig::Monopo
       v[1]=topPoint.id;
       v[2]=top2Point.id;
       sort(v.begin(),v.end());//TK
-      m_triangles.push_back(v);
+      m_triangles.push_back(std::move(v));
     }
 }
 
