@@ -46,7 +46,7 @@ void LArFlatFromFile::singleFloatFlat(const char* blobName, const std::string& i
   std::string line;
   std::vector< std::vector<float> >  values(nGain, std::vector<float>(m_hashMax,1.0f));
   unsigned id;
-  unsigned hash;
+  int hash;
   float value;
   while (std::getline(myfile, line)) {
       std::stringstream st(line);
@@ -58,12 +58,16 @@ void LArFlatFromFile::singleFloatFlat(const char* blobName, const std::string& i
       }
       const HWIdentifier chid(id);
       if (value < 0) {
-        errIfConnected(chid,static_cast<int>(hash),blobName);
+        errIfConnected(chid,hash,blobName);
         value=1.0; //Default vaue is 1.0, since these are multiplicative constants
         ++nDefault;
       } 
-      if (hash >= nGain) {
-        errIfConnected(chid,static_cast<int>(hash),blobName," Wrong Gain !!!");
+      if (hash < 0) {
+        errIfConnected(chid,hash,blobName," Wrong hash !!!");
+        hash=0;
+      }
+      else if (hash >= static_cast<int>(nGain)) {
+        errIfConnected(chid,hash,blobName," Wrong Gain !!!");
         hash=0; 
       }
 
