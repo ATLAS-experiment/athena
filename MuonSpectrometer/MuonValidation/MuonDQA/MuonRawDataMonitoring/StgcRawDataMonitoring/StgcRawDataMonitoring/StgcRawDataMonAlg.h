@@ -66,7 +66,7 @@ class sTgcRawDataMonAlg: public AthMonitorAlgorithm {
   ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc {this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
   ToolHandle<Trk::IResidualPullCalculator> m_residualPullCalculator {this, "ResPullCalc", "Trk::ResidualPullCalculator/ResidualPullCalculator"};
   
-  void fillsTgcOccupancyHistograms(const Muon::sTgcPrepDataContainer*, const MuonGM::MuonDetectorManager*) const;
+  void fillsTgcOccupancyHistograms(const Muon::sTgcPrepDataContainer*, const MuonGM::MuonDetectorManager*, const int lb) const;
   void fillsTgcLumiblockHistograms(const Muon::sTgcPrepDataContainer*, const int lb) const;
   void fillsTgcClusterFromTrackHistograms(const xAOD::TrackParticleContainer*) const;  
   void fillsTgcPadTriggerDataHistograms(const xAOD::MuonContainer*, const Muon::NSW_PadTriggerDataContainer*, const int lb) const;
