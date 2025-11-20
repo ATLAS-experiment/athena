@@ -11,7 +11,7 @@ from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
 from xAODEventInfoCnv.xAODEventInfoCnvConfig import EventInfoOverlayCfg
 
 from DigitizationConfig.DigitizationParametersConfig import writeDigitizationParameters
-from OverlayConfiguration.OverlayMetadata import overlayMetadataCheck
+from OverlayConfiguration.OverlayMetadata import overlayMetadataCheck, writeOverlayDigitizationMetadata
 from OverlayConfiguration.OverlayTestHelpers import overlayTestFlags, postprocessAndLockFlags, printAndRun, CommonTestArgumentParser
 
 # Argument parsing
@@ -23,12 +23,20 @@ flags = initConfigFlags()
 overlayTestFlags(flags, args)
 overlayMetadataCheck(flags)
 postprocessAndLockFlags(flags, args)
+
+# Create DigitParams.db if pileup metadata exists (sqlite mode)
+if hasattr(flags, '_Overlay_pileupDigitizationMetadata'):
+    writeOverlayDigitizationMetadata(flags, flags._Overlay_pileupDigitizationMetadata)
+
 flags.initAll()
 flags.dump()
 # Construct our accumulator to run
 acc = MainServicesCfg(flags)
 acc.merge(PoolReadCfg(flags))
-acc.merge(writeDigitizationParameters(flags))
+
+# Only read from DigitParams.db if we created it
+if hasattr(flags, '_Overlay_pileupDigitizationMetadata'):
+    acc.merge(writeDigitizationParameters(flags))
 
 # Add event info overlay for minimal output
 acc.merge(EventInfoOverlayCfg(flags))

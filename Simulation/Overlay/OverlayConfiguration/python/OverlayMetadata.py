@@ -206,7 +206,8 @@ def overlayMetadataCheck(flags):
         logger.info("Completed all checks against Presampled pile-up Simulation metadata.")
 
         if pileupDigitizationMetadata:
-            writeOverlayDigitizationMetadata(flags,pileupDigitizationMetadata)
+            # Store metadata for later writing in OverlayMainContentCfg
+            flags._Overlay_pileupDigitizationMetadata = pileupDigitizationMetadata
 
 
 def fastChainOverlayMetadataCheck(flags):
@@ -228,22 +229,27 @@ def fastChainOverlayMetadataCheck(flags):
         logger.info("Completed all checks against Presampled pile-up Simulation metadata.")
 
         if pileupDigitizationMetadata:
-            writeOverlayDigitizationMetadata(flags,pileupDigitizationMetadata)
+            # Store metadata for later writing in OverlayMainContentCfg
+            flags._Overlay_pileupDigitizationMetadata = pileupDigitizationMetadata
 
 
 def writeOverlayDigitizationMetadata(flags,pileupDict):
-    from IOVDbMetaDataTools import ParameterDbFiller
-    dbFiller = ParameterDbFiller.ParameterDbFiller()
+    """Write overlay digitization metadata to intermediate sqlite file (DigitParams.db)"""
     runNumber = flags.Input.RunNumbers[0]
     runNumberEnd = flags.Input.RunNumbers[-1]
     if runNumberEnd == runNumber:
         runNumberEnd += 1
-    logger.debug('ParameterDbFiller BeginRun = %s', str(runNumber) )
-    dbFiller.setBeginRun(runNumber)
-    logger.debug('ParameterDbFiller EndRun   = %s', str(runNumberEnd) )
-    dbFiller.setEndRun(runNumberEnd)
+    logger.debug('Overlay BeginRun = %s', str(runNumber) )
+    logger.debug('Overlay EndRun   = %s', str(runNumberEnd) )
 
     logger.info('Filling Digitization MetaData')
+    logger.info('Writing overlay digitization parameters to intermediate sqlite file (DigitParams.db)')
+
+    # Write to DigitParams.db intermediate file
+    from IOVDbMetaDataTools import ParameterDbFiller
+    dbFiller = ParameterDbFiller.ParameterDbFiller()
+    dbFiller.setBeginRun(runNumber)
+    dbFiller.setEndRun(runNumberEnd)
 
     # Copy over pileup dictionary
     for key in pileupDict:
