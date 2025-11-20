@@ -8,8 +8,6 @@
 ***************************************************************************/
 
 
-#include "GaudiKernel/MsgStream.h"
-
 #include "InDetIdentifier/PLR_ID.h"
 #include "IdDict/IdDictDictionary.h"
 #include "IdDict/IdDictField.h"
@@ -35,14 +33,13 @@ PLR_ID::PLR_ID(): PixelID(){
 
 int
 PLR_ID::initialize_from_dictionary(const IdDictMgr& dict_mgr) {
-  MsgStream log(m_msgSvc, "PLR_ID");
-  log << MSG::INFO << "Initialize from dictionary" << endmsg;
+  ATH_MSG_INFO("Initialize from dictionary");
   // Check whether this helper should be reinitialized
   if (!reinitialize(dict_mgr)) {
-    log << MSG::INFO << "Request to reinitialize not satisfied - tags have not changed" << endmsg;
+    ATH_MSG_INFO("Request to reinitialize not satisfied - tags have not changed");
     return(0);
   } else {
-    log << MSG::DEBUG << "(Re)initialize" << endmsg;
+    ATH_MSG_DEBUG("(Re)initialize");
   }
 
   // init base object
@@ -53,8 +50,7 @@ PLR_ID::initialize_from_dictionary(const IdDictMgr& dict_mgr) {
 
   m_dict = dict_mgr.find_dictionary("InnerDetector");
   if (!m_dict) {
-    log << MSG::FATAL << " PLR_ID::initialize_from_dict - cannot access InnerDetector dictionary "
-                      << endmsg;
+    ATH_MSG_FATAL("PLR_ID::initialize_from_dict - cannot access InnerDetector dictionary");
     return(1);
   }
 
@@ -66,8 +62,7 @@ PLR_ID::initialize_from_dictionary(const IdDictMgr& dict_mgr) {
   // save indet id
   m_pixel_id = lumi();
   if (!is_lumi(m_pixel_id)) {
-    log << MSG::FATAL << " PLR_ID::initialize_from_dict - cannot get plr id dictionary "
-                      << endmsg;
+    ATH_MSG_FATAL("PLR_ID::initialize_from_dict - cannot get plr id dictionary");
     return(1);
   }
 
@@ -78,18 +73,13 @@ PLR_ID::initialize_from_dictionary(const IdDictMgr& dict_mgr) {
   m_barrel_field.clear();
   //  barrel
   if (m_dict->get_label_value("barrel_endcap", "barrel", barrel_value)) {
-    log << MSG::FATAL << "Could not get value for label 'barrel' of field 'barrel_endcap' in dictionary "
-                      << m_dict->name()
-                      << endmsg;
+    ATH_MSG_FATAL("Could not get value for label 'barrel' of field 'barrel_endcap' in dictionary " << m_dict->name());
     
     return(1);
   }
   m_barrel_field.add_value(barrel_value);
   m_barrel_field.add_value(barrel_value);
-  log << MSG::DEBUG << " PLR_ID::initialize_from_dict "
-                    << "Set barrel field values: "
-                    << (std::string) m_barrel_field
-                    << endmsg;
+  ATH_MSG_DEBUG("PLR_ID::initialize_from_dict Set barrel field values: " << (std::string)m_barrel_field);
  
 
   //DBM
@@ -104,10 +94,7 @@ PLR_ID::initialize_from_dictionary(const IdDictMgr& dict_mgr) {
   m_dbm_field.clear();
   if (m_dict->get_label_value("barrel_endcap", "negative_dbm", dbm_value)) {
     if (m_dict->version().find("DBM") != std::string::npos) {
-      log << MSG::WARNING <<
-        "Could not get value for label 'negative_dbm' of field 'barrel_endcap' in dictionary "
-                        << m_dict->name()
-                        << endmsg;
+      ATH_MSG_WARNING("Could not get value for label 'negative_dbm' of field 'barrel_endcap' in dictionary " << m_dict->name());
      
     }
     //return (1);
@@ -117,10 +104,7 @@ PLR_ID::initialize_from_dictionary(const IdDictMgr& dict_mgr) {
   }
   if (m_dict->get_label_value("barrel_endcap", "positive_dbm", dbm_value)) {
     if (m_dict->version().find("DBM") != std::string::npos) {
-      log << MSG::WARNING <<
-        "Could not get value for label 'positive_dbm' of field 'barrel_endcap' in dictionary "
-                        << m_dict->name()
-                        << endmsg;
+      ATH_MSG_WARNING("Could not get value for label 'positive_dbm' of field 'barrel_endcap' in dictionary " << m_dict->name());
      
     }
     //return (1);
@@ -128,10 +112,7 @@ PLR_ID::initialize_from_dictionary(const IdDictMgr& dict_mgr) {
   } else {
     m_dbm_field.add_value(dbm_value);
   }
-  log << MSG::DEBUG << " PLR_ID::initialize_from_dict "
-                    << "Set dbm field values: "
-                    << (std::string) m_dbm_field
-                    << endmsg;
+  ATH_MSG_DEBUG("PLR_ID::initialize_from_dict Set dbm field values: " << (std::string)m_dbm_field);
   
   //
   // Build multirange for the valid set of identifiers
@@ -142,9 +123,7 @@ PLR_ID::initialize_from_dictionary(const IdDictMgr& dict_mgr) {
   const IdDictDictionary* atlasDict = dict_mgr.find_dictionary("ATLAS");
   int inDetField = -1;
   if (atlasDict->get_label_value("subdet", "InnerDetector", inDetField)) {
-    log << MSG::FATAL << "Could not get value for label 'InnerDetector' of field 'subdet' in dictionary "
-                      << atlasDict->name()
-                      << endmsg;
+    ATH_MSG_FATAL("Could not get value for label 'InnerDetector' of field 'subdet' in dictionary " << atlasDict->name());
    
     return(1);
   }
@@ -152,9 +131,7 @@ PLR_ID::initialize_from_dictionary(const IdDictMgr& dict_mgr) {
   // Find value for the field LuminosityDetectors
   int lumiField = -1;
   if (m_dict->get_label_value("part", "LuminosityDetectors", lumiField)) {
-    log << MSG::FATAL << "Could not get value for label 'LuminosityDetectors' of field 'part' in dictionary "
-                      << m_dict->name()
-                      << endmsg;
+    ATH_MSG_FATAL("Could not get value for label 'LuminosityDetectors' of field 'part' in dictionary " << m_dict->name());
    
     return(1);
   }
@@ -162,19 +139,13 @@ PLR_ID::initialize_from_dictionary(const IdDictMgr& dict_mgr) {
   // Find value for the field PLR
   int plrField = -1;
   if (m_dict->get_label_value("PLR_or_BCM", "PLR", plrField)) {
-    log << MSG::FATAL << "Could not get value for label 'PLR' of field 'PLR_or_BCM' in dictionary "
-                      << m_dict->name()
-                      << endmsg;
+    ATH_MSG_FATAL("Could not get value for label 'PLR' of field 'PLR_or_BCM' in dictionary " << m_dict->name());
     
     return(1);
   }
 
-  log << MSG::DEBUG << " PLR_ID::initialize_from_dict "
-                    << "Found field values: InDet/LuminosityDetectors/PLR "
-                    << inDetField << "/"
-                    << lumiField << "/"
-                    << plrField
-                    << endmsg;
+  ATH_MSG_DEBUG("PLR_ID::initialize_from_dict Found field values: InDet/LuminosityDetectors/PLR "
+                << inDetField << "/" << lumiField << "/" << plrField);
  
 
   // Set up id for region and range prefix
@@ -200,14 +171,9 @@ PLR_ID::initialize_from_dictionary(const IdDictMgr& dict_mgr) {
 
   // Setup hash tables for finding neighbors
   if (init_neighbors()) return(1);
-  log << MSG::DEBUG << " PLR_ID::initialize_from_dict "
-      << endmsg;
-  log << MSG::DEBUG
-      << "Wafer range -> " << (std::string) m_full_wafer_range
-      << endmsg;
-  log << MSG::DEBUG
-      << "Pixel range -> " << (std::string) m_full_pixel_range
-      << endmsg;
+  ATH_MSG_DEBUG("PLR_ID::initialize_from_dict");
+  ATH_MSG_DEBUG("Wafer range -> " << (std::string)m_full_wafer_range);
+  ATH_MSG_DEBUG("Pixel range -> " << (std::string)m_full_pixel_range);
   
   return 0;
 }
@@ -215,10 +181,9 @@ PLR_ID::initialize_from_dictionary(const IdDictMgr& dict_mgr) {
 
 int
 PLR_ID::initLevelsFromDict(void) {
-  MsgStream log(m_msgSvc, "PLR_ID");
 
   if (!m_dict) {
-    log << MSG::FATAL << " PLR_ID::initLevelsFromDict - dictionary NOT initialized " << endmsg;
+    ATH_MSG_FATAL("PLR_ID::initLevelsFromDict - dictionary NOT initialized");
     return(1);
   }
 
@@ -239,9 +204,7 @@ PLR_ID::initLevelsFromDict(void) {
   ExpandedIdentifier id;
   id << indet_field_value() << lumi_field_value() << plr_field_value();
   if (m_dict->find_region(id, m_pixel_region_index)) {
-    log << MSG::FATAL << "PLR_ID::initLevelsFromDict - unable to find pixel region index: id, reg "
-                      << (std::string) id << " " << m_pixel_region_index
-                      << endmsg;
+    ATH_MSG_FATAL("PLR_ID::initLevelsFromDict - unable to find pixel region index: id, reg " << (std::string)id << " " << m_pixel_region_index);
    
     return(1);
   }
@@ -251,8 +214,7 @@ PLR_ID::initLevelsFromDict(void) {
   if (field) {
     m_INDET_INDEX = field->index();
   } else {
-    log << MSG::FATAL << "PLR_ID::initLevelsFromDict - unable to find 'subdet' field "
-                      << endmsg;
+    ATH_MSG_FATAL("PLR_ID::initLevelsFromDict - unable to find 'subdet' field");
    
     return(1);
   }
@@ -261,7 +223,7 @@ PLR_ID::initLevelsFromDict(void) {
   if (field) {
     m_LUMI_INDEX = field->index();
   } else {
-    log << MSG::FATAL << "PLR_ID::initLevelsFromDict - unable to find 'part' field " << endmsg;
+    ATH_MSG_FATAL("PLR_ID::initLevelsFromDict - unable to find 'part' field");
     return(1);
   }
 
@@ -269,7 +231,7 @@ PLR_ID::initLevelsFromDict(void) {
   if (field) {
     m_PLR_INDEX = field->index();
   } else {
-    log << MSG::FATAL << "PLR_ID::initLevelsFromDict - unable to find 'PLR_or_BCM' field " << endmsg;
+    ATH_MSG_FATAL("PLR_ID::initLevelsFromDict - unable to find 'PLR_or_BCM' field");
     return(1);
   }
 
@@ -277,10 +239,10 @@ PLR_ID::initLevelsFromDict(void) {
   if (field) {
     m_BARREL_EC_INDEX = 3; //this will clash with another value
     if (m_BARREL_EC_INDEX != field->index()){
-      log << MSG::INFO<<"Hardcoded value 3, field index "<< field->index() << endmsg;
+      ATH_MSG_INFO("Hardcoded value 3, field index " << field->index());
     }
   } else {
-    log << MSG::FATAL << "PLR_ID::initLevelsFromDict - unable to find 'barrel_endcap' field " << endmsg;
+    ATH_MSG_FATAL("PLR_ID::initLevelsFromDict - unable to find 'barrel_endcap' field");
     return(1);
   }
 
@@ -288,7 +250,7 @@ PLR_ID::initLevelsFromDict(void) {
   if (field) {
     m_LAYER_DISK_INDEX = 4;
   } else {
-    log << MSG::FATAL << "PLR_ID::initLevelsFromDict - unable to find 'layer' field " << endmsg;
+    ATH_MSG_FATAL("PLR_ID::initLevelsFromDict - unable to find 'layer' field");
     return(1);
   }
 
@@ -296,7 +258,7 @@ PLR_ID::initLevelsFromDict(void) {
   if (field) {
     m_PHI_MODULE_INDEX = 5;
   } else {
-    log << MSG::FATAL << "PLR_ID::initLevelsFromDict - unable to find 'phi_module' field " << endmsg;
+    ATH_MSG_FATAL("PLR_ID::initLevelsFromDict - unable to find 'phi_module' field");
     return(1);
   }
   field = m_dict->find_field("eta_module");
@@ -304,7 +266,7 @@ PLR_ID::initLevelsFromDict(void) {
     
     m_ETA_MODULE_INDEX = 6;
   } else {
-    log << MSG::FATAL << "PLR_ID::initLevelsFromDict - unable to find 'eta_module' field " << endmsg;
+    ATH_MSG_FATAL("PLR_ID::initLevelsFromDict - unable to find 'eta_module' field");
     return(1);
   }
   field = m_dict->find_field("phi_index");
@@ -312,7 +274,7 @@ PLR_ID::initLevelsFromDict(void) {
    
     m_PHI_INDEX_INDEX = 7;
   } else {
-    log << MSG::FATAL << "PLR_ID::initLevelsFromDict - unable to find 'phi_index' field " << endmsg;
+    ATH_MSG_FATAL("PLR_ID::initLevelsFromDict - unable to find 'phi_index' field");
     return(1);
   }
   field = m_dict->find_field("eta_index");
@@ -320,7 +282,7 @@ PLR_ID::initLevelsFromDict(void) {
     
     m_ETA_INDEX_INDEX = 8;
   } else {
-    log << MSG::FATAL << "PLR_ID::initLevelsFromDict - unable to find 'eta_index' field " << endmsg;
+    ATH_MSG_FATAL("PLR_ID::initLevelsFromDict - unable to find 'eta_index' field");
     return(1);
   }
 
@@ -340,21 +302,21 @@ PLR_ID::initLevelsFromDict(void) {
   m_eta_index_impl = region.implementation(m_ETA_INDEX_INDEX);
 
   
-  log << MSG::DEBUG << "decode index and bit fields for each level: " << endmsg;
-  log << MSG::DEBUG << "indet          " << m_indet_impl.show_to_string() << endmsg;
-  log << MSG::DEBUG << "lumi           " << m_lumi_impl.show_to_string() << endmsg;
-  log << MSG::DEBUG << "plr            " << m_plr_impl.show_to_string() << endmsg;
-  log << MSG::DEBUG << "bec            " << m_bec_impl.show_to_string() << endmsg;
-  log << MSG::DEBUG << "bec_shift      " << m_bec_shift_impl.show_to_string() << endmsg;
-  log << MSG::DEBUG << "lay_disk       " << m_lay_disk_impl.show_to_string() << endmsg;
-  log << MSG::DEBUG << "lay_disk_shift " << m_lay_disk_shift_impl.show_to_string() << endmsg;
-  log << MSG::DEBUG << "phi_mod        " << m_phi_mod_impl.show_to_string() << endmsg;
-  log << MSG::DEBUG << "phi_mod_shift  " << m_phi_mod_shift_impl.show_to_string() << endmsg;
-  log << MSG::DEBUG << "eta_mod        " << m_eta_mod_impl.show_to_string() << endmsg;
-  log << MSG::DEBUG << "eta_mod_shift  " << m_eta_mod_shift_impl.show_to_string() << endmsg;
-  log << MSG::DEBUG << "phi_index      " << m_phi_index_impl.show_to_string() << endmsg;
-  log << MSG::DEBUG << "eta_index      " << m_eta_index_impl.show_to_string() << endmsg;
-  log << MSG::DEBUG << "bec_eta_mod    " << m_bec_eta_mod_impl.show_to_string() << endmsg;
+  ATH_MSG_DEBUG("decode index and bit fields for each level:");
+  ATH_MSG_DEBUG("indet          " << m_indet_impl.show_to_string());
+  ATH_MSG_DEBUG("lumi           " << m_lumi_impl.show_to_string());
+  ATH_MSG_DEBUG("plr            " << m_plr_impl.show_to_string());
+  ATH_MSG_DEBUG("bec            " << m_bec_impl.show_to_string());
+  ATH_MSG_DEBUG("bec_shift      " << m_bec_shift_impl.show_to_string());
+  ATH_MSG_DEBUG("lay_disk       " << m_lay_disk_impl.show_to_string());
+  ATH_MSG_DEBUG("lay_disk_shift " << m_lay_disk_shift_impl.show_to_string());
+  ATH_MSG_DEBUG("phi_mod        " << m_phi_mod_impl.show_to_string());
+  ATH_MSG_DEBUG("phi_mod_shift  " << m_phi_mod_shift_impl.show_to_string());
+  ATH_MSG_DEBUG("eta_mod        " << m_eta_mod_impl.show_to_string());
+  ATH_MSG_DEBUG("eta_mod_shift  " << m_eta_mod_shift_impl.show_to_string());
+  ATH_MSG_DEBUG("phi_index      " << m_phi_index_impl.show_to_string());
+  ATH_MSG_DEBUG("eta_index      " << m_eta_index_impl.show_to_string());
+  ATH_MSG_DEBUG("bec_eta_mod    " << m_bec_eta_mod_impl.show_to_string());
 
 
 
