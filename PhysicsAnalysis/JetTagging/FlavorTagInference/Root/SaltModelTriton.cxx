@@ -144,10 +144,10 @@ namespace FlavorTagInference {
       const int rank = session->GetOutputTypeInfo(i).GetTensorTypeAndShapeInfo().GetShape().size();
       if (m_onnx_model_version == SaltModelVersion::V0) {
         const SaltModelOutput saltModelOutput(name, type, m_model_type);
-        m_output_nodes.push_back(saltModelOutput);
+        m_output_nodes.push_back(std::move(saltModelOutput));
       } else {
         const SaltModelOutput saltModelOutput(name, type, rank);
-        m_output_nodes.push_back(saltModelOutput);
+        m_output_nodes.push_back(std::move(saltModelOutput));
       }
     }
 
@@ -178,7 +178,7 @@ namespace FlavorTagInference {
         size_t underscore_pos = name.find('_');
         if (underscore_pos != std::string::npos) {
           std::string substring = name.substr(0, underscore_pos);
-          model_types.insert(substring);
+          model_types.insert(std::move(substring));
         }
 	else {
           return std::string("UnknownModelName");
