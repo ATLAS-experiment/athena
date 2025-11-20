@@ -35,6 +35,12 @@ if __name__ == "__main__":
     )
 
     argumentParser.add_argument(
+        "--events", 
+        type = int, 
+        default = 2,
+    )
+
+    argumentParser.add_argument(
         "--verbose", 
         action = "store_true",
     )
@@ -67,8 +73,12 @@ if __name__ == "__main__":
         flags,
         name = "inputDataStreamLoader",
         bufferSize = arguments.bufferSize,
-        inputCsvPath = arguments.inputTestVectorPath,
-        inputDataStream = "inputDataStream",
+        GHITZTxtInputPaths = [
+            arguments.inputTestVectorPath,
+        ],
+        GHITZTxtInputKeys = [
+            "inputDataStream",
+        ],
     ))
 
     from EFTrackingFPGAPipeline.EFTrackingXrtAlgorithmConfig import EFTrackingXrtAlgorithmCfg
@@ -97,27 +107,21 @@ if __name__ == "__main__":
         ]
     ))
 
-    from EFTrackingFPGAUtility.EFTrackingDataStreamUnloaderAlgorithmConfig import EFTrackingDataStreamUnloaderAlgorithmCfg
-    acc.merge(EFTrackingDataStreamUnloaderAlgorithmCfg(
+    acc.merge(EFTrackingDataStreamLoaderAlgorithmCfg(
         flags,
-        name = "graphDataStreamUnloader",
-        outputCsvPath = arguments.graphOutputPath,
-        outputDataStream = "graphOutputDataStream",
+        name = "outputDataStreamLoader",
+        bufferSize = arguments.bufferSize,
+        GHITZTxtOutputPaths = [
+            arguments.graphOutputPath,
+            arguments.eventOutputPath,
+            arguments.inferenceOutputPath,
+        ],
+        GHITZTxtOutputKeys = [
+            "graphDataStreamUnloader",
+            "eventDataStreamUnloader",
+            "inferenceDataStreamUnloader",
+        ],
     ))
 
-    acc.merge(EFTrackingDataStreamUnloaderAlgorithmCfg(
-        flags,
-        name = "eventDataStreamUnloader",
-        outputCsvPath = arguments.eventOutputPath,
-        outputDataStream = "eventOutputDataStream",
-    ))
-
-    acc.merge(EFTrackingDataStreamUnloaderAlgorithmCfg(
-        flags,
-        name = "inferenceDataStreamUnloader",
-        outputCsvPath = arguments.graphOutputPath,
-        outputDataStream = "inferenceOutputDataStream",
-    ))
-
-    acc.run(2)
+    acc.run(arguments.events)
 

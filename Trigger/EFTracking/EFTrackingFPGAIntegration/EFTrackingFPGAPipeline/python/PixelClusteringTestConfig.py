@@ -5,22 +5,22 @@ if __name__ == "__main__":
     argumentParser = ArgumentParser()
     argumentParser.add_argument(
         "--xclbinPath", 
-        default = "/eos/project/a/atlas-eftracking/FPGA_compilation/FPGA_compilation_hw/22_pathfinder_HLS/Pathfinder_hw.xclbin",
+        required = True,
     )
 
     argumentParser.add_argument(
-        "--hitTestVectorPath",
-        default = "/eos/project/a/atlas-eftracking/TestVectors/FPGATrackSim_TVs/Test_Vectors_v0-6-3d/F150_Region34_SingleMuon/stripL2G_output.txt",
+        "--testVectorPath",
+        required = True,
     )
 
     argumentParser.add_argument(
-        "--trackTestVectorPath",
-        default = "/eos/project/a/atlas-eftracking/TestVectors/FPGATrackSim_TVs/Test_Vectors_v0-6-3d/F150_Region34_SingleMuon/pattern_reco_output.txt",
+        "--outputClusterPath", 
+        default = "pixel_clustering_output.txt",
     )
 
     argumentParser.add_argument(
-        "--outputPath", 
-        default = "pathfinder_output.txt",
+        "--outputEdmPath", 
+        default = "pixel_clustering_edm_output.txt",
     )
 
     argumentParser.add_argument(
@@ -69,47 +69,40 @@ if __name__ == "__main__":
         name = "dataStreamLoader",
         bufferSize = arguments.bufferSize,
         GHITZTxtInputPaths = [
-            arguments.trackTestVectorPath,
-            arguments.hitTestVectorPath,
+            arguments.inputTestVectorPath,
         ],
         GHITZTxtInputKeys = [
-            "pattern_reco_output",
-            "stripL2G_output",
+            "pixel_clustering_input",
         ],
     ))
 
     from EFTrackingFPGAPipeline.EFTrackingXrtAlgorithmConfig import EFTrackingXrtAlgorithmCfg
     acc.merge(EFTrackingXrtAlgorithmCfg(
         flags, 
+        bufferSize = arguments.bufferSize,
         inputInterfaces = [
-            ["configurableLengthWideLoader:{configurableLengthWideLoader_1}", "pattern_reco_output", 0],
-            ["configurableLengthWideLoader:{configurableLengthWideLoader_2}", "stripL2G_output", 0],
+            ["configurableLengthWideLoader:{configurableLengthWideLoader_1}", "pixel_clustering_input", 0],
         ],
         outputInterfaces = [
-            ["dynamicLengthWideUnloader:{dynamicLengthWideUnloader_1}", "pathfinder_output", 1],
+            ["dynamicLengthWideUnloader:{dynamicLengthWideUnloader_1}", "pixel_clustering_output", 1],
+            ["dynamicLengthWideUnloader:{dynamicLengthWideUnloader_2}", "pixel_clustering_edm_output", 1],
         ],
         vSizeInterfaces = [
-            ["configurableLengthWideLoader:{configurableLengthWideLoader_1}", "pattern_reco_output", 2],
-            ["configurableLengthWideLoader:{configurableLengthWideLoader_2}", "stripL2G_output", 2],
+            ["configurableLengthWideLoader:{configurableLengthWideLoader_1}", "pixel_clustering_input", 2],
         ],
-        kernelOrder = [
-            [
-                "configurableLengthWideLoader:{configurableLengthWideLoader_1}",
-                "configurableLengthWideLoader:{configurableLengthWideLoader_2}",
-                "dynamicLengthWideUnloader:{dynamicLengthWideUnloader_1}",
-            ],
-        ]
     ))
 
     from EFTrackingFPGAUtility.EFTrackingDataStreamUnloaderAlgorithmConfig import EFTrackingDataStreamUnloaderAlgorithmCfg
     acc.merge(EFTrackingDataStreamUnloaderAlgorithmCfg(
         flags,
         name = "dataStreamUnloader",
-        GHITZTxtInputPaths = [
+        GHITZTxtOutputPaths = [
             arguments.outputPath,
+            arguments.outputEdmPath,
         ],
-        GHITZTxtInputKeys = [
-            "pathfinder_output",
+        GHITZTxtOutputKeys = [
+            "pixel_clustering_output",
+            "pixel_clustering_edm_output",
         ],
     ))
 
