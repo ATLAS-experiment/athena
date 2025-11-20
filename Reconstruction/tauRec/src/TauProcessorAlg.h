@@ -61,9 +61,6 @@ class TauProcessorAlg: public AthReentrantAlgorithm
 	
   SG::WriteHandleKey<xAOD::TauJetContainer> m_tauOutputContainer{this,"Key_tauOutputContainer","tmp_TauJets","output tau data key"};
   SG::WriteHandleKey<xAOD::TauTrackContainer> m_tauTrackOutputContainer{this,"Key_tauTrackOutputContainer","TauTracks","output tau tracks data key"};
-  SG::WriteHandleKey<xAOD::CaloClusterContainer> m_tauShotClusOutputContainer{this,"Key_tauShotClusOutputContainer", "TauShotClusters", "tau shot clusters out key"};
-  SG::WriteHandleKey<CaloClusterCellLinkContainer> m_tauShotClusLinkContainer{this,"Key_tauShotClusLinkContainer", "TauShotClusters_links", "tau shot clusters out key"};
-  SG::WriteHandleKey<xAOD::PFOContainer> m_tauShotPFOOutputContainer{this,"Key_tauShotPFOOutputContainer", "TauShotParticleFlowObjects", "tau pfo out key"};
   SG::WriteHandleKey<CaloConstCellContainer> m_tauPi0CellOutputContainer{this,"Key_tauPi0CellOutputContainer","TauCommonPi0Cells","output calo cell key"};
     
   const CaloCell_ID* m_cellID = nullptr;
