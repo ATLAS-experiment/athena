@@ -25,6 +25,12 @@ if __name__ == "__main__":
     )
 
     argumentParser.add_argument(
+        "--events", 
+        type = int, 
+        default = 2,
+    )
+
+    argumentParser.add_argument(
         "--verbose", 
         action = "store_true",
     )
@@ -57,21 +63,26 @@ if __name__ == "__main__":
         flags,
         name = "inputDataStreamLoader",
         bufferSize = arguments.bufferSize,
-        inputCsvPath = arguments.inputTestVectorPath,
-        inputDataStream = "inputDataStream",
+        GHITZTxtInputPaths = [
+            arguments.inputTestVectorPath,
+        ],
+        GHITZTxtInputKeys = [
+            "stripL2G_output",
+        ],
     ))
 
     from EFTrackingFPGAPipeline.EFTrackingXrtAlgorithmConfig import EFTrackingXrtAlgorithmCfg
     acc.merge(EFTrackingXrtAlgorithmCfg(
-        flags, 
+        flags,
+        bufferSize = arguments.bufferSize,
         inputInterfaces = [
-            ["configurableLengthWideLoader:{configurableLengthWideLoader_1}", "inputDataStream", 0],
+            ["configurableLengthWideLoader:{configurableLengthWideLoader_1}", "stripL2G_output", 0],
         ],
         outputInterfaces = [
-            ["dynamicLengthWideUnloader:{dynamicLengthWideUnloader_1}", "outputDataStream", 1],
+            ["dynamicLengthWideUnloader:{dynamicLengthWideUnloader_1}", "slicing_engine_output", 1],
         ],
         vSizeInterfaces = [
-            ["configurableLengthWideLoader:{configurableLengthWideLoader_1}", "inputDataStream", 2],
+            ["configurableLengthWideLoader:{configurableLengthWideLoader_1}", "stripL2G_output", 2],
         ],
         kernelOrder = [
             [
@@ -81,12 +92,17 @@ if __name__ == "__main__":
         ]
     ))
 
-    from EFTrackingFPGAUtility.EFTrackingDataStreamUnloaderAlgorithmConfig import EFTrackingDataStreamUnloaderAlgorithmCfg
-    acc.merge(EFTrackingDataStreamUnloaderAlgorithmCfg(
+    acc.merge(EFTrackingDataStreamLoaderAlgorithmCfg(
         flags,
-        outputCsvPath = arguments.outputPath,
-        outputDataStream = "outputDataStream",
+        name = "outputDataStreamLoader",
+        bufferSize = arguments.bufferSize,
+        GHITZTxtOutputPaths = [
+            arguments.outputPath,
+        ],
+        GHITZTxtOutputKeys = [
+            "slicing_engine_output",
+        ],
     ))
 
-    acc.run(1)
+    acc.run(arguments.events)
 
