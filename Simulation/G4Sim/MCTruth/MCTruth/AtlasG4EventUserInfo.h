@@ -6,6 +6,7 @@
 #define MCTRUTH_ATLASG4EVENTUSERINFO_H
 
 
+#include <GaudiKernel/EventContext.h>
 #include "AtlasHepMC/GenEvent_fwd.h"
 #include "AtlasHepMC/GenParticle.h"
 #include "G4VUserEventInformation.hh"
@@ -22,8 +23,9 @@
  */
 class AtlasG4EventUserInfo: public G4VUserEventInformation {
 public:
-  AtlasG4EventUserInfo()
+  AtlasG4EventUserInfo(const EventContext& ctx)
     : G4VUserEventInformation()
+    , m_eventContext(ctx)
   {}
 
   /**
@@ -112,9 +114,12 @@ public:
    */
   void SetHitCollectionMap(std::shared_ptr<HitCollectionMap> hitCollections) {  m_hitCollectionMap = hitCollections; }
 
+  const EventContext& GetEventContext() const { return m_eventContext; }
+
   void Print() const {}
 
 private:
+  const EventContext& m_eventContext;
   HepMC::GenEvent *m_theEvent{};
   HepMC::ConstGenParticlePtr m_currentPrimaryGenParticle{};
   HepMC::GenParticlePtr m_currentGenParticle{};
