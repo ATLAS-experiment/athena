@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( TBRec )
@@ -19,7 +19,7 @@ atlas_add_library( TBRecLib
                    src/*.cxx
                    ${TBRecLibDictSource}
                    PUBLIC_HEADERS TBRec
-                   INCLUDE_DIRS ${ROOT_INCLUDE_DIRS} ${CLHEP_INCLUDE_DIRS} ${EIGEN_INCLUDE_DIRS}
+                   INCLUDE_DIRS CxxUtils ${ROOT_INCLUDE_DIRS} ${CLHEP_INCLUDE_DIRS} ${EIGEN_INCLUDE_DIRS}
                    PRIVATE_INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
                    DEFINITIONS ${CLHEP_DEFINITIONS}
                    LINK_LIBRARIES ${ROOT_LIBRARIES} ${CLHEP_LIBRARIES} ${EIGEN_LIBRARIES} CaloEvent CaloGeoHelpers CaloIdentifier AthenaBaseComps AthenaKernel AthContainers GeoPrimitives Identifier xAODTracking GaudiKernel LArIdentifier LArRawEvent TBEvent TrkDetDescrUtils TrkParameters TrkTrack CaloUtilsLib StoreGateLib LArRawUtilsLib LArCablingLib CaloDetDescrLib TBCaloGeometryLib TBCondRunParLib
