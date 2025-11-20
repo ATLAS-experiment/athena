@@ -163,11 +163,11 @@ const Trk::Surface& TRT_BarrelElement::elementSurface() const
   return *m_surface;
 }
 
-void TRT_BarrelElement::createSurfaceCache(GeoAlignmentStore*) const
+void TRT_BarrelElement::createSurfaceCache(GeoAlignmentStore* alignStore) const
 {
  // create the surface cache
  if (!m_surfaceCache.isValid()) {
-   m_surfaceCache.set(createSurfaceCacheHelper());
+   m_surfaceCache.set(createSurfaceCacheHelper(alignStore));
  }
  // creaete the surface (only if needed, links are still ok even if cache
  // update)
@@ -176,16 +176,16 @@ void TRT_BarrelElement::createSurfaceCache(GeoAlignmentStore*) const
  }
 }
 SurfaceCache
-TRT_BarrelElement::createSurfaceCacheHelper() const{
+TRT_BarrelElement::createSurfaceCacheHelper(GeoAlignmentStore* alignStore) const{
 
   // Calculate the surface from the two end straws.
   int firstStraw = 0;
   int lastStraw = nStraws() - 1;
 
   const Amg::Vector3D& centerFirstStraw =
-    center(m_idHelper->straw_id(identify(), firstStraw));
+    center(m_idHelper->straw_id(identify(), firstStraw), alignStore);
   const Amg::Vector3D& centerLastStraw =
-    center(m_idHelper->straw_id(identify(), lastStraw));
+    center(m_idHelper->straw_id(identify(), lastStraw), alignStore);
 
   // Calculate center as the average position of the end straws.
   auto center = Amg::Vector3D(0.5 * (centerFirstStraw + centerLastStraw));

@@ -117,6 +117,17 @@ TRT_BaseElement::center(const Identifier& id) const
   return m_strawSurfacesCache[straw]->center();
 }
 
+const Amg::Vector3D&
+TRT_BaseElement::center(const Identifier& id, GeoAlignmentStore* alignStore) const
+{
+  int straw = m_idHelper->straw(id);
+  if (!m_strawSurfacesCache[straw]) {
+    createSurfaceCache(id, alignStore);
+  }
+  // forward the transform of the cache
+  return m_strawSurfacesCache[straw]->center();
+}
+  
 const Trk::StraightLineSurface&
 TRT_BaseElement::strawSurface(int straw) const
 {
