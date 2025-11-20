@@ -7,8 +7,11 @@ from AthenaKernel.EventIdOverrideConfig import getMinMaxRunNumbers
 folderName = "/Simulation/Parameters"
 
 
-def fillAtlasMetadata(flags, dbFiller):
+def collectSimulationMetadata(flags):
+    """Collect simulation metadata parameters as a dictionary"""
     simMDlog = logging.getLogger('Sim_Metadata')
+    params = {}
+
     #add all flags to the metadata
     #todo - only add certain ones?
     #in future this should be a ConfigFlags method...?
@@ -45,68 +48,94 @@ def fillAtlasMetadata(flags, dbFiller):
                 value = value.value
             if not isinstance(value, str):
                 value = str(value)
-            dbFiller.addSimParam(key, value)
+            params[key] = value
             simMDlog.info('SimulationMetaData: setting "%s" to be %s', key, value)
 
-    dbFiller.addSimParam('G4Version', flags.Sim.G4Version)
-    dbFiller.addSimParam('RunType', 'atlas')
-    dbFiller.addSimParam('beamType', flags.Beam.Type.value)
-    dbFiller.addSimParam('SimLayout', flags.GeoModel.AtlasVersion)
-    dbFiller.addSimParam('MagneticField', 'AtlasFieldSvc') # TODO hard-coded for now for consistency with old-style configuration.
+    params['G4Version'] = flags.Sim.G4Version
+    params['RunType'] = 'atlas'
+    params['beamType'] = flags.Beam.Type.value
+    params['SimLayout'] = flags.GeoModel.AtlasVersion
+    params['MagneticField'] = 'AtlasFieldSvc' # TODO hard-coded for now for consistency with old-style configuration.
 
     #---------
     ## Simulated detector flags: add each enabled detector to the simulatedDetectors list
     from AthenaConfiguration.DetectorConfigFlags import getEnabledDetectors
     simDets = ['Truth'] + getEnabledDetectors(flags)
     simMDlog.info("Setting 'SimulatedDetectors' = %r", simDets)
-    dbFiller.addSimParam('SimulatedDetectors', repr(simDets))
+    params['SimulatedDetectors'] = repr(simDets)
 
     ## Hard-coded simulation hit file magic number (for major changes)
-    dbFiller.addSimParam('hitFileMagicNumber', '0') ##FIXME Remove this?
+    params['hitFileMagicNumber'] = '0' ##FIXME Remove this?
 
     if flags.Sim.ISFRun:
-        dbFiller.addSimParam('Simulator', flags.Sim.ISF.Simulator.value)
-        dbFiller.addSimParam('SimulationFlavour', flags.Sim.ISF.Simulator.value.replace('MT', '')) # used by egamma
+        params['Simulator'] = flags.Sim.ISF.Simulator.value
+        params['SimulationFlavour'] = flags.Sim.ISF.Simulator.value.replace('MT', '') # used by egamma
     else:
         # TODO hard-code for now, but set flag properly later
-        dbFiller.addSimParam('Simulator', 'AtlasG4')
-        dbFiller.addSimParam('SimulationFlavour', 'AtlasG4')
+        params['Simulator'] = 'AtlasG4'
+        params['SimulationFlavour'] = 'AtlasG4'
 
     ## Data overlay
     if flags.Common.isOverlay and flags.Overlay.DataOverlay:
-        dbFiller.addSimParam('IsDataOverlay', 'True')
+        params['IsDataOverlay'] = 'True'
+
+    return params
+
+
+def fillAtlasMetadata(flags, dbFiller):
+    """Fill ParameterDbFiller with simulation metadata (sqlite mode interface)"""
+    params = collectSimulationMetadata(flags)
+    for key, value in params.items():
+        dbFiller.addSimParam(key, value)
 
 
 def writeSimulationParametersMetadata(flags):
     simMDlog = logging.getLogger('Sim_Metadata')
-    from IOVDbMetaDataTools import ParameterDbFiller
-    dbFiller = ParameterDbFiller.ParameterDbFiller()
     myRunNumber, myEndRunNumber = getMinMaxRunNumbers(flags)
-    simMDlog.debug('ParameterDbFiller BeginRun = %s', str(myRunNumber) )
-    dbFiller.setBeginRun(myRunNumber)
-    simMDlog.debug('ParameterDbFiller EndRun   = %s', str(myEndRunNumber) )
-    dbFiller.setEndRun(myEndRunNumber)
+    simMDlog.debug('Metadata BeginRun = %s', str(myRunNumber))
+    simMDlog.debug('Metadata EndRun   = %s', str(myEndRunNumber))
 
-    fillAtlasMetadata(flags, dbFiller)
+    if flags.IOVDb.WriteParametersAsMetaData:
+        # Direct in-file metadata mode: bypass intermediate sqlite files
+        from IOVDbMetaDataTools.ParameterWriterConfig import writeParametersToMetaData
+        simMDlog.info('Writing simulation parameters directly to in-file metadata (bypassing SimParams.db)')
+        params = collectSimulationMetadata(flags)
+        return writeParametersToMetaData(flags, folderName, params, myRunNumber, myEndRunNumber)
+    else:
+        # Sqlite mode: write to SimParams.db intermediate file
+        from IOVDbMetaDataTools import ParameterDbFiller
+        simMDlog.info('Writing simulation parameters to intermediate sqlite file (SimParams.db)')
+        dbFiller = ParameterDbFiller.ParameterDbFiller()
+        dbFiller.setBeginRun(myRunNumber)
+        dbFiller.setEndRun(myEndRunNumber)
 
-    #-------------------------------------------------
-    # Make the MetaData Db
-    #-------------------------------------------------
-    dbFiller.genSimDb()
+        fillAtlasMetadata(flags, dbFiller)
 
-    return writeSimulationParameters(flags)
+        #-------------------------------------------------
+        # Make the MetaData Db
+        #-------------------------------------------------
+        dbFiller.genSimDb()
+
+        return writeSimulationParameters(flags)
 
 
 def readSimulationParameters(flags):
-    """Read digitization parameters metadata"""
+    """Read simulation parameters metadata"""
+    from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
     from IOVDbSvc.IOVDbSvcConfig import addFolders
-    if flags.Common.ProductionStep not in [ProductionStep.Simulation, ProductionStep.FastChain]:
-        return addFolders(flags, folderName, className="AthenaAttributeList", tag="HEAD")
 
-    # Here we are in a job which runs simulation, so the
-    # /Simulation/Parameters metadata is not present in the
-    # input file and will be created during the job
-    return addFolders(flags, folderName, detDb="SimParams.db", db="SIMPARAM", className="AthenaAttributeList")
+    # Direct in-file metadata mode: IOVDbMetaDataTool populates ConditionStore from file metadata
+    # Exception: In overlay mode, always use IOVDbSvc since input files may not have parameters in metadata
+    if flags.IOVDb.WriteParametersAsMetaData and not flags.Common.isOverlay:
+        return ComponentAccumulator()
+
+    # Sqlite mode: use IOVDbSvc to read and populate ConditionStore
+    if flags.Common.ProductionStep in [ProductionStep.Simulation, ProductionStep.FastChain]:
+        # Reading from intermediate sqlite file SimParams.db (during simulation job)
+        return addFolders(flags, folderName, detDb="SimParams.db", db="SIMPARAM", className="AthenaAttributeList")
+    else:
+        # Reading from input file metadata via IOVDbSvc
+        return addFolders(flags, folderName, className="AthenaAttributeList", tag="HEAD")
 
 
 def writeSimulationParameters(flags):

@@ -113,6 +113,7 @@ private:
     typedef ServiceHandle<StoreGateSvc> StoreGateSvc_t;
     StoreGateSvc_t   m_metaDataStore;
     StoreGateSvc_t   m_inputStore;
+    StoreGateSvc_t   m_condStore;
 
     // Flag to check whether we need to override run number for MC
     // events in incoming file meta data. This is needed for example
@@ -134,6 +135,12 @@ private:
     StringArrayProperty  m_foldersToBeModified{this, "FoldersToBeModified", {"/Simulation/Parameters"}};
     StringArrayProperty  m_attributesToBeRemoved{this, "AttributesToBeRemoved", {"RandomSeedOffset"}};
     bool                 m_modifyFolders;
+
+    // Property for direct payload registration without intermediate files
+    // Format: flat map with "folder:key" -> "value"
+    // Special keys: "folder:beginRun" and "folder:endRun" specify IOV range
+    Gaudi::Property<std::map<std::string, std::string>> m_payloads{
+        this, "Payloads", {}, "Direct payload registration (format: {folder:key: value})"};
 
     // mutex for R/W locking of the entire tool (and supposedly all metadata objects it works with)
     mutable std::shared_mutex    m_mutex;
