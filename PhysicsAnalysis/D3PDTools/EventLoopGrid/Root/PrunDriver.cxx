@@ -40,7 +40,7 @@
 #include <vector>
 #include <stdexcept>
 
-#include <boost/algorithm/string.hpp>
+#include <ranges>
 
 #include "pool.h"
 #include <mutex>
@@ -542,9 +542,7 @@ doManagerStep (Detail::ManagerData& data) const
         );
 
         std::vector<std::string> vect_filesOrDirToShip;
-        // split string based on comma separators
-        boost::split(vect_filesOrDirToShip,listToShipToGrid,boost::is_any_of(","));
-        
+        for (auto&& part : std::views::split(listToShipToGrid, ',')) vect_filesOrDirToShip.emplace_back(part.begin(), part.end());
         // Create symbolic links of files or directories to the submission directory
         for (const std::string & fileOrDirToShip: vect_filesOrDirToShip){
           ANA_MSG_INFO (("Creating symbolic link for: " +fileOrDirToShip).c_str());
