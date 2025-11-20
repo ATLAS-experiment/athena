@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ClusterPatFinder.h"
@@ -220,7 +220,7 @@ bool TrigL2MuonSA::ClusterPatFinder::patfinder(std::vector<TrigL2MuonSA::Cluster
         for(int i = 0; i < 8; i++){
           crPat.clustersID[i] = index[i];
         }
-        crPatterns.push_back(crPat);
+        crPatterns.push_back(std::move(crPat));
       }
     }//for i_start
   }//for l_start

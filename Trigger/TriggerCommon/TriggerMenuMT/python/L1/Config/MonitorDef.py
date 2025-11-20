@@ -369,14 +369,14 @@ class MonitorDef:
                     "L1_eTAU1",
                     "L1_DPHI-2eEM1", "L1_DPHI-2eTAU1",
                     "L1_DPHI-2eEM1_VjTE200",
-                    "L1_2eEM1_VjTE200", "L1_2eEM2_VjTE200", "L1_2eEM1_VjTE200_GAP_AANDC",
+                    "L1_2eEM1_VjTE200", "L1_2eEM2_VjTE200",
                     "L1_eEM5_VjTE200", "L1_eEM9_VjTE200",
                     "L1_eEM1_jTE4_VjTE200", "L1_eEM2_jTE4_VjTE200", "L1_eTAU1_jTE4_VjTE200",
-                    "L1_2eTAU1_VjTE200", "L1_2eTAU1_VjTE200_GAP_AANDC",
-                    "L1_eEM1_TRT_VjTE200", "L1_eTAU1_TRT_VjTE200",
-                    "L1_eEM1_TRT_ZDC_XOR_VjTE200", "L1_eTAU1_TRT_ZDC_XOR_VjTE200",
-                    "L1_eEM1_TRT_VZDC_A_VZDC_C_VjTE100", "L1_eTAU1_TRT_VZDC_A_VZDC_C_VjTE100",
-                    "L1_eEM1_TRT_ZDC_XOR4_VjTE100", "L1_eTAU1_TRT_ZDC_XOR4_VjTE100",
+                    "L1_2eTAU1_VjTE200",
+                    # "L1_eEM1_TRT_VjTE200", "L1_eTAU1_TRT_VjTE200",
+                    # "L1_eEM1_TRT_ZDC_XOR_VjTE200", "L1_eTAU1_TRT_ZDC_XOR_VjTE200",
+                    # "L1_eEM1_TRT_VZDC_A_VZDC_C_VjTE100", "L1_eTAU1_TRT_VZDC_A_VZDC_C_VjTE100",
+                    # "L1_eEM1_TRT_ZDC_XOR4_VjTE100", "L1_eTAU1_TRT_ZDC_XOR4_VjTE100",
                     #
                     "L1_jJ5", "L1_jJ10",
                     "L1_jJ5p30ETA49","L1_jJ10p30ETA49",
@@ -399,18 +399,14 @@ class MonitorDef:
                     #
                     "L1_MBTS_2_VZDC_A_ZDC_C_VjTE200_GAP_A", "L1_MBTS_2_1ZDC_NZDC_VjTE200_GAP_A",
                     "L1_MBTS_2_ZDC_A_VZDC_C_VjTE200_GAP_C", "L1_MBTS_2_1ZDC_NZDC_VjTE200_GAP_C",
-                    "L1_MBTS_1_VZDC_A_ZDC_C_jTE3_VjTE200", "L1_MBTS_1_ZDC_A_VZDC_C_jTE3_VjTE200",
-                    "L1_MBTS_1_1ZDC_NZDC_jTE3_VjTE200",
                     "L1_MBTS_1_VZDC_A_ZDC_C_jTE3_VjTE200_GAP_A", "L1_MBTS_1_1ZDC_NZDC_jTE3_VjTE200_GAP_A",
                     "L1_MBTS_1_ZDC_A_VZDC_C_jTE3_VjTE200_GAP_C", "L1_MBTS_1_1ZDC_NZDC_jTE3_VjTE200_GAP_C",
                     #
                     "L1_1ZDC_A_1ZDC_C_VjTE200", "L1_ZDC_1XOR5_VjTE200",
                     "L1_ZDC_XOR_VjTE200",
-                    "L1_VZDC_A_VZDC_C_jTE5_VjTE200", "L1_ZDC_XOR_jTE5_VjTE200",
-                    "L1_1ZDC_NZDC_jTE5_VjTE200", "L1_5ZDC_A_5ZDC_C_jTE5_VjTE200",
                     "L1_VZDC_A_VZDC_C_jTE10_VjTE200", "L1_ZDC_XOR_jTE10_VjTE200",
                     "L1_1ZDC_NZDC_jTE10_VjTE200",
-                    "L1_TRT_VZDC_A_VZDC_C_jTE5_VjTE200", "L1_TRT_ZDC_XOR_jTE5_VjTE200",
+                    "L1_TRT_ZDC_XOR_jTE5_VjTE200",
                     #
                     # "L1_ZDC_XOR_jJ5_VjTE200", "L1_VZDC_A_VZDC_C_jJ5_VjTE200", "L1_1ZDC_NZDC_jJ5_VjTE200",
                     "L1_1ZDC_NZDC_jJ10_VjTE200", "L1_ZDC_XOR_jJ10_VjTE200", "L1_VZDC_A_VZDC_C_jJ10_VjTE200",
@@ -486,6 +482,34 @@ class MonitorDef:
                     'L1_ESP_ASYM1_ZDC_XOR_VjTE200',
                     'L1_ESP_ASYM2_ZDC_XOR_VjTE200',
                     'L1_ESP_ASYM3_ZDC_XOR_VjTE200',
+
+                    'L1_MATCHA_eEM2',
+                    'L1_MATCHA_eTAU2',
+
+                    'L1_MATCHA_eEM2_VjTE200',
+                    'L1_MATCHA_eTAU2_VjTE200',
+
+                    'L1_MATCHA_eEM5_VjTE200',
+
+                    'L1_MATCHA_eEM2_EMPTY',
+                    'L1_MATCHA_eTAU2_EMPTY',
+
+                    'L1_MATCHA_eEM2_VjTE200_EMPTY',
+                    'L1_MATCHA_eTAU2_VjTE200_EMPTY',
+
+                    'L1_23INVM-27DPHI-2eTAU1_VjTE200',
+
+                    'L1_CALMTEA_DPHI-2eTAU1_VjTE200',
+                    'L1_CALMTEA_DPHI-2eTAU1_VjTE200_EMPTY',
+
+                    'L1_MATCHA_DPHI-2eTAU1_VjTE200',
+                    'L1_MATCHA_DPHI-2eTAU1_VjTE200_EMPTY',
+
+                    'L1_CALMTEA_23INVM-27DPHI-2eTAU1_VjTE200',
+                    'L1_CALMTEA_23INVM-27DPHI-2eTAU1_VjTE200_EMPTY',
+
+                    'L1_MATCHA_23INVM-27DPHI-2eTAU1_VjTE200',
+                    'L1_MATCHA_23INVM-27DPHI-2eTAU1_VjTE200_EMPTY',
                 ])
 
                 # HI HLT menu: Add triggers that are not in the MC menu

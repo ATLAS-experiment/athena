@@ -257,7 +257,7 @@ TrigConf::TriggerItemNode::buildLogic(std::vector<std::string> & conditionList,
       uint32_t pos = conditionList.size()+1;
       if(pos>9) logic += '0'+pos/10;
       logic += '0'+pos%10;
-      conditionList.push_back(condition);
+      conditionList.push_back(std::move(condition));
    } else if (m_NodeType == AND || m_NodeType == OR) {
       logic += "(";
       bool first = true;

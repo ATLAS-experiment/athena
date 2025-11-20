@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////////
@@ -143,9 +143,9 @@ JobConfig::parseProgramOptions(int argc, char* argv[]) {
          if(stripped == "h" || stripped == "help" )        { help = true; continue; }
          if(stripped == "f" || stripped == "fix")          { fix = true; continue; }
          if(stripped == "e" || stripped == "extended")     { extendedSelection = true; continue; }
-         currentPar = stripped;
+         currentPar = std::move(stripped);
       } else {
-         if(currentPar == "c" || currentPar == "cooldb")   { cooldb = stripped; currentPar=""; continue; }
+         if(currentPar == "c" || currentPar == "cooldb")   { cooldb = std::move(stripped); currentPar=""; continue; }
          if(currentPar == "r" || currentPar == "run")      {
             unsigned int val = boost::lexical_cast<unsigned int,string>(stripped);
             switch(runargpos) {
@@ -163,8 +163,8 @@ JobConfig::parseProgramOptions(int argc, char* argv[]) {
             runargpos++;
             continue;
          }
-         if(currentPar == "triggerdb")                     { triggerdb = stripped; continue; }
-         if(currentPar == "release")                       { release = stripped; continue; }
+         if(currentPar == "triggerdb")                     { triggerdb = std::move(stripped); continue; }
+         if(currentPar == "release")                       { release = std::move(stripped); continue; }
          if(currentPar == "p" || currentPar == "print")    { printlevel = boost::lexical_cast<int,string>(stripped); currentPar=""; continue; }
          if(currentPar == "v" || currentPar == "loglevel") {
             if("NIL" == stripped ) { outputlevel = MSGTC::NIL; }
@@ -253,7 +253,7 @@ readKeyFromPrompt( const std::string & prompt, T & key) {
 
 
 
-
+//coverity[root_function]
 int main( int argc, char* argv[] ) {
 
    /***************************************
