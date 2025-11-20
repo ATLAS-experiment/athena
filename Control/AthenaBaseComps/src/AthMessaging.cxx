@@ -27,6 +27,9 @@ AthMessaging::~AthMessaging()
 
 void AthMessaging::setLevel (MSG::Level lvl)
 {
+  // Ensure initMessaging was called to avoid that the user
+  // defined message level is being overwritten (ATEAM-1117).
+  if (!m_initialized.test_and_set()) initMessaging();
   m_lvl = lvl;
 }
 
