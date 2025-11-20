@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -18,6 +18,7 @@ def AddDiTauLowPtCfg(flags, **kwargs):
 
     return acc
 
+
 def AddDiTauIDDecorationCfg(flags, **kwargs):
     """Decorate ditau ID scores """
 
@@ -26,14 +27,17 @@ def AddDiTauIDDecorationCfg(flags, **kwargs):
     import DiTauRec.DiTauToolsConfig as DiTauTools
 
     diTauOnnxScoreCalculator = acc.popToolsAndMerge(DiTauTools.DiTauOnnxScoreCalculatorCfg(
-            flags, 
+            flags,
             onnxModelPath                   = "TrigTauRec/00-11-02/dev/boosted_ditau_omni_model.onnx",
         ))
 
     diTauWPDecorator = acc.popToolsAndMerge(DiTauTools.DiTauWPDecoratorCfg(
             flags,
             ))
-
+    decorWPNames = diTauWPDecorator.DecorWPNames
+    diTauContainerName = kwargs.setdefault("DiTauContainerName", "DiTauJets")
+    wpDecorationKeys = [diTauContainerName + "." + WP for WP in decorWPNames] # FIXME Once WriteDecorHandleKeyArrays are updated, this can switch to wpDecorationKeys = diTauWPDecorator.DecorWPNames
+    decorWPCuts = diTauWPDecorator.DecorWPCuts
     acc.addPublicTool(diTauOnnxScoreCalculator)
     acc.addPublicTool(diTauWPDecorator)
 
@@ -43,12 +47,15 @@ def AddDiTauIDDecorationCfg(flags, **kwargs):
     DiTauIDDecoratorWrapper = DiTauIDDecoratorWrapper(name               = "DiTauIDDecoratorWrapper",
                                                       DiTauContainerName = kwargs['DiTauContainerName'],
                                                       DiTauOnnxDiscriminantTool = diTauOnnxScoreCalculator,
-                                                      DiTauWPDecorator = diTauWPDecorator)
+                                                      DiTauWPDecorator = diTauWPDecorator,
+                                                      WPDecorationKeys = wpDecorationKeys,
+                                                      DecorWPCuts = decorWPCuts)
 
     acc.addPublicTool(DiTauIDDecoratorWrapper)
     acc.addEventAlgo(DiTauIDDecoratorKernel(name              = "DiTauIDDecorKernel",
                                             AugmentationTools = [DiTauIDDecoratorWrapper]))
     return acc
+
 
 def AddDiTauChargeDecoratorCfg(flags, **kwargs):
     """Decorate DiTau charge"""
@@ -57,7 +64,7 @@ def AddDiTauChargeDecoratorCfg(flags, **kwargs):
     kwargs.setdefault("prefix",           kwargs['DiTauContainerName'])
 
     acc = ComponentAccumulator()
-   
+
     DiTauChargeDecorator = CompFactory.DerivationFramework.DiTauChargeDecorator
     DiTauChargeDecoratorKernel = CompFactory.DerivationFramework.CommonAugmentation
 
@@ -69,4 +76,3 @@ def AddDiTauChargeDecoratorCfg(flags, **kwargs):
                                                 AugmentationTools = [diTauChargeDecorator]))
 
     return acc
-

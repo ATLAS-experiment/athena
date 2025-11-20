@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -143,20 +143,34 @@ def AddTauAugmentationCfg(flags, **kwargs):
 def AddTauIDDecorationCfg(flags, **kwargs):
     """Decorate tau ID scores and working points"""
 
-    kwargs.setdefault("evetoFix",         True)
-    kwargs.setdefault("GNNTauID",         True)
-    kwargs.setdefault("TauContainerName", "TauJets")
-    kwargs.setdefault("prefix",           kwargs['TauContainerName'])
+    #kwargs.setdefault("evetoFix",         True)
+    #kwargs.setdefault("GNNTauID",         True)
+    tauContainerKey = kwargs.setdefault("TauContainerName", "TauJets")
+    #kwargs.setdefault("prefix",           kwargs['TauContainerName'])
 
     acc = ComponentAccumulator()
 
     import tauRec.TauToolHolder as tauTools
     tools = []
+    doEvetoWP = False
+    scoreNames = []
+    WPNames = []
 
-    if kwargs['evetoFix']:
+    #def cacheToolProperties(tool):
+    #    doEvetoWP = tool.UseAbsEta
+    #    scoreName = [tool.ScoreName] if tools[-1].ScoreName != "RNNEleScore" else []
+    #    wpName = tool.DecorWPNames
+
+    if kwargs.pop('evetoFix', True):
         tools.append( acc.popToolsAndMerge(tauTools.TauWPDecoratorEleRNNFixCfg(flags)) )
+        # Cache tool properties
+        doEvetoWP |= tools[-1].UseAbsEta
+        # The original RNNEleScore should not be overriden
+        if tools[-1].ScoreName != "RNNEleScore": scoreNames.append(tools[-1].ScoreName)
+        scoreNames.append(tools[-1].NewScoreName)
+        WPNames += tools[-1].DecorWPNames
 
-    if kwargs['GNNTauID']:    
+    if kwargs.pop('GNNTauID', True):
         # vertex-corrected clusters must be rebuilt for tau ID
         tools.append( acc.popToolsAndMerge(tauTools.TauVertexedClusterDecoratorCfg(flags)) )
         # Add in GNTau!
@@ -166,23 +180,41 @@ def AddTauIDDecorationCfg(flags, **kwargs):
         tools.append( acc.popToolsAndMerge(tauTools.TauGNNEvaluatorCfg(flags,1,applyLooseTrackSel=True)) )
         # set WPs decision for v0prune model
         tools.append( acc.popToolsAndMerge(tauTools.TauWPDecoratorGNNCfg(flags,0)) )
+        # Cache tool properties
+        doEvetoWP |= tools[-1].UseAbsEta
+        # The original RNNEleScore should not be overriden
+        if tools[-1].ScoreName != "RNNEleScore": scoreNames.append(tools[-1].ScoreName)
+        scoreNames.append(tools[-1].NewScoreName)
+        WPNames += tools[-1].DecorWPNames
+
         # set WPs decision for v1trunc model
         tools.append( acc.popToolsAndMerge(tauTools.TauWPDecoratorGNNCfg(flags,1)) )
+        # Cache tool properties
+        doEvetoWP |= tools[-1].UseAbsEta
+        # The original RNNEleScore should not be overriden
+        if tools[-1].ScoreName != "RNNEleScore": scoreNames.append(tools[-1].ScoreName)
+        scoreNames.append(tools[-1].NewScoreName)
+        WPNames += tools[-1].DecorWPNames
 
     if tools:
+        kwargs.setdefault("DoEvetoWP", doEvetoWP)
+        kwargs.setdefault("ScoreDecorationKeys", [tauContainerKey + "." + score for score in scoreNames])
+        kwargs.setdefault("WPDecorationKeys", [tauContainerKey + "." + WP for WP in WPNames])
+        # FIXME The above syntax can be simplified once WriteDecorHandleKeyArray is updated
+
         for tool in tools:
             acc.addPublicTool(tool)
+        kwargs.setdefault("TauIDTools", tools)
 
         TauIDDecoratorWrapper = CompFactory.DerivationFramework.TauIDDecoratorWrapper
         TauIDDecoratorKernel = CompFactory.DerivationFramework.CommonAugmentation
 
-        prefix = kwargs['prefix']
-        tauIDDecoratorWrapper = TauIDDecoratorWrapper(name             = f"{prefix}_TauIDDecoratorWrapper",
-                                                      TauContainerName = kwargs['TauContainerName'],
-                                                      TauIDTools       = tools)
-
+        prefix = kwargs.pop('prefix', tauContainerKey)
+        tauIDDecoratorWrapper = TauIDDecoratorWrapper(name = f"{prefix}_TauIDDecoratorWrapper",
+                                                      **kwargs)
+        print("PXQW TauIDDecoratorsWrapper: " + str(tauIDDecoratorWrapper))
         acc.addPublicTool(tauIDDecoratorWrapper)
-        acc.addEventAlgo(TauIDDecoratorKernel(name              = f"{prefix}_TauIDDecorKernel",
+        acc.addEventAlgo(TauIDDecoratorKernel(name = f"{prefix}_TauIDDecorKernel",
                                               AugmentationTools = [tauIDDecoratorWrapper]))
 
     return acc
