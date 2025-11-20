@@ -21,7 +21,7 @@ def ranges_from_chain(chain):
     _, l1 = chain.split('L1')
 
     # Extract (Vj)TE items and separate numbers from them, e.g.: 'VjTE200' -> {'VTE': 200}
-    l1_te_items = dict(map(split_num, filter(lambda x: 'TE' in x, l1.split('_'))))
+    l1_te_items = dict(map(split_num, filter(lambda x: 'TE' in x and 'TEA' not in x, l1.split('_'))))
 
     xmax = l1_te_items.pop('VTE', 20e3 if 'hi_ucc' in chain else 100) * 1.2
     # TODO: xmin from (j)TE?
