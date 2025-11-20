@@ -2346,6 +2346,10 @@ HLT_mb_sptrk_pt0p8_L1eTAU2_TRT_VZDC_A_VZDC_C_VjTE200:
   eventCount: 0
 HLT_mb_sptrk_pt0p8_L1eTAU2_TRT_ZDC_OR_VjTE200:
   eventCount: 0
+HLT_mb_sptrk_pt0p8_sp_vpix800_L1TRT_ZDC_OR_VjTE200:
+  eventCount: 0
+HLT_mb_sptrk_pt0p8_sp_vpix800_trk2_L1TRT_ZDC_OR_VjTE200:
+  eventCount: 0
 HLT_mb_sptrk_pt0p8_trk2_L1ESP_ASYM0_TRT_ZDC_XOR_VjTE200:
   eventCount: 0
 HLT_mb_sptrk_pt0p8_trk2_L1ESP_ASYM0_ZDC_XOR_VjTE200:
@@ -2392,7 +2396,13 @@ HLT_mb_sptrk_pt1_L1TRT_ZDC_XOR_VjTE200:
   eventCount: 0
 HLT_mb_sptrk_pt1_L1TRT_ZDC_XOR_jTE5_VjTE200:
   eventCount: 0
+HLT_mb_sptrk_pt1_sp_vpix800_L1TRT_ZDC_OR_VjTE200:
+  eventCount: 0
+HLT_mb_sptrk_pt1_sp_vpix800_trk2_L1TRT_ZDC_OR_VjTE200:
+  eventCount: 0
 HLT_mb_sptrk_pt1_trk2_L1TRT_ZDC_OR_VjTE200:
+  eventCount: 0
+HLT_mb_sptrk_sp_vpix800_L1TRT_ZDC_OR_VjTE200:
   eventCount: 0
 HLT_mb_sptrk_trk2_pt0p8_L1eEM2_TRT_VZDC_A_VZDC_C_VjTE200:
   eventCount: 0

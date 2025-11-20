@@ -236,7 +236,7 @@ class ItemDef:
         MenuItem('L1_eEM15_EMPTY'       ).setLogic(d.eEM15 & cosmiccond     ).setTriggerType( TT.calo )
         # ATR-29025
         MenuItem('L1_DPHI-2eEM1_VjTE200_EMPTY'  ).setLogic(d.TOPO_23DPHI32_2eEM1s  & Not(d.jTE200) & cosmiccond ).setTriggerType( TT.calo )
-        MenuItem('L1_DPHI-2eTAU1_VjTE200_EMPTY' ).setLogic(d.TOPO_23DPHI32_2eTAU1s & Not(d.jTE200) & cosmiccond ).setTriggerType( TT.calo )
+        MenuItem('L1_DPHI-2eTAU1_VjTE200_EMPTY' ).setLogic(d.TOPO_26DPHI32_2eTAU1s & Not(d.jTE200) & cosmiccond ).setTriggerType( TT.calo )
 
         MenuItem('L1_eEM22A'    ).setLogic( d.eEM22A     & physcond).setTriggerType( TT.calo )
         MenuItem('L1_eEM22C'    ).setLogic( d.eEM22C     & physcond).setTriggerType( TT.calo )
@@ -1745,11 +1745,11 @@ class ItemDef:
         MenuItem('L1_MATCHA_eEM5_VjTE200'       ).setLogic( d.eEM5  & Not(d.TOPO_TeATIME_jTENoSort_ParamSet2) & Not(d.jTE200) & physcond)
         MenuItem('L1_MATCHA_eEM5_VjTE200_EMPTY' ).setLogic( d.eEM5  & Not(d.TOPO_TeATIME_jTENoSort_ParamSet2) & Not(d.jTE200) & cosmiccond)
 
-        MenuItem('L1_CALMTEA_DPHI-2eTAU1_VjTE200'       ).setLogic( d.TOPO_23DPHI32_2eTAU1s & Not(d.TOPO_TeATIME_jTENoSort_ParamSet1) & Not(d.jTE200) & physcond)
-        MenuItem('L1_CALMTEA_DPHI-2eTAU1_VjTE200_EMPTY' ).setLogic( d.TOPO_23DPHI32_2eTAU1s & Not(d.TOPO_TeATIME_jTENoSort_ParamSet1) & Not(d.jTE200) & cosmiccond)
+        MenuItem('L1_CALMTEA_DPHI-2eTAU1_VjTE200'       ).setLogic( d.TOPO_26DPHI32_2eTAU1s & Not(d.TOPO_TeATIME_jTENoSort_ParamSet1) & Not(d.jTE200) & physcond)
+        MenuItem('L1_CALMTEA_DPHI-2eTAU1_VjTE200_EMPTY' ).setLogic( d.TOPO_26DPHI32_2eTAU1s & Not(d.TOPO_TeATIME_jTENoSort_ParamSet1) & Not(d.jTE200) & cosmiccond)
 
-        MenuItem('L1_MATCHA_DPHI-2eTAU1_VjTE200'        ).setLogic( d.TOPO_23DPHI32_2eTAU1s & Not(d.TOPO_TeATIME_jTENoSort_ParamSet2) & Not(d.jTE200) & physcond)
-        MenuItem('L1_MATCHA_DPHI-2eTAU1_VjTE200_EMPTY'  ).setLogic( d.TOPO_23DPHI32_2eTAU1s & Not(d.TOPO_TeATIME_jTENoSort_ParamSet2) & Not(d.jTE200) & cosmiccond)
+        MenuItem('L1_MATCHA_DPHI-2eTAU1_VjTE200'        ).setLogic( d.TOPO_26DPHI32_2eTAU1s & Not(d.TOPO_TeATIME_jTENoSort_ParamSet2) & Not(d.jTE200) & physcond)
+        MenuItem('L1_MATCHA_DPHI-2eTAU1_VjTE200_EMPTY'  ).setLogic( d.TOPO_26DPHI32_2eTAU1s & Not(d.TOPO_TeATIME_jTENoSort_ParamSet2) & Not(d.jTE200) & cosmiccond)
 
         MenuItem('L1_CALMTEA_23INVM-27DPHI-2eTAU1_VjTE200'       ).setLogic( d.TOPO_23INVM400000_27DPHI32_2eTAU07s & Not(d.TOPO_TeATIME_jTENoSort_ParamSet1) & Not(d.jTE200) & physcond)
         MenuItem('L1_CALMTEA_23INVM-27DPHI-2eTAU1_VjTE200_EMPTY' ).setLogic( d.TOPO_23INVM400000_27DPHI32_2eTAU07s & Not(d.TOPO_TeATIME_jTENoSort_ParamSet1) & Not(d.jTE200) & cosmiccond)
@@ -2292,11 +2292,11 @@ class ItemDef:
             MenuItem('L1_BPH-8M15-2MU3V-BO'    ).setLogic( d.TOPO_8INVM15_2CMU3Vab & physcond)           # 96% for Upsi
             #ATR-29784
             MenuItem('L1_DPHI-2eEM1').setLogic( d.TOPO_23DPHI32_2eEM1s & physcond)
-            MenuItem('L1_DPHI-2eTAU1').setLogic( d.TOPO_23DPHI32_2eTAU1s & physcond)
+            MenuItem('L1_DPHI-2eTAU1').setLogic( d.TOPO_26DPHI32_2eTAU1s & physcond)
             MenuItem('L1_DPHI-2eEM1_VjTE200').setLogic( d.TOPO_23DPHI32_2eEM1s & Not(d.jTE200) & physcond)
-            MenuItem('L1_DPHI-2eTAU1_VjTE200').setLogic( d.TOPO_23DPHI32_2eTAU1s & Not(d.jTE200) & physcond)
+            MenuItem('L1_DPHI-2eTAU1_VjTE200').setLogic( d.TOPO_26DPHI32_2eTAU1s & Not(d.jTE200) & physcond)
             MenuItem('L1_DPHI-2eEM1_VjTE200_GAP_AANDC').setLogic( d.TOPO_23DPHI32_2eEM1s & Not(d.jTE200) & GAPAC & physcond)
-            MenuItem('L1_DPHI-2eTAU1_VjTE200_GAP_AANDC').setLogic( d.TOPO_23DPHI32_2eTAU1s & Not(d.jTE200) & GAPAC & physcond)
+            MenuItem('L1_DPHI-2eTAU1_VjTE200_GAP_AANDC').setLogic( d.TOPO_26DPHI32_2eTAU1s & Not(d.jTE200) & GAPAC & physcond)
             MenuItem('L1_DPHI-2jTAU1').setLogic( d.TOPO_23DPHI32_2jTAU1s & physcond)
 
             # ATR-30728

@@ -2545,8 +2545,8 @@ class TopoAlgoDef:
         algolist=[
             { "minDphi": 23, "maxDphi": 32, "mult": 2, "otype1" : "eEM",
                 "ocut1": 1, "olist1": "s", "nleading1": HW.eEmOutputWidthSort, "minET1":0.9, "otype2" : "", "minET2":0.8},#23DPHI32_2eEM1s
-            { "minDphi": 23, "maxDphi": 32, "mult": 2, "otype1" : "eTAU",
-                "ocut1": 1, "olist1": "s", "nleading1": HW.eTauOutputWidthSort,"minET1":0.8,"otype2" : "","minET2":0.8},#23DPHI32_2eTAU1s
+            { "minDphi": 26, "maxDphi": 32, "mult": 2, "otype1" : "eTAU",
+                "ocut1": 1, "olist1": "s", "nleading1": HW.eTauOutputWidthSort,"minET1":0.8,"otype2" : "","minET2":0.8},#26DPHI32_2eTAU1s
             { "minDphi": 23, "maxDphi": 32, "mult": 2, "otype1" : "jTAU",
                 "ocut1": 1, "olist1": "s", "nleading1": HW.jTauOutputWidthSort,"minET1":1.4,"otype2" : "","minET2":1.4},#23DPHI32_2jTAU1s
         ]
