@@ -18,29 +18,28 @@
 
 /**
  * wrapper tool for decorating tau ID scores and WPs
-*/
+ */
 
 namespace DerivationFramework {
 
   class DiTauIDDecoratorWrapper : public extends<AthAlgTool, IAugmentationTool> {
-    public:
-      using base_class::base_class;	    
+  public:
+    using base_class::base_class;
 
-      virtual StatusCode initialize() override;
-      virtual StatusCode addBranches(const EventContext& ctx) const override;
+    virtual StatusCode initialize() override;
+    virtual StatusCode addBranches(const EventContext& ctx) const override;
 
-    private:
-      SG::ReadHandleKey<xAOD::DiTauJetContainer> m_ditauContainerKey { this, "DiTauContainerName", "DiTauJets", "Input tau container key" };
-      SG::WriteDecorHandleKey<xAOD::DiTauJetContainer> m_scoreDecorKey{this, "ScoreDecorationKey", "" };
-      SG::WriteDecorHandleKeyArray<xAOD::DiTauJetContainer> m_WPDecorKeys{ this, "WPDecorationKeys", {}, "List of WP decorations added to the ditau"};
+  private:
+    SG::ReadHandleKey<xAOD::DiTauJetContainer> m_ditauContainerKey { this, "DiTauContainerName", "DiTauJets", "Input tau container key" };
+    SG::WriteDecorHandleKey<xAOD::DiTauJetContainer> m_scoreDecorKey{this, "ScoreDecorationKey", m_ditauContainerKey, "omni_score" };
+    SG::WriteDecorHandleKeyArray<xAOD::DiTauJetContainer> m_WPDecorKeys{ this, "WPDecorationKeys", m_ditauContainerKey, {}, "List of WP decorations added to the ditau"};
 
-      ToolHandle<DiTauOnnxDiscriminantTool> m_tDiTauOnnxDiscriminantTool{this, "DiTauOnnxDiscriminantTool", ""};
-      ToolHandle<DiTauWPDecorator> m_tDiTauWPDecoratorTool{this, "DiTauWPDecorator", ""};
- 
-      Gaudi::Property<bool> m_doWPDecor{this, "DoWPDecor", false, "Enable WP decoration"}; 
+    ToolHandle<DiTauOnnxDiscriminantTool> m_tDiTauOnnxDiscriminantTool{this, "DiTauOnnxDiscriminantTool", ""};
+    ToolHandle<DiTauWPDecorator> m_tDiTauWPDecoratorTool{this, "DiTauWPDecorator", ""};
 
-      std::vector<std::string> m_WPs;
-      std::vector<float> m_WPCuts;
+    Gaudi::Property<bool> m_doWPDecor{this, "DoWPDecor", false, "Enable WP decoration"};
+
+    Gaudi::Property<std::vector<float>> m_WPCuts{this, "DecorWPCuts", {}};
 
   };
 }
