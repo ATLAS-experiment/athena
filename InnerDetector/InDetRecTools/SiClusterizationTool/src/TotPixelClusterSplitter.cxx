@@ -207,7 +207,7 @@ InDet::TotPixelClusterSplitter::splitCluster( const InDet::PixelCluster & OrigCl
       {
 
         Identifier pixid = Rdos[i];
-        assert( element->identifyHash() == pixelID.wafer_hash(pixelID.wafer_id(pixid)));
+        assert( Element->identifyHash() == pixelID.wafer_hash(pixelID.wafer_id(pixid)));
         std::array<InDetDD::PixelDiodeTree::CellIndexType,2> diode_idx
            = InDetDD::PixelDiodeTree::makeCellIndex(pixelID.phi_index(pixid),
                                                     pixelID.eta_index(pixid));
