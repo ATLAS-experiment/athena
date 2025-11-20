@@ -189,6 +189,9 @@ def defineMenu():
         #ATR-29330
         'L1_4J15',
 
+        # ATR-31830
+        'L1_110INVM150-eEM50s-eEM10s-2DISAMB-jJ60s',
+
     ]
 
     # To replace thresholds in the physics menu

@@ -2326,6 +2326,9 @@ class ItemDef:
             MenuItem('L1_BTAG-MU5VFjJ40_2jJ30p0ETA25_jJ50p0ETA25').setLogic( d.TOPO_0DR04_MU5VFab_CjJ40ab & d.jJ300ETA25.x(2) & d.jJ500ETA25 & physcond)
             MenuItem('L1_BTAG-MU5VFjJ40_2jJ40p0ETA25_jJ50p0ETA25').setLogic( d.TOPO_0DR04_MU5VFab_CjJ40ab & d.jJ400ETA25.x(2) & d.jJ500ETA25 & physcond)
 
+            # ATR-31830
+            MenuItem('L1_110INVM150-eEM50s-eEM10s-2DISAMB-jJ60s').setLogic(  d.TOPO_110INVM150_eEM50s_eEM10s_2DISAMB_jJ60s & physcond)
+
         except NameError as ex:
             exc_type, exc_value, exc_traceback = sys.exc_info()
             fn,ln,_,_ = traceback.extract_tb(exc_traceback)[0]
