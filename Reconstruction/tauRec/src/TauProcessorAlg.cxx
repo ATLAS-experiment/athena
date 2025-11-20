@@ -7,7 +7,6 @@
 #include "xAODTau/TauTrackAuxContainer.h"
 #include "xAODCaloEvent/CaloClusterAuxContainer.h"
 #include "xAODPFlow/PFOAuxContainer.h"
-#include "CaloUtils/CaloClusterStoreHelper.h"
 #include "NavFourMom/INavigable4MomentumCollection.h"
 #include <boost/dynamic_bitset.hpp>
 
@@ -34,9 +33,6 @@ StatusCode TauProcessorAlg::initialize() {
   ATH_CHECK( m_jetInputContainer.initialize() );
   ATH_CHECK( m_tauOutputContainer.initialize() );
   ATH_CHECK( m_tauTrackOutputContainer.initialize() );
-  ATH_CHECK( m_tauShotClusOutputContainer.initialize() );
-  ATH_CHECK( m_tauShotClusLinkContainer.initialize() );
-  ATH_CHECK( m_tauShotPFOOutputContainer.initialize() );
   ATH_CHECK( m_tauPi0CellOutputContainer.initialize(SG::AllowEmpty) );
 
   ATH_CHECK(m_pixelDetEleCollKey.initialize(SG::AllowEmpty));
@@ -86,14 +82,6 @@ StatusCode TauProcessorAlg::execute(const EventContext& ctx) const {
   SG::WriteHandle<xAOD::TauTrackContainer> tauTrackHandle( m_tauTrackOutputContainer, ctx );
   ATH_CHECK(tauTrackHandle.record(std::make_unique<xAOD::TauTrackContainer>(), std::make_unique<xAOD::TauTrackAuxContainer>()));
   xAOD::TauTrackContainer* pTauTrackCont = tauTrackHandle.ptr();
-
-  SG::WriteHandle<xAOD::CaloClusterContainer> tauShotClusHandle( m_tauShotClusOutputContainer, ctx );
-  ATH_CHECK(tauShotClusHandle.record(std::make_unique<xAOD::CaloClusterContainer>(), std::make_unique<xAOD::CaloClusterAuxContainer>()));
-  xAOD::CaloClusterContainer* tauShotClusContainer = tauShotClusHandle.ptr();
-
-  SG::WriteHandle<xAOD::PFOContainer> tauShotPFOHandle( m_tauShotPFOOutputContainer, ctx );
-  ATH_CHECK(tauShotPFOHandle.record(std::make_unique<xAOD::PFOContainer>(), std::make_unique<xAOD::PFOAuxContainer>()));
-  xAOD::PFOContainer* tauShotPFOContainer = tauShotPFOHandle.ptr();
 
   CaloConstCellContainer* Pi0CellContainer = nullptr;
   boost::dynamic_bitset<> addedCellsMap;
@@ -163,9 +151,6 @@ StatusCode TauProcessorAlg::execute(const EventContext& ctx) const {
           sc = StatusCode::FAILURE;
           break;
         }
-      } else if (tool->type() == "TauShotFinder") {
-        sc = tool->executeShotFinder(*pTau, *tauShotClusContainer,
-                                     *tauShotPFOContainer);
       } else if (tool->type() == "TauPi0CreateROI") {
         sc = tool->executePi0CreateROI(*pTau, *Pi0CellContainer, addedCellsMap);
       } else {
@@ -187,10 +172,6 @@ StatusCode TauProcessorAlg::execute(const EventContext& ctx) const {
       pContainer->pop_back();
     } 
   }// loop through seeds
-
-  // build cell link container for shot clusters
-  SG::WriteHandle<CaloClusterCellLinkContainer> tauShotClusLinkHandle( m_tauShotClusLinkContainer, ctx );
-  ATH_CHECK(CaloClusterStoreHelper::finalizeClusters (tauShotClusLinkHandle, tauShotClusContainer));
 
   if(Pi0CellContainer) {
     // sort the cell container by hash 

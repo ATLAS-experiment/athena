@@ -38,8 +38,7 @@ def TauBuildAlgCfg(flags):
     if flags.Beam.Type is not BeamType.Cosmics and flags.Tau.doRNNTrackClass:
         tools.append( result.popToolsAndMerge(tauTools.TauTrackRNNClassifierCfg(flags)) )
 
-    tools.append( result.popToolsAndMerge(tauTools.TauShotFinderCfg(flags)) )
-
+    # this needs to go before the TauCaloAlgCfg
     if flags.Tau.doPi0Clus:
         tools.append( result.popToolsAndMerge(tauTools.Pi0ClusterFinderCfg(flags)) )
 
@@ -49,9 +48,6 @@ def TauBuildAlgCfg(flags):
                                Key_jetInputContainer          = flags.Tau.ActiveConfig.SeedJetCollection,
                                Key_tauOutputContainer         = flags.Tau.ActiveConfig.TauJets_tmp,
                                Key_tauTrackOutputContainer    = flags.Tau.ActiveConfig.TauTracks,
-                               Key_tauShotClusOutputContainer = flags.Tau.ActiveConfig.TauShotClusters,
-                               Key_tauShotClusLinkContainer   = flags.Tau.ActiveConfig.TauShotClustersLinks,
-                               Key_tauShotPFOOutputContainer  = flags.Tau.ActiveConfig.TauShotPFOs,
                                Key_tauPi0CellOutputContainer  = flags.Tau.ActiveConfig.TauCommonPi0Cells,
                                MaxEta                         = flags.Tau.SeedMaxEta,
                                MinPt                          = flags.Tau.SeedMinPt,
@@ -124,7 +120,7 @@ def TauRunnerAlgCfg(flags):
     import tauRec.TauToolHolder as tauTools
 
     tools = []
-
+    tools.append( result.popToolsAndMerge(tauTools.TauShotFinderCfg(flags)) )
     tools.append( result.popToolsAndMerge(tauTools.Pi0ClusterCreatorCfg(flags)) )
     tools.append( result.popToolsAndMerge(tauTools.Pi0ClusterScalerCfg(flags)) )
     tools.append( result.popToolsAndMerge(tauTools.Pi0ScoreCalculatorCfg(flags)) )
@@ -179,6 +175,9 @@ def TauRunnerAlgCfg(flags):
                              Key_chargedPFOOutputContainer  = flags.Tau.ActiveConfig.TauChargedPFOs,
                              Key_vertexOutputContainer      = flags.Tau.ActiveConfig.TauSecondaryVertices,
                              Key_pi0Container               = flags.Tau.ActiveConfig.TauFinalPi0s,
+                             Key_tauShotClusOutputContainer = flags.Tau.ActiveConfig.TauShotClusters,
+                             Key_tauShotClusLinkContainer   = flags.Tau.ActiveConfig.TauShotClustersLinks,
+                             Key_tauShotPFOOutputContainer  = flags.Tau.ActiveConfig.TauShotPFOs,
                              Tools                          = tools)
 
     result.addEventAlgo(RunnerAlg)
