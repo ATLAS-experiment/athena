@@ -18,7 +18,6 @@
 #include "DbContainerObj.h"
 
 // Public POOL include files
-#include "StorageSvc/DbToken.h"
 #include "StorageSvc/DbReflex.h"
 #include "StorageSvc/DbColumn.h"
 #include "StorageSvc/DbTypeInfo.h"
@@ -38,6 +37,18 @@ std::ostream& operator << (std::ostream& os, const Token::OID_t oid ) {
 
 static const Guid s_localDb("00000000-0000-0000-0000-000000000000");
 
+void genMD5(const std::string& s, void* code);
+static const int KEY_MASK = (~0x0)&0x00;
+
+/// Produce the token keys only on demand for export
+void makeKey(const Token* tok, Guid& guid)  {
+  char text[32];
+  std::string s;
+  std::sprintf(text, "][TECH=%08X]", tok->technology()&KEY_MASK);
+  s = std::format("[DB={}][CNT={}][CLID={}{}]", tok->dbID().to_fixed_string(),
+                  tok->contID(), tok->classID().to_fixed_string(), text);
+  genMD5(s, &guid);
+}
 
 // Standard Constructor
 DbDatabaseObj::DbDatabaseObj( DbDomain&       dom, 
@@ -49,14 +60,12 @@ DbDatabaseObj::DbDatabaseObj( DbDomain&       dom,
   m_dom(dom), m_info(0), m_string_t(0), m_fileAge(0)
 {
   m_logon = pfn;
-  std::unique_ptr<DbToken> tok(new DbToken());
+  std::unique_ptr<Token> tok(new Token());
   tok->setTechnology(dom.type().type());
   tok->setClassID(Guid::null());
   tok->setDb(fid);
   tok->oid().first  = INVALID;
   tok->oid().second = INVALID;
-  tok->setKey(DbToken::TOKEN_FULL_KEY);
-  tok->setKey(DbToken::TOKEN_CONT_KEY);
   m_token = tok.release();
   if ( 0 == db() )    {
     ATH_MSG_ERROR("->  Access   DbDatabase   " << accessMode(mode())
@@ -128,31 +137,21 @@ DbStatus DbDatabaseObj::cleanup()  {
 // Add association entry
 DbStatus DbDatabaseObj::makeLink(Token* pTok, Token::OID_t& refLnk) {
   if ( pTok )   {
-    int   is_dbTok  = (typeid(*pTok) == typeid(DbToken));
     LinkMap::iterator i;
-    if ( is_dbTok )   {
-      DbToken* pdbTok = static_cast<DbToken*>(pTok);
-      pdbTok->setKey(DbToken::TOKEN_CONT_KEY);
-      i = m_linkMap.find(pdbTok->contKey());
-    }
-    else  {
-      Guid tmp_key;
-      DbToken::makeKey(pTok, DbToken::TOKEN_CONT_KEY, tmp_key);
-      i = m_linkMap.find(tmp_key);
-    }
+    Guid tmp_key;
+    makeKey(pTok, tmp_key);
+    i = m_linkMap.find(tmp_key);
     if ( i != m_linkMap.end() )   {
-      DbToken* t = (*i).second;
+      Token* t = (*i).second;
       refLnk.first  = t->oid().first;
       refLnk.second = pTok->oid().second;
       return Success;
     }
     else if ( mode() != pool::READ ) {
       const Guid& dbn = pTok->dbID();
-      std::unique_ptr<DbToken> link(new DbToken());
+      std::unique_ptr<Token> link(new Token());
       link->fromString(pTok->toString());
       link->oid().first = m_linkVec.size();
-      link->setKey(DbToken::TOKEN_FULL_KEY);
-      link->setKey(DbToken::TOKEN_CONT_KEY);
       // Add the persistent entry to the links container
       if ( 0 != m_string_t )   {
         ATH_MSG_DEBUG("--->Adding Assoc :" << link->dbID() 
@@ -163,7 +162,6 @@ DbStatus DbDatabaseObj::makeLink(Token* pTok, Token::OID_t& refLnk) {
         refLnk.second = pTok->oid().second;
         if ( dbn == name() )  {
           link->setDb(s_localDb);
-	        link->setLocal(true);
         }
         // Update link to use persistent oid
         link->oid().first = m_links->info()->nextRecordId() + 2; // Taking into account unsaved ##Container links
@@ -173,7 +171,9 @@ DbStatus DbDatabaseObj::makeLink(Token* pTok, Token::OID_t& refLnk) {
         }
         link->setDb(dbn);
         // Update the transient list of links
-	      m_linkMap.insert( LinkMap::value_type(link->contKey(), link.get()));
+        Guid tmp_key;
+        makeKey(link.get(), tmp_key);
+	m_linkMap.insert( LinkMap::value_type(tmp_key, link.get()));
         m_indexMap.insert( IndexMap::value_type(link->oid().first, m_linkVec.size()));
         m_linkVec.push_back( link.release() );
         return Success;
@@ -211,14 +211,9 @@ const DbTypeInfo* DbDatabaseObj::contShape(const std::string& nam) {
   }
   LinkVector::const_iterator j=m_linkVec.begin();
   for(; j != m_linkVec.end(); ++j ) {
-    DbToken* t = (*j);
-    if ( !t->typeInfo() )    {
-      t->setTypeInfo(objectShape(t->classID()));
-    }
-    if ( t->typeInfo() )    {
-      if ( t->dbID() == name() && t->contID() == nam )  { // in ##Links
-        return t->typeInfo();
-      }
+    Token* t = (*j);
+    if ( t->dbID() == name() && t->contID() == nam )  { // in ##Links
+      return objectShape(t->classID());
     }
   }
   return 0;
@@ -248,12 +243,11 @@ DbStatus DbDatabaseObj::addShape (const DbTypeInfo* pShape) {
         // Otherwise save will add the type 
         // again and again ending in an 
         // infinite recursion
-        const DbTypeInfo *pShape2 = DbTypeInfo::fromString(dsc);
-        const DbTypeInfo::Columns& cols = pShape2->columns();
+        const DbTypeInfo::Columns& cols = pShape->columns();
         ATH_MSG_DEBUG("--->Adding Shape[" << m_shapeMap.size() << " , "
-                       << pShape2->shapeID().toString() << "]: "
+                       << pShape->shapeID().toString() << "]: "
                        << " [" << cols.size() << " Column(s)]" );
-        ATH_MSG_DEBUG("---->Class:" << (pShape2->clazz() ? DbReflex::fullTypeName(pShape2->clazz()) : "<not available>"));
+        ATH_MSG_DEBUG("---->Class:" << (pShape->clazz() ? DbReflex::fullTypeName(pShape->clazz()) : "<not available>"));
         for (size_t ic=0; ic < cols.size();++ic)  {
           const DbColumn* c = cols[ic];
           ATH_MSG_DEBUG("---->[" << ic << "]:" << c->name()
@@ -262,8 +256,8 @@ DbStatus DbDatabaseObj::addShape (const DbTypeInfo* pShape) {
               << " Offset:" << c->offset()
               << " #Elements:" << c->nElement());
         }
-        bool inserted = m_shapeMap.insert( ShapeMap::value_type(id, pShape2) ).second;
-        if ( pShape2 == m_string_t || id == m_string_t->shapeID() )   {
+        bool inserted = m_shapeMap.insert( ShapeMap::value_type(id, pShape) ).second;
+        if ( pShape == m_string_t || id == m_string_t->shapeID() )   {
           return Success;
         }
         DbString shape_string(dsc);
@@ -272,9 +266,9 @@ DbStatus DbDatabaseObj::addShape (const DbTypeInfo* pShape) {
           m_shapeMap.erase(i);
           return Error;
         }
-        if ( inserted ) pShape2->addRef();
-        if ( pShape2->clazz() )  {
-          m_classMap.insert(std::make_pair(pShape2->clazz(), pShape2));
+        if ( inserted ) pShape->addRef();
+        if ( pShape->clazz() )  {
+          m_classMap.insert(std::make_pair(pShape->clazz(), pShape));
         }
         return Success;
       }
@@ -317,32 +311,32 @@ DbStatus DbDatabaseObj::open()   {
         }
 
         // Add link to "##Shapes" container
-        std::unique_ptr<DbToken> l1(new DbToken());
+        std::unique_ptr<Token> l1(new Token());
         l1->setDb(name());
         l1->setCont("##Shapes");
         l1->setTechnology(containerType.type());
         l1->setClassID(guid);
         l1->oid().first  = m_linkVec.size();
         l1->oid().second = INVALID;
-        l1->setKey(DbToken::TOKEN_FULL_KEY);
-        l1->setKey(DbToken::TOKEN_CONT_KEY);
         // Update the transient list of links
-        m_linkMap.insert( LinkMap::value_type(l1->contKey(), l1.get()));
+        Guid tmp_key1;
+        makeKey(l1.get(), tmp_key1);
+        m_linkMap.insert( LinkMap::value_type(tmp_key1, l1.get()));
         m_indexMap.insert( IndexMap::value_type(l1->oid().first, m_linkVec.size()));
         m_linkVec.push_back( l1.release() );
 
         // Add link to "##Links" container
-        std::unique_ptr<DbToken> l2(new DbToken());
+        std::unique_ptr<Token> l2(new Token());
         l2->setDb(name());
         l2->setCont("##Links");
         l2->setTechnology(type().type());
         l2->setClassID(guid);
         l2->oid().first  = m_linkVec.size();
         l2->oid().second = INVALID;
-        l2->setKey(DbToken::TOKEN_FULL_KEY);
-        l2->setKey(DbToken::TOKEN_CONT_KEY);
         // Update the transient list of links
-        m_linkMap.insert( LinkMap::value_type(l2->contKey(), l2.get()));
+        Guid tmp_key2;
+        makeKey(l2.get(), tmp_key2);
+        m_linkMap.insert( LinkMap::value_type(tmp_key2, l2.get()));
         m_indexMap.insert( IndexMap::value_type(l2->oid().first, m_linkVec.size()));
         m_linkVec.push_back( l2.release() );
 
@@ -387,22 +381,21 @@ DbStatus DbDatabaseObj::open()   {
           while (static_cast<uint64_t>(oid.second) <= m_links.size()) {
             auto result = m_links.ptr()->load(&ptr, m_string_t, oid, oid, true);
             if (!result.isSuccess() || !ptr) break;
-            std::unique_ptr<DbToken> link(new DbToken());
+            std::unique_ptr<Token> link(new Token());
             link->fromString(link_str);
             // Update the transient list of links
             if ( s_localDb == link->dbID() ) {
               link->setDb(name());
-	      link->setLocal(true);
             }
             ATH_MSG_DEBUG("--->Reading Assoc:" << link->dbID()
                 << "/" << link->contID()
                 << " [" << std::hex << link->technology() << "] "
                 << " (" << link->oid().first << " , " << link->oid().second << ")" << std::dec );
             ATH_MSG_DEBUG("---->ClassID:" << link->classID().toString());
-            link->setKey(DbToken::TOKEN_FULL_KEY);
-            link->setKey(DbToken::TOKEN_CONT_KEY);
-	    if ( m_linkMap.find(link->contKey()) == m_linkMap.end() )  {
-	      m_linkMap.insert( LinkMap::value_type(link->contKey(), link.get()));
+            Guid tmp_key;
+            makeKey(link.get(), tmp_key);
+	    if ( m_linkMap.find(tmp_key) == m_linkMap.end() )  {
+	      m_linkMap.insert( LinkMap::value_type(tmp_key, link.get()));
 	    }
             m_indexMap.insert( IndexMap::value_type(link->oid().first, m_linkVec.size()));
 	    m_linkVec.push_back(link.release());
@@ -603,12 +596,6 @@ DbStatus DbDatabaseObj::getLink(const Token::OID_t& oid, Token* pTok)
    if ( 0 == m_info ) open();
    if ( 0 != m_info && 0 != pTok && oid.first >= 0 ) {
       pTok->oid() = oid;
-      if( !(pTok->type() & DbToken::TOKEN_FULL_KEY) )  {
-         if( typeid(*pTok) == typeid(DbToken) )  {
-            DbToken* pdbTok = static_cast<DbToken*>(pTok);
-	    pdbTok->setKey(DbToken::TOKEN_FULL_KEY);
-         }
-      }
       m_linkVec[ oid.first ]->set(pTok);
       return Success;
    }
@@ -622,7 +609,7 @@ std::string DbDatabaseObj::cntName(Token& token) {
     int lnk = m_indexMap[token.oid().first]; // Map link to index
     if ( lnk >= 0 )  {
       if ( lnk < int(m_linkVec.size()) )   {
-	DbToken* link = m_linkVec[lnk];
+	Token* link = m_linkVec[lnk];
         if ( link != 0 ) {
           if ( token.contID().empty() ) {
             token.setCont(link->contID());

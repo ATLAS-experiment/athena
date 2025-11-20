@@ -9,7 +9,6 @@
   <class name="std::pair<long long,long long>"       rootmap="false"/>
   <class name="pool::IOODatabase"        rootmap="false"/>
 
-  <class name="pool::DbToken"  id="B30D24AA-1F1D-4EE0-A9B6-C10405D65854"/>
   <class name="pool::DbString" id="DA8F479C-09BC-49D4-94BC-99D025A23A3B"/> 
   
   <class name="CharDbArray"    id="42A3E929-5016-4D97-932A-15D21E2D17A9" />

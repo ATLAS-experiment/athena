@@ -34,9 +34,6 @@
  */
 namespace pool    {
 
-  // Forward declarations
-  class DbToken;
-
   /** @class DbDatabaseObj DbDatabaseObj.h src/DbDatabaseObj.h
     *
     * Description:
@@ -60,9 +57,9 @@ namespace pool    {
     /// Parameter map definition
     typedef std::map<std::string, std::string>       ParamMap;
     /// Definition of map with link elements
-    typedef std::map< Guid , DbToken* >              LinkMap;
+    typedef std::map< Guid , Token* >                LinkMap;
     /// Definition of array with link elements
-    typedef std::vector<DbToken*>                    LinkVector;
+    typedef std::vector<Token*>                      LinkVector;
     /// Definition of map with shape elements
     typedef std::map< Guid , const DbTypeInfo* >     ShapeMap;
     /// Definition of map with index elements
