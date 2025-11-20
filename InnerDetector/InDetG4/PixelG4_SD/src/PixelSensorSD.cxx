@@ -10,6 +10,7 @@
 
 // Class header
 #include "PixelSensorSD.h"
+#include <GaudiKernel/EventContext.h>
 
 // Athena headers
 #include "MCTruth/AtlasG4EventUserInfo.h"
@@ -311,12 +312,21 @@ G4bool PixelSensorSD::ProcessHits(G4Step* aStep, G4TouchableHistory* /*ROhist*/)
   }
 
   // get the HepMcParticleLink from the TrackHelper
+
   TrackHelper trHelp(aStep->GetTrack());
+  // Event Manager may be null in unit tests...
+  EventContext const* eventContext{nullptr};
+  if(auto* eventManger = G4EventManager::GetEventManager()){
+    if(auto* eventInfo = static_cast<AtlasG4EventUserInfo*>(eventManger->GetUserInformation())){
+      eventContext = &eventInfo->GetEventContext();
+    }
+  }
+
   m_HitColl->Emplace(lP1,
                      lP2,
                      edep,
                      aStep->GetPreStepPoint()->GetGlobalTime(),
-                     trHelp.GenerateParticleLink(),
+                     eventContext ? trHelp.GenerateParticleLink(*eventContext) : trHelp.GenerateParticleLink(),
                      0,BrlEcap,LayerDisk,etaMod,phiMod,side);
   return true;
 }
