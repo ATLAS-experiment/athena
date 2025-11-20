@@ -77,22 +77,3 @@ int main(int argc, char** argv)
    
    return 0;
 }
-
-
-
-/*
-
-int main()
-{
-    const string type = "{ID=B30D24AA-1F1D-4EE0-A9B6-C10405D65854}{CL=pool::DbToken}{NCOL=0}";
-    const DbTypeInfo* tinfo2 = DbTypeInfo::fromString(type);
-    cout << "* " << tinfo2 << "  " << tinfo2->toString() << endl;
-
-    DbTypeInfo* typ_info = 0;
-    const string guidstr("B30D24AA-1F1D-4EE0-A9B6-C10405D65854");
-    DbTransform::getShape(Guid(guidstr), (const DbTypeInfo*&)typ_info);
-    cout << "get for " << guidstr << " = " << typ_info << "  " << typ_info->toString() << endl;
-   return 0;
-}
-
-*/
