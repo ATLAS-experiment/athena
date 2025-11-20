@@ -1,6 +1,6 @@
 /*
-   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
-   */
+   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+*/
 
 #include "TrkVKalVrtCore/VtCFit.h"
 #include "TrkVKalVrtCore/stCnst.h"
@@ -386,6 +386,9 @@ int vtcfit( VKVertex * vk) {
     }
   }
 
+  double vBx,vBy,vBz;
+  Trk::vkalMagFld::getMagFld(xyz[0], xyz[1], xyz[2],vBx,vBy,vBz,(vk->vk_fitterControl).get());
+
   for ( kt = 0; kt < NTRK; ++kt) {
     VKTrack* trk = vk->TrackList[kt].get();
     double theta_ini =trk->iniP[0];
@@ -399,14 +402,15 @@ int vtcfit( VKVertex * vk) {
     double uu = xyz[0]*cosf + xyz[1]*sinf;
     double vv = xyz[1]*cosf - xyz[0]*sinf;
     double phip,zp,eps;
+    double corrCz = (vBy*cosf-vBx*sinf)/Trk::vkalMagFld::getEffField(vBx, vBy, vBz, phi_ini, theta_ini);
     if ( trk->Charge ) {
-      eps     = -vv - uu*uu * invR_ini / 2.;
-      zp     = -uu * (1. - vv * invR_ini) * cotth;   //xyz[2] is added later to gain precision
-      phip     = -uu * invR_ini;                       //phi_ini is added later to gain precision
+      eps    = -vv - uu*uu * invR_ini / 2.;
+      zp     = -uu * (1. - vv * invR_ini) * cotth - 0.5*uu*uu*invR_ini*corrCz;   //xyz[2] is added later to gain precision
+      phip   = -uu * invR_ini;                       //phi_ini is added later to gain precision
     } else {
-      eps     = -vv;
+      eps    = -vv;
       zp     = -uu * cotth;
-      phip     = 0.;
+      phip   = 0.;
     }
 
     /*   contribution of this track to chi2 with initial values */
@@ -425,8 +429,8 @@ int vtcfit( VKVertex * vk) {
     /*   derivatives (deriv1) of perigee param. w.r.t. X,Y,Z (vertex) uu=Q, vv=R */
     double d11 =  sinf             - (                 uu*cosf   *invR_ini);
     double d12 = -cosf             - (                 uu*sinf   *invR_ini);
-    double d21 = -cosf * cotth     + (  (vv*cosf-uu*sinf)*cotth  *invR_ini);
-    double d22 = -sinf * cotth     + (  (vv*sinf+uu*cosf)*cotth  *invR_ini);
+    double d21 = -cosf * cotth     + (  (vv*cosf-uu*sinf)*cotth  *invR_ini) - uu*cosf*invR_ini*corrCz;
+    double d22 = -sinf * cotth     + (  (vv*sinf+uu*cosf)*cotth  *invR_ini) - uu*sinf*invR_ini*corrCz;
     //double d23 = 1.;        //VK for reference
     double d41 = -cosf * invR_ini;
     double d42 = -sinf * invR_ini;
@@ -477,8 +481,8 @@ int vtcfit( VKVertex * vk) {
     double e12 =  uu - invR_ini * vv * uu;
     double e13 = -uu*uu / 2.;
     double e21 =  uu *(1. - vv*invR_ini) * (cotth*cotth + 1.);
-    double e22 = -vv*cotth  + (vv*vv-uu*uu)*invR_ini*cotth;
-    double e23 =  uu*vv*cotth;
+    double e22 = -vv*cotth  + (vv*vv-uu*uu)*invR_ini*cotth - uu*vv*invR_ini*corrCz;
+    double e23 =  uu*vv*cotth    -0.5*uu*uu*corrCz;
     double e43 = -uu + 2.*uu*vv*invR_ini;
     /*  if straight line, set to zero derivatives w.r.t. the curvature */
     /*  and curvature terms in derivatives */
