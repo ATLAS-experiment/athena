@@ -5,9 +5,10 @@
 #include "EFTrackingFPGAUtility/EFTrackingDataStreamLoaderAlgorithm.h"
 #include "EFTrackingFPGAUtility/FPGADataFormatUtilities.h"
 
-#include <optional>
 #include <vector>
 #include <fstream>
+#include <format>
+#include <string>
 
 EFTrackingDataStreamLoaderAlgorithm::EFTrackingDataStreamLoaderAlgorithm(
   const std::string& name,
