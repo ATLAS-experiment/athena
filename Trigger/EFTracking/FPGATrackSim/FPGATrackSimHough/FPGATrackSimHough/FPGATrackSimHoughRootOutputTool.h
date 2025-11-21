@@ -97,9 +97,12 @@ class FPGATrackSimHoughRootOutputTool : public AthAlgTool
         std::vector<unsigned int> m_diskLayer;
         std::vector<unsigned int> m_passesOR;
         std::vector<float> m_roadChi2;
+        std::vector<float> m_roadChi2ndof;
+        std::vector<float> m_roadNCoords;
         std::vector<float> m_nMissingHits;
         std::vector<bool> m_mapped;
         std::vector<bool> m_realHit;
+        std::vector<bool> m_isSP;
 
         TrackCorrType m_idealCoordFitType = TrackCorrType::None;
 
