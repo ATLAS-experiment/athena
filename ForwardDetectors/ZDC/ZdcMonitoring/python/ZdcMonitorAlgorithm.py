@@ -29,10 +29,10 @@ def create_log_bins(min_value, max_value, num_bins):
 def create_vinj_bins():
 
     # Define min, max, and step size for each range
-    min1, max1, step1 = 0.0005 - 0.000001, 0.0025 - 0.000001, 0.00005
-    min2, max2, step2 = 0.0025 - 0.000001, 0.01   - 0.000001, 0.00025
-    min3, max3, step3 = 0.01   - 0.000001, 0.3    - 0.000001, 0.0025
-    min4, max4, step4 = 0.3    - 0.000001, 0.675  - 0.000001, 0.0125
+    min1, max1, step1 = 0.0005 - 0.000001, 0.0025 - 0.000002, 0.00005
+    min2, max2, step2 = 0.0025 - 0.000001, 0.01   - 0.000002, 0.00025
+    min3, max3, step3 = 0.01   - 0.000001, 0.3    - 0.000002, 0.0025
+    min4, max4, step4 = 0.3    - 0.000001, 0.675  - 0.000002, 0.0125
     min5, max5, step5 = 0.675  - 0.000001, 2.500001,          0.025
 
     # Generate each range using the defined variables
