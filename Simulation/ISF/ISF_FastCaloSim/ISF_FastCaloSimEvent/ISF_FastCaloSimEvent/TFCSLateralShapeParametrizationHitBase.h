@@ -110,7 +110,7 @@ public:
     float m_phi_y; // phi for barrel and end-cap, y for FCal
     float m_z;
     float m_E;
-    long unsigned int m_hit_index;
+    long unsigned int m_hit_index{};
     bool m_useXYZ;
     // Variables used to store extrapolated position
     float m_center_r;

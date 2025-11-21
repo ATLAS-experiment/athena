@@ -54,8 +54,8 @@ TFCSBinnedShower::~TFCSBinnedShower() {}
 
 void TFCSBinnedShower::set_layer_energy(
     long unsigned int event_index, long unsigned int layer_index,
-    const std::vector<unsigned int> bin_index_vector,
-    const std::vector<float> E_vector) {
+    const std::vector<unsigned int>& bin_index_vector,
+    const std::vector<float>& E_vector) {
 
   // Assert that the event index is valid
   if (event_index >= m_eventlibrary.size()) {
@@ -74,10 +74,10 @@ void TFCSBinnedShower::set_layer_energy(
 }
 
 void TFCSBinnedShower::set_bin_boundaries(long unsigned int layer_index,
-                                          std::vector<float> R_lower,
-                                          std::vector<float> R_size,
-                                          std::vector<float> alpha_lower,
-                                          std::vector<float> alpha_size) {
+                                          std::vector<float>& R_lower,
+                                          std::vector<float>& R_size,
+                                          std::vector<float>& alpha_lower,
+                                          std::vector<float>& alpha_size) {
   if (layer_index >= m_coordinates.size()) {
     m_coordinates.resize(layer_index + 1);
   }

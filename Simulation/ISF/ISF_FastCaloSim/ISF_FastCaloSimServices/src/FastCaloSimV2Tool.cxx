@@ -200,7 +200,6 @@ StatusCode ISF::FastCaloSimV2Tool::simulate(const EventContext& ctx, ISF::ISFPar
     CLHEP::HepRandomEngine *rndmEngine = rngWrapper->getEngine(ctx);
     TFCSSimulationState simulstate(rndmEngine);
 
-    const EventContext& ctx = Gaudi::Hive::currentContext();
     // ATH_MSG_WARNING("Event number for this event: " << ctx.evt());
     simulstate.setAuxInfo<int>("EventNr"_FCShash, ctx.evt() );
     

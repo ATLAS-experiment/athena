@@ -51,7 +51,7 @@ class TFCSBinnedShowerONNX : public TFCSBinnedShowerBase {
   int get_max_hits_per_voxel() const { return m_max_hits_per_voxel; }
 
   // Loads the ONNX model for the calorimeter simulation.
-  void load_simulator(const std::string &filename) {
+  void load_simulator(std::string &filename) {
     // TODO: Do I have to delete it again?
     m_ai_simulator = new TFCSMLCalorimeterSimulator();
     m_ai_simulator->loadSimulator(filename);
@@ -68,29 +68,29 @@ class TFCSBinnedShowerONNX : public TFCSBinnedShowerBase {
 
   // Allows to set the voxel boundaries for the given layer manually.
   void set_bin_boundaries(long unsigned int layer_index,
-                          std::vector<float> R_lower, std::vector<float> R_size,
-                          std::vector<float> alpha_lower,
-                          std::vector<float> alpha_size);
+                          const std::vector<float>& R_lower, const std::vector<float>& R_size,
+                          const std::vector<float>& alpha_lower,
+                          const std::vector<float>& alpha_size);
 
-  event_bins_t get_coordinates() { return m_coordinates; }
+  const event_bins_t & get_coordinates() { return m_coordinates; }
 
-  void set_coordinates(event_bins_t coordinates) {
+  void set_coordinates(const event_bins_t & coordinates) {
     m_coordinates = coordinates;
   }
 
-  std::vector<std::vector<std::vector<std::vector<float>>>>
+  const std::vector<std::vector<std::vector<std::vector<float>>>>&
   get_sub_bin_distribution() const {
     return m_sub_bin_distribution;
   }
 
-  std::vector<float> get_upscaling_energies() const {
+  const std::vector<float>& get_upscaling_energies() const {
     return m_upscaling_energies;
   }
 
   void set_sub_bin_distribution_and_energies(
-      std::vector<std::vector<std::vector<std::vector<float>>>>
+      const std::vector<std::vector<std::vector<std::vector<float>>>> &
           sub_bin_distribution,
-      std::vector<float> upscaling_energies) {
+      const std::vector<float> & upscaling_energies) {
     m_sub_bin_distribution = sub_bin_distribution;
     m_upscaling_energies = upscaling_energies;
     m_use_upscaling = true;

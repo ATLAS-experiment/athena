@@ -37,14 +37,14 @@ class TFCSPhiModulationCorrection
     m_energy_shift.clear();
   };
 
-  std::vector<std::vector<std::vector<float>>> get_phi_modulation() const {
+  const std::vector<std::vector<std::vector<float>>>& get_phi_modulation() const {
     return m_modulation;
   };
-  std::vector<std::vector<float>> get_min_eta() const { return m_min_eta; };
-  std::vector<std::vector<float>> get_energy_shift() const {
+  const std::vector<std::vector<float>>& get_min_eta() const { return m_min_eta; };
+  const std::vector<std::vector<float>>& get_energy_shift() const {
     return m_energy_shift;
   };
-  std::vector<std::vector<std::vector<float>>> get_min_phi() const {
+  const std::vector<std::vector<std::vector<float>>>& get_min_phi() const {
     return m_min_phi;
   };
 

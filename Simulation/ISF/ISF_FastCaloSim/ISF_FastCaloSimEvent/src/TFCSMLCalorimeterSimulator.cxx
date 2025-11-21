@@ -13,7 +13,7 @@ TFCSMLCalorimeterSimulator::TFCSMLCalorimeterSimulator() {}
 
 TFCSMLCalorimeterSimulator::~TFCSMLCalorimeterSimulator() {}
 
-bool TFCSMLCalorimeterSimulator::loadSimulator(std::string filename) {
+bool TFCSMLCalorimeterSimulator::loadSimulator(std::string& filename) {
   // Load the simulator
   try {
     m_onnx_model = TFCSNetworkFactory::create(filename);

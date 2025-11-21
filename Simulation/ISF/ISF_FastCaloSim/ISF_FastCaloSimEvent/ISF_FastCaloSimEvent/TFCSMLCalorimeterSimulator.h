@@ -34,7 +34,7 @@ public:
     std::vector<layer_t> event_data;
   } event_t;
 
-  bool loadSimulator(std::string filename);
+  bool loadSimulator(std::string& filename);
 
   void Print() const;
 
@@ -42,7 +42,7 @@ public:
   event_t getEvent(TFCSSimulationState &simulstate, float eta, float energy) const;
   VNetworkBase::NetworkOutputs predictVoxels() const;
 
-  void setInputShapes(std::vector<long unsigned int> layer_boundaries, std::vector<long unsigned int> used_layers) {
+  void setInputShapes(std::vector<long unsigned int>& layer_boundaries, std::vector<long unsigned int>& used_layers) {
     m_layer_boundaries = layer_boundaries;
     m_used_layers = used_layers;
     m_nVoxels = layer_boundaries.back();

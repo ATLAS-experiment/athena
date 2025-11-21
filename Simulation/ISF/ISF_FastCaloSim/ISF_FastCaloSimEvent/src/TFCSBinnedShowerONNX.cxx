@@ -192,10 +192,10 @@ void TFCSBinnedShowerONNX::Streamer(TBuffer &R__b) {
 }
 
 void TFCSBinnedShowerONNX::set_bin_boundaries(long unsigned int layer_index,
-                                              std::vector<float> R_lower,
-                                              std::vector<float> R_size,
-                                              std::vector<float> alpha_lower,
-                                              std::vector<float> alpha_size) {
+                                              const std::vector<float>& R_lower,
+                                              const std::vector<float>& R_size,
+                                              const std::vector<float>& alpha_lower,
+                                              const std::vector<float>& alpha_size) {
   if (layer_index >= m_coordinates.size()) {
     m_coordinates.resize(layer_index + 1);
   }

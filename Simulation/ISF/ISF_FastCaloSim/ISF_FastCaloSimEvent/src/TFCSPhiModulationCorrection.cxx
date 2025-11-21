@@ -27,8 +27,8 @@
 //=============================================
 
 TFCSPhiModulationCorrection::TFCSPhiModulationCorrection(const char *name,
-                                                         const char *title)
-    : TFCSLateralShapeParametrizationHitBase(name, title) {}
+                                                         const char *title) 
+  : TFCSLateralShapeParametrizationHitBase(name, title), m_geo{} { }
 
 TFCSPhiModulationCorrection::~TFCSPhiModulationCorrection() {}
 
