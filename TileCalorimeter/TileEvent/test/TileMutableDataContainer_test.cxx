@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file TileEvent/testTileMutableDataContainer_test.cxx
@@ -248,7 +248,7 @@ void test1()
 int main ATLAS_NOT_THREAD_SAFE ()
 {
   std::cout << "TileMutableDataContainer_test\n";
-  TileCablingSvc cabling;
+  auto cabling = std::make_unique<TileCablingSvc>();
   test1();
   return 0;
 }
