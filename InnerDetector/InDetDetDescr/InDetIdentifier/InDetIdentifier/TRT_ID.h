@@ -778,11 +778,10 @@ TRT_ID::straw_hash_bin(Identifier straw_id) const {
 inline
 void
 TRT_ID::invalidMessage() const {
-  MsgStream log(m_msgSvc, "TRT_ID");
 
   if (m_msgSvc) {
-    log << MSG::ERROR << " TRT_ID is NOT valid for this layout. " << endmsg;
-    log << MSG::ERROR << " Please use 'trt_id->is_valid()' if a layout test is needed. " << endmsg;
+    ATH_MSG_ERROR(" TRT_ID is NOT valid for this layout. ");
+    ATH_MSG_ERROR(" Please use 'trt_id->is_valid()' if a layout test is needed. ");
   } else {
     std::cout << " ERROR TRT_ID is NOT valid for this layout. " << std::endl;
     std::cout << " ERROR Please use 'trt_id->is_valid()' if a layout test is needed. " << std::endl;
