@@ -30,13 +30,15 @@ def TauBuildAlgCfg(flags):
         tools.append( result.popToolsAndMerge(tauTools.TauVertexFinderCfg(flags)) )
 
     tools.append( result.popToolsAndMerge(tauTools.TauAxisCfg(flags)) )
+
+    # track classification + association 
     tools.append( result.popToolsAndMerge(tauTools.TauTrackFinderCfg(flags)) )
-
-    tools.append( result.popToolsAndMerge(tauTools.TauClusterFinderCfg(flags)) )
-    tools.append( result.popToolsAndMerge(tauTools.TauVertexedClusterDecoratorCfg(flags)) )
-
     if flags.Beam.Type is not BeamType.Cosmics and flags.Tau.doRNNTrackClass:
         tools.append( result.popToolsAndMerge(tauTools.TauTrackRNNClassifierCfg(flags)) )
+
+    # cluster association + vertex correction
+    tools.append( result.popToolsAndMerge(tauTools.TauClusterFinderCfg(flags)) )
+    tools.append( result.popToolsAndMerge(tauTools.TauVertexedClusterDecoratorCfg(flags)) )
 
     # this needs to go before the TauCaloAlgCfg
     if flags.Tau.doPi0Clus:
