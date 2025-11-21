@@ -175,7 +175,7 @@ class InDetTrackCalibrationConfig (ConfigBlock):
         config.addOutputVar (self.containerName, 'vz', 'vz', noSys=True)
 
         # decorate track summary information on the reconstructed object:
-        if self.outputTrackSummaryInfo and config.dataType() is not DataType.Data:
+        if self.outputTrackSummaryInfo:
             config.addOutputVar (self.containerName, 'numberOfInnermostPixelLayerHits', 'numberOfInnermostPixelLayerHits', noSys=True)
             config.addOutputVar (self.containerName, 'numberOfPixelDeadSensors', 'numberOfPixelDeadSensors', noSys=True)
             config.addOutputVar (self.containerName, 'numberOfPixelHits', 'numberOfPixelHits', noSys=True)
