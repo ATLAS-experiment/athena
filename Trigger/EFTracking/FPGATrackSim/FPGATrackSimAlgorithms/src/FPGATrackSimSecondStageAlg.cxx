@@ -248,6 +248,7 @@ StatusCode FPGATrackSimSecondStageAlg::execute()
             ATH_MSG_DEBUG("Performing Linear tracking");
 
             if (m_passLowestChi2TrackOnly) { // Pass only the lowest chi2 track per road
+
                 std::vector<FPGATrackSimTrack> filteredTracks;
 
                 for (const auto& road : roads) {
@@ -289,7 +290,7 @@ StatusCode FPGATrackSimSecondStageAlg::execute()
                     Monitored::Group(m_monTool, mon_best_chi2);
                 }
             } else { // Pass all tracks with chi2 < 1e15
-	      ATH_CHECK(m_trackFitterTool->getTracks(roads, tracks, m_evtSel->getMin(), m_evtSel->getMax()));
+                ATH_CHECK(m_trackFitterTool->getTracks(roads, tracks, m_evtSel->getMin(), m_evtSel->getMax()));
                 float bestchi2 = 1.e15;
                 for (const FPGATrackSimTrack& track : tracks) {
                     float chi2 = track.getChi2ndof();
@@ -409,7 +410,7 @@ StatusCode FPGATrackSimSecondStageAlg::execute()
 
     if (m_doHoughRootOutput2nd) {
         ATH_MSG_DEBUG("Running HoughRootOutputTool in 2nd stage.");
-        ATH_CHECK(m_houghRootOutputTool->fillTree(roads, truthtracks, offlineTracks, phits_2nd, m_writeOutNonSPStripHits, m_trackScoreCut.value(), m_NumOfHitPerGrouping, true));
+        ATH_CHECK(m_houghRootOutputTool->fillTree(tracks, truthtracks, offlineTracks, phits_2nd, m_writeOutNonSPStripHits, true));
     }
 
     // Reset data pointers
