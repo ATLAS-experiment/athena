@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // ********************************************************************
@@ -398,6 +398,7 @@ StatusCode TileDigiNoiseCalibAlg::fillDigits (const TileDQstatus* theDQstatus) {
       int drawer = m_tileHWID->drawer(adc_id);
       // IMPORTANT! Drawers are from 0 to 63!
 
+      //coverity[STACK_USE]
       double mean_tmp[48][16][2] = {};
 
 
@@ -577,6 +578,7 @@ void TileDigiNoiseCalibAlg::finalDigits() {
               m_meanAmp_ij[ros][drawer][chan_i][chan_j][gain] /= m_evtNr * m_nSamples;
           }
 
+          //coverity[STACK_USE]
           double covar[48][48];
           double mean_cov_ii = 0.; // mean values of covar in diag terms
           double mean_cov_ij = 0.;  // mean values of covar in off diag terms
