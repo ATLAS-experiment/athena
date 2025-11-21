@@ -248,7 +248,7 @@ void test1()
 int main ATLAS_NOT_THREAD_SAFE ()
 {
   std::cout << "TileMutableBeamElemContainer_test\n";
-  TileCablingSvc cabling;
+  auto cabling = std::make_unique<TileCablingSvc>();
   test1();
   return 0;
 }
