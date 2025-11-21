@@ -1,23 +1,24 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ALFA_DETECTORTOOL_H
 #define ALFA_DETECTORTOOL_H
 
 #include "GeoModelUtilities/GeoModelTool.h"
-#include "ALFA_DetectorFactory.h"
+#include "ALFA_DetectorFactory.h" //typedef CONFIGURATION
 #include "AthenaKernel/IIOVDbSvc.h"
-#include "AthenaKernel/IIOVSvc.h"
-#include "AthenaPoolUtilities/CondAttrListCollection.h"
 #include "CxxUtils/checker_macros.h"
+#include "CLHEP/Vector/ThreeVector.h" //CLHEP::Hep3Vector
+
+
 
 #define COOLFOLDER_DETSWCORR "/FWD/ALFA/position_calibration"
 
 typedef struct _USERTRANSFORM
 {
-	int iRPot;
-	double fAngle;
+	int iRPot{};
+	double fAngle{};
 	CLHEP::Hep3Vector vecRotation;
 	CLHEP::Hep3Vector vecTranslation;
 } USERTRANSFORM, *PUSERTRANSFORM;
@@ -27,7 +28,7 @@ typedef struct _USERTRANSFORM
 class ATLAS_NOT_THREAD_SAFE ALFA_DetectorTool final : public GeoModelTool 
 {
  private:
-  CONFIGURATION m_Config;
+  CONFIGURATION m_Config{};
   ALFA_DetectorFactory* m_pALFADetectorFactory{nullptr};
   ServiceHandle< IIOVDbSvc > m_iovDbSvc{this, "IOVDbSvc", "IOVDbSvc"};
 
