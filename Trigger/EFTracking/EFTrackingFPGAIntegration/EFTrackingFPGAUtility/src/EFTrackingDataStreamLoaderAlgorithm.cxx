@@ -216,6 +216,7 @@ StatusCode EFTrackingDataStreamLoaderAlgorithm::finalize() {
   ATH_CHECK(m_GHITZBinOutputKeys.size() == m_GHITZBinOutputPaths.size());
 
   for (std::size_t index = 0; index < m_GHITZBinOutputKeys.size(); index++) {
+    //coverity[ARRAY_VS_SINGLETON]
     ATH_CHECK(writeFile(
       m_GHITZBinOutputPaths.value().at(index), 
       [](
@@ -250,6 +251,7 @@ StatusCode EFTrackingDataStreamLoaderAlgorithm::finalize() {
   ATH_CHECK(m_GHITZBinOutputKeys.size() == m_GHITZBinOutputPaths.size());
 
   for (std::size_t index = 0; index < m_GHITZBinOutputKeys.size(); index++) {
+    //coverity[ARRAY_VS_SINGLETON]
     ATH_CHECK(writeFile(
       m_GHITZBinOutputPaths.value().at(index), 
       [](
@@ -284,6 +286,7 @@ StatusCode EFTrackingDataStreamLoaderAlgorithm::finalize() {
   ATH_CHECK(m_CLUSTERBinOutputKeys.size() == m_CLUSTERBinOutputPaths.size());
 
   for (std::size_t index = 0; index < m_CLUSTERBinOutputKeys.size(); index++) {
+    //coverity[ARRAY_VS_SINGLETON]
     ATH_CHECK(writeFile(
       m_CLUSTERBinOutputPaths.value().at(index), 
       [](
