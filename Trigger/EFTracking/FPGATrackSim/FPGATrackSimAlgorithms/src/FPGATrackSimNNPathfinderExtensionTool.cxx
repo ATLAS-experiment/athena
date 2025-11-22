@@ -152,7 +152,7 @@ StatusCode FPGATrackSimNNPathfinderExtensionTool::extendTracks(const std::vector
                 double radius = std::sqrt(predhit[0] * predhit[0] + predhit[1] * predhit[1]);
                 if ((m_useCartesian && (abs(predhit[0]) > 1024 || abs(predhit[1]) > 1024 || radius > 1024 || abs(predhit[2]) > 3000)) ||
 		    (!m_useCartesian && (abs(predhit[0]) > 1024 || abs(predhit[2]) > 3000))) {
-                    completedRoads.push_back(currentRoad);
+                    completedRoads.push_back(std::move(currentRoad));
                     continue;
                 }
             }
