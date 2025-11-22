@@ -68,6 +68,8 @@ const ZDCJSONConfig::JSONParamList ZDCPulseAnalyzer::JSONConfigParams = {
   {"ampMinSignifHGLG", {JSON::value_t::array, 2, true, false}},
   {"enablePreExclusion", {JSON::value_t::array, 3, false, false}},
   {"enablePostExclusion", {JSON::value_t::array, 3, false, false}},
+  {"enableUnderflowExclusionHG", {JSON::value_t::array, 2, true, false}},
+  {"enableUnderflowExclusionLG", {JSON::value_t::array, 2, true, false}},
   {"enableTimingCorrection", {JSON::value_t::array, 2, false, false}},
   {"timeCorrCoeffHG", {JSON::value_t::array, 0, true, false}},
   {"timeCorrCoeffLG", {JSON::value_t::array, 0, true, false}},
@@ -328,6 +330,7 @@ void ZDCPulseAnalyzer::Reset(bool repass)
     m_adjTimeRangeEvent = false;
     m_backToHG_pre      = false;
     m_fixPrePulse       = false;
+    m_underflowExclusion = false;
 
     m_minADCLG = -1;
     m_maxADCLG = -1;
@@ -941,9 +944,16 @@ bool ZDCPulseAnalyzer::ScanAndSubtractSamples()
 	if ((int) isample < m_firstHGOverFlowSample) m_firstHGOverFlowSample = isample;
       }
       else if (ADCHG < m_HGUnderflowADC) {
-	m_HGUnderflow = true;
-	
-	if (isample == m_preSampleIdx) m_PSHGOverUnderflow  = true;
+	if (m_enableUnderflowExclHG && (isample < m_underFlowExclSamplesPreHG ||
+					isample >= m_NSamplesAna - m_underFlowExclSamplesPostHG)) {
+	  m_useSampleHG[isample] = false;
+	  m_underflowExclusion = true;
+	}
+	else {
+	  m_HGUnderflow = true;
+	  
+	  if (isample == m_preSampleIdx) m_PSHGOverUnderflow  = true;
+	}
       }
     }
 
@@ -974,8 +984,15 @@ bool ZDCPulseAnalyzer::ScanAndSubtractSamples()
       }
       
       if (ADCLG == 0) {
-	m_LGUnderflow = true;
-	m_fail = true;
+	if (m_enableUnderflowExclLG && (isample < m_underFlowExclSamplesPreLG ||
+					isample >= m_NSamplesAna - m_underFlowExclSamplesPostLG)) {
+	  m_underflowExclusion = true;
+	  m_useSampleLG[isample] = false;
+	}
+	else {
+	  m_LGUnderflow = true;
+	  m_fail = true;
+	}
       }
     }
   }
@@ -2213,6 +2230,17 @@ void ZDCPulseAnalyzer::dumpConfiguration() const    // setting
 	       << m_postExclHGADCThresh << ", LG = " << m_postExclLGADCThresh;
     (*m_msgFunc_p)(ZDCMsg::Info, ostrStream.str()); ostrStream.str(""); ostrStream.clear();
   }
+
+  if (m_enableUnderflowExclHG) {
+    ostrStream << "High gain Underflow pre- and post-exclusion enabled for up to " << m_underFlowExclSamplesPreHG
+	       << ", and " << m_underFlowExclSamplesPostHG << " samples, respectively";
+    (*m_msgFunc_p)(ZDCMsg::Info, ostrStream.str()); ostrStream.str(""); ostrStream.clear();
+  }
+  if (m_enableUnderflowExclLG) {
+    ostrStream << "Low gain Underflow pre- and post-exclusion enabled for up to " << m_underFlowExclSamplesPreLG
+	       << ", and " << m_underFlowExclSamplesPostLG << " samples, respectively";
+    (*m_msgFunc_p)(ZDCMsg::Info, ostrStream.str()); ostrStream.str(""); ostrStream.clear();
+  }
   if (m_haveSignifCuts) {
     ostrStream << "Minimum significance cuts applied: HG min. sig. = " << m_sigMinHG << ", LG min. sig. " << m_sigMinLG;
     (*m_msgFunc_p)(ZDCMsg::Info, ostrStream.str()); ostrStream.str(""); ostrStream.clear();
@@ -2247,6 +2275,7 @@ unsigned int ZDCPulseAnalyzer::GetStatusMask() const
   if (repassPulse()) statusMask |= 1 << RepassPulseBit;
   if (armSumInclude()) statusMask |= 1 << ArmSumIncludeBit;
   if (failSigCut()) statusMask |= 1 << FailSigCutBit;
+  if (underflowExclusion()) statusMask |= 1<<UnderFlowExclusionBit;
 
   return statusMask;
 }
@@ -2566,6 +2595,16 @@ std::pair<bool, std::string> ZDCPulseAnalyzer::ConfigFromJSON(const JSON& config
       m_maxSamplesPostExcl  = value[0];
       m_postExclHGADCThresh = value[1];
       m_postExclLGADCThresh = value[2];
+    }
+    else if (key == "enableUnderflowExclusionHG") {
+      m_enableUnderflowExclHG = true;
+      m_underFlowExclSamplesPreHG  = value[0];
+      m_underFlowExclSamplesPostHG = value[1];
+    }
+    else if (key == "enableUnderflowExclusionLG") {
+      m_enableUnderflowExclLG = true;
+      m_underFlowExclSamplesPreLG  = value[0];
+      m_underFlowExclSamplesPostLG = value[1];
     }
     else if (key == "ampMinSignifHGLG") {
       m_haveSignifCuts = true;

@@ -982,7 +982,7 @@ MinBiasChainParts = {
                         'sp1000', 'sp1100', 'sp1200', 'sp1300', 'sp1400', 'sp1500', 'sp1600', 'sp1700', 'sp1800',
                         'sp2000', 'sp2100', 'sp2200', 'sp2300', 'sp2400', 'sp2500', 'sp2700', 'sp2800', 'sp2900', 'sp3000',
                         'sp3100', 'sp3500', 'sp4100', 'sp4500', 'sp4800', 'sp5000', 'sp5200',
-                        'vpix15', 'vpix30', 'vpix35', 'vpix40', 'vpix45', 'vpix50', 'vpix55', 'vpix60',
+                        'vpix15', 'vpix30', 'vpix35', 'vpix40', 'vpix45', 'vpix50', 'vpix55', 'vpix60', 'vpix800',
                         'pix20','pix50','pix100', 'pix200', 'pix500', 'pix1000',
                         'nototpix20', 'nototpix30','nototpix50', 'nototpix70', 'nototpix100', 'nototpix200', 'nototpix500'],
     'pileupInfo'     : ['pusup0', 'pusup7', 'pusup10', 'pusup15', 'pusup20', 'pusup30', 'pusup40','pusup50','pusup60', 'pusup70', 'pusup80', 'pusup90', 'pusup100', 'pusup110', 'pusup120', 'pusup130', 'pusup150', 'pusup180', 'pusup190',

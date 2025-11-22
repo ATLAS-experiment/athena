@@ -798,6 +798,12 @@ def getPhysicsHISignatures():
         ChainProp(name='HLT_mb_sptrk_pt0p8_L1TRT_ZDC_OR_VjTE200',      l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=MinBiasGroup+SupportPhIGroup, monGroups=['mbMon:t0']),
         ChainProp(name='HLT_mb_sptrk_pt0p8_trk2_L1TRT_ZDC_OR_VjTE200', l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=MinBiasGroup+SupportPhIGroup, monGroups=['mbMon:t0']),
 
+        ChainProp(name='HLT_mb_sptrk_sp_vpix800_L1TRT_ZDC_OR_VjTE200',            l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=MinBiasGroup+SupportPhIGroup, monGroups=['mbMon:t0']),
+        ChainProp(name='HLT_mb_sptrk_pt1_sp_vpix800_L1TRT_ZDC_OR_VjTE200',        l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=MinBiasGroup+SupportPhIGroup, monGroups=['mbMon:t0']),
+        ChainProp(name='HLT_mb_sptrk_pt1_sp_vpix800_trk2_L1TRT_ZDC_OR_VjTE200',   l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=MinBiasGroup+SupportPhIGroup, monGroups=['mbMon:t0']),
+        ChainProp(name='HLT_mb_sptrk_pt0p8_sp_vpix800_L1TRT_ZDC_OR_VjTE200',      l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=MinBiasGroup+SupportPhIGroup, monGroups=['mbMon:t0']),
+        ChainProp(name='HLT_mb_sptrk_pt0p8_sp_vpix800_trk2_L1TRT_ZDC_OR_VjTE200', l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=MinBiasGroup+SupportPhIGroup, monGroups=['mbMon:t0']),
+
         # Ditaus
         ChainProp(name='HLT_mb_excl_1trk5_pt0p5_L1TRT_VZDC_A_VZDC_C_VjTE200', l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=MinBiasGroup+SupportPhIGroup),
         ChainProp(name='HLT_mb_excl_1trk5_pt1_L1TRT_VZDC_A_VZDC_C_VjTE200',   l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=MinBiasGroup+SupportPhIGroup),
