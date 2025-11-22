@@ -21,7 +21,6 @@
 
 // Local implementation files
 #include "RootDatabase.h"
-#include "RootCallEnv.h"
 #include "RootKeyContainer.h"
 #include "RootKeyIOHandler.h"
 
