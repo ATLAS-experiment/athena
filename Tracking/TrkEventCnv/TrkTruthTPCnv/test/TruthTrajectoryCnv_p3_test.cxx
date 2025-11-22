@@ -70,7 +70,7 @@ void test1(const std::vector<HepMC::GenParticlePtr> & genPartVector)
   for (int i=0; i<10; i++) {
     auto pGenParticle = genPartVector.at(i);
     HepMcParticleLink trkLink(HepMC::uniqueID(pGenParticle), pGenParticle->parent_event()->event_number(), HepMcParticleLink::IS_EVENTNUM, HepMcParticleLink::IS_ID);
-    trans1.push_back(trkLink);
+    trans1.push_back(std::move(trkLink));
   }
 
   testit (trans1);
