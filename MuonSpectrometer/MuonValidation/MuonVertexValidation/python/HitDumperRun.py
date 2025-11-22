@@ -44,21 +44,22 @@ if __name__ == "__main__":
     flags.Input.Files = args.inputFile 
     flags.Scheduler.ShowDataDeps = True 
     flags.Scheduler.ShowDataFlow = True
-    flags.Detector.EnableMM = False
-    flags.Detector.EnablesTGC = False
-    flags.Detector.EnableRPC = False
-    flags.Detector.EnableMDT = False
-    flags.Detector.EnableTGC = False
-    flags.Detector.EnableCSC = False
     flags.lock()
 
     cfg = SetupMuonStandaloneCA(flags)
     from MuonPRDTest.HitValAlgReco import HitValAlgRecoCfg
     cfg.merge(HitValAlgRecoCfg(flags, outFile=args.outputFile, 
-                               doTruth=False, doMuEntry=False, 
-                               doSDOs=True, doPRDs=True,
-                               doMDTSDO=True, doMDTPRD=True,
-                               doRPCSDO=True, doRPCPRD=True))
+                               doTruth=False, doMuEntry=False,
+                               doSimHits=False, doSDOs=False,
+                               doDigits=False, doRDOs=False,
+                               doPRDs=True,
+                               doMMPRD=True, doSTGCPRD=True,
+                               doRPCPRD=True, doMDTPRD=True,
+                               doTGCPRD=True, doCSCPRD=False,
+                               TgcPrdKey="TGC_MeasurementsAllBCs",
+                               isData=not flags.Input.isMC
+                               ))
+    cfg.printConfig(withDetails=True, summariseProps=True)
 
     flags.dump(evaluate = True)
     execute(cfg)
