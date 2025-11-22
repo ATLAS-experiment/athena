@@ -251,6 +251,7 @@ StatusCode EnergyCalculator::initialize()
     {
       const double Birks_LAr_density = 1.396;
       m_birksLaw = new LArG4BirksLaw(Birks_LAr_density,m_Birksk);
+      ATH_MSG_INFO("Use Birks_LAr_density="<<Birks_LAr_density<<", Birksk="<<(double)m_Birksk);
     }
 
   IRDBRecordset_ptr emecSamplingSep = pAccessSvc->getRecordsetPtr("EmecSamplingSep", larKey, larNode);
