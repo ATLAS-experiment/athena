@@ -9,8 +9,11 @@
 #include <GaudiKernel/EventContext.h>
 #include "AtlasHepMC/GenEvent_fwd.h"
 #include "AtlasHepMC/GenParticle.h"
-#include "G4VUserEventInformation.hh"
 #include "HitManagement/HitCollectionMap.h"
+
+#include <G4EventManager.hh>
+#include "G4VUserEventInformation.hh"
+
 #include <memory>
 /** @class AtlasG4EventUserInfo
 
@@ -117,6 +120,19 @@ public:
   const EventContext& GetEventContext() const { return m_eventContext; }
 
   void Print() const {}
+
+  // Static helper method to get the AtlasG4EventUserInfo from G4EventManager
+  static AtlasG4EventUserInfo* GetEventUserInfo()
+  {
+      // Event manager may be null in unit tests.
+      G4EventManager* eventManager = G4EventManager::GetEventManager();
+      if (!eventManager) {
+          return nullptr;
+      }
+      // User info may be null
+      return static_cast<AtlasG4EventUserInfo*>(eventManager->GetUserInformation());
+  }
+
 
 private:
   const EventContext& m_eventContext;
