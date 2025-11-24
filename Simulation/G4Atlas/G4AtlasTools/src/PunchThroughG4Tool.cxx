@@ -295,15 +295,13 @@ std::vector<std::map<std::string, double>> PunchThroughG4Tool::computePunchThrou
   const G4ParticleDefinition * mainG4Particle = g4PrimaryTrack->GetDefinition();
 
   // Printing for debugging
-  if (msgLvl(MSG::DEBUG) && g4PrimaryTrack) {
-    ATH_MSG_DEBUG("PunchThroughG4Tool::computePunchThroughParticles Debug:"
+  ATH_MSG_DEBUG("PunchThroughG4Tool::computePunchThroughParticles Debug:"
                  << " Incoming particle:"
                  << " E="    << g4PrimaryTrack->GetKineticEnergy()/CLHEP::GeV << " GeV"
                  << " theta=" << g4PrimaryTrack->GetMomentumDirection().theta()
                  << " phi="   << g4PrimaryTrack->GetMomentumDirection().phi()
                  << " PDG="   << (mainG4Particle ? mainG4Particle->GetPDGEncoding() : -999)
                  << " Name="  << (mainG4Particle ? mainG4Particle->GetParticleName() : "UNKNOWN"));
-  }
 
   // Get primary Geant4 particle properties
   int pdgID = mainG4Particle->GetPDGEncoding();
