@@ -55,6 +55,7 @@ private:
   bool m_ignoreSemiDisconnected; // Ignore semi-disconnected particles (normal in Sherpa)
   std::string m_forced_momentum{""}; // Force momentum unit for the event
   std::string m_forced_length{""}; // Force length unit for the event
+  bool m_unitsFix;    // Attempt to identify and fix momentum units problems
   //@}
 
   /// @name Cleaned-particle counters
