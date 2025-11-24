@@ -18,6 +18,7 @@
 #include "PersistentDataModel/Guid.h"
 #include "PersistentDataModel/Token.h"
 
+#include "AthenaKernel/getMessageSvc.h"
 #include "StorageSvc/DbType.h"
 #include "StorageSvc/Shape.h"
 #include "StorageSvc/IStorageSvc.h"
@@ -242,6 +243,7 @@ void test(const DbType storageType, const std::string& filename) {
 }
 
 int main() {
+   Athena::getMessageSvcQuiet = true;
    test(ROOTTREEINDEX_StorageType, "TTreeContIdx_testfile.root");
    test(ROOTRNTUPLE_StorageType, "RNTupleContIdx_testfile.root");
    return 0;

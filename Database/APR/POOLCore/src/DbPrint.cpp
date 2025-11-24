@@ -35,9 +35,5 @@ DbPrint::DbPrint( const std::string& name )
 
 APRMessaging::APRMessaging(const std::string& name) : AthMessaging(name)
 {
-  auto msgSvc = Athena::getMessageSvc(Athena::Options::Eager,true);
-  msgSvc->setOutputLevel(name, DbPrintLvl::getLevel(name) );
+  setLevel( DbPrintLvl::getLevel(name) );
 }
-
-
-  
