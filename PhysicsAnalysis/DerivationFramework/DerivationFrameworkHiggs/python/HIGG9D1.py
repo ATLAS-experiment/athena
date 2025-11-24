@@ -619,7 +619,7 @@ def HIGG9D1Cfg(flags):
         AddRun3TrigNavSlimmingCollectionsToSlimmingHelper(HIGG9D1SlimmingHelper)
 
     # L1 trigger objects
-    from DerivationFrameworkPhys.TriggerMatchingCommonConfig import getDataYear
+    from Campaigns.Utils import getDataYear
     if getDataYear(flags) >= 2024:
         # Run 3 with Phase I jet RoIs.
         from DerivationFrameworkPhys.TriggerMatchingCommonConfig import AddjFexRoIsToSlimmingHelper
