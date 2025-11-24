@@ -14,6 +14,7 @@
 #include "StoreGate/ReadCondHandle.h"
 #include "AthenaKernel/Units.h"
 #include "CxxUtils/trapping_fp.h"
+#include <stdexcept>
 
 using Athena::Units::GeV;
 using Athena::Units::ns;
@@ -163,21 +164,21 @@ StatusCode TileCellMonitorAlgorithm::fillHistograms( const EventContext& ctx ) c
   std::vector<int> timeBalModPartModule;
   std::vector<int> timeBalModPartPartition;
 
-  double energySample[MAX_PART][MAX_SAMP] = {{0.}};
-  int nCells[MAX_PART] = {0};
-  int nBadCells[MAX_PART] = {0};
+  double energySample[MAX_PART][MAX_SAMP]{};
+  int nCells[MAX_PART]{};
+  int nBadCells[MAX_PART]{};
 
   // Arrays for BCID plots
-  int nCellsOverThreshold[MAX_PART] = {0};
+  int nCellsOverThreshold[MAX_PART]{};
 
   // Number of channels masked on the fly
-  int nBadChannelsOnFly[MAX_PART] = {0};
+  int nBadChannelsOnFly[MAX_PART]{};
 
   // Number of channels masked on the fly due to bad DQ status
-  unsigned int nMaskedChannelsDueDQ[MAX_PART] = { 0 };
+  unsigned int nMaskedChannelsDueDQ[MAX_PART]{};
 
   // Number of cells masked on the fly due to bad DQ status
-  unsigned int nMaskedCellsDueDQ[MAX_PART] = { 0 };
+  unsigned int nMaskedCellsDueDQ[MAX_PART]{};
 
   std::vector<int> negOccupModule[Tile::MAX_ROS - 1];
   std::vector<int> negOccupChannel[Tile::MAX_ROS - 1];
@@ -467,7 +468,8 @@ StatusCode TileCellMonitorAlgorithm::fillHistograms( const EventContext& ctx ) c
               && (time != 0)) { // Cell has reconstructed time
             muonCells.push_back(cell);
           }
-
+          //this should never ever happen
+          if (sample >= SAMP_ALL) throw std::runtime_error("TileCellMonitorAlgorithm::fillHistograms: Array index 'sample' exceeds array size.");
           occupEta[sample].push_back(eta);
           occupPhi[sample].push_back(phi);
           occupEnergy[sample].push_back(energy);
