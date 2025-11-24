@@ -11,6 +11,7 @@
 #include "xAODPrimitives/tools/getIsolationAccessor.h"
 #include "xAODPrimitives/tools/getIsolationCorrectionAccessor.h"
 #include "EventPrimitives/EventPrimitivesHelpers.h"
+#include <format>
 #include <stdexcept>
 
 #include <Math/GenVector/PtEtaPhiM4D.h>
@@ -77,11 +78,6 @@ double Egamma_v1::phi() const {
   return acc(*this);
 }
 
-double Egamma_v1::m() const {
-  static const Accessor< float> acc( "m" );
-  return acc(*this);
-}
-
 /// Depends on return value optimization
 Egamma_v1::GenVecFourMom_t Egamma_v1::genvecP4() const {
   return GenVecFourMom_t(pt(), eta(), phi(), m());
@@ -101,15 +97,13 @@ Egamma_v1::FourMom_t Egamma_v1::p4() const {
   return p4;
 }
 
-void Egamma_v1::setP4(float pt, float eta, float phi, float m){
+void Egamma_v1::setPtEtaPhi(float pt, float eta, float phi){
   static const Accessor< float > acc1( "pt" );
   acc1(*this) = pt;
   static const Accessor< float > acc2( "eta" );
   acc2(*this) = eta;
   static const Accessor< float > acc3( "phi" );
   acc3(*this) = phi;
-  static const Accessor< float > acc4( "m" );
-  acc4(*this) = m;
 }
 
 void Egamma_v1::setPt(float pt){
@@ -125,11 +119,6 @@ void Egamma_v1::setEta(float eta){
 void Egamma_v1::setPhi(float phi){
   static const Accessor< float > acc( "phi" );
   acc(*this) = phi;
-}
-
-void Egamma_v1::setM(float m){
-  static const Accessor< float > acc( "m" );
-  acc(*this) = m;
 }
 
 Egamma_v1::EgammaCovMatrix_t Egamma_v1::covMatrix() const{

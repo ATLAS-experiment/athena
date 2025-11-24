@@ -855,11 +855,13 @@ StatusCode EgammaCalibrationAndSmearingTool::initialize() {
     return StatusCode::FAILURE;
   }
   if (m_onlyElectrons.value()) {
+    resetElectron (m_accessors->momAcc, *m_accessors);
     if (m_TESModel == egEnergyCorr::es2011c) {
       resetAccessor (m_accessors->electronTrackAcc, *this, "trackParticleLinks");
     }
   }
   if (m_onlyPhotons.value()) {
+    resetPhoton (m_accessors->momAcc, *m_accessors);
     resetAccessor (m_accessors->photonVertexAcc, *this, "vertexLinks");
   }
   if (m_decorateEmva)
@@ -1019,7 +1021,7 @@ CP::CorrectionCode EgammaCalibrationAndSmearingTool::applyCorrection(
     }
   }
 
-  double energy = acc.eAcc (input);
+  double energy = acc.momAcc.e (input);
   // apply MVA calibration
   if (!m_MVACalibSvc.empty()) {
     egammaMVACalib::GlobalEventInfo gei;
@@ -1228,10 +1230,11 @@ CP::CorrectionCode EgammaCalibrationAndSmearingTool::applyCorrection(
 
 void EgammaCalibrationAndSmearingTool::setPt(columnar::MutableEgammaId input, double energy) const {
   const double new_energy2 = energy * energy;
-  const double m2 = m_accessors->mAcc (input) * m_accessors->mAcc (input);
+  const double m = m_accessors->momAcc.m (input);
+  const double m2 = m * m;
   const double p2 = new_energy2 > m2 ? new_energy2 - m2 : 0.;
   m_accessors->ptOutDec (input) = sqrt(p2) / cosh(m_accessors->etaAcc (input));
-  ATH_MSG_DEBUG("after setting pt, energy = " << m_accessors->eAcc (input));
+  ATH_MSG_DEBUG("after setting pt, energy = " << m_accessors->momAcc.e (input));
 }
 
 double EgammaCalibrationAndSmearingTool::getEnergy(

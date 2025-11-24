@@ -22,6 +22,6 @@ photonWrtPoint::PtEtaPhi photonWrtPoint::PtEtaPhiWrtZ(const xAOD::Egamma& ph,
 
 void photonWrtPoint::correctForZ(xAOD::Egamma& ph, double z) {
   auto corr = photonWrtPoint::PtEtaPhiWrtZ(ph, z);
-  ph.setP4(corr.pt, corr.eta, corr.phi, ph.m());
+  ph.setPtEtaPhi(corr.pt, corr.eta, corr.phi);
 }
 

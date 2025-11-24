@@ -54,7 +54,7 @@ namespace xAODMaker {
       xaod->push_back( photon );
       
       // p4
-      photon->setP4((*itr)->pt(),(*itr)->eta(),(*itr)->phi(),(*itr)->m());
+      photon->setPtEtaPhi((*itr)->pt(),(*itr)->eta(),(*itr)->phi());
       
       // author(s)
       photon->setAuthor( (*itr)->author() );
