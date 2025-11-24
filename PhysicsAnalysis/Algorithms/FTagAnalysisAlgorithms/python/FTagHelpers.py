@@ -34,7 +34,7 @@ def getReadFromBTaggingObject(flags, jetCollection, defaultReadFromBTaggingObjec
     # Define the default value (since default is None) to be used 
     # in case we do not have enough information at our disposal 
     # to determine the strategy to adopt
-    defaultReadFromBTaggingObject = True
+    defaultReadFromBTaggingObject = False
     
     # No auto configuration flag thus using default value 
     if flags is None: 
