@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ISF_FastCaloSimEvent/TFCSParametrizationBase.h"
@@ -89,6 +89,7 @@ void TFCSParametrizationBase::Print(Option_t *option) const {
 
 void TFCSParametrizationBase::FindDuplicates(
     FindDuplicateClasses_t &dupclasses) {
+
   for (unsigned int i = 0; i < size(); ++i)
     if ((*this)[i]) {
       TFCSParametrizationBase *param = (*this)[i];
@@ -96,8 +97,16 @@ void TFCSParametrizationBase::FindDuplicates(
       // If param is already in the duplication list, skip over
       auto checkexist = dup.find(param);
       if (checkexist != dup.end()) {
-        ATH_MSG_DEBUG("Found duplicate pointer for: " << param << "="
-                                                      << param->GetName());
+        ATH_MSG_WARNING(" [TFCSParametrizationBase::FindDuplicates] "
+                        "DUPLICATE POINTER DETECTED");
+
+        ATH_MSG_WARNING(" - Pointer           : " << param);
+        ATH_MSG_WARNING(" - Name              : " << param->GetName());
+        ATH_MSG_WARNING(" - Class             : " << param->ClassName());
+        ATH_MSG_WARNING(" - Occurs in parent  : " << this
+                          << " (" << this->ClassName() << ")"
+                          << " index=" << i);
+
         if (checkexist->second.replace) {
           TFCSParametrizationBase *refparam = checkexist->second.replace;
           ATH_MSG_DEBUG("Found duplicate pointer: "
@@ -125,9 +134,10 @@ void TFCSParametrizationBase::FindDuplicates(
         // Check for objects with identical content
         if (*param == *refparam) {
           ATH_MSG_DEBUG("Found duplicate: "
-                        << refparam << "=" << refparam->GetName()
+                       << refparam << "=" << refparam->GetName()
                         << ", duplicate is " << param << "=" << param->GetName()
                         << " index " << i << " of " << this);
+
           dup[param].replace = refparam;
           dup[refparam].mother.push_back(this);
           dup[refparam].index.push_back(i);
