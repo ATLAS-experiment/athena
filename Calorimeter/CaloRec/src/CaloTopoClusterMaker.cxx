@@ -568,16 +568,13 @@ CaloTopoClusterMaker::execute(const EventContext& ctx,
       m_calo_id->get_neighbours(hashid,opt,theNeighbors);
       // loop over all neighbors of that cell (Seed Growing Algo)
       for (IdentifierHash nId : theNeighbors) {
-        CaloCell_ID::SUBCALO otherSubDet =
-          (CaloCell_ID::SUBCALO)m_calo_id->sub_calo(nId);
-	if ( otherSubDet != CaloCell_ID::NSUBCALO &&
-             otherSubDet != CaloCell_ID::NOT_VALID &&
-             m_subcaloUsed[otherSubDet] )
+        CaloCell_ID::SUBCALO otherSubDet = (CaloCell_ID::SUBCALO)m_calo_id->sub_calo(nId);
+        bool valid = otherSubDet < CaloCell_ID::NSUBCALO;//NOT_VALID value exceeds this
+	      if ( valid && m_subcaloUsed[otherSubDet] )
         {
 	  HashCell neighborCell = hashCells[nId];
 	  if ( neighborCell.getCaloTopoTmpClusterCell() ) {
-	    CaloTopoTmpClusterCell* pNCell =
-              neighborCell.getCaloTopoTmpClusterCell();
+	    CaloTopoTmpClusterCell* pNCell = neighborCell.getCaloTopoTmpClusterCell();
 	    // check neighbor threshold only since seed cells are already in
 	    // the original list 
 	    bool isAboveNeighborThreshold = 
