@@ -10,6 +10,7 @@
 
 
 #undef NDEBUG
+#include "AthenaKernel/getMessageSvc.h"
 #include "TileEvent/TileMutableDigitsContainer.h"
 #include "TileConditions/TileCablingService.h"
 #include "TileIdentifier/TileHWID.h"
@@ -266,6 +267,7 @@ void test1()
 
 int main ATLAS_NOT_THREAD_SAFE ()
 {
+  Athena::getMessageSvcQuiet = true;
   std::cout << "TileMutableDigitsContainer_test\n";
   auto cabling = std::make_unique<TileCablingSvc>();
   test1();
