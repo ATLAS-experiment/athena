@@ -193,12 +193,6 @@ private:
   unsigned int m_underFlowExclSamplesPreLG{0};
   unsigned int m_underFlowExclSamplesPostLG{0};
   
-  // Enable of a user-provided filter on the FADC samples
-  //
-  bool m_haveUserFilter{false};
-  void (*m_userFilterHG)(std::vector<float>& FADCSamples, std::vector<bool> useSamples){};
-  void (*m_userFilterLG)(std::vector<float>& FADCSamples, std::vector<bool> useSamples){};
-  
   //
   unsigned int m_timingCorrMode{NoTimingCorr};
   float m_timingCorrRefADC{500};
