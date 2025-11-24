@@ -37,7 +37,7 @@ StatusCode CTPUnpackingEmulationTool::parseInputFile() {
     }
 
     if ( not ids.empty() ) {
-      m_events.push_back( ids ); // new event
+      m_events.push_back( std::move(ids) ); // new event
     }
   }
   inputFile.close();
