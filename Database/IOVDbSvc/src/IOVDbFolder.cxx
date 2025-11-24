@@ -1146,6 +1146,7 @@ void IOVDbFolder::dumpFile(const std::string& dumpName
   const std::string sanitisedFolder=fMain+"/"+sanitiseFilename(m_foldername);
   const std::string fabricatedName=sanitisedFolder+delimiter+std::to_string(vkey)+fileSuffix;
   std::filesystem::create_directory(fMain);
+  std::remove(fabricatedName.c_str());
   myFile.open(fabricatedName,std::ios::out);
   if (not myFile.is_open()) {
     std::string errorMessage{"File creation for "+fabricatedName+" failed."};
