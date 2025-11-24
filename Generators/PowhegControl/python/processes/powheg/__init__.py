@@ -59,6 +59,7 @@ from .W_EW import W_EW
 from .W_SMEFT import W_SMEFT
 from .Wbb import Wbb
 from .Wbbj import Wbbj
+from .Wc import Wc
 from .Wj import Wj
 from .Wj_MiNNLO import Wj_MiNNLO
 from .Wjj import Wjj
