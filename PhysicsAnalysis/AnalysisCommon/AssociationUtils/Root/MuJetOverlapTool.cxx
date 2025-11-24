@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // System includes
@@ -8,6 +8,8 @@
 // Framework includes
 #include "AthContainers/ConstDataVector.h"
 #include "AthContainers/ConstAccessor.h"
+#include "AsgTools/CurrentContext.h"
+#include "AsgDataHandles/ReadHandle.h"
 
 // Local includes
 #include "AssociationUtils/MuJetOverlapTool.h"
@@ -17,7 +19,7 @@
 namespace
 {
   /// Unit conversion constants
-  const double GeV = 1e3;
+  const double GeV = 1e3; // FIXME local unit definition!!
 }
 
 namespace ORUtils
@@ -59,8 +61,6 @@ namespace ORUtils
                     "Maximum allowed size of sliding dR cone");
     declareProperty("UseRapidity", m_useRapidity = true,
                     "Calculate delta-R using rapidity");
-    declareProperty("PVContainerName", m_PVContName = "PrimaryVertices",
-                    "PV Container to use");
   }
 
   //---------------------------------------------------------------------------
@@ -68,6 +68,8 @@ namespace ORUtils
   //---------------------------------------------------------------------------
   StatusCode MuJetOverlapTool::initializeDerived()
   {
+    ATH_CHECK ( m_PVContName.initialize() );
+
     // Initialize the b-jet helper
     if(!m_bJetLabel.empty()) {
       ATH_MSG_DEBUG("Configuring btag-aware OR with btag label: " << m_bJetLabel);
@@ -214,8 +216,9 @@ namespace ORUtils
   //---------------------------------------------------------------------------
   const xAOD::Vertex* MuJetOverlapTool::getPrimVtx() const
   {
-    const xAOD::VertexContainer* vertices = nullptr;
-    if(evtStore()->retrieve(vertices, m_PVContName).isSuccess()) {
+    const EventContext &ctx = Gaudi::Hive::currentContext();
+    SG::ReadHandle<xAOD::VertexContainer> vertices{m_PVContName, ctx};
+    if (vertices.isValid()) {
       for(auto vtx : *vertices) {
         if(vtx->vertexType() == xAOD::VxType::PriVtx)
           return vtx;

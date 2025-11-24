@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // System includes
@@ -8,6 +8,8 @@
 
 // Framework includes
 #include "AthContainers/ConstDataVector.h"
+#include "AsgTools/CurrentContext.h"
+#include "AsgDataHandles/ReadHandle.h"
 
 // Local includes
 #include "AssociationUtils/AltMuJetOverlapTool.h"
@@ -16,7 +18,7 @@
 namespace
 {
   /// Unit conversion constants
-  const double GeV = 1e3;
+  const double GeV = 1e3; // FIXME local unit definition!!
 }
 
 namespace ORUtils
@@ -145,16 +147,16 @@ namespace ORUtils
   //---------------------------------------------------------------------------
   const xAOD::Vertex* AltMuJetOverlapTool::getPrimVtx() const
   {
-    const char* contName = "PrimaryVertices";
-    const xAOD::VertexContainer* vertices = nullptr;
-    if(evtStore()->retrieve(vertices, contName).isSuccess()) {
+    const EventContext &ctx = Gaudi::Hive::currentContext();
+    SG::ReadHandle<xAOD::VertexContainer> vertices{m_PVContName, ctx};
+    if (vertices.isValid()) {
       for(auto vtx : *vertices) {
         if(vtx->vertexType() == xAOD::VxType::PriVtx)
           return vtx;
       }
     }
     else {
-      ATH_MSG_WARNING("Failed to retrieve " << contName);
+      ATH_MSG_WARNING("Failed to retrieve " << m_PVContName);
     }
     return nullptr;
   }
