@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // ===========================================================================
@@ -33,36 +33,37 @@
 
 // ===========================================================================
 
-const int      slink2ppmChannel[64] = 
+
+
+
+namespace {
+  constexpr int      slink2ppmChannel[64] = 
   {0,  4,  8,  12,  16,  20,  24,  28,  32,  36,  40,  44,  48,  52,  56,  60,
    3,  7, 11,  15,  19,  23,  27,  31,  35,  39,  43,  47,  51,  55,  59,  63,
    1,  5,  9,  13,  17,  21,  25,  29,  33,  37,  41,  45,  49,  53,  57,  61,
    2,  6, 10,  14,  18,  22,  26,  30,  34,  38,  42,  46,  50,  54,  58,  62 };
 
+  uint32_t bitFieldSize(uint32_t word, uint8_t offset, uint8_t size) {
+    return (word >> offset) & ((1U << size) - 1);
+  }
 
+  uint32_t coolId(uint8_t crate, uint8_t module, uint8_t channel) {
+    const uint8_t pin = channel % 16;
+    const uint8_t asic = channel / 16;
+    return (crate << 24) | (1 << 20) | (module << 16) | (pin << 8) | asic;
+  } 
 
-namespace {
-uint32_t bitFieldSize(uint32_t word, uint8_t offset, uint8_t size) {
-  return (word >> offset) & ((1U << size) - 1);
-}
-
-uint32_t coolId(uint8_t crate, uint8_t module, uint8_t channel) {
-  const uint8_t pin = channel % 16;
-  const uint8_t asic = channel / 16;
-  return (crate << 24) | (1 << 20) | (module << 16) | (pin << 8) | asic;
-} 
-
-int16_t pedCorrection(uint16_t twoBytePedCor) {
-  return twoBytePedCor > 511? (twoBytePedCor - 1024): twoBytePedCor;
-}
+  int16_t pedCorrection(uint16_t twoBytePedCor) {
+    return twoBytePedCor > 511? (twoBytePedCor - 1024): twoBytePedCor;
+  }
 
 #if 0
-std::string noAuxSuffix(const std::string& name) {
-  if ((name.size() > 4) && (name.substr(name.size()-4, 4) == "Aux.")) {
-    return name.substr(0, name.size() - 4);
+  std::string noAuxSuffix(const std::string& name) {
+    if ((name.size() > 4) && (name.substr(name.size()-4, 4) == "Aux.")) {
+      return name.substr(0, name.size() - 4);
+    }
+    return name;
   }
-  return name;
-}
 #endif
 }
 // namespace removed since I was not planning on putting everything into the LVL1BS namespace (yet)
@@ -140,11 +141,6 @@ StatusCode ZdcByteStreamReadV1V2Tool::convert(
 }
 
 // Conversion bytestream to trigger towers and then to ZDC digits
-/*
-StatusCode ZdcByteStreamReadV1V2Tool::convert(
-    const IROBDataProviderSvc::VROBFRAG& robFrags,
-    ZdcDigitsCollection* zdcCollection) 
-*/
 StatusCode ZdcByteStreamReadV1V2Tool::convert(   
 					      const IROBDataProviderSvc::VROBFRAG& robFrags,
 					      ZdcDigitsCollection* zdcCollection) const
@@ -155,22 +151,23 @@ StatusCode ZdcByteStreamReadV1V2Tool::convert(
   ttCollection->setStore(aux);
 
   ATH_MSG_DEBUG("Getting TT collection!");
-
   StatusCode sc = convert(robFrags,ttCollection);
 
   ATH_MSG_DEBUG("Got it!");
 
-  if (sc != StatusCode::SUCCESS)
-    {
+  if (sc != StatusCode::SUCCESS) {
       ATH_MSG_DEBUG("ZDC TT Conversion failed");
       return sc;
-    }
+  }
   
   ATH_MSG_DEBUG("convertTT2ZD");
+  //convertTT2ZD 'new-s' and returns a bare ptr for ZdcDigitsCollection... 
+  //return by value or a unique_ptr would be safer
   ZdcDigitsCollection* zc = convertTT2ZD(ttCollection);  
-      
   ATH_MSG_DEBUG("convertedTT2ZD!  Now copying");
-  (*zdcCollection) = (*zc); // will copy work?;
+  (*zdcCollection) = (*zc); 
+  //...so zc should be deleted
+  delete zc; 
   ATH_MSG_DEBUG("Copied!");
 
   return StatusCode::SUCCESS;
