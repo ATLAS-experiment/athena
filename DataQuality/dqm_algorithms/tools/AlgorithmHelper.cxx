@@ -1154,8 +1154,13 @@ dqm_algorithms::tools::buildCluster( binContainer& seed, const std::vector<std::
     //Perpare to check the cluster's new neighbors:
     binsToCheck = std::move(newNeighbors);
 
-    cluster.x = pvpX / cluster.value;
-    cluster.y = pvpY / cluster.value;
+    if (cluster.value != 0) {
+      cluster.x = pvpX / cluster.value;
+      cluster.y = pvpY / cluster.value;
+    }
+    else {
+      cluster.x = cluster.y = 0;
+    }
   }//Finished finding bins in cluster
 
   //Assume that the input errors are uncorrelated (or that the caller will deal with this)
