@@ -30,6 +30,7 @@ atlas_add_library( LArCafJobsLib
                    src/LArNoiseBursts.cxx
                    src/LArHECNoise.cxx
                    src/LArReadCells.cxx
+                   src/LArReadSC.cxx
                    PUBLIC_HEADERS LArCafJobs
                    INCLUDE_DIRS ${CLHEP_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS}
                    LINK_LIBRARIES ${CLHEP_LIBRARIES} ${ROOT_LIBRARIES} AthAnalysisToolsLib AthenaBaseComps AthenaKernel CaloConditions CaloDetDescrLib CaloIdentifier CaloUtilsLib GaudiKernel Identifier LArCablingLib LArElecCalib LArIdentifier LArRawConditions LArRawEvent LArRecConditions StoreGateLib TrigDecisionToolLib egammaEvent LumiBlockData LArRecEvent

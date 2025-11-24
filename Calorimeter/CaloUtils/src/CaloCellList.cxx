@@ -28,7 +28,7 @@ square(double x)
 
 CaloCellList::CaloCellList(const CaloDetDescrManager* mgr, const CaloCellContainer* cell_container)
   : m_cellcont(cell_container)
-  , m_mgr(mgr)
+  , m_mgr(dynamic_cast<const CaloDetDescrManager_Base*>(mgr))
   , m_energy(0)
   , m_et(0)
 {
@@ -40,7 +40,7 @@ CaloCellList::CaloCellList(const CaloDetDescrManager* mgr, const CaloCellContain
 // specify one calo number
 CaloCellList::CaloCellList(const CaloDetDescrManager* mgr, const CaloCellContainer* cell_container, const CaloCell_ID::SUBCALO caloNum)
   : m_cellcont(cell_container)
-  , m_mgr(mgr)  
+  , m_mgr(dynamic_cast<const CaloDetDescrManager_Base*>(mgr))  
   , m_energy(0)
   , m_et(0)
 {
@@ -53,13 +53,24 @@ CaloCellList::CaloCellList(const CaloDetDescrManager* mgr, const CaloCellContain
 CaloCellList::CaloCellList(const CaloDetDescrManager* mgr, const CaloCellContainer* cell_container,
                            const std::vector<CaloCell_ID::SUBCALO>& caloNums)
   : m_cellcont(cell_container)
-  , m_mgr(mgr)  
+  , m_mgr(dynamic_cast<const CaloDetDescrManager_Base*>(mgr))  
   , m_energy(0)
   , m_et(0)
 
 {
   m_caloNums.clear();
   std::copy(caloNums.begin(), caloNums.end(), back_inserter(m_caloNums));
+}
+
+CaloCellList::CaloCellList(const CaloSuperCellDetDescrManager* mgr, const CaloCellContainer* cell_container)
+  : m_cellcont(cell_container)
+  , m_mgr(dynamic_cast<const CaloDetDescrManager_Base*>(mgr))
+  , m_energy(0)
+  , m_et(0)
+{
+  m_caloNums.clear();
+  // NSUBCALO indicate take them all
+  m_caloNums.push_back(CaloCell_ID::NSUBCALO);
 }
 
 
