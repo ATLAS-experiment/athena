@@ -1,5 +1,5 @@
 /*
-	Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+	Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "AFP_Calibration/AFP_NoisyPixelTool.h"
@@ -11,29 +11,23 @@ int AFP_NoisyPixelTool::Identify(std::shared_ptr<const TH2F> input, std::vector<
 		return 0;
 	}
 	
-	output.reserve(4);
+	output[0].Reset();
+	output.resize(4, output[0]);//container now has 4 copies of the 0'th element
+	auto name = [&output](const char * n)->TString{
+	  return Form(n,output[0].GetName());
+	};
+	auto title = [&output](const char * t)->TString{
+	  return Form(t,output[0].GetTitle());
+	};
+	output[1].SetNameTitle(name("leffpixels_found_%s"), title("low efficiency pixels, found, %s"));
+	output[2].SetNameTitle(name("noisypixels_eff_%s"), title("noisy pixels, efficiency, %s"));
+	output[3].SetNameTitle(name("leffpixels_eff_%s"), title("low efficiency pixels, efficiency, %s"));
+	output[0].SetNameTitle(name("noisypixels_found_%s"), title("noisy pixels, found, %s"));
 	
-	TH2F& template_output = output.at(0);
-	template_output.Reset();
-	
-	TH2F tmp_output1(template_output);
-	tmp_output1.SetNameTitle(Form("leffpixels_found_%s",template_output.GetName()), Form("low efficiency pixels, found, %s", template_output.GetTitle()));
-
-	TH2F tmp_output2(template_output);
-	tmp_output2.SetNameTitle(Form("noisypixels_eff_%s",template_output.GetName()), Form("noisy pixels, efficiency, %s", template_output.GetTitle()));
-
-	TH2F tmp_output3(template_output);
-	tmp_output3.SetNameTitle(Form("leffpixels_eff_%s",template_output.GetName()), Form("low efficiency pixels, efficiency, %s", template_output.GetTitle()));
-	TH2F& noisypixels_found_output = output.at(0);
-	noisypixels_found_output.SetNameTitle(Form("noisypixels_found_%s",template_output.GetName()), Form("noisy pixels, found, %s", template_output.GetTitle()));
-
-	output.push_back(tmp_output1);
-	output.push_back(tmp_output2);
-	output.push_back(tmp_output3);
-
-	TH2F& leffpixels_found_output = output.at(1);
-	TH2F& noisypixels_eff_output = output.at(2);
-	TH2F& leffpixels_eff_output = output.at(3);
+  TH2F& noisypixels_found_output = output[0];
+	TH2F& leffpixels_found_output = output[1];
+	TH2F& noisypixels_eff_output = output[2];
+	TH2F& leffpixels_eff_output = output[3];
 		
 	
 	if(input->GetMaximum()<0.5) return 0;
