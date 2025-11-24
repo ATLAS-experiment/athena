@@ -1,10 +1,9 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 import sys
 
 from PyJobTransforms.CommonRunArgsToFlags import commonRunArgsToFlags
 from PyJobTransforms.TransformUtils import processPreExec, processPreInclude, processPostExec, processPostInclude
-from LArCafJobs.LArReadCellsConfig import LArReadCellsCfg
 from AthenaConfiguration.MainServicesConfig import MainServicesCfg
 
 
@@ -26,6 +25,7 @@ def fromRunArgs(runArgs):
     flags.LAr.OFCShapeFolder="4samples3bins17phases"
     flags.Input.Files=runArgs.inputBSFile
     flags.LArShapeDump.outputNtup="CELLS"
+    flags.LArShapeDump.doSCReco=runArgs.doReco
 
     #protection for LArPEB event:
     flags.Trigger.triggerConfig = 'DB'
@@ -43,7 +43,12 @@ def fromRunArgs(runArgs):
     cfg=MainServicesCfg(flags)
     from AthenaConfiguration.ComponentFactory import CompFactory
     cfg.addService(CompFactory.THistSvc(Output=["CELLS DATAFILE='"+runArgs.outputNTUP_LARCELLSFile+"' OPT='RECREATE'",]))
-    cfg.merge(LArReadCellsCfg(flags))
+    if runArgs.isSC:
+       from LArCafJobs.LArReadCellsConfig import LArReadSCCfg
+       cfg.merge(LArReadSCCfg(flags))
+    else:
+       from LArCafJobs.LArReadCellsConfig import LArReadCellsCfg
+       cfg.merge(LArReadCellsCfg(flags))
 
     processPostInclude(runArgs, flags, cfg)
     processPostExec(runArgs, flags, cfg)
