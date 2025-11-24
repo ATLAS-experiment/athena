@@ -779,13 +779,8 @@ inline
 void
 TRT_ID::invalidMessage() const {
 
-  if (m_msgSvc) {
-    ATH_MSG_ERROR(" TRT_ID is NOT valid for this layout. ");
-    ATH_MSG_ERROR(" Please use 'trt_id->is_valid()' if a layout test is needed. ");
-  } else {
-    std::cout << " ERROR TRT_ID is NOT valid for this layout. " << std::endl;
-    std::cout << " ERROR Please use 'trt_id->is_valid()' if a layout test is needed. " << std::endl;
-  }
+  ATH_MSG_ERROR(" TRT_ID is NOT valid for this layout. ");
+  ATH_MSG_ERROR(" Please use 'trt_id->is_valid()' if a layout test is needed. ");
 }
 
 //----------------------------------------------------------------------------

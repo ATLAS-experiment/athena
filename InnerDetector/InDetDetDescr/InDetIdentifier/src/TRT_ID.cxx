@@ -126,7 +126,7 @@ TRT_ID::layer_id_checks(int barrel_ec,
 
 int
 TRT_ID::initialize_from_dictionary(const IdDictMgr& dict_mgr) {
-  ATH_MSG_INFO("Initialize from dictionary msgSvc " << m_msgSvc);
+  ATH_MSG_INFO("Initialize from dictionary");
   // Check whether this helper should be reinitialized
   if (!reinitialize(dict_mgr)) {
     ATH_MSG_INFO("Request to reinitialize not satisfied - tags have not changed");
