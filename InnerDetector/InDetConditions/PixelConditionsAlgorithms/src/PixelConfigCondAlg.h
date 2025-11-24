@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file PixelConditionsAlgorithms/PixelConfigCondAlg.h
@@ -118,38 +118,38 @@ class PixelConfigCondAlg : public AthReentrantAlgorithm {
     // See  https://twiki.cern.ch/twiki/bin/view/Atlas/PixelConditionsRUN2
     // for further details.
     //
-    //======================================================================================
-    // MC Project:                    RUN3                     RUN3                     RUN3
-    // Year:                          2022                     2023                     2024
-    // MC Run Number:               410000                   450000                   470000
-    // Reference run#:                 ---                      ---                      ---
-    // Luminosity(fb-1):           186fb-1                  235fb-1    270(IBL) 300(PIX)fb-1
+    //===============================================================================================================
+    // MC Project:                    RUN3                     RUN3                     RUN3                     RUN3
+    // Year:                          2022                     2023                     2024                     2025
+    // MC Run Number:               410000                   450000                   470000                   495000
+    // Reference run#:                 ---                      ---                      ---                      ---
+    // Luminosity(fb-1):           186fb-1                  235fb-1    270(IBL) 300(PIX)fb-1    400(IBL) 430(PIX)fb-1
     //
     // Barrel:
-    //  ToT:         [  -1,   3,   5,   5]    [  -1,   3,   5,   5]    [  -1,   3,   5,   5]
-    //  Latency:     [  -1, 150, 256, 256]    [  -1, 150, 256, 256]    [  -1, 150, 256, 256]
-    //  Duplicaiton: [ N/A,   F,   F,   F]    [ N/A,   F,   F,   F]    [ N/A,   F,   F,   F]
-    //  SmallHit:    [ N/A,   0,   0,   0]    [ N/A,   0,   0,   0]    [ N/A,   0,   0,   0]
-    //  TimingTune:  [ N/A,2022,2022,2022]    [ N/A,2022,2022,2022]    [ N/A,2022,2022,2022]
-    //  CrossTalk:   [0.30,0.12,0.12,0.12]    [0.30,0.12,0.12,0.12]    [0.30,0.12,0.12,0.12]
-    //  NoiseOcc.:   [5e-8,5e-8,5e-8,5e-8]    [5e-8,5e-8,5e-8,5e-8]    [5e-8,5e-8,5e-8,5e-8]
-    //  DisablePix:  [9e-3,9e-3,9e-3,9e-3]    [9e-3,9e-3,9e-3,9e-3]    [9e-3,9e-3,9e-3,9e-3]
-    //  NoiseShape:  [2018,2018,2018,2018]    [2018,2018,2018,2018]    [2018,2018,2018,2018]
-    //  BiasVoltage: [ 450, 450, 300, 300]    [ 450, 450, 350, 350]    [ 450, 500, 350, 350]
-    //  Fluence(e14):[ 7.2, 6.8, 3.0, 2.0]    [  13, 9.2, 4.5, 3.1]    [  15,  11, 5.0, 3.6]
+    //  ToT:         [  -1,   3,   5,   5]    [  -1,   3,   5,   5]    [  -1,   3,   5,   5]    [  -1,   3,   5,   5]
+    //  Latency:     [  -1, 150, 256, 256]    [  -1, 150, 256, 256]    [  -1, 150, 256, 256]    [  -1, 150, 256, 256]
+    //  Duplicaiton: [ N/A,   F,   F,   F]    [ N/A,   F,   F,   F]    [ N/A,   F,   F,   F]    [ N/A,   F,   F,   F]
+    //  SmallHit:    [ N/A,   0,   0,   0]    [ N/A,   0,   0,   0]    [ N/A,   0,   0,   0]    [ N/A,   0,   0,   0]
+    //  TimingTune:  [ N/A,2022,2022,2022]    [ N/A,2022,2022,2022]    [ N/A,2022,2022,2022]    [ N/A,2022,2022,2022]    
+    //  CrossTalk:   [0.30,0.12,0.12,0.12]    [0.30,0.12,0.12,0.12]    [0.30,0.12,0.12,0.12]    [0.30,0.12,0.12,0.12]
+    //  NoiseOcc.:   [5e-8,5e-8,5e-8,5e-8]    [5e-8,5e-8,5e-8,5e-8]    [5e-8,5e-8,5e-8,5e-8]    [5e-8,5e-8,5e-8,5e-8]   
+    //  DisablePix:  [9e-3,9e-3,9e-3,9e-3]    [9e-3,9e-3,9e-3,9e-3]    [9e-3,9e-3,9e-3,9e-3]    [9e-3,9e-3,9e-3,9e-3]
+    //  NoiseShape:  [2018,2018,2018,2018]    [2018,2018,2018,2018]    [2018,2018,2018,2018]    [2018,2018,2018,2018]
+    //  BiasVoltage: [ 450, 450, 300, 300]    [ 450, 450, 350, 350]    [ 450, 500, 350, 350]    [ 500, 500, 350, 350]
+    //  Fluence(e14):[ 7.2, 6.8, 3.0, 2.0]    [  13, 9.2, 4.5, 3.1]    [  15,  11, 5.0, 3.6]    [  22,  15, 6.6, 4.5]
     //
     // Endcap:
-    //  ToT:         [   5,   5,   5]         [   5,   5,   5]         [   5,   5,   5]
-    //  Latency:     [ 256, 256, 256]         [ 256, 256, 256]         [ 256, 256, 256]
-    //  Duplicaiton: [   F,   F,   F]         [   F,   F,   F]         [   F,   F,   F]
-    //  SmallHit:    [   0,   0,   0]         [   0,   0,   0]         [   0,   0,   0]
-    //  TimingTune:  [2022,2022,2022]         [2022,2022,2022]         [2022,2022,2022]
-    //  CrossTalk:   [0.06,0.06,0.06]         [0.06,0.06,0.06]         [0.06,0.06,0.06]
-    //  NoiseOcc.:   [5e-8,5e-8,5e-8]         [5e-8,5e-8,5e-8]         [5e-8,5e-8,5e-8]
-    //  DisablePix:  [9e-3,9e-3,9e-3]         [9e-3,9e-3,9e-3]         [9e-3,9e-3,9e-3]
-    //  NoiseShape:  [2018,2018,2018]         [2018,2018,2018]         [2018,2018,2018]
-    //  BiasVoltage: [ 300, 300, 300]         [ 350, 350, 350]         [ 350, 350, 350]
-    //  Fluence(e14):[ n/a, n/a, n/a]         [ n/a, n/a, n/a]         [ n/a, n/a, n/a]
+    //  ToT:         [   5,   5,   5]         [   5,   5,   5]         [   5,   5,   5]         [   5,   5,   5]
+    //  Latency:     [ 256, 256, 256]         [ 256, 256, 256]         [ 256, 256, 256]         [ 256, 256, 256]
+    //  Duplicaiton: [   F,   F,   F]         [   F,   F,   F]         [   F,   F,   F]         [   F,   F,   F]
+    //  SmallHit:    [   0,   0,   0]         [   0,   0,   0]         [   0,   0,   0]         [   0,   0,   0]
+    //  TimingTune:  [2022,2022,2022]         [2022,2022,2022]         [2022,2022,2022]         [2022,2022,2022]
+    //  CrossTalk:   [0.06,0.06,0.06]         [0.06,0.06,0.06]         [0.06,0.06,0.06]         [0.06,0.06,0.06]
+    //  NoiseOcc.:   [5e-8,5e-8,5e-8]         [5e-8,5e-8,5e-8]         [5e-8,5e-8,5e-8]         [5e-8,5e-8,5e-8]
+    //  DisablePix:  [9e-3,9e-3,9e-3]         [9e-3,9e-3,9e-3]         [9e-3,9e-3,9e-3]         [9e-3,9e-3,9e-3]
+    //  NoiseShape:  [2018,2018,2018]         [2018,2018,2018]         [2018,2018,2018]         [2018,2018,2018]
+    //  BiasVoltage: [ 300, 300, 300]         [ 350, 350, 350]         [ 350, 350, 350]         [ 350, 350, 350]
+    //  Fluence(e14):[ n/a, n/a, n/a]         [ n/a, n/a, n/a]         [ n/a, n/a, n/a]         [ n/a, n/a, n/a]
     //
     // DBM: Terminated. All values are dummy.
     //  ToT:         [  -1,  -1,  -1]
@@ -159,7 +159,7 @@ class PixelConfigCondAlg : public AthReentrantAlgorithm {
     //  BiasVoltage: [ 500, 500, 500]
     //
     // IBL 3D:
-    //  Fluence(e14):[ 7.5]                   [ 7.5]                   [10.2]
+    //  Fluence(e14):[ 7.5]                   [ 7.5]                   [10.2]                   [15.6]
     //
     // See  https://twiki.cern.ch/twiki/bin/view/Atlas/PixelConditionsRUN3
     // for further details.
@@ -172,7 +172,7 @@ class PixelConfigCondAlg : public AthReentrantAlgorithm {
     {this, "PixelParameterConditionsFolder", "PixelConditionsAlgorithms/v1/", "Folder name for pixel parameter conditions"};
 
     Gaudi::Property<std::string> m_conditionsFileName
-    {this, "PixelParameterConditionsFile", "PixelParametersList-03.dat", "File name for pixel parameter conditions"};
+    {this, "PixelParameterConditionsFile", "PixelParametersList-04.dat", "File name for pixel parameter conditions"};
 
     Gaudi::Property<std::string> m_usePrivateFileName
     {this, "UsePrivateFileName", "", "File name for private pixel settings (default:empty)"};
