@@ -429,6 +429,9 @@ def triggerBSOutputCfg(flags, hypos, offline=False):
             if flags.Trigger.enableL1CaloLegacy or not flags.Trigger.enableL1MuonPhase1:
                 writingOutputs += ['ROIB::RoIBResult#RoIBResult']
                 writingInputs += [('ROIB::RoIBResult', 'StoreGateSvc+RoIBResult')]
+            if flags.Trigger.CTP.UseEDMxAOD:
+                writingOutputs += ['xAOD::CTPResult#CTPResult']
+                writingInputs += [('xAOD::CTPResult', 'StoreGateSvc+CTPResult')]
 
             from TrigT1ResultByteStream.TrigT1ResultByteStreamConfig import L1TriggerByteStreamEncoderCfg
             acc.merge(L1TriggerByteStreamEncoderCfg(flags))
