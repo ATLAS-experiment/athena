@@ -29,10 +29,15 @@ namespace Gep{
   pGepCellMap getCellMap() {
 	return std::make_unique<std::map<unsigned int,Gep::GepCaloCell>>(m_cellMap);
   }
+
+  void setNumberOfOverflowingFEB2s(int n) { m_nFeb2sInOverflow = n; }
+
+  int getNumberOfOverflowingFEB2s() { return m_nFeb2sInOverflow; }
   
   private:  
 
     std::map<unsigned int,Gep::GepCaloCell> m_cellMap;
+    int m_nFeb2sInOverflow = -1;
 
   };
 }
