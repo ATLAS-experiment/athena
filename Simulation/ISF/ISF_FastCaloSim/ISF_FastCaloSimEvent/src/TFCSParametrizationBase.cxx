@@ -217,17 +217,17 @@ void TFCSParametrizationBase::Copy2GPU() {
     TFCSParametrizationBase *param = (*this)[i];
     TString name = param->ClassName();
     if (name.EqualTo("TFCSLateralShapeParametrizationHitChain")) {
-      auto size = ((TFCSLateralShapeParametrizationHitChain *)param)->size();
+      auto size = (static_cast<TFCSLateralShapeParametrizationHitChain *>(param))->size();
       for (size_t ichain = 0; ichain < size; ++ichain) {
         TFCSParametrizationBase *hitsim =
-            (*((TFCSLateralShapeParametrizationHitChain *)param))[ichain];
+            *(static_cast<TFCSLateralShapeParametrizationHitChain *>(param))[ichain];
         TString hitsimname = hitsim->ClassName();
         if (hitsimname.EqualTo("TFCSHistoLateralShapeParametrization")) {
-          ((TFCSHistoLateralShapeParametrization *)hitsim)->LoadHistFuncs();
+          (static_cast<TFCSHistoLateralShapeParametrization *>(hitsim))->LoadHistFuncs();
         } else if (hitsimname.EqualTo("TFCSHitCellMappingWiggle")) {
-          ((TFCSHitCellMappingWiggle *)hitsim)->LoadHistFuncs();
+          (static_cast<TFCSHitCellMappingWiggle *>(hitsim))->LoadHistFuncs();
         } else if (hitsimname.EqualTo("TFCSHistoLateralShapeGausLogWeight")) {
-          ((TFCSHistoLateralShapeGausLogWeight *)hitsim)->LoadHist();
+          (static_cast<TFCSHistoLateralShapeGausLogWeight *>(hitsim))->LoadHist();
         }
       }
     }

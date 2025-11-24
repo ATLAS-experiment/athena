@@ -7,16 +7,11 @@
 
 // local includes
 #include "ISF_FastCaloSimEvent/TFCSLateralShapeParametrizationHitBase.h"
-#include "ISF_FastCaloSimEvent/TFCSSimulationState.h"
+#include "ISF_FastCaloSimEvent/FastCaloSim_CaloCell_ID.h"// CaloCell_ID_FCS::CaloSample_FCS enum
 
-// External includes
-#include <RtypesCore.h>
-#include <TMath.h>
-
-#include <fstream>
 #include <tuple>
-#include <vector>
 
+class TFCSSimulationState;
 class ICaloGeometry;
 
 class TFCSBinnedShowerBase : public TFCSLateralShapeParametrizationHitBase {
@@ -65,7 +60,7 @@ class TFCSBinnedShowerBase : public TFCSLateralShapeParametrizationHitBase {
   }
 
  protected:
-  ICaloGeometry *m_geo;  //! do not persistify
+  ICaloGeometry *m_geo{};  //! do not persistify
 
   // Called at the beginning of the simulation to store and or generate the
   // needed shower data for the current event

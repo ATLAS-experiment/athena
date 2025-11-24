@@ -53,14 +53,14 @@ VNetworkBase::NetworkOutputs TFCSMLCalorimeterSimulator::predictVoxels(TFCSSimul
   VNetworkBase::NetworkInputs inputs;
 
   int i = 0;
-  for (float eta : eta_vector) {
-    inputs["inn_eta_in"].insert(std::pair<std::string, double>("variable_" + std::to_string(i), eta));
+  for (float thisEta : eta_vector) {
+    inputs["inn_eta_in"].insert(std::pair<std::string, double>("variable_" + std::to_string(i), thisEta));
     i++;
   }
 
   i = 0;
-  for (float energy : energy_vector) {
-    inputs["inn_einc_in"].insert(std::pair<std::string, double>("variable_" + std::to_string(i), energy));
+  for (float thisEnergy : energy_vector) {
+    inputs["inn_einc_in"].insert(std::pair<std::string, double>("variable_" + std::to_string(i), thisEnergy));
     i++;
   }
 

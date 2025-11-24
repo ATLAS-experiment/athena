@@ -163,16 +163,16 @@ void TFCSBinnedShowerONNX::load_bin_boundaries(const std::string &filename,
     auto &event_bins = m_coordinates.at(layer_index);
     switch (i) {
       case 0:
-        event_bins.R_lower = data;
+        event_bins.R_lower = std::move(data);
         break;
       case 1:
-        event_bins.R_size = data;
+        event_bins.R_size = std::move(data);
         break;
       case 2:
-        event_bins.alpha_lower = data;
+        event_bins.alpha_lower = std::move(data);
         break;
       case 3:
-        event_bins.alpha_size = data;
+        event_bins.alpha_size = std::move(data);
         break;
     }
   }
@@ -244,11 +244,11 @@ void TFCSBinnedShowerONNX::compute_n_hits_and_elayer(
   }
   // Store the hits per layer vector
   std::vector<std::vector<long unsigned int>> *hits_per_layer_ptr =
-      new std::vector<std::vector<long unsigned int>>(hits_per_layer);
+      new std::vector<std::vector<long unsigned int>>(std::move(hits_per_layer));
   simulstate.setAuxInfo<void *>("BSNHits"_FCShash, hits_per_layer_ptr);
 
   // Store the energy per layer
-  std::vector<float> *elayer_ptr = new std::vector<float>(elayer);
+  std::vector<float> *elayer_ptr = new std::vector<float>(std::move(elayer));
   simulstate.setAuxInfo<void *>("BSELayer"_FCShash, elayer_ptr);
 }
 
@@ -593,6 +593,6 @@ void TFCSBinnedShowerONNX::load_sub_bin_distribution(
     }
   }
 
-  m_upscaling_energies = energies;
-  m_sub_bin_distribution = data;
+  m_upscaling_energies = std::move(energies);
+  m_sub_bin_distribution = std::move(data);
 }
