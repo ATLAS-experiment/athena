@@ -303,6 +303,9 @@ def getPhysicsHISignatures():
         ChainProp(name='HLT_j40a_preselVETOMULT11a15_pf_jes_ftf_L1ESP_VZDC_A_VZDC_C_jJ10_VjTE200', l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=SingleJetGroup+SupportPhIGroup),
         ChainProp(name='HLT_j40a_preselVETOMULT11a15_pf_jes_ftf_L1ESP_ZDC_XOR_jJ10_VjTE200',       l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=SingleJetGroup+SupportPhIGroup),
 
+        ChainProp(name='HLT_j0_MULT0mult11XX15ptXX0eta490_j30a_pf_jes_ftf_L1RIS_ZDC_XOR_jJ10_VjTE200',       l1SeedThresholds=['FSNOSEED']*2, stream=[UPCStream], groups=SingleJetGroup+SupportPhIGroup),
+        ChainProp(name='HLT_j30a_preselVETOMULT11a15_pf_jes_ftf_L1RIS_ZDC_XOR_jJ10_VjTE200',       l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=SingleJetGroup+SupportPhIGroup),
+
         ChainProp(name='HLT_j0_MULT0mult11XX10ptXX0eta490_j10f_pf_jes_ftf_L1TEA_VZDC_A_VZDC_C_jJ5p30ETA49_VjTE200',  l1SeedThresholds=['FSNOSEED']*2, stream=[UPCStream], groups=SingleJetGroup+SupportPhIGroup),
         ChainProp(name='HLT_j0_MULT0mult11XX10ptXX0eta490_j10f_pf_jes_ftf_L1TEA_ZDC_XOR_jJ5p30ETA49_VjTE200',        l1SeedThresholds=['FSNOSEED']*2, stream=[UPCStream], groups=SingleJetGroup+SupportPhIGroup),
         ChainProp(name='HLT_j0_MULT0mult11XX15ptXX0eta490_j15f_pf_jes_ftf_L1TEA_VZDC_A_VZDC_C_jJ5p30ETA49_VjTE200',  l1SeedThresholds=['FSNOSEED']*2, stream=[UPCStream], groups=SingleJetGroup+SupportPhIGroup),
