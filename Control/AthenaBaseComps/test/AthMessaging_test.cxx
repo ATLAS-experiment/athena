@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration.
  */
 
 /**
@@ -24,9 +24,14 @@ struct MyObj : public AthMessaging {
   MyObj()                    : AthMessaging("MyObj1")         {}
   /// Constructor with explicit MessageSvc
   MyObj(IMessageSvc* msgSvc) : AthMessaging(msgSvc, "MyObj2") {}
+  /// Constructor with explicit output level
+  MyObj(MSG::Level lvl)      : AthMessaging("MyObj3")         {
+    setLevel(lvl);
+  }
 
   void print()
   {
+    ATH_MSG_DEBUG("Good morning");
     ATH_MSG_WARNING("Hello");
     ATH_MSG_INFO("World");
   }
@@ -40,6 +45,13 @@ void test(IMessageSvc* msgSvc)
 
   MyObj obj2(msgSvc);
   obj2.print();
+
+  MyObj obj3(MSG::DEBUG);
+  obj3.print();
+
+  // Checking a level < OutputLevel should not result in getMessageSvc warning
+  MyObj obj4(MSG::WARNING);
+  obj4.msgLvl(MSG::DEBUG);
 }
 
 

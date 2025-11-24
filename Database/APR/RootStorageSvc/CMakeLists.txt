@@ -24,7 +24,7 @@ atlas_generate_componentslist( RootStorageSvc )
 atlas_add_test( branchContIdx_test
    SOURCES test/branchContIdx_test.cxx
    INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
-   LINK_LIBRARIES ${ROOT_LIBRARIES} PersistencySvc StorageSvc
+   LINK_LIBRARIES ${ROOT_LIBRARIES} AthenaKernel PersistencySvc StorageSvc
    LOG_IGNORE_PATTERN "Token for .*"
 )
 
