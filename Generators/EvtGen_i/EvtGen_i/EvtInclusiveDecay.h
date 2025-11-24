@@ -62,9 +62,7 @@ public:
   StatusCode execute();
   StatusCode finalize();
   std::string xmlpath(void);
-#ifdef HEPMC3
-  struct ParticleIdCompare {bool operator()(const HepMC::GenParticlePtr& a,const HepMC::GenParticlePtr& b) const {return a->id() < b->id();}};
-#endif
+  struct ParticleIdCompare {bool operator()(const HepMC::GenParticlePtr& a,const HepMC::GenParticlePtr& b) const {return (a)&&(b)&&(a->momentum().e() < b->momentum().e());}};
 private:
 
   /// @name Features for derived classes to use internally
@@ -74,21 +72,13 @@ private:
   CLHEP::HepRandomEngine* getRandomEngineDuringInitialize(const std::string& streamName, unsigned long int randomSeedOffset, unsigned int conditionsRun=1, unsigned int lbn=1) const;
   //@}
 
-#ifdef HEPMC3
   StatusCode traverseDecayTree(HepMC::GenParticlePtr p,
                                bool isToBeRemoved,
                                std::set<HepMC::GenVertexPtr>& visited,
                                std::set<HepMC::GenParticlePtr,ParticleIdCompare>& toBeDecayed);
-#else
-  StatusCode traverseDecayTree(HepMC::GenParticlePtr p,
-                               bool isToBeRemoved,
-                               std::set<HepMC::GenVertexPtr>& visited,
-                               std::set<int>& toBeDecayed);
-#endif
   void removeDecayTree(HepMC::GenEvent* hepMC, HepMC::GenParticlePtr p);
   void decayParticle(HepMC::GenEvent* hepMC, HepMC::GenParticlePtr p);
-  void addEvtGenDecayTree(HepMC::GenEvent* hepMC, HepMC::GenParticlePtr part,
-                          EvtParticle* evtPart, EvtVector4R treeStart, double momentumScaleFactor = 1.0);
+  void addEvtGenDecayTree(HepMC::GenEvent* hepMC, HepMC::GenParticlePtr part, EvtParticle* evtPart, EvtVector4R treeStart, double momentumScaleFactor = 1.0);
 
   bool isToBeDecayed(HepMC::ConstGenParticlePtr p, bool doCrossChecks);
   bool isDefaultB(const int pId) const;
@@ -97,16 +87,10 @@ private:
   double invMass(HepMC::ConstGenParticlePtr p1, HepMC::ConstGenParticlePtr p2);
 
   // Utility functions to print HepMC record for debugging with optional
-  // coloring by status code and highlighting of particles in a specific list of barcodes
-#ifdef HEPMC3
-  void printHepMC(HepMC::GenEvent* hepMC, std::set<HepMC::GenParticlePtr,ParticleIdCompare>* barcodeList = nullptr);
-  unsigned int printTree(HepMC::GenParticlePtr p, std::set<HepMC::GenVertexPtr>& visited, int level, std::set<HepMC::GenParticlePtr,ParticleIdCompare>* barcodeList = nullptr);
-  std::string pdgName(HepMC::ConstGenParticlePtr p, bool statusHighlighting = false, std::set<HepMC::GenParticlePtr,ParticleIdCompare>* barcodeList = nullptr);
-#else
-  void printHepMC(HepMC::GenEvent* hepMC, std::set<int>* barcodeList = nullptr);
-  unsigned int printTree(HepMC::GenParticlePtr p, std::set<HepMC::GenVertexPtr>& visited,int level, std::set<int>* barcodeList = nullptr);
-  std::string pdgName(HepMC::ConstGenParticlePtr p, bool statusHighlighting = false, std::set<int>* barcodeList = nullptr);
-#endif
+  // coloring by status code and highlighting of particles in a specific list
+  void printHepMC(HepMC::GenEvent* hepMC, std::set<HepMC::GenParticlePtr,ParticleIdCompare>* particleSet = nullptr);
+  unsigned int printTree(HepMC::GenParticlePtr p, std::set<HepMC::GenVertexPtr>& visited, int level, std::set<HepMC::GenParticlePtr,ParticleIdCompare>* particleSet = nullptr);
+  std::string pdgName(HepMC::ConstGenParticlePtr p, bool statusHighlighting = false, std::set<HepMC::GenParticlePtr,ParticleIdCompare>* particleSet = nullptr);
 
   // Random number service
   ServiceHandle<IAthRNGSvc> m_rndmSvc{this, "RndmSvc", "AthRNGSvc"};
