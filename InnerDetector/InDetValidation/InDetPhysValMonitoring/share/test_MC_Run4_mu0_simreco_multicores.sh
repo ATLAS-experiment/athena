@@ -164,7 +164,7 @@ case $ArtProcess in
 	--preExec "default:flags.Output.HISTFileName='${dcubemon_sim}';" \
 	--postInclude 'default:PyJobTransforms.UseFrontier' 'HitAnalysis.PostIncludes.ITkHitAnalysis'\
 	--preInclude 'EVNTtoHITS:Campaigns.PhaseIISimulation' \
-	--geometryVersion "default:${geometry}" \
+	--geometryVersion "default:${geotag}" \
 	--inputEVNTFile ${ArtInFile} \
 	--outputHITSFile $hits \
 	--maxEvents ${maxEvents} \
@@ -179,7 +179,6 @@ case $ArtProcess in
         run Digi_tf.py \
 	    --conditionsTag "default:${conditionsTag}" \
 	    --digiSeedOffset1 170 --digiSeedOffset2 170 \
-	    --geometryVersion "default:${geometry}" \
 	    --inputHITSFile $hits \
 	    --jobNumber 568 \
 	    --maxEvents -1 \
