@@ -4,32 +4,16 @@
 
 #include "ISF_FastCaloSimEvent/TFCSBinnedShowerBase.h"
 
-#include <cmath>
-#include <cstdlib>
-
-#include "HepPDT/ParticleData.hh"
+#include "HepPDT/ParticleData.hh" //for HepPDT::ParticleID
 #include "ISF_FastCaloSimEvent/TFCSExtrapolationState.h"
-// #include "ISF_FastCaloSimEvent/TFCSInitWithEkin.h"
-#include "ISF_FastCaloSimEvent/TFCSLateralShapeParametrizationHitBase.h"
 #include "ISF_FastCaloSimEvent/TFCSSimulationState.h"
 #include "ISF_FastCaloSimEvent/TFCSTruthState.h"
 
-#if defined(__FastCaloSimStandAlone__)
-#include "CLHEP/Random/TRandomEngine.h"
-#else
-#include <CLHEP/Random/RanluxEngine.h>
-#endif
+#include "TMath.h"
 
-#include <H5Cpp.h>
-#include <TFile.h>
-#include <TH2.h>
-
-#include <algorithm>
-
-#include "CLHEP/Random/RandFlat.h"
-#include "ISF_FastCaloSimEvent/ICaloGeometry.h"
-#include "TBuffer.h"
-#include "TClass.h"
+#include <cmath>
+#include <cstdlib>
+#include <limits>
 
 //=============================================
 //======= TFCSBinnedShowerBase =========
@@ -94,10 +78,7 @@ FCSReturnCode TFCSBinnedShowerBase::simulate(
 
 FCSReturnCode TFCSBinnedShowerBase::simulate_hit(
     Hit &hit, TFCSSimulationState &simulstate, const TFCSTruthState *truth,
-    const TFCSExtrapolationState *extrapol) {
-
-  // Extrapol unused, but needed for the interface
-  (void)extrapol;
+    const TFCSExtrapolationState */*extrapol*/) {
 
   const int pdgId = truth->pdgid();
   const float charge = HepPDT::ParticleID(pdgId).charge();
@@ -110,7 +91,8 @@ FCSReturnCode TFCSBinnedShowerBase::simulate_hit(
 
   ATH_MSG_VERBOSE(" Layer " << layer_index << " Extrap eta " << center_eta
                             << " phi " << center_phi << " R " << center_r);
-
+                            
+  //next MR: change to std::abs, std::sqrt functions
   const float dist000 = TMath::Sqrt(center_r * center_r + center_z * center_z);
   const float eta_jakobi = TMath::Abs(2.0 * TMath::Exp(-center_eta) /
                                       (1.0 + TMath::Exp(-2 * center_eta)));
@@ -126,8 +108,8 @@ FCSReturnCode TFCSBinnedShowerBase::simulate_hit(
   hit.E() = E;
 
   if (layer_index <= CaloCell_ID_FCS::CaloSample_FCS::FCAL0) {
-    float delta_eta_mm = r * cos(alpha);
-    float delta_phi_mm = r * sin(alpha);
+    float delta_eta_mm = r * std::cos(alpha);
+    float delta_phi_mm = r * std::sin(alpha);
 
     // Particles with negative eta are expected to have the same shape
     // as those with positive eta after transformation: delta_eta -->
@@ -153,8 +135,8 @@ FCSReturnCode TFCSBinnedShowerBase::simulate_hit(
                                 << " layer " << layer_index);
 
   } else {  // FCAL is in (x,y,z)
-    const float hit_r = r * cos(alpha) + center_r;
-    float delta_phi = r * sin(alpha) / center_r;
+    const float hit_r = r * std::cos(alpha) + center_r;
+    float delta_phi = r * std::sin(alpha) / center_r;
     // We derive the shower shapes for electrons and positively charged
     // hadrons. Particle with the opposite charge are expected to have the
     // same shower shape after the transformation: delta_phi -->
@@ -162,8 +144,8 @@ FCSReturnCode TFCSBinnedShowerBase::simulate_hit(
     if ((charge < 0. && pdgId != 11) || pdgId == -11)
       delta_phi = -delta_phi;
     const float hit_phi = TVector2::Phi_mpi_pi(center_phi + delta_phi);
-    hit.x() = hit_r * cos(hit_phi);
-    hit.y() = hit_r * sin(hit_phi);
+    hit.x() = hit_r * std::cos(hit_phi);
+    hit.y() = hit_r * std::sin(hit_phi);
     hit.z() = center_z;
     ATH_MSG_VERBOSE(" Hit x " << hit.x() << " y " << hit.y() << " layer "
                               << layer_index);
