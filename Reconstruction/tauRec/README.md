@@ -10,11 +10,11 @@ The following is a summary of the configuration and the python steering files:
 
 0. The entry point called by general reconstruction is the [TauReconstructionCfg](https://gitlab.cern.ch/atlas/athena/-/blob/main/Reconstruction/tauRec/python/TauConfig.py) function. This in turn calls three main configuration blocks, one for the tau building ( from seed jet to tau object ), one to run the topoclustering for the pi0 reconstruction/tau particle flow, and the last block to schedule other tools acting on the tau object. 
 
-1. The first config block is the [TauBuildAlgCfg](https://gitlab.cern.ch/atlas/athena/-/blob/main/Reconstruction/tauRec/python/TauConfig.py), where the TauBuilder algorithm is created and where all the steps starting from the seedjet to tau track classification and LC TauEnergyScale calibration are steered. All the tools configuration can be found in [TauToolHolder](https://gitlab.cern.ch/atlas/athena/-/blob/main/Reconstruction/tauRec/python/TauToolHolder.py) while the tool implementation can be found in [tauRecTools](https://gitlab.cern.ch/atlas/athena/blob/main/Reconstruction/tauRecTools/)
+1. The first config block is the [TauBuildAlgCfg](https://gitlab.cern.ch/atlas/athena/-/blob/main/Reconstruction/tauRec/python/TauConfig.py), where the TauBuilder algorithm is created and where all the steps starting from the seedjet to tau track classification and cluster association. All the tools configuration can be found in [TauToolHolder](https://gitlab.cern.ch/atlas/athena/-/blob/main/Reconstruction/tauRec/python/TauToolHolder.py) while the tool implementation can be found in [tauRecTools](https://gitlab.cern.ch/atlas/athena/blob/main/Reconstruction/tauRecTools/)
 
 2. The second config block deals with the tools scheduled to perform the topoclustering for the pi0 reconstruction/tau particle flow. A separated block is needed because this runs per event, unlike the builder and the runner which are running per object. 
 
-3. The third config block is the [TauRunnerAlgCfg](https://gitlab.cern.ch/atlas/athena/-/blob/main/Reconstruction/tauRec/python/TauConfig.py), where the TauRunner algorithm is created and where all steps from tau particle flow to Final TauEnergyScale, Tau Identification/Classification are steered. All the tools configuration can be found in [TauToolHolder](https://gitlab.cern.ch/atlas/athena/-/blob/main/Reconstruction/tauRec/python/TauToolHolder.py), while the tool implementation can be found in [tauRecTools](https://gitlab.cern.ch/atlas/athena/blob/main/Reconstruction/tauRecTools/)
+3. The third config block is the [TauRunnerAlgCfg](https://gitlab.cern.ch/atlas/athena/-/blob/main/Reconstruction/tauRec/python/TauConfig.py), where the TauRunner algorithm is created and where all steps from tau particle flow to the TauEnergyScale, Tau Identification/Classification are steered. All the tools configuration can be found in [TauToolHolder](https://gitlab.cern.ch/atlas/athena/-/blob/main/Reconstruction/tauRec/python/TauToolHolder.py), while the tool implementation can be found in [tauRecTools](https://gitlab.cern.ch/atlas/athena/blob/main/Reconstruction/tauRecTools/)
 
 Note that the tools can be created with input arguments, so that they can be changed. This is required in some cases where a tool is used multiple times but with different configurations. In this case the tool configuration in [TauToolHolder](https://gitlab.cern.ch/atlas/athena/-/blob/main/Reconstruction/tauRec/python/TauToolHolder.py) can be changed using the flags from [TauConfigFlags](https://gitlab.cern.ch/atlas/athena/-/blob/main/Reconstruction/tauRec/python/TauConfigFlags.py). This allows options to be set for multiple tools at once, and for them to be set via the command line
 
@@ -27,7 +27,7 @@ The TauBuilder is used to:
   * Associate a vertex
   * Associate tracks
   * Classify tracks
-  * Build identification variables that require cells or athena geometry
+  * Associate vertex corrected clusters 
   * Create Pi0 candidates
 
 The builder sets up the required tools. 
@@ -37,10 +37,12 @@ The builder sets up the required tools.
 This algorithm runs calculations that require input from the tools scheduled in the previous algorithms and:
 
   * Construct pi0 clusters (part of substructure)
-  * Compute common variables used in tau ID and energy scale calculations
   * Run substructure tools
+  * Run Calo based EnergyScale
   * Run PanTau
   * MVA TauEnergyScale
+  * Apply pt cut on calibrated taus
+  * Build identification variables used tauID or subsequent algorithms
   * Tau Identification score and flattening
   * Evaluate and decorate scores
 
