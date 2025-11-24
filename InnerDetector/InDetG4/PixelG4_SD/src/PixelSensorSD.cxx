@@ -314,12 +314,10 @@ G4bool PixelSensorSD::ProcessHits(G4Step* aStep, G4TouchableHistory* /*ROhist*/)
   // get the HepMcParticleLink from the TrackHelper
 
   TrackHelper trHelp(aStep->GetTrack());
-  // Event Manager may be null in unit tests...
+  // Temporary solution to get EventContext from a Geant4 thread 
   EventContext const* eventContext{nullptr};
-  if(auto* eventManger = G4EventManager::GetEventManager()){
-    if(auto* eventInfo = static_cast<AtlasG4EventUserInfo*>(eventManger->GetUserInformation())){
-      eventContext = &eventInfo->GetEventContext();
-    }
+  if(auto* eventInfo = AtlasG4EventUserInfo::GetEventUserInfo()){
+    eventContext = &eventInfo->GetEventContext();
   }
 
   m_HitColl->Emplace(lP1,
