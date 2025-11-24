@@ -2,8 +2,6 @@
   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "GaudiKernel/MsgStream.h"
-
 #include "HGTD_Identifier/HGTD_ID.h"
 #include "IdDict/IdDictDictionary.h"
 #include "IdDict/IdDictField.h"
@@ -51,11 +49,8 @@ HGTD_ID::wafer_id_checks ( int endcap,
     id << indet_field_value() << hgtd_field_value()
        << endcap << layer << phi_module << eta_module;
     if (!m_full_wafer_range.match(id)) {  // module range check is sufficient
-        MsgStream log(m_msgSvc, "HGTD_ID");
-        if(m_msgSvc) log << MSG::ERROR << " HGTD_ID::wafer_id result is NOT ok. ID, range " 
-                         << (std::string)id << "   " << (std::string)m_full_wafer_range << endmsg;
-        else std::cout << " ERROR HGTD_ID::wafer_id result is NOT ok. ID, range " 
-                       << (std::string)id << "   " << (std::string)m_full_wafer_range << std::endl;
+        ATH_MSG_ERROR(" HGTD_ID::wafer_id result is NOT ok. ID, range "
+                      << (std::string)id << "   " << (std::string)m_full_wafer_range);
     }
 }
 
@@ -76,11 +71,8 @@ HGTD_ID::pixel_id_checks ( int endcap,
        << endcap << layer << phi_module << eta_module << phi_index << eta_index;
 
     if (!m_full_pixel_range.match(id)) {
-        MsgStream log(m_msgSvc, "HGTD_ID");
-        if(m_msgSvc) log << MSG::ERROR << " HGTD_ID::pixel_id result is NOT ok. ID, range " 
-                         << (std::string)id << " " << (std::string)m_full_pixel_range << endmsg;
-        else std::cout << " ERROR HGTD_ID::pixel_id result is NOT ok. ID, range " 
-                       << (std::string)id << " " << (std::string)m_full_pixel_range << std::endl;
+        ATH_MSG_ERROR(" HGTD_ID::pixel_id result is NOT ok. ID, range "
+                      << (std::string)id << " " << (std::string)m_full_pixel_range);
     }
 }
 
@@ -208,19 +200,15 @@ int
 HGTD_ID::initialize_from_dictionary(const IdDictMgr& dict_mgr)
 {
 
-    MsgStream log(m_msgSvc, "HGTD_ID");
-    if(m_msgSvc) log << MSG::INFO << "Initialize from dictionary" << endmsg;
-    else         std::cout << " INFO Initialize from dictionary" << std::endl;
-
+    ATH_MSG_INFO("Initialize from dictionary");
+    
     // Check whether this helper should be reinitialized
     if (!reinitialize(dict_mgr)) {
-        if(m_msgSvc) log << MSG::INFO << "Request to reinitialize not satisfied - tags have not changed" << endmsg;
-        else std::cout << " INFO Request to reinitialize not satisfied - tags have not changed" << std::endl;
+        ATH_MSG_INFO("Request to reinitialize not satisfied - tags have not changed");
         return (0);
     }
     else {
-        if(m_msgSvc) log << MSG::DEBUG << "(Re)initialize" << endmsg;
-        else         std::cout << " DEBUG (Re)initialize" << std::endl;
+        ATH_MSG_DEBUG("(Re)initialize");
     }
 
     // init base object
@@ -231,10 +219,7 @@ HGTD_ID::initialize_from_dictionary(const IdDictMgr& dict_mgr)
 
     m_dict = dict_mgr.find_dictionary ("InnerDetector"); 
     if(!m_dict) {
-        if(m_msgSvc) log << MSG::FATAL << " HGTD_ID::initialize_from_dict - cannot access InnerDetector dictionary "
-                         << endmsg;
-        else std::cout << " FATAL HGTD_ID::initialize_from_dict - cannot access InnerDetector dictionary "
-                       << std::endl;
+        ATH_MSG_FATAL(" HGTD_ID::initialize_from_dict - cannot access InnerDetector dictionary ");
         return (1);
     }
 
@@ -251,36 +236,22 @@ HGTD_ID::initialize_from_dictionary(const IdDictMgr& dict_mgr)
     const IdDictDictionary* atlasDict = dict_mgr.find_dictionary ("ATLAS"); 
     int inDetField   = -1;
     if (atlasDict->get_label_value("subdet", "InnerDetector", inDetField)) {
-        if(m_msgSvc) log << MSG::FATAL << "Could not get value for label 'InnerDetector' of field 'subdet' in dictionary " 
-                         << atlasDict->name()
-                         << endmsg;
-        else std::cout << " FATAL Could not get value for label 'InnerDetector' of field 'subdet' in dictionary " 
-                       << atlasDict->name()
-                       << std::endl;
+        ATH_MSG_FATAL("Could not get value for label 'InnerDetector' of field 'subdet' in dictionary "
+                      << atlasDict->name());
         return (1);
     }
 
     // Find value for the field HGTD
     int hgtdField   = -1;
     if (m_dict->get_label_value("part", "HGTD", hgtdField)) {
-        if(m_msgSvc) log << MSG::FATAL << "Could not get value for label 'HGTD' of field 'part' in dictionary " 
-                         << m_dict->name()
-                         << endmsg;
-        else std::cout << " FATAL Could not get value for label 'HGTD' of field 'part' in dictionary " 
-                       << m_dict->name()
-                       << std::endl;
+        ATH_MSG_FATAL("Could not get value for label 'HGTD' of field 'part' in dictionary " 
+                      << m_dict->name());
         return (1);
     }
-    if(m_msgSvc) log << MSG::DEBUG << " HGTD_ID::initialize_from_dict " 
-                     << "Found field values: InDet/HGTD "  
-                     << inDetField << "/"
-                     << hgtdField
-                     << endmsg;
-    else std::cout << " DEBUG HGTD_ID::initialize_from_dict " 
-                   << "Found field values: InDet/HGTD "  
-                   << inDetField << "/"
-                   << hgtdField
-                   << std::endl;
+    ATH_MSG_DEBUG(" HGTD_ID::initialize_from_dict "
+                  << "Found field values: InDet/HGTD "
+                  << inDetField << "/"
+                  << hgtdField);
 
     // Set up id for region and range prefix
     ExpandedIdentifier region_id;
@@ -296,24 +267,9 @@ HGTD_ID::initialize_from_dictionary(const IdDictMgr& dict_mgr)
     // Setup hash tables for finding neighbors
     if(init_neighbors()) return (1);
 
-    if(m_msgSvc) {
-        log << MSG::DEBUG << " HGTD_ID::initialize_from_dict " 
-            << endmsg;
-        log << MSG::DEBUG  
-            << "Wafer range -> " << (std::string)m_full_wafer_range
-            <<  endmsg;
-        log << MSG::DEBUG 
-            << "Pixel range -> " << (std::string)m_full_pixel_range
-            << endmsg;
-    }
-    else {
-        std::cout << " DEBUG HGTD_ID::initialize_from_dict " 
-                  << std::endl;
-        std::cout << " DEBUG Wafer range -> " << (std::string)m_full_wafer_range
-                  <<  std::endl;
-        std::cout << " DEBUG Pixel range -> " << (std::string)m_full_pixel_range
-                  << std::endl;
-    }
+    ATH_MSG_DEBUG("HGTD_ID::initialize_from_dict");
+    ATH_MSG_DEBUG("Wafer range -> " << (std::string)m_full_wafer_range);
+    ATH_MSG_DEBUG("Pixel range -> " << (std::string)m_full_pixel_range);
     return 0;
 }
 
@@ -326,8 +282,6 @@ HGTD_ID::init_hashes()
     // the moment, we implement a hash for wafers but NOT for pixels
     // (too many)
     //
-
-    MsgStream log(m_msgSvc, "HGTD_ID");
 
     // wafer hash
     m_wafer_hash_max = m_full_wafer_range.cardinality();
@@ -347,30 +301,19 @@ HGTD_ID::init_hashes()
                                       exp_id[m_PHI_MODULE_INDEX],
                                       exp_id[m_ETA_MODULE_INDEX]);
             if(!(ids.insert(id)).second) {
-                if(m_msgSvc) log << MSG::FATAL << " HGTD_ID::init_hashes "
-                                 << " Error: duplicated id for wafer id. nid " << nids
-                                 << " id " << show_to_string(id)
-                                 << " exp id " << (std::string)exp_id 
-                                 << " " << (std::string)m_full_wafer_range << endmsg;
-                else std::cout << " FATAL HGTD_ID::init_hashes "
-                               << " Error: duplicated id for wafer id. nid " << nids
-                               << " id " << show_to_string(id)
-                               << " exp id " << (std::string)exp_id 
-                               << " " << (std::string)m_full_wafer_range << std::endl;
-                return (1);
+                ATH_MSG_FATAL(" HGTD_ID::init_hashes "
+                              << " Error: duplicated id for wafer id. nid " << nids
+                              << " id " << show_to_string(id)
+                              << " exp id " << (std::string)exp_id
+                              << " " << (std::string)m_full_wafer_range);
             }
             nids++;
         }
     }
     if(ids.size() != m_wafer_hash_max) {
-        if(m_msgSvc) log << MSG::FATAL << " HGTD_ID::init_hashes "
-                         << " Error: set size NOT EQUAL to hash max. size " << ids.size()
-                         << " hash max " << m_wafer_hash_max 
-                         << endmsg;
-        else std::cout << " FATAL HGTD_ID::init_hashes "
-                       << " Error: set size NOT EQUAL to hash max. size " << ids.size()
-                       << " hash max " << m_wafer_hash_max 
-                       << std::endl;
+        ATH_MSG_FATAL(" HGTD_ID::init_hashes "
+                      << " Error: set size NOT EQUAL to hash max. size " << ids.size()
+                      << " hash max " << m_wafer_hash_max);
         return (1);
     }
 
@@ -445,10 +388,8 @@ HGTD_ID::init_neighbors()
     // create a vector(s) to retrieve the hashes for compact ids for
     // wafer neighbors.
     //
-    MsgStream log(m_msgSvc, "HGTD_ID");
 
-    if(m_msgSvc) log << MSG::DEBUG << "HGTD_ID::init_neighbors " << endmsg;
-    else std::cout << " DEBUG HGTD_ID::init_neighbors " << std::endl;
+    ATH_MSG_DEBUG("HGTD_ID::init_neighbors");
 
     m_prev_phi_wafer_vec.clear();
     m_next_phi_wafer_vec.clear();
@@ -486,10 +427,8 @@ HGTD_ID::init_neighbors()
                                       exp_id[m_PHI_MODULE_INDEX],
                                       exp_id[m_ETA_MODULE_INDEX]);
             if (get_hash(id, hash_id, &wcontext)) {
-                if(m_msgSvc) log << MSG::FATAL << " HGTD_ID::init_neighbors - unable to get hash, exp/compact "
-                                 << id.getString() << " " << show_to_string(id) << endmsg;
-                else std::cout << " FATAL HGTD_ID::init_neighbors - unable to get hash, exp/compact "
-                               << id.getString() << " " << show_to_string(id) << std::endl;
+                ATH_MSG_FATAL(" HGTD_ID::init_neighbors - unable to get hash, exp/compact "
+                              << id.getString() << " " << show_to_string(id));
                 return (1);
             }
 
@@ -509,10 +448,8 @@ HGTD_ID::init_neighbors()
                                           expId[m_PHI_MODULE_INDEX],
                                           expId[m_ETA_MODULE_INDEX]);
                 if (get_hash(id, hash_id, &wcontext)) {
-                    if(m_msgSvc) log << MSG::FATAL << " HGTD_ID::init_neighbors - unable to get previous phi hash, exp/compact "
-                                     << id.getString() << " " << show_to_string(id) << endmsg;
-                    else std::cout << " FATAL HGTD_ID::init_neighbors - unable to get previous phi hash, exp/compact "
-                                   << id.getString() << " " << show_to_string(id) << std::endl;
+                    ATH_MSG_FATAL(" HGTD_ID::init_neighbors - unable to get previous phi hash, exp/compact "
+                                  << id.getString() << " " << show_to_string(id));
                     return (1);
                 }
                 m_prev_phi_wafer_vec[index] = hash_id;
@@ -527,10 +464,8 @@ HGTD_ID::init_neighbors()
                                           expId[m_PHI_MODULE_INDEX],
                                           expId[m_ETA_MODULE_INDEX]);
                 if (get_hash(id, hash_id, &wcontext)) {
-                    if(m_msgSvc) log << MSG::FATAL << " HGTD_ID::init_neighbors - unable to get next phi hash, exp/compact " <<
-                                     id.getString() << " " << show_to_string(id) << endmsg;
-                    else std::cout << " FATAL HGTD_ID::init_neighbors - unable to get next phi hash, exp/compact " <<
-                             id.getString() << " " << show_to_string(id) << std::endl;
+                    ATH_MSG_FATAL(" HGTD_ID::init_neighbors - unable to get next phi hash, exp/compact " <<
+                                  id.getString() << " " << show_to_string(id));
                     return (1);
                 }
                 m_next_phi_wafer_vec[index] = hash_id;
@@ -545,10 +480,8 @@ HGTD_ID::init_neighbors()
                                           expId[m_PHI_MODULE_INDEX],
                                           expId[m_ETA_MODULE_INDEX]);
                 if (get_hash(id, hash_id, &wcontext)) {
-                    if(m_msgSvc) log << MSG::FATAL << " HGTD_ID::init_neighbors - unable to get previous eta hash, exp/compact "
-                                     << id.getString() << " " << show_to_string(id) << endmsg;
-                    else std::cout << " FATAL HGTD_ID::init_neighbors - unable to get previous eta hash, exp/compact "
-                                   << id.getString() << " " << show_to_string(id) << std::endl;
+                    ATH_MSG_FATAL(" HGTD_ID::init_neighbors - unable to get previous eta hash, exp/compact "
+                                  << id.getString() << " " << show_to_string(id));
                     return (1);
                 }
                 m_prev_eta_wafer_vec[index] = hash_id;
@@ -563,29 +496,12 @@ HGTD_ID::init_neighbors()
                                           expId[m_PHI_MODULE_INDEX],
                                           expId[m_ETA_MODULE_INDEX]);
                 if (get_hash(id, hash_id, &wcontext)) {
-                    if(m_msgSvc) log << MSG::FATAL << " HGTD_ID::init_neighbors - unable to get next eta hash, exp/compact "
-                                     << id.getString() << " " << show_to_string(id) << endmsg;
-                    else std::cout << " FATAL HGTD_ID::init_neighbors - unable to get next eta hash, exp/compact "
-                                   << id.getString() << " " << show_to_string(id) << std::endl;
+                    ATH_MSG_FATAL(" HGTD_ID::init_neighbors - unable to get next eta hash, exp/compact "
+                                  << id.getString() << " " << show_to_string(id));
                     return (1);
                 }
                 m_next_eta_wafer_vec[index] = hash_id;
             }
-            
-
-//          std::cout << " HGTD_ID::init_neighbors "
-//                    << " phi, previous, next " << id[m_PHI_MODULE_INDEX]
-//                    << " " << pphi
-//                    << " " << previous_phi
-//                    << " " << nphi
-//                    << " " << next_phi
-//                    << " eta, previous, next " << id[m_ETA_MODULE_INDEX]
-//                    << " " << peta
-//                    << " " << previous_eta
-//                    << " " << neta
-//                    << " " << next_eta
-//                    << " id " << (std::string)(*first)
-//                    << std::endl;
         }
     }
     return (0);
@@ -606,10 +522,8 @@ int
 HGTD_ID::initLevelsFromDict()
 {
 
-    MsgStream log(m_msgSvc, "HGTD_ID");
     if(!m_dict) {
-        if(m_msgSvc) log << MSG::FATAL << " HGTD_ID::initLevelsFromDict - dictionary NOT initialized " << endmsg;
-        else std::cout << " FATAL HGTD_ID::initLevelsFromDict - dictionary NOT initialized " << std::endl;
+        ATH_MSG_FATAL(" HGTD_ID::initLevelsFromDict - dictionary NOT initialized ");
         return (1);
     }
 
@@ -629,12 +543,8 @@ HGTD_ID::initLevelsFromDict()
     ExpandedIdentifier id;
     id << indet_field_value() << hgtd_field_value();
     if (m_dict->find_region(id, m_hgtd_region_index)) {
-        if(m_msgSvc) log << MSG::FATAL << "HGTD_ID::initLevelsFromDict - unable to find hgtd region index: id, reg "  
-                         << (std::string)id << " " << m_hgtd_region_index
-                         << endmsg;
-        else std::cout << " FATAL HGTD_ID::initLevelsFromDict - unable to find hgtd region index: id, reg "  
-                       << (std::string)id << " " << m_hgtd_region_index
-                       << std::endl;
+        ATH_MSG_FATAL("HGTD_ID::initLevelsFromDict - unable to find hgtd region index: id, reg "  
+                      << (std::string)id << " " << m_hgtd_region_index);
         return (1);
     }
     // Choose the name of the identification scheme based on the dictionary name, 
@@ -654,10 +564,7 @@ HGTD_ID::initLevelsFromDict()
         m_INDET_INDEX = field->index();
     }
     else {
-        if(m_msgSvc) log << MSG::FATAL << "HGTD_ID::initLevelsFromDict - unable to find 'subdet' field "        
-                         << endmsg;
-        else std::cout << " FATAL HGTD_ID::initLevelsFromDict - unable to find 'subdet' field "         
-                       << std::endl;
+        ATH_MSG_FATAL("HGTD_ID::initLevelsFromDict - unable to find 'subdet' field ");
         return (1);
     }
 
@@ -666,8 +573,7 @@ HGTD_ID::initLevelsFromDict()
         m_HGTD_INDEX = field->index();
     }
     else {
-        if(m_msgSvc) log << MSG::FATAL << "HGTD_ID::initLevelsFromDict - unable to find 'part' field " << endmsg;       
-        else std::cout << " FATAL HGTD_ID::initLevelsFromDict - unable to find 'part' field " << std::endl;     
+        ATH_MSG_FATAL("HGTD_ID::initLevelsFromDict - unable to find 'part' field ");
         return (1);
     }
  
@@ -676,26 +582,21 @@ HGTD_ID::initLevelsFromDict()
         m_ENDCAP_INDEX = field->index();
     }
     else {
-        if(m_msgSvc) log << MSG::FATAL << "HGTD_ID::initLevelsFromDict - unable to find 'endcap' field "  << endmsg;     
-        else std::cout << " FATAL HGTD_ID::initLevelsFromDict - unable to find 'endcap' field "  << std::endl;   
-            return (1);
+        ATH_MSG_FATAL("HGTD_ID::initLevelsFromDict - unable to find 'endcap' field " );
     }
     field = m_dict->find_field(m_layer_ID);
     if (field) {
         m_LAYER_INDEX = field->index();
     }
     else {
-        if(m_msgSvc) log << MSG::FATAL << "HGTD_ID::initLevelsFromDict - unable to find 'layer' field "  << endmsg;     
-        else std::cout << " FATAL HGTD_ID::initLevelsFromDict - unable to find 'layer' field "  << std::endl;   
-        return (1);
+        ATH_MSG_FATAL("HGTD_ID::initLevelsFromDict - unable to find 'layer' field " );
     }
     field = m_dict->find_field(m_moduleInLayer_Or_Row);
     if (field) {
         m_PHI_MODULE_INDEX = field->index();
     }
     else {
-        if(m_msgSvc) log << MSG::FATAL << "HGTD_ID::initLevelsFromDict - unable to find 'moduleInLayer' field "  << endmsg;     
-        else std::cout << " FATAL HGTD_ID::initLevelsFromDict - unable to find 'moduleInLayer' field "  << std::endl;   
+        ATH_MSG_FATAL("HGTD_ID::initLevelsFromDict - unable to find 'moduleInLayer' field " );
         return (1);
     }
     field = m_dict->find_field(m_moduleInRow);
@@ -703,8 +604,7 @@ HGTD_ID::initLevelsFromDict()
         m_ETA_MODULE_INDEX = field->index();
     }
     else {
-        if(m_msgSvc) log << MSG::FATAL << "HGTD_ID::initLevelsFromDict - unable to find 'hgtd_eta_module' field "  << endmsg;     
-        else std::cout << " FATAL HGTD_ID::initLevelsFromDict - unable to find 'hgtd_eta_module' field "  << std::endl;   
+        ATH_MSG_FATAL("HGTD_ID::initLevelsFromDict - unable to find 'hgtd_eta_module' field " );
         return (1);
     }
     field = m_dict->find_field(m_padInModuleRow);
@@ -712,8 +612,7 @@ HGTD_ID::initLevelsFromDict()
         m_PHI_INDEX_INDEX = field->index();
     }
     else {
-        if(m_msgSvc) log << MSG::FATAL << "HGTD_ID::initLevelsFromDict - unable to find 'hgtd_phi_index' field "  << endmsg;     
-        else std::cout << " FATAL HGTD_ID::initLevelsFromDict - unable to find 'hgtd_phi_index' field "  << std::endl;   
+        ATH_MSG_FATAL("HGTD_ID::initLevelsFromDict - unable to find 'hgtd_phi_index' field " );
         return (1);
     }
     field = m_dict->find_field(m_padInModuleColumn);
@@ -721,8 +620,7 @@ HGTD_ID::initLevelsFromDict()
         m_ETA_INDEX_INDEX = field->index();
     }
     else {
-        if(m_msgSvc) log << MSG::FATAL << "HGTD_ID::initLevelsFromDict - unable to find 'hgtd_eta_index' field "  << endmsg;     
-        else std::cout << " FATAL HGTD_ID::initLevelsFromDict - unable to find 'hgtd_eta_index' field "  << std::endl;   
+        ATH_MSG_FATAL("HGTD_ID::initLevelsFromDict - unable to find 'hgtd_eta_index' field " );
         return (1);
     }
     // Set the field implementations
@@ -738,28 +636,15 @@ HGTD_ID::initLevelsFromDict()
     m_phi_index_impl  = region.implementation(m_PHI_INDEX_INDEX);
     m_eta_index_impl  = region.implementation(m_ETA_INDEX_INDEX);
 
-    if(m_msgSvc) {
-        log << MSG::DEBUG << "decode index and bit fields for each level: " << endmsg;
-        log << MSG::DEBUG << "indet     "  << m_indet_impl.show_to_string() << endmsg;
-        log << MSG::DEBUG << "hgtd      "  << m_hgtd_impl.show_to_string() << endmsg;
-        log << MSG::DEBUG << "ec        "  << m_ec_impl.show_to_string() << endmsg;
-        log << MSG::DEBUG << "layer     "  << m_layer_impl.show_to_string() << endmsg;
-        log << MSG::DEBUG << "phi_mod   "  << m_phi_mod_impl.show_to_string() << endmsg;
-        log << MSG::DEBUG << "eta_mod   "  << m_eta_mod_impl.show_to_string() << endmsg;
-        log << MSG::DEBUG << "phi_index "  << m_phi_index_impl.show_to_string() << endmsg;
-        log << MSG::DEBUG << "eta_index "  << m_eta_index_impl.show_to_string() << endmsg;
-    }
-    else{
-        std::cout << " DEBUG decode index and bit fields for each level: " << std::endl;
-        std::cout << " DEBUG indet     "  << m_indet_impl.show_to_string() << std::endl;
-        std::cout << " DEBUG hgtd      "  << m_hgtd_impl.show_to_string() << std::endl;
-        std::cout << " DEBUG ec        "  << m_ec_impl.show_to_string() << std::endl;
-        std::cout << " DEBUG layer     "  << m_layer_impl.show_to_string() << std::endl;
-        std::cout << " DEBUG phi_mod   "  << m_phi_mod_impl.show_to_string() << std::endl;
-        std::cout << " DEBUG eta_mod   "  << m_eta_mod_impl.show_to_string() << std::endl;
-        std::cout << " DEBUG phi_index "  << m_phi_index_impl.show_to_string() << std::endl;
-        std::cout << " DEBUG eta_index "  << m_eta_index_impl.show_to_string() << std::endl;
-    }
+    ATH_MSG_DEBUG("decode index and bit fields for each level: ");
+    ATH_MSG_DEBUG("indet     "  << m_indet_impl.show_to_string());
+    ATH_MSG_DEBUG("hgtd      "  << m_hgtd_impl.show_to_string());
+    ATH_MSG_DEBUG("ec        "  << m_ec_impl.show_to_string());
+    ATH_MSG_DEBUG("layer     "  << m_layer_impl.show_to_string());
+    ATH_MSG_DEBUG("phi_mod   "  << m_phi_mod_impl.show_to_string());
+    ATH_MSG_DEBUG("eta_mod   "  << m_eta_mod_impl.show_to_string());
+    ATH_MSG_DEBUG("phi_index "  << m_phi_index_impl.show_to_string());
+    ATH_MSG_DEBUG("eta_index "  << m_eta_index_impl.show_to_string());
 
     std::cout << "indet "  << m_indet_impl.decode_index() << " " 
             << (std::string)m_indet_impl.ored_field() << " " 
@@ -947,8 +832,6 @@ HGTD_ID::get_hash       (const Identifier& id,
 void
 HGTD_ID::test_wafer_packing     () const
 {
-    
-    MsgStream log(m_msgSvc, "HGTD_ID");
     if (m_dict) {
 
         int nids = 0;
@@ -964,12 +847,9 @@ HGTD_ID::test_wafer_packing     () const
                                           expId[m_PHI_MODULE_INDEX],
                                           expId[m_ETA_MODULE_INDEX]);
             if (id != new_id) {
-                if(m_msgSvc) log << MSG::ERROR << "HGTD_ID::test_wafer_packing: new and old compact id not equal. New/old/expanded ids "
-                                 << show_to_string(new_id) << " " << show_to_string(id) << " "
-                                 << (std::string)expId << endmsg;
-                else std::cout << " ERROR HGTD_ID::test_wafer_packing: new and old compact id not equal. New/old/expanded ids " 
-                               << show_to_string(new_id) << " " << show_to_string(id) << " "
-                               << (std::string)expId << std::endl;
+                ATH_MSG_ERROR("HGTD_ID::test_wafer_packing: new and old compact id not equal. New/old/expanded ids "
+                              << show_to_string(new_id) << " " << show_to_string(id) << " "
+                              << (std::string)expId);
                 continue;
             }
         }
@@ -994,14 +874,10 @@ HGTD_ID::test_wafer_packing     () const
                 exp_id[3] != new_exp_id[3] ||
                 exp_id[4] != new_exp_id[4] ||
                 exp_id[5] != new_exp_id[5]) {
-                if(m_msgSvc) log << MSG::ERROR << "HGTD_ID::test_wafer_packing: new and old expanded ids not equal. New/old/compact ids "
-                                 << (std::string)new_exp_id 
-                                 << " " << (std::string)exp_id 
-                                 << " " <<  show_to_string(id) << endmsg;
-                else std::cout << " ERROR HGTD_ID::test_wafer_packing: new and old expanded ids not equal. New/old/compact ids "
-                               << (std::string)new_exp_id 
-                               << " " << (std::string)exp_id 
-                               << " " <<  show_to_string(id) << std::endl;
+                ATH_MSG_ERROR("HGTD_ID::test_wafer_packing: new and old expanded ids not equal. New/old/compact ids "
+                              << (std::string)new_exp_id 
+                              << " " << (std::string)exp_id 
+                              << " " <<  show_to_string(id));
             }
 
             Identifier pid = pixel_id (exp_id[m_ENDCAP_INDEX],
@@ -1017,26 +893,16 @@ HGTD_ID::test_wafer_packing     () const
                                         phi_index(pid),
                                         eta_index(pid));
             if (pid != pid1) {
-                if(m_msgSvc) log << MSG::ERROR << "HGTD_ID::test_wafer_packing: new and old pixel ids not equal. New/old ids "
-                                 << " " << show_to_string(pid1) << " " 
-                                 << show_to_string(pid) << endmsg;
-                else std::cout << " ERROR HGTD_ID::test_wafer_packing: new and old pixel ids not equal. New/old ids "
-                               << " " << show_to_string(pid1) << " " 
-                               << show_to_string(pid) << std::endl;
+                ATH_MSG_ERROR("HGTD_ID::test_wafer_packing: new and old pixel ids not equal. New/old ids "
+                              << " " << show_to_string(pid1) << " " 
+                              << show_to_string(pid));
             }
         }
 
-        if(m_msgSvc) log << MSG::DEBUG << "HGTD_ID::test_wafer_packing: Successful tested " 
-                         << nids << " ids. " 
-                         << endmsg;
-        else std::cout << " DEBUG HGTD_ID::test_wafer_packing: Successful tested " 
-                       << nids << " ids. " 
-                       << std::endl;
+        ATH_MSG_DEBUG("HGTD_ID::test_wafer_packing: Successful tested " 
+                      << nids << " ids. ");
     }
     else {
-        if(m_msgSvc) log << MSG::ERROR << "HGTD_ID::test_wafer_packing: Unable to test wafer is packing - no dictionary has been defined. " 
-                         << endmsg;
-        else std::cout << " ERROR HGTD_ID::test_wafer_packing: Unable to test wafer is packing - no dictionary has been defined. " 
-                       << std::endl;
+        ATH_MSG_ERROR("HGTD_ID::test_wafer_packing: Unable to test wafer is packing - no dictionary has been defined. ");
     }
 }
