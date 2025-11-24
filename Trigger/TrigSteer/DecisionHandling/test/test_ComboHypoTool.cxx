@@ -105,7 +105,7 @@ int main ATLAS_NOT_THREAD_SAFE () {
   for (size_t i = 0; i < max_particles; ++i) {
     xAOD::Electron* e = new xAOD::Electron();
     electronContainerPtr->push_back(e);
-    e->setP4(10.0*(max_particles-i), 0., 0., 0.);
+    e->setPtEtaPhi(10.0*(max_particles-i), 0., 0.);
     ElementLink<xAOD::ElectronContainer> el_e(*electronContainerPtr, electronContainerPtr->size()-1, ctx);
 
     Decision* d_e = new Decision();
