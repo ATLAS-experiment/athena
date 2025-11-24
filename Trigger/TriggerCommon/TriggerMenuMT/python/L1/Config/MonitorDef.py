@@ -234,9 +234,6 @@ class MonitorDef:
                 "L1_RD0_FILLED",
                 # Forward
                 # ZDC
-                "L1_ZDC_BIT0", "L1_ZDC_BIT1", "L1_ZDC_BIT2",
-                "L1_ZDC_COMB0", "L1_ZDC_COMB1", "L1_ZDC_COMB2", "L1_ZDC_COMB3",
-                "L1_ZDC_COMB4", "L1_ZDC_COMB5", "L1_ZDC_COMB6", "L1_ZDC_COMB7",
                 "L1_ZDC_A", "L1_ZDC_C", "L1_ZDC_A_C",
                 "L1_VZDC_A_VZDC_C",
                 "L1_ZDC_OR",
@@ -510,6 +507,15 @@ class MonitorDef:
 
                     'L1_MATCHA_23INVM-27DPHI-2eTAU1_VjTE200',
                     'L1_MATCHA_23INVM-27DPHI-2eTAU1_VjTE200_EMPTY',
+
+                    'L1_RISTRETTO',
+                    'L1_RIS_TeAsymmetry-jTENoSort',
+                    'L1_RIS_eEM2',
+                    'L1_RIS_eTAU2',
+                    'L1_RIS_jJ5',
+                    'L1_RIS_jJ5p30ETA49',
+
+                    'L1_RIS_ZDC_XOR_jJ10_VjTE200',
                 ])
 
                 # HI HLT menu: Add triggers that are not in the MC menu

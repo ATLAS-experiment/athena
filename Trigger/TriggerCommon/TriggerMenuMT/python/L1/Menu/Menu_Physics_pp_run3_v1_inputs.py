@@ -247,7 +247,7 @@ def defineInputsMenu():
             ('gXENC70',1), ('gXENC100',1),
             ('gXEJWOJ60',1), ('gXEJWOJ70',1), ('gXEJWOJ80',1), ('gXEJWOJ100',1), ('gXEJWOJ110',1), ('gXEJWOJ120',1), ('gXEJWOJ500',1),
             # gTE
-            ('gTE3',1), ('gTE5',1), ('gTE10',1), ('gTE200',1),
+            ('gTE5',1), ('gTE10',1), ('gTE200',1), ('gTE280',1), 
             # gESPRESSO
             ('gESPRESSO280', 1),
 
