@@ -303,7 +303,6 @@ void ZDCPulseAnalyzer::SetDefaults()
   m_useDelayed = false;
   m_enablePreExcl = false;
   m_enablePostExcl = false;
-  m_haveUserFilter = false;
   
   m_timingCorrMode = NoTimingCorr;
   m_haveNonlinCorr = false;
