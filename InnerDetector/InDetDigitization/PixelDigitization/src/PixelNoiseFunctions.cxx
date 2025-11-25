@@ -136,8 +136,8 @@ namespace PixelDigitization{
     for (int i = 0; i < nNoise; i++) {
       int circuit = CLHEP::RandFlat::shootInt(rndmEngine, nCircuits);
       int column = CLHEP::RandFlat::shootInt(rndmEngine, nColumns);
-      int CircuitsPerCol = CLHEP::RandFlat::shootInt(rndmEngine, CircuitsPerCol);
-      int CircuitsPerRow = CLHEP::RandFlat::shootInt(rndmEngine, CircuitsPerRow); 
+      int CircuitsPerCol = CLHEP::RandFlat::shootInt(rndmEngine, nCircuitsPerCol);
+      int CircuitsPerRow = CLHEP::RandFlat::shootInt(rndmEngine, nCircuitsPerRow); 
       int row = CLHEP::RandFlat::shootInt(rndmEngine, nRows);
       if (row > 159 && technology == InDetDD::PixelReadoutTechnology::FEI3) {
         row += 8;
@@ -149,7 +149,7 @@ namespace PixelDigitization{
       //    ? InDetDD::SiReadoutCellId(nRows + row, nColumns * (circuit - 2) + column)
       //    : InDetDD::SiReadoutCellId(row, nColumns * circuit + column);
 
-      InDetDD::SiReadoutCellId roCell = InDetDD::SiReadoutCellId(row + nRows*(CircuitsPerCol -1), column + nColumns*(CircuitsPerRow -1));
+      InDetDD::SiReadoutCellId roCell = InDetDD::SiReadoutCellId(row + nRows*(CircuitsPerCol), column + nColumns*(CircuitsPerRow));
      
 
 
