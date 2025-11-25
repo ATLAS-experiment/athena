@@ -251,7 +251,7 @@ StatusCode EvtInclusiveDecay::execute() {
     for (auto p: *hepMC) {
       if ( (!p->production_vertex()) ||
            (p->production_vertex()->particles_in_size() == 0) ) {
-        StatusCode sc = traverseDecayTree(p,false,visited,toBeDecayed);
+        StatusCode sc = traverseDecayTree(std::move(p),false,visited,toBeDecayed);
         if (sc.isFailure())
           return StatusCode::FAILURE;
       }
@@ -665,7 +665,7 @@ void EvtInclusiveDecay::printHepMC(HepMC::GenEvent* hepMC, std::set<HepMC::GenPa
          (p->production_vertex()->particles_in().size() == 0) ) {
       nTreesFound++;
       std::cout << "\n    Found new partial decay tree:\n" << std::endl;
-      unsigned int nParticlesVisited = printTree(p,visited,1,particleSet);
+      unsigned int nParticlesVisited = printTree(std::move(p),visited,1,particleSet);
       std::cout << "\n    " << nParticlesVisited << " particles in this subtree" << std::endl;
       nParticlesFound += nParticlesVisited;
     }
@@ -692,7 +692,7 @@ unsigned int EvtInclusiveDecay::printTree(HepMC::GenParticlePtr p, std::set<HepM
       std::cout << std::endl;
       for (auto itp: *v) {
         if (itp->end_vertex())
-          nParticlesVisited += printTree(itp, visited, level+1, particleSet);
+          nParticlesVisited += printTree(std::move(itp), visited, level+1, particleSet);
         else
           nParticlesVisited++;
       }
