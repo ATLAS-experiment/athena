@@ -6,6 +6,7 @@ def MuonBlueprintNodeBuilderCfg(flags, name = "MuonBlueprintNodeBuilder", **kwar
     result = ComponentAccumulator()
     from MuonGeoModelR4.MuonGeoModelConfig import MuonGeoModelCfg
     result.merge(MuonGeoModelCfg(flags))
+    kwargs.setdefault("dumpVolumes", flags.Acts.TrackingGeometry.ObjDebugOutput)
     the_tool = CompFactory.ActsTrk.MuonBlueprintNodeBuilder(name, **kwargs)
     result.setPrivateTools(the_tool)
     return result

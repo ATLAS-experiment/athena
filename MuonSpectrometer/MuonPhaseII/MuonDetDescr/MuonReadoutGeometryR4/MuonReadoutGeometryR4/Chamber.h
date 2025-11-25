@@ -11,7 +11,7 @@
 #include <AthenaBaseComps/AthMessaging.h>
 
 namespace Acts {
-    class TrapezoidVolumeBounds;
+    class VolumeBounds;
     class Volume;
     class PlaneSurface;
 }
@@ -30,7 +30,7 @@ namespace MuonGMR4 {
               /** @brief List of associated readout elements */
               ReadoutSet  detEles{};
               /** @brief Chamber volume bounds */
-              std::shared_ptr<Acts::TrapezoidVolumeBounds> bounds{};
+              std::shared_ptr<Acts::VolumeBounds> bounds{};
           };
           
           /** @brief Standard constructor taking the defineArgs */
@@ -84,7 +84,7 @@ namespace MuonGMR4 {
             * @param gctx: Geometry context carrrying the alignment transformations */
           std::shared_ptr<Acts::Volume> boundingVolume(const ActsTrk::GeometryContext& gctx) const;
           /** @brief Returns the volume bounds */
-          std::shared_ptr<Acts::TrapezoidVolumeBounds> bounds() const;
+          std::shared_ptr<Acts::VolumeBounds> bounds() const;
           /** @brief Returns the pointer to the MS sector enclosing the chamber */
           const SpectrometerSector* parent() const;
           /** @brief Sets the connection to the MS sector enclosing the chamber */

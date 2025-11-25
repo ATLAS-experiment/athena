@@ -120,8 +120,8 @@ class MuonDetectorManager : public GeoVDetectorManager, public AthMessaging {
         bool operator()(const SpectrometerSector* a, const SpectrometerSector* b) const;
         bool operator()(const Chamber* a, const Chamber* b) const;
     };
-    using MuonSectorSet = std::set<const SpectrometerSector*, MSEnvelopeSorter>;
-    using MuonChamberSet = std::set<const Chamber*, MSEnvelopeSorter>;
+    using MuonSectorSet = std::vector<const SpectrometerSector*>;
+    using MuonChamberSet = std::vector<const Chamber*>;
     /// @brief: Returns all MuonChambers associated with the readout geometry
     MuonSectorSet getAllSectors() const;
     MuonChamberSet getAllChambers() const;
