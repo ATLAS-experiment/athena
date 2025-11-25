@@ -353,14 +353,12 @@ for anaName in anaList :
     ## Appending latex line to latex table
     if MyArgs.printLatex: 
         row = df.loc[['Eff_vs_truth']]
-        values = [ f"$ {float(v.split('\u00b1')[0]):.3g} \\% $" for v in row.iloc[0].values]
-        print (values)
         latex_table_line = (
             sampleDict[anaName.split('_')[0]] + " & "
-            + " & ".join(values)
+            + " & ".join(" $ " + row.iloc[0].values + " $ ")
             + " \\\\")
 
-        latex_table_lines.insert(-2,latex_table_line)
+        latex_table_lines.insert(-2,latex_table_line.replace("%","\\%").replace("\u00b1","\\pm"))
 
 
 ## Printing final latex table to .tex output file
