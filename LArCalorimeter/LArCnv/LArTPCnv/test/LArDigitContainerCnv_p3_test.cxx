@@ -72,9 +72,11 @@ void test1 ATLAS_NOT_THREAD_SAFE ()
 
   // create LArOnlineID and LArOnline_SuperCellID helpers to be passed to converter
   std::unique_ptr<LArOnlineID> idHelper = std::make_unique<LArOnlineID>();
+  idHelper->setLevel(MSG::DEBUG);
   assert (idHelper->initialize_from_dictionary (idd) == 0);
 
   std::unique_ptr<LArOnline_SuperCellID> idSCHelper = std::make_unique<LArOnline_SuperCellID>();
+  idSCHelper->setLevel(MSG::DEBUG);
   assert (idSCHelper->initialize_from_dictionary (idd) == 0);
 
   CaloGain::CaloGain gains[CaloGain::LARNGAIN] =
