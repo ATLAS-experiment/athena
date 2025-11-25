@@ -68,7 +68,7 @@ private:
   static bool PR_find( const std::string& logical_file_name, const std::string& search_list,
                        std::filesystem::file_type file_type, std::string& result );
 
-  inline static std::atomic<MSG::Level> m_level{MSG::INFO};
+  inline static std::atomic<MSG::Level> m_level{MSG::NIL};
   static bool msgLvl( const MSG::Level lvl ) { return asgMsg().msgLvl(lvl); }
   static MsgStream& msg() { return asgMsg().msg(); }
   static MsgStream& msg( const MSG::Level lvl ) { return asgMsg().msg(lvl); }
