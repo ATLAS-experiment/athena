@@ -17,6 +17,7 @@
 
 #include <chrono>
 #include <iostream>
+#include <cstring> //for strcmp
 
 
 struct MyObj : public AthMessaging {
@@ -38,7 +39,7 @@ struct MyObj : public AthMessaging {
 };
 
 
-void test(IMessageSvc* msgSvc)
+bool test(IMessageSvc* msgSvc)
 {
   MyObj obj1;
   obj1.print();
@@ -51,7 +52,9 @@ void test(IMessageSvc* msgSvc)
 
   // Checking a level < OutputLevel should not result in getMessageSvc warning
   MyObj obj4(MSG::WARNING);
-  obj4.msgLvl(MSG::DEBUG);
+  //typically used in "if (obj4.msgLvl(MSG::DEBUG)) {  ..debug messages ..}"
+  bool outputExpected = obj4.msgLvl(MSG::DEBUG);
+  return (not outputExpected);
 }
 
 
@@ -76,7 +79,7 @@ int main (int argc, char** argv)
 {
   const unsigned int ntry = 100000;
   bool doPerf = false;
-  if (argc >= 2 && strcmp (argv[1], "--perf") == 0) {
+  if (argc >= 2 && std::strcmp (argv[1], "--perf") == 0) {
     doPerf = true;
   }
 
@@ -98,7 +101,7 @@ int main (int argc, char** argv)
   if (!msgSvc) return 1;
 
   std::cout << "--- Test with MessageSvc" << std::endl;
-  test(msgSvc);
+  if (not test(msgSvc)) return 1;
 
   if (doPerf) {
     perftest(msgSvc, ntry);
