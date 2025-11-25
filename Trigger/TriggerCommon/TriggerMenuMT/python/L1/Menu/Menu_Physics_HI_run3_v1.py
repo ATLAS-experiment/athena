@@ -468,6 +468,16 @@ def defineMenu():
         'L1_MATCHA_eTAU2_VjTE200_EMPTY',
 
         'L1_MATCHA_eEM5_VjTE200_EMPTY',
+
+        # For HI 25ns bunch spacing test
+        'L1_RISTRETTO',
+        'L1_RIS_TeAsymmetry-jTENoSort',
+        'L1_RIS_eEM2',
+        'L1_RIS_eTAU2',
+        'L1_RIS_jJ5',
+        'L1_RIS_jJ5p30ETA49',
+
+        'L1_RIS_ZDC_XOR_jJ10_VjTE200',
     ]
 
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////////
@@ -194,18 +194,18 @@ JobConfig::parseProgramOptions(int argc, char* argv[]) {
          if(stripped == "jo")                              { jo = true; continue; }
          if(stripped == "fw")                              { fw = true; continue; }
          if(stripped == "nomerge") { merge = false; continue; }
-         currentPar = stripped;
+         currentPar = std::move(stripped);
       } else {
-         if(currentPar == "i" || currentPar == "input")     { inpar.push_back(stripped); continue; }
-         if(currentPar == "2" || currentPar == "comp")      { inpar2.push_back(stripped); continue; }
+         if(currentPar == "i" || currentPar == "input")     { inpar.push_back(std::move(stripped)); continue; }
+         if(currentPar == "2" || currentPar == "comp")      { inpar2.push_back(std::move(stripped)); continue; }
          if(currentPar == "o" || currentPar == "output")    {
             if(outpar.size()==0 && stripped != "r3json" && stripped != "cool") {
                error.push_back("Unknown output type: " + stripped + ". Must be either json or cool, optionally followed by a base string for the output file name");
             } else {
-               outpar.push_back(stripped);
+               outpar.push_back(std::move(stripped));
             }
             continue; }
-         if(currentPar == "l" || currentPar == "log")       { logFileName = stripped; continue; }
+         if(currentPar == "l" || currentPar == "log")       { logFileName = std::move(stripped); continue; }
          if(currentPar == "p" || currentPar == "print")     { printlevel = boost::lexical_cast<int,string>(stripped); currentPar=""; continue; }
          if(currentPar == "v" || currentPar == "loglevel") {
             if("NIL" == stripped ) { outputlevel = MSGTC::NIL; }
