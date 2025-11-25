@@ -165,7 +165,7 @@ case $ArtProcess in
 	--postInclude 'default:PyJobTransforms.UseFrontier' 'HitAnalysis.PostIncludes.ITkHitAnalysis'\
 	--preInclude 'EVNTtoHITS:Campaigns.PhaseIISimulation' \
 	--geometryVersion "default:${geotag}" \
-	--inputEVNTFile ${ArtInFile} \
+	--inputEVNTFile $x \
 	--outputHITSFile $hits \
 	--maxEvents ${maxEvents} \
 	--imf False
