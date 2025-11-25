@@ -37,7 +37,6 @@ class FPGAActsTrkConverter : public extends<AthAlgTool,IFPGAActsTrkConverter> {
     std::unique_ptr<Acts::BoundTrackParameters> makeParams (const FPGATrackSimRoad &road) const;
     std::unique_ptr<Acts::BoundTrackParameters> makeParams (const FPGATrackSimTrack &track) const;
     
-    std::vector<Identifier> getRdoIdList(const FPGATrackSimHit& hit) const;
     template <typename XAOD_CLUSTER>
     StatusCode matchTrackMeasurements(const EventContext& ctx,
                                       const XAOD_CLUSTER& cluster,
@@ -48,8 +47,8 @@ class FPGAActsTrkConverter : public extends<AthAlgTool,IFPGAActsTrkConverter> {
     StatusCode findPrototrackMeasurements( const EventContext& ctx,
                                            const xAOD::PixelClusterContainer &pixelClusterContainer,
                                            const xAOD::StripClusterContainer &stripClusterContainer,
-                                           const std::multimap<xAOD::DetectorIDHashType, const xAOD::PixelCluster*> & pixelClusterMap,
-                                           const std::multimap<IdentifierHash, const xAOD::StripCluster*> & stripClusterMap,
+                                           const std::multimap<xAOD::DetectorIdentType, const xAOD::PixelCluster*> & pixelClusterMap,
+                                           const std::multimap<xAOD::DetectorIdentType, const xAOD::StripCluster*> & stripClusterMap,
                                            std::vector<ActsTrk::ATLASUncalibSourceLink>& measurements,
                                            const std::vector <FPGATrackSimHit>& hits) const;
     private:

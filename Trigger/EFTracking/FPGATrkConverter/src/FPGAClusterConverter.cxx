@@ -1,4 +1,3 @@
-
 // Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 #include "FPGAClusterConverter.h"
@@ -50,8 +49,7 @@ StatusCode FPGAClusterConverter::convertHits(const std::vector<FPGATrackSimHit>&
   SCTColl.reserve(hits.size());
   for(const FPGATrackSimHit& h : hits) {
 
-      std::vector<Identifier> rdoList;
-      ATH_CHECK(getRdoList(rdoList, h));
+      std::vector<Identifier> rdoList{Identifier(h.getRdoIdentifier())};
 
       std::unique_ptr<InDet::PixelCluster> pixelCl{};
       std::unique_ptr<InDet::SCT_Cluster> SCTCl{};
@@ -137,8 +135,7 @@ StatusCode FPGAClusterConverter::convertHits(const std::vector<FPGATrackSimHit>&
   SCTCont.reserve(hits.size());
   for(const FPGATrackSimHit& h : hits) {
 
-      std::vector<Identifier> rdoList;
-      ATH_CHECK(getRdoList(rdoList, h));
+      std::vector<Identifier> rdoList{Identifier(h.getIdentifier())};
 
       if (h.isPixel()) {
         xAOD::PixelCluster *xaod_pcl = new xAOD::PixelCluster();
@@ -424,7 +421,8 @@ StatusCode FPGAClusterConverter::createPixelCluster(const FPGATrackSimHit& h,con
   ATH_MSG_DEBUG("\t\tGlobal position: x=" << globalPosition.x() << " y=" << globalPosition.y()  << " z=" << globalPosition.z() );
 
   cl.setMeasurement<2>(hash, localPosition, localCovariance);
-  cl.setIdentifier( rdoList.front().get_compact() );
+  ATH_MSG_INFO("rdoIdentifier: " << h.getRdoIdentifier());
+  cl.setIdentifier( h.getRdoIdentifier() );
   cl.setRDOlist(rdoList);
   cl.globalPosition() = globalPosition; 
   cl.setChannelsInPhiEta(siWidth.colRow()[0], siWidth.colRow()[1]);
@@ -640,7 +638,7 @@ StatusCode FPGAClusterConverter::createSCTCluster(const FPGATrackSimHit& h, cons
   ATH_MSG_DEBUG("\t\tGlobal position: x=" << globalPosition.x() << " y=" << globalPosition.y()  << " z=" << globalPosition.z() );
 
   cl.setMeasurement<1>(hash, localPosition, localCovariance);
-  cl.setIdentifier( rdoList.front().get_compact() );
+  cl.setIdentifier( h.getRdoIdentifier() );
   cl.setRDOlist(rdoList);
   cl.globalPosition() = globalPosition;
   cl.setChannelsInPhi(siWidth.colRow()[0]);
@@ -797,46 +795,13 @@ StatusCode FPGAClusterConverter::getRdoList(std::vector<Identifier> &rdoList, co
   std::vector<FPGATrackSimHit> hits = cluster.getHitList();
 
   for (const FPGATrackSimHit& h : hits) {
-    IdentifierHash hash = h.getIdentifierHash();
-    int phiIndex = h.getPhiIndex();
-    int etaIndex = h.getEtaIndex();
-
-    if (h.isPixel()) {
-      Identifier wafer_id_hit = m_pixelId->wafer_id(hash);
-      Identifier hit_id = m_pixelId->pixel_id(wafer_id_hit, phiIndex, etaIndex); 
-      rdoList.push_back(hit_id);
-    }
-    if (h.isStrip()) {
-      Identifier wafer_id_hit = m_SCTId->wafer_id(hash);
-      Identifier hit_id = m_SCTId->strip_id(wafer_id_hit, int(phiIndex)); 
-      rdoList.push_back(hit_id);
-    }
+    rdoList.emplace_back(h.getRdoIdentifier());
   }
 
   return StatusCode::SUCCESS;
 
 }
 
-
-StatusCode FPGAClusterConverter::getRdoList(std::vector<Identifier> &rdoList, const FPGATrackSimHit& h) const {
-
-  IdentifierHash hash = h.getIdentifierHash();
-  int phiIndex = h.getPhiIndex();
-  int etaIndex = h.getEtaIndex();
-
-  if (h.isPixel()) {
-    Identifier wafer_id_hit = m_pixelId->wafer_id(hash);
-    Identifier hit_id = m_pixelId->pixel_id(wafer_id_hit, phiIndex, etaIndex); 
-    rdoList.push_back(hit_id);
-  }
-  if (h.isStrip()) {
-    Identifier wafer_id_hit = m_SCTId->wafer_id(hash);
-    Identifier hit_id = m_SCTId->strip_id(wafer_id_hit, int(phiIndex)); 
-    rdoList.push_back(hit_id);
-  }
-
-  return StatusCode::SUCCESS;
-}
 
 StatusCode FPGAClusterConverter::getStripsInfo(const xAOD::StripCluster& cl, float& halfStripLength, Amg::Vector3D& stripDirection, Amg::Vector3D& stripCenter) const {
 
