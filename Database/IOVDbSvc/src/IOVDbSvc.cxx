@@ -333,14 +333,7 @@ StatusCode IOVDbSvc::preLoadAddresses(StoreID::type storeID,tadList& tlist) {
       for (const auto & thisNamePtrPair : m_foldermap) {
         IOVDbFolder* folder = thisNamePtrPair.second;
         // take data from FLMD only if tag override is NOT set
-        // Also skip if folder is marked for write-only (writeMeta without explicit read request)
-        // When IOVDbMetaDataTool Payloads are set, folder is write-only and shouldn't auto-read
         if (folder->folderName()==fname && !(folder->tagOverride())) {
-          // Skip auto-read if folder is write-only (marked for metadata writing)
-          if (folder->writeMeta()) {
-            ATH_MSG_INFO( "Folder " << fname << " is write-only, skipping auto-read from input metadata" );
-            break;
-          }
           ATH_MSG_INFO( "Folder " << fname << " will be taken from file metadata" );
           folder->useFileMetaData();
           folder->setFolderDescription( cont->folderDescription() );
