@@ -206,7 +206,7 @@ StatusCode CTPResultByteStreamTool::convertToBS(std::vector<WROBF*>& vrobf, cons
   for (uint32_t bunch = 0; bunch < result->numberOfBunches(); ++bunch) {
 
     // Helper lambda function
-    auto copyWords = [&](std::vector<uint32_t> words, const char* tag) -> StatusCode {
+    auto copyWords = [&](const std::vector<uint32_t>& words, const char* tag) -> StatusCode {
       for (size_t i = 0; i < words.size(); ++i) {
         if (idx >= vDataWords.size()) {
           ATH_MSG_ERROR(tag << " write out-of-bounds: idx = " << idx << " >= ROD size = " << vDataWords.size());
