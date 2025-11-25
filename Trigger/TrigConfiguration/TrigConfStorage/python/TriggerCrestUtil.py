@@ -2,7 +2,7 @@
 from functools import cache
 from typing import Any, cast
 from collections.abc import Iterable
-from pycrest.api.crest_api import CrestApi, HTTPResponse, IovSetDto, TagMetaSetDto
+from pycrest.api.crest_api import CrestApi, HTTPResponse, IovSetDto, TagMetaDto, TagDto
 
 import json
 from pprint import pprint
@@ -10,6 +10,7 @@ from datetime import datetime as dt
 
 from AthenaCommon.Logging import logging
 log = logging.getLogger('TriggerCrestUtil.py')
+
 
 class TriggerCrestUtil:
 
@@ -125,14 +126,14 @@ class TriggerCrestUtil:
         # get the payload specification
         attr_list, _ = TriggerCrestUtil._get_payload_spec(tag, api)
         # get the IOVs in the given range
-        iov = TriggerCrestUtil._get_iov_for_timestamp(tag, timestamp=timestamp, api=api)
+        iov: IovSetDto | HTTPResponse = TriggerCrestUtil._get_iov_for_timestamp(tag, timestamp=timestamp, api=api)
 
         if get_time_type:
             time_type = TriggerCrestUtil.getTagTimeType(tag, api=api)
 
         payload_for_iov = {}
-        payload_hash: str = cast(list, iov['resources'])[0]['payload_hash']
-        since: int = cast(list, iov['resources'])[0]['since']
+        payload_hash: str = iov.resources[0].payload_hash
+        since: int = iov.resources[0].since
         payload = TriggerCrestUtil.getPayloadFromHash(payload_hash, api=api)
         for channel, data in payload.items():
             payload_for_iov[channel] = dict(zip(attr_list, data))
@@ -185,10 +186,10 @@ class TriggerCrestUtil:
             time_type = TriggerCrestUtil.getTagTimeType(tag, api=api)
 
         result: list[dict[str, dict[str, Any]]] = []
-        for iov in cast(Iterable, all_iovs['resources']):
+        for iov in cast(Iterable, all_iovs.resources):
             payload_for_iov = {}
-            payload_hash = iov['payload_hash']
-            since = iov['since']
+            payload_hash = iov.payload_hash
+            since = iov.since
             payload = TriggerCrestUtil.getPayloadFromHash(payload_hash, api=api)
             for channel, data in payload.items():
                 payload_for_iov[channel] = dict(zip(attr_list, data))
@@ -218,8 +219,8 @@ class TriggerCrestUtil:
             raise RuntimeError("Crest access information missing")
         if api is None:
             api = CrestApi(host=server)
-        tag_info = api.find_tag(tag)
-        time_type: str = tag_info['time_type']
+        tag_info : TagDto | HTTPResponse = api.find_tag(tag)
+        time_type: str = tag_info.time_type
         return time_type
 
     @staticmethod
@@ -489,17 +490,22 @@ class TriggerCrestUtil:
         """
         # the upper limit of the iov-search is exclusive, so we need to add 1 to find the iov which includes 'since'
         iovs = api.select_iovs(tag, "0", str(since+1), sort='id.since:DESC', size=1, snapshot=0) # type: ignore
-        if cast(int, iovs['size']) < 1:
+        if cast(int, iovs.size) < 1:
             raise RuntimeError(f"Did not get an iov which includes the start of run {since}")
-        firstiov = cast(list, iovs['resources'])[0]
-        all_iovs = api.select_iovs(tag, str(firstiov['since']), str(until), sort='id.since:ASC', snapshot=0) # type: ignore
+        firstiov = cast(list, iovs.resources)[0]
+        all_iovs = api.select_iovs(tag, str(firstiov.since), str(until), sort='id.since:ASC', snapshot=0) # type: ignore
         return all_iovs
 
     @staticmethod
     def _get_payload_spec(tag: str, api: CrestApi) -> tuple[list[Any], dict[Any, Any]]:
         """Helper to retrieve the payload spec for a given tag"""
-        meta: TagMetaSetDto | HTTPResponse = api.find_tag_meta(tag)
-        tag_info = cast(list, meta['resources'])[0]['tag_info']
+        meta: TagMetaDto | HTTPResponse = api.find_tag_meta(tag)
+        if meta is None:
+            raise RuntimeError(f"Could not retrieve tag info for tag {tag}")
+        if isinstance(meta, HTTPResponse):
+            raise RuntimeError(f"Failed to retrieve tag metadata for tag {tag}: HTTP response received instead of tag metadata")
+        
+        tag_info =  meta.tag_info
         tag_info_dict = json.loads(tag_info)
         attr_list = []
         type_dict = {}

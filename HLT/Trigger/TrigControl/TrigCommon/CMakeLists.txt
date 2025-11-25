@@ -14,8 +14,7 @@ atlas_add_alias( athenaHLT "athenaHLT.py" )
 atlas_add_test( test_AthHLT
    SCRIPT python ${CMAKE_CURRENT_SOURCE_DIR}/python/AthHLT.py
    POST_EXEC_SCRIPT nopost.sh
-   PROPERTIES TIMEOUT 300
-   DISABLED TRUE )  # Temporary to work around CREST changes (see https://gitlab.cern.ch/atlas/athena/-/merge_requests/84073#note_10436352)
+   PROPERTIES TIMEOUT 300 )
 
 atlas_add_test( athenaHLT_jo_noopts
    SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/share/test_athenaHLT.sh dummy.py)
