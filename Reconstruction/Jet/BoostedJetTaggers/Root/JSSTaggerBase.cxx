@@ -212,7 +212,7 @@ StatusCode JSSTaggerBase::initialize() {
   ATH_MSG_INFO( "  " << m_decWeightKey.key() << " : tagging SF" );
 
   m_readTruthLabelKey = m_containerName + "." + m_truthLabelName;
-  ATH_CHECK( m_readTruthLabelKey.initialize() );
+  ATH_CHECK( m_readTruthLabelKey.initialize(!m_truthLabelName.empty()) ); // TODO Could also depend on m_isMC ?
 
 #ifndef XAOD_STANDALONE
   if (m_suppressInputDependence) {
