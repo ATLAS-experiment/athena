@@ -67,15 +67,15 @@ std::visit([&](auto& elems) {
     if (isElementInTheStation(*element,
           {StIdx::BI, StIdx::BM, StIdx::BO, StIdx::BE, StIdx::EE, StIdx::EI},
           EndcapSide::Both)) {
-      barrel.insert(element);
+      barrel.push_back(element);
     } else if (isElementInTheStation(*element, {StIdx::EO}, EndcapSide::A)) {
-      endcapA.insert(element);
+      endcapA.push_back(element);
     } else if (isElementInTheStation(*element, {StIdx::EO}, EndcapSide::C)) {
-      endcapC.insert(element);
+      endcapC.push_back(element);
     } else if (isElementInTheStation(*element, {StIdx::EM}, EndcapSide::A)) {
-      endcapMiddleA.insert(element);
+      endcapMiddleA.push_back(element);
     } else if (isElementInTheStation(*element, {StIdx::EM}, EndcapSide::C)) {
-      endcapMiddleC.insert(element);
+      endcapMiddleC.push_back(element);
     } else {
       ATH_MSG_WARNING("Element " << element->identString()
                       << " not assigned to any station!");

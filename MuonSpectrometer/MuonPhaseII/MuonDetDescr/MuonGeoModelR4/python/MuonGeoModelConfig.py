@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 
@@ -44,10 +44,12 @@ def MmReadoutGeomToolCfg(flags, name="MmReadoutGeomTool", **kwargs):
 
 def ChamberAssebmbleToolCfg(flags,name="MuonChamberAssembleTool", **kwargs):
     result = ComponentAccumulator()
-    kwargs.setdefault("GeoUtilTool", result.getPrimaryAndMerge(MuonGeoUtilityToolCfg(flags)))
+    from AthenaConfiguration.Enums import LHCPeriod
+    kwargs.setdefault("run4Layout", flags.GeoModel.Run >= LHCPeriod.Run4)
     the_tool = CompFactory.MuonGMR4.ChamberAssembleTool(name, **kwargs)
     result.setPrivateTools(the_tool)
     return result
+
 def MuonDetectorToolCfg(flags, name="MuonDetectorToolR4", **kwargs):
     result = ComponentAccumulator()
     sub_detTools = []
@@ -71,7 +73,6 @@ def MuonDetectorToolCfg(flags, name="MuonDetectorToolR4", **kwargs):
         sub_detTools.append(result.popToolsAndMerge(ChamberAssebmbleToolCfg(flags)))
         print("MuonDetectorToolCfg: Adding ChamberAssebmbleTool to MuonDetectorTool")
     kwargs.setdefault("ReadoutEleBuilders", sub_detTools)
-    print(sub_detTools)
     the_tool = CompFactory.MuonGMR4.MuonDetectorTool(name = name, **kwargs)
     result.setPrivateTools(the_tool)
     return result
@@ -81,7 +82,6 @@ def MuonGeoModelCfg(flags):
     from AtlasGeoModel.GeoModelConfig import GeoModelCfg
     geoModelSvc = result.getPrimaryAndMerge(GeoModelCfg(flags))
     geoModelSvc.DetectorTools+=[result.popToolsAndMerge(MuonDetectorToolCfg(flags))]
-    print("MuonGeoModelCfg: Adding MuonDetectorTool to GeoModelSvc")
     return result
 
 def MuonAlignStoreCfg(flags):
