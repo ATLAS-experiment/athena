@@ -215,7 +215,23 @@ void HGTD_GmxInterface::buildReadoutGeometryFromSqlite(IRDBAccessSvc * rdbAccess
     //lots of string parsing...
     std::vector<std::string> fields({"endcap","layer","moduleInLayer"});
     //The map below is a map of string keys which contains all the Identifier/DetElement relevant info, and the associated FullPhysVol
-    std::map<std::string, GeoFullPhysVol*> mapFPV = sqlreader->getPublishedNodes<std::string, GeoFullPhysVol*>("GeoModelXML");
+    
+    std::map<std::string, GeoFullPhysVol*> mapFPV;
+    
+    //First, find which name the tables are in the file under (depends upon the plugin used to create the input file)
+    //sort these in order of precedence - HGTDPlugin, then GeoModelXMLPlugin
+    const std::array<std::string,2> publishers({"HGTD","GeoModelXML"});
+
+    for (auto & iPub : publishers){
+        //setting the "checkTable" option to true, so that an empty map will be returned if not found and we can try the next one
+         mapFPV = sqlreader->getPublishedNodes<std::string, GeoFullPhysVol*>(iPub,true);
+         if (!mapFPV.empty()) {
+            ATH_MSG_DEBUG("Using FPV tables from publisher "<<iPub);
+            break;
+         }
+    }
+    if (mapFPV.empty()) ATH_MSG_ERROR("Could not find any FPV tables under the expected names: "<<publishers);
+
     for (const auto&[fullPhysVolInfoString, fullPhysVolPointer] : mapFPV){
         //find the name of the corresponding detector design type
         size_t startLGAD = fullPhysVolInfoString.find("lgad");
