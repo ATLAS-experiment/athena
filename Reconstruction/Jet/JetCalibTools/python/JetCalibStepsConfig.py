@@ -99,11 +99,11 @@ def etajesStep(flags, **configDic):
 
     pVars = configDic.pop("ParametrizedVars")
 
-    jesstep = CompFactory.EtaMassJESCalibStep("EtaMassJESCalib",
-                                              VarToolE= VarToolCfg(flags,  var=pVars['varE']),
-                                              VarToolEta= VarToolCfg(flags, var=pVars["varEta"]),
-                                              **configDic
-                                              )
+    jesstep = CompFactory.EtaJESCalibStep("EtaJESCalib",
+                                          VarToolE= VarToolCfg(flags,  var=pVars['varE']),
+                                          VarToolEta= VarToolCfg(flags, var=pVars["varEta"]),
+                                          **configDic
+                                          )
     return jesstep
 
 def insituStep(flags, **configDic):

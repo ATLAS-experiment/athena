@@ -4,23 +4,23 @@
   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-// EtaMassJESCalibStep.cxx 
-// Implementation file for class EtaMassJESCalibStep
+// EtaJESCalibStep.cxx 
+// Implementation file for class EtaJESCalibStep
 // Author: Max Swiatlowski <mswiatlo@cern.ch>
 /////////////////////////////////////////////////////////////////// 
 
-#include "JetCalibTools/JESCalibStep.h"
+#include "JetCalibTools/EtaJESCalibStep.h"
 #include "PathResolver/PathResolver.h"
 
 #include "TFile.h"
 
 using JetCalibUtils::VectorizeD;
 
-EtaMassJESCalibStep::EtaMassJESCalibStep(const std::string& name)
+EtaJESCalibStep::EtaJESCalibStep(const std::string& name)
   : asg::AsgTool( name ){ }
 
 
-StatusCode EtaMassJESCalibStep::initialize(){
+StatusCode EtaJESCalibStep::initialize(){
   ATH_MSG_DEBUG ("Initializing " << name() << " Use spline="<<m_useSpline);
 
   ATH_MSG_DEBUG("Reading from " << m_jetInScale << " and writing to " << m_jetOutScale);
@@ -43,7 +43,7 @@ StatusCode EtaMassJESCalibStep::initialize(){
   return StatusCode::SUCCESS;
 }
 
-StatusCode EtaMassJESCalibStep::calibrate(xAOD::JetContainer& jets) const {
+StatusCode EtaJESCalibStep::calibrate(xAOD::JetContainer& jets) const {
   ATH_MSG_DEBUG("Calibrating jet collection.");
 
 
@@ -86,7 +86,7 @@ StatusCode EtaMassJESCalibStep::calibrate(xAOD::JetContainer& jets) const {
 }
 
 
-bool EtaMassJESCalibStep::readMCJESFromText()
+bool EtaJESCalibStep::readMCJESFromText()
 {
   // Open the input file
   std::string local_path=static_cast<std::string> (m_constantFileName);
@@ -136,7 +136,6 @@ bool EtaMassJESCalibStep::readMCJESFromText()
 	}
       }
 
-      
       key=Form("EtaCorr.%s_Bin%d",jetAlgo.c_str(),ieta);
       ATH_MSG_VERBOSE("reading: " << key << " = "<< config.GetValue(key,""));
       params = VectorizeD(config.GetValue(key,"")," ");
@@ -154,7 +153,7 @@ bool EtaMassJESCalibStep::readMCJESFromText()
 
 
 
-bool EtaMassJESCalibStep::readMCJESFromHists()
+bool EtaJESCalibStep::readMCJESFromHists()
 { 
   // Open the input file
   std::string local_path=static_cast<std::string> (m_constantFileName);
@@ -165,7 +164,7 @@ bool EtaMassJESCalibStep::readMCJESFromHists()
 
   std::string jetAlgo=static_cast<std::string> (m_jetAlgo);
 
-  std::vector<double> etaBins = VectorizeD(config.GetValue("JES.EtaBins","")," ");
+  std::vector<double> etaBins = static_cast<std::vector<double>> (m_etaBins);
   if (etaBins.size()==0){ // default binning
     for (int i=0;i<=90; i++) 
       etaBins.push_back(0.1*i-4.5);
@@ -200,7 +199,7 @@ bool EtaMassJESCalibStep::readMCJESFromHists()
     ATH_MSG_VERBOSE("reading: " << key << " = "<< config.GetValue(key,""));
     std::vector<double> params = VectorizeD(config.GetValue(key,"")," ");
     m_energyFreezeJES[ieta] = params[0];
-    
+
     key=Form("EtaCorr.%s_Bin%d",jetAlgo.c_str(),ieta);
     ATH_MSG_VERBOSE("reading: " << key << " = "<< config.GetValue(key,""));
     params = VectorizeD(config.GetValue(key,"")," ");
@@ -214,7 +213,7 @@ bool EtaMassJESCalibStep::readMCJESFromHists()
 }
 
 
-double EtaMassJESCalibStep::getJES(const double X, const double Y, const double Emax) const
+double EtaJESCalibStep::getJES(const double X, const double Y, const double Emax) const
 {
 
   if ( X/cosh(Y) < m_minPt_JES ) { // WARNING !! Won't work if X is actually pT
@@ -247,7 +246,7 @@ double EtaMassJESCalibStep::getJES(const double X, const double Y, const double 
 }
 
 
-double EtaMassJESCalibStep::getLowPtJES(double E_uncorr, double eta_det) const {
+double EtaJESCalibStep::getLowPtJES(double E_uncorr, double eta_det) const {
   int ieta = getEtaBin(eta_det);
   double R=1;
   // This correspond to  m_lowPtExtrap == 0 in the old EtaJESCorrection tool. Not supporting other cases yet.
@@ -267,7 +266,7 @@ double EtaMassJESCalibStep::getLowPtJES(double E_uncorr, double eta_det) const {
 }
 
 
-double EtaMassJESCalibStep::getEtaCorr( double X,  double Y) const
+double EtaJESCalibStep::getEtaCorr( double X,  double Y) const
 {
   int binEta = getEtaBin(Y);
   const double *factors = m_etaCorrFactors[binEta];
@@ -281,7 +280,7 @@ double EtaMassJESCalibStep::getEtaCorr( double X,  double Y) const
   return -eta_corr;
 }
 
-double EtaMassJESCalibStep::getEmaxJES(const double Y) const
+double EtaJESCalibStep::getEmaxJES(const double Y) const
 {
   int binEta = getEtaBin(Y);
   double emaxJES = m_energyFreezeJES[binEta];
@@ -289,7 +288,7 @@ double EtaMassJESCalibStep::getEmaxJES(const double Y) const
   return emaxJES;
 }
 
-double EtaMassJESCalibStep::getLogPolN(const double *factors, double x) const
+double EtaJESCalibStep::getLogPolN(const double *factors, double x) const
 {
   double y=0;
   for ( uint i=0; i<m_nPar; ++i )
@@ -299,7 +298,7 @@ double EtaMassJESCalibStep::getLogPolN(const double *factors, double x) const
 
 
 
-int EtaMassJESCalibStep::getEtaBin(double eta_det) const 
+int EtaJESCalibStep::getEtaBin(double eta_det) const 
 {
   int bin = std::as_const(m_etaBinAxis)->FindBin(eta_det);
   if (bin<=0) return 0;
@@ -307,7 +306,7 @@ int EtaMassJESCalibStep::getEtaBin(double eta_det) const
   return bin-1;
 }
 
-double EtaMassJESCalibStep::getLogPolNSlope(const double *factors, double x) const {
+double EtaJESCalibStep::getLogPolNSlope(const double *factors, double x) const {
   double y=0;
   const double inv_x = 1. / x;
   for ( uint i=0; i<m_nPar; ++i )
@@ -316,7 +315,7 @@ double EtaMassJESCalibStep::getLogPolNSlope(const double *factors, double x) con
 }
 
 
-void EtaMassJESCalibStep::loadSplineHists(const std::string & fileName, const std::string &etajes_name) 
+void EtaJESCalibStep::loadSplineHists(const std::string & fileName, const std::string &etajes_name) 
 {
   std::unique_ptr<TFile> tmpF(TFile::Open( fileName.c_str() ));
   TList *etajes_l = static_cast<TList*>( tmpF->Get(etajes_name.c_str()));
@@ -336,7 +335,7 @@ void EtaMassJESCalibStep::loadSplineHists(const std::string & fileName, const st
 }
 
 
-double EtaMassJESCalibStep::getSplineSlope(const int ieta, const double minE) const {
+double EtaJESCalibStep::getSplineSlope(const int ieta, const double minE) const {
   // Don't want to use interpolation here, so instead just use the values at the bin centers near the cutoff
   int minBin = m_etajesFactors[ieta]->FindBin(minE);
 
@@ -349,7 +348,7 @@ double EtaMassJESCalibStep::getSplineSlope(const int ieta, const double minE) co
 }
 
 
-double EtaMassJESCalibStep::getSplineCorr(const int etaBin, double E) const {
+double EtaJESCalibStep::getSplineCorr(const int etaBin, double E) const {
   double R = m_etajesFactors[ etaBin ]->Interpolate(E);
   return R;
 }

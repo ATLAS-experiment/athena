@@ -1,0 +1,34 @@
+# --------------------------------------------------------------------------------------------------------------------------------------------------------------
+# Global calib tool settings - note no global properties are currently implemented
+# Global:
+#   SetDetectorEta: False # Switch off detector eta setting - copied from R21 but the functionality has not actually been ported (ie. this does nothing)
+
+# --------------------------------------------------------------------------------------------------------------------------------------------------------------
+# 1. Absolute JES
+#AbsoluteJES:
+EtaJES:
+
+  # Used by the python function etajesStep to configure variable retrieval
+  ParametrizedVars:
+    varE: "e"
+    varEta: "DetectorEta"
+
+  # All entries below are direct Properties of EtaJESCalibStep :
+  JetAlgo: AntiKt10UFOCSSKSoftDropBeta100Zcut10
+
+  # The file with the absolute JES factors
+  CalibConstantFile: JetCalibTools/CalibArea-00-04-83/CalibrationFactors/AntiKt10UFOCSSKSoftDropBeta100Zcut10_JES_constants.config
+  # Histograme file with constant when using splines :
+  HistoFile: JetCalibTools/CalibArea-00-04-83/CalibrationFactors/AntiKt10UFOCSSKSoftDropBeta100Zcut10_JES_calibrationFactors.root
+
+  EtaBins: [-3.0,-2.9,-2.8,-2.7,-2.6,-2.5,-2.4,-2.3,-2.2,-2.1,-2.0,-1.9,-1.8,-1.7,-1.6,-1.5,-1.4,-1.3,-1.2,-1.1,-1.0,-0.9,-0.8,-0.7,-0.6,-0.5,-0.4,-0.3,-0.2,-0.1,0.0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1.0,1.1,1.2,1.3,1.4,1.5,1.6,1.7,1.8,1.9,2.0,2.1,2.2,2.3,2.4,2.5,2.6,2.7,2.8,2.9,3.0]
+  
+  FreezeJEScorrectionatHighE: True
+  LowPtJESExtrapolationMethod: 1
+  MinPtForETAJES: 50
+  UseSpline: True
+  OutputLevel: 3
+  InScale: "JetConstitScaleMomentum" # do not include in analysis-facing YAML
+  OutScale: "JetEtaJESScaleMomentum" # do not include in analysis-facing YAML
+  prereqs:
+    default: []
