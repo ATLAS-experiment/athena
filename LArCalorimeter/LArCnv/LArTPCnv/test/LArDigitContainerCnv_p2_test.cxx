@@ -67,6 +67,7 @@ void test1 ATLAS_NOT_THREAD_SAFE ()
 
   // create LArOnlineID helper to be passed to converter
   std::unique_ptr<LArOnlineID> idHelper = std::make_unique<LArOnlineID>();
+  idHelper->setLevel(MSG::DEBUG);
   assert (idHelper->initialize_from_dictionary (idd) == 0);
   
   {
