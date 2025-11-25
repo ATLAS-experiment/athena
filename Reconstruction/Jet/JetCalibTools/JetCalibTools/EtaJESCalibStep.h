@@ -4,12 +4,12 @@
   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-// EtaMassJESCalibStep.h 
-// Header file for class EtaMassJESCalibStep
+// EtaJESCalibStep.h 
+// Header file for class EtaJESCalibStep
 // Author: Max Swiatlowski <mswiatlo@cern.ch>
 /////////////////////////////////////////////////////////////////// 
-#ifndef JETCALIBTOOLS_JESCALIBSTEP_H
-#define JETCALIBTOOLS_JESCALIBSTEP_H 1
+#ifndef JETCALIBTOOLS_ETAJESCALIBSTEP_H
+#define JETCALIBTOOLS_ETAJESCALIBSTEP_H 1
 
 #include <string.h>
 
@@ -28,14 +28,14 @@
 
 #include "JetAnalysisInterfaces/IVarTool.h"
 
-class EtaMassJESCalibStep
+class EtaJESCalibStep
   : public asg::AsgTool,
     virtual public IJetCalibStep {
 
-  ASG_TOOL_CLASS(EtaMassJESCalibStep, IJetCalibStep)
+  ASG_TOOL_CLASS(EtaJESCalibStep, IJetCalibStep)
 
   public:
-  EtaMassJESCalibStep(const std::string& name = "EtaMassJESCalibStep");
+  EtaJESCalibStep(const std::string& name = "EtaJESCalibStep");
 
   virtual StatusCode initialize() override;
   virtual StatusCode calibrate(xAOD::JetContainer&) const override;
@@ -62,7 +62,6 @@ private:
   double getSplineSlope(const int ieta, const double minE) const;
   
   Gaudi::Property<std::string> m_jetInScale {this, "InScale", "JetPileupScaleMomentum", "Starting jet scale"};
-  // Change this to EtaMassJES? Or only if Mass is applied?
   Gaudi::Property<std::string> m_jetOutScale {this, "OutScale", "JetEtaJESScaleMomentum", "Ending jet scale"};
 
   /// name of the text file
@@ -79,7 +78,9 @@ private:
   
   Gaudi::Property< std::string > m_histoFileName { this, "HistoFile", "none", "root file containing histos for spline calib" };
   Gaudi::Property< bool >  m_useSpline = {this, "UseSpline",false, " use spline"};
-  
+
+  /// Eta bins if other than 0.1 steps from -4.5 to 4.5
+  Gaudi::Property<std::vector<double> > m_etaBins {this, "EtaBins", {} ,""}; 
   
   ToolHandle<JetHelper::IVarTool> m_vartoolE{this, "VarToolE", "VarTool", "InputVariable instance E (or pT?)" };
   /// interface for xAOD::jet variable to be defined by user, this must correspond to jet Eta in currect version of jet calibration files
