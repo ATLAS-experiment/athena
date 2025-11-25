@@ -79,10 +79,12 @@ StatusCode TauShotFinder::executeShotFinder(xAOD::TauJet& tau, xAOD::CaloCluster
     // TODO: simplify the calculation 
     if (phiNeigCell) {
       // interpolate position
+      double wtCell_phiNeigCell = m_caloWeightTool->wtCell(phiNeigCell);
+      double wtCell_cell = m_caloWeightTool->wtCell(cell);
       double dPhi = TVector2::Phi_mpi_pi( phiNeigCell->phi() - cell->phi());
-      double ratio = phiNeigCell->pt()*m_caloWeightTool->wtCell(phiNeigCell)/(cell->pt()*m_caloWeightTool->wtCell(cell) + phiNeigCell->pt()*m_caloWeightTool->wtCell(phiNeigCell));
+      double ratio = phiNeigCell->pt()*wtCell_phiNeigCell/(cell->pt()*wtCell_cell + phiNeigCell->pt()*wtCell_phiNeigCell);
       float phi = cell->phi()+dPhi*ratio;
-      float pt = cell->pt()*m_caloWeightTool->wtCell(cell)+phiNeigCell->pt()*m_caloWeightTool->wtCell(phiNeigCell);
+      float pt = cell->pt()*wtCell_cell+phiNeigCell->pt()*wtCell_phiNeigCell;
 
       shot->setP4( static_cast<float>(pt), static_cast<float>(cell->eta()), static_cast<float>(phi), static_cast<float>(cell->m()));
     }
@@ -191,18 +193,17 @@ StatusCode TauShotFinder::selectCells(const xAOD::TauJet& tau,
       }
     }
   }
-  // Get only cells within dR < 0.4
-  // -- TODO: change the hardcoded 0.4
+  // Get only cells within dR < theshold (0.4 by default)
   std::vector<CaloCell_ID::SUBCALO> emSubCaloBlocks;
   emSubCaloBlocks.push_back(CaloCell_ID::LAREM);
   std::unique_ptr<CaloCellList> cellList = std::make_unique<CaloCellList>(detMgr, &cellContainer, emSubCaloBlocks);
   // -- FIXME: tau p4 is corrected to point at tau vertex, but the cells are not 
-  cellList->select(tau.eta(), tau.phi(), 0.4); 
+  cellList->select(tau.eta(), tau.phi(), m_dRThreshold); 
 
   for (const CaloCell* cell : *cellList) {
-    // Require cells above 100 MeV
+    // Require cells above threshold (100 MeV by default)
     // FIXME: cells are not corrected to point at tau vertex
-    if (cell->pt() * m_caloWeightTool->wtCell(cell) < 100.) continue;
+    if (cell->pt() * m_caloWeightTool->wtCell(cell) < m_energyThreshold) continue;
     // if in EleRM, check the clusters do not include electron activities
     if (m_removeElectronCells && inEleRM() && std::find(removed_cells.cbegin(), removed_cells.cend(), cell) != removed_cells.cend()) continue;
     
