@@ -67,7 +67,6 @@ public:
   virtual StatusCode createPixelSPs(xAOD::SpacePointContainer& pixelSPs, xAOD::PixelClusterContainer& clustersCont ) const = 0;
 
   virtual StatusCode getRdoList(std::vector<Identifier> &rdoList, const FPGATrackSimCluster& cluster) const = 0;
-  virtual StatusCode getRdoList(std::vector<Identifier> &rdoList, const FPGATrackSimHit& hit) const = 0;
   virtual StatusCode getStripsInfo(const xAOD::StripCluster& cl, float& halfStripLength, Amg::Vector3D& stripDirection, Amg::Vector3D& stripCenter) const = 0;
 
 
