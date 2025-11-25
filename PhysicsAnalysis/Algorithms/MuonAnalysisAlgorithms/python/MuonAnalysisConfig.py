@@ -509,6 +509,11 @@ class MuonTriggerAnalysisSFBlock (ConfigBlock):
                         alg.minRunNumber = 290000
 
                 alg.trigger = trig
+
+                # Some triggers in `250731_SummerUpdate` recommendations are not supported in 2022 period F
+                if config.campaign() is Campaign.MC23a and (trig_short == "HLT_mu8noL1_FSNOSEED" or trig_short == "HLT_mu22_L1MU14FCH"):
+                    alg.minRunNumber = 435816  # Start of 2022 period H
+
                 if self.saveSF:
                     alg.scaleFactorDecoration = f"muon_{self.prefixSF}_{trig_short}_%SYS%"
                 if self.saveEff:
