@@ -21,7 +21,8 @@ class FlavourUncertaintyComponent : public UncertaintyComponent
                                     const TString& path,
                                     const TString& calibArea,
                                     const bool absEtaGluonFraction,
-                                    const TString& analysisHistPattern=""
+                                    const TString& analysisHistPattern="",
+                                    const TString& NjetAccessorName="Njet"
                                     );
         FlavourUncertaintyComponent(const FlavourUncertaintyComponent& toCopy);
         virtual FlavourUncertaintyComponent* clone() const;

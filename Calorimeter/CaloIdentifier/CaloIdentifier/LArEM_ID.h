@@ -5,18 +5,12 @@
 #ifndef LAREM_ID_H
 #define LAREM_ID_H
 
-#include "AthenaKernel/CLASS_DEF.h"
-#include "AtlasDetDescr/AtlasDetectorID.h"
-#include "Identifier/IdentifierHash.h"
-#include "IdDict/IdDictFieldImplementation.h"
-#include "IdDict/IdDictDefs.h"
-
-#include "CaloIdentifier/LArID_Exception.h"
 #include "CaloIdentifier/LArEM_Base_ID.h"
+#include "Identifier/Identifier.h"
+#include "AthenaKernel/CLASS_DEF.h"
 #include "AthenaKernel/BaseInfo.h"
 
-#include <vector>
-#include <algorithm>
+class IdDictMgr;
 
 /**
 *
@@ -112,17 +106,15 @@
 * @author maintained by Fabienne Ledroit
 */
 
-class Range;
 
 class LArEM_ID : public LArEM_Base_ID
 {
 public:        
 
-  typedef Identifier::size_type  size_type ;
+  using size_type = Identifier::size_type;
 
   LArEM_ID();
-  ~LArEM_ID();
-
+  virtual ~LArEM_ID();
 
   
   /** initialization from the identifier dictionary*/

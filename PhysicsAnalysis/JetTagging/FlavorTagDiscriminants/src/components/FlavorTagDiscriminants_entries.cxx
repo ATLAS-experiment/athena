@@ -13,7 +13,7 @@
 #include "FlavorTagDiscriminants/SoftElectronTruthDecoratorAlg.h"
 #include "FlavorTagDiscriminants/GNNAuxTaskDecoratorAlg.h"
 #include "FlavorTagDiscriminants/TrackClassifier.h"
-#include "FlavorTagDiscriminants/FTagGhostElectronAssociationAlg.h"
+#include "FlavorTagDiscriminants/FTagGhostLeptonAssociationAlg.h"
 #include "FlavorTagDiscriminants/HitDecoratorAlg.h"
 #include "FlavorTagDiscriminants/JetHitAssociationAlg.h"
 
@@ -39,5 +39,6 @@ DECLARE_COMPONENT(GNNAuxTaskDecoratorAlg)
 DECLARE_COMPONENT(CountIParticleAlg)
 DECLARE_COMPONENT(CountTrackParticleAlg)
 DECLARE_COMPONENT(FTagGhostElectronAssociationAlg)
+DECLARE_COMPONENT(FTagGhostMuonAssociationAlg)
 DECLARE_COMPONENT(HitDecoratorAlg)
 DECLARE_COMPONENT(JetHitAssociationAlg)

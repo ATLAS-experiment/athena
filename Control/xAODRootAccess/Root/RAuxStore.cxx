@@ -292,21 +292,20 @@ struct RAuxStore::impl {
 #endif  // ROOT_VERSION_CODE >= ROOT_VERSION(6, 35, 0)
         ) {
 
-          // Get the name of this sub-field.
-          const std::string subFieldName = subField->GetQualifiedFieldName();
-          const std::string subAuxName =
-              subFieldName.substr(subFieldName.find(".") + 1);
+          // Get the type of this sub-field.
+          const std::string& typeName = subField->GetTypeName();
 
           // Skip this entry if it refers to a base class.
-          if (subAuxName.starts_with("xAOD::") ||
-              subAuxName.starts_with("SG::") ||
-              subAuxName.starts_with("ILockable")) {
+          if (typeName.starts_with("xAOD::") ||
+              typeName.starts_with("SG::") ||
+              typeName.starts_with("DMTest::") ||
+              typeName.starts_with("ILockable")) {
             continue;
           }
 
           // Set up this field.
           RETURN_CHECK("xAOD::RAuxStore::impl::scanInputNtuple",
-                       setupAuxField(*subField, subAuxName));
+                       setupAuxField(*subField, subField->GetFieldName()));
         }
         // Don't check the rest of the loop's body:
         continue;
@@ -323,7 +322,8 @@ struct RAuxStore::impl {
         continue;
       }
       // The auxiliary property name:
-      const std::string auxName = fieldName.substr(fieldName.find(":") + 1);
+      std::string_view auxName = fieldName;
+      auxName = auxName.substr(auxName.find(':') + 1);
       // Leave the rest up to the function that is shared with the
       // dynamic fields:
       RETURN_CHECK("xAOD::RAuxStore::scanInputNtuple",
@@ -435,7 +435,8 @@ struct RAuxStore::impl {
     // Check if the registry already knows this variable name. If yes, let's
     // use the type known by the registry. To be able to deal with simple
     // schema evolution in dynamic fields.
-    if (const SG::auxid_t regAuxid = registry.findAuxID(std::string{auxName});
+    const std::string auxNameStr{auxName};//Get rid of this if everything is migrated to string_view
+    if (const SG::auxid_t regAuxid = registry.findAuxID(auxNameStr);
         regAuxid != SG::null_auxid) {
       m_data.m_auxIDs.insert(regAuxid);
       return StatusCode::SUCCESS;
@@ -444,11 +445,11 @@ struct RAuxStore::impl {
     SG::AuxVarFlags flags = SG::AuxVarFlags::SkipNameCheck;
     SG::auxid_t linkedAuxId = SG::null_auxid;
 
-    if (SG::AuxTypeRegistry::isLinkedName(std::string{auxName})) {
+    if (SG::AuxTypeRegistry::isLinkedName(auxNameStr)) {
       flags |= SG::AuxVarFlags::Linked;
     } else if (SG::AuxTypeRegistry::classNameHasLink(expectedClassName)) {
       const std::string linkedAttr =
-          SG::AuxTypeRegistry::linkedName(std::string{auxName});
+          SG::AuxTypeRegistry::linkedName(auxNameStr);
       const std::string linkedFieldName =
           SG::AuxTypeRegistry::linkedName(field.GetFieldName());
       const std::type_info* linkedTi = nullptr;
@@ -470,7 +471,7 @@ struct RAuxStore::impl {
 
     // Check for an auxiliary ID for this field:
     SG::auxid_t auxid =
-        registry.getAuxID(*ti, std::string{auxName}, "", flags, linkedAuxId);
+        registry.getAuxID(*ti, auxNameStr, "", flags, linkedAuxId);
 
     // First try to find a compiled factory for the vector type:
     if (auxid == SG::null_auxid) {
@@ -506,7 +507,7 @@ struct RAuxStore::impl {
               registry.addFactory(
                   *ti, *factory->tiAlloc(),
                   std::unique_ptr<SG::IAuxTypeVectorFactory>(factory));
-              auxid = registry.getAuxID(*ti, std::string{auxName}, "", flags,
+              auxid = registry.getAuxID(*ti, auxNameStr, "", flags,
                                         linkedAuxId);
             }
           }
@@ -534,7 +535,7 @@ struct RAuxStore::impl {
           std::string tiAllocName = factory->tiAllocName();
           registry.addFactory(*ti, tiAllocName, std::move(factory));
         }
-        auxid = registry.getAuxID(*ti, std::string{auxName}, "",
+        auxid = registry.getAuxID(*ti, auxNameStr, "",
                                   SG::AuxVarFlags::SkipNameCheck);
       } else {
         ::Warning("xAOD::RAuxStore::setupAuxField",

@@ -538,6 +538,7 @@
 #include "AthContainers/tools/ElementProxy.h"
 #include "AthContainers/tools/IsMostDerivedFlag.h"
 #include "AthContainers/DataVectorWithAllocFwd.h"
+#include "CxxUtils/concepts.h"
 #include <boost/iterator/iterator_adaptor.hpp>
 #include <type_traits>
 #include <vector>
@@ -1370,6 +1371,26 @@ public:
    * Returns the pushed pointer.
    */
   value_type push_back(std::unique_ptr<base_value_type> pElem);
+
+
+  /**
+   * @brief Create and add a number of new elements to the end of the container.
+   * @param n The number of new elements to add.
+   * @param alloc Functional to call to allocate a new element to push.
+   *              Should be callable like <code>T* = alloc();</code>
+   *              For example:
+   *@code
+   *                dv.push_new (n, [](){ return new Foo; });
+   @endcode
+   *              It may also be useful to allocate from a @c DataPool.
+   *
+   * Note: this method may only be called using the most derived
+   * @c DataVector in the hierarchy.
+   *
+   * Returns the original size of the vector.
+   */
+  template <CxxUtils::detail::AllocationFunction<T> F>
+  size_type push_new (size_type n, F alloc);
 
 
   /**
@@ -2664,6 +2685,26 @@ public:
    * Returns the pushed pointer.
    */
   value_type push_back(std::unique_ptr<base_value_type> pElem);
+
+
+  /**
+   * @brief Create and add a number of new elements to the end of the container.
+   * @param n The number of new elements to add.
+   * @param alloc Functional to call to allocate a new element to push.
+   *              Should be callable like <code>T* = alloc();</code>
+   *              For example:
+   *@code
+   *                dv.push_new (n, [](){ return new Foo; });
+   @endcode
+   *              It may also be useful to allocate from a @c DataPool.
+   *
+   * Note: this method may only be called using the most derived
+   * @c DataVector in the hierarchy.
+   *
+   * Returns the original size of the vector.
+   */
+  template <CxxUtils::detail::AllocationFunction<T> F>
+  size_type push_new (size_type n, F alloc);
 
 
   /**

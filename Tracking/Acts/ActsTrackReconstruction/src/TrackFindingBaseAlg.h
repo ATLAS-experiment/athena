@@ -13,7 +13,7 @@
 
 // Tools
 #include "ActsToolInterfaces/IActsToTrkConverterTool.h"
-#include "ActsGeometryInterfaces/IActsExtrapolationTool.h"
+#include "ActsGeometryInterfaces/IExtrapolationTool.h"
 #include "ActsGeometryInterfaces/ITrackingGeometryTool.h"
 #include "ActsToolInterfaces/ITrackParamsEstimationTool.h"
 #include "src/TrackStatePrinterTool.h"
@@ -85,7 +85,7 @@ namespace ActsTrk {
 
     // Tool Handles
     ToolHandle<GenericMonitoringTool> m_monTool{this, "MonTool", "", "Monitoring tool"};
-    ToolHandle<IActsExtrapolationTool> m_extrapolationTool{this, "ExtrapolationTool", ""};
+    ToolHandle<ActsTrk::IExtrapolationTool> m_extrapolationTool{this, "ExtrapolationTool", ""};
     PublicToolHandle<ActsTrk::ITrackingGeometryTool> m_trackingGeometryTool{this, "TrackingGeometryTool", ""};
     ToolHandle<ActsTrk::TrackStatePrinterTool> m_trackStatePrinter{this, "TrackStatePrinter", "", "optional track state printer"};
     ToolHandle<ActsTrk::IActsToTrkConverterTool > m_ATLASConverterTool{this, "ATLASConverterTool", ""};
@@ -135,6 +135,7 @@ namespace ActsTrk {
     Gaudi::Property<std::vector<double>> m_maxChi2{this, "maxChi2", {}, "TrackSelector: maxChi2"};
 
     Gaudi::Property<bool> m_addCounts{this, "addCounts", true, "keep separate pixel, strip and hgtd counts and apply the following cuts"};
+    Gaudi::Property<bool> m_checkCounts{this, "checkCounts", false, "check consistency among track state counts"};
     Gaudi::Property<std::vector<std::size_t>> m_minPixelHits{this, "minPixelHits", {}, "minimum number of pixel hits"};
     Gaudi::Property<std::vector<std::size_t>> m_minStripHits{this, "minStripHits", {}, "minimum number of strip hits"};
     Gaudi::Property<std::vector<std::size_t>> m_minHgtdHits{this, "minHgtdHits", {}, "minimum number of hgtd hits"};
@@ -309,8 +310,6 @@ namespace ActsTrk {
     static void updateCounts(const detail::RecoTrackContainer::TrackProxy &track,
                              Acts::ConstTrackStateType typeFlags,
                              xAOD::UncalibMeasType detType);
-    static void copyCounts(const detail::RecoTrackContainer::TrackProxy &track,
-                           const detail::RecoTrackContainer::TrackProxy &other);
     void checkCounts(const detail::RecoTrackContainer::TrackProxy &track) const;
     std::array<bool, 3> selectCounts(const detail::RecoTrackContainer::TrackProxy &track, double eta) const;
 

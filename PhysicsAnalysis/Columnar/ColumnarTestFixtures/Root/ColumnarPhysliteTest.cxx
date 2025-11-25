@@ -38,6 +38,7 @@
 
 #include <chrono>
 #include <cstdint>
+#include <format>
 #include <memory>
 #include <vector>
 
@@ -52,7 +53,7 @@ namespace columnar
   namespace
   {
     // the target time to run a given tool
-    const auto targetTime = std::chrono::seconds(1);
+    const auto targetTime = std::chrono::seconds(5);
 
     // the number of events per batch in columnar mode
     const unsigned int batchSize = 1000;
@@ -70,15 +71,33 @@ namespace columnar
       /// the number of times the timer has been started
       std::uint64_t m_count = 0;
 
+      /// the number of calls per batch
+      unsigned m_batchSize = 1;
+
+      /// whether to suppress output
+      bool m_silence = false;
+
     public:
-      Benchmark (const std::string& val_name)
-        : m_name (val_name)
+      Benchmark (const std::string& val_name, unsigned val_batchSize = 1)
+        : m_name (val_name), m_batchSize (val_batchSize)
       {}
 
       ~Benchmark ()
       {
-        if (m_count > 0)
-          std::cout << m_name << ": " << std::chrono::duration<std::uint64_t,std::nano> (m_ticks) / m_count << std::endl;
+        if (m_count > 0 && !m_silence)
+          std::cout << m_name << ": " << std::chrono::duration<std::uint64_t,std::nano> (m_ticks) / (m_count * m_batchSize) << std::endl;
+      }
+
+      void setSilence ()
+      {
+        m_silence = true;
+      }
+
+      std::optional<float> getEntryTime (float emptyTime) const
+      {
+        if (m_count == 0)
+          return std::nullopt;
+        return static_cast<float>((std::chrono::duration<float,std::nano> (m_ticks) / (m_count * m_batchSize)) / std::chrono::duration<float,std::nano> (1))-emptyTime/m_batchSize;
       }
 
       auto getTotalTime () const
@@ -117,6 +136,25 @@ namespace columnar
       {"GSFTrackParticles", 0x2e42db0b},
       {"InDetForwardTrackParticles", 0x143c6846},
       {"MuonSpectrometerTrackParticles", 0x3993c8f3},
+    };
+
+    /// the performance data for reading a single branch
+    struct BranchPerfData final
+    {
+      std::string name;
+      std::optional<float> timeRead;
+      std::optional<float> timeUnpack;
+      std::optional<float> entrySize;
+      std::optional<float> uncompressedSize;
+      std::optional<unsigned> numBaskets;
+    };
+
+    /// the performance data for running a single tool
+    struct ToolPerfData final
+    {
+      std::string name;
+      std::optional<float> timeCheck;
+      std::optional<float> timeCall;
     };
 
     template<typename T>
@@ -204,6 +242,29 @@ namespace columnar
       {
         return *m_data;
       }
+
+      std::optional<float> entrySize () const
+      {
+        if (!m_branch)
+          return std::nullopt;
+        return static_cast<float>(m_branch->GetZipBytes()) / m_branch->GetEntries();
+      }
+
+      std::optional<float> uncompressedSize () const
+      {
+        if (!m_branch)
+          return std::nullopt;
+        return static_cast<float>(m_branch->GetTotBytes()) / m_branch->GetEntries();
+      }
+
+      // technically this is const-correct, but I don't want to convince
+      // the code checker of that
+      std::optional<unsigned> numBaskets ()
+      {
+        if (!m_branch)
+          return std::nullopt;
+        return m_branch->GetListOfBaskets()->GetSize();
+      }
     };
 
     template<typename T>
@@ -269,6 +330,29 @@ namespace columnar
           throw std::runtime_error ("failed to get entry " + std::to_string (entry) + " for branch: " + m_branchName);
         return std::span<const T>(m_dataVec.data(), size);
       }
+
+      std::optional<float> entrySize () const
+      {
+        if (!m_branch)
+          return std::nullopt;
+        return static_cast<float>(m_branch->GetZipBytes()) / m_branch->GetEntries();
+      }
+
+      std::optional<float> uncompressedSize () const
+      {
+        if (!m_branch)
+          return std::nullopt;
+        return static_cast<float>(m_branch->GetTotBytes()) / m_branch->GetEntries();
+      }
+
+      // technically this is const-correct, but I don't want to convince
+      // the code checker of that
+      std::optional<unsigned> numBaskets ()
+      {
+        if (!m_branch)
+          return std::nullopt;
+        return m_branch->GetListOfBaskets()->GetSize();
+      }
     };
 
     class IColumnData
@@ -293,6 +377,8 @@ namespace columnar
       virtual void getEntry (Long64_t entry) = 0;
 
       virtual void setData (TestUtils::ToolWrapperData& tool) = 0;
+
+      [[nodiscard]] virtual BranchPerfData getPerfData (float emptyTime) = 0;
     };
 
     struct ColumnDataEventCount final : public TestUtils::IColumnData
@@ -330,6 +416,13 @@ namespace columnar
       {
         if (outputColumns.at(0).enabled)
           tool.setColumn (outputColumns.at(0).name, data.size(), data.data());
+      }
+
+      [[nodiscard]] virtual BranchPerfData getPerfData (float /*emptyTime*/) override
+      {
+        BranchPerfData result;
+        result.name = "EventCount(auto)";
+        return result;
       }
     };
   
@@ -379,7 +472,21 @@ namespace columnar
       {
         if (outputColumns.at(0).enabled)
           tool.setColumn (outputColumns.at(0).name, outData.size(), outData.data());
-      } 
+      }
+
+      [[nodiscard]] virtual BranchPerfData getPerfData (float emptyTime) override
+      {
+        BranchPerfData result;
+        result.name = branchReader.columnName();
+        result.timeRead = benchmark.getEntryTime(emptyTime);
+        result.timeUnpack = benchmarkUnpack.getEntryTime(emptyTime);
+        benchmark.setSilence();
+        benchmarkUnpack.setSilence();
+        result.entrySize = branchReader.entrySize();
+        result.uncompressedSize = branchReader.uncompressedSize();
+        result.numBaskets = branchReader.numBaskets();
+        return result;
+      }
     };
 
     template<typename T>
@@ -460,6 +567,20 @@ namespace columnar
             throw std::runtime_error ("offset column does not match: " + outputColumns.at(1).name);
         }
       }
+
+      [[nodiscard]] virtual BranchPerfData getPerfData (float emptyTime) override
+      {
+        BranchPerfData result;
+        result.name = branchReader.columnName();
+        result.timeRead = benchmark.getEntryTime(emptyTime);
+        result.timeUnpack = benchmarkUnpack.getEntryTime(emptyTime);
+        benchmark.setSilence();
+        benchmarkUnpack.setSilence();
+        result.entrySize = branchReader.entrySize();
+        result.uncompressedSize = branchReader.uncompressedSize();
+        result.numBaskets = branchReader.numBaskets();
+        return result;
+      }
     };
 
     template<typename T>
@@ -511,6 +632,13 @@ namespace columnar
       {
         if (outputColumns.at(0).enabled)
           tool.setColumn (outputColumns.at(0).name, outData.size(), outData.data());
+      }
+
+      [[nodiscard]] virtual BranchPerfData getPerfData (float /*emptyTime*/) override
+      {
+        BranchPerfData result;
+        result.name = outputColumns.at(0).name + "(out)";
+        return result;
       }
     };
 
@@ -579,6 +707,20 @@ namespace columnar
           tool.setColumn (outputColumns.at(0).name, columnData.size(), columnData.data());
         if (outputColumns.at(1).enabled)
           tool.setColumn (outputColumns.at(1).name, offsets.size(), offsets.data());
+      }
+
+      [[nodiscard]] virtual BranchPerfData getPerfData (float emptyTime) override
+      {
+        BranchPerfData result;
+        result.name = branchReader.columnName();
+        result.timeRead = benchmark.getEntryTime(emptyTime);
+        result.timeUnpack = benchmarkUnpack.getEntryTime(emptyTime);
+        benchmark.setSilence();
+        benchmarkUnpack.setSilence();
+        result.entrySize = branchReader.entrySize();
+        result.uncompressedSize = branchReader.uncompressedSize();
+        result.numBaskets = branchReader.numBaskets();
+        return result;
       }
     };
 
@@ -685,7 +827,21 @@ namespace columnar
           tool.setColumn (outputColumns.at(0).name, columnData.size(), columnData.data());
         if (outputColumns.at(1).enabled)
           tool.setColumn (outputColumns.at(1).name, offsets.size(), offsets.data());
-      } 
+      }
+
+      [[nodiscard]] virtual BranchPerfData getPerfData (float emptyTime) override
+      {
+        BranchPerfData result;
+        result.name = branchReader.columnName();
+        result.timeRead = benchmark.getEntryTime(emptyTime);
+        result.timeUnpack = benchmarkUnpack.getEntryTime(emptyTime);
+        benchmark.setSilence();
+        benchmarkUnpack.setSilence();
+        result.entrySize = branchReader.entrySize();
+        result.uncompressedSize = branchReader.uncompressedSize();
+        result.numBaskets = branchReader.numBaskets();
+        return result;
+      }
     };
 
     template<typename T>
@@ -774,7 +930,21 @@ namespace columnar
           tool.setColumn (outputColumns.at(1).name, innerOffsets.size(), innerOffsets.data());
         if (outputColumns.at(2).enabled)
           tool.setColumn (outputColumns.at(2).name, outerOffsets.size(), outerOffsets.data());
-      } 
+      }
+
+      [[nodiscard]] virtual BranchPerfData getPerfData (float emptyTime) override
+      {
+        BranchPerfData result;
+        result.name = branchReader.columnName();
+        result.timeRead = benchmark.getEntryTime(emptyTime);
+        result.timeUnpack = benchmarkUnpack.getEntryTime(emptyTime);
+        benchmark.setSilence();
+        benchmarkUnpack.setSilence();
+        result.entrySize = branchReader.entrySize();
+        result.uncompressedSize = branchReader.uncompressedSize();
+        result.numBaskets = branchReader.numBaskets();
+        return result;
+      }
     };
 
     template<typename T>
@@ -818,7 +988,7 @@ namespace columnar
         if (auto targetOffsetIter = offsetColumns.find (iter->second.linkTargetNames.at(0)); targetOffsetIter != offsetColumns.end())
           targetOffsetColumn = targetOffsetIter->second;
         else
-          throw std::runtime_error ("missing offset column: " + iter->second.linkTargetNames.at(0));
+          throw std::runtime_error ("missing offset column(vector-link): " + iter->second.linkTargetNames.at(0));
 
         requestedColumns.erase (iter);
 
@@ -889,6 +1059,20 @@ namespace columnar
           tool.setColumn (outputColumns.at(0).name, columnData.size(), columnData.data());
         if (outputColumns.at(1).enabled)
           tool.setColumn (outputColumns.at(1).name, offsets.size(), offsets.data());
+      }
+
+      [[nodiscard]] virtual BranchPerfData getPerfData (float emptyTime) override
+      {
+        BranchPerfData result;
+        result.name = branchReader.columnName();
+        result.timeRead = benchmark.getEntryTime(emptyTime);
+        result.timeUnpack = benchmarkUnpack.getEntryTime(emptyTime);
+        benchmark.setSilence();
+        benchmarkUnpack.setSilence();
+        result.entrySize = branchReader.entrySize();
+        result.uncompressedSize = branchReader.uncompressedSize();
+        result.numBaskets = branchReader.numBaskets();
+        return result;
       }
     };
 
@@ -1002,7 +1186,7 @@ namespace columnar
               targetKeys.push_back (branchDataKey[index]);
               keyIndex = 0;
               std::cout << "assume target key for " << outputColumns.at(0).name << " is " << std::hex << branchDataKey[index] << std::dec << std::endl;
-            } else
+            } else if (branchDataKey[index] != 0)
             {
               std::ostringstream error;
               error << "target key mismatch: read " << std::hex << branchDataKey[index];
@@ -1012,13 +1196,19 @@ namespace columnar
               error << " for " << outputColumns.at(0).name;
               throw std::runtime_error (std::move (error).str());
             }
-            auto& targetOffsetColumn = *targetOffsetColumns.at(keyIndex);
-            auto targetOffset = targetOffsetColumn.at (offsets.size()-1);
-            CM::LinkIndexType linkIndex = branchDataIndex[index];
-            linkIndex += targetOffset;
-            if (linkIndex >= targetOffsetColumn.at(offsets.size()))
-              throw std::runtime_error (std::format ("index out of range for link: {} >= {} (base index {})", outputColumns.at(0).name, linkIndex, targetOffsetColumn.at(offsets.size()), targetOffset));
-            columnData.push_back (CM::mergeLinkKeyIndex (keyIndex, branchDataIndex[index] + targetOffset));
+            if (keyIndex == CM::invalidLinkValue)
+            {
+              columnData.push_back (CM::invalidLinkValue);
+            } else
+            {
+              auto& targetOffsetColumn = *targetOffsetColumns.at(keyIndex);
+              auto targetOffset = targetOffsetColumn.at (offsets.size()-1);
+              CM::LinkIndexType linkIndex = branchDataIndex[index];
+              linkIndex += targetOffset;
+              if (linkIndex >= targetOffsetColumn.at(offsets.size()))
+                throw std::runtime_error (std::format ("index out of range for link: {} >= {} (base index {})", outputColumns.at(0).name, linkIndex, targetOffsetColumn.at(offsets.size()), targetOffset));
+              columnData.push_back (CM::mergeLinkKeyIndex (keyIndex, branchDataIndex[index] + targetOffset));
+            }
           }
         }
         offsets.push_back (columnData.size());
@@ -1040,6 +1230,20 @@ namespace columnar
           tool.setColumn (outputColumns.at(1).name, offsets.size(), offsets.data());
         if (outputColumns.at(2).enabled)
           tool.setColumn (outputColumns.at(2).name, keyColumnData.size(), keyColumnData.data());
+      }
+
+      [[nodiscard]] virtual BranchPerfData getPerfData (float emptyTime) override
+      {
+        BranchPerfData result;
+        result.name = branchReaderSize.columnName();
+        result.timeRead = benchmark.getEntryTime(emptyTime);
+        result.timeUnpack = benchmarkUnpack.getEntryTime(emptyTime);
+        benchmark.setSilence();
+        benchmarkUnpack.setSilence();
+        result.entrySize = branchReaderSize.entrySize().value() + branchReaderKey.entrySize().value() + branchReaderIndex.entrySize().value();
+        result.uncompressedSize = branchReaderSize.uncompressedSize().value() + branchReaderKey.uncompressedSize().value() + branchReaderIndex.uncompressedSize().value();
+        result.numBaskets = branchReaderSize.numBaskets().value() + branchReaderKey.numBaskets().value() + branchReaderIndex.numBaskets().value();
+        return result;
       }
     };
 
@@ -1105,6 +1309,8 @@ namespace columnar
         for ([[maybe_unused]] auto& container : containers)
         {
           keysColumn.push_back (keysColumn.size()+1);
+          if (!offsetColumns.contains (container))
+            throw std::runtime_error ("missing offset column(variant-link): " + container);
           containerOffsets.push_back (offsetColumns.at (container));
           if (auto iter = knownKeys.find (container); iter != knownKeys.end())
           {
@@ -1198,7 +1404,21 @@ namespace columnar
           tool.setColumn (outputColumns.at(1).name, offsets.size(), offsets.data());
         if (outputColumns.at(2).enabled)
           tool.setColumn (outputColumns.at(2).name, keysColumn.size(), keysColumn.data());
-      } 
+      }
+
+      [[nodiscard]] virtual BranchPerfData getPerfData (float emptyTime) override
+      {
+        BranchPerfData result;
+        result.name = branchReader.columnName();
+        result.timeRead = benchmark.getEntryTime(emptyTime);
+        result.timeUnpack = benchmarkUnpack.getEntryTime(emptyTime);
+        benchmark.setSilence();
+        benchmarkUnpack.setSilence();
+        result.entrySize = branchReader.entrySize();
+        result.uncompressedSize = branchReader.uncompressedSize();
+        result.numBaskets = branchReader.numBaskets();
+        return result;
+      }
     };
 
     struct ColumnDataMetNames final : public TestUtils::IColumnData
@@ -1280,7 +1500,21 @@ namespace columnar
           tool.setColumn (outputColumns.at(1).name, offsets.size(), offsets.data());
         if (outputColumns.at(2).enabled)
           tool.setColumn (outputColumns.at(2).name, columnHashData.size(), columnHashData.data());
-      } 
+      }
+
+      [[nodiscard]] virtual BranchPerfData getPerfData (float emptyTime) override
+      {
+        BranchPerfData result;
+        result.name = branchReader.columnName();
+        result.timeRead = benchmark.getEntryTime(emptyTime);
+        result.timeUnpack = benchmarkUnpack.getEntryTime(emptyTime);
+        benchmark.setSilence();
+        benchmarkUnpack.setSilence();
+        result.entrySize = branchReader.entrySize();
+        result.uncompressedSize = branchReader.uncompressedSize();
+        result.numBaskets = branchReader.numBaskets();
+        return result;
+      }
     };
 
     struct ColumnDataOutputMet final : public TestUtils::IColumnData
@@ -1370,6 +1604,13 @@ namespace columnar
         if (outputColumns.at(3).enabled)
           tool.setColumn (outputColumns.at(3).name, namesHash.size(), namesHash.data());
       }
+
+      [[nodiscard]] virtual BranchPerfData getPerfData (float /*emptyTime*/) override
+      {
+        BranchPerfData result;
+        result.name = outputColumns.at(0).name + "(met-out)";
+        return result;
+      }
     };
 
     struct ColumnDataSamplingPattern final : public TestUtils::IColumnData
@@ -1438,7 +1679,21 @@ namespace columnar
           tool.setColumn (outputColumns.at(0).name, columnData.size(), columnData.data());
         if (outputColumns.at(1).enabled)
           tool.setColumn (outputColumns.at(1).name, offsets.size(), offsets.data());
-      } 
+      }
+
+      [[nodiscard]] virtual BranchPerfData getPerfData (float emptyTime) override
+      {
+        BranchPerfData result;
+        result.name = branchReader.columnName() + "(fallback)";
+        result.timeRead = benchmark.getEntryTime(emptyTime);
+        result.timeUnpack = benchmarkUnpack.getEntryTime(emptyTime);
+        benchmark.setSilence();
+        benchmarkUnpack.setSilence();
+        result.entrySize = branchReader.entrySize();
+        result.uncompressedSize = branchReader.uncompressedSize();
+        result.numBaskets = branchReader.numBaskets();
+        return result;
+      }
     };
   }
 
@@ -1607,12 +1862,15 @@ namespace columnar
     // declared to have the correct xAOD type, correct split setting,
     // and correct linked containers.
     knownColumns.push_back (std::make_shared<ColumnDataVectorVectorLink<xAOD::CaloClusterContainer>> ("AnalysisElectronsAuxDyn.caloClusterLinks"));
+    knownColumns.push_back (std::make_shared<ColumnDataVectorVectorLink<xAOD::TrackParticleContainer>> ("AnalysisElectronsAuxDyn.trackParticleLinks"));
     knownColumns.push_back (std::make_shared<ColumnDataVectorVectorLink<xAOD::CaloClusterContainer>> ("AnalysisPhotonsAuxDyn.caloClusterLinks"));
     knownColumns.push_back (std::make_shared<ColumnDataVectorVectorLink<xAOD::VertexContainer>> ("AnalysisPhotonsAuxDyn.vertexLinks"));
     knownColumns.push_back (std::make_shared<ColumnDataVectorSplitLink<xAOD::TrackParticleContainer>> ("AnalysisMuonsAuxDyn.inDetTrackParticleLink"));
     knownColumns.push_back (std::make_shared<ColumnDataVectorSplitLink<xAOD::TrackParticleContainer>> ("AnalysisMuonsAuxDyn.combinedTrackParticleLink"));
     knownColumns.push_back (std::make_shared<ColumnDataVectorSplitLink<xAOD::TrackParticleContainer>> ("AnalysisMuonsAuxDyn.extrapolatedMuonSpectrometerTrackParticleLink"));
     knownColumns.push_back (std::make_shared<ColumnDataVectorVectorLink<xAOD::TrackParticleContainer>> ("GSFConversionVerticesAuxDyn.trackParticleLinks"));
+    knownColumns.push_back (std::make_shared<ColumnDataVectorSplitLink<xAOD::TrackParticleContainer>> ("GSFTrackParticlesAuxDyn.originalTrackParticle"));
+    knownColumns.push_back (std::make_shared<ColumnDataVectorVectorVariantLink<xAOD::IParticleContainer>>("AnalysisJetsAuxDyn.GhostTrack"));
     knownColumns.push_back (std::make_shared<ColumnDataVectorLink<xAOD::JetContainer>>("METAssoc_AnalysisMETAux.jetLink"));
     knownColumns.push_back (std::make_shared<ColumnDataVectorVectorVariantLink<xAOD::IParticleContainer>>("METAssoc_AnalysisMETAux.objectLinks"));
 
@@ -1708,7 +1966,7 @@ namespace columnar
     }
   }
 
-  void ColumnarPhysLiteTest :: doCall (asg::AsgTool& tool, const std::string& name, const std::string& container, std::function<void(XAODArgs&)> callXAOD, const std::vector<std::pair<std::string,std::string>>& containerRenames, const std::string& sysName)
+  void ColumnarPhysLiteTest :: doCall (asg::AsgTool& tool, const std::string& name, const std::string& container, TestUtils::IXAODToolCaller& xAODToolCaller, const std::vector<std::pair<std::string,std::string>>& containerRenames, const std::string& sysName)
   {
     using namespace asg::msgUserCode;
 
@@ -1732,8 +1990,9 @@ namespace columnar
       setupKnownColumns ();
       setupColumns (toolWrapper);
 
-      Benchmark benchmark (name);
-      Benchmark benchmarkCheck (name + "(column check)");
+      Benchmark benchmark (name, batchSize);
+      Benchmark benchmarkCheck (name + "(column check)", batchSize);
+      Benchmark benchmarkEmpty ("empty");
 
       const std::vector<ColumnarOffsetType>* offsetColumn = nullptr;
       if (!container.empty())
@@ -1747,8 +2006,15 @@ namespace columnar
       const auto numberOfEvents = tree->GetEntries();
       std::uint64_t totalSize = 0;
       Long64_t entry = 0;
-      for (; benchmark.getTotalTime() < targetTime; ++entry)
+      const auto startTime = std::chrono::high_resolution_clock::now();
+      bool endLoop = false;
+      for (; !endLoop; ++entry)
       {
+        // just sample how much overhead there is for starting and
+        // stopping the timer
+        benchmarkEmpty.startTimer ();
+        benchmarkEmpty.stopTimer ();
+
         ColumnVectorData columnData (&columnHeader);
         TestUtils::ToolWrapperData toolColumnData (&columnData, &toolWrapper);
         for (auto& column : usedColumns)
@@ -1772,9 +2038,87 @@ namespace columnar
           benchmark.stopTimer ();
           for (auto& column : usedColumns)
             column->clearColumns ();
+          if ((std::chrono::high_resolution_clock::now() - startTime) > targetTime)
+            endLoop = true;
         }
       }
+      std::cout << "Entries in file: " << numberOfEvents << std::endl;
       std::cout << "Total entries read: " << entry << std::endl;
+      const float emptyTime = benchmarkEmpty.getEntryTime(0).value();
+      std::cout << "Empty benchmark time: " << emptyTime << "ns" << std::endl;
+      benchmarkEmpty.setSilence();
+      {
+        std::vector<TestUtils::BranchPerfData> branchPerfData;
+        TestUtils::BranchPerfData summary {.name = "total", .timeRead = 0, .timeUnpack = 0, .entrySize = 0, .uncompressedSize = 0, .numBaskets = 0};
+        for (auto& column : usedColumns)
+        {
+          branchPerfData.push_back (column->getPerfData (emptyTime));
+          summary.timeRead.value() += branchPerfData.back().timeRead.value_or(0);
+          summary.timeUnpack.value() += branchPerfData.back().timeUnpack.value_or(0);
+          summary.entrySize.value() += branchPerfData.back().entrySize.value_or(0);
+          summary.uncompressedSize.value() += branchPerfData.back().uncompressedSize.value_or(0);
+          summary.numBaskets.value() += branchPerfData.back().numBaskets.value_or(0);
+        }
+        std::sort (branchPerfData.begin(), branchPerfData.end(), [] (const auto& a, const auto& b) {return a.name < b.name;});
+        branchPerfData.insert (branchPerfData.end(), summary);
+        const std::size_t nameWidth = std::max_element (branchPerfData.begin(), branchPerfData.end(), [] (const auto& a, const auto& b) {return a.name.size() < b.name.size();})->name.size();
+        std::string header = std::format ("{:{}} | read(ns) | unpack(ns) | size(B) | rate(MB/s) | compression | baskets", "branch name", nameWidth);
+        std::cout << "\n" << header << std::endl;
+        std::cout << std::string (header.size(), '-') << std::endl;
+        for (auto& data : branchPerfData)
+        {
+          if (data.name == "total")
+            std::cout << std::string (header.size(), '-') << std::endl;
+          std::cout << std::format ("{:{}} |", data.name, nameWidth);
+          if (data.timeRead)
+            std::cout << std::format ("{:>9.0f} |", data.timeRead.value());
+          else
+            std::cout << "          |";
+          if (data.timeUnpack)
+            std::cout << std::format ("{:>11.1f} |", data.timeUnpack.value());
+          else
+            std::cout << "            |";
+          if (data.entrySize)
+            std::cout << std::format ("{:>8.1f} |", data.entrySize.value());
+          else
+            std::cout << "         |";
+          if (data.timeRead && data.entrySize)
+            std::cout << std::format ("{:>11.1f} |", (data.entrySize.value() / (data.timeRead.value() * 1e-3 * 1.024 * 1.024)));
+          else
+            std::cout << "            |";
+          if (data.entrySize && data.uncompressedSize)
+            std::cout << std::format ("{:>12.2f} |", float (data.uncompressedSize.value()) / data.entrySize.value());
+          else
+            std::cout << "             |";
+          if (data.numBaskets)
+            std::cout << std::format ("{:>8}", data.numBaskets.value());
+          std::cout << std::endl;
+        }
+      }
+      {
+        std::vector<TestUtils::ToolPerfData> toolPerfData;
+        toolPerfData.emplace_back ();
+        toolPerfData.back().name = name;
+        toolPerfData.back().timeCall = benchmark.getEntryTime(emptyTime);
+        toolPerfData.back().timeCheck = benchmarkCheck.getEntryTime(emptyTime);
+        benchmark.setSilence();
+        benchmarkCheck.setSilence();
+        const std::size_t nameWidth = std::max_element (toolPerfData.begin(), toolPerfData.end(), [] (const auto& a, const auto& b) {return a.name.size() < b.name.size();})->name.size();
+        std::string header = std::format ("{:{}} | call(ns) | check(ns)", "tool name", nameWidth);
+        std::cout << "\n" << header << std::endl;
+        std::cout << std::string (header.size(), '-') << std::endl;
+        for (auto& data : toolPerfData)
+        {
+          std::cout << std::format ("{:{}} |", data.name, nameWidth);
+          if (data.timeCall)
+            std::cout << std::format ("{:>9.0f} |", data.timeCall.value());
+          else
+            std::cout << "          |";
+          if (data.timeCheck)
+            std::cout << std::format ("{:>10.1f}", data.timeCheck.value());
+          std::cout << std::endl;
+        }
+      }
     } else if constexpr (columnarAccessMode == 0)
     {
       // this test simply doesn't work in Athena
@@ -1792,7 +2136,11 @@ namespace columnar
       Benchmark benchmarkPrepClear (name + " prep clear");
 #endif
       Benchmark benchmarkCall (name + " call");
+      Benchmark benchmarkCallCopyRecord (name + " call copy-record");
+      Benchmark benchmarkCallRetrieve (name + " call retrieve");
       Benchmark benchmarkPrep (name + " prep");
+      Benchmark benchmarkPrepCopyRecord (name + " prep copy-record");
+      Benchmark benchmarkPrepRetrieve (name + " prep retrieve");
       Benchmark benchmarkGetEntry (name + " getEntry");
 
       const auto numberOfEvents = event.getEntries();
@@ -1812,30 +2160,37 @@ namespace columnar
       // fixed amount of time.  That is because individual tools can
       // vary wildly in how long they take to run, and we mostly want to
       // make sure that we ran the tool enough to get a precise
-      // performance estimate.  As a fail-safe it also bounds the time
-      // spend in i/o, which can be significant in Athena, but at a much
-      // higher level.
-      for (; benchmarkCall.getTotalTime() < targetTime && benchmarkPrep.getTotalTime() + benchmarkGetEntry.getTotalTime() < 20 * targetTime; ++entry)
+      // performance estimate.
+      const auto startTime = std::chrono::high_resolution_clock::now();
+      for (; (std::chrono::high_resolution_clock::now() - startTime) < targetTime; ++entry)
       {
         benchmarkGetEntry.startTimer ();
         event.getEntry (entry % numberOfEvents);
         benchmarkGetEntry.stopTimer ();
-        XAODArgs args;
-        args.inputContainer = container;
-        args.outputContainer = container + "Copy1";
-        args.isPrepCall = true;
+        benchmarkPrepRetrieve.startTimer ();
+        ASSERT_SUCCESS (xAODToolCaller.retrieve (*tool.evtStore()));
+        benchmarkPrepRetrieve.stopTimer ();
+        benchmarkPrepCopyRecord.startTimer ();
+        static const std::string prepPostfix = "Prep";
+        ASSERT_SUCCESS (xAODToolCaller.copyRecord (*tool.evtStore(), prepPostfix));
+        benchmarkPrepCopyRecord.stopTimer ();
         benchmarkPrep.startTimer ();
-        callXAOD (args);
+        ASSERT_SUCCESS (xAODToolCaller.call ());
         benchmarkPrep.stopTimer ();
-        args.outputContainer = container + "Copy2";
-        args.isPrepCall = false;
 #ifdef XAOD_STANDALONE
         benchmarkPrepClear.startTimer ();
         store.clear ();
         benchmarkPrepClear.stopTimer ();
 #endif
+        benchmarkCallRetrieve.startTimer ();
+        ASSERT_SUCCESS (xAODToolCaller.retrieve (*tool.evtStore()));
+        benchmarkCallRetrieve.stopTimer ();
+        benchmarkCallCopyRecord.startTimer ();
+        static const std::string callPostfix = "Call";
+        ASSERT_SUCCESS (xAODToolCaller.copyRecord (*tool.evtStore(), callPostfix));
+        benchmarkCallCopyRecord.stopTimer ();
         benchmarkCall.startTimer ();
-        callXAOD (args);
+        ASSERT_SUCCESS (xAODToolCaller.call ());
         benchmarkCall.stopTimer ();
 #ifdef XAOD_STANDALONE
         benchmarkCallClear.startTimer ();

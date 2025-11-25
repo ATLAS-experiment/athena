@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArSamplesMon/DigitMonitor.h"
@@ -467,7 +467,7 @@ double DigitMonitor::residualCorr(unsigned int k1, unsigned int k2) const
     }  
   }
   
-  return sum/n;
+  return n==0 ? 0 : sum/n;
 }
 
 
@@ -508,8 +508,10 @@ bool DigitMonitor::residualParams(int lwb, int upb, CovMatrix& k, TVectorD& mean
 
   for (int i1 = lwb; i1 <= upb; i1++) {
     for (int i2 = lwb; i2 <= upb; i2++) {
-      sumCN(i1, i2) = sumCN(i1, i2)/n;
-      sum2N(i1, i2) = sum2N(i1, i2)/n;
+      if (n != 0) {
+        sumCN(i1, i2) = sumCN(i1, i2)/n;
+        sum2N(i1, i2) = sum2N(i1, i2)/n;
+      }
       k(i1, i2) = sum2N(i1, i2) - sumN(i1)*sum(i2) - sum(i1)*sumN(i2)
                 + sum(i1)*sum(i2)*sumA - sumCN(i1,i2);
       k(i1, i2) = (k(i1, i2) >= 0 ? sqrt(k(i1, i2)) : -sqrt(-k(i1, i2)));
@@ -609,8 +611,11 @@ bool DigitMonitor::makeResidualCorrections(const TString& outputFile, short resT
 
       cout << i << " : Phi ring " << cellHistory(i)->cellInfo()->globalPhiRing() << " : adding " << resCalc->size() << endl;
       shapeError->addCell(*resCalc, (CaloGain::CaloGain)g);
-      ringCalcs[g][cellHistory(i)->cellInfo()->globalPhiRing()].append(*resCalc);
-      if (cellHistory(i)->cellInfo()->globalPhiRing() == 1142) cout << ringCalcs[g][cellHistory(i)->cellInfo()->globalPhiRing()].regresser()->mean(0) << endl;
+      short iring = cellHistory(i)->cellInfo()->globalPhiRing();
+      if (iring >= 0) {
+        ringCalcs[g][iring].append(*resCalc);
+        if (iring == 1142) cout << ringCalcs[g][iring].regresser()->mean(0) << endl;
+      }
       delete resCalc;
     }
   }

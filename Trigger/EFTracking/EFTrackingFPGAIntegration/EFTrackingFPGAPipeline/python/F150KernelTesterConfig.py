@@ -3,22 +3,33 @@
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 
-def KernelTesterCfg(flags, name = 'BenckmarkAlg', **kwarg):
+def KernelTesterCfg(flags, name = 'F150BenchmarkAlg', **kwarg):
     acc = ComponentAccumulator()
 
     kwarg.setdefault('bdfID', flags.FPGADataPrep.bdfID) # On the testbed
-    kwarg.setdefault('xclbin', '/eos/project/a/atlas-eftracking/FPGA_compilation/FPGA_compilation_hw/F611/kernels.hw.xclbin')
+    kwarg.setdefault('xclbin', flags.FPGADataPrep.xclbin)
     
-    kwarg.setdefault('RunSlicing', True); 
-    kwarg.setdefault('RunInsideOut', True); 
-    kwarg.setdefault('RunInsideOutOnSlicingEngine', False); 
+    kwarg.setdefault('RunSlicing', False) 
+    kwarg.setdefault('RunInsideOut', False) 
+    kwarg.setdefault('RunInsideOutOnSlicingEngine', False) 
+    kwarg.setdefault('RunFullF150', True) 
+    kwarg.setdefault('outputTextFile', False) 
+    kwarg.setdefault('doEmulation', False) 
 
-    kwarg.setdefault('SlicingEngineInputName', 'krnl_input_stage_rtl'); 
-    kwarg.setdefault('SlicingEngineOutputName', 'krnl_output_stage_rtl'); 
-    kwarg.setdefault('SlicingEngineName', 'slicing_engine'); 
+    kwarg.setdefault('SlicingEngineInputName', 'configurableLengthWideLoader') 
+    kwarg.setdefault('SlicingEngineOutputName', 'dynamicLengthWideUnloader')  
 
-    kwarg.setdefault('InsideOutInputName', 'mem_read'); 
-    kwarg.setdefault('InsideOutOutputName', 'mem_write'); 
+    kwarg.setdefault('InsideOutInputName', 'krnl_mm2s') 
+    kwarg.setdefault('InsideOutOutputName', 'mem_write') 
+
+    kwarg.setdefault('PixelClusterKernelName','pixel_clustering_tool')
+    kwarg.setdefault('StripClusterKernelName','processHits')
+    kwarg.setdefault('StripL2GKernelName','l2g_strip_tool')
+    kwarg.setdefault('PixelEDMPrepKernelName', 'PixelEDMPrep')
+    kwarg.setdefault('StripEDMPrepKernelName', 'StripEDMPrep')
+
+    kwarg.setdefault('FPGATrackSimHitKey_1st', 'FPGAHits_1st_reg' + str(flags.Trigger.FPGATrackSim.regionList[0]))
+    kwarg.setdefault('FPGATrackSimTrack1stKey', 'FPGATracks_1st_reg' + str(flags.Trigger.FPGATrackSim.regionList[0]))
 
     # Set up Cluster maker tool
     from EFTrackingFPGAPipeline.DataPrepConfig import xAODClusterMakerCfg
@@ -41,11 +52,22 @@ def KernelTesterCfg(flags, name = 'BenckmarkAlg', **kwarg):
     ))
 
     alg = CompFactory.EFTrackingFPGAIntegration.F150KernelTesterAlg(**kwarg)
-    import ROOT
-    alg.OutputLevel = ROOT.MSG.DEBUG
     acc.addEventAlgo(alg)
 
     return acc
+
+def F150EDMConversionAlgCfg(flags, **kwarg):
+    acc = ComponentAccumulator()
+
+    kwarg.setdefault('FPGAOutputTrackKey', "FPGATrackOutput")
+    kwarg.setdefault('FPGASpacePointsKey', "ITkPixelSpacePoints")
+    kwarg.setdefault('OutputSeeds', "ActsValidateF150PixelSeeds")
+
+    alg = CompFactory.EFTrackingFPGAIntegration.F150EDMConversionAlg(**kwarg)
+    acc.addEventAlgo(alg)
+
+    return acc
+
 
 def FPGAOutputConversionToolCfg(flags, name = 'FPGAOutputConversionTool', **kwarg):
 

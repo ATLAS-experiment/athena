@@ -560,7 +560,11 @@ def FPGATrackSimSecondStageOutputCfg(flags,name="FPGATrackSimWriteOutputSecondSt
     FPGATrackSimWriteOutput = CompFactory.FPGATrackSimOutputHeaderTool(FPGATrackSimDataPrepConfig.nameWithRegionSuffix(flags,name))
     FPGATrackSimWriteOutput.InFileName = ["test.root"]
     FPGATrackSimWriteOutput.OutputTreeName = FPGATrackSimDataPrepConfig.nameWithRegionSuffix(flags,"FPGATrackSimSecondStageTree")
-    if not flags.Trigger.FPGATrackSim.writeAdditionalOutputData:
+
+    ### don't write this if not needed
+    writeThis=flags.Trigger.FPGATrackSim.writeAdditionalOutputData and (flags.Trigger.FPGATrackSim.regionToWriteDPTree < 0)
+    
+    if not writeThis:
         FPGATrackSimWriteOutput.EventLimit = 0
     else:
         FPGATrackSimWriteOutput.EventLimit = flags.Trigger.FPGATrackSim.writeOutputEventLimit
@@ -623,7 +627,6 @@ def FPGATrackSimOverlapRemovalToolCfg(flags,name="FPGATrackSimOverlapRemovalTool
     OR.ORAlgo = "Normal"
     OR.doFastOR =flags.Trigger.FPGATrackSim.ActiveConfig.doFastOR   
     OR.NumOfHitPerGrouping = 5
-    OR.FPGATrackSimMappingSvc = result.getPrimaryAndMerge(FPGATrackSimDataPrepConfig.FPGATrackSimMappingCfg(flags))
     if flags.Trigger.FPGATrackSim.ActiveConfig.useVaryingChi2Cut and flags.Trigger.FPGATrackSim.ActiveConfig.trackNNAnalysis2nd:
         OR.MinChi2 = getChi2CutNN2ndStage(flags.Trigger.FPGATrackSim.region)
     elif flags.Trigger.FPGATrackSim.ActiveConfig.useVaryingChi2Cut and not flags.Trigger.FPGATrackSim.ActiveConfig.trackNNAnalysis2nd:

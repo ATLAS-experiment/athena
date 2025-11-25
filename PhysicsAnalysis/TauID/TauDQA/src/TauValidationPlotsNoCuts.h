@@ -6,6 +6,7 @@
 #define TAUDQA_TAUVALIDATIONPLOTSNOCUTS_H
 
 // PlotBase objects
+#include "TrkValHistUtils/PlotBase.h"
 #include "TauKinematicPlots.h"
 #include "GeneralTauPlots.h"
 #include "TauIDVariablesPlots.h"
@@ -16,9 +17,6 @@
 #include "DecayModeMigration.h"
 #include "EfficiencyPlots.h"
 
-#include "xAODJet/JetContainer.h"
-#include "xAODEgamma/ElectronContainer.h" 
-#include "xAODTau/TauJetContainer.h" 
 
 class TauValidationPlotsNoCuts:public PlotBase {
     public:

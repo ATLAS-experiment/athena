@@ -27,7 +27,7 @@ namespace DerivationFramework {
     PsiPlusPsiSingleVertex(const std::string& t, const std::string& n, const IInterface* p);
     virtual ~PsiPlusPsiSingleVertex() = default;
     virtual StatusCode initialize() override;
-    virtual StatusCode addBranches() const override;
+    virtual StatusCode addBranches(const EventContext& ctx) const override;
 
   private:
     SG::ReadHandleKey<xAOD::VertexContainer> m_vertexPsi1ContainerKey;

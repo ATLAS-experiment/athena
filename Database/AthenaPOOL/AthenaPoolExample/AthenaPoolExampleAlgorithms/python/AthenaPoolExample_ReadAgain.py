@@ -69,9 +69,6 @@ printOpts += [ "DatabaseName = '*'; BYTES_READ = 'double'" ]
 printOpts += [ "DatabaseName = '*'; READ_CALLS = 'int'" ]
 #Switch Off for TAG - end
 
-QueryTag = CompFactory.AthPoolEx.QueryTag("QueryTag", OutputLevel = DEBUG)
-#svcMgr.EventSelector.HelperTools = [ QueryTag ]
-
 # Run
 import sys
 sc = acc.run(flags.Exec.MaxEvents)

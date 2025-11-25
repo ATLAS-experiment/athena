@@ -3,7 +3,10 @@
 */
 
 #include "CaloIdentifier/LArFCAL_Base_ID.h"
-#include "IdDict/IdDictDefs.h"
+#include "IdDict/IdDictDictionary.h"
+#include "IdDict/IdDictField.h"
+#include "IdDict/IdDictMgr.h"
+#include "IdDict/IdDictRegion.h"
 #include "PathResolver/PathResolver.h"
 
 #include "CxxUtils/StrFormat.h"
@@ -355,7 +358,7 @@ int         LArFCAL_Base_ID::initLevelsFromDict(const std::string& /*group_name*
     return (1);
   }
 
-  IdDictField* field = dict()->find_field("subdet") ;
+  const IdDictField* field = dict()->find_field("subdet") ;
   if (field) {
     m_LAR_INDEX = field->index();
   }

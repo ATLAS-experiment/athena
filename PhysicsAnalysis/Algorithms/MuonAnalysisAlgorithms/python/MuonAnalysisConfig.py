@@ -42,7 +42,8 @@ class MuonCalibrationConfig (ConfigBlock):
         self.addOption ('writeTrackD0Z0', False, type = bool,
             info="save the d0 significance and z0sinTheta variables so they can be written out")
         self.addOption ('writeColumnarToolVariables', False, type=bool,
-            info="whether to add variables needed for running the columnar muon tool(s) on the output n-tuple. (EXPERIMENTAL)")
+            info="whether to add variables needed for running the columnar muon tool(s) on the output n-tuple. (EXPERIMENTAL)",
+            expertMode=True)
         
     def instanceName (self) :
         if self.postfix != "":
@@ -193,11 +194,13 @@ class MuonWorkingPointConfig (ConfigBlock) :
             "The default is False.")
         self.addOption ('onlyRecoEffSF', False, type=bool,
             info="same as noEffSF, but retains the ID scale factor. "
-            "Experimental! only useful for CI tests. The default is False.")
+            "Experimental! only useful for CI tests. The default is False.",
+            expertMode=True)
         self.addOption ('noEffSF', False, type=bool,
             info="disables the calculation of efficiencies and scale factors. "
             "Experimental! only useful to test a new WP for which scale "
-            "factors are not available. The default is False.")
+            "factors are not available. The default is False.",
+            expertMode=True)
         self.addOption ('saveDetailedSF', True, type=bool,
             info="save all the independent detailed object scale factors. "
             "The default is True.")

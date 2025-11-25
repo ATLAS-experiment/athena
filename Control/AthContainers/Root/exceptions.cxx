@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthContainers/src/exceptions.cxx
@@ -690,49 +690,6 @@ ExcJaggedVecOverlappingCopy::ExcJaggedVecOverlappingCopy()
 void throwJaggedVecOverlappingCopy()
 {
   throw ExcJaggedVecOverlappingCopy();
-}
-
-
-//*************************************************************************
-
-
-/// Helper: format exception error string.
-std::string excOutOfRange_format (const char* what,
-                                  size_t i,
-                                  size_t size)
-{
-  std::ostringstream os;
-  os << "SG::ExcOutOfRange: "
-     << "Range reference out of bounds in " << what << "; "
-     << i << " >= " << size;
-  return os.str();
-}
-
-
-/**
- * @brief Constructor.
- * @param what Description of the failing operation.
- * @param i The attempted index.
- * @param size The actual size of the range.
- */
-ExcOutOfRange::ExcOutOfRange (const char* what,
-                              size_t i,
-                              size_t size)
-  : std::out_of_range (excOutOfRange_format (what, i, size))
-{
-}
-
-/**
- * @brief Throw a SG::ExcOutOfRange exception.
- * @param what Description of the failing operation.
- * @param i The attempted index.
- * @param size The actual size of the range.
- */
-void throwOutOfRange (const char* what,
-                       size_t i,
-                       size_t size)
-{
-  throw ExcOutOfRange (what, i, size);
 }
 
 

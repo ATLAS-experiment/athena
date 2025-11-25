@@ -10,10 +10,8 @@
 #include "DerivationFrameworkInDet/EventInfoBSErrDecorator.h"
 #include "DerivationFrameworkInDet/UnassociatedHitsDecorator.h"
 #include "DerivationFrameworkInDet/UnassociatedHitsGetterTool.h"
-#include "DerivationFrameworkInDet/LArCollisionTimeDecorator.h"
 #include "DerivationFrameworkInDet/EGammaTracksThinning.h"
 #include "DerivationFrameworkInDet/TrackMeasurementThinning.h"
-#include "DerivationFrameworkInDet/EventInfoPixelDecorator.h"
 #include "DerivationFrameworkInDet/PixelNtupleMaker.h"
 #include "DerivationFrameworkInDet/InDetTrackSelectionToolWrapper.h"
 #include "DerivationFrameworkInDet/HardScatterVertexDecorator.h"
@@ -22,6 +20,8 @@
 #include "DerivationFrameworkInDet/PseudoTrackSelector.h"
 #include "DerivationFrameworkInDet/TauJets_LepRMParticleThinning.h"
 #include "DerivationFrameworkInDet/UFOTrackParticleThinning.h"
+#include "DerivationFrameworkInDet/JetConstituentThinning.h"
+#include "DerivationFrameworkInDet/JetGhostThinning.h"
 #include "DerivationFrameworkInDet/IsolationTrackDecorator.h"
 #include "DerivationFrameworkInDet/TagAndProbeTrackParticleThinning.h"
 
@@ -39,10 +39,8 @@ DECLARE_COMPONENT( TrackStateOnSurfaceDecorator )
 DECLARE_COMPONENT( EventInfoBSErrDecorator )
 DECLARE_COMPONENT( UnassociatedHitsDecorator )
 DECLARE_COMPONENT( DerivationFramework::UnassociatedHitsGetterTool )
-DECLARE_COMPONENT( LArCollisionTimeDecorator )
 DECLARE_COMPONENT( EGammaTracksThinning )
 DECLARE_COMPONENT( TrackMeasurementThinning )
-DECLARE_COMPONENT( EventInfoPixelDecorator )
 DECLARE_COMPONENT( PixelNtupleMaker )
 DECLARE_COMPONENT( InDetTrackSelectionToolWrapper )
 DECLARE_COMPONENT( HardScatterVertexDecorator )
@@ -51,6 +49,8 @@ DECLARE_COMPONENT( EventInfoPixelModuleStatusMonitoring )
 DECLARE_COMPONENT( PseudoTrackSelector )
 DECLARE_COMPONENT( TauJets_LepRMParticleThinning )
 DECLARE_COMPONENT( UFOTrackParticleThinning )
+DECLARE_COMPONENT( JetConstituentThinning )
+DECLARE_COMPONENT( JetGhostThinning )
 DECLARE_COMPONENT( IsolationTrackDecorator )
 DECLARE_COMPONENT( TagAndProbeTrackParticleThinning )
 

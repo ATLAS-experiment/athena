@@ -82,7 +82,7 @@ dqm_algorithms::LastBinThresholdAction<Exceed, Action>::execute(const std::strin
   const TProfile* histogram;
 
   if( object.IsA()->InheritsFrom( "TProfile" ) ) {
-    histogram = dynamic_cast<const TProfile*>(&object);
+    histogram = static_cast<const TProfile*>(&object);
     if (histogram->GetDimension() > 1){
       throw dqm_core::BadConfig( ERS_HERE, name, "dimension > 2 " );
     }
@@ -178,8 +178,8 @@ dqm_algorithms::LastBinThresholdAction<Exceed, Action>::execute(const std::strin
 
   if (!action.empty() && nBinsOverThreshold >= nBinsForAction && nBinsOverThreshold!=0) {
     double averageBinContent = binsOverThresholdContent / nBinsOverThreshold;
-    const std::string & hname = histogram->GetName();
-    m_doAction(hname, action, lastBinOverThresholdContent, averageBinContent);
+    //coverity[copy_constructor_call]
+    m_doAction(histogram->GetName(), action, lastBinOverThresholdContent, averageBinContent);
   }
 
   return result;

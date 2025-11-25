@@ -1,8 +1,6 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
-
-// $Id$
 /**
  * @file  CaloIdentifier/test/larhec_id_test_common.cxx
  * @author scott snyder
@@ -13,6 +11,7 @@
  */
 
 
+#include "CaloIdentifier/LArID_Exception.h"
 #include "hash_test.h"
 #include "make_idhelper_common.cxx"
 

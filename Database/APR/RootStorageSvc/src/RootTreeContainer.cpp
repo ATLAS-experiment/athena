@@ -18,7 +18,6 @@
 #include "StorageSvc/DbColumn.h"
 #include "StorageSvc/DbTypeInfo.h"
 #include "StorageSvc/DbArray.h"
-#include "POOLCore/DbPrint.h"
 #include "StorageSvc/Transaction.h"
 #include "StorageSvc/DbReflex.h"
 #include "CxxUtils/checker_macros.h"
@@ -125,10 +124,11 @@ RootTreeContainer::BranchDesc::BranchDesc( TClass* cl, TBranch* b, TLeaf* l, voi
 {}
 
 
-RootTreeContainer::RootTreeContainer()
-: m_tree(nullptr), m_type(0), m_dbH(POOL_StorageType),
-  m_rootDb(nullptr), m_branchName(), m_ioBytes(0), m_treeFillMode(false),
-  m_isDirty(false)
+RootTreeContainer::RootTreeContainer(const std::string& name) :
+   DbContainerImp(name),
+   m_tree(nullptr), m_type(0), m_dbH(POOL_StorageType),
+   m_rootDb(nullptr), m_branchName(), m_ioBytes(0), m_treeFillMode(false),
+   m_isDirty(false)
 {
 }
 
@@ -183,9 +183,7 @@ DbStatus RootTreeContainer::writeObject( ActionList::value_type& action )
                 aux_needs_fill = aux_needs_fill || dsc.auxdyn_writer->needsCommit();
              }
           } catch(const std::exception& exc) {
-             DbPrint err(m_name);
-             err << DbPrintLvl::Error << "Dynamic attributes writing error: " << exc.what()
-                 << DbPrint::endmsg;
+             ATH_MSG_ERROR("Dynamic attributes writing error: " << exc.what());
              p.ptr = nullptr;  // signal error
              break;
           }
@@ -218,10 +216,7 @@ DbStatus RootTreeContainer::writeObject( ActionList::value_type& action )
           break;
       }
       if ( nullptr == p.ptr )   {
-         DbPrint err( m_name);
-         err << DbPrintLvl::Error
-             << "[RootTreeContainer] Could not write an object"
-             << DbPrint::endmsg;
+         ATH_MSG_ERROR("[RootTreeContainer] Could not write an object");
          return Error;
       }
       //if (p.ptr != dsc.branch->GetAddress()) {
@@ -239,10 +234,8 @@ DbStatus RootTreeContainer::writeObject( ActionList::value_type& action )
       if( m_treeFillMode ) {
       // Multiple containers per TTree - mark TTree for later Fill at commit
       if( m_isDirty ) {
-         DbPrint log(m_name);
-         log << DbPrintLvl::Error << "Attempt to write to a Branch Container twice in the same transaction! "
-             << "This conflicts with TTree AUTO_FLUSH option. "
-             << DbPrint::endmsg;
+         ATH_MSG_ERROR("Attempt to write to a Branch Container twice in the same transaction! "
+                       "This conflicts with TTree AUTO_FLUSH option.");
          m_ioBytes = -1;
          return Error;
       }
@@ -267,10 +260,7 @@ DbStatus RootTreeContainer::writeObject( ActionList::value_type& action )
       m_rootDb->addByteCount(RootDatabase::WRITE_COUNTER, num_bytes);
       return Success;
    }
-   DbPrint err( m_name);
-   err << DbPrintLvl::Error
-       << "[RootTreeContainer] Could not write an object"
-       << DbPrint::endmsg;
+   ATH_MSG_ERROR("[RootTreeContainer] Could not write an object");
    m_ioBytes = -1;
    return Error;
 }
@@ -369,9 +359,7 @@ RootTreeContainer::loadObject(void** obj_p, ShapeH /*shape*/, Token::OID_t& oid)
                break;
            }
         } else {
-           DbPrint log(m_name);
-           log << DbPrintLvl::Error << "Cannot load branch " << dsc.branch->GetName()
-               << " for entry No." << evt_id << DbPrint::endmsg;
+           ATH_MSG_ERROR("Cannot load branch " << dsc.branch->GetName() << " for entry No." << evt_id);
            m_ioBytes = -1;
            return Error;
         }
@@ -384,22 +372,16 @@ RootTreeContainer::loadObject(void** obj_p, ShapeH /*shape*/, Token::OID_t& oid)
      }
   }
   catch( const std::exception& e )    {
-     DbPrint err(m_name);
-     err << DbPrintLvl::Fatal << "[RootTreeContainer] "
-         << "STL C++ Exception: " << e.what() << DbPrint::endmsg;
+     ATH_MSG_FATAL("[RootTreeContainer] STL C++ Exception: " << e.what());
   }
   catch (...)   {
-     DbPrint err(m_name);
-     err << DbPrintLvl::Fatal << "[RootTreeContainer] "
-         << "Unknown exception occurred. Cannot give more details."
-         << DbPrint::endmsg;
+     ATH_MSG_FATAL("[RootTreeContainer] Unknown exception occurred. Cannot give more details.");
   }
-  DbPrint log(m_name);
-  log << DbPrintLvl::Info << "Cannot load entry No." << evt_id << "..."
-      << (m_branchName.empty() ? " Tree has " : " Branch has " )
-      << size() << " Entries in total." << DbPrint::endmsg;
-  m_ioBytes = -1;
-  return Error;
+  ATH_MSG_INFO("Cannot load entry No." << evt_id << "..."
+               << (m_branchName.empty() ? " Tree has " : " Branch has " )
+               << size() << " Entries in total.");
+   m_ioBytes = -1;
+   return Error;
 }
 
 
@@ -424,10 +406,9 @@ DbStatus RootTreeContainer::open( DbDatabase& dbH,
                                   const DbTypeInfo* info, 
                                   DbAccessMode mode)  
 {
-   DbPrint log(nam);
    m_branches.clear();
    m_name = nam;
-   log << DbPrintLvl::Debug << "Opening"  << DbPrint::endmsg;
+   ATH_MSG_DEBUG("Opening");
    if ( dbH.isValid() && info )    {
       const DbTypeInfo::Columns& cols = info->columns();
       DbTypeInfo::Columns::const_iterator i;
@@ -435,20 +416,19 @@ DbStatus RootTreeContainer::open( DbDatabase& dbH,
       for(std::string::iterator j = treeName.begin(); j != treeName.end(); ++j )    {
          if ( *j == '/' ) *j = '_';
       }
-      log << DbPrintLvl::Debug << "   attributes# = " << cols.size() << DbPrint::endmsg;
+      ATH_MSG_DEBUG("   attributes# = " << cols.size());
       if (cols.size() == 1) {
          // extract tree and branch name for branch containers, notation: "tree(branch)"
          std::string::size_type inx = nam.find('(');
          if (inx != std::string::npos) {
             std::string::size_type inx2 = nam.find(')');
             if (inx2 == std::string::npos || inx2 != nam.size()-1) {
-               log << DbPrintLvl::Error << "Misspecified branch name in " << m_name << "."
-                   << DbPrint::endmsg;
+               ATH_MSG_ERROR("Misspecified branch name in " << m_name << ".");
                return Error;
             }
             m_branchName = treeName.substr(inx+1, inx2-inx-1);
             treeName.resize(inx);
-            log << DbPrintLvl::Debug << "Branch container '" << m_branchName << "'" << DbPrint::endmsg;
+            ATH_MSG_DEBUG("Branch container '" << m_branchName << "'");
          }
       }
       IDbDatabase* idb = dbH.info();
@@ -457,8 +437,7 @@ DbStatus RootTreeContainer::open( DbDatabase& dbH,
          m_tree = m_rootDb->file()->Get<TTree>(treeName.c_str());
       m_auxDynTool = Gaudi::PluginService::Factory< RootAuxDynIO::IFactoryTool*() >::create("RootAuxDynIO::FactoryTool");
       if( !m_auxDynTool ) {
-         log << DbPrintLvl::Warning << "Could NOT load RootAuxDynIO::FactoryTool. Dynamic attributes support disabled"
-             << DbPrint::endmsg;
+         ATH_MSG_WARNING("Could NOT load RootAuxDynIO::FactoryTool. Dynamic attributes support disabled");
       }
 
       bool hasBeenCreated = (m_branchName.empty()
@@ -470,11 +449,10 @@ DbStatus RootTreeContainer::open( DbDatabase& dbH,
          }
          int count;
          if ( !m_tree->InheritsFrom(TTree::Class()) )   {
-            log << DbPrintLvl::Error << "Cannot open the container " << m_name << " of type "
-                << ROOTTREE_StorageType.storageName() << "." << DbPrint::endmsg
+            ATH_MSG_ERROR("Cannot open the container " << m_name << " of type "
+                << ROOTTREE_StorageType.storageName() << ". " << endmsg
                 << "The specified container is not a ROOT " << (m_branchName.empty() ? "Tree" : "Branch")
-                << ", but rather of class " << m_tree->IsA()->GetName() << "."
-                << DbPrint::endmsg;
+                << ", but rather of class " << m_tree->IsA()->GetName() << ".");
             return Error;
          }
          m_branches.resize(cols.size());
@@ -499,20 +477,18 @@ DbStatus RootTreeContainer::open( DbDatabase& dbH,
                 case DbColumn::POINTER:
                    cl = TClass::GetClass(pBranch->GetClassName());
                    if ( nullptr == cl )  {
-                      log << DbPrintLvl::Debug << "Cannot open the container " << m_name << " of type "
+                      ATH_MSG_DEBUG("Cannot open the container " << m_name << " of type "
                           << ROOTTREE_StorageType.storageName()
-                          << " Class " << pBranch->GetClassName() << " is unknown."
-                          << DbPrint::endmsg;
+                          << " Class " << pBranch->GetClassName() << " is unknown.");
                       return Error;
                    }
                    dsc = BranchDesc(cl, pBranch, leaf, cl->New(), c);
                    if( m_auxDynTool and m_auxDynTool->isAuxDynBranch(pBranch) ) {
                       dsc.auxdyn_reader = m_auxDynTool->getBranchAuxDynReader( m_tree, pBranch );
                       if( !dsc.auxdyn_reader ) {
-                         log << DbPrintLvl::Error << "Failed to locate dynamic attribute storage for container "
+                         ATH_MSG_ERROR("Failed to locate dynamic attribute storage for container "
                              << m_name << " of type " << ROOTTREE_StorageType.storageName()
-                             << " Class " << pBranch->GetClassName() << " is unknown."
-                             << DbPrint::endmsg;
+                             << " Class " << pBranch->GetClassName() << " is unknown.");
                          return Error;
                       }
                       if (dsc.auxdyn_reader) {
@@ -551,15 +527,13 @@ DbStatus RootTreeContainer::open( DbDatabase& dbH,
                }
             }
             else  {
-               log << DbPrintLvl::Warning << "Branch with name:" << colnam
+               ATH_MSG_WARNING("Branch with name:" << colnam
                    << " not present in container:" << m_name << " of type "
-                   << ROOTTREE_StorageType.storageName()
-                   << DbPrint::endmsg;
+                   << ROOTTREE_StorageType.storageName());
             }
          }
-         log << DbPrintLvl::Debug << "Opened container " << m_name << " of type "
-             << ROOTTREE_StorageType.storageName()
-             << DbPrint::endmsg;
+         ATH_MSG_DEBUG("Opened container " << m_name << " of type "
+             << ROOTTREE_StorageType.storageName());
          m_dbH = dbH;
          m_type = info;
          if( mode&pool::UPDATE ) {
@@ -653,9 +627,8 @@ DbStatus RootTreeContainer::open( DbDatabase& dbH,
                }
             }
             if( res.isSuccess() )    {
-               log << DbPrintLvl::Debug << "Opened container " << m_name << " of type "
-                   << ROOTTREE_StorageType.storageName()
-                   << DbPrint::endmsg;
+               ATH_MSG_DEBUG("Opened container " << m_name << " of type "
+                   << ROOTTREE_StorageType.storageName());
                m_dbH  = dbH;
                m_type = info;
                m_rootDb->registerBranchContainer(this);
@@ -669,16 +642,13 @@ DbStatus RootTreeContainer::open( DbDatabase& dbH,
             res = Error;
          }
          catch (...)   {
-            DbPrint err( m_name);
-            err << DbPrintLvl::Fatal << "Unknown exception occurred. Cannot give more details."
-                << DbPrint::endmsg;
+            ATH_MSG_FATAL("Unknown exception occurred. Cannot give more details.");
             debugBreak(nam, "Cannot open ROOT container(Tree/Branch)");
             res = Error;
          }
       }
    }
-   log << DbPrintLvl::Error << "Cannot open container '" << nam << "', invalid Database handle."
-       << DbPrint::endmsg;
+   ATH_MSG_ERROR("Cannot open container '" << nam << "', invalid Database handle.");
    return Error;
 }
 
@@ -693,10 +663,8 @@ DbStatus RootTreeContainer::checkAccess(DbDatabase& dbH,
          return Success;
       }
    }
-   DbPrint log(nam);
-   log << DbPrintLvl::Debug << "Cannot access container '" << nam << "', invalid Database handle or "
-       << "container is not of type Tree/Branch."
-       << DbPrint::endmsg;
+   ATH_MSG_DEBUG("Cannot access container '" << nam << "', invalid Database handle or "
+       << "container is not of type Tree/Branch.");
    return Error;
 }
 
@@ -772,16 +740,12 @@ DbStatus  RootTreeContainer::addObject(DbDatabase& dbH,
       debugBreak(m_name, "Cannot attach ROOT object branch.", e);
    }
    catch (...)   {
-      DbPrint err( m_name);
-      err << DbPrintLvl::Fatal << "Unknown exception occurred. Cannot give more details."
-          << DbPrint::endmsg;
+      ATH_MSG_FATAL("Unknown exception occurred. Cannot give more details.");
       debugBreak(m_name, "Cannot attach ROOT object branch.", true);
    }
-   DbPrint log( m_name);
-   log << DbPrintLvl::Error << "Failed to open the container " << m_name << " of type "
+   ATH_MSG_ERROR("Failed to open the container " << m_name << " of type "
        << ROOTTREE_StorageType.storageName()
-       << " Class " << typ << " is unknown."
-       << DbPrint::endmsg;
+       << " Class " << typ << " is unknown.");
    return Error;
 }
 
@@ -1067,20 +1031,17 @@ DbStatus RootTreeContainer::transAct(Transaction::Action action)
          TBranch * b = nullptr;
          while( (b = (TBranch*)next()) ) {
             if (b->GetEntries() != branchEntries) {
-               DbPrint log(m_name);
-               log << DbPrintLvl::Error << "Every branch must have the same number of entries."
-                   << "  branch " << b->GetName() << " " << b->GetEntries()
-                   << DbPrint::endmsg;
+               ATH_MSG_ERROR("Every branch must have the same number of entries."
+                           << "  branch " << b->GetName() << " " << b->GetEntries());
                return Error;
             }
          }
          m_tree->SetEntries(branchEntries);
          m_tree->AutoSave();
       } else if (branchEntries < treeEntries) {
-         DbPrint log(m_name);
-         log << DbPrintLvl::Error << "Every branch must have the same number of entries."
+         ATH_MSG_ERROR("Every branch must have the same number of entries."
              << " Tree entries=" << treeEntries << " but this branch shows " << branchEntries
-             << " entries" << DbPrint::endmsg;
+             << " entries");
          return Error;
       }
       desc.rows_written = 0;

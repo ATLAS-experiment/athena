@@ -99,6 +99,18 @@ namespace MuonR4{
                 rot = std::unique_ptr<Trk::RIO_OnTrack>{m_clusterCreator->createRIO_OnTrack(*prd, 
                                                                                             isect.position,
                                                                                             segment.direction())};
+                if constexpr (std::is_same_v<PrdType, Muon::sTgcPrepData>) {
+                    const sTgcIdHelper& idHelper{m_idHelperSvc->stgcIdHelper()};
+                    if (!rot && idHelper.channelType(prd->identify()) == sTgcIdHelper::sTgcChannelTypes::Wire) {
+                        const Amg::Vector3D locPos = prd->detectorElement()->transform(prd->identify()).inverse() *
+                                                      isect.position;
+                        if (prd->detectorElement()->isEtaZero(prd->identify(), locPos.block<2,1>(0,0))){
+                            ATH_MSG_WARNING("Hit from inactive region "<<m_idHelperSvc->toString(prd->identify())
+                                <<", "<<Amg::toString(locPos)<<" cannot be translated.");
+                            continue;
+                        } 
+                    }
+                }
             }
             if (!rot) {
                 ATH_MSG_ERROR("Failed to create rot from "<<m_idHelperSvc->toString(prd->identify()));
@@ -130,7 +142,7 @@ namespace MuonR4{
         ATH_CHECK(SG::get(stgcPrds, m_keysTgc, ctx));
         ATH_CHECK(SG::get(mmPrds, m_keyMM, ctx));
 
-        const ActsGeometryContext* gctx{nullptr};
+        const ActsTrk::GeometryContext* gctx{nullptr};
         ATH_CHECK(SG::get(gctx, m_geoCtxKey, ctx));
         
         std::vector<std::unique_ptr<Trk::RIO_OnTrack>> rots{};

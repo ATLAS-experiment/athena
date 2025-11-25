@@ -83,6 +83,9 @@ StatusCode ActsEMBremCollectionBuilder::execute(const EventContext &ctx) const {
   std::unique_ptr<ActsTrk::TrackContainer> outputTracks = std::make_unique<ActsTrk::TrackContainer>( std::move(ctrackBackend),
                                                                                                      std::move(ctrackStateBackend) );
 
+  m_nInputTracks.fetch_add(selectedTrackParticles->size(), std::memory_order_relaxed);
+  m_nRefittedTracks.fetch_add(outputTracks->size(), std::memory_order_relaxed);
+
   SG::WriteHandle<ActsTrk::TrackContainer> refittedTrackHandle = SG::makeHandle(m_refittedTracksKey, ctx);
 
   if (refittedTrackHandle.record(std::move(outputTracks)).isFailure()) {
@@ -90,12 +93,6 @@ StatusCode ActsEMBremCollectionBuilder::execute(const EventContext &ctx) const {
                   << m_refittedTracksKey.key());
     return StatusCode::FAILURE;
   }
-
-  const size_t inputCount = selectedTrackParticles->size();
-  const size_t refittedCount = trackContainer.size();
-
-  m_nInputTracks.fetch_add(inputCount, std::memory_order_relaxed);
-  m_nRefittedTracks.fetch_add(refittedCount, std::memory_order_relaxed);
 
   return StatusCode::SUCCESS;
 }

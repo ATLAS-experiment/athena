@@ -8,7 +8,7 @@
 #include "GaudiKernel/IInterface.h"
 // PACKAGE
 #include "ActsInterop/Logger.h"
-#include "ActsGeometryInterfaces/ActsGeometryContext.h"
+#include "ActsGeometryInterfaces/GeometryContext.h"
 #include "ActsGeometry/ActsTrackingGeometryTool.h"
 #include "ActsGeometryInterfaces/ITrackingGeometryTool.h"
 
@@ -52,7 +52,6 @@ ActsSurfaceMappingTool::initialize()
       std::move(propagator),
       makeActsAthenaLogger(this, "SurfaceMaterialMapper"));
 
-  m_geoContext = m_trackingGeometryTool->getNominalGeometryContext();
 
   ATH_MSG_INFO("ACTS Surface Mapper successfully initialized");
   return StatusCode::SUCCESS;
@@ -62,7 +61,7 @@ Acts::SurfaceMaterialMapper::State
 ActsSurfaceMappingTool::mappingState() const
 {
   auto mappingState = m_mapper->createState(
-    m_geoContext.context(), m_magFieldContext, *m_trackingGeometry);
+    m_trackingGeometryTool->getNominalGeometryContext().context(), m_magFieldContext, *m_trackingGeometry);
 
   return mappingState;
 }

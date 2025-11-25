@@ -44,9 +44,10 @@ class sTgcMeasurement_v1 : public UncalibratedMeasurement_v1 {
   IdentifierHash measurementHash() const;
   /** @brief Returns the hash of the associated gasGap layer */
   IdentifierHash layerHash() const;
-
+  /** @brief Returns the local measurement position as 3-vector */
+  Amg::Vector3D localMeasurementPos() const;
   /** @brief Which algorithm produced the Measurement object*/
-  using Author = Muon::sTgcPrepData::Author;
+  using Author = ::Muon::sTgcPrepData::Author;
   Author author() const;
 
   /** @brief In which gasGap is the Measurement */

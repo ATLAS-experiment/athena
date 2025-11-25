@@ -14,11 +14,10 @@
 #include <MuonReadoutGeometryR4/sTgcReadoutElement.h>
 #include <MuonReadoutGeometryR4/MmReadoutElement.h>
 
-#include <ActsGeometryInterfaces/ActsGeometryContext.h>
-#include <ActsGeometryInterfaces/IDetectorVolumeSvc.h>
+#include <ActsGeometryInterfaces/GeometryContext.h>
+#include <ActsGeometryInterfaces/ITrackingGeometrySvc.h>
 #include <StoreGate/ReadCondHandleKey.h>
 
-#include "ActsGeometryInterfaces/IActsTrackingGeometrySvc.h"
 
 #include "Acts/Surfaces/Surface.hpp"
 #include "Acts/Surfaces/StrawSurface.hpp"
@@ -43,7 +42,7 @@ class MuonChamberToolTest: public AthReentrantAlgorithm {
         std::array<Amg::Vector3D, 4> cornerPoints(const Acts::GeometryContext& gctx, const Acts::PlaneSurface&) const;
         /** @brief Checks whether the readout elements of an enevelope are completely embedded into the envelope */
         template <class EnvelopeType>
-          StatusCode allReadoutInEnvelope(const ActsGeometryContext& ctx,
+          StatusCode allReadoutInEnvelope(const ActsTrk::GeometryContext& ctx,
                                           const EnvelopeType& envelope) const; 
         
         /** @brief Checks whether the point is inside of an envelope object, i.e.
@@ -78,27 +77,27 @@ class MuonChamberToolTest: public AthReentrantAlgorithm {
          *  @param envelope: Reference to the envelope to check
          *  @param boundVol: Bounding volume representing the envelope */
         template <class EnvelopeType>
-          StatusCode testReadoutEle(const ActsGeometryContext& gctx,
+          StatusCode testReadoutEle(const ActsTrk::GeometryContext& gctx,
                                     const MdtReadoutElement& readOutEle,
                                     const EnvelopeType& envelope,
                                     const Acts::Volume& boundVol) const;
         template <class EnvelopeType>
-          StatusCode testReadoutEle(const ActsGeometryContext& gctx,
+          StatusCode testReadoutEle(const ActsTrk::GeometryContext& gctx,
                                     const RpcReadoutElement& readOutEle,
                                     const EnvelopeType& envelope,
                                     const Acts::Volume& boundVol) const;
         template <class EnvelopeType>
-          StatusCode testReadoutEle(const ActsGeometryContext& gctx,
+          StatusCode testReadoutEle(const ActsTrk::GeometryContext& gctx,
                                     const TgcReadoutElement& readOutEle,
                                     const EnvelopeType& envelope,
                                     const Acts::Volume& boundVol) const;
         template <class EnvelopeType>
-          StatusCode testReadoutEle(const ActsGeometryContext& gctx,
+          StatusCode testReadoutEle(const ActsTrk::GeometryContext& gctx,
                                     const sTgcReadoutElement& readOutEle,
                                     const EnvelopeType& envelope,
                                     const Acts::Volume& boundVol) const;
         template <class EnvelopeType>
-          StatusCode testReadoutEle(const ActsGeometryContext& gctx,
+          StatusCode testReadoutEle(const ActsTrk::GeometryContext& gctx,
                                     const MmReadoutElement& readOutEle,
                                     const EnvelopeType& envelope,
                                     const Acts::Volume& boundVol) const;
@@ -108,9 +107,9 @@ class MuonChamberToolTest: public AthReentrantAlgorithm {
         ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "IdHelperSvc", 
                                                 "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
 
-        SG::ReadHandleKey<ActsGeometryContext> m_geoCtxKey{this, "AlignmentKey", "ActsAlignment", "cond handle key"};
+        SG::ReadHandleKey<ActsTrk::GeometryContext> m_geoCtxKey{this, "AlignmentKey", "ActsAlignment", "cond handle key"};
 
-        ServiceHandle<IActsTrackingGeometrySvc> m_trackingGeometrySvc{this, "TrackingGeometrySvc","ActsTrackingGeometrySvc"};
+        ServiceHandle<ActsTrk::ITrackingGeometrySvc> m_trackingGeometrySvc{this, "TrackingGeometrySvc","ActsTrackingGeometrySvc"};
 
         const MuonDetectorManager* m_detMgr{nullptr};
 

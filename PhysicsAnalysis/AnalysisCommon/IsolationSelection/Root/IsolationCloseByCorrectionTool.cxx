@@ -1041,7 +1041,7 @@ namespace CP {
         IsoHelperMap::const_iterator itr = m_isohelpers.find(isoVariable);
         float isovalue = 0;
         if (itr == m_isohelpers.end() || itr->second->getOriginalIsolation(particle, isovalue) == CorrectionCode::Error) {
-            ATH_MSG_ERROR("Failed to retrive the original isolation cone ");
+            ATH_MSG_ERROR("Failed to retrieve the original isolation cone ");
             isovalue = FLT_MAX;
         }
         return isovalue;

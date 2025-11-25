@@ -3,8 +3,11 @@
 */
 
 #include "LArIdentifier/LArElectrodeID.h"
+#include "IdDict/IdDictDictionary.h"
+#include "IdDict/IdDictField.h"
+#include "IdDict/IdDictMgr.h"
+#include "IdDict/IdDictRegion.h"
 #include "GaudiKernel/MsgStream.h"
-#include "IdDict/IdDictDefs.h"
 #include "Identifier/IdentifierHash.h"
 #include "Identifier/RangeIterator.h"
 #include <algorithm>
@@ -221,7 +224,7 @@ int LArElectrodeID::initLevelsFromDict()
   log << MSG::DEBUG  << "[initLevelsFromDict] data member initialization OK ... "  << endmsg;
   
   // Search with region name
-  IdDictRegion* reg = m_dict->find_region("EM-BARREL-ALL");
+  const IdDictRegion* reg = m_dict->find_region("EM-BARREL-ALL");
   if (reg) {
       m_larElectrodeRegion_index = reg->index();}
   else {
@@ -233,7 +236,7 @@ int LArElectrodeID::initLevelsFromDict()
 
   // Find LArElectrode field 
   // ========================================================================
-  IdDictField* field = m_dict->find_field("subdet") ;
+  const IdDictField* field = m_dict->find_field("subdet") ;
   if (field) {
     m_atlas_index = field->index();}
   else {

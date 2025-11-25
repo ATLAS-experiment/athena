@@ -4,7 +4,6 @@
 
 
 #include "GeneralTauPlots.h"
-#include "AthContainers/ConstAccessor.h"
 #include "AthenaKernel/Units.h"
 
 namespace Tau{

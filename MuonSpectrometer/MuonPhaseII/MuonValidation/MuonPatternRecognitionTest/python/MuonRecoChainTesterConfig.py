@@ -4,17 +4,20 @@ if __name__=="__main__":
     
     from MuonGeoModelTestR4.testGeoModel import setupGeoR4TestCfg, SetupArgParser
     from MuonConfig.MuonConfigUtils import executeTest, setupHistSvcCfg
+    from MuonGeoModelTestR4.testGeoModel import MuonPhaseIITestDefaults
     parser = SetupArgParser()
     parser.set_defaults(nEvents = -1)
+    parser.set_defaults(noSTGC = True)    
     parser.set_defaults(outRootFile="RecoChainTester.root")
-    parser.set_defaults(inputFile=["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonGeomRTT/R3SimHits.pool.root"])
+    parser.set_defaults(inputFile= MuonPhaseIITestDefaults.HITS_PG_R3)
     parser.add_argument("--monitorPlots", action='store_true', default=False, 
                         help="Setup monitoring plots of the pattern recognition")
     parser.add_argument("--runVtune", 
                         help="runs VTune profiler service for the muon hough alg", action='store_true', default = False)
     parser.add_argument("--noPerfMon", help="If set to true, full perfmonMT is enabled",
                         default=False, action='store_true')
-  
+    parser.add_argument("--houghR4", help="Schedules the R4 pattern -> legacy segment -> legacy track chain",
+                        action="store_true", default = False)
 
     args = parser.parse_args()
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
@@ -38,26 +41,29 @@ if __name__=="__main__":
     from MuonPatternRecognitionTest.PatternTestConfig import LegacyMuonRecoChainCfg
     cfg.merge(LegacyMuonRecoChainCfg(flags))
     ### Setup the new chain
-    from MuonPatternRecognitionAlgs.MuonHoughTransformAlgConfig import MuonPatternRecognitionCfg, MuonSegmentFittingAlgCfg
+    from MuonPatternRecognitionAlgs.MuonPatternRecognitionConfig import MuonPatternRecognitionCfg
     cfg.merge(MuonPatternRecognitionCfg(flags))    
-    cfg.merge(MuonSegmentFittingAlgCfg(flags))
+    from MuonTrackFindingAlgs.TrackFindingConfig import MSTrackFinderAlgCfg
+    cfg.merge(MSTrackFinderAlgCfg(flags))
+   
 
     from MuonPatternRecognitionTest.PatternTestConfig import MuonR4PatternRecoChainCfg, MuonR4SegmentRecoChainCfg
-    cfg.merge(MuonR4PatternRecoChainCfg(flags))
+    if args.houghR4:
+        cfg.merge(MuonR4PatternRecoChainCfg(flags))
 
     ### What happens if you parse the R4 patterns to the legacy chain?
     cfg.merge(MuonR4SegmentRecoChainCfg(flags))
 
     from MuonPatternRecognitionTest.PatternTestConfig import TrackTruthMatchCfg
-    cfg.merge(TrackTruthMatchCfg(flags))
+    cfg.merge(TrackTruthMatchCfg(flags, setupHoughR4 = args.houghR4))
 
     from MuonPatternRecognitionTest.PatternTestConfig import MuonRecoChainTesterCfg
-    cfg.merge(MuonRecoChainTesterCfg(flags))
+    cfg.merge(MuonRecoChainTesterCfg(flags,
+                                    SegmentFromR4HoughKey = "MuonSegmentsFromHoughR4" if args.houghR4 else "" ))
     if args.runVtune: 
         from PerfMonVTune.PerfMonVTuneConfig import VTuneProfilerServiceCfg
         cfg.merge(VTuneProfilerServiceCfg(flags, ProfiledAlgs=["MuonHoughTransformAlg"]))
     
-    ## cfg.getService("MessageSvc").setVerbose = ["TrackBuildingFromR4Segments", "TrackBuildingFromHoughR4", "MuonR4SegmentCnvAlg" ]
     if args.monitorPlots:
         from MuonPatternRecognitionTest.PatternTestConfig import PatternVisualizationToolCfg
         cfg.getEventAlgo("MuonEtaHoughTransformAlg").VisualizationTool = cfg.popToolsAndMerge(PatternVisualizationToolCfg(flags, 

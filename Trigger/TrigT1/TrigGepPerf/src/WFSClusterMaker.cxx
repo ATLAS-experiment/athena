@@ -3,6 +3,8 @@
  */
 
 #include "./WFSClusterMaker.h"
+#include <stdexcept>
+#include <cmath>
 
 std::vector<Gep::Cluster>
 Gep::WFSClusterMaker::makeClusters(const pGepCellMap& caloCellsMap) const {
@@ -17,9 +19,7 @@ Gep::WFSClusterMaker::makeClusters(const pGepCellMap& caloCellsMap) const {
 
 	// Clustering
         std::vector<Gep::GepCaloCell> cluster_cells = clusterFromCells(cell_itr.second, caloCellsMap);
-	
-        Gep::Cluster cluster = getClusterFromListOfCells(cluster_cells);
-        clusters.push_back(cluster);
+        clusters.push_back(getClusterFromListOfCells(cluster_cells));
   }
 
   // Order topo clusters according to their et
@@ -106,7 +106,7 @@ Gep::WFSClusterMaker::clusterFromCells(const Gep::GepCaloCell& seed,
 
                         seenCells.push_back(neighbour.id);
                         cellsNextLayer.push_back(neighbour);
-                        v_clusterCells.push_back(neighbour);
+                        v_clusterCells.push_back(std::move(neighbour));
                 }
         }
         cellsThisLayer.clear();
@@ -140,10 +140,11 @@ Gep::Cluster Gep::WFSClusterMaker::getClusterFromListOfCells(const std::vector<G
 
   cluster.ncells = cells.size();
   cluster.time = cells[0].time; // Take time of seed cell
-  cluster.cell_id = v_cellIDs;
-
+  cluster.cell_id = std::move(v_cellIDs);
+  if (abs_e == 0.) [[unlikely]] throw std::runtime_error("Gep::WFSClusterMaker::getClusterFromListOfCells: abs_e is zero");
   double cluster_eta = etaSum / abs_e;
   double cluster_phi = calculateClusterPhi(seed_phi, phiSum / abs_e);
+  if (weight == 0.) [[unlikely]] throw std::runtime_error("Gep::WFSClusterMaker::getClusterFromListOfCells: weight is zero");
   double cluster_et = (cluster_e * (1.0 / std::cosh(cluster_eta))) / weight;
   cluster.setEtEtaPhi(cluster_et, cluster_eta, cluster_phi);
 
@@ -191,7 +192,7 @@ void Gep::WFSClusterMaker::orderClustersInEt(std::vector<Gep::Cluster> &v_cluste
         if (v_ordered.size() != i_cluster+1) v_ordered.push_back(v_clusters[i_cluster]);
   }
 
-  v_clusters = v_ordered;
+  v_clusters = std::move(v_ordered);
 
   return;
 

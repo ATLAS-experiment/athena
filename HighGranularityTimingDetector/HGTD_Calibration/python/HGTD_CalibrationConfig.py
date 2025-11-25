@@ -5,6 +5,7 @@ Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 
+
 def HGTD_TdcCalibrationToolCfg(flags, name="HGTD_TdcCalibrationTool", **kwargs):
     acc = ComponentAccumulator()
 
@@ -14,4 +15,11 @@ def HGTD_TdcCalibrationToolCfg(flags, name="HGTD_TdcCalibrationTool", **kwargs):
     kwargs.setdefault("PS_SmallStep", 0.097)
     kwargs.setdefault("TOABinSize", 0.02)
     acc.setPrivateTools(CompFactory.HGTD_TdcCalibrationTool(name, **kwargs))
+    return acc
+
+
+def HGTD_TimeResolutionToolCfg(flags, name="HGTD_TimeResolutionTool", **kwargs):
+    acc = ComponentAccumulator()
+
+    acc.setPrivateTools(CompFactory.HGTD_TimeResolutionTool(name, **kwargs))
     return acc

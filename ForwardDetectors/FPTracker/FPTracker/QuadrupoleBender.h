@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef FPTRACKER_QUADRUPOLEBENDER_H
@@ -7,9 +7,10 @@
 
 #include "IBender.h"
 #include "IQuadFocuser.h"
+#include <string>
+
 namespace FPTracker{
 
-  class IFocuser;
   class IParticle;
 
  class QuadrupoleBender: public IBender{

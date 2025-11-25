@@ -1,11 +1,14 @@
+#!/usr/bin/env python
 # Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+
 """
-  Run ACTS gen3 geometry construction for Itk + Muon
+  Run ACTS geometry construction for ITk and Muon
 """
+
 from pathlib import Path
 import argparse
 
-parser = argparse.ArgumentParser(description="Run ACTS geometry construction for ITk")
+parser = argparse.ArgumentParser(description="Run ACTS geometry construction for ITk and Muon")
 parser.add_argument("--gen3", action="store_true", default="True", help="Use Gen3 geometry + construction")
 
 args = parser.parse_args()
@@ -26,15 +29,15 @@ flags.Detector.GeometryBpipe = True
 flags.Detector.GeometryCalo = False
 flags.Detector.GeometryMuon = True
 
-flags.Concurrency.NumThreads = 1
-flags.Concurrency.NumConcurrentEvents = 1
+flags.Concurrency.NumThreads = 64
+flags.Concurrency.NumConcurrentEvents = 64
 
-flags.Exec.MaxEvents = 200
+flags.Exec.MaxEvents = 10
 
 flags.Acts.TrackingGeometry.UseBlueprint = args.gen3
 
-from MuonGeoModelTestR4.testGeoModel import geoModelFileDefault, configureDefaultTagsCfg
-flags.GeoModel.SQLiteDBFullPath = geoModelFileDefault(useR4Layout = True)
+from MuonGeoModelTestR4.testGeoModel import configureDefaultTagsCfg, MuonPhaseIITestDefaults
+flags.GeoModel.SQLiteDBFullPath = MuonPhaseIITestDefaults.GEODB_R4
 
 flags.GeoModel.SQLiteDB = True
 configureDefaultTagsCfg(flags)

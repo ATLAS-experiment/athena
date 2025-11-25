@@ -67,11 +67,14 @@ unsigned int LVL1::eFEXtauAlgo::getEt() const {
   unsigned int out = 0;
 
   out += m_em0cells[0][1];
-  out += m_em0cells[1][1];
-  out += m_em0cells[2][1];
-  out += m_em0cells[0][m_offPhi];
-  out += m_em0cells[1][m_offPhi];
-  out += m_em0cells[2][m_offPhi];
+
+  if (m_AlgoVersion==0){
+    out += m_em0cells[1][1];
+    out += m_em0cells[2][1];
+    out += m_em0cells[0][m_offPhi];
+    out += m_em0cells[1][m_offPhi];
+    out += m_em0cells[2][m_offPhi];
+  }
 
   out += m_em1cells[m_seed][1];
   out += m_em1cells[m_seed + 1][1];
@@ -223,9 +226,13 @@ void LVL1::eFEXtauAlgo::setUnDAndOffPhi() {
   }
 
   unsigned int upwardEt = m_em2cells[m_seed][2];
-
   unsigned int downwardEt = m_em2cells[m_seed][0];
 
+  if (m_AlgoVersion==3){
+    upwardEt = m_em1cells[m_seed][2];
+    downwardEt = m_em1cells[m_seed][0];
+  }
+  
   if (downwardEt > upwardEt) {
     m_offPhi = 0;
     m_und = false;
@@ -257,6 +264,10 @@ void LVL1::eFEXtauAlgo::setSupercellSeed() {
   int cell_et = 0;
   for (unsigned int i = 7; i > 3; --i) {
     cell_et = m_em2cells[i][1];
+    
+    if (m_AlgoVersion==3){
+      cell_et = m_em1cells[i][1];
+    }
     if (cell_et > max_et) {
       seed = i;
       max_et = cell_et;
@@ -275,3 +286,5 @@ unsigned int LVL1::eFEXtauAlgo::getBitwiseEt() const {
 bool LVL1::eFEXtauAlgo::getUnD() const { return m_und; }
 
 unsigned int LVL1::eFEXtauAlgo::getSeed() const { return m_seed; }
+
+void LVL1::eFEXtauAlgo::setAlgoVersion(unsigned int ver) {m_AlgoVersion = ver;}

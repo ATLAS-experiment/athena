@@ -12,9 +12,6 @@ namespace {
     }
 }
 namespace MuonR4 {
-    
-    TgcFastDigiTool::TgcFastDigiTool(const std::string& type, const std::string& name, const IInterface* pIID):
-        MuonDigitizationTool{type,name, pIID} {}
 
     StatusCode TgcFastDigiTool::initialize() {
         ATH_CHECK(MuonDigitizationTool::initialize());
@@ -47,44 +44,44 @@ namespace MuonR4 {
         const TgcIdHelper& idHelper{m_idHelperSvc->tgcIdHelper()};
         const MuonGMR4::TgcReadoutElement* readOutEle = m_detMgr->getTgcReadoutElement(hitId);
         const IdentifierHash measHash = readOutEle->measurementHash(hitId);
-
+        const Amg::Vector3D locSimHitPos{xAOD::toEigen(timedHit->localPosition())};
         if (!readOutEle->numWireGangs(measHash)) {
             ATH_MSG_VERBOSE("There're no wires in "<<m_idHelperSvc->toString(hitId)<<" nothing to do");
             return false;
         }
         ++m_allHits[false];
         if (efficiencyMap && efficiencyMap->getEfficiency(hitId) < CLHEP::RandFlat::shoot(rndEngine,0.,1.)){
-                ATH_MSG_VERBOSE("Simulated hit "<<xAOD::toEigen(timedHit->localPosition())
+                ATH_MSG_VERBOSE("Simulated hit "<<Amg::toString(locSimHitPos)
                               << m_idHelperSvc->toString(hitId) <<" is rejected because of efficency modelling");
                 return false;
         }
-        
-        const Amg::Vector2D locSimHitPos{xAOD::toEigen(timedHit->localPosition()).block<2,1>(0,0)}; 
+
+        const Amg::Vector2D locPos2D{readOutEle->sensorLayout(measHash)->to2D(locSimHitPos, false)}; 
         
         const MuonGMR4::WireGroupDesign& design{readOutEle->wireGangLayout(measHash)};
-        if (!design.insideTrapezoid(locSimHitPos)) {
-            ATH_MSG_DEBUG("The hit "<<Amg::toString(locSimHitPos)<<" in "<<m_idHelperSvc->toStringGasGap(hitId)
+        if (!design.insideTrapezoid(locPos2D)) {
+            ATH_MSG_DEBUG("The hit "<<Amg::toString(locPos2D)<<" in "<<m_idHelperSvc->toStringGasGap(hitId)
                         <<" is outside of the trapezoid "<<design);
             return false;
         }
-        const int wireGrpNum = design.stripNumber(locSimHitPos);
+        const int wireGrpNum = design.stripNumber(locPos2D);
 
         if (wireGrpNum < 0) {
-            ATH_MSG_DEBUG("True hit "<<Amg::toString(locSimHitPos)<<" "<<m_idHelperSvc->toStringGasGap(hitId)
+            ATH_MSG_DEBUG("True hit "<<Amg::toString(locPos2D)<<" "<<m_idHelperSvc->toStringGasGap(hitId)
                         <<" is not covered by any wire gang");
             return false;
         }
 
         const double uncert = design.stripPitch() * design.numWiresInGroup(wireGrpNum) / std::sqrt(12);
-        const double locX = CLHEP::RandGaussZiggurat::shoot(rndEngine, locSimHitPos.x(), uncert);
+        const double locX = CLHEP::RandGaussZiggurat::shoot(rndEngine, locPos2D.x(), uncert);
         /// Recalculate the strip number with the smeared hit -> Use the real Y to ensure that the 
         /// hit remains within the active trapzoid
-        const Amg::Vector2D smearedPos{locX, locSimHitPos.y()};
+        const Amg::Vector2D smearedPos{locX, locPos2D.y()};
         const int prdWireNum = design.stripNumber(smearedPos);
 
         if (prdWireNum < 0) {
             if (design.insideTrapezoid(smearedPos)) {
-                ATH_MSG_WARNING("True hit "<<Amg::toString(locSimHitPos, 2)<<" corresponding to "<<wireGrpNum<<" --> "
+                ATH_MSG_WARNING("True hit "<<Amg::toString(locPos2D, 2)<<" corresponding to "<<wireGrpNum<<" --> "
                                 <<Amg::toString(smearedPos)<<" "<<uncert<<" is outside of "<<design);
             }
             return false;
@@ -132,14 +129,8 @@ namespace MuonR4 {
                 return false;
         }
     
-        const ActsGeometryContext& gctx{getGeoCtx(ctx)};
 
-        const IdentifierHash stripHash{readOutEle->constructHash(0,readOutEle->gasGapNumber(measHash), true)};
-        const IdentifierHash wireHash{readOutEle->constructHash(0, readOutEle->gasGapNumber(measHash), false)};
-
-        const Amg::Transform3D toPhiRot{readOutEle->globalToLocalTrans(gctx, stripHash) *
-                                        readOutEle->localToGlobalTrans(gctx, wireHash)};
-        const Amg::Vector2D locSimHitPos{(toPhiRot*xAOD::toEigen(timedHit->localPosition())).block<2,1>(0,0)};
+        const Amg::Vector2D locSimHitPos{readOutEle->sensorLayout(measHash)->to2D(xAOD::toEigen(timedHit->localPosition()),true)};
 
 
         const MuonGMR4::RadialStripDesign& design{readOutEle->stripLayout(measHash)};

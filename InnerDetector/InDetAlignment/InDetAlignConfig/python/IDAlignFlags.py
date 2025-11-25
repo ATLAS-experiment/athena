@@ -26,6 +26,7 @@ def createInDetAlignFlags():
     icf.addFlag("TRTAlignmentLevel", -1)
     icf.addFlag("TRTAlignmentLevelBarrel", -1)
     icf.addFlag("TRTAlignmentLevelEndcaps", -1)
+    icf.addFlag("localDataBase", "")
     icf.addFlag("beamSpotTag", "")
     icf.addFlag("IBLDistTag", "")
     icf.addFlag("L1IDTag", "")
@@ -41,12 +42,13 @@ def createInDetAlignFlags():
     icf.addFlag("pixelDistortionTag", "")
     icf.addFlag("TRTCalibT0TagCos", "")
     icf.addFlag("TRTCalibRtTagCos", "")
-    icf.addFlag("inputTFiles", "AlignmentTFile.root")
+    icf.addFlag("inputTFiles", [])
+    icf.addFlag("outputTFile", "AlignmentTFile.root")
     icf.addFlag("outputConditionFile", "alignment_output.pool.root")
     
     return icf
     
-def setL11AlignmentFlags(flags, InputLocalDatabase = ""):
+def setL11AlignmentFlags(flags):
     flags.InDet.Align.pixelAlignmentLevel = 11
     flags.InDet.Align.pixelAlignmentLevelBarrel = -1
     flags.InDet.Align.pixelAlignmentLevelEndcaps = -1
@@ -59,7 +61,7 @@ def setL11AlignmentFlags(flags, InputLocalDatabase = ""):
     flags.InDet.Align.TRTAlignmentLevelBarrel = -1
     flags.InDet.Align.TRTAlignmentLevelEndcaps = -1
 
-    if InputLocalDatabase:
+    if flags.InDet.Align.localDataBase:
         msg = logging.getLogger('setL16AlignmentFlags')
         msg.info(f"Change IBLDist tag from '{flags.InDet.Align.IBLDistTag}' to 'InDetAlignIBLDIST-T0-Alignment'")
         msg.info(f"Change L1IDTag tag from '{flags.InDet.Align.L1IDTag}' to 'InDetAlignL1-T0-Alignment'")
@@ -67,7 +69,7 @@ def setL11AlignmentFlags(flags, InputLocalDatabase = ""):
         flags.InDet.Align.IBLDistTag = "InDetAlignIBLDIST-T0-Alignment"
         flags.InDet.Align.L1IDTag = "InDetAlignL1-T0-Alignment"
 
-def setL16AlignmentFlags(flags, InputLocalDatabase = ""):
+def setL16AlignmentFlags(flags):
     if not flags.InDet.Align.alignPixel:
         raise Exception("With alignment level '16' the flag 'flags.InDet.Align.alignPixel' must be true'")
 
@@ -86,7 +88,7 @@ def setL16AlignmentFlags(flags, InputLocalDatabase = ""):
     flags.InDet.Align.alignSCT = False
     flags.InDet.Align.alignTRT = False
     
-    if InputLocalDatabase:
+    if flags.InDet.Align.localDataBase:
         msg = logging.getLogger('setL16AlignmentFlags')
         msg.info(f"Change IBLDist tag from '{flags.InDet.Align.IBLDistTag}' to 'InDetAlignIBLDIST-T0-Alignment'")
         msg.info(f"Change L1IDTag tag from '{flags.InDet.Align.L1IDTag}' to 'InDetAlignL1-T0-Alignment'")

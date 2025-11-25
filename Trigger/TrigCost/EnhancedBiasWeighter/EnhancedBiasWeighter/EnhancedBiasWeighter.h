@@ -64,7 +64,7 @@ class EnhancedBiasWeighter: public asg::AsgTool, public virtual IEnhancedBiasWei
    * @brief Decorate the AOD with EnhancedBias weighting quantities such that no CVMFS or DB access is required on subsequent passes through the dAOD to perform rates.
    * addBranches is required by DerivationFramework::AugmentationTool
    */
-   virtual StatusCode addBranches() const override;
+   virtual StatusCode addBranches(const EventContext& ctx) const override;
 
   /**
    * @return The effective number of events this one event represents from online, given EnhancedBias online prescales. For MC, this is the generator weight
@@ -131,7 +131,7 @@ class EnhancedBiasWeighter: public asg::AsgTool, public virtual IEnhancedBiasWei
    * @return How far into the current train this BCID is.
    * Retrieved from the database using the BunchCrossingCondData or fetched from TRIG1 dAOD
    */
-   virtual StatusCode getDistanceIntoTrain(const xAOD::EventInfo* eventInfo, uint32_t& distance) const override;
+   virtual StatusCode getDistanceIntoTrain(const xAOD::EventInfo* eventInfo, uint32_t& distance, const EventContext& ctx) const override;
 
    /**
    * @return the RunNumber.

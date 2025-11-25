@@ -1,14 +1,12 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-///////////////////////////////////////////////////////////////////
-// DistanceInTrainAugmentationTool.cxx, (c) ATLAS Detector software
 ///////////////////////////////////////////////////////////////////
 // Author: Chris Young (christopher.young@cern.ch)
 ///////////////////////////////////////////////////////////////////
 // This code is designed to augment EventInfo with a variety
-// of variables to describe where in the bunch train structure 
+// of variables to describe where in the bunch train structure
 // a given event lies. Care is taken to ensure that new trains
 // are not defined at the abort gap or 4 non-colliding crossings
 // in the 8b4e scheme.
@@ -17,19 +15,6 @@
 
 #include "StoreGate/WriteDecorHandle.h"
 
-
-DerivationFramework::DistanceInTrainAugmentationTool::DistanceInTrainAugmentationTool(const std::string& t,
-                                                            const std::string& n,
-                                                            const IInterface* p) :
-  base_class(t, n, p)
-{
-
-
-  declareProperty( "BCTool",        m_bunchCrossingKey );
-}
-
-DerivationFramework::DistanceInTrainAugmentationTool::~DistanceInTrainAugmentationTool() {
-}
 
 StatusCode DerivationFramework::DistanceInTrainAugmentationTool::initialize()
 {
@@ -51,34 +36,28 @@ StatusCode DerivationFramework::DistanceInTrainAugmentationTool::initialize()
   return StatusCode::SUCCESS;
 }
 
-StatusCode DerivationFramework::DistanceInTrainAugmentationTool::finalize()
-{
-  ATH_MSG_VERBOSE("finalize() ...");
-  return StatusCode::SUCCESS;
-}
 
-StatusCode DerivationFramework::DistanceInTrainAugmentationTool::addBranches() const {
+StatusCode DerivationFramework::DistanceInTrainAugmentationTool::addBranches(const EventContext& ctx) const {
 
-  auto eventInfo = SG::makeHandle (m_eventInfo_key);
+  auto eventInfo = SG::makeHandle (m_eventInfo_key, ctx);
   if (!eventInfo.isValid()){
     ATH_MSG_WARNING("Invalid  xAOD::EventInfo datahandle"
-		    << m_eventInfo_key.key());
+                    << m_eventInfo_key.key());
     return StatusCode::FAILURE;
   }
   auto ei = eventInfo.cptr();
 
-  const EventContext& context = Gaudi::Hive::currentContext();
-  SG::ReadCondHandle<BunchCrossingCondData> bunchCrossingTool (m_bunchCrossingKey, context);
+  SG::ReadCondHandle<BunchCrossingCondData> bunchCrossingTool (m_bunchCrossingKey, ctx);
   ATH_CHECK( bunchCrossingTool.isValid() );
 
-  SG::WriteDecorHandle<xAOD::EventInfo,int> dec_BCIDDistanceFront(m_BCIDDistanceFrontKey);
-  SG::WriteDecorHandle<xAOD::EventInfo,int> dec_BCIDDistanceTail(m_BCIDDistanceTailKey);
-  SG::WriteDecorHandle<xAOD::EventInfo,int> dec_BCIDGapBeforeTrain(m_BCIDGapBeforeTrainKey);
-  SG::WriteDecorHandle<xAOD::EventInfo,int> dec_BCIDGapAfterTrain(m_BCIDGapAfterTrainKey);
-  SG::WriteDecorHandle<xAOD::EventInfo,int> dec_BCIDType(m_BCIDTypeKey);
-  SG::WriteDecorHandle<xAOD::EventInfo,int> dec_BCIDGapBeforeTrainMinus12(m_BCIDGapBeforeTrainMinus12Key);
-  SG::WriteDecorHandle<xAOD::EventInfo,int> dec_BCIDGapAfterTrainMinus12(m_BCIDGapAfterTrainMinus12Key);
-  SG::WriteDecorHandle<xAOD::EventInfo,int> dec_BCIDTypeMinus12(m_BCIDTypeMinus12Key);
+  SG::WriteDecorHandle<xAOD::EventInfo,int> dec_BCIDDistanceFront(m_BCIDDistanceFrontKey, ctx);
+  SG::WriteDecorHandle<xAOD::EventInfo,int> dec_BCIDDistanceTail(m_BCIDDistanceTailKey, ctx);
+  SG::WriteDecorHandle<xAOD::EventInfo,int> dec_BCIDGapBeforeTrain(m_BCIDGapBeforeTrainKey, ctx);
+  SG::WriteDecorHandle<xAOD::EventInfo,int> dec_BCIDGapAfterTrain(m_BCIDGapAfterTrainKey, ctx);
+  SG::WriteDecorHandle<xAOD::EventInfo,int> dec_BCIDType(m_BCIDTypeKey, ctx);
+  SG::WriteDecorHandle<xAOD::EventInfo,int> dec_BCIDGapBeforeTrainMinus12(m_BCIDGapBeforeTrainMinus12Key, ctx);
+  SG::WriteDecorHandle<xAOD::EventInfo,int> dec_BCIDGapAfterTrainMinus12(m_BCIDGapAfterTrainMinus12Key, ctx);
+  SG::WriteDecorHandle<xAOD::EventInfo,int> dec_BCIDTypeMinus12(m_BCIDTypeMinus12Key, ctx);
 
   dec_BCIDDistanceFront(*ei)  = bunchCrossingTool->distanceFromFront(ei->bcid(), BunchCrossingCondData::BunchDistanceType::BunchCrossings);
   dec_BCIDDistanceTail(*ei)   = bunchCrossingTool->distanceFromTail(ei->bcid(), BunchCrossingCondData::BunchDistanceType::BunchCrossings);
@@ -97,4 +76,3 @@ StatusCode DerivationFramework::DistanceInTrainAugmentationTool::addBranches() c
 
   return StatusCode::SUCCESS;
 }
-

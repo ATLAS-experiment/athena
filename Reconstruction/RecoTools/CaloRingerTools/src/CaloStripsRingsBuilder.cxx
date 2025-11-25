@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 // =================================================================================
 
@@ -64,7 +64,7 @@ StatusCode CaloStripsRingsBuilder::initialize()
           xAOD::RingSetConf::whichLayer(rsLayers),
           xAOD::RingSetConf::whichSection(rsLayers)
         );
-    m_rsRawConfCol.push_back(rawConf);
+    m_rsRawConfCol.push_back(std::move(rawConf));
   }
 
   try {

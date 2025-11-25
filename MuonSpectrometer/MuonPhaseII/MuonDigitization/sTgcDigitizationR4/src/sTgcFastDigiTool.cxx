@@ -243,7 +243,7 @@ namespace MuonR4 {
         const IdentifierHash stripLayHash{readOutEle->createHash(gasGap, channelType::Strip, 0)};
         const IdentifierHash wireLayHash{readOutEle->createHash(gasGap, channelType::Wire, 0)};
         
-        const ActsGeometryContext& gctx{getGeoCtx(ctx)};
+        const ActsTrk::GeometryContext& gctx{getGeoCtx(ctx)};
         const Amg::Transform3D toWire{readOutEle->globalToLocalTrans(gctx, wireLayHash) *
                                       readOutEle->localToGlobalTrans(gctx, stripLayHash)};
         
@@ -325,7 +325,7 @@ namespace MuonR4 {
         const IdentifierHash stripLayHash{readOutEle->createHash(gasGap, channelType::Strip, 0)};
         const IdentifierHash padLayerHash{readOutEle->createHash(gasGap, channelType::Pad, 0)};
         
-        const ActsGeometryContext& gctx{getGeoCtx(ctx)};
+        const ActsTrk::GeometryContext& gctx{getGeoCtx(ctx)};
         const Amg::Transform3D toPad{readOutEle->globalToLocalTrans(gctx, padLayerHash) *
                                       readOutEle->localToGlobalTrans(gctx, stripLayHash)};
         

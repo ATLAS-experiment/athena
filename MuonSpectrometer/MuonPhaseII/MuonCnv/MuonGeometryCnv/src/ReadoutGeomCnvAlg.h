@@ -20,7 +20,7 @@
 #include "GeoModelKernel/GeoIdentifierTag.h"
 
 #include <MuonIdHelpers/IMuonIdHelperSvc.h>
-#include <ActsGeometryInterfaces/ActsGeometryContext.h>
+#include <ActsGeometryInterfaces/GeometryContext.h>
 
 /** The ReadoutGeomCnvAlg converts the Run4 Readout geometry build from the GeoModelXML into the legacy MuonReadoutGeometry.
  *  The algorithm is meant to serve as an adapter allowing to dynamically exchange individual components in the Muon processing chain
@@ -61,56 +61,56 @@ class ReadoutGeomCnvAlg : public AthReentrantAlgorithm {
          *         volumes are attached to the copied clone. 
          * 
          */
-        StatusCode buildStation(const ActsGeometryContext& gctx,
+        StatusCode buildStation(const ActsTrk::GeometryContext& gctx,
                                 const Identifier& stationId,
                                 ConstructionCache& cacheObj) const;
         /** @brief Clones the fullPhysical volume of the readoutElement and embeds it into the associated station.
          *         If creations of the needed station fails, failure is returned. The references to the clonedPhysVol
          *         & to the station are set if the procedure was successful.
          */
-        StatusCode cloneReadoutVolume(const ActsGeometryContext& gctx,
+        StatusCode cloneReadoutVolume(const ActsTrk::GeometryContext& gctx,
                                       const Identifier& stationId,
                                       ConstructionCache& cacheObj,
                                       GeoIntrusivePtr<GeoVFullPhysVol>& clonedPhysVol,
                                       MuonGM::MuonStation* & station) const;
         /** @brief Clones the fullPhysicalVolume of the  */
-        GeoIntrusivePtr<GeoVFullPhysVol> cloneNswWedge(const ActsGeometryContext& gctx,
+        GeoIntrusivePtr<GeoVFullPhysVol> cloneNswWedge(const ActsTrk::GeometryContext& gctx,
                                                        const MuonGMR4::MuonReadoutElement* nswRE,
                                                        ConstructionCache& cacheObj) const;
         
-        StatusCode buildMdt(const ActsGeometryContext& gctx,
+        StatusCode buildMdt(const ActsTrk::GeometryContext& gctx,
                             ConstructionCache& cacheObj) const;
 
-        StatusCode buildRpc(const ActsGeometryContext& gctx,
+        StatusCode buildRpc(const ActsTrk::GeometryContext& gctx,
                             ConstructionCache& cacheObj) const;
 
-        StatusCode buildSTGC(const ActsGeometryContext& gctx,
+        StatusCode buildSTGC(const ActsTrk::GeometryContext& gctx,
                              ConstructionCache& cacheObj) const;
 
-        StatusCode buildMM(const ActsGeometryContext& gctx,
+        StatusCode buildMM(const ActsTrk::GeometryContext& gctx,
                            ConstructionCache& cacheObj) const;
 
-        StatusCode buildTgc(const ActsGeometryContext& gctx,
+        StatusCode buildTgc(const ActsTrk::GeometryContext& gctx,
                             ConstructionCache& cacheObj) const;
 
         
-        StatusCode dumpAndCompare(const ActsGeometryContext& gctx,
+        StatusCode dumpAndCompare(const ActsTrk::GeometryContext& gctx,
                                   const MuonGMR4::RpcReadoutElement& refEle,
                                   const MuonGM::RpcReadoutElement& testEle) const;
 
-        StatusCode dumpAndCompare(const ActsGeometryContext& gctx,
+        StatusCode dumpAndCompare(const ActsTrk::GeometryContext& gctx,
                                   const MuonGMR4::MdtReadoutElement& refEle,
                                   const MuonGM::MdtReadoutElement& testEle) const;
 
-        StatusCode dumpAndCompare(const ActsGeometryContext& gctx,
+        StatusCode dumpAndCompare(const ActsTrk::GeometryContext& gctx,
                                   const MuonGMR4::MmReadoutElement& refEle,
                                   const MuonGM::MMReadoutElement& testEle) const;        
 
-        StatusCode dumpAndCompare(const ActsGeometryContext& gctx,
+        StatusCode dumpAndCompare(const ActsTrk::GeometryContext& gctx,
                                   const MuonGMR4::TgcReadoutElement& refEle,
                                   const MuonGM::TgcReadoutElement& testEle) const;
 
-        StatusCode dumpAndCompare(const ActsGeometryContext& gctx,
+        StatusCode dumpAndCompare(const ActsTrk::GeometryContext& gctx,
                                   const MuonGMR4::sTgcReadoutElement& refEle,
                                   const MuonGM::sTgcReadoutElement& testEle) const;
 
@@ -124,7 +124,10 @@ class ReadoutGeomCnvAlg : public AthReentrantAlgorithm {
         SG::ReadCondHandleKeyArray<ActsTrk::DetectorAlignStore> m_alignStoreKeys{this, "AlignmentKeys", {}, "Alignment key"};
         
         Gaudi::Property<bool> m_checkGeo{this, "checkGeo", false, "Checks the positions of the sensors"};
+        Gaudi::Property<bool> m_dumpGeo{this, "dumpGeo", false, "Dumps the constructed geometry"};
+        Gaudi::Property<std::string> m_geoDumpName{this,"geoDumpName", "ConvMuonGeoModel.db",};
         const MuonGMR4::MuonDetectorManager* m_detMgr{nullptr};
+
  
 };
 }

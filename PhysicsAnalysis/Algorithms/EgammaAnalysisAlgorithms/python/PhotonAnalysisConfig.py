@@ -71,7 +71,8 @@ class PhotonCalibrationConfig (ConfigBlock) :
             "is not affected by systematics. The second step then applies the "
             "systematics dependent corrections.  The net effect is that the "
             "slower first step only has to be run once, while the second is run "
-            "once per systematic. ATLASG-2358")
+            "once per systematic. ATLASG-2358",
+            expertMode=True)
         self.addOption ('decorateTruth', False, type=bool,
             info="decorate truth particle information on the reconstructed one")
         self.addOption ('decorateCaloClusterEta', False, type=bool,
@@ -279,6 +280,7 @@ class PhotonCalibrationConfig (ConfigBlock) :
             alg.isolationCorrectionTool.AFII_corr = (
                 0 if self.forceFullSimConfigForIso
                 else config.dataType() is DataType.FastSim)
+            alg.isolationCorrectionTool.FixTimingIssueInCore = True
             alg.egammas = config.readName (self.containerName)
             alg.egammasOut = config.copyName (self.containerName)
             alg.preselection = config.getPreselection (self.containerName, '')
@@ -332,15 +334,18 @@ class PhotonWorkingPointConfig (ConfigBlock) :
             info="whether to accept additional photons close to muons for the "
             "purpose of FSR corrections to these muons. Expert feature "
             "requested by the H4l analysis running on PHYSLITE. "
-            "The default is False.")
+            "The default is False.",
+            expertMode=True)
         self.addOption ('noEffSFForID', False, type=bool,
             info="disables the calculation of ID efficiencies and scale factors. "
             "Experimental! only useful to test a new WP for which scale "
-            "factors are not available. The default is False.")
+            "factors are not available. The default is False.",
+            expertMode=True)
         self.addOption ('noEffSFForIso', False, type=bool,
             info="disables the calculation of Iso efficiencies and scale factors. "
             "Experimental! only useful to test a new WP for which scale "
-            "factors are not available. The default is False.")
+            "factors are not available. The default is False.",
+            expertMode=True)
         self.addOption ('saveDetailedSF', True, type=bool,
             info="save all the independent detailed object scale factors. "
             "The default is True.")

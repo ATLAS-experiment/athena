@@ -20,13 +20,17 @@ namespace MuonR4{
              *      - FailedCalib: The calibration procedure produced invalid constants and the space point shall not be included
              *                      in the current chi2 iteration, but may tried in the next cycle
              *      - Outlier: The Space point is an outlier and shall never be included in the fit. It's kept for the hit counting
-             *                 purpose but nothing else */
-            enum class State : uint8_t {
-                Valid = 0,
-                FailedCalib = 1,
-                Outlier = 2,
+             *                 purpose but nothing else 
+             *      - Duplicate: The hit is marked during the hole recovery procedure as a duplicate. It should never
+             *                   end up on the final trajectory */
+            enum class State : std::uint8_t {
+                Valid = 1,
+                FailedCalib,
+                Outlier,
+                Duplicate
             };
-            
+            /** @brief Converts the state enum into a string */
+            static std::string toString(const State s);
             /** @brief Standard constructor
              *  @param uncalibSpacePoint: Pointer to the underyling uncalibrated space point
              *  @param posInChamber: Calibrated position of the space point inside the chamber
@@ -83,24 +87,35 @@ namespace MuonR4{
             void setFitState(State st);
             /** @brief Returns the local dimension of the measurement */
             unsigned dimension() const;
+            /** @brief Sets the beamline direction */
+            void setBeamDirection(Amg::Vector3D&& beamDir);
 
             friend std::ostream& operator<<(std::ostream& ostr, const CalibratedSpacePoint& sp) {
                     sp.print(ostr);
                     return ostr;
             }
         private:
+            /** @brief Print function */
             void print(std::ostream& ostr) const;
-            const SpacePoint* m_parent{nullptr};
+            /** @brief Calibrated position */
             Amg::Vector3D m_posInChamber{Amg::Vector3D::Zero()};
-            
-            double m_driftRadius{0.};
+            /** @brief Covariance array */
             Cov_t m_cov{Acts::filledArray<double, 3>(0.)};
-
+            /** @brief Calibrated drift radius */
+            double m_driftRadius{0.};
+            /** @brief Calibrated time (Acts units) */
             double m_time{0.};
-            /// By default the Mdt may measure time
-            bool m_measuresTime{type() == xAOD::UncalibMeasType::MdtDriftCircleType};
+            /** @brief Uncalibrated space point from which this 
+             *         space point is constructed */
+            const SpacePoint* m_parent{nullptr};
+            /** @brief Direction of the beamline (Beamspot constraint) */
+            std::shared_ptr<Amg::Vector3D> m_beamLine{};
+            /** @brief Calibration state */
             State m_state{State::Valid};
-    };
+            /** @brief time flag (By default true for Mdt detectors) */
+            bool m_measuresTime{type() == xAOD::UncalibMeasType::MdtDriftCircleType};
+        
+        };
         static_assert(Acts::Experimental::CompositeSpacePoint<CalibratedSpacePoint>);
 
 

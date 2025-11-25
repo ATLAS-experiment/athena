@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <fstream>
@@ -48,7 +48,7 @@ StatusCode LArHVCorrToSCHVCorr::stop()
       return StatusCode::FAILURE;
   }
 
-  //Retrive SuperCell online id
+  //Retrieve SuperCell online id
   const LArOnline_SuperCellID* onlSCID = nullptr;
   CHECK(detStore()->retrieve(onlSCID));
 

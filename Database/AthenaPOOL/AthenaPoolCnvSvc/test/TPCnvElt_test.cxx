@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthenaPoolCnvSvc/test/TPCnvElt_test.cxx
@@ -107,7 +107,7 @@ void test2()
   assert (!tpcnv_null.persToTrans (cnv1, &x2, "key", msg));
 }
 
-
+//coverity[root_function]
 int main()
 {
   gSystem->Load("libAthenaPoolCnvSvcTestDict");

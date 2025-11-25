@@ -97,6 +97,7 @@ def makeTestSequenceBlocks (dataType, algSeq, isPhyslite,
 
     configSeq += config.makeConfig('CommonServices')
     configSeq.setOptionValue('.systematicsHistogram', 'systematicsList')
+    configSeq.setOptionValue('.enableExpertMode', True)
 
     configSeq += config.makeConfig('PileupReweighting')
 

@@ -700,11 +700,6 @@ namespace CP {
     bool MuonSelectionTool::passedLowPtEfficiencyCuts(const xAOD::Muon& mu, xAOD::Muon::Quality thisMu_quality) const {
         ATH_MSG_VERBOSE("Checking whether muon passes low-pT selection...");
         
-        //LowPt Not supported in run3 for the time being
-        if(isRun3() && !m_developMode){
-            ATH_MSG_VERBOSE("LowPt WP currently not supported for run3 if not in expert mode");
-            return false;
-        }
         if (!m_useAllAuthors) {  // no allAuthors, always fail the WP
             ATH_MSG_VERBOSE("Do not have allAuthors variable - fail low-pT");
             return false;
@@ -1782,7 +1777,7 @@ namespace CP {
         );
 
         AthInfer::OutputDataMap outputData;
-        outputData["TightNNScore"] = std::make_pair(
+        outputData["sequential"] = std::make_pair(
             std::vector<int64_t>{1, 1}, std::vector<float>{}
         );
 
@@ -1790,7 +1785,7 @@ namespace CP {
             ATH_MSG_WARNING("ONNX inference failed!");
             return -999.;
         }
-        const auto& variant = outputData["TightNNScore"].second;
+        const auto& variant = outputData["sequential"].second;
         if (std::holds_alternative<std::vector<float>>(variant)) {
             const auto& vec = std::get<std::vector<float>>(variant);
             if (!vec.empty()) score = vec[0];

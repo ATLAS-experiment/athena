@@ -1,6 +1,6 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 /*
- * Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file AthContainers/DataVectorWithAlloc.h
@@ -58,7 +58,7 @@
 /**
  * @brief @c DataVector using a custom allocator for the elements.
  *
- * The @c ALLOC argument defaulta to @c ArenaHeapSTLAllocator
+ * The @c ALLOC argument defaults to @c ArenaHeapSTLAllocator
  * (see DataVectorWithAllocFwd.h).
  */
 template <class DV, class ALLOC>
@@ -468,6 +468,19 @@ public:
    * Returns the pushed pointer.
    */
   value_type push_back (Ptr pElem);
+
+
+  /**
+   * @brief Create and add a number of new elements to the end of the container.
+   * @param n The number of new elements to add.
+   *          The elements will be created by calling allocate().
+   *
+   * Note: this method may only be called using the most derived
+   * @c DataVector in the hierarchy.
+   *
+   * Returns the original size of the vector.
+   */
+  size_type push_new (size_type n);
 
 
   /**

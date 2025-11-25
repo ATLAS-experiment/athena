@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // Class header
@@ -16,6 +16,7 @@
 // STL header
 #include <sstream>
 #include <limits>
+#include <cmath>
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
@@ -55,7 +56,6 @@ void ALFA_SensitiveDetector::Initialize(G4HCofThisEvent *)
 
 bool ALFA_SensitiveDetector::ProcessHits(G4Step* pStep, G4TouchableHistory*)
 {
-  //////ATH_MSG_DEBUG("ALFA_SensitiveDetector::ProcessHits" );
 
   const double energyDeposit(pStep->GetTotalEnergyDeposit());
 
@@ -95,7 +95,6 @@ bool ALFA_SensitiveDetector::ProcessHits(G4Step* pStep, G4TouchableHistory*)
 
   std::string vol_test_str = vol_name.substr(0,7);
 
-  ////ATH_MSG_DEBUG("test volume name is " << vol_test_str  );
 
   if(vol_name.find("GVS") != std::string::npos)
     {
@@ -129,8 +128,6 @@ bool ALFA_SensitiveDetector::ProcessHits(G4Step* pStep, G4TouchableHistory*)
       std::string substring (vol_name);
       std::string num_string (vol_name);
 
-      ////ATH_MSG_DEBUG(" volume name is " << vol_test_str  );
-      ////ATH_MSG_DEBUG("string slope is " << substring.substr(m_pos2,1)  );
 
       std::string test_str ("A");
       test_str = substring.substr(m_pos2,1);
@@ -138,36 +135,28 @@ bool ALFA_SensitiveDetector::ProcessHits(G4Step* pStep, G4TouchableHistory*)
       if (test_str.compare("U") == 0)
         {
           sign_fiber = 1;
-          ////ATH_MSG_DEBUG("slope is "  << sign_fiber  );
         }
 
       if (test_str.compare("V") == 0)
         {
           sign_fiber = -1;
-          ////ATH_MSG_DEBUG("slope is "  << sign_fiber  );
         }
 
 
       for ( int k = 0; k < 3; k++ )
         {
           substring = substring.substr(m_pos2+1);
-          ////ATH_MSG_DEBUG("remaining string is " << substring  );
           m_pos1 = int(substring.find('['));
-          ////ATH_MSG_DEBUG("position 1 is " << m_pos1  );
           m_pos2 = int(substring.find(']'));
-          ////ATH_MSG_DEBUG("position 2 is " << m_pos1  );
           num_string = substring.substr(m_pos1+1,m_pos2-1);
-          ////ATH_MSG_DEBUG("num_string is " << substring );
           std::istringstream is(num_string);
           is >> m_num[k];
-          ////ATH_MSG_DEBUG("number got is " << m_num[k] );
         }
 
       n_station = m_num[0];
       n_plate   = m_num[1];
       n_fiber   = m_num[2];
 
-      ////ATH_MSG_DEBUG("station=" << n_station << ", plate=" << n_plate << ", fiber=" << n_fiber << ", sign=" << sign_fiber );
 
       if(m_HitCollection.isValid())
         {
@@ -197,62 +186,48 @@ bool ALFA_SensitiveDetector::ProcessHits(G4Step* pStep, G4TouchableHistory*)
       if (std::abs(energyDeposit)<std::numeric_limits<double>::epsilon()) { return true; }
       m_pos2 = 7;
       std::string substring (vol_name);
-      std::string num_string (vol_name);
-
-      //////ATH_MSG_DEBUG(" volume name is " << vol_test_str  );
-      //////ATH_MSG_DEBUG("string slope is " << substring.substr(m_pos2,1)  );
+      std::string num_string (std::move(vol_name));
 
       std::string test_str = substring.substr(m_pos2,1);
       int sign_fiber(0);
       if (test_str.compare("U") == 0)
         {
           sign_fiber = 1;
-          //////ATH_MSG_DEBUG("slope is "  << sign_fiber  );
         }
 
       if (test_str.compare("V") == 0)
         {
           sign_fiber = -1;
-          //////ATH_MSG_DEBUG("slope is "  << sign_fiber  );
         }
 
       std::string test_str_side ("A");
       test_str_side = substring.substr(m_pos2+1,1);
 
-      //////ATH_MSG_DEBUG("remaining string is " << test_str_side );
       int OD_side(0);
       if (test_str_side.compare("0") == 0)
         {
           OD_side = 0;
-          //////ATH_MSG_DEBUG("OD_side is "  << OD_side  );
         }
 
       if (test_str_side.compare("1") == 0)
         {
           OD_side = 1;
-          //////ATH_MSG_DEBUG("OD_side is "  << OD_side  );
         }
 
       for ( int k = 0; k < 3; k++ )
         {
           substring = substring.substr(m_pos2+1);
-          ////ATH_MSG_DEBUG("OD: remaining string is " << substring  );
           m_pos1 = int(substring.find('['));
-          ////ATH_MSG_DEBUG("OD: position 1 is " << m_pos1  );
           m_pos2 = int(substring.find(']'));
-          ////ATH_MSG_DEBUG("OD: position 2 is " << m_pos1  );
           num_string = substring.substr(m_pos1+1,m_pos2-1);
-          ////ATH_MSG_DEBUG("OD: num_string is " << substring );
           std::istringstream is(num_string);
           is >> m_num[k];
-          ////ATH_MSG_DEBUG("OD: number got is " << m_num[k] );
         }
 
       n_station = m_num[0];
       n_plate   = m_num[1];
       n_fiber   = m_num[2];
 
-      ////ATH_MSG_DEBUG("station=" << n_station << ", side=" << OD_side << ", plate= "<< n_plate << ", fiber=" << n_fiber << ", sign=" << sign_fiber );
       if(m_ODHitCollection.isValid())
         {
           m_ODHitCollection->Emplace(m_hitID,

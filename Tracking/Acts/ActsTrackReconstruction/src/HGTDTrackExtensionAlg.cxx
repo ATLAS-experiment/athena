@@ -14,7 +14,7 @@
 #include "AthenaMonitoringKernel/Monitored.h"
 #include "ActsEvent/TrackContainer.h"
 #include "ActsGeometry/ATLASMagneticFieldWrapper.h"
-#include "ActsGeometryInterfaces/ActsGeometryContext.h"
+#include "ActsGeometryInterfaces/GeometryContext.h"
 #include "ActsGeometry/ActsDetectorElement.h"
 #include "ActsInterop/Logger.h"
 #include "src/detail/AtlasMeasurementSelector.h"

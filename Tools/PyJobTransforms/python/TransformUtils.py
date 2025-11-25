@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 import logging
 msg = logging.getLogger(__name__)
@@ -86,6 +86,9 @@ def UseFrontier(flags):
     from os import environ
     from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 
+    if flags.IOVDb.UseCREST:
+        raise RuntimeError('Using PyJobTransforms.UseCREST (setting flags.IOVDb.UseCREST = True) and PyJobTransforms.UseFrontier in the same job is not supported!')
+
     cfg = ComponentAccumulator()
     if environ.get('FRONTIER_SERVER'):
         msg.info('Enabling FRONTIER DB access')
@@ -95,6 +98,19 @@ def UseFrontier(flags):
         msg.info('Using default DB access')
 
     return cfg
+
+
+def UseCREST(flags):
+    """PreInclude to switch to using CREST rather than COOL
+    """
+    flags.IOVDb.UseCREST = True
+    from os import environ
+    msg.info('Enabling CREST DB access')
+    if environ.get('CREST_SERVER'):
+        flags.IOVDb.CrestServer = environ.get('CREST_SERVER')
+    else:
+        msg.info('CREST_SERVER environment variable not defined - using fall-back.')
+    msg.info(f'Using CrestServer: {flags.IOVDb.CrestServer}')
 
 
 def DumpPickle(flags, cfg):
@@ -123,7 +139,12 @@ def SortInput(flags, cfg):
     # Sort Inputs based on one of the EventInfoTag attributes
     # Store sorted event collection in a temporary file
     # This should run as postInclude, so we assume EventSelector.InputCollections is set earlier
-    sorter.execute(inputs, outputCollection=tmpCollFile, sortAttribute=sortTag, sortOrder=sortOrd)
+
+    # moved execution to a subprocess, because Gaudi messaging created by collections causes
+    # AppManager errors
+    rc = sorter.executeInSubprocess(inputs, outputCollection=tmpCollFile, sortAttribute=sortTag, sortOrder=sortOrd)
+    if rc != 0:
+       msg.error(f"Sorting failed with exit code: {rc}")
 
     # Reading Events through References require a populated FileCatalog
     for inpfile in inputs:

@@ -341,7 +341,7 @@ namespace JiveXML {
       } //digit
     
 
-// If the digits are retrived from DPD, retrieve the other cells which do not have the digits avaliable
+// If the digits are retrieved from DPD, retrieve the other cells which do not have the digits available
 
       if (m_inputdpd) {
       

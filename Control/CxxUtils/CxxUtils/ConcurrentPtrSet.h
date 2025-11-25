@@ -1,6 +1,6 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 /*
- * Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file CxxUtils/ConcurrentPtrSet.h
@@ -12,9 +12,10 @@
 
 #include "CxxUtils/ConcurrentHashmapImpl.h"
 #include "CxxUtils/IsUpdater.h"
+#include "CxxUtils/iterator_range.h"
 #include "boost/iterator/iterator_facade.hpp"
-#include "boost/range/iterator_range.hpp"
 #include <type_traits>
+#include <ranges>
 
 
 #ifndef CXXUTILS_CONCURRENTPTRSET_H
@@ -246,7 +247,7 @@ public:
 
 
   /// A range defined by two iterators.
-  typedef boost::iterator_range<const_iterator> const_iterator_range;
+  using const_iterator_range = CxxUtils::iterator_range<const_iterator>;
 
 
   /**

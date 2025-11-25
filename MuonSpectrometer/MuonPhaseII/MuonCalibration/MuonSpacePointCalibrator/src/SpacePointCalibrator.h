@@ -14,15 +14,15 @@
 #include "MuonIdHelpers/IMuonIdHelperSvc.h"
 
 #include "MdtCalibInterfaces/IMdtCalibrationTool.h"
-#include "ActsGeometryInterfaces/ActsGeometryContext.h"
+#include "ActsGeometryInterfaces/GeometryContext.h"
 #include "MuonReadoutGeometryR4/MuonDetectorManager.h"
 
 #include "GaudiKernel/PhysicalConstants.h"
 #include "NSWCalibTools/INSWCalibTool.h"
 #include "MMClusterization/IMMClusterBuilderTool.h"
-#include "xAODMuonPrepData/sTgcMeasurement.h"
-#include "xAODMuonPrepData/sTgcStripCluster.h"
 
+#include "xAODMuonPrepData/sTgcStripClusterFwd.h"
+#include "xAODMuonPrepData/CombinedMuonStripFwd.h"
 
 
 namespace MuonR4{
@@ -54,59 +54,74 @@ namespace MuonR4{
                                          const Amg::Vector3D& seedDirInChamb,
                                          const double timeDelay) const override final;
 
-            CalibSpacePointVec calibrate(const EventContext& ctx,
-                                         CalibSpacePointVec&& spacePoints,
+            CalibSpacePointVec calibrate(const Acts::CalibrationContext& ctx,
                                          const Amg::Vector3D& seedPosInChamb,
                                          const Amg::Vector3D& seedDirInChamb,
-                                         const double timeDelay) const override final;
+                                         const double timeDelay,
+                                         const CalibSpacePointVec& spacePoints) const override final;
 
-            double driftVelocity(const EventContext& ctx,
+            void updateSigns(const Amg::Vector3D& trackPos,
+                             const Amg::Vector3D& trackDir,
+                             CalibSpacePointVec& hitsToCalib) const override final;
+
+            double driftVelocity(const Acts::CalibrationContext& ctx,
                                  const CalibratedSpacePoint& spacePoint) const override final;
-            double driftAcceleration(const EventContext& ctx,
+
+            double driftAcceleration(const Acts::CalibrationContext& ctx,
                                      const CalibratedSpacePoint& spacePoint) const override final;
-            
-            /**
-             * @brief Calibrates the position and covariance of a  MicroMegas (MM) cluster.
-             *
-             * @param ctx The event context providing the necessary conditions and event-specific information.
-             * @param gctx Pointer to the ActsGeometryContext, used for geometry-related transformations.
-             * @param cluster Pointer to the xAOD::MMCluster representing the MicroMegas cluster to be calibrated.
-             * @param globalPos The global position from an external measurement.
-             * @param globalDir The global position from an external measurement.
-             * @param calibLocPos The calibrated local position of the cluster (output parameter).
-             * @param calibLocCov The calibrated local covariance of the cluster (output parameter).
-             *
-             */
-            std::pair<double, double>  calibrateMM(const EventContext& ctx, const ActsGeometryContext& gctx, const  xAOD::MMCluster& cluster,
-                                                   const Amg::Vector3D& globalPos, const Amg::Vector3D& globalDir) const;
-           
-                                                               
-
-
-            /**
-             * @brief Calibrates the position and covariance of an sTGC (small-strip Thin Gap Chamber) cluster.
-             * 
-             * 
-             * @param ctx The event context providing the necessary conditions for the calibration.
-             * @param gctx Pointer to the ActsGeometryContext, which provides geometry-related information.
-             * @param cluster Pointer to the sTGC strip cluster to be calibrated.
-             * @param posAlongTheStrip The position along the strip obtained from the secondary measurement(wire), 0 if no wire measurement is present.
-             * @param globalPos The global position from an external measurement.
-             * @param globalDir The global direction from an external measurement.
-             * @param[out] calibLocPos The calibrated local position of the cluster (output parameter).
-             * @param[out] calibLocCov The calibrated local covariance of the cluster (output parameter).
-             * 
-             */
-            std::pair<double, double>  calibratesTGC(const EventContext& ctx, const ActsGeometryContext& gctx, const  xAOD::sTgcStripCluster& cluster,
-                                                     double posAlongTheStrip, const Amg::Vector3D& globalPos, const Amg::Vector3D& globalDir) const;
 
             void calibrateSourceLink(const Acts::GeometryContext& geoctx,
                                      const Acts::CalibrationContext& cctx,
                                      const Acts::SourceLink& link,
                                      ActsTrk::MutableTrackContainer::TrackStateProxy state) const override final;
+
+            void stampSignsOnMeasurements(const xAOD::MuonSegment& segment) const override final;
         private:
+            /** @brief Calibrates the track states from a combined muon strip. It's a pseudo measurement composed
+             *         out of two 1D strip measurements residing in the same gas gap (Relevant for Rpc/Tgc/sTgc)
+             * @param ctx The event context providing the necessary conditions and event-specific information.
+             * @param gctx Pointer to the ActsTrk::GeometryContext, used for geometry-related transformations.
+             * @param combinedPrd: Pointer to the measurement carrying the actual prds which are to be combined
+             *                     on the track state
+             * @param state: The proxy to the actual track state to fill */
+            void calibrateCombinedPrd(const EventContext& ctx, 
+                                      const ActsTrk::GeometryContext& gctx,
+                                      const xAOD::CombinedMuonStrip* combinedPrd,
+                                      ActsTrk::MutableTrackContainer::TrackStateProxy state) const;
+            /** @brief Calibrates the position and covariance of a  MicroMegas (MM) cluster.
+             *
+             * @param ctx The event context providing the necessary conditions and event-specific information.
+             * @param gctx Pointer to the ActsTrk::GeometryContext, used for geometry-related transformations.
+             * @param cluster Pointer to the xAOD::MMCluster representing the MicroMegas cluster to be calibrated.
+             * @param globalPos The global position from an external measurement.
+             * @param globalDir The global position from an external measurement.
+             * @param calibLocPos The calibrated local position of the cluster (output parameter).
+             * @param calibLocCov The calibrated local covariance of the cluster (output parameter). */
+            std::pair<double, double>  calibrateMM(const EventContext& ctx, 
+                                                   const ActsTrk::GeometryContext& gctx, 
+                                                   const xAOD::MMCluster& cluster,
+                                                   const Amg::Vector3D& globalPos, 
+                                                   const Amg::Vector3D& globalDir) const;
+            /**
+             * @brief Calibrates the position and covariance of an sTGC (small-strip Thin Gap Chamber) cluster.
+             * 
+             * @param ctx The event context providing the necessary conditions for the calibration.
+             * @param gctx Pointer to the ActsTrk::GeometryContext, which provides geometry-related information.
+             * @param cluster Pointer to the sTGC strip cluster to be calibrated.
+             * @param posAlongTheStrip The position along the strip obtained from the secondary measurement(wire), 0 if no wire measurement is present.
+             * @param globalPos The global position from an external measurement.
+             * @param globalDir The global direction from an external measurement.
+             * @param[out] calibLocPos The calibrated local position of the cluster (output parameter).
+             * @param[out] calibLocCov The calibrated local covariance of the cluster (output parameter).  */
+            std::pair<double, double>  calibratesTGC(const EventContext& ctx, 
+                                                     const ActsTrk::GeometryContext& gctx, 
+                                                     const xAOD::sTgcStripCluster& cluster,
+                                                     std::optional<double> posAlongTheStrip, 
+                                                     const Amg::Vector3D& globalPos, 
+                                                     const Amg::Vector3D& globalDir) const;
+
             /// access to the ACTS geometry context 
-            SG::ReadHandleKey<ActsGeometryContext> m_geoCtxKey{this, "AlignmentKey", "ActsAlignment", "cond handle key"}; 
+            SG::ReadHandleKey<ActsTrk::GeometryContext> m_geoCtxKey{this, "AlignmentKey", "ActsAlignment", "cond handle key"}; 
 
             ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
 
@@ -137,6 +152,8 @@ namespace MuonR4{
                                                "Load the Tgc BC-ID on the track states for the fit"};
             Gaudi::Property<bool> m_usesTgcTime{this, "usesTgcTime", false,
                                                "Load the sTgc time on the track states for the fit"};
+            Gaudi::Property<bool> m_MdtSignFromSegment{this, "useSegmentSigns", true,
+                                    "Mdt drift signs are copied from the segment line instead from the track state"};
     };
 
 }

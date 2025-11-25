@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "FPTracker/magnetSet.h"
@@ -7,16 +7,13 @@
 #include "FPTracker/ConfigData.h"
 #include "FPTracker/STLHelpers.h"
 #include "FPTracker/beamlineXPosition.h"
-#include "FPTracker/TransversePoint.h"
-#include "openFile.tpl"
+
 #include <istream>
 #include <fstream>
-#include <sstream>
 #include <stdexcept>
 #include <cmath>
 #include <cassert>
 #include <algorithm>
-//#include  <iostream>
 namespace FPTracker
 {
   
@@ -56,7 +53,6 @@ namespace FPTracker
     return 0;
   }
   
-  // Magnet::Container_t magnetSet(const ConfigData& cData, int sideSelect, const std::vector< std::istream& >& magfiles){
   Magnet::Container_t magnetSet(const ConfigData& cData, const Side& side, int magver, std::shared_ptr< std::ifstream> magfile)
   {
     //  Coordinate system: take z = forwards, x= to left , y = up.
@@ -225,21 +221,8 @@ namespace FPTracker
 	  } 
 	else 
 	  {
-	    std::stringstream sstr;
-	    sstr<<" Unknown magnet aperture type "<<aperture<<'\n' ;
-	    throw std::runtime_error(sstr.str().c_str());
+		  throw std::runtime_error(" Unknown magnet aperture type "+aperture+"\n");
 	  }
-	
-	/*
-	  std::cout<<magname<<" "<<endpos<<" "<<maglength<<" "<<K0L<<" "<<K1L<<" "
-	  <<" --> "<<mmagcen<<" "<<maglength
-	  <<" "<<magstrength
-	  <<" A1 "<<A1
-	  <<" A2 "<<A2
-	  <<" A3 "<<A3
-	  <<" A4 "<<A4
-	  <<std::endl; 
-	*/
 	
 	
 	if(apermb > 0)
@@ -272,9 +255,8 @@ namespace FPTracker
 						cData.pbeam0,
 						side,
 						mmagtype);
-	// std::cout<<*mptr<<std::endl;
-	magnets.push_back(mptr);
-      }
+    magnets.push_back(std::move(mptr));
+    }
     std::sort(magnets.begin(), magnets.end(), absZGreater< Magnet::ConstPtr_t >);
     return magnets;
   }

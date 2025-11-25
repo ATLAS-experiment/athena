@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef LARCELLREC_LArBadFebMaskingTool_H
@@ -84,9 +84,11 @@ public:
   Gaudi::Property<bool> m_maskMissingHeader{this,"maskMissingHeader",true};
   Gaudi::Property<bool> m_maskBadGain{this,"maskBadGain",true};
 
+  Gaudi::Property<bool> m_noFebErrors{this,"noFebErrors",false,"do not read LArFebErrorSummary (MC case)"};
+
   SG::ReadHandleKey<LArFebErrorSummary> m_larFebErrorSummaryKey{this,"FebErrorSummaryKey","LArFebErrorSummary"};
   SG::ReadHandleKey<xAOD::EventInfo> m_eventInfoKey{this,"EventInfoKey","EventInfo"};
-  SG::WriteDecorHandleKey<xAOD::EventInfo> m_eventInfoDecorKey{this,"EventInfoDecorKey","EventInfo.larFlags"};
+  SG::WriteDecorHandleKey<xAOD::EventInfo> m_eventInfoDecorKey{this,"EventInfoDecorKey",m_eventInfoKey, "larFlags"};
   /** compute bit mask of errors to mask
   */
   uint16_t m_errorToMask=0;
@@ -103,6 +105,11 @@ public:
   /** Number of Feb masked
   */
   mutable std::atomic<int> m_mask{0};
+
+  /** Empty dummy map for MC case
+  */
+  const std::map<unsigned int,uint16_t> m_dummyFebMap{}; 
+   
 };
 
 #endif

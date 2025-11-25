@@ -29,7 +29,7 @@ namespace MuonR4::SegmentFit {
 
 
             using SegmentVec = std::vector<std::unique_ptr<Segment>>; 
-            SegmentVec resolveAmbiguity(const ActsGeometryContext& gctx,
+            SegmentVec resolveAmbiguity(const ActsTrk::GeometryContext& gctx,
                                         SegmentVec&& toResolve) const;
 
 
@@ -41,7 +41,7 @@ namespace MuonR4::SegmentFit {
         private:
             const Config m_cfg{};
 
-            std::vector<int> driftSigns(const ActsGeometryContext& gctx,
+            std::vector<int> driftSigns(const ActsTrk::GeometryContext& gctx,
                                         const Segment& segment,
                                         const Segment::MeasVec& measurements) const;
             

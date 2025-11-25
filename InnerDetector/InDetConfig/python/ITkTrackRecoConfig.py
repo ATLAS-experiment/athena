@@ -61,12 +61,6 @@ def CombinedTrackingPassFlagSets(flags):
         flags_set += [flags.cloneAndReplace(
             "Tracking.ActiveConfig",
             "Tracking.ITkGNNPass")]
-
-    # Acts Large Radius Pass
-    if flags.Acts.doLargeRadius:
-        flags_set += [flags.cloneAndReplace(
-            "Tracking.ActiveConfig",
-            "Tracking.ITkActsLargeRadiusPass")]
         
     # Acts Conversion Pass
     if flags.Detector.EnableCalo and flags.Acts.doITkConversion and \
@@ -74,6 +68,12 @@ def CombinedTrackingPassFlagSets(flags):
         flags_set += [flags.cloneAndReplace(
             "Tracking.ActiveConfig",
             "Tracking.ITkActsConversionPass")]
+
+    # Acts Large Radius Pass
+    if flags.Acts.doLargeRadius:
+        flags_set += [flags.cloneAndReplace(
+            "Tracking.ActiveConfig",
+            "Tracking.ITkActsLargeRadiusPass")]
 
     # Acts Low Pt Pass
     if flags.Acts.doLowPt:
@@ -87,6 +87,12 @@ def CombinedTrackingPassFlagSets(flags):
             toAdd = eval(f"flags.cloneAndReplace('Tracking.ActiveConfig', 'Tracking.ITk{key}Pass')")
             flags_set += [toAdd]
 
+    # Photon conversion tracking reco
+    if flags.Detector.EnableCalo and flags.Tracking.doITkConversion:
+        flagsConv = flags.cloneAndReplace("Tracking.ActiveConfig",
+                                          "Tracking.ITkConversionPass")
+        flags_set += [flagsConv]
+    
     # LRT
     if flags.Tracking.doLargeD0:
         if flags.Tracking.useITkFTF:
@@ -105,12 +111,6 @@ def CombinedTrackingPassFlagSets(flags):
         flags_set += [flags.cloneAndReplace(
             "Tracking.ActiveConfig",
             "Tracking.ITkFPGAPass")]
-        
-    # Photon conversion tracking reco
-    if flags.Detector.EnableCalo and flags.Tracking.doITkConversion:
-        flagsConv = flags.cloneAndReplace("Tracking.ActiveConfig",
-                                          "Tracking.ITkConversionPass")
-        flags_set += [flagsConv]
 
     # LowPt
     if flags.Tracking.doLowPt:

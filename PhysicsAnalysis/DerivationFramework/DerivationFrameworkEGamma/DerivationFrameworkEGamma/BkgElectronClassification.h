@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef DERIVATIONFRAMEWORK_BKGELECTRONCLASSIFICATION_H
@@ -20,67 +20,65 @@
 
 namespace DerivationFramework {
 
-class BkgElectronClassification : public extends<AthAlgTool, IAugmentationTool>
-{
-public:
-  BkgElectronClassification(const std::string& t,
-                            const std::string& n,
-                            const IInterface* p);
+  class BkgElectronClassification : public extends<AthAlgTool, IAugmentationTool>
+  {
+  public:
 
-  virtual StatusCode initialize() override final;
-  virtual StatusCode addBranches() const override final;
+    using base_class::base_class;
 
-private:
-  /** @brief MCTruthClassifier **/
-  ToolHandle<IMCTruthClassifier> m_mcTruthClassifier{
-    this,
-    "MCTruthClassifierTool",
-    "",
-    "Handle to the MCTruthClassifier"
-  };
+    virtual StatusCode initialize() override final;
+    virtual StatusCode addBranches(const EventContext& ctx) const override final;
 
-  /** @brief input electron container **/
-  SG::ReadHandleKey<xAOD::ElectronContainer> m_electronContainer{
-    this,
-    "ElectronContainerName",
-    "Electrons",
-    "Input Electrons"
-  };
-  /** @brief Input truth particle container **/
-  SG::ReadHandleKey<xAOD::TruthParticleContainer> m_truthContainer{
-    this,
-    "TruthParticleContainerName",
-    "TruthParticles",
-    "Input Truth Particles"
-  };
+  private:
+    /** @brief MCTruthClassifier **/
+    ToolHandle<IMCTruthClassifier> m_mcTruthClassifier{
+      this,
+        "MCTruthClassifierTool",
+        "",
+        "Handle to the MCTruthClassifier"
+        };
 
-  // Write decoration handle keys
-  // these are not really configuarable
-  SG::WriteDecorHandleKey<xAOD::ElectronContainer>
-    m_truthPdgId{ this, "DoNotSet_truthPdgId", "Electrons.truthPdgId", "" };
-  SG::WriteDecorHandleKey<xAOD::ElectronContainer>
-    m_firstEgMotherTruthType{ this, "firstEgMotherTruthType", "", "" };
-  SG::WriteDecorHandleKey<xAOD::ElectronContainer>
-    m_firstEgMotherTruthOrigin{ this, "firstEgMotherTruthOrigin", "", "" };
-  SG::WriteDecorHandleKey<xAOD::ElectronContainer>
+    /** @brief input electron container **/
+    SG::ReadHandleKey<xAOD::ElectronContainer> m_electronContainer{
+      this,
+      "ElectronContainerName",
+      "Electrons",
+      "Input Electrons"
+    };
+    /** @brief Input truth particle container **/
+    SG::ReadHandleKey<xAOD::TruthParticleContainer> m_truthContainer{
+      this,
+      "TruthParticleContainerName",
+      "TruthParticles",
+      "Input Truth Particles"
+    };
+
+    // Write decoration handle keys
+    SG::WriteDecorHandleKey<xAOD::ElectronContainer>
+    m_truthPdgId{ this, "DoNotSet_truthPdgId", m_electronContainer, "truthPdgId", "" };
+    SG::WriteDecorHandleKey<xAOD::ElectronContainer>
+    m_firstEgMotherTruthType{ this, "firstEgMotherTruthType", m_electronContainer, "firstEgMotherTruthType", "" };
+    SG::WriteDecorHandleKey<xAOD::ElectronContainer>
+    m_firstEgMotherTruthOrigin{ this, "firstEgMotherTruthOrigin", m_electronContainer, "firstEgMotherTruthOrigin", "" };
+    SG::WriteDecorHandleKey<xAOD::ElectronContainer>
     m_firstEgMotherTruthParticleLink{ this,
-                                      "firstEgMotherTruthParticleLink",
-                                      "",
-                                      "" };
-  SG::WriteDecorHandleKey<xAOD::ElectronContainer>
-    m_firstEgMotherPdgId{ this, "firstEgMotherPdgId", "", "" };
-  SG::WriteDecorHandleKey<xAOD::ElectronContainer>
-    m_lastEgMotherTruthType{ this, "lastEgMotherTruthType", "", "" };
-  SG::WriteDecorHandleKey<xAOD::ElectronContainer>
-    m_lastEgMotherTruthOrigin{ this, "lastEgMotherTruthOrigin", "", "" };
-  SG::WriteDecorHandleKey<xAOD::ElectronContainer>
+      "firstEgMotherTruthParticleLink",
+      m_electronContainer, "firstEgMotherTruthParticleLink",
+      "" };
+    SG::WriteDecorHandleKey<xAOD::ElectronContainer>
+    m_firstEgMotherPdgId{ this, "firstEgMotherPdgId", m_electronContainer, "firstEgMotherPdgId", "" };
+    SG::WriteDecorHandleKey<xAOD::ElectronContainer>
+    m_lastEgMotherTruthType{ this, "lastEgMotherTruthType", m_electronContainer, "lastEgMotherTruthType", "" };
+    SG::WriteDecorHandleKey<xAOD::ElectronContainer>
+    m_lastEgMotherTruthOrigin{ this, "lastEgMotherTruthOrigin", m_electronContainer, "lastEgMotherTruthOrigin", "" };
+    SG::WriteDecorHandleKey<xAOD::ElectronContainer>
     m_lastEgMotherTruthParticleLink{ this,
-                                     "lastEgMotherTruthParticleLink",
-                                     "",
-                                     "" };
-  SG::WriteDecorHandleKey<xAOD::ElectronContainer>
-    m_lastEgMotherPdgId{ this, "lastEgMotherPdgId", "", "" };
-};
+      "lastEgMotherTruthParticleLink",
+      m_electronContainer, "lastEgMotherTruthParticleLink",
+      "" };
+    SG::WriteDecorHandleKey<xAOD::ElectronContainer>
+    m_lastEgMotherPdgId{ this, "lastEgMotherPdgId", m_electronContainer, "lastEgMotherPdgId", "" };
+  };
 }
 
 #endif // DERIVATIONFRAMEWORK_BKGELECTRONCLASSIFICATION_H

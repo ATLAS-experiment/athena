@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -15,6 +15,8 @@
 #include "GaudiKernel/MsgStream.h"
 
 #include "IdDictDetDescr/IdDictManager.h"
+#include "IdDict/IdDictDictionary.h"
+#include "IdDict/IdDictMgr.h"
 #include "ZdcIdentifier/ZdcID.h"
 
 
@@ -56,7 +58,7 @@ ZdcIDDetDescrCnv::createObj(IOpaqueAddress* /*pAddr*/, DataObject*& pObj)
     // DoChecks flag
     bool doChecks                 = mgr->do_checks();
 
-    IdDictDictionary* dict = mgr->find_dictionary("InnerDetector");  
+    const IdDictDictionary* dict = mgr->find_dictionary("InnerDetector");
     if (!dict) {
 	ATH_MSG_ERROR("unable to find idDict for InnerDetector");
 	return StatusCode::FAILURE;
@@ -106,9 +108,9 @@ ZdcIDDetDescrCnv::createObj(IOpaqueAddress* /*pAddr*/, DataObject*& pObj)
         ATH_CHECK( idDictMgr->initializeHelper(*m_zdcId) == 0 );
 
         // Save state:
-        m_inDetIDTag      = inDetIDTag;
-        m_inDetIDFileName = inDetIDFileName;
-        m_inDetIdDictTag  = inDetIdDictTag;
+        m_inDetIDTag      = std::move(inDetIDTag);
+        m_inDetIDFileName = std::move(inDetIDFileName);
+        m_inDetIdDictTag  = std::move(inDetIdDictTag);
         m_doChecks        = doChecks;
     }
     

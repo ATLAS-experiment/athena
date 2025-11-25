@@ -158,7 +158,7 @@ Amg::Transform3D ChamberAssembleTool::centerTrapezoid(const std::array<Amg::Vect
 
 
 ChamberAssembleTool::TrfWithBounds 
-      ChamberAssembleTool::boundingBox(const ActsGeometryContext& gctx,
+      ChamberAssembleTool::boundingBox(const ActsTrk::GeometryContext& gctx,
                                        const std::vector<const MuonReadoutElement*>& readoutEles,
                                        const Amg::Transform3D& toCenter,
                                        Acts::VolumeBoundFactory& volBoundSet,
@@ -288,8 +288,8 @@ ChamberAssembleTool::TrfWithBounds
       SurfBoundPtr_t surfToReturn{};
       if (std::abs(envelopeBounds->get(BoundEnum::eHalfLengthXnegY) - 
                   envelopeBounds->get(BoundEnum::eHalfLengthXposY)) > margin) {
-         surfToReturn = surfBoundSet.makeBounds<Acts::TrapezoidBounds>(envelopeBounds->get(BoundEnum::eHalfLengthXposY),
-                                                                       envelopeBounds->get(BoundEnum::eHalfLengthXnegY),
+         surfToReturn = surfBoundSet.makeBounds<Acts::TrapezoidBounds>(envelopeBounds->get(BoundEnum::eHalfLengthXnegY),
+                                                                       envelopeBounds->get(BoundEnum::eHalfLengthXposY),
                                                                        envelopeBounds->get(BoundEnum::eHalfLengthY)); 
       } else {
          const double maxX = std::max(envelopeBounds->get(BoundEnum::eHalfLengthXnegY), 
@@ -364,6 +364,7 @@ StatusCode ChamberAssembleTool::buildReadOutElements(MuonDetectorManager &mgr) {
                                 stIndicesEIL.count(refEle->stationName())) {
                                  return true;    
                             }
+
                             return false;
                          });
       /// If no chamber has been found, then create a new one
@@ -376,7 +377,7 @@ StatusCode ChamberAssembleTool::buildReadOutElements(MuonDetectorManager &mgr) {
       }
     }
     /// Find the chamber middle and create the geometry from that
-    ActsGeometryContext gctx{};    
+    ActsTrk::GeometryContext gctx{};    
 
 
    Acts::VolumeBoundFactory volBoundSet{};
@@ -393,6 +394,12 @@ StatusCode ChamberAssembleTool::buildReadOutElements(MuonDetectorManager &mgr) {
          SpectrometerSector::defineArgs sectorArgs{};
          sectorArgs.bounds = envelopeBox;
          sectorArgs.surface = Acts::Surface::makeShared<Acts::PlaneSurface>(toCenter.inverse() * envelopeCentre, envelopePlane);
+         //print the rotation of the surface
+          //sort the readout elements in the chamber per technology (in cases we have multiple technologies in the same chamber)
+         std::ranges::sort(candidate.detEles,[](const MuonReadoutElement* a, 
+						const MuonReadoutElement* b){
+	   return a->detectorType() < b->detectorType();
+	 });
          
          if (!isNsw(candidate.detEles.front())) {
             /** Define the chamber envelopes */
@@ -409,14 +416,17 @@ StatusCode ChamberAssembleTool::buildReadOutElements(MuonDetectorManager &mgr) {
                const auto[chamberCentre, chamberBox, planeBounds] = boundingBox(gctx, detEles, toChambCentre, volBoundSet, 
                                                                                 surfBoundSet, 0.1*Gaudi::Units::cm);
                chamberArgs chambArgs{};
-               chambArgs.detEles =std::move(detEles);
+               chambArgs.detEles = std::move(detEles);
                chambArgs.bounds = chamberBox;
                chambArgs.surface = Acts::Surface::makeShared<Acts::PlaneSurface>(toChambCentre.inverse() * chamberCentre, planeBounds);
                const Chamber* newChamber {sectorArgs.chambers.emplace_back(std::make_unique<Chamber>(std::move(chambArgs))).get()};
                for (const MuonReadoutElement* re : newChamber->readoutEles()) {
                   reIds.insert(re->identify());
                   mgr.getReadoutElement(re->identify())->setChamberLink(newChamber);
+                  ATH_MSG_VERBOSE("  Chamber element: "<<m_idHelperSvc->toStringDetEl(re->identify()));
+                   
                }
+               ATH_MSG_VERBOSE(*newChamber);
             }
          } else {
             const MuonReadoutElement* refEle = candidate.detEles.front();
@@ -424,6 +434,7 @@ StatusCode ChamberAssembleTool::buildReadOutElements(MuonDetectorManager &mgr) {
             ATH_MSG_VERBOSE("New chambre candidate "<<m_idHelperSvc->toStringChamber(refEle->identify()));
             const auto[chamberCentre, chamberBox, planeBounds] = boundingBox(gctx, candidate.detEles, toChambCentre, 
                                                                              volBoundSet, surfBoundSet, 0.1*Gaudi::Units::cm);
+       
             chamberArgs chambArgs{};
             chambArgs.detEles = candidate.detEles;
             chambArgs.bounds = chamberBox;
@@ -432,7 +443,10 @@ StatusCode ChamberAssembleTool::buildReadOutElements(MuonDetectorManager &mgr) {
             for (const MuonReadoutElement* re : newChamber->readoutEles()) {
                reIds.insert(re->identify());
                mgr.getReadoutElement(re->identify())->setChamberLink(newChamber);
+               ATH_MSG_VERBOSE("  Chamber element: "<<m_idHelperSvc->toStringDetEl(re->identify()));
             }
+            ATH_MSG_VERBOSE(*newChamber);
+
          }
          std::ranges::sort(sectorArgs.chambers, [](const SpectrometerSector::ChamberPtr& a,
                                                    const SpectrometerSector::ChamberPtr& b) {
@@ -442,7 +456,7 @@ StatusCode ChamberAssembleTool::buildReadOutElements(MuonDetectorManager &mgr) {
 
          /// now, build simplified 2D representations of the sorted chambers we collected. 
          for (auto & chamber : sectorArgs.chambers){
-            // split by readout elements - MDT multilayers and trigger chambers 
+            // split by readout elements - MDT multilayers and trigger chambers for the sector
             for (auto & RE : chamber->readoutEles()){
                // get the center of the element in the sector frame 
                const Amg::Transform3D& chamberToGlobal{RE->localToGlobalTrans(gctx)}; 
@@ -450,13 +464,14 @@ StatusCode ChamberAssembleTool::buildReadOutElements(MuonDetectorManager &mgr) {
                // and then add the bounds of the element - this is technology dependent 
                sectorArgs.detectorLocs.emplace_back(origin, RE, boundingBox(RE, volBoundSet));
             }
+
          }
          auto newSector = std::make_unique<SpectrometerSector>(std::move(sectorArgs));
          
          for (const Identifier& chId : reIds) {
             mgr.getReadoutElement(chId)->setSectorLink(newSector.get());
          }
-         ATH_MSG_VERBOSE("Add new sector "<<(*newSector));
+         
          mgr.addSpectrometerSector(std::move(newSector));
     }
     return StatusCode::SUCCESS;

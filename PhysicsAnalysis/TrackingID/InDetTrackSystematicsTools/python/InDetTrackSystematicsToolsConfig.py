@@ -57,9 +57,9 @@ def JetTrackFilterToolCfg(flags, name="JetTrackFilterTool", **kwargs):
             InDetTrackTruthOriginToolCfg(flags)))
 
     from AthenaConfiguration.Enums import LHCPeriod
-    # Run 3 recommendations (MC23): https://indico.cern.ch/event/1424738/#20-run-3-recommendations-fake
+    # Run 3 recommendations (MC23): https://indico.cern.ch/event/1587937/#40-fake-tracks-in-the-jet-core
     if flags.GeoModel.Run >= LHCPeriod.Run3:
-        kwargs.setdefault("FakeUncertainty", 0.30)
+        kwargs.setdefault("FakeUncertainty", 0.25)
     # Run 2 recommendations (MC20): https://cds.cern.ch/record/2859907
     else:
         kwargs.setdefault("FakeUncertainty", 0.35)

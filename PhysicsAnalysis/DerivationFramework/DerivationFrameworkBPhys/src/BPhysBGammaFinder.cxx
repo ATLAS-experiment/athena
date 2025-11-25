@@ -69,7 +69,7 @@ StatusCode BPhysBGammaFinder::finalize() {
 }
 
 
-StatusCode BPhysBGammaFinder::addBranches() const {
+StatusCode BPhysBGammaFinder::addBranches(const EventContext&) const {
 
   std::vector<const xAOD::Vertex*> BVertices;
   BVertices.clear();
@@ -82,13 +82,13 @@ StatusCode BPhysBGammaFinder::addBranches() const {
   conversionContainer->setStore(conversionAuxContainer.get());
 
   // Retrieve track particles from StoreGate
-  const xAOD::TrackParticleContainer* inputTrackParticles = nullptr;
-  ATH_CHECK( evtStore()->retrieve(inputTrackParticles, m_inputTrackParticleContainerName));
+  const xAOD::TrackParticleContainer* inputTrackParticles{};
+  ATH_CHECK( evtStore()->retrieve(inputTrackParticles, m_inputTrackParticleContainerName)); // FIXME Use Handles
   ATH_MSG_DEBUG( "Track particle container size " << inputTrackParticles->size() );
   // Low pT collection
-  const xAOD::TrackParticleContainer* lowPtTrackParticles = nullptr;
+  const xAOD::TrackParticleContainer* lowPtTrackParticles{};
   if (m_use_low_pT) {
-    StatusCode sc = evtStore()->retrieve(lowPtTrackParticles, m_inputLowPtTrackContainerName);
+    StatusCode sc = evtStore()->retrieve(lowPtTrackParticles, m_inputLowPtTrackContainerName); // FIXME Use Handles
     if (sc.isFailure()) {
       ATH_MSG_WARNING("No low pT collection with key " << m_inputLowPtTrackContainerName << " found in StoreGate.");
       return StatusCode::SUCCESS;;
@@ -112,8 +112,8 @@ StatusCode BPhysBGammaFinder::addBranches() const {
   // Retrieve vertex containers
   for (auto itr = m_BVertexCollectionsToCheck.begin(); itr!=m_BVertexCollectionsToCheck.end(); ++itr) {
     // retieve vertex
-    const xAOD::VertexContainer* BVtxContainer = nullptr;
-    CHECK( evtStore()->retrieve(BVtxContainer, *itr));
+    const xAOD::VertexContainer* BVtxContainer{};
+    CHECK( evtStore()->retrieve(BVtxContainer, *itr)); // FIXME Use Handles
     ATH_MSG_DEBUG( "Vertex Container (" << *itr << ") contains " << BVtxContainer->size() << " vertices" );
 
     static const SG::Decorator< std::vector< VertexLink > > BGammaLinks( "BGammaLinks" );
@@ -330,8 +330,8 @@ StatusCode BPhysBGammaFinder::addBranches() const {
   } // end of vertex container loop
 
   // Write the results to StoreGate
-  CHECK(evtStore()->record(conversionContainer.release(), m_conversionContainerName));
-  CHECK(evtStore()->record(conversionAuxContainer.release(), m_conversionContainerName + "Aux."));
+  CHECK(evtStore()->record(conversionContainer.release(), m_conversionContainerName)); // FIXME Use Handles
+  CHECK(evtStore()->record(conversionAuxContainer.release(), m_conversionContainerName + "Aux.")); // FIXME Use Handles
 
   return StatusCode::SUCCESS;
 }

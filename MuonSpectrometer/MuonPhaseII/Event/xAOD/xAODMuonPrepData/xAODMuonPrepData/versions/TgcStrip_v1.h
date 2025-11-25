@@ -36,24 +36,25 @@ class TgcStrip_v1 : public UncalibratedMeasurement_v1 {
     /** @brief Returns the bcBitMap of this PRD
       bit2 for Previous BC, bit1 for Current BC, bit0 for Next BC */
     uint16_t bcBitMap() const;
-
+    /** @brief Set the bunch crossing-id map */
     void setBcBitMap(uint16_t);
 
     /** @brief Strip or wire group number of the Tgc strip measurement*/
     uint16_t channelNumber() const;
-    
+    /** @brief Set the strip or wire group number of the measurement */
     void setChannelNumber(uint16_t chan);
 
     /** @brief Associated gas gap number of the Tgc strip measurement 
-     *         Ranges [1-N]
-    */
+     *         Ranges [1-N]*/
     uint8_t gasGap() const;
-    
+    /** @brief Set the gas gap number of the measurement [1-N] */
     void setGasGap(uint8_t gapNum);
+    /** @brief Returns the local position of the measurement */
+    Amg::Vector3D localMeasurementPos() const;
     
     /**  @brief Does the object belong to an eta or a phi measurement (si /no) */
     uint8_t measuresPhi() const;
-
+    /** @brief Set the measures phi flag of the measurement to true /false */
     void setMeasuresPhi(uint8_t measPhi);
 
     /** @brief Returns the hash of the measurement channel  */

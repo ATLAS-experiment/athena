@@ -59,11 +59,11 @@ StatusCode SeedToTrackCnvAlg::execute(const EventContext& context) const {
     ATH_CHECK(parameterHandle.isValid());
 
     for (std::size_t seedIndex = 0 ;  seedIndex < seedsHandle->size() ;++seedIndex){
-      const ActsTrk::Seed* seedPointer = seedsHandle->at(seedIndex);
+      ActsTrk::Seed seed = seedsHandle->at(seedIndex);
       const Acts::BoundTrackParameters* paramsPointer = parameterHandle->at(seedIndex);
 
-      if (seedPointer == nullptr || paramsPointer == nullptr) {
-        ATH_MSG_DEBUG("Seed or Track Parameters is nullptr");
+      if (paramsPointer == nullptr) {
+        ATH_MSG_DEBUG("Track Parameters is nullptr");
         continue;
       }
       
@@ -74,7 +74,7 @@ StatusCode SeedToTrackCnvAlg::execute(const EventContext& context) const {
       actsTrack.covariance() = (*paramsPointer->covariance());
       actsTrack.setReferenceSurface(paramsPointer->referenceSurface().getSharedPtr());
       std::size_t tsosPreviousIndex = Acts::MultiTrajectoryTraits::kInvalid;
-      for (const xAOD::SpacePoint_v1* spacepoint: seedPointer->sp()) {
+      for (const xAOD::SpacePoint_v1* spacepoint: seed.sp()) {
           const auto& measurements = spacepoint->measurements();
           for (const xAOD::UncalibratedMeasurement *umeas : measurements) {
             const Acts::Surface *surf = m_surfAcc.get(umeas);

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthenaKernel/CondCont.h
@@ -17,7 +17,7 @@
  *  CONDCONT_DEF (MyType, 12345);
  @endcode
  *
- * If one payload class derives from another, it is possible declare
+ * If one payload class derives from another, it is possible to declare
  * conditions containers so that they have the same inheritance by adding
  * the payload base class as a thir argument to @c CONDCONT_DEF.  For example,
  * if @c MyType derived from @c MyBase then you can use
@@ -1435,7 +1435,7 @@ public:
               std::shared_ptr<typename CondContSet::IPayloadDeleter> payloadDeleter, \
               size_t capacity = 16)                                      \
       : CondContMixed<T> (rcusvc, clid, id, proxy,                       \
-                          payloadDeleter, capacity) {}                   \
+                          std::move(payloadDeleter), capacity) {}        \
   };                                                                     \
   CLASS_DEF( CondCont<T>, CLID_, 1)                                      \
   SG_BASES(CondCont<T>, CondContMixed<T>);                               \

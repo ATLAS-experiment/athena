@@ -48,8 +48,7 @@ namespace LVL1
         // Key for reading CondHandles
         SG::ReadCondHandleKey<CondAttrListCollection> m_GfexNoiseCutsKey{this, "GfexNoiseCuts", "", "Key to store GfexNoiseCuts DB path"};
 
-        // STILL NEED TO CHECK TIME
-        UnsignedIntegerProperty m_dbBeginTimestamp{this, "BeginTimestamp", 1729591852, "Earliest timestamp that db parameters will be loaded. Default is start of 2023-10-27"};
+        UnsignedIntegerProperty m_dbBeginTimestamp{this, "BeginTimestamp", 1729591852, "Earliest timestamp that db parameters will be loaded. Default is start of 2024-10-22"};
 
     Gaudi::Property<bool> m_isMC {this, "IsMC", false, "For MC, always access the DB"};
     };

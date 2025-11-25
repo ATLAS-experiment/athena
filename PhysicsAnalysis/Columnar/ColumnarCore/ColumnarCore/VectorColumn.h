@@ -70,13 +70,13 @@ namespace columnar
     AccessorTemplate (ColumnarTool<CM>& columnarTool, const std::string& name, ColumnInfo&& info = {})
     {
       auto myinfo = info;
-      myinfo.offsetName = columnarTool.containerStoreName (CI::idName);
+      myinfo.offsetName = CI::idName;
       myinfo.isOffset = true;
-      info.offsetName = columnarTool.containerStoreName (CI::idName) + "." + name + ".offset";
+      info.offsetName = std::string (CI::idName) + "." + name + ".offset";
       m_offsetData = std::make_unique<ColumnAccessorDataArray> (&m_offsetIndex, &m_offsetData, &typeid (ColumnarOffsetType), ColumnAccessMode::input);
       columnarTool.addColumn (info.offsetName, m_offsetData.get(), std::move (myinfo));
       m_dataData = std::make_unique<ColumnAccessorDataArray> (&m_dataIndex, &m_dataData, &typeid (ElementType), ColumnAccessMode::input);
-      columnarTool.addColumn (columnarTool.containerStoreName(CI::idName) + "." + name + ".data", m_dataData.get(), std::move (info));
+      columnarTool.addColumn (std::string (CI::idName) + "." + name + ".data", m_dataData.get(), std::move (info));
     }
 
     AccessorTemplate (AccessorTemplate&& that)

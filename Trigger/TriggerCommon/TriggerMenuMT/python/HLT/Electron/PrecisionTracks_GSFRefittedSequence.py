@@ -40,7 +40,7 @@ def precisionTracks_GSFRefitted(flags, RoIs, ion=False, variant=''):
                    ]
 
     if flags.Trigger.useActsTracking and flags.Acts.GsfRefitActs:
-        dataObjects += [( 'ActsGeometryContext' , 'StoreGateSvc+ActsAlignment' ),
+        dataObjects += [('ActsTrk::GeometryContext' , 'StoreGateSvc+ActsAlignment' ),
                         ( 'xAOD::TrackParticleContainer','StoreGateSvc+%s.actsTrack' % trackParticles)]
  
 

@@ -11,31 +11,31 @@
 
 // Members
 #include <G4Region.hh>
-#include "G4Types.hh"
-#include "G4VFastSimulationModel.hh"
-#ifdef G4MULTITHREADED
-#  include "tbb/concurrent_unordered_map.h"
-#endif
 
 // STL library
 #include <string>
-#include <vector>
-#include <thread>
 
 /// @class FastSimulationBase
-/// @todo TODO needs class documentation
+/// Lightweight Gaudi tool base class for Geant4 fast-simulation models.
+/// It takes care of the per-thread creation of the concrete
+/// fast-simulation model and registering it for automatic Geant4 cleanup.
+/// Derived tools are responsible for implementing `makeFastSimModel()` and
+/// for assigning the returned model to the desired Geant4 regions, which can
+/// be accessed via the configured `RegionName` property or the `getRegion()`
+/// helper. Multi-threaded jobs will invoke `initializeFastSim` on every worker
+/// during detector construction, ensuring each thread instantiates its own model.
 class FastSimulationBase : public extends<AthAlgTool, IFastSimulation> {
  public:
   FastSimulationBase(const std::string& type, const std::string& name,
                      const IInterface *parent);
-  virtual ~FastSimulationBase();
 
   /// @brief Construct and setup the fast simulation model.
   ///
-  /// This method invokes the makeFastSimModel of the derived concrete tool type
-  /// and assigns the configured regions. Errors are reported if regions are
-  /// missing. In multi-threading jobs, this method is called once per worker
-  /// thread.
+  /// This method invokes the makeFastSimModel of the derived concrete tool type.
+  /// It is the derived class's responsibility to assign the fast simulation model
+  /// to the correct regions. The fast simulation model is registered for deletion.
+  /// In multi-threaded jobs, this method is called once on each geant4 worker thread during
+  /// detector construction (ConstructSDandField).
   StatusCode initializeFastSim() override;
 
   /** Begin of an athena event - do anything that needs to be done at the beginning of each *athena* event. */
@@ -45,11 +45,6 @@ class FastSimulationBase : public extends<AthAlgTool, IFastSimulation> {
   virtual StatusCode EndOfAthenaEvent() override { return StatusCode::SUCCESS; }
 
  protected:
-  /// Retrieve the current Fast Simulation Model. In MT, this means the
-  /// thread-local Fast Simulation Model. Otherwise, it is simply the single
-  /// Fast Simulation Model.
-  G4VFastSimulationModel* getFastSimModel();
-
   // Helper to retrieve the region to which this fast simulation is assigned from the region store.
   G4Region* getRegion() const;
 
@@ -57,26 +52,6 @@ class FastSimulationBase : public extends<AthAlgTool, IFastSimulation> {
   Gaudi::Property<std::string> m_regionName{this, "RegionName", ""};
   /// This Fast Simulation has no regions associated with it.
   Gaudi::Property<bool> m_noRegions{this, "NoRegions", false};
-
- private:
-
-  /// Set the current model. In hive, this gets assigned as the thread-local model
-  void setFastSimModel(G4VFastSimulationModel*);
-  
-  /// Delete the current model.
-  void deleteFastSimModel();
-
-#ifdef G4MULTITHREADED
-  /// Thread-to-FastSimModel concurrent map type
-  typedef tbb::concurrent_unordered_map < std::thread::id,
-                                          G4VFastSimulationModel*,
-                                          std::hash<std::thread::id> > FastSimModelThreadMap_t;
-  /// Concurrent map of Fast Sim Models, one for each thread
-  FastSimModelThreadMap_t m_fastsimmodelThreadMap;
-#else
-  /// The Fast Simulation Model to which this thing corresponds
-  G4VFastSimulationModel* m_FastSimModel{};
-#endif
 };
 
 #endif

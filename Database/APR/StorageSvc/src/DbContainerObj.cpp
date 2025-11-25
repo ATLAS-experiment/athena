@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //====================================================================
@@ -15,14 +15,13 @@
 
 // Framework include files
 #include "DbContainerObj.h"
-#include "POOLCore/DbPrint.h"
-#include "StorageSvc/IOODatabase.h"
 #include "StorageSvc/IDbContainer.h"
 #include "StorageSvc/DbDomain.h"
 #include "StorageSvc/DbSelect.h"
 #include "StorageSvc/DbTypeInfo.h"
 #include "StorageSvc/DbContainer.h"
 #include <memory>
+#include <stdexcept>
 #include <atomic>
 using namespace std;
 using namespace pool;
@@ -43,9 +42,10 @@ DbContainerObj::DbContainerObj( DbDatabase&       dbH,
                                 const string&     nam, 
                                 const DbType&     dbtyp,
                                 DbAccessMode      mod)   
-: Base(nam, mod, dbtyp, dbH.db()), m_info(0), m_tokH(0)
+: Base(nam, mod, dbtyp, dbH.db()),
+  APRMessaging( dbH.logon() ),
+  m_info(0), m_tokH(0)
 {
-  DbPrint log( dbH.logon() );
   m_isOpen    = false;
 
   if ( 0 != db() && dbtyp == dbH.type() )   {
@@ -56,38 +56,32 @@ DbContainerObj::DbContainerObj( DbDatabase&       dbH,
         if ( mod & pool::UPDATE ) {
           setMode(mod |= pool::CREATE);
         }
-        log << DbPrintLvl::Debug << "--> Access   DbContainer  " 
+        ATH_MSG_DEBUG("--> Access   DbContainer  " 
             << accessMode(mode())
             << " [" << type().storageName() << "] " 
-            << name() 
-            << DbPrint::endmsg;
+            << name() );
         return;
       }
     }
   }
-  log << DbPrintLvl::Error
-      << "--> Access   DbContainer  "
+  ATH_MSG_ERROR("--> Access   DbContainer  "
       << " Mode:" << accessMode(mode()) 
       << "  " << name()
       << " impossible."
-      << " [" << type().storageName() << "] " 
-      << DbPrint::endmsg;
-  type().missingDriver(log);
+      << " [" << type().storageName() << "] " );
+  type().missingDriver(msg());
 }
 
 // Destructor
 DbContainerObj::~DbContainerObj()     {
-  string id = m_dbH.isValid() ? m_dbH.logon() : name();
-  DbPrint log( id );
-  clearEntries();
-  releasePtr(m_info);
-  m_dbH.remove(this);
-  log << DbPrintLvl::Debug
-      << "--> Deaccess DbContainer  " 
+   string id = m_dbH.isValid() ? m_dbH.logon() : name();
+   clearEntries();
+   releasePtr(m_info);
+   m_dbH.remove(this);
+   ATH_MSG_DEBUG("--> Deaccess DbContainer  " 
       << accessMode(mode()) 
       << " [" << type().storageName() << "] " 
-      << name()
-      << DbPrint::endmsg;
+      << name());
 }
 
 // Check database access
@@ -108,23 +102,20 @@ bool DbContainerObj::hasAccess()    {
 uint64_t DbContainerObj::size()   {
   if ( !hasAccess() )    {
     string id = database().isValid() ? database().logon() : name();
-    DbPrint log( id );
-    log << DbPrintLvl::Error
-        << "--> Access   DbContainer::size()" 
+    ATH_MSG_ERROR("--> Access   DbContainer::size()" 
         << "  " << name()
-        << " impossible - invalid object!"
-        << DbPrint::endmsg;
-    return -1;
-  }
-  database().setAge(0);
-  return m_info->size();
+        << " impossible - invalid object!");
+     return -1;
+   }
+   database().setAge(0);
+   return m_info->size();
 }
 
 /// Open Database container
 DbStatus DbContainerObj::open(const DbTypeInfo* typ)   {
   if ( !m_isOpen )    {
     if ( 0 == m_info )  {
-      m_info = db()->createContainer(type());
+      m_info = db()->createContainer(name(), type());
     }
     if ( 0 != m_info && 0 != typ && database().isValid() )  {
       DbStatus sc = info()->open(database(), name(), typ, mode());
@@ -164,7 +155,7 @@ DbStatus DbContainerObj::open(const DbTypeInfo* typ)   {
 /// Check if we can access the container
 DbStatus DbContainerObj::checkAccess() {
   DbStatus result = Error;
-  auto container = db()->createContainer(type());
+  auto container = db()->createContainer(name(), type());
   if( database().isValid() && container ) {
     result = container->checkAccess(database(), name());
   }
@@ -197,11 +188,6 @@ DbStatus DbContainerObj::retire()   {
   return Success;
 }
 
-/// Query the size of the pending transaction stack
-bool DbContainerObj::updatesPending() const  {
-  return m_info != 0 ? m_info->updatesPending() : false;
-}
-
 /// Execute Transaction Action
 DbStatus DbContainerObj::transAct(Transaction::Action action) {
    return m_info?  m_info->transAct(action) : Success;
@@ -217,105 +203,40 @@ DbStatus DbContainerObj::getOption(DbOption& refOpt) {
   return hasAccess() ? m_info->getOption(refOpt) : Error;
 }
 
-/// In place allocation of raw memory
-void* DbContainerObj::allocate(unsigned long siz, 
+/// Store object in location
+DbStatus DbContainerObj::store(const void* object,
                                DbContainer& cntH,
                                ShapeH shape)
 {
   if ( !isReadOnly() && hasAccess() )  {
     m_dbH.setAge(0);
-    return m_info->allocate(siz, cntH, shape);
+    return m_info->store(object, cntH, shape);
   }
-  return 0;
+  return Error;
 }
 
 /// In place allocation of raw memory
 DbStatus DbContainerObj::allocate(DbContainer& cntH,
                                   const void* object,
                                   ShapeH shape,
-                                  Token::OID_t& oid) 
+                                  Token::OID_t& oid)
 {
-  if ( !isReadOnly() && hasAccess() )  {
-    m_dbH.setAge(0);
-    if ( object )  {
-      return m_info->allocate(cntH, object, shape, oid);
-    }
+  if ( isReadOnly() ) {
+    throw std::runtime_error("DbContainerObj::allocate failed: container is read-only");
   }
-  throw bad_alloc();
-}
-
-/// In place free of raw memory
-DbStatus DbContainerObj::free(void* ptr, DbContainer& cntH)   {
+  if ( !hasAccess() ) {
+    throw std::runtime_error("DbContainerObj::allocate failed: no access to container");
+  }
+  if ( !object ) {
+    throw std::runtime_error("DbContainerObj::allocate failed: null object pointer");
+  }
   m_dbH.setAge(0);
-  return hasAccess() ? m_info->free(ptr, cntH) : Error;
+  return m_info->allocate(cntH, object, shape, oid);
 }
 
 /// Retrieve persistent type information
 const DbTypeInfo* DbContainerObj::objectShape(const Guid& guid) {
   return m_dbH.objectShape(guid);
-}
-
-/// Add entry to container
-DbStatus DbContainerObj::save(DbObjectHandle<DbObject>& objH, const DbTypeInfo* typ) {
-  if ( !isReadOnly() && hasAccess() && m_isOpen && objH.isValid() ) {
-    if ( m_info->save(objH).isSuccess() ) {
-      if ( m_dbH.addShape(typ).isSuccess() ) {
-        m_dbH.setAge(0);
-        return Success;
-      }
-    }
-  }
-  return Error;
-}
-
-/// Remove transient object representation 
-DbStatus DbContainerObj::remove(ObjHandle& objH) {
-  if ( hasAccess() && objH.isValid() && m_isOpen )    {
-    DbObject* it = objH.ptr();
-    DbObjectHolder holder(it);
-    objH._setObject(0);
-    Base::remove(&holder);
-    m_dbH.setAge(0);
-    return Success;
-  }
-  return Error;
-}
-
-/// Destroy an existing persistent object identified by its handle
-DbStatus DbContainerObj::destroy(const Token::OID_t& linkH) {
-  if ( !isReadOnly() && hasAccess() && m_isOpen )  {
-    m_dbH.setAge(0);
-    return m_info->destroy(linkH);
-  }
-  return Error;
-}
-
-/// Save new object in the container and return its handle
-DbStatus DbContainerObj::save(DbContainer&  cntH, const void* object, ShapeH shape, Token::OID_t& linkH)  {
-  if ( !isReadOnly() && hasAccess() && object && m_isOpen ) {
-    m_dbH.setAge(0);
-    return m_info->save(cntH, object, shape, linkH);
-  }
-  return Error;
-}
-
-/// Update an object to the container identified by its handle
-DbStatus DbContainerObj::update(DbContainer& cntH, const void* object, ShapeH shape, const Token::OID_t& linkH)  {
-  if ( !isReadOnly() && hasAccess() && object && m_isOpen ) {
-    m_dbH.setAge(0);
-    return m_info->update(cntH, object, shape, linkH);
-  }
-  return Error;
-}
-
-/// Update an object to the container identified by its handle
-DbStatus DbContainerObj::update(DbContainer& cntH, const void* object, ShapeH shape, const DbObjectHandle<DbObject>& objH)
-{
-  if ( !isReadOnly() && hasAccess() && m_isOpen ) {
-    m_dbH.setAge(0);
-    return m_info->update(cntH, object, shape, objH);
-  }
-  return Error;
 }
 
 /// Select object in the container identified by its handle

@@ -42,6 +42,7 @@ FastChain_tf.py \
    --skipEvents 0 \
    --digiSeedOffset1 511 \
    --digiSeedOffset2 727 \
+   --preExec "flags.Scheduler.CheckDependencies=True;flags.Scheduler.ShowDataDeps=True;flags.Scheduler.ShowDataFlow=True;flags.Scheduler.ShowControlFlow = True;" \
    --preInclude "Campaigns.DataOverlay2023" \
    --conditionsTag "default:CONDBR2-BLKPA-2023-07" \
    --geometryVersion "default:ATLAS-R3S-2021-03-02-00" \
@@ -61,6 +62,7 @@ if [ $rc1 -eq 0 ]; then
       --maxEvents ${events} \
       --skipEvents 0 \
       --preInclude "Campaigns.DataOverlay2023" \
+      --preExec "flags.Scheduler.CheckDependencies=True;flags.Scheduler.ShowDataDeps=True;flags.Scheduler.ShowDataFlow=True;flags.Scheduler.ShowControlFlow = True;" \
       --conditionsTag "default:CONDBR2-BLKPA-2023-07" \
       --geometryVersion "default:ATLAS-R3S-2021-03-02-00" \
       --imf False

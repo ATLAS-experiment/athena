@@ -18,14 +18,14 @@ class SegmentSeed {
     
     /// @brief Constructor to write a segment seed from an eta maximum and a valid
     /// phi extension. 
-    /// @param tanTheta: tan(theta) from the eta-transform
+    /// @param tanBeta: tan(theta) from the eta-transform
     /// @param interceptY: y axis intercept from the eta-transform
-    /// @param tanPhi: tan(phi) from the phi-extension
+    /// @param tanAlpha: tan(phi) from the phi-extension
     /// @param interceptX: x axis intercept from the phi-extension
     /// @param counts: (weighted) counts for the given hough maximum
     /// @param hits: Measurements on this maximum
     /// @param bucket: Space point bucket out of which the seed is built
-    SegmentSeed(double tanTheta, double interceptY, double tanPhi,
+    SegmentSeed(double tanBeta, double interceptY, double tanAlpha,
                 double interceptX, double counts,
                 std::vector<HitType>&& hits,
                 const SpacePointBucket* bucket);
@@ -37,11 +37,11 @@ class SegmentSeed {
     SegmentSeed(const HoughMaximum& toCopy);
 
     /// @brief Returns the angle from the phi extension
-    double tanPhi() const;
+    double tanAlpha() const;
     /// @brief Returns the intercept from the phi extension
     double interceptX() const;  
     /// @brief Returns the angular coordinate of the eta transform
-    double tanTheta() const;
+    double tanBeta() const;
     /// @brief Returns the intercept coordinate of the eta transform
     double interceptY() const;
     /// @brief Returns the parameter array
@@ -69,7 +69,7 @@ class SegmentSeed {
     Amg::Vector3D localDirection() const; 
    private:
         /** @brief Set of defining parameters */
-        Parameters m_pars{Parameters::Zero()};
+        Parameters m_pars{};
         /** @brief Pointer to the parent */
         const SpacePointBucket* m_parent{nullptr};
         /** @brief List of associated hits */

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArSamplesMon/Interface.h"
@@ -757,7 +757,6 @@ bool Interface::firstNeighbors(unsigned int hash, std::vector<unsigned int>& has
     if (!neighbors(*cell, 0.15, allHashes)) return false;
     m_neighborCache[hash] = new std::vector<unsigned int>(allHashes);
   }
-  if (layer == -2) { hashes = allHashes; return true; }
   for (unsigned int h : allHashes) {
     const CellInfo* info = cellInfo(h);
     if (!info) continue;

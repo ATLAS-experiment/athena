@@ -1,4 +1,4 @@
-#include "eflowRec/PFLCNeutralFlowElementCreatorAlgorithm.h"
+#include "PFLCNeutralFlowElementCreatorAlgorithm.h"
 #include "xAODCore/ShallowCopy.h"
 #include "xAODCaloEvent/CaloClusterContainer.h"
 

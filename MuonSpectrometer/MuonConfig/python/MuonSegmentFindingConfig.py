@@ -579,7 +579,17 @@ def MuonSegmentFindingCfg(flags, setup_bytestream = True):
             from MuonConfig.MuonRdoDecodeConfig import MuonRDOtoPRDConvertorsCfg
             result.merge( MuonRDOtoPRDConvertorsCfg(flags) )
   
-    
+    ###
+    #### Check the 
+    ###
+    if flags.Muon.scheduleActsReco:
+        if not flags.Muon.usePhaseIIGeoSetup:
+            raise RuntimeError("The phase II reconstruction flag cannot be set to true without also running the job from a proper SQLite input")
+        from MuonPatternRecognitionAlgs.MuonPatternRecognitionConfig import MuonPatternRecognitionCfg
+        ### Schedule the standard R4 pattern recognition chain
+        result.merge(MuonPatternRecognitionCfg(flags))
+
+        return result
     # We need to add two algorithms - one for normal collisions, one for NCB
     result.merge(MuonLayerHoughAlgCfg(flags))
     result.merge(MuonSegmentFinderAlgCfg(flags, name="MuonSegmentMaker"))

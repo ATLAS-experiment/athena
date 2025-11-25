@@ -22,3 +22,6 @@ atlas_add_executable( trigCudaFitter
 
 target_link_libraries( trigCudaFitter
    PRIVATE CUDA::cudart )
+
+set_target_properties( trigCudaFitter PROPERTIES
+   POSITION_INDEPENDENT_CODE TRUE )

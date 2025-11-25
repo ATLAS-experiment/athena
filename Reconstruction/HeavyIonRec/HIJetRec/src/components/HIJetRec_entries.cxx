@@ -1,5 +1,6 @@
 #ifndef XAOD_ANALYSIS
 #include "../HIClusterMaker.h"
+#include "../HIClusterCopier.h"
 #include "../HIJetCellSubtractorTool.h"
 #include "../HIClusterSubtraction.h"
 #include "../HISubtractedCellMakerTool.h"
@@ -17,6 +18,7 @@
 
 #ifndef XAOD_ANALYSIS
 DECLARE_COMPONENT( HIClusterMaker )
+DECLARE_COMPONENT( HIClusterCopier )
 DECLARE_COMPONENT( HIJetCellSubtractorTool )
 DECLARE_COMPONENT( HIClusterSubtraction )
 DECLARE_COMPONENT( HISubtractedCellMakerTool )

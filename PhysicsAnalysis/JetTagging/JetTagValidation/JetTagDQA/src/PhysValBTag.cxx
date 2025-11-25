@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // PhysValBTag.cxx
@@ -45,7 +45,6 @@ namespace JetTagDQA {
     m_antiKt4EMTopoPlots                       (0, "BTag/AntiKt4EMTopoJets/"                ,        "antiKt4EMTopoJets"),
     m_antiKt4EMPFlowJetsPlots                  (0, "BTag/AntiKt4EMPFlowJets/"               , 	     "antiKt4EMPFlowJets"),
     m_antiKt10UFOCSSKSoftDropBeta100Zcut10Jets (0, "BTag/AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets/", "antiKt10UFOCSSKSoftDropBeta100Zcut10Jets"),
-    m_antiKtVR30Rmax4Rmin02PV0TrackJetsPlots   (0, "BTag/AntiKtVR30Rmax4Rmin02PV0TrackJets/", "antiKtVR30Rmax4Rmin02PV0TrackJets"),
     m_nevents(0)
   {
  
@@ -54,7 +53,6 @@ namespace JetTagDQA {
     declareProperty( "JetContainerEMTopo", m_jetNameEMTopo = "AntiKt4EMTopoJets" );
     declareProperty( "JetContainerPFlow", m_jetNamePFlow = "AntiKt4EMPFlowJets");
     declareProperty( "JetContainerR10", m_jetNameR10 = "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets");
-    declareProperty( "JetContainerTrackJets", m_jetNameTrackJet = "AntiKtVR30Rmax4Rmin02PV0TrackJets");
 
     declareProperty( "TrackContainerName", m_trackName = "InDetTrackParticles" );
     declareProperty( "VertexContainerName", m_vertexName = "PrimaryVertices" );
@@ -100,7 +98,6 @@ namespace JetTagDQA {
     }
     m_btagplots.insert(std::make_pair(m_jetNamePFlow, &m_antiKt4EMPFlowJetsPlots));
     m_btagplots.insert(std::make_pair(m_jetNameR10, &m_antiKt10UFOCSSKSoftDropBeta100Zcut10Jets));
-    m_btagplots.insert(std::make_pair(m_jetNameTrackJet, &m_antiKtVR30Rmax4Rmin02PV0TrackJetsPlots));
 
     for(const auto& [name, plot]: m_btagplots){
       plot->setDetailLevel(m_detailLevel);

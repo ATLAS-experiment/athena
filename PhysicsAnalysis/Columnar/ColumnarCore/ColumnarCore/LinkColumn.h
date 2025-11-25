@@ -98,9 +98,9 @@ namespace columnar
     static constexpr bool isNativeType = false;
     static constexpr bool useConvertInput = false;
     static constexpr bool useConvertWithDataInput = true;
-    static ColumnInfo& updateColumnInfo (ColumnarTool<CM>& columnarTool, ColumnInfo& info)
+    static ColumnInfo& updateColumnInfo (ColumnarTool<CM>& /*columnarTool*/, ColumnInfo& info)
     {
-      info.linkTargetNames = {columnarTool.containerStoreName(LT::idName)};
+      info.linkTargetNames = {std::string{LT::idName}};
       return info;
     }
 
@@ -111,9 +111,11 @@ namespace columnar
       return OptObjectId<LT,CM> (data, link);
     }
   };
+
   // I'm just inheriting the ColumnTypeTraits from OptObjectId, as the
-  // behavior is exactly the same.
-  template<ContainerIdConcept LT,typename ELT>
+  // behavior is exactly the same. Note that this is only for regular
+  // container IDs, as e.g. VariantContainerId needs special handling.
+  template<RegularContainerIdConcept LT,typename ELT>
   struct ColumnTypeTraits<LinkCastColumn<LT,ELT>,ColumnarModeArray> : ColumnTypeTraits<OptObjectId<LT>,ColumnarModeArray> {};
 }
 

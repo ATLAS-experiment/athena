@@ -224,7 +224,7 @@ namespace H5Utils {
       } else if (leaf_type == "vector<vector<bool> >") {
         buffers.emplace_back(new VVBuf<bool>(vars3d, idx2, tt, branchName, 0));
       } else {
-        skipped.insert(leaf_type);
+        skipped.insert(std::move(leaf_type));
       }
     }
 
@@ -249,21 +249,21 @@ namespace H5Utils {
       if (opts.vector_lengths.size() > 1) {
         size_t length2 = opts.vector_lengths.at(1);
         if (vars3d.size() > 0) {
-          writer3d.reset(new WriterXd(*top_group, "3d", vars3d,
+          writer3d.reset(new WriterXd(*top_group, "3d", std::move(vars3d),
                                       {length, length2}, opts.chunk_size));
         }
       }
       if (vars2d.size() > 0) {
-        writer2d.reset(new WriterXd(*top_group, "2d", vars2d,
+        writer2d.reset(new WriterXd(*top_group, "2d", std::move(vars2d),
                                     {length}, opts.chunk_size));
       }
       if (vars.size() > 0) {
         writer1d.reset(new WriterXd(*top_group, "1d",
-                                    vars, {}, opts.chunk_size));
+                                    std::move(vars), {}, opts.chunk_size));
       }
     } else {
       if (vars.size() > 0) {
-        writer1d.reset(new WriterXd(fg, tree_name, vars, {}, opts.chunk_size));
+        writer1d.reset(new WriterXd(fg, tree_name, std::move(vars), {}, opts.chunk_size));
       }
     }
 

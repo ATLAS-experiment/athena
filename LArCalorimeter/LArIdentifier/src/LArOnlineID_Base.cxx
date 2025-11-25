@@ -3,8 +3,12 @@
 */
 
 #include "LArIdentifier/LArOnlineID_Base.h"
+#include "IdDict/IdDictDictionary.h"
+#include "IdDict/IdDictField.h"
+#include "IdDict/IdDictGroup.h"
+#include "IdDict/IdDictMgr.h"
+#include "IdDict/IdDictRegion.h"
 #include "GaudiKernel/MsgStream.h"
-#include "IdDict/IdDictDefs.h"
 #include "Identifier/IdentifierHash.h"
 #include "Identifier/RangeIterator.h"
 #include "LArIdentifier/LArOnlID_Exception.h"
@@ -623,7 +627,7 @@ int  LArOnlineID_Base::initialize_from_dictionary (const IdDictMgr& dict_mgr)
                     if (slotField.isBounded()) {
                         // save values
                         unsigned int nvalues = slotField.get_maximum() - slotField.get_minimum() + 1;
-                        hc.m_slot_values.reserve(hc.m_slot_values.size() + nvalues);
+                        hc.m_slot_values.reserve(std::max(hc.m_slot_values.size()*3/2, hc.m_slot_values.size() + nvalues));
                         for (unsigned int j = 0; j < nvalues; ++j) {
                             hc.m_slot_values.push_back(j + slotField.get_minimum());
                         }
@@ -644,7 +648,7 @@ int  LArOnlineID_Base::initialize_from_dictionary (const IdDictMgr& dict_mgr)
 
         
         // Set hash calculator
-        m_feb_hash_calcs[m_bec_ft_impl.unpack(min)] = hc;
+        m_feb_hash_calcs[m_bec_ft_impl.unpack(min)] = std::move(hc);
 
 
         if (m_bec_ft_impl.unpack(min) >= size) {
@@ -871,7 +875,7 @@ int LArOnlineID_Base::initLevelsFromDict(const std::string& group_name)
   std::string strg;
  
   // Save index to a DictionaryRegion for unpacking
-  IdDictRegion* reg = m_dict->find_region("laronline-barrel");
+  const IdDictRegion* reg = m_dict->find_region("laronline-barrel");
   if (reg) 
     {
       m_laronlineRegion_index = reg->index();
@@ -890,7 +894,7 @@ int LArOnlineID_Base::initLevelsFromDict(const std::string& group_name)
       return (1);
     }
   /* Find LAr field */
-  IdDictField* field = m_dict->find_field("subdet") ;
+  const IdDictField* field = m_dict->find_field("subdet") ;
   if (field) 
     {
       m_lar_index = field->index();
@@ -1070,12 +1074,12 @@ int LArOnlineID_Base::initLevelsFromDict(const std::string& group_name)
   
   /* Set the field implementations */
 
-  IdDictGroup* group = m_dict->find_group(group_name);
+  const IdDictGroup* group = m_dict->find_group(group_name);
   if ( !group ) {
         log << MSG::ERROR << "initLevelsFromDict - cannot find "
                 << group_name << endmsg;
   } else {
-        m_laronlineRegion_index = group->regions()[0]->index();
+        m_laronlineRegion_index = group->region(0).index();
   }
 
   const IdDictRegion& region = m_dict->region(m_laronlineRegion_index);

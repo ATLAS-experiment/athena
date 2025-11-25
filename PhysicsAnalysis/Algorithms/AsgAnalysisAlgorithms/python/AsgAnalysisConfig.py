@@ -4,8 +4,14 @@
 from AnalysisAlgorithmsConfig.ConfigBlock import ConfigBlock
 from AnalysisAlgorithmsConfig.ConfigSequence import groupBlocks
 from AthenaConfiguration.Enums import LHCPeriod
-from AnalysisAlgorithmsConfig.ConfigAccumulator import DataType
+from AnalysisAlgorithmsConfig.ConfigAccumulator import DataType, ExpertModeWarning
 from enum import Enum
+import warnings
+
+try:
+    from AthenaCommon.Logging import logging
+except ImportError:
+    import logging
 
 class SystematicsCategories(Enum):
     JETS = ['JET_']
@@ -50,6 +56,16 @@ class CommonServicesConfig (ConfigBlock) :
             "histogram holding only the names of weight-based systematics. This is useful "
             "to help make histogramming frameworks more efficient by knowing in advance which "
             "systematics need to recompute the observable and which don't.")
+        self.addOption ('metadataHistogram', None , type=str,
+            info="the name (string) of the metadata histogram which contains information about "
+            "data type, campaign, etc. The default is None (don't write out "
+            "the histogram).")
+        self.addOption ('enableExpertMode', False, type=bool,
+            info="allows CP experts and CPAlgorithm devs to use non-recommended configurations. "
+            "DO NOT USE FOR ANALYSIS.")
+        self.addOption ('streamName', 'ANALYSIS', type=str,
+            info="name of the output stream to save the cut bookkeeper in. "
+            "The default is ANALYSIS.")
 
     def instanceName (self) :
         """Return the instance name for this block"""
@@ -94,12 +110,53 @@ class CommonServicesConfig (ConfigBlock) :
             # print out all systematics
             allSysDumper = config.createAlgorithm( 'CP::SysListDumperAlg', 'SystematicsPrinter' )
             allSysDumper.histogramName = self.systematicsHistogram
+            allSysDumper.RootStreamName = self.streamName
 
             if self.separateWeightSystematics:
                 # print out only the weight systematics (for more efficient histogramming down the line)
                 weightSysDumper = config.createAlgorithm( 'CP::SysListDumperAlg', 'OnlyWeightSystematicsPrinter' )
                 weightSysDumper.histogramName = f"{self.systematicsHistogram}OnlyWeights"
                 weightSysDumper.systematicsRegex = "^(GEN_|EL_EFF_|MUON_EFF_|PH_EFF_|TAUS_TRUEHADTAU_EFF_|FT_EFF_|extrapolation_pt_|JET_.*JvtEfficiency_|PRW_).*"
+
+        if self.metadataHistogram is not None:
+            # add histogram with metadata
+            if not config.flags:
+                raise ValueError ("Writing out the metadata histogram requires to pass config flags")
+            metadataHistAlg = config.createAlgorithm( 'CP::MetadataHistAlg', 'MetadataHistAlg' )
+            metadataHistAlg.histogramName = self.metadataHistogram
+            metadataHistAlg.dataType = str(config.dataType().value)
+            metadataHistAlg.campaign = str(config.dataYear()) if config.dataType() is DataType.Data else str(config.campaign().value)
+            metadataHistAlg.mcChannelNumber = str(config.dsid())
+            if config.dataType() is DataType.Data:
+                etag = "unavailable"
+            else:
+                from AthenaConfiguration.AutoConfigFlags import GetFileMD
+                metadata = GetFileMD(config.flags.Input.Files)
+                amiTags = metadata.get("AMITag", "not found!")
+                etag = str(amiTags.split("_")[0])
+            metadataHistAlg.etag = etag
+
+        if self.enableExpertMode and config._pass == 0:
+            # set any expert-mode errors to be ignored instead
+            warnings.simplefilter('ignore', ExpertModeWarning)
+            # just warning users they might be doing something dangerous
+            log = logging.getLogger('CommonServices')
+            bold = "\033[1m"
+            red = "\033[91m"
+            yellow = "\033[93m"
+            reset = "\033[0m"
+            log.warning(red +r"""
+  ________   _______  ______ _____ _______      __  __  ____  _____  ______       ______ _   _          ____  _      ______ _____
+ |  ____\ \ / /  __ \|  ____|  __ \__   __|    |  \/  |/ __ \|  __ \|  ____|     |  ____| \ | |   /\   |  _ \| |    |  ____|  __ \
+ | |__   \ V /| |__) | |__  | |__) | | |       | \  / | |  | | |  | | |__        | |__  |  \| |  /  \  | |_) | |    | |__  | |  | |
+ |  __|   > < |  ___/|  __| |  _  /  | |       | |\/| | |  | | |  | |  __|       |  __| | . ` | / /\ \ |  _ <| |    |  __| | |  | |
+ | |____ / . \| |    | |____| | \ \  | |       | |  | | |__| | |__| | |____      | |____| |\  |/ ____ \| |_) | |____| |____| |__| |
+ |______/_/ \_\_|    |______|_|  \_\ |_|       |_|  |_|\____/|_____/|______|     |______|_| \_/_/    \_\____/|______|______|_____/
+
+"""
+                        +reset)
+            log.warning(f"{bold}{yellow}These settings are not recommended for analysis. Make sure you know what you're doing, or disable them with `enableExpertMode: False` in `CommonServices`.{reset}")
+
 
 
 @groupBlocks
@@ -156,7 +213,8 @@ class PileupReweightingBlock (ConfigBlock):
             info="whether this is used as an additional alternative config for PileupReweighting. "
             "Will only store the alternative pile up weight in that case.")
         self.addOption ('writeColumnarToolVariables', False, type=bool,
-            info="whether to add EventInfo variables needed for running the columnar tool(s) on the output n-tuple. (EXPERIMENTAL)")
+            info="whether to add EventInfo variables needed for running the columnar tool(s) on the output n-tuple. (EXPERIMENTAL)",
+            expertMode=True)
 
     def instanceName (self) :
         """Return the instance name for this block"""
@@ -166,10 +224,6 @@ class PileupReweightingBlock (ConfigBlock):
 
         from Campaigns.Utils import Campaign
 
-        try:
-            from AthenaCommon.Logging import logging
-        except ImportError:
-            import logging
         log = logging.getLogger('makePileupAnalysisSequence')
 
         eventInfoVar = ['runNumber', 'eventNumber', 'actualInteractionsPerCrossing', 'averageInteractionsPerCrossing']
@@ -353,10 +407,6 @@ class GeneratorAnalysisBlock (ConfigBlock):
         if config.dataType() is DataType.Data:
             # there are no generator weights in data!
             return
-        try:
-            from AthenaCommon.Logging import logging
-        except ImportError:
-            import logging
         log = logging.getLogger('makeGeneratorAnalysisSequence')
 
         if self.runNumber is None:
@@ -388,13 +438,13 @@ class GeneratorAnalysisBlock (ConfigBlock):
             alg = config.createAlgorithm( 'CP::PDFinfoAlg', 'PDFinfoAlg', reentrant=True )
             for var in ["PDFID1","PDFID2","PDGID1","PDGID2","Q","X1","X2","XF1","XF2"]:
                 config.addOutputVar ('EventInfo', var, 'PDFinfo_' + var, noSys=True)
-        
+
         if self.doHFProdFracReweighting:
             generatorInfo = config.flags.Input.GeneratorsInfo
             log.info(f"Loaded generator info: {generatorInfo}")
 
             DSID = "000000"
-            
+
             if not generatorInfo:
                 log.warning("No generator info found.")
                 DSID = "000000"

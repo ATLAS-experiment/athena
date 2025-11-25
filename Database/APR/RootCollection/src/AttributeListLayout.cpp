@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "RootCollection.h"
@@ -8,13 +8,11 @@
 #include "CollectionBase/CollectionDescription.h"
 #include "CollectionBase/CollectionColumn.h"
 
-#include "CoralBase/MessageStream.h"
+#include "POOLCore/DbPrint.h"
 #include "CoralBase/Attribute.h"
 #include "CoralBase/AttributeList.h"
 
 ClassImp(AttributeListLayout)
-
-#include <iostream> 
 using namespace pool;
 using namespace std;
    
@@ -61,14 +59,9 @@ void AttributeListLayout::fillDescription( pool::CollectionDescription& desc )
 }
 
 
-
-void AttributeListLayout::print()const{
-  coral::MessageStream log( "AttributeListLayout" );
-  typedef std::vector< std::pair<std::string, std::string> >::const_iterator Iter;
-  for(Iter iter=m_layout.begin();
-      iter!=m_layout.end();
-      ++iter)
-    log  << coral::Info << iter->first << " \t"
-         << iter->second << coral::MessageStream::endmsg;
+void AttributeListLayout::print() const {
+  DbPrint log( "AttributeListLayout" );
+  for(auto iter=m_layout.begin(); iter!=m_layout.end(); ++iter) {
+     log << MSG::INFO << iter->first << " \t" << iter->second << endmsg;
+  }
 }
-

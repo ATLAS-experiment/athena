@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # File: Hephaestus/Auditor.py
 # Author Wim Lavrijsen (WLavrijsen@lbl.gov)
@@ -123,7 +123,6 @@ class HephaestusAuditor( PyAthena.Aud ):
 
       # copy the values instead of resetting the reference, in case it has
       # been imported somewhere
-        global GlobalSettings
         for k,v in dct[ 'GlobalSettings' ].items():
             GlobalSettings[ k ] = v
 

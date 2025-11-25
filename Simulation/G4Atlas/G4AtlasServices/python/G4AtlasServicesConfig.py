@@ -3,6 +3,7 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.AccumulatorCache import AccumulatorCache
 
+from G4AtlasTools.G4AtlasToolsConfig import FastSimulationConstructorToolCfg
 from ExtraParticles.ExtraParticlesConfig import ExtraParticlesPhysicsToolCfg
 from SimulationConfig.SimEnums import CavernBackground
 from G4ExtraProcesses.G4ExtraProcessesConfig import G4EMProcessesPhysicsToolCfg
@@ -38,6 +39,10 @@ def PhysicsListSvcCfg(flags, name="PhysicsListSvc", **kwargs):
     kwargs.setdefault("NeutronEnergyCut", flags.Sim.NeutronEnergyCut)
     kwargs.setdefault("ApplyEMCuts", flags.Sim.ApplyEMCuts)
     kwargs.setdefault("QuietMode", flags.Exec.QuietMode)
+
+    #fast simulation constructor tool
+    kwargs.setdefault("FastSimConstructor", result.popToolsAndMerge(FastSimulationConstructorToolCfg(flags)))
+
     ## from AthenaCommon.SystemOfUnits import eV, TeV
     ## kwargs.setdefault("EMMaxEnergy"     , 7*TeV)
     ## kwargs.setdefault("EMMinEnergy"     , 100*eV)

@@ -3,7 +3,7 @@ Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 FtagBaseContent.py
 This module contains common configuration used by PHYSVAL, FTAG1 and FTAG2.
-Most of the configuration of which variables to save is handled by the 
+Most of the configuration of which variables to save is handled by the
 smart slimming lists, whhich are defined in BTaggingContent.py. New variables
 should be added there, not here.
 """
@@ -13,6 +13,8 @@ from DerivationFrameworkFlavourTag.FtagDerivationConfig import (
 )
 from JetTagDerivationUtils.JetMatchingConfig import JetMatchingCfg
 
+from DerivationFrameworkFlavourTag.FlowEnergyDecoratorConfig import FlowEnergyDecoratorCfg
+
 ## Common items used in PHYSVAL, FTAG1 and FTAG2
 PHYSVAL_FTAG1_FTAG2_SmartCollections = [
     "Electrons",
@@ -21,7 +23,6 @@ PHYSVAL_FTAG1_FTAG2_SmartCollections = [
     "InDetTrackParticles",
     "AntiKt4EMPFlowJets",
     "AntiKt4TruthJets",
-    "BTagging_AntiKt4EMPFlow",
     "MET_Baseline_AntiKt4EMPFlow",
     "TauJets",
 ]
@@ -30,9 +31,6 @@ PHYSVAL_FTAG1_FTAG2_AllVariables = [
     "EventInfo",
     "PrimaryVertices",
     "InDetTrackParticles",
-    "BTagging_AntiKt4EMPFlow",
-    "BTagging_AntiKt4EMPFlowJFVtx",
-    "BTagging_AntiKt4EMPFlowSecVtx",
     "TruthBottom", "TruthElectrons","TruthMuons","TruthTaus",
 ]
 
@@ -61,7 +59,6 @@ PHYSVAL_FTAG1_FTAG2_StaticContent += ["xAOD::VertexContainer#SoftBVrtClusterTool
 PHYSVAL_FTAG1_FTAG2_StaticContent += ["xAOD::VertexAuxContainer#SoftBVrtClusterTool_Medium_VerticesAux." + excludedVertexAuxData]
 PHYSVAL_FTAG1_FTAG2_StaticContent += ["xAOD::VertexContainer#SoftBVrtClusterTool_Loose_Vertices"]
 PHYSVAL_FTAG1_FTAG2_StaticContent += ["xAOD::VertexAuxContainer#SoftBVrtClusterTool_Loose_VerticesAux." + excludedVertexAuxData]
-PHYSVAL_FTAG1_FTAG2_StaticContent += ["xAOD::VertexAuxContainer#BTagging_AntiKt4EMPFlowSecVtxAux.-vxTrackAtVertex"]
 
 ## Common functions used in PHYSVAL, FTAG1 and FTAG2
 def update_AppendToDictionary_in_SlimmingHelper(SlimmingHelper, flags, extra_AppendToDictionary={}):
@@ -143,10 +140,10 @@ def trigger_matching(SlimmingHelper, TriggerListsHelper, ConfigFlags):
     # Run 2
     if ConfigFlags.Trigger.EDMVersion == 2:
         from DerivationFrameworkPhys.TriggerMatchingCommonConfig import AddRun2TriggerMatchingToSlimmingHelper
-        AddRun2TriggerMatchingToSlimmingHelper(SlimmingHelper = SlimmingHelper, 
-                                               OutputContainerPrefix = "TrigMatch_", 
+        AddRun2TriggerMatchingToSlimmingHelper(SlimmingHelper = SlimmingHelper,
+                                               OutputContainerPrefix = "TrigMatch_",
                                                TriggerList = TriggerListsHelper.Run2TriggerNamesTau)
-        AddRun2TriggerMatchingToSlimmingHelper(SlimmingHelper = SlimmingHelper, 
+        AddRun2TriggerMatchingToSlimmingHelper(SlimmingHelper = SlimmingHelper,
                                                OutputContainerPrefix = "TrigMatch_",
                                                TriggerList = TriggerListsHelper.Run2TriggerNamesNoTau)
     # Run 3, or Run 2 with navigation conversion
@@ -176,10 +173,8 @@ def _match_vars(flags, source):
     return allvars
 
 
-def addCommonAugmentation(flags, cfg, helper):
+def addCommonAugmentation(flags, cfg, helper, target = "AntiKt4EMPFlowJets"):
     """add content common to all ftag derivations"""
-
-    target = "AntiKt4EMPFlowJets"
 
     cfg.merge(
         JetMatchingCfg(
@@ -189,7 +184,7 @@ def addCommonAugmentation(flags, cfg, helper):
         )
     )
     helper.ExtraVariables +=  [
-        '.'.join(['AntiKt4EMPFlowJets'] + _match_vars(flags, target))
+        '.'.join([target] + _match_vars(flags, target))
     ]
 
     if not flags.Input.isMC:
@@ -213,5 +208,10 @@ def addCommonAugmentation(flags, cfg, helper):
         *[f"parent{p}ParentsMask" for p in ["Higgs", "Z", "Scalar", "Top"]],
     ]
 
-    helper.ExtraVariables += ['.'.join(['AntiKt4EMPFlowJets'] + truth_labels)]
+    helper.ExtraVariables += ['.'.join([target] + truth_labels)]
 
+    # add flow energy decorator
+    cfg.merge(
+        FlowEnergyDecoratorCfg(
+        )
+    )

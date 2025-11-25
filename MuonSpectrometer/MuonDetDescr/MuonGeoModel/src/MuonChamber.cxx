@@ -1002,7 +1002,6 @@ namespace MuonGM {
                 Identifier id = mdt_id->channelID(stationType, stationEta, stationPhi, ml, tubel, tube);
                 det->setIdentifier(id);
                 det->setMultilayer(ml);
-                det->setParentStationPV(PVConstLink(ptrd));
                 det->setParentMuonStation(mstat);
                 det->geoInitDone();
 
@@ -1051,7 +1050,6 @@ namespace MuonGM {
                 Identifier id = csc_id->channelID(stationType, stationEta, stationPhi, chamberLayer, 1, 0, 1);
                 det->setIdentifier(id);
                 det->setChamberLayer(chamberLayer);
-                det->setParentStationPV(PVConstLink(ptrd));
                 det->setParentMuonStation(mstat);
 
                 int jobIndex = c->index;
@@ -1103,7 +1101,6 @@ namespace MuonGM {
                 det->setHasCutouts(ncutouts > 0);
                 Identifier id = tgc_id->channelID(stationType, stationEta, stationPhi, 1, false, 1);
                 det->setIdentifier(id);
-                det->setParentStationPV(PVConstLink(ptrd));
                 det->setParentMuonStation(mstat);
 
                 int jobIndex = c->index;
@@ -1242,7 +1239,6 @@ namespace MuonGM {
                 ATH_MSG_DEBUG( stName << techname << " trying to build a RPC Id from stType/eta/phi/dbR/dbZ/dbP " << stationType << "/" << stationEta << "/"
                         << stationPhi << "/" << doubletR << "/" << doubletZ << "/" << doubletPhi << "///" << gasGap << "/" << measuresPhi << "/" << strip << endmsg
                         << " Copy number " << geoid << " tagName= " << stag );
-                det->setParentStationPV(PVConstLink(ptrd));
                 det->setParentMuonStation(mstat);
 
                 int jobIndex = c->index;

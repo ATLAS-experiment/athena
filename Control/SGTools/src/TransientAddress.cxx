@@ -32,9 +32,9 @@ TransientAddress::TransientAddress(CLID id, const std::string& key)
 // Constructor with CLID, string key and IOpaqueAddress:
 // (typically used by a ProxyProvider)
 TransientAddress::TransientAddress(CLID id, const std::string& key, 
-				   IOpaqueAddress* addr, 
+				   CxxUtils::RefCountedPtr<IOpaqueAddress> addr,
 				   bool clearAddress)
-  : TransientAddress (id, key, addr, clearAddress, true)
+  : TransientAddress (id, key, std::move(addr), clearAddress, true)
 {
   if (id != CLID_NULL)
     m_transientID.push_back(id);
@@ -44,9 +44,9 @@ TransientAddress::TransientAddress(CLID id, const std::string& key,
 // Constructor giving full list of symlinked IDs
 // --- used from DataHeaderElement::getAddress().
 TransientAddress::TransientAddress(CLID id, const std::string& key, 
-				   IOpaqueAddress* addr,
+				   CxxUtils::RefCountedPtr<IOpaqueAddress> addr,
                                    const std::vector<CLID>& clids)
-  : TransientAddress (id, key, addr, true, true)
+  : TransientAddress (id, key, std::move(addr), true, true)
 {
   m_transientID.reserve (clids.size() + 1);
   m_transientID = clids;
@@ -60,7 +60,7 @@ TransientAddress::TransientAddress(CLID id, const std::string& key,
 // Note: this is a private ctor, only used from other ctors.
 // It does not initialize m_transientID.
 TransientAddress::TransientAddress(CLID id, const std::string& key, 
-				   IOpaqueAddress* addr, 
+				   CxxUtils::RefCountedPtr<IOpaqueAddress> addr,
 				   bool clearAddress,
                                    bool consultProvider)
   : m_clid(id),
@@ -68,14 +68,11 @@ TransientAddress::TransientAddress(CLID id, const std::string& key,
     m_storeID(StoreID::UNKNOWN),
     m_clearAddress(clearAddress),
     m_consultProvider(consultProvider),
-    m_address(nullptr),
+    m_address(std::move(addr)),
     m_pAddressProvider(nullptr)
 {
   if (!key.empty()) {
     m_name.store (key);
-  }
-  if (addr) {
-    setAddress(addr);
   }
 }
 
@@ -86,13 +83,12 @@ TransientAddress::TransientAddress (const TransientAddress& other)
     m_storeID (other.m_storeID),
     m_clearAddress (other.m_clearAddress),
     m_consultProvider (other.m_consultProvider),
+    m_address (other.m_address),
     m_pAddressProvider (other.m_pAddressProvider),
     m_name (other.m_name),
     m_transientID (other.m_transientID),
     m_transientAlias (other.m_transientAlias)
 {
-  m_address = nullptr;
-  setAddress (other.m_address);
 }
 
 
@@ -102,25 +98,21 @@ TransientAddress::TransientAddress (TransientAddress&& other)
     m_storeID (other.m_storeID),
     m_clearAddress (other.m_clearAddress),
     m_consultProvider (other.m_consultProvider),
+    m_address (std::move (other.m_address)),
     m_pAddressProvider (other.m_pAddressProvider),
     m_name (std::move (other.m_name)),
     m_transientID (std::move (other.m_transientID)),
     m_transientAlias (std::move (other.m_transientAlias))
 {
-  m_address = other.m_address;
-  other.m_address = nullptr;
 }
 
 
 // Destructor
 TransientAddress::~TransientAddress() 
 { 
-  setAddress(0);
 }
 
 
-// cppcheck-suppress operatorEqVarError; false positive ---
-//    m_address is copied by setAddress.
 TransientAddress& TransientAddress::operator= (const TransientAddress& other)
 {
   if (this != &other) {
@@ -133,8 +125,7 @@ TransientAddress& TransientAddress::operator= (const TransientAddress& other)
     m_pAddressProvider = other.m_pAddressProvider;
     m_storeID = other.m_storeID;
     m_sgkey = static_cast<sgkey_t>(other.m_sgkey);
-
-    setAddress (other.m_address);
+    m_address = other.m_address;
   }
   return *this;
 }
@@ -152,9 +143,7 @@ TransientAddress& TransientAddress::operator= (TransientAddress&& other)
     m_pAddressProvider = other.m_pAddressProvider;
     m_storeID = other.m_storeID;
     m_sgkey = static_cast<sgkey_t>(other.m_sgkey);
-
-    m_address = other.m_address;
-    other.m_address = nullptr;
+    m_address = std::move (other.m_address);
   }
   return *this;
 }
@@ -190,12 +179,16 @@ void TransientAddress::setID (CLID id, const std::string& key)
     m_transientID.push_back(id);
 }
 
+// Reset the TransientAddress
+void TransientAddress::reset()
+{
+  if (m_clearAddress) m_address.reset();
+}
+
 /// set IOpaqueAddress
-void TransientAddress::setAddress(IOpaqueAddress* pAddress)
+void TransientAddress::setAddress(CxxUtils::RefCountedPtr<IOpaqueAddress> pAddress)
 { 
-  if (0 != pAddress) pAddress->addRef();
-  if (0 != m_address) m_address->release();
-  m_address = pAddress;
+  m_address = std::move(pAddress);
 }
 
 bool TransientAddress::isValid(const EventContext* ctx,

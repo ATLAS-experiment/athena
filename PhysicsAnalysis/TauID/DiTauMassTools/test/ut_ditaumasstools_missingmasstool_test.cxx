@@ -49,7 +49,7 @@ int main() {
    DiTauMassTools::MissingMassTool missingmassTool("missingmass_tool");
    ANA_CHECK( missingmassTool.setProperty("Decorate", true)) ;
    ANA_CHECK( missingmassTool.setProperty("UseVerbose", 1)) ;
-   ANA_CHECK( missingmassTool.setProperty("CalibSet", "2019")); // Use "2024" to test the new available version of MMC, if applicable. 
+   ANA_CHECK( missingmassTool.setProperty("CalibSet", "2024")); 
    ANA_CHECK( missingmassTool.setProperty("UseTailCleanup", 0));
    ANA_CHECK( missingmassTool.setProperty("NiterFit2", 30));
    ANA_CHECK( missingmassTool.setProperty("NiterFit3", 10));

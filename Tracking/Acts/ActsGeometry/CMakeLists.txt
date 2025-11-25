@@ -20,7 +20,8 @@ atlas_add_library( ActsGeometryLib
                    src/ActsTrackingGeometrySvc.cxx
                    src/DetectorVolumeSvc.cxx
                    src/SimpleCylinderDetBuilderTool.cxx
-                   src/ItkBlueprintNodeBuilder.cxx                  
+                   src/ItkBlueprintNodeBuilder.cxx    
+                   src/CaloBlueprintNodeBuilder.cxx              
                    src/util/*.cxx
                    PUBLIC_HEADERS ActsGeometry
                    INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS} ${TBB_INCLUDE_DIRS}
@@ -59,11 +60,10 @@ atlas_add_component( ActsGeometry
                      src/ActsExtrapolationAlg.cxx
                      src/ActsWriteTrackingGeometry.cxx
                      src/ActsWriteTrackingGeometryTransforms.cxx
-                     src/ActsExtrapolationTool.cxx
+                     src/ExtrapolationTool.cxx
                      src/ActsMaterialMapping.cxx
                      src/ActsSurfaceMappingTool.cxx
                      src/ActsVolumeMappingTool.cxx
-                     src/ActsObjWriterTool.cxx
                      src/ActsMaterialStepConverterTool.cxx
                      src/ActsMaterialJsonWriterTool.cxx
                      src/ActsMaterialTrackWriterSvc.cxx
@@ -91,11 +91,10 @@ atlas_add_component( ActsGeometry
                      TrkParameters
                      TrkSurfaces
                      Acts::PluginGeoModel
-                      )
+                    )
 
 # Install files from the package:
 atlas_install_joboptions( scripts/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
-atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
 atlas_install_scripts( test/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
 
 atlas_add_dictionary( ActsGeometryDict

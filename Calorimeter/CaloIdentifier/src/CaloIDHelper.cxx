@@ -10,7 +10,9 @@
 
 
 #include "CaloIdentifier/CaloIDHelper.h"
-#include "IdDict/IdDictDefs.h"
+#include "IdDict/IdDictDictionary.h"
+#include "IdDict/IdDictMgr.h"
+#include "IdDict/IdDictRegion.h"
 #include "Identifier/Range.h"
 #include "GaudiKernel/MsgStream.h"
 
@@ -185,7 +187,7 @@ int CaloIDHelper::get_hash  (const Identifier& id, IdentifierHash& hash_id, cons
 float CaloIDHelper::etaGranularity(const IdentifierHash regHash) const
 {
   if (regHash >= m_vecOfDictRegions.size()) return NOT_VALID;
-  return m_vecOfDictRegions[regHash]->deta();
+  return m_vecOfDictRegions.at(regHash)->deta();
 }
 
 
@@ -196,7 +198,7 @@ float CaloIDHelper::etaGranularity(const IdentifierHash regHash) const
 float CaloIDHelper::phiGranularity(const IdentifierHash regHash) const
 {
   if (regHash >= m_vecOfDictRegions.size()) return NOT_VALID;
-  return  2. * M_PI / m_vecOfDictRegions[regHash]->dphi();
+  return  2. * M_PI / m_vecOfDictRegions.at(regHash)->dphi();
 }
 
 
@@ -207,7 +209,7 @@ float CaloIDHelper::phiGranularity(const IdentifierHash regHash) const
 float CaloIDHelper::eta0(const IdentifierHash regHash) const
 {
   if (regHash >= m_vecOfDictRegions.size()) return NOT_VALID;
-  return (m_vecOfDictRegions[regHash]->eta0());
+  return (m_vecOfDictRegions.at(regHash)->eta0());
 }
 
 
@@ -218,7 +220,7 @@ float CaloIDHelper::eta0(const IdentifierHash regHash) const
 float CaloIDHelper::phi0(const IdentifierHash regHash) const
 {
   if (regHash >= m_vecOfDictRegions.size()) return NOT_VALID;
-  return (m_vecOfDictRegions[regHash]->phi0());
+  return (m_vecOfDictRegions.at(regHash)->phi0());
 }
 
 

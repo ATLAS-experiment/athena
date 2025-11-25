@@ -132,8 +132,8 @@ namespace MuonR4{
         rngWrapper->setSeed(rngName, ctx);
         return rngWrapper->getEngine(ctx);
     }
-    const ActsGeometryContext& MuonDigitizationTool::getGeoCtx(const EventContext& ctx) const {
-        const ActsGeometryContext* gctx{};
+    const ActsTrk::GeometryContext& MuonDigitizationTool::getGeoCtx(const EventContext& ctx) const {
+        const ActsTrk::GeometryContext* gctx{};
         if (!SG::get(gctx, m_geoCtxKey, ctx).isSuccess()) {
             THROW_EXCEPTION("Failed to retrieve the geometry context "<<m_geoCtxKey.fullKey());
         }

@@ -127,7 +127,7 @@ std::string BasenameOfBranch (const std::string& fullname)
 /**
  * @brief Find the @c TStreamerInfo for a class from a @c TFile.
  * @param cl The class for which we want the @c TStreamerInfo.
- * @parma br The branch in which the class is being read.
+ * @param br The branch in which the class is being read.
  *
  * Find the @c TStreamerInfo for a class by looking directly at the
  * list from the file from which it's being read (not relying on the
@@ -138,16 +138,16 @@ TStreamerInfo* GetStreamerInfoFromFile (const TClass* cl, const TBranch* br)
   // Find the file holding this branch.
   // (Can't rely on fInfo having being set up yet.)
   TDirectory* dir = br->GetDirectory();
-  if (!dir) return 0;
+  if (!dir) return nullptr;
   TFile* file = dir->GetFile();
-  if (!file) return 0;
-  if (file->GetSeekInfo() == 0) return 0;
+  if (!file) return nullptr;
+  if (file->GetSeekInfo() == 0) return nullptr;
 
   // Find the streamerinfo for this class.
   const TList* silist = file->GetStreamerInfoCache();
   TListIter li (silist);
   TStreamerInfo* info;
-  while ((info = dynamic_cast<TStreamerInfo*> (li.Next())) != 0) {
+  while ((info = dynamic_cast<TStreamerInfo*> (li.Next())) != nullptr) {
     if (strcmp (info->GetName(), cl->GetName()) == 0)
       break;
   }
@@ -285,10 +285,10 @@ bool BaseHasField (TStreamerBase* elt,
  * @brief Constructor.
  */
 TConvertingBranchElement::TConvertingBranchElement()
-: fConv(0)
-, fConvClass(0)
-, fConvObject(0)
-, fConvOrigBranches(0)
+: fConv(nullptr)
+, fConvClass(nullptr)
+, fConvObject(nullptr)
+, fConvOrigBranches(nullptr)
 , fConvOrigType(-1)
 , fConvContainerFlag(false)
 , fConvDontReset(false)
@@ -334,23 +334,6 @@ TConvertingBranchElement::~TConvertingBranchElement()
  */
 void TConvertingBranchElement::Initialize()
 {
-#if 0
-  static bool initialized = false;
-  if (initialized)
-    return;
-  initialized = true;
-
-  TClass* cl = gROOT->GetClass ("TBranchElement", true);
-  if (!cl) {
-    ::Error ("TConvertingBranchElement",
-             "Can't find TClass for TBranchElement");
-    return;
-  }
-
-  // Change the @c New() method for @c TBranchElement to make
-  // an instance of this class instead.
-  cl->SetNew (TConvertingBranchElement::new_TConvertingBranchElement);
-#endif
 }
 
 
@@ -400,7 +383,7 @@ void TConvertingBranchElement::BuildConvertedElisions()
   if (!fInfo) return;
 
   // The class of this branch's element.
-  TClass* topclass = 0;
+  TClass* topclass = nullptr;
   if (fID < 0)
     topclass = gROOT->GetClass (GetClassName());
   else {
@@ -543,7 +526,7 @@ void TConvertingBranchElement::BuildConvertedElisions()
         dum->fTree = this->fTree;
         dum->fDirectory = this->fDirectory;
         dum->fBranchClass = topclass;
-        if (dynamic_cast<TStreamerBase*> (elt) != 0) {
+        if (dynamic_cast<TStreamerBase*> (elt) != nullptr) {
           dum->fType = 1;
           Ssiz_t i = namedot.Length()-2;
           while (i >= 0 && namedot[i] != '.')

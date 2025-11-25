@@ -1,7 +1,7 @@
 // Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef  DITAURECTOOLS_DITAUDISCRIMINANTTOOL_H
@@ -20,16 +20,15 @@
 
 // Local include(s):
 #include "DiTauRecTools/IDiTauToolBase.h"
-
+#include "xAODTau/DiTauJet.h"
 #include "tauRecTools/BDTHelper.h"
 
 #include <string>
 #include <map>
-
+#include <memory>
 
 namespace DiTauRecTools
 {
-
 
 class DiTauDiscriminantTool
   : public DiTauRecTools::IDiTauToolBase

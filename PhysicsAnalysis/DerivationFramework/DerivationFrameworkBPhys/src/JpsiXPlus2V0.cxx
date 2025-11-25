@@ -273,20 +273,20 @@ namespace DerivationFramework {
     return StatusCode::SUCCESS;
   }
 
-  StatusCode JpsiXPlus2V0::performSearch(std::vector<Trk::VxCascadeInfo*>& cascadeinfoContainer, const std::vector<std::pair<const xAOD::Vertex*,V0Enum> >& selectedV0Candidates) const {
+  StatusCode JpsiXPlus2V0::performSearch(std::vector<Trk::VxCascadeInfo*>& cascadeinfoContainer, const std::vector<std::pair<const xAOD::Vertex*,V0Enum> >& selectedV0Candidates, const EventContext& ctx) const {
     ATH_MSG_DEBUG( "JpsiXPlus2V0::performSearch" );
     if(selectedV0Candidates.size()==0) return StatusCode::SUCCESS;
 
     // Get all track containers when m_RelinkContainers is not empty
     std::vector<const xAOD::TrackParticleContainer*> trackCols;
     for(const SG::ReadHandleKey<xAOD::TrackParticleContainer>& key : m_RelinkContainers){
-      SG::ReadHandle<xAOD::TrackParticleContainer> handle(key);
+      SG::ReadHandle<xAOD::TrackParticleContainer> handle(key, ctx);
       ATH_CHECK( handle.isValid() );
       trackCols.push_back(handle.cptr());
     }
 
     // Get Jpsi+X container
-    SG::ReadHandle<xAOD::VertexContainer> jxContainer(m_vertexJXContainerKey);
+    SG::ReadHandle<xAOD::VertexContainer> jxContainer(m_vertexJXContainerKey, ctx);
     ATH_CHECK( jxContainer.isValid() );
 
     std::vector<double> massesJX{m_jxDaug1MassHypo, m_jxDaug2MassHypo};
@@ -421,7 +421,7 @@ namespace DerivationFramework {
     return StatusCode::SUCCESS;
   }
 
-  StatusCode JpsiXPlus2V0::addBranches() const {
+  StatusCode JpsiXPlus2V0::addBranches(const EventContext& ctx) const {
     size_t topoN = 4;
     if(!m_JXSubVtx) topoN--;
 
@@ -432,7 +432,7 @@ namespace DerivationFramework {
 
     std::array<SG::WriteHandle<xAOD::VertexContainer>, 4> VtxWriteHandles; int ikey(0);
     for(const SG::WriteHandleKey<xAOD::VertexContainer>& key : m_cascadeOutputKeys) {
-      VtxWriteHandles[ikey] = SG::WriteHandle<xAOD::VertexContainer>(key);
+      VtxWriteHandles[ikey] = SG::WriteHandle<xAOD::VertexContainer>(key, ctx);
       ATH_CHECK( VtxWriteHandles[ikey].record(std::make_unique<xAOD::VertexContainer>(), std::make_unique<xAOD::VertexAuxContainer>()) );
       ikey++;
     }
@@ -441,7 +441,7 @@ namespace DerivationFramework {
     // retrieve primary vertices
     //----------------------------------------------------
     const xAOD::Vertex* primaryVertex(nullptr);
-    SG::ReadHandle<xAOD::VertexContainer> pvContainer(m_VxPrimaryCandidateName);
+    SG::ReadHandle<xAOD::VertexContainer> pvContainer(m_VxPrimaryCandidateName, ctx);
     ATH_CHECK( pvContainer.isValid() );
     if (pvContainer.cptr()->size()==0) {
       ATH_MSG_WARNING("You have no primary vertices: " << pvContainer.cptr()->size());
@@ -454,18 +454,18 @@ namespace DerivationFramework {
     //----------------------------------------------------
     SG::WriteHandle<xAOD::VertexContainer> refPvContainer;
     if(m_refitPV) {
-      refPvContainer = SG::WriteHandle<xAOD::VertexContainer>(m_refPVContainerName);
+      refPvContainer = SG::WriteHandle<xAOD::VertexContainer>(m_refPVContainerName, ctx);
       ATH_CHECK( refPvContainer.record(std::make_unique<xAOD::VertexContainer>(), std::make_unique<xAOD::VertexAuxContainer>()) );
     }
 
     // Get TrackParticle container (standard + LRT)
-    SG::ReadHandle<xAOD::TrackParticleContainer> trackContainer(m_TrkParticleCollection);
+    SG::ReadHandle<xAOD::TrackParticleContainer> trackContainer(m_TrkParticleCollection, ctx);
     ATH_CHECK( trackContainer.isValid() );
 
     // Get all track containers when m_RelinkContainers is not empty
     std::vector<const xAOD::TrackParticleContainer*> trackCols;
     for(const SG::ReadHandleKey<xAOD::TrackParticleContainer>& key : m_RelinkContainers){
-      SG::ReadHandle<xAOD::TrackParticleContainer> handle(key);
+      SG::ReadHandle<xAOD::TrackParticleContainer> handle(key, ctx);
       ATH_CHECK( handle.isValid() );
       trackCols.push_back(handle.cptr());
     }
@@ -473,13 +473,13 @@ namespace DerivationFramework {
     // output V0 vertices
     SG::WriteHandle<xAOD::VertexContainer> V0OutputContainer;
     if(m_vertexV0ContainerKey.key()=="" && m_v0VtxOutputKey.key()!="") {
-      V0OutputContainer = SG::WriteHandle<xAOD::VertexContainer>(m_v0VtxOutputKey);
+      V0OutputContainer = SG::WriteHandle<xAOD::VertexContainer>(m_v0VtxOutputKey, ctx);
       ATH_CHECK( V0OutputContainer.record(std::make_unique<xAOD::VertexContainer>(), std::make_unique<xAOD::VertexAuxContainer>()) );
     }
 
     // Get the input containers
     // Note: If the event does not contain a JX candidate, it is skipped and the V0 container will not be constructed if not previously available in StoreGate
-    SG::ReadHandle<xAOD::VertexContainer> jxContainer(m_vertexJXContainerKey);
+    SG::ReadHandle<xAOD::VertexContainer> jxContainer(m_vertexJXContainerKey, ctx);
     ATH_CHECK( jxContainer.isValid() );
     if(jxContainer->size()==0) return StatusCode::SUCCESS;
 
@@ -518,7 +518,7 @@ namespace DerivationFramework {
 
     SG::ReadHandle<xAOD::VertexContainer> V0Container;
     if(m_vertexV0ContainerKey.key() != "") {
-      V0Container = SG::ReadHandle<xAOD::VertexContainer>(m_vertexV0ContainerKey);
+      V0Container = SG::ReadHandle<xAOD::VertexContainer>(m_vertexV0ContainerKey, ctx);
       ATH_CHECK( V0Container.isValid() );
 
       for(const xAOD::Vertex* vtx : *V0Container.cptr()) {
@@ -606,7 +606,7 @@ namespace DerivationFramework {
     if(selectedV0Candidates.size()==0) return StatusCode::SUCCESS;
 
     std::vector<Trk::VxCascadeInfo*> cascadeinfoContainer;
-    ATH_CHECK( performSearch(cascadeinfoContainer, selectedV0Candidates) );
+    ATH_CHECK( performSearch(cascadeinfoContainer, selectedV0Candidates, ctx) );
 
     // sort and chop the main candidates
     std::sort( cascadeinfoContainer.begin(), cascadeinfoContainer.end(), [](Trk::VxCascadeInfo* a, Trk::VxCascadeInfo* b) { return a->fitChi2()/a->nDoF() < b->fitChi2()/b->nDoF(); } );
@@ -615,7 +615,7 @@ namespace DerivationFramework {
       cascadeinfoContainer.erase(cascadeinfoContainer.begin()+m_maxMainVCandidates, cascadeinfoContainer.end());
     }
 
-    SG::ReadHandle<xAOD::EventInfo> evt(m_eventInfo_key);
+    SG::ReadHandle<xAOD::EventInfo> evt(m_eventInfo_key, ctx);
     ATH_CHECK( evt.isValid() );
     BPhysPVCascadeTools helper(&(*m_CascadeTools), evt.cptr());
     helper.SetMinNTracksInPV(m_PV_minNTracks);

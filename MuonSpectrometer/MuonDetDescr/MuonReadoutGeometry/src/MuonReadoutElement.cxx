@@ -68,69 +68,13 @@ namespace MuonGM {
         // this doesn't apply to TGC
         return (!largeSector());
     }
-
-    void MuonReadoutElement::setParentStationPV(const PVConstLink& x) {
-        m_parentStationPV = x;
-        setIndexOfREinMuonStation();
-    }
-
-    void MuonReadoutElement::setParentStationPV() {
-        if (m_parentStationPV) return;
-
-        std::string::size_type npos;
-        PVConstLink pStat = PVConstLink(nullptr);
-        PVConstLink myphysvol(getMaterialGeom());
-
-        std::string name = (myphysvol->getLogVol())->getName();
-        if ((npos = name.find("Station")) != std::string::npos) {
-            pStat = myphysvol;
-        } else {
-            for (unsigned int k = 0; k < 10; k++) {
-                pStat = myphysvol->getParent();
-                if (pStat == PVConstLink(nullptr)) break;
-                name = (pStat->getLogVol())->getName();
-                if ((npos = name.find("Station")) != std::string::npos) { break; }
-                myphysvol = pStat;
-            }
-        }
-        m_parentStationPV = pStat;
-        setIndexOfREinMuonStation();
-    }
-
-    PVConstLink MuonReadoutElement::parentStationPV() const { return m_parentStationPV; }
-
-    int MuonReadoutElement::getIndexOfREinMuonStation() const { return m_indexOfREinMuonStation; }
-
-    void MuonReadoutElement::setIndexOfREinMuonStation() {
-        PVConstLink par = parentStationPV();
-        if (par == PVConstLink(nullptr)) {
-            ATH_MSG_FATAL(__FILE__<<":"<<__LINE__<<" No parent station found for "<<m_idHelperSvc->toStringDetEl(identify()));
-            throw std::runtime_error("Parent station is a nullptr");
-        }
-	std::optional<unsigned int> c = par->indexOf(getMaterialGeom());
-        if (c) {
-	  m_indexOfREinMuonStation = (int)(*c);
-        } else {
-            m_indexOfREinMuonStation = -999;
-	}
-    }
-
+ 
     Amg::Transform3D MuonReadoutElement::toParentStation() const {
-        PVConstLink par = parentStationPV();
-        if (par == PVConstLink(nullptr)) {
-            ATH_MSG_FATAL(__FILE__<<":"<<__LINE__<<" No parent station found for "<<m_idHelperSvc->toStringDetEl(identify()));
-            throw std::runtime_error("Parent station is a nullptr");
-        }
-
-        if (m_indexOfREinMuonStation >= 0) return par->getXToChildVol((unsigned int)m_indexOfREinMuonStation);
-        return GeoTrf::Transform3D::Identity();
+        return getMaterialGeom()->getX();
     }
 
     void MuonReadoutElement::setParentMuonStation(const MuonStation* mstat) { 
         m_parentMuonStation = mstat; 
-        if (mstat->getPhysVol()) {
-            setParentStationPV(mstat->getPhysVol());
-        }
     }
 
     const MuonStation* MuonReadoutElement::parentMuonStation() const { return m_parentMuonStation; }

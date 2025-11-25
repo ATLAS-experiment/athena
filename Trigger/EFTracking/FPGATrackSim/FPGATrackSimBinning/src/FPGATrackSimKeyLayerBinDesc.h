@@ -57,20 +57,25 @@ public:
         keypars.phi1+=fieldCorrection(m_fieldCorRegion, pars.qOverPt/1000.0 ,m_keylyrtool.R1());
         keypars.phi2+=fieldCorrection(m_fieldCorRegion, pars.qOverPt/1000.0 ,m_keylyrtool.R2());
       }
+      keypars.phi1=remainder(keypars.phi1+m_phiOffset,2*M_PI);
+      keypars.phi2=remainder(keypars.phi2+m_phiOffset,2*M_PI);
       return keyparsToParSet(keypars);
     }
 
     
 
     virtual const FPGATrackSimTrackPars parSetToTrackPars(const FPGATrackSimBinUtil::ParSet &parset) const override {
-      return m_keylyrtool.keyParsToTrackPars(parSetToKeyPars(parset));
+      FPGATrackSimKeyLayerTool::KeyLyrPars keypars = parSetToKeyPars(parset);
+      keypars.phi1=remainder(keypars.phi1-m_phiOffset,2*M_PI);
+      keypars.phi2=remainder(keypars.phi2-m_phiOffset,2*M_PI);      
+      return m_keylyrtool.keyParsToTrackPars(keypars);
     }
 
     // calculate the distance in phi or eta from a track defined by parset to a
     // hit these can be implemented as any variable in the r-phi or r-eta plane
     // (not necessarily eta and phi).
     virtual double phiResidual(const FPGATrackSimBinUtil::ParSet &parset, FPGATrackSimHit const *hit) const override {
-        return m_keylyrtool.deltaX(parSetToKeyPars(parset), hit);
+        return m_keylyrtool.deltaX(parSetToKeyPars(parset), hit->getR(), hit->getGPhi() + m_phiOffset);
     }
   
     virtual double etaResidual(const FPGATrackSimBinUtil::ParSet &parset, FPGATrackSimHit const *hit) const override {
@@ -86,9 +91,44 @@ public:
     virtual bool hitInBin(const FPGATrackSimBinStep &step, const FPGATrackSimBinUtil::IdxSet &idx,
                           FPGATrackSimBinUtil::StoredHit &storedhit) const override;
 
+    
+    // Structs to hold firmware LUTs for one bin
+    // This allows the firmware calculation to be exactly reproduced 
+    // here and comapared to the original/main algorithm
+    struct phiLUTConsts { 
+      double r_in;   
+      double r_out;   
+      double y;
+      double x1p;
+      double y1p;
+      double cosb;
+      double sinb;
+      double x_m;
+      double x_factor;
+      double w_x;
+      double w_in;
+      double dw_dr;
+      double phiShift(double phi, double r);
+      double phiWindow(double r);
+    };
+    struct etaLUTConsts {
+      double r_in;   
+      double r_out;   
+      double z_in;
+      double dz_dr;
+      double w_in;
+      double dw_dr;
+      double etaShift(double z, double r);
+      double etaWindow(double r);
+    };
+    phiLUTConsts getPhiLUTConsts(const FPGATrackSimBinStep &step, const std::vector<unsigned>& idx) const;
+    etaLUTConsts getEtaLUTConsts(const FPGATrackSimBinStep &step, const std::vector<unsigned>& idx) const;
+
+
     // Write the relevant LUT tables for firmware    
     virtual void writeLUTs(const FPGATrackSimBinStep &step) const override;
     
+
   private:
     // Configurable Properties
     Gaudi::Property<double> m_rin{this, "rin", {-1.0}, "Radius of inner layer for keylayer definition"};
@@ -108,6 +148,7 @@ public:
         "Strip length per eta eta mod"
     };
 
+    Gaudi::Property<double> m_phiOffset{this, "PhiOffset", 0.0, "Phi offset between local and global parameters (avoids phi wrap around effects in region code)"};
 
     Gaudi::Property<unsigned> m_fieldCorRegion  { this, "fieldCorRegion", 2, "region for fieldCorrection"};
     Gaudi::Property<bool> m_fieldCorrection {this, "fieldCorrection", true, "Use magnetic field correction for Hough transform"};

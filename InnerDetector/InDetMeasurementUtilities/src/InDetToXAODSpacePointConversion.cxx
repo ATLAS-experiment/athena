@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration   
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "src/InDetToXAODSpacePointConversion.h"
@@ -10,6 +10,7 @@
 
 #include "InDetPrepRawData/SiCluster.h"
 #include "TrkPrepRawData/PrepRawData.h"
+#include "AthAllocators/DataPool.h"
 
 namespace InDet {
 
@@ -118,20 +119,25 @@ namespace InDet {
     const ::SpacePointContainer* pixel_container = pixel_handle.cptr();
 
     // Output
-    std::unique_ptr< xAOD::SpacePointContainer > pixel_xaod_container = std::make_unique< xAOD::SpacePointContainer >();
+    std::unique_ptr< xAOD::SpacePointContainer > pixel_xaod_container = std::make_unique< xAOD::SpacePointContainer >(SG::VIEW_ELEMENTS, SG::ALWAYS_TRACK_INDICES);
     std::unique_ptr< xAOD::SpacePointAuxContainer > pixel_xaod_aux_container = std::make_unique< xAOD::SpacePointAuxContainer >();
     pixel_xaod_container->setStore( pixel_xaod_aux_container.get() );
 
-    pixel_xaod_container->reserve(pixel_container->size());
-    pixel_xaod_aux_container->reserve(pixel_container->size());
+    size_t nsp = 0;
+    for (const ::SpacePointCollection *spc : *pixel_container) {
+      nsp += spc->size();
+    }
+    DataPool<xAOD::SpacePoint> pool (nsp);
+    pixel_xaod_container->push_new (nsp, [&pool](){return pool.nextElementPtr();});
+    size_t isp = 0;
 
     // Conversion
     for (const ::SpacePointCollection *spc : *pixel_container) {
       for (const Trk::SpacePoint *sp : *spc) {
 	const InDet::PixelSpacePoint *indetSP = dynamic_cast<const InDet::PixelSpacePoint *>(sp);
-	
-	pixel_xaod_container->push_back( new xAOD::SpacePoint() );
-	ATH_CHECK( TrackingUtilities::convertTrkToXaodPixelSpacePoint(*indetSP, *pixel_xaod_container->back()) );
+
+        xAOD::SpacePoint* pixel_sp = pixel_xaod_container->at (isp++);
+	ATH_CHECK( TrackingUtilities::convertTrkToXaodPixelSpacePoint(*indetSP, *pixel_sp) );
 
 	// Also make cluster object, if requested
 	if (m_convertClusters) {
@@ -151,12 +157,12 @@ namespace InDet {
 	  xAOD::PixelCluster * pixelCl = new xAOD::PixelCluster();
 	  cluster_xaod_container->push_back(pixelCl);
 	  ATH_CHECK( TrackingUtilities::convertInDetToXaodCluster(*theCluster, *element, *pixelCl) );
-	  pixel_xaod_container->back()->setMeasurements( {cluster_xaod_container->back()} );
+	  pixel_sp->setMeasurements( {cluster_xaod_container->back()} );
 	}
 
 	// Add link to this space point
 	ElementLink< ::SpacePointCollection > link(indetSP, *spc);
-	linkAcc(*pixel_xaod_container->back()) = link;
+	linkAcc(*pixel_sp) = link;
       }
     }
 

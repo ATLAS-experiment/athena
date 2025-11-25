@@ -10,7 +10,7 @@
 
 #include "GeoModelKernel/GeoVDetectorElement.h"
 #include "ActsGeometryInterfaces/IDetectorElement.h"
-#include "ActsGeometryInterfaces/ActsGeometryContext.h"
+#include "ActsGeometryInterfaces/GeometryContext.h"
 // ATHENA INCLUDES
 #include "ActsGeoUtils/TransformCache.h"
 
@@ -44,7 +44,7 @@ class IdentityHelper;
 class ActsDetectorElement : public ActsTrk::IDetectorElement, public GeoVDetectorElement {
 public:
   using DetectorType = ActsTrk::DetectorType;
-  using AlignmentStore = ActsGeometryContext::AlignmentStore;
+  using AlignmentStore = ActsTrk::GeometryContext::AlignmentStore;
 
 
   ActsDetectorElement(const InDetDD::SiDetectorElement &detElem);

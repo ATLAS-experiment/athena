@@ -3,10 +3,13 @@
 */
 
 #include "CaloIdentifier/JGTowerBase_ID.h"
+#include "IdDict/IdDictDictionary.h"
+#include "IdDict/IdDictField.h"
+#include "IdDict/IdDictRegion.h"
+#include "IdDict/IdDictMgr.h"
 #include "AtlasDetDescr/AtlasDetectorID.h"
 #include "CxxUtils/StrFormat.h"
 #include "GaudiKernel/MsgStream.h"
-#include "IdDict/IdDictDefs.h"
 #include "Identifier/IdentifierHash.h"
 #include "Identifier/RangeIterator.h"
 #include <algorithm>
@@ -669,7 +672,7 @@ int   JGTowerBase_ID::initLevelsFromDict(const std::string& t_pre)
   m_PHI_INDEX        = 999 ;
 
   // Save index to a JGTOWER region for unpacking - search with region name
-  IdDictRegion* reg = m_dict->find_region(t_pre+"ower_0");
+  const IdDictRegion* reg = m_dict->find_region(t_pre+"ower_0");
   if (reg) 
     {
       m_jgtower_region_index = reg->index();
@@ -688,7 +691,7 @@ int   JGTowerBase_ID::initLevelsFromDict(const std::string& t_pre)
     }
   
   // Fing a JGTOWER region
-  IdDictField* field = m_dict->find_field("subdet") ;
+  const IdDictField* field = m_dict->find_field("subdet") ;
   if (field) {
     m_CALO_INDEX = field->index();
   }

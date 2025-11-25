@@ -83,6 +83,9 @@ def createFPGATrackSimConfigFlags():
     cf.addFlag('MinSpacePointsPerSeed',3)
     cf.addFlag('MaxSpacePointsPerSeed',3)
 
+    cf.addFlag('runF150hw', False)
+
+
     def __httHough1DFlags():
         """Additional function delays import"""
         from FPGATrackSimConfTools.FPGATrackSimConfigFlags import createHough1dFPGATrackSimConfigFlags
@@ -136,7 +139,9 @@ def createFPGATrackSimConfigFlags():
 
     # Monitoring
     cf.addFlag('writeAdditionalOutputData', True)
+    cf.addFlag('regionToWriteDPTree', -1)
     cf.addFlag('writeOutputEventLimit', -1)
+    cf.addFlag('writeRegion', -1)
     cf.addFlag('readOfflineObjects', True)
 
     # ACTS Tracking
@@ -239,7 +244,7 @@ def createBasicFPGATrackSimConfigFlags():
     cf.addFlag('doMissingHitsChecks', False)
     cf.addFlag('idealCoordFitType', 2)
     cf.addFlag('doDeltaGPhis', False)
-    cf.addFlag('chi2cut', 9)
+    cf.addFlag('chi2cut', 2.25)
     cf.addFlag('useVaryingChi2Cut', False)
     cf.addFlag('fitFromRoad', True)
 
@@ -368,6 +373,7 @@ def createGenScanFPGATrackSimConfigFlags():
     cf.addFlag('binFilter','IncrementalBuild')
     cf.addFlag('layerStudy',False)
     cf.addFlag('layerMapFile','')
+    cf.addFlag('useLayerRadiiFile',False)
     cf.addFlag('noCuts',False)
 
     cf.addFlag('filterInBin', False)

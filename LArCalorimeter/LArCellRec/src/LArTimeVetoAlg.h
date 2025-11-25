@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef LARCELLREC_LARTIMEVETOALG_H
@@ -12,6 +12,7 @@
 #include "StoreGate/ReadCondHandleKey.h"
 #include "StoreGate/WriteDecorHandleKey.h"
 #include "xAODEventInfo/EventInfo.h"
+#include "PersistentDataModel/AthenaAttributeList.h"
 #include <atomic>
 
 class AthenaAttributeList;
@@ -31,6 +32,6 @@ class LArTimeVetoAlg : public AthReentrantAlgorithm {
 
     SG::ReadCondHandleKey<AthenaAttributeList> m_eventVetoKey{this, "folderName", "/LAR/BadChannelsOfl/EventVeto", "Folder name for DB access"};
     SG::ReadHandleKey<xAOD::EventInfo> m_eventInfoKey{this,"EventInfoKey","EventInfo"};
-    SG::WriteDecorHandleKey<xAOD::EventInfo> m_eventInfoDecorKey{this, "eventInfoDecorKey", "EventInfo.larFlags", "Key for EventInfo object"};
+    SG::WriteDecorHandleKey<xAOD::EventInfo> m_eventInfoDecorKey{this, "eventInfoDecorKey", m_eventInfoKey, "larFlags", "Key for EventInfo object"};
 };
 #endif

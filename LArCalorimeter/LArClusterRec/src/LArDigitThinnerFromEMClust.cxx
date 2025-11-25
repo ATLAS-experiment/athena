@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArClusterRec/LArDigitThinnerFromEMClust.h"
@@ -61,7 +61,7 @@ StatusCode LArDigitThinnerFromEMClust::execute(const EventContext& ctx) const {
   SG::ReadCondHandle<LArOnOffIdMapping> larCablingHdl(m_larCablingKey,ctx);
   const LArOnOffIdMapping* larCabling=*larCablingHdl;
 
-  std::bitset<200000> clusteredDigits;
+  auto clusteredDigits = std::make_unique<std::bitset<200000> >();
 
   //Loop over Clusters:
   for (const xAOD::CaloCluster* clus : *clusterContainer) {
@@ -76,7 +76,7 @@ StatusCode LArDigitThinnerFromEMClust::execute(const EventContext& ctx) const {
 	HWIdentifier hwid = larCabling->createSignalChannelID(id);
 	IdentifierHash idHash =  m_onlineID->channel_Hash(hwid);
 	size_t index = (size_t) (idHash);
-	clusteredDigits.set(index);
+	clusteredDigits->set(index);
       }
     }//end loop over cells in cluster
   }//end loop over cluster
@@ -86,7 +86,7 @@ StatusCode LArDigitThinnerFromEMClust::execute(const EventContext& ctx) const {
     HWIdentifier channelID = dig->channelID();
     IdentifierHash idHash = m_onlineID->channel_Hash(channelID);
     size_t index = (size_t) (idHash);
-    if (clusteredDigits.test(index)) outputContainer->push_back(dig);
+    if (clusteredDigits->test(index)) outputContainer->push_back(dig);
   }
 
   ATH_MSG_DEBUG("Copied " << outputContainer->size() << " of " << inputContainer->size() << " digits.");

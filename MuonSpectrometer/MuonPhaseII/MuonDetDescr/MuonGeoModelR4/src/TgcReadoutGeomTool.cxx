@@ -123,9 +123,8 @@ StatusCode TgcReadoutGeomTool::loadDimensions(TgcReadoutElement::defineArgs& def
     for (const physVolWithTrans& pVolTrans : allGasGaps) {
         const std::string key = std::format("{:}_{:}{:}",define.chambDesign, gasGap+1,
                                             (m_idHelperSvc->stationEta(define.detElId) > 0 ? "A" : "C"));
-        StripLayerPtr& wireReadout{factoryCache.wireLayers[key]};
-        StripLayerPtr& stripReadout{factoryCache.stripLayers[key]};
-        if (!wireReadout || !stripReadout) {
+        StripLayerPtr& wireReadout{factoryCache.readoutLayers[key]};
+        if (!wireReadout) {
             const wTgcTable& table{factoryCache.parameterBook[key]};
             if (!table.gasGap) {
                 ATH_MSG_FATAL("No wTGC table could be found for "<<m_idHelperSvc->toStringDetEl(define.detElId)
@@ -153,10 +152,7 @@ StatusCode TgcReadoutGeomTool::loadDimensions(TgcReadoutElement::defineArgs& def
                 const Amg::Transform3D trans{pVolTrans.transform 
                                              * Amg::getRotateY3D(-90.*Gaudi::Units::deg)
                                              * Amg::getRotateX3D(180.* Gaudi::Units::deg)};
-                /// Don't absorb the radial strip design into the same transform for the moment
-                /// Acts needs first to support to measurements per surface or SpacePoints will
-                /// become xAOD::UncalibratedMeasurements
-                if (false && radDesign) {
+                if (radDesign) {
                     wireReadout = std::make_unique<StripLayer>(factoryCache.trfNodeMaker.makeTransform(trans), 
                                                                 wireDesign, radDesign, layHash);
                     wireReadout->flipPhiRotation();
@@ -165,17 +161,7 @@ StatusCode TgcReadoutGeomTool::loadDimensions(TgcReadoutElement::defineArgs& def
                                                                 wireDesign, layHash);
                 }
             } 
-            if (!stripReadout && radDesign) {
-                const IdentifierHash layHash = TgcReadoutElement::constructHash(0, gasGap+1, true);
-                ATH_MSG_VERBOSE("Radial hash "<<layHash);
-                const Amg::Transform3D trans{pVolTrans.transform 
-                                             * Amg::getRotateZ3D(90.* Gaudi::Units::deg)
-                                             * Amg::getRotateX3D(90.*Gaudi::Units::deg)};
-                stripReadout = std::make_unique<StripLayer>(factoryCache.trfNodeMaker.makeTransform(trans), 
-                                                            radDesign, layHash);
-            }
         }
-        ATH_CHECK(assignReadoutLayer(stripReadout));
         ATH_CHECK(assignReadoutLayer(wireReadout));
         ++gasGap;
     }
@@ -240,7 +226,7 @@ StatusCode TgcReadoutGeomTool::writeSectorMapping(const MuonDetectorManager& mgr
     std::unique_ptr<std::vector<int>> tgcSectorMapping = std::make_unique<std::vector<int>>();
     tgcSectorMapping->resize(m_idHelperSvc->tgcIdHelper().module_hash_max());
     Muon::MuonSectorMapping sectorMapping{};
-    const ActsGeometryContext gctx{};
+    const ActsTrk::GeometryContext gctx{};
     for (const TgcReadoutElement* readoutEle : tgcReadOutEles) {
         int& sectNumb = (*tgcSectorMapping)[m_idHelperSvc->moduleHash(readoutEle->identify())];
         sectNumb = sectorMapping.getSector(readoutEle->center(gctx).phi());

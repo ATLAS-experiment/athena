@@ -1,6 +1,6 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 /*
- * Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file LumiBlockComps/src/LuminosityCondAlg.h
@@ -21,6 +21,7 @@
 #include "CoolLumiUtilities/BunchGroupCondData.h"
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "AthenaPoolUtilities/CondAttrListCollection.h"
+#include "PersistentDataModel/AthenaAttributeList.h"
 #include "StoreGate/ReadCondHandleKey.h"
 #include "StoreGate/WriteCondHandleKey.h"
 #include "CoralBase/Blob.h"
@@ -182,11 +183,11 @@ private:
   { this, "EventInfoKey", "EventInfo", "EventInfo key, used to read in simulated mu in MC" };
 
   SG::ReadDecorHandleKey<xAOD::EventInfo> m_actualMuKey 
-  { this, "actualMuKey", "EventInfo.actualInteractionsPerCrossing",
+  { this, "actualMuKey", m_eventInfoKey, "actualInteractionsPerCrossing",
     "Decoration for Actual Interaction Per Crossing, for MC" };
 
   SG::ReadDecorHandleKey<xAOD::EventInfo> m_averageMuKey 
-  { this, "averageMuKey", "EventInfo.averageInteractionsPerCrossing",
+  { this, "averageMuKey", m_eventInfoKey, "averageInteractionsPerCrossing",
     "Decoration for Average Interaction Per Crossing" };
 
   /// Output conditions object.

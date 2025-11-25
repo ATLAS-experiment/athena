@@ -108,6 +108,8 @@ def getNNs(flags):
              "JetCalibTools/CalibArea-00-04-83/CalibrationFactors/bbJESJMS_calibFactors_R22_MC20_CSSKUFO_bJR10v00Ext_20250212.onnx", # bJR10v00Ext
              "JetCalibTools/CalibArea-00-04-83/CalibrationFactors/bbJESJMS_calibFactors_R22_MC20MC23_CSSKUFO_bJR10v01_20250212.onnx" # bJR10v01
     ]
+    # we can't flip large-R taggers
+    noflip = dict(flip=False)
 
     return {
         'AntiKt4EMPFlowJets': [
@@ -141,7 +143,14 @@ def getNNs(flags):
             }
         ],
         'AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets': [
-            {'folds' : [nn_path]} for nn_path in lrj_paths
+            {'folds' : [nn_path], **noflip} for nn_path in lrj_paths
+        ],
+        'DFAntiKt4HIJets': [
+            {
+                'folds': pf_nns,
+                'hash': 'jetFoldHash',
+                'cone_association': True
+            }
         ]
     }
 
@@ -198,9 +207,6 @@ def createBTaggingConfigFlags():
 
     # GNN vertex fitter
     btagcf.addFlag("BTagging.GNNVertexFitter", False)
-
-    # a flag to enable legacy BTagging
-    btagcf.addFlag("BTagging.EnableLegacyBTagging", False)
 
     # (multifold) NN trainings, each jet collection maps to a list of
     # dicts. The dict has several keys:

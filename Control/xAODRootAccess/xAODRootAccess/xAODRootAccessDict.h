@@ -1,6 +1,6 @@
 // Dear emacs, this is -*- c++ -*-
 //
-//  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+//  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 //
 #ifndef XAODROOTACCESS_XAODROOTACCESSDICT_H
 #define XAODROOTACCESS_XAODROOTACCESSDICT_H
@@ -13,5 +13,7 @@
 #include "xAODRootAccess/TPyStore.h"
 #include "xAODRootAccess/TTreeMgr.h"
 #include "xAODRootAccess/tools/TVirtualManager.h"
+#include "xAODRootAccess/REvent.h"
+#include "xAODRootAccess/RPyEvent.h"
 
 #endif // XAODROOTACCESS_XAODROOTACCESSDICT_H

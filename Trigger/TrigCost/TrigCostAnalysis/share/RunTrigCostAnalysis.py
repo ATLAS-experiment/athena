@@ -41,6 +41,8 @@ def trigCostAnalysisCfg(flags, args):
   trigCostAnalysis.UseSingleTimeRange = flags.Input.isMC or args.useEBWeights
   trigCostAnalysis.ROSToROBMap = ROSToROBMap().get_mapping()
   trigCostAnalysis.DoMonitorChainAlgorithm = args.monitorChainAlgorithm
+  if args.excludeAlgsFromChainTime:
+    trigCostAnalysis.ExcludeAlgsFromChainTime = args.excludeAlgsFromChainTime.split(',')
 
   if not flags.Input.isMC:
     trigCostAnalysis.AdditionalHashList = readHashesFromHLTJO(args.joFile, args.smk, args.dbAlias)
@@ -214,6 +216,8 @@ if __name__=='__main__':
   parser.add_argument('--MCFilterEfficiency', default=1.0, type=float, help='For MC input: Filter efficiency of any MC filter (0.0 - 1.0)')
   parser.add_argument('--MCKFactor', default=1.0, type=float, help='For MC input: Additional multiplicitive fudge-factor to the supplied cross section.')
   parser.add_argument('--MCIgnoreGeneratorWeights', action='store_true', help='For MC input: Flag to disregard any generator weights.')
+
+  parser.add_argument('--excludeAlgsFromChainTime',  help='comma separated list of algorithms to exclude from chain time calculation')
 
   args = flags.fillFromArgs(parser=parser)
   flags.lock()

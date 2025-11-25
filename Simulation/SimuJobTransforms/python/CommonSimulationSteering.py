@@ -152,9 +152,4 @@ def CommonSimulationCfg(flags, log):
         cfg.merge( OutputStreamCfg(flags,"EVNT_TR", ItemList=getStreamEVNT_TR_ItemList(flags), disableEventTag=True, AcceptAlgs=AcceptAlgNames) )
         cfg.merge(SetupMetaDataForStreamCfg(flags, "EVNT_TR", AcceptAlgs=AcceptAlgNames, createMetadata=[MetadataCategory.IOVMetaData]))
 
-    # Add MT-safe PerfMon
-    if flags.PerfMon.doFastMonMT or flags.PerfMon.doFullMonMT:
-        from PerfMonComps.PerfMonCompsConfig import PerfMonMTSvcCfg
-        cfg.merge(PerfMonMTSvcCfg(flags))
-
     return cfg

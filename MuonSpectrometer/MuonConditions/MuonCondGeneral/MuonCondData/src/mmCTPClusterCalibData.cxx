@@ -48,7 +48,7 @@ double mmCTPClusterCalibData::getCTPCorrectedDriftVelocity(const Identifier& gas
         ATH_MSG_ERROR("There's no drift velocity calibration available for gasGap " << m_idHelperSvc->toStringGasGap(gasGapIdentifier)<< " size of the calib map is: " << m_database.size() );
     }
 
-    ATH_MSG_VERBOSE( "Retriving drift velocity for stName" << m_idHelperSvc->toStringGasGap(gasGapIdentifier) );
+    ATH_MSG_VERBOSE( "Retrieving drift velocity for stName" << m_idHelperSvc->toStringGasGap(gasGapIdentifier) );
 
     //Conversions of incident angle
     double trf_theta_in_degrees = (theta > 90) ? (180 - theta) : theta;

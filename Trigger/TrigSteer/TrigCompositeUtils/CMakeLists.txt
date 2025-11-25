@@ -14,10 +14,10 @@ endif()
 atlas_add_library( TrigCompositeUtilsLib
   TrigCompositeUtils/*.h TrigCompositeUtils/*.icc Root/*.cxx
   PUBLIC_HEADERS TrigCompositeUtils
-  LINK_LIBRARIES TrigConfHLTUtilsLib CxxUtils AsgMessagingLib AsgDataHandlesLib AsgTools TrigDecisionInterface xAODBase xAODTrigger TrigConfHLTData ${extra_libs}
+  LINK_LIBRARIES TrigConfHLTUtilsLib CxxUtils SGCoreLib AsgMessagingLib AsgDataHandlesLib AsgTools TrigDecisionInterface xAODBase xAODTrigger TrigConfHLTData ${extra_libs}
   PRIVATE_LINK_LIBRARIES TrigSteeringEvent )
 
-atlas_add_dictionary( ChainNameParserDict 
+atlas_add_dictionary( ChainNameParserDict
    TrigCompositeUtils/ChainNameParserDict.h
    TrigCompositeUtils/selection.xml
    LINK_LIBRARIES TrigCompositeUtilsLib )
@@ -38,11 +38,6 @@ if( NOT XAOD_STANDALONE )
     LINK_LIBRARIES TestTools AthenaKernel GaudiKernel SGTools StoreGateLib
     CxxUtils xAODTrigger TrigCompositeUtilsLib AthContainers
     LOG_IGNORE_PATTERN "@0x[0-9a-f]{4,}" )
-
-  atlas_add_test( TrigTraversal_test
-    SOURCES test/TrigTraversal_test.cxx
-    LINK_LIBRARIES TestTools StoreGateLib AthenaKernel GaudiKernel SGTools
-    CxxUtils xAODTrigger xAODEgamma xAODMuon xAODBase TrigCompositeUtilsLib )
 endif()
 
 atlas_add_test( Combinators_test

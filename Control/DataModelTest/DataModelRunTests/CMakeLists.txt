@@ -32,13 +32,17 @@ function (datamodel_run_test testName)
 
   if( ARG_RNTUPLE )
     set( testName "${testName}RNTup" )
-    set( _options " Output.StorageTechnology.EventData='ROOTRNTUPLE' " )
+    if( ARG_COMMAND )
+      set( _options "--rntuple" )
+    else()
+      set( _options "rntuple=True" )
+    endif()
   endif()
 
   atlas_add_test( ${testName}
                   SCRIPT ${_command} ${_arg} ${_options}
                   PROPERTIES TIMEOUT 600
-                  LOG_IGNORE_PATTERN "has different type than the branch|no dictionary for class|^StorageSvc +INFO|Cache alignment|Unable to locate catalog|IOVDbSvc[0-9 ]+INFO|Invalid ./TagInfo${ARG_EXTRA_IGNORE}|The database does not exist|IDatabaseSvc::openDatabase.*=>|New file created"
+                  LOG_IGNORE_PATTERN "has different type than the branch|no dictionary for class|^StorageSvc +INFO|Cache alignment|Unable to locate catalog|IOVDbSvc[0-9 ]+INFO|Invalid ./TagInfo${ARG_EXTRA_IGNORE}|The database does not exist|IDatabaseSvc::openDatabase.*=>|New file created|MessageSvc not found"
                   ENVIRONMENT "ATLAS_REFERENCE_TAG=DataModelRunTests/DataModelRunTestsReference-01-00-03"
                   DEPENDS ${ARG_DEPENDS} )
 endfunction (datamodel_run_test)
@@ -159,6 +163,11 @@ datamodel_run_test (xAODTestReadRename RNTUPLE DEPENDS xAODTestWriteRNTup)
 datamodel_run_test (xAODTestReadFilter RNTUPLE DEPENDS xAODTestWriteRNTup)
 datamodel_run_test (xAODTestWriteThinned RNTUPLE)
 datamodel_run_test (xAODTestReadThinned RNTUPLE DEPENDS xAODTestWriteThinnedRNTup)
+
+datamodel_run_test (xAODRootTestRead RNTUPLE
+                    COMMAND python
+                    ARG xAODRootTestRead_t.py
+                    DEPENDS xAODTestWriteRNTup)
 
 
 ##############################################################################

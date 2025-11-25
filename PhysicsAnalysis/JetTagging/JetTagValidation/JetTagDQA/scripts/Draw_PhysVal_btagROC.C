@@ -150,7 +150,6 @@ TString getRefHistoName(TString var, TString truth_label){
   if(jetType=="EMTopo") jetCollection = "AntiKt4EMTopoJets";
   else if(jetType=="PFlow") jetCollection = "AntiKt4EMPFlowJets";
   else if(jetType=="LR") jetCollection = "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets";
-  else if(jetType=="VR") jetCollection = "AntiKtVR30Rmax4Rmin02PV0TrackJets";
 
   TString name;
 
@@ -594,7 +593,6 @@ void plotGraphs(const vector<TString>& InputFileNames,
       if(jetType=="EMTopo") jetCollection = "AntiKt4EMTopoJets";
       else if(jetType=="PFlow") jetCollection = "AntiKt4EMPFlowJets";
       else if(jetType=="LR") jetCollection = "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets";
-      else if(jetType=="VR") jetCollection = "AntiKtVR30Rmax4Rmin02PV0TrackJets";
 
       TString hname_b = "BTag/" + jetCollection + "/" + folder1 + "/BTag_"
 	+ jetCollection + "_" + folder2 + "_b_matched_weight";
@@ -942,7 +940,6 @@ void plotGraphsEffVsVar(TString var_name, const vector<TString>& InputFileNames,
 	  if(jetType=="EMTopo") jetCollection = "AntiKt4EMTopoJets";
 	  else if(jetType=="PFlow") jetCollection = "AntiKt4EMPFlowJets";
 	  else if(jetType=="LR") jetCollection = "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets";
-          else if(jetType=="VR") jetCollection = "AntiKtVR30Rmax4Rmin02PV0TrackJets";
 
 	  TString hname_WPcuts = "BTag/" + jetCollection + "/" + folder1
 	    + "/BTag_" + jetCollection + "_" + folder2 + "_"

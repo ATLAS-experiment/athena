@@ -164,7 +164,8 @@ StatusCode FixLArElecCalib::stop ATLAS_NOT_THREAD_SAFE () {
    SG::ReadCondHandle<LArOnOffIdMapping> cablingHdl{m_cablingKey, ctx};
    const LArOnOffIdMapping* cabling{*cablingHdl};
    if(!cabling) {
-     ATH_MSG_WARNING( "Do not have cabling mapping from key " << m_cablingKey.key() );
+     ATH_MSG_ERROR( "Do not have cabling mapping from key " << m_cablingKey.key() );
+     return StatusCode::FAILURE;
    }
    SG::ReadCondHandle<LArCalibLineMapping> clHdl{m_CLKey, ctx};
    const LArCalibLineMapping *clCont {*clHdl};
@@ -1230,8 +1231,8 @@ StatusCode FixLArElecCalib::ReadFileAll(const std::string& filename, const LArOn
    infile.getline(s,200);
    ATH_MSG_INFO(" first line of the file  "<<s);
 
-   int   det,samp,reg,eta;
-   int first; 
+   int   det=0,samp=0,reg=0,eta=0;
+   int first=0;
    while ( infile>>first>>samp>>reg>>eta ) {
        Identifier id ; 
        int gain=0;
@@ -1696,15 +1697,8 @@ StatusCode FixLArElecCalib::fix10 ATLAS_NOT_THREAD_SAFE (const LArOnOffIdMapping
 	    
 	    float ramp_high = ramp0.m_vRamp[1]; 
 	    
-	    std::vector<float> v_m ;
-	    v_m.push_back(0);
-	    v_m.push_back(ramp_high*9.96);
-	    ramp1.m_vRamp=v_m;
-	    
-	    std::vector<float> v_l ;
-	    v_l.push_back(0);
-	    v_l.push_back(ramp_high*9.96*9.67);
-	    ramp2.m_vRamp=v_l;
+	    ramp1.m_vRamp.assign ({0, ramp_high*9.96f});
+	    ramp2.m_vRamp.assign ({0, ramp_high*9.96f*9.67f});
 	    ++n; 
 
 	    ATH_MSG_DEBUG(" ramp hi,med,low"<< ramp0.m_vRamp[1]<< " "<<ramp1.m_vRamp[1]<<  " " <<
@@ -1712,7 +1706,7 @@ StatusCode FixLArElecCalib::fix10 ATLAS_NOT_THREAD_SAFE (const LArOnOffIdMapping
 	    
 	  }
 
-    ATH_MSG_INFO( " Number of channels updted =  " <<n );
+    ATH_MSG_INFO( " Number of channels updated =  " <<n );
     ATH_MSG_INFO( " Number of disconnected =  " <<ndisc );
     
     return StatusCode::SUCCESS;
@@ -2017,6 +2011,10 @@ StatusCode FixLArElecCalib::fix12(const LArOnOffIdMapping *cabling) {
    //
    std::unique_ptr<TFile> fin= std::make_unique<TFile>("ntuple_av.root");
    TTree *tin=dynamic_cast<TTree*>(fin->Get("m_tree"));
+   if (!tin) {
+     ATH_MSG_ERROR("Can't read tree m_tree");
+     return StatusCode::FAILURE;
+   }
    int           ncell;
    int           identifier[2862];   
    int           layer[2862];   
@@ -2084,14 +2082,18 @@ StatusCode FixLArElecCalib::fix14(const LArOnOffIdMapping *cabling) {
    //
    std::unique_ptr<TFile> fin= std::make_unique<TFile>(m_infile.value().c_str());
    TTree *tin=dynamic_cast<TTree*>(fin->Get("m_tree"));
+   if (!tin) {
+     ATH_MSG_ERROR("Can't read tree m_tree");
+     return StatusCode::FAILURE;
+   }
    int           ncell;
-   int           identifier[2862];   
-   int           layer[2862];   
-   int           region[2862]; 
-   int           ieta[2862];   
-   float         eta[2862];   
-   double        average[2862];   
-   double        rms[2862];   
+   std::vector<int> identifier(2862);
+   std::vector<int> layer(2862);
+   std::vector<int> region(2862);
+   std::vector<int> ieta(2862);
+   std::vector<float> eta(2862);
+   std::vector<double> average(2862);
+   std::vector<double> rms(2862);
    TBranch        *b_ncell;   //!
    TBranch        *b_identifier;   //!
    TBranch        *b_layer;   //!
@@ -2102,13 +2104,13 @@ StatusCode FixLArElecCalib::fix14(const LArOnOffIdMapping *cabling) {
    TBranch        *b_rms;   //!
    tin->SetMakeClass(1);
    tin->SetBranchAddress("ncell", &ncell, &b_ncell);
-   tin->SetBranchAddress("identifier", identifier, &b_identifier);
-   tin->SetBranchAddress("layer", layer, &b_layer);
-   tin->SetBranchAddress("region", region, &b_region);
-   tin->SetBranchAddress("ieta", ieta, &b_ieta);
-   tin->SetBranchAddress("eta", eta, &b_eta);
-   tin->SetBranchAddress("average", average, &b_average);
-   tin->SetBranchAddress("rms", rms, &b_rms);
+   tin->SetBranchAddress("identifier", identifier.data(), &b_identifier);
+   tin->SetBranchAddress("layer", layer.data(), &b_layer);
+   tin->SetBranchAddress("region", region.data(), &b_region);
+   tin->SetBranchAddress("ieta", ieta.data(), &b_ieta);
+   tin->SetBranchAddress("eta", eta.data(), &b_eta);
+   tin->SetBranchAddress("average", average.data(), &b_average);
+   tin->SetBranchAddress("rms", rms.data(), &b_rms);
    tin->GetEntry(0);
 
 

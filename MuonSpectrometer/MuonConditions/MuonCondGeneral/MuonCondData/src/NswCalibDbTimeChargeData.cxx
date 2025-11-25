@@ -1,11 +1,12 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonCondData/NswCalibDbTimeChargeData.h"
-#include "MuonIdHelpers/IMuonIdHelperSvc.h"
-#include "Identifier/Identifier.h"
+#include "Identifier/IdentifierHash.h"
 #include "GeoModelKernel/throwExcept.h"
+#include <iostream>
+#include <iomanip>
 
 std::ostream& operator<<(std::ostream& ostr, const NswCalibDbTimeChargeData::CalibConstants& obj) {
     ostr<<"slope: "<<std::setprecision(15)<<obj.slope;//<<" pm "<<std::setprecision(15)<<obj.slopeError;

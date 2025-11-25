@@ -193,10 +193,6 @@ private:
   Gaudi::Property<bool> m_sequential{this, "Sequential", false,
     "Concurrent or (strict) Sequential ordering of algorithms"};
 
-  Gaudi::Property<double> m_timeout{this, "TimeOut", 0,
-    "Abort job after one algorithm or sequence reaches the time out. Timeout given in Nanoseconds "
-    "(official ATLAS units), despite its millisecond resolution"};
-
   Gaudi::Property<std::vector<std::string>> m_undeclaredOutputData{this, "ExtraDataForDynamicConsumers", {},
     "Pass these extra output data IDs, which are not declared by any of the algorithms or tools, to dynamic data consumers."};
 
@@ -206,7 +202,6 @@ private:
 
   ServiceHandle<IClassIDSvc> m_clidSvc;
 
-  unsigned int m_timeoutMilliseconds{0};  //!< timeout converted to ms
   const unsigned int m_maxPass{100};      //<! maximum number of iterations to process dynamic data dependencies
 };
 

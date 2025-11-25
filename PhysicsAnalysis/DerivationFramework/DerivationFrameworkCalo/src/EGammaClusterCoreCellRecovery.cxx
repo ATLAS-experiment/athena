@@ -1,10 +1,7 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-/////////////////////////////////////////////////////////////////
-// EGammaClusterCoreCellRecovery.cxx, (c) ATLAS Detector software
-///////////////////////////////////////////////////////////////////
 // Author: G. Unal (Guillaume.Unal@cern.ch)
 // Decorate egamma objects with the energies in L2 and L3 that are in cells
 // not included in the original supercluser due to the timing cut in topocluster
@@ -18,16 +15,7 @@
 #include <string>
 namespace {}
 
-// Constructor
-DerivationFramework::EGammaClusterCoreCellRecovery::EGammaClusterCoreCellRecovery(const std::string& t,
-										  const std::string& n,
-										  const IInterface* p)
-  : base_class(t, n, p)
-{
-}
-
-
-// Athena initialize and finalize
+// Athena initialize
 StatusCode
 DerivationFramework::EGammaClusterCoreCellRecovery::initialize()
 {
@@ -35,51 +23,35 @@ DerivationFramework::EGammaClusterCoreCellRecovery::initialize()
 
   // The main tool
   ATH_CHECK(m_egammaCellRecoveryTool.retrieve());
-  
+
   if (m_SGKey_photons.key().empty() && m_SGKey_electrons.key().empty()) {
     ATH_MSG_FATAL("No e-gamma collection provided for thinning. At least one "
                   "egamma collection (photons/electrons) must be provided!");
     return StatusCode::FAILURE;
   }
 
+  ATH_CHECK(m_SGKey_electrons.initialize(SG::AllowEmpty));
+  ATH_CHECK(m_SGKey_electrons_decorations.initialize(!m_SGKey_electrons.key().empty()));
   if (!m_SGKey_electrons.key().empty()) {
-    ATH_MSG_DEBUG("Using " << m_SGKey_electrons << " for electrons");
-    ATH_CHECK(m_SGKey_electrons.initialize());
-
-    const std::string containerKey = m_SGKey_electrons.key();
-    for (int i = 2; i <= 3; i++) {
-      for (int t = 0; t <=1 ; t++) {
-	m_SGKey_electrons_decorations.emplace_back(
-	  Form("%s.%sadded_Lr%d", containerKey.c_str(), (t == 0 ? "n" : "E"), i));
-      }
-    }
-    ATH_CHECK(m_SGKey_electrons_decorations.initialize());
+    ATH_MSG_DEBUG("Using " << m_SGKey_electrons.key() << " for electrons");
     if (msgLvl(MSG::DEBUG)) {
-      ATH_MSG_DEBUG("Decorations for " << containerKey);
+      ATH_MSG_DEBUG("Decorations for " << m_SGKey_electrons.key());
       for (const auto& s : m_SGKey_electrons_decorations)
-	{ ATH_MSG_DEBUG(s.key()); }
+        { ATH_MSG_DEBUG(s.key()); }
     }
   }
 
   // This tool needs the calo cells linked to the clusters...
   ATH_CHECK(m_SGKey_CaloCells.initialize());
 
+  ATH_CHECK(m_SGKey_photons.initialize(SG::AllowEmpty));
+  ATH_CHECK(m_SGKey_photons_decorations.initialize(!m_SGKey_photons.key().empty()));
   if (!m_SGKey_photons.key().empty()) {
-    ATH_MSG_DEBUG("Using " << m_SGKey_photons << " for photons");
-    ATH_CHECK(m_SGKey_photons.initialize());
-
-    const std::string containerKey = m_SGKey_photons.key();
-    for (int i = 2; i <= 3; i++) {
-      for (int t = 0; t <= 1 ; t++) {
-	m_SGKey_photons_decorations.emplace_back(
-	  Form("%s.%sadded_Lr%d", containerKey.c_str(), (t == 0 ? "n" : "E"), i));
-      }
-    }    
-    ATH_CHECK(m_SGKey_photons_decorations.initialize());
+    ATH_MSG_DEBUG("Using " << m_SGKey_photons.key() << " for photons");
     if (msgLvl(MSG::DEBUG)) {
-      ATH_MSG_DEBUG("Decorations for " << containerKey);
+      ATH_MSG_DEBUG("Decorations for " << m_SGKey_photons.key());
       for (const auto& s : m_SGKey_photons_decorations)
-	{ ATH_MSG_DEBUG(s.key()); }
+        { ATH_MSG_DEBUG(s.key()); }
     }
   }
 
@@ -89,10 +61,9 @@ DerivationFramework::EGammaClusterCoreCellRecovery::initialize()
 
 // The decoration itself
 StatusCode
-DerivationFramework::EGammaClusterCoreCellRecovery::addBranches() const
+DerivationFramework::EGammaClusterCoreCellRecovery::addBranches(const EventContext& ctx) const
 {
-  const EventContext& ctx = Gaudi::Hive::currentContext();
-  
+
   std::vector<SG::WriteDecorHandle<xAOD::EgammaContainer, char>> decon;
   std::vector<SG::WriteDecorHandle<xAOD::EgammaContainer, float>> decoE;
   decon.reserve(2);
@@ -113,8 +84,8 @@ DerivationFramework::EGammaClusterCoreCellRecovery::addBranches() const
     for (const auto* photon : *photonContainer.ptr()) {
       IegammaCellRecoveryTool::Info res = decorateObject(photon);
       for (int i = 0; i < 2; i++) {
-	decon[i](*photon) = res.nCells[i];
-	decoE[i](*photon) = res.eCells[i];
+        decon[i](*photon) = res.nCells[i];
+        decoE[i](*photon) = res.eCells[i];
       }
     }
   }
@@ -138,8 +109,8 @@ DerivationFramework::EGammaClusterCoreCellRecovery::addBranches() const
     for (const auto* electron : *electronContainer.ptr()) {
       IegammaCellRecoveryTool::Info res = decorateObject(electron);
       for (int i = 0; i < 2; i++) {
-	decon[i](*electron) = res.nCells[i];
-	decoE[i](*electron) = res.eCells[i];
+        decon[i](*electron) = res.nCells[i];
+        decoE[i](*electron) = res.eCells[i];
       }
     }
   }
@@ -149,21 +120,21 @@ DerivationFramework::EGammaClusterCoreCellRecovery::addBranches() const
 
 IegammaCellRecoveryTool::Info
 DerivationFramework::EGammaClusterCoreCellRecovery::decorateObject(
-  const xAOD::Egamma*& egamma) const
+                                                                   const xAOD::Egamma*& egamma) const
 {
   IegammaCellRecoveryTool::Info info{};
 
   ATH_MSG_DEBUG("Trying to recover cell for object of type " << egamma->type()
-		<< " pT = " << egamma->pt()
-		<< " eta = " << egamma->eta()
-		<< " phi = " << egamma->phi());
+                << " pT = " << egamma->pt()
+                << " eta = " << egamma->eta()
+                << " phi = " << egamma->phi());
 
   const xAOD::CaloCluster *clus = egamma->caloCluster();
   if (!clus) {
     ATH_MSG_WARNING("No associated egamma cluster. Do nothing");
     return info;
   }
- 
+
   // Find max energy cell in layer 2
   double etamax = -999., phimax = -999.;
   if (findMaxECell(clus,etamax,phimax).isFailure()) {
@@ -181,7 +152,7 @@ DerivationFramework::EGammaClusterCoreCellRecovery::decorateObject(
 
 StatusCode
 DerivationFramework::EGammaClusterCoreCellRecovery::findMaxECell(
-  const xAOD::CaloCluster *clus, double &etamax, double &phimax) const
+                                                                 const xAOD::CaloCluster *clus, double &etamax, double &phimax) const
 {
   const CaloClusterCellLink* cellLinks = clus->getCellLinks();
   if (!cellLinks) {
@@ -214,20 +185,20 @@ DerivationFramework::EGammaClusterCoreCellRecovery::findMaxECell(
     const CaloCell* cell = (*it_cell);
     if (cell) {
       if (!cell->caloDDE()) {
-	ATH_MSG_WARNING("Calo cell without detector element ?? eta = "
-			<< cell->eta() << " phi = " << cell->phi());
-	continue;
+        ATH_MSG_WARNING("Calo cell without detector element ?? eta = "
+                        << cell->eta() << " phi = " << cell->phi());
+        continue;
       }
       int layer = cell->caloDDE()->getSampling();
       if (layer == CaloSampling::EMB2 || layer == CaloSampling::EME2) {
-	double w     = it_cell.weight();
-	double eCell = cell->energy();
-	if (m_UseWeightForMaxCell) eCell *= w;
-	if (eCell > emax) {
-	  emax           = eCell;
-	  maxcell.first  = cell;
-	  maxcell.second = w;
-	}
+        double w     = it_cell.weight();
+        double eCell = cell->energy();
+        if (m_UseWeightForMaxCell) eCell *= w;
+        if (eCell > emax) {
+          emax           = eCell;
+          maxcell.first  = cell;
+          maxcell.second = w;
+        }
       }
     }
   }
@@ -241,11 +212,11 @@ DerivationFramework::EGammaClusterCoreCellRecovery::findMaxECell(
       double phiAmax = clus->phimax(sam);
       double vemax   = clus->energy_max(sam);
       ATH_MSG_DEBUG("Cluster energy in sampling 2 = " << clus->energyBE(2)
-		    << " maximum layer 2 energy cell, E = " << maxcell.first->energy()
-		    << " check E = " << vemax
-		    << " w = " << maxcell.second << "\n"
-		    << " in calo  frame, eta = " << etamax << " phi = " << phimax << "\n"
-		    << " in ATLAS frame, eta = " << etaAmax << " phi = " << phiAmax);
+                    << " maximum layer 2 energy cell, E = " << maxcell.first->energy()
+                    << " check E = " << vemax
+                    << " w = " << maxcell.second << "\n"
+                    << " in calo  frame, eta = " << etamax << " phi = " << phimax << "\n"
+                    << " in ATLAS frame, eta = " << etaAmax << " phi = " << phiAmax);
     }
   } else {
     ATH_MSG_WARNING("No layer 2 cell with positive energy ! Should never happen");

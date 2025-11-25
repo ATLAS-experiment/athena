@@ -51,6 +51,7 @@ public:
   // Get the nominal resolution
   StatusCode getNominalResolutionData(const xAOD::Jet& jet, double& resolution) const override;
   StatusCode getNominalResolutionMC(  const xAOD::Jet& jet, double& resolution) const override;
+  StatusCode getNominalResolutionHist( const xAOD::Jet& jet, double& resolution, const TH2D* histo) const;
   
 private:
   StatusCode calibrate(xAOD::Jet& jet, JetEventInfo& jetEventInfo) const;

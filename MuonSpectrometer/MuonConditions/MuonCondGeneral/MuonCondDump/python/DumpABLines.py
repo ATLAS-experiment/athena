@@ -11,9 +11,10 @@ def MuonABLineJsonDumpAlgCfg(flags, name = "MuonABLineJsonDumpAlg", **kwargs):
 if __name__ == "__main__":
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
     from MuonCondTest.MdtCablingTester import SetupArgParser
+    from AthenaConfiguration.TestDefaults import defaultTestFiles
     parser = SetupArgParser()
     parser.set_defaults(output="ForkLiftTruckDrivingIsFun.json")
-    parser.set_defaults(inputFile = ["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/CampaignInputs/data23/ESD/data23_cos.00448208.express_express.recon.ESD.x721/73events.data23_cos.00448208.express_express.recon.ESD.x721._lb0003._SFO-ALL._0001.1"])  
+    parser.set_defaults(inputFile = defaultTestFiles.ESD_RUN3_DATA22)  
     parser.add_argument("--alignJsonFile", 
                         help="External JSON file parsed to the Alignment algorithm", 
                         default="")

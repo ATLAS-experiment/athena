@@ -7,7 +7,7 @@
 #include <AthenaBaseComps/AthAlgorithm.h>
 #include <MuonIdHelpers/IMuonIdHelperSvc.h>
 #include <StoreGate/ReadHandleKeyArray.h>
-#include <ActsGeometryInterfaces/ActsGeometryContext.h>
+#include <ActsGeometryInterfaces/GeometryContext.h>
 #include <MuonSpacePoint/SpacePointContainer.h>
 
 

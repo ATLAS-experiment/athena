@@ -60,9 +60,10 @@ def TrackCountHypoToolGen(flags, chainDict):
     if "mb_sptrk" in chainDict["chainName"]:
         hypo.minPt = 100*Units.MeV
         hypo.maxZ0 = 401*Units.millimeter
-    if "mb_sptrk_pt" in chainDict["chainName"]:
-        hypo.minPt = ptToGeV(chainDict["chainParts"][0]["hypoPtInfo"].strip("pt"))*Units.GeV
-        hypo.maxZ0 = 401*Units.millimeter
+        if "_pt" in chainDict["chainName"]:
+            hypo.minPt = ptToGeV(chainDict["chainParts"][0]["hypoPtInfo"].strip("pt"))*Units.GeV
+        if "_trk" in chainDict["chainName"]:
+            hypo.minNtrks = int(chainDict["chainParts"][0]["hypoTrkInfo"].strip("trk"))
     if "excl" in chainDict["chainName"]:
         hypo.exclusive = True
         hypo.minPt = ptToGeV(chainDict["chainParts"][0]["hypoPtInfo"].strip("pt"))*Units.GeV

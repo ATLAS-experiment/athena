@@ -1,10 +1,7 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-/////////////////////////////////////////////////////////////////
-// ClusterEnergyPerLayerDecorator.cxx, (c) ATLAS Detector software
-///////////////////////////////////////////////////////////////////
 // Author: Bruno Lenzi,
 //         Giovanni Marchiori (giovanni.marchiori@cern.ch)
 // Decorate egamma objects with the energy per layer for a rectangular cluster
@@ -15,24 +12,7 @@
 
 #include <TString.h>
 
-// Constructor
-DerivationFramework::ClusterEnergyPerLayerDecorator::
-  ClusterEnergyPerLayerDecorator(const std::string& t,
-                                 const std::string& n,
-                                 const IInterface* p)
-  : base_class(t, n, p)
-{
-  declareProperty("neta", m_eta_size);
-  declareProperty("nphi", m_phi_size);
-  declareProperty("layers", m_layers = { 0, 1, 2, 3 });
-}
-
-// Destructor
-DerivationFramework::ClusterEnergyPerLayerDecorator::
-  ~ClusterEnergyPerLayerDecorator()
-= default;
-
-// Athena initialize and finalize
+// Athena initialize
 StatusCode
 DerivationFramework::ClusterEnergyPerLayerDecorator::initialize()
 {
@@ -45,58 +25,38 @@ DerivationFramework::ClusterEnergyPerLayerDecorator::initialize()
   }
 
   ATH_CHECK(m_caloFillRectangularTool.retrieve());
-  // how to add a statement to theck that the tool indeed has the size matching
+  // how to add a statement to check that the tool indeed has the size matching
   // the neta and nphi properties? ATH_MSG_DEBUG("CaloFillRectangularCluster
   // print size ...
   m_tool =
     dynamic_cast<const CaloFillRectangularCluster*>(
-      &(*m_caloFillRectangularTool));
-  if (m_tool==nullptr) {
+                                                    &(*m_caloFillRectangularTool));
+  if (!m_tool) {
     ATH_MSG_ERROR("Pointer to CaloFillRectantularCluster tool is invalid");
     return StatusCode::FAILURE;
   }
 
   ATH_CHECK(m_SGKey_caloCells.initialize());
-
+  ATH_CHECK(m_SGKey_electrons.initialize(SG::AllowEmpty));
   if (!m_SGKey_electrons.key().empty()) {
     ATH_MSG_DEBUG("Using " << m_SGKey_electrons << " for electrons");
-    ATH_CHECK(m_SGKey_electrons.initialize());
-
-    const char* containerKey = m_SGKey_electrons.key().c_str();
-    for (int layer : m_layers) {
-      m_SGKey_electrons_decorations.emplace_back(
-        Form("%s.E%dx%d_Lr%d", containerKey, m_eta_size, m_phi_size, layer));
-    }
-    ATH_CHECK(m_SGKey_electrons_decorations.initialize());
   }
+  ATH_CHECK(m_SGKey_electrons_decorations.initialize(!m_SGKey_electrons.key().empty()));
 
+  ATH_CHECK(m_SGKey_photons.initialize(SG::AllowEmpty));
   if (!m_SGKey_photons.key().empty()) {
     ATH_MSG_DEBUG("Using " << m_SGKey_photons << " for photons");
-    ATH_CHECK(m_SGKey_photons.initialize());
-
-    const char* containerKey = m_SGKey_photons.key().c_str();
-    for (int layer : m_layers) {
-      m_SGKey_photons_decorations.emplace_back(
-        Form("%s.E%dx%d_Lr%d", containerKey, m_eta_size, m_phi_size, layer));
-    }
-    ATH_CHECK(m_SGKey_photons_decorations.initialize());
   }
+  ATH_CHECK(m_SGKey_photons_decorations.initialize(!m_SGKey_photons.key().empty()));
 
   return StatusCode::SUCCESS;
 }
 
-StatusCode
-DerivationFramework::ClusterEnergyPerLayerDecorator::finalize()
-{
-
-  return StatusCode::SUCCESS;
-}
 
 // The decoration itself
 StatusCode
-DerivationFramework::ClusterEnergyPerLayerDecorator::addBranches() const
+DerivationFramework::ClusterEnergyPerLayerDecorator::addBranches(const EventContext& ctx) const
 {
-  const EventContext& ctx = Gaudi::Hive::currentContext();
 
   // Retrieve cell container
 
@@ -115,8 +75,8 @@ DerivationFramework::ClusterEnergyPerLayerDecorator::addBranches() const
     std::vector<SG::WriteDecorHandle<xAOD::EgammaContainer, float>> decorations;
     for (unsigned int i = 0; i < m_layers.size(); i++) {
       decorations.emplace_back(
-        
-          m_SGKey_photons_decorations[i], ctx);
+
+                               m_SGKey_photons_decorations[i], ctx);
     }
 
     // Decorate photons
@@ -141,8 +101,8 @@ DerivationFramework::ClusterEnergyPerLayerDecorator::addBranches() const
     std::vector<SG::WriteDecorHandle<xAOD::EgammaContainer, float>> decorations;
     for (unsigned int i = 0; i < m_layers.size(); i++) {
       decorations.emplace_back(
-        
-          m_SGKey_electrons_decorations[i], ctx);
+
+                               m_SGKey_electrons_decorations[i], ctx);
     }
 
     // Decorate electrons
@@ -159,9 +119,9 @@ DerivationFramework::ClusterEnergyPerLayerDecorator::addBranches() const
 
 std::vector<float>
 DerivationFramework::ClusterEnergyPerLayerDecorator::decorateObject(
-  const EventContext& ctx,
-  const xAOD::Egamma* egamma,
-  const CaloCellContainer* cellCont) const
+                                                                    const EventContext& ctx,
+                                                                    const xAOD::Egamma* egamma,
+                                                                    const CaloCellContainer* cellCont) const
 {
   std::vector<float> result;
   result.clear();

@@ -2,19 +2,7 @@
   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "xAODTau/TauJet.h"
-#include "xAODTracking/Vertex.h"
-#include "xAODTracking/TrackParticle.h"
-
-#include "TLorentzVector.h"
-#include "TVector3.h"
-
-#include <cmath>
-#include <map>
-#include <vector>
-
 #include "PanTauAlgs/Tool_FeatureExtractor.h"
-#include "PanTauAlgs/Tool_InformationStore.h"
 #include "PanTauAlgs/TauConstituent.h"
 #include "PanTauAlgs/PanTauSeed.h"
 #include "PanTauAlgs/TauFeature.h"
@@ -33,8 +21,7 @@ bool sortTauConstituentEt(const PanTau::TauConstituent* u, const PanTau::TauCons
 
 PanTau::Tool_FeatureExtractor::Tool_FeatureExtractor(const std::string& name) :
   asg::AsgTool(name)
-{
-}
+{}
 
 
 StatusCode PanTau::Tool_FeatureExtractor::initialize() {
@@ -45,10 +32,7 @@ StatusCode PanTau::Tool_FeatureExtractor::initialize() {
   ATH_CHECK( HelperFunctions::bindToolHandle( m_Tool_InformationStore, m_Tool_InformationStoreName ) );
   ATH_CHECK( m_Tool_InformationStore.retrieve() );
     
-  ATH_CHECK( m_Tool_InformationStore->getInfo_String("FeatureExtractor_VarTypeName_varTypeName_Sum",          m_varTypeName_Sum) );
   ATH_CHECK( m_Tool_InformationStore->getInfo_String("FeatureExtractor_VarTypeName_varTypeName_Ratio",        m_varTypeName_Ratio) );
-  ATH_CHECK( m_Tool_InformationStore->getInfo_String("FeatureExtractor_VarTypeName_varTypeName_Isolation",    m_varTypeName_Isolation) );
-  ATH_CHECK( m_Tool_InformationStore->getInfo_String("FeatureExtractor_VarTypeName_varTypeName_Num",          m_varTypeName_Num) );
   ATH_CHECK( m_Tool_InformationStore->getInfo_String("FeatureExtractor_VarTypeName_varTypeName_Mean",         m_varTypeName_Mean) );
   ATH_CHECK( m_Tool_InformationStore->getInfo_String("FeatureExtractor_VarTypeName_varTypeName_StdDev",       m_varTypeName_StdDev) );
   ATH_CHECK( m_Tool_InformationStore->getInfo_String("FeatureExtractor_VarTypeName_varTypeName_HLV",          m_varTypeName_HLV) );

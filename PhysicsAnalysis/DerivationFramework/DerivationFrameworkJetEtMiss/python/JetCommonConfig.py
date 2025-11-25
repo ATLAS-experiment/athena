@@ -191,7 +191,7 @@ def AddEventCleanFlagsCfg(ConfigFlags, workingPoints = ['Loose', 'Tight', 'Loose
         if doEvent_EMTopo:
             jetCleaningTool_legacy = acc.popToolsAndMerge(JetCleaningToolCfg(
                     ConfigFlags, 'JetCleaningTool_'+cleaningLevel+'_EMTopo',
-                    'AntiKt4EMTopo', cleaningLevel, False))
+                    'AntiKt4EMTopoJets', cleaningLevel, False))
             acc.addPublicTool(jetCleaningTool_legacy)
             ecTool_legacy = acc.popToolsAndMerge(EventCleaningToolCfg(
                     ConfigFlags,'EventCleaningTool_'+wp+'_EMTopo', cleaningLevel))

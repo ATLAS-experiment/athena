@@ -44,9 +44,9 @@ FPGATrackSimKeyLayerTool::rotatedConfig FPGATrackSimKeyLayerTool::getRotatedConf
     return result;
 }
 
-std::pair<double, double> FPGATrackSimKeyLayerTool::getRotatedHit(const std::pair<double, double>& rotang, const FPGATrackSimHit *hit) const
+std::pair<double, double> FPGATrackSimKeyLayerTool::getRotatedHit(const std::pair<double, double>& rotang, double rHit, double phiHit) const
 {
-    auto xyh = getXY(hit->getR(), hit->getGPhi());
+    auto xyh = getXY(rHit, phiHit);
     return rotateXY(xyh, rotang);
 }
 
@@ -105,6 +105,7 @@ FPGATrackSimTrackPars FPGATrackSimKeyLayerTool::keyParsToTrackPars(const KeyLyrP
 
         pars[FPGATrackSimTrackPars::IHIP] = -1 * Rinv / (2.0 * FPGATrackSimBinUtil::GeomHelpers::CurvatureConstant);
 
+        
         std::pair<double, double> xycp(-d + xy1p.first, y / 2.0 + xy1p.second);
 
         pars[FPGATrackSimTrackPars::ID0] = -1 * sign * (std::abs(1 / Rinv) - std::hypot(xycp.first, xycp.second));
@@ -129,14 +130,14 @@ double FPGATrackSimKeyLayerTool::zExpected(const KeyLyrPars& keypars, double r) 
 }
 
 // takes hit position and calculated what xm should be for that hit
-double FPGATrackSimKeyLayerTool::xmForHit(const KeyLyrPars& keypars, const FPGATrackSimHit *hit) const
+double FPGATrackSimKeyLayerTool::xmForHit(const KeyLyrPars& keypars, double rHit, double phiHit) const
 {
     auto rotated_coords = getRotatedConfig(keypars);
     auto xy1p = rotated_coords.xy1p;
     auto rotang = rotated_coords.rotang;
     auto y = rotated_coords.y;
 
-    auto xyhp = getRotatedHit(rotang, hit);
+    auto xyhp = getRotatedHit(rotang, rHit, phiHit);
     double xh = xyhp.first - xy1p.first;
     double yh = xyhp.second - xy1p.second;
 
@@ -153,28 +154,28 @@ double FPGATrackSimKeyLayerTool::xmForHit(const KeyLyrPars& keypars, const FPGAT
 }
 
 // Find shift from nominal track to hit in the "x" direction 
-double FPGATrackSimKeyLayerTool::deltaX(const KeyLyrPars& keypars, const FPGATrackSimHit *hit) const
+double FPGATrackSimKeyLayerTool::deltaX(const KeyLyrPars& keypars,  double rHit, double phiHit) const
 {
     auto rotated_coords = getRotatedConfig(keypars);
 
     auto rotang = rotated_coords.rotang;
 
-    auto xyhp = getRotatedHit(rotang, hit);
+    auto xyhp = getRotatedHit(rotang, rHit, phiHit);
 
     double xh = xyhp.first-rotated_coords.xy1p.first;
 
-    return xh - xExpected(keypars,hit);
+    return xh - xExpected(keypars,rHit, phiHit);
 }
 
 // Find shift from nominal track to hit in the "x" direction 
-double FPGATrackSimKeyLayerTool::xExpected(const KeyLyrPars& keypars, const FPGATrackSimHit *hit) const
+double FPGATrackSimKeyLayerTool::xExpected(const KeyLyrPars& keypars,  double rHit, double phiHit) const
 {
     auto rotated_coords = getRotatedConfig(keypars);
 
     auto rotang = rotated_coords.rotang;
     auto y = rotated_coords.y;
 
-    auto xyhp = getRotatedHit(rotang, hit);
+    auto xyhp = getRotatedHit(rotang, rHit, phiHit);
 
     double yh = xyhp.second-rotated_coords.xy1p.second;
 

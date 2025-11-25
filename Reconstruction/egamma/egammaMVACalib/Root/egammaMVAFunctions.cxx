@@ -140,6 +140,45 @@ namespace egammaMVAFunctions
     return funcLibraryPtr;
   }
 
+  std::unique_ptr<funcMap_t> initializeForwardElectronFuncs(bool useLayerCorrected) {
+    auto funcLibraryPtr = std::make_unique<funcMap_t>();
+    funcMap_t& funcLibrary = *funcLibraryPtr;
+
+    funcLibrary["el_cl_e"] = [](const xAOD::Egamma*, const xAOD::CaloCluster* cl)
+      { return compute_cl_e(*cl); };
+    funcLibrary["abs_el_cl_eta"] = [](const xAOD::Egamma*, const xAOD::CaloCluster* cl)
+      { return std::abs(compute_cl_eta(*cl));  };
+    funcLibrary["etaModCalo"] = [](const xAOD::Egamma*, const xAOD::CaloCluster* cl)
+      { return (std::abs(cl->eta()) < 3.15 ? compute_etaMod_EMEC(*cl) : compute_etaMod_FCAL(*cl)); };
+    funcLibrary["cellIndex"] = [](const xAOD::Egamma*, const xAOD::CaloCluster* cl)
+      { return (std::abs(cl->eta()) < 3.15 ? compute_cellIndex_EMEC(*cl) : compute_cellIndex_FCAL(*cl)); };
+    funcLibrary["el_cl_phi"] = [](const xAOD::Egamma*, const xAOD::CaloCluster* cl)
+      { return compute_cl_phi(*cl); };
+    funcLibrary["phiMod2pi32"] = [](const xAOD::Egamma*, const xAOD::CaloCluster* cl)
+      { return compute_phiMod_EMEC(*cl); };
+    if (useLayerCorrected) {
+      funcLibrary["el_cl_secondR"] = [](const xAOD::Egamma* eg, const xAOD::CaloCluster*)
+	{ return compute_cl_secondR_fudge(*eg); };
+    } else {
+      funcLibrary["el_cl_secondR"] = [](const xAOD::Egamma*, const xAOD::CaloCluster* cl)
+	{ return compute_cl_secondR(*cl); };
+    }
+    funcLibrary["Es1Es2Ratio"] = [](const xAOD::Egamma*, const xAOD::CaloCluster* cl)
+      { return compute_R12_EMEC(*cl); };
+    funcLibrary["el_cl_centerX"] = [](const xAOD::Egamma*, const xAOD::CaloCluster* cl)
+      { return compute_cl_x(*cl); };
+    funcLibrary["el_cl_centerY"] = [](const xAOD::Egamma*, const xAOD::CaloCluster* cl)
+      { return compute_cl_y(*cl); };
+    funcLibrary["abs_el_cl_centerZ"] = [](const xAOD::Egamma*, const xAOD::CaloCluster* cl)
+      {  return std::abs(compute_cl_z(*cl)); };
+    funcLibrary["el_cl_centerLambda"] = [](const xAOD::Egamma*, const xAOD::CaloCluster* cl)
+      { return compute_cl_centerLambda(*cl); };
+    funcLibrary["el_cl_secondMoment"] = [](const xAOD::Egamma*, const xAOD::CaloCluster* cl)
+      { return compute_cl_secondDensity(*cl); };
+    
+    return funcLibraryPtr;
+  }
+
 
   // Initialize the functions that just depend on the cluster.
   // This helper function is not meant for external use.

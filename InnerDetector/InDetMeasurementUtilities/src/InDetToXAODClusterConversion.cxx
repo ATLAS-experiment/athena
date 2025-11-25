@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "src/InDetToXAODClusterConversion.h"
@@ -22,6 +22,7 @@
 #include "SCT_ReadoutGeometry/StripStereoAnnulusDesign.h"
 
 #include "AthContainers/DataVector.h"
+#include "AthAllocators/DataPool.h"
 #include <iterator>
 
 
@@ -92,13 +93,23 @@ StatusCode InDetToXAODClusterConversion::convertPixelClusters(const EventContext
   }
 
   SG::WriteHandle<xAOD::PixelClusterContainer> outputPixelClusterContainer(m_outputPixelClusterContainerKey, ctx);
-  ATH_CHECK( outputPixelClusterContainer.record (std::make_unique<xAOD::PixelClusterContainer>(),
+  ATH_CHECK( outputPixelClusterContainer.record (std::make_unique<xAOD::PixelClusterContainer>(SG::VIEW_ELEMENTS, SG::ALWAYS_TRACK_INDICES),
 						 std::make_unique<xAOD::PixelClusterAuxContainer>()) );
   ATH_MSG_DEBUG( "Recorded xAOD::PixelClusterContainer with key: " << m_outputPixelClusterContainerKey.key()  );
 
   SG::ReadHandle<InDet::PixelClusterContainer> inputPixelClusterContainer(m_inputPixelClusterContainerKey, ctx);
 
   static const SG::AuxElement::Accessor< ElementLink< InDet::PixelClusterCollection > > pixelLinkAcc("pixelClusterLink");
+
+  size_t nclusters = 0;
+  for (const auto *const clusterCollection : *inputPixelClusterContainer) {
+    if (!clusterCollection) continue;
+    nclusters += clusterCollection->size();
+  }
+  DataPool<xAOD::PixelCluster> pool (nclusters);
+  outputPixelClusterContainer->push_new (nclusters, [&pool](){return pool.nextElementPtr();});
+  size_t icluster = 0;
+
   for (const auto *const clusterCollection : *inputPixelClusterContainer) {
     if (!clusterCollection) continue;
     for(const auto *const theCluster : *clusterCollection)  {
@@ -110,14 +121,17 @@ StatusCode InDetToXAODClusterConversion::convertPixelClusters(const EventContext
 	return StatusCode::FAILURE;
       }
 
-      xAOD::PixelCluster * pixelCl = new xAOD::PixelCluster();
-      outputPixelClusterContainer->push_back(pixelCl);
+      xAOD::PixelCluster * pixelCl = outputPixelClusterContainer->at(icluster++);
       ATH_CHECK( TrackingUtilities::convertInDetToXaodCluster(*theCluster, *element, *pixelCl) );
 
       // Create auxiliary branches accessors
       ElementLink<InDet::PixelClusterCollection> pixelLink(theCluster, *clusterCollection);
       pixelLinkAcc( *pixelCl ) = pixelLink;
     }
+  }
+  if (icluster != outputPixelClusterContainer->size()) {
+    ATH_MSG_ERROR("xAOD::PixelClusterContainer miscount; " << icluster << " versus " << outputPixelClusterContainer->size());
+    return StatusCode::FAILURE;
   }
 
   ATH_MSG_DEBUG("xAOD::PixelClusterContainer with size: " << outputPixelClusterContainer->size());
@@ -133,11 +147,20 @@ StatusCode InDetToXAODClusterConversion::convertStripClusters(const EventContext
   }
 
   SG::WriteHandle<xAOD::StripClusterContainer> outputStripClusterContainer(m_outputStripClusterContainerKey, ctx);
-  ATH_CHECK( outputStripClusterContainer.record (std::make_unique<xAOD::StripClusterContainer>(),
+  ATH_CHECK( outputStripClusterContainer.record (std::make_unique<xAOD::StripClusterContainer>(SG::VIEW_ELEMENTS, SG::ALWAYS_TRACK_INDICES),
 						 std::make_unique<xAOD::StripClusterAuxContainer>()) );
   ATH_MSG_DEBUG( "Recorded xAOD::StripClusterContainer with key: " << m_outputStripClusterContainerKey.key()  );
 
   SG::ReadHandle<InDet::SCT_ClusterContainer> inputStripClusterContainer(m_inputStripClusterContainerKey, ctx);
+
+  size_t nclusters = 0;
+  for (const auto *const clusterCollection : *inputStripClusterContainer) {
+    if (!clusterCollection) continue;
+    nclusters += clusterCollection->size();
+  }
+  DataPool<xAOD::StripCluster> pool (nclusters);
+  outputStripClusterContainer->push_new (nclusters, [&pool](){return pool.nextElementPtr();});
+  size_t icluster = 0;
 
   static const SG::AuxElement::Accessor< ElementLink< InDet::SCT_ClusterCollection > > stripLinkAcc("sctClusterLink");
   for (const auto *const clusterCollection : *inputStripClusterContainer) {
@@ -152,14 +175,17 @@ StatusCode InDetToXAODClusterConversion::convertStripClusters(const EventContext
       }
 
 
-      xAOD::StripCluster * stripCl = new xAOD::StripCluster();
-      outputStripClusterContainer->push_back(stripCl);
+      xAOD::StripCluster * stripCl = outputStripClusterContainer->at(icluster++);
       ATH_CHECK( TrackingUtilities::convertInDetToXaodCluster(*theCluster, *element, *stripCl, m_isITk) );
       
       // Create auxiliary branches accessors
       ElementLink<InDet::SCT_ClusterCollection> stripLink(theCluster, *clusterCollection);
       stripLinkAcc( *stripCl ) = stripLink;
     }
+  }
+  if (icluster != outputStripClusterContainer->size()) {
+    ATH_MSG_ERROR("xAOD::StripClusterContainer miscount; " << icluster << " versus " << outputStripClusterContainer->size());
+    return StatusCode::FAILURE;
   }
 
   ATH_MSG_DEBUG("xAOD::StripClusterContainer with size: " << outputStripClusterContainer->size());

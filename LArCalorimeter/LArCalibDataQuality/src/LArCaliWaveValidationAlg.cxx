@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArCalibDataQuality/LArCaliWaveValidationAlg.h"
@@ -160,7 +160,7 @@ bool LArCaliWaveValidationAlg::validateChannel(const LArCondObj& ref, const LArC
   }
 
  
-  if (1000*fabs(ampVal-ampRef)/ampRef > ampTolerance || 1000*fabs(fwhmVal-fwhmRef)/fwhmRef > fwhmTolerance) {
+  if (ampRef!=0 && fwhmRef!=0 && (1000*fabs(ampVal-ampRef)/ampRef > ampTolerance || 1000*fabs(fwhmVal-fwhmRef)/fwhmRef > fwhmTolerance)) {
     retval=false;
     if (m_nFailedValidation<m_maxmessages) {
       msg().precision(2);

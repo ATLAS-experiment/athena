@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # @file: AthenaServices/python/Dso.py
 # @purpose: simple interface to the rootmap files to easily locate reflex
@@ -28,6 +28,38 @@ try:
     import RootUtils.PyROOTFixes  # noqa: F401
 except ImportError:
     pass
+
+_cpp_builtins = (
+    'char',      'unsigned char',      'signed char',
+    'signed',
+    'short int',                       'short signed', 'short signed int',
+    'short',     'unsigned short',     'signed short',
+    'int',       'unsigned int',
+
+    'long int',
+    'long signed int',
+    'signed long int',
+
+    'long',
+    'long signed',  'signed long',
+    'unsigned long',
+    'unsigned long int',
+    'long unsigned int',
+
+    'long long',
+    'long long int',
+    'unsigned long long',
+    'longlong',
+
+    # no clue from where this one comes from, who's requesting it nor who
+    # got the alien naming scheme idea...
+    'ulonglong',
+
+    'float',
+    'double',
+    'long double',
+    'bool',
+    )
 
 ### classes -------------------------------------------------------------------
 
@@ -62,7 +94,6 @@ class DsoDb(_Dso.PyDsoDb):
         return
 
     def has_type (self, typename):
-        global _cpp_builtins
         if typename in _cpp_builtins:
             return True
         # need to massage a bit the typename to match ROOT naming convention
@@ -83,7 +114,6 @@ class DsoDb(_Dso.PyDsoDb):
         _rflx_name    = self._to_rflx_name    (typename)
         self.msg.verbose("------- loading type [%s]...", typename)
         
-        global _cpp_builtins
         if typename in _cpp_builtins:
             self.msg.verbose(" ==> [ok] (builtin)")
             return self._rflx_type (_rflx_name)

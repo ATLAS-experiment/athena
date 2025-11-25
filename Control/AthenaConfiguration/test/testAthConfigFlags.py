@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.AthConfigFlags import AthConfigFlags, isGaudiEnv
 from AthenaConfiguration.AllConfigFlags import initConfigFlags
@@ -49,7 +49,24 @@ class BasicTests(FlagsSetup):
         self.assertFalse( self.flags.hasFlag("A") )  # category, not flag
         self.assertTrue( self.flags.hasFlag("A.One") )
         self.assertTrue( self.flags.hasCategory("A.B") )
+        self.assertFalse( self.flags.hasCategory("Atest") )  # flag, not category
         self.assertFalse( self.flags.hasCategory("Z") )
+
+    def test_hasattr(self):
+        """Test hasattr"""
+        self.assertTrue( hasattr(self.flags, "Atest") )
+        self.assertTrue( hasattr(self.flags, "A") )  # also works for category
+        self.assertTrue( hasattr(self.flags, "A.One") )
+        self.assertTrue( hasattr(self.flags, "A.B") )
+        self.assertFalse( hasattr(self.flags, "Z") )
+
+    def test_contains(self):
+        """Test in operator"""
+        self.assertTrue( "Atest" in self.flags )
+        self.assertTrue( "A" in self.flags )  # also works for category
+        self.assertTrue( "One" in self.flags.A )
+        self.assertTrue( "B" in self.flags.A )
+        self.assertFalse( "Z" in self.flags )
 
     def test_dependentFlag(self):
         """The dependent flags will use another flag value to establish its own value"""
@@ -189,10 +206,9 @@ class BasicTests(FlagsSetup):
         self.assertEqual(self.flags.A.B.C, bdict['C'])
 
     def test_iterator(self):
-        self.assertTrue('A' in self.flags)
-        self.assertFalse('Z' in self.flags)
-        self.assertTrue('B' in self.flags.A)
-        self.assertFalse('Z' in self.flags.A)
+        self.assertEqual( list(iter(self.flags)), ['Atest', 'A'] )
+        self.assertEqual( list(iter(self.flags.A)), ['One', 'B', 'dependentFlag'] )
+
 
 class TestFlagsSetupDynamic(FlagsSetup):
     def setUp(self):
@@ -300,26 +316,36 @@ class TestFlagsSetupDynamic(FlagsSetup):
         wdict = copyf.Z.asdict()['W']
         self.assertEqual(cdict, wdict)
 
-
     def test_exists(self):
         """Test `has` methods"""
         self.assertTrue( self.flags.hasCategory("Z") )
-        self.assertFalse( self.flags.hasCategory("Z.C") )  # sub-category not auto-resolved
+        self.assertTrue( self.flags.hasCategory("Z.C") )  # sub-category is loaded on check
         # now load category:
         self.flags.needFlagsCategory("Z")
         self.assertTrue( self.flags.hasFlag("Z.A") )
         self.assertTrue( self.flags.hasCategory("Z.C") )
 
+    def test_hasattr(self):
+        """Test hasattr"""
+        self.assertTrue( hasattr(self.flags, "Z") )
+        self.assertTrue( hasattr(self.flags, "Z.C") )  # sub-category is loaded on check
+        self.assertTrue( hasattr(self.flags, "Z.A") )
+
+    def test_contains(self):
+        """Test in operator"""
+        self.assertTrue( "Z" in self.flags )
+        self.assertTrue( "C" in self.flags.Z )
+        self.assertTrue( "A" in self.flags.Z )
+
     def test_cloneExists(self):
         """test if flags can be found after cloning"""
         clonef = self.flags.cloneAndReplace('W', 'Z')
-        clonef.loadAllDynamicFlags()
         self.assertTrue(clonef.hasFlag('W.A'))
+        clonef.W.A  # check that access works
         self.assertFalse(clonef.hasFlag('Z.A'))
         
     def test_nonReplacingCloneExists(self):
         clonef = self.flags.cloneAndReplace('W', 'Z', True)
-        clonef.loadAllDynamicFlags()
         self.assertTrue(clonef.hasFlag('W.A'))
         self.assertTrue(clonef.hasFlag('Z.A'))
     
@@ -327,7 +353,6 @@ class TestFlagsSetupDynamic(FlagsSetup):
         clonef = self.flags.cloneAndReplace('W1', 'Z', True)
         clonef = clonef.cloneAndReplace('W2', 'Z', True)
         clonef = clonef.cloneAndReplace('W3', 'W1', True)
-        clonef.loadAllDynamicFlags()
         self.assertTrue(clonef.hasFlag('W1.A'))
         self.assertTrue(clonef.hasFlag('W2.A'))
         self.assertTrue(clonef.hasFlag('W3.A'))
@@ -349,8 +374,6 @@ class TestFlagsSetupDynamic(FlagsSetup):
     def test_circularClone(self):
         clonef1 = self.flags.cloneAndReplace('W', 'Z')
         clonef2 = clonef1.cloneAndReplace('Z', 'W')
-        clonef1.loadAllDynamicFlags()
-        clonef2.loadAllDynamicFlags()
         self.assertTrue(clonef1.hasFlag('W.A'))
         self.assertTrue(clonef2.hasFlag('Z.A'))
         self.assertFalse(clonef1.hasFlag('Z.A'))
@@ -359,8 +382,6 @@ class TestFlagsSetupDynamic(FlagsSetup):
     def test_circularNonReplacingClone(self):
         clonef1 = self.flags.cloneAndReplace('W', 'Z', True)
         clonef2 = clonef1.cloneAndReplace('Z', 'W', True)
-        clonef1.loadAllDynamicFlags()
-        clonef2.loadAllDynamicFlags()
         self.assertTrue(clonef1.hasFlag('Z.A'))
         self.assertTrue(clonef1.hasFlag('W.A'))
         self.assertTrue(clonef2.hasFlag('Z.A'))
@@ -413,6 +434,8 @@ class TestFlagsSetupDynamic(FlagsSetup):
         self.assertTrue('Z' in self.flags)
         self.assertTrue('A' in self.flags.Z)
         clonez2w = self.flags.cloneAndReplace('W', 'Z')
+        self.assertEqual(list(iter(clonez2w)), ['Atest', 'A', 'W', 'X', 'T'])
+        self.assertEqual(list(iter(clonez2w.W)), ['A', 'B', 'C', 'Xclone1', 'Xclone2'])
         self.assertFalse('Z' in clonez2w)
         self.assertTrue('W' in clonez2w)
         self.assertFalse('Z' in clonez2w.W)
@@ -421,6 +444,7 @@ class TestFlagsSetupDynamic(FlagsSetup):
         # check one level down
         self.assertTrue('C' in self.flags.Z)
         clonec2x = self.flags.cloneAndReplace('Z.X', 'Z.C')
+        self.assertEqual(list(iter(clonec2x.Z)), ['A', 'B', 'X', 'Xclone1', 'Xclone2'])
         self.assertTrue('X' in clonec2x.Z)
         self.assertFalse('C' in clonec2x.Z)
 
@@ -449,7 +473,6 @@ class TestFlagsSetupDynamic(FlagsSetup):
         copyflags = copy.deepcopy(self.flags)
         copyflags.lock()
         initialHash = copyflags.athHash()
-        copyflags.loadAllDynamicFlags()
         postHash = copyflags.athHash()
         self.assertEqual(initialHash, postHash, "After loading all dynamic flags the hash has changed")
 

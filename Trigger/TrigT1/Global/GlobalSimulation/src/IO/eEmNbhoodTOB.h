@@ -12,20 +12,20 @@
 #ifndef GLOBALSIM_EEMNBHOODTOB_H
 #define GLOBALSIM_EEMNBHOODTOB_H
 
-#include "IeEmTOB.h"
+#include "IeEmNbhoodTOB.h"
 #include "eEmTOB.h"
 #include "AthenaKernel/CLASS_DEF.h"
 
-#include "../IO/LArStripNeighborhood.h"
+#include "LArStripNeighborhood.h"
 
 #include <bitset>
 
 namespace GlobalSim::IOBitwise {
-  /*! @copydoc IeEmTOB 
+  /*! @copydoc IeEmNbhoodTOB 
   *
   * Additionally holds an LArStripNeighborhood alongside the eEmTOB information.
   */
-  class eEmNbhoodTOB : virtual public IeEmTOB, private eEmTOB {
+  class eEmNbhoodTOB : virtual public IeEmNbhoodTOB, private eEmTOB {
     
   public:
     /**
@@ -51,11 +51,14 @@ namespace GlobalSim::IOBitwise {
      */
     eEmNbhoodTOB(const GlobalSim::IOBitwise::IeEmTOB& IeEmTOB, const GlobalSim::LArStripNeighborhood& nbhood);
 
-    //! @copydoc IeEmTOB::~IeEmTOB()   
+    //! @copydoc IeEmNbhoodTOB::~IeEmNbhoodTOB()   
     virtual ~eEmNbhoodTOB(){};
 
-    /** @brief Returns the LArStripNeighborhood */ 
-    virtual const LArStripNeighborhood& Neighbourhood() const;
+    //! @copydoc IeEmNbhoodTOB::Neighbourhood()
+    virtual const LArStripNeighborhood& Neighbourhood() const override;
+
+    //! @copydoc IeEmNbhoodTOB::to_string()  
+    virtual std::string to_string() const override;
     
   private:
      /// Property: LArStripNeighborhood associated with this eEmTOB 

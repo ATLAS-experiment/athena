@@ -19,6 +19,7 @@ namespace SG {
  * @param index The index to test.
  */
 template <class SET>
+requires CxxUtils::detail::SimpleAssociativeContainer<SET>
 inline
 bool SetIndexingPolicy<SET>::isValid (const stored_index_type& index) 
 {
@@ -30,10 +31,11 @@ bool SetIndexingPolicy<SET>::isValid (const stored_index_type& index)
  * @brief Convert from stored to external index types.
  * @param index The stored index.
  */
-template <class CONT>
+template <class SET>
+requires CxxUtils::detail::SimpleAssociativeContainer<SET>
 inline
-typename SetIndexingPolicy<CONT>::index_type
-SetIndexingPolicy<CONT>::storedToExternal (stored_index_type index)
+typename SetIndexingPolicy<SET>::index_type
+SetIndexingPolicy<SET>::storedToExternal (stored_index_type index)
 {
   return index;
 }
@@ -44,6 +46,7 @@ SetIndexingPolicy<CONT>::storedToExternal (stored_index_type index)
  * @param index[out] The index to reset.
  */
 template <class SET>
+requires CxxUtils::detail::SimpleAssociativeContainer<SET>
 inline
 void SetIndexingPolicy<SET>::reset (stored_index_type& index)
 {
@@ -60,6 +63,7 @@ void SetIndexingPolicy<SET>::reset (stored_index_type& index)
  * SG::ExcIndexNotFound if the index is not in the container.
  */
 template <class SET>
+requires CxxUtils::detail::SimpleAssociativeContainer<SET>
 typename SetIndexingPolicy<SET>::ElementType
 SetIndexingPolicy<SET>::lookup(const stored_index_type& index,
                                const SET& data)
@@ -82,14 +86,14 @@ SetIndexingPolicy<SET>::lookup(const stored_index_type& index,
  * Throws SG::ExcElementNotFound if the element is not in the container.
  */
 template <class SET>
+requires CxxUtils::detail::SimpleAssociativeContainer<SET>
 void
 SetIndexingPolicy<SET>::reverseLookup(const SET& data,
                                       ElementConstReference element,
                                       index_type& same) 
 {
   //compiler checks we can compare elements
-  ::boost::function_requires<typename ::boost::EqualityComparableConcept<ElementType> >();
-
+  static_assert(std::equality_comparable<ElementType>, "ElementType must support equality comparison");
   // Note that reverseLookup will recalculate index even if m_valid is true.
   // Must ensure that index is write before persistency
   if (data.end() != data.find(element)) 

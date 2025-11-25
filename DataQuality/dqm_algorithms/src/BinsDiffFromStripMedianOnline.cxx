@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /*  BinsDiffFromStripMedianOnline.cxx is to pick out the problematic bins in 2D histogram assuming that y-axis(the phi direction) be symmetric. 
@@ -19,7 +19,6 @@
 #include <cmath>
 
 #include <iostream>
-#include <string>
 
 static dqm_algorithms::BinsDiffFromStripMedianOnline myInstance;
 
@@ -205,7 +204,7 @@ dqm_core::Result * dqm_algorithms::BinsDiffFromStripMedianOnline::execute(const 
 	colorbinOnline oneColorBin = {-1,-1,k,l,-1,green,1};
 	oneColorStrip.push_back(oneColorBin);
       }
-      ColorBinMap.push_back(oneColorStrip);
+      ColorBinMap.push_back(std::move(oneColorStrip));
     } 
 
     // map redbins and yellowbins to ColorBinMap

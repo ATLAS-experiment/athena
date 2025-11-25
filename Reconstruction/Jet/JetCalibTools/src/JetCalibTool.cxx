@@ -28,6 +28,14 @@ StatusCode JetCalibTool::initialize() {
   if(!m_smearingTool.empty() ){
     ATH_CHECK( m_smearingTool.retrieve());
   }
+
+  ATH_MSG_INFO("Jet calibration sequence :");
+  for(const ToolHandle<IJetCalibStep> &t : m_calibSteps){
+    ATH_MSG_INFO("  - "<< t->name() );
+  }
+  if(!m_smearingTool.empty() ){
+    ATH_MSG_INFO("  - "<< m_smearingTool->name() );
+  }
   
   return StatusCode::SUCCESS;
 }

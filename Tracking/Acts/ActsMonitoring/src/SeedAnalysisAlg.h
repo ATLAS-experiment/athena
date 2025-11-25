@@ -11,14 +11,12 @@
 #include "InDetReadoutGeometry/SiDetectorElementCollection.h"
 #include "xAODInDetMeasurement/PixelClusterContainer.h"
 #include "xAODInDetMeasurement/StripClusterContainer.h"
-#include "ActsEvent/Seed.h"
 
 #include "InDetPrepRawData/PixelClusterContainer.h"
 #include "InDetPrepRawData/SCT_ClusterContainer.h"
 
 #include "StoreGate/ReadCondHandleKey.h"
 #include "StoreGate/ReadHandleKey.h"
-#include "ActsEvent/Seed.h"
 #include "ActsEvent/SeedContainer.h"
 
 #include "BeamSpotConditionsData/BeamSpotData.h"

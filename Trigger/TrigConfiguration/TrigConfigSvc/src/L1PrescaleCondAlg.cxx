@@ -4,6 +4,8 @@
 
 #include "./L1PrescaleCondAlg.h"
 #include "./TrigConfMD5.h"
+#include "./TrigConfSvcHelper.h"
+
 #include "TrigConfIO/TrigDBL1PrescalesSetLoader.h"
 #include "TrigConfIO/JsonFileLoader.h"
 #include "TrigConfInterfaces/IJobOptionsSvc.h"
@@ -47,6 +49,13 @@ TrigConf::L1PrescaleCondAlg::createFromDB( unsigned int psk, bool isRun3 ) const
    // load the L1 psk into the L1 prescales set
    ATH_MSG_DEBUG( "Setting up TrigDBL1PrescalesSetLoader with DB connection " << m_dbConnection.value() );
    TrigConf::TrigDBL1PrescalesSetLoader psLoader(m_dbConnection);
+   std::string crest_server("");
+   std::string crest_api("");
+   std::string dbname("");
+   if(isCrestConnection(m_dbConnection, crest_server, crest_api, dbname)) {
+      psLoader.setCrestTrigDB(dbname);
+      psLoader.setCrestConnection(crest_server, crest_api);
+   }
    psLoader.setLevel(TrigConf::MSGTC::WARNING); 
    ATH_MSG_DEBUG( "Going to load prescales" );
    try {

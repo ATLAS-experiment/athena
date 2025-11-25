@@ -1,6 +1,6 @@
 // Dear emacs, this is -*- c++ -*-
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef XAODCORE_AUXCONTAINERBASE_H
 #define XAODCORE_AUXCONTAINERBASE_H
@@ -19,9 +19,7 @@
 #include "AthContainers/PackedContainer.h"
 #include "CxxUtils/CachedPointer.h"
 #include "CxxUtils/checker_macros.h"
-#ifndef XAOD_STANDALONE
-#   include "AthenaKernel/ILockable.h"
-#endif // not XAOD_STANDALONE
+#include "SGCore/ILockable.h"
 
 // Local include(s):
 #include "xAODCore/AuxSelection.h"
@@ -52,10 +50,8 @@ namespace xAOD {
    ///
    class AuxContainerBase : public SG::IAuxStore,
                             public SG::IAuxStoreIO,
-                            public SG::IAuxStoreHolder
-#ifndef XAOD_STANDALONE
-                          , public ILockable
-#endif // not XAOD_STANDALONE
+                            public SG::IAuxStoreHolder,
+                            public ILockable
    {
 
    public:

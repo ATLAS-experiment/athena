@@ -316,7 +316,7 @@ void L1CaloCTPMonitorAlgorithm::compare(const CTP_BC& bunch, int hits, int total
       ATH_MSG_DEBUG("Size of thresholds vector: " << thresholds.size());
       
       for (const auto& it : thresholds) {
-        int offset = 0;
+        int thisOffset = 0;
         int nbits = 3;
         const int threshNumber = it->mapping();
         int fixedThreshNumber  = threshNumber;
@@ -324,58 +324,58 @@ void L1CaloCTPMonitorAlgorithm::compare(const CTP_BC& bunch, int hits, int total
         while (true) {
           if ( it->type() == L1DataDef::typeAsString(L1DataDef::EM) ) {
             if (threshNumber >= (int)L1DataDef::typeConfig(L1DataDef::EM).max/2) {  // Cable EM2; else cable EM1
-              offset += nbits*L1DataDef::typeConfig(L1DataDef::EM).max/2;
+              thisOffset += nbits*L1DataDef::typeConfig(L1DataDef::EM).max/2;
               fixedThreshNumber -= L1DataDef::typeConfig(L1DataDef::EM).max/2;
             }
             break;
           }
-          offset += nbits*L1DataDef::typeConfig(L1DataDef::EM).max;
+          thisOffset += nbits*L1DataDef::typeConfig(L1DataDef::EM).max;
           if ( it->type() == L1DataDef::typeAsString(L1DataDef::TAU) ) {
             if (threshNumber >= (int)max_TAU_3bit_Threshold_Number/2) { // Cable TAU2; else cable TAU1
-              offset += nbits*max_TAU_3bit_Threshold_Number/2;
+              thisOffset += nbits*max_TAU_3bit_Threshold_Number/2;
               fixedThreshNumber -= max_TAU_3bit_Threshold_Number/2;
             }
             break;
           }
-          offset += nbits*max_TAU_3bit_Threshold_Number; 
+          thisOffset += nbits*max_TAU_3bit_Threshold_Number; 
           if ( it->type() == L1DataDef::typeAsString(L1DataDef::JET) ) {
             if (threshNumber >= (int)max_JET_3bit_Threshold_Number) {   // Cable JET2 (2-bit thresholds); else JET1 (3-bit)
-              offset += 3*max_JET_3bit_Threshold_Number;
+              thisOffset += 3*max_JET_3bit_Threshold_Number;
               fixedThreshNumber -= max_JET_3bit_Threshold_Number;
               nbits--;
             }
             break;
           }
-          offset += 3*max_JET_3bit_Threshold_Number;
+          thisOffset += 3*max_JET_3bit_Threshold_Number;
           nbits--;
-          offset += 2*max_JET_2bit_Threshold_Number;
+          thisOffset += 2*max_JET_2bit_Threshold_Number;
           nbits--;
           if ( it->type() == L1DataDef::typeAsString(L1DataDef::TE) ) {
             if (threshNumber >= (int)max_TE_Threshold_Number/2) {  // Restricted eta TE threshold: jump to cable EN2
-              offset += nbits*max_TE_Threshold_Number/2 + nbits*max_XE_Threshold_Number/2 + nbits*max_XS_Threshold_Number; // 8+8+8 bits on cable EN1
+              thisOffset += nbits*max_TE_Threshold_Number/2 + nbits*max_XE_Threshold_Number/2 + nbits*max_XS_Threshold_Number; // 8+8+8 bits on cable EN1
               fixedThreshNumber -= max_TE_Threshold_Number/2;
             }
             break;  // Full eta & restricted eta thresholds separated on two cables
          }
-          offset += nbits*max_TE_Threshold_Number/2; 
+          thisOffset += nbits*max_TE_Threshold_Number/2; 
           if ( it->type() == L1DataDef::typeAsString(L1DataDef::XE) ) {
             if (threshNumber >= (int)max_XE_Threshold_Number/2) { // Restricted eta XE threshold: jump to cable EN2
-              offset += nbits*max_TE_Threshold_Number/2 + nbits*max_XE_Threshold_Number/2 + nbits*max_XS_Threshold_Number;
+              thisOffset += nbits*max_TE_Threshold_Number/2 + nbits*max_XE_Threshold_Number/2 + nbits*max_XS_Threshold_Number;
               fixedThreshNumber -= max_XE_Threshold_Number/2;
             }
             break;
           }
-          offset += nbits*max_XE_Threshold_Number/2;
+          thisOffset += nbits*max_XE_Threshold_Number/2;
           if ( it->type() == L1DataDef::typeAsString(L1DataDef::XS) ) break;
-          offset += nbits*max_XS_Threshold_Number;
+          thisOffset += nbits*max_XS_Threshold_Number;
           nbits--;
           break;
         }
         if (nbits == 0) continue;
         if (threshNumber < 0) continue;
         threshMap.insert(std::make_pair(it->name(),
-	                 offset + fixedThreshNumber*nbits));
-        ATH_MSG_DEBUG("threshMap: name, offset, threshNumber, nbits  " << it->name() << " " << offset << " " << fixedThreshNumber << " " << nbits);
+	                 thisOffset + fixedThreshNumber*nbits));
+        ATH_MSG_DEBUG("threshMap: name, offset, threshNumber, nbits  " << it->name() << " " << thisOffset << " " << fixedThreshNumber << " " << nbits);
       } // End loop over thresholds vector
 
       ATH_MSG_DEBUG("Size of threshMap = " << threshMap.size());

@@ -3,6 +3,7 @@
 # AnaAlgorithm import(s):
 from AnalysisAlgorithmsConfig.ConfigBlock import ConfigBlock
 from AnalysisAlgorithmsConfig.ConfigAccumulator import DataType
+from AthenaConfiguration.Enums import LHCPeriod
 
 
 class MetAnalysisConfig (ConfigBlock):
@@ -47,17 +48,34 @@ class MetAnalysisConfig (ConfigBlock):
             info="EXPERIMENTAL: whether to use simplified OR based on nominal jets "
             "and for jet-related systematics only. "
             "WARNING: this option is strictly for doing physics studies of the feasibility "
-            "of this OR scheme, it should not be used in a regular analysis")
+            "of this OR scheme, it should not be used in a regular analysis",
+            expertMode=True)
         self.addOption ('saveSignificance', True, type=bool,
             info="whether to save the MET significance (default=True)")
+        self.addOption ('jetCalibConfig', "", type=str,
+            info="config file used in jet calibration (for MET significance)")
+        self.addOption ('jetCalibSequence', "", type=str,
+            info="jet calibration sequence (for MET significance)")
+        self.addOption ('jetCalibArea', "", type=str,
+            info="CalibArea used in jet calibration (for MET significance)")
+        self.addOption ('egammaESModel', "", type=str,
+            info="ESModel for egamma calibration (for MET significance)")
+        self.addOption ('egammaDecorrelationModel', "1NP_v1", type=str,
+            info="Decorrelation model for egamma calibration (for MET significance)")
+        self.addOption ('tauTESConfig', "CombinedTES_R22_Round2.5_v2.root", type=str,
+            info="Config file for tau energy scale calibration (for MET significance)")
+        self.addOption ('tauUseMVAResolution', True, type=bool,
+            info="Use MVA resolution for taus? (for MET significance)")
         self.addOption ('addExtraSignificanceVars', False, type=bool,
             info="whether to save some additional (event-based) MET significance variables (default=False)")
         self.addOption ('useLRT', False, type=bool,
             info="whether to use LRT MET Core and association map")
         self.addOption ('useCaloSoftTerm', False, type=bool,
-            info="(expert) use calo- instead of track-based soft term")
+            info="(expert) use calo- instead of track-based soft term",
+            expertMode=True)
         self.addOption ('softTermResolution', -1.0, type=float,
-            info="(expert) override the default soft term resolution in METSignificance")
+            info="(expert) override the default soft term resolution in METSignificance",
+            expertMode=True)
 
     def instanceName (self) :
         """Return the instance name for this block"""
@@ -134,11 +152,34 @@ class MetAnalysisConfig (ConfigBlock):
                 alg.significanceTool.MuonCalibTool.calibMode = (
                     config.getContainerMeta(self.muons.split(".")[0], 'calibMode', failOnMiss=True))
 
+            # Preliminary R22 recommendation is to use R21 jet resolutions from 2018 for MET significance.
+            # See Jet/Etmiss recommendation documentation for details.
+            if self.jetCalibConfig == "":
+                self.jetCalibConfig = "JES_data2017_2016_2015_Recommendation_PFlow_Aug2018_rel21.config"
+                self.jetCalibArea = "00-04-81"
+                # Include Smear and not InSitu, even when running on data.
+                # This is for technical reasons and allows access to the correct resolutions for both data and MC.
+                self.jetCalibSequence = 'JetArea_Residual_EtaJES_GSC_Smear'
+
+            # Standard e/gamma calibration. Must be kept in agreement with ElectronAnalysisConfig.py
+            if self.egammaESModel == "":
+                if config.geometry() is LHCPeriod.Run2:
+                    self.egammaESModel = 'es2023_R22_Run2_v1'
+                elif config.geometry() is LHCPeriod.Run3:
+                    self.egammaESModel = 'es2024_Run3_v0'
+
             alg.significanceTool.SoftTermParam = 0
             if self.softTermResolution > 0:
                 alg.significanceTool.SoftTermReso = self.softTermResolution
             alg.significanceTool.TreatPUJets = self.treatPUJets
-            alg.significanceTool.IsAFII = config.dataType() is DataType.FastSim
+            alg.significanceTool.JetCalibConfig = self.jetCalibConfig
+            alg.significanceTool.JetCalibSequence = self.jetCalibSequence
+            alg.significanceTool.JetCalibArea = self.jetCalibArea
+            alg.significanceTool.EgammaESModel = self.egammaESModel
+            alg.significanceTool.EgammaDecorrelationModel = self.egammaDecorrelationModel
+            alg.significanceTool.EgammaUseFastsim = (config.dataType() is DataType.FastSim)
+            alg.significanceTool.TauTESConfig = self.tauTESConfig
+            alg.significanceTool.TauUseMVAResolution = self.tauUseMVAResolution
             alg.met = config.readName (self.containerName)
             config.addOutputVar (self.containerName, 'significance_%SYS%', 'significance')
             if self.addExtraSignificanceVars:

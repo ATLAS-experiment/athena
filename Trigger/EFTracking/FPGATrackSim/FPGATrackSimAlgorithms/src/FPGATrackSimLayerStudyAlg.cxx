@@ -173,16 +173,19 @@ StatusCode FPGATrackSimLayerStudyAlg::execute ATLAS_NOT_THREAD_SAFE()
 
     // scan over image building pairs for bins over threshold
     for (FPGATrackSimBinArray<FPGATrackSimBinnedHits::BinEntry>::ConstIterator &bin : m_hitBinningTool->lastStepBinnedHits()) {
+        bool isTruthBin =  (FPGATrackSimBinUtil::IdxSet(bin.idx())==m_binMonitoring->truthBin(m_hitBinningTool->getBinTool().lastStep()->stepNum()));
+
         // Apply threshold, of course if threshold is 0 then use all bins
         if (bin.data().hitCnt < m_threshold) {
-            continue;
-        } else {
-            if (FPGATrackSimBinUtil::IdxSet(bin.idx())==m_binMonitoring->truthBin(m_hitBinningTool->getBinTool().lastStep()->stepNum())) {
+            if (isTruthBin) {
                 ATH_MSG_DEBUG("Truth bin failed threshold " << bin.data().hitCnt << " thr=" << m_threshold << " " << bin.idx());}
-        }
+            continue;
+        } 
         ATH_MSG_DEBUG("Bin passes threshold " << bin.data().hitCnt << " " << bin.idx());
 
         // Monitor contents of bins passing threshold
+        if (m_requireTruth and not isTruthBin) continue;
+
         m_binMonitoring->fillBinLevelOutput(bin.idx(), bin.data());
     }
     m_binMonitoring->fillBinningSummary(phits);

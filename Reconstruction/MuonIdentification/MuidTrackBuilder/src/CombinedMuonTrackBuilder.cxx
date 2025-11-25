@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //////////////////////////////////////////////////////////////////////////////
@@ -1926,7 +1926,7 @@ namespace Rec {
                 particleHypothesis = Trk::nonInteracting;
                 runOutlier = false;
 
-                ATH_MSG_VERBOSE(" Retriving Calorimeter TSOS from " << __func__ << " at line " << __LINE__);
+                ATH_MSG_VERBOSE(" Retrieving Calorimeter TSOS from " << __func__ << " at line " << __LINE__);
 
                 if (m_useCaloTG) {
                     caloTSOS = getCaloTSOSfromMatProvider(*trackParameters, spectrometerTrack);
@@ -2130,7 +2130,7 @@ namespace Rec {
             std::vector<std::unique_ptr<const Trk::TrackStateOnSurface>> caloTSOS;
             if (m_useCaloTG) {
                 if (!lastIDtp) { lastIDtp = parameters; }
-                ATH_MSG_VERBOSE(" Retriving Calorimeter TSOS from " << __func__ << " at line " << __LINE__);
+                ATH_MSG_VERBOSE(" Retrieving Calorimeter TSOS from " << __func__ << " at line " << __LINE__);
                 caloTSOS = getCaloTSOSfromMatProvider(*lastIDtp, muonTrack);
             } else {
                 caloTSOS = m_caloTSOS->caloTSOS(ctx, *parameters);

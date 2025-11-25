@@ -132,7 +132,21 @@ get_files LarFCalSamplingFraction_analysis.py
 for file in $resultdir/mc.PG_pid*Mom40000_Z*_bec_eta_350_380.HITS.pool.root;do echo $file;athena.py --filesInput="$file" CaloSamplingFractionAnalysis/LArFCalSamplingFractionConfig.py;a=$file;b1=${a/Z4713500_bec_eta_350_380.HITS.pool/fcal1.aan};b2=${b1/Z5173300_bec_eta_350_380.HITS.pool/fcal2.aan};b3=${b2/Z5647800_bec_eta_350_380.HITS.pool/fcal3.aan};mv LArFCal_SF.root $b3;python LarFCalSamplingFraction_analysis.py $b3 -o ${b3/aan.root/txt};done
 ```                                                                                                                                                                 
 
-# Tile sampline fractions
+# Tile sampling fractions
+The measured hit energy in MC is converted to the EM scale using the sampling fraction (Etot/Evis)
+determined from the test beam simulation of 100 GeV electrons incident at the center of the front face of the TileCal module at 20 degrees with a beam spot size of 2 cm.
+Since the regularly spaced scintillating tiles are oriented vertically,
+the electron response varies periodically with the impact point.
+Thus, the sampling fraction is periodic and depends on the coordinate of the impact point along the front face of the calorimeter (Z).
+The average sampling fraction is obtained by fitting its variation along the Z-direction with a simple periodic function (see more details [here](https://cds.cern.ch/record/962065/files/tilecal-pub-2006-006.pdf))
+
+The sampling fraction at different incident angles can be extracted using the following command (first you need to setup athena):
+```
+run_Tile_SamplingFraction_simulation.sh 2000 +20 -20
+```
+Here, the first argument specifies the number of events per incident angle (theta), followed by the list of theta values (in degrees). 
+At the end, this will produce the `TileSamplingFractions.root` file containing a TGraph of the inverse sampling fraction as a function of theta.
+The values are also printed in `TileSamplingFraction_analysis.log`, and the periodic function fit for each theta angle can be seen in the files like `hist+20.png`.
 
 
 # All simulation+analysis steps together for all LAr calorimeters should run out-of-the box with the following command

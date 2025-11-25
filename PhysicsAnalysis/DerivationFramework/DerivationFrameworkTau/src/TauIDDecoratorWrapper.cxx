@@ -58,7 +58,6 @@ namespace DerivationFramework {
     // initialize read/write handle keys
     ATH_CHECK( m_tauContainerKey.initialize() );
     ATH_CHECK( m_muonContainerKey.initialize() );
-    ATH_CHECK( m_vtxContainerKey.initialize() );
     ATH_CHECK( m_scoreDecorKeys.initialize() );
     ATH_CHECK( m_WPDecorKeys.initialize() );
     ATH_CHECK( m_trackWidthKey.initialize() );
@@ -72,9 +71,8 @@ namespace DerivationFramework {
     return StatusCode::SUCCESS;
   }
 
-  StatusCode TauIDDecoratorWrapper::addBranches() const
+  StatusCode TauIDDecoratorWrapper::addBranches(const EventContext& ctx) const
   {
-    const EventContext& ctx = Gaudi::Hive::currentContext();
 
     // retrieve tau container
     SG::ReadHandle<xAOD::TauJetContainer> tauJetsReadHandle(m_tauContainerKey, ctx);
@@ -84,41 +82,8 @@ namespace DerivationFramework {
     }
     const xAOD::TauJetContainer* tauContainer = tauJetsReadHandle.cptr();
 
-    // retrieve PrimaryVertices container
-    SG::ReadHandle<xAOD::VertexContainer> vtxReadHandle(m_vtxContainerKey, ctx);
-    if (!vtxReadHandle.isValid()) {
-      ATH_MSG_ERROR ("Could not retrieve VertexContainer with key " << vtxReadHandle.key());
-      return StatusCode::FAILURE;
-    }
-    const xAOD::VertexContainer* vtxContainer = vtxReadHandle.cptr();
-    const xAOD::Vertex* pVtx = nullptr;
-    float sumpt_PV0 = 0., sumpt2_PV0 = 0.;
-
-    // Check that PV container exists and is non-empty, find the PV if possible
-    if (vtxContainer != nullptr && !vtxContainer->empty()) {
-      auto itrVtx = std::find_if(vtxContainer->begin(), vtxContainer->end(),
-				 [](const xAOD::Vertex* vtx) {
-				   return vtx->vertexType() == xAOD::VxType::PriVtx;
-				 });
-      pVtx = (itrVtx == vtxContainer->end() ? nullptr : *itrVtx);
-      if (pVtx == nullptr){
-        ATH_MSG_DEBUG("No PV found, using the first element instead!");
-        pVtx = vtxContainer->at(0);
-      }
-
-      for (const ElementLink<xAOD::TrackParticleContainer>& trk : pVtx->trackParticleLinks()) {
-	sumpt_PV0 += (*trk)->pt();
-	sumpt2_PV0 += std::pow((*trk)->pt(), 2.);
-      }
-    }
-    
     //Create accessors  
     static const SG::Accessor<float> acc_absEtaLead("ABS_ETA_LEAD_TRACK");
-    static const SG::Accessor<float> acc_dz0_TV_PV0("dz0_TV_PV0");
-    static const SG::Accessor<float> acc_log_sumpt_TV("log_sumpt_TV");
-    static const SG::Accessor<float> acc_log_sumpt2_TV("log_sumpt2_TV");
-    static const SG::Accessor<float> acc_log_sumpt_PV0("log_sumpt_PV0");
-    static const SG::Accessor<float> acc_log_sumpt2_PV0("log_sumpt2_PV0");
 
     std::vector<SG::WriteDecorHandle<xAOD::TauJetContainer, float> > scoreDecors;
     scoreDecors.reserve (m_scores.size());
@@ -158,21 +123,6 @@ namespace DerivationFramework {
     auto shallowCopy = xAOD::shallowCopyContainer (*tauContainer);
 
     for (auto tau : *shallowCopy.first) {
-      
-      //Add in the TV/PV0 vertex variables needed for some calculators in TauGNNUtils.cxx (for GNTau)
-      float dz0_TV_PV0 = -999., sumpt_TV = 0., sumpt2_TV = 0.;
-      if (pVtx!=nullptr) {
-        dz0_TV_PV0 = tau->vertex()->z() - pVtx->z();
-        for (const ElementLink<xAOD::TrackParticleContainer>& trk : tau->vertex()->trackParticleLinks()) {
-          sumpt_TV += (*trk)->pt();
-          sumpt2_TV += std::pow((*trk)->pt(), 2.);
-        }
-      }
-      acc_dz0_TV_PV0(*tau) = dz0_TV_PV0;
-      acc_log_sumpt_TV(*tau) = (sumpt_TV>0.) ? std::log(sumpt_TV) : 0.;
-      acc_log_sumpt2_TV(*tau) = (sumpt2_TV>0.) ? std::log(sumpt2_TV) : 0.;
-      acc_log_sumpt_PV0(*tau) = (sumpt_PV0>0.) ? std::log(sumpt_PV0) : 0.;
-      acc_log_sumpt2_PV0(*tau) = (sumpt2_PV0>0.) ? std::log(sumpt2_PV0) : 0.;
 
       // ABS_ETA_LEAD_TRACK is removed from the AOD content and must be redecorated when computing eVeto WPs
       // note: this redecoration is not robust against charged track thinning, but charged tracks should never be thinned      
@@ -206,7 +156,7 @@ namespace DerivationFramework {
     delete shallowCopy.second;
 
     // add TauAnalysisTool MuonOLR
-    SG::ReadHandle<xAOD::MuonContainer> muonReadHandle(m_muonContainerKey);
+    SG::ReadHandle<xAOD::MuonContainer> muonReadHandle(m_muonContainerKey, ctx);
     if (!muonReadHandle.isValid()) {
       ATH_MSG_DEBUG ("Could not retrieve MuonContainer with key " << muonReadHandle.key() << " so won't add TAT MuonOLR flag");
       return StatusCode::SUCCESS;

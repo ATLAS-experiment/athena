@@ -5,20 +5,15 @@
 #ifndef LARIDENTIFIER_LARHVLINEID_H
 #define LARIDENTIFIER_LARHVLINEID_H
 
-#include "AthenaKernel/CLASS_DEF.h"
 #include "AtlasDetDescr/AtlasDetectorID.h"
+#include "IdDict/IdDictFieldImplementation.h"
 #include "Identifier/HWIdentifier.h"
 #include "Identifier/IdentifierHash.h"
-#include "Identifier/Range.h"
-#include "IdDict/IdDictFieldImplementation.h"
-#include "IdDict/IdDictDefs.h"
-#include "LArIdentifier/LArOnlID_Exception.h"
+#include "Identifier/MultiRange.h"
+#include "AthenaKernel/CLASS_DEF.h"
 #include <vector>
-#include <iostream>
 #include <algorithm>
 
-class IdentifierHash;
-class Range;
 
 /**
  * @brief Helper for the Liquid Argon Calorimeter High-Voltage identifiers.
@@ -52,7 +47,7 @@ class LArHVLineID : public AtlasDetectorID {
   
   /** only allowed constructor */
   LArHVLineID();
-  ~LArHVLineID();
+  virtual ~LArHVLineID();
 
   /**
    * @brief Create an HighVoltage line identifier from fields

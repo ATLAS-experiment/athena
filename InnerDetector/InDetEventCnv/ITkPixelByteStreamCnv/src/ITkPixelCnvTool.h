@@ -17,9 +17,9 @@ Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 #include "GaudiKernel/ServiceHandle.h"
 #include "StoreGate/ReadCondHandleKey.h"
 #include "ITkPixelCabling/ITkPixelCablingData.h"
-
-class ITkPixelHitSortingTool;
-class ITkPixelEncodingTool;
+#include "ITkPixelHitSortingTool.h"
+#include "ITkPixelEncodingTool.h"
+#include "ITkPixelDataRateMonTool.h"
 
 /**
  * @class ITkPixelCnvTool
@@ -40,13 +40,15 @@ class ITkPixelCnvTool : public AthAlgTool {
 
     private:
 
-        ToolHandle<ITkPixelHitSortingTool> m_hitSortingTool;
+        ToolHandle<ITkPixelHitSortingTool> m_hitSortingTool{this, "HitSortingTool", ""};
 
-        ToolHandle<ITkPixelEncodingTool> m_encodingTool;
+        ToolHandle<ITkPixelEncodingTool> m_encodingTool{this, "EncodingTool", "", "The encoding tool"};
 
-        ServiceHandle<IByteStreamCnvSvc> m_byteStreamCnvSvc;
+        ServiceHandle<IByteStreamCnvSvc> m_byteStreamCnvSvc{this, "ByteStreamConvertionService", "ByteStreamCnvSvc", "The Byte stream coversion service"};
         
-        SG::ReadCondHandleKey<ITkPixelCablingData> m_pixelCablingKey{this, "PixelCablingKey", "ITkPixelCablingData", "Cond Key of Pixel Cabling"};
+        SG::ReadCondHandleKey<ITkPixelCablingData> m_pixelCablingKey{this, "PixelCablingKey", "", "Cond Key of Pixel Cabling"};
+
+        ToolHandle<ITkPixelDataRateMonTool> m_dataRateMonTool{this, "DataRateMonitoringTool", "", "Monitoring tool for data rate evaluation"};
 
 };
 

@@ -281,21 +281,23 @@ void ActsLayerBuilder::buildBarrel(const Acts::GeometryContext &gctx,
 
     std::shared_ptr<Acts::Layer> layer;
     if (m_cfg.mode == Mode::ITkStrip) {
-      double f = 1.0;
-      if (key <= 1) {
-        f = 4.0; // four rows per module
-      } else {
-        f = 2.0; // two rows per module
-      }
-      size_t nBinsPhi = nModPhi;
-      size_t nBinsZ = nModZ / f;
+      size_t nBinsPhi = nModPhi * m_cfg.numberOfBinsFactor;
+      size_t nBinsZ = nModZ * m_cfg.numberOfBinsFactor;
       layer = m_cfg.layerCreator->cylinderLayer(gctx, surfaces, nBinsPhi,
                                                 nBinsZ, pl, transform,
                                                 std::move(approachDescriptor));
     } else if (m_cfg.mode == Mode::ITkPixelInner ||
                m_cfg.mode == Mode::ITkPixelOuter) {
-      size_t nBinsPhi = nModPhi;
-      size_t nBinsZ = nModZ;
+      size_t nBinsPhi = nModPhi * m_cfg.numberOfBinsFactor;
+      size_t nBinsZ = nModZ * m_cfg.numberOfBinsFactor;
+
+      // Special treatment to allow
+      // for larger bins at high-eta and potentially avoid missing innermost hits
+      // for tracks at shallow angles
+      if (m_cfg.mode == Mode::ITkPixelInner && key==0 ) {
+        nBinsZ = nModZ * m_cfg.numberOfInnermostLayerBinsFactor;
+      }
+      
       layer = m_cfg.layerCreator->cylinderLayer(gctx, surfaces, nBinsPhi,
                                                 nBinsZ, pl, transform,
                                                 std::move(approachDescriptor));
@@ -575,21 +577,8 @@ void ActsLayerBuilder::buildEndcap(const Acts::GeometryContext &gctx,
     ACTS_VERBOSE("Identifier reports: " << nModPhi << " is lowest for " << nModR
                                         << " r-rings");
 
-    size_t nBinsPhi = nModPhi;
-    size_t nBinsR = nModR;
-
-    if(!isITk) {
-      // In the ID, the modules in the innermost r-rings are exactly shifted by
-      // one half module width since it's the same number of modules, this gives
-      // binning trouble. Reduce bins by half: about 2 module pairs should be in
-      // each bin. This should be fine.
-      // @TODO: evaluate
-      nBinsPhi /= 2.0;
-    }
-    if(m_cfg.mode == Mode::ITkStrip) {
-      // up to four rows per module
-      nBinsR /= 4.0;
-    }
+    size_t nBinsPhi = nModPhi * m_cfg.numberOfBinsFactor;
+    size_t nBinsR = nModR * m_cfg.numberOfBinsFactor;
 
     ACTS_VERBOSE("Creating r x phi binned layer with " << nBinsR << " x "
                                                        << nBinsPhi << " bins");

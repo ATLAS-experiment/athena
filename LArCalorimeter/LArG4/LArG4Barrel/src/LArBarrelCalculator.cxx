@@ -555,8 +555,7 @@ G4bool LArBarrelCalculator::Process(const G4Step* step, std::vector<LArHitData>&
       }
     }    // loop over hits
     if (!found) {
-      LArHitData newdata = {identifier2, time*Current, Current};
-      hdata.push_back(newdata);
+      hdata.emplace_back(LArHitData{identifier2, time*Current, Current});
     }    // hit was not existing before
 
     if (Xtalk) {
@@ -569,8 +568,7 @@ G4bool LArBarrelCalculator::Process(const G4Step* step, std::vector<LArHitData>&
         }
       }    // loop over hits
       if (!found) {
-        LArHitData newdata = {identifier_xt1, time*Current_xt1, Current_xt1};
-        hdata.push_back(newdata);
+        hdata.emplace_back(LArHitData{identifier_xt1, time*Current_xt1, Current_xt1});
       }
       found=false;
       for (unsigned int i=0; i<hdata.size(); i++) {
@@ -582,8 +580,7 @@ G4bool LArBarrelCalculator::Process(const G4Step* step, std::vector<LArHitData>&
         }
       }    // loop over hits
       if (!found) {
-        LArHitData newdata = {identifier_xt2, time*Current_xt2, Current_xt2};
-        hdata.push_back(newdata);
+        hdata.emplace_back(LArHitData{identifier_xt2, time*Current_xt2, Current_xt2});
       }
     }    // Xtalk true
 

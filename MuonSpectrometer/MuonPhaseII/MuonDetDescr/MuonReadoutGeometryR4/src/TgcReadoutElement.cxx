@@ -53,9 +53,7 @@ StatusCode TgcReadoutElement::initElement() {
         /// ensure a consistent layerHash schema
         if (isStrip(layPtr->hash())) {
             m_pars.sensorLayouts[static_cast<unsigned>(layHash)] = layPtr;
-        }
-        if (layHash != layPtr->hash()) {
-            THROW_EXCEPTION("Fart");
+            continue;
         }
         ATH_CHECK(insertTransform<TgcReadoutElement>(layHash));
 #ifndef SIMULATIONBASE
@@ -82,7 +80,7 @@ StatusCode TgcReadoutElement::initElement() {
 #endif
     const IdentifierHash firstLay  = constructHash(0, 1, false);
     const IdentifierHash secondLay = constructHash(0, 2, false);
-    ActsGeometryContext gctx{};
+    ActsTrk::GeometryContext gctx{};
     m_gasThickness = (center(gctx, firstLay) - center(gctx, secondLay)).mag(); 
     return StatusCode::SUCCESS;
 }
@@ -90,7 +88,7 @@ StatusCode TgcReadoutElement::initElement() {
 Amg::Transform3D TgcReadoutElement::fromGapToChamOrigin(const IdentifierHash& layHash) const {
     return sensorLayout(layHash)->toOrigin();
 }
-Amg::Vector3D TgcReadoutElement::channelPosition(const ActsGeometryContext& ctx, const IdentifierHash& measHash) const { 
+Amg::Vector3D TgcReadoutElement::channelPosition(const ActsTrk::GeometryContext& ctx, const IdentifierHash& measHash) const { 
    const StripLayerPtr& layDesign{sensorLayout(measHash)};
    if (!layDesign) {
        ATH_MSG_WARNING("The gasGap "<<gasGapNumber(measHash)<<" & strip:"<<isStrip(measHash)<<" is unknown");

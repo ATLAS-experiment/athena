@@ -40,7 +40,7 @@ StatusCode F1X0XRTIntegrationAlg::initialize()
   }
   {
     Athena::Chrono chrono("XRT::load_xclbin", m_chronoSvc.get());
-    xrt::xclbin xb(m_xclbin);
+    xrt::xclbin xb(m_xclbin.value());
     m_xrtUuid = m_xrtDevice.load_xclbin(xb);
   }
   ATH_MSG_INFO("loading " << m_xclbin);
@@ -49,7 +49,9 @@ StatusCode F1X0XRTIntegrationAlg::initialize()
   ATH_CHECK(m_FPGAPixelRDO.initialize());
   ATH_CHECK(m_FPGAStripOutput.initialize());
   ATH_CHECK(m_FPGAPixelOutput.initialize());
-
+  ATH_CHECK(m_FPGAPixelRDOSize.initialize());
+  ATH_CHECK(m_FPGAStripRDOSize.initialize());
+  
   // Enumerate CUs
   std::vector<std::string> listofCUs;
   getListofCUs(listofCUs);
@@ -130,8 +132,8 @@ StatusCode F1X0XRTIntegrationAlg::initialize()
 
     // Final EDM containers (outputs)
     // PixelEDM(arg1) and StripEDM(arg1) are the output BOs
-    m_edmPixelOutputBOList.emplace_back(xrt::bo{m_xrtDevice, EFTrackingTransient::PIXEL_CONTAINER_BUF_SIZE * sizeof(uint64_t), xrt::bo::flags::normal, gid(kPEDM, 1)});
-    m_edmStripOutputBOList.emplace_back(xrt::bo{m_xrtDevice, EFTrackingTransient::STRIP_CONTAINER_BUF_SIZE * sizeof(uint64_t), xrt::bo::flags::normal, gid(kSEDM, 1)});
+    m_edmPixelOutputBOList.emplace_back(xrt::bo{m_xrtDevice, EFTrackingTransient::PIXEL_CONTAINER_BUF_SIZE * sizeof(uint32_t), xrt::bo::flags::normal, gid(kPEDM, 1)});
+    m_edmStripOutputBOList.emplace_back(xrt::bo{m_xrtDevice, EFTrackingTransient::STRIP_CONTAINER_BUF_SIZE * sizeof(uint32_t), xrt::bo::flags::normal, gid(kSEDM, 1)});
   }
 
   return StatusCode::SUCCESS;
@@ -147,6 +149,10 @@ StatusCode F1X0XRTIntegrationAlg::execute(const EventContext &ctx) const
   const std::vector<uint64_t>* stripInput{nullptr};
   ATH_CHECK(SG::get(pixelInput, m_FPGAPixelRDO, ctx));
   ATH_CHECK(SG::get(stripInput, m_FPGAStripRDO, ctx));
+
+  const int* pixelInputSize{nullptr}, *stripInputSize{nullptr};
+  ATH_CHECK(SG::get(pixelInputSize, m_FPGAPixelRDOSize, ctx));
+  ATH_CHECK(SG::get(stripInputSize, m_FPGAStripRDOSize, ctx));
 
 
   // Thread/buffer index
@@ -218,7 +224,7 @@ StatusCode F1X0XRTIntegrationAlg::execute(const EventContext &ctx) const
     r_pix_cl.set_arg(2, bo_pix_cl_edm);
 
     // extra size args (bytes), rounded to 256 elements
-    int rounded = static_cast<int>(std::ceil(static_cast<double>(pixelInput->size()) / 256.0)) * 256;
+    int rounded = static_cast<int>(std::ceil(static_cast<double>(*pixelInputSize) / 256.0)) * 256;
     uint32_t hit_bytes     = static_cast<uint32_t>(sizeof(uint64_t) * rounded);
     uint32_t cluster_bytes = static_cast<uint32_t>(sizeof(uint64_t) * rounded);
     uint32_t edm_bytes     = static_cast<uint32_t>(sizeof(uint64_t) * rounded * 8);
@@ -234,7 +240,7 @@ StatusCode F1X0XRTIntegrationAlg::execute(const EventContext &ctx) const
   r_str_cl.set_arg(0, bo_str_in);
   r_str_cl.set_arg(1, bo_str_cl);
   r_str_cl.set_arg(2, bo_str_cl_edm);
-  r_str_cl.set_arg(3, static_cast<unsigned int>(stripInput->size()));
+  r_str_cl.set_arg(3, static_cast<unsigned int>(*stripInputSize));
   const auto t_sc_start = std::chrono::steady_clock::now();
   r_str_cl.start();
 
@@ -317,11 +323,11 @@ StatusCode F1X0XRTIntegrationAlg::execute(const EventContext &ctx) const
   ATH_MSG_DEBUG("Kernel execution time: " << (ns_between(t_k0, t_kend) / 1e6) << " ms");
 
   // Output handles and readbacks
-  SG::WriteHandle<std::vector<uint64_t>> FPGAPixelOutput(m_FPGAPixelOutput, ctx);
-  ATH_CHECK(FPGAPixelOutput.record(std::make_unique<std::vector<uint64_t>>(EFTrackingTransient::PIXEL_CONTAINER_BUF_SIZE, 0)));
+  SG::WriteHandle<std::vector<uint32_t>> FPGAPixelOutput(m_FPGAPixelOutput, ctx);
+  ATH_CHECK(FPGAPixelOutput.record(std::make_unique<std::vector<uint32_t>>(EFTrackingTransient::PIXEL_CONTAINER_BUF_SIZE, 0)));
 
-  SG::WriteHandle<std::vector<uint64_t>> FPGAStripOutput(m_FPGAStripOutput, ctx);
-  ATH_CHECK(FPGAStripOutput.record(std::make_unique<std::vector<uint64_t>>(EFTrackingTransient::STRIP_CONTAINER_BUF_SIZE, 0)));
+  SG::WriteHandle<std::vector<uint32_t>> FPGAStripOutput(m_FPGAStripOutput, ctx);
+  ATH_CHECK(FPGAStripOutput.record(std::make_unique<std::vector<uint32_t>>(EFTrackingTransient::STRIP_CONTAINER_BUF_SIZE, 0)));
 
   const auto t_ro0 = std::chrono::steady_clock::now();
   bo_pix_edm_cont.sync(XCL_BO_SYNC_BO_FROM_DEVICE);
@@ -338,8 +344,8 @@ StatusCode F1X0XRTIntegrationAlg::execute(const EventContext &ctx) const
   ATH_MSG_DEBUG("Strip output buffer read time: " << (ns_between(t_ro2, t_ro3) / 1e6) << " ms");
 
 
-  if(pixelInput->size() == 6) (*FPGAPixelOutput)[0] = 0; // if no pixel input, set the first element to 0
-  if(stripInput->size() == 6) (*FPGAStripOutput)[0] = 0; // if no strip input, set the first element to 0
+  if(*pixelInputSize == 6) (*FPGAPixelOutput)[0] = 0; // if no pixel input, set the first element to 0
+  if(*stripInputSize == 6) (*FPGAStripOutput)[0] = 0; // if no strip input, set the first element to 0
 
   return StatusCode::SUCCESS;
 }
@@ -370,7 +376,7 @@ StatusCode F1X0XRTIntegrationAlg::finalize()
 
 void F1X0XRTIntegrationAlg::getListofCUs(std::vector<std::string>& cuNames)
 {
-  xrt::xclbin xrt_xclbin(m_xclbin);
+  xrt::xclbin xrt_xclbin(m_xclbin.value());
 
   ATH_MSG_INFO("xsa name: "  << xrt_xclbin.get_xsa_name());
   ATH_MSG_INFO("fpga name: " << xrt_xclbin.get_fpga_device_name());

@@ -10,6 +10,8 @@
 #include "StoreGate/StoreGateSvc.h" 
 
 #include "IdDictDetDescr/IdDictManager.h"
+#include "IdDict/IdDictDictionary.h"
+#include "IdDict/IdDictMgr.h"
 #include "InDetIdentifier/SCT_ID.h"
 
 
@@ -52,7 +54,7 @@ SCT_IDDetDescrCnv::createObj(IOpaqueAddress* /*pAddr*/, DataObject*& pObj)
     // DoChecks flag
     bool doChecks                 = mgr->do_checks();
 
-    IdDictDictionary* dict = mgr->find_dictionary("InnerDetector");  
+    const IdDictDictionary* dict = mgr->find_dictionary("InnerDetector");
     if (!dict) {
         ATH_MSG_ERROR("unable to find idDict for InnerDetector");
         return StatusCode::FAILURE;

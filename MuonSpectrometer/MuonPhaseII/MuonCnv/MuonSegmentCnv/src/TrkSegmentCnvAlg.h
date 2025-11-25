@@ -65,10 +65,10 @@ namespace MuonR4{
             SG::ReadHandleKey<Muon::MMPrepDataContainer> m_keyMM{this, "MmKey", "MM_Measurements"};
 
             // ACTS geometry context
-            SG::ReadHandleKey<ActsGeometryContext> m_geoCtxKey{this, "AlignmentKey", "ActsAlignment", "cond handle key"};
+            SG::ReadHandleKey<ActsTrk::GeometryContext> m_geoCtxKey{this, "AlignmentKey", "ActsAlignment", "cond handle key"};
 
            
-            SG::ReadHandleKeyArray<SegmentContainer> m_readKeys{this, "Segments", {"R4MuonSegments"}};
+            SG::ReadHandleKeyArray<SegmentContainer> m_readKeys{this, "ReadSegments", {"R4MuonSegments"}};
 
             SG::WriteHandleKey<Trk::SegmentCollection> m_writeKey{this, "WriteKey", "TrackMuonSegmentsR4"};
 

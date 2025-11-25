@@ -1,10 +1,17 @@
 # Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 def isPrimaryPass(flags) -> bool:
-    return f"{flags.Tracking.ITkPrimaryPassConfig.value}Pass" not in flags.Tracking
+    if not flags.hasCategory("Tracking.ActiveConfig"):
+        return False
+    # Support for non ACTS passes, that do not respect the convention
+    # This comes from Athena legacy passes
+    if flags.Tracking.ActiveConfig.extension in ["", "HeavyIon"]:
+        return True
+    # For ACTS the convention is respected: ITk{extension} + Pass
+    return f"ITk{flags.Tracking.ActiveConfig.extension}" == flags.Tracking.ITkPrimaryPassConfig.value
 
 def isFastPrimaryPass(flags) -> bool:
-    if "ActiveConfig" in flags.Tracking and flags.Tracking.ActiveConfig.extension in ["ActsValidateF100", "ActsValidateF150"] and flags.Tracking.doITkFastTracking:
+    if flags.hasCategory("Tracking.ActiveConfig") and flags.Tracking.ActiveConfig.extension in ["ActsValidateF100", "ActsValidateF150"] and flags.Tracking.doITkFastTracking:
         return True
     return flags.Tracking.doITkFastTracking and isPrimaryPass(flags)
 
@@ -57,12 +64,6 @@ def extractTrackingPasses(flags) -> list:
         "Tracking.ActiveConfig",
         f"Tracking.{flags.Tracking.ITkPrimaryPassConfig.value}Pass")]
 
-    # Large Radius pass
-    if flags.Acts.doLargeRadius:
-        trackingPasses += [flags.cloneAndReplace(
-            "Tracking.ActiveConfig",
-            "Tracking.ITkActsLargeRadiusPass")]
-
     # Conversion pass
     if flags.Acts.doITkConversion:
         # Check that we can schedule the conversion
@@ -71,6 +72,13 @@ def extractTrackingPasses(flags) -> list:
         trackingPasses += [flags.cloneAndReplace(
             "Tracking.ActiveConfig",
             "Tracking.ITkActsConversionPass")]
+
+    # Large Radius pass
+    if flags.Acts.doLargeRadius:
+        trackingPasses += [flags.cloneAndReplace(
+            "Tracking.ActiveConfig",
+            "Tracking.ITkActsLargeRadiusPass")]
+
         
     # Low pT pass
     if flags.Acts.doLowPt:

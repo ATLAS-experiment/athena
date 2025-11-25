@@ -3,6 +3,11 @@
 */
 
 #include "MuonIdHelpers/MmIdHelper.h"
+#include "IdDict/IdDictDictionary.h"
+#include "IdDict/IdDictField.h"
+#include "IdDict/IdDictGroup.h"
+#include "IdDict/IdDictMgr.h"
+#include "IdDict/IdDictRegion.h"
 #include "Identifier/RangeIterator.h"
 
 #include "AthenaKernel/getMessageSvc.h"
@@ -48,7 +53,7 @@ int MmIdHelper::initialize_from_dictionary(const IdDictMgr& dict_mgr) {
         return 0;
     }
 
-    IdDictField* field = m_dict->find_field("mmMultilayer");
+    const IdDictField* field = m_dict->find_field("mmMultilayer");
     if (field) {
         m_DETECTORELEMENT_INDEX = field->index();
     } else {
@@ -76,11 +81,11 @@ int MmIdHelper::initialize_from_dictionary(const IdDictMgr& dict_mgr) {
     //// m_DETECTORELEMENT_INDEX = m_MODULE_INDEX;
 
     // save an index to the first region of MM
-    IdDictGroup* mmGroup = m_dict->find_group("mm");
+    const IdDictGroup* mmGroup = m_dict->find_group("mm");
     if (!mmGroup) {
         ATH_MSG_ERROR("Cannot find mm group");
     } else {
-        m_GROUP_INDEX = mmGroup->regions()[0]->index();
+        m_GROUP_INDEX = mmGroup->region(0).index();
     }
 
     const IdDictRegion& region = m_dict->region(m_GROUP_INDEX);
@@ -383,65 +388,91 @@ void MmIdHelper::idChannels(const Identifier& id, std::vector<Identifier>& vect)
     }
 }
 /*******************************************************************************/
+int MmIdHelper::stationEtaMin(const ExpandedIdentifier& expId) const {
+    int result = -999;
+    for (unsigned int i = 0; i < m_full_module_range.size(); ++i) {
+        const Range& range = m_full_module_range[i];
+        if (range.match(expId)) {
+            const Range::field& eta_field = range[m_ETA_INDEX];
+            if (not eta_field.empty()) {
+                int etamin = eta_field.get_minimum();
+                if (-999 == result) {
+                    result = etamin;
+                } else {
+                    if (etamin < result) result = etamin;
+                }
+            }
+        }
+    }
+    return (result);
+}  // end MmIdHelper::stationEtaMin
+/*******************************************************************************/
 int MmIdHelper::stationEtaMin(const Identifier& id) const {
     ExpandedIdentifier expId;
     IdContext eta_context(expId, 0, m_ETA_INDEX);
     if (!get_expanded_id(id, expId, &eta_context)) {
-        int result = -999;
-        for (unsigned int i = 0; i < m_full_module_range.size(); ++i) {
-            const Range& range = m_full_module_range[i];
-            if (range.match(expId)) {
-                const Range::field& eta_field = range[m_ETA_INDEX];
-                if (not eta_field.empty()) {
-                    int etamin = eta_field.get_minimum();
-                    if (-999 == result) {
-                        result = etamin;
-                    } else {
-                        if (etamin < result) result = etamin;
-                    }
-                }
-            }
-        }
-        return (result);
+        return stationEtaMin(expId);
     }
     return (999);  // default
 }  // end MmIdHelper::stationEtaMin
+/*******************************************************************************/
+int MmIdHelper::stationEtaMax(const ExpandedIdentifier& expId) const {
+    int result = -999;
+    for (unsigned int i = 0; i < m_full_module_range.size(); ++i) {
+        const Range& range = m_full_module_range[i];
+        if (range.match(expId)) {
+            const Range::field& eta_field = range[m_ETA_INDEX];
+            if (not eta_field.empty()) {
+                int etamax = eta_field.get_maximum();
+                if (result < etamax) result = etamax;
+            }
+        }
+    }
+    return (result);
+}  // end MmIdHelper::stationEtaMax
 /*******************************************************************************/
 int MmIdHelper::stationEtaMax(const Identifier& id) const {
     ExpandedIdentifier expId;
     IdContext eta_context(expId, 0, m_ETA_INDEX);
     if (!get_expanded_id(id, expId, &eta_context)) {
-        int result = -999;
-        for (unsigned int i = 0; i < m_full_module_range.size(); ++i) {
-            const Range& range = m_full_module_range[i];
-            if (range.match(expId)) {
-                const Range::field& eta_field = range[m_ETA_INDEX];
-                if (not eta_field.empty()) {
-                    int etamax = eta_field.get_maximum();
-                    if (result < etamax) result = etamax;
-                }
-            }
-        }
-        return (result);
+        return stationEtaMax(expId);
     }
     return (-999);
 }  // end MmIdHelper::stationEtaMax
+/*******************************************************************************/
+int MmIdHelper::stationPhiMin(const ExpandedIdentifier& expId) const {
+    for (unsigned int i = 0; i < m_full_module_range.size(); ++i) {
+        const Range& range = m_full_module_range[i];
+        if (range.match(expId)) {
+            const Range::field& phi_field = range[m_PHI_INDEX];
+            if (not phi_field.empty()) { return (phi_field.get_minimum()); }
+        }
+    }
+    // Failed to find the min
+    return (999);
+}
 /*******************************************************************************/
 int MmIdHelper::stationPhiMin(const Identifier& id) const {
     ExpandedIdentifier expId;
     IdContext phi_context(expId, 0, m_PHI_INDEX);
 
     if (!get_expanded_id(id, expId, &phi_context)) {
-        for (unsigned int i = 0; i < m_full_module_range.size(); ++i) {
-            const Range& range = m_full_module_range[i];
-            if (range.match(expId)) {
-                const Range::field& phi_field = range[m_PHI_INDEX];
-                if (not phi_field.empty()) { return (phi_field.get_minimum()); }
-            }
-        }
+        return stationPhiMin(expId);
     }
     // Failed to find the min
     return (999);
+}
+/*******************************************************************************/
+int MmIdHelper::stationPhiMax(const ExpandedIdentifier& expId) const {
+    for (unsigned int i = 0; i < m_full_module_range.size(); ++i) {
+        const Range& range = m_full_module_range[i];
+        if (range.match(expId)) {
+            const Range::field& phi_field = range[m_PHI_INDEX];
+            if (not phi_field.empty()) { return (phi_field.get_maximum()); }
+        }
+    }
+    // Failed to find the max
+    return (-999);
 }
 /*******************************************************************************/
 int MmIdHelper::stationPhiMax(const Identifier& id) const {
@@ -449,13 +480,7 @@ int MmIdHelper::stationPhiMax(const Identifier& id) const {
     IdContext phi_context(expId, 0, m_PHI_INDEX);
 
     if (!get_expanded_id(id, expId, &phi_context)) {
-        for (unsigned int i = 0; i < m_full_module_range.size(); ++i) {
-            const Range& range = m_full_module_range[i];
-            if (range.match(expId)) {
-                const Range::field& phi_field = range[m_PHI_INDEX];
-                if (not phi_field.empty()) { return (phi_field.get_maximum()); }
-            }
-        }
+        return stationPhiMax(expId);
     }
     // Failed to find the max
     return (-999);
@@ -481,199 +506,193 @@ int MmIdHelper::numberOfMultilayers(const Identifier& id) const {
     return (-999);
 }
 /*******************************************************************************/
+int MmIdHelper::multilayerMin(const ExpandedIdentifier& expId) const {
+    int result = -999;
+    for (unsigned int i = 0; i < m_full_channel_range.size(); ++i) {
+        const Range& range = m_full_channel_range[i];
+        if (range.match(expId)) {
+            const Range::field& multilayer_field = range[m_DETECTORELEMENT_INDEX];
+            if (not multilayer_field.empty()) {
+                int multilayermin = multilayer_field.get_minimum();
+                if (-999 == result) {
+                    result = multilayermin;
+                } else {
+                    if (multilayermin < result) result = multilayermin;
+                }
+            }
+        }
+    }
+    return (result);
+}
+/*******************************************************************************/
 int MmIdHelper::multilayerMin(const Identifier& id) const {
     ExpandedIdentifier expId;
     IdContext multilayer_context(expId, 0, m_DETECTORELEMENT_INDEX);
     if (!get_expanded_id(id, expId, &multilayer_context)) {
-        int result = -999;
-        for (unsigned int i = 0; i < m_full_channel_range.size(); ++i) {
-            const Range& range = m_full_channel_range[i];
-            if (range.match(expId)) {
-                const Range::field& multilayer_field = range[m_DETECTORELEMENT_INDEX];
-                if (not multilayer_field.empty()) {
-                    int multilayermin = multilayer_field.get_minimum();
-                    if (-999 == result) {
-                        result = multilayermin;
-                    } else {
-                        if (multilayermin < result) result = multilayermin;
-                    }
-                }
-            }
-        }
-        return (result);
+        return multilayerMin(expId);
     }
     return (999);  /// default
+}
+/*******************************************************************************/
+int MmIdHelper::multilayerMax(const ExpandedIdentifier& expId) const {
+    int result = -999;
+    for (unsigned int i = 0; i < m_full_channel_range.size(); ++i) {
+        const Range& range = m_full_channel_range[i];
+        if (range.match(expId)) {
+            const Range::field& multilayer_field = range[m_DETECTORELEMENT_INDEX];
+            if (not multilayer_field.empty()) {
+                int multilayermax = multilayer_field.get_maximum();
+                if (result < multilayermax) result = multilayermax;
+            }
+        }
+    }
+    return (result);
 }
 /*******************************************************************************/
 int MmIdHelper::multilayerMax(const Identifier& id) const {
     ExpandedIdentifier expId;
     IdContext multilayer_context(expId, 0, m_DETECTORELEMENT_INDEX);
     if (!get_expanded_id(id, expId, &multilayer_context)) {
-        int result = -999;
-        for (unsigned int i = 0; i < m_full_channel_range.size(); ++i) {
-            const Range& range = m_full_channel_range[i];
-            if (range.match(expId)) {
-                const Range::field& multilayer_field = range[m_DETECTORELEMENT_INDEX];
-                if (not multilayer_field.empty()) {
-                    int multilayermax = multilayer_field.get_maximum();
-                    if (result < multilayermax) result = multilayermax;
+        return multilayerMax(expId);
+    }
+    return (-999);
+}
+/*******************************************************************************/
+int MmIdHelper::gasGapMin(const ExpandedIdentifier& expId) const {
+    int result = -999;
+    for (unsigned int i = 0; i < m_full_channel_range.size(); ++i) {
+        const Range& range = m_full_channel_range[i];
+        if (range.match(expId)) {
+            const Range::field& gasgap_field = range[m_GASGAP_INDEX];
+            if (not gasgap_field.empty()) {
+                int gasgapmin = gasgap_field.get_minimum();
+                if (-999 == result) {
+                    result = gasgapmin;
+                } else {
+                    if (gasgapmin < result) result = gasgapmin;
                 }
             }
         }
-        return (result);
     }
-    return (-999);
+    return (result);
 }
 /*******************************************************************************/
 int MmIdHelper::gasGapMin(const Identifier& id) const {
     ExpandedIdentifier expId;
     IdContext gasgap_context(expId, 0, m_GASGAP_INDEX);
     if (!get_expanded_id(id, expId, &gasgap_context)) {
-        int result = -999;
-        for (unsigned int i = 0; i < m_full_channel_range.size(); ++i) {
-            const Range& range = m_full_channel_range[i];
-            if (range.match(expId)) {
-                const Range::field& gasgap_field = range[m_GASGAP_INDEX];
-                if (not gasgap_field.empty()) {
-                    int gasgapmin = gasgap_field.get_minimum();
-                    if (-999 == result) {
-                        result = gasgapmin;
-                    } else {
-                        if (gasgapmin < result) result = gasgapmin;
-                    }
-                }
-            }
-        }
-        return (result);
+        return gasGapMin(expId);
     }
     return (999);
 }
 /*******************************************************************************/
-int MmIdHelper::gasGapMax(const Identifier& id) const {
-    ExpandedIdentifier expId;
-    IdContext gasgap_context(expId, 0, m_GASGAP_INDEX);
-    if (!get_expanded_id(id, expId, &gasgap_context)) {
-        for (unsigned int i = 0; i < m_full_channel_range.size(); ++i) {
-            const Range& range = m_full_channel_range[i];
-            if (range.match(expId)) {
-                const Range::field& gasgap_field = range[m_GASGAP_INDEX];
-                if (not gasgap_field.empty()) { return (gasgap_field.get_maximum()); }
-            }
+int MmIdHelper::gasGapMax(const ExpandedIdentifier& expId) const {
+    for (unsigned int i = 0; i < m_full_channel_range.size(); ++i) {
+        const Range& range = m_full_channel_range[i];
+        if (range.match(expId)) {
+            const Range::field& gasgap_field = range[m_GASGAP_INDEX];
+            if (not gasgap_field.empty()) { return (gasgap_field.get_maximum()); }
         }
     }
     // Failed to find the max
     return (-999);
 }
 /*******************************************************************************/
+int MmIdHelper::gasGapMax(const Identifier& id) const {
+    ExpandedIdentifier expId;
+    IdContext gasgap_context(expId, 0, m_GASGAP_INDEX);
+    if (!get_expanded_id(id, expId, &gasgap_context)) {
+        return gasGapMax(expId);
+    }
+    // Failed to find the max
+    return (-999);
+}
+/*******************************************************************************/
+int MmIdHelper::channelMin(const ExpandedIdentifier& expId) const {
+    int result = -999;
+    for (unsigned int i = 0; i < m_full_channel_range.size(); ++i) {
+        const Range& range = m_full_channel_range[i];
+        if (range.match(expId)) {
+            const Range::field& channel_field = range[m_CHANNEL_INDEX];
+            if (not channel_field.empty()) {
+                int channelmin = channel_field.get_minimum();
+                if (-999 == result) {
+                    result = channelmin;
+                } else {
+                    if (channelmin < result) result = channelmin;
+                }
+            }
+        }
+    }
+    return (result);
+}
+/*******************************************************************************/
 int MmIdHelper::channelMin(const Identifier& id) const {
     ExpandedIdentifier expId;
     IdContext channel_context(expId, 0, m_CHANNEL_INDEX);
     if (!get_expanded_id(id, expId, &channel_context)) {
-        int result = -999;
-        for (unsigned int i = 0; i < m_full_channel_range.size(); ++i) {
-            const Range& range = m_full_channel_range[i];
-            if (range.match(expId)) {
-                const Range::field& channel_field = range[m_CHANNEL_INDEX];
-                if (not channel_field.empty()) {
-                    int channelmin = channel_field.get_minimum();
-                    if (-999 == result) {
-                        result = channelmin;
-                    } else {
-                        if (channelmin < result) result = channelmin;
-                    }
-                }
-            }
-        }
-        return (result);
+        return channelMin(expId);
     }
     return (999);
+}
+/*******************************************************************************/
+int MmIdHelper::channelMax(const ExpandedIdentifier& expId) const {
+    int result = -999;
+    for (unsigned int i = 0; i < m_full_channel_range.size(); ++i) {
+        const Range& range = m_full_channel_range[i];
+        if (range.match(expId)) {
+            const Range::field& channel_field = range[m_CHANNEL_INDEX];
+            if (not channel_field.empty()) {
+                int channelmax = channel_field.get_maximum();
+                if (result < channelmax) result = channelmax;
+            }
+        }
+    }
+    return (result);
 }
 /*******************************************************************************/
 int MmIdHelper::channelMax(const Identifier& id) const {
     ExpandedIdentifier expId;
     IdContext channel_context(expId, 0, m_CHANNEL_INDEX);
     if (!get_expanded_id(id, expId, &channel_context)) {
-        int result = -999;
-        for (unsigned int i = 0; i < m_full_channel_range.size(); ++i) {
-            const Range& range = m_full_channel_range[i];
-            if (range.match(expId)) {
-                const Range::field& channel_field = range[m_CHANNEL_INDEX];
-                if (not channel_field.empty()) {
-                    int channelmax = channel_field.get_maximum();
-                    if (result < channelmax) result = channelmax;
-                }
-            }
-        }
-        return (result);
+        return channelMax(expId);
     }
     return (-999);
 }
 /*******************************************************************************/
 // validation of levels
 bool MmIdHelper::valid(const Identifier& id) const {
-    if (!validElement(id)) return false;
-
-    int mplet = multilayer(id);
-    if ((mplet < multilayerMin(id)) || (mplet > multilayerMax(id))) {
-        ATH_MSG_DEBUG("Invalid multilayer=" << mplet << " multilayerMin=" << multilayerMin(id) << " multilayerMax=" << multilayerMax(id));
-        return false;
-    }
-
-    int gasG = gasGap(id);
-    if (gasG < gasGapMin(id) || gasG > gasGapMax(id)) {
-        ATH_MSG_DEBUG("Invalid gasGap=" << gasG << " gasGapMin=" << gasGapMin(id) << " gasGapMax=" << gasGapMax(id));
-        return false;
-    }
-
-    int element = channel(id);
-    if (element < channelMin(id) || element > channelMax(id)) {
-        ATH_MSG_DEBUG("Invalid channel=" << element << " channelMin=" << channelMin(id) << " channelMax=" << channelMax(id));
-        return false;
-    }
-    return true;
+    return validChannel(id,
+                        stationName(id), stationEta(id), stationPhi(id),
+                        multilayer(id), gasGap(id), channel(id));
 }  // end MmIdHelper::valid
 /*******************************************************************************/
 bool MmIdHelper::isStNameInTech(const std::string& stationName) const { return stationName[0] == 'M'; }
 bool MmIdHelper::validElement(const Identifier& id) const {
-    int station = stationName(id);
-    if (!validStation(station)) {
-        ATH_MSG_DEBUG("Invalid stationName=" << stationNameString(station));
+    ExpandedIdentifier expId;
+    IdContext context(expId, 0, m_PHI_INDEX);
+    if (get_expanded_id(id, expId, &context)) {
         return false;
     }
-
-    int eta = stationEta(id);
-    if (eta < stationEtaMin(id) || eta > stationEtaMax(id)) {
-        ATH_MSG_DEBUG("Invalid stationEta=" << eta << " for stationName=" << stationNameString(station) << " stationIndex=" << station
-                                            << " stationEtaMin=" << stationEtaMin(id) << " stationEtaMax=" << stationEtaMax(id));
-        return false;
-    }
-
-    int phi = stationPhi(id);
-    if (phi < stationPhiMin(id) || phi > stationPhiMax(id)) {
-        ATH_MSG_DEBUG("Invalid stationPhi=" << phi << " for stationName=" << stationNameString(station) << " stationIndex=" << station
-                                            << " stationPhiMin=" << stationPhiMin(id) << " stationPhiMax=" << stationPhiMax(id));
-        return false;
-    }
-    return true;
-
+    return validElement (expId, stationName(id), stationEta(id), stationPhi(id));
 }  // end MmIdHelper::validElement
 /*******************************************************************************/
 // Private validation of levels
-bool MmIdHelper::validElement(const Identifier& id, int stationName, int stationEta, int stationPhi) const {
+bool MmIdHelper::validElement(const ExpandedIdentifier& expId, int stationName, int stationEta, int stationPhi) const {
     if (!validStation(stationName)) {
         ATH_MSG_DEBUG("Invalid stationName=" << stationNameString(stationName));
         return false;
     }
-    if (stationEta < stationEtaMin(id) || stationEta > stationEtaMax(id)) {
+    if (stationEta < stationEtaMin(expId) || stationEta > stationEtaMax(expId)) {
         ATH_MSG_DEBUG("Invalid stationEta=" << stationEta << " for stationName=" << stationNameString(stationName)
-                                            << " stationIndex=" << stationName << " stationEtaMin=" << stationEtaMin(id)
-                                            << " stationEtaMax=" << stationEtaMax(id));
+                                            << " stationIndex=" << stationName << " stationEtaMin=" << stationEtaMin(expId)
+                                            << " stationEtaMax=" << stationEtaMax(expId));
         return false;
     }
-    if (stationPhi < stationPhiMin(id) || stationPhi > stationPhiMax(id)) {
+    if (stationPhi < stationPhiMin(expId) || stationPhi > stationPhiMax(expId)) {
         ATH_MSG_DEBUG("Invalid stationPhi=" << stationPhi << " for stationName=" << stationNameString(stationName)
-                                            << " stationIndex=" << stationName << " stationPhiMin=" << stationPhiMin(id)
-                                            << " stationPhiMax=" << stationPhiMax(id));
+                                            << " stationIndex=" << stationName << " stationPhiMin=" << stationPhiMin(expId)
+                                            << " stationPhiMax=" << stationPhiMax(expId));
         return false;
     }
     return true;
@@ -682,20 +701,26 @@ bool MmIdHelper::validElement(const Identifier& id, int stationName, int station
 // Check values down to readout channel level
 bool MmIdHelper::validChannel(const Identifier& id, int stationName, int stationEta, int stationPhi, int multilayer, int gasGap,
                               int channel) const {
-    if (!validElement(id, stationName, stationEta, stationPhi)) return false;
-
-    if ((multilayer < multilayerMin(id)) || (multilayer > multilayerMax(id))) {
-        ATH_MSG_DEBUG("Invalid multilayer=" << multilayer << " multilayerMin=" << multilayerMin(id)
-                                            << " multilayerMax=" << multilayerMax(id));
+    ExpandedIdentifier expId;
+    IdContext context(expId, 0, m_CHANNEL_INDEX);
+    if (get_expanded_id(id, expId, &context)) {
         return false;
     }
 
-    if (gasGap < gasGapMin(id) || gasGap > gasGapMax(id)) {
-        ATH_MSG_DEBUG("Invalid gasGap=" << gasGap << " gasGapMin=" << gasGapMin(id) << " gasGapMax=" << gasGapMax(id));
+    if (!validElement(expId, stationName, stationEta, stationPhi)) return false;
+
+    if ((multilayer < multilayerMin(expId)) || (multilayer > multilayerMax(expId))) {
+        ATH_MSG_DEBUG("Invalid multilayer=" << multilayer << " multilayerMin=" << multilayerMin(expId)
+                                            << " multilayerMax=" << multilayerMax(expId));
         return false;
     }
-    if (channel < channelMin(id) || channel > channelMax(id)) {
-        ATH_MSG_DEBUG("Invalid channel=" << channel << " channelMin=" << channelMin(id) << " channelMax=" << channelMax(id));
+
+    if (gasGap < gasGapMin(expId) || gasGap > gasGapMax(expId)) {
+        ATH_MSG_DEBUG("Invalid gasGap=" << gasGap << " gasGapMin=" << gasGapMin(expId) << " gasGapMax=" << gasGapMax(expId));
+        return false;
+    }
+    if (channel < channelMin(expId) || channel > channelMax(expId)) {
+        ATH_MSG_DEBUG("Invalid channel=" << channel << " channelMin=" << channelMin(expId) << " channelMax=" << channelMax(expId));
         return false;
     }
     return true;
@@ -716,7 +741,14 @@ Identifier MmIdHelper::elementID(int stationName, int stationEta, int stationPhi
 Identifier MmIdHelper::elementID(int stationName, int stationEta, int stationPhi, bool& isValid) const {
     try {
         const Identifier result = elementID(stationName, stationEta, stationPhi);
-        isValid = validElement(result, stationName, stationEta, stationPhi);
+        ExpandedIdentifier expId;
+        IdContext context(expId, 0, m_PHI_INDEX);
+        if (get_expanded_id(result, expId, &context)) {
+          isValid = false;
+        }
+        else {
+          isValid = validElement(expId, stationName, stationEta, stationPhi);
+        }
         return result;
     } catch (const std::out_of_range&) { isValid = false; }
     return Identifier{0};

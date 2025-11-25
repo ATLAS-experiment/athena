@@ -73,10 +73,9 @@ StatusCode DerivationFramework::TruthBornLeptonCollectionMaker::initialize()
 }
 
 // Selection and collection creation
-StatusCode DerivationFramework::TruthBornLeptonCollectionMaker::addBranches() const
+StatusCode DerivationFramework::TruthBornLeptonCollectionMaker::addBranches(const EventContext& ctx) const
 {
   // Event context
-  const EventContext& ctx = Gaudi::Hive::currentContext();
   
   // Set up for some metadata handling
   static const bool is_sherpa = [this]() {
@@ -200,10 +199,10 @@ StatusCode DerivationFramework::TruthBornLeptonCollectionMaker::addBranches() co
     // Fill with numerical content
     *xTruthParticle=*theParticle;
     // Copy over the decorations if they are available
-    typeDecorator(*xTruthParticle) = typeAccessor.withDefault(*theParticle, 0);
-    originDecorator(*xTruthParticle) = originAccessor.withDefault(*theParticle, 0);
-    outcomeDecorator(*xTruthParticle) = outcomeAccessor.withDefault(*theParticle, 0);
-    classificationDecorator(*xTruthParticle) = classificationAccessor.withDefault(*theParticle, 0);
+    typeDecorator(*xTruthParticle) = typeAccessor(*theParticle);
+    originDecorator(*xTruthParticle) = originAccessor(*theParticle);
+    outcomeDecorator(*xTruthParticle) = outcomeAccessor(*theParticle);
+    classificationDecorator(*xTruthParticle) = classificationAccessor(*theParticle);
   } // Loop over all particles
 
   return StatusCode::SUCCESS;

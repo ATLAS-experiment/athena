@@ -34,7 +34,10 @@ const Identifier& TgcStrip_v1::identify() const {
    return (*m_identifier.ptr());
 }
 IdentifierHash TgcStrip_v1::layerHash() const {
-   return MuonGMR4::TgcReadoutElement::constructHash(0, gasGap(), measuresPhi());
+   return MuonGMR4::TgcReadoutElement::constructHash(0, gasGap(), false);
+}
+Amg::Vector3D TgcStrip_v1::localMeasurementPos() const {
+   return localPosition<1>()[0] * Amg::Vector3D::Unit(measuresPhi());
 }
 }  // namespace xAOD
 #undef IMPLEMENT_SETTER_GETTER

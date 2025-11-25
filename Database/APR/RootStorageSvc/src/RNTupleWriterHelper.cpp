@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "RNTupleWriterHelper.h"
@@ -14,7 +14,7 @@ RNTupleWriterHelper::RNTupleWriterHelper(TFile* file,
                                          const std::string& ntupleName,
                                          bool enableBufferedWrite,
                                          bool enableMetrics)
-    : AthMessaging(std::string("RNTupleWriterHelper[") + ntupleName + "]"),
+    : pool::APRMessaging(std::string("RNTupleWriterHelper[") + ntupleName + "]"),
       m_model(ROOT::RNTupleModel::Create()),
       m_ntupleName(ntupleName),
       m_tfile(file),

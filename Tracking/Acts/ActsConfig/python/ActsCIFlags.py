@@ -2,17 +2,20 @@
 # Flags used in CI tests
 
 from TrkConfig.TrkConfigFlags import TrackingComponent
+from AthenaConfiguration.Enums import LHCPeriod
 
 def actsLegacyWorkflowFlags(flags) -> None:
     """flags for Reco_tf with CA used in CI tests: add Acts (legacy like) workflow to reco sequence"""
     flags.Reco.EnableHGTDExtension = False
     flags.Tracking.recoChain = [TrackingComponent.ActsLegacyChain]
+    flags.Tracking.doPixelDigitalClustering = lambda pcf: pcf.GeoModel.Run >= LHCPeriod.Run4
 
 def actsWorkflowFlags(flags) -> None:
     """flags for Reco_tf with CA used in unit test: schedule a pure ACTS workflow to reco sequence"""
     flags.Reco.EnableHGTDExtension = False
     flags.Acts.doAmbiguityResolution = False
     flags.Tracking.doITkFastTracking = True
+    flags.Tracking.doPixelDigitalClustering = lambda pcf: pcf.GeoModel.Run >= LHCPeriod.Run4
     flags.Tracking.recoChain = [TrackingComponent.ActsChain]
 
 def actsScoreBasedAmbiguityWorkflowFlags(flags) -> None:
@@ -24,16 +27,18 @@ def actsScoreBasedAmbiguityWorkflowFlags(flags) -> None:
 def actsHeavyIonFlags(flags) -> None:
     flags.Reco.EnableHGTDExtension = False
     flags.Acts.doAmbiguityResolution = False
+    flags.Tracking.doPixelDigitalClustering = lambda pcf: pcf.GeoModel.Run >= LHCPeriod.Run4
     flags.Tracking.recoChain = [TrackingComponent.ActsHeavyIon]
 
+
+# Validation workflows
+    
+    
 def actsValidateLargeRadiusStandaloneFlags(flags) -> None:
     """flags for Reco_tf with CA used in CI tests: use legacy primary pass and Acts LRT pass"""
     flags.Tracking.recoChain = [TrackingComponent.AthenaChain,
                                 TrackingComponent.ActsValidateLargeRadiusStandalone]
     flags.Tracking.writeSeedValNtuple = True
-
-
-# Validation workflows
 
 def actsValidateClustersFlags(flags) -> None:
     """flags for Reco_tf with CA used in CI tests: use cluster conversion [xAOD -> InDet] with both Athena and Acts sequences"""
@@ -68,6 +73,8 @@ def actsValidateLargeRadiusSeedsFlags(flags) -> None:
     """flags for Reco_tf with CA used in CI tests: use SiSpacePointSeedMaker tool during reconstruction"""
     flags.Tracking.recoChain = [TrackingComponent.AthenaChain,
                                 TrackingComponent.ActsValidateLargeRadiusSeeds]
+    from ActsConfig.ActsConfigFlags import SeedingStrategy
+    flags.Acts.SeedingStrategy = SeedingStrategy.Default
     flags.Tracking.writeSeedValNtuple = True
     
 def actsValidateOrthogonalSeedsFlags(flags) -> None:

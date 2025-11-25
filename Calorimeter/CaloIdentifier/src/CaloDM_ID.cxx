@@ -3,10 +3,13 @@
 */
 
 #include "CaloIdentifier/CaloDM_ID.h"
+#include "IdDict/IdDictField.h"
+#include "IdDict/IdDictMgr.h"
+#include "IdDict/IdDictRegion.h"
+#include "IdDict/IdDictDictionary.h"
 #include "AtlasDetDescr/AtlasDetectorID.h"
 #include "CxxUtils/StrFormat.h"
 #include "GaudiKernel/MsgStream.h"
-#include "IdDict/IdDictDefs.h"
 #include "Identifier/IdentifierHash.h"
 #include "Identifier/RangeIterator.h"
 #include <algorithm>
@@ -662,7 +665,7 @@ int   CaloDM_ID::initLevelsFromDict()
   m_PHI_INDEX        = 999 ;
 
   // Save index to a LArDM region for unpacking - search with region name
-  IdDictRegion* reg = m_dict->find_region("DM_4_1_0_0");
+  const IdDictRegion* reg = m_dict->find_region("DM_4_1_0_0");
   if (reg) 
     {
       m_calodm_region_index = reg->index();
@@ -683,7 +686,7 @@ int   CaloDM_ID::initLevelsFromDict()
   
   
   // Fing a CaloDM region
-  IdDictField* field = m_dict->find_field("subdet") ;
+  const IdDictField* field = m_dict->find_field("subdet") ;
   if (field) {
     m_CALO_INDEX = field->index();
   }

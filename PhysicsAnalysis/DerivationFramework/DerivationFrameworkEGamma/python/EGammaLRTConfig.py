@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # ********************************************************************
 # EGammaLRTConfig.py
@@ -12,7 +12,7 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 
 
-def EGammaLRTCfg(ConfigFlags):
+def EGammaLRTCfg(flags):
     """Main config method for LRT e-gamma decorations"""
 
     acc = ComponentAccumulator()
@@ -29,14 +29,14 @@ def EGammaLRTCfg(ConfigFlags):
     # ELECTRON CHARGE SELECTION
     # ====================================================================
     if not hasattr(acc, "ElectronChargeIDSelectorLoose"):
-        if ConfigFlags.Derivation.Egamma.addECIDS:
+        if flags.Derivation.Egamma.addECIDS:
             from ElectronPhotonSelectorTools.AsgElectronChargeIDSelectorToolConfig import (
                 AsgElectronChargeIDSelectorToolCfg,
             )
 
             ElectronChargeIDSelector = acc.popToolsAndMerge(
                 AsgElectronChargeIDSelectorToolCfg(
-                    ConfigFlags, name="ElectronChargeIDSelectorLoose"
+                    flags, name="ElectronChargeIDSelectorLoose"
                 )
             )
             ElectronChargeIDSelector.primaryVertexContainer = "PrimaryVertices"
@@ -57,10 +57,10 @@ def EGammaLRTCfg(ConfigFlags):
     # TODO same as above, update with central ID
 
     # decorate electrons with the output of ECIDS
-    if ConfigFlags.Derivation.Egamma.addECIDS:
-        LRTElectronPassECIDS = acc.getPrimaryAndMerge(
+    if flags.Derivation.Egamma.addECIDS:
+        LRTElectronPassECIDS = acc.addPublicTool(acc.popToolsAndMerge(
             EGElectronLikelihoodToolWrapperCfg(
-                ConfigFlags,
+                flags,
                 name="LRTElectronPassECIDS",
                 EGammaElectronLikelihoodTool=ElectronChargeIDSelector,
                 EGammaFudgeMCTool="",
@@ -69,54 +69,42 @@ def EGammaLRTCfg(ConfigFlags):
                 ContainerName="LRTElectrons",
                 StoreTResult=True,
             )
-        )
+        ))
 
     # decorate some electrons with an additional ambiguity flag
     # against internal and early material conversion
     from DerivationFrameworkEGamma.EGammaToolsConfig import EGElectronAmbiguityToolCfg
 
-    LRTElectronAmbiguity = acc.getPrimaryAndMerge(
+    LRTElectronAmbiguity = acc.addPublicTool(acc.popToolsAndMerge(
         EGElectronAmbiguityToolCfg(
-            ConfigFlags,
+            flags,
             name="LRTElectronAdditionnalAmbiguity",
             idCut="DFCommonElectronsLHLooseNoPix",
             ContainerName="LRTElectrons",
-            isMC=ConfigFlags.Input.isMC,
+            isMC=flags.Input.isMC,
         )
-    )
+    ))
 
     # list of all the decorators so far
     LRTEGAugmentationTools = [LRTElectronAmbiguity]
-    if ConfigFlags.Derivation.Egamma.addECIDS:
+    if flags.Derivation.Egamma.addECIDS:
         LRTEGAugmentationTools.extend([LRTElectronPassECIDS])
 
     # ==================================================
     # Truth Related tools
-    if ConfigFlags.Input.isMC:
+    if flags.Input.isMC:
         # Decorate Electron with bkg electron type/origin
-        from MCTruthClassifier.MCTruthClassifierConfig import MCTruthClassifierCfg
-
-        BkgElectronMCTruthClassifier = acc.popToolsAndMerge(
-            MCTruthClassifierCfg(
-                ConfigFlags,
-                name="BkgElectronMCTruthClassifier",
-                ParticleCaloExtensionTool="",
-            )
-        )
-        acc.addPublicTool(BkgElectronMCTruthClassifier)
-
         from DerivationFrameworkEGamma.EGammaToolsConfig import (
             BkgElectronClassificationCfg,
         )
 
-        BkgLRTElectronClassificationTool = acc.getPrimaryAndMerge(
+        BkgLRTElectronClassificationTool = acc.addPublicTool(acc.popToolsAndMerge(
             BkgElectronClassificationCfg(
-                ConfigFlags,
+                flags,
                 name="BkgLRTElectronClassificationTool",
-                MCTruthClassifierTool=BkgElectronMCTruthClassifier,
-                ElectronContainerName="LRTElectrons",
+                ElectronContainerName="LRTElectrons"
             )
-        )
+        ))
         LRTEGAugmentationTools.append(BkgLRTElectronClassificationTool)
 
     # =======================================
@@ -136,7 +124,7 @@ def EGammaLRTCfg(ConfigFlags):
 
     acc.merge(
         DerivationTrackIsoCfg(
-            ConfigFlags, object_types=("Electrons", "Muons"), postfix="LRT"
+            flags, object_types=("Electrons", "Muons"), postfix="LRT"
         )
     )
 
@@ -145,13 +133,13 @@ def EGammaLRTCfg(ConfigFlags):
             LRTElectronIsolationSteeringDerivCfg,
         )
 
-        acc.merge(LRTElectronIsolationSteeringDerivCfg(ConfigFlags))
+        acc.merge(LRTElectronIsolationSteeringDerivCfg(flags))
 
     from IsolationAlgs.IsolationBuilderConfig import egIsolationCfg
 
     acc.merge(
         egIsolationCfg(
-            ConfigFlags,
+            flags,
             name="electronIsolationLRT",
             # Avoid overlap with the previously-configured IsolationBuilder.
             noCalo=True,

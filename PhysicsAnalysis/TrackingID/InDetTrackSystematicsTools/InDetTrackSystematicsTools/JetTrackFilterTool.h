@@ -84,7 +84,7 @@ namespace InDet {
 
     Gaudi::Property<double> m_effUncertTIDE{this, "FLostUncertainty", 0.24,
       "Option to set the uncertainty on FLost"};
-    Gaudi::Property<double> m_fakeUncertTIDE{this, "FakeUncertainty", 0.35,
+    Gaudi::Property<double> m_fakeUncertTIDE{this, "FakeUncertainty", 0.25,
       "Option to set the fake uncertainty"};
 
     ToolHandle< IInDetTrackTruthOriginTool > m_trackOriginTool

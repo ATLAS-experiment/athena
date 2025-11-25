@@ -10,11 +10,12 @@
 #include "xAODInDetMeasurement/StripClusterAuxContainer.h"
 #include "xAODInDetMeasurement/SpacePointContainer.h"
 #include "xAODInDetMeasurement/SpacePointAuxContainer.h"
-#include "ActsEvent/Seed.h"
+#include "ActsEvent/SeedContainer.h"
 #include "src/detail/MeasurementIndex.h"
 #include "src/detail/DuplicateSeedDetector.h"
 #include <vector>
 #include <ranges>
+#include <array>
 
 #include "../src/detail/DuplicateSeedDetector.cxx"
 
@@ -24,10 +25,12 @@ namespace ActsTrk::detail {
 
     static ActsTrk::SeedContainer createSeeds(const xAOD::SpacePointContainer& spacePoints) {
       ActsTrk::SeedContainer seedContainer;
-      for (std::size_t i(0ul); i+2ul<spacePoints.size(); i+=3ul) {
-        seedContainer.push_back( new ActsTrk::Seed(*spacePoints.at(i),
-                                                   *spacePoints.at(i+1),
-                                                   *spacePoints.at(i+2)) );
+      seedContainer.spacePoints().reserve(spacePoints.size());
+      for (const auto* sp : spacePoints) {
+        seedContainer.spacePoints().push_back(sp);
+      }
+      for (unsigned int i(0u); i+2u<spacePoints.size(); i+=3u) {
+        seedContainer.push_back(std::array{i, i+1, i+2});
       }
       return seedContainer;
     }
@@ -131,9 +134,9 @@ namespace ActsTrk::detail {
       std::cout << "Checking seedOffset" << std::endl;
       assert( duplicateSeedDetector.m_seedOffset.empty() );
       std::cout << "Chacking UsedMeasurements" << std::endl;
-      checkCollection( duplicateSeedDetector.m_nUsedMeasurements, nTotalSeeds, 0ul );
+      checkCollection( duplicateSeedDetector.m_nUsedMeasurements, nTotalSeeds, 0u );
       std::cout << "Checking nSeedMeasurements" << std::endl;
-      checkCollection( duplicateSeedDetector.m_nSeedMeasurements, nTotalSeeds, 0ul );
+      checkCollection( duplicateSeedDetector.m_nSeedMeasurements, nTotalSeeds, 0u );
       std::cout << "Checking isDuplicateSeed" << std::endl;
       checkCollection( duplicateSeedDetector.m_isDuplicateSeed, nTotalSeeds, false );
 
@@ -155,15 +158,15 @@ namespace ActsTrk::detail {
       assert( duplicateSeedDetector.m_seedOffset[0] == 0ul );
       assert( duplicateSeedDetector.m_seedOffset[1] == pixelSeeds.size() );
       std::cout << "Chacking UsedMeasurements" << std::endl;
-      checkCollection( duplicateSeedDetector.m_nUsedMeasurements, nTotalSeeds, 0ul );
+      checkCollection( duplicateSeedDetector.m_nUsedMeasurements, nTotalSeeds, 0u );
       std::cout << "Checking nSeedMeasurements" << std::endl;
-      const std::vector<std::size_t>& nSeedMeasurementsPostFill = duplicateSeedDetector.m_nSeedMeasurements;
-      for (std::vector<std::size_t>::const_iterator it(nSeedMeasurementsPostFill.begin()),
+      const std::vector<unsigned int>& nSeedMeasurementsPostFill = duplicateSeedDetector.m_nSeedMeasurements;
+      for (std::vector<unsigned int>::const_iterator it(nSeedMeasurementsPostFill.begin()),
             itEnd(nSeedMeasurementsPostFill.begin() + pixelSeeds.size());
           it != itEnd; ++it) {
         assert( *it == 3ul );
       }
-      for (std::vector<std::size_t>::const_iterator it(nSeedMeasurementsPostFill.begin() + pixelSeeds.size());
+      for (std::vector<unsigned int>::const_iterator it(nSeedMeasurementsPostFill.begin() + pixelSeeds.size());
           it != nSeedMeasurementsPostFill.end(); ++it) {
         assert( *it == 6 );
       }

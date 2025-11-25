@@ -14,11 +14,15 @@
 #include "RDBAccessSvc/IRDBRecord.h"
 #include "GeometryDBSvc/IGeometryDBSvc.h"
 #include "StoreGate/StoreGateSvc.h"
+#include "CxxUtils/close_to_zero.h"
 
 #include <iostream>
 #include <iomanip>
-#include <cmath>
+#include <cmath> //for std::abs
 #include <stdexcept>
+
+//for checking whether a value is a reliable denominator
+using CxxUtils::close_to_zero;
 
 // Constructor
 InDetMaterialManager::InDetMaterialManager(const std::string& managerName,
@@ -314,6 +318,9 @@ InDetMaterialManager::addMaterial(GeoMaterial* material) {
 
 bool
 InDetMaterialManager::compareDensity(double d1, double d2) const {
+  if (close_to_zero(d2)){
+    throw (std::runtime_error("InDetMaterialManager:compareDensity: Density is zero"));
+  }
   return(std::abs(d1 / d2 - 1.) < 1e-5);
 }
 
@@ -665,53 +672,21 @@ InDetMaterialManager::getMaterialForVolumeLength(const std::string& name,
                         << " Weight(g) = " << fracWeight[i] / Gaudi::Units::g << endmsg;
     }
   }
-
+  if (close_to_zero(totWeight)){
+    ATH_MSG_ERROR("totWeight is zero in InDetMaterialManager::getMaterialForVolumeLength");
+    return nullptr;
+  }
   for (unsigned int i = 0; i < fracWeight.size(); ++i) {
     fracWeight[i] /= totWeight;
+  }
+  if (close_to_zero(volume)){
+    ATH_MSG_ERROR("volume is zero in InDetMaterialManager::getMaterialForVolumeLength");
+    return nullptr;
   }
   double density = totWeight / volume;
 
   return getMaterial(name, baseMaterials, fracWeight, density);
 }
-
-// Add materials assuming they simply occupy the same volume.
-/*
-   const GeoMaterial*
-   InDetMaterialManager::getMaterial(const std::vector<const GeoMaterial *> & materialComponents,
-                  const std::string & newName)
-   {
-   const GeoMaterial * newMaterial = 0;
-   std::vector<double> fracWeight;
-   fracWeight.reserve(materialComponents.size());
-
-   for (unsigned int i = 0; i < materialComponents.size(); i++) {
-    const GeoMaterial * origMaterial = materialComponents[i];
-    double weight = origMaterial->getDensity();
-    fracWeight.push_back(weight);
-    totWeight += weight;
-   }
-   for (unsigned int i = 0; i < fracWeight.size(); ++i) {
-    fracWeight[i] /= totWeight;
-   }
-   return getMaterial(materialComponents, fracWeight, totWeight, newName);
-   }
-
-   const GeoMaterial*
-   InDetMaterialManager::getMaterial(const std::vector<std::string> & materialComponents,
-                  const std::string & newName)
-   {
-   const GeoMaterial * newMaterial = 0;
-
-   // First see if we already have the modified material
-   const GeoMaterial* material = getAdditionalMaterial(newName);
-
-   for (unsigned int i = 0; i < materialComponents.size(); i++) {
-    const GeoMaterial * origMaterial = getMaterial(materialComponents[i]);
-    components.push_back(origMaterial);
-   }
-   return getMaterial(components,  newName);
-   }
- */
 
 
 const GeoMaterial*
@@ -879,6 +854,10 @@ InDetMaterialManager::createMaterial(const MaterialDef& material) {
   GeoIntrusivePtr<GeoMaterial> newMaterial{new GeoMaterial(material.name(), material.density())};
   ATH_MSG_DEBUG("Creating material: " << material.name() << " with density: "
                 << material.density() / (Gaudi::Units::g / Gaudi::Units::cm3));
+  if (close_to_zero(totWeight)){
+    ATH_MSG_ERROR("totWeight is zero in InDetMaterialManager::createMaterial");
+    return;
+  }
   for (unsigned int i = 0; i < material.numComponents(); i++) {
     double fracWeight = material.fraction(i) / totWeight;
     if (material.compName(i).find("::") == std::string::npos) {

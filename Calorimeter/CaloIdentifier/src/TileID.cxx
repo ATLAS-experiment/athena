@@ -9,7 +9,6 @@
 
 
 #include "CaloIdentifier/TileID.h"
-#include "IdDict/IdDictDefs.h"
 #include "Identifier/IdentifierHash.h"
 #include "AtlasDetDescr/AtlasDetectorID.h"
 

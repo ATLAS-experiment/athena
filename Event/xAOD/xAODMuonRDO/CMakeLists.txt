@@ -23,3 +23,5 @@ atlas_add_dictionary( xAODMuonRDODict
     LINK_LIBRARIES xAODCore xAODMuonRDO
     EXTRA_FILES Root/dict/*.cxx )
 
+# Generate CLIDs for the library explicitly.
+atlas_generate_cliddb( xAODMuonRDO )

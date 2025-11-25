@@ -94,7 +94,7 @@ StatusCode TrigCostAnalysis::start() {
       ATH_MSG_VERBOSE("AlgType:" << algType << ", AlgName:" << algName );
       if (algType.find("EventViewCreatorAlgorithm") != std::string::npos) {
         ATH_MSG_VERBOSE(algType << " is identified as a ViewCreator");
-        m_storeIdentifiers.insert(algName);
+        m_storeIdentifiers.insert(std::move(algName));
       }
     }
   }
@@ -209,8 +209,7 @@ StatusCode TrigCostAnalysis::execute() {
       for (const xAOD::TrigComposite* tc : *metadataDataHandle) {
         try {
           std::lock_guard<std::mutex> lock(m_addHostnameMutex);
-          const std::string hostname = tc->getDetail<std::string>("hostname");
-          m_hostnames.insert(hostname);
+          m_hostnames.insert(tc->getDetail<std::string>("hostname"));
         } catch ( const std::exception& ) {
           ATH_MSG_WARNING("Missing HLT_RuntimeMetadata EDM hostname for event " << context.eventID().event_number());
         }
@@ -239,6 +238,8 @@ StatusCode TrigCostAnalysis::execute() {
     const std::string algName = TrigConf::HLTUtils::hash2string(nameHash, "ALG");
 
     size_t i = 0;
+    if(m_excludeAlgsFromChain.find(algName) != m_excludeAlgsFromChain.end()) continue;
+
     for (const std::string& chain : algToChain[algName]){
       chainToAlgIdx[chain].insert(tc->index());
       ++i;
@@ -268,7 +269,7 @@ StatusCode TrigCostAnalysis::execute() {
   for (auto id : seededChains){
       TrigCompositeUtils::AlgToChainTool::ChainInfo chainInfo;
       ATH_CHECK(m_algToChainTool->getChainInfo(context, id, chainInfo));
-      seededChainsInfo.push_back(chainInfo);
+      seededChainsInfo.push_back(std::move(chainInfo));
   }
 
   const uint32_t onlineSlot = getOnlineSlot( costDataHandle.get() );
@@ -361,7 +362,7 @@ StatusCode TrigCostAnalysis::registerMonitors(MonitoredRange* range) {
 StatusCode TrigCostAnalysis::getRange(const EventContext& context, MonitoredRange*& range) {
   std::string rangeName;
   range = nullptr;
-  bool includeEndOfLB = false;
+  constexpr bool includeEndOfLB = false;
 
   if (m_singleTimeRange) {
     rangeName = m_singleTimeRangeName;

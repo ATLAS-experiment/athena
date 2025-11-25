@@ -9,6 +9,8 @@
 #include <StoreGate/WriteCondHandle.h>
 #include <StoreGate/ReadCondHandle.h>
 #include <GeoModelKernel/GeoFullPhysVol.h>
+#include <GeoModelKernel/GeoShapeShift.h>
+#include <GeoModelHelpers/printVolume.h>
 
 #include <MuonReadoutGeometryR4/MdtReadoutElement.h>
 #include <MuonReadoutGeometryR4/RpcReadoutElement.h>
@@ -41,6 +43,7 @@
 #include <GeoModelHelpers/getChildNodesWithTrf.h>
 #include <GeoModelHelpers/TransformToStringConverter.h>
 #include <GeoModelHelpers/GeoShapeUtils.h>
+#include <GeoModelIOHelpers/GMIO.h>
 #include <map>
 #include <format>
 
@@ -48,7 +51,7 @@
 
 
 namespace {
-    using SubDetAlignment = ActsGeometryContext::AlignmentStorePtr;
+    using SubDetAlignment = ActsTrk::GeometryContext::AlignmentStorePtr;
     bool  hasStationVolume(const PVConstLink treeTop,
                            const std::set<PVConstLink>& translated) {
         const unsigned int nCh = treeTop->getNChildVols();
@@ -75,14 +78,14 @@ StatusCode ReadoutGeomCnvAlg::initialize()  {
 
 
 StatusCode ReadoutGeomCnvAlg::execute(const EventContext& ctx) const {
-    SG::WriteCondHandle<MuonGM::MuonDetectorManager> writeHandle{m_writeKey, ctx};
+    SG::WriteCondHandle writeHandle{m_writeKey, ctx};
     if (writeHandle.isValid()) {
         ATH_MSG_DEBUG("The current readout geometry is still valid.");
         return StatusCode::SUCCESS;
     }
     writeHandle.addDependency(IOVInfiniteRange::infiniteRunLB());
     /// Prepare the Geometry context
-    ActsGeometryContext geoContext{};
+    ActsTrk::GeometryContext geoContext{};
     using TrackingAlignment = ActsTrk::DetectorAlignStore::TrackingAlignStore;
     for (const SG::ReadCondHandleKey<ActsTrk::DetectorAlignStore>& key : m_alignStoreKeys) {
         SG::ReadCondHandle<ActsTrk::DetectorAlignStore> readHandle{key, ctx};
@@ -138,11 +141,15 @@ StatusCode ReadoutGeomCnvAlg::execute(const EventContext& ctx) const {
             ATH_CHECK(checkIdCompability(*refEle, *cacheObj.detMgr->getReadoutElement(refEle->identify())));
         }
     }
+    if (m_dumpGeo) {
+        ATH_MSG_DEBUG("Save geometry to SqLite file "<<m_geoDumpName);
+        GeoModelIO::IO::saveToDB(cacheObj.world, m_geoDumpName, 0 , true);
+    }
 
     ATH_CHECK(writeHandle.record(std::move(cacheObj.detMgr)));
     return StatusCode::SUCCESS;
 }
-StatusCode ReadoutGeomCnvAlg::buildStation(const ActsGeometryContext& gctx,
+StatusCode ReadoutGeomCnvAlg::buildStation(const ActsTrk::GeometryContext& gctx,
                                            const Identifier& stationId,
                                            ConstructionCache& cacheObj) const {
     const std::string stName{m_idHelperSvc->stationNameString(stationId)};
@@ -158,11 +165,30 @@ StatusCode ReadoutGeomCnvAlg::buildStation(const ActsGeometryContext& gctx,
     
     /// Retrieve the full phyiscal volume
     const GeoVFullPhysVol* readOutVol = copyMe->getMaterialGeom();
-    PVConstLink parentVolume = readOutVol->getParent();   // This is the physical volume that contains the readOutVol as a child. This is a const link to an existing physical volume
+    // This is the physical volume that contains the readOutVol as a child. 
+    PVConstLink parentVolume = readOutVol->getParent(); 
+    
+    const GeoAlignableTransform* alignTrf{copyMe->alignableTransform()};
+    
+    /// There is one alignable node in front of the 
+    GeoIntrusivePtr<const GeoGraphNode> alignNode{*(parentVolume->getParent()->findChildNode(alignTrf) + 1)};
+    /// Check whether the alignable node is displaced from the station
+    GeoIntrusivePtr<const GeoTransform> stationShiftNode{alignNode != parentVolume ? 
+                dynamic_pointer_cast<const GeoTransform>(alignNode) : nullptr};
+    
     cacheObj.translatedStations.insert(parentVolume);
     /// Copy the full physical volume of the muon station
-    PVLink parentPhysVol{make_intrusive<GeoFullPhysVol>(parentVolume->getLogVol())};  // This is a mutable pointer. This creates a new physical volume using the same logical structure (shapes and materials but not position).
-
+    PVLink copiedStationVol{};
+    if (!stationShiftNode) {
+        copiedStationVol = make_intrusive<GeoFullPhysVol>(parentVolume->getLogVol());
+    } else {
+        auto volToCopy = parentVolume->getLogVol();
+        auto newShape = cacheObj.cacheShape(make_intrusive<GeoShapeShift>(volToCopy->getShape(),
+                                                                stationShiftNode->getDefTransform()));
+        auto newLogVol = make_intrusive<GeoLogVol>(volToCopy->getName(), newShape, volToCopy->getMaterial());
+        copiedStationVol = make_intrusive<GeoFullPhysVol>(cacheObj.cacheVolume(newLogVol));
+    }
+ 
     /// Make sure to copy all the children from the original tree that're not FullPhysVols -> represent
     /// They represent the passive material inside the station and are needed for the TrackinGeometry building
     const std::vector<GeoChildNodeWithTrf> children = getChildrenWithRef(parentVolume, false);    // we get the list of child nodes attached to the parent volume
@@ -183,19 +209,6 @@ StatusCode ReadoutGeomCnvAlg::buildStation(const ActsGeometryContext& gctx,
                 maxY2 = std::max(maxY2, edge.y());
             }
         }
-    }
-    /// To create the muon station, we need to extract the dimensions
-    ///  --> Recieve the edge points from the shapes
-    const double shortS = (maxY1 - minY1);
-    const double longS  = (maxY2 - minY2);
-    const double lengthR = (maxX - minX);
-    const double lengthZ = (maxZ - minZ);
-    
-    const GeoAlignableTransform* alignTrf{copyMe->alignableTransform()};
-    /// Transformation to reach from the alignable point to the Muon station
-    const Amg::Transform3D stationTransform = alignTrf->getDefTransform().inverse()*parentVolume->getX();
-
-    for (const GeoChildNodeWithTrf& child : children) {
         /// Skip the full physical volumes as they represent the readout elements
         const GeoVPhysVol &childVolRef = *child.volume;
         if (typeid(childVolRef) == typeid(GeoFullPhysVol)) {
@@ -203,42 +216,54 @@ StatusCode ReadoutGeomCnvAlg::buildStation(const ActsGeometryContext& gctx,
         }
         // Add the beam lines / foams inside the station volume
         PVLink childVol = const_pointer_cast<GeoVPhysVol>(child.volume);
-        parentPhysVol->add(cacheObj.newIdTag());
-        parentPhysVol->add(cacheObj.makeTransform(stationTransform*child.transform));
-        parentPhysVol->add(cloneVolume(childVol));
+        copiedStationVol->add(cacheObj.newIdTag());
+        if (stationShiftNode) {
+            copiedStationVol->add(const_pointer_cast(stationShiftNode));
+        }
+        copiedStationVol->add(cacheObj.makeTransform(child.transform));
+        copiedStationVol->add(cloneVolume(childVol));
     }
+
+    /// To create the muon station, we need to extract the dimensions
+    ///  --> Recieve the edge points from the shapes
+    const double shortS = (maxY1 - minY1);
+    const double longS  = (maxY2 - minY2);
+    const double lengthR = (maxX - minX);
+    const double lengthZ = (maxZ - minZ);
+
     /// Fetch the transform of the detector element which is AlignableNode x Station x [relative pos in station]
     const Amg::Transform3D alignedTransform = copyMe->localToGlobalTrans(gctx) *
-                                              (stationTransform * readOutVol->getX()).inverse();
+                                             ( ( stationShiftNode ? stationShiftNode->getDefTransform() : Amg::Transform3D::Identity()) 
+                                               * readOutVol->getDefX()).inverse();
 
-    ATH_MSG_VERBOSE("stName: "<<stName<<", stEta: "<<stEta<<", stPhi: "<<stPhi
-                <<" -- shortS: "<<shortS<<", longS: "<<longS
-                <<", lengthR: "<<lengthR<<", lengthZ: "<<lengthZ
-                <<std::endl<<"AlignableNode: "<<GeoTrf::toString(alignedTransform, true)
-                <<std::endl<<"Station transform: "<<GeoTrf::toString(stationTransform, true)
-                <<std::endl<<"Readout transform: "<<GeoTrf::toString(readOutVol->getX(), true));
+
     auto newStation = std::make_unique<MuonGM::MuonStation>(stName,
                                                             shortS, lengthR, lengthZ, /// S / R / Z size
                                                             longS, lengthR, lengthZ,  /// S / R / Z size (long)
                                                             stEta, stPhi, false);
-    newStation->setPhysVol(parentPhysVol);
+    newStation->setPhysVol(copiedStationVol);
     /// Add the physical volume to the world
     cacheObj.world->add(cacheObj.newIdTag());
-    GeoIntrusivePtr<GeoAlignableTransform> trf = make_intrusive<GeoAlignableTransform>(alignedTransform);
-    newStation->setTransform(trf);
+    auto copyAlignNode = make_intrusive<GeoAlignableTransform>(alignedTransform);
+    newStation->setTransform(copyAlignNode);    
+    newStation->setNominalAmdbLRSToGlobal(copyAlignNode->getTransform()); 
     
-    newStation->setNominalAmdbLRSToGlobal( trf->getTransform()); 
-    
+    ATH_MSG_VERBOSE("stName: "<<stName<<", stEta: "<<stEta<<", stPhi: "<<stPhi
+                <<" -- shortS: "<<shortS<<", longS: "<<longS
+                <<", lengthR: "<<lengthR<<", lengthZ: "<<lengthZ
+                <<std::endl<<"AlignableNode: "<<GeoTrf::toString(alignedTransform, true)
+                <<std::endl<<"Station shift: "<<GeoTrf::toString(stationShiftNode ? stationShiftNode->getDefTransform() 
+                                                                                  : Amg::Transform3D::Identity(), true)
+                <<std::endl<<"AmdLRSToGlobal: "<<GeoTrf::toString(newStation->getNominalAmdbLRSToGlobal(), true)
+                <<std::endl<<"Readout transform: "<<GeoTrf::toString(readOutVol->getX(), true));
     cacheObj.detMgr->addMuonStation(std::move(newStation));
-
-    cacheObj.world->add(trf);   
-    cacheObj.world->add(parentPhysVol);
-
+    cacheObj.world->add(copyAlignNode);
+    cacheObj.world->add(copiedStationVol);
     return StatusCode::SUCCESS;
 }
 
 
-StatusCode ReadoutGeomCnvAlg::cloneReadoutVolume(const ActsGeometryContext& gctx,
+StatusCode ReadoutGeomCnvAlg::cloneReadoutVolume(const ActsTrk::GeometryContext& gctx,
                                                  const Identifier& reId,
                                                  ConstructionCache& cacheObj,
                                                  GeoIntrusivePtr<GeoVFullPhysVol>& physVol,
@@ -250,10 +275,10 @@ StatusCode ReadoutGeomCnvAlg::cloneReadoutVolume(const ActsGeometryContext& gctx
                                               m_idHelperSvc->stationEta(reId), 
                                               m_idHelperSvc->stationPhi(reId));
   
-    PVLink parentPhysVol{station->getPhysVol()};
+    PVLink copiedStationVol{station->getPhysVol()};
     const MuonGMR4::MuonReadoutElement* copyMe = m_detMgr->getReadoutElement(reId);
     GeoIntrusivePtr<const GeoVFullPhysVol> readOutVol{copyMe->getMaterialGeom()};
-    parentPhysVol->add(cacheObj.newIdTag());
+    copiedStationVol->add(cacheObj.newIdTag());
     /// This is a hack to include the BIL Rpcs into the translation. Recall that the BI-RPCs break the station paradigm
     /// Hence, in the new description they have their own alignable transform. However, the legacy geometry tries to sort
     /// them into the corresponding Mdt station with the same stName, stEta, stPhi. So quite a lot of gymnastics is now needed
@@ -268,17 +293,17 @@ StatusCode ReadoutGeomCnvAlg::cloneReadoutVolume(const ActsGeometryContext& gctx
                                          readOutVol->getParent()->getX() * readOutVol->getX()};
     const Amg::Transform3D alignedNode{copyMe->localToGlobalTrans(gctx) * alignNodeToRE.inverse()};
     
-    const Amg::Transform3D stationTrf{station->getTransform().inverse() * alignedNode};
+    const Amg::Transform3D stationTrf{copiedStationVol->getX().inverse() * alignedNode};
 
-    parentPhysVol->add(cacheObj.makeTransform(stationTrf*alignNodeToRE));
+    copiedStationVol->add(cacheObj.makeTransform(stationTrf*alignNodeToRE));
     /// Clone the detector element with all of its subvolumes
     PVLink clonedVol{cloneVolume(const_pointer_cast<GeoVFullPhysVol>(readOutVol))};
     physVol = dynamic_pointer_cast<GeoVFullPhysVol>(clonedVol);
-    parentPhysVol->add(physVol);
+    copiedStationVol->add(physVol);
     return StatusCode::SUCCESS;
 }
 
-StatusCode ReadoutGeomCnvAlg::buildRpc(const ActsGeometryContext& gctx, ConstructionCache& cacheObj) const {
+StatusCode ReadoutGeomCnvAlg::buildRpc(const ActsTrk::GeometryContext& gctx, ConstructionCache& cacheObj) const {
     
     const std::vector<const MuonGMR4::RpcReadoutElement*> readoutEles = m_detMgr->getAllRpcReadoutElements();
     ATH_MSG_INFO("Copy "<<readoutEles.size()<<" Rpc readout elements to the legacy system");
@@ -355,7 +380,11 @@ StatusCode ReadoutGeomCnvAlg::buildRpc(const ActsGeometryContext& gctx, Construc
         for (const Identifier& gapId : gapIds) {
             const int surfaceHash = newElement->surfaceHash(gapId);
             const int layerHash = newElement->layerHash(gapId);
-            const Amg::Transform3D& refTrf{copyMe->localToGlobalTrans(gctx, gapId)};
+            const Amg::Transform3D refTrf{copyMe->localToGlobalTrans(gctx, gapId)* 
+                                          (m_idHelperSvc->measuresPhi(gapId) ? 
+                                                Amg::getRotateZ3D(90*Gaudi::Units::deg) :
+                                                Amg::Transform3D::Identity())};
+            ATH_MSG_VERBOSE("Assign transform: "<<m_idHelperSvc->toString(gapId)<<", "<<Amg::toString(refTrf));
             newElement->m_surfaceData->m_layerTransforms[surfaceHash] = refTrf;
             newElement->m_surfaceData->m_layerCenters[layerHash] = refTrf.translation();
             newElement->m_surfaceData->m_layerNormals[layerHash] = refTrf.linear() * Amg::Vector3D::UnitZ();
@@ -367,7 +396,7 @@ StatusCode ReadoutGeomCnvAlg::buildRpc(const ActsGeometryContext& gctx, Construc
 }
 
 
-StatusCode ReadoutGeomCnvAlg::buildTgc(const ActsGeometryContext& gctx, ConstructionCache& cacheObj) const {
+StatusCode ReadoutGeomCnvAlg::buildTgc(const ActsTrk::GeometryContext& gctx, ConstructionCache& cacheObj) const {
 
     std::vector<const MuonGMR4::TgcReadoutElement*> tgcReadouts{m_detMgr->getAllTgcReadoutElements()};
     std::ranges::stable_sort(tgcReadouts,[](const MuonGMR4::TgcReadoutElement* a, const MuonGMR4::TgcReadoutElement* b){
@@ -470,7 +499,7 @@ StatusCode ReadoutGeomCnvAlg::buildTgc(const ActsGeometryContext& gctx, Construc
 }
 
 GeoIntrusivePtr<GeoVFullPhysVol> 
-            ReadoutGeomCnvAlg::cloneNswWedge(const ActsGeometryContext& gctx,
+            ReadoutGeomCnvAlg::cloneNswWedge(const ActsTrk::GeometryContext& gctx,
                                              const MuonGMR4::MuonReadoutElement* copyMe,
                                              ConstructionCache& cacheObj) const {
     GeoIntrusivePtr<const GeoVFullPhysVol> readOutVol{copyMe->getMaterialGeom()};
@@ -483,7 +512,7 @@ GeoIntrusivePtr<GeoVFullPhysVol>
     cacheObj.world->add(physVol);
     return physVol;
 }
-StatusCode ReadoutGeomCnvAlg::buildMM(const ActsGeometryContext& gctx, ConstructionCache& cacheObj) const {
+StatusCode ReadoutGeomCnvAlg::buildMM(const ActsTrk::GeometryContext& gctx, ConstructionCache& cacheObj) const {
 
     SubDetAlignment alignItr = gctx.getStore(ActsTrk::DetectorType::Mm);
     const auto alignStore = alignItr ?
@@ -539,7 +568,7 @@ StatusCode ReadoutGeomCnvAlg::buildMM(const ActsGeometryContext& gctx, Construct
     return StatusCode::SUCCESS;
 }
 
-StatusCode  ReadoutGeomCnvAlg::buildSTGC(const ActsGeometryContext& gctx, ConstructionCache& cacheObj) const{
+StatusCode  ReadoutGeomCnvAlg::buildSTGC(const ActsTrk::GeometryContext& gctx, ConstructionCache& cacheObj) const{
     SubDetAlignment alignItr = gctx.getStore(ActsTrk::DetectorType::sTgc);
     auto alignStore = alignItr ? static_cast<const sTgcAlignmentStore*>(alignItr->internalAlignment.get()) : nullptr;
 
@@ -654,7 +683,7 @@ StatusCode  ReadoutGeomCnvAlg::buildSTGC(const ActsGeometryContext& gctx, Constr
     }
     return StatusCode::SUCCESS;
 }
-StatusCode ReadoutGeomCnvAlg::buildMdt(const ActsGeometryContext& gctx, ConstructionCache& cacheObj) const {    
+StatusCode ReadoutGeomCnvAlg::buildMdt(const ActsTrk::GeometryContext& gctx, ConstructionCache& cacheObj) const {    
     /// Access the B-Line and As-built parameters
     SubDetAlignment alignItr = gctx.getStore(ActsTrk::DetectorType::Mdt);
     const MdtAlignmentStore* alignStore = alignItr ?
@@ -783,7 +812,7 @@ StatusCode ReadoutGeomCnvAlg::checkIdCompability(const MuonGMR4::MuonReadoutElem
     return StatusCode::SUCCESS;
 }
 
-StatusCode ReadoutGeomCnvAlg::dumpAndCompare(const ActsGeometryContext& gctx,
+StatusCode ReadoutGeomCnvAlg::dumpAndCompare(const ActsTrk::GeometryContext& gctx,
                                              const MuonGMR4::MmReadoutElement& refEle,
                                              const MuonGM::MMReadoutElement& testEle) const {
 
@@ -831,7 +860,7 @@ StatusCode ReadoutGeomCnvAlg::dumpAndCompare(const ActsGeometryContext& gctx,
     return StatusCode::SUCCESS;
 }
 
-StatusCode ReadoutGeomCnvAlg::dumpAndCompare(const ActsGeometryContext& gctx,
+StatusCode ReadoutGeomCnvAlg::dumpAndCompare(const ActsTrk::GeometryContext& gctx,
                                              const MuonGMR4::MdtReadoutElement& refEle,
                                              const MuonGM::MdtReadoutElement& testEle) const {
     
@@ -888,7 +917,7 @@ StatusCode ReadoutGeomCnvAlg::dumpAndCompare(const ActsGeometryContext& gctx,
 
     return StatusCode::SUCCESS;
 }
-StatusCode ReadoutGeomCnvAlg::dumpAndCompare(const ActsGeometryContext& gctx,
+StatusCode ReadoutGeomCnvAlg::dumpAndCompare(const ActsTrk::GeometryContext& gctx,
                                              const MuonGMR4::RpcReadoutElement& refEle,
                                              const MuonGM::RpcReadoutElement& testEle) const {
     
@@ -911,7 +940,9 @@ StatusCode ReadoutGeomCnvAlg::dumpAndCompare(const ActsGeometryContext& gctx,
                                                                   refEle.doubletZ(), 
                                                                   doubPhi, gasGap, measPhi, strip);
                     
-                    const Amg::Transform3D& refTrans{refEle.localToGlobalTrans(gctx, stripId)};
+                    const Amg::Transform3D refTrans{refEle.localToGlobalTrans(gctx, stripId) * 
+                                                    (measPhi ? Amg::getRotateZ3D(90*Gaudi::Units::deg) : 
+                                                               Amg::Transform3D::Identity())};
                     const Amg::Transform3D& testTrans{testEle.transform(stripId)};
                     if (strip == 1 && !Amg::isIdentity(refTrans.inverse()*testTrans)) {
                         ATH_MSG_ERROR("Transformation for "<<m_idHelperSvc->toString(stripId)<<" - "<<refEle.identHash()<<std::endl
@@ -947,7 +978,7 @@ StatusCode ReadoutGeomCnvAlg::dumpAndCompare(const ActsGeometryContext& gctx,
     }
     return StatusCode::SUCCESS;
 }
-StatusCode ReadoutGeomCnvAlg::dumpAndCompare(const ActsGeometryContext& gctx,
+StatusCode ReadoutGeomCnvAlg::dumpAndCompare(const ActsTrk::GeometryContext& gctx,
                                              const MuonGMR4::TgcReadoutElement& refEle,
                                              const MuonGM::TgcReadoutElement& testEle) const {
     
@@ -972,7 +1003,9 @@ StatusCode ReadoutGeomCnvAlg::dumpAndCompare(const ActsGeometryContext& gctx,
             const Identifier layId = idHelper.channelID(refEle.identify(), gasGap, isStrip, 1);
             ATH_MSG_VERBOSE("Test layer "<<m_idHelperSvc->toString(layId)<<", nCh: "<<refEle.numChannels(layHash)<<", layHash: "<<layHash);
             if (!refEle.numChannels(layHash)) continue;
-            const Amg::Transform3D& refLayerTrf = refEle.localToGlobalTrans(gctx, layHash);
+            const Amg::Transform3D refLayerTrf = refEle.localToGlobalTrans(gctx, refEle.constructHash(0, gasGap, false)) *
+                                                                            (!isStrip ? Amg::Transform3D::Identity()
+                                                                                      : Amg::getRotateZ3D(-90.*Gaudi::Units::deg));
             const Amg::Transform3D& testLayerTrf = testEle.transform(layId);
             if (!Amg::isIdentity(refLayerTrf.inverse()* testLayerTrf)) {
                 ATH_MSG_FATAL("The transformations in "<<m_idHelperSvc->toString(layId)
@@ -1022,7 +1055,7 @@ StatusCode ReadoutGeomCnvAlg::dumpAndCompare(const ActsGeometryContext& gctx,
     }
     return StatusCode::SUCCESS;
 }
-StatusCode ReadoutGeomCnvAlg::dumpAndCompare(const ActsGeometryContext& gctx,
+StatusCode ReadoutGeomCnvAlg::dumpAndCompare(const ActsTrk::GeometryContext& gctx,
                                              const MuonGMR4::sTgcReadoutElement& refEle,
                                              const MuonGM::sTgcReadoutElement& testEle) const {
     if (!m_checkGeo) {

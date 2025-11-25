@@ -71,7 +71,7 @@ private:
 
   const MuonGMR4::MuonDetectorManager* m_detMgr{nullptr};
 
-  Gaudi::Property<bool> m_dumpVolumes{this, "dumpVolumes", true}; // Flag to control if we want to visualize each chamber volume individually
+  Gaudi::Property<bool> m_dumpVolumes{this, "dumpVolumes", false}; // Flag to control if we want to visualize each chamber volume individually
 
   Gaudi::Property<bool> m_useSectors{this, "UseSectors", false}; // Flag to control if we want to build the muon node from sectors or chambers
 
@@ -89,7 +89,7 @@ private:
     * @param boundsFactory The factory for volume bounds
     *  This function constructs and returns the sensitive elements (volumes and surfaces) of the sector. */
    template<typename T>
-   std::pair<std::vector<staticNodePtr>, std::vector<surfacePtr>> getSensitiveElements(const ActsGeometryContext& gctx,
+   std::pair<std::vector<staticNodePtr>, std::vector<surfacePtr>> getSensitiveElements(const ActsTrk::GeometryContext& gctx,
                                                                                   const T& element,
                                                                                   const Acts::GeometryIdentifier& chId,
                                                                                   Acts::VolumeBoundFactory& boundsFactory) const;

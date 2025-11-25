@@ -1,21 +1,17 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "PersistentDataModel/Guid.h"
 
+#include <iostream>
 #include <cstdio>
-#include <cstring>
-#include <cstdlib>
-
 #include "uuid/uuid.h"
 
-static const char* const fmt_Guid = "%08X-%04hX-%04hX-%02hhX%02hhX-%02hhX%02hhX%02hhX%02hhX%02hhX%02hhX";
-
 //{ 0x0,0x0,0x0,{0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0}};
-static const Guid clid_null(std::string("00000000-0000-0000-0000-000000000000"));
+static constexpr Guid clid_null("00000000-0000-0000-0000-000000000000");
 
-const Guid& Guid::null() {
+const Guid& Guid::null() noexcept {
    return clid_null;
 }
 
@@ -55,26 +51,61 @@ void Guid::create(Guid& guid, GuidGenMethod method) {
    }
 }
 
-const std::string Guid::toString() const {
-   char text[128];
-   int s = ::sprintf(text, fmt_Guid, m_data1, m_data2, m_data3,
-	   m_data4[0], m_data4[1], m_data4[2], m_data4[3], m_data4[4], m_data4[5], m_data4[6], m_data4[7]);
-   return std::string(text, s);
+bool Guid::isGuid(std::string_view sv) noexcept{
+    // The GUID must be exactly 36 characters long
+    if (sv.size() != 36) {
+        return false;
+    }
+
+    // Check for hyphens at specific positions (0-based indices: 8, 13, 18, 23)
+    if (sv[8] != '-' || sv[13] != '-' || sv[18] != '-' || sv[23] != '-') {
+        return false;
+    }
+
+    // Validate that all other characters are hexadecimal digits (0-9, a-f, A-F)
+    for (size_t i = 0; i < 36; ++i) {
+        // Skip hyphen positions
+        if (i == 8 || i == 13 || i == 18 || i == 23) {
+            continue;
+        }
+
+        char c = sv[i];
+        // Check if it's a valid hex digit
+        if (!((c >= '0' && c <= '9') || (c >= 'a' && c <= 'f') || (c >= 'A' && c <= 'F'))) {
+            return false;
+        }
+    }
+    return true;
 }
 
-const Guid& Guid::fromString(const std::string& source) {
-   if (::sscanf(source.c_str(), fmt_Guid, &m_data1, &m_data2, &m_data3,
-	   	&m_data4[0], &m_data4[1], &m_data4[2], &m_data4[3], &m_data4[4], &m_data4[5], &m_data4[6], &m_data4[7]) != 11) {
-      m_data1 = 0U;
-      m_data2 = 0U;
-      m_data3 = 0U;
-      for (unsigned int i = 0; i < 8; i++) {
-         m_data4[i] = '\0';
-      }
+bool Guid::operator==(std::string_view str) const {
+   return str.size() == Guid::string::stringSize() && *this == Guid(str);
+}
+
+
+void Guid::fromStringFallBack(const std::string &s){
+   //If it conforms to correct Guid use fast method
+   if(isGuid(s)){
+      fromString(s);
+      return;
    }
-   return *this;
+   //If not try "old" more error tolerant method
+   //sscanf will correct subtle corner cases: 
+   //when the input string was missing a single hexadecimal digit,
+   // e.g., 83B9F174-5E27-11E4-98C2-02163E00A82,
+   // sscanf still reported 11 successful conversions.
+   //So, the outcome is an "auto-corrected" CLID as 83B9F174-5E27-11E4-98C2-02163E00A802
+   static const char* const fmt_Guid = "%08X-%04hX-%04hX-%02hhX%02hhX-%02hhX%02hhX%02hhX%02hhX%02hhX%02hhX";
+   if (::sscanf(s.c_str(), fmt_Guid, &m_data1, &m_data2, &m_data3,
+        &m_data4[0], &m_data4[1], &m_data4[2], &m_data4[3], &m_data4[4], &m_data4[5], &m_data4[6], &m_data4[7]) != 11) {
+       setToNull();
+   }
+   return;
 }
 
-bool Guid::operator<(const Guid& g) const {
-   return ::memcmp(&g.m_data1, &m_data1, 16) < 0;
+std::ostream& operator<<(std::ostream& os, const Guid& rhs) {
+  auto buff = rhs.to_fixed_string();
+  os.write(buff.data(), buff.size());
+  return os; 
 }
+

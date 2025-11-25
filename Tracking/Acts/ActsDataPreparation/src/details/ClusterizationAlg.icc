@@ -57,12 +57,16 @@ template <typename IClusteringTool, bool useCache>
 StatusCode ClusterizationAlg<IClusteringTool, useCache>::execute(const EventContext& ctx) const
 {
   auto timer = Monitored::Timer<std::chrono::milliseconds>( "TIME_execute" );
-  auto mon_nclusters = Monitored::Scalar<int>("NClustersCreated");
-  auto mon = Monitored::Group( m_monTool, timer, mon_nclusters );
+  auto timer_rdoReading = Monitored::Timer<std::chrono::milliseconds>( "TIME_readingRDOs" );
+  auto timer_processing = Monitored::Timer<std::chrono::milliseconds>( "TIME_clusterization" );
+  auto mon_nclusters = Monitored::Scalar<int>( "NClustersCreated" );
+  auto mon = Monitored::Group( m_monTool, timer, timer_rdoReading, timer_processing, mon_nclusters );
     
+  timer_rdoReading.start();
   SG::ReadHandle<RDOContainer> rdoContainerHandle = SG::makeHandle(m_rdoContainerKey, ctx);
   ATH_CHECK(rdoContainerHandle.isValid());
   const RDOContainer* rdoContainer = rdoContainerHandle.cptr();
+  timer_rdoReading.stop();
 
   SG::ReadHandle<TrigRoiDescriptorCollection> roiCollectionHandle = SG::makeHandle( m_roiCollectionKey, ctx );
   ATH_CHECK(roiCollectionHandle.isValid());
@@ -75,6 +79,8 @@ StatusCode ClusterizationAlg<IClusteringTool, useCache>::execute(const EventCont
   SG::ReadHandle< InDet::SiDetectorElementStatus > detEleStatusHandle = SG::makeHandle(m_detElStatus, ctx);
   ATH_CHECK(detEleStatusHandle.isValid());
   const InDet::SiDetectorElementStatus* detEleStatus = detEleStatusHandle.cptr();
+
+  timer_processing.start();
 
   Cache_WriteHandle cacheHandle;
   if constexpr (useCache) {
@@ -163,16 +169,9 @@ StatusCode ClusterizationAlg<IClusteringTool, useCache>::execute(const EventCont
 				  std::make_unique<ClusterAuxContainer>() ));
   ClusterContainer *clusterContainer = clusterHandle.ptr();
 
-  // Fast Insertion of N elements
   using xAODCluster_t = typename ClusterContainer::base_value_type;
-  std::vector<xAODCluster_t*> toAddCollection;
-  toAddCollection.reserve(nClusters);
-  for (std::size_t i(0); i<nClusters; ++i)
-    toAddCollection.push_back(new xAODCluster_t());
-  clusterContainer->insert(clusterContainer->end(),
-			   toAddCollection.begin(),
-			   toAddCollection.end());
-  
+  clusterContainer->push_new(nClusters, [] () {return new xAODCluster_t();});
+
   // Fill the collection to xAOD format, computing necessary quantities
   std::size_t xaodCounter = 0ul;
   typename ClusterContainer::iterator finalElement = clusterContainer->end();
@@ -204,6 +203,7 @@ StatusCode ClusterizationAlg<IClusteringTool, useCache>::execute(const EventCont
 
   m_stat[kNClusters] += clusterContainer->size();
   ATH_MSG_DEBUG("Clusters produced size: "<<clusterContainer->size());
+  timer_processing.stop();
   return StatusCode::SUCCESS;
 }
   

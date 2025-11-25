@@ -11,9 +11,13 @@
 #include "GaudiKernel/MsgStream.h"
 
 #include "InDetIdentifier/PixelID.h"
+#include "IdDict/IdDictDictionary.h"
+#include "IdDict/IdDictField.h"
+#include "IdDict/IdDictMgr.h"
+#include "IdDict/IdDictRegion.h"
 #include "Identifier/IdentifierHash.h"
 #include "Identifier/RangeIterator.h"
-#include "IdDict/IdDictDefs.h"
+#include "Identifier/IdContext.h"
 #include <set>
 #include <algorithm>
 #include <iostream>
@@ -627,7 +631,7 @@ PixelID::initLevelsFromDict() {
   }
 
   // Get levels
-  IdDictField* field = m_dict->find_field("subdet");
+  const IdDictField* field = m_dict->find_field("subdet");
   if (field) {
     m_INDET_INDEX = field->index();
   } else {
@@ -1012,4 +1016,19 @@ PixelID::test_wafer_packing() const {
                       << endmsg;
    
   }
+}
+
+
+IdContext
+PixelID::wafer_context() const {
+  ExpandedIdentifier id;
+
+  return(IdContext(id, 0, m_ETA_MODULE_INDEX));
+}
+
+
+IdContext
+PixelID::pixel_context() const {
+  // For pixel only, the prefix is the first two levels
+  return(IdContext(m_baseExpandedIdentifier, m_BARREL_EC_INDEX, m_ETA_INDEX_INDEX));
 }

@@ -7,7 +7,7 @@
 
 #include <vector>
 
-#include "ActsEvent/Seed.h"
+#include "ActsEvent/SeedContainer.h"
 #include "src/detail/AtlasUncalibSourceLinkAccessor.h"
 #include "src/detail/MeasurementIndex.h"
 

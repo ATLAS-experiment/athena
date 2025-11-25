@@ -26,7 +26,6 @@
 #include <memory>
 #include <functional>
 
-
 namespace egammaMVACalibTool_detail {
 struct Funcs;
 }
@@ -89,7 +88,9 @@ public:
 
   /** returns the calibrated energy **/
   float getEnergy(const xAOD::CaloCluster& clus,
-                  const xAOD::Egamma* eg) const override final;
+                  const xAOD::Egamma* eg,
+		  const egammaMVACalib::GlobalEventInfo& gei = egammaMVACalib::GlobalEventInfo())
+    const override final;
 
 private:
   Gaudi::Property<int> m_particleType {this,
@@ -116,7 +117,7 @@ private:
   Gaudi::Property<bool> m_useLayerCorrected {this,
       "use_layer_corrected", false,
       "whether to use layer corrections"};
-
+  
   /// A TH2Poly used to extract bin numbers. Note there is an offset of 1
   std::unique_ptr<TH2Poly> m_hPoly;
 

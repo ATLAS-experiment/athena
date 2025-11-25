@@ -24,7 +24,6 @@
 
 
 #include "FPGATrackSimObjects/FPGATrackSimTrackPars.h"
-#include "FPGATrackSimObjects/FPGATrackSimHit.h"
 #include "FPGATrackSimBinning/FPGATrackSimBinUtil.h"
 #include <cmath>
 
@@ -77,7 +76,7 @@ public:
   rotatedConfig getRotatedConfig(const KeyLyrPars &keypars) const;
 
   // get the x,y coordinates of a hit in the rotated coordinate system specified by rotang
-  std::pair<double, double> getRotatedHit(const std::pair<double, double>& rotang, const FPGATrackSimHit *hit) const;
+  std::pair<double, double> getRotatedHit(const std::pair<double, double>& rotang, double rHit, double phiHit) const;
 
   // Convert back and forth to standard track parameters
   KeyLyrPars trackParsToKeyPars(const FPGATrackSimTrackPars &pars) const;
@@ -87,13 +86,13 @@ public:
   double zExpected(const KeyLyrPars& keypars, double r) const;
 
   // find expected x position of a hit at given a radius in the rotated coordinate system
-  double xExpected(const KeyLyrPars& keypars, const FPGATrackSimHit *hit) const;
+  double xExpected(const KeyLyrPars& keypars, double rHit, double phiHit) const;
 
   // takes hit position and calculated what xm would be for track going through that hit
-  double xmForHit(const KeyLyrPars& keypars, const FPGATrackSimHit *hit) const;
+  double xmForHit(const KeyLyrPars& keypars,  double rHit, double phiHit) const;
 
   // Find shift from nominal track to hit in the "x" direction 
-  double deltaX(const KeyLyrPars& keypars, const FPGATrackSimHit *hit) const;
+  double deltaX(const KeyLyrPars& keypars,  double rHit, double phiHit) const;
 
   // accessors
   double R1() const {return m_R1;}

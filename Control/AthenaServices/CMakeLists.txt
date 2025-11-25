@@ -4,7 +4,7 @@
 atlas_subdir( AthenaServices )
 
 # External dependencies:
-find_package( Boost COMPONENTS thread serialization unit_test_framework)
+find_package( Boost COMPONENTS thread serialization )
 find_package( bmpi3 REQUIRED )
 find_package( CLHEP )
 find_package( Python COMPONENTS Development )
@@ -21,7 +21,7 @@ atlas_add_component( AthenaServices
    LINK_LIBRARIES ${Boost_LIBRARIES} ${Python_LIBRARIES} ${ROOT_LIBRARIES} ${TBB_LIBRARIES} ${UUID_LIBRARIES}
    ${YAMPL_LIBRARIES} bmpi3::bmpi3 ${CLHEP_LIBRARIES}
    AthenaBaseComps AthenaKernel RootUtilsPyROOT CxxUtils SQLiteDBSvcLib
-   AthContainers AthContainersInterfaces DataModelRoot SGTools
+   AthContainers AthContainersInterfaces DataModelRoot SGTools SGCoreLib
    StoreGateLib PersistentDataModel EventInfo xAODCore
    xAODEventInfo EventInfoUtils GaudiKernel RootAuxDynIOHeaders )
 
@@ -68,12 +68,12 @@ atlas_add_test( DelayedConditionsCleanerSvc_test
 atlas_add_test( ThinningCacheTool_test
    SOURCES test/ThinningCacheTool_test.cxx
    LINK_LIBRARIES TestTools AthContainers AthenaKernel GaudiKernel AthenaBaseComps StoreGateLib )
-   
+
 atlas_add_test( MetaDataSvc_test
-   SOURCES test/MetaDataSvc_test.cxx src/MetaDataSvc.cxx src/OutputStreamSequencerSvc.cxx 
+   SOURCES test/MetaDataSvc_test.cxx src/MetaDataSvc.cxx src/OutputStreamSequencerSvc.cxx
    INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS}
-   LINK_LIBRARIES ${Boost_LIBRARIES} ${ROOT_LIBRARIES} TestTools AthenaKernel CxxUtils GaudiKernel
-                  StoreGateLib PersistencySvc AthenaBaseComps RootAuxDynIOHeaders PersistentDataModel SGTools
+   LINK_LIBRARIES ${ROOT_LIBRARIES} TestTools AthenaKernel CxxUtils GaudiKernel
+                  StoreGateLib PersistencySvc AthenaBaseComps RootAuxDynIOHeaders PersistentDataModel SGTools Boost::unit_test_framework
    POST_EXEC_SCRIPT nopost.sh)
 
 atlas_add_test( AthTPCnvSvc

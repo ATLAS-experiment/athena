@@ -13,7 +13,7 @@
 
 // Framework include files
 #include "PersistentDataModel/Token.h"
-#include "StorageSvc/DbObjectHandle.h"
+#include "StorageSvc/pool.h"
 #include "StorageSvc/Transaction.h"
 
 #include <vector>
@@ -59,18 +59,15 @@ namespace pool    {
     virtual DbStatus setOption(const DbOption& refOpt) = 0;
     /// Access options
     virtual DbStatus getOption(DbOption& refOpt) = 0;
-    /// In place allocation of raw memory
-    virtual void* allocate( unsigned long siz, 
-                            DbContainer&  cntH,
-                            ShapeH shape) = 0; 
+    /// Store object in location
+    virtual DbStatus store(const void* object,
+                           DbContainer&  cntH,
+                           ShapeH shape) = 0;
     /// In place allocation of object location
-    virtual DbStatus allocate(DbContainer& cntH, 
+    virtual DbStatus allocate(DbContainer& cntH,
                               const void* object,
-                              ShapeH shape, 
+                              ShapeH shape,
                               Token::OID_t& oid) = 0;
-    /// In place deletion of raw memory
-    virtual DbStatus free(  void* ptr,
-                            DbContainer&  cntH) = 0;
 
     /// Number of next record in the container (=size if no delete is allowed)
     virtual uint64_t nextRecordId() = 0;
@@ -102,61 +99,13 @@ namespace pool    {
       *                          will differ from the preferred oid.
       * @return Status code indicating success or failure.
       */
-    virtual DbStatus load( void** ptr, ShapeH shape, 
-                           const Token::OID_t& lnkH, 
+    virtual DbStatus load( void** ptr, ShapeH shape,
+                           const Token::OID_t& lnkH,
                            Token::OID_t&       oid,
                            bool                any_next=false) = 0;
 
-    /// Save new object in the container and return its handle
-    /** @param  cntH      [IN]   Handle to container object.
-      * @param  object    [IN]   Pointer to feed data.
-      * @param  linkH     [OUT]  Internal OID to identify object.
-      *
-      * @return DbStatus code indicating success or failure.
-      */
-    virtual DbStatus save(  DbContainer&  cntH,
-                            const void* object,
-                            ShapeH shape, 
-                            Token::OID_t& linkH) = 0;
-
-    /// Add object to the container
-    virtual DbStatus save(  DbObjectHandle<DbObject>& objH) = 0;
-    /// Update existing object in the container
-    /** @param cntH      [IN]     Valid handle to container 
-      * @param  object   [IN]     Pointer to feed data.
-      * @param objH      [IN]     Object handle
-      *
-      * @return Status code indicating success or failure.
-      */
-    virtual DbStatus update(DbContainer&  cntH,
-                            const void* object,
-                            ShapeH shape, 
-                            const DbObjectHandle<DbObject>& objH) = 0;
-
-    /// Update existing object in the container
-    /** @param cntH      [IN]     Valid handle to container 
-      * @param  object   [IN]     Pointer to feed data.
-      * @param linkH     [IN/OUT] Object identifier
-      *
-      * @return Status code indicating success or failure.
-      */
-    virtual DbStatus update(DbContainer&  cntH,
-                            const void* object,
-                            ShapeH shape, 
-                            const Token::OID_t& linkH) = 0;
-
-    /// Destroy an object in a container
-    /** @param linkH     [IN]     Object identifier
-      *
-      * @return Status code indicating success or failure.
-      */
-    virtual DbStatus destroy( const Token::OID_t& linkH) = 0;
-
     /// Execute Transaction Action
     virtual DbStatus transAct(Transaction::Action) = 0;
-
-    /// Query the pending transaction stack
-    virtual bool updatesPending() const = 0;
   };
 }      // End namespace pool
 #endif // POOL_IDBCONTAINER_H

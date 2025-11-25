@@ -120,8 +120,8 @@ namespace Muon {
     inline double MuonSectorMapping::sectorOverlapPhi(int sector1, int sector2) const {
         if (sector1 == sector2) return sectorPhi(sector1);
 
-        int s1 = sector1 < sector2 ? sector1 : sector2;
-        int s2 = sector1 > sector2 ? sector1 : sector2;
+        int s1 = std::min(sector1, sector2);
+        int s2 = std::max(sector1, sector2);
         if (s2 == 16 && s1 == 1) {
             s1 = 16;
             s2 = 1;

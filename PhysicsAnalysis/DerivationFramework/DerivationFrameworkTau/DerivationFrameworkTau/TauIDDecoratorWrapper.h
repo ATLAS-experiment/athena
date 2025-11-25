@@ -12,7 +12,6 @@
 #include "StoreGate/ReadHandleKey.h"
 #include "StoreGate/WriteDecorHandleKeyArray.h"
 #include "xAODTau/TauJetContainer.h"
-#include "xAODTracking/VertexContainer.h"
 #include "xAODMuon/MuonContainer.h"
 
 #include <string>
@@ -30,12 +29,11 @@ namespace DerivationFramework {
 
       virtual StatusCode initialize() override;
       virtual StatusCode finalize() override;
-      virtual StatusCode addBranches() const override;
+      virtual StatusCode addBranches(const EventContext& ctx) const override;
 
     private:
       SG::ReadHandleKey<xAOD::TauJetContainer> m_tauContainerKey { this, "TauContainerName", "TauJets", "Input tau container key" };
       SG::ReadHandleKey<xAOD::MuonContainer> m_muonContainerKey { this, "MuonContainerName", "Muons", "Input muon container key" };
-      SG::ReadHandleKey<xAOD::VertexContainer> m_vtxContainerKey { this, "VertexContainerName", "PrimaryVertices", "Input PV container key" };
       SG::WriteDecorHandleKeyArray<xAOD::TauJetContainer> m_scoreDecorKeys{ this, "ScoreDecorationKeys", {}, "List of score decorations added to the tau"};
       SG::WriteDecorHandleKeyArray<xAOD::TauJetContainer> m_WPDecorKeys{ this, "WPDecorationKeys", {}, "List of WP decorations added to the tau"};
       SG::WriteDecorHandleKey<xAOD::TauJetContainer> m_trackWidthKey{ this, "TrackWidthKey", m_tauContainerKey, "trackWidth", "Track width decoration name"};

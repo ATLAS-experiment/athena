@@ -338,9 +338,9 @@ def createTriggerFlags(doTriggerRecoFlags):
             raise RuntimeError('Trigger.availableRecoMetadata is ill-defined if Trigger.doHLT==True')
         # RAW: check if keys are in COOL
         elif flags.Input.Format is Format.BS:
-            from TrigConfigSvc.TriggerConfigAccess import getKeysFromCool
-            keys = getKeysFromCool(flags.Input.RunNumbers[0], lbNr = 1)  # currently only checking first file
-            return ( (['L1'] if 'L1PSK' in keys else []) +
+            from TrigConfigSvc.TriggerConfigAccess import getKeysFromConditions
+            keys = getKeysFromConditions(flags.Input.RunNumbers[0], lbNr = 1, flags = flags)  # currently only checking first file
+            return ( (['L1'] if 'LVL1PSK' in keys else []) +
                      (['HLT'] if 'HLTPSK' in keys else []) )
         # POOL: metadata (do not distinguish L1/HLT yet, see discussions on GitLab commit f83ae2bc)
         else:
@@ -403,6 +403,12 @@ def createTriggerFlags(doTriggerRecoFlags):
 
     flags.addFlag('Trigger.triggerConfig', lambda flags: __triggerConfig(flags),
                   help='Trigger configuration source (https://twiki.cern.ch/twiki/bin/view/Atlas/TriggerConfigFlag)')
+
+    flags.addFlag('Trigger.useCrest', lambda prevFlags: prevFlags.IOVDb.UseCREST, # only effective if Trigger.triggerConfig is set to 'DB'
+                  help='Flag enables trigger configuration database access through CREST')
+
+    flags.addFlag('Trigger.crestServer', lambda prevFlags: prevFlags.IOVDb.CrestServer,
+                  help='CREST server to access trigger configuration')
 
     flags.addFlag('Trigger.triggerMenuSetup', lambda flags: 'MC_pp_run3_v1_BulkMCProd_prescale' if flags.GeoModel.Run is LHCPeriod.Run3 else 'MC_pp_run4_v1_BulkMCProd_prescale',
                   help='name of the trigger menu')

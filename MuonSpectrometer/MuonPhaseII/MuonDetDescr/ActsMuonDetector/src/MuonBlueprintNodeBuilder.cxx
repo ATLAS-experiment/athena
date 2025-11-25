@@ -19,7 +19,7 @@
 #include <Acts/Geometry/TrackingVolume.hpp>
 #include <Acts/Geometry/TrapezoidVolumeBounds.hpp>
 #include <Acts/Surfaces/PlaneSurface.hpp>
-#include <Acts/Plugins/GeoModel/GeoModelMaterialConverter.hpp>
+#include <ActsPlugins/GeoModel/GeoModelMaterialConverter.hpp>
 #include <Acts/Visualization/ObjVisualization3D.hpp>
 
 
@@ -126,7 +126,7 @@ MuonBlueprintNodeBuilder::buildMuonNode(
     const Acts::GeometryIdentifier& id,
     Acts::VolumeBoundFactory& boundsFactory) const {
 
-    const ActsGeometryContext* context = gctx.get<const ActsGeometryContext* >();
+    const ActsTrk::GeometryContext* context = gctx.get<const ActsTrk::GeometryContext* >();
     std::vector<std::string> stationNames;
   
     std::vector<std::shared_ptr<Acts::Experimental::StaticBlueprintNode>> nodes;
@@ -221,7 +221,7 @@ MuonBlueprintNodeBuilder::buildMuonNode(
 template<typename T>
 std::pair<std::vector<staticNodePtr>, std::vector<surfacePtr>>
 MuonBlueprintNodeBuilder::getSensitiveElements(
-    const ActsGeometryContext& gctx,
+    const ActsTrk::GeometryContext& gctx,
     const T& element,
     const Acts::GeometryIdentifier& chId,
     Acts::VolumeBoundFactory& boundsFactory) const {
@@ -303,7 +303,7 @@ MuonBlueprintNodeBuilder::blendMaterial(
   GeoModelTools::GeoMaterialHelper geoMaterialHelper;
   std::pair<GeoModelTools::GeoMaterialPtr, double> geoMaterials = geoMaterialHelper.collectMaterial(parentVolume);
 
-  const Acts::Material aMat = Acts::GeoModel::geoMaterialConverter(*geoMaterials.first);
+  const Acts::Material aMat = ActsPlugins::GeoModel::geoMaterialConverter(*geoMaterials.first);
   //rotate about the z axis
   auto constPtr = element.surface().getSharedPtr();
   //to assign the material shouldnt be const

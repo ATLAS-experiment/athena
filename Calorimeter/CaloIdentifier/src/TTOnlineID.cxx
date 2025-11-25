@@ -3,10 +3,14 @@
 */
 
 #include "CaloIdentifier/TTOnlineID.h"
+#include "CaloIdentifier/CaloID_Exception.h"
+#include "IdDict/IdDictDictionary.h"
+#include "IdDict/IdDictField.h"
+#include "IdDict/IdDictMgr.h"
+#include "IdDict/IdDictRegion.h"
 #include "AtlasDetDescr/AtlasDetectorID.h"
 #include "CxxUtils/StrFormat.h"
 #include "GaudiKernel/MsgStream.h"
-#include "IdDict/IdDictDefs.h"
 #include "Identifier/IdentifierHash.h"
 #include "Identifier/RangeIterator.h"
 #include <algorithm>
@@ -388,7 +392,7 @@ int TTOnlineID::initLevelsFromDict()
   log << MSG::DEBUG << "Calorimeter dict. DB tag= " << tag << endmsg;
 
   // Save index to a Online LVL1 region for unpacking - search with region name
-  IdDictRegion* reg = m_dict->find_region("PPM_Crate-00");
+  const IdDictRegion* reg = m_dict->find_region("PPM_Crate-00");
   if (reg) {
       m_l1online_regions_index = reg->index();}
   else {
@@ -399,7 +403,7 @@ int TTOnlineID::initLevelsFromDict()
 
   // Look for Fields...
   // ------------------
-  IdDictField* field = m_dict->find_field("subdet") ;
+  const IdDictField* field = m_dict->find_field("subdet") ;
   if (field) {
     m_calo_index = field->index();}
   else {

@@ -38,6 +38,11 @@ StatusCode AthenaPoolCnvSvc::initialize() {
    ATH_CHECK(dmcsvc.retrieve());
    // Retrieve PoolSvc
    ATH_CHECK(m_poolSvc.retrieve());
+   StringProperty defContainerType("DefaultContainerType", "ROOTTREEINDEX");
+   if(IProperty* propertyServer = dynamic_cast<IProperty*>(m_poolSvc.get())) {
+      propertyServer->getProperty(&defContainerType).ignore();
+   }
+   m_defContainerType = defContainerType.value();
    // Retrieve ClassIDSvc
    ATH_CHECK(m_clidSvc.retrieve());
    // Register this service for 'I/O' events
@@ -64,18 +69,23 @@ StatusCode AthenaPoolCnvSvc::initialize() {
          }
       }
    }
-   ATH_MSG_DEBUG("Setting StorageType to " << m_storageTechProp.value());
-   m_dbType = pool::DbType::getType( m_storageTechProp.value() );
-   if( m_dbType == TEST_StorageType ) {
-      ATH_MSG_FATAL("Unknown StorageType rquested: " << m_storageTechProp.value());
-      return StatusCode::FAILURE;
+   // Validate provided event data technologies and fill the internal cache
+   for (const auto& [key, value] : m_storageTechProp.value()) {
+      try {
+         const auto dbType = pool::DbType::getType(value);
+         if (dbType == pool::TEST_StorageType) {
+            ATH_MSG_FATAL(std::format("Unknown storage type requested for file {}: {}", key, value));
+            return StatusCode::FAILURE;
+         }
+         m_storageTechMap.emplace(key, dbType.type());
+      } catch (const std::exception& e) {
+        ATH_MSG_FATAL(std::format("Exception while getting storage type for file {}: {}", key, e.what()));
+        return StatusCode::FAILURE;
+      } catch (...) {
+        ATH_MSG_FATAL(std::format("Unknown exception while getting storage type for file {}", key));
+        return StatusCode::FAILURE;
+      }
    }
-   if( m_containerPrefixProp.value() == "Default" ) {
-      // select default storage element name accoring to storage tech
-      if( m_dbType.exactMatch(pool::ROOTRNTUPLE_StorageType) ) m_containerPrefixProp.setValue( APRDefaults::RNTupleNames::EventData );
-      else m_containerPrefixProp.setValue( APRDefaults::TTreeNames::EventData );
-   }
-
    // Extracting INPUT POOL ItechnologySpecificAttributes for Domain, Database and Container.
    extractPoolAttributes(m_inputPoolAttr, &m_inputAttr, &m_inputAttr, &m_inputAttr);
    // Extracting the INPUT POOL ItechnologySpecificAttributes which are to be printed for each event
@@ -261,7 +271,7 @@ StatusCode AthenaPoolCnvSvc::connectOutput(const std::string& outputConnectionSp
 // This is called before DataObjects are being converted.
    std::string outputConnection = outputConnectionSpec.substr(0, outputConnectionSpec.find('['));
    // Extract the technology
-   int tech = m_dbType.type();
+   int tech{0};
    if (!decodeOutputSpec(outputConnection, tech).isSuccess()) {
       ATH_MSG_ERROR("connectOutput FAILED extract file name and technology.");
       return(StatusCode::FAILURE);
@@ -298,10 +308,12 @@ StatusCode AthenaPoolCnvSvc::connectOutput(const std::string& outputConnectionSp
          std::size_t equal = cont.find('='); // Used to remove leading "TTree="
          if (equal == std::string::npos) equal = 0;
          else equal++;
-         std::size_t colon = m_containerPrefixProp.value().find(':');
+         const auto& prefix = m_containerPrefixProp.value();
+         std::size_t colon = prefix.find(':');
          if (colon == std::string::npos) colon = 0; // Used to remove leading technology
          else colon++;
-         const auto& strProp = m_containerPrefixProp.value();
+         const auto defaultContName = (tech == pool::ROOTRNTUPLE_StorageType.type()) ? APRDefaults::RNTupleNames::EventData : APRDefaults::TTreeNames::EventData;
+         const auto& strProp = (prefix == "Default") ? defaultContName : prefix;
          if (merge != std::string::npos && opt == "TREE_AUTO_FLUSH" && 0 == outputConnection.compare(0, merge, file) &&cont.compare(equal, std::string::npos, strProp, colon) == 0 && data != "int" && data != "DbLonglong" && data != "double" && data != "string") {
             flush = atoi(data.c_str());
             if (flush < 0 && m_numberEventsPerWrite.value() > 0) {
@@ -334,7 +346,7 @@ StatusCode AthenaPoolCnvSvc::commitOutput(const std::string& outputConnectionSpe
    PMonUtils::BasicStopWatch stopWatch("commitOutput", m_chronoMap);
    std::unique_lock<std::mutex> lock(m_mutex);
    // Extract the technology
-   int tech = m_dbType.type();
+   int tech{0};
    if (!decodeOutputSpec(outputConnection, tech).isSuccess()) {
       ATH_MSG_ERROR("connectOutput FAILED extract file name and technology.");
       return(StatusCode::FAILURE);
@@ -379,7 +391,7 @@ StatusCode AthenaPoolCnvSvc::commitOutput(const std::string& outputConnectionSpe
       return(StatusCode::FAILURE);
    }
    // Check FileSize
-   long long int currentFileSize = m_poolSvc->getFileSize(outputConnection, m_dbType.type(), contextId);
+   long long int currentFileSize = m_poolSvc->getFileSize(outputConnection, tech, contextId);
    if (m_databaseMaxFileSize.find(outputConnection) != m_databaseMaxFileSize.end()) {
       if (currentFileSize > m_databaseMaxFileSize[outputConnection]) {
          ATH_MSG_WARNING(std::format("FileSize {} > {} for {}", currentFileSize, m_databaseMaxFileSize[outputConnection], outputConnection));
@@ -445,8 +457,8 @@ StatusCode AthenaPoolCnvSvc::createAddress(long svcType,
 		const std::string* par,
 		const unsigned long* ip,
 		IOpaqueAddress*& refpAddress) {
-   if (svcType != POOL_StorageType) {
-      ATH_MSG_ERROR("createAddress: svcType != POOL_StorageType " << svcType << " " << POOL_StorageType);
+   if( svcType != repSvcType() ) {
+      ATH_MSG_ERROR("createAddress: svcType != POOL_StorageType " << svcType << " " << repSvcType());
       return(StatusCode::FAILURE);
    }
    std::unique_ptr<Token> token;
@@ -462,7 +474,7 @@ StatusCode AthenaPoolCnvSvc::createAddress(long svcType,
    if (token == nullptr) {
       return(StatusCode::RECOVERABLE);
    }
-   refpAddress = new TokenAddress(POOL_StorageType, clid, "", par[1], IPoolSvc::kInputStream, std::move(token));
+   refpAddress = new TokenAddress(repSvcType(), clid, "", par[1], IPoolSvc::kInputStream, std::move(token));
    return(StatusCode::SUCCESS);
 }
 //______________________________________________________________________________
@@ -470,11 +482,11 @@ StatusCode AthenaPoolCnvSvc::createAddress(long svcType,
 		const CLID& clid,
 		const std::string& refAddress,
 		IOpaqueAddress*& refpAddress) {
-   if (svcType != POOL_StorageType) {
-      ATH_MSG_ERROR("createAddress: svcType != POOL_StorageType " << svcType << " " << POOL_StorageType);
+   if (svcType != repSvcType()) {
+      ATH_MSG_ERROR("createAddress: svcType != POOL_StorageType " << svcType << " " << repSvcType());
       return(StatusCode::FAILURE);
    }
-   refpAddress = new GenericAddress(POOL_StorageType, clid, refAddress);
+   refpAddress = new GenericAddress(repSvcType(), clid, refAddress);
    return(StatusCode::SUCCESS);
 }
 //______________________________________________________________________________
@@ -491,9 +503,7 @@ StatusCode AthenaPoolCnvSvc::convertAddress(const IOpaqueAddress* pAddress,
 }
 //__________________________________________________________________________
 StatusCode AthenaPoolCnvSvc::decodeOutputSpec(std::string& fileSpec, int& outputTech) const {
-  if (fileSpec.starts_with ( "oracle") || fileSpec.starts_with ( "mysql")) {
-      outputTech = pool::POOL_RDBMS_StorageType.type();
-   } else if (fileSpec.starts_with ( "ROOTKEY:")) {
+   if (fileSpec.starts_with ( "ROOTKEY:")) {
       outputTech = pool::ROOTKEY_StorageType.type();
       fileSpec.erase(0, 8);
    } else if (fileSpec.starts_with ( "ROOTTREE:")) {
@@ -506,9 +516,25 @@ StatusCode AthenaPoolCnvSvc::decodeOutputSpec(std::string& fileSpec, int& output
       outputTech = pool::ROOTRNTUPLE_StorageType.type();
       fileSpec.erase(0, 12);
    } else if (outputTech == 0) {
-      outputTech = m_dbType.type();
+      // Extract the file name
+      std::string fileName{fileSpec};
+      if (auto pos = fileSpec.find("?pmerge="); pos != std::string::npos) {
+         fileName = fileSpec.substr(0, pos);
+      }
+      // Find the appropriate event data technology for this file
+      // This will be used for event data and its data header
+      // First we look for an exact file name match
+      // If that fails, we look for a wildcard ("*") match
+      // If that also fails, we use the default value from PoolSvc
+      if (auto it = m_storageTechMap.find(fileName); it != m_storageTechMap.end()) {
+         outputTech = it->second;
+      } else if (it = m_storageTechMap.find("*"); it != m_storageTechMap.end()) {
+         outputTech = it->second;
+      } else {
+         outputTech = pool::DbType::getType(m_defContainerType).type();
+      }
    }
-   return(StatusCode::SUCCESS);
+   return StatusCode::SUCCESS;
 }
 //______________________________________________________________________________
 StatusCode AthenaPoolCnvSvc::registerCleanUp(IAthenaPoolCleanUp* cnv) {
@@ -568,7 +594,7 @@ void AthenaPoolCnvSvc::handle(const Incident& incident) {
 }
 //______________________________________________________________________________
 AthenaPoolCnvSvc::AthenaPoolCnvSvc(const std::string& name, ISvcLocator* pSvcLocator) :
-	base_class(name, pSvcLocator, POOL_StorageType) {
+	base_class(name, pSvcLocator, pool::POOL_StorageType.type()) {
 }
 //__________________________________________________________________________
 void AthenaPoolCnvSvc::extractPoolAttributes(const StringArrayProperty& property,
@@ -588,7 +614,7 @@ void AthenaPoolCnvSvc::extractPoolAttributes(const StringArrayProperty& property
          const std::string tag = attrib.tag;
          const std::string val = attrib.value;
          if (tag == "DatabaseName") {
-            databaseName = val;
+            databaseName = std::move(val);
          } else if (tag == "ContainerName") {
             if (databaseName.empty()) {
                databaseName = "*";

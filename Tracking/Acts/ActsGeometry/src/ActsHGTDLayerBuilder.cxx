@@ -206,8 +206,8 @@ void ActsHGTDLayerBuilder::buildEndcap(const Acts::GeometryContext &gctx,
     ACTS_VERBOSE("Identifier reports: " << nModPhi << " is lowest for " << nModR
                                         << " r-rings");
 
-    size_t nBinsPhi = nModPhi;
-    size_t nBinsR = nModR;
+    size_t nBinsPhi = nModPhi * m_cfg.numberOfBinsFactor;
+    size_t nBinsR = nModR * m_cfg.numberOfBinsFactor;
 
 
     ACTS_VERBOSE("Creating r x phi binned layer with " << nBinsR << " x "

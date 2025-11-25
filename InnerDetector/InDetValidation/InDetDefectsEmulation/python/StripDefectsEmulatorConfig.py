@@ -9,6 +9,10 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 
 from AthenaCommon.Constants import INFO
 
+# magic ranges indicating an even odd filter
+ODD_INDEX=[1,-2]
+EVEN_INDEX=[0,-2]
+
 def ordered_pairs(a_list) :
     """
     Return True if every two elements in a_list form a pair whose two elements are
@@ -16,7 +20,9 @@ def ordered_pairs(a_list) :
     """
     for i in range(0,len(a_list),2) :
         if a_list[i]>a_list[i+1] :
-            return False
+            if a_list != ODD_INDEX and a_list != EVEN_INDEX :
+                print (i,a_list)
+                return False
     return True
 
 def makeCornerDefectParam(probability=1e-1,
@@ -75,13 +81,20 @@ def moduleDefect(bec=[-2,2],
     probabilities: module-defect, strip/pixel defect (for pixel additionally group defect probabilities:
                    at least one core-column defect, at least one defect circuit)
     fractions: per group defect, fractions to have exactly 1..n group defects under the condition that there is
-               at least one such group defect.
+               at least one such group defect. The first element are the fractions to have consecutive cell
+               defects of 1,2, ... n rows.
     noiseProbability: None or probability of a strip (or pixel) to produce a spurious hit.
     noiseShape: empty list or binned pdf used to compute one random number per spurious hit (time bin for strips, tot for pixel).
     cornerDefectParam: None or parameters e.g. created with makeCornerDefectParam to create defects at module corners.
     cornerDefectNCornerFractions: if cornerDefectParam is not None the fractions of 1 to 4 corners to have a defect if the module
                                   has such defects.
     '''
+    if len(fractionsOfNDefects)+2==len(probability) or len(fractionsOfNDefects) == 0:
+        # if there only fractionsOfNDefects for the group defects but not the cell defects
+        # then assume that each cell defect is only a cell defect not a defect of n-cells
+        # in consecutive rows
+        fractionsOfNDefects = [[1.]] + fractionsOfNDefects
+
     # test that the ranges have coorect number of elements and that ranges are ordered
     assert len(bec)%2==0 and len(bec) >= 2 and ordered_pairs(bec)
     assert len(layer)%2==0 and len(layer) >= 2 and ordered_pairs(layer)
@@ -90,7 +103,7 @@ def moduleDefect(bec=[-2,2],
     assert len(side_range)%2==0 and len(side_range) >= 2 and ordered_pairs(side_range)
     assert len(columns_or_strips)%2==0 and len(columns_or_strips) >= 2 and ordered_pairs(columns_or_strips)
     assert len(column_or_strip_length)%2==0 and len(column_or_strip_length) >= 2 and ordered_pairs(column_or_strip_length)
-    assert len(fractionsOfNDefects)==0 or len(fractionsOfNDefects)+2==len(probability)
+    assert len(fractionsOfNDefects)==0 or len(fractionsOfNDefects)+1==len(probability)
 
     assert cornerDefectParam is not None or cornerDefectNCornerFractions is None
     assert cornerDefectParam is None or cornerDefectNCornerFractions is not None

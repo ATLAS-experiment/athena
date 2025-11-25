@@ -25,7 +25,8 @@ atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
 atlas_add_test( MsTrackFinderTestR3
                 SCRIPT python -m MuonTrackFindingTest.MsTrackFindingTester --nEvents 1
                 PRIVATE_WORKING_DIRECTORY
-                POST_EXEC_SCRIPT nopost.sh)
+                POST_EXEC_SCRIPT nopost.sh
+                PROPERTIES TIMEOUT 1200)
 
 atlas_add_test( SegmentRefitTestR4
                 SCRIPT python -m MuonTrackFindingTest.SegmentRefitTester --nEvents 1

@@ -315,5 +315,6 @@ const TrigFTF_GNN_Layer* TrigFTF_GNN_Geometry::addNewLayer(const TrigInDetSiLaye
   
   m_layMap.insert(std::pair<unsigned int, TrigFTF_GNN_Layer*>(layerKey, pHL));
   m_layArray.push_back(pHL);
+  m_layerKeys.push_back(layerKey);
   return pHL;
 }

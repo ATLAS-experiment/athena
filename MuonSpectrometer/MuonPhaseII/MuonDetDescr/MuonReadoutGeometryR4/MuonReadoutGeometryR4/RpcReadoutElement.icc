@@ -71,16 +71,13 @@ namespace MuonGMR4 {
                             << " picks the wrong readout element " << idHelperSvc()->toStringDetEl(identify()));
         }
         return createHash(0, m_idHelper.gasGap(measId),
-                             m_idHelper.doubletPhi(measId), 
-                             m_idHelper.measuresPhi(measId));
+                             m_idHelper.doubletPhi(measId), 0);
     }
     inline const StripDesign& RpcReadoutElement::stripDesign(const IdentifierHash& measHash) const {
         return measuresPhi(measHash) ? *m_pars.phiDesign : *m_pars.etaDesign;
     }
     inline IdentifierHash RpcReadoutElement::layerHash(const IdentifierHash& measHash) const {
-        using namespace RpcIdMeasHashFields;
-        constexpr unsigned mask = minOne << channelShift;
-        return IdentifierHash{static_cast<unsigned>(measHash) & (~mask)};
+        return createHash(0, gasGapNumber(measHash) + 1, doubletPhiNumber(measHash) + 1, false);
     }
     inline IdentifierHash RpcReadoutElement::createHash(const unsigned strip, 
                                                         const unsigned gasGap, 
@@ -88,7 +85,7 @@ namespace MuonGMR4 {
                                                         const bool measPhi) {
         using namespace RpcIdMeasHashFields;
         const IdentifierHash hash{ strip << channelShift | measPhi << measPhiShift |
-                                (doubPhi -1) << doubletPhiShift | (gasGap -1) << gasGapShift };
+                                   (doubPhi -1) << doubletPhiShift | (gasGap -1) << gasGapShift };
         return hash;
     }
     inline unsigned RpcReadoutElement::stripNumber(const IdentifierHash& measHash) {
@@ -113,8 +110,8 @@ namespace MuonGMR4 {
         const unsigned stripedMask = (~mask) & static_cast<unsigned>(measHash);    
         return (stripedMask >> measPhiShift);
     }
-    inline const StripLayer& RpcReadoutElement::sensorLayout(const IdentifierHash& measHash) const {
-        const unsigned layIdx{static_cast<unsigned>(layerHash(measHash))};
+    inline const StripLayerPtr& RpcReadoutElement::sensorLayout(const IdentifierHash& measHash) const {
+        const auto layIdx{static_cast<unsigned>(layerHash(measHash))};
         if (layIdx >= m_pars.layers.size() || !m_pars.layers[layIdx]) {
             ATH_MSG_FATAL("The sensorLayout does not exist for "<<idHelperSvc()->toStringDetEl(identify())
                         <<" gasGap "<<(gasGapNumber(measHash) +1)
@@ -123,19 +120,19 @@ namespace MuonGMR4 {
                         <<" strip: "<<stripNumber(measHash) );
             throw std::runtime_error("Invalid sensor layout");
         }
-        return (*m_pars.layers[layIdx]);
+        return m_pars.layers[layIdx];
     }
     inline Identifier RpcReadoutElement::measurementId(const IdentifierHash& measHash) const {
         return m_idHelper.channelID(identify(), doubletZ(), doubletPhiNumber(measHash) + 1, 
                                     gasGapNumber(measHash) + 1, measuresPhi(measHash), stripNumber(measHash));  
     }
-    inline Amg::Vector3D RpcReadoutElement::stripPosition(const ActsGeometryContext& ctx, const Identifier& measId) const {
+    inline Amg::Vector3D RpcReadoutElement::stripPosition(const ActsTrk::GeometryContext& ctx, const Identifier& measId) const {
         return stripPosition(ctx, measurementHash(measId));
     }  
-    inline Amg::Vector3D RpcReadoutElement::rightStripEdge(const ActsGeometryContext& ctx, const Identifier& measId) const{
+    inline Amg::Vector3D RpcReadoutElement::rightStripEdge(const ActsTrk::GeometryContext& ctx, const Identifier& measId) const{
         return rightStripEdge(ctx, measurementHash(measId));
     }
-    inline Amg::Vector3D RpcReadoutElement::leftStripEdge(const ActsGeometryContext& ctx, const Identifier& measId) const{
+    inline Amg::Vector3D RpcReadoutElement::leftStripEdge(const ActsTrk::GeometryContext& ctx, const Identifier& measId) const{
         return leftStripEdge(ctx, measurementHash(measId));
     }
 }  // namespace MuonGMR4

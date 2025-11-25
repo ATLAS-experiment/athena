@@ -1,14 +1,12 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "AnalysisJiveXML/TruthParticleRetriever.h"
 
-#include <string>
-
 #include "CLHEP/Units/SystemOfUnits.h"
-
 #include "McParticleEvent/TruthParticleContainer.h"
+#include <string>
 
 namespace JiveXML {
 
@@ -287,16 +285,16 @@ namespace JiveXML {
     //    log << MSG::DEBUG << "TruthParticles status: " << statusList << endmsg;
   } // end of TruthParticle Loop
     DataMap myDataMap;
-      myDataMap["pt"] = pt;
-      myDataMap["phi"] = phi;
-      myDataMap["eta"] = eta;
-      myDataMap["typeEV"] = typeEV;
-//      myDataMap["label"] = label;
-      myDataMap["label"] = typeLabelStr;
-      myDataMap["pdgId"] = pdgId;
-      myDataMap["dataType"] = dataType;
+    const auto n = phi.size();
+      myDataMap["pt"] = std::move(pt);
+      myDataMap["phi"] = std::move(phi);
+      myDataMap["eta"] = std::move(eta);
+      myDataMap["typeEV"] = std::move(typeEV);
+      myDataMap["label"] = std::move(typeLabelStr);
+      myDataMap["pdgId"] = std::move(pdgId);
+      myDataMap["dataType"] = std::move(dataType);
 
-    if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG) << dataTypeName() << ": "<< phi.size() << endmsg;
+    if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG) << dataTypeName() << ": "<< n << endmsg;
 
     //forward data to formating tool
     return FormatTool->AddToEvent(dataTypeName(), m_sgKey, &myDataMap);

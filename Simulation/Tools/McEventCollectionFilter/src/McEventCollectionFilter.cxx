@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //////////////////////////////////////////////////////////////////////////
@@ -92,7 +92,7 @@ StatusCode McEventCollectionFilter::execute(const EventContext &ctx) const
   }
   if (genEvt->cross_section()) {
     auto cs = std::make_shared<HepMC3::GenCrossSection>(*genEvt->cross_section().get());
-    evt->set_cross_section(cs);
+    evt->set_cross_section(std::move(cs));
   }
   // to set geantino vertex as a truth primary vertex
   HepMC::ConstGenVertexPtr hScatVx = genEvt->vertices().at(3-1);
@@ -150,7 +150,7 @@ StatusCode McEventCollectionFilter::execute(const EventContext &ctx) const
       const HepMC::FourVector &position = vx->position();
       HepMC::GenVertexPtr newVertex = HepMC::newGenVertexPtr(position);
       newVertex->add_particle_out(newParticle);
-      evt->add_vertex(newVertex);
+      evt->add_vertex(std::move(newVertex));
 #ifdef HEPMC3
       HepMC::suggest_barcode(newParticle, HepMC::barcode(link)); // FIXME
 #endif
@@ -158,7 +158,7 @@ StatusCode McEventCollectionFilter::execute(const EventContext &ctx) const
   }
 
   //.....add new vertex with geantino
-  evt->add_vertex(genVertex);
+  evt->add_vertex(std::move(genVertex));
 #ifdef HEPMC3
   HepMC::suggest_barcode(genPart, HepMC::SUPPRESSED_PILEUP_BARCODE ); // FIXME
 #endif

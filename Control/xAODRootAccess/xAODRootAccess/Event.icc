@@ -1,0 +1,351 @@
+// Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+#ifndef XAODROOTACCESS_EVENT_ICC
+#define XAODROOTACCESS_EVENT_ICC
+
+// EDM include(s):
+#include "AthContainers/normalizedTypeinfoName.h"
+
+// System include(s).
+#include <utility>
+
+namespace xAOD {
+
+/// This function works pretty much like StoreGateSvc::contains. It can be
+/// used to check if an object with a given type having a given key can be
+/// retrieved from the event.
+///
+/// @param key The key/name of the object
+/// @returns @c true if the object is available,
+///          @c false otherwise
+///
+template <typename T>
+bool Event::contains(const std::string& key) {
+
+  static const bool METADATA = false;
+  const std::type_info& ti = typeid(T);
+  return contains(key, ti, METADATA);
+}
+
+/// This function works pretty much like StoreGateSvc::transientContains.
+/// It doesn't try to do any I/O operations, it just checks if an object
+/// of a given type, with a given key, is already in memory.
+///
+/// @param key The key/name of the object
+/// @returns The usual @c StatusCode types
+///
+template <typename T>
+bool Event::transientContains(const std::string& key) const {
+
+  static const bool METADATA = false;
+  const std::type_info& ti = typeid(T);
+  return transientContains(key, ti, METADATA);
+}
+
+/// This can be useful in generic client code to process all objects of a given
+/// type.
+///
+/// @param vkeys will be filled with the list of keys (may be empty)
+/// @param metadata Whether to look for metadata or data objects
+/// @returns The usual @c StatusCode types
+///
+template <typename T>
+StatusCode Event::keys(std::vector<std::string>& vkeys, bool metadata) const {
+
+  ATH_CHECK(getNames(SG::normalizedTypeinfoName(typeid(T)), vkeys, metadata));
+  return StatusCode::SUCCESS;
+}
+
+/// This function needs to be used when retrieving an object either from
+/// the input or the output object list. The returned object can not be
+/// modified.
+///
+/// @param obj The pointer that will be set to the object requested
+/// @param key The key/name of the object
+/// @returns The usual @c StatusCode types
+///
+template <typename T>
+StatusCode Event::retrieve(const T*& obj, const std::string& key) {
+
+  // The type in question.
+  const std::type_info& ti = typeid(T);
+  // Look among the output objects first.
+  static const bool METADATA = false;
+  const void* result = getOutputObject(key, ti, METADATA);
+  // Check if it succeeded.
+  if (result == nullptr) {
+    // Try the input then.
+    static const bool SILENT = false;
+    result = getInputObject(key, ti, SILENT, METADATA);
+    if (result == nullptr) {
+      ATH_MSG_WARNING("Couldn't (const) retrieve \""
+                      << SG::normalizedTypeinfoName(ti) << "/" << key << "\"");
+      return StatusCode::RECOVERABLE;
+    }
+  } else {
+    // Even if there is an output object with this key, it may
+    // be an input object that was copied to the output. So let's
+    // try to silently retrieve an input object as well. This makes
+    // sure that the input/output object is updated for the current
+    // event.
+    static const bool SILENT = true;
+    getInputObject(key, ti, SILENT, METADATA);
+  }
+
+  // If we were successful.
+  obj = reinterpret_cast<const T*>(result);
+  return StatusCode::SUCCESS;
+}
+
+/// This function can be used to retrieve an object from the output list.
+/// Since only output objects are considered, the function returns a
+/// non-const object, allowing downstream code to modify an object that
+/// was put into the event somewhere upstream.
+///
+/// @param obj The pointer that will be set to the object requested
+/// @param key The key/name of the object
+/// @returns The usual @c StatusCode types
+///
+template <typename T>
+StatusCode Event::retrieve(T*& obj, const std::string& key) {
+
+  // The type in question.
+  const std::type_info& ti = typeid(T);
+  // Only look among the output objects in this case:
+  static const bool METADATA = false;
+  void* result = getOutputObject(key, ti, METADATA);
+  // Check if we found the object:
+  if (result == nullptr) {
+    ATH_MSG_WARNING("Couldn't (non-const) retrieve \""
+                    << SG::normalizedTypeinfoName(ti) << "/" << key << "\"");
+    return StatusCode::RECOVERABLE;
+  }
+
+  // If we were successful.
+  obj = reinterpret_cast<T*>(result);
+  return StatusCode::SUCCESS;
+}
+
+/// This function can be used to add an object to the output. The function
+/// takes posession of the object, so the user code must not delete an
+/// object that was added to an event.
+///
+/// @param obj Pointer to the object to be added to the event
+/// @param key The key/name to give the object
+/// @returns The usual @c StatusCode types
+///
+template <typename T>
+StatusCode Event::record(T* obj, const std::string& key) {
+
+  // Just call the non-templated implementation.
+  static const bool OVERWRITE = false;
+  static const bool METADATA = false;
+  static const bool ISOWNER = true;
+  ATH_CHECK(record(obj, SG::normalizedTypeinfoName(typeid(T)), key, OVERWRITE,
+                   METADATA, ISOWNER));
+  return StatusCode::SUCCESS;
+}
+
+/// This function is used to add an object to the output. As the interface
+/// clearly states, the function takes posession of the object given to it.
+/// Since the user must give up ownership of the object in order to call this
+/// function, it doesn't even need to be said that the user must not delete
+/// the object by hand after calling this function.
+///
+/// @param obj Smart pointer to the object to tbe added to the event
+/// @param key The key/name to give the object
+/// @returns The usual @c StatusCode types
+///
+template <typename T>
+StatusCode Event::record(std::unique_ptr<T> obj, const std::string& key) {
+
+  // Just call the non-templated implementation.
+  static const bool OVERWRITE = false;
+  static const bool METADATA = false;
+  static const bool ISOWNER = true;
+  ATH_CHECK(record(obj.get(), SG::normalizedTypeinfoName(typeid(T)), key,
+                   OVERWRITE, METADATA, ISOWNER));
+
+  // If the record was successful, let's release the object from the unique
+  // pointer.
+  //coverity[leaked_storage]
+  std::ignore = obj.release();
+  return StatusCode::SUCCESS;
+}
+
+/// This function works pretty much like StoreGateSvc::contains for metadata
+/// objects. It can be used to check if a metadata object with a given type
+/// having a given key can be (const) retrieved.
+///
+/// @param key The key/name of the metadata object
+/// @returns @c true if the object is available,
+///          @c false otherwise
+///
+template <typename T>
+bool Event::containsMeta(const std::string& key) {
+
+  static const bool METADATA = true;
+  static const bool SILENT = true;
+  const std::type_info& ti = typeid(T);
+  return ((getOutputObject(key, ti, METADATA) != nullptr) ||
+          (getInputObject(key, ti, SILENT, METADATA) != nullptr));
+}
+
+/// This function works pretty much like StoreGateSvc::transientContains for
+/// metadata objects. It doesn't try to do any I/O operations, it just checks
+/// if an object of a given type, with a given key, can be retrieved in
+/// non-const mode.
+///
+/// @param key The key/name of the metadata object
+/// @returns @c true if the object is available,
+///          @c false otherwise
+///
+template <typename T>
+bool Event::transientContainsMeta(const std::string& key) const {
+
+  static const bool METADATA = true;
+  const std::type_info& ti = typeid(T);
+  return (getOutputObject(key, ti, METADATA) != nullptr);
+}
+
+/// This can be useful in generic client code to process all metadata objects of
+/// a given type.
+///
+/// @param vkeys will be filled with the list of keys (may be empty)
+/// @returns The usual @c StatusCode types
+///
+template <typename T>
+StatusCode Event::metaKeys(std::vector<std::string>& vkeys) const {
+
+  static const bool METADATA = true;
+  ATH_CHECK(getNames(SG::normalizedTypeinfoName(typeid(T)), vkeys, METADATA));
+  return StatusCode::SUCCESS;
+}
+
+/// This function can be used to retrieve an object from the input metadata
+/// list.
+///
+/// @param obj The pointer that will be set to the object requested
+/// @param key The key/name of the object
+/// @returns The usual @c StatusCode values
+///
+template <typename T>
+StatusCode Event::retrieveMetaInput(const T*& obj, const std::string& key) {
+
+  // Only look among the output objects in this case.
+  static const bool SILENT = false;
+  static const bool METADATA = true;
+  const std::type_info& ti = typeid(T);
+  const void* result = getInputObject(key, ti, SILENT, METADATA);
+  // Check if we found the object.
+  if (result == nullptr) {
+    ATH_MSG_WARNING("Couldn't (const) retrieve \""
+                    << SG::normalizedTypeinfoName(ti) << "/" << key << "\"");
+    return StatusCode::RECOVERABLE;
+  }
+
+  // If we were successful.
+  obj = reinterpret_cast<const T*>(result);
+  return StatusCode::SUCCESS;
+}
+
+/// This function can be used to retrieve an object from the output metadata
+/// list.
+///
+/// @param obj The pointer that will be set to the object requested
+/// @param key The key/name of the object
+/// @returns The usual @c StatusCode values
+///
+template <typename T>
+StatusCode Event::retrieveMetaOutput(const T*& obj, const std::string& key) {
+
+  // Only look among the output objects in this case:
+  static const bool METADATA = true;
+  const std::type_info& ti = typeid(T);
+  const void* result = getOutputObject(key, ti, METADATA);
+  // Check if we found the object.
+  if (result == nullptr) {
+    ATH_MSG_WARNING("Couldn't (const) retrieve \""
+                    << SG::normalizedTypeinfoName(ti) << "/" << key << "\"");
+    return StatusCode::RECOVERABLE;
+  }
+
+  // If we were successful.
+  obj = reinterpret_cast<const T*>(result);
+  return StatusCode::SUCCESS;
+}
+
+/// This function can be used to retrieve an object from the output metadata
+/// list.
+///
+/// @param obj The pointer that will be set to the object requested
+/// @param key The key/name of the object
+/// @returns The usual @c StatusCode values
+///
+template <typename T>
+StatusCode Event::retrieveMetaOutput(T*& obj, const std::string& key) {
+
+  // Only look among the output objects in this case.
+  static const bool METADATA = true;
+  const std::type_info& ti = typeid(T);
+  void* result = getOutputObject(key, ti, METADATA);
+  // Check if we found the object.
+  if (result == nullptr) {
+    ATH_MSG_WARNING("Couldn't (non-const) retrieve \""
+                    << SG::normalizedTypeinfoName(ti) << "/" << key << "\"");
+    return StatusCode::RECOVERABLE;
+  }
+
+  // If we were successful.
+  obj = reinterpret_cast<T*>(result);
+  return StatusCode::SUCCESS;
+}
+
+/// This function can be used to add a metadata object to the output.
+/// The function takes posession of the object, so the user code must not
+/// delete an object that was added to the output.
+///
+/// @param obj Pointer to the object to be added to the output metadata
+/// @param key The key/name to give the object
+/// @returns The usual @c StatusCode values
+///
+template <typename T>
+StatusCode Event::recordMeta(T* obj, const std::string& key) {
+
+  // Just call the non-templated implementation.
+  static const bool OVERWRITE = false;
+  static const bool METADATA = true;
+  static const bool ISOWNER = true;
+  ATH_CHECK(record(obj, SG::normalizedTypeinfoName(typeid(T)), key, OVERWRITE,
+                   METADATA, ISOWNER));
+  return StatusCode::SUCCESS;
+}
+
+/// This function can be used to add a metadata object to the output. As the
+/// interface clearly states, the function takes posession of the object
+/// given to it. So it's not even worth mentioning that the user must not
+/// delete the object after giving it to this function.
+///
+/// @param obj Smart pointer to the object to be added to the output metadata
+/// @param key The key/name to give the object
+/// @returns The usual @c StatusCode values
+///
+template <typename T>
+StatusCode Event::recordMeta(std::unique_ptr<T> obj, const std::string& key) {
+
+  // Just call the non-templated implementation.
+  static const bool OVERWRITE = false;
+  static const bool METADATA = true;
+  static const bool ISOWNER = true;
+  ATH_CHECK(record(obj.get(), SG::normalizedTypeinfoName(typeid(T)), key,
+                   OVERWRITE, METADATA, ISOWNER));
+
+  // If the record was successful, let's release the object from the unique
+  // pointer.
+  //coverity[leaked_storage]
+  std::ignore = obj.release();
+  return StatusCode::SUCCESS;
+}
+
+}  // namespace xAOD
+
+#endif  // XAODROOTACCESS_EVENT_ICC

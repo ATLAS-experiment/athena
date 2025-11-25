@@ -113,8 +113,10 @@ private:
   bool m_correct_etcone;
   bool m_trouble_categories;
   bool m_useLogLogFit;
+  bool m_fixCoreTime;
   bool m_forcePartType;
 
+  static const unsigned int m_Run2Run3runNumberTransition = 400000;
   // For systematcis
   CP::SystematicVariation m_systDDonoff;
 };

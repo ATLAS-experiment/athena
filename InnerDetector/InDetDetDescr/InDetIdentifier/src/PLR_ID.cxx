@@ -11,8 +11,11 @@
 #include "GaudiKernel/MsgStream.h"
 
 #include "InDetIdentifier/PLR_ID.h"
+#include "IdDict/IdDictDictionary.h"
+#include "IdDict/IdDictField.h"
+#include "IdDict/IdDictMgr.h"
+#include "IdDict/IdDictRegion.h"
 #include "Identifier/IdentifierHash.h"
-#include "IdDict/IdDictDefs.h"
 #include <set>
 #include <algorithm>
 #include <iostream>
@@ -244,7 +247,7 @@ PLR_ID::initLevelsFromDict(void) {
   }
 
   // Get levels
-  IdDictField* field = m_dict->find_field("subdet");
+  const IdDictField* field = m_dict->find_field("subdet");
   if (field) {
     m_INDET_INDEX = field->index();
   } else {

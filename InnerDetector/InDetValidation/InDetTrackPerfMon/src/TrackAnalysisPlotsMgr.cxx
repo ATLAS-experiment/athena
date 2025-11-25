@@ -132,34 +132,34 @@ StatusCode IDTPM::TrackAnalysisPlotsMgr::initialize()
     m_plots_hitsOnTrk_vsTest = std::make_unique< HitsOnTracksPlots >(
         this, "Tracks/HitsOnTracks", m_anaTag,
         m_trkAnaDefSvc->testTag(), m_trkAnaDefSvc->isITk(),
-        true, m_trkAnaDefSvc->hasFullPileupTruth() );
+        true, m_trkAnaDefSvc->hasFullPileupTruth(), m_trkAnaDefSvc->plotHitsOnTracksExpert() );
   }
   if( m_trkAnaDefSvc->plotHitsOnTracksReference() and not m_trkAnaDefSvc->isReferenceTruth() ) {
     m_plots_hitsOnTrk_vsRef = std::make_unique< HitsOnTracksPlots >(
         this, "Tracks/HitsOnTracks", m_anaTag,
-        m_trkAnaDefSvc->referenceTag(), m_trkAnaDefSvc->isITk() );
+        m_trkAnaDefSvc->referenceTag(), m_trkAnaDefSvc->isITk(), m_trkAnaDefSvc->plotHitsOnTracksExpert() );
   }
   /// -- matched tracks
   if( m_trkAnaDefSvc->plotHitsOnMatchedTracks() and not m_trkAnaDefSvc->isTestTruth() ) {
     m_plots_hitsOnMatchedTrk = std::make_unique< HitsOnTracksPlots >(
         this, "Tracks/Resolutions/HitsOnTracks", m_anaTag,
         m_trkAnaDefSvc->testTag(), m_trkAnaDefSvc->isITk(),
-        true, m_trkAnaDefSvc->hasFullPileupTruth() );
+        true, m_trkAnaDefSvc->hasFullPileupTruth(), m_trkAnaDefSvc->plotHitsOnTracksExpert() );
     m_plots_hitsOnMatchedTrk_vsRef = std::make_unique< HitsOnTracksPlots >(
         this, "Tracks/Resolutions/HitsOnTracks", m_anaTag,
-        m_trkAnaDefSvc->testTag(), m_trkAnaDefSvc->referenceTag(), m_trkAnaDefSvc->isITk() );
+        m_trkAnaDefSvc->testTag(), m_trkAnaDefSvc->referenceTag(), m_trkAnaDefSvc->isITk(), m_trkAnaDefSvc->plotHitsOnTracksExpert() );
   }
   /// -- fake and unlinked tracks
   if( m_trkAnaDefSvc->plotHitsOnFakeTracks() and m_trkAnaDefSvc->isReferenceTruth() ) {
     m_plots_hitsOnFakeTrk = std::make_unique< HitsOnTracksPlots >(
         this, "Tracks/FakeRates/HitsOnTracks", m_anaTag,
         m_trkAnaDefSvc->testTag(), m_trkAnaDefSvc->isITk(),
-        true, m_trkAnaDefSvc->hasFullPileupTruth() );
+        true, m_trkAnaDefSvc->hasFullPileupTruth(), m_trkAnaDefSvc->plotHitsOnTracksExpert() );
     if ( not m_trkAnaDefSvc->unlinkedAsFakes() ) {
       m_plots_hitsOnUnlinkedTrk = std::make_unique< HitsOnTracksPlots >(
           this, "Tracks/FakeRates/Unlinked/HitsOnTracks", m_anaTag,
           m_trkAnaDefSvc->testTag(), m_trkAnaDefSvc->isITk(),
-          true, m_trkAnaDefSvc->hasFullPileupTruth() );
+          true, m_trkAnaDefSvc->hasFullPileupTruth(), m_trkAnaDefSvc->plotHitsOnTracksExpert() );
     }
   }
 

@@ -1,8 +1,9 @@
 /*
-   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
    */
 
 #include "RPC_CondCabling/RpcCablingCondAlg.h"
+#include "RPC_CondCabling/RPCofflineId.h"
 
 #include <sstream>
 
@@ -738,7 +739,7 @@ std::list<Identifier> RpcCablingCondAlg::give_strip_id(const unsigned short int 
         rpcId.measuresPhi = static_cast<int>(decode.view());
         rpcId.strip = RPC_strip + 1;
 
-        offlineIdList.push_back(rpcId);
+        offlineIdList.push_back(std::move(rpcId));
 
         ++it;
     }

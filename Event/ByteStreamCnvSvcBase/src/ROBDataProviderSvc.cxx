@@ -84,13 +84,8 @@
 #include "eformat/Status.h"
 
 // Constructor.
-ROBDataProviderSvc::ROBDataProviderSvc(const std::string& name, ISvcLocator* svcloc) 
-  : base_class(name, svcloc) {
-
-  declareProperty("filterRobWithStatus", m_filterRobWithStatus);
-  declareProperty("filterSubDetWithStatus", m_filterSubDetWithStatus);
-  declareProperty("filterEmptyROB", m_filterEmptyROB = false);
-}
+ROBDataProviderSvc::ROBDataProviderSvc(const std::string& name, ISvcLocator* svcloc)
+  : base_class(name, svcloc) {}
 
 
 // Initialization
@@ -218,7 +213,7 @@ void ROBDataProviderSvc::setNextEvent( const EventContext& context, const RawEve
    m_maskL2EFModuleID = (re->nlvl2_trigger_info() != 0);
 
    // get all the ROBFragments
-   const size_t MAX_ROBFRAGMENTS = 4096;
+   constexpr size_t MAX_ROBFRAGMENTS = 4096;
    std::vector<OFFLINE_FRAGMENTS_NAMESPACE::PointerType> robF(MAX_ROBFRAGMENTS);
    OFFLINE_FRAGMENTS_NAMESPACE::PointerType rePointer;
    re->start(rePointer);
@@ -256,7 +251,7 @@ void ROBDataProviderSvc::setNextEvent( const EventContext& context, const RawEve
 	            << " removed for L1 Id = " << cache->currentLvl1ID);
          }
          rob.reset();
-      } else if ((rob->rod_ndata() == 0) && (m_filterEmptyROB)) {
+      } else if ((rob->rod_ndata() == 0) && (m_filterEmptyROB.value())) {
          ATH_MSG_DEBUG( " ---> Empty ROB Id = 0x" << MSG::hex << id << MSG::dec
 	         << " removed for L1 Id = " << cache->currentLvl1ID);
           rob.reset();

@@ -61,6 +61,19 @@ def get_input_years(config: ConfigAccumulator) -> list[int]:
     return years
 
 
+def trigger_set(config, triggerChainsPerYear, includeAllYearsPerRun):
+    triggers = set()
+    if includeAllYearsPerRun:
+        for year in triggerChainsPerYear:
+            if not is_year_in_current_period(config, year):
+                continue
+            triggers.update(get_year_data(triggerChainsPerYear, year))
+    else:
+        for year in get_input_years(config):
+            triggers.update(get_year_data(triggerChainsPerYear, year))
+    return triggers
+
+
 class TriggerAnalysisSFBlock(ConfigBlock):
     """the ConfigBlock for trigger analysis"""
     def __init__(self):
@@ -113,7 +126,8 @@ class TriggerAnalysisSFBlock(ConfigBlock):
             info="disables the calculation of efficiencies and scale factors. "
             "Experimental! only useful to test a new WP for which scale "
             "factors are not available. Still performs the global trigger "
-            "matching (same behaviour as on data). The default is False.")
+            "matching (same behaviour as on data). The default is False.",
+            expertMode=True)
         self.addOption ('noGlobalTriggerEff', False, type=bool,
             info="disables the global trigger efficiency tool (including "
             "matching), which is only suited for electron/muon/photon "

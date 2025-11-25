@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "GaudiKernel/MsgStream.h"
@@ -128,7 +128,24 @@ unsigned int EMECDetectorManager::getNumTreeTops () const
 void EMECDetectorManager::addDetectorRegion (const EMECDetectorRegion *region)
 {
   m_DetRegionsIterative.push_back(region);
-  m_DetRegionsRandom[region->getRegionIndex()][region->getSamplingIndex()][region->getRadialIndex()][region->getEndcapIndex()] = region;
+  size_t iregion = region->getRegionIndex();
+  if (iregion >= 6) {
+    throw std::out_of_range("EMECDetectorManager::addDetectorRegion -- region");
+  }
+  size_t isampling = region->getSamplingIndex();
+  if (isampling >= 4) {
+    throw std::out_of_range("EMECDetectorManager::addDetectorRegion -- sampling");
+  }
+  // coverity[checked_return]
+  size_t iradius = region->getRadialIndex();
+  if (iradius >= 2) {
+    throw std::out_of_range("EMECDetectorManager::addDetectorRegion -- radius");
+  }
+  size_t iendcap = region->getEndcapIndex();
+  if (iendcap >= 2) {
+    throw std::out_of_range("EMECDetectorManager::addDetectorRegion -- endcap");
+  }
+  m_DetRegionsRandom[iregion][isampling][iradius][iendcap] = region;
 }
 
 void EMECDetectorManager::addTreeTop (const PVLink& treeTop)

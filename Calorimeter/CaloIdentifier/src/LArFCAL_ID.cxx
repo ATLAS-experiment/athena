@@ -5,7 +5,6 @@
 #include "CaloIdentifier/LArFCAL_ID.h"
 #include "AtlasDetDescr/AtlasDetectorID.h"
 #include "Identifier/IdentifierHash.h"
-#include "IdDict/IdDictDefs.h"
 #include "LArFCAL_region.h"
 #include "PathResolver/PathResolver.h"
 

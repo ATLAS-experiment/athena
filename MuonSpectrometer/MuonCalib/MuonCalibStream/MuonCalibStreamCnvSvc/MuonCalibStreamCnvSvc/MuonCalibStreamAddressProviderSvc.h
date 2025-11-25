@@ -1,13 +1,19 @@
+/*
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+*/
 #ifndef MUONCALIBSTREAMCNVSVCBASE_MUONCALIBSTREAMADDRESSPROVIDERSVC_H
 #define MUONCALIBSTREAMCNVSVCBASE_MUONCALIBSTREAMADDRESSPROVIDERSVC_H
 
-#include <map>
-#include <set>
+
 
 #include "AthenaBaseComps/AthService.h"
 #include "AthenaKernel/IAddressProvider.h"
 #include "GaudiKernel/ClassID.h"
 #include "MuonCalibStreamCnvSvc/IMuonCalibStreamDataProviderSvc.h"
+#include <map>
+#include <set>
+#include <vector>
+#include <string>
 
 class MuonCalibStreamAddressProviderSvc : public extends<AthService, IAddressProvider> {
 

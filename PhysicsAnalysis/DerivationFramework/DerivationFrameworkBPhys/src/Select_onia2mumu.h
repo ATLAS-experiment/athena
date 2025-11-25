@@ -44,7 +44,7 @@ namespace DerivationFramework {
        *  passed the selection. This flag is then used by the event selection tool
        *  and by the vertex thinning tool.
        */
-      virtual StatusCode addBranches() const override;
+      virtual StatusCode addBranches(const EventContext& ctx) const override;
 
     private:
       void ProcessVertex(xAOD::BPhysHypoHelper&, xAOD::BPhysHelper::pv_type) const;

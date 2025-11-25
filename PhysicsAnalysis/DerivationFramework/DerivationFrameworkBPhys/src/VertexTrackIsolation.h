@@ -28,7 +28,7 @@ namespace DerivationFramework {
       StatusCode initialize();
       StatusCode finalize();
       
-      virtual StatusCode addBranches() const;
+      virtual StatusCode addBranches(const EventContext& ctx) const;
 
       bool isSame(const xAOD::Vertex* theVtx1, const xAOD::Vertex* theVtx2) const;
       bool isContainedIn(const xAOD::Vertex* theVtx, const std::vector<const xAOD::Vertex*> &theColl) const;
@@ -37,8 +37,8 @@ namespace DerivationFramework {
 
 	ToolHandle<xAOD::ITrackIsolationTool> m_trackIsoTool;
 
-	std::string m_trackContainerName;
-	std::string m_vertexContainerName;
+    std::string m_trackContainerName; // FIXME Use Handles
+	std::string m_vertexContainerName; // FIXME Use Handles
 	std::vector<unsigned int> m_cones;
 	std::vector<std::string> m_passFlags;
 	int m_vertexType; 	//Which type of primary vertices should be used? (7 = 0b111 are all at the moment)

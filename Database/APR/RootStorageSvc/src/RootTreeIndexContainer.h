@@ -1,5 +1,5 @@
 /*
- *   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+ *   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
  *   */
 
 #ifndef POOL_ROOTTREEINDEXCONTAINER_H
@@ -32,13 +32,10 @@ namespace pool {
 
    class RootTreeIndexContainer : public RootTreeContainer {
    public:
-      /// Standard constructor
-      RootTreeIndexContainer();
-
+      explicit RootTreeIndexContainer(const std::string& name);
       RootTreeIndexContainer (const RootTreeIndexContainer&) = delete;
       RootTreeIndexContainer& operator= (const RootTreeIndexContainer&) = delete;
 
-      /// Standard destructor
       virtual ~RootTreeIndexContainer() override {}
 
       /// Open the container

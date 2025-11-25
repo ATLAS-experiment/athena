@@ -54,11 +54,11 @@ namespace MuonValR4{
       std::vector<const MuonR4::Segment*> matchedSegments;
       /// @brief All seeds matched to this object
       std::vector<const MuonR4::SegmentSeed*> matchedSeeds; 
-      std::vector<char> matchedSeedFoundSegment{0};
+      std::vector<char> matchedSeedFoundSegment;
     };
 
   private:
-    std::vector<ObjectMatching> matchWithTruth(const ActsGeometryContext& gctx,
+    std::vector<ObjectMatching> matchWithTruth(const ActsTrk::GeometryContext& gctx,
                                                const xAOD::MuonSegmentContainer* truthSegments,
                                                const MuonR4::SegmentSeedContainer* seedContainer,
                                                const MuonR4::SegmentContainer* segmentContainer) const;
@@ -67,7 +67,7 @@ namespace MuonValR4{
      *  @param gctx: Geometry context to fetch the alignment constants
      *  @param truthSeg: Reference to the truth segment
      *  @param recoSeg: Reference to the reco segment. */
-    unsigned int countOnSameSide(const ActsGeometryContext& gctx,
+    unsigned int countOnSameSide(const ActsTrk::GeometryContext& gctx,
                                  const xAOD::MuonSegment& truthSeg,
                                  const MuonR4::Segment& recoSeg) const;
     
@@ -77,7 +77,7 @@ namespace MuonValR4{
     /** @brief Fill the associated truth information into the tree
     *  @param truthSegment: Pointer to the truth parameters in form of a segment
     *  @param gctx: Geometry context for the alignment of the spectrometer sector */
-    void fillTruthInfo(const ActsGeometryContext& gctx,
+    void fillTruthInfo(const ActsTrk::GeometryContext& gctx,
                        const xAOD::MuonSegment* truthSegment);
     /** @brief Fill the hit summary info of the associated bucket */
     void fillBucketInfo(const MuonR4::SpacePointBucket& bucket);
@@ -87,7 +87,7 @@ namespace MuonValR4{
     void fillSeedInfo(const ObjectMatching& obj);
     /** @brief Fill the info assciated to the segment 
       * @param obj: Pointer to the matching object connecting the seeds & segment & truth */
-    void fillSegmentInfo(const ActsGeometryContext& gctx, const ObjectMatching& obj);  
+    void fillSegmentInfo(const ActsTrk::GeometryContext& gctx, const ObjectMatching& obj);  
                          
 
       
@@ -95,14 +95,14 @@ namespace MuonValR4{
     MuonVal::MuonTesterTree m_tree{"MuonEtaHoughTest","MuonEtaHoughTransformTest"}; 
 
     // MDT sim hits in xAOD format 
-    SG::ReadHandleKey<xAOD::MuonSegmentContainer> m_truthSegmentKey {this, "TruthSegmentKey","TruthSegmentsR4", "truth segment container"};
+    SG::ReadHandleKey<xAOD::MuonSegmentContainer> m_truthSegmentKey {this, "TruthSegmentKey","MuonTruthSegments", "truth segment container"};
                                                           
     SG::ReadHandleKeyArray<MuonR4::SegmentSeedContainer> m_inHoughSegmentSeedKeys{this, "SegmentSeedKeys", {"MuonHoughStationSegmentSeeds"}};
     SG::ReadHandleKeyArray<MuonR4::SegmentContainer> m_inSegmentKeys{this, "SegmentKeys", {"R4MuonSegments"}};
 
 
     SG::ReadHandleKey<MuonR4::SpacePointContainer> m_spKey{this, "SpacePointKey", "MuonSpacePoints"};
-    SG::ReadHandleKey<ActsGeometryContext> m_geoCtxKey{this, "AlignmentKey", "ActsAlignment", "cond handle key"};
+    SG::ReadHandleKey<ActsTrk::GeometryContext> m_geoCtxKey{this, "AlignmentKey", "ActsAlignment", "cond handle key"};
 
     ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
     

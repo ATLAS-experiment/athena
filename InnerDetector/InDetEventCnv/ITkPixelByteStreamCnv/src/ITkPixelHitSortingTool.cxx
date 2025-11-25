@@ -19,8 +19,7 @@ Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 
 ITkPixelHitSortingTool::ITkPixelHitSortingTool(const std::string& type,const std::string& name,const IInterface* parent) : 
-  AthAlgTool(type,name,parent),
-  m_pixelReadout(this, "PixelReadoutManager", "ITkPixelReadoutManager", "Pixel readout manager")
+  AthAlgTool(type,name,parent)
 {
     //not much to construct as of now
 }

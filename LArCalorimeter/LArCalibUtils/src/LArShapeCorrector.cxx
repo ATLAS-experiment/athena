@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArCalibUtils/LArShapeCorrector.h"
@@ -154,10 +154,8 @@ StatusCode LArShapeCorrector::stop() {
 	}
       }//end else
 
-      std::vector<std::vector<float> > shapeAmpl;
-      shapeAmpl.push_back(theShape);
-      std::vector<std::vector<float> > shapeDer;
-      shapeDer.push_back(theShapeDer);
+      std::vector<std::vector<float> > shapeAmpl { std::move(theShape) };
+      std::vector<std::vector<float> > shapeDer  { std::move(theShapeDer) };
       larShapeCompleteCorr->set(id,(int)gain,shapeAmpl,shapeDer,timeOffset,25.);
       
     }//end loop over cells

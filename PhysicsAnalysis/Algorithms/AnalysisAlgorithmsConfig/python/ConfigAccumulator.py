@@ -28,6 +28,13 @@ def deprecated(reason: str = ""):
         return wrapper
     return decorator
 
+class ExpertModeWarning(Warning):
+    """Warning raised when an expert-only configuration option is used."""
+    pass
+# Default filter: error out unless the user overrides
+if not any(f[0] == 'error' and f[2] is ExpertModeWarning for f in warnings.filters):
+    warnings.simplefilter('error', ExpertModeWarning)
+
 class DataType(FlagEnum):
     """holds the various data types as an enum"""
     Data = 'data'
@@ -378,7 +385,6 @@ class ConfigAccumulator :
 
     def createService (self, type, name) :
         '''create a new service and register it as the "current algorithm"'''
-        name = name + self._algPostfix
         if self._pass == 0 :
             if name in self._algorithms :
                 raise Exception ('duplicate service: ' + name)
@@ -403,7 +409,6 @@ class ConfigAccumulator :
 
     def createPublicTool (self, type, name) :
         '''create a new public tool and register it as the "current algorithm"'''
-        name = name + self._algPostfix
         if self._pass == 0 :
             if name in self._algorithms :
                 raise Exception ('duplicate public tool: ' + name)

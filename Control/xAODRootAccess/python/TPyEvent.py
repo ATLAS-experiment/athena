@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 #
 # Module holding the TPyEvent Python class
 #
@@ -17,11 +17,15 @@ import ROOT
 class TPyEvent( ROOT.xAOD.TPyEvent ):
 
     ## Constructor for the class
-    def __init__( self ):
+    def __init__( self, mode = ROOT.xAOD.TEvent.kClassAccess ):
 
         # Forward the call to the base class's constructor:
-        ROOT.xAOD.TPyEvent.__init__( self )
+        ROOT.xAOD.TPyEvent.__init__( self, mode )
         return
+
+    ## Convenient shorthand for retrieving an object.
+    def __getitem__( self, key ):
+        return self.pyRetrieve( key )
 
     ## Convenient version of the base class's contains function
     #
@@ -29,7 +33,7 @@ class TPyEvent( ROOT.xAOD.TPyEvent ):
     # type name of some C++ type, to rather write code like:
     #
     # <code>
-    #   if event.contains( "Electrons", ROOT.xAOD.ElectronContainer_v1 ):
+    #   if event.contains( "Electrons", ROOT.xAOD.ElectronContainer ):
     # </code>
     #
     # @param key  The string key of the object to check for
@@ -44,7 +48,7 @@ class TPyEvent( ROOT.xAOD.TPyEvent ):
             clname = type.__cpp_name__
             pass
         # Call the parent class's function:
-        return super( TPyEvent, self ).contains( key, clname )
+        return super( TPyEvent, self ).pyContains( key, clname )
 
     ## Convenient version of the base class's transientContains function
     #
@@ -53,7 +57,7 @@ class TPyEvent( ROOT.xAOD.TPyEvent ):
     #
     # <code>
     #   if event.transientContains( "MyElectrons",<br/>
-    #                               ROOT.xAOD.ElectronContainer_v1 ):
+    #                               ROOT.xAOD.ElectronContainer ):
     # </code>
     #
     # @param key  The string key of the object to check for
@@ -69,7 +73,7 @@ class TPyEvent( ROOT.xAOD.TPyEvent ):
             pass
         # Call the parent class's function:
         return super( TPyEvent,
-                      self ).transientContains( key, clname )
+                      self ).pyTransientContains( key, clname )
 
     ## Convenient version of the base class's record function
     #
@@ -77,23 +81,20 @@ class TPyEvent( ROOT.xAOD.TPyEvent ):
     # record objects into an output file like:
     #
     # <code>
-    #   el = ROOT.xAOD.ElectronContainer_v1()
+    #   el = ROOT.xAOD.ElectronContainer()
     #   event.record( el, "MyElectrons" )
     # </code>
     #
     # @param obj The object to be recorded into the output file
     # @param key The key (branch name) for the object
-    # @param basketSize The (optional) size of the basket for the output branch
-    # @param splitLevel The (optional) split level for the output branch
     # @returns <code>StatusCode::SUCCESS</code> if all was successful,
     #          or <code>StatusCode::FAILURE</code> if not
     #
-    def record( self, obj, key, basketSize = 32000, splitLevel = 0 ):
+    def record( self, obj, key ):
         # Determine the class name:
         clname = obj.__class__.__name__
         if hasattr( obj.__class__, "__cpp_name__" ):
             clname = obj.__class__.__cpp_name__
             pass
         # Call the parent class's function:
-        return super( TPyEvent, self ).record( 0, obj, key, clname, basketSize,
-                                               splitLevel )
+        return super( TPyEvent, self ).pyRecord( obj, key, clname )

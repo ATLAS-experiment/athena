@@ -20,12 +20,8 @@ class TFile;
 class TClass;
 
 
-#if ROOT_VERSION_CODE >= ROOT_VERSION( 6, 35, 0 )
-   namespace ROOT { class RNTupleReader; }
-#else
-   namespace ROOT::Experimental { class RNTupleReader; }
-   namespace ROOT { using RNTupleReader = ROOT::Experimental::RNTupleReader; }
-#endif
+// Forward declarations
+namespace ROOT { class RNTupleReader; }
 
 namespace RootAuxDynIO
 {

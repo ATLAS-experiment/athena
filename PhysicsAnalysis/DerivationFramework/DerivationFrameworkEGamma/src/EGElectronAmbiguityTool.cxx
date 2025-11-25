@@ -1,12 +1,6 @@
 /*
-   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
-
-///////////////////////////////////////////////////////////////////
-// EGElectronAmbiguityTool.cxx, (c) ATLAS Detector software
-///////////////////////////////////////////////////////////////////
-//
-//
 
 #include "DerivationFrameworkEGamma/EGElectronAmbiguityTool.h"
 
@@ -49,39 +43,6 @@ helix(const xAOD::TrackParticle* trkP,
 
 namespace DerivationFramework {
 
-EGElectronAmbiguityTool::EGElectronAmbiguityTool(const std::string& t,
-                                                 const std::string& n,
-                                                 const IInterface* p)
-  : base_class(t, n, p)
-{
-
-  declareProperty("isMC", m_isMC);
-
-  declareProperty(
-    "pTCut", m_elepTCut = 9e3, "minimum pT for an electron to be studied");
-  declareProperty("idCut",
-                  m_idCut = "DFCommonElectronsLHLoose",
-                  "minimal quality for an electron to be studied");
-
-  declareProperty(
-    "nSiCut", m_nSiCut = 7, "minimum number of Si hits in the other track");
-  declareProperty(
-    "dzsinTCut", m_dzCut = 0.5, "max dz sinTheta between ele and other tracks");
-  declareProperty("SeparationCut", m_sepCut = 1., "first separation cut");
-  declareProperty("DCTCut", m_dctCut = 0.02, "second separation cut");
-
-  declareProperty("radiusCut",
-                  m_rvECCut = 20,
-                  "minimum radius to be classified as external conversion");
-  declareProperty(
-    "meeAtVtxCut",
-    m_meeAtVtxECCut = 100,
-    "maximal mass at vertex to be classified as external conversion");
-  declareProperty("meeCut",
-                  m_meeICCut = 100,
-                  "maximal mass at primary vertex to be classified as gamma*");
-}
-
 StatusCode
 EGElectronAmbiguityTool::initialize()
 {
@@ -90,17 +51,6 @@ EGElectronAmbiguityTool::initialize()
   ATH_CHECK(m_VtxContainerName.initialize());
   ATH_CHECK(m_tpContainerName.initialize());
   ATH_CHECK(m_tpCName.initialize());
-
-  const std::string baseName = m_containerName.key();
-  m_drv = baseName + ".DFCommonSimpleConvRadius";
-  m_dphiv = baseName + ".DFCommonSimpleConvPhi";
-  m_dmee = baseName + ".DFCommonSimpleMee";
-  m_dmeeVtx = baseName + ".DFCommonSimpleMeeAtVtx";
-  m_dsep = baseName + ".DFCommonSimpleSeparation";
-  m_dambi = baseName + ".DFCommonAddAmbiguity";
-  m_dtrv = baseName + ".DFCommonProdTrueRadius";
-  m_dtpv = baseName + ".DFCommonProdTruePhi";
-  m_dtzv = baseName + ".DFCommonProdTrueZ";
 
   ATH_CHECK(m_drv.initialize());
   ATH_CHECK(m_dphiv.initialize());
@@ -130,9 +80,8 @@ EGElectronAmbiguityTool::DecorHandles::DecorHandles
 }
 
 StatusCode
-EGElectronAmbiguityTool::addBranches() const
+EGElectronAmbiguityTool::addBranches(const EventContext& ctx) const
 {
-  const EventContext& ctx = Gaudi::Hive::currentContext();
 
   DecorHandles dh (*this, ctx);
 

@@ -107,7 +107,7 @@ evgenLog.debug("****************** CONFIGURING EVENT GENERATION ****************
 ## Functions for operating on generator names
 ## NOTE: evgenConfig, topSeq, svcMgr, theApp, etc. should NOT be explicitly re-imported in JOs
 from EvgenJobTransforms.EvgenConfig import evgenConfig
-from GeneratorConfig.GenConfigHelpers import gens_known, gen_lhef, gens_lhef, gen_sortkey, gens_testhepmc, gens_notune, gen_require_steering
+from GeneratorConfig.GenConfigHelpers import gens_known, gen_lhef, gens_lhef, gen_sortkey, gens_testhepmc, gens_notune, gen_require_steering, gens_purgenoendvtx
 
 ## Fix non-standard event features
 from EvgenProdTools.EvgenProdToolsConf import FixHepMC
@@ -145,7 +145,7 @@ theApp.EvtMax = -1
 if not hasattr(postSeq, "CountHepMC"):
     postSeq += CountHepMC(InputEventInfo="TMPEvtInfo",
                           OutputEventInfo="EventInfo",
-                          mcEventWeightsKey="TMPEvtInfo.mcEventWeights")
+                          mcEventWeightsKey="mcEventWeights")
 #postSeq.CountHepMC.RequestedOutput = evgenConfig.nEventsPerJob if runArgs.maxEvents == -1 else runArgs.maxEvents
 
 postSeq.CountHepMC.FirstEvent = runArgs.firstEvent
@@ -514,7 +514,13 @@ else:
    include("EvgenJobTransforms/Generate_dsid_ranseed.py")
 
 ## Purge unstable particle w/o end vertex occasionally produced by Hijing or Herwig
-if 'Hijing' in evgenConfig.generators or 'Herwig7' in evgenConfig.generators:
+generatorsList = evgenConfig.generators.copy()
+if hasattr(genSeq, "Pythia8"):
+    if (hasattr(genSeq.Pythia8, "Beam1") and genSeq.Pythia8.Beam1 != "PROTON" ) or \
+       (hasattr(genSeq.Pythia8, "Beam2") and genSeq.Pythia8.Beam2 != "PROTON" ):
+        # generator name is still "Pythia8", even when colliding nuclei
+        generatorsList.append("Pythia8-Angantyr")
+if gens_purgenoendvtx(generatorsList):
     fixSeq.FixHepMC.PurgeUnstableWithoutEndVtx = True
 
 ## Skip the semi-disconnected particles correction when running Sherpa with HEPMC_TREE_LIKE: 1
@@ -743,6 +749,10 @@ if eventsFile or datFile:
     if datFile:
       if ".tar" in os.path.basename(runArgs.inputGeneratorFile):
         inputroot = os.path.basename(runArgs.inputGeneratorFile).split(".tar.")[0]
+      elif ".tgz" in os.path.basename(runArgs.inputGeneratorFile):
+        inputroot = os.path.basename(runArgs.inputGeneratorFile).split(".tgz")[0]
+      elif ".gz" in os.path.basename(runArgs.inputGeneratorFile):
+        inputroot = os.path.basename(runArgs.inputGeneratorFile).split(".gz")[0]
       else:  
         inputroot = os.path.basename(runArgs.inputGeneratorFile).split("._")[0]
 
@@ -756,6 +766,10 @@ if eventsFile or datFile:
         if(numberOfFiles<2):
            if ".tar" in os.path.basename(runArgs.inputGeneratorFile):
              inputroot = os.path.basename(runArgs.inputGeneratorFile).split(".tar.")[0]
+           elif ".tgz" in os.path.basename(runArgs.inputGeneratorFile):
+             inputroot = os.path.basename(runArgs.inputGeneratorFile).split(".tgz")[0]
+           elif ".gz" in os.path.basename(runArgs.inputGeneratorFile):
+             inputroot = os.path.basename(runArgs.inputGeneratorFile).split(".gz")[0]
            else:  
              inputroot = os.path.basename(runArgs.inputGeneratorFile).split("._")[0]
 
@@ -770,6 +784,10 @@ if eventsFile or datFile:
 #             to make it unique
               if ".tar" in os.path.basename(runArgs.inputGeneratorFile):
                 inputroot = os.path.basename(runArgs.inputGeneratorFile).split(".tar.")[0]
+              elif ".tgz" in os.path.basename(runArgs.inputGeneratorFile):
+                inputroot = os.path.basename(runArgs.inputGeneratorFile).split(".tgz")[0]
+              elif ".gz" in os.path.basename(runArgs.inputGeneratorFile):
+                inputroot = os.path.basename(runArgs.inputGeneratorFile).split(".gz")[0]
               else:  
                 input0 = os.path.basename(file).split("._")[0]
                 input1 = (os.path.basename(file).split("._")[1]).split(".")[0]

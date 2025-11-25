@@ -9,11 +9,12 @@ find_package( GTest )
 find_package( APTypes )
 
 atlas_add_component (GlobalSimulation
-   src/*.h src/*.cxx src/L1TopoAlgs/*.h src/L1TopoAlgs/*.cxx
-   src/GlobalAlgs/*.h src/GlobalAlgs/*.cxx
-   src/GlobalAlgs/BDT/*.h src/GlobalAlgs/Egamma1BDT/*.cpp 
-   src/GlobalAlgs/Hypothesis/UCL/*.h src/GlobalAlgs/Hypothesis/UCL/*.cxx 
-   src/GlobalAlgs/FirstChain/*.h src/GlobalAlgs/FirstChain/*.cxx 
+   src/*.h src/*.cxx  
+   # src/GlobalAlgs/*.h src/GlobalAlgs/*.cxx FIXME
+   src/Utilities/*.cxx
+   src/GlobalSimComponents/*.h src/GlobalSimComponents/*.cxx
+   src/FirstChain/BDT/*.h src/FirstChain/Egamma1BDT/*.cpp
+   src/FirstChain/*.h src/FirstChain/*.cxx 
    src/IO/*.h src/IO/*.cxx
    src/components/*.cxx
    INCLUDE_DIRS ${APTYPES_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS}
@@ -33,7 +34,8 @@ atlas_add_component (GlobalSimulation
 
 # Install files from the package:
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
-atlas_install_runtime(share/*.txt)
+atlas_install_runtime(share/*.txt share/*.json)
+atlas_install_data( data/* )
 
 atlas_add_test(ap_fixed
                SOURCES src/NumericTypes/Tests/all_tests.cxx
@@ -44,30 +46,24 @@ atlas_add_test(ap_fixed
    )
 
 atlas_add_test(testEgamma1BDT_tv
-               SOURCES src/GlobalAlgs/TestEgamma1/all_tests.cxx
-	       src/GlobalAlgs/TestEgamma1/egamma1BDT_Test.cxx
-	       src/GlobalAlgs/Egamma1BDT/*.cpp
+               SOURCES src/FirstChain/Egamma1BDT/TestEgamma1/all_tests.cxx
+	       src/FirstChain/TestEgamma1/egamma1BDT_Test.cxx
+	       src/FirstChain/Egamma1BDT/*.cpp
                INCLUDE_DIRS ${APTYPES_INCLUDE_DIRS} ${GTEST_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS}
                LINK_LIBRARIES ${APTYPES_LIBRARIES} ${GTEST_LIBRARIES} ${ROOT_LIBRARIES} CxxUtils
 	       		      PathResolver
 	       POST_EXEC_SCRIPT nopost.sh
    )
 
-atlas_add_test( testGlobalL1TopoSim
-   SCRIPT python/GlobalL1TopoSimulation_ctest.py --evtMax 3
-   PRIVATE_WORKING_DIRECTORY
-   POST_EXEC_SCRIPT noerror.sh )
-   
 
 atlas_add_test( testEfex
    SCRIPT python/run_Egamma1_LArStrip_Fex.py --evtMax 3
    PRIVATE_WORKING_DIRECTORY
    POST_EXEC_SCRIPT noerror.sh )
 
-   
 
-atlas_add_test( test_eEmSortSelectCount
-   SCRIPT python/run_hypo_container_ctest.py --evtMax 2
+atlas_add_test(test_eEmMult
+   SCRIPT python/run_hypo_mult_ctest.py --evtMax 1
    PRIVATE_WORKING_DIRECTORY
    POST_EXEC_SCRIPT noerror.sh )
 

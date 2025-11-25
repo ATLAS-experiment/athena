@@ -10,9 +10,13 @@
 
 
 #include "CaloIdentifier/LArHEC_Base_ID.h"
+#include "CaloIdentifier/LArID_Exception.h"
+#include "IdDict/IdDictDictionary.h"
+#include "IdDict/IdDictField.h"
+#include "IdDict/IdDictMgr.h"
+#include "IdDict/IdDictRegion.h"
 #include "AtlasDetDescr/AtlasDetectorID.h"
 #include "Identifier/IdentifierHash.h"
-#include "IdDict/IdDictDefs.h"
 #include "LArHEC_region.h"
 #include "CxxUtils/StrFormat.h"
 #include "CxxUtils/trapping_fp.h"
@@ -511,7 +515,7 @@ int LArHEC_Base_ID::initLevelsFromDict (const std::string& /*group_name*/)
     return (1);
   }
 
-  IdDictField* field = dict()->find_field("subdet") ;
+  const IdDictField* field = dict()->find_field("subdet") ;
   if (field) {
     m_LAR_INDEX = field->index();
   }

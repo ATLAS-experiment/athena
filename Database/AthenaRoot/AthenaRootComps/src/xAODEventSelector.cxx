@@ -1,13 +1,13 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-// xAODEventSelector.cxx 
+// xAODEventSelector.cxx
 // Implementation file for class xAODEventSelector
 // Author: Johannes Elmsheuser, Will Buttinger
-/////////////////////////////////////////////////////////////////// 
+///////////////////////////////////////////////////////////////////
 
 // STL includes
 #include <sstream>
@@ -46,7 +46,7 @@
 #include "SGTools/StlMapClids.h"     // to make sure we have their clids
 #include "SGTools/StlVectorClids.h"  // to make sure we have their clids
 #include "SGTools/TransientAddress.h"
-#include "StoreGate/StoreGateSvc.h" 
+#include "StoreGate/StoreGateSvc.h"
 
 // EventInfo includes
 #include "EventInfo/EventInfo.h"
@@ -73,7 +73,7 @@
 
 namespace Athena {
 
-/** @class xAODEventContext 
+/** @class xAODEventContext
  *  event selector context ... just holds reference back to the selector
  */
 class xAODEventContext : public ::IEvtSelector::Context
@@ -178,7 +178,7 @@ StatusCode xAODEventSelector::initialize()
   } else {
     ATH_MSG_INFO("Selector configured to read [" << nbrInputFiles << "] file(s)...");
   }
-  
+
   ATH_MSG_DEBUG("Calling xAOD::Init...");
   int old_level = gErrorIgnoreLevel;
   gErrorIgnoreLevel = kWarning;
@@ -202,7 +202,7 @@ StatusCode xAODEventSelector::initialize()
   } else {
    m_tevent = new xAOD::xAODTEvent(); //our special class inheriting from xAOD::TEvent
   }
-  m_tevent->setPrintEventProxyWarnings(m_printEventProxyWarnings);
+  m_tevent->printProxyWarnings(m_printEventProxyWarnings);
 
   //use the first file to decide if reading metadata with POOL is ok
   if(m_readMetadataWithPool) {
@@ -234,8 +234,8 @@ StatusCode xAODEventSelector::initialize()
     const std::vector<std::string>& incol = m_inputCollectionsName.value();
     bool allGood = true;
     for (std::size_t icol = 0, imax = incol.size(); icol < imax; icol++) {
-      if (!iomgr->io_register(this, 
-                              IIoComponentMgr::IoMode::READ, 
+      if (!iomgr->io_register(this,
+                              IIoComponentMgr::IoMode::READ,
                               incol[icol]).isSuccess()) {
         ATH_MSG_FATAL("could not register [" << incol[icol] << "] for output !");
         allGood = false;
@@ -279,7 +279,7 @@ StatusCode xAODEventSelector::initialize()
 
   //ensure the xAODCnvSvc is listed in the EventPersistencySvc
   ServiceHandle<IProperty> epSvc("EventPersistencySvc",name());
-  
+
 
   std::vector<std::string> propVal;
   CHECK( Gaudi::Parsers::parse( propVal , epSvc->getProperty("CnvServices").toString() ) );
@@ -327,7 +327,7 @@ StatusCode xAODEventSelector::initialize()
   //not actually needed
   //CHECK( m_dataStore->loadEventProxies() );
 
-  
+
   //finally ensure the storegate has our proxy set in it
   //FIXME: this doesnt seem to allow multi storegates on the fly ???
   //m_dataStore->setProxyProviderSvc( &*m_ppSvc );
@@ -359,13 +359,13 @@ StatusCode xAODEventSelector::finalize()
     xAOD::PerfStats::instance().stop();
     xAOD::IOStats::instance().stats().Print();
   }
-  
+
 
   return StatusCode::SUCCESS;
 }
 
 ///////////////////////////////////////////////////////////////////
-// Const methods: 
+// Const methods:
 ///////////////////////////////////////////////////////////////////
 
 StatusCode
@@ -381,7 +381,7 @@ xAODEventSelector::next( IEvtSelector::Context& ctx ) const
     ATH_MSG_ERROR ("Could not dyn-cast to xAODEventContext !!");
     throw GaudiException("xAODEventSelector::next() - Unable to get xAODEventContext","xAODEventSelector",StatusCode::FAILURE);
   }
-  
+
 
   const TFile *file = rctx->file();
   if(file && m_nbrEvts==0) {
@@ -410,15 +410,15 @@ xAODEventSelector::next( IEvtSelector::Context& ctx ) const
 	return StatusCode::FAILURE; //this is a valid failure ... athena will interpret as 'finished looping'
       }
       if( m_tevent_entries==0) m_collIdx++;
-      
-      
+
+
    } //end of while loop
 
   }
 
 
   ATH_MSG_DEBUG("m_curEvt=" << m_curEvt);
-  
+
    //Infer the local entry (entry of current file) from the global entry
 
   int64_t global_entry = rctx->entry(); //the actual event counter
@@ -478,7 +478,7 @@ xAODEventSelector::next( IEvtSelector::Context& ctx ) const
     //           << std::endl;
     // std::cerr << "::switch to next file...\n";
 
-    // iterate over our "cached" transient addresses, 
+    // iterate over our "cached" transient addresses,
     // marking them as garbage and dropping the RootBranchAddress (as a side effect of
     // ::setAddress(NULL).
     // this way, the next time we hit ::createRootBranchAddress or ::updateAddress
@@ -508,7 +508,7 @@ xAODEventSelector::next( IEvtSelector::Context& ctx ) const
     CHECK( rctx->setFile("") );
     return next(*rctx);
   }
-  
+
   // NOT REACHED
   // std::cout << "***end of collections***" << std::endl;
   // end of collections
@@ -526,13 +526,13 @@ StatusCode xAODEventSelector::next( Context& ctx, int jump ) const
 }
 
 StatusCode
-xAODEventSelector::previous( IEvtSelector::Context& ctx ) const 
+xAODEventSelector::previous( IEvtSelector::Context& ctx ) const
 {
   return next( ctx, -1 );
 }
 
-StatusCode 
-xAODEventSelector::previous( Context& ctx, int jump ) const 
+StatusCode
+xAODEventSelector::previous( Context& ctx, int jump ) const
 {
   return next( ctx, -jump );
 }
@@ -545,8 +545,8 @@ xAODEventSelector::last( Context& /*ctxt*/ ) const
 }
 
 
-StatusCode 
-xAODEventSelector::rewind( Context& ctxt ) const 
+StatusCode
+xAODEventSelector::rewind( Context& ctxt ) const
 {
   return self()->seek(ctxt, 0);
 }
@@ -560,8 +560,8 @@ xAODEventSelector::createContext( Context*& refCtx ) const
 }
 
 StatusCode
-xAODEventSelector::createAddress( const Context& /*refCtx*/, 
-                                        IOpaqueAddress*& /*addr*/ ) const 
+xAODEventSelector::createAddress( const Context& /*refCtx*/,
+                                        IOpaqueAddress*& /*addr*/ ) const
 {
   //std::cerr << "::TTES::createAddress()...\n";
   return StatusCode::SUCCESS;
@@ -576,20 +576,20 @@ xAODEventSelector::releaseContext( Context*& refCtxt ) const
     delete ctx; ctx = 0;
     return StatusCode::SUCCESS;
   }
-  
+
   return StatusCode::FAILURE;
 }
 
 StatusCode
-xAODEventSelector::resetCriteria( const std::string&, Context& ) const 
+xAODEventSelector::resetCriteria( const std::string&, Context& ) const
 {
   ATH_MSG_ERROR ("............. resetCriteria Not Implemented .............");
   return StatusCode::FAILURE;
 }
 
-/////////////////////////////////////////////////////////////////// 
-// Non-const methods: 
-/////////////////////////////////////////////////////////////////// 
+///////////////////////////////////////////////////////////////////
+// Non-const methods:
+///////////////////////////////////////////////////////////////////
 
 /**
  * @brief Seek to a given event number.
@@ -598,13 +598,13 @@ xAODEventSelector::resetCriteria( const std::string&, Context& ) const
 StatusCode
 xAODEventSelector::seek (Context& refCtxt, int evtnum) const
 {
-  // std::cout << "::seek - evtnum=" << evtnum 
-  //           << " curevt=" << m_curEvt 
+  // std::cout << "::seek - evtnum=" << evtnum
+  //           << " curevt=" << m_curEvt
   //           << " curcol=" << m_collIdx
   //           << std::endl;
   long coll_idx = find_coll_idx(evtnum);
-  // std::cout << "::seek - evtnum=" << evtnum 
-  //           << " curevt=" << m_curEvt 
+  // std::cout << "::seek - evtnum=" << evtnum
+  //           << " curevt=" << m_curEvt
   //           << " curcol=" << m_collIdx
   //           << " colidx=" << coll_idx
   //           << std::endl;
@@ -636,15 +636,15 @@ xAODEventSelector::seek (Context& refCtxt, int evtnum) const
  * @brief return the current event number.
  * @return The current event number.
  */
-int 
+int
 xAODEventSelector::curEvent (const Context& /*refCtxt*/) const
 {
   return m_curEvt;
 }
 
-/// Callback method to reinitialize the internal state of the component 
+/// Callback method to reinitialize the internal state of the component
 /// for I/O purposes (e.g. upon @c fork(2))
-StatusCode 
+StatusCode
 xAODEventSelector::io_reinit()
 {
   ATH_MSG_VERBOSE("I/O reinitialization...");
@@ -660,10 +660,10 @@ xAODEventSelector::io_reinit()
   }
   std::vector<std::string> inputCollections = m_inputCollectionsName.value();
 
-  for (std::size_t 
-         i = 0, 
-         imax = m_inputCollectionsName.value().size(); 
-       i < imax; 
+  for (std::size_t
+         i = 0,
+         imax = m_inputCollectionsName.value().size();
+       i < imax;
        ++i) {
     std::string &fname = inputCollections[i];
     // std::cout << "--retrieve new name for [" << fname << "]...\n";
@@ -687,7 +687,7 @@ xAODEventSelector::io_reinit()
   //     ATH_MSG_ERROR("could not clear event store!");
   //     return StatusCode::FAILURE;
   //   } else {
-  //     ATH_MSG_INFO("sgdump: \n" << m_dataStore->dump()); 
+  //     ATH_MSG_INFO("sgdump: \n" << m_dataStore->dump());
   //   }
   // }
 
@@ -695,7 +695,7 @@ xAODEventSelector::io_reinit()
   if (!do_init_io().isSuccess()) {
     return StatusCode::FAILURE;
   }
-  
+
   ATH_MSG_INFO("I/O reinitialization... [done]");
   return StatusCode::SUCCESS;
 }
@@ -704,8 +704,8 @@ xAODEventSelector::io_reinit()
 ///@{
 /// @c IAddressProvider interface
 ///get all addresses from Provider : Called before Begin Event
-StatusCode 
-xAODEventSelector::preLoadAddresses(StoreID::type /*storeID*/, 
+StatusCode
+xAODEventSelector::preLoadAddresses(StoreID::type /*storeID*/,
                                           tadList& /*tads*/)
 {
   // std::cerr << "TTES::preLoadAddresses(" << int(storeID)
@@ -713,21 +713,21 @@ xAODEventSelector::preLoadAddresses(StoreID::type /*storeID*/,
   // 	    << ")...\n";
   return StatusCode::SUCCESS;
 }
- 
+
 /// get all new addresses from Provider for this Event.
-StatusCode 
+StatusCode
 xAODEventSelector::loadAddresses(StoreID::type storeID, tadList& tads)
 {
   if (m_needReload || m_rootAddresses.empty()) {
-    //CHECK(createMetaDataRootBranchAddresses()); 
+    //CHECK(createMetaDataRootBranchAddresses());
     return createRootBranchAddresses(storeID, tads);
   }
 
   return StatusCode::SUCCESS;
 }
- 
+
 /// update a transient Address
-StatusCode 
+StatusCode
 xAODEventSelector::updateAddress(StoreID::type /*storeID*/, SG::TransientAddress* tad,
                                  const EventContext& /*ctx*/)
 {
@@ -740,21 +740,21 @@ xAODEventSelector::updateAddress(StoreID::type /*storeID*/, SG::TransientAddress
     ATH_MSG_DEBUG("updateAddress: address [" << tad->clID() << "#"
 		  << tad->name() << ") NOT known to us.");
     return StatusCode::FAILURE;
-  }  
+  }
 
-  // do nothing. 
+  // do nothing.
   return StatusCode::SUCCESS;
 }
 ///@}
 
-/////////////////////////////////////////////////////////////////// 
-// Protected methods: 
-/////////////////////////////////////////////////////////////////// 
+///////////////////////////////////////////////////////////////////
+// Protected methods:
+///////////////////////////////////////////////////////////////////
 
 
 
 
-StatusCode 
+StatusCode
 xAODEventSelector::createRootBranchAddresses(StoreID::type storeID,
                                                    tadList &tads)
 {
@@ -769,7 +769,7 @@ xAODEventSelector::createRootBranchAddresses(StoreID::type storeID,
   }
 
   TTree* inputTree = dynamic_cast<TTree*>(m_tfile->Get(m_tupleName.value().c_str()));
-  
+
   if(inputTree!=0) {
 
 
@@ -801,7 +801,7 @@ xAODEventSelector::createRootBranchAddresses(StoreID::type storeID,
 	    const std::type_info *ti = cls->GetTypeInfo();
 	    if(ti) className = System::typeinfoName(*ti);
 	  }
-	  
+
 	  if( m_clidsvc->getIDOfTypeInfoName(className.Data(), id).isFailure() &&
 	      m_clidsvc->getIDOfTypeName(className.Data(), id).isFailure()) {
 	    ATH_MSG_WARNING("No CLID for class " << itr->second.className() << " , cannot read " << itr->second.branchName());
@@ -813,9 +813,9 @@ xAODEventSelector::createRootBranchAddresses(StoreID::type storeID,
       const std::string br_name = itr->second.branchName();
 
       Athena::xAODBranchAddress* addr = new Athena::xAODBranchAddress
-        (POOL_ROOTTREE_StorageType, id, 
-         m_tupleName.value(), 
-         br_name, 
+        (POOL_ROOTTREE_StorageType, id,
+         m_tupleName.value(),
+         br_name,
          (unsigned long)(value_ptr),
          (unsigned long)(0)); //IMPORTANT THIS IS 0: signals to xAODBranchAddress to read event-level info (see setTEventAddress)
       // recycle old rootaddress, if any.
@@ -823,7 +823,7 @@ xAODEventSelector::createRootBranchAddresses(StoreID::type storeID,
       // FIXME: should we only iterate over m_rootAddresses which have been marked
       //        as invalid ? (ie: iaddr->second == false)
       //        probably not worth it... (but depends on the "occupancy")
-      for (auto 
+      for (auto
              iaddr = m_rootAddresses.begin(),
              iaddre= m_rootAddresses.end();
            iaddr != iaddre;
@@ -878,12 +878,12 @@ xAODEventSelector::createRootBranchAddresses(StoreID::type storeID,
   return StatusCode::SUCCESS;
 }
 
-StatusCode 
+StatusCode
 xAODEventSelector::createMetaDataRootBranchAddresses() const
 {
 
   ATH_MSG_DEBUG("In xAODEventSelector::createMetaDataRootBranchAddresses start ...");
-  
+
   if ( 0 == m_tfile ) {
     ATH_MSG_ERROR ("Could not get m_tfile !!");
     throw "xAODEventSelector: Unable to get m_tfile";
@@ -900,13 +900,13 @@ xAODEventSelector::createMetaDataRootBranchAddresses() const
     ATH_MSG_INFO("no leaves!!");
     return StatusCode::SUCCESS;
   }
-  
+
   // loop over leaves
   for (Int_t i = 0; i < leaves->GetEntries(); ++i) {
     TLeaf *leaf = (TLeaf *)leaves->At(i);
     TBranch *branch = leaf->GetBranch();
     if (branch) {
-      
+
       CLID id = 0;
       const void* value_ptr = m_tevent;
       const std::string type_name = leaf->GetTypeName();
@@ -932,7 +932,7 @@ xAODEventSelector::createMetaDataRootBranchAddresses() const
           m_dictsvc->load_type(*ti);
         }
         if (!ti) {
-          ATH_MSG_DEBUG("could not find a type-info for [" << 
+          ATH_MSG_DEBUG("could not find a type-info for [" <<
                           type_name << "]");
           continue;
         }
@@ -949,16 +949,16 @@ xAODEventSelector::createMetaDataRootBranchAddresses() const
 
 
 	ATH_MSG_DEBUG("id = " << id << ", m_metadataName.value() = " << m_metadataName.value() << ", br_name = " << br_name << ", value_ptr = " << value_ptr);
-	Athena::xAODBranchAddress* addr = new Athena::xAODBranchAddress
-	  (POOL_ROOTTREE_StorageType, id, 
-	   m_metadataName.value(), 
-	   br_name, 
-	   (unsigned long)(value_ptr),
-	   (unsigned long)(1)); //IMPORTANT THIS IS 1: signals to BranchAddress to read metadata
-	if (!m_imetaStore->recordAddress(br_name, addr, true).isSuccess()) {
+        CxxUtils::RefCountedPtr<Athena::xAODBranchAddress> addr
+          (new Athena::xAODBranchAddress
+           (POOL_ROOTTREE_StorageType, id,
+            m_metadataName.value(),
+            br_name,
+            (unsigned long)(value_ptr),
+            (unsigned long)(1))); //IMPORTANT THIS IS 1: signals to BranchAddress to read metadata
+	if (!m_imetaStore->recordAddress(br_name, std::move(addr), true).isSuccess()) {
 	  ATH_MSG_ERROR("could not record address at [" << br_name << "] in store ["
 			<< m_imetaStore->name() << "]");
-	  delete addr; addr = 0;
 	}
 	// SG::TransientAddress* taddr = new SG::TransientAddress
 	//   (id, sg_key, addr);
@@ -968,9 +968,9 @@ xAODEventSelector::createMetaDataRootBranchAddresses() const
       }
     }
   }
-  
+
   ATH_MSG_DEBUG("In xAODEventSelector::createMetaDataRootBranchAddresses end ...");
-  
+
   return StatusCode::SUCCESS;
 }
 
@@ -1035,7 +1035,7 @@ StatusCode xAODEventSelector::setFile(const std::string& fname) {
       return StatusCode::FAILURE;
    }
 
-   
+
   if(m_readMetadataWithPool) {
       //ensure input file collection created
       ATH_MSG_DEBUG("Creating poolsvc collection for " << fname);
@@ -1062,7 +1062,7 @@ xAODEventSelector::do_init_io()
 
   // initialize some helper structures and data
   {
-    CollMetaData zero; 
+    CollMetaData zero;
     zero.min_entries = -1;
     zero.max_entries = -1;
     m_collEvts.resize(m_inputCollectionsName.value().size(), zero);
@@ -1090,7 +1090,7 @@ xAODEventSelector::do_init_io()
 /// helper method to get the collection index (into `m_inputCollectionsName`)
 /// for a given event index `evtidx`.
 /// returns -1 if not found.
-int 
+int
 xAODEventSelector::find_coll_idx(int evtidx) const
 {
   // std::cout << "--find_coll_idx(" << evtidx << ")..." << std::endl

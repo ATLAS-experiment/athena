@@ -15,8 +15,8 @@ namespace ActsTrk::detail {
                                                bool enabled)
       : m_disabled(!enabled),
 	m_measOffset(measOffset),
-        m_nUsedMeasurements(enabled ? numSeeds : 0ul, 0ul),
-        m_nSeedMeasurements(enabled ? numSeeds : 0ul, 0ul),
+        m_nUsedMeasurements(enabled ? numSeeds : 0ul, 0u),
+        m_nSeedMeasurements(enabled ? numSeeds : 0ul, 0u),
         m_isDuplicateSeed(enabled ? numSeeds : 0ul, false) {
     if (m_disabled)
       return;
@@ -43,13 +43,10 @@ namespace ActsTrk::detail {
     m_seedOffset[typeIndex] = m_numSeeds;
     m_seedIndex.resize(measurementIndex.size());  // will resize for each seed container, but always with the same space
 
-    for (const ActsTrk::Seed *seed : seeds) {
-      if (!seed)
-        continue;
-
+    for (const ActsTrk::Seed seed : seeds) {
       std::size_t nSP = 0;
-      bool useTopSp = useTopSpFun(*seed);
-      const auto& sps = seed->sp();
+      bool useTopSp = useTopSpFun(seed);
+      const auto& sps = seed.sp();
       for (std::size_t isp : spacePointIndicesFun(sps.size())) {
         const xAOD::SpacePoint *sp = sps.at(useTopSp ? sps.size() - isp - 1 : isp);
         const std::vector<const xAOD::UncalibratedMeasurement *> &els = sp->measurements();

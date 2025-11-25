@@ -143,11 +143,6 @@ def fromRunArgs(runArgs):
             ( 'InDetDD::TRT_DetElementContainer',
                   'ConditionStore+TRT_DetElementContainer' ) )
 
-    # Add PerfMon
-    if flags.PerfMon.doFastMonMT or flags.PerfMon.doFullMonMT:
-        from PerfMonComps.PerfMonCompsConfig import PerfMonMTSvcCfg
-        cfg.merge(PerfMonMTSvcCfg(flags))
-
     # Post-include
     log.info('**** Processing postInclude')
     processPostInclude(runArgs, flags, cfg)

@@ -12,6 +12,7 @@
 #include "AtlasHepMC/GenParticle.h"
 #include "AtlasHepMC/GenVertex.h"
 #include "AtlasHepMC/IO_GenEvent.h"
+#include "CLHEP/Random/RandFlat.h"
 
 #include <stdexcept>
 
@@ -188,7 +189,7 @@ void LArFastShower::DoIt(const G4FastTrack& fastTrack, G4FastStep& fastStep)
 #endif
 
   if ( m_generate_starting_points ) {
-    if ((float)rand()/static_cast<float>(RAND_MAX) <= m_configuration.m_generated_starting_points_ratio) {
+    if (CLHEP::RandFlat::shoot(G4Random::getTheEngine()) <= m_configuration.m_generated_starting_points_ratio) {
       std::unique_ptr<const HepMC::GenEvent> ge = GetGenEvent(fastTrack);
       generateFSStartingPoint(ge);
     }
@@ -385,13 +386,13 @@ std::unique_ptr<const HepMC::GenEvent> LArFastShower::GetGenEvent(const G4FastTr
   HepMC::GenParticlePtr gpi = HepMC::newGenParticlePtr(
       HepMC::FourVector(0.,0.,0.,0.),
       999, 4 );
-  gv->add_particle_in(gpi);
+  gv->add_particle_in(std::move(gpi));
 
   // output particle (status=1) is the FourVector of the shower.
   HepMC::GenParticlePtr gpo = HepMC::newGenParticlePtr(
       HepMC::FourVector(showerMom.x(), showerMom.y(), showerMom.z(), energy),
       pdgcode, 1 );
-  gv->add_particle_out(gpo);
+  gv->add_particle_out(std::move(gpo));
 
   // return auto_pointer. will be deleted automatically
   return ge;

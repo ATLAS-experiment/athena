@@ -12,7 +12,6 @@
 #include "CaloIdentifier/LArEM_SuperCell_ID.h"
 #include "AtlasDetDescr/AtlasDetectorID.h"
 #include "Identifier/IdentifierHash.h"
-#include "IdDict/IdDictDefs.h"
 #include "LArEM_region.h"
 
 #include "GaudiKernel/MsgStream.h"

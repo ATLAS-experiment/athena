@@ -18,7 +18,7 @@ namespace MuonValR4{
         return declare_dependency(m_key);
     }
     bool MmClusterVariables::fill(const EventContext& ctx){
-        const ActsGeometryContext& gctx{getGeoCtx(ctx)};
+        const ActsTrk::GeometryContext& gctx{getGeoCtx(ctx)};
 
         SG::ReadHandle inContainer{m_key, ctx};
         if (!inContainer.isPresent()) {
@@ -64,7 +64,7 @@ namespace MuonValR4{
         }
         return insert_itr.first->second; 
     }
-    void MmClusterVariables::dump(const ActsGeometryContext& gctx,
+    void MmClusterVariables::dump(const ActsTrk::GeometryContext& gctx,
                                  const xAOD::MMCluster& strip) {
         const MuonGMR4::MmReadoutElement* re = strip.readoutElement();
         const Identifier id{re->measurementId(strip.layerHash())};

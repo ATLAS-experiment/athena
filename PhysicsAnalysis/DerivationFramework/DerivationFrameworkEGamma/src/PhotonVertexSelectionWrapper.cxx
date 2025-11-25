@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "DerivationFrameworkEGamma/PhotonVertexSelectionWrapper.h"
@@ -7,16 +7,6 @@
 #include <vector>
 
 namespace DerivationFramework {
-
-PhotonVertexSelectionWrapper::PhotonVertexSelectionWrapper(const std::string& t,
-                                                           const std::string& n,
-                                                           const IInterface* p)
-  : base_class(t, n, p)
-  , m_decPrefix("")
-{
-  declareProperty(
-    "DecorationPrefix", m_decPrefix, "Prefix for the decoration name");
-}
 
 StatusCode
 PhotonVertexSelectionWrapper::initialize()
@@ -27,15 +17,6 @@ PhotonVertexSelectionWrapper::initialize()
 
   ATH_CHECK(m_photonContainer.initialize());
   ATH_CHECK(m_vertexContainer.initialize());
-
-  const std::string baseName = m_vertexContainer.key();
-  std::string prefix = "";
-  if(!m_decPrefix.empty()) prefix = m_decPrefix + "_";
-  m_vtxPt = baseName + "." + prefix + "pt";
-  m_vtxEta = baseName + "." + prefix + "eta";
-  m_vtxPhi = baseName + "." + prefix + "phi";
-  m_vtxSumPt = baseName + "." + prefix + "sumPt";
-  m_vtxSumPt2 = baseName + "." + prefix + "sumPt2";
 
   ATH_CHECK(m_vtxPt.initialize());
   ATH_CHECK(m_vtxEta.initialize());
@@ -49,10 +30,9 @@ PhotonVertexSelectionWrapper::initialize()
 }
 
 StatusCode
-PhotonVertexSelectionWrapper::addBranches() const
+PhotonVertexSelectionWrapper::addBranches(const EventContext& ctx) const
 {
   // retrieve the input containers
-  const EventContext& ctx = Gaudi::Hive::currentContext();
   SG::ReadHandle<xAOD::PhotonContainer> photons{ m_photonContainer, ctx };
   SG::ReadHandle<xAOD::VertexContainer> vertices{ m_vertexContainer, ctx };
 

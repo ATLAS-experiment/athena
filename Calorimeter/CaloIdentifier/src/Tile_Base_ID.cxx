@@ -10,7 +10,11 @@
 
 
 #include "CaloIdentifier/Tile_Base_ID.h"
-#include "IdDict/IdDictDefs.h"
+#include "IdDict/IdDictDictionary.h"
+#include "IdDict/IdDictField.h"
+#include "IdDict/IdDictGroup.h"
+#include "IdDict/IdDictMgr.h"
+#include "IdDict/IdDictRegion.h"
 #include "Identifier/IdentifierHash.h"
 #include "AtlasDetDescr/AtlasDetectorID.h"
 #include "CxxUtils/StrFormat.h"
@@ -1631,17 +1635,17 @@ int Tile_Base_ID::initLevelsFromDict (const std::string& group_name)
   m_PMT_INDEX           = 999;
   m_ADC_INDEX           = 999;
 
-  IdDictGroup* group = dict()->find_group(group_name);
+  const IdDictGroup* group = dict()->find_group(group_name);
   if ( !group ){
     log << MSG::ERROR << "initLevelsFromDict - cannot find " << group_name
         << " group' field " << endmsg;
   }
   else {
-	m_tile_region_index = group->regions()[0]->index();
+	m_tile_region_index = group->region(0).index();
   }
 
   // Fing a Tile region
-  IdDictField* field = dict()->find_field("subdet") ;
+  const IdDictField* field = dict()->find_field("subdet") ;
   if (field) {
     m_SYSTEM_INDEX = field->index();
   }

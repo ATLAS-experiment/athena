@@ -2,7 +2,6 @@
   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #include <MuonPatternHelpers/MdtSegmentSeedGenerator.h>
-#include <MuonPatternHelpers/SegmentFitHelperFunctions.h>
 #include <MuonRecToolInterfacesR4/ISpacePointCalibrator.h>
 #include <MuonSpacePoint/CalibratedSpacePoint.h>
 #include <xAODMuonPrepData/MdtDriftCircle.h>
@@ -207,7 +206,7 @@ namespace MuonR4::SegmentFit{
             patternSeed.seedHits.resize(2*m_hitLayers.mdtHits().size());
             patternSeed.solutionSigns.resize(2*m_hitLayers.mdtHits().size());
             patternSeed.y0 = m_segmentSeed->interceptY();
-            patternSeed.theta = m_segmentSeed->tanTheta();
+            patternSeed.theta = m_segmentSeed->tanBeta();
             m_seenSolutions.push_back(std::move(patternSeed));
             return found;
         }
@@ -218,7 +217,8 @@ namespace MuonR4::SegmentFit{
             ATH_MSG_VERBOSE("Layers with hits: "<<m_hitLayers.mdtHits().size()
                             <<" -- next bottom hit: "<<m_lowerLayer<<", hit: "<<m_lowerHitIndex
                             <<" ("<<lower.size()<<"), top hit " <<m_upperLayer<<", "<<m_upperHitIndex
-                            <<" ("<<upper.size()<<") - ambiguity "<<s_signCombos[m_signComboIndex]);
+                            <<" ("<<upper.size()<<") - ambiguity "
+                            <<LineSeeder_t::toString(s_signCombos[m_signComboIndex]));
 
             found = buildSeed(ctx, upper.at(m_upperHitIndex), lower.at(m_lowerHitIndex), s_signCombos.at(m_signComboIndex));
             /// Increment for the next candidate
@@ -234,8 +234,8 @@ namespace MuonR4::SegmentFit{
         Line_t::ParamVector pars{};
         pars[Acts::toUnderlying(ParamDefs::y0)] = y0;
         pars[Acts::toUnderlying(ParamDefs::x0)] = m_segmentSeed->interceptX();     
-        if (Acts::abs(m_segmentSeed->tanPhi()) > std::numeric_limits<double>::epsilon()) {
-            const Amg::Vector3D dirFromTan = Acts::makeDirectionFromAxisTangents(m_segmentSeed->tanPhi(),
+        if (Acts::abs(m_segmentSeed->tanAlpha()) > std::numeric_limits<double>::epsilon()) {
+            const Amg::Vector3D dirFromTan = Acts::makeDirectionFromAxisTangents(m_segmentSeed->tanAlpha(),
                                                                                  std::tan(theta));
             pars[Acts::toUnderlying(ParamDefs::phi)] = dirFromTan.phi();
             pars[Acts::toUnderlying(ParamDefs::theta)]  = dirFromTan.theta();
@@ -245,11 +245,31 @@ namespace MuonR4::SegmentFit{
         }
         return pars;
     }
+    bool MdtSegmentSeedGenerator::isValidLine(const TangentLine& solution) const{
+        if (solution.theta < m_cfg.thetaRange[0] || 
+            solution.theta > m_cfg.thetaRange[1]) {
+            ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<": The theta angle: "
+                <<(solution.theta / 1._degree)
+                <<" is out of the valid range ["<<(m_cfg.thetaRange[0] / 1._degree)
+                <<"-"<<(m_cfg.thetaRange[1] / 1._degree)<<"].");
+            return false;
+        }
+        if (solution.y0 < m_cfg.interceptRange[0] || 
+            solution.y0 > m_cfg.interceptRange[1]) {
+            ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<": The intercept: "
+                <<solution.y0 
+                <<" is out of the valid range ["<<m_cfg.interceptRange[0] 
+                <<"-"<<m_cfg.interceptRange[1] <<"].");
+            return false;
+        }
+        return true;
+
+    }
     std::optional<MdtSegmentSeedGenerator::DriftCircleSeed>  
         MdtSegmentSeedGenerator::buildSeed(const EventContext& ctx,
                                            const HoughHitType& topHit, 
                                            const HoughHitType& bottomHit, 
-                                           const SignComboType& signs) {
+                                           const TangentAmbi ambi) {
         
         const Muon::IMuonIdHelperSvc* idHelperSvc{topHit->msSector()->idHelperSvc()};
         if (!isGoodDC(*bottomHit) || !isGoodDC(*topHit)) {
@@ -262,9 +282,13 @@ namespace MuonR4::SegmentFit{
         ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<": Attempt to construct seed from "<<idHelperSvc->toString(bottomHit->identify())
                       <<" && top tube "<<idHelperSvc->toString(topHit->identify()));
         
-        SeedSolution solCandidate = estimateTangentLine(*topHit, *bottomHit, signs);
-        if (!solCandidate.isValid){
-            ATH_MSG_VERBOSE("Estimated solution is invalid" <<solCandidate);
+        SeedSolution solCandidate{};
+        static_cast<TangentLine&>(solCandidate) = LineSeeder_t::constructTangentLine(*topHit, *bottomHit, ambi);
+
+        Amg::Vector3D flipedDir = Amg::AngleAxis3D{solCandidate.theta, topHit->sensorDirection()} * topHit->planeNormal();
+        solCandidate.theta = flipedDir.theta();
+
+        if (!isValidLine(solCandidate)) {
             return std::nullopt;
         }
         
@@ -277,9 +301,9 @@ namespace MuonR4::SegmentFit{
             /// potential phi estimates into account
             calibBottom = m_cfg.calibrator->calibrate(ctx, bottomHit, m_line.position(), m_line.direction(), t0);
             calibTop = m_cfg.calibrator->calibrate(ctx, topHit, m_line.position(), m_line.direction(), t0);
-            solCandidate = estimateTangentLine(*calibTop, *calibBottom, signs);
-            if (!solCandidate.isValid){
-                ATH_MSG_WARNING(__func__<<"() "<<__LINE__<<": Recalibrated seed turned to be invalid");
+            static_cast<TangentLine&>(solCandidate) = LineSeeder_t::constructTangentLine(*calibTop, *calibBottom, ambi);
+            if (!isValidLine(solCandidate)) {
+                ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<": Recalibrated segment seed is invalid");
                 return std::nullopt;
             }
         }

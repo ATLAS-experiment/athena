@@ -173,22 +173,23 @@ void TrigFTF_GNN_TrackingFilter::propagate(TrigFTF_GNN_Edge* pS, TrigFTF_GNN_Edg
 
 bool TrigFTF_GNN_TrackingFilter::update(TrigFTF_GNN_Edge* pS, TrigFTF_GNN_EdgeState& ts) {
 
-  const float sigma_t = 0.0003;
-  const float sigma_w = 0.00009;
+  const float sigmaMS = 0.016; //for 900 MeV track at eta=0
+  const float radLen  = 0.025; // 2.5% per layer
 
-  const float sigmaMS = 0.016;
-
-  const float sigma_x = 0.25;//was 0.22
-  const float sigma_y = 2.5;//was 1.7
-
+  const float sigma_x = 0.08;
+  const float sigma_y = 0.25;
+  
   const float weight_x = 0.5;
   const float weight_y = 0.5;
 
-  const float maxDChi2_x = 60.0;//35.0;
-  const float maxDChi2_y = 60.0;//31.0;
+  const float maxDChi2_x = 5.0;
+  const float maxDChi2_y = 6.0;
 
   const float add_hit = 14.0;
 
+  const float max_curvature = 1e-3f;
+  const float max_z0  = 170.0;
+  
   if(ts.m_Cx[2][2] < 0.0 || ts.m_Cx[1][1] < 0.0 || ts.m_Cx[0][0] < 0.0) {
     std::cout<<"Negative cov_x"<<std::endl;
   }
@@ -199,18 +200,22 @@ bool TrigFTF_GNN_TrackingFilter::update(TrigFTF_GNN_Edge* pS, TrigFTF_GNN_EdgeSt
 
   //add ms.
 
-  ts.m_Cx[2][2] += sigma_w*sigma_w;
-  ts.m_Cx[1][1] += sigma_t*sigma_t;
+  float tau2 = ts.m_Y[1]*ts.m_Y[1];
+  float invSin2 = 1 + tau2;
+  
+  int type1 = getLayerType(pS->m_n2->layer());//0 - barrel
 
-  int type1 = getLayerType(pS->m_n2->layer());
+  float lenCorr = type1 == 0 ? invSin2 : invSin2/tau2;
+  
+  float minPtFrac = std::abs(ts.m_X[2]) / max_curvature;
 
-  float t2 = type1 == 0 ? 1.0 + ts.m_Y[1]*ts.m_Y[1] : 1.0 + 1.0/(ts.m_Y[1]*ts.m_Y[1]); 
-  float s1 = sigmaMS*t2;
-  float s2 = s1*s1;
+  float corrMS = sigmaMS*minPtFrac;
 
-  s2 *= std::sqrt(t2);
-
-  ts.m_Cy[1][1] += s2;  
+  float sigma2 = radLen*lenCorr*corrMS*corrMS;// /invSin2;
+  
+  ts.m_Cx[1][1] += sigma2;
+  
+  ts.m_Cy[1][1] += sigma2;
 
   //extrapolation
 
@@ -296,8 +301,15 @@ bool TrigFTF_GNN_TrackingFilter::update(TrigFTF_GNN_Edge* pS, TrigFTF_GNN_EdgeSt
   float Ky[2] = {Dy*Cy[0][0], Dy*Cy[0][1]};
   
   for(int i=0;i<3;i++) ts.m_X[i] = X[i] + Kx[i]*resid_x;
+
+  if(std::abs(ts.m_X[2]) > max_curvature) return false;
+  
   for(int i=0;i<2;i++) ts.m_Y[i] = Y[i] + Ky[i]*resid_y;
 
+  float z0 = ts.m_Y[0] - refY*ts.m_Y[1];
+
+  if(std::abs(z0) > max_z0) return false;
+  
   for(int i=0;i<3;i++) {
     for(int j=0;j<3;j++) {
       ts.m_Cx[i][j] = Cx[i][j] - Kx[i]*CHx[j];

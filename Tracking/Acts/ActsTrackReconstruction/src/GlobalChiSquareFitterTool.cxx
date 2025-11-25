@@ -33,7 +33,7 @@
 // PACKAGE
 #include "ActsGeometry/ATLASMagneticFieldWrapper.h"
 #include "ActsGeometry/ATLASSourceLink.h"
-#include "ActsGeometryInterfaces/ActsGeometryContext.h"
+#include "ActsGeometryInterfaces/GeometryContext.h"
 #include "ActsInterop/Logger.h"
 
 #include "ActsCalibBase/CalibrationContext.h"
@@ -54,7 +54,7 @@ StatusCode GlobalChiSquareFitterTool::initialize() {
   m_logger = makeActsAthenaLogger(this, "Gx2fRefit");
   if (!m_doStraightLine){
       // Fitter
-      Acts::SympyStepper stepper{std::make_shared<ATLASMagneticFieldWrapper>()};
+      CurvedPropagator_t::Stepper stepper{std::make_shared<ATLASMagneticFieldWrapper>()};
       Acts::Navigator::Config navConfig{m_trackingGeometryTool->trackingGeometry()};
       Acts::Navigator navigator(std::move(navConfig), logger().cloneWithSuffix("Navigator"));
       CurvedPropagator_t propagator{stepper, std::move(navigator), logger().cloneWithSuffix("Prop")};
@@ -140,7 +140,9 @@ GlobalChiSquareFitterTool::Gx2FitterOptions_t
                               m_gx2fExtensions[static_cast<int>(slType)], 
                               std::move(propagationOption),
                               surface, m_option_includeScat, 
-                              m_option_includeELoss};
+                              m_option_includeELoss,
+                              Acts::FreeToBoundCorrection{m_doJacobianCorr},
+                              m_nIterMax};                           
 }
 
 // refit a track

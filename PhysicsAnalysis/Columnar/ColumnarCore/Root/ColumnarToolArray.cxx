@@ -11,6 +11,7 @@
 #include <ColumnarCore/ColumnarTool.h>
 
 #include <ColumnarCore/ColumnAccessorDataArray.h>
+#include <ColumnarCore/ColumnInfoHelpers.h>
 #include <ColumnarCore/ColumnarToolDataArray.h>
 #include <ColumnarInterfaces/ColumnInfo.h>
 
@@ -27,15 +28,15 @@ namespace columnar
     m_data->mainTool = this;
     m_data->sharedTools.push_back (this);
 
-    setContainerStoreName (ContainerId::eventContext::idName, numberOfEventsName);
+    setContainerUserName (ContainerId::eventContext::idName, numberOfEventsName);
 
     // this name matches the ContainerId::eventInfo::idName, make sure
     // to keep them in sync. the reason for hard-coding this in two
     // places is because ContainerId::eventInfo is defined in a separate
     // package
-    setContainerStoreName ("eventInfo", numberOfEventsName);
+    setContainerUserName ("eventInfo", numberOfEventsName);
     m_eventsData = std::make_unique<ColumnAccessorDataArray> (&m_eventsIndex, &m_eventsData, &typeid (ColumnarOffsetType), ColumnAccessMode::input);
-    addColumn (numberOfEventsName, m_eventsData.get(), {.isOffset = true});
+    addColumn (std::string (ContainerId::eventContext::idName), m_eventsData.get(), {.isOffset = true});
   }
 
   ColumnarTool<ColumnarModeArray> ::
@@ -71,11 +72,21 @@ namespace columnar
     if (subtoolData->mainTool != &subtool)
       throw std::runtime_error ("subtool already has a different parent tool");
 
-    for (auto& containerName : subtoolData->containerStoreNames)
+    for (auto& containerName : subtoolData->containerInternalToUserNames)
     {
-      auto [iter,success] = m_data->containerStoreNames.emplace (containerName.first, containerName.second);
+      auto [iter,success] = m_data->containerInternalToUserNames.emplace (containerName.first, containerName.second);
       if (!success && iter->second != containerName.second)
         throw std::runtime_error ("container assigned different name in subtool: " + iter->second + " vs " + containerName.second);
+      if (success)
+        m_data->containerUserToInternalNames[containerName.second].push_back (containerName.first);
+    }
+    for (auto& columnName : subtoolData->columnInternalToUserNames)
+    {
+      auto [iter,success] = m_data->columnInternalToUserNames.emplace (columnName.first, columnName.second);
+      if (!success && iter->second != columnName.second)
+        throw std::runtime_error ("column assigned different name in subtool: " + iter->second + " vs " + columnName.second);
+      if (success)
+        m_data->columnUserToInternalNames[columnName.second].push_back (columnName.first);
     }
 
     for (auto& column : subtoolData->columns)
@@ -89,6 +100,8 @@ namespace columnar
     for (auto& tool : subtoolData->sharedTools)
       tool->m_data = m_data;
   }
+
+
 
   StatusCode ColumnarTool<ColumnarModeArray> ::
   initializeColumns ()
@@ -110,22 +123,31 @@ namespace columnar
   std::vector<ColumnInfo> ColumnarTool<ColumnarModeArray> ::
   getColumnInfo () const
   {
-    std::vector<std::string> names;
+    std::vector<std::pair<std::string,std::string>> names;
     names.reserve (m_data->columns.size());
     for (auto& [name, column] : m_data->columns)
     {
       if (!column.empty())
-        names.push_back (name);
+        names.emplace_back (name, m_data->convertInternalToUserName (name));
     }
-    std::sort (names.begin(), names.end());
+    std::sort (names.begin(), names.end(), [] (const auto& a, const auto& b) { return a.second < b.second; });
 
     std::vector<ColumnInfo> result;
     result.reserve (names.size());
     for (auto& name : names)
     {
-      auto& column = m_data->columns.at (name);
-      result.push_back (column.info());
-      result.back().name = name;
+      auto& column = m_data->columns.at (name.first);
+      auto info = column.info();
+      info.name = name.second;
+      info.offsetName = m_data->convertInternalToUserName (info.offsetName);
+      info.replacesColumn = m_data->convertInternalToUserName (info.replacesColumn);
+      for (auto& targetName : info.linkTargetNames)
+        targetName = m_data->convertInternalToUserName (targetName);
+      info.variantLinkKeyColumn = m_data->convertInternalToUserName (info.variantLinkKeyColumn);
+      if (result.empty() || result.back().name != info.name)
+        result.push_back (std::move(info));
+      else
+        mergeColumnInfo (result.back(), info);
     }
     return result;
   }
@@ -135,29 +157,21 @@ namespace columnar
   void ColumnarTool<ColumnarModeArray> ::
   renameColumn (const std::string& from, const std::string& to)
   {
-    // Note: This is not the most efficient way to do this, if you want
-    // to rename all columns it is at O(n^2).  However, since n is
-    // supposed to be small this shouldn't be a problem.  Should this
-    // become a problem I'd have to introduce back-references to
-    // offset-columns, etc.  However, that also introduces a fair bit of
-    // complexity, so I'm not doing it unless I have to.
-
-    auto from_iter = m_data->columns.find (from);
-    if (from_iter == m_data->columns.end())
-      throw std::runtime_error ("column to rename from not found: " + from);
-    auto to_iter = m_data->columns.find (to);
-    if (to_iter != m_data->columns.end())
+    if (auto iter = m_data->columnUserToInternalNames.find (from);
+        iter != m_data->columnUserToInternalNames.end())
     {
-      to_iter->second.mergeData (to, std::move (from_iter->second));
-      m_data->columns.erase (from_iter);
-    } else
-    {
-      auto node = m_data->columns.extract (from_iter);
-      node.key() = to;
-      m_data->columns.insert (std::move (node));
+      for (auto& internalName : iter->second)
+        m_data->columnInternalToUserNames[internalName] = to;
+      auto internalNames = iter->second;
+      m_data->columnUserToInternalNames.erase (iter);
+      m_data->columnUserToInternalNames[to].insert (m_data->columnUserToInternalNames[to].end(), internalNames.begin(), internalNames.end());
+      return;
     }
-    for (auto& column : m_data->columns)
-      column.second.updateColumnRef (from, to);
+
+    auto internalNames = m_data->convertUserToInternalNames (from);
+    m_data->columnUserToInternalNames[to].insert (m_data->columnUserToInternalNames[to].end(), internalNames.begin(), internalNames.end());
+    for (auto& internalName : internalNames)
+      m_data->columnInternalToUserNames[internalName] = to;
   }
 
 
@@ -165,9 +179,19 @@ namespace columnar
   void ColumnarTool<ColumnarModeArray> ::
   setColumnIndex (const std::string& name, std::size_t index)
   {
-    if (auto column = m_data->columns.find (name);
-        column != m_data->columns.end())
-      column->second.setIndex (index);
+    auto internalNames = m_data->convertUserToInternalNames (name);
+    bool wasSet = false;
+    for (auto& internalName : internalNames)
+    {
+      if (auto column = m_data->columns.find (internalName);
+          column != m_data->columns.end())
+      {
+        column->second.setIndex (index);
+        wasSet = true;
+      }
+    }
+    if (!wasSet)
+      throw std::runtime_error ("column not found: " + name);
   }
 
 
@@ -180,23 +204,13 @@ namespace columnar
 
 
 
-  const std::string& ColumnarTool<ColumnarModeArray> ::
-  containerStoreName (std::string_view ciName) const
-  {
-    auto iter = m_data->containerStoreNames.find (ciName);
-    if (iter == m_data->containerStoreNames.end())
-      throw std::runtime_error ("container id not registered, make sure to register object handle first: " + std::string (ciName));
-    return iter->second;
-  }
-
-
-
   void ColumnarTool<ColumnarModeArray> ::
-  setContainerStoreName (std::string_view container, const std::string& name)
+  setContainerUserName (std::string_view container, const std::string& name)
   {
-    auto [iter, success] = m_data->containerStoreNames.emplace (container, name);
+    auto [iter, success] = m_data->containerInternalToUserNames.emplace (container, name);
     if (!success && iter->second != name)
       throw std::runtime_error ("container already registered with different name: " + name + " vs " + iter->second);
+    m_data->containerUserToInternalNames[name].emplace_back (container);
   }
 
 
@@ -303,6 +317,7 @@ namespace columnar
   void ColumnDataArray ::
   mergeData (const std::string& name, ColumnDataArray&& other)
   {
+    mergeColumnInfo (m_info, other.m_info);
     addAccessor (name, other.m_info, nullptr);
     m_accessors.insert (m_accessors.end(), other.m_accessors.begin(), other.m_accessors.end());
     for (auto *ptr : other.m_accessors)
@@ -313,29 +328,53 @@ namespace columnar
 
 
   void ColumnDataArray ::
-  updateColumnRef (const std::string& from, const std::string& to)
-  {
-    auto remapName = [&] (std::string& name)
-    {
-      if (name == from)
-        name = to;
-    };
-
-    remapName (m_info.name);
-    remapName (m_info.offsetName);
-    remapName (m_info.replacesColumn);
-    for (auto& linkTargetName : m_info.linkTargetNames)
-      remapName (linkTargetName);
-    remapName (m_info.variantLinkKeyColumn);
-  }
-
-
-
-  void ColumnDataArray ::
   setIndex (unsigned index) noexcept
   {
     m_info.index = index;
     for (auto *ptr : m_accessors)
       *ptr->dataIndexPtr = index;
+  }
+
+
+
+  std::string ColumnarToolDataArray ::
+  convertInternalToUserName (std::string_view name) const
+  {
+    if (name.empty())
+      return std::string{};
+    if (auto iter = columnInternalToUserNames.find (name);
+        iter != columnInternalToUserNames.end())
+      return iter->second;
+    auto split = name.find ('.');
+    if (split == std::string::npos)
+      split = name.size();
+    auto containerName = name.substr (0, split);
+    auto iter = containerInternalToUserNames.find (containerName);
+    if (iter == containerInternalToUserNames.end())
+      return std::string (name);
+    return iter->second + std::string (name.substr (split));
+  }
+
+
+
+  std::vector<std::string> ColumnarToolDataArray ::
+  convertUserToInternalNames (std::string_view name) const
+  {
+    if (auto iter = columnUserToInternalNames.find (name);
+        iter != columnUserToInternalNames.end())
+      return iter->second;
+    auto split = name.find ('.');
+    if (split == std::string::npos)
+      split = name.size();
+    auto containerName = name.substr (0, split);
+    auto iter = containerUserToInternalNames.find (containerName);
+    if (iter == containerUserToInternalNames.end())
+      return {std::string (name)};
+    std::vector<std::string> result;
+    for (auto& internalContainerName : iter->second)
+      result.push_back (internalContainerName + std::string (name.substr (split)));
+    if (result.empty())
+      result.push_back (std::string (name));
+    return result;
   }
 }

@@ -1,11 +1,12 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ACTSTRKEVENT_TRACKCONTAINER_H
 #define ACTSTRKEVENT_TRACKCONTAINER_H 1
 
 #include "AthLinks/tools/DefaultIndexingPolicy.h"
+#include "GeoPrimitives/GeoPrimitives.h"
 #include "Acts/EventData/TrackContainer.hpp"
 #include "Acts/EventData/VectorTrackContainer.hpp"
 #include "Acts/EventData/VectorMultiTrajectory.hpp"
@@ -29,6 +30,7 @@ namespace ActsTrk {
   class TrackContainer
     : public TrackContainerBase {
   public:
+    //coverity[pass_by_value]
     using TrackContainerBase::TrackContainerBase;
     using value_type = typename TrackContainerBase::ConstTrackProxy;
     

@@ -1,10 +1,10 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigCompositeUtils/TrigCompositeUtils.h"
 #include "TrigCompositeUtils/NavGraph.h"
-#include "CxxUtils/sgkey_t.h"
+#include "SGCore/sgkey_t.h"
 
 #ifndef XAOD_STANDALONE // Athena or AthAnalysis
 #include "AthenaKernel/CLIDRegistry.h"
@@ -61,7 +61,7 @@ namespace TrigCompositeUtils {
     m_keepFlag = false;
   }
 
- 
+
   bool NavGraphNode::getKeep() const {
     return m_keepFlag;
   }
@@ -185,8 +185,8 @@ namespace TrigCompositeUtils {
       Decision::index_type index;
       node->typelessGetObjectLink(featureString(), key, clid, index);
 #ifndef XAOD_STANDALONE // Athena or AthAnalysis
-      ss << " Feature(#" << index << ", " << CLIDRegistry::CLIDToTypeinfo(clid)->name() << ", " << key << ")"; 
-#else 
+      ss << " Feature(#" << index << ", " << CLIDRegistry::CLIDToTypeinfo(clid)->name() << ", " << key << ")";
+#else
       ss << " Feature(#" << index << ", " << key << ")";
 #endif
     }
@@ -200,4 +200,3 @@ namespace TrigCompositeUtils {
   }
 
 }
-

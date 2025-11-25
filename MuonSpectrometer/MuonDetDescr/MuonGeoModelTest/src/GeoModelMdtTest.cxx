@@ -176,12 +176,7 @@ StatusCode GeoModelMdtTest::dumpToTree(const EventContext& ctx, const MdtReadout
     }
 
     const MuonMDT_CablingMap* cabling{nullptr};
-    if (!m_cablingKey.empty()){
-         SG::ReadCondHandle<MuonMDT_CablingMap> cablingHandle{m_cablingKey, ctx};
-         ATH_CHECK(cablingHandle.isValid());
-         cabling = cablingHandle.cptr();
-    }
-
+    ATH_CHECK(SG::get(cabling, m_cablingKey, ctx));
     m_readoutTransform = readoutEle->getMaterialGeom()->getAbsoluteTransform();
     
     const MdtIdHelper& id_helper{m_idHelperSvc->mdtIdHelper()};

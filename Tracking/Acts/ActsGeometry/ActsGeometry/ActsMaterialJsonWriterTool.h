@@ -13,11 +13,11 @@
 #include "Gaudi/Property.h"  /*no forward decl: typedef*/
 
 // PACKAGE
-#include "ActsGeometryInterfaces/ActsGeometryContext.h"
+#include "ActsGeometryInterfaces/GeometryContext.h"
 #include "ActsGeometryInterfaces/IActsMaterialJsonWriterTool.h"
 
 // ACTS
-#include "Acts/Plugins/Json/MaterialMapJsonConverter.hpp"
+#include "ActsPlugins/Json/MaterialMapJsonConverter.hpp"
 
 namespace Acts {
   class TrackingGeometry;
@@ -37,11 +37,12 @@ public:
 
   virtual
   void
-  write(const ActsGeometryContext& gctx, const Acts::TrackingGeometryMaterial& detMaterial) const override;
+  write(const ActsTrk::GeometryContext& gctx, 
+        const Acts::TrackingGeometryMaterial& detMaterial) const override;
 
   virtual
   void
-  write(const ActsGeometryContext& gctx, const Acts::TrackingGeometry& tGeometry) const override;
+  write(const ActsTrk::GeometryContext& gctx, const Acts::TrackingGeometry& tGeometry) const override;
 
 
 private:

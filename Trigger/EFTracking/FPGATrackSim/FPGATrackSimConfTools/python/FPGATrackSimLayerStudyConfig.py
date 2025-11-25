@@ -70,17 +70,12 @@ def FPGATrackSimBinnedHitsToolCfg(flags):
         BinDesc.OutputLevel=flags.Trigger.FPGATrackSim.loglevel
         BinDesc.rin=cutset["rin"]
         BinDesc.rout=cutset["rout"]
+        phirange = FPGATrackSimDataPrepConfig.getPhiRange(flags)
+        if flags.Trigger.FPGATrackSim.GenScan.useLayerRadiiFile:
+            phicenter = (phirange[0]+phirange[1])/2.0
+            BinDesc.PhiOffset = -1.0*phicenter
 
-        BinDesc.region = flags.Trigger.FPGATrackSim.region
-
-        #resolution padding
-        BinDesc.D0Pad=getPadding(flags.Trigger.FPGATrackSim.region)["d0"]
-        BinDesc.EtaPad=getPadding(flags.Trigger.FPGATrackSim.region)["eta"]
-        BinDesc.QPtPad=getPadding(flags.Trigger.FPGATrackSim.region)["qpt"]
-        BinDesc.PhiPad=getPadding(flags.Trigger.FPGATrackSim.region)["phi"]
-        BinDesc.Z0Pad=getPadding(flags.Trigger.FPGATrackSim.region)["z0"]
-        BinDesc.fieldCorrection=True
-        BinDesc.fieldCorRegion=flags.Trigger.FPGATrackSim.region
+        BinDesc.region = flags.Trigger.FPGATrackSim.region        
 
         # parameters for key layer bindesc are :"zR1", "zR2", "phiR1", "phiR2", "xm"
         step1 = CompFactory.FPGATrackSimBinStep("PhiBinning")

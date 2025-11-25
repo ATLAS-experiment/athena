@@ -52,9 +52,11 @@ StatusCode RpcReadoutElement::initElement() {
          ATH_MSG_VERBOSE("Layer "<<layer <<" has not sensor layout associated.");
          continue;
       }
+      ATH_MSG_VERBOSE("New layer "<<layHash<<", doubletPhi: "<<doubletPhiNumber(layHash)
+                    <<", gasGap: "<<gasGapNumber(layHash)<<", measPhi: "<<measuresPhi(layHash));
       ATH_CHECK(insertTransform<RpcReadoutElement>(layHash));
 #ifndef SIMULATIONBASE
-      const StripDesign& design{sensorLayout(layHash).design()};
+      const StripDesign& design{sensorLayout(layHash)->design()};
       ATH_CHECK(planeSurfaceFactory(layHash, 
                     m_pars.layerBounds->makeBounds<Acts::RectangleBounds>(design.halfWidth(),
                                                                           design.shortHalfHeight())));
@@ -69,7 +71,7 @@ StatusCode RpcReadoutElement::initElement() {
 }
 
 Amg::Transform3D RpcReadoutElement::fromGapToChamOrigin(const IdentifierHash& hash) const{
-   return sensorLayout(hash).toOrigin();
+   return sensorLayout(hash)->toOrigin();
 }
 
 #if defined(FLATTEN) && defined(__GNUC__)
@@ -80,9 +82,9 @@ Amg::Transform3D RpcReadoutElement::fromGapToChamOrigin(const IdentifierHash& ha
 // to be inlined here if possible.
 [[gnu::flatten]]
 #endif
-Amg::Vector3D RpcReadoutElement::stripPosition(const ActsGeometryContext& ctx, const IdentifierHash& measHash) const {
+Amg::Vector3D RpcReadoutElement::stripPosition(const ActsTrk::GeometryContext& ctx, const IdentifierHash& measHash) const {
    return localToGlobalTrans(ctx, layerHash(measHash)) * 
-           sensorLayout(measHash).localStripPosition(stripNumber(measHash));
+           sensorLayout(measHash)->localStripPosition(stripNumber(measHash), measuresPhi(measHash));
 }
 #if defined(FLATTEN) && defined(__GNUC__)
 // We compile this function with optimization, even in debug builds; otherwise,
@@ -92,9 +94,9 @@ Amg::Vector3D RpcReadoutElement::stripPosition(const ActsGeometryContext& ctx, c
 // to be inlined here if possible.
 [[gnu::flatten]]
 #endif
-Amg::Vector3D RpcReadoutElement::rightStripEdge(const ActsGeometryContext& ctx, const IdentifierHash& measHash) const{
+Amg::Vector3D RpcReadoutElement::rightStripEdge(const ActsTrk::GeometryContext& ctx, const IdentifierHash& measHash) const{
       return localToGlobalTrans(ctx, layerHash(measHash)) * 
-              sensorLayout(measHash).localStripLeftEdge(stripNumber(measHash));
+              sensorLayout(measHash)->localStripLeftEdge(stripNumber(measHash), measuresPhi(measHash));
 }
 #if defined(FLATTEN) && defined(__GNUC__)
 // We compile this function with optimization, even in debug builds; otherwise,
@@ -104,23 +106,26 @@ Amg::Vector3D RpcReadoutElement::rightStripEdge(const ActsGeometryContext& ctx, 
 // to be inlined here if possible.
 [[gnu::flatten]]
 #endif
-Amg::Vector3D RpcReadoutElement::leftStripEdge(const ActsGeometryContext& ctx, const IdentifierHash& measHash) const {
+Amg::Vector3D RpcReadoutElement::leftStripEdge(const ActsTrk::GeometryContext& ctx, const IdentifierHash& measHash) const {
     return localToGlobalTrans(ctx, layerHash(measHash)) * 
-           sensorLayout(measHash).localStripRightEdge(stripNumber(measHash));
+           sensorLayout(measHash)->localStripRightEdge(stripNumber(measHash), measuresPhi(measHash));
 }
 
 Amg::Vector3D RpcReadoutElement::chamberStripPos(const IdentifierHash& measHash) const {
-    const StripLayer& layout{sensorLayout(measHash)};
-    return layout.toOrigin() * layout.localStripPosition(stripNumber(measHash));
+    const StripLayerPtr& layout{sensorLayout(measHash)};
+    return layout->toOrigin() * layout->localStripPosition(stripNumber(measHash), measuresPhi(measHash));
 }
 
-double RpcReadoutElement::distanceToEdge(const IdentifierHash& layerHash, 
-                                         const Amg::Vector2D& posInStripPlane,
+double RpcReadoutElement::distanceToEdge(const IdentifierHash& measHeash, 
+                                         const Amg::Vector3D& posInStripPlane,
                                          const EdgeSide side) const {
-    const StripDesign& design{measuresPhi(layerHash) ? *m_pars.phiDesign : *m_pars.etaDesign};
+    const StripLayerPtr& layout{sensorLayout(measHeash)};
+    const StripDesign& design{layout->design(measuresPhi(measHeash))};
     /// For the moment define the readOut to be at negative y while the highVolt is at positive
     const double refPoint{design.longHalfHeight() * (side == EdgeSide::readOut ? -1. : 1.) * m_pars.readoutSide};
-    return std::abs(refPoint - posInStripPlane.y());                                    
+    /// Recall that the phi & eta measurements are expressed on the same surface
+    /// In case of eta measurements check y otherwise the x component
+    return std::abs(refPoint - layout->to2D(posInStripPlane, measuresPhi(measHeash)).y());
 }
 
 

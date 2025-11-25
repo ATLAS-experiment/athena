@@ -129,10 +129,7 @@ class InformationHandler:
         #end loop over signal modes
         
         #add the prefixes for the variables
-        self.m_Infos_String["FeatureExtractor_VarTypeName_varTypeName_Sum"]         = theFeatureHandler.m_VarTypeName_Sum
         self.m_Infos_String["FeatureExtractor_VarTypeName_varTypeName_Ratio"]       = theFeatureHandler.m_VarTypeName_Ratio
-        self.m_Infos_String["FeatureExtractor_VarTypeName_varTypeName_Isolation"]   = theFeatureHandler.m_VarTypeName_Isolation
-        self.m_Infos_String["FeatureExtractor_VarTypeName_varTypeName_Num"]         = theFeatureHandler.m_VarTypeName_Num
         self.m_Infos_String["FeatureExtractor_VarTypeName_varTypeName_Mean"]        = theFeatureHandler.m_VarTypeName_Mean
         self.m_Infos_String["FeatureExtractor_VarTypeName_varTypeName_StdDev"]      = theFeatureHandler.m_VarTypeName_StdDev
         self.m_Infos_String["FeatureExtractor_VarTypeName_varTypeName_HLV"]         = theFeatureHandler.m_VarTypeName_HLV

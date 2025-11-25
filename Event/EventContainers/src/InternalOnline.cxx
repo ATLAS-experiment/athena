@@ -46,7 +46,7 @@ void InternalOnline::wait() const {
     std::scoped_lock lock (m_waitMutex);
     if(m_waitNeeded.load(std::memory_order_acquire) == false) return;
     using namespace EventContainers;
-    const void* ABORTstate = reinterpret_cast<const void*>(IdentifiableCacheBase::ABORTEDflag);
+    const void* ABORTstate = std::bit_cast<const void*>(IdentifiableCacheBase::ABORTEDflag);
     while(!m_waitlist.empty()) {
         IdentifierHash hash = m_waitlist.back();
         EventContainers::IdentifiableCacheBase* cacheLink ATLAS_THREAD_SAFE = m_cacheLink;

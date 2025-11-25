@@ -38,7 +38,7 @@ StatusCode TileCalCellMonAlg::fillHistograms( const EventContext& ctx ) const {
 
   ATH_MSG_VERBOSE("::checkFilters() passed");
 
-  const int nTileCells = 5184;
+  constexpr int nTileCells = 5184;
   std::vector<float> cellEnergyToNoiseRatio;
   cellEnergyToNoiseRatio.reserve(nTileCells);
 
@@ -112,6 +112,10 @@ StatusCode TileCalCellMonAlg::fillHistograms( const EventContext& ctx ) const {
         overThrPhi.push_back(phi);
         overThrTower.push_back(tower + 1);
         overThrEnergyGeV.push_back(energyGeV);
+        if (sample<0 or sample>=N_TILE_SAMPLES){
+          ATH_MSG_ERROR("TileCalCellMonAlg::fillHistograms: sample = "<<sample<<", array size = "<<N_TILE_SAMPLES);
+          continue;
+        }
         overThrModule[sample].push_back(module + 1);
         overThrModuleEnergy[sample].push_back(energyGeV);
       }

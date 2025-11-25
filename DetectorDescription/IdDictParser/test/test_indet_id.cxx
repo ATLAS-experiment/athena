@@ -3,17 +3,21 @@
 */
 
 
-// $Header: /build/atlas/cvs/atlas/offline/DetectorDescription/IdDictParser/test/test_indet_id.cxx,v 1.13 2008-12-09 09:55:22 dquarrie Exp $ 
-
-
 #include "IdDictParser/IdDictParser.h"  
+#include "IdDict/IdDictDictionary.h"
+#include "IdDict/IdDictField.h"
+#include "IdDict/IdDictFieldImplementation.h"
+#include "IdDict/IdDictLabel.h"
+#include "IdDict/IdDictRange.h"
+#include "IdDict/IdDictRegion.h"
 #include "Identifier/Range.h" 
+#include "Identifier/MultiRange.h" 
 #include "Identifier/Identifier.h" 
 #include "Identifier/RangeIterator.h" 
  
 #include <cstdlib>
 #include <iostream> 
- 
+
 static void 
 tab (size_t level) { 
   std::cout << std::string(level,' '); 
@@ -67,7 +71,7 @@ initLevelsFromDict(const IdDictDictionary* dict){
   size_t PHI_INDEX_INDEX  	= 999;
   size_t ETA_INDEX_INDEX	= 999;
   
-  IdDictField* field = dict->find_field("subdet");
+  const IdDictField* field = dict->find_field("subdet");
   if (field) {
     INDET_INDEX = field->index();
   } else {
@@ -368,16 +372,13 @@ test_pixel (const IdDictMgr& idd, Identifier::size_type pixel_region){
 
 static void
 print_bits (const IdDictMgr& idd){
-  const IdDictMgr::dictionary_map& dm = idd.get_dictionary_map (); 
-  IdDictMgr::dictionary_map::const_iterator it;  
-  int n = 0; 
-  for (it = dm.begin (); it != dm.end (); ++it, ++n) { 
-    const IdDictDictionary& dictionary = *((*it).second); 
+  int n = 0;
+  for (const IdDictDictionary* dictionary : idd.get_dictionaries()) {
     std::cout << "---- " << n << " ----------------------------" << std::endl; 
-    std::cout << "Dictionary " << dictionary.name() << std::endl;
-    size_t nregions = dictionary.n_regions();
+    std::cout << "Dictionary " << dictionary->name() << std::endl;
+    size_t nregions = dictionary->n_regions();
     for (size_t i = 0; i < nregions; ++i) {
-      const IdDictRegion& region = dictionary.region(i);
+      const IdDictRegion& region = dictionary->region(i);
       std::cout << "region #" << region.index()
           << " name "   << region.name()
           << " group "  << region.group_name()
@@ -414,16 +415,13 @@ print_bits (const IdDictMgr& idd){
 
 static void
 print_ranges (const IdDictMgr& idd){
-    const IdDictMgr::dictionary_map& dm = idd.get_dictionary_map (); 
-    IdDictMgr::dictionary_map::const_iterator it;  
     int n = 0; 
-    for (it = dm.begin (); it != dm.end (); ++it, ++n) { 
-      const IdDictDictionary& dictionary = *((*it).second); 
+    for (const IdDictDictionary* dictionary : idd.get_dictionaries()) {
      
       std::cout << "---- " << n << " ----------------------------" << std::endl;
-      std::cout << "Dictionary " << dictionary.name() << std::endl;
+      std::cout << "Dictionary " << dictionary->name() << std::endl;
     
-      MultiRange mr = dictionary.build_multirange(); 
+      MultiRange mr = dictionary->build_multirange(); 
       std::cout << "Multirange: " << (std::string)mr << std::endl;
     } 
 }
@@ -485,7 +483,7 @@ int main (int argc, char* argv[])  {
         std::cout << "Unable to verify dictionary " << dictionary->name() << std::endl;
       }
       Identifier packedB((Identifier::value_type)0);
-      dictionary->pack32 (id, 0, 6, packedB); 
+      if (dictionary->pack32 (id, 0, 6, packedB)) std::abort();
       std::cout << "b=[" << packedB << "]" << std::endl; 
       ExpandedIdentifier id2;
       dictionary->unpack ("pixel", packedB, ExpandedIdentifier (), 6, id2);

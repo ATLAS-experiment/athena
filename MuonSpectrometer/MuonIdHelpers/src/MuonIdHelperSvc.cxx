@@ -59,7 +59,7 @@ namespace Muon {
 
             StationNameData& data = m_stationNameData[i];
 
-            data.stationName = name;
+            data.stationName = std::move(name);
             data.isEndcap = m_primaryHelper->isEndcap(i);
             data.isSmall = m_primaryHelper->isSmall(i);
 

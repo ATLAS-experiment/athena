@@ -16,7 +16,7 @@
   <class name="LVL1::MbtsCTP" id="B71654BF-0D09-42AD-9531-187FDFEEDD6A"/>
 
   <!-- BCM CTP input -->
-  <class name="LVL1::BcmCTP" id="2C1AC071-7948-48C9-B6C0-B3f913B4E790"/>
+  <class name="LVL1::BcmCTP" id="2C1AC071-7948-48C9-B6C0-B3F913B4E790"/>
 
   <!-- TRT CTP input -->
   <class name="LVL1::TrtCTP" id="E55FADE4-21BC-47BF-AE93-EC40CD5BAB89"/>

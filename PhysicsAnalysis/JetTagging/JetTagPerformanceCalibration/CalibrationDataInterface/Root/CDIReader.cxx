@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //////////////////////////////////////////////////////////////////////
@@ -77,7 +77,7 @@ void Analysis::CDIReader::crawlCDI(TDirectoryFile* parentDir, int depth, const s
               std::cout << "No default_SF CalibrationDataHistogramContainer?" << std::endl;
             } else { 
               uncertainties = cont->listUncertainties();
-              for(std::string s : uncertainties){
+              for(const std::string &s : uncertainties){
                 systematics_set.insert(s);
               }
             }
@@ -92,15 +92,15 @@ void Analysis::CDIReader::crawlCDI(TDirectoryFile* parentDir, int depth, const s
     }
     // sort and add the labels to the Data object
     std::sort(theseLabels.begin(), theseLabels.end());
-    theseData["labels"] = theseLabels;
+    theseData["labels"] = std::move(theseLabels);
     // convert DSID set to vector of strings
     Labels theseDSIDs(DSID_set.size());
     std::copy(DSID_set.begin(), DSID_set.end(), theseDSIDs.begin());
-    theseData["DSIDs"] = theseDSIDs;
+    theseData["DSIDs"] = std::move(theseDSIDs);
     // convert systematic set to vector of strings
     Labels theseSystematics(systematics_set.size());
     std::copy(systematics_set.begin(), systematics_set.end(), theseSystematics.begin());
-    theseData["systematics"] = theseSystematics;
+    theseData["systematics"] = std::move(theseSystematics);
     // Construct this branch of the metadata map
     // and record the Data object
     record_metadata_map(theseData, metamap);
@@ -270,7 +270,7 @@ std::vector<std::string> Analysis::CDIReader::getDSIDs(const std::string& tagger
     // unless specified, return the vector of all known DSIDs from this CDI file
     Labels DSID_vec(m_DSIDs.size());
     std::copy(m_DSIDs.begin(), m_DSIDs.end(), DSID_vec.begin());
-    DSIDs = DSID_vec;
+    DSIDs = std::move(DSID_vec);
   //} else if(std::find(m_taggers.begin(), m_taggers.end(), tagger) == m_taggers.end()){
   } else if(m_taggers.find(tagger) == m_taggers.end()){
     std::cout << " The tagger [" << tagger << "] doesn't exist in this CDI file!" << std::endl;

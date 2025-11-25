@@ -12,8 +12,11 @@ class ActsTrigSequence(InnerTrackerTrigSequence):
     super().__init__(flags, signature,rois,inView)
     self.log = logging.getLogger("ActsTrigSequence")
     self.log.info(f"signature: {self.signature} rois: {self.rois} inview: {self.inView}")
-      
-    
+
+    # Check fast tracking flag
+    if not self.flags.Tracking.doITkFastTracking:
+        raise ValueError(f"Acts Trig Sequence needs to run in fast tracking mode but 'Tracking.doITkFastTracking' flag is set to {self.flags.Tracking.doITkFastTracking}")
+
   def viewDataVerifier(self, viewVerifier='IDViewDataVerifier') -> ComponentAccumulator:
 
     acc = ComponentAccumulator()
@@ -27,13 +30,8 @@ class ActsTrigSequence(InnerTrackerTrigSequence):
                       #( 'IDCInDetBSErrContainer_Cache' , self.flags.Trigger.ITkTracking.PixBSErrCacheKey ),
                       #( 'IDCInDetBSErrContainer_Cache' , self.flags.Trigger.ITkTracking.SCTBSErrCacheKey ),
                       #( 'IDCInDetBSErrContainer_Cache' , self.flags.Trigger.ITkTracking.SCTFlaggedCondCacheKey ),
-                      ( 'ActsTrk::Cache::Handles<xAOD::SpacePoint>::IDCBackend' , 'StoreGateSvc+ActsPixelSpacePointCache_Back' ),
-                      ('ActsTrk::Cache::Handles<xAOD::SpacePoint>::IDCBackend', 'StoreGateSvc+ActsStripSpacePointCache_Back'),
-                      ('ActsTrk::Cache::Handles<xAOD::SpacePoint>::IDCBackend', 'StoreGateSvc+ActsStripOverlapSpacePointCache_Back'),
-                      ( 'ActsTrk::Cache::Handles<xAOD::PixelCluster>::IDCBackend' , 'StoreGateSvc+ActsPixelClusterCache_Back' ),
-                      ( 'ActsTrk::Cache::Handles<xAOD::StripCluster>::IDCBackend' , 'StoreGateSvc+ActsStripClusterCache_Back' ),
                       ('xAOD::EventInfo', 'EventInfo'),
-                      ( 'ActsGeometryContext' , 'StoreGateSvc+ActsAlignment' ),
+                      ('ActsTrk::GeometryContext' , 'StoreGateSvc+ActsAlignment' ),
                       ('TrigRoiDescriptorCollection', str(self.rois)),
                       ( 'TagInfo' , 'DetectorStore+ProcessingTags' )} )
 
@@ -41,17 +39,20 @@ class ActsTrigSequence(InnerTrackerTrigSequence):
         ViewDataVerifier.DataObjects |= {( 'PixelRDO_Container' , 'StoreGateSvc+ITkPixelRDOs' ),
                                          ( 'SCT_RDO_Container' , 'StoreGateSvc+ITkStripRDOs' ),
                                          ( 'InDetSimDataCollection' , 'ITkPixelSDO_Map'),
-                      ( 'ActsTrk::Cache::Handles<xAOD::SpacePoint>::IDCBackend' , 'StoreGateSvc+ActsPixelSpacePointCache_Back' ),
-                      ('ActsTrk::Cache::Handles<xAOD::SpacePoint>::IDCBackend', 'StoreGateSvc+ActsStripSpacePointCache_Back'),
-                      ('ActsTrk::Cache::Handles<xAOD::SpacePoint>::IDCBackend', 'StoreGateSvc+ActsStripOverlapSpacePointCache_Back'),
-                      ( 'ActsTrk::Cache::Handles<xAOD::PixelCluster>::IDCBackend' , 'StoreGateSvc+ActsPixelClusterCache_Back' ),
-                      ( 'ActsTrk::Cache::Handles<xAOD::StripCluster>::IDCBackend' , 'StoreGateSvc+ActsStripClusterCache_Back' ),
-                      ( 'ActsGeometryContext' , 'StoreGateSvc+ActsAlignment' )}
+                                         ('ActsTrk::GeometryContext' , 'StoreGateSvc+ActsAlignment' )}
         from SGComps.SGInputLoaderConfig import SGInputLoaderCfg
         sgil_load = [( 'PixelRDO_Container' , 'StoreGateSvc+ITkPixelRDOs' ),
                     ( 'SCT_RDO_Container' , 'StoreGateSvc+ITkStripRDOs' ),
                     ( 'InDetSimDataCollection' , 'ITkPixelSDO_Map'),]
         acc.merge(SGInputLoaderCfg(self.flags, Load=sgil_load))
+
+    if self.flags.Acts.useCache:
+        ViewDataVerifier.DataObjects |= {( 'ActsTrk::Cache::Handles<xAOD::SpacePoint>::IDCBackend' , 'StoreGateSvc+ActsPixelSpacePointCache_Back' ),
+                                         ( 'ActsTrk::Cache::Handles<xAOD::PixelCluster>::IDCBackend' , 'StoreGateSvc+ActsPixelClusterCache_Back' ),
+                                         ( 'ActsTrk::Cache::Handles<xAOD::StripCluster>::IDCBackend' , 'StoreGateSvc+ActsStripClusterCache_Back' ),
+                                         ( 'ActsTrk::Cache::Handles<xAOD::PixelCluster>::IDC' , 'StoreGateSvc+ActsPixelClustersCache' ),
+                                         ( 'ActsTrk::Cache::Handles<xAOD::StripCluster>::IDC' , 'StoreGateSvc+ActsStripClustersCache' ),
+                                         ( 'ActsTrk::Cache::Handles<xAOD::SpacePoint>::IDC' , 'StoreGateSvc+ActsPixelSpacePointCache' )}
 
     ViewDataVerifier.DataObjects |= {
       ('InDet::SiDetectorElementStatus' ,   'StoreGateSvc+ITkPixelDetectorElementStatus' ),
@@ -78,19 +79,29 @@ class ActsTrigSequence(InnerTrackerTrigSequence):
 
     acc.merge(ActsPixelClusterizationAlgCfg(self.flags, 
                                             name="ActsPixelClusterizationAlg_"+self.signature,
-                                            useCache=True, 
+                                            useCache=self.flags.Acts.useCache, 
                                             RoIs=self.rois,
                                             ClustersKey="ITkPixelClusters_"+self.signature))
     acc.merge(ActsStripClusterizationAlgCfg(self.flags, 
                                             name="ActsStripClusterizationAlg_"+self.signature,
-                                            useCache=True, 
+                                            useCache=self.flags.Acts.useCache, 
                                             RoIs=self.rois,
                                             ClustersKey="ITkStripClusters_"+self.signature))
 
     
     if self.flags.Acts.useCache:
-      acc.merge(ActsPixelClusterPreparationAlgCfg(self.flags, "ActsPixelClusterViewFiller_"+self.signature, True,OutputCollection="ITkPixelClusters_Cached", InputIDC="ActsPixelClustersCache", RoIs=self.rois))
-      acc.merge(ActsStripClusterPreparationAlgCfg(self.flags, "ActsStripClusterViewFiller_"+self.signature, True,OutputCollection="ITkStripClusters_Cached", InputIDC="ActsStripClustersCache", RoIs=self.rois))
+      acc.merge(ActsPixelClusterPreparationAlgCfg(self.flags, 
+                                                  "ActsPixelClusterViewFiller_"+self.signature, 
+                                                  True, 
+                                                  OutputCollection="ITkPixelClusters_Cached", 
+                                                  InputIDC="ActsPixelClustersCache", 
+                                                  RoIs=self.rois))
+      acc.merge(ActsStripClusterPreparationAlgCfg(self.flags, 
+                                                  "ActsStripClusterViewFiller_"+self.signature, 
+                                                  True, 
+                                                  OutputCollection="ITkStripClusters_Cached", 
+                                                  InputIDC="ActsStripClustersCache", 
+                                                  RoIs=self.rois))
 
     return acc
         
@@ -103,7 +114,7 @@ class ActsTrigSequence(InnerTrackerTrigSequence):
             name = viewVerifier + "_" + self.signature,
             DataObjects = {
                 ( 'InDetSimDataCollection' , 'ITkPixelSDO_Map'),
-                ( 'ActsGeometryContext' , 'StoreGateSvc+ActsAlignment' ),
+                ('ActsTrk::GeometryContext' , 'StoreGateSvc+ActsAlignment' ),
                 ( 'InDet::SiDetectorElementStatus' ,   'StoreGateSvc+ITkPixelDetectorElementStatus' ),
                 ( 'InDet::SiDetectorElementStatus' ,   'StoreGateSvc+ITkStripDetectorElementStatus' ),
             }
@@ -117,11 +128,19 @@ class ActsTrigSequence(InnerTrackerTrigSequence):
     acc = ComponentAccumulator()
 
     from ActsConfig.ActsSpacePointFormationConfig import ActsPixelSpacePointFormationAlgCfg,ActsPixelSpacePointPreparationAlgCfg
-
-    acc.merge(ActsPixelSpacePointFormationAlgCfg(self.flags,name="PixelSPFormation_"+self.signature,useCache=self.flags.Acts.useCache, PixelClusters = "ITkPixelClusters_Cached" if self.flags.Acts.useCache else "ITkPixelClusters_"+self.signature, PixelSpacePoints = "ITkPixelSpacepoints_"+self.signature))
+    acc.merge(ActsPixelSpacePointFormationAlgCfg(self.flags,
+                                                 name="ActsPixelSPFormation_"+self.signature,
+                                                 useCache=self.flags.Acts.useCache, 
+                                                 PixelClusters = "ITkPixelClusters_Cached" if self.flags.Acts.useCache else "ITkPixelClusters_"+self.signature, 
+                                                 PixelSpacePoints = "ITkPixelSpacepoints_"+self.signature))
     
     if self.flags.Acts.useCache:
-      acc.merge(ActsPixelSpacePointPreparationAlgCfg(self.flags,name="PixelSPVF_"+self.signature,useCache=True, RoIs=self.rois, OutputCollection="ITkPixelSpacePoints_Cached", InputIDC="ActsPixelSpacePointCache"))
+      acc.merge(ActsPixelSpacePointPreparationAlgCfg(self.flags,
+                                                     name="ActsPixelSPViewFiller_"+self.signature,
+                                                     useCache=True, 
+                                                     RoIs=self.rois, 
+                                                     OutputCollection="ITkPixelSpacePoints_Cached", 
+                                                     InputIDC="ActsPixelSpacePointCache"))
 
     return acc
 
@@ -132,41 +151,55 @@ class ActsTrigSequence(InnerTrackerTrigSequence):
 
     from ActsConfig.ActsSeedingConfig import ActsPixelSeedingAlgCfg
 
-    acc.merge(ActsPixelSeedingAlgCfg(self.flags, name="ActsPixelSeedingAlg_"+self.signature, InputSpacePoints=['ITkPixelSpacePoints_Cached'] if self.flags.Acts.useCache else ['ITkPixelSpacepoints_'+self.signature], useFastTracking=True))
+    acc.merge(ActsPixelSeedingAlgCfg(self.flags, 
+                                     name="ActsPixelSeedingAlg_"+self.signature, 
+                                     InputSpacePoints=['ITkPixelSpacePoints_Cached'] if self.flags.Acts.useCache else ['ITkPixelSpacepoints_'+self.signature], 
+                                     useFastTracking=True))
 
     from ActsConfig.ActsTrackFindingConfig import ActsMainTrackFindingAlgCfg, ActsTrackToTrackParticleCnvAlgCfg
     measurements = ["ITkPixelClusters_Cached" if self.flags.Acts.useCache else "ITkPixelClusters_"+self.signature,
                     "ITkStripClusters_Cached" if self.flags.Acts.useCache else "ITkStripClusters_"+self.signature]
-    
+
     trackfinding = ActsMainTrackFindingAlgCfg(self.flags, 
                                               name="ActsTrackFindingAlg_"+self.signature, 
                                               ACTSTracksLocation=self.flags.Tracking.ActiveConfig.trkTracks_FTF,
-                                              SeedLabels=["PPP"],SeedContainerKeys=["ActsPixelSeeds"],
+                                              SeedLabels=["PPP"],
+                                              SeedContainerKeys=["ActsPixelSeeds"],
                                               DetectorElementsKeys=['ITkPixelDetectorElementCollection'],
                                               UncalibratedMeasurementContainerKeys=measurements)
-    
+     
     acc.merge(trackfinding)
-    acc.merge(ActsTrackToTrackParticleCnvAlgCfg(self.flags,name="ActsTrackParticleCreator_"+self.signature, ACTSTracksLocation=[self.flags.Tracking.ActiveConfig.trkTracks_FTF], TrackParticlesOutKey=self.flags.Tracking.ActiveConfig.tracks_FTF))
+    acc.merge(ActsTrackToTrackParticleCnvAlgCfg(self.flags,
+                                                name="ActsTrackParticleCreator_"+self.signature, 
+                                                ACTSTracksLocation=[self.flags.Tracking.ActiveConfig.trkTracks_FTF], 
+                                                TrackParticlesOutKey=self.flags.Tracking.ActiveConfig.tracks_FTF))
 
     return acc
 
   def ambiguitySolver(self) -> ComponentAccumulator:
     acc = ComponentAccumulator()
-
     if self.inView:
-      acc.merge(self.viewDataVerifierAfterPattern())
+        acc.merge(self.viewDataVerifierAfterPattern())
 
     from ActsConfig.ActsTrackFindingConfig import ActsMainAmbiguityResolutionAlgCfg
-
-    acc.merge(ActsMainAmbiguityResolutionAlgCfg(self.flags, "ActsAmbiguityResolutionAlg_"+self.signature, TracksLocation=self.flags.Tracking.ActiveConfig.trkTracks_FTF, ResolvedTracksLocation=self.flags.Tracking.ActiveConfig.trkTracks_IDTrig))
+    acc.merge(ActsMainAmbiguityResolutionAlgCfg(self.flags, 
+                                                "ActsAmbiguityResolutionAlg_"+self.signature, 
+                                                TracksLocation=self.flags.Tracking.ActiveConfig.trkTracks_FTF, 
+                                                ResolvedTracksLocation=self.flags.Tracking.ActiveConfig.trkTracks_IDTrig))
     
 
     return acc
 
   def xAODParticleCreation(self) -> ComponentAccumulator:
-
     acc = ComponentAccumulator()
+
     from ActsConfig.ActsTrackFindingConfig import ActsTrackToTrackParticleCnvAlgCfg
-    acc.merge(ActsTrackToTrackParticleCnvAlgCfg(self.flags,"ActsTrackParticleCreator_Ambi_"+self.signature, ACTSTracksLocation=[self.flags.Tracking.ActiveConfig.trkTracks_IDTrig], TrackParticlesOutKey=self.flags.Tracking.ActiveConfig.tracks_IDTrig))
+    acc.merge(ActsTrackToTrackParticleCnvAlgCfg(self.flags,
+                                                "ActsTrackParticleCreator_Ambi_"+self.signature, 
+                                                ACTSTracksLocation=[self.flags.Tracking.ActiveConfig.trkTracks_IDTrig], 
+                                                TrackParticlesOutKey=self.flags.Tracking.ActiveConfig.tracks_IDTrig))
 
     return acc
+
+
+

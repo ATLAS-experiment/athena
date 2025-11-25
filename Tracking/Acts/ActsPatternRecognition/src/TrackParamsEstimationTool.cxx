@@ -3,6 +3,7 @@
 */
 
 #include "src/TrackParamsEstimationTool.h"
+#include "xAODInDetMeasurement/SpacePoint.h"
 #include "ActsGeometry/ATLASMagneticFieldWrapper.h"
 #include "Acts/Seeding/EstimateTrackParamsFromSeed.hpp"
 #include "Acts/EventData/TransformationHelpers.hpp"
@@ -47,11 +48,11 @@ namespace ActsTrk {
 						     bool useTopSp,
 						     const Acts::GeometryContext& geoContext,
 						     const Acts::MagneticFieldContext& magFieldContext,
-						     std::function<const Acts::Surface&(const ActsTrk::Seed& seed, bool useTopSp)> retrieveSurface) const 
+						     std::function<const Acts::Surface&(const ActsTrk::Seed& seed, bool useTopSp)> retrieveSurface) const
   {
     const auto& sp_collection = seed.sp();
     if ( sp_collection.size() < 3 ) return std::nullopt;
-    const auto& bottom_sp = (useTopSp && m_bFieldMode != 2) ? sp_collection.back() : sp_collection.front();
+    const xAOD::SpacePoint* bottom_sp = (useTopSp && m_bFieldMode != 2) ? sp_collection.back() : sp_collection.front();
 
     // Magnetic Field
     ATLASMagneticFieldWrapper magneticField;

@@ -507,12 +507,12 @@ namespace Muon {
             const int doubZ{idHelper.doubletZ(detElId)};
             const int gapMax{idHelper.gasGapMax(detElId)};
             for (int phiGap = idHelper.doubletPhi(detElId);
-                     phiGap <= RpcIdHelper::doubletPhiMax(); ++phiGap) {
+                     phiGap <= idHelper.doubletPhiMax(detElId); ++phiGap) {
                 for (int gap = idHelper.gasGapMin(detElId);
                          gap <= gapMax; ++gap) {
                     for (int measPhi: {0, 1}) {
                         const Identifier layerId = idHelper.channelID(detElId, doubZ, phiGap, gap, measPhi, 1);
-                        if (!knownLayers.count(layerId)) holeGaps.insert(layerId);
+                        if (!knownLayers.count(layerId)) holeGaps.insert(layerId);	
                     }
                 }
             }

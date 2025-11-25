@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 from AthenaCommon.Logging import logging
 log = logging.getLogger(__name__)
@@ -68,7 +68,7 @@ def _preselJetHypoToolFromDict(flags, mainChainDict, doTaggingSel=False):
 
     # Get from the last chainPart in order to avoid to specify preselection for every leg
     #TODO: add protection for cases where the preselection is not specified in the last chainPart
-    presel_matched = re.match(r'presel(?P<cut>\d?\d?(Z[\d\D]+)?[jacf](HT)?[\d\D]+)', trkpresel)
+    presel_matched = re.match(r'presel(?P<cut>(VETOMULT)?\d?\d?(Z[\d\D]+)?[jacf]\d?(HT)?[\d\D]+)', trkpresel)
     assert presel_matched is not None, "Impossible to match preselection pattern for self.trkpresel=\'{0}\'.".format(trkpresel)
     presel_cut_str = presel_matched.groupdict()['cut'] #This is the cut string you want to parse. For example 'presel2j50XXj40'
     
@@ -107,8 +107,9 @@ def _preselJetHypoToolFromDict(flags, mainChainDict, doTaggingSel=False):
         bmatches = r'(?P<btagger>(b|bg|bgtwo))(?P<bwp>\d\d)' if hasBjetSel else ""
         taumatches = r'(?P<tauid>(gntau|uht1tau))(?P<tauwp>\d\d)' if hasTauSel else ""
 
-        pattern_to_test = r'(?P<mult>\d?\d?)(?P<region>[jacf])' # jet multiplicity and region
-        pattern_to_test += r'(?P<scenario>(HT)?)(?P<cut>\d+)' # scenario string # could be made more general
+        pattern_to_test = r'(?P<veto>(VETOMULT))?' # veto flag #TODO veto pt as well
+        pattern_to_test += r'(?P<mult>\d*)?(?P<region>[jacf])' # jet multiplicity and region and ptlow
+        pattern_to_test += r'(?P<scenario>(HT))?(?P<cut>\d+)?' # scenario string # could be made more general
         pattern_to_test += bmatches
         pattern_to_test += taumatches
         pattern_to_test += r'emf(?P<emfc>\d+)' if hascalSel else ''
@@ -131,6 +132,9 @@ def _preselJetHypoToolFromDict(flags, mainChainDict, doTaggingSel=False):
         for k in testkeys:
             cut_dict.setdefault(k, "")
 
+        veto = 'veto' in cut_dict
+        if veto:
+            veto = cut_dict['veto'] is not None
         mult = cut_dict['mult']
         region = cut_dict['region']
         scenario = cut_dict['scenario']
@@ -138,9 +142,12 @@ def _preselJetHypoToolFromDict(flags, mainChainDict, doTaggingSel=False):
         dipzwp = cut_dict['dipzwp']
         emfc = cut_dict['emfc']
         prefilters = []
-
+    
         if mult=='': mult='1'
         etarange = etaRangeAbbrev[region]
+        if veto:
+            scenario = cut_dict['veto'][4:]
+            assert (not (scenario in ['HT','Z'])), "Veto preselection not yet supported for HT or Z scenarios. Please investigate."
         if scenario == "HT":
             hyposcenario=f'HT{cut}XX{etarange}'
             threshold='0'
@@ -151,6 +158,11 @@ def _preselJetHypoToolFromDict(flags, mainChainDict, doTaggingSel=False):
             if prefilt != '': prefilters.append(prefilt)
             threshold='0'
             chainPartName=f'j0_{hyposcenario}'
+        elif scenario == "MULT":
+            hyposcenario=f'MULT0mult{mult}XX{cut}ptXX{etarange}'
+            threshold='0'
+            chainPartName=f'j0_{hyposcenario}'
+            log.info(f'Generated chainPartName {chainPartName}')
         else:
             hyposcenario='simple'
             threshold=cut

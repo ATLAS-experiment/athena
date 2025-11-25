@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef L1TOPOONLINEMONITORING_L1TopoOnlineMonitor_h
@@ -9,6 +9,7 @@
 #include "xAODTrigL1Calo/L1TopoRawDataContainer.h"
 #include "xAODTrigger/L1TopoSimResultsContainer.h"
 #include "TrigT1Interfaces/TrigT1StoreGateKeys.h"
+#include "xAODTrigger/TrigCompositeContainer.h"
 #include "TrigT1Result/CTP_RDO.h"
 #include "TrigConfData/L1Menu.h"
 

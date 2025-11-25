@@ -21,6 +21,6 @@ Derivation_tf.py \
   --inputAODFile="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/CampaignInputs/data23/AOD/data23_13p6TeV.00453713.physics_Main.recon.AOD.f1357/2012events.data23_13p6TeV.00453713.physics_Main.recon.AOD.f1357._lb1416._0006.1" \
   --outputDAODFile="pool.root" \
   --formats "PHYS" "PHYSLITE" \
-  --preExec="flags.Output.StorageTechnology.EventData=\"ROOTRNTUPLE\";";
+  --preExec="flags.PoolSvc.DefaultContainerType=\"ROOTRNTUPLE\";";
 
 echo "art-result: $? derivation";

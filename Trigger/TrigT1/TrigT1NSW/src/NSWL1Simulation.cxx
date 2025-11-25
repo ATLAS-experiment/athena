@@ -22,12 +22,13 @@ namespace NSWL1 {
     }
 
     if(m_dosTGC){
-      if(m_doPad || m_doStrip) ATH_CHECK(m_pad_tds.retrieve());
-        ATH_CHECK(m_pad_trigger.retrieve());
+      if(m_doPad) {
+        ATH_CHECK(m_pad_emulator.retrieve());
+        if(m_doNtuple) ATH_CHECK(m_pad_emulator->attachBranches(m_altree));
+      }
       if(m_doStrip){
-        ATH_CHECK(m_strip_tds.retrieve());
-        ATH_CHECK(m_strip_cluster.retrieve());
-        ATH_CHECK(m_strip_segment.retrieve());
+        ATH_MSG_ERROR("No sTGC Strip Trigger algorithm defined. Please, check whether the hardware implementation is available before implementing any kind of tool!");
+        return StatusCode::FAILURE;
       }
     }
 
@@ -44,26 +45,19 @@ namespace NSWL1 {
 
 
   StatusCode NSWL1Simulation::execute(const EventContext& ctx) const {
-    std::vector<std::shared_ptr<PadData>> pads;
-    std::vector<std::unique_ptr<PadTrigger>> padTriggers;
-    std::vector<std::unique_ptr<StripData>> strips;
-    std::vector<std::unique_ptr<StripClusterData> > clusters;
     auto padTriggerContainer = std::make_unique<Muon::NSW_PadTriggerDataContainer>();
     auto stripTriggerContainer = std::make_unique<Muon::NSW_TrigRawDataContainer>();
     auto MMTriggerContainer = std::make_unique<Muon::NSW_TrigRawDataContainer>();
 
-    if(m_dosTGC){
-      if(m_doPad || m_doStrip) ATH_CHECK( m_pad_tds->gather_pad_data(pads) );
-        ATH_CHECK( m_pad_trigger->compute_pad_triggers(pads, padTriggers) );
-      if(m_doStrip){
-        ATH_CHECK( m_strip_tds->gather_strip_data(strips,padTriggers) );
-        ATH_CHECK( m_strip_cluster->cluster_strip_data(ctx, strips, clusters) );
-        ATH_CHECK( m_strip_segment->find_segments(clusters,stripTriggerContainer) );
+    // sTGC Trigger
+    if(m_dosTGC) {
+      if(m_doPad) {
+        ATH_CHECK( m_pad_emulator->emulate(ctx, padTriggerContainer.get()) );
       }
-      if(m_doPad) ATH_CHECK(PadTriggerAdapter::fillContainer(padTriggerContainer, padTriggers, ctx.eventID().event_number()));
     }
 
-    if(m_doMM){
+    // MM Trigger
+    if(m_doMM) {
       ATH_CHECK( m_mmtrigger->runTrigger(ctx, MMTriggerContainer.get(), m_doMMDiamonds) );
     }
 

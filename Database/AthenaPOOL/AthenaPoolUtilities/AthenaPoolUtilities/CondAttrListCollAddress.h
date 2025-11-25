@@ -16,12 +16,9 @@
 // Framework include files
 #include "GaudiKernel/GenericAddress.h"
 
-// Forward declarations
-class IRegistry;
-
-/** @class CondAttrListCollAddress 
- *  @brief This class provides the an IOpaqueAddress/GenericAddress
- *  which can hold a pointer to an CondAttrListCollection object
+/** @class CondAttrListCollAddress
+ *  @brief This class provides an IOpaqueAddress/GenericAddress
+ *  which can hold a pointer to a CondAttrListCollection object
  *
  **/
 class CondAttrListCollAddress : public GenericAddress {
@@ -41,7 +38,7 @@ public:
 			  const std::string& p2="",
 			  unsigned long ip1=0,
 			  unsigned long ip2=0,
-			  CondAttrListCollection* attrListColl=0);
+			  CondAttrListCollection* attrListColl=nullptr);
 
     /// Standard Destructor
     virtual ~CondAttrListCollAddress();
@@ -60,10 +57,10 @@ private:
 
 ///  Inline definitions
 inline     
-CondAttrListCollAddress::CondAttrListCollAddress() 
-	: 
+CondAttrListCollAddress::CondAttrListCollAddress()
+	:
 	GenericAddress(),
-	m_attrListColl(0)
+	m_attrListColl(nullptr)
 {}
 
 inline     
@@ -92,7 +89,7 @@ inline
 CondAttrListCollAddress::CondAttrListCollAddress(const GenericAddress& copy)
 	:
 	GenericAddress(copy),
-	m_attrListColl(0)
+	m_attrListColl(nullptr)
 {}
 
 inline     

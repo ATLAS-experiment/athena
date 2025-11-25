@@ -1,12 +1,13 @@
 #!/usr/bin/env python
 #
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 #
 # Unit test for the transient tree creating infrastructure
 #
 
 # The necessary import(s):
 import ROOT
+ROOT.xAOD.EgammaContainer # Work around cling assertion failure
 
 ## Helper function creating a vector<string> object out of a list of strings
 def toVectorString( stringList ):

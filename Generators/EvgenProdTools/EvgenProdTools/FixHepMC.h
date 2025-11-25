@@ -53,6 +53,8 @@ private:
   bool m_cleanDecays; // Clean decays?
   bool m_purgeUnstableWithoutEndVtx; // Remove unstable particles without decay vertex?
   bool m_ignoreSemiDisconnected; // Ignore semi-disconnected particles (normal in Sherpa)
+  std::string m_forced_momentum{""}; // Force momentum unit for the event
+  std::string m_forced_length{""}; // Force length unit for the event
   //@}
 
   /// @name Cleaned-particle counters
@@ -66,6 +68,7 @@ private:
   //@}
    
   std::map<int,int> m_pidmap; //!< map of pids to change.
+  std::map<int,int> m_replacedpid_counts; //!< map of counters of replacements.
 
 
   MC::Loops<HepMC::GenEvent,HepMC::ConstGenParticlePtr,HepMC::ConstGenVertexPtr> m_looper; //!< member to detect loops

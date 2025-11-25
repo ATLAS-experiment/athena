@@ -2,25 +2,49 @@
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 
-def geoModelFileDefault(useR4Layout = False):
-    # If this is changed, remember to also test with other dependent tests 
-    # e.g. run ctest with ActsEventCnv
-    if useR4Layout: 
-        return  "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonGeomRTT/GeoDB/ATLAS-P2-RUN4-01-00-00.db"
-    return "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonGeomRTT/GeoDB/ATLAS-R3S-2021-03-02-00.db"
+
+
+class MuonPhaseIITestDefaults:
+    ## Particle gun EVGen file (5 -250) GeV spectrum
+    EVGEN_PG = ["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonRecRTT/EVGEN_ParticleGun_FourMuon_Pt10to500.root"]
+    ### Hits parsed though full R3 ATLAS layout (Only MS hits saved)
+    HITS_PG_R3 = ["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonGeomRTT/R3SimHits.pool.root"]
+    ### Hits parsed though full R4 ATLAS layout (Only MS hits saved)
+    HITS_PG_R4 = ["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonGeomRTT/R4SimHits.pool.root"]
+    ### Hits parsed through the R3 MS-only ATLAS layout    
+    HITS_PG_R3_MSOnly = []
+    ### Hits parsed through the R4 MS-only ATLAS layout
+    HITS_PG_R4_MSOnly = []
+    ### BS file taken in MD3 2025 with a pile-up of >120
+    DATA_BS = ["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonRecRTT/data25_13p6TeV.00508073.physics_Main.daq.RAW._lb0277._SFO-14._0001.data" ]
+    
+    ###
+    ###     Layout files
+    ###
+
+    ### R3 ATLAS layout
+    GEODB_R3 = "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonGeomRTT/GeoDB/ATLAS-R3S-2021-03-02-00.db"
+    ### R3 MS only layout
+    GEODB_R3MSOnly = "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonGeomRTT/GeoDB/ATLAS-R3S-2021-03-02-00_MSOnly.db"
+    ### R4 ATLAS layout
+    GEODB_R4 = "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonGeomRTT/GeoDB/ATLAS-P2-RUN4-01-00-00.db"
+    ### R4 MS only layout
+    GEODB_R4MSOnly = "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonGeomRTT/GeoDB/ATLAS-P2-RUN4-01-00-00_MSOnly.db"
+    ### ITk + Calo + R3-MS ATLAS layout
+    GEODB_ITk_R3MS = "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonGeomRTT/GeoDB/ATLAS-P2-RUN4-01-00-00_R3MS.db"
+   
 
 def SetupArgParser():
     from argparse import ArgumentParser
 
     parser = ArgumentParser()
     parser.add_argument("--threads", type=int, help="number of threads", default=1)
-    parser.add_argument("--inputFile", "-i", default=[
-                                                      #"/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/Tier0ChainTests/TCT_Run3/data22_13p6TeV.00431493.physics_Main.daq.RAW._lb0525._SFO-16._0001.data"
-                                                      "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonRecRTT/EVGEN_ParticleGun_FourMuon_Pt10to500.root"
-                                                      ], 
+    parser.add_argument("--inputFile", "-i", default= MuonPhaseIITestDefaults.EVGEN_PG, 
                         help="Input file to run on ", nargs="+")
-    parser.add_argument("--geoModelFile", default = geoModelFileDefault(), help="GeoModel SqLite file containing the muon geometry.")
-    parser.add_argument("--defaultGeoFile", help="Use the  predefined GeoModel files on cvmfs", choices=["NONE", "RUN3", "RUN4" ], default="NONE")
+    parser.add_argument("--geoModelFile", default = MuonPhaseIITestDefaults.GEODB_R3, help="GeoModel SqLite file containing the muon geometry.")
+    parser.add_argument("--defaultGeoFile", help="Use the  predefined GeoModel files on cvmfs", choices=["NONE", "RUN3", "RUN4", 
+                                                                                                         "RUN3MSOnly", "RUN4MSOnly", 
+                                                                                                         "ITkR3MS" ], default="NONE")
     parser.add_argument("--chambers", default=["all"], nargs="+", help="Chambers to check. If string is all, all chambers will be checked")
     parser.add_argument("--excludedChambers", default=[], nargs="+", help="Chambers to exclude. If string contains 'none', all chambers will be checked. Note: adding a chamber to --excludedChambers will overwrite it being in --chambers.")
     parser.add_argument("--outRootFile", default="NewGeoModelDump.root", help="Output ROOT file to dump the geomerty")
@@ -54,6 +78,8 @@ def setupServicesCfg(flags):
 
 def GeoModelMdtTestCfg(flags, name = "GeoModelMdtTest", **kwargs):
     result = ComponentAccumulator()
+    from MuonConfig.MuonCablingConfig import MDTCablingConfigCfg
+    result.merge(MDTCablingConfigCfg(flags))
     the_alg = CompFactory.MuonGMR4.GeoModelMdtTest(name, **kwargs)
     result.addEventAlgo(the_alg, primary = True)
     return result
@@ -143,9 +169,15 @@ def setupGeoR4TestCfg(args,  flags = None):
     flags.Exec.EventPrintoutInterval = 500
     
     if args.defaultGeoFile == "RUN3":
-          flags.GeoModel.SQLiteDBFullPath = geoModelFileDefault(useR4Layout = False)
-    elif  args.defaultGeoFile == "RUN4":
-          flags.GeoModel.SQLiteDBFullPath = geoModelFileDefault(useR4Layout = True)
+        flags.GeoModel.SQLiteDBFullPath =  MuonPhaseIITestDefaults.GEODB_R3
+    elif args.defaultGeoFile == "RUN4":
+        flags.GeoModel.SQLiteDBFullPath =  MuonPhaseIITestDefaults.GEODB_R4
+    elif args.defaultGeoFile == "RUN3MSOnly":
+        flags.GeoModel.SQLiteDBFullPath = MuonPhaseIITestDefaults.GEODB_R3MSOnly
+    elif args.defaultGeoFile == "RUN4MSOnly":
+        flags.GeoModel.SQLiteDBFullPath = MuonPhaseIITestDefaults.GEODB_R4MSOnly
+    elif args.defaultGeoFile == "ITkR3MS":
+        flags.GeoModel.SQLiteDBFullPath = MuonPhaseIITestDefaults.GEODB_ITk_R3MS
     elif args.geoModelFile.startswith("root://"):
         if not path.exists("Geometry/{geoTag}.db".format(geoTag=args.geoTag)):
             print ("Copy geometry file from EOS {source}".format(source = args.geoModelFile))
@@ -191,6 +223,8 @@ def setupGeoR4TestCfg(args,  flags = None):
     if args.noMdt:
         flags.Detector.GeometryMDT = False
 
+    flags.Acts.TrackingGeometry.UseBlueprint = True
+
     flags.Scheduler.CheckDependencies = True
     flags.Scheduler.ShowDataDeps = True
     flags.Scheduler.ShowDataFlow = True
@@ -232,6 +266,7 @@ if __name__=="__main__":
     ### Ensure consistent translation of the geometry
     if flags.Muon.usePhaseIIGeoSetup:
         cfg.getCondAlgo("MuonDetectorCondAlg").checkGeo = True
+        cfg.getCondAlgo("MuonDetectorCondAlg").dumpGeo = True
         from TrackingGeometryCondAlg.AtlasTrackingGeometryCondAlgConfig import TrackingGeometryCondAlgCfg
         cfg.merge(TrackingGeometryCondAlgCfg(flags))
     

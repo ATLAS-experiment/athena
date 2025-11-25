@@ -18,6 +18,7 @@
 #include "CommissionEvent/ComTime.h"
 #include "xAODTrigger/TrigDecision.h"
 #include "xAODEventInfo/EventInfo.h"
+#include "xAODTracking/TrackParticleContainer.h"
 #include "InDetRawData/InDetTimeCollection.h"
 #include "InDetRawData/InDetRawDataCLASS_DEF.h"
 

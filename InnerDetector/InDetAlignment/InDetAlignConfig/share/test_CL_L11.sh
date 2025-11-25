@@ -7,16 +7,23 @@ LOGLEVEL=$2
 [ ! -n "${LOGLEVEL}" ] && LOGLEVEL=INFO
 
 ## Test iteration on L11
-runIDAlign.py \
+IDAlign_tf.py \
     --alignLevel 11 \
     --maxEvents ${MAXEVENTS} \
     --accumulate \
     --baseDir Iter0 \
     --logLevel ${LOGLEVEL} \
-    --monitorFile monitor.root
+    --outputMonitorFile monitor.root \
+    --execOnly \
+    --outputTFile matrix.root
 
-runIDAlign.py \
+IDAlign_tf.py \
     --alignLevel 11 \
     --solve \
     --logLevel ${LOGLEVEL} \
-    --baseDir Iter0
+    --baseDir Iter0 \
+    --inputTFile Iter0/Accumulate/matrix.root \
+    --outputConditionFile condition_pool.root \
+    --outputDBFile condition.db \
+    --execOnly \
+    --outputTaredLogFile align_logs.tar.gz

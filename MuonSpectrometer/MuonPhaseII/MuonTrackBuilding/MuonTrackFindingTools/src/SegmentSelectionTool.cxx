@@ -6,6 +6,8 @@
 
 namespace {
     using LayIdx_t = Muon::MuonStationIndex::LayerIndex;
+
+    // std::string print(0)
 }
 
 
@@ -30,7 +32,7 @@ namespace MuonR4{
                     switch (layIdx) {
                         case LayIdx_t::Inner:
                         case LayIdx_t::BarrelExtended:
-                            return  summary.nPhiHits >= m_nRpcPhiSeedHitCutBI;
+                            return summary.nPhiHits >= m_nRpcPhiSeedHitCutBI;
                         case LayIdx_t::Middle:
                             return summary.nPhiHits >= m_nRpcPhiSeedHitCutBM;
                         case LayIdx_t::Outer:
@@ -41,8 +43,9 @@ namespace MuonR4{
                 } else {
                     /** Apply another threshold on the TGC trigger hits */
                     switch (layIdx) {
-                        case LayIdx_t::Inner:
                         case LayIdx_t::Extended:
+                            return true;
+                        case LayIdx_t::Inner:
                             return summary.nPhiHits >= m_nTgcPhiSeedHitCutEI;
                         case LayIdx_t::Middle:
                             return summary.nPhiHits >= m_nTgcPhiSeedHitCutEM;
@@ -52,10 +55,11 @@ namespace MuonR4{
                 }
                 break;
             }
-            case xAOD::UncalibMeasType::MMClusterType:
+            case xAOD::UncalibMeasType::MMClusterType: {
+                return summary.nPrecHits >= m_nMmSeedMinHitCut;
+            }
             case xAOD::UncalibMeasType::sTgcStripType:{
-                ATH_MSG_ALWAYS(__FILE__<<":"<<__LINE__<<" Implement me");
-                break;
+                return summary.nPrecHits >= m_nStgcSeedMinHitCut;
             }
             default:
                 break;
@@ -80,18 +84,12 @@ namespace MuonR4{
         return false;
     }
     bool SegmentSelectionTool::compatibleForTrack(const EventContext& /*ctx*/,
-                                                 const Segment& segA,
-                                                 const Segment& segB) const {
+                                                  const Segment& segA,
+                                                  const Segment& segB) const {
         /** Segment is on the same spectrometer layer */
         if(segA.msSector() == segB.msSector()) {
             return false;
         }
-        /** Segment sector deviates too much */
-        const unsigned secMax = Muon::MuonStationIndex::numberOfSectors();
-        const unsigned deltaSec = std::abs(segA.msSector()->sector() - segB.msSector()->sector()) % secMax;
-        if (deltaSec > 1) {
-            return false;
-        } 
         const HitSummary& sumA = segA.summary();
         const HitSummary& sumB = segB.summary();
         /** If both segments don't have phi information, then they may be compatible */

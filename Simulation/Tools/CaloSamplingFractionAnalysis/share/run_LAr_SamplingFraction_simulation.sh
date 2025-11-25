@@ -44,11 +44,14 @@ Sim_tf.py \
 --postExec 'with open("ConfigSimCA.pkl", "wb") as f: cfg.store(f)' \
 --imf False
 
-echo  "art-result: $? Simulation"
-
+#To run with the new EMEC geometry, use 
 #--preExec "flags.dump('GeoModel');flags.GeoModel.EMECStandard=True;flags.dump('GeoModel')" \
+#This should eventually move into a dedicated ART test
 
+status=$?
+#echo  "art-result: $status Simulation"
 
 cd ..
 
+exit $status
 

@@ -4,9 +4,12 @@
 
 #include "CaloIdentifier/CaloLVL1_ID.h"
 #include "AtlasDetDescr/AtlasDetectorID.h"
+#include "IdDict/IdDictDictionary.h"
+#include "IdDict/IdDictField.h"
+#include "IdDict/IdDictMgr.h"
+#include "IdDict/IdDictRegion.h"
 #include "CxxUtils/StrFormat.h"
 #include "GaudiKernel/MsgStream.h"
-#include "IdDict/IdDictDefs.h"
 #include "Identifier/IdentifierHash.h"
 #include "Identifier/RangeIterator.h"
 #include <algorithm>
@@ -734,7 +737,7 @@ int   CaloLVL1_ID::initLevelsFromDict()
   m_LAYER_INDEX      = 999 ;
 
   // Save index to a LVL1 region for unpacking - search with region name
-  IdDictRegion* reg = m_dict->find_region("Lvl1_0");
+  const IdDictRegion* reg = m_dict->find_region("Lvl1_0");
   if (reg) 
     {
       m_lvl1_region_index = reg->index();
@@ -753,7 +756,7 @@ int   CaloLVL1_ID::initLevelsFromDict()
     }
   
   // Fing a LVL1 region
-  IdDictField* field = m_dict->find_field("subdet") ;
+  const IdDictField* field = m_dict->find_field("subdet") ;
   if (field) {
     m_CALO_INDEX = field->index();
   }

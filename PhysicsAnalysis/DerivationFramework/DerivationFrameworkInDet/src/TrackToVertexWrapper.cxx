@@ -1,12 +1,8 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-///////////////////////////////////////////////////////////////////
-// TrackToVertexWrapper.cxx, (c) ATLAS Detector software
-///////////////////////////////////////////////////////////////////
 // Author: James Catmore (james.catmore@cern.ch)
-//
 
 #include "DerivationFrameworkInDet/TrackToVertexWrapper.h"
 #include "TrkVertexFitterInterfaces/ITrackToVertexIPEstimator.h"
@@ -17,16 +13,9 @@
 
 namespace DerivationFramework {
 
-  TrackToVertexWrapper::TrackToVertexWrapper(const std::string& t,
-      const std::string& n,
-      const IInterface* p) :
-    base_class(t,n,p)
-  {
-  }
-
   StatusCode TrackToVertexWrapper::initialize()
   {
-     if (m_sgName.empty()) {
+    if (m_sgName.empty()) {
       ATH_MSG_ERROR("No decoration prefix name provided for the output of TracktoVertexWrapper!");
       return StatusCode::FAILURE;
     }
@@ -38,6 +27,7 @@ namespace DerivationFramework {
     ATH_CHECK(m_tool.retrieve());
     ATH_CHECK(m_vertexKey.initialize());
     {
+      // FIXME Properly configure WriteDecorHandleKeys in python
       std::vector<std::string> names;
       names.resize(kNFloatDecor);
       names[kdecnD0Decor]                 = "unbiased_d0";
@@ -63,14 +53,9 @@ namespace DerivationFramework {
     return StatusCode::SUCCESS;
   }
 
-  StatusCode TrackToVertexWrapper::finalize()
-  {
-    return StatusCode::SUCCESS;
-  }
 
-  StatusCode TrackToVertexWrapper::addBranches() const
+  StatusCode TrackToVertexWrapper::addBranches(const EventContext& ctx) const
   {
-    const EventContext& ctx = Gaudi::Hive::currentContext();
 
     // retrieve track container
     SG::ReadHandle<xAOD::TrackParticleContainer> tracks(m_containerName, ctx );
@@ -80,14 +65,14 @@ namespace DerivationFramework {
     }
     SG::ReadHandle<xAOD::VertexContainer> vertices { m_vertexKey, ctx };
     if ( !vertices.isValid() )
-    {
-      ATH_MSG_ERROR ("Couldn't retrieve Vertices with key: " << m_vertexKey.key());
-      return StatusCode::FAILURE;
-    }
+      {
+        ATH_MSG_ERROR ("Couldn't retrieve Vertices with key: " << m_vertexKey.key());
+        return StatusCode::FAILURE;
+      }
 
     std::vector<SG::WriteDecorHandle<xAOD::TrackParticleContainer,float> >
       track_decorators = createDecorators<xAOD::TrackParticleContainer,float>(m_trackFloatDecorKeys,ctx);
-    // Run tool for each element and calculate the impact parameters/errors 
+    // Run tool for each element and calculate the impact parameters/errors
     for (const auto *trItr : *tracks) {
       std::unique_ptr<Trk::ImpactParametersAndSigma> iPandSigma;
       std::unique_ptr<Trk::ImpactParametersAndSigma> iPandSigmaBiased;
@@ -157,9 +142,9 @@ namespace DerivationFramework {
         track_decorators[kdecn_b_PVZ0ErrDecor] (*trItr )         = 999.;
         track_decorators[kdecn_b_PVZ0SinThetaErrDecor] (*trItr ) = 999.;
       }
-    } // end of loop over tracks          
-    
+    } // end of loop over tracks
+
     return StatusCode::SUCCESS;
-  }  
+  }
 
 }

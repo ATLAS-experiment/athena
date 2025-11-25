@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration.
  */
 #include "LumiBlockData/BunchCrossingCondData.h"
 #include "AthenaKernel/getMessageSvc.h"
@@ -107,14 +107,14 @@ unsigned BunchCrossingCondData::countColliding(int from, int to) const {
 
   if (from<0) {
     //wrap-around ...
-    for (int idx=m_MAX_BCID-from;idx<0;++idx) {
+    for (int idx=m_MAX_BCID+from;idx<m_MAX_BCID;++idx) {
       if (m_luminous.test(idx)) ++ncoll;      
     }
     from=0;
   }
 
   if (to>m_MAX_BCID) {
-    for (int idx=0;idx<m_MAX_BCID-to;++idx) {
+    for (int idx=0;idx<to-m_MAX_BCID;++idx) {
       if (m_luminous.test(idx)) ++ncoll;
     }
     to=m_MAX_BCID;

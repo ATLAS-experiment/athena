@@ -15,6 +15,7 @@
 #include "GaudiKernel/SmartIF.h"
 #include "StorageSvc/IDbDatabase.h"
 #include "StorageSvc/DbDatabase.h"
+#include "POOLCore/DbPrint.h"
 
 #include <set>
 #include <map>
@@ -22,12 +23,7 @@
 #include <unordered_map>
 
 // Forward declarations
-#if ROOT_VERSION_CODE >= ROOT_VERSION( 6, 35, 0 )
 namespace ROOT { class RNTupleReader; }
-#else
-namespace ROOT::Experimental { class RNTupleReader; }
-namespace ROOT { using RNTupleReader = ROOT::Experimental::RNTupleReader; }
-#endif
 
 class TFile;
 class TTree;
@@ -55,7 +51,7 @@ namespace pool  {
     * @date    1/8/2002
     * @version 1.0
     */
-   class RootDatabase : public IDbDatabase
+   class RootDatabase : public IDbDatabase, public APRMessaging
    {
   public:
     enum { READ_COUNTER = 0, WRITE_COUNTER = 1, OTHER_COUNTER = 2 };
@@ -141,6 +137,8 @@ namespace pool  {
 
     /// Access to the actual implemented file 
     TFile* file()                             { return m_file;    }
+    /// Get the DB name (here it is the TFile name)
+    std::string name() const;
 
     /// Get TTree by name from the TFile
     TTree* getTree(const std::string& name);
@@ -260,6 +258,8 @@ namespace pool  {
     void                increaseBasketsSize(TTree* tree);
 
     DbStatus            close();
+
+    void                printErrno(const char* nam, int err);
    };
 
 }       // End namespace pool

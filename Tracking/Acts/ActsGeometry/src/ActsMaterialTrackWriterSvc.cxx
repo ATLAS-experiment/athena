@@ -1,9 +1,9 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ActsGeometry/ActsMaterialTrackWriterSvc.h"
-#include "ActsGeometryInterfaces/ActsGeometryContext.h"
+#include "ActsGeometryInterfaces/GeometryContext.h"
 #include "GaudiKernel/IInterface.h"
 
 #include "TTree.h"
@@ -278,7 +278,7 @@ ActsMaterialTrackWriterSvc::doWrite(const Acts::RecordedMaterialTrack& mTrack)
       const Acts::Surface* surface = mint.surface;
       Acts::GeometryIdentifier layerID;
       if (surface) {
-        const ActsGeometryContext& gctx{m_trackingGeometrySvc->getNominalContext()};
+        const ActsTrk::GeometryContext& gctx{m_trackingGeometrySvc->getNominalContext()};
         auto sfIntersection = surface
           ->intersect(gctx.context(), mint.position,
                       mint.direction, Acts::BoundaryTolerance::None())

@@ -8,7 +8,6 @@
 #include "TauAnalysisTools/HelperFunctions.h"
 #include "TruthUtils/HepMCHelpers.h"
 #include "TruthUtils/ParticleConstants.h"
-#include "AthContainers/ConstAccessor.h"
 #include "TF1.h"
 
 #ifdef ASGTOOL_ATHENA

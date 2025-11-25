@@ -34,10 +34,11 @@
 #include "CollectionBase/ICollectionCursor.h"
 #include "CollectionBase/CollectionRowBuffer.h"
 #include "CollectionBase/TokenList.h"
+#include "StorageSvc/DbType.h"
 
 #include <boost/tokenizer.hpp>
 #include <algorithm>
-#include <sstream>
+#include <format>
 #include <vector>
 
 
@@ -56,7 +57,6 @@ namespace {
 EventSelectorAthenaPool::EventSelectorAthenaPool(const std::string& name, ISvcLocator* pSvcLocator) :
 	base_class(name, pSvcLocator)
 {
-   declareProperty("HelperTools", m_helperTools);
 
    // TODO: validate if those are even used
    m_runNo.verifier().setLower(0);
@@ -95,57 +95,47 @@ StatusCode EventSelectorAthenaPool::initialize() {
       ATH_MSG_DEBUG("Initializing " << name());
    }
 
-   if (!::AthService::initialize().isSuccess()) {
-      ATH_MSG_FATAL("Cannot initialize AthService base class.");
-      return(StatusCode::FAILURE);
-   }
+   ATH_CHECK(::AthService::initialize());
    // Check for input collection
    if (m_inputCollectionsProp.value().empty()) {
       ATH_MSG_FATAL("Use the property: EventSelector.InputCollections = "
 		      << "[ \"<collectionName>\" ] (list of collections)");
-      return(StatusCode::FAILURE);
+      return StatusCode::FAILURE;
    }
    boost::char_separator<char> sep_coma(","), sep_hyph("-");
    boost::tokenizer  ranges(m_skipEventRangesProp.value(), sep_coma);
    for( const std::string& r: ranges ) {
       boost::tokenizer  fromto(r, sep_hyph);
       auto from_iter = fromto.begin();
-      std::stringstream strstr1( *from_iter );
-      long from, to;
-      strstr1 >> from;
+      long from = std::stol(*from_iter);
+      long to = from;
       if( ++from_iter != fromto.end() ) {
-         std::stringstream strstr2( *from_iter );
-         strstr2 >> to;
-      } else {
-         to = from;
+         to = std::stol(*from_iter);
       }
-      m_skipEventRanges.push_back( std::pair(from,to) );
+      m_skipEventRanges.emplace_back(from, to);
    }
 
    for( auto v : m_skipEventSequenceProp.value() ) {
-      m_skipEventRanges.push_back( std::pair(v,v) );
+      m_skipEventRanges.emplace_back(v, v);
    }
    std::sort(m_skipEventRanges.begin(), m_skipEventRanges.end());
    if( msgLvl(MSG::DEBUG) ) {
-      std::stringstream skip_ranges_ss;
-      for( auto& r: m_skipEventRanges ) {
-         if( not skip_ranges_ss.str().empty() ) skip_ranges_ss << ", ";
-         skip_ranges_ss << r.first;
-         if( r.first != r.second) skip_ranges_ss << "-" << r.second;
+      std::string skip_ranges_str;
+      for( const auto& [first, second] : m_skipEventRanges ) {
+         if( !skip_ranges_str.empty() ) skip_ranges_str += ", ";
+         skip_ranges_str += std::to_string(first);
+         if( first != second) skip_ranges_str += std::format("-{}", second);
       }
-      if( not skip_ranges_ss.str().empty() )
-         ATH_MSG_DEBUG("Events to skip: " << skip_ranges_ss.str());
+      if( !skip_ranges_str.empty() )
+         ATH_MSG_DEBUG("Events to skip: " << skip_ranges_str);
    }
    // CollectionType must be one of:
    if (m_collectionType.value() != "RootCollection" && m_collectionType.value() != "ImplicitCollection") {
       ATH_MSG_FATAL("EventSelector.CollectionType must be one of: RootCollection, ImplicitCollection (default)");
-      return(StatusCode::FAILURE);
+      return StatusCode::FAILURE;
    }
    // Get IncidentSvc
-   if (!m_incidentSvc.retrieve().isSuccess()) {
-      ATH_MSG_FATAL("Cannot get " << m_incidentSvc.typeAndName() << ".");
-      return(StatusCode::FAILURE);
-   }
+   ATH_CHECK(m_incidentSvc.retrieve());
    // Listen to the Event Processing incidents
    if (m_eventStreamingTool.empty()) {
       m_incidentSvc->addListener(this, IncidentType::BeginProcessing, 0);
@@ -153,39 +143,26 @@ StatusCode EventSelectorAthenaPool::initialize() {
    }
 
    // Get AthenaPoolCnvSvc
-   if (!m_athenaPoolCnvSvc.retrieve().isSuccess()) {
-      ATH_MSG_FATAL("Cannot get " << m_athenaPoolCnvSvc.typeAndName() << ".");
-      return(StatusCode::FAILURE);
-   }
+   ATH_CHECK(m_athenaPoolCnvSvc.retrieve());
    // Get CounterTool (if configured)
-   if (!m_counterTool.empty() && !m_counterTool.retrieve().isSuccess()) {
-      ATH_MSG_FATAL("Cannot get CounterTool.");
-      return(StatusCode::FAILURE);
+   if (!m_counterTool.empty()) {
+      ATH_CHECK(m_counterTool.retrieve());
    }
    // Get HelperTools
-   if (!m_helperTools.retrieve().isSuccess()) {
-      ATH_MSG_FATAL("Cannot get " << m_helperTools);
-      return(StatusCode::FAILURE);
-   }
+   ATH_CHECK(m_helperTools.retrieve());
    // Get SharedMemoryTool (if configured)
    if (!m_eventStreamingTool.empty() && !m_eventStreamingTool.retrieve().isSuccess()) {
       ATH_MSG_FATAL("Cannot get " << m_eventStreamingTool.typeAndName() << "");
-      return(StatusCode::FAILURE);
+      return StatusCode::FAILURE;
    } else if (m_makeStreamingToolClient.value() == -1) {
       std::string dummyStr;
-      if (!m_eventStreamingTool->makeClient(m_makeStreamingToolClient.value(), dummyStr).isSuccess()) {
-         ATH_MSG_ERROR("Could not make AthenaPoolCnvSvc a Share Client");
-         return(StatusCode::FAILURE);
-      }
+      ATH_CHECK(m_eventStreamingTool->makeClient(m_makeStreamingToolClient.value(), dummyStr));
    }
 
    // Ensure the xAODCnvSvc is listed in the EventPersistencySvc
    ServiceHandle<IProperty> epSvc("EventPersistencySvc", name());
    std::vector<std::string> propVal;
-   if (!Gaudi::Parsers::parse(propVal , epSvc->getProperty("CnvServices").toString()).isSuccess()) {
-      ATH_MSG_FATAL("Cannot get EventPersistencySvc Property for CnvServices");
-      return(StatusCode::FAILURE);
-   }
+   ATH_CHECK(Gaudi::Parsers::parse(propVal , epSvc->getProperty("CnvServices").toString()));
    bool foundCnvSvc = false;
    for (const auto& property : propVal) {
       if (property == m_athenaPoolCnvSvc.type()) { foundCnvSvc = true; }
@@ -194,48 +171,43 @@ StatusCode EventSelectorAthenaPool::initialize() {
       propVal.push_back(m_athenaPoolCnvSvc.type());
       if (!epSvc->setProperty("CnvServices", Gaudi::Utils::toString(propVal)).isSuccess()) {
          ATH_MSG_FATAL("Cannot set EventPersistencySvc Property for CnvServices");
-         return(StatusCode::FAILURE);
+         return StatusCode::FAILURE;
       }
    }
 
    // Register this service for 'I/O' events
    ServiceHandle<IIoComponentMgr> iomgr("IoComponentMgr", name());
-   if (!iomgr.retrieve().isSuccess()) {
-      ATH_MSG_FATAL("Could not retrieve IoComponentMgr !");
-      return(StatusCode::FAILURE);
-   }
-   if (!iomgr->io_register(this).isSuccess()) {
-      ATH_MSG_FATAL("Could not register myself with the IoComponentMgr !");
-      return(StatusCode::FAILURE);
-   }
+   ATH_CHECK(iomgr.retrieve());
+   ATH_CHECK(iomgr->io_register(this));
    // Register input file's names with the I/O manager
    const std::vector<std::string>& incol = m_inputCollectionsProp.value();
    bool allGood = true;
-   std::string fileName, fileType;
-   for (std::size_t icol = 0, imax = incol.size(); icol < imax; icol++) {
-      if (incol[icol].substr(0, 4) == "LFN:" || incol[icol].substr(0, 4) == "FID:") {
-         m_athenaPoolCnvSvc->getPoolSvc()->lookupBestPfn(incol[icol], fileName, fileType);
+   std::string fileName;
+   std::string fileType;
+   for (const auto& inputCollection : incol) {
+      if (inputCollection.starts_with("LFN:") || inputCollection.starts_with("FID:")) {
+         m_athenaPoolCnvSvc->getPoolSvc()->lookupBestPfn(inputCollection, fileName, fileType);
       } else {
-         fileName = incol[icol];
+         fileName = inputCollection;
       }
-      if (fileName.substr(0, 4) == "PFN:") {
+      if (fileName.starts_with("PFN:")) {
          fileName = fileName.substr(4);
       }
-      if (!iomgr->io_register(this, IIoComponentMgr::IoMode::READ, incol[icol], fileName).isSuccess()) {
-         ATH_MSG_FATAL("could not register [" << incol[icol] << "] for output !");
+      if (!iomgr->io_register(this, IIoComponentMgr::IoMode::READ, inputCollection, fileName).isSuccess()) {
+         ATH_MSG_FATAL("could not register [" << inputCollection << "] for output !");
          allGood = false;
       } else {
-         ATH_MSG_VERBOSE("io_register[" << this->name() << "](" << incol[icol] << ") [ok]");
+         ATH_MSG_VERBOSE("io_register[" << this->name() << "](" << inputCollection << ") [ok]");
       }
    }
    if (!allGood) {
-      return(StatusCode::FAILURE);
+      return StatusCode::FAILURE;
    }
 
    // Connect to PersistencySvc
    if (!m_athenaPoolCnvSvc->getPoolSvc()->connect(pool::ITransaction::READ, IPoolSvc::kInputStream).isSuccess()) {
       ATH_MSG_FATAL("Cannot connect to POOL PersistencySvc.");
-      return(StatusCode::FAILURE);
+      return StatusCode::FAILURE;
    }
    // Jump to reinit() to execute common init/reinit actions
    m_guid = Guid::null();
@@ -247,9 +219,7 @@ StatusCode EventSelectorAthenaPool::reinit() const {
 
    // reset markers
    m_numEvt.resize(m_inputCollectionsProp.value().size(), -1);
-   for( auto& el : m_numEvt ) el = -1;
    m_firstEvt.resize(m_inputCollectionsProp.value().size(), -1);
-   for( auto& el : m_firstEvt ) el = -1;
 
    // Initialize InputCollectionsIterator
    m_inputCollectionsIterator = m_inputCollectionsProp.value().begin();
@@ -262,7 +232,7 @@ StatusCode EventSelectorAthenaPool::reinit() const {
    m_headerIterator = 0;
    if (!m_eventStreamingTool.empty() && m_eventStreamingTool->isClient()) {
       ATH_MSG_INFO("Done reinitialization for shared reader client");
-      return(StatusCode::SUCCESS);
+      return StatusCode::SUCCESS;
    }
    bool retError = false;
    for (auto& tool : m_helperTools) {
@@ -273,7 +243,7 @@ StatusCode EventSelectorAthenaPool::reinit() const {
    }
    if (retError) {
       ATH_MSG_FATAL("Failed to postInitialize() helperTools");
-      return(StatusCode::FAILURE);
+      return StatusCode::FAILURE;
    }
 
    // Create an m_poolCollectionConverter to read the objects in
@@ -290,7 +260,7 @@ StatusCode EventSelectorAthenaPool::reinit() const {
             m_firedIncident = true;
          }
       }
-      return(StatusCode::SUCCESS);
+      return StatusCode::SUCCESS;
    }
    // Get DataHeader iterator
    try {
@@ -298,7 +268,7 @@ StatusCode EventSelectorAthenaPool::reinit() const {
    } catch (std::exception &e) {
       ATH_MSG_FATAL("Cannot open implicit collection - check data/software version.");
       ATH_MSG_ERROR(e.what());
-      return(StatusCode::FAILURE);
+      return StatusCode::FAILURE;
    }
    while (m_headerIterator == nullptr || m_headerIterator->next() == 0) { // no selected events
       if (m_poolCollectionConverter) {
@@ -318,7 +288,7 @@ StatusCode EventSelectorAthenaPool::reinit() const {
       m_curCollection = 0;
       m_poolCollectionConverter = getCollectionCnv();
       if (!m_poolCollectionConverter) {
-         return(StatusCode::SUCCESS);
+         return StatusCode::SUCCESS;
       }
       m_headerIterator = &m_poolCollectionConverter->selectAll();
       while (m_headerIterator == nullptr || m_headerIterator->next() == 0) { // empty collection
@@ -336,7 +306,7 @@ StatusCode EventSelectorAthenaPool::reinit() const {
       }
    }
    if (!m_poolCollectionConverter || m_headerIterator == nullptr) {
-      return(StatusCode::SUCCESS);
+      return StatusCode::SUCCESS;
    }
    const Token& headRef = m_headerIterator->eventRef();
    const std::string fid = headRef.dbID().toString();
@@ -349,7 +319,7 @@ StatusCode EventSelectorAthenaPool::reinit() const {
       m_incidentSvc->fireIncident(firstInputFileIncident);
       m_firedIncident = true;
    }
-   return(StatusCode::SUCCESS);
+   return StatusCode::SUCCESS;
 }
 //________________________________________________________________________________
 StatusCode EventSelectorAthenaPool::start() {
@@ -361,7 +331,7 @@ StatusCode EventSelectorAthenaPool::start() {
    m_inputCollectionsIterator = m_inputCollectionsProp.value().begin();
    m_curCollection = 0;
    if (!m_eventStreamingTool.empty() && m_eventStreamingTool->isClient()) {
-      return(StatusCode::SUCCESS);
+      return StatusCode::SUCCESS;
    }
    m_poolCollectionConverter = getCollectionCnv(true);
    if (!m_poolCollectionConverter) {
@@ -377,18 +347,18 @@ StatusCode EventSelectorAthenaPool::start() {
    delete m_endIter;
    m_endIter = nullptr;
    m_endIter = new EventContextAthenaPool(nullptr);
-   return(StatusCode::SUCCESS);
+   return StatusCode::SUCCESS;
 }
 //________________________________________________________________________________
 StatusCode EventSelectorAthenaPool::stop() {
    if (!m_eventStreamingTool.empty() && m_eventStreamingTool->isClient()) {
-      return(StatusCode::SUCCESS);
+      return StatusCode::SUCCESS;
    }
    IEvtSelector::Context* ctxt(nullptr);
    if (!releaseContext(ctxt).isSuccess()) {
       ATH_MSG_WARNING("Cannot release context");
    }
-   return(StatusCode::SUCCESS);
+   return StatusCode::SUCCESS;
 }
 
 //________________________________________________________________________________
@@ -425,34 +395,14 @@ StatusCode EventSelectorAthenaPool::finalize() {
    if (m_poolCollectionConverter) {
      m_poolCollectionConverter.reset();
    }
-   // Release AthenaSharedMemoryTool
-   if (!m_eventStreamingTool.empty() && !m_eventStreamingTool.release().isSuccess()) {
-      ATH_MSG_WARNING("Cannot release AthenaSharedMemoryTool");
-   }
-   // Release CounterTool
-   if (!m_counterTool.empty() && !m_counterTool.release().isSuccess()) {
-      ATH_MSG_WARNING("Cannot release CounterTool.");
-   }
-   // Release HelperTools
-   if (!m_helperTools.release().isSuccess()) {
-      ATH_MSG_WARNING("Cannot release " << m_helperTools);
-   }
-   // Release AthenaPoolCnvSvc
-   if (!m_athenaPoolCnvSvc.release().isSuccess()) {
-      ATH_MSG_WARNING("Cannot release " << m_athenaPoolCnvSvc.typeAndName() << ".");
-   }
-   // Release IncidentSvc
-   if (!m_incidentSvc.release().isSuccess()) {
-      ATH_MSG_WARNING("Cannot release " << m_incidentSvc.typeAndName() << ".");
-   }
    // Finalize the Service base class.
-   return(::AthService::finalize());
+   return ::AthService::finalize();
 }
 
 //________________________________________________________________________________
 StatusCode EventSelectorAthenaPool::createContext(IEvtSelector::Context*& ctxt) const {
    ctxt = new EventContextAthenaPool(this);
-   return(StatusCode::SUCCESS);
+   return StatusCode::SUCCESS;
 }
 //________________________________________________________________________________
 StatusCode EventSelectorAthenaPool::next(IEvtSelector::Context& ctxt) const {
@@ -475,12 +425,12 @@ StatusCode EventSelectorAthenaPool::next(IEvtSelector::Context& ctxt) const {
          // Return end iterator
          ctxt = *m_endIter;
          // This is not a real failure but a Gaudi way of handling "end of job"
-         return(StatusCode::FAILURE);
+         return StatusCode::FAILURE;
       }
       if (sc.isFailure()) {
          ATH_MSG_FATAL("Cannot get NextEvent from AthenaSharedMemoryTool");
          delete [] (char*)tokenStr; tokenStr = nullptr;
-         return(StatusCode::FAILURE);
+         return StatusCode::FAILURE;
       }
       if (!eventStore()->clearStore().isSuccess()) {
          ATH_MSG_WARNING("Cannot clear Store");
@@ -492,7 +442,7 @@ StatusCode EventSelectorAthenaPool::next(IEvtSelector::Context& ctxt) const {
       if (!wh.record(std::move(athAttrList)).isSuccess()) {
          delete [] (char*)tokenStr; tokenStr = nullptr;
          ATH_MSG_ERROR("Cannot record AttributeList to StoreGate " << StoreID::storeName(eventStore()->storeID()));
-         return(StatusCode::FAILURE);
+         return StatusCode::FAILURE;
       }
       Token token;
       token.fromString(std::string((char*)tokenStr));
@@ -508,7 +458,7 @@ StatusCode EventSelectorAthenaPool::next(IEvtSelector::Context& ctxt) const {
          FileIncident beginInputFileIncident(name(), "BeginInputFile", "FID:" + m_guid.toString(), m_guid.toString());
          m_incidentSvc->fireIncident(beginInputFileIncident);
       }
-      return(StatusCode::SUCCESS);
+      return StatusCode::SUCCESS;
    }
    for (const auto& tool : m_helperTools) {
       if (!tool->preNext().isSuccess()) {
@@ -536,7 +486,7 @@ StatusCode EventSelectorAthenaPool::next(IEvtSelector::Context& ctxt) const {
             IDataShare* ds = dynamic_cast<IDataShare*>(m_athenaPoolCnvSvc.get());
             if (ds == nullptr) {
                ATH_MSG_ERROR("Cannot cast AthenaPoolCnvSvc to DataShare");
-               return(StatusCode::FAILURE);
+               return StatusCode::FAILURE;
             }
             std::string token = m_headerIterator->eventRef().toString();
             StatusCode sc;
@@ -550,7 +500,7 @@ StatusCode EventSelectorAthenaPool::next(IEvtSelector::Context& ctxt) const {
             }
             if (!sc.isSuccess()) {
                ATH_MSG_ERROR("Cannot put Event " << m_evtCount - 1 << " to AthenaSharedMemoryTool");
-               return(StatusCode::FAILURE);
+               return StatusCode::FAILURE;
             }
          } else {
             if (!m_isSecondary.value()) {
@@ -559,7 +509,7 @@ StatusCode EventSelectorAthenaPool::next(IEvtSelector::Context& ctxt) const {
                }
                if (!recordAttributeList().isSuccess()) {
                   ATH_MSG_ERROR("Failed to record AttributeList.");
-                  return(StatusCode::FAILURE);
+                  return StatusCode::FAILURE;
                }
             }
          }
@@ -593,7 +543,7 @@ StatusCode EventSelectorAthenaPool::next(IEvtSelector::Context& ctxt) const {
          ATH_MSG_INFO("skipping event " << m_evtCount);
       }
    }
-   return(StatusCode::SUCCESS);
+   return StatusCode::SUCCESS;
 }
 //________________________________________________________________________________
 StatusCode EventSelectorAthenaPool::next(IEvtSelector::Context& ctxt, int jump) const {
@@ -601,9 +551,9 @@ StatusCode EventSelectorAthenaPool::next(IEvtSelector::Context& ctxt, int jump) 
       for (int i = 0; i < jump; i++) {
          ATH_CHECK(next(ctxt));
       }
-      return(StatusCode::SUCCESS);
+      return StatusCode::SUCCESS;
    }
-   return(StatusCode::FAILURE);
+   return StatusCode::FAILURE;
 }
 //________________________________________________________________________________
 StatusCode EventSelectorAthenaPool::nextHandleFileTransition(IEvtSelector::Context& ctxt) const
@@ -668,7 +618,7 @@ StatusCode EventSelectorAthenaPool::nextHandleFileTransition(IEvtSelector::Conte
          // For now, we can only deal with input metadata from POOL files, but we know we have a POOL file here
          if (!m_athenaPoolCnvSvc->setInputAttributes(*m_inputCollectionsIterator).isSuccess()) {
                ATH_MSG_ERROR("Failed to set input attributes.");
-               return(StatusCode::FAILURE);
+               return StatusCode::FAILURE;
          }
          if (m_processMetadata.value()) {
             FileIncident beginInputFileIncident(name(), "BeginInputFile", *m_inputCollectionsIterator, m_guid.toString());
@@ -725,7 +675,7 @@ StatusCode EventSelectorAthenaPool::nextWithSkip(IEvtSelector::Context& ctxt) co
 //________________________________________________________________________________
 StatusCode EventSelectorAthenaPool::previous(IEvtSelector::Context& /*ctxt*/) const {
    ATH_MSG_ERROR("previous() not implemented");
-   return(StatusCode::FAILURE);
+   return StatusCode::FAILURE;
 }
 //________________________________________________________________________________
 StatusCode EventSelectorAthenaPool::previous(IEvtSelector::Context& ctxt, int jump) const {
@@ -733,23 +683,23 @@ StatusCode EventSelectorAthenaPool::previous(IEvtSelector::Context& ctxt, int ju
       for (int i = 0; i < jump; i++) {
          ATH_CHECK(previous(ctxt));
       }
-      return(StatusCode::SUCCESS);
+      return StatusCode::SUCCESS;
    }
-   return(StatusCode::FAILURE);
+   return StatusCode::FAILURE;
 }
 //________________________________________________________________________________
 StatusCode EventSelectorAthenaPool::last(IEvtSelector::Context& ctxt) const {
    if (ctxt.identifier() == m_endIter->identifier()) {
       ATH_MSG_DEBUG("last(): Last event in InputStream.");
-      return(StatusCode::SUCCESS);
+      return StatusCode::SUCCESS;
    }
-   return(StatusCode::FAILURE);
+   return StatusCode::FAILURE;
 }
 //________________________________________________________________________________
 StatusCode EventSelectorAthenaPool::rewind(IEvtSelector::Context& ctxt) const {
    ATH_CHECK(reinit());
    ctxt = EventContextAthenaPool(this);
-   return(StatusCode::SUCCESS);
+   return StatusCode::SUCCESS;
 }
 //________________________________________________________________________________
 StatusCode EventSelectorAthenaPool::createAddress(const IEvtSelector::Context& /*ctxt*/,
@@ -762,7 +712,7 @@ StatusCode EventSelectorAthenaPool::createAddress(const IEvtSelector::Context& /
          ATH_MSG_DEBUG("found AthenaAttribute, name = eventRef = " << tokenStr);
       } catch (std::exception &e) {
          ATH_MSG_ERROR(e.what());
-         return(StatusCode::FAILURE);
+         return StatusCode::FAILURE;
       }
    } else {
       ATH_MSG_WARNING("Cannot find AthenaAttribute, key = " << m_attrListKey.value());
@@ -770,17 +720,17 @@ StatusCode EventSelectorAthenaPool::createAddress(const IEvtSelector::Context& /
    }
    auto token = std::make_unique<Token>();
    token->fromString(tokenStr);
-   iop = new TokenAddress(POOL_StorageType, ClassID_traits<DataHeader>::ID(), "", "EventSelector", IPoolSvc::kInputStream, std::move(token));
-   return(StatusCode::SUCCESS);
+   iop = new TokenAddress(pool::POOL_StorageType.type(), ClassID_traits<DataHeader>::ID(), "", "EventSelector", IPoolSvc::kInputStream, std::move(token));
+   return StatusCode::SUCCESS;
 }
 //________________________________________________________________________________
 StatusCode EventSelectorAthenaPool::releaseContext(IEvtSelector::Context*& /*ctxt*/) const {
-   return(StatusCode::SUCCESS);
+   return StatusCode::SUCCESS;
 }
 //________________________________________________________________________________
 StatusCode EventSelectorAthenaPool::resetCriteria(const std::string& /*criteria*/,
 		IEvtSelector::Context& /*ctxt*/) const {
-   return(StatusCode::SUCCESS);
+   return StatusCode::SUCCESS;
 }
 //__________________________________________________________________________
 StatusCode EventSelectorAthenaPool::seek(Context& /*ctxt*/, int evtNum) const {
@@ -798,7 +748,7 @@ StatusCode EventSelectorAthenaPool::seek(Context& /*ctxt*/, int evtNum) const {
       m_headerIterator = nullptr;
       ATH_MSG_INFO("seek: Reached end of Input.");
       fireEndFileIncidents(true);
-      return(StatusCode::RECOVERABLE);
+      return StatusCode::RECOVERABLE;
    }
    if (newColl != m_curCollection) {
       if (!m_keepInputFilesOpen.value() && m_poolCollectionConverter) {
@@ -820,7 +770,7 @@ StatusCode EventSelectorAthenaPool::seek(Context& /*ctxt*/, int evtNum) const {
          if (!m_poolCollectionConverter->initialize().isSuccess()) {
             m_headerIterator = nullptr;
             ATH_MSG_ERROR("seek: Unable to initialize PoolCollectionConverter.");
-            return(StatusCode::FAILURE);
+            return StatusCode::FAILURE;
          }
          // Create DataHeader iterators
          m_headerIterator = &m_poolCollectionConverter->selectAll();
@@ -831,18 +781,18 @@ StatusCode EventSelectorAthenaPool::seek(Context& /*ctxt*/, int evtNum) const {
       } catch (std::exception &e) {
          m_headerIterator = nullptr;
          ATH_MSG_ERROR(e.what());
-         return(StatusCode::FAILURE);
+         return StatusCode::FAILURE;
       }
    }
 
    if (m_headerIterator->seek(evtNum - m_firstEvt[m_curCollection]) == 0) {
       m_headerIterator = nullptr;
       ATH_MSG_ERROR("Did not find event, evtNum = " << evtNum);
-      return(StatusCode::FAILURE);
+      return StatusCode::FAILURE;
    } else {
       m_evtCount = evtNum + 1;
    }
-   return(StatusCode::SUCCESS);
+   return StatusCode::SUCCESS;
 }
 //__________________________________________________________________________
 int EventSelectorAthenaPool::curEvent (const Context& /*ctxt*/) const {
@@ -887,20 +837,20 @@ StatusCode EventSelectorAthenaPool::makeServer(int num) {
    IDataShare* ds = dynamic_cast<IDataShare*>(m_athenaPoolCnvSvc.get());
    if (ds == nullptr) {
       ATH_MSG_ERROR("Cannot cast AthenaPoolCnvSvc to DataShare");
-      return(StatusCode::FAILURE);
+      return StatusCode::FAILURE;
    }
    if (num < 0) {
       if (ds->makeServer(num - 1).isFailure()) {
          ATH_MSG_ERROR("Failed to switch AthenaPoolCnvSvc to output DataStreaming server");
       }
-      return(StatusCode::SUCCESS);
+      return StatusCode::SUCCESS;
    }
    if (ds->makeServer(num + 1).isFailure()) {
       ATH_MSG_ERROR("Failed to switch AthenaPoolCnvSvc to input DataStreaming server");
-      return(StatusCode::FAILURE);
+      return StatusCode::FAILURE;
    }
    if (m_eventStreamingTool.empty()) {
-      return(StatusCode::SUCCESS);
+      return StatusCode::SUCCESS;
    }
    m_processMetadata = false;
    ATH_MSG_DEBUG("makeServer: " << m_eventStreamingTool << " = " << num);
@@ -912,14 +862,14 @@ StatusCode EventSelectorAthenaPool::makeClient(int num) {
    IDataShare* ds = dynamic_cast<IDataShare*>(m_athenaPoolCnvSvc.get());
    if (ds == nullptr) {
       ATH_MSG_ERROR("Cannot cast AthenaPoolCnvSvc to DataShare");
-      return(StatusCode::FAILURE);
+      return StatusCode::FAILURE;
    }
    if (ds->makeClient(num + 1).isFailure()) {
       ATH_MSG_ERROR("Failed to switch AthenaPoolCnvSvc to DataStreaming client");
-      return(StatusCode::FAILURE);
+      return StatusCode::FAILURE;
    }
    if (m_eventStreamingTool.empty()) {
-      return(StatusCode::SUCCESS);
+      return StatusCode::SUCCESS;
    }
    ATH_MSG_DEBUG("makeClient: " << m_eventStreamingTool << " = " << num);
    std::string dummyStr;
@@ -931,7 +881,7 @@ StatusCode EventSelectorAthenaPool::share(int evtnum) {
    IDataShare* ds = dynamic_cast<IDataShare*>(m_athenaPoolCnvSvc.get());
    if (ds == nullptr) {
       ATH_MSG_ERROR("Cannot cast AthenaPoolCnvSvc to DataShare");
-      return(StatusCode::FAILURE);
+      return StatusCode::FAILURE;
    }
    if (!m_eventStreamingTool.empty() && m_eventStreamingTool->isClient()) {
       StatusCode sc = m_eventStreamingTool->lockEvent(evtnum);
@@ -942,7 +892,7 @@ StatusCode EventSelectorAthenaPool::share(int evtnum) {
 // Send stop client and wait for restart
       if (sc.isFailure()) {
          if (ds->makeClient(0).isFailure()) {
-            return(StatusCode::FAILURE);
+            return StatusCode::FAILURE;
          }
          sc = m_eventStreamingTool->lockEvent(evtnum);
          while (sc.isRecoverable() || sc.isFailure()) {
@@ -951,12 +901,12 @@ StatusCode EventSelectorAthenaPool::share(int evtnum) {
          }
 //FIXME
          if (ds->makeClient(1).isFailure()) {
-            return(StatusCode::FAILURE);
+            return StatusCode::FAILURE;
          }
       }
       return(sc);
    }
-   return(StatusCode::FAILURE);
+   return StatusCode::FAILURE;
 }
 
 //________________________________________________________________________________
@@ -964,11 +914,11 @@ StatusCode EventSelectorAthenaPool::readEvent(int maxevt) {
    IDataShare* ds = dynamic_cast<IDataShare*>(m_athenaPoolCnvSvc.get());
    if (ds == nullptr) {
       ATH_MSG_ERROR("Cannot cast AthenaPoolCnvSvc to DataShare");
-      return(StatusCode::FAILURE);
+      return StatusCode::FAILURE;
    }
    if (m_eventStreamingTool.empty()) {
       ATH_MSG_ERROR("No AthenaSharedMemoryTool configured for readEvent()");
-      return(StatusCode::FAILURE);
+      return StatusCode::FAILURE;
    }
    ATH_MSG_VERBOSE("Called read Event " << maxevt);
    IEvtSelector::Context* ctxt = new EventContextAthenaPool(this);
@@ -980,7 +930,7 @@ StatusCode EventSelectorAthenaPool::readEvent(int maxevt) {
          }
          ATH_MSG_ERROR("Cannot read Event " << m_evtCount - 1 << " into AthenaSharedMemoryTool");
          delete ctxt; ctxt = nullptr;
-         return(StatusCode::FAILURE);
+         return StatusCode::FAILURE;
       } else {
          ATH_MSG_VERBOSE("Called next, read Event " << m_evtCount - 1);
       }
@@ -996,7 +946,7 @@ StatusCode EventSelectorAthenaPool::readEvent(int maxevt) {
    }
    if (!sc.isSuccess()) {
       ATH_MSG_ERROR("Cannot put last Event marker to AthenaSharedMemoryTool");
-      return(StatusCode::FAILURE);
+      return StatusCode::FAILURE;
    } else {
       sc = ds->readData();
       while (sc.isSuccess() || sc.isRecoverable()) {
@@ -1004,18 +954,14 @@ StatusCode EventSelectorAthenaPool::readEvent(int maxevt) {
       }
       ATH_MSG_DEBUG("Failed last readData -> Clients are stopped, after marking last event in readEvent()");
    }
-   return(StatusCode::SUCCESS);
+   return StatusCode::SUCCESS;
 }
 
 //__________________________________________________________________________
 int EventSelectorAthenaPool::size(Context& /*ctxt*/) const {
    // Fetch sizes of all collections.
    findEvent(-1);
-   int sz = 0;
-   for (std::size_t i = 0, imax = m_numEvt.size(); i < imax; i++) {
-      sz += m_numEvt[i];
-   }
-   return(sz);
+   return std::accumulate(m_numEvt.begin(), m_numEvt.end(), 0);
 }
 //__________________________________________________________________________
 std::unique_ptr<PoolCollectionConverter>
@@ -1073,11 +1019,8 @@ StatusCode EventSelectorAthenaPool::recordAttributeList() const {
    ATH_CHECK(fillAttributeList(athAttrList.get(), "", false));
    // Write the AttributeList
    SG::WriteHandle<AthenaAttributeList> wh(m_attrListKey.value(), eventStore()->name());
-   if (!wh.record(std::move(athAttrList)).isSuccess()) {
-      ATH_MSG_ERROR("Cannot record AttributeList to StoreGate " << StoreID::storeName(eventStore()->storeID()));
-      return(StatusCode::FAILURE);
-   }
-   return(StatusCode::SUCCESS);
+   ATH_CHECK(wh.record(std::move(athAttrList)));
+   return StatusCode::SUCCESS;
 }
 //__________________________________________________________________________
 StatusCode EventSelectorAthenaPool::fillAttributeList(coral::AttributeList *attrList, const std::string &suffix, bool copySource) const
@@ -1118,11 +1061,11 @@ StatusCode EventSelectorAthenaPool::io_reinit() {
    ServiceHandle<IIoComponentMgr> iomgr("IoComponentMgr", name());
    if (!iomgr.retrieve().isSuccess()) {
       ATH_MSG_FATAL("Could not retrieve IoComponentMgr !");
-      return(StatusCode::FAILURE);
+      return StatusCode::FAILURE;
    }
    if (!iomgr->io_hasitem(this)) {
       ATH_MSG_FATAL("IoComponentMgr does not know about myself !");
-      return(StatusCode::FAILURE);
+      return StatusCode::FAILURE;
    }
    if (!m_eventStreamingTool.empty() && m_eventStreamingTool->isClient()) {
       m_guid = Guid::null();
@@ -1136,11 +1079,11 @@ StatusCode EventSelectorAthenaPool::io_reinit() {
       std::string &fname = inputCollections[i];
       if (!iomgr->io_contains(this, fname)) {
          ATH_MSG_ERROR("IoComponentMgr does not know about [" << fname << "] !");
-         return(StatusCode::FAILURE);
+         return StatusCode::FAILURE;
       }
       if (!iomgr->io_retrieve(this, fname).isSuccess()) {
          ATH_MSG_FATAL("Could not retrieve new value for [" << fname << "] !");
-         return(StatusCode::FAILURE);
+         return StatusCode::FAILURE;
       }
       if (savedName != fname) {
          ATH_MSG_DEBUG("Mapping value for [" << savedName << "] to [" << fname << "]");
@@ -1166,7 +1109,7 @@ StatusCode EventSelectorAthenaPool::io_finalize() {
       m_poolCollectionConverter->disconnectDb().ignore();
       m_poolCollectionConverter.reset();
    }
-   return(StatusCode::SUCCESS);
+   return StatusCode::SUCCESS;
 }
 
 //__________________________________________________________________________

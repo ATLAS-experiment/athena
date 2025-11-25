@@ -1,0 +1,1414 @@
+Py:Athena            INFO including file "DataModelRunTests/xAODRootTest.py"
+xAOD::Init                INFO    Environment initialised for data access
+Athena::getMessageSvc: WARNING MessageSvc not found, will use std::cout
+xAOD::Experimen...WARNING Auxiliary store "ctrigAux." is of an unknown type: DMTest::CTrigAuxContainer_v1
+---> Event 0
+cvec
+  anInt1: 201; aFloat: 400.0; anInt: 201; anInt2: 601; cEL: cvec[9]; dInt1: 801; dVar1: 901; 
+  anInt1: 202; aFloat: 400.1; anInt: 202; anInt2: 602; cEL: cvec[8]; dInt1: 802; dVar1: 902; 
+  anInt1: 203; aFloat: 400.2; anInt: 203; anInt2: 603; cEL: cvec[7]; dInt1: 803; dVar1: 903; 
+  anInt1: 204; aFloat: 400.3; anInt: 204; anInt2: 604; cEL: cvec[6]; dInt1: 804; dVar1: 904; 
+  anInt1: 205; aFloat: 400.4; anInt: 205; anInt2: 605; cEL: cvec[5]; dInt1: 805; dVar1: 905; 
+  anInt1: 206; aFloat: 400.5; anInt: 206; anInt2: 606; cEL: cvec[4]; dInt1: 806; dVar1: 906; 
+  anInt1: 207; aFloat: 400.6; anInt: 207; anInt2: 607; cEL: cvec[3]; dInt1: 807; dVar1: 907; 
+  anInt1: 208; aFloat: 400.7; anInt: 208; anInt2: 608; cEL: cvec[2]; dInt1: 808; dVar1: 908; 
+  anInt1: 209; aFloat: 400.8; anInt: 209; anInt2: 609; cEL: cvec[1]; dInt1: 809; dVar1: 909; 
+  anInt1: 210; aFloat: 400.9; anInt: 210; anInt2: 610; cEL: cvec[0]; dInt1: 810; dVar1: 910; 
+cinfo
+  anInt1: 2000; aFloat: 0.2; anInt: 2000; anInt2: 4000; cEL: cvec[2]; dInt1: 6000; dInt1Base: 6001; 
+ctrig
+  anInt1: 1001; aFloat: 1200.0; anInt: 1001; anInt2: 1401; dInt1: 961; 
+  anInt1: 1002; aFloat: 1200.1; anInt: 1002; anInt2: 1402; dInt1: 962; 
+  anInt1: 1003; aFloat: 1200.2; anInt: 1003; anInt2: 1403; dInt1: 963; 
+  anInt1: 1004; aFloat: 1200.3; anInt: 1004; anInt2: 1404; dInt1: 964; 
+  anInt1: 1005; aFloat: 1200.4; anInt: 1005; anInt2: 1405; dInt1: 965; 
+  anInt1: 1006; aFloat: 1200.5; anInt: 1006; anInt2: 1406; dInt1: 966; 
+  anInt1: 1007; aFloat: 1200.6; anInt: 1007; anInt2: 1407; dInt1: 967; 
+  anInt1: 1008; aFloat: 1200.7; anInt: 1008; anInt2: 1408; dInt1: 968; 
+cvecWD  1002
+  anInt1: 401; aFloat: 0.0; anInt: 401; 
+  anInt1: 402; aFloat: 0.0; anInt: 402; 
+  anInt1: 403; aFloat: 0.0; anInt: 403; 
+  anInt1: 404; aFloat: 0.0; anInt: 404; 
+  anInt1: 405; aFloat: 0.0; anInt: 405; 
+  anInt1: 406; aFloat: 0.0; anInt: 406; 
+  anInt1: 407; aFloat: 0.0; anInt: 407; 
+  anInt1: 408; aFloat: 0.0; anInt: 408; 
+  anInt1: 409; aFloat: 0.0; anInt: 409; 
+  anInt1: 410; aFloat: 0.0; anInt: 410; 
+hvec
+anInt: 801; 
+anInt: 802; 
+anInt: 803; 
+anInt: 804; 
+anInt: 805; 
+anInt: 806; 
+anInt: 807; 
+anInt: 808; 
+anInt: 809; 
+anInt: 810; 
+anInt: 811; 
+anInt: 812; 
+anInt: 813; 
+anInt: 814; 
+anInt: 815; 
+anInt: 816; 
+anInt: 817; 
+anInt: 818; 
+anInt: 819; 
+anInt: 820; 
+jvecContainer
+decorJVec: [300.5,301.5]; fvec: [200.5]; ivec: []; lvec: [cvec[0], cvec[1], cvec[2]]; svec: ['str450','str451']; 
+decorJVec: [301.5,302.5,303.5]; fvec: [201.5,202.5]; ivec: [101]; lvec: [cvec[1], cvec[2], cvec[3], cvec[4]]; svec: ['str451','str452','str453']; 
+decorJVec: [302.5,303.5,304.5,305.5]; fvec: [202.5,203.5,204.5]; ivec: [102,103]; lvec: []; svec: ['str452','str453','str454','str455']; 
+decorJVec: []; fvec: [203.5,204.5,205.5,206.5]; ivec: [103,104,105]; lvec: [cvec[3]]; svec: []; 
+decorJVec: [304.5]; fvec: []; ivec: [104,105,106,107]; lvec: [cvec[4], cvec[5]]; svec: ['str454']; 
+jvecInfo
+decorJVec: [404.5]; fvec: [1201.5,1202.5]; ivec: [1101]; lvec: [cvec[1], cvec[2], cvec[3], cvec[4]]; svec: ['str1451','str1452','str1453']; 
+plinksContainer
+decorLink: cvec[0]; decorVLinks: [ctrig[4], [inv], cvec[6]]; plink: cvec[0]; vlinks: []; 
+decorLink: ctrig[1]; decorVLinks: [[inv], cvec[6], ctrig[7], [inv]]; plink: ctrig[1]; vlinks: [[inv]]; 
+decorLink: [inv]; decorVLinks: []; plink: [inv]; vlinks: [cvec[3], ctrig[4]]; 
+decorLink: cvec[3]; decorVLinks: [ctrig[7]]; plink: cvec[3]; vlinks: [ctrig[4], [inv], cvec[6]]; 
+decorLink: ctrig[4]; decorVLinks: [[inv], cvec[9]]; plink: ctrig[4]; vlinks: [[inv], cvec[6], ctrig[7], [inv]]; 
+plinksInfo
+decorLink: ctrig[4]; decorVLinks: [[inv], cvec[9]]; plink: cvec[3]; vlinks: [ctrig[4], [inv], cvec[6]]; 
+---> Event 1
+cvec
+  anInt1: 301; aFloat: 600.0; anInt: 301; anInt2: 901; cEL: cvec[9]; dInt1: 1201; dVar1: 1351; 
+  anInt1: 302; aFloat: 600.1; anInt: 302; anInt2: 902; cEL: cvec[8]; dInt1: 1202; dVar1: 1352; 
+  anInt1: 303; aFloat: 600.2; anInt: 303; anInt2: 903; cEL: cvec[7]; dInt1: 1203; dVar1: 1353; 
+  anInt1: 304; aFloat: 600.3; anInt: 304; anInt2: 904; cEL: cvec[6]; dInt1: 1204; dVar1: 1354; 
+  anInt1: 305; aFloat: 600.4; anInt: 305; anInt2: 905; cEL: cvec[5]; dInt1: 1205; dVar1: 1355; 
+  anInt1: 306; aFloat: 600.5; anInt: 306; anInt2: 906; cEL: cvec[4]; dInt1: 1206; dVar1: 1356; 
+  anInt1: 307; aFloat: 600.6; anInt: 307; anInt2: 907; cEL: cvec[3]; dInt1: 1207; dVar1: 1357; 
+  anInt1: 308; aFloat: 600.7; anInt: 308; anInt2: 908; cEL: cvec[2]; dInt1: 1208; dVar1: 1358; 
+  anInt1: 309; aFloat: 600.8; anInt: 309; anInt2: 909; cEL: cvec[1]; dInt1: 1209; dVar1: 1359; 
+  anInt1: 310; aFloat: 600.9; anInt: 310; anInt2: 910; cEL: cvec[0]; dInt1: 1210; dVar1: 1360; 
+cinfo
+  anInt1: 3000; aFloat: 0.3; anInt: 3000; anInt2: 6000; cEL: cvec[3]; dInt1: 9000; dInt1Base: 9001; 
+ctrig
+  anInt1: 1501; aFloat: 1800.0; anInt: 1501; anInt2: 2101; dInt1: 1441; 
+  anInt1: 1502; aFloat: 1800.1; anInt: 1502; anInt2: 2102; dInt1: 1442; 
+  anInt1: 1503; aFloat: 1800.2; anInt: 1503; anInt2: 2103; dInt1: 1443; 
+  anInt1: 1504; aFloat: 1800.3; anInt: 1504; anInt2: 2104; dInt1: 1444; 
+  anInt1: 1505; aFloat: 1800.4; anInt: 1505; anInt2: 2105; dInt1: 1445; 
+  anInt1: 1506; aFloat: 1800.5; anInt: 1506; anInt2: 2106; dInt1: 1446; 
+  anInt1: 1507; aFloat: 1800.6; anInt: 1507; anInt2: 2107; dInt1: 1447; 
+  anInt1: 1508; aFloat: 1800.7; anInt: 1508; anInt2: 2108; dInt1: 1448; 
+cvecWD  1003
+  anInt1: 601; aFloat: 0.0; anInt: 601; 
+  anInt1: 602; aFloat: 0.0; anInt: 602; 
+  anInt1: 603; aFloat: 0.0; anInt: 603; 
+  anInt1: 604; aFloat: 0.0; anInt: 604; 
+  anInt1: 605; aFloat: 0.0; anInt: 605; 
+  anInt1: 606; aFloat: 0.0; anInt: 606; 
+  anInt1: 607; aFloat: 0.0; anInt: 607; 
+  anInt1: 608; aFloat: 0.0; anInt: 608; 
+  anInt1: 609; aFloat: 0.0; anInt: 609; 
+  anInt1: 610; aFloat: 0.0; anInt: 610; 
+hvec
+anInt: 1201; 
+anInt: 1202; 
+anInt: 1203; 
+anInt: 1204; 
+anInt: 1205; 
+anInt: 1206; 
+anInt: 1207; 
+anInt: 1208; 
+anInt: 1209; 
+anInt: 1210; 
+anInt: 1211; 
+anInt: 1212; 
+anInt: 1213; 
+anInt: 1214; 
+anInt: 1215; 
+anInt: 1216; 
+anInt: 1217; 
+anInt: 1218; 
+anInt: 1219; 
+anInt: 1220; 
+jvecContainer
+decorJVec: [301.5,302.5,303.5]; fvec: [201.5,202.5]; ivec: [101]; lvec: [cvec[1], cvec[2], cvec[3], cvec[4]]; svec: ['str451','str452','str453']; 
+decorJVec: [302.5,303.5,304.5,305.5]; fvec: [202.5,203.5,204.5]; ivec: [102,103]; lvec: []; svec: ['str452','str453','str454','str455']; 
+decorJVec: []; fvec: [203.5,204.5,205.5,206.5]; ivec: [103,104,105]; lvec: [cvec[3]]; svec: []; 
+decorJVec: [304.5]; fvec: []; ivec: [104,105,106,107]; lvec: [cvec[4], cvec[5]]; svec: ['str454']; 
+decorJVec: [305.5,306.5]; fvec: [205.5]; ivec: []; lvec: [cvec[5], cvec[6], cvec[7]]; svec: ['str455','str456']; 
+jvecInfo
+decorJVec: [405.5,406.5]; fvec: [1202.5,1203.5,1204.5]; ivec: [1102,1103]; lvec: []; svec: ['str1452','str1453','str1454','str1455']; 
+plinksContainer
+decorLink: ctrig[1]; decorVLinks: [[inv], cvec[6], ctrig[7], [inv]]; plink: ctrig[1]; vlinks: [[inv]]; 
+decorLink: [inv]; decorVLinks: []; plink: [inv]; vlinks: [cvec[3], ctrig[4]]; 
+decorLink: cvec[3]; decorVLinks: [ctrig[7]]; plink: cvec[3]; vlinks: [ctrig[4], [inv], cvec[6]]; 
+decorLink: ctrig[4]; decorVLinks: [[inv], cvec[9]]; plink: ctrig[4]; vlinks: [[inv], cvec[6], ctrig[7], [inv]]; 
+decorLink: [inv]; decorVLinks: [cvec[9], ctrig[2], [inv]]; plink: [inv]; vlinks: []; 
+plinksInfo
+decorLink: [inv]; decorVLinks: [cvec[9], ctrig[2], [inv]]; plink: ctrig[4]; vlinks: [[inv], cvec[6], ctrig[7], [inv]]; 
+---> Event 2
+cvec
+  anInt1: 401; aFloat: 800.0; anInt: 401; anInt2: 1201; cEL: cvec[9]; dInt1: 1601; dVar1: 1801; 
+  anInt1: 402; aFloat: 800.1; anInt: 402; anInt2: 1202; cEL: cvec[8]; dInt1: 1602; dVar1: 1802; 
+  anInt1: 403; aFloat: 800.2; anInt: 403; anInt2: 1203; cEL: cvec[7]; dInt1: 1603; dVar1: 1803; 
+  anInt1: 404; aFloat: 800.3; anInt: 404; anInt2: 1204; cEL: cvec[6]; dInt1: 1604; dVar1: 1804; 
+  anInt1: 405; aFloat: 800.4; anInt: 405; anInt2: 1205; cEL: cvec[5]; dInt1: 1605; dVar1: 1805; 
+  anInt1: 406; aFloat: 800.5; anInt: 406; anInt2: 1206; cEL: cvec[4]; dInt1: 1606; dVar1: 1806; 
+  anInt1: 407; aFloat: 800.6; anInt: 407; anInt2: 1207; cEL: cvec[3]; dInt1: 1607; dVar1: 1807; 
+  anInt1: 408; aFloat: 800.7; anInt: 408; anInt2: 1208; cEL: cvec[2]; dInt1: 1608; dVar1: 1808; 
+  anInt1: 409; aFloat: 800.8; anInt: 409; anInt2: 1209; cEL: cvec[1]; dInt1: 1609; dVar1: 1809; 
+  anInt1: 410; aFloat: 800.9; anInt: 410; anInt2: 1210; cEL: cvec[0]; dInt1: 1610; dVar1: 1810; 
+cinfo
+  anInt1: 4000; aFloat: 0.4; anInt: 4000; anInt2: 8000; cEL: cvec[4]; dInt1: 12000; dInt1Base: 12001; 
+ctrig
+  anInt1: 2001; aFloat: 2400.0; anInt: 2001; anInt2: 2801; dInt1: 1921; 
+  anInt1: 2002; aFloat: 2400.1; anInt: 2002; anInt2: 2802; dInt1: 1922; 
+  anInt1: 2003; aFloat: 2400.2; anInt: 2003; anInt2: 2803; dInt1: 1923; 
+  anInt1: 2004; aFloat: 2400.3; anInt: 2004; anInt2: 2804; dInt1: 1924; 
+  anInt1: 2005; aFloat: 2400.4; anInt: 2005; anInt2: 2805; dInt1: 1925; 
+  anInt1: 2006; aFloat: 2400.5; anInt: 2006; anInt2: 2806; dInt1: 1926; 
+  anInt1: 2007; aFloat: 2400.6; anInt: 2007; anInt2: 2807; dInt1: 1927; 
+  anInt1: 2008; aFloat: 2400.7; anInt: 2008; anInt2: 2808; dInt1: 1928; 
+cvecWD  1004
+  anInt1: 801; aFloat: 0.0; anInt: 801; 
+  anInt1: 802; aFloat: 0.0; anInt: 802; 
+  anInt1: 803; aFloat: 0.0; anInt: 803; 
+  anInt1: 804; aFloat: 0.0; anInt: 804; 
+  anInt1: 805; aFloat: 0.0; anInt: 805; 
+  anInt1: 806; aFloat: 0.0; anInt: 806; 
+  anInt1: 807; aFloat: 0.0; anInt: 807; 
+  anInt1: 808; aFloat: 0.0; anInt: 808; 
+  anInt1: 809; aFloat: 0.0; anInt: 809; 
+  anInt1: 810; aFloat: 0.0; anInt: 810; 
+hvec
+anInt: 1601; 
+anInt: 1602; 
+anInt: 1603; 
+anInt: 1604; 
+anInt: 1605; 
+anInt: 1606; 
+anInt: 1607; 
+anInt: 1608; 
+anInt: 1609; 
+anInt: 1610; 
+anInt: 1611; 
+anInt: 1612; 
+anInt: 1613; 
+anInt: 1614; 
+anInt: 1615; 
+anInt: 1616; 
+anInt: 1617; 
+anInt: 1618; 
+anInt: 1619; 
+anInt: 1620; 
+jvecContainer
+decorJVec: [302.5,303.5,304.5,305.5]; fvec: [202.5,203.5,204.5]; ivec: [102,103]; lvec: []; svec: ['str452','str453','str454','str455']; 
+decorJVec: []; fvec: [203.5,204.5,205.5,206.5]; ivec: [103,104,105]; lvec: [cvec[3]]; svec: []; 
+decorJVec: [304.5]; fvec: []; ivec: [104,105,106,107]; lvec: [cvec[4], cvec[5]]; svec: ['str454']; 
+decorJVec: [305.5,306.5]; fvec: [205.5]; ivec: []; lvec: [cvec[5], cvec[6], cvec[7]]; svec: ['str455','str456']; 
+decorJVec: [306.5,307.5,308.5]; fvec: [206.5,207.5]; ivec: [106]; lvec: [cvec[6], cvec[7], cvec[8], cvec[9]]; svec: ['str456','str457','str458']; 
+jvecInfo
+decorJVec: [406.5,407.5,408.5]; fvec: [1203.5,1204.5,1205.5,1206.5]; ivec: [1103,1104,1105]; lvec: [cvec[3]]; svec: []; 
+plinksContainer
+decorLink: [inv]; decorVLinks: []; plink: [inv]; vlinks: [cvec[3], ctrig[4]]; 
+decorLink: cvec[3]; decorVLinks: [ctrig[7]]; plink: cvec[3]; vlinks: [ctrig[4], [inv], cvec[6]]; 
+decorLink: ctrig[4]; decorVLinks: [[inv], cvec[9]]; plink: ctrig[4]; vlinks: [[inv], cvec[6], ctrig[7], [inv]]; 
+decorLink: [inv]; decorVLinks: [cvec[9], ctrig[2], [inv]]; plink: [inv]; vlinks: []; 
+decorLink: cvec[6]; decorVLinks: [ctrig[2], [inv], cvec[2], ctrig[5]]; plink: cvec[6]; vlinks: [ctrig[7]]; 
+plinksInfo
+decorLink: cvec[6]; decorVLinks: [ctrig[2], [inv], cvec[2], ctrig[5]]; plink: [inv]; vlinks: []; 
+---> Event 3
+cvec
+cinfo
+  anInt1: 5000; aFloat: 0.5; anInt: 5000; anInt2: 10000; cEL: [inv]; dInt1: 15000; dInt1Base: 15001; 
+ctrig
+  anInt1: 2501; aFloat: 3000.0; anInt: 2501; anInt2: 3501; dInt1: 2401; 
+  anInt1: 2502; aFloat: 3000.1; anInt: 2502; anInt2: 3502; dInt1: 2402; 
+  anInt1: 2503; aFloat: 3000.2; anInt: 2503; anInt2: 3503; dInt1: 2403; 
+  anInt1: 2504; aFloat: 3000.3; anInt: 2504; anInt2: 3504; dInt1: 2404; 
+  anInt1: 2505; aFloat: 3000.4; anInt: 2505; anInt2: 3505; dInt1: 2405; 
+  anInt1: 2506; aFloat: 3000.5; anInt: 2506; anInt2: 3506; dInt1: 2406; 
+  anInt1: 2507; aFloat: 3000.6; anInt: 2507; anInt2: 3507; dInt1: 2407; 
+  anInt1: 2508; aFloat: 3000.7; anInt: 2508; anInt2: 3508; dInt1: 2408; 
+cvecWD  1005
+  anInt1: 1001; aFloat: 0.0; anInt: 1001; 
+  anInt1: 1002; aFloat: 0.0; anInt: 1002; 
+  anInt1: 1003; aFloat: 0.0; anInt: 1003; 
+  anInt1: 1004; aFloat: 0.0; anInt: 1004; 
+  anInt1: 1005; aFloat: 0.0; anInt: 1005; 
+  anInt1: 1006; aFloat: 0.0; anInt: 1006; 
+  anInt1: 1007; aFloat: 0.0; anInt: 1007; 
+  anInt1: 1008; aFloat: 0.0; anInt: 1008; 
+  anInt1: 1009; aFloat: 0.0; anInt: 1009; 
+  anInt1: 1010; aFloat: 0.0; anInt: 1010; 
+hvec
+anInt: 2001; 
+anInt: 2002; 
+anInt: 2003; 
+anInt: 2004; 
+anInt: 2005; 
+anInt: 2006; 
+anInt: 2007; 
+anInt: 2008; 
+anInt: 2009; 
+anInt: 2010; 
+anInt: 2011; 
+anInt: 2012; 
+anInt: 2013; 
+anInt: 2014; 
+anInt: 2015; 
+anInt: 2016; 
+anInt: 2017; 
+anInt: 2018; 
+anInt: 2019; 
+anInt: 2020; 
+jvecContainer
+decorJVec: []; fvec: [203.5,204.5,205.5,206.5]; ivec: [103,104,105]; lvec: [[inv]]; svec: []; 
+decorJVec: [304.5]; fvec: []; ivec: [104,105,106,107]; lvec: [[inv], [inv]]; svec: ['str454']; 
+decorJVec: [305.5,306.5]; fvec: [205.5]; ivec: []; lvec: [[inv], [inv], [inv]]; svec: ['str455','str456']; 
+decorJVec: [306.5,307.5,308.5]; fvec: [206.5,207.5]; ivec: [106]; lvec: [[inv], [inv], [inv], [inv]]; svec: ['str456','str457','str458']; 
+decorJVec: [307.5,308.5,309.5,310.5]; fvec: [207.5,208.5,209.5]; ivec: [107,108]; lvec: []; svec: ['str457','str458','str459','str460']; 
+jvecInfo
+decorJVec: [407.5,408.5,409.5,410.5]; fvec: []; ivec: [1104,1105,1106,1107]; lvec: [[inv], [inv]]; svec: ['str1454']; 
+plinksContainer
+decorLink: [inv]; decorVLinks: [ctrig[7]]; plink: [inv]; vlinks: [ctrig[4], [inv], [inv]]; 
+decorLink: ctrig[4]; decorVLinks: [[inv], [inv]]; plink: ctrig[4]; vlinks: [[inv], [inv], ctrig[7], [inv]]; 
+decorLink: [inv]; decorVLinks: [[inv], ctrig[2], [inv]]; plink: [inv]; vlinks: []; 
+decorLink: [inv]; decorVLinks: [ctrig[2], [inv], [inv], ctrig[5]]; plink: [inv]; vlinks: [ctrig[7]]; 
+decorLink: ctrig[7]; decorVLinks: []; plink: ctrig[7]; vlinks: [[inv], [inv]]; 
+plinksInfo
+decorLink: ctrig[7]; decorVLinks: []; plink: [inv]; vlinks: [ctrig[7]]; 
+---> Event 4
+cvec
+  anInt1: 601; aFloat: 1200.0; anInt: 601; anInt2: 1801; cEL: cvec[9]; dInt1: 2401; dVar1: 2701; 
+  anInt1: 602; aFloat: 1200.1; anInt: 602; anInt2: 1802; cEL: cvec[8]; dInt1: 2402; dVar1: 2702; 
+  anInt1: 603; aFloat: 1200.2; anInt: 603; anInt2: 1803; cEL: cvec[7]; dInt1: 2403; dVar1: 2703; 
+  anInt1: 604; aFloat: 1200.3; anInt: 604; anInt2: 1804; cEL: cvec[6]; dInt1: 2404; dVar1: 2704; 
+  anInt1: 605; aFloat: 1200.4; anInt: 605; anInt2: 1805; cEL: cvec[5]; dInt1: 2405; dVar1: 2705; 
+  anInt1: 606; aFloat: 1200.5; anInt: 606; anInt2: 1806; cEL: cvec[4]; dInt1: 2406; dVar1: 2706; 
+  anInt1: 607; aFloat: 1200.6; anInt: 607; anInt2: 1807; cEL: cvec[3]; dInt1: 2407; dVar1: 2707; 
+  anInt1: 608; aFloat: 1200.7; anInt: 608; anInt2: 1808; cEL: cvec[2]; dInt1: 2408; dVar1: 2708; 
+  anInt1: 609; aFloat: 1200.8; anInt: 609; anInt2: 1809; cEL: cvec[1]; dInt1: 2409; dVar1: 2709; 
+  anInt1: 610; aFloat: 1200.9; anInt: 610; anInt2: 1810; cEL: cvec[0]; dInt1: 2410; dVar1: 2710; 
+cinfo
+  anInt1: 6000; aFloat: 0.6; anInt: 6000; anInt2: 12000; cEL: cvec[6]; dInt1: 18000; dInt1Base: 18001; 
+ctrig
+  anInt1: 3001; aFloat: 3600.0; anInt: 3001; anInt2: 4201; dInt1: 2881; 
+  anInt1: 3002; aFloat: 3600.1; anInt: 3002; anInt2: 4202; dInt1: 2882; 
+  anInt1: 3003; aFloat: 3600.2; anInt: 3003; anInt2: 4203; dInt1: 2883; 
+  anInt1: 3004; aFloat: 3600.3; anInt: 3004; anInt2: 4204; dInt1: 2884; 
+  anInt1: 3005; aFloat: 3600.4; anInt: 3005; anInt2: 4205; dInt1: 2885; 
+  anInt1: 3006; aFloat: 3600.5; anInt: 3006; anInt2: 4206; dInt1: 2886; 
+  anInt1: 3007; aFloat: 3600.6; anInt: 3007; anInt2: 4207; dInt1: 2887; 
+  anInt1: 3008; aFloat: 3600.7; anInt: 3008; anInt2: 4208; dInt1: 2888; 
+cvecWD  1006
+  anInt1: 1201; aFloat: 0.0; anInt: 1201; 
+  anInt1: 1202; aFloat: 0.0; anInt: 1202; 
+  anInt1: 1203; aFloat: 0.0; anInt: 1203; 
+  anInt1: 1204; aFloat: 0.0; anInt: 1204; 
+  anInt1: 1205; aFloat: 0.0; anInt: 1205; 
+  anInt1: 1206; aFloat: 0.0; anInt: 1206; 
+  anInt1: 1207; aFloat: 0.0; anInt: 1207; 
+  anInt1: 1208; aFloat: 0.0; anInt: 1208; 
+  anInt1: 1209; aFloat: 0.0; anInt: 1209; 
+  anInt1: 1210; aFloat: 0.0; anInt: 1210; 
+hvec
+anInt: 2401; 
+anInt: 2402; 
+anInt: 2403; 
+anInt: 2404; 
+anInt: 2405; 
+anInt: 2406; 
+anInt: 2407; 
+anInt: 2408; 
+anInt: 2409; 
+anInt: 2410; 
+anInt: 2411; 
+anInt: 2412; 
+anInt: 2413; 
+anInt: 2414; 
+anInt: 2415; 
+anInt: 2416; 
+anInt: 2417; 
+anInt: 2418; 
+anInt: 2419; 
+anInt: 2420; 
+jvecContainer
+decorJVec: [304.5]; fvec: []; ivec: [104,105,106,107]; lvec: [cvec[4], cvec[5]]; svec: ['str454']; 
+decorJVec: [305.5,306.5]; fvec: [205.5]; ivec: []; lvec: [cvec[5], cvec[6], cvec[7]]; svec: ['str455','str456']; 
+decorJVec: [306.5,307.5,308.5]; fvec: [206.5,207.5]; ivec: [106]; lvec: [cvec[6], cvec[7], cvec[8], cvec[9]]; svec: ['str456','str457','str458']; 
+decorJVec: [307.5,308.5,309.5,310.5]; fvec: [207.5,208.5,209.5]; ivec: [107,108]; lvec: []; svec: ['str457','str458','str459','str460']; 
+decorJVec: []; fvec: [208.5,209.5,210.5,211.5]; ivec: [108,109,110]; lvec: [cvec[8]]; svec: []; 
+jvecInfo
+decorJVec: []; fvec: [1205.5]; ivec: []; lvec: [cvec[5], cvec[6], cvec[7]]; svec: ['str1455','str1456']; 
+plinksContainer
+decorLink: ctrig[4]; decorVLinks: [[inv], cvec[9]]; plink: ctrig[4]; vlinks: [[inv], cvec[6], ctrig[7], [inv]]; 
+decorLink: [inv]; decorVLinks: [cvec[9], ctrig[2], [inv]]; plink: [inv]; vlinks: []; 
+decorLink: cvec[6]; decorVLinks: [ctrig[2], [inv], cvec[2], ctrig[5]]; plink: cvec[6]; vlinks: [ctrig[7]]; 
+decorLink: ctrig[7]; decorVLinks: []; plink: ctrig[7]; vlinks: [[inv], cvec[9]]; 
+decorLink: [inv]; decorVLinks: [cvec[2]]; plink: [inv]; vlinks: [cvec[9], ctrig[2], [inv]]; 
+plinksInfo
+decorLink: [inv]; decorVLinks: [cvec[2]]; plink: ctrig[7]; vlinks: [[inv], cvec[9]]; 
+---> Event 5
+cvec
+  anInt1: 701; aFloat: 1400.0; anInt: 701; anInt2: 2101; cEL: cvec[9]; dInt1: 2801; dVar1: 3151; 
+  anInt1: 702; aFloat: 1400.1; anInt: 702; anInt2: 2102; cEL: cvec[8]; dInt1: 2802; dVar1: 3152; 
+  anInt1: 703; aFloat: 1400.2; anInt: 703; anInt2: 2103; cEL: cvec[7]; dInt1: 2803; dVar1: 3153; 
+  anInt1: 704; aFloat: 1400.3; anInt: 704; anInt2: 2104; cEL: cvec[6]; dInt1: 2804; dVar1: 3154; 
+  anInt1: 705; aFloat: 1400.4; anInt: 705; anInt2: 2105; cEL: cvec[5]; dInt1: 2805; dVar1: 3155; 
+  anInt1: 706; aFloat: 1400.5; anInt: 706; anInt2: 2106; cEL: cvec[4]; dInt1: 2806; dVar1: 3156; 
+  anInt1: 707; aFloat: 1400.6; anInt: 707; anInt2: 2107; cEL: cvec[3]; dInt1: 2807; dVar1: 3157; 
+  anInt1: 708; aFloat: 1400.7; anInt: 708; anInt2: 2108; cEL: cvec[2]; dInt1: 2808; dVar1: 3158; 
+  anInt1: 709; aFloat: 1400.8; anInt: 709; anInt2: 2109; cEL: cvec[1]; dInt1: 2809; dVar1: 3159; 
+  anInt1: 710; aFloat: 1400.9; anInt: 710; anInt2: 2110; cEL: cvec[0]; dInt1: 2810; dVar1: 3160; 
+cinfo
+  anInt1: 7000; aFloat: 0.7; anInt: 7000; anInt2: 14000; cEL: cvec[7]; dInt1: 21000; dInt1Base: 21001; 
+ctrig
+  anInt1: 3501; aFloat: 4200.0; anInt: 3501; anInt2: 4901; dInt1: 3361; 
+  anInt1: 3502; aFloat: 4200.1; anInt: 3502; anInt2: 4902; dInt1: 3362; 
+  anInt1: 3503; aFloat: 4200.2; anInt: 3503; anInt2: 4903; dInt1: 3363; 
+  anInt1: 3504; aFloat: 4200.3; anInt: 3504; anInt2: 4904; dInt1: 3364; 
+  anInt1: 3505; aFloat: 4200.4; anInt: 3505; anInt2: 4905; dInt1: 3365; 
+  anInt1: 3506; aFloat: 4200.5; anInt: 3506; anInt2: 4906; dInt1: 3366; 
+  anInt1: 3507; aFloat: 4200.6; anInt: 3507; anInt2: 4907; dInt1: 3367; 
+  anInt1: 3508; aFloat: 4200.7; anInt: 3508; anInt2: 4908; dInt1: 3368; 
+cvecWD  1007
+  anInt1: 1401; aFloat: 0.0; anInt: 1401; 
+  anInt1: 1402; aFloat: 0.0; anInt: 1402; 
+  anInt1: 1403; aFloat: 0.0; anInt: 1403; 
+  anInt1: 1404; aFloat: 0.0; anInt: 1404; 
+  anInt1: 1405; aFloat: 0.0; anInt: 1405; 
+  anInt1: 1406; aFloat: 0.0; anInt: 1406; 
+  anInt1: 1407; aFloat: 0.0; anInt: 1407; 
+  anInt1: 1408; aFloat: 0.0; anInt: 1408; 
+  anInt1: 1409; aFloat: 0.0; anInt: 1409; 
+  anInt1: 1410; aFloat: 0.0; anInt: 1410; 
+hvec
+anInt: 2801; 
+anInt: 2802; 
+anInt: 2803; 
+anInt: 2804; 
+anInt: 2805; 
+anInt: 2806; 
+anInt: 2807; 
+anInt: 2808; 
+anInt: 2809; 
+anInt: 2810; 
+anInt: 2811; 
+anInt: 2812; 
+anInt: 2813; 
+anInt: 2814; 
+anInt: 2815; 
+anInt: 2816; 
+anInt: 2817; 
+anInt: 2818; 
+anInt: 2819; 
+anInt: 2820; 
+jvecContainer
+decorJVec: [305.5,306.5]; fvec: [205.5]; ivec: []; lvec: [cvec[5], cvec[6], cvec[7]]; svec: ['str455','str456']; 
+decorJVec: [306.5,307.5,308.5]; fvec: [206.5,207.5]; ivec: [106]; lvec: [cvec[6], cvec[7], cvec[8], cvec[9]]; svec: ['str456','str457','str458']; 
+decorJVec: [307.5,308.5,309.5,310.5]; fvec: [207.5,208.5,209.5]; ivec: [107,108]; lvec: []; svec: ['str457','str458','str459','str460']; 
+decorJVec: []; fvec: [208.5,209.5,210.5,211.5]; ivec: [108,109,110]; lvec: [cvec[8]]; svec: []; 
+decorJVec: [309.5]; fvec: []; ivec: [109,110,111,112]; lvec: [cvec[9], cvec[0]]; svec: ['str459']; 
+jvecInfo
+decorJVec: [409.5]; fvec: [1206.5,1207.5]; ivec: [1106]; lvec: [cvec[6], cvec[7], cvec[8], cvec[9]]; svec: ['str1456','str1457','str1458']; 
+plinksContainer
+decorLink: [inv]; decorVLinks: [cvec[9], ctrig[2], [inv]]; plink: [inv]; vlinks: []; 
+decorLink: cvec[6]; decorVLinks: [ctrig[2], [inv], cvec[2], ctrig[5]]; plink: cvec[6]; vlinks: [ctrig[7]]; 
+decorLink: ctrig[7]; decorVLinks: []; plink: ctrig[7]; vlinks: [[inv], cvec[9]]; 
+decorLink: [inv]; decorVLinks: [cvec[2]]; plink: [inv]; vlinks: [cvec[9], ctrig[2], [inv]]; 
+decorLink: cvec[9]; decorVLinks: [ctrig[5], [inv]]; plink: cvec[9]; vlinks: [ctrig[2], [inv], cvec[2], ctrig[5]]; 
+plinksInfo
+decorLink: cvec[9]; decorVLinks: [ctrig[5], [inv]]; plink: [inv]; vlinks: [cvec[9], ctrig[2], [inv]]; 
+---> Event 6
+cvec
+  anInt1: 801; aFloat: 1600.0; anInt: 801; anInt2: 2401; cEL: cvec[9]; dInt1: 3201; dVar1: 3601; 
+  anInt1: 802; aFloat: 1600.1; anInt: 802; anInt2: 2402; cEL: cvec[8]; dInt1: 3202; dVar1: 3602; 
+  anInt1: 803; aFloat: 1600.2; anInt: 803; anInt2: 2403; cEL: cvec[7]; dInt1: 3203; dVar1: 3603; 
+  anInt1: 804; aFloat: 1600.3; anInt: 804; anInt2: 2404; cEL: cvec[6]; dInt1: 3204; dVar1: 3604; 
+  anInt1: 805; aFloat: 1600.4; anInt: 805; anInt2: 2405; cEL: cvec[5]; dInt1: 3205; dVar1: 3605; 
+  anInt1: 806; aFloat: 1600.5; anInt: 806; anInt2: 2406; cEL: cvec[4]; dInt1: 3206; dVar1: 3606; 
+  anInt1: 807; aFloat: 1600.6; anInt: 807; anInt2: 2407; cEL: cvec[3]; dInt1: 3207; dVar1: 3607; 
+  anInt1: 808; aFloat: 1600.7; anInt: 808; anInt2: 2408; cEL: cvec[2]; dInt1: 3208; dVar1: 3608; 
+  anInt1: 809; aFloat: 1600.8; anInt: 809; anInt2: 2409; cEL: cvec[1]; dInt1: 3209; dVar1: 3609; 
+  anInt1: 810; aFloat: 1600.9; anInt: 810; anInt2: 2410; cEL: cvec[0]; dInt1: 3210; dVar1: 3610; 
+cinfo
+  anInt1: 8000; aFloat: 0.8; anInt: 8000; anInt2: 16000; cEL: cvec[8]; dInt1: 24000; dInt1Base: 24001; 
+ctrig
+  anInt1: 4001; aFloat: 4800.0; anInt: 4001; anInt2: 5601; dInt1: 3841; 
+  anInt1: 4002; aFloat: 4800.1; anInt: 4002; anInt2: 5602; dInt1: 3842; 
+  anInt1: 4003; aFloat: 4800.2; anInt: 4003; anInt2: 5603; dInt1: 3843; 
+  anInt1: 4004; aFloat: 4800.3; anInt: 4004; anInt2: 5604; dInt1: 3844; 
+  anInt1: 4005; aFloat: 4800.4; anInt: 4005; anInt2: 5605; dInt1: 3845; 
+  anInt1: 4006; aFloat: 4800.5; anInt: 4006; anInt2: 5606; dInt1: 3846; 
+  anInt1: 4007; aFloat: 4800.6; anInt: 4007; anInt2: 5607; dInt1: 3847; 
+  anInt1: 4008; aFloat: 4800.7; anInt: 4008; anInt2: 5608; dInt1: 3848; 
+cvecWD  1008
+  anInt1: 1601; aFloat: 0.0; anInt: 1601; 
+  anInt1: 1602; aFloat: 0.0; anInt: 1602; 
+  anInt1: 1603; aFloat: 0.0; anInt: 1603; 
+  anInt1: 1604; aFloat: 0.0; anInt: 1604; 
+  anInt1: 1605; aFloat: 0.0; anInt: 1605; 
+  anInt1: 1606; aFloat: 0.0; anInt: 1606; 
+  anInt1: 1607; aFloat: 0.0; anInt: 1607; 
+  anInt1: 1608; aFloat: 0.0; anInt: 1608; 
+  anInt1: 1609; aFloat: 0.0; anInt: 1609; 
+  anInt1: 1610; aFloat: 0.0; anInt: 1610; 
+hvec
+anInt: 3201; 
+anInt: 3202; 
+anInt: 3203; 
+anInt: 3204; 
+anInt: 3205; 
+anInt: 3206; 
+anInt: 3207; 
+anInt: 3208; 
+anInt: 3209; 
+anInt: 3210; 
+anInt: 3211; 
+anInt: 3212; 
+anInt: 3213; 
+anInt: 3214; 
+anInt: 3215; 
+anInt: 3216; 
+anInt: 3217; 
+anInt: 3218; 
+anInt: 3219; 
+anInt: 3220; 
+jvecContainer
+decorJVec: [306.5,307.5,308.5]; fvec: [206.5,207.5]; ivec: [106]; lvec: [cvec[6], cvec[7], cvec[8], cvec[9]]; svec: ['str456','str457','str458']; 
+decorJVec: [307.5,308.5,309.5,310.5]; fvec: [207.5,208.5,209.5]; ivec: [107,108]; lvec: []; svec: ['str457','str458','str459','str460']; 
+decorJVec: []; fvec: [208.5,209.5,210.5,211.5]; ivec: [108,109,110]; lvec: [cvec[8]]; svec: []; 
+decorJVec: [309.5]; fvec: []; ivec: [109,110,111,112]; lvec: [cvec[9], cvec[0]]; svec: ['str459']; 
+decorJVec: [310.5,311.5]; fvec: [210.5]; ivec: []; lvec: [cvec[0], cvec[1], cvec[2]]; svec: ['str460','str461']; 
+jvecInfo
+decorJVec: [410.5,411.5]; fvec: [1207.5,1208.5,1209.5]; ivec: [1107,1108]; lvec: []; svec: ['str1457','str1458','str1459','str1460']; 
+plinksContainer
+decorLink: cvec[6]; decorVLinks: [ctrig[2], [inv], cvec[2], ctrig[5]]; plink: cvec[6]; vlinks: [ctrig[7]]; 
+decorLink: ctrig[7]; decorVLinks: []; plink: ctrig[7]; vlinks: [[inv], cvec[9]]; 
+decorLink: [inv]; decorVLinks: [cvec[2]]; plink: [inv]; vlinks: [cvec[9], ctrig[2], [inv]]; 
+decorLink: cvec[9]; decorVLinks: [ctrig[5], [inv]]; plink: cvec[9]; vlinks: [ctrig[2], [inv], cvec[2], ctrig[5]]; 
+decorLink: ctrig[2]; decorVLinks: [[inv], cvec[5], ctrig[0]]; plink: ctrig[2]; vlinks: []; 
+plinksInfo
+decorLink: ctrig[2]; decorVLinks: [[inv], cvec[5], ctrig[0]]; plink: cvec[9]; vlinks: [ctrig[2], [inv], cvec[2], ctrig[5]]; 
+---> Event 7
+cvec
+  anInt1: 901; aFloat: 1800.0; anInt: 901; anInt2: 2701; cEL: cvec[9]; dInt1: 3601; dVar1: 4051; 
+  anInt1: 902; aFloat: 1800.1; anInt: 902; anInt2: 2702; cEL: cvec[8]; dInt1: 3602; dVar1: 4052; 
+  anInt1: 903; aFloat: 1800.2; anInt: 903; anInt2: 2703; cEL: cvec[7]; dInt1: 3603; dVar1: 4053; 
+  anInt1: 904; aFloat: 1800.3; anInt: 904; anInt2: 2704; cEL: cvec[6]; dInt1: 3604; dVar1: 4054; 
+  anInt1: 905; aFloat: 1800.4; anInt: 905; anInt2: 2705; cEL: cvec[5]; dInt1: 3605; dVar1: 4055; 
+  anInt1: 906; aFloat: 1800.5; anInt: 906; anInt2: 2706; cEL: cvec[4]; dInt1: 3606; dVar1: 4056; 
+  anInt1: 907; aFloat: 1800.6; anInt: 907; anInt2: 2707; cEL: cvec[3]; dInt1: 3607; dVar1: 4057; 
+  anInt1: 908; aFloat: 1800.7; anInt: 908; anInt2: 2708; cEL: cvec[2]; dInt1: 3608; dVar1: 4058; 
+  anInt1: 909; aFloat: 1800.8; anInt: 909; anInt2: 2709; cEL: cvec[1]; dInt1: 3609; dVar1: 4059; 
+  anInt1: 910; aFloat: 1800.9; anInt: 910; anInt2: 2710; cEL: cvec[0]; dInt1: 3610; dVar1: 4060; 
+cinfo
+  anInt1: 9000; aFloat: 0.9; anInt: 9000; anInt2: 18000; cEL: cvec[9]; dInt1: 27000; dInt1Base: 27001; 
+ctrig
+  anInt1: 4501; aFloat: 5400.0; anInt: 4501; anInt2: 6301; dInt1: 4321; 
+  anInt1: 4502; aFloat: 5400.1; anInt: 4502; anInt2: 6302; dInt1: 4322; 
+  anInt1: 4503; aFloat: 5400.2; anInt: 4503; anInt2: 6303; dInt1: 4323; 
+  anInt1: 4504; aFloat: 5400.3; anInt: 4504; anInt2: 6304; dInt1: 4324; 
+  anInt1: 4505; aFloat: 5400.4; anInt: 4505; anInt2: 6305; dInt1: 4325; 
+  anInt1: 4506; aFloat: 5400.5; anInt: 4506; anInt2: 6306; dInt1: 4326; 
+  anInt1: 4507; aFloat: 5400.6; anInt: 4507; anInt2: 6307; dInt1: 4327; 
+  anInt1: 4508; aFloat: 5400.7; anInt: 4508; anInt2: 6308; dInt1: 4328; 
+cvecWD  1009
+  anInt1: 1801; aFloat: 0.0; anInt: 1801; 
+  anInt1: 1802; aFloat: 0.0; anInt: 1802; 
+  anInt1: 1803; aFloat: 0.0; anInt: 1803; 
+  anInt1: 1804; aFloat: 0.0; anInt: 1804; 
+  anInt1: 1805; aFloat: 0.0; anInt: 1805; 
+  anInt1: 1806; aFloat: 0.0; anInt: 1806; 
+  anInt1: 1807; aFloat: 0.0; anInt: 1807; 
+  anInt1: 1808; aFloat: 0.0; anInt: 1808; 
+  anInt1: 1809; aFloat: 0.0; anInt: 1809; 
+  anInt1: 1810; aFloat: 0.0; anInt: 1810; 
+hvec
+anInt: 3601; 
+anInt: 3602; 
+anInt: 3603; 
+anInt: 3604; 
+anInt: 3605; 
+anInt: 3606; 
+anInt: 3607; 
+anInt: 3608; 
+anInt: 3609; 
+anInt: 3610; 
+anInt: 3611; 
+anInt: 3612; 
+anInt: 3613; 
+anInt: 3614; 
+anInt: 3615; 
+anInt: 3616; 
+anInt: 3617; 
+anInt: 3618; 
+anInt: 3619; 
+anInt: 3620; 
+jvecContainer
+decorJVec: [307.5,308.5,309.5,310.5]; fvec: [207.5,208.5,209.5]; ivec: [107,108]; lvec: []; svec: ['str457','str458','str459','str460']; 
+decorJVec: []; fvec: [208.5,209.5,210.5,211.5]; ivec: [108,109,110]; lvec: [cvec[8]]; svec: []; 
+decorJVec: [309.5]; fvec: []; ivec: [109,110,111,112]; lvec: [cvec[9], cvec[0]]; svec: ['str459']; 
+decorJVec: [310.5,311.5]; fvec: [210.5]; ivec: []; lvec: [cvec[0], cvec[1], cvec[2]]; svec: ['str460','str461']; 
+decorJVec: [311.5,312.5,313.5]; fvec: [211.5,212.5]; ivec: [111]; lvec: [cvec[1], cvec[2], cvec[3], cvec[4]]; svec: ['str461','str462','str463']; 
+jvecInfo
+decorJVec: [411.5,412.5,413.5]; fvec: [1208.5,1209.5,1210.5,1211.5]; ivec: [1108,1109,1110]; lvec: [cvec[8]]; svec: []; 
+plinksContainer
+decorLink: ctrig[7]; decorVLinks: []; plink: ctrig[7]; vlinks: [[inv], cvec[9]]; 
+decorLink: [inv]; decorVLinks: [cvec[2]]; plink: [inv]; vlinks: [cvec[9], ctrig[2], [inv]]; 
+decorLink: cvec[9]; decorVLinks: [ctrig[5], [inv]]; plink: cvec[9]; vlinks: [ctrig[2], [inv], cvec[2], ctrig[5]]; 
+decorLink: ctrig[2]; decorVLinks: [[inv], cvec[5], ctrig[0]]; plink: ctrig[2]; vlinks: []; 
+decorLink: [inv]; decorVLinks: [cvec[5], ctrig[0], [inv], cvec[8]]; plink: [inv]; vlinks: [cvec[2]]; 
+plinksInfo
+decorLink: [inv]; decorVLinks: [cvec[5], ctrig[0], [inv], cvec[8]]; plink: ctrig[2]; vlinks: []; 
+---> Event 8
+cvec
+  anInt1: 1001; aFloat: 2000.0; anInt: 1001; anInt2: 3001; cEL: cvec[9]; dInt1: 4001; dVar1: 4501; 
+  anInt1: 1002; aFloat: 2000.1; anInt: 1002; anInt2: 3002; cEL: cvec[8]; dInt1: 4002; dVar1: 4502; 
+  anInt1: 1003; aFloat: 2000.2; anInt: 1003; anInt2: 3003; cEL: cvec[7]; dInt1: 4003; dVar1: 4503; 
+  anInt1: 1004; aFloat: 2000.3; anInt: 1004; anInt2: 3004; cEL: cvec[6]; dInt1: 4004; dVar1: 4504; 
+  anInt1: 1005; aFloat: 2000.4; anInt: 1005; anInt2: 3005; cEL: cvec[5]; dInt1: 4005; dVar1: 4505; 
+  anInt1: 1006; aFloat: 2000.5; anInt: 1006; anInt2: 3006; cEL: cvec[4]; dInt1: 4006; dVar1: 4506; 
+  anInt1: 1007; aFloat: 2000.6; anInt: 1007; anInt2: 3007; cEL: cvec[3]; dInt1: 4007; dVar1: 4507; 
+  anInt1: 1008; aFloat: 2000.7; anInt: 1008; anInt2: 3008; cEL: cvec[2]; dInt1: 4008; dVar1: 4508; 
+  anInt1: 1009; aFloat: 2000.8; anInt: 1009; anInt2: 3009; cEL: cvec[1]; dInt1: 4009; dVar1: 4509; 
+  anInt1: 1010; aFloat: 2000.9; anInt: 1010; anInt2: 3010; cEL: cvec[0]; dInt1: 4010; dVar1: 4510; 
+cinfo
+  anInt1: 10000; aFloat: 1.0; anInt: 10000; anInt2: 20000; cEL: cvec[0]; dInt1: 30000; dInt1Base: 30001; 
+ctrig
+  anInt1: 5001; aFloat: 6000.0; anInt: 5001; anInt2: 7001; dInt1: 4801; 
+  anInt1: 5002; aFloat: 6000.1; anInt: 5002; anInt2: 7002; dInt1: 4802; 
+  anInt1: 5003; aFloat: 6000.2; anInt: 5003; anInt2: 7003; dInt1: 4803; 
+  anInt1: 5004; aFloat: 6000.3; anInt: 5004; anInt2: 7004; dInt1: 4804; 
+  anInt1: 5005; aFloat: 6000.4; anInt: 5005; anInt2: 7005; dInt1: 4805; 
+  anInt1: 5006; aFloat: 6000.5; anInt: 5006; anInt2: 7006; dInt1: 4806; 
+  anInt1: 5007; aFloat: 6000.6; anInt: 5007; anInt2: 7007; dInt1: 4807; 
+  anInt1: 5008; aFloat: 6000.7; anInt: 5008; anInt2: 7008; dInt1: 4808; 
+cvecWD  1010
+  anInt1: 2001; aFloat: 0.0; anInt: 2001; 
+  anInt1: 2002; aFloat: 0.0; anInt: 2002; 
+  anInt1: 2003; aFloat: 0.0; anInt: 2003; 
+  anInt1: 2004; aFloat: 0.0; anInt: 2004; 
+  anInt1: 2005; aFloat: 0.0; anInt: 2005; 
+  anInt1: 2006; aFloat: 0.0; anInt: 2006; 
+  anInt1: 2007; aFloat: 0.0; anInt: 2007; 
+  anInt1: 2008; aFloat: 0.0; anInt: 2008; 
+  anInt1: 2009; aFloat: 0.0; anInt: 2009; 
+  anInt1: 2010; aFloat: 0.0; anInt: 2010; 
+hvec
+anInt: 4001; 
+anInt: 4002; 
+anInt: 4003; 
+anInt: 4004; 
+anInt: 4005; 
+anInt: 4006; 
+anInt: 4007; 
+anInt: 4008; 
+anInt: 4009; 
+anInt: 4010; 
+anInt: 4011; 
+anInt: 4012; 
+anInt: 4013; 
+anInt: 4014; 
+anInt: 4015; 
+anInt: 4016; 
+anInt: 4017; 
+anInt: 4018; 
+anInt: 4019; 
+anInt: 4020; 
+jvecContainer
+decorJVec: []; fvec: [208.5,209.5,210.5,211.5]; ivec: [108,109,110]; lvec: [cvec[8]]; svec: []; 
+decorJVec: [309.5]; fvec: []; ivec: [109,110,111,112]; lvec: [cvec[9], cvec[0]]; svec: ['str459']; 
+decorJVec: [310.5,311.5]; fvec: [210.5]; ivec: []; lvec: [cvec[0], cvec[1], cvec[2]]; svec: ['str460','str461']; 
+decorJVec: [311.5,312.5,313.5]; fvec: [211.5,212.5]; ivec: [111]; lvec: [cvec[1], cvec[2], cvec[3], cvec[4]]; svec: ['str461','str462','str463']; 
+decorJVec: [312.5,313.5,314.5,315.5]; fvec: [212.5,213.5,214.5]; ivec: [112,113]; lvec: []; svec: ['str462','str463','str464','str465']; 
+jvecInfo
+decorJVec: [412.5,413.5,414.5,415.5]; fvec: []; ivec: [1109,1110,1111,1112]; lvec: [cvec[9], cvec[0]]; svec: ['str1459']; 
+plinksContainer
+decorLink: [inv]; decorVLinks: [cvec[2]]; plink: [inv]; vlinks: [cvec[9], ctrig[2], [inv]]; 
+decorLink: cvec[9]; decorVLinks: [ctrig[5], [inv]]; plink: cvec[9]; vlinks: [ctrig[2], [inv], cvec[2], ctrig[5]]; 
+decorLink: ctrig[2]; decorVLinks: [[inv], cvec[5], ctrig[0]]; plink: ctrig[2]; vlinks: []; 
+decorLink: [inv]; decorVLinks: [cvec[5], ctrig[0], [inv], cvec[8]]; plink: [inv]; vlinks: [cvec[2]]; 
+decorLink: cvec[2]; decorVLinks: []; plink: cvec[2]; vlinks: [ctrig[5], [inv]]; 
+plinksInfo
+decorLink: cvec[2]; decorVLinks: []; plink: [inv]; vlinks: [cvec[2]]; 
+---> Event 9
+cvec
+  anInt1: 1101; aFloat: 2200.0; anInt: 1101; anInt2: 3301; cEL: cvec[9]; dInt1: 4401; dVar1: 4951; 
+  anInt1: 1102; aFloat: 2200.1; anInt: 1102; anInt2: 3302; cEL: cvec[8]; dInt1: 4402; dVar1: 4952; 
+  anInt1: 1103; aFloat: 2200.2; anInt: 1103; anInt2: 3303; cEL: cvec[7]; dInt1: 4403; dVar1: 4953; 
+  anInt1: 1104; aFloat: 2200.3; anInt: 1104; anInt2: 3304; cEL: cvec[6]; dInt1: 4404; dVar1: 4954; 
+  anInt1: 1105; aFloat: 2200.4; anInt: 1105; anInt2: 3305; cEL: cvec[5]; dInt1: 4405; dVar1: 4955; 
+  anInt1: 1106; aFloat: 2200.5; anInt: 1106; anInt2: 3306; cEL: cvec[4]; dInt1: 4406; dVar1: 4956; 
+  anInt1: 1107; aFloat: 2200.6; anInt: 1107; anInt2: 3307; cEL: cvec[3]; dInt1: 4407; dVar1: 4957; 
+  anInt1: 1108; aFloat: 2200.7; anInt: 1108; anInt2: 3308; cEL: cvec[2]; dInt1: 4408; dVar1: 4958; 
+  anInt1: 1109; aFloat: 2200.8; anInt: 1109; anInt2: 3309; cEL: cvec[1]; dInt1: 4409; dVar1: 4959; 
+  anInt1: 1110; aFloat: 2200.9; anInt: 1110; anInt2: 3310; cEL: cvec[0]; dInt1: 4410; dVar1: 4960; 
+cinfo
+  anInt1: 11000; aFloat: 1.1; anInt: 11000; anInt2: 22000; cEL: cvec[1]; dInt1: 33000; dInt1Base: 33001; 
+ctrig
+  anInt1: 5501; aFloat: 6600.0; anInt: 5501; anInt2: 7701; dInt1: 5281; 
+  anInt1: 5502; aFloat: 6600.1; anInt: 5502; anInt2: 7702; dInt1: 5282; 
+  anInt1: 5503; aFloat: 6600.2; anInt: 5503; anInt2: 7703; dInt1: 5283; 
+  anInt1: 5504; aFloat: 6600.3; anInt: 5504; anInt2: 7704; dInt1: 5284; 
+  anInt1: 5505; aFloat: 6600.4; anInt: 5505; anInt2: 7705; dInt1: 5285; 
+  anInt1: 5506; aFloat: 6600.5; anInt: 5506; anInt2: 7706; dInt1: 5286; 
+  anInt1: 5507; aFloat: 6600.6; anInt: 5507; anInt2: 7707; dInt1: 5287; 
+  anInt1: 5508; aFloat: 6600.7; anInt: 5508; anInt2: 7708; dInt1: 5288; 
+cvecWD  1011
+  anInt1: 2201; aFloat: 0.0; anInt: 2201; 
+  anInt1: 2202; aFloat: 0.0; anInt: 2202; 
+  anInt1: 2203; aFloat: 0.0; anInt: 2203; 
+  anInt1: 2204; aFloat: 0.0; anInt: 2204; 
+  anInt1: 2205; aFloat: 0.0; anInt: 2205; 
+  anInt1: 2206; aFloat: 0.0; anInt: 2206; 
+  anInt1: 2207; aFloat: 0.0; anInt: 2207; 
+  anInt1: 2208; aFloat: 0.0; anInt: 2208; 
+  anInt1: 2209; aFloat: 0.0; anInt: 2209; 
+  anInt1: 2210; aFloat: 0.0; anInt: 2210; 
+hvec
+anInt: 4401; 
+anInt: 4402; 
+anInt: 4403; 
+anInt: 4404; 
+anInt: 4405; 
+anInt: 4406; 
+anInt: 4407; 
+anInt: 4408; 
+anInt: 4409; 
+anInt: 4410; 
+anInt: 4411; 
+anInt: 4412; 
+anInt: 4413; 
+anInt: 4414; 
+anInt: 4415; 
+anInt: 4416; 
+anInt: 4417; 
+anInt: 4418; 
+anInt: 4419; 
+anInt: 4420; 
+jvecContainer
+decorJVec: [309.5]; fvec: []; ivec: [109,110,111,112]; lvec: [cvec[9], cvec[0]]; svec: ['str459']; 
+decorJVec: [310.5,311.5]; fvec: [210.5]; ivec: []; lvec: [cvec[0], cvec[1], cvec[2]]; svec: ['str460','str461']; 
+decorJVec: [311.5,312.5,313.5]; fvec: [211.5,212.5]; ivec: [111]; lvec: [cvec[1], cvec[2], cvec[3], cvec[4]]; svec: ['str461','str462','str463']; 
+decorJVec: [312.5,313.5,314.5,315.5]; fvec: [212.5,213.5,214.5]; ivec: [112,113]; lvec: []; svec: ['str462','str463','str464','str465']; 
+decorJVec: []; fvec: [213.5,214.5,215.5,216.5]; ivec: [113,114,115]; lvec: [cvec[3]]; svec: []; 
+jvecInfo
+decorJVec: []; fvec: [1210.5]; ivec: []; lvec: [cvec[0], cvec[1], cvec[2]]; svec: ['str1460','str1461']; 
+plinksContainer
+decorLink: cvec[9]; decorVLinks: [ctrig[5], [inv]]; plink: cvec[9]; vlinks: [ctrig[2], [inv], cvec[2], ctrig[5]]; 
+decorLink: ctrig[2]; decorVLinks: [[inv], cvec[5], ctrig[0]]; plink: ctrig[2]; vlinks: []; 
+decorLink: [inv]; decorVLinks: [cvec[5], ctrig[0], [inv], cvec[8]]; plink: [inv]; vlinks: [cvec[2]]; 
+decorLink: cvec[2]; decorVLinks: []; plink: cvec[2]; vlinks: [ctrig[5], [inv]]; 
+decorLink: ctrig[5]; decorVLinks: [[inv]]; plink: ctrig[5]; vlinks: [[inv], cvec[5], ctrig[0]]; 
+plinksInfo
+decorLink: ctrig[5]; decorVLinks: [[inv]]; plink: cvec[2]; vlinks: [ctrig[5], [inv]]; 
+---> Event 10
+cvec
+  anInt1: 1201; aFloat: 2400.0; anInt: 1201; anInt2: 3601; cEL: cvec[9]; dInt1: 4801; dVar1: 5401; 
+  anInt1: 1202; aFloat: 2400.1; anInt: 1202; anInt2: 3602; cEL: cvec[8]; dInt1: 4802; dVar1: 5402; 
+  anInt1: 1203; aFloat: 2400.2; anInt: 1203; anInt2: 3603; cEL: cvec[7]; dInt1: 4803; dVar1: 5403; 
+  anInt1: 1204; aFloat: 2400.3; anInt: 1204; anInt2: 3604; cEL: cvec[6]; dInt1: 4804; dVar1: 5404; 
+  anInt1: 1205; aFloat: 2400.4; anInt: 1205; anInt2: 3605; cEL: cvec[5]; dInt1: 4805; dVar1: 5405; 
+  anInt1: 1206; aFloat: 2400.5; anInt: 1206; anInt2: 3606; cEL: cvec[4]; dInt1: 4806; dVar1: 5406; 
+  anInt1: 1207; aFloat: 2400.6; anInt: 1207; anInt2: 3607; cEL: cvec[3]; dInt1: 4807; dVar1: 5407; 
+  anInt1: 1208; aFloat: 2400.7; anInt: 1208; anInt2: 3608; cEL: cvec[2]; dInt1: 4808; dVar1: 5408; 
+  anInt1: 1209; aFloat: 2400.8; anInt: 1209; anInt2: 3609; cEL: cvec[1]; dInt1: 4809; dVar1: 5409; 
+  anInt1: 1210; aFloat: 2400.9; anInt: 1210; anInt2: 3610; cEL: cvec[0]; dInt1: 4810; dVar1: 5410; 
+cinfo
+  anInt1: 12000; aFloat: 1.2; anInt: 12000; anInt2: 24000; cEL: cvec[2]; dInt1: 36000; dInt1Base: 36001; 
+ctrig
+  anInt1: 6001; aFloat: 7200.0; anInt: 6001; anInt2: 8401; dInt1: 5761; 
+  anInt1: 6002; aFloat: 7200.1; anInt: 6002; anInt2: 8402; dInt1: 5762; 
+  anInt1: 6003; aFloat: 7200.2; anInt: 6003; anInt2: 8403; dInt1: 5763; 
+  anInt1: 6004; aFloat: 7200.3; anInt: 6004; anInt2: 8404; dInt1: 5764; 
+  anInt1: 6005; aFloat: 7200.4; anInt: 6005; anInt2: 8405; dInt1: 5765; 
+  anInt1: 6006; aFloat: 7200.5; anInt: 6006; anInt2: 8406; dInt1: 5766; 
+  anInt1: 6007; aFloat: 7200.6; anInt: 6007; anInt2: 8407; dInt1: 5767; 
+  anInt1: 6008; aFloat: 7200.7; anInt: 6008; anInt2: 8408; dInt1: 5768; 
+cvecWD  1012
+  anInt1: 2401; aFloat: 0.0; anInt: 2401; 
+  anInt1: 2402; aFloat: 0.0; anInt: 2402; 
+  anInt1: 2403; aFloat: 0.0; anInt: 2403; 
+  anInt1: 2404; aFloat: 0.0; anInt: 2404; 
+  anInt1: 2405; aFloat: 0.0; anInt: 2405; 
+  anInt1: 2406; aFloat: 0.0; anInt: 2406; 
+  anInt1: 2407; aFloat: 0.0; anInt: 2407; 
+  anInt1: 2408; aFloat: 0.0; anInt: 2408; 
+  anInt1: 2409; aFloat: 0.0; anInt: 2409; 
+  anInt1: 2410; aFloat: 0.0; anInt: 2410; 
+hvec
+anInt: 4801; 
+anInt: 4802; 
+anInt: 4803; 
+anInt: 4804; 
+anInt: 4805; 
+anInt: 4806; 
+anInt: 4807; 
+anInt: 4808; 
+anInt: 4809; 
+anInt: 4810; 
+anInt: 4811; 
+anInt: 4812; 
+anInt: 4813; 
+anInt: 4814; 
+anInt: 4815; 
+anInt: 4816; 
+anInt: 4817; 
+anInt: 4818; 
+anInt: 4819; 
+anInt: 4820; 
+jvecContainer
+decorJVec: [310.5,311.5]; fvec: [210.5]; ivec: []; lvec: [cvec[0], cvec[1], cvec[2]]; svec: ['str460','str461']; 
+decorJVec: [311.5,312.5,313.5]; fvec: [211.5,212.5]; ivec: [111]; lvec: [cvec[1], cvec[2], cvec[3], cvec[4]]; svec: ['str461','str462','str463']; 
+decorJVec: [312.5,313.5,314.5,315.5]; fvec: [212.5,213.5,214.5]; ivec: [112,113]; lvec: []; svec: ['str462','str463','str464','str465']; 
+decorJVec: []; fvec: [213.5,214.5,215.5,216.5]; ivec: [113,114,115]; lvec: [cvec[3]]; svec: []; 
+decorJVec: [314.5]; fvec: []; ivec: [114,115,116,117]; lvec: [cvec[4], cvec[5]]; svec: ['str464']; 
+jvecInfo
+decorJVec: [414.5]; fvec: [1211.5,1212.5]; ivec: [1111]; lvec: [cvec[1], cvec[2], cvec[3], cvec[4]]; svec: ['str1461','str1462','str1463']; 
+plinksContainer
+decorLink: ctrig[2]; decorVLinks: [[inv], cvec[5], ctrig[0]]; plink: ctrig[2]; vlinks: []; 
+decorLink: [inv]; decorVLinks: [cvec[5], ctrig[0], [inv], cvec[8]]; plink: [inv]; vlinks: [cvec[2]]; 
+decorLink: cvec[2]; decorVLinks: []; plink: cvec[2]; vlinks: [ctrig[5], [inv]]; 
+decorLink: ctrig[5]; decorVLinks: [[inv]]; plink: ctrig[5]; vlinks: [[inv], cvec[5], ctrig[0]]; 
+decorLink: [inv]; decorVLinks: [cvec[8], ctrig[3]]; plink: [inv]; vlinks: [cvec[5], ctrig[0], [inv], cvec[8]]; 
+plinksInfo
+decorLink: [inv]; decorVLinks: [cvec[8], ctrig[3]]; plink: ctrig[5]; vlinks: [[inv], cvec[5], ctrig[0]]; 
+---> Event 11
+cvec
+  anInt1: 1301; aFloat: 2600.0; anInt: 1301; anInt2: 3901; cEL: cvec[9]; dInt1: 5201; dVar1: 5851; 
+  anInt1: 1302; aFloat: 2600.1; anInt: 1302; anInt2: 3902; cEL: cvec[8]; dInt1: 5202; dVar1: 5852; 
+  anInt1: 1303; aFloat: 2600.2; anInt: 1303; anInt2: 3903; cEL: cvec[7]; dInt1: 5203; dVar1: 5853; 
+  anInt1: 1304; aFloat: 2600.3; anInt: 1304; anInt2: 3904; cEL: cvec[6]; dInt1: 5204; dVar1: 5854; 
+  anInt1: 1305; aFloat: 2600.4; anInt: 1305; anInt2: 3905; cEL: cvec[5]; dInt1: 5205; dVar1: 5855; 
+  anInt1: 1306; aFloat: 2600.5; anInt: 1306; anInt2: 3906; cEL: cvec[4]; dInt1: 5206; dVar1: 5856; 
+  anInt1: 1307; aFloat: 2600.6; anInt: 1307; anInt2: 3907; cEL: cvec[3]; dInt1: 5207; dVar1: 5857; 
+  anInt1: 1308; aFloat: 2600.7; anInt: 1308; anInt2: 3908; cEL: cvec[2]; dInt1: 5208; dVar1: 5858; 
+  anInt1: 1309; aFloat: 2600.8; anInt: 1309; anInt2: 3909; cEL: cvec[1]; dInt1: 5209; dVar1: 5859; 
+  anInt1: 1310; aFloat: 2600.9; anInt: 1310; anInt2: 3910; cEL: cvec[0]; dInt1: 5210; dVar1: 5860; 
+cinfo
+  anInt1: 13000; aFloat: 1.3; anInt: 13000; anInt2: 26000; cEL: cvec[3]; dInt1: 39000; dInt1Base: 39001; 
+ctrig
+  anInt1: 6501; aFloat: 7800.0; anInt: 6501; anInt2: 9101; dInt1: 6241; 
+  anInt1: 6502; aFloat: 7800.1; anInt: 6502; anInt2: 9102; dInt1: 6242; 
+  anInt1: 6503; aFloat: 7800.2; anInt: 6503; anInt2: 9103; dInt1: 6243; 
+  anInt1: 6504; aFloat: 7800.3; anInt: 6504; anInt2: 9104; dInt1: 6244; 
+  anInt1: 6505; aFloat: 7800.4; anInt: 6505; anInt2: 9105; dInt1: 6245; 
+  anInt1: 6506; aFloat: 7800.5; anInt: 6506; anInt2: 9106; dInt1: 6246; 
+  anInt1: 6507; aFloat: 7800.6; anInt: 6507; anInt2: 9107; dInt1: 6247; 
+  anInt1: 6508; aFloat: 7800.7; anInt: 6508; anInt2: 9108; dInt1: 6248; 
+cvecWD  1013
+  anInt1: 2601; aFloat: 0.0; anInt: 2601; 
+  anInt1: 2602; aFloat: 0.0; anInt: 2602; 
+  anInt1: 2603; aFloat: 0.0; anInt: 2603; 
+  anInt1: 2604; aFloat: 0.0; anInt: 2604; 
+  anInt1: 2605; aFloat: 0.0; anInt: 2605; 
+  anInt1: 2606; aFloat: 0.0; anInt: 2606; 
+  anInt1: 2607; aFloat: 0.0; anInt: 2607; 
+  anInt1: 2608; aFloat: 0.0; anInt: 2608; 
+  anInt1: 2609; aFloat: 0.0; anInt: 2609; 
+  anInt1: 2610; aFloat: 0.0; anInt: 2610; 
+hvec
+anInt: 5201; 
+anInt: 5202; 
+anInt: 5203; 
+anInt: 5204; 
+anInt: 5205; 
+anInt: 5206; 
+anInt: 5207; 
+anInt: 5208; 
+anInt: 5209; 
+anInt: 5210; 
+anInt: 5211; 
+anInt: 5212; 
+anInt: 5213; 
+anInt: 5214; 
+anInt: 5215; 
+anInt: 5216; 
+anInt: 5217; 
+anInt: 5218; 
+anInt: 5219; 
+anInt: 5220; 
+jvecContainer
+decorJVec: [311.5,312.5,313.5]; fvec: [211.5,212.5]; ivec: [111]; lvec: [cvec[1], cvec[2], cvec[3], cvec[4]]; svec: ['str461','str462','str463']; 
+decorJVec: [312.5,313.5,314.5,315.5]; fvec: [212.5,213.5,214.5]; ivec: [112,113]; lvec: []; svec: ['str462','str463','str464','str465']; 
+decorJVec: []; fvec: [213.5,214.5,215.5,216.5]; ivec: [113,114,115]; lvec: [cvec[3]]; svec: []; 
+decorJVec: [314.5]; fvec: []; ivec: [114,115,116,117]; lvec: [cvec[4], cvec[5]]; svec: ['str464']; 
+decorJVec: [315.5,316.5]; fvec: [215.5]; ivec: []; lvec: [cvec[5], cvec[6], cvec[7]]; svec: ['str465','str466']; 
+jvecInfo
+decorJVec: [415.5,416.5]; fvec: [1212.5,1213.5,1214.5]; ivec: [1112,1113]; lvec: []; svec: ['str1462','str1463','str1464','str1465']; 
+plinksContainer
+decorLink: [inv]; decorVLinks: [cvec[5], ctrig[0], [inv], cvec[8]]; plink: [inv]; vlinks: [cvec[2]]; 
+decorLink: cvec[2]; decorVLinks: []; plink: cvec[2]; vlinks: [ctrig[5], [inv]]; 
+decorLink: ctrig[5]; decorVLinks: [[inv]]; plink: ctrig[5]; vlinks: [[inv], cvec[5], ctrig[0]]; 
+decorLink: [inv]; decorVLinks: [cvec[8], ctrig[3]]; plink: [inv]; vlinks: [cvec[5], ctrig[0], [inv], cvec[8]]; 
+decorLink: cvec[5]; decorVLinks: [ctrig[3], [inv], cvec[1]]; plink: cvec[5]; vlinks: []; 
+plinksInfo
+decorLink: cvec[5]; decorVLinks: [ctrig[3], [inv], cvec[1]]; plink: [inv]; vlinks: [cvec[5], ctrig[0], [inv], cvec[8]]; 
+---> Event 12
+cvec
+  anInt1: 1401; aFloat: 2800.0; anInt: 1401; anInt2: 4201; cEL: cvec[9]; dInt1: 5601; dVar1: 6301; 
+  anInt1: 1402; aFloat: 2800.1; anInt: 1402; anInt2: 4202; cEL: cvec[8]; dInt1: 5602; dVar1: 6302; 
+  anInt1: 1403; aFloat: 2800.2; anInt: 1403; anInt2: 4203; cEL: cvec[7]; dInt1: 5603; dVar1: 6303; 
+  anInt1: 1404; aFloat: 2800.3; anInt: 1404; anInt2: 4204; cEL: cvec[6]; dInt1: 5604; dVar1: 6304; 
+  anInt1: 1405; aFloat: 2800.4; anInt: 1405; anInt2: 4205; cEL: cvec[5]; dInt1: 5605; dVar1: 6305; 
+  anInt1: 1406; aFloat: 2800.5; anInt: 1406; anInt2: 4206; cEL: cvec[4]; dInt1: 5606; dVar1: 6306; 
+  anInt1: 1407; aFloat: 2800.6; anInt: 1407; anInt2: 4207; cEL: cvec[3]; dInt1: 5607; dVar1: 6307; 
+  anInt1: 1408; aFloat: 2800.7; anInt: 1408; anInt2: 4208; cEL: cvec[2]; dInt1: 5608; dVar1: 6308; 
+  anInt1: 1409; aFloat: 2800.8; anInt: 1409; anInt2: 4209; cEL: cvec[1]; dInt1: 5609; dVar1: 6309; 
+  anInt1: 1410; aFloat: 2800.9; anInt: 1410; anInt2: 4210; cEL: cvec[0]; dInt1: 5610; dVar1: 6310; 
+cinfo
+  anInt1: 14000; aFloat: 1.4; anInt: 14000; anInt2: 28000; cEL: cvec[4]; dInt1: 42000; dInt1Base: 42001; 
+ctrig
+  anInt1: 7001; aFloat: 8400.0; anInt: 7001; anInt2: 9801; dInt1: 6721; 
+  anInt1: 7002; aFloat: 8400.1; anInt: 7002; anInt2: 9802; dInt1: 6722; 
+  anInt1: 7003; aFloat: 8400.2; anInt: 7003; anInt2: 9803; dInt1: 6723; 
+  anInt1: 7004; aFloat: 8400.3; anInt: 7004; anInt2: 9804; dInt1: 6724; 
+  anInt1: 7005; aFloat: 8400.4; anInt: 7005; anInt2: 9805; dInt1: 6725; 
+  anInt1: 7006; aFloat: 8400.5; anInt: 7006; anInt2: 9806; dInt1: 6726; 
+  anInt1: 7007; aFloat: 8400.6; anInt: 7007; anInt2: 9807; dInt1: 6727; 
+  anInt1: 7008; aFloat: 8400.7; anInt: 7008; anInt2: 9808; dInt1: 6728; 
+cvecWD  1014
+  anInt1: 2801; aFloat: 0.0; anInt: 2801; 
+  anInt1: 2802; aFloat: 0.0; anInt: 2802; 
+  anInt1: 2803; aFloat: 0.0; anInt: 2803; 
+  anInt1: 2804; aFloat: 0.0; anInt: 2804; 
+  anInt1: 2805; aFloat: 0.0; anInt: 2805; 
+  anInt1: 2806; aFloat: 0.0; anInt: 2806; 
+  anInt1: 2807; aFloat: 0.0; anInt: 2807; 
+  anInt1: 2808; aFloat: 0.0; anInt: 2808; 
+  anInt1: 2809; aFloat: 0.0; anInt: 2809; 
+  anInt1: 2810; aFloat: 0.0; anInt: 2810; 
+hvec
+anInt: 5601; 
+anInt: 5602; 
+anInt: 5603; 
+anInt: 5604; 
+anInt: 5605; 
+anInt: 5606; 
+anInt: 5607; 
+anInt: 5608; 
+anInt: 5609; 
+anInt: 5610; 
+anInt: 5611; 
+anInt: 5612; 
+anInt: 5613; 
+anInt: 5614; 
+anInt: 5615; 
+anInt: 5616; 
+anInt: 5617; 
+anInt: 5618; 
+anInt: 5619; 
+anInt: 5620; 
+jvecContainer
+decorJVec: [312.5,313.5,314.5,315.5]; fvec: [212.5,213.5,214.5]; ivec: [112,113]; lvec: []; svec: ['str462','str463','str464','str465']; 
+decorJVec: []; fvec: [213.5,214.5,215.5,216.5]; ivec: [113,114,115]; lvec: [cvec[3]]; svec: []; 
+decorJVec: [314.5]; fvec: []; ivec: [114,115,116,117]; lvec: [cvec[4], cvec[5]]; svec: ['str464']; 
+decorJVec: [315.5,316.5]; fvec: [215.5]; ivec: []; lvec: [cvec[5], cvec[6], cvec[7]]; svec: ['str465','str466']; 
+decorJVec: [316.5,317.5,318.5]; fvec: [216.5,217.5]; ivec: [116]; lvec: [cvec[6], cvec[7], cvec[8], cvec[9]]; svec: ['str466','str467','str468']; 
+jvecInfo
+decorJVec: [416.5,417.5,418.5]; fvec: [1213.5,1214.5,1215.5,1216.5]; ivec: [1113,1114,1115]; lvec: [cvec[3]]; svec: []; 
+plinksContainer
+decorLink: cvec[2]; decorVLinks: []; plink: cvec[2]; vlinks: [ctrig[5], [inv]]; 
+decorLink: ctrig[5]; decorVLinks: [[inv]]; plink: ctrig[5]; vlinks: [[inv], cvec[5], ctrig[0]]; 
+decorLink: [inv]; decorVLinks: [cvec[8], ctrig[3]]; plink: [inv]; vlinks: [cvec[5], ctrig[0], [inv], cvec[8]]; 
+decorLink: cvec[5]; decorVLinks: [ctrig[3], [inv], cvec[1]]; plink: cvec[5]; vlinks: []; 
+decorLink: ctrig[0]; decorVLinks: [[inv], cvec[1], ctrig[6], [inv]]; plink: ctrig[0]; vlinks: [[inv]]; 
+plinksInfo
+decorLink: ctrig[0]; decorVLinks: [[inv], cvec[1], ctrig[6], [inv]]; plink: cvec[5]; vlinks: []; 
+---> Event 13
+cvec
+  anInt1: 1501; aFloat: 3000.0; anInt: 1501; anInt2: 4501; cEL: cvec[9]; dInt1: 6001; dVar1: 6751; 
+  anInt1: 1502; aFloat: 3000.1; anInt: 1502; anInt2: 4502; cEL: cvec[8]; dInt1: 6002; dVar1: 6752; 
+  anInt1: 1503; aFloat: 3000.2; anInt: 1503; anInt2: 4503; cEL: cvec[7]; dInt1: 6003; dVar1: 6753; 
+  anInt1: 1504; aFloat: 3000.3; anInt: 1504; anInt2: 4504; cEL: cvec[6]; dInt1: 6004; dVar1: 6754; 
+  anInt1: 1505; aFloat: 3000.4; anInt: 1505; anInt2: 4505; cEL: cvec[5]; dInt1: 6005; dVar1: 6755; 
+  anInt1: 1506; aFloat: 3000.5; anInt: 1506; anInt2: 4506; cEL: cvec[4]; dInt1: 6006; dVar1: 6756; 
+  anInt1: 1507; aFloat: 3000.6; anInt: 1507; anInt2: 4507; cEL: cvec[3]; dInt1: 6007; dVar1: 6757; 
+  anInt1: 1508; aFloat: 3000.7; anInt: 1508; anInt2: 4508; cEL: cvec[2]; dInt1: 6008; dVar1: 6758; 
+  anInt1: 1509; aFloat: 3000.8; anInt: 1509; anInt2: 4509; cEL: cvec[1]; dInt1: 6009; dVar1: 6759; 
+  anInt1: 1510; aFloat: 3000.9; anInt: 1510; anInt2: 4510; cEL: cvec[0]; dInt1: 6010; dVar1: 6760; 
+cinfo
+  anInt1: 15000; aFloat: 1.5; anInt: 15000; anInt2: 30000; cEL: cvec[5]; dInt1: 45000; dInt1Base: 45001; 
+ctrig
+  anInt1: 7501; aFloat: 9000.0; anInt: 7501; anInt2: 10501; dInt1: 7201; 
+  anInt1: 7502; aFloat: 9000.1; anInt: 7502; anInt2: 10502; dInt1: 7202; 
+  anInt1: 7503; aFloat: 9000.2; anInt: 7503; anInt2: 10503; dInt1: 7203; 
+  anInt1: 7504; aFloat: 9000.3; anInt: 7504; anInt2: 10504; dInt1: 7204; 
+  anInt1: 7505; aFloat: 9000.4; anInt: 7505; anInt2: 10505; dInt1: 7205; 
+  anInt1: 7506; aFloat: 9000.5; anInt: 7506; anInt2: 10506; dInt1: 7206; 
+  anInt1: 7507; aFloat: 9000.6; anInt: 7507; anInt2: 10507; dInt1: 7207; 
+  anInt1: 7508; aFloat: 9000.7; anInt: 7508; anInt2: 10508; dInt1: 7208; 
+cvecWD  1015
+  anInt1: 3001; aFloat: 0.0; anInt: 3001; 
+  anInt1: 3002; aFloat: 0.0; anInt: 3002; 
+  anInt1: 3003; aFloat: 0.0; anInt: 3003; 
+  anInt1: 3004; aFloat: 0.0; anInt: 3004; 
+  anInt1: 3005; aFloat: 0.0; anInt: 3005; 
+  anInt1: 3006; aFloat: 0.0; anInt: 3006; 
+  anInt1: 3007; aFloat: 0.0; anInt: 3007; 
+  anInt1: 3008; aFloat: 0.0; anInt: 3008; 
+  anInt1: 3009; aFloat: 0.0; anInt: 3009; 
+  anInt1: 3010; aFloat: 0.0; anInt: 3010; 
+hvec
+anInt: 6001; 
+anInt: 6002; 
+anInt: 6003; 
+anInt: 6004; 
+anInt: 6005; 
+anInt: 6006; 
+anInt: 6007; 
+anInt: 6008; 
+anInt: 6009; 
+anInt: 6010; 
+anInt: 6011; 
+anInt: 6012; 
+anInt: 6013; 
+anInt: 6014; 
+anInt: 6015; 
+anInt: 6016; 
+anInt: 6017; 
+anInt: 6018; 
+anInt: 6019; 
+anInt: 6020; 
+jvecContainer
+decorJVec: []; fvec: [213.5,214.5,215.5,216.5]; ivec: [113,114,115]; lvec: [cvec[3]]; svec: []; 
+decorJVec: [314.5]; fvec: []; ivec: [114,115,116,117]; lvec: [cvec[4], cvec[5]]; svec: ['str464']; 
+decorJVec: [315.5,316.5]; fvec: [215.5]; ivec: []; lvec: [cvec[5], cvec[6], cvec[7]]; svec: ['str465','str466']; 
+decorJVec: [316.5,317.5,318.5]; fvec: [216.5,217.5]; ivec: [116]; lvec: [cvec[6], cvec[7], cvec[8], cvec[9]]; svec: ['str466','str467','str468']; 
+decorJVec: [317.5,318.5,319.5,320.5]; fvec: [217.5,218.5,219.5]; ivec: [117,118]; lvec: []; svec: ['str467','str468','str469','str470']; 
+jvecInfo
+decorJVec: [417.5,418.5,419.5,420.5]; fvec: []; ivec: [1114,1115,1116,1117]; lvec: [cvec[4], cvec[5]]; svec: ['str1464']; 
+plinksContainer
+decorLink: ctrig[5]; decorVLinks: [[inv]]; plink: ctrig[5]; vlinks: [[inv], cvec[5], ctrig[0]]; 
+decorLink: [inv]; decorVLinks: [cvec[8], ctrig[3]]; plink: [inv]; vlinks: [cvec[5], ctrig[0], [inv], cvec[8]]; 
+decorLink: cvec[5]; decorVLinks: [ctrig[3], [inv], cvec[1]]; plink: cvec[5]; vlinks: []; 
+decorLink: ctrig[0]; decorVLinks: [[inv], cvec[1], ctrig[6], [inv]]; plink: ctrig[0]; vlinks: [[inv]]; 
+decorLink: [inv]; decorVLinks: []; plink: [inv]; vlinks: [cvec[8], ctrig[3]]; 
+plinksInfo
+decorLink: [inv]; decorVLinks: []; plink: ctrig[0]; vlinks: [[inv]]; 
+---> Event 14
+cvec
+  anInt1: 1601; aFloat: 3200.0; anInt: 1601; anInt2: 4801; cEL: cvec[9]; dInt1: 6401; dVar1: 7201; 
+  anInt1: 1602; aFloat: 3200.1; anInt: 1602; anInt2: 4802; cEL: cvec[8]; dInt1: 6402; dVar1: 7202; 
+  anInt1: 1603; aFloat: 3200.2; anInt: 1603; anInt2: 4803; cEL: cvec[7]; dInt1: 6403; dVar1: 7203; 
+  anInt1: 1604; aFloat: 3200.3; anInt: 1604; anInt2: 4804; cEL: cvec[6]; dInt1: 6404; dVar1: 7204; 
+  anInt1: 1605; aFloat: 3200.4; anInt: 1605; anInt2: 4805; cEL: cvec[5]; dInt1: 6405; dVar1: 7205; 
+  anInt1: 1606; aFloat: 3200.5; anInt: 1606; anInt2: 4806; cEL: cvec[4]; dInt1: 6406; dVar1: 7206; 
+  anInt1: 1607; aFloat: 3200.6; anInt: 1607; anInt2: 4807; cEL: cvec[3]; dInt1: 6407; dVar1: 7207; 
+  anInt1: 1608; aFloat: 3200.7; anInt: 1608; anInt2: 4808; cEL: cvec[2]; dInt1: 6408; dVar1: 7208; 
+  anInt1: 1609; aFloat: 3200.8; anInt: 1609; anInt2: 4809; cEL: cvec[1]; dInt1: 6409; dVar1: 7209; 
+  anInt1: 1610; aFloat: 3200.9; anInt: 1610; anInt2: 4810; cEL: cvec[0]; dInt1: 6410; dVar1: 7210; 
+cinfo
+  anInt1: 16000; aFloat: 1.6; anInt: 16000; anInt2: 32000; cEL: cvec[6]; dInt1: 48000; dInt1Base: 48001; 
+ctrig
+  anInt1: 8001; aFloat: 9600.0; anInt: 8001; anInt2: 11201; dInt1: 7681; 
+  anInt1: 8002; aFloat: 9600.1; anInt: 8002; anInt2: 11202; dInt1: 7682; 
+  anInt1: 8003; aFloat: 9600.2; anInt: 8003; anInt2: 11203; dInt1: 7683; 
+  anInt1: 8004; aFloat: 9600.3; anInt: 8004; anInt2: 11204; dInt1: 7684; 
+  anInt1: 8005; aFloat: 9600.4; anInt: 8005; anInt2: 11205; dInt1: 7685; 
+  anInt1: 8006; aFloat: 9600.5; anInt: 8006; anInt2: 11206; dInt1: 7686; 
+  anInt1: 8007; aFloat: 9600.6; anInt: 8007; anInt2: 11207; dInt1: 7687; 
+  anInt1: 8008; aFloat: 9600.7; anInt: 8008; anInt2: 11208; dInt1: 7688; 
+cvecWD  1016
+  anInt1: 3201; aFloat: 0.0; anInt: 3201; 
+  anInt1: 3202; aFloat: 0.0; anInt: 3202; 
+  anInt1: 3203; aFloat: 0.0; anInt: 3203; 
+  anInt1: 3204; aFloat: 0.0; anInt: 3204; 
+  anInt1: 3205; aFloat: 0.0; anInt: 3205; 
+  anInt1: 3206; aFloat: 0.0; anInt: 3206; 
+  anInt1: 3207; aFloat: 0.0; anInt: 3207; 
+  anInt1: 3208; aFloat: 0.0; anInt: 3208; 
+  anInt1: 3209; aFloat: 0.0; anInt: 3209; 
+  anInt1: 3210; aFloat: 0.0; anInt: 3210; 
+hvec
+anInt: 6401; 
+anInt: 6402; 
+anInt: 6403; 
+anInt: 6404; 
+anInt: 6405; 
+anInt: 6406; 
+anInt: 6407; 
+anInt: 6408; 
+anInt: 6409; 
+anInt: 6410; 
+anInt: 6411; 
+anInt: 6412; 
+anInt: 6413; 
+anInt: 6414; 
+anInt: 6415; 
+anInt: 6416; 
+anInt: 6417; 
+anInt: 6418; 
+anInt: 6419; 
+anInt: 6420; 
+jvecContainer
+decorJVec: [314.5]; fvec: []; ivec: [114,115,116,117]; lvec: [cvec[4], cvec[5]]; svec: ['str464']; 
+decorJVec: [315.5,316.5]; fvec: [215.5]; ivec: []; lvec: [cvec[5], cvec[6], cvec[7]]; svec: ['str465','str466']; 
+decorJVec: [316.5,317.5,318.5]; fvec: [216.5,217.5]; ivec: [116]; lvec: [cvec[6], cvec[7], cvec[8], cvec[9]]; svec: ['str466','str467','str468']; 
+decorJVec: [317.5,318.5,319.5,320.5]; fvec: [217.5,218.5,219.5]; ivec: [117,118]; lvec: []; svec: ['str467','str468','str469','str470']; 
+decorJVec: []; fvec: [218.5,219.5,220.5,221.5]; ivec: [118,119,120]; lvec: [cvec[8]]; svec: []; 
+jvecInfo
+decorJVec: []; fvec: [1215.5]; ivec: []; lvec: [cvec[5], cvec[6], cvec[7]]; svec: ['str1465','str1466']; 
+plinksContainer
+decorLink: [inv]; decorVLinks: [cvec[8], ctrig[3]]; plink: [inv]; vlinks: [cvec[5], ctrig[0], [inv], cvec[8]]; 
+decorLink: cvec[5]; decorVLinks: [ctrig[3], [inv], cvec[1]]; plink: cvec[5]; vlinks: []; 
+decorLink: ctrig[0]; decorVLinks: [[inv], cvec[1], ctrig[6], [inv]]; plink: ctrig[0]; vlinks: [[inv]]; 
+decorLink: [inv]; decorVLinks: []; plink: [inv]; vlinks: [cvec[8], ctrig[3]]; 
+decorLink: cvec[8]; decorVLinks: [ctrig[6]]; plink: cvec[8]; vlinks: [ctrig[3], [inv], cvec[1]]; 
+plinksInfo
+decorLink: cvec[8]; decorVLinks: [ctrig[6]]; plink: [inv]; vlinks: [cvec[8], ctrig[3]]; 
+---> Event 15
+cvec
+  anInt1: 1701; aFloat: 3400.0; anInt: 1701; anInt2: 5101; cEL: cvec[9]; dInt1: 6801; dVar1: 7651; 
+  anInt1: 1702; aFloat: 3400.1; anInt: 1702; anInt2: 5102; cEL: cvec[8]; dInt1: 6802; dVar1: 7652; 
+  anInt1: 1703; aFloat: 3400.2; anInt: 1703; anInt2: 5103; cEL: cvec[7]; dInt1: 6803; dVar1: 7653; 
+  anInt1: 1704; aFloat: 3400.3; anInt: 1704; anInt2: 5104; cEL: cvec[6]; dInt1: 6804; dVar1: 7654; 
+  anInt1: 1705; aFloat: 3400.4; anInt: 1705; anInt2: 5105; cEL: cvec[5]; dInt1: 6805; dVar1: 7655; 
+  anInt1: 1706; aFloat: 3400.5; anInt: 1706; anInt2: 5106; cEL: cvec[4]; dInt1: 6806; dVar1: 7656; 
+  anInt1: 1707; aFloat: 3400.6; anInt: 1707; anInt2: 5107; cEL: cvec[3]; dInt1: 6807; dVar1: 7657; 
+  anInt1: 1708; aFloat: 3400.7; anInt: 1708; anInt2: 5108; cEL: cvec[2]; dInt1: 6808; dVar1: 7658; 
+  anInt1: 1709; aFloat: 3400.8; anInt: 1709; anInt2: 5109; cEL: cvec[1]; dInt1: 6809; dVar1: 7659; 
+  anInt1: 1710; aFloat: 3400.9; anInt: 1710; anInt2: 5110; cEL: cvec[0]; dInt1: 6810; dVar1: 7660; 
+cinfo
+  anInt1: 17000; aFloat: 1.7; anInt: 17000; anInt2: 34000; cEL: cvec[7]; dInt1: 51000; dInt1Base: 51001; 
+ctrig
+  anInt1: 8501; aFloat: 10200.0; anInt: 8501; anInt2: 11901; dInt1: 8161; 
+  anInt1: 8502; aFloat: 10200.1; anInt: 8502; anInt2: 11902; dInt1: 8162; 
+  anInt1: 8503; aFloat: 10200.2; anInt: 8503; anInt2: 11903; dInt1: 8163; 
+  anInt1: 8504; aFloat: 10200.3; anInt: 8504; anInt2: 11904; dInt1: 8164; 
+  anInt1: 8505; aFloat: 10200.4; anInt: 8505; anInt2: 11905; dInt1: 8165; 
+  anInt1: 8506; aFloat: 10200.5; anInt: 8506; anInt2: 11906; dInt1: 8166; 
+  anInt1: 8507; aFloat: 10200.6; anInt: 8507; anInt2: 11907; dInt1: 8167; 
+  anInt1: 8508; aFloat: 10200.7; anInt: 8508; anInt2: 11908; dInt1: 8168; 
+cvecWD  1017
+  anInt1: 3401; aFloat: 0.0; anInt: 3401; 
+  anInt1: 3402; aFloat: 0.0; anInt: 3402; 
+  anInt1: 3403; aFloat: 0.0; anInt: 3403; 
+  anInt1: 3404; aFloat: 0.0; anInt: 3404; 
+  anInt1: 3405; aFloat: 0.0; anInt: 3405; 
+  anInt1: 3406; aFloat: 0.0; anInt: 3406; 
+  anInt1: 3407; aFloat: 0.0; anInt: 3407; 
+  anInt1: 3408; aFloat: 0.0; anInt: 3408; 
+  anInt1: 3409; aFloat: 0.0; anInt: 3409; 
+  anInt1: 3410; aFloat: 0.0; anInt: 3410; 
+hvec
+anInt: 6801; 
+anInt: 6802; 
+anInt: 6803; 
+anInt: 6804; 
+anInt: 6805; 
+anInt: 6806; 
+anInt: 6807; 
+anInt: 6808; 
+anInt: 6809; 
+anInt: 6810; 
+anInt: 6811; 
+anInt: 6812; 
+anInt: 6813; 
+anInt: 6814; 
+anInt: 6815; 
+anInt: 6816; 
+anInt: 6817; 
+anInt: 6818; 
+anInt: 6819; 
+anInt: 6820; 
+jvecContainer
+decorJVec: [315.5,316.5]; fvec: [215.5]; ivec: []; lvec: [cvec[5], cvec[6], cvec[7]]; svec: ['str465','str466']; 
+decorJVec: [316.5,317.5,318.5]; fvec: [216.5,217.5]; ivec: [116]; lvec: [cvec[6], cvec[7], cvec[8], cvec[9]]; svec: ['str466','str467','str468']; 
+decorJVec: [317.5,318.5,319.5,320.5]; fvec: [217.5,218.5,219.5]; ivec: [117,118]; lvec: []; svec: ['str467','str468','str469','str470']; 
+decorJVec: []; fvec: [218.5,219.5,220.5,221.5]; ivec: [118,119,120]; lvec: [cvec[8]]; svec: []; 
+decorJVec: [319.5]; fvec: []; ivec: [119,120,121,122]; lvec: [cvec[9], cvec[0]]; svec: ['str469']; 
+jvecInfo
+decorJVec: [419.5]; fvec: [1216.5,1217.5]; ivec: [1116]; lvec: [cvec[6], cvec[7], cvec[8], cvec[9]]; svec: ['str1466','str1467','str1468']; 
+plinksContainer
+decorLink: cvec[5]; decorVLinks: [ctrig[3], [inv], cvec[1]]; plink: cvec[5]; vlinks: []; 
+decorLink: ctrig[0]; decorVLinks: [[inv], cvec[1], ctrig[6], [inv]]; plink: ctrig[0]; vlinks: [[inv]]; 
+decorLink: [inv]; decorVLinks: []; plink: [inv]; vlinks: [cvec[8], ctrig[3]]; 
+decorLink: cvec[8]; decorVLinks: [ctrig[6]]; plink: cvec[8]; vlinks: [ctrig[3], [inv], cvec[1]]; 
+decorLink: ctrig[3]; decorVLinks: [[inv], cvec[4]]; plink: ctrig[3]; vlinks: [[inv], cvec[1], ctrig[6], [inv]]; 
+plinksInfo
+decorLink: ctrig[3]; decorVLinks: [[inv], cvec[4]]; plink: cvec[8]; vlinks: [ctrig[3], [inv], cvec[1]]; 
+---> Event 16
+cvec
+  anInt1: 1801; aFloat: 3600.0; anInt: 1801; anInt2: 5401; cEL: cvec[9]; dInt1: 7201; dVar1: 8101; 
+  anInt1: 1802; aFloat: 3600.1; anInt: 1802; anInt2: 5402; cEL: cvec[8]; dInt1: 7202; dVar1: 8102; 
+  anInt1: 1803; aFloat: 3600.2; anInt: 1803; anInt2: 5403; cEL: cvec[7]; dInt1: 7203; dVar1: 8103; 
+  anInt1: 1804; aFloat: 3600.3; anInt: 1804; anInt2: 5404; cEL: cvec[6]; dInt1: 7204; dVar1: 8104; 
+  anInt1: 1805; aFloat: 3600.4; anInt: 1805; anInt2: 5405; cEL: cvec[5]; dInt1: 7205; dVar1: 8105; 
+  anInt1: 1806; aFloat: 3600.5; anInt: 1806; anInt2: 5406; cEL: cvec[4]; dInt1: 7206; dVar1: 8106; 
+  anInt1: 1807; aFloat: 3600.6; anInt: 1807; anInt2: 5407; cEL: cvec[3]; dInt1: 7207; dVar1: 8107; 
+  anInt1: 1808; aFloat: 3600.7; anInt: 1808; anInt2: 5408; cEL: cvec[2]; dInt1: 7208; dVar1: 8108; 
+  anInt1: 1809; aFloat: 3600.8; anInt: 1809; anInt2: 5409; cEL: cvec[1]; dInt1: 7209; dVar1: 8109; 
+  anInt1: 1810; aFloat: 3600.9; anInt: 1810; anInt2: 5410; cEL: cvec[0]; dInt1: 7210; dVar1: 8110; 
+cinfo
+  anInt1: 18000; aFloat: 1.8; anInt: 18000; anInt2: 36000; cEL: cvec[8]; dInt1: 54000; dInt1Base: 54001; 
+ctrig
+  anInt1: 9001; aFloat: 10800.0; anInt: 9001; anInt2: 12601; dInt1: 8641; 
+  anInt1: 9002; aFloat: 10800.1; anInt: 9002; anInt2: 12602; dInt1: 8642; 
+  anInt1: 9003; aFloat: 10800.2; anInt: 9003; anInt2: 12603; dInt1: 8643; 
+  anInt1: 9004; aFloat: 10800.3; anInt: 9004; anInt2: 12604; dInt1: 8644; 
+  anInt1: 9005; aFloat: 10800.4; anInt: 9005; anInt2: 12605; dInt1: 8645; 
+  anInt1: 9006; aFloat: 10800.5; anInt: 9006; anInt2: 12606; dInt1: 8646; 
+  anInt1: 9007; aFloat: 10800.6; anInt: 9007; anInt2: 12607; dInt1: 8647; 
+  anInt1: 9008; aFloat: 10800.7; anInt: 9008; anInt2: 12608; dInt1: 8648; 
+cvecWD  1018
+  anInt1: 3601; aFloat: 0.0; anInt: 3601; 
+  anInt1: 3602; aFloat: 0.0; anInt: 3602; 
+  anInt1: 3603; aFloat: 0.0; anInt: 3603; 
+  anInt1: 3604; aFloat: 0.0; anInt: 3604; 
+  anInt1: 3605; aFloat: 0.0; anInt: 3605; 
+  anInt1: 3606; aFloat: 0.0; anInt: 3606; 
+  anInt1: 3607; aFloat: 0.0; anInt: 3607; 
+  anInt1: 3608; aFloat: 0.0; anInt: 3608; 
+  anInt1: 3609; aFloat: 0.0; anInt: 3609; 
+  anInt1: 3610; aFloat: 0.0; anInt: 3610; 
+hvec
+anInt: 7201; 
+anInt: 7202; 
+anInt: 7203; 
+anInt: 7204; 
+anInt: 7205; 
+anInt: 7206; 
+anInt: 7207; 
+anInt: 7208; 
+anInt: 7209; 
+anInt: 7210; 
+anInt: 7211; 
+anInt: 7212; 
+anInt: 7213; 
+anInt: 7214; 
+anInt: 7215; 
+anInt: 7216; 
+anInt: 7217; 
+anInt: 7218; 
+anInt: 7219; 
+anInt: 7220; 
+jvecContainer
+decorJVec: [316.5,317.5,318.5]; fvec: [216.5,217.5]; ivec: [116]; lvec: [cvec[6], cvec[7], cvec[8], cvec[9]]; svec: ['str466','str467','str468']; 
+decorJVec: [317.5,318.5,319.5,320.5]; fvec: [217.5,218.5,219.5]; ivec: [117,118]; lvec: []; svec: ['str467','str468','str469','str470']; 
+decorJVec: []; fvec: [218.5,219.5,220.5,221.5]; ivec: [118,119,120]; lvec: [cvec[8]]; svec: []; 
+decorJVec: [319.5]; fvec: []; ivec: [119,120,121,122]; lvec: [cvec[9], cvec[0]]; svec: ['str469']; 
+decorJVec: [320.5,321.5]; fvec: [220.5]; ivec: []; lvec: [cvec[0], cvec[1], cvec[2]]; svec: ['str470','str471']; 
+jvecInfo
+decorJVec: [420.5,421.5]; fvec: [1217.5,1218.5,1219.5]; ivec: [1117,1118]; lvec: []; svec: ['str1467','str1468','str1469','str1470']; 
+plinksContainer
+decorLink: ctrig[0]; decorVLinks: [[inv], cvec[1], ctrig[6], [inv]]; plink: ctrig[0]; vlinks: [[inv]]; 
+decorLink: [inv]; decorVLinks: []; plink: [inv]; vlinks: [cvec[8], ctrig[3]]; 
+decorLink: cvec[8]; decorVLinks: [ctrig[6]]; plink: cvec[8]; vlinks: [ctrig[3], [inv], cvec[1]]; 
+decorLink: ctrig[3]; decorVLinks: [[inv], cvec[4]]; plink: ctrig[3]; vlinks: [[inv], cvec[1], ctrig[6], [inv]]; 
+decorLink: [inv]; decorVLinks: [cvec[4], ctrig[1], [inv]]; plink: [inv]; vlinks: []; 
+plinksInfo
+decorLink: [inv]; decorVLinks: [cvec[4], ctrig[1], [inv]]; plink: ctrig[3]; vlinks: [[inv], cvec[1], ctrig[6], [inv]]; 
+---> Event 17
+cvec
+  anInt1: 1901; aFloat: 3800.0; anInt: 1901; anInt2: 5701; cEL: cvec[9]; dInt1: 7601; dVar1: 8551; 
+  anInt1: 1902; aFloat: 3800.1; anInt: 1902; anInt2: 5702; cEL: cvec[8]; dInt1: 7602; dVar1: 8552; 
+  anInt1: 1903; aFloat: 3800.2; anInt: 1903; anInt2: 5703; cEL: cvec[7]; dInt1: 7603; dVar1: 8553; 
+  anInt1: 1904; aFloat: 3800.3; anInt: 1904; anInt2: 5704; cEL: cvec[6]; dInt1: 7604; dVar1: 8554; 
+  anInt1: 1905; aFloat: 3800.4; anInt: 1905; anInt2: 5705; cEL: cvec[5]; dInt1: 7605; dVar1: 8555; 
+  anInt1: 1906; aFloat: 3800.5; anInt: 1906; anInt2: 5706; cEL: cvec[4]; dInt1: 7606; dVar1: 8556; 
+  anInt1: 1907; aFloat: 3800.6; anInt: 1907; anInt2: 5707; cEL: cvec[3]; dInt1: 7607; dVar1: 8557; 
+  anInt1: 1908; aFloat: 3800.7; anInt: 1908; anInt2: 5708; cEL: cvec[2]; dInt1: 7608; dVar1: 8558; 
+  anInt1: 1909; aFloat: 3800.8; anInt: 1909; anInt2: 5709; cEL: cvec[1]; dInt1: 7609; dVar1: 8559; 
+  anInt1: 1910; aFloat: 3800.9; anInt: 1910; anInt2: 5710; cEL: cvec[0]; dInt1: 7610; dVar1: 8560; 
+cinfo
+  anInt1: 19000; aFloat: 1.9; anInt: 19000; anInt2: 38000; cEL: cvec[9]; dInt1: 57000; dInt1Base: 57001; 
+ctrig
+  anInt1: 9501; aFloat: 11400.0; anInt: 9501; anInt2: 13301; dInt1: 9121; 
+  anInt1: 9502; aFloat: 11400.1; anInt: 9502; anInt2: 13302; dInt1: 9122; 
+  anInt1: 9503; aFloat: 11400.2; anInt: 9503; anInt2: 13303; dInt1: 9123; 
+  anInt1: 9504; aFloat: 11400.3; anInt: 9504; anInt2: 13304; dInt1: 9124; 
+  anInt1: 9505; aFloat: 11400.4; anInt: 9505; anInt2: 13305; dInt1: 9125; 
+  anInt1: 9506; aFloat: 11400.5; anInt: 9506; anInt2: 13306; dInt1: 9126; 
+  anInt1: 9507; aFloat: 11400.6; anInt: 9507; anInt2: 13307; dInt1: 9127; 
+  anInt1: 9508; aFloat: 11400.7; anInt: 9508; anInt2: 13308; dInt1: 9128; 
+cvecWD  1019
+  anInt1: 3801; aFloat: 0.0; anInt: 3801; 
+  anInt1: 3802; aFloat: 0.0; anInt: 3802; 
+  anInt1: 3803; aFloat: 0.0; anInt: 3803; 
+  anInt1: 3804; aFloat: 0.0; anInt: 3804; 
+  anInt1: 3805; aFloat: 0.0; anInt: 3805; 
+  anInt1: 3806; aFloat: 0.0; anInt: 3806; 
+  anInt1: 3807; aFloat: 0.0; anInt: 3807; 
+  anInt1: 3808; aFloat: 0.0; anInt: 3808; 
+  anInt1: 3809; aFloat: 0.0; anInt: 3809; 
+  anInt1: 3810; aFloat: 0.0; anInt: 3810; 
+hvec
+anInt: 7601; 
+anInt: 7602; 
+anInt: 7603; 
+anInt: 7604; 
+anInt: 7605; 
+anInt: 7606; 
+anInt: 7607; 
+anInt: 7608; 
+anInt: 7609; 
+anInt: 7610; 
+anInt: 7611; 
+anInt: 7612; 
+anInt: 7613; 
+anInt: 7614; 
+anInt: 7615; 
+anInt: 7616; 
+anInt: 7617; 
+anInt: 7618; 
+anInt: 7619; 
+anInt: 7620; 
+jvecContainer
+decorJVec: [317.5,318.5,319.5,320.5]; fvec: [217.5,218.5,219.5]; ivec: [117,118]; lvec: []; svec: ['str467','str468','str469','str470']; 
+decorJVec: []; fvec: [218.5,219.5,220.5,221.5]; ivec: [118,119,120]; lvec: [cvec[8]]; svec: []; 
+decorJVec: [319.5]; fvec: []; ivec: [119,120,121,122]; lvec: [cvec[9], cvec[0]]; svec: ['str469']; 
+decorJVec: [320.5,321.5]; fvec: [220.5]; ivec: []; lvec: [cvec[0], cvec[1], cvec[2]]; svec: ['str470','str471']; 
+decorJVec: [321.5,322.5,323.5]; fvec: [221.5,222.5]; ivec: [121]; lvec: [cvec[1], cvec[2], cvec[3], cvec[4]]; svec: ['str471','str472','str473']; 
+jvecInfo
+decorJVec: [421.5,422.5,423.5]; fvec: [1218.5,1219.5,1220.5,1221.5]; ivec: [1118,1119,1120]; lvec: [cvec[8]]; svec: []; 
+plinksContainer
+decorLink: [inv]; decorVLinks: []; plink: [inv]; vlinks: [cvec[8], ctrig[3]]; 
+decorLink: cvec[8]; decorVLinks: [ctrig[6]]; plink: cvec[8]; vlinks: [ctrig[3], [inv], cvec[1]]; 
+decorLink: ctrig[3]; decorVLinks: [[inv], cvec[4]]; plink: ctrig[3]; vlinks: [[inv], cvec[1], ctrig[6], [inv]]; 
+decorLink: [inv]; decorVLinks: [cvec[4], ctrig[1], [inv]]; plink: [inv]; vlinks: []; 
+decorLink: cvec[1]; decorVLinks: [ctrig[1], [inv], cvec[7], ctrig[4]]; plink: cvec[1]; vlinks: [ctrig[6]]; 
+plinksInfo
+decorLink: cvec[1]; decorVLinks: [ctrig[1], [inv], cvec[7], ctrig[4]]; plink: [inv]; vlinks: []; 
+---> Event 18
+cvec
+  anInt1: 2001; aFloat: 4000.0; anInt: 2001; anInt2: 6001; cEL: cvec[9]; dInt1: 8001; dVar1: 9001; 
+  anInt1: 2002; aFloat: 4000.1; anInt: 2002; anInt2: 6002; cEL: cvec[8]; dInt1: 8002; dVar1: 9002; 
+  anInt1: 2003; aFloat: 4000.2; anInt: 2003; anInt2: 6003; cEL: cvec[7]; dInt1: 8003; dVar1: 9003; 
+  anInt1: 2004; aFloat: 4000.3; anInt: 2004; anInt2: 6004; cEL: cvec[6]; dInt1: 8004; dVar1: 9004; 
+  anInt1: 2005; aFloat: 4000.4; anInt: 2005; anInt2: 6005; cEL: cvec[5]; dInt1: 8005; dVar1: 9005; 
+  anInt1: 2006; aFloat: 4000.5; anInt: 2006; anInt2: 6006; cEL: cvec[4]; dInt1: 8006; dVar1: 9006; 
+  anInt1: 2007; aFloat: 4000.6; anInt: 2007; anInt2: 6007; cEL: cvec[3]; dInt1: 8007; dVar1: 9007; 
+  anInt1: 2008; aFloat: 4000.7; anInt: 2008; anInt2: 6008; cEL: cvec[2]; dInt1: 8008; dVar1: 9008; 
+  anInt1: 2009; aFloat: 4000.8; anInt: 2009; anInt2: 6009; cEL: cvec[1]; dInt1: 8009; dVar1: 9009; 
+  anInt1: 2010; aFloat: 4000.9; anInt: 2010; anInt2: 6010; cEL: cvec[0]; dInt1: 8010; dVar1: 9010; 
+cinfo
+  anInt1: 20000; aFloat: 2.0; anInt: 20000; anInt2: 40000; cEL: cvec[0]; dInt1: 60000; dInt1Base: 60001; 
+ctrig
+  anInt1: 10001; aFloat: 12000.0; anInt: 10001; anInt2: 14001; dInt1: 9601; 
+  anInt1: 10002; aFloat: 12000.1; anInt: 10002; anInt2: 14002; dInt1: 9602; 
+  anInt1: 10003; aFloat: 12000.2; anInt: 10003; anInt2: 14003; dInt1: 9603; 
+  anInt1: 10004; aFloat: 12000.3; anInt: 10004; anInt2: 14004; dInt1: 9604; 
+  anInt1: 10005; aFloat: 12000.4; anInt: 10005; anInt2: 14005; dInt1: 9605; 
+  anInt1: 10006; aFloat: 12000.5; anInt: 10006; anInt2: 14006; dInt1: 9606; 
+  anInt1: 10007; aFloat: 12000.6; anInt: 10007; anInt2: 14007; dInt1: 9607; 
+  anInt1: 10008; aFloat: 12000.7; anInt: 10008; anInt2: 14008; dInt1: 9608; 
+cvecWD  1020
+  anInt1: 4001; aFloat: 0.0; anInt: 4001; 
+  anInt1: 4002; aFloat: 0.0; anInt: 4002; 
+  anInt1: 4003; aFloat: 0.0; anInt: 4003; 
+  anInt1: 4004; aFloat: 0.0; anInt: 4004; 
+  anInt1: 4005; aFloat: 0.0; anInt: 4005; 
+  anInt1: 4006; aFloat: 0.0; anInt: 4006; 
+  anInt1: 4007; aFloat: 0.0; anInt: 4007; 
+  anInt1: 4008; aFloat: 0.0; anInt: 4008; 
+  anInt1: 4009; aFloat: 0.0; anInt: 4009; 
+  anInt1: 4010; aFloat: 0.0; anInt: 4010; 
+hvec
+anInt: 8001; 
+anInt: 8002; 
+anInt: 8003; 
+anInt: 8004; 
+anInt: 8005; 
+anInt: 8006; 
+anInt: 8007; 
+anInt: 8008; 
+anInt: 8009; 
+anInt: 8010; 
+anInt: 8011; 
+anInt: 8012; 
+anInt: 8013; 
+anInt: 8014; 
+anInt: 8015; 
+anInt: 8016; 
+anInt: 8017; 
+anInt: 8018; 
+anInt: 8019; 
+anInt: 8020; 
+jvecContainer
+decorJVec: []; fvec: [218.5,219.5,220.5,221.5]; ivec: [118,119,120]; lvec: [cvec[8]]; svec: []; 
+decorJVec: [319.5]; fvec: []; ivec: [119,120,121,122]; lvec: [cvec[9], cvec[0]]; svec: ['str469']; 
+decorJVec: [320.5,321.5]; fvec: [220.5]; ivec: []; lvec: [cvec[0], cvec[1], cvec[2]]; svec: ['str470','str471']; 
+decorJVec: [321.5,322.5,323.5]; fvec: [221.5,222.5]; ivec: [121]; lvec: [cvec[1], cvec[2], cvec[3], cvec[4]]; svec: ['str471','str472','str473']; 
+decorJVec: [322.5,323.5,324.5,325.5]; fvec: [222.5,223.5,224.5]; ivec: [122,123]; lvec: []; svec: ['str472','str473','str474','str475']; 
+jvecInfo
+decorJVec: [422.5,423.5,424.5,425.5]; fvec: []; ivec: [1119,1120,1121,1122]; lvec: [cvec[9], cvec[0]]; svec: ['str1469']; 
+plinksContainer
+decorLink: cvec[8]; decorVLinks: [ctrig[6]]; plink: cvec[8]; vlinks: [ctrig[3], [inv], cvec[1]]; 
+decorLink: ctrig[3]; decorVLinks: [[inv], cvec[4]]; plink: ctrig[3]; vlinks: [[inv], cvec[1], ctrig[6], [inv]]; 
+decorLink: [inv]; decorVLinks: [cvec[4], ctrig[1], [inv]]; plink: [inv]; vlinks: []; 
+decorLink: cvec[1]; decorVLinks: [ctrig[1], [inv], cvec[7], ctrig[4]]; plink: cvec[1]; vlinks: [ctrig[6]]; 
+decorLink: ctrig[6]; decorVLinks: []; plink: ctrig[6]; vlinks: [[inv], cvec[4]]; 
+plinksInfo
+decorLink: ctrig[6]; decorVLinks: []; plink: cvec[1]; vlinks: [ctrig[6]]; 
+---> Event 19
+cvec
+  anInt1: 2101; aFloat: 4200.0; anInt: 2101; anInt2: 6301; cEL: cvec[9]; dInt1: 8401; dVar1: 9451; 
+  anInt1: 2102; aFloat: 4200.1; anInt: 2102; anInt2: 6302; cEL: cvec[8]; dInt1: 8402; dVar1: 9452; 
+  anInt1: 2103; aFloat: 4200.2; anInt: 2103; anInt2: 6303; cEL: cvec[7]; dInt1: 8403; dVar1: 9453; 
+  anInt1: 2104; aFloat: 4200.3; anInt: 2104; anInt2: 6304; cEL: cvec[6]; dInt1: 8404; dVar1: 9454; 
+  anInt1: 2105; aFloat: 4200.4; anInt: 2105; anInt2: 6305; cEL: cvec[5]; dInt1: 8405; dVar1: 9455; 
+  anInt1: 2106; aFloat: 4200.5; anInt: 2106; anInt2: 6306; cEL: cvec[4]; dInt1: 8406; dVar1: 9456; 
+  anInt1: 2107; aFloat: 4200.6; anInt: 2107; anInt2: 6307; cEL: cvec[3]; dInt1: 8407; dVar1: 9457; 
+  anInt1: 2108; aFloat: 4200.7; anInt: 2108; anInt2: 6308; cEL: cvec[2]; dInt1: 8408; dVar1: 9458; 
+  anInt1: 2109; aFloat: 4200.8; anInt: 2109; anInt2: 6309; cEL: cvec[1]; dInt1: 8409; dVar1: 9459; 
+  anInt1: 2110; aFloat: 4200.9; anInt: 2110; anInt2: 6310; cEL: cvec[0]; dInt1: 8410; dVar1: 9460; 
+cinfo
+  anInt1: 21000; aFloat: 2.1; anInt: 21000; anInt2: 42000; cEL: cvec[1]; dInt1: 63000; dInt1Base: 63001; 
+ctrig
+  anInt1: 10501; aFloat: 12600.0; anInt: 10501; anInt2: 14701; dInt1: 10081; 
+  anInt1: 10502; aFloat: 12600.1; anInt: 10502; anInt2: 14702; dInt1: 10082; 
+  anInt1: 10503; aFloat: 12600.2; anInt: 10503; anInt2: 14703; dInt1: 10083; 
+  anInt1: 10504; aFloat: 12600.3; anInt: 10504; anInt2: 14704; dInt1: 10084; 
+  anInt1: 10505; aFloat: 12600.4; anInt: 10505; anInt2: 14705; dInt1: 10085; 
+  anInt1: 10506; aFloat: 12600.5; anInt: 10506; anInt2: 14706; dInt1: 10086; 
+  anInt1: 10507; aFloat: 12600.6; anInt: 10507; anInt2: 14707; dInt1: 10087; 
+  anInt1: 10508; aFloat: 12600.7; anInt: 10508; anInt2: 14708; dInt1: 10088; 
+cvecWD  1021
+  anInt1: 4201; aFloat: 0.0; anInt: 4201; 
+  anInt1: 4202; aFloat: 0.0; anInt: 4202; 
+  anInt1: 4203; aFloat: 0.0; anInt: 4203; 
+  anInt1: 4204; aFloat: 0.0; anInt: 4204; 
+  anInt1: 4205; aFloat: 0.0; anInt: 4205; 
+  anInt1: 4206; aFloat: 0.0; anInt: 4206; 
+  anInt1: 4207; aFloat: 0.0; anInt: 4207; 
+  anInt1: 4208; aFloat: 0.0; anInt: 4208; 
+  anInt1: 4209; aFloat: 0.0; anInt: 4209; 
+  anInt1: 4210; aFloat: 0.0; anInt: 4210; 
+hvec
+anInt: 8401; 
+anInt: 8402; 
+anInt: 8403; 
+anInt: 8404; 
+anInt: 8405; 
+anInt: 8406; 
+anInt: 8407; 
+anInt: 8408; 
+anInt: 8409; 
+anInt: 8410; 
+anInt: 8411; 
+anInt: 8412; 
+anInt: 8413; 
+anInt: 8414; 
+anInt: 8415; 
+anInt: 8416; 
+anInt: 8417; 
+anInt: 8418; 
+anInt: 8419; 
+anInt: 8420; 
+jvecContainer
+decorJVec: [319.5]; fvec: []; ivec: [119,120,121,122]; lvec: [cvec[9], cvec[0]]; svec: ['str469']; 
+decorJVec: [320.5,321.5]; fvec: [220.5]; ivec: []; lvec: [cvec[0], cvec[1], cvec[2]]; svec: ['str470','str471']; 
+decorJVec: [321.5,322.5,323.5]; fvec: [221.5,222.5]; ivec: [121]; lvec: [cvec[1], cvec[2], cvec[3], cvec[4]]; svec: ['str471','str472','str473']; 
+decorJVec: [322.5,323.5,324.5,325.5]; fvec: [222.5,223.5,224.5]; ivec: [122,123]; lvec: []; svec: ['str472','str473','str474','str475']; 
+decorJVec: []; fvec: [223.5,224.5,225.5,226.5]; ivec: [123,124,125]; lvec: [cvec[3]]; svec: []; 
+jvecInfo
+decorJVec: []; fvec: [1220.5]; ivec: []; lvec: [cvec[0], cvec[1], cvec[2]]; svec: ['str1470','str1471']; 
+plinksContainer
+decorLink: ctrig[3]; decorVLinks: [[inv], cvec[4]]; plink: ctrig[3]; vlinks: [[inv], cvec[1], ctrig[6], [inv]]; 
+decorLink: [inv]; decorVLinks: [cvec[4], ctrig[1], [inv]]; plink: [inv]; vlinks: []; 
+decorLink: cvec[1]; decorVLinks: [ctrig[1], [inv], cvec[7], ctrig[4]]; plink: cvec[1]; vlinks: [ctrig[6]]; 
+decorLink: ctrig[6]; decorVLinks: []; plink: ctrig[6]; vlinks: [[inv], cvec[4]]; 
+decorLink: [inv]; decorVLinks: [cvec[7]]; plink: [inv]; vlinks: [cvec[4], ctrig[1], [inv]]; 
+plinksInfo
+decorLink: [inv]; decorVLinks: [cvec[7]]; plink: ctrig[6]; vlinks: [[inv], cvec[4]]; 

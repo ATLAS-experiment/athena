@@ -2,9 +2,14 @@
   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-#include <iostream>
 #include "MuonIdHelpers/RpcIdHelper.h"
+#include "IdDict/IdDictDictionary.h"
+#include "IdDict/IdDictField.h"
+#include "IdDict/IdDictGroup.h"
+#include "IdDict/IdDictMgr.h"
+#include "IdDict/IdDictRegion.h"
 #include "Identifier/RangeIterator.h"
+
 RpcIdHelper::RpcIdHelper() : MuonIdHelper("RpcIdHelper", "rpc") {}
 
 // Initialize dictionary
@@ -34,7 +39,7 @@ int RpcIdHelper::initialize_from_dictionary(const IdDictMgr& dict_mgr) {
     // Initialize some of the field indices
     if (initLevelsFromDict()) return 1;
 
-    IdDictField* field = m_dict->find_field("doubletR");
+    const IdDictField* field = m_dict->find_field("doubletR");
     if (field) {
         m_DOUBLETR_INDEX = field->index();
     } else {
@@ -87,11 +92,11 @@ int RpcIdHelper::initialize_from_dictionary(const IdDictMgr& dict_mgr) {
     m_DETECTORELEMENT_INDEX = m_DOUBLETZ_INDEX;
 
     // save an index to the first region of rpc
-    IdDictGroup* rpcGroup = m_dict->find_group("rpc");
+    const IdDictGroup* rpcGroup = m_dict->find_group("rpc");
     if (!rpcGroup) {
         ATH_MSG_ERROR("Cannot find rpc group");
     } else {
-        m_GROUP_INDEX = rpcGroup->regions()[0]->index();
+        m_GROUP_INDEX = rpcGroup->region(0).index();
     }
 
     const IdDictRegion& region = m_dict->region(m_GROUP_INDEX);

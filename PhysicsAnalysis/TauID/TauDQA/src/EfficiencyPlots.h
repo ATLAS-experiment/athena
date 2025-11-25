@@ -6,8 +6,9 @@
 #define TAUDQA_EFFICIENCYPLOTS_H
 
 #include "TrkValHistUtils/PlotBase.h"
-#include "TauKinematicPlots.h"
 #include "xAODTau/TauJet.h"
+
+class TProfile;
 
 namespace Tau{
 

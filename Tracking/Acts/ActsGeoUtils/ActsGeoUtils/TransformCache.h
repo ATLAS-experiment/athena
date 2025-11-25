@@ -13,7 +13,7 @@
 
 namespace ActsTrk {
   /*** @brief: The TransformCache holds the local -> global transformations associated with a tracking surface 
-   *           from the Readout geometry. The cache establishes the connection with the ActsGeometryContext or more
+   *           from the Readout geometry. The cache establishes the connection with the GeometryContext or more
    *           precisely with its DetectorAlignStore to provide the transformations of an aligned surface. 
    *           As soon as the alignment store is accessed, the nominal surface is released from memory.
    *           In order to be used for each detector technology, the virtual <fetchTransform> needs to

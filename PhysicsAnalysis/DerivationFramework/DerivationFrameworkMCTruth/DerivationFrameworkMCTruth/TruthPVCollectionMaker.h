@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef DERIVATIONFRAMEWORK_TRUTHPVCOLLECTIONMAKER_H
@@ -16,16 +16,17 @@
 namespace DerivationFramework {
 
   class TruthPVCollectionMaker : public extends<AthAlgTool, IAugmentationTool> {
-    public: 
-      TruthPVCollectionMaker(const std::string& t, const std::string& n, const IInterface* p);
-      ~TruthPVCollectionMaker();
-      StatusCode initialize();
-      virtual StatusCode addBranches() const;
+  public:
 
-    private:
-      SG::ReadHandleKey<xAOD::TruthEventContainer> m_eventsKey{this, "EventsKey", "TruthEvents"}; //!< Input event collection (navigates to the vertices)
-      SG::WriteHandleKey<xAOD::TruthVertexContainer> m_outVtxKey{this, "NewCollectionName", ""}; //!< Output collection name
-  }; 
+    using base_class::base_class;
+
+    virtual StatusCode initialize() override final;
+    virtual StatusCode addBranches(const EventContext& ctx) const override final;
+
+  private:
+    SG::ReadHandleKey<xAOD::TruthEventContainer> m_eventsKey{this, "EventsKey", "TruthEvents"}; //!< Input event collection (navigates to the vertices)
+    SG::WriteHandleKey<xAOD::TruthVertexContainer> m_outVtxKey{this, "NewCollectionName", ""}; //!< Output collection name
+  };
 }
 
 #endif // DERIVATIONFRAMEWORK_TRUTHPVCOLLECTIONMAKER_H

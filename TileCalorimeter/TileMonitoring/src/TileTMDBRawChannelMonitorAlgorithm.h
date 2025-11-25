@@ -14,6 +14,8 @@
 #include "AthenaMonitoring/AthMonitorAlgorithm.h"
 #include "AthenaMonitoringKernel/Monitored.h"
 #include "StoreGate/ReadHandleKey.h"
+#include "xAODMuon/MuonContainer.h"
+#include "xAODTrigger/MuonRoIContainer.h"
 
 class TileHWID;
 

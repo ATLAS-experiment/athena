@@ -15,6 +15,18 @@
 #include "PATInterfaces/SystematicsCache.h"
 #include "xAODEventInfo/EventInfo.h"
 
+#include "ColumnarCore/ColumnarTool.h"
+#include "ColumnarCore/ColumnAccessor.h"
+#include "ColumnarCore/LinkColumn.h"
+#include "ColumnarEventInfo/EventInfoHelpers.h"
+#include "ColumnarMuon/MuonDef.h"
+#include "ColumnarMuon/MuonTrackHelpers.h"
+#include <ColumnarCore/ObjectColumn.h>
+#include "ColumnarTracking/TrackHelpers.h"
+#include "ColumnarVariant/VariantAccessor.h"
+#include "ColumnarVariant/VariantDef.h"
+#include "ColumnarVariant/VariantLinkColumn.h"
+
 #include "MuonMomentumCorrections/MuonObj.h"
 #include "MuonMomentumCorrections/IMuonCalibIntTool.h"
 
@@ -22,7 +34,7 @@
 namespace CP {
 
     class MuonCalibTool : public virtual IMuonCalibrationAndSmearingTool,
-                                           public asg::AsgTool {
+                                           public asg::AsgTool, public columnar::ColumnarTool<> {
         // Create a proper constructor for Athena
         ASG_TOOL_CLASS3(MuonCalibTool, CP::IMuonCalibrationAndSmearingTool, CP::ISystematicsTool,
                         CP::IReentrantSystematicsTool)
@@ -41,6 +53,7 @@ namespace CP {
         // Interface methods that must be defined
         // Interface - Apply the correction on a modifyable object
         virtual CorrectionCode applyCorrection(xAOD::Muon& mu) const override;
+        CorrectionCode applyCorrection(columnar::MuonId mu, columnar::EventInfoId evtInfo) const;
         // Interface - Create a corrected copy from a constant muon
         virtual CorrectionCode correctedCopy(const xAOD::Muon& input, xAOD::Muon*& output) const override;
         // Interface - Is the tool affected by a specific systematic?
@@ -55,6 +68,7 @@ namespace CP {
         virtual double expectedResolution(const std::string& DetType, const xAOD::Muon& mu, const bool addMCCorrectionSmearing) const override;
         // Interface - get the expected resolution of the muon
         virtual double expectedResolution(const int& DetType, const xAOD::Muon& mu, const bool addMCCorrectionSmearing) const override;
+        double expectedResolution(const int& DetType, columnar::MuonId mu, columnar::EventInfoId evtInfo, const bool addMCCorrectionSmearing) const;
         // Interface - Expert method to apply the MC correction on a modifyable trackParticle for ID- or MS-only corrections
         virtual CorrectionCode applyCorrectionTrkOnly(xAOD::TrackParticle& inTrk, const int DetType) const override;
 
@@ -118,17 +132,26 @@ namespace CP {
 
         // internal tool function
         // Converts xAOD object to an internal MuonObj for easier transfer of information
-        MCP::MuonObj convertToMuonObj(const xAOD::Muon& mu) const;
+        MCP::MuonObj convertToMuonObj(columnar::MuonId mu, columnar::EventInfoId evtInfo) const;
         MCP::MuonObj convertToMuonObj(const xAOD::TrackParticle& inTrk, const int DetType) const;
         /// Decorate all information that's needed to ensure reproducibility of the smearing
-        void initializeRandNumbers(MCP::MuonObj& obj) const;
+        void initializeRandNumbers(MCP::MuonObj& obj, columnar::EventInfoId evtInfo) const;
 
 
-        MCP::DataYear getPeriod(bool isData) const; 
+        MCP::DataYear getPeriod(bool isData, columnar::EventInfoId evtInfo) const; 
 
    private:
 
         bool m_MuonIntHighTSmearToolInitialized{false};
+
+    public:
+
+        Gaudi::Property<bool> m_skipResolutionCategory{this, "skipResolutionCategory", false, "whether to skip the resolution category variable"};
+
+        std::unique_ptr<MCP::MuonCalibToolAccessors> m_acc {std::make_unique<MCP::MuonCalibToolAccessors>(*this)};
+
+        void callSingleEvent (columnar::MuonRange muons, columnar::EventInfoId event) const;
+        void callEvents (columnar::EventContextRange events) const override;
 
     };  // class MuonCalibTool
 

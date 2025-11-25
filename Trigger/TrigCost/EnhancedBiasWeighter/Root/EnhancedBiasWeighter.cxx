@@ -697,12 +697,11 @@ uint32_t EnhancedBiasWeighter::getPairedBunches() const
   return m_pairedBunches;
 }
 
-StatusCode EnhancedBiasWeighter::getDistanceIntoTrain(const xAOD::EventInfo* eventInfo, uint32_t& distance) const
+StatusCode EnhancedBiasWeighter::getDistanceIntoTrain(const xAOD::EventInfo* eventInfo, uint32_t& distance, const EventContext& ctx) const
 {
   if (!m_useBunchCrossingData) return StatusCode::SUCCESS;
 
-  const EventContext& context = Gaudi::Hive::currentContext();
-  SG::ReadCondHandle<BunchCrossingCondData> bunchCrossingTool (m_bunchCrossingKey, context);
+  SG::ReadCondHandle<BunchCrossingCondData> bunchCrossingTool (m_bunchCrossingKey, ctx);
   ATH_CHECK( bunchCrossingTool.isValid() );
   distance = bunchCrossingTool->distanceFromFront( eventInfo->bcid(), BunchCrossingCondData::BunchDistanceType::BunchCrossings );
 
@@ -720,7 +719,7 @@ double EnhancedBiasWeighter::getAverageMu() const
 }
 
 
-StatusCode EnhancedBiasWeighter::addBranches() const
+StatusCode EnhancedBiasWeighter::addBranches(const EventContext& ctx) const
 {
   // Set up the decorator
   SG::AuxElement::Decorator< double >   decoratorEBWeight("EnhancedBiasWeight"); 
@@ -733,8 +732,8 @@ StatusCode EnhancedBiasWeighter::addBranches() const
 
   const xAOD::EventInfo* eventInfo(nullptr);
   uint32_t distance = 0;
-  ATH_CHECK( evtStore()->retrieve(eventInfo, "EventInfo") );
-  ATH_CHECK( getDistanceIntoTrain(eventInfo, distance) );
+  ATH_CHECK( evtStore()->retrieve(eventInfo, "EventInfo") ); // FIXME Use Handles
+  ATH_CHECK( getDistanceIntoTrain(eventInfo, distance, ctx) );
 
   decoratorEBWeight(*eventInfo) = getEBWeight(eventInfo);
   decoratorEBLivetime(*eventInfo) = getEBLiveTime(eventInfo);

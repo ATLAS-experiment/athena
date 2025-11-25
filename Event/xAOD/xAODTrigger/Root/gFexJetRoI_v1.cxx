@@ -1,6 +1,6 @@
 
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -335,10 +335,9 @@ namespace xAOD {
       if (( iEta() <= 3 ) || ( (iEta() >= 36) )){
         phi_out = ( 8 * iPhi() ) + 4;
       }
-      else if ( iEta() >3  && iEta() < 36 ){
+      else {
         phi_out = ( 4 * iPhi() ) + 2;
       } 
-      else return -999; 
     } 
     return phi_out; 
   }

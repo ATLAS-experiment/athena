@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CBNT_Timing.h"
@@ -107,7 +107,7 @@ StatusCode CBNT_Timing::CBNT_initialize() {
     // build the vector of idSample
     std::vector<CaloSampling::CaloSample> samplingV = m_calosAndSamplings[idCalo];
     samplingV.push_back(idSample);
-    m_calosAndSamplings[idCalo] = samplingV;
+    m_calosAndSamplings[idCalo] = std::move(samplingV);
   }
   // printout
   for (const auto& p : m_calosAndSamplings) {

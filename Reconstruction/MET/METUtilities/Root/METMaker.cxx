@@ -95,7 +95,6 @@ namespace met {
     //
     // Property declaration
     //
-    declareProperty("JetJvtMomentName",   m_jetJvtMomentName   = "Jvt"               );
     declareProperty("JetRejectionDec",    m_jetRejectionDec    = ""                  );
     declareProperty("JetMinEFrac",        m_jetMinEfrac        = 0.0                 );
     declareProperty("JetMinWeightedPt",   m_jetMinWeightedPt   = 20.0e3              );

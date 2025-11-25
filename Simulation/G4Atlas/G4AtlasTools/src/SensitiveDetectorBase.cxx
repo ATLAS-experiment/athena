@@ -1,22 +1,17 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-// STL includes
-#include <sstream>
+
 
 // Base class
 #include "G4AtlasTools/SensitiveDetectorBase.h"
-
 // Geant4 includes used in functions
-//#include "G4RunManager.hh"
-//#include "G4VUserDetectorConstruction.hh"
 #include "G4LogicalVolumeStore.hh"
+#include "G4MultiSensitiveDetector.hh"
 #include "G4SDManager.hh"
-
-// From this package, borrowed from G4 10.2
-#include "G4AtlasTools/G4MultiSensitiveDetector.hh"
-
+// STL includes
+#include <sstream>
 
 
 SensitiveDetectorBase::SensitiveDetectorBase(const std::string& type,
@@ -199,8 +194,7 @@ SetSensitiveDetector(G4LogicalVolume* logVol, G4VSensitiveDetector* aSD) const
           std::stringstream ss;
           ss << static_cast<const void*>(logVol);
           const G4String msdname = "/MultiSD_" + logVol->GetName() + ss.str();
-          //ATH_MSG_INFO("MultiSD name: " << msdname);
-          msd = new G4MultiSensitiveDetector(msdname);
+          msd = new G4MultiSensitiveDetector(std::move(msdname));
           // We need to register the proxy to have correct handling of IDs
           G4SDManager::GetSDMpointer()->AddNewDetector(msd);
           msd->AddSD(originalSD);

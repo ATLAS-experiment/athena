@@ -5,9 +5,11 @@
 #ifndef TAUDQA_GENERALTAUPLOTS_H
 #define TAUDQA_GENERALTAUPLOTS_H
 
-#include "TrkValHistUtils/PlotBase.h" //inheritance
+#include "TrkValHistUtils/PlotBase.h"
 #include "TauKinematicPlots.h" //member
 #include "xAODTau/TauJet.h" //typedef
+
+class TH1;
 
 namespace Tau{
 

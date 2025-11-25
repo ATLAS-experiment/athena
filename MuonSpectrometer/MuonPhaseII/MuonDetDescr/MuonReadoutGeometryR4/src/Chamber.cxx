@@ -31,7 +31,7 @@ namespace MuonGMR4{
     
     //Comparison operator for the MuonChambers: 
     // Legacy & NSW: sorted by StationName
-    // NSW (MM) & NSW (STG) : sorted b Station Name
+    // NSW (MM) & NSW (STG) : sorted by Station Name
     // NSW (MM/STGC) & NSW(MM/STGC) : if they have same eta and phi -> sorted by multilayer (case for large sectors)
     // small NSW chambers are sorted by phi - all elements in a sector are grouped in the same chamber
     bool Chamber::operator<(const Chamber& other) const {
@@ -47,6 +47,11 @@ namespace MuonGMR4{
 
         if(stationEta() != other.stationEta()){
             return stationEta() < other.stationEta();
+        }
+
+        if(detectorType() != other.detectorType()){
+
+            return detectorType() < other.detectorType();
         }
 
         //for NSW order by multilayer for MMLS and STGCs for the large sectors
@@ -75,14 +80,16 @@ namespace MuonGMR4{
     std::string Chamber::identString() const {
         if(idHelperSvc()->isMM(readoutEles().front()->identify()) ||
            idHelperSvc()->issTgc(readoutEles().front()->identify()) ) {
-            return std::format("MSchamber {:} eta {:02} phi {:02} ml {:02}",
+            return std::format("MS chamber {:} station {:} eta {:02} phi {:02} ml {:02}",
+                               ActsTrk::to_string(detectorType()),
                                idHelperSvc()->stationNameString(readoutEles().front()->identify()),
                                stationEta(), stationPhi(),
                                idHelperSvc()->isMM(readoutEles().front()->identify()) ?
                                idHelperSvc()->mmIdHelper().multilayer(readoutEles().front()->identify()) :
                                idHelperSvc()->stgcIdHelper().multilayer(readoutEles().front()->identify()));
         }
-        return std::format("MS chamber {:} eta {:02} phi {:02}",
+        return std::format("MS chamber {:} station {:} eta {:02} phi {:02}",
+                          ActsTrk::to_string(detectorType()),
                           idHelperSvc()->stationNameString(readoutEles().front()->identify()),
                           stationEta(), stationPhi());        
     }
@@ -95,12 +102,16 @@ namespace MuonGMR4{
     Muon::MuonStationIndex::ChIndex Chamber::chamberIndex() const {
         return readoutEles().front()->chamberIndex();
     }
+      
+    ActsTrk::DetectorType Chamber::detectorType() const {
+       return readoutEles().front()->detectorType();
+    }
     double Chamber::halfXLong() const { return m_args.bounds->get(BoundEnums::eHalfLengthXposY); }
     double Chamber::halfXShort() const { return m_args.bounds->get(BoundEnums::eHalfLengthXnegY); }
     double Chamber::halfY() const { return  m_args.bounds->get(BoundEnums::eHalfLengthY); }
     double Chamber::halfZ() const { return m_args.bounds->get(BoundEnums::eHalfLengthZ); }
 
-    std::shared_ptr<Acts::Volume> Chamber::boundingVolume(const ActsGeometryContext& gctx) const {
+    std::shared_ptr<Acts::Volume> Chamber::boundingVolume(const ActsTrk::GeometryContext& gctx) const {
         return std::make_shared<Acts::Volume>(localToGlobalTrans(gctx), bounds());
     }
     std::shared_ptr<Acts::TrapezoidVolumeBounds> Chamber::bounds() const {
@@ -118,10 +129,10 @@ namespace MuonGMR4{
     const Acts::PlaneSurface& Chamber::surface() const {
         return *m_args.surface;
     }
-    const Amg::Transform3D& Chamber::localToGlobalTrans(const ActsGeometryContext& gctx) const {
+    const Amg::Transform3D& Chamber::localToGlobalTrans(const ActsTrk::GeometryContext& gctx) const {
         return surface().transform(gctx.context());
     }
-    Amg::Transform3D Chamber::globalToLocalTrans(const ActsGeometryContext& gctx) const {
+    Amg::Transform3D Chamber::globalToLocalTrans(const ActsTrk::GeometryContext& gctx) const {
         return localToGlobalTrans(gctx).inverse();
     }
     const SpectrometerSector* Chamber::parent() const { return m_parent; }

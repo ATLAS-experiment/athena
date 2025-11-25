@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef CSCCALIBDATA_CSCCALIBREPORTSLOPE_H
@@ -79,7 +79,7 @@ class CscCalibReportSlope : public CscCalibReportBase
     void setFitResults(std::vector<float> * fitResults);
 
 
-    /**Retrive bit histogram vector*/
+    /**Retrieve bit histogram vector*/
     const DataVector<TH1I> * getBitHists() const;        
 
     /**Retrieve pedestal amplitude histogram vector*/

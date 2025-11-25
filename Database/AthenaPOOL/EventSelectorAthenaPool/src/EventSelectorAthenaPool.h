@@ -157,7 +157,7 @@ protected:
 private: // internal member functions
    /// Return pointer to active event SG
    StoreGateSvc* eventStore() const;
-   /// Reinitialize the service when a @c fork() occured/was-issued
+   /// Reinitialize the service when a @c fork() occurred/was-issued
    StatusCode reinit() const;
    /// Return pointer to new PoolCollectionConverter
    std::unique_ptr<PoolCollectionConverter> getCollectionCnv(bool throwIncidents = false) const;
@@ -205,11 +205,11 @@ private: // properties
    Gaudi::Property<bool> m_keepInputFilesOpen{this, "KeepInputFilesOpen", false, ""};
 
    /// HelperTools, vector of names of AlgTools that are executed by the EventSelector
-   mutable ToolHandleArray<IAthenaSelectorTool> m_helperTools ATLAS_THREAD_SAFE {this};
+   mutable ToolHandleArray<IAthenaSelectorTool> m_helperTools ATLAS_THREAD_SAFE {this, "HelperTools", {}, ""};
    ToolHandle<IAthenaSelectorTool> m_counterTool{this, "CounterTool", "", ""};
    ToolHandle<IAthenaIPCTool> m_eventStreamingTool{this, "SharedMemoryTool", "", ""};
    /// Make this instance a Streaming Client during first iteration automatically
-   IntegerProperty m_makeStreamingToolClient{this,"MakeStreamingToolClient",0};
+   Gaudi::Property<int> m_makeStreamingToolClient{this,"MakeStreamingToolClient",0};
 
    /// The following are included for compatibility with McEventSelector and are not really used.
    /// However runNo, oldRunNo and overrideRunNumberFromInput are used to reset run number for

@@ -35,8 +35,8 @@ static const char* const APP_NAME = "xAODFileReadTest";
 /// Class used for the test
 class REventClass : public xAOD::Experimental::REvent {
 public:
-   /// Constructor
-   REventClass( xAOD::Experimental::REvent::EAuxMode mode ) : xAOD::Experimental::REvent( mode ) {}
+   // Inherit the constructor(s).
+   using xAOD::Experimental::REvent::REvent;
 
    /// Function loading all interface objects of the event
    StatusCode loadInputObjects() {
@@ -74,11 +74,13 @@ public:
             continue;
          }
          // Check if the branch exists in the file:
-         if( ! this->contains( efe.branchName(), *ti ) ) {
+         static constexpr bool METADATA = false;
+         if( ! this->contains( efe.branchName(), *ti, METADATA ) ) {
             continue;
          }
          // Try to load the object/container:
-         if( ! this->getInputObject( efe.branchName(), *ti ) ) {
+         static constexpr bool SILENT = false;
+         if( ! this->getInputObject( efe.branchName(), *ti, SILENT, METADATA ) ) {
             Error( "REventClass::loadInputObjects",
                    XAOD_MESSAGE( "Couldn't load object: %s" ),
                    efe.branchName().c_str() );
@@ -110,25 +112,12 @@ int main( int argc, char* argv[] ) {
 
    // Decode the command line options:
    std::vector< std::string > fileNames;
-   xAOD::Experimental::REvent::EAuxMode auxMode = xAOD::Experimental::REvent::kClassAccess;
    for( int i = 1; i < argc; ++i ) {
-      if( ! strcmp( argv[ i ], "-m" ) ) {
-         if( i + 1 >= argc ) {
-            ::Error( APP_NAME,
-                     XAOD_MESSAGE( "No access mode specified after -m" ) );
-            return 1;
-         } else {
-            const long mode = ::strtol( argv[ i + 1 ], 0, 10 );
-            auxMode = static_cast< xAOD::Experimental::REvent::EAuxMode >( mode );
-            ++i;
-         }
-      } else {
-         fileNames.push_back( argv[ i ] );
-      }
+      fileNames.push_back( argv[ i ] );
    }
 
    // Create the "REvent" object used for the test:
-   REventClass event( auxMode );
+   REventClass event;
 
    // Loop over the specified input files:
    for( const std::string& fileName : fileNames ) {

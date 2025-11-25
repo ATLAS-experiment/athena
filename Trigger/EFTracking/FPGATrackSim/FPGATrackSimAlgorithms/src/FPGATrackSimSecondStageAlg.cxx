@@ -202,7 +202,7 @@ StatusCode FPGATrackSimSecondStageAlg::execute()
                 road_hits.push_back(*layerH);
             }
         }
-        FPGAHitsInRoads_2nd->push_back(road_hits);
+        FPGAHitsInRoads_2nd->push_back(std::move(road_hits));
         FPGARoads_2nd->push_back(*road);
     }
 

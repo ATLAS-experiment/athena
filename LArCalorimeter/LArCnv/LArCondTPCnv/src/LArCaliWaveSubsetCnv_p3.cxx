@@ -46,6 +46,8 @@ LArCaliWaveSubsetCnv_p3::persToTrans(const LArCaliWaveSubset_p3* persObj,  LArCW
     for (unsigned int j = 0; j < nChannelsPerFeb; ++j){
       bool copyChannel = true;
       if (hasSparseData) {  		  
+        // coverity[bad_shift]
+        // coverity[integer_overflow]
         if (!(chansSet & (1 << (j - chansOffset)))) {	// Channel is missing data - skip
           copyChannel = false;
         }
@@ -251,6 +253,7 @@ LArCaliWaveSubsetCnv_p3::transToPers(const LArCWTransType* transObj,  LArCaliWav
         if (subsetIt->second[j].size() > 0) { // channel exists
                     
           assert (j >= chansOffset && (j - chansOffset) <= 31);
+          // coverity[integer_overflow]
           chansSet |= (1 << (j - chansOffset)); //store the channel number in the bit map
 					
         }

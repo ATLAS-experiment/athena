@@ -1,5 +1,5 @@
 /**
- * @copyright Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+ * @copyright Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
  *
  * @file DiTauTruthMatchingTool.cxx
  * @brief Class for ditau truth matching
@@ -9,14 +9,6 @@
 
 // Local include(s)
 #include "TauAnalysisTools/DiTauTruthMatchingTool.h"
-
-// Core include(s):
-#include "AthLinks/ElementLink.h"
-#include "TruthUtils/HepMCHelpers.h"
-#include "AthContainers/ConstAccessor.h"
-#include "AthContainers/Decorator.h"
-
-#include "MCTruthClassifier/MCTruthClassifier.h"
 
 using namespace TauAnalysisTools;
 
@@ -229,12 +221,12 @@ StatusCode DiTauTruthMatchingTool::checkTruthMatch (const xAOD::DiTauJet& xDiTau
   static const SG::Decorator<float> decTruthLeadEta("TruthVisLeadEta");
   static const SG::Decorator<float> decTruthLeadPhi("TruthVisLeadPhi");
   static const SG::Decorator<float> decTruthLeadM("TruthVisLeadM");
-  static const SG::Decorator<float> decTruthLeadPdgID("TruthLeadPdgID");
+  static const SG::Decorator<int> decTruthLeadPdgID("TruthLeadPdgID");
   static const SG::Decorator<float> decTruthSubleadPt("TruthVisSubleadPt");
   static const SG::Decorator<float> decTruthSubleadEta("TruthVisSubleadEta");
   static const SG::Decorator<float> decTruthSubleadPhi("TruthVisSubleadPhi");
   static const SG::Decorator<float> decTruthSubleadM("TruthVisSubleadM");
-  static const SG::Decorator<float> decTruthSubleadPdgID("TruthSubleadPdgID");
+  static const SG::Decorator<int> decTruthSubleadPdgID("TruthSubleadPdgID");
   static const SG::Decorator<float> decTruthDeltaR("TruthVisDeltaR");
   static const SG::Decorator<float> decTruthMass("TruthVisMass");
 

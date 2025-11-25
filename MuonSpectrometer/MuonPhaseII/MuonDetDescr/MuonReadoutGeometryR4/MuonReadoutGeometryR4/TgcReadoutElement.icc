@@ -46,10 +46,10 @@ namespace MuonGMR4 {
             ATH_MSG_WARNING("The measurement " << idHelperSvc()->toString(measId)
                             << " picks the wrong readout element " << idHelperSvc()->toStringDetEl(identify()));
         }
-        return constructHash(0, m_idHelper.gasGap(measId), m_idHelper.isStrip(measId));
+        return constructHash(0, m_idHelper.gasGap(measId), false);
     }
     inline IdentifierHash TgcReadoutElement::layerHash(const IdentifierHash& measHash) const {
-        return constructHash(0, gasGapNumber(measHash), isStrip(measHash));
+        return constructHash(0, gasGapNumber(measHash), false);
     }
     inline unsigned TgcReadoutElement::channelNumber(const IdentifierHash& measHash) {
         constexpr unsigned chanShift = 3;
@@ -109,7 +109,7 @@ namespace MuonGMR4 {
         }
         return static_cast<const RadialStripDesign&>(layerPtr->design(true));
     }
-    inline Amg::Vector3D TgcReadoutElement::channelPosition(const ActsGeometryContext& ctx, const Identifier& measId) const {
+    inline Amg::Vector3D TgcReadoutElement::channelPosition(const ActsTrk::GeometryContext& ctx, const Identifier& measId) const {
         return channelPosition(ctx, measurementHash(measId));
     }
 }  // namespace MuonGMR4

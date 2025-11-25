@@ -228,7 +228,7 @@ def JETM1Cfg(flags):
                                             "AntiKt4EMTopoJets",
                                             "AntiKt10UFOCSSKJets",
                                             "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets",
-                                            "BTagging_AntiKt4EMPFlow"]
+]
 
     JETM1SlimmingHelper.ExtraVariables  = ["AntiKt4EMTopoJets.DFCommonJets_QGTagger_NTracks.DFCommonJets_QGTagger_TracksWidth.DFCommonJets_QGTagger_TracksC1",
                                            "AntiKt4EMPFlowJets.DFCommonJets_QGTagger_NTracks.DFCommonJets_QGTagger_TracksWidth.DFCommonJets_QGTagger_TracksC1",

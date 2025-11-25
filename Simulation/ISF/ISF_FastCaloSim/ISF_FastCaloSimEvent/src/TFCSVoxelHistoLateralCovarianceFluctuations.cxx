@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <string>
@@ -147,7 +147,7 @@ bool TFCSVoxelHistoLateralCovarianceFluctuations::initialize(
         transform[x][y] = func;
       }
     }
-    m_transform.push_back(transform);
+    m_transform.push_back(std::move(transform));
     ++bin;
   }
 

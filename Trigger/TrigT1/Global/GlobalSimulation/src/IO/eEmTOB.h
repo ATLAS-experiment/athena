@@ -42,6 +42,15 @@ namespace GlobalSim::IOBitwise {
      */
 
     eEmTOB(const GlobalSim::IOBitwise::IeEmTOB& eEmTOB);
+
+    eEmTOB(const GlobalSim::IOBitwise::ICommonTOB&,
+	   const std::bitset<s_RHad_width>&,
+	   const std::bitset<s_REta_width>&,
+	   const std::bitset<s_WsTot_width>&,
+	   const std::bitset<s_Seed_width>&,
+	   const std::bitset<s_UpNotDown_width>&,
+	   const std::bitset<s_SeedIsMax_width>&
+	   );
     
     //! @copydoc IeEmTOB::~IeEmTOB()     
     virtual ~eEmTOB(){};
@@ -58,6 +67,8 @@ namespace GlobalSim::IOBitwise {
     virtual const std::bitset<s_UpNotDown_width>& UpNotDown_bit() const override;
     //! @copydoc IeEmTOB::SeedIsMax_bit()
     virtual const std::bitset<s_SeedIsMax_width>& SeedIsMax_bit() const override;
+
+    virtual std::string to_string() const override;
 
   private:
 

@@ -10,6 +10,7 @@
 
 
 #include "AthAllocators/exceptions.h"
+#include "CxxUtils/throw_out_of_range.h"
 
 
 //=== Smart pointer.
@@ -365,7 +366,7 @@ typename DataVectorWithAlloc<DV, ALLOC>::ElementProxy
 DataVectorWithAlloc<DV, ALLOC>::at (size_type n)
 {
   if (n >= this->size())
-    throw std::out_of_range ("DataVector::at range check");
+    CxxUtils::throw_out_of_range (__PRETTY_FUNCTION__, n, this->size(), this);
   return to_element_proxy (this->m_pCont.begin() + n);
 }
 
@@ -500,6 +501,31 @@ DataVectorWithAlloc<DV, ALLOC>::push_back (Ptr pElem)
   typename DV::value_type p = pElem.release();
   DV::push_back (p);
   return p;
+}
+
+
+/**
+ * @brief Create and add a number of new elements to the end of the container.
+ * @param n The number of new elements to add.
+ *          The elements will be created by calling allocate().
+ *
+ * Note: this method may only be called using the most derived
+ * @c DataVector in the hierarchy.
+ *
+ * Returns the original size of the vector.
+ */
+template <class DV, class ALLOC>
+inline
+auto
+DataVectorWithAlloc<DV, ALLOC>::push_new (size_type n) ->size_type
+{
+  auto alloc = [&]() {
+    typename elt_allocator_type::pointer p = m_heap->allocate(1);
+    // Note: not protected against exceptions.
+    m_heap->construct (p);
+    return p;
+  };
+  return DV::push_new (n, alloc);
 }
 
 

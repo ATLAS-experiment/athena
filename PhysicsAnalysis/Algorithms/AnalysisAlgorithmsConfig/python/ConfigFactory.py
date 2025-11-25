@@ -272,6 +272,9 @@ class ConfigFactory():
         from FTagAnalysisAlgorithms.XbbAnalysisConfig import XbbConfig
         self.addAlgConfigBlock(algName="XbbTagging", alg=XbbConfig,
                                superBlocks="Jets")
+        from JetAnalysisAlgorithms.JetUncertaintiesConfig import JetUncertaintiesConfig 
+        self.addAlgConfigBlock(algName="Uncertainties", alg=JetUncertaintiesConfig,
+            superBlocks="Jets")
 
         # electrons
         from EgammaAnalysisAlgorithms.ElectronAnalysisConfig import ElectronCalibrationConfig

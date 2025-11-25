@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // A unit test for the track selection tool. Currently this compares the pre-defined cut levels
@@ -22,6 +22,9 @@
 
 // Local include(s):
 #include "InDetTrackSelectionTool/InDetTrackSelectionTool.h"
+#include "xAODTracking/TrackingPrimitives.h"
+#include "xAODTracking/VertexContainer.h"
+#include "xAODTracking/TrackParticle.h"
 
 using std::string;
 using std::vector;

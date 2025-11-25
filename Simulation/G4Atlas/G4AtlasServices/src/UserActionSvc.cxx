@@ -215,4 +215,26 @@ namespace G4UA
 
     return StatusCode::SUCCESS;
   }
+  /// Calls BeginOfAthenaEvent on each UserAction tool
+  StatusCode UserActionSvc::BeginOfAthenaEvent(HitCollectionMap& hitCollections)
+  {
+    for(auto& actionTool : m_userActionTools) {
+      if(actionTool->BeginOfAthenaEvent(hitCollections).isFailure()) {
+        ATH_MSG_ERROR("BeginOfAthenaEvent failed for " << actionTool->name());
+        return StatusCode::FAILURE;
+      }
+    }
+    return StatusCode::SUCCESS;
+  }
+  /// Calls EndOfAthenaEvent on each UserAction tool
+  StatusCode UserActionSvc::EndOfAthenaEvent(HitCollectionMap& hitCollections)
+  {
+    for(auto& actionTool : m_userActionTools) {
+      if(actionTool->EndOfAthenaEvent(hitCollections).isFailure()) {
+        ATH_MSG_ERROR("EndOfAthenaEvent failed for " << actionTool->name());
+        return StatusCode::FAILURE;
+      }
+    }
+    return StatusCode::SUCCESS;
+  }
 } // namespace G4UA

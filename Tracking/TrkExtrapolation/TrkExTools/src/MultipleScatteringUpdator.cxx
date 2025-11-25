@@ -16,6 +16,9 @@
 #include "GaudiKernel/ThreadLocalContext.h"
 #include "CLHEP/Random/RandFlat.h"
 #include "CxxUtils/checker_macros.h"
+#include "CxxUtils/close_to_zero.h"
+
+using CxxUtils::close_to_zero;
 
 namespace{
 // static doubles
@@ -115,11 +118,13 @@ Trk::MultipleScatteringUpdator::sigmaSquare(const MaterialProperties &mat,
 
 
   if (particle != Trk::electron) {
-    // the highland formula
-    sigma2 = s_main_RutherfordScott / (beta * p);
+    if (auto denom = beta * p; not close_to_zero(denom)){
+      // the highland formula
+      sigma2 = s_main_RutherfordScott / denom;
+    }
 
     if (m_log_include) {
-      sigma2 *= (1. + s_log_RutherfordScott * log(t));
+      sigma2 *= (1. + s_log_RutherfordScott * std::log(t));
     }
 
     sigma2 *= (sigma2 * t);
@@ -131,7 +136,7 @@ Trk::MultipleScatteringUpdator::sigmaSquare(const MaterialProperties &mat,
     sigma2 *= (sigma2 * t);
 
     if (m_log_include) {
-      double factor = 1. + s_log_RossiGreisen * log10(10. * t);
+      double factor = 1. + s_log_RossiGreisen * std::log10(10. * t);
       factor *= factor;
       sigma2 *= factor;
     }
@@ -149,10 +154,16 @@ Trk::MultipleScatteringUpdator::sigmaSquare(const MaterialProperties &mat,
     }
     CLHEP::HepRandomEngine* engine = m_rngWrapper->getEngine (ctx);
     // d_0'
-    double dprime = t / (beta * beta);
-    double log_dprime = log(dprime);
+    double dprime{};
+    if (auto denom = beta * beta; not close_to_zero(denom)){
+      dprime = t / denom;
+    } else {
+      ATH_MSG_WARNING("Trk::MultipleScatteringUpdator::sigmaSquare: beta close to zero");
+      return 0.;
+    }
+    double log_dprime = std::log(dprime);
     // d_0''
-    double log_dprimeprime = log(std::pow(mat.averageZ(), 2.0 / 3.0) * dprime);
+    double log_dprimeprime = std::log(std::pow(mat.averageZ(), 2.0 / 3.0) * dprime);
     // get epsilon
     double epsilon = log_dprimeprime < 0.5 ?
                      s_gausMixEpsilon_a0 + s_gausMixEpsilon_a1 * log_dprimeprime + s_gausMixEpsilon_a2 *
@@ -164,7 +175,11 @@ Trk::MultipleScatteringUpdator::sigmaSquare(const MaterialProperties &mat,
                           log_dprime;
     // G4 optimised / native double Gaussian model
     if (!m_optGaussianMixtureG4) {
-      sigma2 = 225. * dprime / (p * p);
+      if (auto denom = p * p;not close_to_zero(denom)){
+        sigma2 = 225. * dprime / (p * p);
+      } else {
+        ATH_MSG_WARNING("Trk::MultipleScatteringUpdator::sigmaSquare: p close to zero");
+      }
     }
     // throw the random number core/tail
     if (CLHEP::RandFlat::shoot(engine) < epsilon) {

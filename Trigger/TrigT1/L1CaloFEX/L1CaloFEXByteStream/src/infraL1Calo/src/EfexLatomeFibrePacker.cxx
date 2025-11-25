@@ -1,3 +1,7 @@
+/*
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+*/
+
 #include "infraL1Calo/EfexLatomeFibrePacker.h"
 
 #include <iostream>
@@ -181,31 +185,31 @@ std::vector<FibrePackerBase::myDataWord>  EfexLatomeFibrePacker::getUnpackedData
             // word 6 has 2 more, and the last count is spread over the extra
             // 2 bits in words 1-5
 
-            supercells.at(0)  = (encodedData.at(0) >> 10) & 0x3ff;
-            supercells.at(1)  = (encodedData.at(0) >> 20) & 0x3ff;
-            supercells.at(2)  = (encodedData.at(1)      ) & 0x3ff;
-            supercells.at(3)  = (encodedData.at(1) >> 10) & 0x3ff;
-            supercells.at(4)  = (encodedData.at(1) >> 20) & 0x3ff;
-            supercells.at(5)  = (encodedData.at(2)      ) & 0x3ff;
-            supercells.at(6)  = (encodedData.at(2) >> 10) & 0x3ff;
-            supercells.at(7)  = (encodedData.at(2) >> 20) & 0x3ff;
-            supercells.at(8)  = (encodedData.at(3)      ) & 0x3ff;
-            supercells.at(9)  = (encodedData.at(3) >> 10) & 0x3ff;
-            supercells.at(10) = (encodedData.at(3) >> 20) & 0x3ff;
-            supercells.at(11) = (encodedData.at(4)      ) & 0x3ff;
-            supercells.at(12) = (encodedData.at(4) >> 10) & 0x3ff;
-            supercells.at(13) = (encodedData.at(4) >> 20) & 0x3ff;
-            supercells.at(14) = (encodedData.at(5)      ) & 0x3ff;
-            supercells.at(15) = (encodedData.at(5) >> 10) & 0x3ff;
-            supercells.at(16) = (encodedData.at(5) >> 20) & 0x3ff;
-            supercells.at(17) = (encodedData.at(6)      ) & 0x3ff;
-            supercells.at(18) = (encodedData.at(6) >> 10) & 0x3ff;
-            supercells.at(19) = ((encodedData.at(5) >> 30) & 0x3)      |
-                                ((encodedData.at(4) >> 30) & 0x3) << 2 | 
-                                ((encodedData.at(3) >> 30) & 0x3) << 4 |
-                                ((encodedData.at(2) >> 30) & 0x3) << 6 | 
-                                ((encodedData.at(1) >> 30) & 0x3) << 8 ;
-            unpackedData=supercells;    
+            supercells[0]  = (encodedData[0] >> 10) & 0x3ff;
+            supercells[1]  = (encodedData[0] >> 20) & 0x3ff;
+            supercells[2]  = (encodedData[1]      ) & 0x3ff;
+            supercells[3]  = (encodedData[1] >> 10) & 0x3ff;
+            supercells[4]  = (encodedData[1] >> 20) & 0x3ff;
+            supercells[5]  = (encodedData[2]      ) & 0x3ff;
+            supercells[6]  = (encodedData[2] >> 10) & 0x3ff;
+            supercells[7]  = (encodedData[2] >> 20) & 0x3ff;
+            supercells[8]  = (encodedData[3]      ) & 0x3ff;
+            supercells[9]  = (encodedData[3] >> 10) & 0x3ff;
+            supercells[10] = (encodedData[3] >> 20) & 0x3ff;
+            supercells[11] = (encodedData[4]      ) & 0x3ff;
+            supercells[12] = (encodedData[4] >> 10) & 0x3ff;
+            supercells[13] = (encodedData[4] >> 20) & 0x3ff;
+            supercells[14] = (encodedData[5]      ) & 0x3ff;
+            supercells[15] = (encodedData[5] >> 10) & 0x3ff;
+            supercells[16] = (encodedData[5] >> 20) & 0x3ff;
+            supercells[17] = (encodedData.at(6)      ) & 0x3ff;
+            supercells[18] = (encodedData[6] >> 10) & 0x3ff;
+            supercells.at(19) = ((encodedData[5] >> 30) & 0x3)      |
+                                ((encodedData[4] >> 30) & 0x3) << 2 | 
+                                ((encodedData[3] >> 30) & 0x3) << 4 |
+                                ((encodedData[2] >> 30) & 0x3) << 6 | 
+                                ((encodedData[1] >> 30) & 0x3) << 8 ;
+            unpackedData=std::move(supercells);    
             break;
             }
         case InputDataFrameType::Alignement:		                

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 // utility to take a root file full of TGraph2DErrors and create a root file with TF2s.
 #include <iostream>
@@ -57,7 +57,7 @@ int main(int argc, char** argv) {
     TGraph2DErrors* gr = nullptr;
     fin->GetObject(obj->GetName(), gr);
     if (gr == nullptr) {
-      cerr << "Could not retrive " << obj->GetName()
+      cerr << "Could not retrieve " << obj->GetName()
 	   << " as a TGraph2DErrors." << endl;
       continue;
     }

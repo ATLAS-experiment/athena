@@ -16,6 +16,7 @@
 #include "PersistentDataModel/Token.h"
 #include "CxxUtils/checker_macros.h"
 #include "CoralBase/Attribute.h"
+#include "AthenaKernel/getMessageSvc.h"
 
 #include "rw_test.h"
 
@@ -32,6 +33,7 @@ TestDriver::TestDriver( const std::string& name,
                         const std::string& connection )
    : m_name( name ),  m_type( type ), m_connection( connection )
 {
+   Athena::getMessageSvcQuiet = true;
 }
 
 

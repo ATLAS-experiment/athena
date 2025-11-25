@@ -24,7 +24,7 @@ ex.threads = 1
 ex.flags = ['Trigger.triggerMenuSetup="Dev_pp_run3_v1_TriggerValidation_prescale"',
             'Trigger.doLVL1=True',
             f'IOVDb.GlobalTag="{globalTag}"',
-            'IOVDb.CrestServer="http://crest-j23.cern.ch:9090/api-v5.0"']
+            'IOVDb.UseCREST=True']
 
 test = Test.Test()
 test.art_type = 'build'

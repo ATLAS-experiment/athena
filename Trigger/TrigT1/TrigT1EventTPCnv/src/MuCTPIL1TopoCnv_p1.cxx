@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -98,7 +98,7 @@ void MuCTPIL1TopoCnv_p1::transToPers( const LVL1::MuCTPIL1Topo* transObj, MuCTPI
     muCand.m_innerCoin        = cand.getinnerCoin();
     muCand.m_goodMF           = cand.getgoodMF();   
 
-    persObj->m_muonTopoCandidates.push_back(muCand);
+    persObj->m_muonTopoCandidates.push_back(std::move(muCand));
   }
   persObj->m_bcidOffset         = transObj->getBcidOffset();
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //====================================================================
@@ -11,18 +11,19 @@
 //====================================================================
 
 /// Framework include files
-#include "POOLCore/DbPrint.h"
 #include "StorageSvc/DbSelect.h"
 #include "StorageSvc/DbContainer.h"
 #include "StorageSvc/DbContainerImp.h"
-#include "StorageSvc/DbHeap.h"
+
+#include <stdexcept>
 
 using namespace std;
 using namespace pool;
 
 /// Standard Constructor
-DbContainerImp::DbContainerImp()
-: m_size(0), m_writeSize(0), m_name("UNKNOWN"),
+DbContainerImp::DbContainerImp(const std::string& name) :
+  APRMessaging(name),
+  m_size(0), m_writeSize(0), m_name("UNKNOWN"),
   m_canUpdate(false),
   m_canDestroy(false)
 {
@@ -60,18 +61,11 @@ DbStatus DbContainerImp::close()   {
 }
 
 /// In place allocation of raw memory for the transient object
-void* DbContainerImp::allocate(unsigned long siz, DbContainer& cntH, ShapeH shape)  {
-  DbObjectHandle<DbObject> objH(cntH.type());
+DbStatus DbContainerImp::store(const void* object, DbContainer& cntH, ShapeH shape)  {
   Token::OID_t objLink(cntH.token()->oid().first, nextRecordId());
-  DbHeap::allocate(siz, &cntH, &objLink, &objH);
-  if ( m_stack.size() < m_size+1 )  {
-    m_stack.resize(m_size+1024);
-  }
-  m_stack[m_size] = DbAction( objH.ptr(), shape, objLink, pool::WRITE );
-  m_stackType |= pool::WRITE;
-  m_writeSize++;
-  m_size++;
-  return objH.ptr();
+  DbAction action( object, shape, objLink, pool::WRITE );
+  DbStatus status = writeObject( action );
+  return status;
 }
 
 /// In place allocation of raw memory for the transient object
@@ -88,12 +82,7 @@ DbStatus DbContainerImp::allocate(DbContainer& cntH, const void* object, ShapeH 
     m_size++;
     return Success;
   }
-  throw bad_alloc();
-}
-
-/// In place deletion of raw memory
-DbStatus DbContainerImp::free(void* ptr, DbContainer& cntH) {
-  return DbHeap::free(ptr, &cntH);
+  throw std::runtime_error("DbContainerImp::allocate failed: null object pointer");
 }
 
 /// Reset action list
@@ -111,12 +100,6 @@ DbStatus DbContainerImp::commitTransaction() {
   ActionList::iterator i = m_stack.begin();
   for(size_t j=0; j < m_size; ++j, ++i )  {
     switch( (*i).action )  {
-      case pool::DESTROY:
-        status = destroyObject(*i);
-        break;
-      case pool::UPDATE:
-        status = updateObject(*i);
-        break;
       case pool::WRITE:
         status = writeObject(*i);
         break;
@@ -126,10 +109,8 @@ DbStatus DbContainerImp::commitTransaction() {
     }
     if ( !status.isSuccess() ) {
       iret = status;
-      DbPrint log( m_name);
-      log << DbPrintLvl::Error << "The Transaction cannot be committed..." 
-          << " Container has " << size() << " Entries in total."
-          << DbPrint::endmsg;
+      ATH_MSG_ERROR("The Transaction cannot be committed..."
+                    << " Container has " << size() << " Entries in total.");
       break;
     }
   }
@@ -148,77 +129,6 @@ DbStatus DbContainerImp::transAct(Transaction::Action action)
   return status;
 }
 
-DbStatus 
-DbContainerImp::save(DbObjectHandle<DbObject>& objH)  {
-  // Can only be done if no Transaction is ongoing...
-  // i.e. exactly one object was allocated
-  if ( m_writeSize == 1 )   {
-     if ( m_stack.begin()->object == objH.ptr() )   {
-        objH.oid() = m_stack.begin()->link;
-        DbStatus status = writeObject( *m_stack.begin() );
-        clearStack();
-        return status;
-     }
-  }
-  return Error;
-}
-
-DbStatus
-DbContainerImp::save(DbContainer& /* cntH */, const void* object, ShapeH shape, Token::OID_t& linkH)
-{
-  // Only possible if no open transaction, i.e. No object was allocated
-  if ( m_stack.empty() )  {
-     DbAction act(object, shape, linkH, WRITE);
-     return writeObject( act );
-  }
-  return Error;
-}
-
-// Update existing object in the container
-DbStatus 
-DbContainerImp::update(DbContainer& /* cntH */, const void* object, ShapeH shape, const DbObjectHandle<DbObject>& objH) {
-  if ( m_canUpdate )  {
-    if ( true || object )  {
-      if ( m_stack.size() < m_size+1 )  {
-        m_stack.resize(m_size+1024);
-      }
-      m_stack[ m_size ] = DbAction(objH.ptr(), shape, objH.oid(), pool::UPDATE);
-      m_stackType |= pool::UPDATE;
-      m_size++;
-      return Success;
-    }
-    return Error;
-  }
-  DbPrint log( m_name );
-  log << DbPrintLvl::Error << "The chosen implementation does not allow to "
-      << "update existing objects."
-      << "The requested action is not supported." << DbPrint::endmsg;
-  return Error;
-}
-
-// Update existing object in the container
-DbStatus
-DbContainerImp::update(DbContainer& /* cntH */, const void* object, ShapeH shape, const Token::OID_t& linkH)
-{
-  if ( m_canUpdate )  {
-    if ( object )  {
-      if ( m_stack.size() < m_size+1 )  {
-        m_stack.resize(m_size+1024);
-      }
-      m_stack[ m_size ] = DbAction(object, shape, linkH, pool::UPDATE);
-      m_stackType |= pool::UPDATE;
-      m_size++;
-      return Success;
-    }
-    return Error;
-  }
-  DbPrint log( m_name );
-  log << DbPrintLvl::Error << "The chosen implementation does not allow to "
-      << "update existing objects."
-      << "The requested action is not supported." << DbPrint::endmsg;
-  return Error;
-}
-
 // Fetch next object address of the selection to set token
 DbStatus DbContainerImp::fetch(DbSelect& sel) {
    Token::OID_t lnk = sel.link();
@@ -231,25 +141,6 @@ DbStatus DbContainerImp::fetch(DbSelect& sel) {
    }
    return Error;
 } 
-
-/// Destroy persistent object in the container; does not touch transient!
-DbStatus DbContainerImp::destroy(const Token::OID_t& linkH) {
-  if ( m_canDestroy )  {
-    if ( m_stack.size() < m_size+1 )  {
-      m_stack.resize(m_size+1024);
-    }
-    m_stack[ m_size ] = DbAction(0, 0, linkH, DESTROY);
-    m_stackType |= DESTROY;
-    m_size++;
-    return Success;
-  }
-  DbPrint log( m_name );
-  log << DbPrintLvl::Error << "The chosen implementation does not allow to "
-      << "destroy existing objects from the container."
-      << "The requested action is not supported." << DbPrint::endmsg;
-  return Error;
-}
-
 
 // Fetch refined object address. Default implementation returns identity
 DbStatus DbContainerImp::fetch(const Token::OID_t& linkH, Token::OID_t& stmt)  {
@@ -277,9 +168,8 @@ DbStatus DbContainerImp::load( void** ptr, ShapeH shape,
          oid.second++;
       }
       if( linkH.second < 0 || (uint64_t)linkH.second <= size() ) {
-         DbPrint log( m_name );
-         log << DbPrintLvl::Debug << "No objects passing selection criteria..." 
-             << " Container has " << size() << " Entries in total." << DbPrint::endmsg;
+         ATH_MSG_DEBUG("No objects passing selection criteria..."
+                       << " Container has " << size() << " Entries in total.");
       }
    }
    else {

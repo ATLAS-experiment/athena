@@ -1006,12 +1006,6 @@ def makeMultipleEventSelectionConfigs(seq,
         cutFlowHistograms -- whether to toggle event cutflow histograms per region and per systematic
     """
 
-    # handle the case where a user is only providing one selection
-    if len(list(selectionCutsDict.keys())) == 1:
-        name, selectionCuts = list(selectionCutsDict.items())[0]
-        makeEventSelectionConfig(seq, name, electrons, muons, jets, largeRjets, photons, taus, met, metTerm, btagDecoration, preselection, selectionCuts, noFilter=noFilter, debugMode=debugMode, cutFlowHistograms=cutFlowHistograms)
-        return
-
     # first, we generate all the individual event selections
     # !!! it's important to pass noFilter=True, to avoid applying the individual filters in series
     for name, selectionCuts in selectionCutsDict.items():

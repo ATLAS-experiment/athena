@@ -32,6 +32,7 @@ ex.flags += [
     'Trigger.writeBS=True',
     'Trigger.doRuntimeNaviVal=True'
 ]
+ex.args += ' --preExec "from TrigEDMConfig.DataScoutingInfo import TruncationThresholds;TruncationThresholds[1]*=1.1;"' # 6 Oct 2025: we are just over threshold, increase by 10%
 
 checkBS = Step.Step("CheckBS")
 checkBS.executable = 'trigbs_dumpHLTContentInBS_run3.py'

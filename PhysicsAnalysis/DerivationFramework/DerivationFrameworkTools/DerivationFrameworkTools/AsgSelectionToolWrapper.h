@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef DERIVATIONFRAMEWORK_ASGSELECTIONTOOLWRAPPER_H
 #define DERIVATIONFRAMEWORK_ASGSELECTIONTOOLWRAPPER_H
@@ -16,25 +16,19 @@
 namespace DerivationFramework {
 
   class AsgSelectionToolWrapper : public extends<AthAlgTool, IAugmentationTool> {
-    public: 
-      AsgSelectionToolWrapper(const std::string& t, const std::string& n, const IInterface* p);
+  public:
 
-      StatusCode initialize() override final;
-      virtual StatusCode addBranches() const override final;
+    using base_class::base_class;
 
-    private:
+    virtual StatusCode initialize() override final;
+    virtual StatusCode addBranches(const EventContext& ctx) const override final;
 
-      PublicToolHandle<IAsgSelectionTool> m_tool{this, "AsgSelectionTool", ""};
-      Gaudi::Property<std::string> m_cut{this, "CutType", "" };
-      Gaudi::Property<std::string> m_sgName{this, "StoreGateEntryName", ""};
-      
-      SG::ReadHandleKey<xAOD::IParticleContainer> m_containerKey{this, "ContainerName", ""};
-
-      SG::WriteDecorHandleKey<xAOD::IParticleContainer> m_decorKey{this, "DecorationKey", "", 
-                                        "Will be composed by <ContainerName>.<StoreGateEntryName>"};
-      
-      
-  }; 
+  private:
+    PublicToolHandle<IAsgSelectionTool> m_tool{this, "AsgSelectionTool", ""};
+    Gaudi::Property<std::string> m_cut{this, "CutType", "" };
+    SG::ReadHandleKey<xAOD::IParticleContainer> m_containerKey{this, "ContainerName", ""};
+    SG::WriteDecorHandleKey<xAOD::IParticleContainer> m_decorKey{this, "StoreGateEntryName", m_containerKey, ""};
+  };
 }
 
 #endif // DERIVATIONFRAMEWORK_ASGSELECTIONTOOLWRAPPER_H

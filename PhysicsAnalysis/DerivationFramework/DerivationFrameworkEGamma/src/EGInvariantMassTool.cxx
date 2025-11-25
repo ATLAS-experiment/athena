@@ -1,9 +1,9 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
-// EGInvariantMassTool.cxx, (c) ATLAS Detector software
+// EGInvariantMassTool.cxx
 // Author: Giovanni Marchiori (giovanni.marchiori@cern.ch)
 ///////////////////////////////////////////////////////////////////
 
@@ -17,27 +17,6 @@ using std::sqrt;
 #include "TLorentzVector.h"
 
 namespace DerivationFramework {
-
-EGInvariantMassTool::EGInvariantMassTool(const std::string& t,
-                                         const std::string& n,
-                                         const IInterface* p)
-  : base_class(t, n, p)
-  , m_expression1("true")
-  , m_expression2("true")
-  , m_mass1Hypothesis(0.0)
-  , m_mass2Hypothesis(0.0)
-  , m_mindR(0.0)
-  , m_checkCharge(true)
-  , m_doTransverseMass(false)
-{
-  declareProperty("Object1Requirements", m_expression1);
-  declareProperty("Object2Requirements", m_expression2);
-  declareProperty("Mass1Hypothesis", m_mass1Hypothesis);
-  declareProperty("Mass2Hypothesis", m_mass2Hypothesis);
-  declareProperty("CheckCharge", m_checkCharge);
-  declareProperty("MinDeltaR", m_mindR);
-  declareProperty("DoTransverseMass", m_doTransverseMass);
-}
 
 StatusCode
 EGInvariantMassTool::initialize()
@@ -79,10 +58,9 @@ EGInvariantMassTool::initialize()
 }
 
 StatusCode
-EGInvariantMassTool::addBranches() const
+EGInvariantMassTool::addBranches(const EventContext& ctx) const
 {
 
-  const EventContext& ctx = Gaudi::Hive::currentContext();
   SG::WriteHandle<std::vector<float>> writeHandle{ m_sgName, ctx };
 
   // create the vector which will hold the values invariant masses

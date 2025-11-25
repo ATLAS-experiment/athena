@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonCablingData/MdtTdcMap.h"
@@ -8,7 +8,7 @@
 
 // constructor
 MdtTdcMap::MdtTdcMap(MezzCardPtr mezType, const MdtCablingData& cabling_data)
-    : m_statId{cabling_data}, m_mezzCard{mezType} {
+    : m_statId{cabling_data}, m_mezzCard{std::move(mezType)} {
     for (uint8_t globTube : m_mezzCard->tdcToTubeMap()) {
         if (globTube == NOTSET)
             continue;

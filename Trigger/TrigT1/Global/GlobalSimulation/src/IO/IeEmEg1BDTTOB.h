@@ -15,6 +15,8 @@
 #include "IeEmTOB.h"
 #include "AthenaKernel/CLASS_DEF.h"
 
+#include <ostream>
+
 namespace GlobalSim::IOBitwise {
   /**
    * @brief Class to hold eGamma1 BDT decision bits
@@ -30,12 +32,19 @@ namespace GlobalSim::IOBitwise {
     virtual ~IeEmEg1BDTTOB(){}
 
     /// Count: Size of output bits of the eGamma1 BDT algorithm
-    static const std::size_t s_eGamma1BDT_width{11};
+    static const std::size_t s_eGamma1BDT_width{10};
 
     /** @brief Returns the eGamma1 BDT result bits*/
     virtual std::bitset<s_eGamma1BDT_width> eGamma1BDT_bits() const = 0;
+
+    /** @brief print out contents to string*/
+    virtual std::string to_string() const = 0;
   };
+
 } //End of namespace
+
+std::ostream& operator << (std::ostream&,
+                           const GlobalSim::IOBitwise::IeEmEg1BDTTOB&);
 
 CLASS_DEF( GlobalSim::IOBitwise::IeEmEg1BDTTOB , 67631718 , 1 )
 

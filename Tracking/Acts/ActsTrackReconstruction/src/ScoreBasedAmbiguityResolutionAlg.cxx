@@ -17,7 +17,7 @@
 #include "Acts/Definitions/Units.hpp"
 #include "Acts/EventData/VectorMultiTrajectory.hpp"
 #include "Acts/EventData/VectorTrackContainer.hpp"
-#include "Acts/Plugins/Json/AmbiguityConfigJsonConverter.hpp"
+#include "ActsPlugins/Json/AmbiguityConfigJsonConverter.hpp"
 #include "Acts/Utilities/Logger.hpp"
 #include "ActsGeometry/ATLASSourceLink.h"
 #include "ActsInterop/Logger.h"

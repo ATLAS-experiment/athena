@@ -35,13 +35,9 @@ def TauBuildAlgCfg(flags):
     tools.append( result.popToolsAndMerge(tauTools.TauClusterFinderCfg(flags)) )
     tools.append( result.popToolsAndMerge(tauTools.TauVertexedClusterDecoratorCfg(flags)) )
 
-    if flags.Beam.Type is not BeamType.Cosmics:
-        if flags.Tau.doRNNTrackClass:
-            tools.append( result.popToolsAndMerge(tauTools.TauTrackRNNClassifierCfg(flags)) )
-        tools.append( result.popToolsAndMerge(tauTools.EnergyCalibrationLCCfg(flags)) )
+    if flags.Beam.Type is not BeamType.Cosmics and flags.Tau.doRNNTrackClass:
+        tools.append( result.popToolsAndMerge(tauTools.TauTrackRNNClassifierCfg(flags)) )
 
-    tools.append( result.popToolsAndMerge(tauTools.CellVariablesCfg(flags)) )
-    tools.append( result.popToolsAndMerge(tauTools.ElectronVetoVarsCfg(flags)) )
     tools.append( result.popToolsAndMerge(tauTools.TauShotFinderCfg(flags)) )
 
     if flags.Tau.doPi0Clus:
@@ -134,11 +130,17 @@ def TauRunnerAlgCfg(flags):
     tools.append( result.popToolsAndMerge(tauTools.Pi0ScoreCalculatorCfg(flags)) )
     tools.append( result.popToolsAndMerge(tauTools.Pi0SelectorCfg(flags)) )
 
+    if flags.Beam.Type is not BeamType.Cosmics:
+        tools.append( result.popToolsAndMerge(tauTools.EnergyCalibrationLCCfg(flags)) )
+
     if flags.Tau.doPanTau:
         import PanTauAlgs.JobOptions_Main_PanTau as pantau
         tools.append( result.popToolsAndMerge(pantau.PanTauCfg(flags)) )
 
     tools.append(result.popToolsAndMerge(tauTools.TauCombinedTESCfg(flags)) )
+
+    # this is scheduled here because it provides variables used in the MVATES evaluation
+    tools.append( result.popToolsAndMerge(tauTools.CellVariablesCfg(flags)) )
     # these tools need pantau info
     if flags.Beam.Type is not BeamType.Cosmics:
         tools.append( result.popToolsAndMerge(tauTools.MvaTESVariableDecoratorCfg(flags)) )
@@ -150,15 +152,18 @@ def TauRunnerAlgCfg(flags):
     # do some extra variable calculation
     if flags.Tau.isStandalone or flags.Tracking.doVertexFinding:
         tools.append(result.popToolsAndMerge(tauTools.TauVertexVariablesCfg(flags)) )
+    tools.append( result.popToolsAndMerge(tauTools.ElectronVetoVarsCfg(flags)) )
     tools.append( result.popToolsAndMerge(tauTools.TauCommonCalcVarsCfg(flags)) )
     tools.append( result.popToolsAndMerge(tauTools.TauSubstructureCfg(flags)) )
   
     if flags.Tau.doTauDiscriminant:
         tools.append( result.popToolsAndMerge(tauTools.TauIDVarCalculatorCfg(flags)) )
-        tools.append( result.popToolsAndMerge(tauTools.TauJetRNNEvaluatorCfg(flags)) )
-        tools.append( result.popToolsAndMerge(tauTools.TauWPDecoratorJetRNNCfg(flags)) )
-        tools.append( result.popToolsAndMerge(tauTools.TauEleRNNEvaluatorCfg(flags)) )
-        tools.append( result.popToolsAndMerge(tauTools.TauWPDecoratorEleRNNCfg(flags)) )
+        # do not schedule RNNID and eVeto for Run4
+        if flags.GeoModel.Run <= LHCPeriod.Run3:
+            tools.append( result.popToolsAndMerge(tauTools.TauJetRNNEvaluatorCfg(flags)) )
+            tools.append( result.popToolsAndMerge(tauTools.TauWPDecoratorJetRNNCfg(flags)) )
+            tools.append( result.popToolsAndMerge(tauTools.TauEleRNNEvaluatorCfg(flags)) )
+            tools.append( result.popToolsAndMerge(tauTools.TauWPDecoratorEleRNNCfg(flags)) )
         tools.append( result.popToolsAndMerge(tauTools.TauDecayModeNNClassifierCfg(flags)) )
         # added for offline tau trigger monitoring at T0, not needed for TauJets_EleRM
         if not flags.Tau.ActiveConfig.inTauEleRM:
@@ -277,6 +282,9 @@ def TauReconstructionCfg(flags):
     minimalghosts = ["Track","MuonSegment","Truth"]
 
     #Check if the specific jet collection is needed based on flags
+    if flags.Tau.TauRec.SeedJetCollection == "AntiKt4EMPFlowMLJets":
+        from JetRecConfig.StandardSmallRJets import AntiKt4EMPFlowML
+        result.merge(JetRecCfg(flags, AntiKt4EMPFlowML))
     if flags.Tau.TauRec.SeedJetCollection == "AntiKt4EMPFlow10GeVCutTauSeedJets":
         AntiKt4EMPFlow10GeVCutTauSeed = JetDefinition("AntiKt",0.4,cst.GPFlow,
                                       infix = "10GeVCutTauSeed",
@@ -355,7 +363,7 @@ def TauReconstructionCfg(flags):
             result.merge(TauxAODthinngCfg(flags_TauEleRM))
 
     # had-had boosted ditaus
-    if flags.Tau.doDiTauRec:
+    if flags.DiTau.doDiTauRec:
         from DiTauRec.DiTauBuilderConfig import DiTauBuilderCfg
         result.merge(DiTauBuilderCfg(flags))
 

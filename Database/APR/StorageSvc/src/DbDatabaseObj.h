@@ -21,6 +21,7 @@
 #include "StorageSvc/DbDomain.h"
 #include "StorageSvc/DbDatabase.h"
 #include "StorageSvc/DbContainer.h"
+#include "POOLCore/DbPrint.h"
 
 // STL include files
 #include <map>
@@ -46,7 +47,7 @@ namespace pool    {
     * @author  M.Frank
     * @version 1.0
     */
-  class DbDatabaseObj : public  DbAccessObj<std::string, DbContainerObj > {
+  class DbDatabaseObj : public  DbAccessObj<std::string, DbContainerObj >, public APRMessaging {
   private:
     /// Reflection class identifier
     typedef RootType                            TypeH;
@@ -136,8 +137,6 @@ namespace pool    {
     DbStatus close();
     /// End database access, but still leave database accessible
     DbStatus retire();
-    /// Check for pending updates
-    bool updatesPending() const;
     /// Execute Database Transaction action
     DbStatus transAct(Transaction::Action action);
 

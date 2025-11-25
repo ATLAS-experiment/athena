@@ -8,6 +8,7 @@
 
 // Athena includes
 #include "AthenaBaseComps/AthMsgStreamMacros.h"
+#include "PersistentDataModel/AthenaAttributeList.h"
 #include "AthenaKernel/errorcheck.h"
 #include "AthenaKernel/ExtendedEventContext.h"
 #include "AthenaKernel/EventContextClid.h"

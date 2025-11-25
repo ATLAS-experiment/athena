@@ -45,7 +45,7 @@ def JETM7KernelCfg(flags, name='JETM7Kernel', **kwargs):
     acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation("JETM7CommonKernel", AugmentationTools = [DFCommonTrackSelection]))
 
     # Thinning tools...
-    from DerivationFrameworkInDet.InDetToolsConfig import MuonTrackParticleThinningCfg, EgammaTrackParticleThinningCfg, JetTrackParticleThinningCfg
+    from DerivationFrameworkInDet.InDetToolsConfig import MuonTrackParticleThinningCfg, EgammaTrackParticleThinningCfg, JetTrackParticleThinningCfg, TauTrackParticleThinningCfg
     # from DerivationFrameworkMCTruth.TruthDerivationToolsConfig import GenericTruthThinningCfg
     from DerivationFrameworkTools.DerivationFrameworkToolsConfig import GenericObjectThinningCfg
 
@@ -53,6 +53,7 @@ def JETM7KernelCfg(flags, name='JETM7Kernel', **kwargs):
     electronSelectionString = "(Electrons.pt > 5*GeV)"
     photonSelectionString = "(Photons.pt > 5*GeV)"
     jetSelectionString = "(AntiKt4EMPFlowByVertexJets.pt > 7.*GeV && AntiKt4EMPFlowByVertexJets.Jvt > 0.4)"
+    tauJetSelectionString = "(TauJets.pt > 20.*GeV && TauJets.nTracks > 0)"
 
     # Include inner detector tracks associated with muons
     JETM7MuonTPThinningTool = acc.getPrimaryAndMerge(MuonTrackParticleThinningCfg(flags,
@@ -70,6 +71,18 @@ def JETM7KernelCfg(flags, name='JETM7Kernel', **kwargs):
         SelectionString         = electronSelectionString,
         InDetTrackParticlesKey  = "InDetTrackParticles"))
 
+    # Include inner detector tracks associated with taus
+    JETM7TauTPThinningTool = acc.getPrimaryAndMerge(TauTrackParticleThinningCfg(
+        flags,
+        name                   = "JETM7TauTPThinningTool",
+        StreamName             = kwargs['StreamName'],
+        TauKey                 = "TauJets",
+        SelectionString        = tauJetSelectionString,
+        InDetTrackParticlesKey = "InDetTrackParticles",
+        DoTauTracksThinning    = True,
+        ConeSize               = 0.6,
+        TauTracksKey           = "TauTracks"))
+
     # Include inner detector tracks associated with by-vertex jets
     JETM7Akt4JetTPThinningTool  = acc.getPrimaryAndMerge(JetTrackParticleThinningCfg(flags,
         name                    = "JETM7Akt4JetTPThinningTool",
@@ -77,6 +90,7 @@ def JETM7KernelCfg(flags, name='JETM7Kernel', **kwargs):
         JetKey                  = "AntiKt4EMPFlowByVertexJets",
         SelectionString         = jetSelectionString,
         InDetTrackParticlesKey  = "InDetTrackParticles"))
+
 
 
     # Store EMPFlowByVertexJets with JVT > 0.4. This will result in jets extending up to about 2.6 in |eta|
@@ -107,6 +121,11 @@ def JETM7KernelCfg(flags, name='JETM7Kernel', **kwargs):
                                                                             StreamName       = kwargs['StreamName'],
                                                                             SelectionString  = electronSelectionString))
 
+    JETM7TauJetThinningTool = acc.getPrimaryAndMerge(GenericObjectThinningCfg(flags,
+                                                                        name             = "JETM7TauJetThinningTool",
+                                                                        ContainerName    = "TauJets",
+                                                                        StreamName       = kwargs['StreamName'],
+                                                                        SelectionString  = tauJetSelectionString))
 
     JETM7PhotonThinningTool = acc.getPrimaryAndMerge(GenericObjectThinningCfg(flags,
                                                                         name             = "JETM7PhotonThinningTool",
@@ -121,18 +140,20 @@ def JETM7KernelCfg(flags, name='JETM7Kernel', **kwargs):
     # Finally the kernel itself
     thinningTools = [JETM7MuonTPThinningTool,
                      JETM7ElectronTPThinningTool,
+                     JETM7TauTPThinningTool,
                      JETM7Akt4JetTPThinningTool,
                      JETM7Akt4PFlowByVertexJetThinningTool,
                      JETM7Akt4PFlowJetThinningTool,
                      JETM7MuonThinningTool,
                      JETM7ElectronThinningTool,
+                     JETM7TauJetThinningTool,
                      JETM7PhotonThinningTool,
                      ]
 
     DerivationKernel = CompFactory.DerivationFramework.DerivationKernel
     acc.addEventAlgo(DerivationKernel(name, 
                                       ThinningTools = thinningTools,
-                                      SkimmingTools =[skimmingTool] if not flags.Input.isMC else []))   
+                                      SkimmingTools = [skimmingTool] if not flags.Input.isMC else []))   
 
 
     return acc
@@ -206,7 +227,7 @@ def JETM7Cfg(flags):
     
     JETM7SlimmingHelper = SlimmingHelper("JETM7SlimmingHelper", NamesAndTypes = flags.Input.TypedCollections, flags = flags)
 
-    JETM7SlimmingHelper.SmartCollections = ["Electrons", "Photons", "Muons",
+    JETM7SlimmingHelper.SmartCollections = ["Electrons", "Photons", "Muons", "TauJets",
                                             "PrimaryVertices",
                                             "InDetTrackParticles",
                                             "AntiKt4EMPFlowJets",

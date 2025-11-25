@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 //
 
 // Local include(s):
@@ -49,7 +49,9 @@ xAODTEventBranch::xAODTEventBranch( ::TTree& parent, xAOD::TEvent& event,
    }
 
    // Update the internal pointer:
-   m_object = m_event->getInputObject( GetName(), *m_ti );
+   static constexpr bool SILENT = false;
+   static constexpr bool METADATA = false;
+   m_object = m_event->getInputObject( GetName(), *m_ti, SILENT, METADATA );
    if( ! m_object ) {
       Error( "GetEntry",
              XAOD_MESSAGE( "Failed to read variable of type \"%s\" with "

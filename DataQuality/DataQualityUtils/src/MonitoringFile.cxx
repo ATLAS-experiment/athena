@@ -71,7 +71,7 @@ namespace dqutils {
       std::regex_match(test, reNew);
     } catch (std::exception& e) {
       std::cout << "ERROR: Invalid RegEx string \"" << re << "\"." << std::endl;
-      std::cout << "See http://www.boost.org/doc/libs/1_42_0/libs/regex/doc/html/boost_regex/syntax.html for allowed regular expression syntax" << std::endl;
+      std::cout << "See https://en.cppreference.com/w/cpp/regex.html for allowed regular expression syntax" << std::endl;
       return std::nullopt;
     }
     return reNew;
@@ -741,7 +741,7 @@ namespace dqutils {
 
     subdir = dir->mkdir(path.c_str());
     DirMap_t::value_type dirmapVal(fName, subdir);
-    dirmap.insert(dirmapVal);
+    dirmap.insert(std::move(dirmapVal));
     return subdir;
   }
 
@@ -1014,7 +1014,10 @@ namespace dqutils {
     if (stat) return stat;
 
     for (const auto& tmpFile : tmpIntermediateFiles) {
-      std::remove(tmpFile.c_str());
+      auto rc = std::remove(tmpFile.c_str());
+      if (rc!=0){
+        std::cerr<<"MonitoringFile::mergeFiles: tmpFile "<<tmpFile<<" could not be removed\n";
+      }
     }
     return 0;
   }

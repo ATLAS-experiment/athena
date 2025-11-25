@@ -15,9 +15,13 @@ usage () {
     -x  |  --xclbin         STRING      path to the xclbin that needs to be run
     -b  |  --bdfid          STRING      bdfid of the FPGA to run on
     -n  |  --nEvents        INT         Number of events to run on (default = -1 aka All)
+    -d  |  --skipEvents     INT         Number of events to skip at the start (default = 0)
+    -t  |  --threads        INT         Number of threads to use (default = 1)
+    -q  |  --doCodeType     STRING      Code type for FPGADataPrep.doCodeType (default = F1X0)
     -s  |  --skipCheck                  skip checks on output AOD file
     -f  |  --runF110                    run F110 Integration algo
     -c  |  --doClusters                 persistify xAOD cluster and space point containers
+    -k  |  --doSeeds                    persistify xAOD track seed containers
     -h  |  --help                       this help
     "
     [ $# -gt 0 ] && exit $1
@@ -31,13 +35,14 @@ bdfid="0000:c3:00.1"
 inputRDO="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/RDO/ATLAS-P2-RUN4-03-00-00/mc21_14TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.recon.RDO.e8481_s4149_r14700/RDO.33629020._000047.pool.root.1"
 
 #single muon sample
-# inputRDO="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/EFTracking/ATLAS-P2-RUN4-03-00-00/RDO/reg0_singlemu.root"
+# inputRDO="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/EFTracking/ATLAS-P2-RUN4-03-00-00/RDO/rdo_singleMu_alleta.root"
 
 outputAOD="AOD.root"
 threads=1
 nEvents="100"
 skipCheck=0
 storeClusters=False
+doSeeds=False
 runF110=False
 skipEvents=0
 doCodeType="F1X0"
@@ -54,6 +59,7 @@ while [ $# -ge 1 ];do
         -b  | --bdfid )         if [ $# -lt 2 ] ; then usage ; fi ; bdfid="$2" ; shift ;;
         -s  | --skipCheck )     if [ $# -lt 1 ] ; then usage ; fi ; skipCheck=1 ; shift ;;
         -c  | --doClusters )    if [ $# -lt 1 ] ; then usage ; fi ; storeClusters=True; shift ;;
+        -k  | --doSeeds )       if [ $# -lt 1 ] ; then usage ; fi ; doSeeds=True; shift ;;
         -f  | --runF110 )       runF110=True ;;
         -t  | --threads )       if [ $# -lt 2 ] ; then usage ; fi ; threads=${2} ; shift ;;
         -q  | --doCodeType )    if [ $# -lt 2 ] ; then usage ; fi ; doCodeType="$2" ; shift ;;
@@ -90,6 +96,7 @@ ATHENA_CORE_NUMBER=${threads} Reco_tf.py --CA \
     --preExec "flags.Tracking.ITkActsValidateF100Pass.doFPGATrackSim=False;\
                 flags.Tracking.doPixelDigitalClustering=True;\
                 flags.Concurrency.NumConcurrentEvents=${threads}; flags.Concurrency.NumThreads=${threads};\
+                flags.Tracking.ITkActsValidateF100Pass.storeTrackSeeds=${doSeeds};\
                 flags.Acts.EDM.PersistifyClusters=${storeClusters};flags.Acts.EDM.PersistifySpacePoints=${storeClusters};\
                 flags.FPGADataPrep.doCodeType=\"${doCodeType}\";flags.FPGADataPrep.doF110=${runF110};flags.FPGADataPrep.bdfID=\"${bdfid}\";flags.FPGADataPrep.xclbin=\"${xclbinPath}\"" \
     --postInclude "ActsConfig.ActsPostIncludes.ACTSClusterPostInclude" \

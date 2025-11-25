@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 /*
  *   */
@@ -72,8 +72,7 @@ namespace Analysis {
       ATH_MSG_DEBUG( "#BTAG# List of calibrated taggers");
       for(uint i=0;i<m_taggers.size();i++) {
         ATH_MSG_DEBUG("#BTAG# Tagger " << m_taggers[i] );
-        std::vector<std::string> hvect;
-        m_taggersHists.push_back(hvect);
+        m_taggersHists.emplace_back();
       }
     }
     else {
@@ -103,7 +102,7 @@ namespace Analysis {
           // (necessary because getJetAuthor used in taggers does not use
           //  jet collection name but standardised info)
           if (std::find(m_originalChannels.begin(), m_originalChannels.end(),jetc)
-                       == m_originalChannels.end()) m_originalChannels.push_back(jetc);
+                       == m_originalChannels.end()) m_originalChannels.push_back(std::move(jetc));
         }
       }
     }
@@ -652,7 +651,7 @@ namespace Analysis {
 		  channels.push_back(aliasentry);
 	        }
                 histosCdo->addChannelAlias(m_originalChannels[j],aliasentry);
-                m_mappedAlias.push_back(aliasentry);
+                m_mappedAlias.push_back(std::move(aliasentry));
 	      }
 	      foundalias=true;
 	      break;
@@ -697,8 +696,7 @@ namespace Analysis {
       sEnd = str.find_first_of(delim, sPos);
       if(sEnd == std::string::npos) sEnd = str.length();
       sLen = sEnd - sPos;
-      std::string token = str.substr(sPos, sLen);
-      tokens.push_back(token);
+      tokens.emplace_back(str.substr(sPos, sLen));
       sPos = str.find_first_not_of(delim, sEnd);
     }
     return tokens;
@@ -789,7 +787,7 @@ void JetTagCalibCondAlg::smoothASH2D(TH2* input2D, int m1, int m2) {
   //
   const int lsup = 20;
   if (m1 > lsup || m2 > lsup) {
-    ATH_MSG_DEBUG("HistoHelperRoot::smoothASH2D: m1 or m2 too big !");
+    ATH_MSG_DEBUG("JetTagCalibCondAlg::smoothASH2D: m1 or m2 too big !");
     return;
   } else {
     int nx = input2D->GetNbinsX()+1;
@@ -808,8 +806,10 @@ void JetTagCalibCondAlg::smoothASH2D(TH2* input2D, int m1, int m2) {
     }
     //
     int i,j,k,l;
-    float wk1[41],wk2[41],wgt[100][100];
-    double wk[41][41],wks = 0.;
+    float wk1[41],wk2[41];
+    std::vector<std::vector<float>> wgt(100, std::vector<float>(100));//avoid large stack use
+    std::vector<std::vector<float>> wk(41, std::vector<float>(41));//avoid large stack use
+    double wks = 0.;
     float ai,am1 = float(m1), am2 = float(m2);
     const float am12 = am1*am1, am22 = am2*am2;
     const float inv_am1_am2 = 1. / (am1 * am2);
@@ -827,6 +827,17 @@ void JetTagCalibCondAlg::smoothASH2D(TH2* input2D, int m1, int m2) {
       wk1[i] = 15./16.*(1.-ai*inv_am12)*(1.-ai*inv_am12);
       wks = wks + wk1[i];
     }
+    if (wks == 0){
+      ATH_MSG_WARNING("JetTagCalibCondAlg::wks is zero !");
+      //cleanup
+      for (int i = 0; i < nx-1; ++i) {
+        delete[] h[i];
+        delete[] res[i];
+      }
+      delete[] h;
+      delete[] res;
+      return;
+    }
     const double fac1 = am1 / wks;
     for (i = lsup+1-m1;i<lsup+m1;i++) {
       wk1[i] =  wk1[i]*fac1;
@@ -836,6 +847,17 @@ void JetTagCalibCondAlg::smoothASH2D(TH2* input2D, int m1, int m2) {
       ai = float(i-lsup)*float(i-lsup);
       wk2[i] = 15./16.*(1.-ai*inv_am22)*(1.-ai*inv_am22);
       wks = wks + wk2[i];
+    }
+    if (wks == 0){
+      ATH_MSG_WARNING("JetTagCalibCondAlg::wks is zero !");
+      //cleanup
+      for (int i = 0; i < nx-1; ++i) {
+        delete[] h[i];
+        delete[] res[i];
+      }
+      delete[] h;
+      delete[] res;
+      return;
     }
     const double fac2 = am2 / wks;
     for (i = lsup+1-m2;i<lsup+m2;i++) {

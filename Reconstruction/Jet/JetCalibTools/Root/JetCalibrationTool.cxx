@@ -231,7 +231,6 @@ StatusCode JetCalibrationTool::initialize() {
     // Received a PV key, declare the data dependency
     ATH_CHECK( m_pvKey.initialize() );
   }
-
   return StatusCode::SUCCESS;
 }
 
@@ -686,7 +685,7 @@ StatusCode JetCalibrationTool::calibrate(xAOD::Jet& jet, JetEventInfo& jetEventI
 StatusCode JetCalibrationTool::getNominalResolutionData(const xAOD::Jet& jet, double& resolution) const{
 
   if(m_smearIndex < 0){
-    ATH_MSG_ERROR("Cannot retrieve the nominal data resolution - smearing was not configured during initialization");
+    ATH_MSG_ERROR("Requested jet resolution without a smearing step in the CalibSequence!");
     return StatusCode::FAILURE;
   }
   return m_calibSteps.at(m_smearIndex)->getNominalResolutionData(jet, resolution);
@@ -695,9 +694,8 @@ StatusCode JetCalibrationTool::getNominalResolutionData(const xAOD::Jet& jet, do
 StatusCode JetCalibrationTool::getNominalResolutionMC(const xAOD::Jet& jet, double& resolution) const{
   
   if(m_smearIndex < 0){
-    ATH_MSG_ERROR("Cannot retrieve the nominal MC resolution - smearing was not configured during initialization");
+    ATH_MSG_ERROR("Requested jet resolution without a smearing step in the CalibSequence!");
     return StatusCode::FAILURE;
   }
   return m_calibSteps.at(m_smearIndex)->getNominalResolutionMC(jet, resolution);
 }
-

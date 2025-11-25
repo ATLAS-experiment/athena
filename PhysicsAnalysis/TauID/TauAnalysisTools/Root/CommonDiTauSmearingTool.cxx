@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // Framework include(s):
@@ -7,7 +7,6 @@
 
 // local include(s)
 #include "TauAnalysisTools/CommonDiTauSmearingTool.h"
-#include "xAODTruth/TruthParticleContainer.h"
 
 // ROOT include(s)
 #include "TROOT.h"
@@ -24,8 +23,7 @@ CommonDiTauSmearingTool::CommonDiTauSmearingTool(const std::string& sName)
   , m_fX(&TruthLeadPt)
   , m_fY(&TruthSubleadPt)
   , m_fZ(&TruthDeltaR)
-{
-}
+{}
 
 /*
   - Find the root files with smearing inputs on eos/cvmfs using PathResolver

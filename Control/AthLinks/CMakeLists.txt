@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( AthLinks )
@@ -13,7 +13,7 @@ atlas_add_library( AthLinks
                    PUBLIC_HEADERS AthLinks
                    INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
                    PRIVATE_INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
-                   LINK_LIBRARIES ${Boost_LIBRARIES} AthenaKernel CxxUtils SGTools GaudiKernel
+                   LINK_LIBRARIES ${Boost_LIBRARIES} AthenaKernel CxxUtils SGTools SGCoreLib GaudiKernel
                    PRIVATE_LINK_LIBRARIES ${ROOT_LIBRARIES} )
 
 atlas_add_dictionary( AthLinksDict

@@ -120,7 +120,11 @@ TCS::ADVAE_2A::processBitCorrect( const std::vector<TCS::TOBArray const *> & inp
       TRG_MSG_DEBUG("Number of met are " << (*met).size());
       
       //check for ambiguous sorting and set corresponding flag if an ambiguity is found
-      bool hasAmbiguousInputs =  TSU::isAmbiguousAnywhere(jets, p_NumberLeading1, p_minEt1)
+      bool hasAmbiguousInputs =  TSU::isAmbiguousTruncation(jets, p_NumberLeading1, p_minEt1)
+                              || TSU::isAmbiguousTruncation(taus, p_NumberLeading2, p_minEt2)
+                              || TSU::isAmbiguousTruncation(mus,  p_NumberLeading3, p_minEt3)
+                              || TSU::isAmbiguousTruncation(met,  p_NumberLeading4, p_minEt4)
+                              || TSU::isAmbiguousAnywhere(jets, p_NumberLeading1, p_minEt1)
                               || TSU::isAmbiguousAnywhere(taus, p_NumberLeading2, p_minEt2)
                               || TSU::isAmbiguousAnywhere(mus,  p_NumberLeading3, p_minEt3)
                               || TSU::isAmbiguousAnywhere(met,  p_NumberLeading4, p_minEt4);

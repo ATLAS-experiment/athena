@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( CaloRec )
@@ -20,7 +20,8 @@ atlas_add_component( CaloRec
    StoreGateLib LumiBlockCompsLib AthenaMonitoringKernelLib
    ${ROOT_LIBRARIES} ${CORAL_LIBRARIES}
    ${EIGEN_LIBRARIES} AthAllocators IdDictParser CaloLumiConditions
-   LArRawConditions FourMom LumiBlockData xAODTrigCalo )
+   LArRawConditions FourMom LumiBlockData xAODTrigCalo
+   xAODTracking)
 
 
 

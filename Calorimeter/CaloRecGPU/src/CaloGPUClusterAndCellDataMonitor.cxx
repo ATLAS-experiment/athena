@@ -874,7 +874,7 @@ StatusCode CaloGPUClusterAndCellDataMonitor::match_clusters(sample_comparisons_h
 
       sorter.resize(wanted_size);
 
-      sorted_GPU_matches.push_back(sorter);
+      sorted_GPU_matches.push_back(std::move(sorter));
     }
 
   int num_iter = 0;

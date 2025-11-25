@@ -200,7 +200,7 @@ namespace MuonR4 {
 
         const MmIdHelper &idHelper{m_idHelperSvc->mmIdHelper()};
         CLHEP::HepRandomEngine *rndEngine = getRandomEngine(ctx);
-        const ActsGeometryContext &gctx{getGeoCtx(ctx)};
+        const ActsTrk::GeometryContext &gctx{getGeoCtx(ctx)};
 
         // Prepare the temporary cache
         DigiCache digitCache{};

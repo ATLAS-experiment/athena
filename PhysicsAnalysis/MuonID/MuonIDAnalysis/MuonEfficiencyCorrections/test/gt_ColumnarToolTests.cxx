@@ -13,6 +13,7 @@
 #include "CxxUtils/checker_macros.h"
 ATLAS_NO_CHECK_FILE_THREAD_SAFETY;
 
+#include <AsgMessaging/AsgMessaging.h>
 #include <AsgTesting/UnitTest.h>
 #include <AsgTools/AsgToolConfig.h>
 #include <ColumnarTestFixtures/ColumnarMemoryTest.h>
@@ -31,6 +32,7 @@ ATLAS_NO_CHECK_FILE_THREAD_SAFETY;
 
 using columnar::ColumnarMemoryTest;
 using columnar::ColumnarPhysLiteTest;
+using columnar::TestUtils::IXAODToolCaller;
 
 TEST_F (ColumnarMemoryTest, MuonEfficiencyScaleFactors)
 {
@@ -173,27 +175,42 @@ TEST_F (ColumnarMemoryTest, MuonEfficiencyScaleFactors_multiEvent)
   columnMap.checkExpectations ();
 }
 
-void callXAOD (const CP::MuonEfficiencyScaleFactors& tool, bool isPrepCall, const std::string& name) {
-  using namespace asg::msgUserCode;
-  if (isPrepCall)
+class XAODToolCaller final : public IXAODToolCaller, public asg::AsgMessaging
+{
+public:
+  XAODToolCaller (const CP::MuonEfficiencyScaleFactors& tool, const std::string& inputContainer)
+    : AsgMessaging ("XAODToolCaller"), m_tool (tool), m_inputContainer (inputContainer)
+  {}
+
+  virtual StatusCode retrieve (EventStoreType& evtStore) override
   {
-      const xAOD::MuonContainer *muons = nullptr;
-      ANA_CHECK_THROW (tool.evtStore()->retrieve (muons, name));
-      auto [muonsCopy, auxCopy] = xAOD::shallowCopyContainer (*muons);
-      const xAOD::EventInfo *eventInfo = nullptr;
-      ANA_CHECK_THROW (tool.evtStore()->retrieve (eventInfo, "EventInfo"));
-      tool.callSingleEvent (*muonsCopy, *eventInfo);
-      delete muonsCopy;
-      delete auxCopy;
-  } else
-  {
-      const xAOD::MuonContainer *muons = nullptr;
-      ANA_CHECK_THROW (tool.evtStore()->retrieve (muons, name));
-      const xAOD::EventInfo *eventInfo = nullptr;
-      ANA_CHECK_THROW (tool.evtStore()->retrieve (eventInfo, "EventInfo"));
-      tool.callSingleEvent (*muons, *eventInfo);
+    ANA_CHECK (evtStore.retrieve (m_muons, m_inputContainer));
+    ANA_CHECK (evtStore.retrieve (m_eventInfo, "EventInfo"));
+    return StatusCode::SUCCESS;
   }
-}
+
+  virtual StatusCode copyRecord (EventStoreType& evtStore, const std::string& postfix) override
+  {
+    auto [muonsCopy, auxCopy] = xAOD::shallowCopyContainer (*m_muons);
+    m_muons = muonsCopy;
+    evtStore.record (muonsCopy, m_inputContainer + postfix + "Copy").ignore();
+    evtStore.record (auxCopy, m_inputContainer + postfix + "CopyAux.").ignore();
+    return StatusCode::SUCCESS;
+  }
+
+  virtual StatusCode call () override
+  {
+    m_tool.callSingleEvent (*m_muons, *m_eventInfo);
+    return StatusCode::SUCCESS;
+  }
+
+private:
+  const CP::MuonEfficiencyScaleFactors& m_tool;
+  std::string m_inputContainer;
+
+  const xAOD::MuonContainer *m_muons = nullptr;
+  const xAOD::EventInfo *m_eventInfo = nullptr;
+};
 
 
 TEST_F (ColumnarPhysLiteTest, MuonEfficiencyScaleFactors)
@@ -204,7 +221,9 @@ TEST_F (ColumnarPhysLiteTest, MuonEfficiencyScaleFactors)
   std::shared_ptr<void> cleanup;
   ASSERT_SUCCESS (toolConfig.makeTool (myToolHandle, cleanup));
 
-  doCall (*myToolHandle, "MuonEfficiencyScaleFactors", "AnalysisMuons", [&] (auto& args) {callXAOD (*myToolHandle, args.isPrepCall, args.inputContainer);}, {{"Muons", "AnalysisMuons"}});
+  XAODToolCaller callXAOD (*myToolHandle, "AnalysisMuons");
+
+  doCall (*myToolHandle, "MuonEfficiencyScaleFactors", "AnalysisMuons", callXAOD, {{"Muons", "AnalysisMuons"}});
 }
 
 
@@ -216,7 +235,9 @@ TEST_F (ColumnarPhysLiteTest, MuonEfficiencyScaleFactors_systematics)
   std::shared_ptr<void> cleanup;
   ASSERT_SUCCESS (toolConfig.makeTool (myToolHandle, cleanup));
 
-  doCall (*myToolHandle, "MuonEfficiencyScaleFactors", "AnalysisMuons", [&] (auto& args) {callXAOD (*myToolHandle, args.isPrepCall, args.inputContainer);}, {{"Muons", "AnalysisMuons"}}, "MUON_EFF_RECO_STAT__1down");
+  XAODToolCaller callXAOD (*myToolHandle, "AnalysisMuons");
+
+  doCall (*myToolHandle, "MuonEfficiencyScaleFactors", "AnalysisMuons", callXAOD, {{"Muons", "AnalysisMuons"}}, "MUON_EFF_RECO_STAT__1down");
 }
 
 ATLAS_GOOGLE_TEST_MAIN

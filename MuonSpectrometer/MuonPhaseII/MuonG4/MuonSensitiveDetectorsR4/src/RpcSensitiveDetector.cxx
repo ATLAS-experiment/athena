@@ -36,7 +36,7 @@ G4bool RpcSensitiveDetector::ProcessHits(G4Step* aStep,G4TouchableHistory*) {
       return false;
   }
 
-  const ActsGeometryContext gctx{getGeoContext()};
+  const ActsTrk::GeometryContext gctx{getGeoContext()};
 
   const Amg::Transform3D localToGlobal = getTransform(touchHist, 0);
   ATH_MSG_VERBOSE(" Track is inside volume "
@@ -61,7 +61,7 @@ G4bool RpcSensitiveDetector::ProcessHits(G4Step* aStep,G4TouchableHistory*) {
   return true;
 }
 
-Identifier RpcSensitiveDetector::getIdentifier(const ActsGeometryContext& gctx,
+Identifier RpcSensitiveDetector::getIdentifier(const ActsTrk::GeometryContext& gctx,
                                                const MuonGMR4::RpcReadoutElement* readOutEle, 
                                                const Amg::Vector3D& hitAtGapPlane, bool phiGap) const {
   const RpcIdHelper& idHelper{m_detMgr->idHelperSvc()->rpcIdHelper()};

@@ -24,6 +24,7 @@ UPDATES:  - Calculate identifier method used by CalibrationCalculator.
 
 #include <cmath>
 #include <iostream>
+#include <vector>
 #include "LArBarrelGeometry.h"
 
 #include "LArStraightAbsorbers.h"
@@ -766,7 +767,8 @@ namespace LArG4 {
       const G4double inv_dl = 1. / dl;
       G4double cenx[15],ceny[15];
       //G4double xl,xl2;
-      G4double sum1[5000],sumx[5000];
+      std::vector<G4double> sum1(5000);
+      std::vector<G4double> sumx(5000);
       //xl=0;
       //xl2=0.;
       m_NRphi=5000;

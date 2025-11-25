@@ -15,8 +15,6 @@
 #include "G4TransportationManager.hh"
 #include "G4UImanager.hh"
 #include "G4UserRunAction.hh"
-#include "G4RunManager.hh"
-#include "G4UserWorkerInitialization.hh"
 #include "G4Version.hh"
 
 #include <string>
@@ -45,14 +43,6 @@ void G4AtlasRunManager::Initialize()
   // InitializeGeometry and InitializePhysics.
   if (m_quietMode) { SetVerboseLevel(0); } // HACK
   G4RunManager::Initialize();
-}
-
-void G4AtlasRunManager::RunInitialization()
-{
-  G4RunManager::RunInitialization();
-  if(auto* uwi = GetUserWorkerInitialization()) {
-    uwi->WorkerRunStart();
-  }
 }
 
 void G4AtlasRunManager::InitializeGeometry()

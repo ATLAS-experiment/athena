@@ -3,8 +3,11 @@
 */
 
 #include "LArIdentifier/LArOnlineID.h"
+#include "IdDict/IdDictDictionary.h"
+#include "IdDict/IdDictField.h"
+#include "IdDict/IdDictMgr.h"
+#include "IdDict/IdDictRegion.h"
 #include "GaudiKernel/MsgStream.h"
-#include "IdDict/IdDictDefs.h"
 #include "Identifier/IdentifierHash.h"
 #include "Identifier/RangeIterator.h"
 #include "LArIdentifier/LArOnlID_Exception.h"
@@ -343,7 +346,7 @@ int  LArOnlineID::initialize_from_dictionary (const IdDictMgr& dict_mgr)
                     if (slotField.isBounded()) {
                         // save values
                         unsigned int nvalues = slotField.get_maximum() - slotField.get_minimum() + 1;
-                        hc.m_slot_values.reserve(hc.m_slot_values.size() + nvalues);
+                        hc.m_slot_values.reserve(std::max(hc.m_slot_values.size()*3/2, hc.m_slot_values.size() + nvalues));
                         for (unsigned int j = 0; j < nvalues; ++j) {
                             hc.m_slot_values.push_back(j + slotField.get_minimum());
                         }
@@ -363,7 +366,7 @@ int  LArOnlineID::initialize_from_dictionary (const IdDictMgr& dict_mgr)
 
         
         // Set hash calculator
-        m_feb_hash_calcs[m_bec_ft_impl.unpack(min)] = hc;
+        m_feb_hash_calcs[m_bec_ft_impl.unpack(min)] = std::move(hc);
 
 
         if (m_bec_ft_impl.unpack(min) >= size) {

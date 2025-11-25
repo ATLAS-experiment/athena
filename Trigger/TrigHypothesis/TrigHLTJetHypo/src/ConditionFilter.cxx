@@ -1,10 +1,10 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
-
+#include "./ConditionFilter.h"
 #include <algorithm>
 
-#include "./ConditionFilter.h"
+
 
 ConditionFilter::ConditionFilter(ConditionPtrs&& conditions):
   m_conditions(std::move(conditions)) {
@@ -19,7 +19,7 @@ struct FilterPred{
   }
 
   bool operator() (pHypoJet pjet) {
-    auto hjv = HypoJetVector{pjet};
+    auto hjv = HypoJetVector{std::move(pjet)};
     return m_cptr->isSatisfied(hjv, m_collector);
   }
   

@@ -333,7 +333,7 @@ class CscCalibMonToolBase: public ManagedMonitorToolBase
          */
         virtual StatusCode copyDataToHists(HistCollection * histCollection);
 
-        /**Run after handleParameter. The derived class can use this to retrive additional calibration
+        /**Run after handleParameter. The derived class can use this to retrieve additional calibration
           mode specific histogram from the calibration procedure.
          */
         virtual StatusCode postProc();

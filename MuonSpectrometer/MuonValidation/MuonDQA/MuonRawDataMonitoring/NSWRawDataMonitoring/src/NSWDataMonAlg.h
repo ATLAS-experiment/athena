@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////////////////////////////
@@ -18,9 +18,10 @@
 #include "AthenaMonitoringKernel/Monitored.h"
 #include "StoreGate/ReadHandleKey.h"
 #include "MuonIdHelpers/IMuonIdHelperSvc.h"
+#include "xAODMuon/MuonContainer.h"
 
 
-//stl includes                                                                                              
+//stl includes
 #include <string>
 
 class NSWDataMonAlg: public AthMonitorAlgorithm {

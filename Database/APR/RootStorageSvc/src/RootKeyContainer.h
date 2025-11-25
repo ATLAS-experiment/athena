@@ -42,7 +42,7 @@ namespace pool  {
     * @date    1/8/2002
     * @version 1.0
     */
-  class RootKeyContainer : public DbContainerImp  {
+  class RootKeyContainer : public DbContainerImp {
     /// Reference to the root tree object
     TDirectory*        m_dir;
     /// Parent Database handle
@@ -57,14 +57,10 @@ namespace pool  {
     int                m_ioBytes;
 
   protected:
-    /// Destroy persistent object in the container
-    virtual DbStatus destroyObject(ActionList::value_type&) override;
     /// Commit single entry to container
     virtual DbStatus writeObject(ActionList::value_type&) override;
   public:
-    /// Standard constructor
-    RootKeyContainer();
-    /// Standard destructor
+    explicit RootKeyContainer(const std::string& name);
     virtual ~RootKeyContainer();
     RootKeyContainer(const RootKeyContainer&) = delete;
     RootKeyContainer& operator=(const RootKeyContainer&) = delete;

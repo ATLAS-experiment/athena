@@ -2,7 +2,6 @@
   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "POOLCore/DbPrint.h"
 #include "FileCatalog/URIParser.h"
 
 #include <exception>
@@ -10,12 +9,13 @@
 
 namespace pool{
   
-  URIParser::URIParser(){
-  }
+  URIParser::URIParser() : APRMessaging("APR.URIParser")
+  {}
   
-  URIParser::URIParser(const std::string& contactstr)
-    :m_contactstr(contactstr){
-  }
+  URIParser::URIParser(const std::string& contactstr) :
+    APRMessaging("APR.URIParser"),
+    m_contactstr(contactstr)
+  { }
   
   void URIParser::dump() const{
     std::cout << "contact string "<<m_contactstr<<std::endl;
@@ -35,8 +35,7 @@ namespace pool{
       char* me= getenv("POOL_CATALOG");
       if (!me){
          mystr = "xmlcatalog_file:PoolFileCatalog.xml";
-         DbPrint log("APR.URIParser");
-         log << DbPrintLvl::Info << "$POOL_CATALOG is not defined - using default `" << mystr << "'" <<endmsg;
+         ATH_MSG_INFO("$POOL_CATALOG is not defined - using default `" << mystr << "'");
       }else{
         mystr=me;
       }

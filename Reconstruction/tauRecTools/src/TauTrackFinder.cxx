@@ -1,13 +1,10 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef XAOD_ANALYSIS
-#include "TrkToolInterfaces/ITrackSelectorTool.h"
-#include "TrkParametersIdentificationHelpers/TrackParametersIdHelper.h"
 
-#include "xAODTau/TauJet.h"
-#include "xAODTau/TauTrackContainer.h"
+#include "TrkParametersIdentificationHelpers/TrackParametersIdHelper.h"
 
 #include "TauTrackFinder.h"
 #include "tauRecTools/TrackSort.h"
@@ -17,11 +14,9 @@ TauTrackFinder::TauTrackFinder(const std::string& name) :
   TauRecToolBase(name),
   m_EMSamplings {CaloSampling::EME1, CaloSampling::EMB1},
   m_HadSamplings {CaloSampling::TileBar1, CaloSampling::HEC1, CaloSampling::TileExt1}
-{  
-}
+{}
 
-TauTrackFinder::~TauTrackFinder() {
-}
+TauTrackFinder::~TauTrackFinder() {}
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 StatusCode TauTrackFinder::initialize() {

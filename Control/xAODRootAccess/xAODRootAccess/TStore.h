@@ -1,6 +1,6 @@
 // Dear emacs, this is -*- c++ -*-
 //
-// Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 //
 #ifndef XAODROOTACCESS_TSTORE_H
 #define XAODROOTACCESS_TSTORE_H
@@ -16,7 +16,7 @@
 
 // EDM include(s):
 #include "AthContainers/ConstDataVector.h"
-#include "CxxUtils/sgkey_t.h"
+#include "SGCore/sgkey_t.h"
 
 // Local include(s):
 #include "AsgMessaging/StatusCode.h"
@@ -24,11 +24,9 @@
 namespace xAOD {
 
    // Forward declaration(s):
-   namespace Experimental {
-      class REvent;
-   }
    class THolder;
    class TEvent;
+   class Event;
 
    /// A relatively simple transient store for objects created in analysis
    ///
@@ -48,7 +46,7 @@ namespace xAOD {
 
       /// Make TEvent a friend of this class
       friend class TEvent;
-      friend class Experimental::REvent;
+      friend class Event;
 
    public:
       /// Default constructor

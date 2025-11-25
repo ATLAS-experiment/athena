@@ -74,7 +74,7 @@ public:
   std::vector<std::array<float,5> > m_params;//node attributes: m_minCutOnTau, m_maxCutOnTau, m_phi, m_r, m_z;
 
   float m_minRadius, m_maxRadius;
-  
+  unsigned int m_layerKey{0};
 };
 
 class TrigFTF_GNN_DataStorage {

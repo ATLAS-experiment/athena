@@ -130,7 +130,7 @@ def JETM5Cfg(flags):
                                             "Electrons", "Photons", "Muons", "TauJets",
                                             "MET_Baseline_AntiKt4EMTopo","MET_Baseline_AntiKt4EMPFlow",
                                             "AntiKt4EMTopoJets","AntiKt4EMPFlowJets",
-                                            "BTagging_AntiKt4EMPFlow"]
+]
 
     JETM5SlimmingHelper.AllVariables = ["CaloCalTopoClusters",
                                         "MuonSegments",

@@ -1,41 +1,34 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-// LArG4TBECBeamChSensitiveDetector.hh
 #ifndef  LARG4H6SD_LARG4TBECBEAMCHSENSITIVEDETECTOR_H
 #define  LARG4H6SD_LARG4TBECBEAMCHSENSITIVEDETECTOR_H
 
-#include "LArG4TBECBeamChHit.h"
-
+#include "LArG4TBECBeamChCalculator.h"
 #include "G4VSensitiveDetector.hh"
-
-#include <set>
 #include <vector>
+#include <memory>
 
 // Forward declarations.
-class G4Step;
-class G4HCofThisEvent;
-class G4TouchableHistory;
-class LArG4TBECBeamChCalculator;
+class LArG4TBECBeamChHit;
 
 class LArG4TBECBeamChSensitiveDetector : public G4VSensitiveDetector
 {
 public:
-  LArG4TBECBeamChSensitiveDetector(const G4String& name);//,
-  ~LArG4TBECBeamChSensitiveDetector();
+  LArG4TBECBeamChSensitiveDetector(const G4String& name);
+  ~LArG4TBECBeamChSensitiveDetector() = default;
+  LArG4TBECBeamChSensitiveDetector (const LArG4TBECBeamChSensitiveDetector&) = delete;
+  LArG4TBECBeamChSensitiveDetector& operator= (const LArG4TBECBeamChSensitiveDetector&) = delete;
 
   // The required functions for all sensitive detectors:
-  void Initialize(G4HCofThisEvent* HCE);
-  G4bool ProcessHits(G4Step* step, G4TouchableHistory* ROhist);
-  void EndOfEvent(G4HCofThisEvent* HCE);
-
-  // Accessor method
-  inline LArG4TBECBeamChCalculator* GetCalculator() { return m_calculator; }
+  virtual void Initialize(G4HCofThisEvent* HCE) override;
+  virtual G4bool ProcessHits(G4Step* step, G4TouchableHistory* ROhist) override;
+  virtual void EndOfEvent(G4HCofThisEvent* HCE) override;
 
 private:
   // Pointer to a calculator class.
-  LArG4TBECBeamChCalculator* m_calculator;
+  std::unique_ptr<LArG4TBECBeamChCalculator> m_calculator{};
 
   // The name of the sensitive detector.
   G4String m_detectorName;
@@ -44,15 +37,7 @@ private:
   // detector.
   G4String m_HCname;
 
-  public:
-  typedef std::vector< LArG4TBECBeamChHit*>  m_Hit_t;
-  typedef m_Hit_t::iterator m_Hit_pointer;
-  // Used to have static access, but I see no place in LXR where that's needed
-  m_Hit_t m_Hits;
-
- private:
-  LArG4TBECBeamChSensitiveDetector (const LArG4TBECBeamChSensitiveDetector&);
-  LArG4TBECBeamChSensitiveDetector& operator= (const LArG4TBECBeamChSensitiveDetector&);
+  std::vector< std::unique_ptr<LArG4TBECBeamChHit>> m_Hits;
 };
 
-#endif // __LArG4TBECBeamChSensitiveDetector_H__
+#endif // LARG4H6SD_LARG4TBECBEAMCHSENSITIVEDETECTOR_H

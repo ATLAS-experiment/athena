@@ -114,7 +114,7 @@ IOVDbParser::getKey(const std::string& key, const std::string& defvalue,
     value=defvalue;
     return false;
   }
-  const auto [theValue,found] = at(key,defvalue);
+  auto [theValue,found] = at(key,defvalue);
   value=std::move(theValue);
   return found;
 }

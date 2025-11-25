@@ -3,28 +3,47 @@
 */
 #include <MuonSpacePoint/CalibratedSpacePoint.h>
 #include <GeoPrimitives/GeoPrimitivesToStringConverter.h> 
+namespace {
+    static const Amg::Vector3D zero{Amg::Vector3D::Zero()};
+}
 namespace MuonR4{
-
+    std::string CalibratedSpacePoint::toString(const State s) {
+        switch (s){
+            case State::Valid:
+                return "valid";
+            case State::Outlier:
+                return "outlier";
+            case State::FailedCalib:
+                return "failed calibration";
+            case State::Duplicate:
+                return "duplicate";
+               
+        }
+         return "unknown";
+    }
     CalibratedSpacePoint::CalibratedSpacePoint(const SpacePoint* uncalibSpacePoint,
                                                Amg::Vector3D&& posInChamber,
                                                State st):
+        m_posInChamber{std::move(posInChamber)},
         m_parent{uncalibSpacePoint},
-        m_posInChamber{posInChamber},
         m_state{st} {
     }
     const SpacePoint* CalibratedSpacePoint::spacePoint() const { return m_parent; }
     const Amg::Vector3D& CalibratedSpacePoint::localPosition() const { return m_posInChamber; }
     const Amg::Vector3D& CalibratedSpacePoint::sensorDirection() const {
         static const Amg::Vector3D s_Dir{Amg::Vector3D::UnitX()};
-        return m_parent? m_parent->sensorDirection() : s_Dir;
+        return m_parent? m_parent->sensorDirection() : (m_beamLine ? (*m_beamLine) : s_Dir);
     }
     const Amg::Vector3D& CalibratedSpacePoint::toNextSensor() const {
         static const Amg::Vector3D s_Dir{Amg::Vector3D::UnitY()};
-        return m_parent? m_parent->toNextSensor() : s_Dir;
+        /** To calculate the residual only the sensor direction is needed. Set the 
+         *  planeNormal & toNextSensor to zero to avoid that the measurement is picked up
+         *  by e.g. the fast line fitter */
+        return m_parent? m_parent->toNextSensor() : (m_beamLine ? zero : s_Dir);
     }
     const Amg::Vector3D& CalibratedSpacePoint::planeNormal() const {
         static const Amg::Vector3D s_Dir{Amg::Vector3D::UnitZ()};
-        return m_parent? m_parent->planeNormal() : s_Dir;
+        return m_parent ? m_parent->planeNormal() : (m_beamLine ? zero : s_Dir);
     }
     const CalibratedSpacePoint::Cov_t& 
         CalibratedSpacePoint::covariance() const {
@@ -33,7 +52,11 @@ namespace MuonR4{
     bool CalibratedSpacePoint::hasTime() const { return m_measuresTime; }
     bool CalibratedSpacePoint::measuresLoc0() const { return measuresPhi(); }
     bool CalibratedSpacePoint::measuresLoc1() const { return measuresEta(); } 
-    bool CalibratedSpacePoint::isStraw() const { return type() == xAOD::UncalibMeasType::MdtDriftCircleType; }
+    bool CalibratedSpacePoint::isStraw() const { 
+        using enum xAOD::UncalibMeasType;
+        const auto t = type();
+        return t == MdtDriftCircleType || (t == Other && m_beamLine != nullptr); 
+    }
     double CalibratedSpacePoint::driftRadius() const {
         return m_driftRadius;
     }
@@ -51,7 +74,10 @@ namespace MuonR4{
     CalibratedSpacePoint::State CalibratedSpacePoint::fitState() const { return m_state; }
     void CalibratedSpacePoint::setFitState(State st) { m_state = st; }
     unsigned CalibratedSpacePoint::dimension() const { return measuresEta() + measuresPhi(); }
-    void CalibratedSpacePoint::setCovariance(const Cov_t& cov) {m_cov = cov;}
+    void CalibratedSpacePoint::setCovariance(const Cov_t& cov) { m_cov = cov; }
+    void CalibratedSpacePoint::setBeamDirection(Amg::Vector3D&& beamDir) {
+        m_beamLine = std::make_unique<Amg::Vector3D>(std::move(beamDir));
+    }
 
     void CalibratedSpacePoint::print(std::ostream& ostr) const {
         if (type() != xAOD::UncalibMeasType::Other) {
@@ -59,6 +85,7 @@ namespace MuonR4{
         } else {
             ostr<<"Auxiliary measurement";
         }
+        ostr<<" ("<<toString(fitState())<<")";
         ostr<<" @ "<<Amg::toString(localPosition());
         if (type() == xAOD::UncalibMeasType::MdtDriftCircleType) {
             ostr<<", wire: "<<Amg::toString(sensorDirection())<<", drift R: "<<driftRadius();

@@ -3,8 +3,11 @@
 */
 
 #include "LArIdentifier/LArHVLineID.h"
+#include "IdDict/IdDictDictionary.h"
+#include "IdDict/IdDictField.h"
+#include "IdDict/IdDictMgr.h"
+#include "IdDict/IdDictRegion.h"
 #include "GaudiKernel/MsgStream.h"
-#include "IdDict/IdDictDefs.h"
 #include "Identifier/IdentifierHash.h"
 #include "Identifier/RangeIterator.h"
 #include <algorithm>
@@ -221,7 +224,7 @@ int LArHVLineID::initLevelsFromDict()
   log << MSG::DEBUG  << "[initLevelsFromDict] data member initialization OK ... "  << endmsg;
   
   // Search with region name
-  IdDictRegion* reg = m_dict->find_region("LArHV-HEC-A");
+  const IdDictRegion* reg = m_dict->find_region("LArHV-HEC-A");
   if (reg) {
       m_larhvRegion_index = reg->index();}
   else {
@@ -233,7 +236,7 @@ int LArHVLineID::initLevelsFromDict()
 
   // Find ATLAS field 
   // ========================================================================
-  IdDictField* field = m_dict->find_field("subdet") ;
+  const IdDictField* field = m_dict->find_field("subdet") ;
   if (field) {
     m_atlas_index = field->index();}
   else {

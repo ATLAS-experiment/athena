@@ -279,6 +279,8 @@ StatusCode FPGATrackSimNNTrackTool::getTracks_1st(std::vector<std::shared_ptr<co
         temp.setHoughXBin(iroad->getXBin());
         temp.setHoughYBin(iroad->getYBin());
 
+        temp.setBinIdx(iroad->getBinIdx());
+
         ////////////////////////////////////////////////////////////////////////
         // Get a list of indices for all possible combinations given a certain
         // number of layers
@@ -303,7 +305,7 @@ StatusCode FPGATrackSimNNTrackTool::getTracks_1st(std::vector<std::shared_ptr<co
                     std::shared_ptr<const FPGATrackSimHit> hit = iroad->getHits(layer)[hit_indices[layer]];
                     // Add this hit to the road
                     if (hit->isReal()){
-                        hit_list.push_back(hit);
+                        hit_list.push_back(std::move(hit));
                     }
                 }
             }
@@ -540,7 +542,7 @@ StatusCode FPGATrackSimNNTrackTool::getTracks_2nd(std::vector<std::shared_ptr<co
                     std::shared_ptr<const FPGATrackSimHit> hit = iroad->getHits(layer)[hit_indices[layer]];
                     // Add this hit to the road
                     if (hit->isReal()){
-                        hit_list.push_back(hit);
+                        hit_list.push_back(std::move(hit));
                     }
                 }
             }

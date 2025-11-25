@@ -171,7 +171,7 @@ def TRIG9Cfg(flags):
                                             "InDetTrackParticles",
                                             "AntiKt4EMPFlowJets",
                                             "MET_Baseline_AntiKt4EMPFlow",
-                                            "BTagging_AntiKt4EMPFlow",
+
                                             "TauJets",
                                             ]
 

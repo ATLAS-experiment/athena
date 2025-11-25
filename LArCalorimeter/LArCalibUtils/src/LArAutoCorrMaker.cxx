@@ -92,11 +92,7 @@ StatusCode LArAutoCorrMaker::execute()
   StatusCode sc;
   if (m_bunchCrossingsFromFront>0) {
     const xAOD::EventInfo* eventInfo = nullptr;
-    sc=evtStore()->retrieve( eventInfo ); 
-    if (sc.isFailure()) {
-      ATH_MSG_ERROR( "Failed to retrieve EventInfo object!" );
-      return sc;
-    }
+    ATH_CHECK( evtStore()->retrieve( eventInfo ) );
 
     SG::ReadCondHandle<BunchCrossingCondData> bccd (m_bcDataKey);
     const BunchCrossingCondData* bunchCrossing=*bccd;
@@ -189,7 +185,7 @@ StatusCode LArAutoCorrMaker::stop()
   }
 
   // Create the LArAutoCorrComplete object
-  LArAutoCorrComplete* larAutoCorrComplete = new LArAutoCorrComplete();
+  auto larAutoCorrComplete = std::make_unique<LArAutoCorrComplete>();
 
   sc=larAutoCorrComplete->setGroupingType(m_groupingType,msg());
   if (sc.isFailure()) {
@@ -244,19 +240,7 @@ StatusCode LArAutoCorrMaker::stop()
   ATH_MSG_INFO( " Summary : Number of FCAL      cells side A or C (connected+unconnected):  1792 " );
   
   // Record LArAutoCorrComplete
-  sc = detStore()->record(larAutoCorrComplete,m_keyoutput);
-  if (sc != StatusCode::SUCCESS) { 
-      ATH_MSG_ERROR( " Cannot store LArAutoCorrComplete in DetectorStore " );
-      return sc;
-    }
-  
-  // Make symlink
-  sc = detStore()->symLink(larAutoCorrComplete, static_cast<ILArAutoCorr*>(larAutoCorrComplete));
-  if (sc != StatusCode::SUCCESS)  {
-      ATH_MSG_ERROR( " Cannot make link for Data Object " );
-      return sc;
-    }
-  
+  ATH_CHECK( detStore()->record(std::move(larAutoCorrComplete),m_keyoutput) );
   return StatusCode::SUCCESS;
 }
 

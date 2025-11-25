@@ -3,9 +3,13 @@
 */
 
 #include "CaloIdentifier/LArMiniFCAL_ID.h"
+#include "CaloIdentifier/LArID_Exception.h"
+#include "IdDict/IdDictDictionary.h"
+#include "IdDict/IdDictField.h"
+#include "IdDict/IdDictMgr.h"
+#include "IdDict/IdDictRegion.h"
 #include "AtlasDetDescr/AtlasDetectorID.h"
 #include "Identifier/IdentifierHash.h"
-#include "IdDict/IdDictDefs.h"
 #include "PathResolver/PathResolver.h"
 
 #include "GaudiKernel/MsgStream.h"
@@ -448,7 +452,7 @@ int         LArMiniFCAL_ID::initLevelsFromDict()
   m_ETA_INDEX         = 999 ;
   m_PHI_INDEX         = 999 ;
 
-  IdDictField* field = dict()->find_field("subdet") ;
+  const IdDictField* field = dict()->find_field("subdet") ;
   if (field) {
     m_LAR_INDEX = field->index();
   }

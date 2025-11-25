@@ -631,7 +631,7 @@ StatusCode FPGAClusterConverter::createSCTCluster(const FPGATrackSimHit& h, cons
       }
       ATH_MSG_WARNING(msg.str());
     }
-    InDetDD::SiLocalPosition localInPolar = designNew->localPositionOfCell(cellId);
+    InDetDD::SiLocalPosition localInPolar = designNew->localPositionOfCellPC(cellId);
     localPosition(0, 0) = localInPolar.xPhi();
     localCovariance(0, 0) = designNew->phiPitchPhi() * designNew->phiPitchPhi() * (1./12.);
   }
@@ -696,8 +696,8 @@ StatusCode FPGAClusterConverter::createPixelSPs(xAOD::SpacePointContainer& pixel
 
     // Covariance
     // TODO: check if we need to scale covariance based on rotation matrix like in PixelSpacePointFormationTool.cxx
-    const float & cov_r = p_cl->localCovariance<2>()(0,0);
-    const float & cov_z = p_cl->localCovariance<2>()(1,0);
+    const float cov_r = p_cl->localCovariance<2>()(0,0);
+    const float cov_z = p_cl->localCovariance<2>()(1,0);
 
     pixelSPs.back()->setSpacePoint(
       p_cl->identifierHash(),

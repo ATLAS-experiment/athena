@@ -1,7 +1,7 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // $Id: TConverterStreamer.h,v 1.3 2008-11-04 12:42:10 ssnyder Exp $
@@ -26,12 +26,13 @@
  */
 
 
-#ifndef TCONVERTERSTREAMER_H
-#define TCONVERTERSTREAMER_H
+#ifndef ROOTCONVERSIONS_TCONVERTERSTREAMER_H
+#define ROOTCONVERSIONS_TCONVERTERSTREAMER_H
 
+#include <map>
 #include "TClassStreamer.h"
 #include "TVirtualConverter.h"
-#include <map>
+
 class TClass;
 class TBuffer;
 class TFile;
@@ -44,8 +45,8 @@ class TConverterStreamer
   : public TClassStreamer
 {
 public:
-  typedef std::pair<TVirtualConverter*, bool> Payload;
-  typedef std::map<UInt_t, Payload> CheckSumMap;
+  using Payload = std::pair<TVirtualConverter*, bool>;
+  using CheckSumMap = std::map<UInt_t, Payload>;
 
   /**
    * @brief Constructor.
@@ -100,5 +101,5 @@ private:
 };
 
 
-#endif // not TCONVERTERSTREAMER_H
+#endif // not ROOTCONVERSIONS_TCONVERTERSTREAMER_H
 

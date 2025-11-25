@@ -6,7 +6,7 @@
 atlas_subdir( CoraCool )
 
 # External dependencies:
-find_package( Boost COMPONENTS  unit_test_framework thread)
+find_package( Boost COMPONENTS thread )
 find_package( COOL COMPONENTS CoolKernel CoolApplication )
 find_package( CORAL COMPONENTS CoralBase CoralKernel RelationalAccess )
 find_package( ROOT COMPONENTS Core Tree MathCore Hist RIO pthread )
@@ -29,6 +29,7 @@ atlas_add_test  ( CoraCoolDatabaseSvcFactory_test
                   test/CoraCoolDatabaseSvcFactory_test.cxx 
                   INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${COOL_INCLUDE_DIRS}  ${CORAL_INCLUDE_DIRS}
                   LINK_LIBRARIES ${Boost_LIBRARIES} ${COOL_LIBRARIES} ${CORAL_LIBRARIES} CoraCool
+                  Boost::unit_test_framework
                   POST_EXEC_SCRIPT nopost.sh
                   )
                   
@@ -37,6 +38,7 @@ atlas_add_test  ( CoraCoolDatabaseSvc_test
                   test/CoraCoolDatabaseSvc_test.cxx 
                   INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${COOL_INCLUDE_DIRS}  ${CORAL_INCLUDE_DIRS}
                   LINK_LIBRARIES ${Boost_LIBRARIES} ${COOL_LIBRARIES} ${CORAL_LIBRARIES} CoraCool
+                  Boost::unit_test_framework
                   POST_EXEC_SCRIPT nopost.sh
                   )                
 
@@ -45,6 +47,7 @@ atlas_add_test  ( CoraCoolDatabase_test
                   test/CoraCoolDatabase_test.cxx 
                   INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${COOL_INCLUDE_DIRS}  ${CORAL_INCLUDE_DIRS}
                   LINK_LIBRARIES ${Boost_LIBRARIES} ${COOL_LIBRARIES} ${CORAL_LIBRARIES} CoraCool
+                  Boost::unit_test_framework
                   POST_EXEC_SCRIPT nopost.sh
                   )     
                   
@@ -53,6 +56,7 @@ atlas_add_test  ( CoraCoolFolder_test
                   test/CoraCoolFolder_test.cxx 
                   INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${COOL_INCLUDE_DIRS}  ${CORAL_INCLUDE_DIRS}
                   LINK_LIBRARIES ${Boost_LIBRARIES} ${COOL_LIBRARIES} ${CORAL_LIBRARIES} CoraCool
+                  Boost::unit_test_framework
                   POST_EXEC_SCRIPT nopost.sh
                   )   
                   
@@ -61,6 +65,7 @@ atlas_add_test  ( CoraCoolObjectIter_test
                   test/CoraCoolObjectIter_test.cxx 
                   INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${COOL_INCLUDE_DIRS}  ${CORAL_INCLUDE_DIRS}
                   LINK_LIBRARIES ${Boost_LIBRARIES} ${COOL_LIBRARIES} ${CORAL_LIBRARIES} CoraCool
+                  Boost::unit_test_framework
                   POST_EXEC_SCRIPT nopost.sh
                   )     
                       

@@ -253,6 +253,7 @@ def initConfigFlags():
     acf.addFlag('Beam.vdMScan.PV.PDF', 'Default', help='vdM Scan Sim/BSFit PV PDF Histogram')
 
     # output
+    acf.addFlag('Output.BSFileName', '', help='BS output file name')
     acf.addFlag('Output.EVNTFileName', '', help='EVNT output file name')
     acf.addFlag('Output.EVNT_TRFileName', '', help='EVNT_TR output file name')
     acf.addFlag('Output.HITSFileName', '', help='HITS output file name')
@@ -277,8 +278,10 @@ def initConfigFlags():
     acf.addFlag('Output.OneDataHeaderForm', False, help="Write only a single common DataHeaderForm per stream")
     acf.addFlag('Output.TreeAutoFlush', {}, help="dict with auto-flush settings for stream e.g. {'STREAM': 123}")
     acf.addFlag('Output.TemporaryStreams', [], help='list of output streams that are marked temporary')
-    acf.addFlag('Output.StorageTechnology.EventData', 'ROOTTREEINDEX', help='set the underlying POOL storage technology for event data')
-    acf.addFlag('Output.StorageTechnology.MetaData', 'ROOTTREE', help='set the underlying POOL storage technology for metadata')
+    acf.addFlag('Output.StorageTechnology.EventData', {},
+                help="set the underlying POOL storage technology for event data, e.g., {f'{flags.Output.AODFileName}':'ROOTRNTUPLE', '*':'ROOTTREEINDEX'}. If not set for a file, defaults to PoolSvc.DefaultContainerType.")
+    acf.addFlag('Output.StorageTechnology.MetaData', {},
+                help="set the underlying POOL storage technology for metadata, e.g., {f'{flags.Output.AODFileName}':'ROOTRNTUPLE', '*':'ROOTTREE'}. If not set for a file, defaults to the EventData technology for that file.")
 
     # Might move this elsewhere in the future.
     # Some flags from https://gitlab.cern.ch/atlas/athena/blob/master/Tracking/TrkDetDescr/TrkDetDescrSvc/python/TrkDetDescrJobProperties.py
@@ -350,8 +353,10 @@ def initConfigFlags():
 
         # Run dependent simulation
         acf.addFlag("IOVDb.RunToTimestampDict", lambda prevFlags: getRunToTimestampDict(), help='runNumber to timestamp map')
+
         acf.addFlag("IOVDb.DBConnection", lambda prevFlags : "sqlite://;schema=mycool.db;dbname=" + prevFlags.IOVDb.DatabaseInstance, help='default DB connection string')
-        acf.addFlag("IOVDb.CrestServer", "http://crest-undertow-api.web.cern.ch", help="CREST server URL")
+        acf.addFlag("IOVDb.CrestServer", "https://crest.cern.ch", help="CREST server URL") # FIXME could this be merged with IOVDb.DBConnection?
+        acf.addFlag("IOVDb.UseCREST", False, help='Use CREST for conditions access')
 
         #For HLT-jobs, the ring-size should be 0 (eg no cleaning at all since there are no IOV-updates during the job)
         acf.addFlag("IOVDb.CleanerRingSize",lambda prevFlags : 0 if prevFlags.Trigger.doHLT else 2*max(1, prevFlags.Concurrency.NumConcurrentEvents), help='size of ring-buffer for conditions cleaner')

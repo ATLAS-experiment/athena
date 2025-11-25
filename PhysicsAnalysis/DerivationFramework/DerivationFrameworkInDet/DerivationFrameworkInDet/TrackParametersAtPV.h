@@ -1,13 +1,9 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-///////////////////////////////////////////////////////////
-// TrackParametersAtPV.h  (c) ATLAS Detector software
-///////////////////////////////////////////////////////////////////
-
 #ifndef DERIVATIONFRAMEWORK_TRACKPARAMETERSATPV_H
-#define DERIVATIONFRAMEWORK_TRACKPARAMETERSATPV_H 
+#define DERIVATIONFRAMEWORK_TRACKPARAMETERSATPV_H
 
 #include<string>
 
@@ -26,39 +22,35 @@
 namespace DerivationFramework {
 
   /** @class TrackParametersAtPV
- 
+
       the code used in this implementation is kindly stolen from:
       atlasoff:: ISF/ISF_Core/ISF_Tools
 
       @author James Catmore -at- cern.ch
-     */
+  */
   class TrackParametersAtPV : public extends<AthAlgTool, IAugmentationTool> {
-   
-  public: 
-    /** Constructor with parameters */
-    TrackParametersAtPV( const std::string& t, const std::string& n, const IInterface* p );
-   
-    /** Destructor */
-    ~TrackParametersAtPV();
-   
+
+  public:
+
+    using base_class::base_class;
+
     // Athena algtool's Hooks
-    StatusCode  initialize();
-    StatusCode  finalize();
- 
+    virtual StatusCode  initialize() override final;
+
     /** Check that the current event passes this filter */
-    virtual StatusCode addBranches() const;
+    virtual StatusCode addBranches(const EventContext& ctx) const override final;
 
   private:
     SG::ReadHandleKey<xAOD::TrackParticleContainer> m_collTrackKey
-       { this, "TrackParticleContainerName", "InDetTrackParticles", ""};
+    { this, "TrackParticleContainerName", "InDetTrackParticles", ""};
     SG::ReadHandleKey<xAOD::VertexContainer>        m_collVertexKey
-       { this, "VertexContainerName", "PrimaryVertices", ""};
+      { this, "VertexContainerName", "PrimaryVertices", ""};
 
     SG::WriteHandleKey< std::vector<float> > m_trackZ0PVKey
-       { this, "Z0SGEntryName", "", "" };
+      { this, "Z0SGEntryName", "", "" };
 
   };
- 
+
 }
 
 #endif

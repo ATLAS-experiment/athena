@@ -363,7 +363,7 @@ namespace {
   // Getter from xAOD::FlowElement
   std::optional<SequenceGetterFunc<xAOD::FlowElement>>
   getterFromFlowElements(const std::string& name)
-  {   
+  {
     using Fl = xAOD::FlowElement;
     using Jet = xAOD::IParticle;
     if (name == "isCharged") {
@@ -381,7 +381,7 @@ namespace {
     // I want to compute jab coordinates: jet projection, adjacent
     // projection, beamline projection. The "adjacent" projection
     // is defined to be orthogonal to the jet and beam, but this
-    // isn't a fully orthogonal basis. 
+    // isn't a fully orthogonal basis.
 
     auto p4 = j.p4();
     Eigen::Vector3d local_hits (local_hitX, local_hitY, local_hitZ);
@@ -405,7 +405,7 @@ namespace {
   {
     using Tmv = xAOD::TrackMeasurementValidation;
     using Jet = xAOD::IParticle;
-    
+
     SG::AuxElement::ConstAccessor<float> local_hitX("HitsXRelToBeamspot");
     SG::AuxElement::ConstAccessor<float> local_hitY("HitsYRelToBeamspot");
     SG::AuxElement::ConstAccessor<float> local_hitZ("HitsZRelToBeamspot");
@@ -431,13 +431,34 @@ namespace {
 
   // Getters from xAOD::Electron
   // Based on ElectronPhotonSelectorTools/AsgElectronLikelihoodTool
+  using decorated_electron_getter_t = std::pair<
+    SequenceGetterFunc<xAOD::Electron>,
+    std::set<std::string>
+    >;
+  std::optional<decorated_electron_getter_t>
+  getterFromDecoratedElectrons(const std::string& name)
+  {
+    using Jet = xAOD::IParticle;
+    using El = xAOD::Electron;
+
+    std::string isovar{"ptvarcone30_Nonprompt_All_MaxWeightTTVALooseCone_pt1000"};
+    std::set<std::string> isodeps{{isovar}};
+    SG::AuxElement::ConstAccessor<float> pt_varcone30{isovar};
+    if ((name == "ftag_ptVarCone30OverPt") || (name == "ptVarCone30OverPt")) {
+      return decorated_electron_getter_t {
+        CustomSeqGetter<El>([pt_varcone30](const El& p, const Jet&) {
+          return pt_varcone30(p) / p.pt();
+        }), isodeps
+      };
+    }
+    return std::nullopt;
+  }
+
   std::optional<SequenceGetterFunc<xAOD::Electron>>
   getterFromElectrons(const std::string& name, const std::string& prefix)
   {
     using Jet = xAOD::IParticle;
     using El = xAOD::Electron;
-
-    SG::AuxElement::ConstAccessor<float> pt_varcone30{"ptvarcone30_Nonprompt_All_MaxWeightTTVALooseCone_pt1000"};
 
     if ((name == "ftag_et") || (name == "et")) {
       return CustomSeqGetter<El>([](const El& p, const Jet&) {
@@ -458,11 +479,6 @@ namespace {
             el_dpop = 1 - track->qOverP() / (refittedTrack_LMqoverp);
         }
         return el_dpop;
-      });
-    }
-    if ((name == "ftag_ptVarCone30OverPt") || (name == "ptVarCone30OverPt")) {
-      return CustomSeqGetter<El>([pt_varcone30](const El& p, const Jet&) {
-        return pt_varcone30(p) / p.pt();
       });
     }
     if ((name == "ftag_energyOverP") || (name == "energyOverP")) {
@@ -527,13 +543,16 @@ namespace {
           return {*getter, {}};
         }
       }
-      
+
       if constexpr (std::is_same_v<T, xAOD::Electron>) {
+        if (auto getterdep = getterFromDecoratedElectrons(name)) {;
+          return {getterdep->first, getterdep->second};
+        }
         if (auto getter = getterFromElectrons(name, prefix)){
           return {*getter, {}};
         }
       }
-      
+
       if constexpr (std::is_same_v<T, xAOD::FlowElement>) {
         if (auto getter = getterFromFlowElements(name)){
           return {*getter, {}};

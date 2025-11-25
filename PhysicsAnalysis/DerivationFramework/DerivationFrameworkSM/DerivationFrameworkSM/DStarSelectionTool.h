@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //==================================================
@@ -21,8 +21,8 @@
 #include "xAODTracking/TrackParticleContainer.h"
 #include "xAODTracking/TrackParticle.h"
 
-#include "AsgDataHandles/ReadHandleKey.h"
-#include "AsgDataHandles/WriteDecorHandleKey.h"
+#include "StoreGate/ReadHandleKey.h"
+#include "StoreGate/WriteDecorHandleKey.h"
 
 #include <AsgTools/PropertyWrapper.h>
 
@@ -37,7 +37,7 @@ namespace DerivationFramework {
     
     StatusCode initialize() override;
     
-    virtual StatusCode addBranches() const override;
+    virtual StatusCode addBranches(const EventContext& ctx) const override;
     
   private:
     SG::ReadHandleKey<xAOD::VertexContainer> m_inputVtxContainerName{this, "InputVtxContainerName", ""};

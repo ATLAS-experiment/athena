@@ -39,7 +39,6 @@
 #include "AGDDKernel/AGDDDetectorPositioner.h"
 #include "AGDDControl/IAGDD2GeoSvc.h"
 #include "AGDDControl/AGDDController.h"
-#include "IdDict/IdDictDefs.h"
 #include "AtlasDetDescr/AtlasDetectorID.h"
 #include "IdDictParser/IdDictParser.h"
 #include "StoreGate/StoreGateSvc.h"

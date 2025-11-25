@@ -11,6 +11,7 @@
 #include "MuonPatternEvent/HoughMaximum.h"
 
 #include "Acts/Seeding/detail/CompSpacePointAuxiliaries.hpp"
+#include "Acts/Seeding/CompositeSpacePointLineFitter.hpp"
 #include "Acts/Seeding/HoughTransformUtils.hpp"
 #include "Acts/Utilities/Helpers.hpp"
 
@@ -42,8 +43,8 @@ namespace MuonR4{
         using AxisDefs = SpacePoint::CovIdx;
         
 
-        using Parameters = AmgVector(Acts::toUnderlying(ParamDefs::nPars));
-        using Covariance = AmgSymMatrix(Acts::toUnderlying(ParamDefs::nPars));
+        using Parameters = Acts::Experimental::CompositeSpacePointLineFitter::ParamVec_t;
+        using Covariance = Acts::Experimental::CompositeSpacePointLineFitter::CovMat_t;
   }
 
 }

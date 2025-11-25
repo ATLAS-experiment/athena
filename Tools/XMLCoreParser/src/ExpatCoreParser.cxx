@@ -246,7 +246,7 @@ ExpatCoreParser::generic_parse (XML_Parser p, const std::string& file_name){
       if (docfd != 0) break;
       // Test whether prefix is a relative path and if so use it
       if (m_prefix != "" && '/' != m_prefix[0]) {
-        temp_name =  last_temp_name;
+        temp_name =  std::move(last_temp_name);
         temp_name += "/";
         temp_name += m_prefix;
         temp_name += "/";

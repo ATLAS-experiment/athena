@@ -92,8 +92,6 @@ def createTauConfigFlags():
     tau_cfg.addFlag("Tau.TauEleRM_isAvailable", lambda prevFlags : "xAOD::TauJetContainer#TauJets_EleRM" in prevFlags.Input.TypedCollections)
     # helper for derivations, used in PHYSVAL monitoring
     tau_cfg.addFlag("Tau.TauMuonRM_isAvailable", lambda prevFlags : "xAOD::TauJetContainer#TauJets_MuonRM" in prevFlags.Input.TypedCollections)
-    # had-had boosted ditaus
-    tau_cfg.addFlag("Tau.doDiTauRec", True)
 
     return tau_cfg
 

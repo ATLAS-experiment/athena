@@ -5,7 +5,8 @@
 
 #include "LArRDOAnalysis.h"
 #include "StoreGate/ReadHandle.h"
-
+#include "TTree.h"
+#include "TH1F.h"
 #include <format>
 
 StatusCode LArRDOAnalysis::initialize() {
@@ -18,26 +19,27 @@ StatusCode LArRDOAnalysis::initialize() {
   ATH_CHECK( m_inputTTL1EMKey.initialize(SG::AllowEmpty) );
   ATH_CHECK( m_inputDigitKey.initialize(SG::AllowEmpty) );
 
- 
-  m_tree = new TTree(m_ntupleTreeName.value().c_str(), "LArRDOAna");
-  std::string fullNtupleName =std::format("{}{}{}",m_ntupleFileName.value(), m_ntupleDirName.value(), 
-                                                   m_ntupleTreeName.value());
-  ATH_CHECK(histSvc()->regTree(fullNtupleName, m_tree));
-  m_tree->Branch("larID", &m_larID);
-  m_tree->Branch("energy", &m_energy);
-  m_tree->Branch("time", &m_time);
-  m_tree->Branch("qual", &m_qual);
-  m_tree->Branch("prov", &m_prov);
-  m_tree->Branch("gain", &m_gain);
-  m_tree->Branch("hadOnID", &m_hadOnID);
-  m_tree->Branch("hadOffID", &m_hadOffID);
-  m_tree->Branch("hadSamples", &m_hadSamples);
-  m_tree->Branch("emOnID", &m_emOnID);
-  m_tree->Branch("emOffID", &m_emOffID);
-  m_tree->Branch("emSamples", &m_emSamples);
-  m_tree->Branch("digiID", &m_digiID);
-  m_tree->Branch("digiGain", &m_digiGain);
-  m_tree->Branch("digiSamples", &m_digiSamples);
+  if(m_doNtuple){
+    m_tree = new TTree(m_ntupleTreeName.value().c_str(), "LArRDOAna");
+    std::string fullNtupleName =std::format("{}{}{}",m_ntupleFileName.value(), m_ntupleDirName.value(), 
+                                                    m_ntupleTreeName.value());
+    ATH_CHECK(histSvc()->regTree(fullNtupleName, m_tree));
+    m_tree->Branch("larID", &m_larID);
+    m_tree->Branch("energy", &m_energy);
+    m_tree->Branch("time", &m_time);
+    m_tree->Branch("qual", &m_qual);
+    m_tree->Branch("prov", &m_prov);
+    m_tree->Branch("gain", &m_gain);
+    m_tree->Branch("hadOnID", &m_hadOnID);
+    m_tree->Branch("hadOffID", &m_hadOffID);
+    m_tree->Branch("hadSamples", &m_hadSamples);
+    m_tree->Branch("emOnID", &m_emOnID);
+    m_tree->Branch("emOffID", &m_emOffID);
+    m_tree->Branch("emSamples", &m_emSamples);
+    m_tree->Branch("digiID", &m_digiID);
+    m_tree->Branch("digiGain", &m_digiGain);
+    m_tree->Branch("digiSamples", &m_digiSamples);
+  }
   
   m_h_larID = new TH1F("h_larID", "LAr ID", 100, 0, 5e18);
   m_h_larID->StatOverflows();
@@ -104,22 +106,24 @@ StatusCode LArRDOAnalysis::initialize() {
 
 StatusCode LArRDOAnalysis::execute() {
   ATH_MSG_DEBUG( "In LArRDOAnalysis::execute()" );
-
-  m_larID->clear();
-  m_energy->clear();
-  m_time->clear();
-  m_qual->clear();
-  m_prov->clear();
-  m_gain->clear();
-  m_hadOnID->clear();
-  m_hadOffID->clear();
-  m_hadSamples->clear();
-  m_emOnID->clear();
-  m_emOffID->clear();
-  m_emSamples->clear();
-  m_digiID->clear();
-  m_digiGain->clear();
-  m_digiSamples->clear();
+  
+  if(m_tree){
+    m_larID->clear();
+    m_energy->clear();
+    m_time->clear();
+    m_qual->clear();
+    m_prov->clear();
+    m_gain->clear();
+    m_hadOnID->clear();
+    m_hadOffID->clear();
+    m_hadSamples->clear();
+    m_emOnID->clear();
+    m_emOffID->clear();
+    m_emSamples->clear();
+    m_digiID->clear();
+    m_digiGain->clear();
+    m_digiSamples->clear();
+  }
 
   const EventContext& ctx{Gaudi::Hive::currentContext()};
   const LArRawChannelContainer* p_larRawCont{nullptr};
@@ -149,12 +153,14 @@ StatusCode LArRDOAnalysis::execute() {
 
           const unsigned long long larID_int = larID.get_compact();
           const int larGain_int = (int)larGain;
-          m_larID->push_back(larID_int);
-          m_energy->push_back(rawEnergy);
-          m_time->push_back(rawTime);
-          m_qual->push_back(rawQual);
-          m_prov->push_back(rawProv);
-          m_gain->push_back(larGain_int);
+          if(m_tree){
+            m_larID->push_back(larID_int);
+            m_energy->push_back(rawEnergy);
+            m_time->push_back(rawTime);
+            m_qual->push_back(rawQual);
+            m_prov->push_back(rawProv);
+            m_gain->push_back(larGain_int);
+          }
 
           m_h_larID->Fill(larID_int);
           m_h_energy->Fill(rawEnergy);
@@ -174,10 +180,10 @@ StatusCode LArRDOAnalysis::execute() {
 
           const unsigned long long hadOnID_int = hadOnID.get_compact();
           const unsigned long long hadOffID_int = hadOffID.get_compact();
-          m_hadOnID->push_back(hadOnID_int);
-          m_hadOffID->push_back(hadOffID_int);
+          if(m_tree) m_hadOnID->push_back(hadOnID_int);
+          if(m_tree) m_hadOffID->push_back(hadOffID_int);
           for (std::vector<float>::size_type i = 0; i != hadSamples.size(); ++i) {
-            m_hadSamples->push_back(hadSamples.at(i));
+            if(m_tree) m_hadSamples->push_back(hadSamples.at(i));
             m_h_hadSamples->Fill(hadSamples.at(i));
           }
 
@@ -196,10 +202,10 @@ StatusCode LArRDOAnalysis::execute() {
 
           const unsigned long long emOnID_int = emOnID.get_compact();
           const unsigned long long emOffID_int = emOffID.get_compact();
-          m_emOnID->push_back(emOnID_int);
-          m_emOffID->push_back(emOffID_int);
+          if(m_tree) m_emOnID->push_back(emOnID_int);
+          if(m_tree) m_emOffID->push_back(emOffID_int);
           for (std::vector<float>::size_type j = 0; j != emSamples.size(); ++j) {
-            m_emSamples->push_back(emSamples.at(j));
+            if(m_tree) m_emSamples->push_back(emSamples.at(j));
             m_h_emSamples->Fill(emSamples.at(j));
           }
 
@@ -220,10 +226,10 @@ StatusCode LArRDOAnalysis::execute() {
 
       const unsigned long long digiID_int = digiID.get_compact();
       const int digiGain_int = (int)digiGain;
-      m_digiID->push_back(digiID_int);
-      m_digiGain->push_back(digiGain_int);
+      if(m_tree) m_digiID->push_back(digiID_int);
+      if(m_tree) m_digiGain->push_back(digiGain_int);
       for (std::vector<short>::size_type k = 0; k != digiSamples.size(); ++k) {
-        m_digiSamples->push_back(digiSamples.at(k));
+        if(m_tree) m_digiSamples->push_back(digiSamples.at(k));
         m_h_digiSamples->Fill(digiSamples.at(k));
       }
 
@@ -233,7 +239,9 @@ StatusCode LArRDOAnalysis::execute() {
  }
   
 
+ if(m_tree and m_doNtuple){ 
   m_tree->Fill();
+ }
   
   return StatusCode::SUCCESS;
 }

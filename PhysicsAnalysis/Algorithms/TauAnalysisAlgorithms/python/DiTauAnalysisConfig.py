@@ -23,6 +23,10 @@ class DiTauCalibrationConfig (ConfigBlock):
         self.addOption ('rerunTruthMatching', True, type=bool,
             info="whether to rerun truth matching (sets up an instance of "
             "CP::DiTauTruthMatchingAlg). The default is True.")
+        self.addOption ('decorateTruth', False, type=bool,
+            info="decorate truth particle information on the reconstructed one")
+        self.addOption ('decorateExtraVariables', True, type=bool,
+            info="decorate extra variables for the reconstructed ditau")    
 
     def instanceName (self) :
         """Return the instance name for this block"""
@@ -48,12 +52,59 @@ class DiTauCalibrationConfig (ConfigBlock):
             alg.taus = config.readName (self.containerName)
             alg.preselection = config.getPreselection (self.containerName, '')
 
+       
+        # decorate truth tau information on the reconstructed object:
+        if self.decorateTruth and self.rerunTruthMatching and config.dataType() is not DataType.Data:
+            # in the case of the ditau, the DiTauTruthMatchingTool decorates directly the reco ditau with truth information.
+            # So information can be written directly out without any additional algorithm 
+            config.addOutputVar (self.containerName, 'TruthVisLeadPt', 'TruthVisLeadPt', noSys=True) 
+            config.addOutputVar (self.containerName, 'TruthVisLeadEta', 'TruthVisLeadEta', noSys=True) 
+            config.addOutputVar (self.containerName, 'TruthVisLeadPhi', 'TruthVisLeadPhi', noSys=True)
+            config.addOutputVar (self.containerName, 'TruthVisLeadM', 'TruthVisLeadM', noSys=True)
+            config.addOutputVar (self.containerName, 'TruthLeadPdgID', 'TruthLeadPdgID', noSys=True)
+            config.addOutputVar (self.containerName, 'TruthVisSubleadPt', 'TruthVisSubleadPt', noSys=True)
+            config.addOutputVar (self.containerName, 'TruthVisSubleadEta', 'TruthVisSubleadEta', noSys=True)
+            config.addOutputVar (self.containerName, 'TruthVisSubleadPhi', 'TruthVisSubleadPhi', noSys=True)
+            config.addOutputVar (self.containerName, 'TruthVisSubleadM', 'TruthVisSubleadM', noSys=True)
+            config.addOutputVar (self.containerName, 'TruthSubleadPdgID', 'TruthSubleadPdgID', noSys=True)
+            config.addOutputVar (self.containerName, 'TruthVisDeltaR', 'TruthVisDeltaR', noSys=True)
+            config.addOutputVar (self.containerName, 'TruthVisMass', 'TruthVisMass', noSys=True)
+            config.addOutputVar (self.containerName, 'IsTruthMatched', 'IsTruthMatched', noSys=True)
+            config.addOutputVar (self.containerName, 'IsTruthHadronic', 'IsTruthHadronic', noSys=True)
+
+        # Decorate extra variables
+        if self.decorateExtraVariables:
+           alg = config.createAlgorithm( 'CP::DiTauExtraVariablesAlg',
+                                         'DiTauExtraVariablesAlg',
+                                         reentrant=True )
+           alg.ditaus = config.readName (self.containerName)
+           config.addOutputVar (self.containerName, 'omniScore', 'omniScore', noSys=True)
+           config.addOutputVar (self.containerName, 'leadSubjetPt', 'leadSubjetPt', noSys=True)
+           config.addOutputVar (self.containerName, 'leadSubjetEta', 'leadSubjetEta', noSys=True)
+           config.addOutputVar (self.containerName, 'leadSubjetPhi', 'leadSubjetPhi', noSys=True)
+           config.addOutputVar (self.containerName, 'leadSubjetE', 'leadSubjetE', noSys=True)
+           config.addOutputVar (self.containerName, 'leadSubjetNTracks', 'leadSubjetNTracks', noSys=True)
+           config.addOutputVar (self.containerName, 'leadSubjetCharge', 'leadSubjetCharge', noSys=True)
+           config.addOutputVar (self.containerName, 'subleadSubjetPt', 'subleadSubjetPt', noSys=True)
+           config.addOutputVar (self.containerName, 'subleadSubjetEta', 'subleadSubjetEta', noSys=True)
+           config.addOutputVar (self.containerName, 'subleadSubjetPhi', 'subleadSubjetPhi', noSys=True)
+           config.addOutputVar (self.containerName, 'subleadSubjetE', 'subleadSubjetE', noSys=True)
+           config.addOutputVar (self.containerName, 'subleadSubjetNTracks', 'subleadSubjetNTracks', noSys=True)
+           config.addOutputVar (self.containerName, 'subleadSubjetCharge', 'subleadSubjetCharge', noSys=True)
+
         # Set up the tau 4-momentum smearing algorithm:
         alg = config.createAlgorithm( 'CP::DiTauSmearingAlg', 'DiTauSmearingAlg' )
         config.addPrivateTool( 'smearingTool', 'TauAnalysisTools::DiTauSmearingTool' )
         alg.taus = config.readName (self.containerName)
         alg.tausOut = config.copyName (self.containerName)
         alg.preselection = config.getPreselection (self.containerName, '')
+
+        # Save base kinematic ditau variables in output
+        config.addOutputVar (self.containerName, 'pt', 'pt')
+        config.addOutputVar (self.containerName, 'eta', 'eta', noSys=True)
+        config.addOutputVar (self.containerName, 'phi', 'phi', noSys=True)
+        config.addOutputVar (self.containerName, 'm', 'm', noSys=True)
+
 
 
 class DiTauWorkingPointConfig (ConfigBlock) :

@@ -10,6 +10,7 @@
 #include "StorageSvc/DbSession.h"
 #include "StorageSvc/DbDomain.h"
 #include "StorageSvc/IStorageSvc.h"
+#include "POOLCore/DbPrint.h"
 
 /*
  *   POOL namespace declaration
@@ -35,7 +36,7 @@ namespace pool  {
     * @author  Markus Frank
     * @version 1.0
     */
-  class DbStorageSvc  : virtual public IStorageSvc
+  class DbStorageSvc  : virtual public IStorageSvc, virtual public APRMessaging
   {
     typedef std::vector<const Token*> TokenVec;
   private:
@@ -115,33 +116,6 @@ namespace pool  {
                                     const void*           object,
                                     ShapeH                shapeH,
                                     Token*&               refpTok);
-
-    /// In place update of an existing object.
-    /**
-      * @param   refDB     [IN] Reference to Database descriptor 
-      * @param   object    [IN] Pointer to persistent data object.
-      * @param   shapeH    [IN] Handle to persistent type information
-      * @param   refToken  [IN] Reference to token containing the location
-      *                         information of the persistent object.
-      *
-      * @return                 DbStatus code indicating success or failure.
-      */
-    virtual DbStatus update(        FileDescriptor&       refDB,
-                                    const void*           object,
-                                    ShapeH                shapeH,
-                                    Token&                refToken);
-
-    /// Destroy an existing persistent object.
-    /**
-      * @param   refDB     [IN] Reference to Database descriptor 
-      * @param   refToken  [IN] Reference to token containing the location
-      *                         information of the persistent object.
-      *
-      * @return                 DbStatus code indicating success or failure.
-      */
-    virtual DbStatus destroy(             FileDescriptor& refDB,
-                                          Token&          refToken);
-
 
     /// Read a persistent object from the medium.
     /** Reading an object does not create the object.
@@ -273,20 +247,6 @@ namespace pool  {
                                   int                 mode,
                                   FileDescriptor&     refDB);
 
-    /// Reconnect to a logical Database unit with different access mode
-    /** In order to reconnect, the database obviously must already be open.
-      *
-      * @param    refDB    [IN] Descriptor of the Database to be re-opened. 
-      * @param    mode     [IN] Flag to indicate the accessmode of the session.
-      *                         Since a database can only be re-opened if it 
-      *                         exists, possible values may only be:
-      *                         READ, UPDATE.
-      *
-      * @return                 DbStatus code indicating success or failure.
-      */
-    virtual DbStatus reconnect(   FileDescriptor&     refDB,
-                                  int                 mode );
-
     /// Disconnect from a logical Database unit.
     /** The  request for disconnect requires, that all pending Transactions
       * are already commited. Otherwise data are lost. On disconnection the 
@@ -304,8 +264,7 @@ namespace pool  {
     virtual DbStatus disconnect(  FileDescriptor&  refDB);
 
     /// Query the access mode of a Database unit.
-    /** In order to reconnect, the database obviously must already be open.
-      *
+    /**
       * @param    refDB    [IN] Descriptor of the Database to be queried. 
       * @param    mode    [OUT] Open mod to the database.
       *

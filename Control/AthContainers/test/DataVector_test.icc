@@ -18,7 +18,10 @@
 #include "TestTools/expect_exception.h"
 #include "SGTools/TestStore.h"
 #include "CxxUtils/checker_macros.h"
-#include "boost/concept_check.hpp"
+#include <concepts>
+#include <type_traits>
+#include <iterator>
+#include <ranges>
 #include <stdexcept>
 #include <string>
 #include <sstream>
@@ -1174,6 +1177,112 @@ void test2_push_back()
 }
 
  
+// Test push_new
+template <class B, class D>
+void test2_push_new()
+{
+  DataVector<B> vb;
+  SG::AuxStoreInternal storeb;
+  setaux (vb, storeb);
+  int x = 1;
+  bool useaux = false;
+  auto allocB = [&]() { return make_comp<B>(x, useaux); };
+  auto allocD = [&]() { return make_comp<D>(x, useaux); };
+  x = 1;
+  assert (vb.push_new (5, allocB) == 0);
+  x = 2;
+  assert (vb.push_new (5, allocD) == 5);
+  assert (vb.size() == 10);
+  assert (vb[0]->x == 1);
+  assert (vb[5]->x == 2);
+  CHECK_INDICES(vb);
+  vb.clear();
+
+  useaux = true; x = 1;
+  assert (vb.push_new (5, allocB) == 0);
+  x = 2;
+  assert (vb.push_new (5, allocD) == 5);
+  assert (vb.size() == 10);
+  assert (vb[0]->x == 1);
+  assert (vb[5]->x == 2);
+  CHECK_INDICES(vb);
+  checkaux(vb);
+
+  DataVector<B> vb2 (SG::VIEW_ELEMENTS);
+  vb2.push_new (5, [&](){ return vb[0];});
+  assert (vb2.size() == 5);
+  assert (vb2[0] == vb[0]);
+  CHECK_INDICES(vb);
+
+  DataVector<D> vd;
+  SG::AuxStoreInternal stored;
+  setaux (vd, stored);
+  useaux = false; x = 3;
+  assert (vd.push_new (5, allocD) == 0);
+  assert (vd.size() == 5);
+  assert (vd[0]->x == 3);
+  CHECK_INDICES(vd);
+  vd.clear();
+  useaux = true; x = 4;
+  assert (vd.push_new (5, allocD) == 0);
+  assert (vd.size() == 5);
+  assert (vd[0]->x == 4);
+  CHECK_INDICES(vd);
+  checkaux(vd);
+
+  DataVector<D> vd2 (SG::VIEW_ELEMENTS);
+  vd2.push_new (5, [&](){ return vd[0];});
+  assert (vd2.size() == 5);
+  assert (vd2[0] == vd[0]);
+  CHECK_INDICES(vd);
+
+  {
+    DataVectorWithAlloc<DataVector<D> > tvd;
+    assert (tvd.push_new (5) == 0);
+    myassert (tvd.size() == 5);
+    myassert (tvd[0]->x == 0);
+    CHECK_INDICES(tvd);
+  }
+
+  useaux = false; x = 3;
+  typedef typename test2_maybeconst<D>::type Dconst;
+  DataVector<Dconst> vcd;
+  vcd.push_new (5, allocD);
+  myassert (vcd.size() == 5);
+  myassert (vcd[0]->x == 3);
+  CHECK_INDICES(vcd);
+
+  // This isn't allowed.
+  DataVector<B>& vd4 = vd;
+  EXPECT_EXCEPTION (SG::ExcInsertionInBaseClass, vd4.push_new (5, allocB));
+
+  bool auxdata_b = typename SG::AuxStore_traits<B>::flag();
+  bool auxdata_d = typename SG::AuxStore_traits<D>::flag();
+
+  useaux = false;
+
+  vd.setStore (vd.getConstStore());
+  bool caught = false;
+  try {
+    vd.push_new (5, allocD);
+  }
+  catch (SG::ExcConstAuxData&) {
+    caught = true;
+  }
+  assert (caught || !auxdata_d);
+
+  vb.setStore (vb.getConstStore());
+  caught = false;
+  try {
+    vb.push_new (5, allocB);
+  }
+  catch (SG::ExcConstAuxData&) {
+    caught = true;
+  }
+  assert (caught || !auxdata_b);
+}
+
+
 // Test operator[] const
 template <class B, class D>
 void test2_operator_index_const()
@@ -6598,8 +6707,8 @@ void test2_deleter()
 template <class B, class D>
 void do_test2()
 {
-  boost::function_requires<boost::ForwardContainer<DataVector<B> > >();
-  boost::function_requires<boost::ForwardContainer<DataVector<D> > >();
+  static_assert(std::ranges::forward_range<DataVector<B>>, "DataVector<B> must be a forward range");
+  static_assert(std::ranges::forward_range<DataVector<D>>, "DataVector<D> must be a forward range");
 
   test2_initial<B,D> ();
   test2_default_ctor<B,D> ();
@@ -6608,6 +6717,7 @@ void do_test2()
   test2_copy_ctor<B,D> ();
   test2_dtor<B,D> ();
   test2_push_back<B,D> ();
+  test2_push_new<B,D> ();
   test2_operator_index_const<B,D> ();
   test2_at_const<B,D> ();
   test2_size<B,D> ();

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // Include files
@@ -165,11 +165,12 @@ StatusCode DetDescrCnvSvc::addToDetStore(const CLID &clid,
 
     // fill in the Addresses for Transient Detector Store objects
 
-    DetDescrAddress *addr = new DetDescrAddress(clid, name, name);
-    ATH_CHECK(m_detStore->recordAddress(addr));
+    CxxUtils::RefCountedPtr<DetDescrAddress> addr
+      (new DetDescrAddress(clid, name, name));
     ATH_MSG_INFO(" filling address for " << (*addr->par()) << " with CLID "
                                          << addr->clID() << " and storage type "
                                          << addr->svcType()
                                          << " to detector store ");
+    ATH_CHECK(m_detStore->recordAddress(std::move(addr)));
     return StatusCode::SUCCESS;
 }

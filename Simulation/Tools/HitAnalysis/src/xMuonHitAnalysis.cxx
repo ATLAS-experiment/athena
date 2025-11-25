@@ -172,7 +172,7 @@ namespace MuonValR4{
     StatusCode xMuonHitAnalysis::execute() {
         const EventContext& ctx{Gaudi::Hive::currentContext()};
         const xAOD::MuonSimHitContainer* simHits{nullptr};
-        const ActsGeometryContext* gctx{nullptr};
+        const ActsTrk::GeometryContext* gctx{nullptr};
         ATH_CHECK(SG::get(simHits, m_inputKey, ctx));
         if (simHits->empty()) {
             ATH_MSG_DEBUG("No hits recorded in the event "<<m_inputKey.fullKey());

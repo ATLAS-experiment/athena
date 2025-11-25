@@ -3,6 +3,10 @@
 */
 
 #include "MuonIdHelpers/MuonIdHelper.h"
+#include "IdDict/IdDictDictionary.h"
+#include "IdDict/IdDictField.h"
+#include "IdDict/IdDictMgr.h"
+#include "IdDict/IdDictRegion.h"
 #include "Identifier/RangeIterator.h"
 
 const std::string MuonIdHelper::BAD_NAME = "UNKNOWN";
@@ -267,7 +271,7 @@ int MuonIdHelper::initLevelsFromDict() {
     }
 
     // Find a Muon region
-    IdDictField* field = m_dict->find_field("subdet");
+    const IdDictField* field = m_dict->find_field("subdet");
     if (field) {
         m_MUON_INDEX = field->index();
     } else {
@@ -329,7 +333,7 @@ int MuonIdHelper::initLevelsFromDict() {
                 int index = (int)field->get_label_value(name);
                 m_technologyIndexMax = std::max(m_technologyIndexMax, index);
                 m_technologyNameToIdxMap[name] = index;
-                m_technologyIdxToNameMap[index] = name;
+                m_technologyIdxToNameMap[index] = std::move(name);
             }
         }
 

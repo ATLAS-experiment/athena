@@ -296,6 +296,8 @@ Notes:
                                                  TauAnalysisTools::CutAbsEta |
                                                  TauAnalysisTools::CutNTracks);
 
+   please notice that each cut need to setup through setProperty option like in the step below
+
 #. If one wants to use a different working point, e.g. for ``CutJetIDWP`` one
    needs to pass an enum, defined in `Enums.h <../TauAnalysisTools/Enums.h>`_,
    which need to be casted to int, e.g.::

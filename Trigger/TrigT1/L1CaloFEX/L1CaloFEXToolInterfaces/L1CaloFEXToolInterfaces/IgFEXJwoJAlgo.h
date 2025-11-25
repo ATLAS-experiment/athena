@@ -30,7 +30,7 @@ Interface definition for gFEXJwoJAlgo
                                  int gXE_seedThrA, int gXE_seedThrB, int gXE_seedThrC) = 0;
 
     virtual std::vector<std::unique_ptr<gFEXJwoJTOB>> jwojAlgo(const gTowersType& Atwr,const gTowersType& Btwr, const gTowersType& Ctwr,
-                                                                 std::array<uint32_t, 4> & outTOB) const = 0;
+                                                                 std::array<int32_t, 4> & outTOB) const = 0;
 
 
 

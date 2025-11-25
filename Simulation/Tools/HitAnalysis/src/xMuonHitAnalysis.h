@@ -11,7 +11,7 @@
 
 #include "xAODMuonSimHit/MuonSimHitContainer.h"
 #include "MuonReadoutGeometryR4/MuonDetectorManager.h"
-#include "ActsGeometryInterfaces/ActsGeometryContext.h"
+#include "ActsGeometryInterfaces/GeometryContext.h"
 
 namespace MuonValR4{
     class xMuonHitAnalysis : public AthHistogramAlgorithm{
@@ -23,7 +23,7 @@ namespace MuonValR4{
         private:
             SG::ReadHandleKey<xAOD::MuonSimHitContainer> m_inputKey{this, "InputKey", ""};
             // ACTS geometry context
-            SG::ReadHandleKey<ActsGeometryContext> m_geoCtxKey{this, "AlignmentKey", "ActsAlignment", "cond handle key"};
+            SG::ReadHandleKey<ActsTrk::GeometryContext> m_geoCtxKey{this, "AlignmentKey", "ActsAlignment", "cond handle key"};
             /** @brief Service handle of the IdHelperSvc */
             ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "MuonIdHelperSvc", 
                                                                 "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};

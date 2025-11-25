@@ -16,6 +16,8 @@
 #include "JpsiUpsilonTools/PrimaryVertexRefitter.h"
 #include <vector>
 #include "xAODEventInfo/EventInfo.h"
+// dummy EventContext for AnalysisBase
+#include "AsgTools/CurrentContext.h"
 
 namespace Trk {
     class IVertexFitter;
@@ -37,15 +39,15 @@ namespace DerivationFramework {
         JpsiPlusDsCascade(const std::string& t, const std::string& n, const IInterface*  p);
         ~JpsiPlusDsCascade();
         virtual StatusCode initialize() override;
-        StatusCode performSearch(std::vector<Trk::VxCascadeInfo*> *cascadeinfoContainer ) const;
-        virtual StatusCode addBranches() const override;
+        StatusCode performSearch(std::vector<Trk::VxCascadeInfo*> *cascadeinfoContainer, const EventContext& ctx ) const;
+        virtual StatusCode addBranches(const EventContext& ctx) const override;
 
       private:
-        std::string m_vertexContainerKey;
-        std::string m_vertexDxContainerKey;
-        std::vector<std::string> m_cascadeOutputsKeys;
+        std::string m_vertexContainerKey; // FIXME Use Handles
+        std::string m_vertexDxContainerKey; // FIXME Use Handles
+        std::vector<std::string> m_cascadeOutputsKeys; // FIXME Use Handles
 
-        std::string m_VxPrimaryCandidateName;   //!< Name of primary vertex container
+        std::string m_VxPrimaryCandidateName;   //!< Name of primary vertex container // FIXME Use Handles
 
         double m_jpsiMassLower;
         double m_jpsiMassUpper;

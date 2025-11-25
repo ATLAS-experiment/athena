@@ -1,12 +1,12 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-// MbtsToVectorsTool.h 
+// MbtsToVectorsTool.h
 // Header file for class MBTSToVectors
-/////////////////////////////////////////////////////////////////// 
+///////////////////////////////////////////////////////////////////
 #ifndef DERIVATIONFRAMEWORK_DERIVATIONFRAMEWORKTILECAL_MBTSTOVECTORSTOOL_H
 #define DERIVATIONFRAMEWORK_DERIVATIONFRAMEWORKTILECAL_MBTSTOVECTORSTOOL_H 1
 
@@ -29,37 +29,35 @@ class TileTBID;
 namespace DerivationFramework {
 
   class MbtsToVectorsTool: public extends<AthAlgTool, IAugmentationTool>
-  { 
-    
-    public: 
-    
-      /// Constructor with parameters: 
-      MbtsToVectorsTool( const std::string& type, const std::string& name, const IInterface* parent );
-    
-      virtual StatusCode addBranches() const override final;
-      virtual StatusCode initialize() override final;
+  {
 
-    private:
+  public:
 
-      Gaudi::Property<std::string> m_prefix{this, "Prefix", "mbts_"};
-      Gaudi::Property<bool> m_saveEtaPhi{this, "SaveEtaPhiInfo", true};
+    using base_class::base_class;
 
-      SG::ReadHandleKey<TileCellContainer> m_cellContainerKey{this, "CellContainer", "MBTSContainer"};
+    virtual StatusCode addBranches(const EventContext& ctx) const override final;
+    virtual StatusCode initialize() override final;
 
-      SG::WriteHandleKey<std::vector<float> > m_energyKey{this, "Energy", "energy"};
-      SG::WriteHandleKey<std::vector<float> > m_timeKey{this, "Time", "time"};
-      SG::WriteHandleKey<std::vector<float> > m_etaKey{this, "Eta", "eta"};
-      SG::WriteHandleKey<std::vector<float> > m_phiKey{this, "Phi", "phi"};
-      SG::WriteHandleKey<std::vector<int> > m_qualityKey{this, "Quality", "quality"};
-      SG::WriteHandleKey<std::vector<int> > m_typeKey{this, "Type", "type"};
-      SG::WriteHandleKey<std::vector<int> > m_moduleKey{this, "Module", "module"};
-      SG::WriteHandleKey<std::vector<int> > m_channelKey{this, "Channel", "channel"};
+  private:
 
-      const TileTBID* m_tileTBID = nullptr;
+    Gaudi::Property<bool> m_saveEtaPhi{this, "SaveEtaPhiInfo", true};
 
-      static const unsigned int MAX_MBTS_COUNTER{32};
-  }; 
-  
+    SG::ReadHandleKey<TileCellContainer> m_cellContainerKey{this, "CellContainer", "MBTSContainer"};
+
+    SG::WriteHandleKey<std::vector<float> > m_energyKey{this, "Energy", "energy"};
+    SG::WriteHandleKey<std::vector<float> > m_timeKey{this, "Time", "time"};
+    SG::WriteHandleKey<std::vector<float> > m_etaKey{this, "Eta", "eta"};
+    SG::WriteHandleKey<std::vector<float> > m_phiKey{this, "Phi", "phi"};
+    SG::WriteHandleKey<std::vector<int> > m_qualityKey{this, "Quality", "quality"};
+    SG::WriteHandleKey<std::vector<int> > m_typeKey{this, "Type", "type"};
+    SG::WriteHandleKey<std::vector<int> > m_moduleKey{this, "Module", "module"};
+    SG::WriteHandleKey<std::vector<int> > m_channelKey{this, "Channel", "channel"};
+
+    const TileTBID* m_tileTBID{};
+
+    static const unsigned int MAX_MBTS_COUNTER{32};
+  };
+
 }
 
 

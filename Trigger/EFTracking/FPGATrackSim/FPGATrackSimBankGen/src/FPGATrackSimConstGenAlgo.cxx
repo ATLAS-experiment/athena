@@ -287,7 +287,7 @@ void FPGATrackSimConstGenAlgo::generate_constants()
         // Fill the constant tree and good matrix tree
         fillConstTree(modules, acc, geo);
         writer.fill(modules, acc);
-        m_geo_consts.push_back(geo);
+        m_geo_consts.push_back(std::move(geo));
 
         // If needed, we generate the same as above but dropping/ignoring each potential hit
         if (m_dumpMissingHitsConstants) createMissingHitsConstants(acc_norm, entry);
@@ -302,7 +302,7 @@ void FPGATrackSimConstGenAlgo::createMissingHitsConstants(FPGATrackSimMatrixAccu
         if (!acc_norm.coords_usable[missing]) // just skip ahead if we aren't using this coordinate already
         {
             geo_constants emptyGeo(m_nCoords);
-            m_geo_consts_with_missinghit[ip].push_back(emptyGeo);
+            m_geo_consts_with_missinghit[ip].push_back(std::move(emptyGeo));
             continue;
         }
 
@@ -323,11 +323,11 @@ void FPGATrackSimConstGenAlgo::createMissingHitsConstants(FPGATrackSimMatrixAccu
         {
             // push this back to keep the order correct (ie same numbering as nominal constants)
             geo_constants emptyGeo(m_nCoords);
-            m_geo_consts_with_missinghit[ip].push_back(emptyGeo);
+            m_geo_consts_with_missinghit[ip].push_back(std::move(emptyGeo));
         }
         else
         {
-            m_geo_consts_with_missinghit[ip].push_back(geo);
+            m_geo_consts_with_missinghit[ip].push_back(std::move(geo));
         }
     }
 }
@@ -579,8 +579,8 @@ std::vector<double> FPGATrackSimConstGenAlgo::matrix_multiply(std::vector<double
 
     return x;
 }
-
-
+//TMatrixD is 264 bytes passed by value
+//coverity[pass_by_value]
 bool FPGATrackSimConstGenAlgo::isSingular(TMatrixD mtx)
 {
     TDecompLU dc(mtx); // note mtx is a copy
@@ -707,8 +707,8 @@ double FPGATrackSimConstGenAlgo::dot(const double* vec1, const double* vec2, siz
         total += vec1[i] * vec2[i];
     return total;
 }
-
-
+//geo_constants is 232 bytes passed by value
+//coverity[pass_by_value]
 geo_constants FPGATrackSimConstGenAlgo::calculate_gcorth(geo_constants geo, int nCoords, std::vector<bool> const & usable)
 {
     for (int i = 0; i < nCoords - FPGATrackSimTrackPars::NPARS;i++)

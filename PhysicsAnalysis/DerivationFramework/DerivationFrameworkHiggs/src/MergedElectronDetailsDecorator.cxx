@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -9,9 +9,6 @@
 #include "xAODTruth/TruthVertexContainer.h"
 #include "xAODCaloEvent/CaloClusterContainer.h"
 
-#include "egammaInterfaces/IEMExtrapolationTools.h"
-#include "TrkVertexFitterInterfaces/IVertexFitter.h"
-#include "TrkVertexAnalysisUtils/V0Tools.h"
 #include "FourMomUtils/P4Helpers.h"
 #include "xAODTruth/xAODTruthHelpers.h"
 #include "ElectronPhotonSelectorTools/ElectronSelectorHelpers.h"
@@ -22,22 +19,6 @@
 #include <vector>
 
 namespace DerivationFramework {
-
-  MergedElectronDetailsDecorator::MergedElectronDetailsDecorator(const std::string& t, const std::string& n, const IInterface* p):
-    base_class(t,n,p),
-    m_emExtrapolationTool("EMExtrapolationTools"),
-    m_VertexFitter("Trk::TrkVkalVrtFitter"),
-    m_V0Tools("Trk::V0Tools"),
-    m_minET(5000)
-  {
-    declareProperty("EMExtrapolationTool",m_emExtrapolationTool);
-    declareProperty("VertexFitterTool",m_VertexFitter);
-    declareProperty("V0Tools",m_V0Tools);
-    declareProperty("MinET",m_minET);
-  }
-
-  MergedElectronDetailsDecorator::~MergedElectronDetailsDecorator() {}
-
 
   StatusCode MergedElectronDetailsDecorator::initialize() {
 
@@ -68,13 +49,9 @@ namespace DerivationFramework {
     return StatusCode::SUCCESS;
   }
 
-  StatusCode MergedElectronDetailsDecorator::finalize(){
-    return StatusCode::SUCCESS;
-  }
 
-  StatusCode MergedElectronDetailsDecorator::addBranches() const{
+  StatusCode MergedElectronDetailsDecorator::addBranches(const EventContext& ctx) const{
 
-    const EventContext& ctx = Gaudi::Hive::currentContext();
 
     // Retrieve the xAOD event info
     SG::ReadHandle<xAOD::ElectronContainer> electrons (m_electronKey, ctx);

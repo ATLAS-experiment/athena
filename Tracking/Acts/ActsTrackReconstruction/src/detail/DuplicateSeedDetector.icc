@@ -7,7 +7,7 @@
 namespace ActsTrk::detail {
 
   inline void DuplicateSeedDetector::newTrajectory() {
-    if (m_disabled || m_foundSeeds == 0 || m_nextSeed == m_nUsedMeasurements.size())
+    if (m_disabled || m_foundSeeds == 0u || m_nextSeed == m_nUsedMeasurements.size())
       return;
 
     auto beg = m_nUsedMeasurements.begin();
@@ -15,7 +15,7 @@ namespace ActsTrk::detail {
       std::advance(beg, m_nextSeed);
     }
 
-    std::fill(beg, m_nUsedMeasurements.end(), 0ul);
+    std::fill(beg, m_nUsedMeasurements.end(), 0u);
   }
 
   inline void DuplicateSeedDetector::addMeasurement(const ActsTrk::ATLASUncalibSourceLink &sl, const MeasurementIndex& measurementIndex) {
@@ -34,7 +34,7 @@ namespace ActsTrk::detail {
 
 
       // Here is to decide how many hits need to be on the seed to mark it as duplicate
-      if (++m_nUsedMeasurements[iseed] >= std::max(1ul, m_nSeedMeasurements[iseed] - m_measOffset)) {
+      if (++m_nUsedMeasurements[iseed] >= std::max(1u, m_nSeedMeasurements[iseed] - m_measOffset)) {
 	assert(m_nUsedMeasurements[iseed] <= m_nSeedMeasurements[iseed]);  // shouldn't ever find more
         m_isDuplicateSeed[iseed] = true;
       }

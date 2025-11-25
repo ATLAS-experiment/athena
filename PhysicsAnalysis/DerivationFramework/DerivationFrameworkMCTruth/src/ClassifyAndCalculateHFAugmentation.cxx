@@ -8,7 +8,7 @@
 // Implementation file for class ClassifyAndCalculateHFAugmentation     //
 // Author: Adrian Berrocal Guardia <adrian.berrocal.guardia@cern.ch>    //
 //                                                                      //
-////////////////////////////////////////////////////////////////////////// 
+//////////////////////////////////////////////////////////////////////////
 
 // Header of the class ClassifyAndCalculateHFAugmentation.
 
@@ -19,34 +19,9 @@
 namespace DerivationFramework {
 
   /*
-  ---------------------------------------------------------------------------------------------------------------------------------------
-  ------------------------------------------------------- Constructor/Destructor --------------------------------------------------------
-  ---------------------------------------------------------------------------------------------------------------------------------------
-  */
-
-  ClassifyAndCalculateHFAugmentation::ClassifyAndCalculateHFAugmentation(const std::string& t, const std::string& n, const IInterface* p) : 
-  base_class(t,n,p),                 // Athena tool.
-  m_JetMatchingTool_Tool(""),        // Hadron-jet matching tool.
-  m_HFClassification_tool(""),       // HF classifier tool.
-  m_HadronOriginClassifier_Tool("")  // HF hadron origin tool.
-  {
-    
-    // Declare a set of tool properties to set them exertanally:
-    //  -m_HFClassification_tool:       The tool to compute the HF classifier.
-    //  -m_HadronOriginClassifier_Tool: The tool to determine the origin of the HF hadrons.
-    //  -m_JetMatchingTool_Tool:        The tool to match the hadrons with the jets.
-
-    declareProperty("ClassifyAndComputeHFtool",   m_HFClassification_tool);
-    declareProperty("HadronOriginClassifierTool", m_HadronOriginClassifier_Tool);
-    declareProperty("JetMatchingTool",            m_JetMatchingTool_Tool);
-  }
-
-  ClassifyAndCalculateHFAugmentation::~ClassifyAndCalculateHFAugmentation(){}
-
-  /*
-  ---------------------------------------------------------------------------------------------------------------------------------------
-  --------------------------------------------------------- Initialize/Finalize ---------------------------------------------------------
-  ---------------------------------------------------------------------------------------------------------------------------------------
+    ---------------------------------------------------------------------------------------------------------------------------------------
+    ------------------------------------------------------------- Initialize -------------------------------------------------------------
+    ---------------------------------------------------------------------------------------------------------------------------------------
   */
 
   StatusCode ClassifyAndCalculateHFAugmentation::initialize(){
@@ -55,18 +30,16 @@ namespace DerivationFramework {
 
     ATH_MSG_INFO("Jets Container Name "            << m_jetCollectionKey.key());
     ATH_MSG_INFO("Truth Particles Container Name " << m_truthParticlesKey.key());
-    ATH_MSG_INFO("HF Classifier Name "             << m_hfDecorationName);
-    ATH_MSG_INFO("Simple HF Classifier Name "      << m_SimplehfDecorationName);
-    ATH_MSG_INFO("Jet Origin ID Decoration Name "  << m_jetIDDecorationName);
-
+    ATH_MSG_INFO("HF Classifier Name "             << m_hfDecorKey.key());
+    ATH_MSG_INFO("Simple HF Classifier Name "      << m_SimplehfDecorKey.key());
+    ATH_MSG_INFO("Jet Origin ID Decoration Name "  << m_jetIDDecorationKey.key());
+    std::size_t pos = m_hfDecorKey.key().find(".");
+    if (pos != std::string::npos) { m_hfDecorationName = m_hfDecorKey.key().substr (pos+1); }
     ATH_CHECK( m_truthParticlesKey.initialize() );
     ATH_CHECK( m_jetCollectionKey.initialize() );
     ATH_CHECK( m_eventInfoKey.initialize() );
-    ATH_CHECK( m_hfDecorKey.assign(m_eventInfoKey.key()+"."+m_hfDecorationName) );
     ATH_CHECK( m_hfDecorKey.initialize() );
-    ATH_CHECK( m_SimplehfDecorKey.assign(m_eventInfoKey.key()+"."+m_SimplehfDecorationName) );
     ATH_CHECK( m_SimplehfDecorKey.initialize() );
-    ATH_CHECK( m_jetIDDecorationKey.assign(m_jetCollectionKey.key()+"."+m_jetIDDecorationName) );
     ATH_CHECK( m_jetIDDecorationKey.initialize() );
 
     // Retrieve the necessary tools
@@ -79,7 +52,7 @@ namespace DerivationFramework {
       ATH_MSG_ERROR("Unable to retrieve the tool " << m_HadronOriginClassifier_Tool);
       return StatusCode::FAILURE;
     }
-  
+
     if(m_JetMatchingTool_Tool.retrieve().isFailure()){
       ATH_MSG_ERROR("Unable to retrieve the tool " << m_JetMatchingTool_Tool);
       return StatusCode::FAILURE;
@@ -88,20 +61,15 @@ namespace DerivationFramework {
     return StatusCode::SUCCESS;
   }
 
-  StatusCode ClassifyAndCalculateHFAugmentation::finalize(){
-    return StatusCode::SUCCESS;
-  }
-
   /*
-  ---------------------------------------------------------------------------------------------------------------------------------------
-  ------------------------------------------------------------- AddBranches -------------------------------------------------------------
-  ---------------------------------------------------------------------------------------------------------------------------------------
+    ---------------------------------------------------------------------------------------------------------------------------------------
+    ------------------------------------------------------------- AddBranches -------------------------------------------------------------
+    ---------------------------------------------------------------------------------------------------------------------------------------
   */
 
-  StatusCode ClassifyAndCalculateHFAugmentation::addBranches() const
+  StatusCode ClassifyAndCalculateHFAugmentation::addBranches(const EventContext& ctx) const
   {
 
-    const EventContext& ctx = Gaudi::Hive::currentContext();
 
     // Retrieve the truth particle container
     SG::ReadHandle<xAOD::TruthParticleContainer> truthParticlesHandle(m_truthParticlesKey, ctx);
@@ -120,7 +88,7 @@ namespace DerivationFramework {
     const xAOD::JetContainer* JetCollection = jetInputHandle.cptr();
 
     // Compute a map that associates the HF hadrons with their origin using the tool m_HadronOriginClassifier_Tool.
-    std::map<const xAOD::TruthParticle*, DerivationFramework::HadronOriginClassifier::HF_id> hadronMap = m_HadronOriginClassifier_Tool->GetOriginMap(); 
+    std::map<const xAOD::TruthParticle*, DerivationFramework::HadronOriginClassifier::HF_id> hadronMap = m_HadronOriginClassifier_Tool->GetOriginMap();
 
     // Create a map with a list of matched hadrons for each jet.
     std::map<const xAOD::Jet*, std::vector<xAOD::TruthParticleContainer::const_iterator>> particleMatch = m_JetMatchingTool_Tool->matchHadronsToJets(xTruthParticleContainer, JetCollection);

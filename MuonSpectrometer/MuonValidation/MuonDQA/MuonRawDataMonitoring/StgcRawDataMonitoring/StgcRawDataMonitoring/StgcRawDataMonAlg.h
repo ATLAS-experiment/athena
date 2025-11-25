@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -37,8 +37,10 @@
 
 #include "FourMomUtils/xAODP4Helpers.h"
 #include "MuonDetDescrUtils/MuonSectorMapping.h"
+#include "xAODTracking/TrackParticleContainer.h"
+#include "xAODMuon/MuonContainer.h"
 
-// stl includes                                                                                 
+// stl includes
 #include <string>
 
 namespace Muon {

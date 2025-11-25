@@ -5,14 +5,11 @@
 #include "PanTauAlgs/Tool_DecayModeDeterminator.h"
 #include "PanTauAlgs/PanTauSeed.h"
 #include "PanTauAlgs/HelperFunctions.h"
-#include "PanTauAlgs/TauClassificationTypes.h"
-#include "xAODTau/TauDefs.h"
 
 
 PanTau::Tool_DecayModeDeterminator::Tool_DecayModeDeterminator(const std::string& name) :
   asg::AsgTool(name)
-{
-}
+{}
 
 
 PanTau::Tool_DecayModeDeterminator::~Tool_DecayModeDeterminator() = default;

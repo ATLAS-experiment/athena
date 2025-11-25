@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
  */
  #include "PixelDigitizationUtilities.h"
  #include "BichselData.h"
@@ -20,13 +20,14 @@ BichselData::lastBetaGammaValue() const{
  
 void 
 BichselData::addNewLogBetaGamma(double logBetaGamma){
-  const std::vector<double> emptyArray;
+  
   if (not empty()) {
     logHighestCrossSectionsVector.push_back(logIntegratedCrossSectionsVectorOfVector.back().back());
   }
   logBetaGammaVector.push_back(logBetaGamma);
-  logCollisionEnergyVectorOfVector.push_back(emptyArray);
-  logIntegratedCrossSectionsVectorOfVector.push_back(emptyArray);
+  //insert empty arrays
+  logCollisionEnergyVectorOfVector.emplace_back();
+  logIntegratedCrossSectionsVectorOfVector.emplace_back();
 }
 
 void 

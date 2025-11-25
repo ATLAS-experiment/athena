@@ -5,10 +5,14 @@
 def setupHistSvcCfg(flags, outFile: str, outStream: str):
     from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
     result = ComponentAccumulator()
-    if len(outFile) == 0: return result
+    if len(outFile) == 0: 
+        raise ValueError("The output file must not be empty")
+    if len(outStream) == 0: 
+        raise ValueError("The outstream must not be empty")
+
     from AthenaConfiguration.ComponentFactory import CompFactory
     histSvc = CompFactory.THistSvc(Output=[f"{outStream} DATAFILE='{outFile}', OPT='RECREATE'"])
-    print(f"Regiter new stream {outStream} piped to {outFile}")
+    print(f"Register new stream {outStream} piped to {outFile}")
     result.addService(histSvc, primary=True)
     return result
 
@@ -89,7 +93,10 @@ def SetupMuonStandaloneCA(flags):
    
  
     from AthenaConfiguration.Enums import Format
-    if flags.Input.Format is Format.POOL:
+    if not flags.Input.Files:
+        # No input file --- skip setting up event reading.
+        pass
+    elif flags.Input.Format is Format.POOL:
         from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
         cfg.merge(PoolReadCfg(flags))
     elif flags.Input.Format == Format.BS:

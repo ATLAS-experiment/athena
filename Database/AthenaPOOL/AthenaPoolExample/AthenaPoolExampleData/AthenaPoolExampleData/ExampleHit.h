@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ATHENAPOOLEXAMPLEDATA_EXAMPLEHIT_H
@@ -25,9 +25,9 @@ class ExampleHit : public DataObject, public NavigableTerminalNode {
 
 public: // Constructor and Destructor
    /// Default Constructor
-   ExampleHit() : m_vec(0.0, 0.0, 0.0), m_detector("") {}
+   ExampleHit() = default;
    /// Destructor
-   virtual ~ExampleHit() {}
+   virtual ~ExampleHit() = default;
 
 public: // Non-static members
    /// @return the X coordinate.
@@ -59,7 +59,7 @@ public: // Non-static members
    void setDetector(const std::string& detector) { m_detector = detector; }
 
 private:
-   HepGeom::Vector3D<double> m_vec;
+   HepGeom::Vector3D<double> m_vec{0.0, 0.0, 0.0};
    std::string m_detector;
 };
 #endif

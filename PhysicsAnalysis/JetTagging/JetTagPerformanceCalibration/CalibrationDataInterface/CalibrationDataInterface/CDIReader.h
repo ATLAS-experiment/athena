@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //////////////////////////////////////////////////////////////////////
@@ -172,7 +172,7 @@ namespace Analysis
         do {
           end = tmp.find(token);
           std::string entry = trim(tmp.substr(0,end));
-          if (entry.size() > 0) result.push_back(entry); 
+          if (!entry.empty()) result.push_back(std::move(entry)); 
           if (end != std::string::npos) tmp = tmp.substr(end+1);
         } while (end != std::string::npos);
       }

@@ -33,13 +33,13 @@ def setupTestOutputCfg(flags,**kwargs):
     return result
 
 if __name__=="__main__":
-    from MuonGeoModelTestR4.testGeoModel import setupGeoR4TestCfg, SetupArgParser, executeTest
+    from MuonGeoModelTestR4.testGeoModel import setupGeoR4TestCfg, SetupArgParser, executeTest, MuonPhaseIITestDefaults
     parser = SetupArgParser()
     parser.add_argument("--saveTestNtuple", help="Schedule the SimHits tester n-tuple", action='store_true',
                          default=False)
     parser.set_defaults(nEvents = 150)
     parser.set_defaults(outRootFile="MuonPrepDataTest.root")
-    parser.set_defaults(inputFile=["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonGeomRTT/R4SimHits.pool.root"])
+    parser.set_defaults(inputFile=MuonPhaseIITestDefaults.HITS_PG_R4)
     parser.set_defaults(defaultGeoFile="RUN4")
     parser.set_defaults(eventPrintoutLevel = 50)
    

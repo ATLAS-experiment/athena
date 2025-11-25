@@ -1,0 +1,185 @@
+// -*- mode: c++; -*-
+
+// =====================================================================
+//  File: StableMatchingBase.icc
+//  Purpose: Implementation of template base class for stable matching
+// =====================================================================
+
+#include <queue>
+
+namespace IDTPM {
+
+// =====================================================================
+// matchVectors
+// =====================================================================
+template <typename T, typename R>
+StatusCode StableMatchingBase<T, R>::matchVectors(
+    const std::vector<const T*>& vTest,
+    const std::vector<const R*>& vRef,
+    ITrackMatchingLookup& matches) const
+{
+  ATH_MSG_DEBUG("matchVectors called");
+
+  const size_t nT = vTest.size();
+  const size_t nR = vRef.size();
+  if (nT == 0 || nR == 0) {
+    ATH_MSG_DEBUG("Empty input vectors — no matches to compute");
+    return StatusCode::SUCCESS;
+  }
+
+  // build distance matrix between tests and references
+  std::vector<std::vector<float>> dist;
+  buildDistanceMatrix(vTest, vRef, dist);
+
+  // build test preference lists and reference rankings lists
+  std::vector<std::vector<int>> testPrefs, refRankings;
+  buildPreferenceLists(dist, testPrefs, refRankings);
+
+  // stable matching using Gale-Shapely algorithm
+  std::vector<int> testMatch(nT, -1), refMatch(nR, -1);
+  galeShapley(testPrefs, refRankings, dist, testMatch, refMatch);
+
+  // Insert matches into lookup structure
+  for (size_t i = 0; i < nT; ++i) {
+    int j = testMatch[i];
+    if (j >= 0) {
+      const T* tptr = vTest[i];
+      const R* rptr = vRef[j];
+      float dval = dist[i][j];
+      ATH_CHECK( matches.update( *tptr, *rptr, dval ) );
+      }
+    }
+  ATH_MSG_DEBUG("Stable matching complete.");
+  return StatusCode::SUCCESS;
+}
+
+// =====================================================================
+// buildDistanceMatrix
+// =====================================================================
+template <typename T, typename R>
+void StableMatchingBase<T, R>::buildDistanceMatrix(
+    const std::vector<const T*>& vTest,
+    const std::vector<const R*>& vRef,
+    std::vector<std::vector<float>>& dist) const
+{
+  const size_t nT = vTest.size();
+  const size_t nR = vRef.size();
+
+  dist.assign(nT, std::vector<float>(nR, -1));
+
+  for (size_t i = 0; i < nT; ++i) {
+    for (size_t j = 0; j < nR; ++j) {
+      dist[i][j] = distance(*vTest[i], *vRef[j]);
+    }
+  }
+}
+
+// =====================================================================
+// buildPreferenceLists
+// =====================================================================
+template <typename T, typename R>
+void StableMatchingBase<T, R>::buildPreferenceLists(
+    const std::vector<std::vector<float>>& dist,
+    std::vector<std::vector<int>>& testPrefs,
+    std::vector<std::vector<int>>& refRankings) const
+{
+  const size_t nT = dist.size();
+  const size_t nR = (nT ? dist[0].size() : 0); // guard against segfault if dist[0] doesnt exist
+
+  testPrefs.assign(nT, std::vector<int>());
+  for (size_t i = 0; i < nT; ++i) {
+    std::vector<int> order;
+    order.reserve(nR);
+    // Only include references with valid distances (filter out -1)
+    for (size_t j = 0; j < nR; ++j) {
+      if (dist[i][j] >= 0) {
+        order.push_back(j);
+      }
+    }
+    // Always sort by distance to ensure distance-based preferences
+    std::stable_sort(order.begin(), order.end(),
+              [&](int a, int b) { return dist[i][a] < dist[i][b]; });
+    testPrefs[i] = std::move(order);
+  }
+
+  // Build refRankings as test_index → rank mapping (lower rank = more preferred)
+  refRankings.assign(nR, std::vector<int>(nT, nT));  // Default to max rank (nT) for unmatched/invalid
+  for (size_t j = 0; j < nR; ++j) {
+    std::vector<std::pair<float, int>> scores;
+    scores.reserve(nT);
+    // Only include tests with valid distances (filter out -1)
+    for (size_t i = 0; i < nT; ++i) {
+      if (dist[i][j] >= 0) {
+        scores.emplace_back(dist[i][j], static_cast<int>(i));
+      }
+    }
+    // Always sort by distance to ensure distance-based preferences
+    std::sort(scores.begin(), scores.end(),
+              [](auto& a, auto& b) { return a.first < b.first; });
+    for (size_t rank = 0; rank < scores.size(); ++rank) {
+      int testIdx = scores[rank].second;
+      refRankings[j][testIdx] = static_cast<int>(rank);
+    }
+  }
+}
+
+// =====================================================================
+// galeShapley
+// =====================================================================
+template <typename T, typename R>
+void StableMatchingBase<T, R>::galeShapley(
+    const std::vector<std::vector<int>>& testPrefs,
+    const std::vector<std::vector<int>>& refRankings,
+    const std::vector<std::vector<float>>& /*dist*/,
+    std::vector<int>& testMatch,
+    std::vector<int>& refMatch) const {
+
+  const size_t nT = testPrefs.size();
+
+  // Store the index of the next reference to propose to and the index of tests that need a match
+  std::vector<size_t> nextProposalIdx(nT, 0);
+  std::queue<int> freeQueue;
+  for (size_t i = 0; i < nT; ++i) {
+    if (!testPrefs[i].empty()) freeQueue.push(static_cast<int>(i));
+  }
+
+  // Main loop - take the next free test, propose to next ref, loop until free tests dont have any refs to propose to
+  while (!freeQueue.empty()) {
+    int ti = freeQueue.front();
+    freeQueue.pop();
+    size_t i = static_cast<size_t>(ti); 
+
+    // Skip if no more refs to propose to, test will remain unmatched
+    if (nextProposalIdx[i] >= testPrefs[i].size()) continue;
+
+    // Fetch the next preferred reference for this test rj, then increment its proposal index
+    int rj = testPrefs[i][ nextProposalIdx[i]++ ];
+
+    // If that reference is free, accept the proposal
+    if (refMatch[rj] == -1) {
+      refMatch[rj] = static_cast<int>(i); // ref rj is now matched to test i
+      testMatch[i] = rj; // test i is matched to ref rj
+    } else {
+      // If reference is already matched then check preference
+      int currentT = refMatch[rj];
+      int rankNew = (refRankings[rj][i]);
+      int rankCurr = (refRankings[rj][currentT]);
+
+      if (rankNew < rankCurr) {
+        // ref prefers new proposer so assign
+        refMatch[rj] = static_cast<int>(i);
+        testMatch[i] = rj;
+        testMatch[currentT] = -1;
+        // replaced test rejoins queue if refs remain
+        if (nextProposalIdx[currentT] < testPrefs[currentT].size()) freeQueue.push(currentT);
+      } else {
+        // ref prefers current match so rejects i; test remains free if it has more refs
+        if (nextProposalIdx[i] < testPrefs[i].size()) freeQueue.push(ti);
+      }
+    }
+    // iterate until queue is empty and all tests are matched or every unmatched test has exhausted its preference list
+  } // end of main loop
+
+} // end of Gale-Shapley method
+
+} // namespace IDTPM

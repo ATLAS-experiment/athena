@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 ## @Package PyJobTransforms.trfExceptions
 #  @brief Standard exceptions thrown by transforms
@@ -15,6 +15,7 @@ class TransformException(Exception):
     def __init__(self, errCode, errMsg):
         self._errCode = errCode
         self._errMsg = errMsg
+        super().__init__ (errCode, errMsg)
                 
     def __str__(self):
         return "%s (Error code %d)" % (self._errMsg, self._errCode)

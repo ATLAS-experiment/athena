@@ -52,7 +52,7 @@ if __name__=="__main__":
 
 
    # example runs pixel clusterization
-   from ITkPixelByteStreamCnv.ITkPixelTranslatorAlgConfig import ITkPixelTranslatorAlgCfg
+   from ITkPixelByteStreamCnv.ITkPixelByteStreamCnvConfig import ITkPixelTranslatorAlgCfg
    cfg.merge( ITkPixelTranslatorAlgCfg(flags) )
 
    from ByteStreamCnvSvc.ByteStreamConfig import ByteStreamWriteCfg

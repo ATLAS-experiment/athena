@@ -14,4 +14,9 @@ namespace GlobalSim::IOBitwise {
   const LArStripNeighborhood& eEmNbhoodTOB::Neighbourhood() const {
     return m_neighbourhood;
   }
+
+  std::string eEmNbhoodTOB::to_string() const {
+    return IeEmNbhoodTOB::to_string();
+  }
+
 }

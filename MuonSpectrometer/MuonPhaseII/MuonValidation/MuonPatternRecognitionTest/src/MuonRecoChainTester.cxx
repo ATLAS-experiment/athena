@@ -30,6 +30,9 @@ namespace MuonValR4{
         m_tree.addBranch(std::make_unique<EventInfoBranch>(m_tree, evOpts));
 
         auto initSegBranch = [this](const std::string& sgKey, const std::string& outCollName) {
+            if (sgKey.empty()){
+                return;
+            }
             auto newColl = std::make_unique<SegmentVariables>(m_tree, sgKey, outCollName, msgLevel());
             if (m_isMC) {
                 newColl->addVariable(std::make_unique<MuonVal::GenericAuxDecorationBranch<unsigned short>>(m_tree, 
@@ -62,7 +65,7 @@ namespace MuonValR4{
         }
 
         ATH_CHECK(m_legacyTrackKey.initialize());
-        ATH_CHECK(m_TrackKeyHoughR4.initialize());
+        ATH_CHECK(m_TrackKeyHoughR4.initialize(m_r4PatternSegmentKey.value().size()));
         ATH_CHECK(m_TrackKeyR4.initialize());
         ATH_CHECK(m_spacePointKey.initialize());
         ATH_CHECK(m_truthKey.initialize(m_isMC));
@@ -70,32 +73,36 @@ namespace MuonValR4{
         m_legacyTrks = std::make_unique<IParticleFourMomBranch>(m_tree, "LegacyMSTrks");
         m_legacyTrks->addVariable(std::make_unique<TrackChi2Branch>(*m_legacyTrks));
 
-        m_TrksHoughR4 = std::make_unique<IParticleFourMomBranch>(m_tree, "HoughMSTrks");
-        m_TrksHoughR4->addVariable(std::make_unique<TrackChi2Branch>(*m_TrksHoughR4));
+        if (!m_TrackKeyHoughR4.empty()){
+            m_TrksHoughR4 = std::make_unique<IParticleFourMomBranch>(m_tree, "HoughMSTrks");
+            m_TrksHoughR4->addVariable(std::make_unique<TrackChi2Branch>(*m_TrksHoughR4));
+            m_tree.addBranch(m_TrksHoughR4);
 
+        }
         m_TrksSegmentR4 = std::make_unique<IParticleFourMomBranch>(m_tree, "MSTrksR4");
         m_TrksSegmentR4->addVariable(std::make_unique<TrackChi2Branch>(*m_TrksSegmentR4));
 
         m_tree.addBranch(m_legacyTrks);
         m_tree.addBranch(m_TrksSegmentR4);
-        m_tree.addBranch(m_TrksHoughR4);
         
         if (m_isMC) {
             m_trkTruthLinks.emplace_back(m_legacyTrackKey, "truthParticleLink");
-            m_trkTruthLinks.emplace_back(m_TrackKeyHoughR4, "truthParticleLink");
+            if (!m_TrackKeyHoughR4.empty()) {
+                m_trkTruthLinks.emplace_back(m_TrackKeyHoughR4, "truthParticleLink");
+                m_trkTruthLinks.emplace_back(std::format("{:}.truthParticleLink", m_r4PatternSegmentKey.value()));
+                BilateralLinkerBranch::connectCollections(m_TrksHoughR4, m_truthTrks, [](const xAOD::IParticle* trk){ 
+                                                          return xAOD::TruthHelpers::getTruthParticle(*trk); }, "truth", "HoughMS");
+            }
             m_trkTruthLinks.emplace_back(m_TrackKeyR4, "truthParticleLink");
             m_trkTruthLinks.emplace_back(m_truthSegmentKey, "truthParticleLink");
-            m_trkTruthLinks.emplace_back(std::format("{:}.truthParticleLink", m_r4PatternSegmentKey.value()));
+    
             m_trkTruthLinks.emplace_back(std::format("{:}.truthParticleLink", m_segmentKeyR4.value()));
 
             m_truthTrks = std::make_unique<IParticleFourMomBranch>(m_tree, "TruthMuons");
             BilateralLinkerBranch::connectCollections(m_legacyTrks, m_truthTrks, [](const xAOD::IParticle* trk){ 
-                                                        return xAOD::TruthHelpers::getTruthParticle(*trk); }, "truth", "LegacyMS");
-            BilateralLinkerBranch::connectCollections(m_TrksHoughR4, m_truthTrks, [](const xAOD::IParticle* trk){ 
-                                                            return xAOD::TruthHelpers::getTruthParticle(*trk); }, "truth", "HoughMS");
+                                                      return xAOD::TruthHelpers::getTruthParticle(*trk); }, "truth", "LegacyMS");
             BilateralLinkerBranch::connectCollections(m_TrksSegmentR4, m_truthTrks, [](const xAOD::IParticle* trk){ 
-                                                                return xAOD::TruthHelpers::getTruthParticle(*trk); }, "truth", "MSTrksR4");
-        
+                                                      return xAOD::TruthHelpers::getTruthParticle(*trk); }, "truth", "MSTrksR4");
             m_tree.addBranch(m_truthTrks);
         } 
 
@@ -133,10 +140,11 @@ namespace MuonValR4{
           m_TrksSegmentR4->push_back(trk);
       }
       ATH_MSG_DEBUG("Fill reconstructed tracks from "<<m_TrackKeyHoughR4.fullKey());
-      for (const xAOD::TrackParticle* trk : *trksFromHoughR4) {
-          m_TrksHoughR4->push_back(trk);
-      } 
-  
+      if (trksFromHoughR4) {
+        for (const xAOD::TrackParticle* trk : *trksFromHoughR4) {
+            m_TrksHoughR4->push_back(trk);
+        } 
+      }
       if (!m_truthKey.empty()) {
           const xAOD::TruthParticleContainer* truthCont{nullptr};
           ATH_CHECK(SG::get(truthCont, m_truthKey, ctx));

@@ -15,7 +15,7 @@
 #define ATHLINKS_DATAPROXYHOLDER_H
 
 
-#include "CxxUtils/sgkey_t.h"
+#include "SGCore/sgkey_t.h"
 #include "GaudiKernel/ClassID.h"
 #include <string>
 #include <unordered_map>

@@ -90,6 +90,9 @@ class WriteDecorHandleKey
 public:
   typedef WriteHandleKey<T> Base;
 
+
+  constexpr static bool isDecorHandleKey = true;
+
   
   /**
    * @brief Constructor.

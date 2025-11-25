@@ -38,7 +38,7 @@ for opt, arg in options:
     elif opt in ('--schema'):
         schema = arg
     elif opt in ('--server'):
-        server = a
+        server = arg
 
 if 'ONL01' in folder:
     print (' it does not work with singleversion folders')

@@ -11,7 +11,7 @@ Gep::TCTowerMaker::makeTowers(const xAOD::CaloClusterContainer& clusters, const 
     Gep::Cluster clus;
     clus.vec.SetPxPyPzE(iClus->p4().Px(), iClus->p4().Py(),
                           iClus->p4().Pz(), iClus->e());
-    customClusters.push_back(clus);
+    customClusters.push_back(std::move(clus));
   }
 
   // Define tower array (98 eta bins x 64 phi bins)

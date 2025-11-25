@@ -9,7 +9,10 @@
 
 
 #include "CaloIdentifier/TileTBID.h"
-#include "IdDict/IdDictDefs.h"
+#include "IdDict/IdDictDictionary.h"
+#include "IdDict/IdDictField.h"
+#include "IdDict/IdDictMgr.h"
+#include "IdDict/IdDictRegion.h"
 #include "Identifier/IdentifierHash.h"
 #include "Identifier/RangeIterator.h"
 #include "CxxUtils/StrFormat.h"
@@ -524,7 +527,7 @@ int TileTBID::initLevelsFromDict()
   }
 
   // Fing a Tile region
-  IdDictField* field = m_dict->find_field("subdet") ;
+  const IdDictField* field = m_dict->find_field("subdet") ;
   if (field) {
     m_SYSTEM_INDEX = field->index();
   }

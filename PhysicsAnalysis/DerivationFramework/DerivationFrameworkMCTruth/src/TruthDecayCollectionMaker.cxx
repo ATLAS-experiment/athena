@@ -26,18 +26,6 @@
 // For a find in the vector
 #include <algorithm>
 
-// Constructor
-DerivationFramework::TruthDecayCollectionMaker::TruthDecayCollectionMaker(const std::string& t,
-                                                                          const std::string& n,
-                                                                          const IInterface* p)
-  : base_class(t,n,p)
-{
-}
-
-// Destructor
-DerivationFramework::TruthDecayCollectionMaker::~TruthDecayCollectionMaker() {
-}
-
 // Athena initialize
 StatusCode DerivationFramework::TruthDecayCollectionMaker::initialize()
 {
@@ -77,10 +65,9 @@ StatusCode DerivationFramework::TruthDecayCollectionMaker::initialize()
 
 
 // Selection and collection creation
-StatusCode DerivationFramework::TruthDecayCollectionMaker::addBranches() const
+StatusCode DerivationFramework::TruthDecayCollectionMaker::addBranches(const EventContext& ctx) const
 {
     // Event context for AthenaMT
-    const EventContext& ctx = Gaudi::Hive::currentContext();
 
     // Retrieve truth collections
     SG::ReadHandle<xAOD::TruthParticleContainer> truthParticles(m_particlesKey,ctx);
@@ -170,10 +157,10 @@ int DerivationFramework::TruthDecayCollectionMaker::addTruthParticle( const Even
     SG::ReadDecorHandle<xAOD::TruthParticleContainer, unsigned int > classifierParticleOutcomeAcc(m_outcomeAccessorKey, ctx);
     SG::ReadDecorHandle<xAOD::TruthParticleContainer, unsigned int > ClassificationAcc(m_classificationAccessorKey, ctx);
 
-    typeDecorator(*xTruthParticle) = classifierParticleTypeAcc.withDefault (old_part, 0);
-    originDecorator(*xTruthParticle) = classifierParticleOriginAcc.withDefault (old_part, 0);
-    outcomeDecorator(*xTruthParticle) = classifierParticleOutcomeAcc.withDefault (old_part, 0);
-    classificationDecorator(*xTruthParticle) = ClassificationAcc.withDefault (old_part, 0);
+    typeDecorator(*xTruthParticle) = classifierParticleTypeAcc(old_part);
+    originDecorator(*xTruthParticle) = classifierParticleOriginAcc(old_part);
+    outcomeDecorator(*xTruthParticle) = classifierParticleOutcomeAcc(old_part);
+    classificationDecorator(*xTruthParticle) = ClassificationAcc(old_part);
 
     // Return a link to this particle
     return my_index;

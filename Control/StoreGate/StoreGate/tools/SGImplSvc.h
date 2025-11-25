@@ -41,6 +41,7 @@
 #include "AthenaKernel/IHiveStoreMgr.h"
 #include "AthenaKernel/IOVSvcDefs.h"
 #include "AthenaKernel/DefaultKey.h"
+#include "CxxUtils/RefCountedPtr.h"
 
 #include <SGTools/StringPool.h> 
 #include "SGTools/ProxyMap.h" /* for SG::ConstProxyIterator */
@@ -131,9 +132,11 @@ public:
 
   /// Create a proxy object using an IOpaqueAddress and a transient key
   StatusCode recordAddress(const std::string& skey,
-                           IOpaqueAddress* pAddress, bool clearAddressFlag=true);
+                           CxxUtils::RefCountedPtr<IOpaqueAddress> pAddress,
+                           bool clearAddressFlag=true);
   /// Create a proxy object using an IOpaqueAddress
-  StatusCode recordAddress(IOpaqueAddress* pAddress, bool clearAddressFlag=true);
+  StatusCode recordAddress(CxxUtils::RefCountedPtr<IOpaqueAddress> pAddress,
+                           bool clearAddressFlag=true);
 
   /// make a soft link to the object T* already registered
   StatusCode symLink (const void* p2BRegistered, CLID linkID );

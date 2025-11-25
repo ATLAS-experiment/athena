@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////
@@ -10,23 +10,8 @@
 #include "DerivationFrameworkMCTruth/TruthCollectionMakerTau.h"
 
 // Tool header file
-#include "TauAnalysisTools/IBuildTruthTaus.h"
 // for TruthTausEvent
 #include "TauAnalysisTools/BuildTruthTaus.h"
-
-// Constructor
-DerivationFramework::TruthCollectionMakerTau::TruthCollectionMakerTau(const std::string& t,
-								      const std::string& n,
-								      const IInterface* p )
-  : base_class(t,n,p)
-  , m_buildTruthTaus("TauAnalysisTools::BuildTruthTaus/BuildTruthTaus")
-{
-  declareProperty("BuildTruthTaus", m_buildTruthTaus);
-}
-
-// Destructor
-DerivationFramework::TruthCollectionMakerTau::~TruthCollectionMakerTau() {
-}
 
 // Athena initialize and finalize
 StatusCode DerivationFramework::TruthCollectionMakerTau::initialize()
@@ -39,13 +24,13 @@ StatusCode DerivationFramework::TruthCollectionMakerTau::initialize()
 }
 
 // Selection and collection creation
-StatusCode DerivationFramework::TruthCollectionMakerTau::addBranches() const
+StatusCode DerivationFramework::TruthCollectionMakerTau::addBranches(const EventContext& ctx) const
 {
   ATH_MSG_VERBOSE("addBranches() ...");
 
   // One call to build the truth tau collection
   TauAnalysisTools::BuildTruthTaus::TruthTausEvent truthTausEvent;
-  ATH_CHECK( m_buildTruthTaus->retrieveTruthTaus( truthTausEvent ) );
+  ATH_CHECK( m_buildTruthTaus->retrieveTruthTaus( truthTausEvent, ctx ) );
 
   return StatusCode::SUCCESS;
 }

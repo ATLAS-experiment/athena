@@ -253,7 +253,8 @@ namespace xAOD {
    MACRO(std::uint64_t)               \
    MACRO(char)                        \
    MACRO(float)                       \
-   MACRO(double)
+   MACRO(double)                      \
+   MACRO(bool)
 
 /// Macro returning the type info for a given type name
 #define GETTYPEINFO_SPECIALIZE(TYPE) \

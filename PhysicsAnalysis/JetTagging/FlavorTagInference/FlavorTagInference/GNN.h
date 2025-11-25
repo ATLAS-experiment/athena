@@ -27,7 +27,7 @@
 
 namespace FlavorTagInference {
 
-    struct GNNOptions;
+  struct GNNOptions;
 
   //
   // Tool to to flavor tag jet/btagging object
@@ -37,6 +37,9 @@ namespace FlavorTagInference {
   public:
     // recommended constructor, file path + options
     GNN(const std::string& nnFile, const GNNOptions& opts);
+    // Formerly private constructor, promoted to public to contain
+    // preprocessor macros within a single class in the package: NNSharingSvc
+    GNN(ISaltModelPtr, const GNNOptions& opts);
     // redefined options constructor, will share underlying network
     GNN(const GNN&, const GNNOptions& opts);
     // legacy constructor
@@ -51,13 +54,10 @@ namespace FlavorTagInference {
     virtual void decorate(const xAOD::IParticle& i_jet) const;
     virtual void decorateWithDefaults(const xAOD::IParticle& jet) const;
 
-    virtual std::set<std::string> getDecoratorKeys() const;
-    virtual std::set<std::string> getAuxInputKeys() const;
-    virtual std::set<std::string> getConstituentAuxInputKeys() const;
+    // cppcheck-suppress returnByReference
+    FTagDataDependencyNames getDependencies() const;
 
   private:
-    // private constructor, delegate of the above public ones
-    GNN(ISaltModelPtr, const GNNOptions& opts);
     // type definitions for ONNX output decorators
     using TPC = xAOD::TrackParticleContainer;
     using TrackLinks = std::vector<ElementLink<TPC>>;
@@ -82,7 +82,6 @@ namespace FlavorTagInference {
     createDecorators(const OutputConfig& outConfig, const FTagOptions& options);
 
     ISaltModelPtr m_saltModel;
-    SG::AuxElement::ConstAccessor<ElementLink<xAOD::JetContainer>> m_jetLink;
     std::string m_input_node_name;
     GNNDataLoader m_dataLoader;
 

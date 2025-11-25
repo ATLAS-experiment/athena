@@ -1,10 +1,6 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
-
-///////////////////////////////////////////////////////////////////
-// MaxCellDecorator.h, (c) ATLAS Detector software
-///////////////////////////////////////////////////////////////////
 
 #ifndef DERIVATIONFRAMEWORK_MAXCELLDECORATOR_H
 #define DERIVATIONFRAMEWORK_MAXCELLDECORATOR_H
@@ -29,105 +25,106 @@
 
 namespace DerivationFramework {
 
-class MaxCellDecorator : public extends<AthAlgTool, IAugmentationTool>
-{
-public:
-  MaxCellDecorator(const std::string& t,
-                   const std::string& n,
-                   const IInterface* p);
-  ~MaxCellDecorator();
-  StatusCode initialize();
-  StatusCode finalize();
-  virtual StatusCode addBranches() const;
-
-  struct calculation
+  class MaxCellDecorator : public extends<AthAlgTool, IAugmentationTool>
   {
-    float maxEcell_time = -9999.9;
-    float maxEcell_energy = -9999.9;
-    int maxEcell_gain = -1;
-    uint64_t maxEcell_onlId = 0;
-    float maxEcell_x = -9999.9;
-    float maxEcell_y = -9999.9;
-    float maxEcell_z = -9999.9;
-  };
+  public:
 
-private:
-  SG::ReadCondHandleKey<LArOnOffIdMapping> m_cablingKey{
-    this,
-    "CablingKey",
-    "LArOnOffIdMap",
-    "SG Key of LArOnOffIdMapping object"
-  };
+    using base_class::base_class;
 
-  SG::ReadHandleKey<xAOD::EgammaContainer>
+    virtual StatusCode initialize() override final;
+    virtual StatusCode addBranches(const EventContext& ctx) const override final;
+
+    struct calculation
+    {
+      float maxEcell_time = -9999.9;
+      float maxEcell_energy = -9999.9;
+      int maxEcell_gain = -1;
+      uint64_t maxEcell_onlId = 0;
+      float maxEcell_x = -9999.9;
+      float maxEcell_y = -9999.9;
+      float maxEcell_z = -9999.9;
+    };
+
+  private:
+    SG::ReadCondHandleKey<LArOnOffIdMapping> m_cablingKey{
+      this,
+        "CablingKey",
+        "LArOnOffIdMap",
+        "SG Key of LArOnOffIdMapping object"
+        };
+
+    SG::ReadHandleKey<xAOD::EgammaContainer>
     m_SGKey_photons{ this, "SGKey_photons", "", "SG key of photon container" };
 
-  SG::ReadHandleKey<xAOD::EgammaContainer> m_SGKey_electrons{
-    this,
-    "SGKey_electrons",
-    "",
-    "SG key of electron container"
-  };
+    SG::ReadHandleKey<xAOD::EgammaContainer> m_SGKey_electrons{
+      this,
+      "SGKey_electrons",
+      "",
+      "SG key of electron container"
+    };
 
-  /** This should be only for using run 2 reprocessing, which misses the
-      cell link from LRT electron clusters :
-      try to get info from the best matched "regular" egamma cluster */
-  SG::ReadHandleKey<xAOD::CaloClusterContainer> m_SGKey_egammaClusters{
-    this,
-    "SGKey_egammaClusters",
-    "",
-    "SG key of cluster container associated to standard egammas"
-  };
+    /** This should be only for using run 2 reprocessing, which misses the
+        cell link from LRT electron clusters :
+        try to get info from the best matched "regular" egamma cluster */
+    SG::ReadHandleKey<xAOD::CaloClusterContainer> m_SGKey_egammaClusters{
+      this,
+      "SGKey_egammaClusters",
+      "",
+      "SG key of cluster container associated to standard egammas"
+    };
 
-  SG::ReadHandleKey<xAOD::TauJetContainer>
+    SG::ReadHandleKey<xAOD::TauJetContainer>
     m_SGKey_taus{ this, "SGKey_taus", "", "SG key of tau container" };
 
-  SG::ReadHandleKey<xAOD::JetContainer>
+    SG::ReadHandleKey<xAOD::JetContainer>
     m_SGKey_jets{ this, "SGKey_jets", "", "SG key of jet container" };
-    
-  /** @brief matching cone size*/
-  Gaudi::Property<double> m_dRLRTegClusegClusMax{
-    this,
-    "dRLRTegClusegClusMax",
-    0.05,
-    "Maximum delta R to match LRT egammaCluster to std egammaCluster"
-  };
 
-  SG::WriteDecorHandleKeyArray<xAOD::EgammaContainer>
+    /** @brief matching cone size*/
+    Gaudi::Property<double> m_dRLRTegClusegClusMax{
+      this, "dRLRTegClusegClusMax",
+      0.05,
+      "Maximum delta R to match LRT egammaCluster to std egammaCluster"
+    };
+
+    SG::WriteDecorHandleKeyArray<xAOD::EgammaContainer>
     m_SGKey_photons_decorations{
       this,
-      "SGKey_photons_decorations_noConf",
-      {},
+      "SGKey_photons_decorations",
+      m_SGKey_photons, {"maxEcell_time", "maxEcell_energy", "maxEcell_gain",
+        "maxEcell_onlId", "maxEcell_x", "maxEcell_y", "maxEcell_z"},
       "SG keys for photon decorations not really configurable"
     };
 
-  SG::WriteDecorHandleKeyArray<xAOD::EgammaContainer>
+    SG::WriteDecorHandleKeyArray<xAOD::EgammaContainer>
     m_SGKey_electrons_decorations{
       this,
-      "SGKey_electrons_decorations_noConf",
-      {},
+      "SGKey_electrons_decorations",
+      m_SGKey_electrons, {"maxEcell_time", "maxEcell_energy", "maxEcell_gain",
+        "maxEcell_onlId", "maxEcell_x", "maxEcell_y", "maxEcell_z"},
       "SG keys for electrons decorations not really configurable"
     };
 
-  SG::WriteDecorHandleKeyArray<xAOD::TauJetContainer>
+    SG::WriteDecorHandleKeyArray<xAOD::TauJetContainer>
     m_SGKey_taus_decorations{
       this,
-      "SGKey_taus_decorations_noConf",
-      {},
+      "SGKey_taus_decorations",
+      m_SGKey_taus, {"maxEcell_time", "maxEcell_energy", "maxEcell_gain",
+        "maxEcell_onlId", "maxEcell_x", "maxEcell_y", "maxEcell_z"},
       "SG keys for tau decorations not really configurable"
     };
 
-  SG::WriteDecorHandleKeyArray<xAOD::JetContainer>
+    SG::WriteDecorHandleKeyArray<xAOD::JetContainer>
     m_SGKey_jets_decorations{
       this,
-      "SGKey_jets_decorations_noConf",
-      {},
+      "SGKey_jets_decorations",
+      m_SGKey_jets, {"maxEcell_time", "maxEcell_energy", "maxEcell_gain",
+        "maxEcell_onlId", "maxEcell_x", "maxEcell_y", "maxEcell_z"},
       "SG keys for jet decorations not really configurable"
     };
 
-  calculation decorateObject(const xAOD::CaloCluster* cluster,
-                             const EventContext& ctx) const;
-};
+    calculation decorateObject(const xAOD::CaloCluster* cluster,
+                               const EventContext& ctx) const;
+  };
 }
 
 #endif // DERIVATIONFRAMEWORK_MAXCELLDECORATOR_H

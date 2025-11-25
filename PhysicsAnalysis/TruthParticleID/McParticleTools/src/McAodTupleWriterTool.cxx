@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////// 
@@ -198,7 +198,7 @@ void McAodTupleWriterTool::setupBackend( Gaudi::Details::PropertyBase& /*m_outpu
       "OPT='RECREATE'" 
       );
   outputFileName.set( updatedProp );
-  outputFileName.setName( propName );
+  outputFileName.setName( std::move(propName) );
   if ( !tSvc->setProperty( outputFileName ).isSuccess() ) {
     ATH_MSG_ERROR("Could not configure the THistSvc's output filename ["
 		  << m_outputFileName.value() << "] !!");

@@ -8,10 +8,8 @@ ReadData                                             INFO in initialize()
 MetaDataSvc                                          INFO Initializing MetaDataSvc
 PoolSvc                                             DEBUG OutputLevel is 2
 PoolSvc                                             DEBUG POOL ReadCatalog is file:Catalog1.xml
-AthenaPoolCnvSvc                                    DEBUG Setting StorageType to ROOTTREEINDEX
 PoolSvc                                             DEBUG createCollection() type=RootCollection, connection=PFN:SimplePoolFile3.root, name=SimplePoolFile3.root, contextID=0
-MetaDataSvc                                         DEBUG handle() FirstInputFile for FID:A811B014-0297-AD47-AF4C-B75EF418982D
-MetaDataSvc                                         DEBUG initInputMetaDataStore: file name FID:A811B014-0297-AD47-AF4C-B75EF418982D
+PoolSvc                                             DEBUG createCollection() type=ImplicitCollection, connection=PFN:SimplePoolFile3.root, name=POOLContainer(DataHeader), contextID=0
 SimplePoolFile3.root                                DEBUG --> Access   DbContainer  READ      [ROOT_All] ##Shapes
 SimplePoolFile3.root                                DEBUG --> Access   DbContainer  READ      [ROOT_All] ##Shapes
 ##Shapes                                            DEBUG Opening
@@ -27,19 +25,15 @@ SimplePoolFile3.root                                DEBUG --->Reading Shape[3 , 
 SimplePoolFile3.root                                DEBUG ---->[0]:DataHeader_p6 Typ:DataHeader_p6 [21] Size:0 Offset:0 #Elements:1
 SimplePoolFile3.root                                DEBUG --->Reading Shape[4 , 7BE56CEF-C866-4BEE-9348-A5F34B5F1DAD]: [1 Column(s)]
 SimplePoolFile3.root                                DEBUG ---->[0]:DataHeaderForm_p6 Typ:DataHeaderForm_p6 [21] Size:0 Offset:0 #Elements:1
-SimplePoolFile3.root                                DEBUG --->Reading Shape[5 , E013D4B1-CA9C-4E3C-9BE2-8691BBAFCB9A]: [1 Column(s)]
-SimplePoolFile3.root                                DEBUG ---->[0]:Token Typ:Token [18] Size:0 Offset:0 #Elements:1
-SimplePoolFile3.root                                DEBUG --->Reading Shape[6 , BBACA313-D7B0-3A4C-9161-089CACF4B1CC]: [1 Column(s)]
-SimplePoolFile3.root                                DEBUG ---->[0]:unsigned int Typ:unsigned int [3] Size:0 Offset:0 #Elements:1
-SimplePoolFile3.root                                DEBUG --->Reading Shape[7 , BEE2BECF-A936-4078-9FDD-AD703C9ADF9F]: [1 Column(s)]
+SimplePoolFile3.root                                DEBUG --->Reading Shape[5 , BEE2BECF-A936-4078-9FDD-AD703C9ADF9F]: [1 Column(s)]
 SimplePoolFile3.root                                DEBUG ---->[0]:xAOD::FileMetaDataAuxInfo_v1 Typ:xAOD::FileMetaDataAuxInfo_v1 [21] Size:0 Offset:0 #Elements:1
-SimplePoolFile3.root                                DEBUG --->Reading Shape[8 , 11DF1B8C-0DEE-4687-80D7-E74B520ACBB4]: [1 Column(s)]
+SimplePoolFile3.root                                DEBUG --->Reading Shape[6 , 11DF1B8C-0DEE-4687-80D7-E74B520ACBB4]: [1 Column(s)]
 SimplePoolFile3.root                                DEBUG ---->[0]:EventStreamInfo_p3 Typ:EventStreamInfo_p3 [21] Size:0 Offset:0 #Elements:1
-SimplePoolFile3.root                                DEBUG --->Reading Shape[9 , C87E3828-4A7A-480A-95DE-0339539F6A0F]: [1 Column(s)]
+SimplePoolFile3.root                                DEBUG --->Reading Shape[7 , C87E3828-4A7A-480A-95DE-0339539F6A0F]: [1 Column(s)]
 SimplePoolFile3.root                                DEBUG ---->[0]:xAOD::FileMetaData_v1 Typ:xAOD::FileMetaData_v1 [21] Size:0 Offset:0 #Elements:1
-SimplePoolFile3.root                                DEBUG --->Reading Shape[10 , 6C2DE6DF-6D52-43F6-B435-9F29812F40C0]: [1 Column(s)]
+SimplePoolFile3.root                                DEBUG --->Reading Shape[8 , 6C2DE6DF-6D52-43F6-B435-9F29812F40C0]: [1 Column(s)]
 SimplePoolFile3.root                                DEBUG ---->[0]:IOVMetaDataContainer_p1 Typ:IOVMetaDataContainer_p1 [21] Size:0 Offset:0 #Elements:1
-##Shapes                                            DEBUG No objects passing selection criteria... Container has 11 Entries in total.
+##Shapes                                            DEBUG No objects passing selection criteria... Container has 9 Entries in total.
 SimplePoolFile3.root                                DEBUG --> Access   DbContainer  READ      [ROOT_All] ##Links
 ##Links                                             DEBUG Opening
 ##Links                                             DEBUG    attributes# = 1
@@ -56,27 +50,19 @@ SimplePoolFile3.root                                DEBUG --->Reading Assoc:A811
 SimplePoolFile3.root                                DEBUG ---->ClassID:4DDBD295-EFCE-472A-9EC8-15CD35A9EB8D
 SimplePoolFile3.root                                DEBUG --->Reading Assoc:A811B014-0297-AD47-AF4C-B75EF418982D/POOLContainerForm(DataHeaderForm) [203]  (7 , ffffffffffffffff)
 SimplePoolFile3.root                                DEBUG ---->ClassID:7BE56CEF-C866-4BEE-9348-A5F34B5F1DAD
-SimplePoolFile3.root                                DEBUG --->Reading Assoc:A811B014-0297-AD47-AF4C-B75EF418982D/POOLCollectionTree(Token) [202]  (8 , ffffffffffffffff)
-SimplePoolFile3.root                                DEBUG ---->ClassID:E013D4B1-CA9C-4E3C-9BE2-8691BBAFCB9A
-SimplePoolFile3.root                                DEBUG --->Reading Assoc:A811B014-0297-AD47-AF4C-B75EF418982D/POOLCollectionTree(RunNumber) [202]  (9 , ffffffffffffffff)
-SimplePoolFile3.root                                DEBUG ---->ClassID:BBACA313-D7B0-3A4C-9161-089CACF4B1CC
-SimplePoolFile3.root                                DEBUG --->Reading Assoc:A811B014-0297-AD47-AF4C-B75EF418982D/POOLCollectionTree(EventNumber) [202]  (a , ffffffffffffffff)
-SimplePoolFile3.root                                DEBUG ---->ClassID:BBACA313-D7B0-3A4C-9161-089CACF4B1CC
-SimplePoolFile3.root                                DEBUG --->Reading Assoc:A811B014-0297-AD47-AF4C-B75EF418982D/POOLCollectionTree(MagicNumber) [202]  (b , ffffffffffffffff)
-SimplePoolFile3.root                                DEBUG ---->ClassID:BBACA313-D7B0-3A4C-9161-089CACF4B1CC
-SimplePoolFile3.root                                DEBUG --->Reading Assoc:A811B014-0297-AD47-AF4C-B75EF418982D/MetaData(xAOD::FileMetaDataAuxInfo_v1/FileMetaDataAux.) [202]  (c , ffffffffffffffff)
+SimplePoolFile3.root                                DEBUG --->Reading Assoc:A811B014-0297-AD47-AF4C-B75EF418982D/MetaData(xAOD::FileMetaDataAuxInfo_v1/FileMetaDataAux.) [203]  (8 , ffffffffffffffff)
 SimplePoolFile3.root                                DEBUG ---->ClassID:BEE2BECF-A936-4078-9FDD-AD703C9ADF9F
-SimplePoolFile3.root                                DEBUG --->Reading Assoc:A811B014-0297-AD47-AF4C-B75EF418982D/MetaData(EventStreamInfo_p3/StreamReWrite) [202]  (d , ffffffffffffffff)
+SimplePoolFile3.root                                DEBUG --->Reading Assoc:A811B014-0297-AD47-AF4C-B75EF418982D/MetaData(EventStreamInfo_p3/StreamReWrite) [203]  (9 , ffffffffffffffff)
 SimplePoolFile3.root                                DEBUG ---->ClassID:11DF1B8C-0DEE-4687-80D7-E74B520ACBB4
-SimplePoolFile3.root                                DEBUG --->Reading Assoc:A811B014-0297-AD47-AF4C-B75EF418982D/MetaData(xAOD::FileMetaData_v1/FileMetaData) [202]  (e , ffffffffffffffff)
+SimplePoolFile3.root                                DEBUG --->Reading Assoc:A811B014-0297-AD47-AF4C-B75EF418982D/MetaData(xAOD::FileMetaData_v1/FileMetaData) [203]  (a , ffffffffffffffff)
 SimplePoolFile3.root                                DEBUG ---->ClassID:C87E3828-4A7A-480A-95DE-0339539F6A0F
-SimplePoolFile3.root                                DEBUG --->Reading Assoc:A811B014-0297-AD47-AF4C-B75EF418982D/MetaData(IOVMetaDataContainer_p1//TagInfo) [202]  (f , ffffffffffffffff)
+SimplePoolFile3.root                                DEBUG --->Reading Assoc:A811B014-0297-AD47-AF4C-B75EF418982D/MetaData(IOVMetaDataContainer_p1//TagInfo) [203]  (b , ffffffffffffffff)
 SimplePoolFile3.root                                DEBUG ---->ClassID:6C2DE6DF-6D52-43F6-B435-9F29812F40C0
-SimplePoolFile3.root                                DEBUG --->Reading Assoc:A811B014-0297-AD47-AF4C-B75EF418982D/MetaDataHdr(DataHeader) [202]  (10 , ffffffffffffffff)
+SimplePoolFile3.root                                DEBUG --->Reading Assoc:A811B014-0297-AD47-AF4C-B75EF418982D/MetaDataHdr(DataHeader) [203]  (c , ffffffffffffffff)
 SimplePoolFile3.root                                DEBUG ---->ClassID:4DDBD295-EFCE-472A-9EC8-15CD35A9EB8D
-SimplePoolFile3.root                                DEBUG --->Reading Assoc:A811B014-0297-AD47-AF4C-B75EF418982D/MetaDataHdrForm(DataHeaderForm) [202]  (11 , ffffffffffffffff)
+SimplePoolFile3.root                                DEBUG --->Reading Assoc:A811B014-0297-AD47-AF4C-B75EF418982D/MetaDataHdrForm(DataHeaderForm) [203]  (d , ffffffffffffffff)
 SimplePoolFile3.root                                DEBUG ---->ClassID:7BE56CEF-C866-4BEE-9348-A5F34B5F1DAD
-##Links                                             DEBUG No objects passing selection criteria... Container has 16 Entries in total.
+##Links                                             DEBUG No objects passing selection criteria... Container has 12 Entries in total.
 SimplePoolFile3.root                                DEBUG --> Access   DbContainer  READ      [ROOT_All] ##Params
 ##Params                                            DEBUG Opening
 ##Params                                            DEBUG    attributes# = 1
@@ -84,12 +70,19 @@ SimplePoolFile3.root                                DEBUG --> Access   DbContain
 SimplePoolFile3.root                                DEBUG --->Reading Param:FID=[A811B014-0297-AD47-AF4C-B75EF418982D]
 SimplePoolFile3.root                                DEBUG --->Reading Param:PFN=[SimplePoolFile3.root]
 ##Params                                            DEBUG No objects passing selection criteria... Container has 4 Entries in total.
-SimplePoolFile3.root                                DEBUG --> Access   DbContainer  READ      [ROOT_Tree] MetaDataHdr(DataHeader)
+SimplePoolFile3.root                                DEBUG --> Access   DbContainer  READ      [ROOT_TreeIndex] POOLContainer(DataHeader)
+POOLContainer(DataHeader)                           DEBUG Opening
+POOLContainer(DataHeader)                           DEBUG    attributes# = 1
+POOLContainer(DataHeader)                           DEBUG Branch container 'DataHeader'
+POOLContainer(DataHeader)                           DEBUG Opened container POOLContainer(DataHeader) of type ROOT_Tree
+MetaDataSvc                                         DEBUG handle() FirstInputFile for FID:A811B014-0297-AD47-AF4C-B75EF418982D
+MetaDataSvc                                         DEBUG initInputMetaDataStore: file name FID:A811B014-0297-AD47-AF4C-B75EF418982D
+SimplePoolFile3.root                                DEBUG --> Access   DbContainer  READ      [ROOT_TreeIndex] MetaDataHdr(DataHeader)
 MetaDataHdr(DataHeader)                             DEBUG Opening
 MetaDataHdr(DataHeader)                             DEBUG    attributes# = 1
 MetaDataHdr(DataHeader)                             DEBUG Branch container 'DataHeader'
 MetaDataHdr(DataHeader)                             DEBUG Opened container MetaDataHdr(DataHeader) of type ROOT_Tree
-SimplePoolFile3.root                                DEBUG --> Access   DbContainer  READ      [ROOT_Tree] MetaDataHdrForm(DataHeaderForm)
+SimplePoolFile3.root                                DEBUG --> Access   DbContainer  READ      [ROOT_TreeIndex] MetaDataHdrForm(DataHeaderForm)
 MetaDataHdrForm(DataHeaderForm)                     DEBUG Opening
 MetaDataHdrForm(DataHeaderForm)                     DEBUG    attributes# = 1
 MetaDataHdrForm(DataHeaderForm)                     DEBUG Branch container 'DataHeaderForm'
@@ -105,21 +98,6 @@ ReWriteData                                          INFO in initialize()
 ReWriteData                                         DEBUG data dependencies:
   + INPUT IGNORED  ( 'ExampleHitContainer' , '' ) 
   + OUTPUT IGNORED  ( 'ExampleTrackContainer' , '' ) 
-WriteTag                                             INFO in initialize()
-WriteTag                                            DEBUG Defining the attribute list specification.
-WriteTag                                            DEBUG Printing out attribute list specification:
-WriteTag                                            DEBUG  name RunNumber type unsigned int
-WriteTag                                            DEBUG  name EventNumber type unsigned int
-WriteTag                                            DEBUG data dependencies:
-  + OUTPUT  ( 'AthenaAttributeList' , 'StoreGateSvc+RunEventTag' ) 
-MagicWriteTag                                        INFO in initialize()
-MagicWriteTag                                       DEBUG Defining the attribute list specification.
-MagicWriteTag                                       DEBUG Printing out attribute list specification:
-MagicWriteTag                                       DEBUG  name RunNumber type unsigned int
-MagicWriteTag                                       DEBUG  name EventNumber type unsigned int
-MagicWriteTag                                       DEBUG  name MagicNumber type unsigned int
-MagicWriteTag                                       DEBUG data dependencies:
-  + OUTPUT  ( 'AthenaAttributeList' , 'StoreGateSvc+MagicTag' ) 
 StreamStream1                                       DEBUG In initialize
 StreamStream1                                       DEBUG In initialize 
 StreamStream1                                       DEBUG Found IDecisionSvc.
@@ -140,13 +118,82 @@ StreamStream1                                       DEBUG Adding private ToolHan
 StreamStream1                                       DEBUG Adding private ToolHandle tool StreamStream1.StreamStream1_MakeEventStreamInfo (MakeEventStreamInfo)
 StreamStream1                                       DEBUG Adding private ToolHandle tool StreamStream1.StreamStream1Tool (AthenaOutputStreamTool)
 StreamStream1                                       DEBUG data dependencies:
-  + INPUT   ( 'AthenaAttributeList' , 'StoreGateSvc+MagicTag' )  [StreamStream1.StreamStream1Tool]
+  + INPUT IGNORED  ( 'AthenaAttributeList' , '' )  [StreamStream1.StreamStream1Tool]
   + OUTPUT  ( 'DataHeader' , 'StoreGateSvc+StreamStream1' ) 
   + OUTPUT  ( 'SG::CompressionInfo' , 'StoreGateSvc+CompressionInfo_StreamStream1' ) 
   + OUTPUT  ( 'SG::SelectionVetoes' , 'StoreGateSvc+SelectionVetoes_StreamStream1' ) 
 AthenaEventLoopMgr                                   INFO Setup EventSelector service EventSelector
 ApplicationMgr                                       INFO Application Manager Initialized successfully
+StorageSvc                                          DEBUG Disconnect request for database: FID=A811B014-0297-AD47-AF4C-B75EF418982D PFN=SimplePoolFile3.root
+StorageSvc                                          DEBUG Closing database: FID=A811B014-0297-AD47-AF4C-B75EF418982D
+RootDatabase.close                                  DEBUG Closing DB SimplePoolFile3.root
 PoolSvc                                             DEBUG createCollection() type=RootCollection, connection=PFN:SimplePoolFile3.root, name=SimplePoolFile3.root, contextID=0
+PoolSvc                                             DEBUG createCollection() type=ImplicitCollection, connection=PFN:SimplePoolFile3.root, name=POOLContainer(DataHeader), contextID=0
+SimplePoolFile3.root                                DEBUG --> Access   DbContainer  READ      [ROOT_All] ##Shapes
+SimplePoolFile3.root                                DEBUG --> Access   DbContainer  READ      [ROOT_All] ##Shapes
+##Shapes                                            DEBUG Opening
+##Shapes                                            DEBUG    attributes# = 1
+##Shapes                                            DEBUG Opened container ##Shapes of type ROOT_Tree
+SimplePoolFile3.root                                DEBUG --->Reading Shape[0 , FF777FDA-721C-4756-BBF3-4CE28C2A3AF5]: [1 Column(s)]
+SimplePoolFile3.root                                DEBUG ---->[0]:ExampleTrackContainer_p1 Typ:ExampleTrackContainer_p1 [21] Size:0 Offset:0 #Elements:1
+SimplePoolFile3.root                                DEBUG --->Reading Shape[1 , 0D6FFB22-1BCB-49B9-BBFB-66B6DF352067]: [1 Column(s)]
+SimplePoolFile3.root                                DEBUG ---->[0]:xAOD::EventAuxInfo_v3 Typ:xAOD::EventAuxInfo_v3 [21] Size:0 Offset:0 #Elements:1
+SimplePoolFile3.root                                DEBUG --->Reading Shape[2 , AE8BED6D-1D41-4CAF-994B-42613FC91A0A]: [1 Column(s)]
+SimplePoolFile3.root                                DEBUG ---->[0]:xAOD::EventInfo_v1 Typ:xAOD::EventInfo_v1 [21] Size:0 Offset:0 #Elements:1
+SimplePoolFile3.root                                DEBUG --->Reading Shape[3 , 4DDBD295-EFCE-472A-9EC8-15CD35A9EB8D]: [1 Column(s)]
+SimplePoolFile3.root                                DEBUG ---->[0]:DataHeader_p6 Typ:DataHeader_p6 [21] Size:0 Offset:0 #Elements:1
+SimplePoolFile3.root                                DEBUG --->Reading Shape[4 , 7BE56CEF-C866-4BEE-9348-A5F34B5F1DAD]: [1 Column(s)]
+SimplePoolFile3.root                                DEBUG ---->[0]:DataHeaderForm_p6 Typ:DataHeaderForm_p6 [21] Size:0 Offset:0 #Elements:1
+SimplePoolFile3.root                                DEBUG --->Reading Shape[5 , BEE2BECF-A936-4078-9FDD-AD703C9ADF9F]: [1 Column(s)]
+SimplePoolFile3.root                                DEBUG ---->[0]:xAOD::FileMetaDataAuxInfo_v1 Typ:xAOD::FileMetaDataAuxInfo_v1 [21] Size:0 Offset:0 #Elements:1
+SimplePoolFile3.root                                DEBUG --->Reading Shape[6 , 11DF1B8C-0DEE-4687-80D7-E74B520ACBB4]: [1 Column(s)]
+SimplePoolFile3.root                                DEBUG ---->[0]:EventStreamInfo_p3 Typ:EventStreamInfo_p3 [21] Size:0 Offset:0 #Elements:1
+SimplePoolFile3.root                                DEBUG --->Reading Shape[7 , C87E3828-4A7A-480A-95DE-0339539F6A0F]: [1 Column(s)]
+SimplePoolFile3.root                                DEBUG ---->[0]:xAOD::FileMetaData_v1 Typ:xAOD::FileMetaData_v1 [21] Size:0 Offset:0 #Elements:1
+SimplePoolFile3.root                                DEBUG --->Reading Shape[8 , 6C2DE6DF-6D52-43F6-B435-9F29812F40C0]: [1 Column(s)]
+SimplePoolFile3.root                                DEBUG ---->[0]:IOVMetaDataContainer_p1 Typ:IOVMetaDataContainer_p1 [21] Size:0 Offset:0 #Elements:1
+##Shapes                                            DEBUG No objects passing selection criteria... Container has 9 Entries in total.
+SimplePoolFile3.root                                DEBUG --> Access   DbContainer  READ      [ROOT_All] ##Links
+##Links                                             DEBUG Opening
+##Links                                             DEBUG    attributes# = 1
+##Links                                             DEBUG Opened container ##Links of type ROOT_Tree
+SimplePoolFile3.root                                DEBUG --->Reading Assoc:A811B014-0297-AD47-AF4C-B75EF418982D/##Params [200]  (2 , ffffffffffffffff)
+SimplePoolFile3.root                                DEBUG ---->ClassID:DA8F479C-09BC-49D4-94BC-99D025A23A3B
+SimplePoolFile3.root                                DEBUG --->Reading Assoc:A811B014-0297-AD47-AF4C-B75EF418982D/CollectionTree(ExampleTrackContainer_p1/MyTracks) [203]  (3 , ffffffffffffffff)
+SimplePoolFile3.root                                DEBUG ---->ClassID:FF777FDA-721C-4756-BBF3-4CE28C2A3AF5
+SimplePoolFile3.root                                DEBUG --->Reading Assoc:A811B014-0297-AD47-AF4C-B75EF418982D/CollectionTree(xAOD::EventAuxInfo_v3/EventInfoAux.) [203]  (4 , ffffffffffffffff)
+SimplePoolFile3.root                                DEBUG ---->ClassID:0D6FFB22-1BCB-49B9-BBFB-66B6DF352067
+SimplePoolFile3.root                                DEBUG --->Reading Assoc:A811B014-0297-AD47-AF4C-B75EF418982D/CollectionTree(xAOD::EventInfo_v1/EventInfo) [203]  (5 , ffffffffffffffff)
+SimplePoolFile3.root                                DEBUG ---->ClassID:AE8BED6D-1D41-4CAF-994B-42613FC91A0A
+SimplePoolFile3.root                                DEBUG --->Reading Assoc:A811B014-0297-AD47-AF4C-B75EF418982D/POOLContainer(DataHeader) [203]  (6 , ffffffffffffffff)
+SimplePoolFile3.root                                DEBUG ---->ClassID:4DDBD295-EFCE-472A-9EC8-15CD35A9EB8D
+SimplePoolFile3.root                                DEBUG --->Reading Assoc:A811B014-0297-AD47-AF4C-B75EF418982D/POOLContainerForm(DataHeaderForm) [203]  (7 , ffffffffffffffff)
+SimplePoolFile3.root                                DEBUG ---->ClassID:7BE56CEF-C866-4BEE-9348-A5F34B5F1DAD
+SimplePoolFile3.root                                DEBUG --->Reading Assoc:A811B014-0297-AD47-AF4C-B75EF418982D/MetaData(xAOD::FileMetaDataAuxInfo_v1/FileMetaDataAux.) [203]  (8 , ffffffffffffffff)
+SimplePoolFile3.root                                DEBUG ---->ClassID:BEE2BECF-A936-4078-9FDD-AD703C9ADF9F
+SimplePoolFile3.root                                DEBUG --->Reading Assoc:A811B014-0297-AD47-AF4C-B75EF418982D/MetaData(EventStreamInfo_p3/StreamReWrite) [203]  (9 , ffffffffffffffff)
+SimplePoolFile3.root                                DEBUG ---->ClassID:11DF1B8C-0DEE-4687-80D7-E74B520ACBB4
+SimplePoolFile3.root                                DEBUG --->Reading Assoc:A811B014-0297-AD47-AF4C-B75EF418982D/MetaData(xAOD::FileMetaData_v1/FileMetaData) [203]  (a , ffffffffffffffff)
+SimplePoolFile3.root                                DEBUG ---->ClassID:C87E3828-4A7A-480A-95DE-0339539F6A0F
+SimplePoolFile3.root                                DEBUG --->Reading Assoc:A811B014-0297-AD47-AF4C-B75EF418982D/MetaData(IOVMetaDataContainer_p1//TagInfo) [203]  (b , ffffffffffffffff)
+SimplePoolFile3.root                                DEBUG ---->ClassID:6C2DE6DF-6D52-43F6-B435-9F29812F40C0
+SimplePoolFile3.root                                DEBUG --->Reading Assoc:A811B014-0297-AD47-AF4C-B75EF418982D/MetaDataHdr(DataHeader) [203]  (c , ffffffffffffffff)
+SimplePoolFile3.root                                DEBUG ---->ClassID:4DDBD295-EFCE-472A-9EC8-15CD35A9EB8D
+SimplePoolFile3.root                                DEBUG --->Reading Assoc:A811B014-0297-AD47-AF4C-B75EF418982D/MetaDataHdrForm(DataHeaderForm) [203]  (d , ffffffffffffffff)
+SimplePoolFile3.root                                DEBUG ---->ClassID:7BE56CEF-C866-4BEE-9348-A5F34B5F1DAD
+##Links                                             DEBUG No objects passing selection criteria... Container has 12 Entries in total.
+SimplePoolFile3.root                                DEBUG --> Access   DbContainer  READ      [ROOT_All] ##Params
+##Params                                            DEBUG Opening
+##Params                                            DEBUG    attributes# = 1
+##Params                                            DEBUG Opened container ##Params of type ROOT_Tree
+SimplePoolFile3.root                                DEBUG --->Reading Param:FID=[A811B014-0297-AD47-AF4C-B75EF418982D]
+SimplePoolFile3.root                                DEBUG --->Reading Param:PFN=[SimplePoolFile3.root]
+##Params                                            DEBUG No objects passing selection criteria... Container has 4 Entries in total.
+SimplePoolFile3.root                                DEBUG --> Access   DbContainer  READ      [ROOT_TreeIndex] POOLContainer(DataHeader)
+POOLContainer(DataHeader)                           DEBUG Opening
+POOLContainer(DataHeader)                           DEBUG    attributes# = 1
+POOLContainer(DataHeader)                           DEBUG Branch container 'DataHeader'
+POOLContainer(DataHeader)                           DEBUG Opened container POOLContainer(DataHeader) of type ROOT_Tree
 ApplicationMgr                                       INFO Application Manager Started successfully
 RootDatabase.setOption                              DEBUG Request tree cache 
 RootDatabase.setOption                              DEBUG File name SimplePoolFile3.root
@@ -154,14 +201,19 @@ RootDatabase.setOption                              DEBUG Got tree CollectionTre
 RootDatabase.setOption                              DEBUG Using Tree cache. Size: -1 Nevents to learn with: -1
 MetaDataSvc                                         DEBUG handle() BeginInputFile for SimplePoolFile3.root
 MetaDataSvc                                         DEBUG initInputMetaDataStore: file name SimplePoolFile3.root
+SimplePoolFile3.root                                DEBUG --> Access   DbContainer  READ      [ROOT_TreeIndex] MetaDataHdr(DataHeader)
+MetaDataHdr(DataHeader)                             DEBUG Opening
+MetaDataHdr(DataHeader)                             DEBUG    attributes# = 1
+MetaDataHdr(DataHeader)                             DEBUG Branch container 'DataHeader'
+MetaDataHdr(DataHeader)                             DEBUG Opened container MetaDataHdr(DataHeader) of type ROOT_Tree
 MetaDataSvc                                         DEBUG Loaded input meta data store proxies
 MetaDataSvc                                         DEBUG  calling beginInputFile on ToolSvc.xAODMaker::FileMetaDataTool for GUID "A811B014-0297-AD47-AF4C-B75EF418982D"
-SimplePoolFile3.root                                DEBUG --> Access   DbContainer  READ      [ROOT_Tree] MetaData(xAOD::FileMetaData_v1/FileMetaData)
+SimplePoolFile3.root                                DEBUG --> Access   DbContainer  READ      [ROOT_TreeIndex] MetaData(xAOD::FileMetaData_v1/FileMetaData)
 MetaData(xAOD::FileMetaData_v1/FileMetaData)        DEBUG Opening
 MetaData(xAOD::FileMetaData_v1/FileMetaData)        DEBUG    attributes# = 1
 MetaData(xAOD::FileMetaData_v1/FileMetaData)        DEBUG Branch container 'xAOD::FileMetaData_v1_FileMetaData'
 MetaData(xAOD::FileMetaData_v1/FileMetaData)        DEBUG Opened container MetaData(xAOD::FileMetaData_v1/FileMetaData) of type ROOT_Tree
-SimplePoolFile3.root                                DEBUG --> Access   DbContainer  READ      [ROOT_Tree] MetaData(xAOD::FileMetaDataAuxInfo_v1/FileMetaDataAux.)
+SimplePoolFile3.root                                DEBUG --> Access   DbContainer  READ      [ROOT_TreeIndex] MetaData(xAOD::FileMetaDataAuxInfo_v1/FileMetaDataAux.)
 MetaData(xAOD::FileMetaDataAuxInfo_v1/FileMeta...)  DEBUG Opening
 MetaData(xAOD::FileMetaDataAuxInfo_v1/FileMeta...)  DEBUG    attributes# = 1
 MetaData(xAOD::FileMetaDataAuxInfo_v1/FileMeta...)  DEBUG Branch container 'xAOD::FileMetaDataAuxInfo_v1_FileMetaDataAux.'
@@ -169,11 +221,6 @@ MetaData(xAOD::FileMetaDataAuxInfo_v1/FileMeta...)  DEBUG Opened container MetaD
 MetaDataSvc                                         DEBUG MetaDataSvc will handle xAOD::FileMetaData_v1 ClassID: 178309087
 MetaDataSvc                                         DEBUG MetaDataSvc will handle xAOD::FileMetaDataAuxInfo_v1 ClassID: 73252552
 ToolSvc.xAODMaker::FileMetaDataTool                  INFO Copied "FileMetaData" to MetaDataStore
-SimplePoolFile3.root                                DEBUG --> Access   DbContainer  READ      [ROOT_TreeIndex] POOLContainer(DataHeader)
-POOLContainer(DataHeader)                           DEBUG Opening
-POOLContainer(DataHeader)                           DEBUG    attributes# = 1
-POOLContainer(DataHeader)                           DEBUG Branch container 'DataHeader'
-POOLContainer(DataHeader)                           DEBUG Opened container POOLContainer(DataHeader) of type ROOT_Tree
 SimplePoolFile3.root                                DEBUG --> Access   DbContainer  READ      [ROOT_TreeIndex] POOLContainerForm(DataHeaderForm)
 POOLContainerForm(DataHeaderForm)                   DEBUG Opening
 POOLContainerForm(DataHeaderForm)                   DEBUG    attributes# = 1
@@ -199,7 +246,7 @@ IOVDbSvc                                             INFO Initialised with 1 con
 IOVDbSvc                                             INFO Service IOVDbSvc initialised successfully
 AthenaEventLoopMgr                                   INFO   ===>>>  start processing event #4294967297, run #1 0 events processed so far  <<<===
 ReadData                                            DEBUG in execute()
-SimplePoolFile3.root                                DEBUG --> Access   DbContainer  READ      [ROOT_Tree] MetaData(EventStreamInfo_p3/StreamReWrite)
+SimplePoolFile3.root                                DEBUG --> Access   DbContainer  READ      [ROOT_TreeIndex] MetaData(EventStreamInfo_p3/StreamReWrite)
 MetaData(EventStreamInfo_p3/StreamReWrite)          DEBUG Opening
 MetaData(EventStreamInfo_p3/StreamReWrite)          DEBUG    attributes# = 1
 MetaData(EventStreamInfo_p3/StreamReWrite)          DEBUG Branch container 'EventStreamInfo_p3_StreamReWrite'
@@ -229,12 +276,6 @@ ReadData                                          WARNING Could not follow Examp
 ReadData                                             INFO Could not find ExampleHitContainer/MyHits
 ReWriteData                                         DEBUG in execute()
 ReWriteData                                          INFO registered all data
-WriteTag                                            DEBUG in execute()
-WriteTag                                             INFO EventInfo event: 1  run: 1
-WriteTag                                             INFO registered all data
-MagicWriteTag                                       DEBUG in execute()
-MagicWriteTag                                        INFO EventInfo event: 1  run: 1
-MagicWriteTag                                        INFO registered all data
 StreamStream1                                       DEBUG addItemObjects(2101,"*") called
 StreamStream1                                       DEBUG            Key:*
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
@@ -351,40 +392,6 @@ SimplePoolFile4.root                                DEBUG ---->ClassID:7BE56CEF-
 SimplePoolFile4.root                                DEBUG --->Adding Shape[5 , 7BE56CEF-C866-4BEE-9348-A5F34B5F1DAD]:  [1 Column(s)] 
 SimplePoolFile4.root                                DEBUG ---->Class:DataHeaderForm_p6
 SimplePoolFile4.root                                DEBUG ---->[0]:DataHeaderForm_p6 Typ:DataHeaderForm_p6 [21] Size:0 Offset:0 #Elements:1
-SimplePoolFile4.root                                DEBUG --> Access   DbContainer  CREA/UPDA [ROOT_Tree] POOLCollectionTree(Token)
-POOLCollectionTree(Token)                           DEBUG Opening
-POOLCollectionTree(Token)                           DEBUG    attributes# = 1
-POOLCollectionTree(Token)                           DEBUG Branch container 'Token'
-POOLCollectionTree(Token)                           DEBUG Opened container POOLCollectionTree(Token) of type ROOT_Tree
-SimplePoolFile4.root                                DEBUG --->Adding Assoc :298DE14D-49CF-674A-9171-CEBBD9BEC6F8/POOLCollectionTree(Token) [202]  (9 , ffffffffffffffff)
-SimplePoolFile4.root                                DEBUG ---->ClassID:E013D4B1-CA9C-4E3C-9BE2-8691BBAFCB9A
-SimplePoolFile4.root                                DEBUG --->Adding Shape[6 , E013D4B1-CA9C-4E3C-9BE2-8691BBAFCB9A]:  [1 Column(s)] 
-SimplePoolFile4.root                                DEBUG ---->Class:Token
-SimplePoolFile4.root                                DEBUG ---->[0]:Token Typ:Token [18] Size:0 Offset:0 #Elements:1
-SimplePoolFile4.root                                DEBUG --> Access   DbContainer  CREA/UPDA [ROOT_Tree] POOLCollectionTree(RunNumber)
-POOLCollectionTree(RunNumber)                       DEBUG Opening
-POOLCollectionTree(RunNumber)                       DEBUG    attributes# = 1
-POOLCollectionTree(RunNumber)                       DEBUG Branch container 'RunNumber'
-POOLCollectionTree(RunNumber)                       DEBUG Opened container POOLCollectionTree(RunNumber) of type ROOT_Tree
-SimplePoolFile4.root                                DEBUG --->Adding Assoc :298DE14D-49CF-674A-9171-CEBBD9BEC6F8/POOLCollectionTree(RunNumber) [202]  (a , ffffffffffffffff)
-SimplePoolFile4.root                                DEBUG ---->ClassID:BBACA313-D7B0-3A4C-9161-089CACF4B1CC
-SimplePoolFile4.root                                DEBUG --->Adding Shape[7 , BBACA313-D7B0-3A4C-9161-089CACF4B1CC]:  [1 Column(s)] 
-SimplePoolFile4.root                                DEBUG ---->Class:unsigned int
-SimplePoolFile4.root                                DEBUG ---->[0]:unsigned int Typ:unsigned int [3] Size:0 Offset:0 #Elements:1
-SimplePoolFile4.root                                DEBUG --> Access   DbContainer  CREA/UPDA [ROOT_Tree] POOLCollectionTree(EventNumber)
-POOLCollectionTree(EventNumber)                     DEBUG Opening
-POOLCollectionTree(EventNumber)                     DEBUG    attributes# = 1
-POOLCollectionTree(EventNumber)                     DEBUG Branch container 'EventNumber'
-POOLCollectionTree(EventNumber)                     DEBUG Opened container POOLCollectionTree(EventNumber) of type ROOT_Tree
-SimplePoolFile4.root                                DEBUG --->Adding Assoc :298DE14D-49CF-674A-9171-CEBBD9BEC6F8/POOLCollectionTree(EventNumber) [202]  (b , ffffffffffffffff)
-SimplePoolFile4.root                                DEBUG ---->ClassID:BBACA313-D7B0-3A4C-9161-089CACF4B1CC
-SimplePoolFile4.root                                DEBUG --> Access   DbContainer  CREA/UPDA [ROOT_Tree] POOLCollectionTree(MagicNumber)
-POOLCollectionTree(MagicNumber)                     DEBUG Opening
-POOLCollectionTree(MagicNumber)                     DEBUG    attributes# = 1
-POOLCollectionTree(MagicNumber)                     DEBUG Branch container 'MagicNumber'
-POOLCollectionTree(MagicNumber)                     DEBUG Opened container POOLCollectionTree(MagicNumber) of type ROOT_Tree
-SimplePoolFile4.root                                DEBUG --->Adding Assoc :298DE14D-49CF-674A-9171-CEBBD9BEC6F8/POOLCollectionTree(MagicNumber) [202]  (c , ffffffffffffffff)
-SimplePoolFile4.root                                DEBUG ---->ClassID:BBACA313-D7B0-3A4C-9161-089CACF4B1CC
 SimplePoolFile4.root                                DEBUG DB Action Commit
 MetaDataSvc                                         DEBUG MetaDataSvc will handle EventStreamInfo ClassID: 167728019
 StreamStream1.StreamStream1_MakeEventStreamInfo     DEBUG Resetting the EventStreamInfo payload at the first event
@@ -415,12 +422,6 @@ ReadData                                          WARNING Could not follow Examp
 ReadData                                             INFO Could not find ExampleHitContainer/MyHits
 ReWriteData                                         DEBUG in execute()
 ReWriteData                                          INFO registered all data
-WriteTag                                            DEBUG in execute()
-WriteTag                                             INFO EventInfo event: 2  run: 1
-WriteTag                                             INFO registered all data
-MagicWriteTag                                       DEBUG in execute()
-MagicWriteTag                                        INFO EventInfo event: 2  run: 1
-MagicWriteTag                                        INFO registered all data
 StreamStream1                                       DEBUG addItemObjects(2101,"*") called
 StreamStream1                                       DEBUG            Key:*
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
@@ -474,12 +475,6 @@ ReadData                                          WARNING Could not follow Examp
 ReadData                                             INFO Could not find ExampleHitContainer/MyHits
 ReWriteData                                         DEBUG in execute()
 ReWriteData                                          INFO registered all data
-WriteTag                                            DEBUG in execute()
-WriteTag                                             INFO EventInfo event: 3  run: 1
-WriteTag                                             INFO registered all data
-MagicWriteTag                                       DEBUG in execute()
-MagicWriteTag                                        INFO EventInfo event: 3  run: 1
-MagicWriteTag                                        INFO registered all data
 StreamStream1                                       DEBUG addItemObjects(2101,"*") called
 StreamStream1                                       DEBUG            Key:*
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
@@ -533,12 +528,6 @@ ReadData                                          WARNING Could not follow Examp
 ReadData                                             INFO Could not find ExampleHitContainer/MyHits
 ReWriteData                                         DEBUG in execute()
 ReWriteData                                          INFO registered all data
-WriteTag                                            DEBUG in execute()
-WriteTag                                             INFO EventInfo event: 4  run: 1
-WriteTag                                             INFO registered all data
-MagicWriteTag                                       DEBUG in execute()
-MagicWriteTag                                        INFO EventInfo event: 4  run: 1
-MagicWriteTag                                        INFO registered all data
 StreamStream1                                       DEBUG addItemObjects(2101,"*") called
 StreamStream1                                       DEBUG            Key:*
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
@@ -592,12 +581,6 @@ ReadData                                          WARNING Could not follow Examp
 ReadData                                             INFO Could not find ExampleHitContainer/MyHits
 ReWriteData                                         DEBUG in execute()
 ReWriteData                                          INFO registered all data
-WriteTag                                            DEBUG in execute()
-WriteTag                                             INFO EventInfo event: 5  run: 1
-WriteTag                                             INFO registered all data
-MagicWriteTag                                       DEBUG in execute()
-MagicWriteTag                                        INFO EventInfo event: 5  run: 1
-MagicWriteTag                                        INFO registered all data
 StreamStream1                                       DEBUG addItemObjects(2101,"*") called
 StreamStream1                                       DEBUG            Key:*
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
@@ -651,12 +634,6 @@ ReadData                                          WARNING Could not follow Examp
 ReadData                                             INFO Could not find ExampleHitContainer/MyHits
 ReWriteData                                         DEBUG in execute()
 ReWriteData                                          INFO registered all data
-WriteTag                                            DEBUG in execute()
-WriteTag                                             INFO EventInfo event: 6  run: 1
-WriteTag                                             INFO registered all data
-MagicWriteTag                                       DEBUG in execute()
-MagicWriteTag                                        INFO EventInfo event: 6  run: 1
-MagicWriteTag                                        INFO registered all data
 StreamStream1                                       DEBUG addItemObjects(2101,"*") called
 StreamStream1                                       DEBUG            Key:*
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
@@ -710,12 +687,6 @@ ReadData                                          WARNING Could not follow Examp
 ReadData                                             INFO Could not find ExampleHitContainer/MyHits
 ReWriteData                                         DEBUG in execute()
 ReWriteData                                          INFO registered all data
-WriteTag                                            DEBUG in execute()
-WriteTag                                             INFO EventInfo event: 7  run: 1
-WriteTag                                             INFO registered all data
-MagicWriteTag                                       DEBUG in execute()
-MagicWriteTag                                        INFO EventInfo event: 7  run: 1
-MagicWriteTag                                        INFO registered all data
 StreamStream1                                       DEBUG addItemObjects(2101,"*") called
 StreamStream1                                       DEBUG            Key:*
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
@@ -769,12 +740,6 @@ ReadData                                          WARNING Could not follow Examp
 ReadData                                             INFO Could not find ExampleHitContainer/MyHits
 ReWriteData                                         DEBUG in execute()
 ReWriteData                                          INFO registered all data
-WriteTag                                            DEBUG in execute()
-WriteTag                                             INFO EventInfo event: 8  run: 1
-WriteTag                                             INFO registered all data
-MagicWriteTag                                       DEBUG in execute()
-MagicWriteTag                                        INFO EventInfo event: 8  run: 1
-MagicWriteTag                                        INFO registered all data
 StreamStream1                                       DEBUG addItemObjects(2101,"*") called
 StreamStream1                                       DEBUG            Key:*
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
@@ -828,12 +793,6 @@ ReadData                                          WARNING Could not follow Examp
 ReadData                                             INFO Could not find ExampleHitContainer/MyHits
 ReWriteData                                         DEBUG in execute()
 ReWriteData                                          INFO registered all data
-WriteTag                                            DEBUG in execute()
-WriteTag                                             INFO EventInfo event: 9  run: 1
-WriteTag                                             INFO registered all data
-MagicWriteTag                                       DEBUG in execute()
-MagicWriteTag                                        INFO EventInfo event: 9  run: 1
-MagicWriteTag                                        INFO registered all data
 StreamStream1                                       DEBUG addItemObjects(2101,"*") called
 StreamStream1                                       DEBUG            Key:*
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
@@ -887,12 +846,6 @@ ReadData                                          WARNING Could not follow Examp
 ReadData                                             INFO Could not find ExampleHitContainer/MyHits
 ReWriteData                                         DEBUG in execute()
 ReWriteData                                          INFO registered all data
-WriteTag                                            DEBUG in execute()
-WriteTag                                             INFO EventInfo event: 10  run: 1
-WriteTag                                             INFO registered all data
-MagicWriteTag                                       DEBUG in execute()
-MagicWriteTag                                        INFO EventInfo event: 10  run: 1
-MagicWriteTag                                        INFO registered all data
 StreamStream1                                       DEBUG addItemObjects(2101,"*") called
 StreamStream1                                       DEBUG            Key:*
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
@@ -946,12 +899,6 @@ ReadData                                          WARNING Could not follow Examp
 ReadData                                             INFO Could not find ExampleHitContainer/MyHits
 ReWriteData                                         DEBUG in execute()
 ReWriteData                                          INFO registered all data
-WriteTag                                            DEBUG in execute()
-WriteTag                                             INFO EventInfo event: 11  run: 1
-WriteTag                                             INFO registered all data
-MagicWriteTag                                       DEBUG in execute()
-MagicWriteTag                                        INFO EventInfo event: 11  run: 1
-MagicWriteTag                                        INFO registered all data
 StreamStream1                                       DEBUG addItemObjects(2101,"*") called
 StreamStream1                                       DEBUG            Key:*
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
@@ -1005,12 +952,6 @@ ReadData                                          WARNING Could not follow Examp
 ReadData                                             INFO Could not find ExampleHitContainer/MyHits
 ReWriteData                                         DEBUG in execute()
 ReWriteData                                          INFO registered all data
-WriteTag                                            DEBUG in execute()
-WriteTag                                             INFO EventInfo event: 12  run: 1
-WriteTag                                             INFO registered all data
-MagicWriteTag                                       DEBUG in execute()
-MagicWriteTag                                        INFO EventInfo event: 12  run: 1
-MagicWriteTag                                        INFO registered all data
 StreamStream1                                       DEBUG addItemObjects(2101,"*") called
 StreamStream1                                       DEBUG            Key:*
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
@@ -1064,12 +1005,6 @@ ReadData                                          WARNING Could not follow Examp
 ReadData                                             INFO Could not find ExampleHitContainer/MyHits
 ReWriteData                                         DEBUG in execute()
 ReWriteData                                          INFO registered all data
-WriteTag                                            DEBUG in execute()
-WriteTag                                             INFO EventInfo event: 13  run: 1
-WriteTag                                             INFO registered all data
-MagicWriteTag                                       DEBUG in execute()
-MagicWriteTag                                        INFO EventInfo event: 13  run: 1
-MagicWriteTag                                        INFO registered all data
 StreamStream1                                       DEBUG addItemObjects(2101,"*") called
 StreamStream1                                       DEBUG            Key:*
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
@@ -1123,12 +1058,6 @@ ReadData                                          WARNING Could not follow Examp
 ReadData                                             INFO Could not find ExampleHitContainer/MyHits
 ReWriteData                                         DEBUG in execute()
 ReWriteData                                          INFO registered all data
-WriteTag                                            DEBUG in execute()
-WriteTag                                             INFO EventInfo event: 14  run: 1
-WriteTag                                             INFO registered all data
-MagicWriteTag                                       DEBUG in execute()
-MagicWriteTag                                        INFO EventInfo event: 14  run: 1
-MagicWriteTag                                        INFO registered all data
 StreamStream1                                       DEBUG addItemObjects(2101,"*") called
 StreamStream1                                       DEBUG            Key:*
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
@@ -1182,12 +1111,6 @@ ReadData                                          WARNING Could not follow Examp
 ReadData                                             INFO Could not find ExampleHitContainer/MyHits
 ReWriteData                                         DEBUG in execute()
 ReWriteData                                          INFO registered all data
-WriteTag                                            DEBUG in execute()
-WriteTag                                             INFO EventInfo event: 15  run: 1
-WriteTag                                             INFO registered all data
-MagicWriteTag                                       DEBUG in execute()
-MagicWriteTag                                        INFO EventInfo event: 15  run: 1
-MagicWriteTag                                        INFO registered all data
 StreamStream1                                       DEBUG addItemObjects(2101,"*") called
 StreamStream1                                       DEBUG            Key:*
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
@@ -1241,12 +1164,6 @@ ReadData                                          WARNING Could not follow Examp
 ReadData                                             INFO Could not find ExampleHitContainer/MyHits
 ReWriteData                                         DEBUG in execute()
 ReWriteData                                          INFO registered all data
-WriteTag                                            DEBUG in execute()
-WriteTag                                             INFO EventInfo event: 16  run: 1
-WriteTag                                             INFO registered all data
-MagicWriteTag                                       DEBUG in execute()
-MagicWriteTag                                        INFO EventInfo event: 16  run: 1
-MagicWriteTag                                        INFO registered all data
 StreamStream1                                       DEBUG addItemObjects(2101,"*") called
 StreamStream1                                       DEBUG            Key:*
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
@@ -1300,12 +1217,6 @@ ReadData                                          WARNING Could not follow Examp
 ReadData                                             INFO Could not find ExampleHitContainer/MyHits
 ReWriteData                                         DEBUG in execute()
 ReWriteData                                          INFO registered all data
-WriteTag                                            DEBUG in execute()
-WriteTag                                             INFO EventInfo event: 17  run: 1
-WriteTag                                             INFO registered all data
-MagicWriteTag                                       DEBUG in execute()
-MagicWriteTag                                        INFO EventInfo event: 17  run: 1
-MagicWriteTag                                        INFO registered all data
 StreamStream1                                       DEBUG addItemObjects(2101,"*") called
 StreamStream1                                       DEBUG            Key:*
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
@@ -1359,12 +1270,6 @@ ReadData                                          WARNING Could not follow Examp
 ReadData                                             INFO Could not find ExampleHitContainer/MyHits
 ReWriteData                                         DEBUG in execute()
 ReWriteData                                          INFO registered all data
-WriteTag                                            DEBUG in execute()
-WriteTag                                             INFO EventInfo event: 18  run: 1
-WriteTag                                             INFO registered all data
-MagicWriteTag                                       DEBUG in execute()
-MagicWriteTag                                        INFO EventInfo event: 18  run: 1
-MagicWriteTag                                        INFO registered all data
 StreamStream1                                       DEBUG addItemObjects(2101,"*") called
 StreamStream1                                       DEBUG            Key:*
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
@@ -1418,12 +1323,6 @@ ReadData                                          WARNING Could not follow Examp
 ReadData                                             INFO Could not find ExampleHitContainer/MyHits
 ReWriteData                                         DEBUG in execute()
 ReWriteData                                          INFO registered all data
-WriteTag                                            DEBUG in execute()
-WriteTag                                             INFO EventInfo event: 19  run: 1
-WriteTag                                             INFO registered all data
-MagicWriteTag                                       DEBUG in execute()
-MagicWriteTag                                        INFO EventInfo event: 19  run: 1
-MagicWriteTag                                        INFO registered all data
 StreamStream1                                       DEBUG addItemObjects(2101,"*") called
 StreamStream1                                       DEBUG            Key:*
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
@@ -1477,12 +1376,6 @@ ReadData                                          WARNING Could not follow Examp
 ReadData                                             INFO Could not find ExampleHitContainer/MyHits
 ReWriteData                                         DEBUG in execute()
 ReWriteData                                          INFO registered all data
-WriteTag                                            DEBUG in execute()
-WriteTag                                             INFO EventInfo event: 20  run: 1
-WriteTag                                             INFO registered all data
-MagicWriteTag                                       DEBUG in execute()
-MagicWriteTag                                        INFO EventInfo event: 20  run: 1
-MagicWriteTag                                        INFO registered all data
 StreamStream1                                       DEBUG addItemObjects(2101,"*") called
 StreamStream1                                       DEBUG            Key:*
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
@@ -1548,65 +1441,65 @@ StreamStream1                                       DEBUG  Added object 13163830
 StreamStream1                                       DEBUG connectOutput done for SimplePoolFile4.root
 StorageSvc                                           INFO Building shape according to reflection information using shape ID for:
 StorageSvc                                           INFO xAOD::FileMetaDataAuxInfo_v1 [BEE2BECF-A936-4078-9FDD-AD703C9ADF9F]
-SimplePoolFile4.root                                DEBUG --> Access   DbContainer  CREA/UPDA [ROOT_Tree] MetaData(xAOD::FileMetaDataAuxInfo_v1/FileMetaDataAux.)
+SimplePoolFile4.root                                DEBUG --> Access   DbContainer  CREA/UPDA [ROOT_TreeIndex] MetaData(xAOD::FileMetaDataAuxInfo_v1/FileMetaDataAux.)
 MetaData(xAOD::FileMetaDataAuxInfo_v1/FileMeta...)  DEBUG Opening
 MetaData(xAOD::FileMetaDataAuxInfo_v1/FileMeta...)  DEBUG    attributes# = 1
 MetaData(xAOD::FileMetaDataAuxInfo_v1/FileMeta...)  DEBUG Branch container 'xAOD::FileMetaDataAuxInfo_v1_FileMetaDataAux.'
 MetaData(xAOD::FileMetaDataAuxInfo_v1/FileMeta...)  DEBUG Opened container MetaData(xAOD::FileMetaDataAuxInfo_v1/FileMetaDataAux.) of type ROOT_Tree
-SimplePoolFile4.root                                DEBUG --->Adding Assoc :298DE14D-49CF-674A-9171-CEBBD9BEC6F8/MetaData(xAOD::FileMetaDataAuxInfo_v1/FileMetaDataAux.) [202]  (d , ffffffffffffffff)
+SimplePoolFile4.root                                DEBUG --->Adding Assoc :298DE14D-49CF-674A-9171-CEBBD9BEC6F8/MetaData(xAOD::FileMetaDataAuxInfo_v1/FileMetaDataAux.) [203]  (9 , ffffffffffffffff)
 SimplePoolFile4.root                                DEBUG ---->ClassID:BEE2BECF-A936-4078-9FDD-AD703C9ADF9F
-SimplePoolFile4.root                                DEBUG --->Adding Shape[8 , BEE2BECF-A936-4078-9FDD-AD703C9ADF9F]:  [1 Column(s)] 
+SimplePoolFile4.root                                DEBUG --->Adding Shape[6 , BEE2BECF-A936-4078-9FDD-AD703C9ADF9F]:  [1 Column(s)] 
 SimplePoolFile4.root                                DEBUG ---->Class:xAOD::FileMetaDataAuxInfo_v1
 SimplePoolFile4.root                                DEBUG ---->[0]:xAOD::FileMetaDataAuxInfo_v1 Typ:xAOD::FileMetaDataAuxInfo_v1 [21] Size:0 Offset:0 #Elements:1
 StorageSvc                                           INFO Building shape according to reflection information using shape ID for:
 StorageSvc                                           INFO EventStreamInfo_p3 [11DF1B8C-0DEE-4687-80D7-E74B520ACBB4]
-SimplePoolFile4.root                                DEBUG --> Access   DbContainer  CREA/UPDA [ROOT_Tree] MetaData(EventStreamInfo_p3/StreamStream1)
+SimplePoolFile4.root                                DEBUG --> Access   DbContainer  CREA/UPDA [ROOT_TreeIndex] MetaData(EventStreamInfo_p3/StreamStream1)
 MetaData(EventStreamInfo_p3/StreamStream1)          DEBUG Opening
 MetaData(EventStreamInfo_p3/StreamStream1)          DEBUG    attributes# = 1
 MetaData(EventStreamInfo_p3/StreamStream1)          DEBUG Branch container 'EventStreamInfo_p3_StreamStream1'
 MetaData(EventStreamInfo_p3/StreamStream1)          DEBUG Opened container MetaData(EventStreamInfo_p3/StreamStream1) of type ROOT_Tree
-SimplePoolFile4.root                                DEBUG --->Adding Assoc :298DE14D-49CF-674A-9171-CEBBD9BEC6F8/MetaData(EventStreamInfo_p3/StreamStream1) [202]  (e , ffffffffffffffff)
+SimplePoolFile4.root                                DEBUG --->Adding Assoc :298DE14D-49CF-674A-9171-CEBBD9BEC6F8/MetaData(EventStreamInfo_p3/StreamStream1) [203]  (a , ffffffffffffffff)
 SimplePoolFile4.root                                DEBUG ---->ClassID:11DF1B8C-0DEE-4687-80D7-E74B520ACBB4
-SimplePoolFile4.root                                DEBUG --->Adding Shape[9 , 11DF1B8C-0DEE-4687-80D7-E74B520ACBB4]:  [1 Column(s)] 
+SimplePoolFile4.root                                DEBUG --->Adding Shape[7 , 11DF1B8C-0DEE-4687-80D7-E74B520ACBB4]:  [1 Column(s)] 
 SimplePoolFile4.root                                DEBUG ---->Class:EventStreamInfo_p3
 SimplePoolFile4.root                                DEBUG ---->[0]:EventStreamInfo_p3 Typ:EventStreamInfo_p3 [21] Size:0 Offset:0 #Elements:1
 StorageSvc                                           INFO Building shape according to reflection information using shape ID for:
 StorageSvc                                           INFO xAOD::FileMetaData_v1 [C87E3828-4A7A-480A-95DE-0339539F6A0F]
-SimplePoolFile4.root                                DEBUG --> Access   DbContainer  CREA/UPDA [ROOT_Tree] MetaData(xAOD::FileMetaData_v1/FileMetaData)
+SimplePoolFile4.root                                DEBUG --> Access   DbContainer  CREA/UPDA [ROOT_TreeIndex] MetaData(xAOD::FileMetaData_v1/FileMetaData)
 MetaData(xAOD::FileMetaData_v1/FileMetaData)        DEBUG Opening
 MetaData(xAOD::FileMetaData_v1/FileMetaData)        DEBUG    attributes# = 1
 MetaData(xAOD::FileMetaData_v1/FileMetaData)        DEBUG Branch container 'xAOD::FileMetaData_v1_FileMetaData'
 MetaData(xAOD::FileMetaData_v1/FileMetaData)        DEBUG Opened container MetaData(xAOD::FileMetaData_v1/FileMetaData) of type ROOT_Tree
-SimplePoolFile4.root                                DEBUG --->Adding Assoc :298DE14D-49CF-674A-9171-CEBBD9BEC6F8/MetaData(xAOD::FileMetaData_v1/FileMetaData) [202]  (f , ffffffffffffffff)
+SimplePoolFile4.root                                DEBUG --->Adding Assoc :298DE14D-49CF-674A-9171-CEBBD9BEC6F8/MetaData(xAOD::FileMetaData_v1/FileMetaData) [203]  (b , ffffffffffffffff)
 SimplePoolFile4.root                                DEBUG ---->ClassID:C87E3828-4A7A-480A-95DE-0339539F6A0F
-SimplePoolFile4.root                                DEBUG --->Adding Shape[10 , C87E3828-4A7A-480A-95DE-0339539F6A0F]:  [1 Column(s)] 
+SimplePoolFile4.root                                DEBUG --->Adding Shape[8 , C87E3828-4A7A-480A-95DE-0339539F6A0F]:  [1 Column(s)] 
 SimplePoolFile4.root                                DEBUG ---->Class:xAOD::FileMetaData_v1
 SimplePoolFile4.root                                DEBUG ---->[0]:xAOD::FileMetaData_v1 Typ:xAOD::FileMetaData_v1 [21] Size:0 Offset:0 #Elements:1
 StorageSvc                                           INFO Building shape according to reflection information using shape ID for:
 StorageSvc                                           INFO IOVMetaDataContainer_p1 [6C2DE6DF-6D52-43F6-B435-9F29812F40C0]
-SimplePoolFile4.root                                DEBUG --> Access   DbContainer  CREA/UPDA [ROOT_Tree] MetaData(IOVMetaDataContainer_p1//TagInfo)
+SimplePoolFile4.root                                DEBUG --> Access   DbContainer  CREA/UPDA [ROOT_TreeIndex] MetaData(IOVMetaDataContainer_p1//TagInfo)
 MetaData(IOVMetaDataContainer_p1//TagInfo)          DEBUG Opening
 MetaData(IOVMetaDataContainer_p1//TagInfo)          DEBUG    attributes# = 1
 MetaData(IOVMetaDataContainer_p1//TagInfo)          DEBUG Branch container 'IOVMetaDataContainer_p1__TagInfo'
 MetaData(IOVMetaDataContainer_p1//TagInfo)          DEBUG Opened container MetaData(IOVMetaDataContainer_p1//TagInfo) of type ROOT_Tree
-SimplePoolFile4.root                                DEBUG --->Adding Assoc :298DE14D-49CF-674A-9171-CEBBD9BEC6F8/MetaData(IOVMetaDataContainer_p1//TagInfo) [202]  (10 , ffffffffffffffff)
+SimplePoolFile4.root                                DEBUG --->Adding Assoc :298DE14D-49CF-674A-9171-CEBBD9BEC6F8/MetaData(IOVMetaDataContainer_p1//TagInfo) [203]  (c , ffffffffffffffff)
 SimplePoolFile4.root                                DEBUG ---->ClassID:6C2DE6DF-6D52-43F6-B435-9F29812F40C0
-SimplePoolFile4.root                                DEBUG --->Adding Shape[11 , 6C2DE6DF-6D52-43F6-B435-9F29812F40C0]:  [1 Column(s)] 
+SimplePoolFile4.root                                DEBUG --->Adding Shape[9 , 6C2DE6DF-6D52-43F6-B435-9F29812F40C0]:  [1 Column(s)] 
 SimplePoolFile4.root                                DEBUG ---->Class:IOVMetaDataContainer_p1
 SimplePoolFile4.root                                DEBUG ---->[0]:IOVMetaDataContainer_p1 Typ:IOVMetaDataContainer_p1 [21] Size:0 Offset:0 #Elements:1
-SimplePoolFile4.root                                DEBUG --> Access   DbContainer  CREA/UPDA [ROOT_Tree] MetaDataHdr(DataHeader)
+SimplePoolFile4.root                                DEBUG --> Access   DbContainer  CREA/UPDA [ROOT_TreeIndex] MetaDataHdr(DataHeader)
 MetaDataHdr(DataHeader)                             DEBUG Opening
 MetaDataHdr(DataHeader)                             DEBUG    attributes# = 1
 MetaDataHdr(DataHeader)                             DEBUG Branch container 'DataHeader'
 MetaDataHdr(DataHeader)                             DEBUG Opened container MetaDataHdr(DataHeader) of type ROOT_Tree
-SimplePoolFile4.root                                DEBUG --->Adding Assoc :298DE14D-49CF-674A-9171-CEBBD9BEC6F8/MetaDataHdr(DataHeader) [202]  (11 , ffffffffffffffff)
+SimplePoolFile4.root                                DEBUG --->Adding Assoc :298DE14D-49CF-674A-9171-CEBBD9BEC6F8/MetaDataHdr(DataHeader) [203]  (d , ffffffffffffffff)
 SimplePoolFile4.root                                DEBUG ---->ClassID:4DDBD295-EFCE-472A-9EC8-15CD35A9EB8D
-SimplePoolFile4.root                                DEBUG --> Access   DbContainer  CREA/UPDA [ROOT_Tree] MetaDataHdrForm(DataHeaderForm)
+SimplePoolFile4.root                                DEBUG --> Access   DbContainer  CREA/UPDA [ROOT_TreeIndex] MetaDataHdrForm(DataHeaderForm)
 MetaDataHdrForm(DataHeaderForm)                     DEBUG Opening
 MetaDataHdrForm(DataHeaderForm)                     DEBUG    attributes# = 1
 MetaDataHdrForm(DataHeaderForm)                     DEBUG Branch container 'DataHeaderForm'
 MetaDataHdrForm(DataHeaderForm)                     DEBUG Opened container MetaDataHdrForm(DataHeaderForm) of type ROOT_Tree
-SimplePoolFile4.root                                DEBUG --->Adding Assoc :298DE14D-49CF-674A-9171-CEBBD9BEC6F8/MetaDataHdrForm(DataHeaderForm) [202]  (12 , ffffffffffffffff)
+SimplePoolFile4.root                                DEBUG --->Adding Assoc :298DE14D-49CF-674A-9171-CEBBD9BEC6F8/MetaDataHdrForm(DataHeaderForm) [203]  (e , ffffffffffffffff)
 SimplePoolFile4.root                                DEBUG ---->ClassID:7BE56CEF-C866-4BEE-9348-A5F34B5F1DAD
 SimplePoolFile4.root                                DEBUG DB Action Commit
 StreamStream1                                       DEBUG Metadata items written: 4
@@ -1623,8 +1516,6 @@ PoolSvc                                             DEBUG Disconnected Persisten
 ApplicationMgr                                       INFO Application Manager Stopped successfully
 ReadData                                             INFO in finalize()
 ReWriteData                                          INFO in finalize()
-WriteTag                                             INFO in finalize()
-MagicWriteTag                                        INFO in finalize()
 StreamStream1                                       DEBUG finalize: Optimize output
 PoolSvc                                             DEBUG Disconnect request for contextId=1
 StreamStream1                                       DEBUG finalize: end optimize output

@@ -11,6 +11,7 @@ from D3PDMakerConfig.D3PDMakerFlags import configFlags
 from AthenaConfiguration.MainServicesConfig import MainServicesCfg
 
 configFlags.Reco.EnableBTagging = False
+configFlags.Jet.strictMode = False
 configFlags.fillFromArgs()
 configFlags.lock()
 

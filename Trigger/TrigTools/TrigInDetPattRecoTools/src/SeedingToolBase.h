@@ -6,11 +6,8 @@
 #define TRIGINDETPATTRECOTOOLS_SEEDINGTOOLBASE_H
 
 #include "GaudiKernel/ToolHandle.h"
-//#include "TrigInDetToolInterfaces/ITrigInDetTrackSeedingTool.h"
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "StoreGate/ReadHandleKey.h"
-#include <string>
-#include <vector>
 
 #include "IRegionSelector/IRegSelTool.h"
 #include "TrigInDetToolInterfaces/ITrigL2LayerNumberTool.h"
@@ -18,6 +15,12 @@
 #include "TrigInDetPattRecoTools/GNN_FasTrackConnector.h"
 #include "TrigInDetPattRecoTools/GNN_Geometry.h"
 #include "GNN_DataStorage.h"
+#include <string>
+#include <vector>
+#include <utility> //for std::pair
+#include <tuple>
+#include <memory>
+#include <array>
 
 class AtlasDetectorID;
 class SCT_ID;
@@ -39,7 +42,9 @@ class SeedingToolBase: public AthAlgTool {
   std::pair<int, int> buildTheGraph(const IRoiDescriptor&, const std::unique_ptr<GNN_DataStorage>&, std::vector<GNN_Edge>&) const;
 
   int runCCA(int, std::vector<GNN_Edge>&) const;
-  
+
+  void extractSeedsFromTheGraph(int, int, int, std::vector<GNN_Edge>&, std::vector<std::tuple<float, int, std::vector<unsigned int> > >&) const;
+
   ToolHandle<ITrigL2LayerNumberTool> m_layerNumberTool {this, "layerNumberTool", "TrigL2LayerNumberToolITk"};
 
   const AtlasDetectorID* m_atlasId = nullptr;
@@ -54,7 +59,7 @@ class SeedingToolBase: public AthAlgTool {
   UnsignedIntegerProperty m_nMaxPhiSlice{this, "nMaxPhiSlice", 53};
   BooleanProperty m_doubletFilterRZ{this, "Doublet_FilterRZ", true};
   BooleanProperty m_useEtaBinning{this, "UseEtaBinning", true};
-  BooleanProperty m_matchBeforeCreate{this, "MatchBeforeCreate", false};
+  BooleanProperty m_matchBeforeCreate{this, "MatchBeforeCreate", true};
   FloatProperty m_minPt{this, "pTmin", 1000.0};
   FloatProperty m_etaBinOverride{this, "etaBin", 0.0f, "specify non-zero to override eta bin width from connection file (default 0.2 in createLinkingScheme.py)"};
   IntegerProperty m_nMaxEdges{this, "MaxGraphEdges", 2000000};

@@ -44,10 +44,10 @@ private:
   ServiceHandle<IClassIDSvc> m_clidSvc;
   std::string m_crest_tag;
   std::string m_crest_folder_desc;
-  cool::ValidityKey m_vkey;
+  std::vector<uint64_t> m_vList;
   bool m_head;
 public:
-  CoolCrestCompare(std::string& cool_str,std::string& crest_str,std::string& gTagCrest,std::string& gTagCool, std::string& folder, cool::ValidityKey vkey,bool isHead):m_msgSvc("msgSvc","test"),
+  CoolCrestCompare(std::string& cool_str,std::string& crest_str,std::string& gTagCrest,std::string& gTagCool, std::string& folder, std::vector<uint64_t>& vList,bool isHead):m_msgSvc("msgSvc","test"),
   m_cool_con_str(cool_str),
   m_crest_str(crest_str),
   m_gTagCrest(gTagCrest),
@@ -57,7 +57,7 @@ public:
   m_clidSvc("ClassIDSvc","test"),
   m_crest_tag(""),
   m_crest_folder_desc(""),
-  m_vkey(vkey),
+  m_vList(vList),
   m_head(isHead)	
   {
   }
@@ -66,38 +66,40 @@ public:
     const std::string delimiter{"."};
     std::string fMainCool("cool_dump");
     std::string fMainCrest("crest_dump");
-    const std::string p1=fMainCool+"/"+IOVDbNamespace::sanitiseFilename(m_folder)+delimiter+std::to_string(m_vkey)+fileSuffix;
-    const std::string p2=fMainCrest+"/"+IOVDbNamespace::sanitiseFilename(m_folder)+delimiter+std::to_string(m_vkey)+fileSuffix;
-    
-    std::ifstream f1(p1, std::ifstream::binary|std::ifstream::ate);
-    std::ifstream f2(p2, std::ifstream::binary|std::ifstream::ate);
+    for (uint64_t vkey : m_vList) {
+      const std::string p1=fMainCool+"/"+IOVDbNamespace::sanitiseFilename(m_folder)+delimiter+std::to_string(vkey)+fileSuffix;
+      const std::string p2=fMainCrest+"/"+IOVDbNamespace::sanitiseFilename(m_folder)+delimiter+std::to_string(vkey)+fileSuffix;
 
-    if (f1.fail() || f2.fail()) {
-      if(f1.fail())
-        std::cerr<<"COOL output file problem"<<std::endl;
-      else
-	std::cerr<<"CREST output file problem"<<std::endl;
-      return;
-    }
-    bool result=true;
-    if (f1.tellg() != f2.tellg()) {
-      result=false; //size mismatch
-    }
-    if(result){
+      std::ifstream f1(p1, std::ifstream::binary|std::ifstream::ate);
+      std::ifstream f2(p2, std::ifstream::binary|std::ifstream::ate);
+
+      if (f1.fail() || f2.fail()) {
+        if(f1.fail())
+          std::cerr<<"COOL output file problem"<<std::endl;
+        else
+	  std::cerr<<"CREST output file problem"<<std::endl;
+        return;
+      }
+      bool result=true;
+      if (f1.tellg() != f2.tellg()) {
+        result=false; //size mismatch
+      }
+      if(result){
       //seek back to beginning and use std::equal to compare contents
-      f1.seekg(0, std::ifstream::beg);
-      f2.seekg(0, std::ifstream::beg);
-      result = std::equal(std::istreambuf_iterator<char>(f1.rdbuf()),
+        f1.seekg(0, std::ifstream::beg);
+        f2.seekg(0, std::ifstream::beg);
+        result = std::equal(std::istreambuf_iterator<char>(f1.rdbuf()),
                     std::istreambuf_iterator<char>(),
                     std::istreambuf_iterator<char>(f2.rdbuf()));
-    }
-    std::cout<<"-----------------------------------------------------------"<<std::endl;
-    if(result)
-	    std::cout<<"The folder: \""<<m_folder<<"\" is the same in COOL and CREST"<<std::endl;
-    else{
-	    std::cout<<"The folder: \""<<m_folder<<"\" is different in COOL and CREST"<<std::endl;
+      }
+      std::cout<<"-----------------------------------------------------------"<<std::endl;
+      if(result)
+	    std::cout<<"The folder \""<<m_folder<<"\" is the same in COOL and CREST at timestamp: "<< vkey<<std::endl;
+      else{
+	    std::cout<<"The folder \""<<m_folder<<"\" is different in COOL and CREST at timestamp: "<<vkey<<std::endl;
 	    std::cout<<"To check differences use the following command:"<<std::endl;
 	    std::cout<<"diff "<<p1<<" "<<p2<<std::endl;
+     }
     }
   }
   void startCool(){
@@ -106,7 +108,9 @@ public:
     IOVDbConn connection(m_cool_con_str, true, m_log);
     IOVDbFolder f(&(connection), parser, m_log, m_clidSvc.get(), nullptr, false, false, "COOL_DATABASE","http://unknown","unknown",true);
     f.preLoadFolder(tagInfoMgr.get() , 0, 0);
-    f.loadCache(m_vkey, 0,m_gTagCool, true);
+    for (uint64_t vkey : m_vList) {
+    	f.loadCache(vkey, 0,m_gTagCool, true);
+    }
   }
   void startCrest(){
     ServiceHandle<ITagInfoMgr> tagInfoMgr{"TagInfoMgr","TagInfoMgr"};
@@ -128,9 +132,12 @@ public:
     IOVDbConn connection("", true, m_log);
     IOVDbFolder f(&(connection), parser, m_log, m_clidSvc.get(), nullptr, false, false, "CREST",m_crest_str,m_crest_tag,true);
     f.preLoadFolder(tagInfoMgr.get() , 0, 0);
-    f.loadCache(m_vkey, 0,m_gTagCrest, true);
+    for (uint64_t vkey : m_vList) {
+      f.loadCache(vkey, 0,m_gTagCrest, true);
+    }
   }
 };
+//coverity[root_function]
 int main(int argc, char ** argv)
 {
     boost::program_options::options_description description( "Options" );
@@ -142,7 +149,7 @@ int main(int argc, char ** argv)
         ( "globalTagCrest,g", boost::program_options::value<std::string>(), "Global tag for CREST" )
 	( "globalTagCool,G", boost::program_options::value<std::string>(), "Global tag for COOL" )
 	( "folder,f", boost::program_options::value<std::string>(), "name of Folder" )
-        ( "timestamp,t", boost::program_options::value<uint64_t>(), "time of data" )
+        ( "timestamp,t", boost::program_options::value<std::vector<uint64_t>>()->multitoken(), "Time of data. Support multiple space separated values. Example: -t 1715204691957781740 1725204691957781740" )
 	( "head,H", boost::program_options::bool_switch()->default_value(false), "Use HEAD tag" );
 
     boost::program_options::variables_map arguments;
@@ -168,7 +175,7 @@ int main(int argc, char ** argv)
     std::string conStr="";
     std::string crestStr="";
     bool isHead = false; 
-    cool::ValidityKey vkey;
+    std::vector<uint64_t> vList;
     if (arguments.count("folder")) {
       folder = arguments["folder"].as<std::string>();
     }
@@ -205,7 +212,7 @@ int main(int argc, char ** argv)
       return -1;
     }
     if (arguments.count("timestamp")) {
-      vkey = arguments["timestamp"].as<uint64_t>();
+      vList = arguments["timestamp"].as<std::vector<uint64_t>>();	    
     }
     else{
       std::cerr <<"Error do not define timestamp"<<std::endl;
@@ -213,7 +220,7 @@ int main(int argc, char ** argv)
     }
     if (arguments.count("head"))
       isHead=arguments["head"].as<bool>();
-    CoolCrestCompare pr(conStr,crestStr,globalTagCrest,globalTagCool,folder,vkey,isHead);
+    CoolCrestCompare pr(conStr,crestStr,globalTagCrest,globalTagCool,folder,vList,isHead);
     pr.startCrest();
     pr.startCool();
     pr.compareFiles();

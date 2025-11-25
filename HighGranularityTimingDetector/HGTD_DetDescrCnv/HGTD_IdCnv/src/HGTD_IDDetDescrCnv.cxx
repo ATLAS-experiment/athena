@@ -12,6 +12,8 @@
 #include "AthenaBaseComps/AthCheckMacros.h"
 
 #include "IdDictDetDescr/IdDictManager.h"
+#include "IdDict/IdDictDictionary.h"
+#include "IdDict/IdDictMgr.h"
 
 //--------------------------------------------------------------------
 
@@ -55,7 +57,7 @@ HGTD_IDDetDescrCnv::createObj(IOpaqueAddress* /*pAddr*/, DataObject*& pObj)
     // DoChecks flag
     bool doChecks                 = mgr->do_checks();
 
-    IdDictDictionary* dict = mgr->find_dictionary("InnerDetector");
+    const IdDictDictionary* dict = mgr->find_dictionary("InnerDetector");
     if (!dict) {
         ATH_MSG_ERROR( "unable to find idDict for InnerDetector" );
         return StatusCode::FAILURE;
@@ -107,9 +109,9 @@ HGTD_IDDetDescrCnv::createObj(IOpaqueAddress* /*pAddr*/, DataObject*& pObj)
             return StatusCode::FAILURE;
         }
         // Save state:
-        m_inDetIDTag      = inDetIDTag;
-        m_inDetIDFileName = inDetIDFileName;
-        m_inDetIdDictTag  = inDetIdDictTag;
+        m_inDetIDTag      = std::move(inDetIDTag);
+        m_inDetIDFileName = std::move(inDetIDFileName);
+        m_inDetIdDictTag  = std::move(inDetIdDictTag);
         m_doChecks        = doChecks;
     }
     

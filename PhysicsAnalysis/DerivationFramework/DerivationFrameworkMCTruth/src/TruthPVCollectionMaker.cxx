@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////
@@ -15,16 +15,6 @@
 
 #include "TruthUtils/HepMCHelpers.h"
 
-// Constructor
-DerivationFramework::TruthPVCollectionMaker::TruthPVCollectionMaker(const std::string& t,
-                                                                    const std::string& n,
-                                                                    const IInterface* p)
-  : base_class(t,n,p)
- {
-}
-
-// Destructor
-DerivationFramework::TruthPVCollectionMaker::~TruthPVCollectionMaker() = default;
 // Athena initialize
 StatusCode DerivationFramework::TruthPVCollectionMaker::initialize()
 {
@@ -41,9 +31,8 @@ StatusCode DerivationFramework::TruthPVCollectionMaker::initialize()
 
 
 // Selection and collection creation
-StatusCode DerivationFramework::TruthPVCollectionMaker::addBranches() const
+StatusCode DerivationFramework::TruthPVCollectionMaker::addBranches(const EventContext& ctx) const
 {
-    const EventContext& ctx{Gaudi::Hive::currentContext()};
     // Retrieve truth collections
     SG::ReadHandle<xAOD::TruthEventContainer> importedTruthEvents{m_eventsKey, ctx};
     if (!importedTruthEvents.isValid()) {
@@ -53,7 +42,7 @@ StatusCode DerivationFramework::TruthPVCollectionMaker::addBranches() const
 
     // Create the new vertex containers
     SG::WriteHandle<xAOD::TruthVertexContainer> writeHandleVtx{m_outVtxKey, ctx};
-    ATH_CHECK(writeHandleVtx.record(std::make_unique<xAOD::TruthVertexContainer>(), 
+    ATH_CHECK(writeHandleVtx.record(std::make_unique<xAOD::TruthVertexContainer>(),
                                     std::make_unique<xAOD::TruthVertexAuxContainer>()));
     xAOD::TruthVertexContainer* newVertexCollection = writeHandleVtx.ptr();
     ATH_MSG_DEBUG( "Recorded new TruthVertexContainer with key: " << m_outVtxKey.fullKey());

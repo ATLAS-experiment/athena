@@ -75,6 +75,7 @@ JetUncertaintiesTool::JetUncertaintiesTool(const std::string& name)
     , m_path("")
     , m_analysisFile("")
     , m_analysisHistPattern("")
+    , m_NJetAccessorName("Njet")
     , m_systFilters()
     , m_defAnaFile("")
     , m_refNPV(-1)
@@ -114,6 +115,7 @@ JetUncertaintiesTool::JetUncertaintiesTool(const std::string& name)
     declareProperty("Path",m_path);
     declareProperty("AnalysisFile",m_analysisFile);
     declareProperty("AnalysisHistPattern",m_analysisHistPattern);
+    declareProperty("NJetAccessorName",m_NJetAccessorName);
     declareProperty("VariablesToShift",m_systFilters);
     declareProperty("IsData",m_isData);
     declareProperty("AbsEtaGluonFraction",m_absEtaGluonFraction);
@@ -140,6 +142,7 @@ JetUncertaintiesTool::JetUncertaintiesTool(const JetUncertaintiesTool& toCopy)
     , m_path(toCopy.m_path)
     , m_analysisFile(toCopy.m_analysisFile)
     , m_analysisHistPattern(toCopy.m_analysisHistPattern)
+    , m_NJetAccessorName(toCopy.m_NJetAccessorName)
     , m_systFilters(toCopy.m_systFilters)
     , m_defAnaFile(toCopy.m_defAnaFile)
     , m_refNPV(toCopy.m_refNPV)
@@ -1003,7 +1006,7 @@ UncertaintyComponent* JetUncertaintiesTool::buildUncertaintyComponent(const Comp
                     component.flavourType == FlavourComp::PerJetResponse_C){
                         return new PerJetFlavourUncertaintyComponent(component);
                     }else
-                        return new FlavourUncertaintyComponent(component,m_jetDef,m_analysisFile.c_str(),m_defAnaFile.c_str(),m_path.c_str(),m_calibArea.c_str(),m_absEtaGluonFraction,m_analysisHistPattern.c_str());
+                        return new FlavourUncertaintyComponent(component,m_jetDef,m_analysisFile.c_str(),m_defAnaFile.c_str(),m_path.c_str(),m_calibArea.c_str(),m_absEtaGluonFraction,m_analysisHistPattern.c_str(),m_NJetAccessorName);
                                     
             }
             else

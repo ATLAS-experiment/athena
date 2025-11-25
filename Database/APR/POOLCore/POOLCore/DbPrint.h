@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //====================================================================
@@ -9,42 +9,37 @@
 #ifndef POOL_DBPRINT_H
 #define POOL_DBPRINT_H 1
 
-#include "GaudiKernel/MsgStream.h"
-#include "GaudiKernel/Bootstrap.h"
-#include "GaudiKernel/ISvcLocator.h"
 #include <atomic>
-
+#include "AthenaKernel/getMessageSvc.h"
+#include "AthenaBaseComps/AthMessaging.h"
+#include "SystemTools.h"
 
 namespace pool {
 
-   namespace  DbPrintLvl {
-      typedef   MSG::Level      MsgLevel;
-      static const MsgLevel None        = MsgLevel::NIL;
-      static const MsgLevel Verbose     = MsgLevel::VERBOSE;
-      static const MsgLevel Debug       = MsgLevel::DEBUG;
-      static const MsgLevel Info        = MsgLevel::INFO;
-      static const MsgLevel Warning     = MsgLevel::WARNING;
-      static const MsgLevel Error       = MsgLevel::ERROR;
-      static const MsgLevel Fatal       = MsgLevel::FATAL;
-      static const MsgLevel Always      = MsgLevel::ALWAYS;
-
-      extern std::atomic<MsgLevel>   outputLvl;
-      inline void       setLevel( MsgLevel l )  { outputLvl=l; }
-   }
+   struct  DbPrintLvl {
+      static std::atomic<MSG::Level>   outputLvl;
+      inline static void         setLevel( MSG::Level l )  { outputLvl.store(l); }
+      inline static MSG::Level   getLevel( const std::string& name );
+   };
 
 
-   class DbPrint : public MsgStream
-   {
-  public:
-     DbPrint( const std::string& name )
-           : MsgStream( Gaudi::svcLocator()->service<IMessageSvc>( "MessageSvc" ).get(), name )
-     {
-        if( DbPrintLvl::outputLvl != DbPrintLvl::None ) {
-           setLevel( DbPrintLvl::outputLvl );
-        }
-     }
+   class DbPrint : public MsgStream {
+   public:
+     DbPrint( const std::string& name );
 
      static MsgStream& endmsg( MsgStream& s ) { return ::endmsg(s); }
+   };
+
+
+   /// @brief  AthMessaging wrapper to set the output level in APR components
+   class APRMessaging : public AthMessaging {
+   public:
+      APRMessaging(const std::string& name);
+
+      APRMessaging(const APRMessaging&) = delete;
+      APRMessaging& operator=(const APRMessaging&) = delete;
+      APRMessaging(APRMessaging&&) = delete;
+      APRMessaging& operator=(APRMessaging&&) = delete;
    };
 
 }       // End namespace pool

@@ -724,7 +724,7 @@ GeoIntrusivePtr<GeoFullPhysVol> LArGeo::EndcapCryostatConstruction::createEnvelo
 
     std::string tag = bPos ? "FCAL_POS" : "FCAL_NEG";
     // Get default values for alignable transform deltas from SubdetPosHelper
-    const IRDBRecord *posRec = GeoDBUtils::getTransformRecord(larPosition, tag);
+    const IRDBRecord *posRec = GeoDBUtils::getTransformRecord(std::move(larPosition), tag);
     if (!posRec) throw std::runtime_error("Error, no lar position record in the database") ;
     GeoTrf::Transform3D xfPos = GeoDBUtils::getTransform(posRec);
     GeoAlignableTransform *fcalXF = new GeoAlignableTransform(xfPos);

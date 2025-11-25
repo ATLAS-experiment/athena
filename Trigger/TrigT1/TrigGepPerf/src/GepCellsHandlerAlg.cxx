@@ -255,7 +255,7 @@ StatusCode GepCellsHandlerAlg::execute(const EventContext& ctx) const {
   
     // Fill cells into map according to FEB  
     auto feb_itr = gepCellsPerFEB.find(caloCell.FEB);
-    if (feb_itr != gepCellsPerFEB.end()) feb_itr->second.push_back(caloCell);
+    if (feb_itr != gepCellsPerFEB.end()) feb_itr->second.push_back(std::move(caloCell));
     else {
 	std::vector<Gep::GepCaloCell> cellsThisFEB;
 	cellsThisFEB.push_back(caloCell);
@@ -291,7 +291,7 @@ int GepCellsHandlerAlg::getGepEnergy(float offline_et) const {
 
   // If cell saturates readout range, largest possible value is send
   if (offline_et > m_readoutRanges[4]) 
-      return m_stepsPerRange+(m_stepsPerRange*m_valG)+(m_stepsPerRange*m_valG*m_valG)+((m_stepsPerRange-1)*m_valG*m_valG*m_valG)*m_valLeastSigBit;
+      return (m_stepsPerRange+(m_stepsPerRange*m_valG)+(m_stepsPerRange*m_valG*m_valG)+((m_stepsPerRange-1)*m_valG*m_valG*m_valG))*m_valLeastSigBit;
 
   int readoutRange = 0;
   for (int i = 1; i <= 3; ++i) {

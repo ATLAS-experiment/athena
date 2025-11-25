@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include<iostream>
@@ -901,7 +901,7 @@ RingerProcedureWrapper<
     // Retrieve position indexes where we shall retrieve this discriminator
     IOHelperFcns::getIdxVecFromStr( folderName, discrIdxVec );
 
-    // Check if everything is ok on indexes retrived:
+    // Check if everything is ok on indexes retrieved:
     if ( discrIdxVec.size() < 3 ||
         discrIdxVec[0] >= discrSegDepSize ||
         discrIdxVec[1] >= discrEtDepSize  ||

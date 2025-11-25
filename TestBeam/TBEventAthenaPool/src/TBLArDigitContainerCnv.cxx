@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TBLArDigitContainerCnv.h"
@@ -8,9 +8,7 @@
 
 
 TBLArDigitContainerCnv::TBLArDigitContainerCnv(ISvcLocator* svcLoc) : 
-  TBLArDigitContainerCnvBase(svcLoc),
-  p0_guid("B15FFDA0-206D-4062-8B5F-582A1ECD5502"),	// GUID of the transient object
-  p1_guid("9F58DDD2-ACDC-4ECF-A714-779B05F94649")		// GUID of the persistent object
+  TBLArDigitContainerCnvBase(svcLoc)
 {}
 
 
@@ -27,7 +25,9 @@ TBLArDigitContainerPERS* TBLArDigitContainerCnv::createPersistent(TBLArDigitCont
 
 TBLArDigitContainer* TBLArDigitContainerCnv::createTransient() {
    MsgStream log(msgSvc(), "TBLArDigitContainerCnv" );
-   TBLArDigitContainer* trans=new TBLArDigitContainer();
+   constexpr pool::Guid p0_guid("B15FFDA0-206D-4062-8B5F-582A1ECD5502"); // GUID of the transient object
+   constexpr pool::Guid p1_guid("9F58DDD2-ACDC-4ECF-A714-779B05F94649");  // GUID of the persistent object
+   auto trans = std::make_unique<TBLArDigitContainer>();
    if (compareClassGuid(p0_guid)) {
      log << MSG::DEBUG << "Read version p0 of TBLArDigitContainer. GUID=" 
          << m_classID.toString() << endmsg;
@@ -36,16 +36,15 @@ TBLArDigitContainer* TBLArDigitContainerCnv::createTransient() {
    else if (compareClassGuid(p1_guid)) {
      log << MSG::DEBUG << "Reading TBLArDigitContainer_p1. GUID=" 
          << m_classID.toString() << endmsg;
-     TBLArDigitContainer_p1* pers=poolReadObject<TBLArDigitContainer_p1>();
-     m_converter.persToTrans(pers,trans, log);
-     delete pers;
-     return trans;
+     std::unique_ptr<TBLArDigitContainer_p1> pers (poolReadObject<TBLArDigitContainer_p1>());
+     m_converter.persToTrans(pers.get(),trans.get(), log);
+     return trans.release();
    }
    else {
      log << MSG::ERROR << "Unsupported persistent version of TBLArDigitContainer. GUID="
      << m_classID.toString() << endmsg;
      throw std::runtime_error("Unsupported persistent version of Data Collection");
    }
-   return trans;
+   return trans.release();
 }
 

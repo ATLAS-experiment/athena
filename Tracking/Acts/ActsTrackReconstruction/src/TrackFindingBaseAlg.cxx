@@ -34,6 +34,7 @@ namespace ActsTrk {
     ATH_MSG_DEBUG("   " << m_absEtaMaxMeasurements);
     ATH_MSG_DEBUG("   " << m_doBranchStopper);
     ATH_MSG_DEBUG("   " << m_addCounts);
+    ATH_MSG_DEBUG("   " << m_checkCounts);
     ATH_MSG_DEBUG("   " << m_doTwoWay);
     ATH_MSG_DEBUG("   " << m_phiMin);
     ATH_MSG_DEBUG("   " << m_phiMax);
@@ -182,10 +183,11 @@ namespace ActsTrk {
   std::unique_ptr<ActsTrk::IMeasurementSelector> TrackFindingBaseAlg::setMeasurementSelector(
       const detail::TrackFindingMeasurements &measurements,
       TrackFinderOptions &options) const {
-    ATH_MSG_DEBUG(name() << "::" << __FUNCTION__);
 
     std::unique_ptr<ActsTrk::IMeasurementSelector> measurementSelector = ActsTrk::detail::getMeasurementSelector(
         m_pixelCalibTool.isEnabled() ? &(*m_pixelCalibTool) : nullptr,
+        m_stripCalibTool.isEnabled() ? &(*m_stripCalibTool) : nullptr,
+        m_hgtdCalibTool.isEnabled() ? &(*m_hgtdCalibTool) : nullptr,
         measurements.measurementRanges(),
         m_measurementSelectorConfig.m_etaBins,
         m_measurementSelectorConfig.m_chi2CutOffOutlier,
@@ -246,9 +248,6 @@ namespace ActsTrk {
 
     auto rootBranch = tracksContainerTemp.makeTrack();
     rootBranch.copyFromWithoutStates(trackProxy);  // #3534
-    if (m_addCounts) {
-      copyCounts(rootBranch, trackProxy);
-    }
 
     // perform track finding
     auto secondResult =
@@ -274,7 +273,6 @@ namespace ActsTrk {
         }
       }
     }
-
     return xAOD::UncalibMeasType::Other;
   }
 
@@ -289,7 +287,9 @@ namespace ActsTrk {
     if (m_addCounts) {
       updateCounts(track, trackState.typeFlags(),
                    measurementType(trackState));
-      checkCounts(track);
+      if (m_checkCounts) {
+        checkCounts(track);
+      }
     }
 
     if (m_trackStatePrinter.isSet()) {
@@ -437,20 +437,6 @@ namespace ActsTrk {
     }
   }
   
-  void TrackFindingBaseAlg::copyCounts(
-                                       const detail::RecoTrackContainer::TrackProxy &track,
-      const detail::RecoTrackContainer::TrackProxy &other) {
-    s_branchState.nPixelHits(track) = s_branchState.nPixelHits(other);
-    s_branchState.nStripHits(track) = s_branchState.nStripHits(other);
-    s_branchState.nHgtdHits(track) = s_branchState.nHgtdHits(other);
-    s_branchState.nPixelHoles(track) = s_branchState.nPixelHoles(other);
-    s_branchState.nStripHoles(track) = s_branchState.nStripHoles(other);
-    s_branchState.nHgtdHoles(track) = s_branchState.nHgtdHoles(other);
-    s_branchState.nPixelOutliers(track) = s_branchState.nPixelOutliers(other);
-    s_branchState.nStripOutliers(track) = s_branchState.nStripOutliers(other);
-    s_branchState.nHgtdOutliers(track) = s_branchState.nHgtdOutliers(other);
-  }
-
   void TrackFindingBaseAlg::checkCounts(const detail::RecoTrackContainer::TrackProxy &track) const {
     // This check will fail if there are other types (HGTD, MS?) of hits, holes, or outliers.
     // The check can be removed when it is no longer appropriate.

@@ -54,6 +54,7 @@ class NSWTriggerSTGL1AElink : public NSWTriggerElink {
   const std::vector<STGTPPadPacket>& pad_packets() const { return m_pad_packets; };
   const std::vector<STGTPSegmentPacket>& segment_packet() const { return m_segment_packets; };
   const std::vector<STGTPMMPacket>& mm_packet() const { return m_mm_packets; };
+  const std::vector<STGTPStripPacket>& strip_packet() const { return m_strip_packets; };
   
 
  private:
@@ -187,6 +188,7 @@ class NSWTriggerSTGL1AElink : public NSWTriggerElink {
   std::vector<STGTPPadPacket> m_pad_packets;
   std::vector<STGTPSegmentPacket> m_segment_packets;
   std::vector<STGTPMMPacket> m_mm_packets;
+  std::vector<STGTPStripPacket> m_strip_packets;
 
   int m_packet_version;
 };

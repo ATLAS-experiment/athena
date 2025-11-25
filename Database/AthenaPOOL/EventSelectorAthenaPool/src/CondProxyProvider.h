@@ -37,8 +37,6 @@ public: // Constructor and Destructor
 
    /// Required of all Gaudi Services
    virtual StatusCode initialize() override;
-   /// Required of all Gaudi Services
-   virtual StatusCode finalize() override;
 
    /// Get all addresses from provider. Called before begin event.
    /// @param storeID [IN] store ID, this function only preloads detector store addresses.
@@ -60,7 +58,7 @@ private: // data
 
 private: // properties
    /// InputCollections, vector with names of the input collections.
-   StringArrayProperty m_inputCollectionsProp
+   Gaudi::Property<std::vector<std::string>> m_inputCollectionsProp
    { this, "InputCollections", {}, "Files to read", "OrderedSet<std::string>" };
    std::vector<std::string>::const_iterator m_inputCollectionsIterator{};
 

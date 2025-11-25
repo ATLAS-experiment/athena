@@ -18,7 +18,8 @@
 #include "TauAnalysisTools/ITauTruthMatchingTool.h"
 #include "tauRecTools/ITauToolBase.h"
 #include "TriggerMatchingTool/IMatchingTool.h"
-#include <boost/algorithm/string.hpp>
+#include <string_view>
+#include <ranges>
 
 #ifndef XAOD_STANDALONE // For now metadata is Athena-only
 #include "AthAnalysisBaseComps/AthAnalysisHelper.h"
@@ -202,7 +203,7 @@ double SUSYObjDef_xAOD::GetTauTriggerEfficiencySF(const xAOD::TauJet& tau, const
 
   // trigger matching (dR=0.2)
   std::vector<std::string> chains;
-  boost::split(chains, map_it->second, [](char c){return c == ',';});
+  for (auto part : std::views::split(map_it->second, ','))  chains.emplace_back(&*part.begin(), std::ranges::distance(part));
   bool match = false;
   for (const std::string& chain : chains)
     if (m_trigMatchingTool->match({&tau}, chain, 0.2)) {

@@ -5,17 +5,13 @@
 #ifndef JTOWER_ID_H
 #define JTOWER_ID_H
 
-#include "AthenaKernel/CLASS_DEF.h"
-#include "AtlasDetDescr/AtlasDetectorID.h"
-#include "Identifier/IdentifierHash.h"
-#include "IdDict/IdDictFieldImplementation.h"
-#include "IdDict/IdDictDefs.h"
-
 #include "CaloIdentifier/JGTowerBase_ID.h"
+#include "Identifier/Identifier.h"
+#include "AthenaKernel/CLASS_DEF.h"
 #include "AthenaKernel/BaseInfo.h"
 
-#include <vector>
-#include <algorithm>
+class IdDictMgr;
+
 
 /**
 *
@@ -33,18 +29,16 @@
 * @author maintained by Walter Hopkins
 */
 
-class Range;
 
 class JTower_ID : public JGTowerBase_ID
 {
 public:        
-
-  typedef Identifier::size_type  size_type ;
+  using size_type = Identifier::size_type;
 
   JTower_ID();
-  ~JTower_ID();
+  virtual ~JTower_ID();
 
-  
+
   /** initialization from the identifier dictionary*/
   virtual int  initialize_from_dictionary (const IdDictMgr& dict_mgr);
 };

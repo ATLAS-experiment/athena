@@ -320,8 +320,7 @@ G4bool LArBarrelPresamplerCalculator::Process(const G4Step* a_step, std::vector<
         }
       }    // loop over hits
       if (!found) {
-        LArHitData newdata = {identifier2, time*Current, Current};
-        hdata.push_back(newdata);
+        hdata.emplace_back(LArHitData{identifier2, time*Current, Current});
       }    // hit was not existing before
 
 

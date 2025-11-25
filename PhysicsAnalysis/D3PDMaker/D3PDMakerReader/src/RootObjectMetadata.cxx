@@ -60,7 +60,7 @@ namespace D3PD {
       var.setDoc( docstring );
 
       // Remember the variable:
-      m_variables.insert( var );
+      m_variables.insert( std::move(var) );
 
       return StatusCode::SUCCESS;
    }
@@ -94,7 +94,7 @@ namespace D3PD {
             Variable var = *itr;
             var.setName( var.name().substr( m_prefix.size(), var.name().npos ) );
             // Insert it into the new container:
-            newVariables.insert( var );
+            newVariables.insert( std::move(var) );
          } else {
             // Insert the variable as it is into the new container:
             newVariables.insert( *itr );

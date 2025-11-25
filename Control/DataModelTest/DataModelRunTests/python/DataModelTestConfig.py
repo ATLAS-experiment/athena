@@ -24,6 +24,7 @@ from AthenaCommon.Constants import INFO
 #
 def DataModelTestFlags (infile = None, evtMax = 20, **kw):
     flags = initConfigFlags()
+    flags.addFlag('rntuple', False)
     flags.Exec.MaxEvents = evtMax
     flags.Exec.OutputLevel = INFO
     flags.Common.MsgSourceLength = 18
@@ -48,7 +49,8 @@ def DataModelTestFlags (infile = None, evtMax = 20, **kw):
     flags.Input.MCCampaign = Campaign.Unknown
     flags.fillFromArgs()
 
-    if flags.Output.StorageTechnology.EventData == 'ROOTRNTUPLE':
+    if flags.rntuple:
+        flags.Output.StorageTechnology.EventData = {'*' : 'ROOTRNTUPLE'}
         def to_rntup (s):
             return s.replace ('.root', '.rntup.root')
         flags.Input.Files = [to_rntup(f) for f in flags.Input.Files]
@@ -102,7 +104,7 @@ def DataModelTestCfg (flags, testName,
         cfg.merge (LoadReadDictsCfg (flags))
 
     # Prevent races when we run tests in parallel in the same directory.
-    if flags.Output.StorageTechnology.EventData == 'ROOTRNTUPLE':
+    if 'ROOTRNTUPLE' in flags.Output.StorageTechnology.EventData.values():
         testName = testName + '_rntup'
     fileCatalog = testName + '_catalog.xml'
     from AthenaPoolCnvSvc.PoolCommonConfig import PoolSvcCfg
@@ -204,7 +206,7 @@ def LoadReadDictsCfg (flags):
 
 
 def rnt (flags):
-    is_rntuple = flags.Output.StorageTechnology.EventData == 'ROOTRNTUPLE'
+    is_rntuple = 'ROOTRNTUPLE' in flags.Output.StorageTechnology.EventData.values()
     if is_rntuple:
         return True, lambda k: ''
     return False, lambda k:k

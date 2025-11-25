@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -289,7 +289,7 @@ StatusCode InDetRawDataFakeWriter::printRDOs() const
 
     // pixel element links
 
-    // Retrive the element link vector
+    // Retrieve the element link vector
     const PixelRDOElemLinkVec* linkVec = nullptr;
     ATH_CHECK( evtStore()->retrieve(linkVec, "PixelRDOELs") );
     

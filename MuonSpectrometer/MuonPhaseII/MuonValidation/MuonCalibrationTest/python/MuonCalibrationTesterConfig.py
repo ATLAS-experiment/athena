@@ -10,12 +10,12 @@ def MdtCalibDbAlgTestCfg(flags, name = "MdtCalibDbAlgTest", **kwargs):
     return result
 
 if __name__=="__main__":
-    from MuonGeoModelTestR4.testGeoModel import setupGeoR4TestCfg, SetupArgParser
+    from MuonGeoModelTestR4.testGeoModel import setupGeoR4TestCfg, SetupArgParser, MuonPhaseIITestDefaults
     from MuonConfig.MuonConfigUtils import executeTest, setupHistSvcCfg
     parser = SetupArgParser()
     parser.set_defaults(nEvents = -1)
     parser.set_defaults(outRootFile="MdtCalibDbAlgTest.root")
-    parser.set_defaults(inputFile=["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonGeomRTT/R4SimHits.pool.root"])
+    parser.set_defaults(inputFile=MuonPhaseIITestDefaults.HITS_PG_R4)
     parser.set_defaults(defaultGeoFile="RUN4")
     parser.set_defaults(noMM=True)
     parser.set_defaults(noSTGC=True)

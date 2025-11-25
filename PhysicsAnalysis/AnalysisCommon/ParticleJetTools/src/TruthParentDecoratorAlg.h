@@ -113,6 +113,13 @@ private:
   mutable std::atomic<unsigned long long> m_missing_n_ignored;
   mutable std::atomic<unsigned long long> m_missing_n_warned;
   mutable std::atomic<unsigned long long> m_total_children;
+
+  // ATLASRECTS-8290: this is for backward compatability, remove eventually
+  Gaudi::Property<bool> m_use_barcode {
+    this, "useBarcode", false, "use barcode rather than UID"
+  };
+  SG::ConstAccessor<int> m_uid{"uid"};
+
 };
 
 #endif

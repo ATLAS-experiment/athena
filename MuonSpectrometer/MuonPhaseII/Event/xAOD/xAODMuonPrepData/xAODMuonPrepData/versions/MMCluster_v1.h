@@ -29,6 +29,8 @@ class MMCluster_v1 : public UncalibratedMeasurement_v1 {
     xAOD::UncalibMeasType type() const override final {
         return xAOD::UncalibMeasType::MMClusterType;
     }
+    /** @brief Returns the local measurement position as 3-vector */
+    Amg::Vector3D localMeasurementPos() const;
     /** @brief: Returns the Athena identifier of the micro mega cluster 
      *          It's constructed from the measurementHash & passed to the associated readoutElement */
     const Identifier& identify() const;
@@ -76,11 +78,11 @@ class MMCluster_v1 : public UncalibratedMeasurement_v1 {
     /** @brief Sets the microTPC chisq probability*/
     void setChiSqProb(float value);
 
-    using Author = Muon::MMPrepData::Author;
+    using Author = ::Muon::MMPrepData::Author;
     Author author() const;
     void setAuthor(Author author);
     
-    using Quality = Muon::MMPrepData::Quality;
+    using Quality = ::Muon::MMPrepData::Quality;
     Quality quality() const;
     void setQuality(Quality quality);
 

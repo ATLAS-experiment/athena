@@ -37,7 +37,7 @@ class AccelTrackTrigSequence(InnerTrackerTrigSequence):
 
     seq = ActsTrigSequence(self.flags, self.signature, self.rois, self.inView)
 
-    ca.merge(F100Config.dataPreparation2(self.flags, self.signature, self.inView, self.rois))
+    ca.merge(F100Config.dataPreparation(self.flags, self.signature, self.inView, self.rois))
     ca.merge(seq.fastTrackFinder())
 
     return ca
@@ -107,7 +107,7 @@ class AccelTrackTrigSequence(InnerTrackerTrigSequence):
                         #( 'IDCInDetBSErrContainer_Cache' , self.flags.Trigger.ITkTracking.SCTBSErrCacheKey ),
                         #( 'IDCInDetBSErrContainer_Cache' , self.flags.Trigger.ITkTracking.SCTFlaggedCondCacheKey ),
                         ('xAOD::EventInfo', 'EventInfo'),
-                        ( 'ActsGeometryContext' , 'StoreGateSvc+ActsAlignment' ),
+                        ('ActsTrk::GeometryContext' , 'StoreGateSvc+ActsAlignment' ),
                         ('TrigRoiDescriptorCollection', str(self.rois)),
                         ( 'TagInfo' , 'DetectorStore+ProcessingTags' )} )
 
@@ -115,7 +115,7 @@ class AccelTrackTrigSequence(InnerTrackerTrigSequence):
           ViewDataVerifier.DataObjects |= {( 'PixelRDO_Container' , 'StoreGateSvc+ITkPixelRDOs' ),
                                            ( 'SCT_RDO_Container' , 'StoreGateSvc+ITkStripRDOs' ),
                                            ( 'InDetSimDataCollection' , 'ITkPixelSDO_Map'),
-                        ( 'ActsGeometryContext' , 'StoreGateSvc+ActsAlignment' )}
+                        ('ActsTrk::GeometryContext' , 'StoreGateSvc+ActsAlignment' )}
           from SGComps.SGInputLoaderConfig import SGInputLoaderCfg
           sgil_load = [( 'PixelRDO_Container' , 'StoreGateSvc+ITkPixelRDOs' ),
                       ( 'SCT_RDO_Container' , 'StoreGateSvc+ITkStripRDOs' ),

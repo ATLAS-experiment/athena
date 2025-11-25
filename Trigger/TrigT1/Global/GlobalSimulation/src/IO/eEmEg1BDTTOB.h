@@ -26,7 +26,7 @@ namespace GlobalSim::IOBitwise {
     /**
      * @brief Constructor taking an eFexROITOB and eGamma1 BDT output bits to initialise bits..
      * @param[in] eFexTOB The input eFexRoI TOB defining the common/eFex bits.
-     * @param[in] eFexTOB The input eGamma1 BDT bits defining the result of the algorithm.
+     * @param[in] eGamma1BDT_bits The input eGamma1 BDT bits defining the result of the algorithm.
      *
      * To be used to create, and initilise a global eEmTOB from an existing eFexTOB and an 
      * eGamma1 BDT result
@@ -35,12 +35,27 @@ namespace GlobalSim::IOBitwise {
      */
     eEmEg1BDTTOB(const xAOD::eFexEMRoI& eFexTOB,
 		 std::bitset<s_eGamma1BDT_width> eGamma1BDT_bits);
+    /**
+     * @brief Constructor taking an eEmTOB and eGamma1 BDT output bits to initialise bits..
+     * @param[in] eEmTOB The input eEmTOB defining the common/eFex bits.
+     * @param[in] eGamma1BDT_bits The input eGamma1 BDT bits defining the result of the algorithm.
+     *
+     * To be used to create, and initilise a global eEmTOB from an existing eEmTOB and an 
+     * eGamma1 BDT result
+     * eGamma1 BDT result bits are set here, eFexRoI threshold bits are set in the eEmTOB 
+     * constructor, the CommonTOB constructor is used to initialise the common bits.
+     */
+    eEmEg1BDTTOB(const IeEmTOB& eEmTOB,
+		 std::bitset<s_eGamma1BDT_width> eGamma1BDT_bits);
+
     //! @copydoc IeEmEg1BDTTOB::~IeEmEg1BDTTOB()
     virtual ~eEmEg1BDTTOB(){};
 
     //! @copydoc IeEmEg1BDTTOB::eGamma1BDT_bits()
     virtual std::bitset<s_eGamma1BDT_width> eGamma1BDT_bits() const override;
 
+    //! @copydoc IeEmEg1BDTTOB::to_string() 
+    virtual std::string to_string() const override;
   private:
     /// Property: Bitset to hold the eGamma1BDT bits
     std::bitset<s_eGamma1BDT_width> m_eGamma1BDT_bits;

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -23,6 +23,7 @@
 #include "CollectionBase/TokenList.h"
 #include "PersistentDataModel/DataHeader.h"
 #include "PersistentDataModel/Token.h"
+#include "PersistentDataModel/AthenaAttributeList.h"
 
 
 DoubleEventSelectorAthenaPool::DoubleEventSelectorAthenaPool(const std::string& name, ISvcLocator* pSvcLocator)
@@ -187,10 +188,7 @@ StatusCode DoubleEventSelectorAthenaPool::recordAttributeList() const
   (*athAttrList)["hasSecondaryInput"].data<bool>() = true;
 
   SG::WriteHandle<AthenaAttributeList> wh(m_attrListKey.value(), eventStore()->name());
-  if (!wh.record(std::move(athAttrList)).isSuccess()) {
-    ATH_MSG_ERROR("Cannot record AttributeList to StoreGate " << StoreID::storeName(eventStore()->storeID()));
-    return StatusCode::FAILURE;
-  }
+  ATH_CHECK(wh.record(std::move(athAttrList)));
 
   return StatusCode::SUCCESS;
 }

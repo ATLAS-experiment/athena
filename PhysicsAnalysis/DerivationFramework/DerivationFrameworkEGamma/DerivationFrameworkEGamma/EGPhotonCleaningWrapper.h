@@ -1,10 +1,6 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
-
-///////////////////////////////////////////////////////////////////
-// EGPhotonCleaningWrapper.h, (c) ATLAS Detector software
-///////////////////////////////////////////////////////////////////
 
 #ifndef DERIVATIONFRAMEWORK_EGPHOTONCLEANINGWRAPPER_H
 #define DERIVATIONFRAMEWORK_EGPHOTONCLEANINGWRAPPER_H
@@ -24,35 +20,33 @@
 #include <string>
 namespace DerivationFramework {
 
-class EGPhotonCleaningWrapper : public extends<AthAlgTool, IAugmentationTool>
-{
-public:
-  EGPhotonCleaningWrapper(const std::string& t,
-                          const std::string& n,
-                          const IInterface* p);
+  class EGPhotonCleaningWrapper : public extends<AthAlgTool, IAugmentationTool>
+  {
+  public:
 
-  virtual StatusCode initialize() override final;
-  virtual StatusCode addBranches() const override final;
+    using base_class::base_class;
 
-private:
-  ToolHandle<IElectronPhotonShowerShapeFudgeTool> m_fudgeMCTool{
-    this,
-    "EGammaFudgeMCTool",
-    "",
-    "Handle to the Fudging Tool"
+    virtual StatusCode initialize() override final;
+    virtual StatusCode addBranches(const EventContext& ctx) const override final;
+
+  private:
+    ToolHandle<IElectronPhotonShowerShapeFudgeTool> m_fudgeMCTool{
+      this,
+        "EGammaFudgeMCTool",
+        "",
+        "Handle to the Fudging Tool"
+        };
+    SG::ReadHandleKey<xAOD::PhotonContainer> m_containerName{ this,
+      "ContainerName",
+      "",
+      "Input" };
+
+    // Write decoration handle keys
+    SG::WriteDecorHandleKey<xAOD::PhotonContainer>
+    m_decoratorPass{ this, "decoratorPass", m_containerName, "", "" };
+    SG::WriteDecorHandleKey<xAOD::PhotonContainer>
+    m_decoratorPassDelayed{ this, "decoratorPassDelayed", m_containerName, "", "" };
   };
-  SG::ReadHandleKey<xAOD::PhotonContainer> m_containerName{ this,
-                                                            "ContainerName",
-                                                            "",
-                                                            "Input" };
-
-  // Write decoration handle keys
-  SG::WriteDecorHandleKey<xAOD::PhotonContainer>
-    m_decoratorPass{ this, "decoratorPass", "", "" };
-  SG::WriteDecorHandleKey<xAOD::PhotonContainer>
-    m_decoratorPassDelayed{ this, "decoratorPassDelayed", "", "" };
-  std::string m_sgName;
-};
 }
 
 #endif // DERIVATIONFRAMEWORK_EGSELECTIONTOOLWRAPPER_H

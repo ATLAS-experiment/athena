@@ -4,7 +4,7 @@
 #ifndef MUONSPACEPOINTFORMATION_MUONSPACEPOINTMAKERALG_H
 #define MUONSPACEPOINTFORMATION_MUONSPACEPOINTMAKERALG_H
 
-#include "ActsGeometryInterfaces/ActsGeometryContext.h"
+#include "ActsGeometryInterfaces/GeometryContext.h"
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
 
 #include "GeoPrimitives/GeoPrimitives.h"
@@ -118,7 +118,7 @@ namespace MuonR4{
                                      const std::vector<const PrdType*>& phiHits) const;
             /** @brief Fills all space points that are beloni */
             template <class PrdType> 
-                void fillUncombinedSpacePoints(const ActsGeometryContext& gctx,
+                void fillUncombinedSpacePoints(const ActsTrk::GeometryContext& gctx,
                                                const Amg::Transform3D& sectorTrans,
                                                const std::vector<const PrdType*>& prdsToFill,
                                                std::vector<SpacePoint>& outColl) const;          
@@ -176,7 +176,7 @@ namespace MuonR4{
             SG::ReadHandleKey<xAOD::sTgcMeasContainer> m_stgcKey{this, "sTgcKey", "xAODsTgcMeasurements"};
 
 
-            SG::ReadHandleKey<ActsGeometryContext> m_geoCtxKey{this, "AlignmentKey", "ActsAlignment", "cond handle key"};
+            SG::ReadHandleKey<ActsTrk::GeometryContext> m_geoCtxKey{this, "AlignmentKey", "ActsAlignment", "cond handle key"};
 
             ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "IdHelperSvc",  "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
             
@@ -210,7 +210,7 @@ namespace MuonR4{
 
             Gaudi::Property<double> m_maxOccStgcEta{this, "maxSTGCEtaOccupancy", 0.1, 
                                                    "Maximum occpancy of sTgc eta hits in a gasGap"};
-            Gaudi::Property<double> m_maxOccStgcPhi{this, "maxSTGCPhiOccupancy", 0.1, 
+            Gaudi::Property<double> m_maxOccStgcPhi{this, "maxSTGCPhiOccupancy", 0.5, 
                                                     "Maximum occpancy of sTgc phi hits in a gasGap"};
 
     };

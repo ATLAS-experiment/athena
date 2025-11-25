@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file CaloIdentifier/CaloIDHelper.icc
@@ -99,7 +99,7 @@ CaloIDHelper::id_range CaloIDHelper::HashGroup::range() const
 inline
 Identifier CaloIDHelper::HashGroup::id (IdentifierHash hashId) const
 {
-  return m_id_vec[hashId];
+  return m_id_vec.at(hashId);
 }
 
 

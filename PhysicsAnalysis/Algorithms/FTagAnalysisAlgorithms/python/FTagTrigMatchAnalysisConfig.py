@@ -5,33 +5,9 @@ from AnalysisAlgorithmsConfig.ConfigBlock import ConfigBlock
 from AthenaCommon.Logging import logging
 
 from AthenaConfiguration.Enums import LHCPeriod
-from Campaigns.Utils import Campaign
 
-from TriggerAnalysisAlgorithms.TriggerAnalysisConfig import TriggerAnalysisBlock, is_year_in_current_period
-from TriggerAnalysisAlgorithms.TriggerAnalysisSFConfig import get_year_data
-
-
-def trigger_set(config, triggerChainsPerYear, includeAllYearsPerRun, log):
-    triggers = set()
-    if includeAllYearsPerRun:
-        for year in triggerChainsPerYear:
-            if not is_year_in_current_period(config, year):
-                continue
-            triggers.update(get_year_data(triggerChainsPerYear, year))
-    elif config.campaign() is Campaign.MC20a:
-        triggers.update(get_year_data(triggerChainsPerYear, 2015))
-        triggers.update(get_year_data(triggerChainsPerYear, 2016))
-    elif config.campaign() is Campaign.MC20d:
-        triggers.update(get_year_data(triggerChainsPerYear, 2017))
-    elif config.campaign() is Campaign.MC20e:
-        triggers.update(get_year_data(triggerChainsPerYear, 2018))
-    elif config.campaign() is Campaign.MC23a:
-        triggers.update(get_year_data(triggerChainsPerYear, 2022))
-    elif config.campaign() is Campaign.MC23d:
-        triggers.update(get_year_data(triggerChainsPerYear, 2023))
-    else:
-        log.warning("unknown campaign, skipping triggers: %s", str(config.campaign()))
-    return triggers
+from TriggerAnalysisAlgorithms.TriggerAnalysisConfig import TriggerAnalysisBlock
+from TriggerAnalysisAlgorithms.TriggerAnalysisSFConfig import trigger_set
 
 
 class FTagJetTrigMatchingBlock(ConfigBlock):
@@ -70,7 +46,7 @@ class FTagJetTrigMatchingBlock(ConfigBlock):
 
         if self.triggerChainsPerYear:
             triggers = trigger_set(config, self.triggerChainsPerYear,
-                                   self.includeAllYearsPerRun, log)
+                                   self.includeAllYearsPerRun)
             decisionTool = TriggerAnalysisBlock.makeTriggerDecisionTool(config)
             
             for chain in triggers:

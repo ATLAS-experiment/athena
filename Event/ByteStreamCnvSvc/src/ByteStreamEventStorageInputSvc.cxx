@@ -45,20 +45,14 @@ ByteStreamEventStorageInputSvc::ByteStreamEventStorageInputSvc(
   , m_evtInFile(0)
   , m_evtFileOffset(0)
   , m_fileGUID("")
-  , m_storeGate    ("StoreGateSvc", name)
-  , m_inputMetadata("StoreGateSvc/InputMetaDataStore", name)
-  , m_robProvider  ("ROBDataProviderSvc", name)
+  , m_robProvider("ROBDataProviderSvc", name)
 {
   assert(pSvcLocator != nullptr);
-
-  declareProperty("EventStore",    m_storeGate);
-  declareProperty("MetaDataStore", m_inputMetadata);
 }
 
 
 /******************************************************************************/
-ByteStreamEventStorageInputSvc::~ByteStreamEventStorageInputSvc()
-{}
+ByteStreamEventStorageInputSvc::~ByteStreamEventStorageInputSvc() = default;
 
 
 /******************************************************************************/
@@ -71,7 +65,7 @@ ByteStreamEventStorageInputSvc::initialize()
   ATH_CHECK(m_storeGate.retrieve());
   ATH_CHECK(m_robProvider.retrieve());
 
-  return(StatusCode::SUCCESS);
+  return StatusCode::SUCCESS;
 }
 
 
@@ -80,20 +74,14 @@ StatusCode
 ByteStreamEventStorageInputSvc::stop()
 {
   // close moved to EventSelector for explicit coupling with incident
-  //if (m_reader != 0) closeBlockIterator(false);
-  return(StatusCode::SUCCESS);
+  return StatusCode::SUCCESS;
 }
 
 
 /******************************************************************************/
 StatusCode
 ByteStreamEventStorageInputSvc::finalize() {
-
-  ATH_CHECK(m_storeGate.release());
-  ATH_CHECK(m_robProvider.release());
-  ATH_CHECK(m_inputMetadata.release());
-
-  return(StatusCode::SUCCESS);
+  return StatusCode::SUCCESS;
 }
 
 
@@ -155,7 +143,7 @@ ByteStreamEventStorageInputSvc::previousEvent()
   }
   else {
     ATH_MSG_ERROR("DataReader not ready. Need to getBlockIterator first");
-    return 0;
+    return nullptr;
   }
 
   // Use buffer to build FullEventFragment
@@ -181,7 +169,7 @@ ByteStreamEventStorageInputSvc::previousEvent()
     DumpFrags::dump(cache->rawEvent.get());
   }
   ATH_MSG_DEBUG( "switched to previous event in slot " << context);
-  return(cache->rawEvent.get());
+  return cache->rawEvent.get();
 }
 
 
@@ -223,7 +211,7 @@ ByteStreamEventStorageInputSvc::nextEvent() {
         int result = usleep(static_cast<int>(m_wait * 1e6));
         if (result != 0) {
           ATH_MSG_ERROR("System Error while running sleep");
-          return 0;
+          return nullptr;
         }
       } while(m_reader->getData(eventSize, &(cache->data)) == DRWAIT);
     } else if (DROK != ecode) {
@@ -234,7 +222,7 @@ ByteStreamEventStorageInputSvc::nextEvent() {
 
   } else {
     ATH_MSG_ERROR("DataReader not ready. Need to getBlockIterator first");
-    return 0;
+    return nullptr;
   }
 
   // Use buffer to build FullEventFragment
@@ -262,7 +250,7 @@ ByteStreamEventStorageInputSvc::nextEvent() {
     DumpFrags::dump(cache->rawEvent.get());
   }
   ATH_MSG_DEBUG("switched to next event in slot " << context);
-  return(cache->rawEvent.get());
+  return cache->rawEvent.get();
 }
 
 
@@ -418,7 +406,7 @@ ByteStreamEventStorageInputSvc::generateDataHeader()
     // Now add ref to xAOD::EventInfo
     std::unique_ptr<IOpaqueAddress> iopx = std::make_unique<ByteStreamAddress>(
         ClassID_traits<xAOD::EventInfo>::ID(), key, "");
-    ATH_CHECK(m_storeGate->recordAddress(key, iopx.release()));
+    ATH_CHECK(m_storeGate->recordAddress(key, std::move(iopx)));
     const SG::DataProxy* ptmpx = m_storeGate->transientProxy(
         ClassID_traits<xAOD::EventInfo>::ID(), key);
     if (ptmpx != nullptr) {
@@ -432,7 +420,7 @@ ByteStreamEventStorageInputSvc::generateDataHeader()
     // Now add ref to xAOD::EventAuxInfo
     std::unique_ptr<IOpaqueAddress> iopaux = std::make_unique<ByteStreamAddress>(
         ClassID_traits<xAOD::EventAuxInfo>::ID(), key, "");
-    ATH_CHECK(m_storeGate->recordAddress(key, iopaux.release()));
+    ATH_CHECK(m_storeGate->recordAddress(key, std::move(iopaux)));
     const SG::DataProxy* ptmpaux = m_storeGate->transientProxy(
         ClassID_traits<xAOD::EventAuxInfo>::ID(), key);
     if (ptmpaux !=0) {

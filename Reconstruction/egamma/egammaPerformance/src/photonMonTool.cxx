@@ -405,8 +405,10 @@ StatusCode photonMonTool::fillHistograms() {
   
   if (!hasGoodTrigger("single photon")) return StatusCode::SUCCESS; 
   
+  const EventContext& ctx = Gaudi::Hive::currentContext();
+
   //check whether Lar signalled event bad
-  if(hasBadLar()) {
+  if(hasBadLar(ctx)) {
     ATH_MSG_DEBUG("photonMonTool::hasBadLar()");
     return StatusCode::SUCCESS;
   }
@@ -415,7 +417,7 @@ StatusCode photonMonTool::fillHistograms() {
   //figure out current LB
   //--------------------
   unsigned int previousLB = m_currentLB;
-  m_currentLB = getCurrentLB();
+  m_currentLB = getCurrentLB(ctx);
 
   //deal with the change of LB
   if (m_currentLB>previousLB) {

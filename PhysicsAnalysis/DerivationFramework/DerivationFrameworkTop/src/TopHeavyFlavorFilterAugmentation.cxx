@@ -1,42 +1,29 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "DerivationFrameworkTop/TopHeavyFlavorFilterAugmentation.h"
+#include "StoreGate/WriteDecorHandle.h"
 
-#include "xAODEventInfo/EventInfo.h"
-#include "DerivationFrameworkTop/TTbarPlusHeavyFlavorFilterTool.h"
 
 namespace DerivationFramework {
 
 
 TopHeavyFlavorFilterAugmentation::TopHeavyFlavorFilterAugmentation(const std::string& t, const std::string& n, const IInterface* p):
-  base_class(t,n,p),
-  m_filterTool("")
+  base_class(t,n,p)
 {
-
-
-    declareProperty("EventInfoName",m_eventInfoName="EventInfo");
-    declareProperty("FilterTool",m_filterTool);
-
-
 }
 
 
 
-TopHeavyFlavorFilterAugmentation::~TopHeavyFlavorFilterAugmentation(){}
+TopHeavyFlavorFilterAugmentation::~TopHeavyFlavorFilterAugmentation() = default;
 
 
 
 StatusCode TopHeavyFlavorFilterAugmentation::initialize(){
-
-  ATH_MSG_INFO("Initialize " );
-
-
-  if(m_filterTool.retrieve().isFailure()){
-    ATH_MSG_ERROR("unable to retrieve filter tool " <<m_filterTool);
-    return StatusCode::FAILURE;
-  }
+  ATH_MSG_DEBUG("Initialize " );
+  ATH_CHECK(m_eventInfoName.initialize());
+  ATH_CHECK(m_filterTool.retrieve());
 
   return StatusCode::SUCCESS;
 
@@ -44,28 +31,16 @@ StatusCode TopHeavyFlavorFilterAugmentation::initialize(){
 
 
 
-StatusCode TopHeavyFlavorFilterAugmentation::finalize(){
+StatusCode TopHeavyFlavorFilterAugmentation::addBranches(const EventContext& ctx) const {
 
-  return StatusCode::SUCCESS;
-
-}
-
-
-
-StatusCode TopHeavyFlavorFilterAugmentation::addBranches() const{
-
-  const xAOD::EventInfo* eventInfo;
-
-  if (evtStore()->retrieve(eventInfo,m_eventInfoName).isFailure()) {
+  SG::ReadHandle<xAOD::EventInfo> eventInfo{m_eventInfoName, ctx};
+  if (!eventInfo.isValid()) {
     ATH_MSG_ERROR("could not retrieve event info " <<m_eventInfoName);
     return StatusCode::FAILURE;
   }
 
-  int flavortype=m_filterTool->filterFlag();
-
-
-  static const SG::AuxElement::Decorator<int> decoration("TopHeavyFlavorFilterFlag");
-
+  const int flavortype=m_filterTool->filterFlag();
+  SG::WriteDecorHandle<xAOD::EventInfo, int> decoration{m_filterFlagKey, ctx};
   decoration(*eventInfo) = flavortype;
 
  return StatusCode::SUCCESS;

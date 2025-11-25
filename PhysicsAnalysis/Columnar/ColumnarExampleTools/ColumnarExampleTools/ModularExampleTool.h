@@ -82,13 +82,6 @@ namespace columnar
       SubtoolPt (float val_cutValue);
       bool select (ParticleId particle) const;
 
-      // this accessor isn't actually used, but it needs to be declared
-      // so that in columnar mode the accessors know the name of the
-      // object for each column.  it the subtool is connected before the
-      // accessors get connected (i.e. via the base class constructor),
-      // this isn't needed.
-      ParticleAccessor<ObjectColumn> particlesHandle {*this, "Particles"};
-
       ParticleAccessor<float> ptAcc {*this, "pt"};
       float m_cutValue = 0;
     };

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef SRC_ATLASDETECTORIDHELPER_H
@@ -116,7 +116,7 @@ private:
     size_type m_lucid_region_index{UNDEFINED};
     size_type m_zdc_region_index{UNDEFINED};
     bool m_initialized{false};
-    IdDictField *m_station_field{};
+    const IdDictField *m_station_field{};
 
 };
 

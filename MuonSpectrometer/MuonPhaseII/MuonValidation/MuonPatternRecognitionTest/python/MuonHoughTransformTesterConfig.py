@@ -15,7 +15,8 @@ if __name__=="__main__":
     parser.set_defaults(noSTGC=True)
  
     parser.set_defaults(outRootFile="HoughTransformTester.root")
-    parser.set_defaults(inputFile=["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonGeomRTT/R3SimHits.pool.root"])
+    from MuonGeoModelTestR4.testGeoModel import MuonPhaseIITestDefaults
+    parser.set_defaults(inputFile = MuonPhaseIITestDefaults.HITS_PG_R3)
     parser.set_defaults(eventPrintoutLevel = 50)
    
     args = parser.parse_args()
@@ -39,7 +40,7 @@ if __name__=="__main__":
     from MuonSpacePointFormation.SpacePointFormationConfig import MuonSpacePointFormationCfg 
     cfg.merge(MuonSpacePointFormationCfg(flags))
 
-    from MuonPatternRecognitionAlgs.MuonHoughTransformAlgConfig import MuonPatternRecognitionCfg
+    from MuonPatternRecognitionAlgs.MuonPatternRecognitionConfig import MuonPatternRecognitionCfg
     from MuonPatternRecognitionTest.PatternTestConfig import MuonHoughTransformTesterCfg, PatternVisualizationToolCfg
 
     cfg.merge(MuonPatternRecognitionCfg(flags))
@@ -49,37 +50,29 @@ if __name__=="__main__":
         # "MDTTwinMapping_compactFormat_Run123",  
         from IOVDbSvc.IOVDbSvcConfig import addOverride
         cfg.merge(addOverride(flags, "/MDT/TWINMAPPING", "MDTTwinMapping_compactFormat_Run123"))
-
-    
-        cfg.merge(MuonHoughTransformTesterCfg(flags,
+        
+    cfg.merge(MuonHoughTransformTesterCfg(flags,
                                               VisualizationTool = cfg.popToolsAndMerge(PatternVisualizationToolCfg(flags, CanvasLimits =0))))
 
     if not args.noMonitorPlots and (flags.Detector.GeometryMDT or flags.Detector.GeometryRPC or flags.Detector.GeometryTGC):
         cfg.getEventAlgo("MuonEtaHoughTransformAlg").VisualizationTool = cfg.popToolsAndMerge(PatternVisualizationToolCfg(flags, 
-                                                                                                CanvasPreFix="EtaHoughPlotValid",
-                                                                                                AllCanvasName="AllEtaHoughiDiPuffPlots", doPhiBucketViews = False,
-                                                                                                displayTruthOnly = True, saveSinglePDFs = True, saveSummaryPDF= False))
-        #cfg.getEventAlgo("MuonPhiHoughTransformAlg").VisualizationTool = cfg.popToolsAndMerge(PatternVisualizationToolCfg(flags, 
-        #                                                                                        CanvasPreFix="PhiHoughPlotValid",
-        #                                                                                        AllCanvasName="AllPhiHoughiDiPuffPlots",doEtaBucketViews = False,
-        #                                                                                        displayTruthOnly = True, saveSinglePDFs = False, saveSummaryPDF= False))
+                                                                                                CanvasPreFix="EtaHoughPlotValid", doPhiBucketViews = False,
+                                                                                                outSubDir="EtaHoughiDiPuffPlots", displayTruthOnly = True, 
+                                                                                                saveSinglePDFs = True, saveSummaryPDF= True))
+
         cfg.getEventAlgo("MuonSegmentFittingAlg").VisualizationTool = cfg.popToolsAndMerge(PatternVisualizationToolCfg(flags, 
-                                                                                                CanvasPreFix="SegmentPlotValid",
-                                                                                                AllCanvasName="AllSegmentFitPlots", displayTruthOnly = True,
-                                                                                                saveSinglePDFs = True, saveSummaryPDF= False))
+                                                                                                CanvasPreFix="SegmentPlotValid", outSubDir="SegmentValidPlots", 
+                                                                                                displayTruthOnly = True, saveSinglePDFs = True, saveSummaryPDF= True))
     if not args.noMonitorPlots and (flags.Detector.GeometryMM or flags.Detector.GeometrysTGC):
-        cfg.getEventAlgo("NswEtaHoughTransformAlg").VisualizationTool = cfg.popToolsAndMerge(PatternVisualizationToolCfg(flags, 
-                                                                                                CanvasPreFix="NswEtaHoughPlotValid",
-                                                                                                AllCanvasName="AllNswEtaHoughiDiPuffPlots",
-                                                                                                saveSinglePDFs = True, saveSummaryPDF= False))
-        cfg.getEventAlgo("NswPhiSeedFinderAlg").VisualizationTool = cfg.popToolsAndMerge(PatternVisualizationToolCfg(flags, 
+        cfg.getEventAlgo("MuonNswEtaHoughTransformAlg").VisualizationTool = cfg.popToolsAndMerge(PatternVisualizationToolCfg(flags,
+                                                                                                CanvasPreFix="NswEtaHoughPlotValid",  outSubDir="EtaHoughiDiPuffPlots",
+                                                                                                saveSinglePDFs = True, doPhiBucketViews = False, saveSummaryPDF= True))
+
+        cfg.getEventAlgo("MuonNswSegmentFinderAlg").VisualizationTool = cfg.popToolsAndMerge(PatternVisualizationToolCfg(flags, 
                                                                                                 CanvasPreFix="NswPhiHoughPlotValid",
-                                                                                                AllCanvasName="AllNswPhiHoughiDiPuffPlots",
-                                                                                                saveSinglePDFs = True, saveSummaryPDF= False))
-        cfg.getEventAlgo("NswSegmentFitter").VisualizationTool = cfg.popToolsAndMerge(PatternVisualizationToolCfg(flags, 
-                                                                                                CanvasPreFix="NswSegmentFitPlotValid",
-                                                                                                AllCanvasName="AllNswSegmentFitPlots",
-                                                                                                saveSinglePDFs = True, saveSummaryPDF= False))
+                                                                                                outSubDir="AllNswPhiHoughiDiPuffPlots",
+                                                                                                saveSinglePDFs = True, doPhiBucketViews = False, saveSummaryPDF= True))
+       
 
     executeTest(cfg)
     

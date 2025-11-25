@@ -211,6 +211,7 @@ class EgammaCalibrationAndSmearingTool
   // Apply the correction on a modifyable egamma object
   virtual CP::CorrectionCode applyCorrection(xAOD::Egamma&) const override;
   CP::CorrectionCode applyCorrection(columnar::MutableEgammaId input, columnar::EventInfoId event_info) const;
+  void setPt(columnar::MutableEgammaId input, double energy) const;
 
   // Create a corrected copy from a constant egamma object
   //  virtual CP::CorrectionCode correctedCopy(const xAOD::Egamma&,
@@ -289,8 +290,16 @@ class EgammaCalibrationAndSmearingTool
   std::unique_ptr<TH2> m_caloDistPhiUnifCorr;
 
   Gaudi::Property<bool> m_fixForMissingCells{
-      this, "FixForMissingCells", true,
+    this, "FixForMissingCells", true,
       "AOD fix for cell recovery in core egamma cluster"};
+
+  Gaudi::Property<bool> m_doFwdCalib{
+    this, "DoFwdElectronCalibration", false,
+      "MVA calibration of the forward electron"};
+
+  Gaudi::Property<std::string> m_pVtxKey{
+    this, "PrimaryVerticesKey", "PrimaryVertices",
+      "Name of the primary vertex container"};
 
   void setupSystematics();
 
@@ -473,6 +482,7 @@ public:
     columnar::EventInfoAccessor<uint32_t> runNumberAcc {*this, "runNumber"};
     columnar::EventInfoAccessor<uint64_t> eventNumberAcc {*this, "eventNumber"};
     columnar::EventInfoAccessor<unsigned int> randomrunnumber_getter {*this, "RandomRunNumber"};
+    columnar::EventInfoAccessor<float> actIntPerXingAcc {*this, "actualInteractionsPerCrossing"};
   };
   std::unique_ptr<Accessors> m_accessors;
 

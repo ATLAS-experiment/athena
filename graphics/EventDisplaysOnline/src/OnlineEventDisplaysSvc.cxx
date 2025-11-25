@@ -246,7 +246,7 @@ StatusCode OnlineEventDisplaysSvc::initialize(){
     m_CheckPair = false;
   }
   incSvc->addListener( this, "BeginEvent");
-  incSvc->addListener( this, "StoreCleared");
+  incSvc->addListener( this, "EndEvent");
 
   ATH_CHECK( m_evt.initialize() );
 
@@ -264,7 +264,7 @@ void OnlineEventDisplaysSvc::handle( const Incident& incident ){
   if ( incident.type() == IncidentType::BeginEvent && incident.source() == "BeginIncFiringAlg" ){
     beginEvent();
   }
-  if ( incident.type() == "StoreCleared" && incident.source() == "StoreGateSvc" ){
+  if (incident.type() == "EndEvent" && incident.source() == "EndIncFiringAlg"){
     endEvent();
   }
 }

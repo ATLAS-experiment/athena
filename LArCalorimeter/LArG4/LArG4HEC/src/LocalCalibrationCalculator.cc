@@ -42,7 +42,7 @@ namespace LArG4 {
           std::string merr{"LArG4::HEC::LocalCalibrationCalculator::GeometryTypeUpdateHandler FATAL: invalid eHECGeometryType specified "};
           merr += geoTypeString;
 	  ATH_MSG_ERROR(merr);
-          throw GaudiException(merr, "LArG4::HEC::LocalCalibrationCalculator::GeometryTypeUpdateHandler", StatusCode::FAILURE);
+          throw GaudiException(std::move(merr), "LArG4::HEC::LocalCalibrationCalculator::GeometryTypeUpdateHandler", StatusCode::FAILURE);
         }
 
     }

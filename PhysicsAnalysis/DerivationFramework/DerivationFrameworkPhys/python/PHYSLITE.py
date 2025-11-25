@@ -39,6 +39,11 @@ def CPAlgorithmsCfg(flags):
     subConfig.setOptionValue ('.fixDAODTruthRecord', False)
     configSeq += subConfig
 
+    # Disable expert-mode warnings
+    import warnings
+    from AnalysisAlgorithmsConfig.ConfigAccumulator import ExpertModeWarning
+    warnings.simplefilter('ignore', ExpertModeWarning)
+
     # Create a pile-up analysis config
     if flags.Input.isMC:
         # setup config and lumicalc files for pile-up tool
@@ -193,6 +198,9 @@ def CPAlgorithmsCfg(flags):
         jetCollection=jetContainer)
     subConfig.setOptionValue ('.runFJvtSelection', False)
     subConfig.setOptionValue ('.runJvtSelection', False)
+    configSeq += subConfig
+    subConfig = factory.makeConfig ('Jets.Uncertainties')
+    subConfig.setOptionValue ('.containerName', 'AnalysisJets')
     configSeq += subConfig
     subConfig = factory.makeConfig ('Thinning')
     subConfig.setOptionValue ('.containerName', 'AnalysisJets')

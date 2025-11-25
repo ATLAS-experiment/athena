@@ -5,6 +5,8 @@
 #ifndef POOLCORE_URIPARSER_H
 #define POOLCORE_URIPARSER_H
 
+#include "POOLCore/DbPrint.h"
+
 #include <string>
 namespace pool{
 
@@ -15,13 +17,13 @@ namespace pool{
      Protocol, host, path MUST be specified. 
      @author Zhen Xie
   */
-  class URIParser{
+  class URIParser : public APRMessaging {
   public:
     /** Constructor. Contact string will be read from the environment variable
 	POOL_CATALOG if no argument is given to the constructor.
 	@param contactstr the contact string to the catalog
     */
-    URIParser(const std::string& contactstr);
+    explicit URIParser(const std::string& contactstr);
     ///Default constructor
     URIParser();
     ///Destructor

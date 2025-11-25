@@ -228,10 +228,10 @@ namespace {
          return element.value();
       }
       static bool isDefect(const nlohmann::json &value) {
-         return value["isDefect"];
+         return !value.contains("isDefect") ? false : value["isDefect"].get<bool>();
       }
       static std::vector<KEY_TYPE> moduleDefects(const nlohmann::json &value) {
-         return value["defects"];
+         return !value.contains("defects") ? std::vector<KEY_TYPE>() : value["defects"].get< std::vector<KEY_TYPE> >();
       }
    private:
       nlohmann::json m_jsDefects;
@@ -583,10 +583,30 @@ namespace InDet{
                                                     m_oddColToggle.value() );
                       }
 
-                      std::pair<typename T_ModuleHelper::KEY_TYPE, typename T_ModuleHelper::KEY_TYPE>
-                         key_range( T_ModuleHelper::makeRangeForMask(helper.hardwareCoordinates(getSensorRow(helper, cell_idx),
+                      std::pair<typename T_ModuleHelper::KEY_TYPE, typename T_ModuleHelper::KEY_TYPE> key_range;
+                      if (mask_i==0 && m_perPatternAndMaskFractions[match_i].at(mask_i).size()>1) {
+                         // for cell defects throw a group size,
+                         // the fractions are actual fractions for group sizes of 1,2,... where the first element
+                         // is the fraction for a group size of 1.
+                         float group_size_prob=CLHEP::RandFlat::shoot(rndmEngine[kMaskDefects+mask_i],1.);
+                         unsigned int group_size=m_perPatternAndMaskFractions.at(match_i).at(mask_i).size();
+                         for (; group_size-->0 && group_size_prob <= m_perPatternAndMaskFractions[match_i][mask_i][group_size];);
+                         ++group_size;
+                         // squeeze the random row index into the number of rows reduced by the group size.
+                         unsigned int sensor_row = std::min(static_cast<unsigned int>(getSensorRow(helper, cell_idx) %
+                                                                                       (helper.nSensorRows() - group_size -1)),
+                                                            static_cast<unsigned int>(helper.nSensorRows() - group_size - 1));
+                         unsigned int sensor_col = getSensorColumn(helper, cell_idx);
+                         key_range = std::make_pair( helper.hardwareCoordinates(sensor_row,
+                                                                                sensor_col),
+                                                     helper.hardwareCoordinates(sensor_row+group_size,
+                                                                                sensor_col));
+                      }
+                      else {
+                         key_range= T_ModuleHelper::makeRangeForMask(helper.hardwareCoordinates(getSensorRow(helper, cell_idx),
                                                                                                 getSensorColumn(helper, cell_idx)),
-                                                                     masks[mask_i]));
+                                                                     masks[mask_i]);
+                      }
 
                       if (EmulatedDefectsBuilder::insertKeyRange(helper, module_defects, key_range, T_ModuleHelper::makeDefectTypeKey(mask_i))) {
                          if (h2) {

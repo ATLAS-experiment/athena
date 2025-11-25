@@ -1,7 +1,7 @@
 // emacs, this file is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <vector>
@@ -39,25 +39,23 @@ TTree * ClusterMomentSetter::tree = 0;
 
 namespace ClusterData {
 
-  xAOD::CaloClusterContainer* clusterCont = new  xAOD::CaloClusterContainer();
-  xAOD::JetContainer* jetCont = new xAOD::JetContainer();
-
-
-  int testEL(){
-    //const xAOD::IParticleContainer *cont = dynamic_cast<const xAOD::IParticleContainer*>( ClusterData::clusterCont[0]->container() ); 
-    //std::cout << " testEL : "<< cont << "  "<< &ClusterData::clusterCont << std::endl;
-    ElementLink<xAOD::IParticleContainer> el(*ClusterData::clusterCont,0);
+  int testEL(xAOD::CaloClusterContainer& clusterCont){
+    //const xAOD::IParticleContainer *cont = dynamic_cast<const xAOD::IParticleContainer*>( clusterCont[0]->container() );
+    //std::cout << " testEL : "<< cont << "  "<< &clusterCont << std::endl;
+    ElementLink<xAOD::IParticleContainer> el(clusterCont,0);
     return 0;
   }
 
 
 
-  void fillContainer(const std::string &fname ){
+  void fillContainer(const std::string &fname,
+                     xAOD::CaloClusterContainer& clusterCont,
+                     xAOD::JetContainer& jetCont){
     static bool auxStoreAdded = false;
     if( ! auxStoreAdded ){
       xAOD::CaloClusterAuxContainer* aux = new xAOD::CaloClusterAuxContainer();
-      clusterCont->setStore(aux);
-      jetCont->setStore(    new xAOD::JetAuxContainer() ) ;
+      clusterCont.setStore(aux);
+      jetCont.setStore(    new xAOD::JetAuxContainer() ) ;
       auxStoreAdded = true;
     }
     
@@ -93,7 +91,7 @@ namespace ClusterData {
       xAOD::CaloCluster *cl = new xAOD::CaloCluster();
 #define SETCLUSTERMOM( E, eta, phi ) cl->setE(E);cl->setEta(eta);cl->setPhi(phi);cl->setM(0)
 #define SETCLUSTERRAWMOM( E, eta, phi ) cl->setRawE(E);cl->setRawEta(eta);cl->setRawPhi(phi);cl->setRawM(0)
-      clusterCont->push_back(cl);
+      clusterCont.push_back(cl);
 
       SETCLUSTERMOM( e[i], eta[i], phi[i] );
       SETCLUSTERRAWMOM( rawe[i], eta[i], phi[i] );
@@ -101,7 +99,7 @@ namespace ClusterData {
       for( auto & setter : momsetters) setter.fillCluster(i, cl );
       if(i < 3 ){
         double sig;
-        cl->retrieveMoment(xAOD::CaloCluster::SIGNIFICANCE, sig);
+        (void)cl->retrieveMoment(xAOD::CaloCluster::SIGNIFICANCE, sig);
         std::cout << " cluster e="<< cl->e() << " eta="<< cl->eta() << "  sig="<<sig<<std::endl; 
       }
     }
@@ -109,10 +107,10 @@ namespace ClusterData {
     // redo a loop for time
     ncl = tree->Draw("CaloCalTopoClusterAux.time", "","goff",1);
     e =   tree->GetV1();
-    for(size_t i=0;i<ncl; i++){ (*clusterCont)[i]->setTime( e[i] ); }
+    for(size_t i=0;i<ncl; i++){ clusterCont[i]->setTime( e[i] ); }
 
     // std::cout << " testing EL "<< std::endl;
-    // testEL();
+    // testEL(clusterCont);
     // std::cout << " tested EL "<< std::endl;
 
 
@@ -123,12 +121,12 @@ namespace ClusterData {
     for(size_t i=0;i<3;i++){
       size_t nconst = tree->Draw(TString::Format("AntiKt4LCTopoJetsAux.constituentLinks.ElementLinkBase.m_persIndex[%d]",int(i)) ,"","goff",1);
       double *ind = tree->GetV1();
-      jetCont->push_back(new xAOD::Jet());
-      xAOD::Jet *jet = jetCont->back();
+      jetCont.push_back(new xAOD::Jet());
+      xAOD::Jet *jet = jetCont.back();
       
       TLorentzVector sum;
       for(size_t c=0; c<nconst; c++) {
-        xAOD::CaloCluster* cl = (*clusterCont)[ size_t(ind[c]) ];
+        xAOD::CaloCluster* cl = clusterCont[ size_t(ind[c]) ];
         jet->addConstituent( cl );
         sum += cl->p4();
       }

@@ -18,20 +18,16 @@
 #include "DbContainerObj.h"
 
 // Public POOL include files
-#include "POOLCore/DbPrint.h"
-#include "StorageSvc/DbIter.h"
 #include "StorageSvc/DbToken.h"
 #include "StorageSvc/DbReflex.h"
 #include "StorageSvc/DbColumn.h"
 #include "StorageSvc/DbTypeInfo.h"
 #include "StorageSvc/DbOption.h"
-#include "StorageSvc/IOODatabase.h"
 #include "StorageSvc/IDbDatabase.h"
 #include "StorageSvc/IDbContainer.h"
 
 #include <memory>
 #include <cstdio>
-
 
 using namespace pool;
 
@@ -41,7 +37,6 @@ std::ostream& operator << (std::ostream& os, const Token::OID_t oid ) {
 }
 
 static const Guid s_localDb("00000000-0000-0000-0000-000000000000");
-static const DbPrintLvl::MsgLevel dbg_lvl = DbPrintLvl::Debug;
 
 
 // Standard Constructor
@@ -49,10 +44,10 @@ DbDatabaseObj::DbDatabaseObj( DbDomain&       dom,
                               const std::string&   pfn, 
                               const std::string&   fid, 
                               DbAccessMode    mod) 
-: Base(fid, mod, dom.type(), dom.db()), m_dom(dom), 
-  m_info(0), m_string_t(0), m_fileAge(0)
+: Base(fid, mod, dom.type(), dom.db()), 
+  APRMessaging( pfn ),
+  m_dom(dom), m_info(0), m_string_t(0), m_fileAge(0)
 {
-  DbPrint log( m_dom.name() );
   m_logon = pfn;
   std::unique_ptr<DbToken> tok(new DbToken());
   tok->setTechnology(dom.type().type());
@@ -64,34 +59,23 @@ DbDatabaseObj::DbDatabaseObj( DbDomain&       dom,
   tok->setKey(DbToken::TOKEN_CONT_KEY);
   m_token = tok.release();
   if ( 0 == db() )    {
-    log << DbPrintLvl::Error
-        << "->  Access   DbDatabase   " << accessMode(mode())  
-        << " [" << type().storageName() << "] " << name() 
-        << " impossible."
-        << DbPrint::endmsg
-        << "                          " << logon()
-        << DbPrint::endmsg;
-    type().missingDriver(log);
+    ATH_MSG_ERROR("->  Access   DbDatabase   " << accessMode(mode())
+                  << " [" << type().storageName() << "] " << name() 
+                  << " impossible." << endmsg
+                  << "                          " << logon());
+    type().missingDriver(msg());
     return;
   }
-  if ( !m_dom.add( name(), this ).isSuccess() )    {
-    log << DbPrintLvl::Error
-        << "->  Access   DbDatabase   " << accessMode(mode())  
-        << " [" << type().storageName() << "] " << name() 
-        << " impossible."
-        << DbPrint::endmsg
-        << "                          " << logon()
-        << " Error inserting DbDatabaseObj into domain!"
-        << DbPrint::endmsg;
+  if( !m_dom.add( name(), this ).isSuccess() ) {
+    ATH_MSG_ERROR("->  Access   DbDatabase   " << accessMode(mode())
+                  << " [" << type().storageName() << "] " << name()
+                  << " impossible." << endmsg
+                  << "                          " << logon()
+                  << " Error inserting DbDatabaseObj into domain!");
     return;
   }
-  log << DbPrintLvl::Info
-      << "->  Access   DbDatabase   " << accessMode(mode())  
-      << " [" << type().storageName() << "] " << name() 
-      << DbPrint::endmsg;
-  if ( logon() != name() )  {
-    log  << "                          " << logon() << DbPrint::endmsg;
-  }
+  ATH_MSG_INFO("->  Access   DbDatabase   " << accessMode(mode())
+               << " [" << type().storageName() << "] " << name());
   DbString s;
   DbTypeInfo::Columns c;
   c.push_back(new DbColumn("db_string",DbColumn::STRING,size_t(static_cast<std::string*>(&s))-size_t(&s),0,1,0));
@@ -135,11 +119,8 @@ DbStatus DbDatabaseObj::cleanup()  {
   m_classMap.clear();
   if ( m_info )   {
     deletePtr( m_info );
-    DbPrint log( m_dom.name() );
-    log << DbPrintLvl::Info
-        << "->  Deaccess DbDatabase   " << accessMode(mode())  
-        << " [" << type().storageName() << "] " << name()
-        << DbPrint::endmsg;
+    ATH_MSG_INFO("->  Deaccess DbDatabase   " << accessMode(mode())
+                  << " [" << type().storageName() << "] " << name());
   }
   return Success;
 }
@@ -174,30 +155,25 @@ DbStatus DbDatabaseObj::makeLink(Token* pTok, Token::OID_t& refLnk) {
       link->setKey(DbToken::TOKEN_CONT_KEY);
       // Add the persistent entry to the links container
       if ( 0 != m_string_t )   {
-        DbPrint log( m_logon );
-        log << dbg_lvl 
-            << "--->Adding Assoc :" << link->dbID() 
-            << "/" << link->contID() 
-            << " [" << std::hex << link->technology() << "] " 
-            << " (" << link->oid().first << " , " << link->oid().second
-            << ")" << DbPrint::endmsg;
-        log << "---->ClassID:" << link->classID().toString() << DbPrint::endmsg;
+        ATH_MSG_DEBUG("--->Adding Assoc :" << link->dbID() 
+                      << "/" << link->contID() << " [" << std::hex << link->technology() << "] "
+                      << " (" << link->oid().first << " , " << link->oid().second << ")" << std::dec << endmsg
+                      << "---->ClassID:" << link->classID().toString() );
         refLnk.first  = link->oid().first;
         refLnk.second = pTok->oid().second;
         if ( dbn == name() )  {
           link->setDb(s_localDb);
-	  link->setLocal(true);
+	        link->setLocal(true);
         }
         // Update link to use persistent oid
         link->oid().first = m_links->info()->nextRecordId() + 2; // Taking into account unsaved ##Container links
-        DbHandle<DbString> persH = new(m_links, m_string_t) DbString(link->toString());
-        if ( !m_links.save(persH, m_string_t).isSuccess() )    {
+        DbString link_string(link->toString());
+        if ( !m_links.store(&link_string, m_string_t).isSuccess() )    {
           return Error;
         }
-        persH.ptr()->~DbString(); m_links.free(persH.ptr());
         link->setDb(dbn);
         // Update the transient list of links
-	m_linkMap.insert( LinkMap::value_type(link->contKey(), link.get()));
+	      m_linkMap.insert( LinkMap::value_type(link->contKey(), link.get()));
         m_indexMap.insert( IndexMap::value_type(link->oid().first, m_linkVec.size()));
         m_linkVec.push_back( link.release() );
         return Success;
@@ -266,8 +242,6 @@ DbStatus DbDatabaseObj::addShape (const DbTypeInfo* pShape) {
       const std::string& dsc = pShape->toString();
       // Add the persistent entry to the links container
       if ( 0 != m_string_t )   {
-        DbPrint log( m_logon );
-        //log << DbPrint::Always << persH->c_str() << DbPrint::endmsg;
         // Update the transient list of links
         // This must be done BEFORE the entry 
         // is inserted into the container!
@@ -276,34 +250,28 @@ DbStatus DbDatabaseObj::addShape (const DbTypeInfo* pShape) {
         // infinite recursion
         const DbTypeInfo *pShape2 = DbTypeInfo::fromString(dsc);
         const DbTypeInfo::Columns& cols = pShape2->columns();
-        log << dbg_lvl << "--->Adding Shape[" << m_shapeMap.size() << " , "
-            << pShape2->shapeID().toString() << "]: ";
-        log << " [" << cols.size() << " Column(s)] " << DbPrint::endmsg;        
-        if ( pShape2->clazz() ) {
-          log << "---->Class:" << DbReflex::fullTypeName(pShape2->clazz()) << DbPrint::endmsg;
-        } else {
-          log << "---->Class:" << "<not availible>" << DbPrint::endmsg;
-        }
+        ATH_MSG_DEBUG("--->Adding Shape[" << m_shapeMap.size() << " , "
+                       << pShape2->shapeID().toString() << "]: "
+                       << " [" << cols.size() << " Column(s)]" );
+        ATH_MSG_DEBUG("---->Class:" << (pShape2->clazz() ? DbReflex::fullTypeName(pShape2->clazz()) : "<not available>"));
         for (size_t ic=0; ic < cols.size();++ic)  {
           const DbColumn* c = cols[ic];
-          log << "---->[" << ic << "]:" << c->name()
+          ATH_MSG_DEBUG("---->[" << ic << "]:" << c->name()
               << " Typ:" << c->typeName() << " ["<< c->typeID() << ']'
               << " Size:" << c->size()
               << " Offset:" << c->offset()
-              << " #Elements:" << c->nElement()
-              << DbPrint::endmsg;
+              << " #Elements:" << c->nElement());
         }
         bool inserted = m_shapeMap.insert( ShapeMap::value_type(id, pShape2) ).second;
         if ( pShape2 == m_string_t || id == m_string_t->shapeID() )   {
           return Success;
         }
-        DbHandle<DbString> persH = new(m_shapes, m_string_t) DbString(dsc);
-        if ( !m_shapes.save(persH, m_string_t).isSuccess() )  {
+        DbString shape_string(dsc);
+        if ( !m_shapes.store(&shape_string, m_string_t).isSuccess() )  {
           i = m_shapeMap.find(id);
           m_shapeMap.erase(i);
           return Error;
         }
-        persH.ptr()->~DbString(); m_shapes.free(persH.ptr());
         if ( inserted ) pShape2->addRef();
         if ( pShape2->clazz() )  {
           m_classMap.insert(std::make_pair(pShape2->clazz(), pShape2));
@@ -318,8 +286,6 @@ DbStatus DbDatabaseObj::addShape (const DbTypeInfo* pShape) {
 // Open Database object
 DbStatus DbDatabaseObj::open()   {
   if ( !m_info && m_dom.isValid() && db() )    {
-    DbPrint log( m_logon );
-    log << dbg_lvl;
     m_info = db()->createDatabase();
     if ( m_info->open(m_dom, m_logon, mode()).isSuccess() )    {
       // Age open databases. Aging is only effective
@@ -380,23 +346,27 @@ DbStatus DbDatabaseObj::open()   {
         m_indexMap.insert( IndexMap::value_type(l2->oid().first, m_linkVec.size()));
         m_linkVec.push_back( l2.release() );
 
+        // Internal containers use stack buffers with load() to avoid DbHeap overhead
         if ( m_shapes.open(dbH,"##Shapes",m_string_t,containerType,mode()).isSuccess() )    {
-          DbIter<DbString> it;
-          for ( it.scan(m_shapes, m_string_t); it.next().isSuccess(); ) {
-            //log << DbPrint::Always << "Oid=" << (*it).oid().first << (*it).oid().second << " " << **it << DbPrint::endmsg;
-            const DbTypeInfo* pShape = DbTypeInfo::fromString(**it);
+          Token::OID_t oid(0, 0);
+          DbString shape_str;
+          DbObject* ptr = &shape_str;
+
+          while (static_cast<uint64_t>(oid.second) <= m_shapes.size()) {
+            auto result = m_shapes.ptr()->load(&ptr, m_string_t, oid, oid, true);
+            if (!result.isSuccess() || !ptr) break;
+            const DbTypeInfo* pShape = DbTypeInfo::fromString(shape_str);
             const DbTypeInfo::Columns& cols = pShape->columns();
-            log << "--->Reading Shape[" << m_shapeMap.size() << " , "
-                << pShape->shapeID().toString() << "]: ";
-            log << "[" << cols.size() << " Column(s)]" << DbPrint::endmsg;
+            ATH_MSG_DEBUG("--->Reading Shape[" << m_shapeMap.size() << " , "
+                          << pShape->shapeID().toString() << "]: "
+                          << "[" << cols.size() << " Column(s)]" );
             for (size_t ic=0; ic < cols.size();++ic)  {
               const DbColumn* c = cols[ic];
-              log << "---->[" << ic << "]:" << c->name()
+              ATH_MSG_DEBUG("---->[" << ic << "]:" << c->name()
                   << " Typ:" << c->typeName() << " ["<< c->typeID() << ']'
                   << " Size:" << c->size()
                   << " Offset:" << c->offset()
-                  << " #Elements:" << c->nElement()
-                  << DbPrint::endmsg;
+                  << " #Elements:" << c->nElement());
             }
             // Update the transient list of links
             if( m_shapeMap.insert(ShapeMap::value_type(pShape->shapeID(), pShape)).second )
@@ -405,26 +375,30 @@ DbStatus DbDatabaseObj::open()   {
             if ( pShape->clazz(noIdScan) )  {
                m_classMap.insert(std::make_pair(pShape->clazz(), pShape));
             }
-            it.object()->~DbString(); m_shapes.free(it.object());
+            ++oid.second;
           }
         }
 
         if ( m_links.open(dbH,"##Links",m_string_t,containerType,mode()).isSuccess() )  {
-          DbIter<DbString> it;
-          for ( it.scan(m_links, m_string_t); it.next().isSuccess(); )   {
+          Token::OID_t oid(0, 0);
+          DbString link_str;
+          DbObject* ptr = &link_str;
+
+          while (static_cast<uint64_t>(oid.second) <= m_links.size()) {
+            auto result = m_links.ptr()->load(&ptr, m_string_t, oid, oid, true);
+            if (!result.isSuccess() || !ptr) break;
             std::unique_ptr<DbToken> link(new DbToken());
-            link->fromString(**it);
+            link->fromString(link_str);
             // Update the transient list of links
             if ( s_localDb == link->dbID() ) {
               link->setDb(name());
 	      link->setLocal(true);
             }
-            log << "--->Reading Assoc:" << link->dbID() 
-                << "/" << link->contID() 
-                << " [" << std::hex << link->technology() << "] " 
-                << " (" << link->oid().first << " , " << link->oid().second
-                << ")" << DbPrint::endmsg;
-            log << "---->ClassID:" << link->classID().toString() << DbPrint::endmsg;
+            ATH_MSG_DEBUG("--->Reading Assoc:" << link->dbID()
+                << "/" << link->contID()
+                << " [" << std::hex << link->technology() << "] "
+                << " (" << link->oid().first << " , " << link->oid().second << ")" << std::dec );
+            ATH_MSG_DEBUG("---->ClassID:" << link->classID().toString());
             link->setKey(DbToken::TOKEN_FULL_KEY);
             link->setKey(DbToken::TOKEN_CONT_KEY);
 	    if ( m_linkMap.find(link->contKey()) == m_linkMap.end() )  {
@@ -432,17 +406,20 @@ DbStatus DbDatabaseObj::open()   {
 	    }
             m_indexMap.insert( IndexMap::value_type(link->oid().first, m_linkVec.size()));
 	    m_linkVec.push_back(link.release());
-            it.object()->~DbString(); m_links.free(it.object());
+            ++oid.second;
           }
         }
         
         if ( m_params.open(dbH,"##Params",m_string_t,containerType,mode()).isSuccess() )    {
 	  std::vector<std::string> fids;
-          DbIter<DbString> it;
-          //it.scan(m_params, m_string_t);
-          //it.next();
-          for ( it.scan(m_params, m_string_t); it.next().isSuccess(); )   {
-            std::string dsc = **it;
+          Token::OID_t oid(0, 0);
+          DbString param_str;
+          DbObject* ptr = &param_str;
+
+          while (static_cast<uint64_t>(oid.second) <= m_params.size()) {
+            auto result = m_params.ptr()->load(&ptr, m_string_t, oid, oid, true);
+            if (!result.isSuccess() || !ptr) break;
+            std::string dsc = param_str;
             size_t id1 = dsc.find("[NAME=");
             size_t id2 = dsc.find("[VALUE=");
             if ( id1 != std::string::npos && id2 != std::string::npos )  {
@@ -452,13 +429,12 @@ DbStatus DbDatabaseObj::open()   {
                 std::string n = dsc.substr(id1+6, id11-id1-6);
                 std::string v = dsc.substr(id2+7, id22-id2-7);
                 // ParamMap::value_type val(n, v);
-                log << "--->Reading Param:" << n << "=[" << v << ']' 
-                    << DbPrint::endmsg;
+                ATH_MSG_DEBUG("--->Reading Param:" << n << "=[" << v << ']');
                 m_paramMap[n] = v;
                 if (n == "FID") fids.emplace_back(std::move(v));
               }
             }
-            it.object()->~DbString(); m_params.free(it.object());
+            ++oid.second;
           }
 	  // We assume that the last FID is the true FID of the file...
 	  ParamMap::const_iterator fidIt = m_paramMap.find("FID");
@@ -467,8 +443,7 @@ DbStatus DbDatabaseObj::open()   {
 	    for(size_t i=0; fids.size()>0 && i<fids.size()-1;++i)  {	    
 	      char num[32];
 	      ::sprintf(num, "FID.%d", static_cast<int>(i+1));
-	      log << "--->Redirect FID[" << i << "]: " << fids[i] 
-		  << " to " << fid << DbPrint::endmsg;
+	      ATH_MSG_DEBUG("--->Redirect FID[" << i << "]: " << fids[i] << " to " << fid);
 	      m_paramMap[num] = fid;
 	    }
 	  }
@@ -477,17 +452,17 @@ DbStatus DbDatabaseObj::open()   {
           std::string par_val;
           if ( !param("FID", par_val).isSuccess() )  {
             if ( !addParam("FID", name()).isSuccess() )  {
-              log << "Failed to write parameter FID=" << name() << DbPrint::endmsg;
+              ATH_MSG_ERROR("Failed to write parameter FID=" << name());
             }
           }
           if ( !param("PFN", par_val).isSuccess() )  {
             if ( !addParam("PFN", m_logon).isSuccess() )  {
-              log << "Failed to write parameter PFN=" << m_logon << DbPrint::endmsg;
+              ATH_MSG_ERROR("Failed to write parameter PFN=" << m_logon);
             }
           }
           if ( !param("POOL_VSN", par_val).isSuccess() )  {
             if ( !addParam("POOL_VSN", "1.1").isSuccess() )  {
-              log << "Failed to write parameter POOL_VSN." << DbPrint::endmsg;
+              ATH_MSG_ERROR("Failed to write parameter POOL_VSN.");
             }
           }
         }
@@ -503,20 +478,8 @@ DbStatus DbDatabaseObj::open()   {
 
 /// Re-open database with changing access permissions
 DbStatus DbDatabaseObj::reopen(DbAccessMode mod) {
-  DbPrint log(m_logon);
   if (mod == pool::READ || mod == pool::UPDATE )  {
     if ( mode() != mod )   {
-      if ( mod == pool::READ )  {
-        for (const_iterator i=begin(); i != end(); ++i )  {
-          if ( !(*i).second->updatesPending() )  {
-            log << DbPrintLvl::Error << "Cannot change mode of " << name()
-                << " to " << accessMode(mod) 
-                << " if updates are queued."
-                << DbPrint::endmsg;
-            return Error;
-          }
-        }
-      }
       setMode(mod);
       DbStatus sc = (0==m_info) ? open() : m_info->reopen(mod);
       if ( sc.isSuccess() )   {
@@ -526,21 +489,17 @@ DbStatus DbDatabaseObj::reopen(DbAccessMode mod) {
         }
         return sc;
       }
-      log << DbPrintLvl::Error << "Failed to reopen the database " << name()
-          << " in mode " << accessMode(mod) 
-          << DbPrint::endmsg;
+      ATH_MSG_ERROR("Failed to reopen the database " << name()
+          << " in mode " << accessMode(mod));
       return sc;
     }
-    log << DbPrintLvl::Debug << "Database already open in the requested access mode."
-        << DbPrint::endmsg;
+    ATH_MSG_DEBUG("Database already open in the requested access mode.");
     for (const_iterator i=begin(); i != end(); ++i )  {
       (*i).second->setMode(mod);
     }
     return Success;
   }
-  log << DbPrintLvl::Error << "A database can only be re-opened in "
-      << " UPDATE or READ mode!"
-      << DbPrint::endmsg;
+  ATH_MSG_ERROR("A database can only be re-opened in UPDATE or READ mode!");
   return Error;
 }
 
@@ -562,38 +521,24 @@ DbStatus DbDatabaseObj::close()  {
   return sc;
 }
 
-/// Check for pending updates
-bool DbDatabaseObj::updatesPending() const  {
-  for (const_iterator i=begin(); i != end(); ++i )  {
-    if ( (*i).second->updatesPending() )  {
-      return true;
-    }
-  }
-  return false;
-}
-
 /// Close Database object
 DbStatus DbDatabaseObj::retire()  {
-  if ( !updatesPending() )  {
-    DbPrint log( m_logon);
-    log << DbPrintLvl::Info << "Database being retired..." << DbPrint::endmsg;
+  ATH_MSG_INFO("Database being retired...");
 
-    if (m_links.isValid()) m_links.close();
-    if (m_shapes.isValid()) m_shapes.close();
-    if (m_params.isValid()) m_params.close();
-    for (const_iterator j=begin(); j != end(); ++j )  {
-      DbContainerObj* curr = (*j).second;
-      curr->retire();
-    }
-    DbStatus ret = Success;
-    if ( m_info )    {
-      ret = m_info->close(mode());
-    }
-    cleanup();
-    m_fileAge = 0;
-    return ret;
+  if (m_links.isValid()) m_links.close();
+  if (m_shapes.isValid()) m_shapes.close();
+  if (m_params.isValid()) m_params.close();
+  for (const_iterator j=begin(); j != end(); ++j )  {
+    DbContainerObj* curr = (*j).second;
+    curr->retire();
   }
-  return Error;
+  DbStatus ret = Success;
+  if ( m_info )    {
+    ret = m_info->close(mode());
+  }
+  cleanup();
+  m_fileAge = 0;
+  return ret;
 }
 
 /// Retrieve the number of user parameters
@@ -611,12 +556,10 @@ DbStatus DbDatabaseObj::addParam(const std::string& nam, const std::string& val)
     if ( m_info )  {
       ParamMap::const_iterator i = m_paramMap.find(nam);
       if ( i == m_paramMap.end() )  {
-        std::string dsc = "[NAME=" + nam + "][VALUE=" + val + ']';
-        DbHandle<DbString> persH = new(m_params, m_string_t) DbString(dsc);
-        if ( !m_params.save(persH, m_string_t).isSuccess() )  {
+        DbString param_string("[NAME=" + nam + "][VALUE=" + val + ']');
+        if ( !m_params.store(&param_string, m_string_t).isSuccess() )  {
           return Error;
         }
-        persH.ptr()->~DbString(); m_params.free(persH.ptr());
         m_paramMap.insert(ParamMap::value_type(nam, val));
         return Success;
       }
@@ -709,9 +652,7 @@ DbStatus DbDatabaseObj::read(const Token& token, ShapeH shape, void** object)
                   // try a direct link table access
                   containerName = m_linkVec[ oid.first ]->contID();
                } else {
-                  DbPrint log( name() );
-                  log << DbPrintLvl::Error << "OID1 not found in the index redirection map. Token=" << token.toString()
-                      << DbPrint::endmsg;
+                  ATH_MSG_ERROR("OID1 not found in the index redirection map. Token=" << token.toString());
                   return Error;
                }
             }
@@ -729,9 +670,8 @@ DbStatus DbDatabaseObj::read(const Token& token, ShapeH shape, void** object)
          if ( typ_info && typ_info == shape ) {
             return cntH.load(object, shape, oid);
          }
-         DbPrint log( name() );
-         log << DbPrintLvl::Error << "Token ClassID " << token.classID().toString()
-             << " is different from requested Shape " << shape->shapeID().toString() << DbPrint::endmsg;
+         ATH_MSG_ERROR("Token ClassID " << token.classID().toString() 
+              << " is different from requested Shape " << shape->shapeID().toString());
       }
    }
    return Error;
@@ -845,10 +785,7 @@ DbStatus DbDatabaseObj::transAct(Transaction::Action action)  {
     return status;
   }
   else if ( upda )  {
-    DbPrint err( name());
-    err << DbPrintLvl::Error << "The database:" << name() 
-        << " was not opened properly. Commit failed."
-        << DbPrint::endmsg;
+    ATH_MSG_ERROR("The database:" << name() << " was not opened properly. Commit failed.");
     return Error;
   }
   else  {

@@ -3,6 +3,11 @@
 */
 
 #include "MuonIdHelpers/sTgcIdHelper.h"
+#include "IdDict/IdDictDictionary.h"
+#include "IdDict/IdDictField.h"
+#include "IdDict/IdDictGroup.h"
+#include "IdDict/IdDictMgr.h"
+#include "IdDict/IdDictRegion.h"
 #include "Identifier/RangeIterator.h"
 
 /*******************************************************************************/
@@ -45,7 +50,7 @@ int sTgcIdHelper::initialize_from_dictionary(const IdDictMgr& dict_mgr) {
         return 0;
     }
 
-    IdDictField* field = m_dict->find_field("stgcMultilayer");
+    const IdDictField* field = m_dict->find_field("stgcMultilayer");
     if (field) {
         m_DETECTORELEMENT_INDEX = field->index();
     } else {
@@ -81,11 +86,11 @@ int sTgcIdHelper::initialize_from_dictionary(const IdDictMgr& dict_mgr) {
     // m_DETECTORELEMENT_INDEX = m_MODULE_INDEX;
 
     // save an index to the first region of tgc
-    IdDictGroup* stgcGroup = m_dict->find_group("stgc");
+    const IdDictGroup* stgcGroup = m_dict->find_group("stgc");
     if (!stgcGroup) {
         ATH_MSG_ERROR("Cannot find stgc group");
     } else {
-        m_GROUP_INDEX = stgcGroup->regions()[0]->index();
+        m_GROUP_INDEX = stgcGroup->region(0).index();
     }
 
     const IdDictRegion& region = m_dict->region(m_GROUP_INDEX);

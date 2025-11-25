@@ -1,13 +1,13 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-// xAODBranchAddress.cxx 
+// xAODBranchAddress.cxx
 // Implementation file for class Athena::xAODBranchAddress
 // Author: Johannes ELmsheuser, Will Buttinger
-/////////////////////////////////////////////////////////////////// 
+///////////////////////////////////////////////////////////////////
 
 // AthenaRootComps includes
 #include "xAODBranchAddress.h"
@@ -25,32 +25,32 @@
 
 #include "xAODRootAccess/TEvent.h"
 #include "TClass.h"
-#include <typeinfo> 
+#include <typeinfo>
 
 
 namespace Athena {
 
-/////////////////////////////////////////////////////////////////// 
-// Public methods: 
-/////////////////////////////////////////////////////////////////// 
+///////////////////////////////////////////////////////////////////
+// Public methods:
+///////////////////////////////////////////////////////////////////
 
 // Constructors
 ////////////////
 
-/// Default constructor: 
+/// Default constructor:
 xAODBranchAddress::xAODBranchAddress() :
   GenericAddress(),
   m_ptr    ()
 {}
 
-/// Copy constructor: 
+/// Copy constructor:
 xAODBranchAddress::xAODBranchAddress( const xAODBranchAddress& rhs ) :
   GenericAddress(rhs),
   m_ptr    (rhs.m_ptr)
 {}
 
-/// Assignment operator: 
-xAODBranchAddress& 
+/// Assignment operator:
+xAODBranchAddress&
 xAODBranchAddress::operator=( const xAODBranchAddress& rhs )
 {
   if (this != &rhs) {
@@ -60,7 +60,7 @@ xAODBranchAddress::operator=( const xAODBranchAddress& rhs )
   return *this;
 }
 
-/// Constructor with parameters: 
+/// Constructor with parameters:
 xAODBranchAddress::xAODBranchAddress(long svc,
                                      const CLID& clid,
                                      const std::string& p1,
@@ -70,11 +70,11 @@ xAODBranchAddress::xAODBranchAddress(long svc,
   GenericAddress(svc, clid, p1, p2, ip1, ip2),
   m_ptr(0) //the actual data object that is retrieved
 {
-  // std::cerr << "::RBA::+RBA... (this=" << this << ") br=[" 
+  // std::cerr << "::RBA::+RBA... (this=" << this << ") br=["
   //           << this->par()[1] << "]\n";
 }
 
-/// Destructor: 
+/// Destructor:
 xAODBranchAddress::~xAODBranchAddress()
 {
   // std::cerr << "::RBA::~RBA... (this=" << this << ") br=["
@@ -86,11 +86,11 @@ xAOD::xAODTEvent*
   xAODBranchAddress::tevent()
 {
   //std::cout << "xAODBranchAddress::tevent ..." << std::endl;
-  return reinterpret_cast<xAOD::xAODTEvent*>(reinterpret_cast<unsigned long*>(this->ipar()[0]));  
+  return reinterpret_cast<xAOD::xAODTEvent*>(reinterpret_cast<unsigned long*>(this->ipar()[0]));
 }
 
 void
-xAODBranchAddress::setTEventAddress() 
+xAODBranchAddress::setTEventAddress()
 {
 
   //std::cout << "xAODBranchAddress::setTEvent ..." << std::endl;
@@ -103,7 +103,7 @@ xAODBranchAddress::setTEventAddress()
   //std::cout << "xAODBranchAddress::setTEventAddress  br_name=" << br_name << std::endl;
   //std::cout << "xAODBranchAddress::setTEventAddress  tevent=" << tevent << " entries = " << tevent->getEntries() << std::endl;
   //std::cout << "xAODBranchAddress::setTEventAddress  tlID()=" << this->clID() << std::endl;
-  
+
   const std::type_info* ti = CLIDRegistry::CLIDToTypeinfo(this->clID());
   //std::cout << "xAODBranchAddress::setTEventAddress ti=" << ti << std::endl;
 
@@ -112,19 +112,23 @@ xAODBranchAddress::setTEventAddress()
 
   //we use the ipar()[1] to flag if we retrieve main event info (0) or metadata (1) (see xAODEventSelector where it creates BranchAddress)
   switch( (this->ipar()[1]) ) {
-  case 0: 
+  case 0:
     {//reading event level info
       tevent->setActive(); //ensure we are active tevent
-      void* addr ATLAS_THREAD_SAFE = const_cast<void*>(tevent->getInputObject(br_name, *ti));
+      static constexpr bool SILENT = false;
+      static constexpr bool METADATA = false;
+      void* addr ATLAS_THREAD_SAFE = const_cast<void*>(tevent->getInputObject(br_name, *ti, SILENT, METADATA));
       m_ptr = addr;
     }
     break;
-  case 1: 
+  case 1:
     {//reading metadata
       //FIXME: NEEED TO ACCESS METADATA
       //std::cout << "xAODBranchAddress::setTEventAddress metadata " << br_name << std::endl;
       tevent->setActive(); //ensure we are active tevent
-      void* addr ATLAS_THREAD_SAFE = const_cast<void*>(tevent->getInputObject(br_name, *ti, false, true));
+      static constexpr bool SILENT = false;
+      static constexpr bool METADATA = true;
+      void* addr ATLAS_THREAD_SAFE = const_cast<void*>(tevent->getInputObject(br_name, *ti, SILENT, METADATA));
       m_ptr = addr;
     }
     break;
@@ -132,11 +136,11 @@ xAODBranchAddress::setTEventAddress()
 
   //std::cout << "xAODBranchAddress::setTEventAddress m_ptr=" << m_ptr << std::endl;
 
- 
+
 }
 
-/////////////////////////////////////////////////////////////////// 
-// Protected methods: 
-/////////////////////////////////////////////////////////////////// 
+///////////////////////////////////////////////////////////////////
+// Protected methods:
+///////////////////////////////////////////////////////////////////
 
 } //> end namespace Athena

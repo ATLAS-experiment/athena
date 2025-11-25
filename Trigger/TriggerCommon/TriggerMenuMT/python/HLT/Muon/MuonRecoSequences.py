@@ -121,7 +121,7 @@ def MuDataPrepViewDataVerifierCfg(flags):
       dataObjects += [( 'sTgcPrepDataCollection_Cache'  , 'StoreGateSvc+' + MuonPrdCacheNames.sTgcCache)]
     
     if flags.Muon.usePhaseIIGeoSetup:
-      dataObjects += [( 'ActsGeometryContext' , 'StoreGateSvc+ActsAlignment' )]
+      dataObjects += [('ActsTrk::GeometryContext' , 'StoreGateSvc+ActsAlignment' )]
       
     alg = CompFactory.AthViews.ViewDataVerifier( name = "VDVMuDataPrep",
                                                  DataObjects = dataObjects)
@@ -207,7 +207,7 @@ def muFastVDVCfg(flags, RoIs, postFix, InsideOutMode, extraLoads):
       dataObjects += [('Muon::MMPrepDataContainer','StoreGateSvc+MM_Measurements')]
     
     if flags.Muon.usePhaseIIGeoSetup:
-      dataObjects += [( 'ActsGeometryContext' , 'StoreGateSvc+ActsAlignment' )]
+      dataObjects += [('ActsTrk::GeometryContext' , 'StoreGateSvc+ActsAlignment' )]
       dataObjects += [( 'MuonR4::SpacePointContainer' , 'StoreGateSvc+MuonSpacePoints' )]
       if flags.Detector.GeometrysTGC or flags.Detector.GeometryMM:
         dataObjects += [( 'MuonR4::SpacePointContainer' , 'StoreGateSvc+NswSpacePoints' )]

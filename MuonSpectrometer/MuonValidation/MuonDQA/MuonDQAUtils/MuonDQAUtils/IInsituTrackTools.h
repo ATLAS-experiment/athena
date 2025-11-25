@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -9,7 +9,8 @@
 #define IMSINSITUMSINSITUTOOLS_H 
 
 #include "GaudiKernel/IAlgTool.h"
-#include "EventKernel/INavigable4Momentum.h" 
+
+class INavigable4Momentum;
 
 static const InterfaceID IID_IInsituTrackTools("IInsituTrackTools", 1, 0);
 

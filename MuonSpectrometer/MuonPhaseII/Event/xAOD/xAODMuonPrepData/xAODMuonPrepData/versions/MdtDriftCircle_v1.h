@@ -37,7 +37,7 @@ class MdtDriftCircle_v1 : public UncalibratedMeasurement_v1 {
     /** @brief: Return the measurement's position vector in the local frame. If the
      *          measurement is an ordinary 1D drift circle, the Zero vector is returned.
      *          Otherwise the local position along z */
-    Amg::Vector3D localCirclePosition() const;
+    Amg::Vector3D localMeasurementPos() const;
     /** @brief Override the dimensions to be 1. */
     unsigned int numDimensions() const override { return 1; }
     /** @brief Returns the TDC (typically range is 0 to 2500)*/

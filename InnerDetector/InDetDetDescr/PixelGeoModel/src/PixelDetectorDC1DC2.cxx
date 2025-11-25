@@ -1196,6 +1196,8 @@ GeoPixelSiCrystal::GeoPixelSiCrystal(InDetDD::PixelDetectorManager* ddmgr,
   double pitchPhi = m_gmt_mgr->DesignPitchRP(isBLayer);
   double pitchEta = m_gmt_mgr->DesignPitchZ(isBLayer);
 
+  InDetDD::detail::FENumbering fe_numbering = InDetDD::detail::FENumbering::kRegular; // also mirrored FE numbering for even-phi endcap modules ?
+
   // assumed layout
   // circuit :
   /// local-x/phi/row ^   big (1) .... normal pitch (columnsPerCircuit-2) ... big
@@ -1218,7 +1220,8 @@ GeoPixelSiCrystal::GeoPixelSiCrystal(InDetDD::PixelDetectorManager* ddmgr,
                                                     std::array<std::array<double,kNDirections>,kNPixelLocations>{   // regular/central,longEnd/outer,long/inner
                                                        std::array<double,kNDirections>{pitchPhi,pitchEta},
                                                        std::array<double,kNDirections>{0.,pitchEtaBig},
-                                                       std::array<double,kNDirections>{0.,pitchEtaBig}});
+                                                       std::array<double,kNDirections>{0.,pitchEtaBig}},
+                                                    fe_numbering);
 
   std::unique_ptr<PixelModuleDesign> p_barrelDesign2 = std::make_unique<PixelModuleDesign>(thickness,
 							     circuitsPerEta,
@@ -1321,11 +1324,11 @@ GeoVPhysVol* GeoPixelSiCrystal::Build() {
       phimod = 48-m_gmt_mgr->Phi()*2-m_gmt_mgr->Eta()-2;
       if (phimod == -1) phimod = 47;
     }
-      
+
     idwafer = ppp->wafer_id(brl_ec,m_gmt_mgr->GetLD(),phimod,0);
   }
   m_id=idwafer;
-  
+
   SiDetectorElement * element = new SiDetectorElement(idwafer, m_design, siPhys, m_gmt_mgr->commonItems());
   // Add conditions:  (do it here as eventually they will come from the cond DB)
   //SiliconConditions conditions(m_gmt_mgr->Temperature(m_isBLayer), m_gmt_mgr->Voltage(m_isBLayer), 0.);

@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration.
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration.
 #
 # File: CaloRec/python/CaloThinCellsByClusterAlg_test.py
 # Author: scott snyder
@@ -61,8 +61,7 @@ def make_clusters (mgr, ccc, hashes, ctx):
                 else:
                     hashes.add (hash.value())
                     cl.addCell (idx, 1)
-
-        cl.setLink(cellLinks,ctx)
+        cl.setLink(cellLinks, ctx)
 
     return (clc, clc_store, cellLinks)
 
@@ -94,7 +93,6 @@ class CheckThinningAlg (Alg):
         mgr = self.condStore['CaloDetDescrManager'].find (ctx.eventID())
         dec = self.evtStore['AllCalo_THINNED_StreamAOD.thinAlg']
 
-        global cell_hashes
         for i in range (dec.size()):
             elt = mgr.get_element (ROOT.IdentifierHash (i))
             if elt.getSampling() == 3:

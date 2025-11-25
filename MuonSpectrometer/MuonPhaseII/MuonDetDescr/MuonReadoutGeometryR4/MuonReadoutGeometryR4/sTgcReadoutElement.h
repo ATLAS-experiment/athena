@@ -169,8 +169,8 @@ class sTgcReadoutElement : public MuonReadoutElement {
     localCornerArray localPadCorners(const IdentifierHash& measHash) const;
     /// Returns an array of four 3D vectors representing corner positions of the pads
     using globalCornerArray = std::array<Amg::Vector3D, 4>;
-    globalCornerArray globalPadCorners(const ActsGeometryContext& ctx, const Identifier& measId) const;
-    globalCornerArray globalPadCorners(const ActsGeometryContext& ctx, const IdentifierHash& measHash) const;  
+    globalCornerArray globalPadCorners(const ActsTrk::GeometryContext& ctx, const Identifier& measId) const;
+    globalCornerArray globalPadCorners(const ActsTrk::GeometryContext& ctx, const IdentifierHash& measHash) const;  
     /// Returns the pad Number given local position of hit and Identifier/Hash
     int padNumber(const Amg::Vector2D& hitPos, const Identifier& measId) const;
     int padNumber(const Amg::Vector2D& hitPos, const IdentifierHash& measHash) const;
@@ -187,15 +187,15 @@ class sTgcReadoutElement : public MuonReadoutElement {
     const PadDesign& padDesign(const IdentifierHash& measHash) const;
 
     /// Returns the global pad/strip/wireGroup position
-    Amg::Vector3D globalChannelPosition(const ActsGeometryContext& ctx, const Identifier& measId) const;
-    Amg::Vector3D globalChannelPosition(const ActsGeometryContext& ctx, const IdentifierHash& measHash) const;
+    Amg::Vector3D globalChannelPosition(const ActsTrk::GeometryContext& ctx, const Identifier& measId) const;
+    Amg::Vector3D globalChannelPosition(const ActsTrk::GeometryContext& ctx, const IdentifierHash& measHash) const;
     /// Returns the local pad/strip/wireGroup position
     Amg::Vector2D localChannelPosition(const Identifier& measId) const;
     Amg::Vector2D localChannelPosition(const IdentifierHash& measHash) const;
 
     // Returns the global left/right edge position of strip or wire
-    Amg::Vector3D leftStripEdge(const ActsGeometryContext& ctx, const IdentifierHash& measHash) const;
-    Amg::Vector3D rightStripEdge(const ActsGeometryContext& ctx, const IdentifierHash& measHash) const;
+    Amg::Vector3D leftStripEdge(const ActsTrk::GeometryContext& ctx, const IdentifierHash& measHash) const;
+    Amg::Vector3D rightStripEdge(const ActsTrk::GeometryContext& ctx, const IdentifierHash& measHash) const;
 
     /// Constructs the identifier hash from the full measurement Identifier. The
     /// hash is always defined w.r.t the specific detector element and used to

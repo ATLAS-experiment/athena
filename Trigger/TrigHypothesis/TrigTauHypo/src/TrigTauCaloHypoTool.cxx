@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /********************************************************************
@@ -44,12 +44,12 @@ StatusCode TrigTauCaloHypoTool::initialize()
 }
 
 
-bool TrigTauCaloHypoTool::decide(const ITrigTauCaloHypoTool::ToolInfo& input) const
+bool TrigTauCaloHypoTool::decide(const ITrigTauJetHypoTool::ToolInfo& input) const
 {
     // Monitoring config
     auto passedCuts = Monitored::Scalar<unsigned int>("CutCounter", 0);
     auto pT = Monitored::Scalar<float>("pT", 0);
-    auto mon = Monitored::Group(m_monTool, passedCuts);
+    auto mon = Monitored::Group(m_monTool, passedCuts, pT);
 
     
     // Get TauJet collection
@@ -91,9 +91,9 @@ bool TrigTauCaloHypoTool::decide(const ITrigTauCaloHypoTool::ToolInfo& input) co
 }
 
 
-StatusCode TrigTauCaloHypoTool::decide(std::vector<ITrigTauCaloHypoTool::ToolInfo>& input) const
+StatusCode TrigTauCaloHypoTool::decide(std::vector<ITrigTauJetHypoTool::ToolInfo>& input) const
 {
-    for(auto& i : input) {
+    for(ITrigTauJetHypoTool::ToolInfo& i : input) {
         if(passed(m_decisionId.numeric(), i.previousDecisionIDs)) {
             if(decide(i)) {
                 addDecisionID(m_decisionId, i.decision);

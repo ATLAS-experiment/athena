@@ -106,10 +106,14 @@ TCS::TeAsymmetry::processBitCorrect( const std::vector<TCS::TOBArray const *> & 
 
         //std::cout << "jTE SideA: " << jteSideA << ", jTE SideC: " << jteSideC << " , " << p_deltaAbsMin[i] << " , " << abs(jteSideA - jteSideC)  << std::endl;
 
-        bool condition_1 = abs(jteSideA - jteSideC) > p_deltaAbsMin[i];
+        bool condition_1 = std::abs(jteSideA - jteSideC) > p_deltaAbsMin[i];
         
         //std::cout << "Condition 1: " << condition_1 << std::endl;
-        bool condition_2  = abs(jteSideA - jteSideC) > p_asymFactor[i]*((*jte)->sumEt() + p_asymOffset[i]);
+        //attention: some of these values are to be interpreted as signed, 
+        //but also need to explicitly cast unsigned quantities to have correct results
+        static constexpr unsigned c2fractionalBits = 8; // 8 fractional bits in p_asymFactor
+        int offsetSumEt = static_cast<int>((*jte)->sumEt()) + static_cast<int>(p_asymOffset[i]);
+        bool condition_2  = std::abs(jteSideA - jteSideC) >  (( static_cast<long long>(p_asymFactor[i]) * offsetSumEt ) >> c2fractionalBits); 
         //std::cout << "Condition 2: " << condition_2 << std::endl;
         bool condition_3  = jteSideA * jteSideC < p_maxTeProduct[i];
         //std::cout << "Condition 3: " << condition_3 << std::endl;
@@ -118,12 +122,13 @@ TCS::TeAsymmetry::processBitCorrect( const std::vector<TCS::TOBArray const *> & 
         accept = condition_1 && condition_2 && condition_3;
         //std::cout << "Accept: " << accept << std::endl;
         
+        
         const bool fillAccept = fillHistos() and (fillHistosBasedOnHardware() ? getDecisionHardwareBit(i) : accept);
         const bool fillReject = fillHistos() and not fillAccept;
         const bool alreadyFilled = decision.bit(i);
         
         TRG_MSG_DEBUG("Decision " << i << ": " << (accept?"pass":"fail") << " jTE_A = " << (*jte)->sumEtSideA() << " , jTE_C = " << (*jte)->sumEtSideC());
-
+        
         if( accept ) {
           decision.setBit(i, true);  
           output[i]->push_back( TCS::CompositeTOB(*jte) );

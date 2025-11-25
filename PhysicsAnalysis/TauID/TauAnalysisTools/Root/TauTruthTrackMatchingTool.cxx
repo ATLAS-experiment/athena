@@ -1,14 +1,13 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-#include <TauAnalysisTools/TauTruthTrackMatchingTool.h>
+#include "TauAnalysisTools/TauTruthTrackMatchingTool.h"
 
 // EDM include(s)
 #include "xAODTruth/TruthParticleContainer.h"
 #include "xAODTruth/TruthVertex.h"
 #include "TruthUtils/HepMCHelpers.h"
-#include "AthContainers/ConstAccessor.h"
 
 using namespace TauAnalysisTools;
 
@@ -16,13 +15,11 @@ using namespace TauAnalysisTools;
 //______________________________________________________________________________
 TauTruthTrackMatchingTool::TauTruthTrackMatchingTool( const std::string& name )
   : AsgTool(name)
-{
-}
+{}
 
 //______________________________________________________________________________
 TauTruthTrackMatchingTool::~TauTruthTrackMatchingTool( )
-{
-}
+{}
 
 //______________________________________________________________________________
 StatusCode TauTruthTrackMatchingTool::initialize()
@@ -97,6 +94,16 @@ StatusCode TauTruthTrackMatchingTool::checkTrackType(const xAOD::TauTrack& xTrac
 // Based on https://its.cern.ch/jira/browse/ATLTAU-482 one can speculate the code was designed to distinguish between 
 // TauAnalysisTools::UnderlyingEventTrack and TauAnalysisTools::PileupTrack.
 // But such distinction has never been implemented, so the new code has just TauAnalysisTools::UnderlyingEventTrack and TauAnalysisTools::FakeTrack
+
+// protection against code break because of missing uniqueID
+  try{
+      HepMC::no_truth_link(xTruthParticle);
+  } catch (...) {
+      ATH_MSG_DEBUG("unique ID not available for this truth track. Will mark as UnclassifiedTrack ");
+      decTruthType(xTrackParticle) = TauAnalysisTools::UnclassifiedTrack;
+      return StatusCode::SUCCESS;
+  }
+
   if (HepMC::no_truth_link(xTruthParticle))                decTruthType(xTrackParticle) = TauAnalysisTools::FakeTrack;
   else if (HepMC::is_simulation_particle(xTruthParticle))  ATH_CHECK(classifyConversion(xTrackParticle, *xTruthParticle));
   else decTruthType(xTrackParticle) = TauAnalysisTools::UnderlyingEventTrack;

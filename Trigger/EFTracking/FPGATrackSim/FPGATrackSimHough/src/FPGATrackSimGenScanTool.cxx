@@ -100,10 +100,11 @@ StatusCode FPGATrackSimGenScanTool::initialize()
   
   // Check inputs
   bool ok = false;
-  if (std::ssize(m_pairFilterDeltaPhiCut) != static_cast<int>(m_binnedhits->getNLayers()) - 1)
-    ATH_MSG_FATAL("initialize() pairFilterDeltaPhiCut must have size nLayers-1=" << m_binnedhits->getNLayers() - 1 << " found " << m_pairFilterDeltaPhiCut.size());
-  else if (m_pairFilterDeltaEtaCut.size() != m_binnedhits->getNLayers() - 1)
-    ATH_MSG_FATAL("initialize() pairFilterDeltaEtaCut must have size nLayers-1=" << m_binnedhits->getNLayers() - 1 << " found " << m_pairFilterDeltaEtaCut.size());
+  const int signedSize = static_cast<int>(m_binnedhits->getNLayers()) - 1;
+  if (std::ssize(m_pairFilterDeltaPhiCut) != signedSize)
+    ATH_MSG_FATAL("initialize() pairFilterDeltaPhiCut must have size nLayers-1=" << signedSize << " found " << m_pairFilterDeltaPhiCut.size());
+  else if (std::ssize(m_pairFilterDeltaEtaCut) != signedSize)
+    ATH_MSG_FATAL("initialize() pairFilterDeltaEtaCut must have size nLayers-1=" << signedSize << " found " << m_pairFilterDeltaEtaCut.size());
   else if (m_pairFilterPhiExtrapCut.size() != 2)
     ATH_MSG_FATAL("initialize() pairFilterPhiExtrapCut must have size 2 found " << m_pairFilterPhiExtrapCut.size());
   else if (m_pairFilterEtaExtrapCut.size() != 2)
@@ -173,7 +174,7 @@ StatusCode FPGATrackSimGenScanTool::getRoads(const std::vector<std::shared_ptr<c
     // convert the group pairsets to FPGATrackSimRoads
     for (const FPGATrackSimGenScanTool::HitPairSet& pairset: pairsets)
       {      
-        addRoad(pairset.hitlist, bin.idx());
+        addRoad(pairset.hitlist, bin.idx());        
         ATH_MSG_DEBUG("Output road size=" <<pairset.hitlist.size());
 
         // debug statement if more than one road found in bin
@@ -306,7 +307,7 @@ void FPGATrackSimGenScanTool::updateState(const IntermediateState &inputstate,
         HitPairSet newset(pairset);
         newset.addPair(nextpair);
         pairset_used[ps_idx]=true;
-        outputstate.pairsets.push_back(newset);
+        outputstate.pairsets.push_back(std::move(newset));
         // put inpair hits in list of hits not to pair again with the new hits
         for (auto vetohit : pairset.hitlist) {
           vetoList.insert(vetohit);
@@ -622,8 +623,8 @@ void FPGATrackSimGenScanTool::addRoad(std::vector<const StoredHit *> const &hits
 
   // "Fit" the track.
   FPGATrackSimTrackPars fittedpars;
-  double chi2;
-  bool inBin = fitRoad(hits, idx, fittedpars, chi2);
+  double chi2,chi2_phi,chi2_eta;
+  bool inBin = fitRoad(hits, idx, fittedpars, chi2, chi2_phi,chi2_eta);
   if (!inBin && m_inBinFiltering) return;
 
   m_roads.emplace_back(std::make_unique<FPGATrackSimRoad>());
@@ -632,6 +633,8 @@ void FPGATrackSimGenScanTool::addRoad(std::vector<const StoredHit *> const &hits
   r->setRoadID(m_roads.size() - 1);
   //    r.setPID(y * m_imageSize_y + x);
   r->setHits(std::move(sorted_hits));
+
+  r->setBinIdx(idx);
 
   FPGATrackSimBinUtil::ParSet binCenterPars = m_binnedhits->getBinTool().lastStep()->binCenter(idx);
   FPGATrackSimTrackPars trackpars = m_binnedhits->getBinTool().binDesc()->parSetToTrackPars(binCenterPars);
@@ -645,6 +648,7 @@ void FPGATrackSimGenScanTool::addRoad(std::vector<const StoredHit *> const &hits
   // Store the fitted information on the track.
   r->setFitParams(fittedpars);
   r->setFitChi2(chi2);
+  r->setFitChi2_2d(chi2_phi,chi2_eta);
 }
 
 
@@ -748,7 +752,7 @@ double FPGATrackSimGenScanTool::HitPairSet::PhiOutExtrapCurved(const HitPair &pa
 
 
 // format final pairsets into expected output of getRoads
-bool FPGATrackSimGenScanTool::fitRoad(std::vector<const StoredHit *> const &hits, const FPGATrackSimBinUtil::IdxSet &idx, FPGATrackSimTrackPars& trackpars, double& chi2) const
+bool FPGATrackSimGenScanTool::fitRoad(std::vector<const StoredHit *> const &hits, const FPGATrackSimBinUtil::IdxSet &idx, FPGATrackSimTrackPars& trackpars, double& chi2, double& phi_chi2, double& eta_chi2) const
 {
 
   double N =hits.size();
@@ -847,13 +851,13 @@ bool FPGATrackSimGenScanTool::fitRoad(std::vector<const StoredHit *> const &hits
 
   double ec0 = etavars[0];
   double ec1 = etavars[1];
-  double eta_chi2 =  sum_Eta2 - 2*ec0*sum_Eta - 2*ec1*sum_EtaR + N*ec0*ec0 + 2*ec0*ec1*sum_R + ec1*ec1*sum_R2;
+  eta_chi2 =  sum_Eta2 - 2*ec0*sum_Eta - 2*ec1*sum_EtaR + N*ec0*ec0 + 2*ec0*ec1*sum_R + ec1*ec1*sum_R2;
 
   double pc0 = phivars[0];
   double pc1 = phivars[1];
   double pc2 = phivars[2];
 
-  double phi_chi2 = sum_Phi2 - 2*pc0*sum_Phi - 2*pc1*sum_PhiR - 2*pc2*sum_PhiR2 + N*pc0*pc0 + 2*pc0*pc1*sum_R + 2*pc0*pc2*sum_R2 + 2*pc1*pc2*sum_R3 + pc1*pc1*sum_R2 + pc2*pc2*sum_R4;
+  phi_chi2 = sum_Phi2 - 2*pc0*sum_Phi - 2*pc1*sum_PhiR - 2*pc2*sum_PhiR2 + N*pc0*pc0 + 2*pc0*pc1*sum_R + 2*pc0*pc2*sum_R2 + 2*pc1*pc2*sum_R3 + pc1*pc1*sum_R2 + pc2*pc2*sum_R4;
 
   for (const FPGATrackSimBinUtil::StoredHit* hit : hits)
   {
@@ -870,7 +874,11 @@ bool FPGATrackSimGenScanTool::fitRoad(std::vector<const StoredHit *> const &hits
   ATH_MSG_VERBOSE("Fitted track pars" << trackpars);
 
   // and the summed chi2, which is assuming (right now) an even weighting between the two components.
-  chi2 = std::sqrt(m_etaWeight * eta_chi2 * eta_chi2 + m_phiWeight * phi_chi2 * phi_chi2);
+  // assume only options are 4 or 5 hits for now
+  chi2 = (hits.size() == 5) ?
+	  m_etaWeight_5hits * eta_chi2 * eta_chi2 + m_phiWeight_5hits * phi_chi2 * phi_chi2 :
+	  m_etaWeight_4hits * eta_chi2 * eta_chi2 + m_phiWeight_4hits * phi_chi2 * phi_chi2;
+	  
 
   return inBin;
 }

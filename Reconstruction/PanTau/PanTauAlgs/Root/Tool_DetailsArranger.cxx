@@ -2,11 +2,6 @@
   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "xAODTau/TauJet.h"
-#include "xAODPFlow/PFOContainer.h"
-#include "xAODParticleEvent/Particle.h"
-#include "xAODParticleEvent/ParticleContainer.h"
-
 #include "PanTauAlgs/Tool_DetailsArranger.h"
 #include "PanTauAlgs/PanTauSeed.h"
 #include "PanTauAlgs/HelperFunctions.h"
@@ -20,12 +15,9 @@ bool sortBDTscore(const ElementLink< xAOD::PFOContainer >& i, const ElementLink<
 
 PanTau::Tool_DetailsArranger::Tool_DetailsArranger(const std::string& name) :
   asg::AsgTool(name)
-{
-}
-
+{}
 
 PanTau::Tool_DetailsArranger::~Tool_DetailsArranger() = default;
-
 
 StatusCode PanTau::Tool_DetailsArranger::initialize() {
 
@@ -36,10 +28,7 @@ StatusCode PanTau::Tool_DetailsArranger::initialize() {
   ATH_CHECK( m_Tool_InformationStore->getInfo_Double("TauConstituents_Types_DeltaRCore",                      m_CoreCone) );
   ATH_CHECK( m_Tool_InformationStore->getInfo_VecDouble("TauConstituents_BinEdges_Eta",                       m_EtaBinEdges) );
   ATH_CHECK( m_Tool_InformationStore->getInfo_VecDouble("TauConstituents_Selection_Neutral_EtaBinned_EtCut",  m_EtaBinnedEtCuts) );
-  ATH_CHECK( m_Tool_InformationStore->getInfo_String("FeatureExtractor_VarTypeName_varTypeName_Sum",          m_varTypeName_Sum) );
   ATH_CHECK( m_Tool_InformationStore->getInfo_String("FeatureExtractor_VarTypeName_varTypeName_Ratio",        m_varTypeName_Ratio) );
-  ATH_CHECK( m_Tool_InformationStore->getInfo_String("FeatureExtractor_VarTypeName_varTypeName_Isolation",    m_varTypeName_Isolation) );
-  ATH_CHECK( m_Tool_InformationStore->getInfo_String("FeatureExtractor_VarTypeName_varTypeName_Num",          m_varTypeName_Num) );
   ATH_CHECK( m_Tool_InformationStore->getInfo_String("FeatureExtractor_VarTypeName_varTypeName_Mean",         m_varTypeName_Mean) );
   ATH_CHECK( m_Tool_InformationStore->getInfo_String("FeatureExtractor_VarTypeName_varTypeName_StdDev",       m_varTypeName_StdDev) );
   ATH_CHECK( m_Tool_InformationStore->getInfo_String("FeatureExtractor_VarTypeName_varTypeName_HLV",          m_varTypeName_HLV) );

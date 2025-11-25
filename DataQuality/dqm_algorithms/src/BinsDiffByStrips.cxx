@@ -321,8 +321,8 @@ AllBinInOneStrip.push_back(binContent_tmp);
     if( (!combineStripsBeforeSkimming) && ((int)inputs.size() < minBinsBeforeSkimming) ) {
       nBinsUndefined += inputs.size();
     }
-    else if(inputs.size() != 0) {
-      strips.push_back(inputs);
+    else if(not inputs.empty()) {
+      strips.push_back(std::move(inputs));
     }
   }
 

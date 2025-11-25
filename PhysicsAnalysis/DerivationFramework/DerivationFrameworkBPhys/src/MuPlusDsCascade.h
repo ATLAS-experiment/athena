@@ -19,6 +19,8 @@
 #include "xAODEventInfo/EventInfo.h"
 #include "InDetTrackSelectionTool/InDetTrackSelectionTool.h"
 #include "GaudiKernel/IPartPropSvc.h"
+// dummy EventContext for AnalysisBase
+#include "AsgTools/CurrentContext.h"
 
 namespace Trk {
     class IVertexFitter;
@@ -42,17 +44,17 @@ namespace DerivationFramework {
         MuPlusDsCascade(const std::string& t, const std::string& n, const IInterface*  p);
         ~MuPlusDsCascade();
         virtual StatusCode initialize() override;
-        StatusCode performSearch(std::vector<Trk::VxCascadeInfo*> *cascadeinfoContainer ) const;
-        virtual StatusCode addBranches() const override;
+        StatusCode performSearch(std::vector<Trk::VxCascadeInfo*> *cascadeinfoContainer, const EventContext& ctx) const;
+        virtual StatusCode addBranches(const EventContext& ctx) const override;
 
         static xAOD::Vertex* FindVertexTrack(const xAOD::MuonContainer* c,  xAOD::Vertex* v);
 
 
       private:
         
-        std::string m_vertexContainerKey;
-        std::string m_vertexDxContainerKey;
-        std::vector<std::string> m_cascadeOutputsKeys;
+        std::string m_vertexContainerKey; // FIXME Use Handles
+        std::string m_vertexDxContainerKey; // FIXME Use Handles
+        std::vector<std::string> m_cascadeOutputsKeys; // FIXME Use Handles
 
         std::string m_VxPrimaryCandidateName;   //!< Name of primary vertex container
 
@@ -80,7 +82,7 @@ namespace DerivationFramework {
         ServiceHandle<IPartPropSvc> m_partPropSvc{this, "PartPropSvc", "PartPropSvc"};
 
         bool        m_refitPV;
-        std::string m_refPVContainerName;
+        std::string m_refPVContainerName; // FIXME Use Handles
         std::string m_hypoName;               //!< name of the mass hypothesis. E.g. Jpis, Upsi, etc. Will be used as a prefix for decorations
         //This parameter will allow us to optimize the number of PVs under consideration as the probability
         //of a useful primary vertex drops significantly the higher you go

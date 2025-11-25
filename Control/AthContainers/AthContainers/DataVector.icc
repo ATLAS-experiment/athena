@@ -16,6 +16,7 @@
 #include "AthContainers/tools/CompareAndPrint.h"
 #include "AthContainers/tools/ATHCONTAINERS_ASSERT.h"
 #include "CxxUtils/releasing_iterator.h"
+#include "CxxUtils/throw_out_of_range.h"
 #include <limits>
 #include <functional>
 
@@ -769,7 +770,7 @@ DataVector<T, BASE>::at (size_type n)
   // Can't use m_pCont's at here, because we need an iterator.
   // So we have to do the bounds check ourselves.
   if (n >= this->size())
-    throw std::out_of_range ("DataVector::at range check");
+    CxxUtils::throw_out_of_range  (__PRETTY_FUNCTION__, n, this->size(), this);
   return ElementProxy (this->m_pCont.begin() + n, this);
 }
 
@@ -1107,6 +1108,42 @@ DataVector<T, BASE>::push_back(std::unique_ptr<base_value_type> pElem)
   if (ptr)
     this->moveAux (this->size()-1, ptr, false, true);
   return ptr;
+}
+
+
+/**
+ * @brief Create and add a number of new elements to the end of the container.
+ * @param n The number of new elements to add.
+ * @param alloc Functional to call to allocate a new element to push.
+ *              Should be callable like <code>T* = alloc();</code>
+ *              For example:
+ *@code
+ *                dv.push_new (n, [](){ return new Foo; });
+ @endcode
+ *              It may also be useful to allocate from a @c DataPool.
+ *
+ * Note: this method may only be called using the most derived
+ * @c DataVector in the hierarchy.
+ *
+ * Returns the original size of the vector.
+ */
+template <class T, class BASE>
+template <CxxUtils::detail::AllocationFunction<T> F>
+auto
+DataVector<T, BASE>::push_new(size_type n, F alloc) -> size_type
+{
+  // Ensure we're not being called via a base class.
+  testInsert ("push_new");
+
+  size_t sz = this->m_pCont.size();
+  this->m_pCont.resize (sz + n);
+  SG::AuxVectorBase::resize<DataVector> (this->size());
+  for (size_t i = 0; i < n; i++) {
+    T* p = alloc();
+    this->m_pCont[sz+i] = p;
+    this->moveAux (sz+i, p, false, true);
+  }
+  return sz;
 }
 
 
@@ -2580,7 +2617,7 @@ typename DATAVECTOR::ElementProxy DATAVECTOR::at (size_type n)
   // Can't use m_pCont's at here, because we need an iterator.
   // So we have to do the bounds check ourselves.
   if (n >= size())
-    throw std::out_of_range ("DataVector::at range check");
+    CxxUtils::throw_out_of_range (__PRETTY_FUNCTION__, n, this->size(), this);
   return ElementProxy (m_pCont.begin() + n, this);
 }
 
@@ -2904,6 +2941,42 @@ DATAVECTOR::push_back(std::unique_ptr<base_value_type> pElem)
   if (ptr)
     this->moveAux (this->size()-1, ptr, false, true);
   return ptr;
+}
+
+
+/**
+ * @brief Create and add a number of new elements to the end of the container.
+ * @param n The number of new elements to add.
+ * @param alloc Functional to call to allocate a new element to push.
+ *              Should be callable like <code>T* = alloc();</code>
+ *              For example:
+ *@code
+ *                dv.push_new (n, [](){ return new Foo; });
+ @endcode
+ *              It may also be useful to allocate from a @c DataPool.
+ *
+ * Note: this method may only be called using the most derived
+ * @c DataVector in the hierarchy.
+ *
+ * Returns the original size of the vector.
+ */
+template <class T>
+template <CxxUtils::detail::AllocationFunction<T> F>
+auto
+DATAVECTOR::push_new(size_type n, F alloc) -> size_type
+{
+  // Ensure we're not being called via a base class.
+  testInsert ("push_new");
+
+  size_t sz = this->m_pCont.size();
+  this->m_pCont.resize (sz + n);
+  SG::AuxVectorBase::resize<DataVector> (this->size());
+  for (size_t i = 0; i < n; i++) {
+    T* p = alloc();
+    this->m_pCont[sz+i] = p;
+    this->moveAux (sz+i, p, false, true);
+  }
+  return sz;
 }
 
 

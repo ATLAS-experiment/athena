@@ -14,6 +14,7 @@
 #include "StoreGate/ReadDecorHandle.h"
 
 using namespace MuonR4::SegmentFit;
+using namespace Acts;
 
 namespace MuonValR4{
     StatusCode SegmentRefitTest::initialize() {
@@ -46,25 +47,32 @@ namespace MuonValR4{
             const MuonR4::Segment* reFitMe = MuonR4::detailedSegment(*seg);
 
             auto preFitPars = localSegmentPars(*seg);
-            m_chamberIndex = Acts::toUnderlying(reFitMe->msSector()->chamberIndex());
+            m_chamberIndex = toUnderlying(reFitMe->msSector()->chamberIndex());
             m_stationSide = reFitMe->msSector()->side();
             m_stationPhi = reFitMe->msSector()->stationPhi();
             /** parameters */
-            m_preFitLocX = preFitPars[Acts::toUnderlying(ParamDefs::x0)];
-            m_preFitLocY = preFitPars[Acts::toUnderlying(ParamDefs::y0)];
-            m_preFitTheta = preFitPars[Acts::toUnderlying(ParamDefs::theta)];
-            m_preFitPhi = preFitPars[Acts::toUnderlying(ParamDefs::phi)];
+            using enum ParamDefs;
+            m_preFitLocX = preFitPars[toUnderlying(x0)];
+            m_preFitLocY = preFitPars[toUnderlying(y0)];
+            m_preFitTheta = preFitPars[toUnderlying(theta)];
+            m_preFitPhi = preFitPars[toUnderlying(phi)];
             /** uncertainty */
-            m_uncertLocX = Amg::error(reFitMe->covariance(), Acts::toUnderlying(ParamDefs::x0));
-            m_uncertLocY = Amg::error(reFitMe->covariance(), Acts::toUnderlying(ParamDefs::y0));
-            m_uncertTheta = Amg::error(reFitMe->covariance(), Acts::toUnderlying(ParamDefs::theta));
-            m_uncertPhi = Amg::error(reFitMe->covariance(), Acts::toUnderlying(ParamDefs::phi));
+            m_uncertLocX = Amg::error(reFitMe->covariance(), toUnderlying(x0));
+            m_uncertLocY = Amg::error(reFitMe->covariance(), toUnderlying(y0));
+            m_uncertTheta = Amg::error(reFitMe->covariance(), toUnderlying(theta));
+            m_uncertPhi = Amg::error(reFitMe->covariance(), toUnderlying(phi));
 
             m_preFitChi2 = reFitMe->chi2();
             m_preFitNdoF = reFitMe->nDoF();
             m_preFitNPrecHits = reFitMe->summary().nPrecHits;
             m_preFitNTrigEtaHits = reFitMe->summary().nEtaTrigHits;
             m_preFitNTrigPhiHits = reFitMe->summary().nPhiHits;
+            static const SG::ConstAccessor<xAOD::MeasVector<toUnderlying(nPars)>> acc_seed{"seedSegPars"};
+            m_seedFitLocY  = acc_seed(*seg)[toUnderlying(y0)];
+            m_seedFitTheta = acc_seed(*seg)[toUnderlying(theta)];
+            m_seedFitLocX  = acc_seed(*seg)[toUnderlying(x0)];
+            m_seedFitPhi   = acc_seed(*seg)[toUnderlying(phi)];
+
             return m_tree.fill(ctx) ? StatusCode::SUCCESS : StatusCode::FAILURE;
         };
         /// Loop over the post fit segment container
@@ -75,15 +83,11 @@ namespace MuonValR4{
             m_postFitNTrigEtaHits = seg->nTrigEtaLayers();
             m_postFitNTrigPhiHits = seg->nPhiLayers();
             const auto segPars = localSegmentPars(*seg);
-            m_postFitLocX  = segPars[Acts::toUnderlying(ParamDefs::x0)];
-            m_postFitLocY  = segPars[Acts::toUnderlying(ParamDefs::y0)];
-            m_postFitTheta = segPars[Acts::toUnderlying(ParamDefs::theta)];
-            m_postFitPhi   = segPars[Acts::toUnderlying(ParamDefs::phi)];
-            static const SG::ConstAccessor<xAOD::MeasVector<Acts::toUnderlying(ParamDefs::nPars)>> acc_seed{"seedSegPars"};
-            m_seedFitLocY  = acc_seed(*seg)[Acts::toUnderlying(ParamDefs::y0)];
-            m_seedFitTheta = acc_seed(*seg)[Acts::toUnderlying(ParamDefs::theta)];
-            m_seedFitLocX  = acc_seed(*seg)[Acts::toUnderlying(ParamDefs::x0)];
-            m_seedFitPhi   = acc_seed(*seg)[Acts::toUnderlying(ParamDefs::phi)];
+            using enum ParamDefs;
+            m_postFitLocX  = segPars[toUnderlying(x0)];
+            m_postFitLocY  = segPars[toUnderlying(y0)];
+            m_postFitTheta = segPars[toUnderlying(theta)];
+            m_postFitPhi   = segPars[toUnderlying(phi)];
             
             m_goodFit = true;
             ATH_CHECK(fillPrefit((*acc_segLink(*seg))));

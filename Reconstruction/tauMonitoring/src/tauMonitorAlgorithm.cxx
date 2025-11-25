@@ -124,8 +124,6 @@ StatusCode tauMonitorAlgorithm::fillHistograms(const EventContext &ctx) const {
   auto EMRadius = Monitored::Scalar<float>("EMRadius", 0.0);
   auto hadRadius = Monitored::Scalar<float>("hadRadius", 0.0);
   auto isolFrac = Monitored::Scalar<float>("isolFrac", 0.0);
-  auto stripWidth2 = Monitored::Scalar<float>("stripWidth2", 0.0);
-  auto nStrip = Monitored::Scalar<float>("nStrip", 0.0);
   auto etEMAtEMScale = Monitored::Scalar<float>("etEMAtEMScale", 0.0);
 
   auto etHadAtEMScale = Monitored::Scalar<float>("etHadAtEMScale", 0.0);
@@ -144,12 +142,8 @@ StatusCode tauMonitorAlgorithm::fillHistograms(const EventContext &ctx) const {
   auto EMFrac = Monitored::Scalar<float>("EMFrac", 0.0);
 
   auto EMFracTrk = Monitored::Scalar<float>("EMFracTrk", 0.0);
-  auto EfracL2EffCluster = Monitored::Scalar<float>("EfracL2EffCluster", 0.0);
-  auto EisoEffCluster = Monitored::Scalar<float>("EisoEffCluster", 0.0);
-  auto InvMassEffClusters = Monitored::Scalar<float>("InvMassEffClusters", 0.0);
   auto nNeutPFO = Monitored::Scalar<float>("nNeutPFO", 0.0);
   auto nShot = Monitored::Scalar<float>("nShot", 0.0);
-  auto pt3 = Monitored::Scalar<float>("pt3", -9.0);
 
   auto BDTScoreAsP0 = Monitored::Scalar<float>("BDTScoreAsP0", 0.0);
   auto dRmax = Monitored::Scalar<float>("dRmax", 0.0);
@@ -180,7 +174,6 @@ StatusCode tauMonitorAlgorithm::fillHistograms(const EventContext &ctx) const {
   auto numberOfTRTHits = Monitored::Scalar<float>("numberOfTRTHits", 0.0);
   auto numberOfTRTOutliers =
       Monitored::Scalar<float>("numberOfTRTOutliers", 0.0);
-  auto trkWidth2 = Monitored::Scalar<float>("trkWidth2", 0.0);
   auto ipZ0SinThetaSigLeadTrk =
       Monitored::Scalar<float>("ipZ0SinThetaSigLeadTrk", 0.0);
   auto numberOfPixelHits = Monitored::Scalar<float>("numberOfPixelHits", 0.0);
@@ -268,8 +261,6 @@ StatusCode tauMonitorAlgorithm::fillHistograms(const EventContext &ctx) const {
     EMRadius = tau->detail<float>(xAOD::TauJetParameters::EMRadius);
     hadRadius = tau->detail<float>(xAOD::TauJetParameters::hadRadius);
     isolFrac = tau->detail<float>(xAOD::TauJetParameters::isolFrac);
-    stripWidth2 = tau->detail<float>(xAOD::TauJetParameters::stripWidth2);
-    nStrip = tau->detail<int>(xAOD::TauJetParameters::nStrip);
     etEMAtEMScale = tau->detail<float>(xAOD::TauJetParameters::etEMAtEMScale);
     etHadAtEMScale = tau->detail<float>(xAOD::TauJetParameters::etHadAtEMScale);
 
@@ -330,13 +321,6 @@ StatusCode tauMonitorAlgorithm::fillHistograms(const EventContext &ctx) const {
 
     // TauB/SubStructure
     EMFracTrk = tau->detail<float>(xAOD::TauJetParameters::ChPiEMEOverCaloEME);
-    EfracL2EffCluster = tau->detail<float>(
-        xAOD::TauJetParameters::lead2ClusterEOverAllClusterE);
-    EisoEffCluster =
-        tau->detail<float>(xAOD::TauJetParameters::caloIsoCorrected) / GeV;
-    InvMassEffClusters =
-        tau->detail<float>(xAOD::TauJetParameters::effTopoInvMass) /
-        GeV; // puts it in GeV
     nNeutPFO = tau->nProtoNeutralPFOs();
     nShot = tau->nShotPFOs();
 
@@ -408,7 +392,6 @@ StatusCode tauMonitorAlgorithm::fillHistograms(const EventContext &ctx) const {
 
         massTrkSys =
             tau->detail<float>(xAOD::TauJetParameters::massTrkSys) / GeV; // GeV
-        trkWidth2 = tau->detail<float>(xAOD::TauJetParameters::trkWidth2);
         trFlightPathSig =
             tau->detail<float>(xAOD::TauJetParameters::trFlightPathSig);
 
@@ -432,7 +415,7 @@ StatusCode tauMonitorAlgorithm::fillHistograms(const EventContext &ctx) const {
             tau->detail<float>(xAOD::TauJetParameters::etOverPtLeadTrk);
         leadTrkPt = tau->detail<float>(xAOD::TauJetParameters::leadTrkPt) / GeV;
 
-        fill(tool, massTrkSys, etOverPtLeadTrack, trkWidth2, trFlightPathSig,
+        fill(tool, massTrkSys, etOverPtLeadTrack, trFlightPathSig,
              ipSigLeadTrk, ipZ0SinThetaSigLeadTrk, leadTrkPt);
 
         if (environment() != Environment_t::AOD) {
@@ -711,17 +694,6 @@ StatusCode tauMonitorAlgorithm::fillHistograms(const EventContext &ctx) const {
            clustersMeanEMProbability, clustersMeanSecondLambda,
            clustersMeanPresamplerFrac, clustersPFOEngRelDiff);
 
-      for (int s = 0; s < nShot; s++) {
-        const xAOD::PFO *shot = tau->shotPFO(s);
-        if (shot != nullptr) {
-          float pt3Temp = -9.0;
-          shot->attribute(xAOD::PFODetails::PFOAttributes::tauShots_pt3,
-                          pt3Temp);
-          pt3 = pt3Temp / GeV; // GeV
-          fill(tool, pt3);
-        }
-      }
-
       for (unsigned int np = 0; np < nNeutPFO; np++) {
         const xAOD::PFO *npfo = tau->protoNeutralPFO(np);
         BDTScoreAsP0 = npfo->bdtPi0Score();
@@ -735,10 +707,9 @@ StatusCode tauMonitorAlgorithm::fillHistograms(const EventContext &ctx) const {
       }
 
       fill(tool, tauPhi, tauEta, LB, tauEt, centFrac, isolFrac, EMRadius,
-           hadRadius, stripWidth2, nStrip, etEMAtEMScale, etHadAtEMScale,
+           hadRadius, etEMAtEMScale, etHadAtEMScale,
            tauCharge, JetScore, JetScoreSigTrans, RNNEleScore, RNNEleScoreSigTrans,
-	   muonVeto, tauLoose, tauMedium, tauTight, PSSFrac, EMFrac, EMFracTrk,
-           EfracL2EffCluster, EisoEffCluster, InvMassEffClusters, nNeutPFO,
+	   muonVeto, tauLoose, tauMedium, tauTight, PSSFrac, EMFrac, EMFracTrk, nNeutPFO,
            nShot, NumTracks, nClusters, jetSeedEta, jetSeedPhi, jetSeedPt,
            dRmax, ptRatioEflowApprox, trkAvgDist);
 

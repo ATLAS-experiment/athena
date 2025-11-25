@@ -283,10 +283,6 @@ mv 5thread/OUT_ESD_5thread.root ./
 #####################################################################
 # now run diff-root to compare the ESDs made with serial and 1thread
 acmd.py diff-root --ignore-leaves index_ref  \
-                            xAOD::BTaggingAuxContainer_v1_BTagging_AntiKt4EMTopoAuxDyn \
-                            xAOD::BTaggingAuxContainer_v1_BTagging_AntiKt4EMPFlowAuxDyn \
-                            xAOD::BTaggingAuxContainer_v2_BTagging_AntiKt4EMPFlowAuxDyn \
-                            xAOD::BTaggingAuxContainer_v2_BTagging_AntiKt4EMTopoAuxDyn \
                             xAOD::JetAuxContainer_v1_AntiKt10LCTopoJetsAuxDyn \
                             xAOD::JetAuxContainer_v1_AntiKt4EMPFlowJetsAuxDyn \
                             xAOD::JetAuxContainer_v1_AntiKt4EMTopoJetsAuxDyn \
@@ -305,10 +301,6 @@ fi
 #####################################################################
 # now run diff-root to compare the ESDs made with 5threads and 1thread
 acmd.py diff-root --ignore-leaves index_ref \
-                          xAOD::BTaggingAuxContainer_v1_BTagging_AntiKt4EMTopoAuxDyn \
-                          xAOD::BTaggingAuxContainer_v1_BTagging_AntiKt4EMPFlowAuxDyn \
-                          xAOD::BTaggingAuxContainer_v2_BTagging_AntiKt4EMPFlowAuxDyn \
-                          xAOD::BTaggingAuxContainer_v2_BTagging_AntiKt4EMTopoAuxDyn \
                           xAOD::JetAuxContainer_v1_AntiKt10LCTopoJetsAuxDyn \
                           xAOD::JetAuxContainer_v1_AntiKt4EMPFlowJetsAuxDyn \
                           xAOD::JetAuxContainer_v1_AntiKt4EMTopoJetsAuxDyn \

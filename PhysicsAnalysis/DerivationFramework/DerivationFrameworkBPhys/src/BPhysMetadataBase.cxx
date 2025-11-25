@@ -88,7 +88,7 @@ namespace DerivationFramework {
     return StatusCode::SUCCESS;
   }
   //--------------------------------------------------------------------------
-  StatusCode BPhysMetadataBase::addBranches() const {
+  StatusCode BPhysMetadataBase::addBranches(const EventContext&) const {
 
     // nothing to do here
     return StatusCode::SUCCESS;

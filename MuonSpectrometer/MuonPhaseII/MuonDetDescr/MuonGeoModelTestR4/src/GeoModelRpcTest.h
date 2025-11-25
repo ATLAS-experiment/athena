@@ -8,7 +8,7 @@
 #include <set>
 #include <StoreGate/ReadHandleKey.h>
 #include <MuonIdHelpers/IMuonIdHelperSvc.h>
-#include <ActsGeometryInterfaces/ActsGeometryContext.h>
+#include <ActsGeometryInterfaces/GeometryContext.h>
 #include <MuonTesterTree/MuonTesterTree.h>
 #include <MuonTesterTree/IdentifierBranch.h>
 #include <MuonTesterTree/ThreeVectorBranch.h>
@@ -34,7 +34,7 @@ class GeoModelRpcTest : public AthHistogramAlgorithm{
       ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "IdHelperSvc", 
                                                 "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
 
-      SG::ReadHandleKey<ActsGeometryContext> m_geoCtxKey{this, "AlignmentKey", "ActsAlignment", "cond handle key"};
+      SG::ReadHandleKey<ActsTrk::GeometryContext> m_geoCtxKey{this, "AlignmentKey", "ActsAlignment", "cond handle key"};
 
       /// Set of stations to be tested
       std::set<Identifier> m_testStations{};
@@ -46,7 +46,7 @@ class GeoModelRpcTest : public AthHistogramAlgorithm{
       const MuonDetectorManager* m_detMgr{nullptr};
      
       StatusCode dumpToTree(const EventContext& ctx,
-                            const ActsGeometryContext& gctx, const RpcReadoutElement* readoutEle);
+                            const ActsTrk::GeometryContext& gctx, const RpcReadoutElement* readoutEle);
      
       MuonVal::MuonTesterTree m_tree{"RpcGeoModelTree", "GEOMODELTESTER"};
 
@@ -68,7 +68,12 @@ class GeoModelRpcTest : public AthHistogramAlgorithm{
       MuonVal::ScalarBranch<float>& m_stripEtaWidth{m_tree.newScalar<float>("stripEtaWidth")};
       MuonVal::ScalarBranch<float>& m_stripPhiWidth{m_tree.newScalar<float>("stripPhiWidth")};
       MuonVal::ScalarBranch<float>& m_stripEtaLength{m_tree.newScalar<float>("stripEtaLength")};
-      MuonVal::ScalarBranch<float>& m_stripPhiLength{m_tree.newScalar<float>("stripPhiLength")};    
+      MuonVal::ScalarBranch<float>& m_stripPhiLength{m_tree.newScalar<float>("stripPhiLength")}; 
+      /// Box dimension
+      MuonVal::ScalarBranch<float>& m_envelopeHeight{m_tree.newScalar<float>("envelopeHeight")}; 
+      MuonVal::ScalarBranch<float>& m_envelopeWidth{m_tree.newScalar<float>("envelopeWidth")}; 
+      MuonVal::ScalarBranch<float>& m_envelopeLength{m_tree.newScalar<float>("envelopeLength")}; 
+         
       /// Number of eta & phi gas gaps
       
       MuonVal::ScalarBranch<uint8_t>& m_numRpcLayers{m_tree.newScalar<uint8_t>("numRpcLayers")};      

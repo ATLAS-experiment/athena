@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////
@@ -13,32 +13,19 @@
 #include "xAODJet/JetContainer.h"
 #include <string>
 
-// Constructor
-DerivationFramework::TruthQGDecorationTool::TruthQGDecorationTool(const std::string& t,
-        const std::string& n,
-        const IInterface* p ) :
-    base_class(t,n,p)
-{
-}
-
-// Destructor
-DerivationFramework::TruthQGDecorationTool::~TruthQGDecorationTool() {
-}
-
 // Initialize
 StatusCode DerivationFramework::TruthQGDecorationTool::initialize() {
 
   ATH_CHECK(m_jetsKey.initialize());
   ATH_CHECK(m_decOutput.initialize());
-  return StatusCode::SUCCESS; 
+  return StatusCode::SUCCESS;
 
 }
 
 // Function to do dressing, implements interface in IAugmentationTool
-StatusCode DerivationFramework::TruthQGDecorationTool::addBranches() const
+StatusCode DerivationFramework::TruthQGDecorationTool::addBranches(const EventContext& ctx) const
 {
   // Event context
-  const EventContext& ctx = Gaudi::Hive::currentContext();
 
   // Retrieve the jet container
   SG::ReadHandle<xAOD::JetContainer> inputJets(m_jetsKey, ctx);

@@ -16,6 +16,7 @@
 #include "PersistentDataModel/Token.h"
 #include "StorageSvc/DbAccessObj.h"
 #include "StorageSvc/DbSession.h"
+#include "POOLCore/DbPrint.h"
 
 /*
  *  POOL namespace declaration
@@ -36,7 +37,7 @@ namespace pool    {
       @author  M.Frank
       @version 1.0
   */
-  class DbDomainObj : public  DbAccessObj<std::string, DbDatabaseObj >  {
+  class DbDomainObj : public  DbAccessObj<std::string, DbDatabaseObj >, public APRMessaging  {
   private:
     /// Handle to session
     DbSession       m_session;

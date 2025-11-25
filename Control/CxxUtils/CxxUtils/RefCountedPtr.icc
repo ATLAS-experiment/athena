@@ -1,0 +1,251 @@
+/*
+ * Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration.
+ */
+/**
+ * @file CxxUtils/RefCountedPtr.icc
+ * @author scott snyder <snyder@bnl.gov>
+ * @date Oct, 2025
+ * @brief Simple smart pointer for Gaudi-style refcounted objects.
+ */
+
+
+namespace CxxUtils {
+
+
+/// Constructor from pointer.  Adds to the refcount.
+template <CxxUtils::detail::RefCounted T>
+inline
+RefCountedPtr<T>::RefCountedPtr (T* p)
+  : m_ptr (p)
+{
+  if (m_ptr) m_ptr->addRef();
+}
+
+
+/// Constructor from unique_ptr.  Adds to the refcount.
+template <CxxUtils::detail::RefCounted T>
+template <CxxUtils::detail::RefCounted OTHER>
+requires std::convertible_to<OTHER*, T*>
+inline
+RefCountedPtr<T>::RefCountedPtr (std::unique_ptr<OTHER>&& other)
+  : RefCountedPtr (other.release())
+{
+}
+
+
+/// Copy constructor.
+template <CxxUtils::detail::RefCounted T>
+inline
+RefCountedPtr<T>::RefCountedPtr (const RefCountedPtr& other)
+  : RefCountedPtr (other.m_ptr)
+{
+}
+
+
+/// Move constructor.
+template <CxxUtils::detail::RefCounted T>
+inline
+RefCountedPtr<T>::RefCountedPtr (RefCountedPtr&& other)
+  : m_ptr (other.release())
+{
+}
+
+
+/// Constructor from another RefCountedPtr, with a different type.
+template <CxxUtils::detail::RefCounted T>
+template <CxxUtils::detail::RefCounted OTHER>
+requires std::convertible_to<OTHER*, T*>
+inline
+RefCountedPtr<T>::RefCountedPtr (const RefCountedPtr<OTHER>& other)
+  : RefCountedPtr (other.m_ptr)
+{
+}
+
+
+/// Move from another RefCountedPtr, with a different type.
+template <CxxUtils::detail::RefCounted T>
+template <CxxUtils::detail::RefCounted OTHER>
+requires std::convertible_to<OTHER*, T*>
+inline
+RefCountedPtr<T>::RefCountedPtr (RefCountedPtr<OTHER>&& other)
+  : m_ptr (other.release())
+{
+}
+
+
+/// Assignment.
+template <CxxUtils::detail::RefCounted T>
+inline
+RefCountedPtr<T>& RefCountedPtr<T>::operator= (const RefCountedPtr& other)
+{
+  reset (other.m_ptr);
+  return *this;
+}
+
+
+/// Move.
+template <CxxUtils::detail::RefCounted T>
+inline
+RefCountedPtr<T>& RefCountedPtr<T>::operator= (RefCountedPtr&& other)
+{
+  if (m_ptr) m_ptr->release();
+  m_ptr = other.release();
+  return *this;
+}
+
+
+/// Assignment from pointer.
+template <CxxUtils::detail::RefCounted T>
+inline
+RefCountedPtr<T>& RefCountedPtr<T>::operator= (T* p)
+{
+  reset (p);
+  return *this;
+}
+
+
+/// Assignment from different type.
+template <CxxUtils::detail::RefCounted T>
+template <CxxUtils::detail::RefCounted OTHER>
+requires std::convertible_to<OTHER*, T*>
+inline
+RefCountedPtr<T>& RefCountedPtr<T>::operator= (const RefCountedPtr<OTHER>& other)
+{
+  reset (other.m_ptr);
+  return *this;
+}
+
+
+/// Move from different type.
+template <CxxUtils::detail::RefCounted T>
+template <CxxUtils::detail::RefCounted OTHER>
+requires std::convertible_to<OTHER*, T*>
+inline
+RefCountedPtr<T>& RefCountedPtr<T>::operator= (RefCountedPtr<OTHER>&& other)
+{
+  if (m_ptr) m_ptr->release();
+  m_ptr = other.release();
+  return *this;
+}
+
+
+/// Destructor.
+template <CxxUtils::detail::RefCounted T>
+inline
+RefCountedPtr<T>::~RefCountedPtr()
+{
+  if (m_ptr) m_ptr->release();
+}
+
+
+/// Change the pointer.
+template <CxxUtils::detail::RefCounted T>
+inline
+void RefCountedPtr<T>::reset (T* p)
+{
+  if (p == m_ptr) return;
+  if (m_ptr) m_ptr->release();
+  m_ptr = p;
+  if (m_ptr) m_ptr->addRef();
+}
+
+
+/// Check if the pointer is valid.
+template <CxxUtils::detail::RefCounted T>
+inline
+bool RefCountedPtr<T>::isValid() const
+{
+  return m_ptr != nullptr;
+}
+
+
+/// Check if the pointer is valid.
+template <CxxUtils::detail::RefCounted T>
+inline
+RefCountedPtr<T>::operator bool() const
+{
+  return m_ptr != nullptr;
+}
+
+
+/// Check if the pointer is invalid.
+template <CxxUtils::detail::RefCounted T>
+inline
+bool RefCountedPtr<T>::operator!() const
+{
+  return m_ptr == nullptr;
+}
+
+
+/// Get the pointer.
+template <CxxUtils::detail::RefCounted T>
+inline
+T* RefCountedPtr<T>::get()
+{
+  return m_ptr;
+}
+template <CxxUtils::detail::RefCounted T>
+inline
+const T* RefCountedPtr<T>::get() const
+{
+  return m_ptr;
+}
+
+
+/// Convert to pointer.
+template <CxxUtils::detail::RefCounted T>
+inline
+RefCountedPtr<T>::operator T*()
+{
+  return m_ptr;
+}
+template <CxxUtils::detail::RefCounted T>
+inline
+RefCountedPtr<T>::operator const T*() const
+{
+  return m_ptr;
+}
+
+
+/// Dereference.
+template <CxxUtils::detail::RefCounted T>
+inline
+T* RefCountedPtr<T>::operator->()
+{
+  return m_ptr;
+}
+template <CxxUtils::detail::RefCounted T>
+inline
+const T* RefCountedPtr<T>::operator->() const
+{
+  return m_ptr;
+}
+
+
+/// Dereference.
+template <CxxUtils::detail::RefCounted T>
+inline
+T& RefCountedPtr<T>::operator*()
+{
+  return *m_ptr;
+}
+template <CxxUtils::detail::RefCounted T>
+inline
+const T& RefCountedPtr<T>::operator*() const
+{
+  return *m_ptr;
+}
+
+
+/// Return the pointer and give up ownership.
+template <CxxUtils::detail::RefCounted T>
+inline
+T* RefCountedPtr<T>::release()
+{
+  T* p = m_ptr;
+  m_ptr = nullptr;
+  return p;
+}
+
+
+} // namespace CxxUtils

@@ -15,15 +15,15 @@ class HoughMaximum {
    public:
     using HitType = const SpacePoint*;
     /// @brief constructor.
-    /// @param tanTheta: angle coordinate
+    /// @param tanBeta: angle coordinate
     /// @param interceptY: intercept coordinate 
     /// @param counts: Weighted hit count of the maximum
     /// @param hits: list of measurements assigned to the maximum (owned by SG).
     /// @param bucket: Space point bucket out of which the hough maximum is built
-    HoughMaximum(double tanTheta, double interceptY, double counts,
+    HoughMaximum(double tanBeta, double interceptY, double counts,
                  std::vector<HitType>&& hits,
                  const SpacePointBucket* bucket):
-        m_tanTheta{tanTheta}, 
+        m_tanBeta{tanBeta}, 
         m_interceptY{interceptY}, 
         m_counts{counts}, 
         m_hitsInMax{hits},
@@ -33,7 +33,7 @@ class HoughMaximum {
     HoughMaximum() = default;
     /// @brief getter
     /// @return  the angular coordinate of the eta transform
-    double tanTheta() const { return m_tanTheta; }
+    double tanBeta() const { return m_tanBeta; }
 
     /// @brief getter
     /// @return  the intercept coordinate of the eta transform
@@ -58,7 +58,7 @@ class HoughMaximum {
     }
 
    private:
-    double m_tanTheta{0.};                    // first coordinate
+    double m_tanBeta{0.};                    // first coordinate
     double m_interceptY{0.};                  // second coordinate
     double m_counts{0.};                      // weighted counts
     std::vector<HitType> m_hitsInMax{};  // list of hits on maximum

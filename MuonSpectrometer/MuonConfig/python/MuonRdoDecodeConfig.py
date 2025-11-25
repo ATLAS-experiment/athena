@@ -413,8 +413,16 @@ def MuonRDOtoPRDConvertorsCfg(flags):
         acc.merge(CscRDODecodeCfg(flags))
         acc.merge(CscClusterBuildCfg(flags))
 
-    if flags.Input.isMC and not flags.Muon.usePhaseIIGeoSetup:
-        acc.merge(MuonPRD_MultiTruthMakerCfg(flags))
+    if flags.Muon.scheduleActsReco:
+        from MuonSpacePointFormation.SpacePointFormationConfig import MuonSpacePointFormationCfg 
+        acc.merge(MuonSpacePointFormationCfg(flags))
+
+    if flags.Input.isMC:
+        if not flags.Muon.usePhaseIIGeoSetup:
+            acc.merge(MuonPRD_MultiTruthMakerCfg(flags))
+        else:
+            from MuonTruthAlgsR4.MuonTruthAlgsConfig import MuonTruthAlgsCfg
+            acc.merge(MuonTruthAlgsCfg(flags))
     return acc
 
 
@@ -469,8 +477,9 @@ def muonRdoDecodeTestData( forTrigger = False ):
 def muonRdoDecodeTestMC():
 
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
+    from AthenaConfiguration.TestDefaults import defaultTestFiles
     flags = initConfigFlags()
-    flags.Input.Files = ["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/TriggerTest/valid1.110401.PowhegPythia_P2012_ttbar_nonallhad.recon.RDO.e3099_s2578_r7572_tid07644622_00/RDO.07644622._000001.pool.root.1"]
+    flags.Input.Files = defaultTestFiles.RDO_RUN3
 
     flags.lock()
     flags.dump()

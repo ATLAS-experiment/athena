@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef XAODCALORINGS_VERSIONS_RINGSETCONF_V1_H
 #define XAODCALORINGS_VERSIONS_RINGSETCONF_V1_H
@@ -181,7 +181,7 @@ class RingSetConf_v1 : public SG::AuxElement {
      **/
     static void fillRingSetConfContainer(
         const RawConfCollection &rawConfCol,
-        RingSetConfContainer_v1 *container);
+        RingSetConfContainer_v1 &container);
     /**
      * Retrieve RawConfCollection from RingSetConf container.
      **/

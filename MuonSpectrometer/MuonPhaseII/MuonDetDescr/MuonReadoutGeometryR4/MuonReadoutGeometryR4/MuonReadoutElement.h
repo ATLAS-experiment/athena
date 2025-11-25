@@ -101,14 +101,14 @@ class MuonReadoutElement : public GeoVDetectorElement, public AthMessaging, publ
 
     /// Returns the detector center (Which is the same as the detector center of
     /// the first measurement layer)
-    Amg::Vector3D center(const ActsGeometryContext& ctx) const;
+    Amg::Vector3D center(const ActsTrk::GeometryContext& ctx) const;
     /// Returns the center of a given detector layer using the complete
     /// Identifier of the measurement
-    Amg::Vector3D center(const ActsGeometryContext& ctx,
+    Amg::Vector3D center(const ActsTrk::GeometryContext& ctx,
                          const Identifier& id) const;
     /// Returns the center of a given detector layer using the Identifier hash
     /// of the measurement
-    Amg::Vector3D center(const ActsGeometryContext& ctx,
+    Amg::Vector3D center(const ActsTrk::GeometryContext& ctx,
                          const IdentifierHash& hash) const;
 
     ///   Transformations to translate between local <-> global coordinates.
@@ -121,22 +121,22 @@ class MuonReadoutElement : public GeoVDetectorElement, public AthMessaging, publ
     ///   the alignment system
     /// Returns the global to local transformation into the rest frame of the
     /// detector (Coincides with the first measurement layer)
-    Amg::Transform3D globalToLocalTrans(const ActsGeometryContext& ctx) const;
+    Amg::Transform3D globalToLocalTrans(const ActsTrk::GeometryContext& ctx) const;
     /// Returns the global to local transformation into the rest frame of a
     /// given measurement layer
-    Amg::Transform3D globalToLocalTrans(const ActsGeometryContext& ctx,
+    Amg::Transform3D globalToLocalTrans(const ActsTrk::GeometryContext& ctx,
                                         const Identifier& id) const;
     /// Returns the global to local transformation into the rest frame of a
     /// given measurement layer
-    Amg::Transform3D globalToLocalTrans(const ActsGeometryContext& ctx, 
+    Amg::Transform3D globalToLocalTrans(const ActsTrk::GeometryContext& ctx, 
                                         const IdentifierHash& hash) const;
 
     /// Returns the local to global transformation into the ATLAS coordinate
     /// system
-    const Amg::Transform3D& localToGlobalTrans(const ActsGeometryContext& ctx) const;
-    const Amg::Transform3D& localToGlobalTrans(const ActsGeometryContext& ctx,
+    const Amg::Transform3D& localToGlobalTrans(const ActsTrk::GeometryContext& ctx) const;
+    const Amg::Transform3D& localToGlobalTrans(const ActsTrk::GeometryContext& ctx,
                                                const Identifier& id) const;
-    const Amg::Transform3D& localToGlobalTrans(const ActsGeometryContext& ctx,
+    const Amg::Transform3D& localToGlobalTrans(const ActsTrk::GeometryContext& ctx,
                                                const IdentifierHash& id) const;
 
 #ifndef SIMULATIONBASE

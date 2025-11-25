@@ -11,6 +11,7 @@
 
 #include "CollectionBase/ICollectionColumn.h"
 #include "CollectionBase/CollectionBaseNames.h"
+#include "POOLCore/SystemTools.h"
 
 #include "GaudiKernel/Bootstrap.h"
 #include "GaudiKernel/ISvcLocator.h"
@@ -18,7 +19,6 @@
 
 #include "CoralBase/Attribute.h"
 #include "CoralBase/AttributeList.h"
-#define corENDL coral::MessageStream::endmsg
 
 #include "TFile.h"
 #include "TDirectory.h"
@@ -36,26 +36,19 @@ using namespace std;
 using namespace pool::RootCollection;
 using namespace pool::CollectionBaseNames;
 
-#if ROOT_VERSION_CODE < ROOT_VERSION( 6, 35, 0 )
-namespace ROOT {
-   using RFieldBase = ROOT::Experimental::RFieldBase;
-   using RNTupleWriteOptions = ROOT::Experimental::RNTupleWriteOptions;
-}
-#endif
-
 RNTCollection::RNTCollection(
    const pool::ICollectionDescription* description,
    pool::ICollection::OpenMode mode,
    pool::ISession* )
-   : m_description( *description ),
+   : APRMessaging("RNTCollection"),
+     m_description( *description ),
      m_name( description->name() ),
      m_fileName( description->name() + ".root" ),
      m_mode( mode ),
      m_file( 0 ),
      m_session( 0 ),
      m_open( false ),
-     m_readOnly( mode == ICollection::READ ? true : false ),
-     m_poolOut( "RNTCollection")
+     m_readOnly( mode == ICollection::READ ? true : false )
 {
    RNTCollection::open();
 }
@@ -66,7 +59,7 @@ RNTCollection::~RNTCollection()
    if( m_open ) try {
       RNTCollection::close();
    } catch( std::exception& exception ) {
-      m_poolOut << coral::Error << exception.what() << corENDL;
+      ATH_MSG_ERROR( exception.what() );
       cleanup();
    }
    else cleanup();
@@ -80,7 +73,7 @@ void  RNTCollection::delayedFileOpen( const std::string& method )
       if(!m_file || m_file->IsZombie()) {
          throw std::runtime_error( string("ROOT cannot \"") + poolOptToRootOpt[m_mode] + "\" file " + m_fileName + " (APR: \" RNTCollection::" + method +" \" from \" RNTCollection \")");
       }
-      m_poolOut << coral::Info << "File " << m_fileName << " opened in " << method <<  coral::MessageStream::endmsg;
+   ATH_MSG_INFO( "File " << m_fileName << " opened in " << method );
 // (Write Schema)
    }
 }
@@ -90,9 +83,7 @@ std::unique_ptr< ROOT::RNTupleReader > RNTCollection::getCollectionRNTuple()
    if( m_file ) {
       auto reader = ROOT::RNTupleReader::Open( APRDefaults::RNTupleNames::EventTag, m_fileName );
       if( reader )
-         m_poolOut << coral::Debug << "Retrieved Collection RNTuple  \""
-                   << reader->GetDescriptor().GetName() << "\" from file " << m_fileName
-                   << coral::MessageStream::endmsg;
+         ATH_MSG_DEBUG( "Retrieved Collection RNTuple  '" << reader->GetDescriptor().GetName() << "' from file " << m_fileName );
       return reader;
    }
    return nullptr;
@@ -127,17 +118,14 @@ void RNTCollection::commit( bool )
    delayedFileOpen("commit");
 
    if( m_open ) {
-      m_poolOut << coral::Debug
-                << "Commit: saving collection to file: " << ""
-                << coral::MessageStream::endmsg;
+   ATH_MSG_DEBUG( "Commit: saving collection to file: " << "" );
    }
 }
 
      
 void RNTCollection::close()
 {
-   m_poolOut << coral::Info << "Closing " << (m_open? "open":"not open")
-             << " collection '" << m_fileName << "'" << coral::MessageStream::endmsg;
+   ATH_MSG_INFO( "Closing " << (m_open? "open":"not open") << " collection '" << m_fileName << "'" );
    if(m_open) {
       delayedFileOpen("close");
               
@@ -249,11 +237,9 @@ void RNTCollection::open()  try
    TDirectory::TContext dirctxt;
    if( m_session == 0 || m_mode == ICollection::READ || m_mode == ICollection::UPDATE ) {
       // first step: Try to open the file
-      m_poolOut << coral::Info << "Opening Collection File '" << m_fileName << "' in mode: "
-                << poolOptToRootOpt[m_mode] << coral::MessageStream::endmsg;
+      ATH_MSG_INFO( "Opening Collection File '" << m_fileName << "' in mode: " << poolOptToRootOpt[m_mode] );
       bool fileExists = !gSystem->AccessPathName( m_fileName.c_str() );
-      m_poolOut << coral::Debug << "File '" << m_fileName << "'"
-                << (fileExists? " exists." : " does not exist." ) << corENDL;
+       ATH_MSG_DEBUG( "File '" << m_fileName << "'" << (fileExists? " exists." : " does not exist." ) );
       // open the file if it exists, or create if requested
       if( !fileExists && m_mode != ICollection::CREATE && m_mode != ICollection::CREATE_AND_OVERWRITE )
          m_file = 0;
@@ -270,16 +256,11 @@ void RNTCollection::open()  try
          if( !m_fileMgr ) {
             m_fileMgr = Gaudi::svcLocator()->service("FileMgr");
             if ( !m_fileMgr ) {
-               m_poolOut << coral::Error 
-                         << "unable to get the FileMgr, will not manage TFiles"
-                         << coral::MessageStream::endmsg;
+               ATH_MSG_ERROR( "unable to get the FileMgr, will not manage TFiles" );
             }
          }
          if (m_fileMgr && m_fileMgr->hasHandler(Io::ROOT).isFailure()) {
-            m_poolOut << coral::Info
-                      << "Unable to locate ROOT file handler via FileMgr. "
-                      << "Will use default TFile::Open"
-                      << coral::MessageStream::endmsg;
+            ATH_MSG_INFO( "Unable to locate ROOT file handler via FileMgr. Will use default TFile::Open" );
             m_fileMgr.reset();
          }
 
@@ -295,9 +276,7 @@ void RNTCollection::open()  try
             int r = m_fileMgr->open(Io::ROOT, "RNTCollection", m_fileName,
                                     io_mode, vf, "TAG", SHARED);
             if (r < 0) {
-               m_poolOut << coral::Error << "unable to open \"" << m_fileName
-                         << "\" for " << root_mode
-                         << coral::MessageStream::endmsg;
+               ATH_MSG_ERROR( "unable to open '" << m_fileName << "' for " << root_mode );
             } else {
                m_file = (TFile*)vf;
             }
@@ -306,8 +285,7 @@ void RNTCollection::open()  try
       if (!m_file || m_file->IsZombie()) {
          throw std::runtime_error(  string("ROOT cannot \"") + poolOptToRootOpt[m_mode] + "\" file " + m_fileName + " (APR: \" RNTCollection::open \" from \" RNTCollection \")");
       }
-      m_poolOut << coral::Info << "File " << m_fileName << " opened"
-                << coral::MessageStream::endmsg;
+   ATH_MSG_INFO( "File " << m_fileName << " opened" );
    }
 
    if (m_mode == ICollection::READ || m_mode == ICollection::UPDATE) {
@@ -342,8 +320,8 @@ void RNTCollection::open()  try
             continue;
          std::string field_type = f.GetTypeName();
    
-         m_poolOut << coral::Debug << "  + field name: " << field_name <<  corENDL;
-         m_poolOut << coral::Debug << "    field type: " << field_type <<  corENDL;
+         ATH_MSG_DEBUG( "  + field name: " << field_name );
+         ATH_MSG_DEBUG( "    field type: " << field_type );
    
          // MN: TODO : may need to fix coral::Attribute to recognize the "new" typenames
          static const std::map< std::string, std::string > typenameConv = {
@@ -356,7 +334,7 @@ void RNTCollection::open()  try
             { "std::int16_t", "short" } };
          auto it = typenameConv.find( field_type );
          if( it != typenameConv.end() ) {
-            m_poolOut << coral::Debug << "Replaced type  " << field_type << " with " << it->second << corENDL;
+            ATH_MSG_DEBUG( "Replaced type  " << field_type << " with " << it->second );
             field_type = it->second;
          }
    
@@ -383,9 +361,7 @@ void RNTCollection::open()  try
       // create a new Collection
       std::string rntupleName = std::string(APRDefaults::RNTupleNames::EventTag);
       if( m_mode == ICollection::CREATE_AND_OVERWRITE ) {
-         m_poolOut << coral::Warning
-                   << "Cleaning previous collection object from the file..."
-                   << coral::MessageStream::endmsg;
+         ATH_MSG_DEBUG( "Creating collection in overwrite mode..." );
          m_file->Delete( (rntupleName+";*").c_str() );
       }
       // (Create Schema)
@@ -406,16 +382,12 @@ void RNTCollection::open()  try
       // MN: TODO : add support for OVERWRITE?
       m_rntupleWriter = ROOT::RNTupleWriter::Append(std::move(model), rntupleName, *m_file, opts);
 
-      m_poolOut << coral::Debug
-                << "Created RNTCollection, collection file will be "
-                << m_fileName << coral::MessageStream::endmsg;
+   ATH_MSG_DEBUG( "Created RNTCollection, collection file will be " << m_fileName );
 
-      m_poolOut << coral::Info << "RNTuple Collection created" << corENDL;
+   ATH_MSG_INFO( "RNTuple Collection created" );
    }
    else {
-      m_poolOut << coral::Info
-                << "RNTuple Collection opened, size = " << m_reader->GetNEntries()
-                << corENDL;
+   ATH_MSG_INFO( "RNTuple Collection opened, size = " << m_reader->GetNEntries() );
    }
       
    if (m_session && m_mode == ICollection::UPDATE) {
@@ -433,8 +405,7 @@ void RNTCollection::open()  try
    m_open = true;
 
 } catch (std::exception& e) {
-   m_poolOut << coral::Debug << "Open() failed with expception: " << e.what()
-             << corENDL;
+   ATH_MSG_DEBUG( "Open() failed with exception: " << e.what() );
    cleanup();
    throw;
 }
@@ -442,8 +413,7 @@ void RNTCollection::open()  try
 
 void RNTCollection::addField(ROOT::RNTupleModel* model, const std::string& field_name, const std::string& field_type)
 {
-   m_poolOut << coral::Debug << "Adding new column: name=" << field_name
-             << " of type " << field_type << corENDL;
+   ATH_MSG_DEBUG( "Adding new column: name=" << field_name << " of type " << field_type );
    const std::string actual_type = (field_type == tokenTypeName? "std::string" : field_type);
    auto field = ROOT::RFieldBase::Create(field_name, actual_type).Unwrap();
    model->AddField( std::move(field) );

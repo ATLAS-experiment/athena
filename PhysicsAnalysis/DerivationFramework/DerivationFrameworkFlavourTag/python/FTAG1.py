@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 #====================================================================
 # DAOD_FTAG1.py
 # This defines DAOD_FTAG1, an unskimmed DAOD format for Run 3.
@@ -78,15 +78,12 @@ def FTAG1CoreCfg(flags, name_tag='FTAG1', extra_SmartCollections=None, extra_All
     addCommonAugmentation(flags, acc, FTAG1SlimmingHelper)
 
     FTAG1SlimmingHelper.SmartCollections += [
-                                           "BTagging_AntiKt4UFOCSSK",
                                            "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets",
-                                           "AntiKt4EMPFlowJets_FTAG",
                                           ]
 
     if flags.GeoModel.Run >= LHCPeriod.Run4:
         FTAG1SlimmingHelper.SmartCollections += [
                                                 "AntiKt4EMTopoJets",
-                                                "BTagging_AntiKt4EMTopo",
                                                 "MET_Baseline_AntiKt4EMTopo",
                                                 ]
 
@@ -109,20 +106,18 @@ def FTAG1CoreCfg(flags, name_tag='FTAG1', extra_SmartCollections=None, extra_All
             "GlobalNeutralParticleFlowObjects",
             "CHSGChargedParticleFlowObjects",
             "CHSGNeutralParticleFlowObjects",
+            "CaloCalTopoClusters",
             "TruthParticles",
             "TruthVertices",
             "JetAssociatedPixelClusters",
             "JetAssociatedSCTClusters",
             "PixelClusters",
-            "SCT_Clusters",
+            "SCT_Clusters"
     ]
     
     if flags.GeoModel.Run >= LHCPeriod.Run4:
         FTAG1SlimmingHelper.AllVariables += [
             "AntiKt4EMTopoJets",
-            "BTagging_AntiKt4EMTopo",
-            "BTagging_AntiKt4EMTopoJFVtx",
-            "BTagging_AntiKt4EMTopoSecVtx",
             "AntiKt4TruthJets",
             "ITkPixelMeasurements",
             "ITkStripMeasurements"
@@ -202,7 +197,7 @@ def FTAG1CoreCfg(flags, name_tag='FTAG1', extra_SmartCollections=None, extra_All
 
     return acc
 
-def FTAG1Cfg(flags):
+def FTAG1Cfg(flags, name_tag='FTAG1'):
 
     acc = ComponentAccumulator()
 
@@ -213,13 +208,11 @@ def FTAG1Cfg(flags):
     from DerivationFrameworkPhys.TriggerListsHelper import TriggerListsHelper
     FTAG1TriggerListsHelper = TriggerListsHelper(flags)
    
-    # name_tag has to be consistent between KernelCfg and CoreCfg
-    FTAG1_name_tag = 'FTAG1'
 
     # Common augmentations
-    acc.merge(FTAG1KernelCfg(flags, name=FTAG1_name_tag + "Kernel", StreamName = 'StreamDAOD_'+FTAG1_name_tag, TriggerListsHelper = FTAG1TriggerListsHelper))
+    acc.merge(FTAG1KernelCfg(flags, name=name_tag + "Kernel", StreamName = 'StreamDAOD_'+name_tag, TriggerListsHelper = FTAG1TriggerListsHelper))
     # Content of FTAG1 
-    acc.merge(FTAG1CoreCfg(flags, FTAG1_name_tag, trigger_option='FTAG1', TriggerListsHelper = FTAG1TriggerListsHelper))
+    acc.merge(FTAG1CoreCfg(flags, name_tag, trigger_option=name_tag, TriggerListsHelper = FTAG1TriggerListsHelper))
 
     return acc
 

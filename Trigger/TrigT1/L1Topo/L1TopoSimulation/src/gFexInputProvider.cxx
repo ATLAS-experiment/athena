@@ -48,7 +48,11 @@ gFexInputProvider::initialize() {
   ATH_CHECK(m_gXERHO_EDMKey.initialize(SG::AllowEmpty));
 
   ATH_CHECK(m_gTE_EDMKey.initialize(SG::AllowEmpty));
-
+  ATH_CHECK(m_gESPRESSO_EDMKey.initialize(SG::AllowEmpty));
+  if (! m_gESPRESSO_EDMKey.empty() ) {
+    renounce(m_gESPRESSO_EDMKey); //make this optional, as its availability depends on how gFEX TOBs are being produced (cannot be simulated by gFEX sim, optional form gFEX bytestream decoders
+  }
+  
   if (!m_monTool.empty()) ATH_CHECK(m_monTool.retrieve());
 
   return StatusCode::SUCCESS;
@@ -399,6 +403,45 @@ gFexInputProvider::fillTE(TCS::TopoInputEvent& inputEvent) const {
 
 }
 
+StatusCode
+gFexInputProvider::fillGESPRESSO(TCS::TopoInputEvent& inputEvent) const {
+  if (m_gESPRESSO_EDMKey.empty()) {
+    ATH_MSG_DEBUG("gFex ESPRESSO input disabled, skip filling");
+    return StatusCode::SUCCESS;
+  }
+  
+  SG::ReadHandle<xAOD::gFexGlobalRoIContainer> gESPRESSO_EDM(m_gESPRESSO_EDMKey);
+  if (! gESPRESSO_EDM.isValid() ) {
+    //gESPRESSO is only active in HI runs and only available from data. If not present simply skip it.
+    ATH_MSG_DEBUG("gFex ESPRESSO input is not available, skip filling");
+    return StatusCode::SUCCESS;
+  }
+  
+  for(const xAOD::gFexGlobalRoI* gFexRoI : * gESPRESSO_EDM) {
+
+    auto globalType = gFexRoI->globalType();
+    if ( globalType != 1 ) { continue; } // 1 = scalar values (MET, SumET)
+
+    ATH_MSG_DEBUG( "EDM gFex ESPRESSO type: "
+                   << gFexRoI->globalType()
+                   << " sumEt: " 
+		   << gFexRoI->METquantityTwo() // returns sumEt in MeV
+		   );
+    
+   unsigned int sumEtTopo = gFexRoI->METquantityTwo()*m_EtGlobal_conversion;
+
+   TCS::gTETOB gespresso( sumEtTopo, TCS::GESPRESSO );
+ 
+   gespresso.setSumEtDouble( static_cast<double>(sumEtTopo*m_EtDoubleGlobal_conversion) );
+ 
+   inputEvent.setgESPRESSO( gespresso );
+   auto mon_h_gTEsumEt = Monitored::Scalar("gESPRESSOsumEt", gespresso.sumEtDouble());
+   Monitored::Group(m_monTool, mon_h_gTEsumEt); 
+
+   }
+
+   return StatusCode::SUCCESS;
+}
 
 StatusCode
 gFexInputProvider::fillTopoInputEvent(TCS::TopoInputEvent& inputEvent) const {
@@ -411,6 +454,7 @@ gFexInputProvider::fillTopoInputEvent(TCS::TopoInputEvent& inputEvent) const {
   ATH_CHECK(fillXERHO(inputEvent));
 
   ATH_CHECK(fillTE(inputEvent));
+  ATH_CHECK(fillGESPRESSO(inputEvent));
   return StatusCode::SUCCESS;
 }
 

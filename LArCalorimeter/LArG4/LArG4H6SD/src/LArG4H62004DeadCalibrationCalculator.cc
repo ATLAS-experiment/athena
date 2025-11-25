@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArG4H62004DeadCalibrationCalculator.h"
@@ -140,6 +140,10 @@ G4bool LArG4H62004DeadCalibrationCalculator::Process( const G4Step* a_step, LArG
     // Calculate the identifier.
     G4StepPoint* pre_step_point = a_step->GetPreStepPoint();
     const G4TouchableHistory* theTouchable = dynamic_cast<const G4TouchableHistory*>(pre_step_point->GetTouchable());
+    if (!theTouchable) {
+      std::cerr<<"LArG4H62004DeadCalibrationCalculator bad dynamic_cast, abort...."<<std::endl;
+      std::abort();
+    }
     // Volume name
     G4String hitVolume = theTouchable->GetVolume(0)->GetName();
     //   if(hitVolume.contains("::") ) {

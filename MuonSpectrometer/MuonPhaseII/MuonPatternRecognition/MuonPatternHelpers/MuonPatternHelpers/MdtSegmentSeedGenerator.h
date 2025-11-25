@@ -12,6 +12,7 @@
 #include <vector>
 #include <array>
 
+#include "Acts/Seeding/CompositeSpacePointLineSeeder.hpp"
 namespace MuonR4{
     class ISpacePointCalibrator;
     class CalibratedSpacePoint;
@@ -25,6 +26,7 @@ namespace MuonR4::SegmentFit {
      *         within the parameter resolution are generated, then the latter one is skipped. */
     class MdtSegmentSeedGenerator: public AthMessaging {
         public:
+            using LineSeeder_t = Acts::Experimental::CompositeSpacePointLineSeeder;
             using HitVec = SpacePointPerLayerSplitter::HitVec;
             /** @brief Configuration switches of the module  */
             struct Config{
@@ -61,7 +63,7 @@ namespace MuonR4::SegmentFit {
             /** @brief Helper struct from a generated Mdt seed */
             struct DriftCircleSeed{
                 /** @brief Seed parameters */
-                Parameters parameters{Parameters::Zero()};
+                Parameters parameters{};
                 /** @brief List of calibrated measurements */
                 std::vector<std::unique_ptr<CalibratedSpacePoint>> measurements{};
                 /** @brief Iterations to obtain the seed */
@@ -91,25 +93,12 @@ namespace MuonR4::SegmentFit {
         /** @brief Returns the current seed configuration */
         const Config& config() const;
         private:
-            /** @brief Sign combinations to draw the 4 lines tangent to 2 drift circles
-             *         The first two are indicating whether the tangent is left/right to the
-             *         first/second circle. The last sign is picking the sign of the 
-             *         solution arising from the final quadratic equation. */
-            using SignComboType = std::array<int, 2>;
-            constexpr static std::array<SignComboType,4> s_signCombos{
-                std::array{ 1, 1}, std::array{ 1,-1}, 
-                std::array{-1,-1}, std::array{-1, 1},  
-            };
+            using TangentLine = LineSeeder_t::TwoCircleTangentPars;
+            using TangentAmbi = LineSeeder_t::TangentAmbi;
+            static constexpr std::array<TangentAmbi, 4> s_signCombos{TangentAmbi::LL, TangentAmbi::RR,
+                                                                     TangentAmbi::LR, TangentAmbi::RL};
             /** @brief Cache of all solutions seen thus far */
-            struct SeedSolution{
-                /** @brief: Theta of the line */
-                double theta{0.};
-                /** @brief Intersecpt of the line */
-                double y0{0.};
-                /** @brief: Uncertainty on the slope*/
-                double dTheta{0.};
-                /** @brief: Uncertainty on the intercept */
-                double dY0{0.};
+            struct SeedSolution : public TangentLine {
                 /** @brief Used hits in the seed */
                 HitVec seedHits{};
                 /** @brief Vector of radial signs of the valid hits */
@@ -122,13 +111,9 @@ namespace MuonR4::SegmentFit {
                 }
                 std::ostream& print(std::ostream& ostr) const;
             };
-            /** @brief Estimate the line tangential to two space points for a given left/right pattern
-             *  @param topHit: First drift circle space point
-             *  @param bottomHit: Second drift cricle space point
-             *  @param signs: Left/right ambiguity to the first & second space point */
-            template <Acts::Experimental::CompositeSpacePoint SpacePoint_t>
-                SeedSolution estimateTangentLine(const SpacePoint_t& topHit, const SpacePoint_t& bottomHit,
-                                                 const SignComboType& signs) const;
+            /** @brief Checks whether the intercept and the angle are witihn the allowed ranges 
+             *  @param solution: Reference to the tangent line solution to check */            
+            bool isValidLine(const TangentLine& solution) const;
             /** @brief Construct the 3D-Line parameters from the estimates theta & y0 from the tangent line
              *  @param theta: Tangent line theta in the y-z plane
              *  @param y0: Y intercept at z=0 */
@@ -141,7 +126,7 @@ namespace MuonR4::SegmentFit {
             std::optional<DriftCircleSeed> buildSeed(const EventContext& ctx,
                                                      const HoughHitType& topHit, 
                                                      const HoughHitType& bottomHit, 
-                                                     const SignComboType& signs); 
+                                                     const TangentAmbi ambi); 
             /** @brief Prepares the generator to generate the seed from the next pair of drift circles */
             void moveToNextCandidate();
             /** @brief Translate the SeedGenerator config to a Seed auxillary config */
@@ -170,6 +155,4 @@ namespace MuonR4::SegmentFit {
         
     };
 }
-#include <MuonPatternHelpers/MdtSegmentSeedGenerator.icc>
-
 #endif

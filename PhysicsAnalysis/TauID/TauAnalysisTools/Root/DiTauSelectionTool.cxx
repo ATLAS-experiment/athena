@@ -4,7 +4,6 @@
 
 // Local include(s):
 #include "TauAnalysisTools/DiTauSelectionTool.h"
-#include "TauAnalysisTools/SharedFilesVersion.h"
 #include "TauAnalysisTools/DiTauSelectionCuts.h"
 
 // Framework include(s):
@@ -15,7 +14,6 @@
 #include "THashList.h"
 
 // System include(s)
-#include <atomic>
 #include <cmath>  // for std::isnan
 
 using namespace TauAnalysisTools;
@@ -24,6 +22,7 @@ using namespace TauAnalysisTools;
 //______________________________________________________________________________
 DiTauSelectionTool::DiTauSelectionTool( const std::string& name )
   : asg::AsgMetadataTool( name )
+  , m_sOmniIDWP("OMNIIDNONE")	
   , m_fOutFile(nullptr)
   , m_aAccept( "DiTauSelection" )
 {}
@@ -60,7 +59,7 @@ StatusCode DiTauSelectionTool::initialize()
   if (!bConfigViaProperties and !m_vOmniScoreRegion.empty())         bConfigViaProperties = true;
   if (!bConfigViaProperties and !std::isnan(m_dOmniScoreMin.value())) bConfigViaProperties = true;
   if (!bConfigViaProperties and !std::isnan(m_dOmniScoreMax.value())) bConfigViaProperties = true;
-
+  if (!bConfigViaProperties and m_iOmniIDWP != 0)              bConfigViaProperties = true;
 
   if (bConfigViaConfigFile and bConfigViaProperties)
   {
@@ -213,6 +212,20 @@ StatusCode DiTauSelectionTool::initialize()
 	// check if using OmniScore
 	m_useOmniScore = true;
       }
+      else if (sCut == "OmniIDWP")
+      {
+        iSelectionCuts = iSelectionCuts | DiTauCutOmniIDWP;
+        if (m_iOmniIDWP == OMNIIDNONE){
+          m_iOmniIDWP = convertStrToOmniIDWP(rEnv.GetValue("OmniIDWP","OMNIIDNONE"));
+        }	  
+	// check for possible mis-config in Tau selection
+        for (const std::string& checkCut : vCuts){
+	   if (checkCut.find("OmniScore") != std::string::npos) {
+              ATH_MSG_ERROR("Misconfig due to OmniIDWP and OmniScore cuts both present in the config file. Please CHECK carefully config file again");
+              return StatusCode::FAILURE;
+	   }   
+	}
+      }
       else ATH_MSG_WARNING("Cut " << sCut << " is not available");
     }
 
@@ -228,6 +241,8 @@ StatusCode DiTauSelectionTool::initialize()
   }
   ATH_CHECK( m_OmniScoreDecorKey.initialize( m_useOmniScore ) );
 
+  m_sOmniIDWP = convertOmniIDWPToStr(m_iOmniIDWP);
+
   // specify all available cut descriptions
   using map_type  = std::map<DiTauSelectionCuts, std::unique_ptr<TauAnalysisTools::DiTauSelectionCut>>;
   using pair_type = map_type::value_type;
@@ -239,6 +254,7 @@ StatusCode DiTauSelectionTool::initialize()
    {DiTauCutNSubjets, std::make_unique<TauAnalysisTools::DiTauSelectionCutNSubjets>(this)},
    {DiTauCutAbsCharge, std::make_unique<TauAnalysisTools::DiTauSelectionCutAbsCharge>(this)},
    {DiTauCutOmniScore, std::make_unique<TauAnalysisTools::DiTauSelectionCutOmniScore>(this)}, 
+   {DiTauCutOmniIDWP, std::make_unique<TauAnalysisTools::DiTauSelectionCutOmniIDWP>(this)},
   };
   
   m_cMap = { std::make_move_iterator( begin(elements) ), std::make_move_iterator( end(elements) ) };
@@ -255,6 +271,7 @@ StatusCode DiTauSelectionTool::initialize()
   PrintConfigRegion ("NSubjets",    m_vNSubjetsRegion);
   PrintConfigValue  ("AbsCharge",   m_vAbsCharges);
   PrintConfigRegion ("OmniScore",   m_vOmniScoreRegion);
+  PrintConfigValue  ("OmniIDWP",    m_sOmniIDWP);
 
   std::string sCuts = "";
   if (m_iSelectionCuts & DiTauCutPt) sCuts += "Pt ";
@@ -262,6 +279,7 @@ StatusCode DiTauSelectionTool::initialize()
   if (m_iSelectionCuts & DiTauCutNSubjets) sCuts += "NSubjets ";
   if (m_iSelectionCuts & DiTauCutAbsCharge) sCuts += "AbsCharge ";
   if (m_iSelectionCuts & DiTauCutOmniScore) sCuts += "OmniScore ";
+  if (m_iSelectionCuts & DiTauCutOmniIDWP) sCuts += "OmniIDWP "; 
 
   ATH_MSG_DEBUG( "cuts: " << sCuts);
 
@@ -475,4 +493,42 @@ void DiTauSelectionTool::PrintConfigValue(const std::string& sCutName, T& tVal) 
 {
   ATH_MSG_DEBUG( sCutName<<": " << tVal );
 }
+
+//______________________________________________________________________________
+int DiTauSelectionTool::convertStrToOmniIDWP(const std::string& sOmniIDWP) const
+{
+  if      (sOmniIDWP == "OMNIIDNONE")      return int(OMNIIDNONE);
+  else if (sOmniIDWP == "OMNIIDVERYLOOSE") return int(OMNIIDVERYLOOSE);
+  else if (sOmniIDWP == "OMNIIDLOOSE")     return int(OMNIIDLOOSE);
+  else if (sOmniIDWP == "OMNIIDMEDIUM")    return int(OMNIIDMEDIUM);
+  else if (sOmniIDWP == "OMNIIDTIGHT")     return int(OMNIIDTIGHT);
+
+  ATH_MSG_ERROR( "omni ID working point "<<sOmniIDWP<<" is unknown, the OmniIDWP cut will not accept any ditau!" );
+  return -1;
+}
+
+//______________________________________________________________________________
+std::string DiTauSelectionTool::convertOmniIDWPToStr(int iOmniIDWP) const
+{
+  switch (iOmniIDWP)
+  {
+  case OMNIIDNONE:
+    return "OMNIIDNONE";
+  case OMNIIDVERYLOOSE:
+    return "OMNIIDVERYLOOSE";
+  case OMNIIDLOOSE:
+    return "OMNIIDLOOSE";
+  case OMNIIDMEDIUM:
+    return "OMNIIDMEDIUM";
+  case OMNIIDTIGHT:
+    return "OMNIIDTIGHT";
+
+  default:
+    ATH_MSG_WARNING( "OmniID working point with enum " << iOmniIDWP << " is unknown, the OmniIDWP cut will not accept any ditau!" );
+    return "";
+  }
+}
+
+
+
 

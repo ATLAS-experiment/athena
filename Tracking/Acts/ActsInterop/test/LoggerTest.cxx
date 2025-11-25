@@ -55,7 +55,7 @@ BOOST_AUTO_TEST_CASE( loglevel_propagation )
     BOOST_CHECK_EQUAL(lvl, msg->level());
 
     auto filter = std::make_unique<ActsAthenaFilterPolicy>(msg);
-    auto print = std::make_unique<ActsAthenaPrintPolicy>(msgSvc, msg, name);
+    auto print = std::make_unique<ActsAthenaPrintPolicy>(msg, name);
     const auto logger = std::make_unique<const Acts::Logger>(std::move(print), std::move(filter));
     
     BOOST_CHECK_EQUAL(logger->name(), name);

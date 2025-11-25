@@ -6,6 +6,7 @@
 #define LARONLINEID_H
 
 #include "LArIdentifier/LArOnlineID_Base.h"
+#include "AthenaKernel/BaseInfo.h"
 #include "string.h"
 #include <vector>
 #include <algorithm>
@@ -67,6 +68,7 @@ private:
 //using the macro below we can assign an identifier (and a version)
 //This is required and checked at compile time when you try to record/retrieve
 CLASS_DEF( LArOnlineID , 158698068 , 1 )
+SG_BASES( LArOnlineID, LArOnlineID_Base );
 
 /* TEST BEAM dictionaries */
 

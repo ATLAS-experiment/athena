@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArCOOLConditions/LArDSPConfig.h" 
@@ -47,7 +47,9 @@ LArDSPConfigWrite::LArDSPConfigWrite() : m_pBlob_nc(nullptr)  {
   if (this->initializeBase().isFailure()) return;
     
 
-  m_nFebs=m_onlineHelper->febHashMax();
+  if (m_onlineHelper) { // Should never actually be null, but avoids a coverity warning.
+    m_nFebs=m_onlineHelper->febHashMax();
+  }
   coral::AttributeListSpecification* spec = new coral::AttributeListSpecification();
   spec->extend("febdata", "blob");
   spec->extend<unsigned>("version");

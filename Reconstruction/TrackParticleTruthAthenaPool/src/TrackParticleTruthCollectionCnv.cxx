@@ -20,13 +20,10 @@
 #include "StoreGate/StoreGateSvc.h"
 
 // This is release 12 guid for TrackParticleTruthVector.
-const pool::Guid TrackParticleTruthCollectionCnv::s_p0_guid("B35041E8-D980-458E-AC06-79028CF79D5D");
-
-const pool::Guid TrackParticleTruthCollectionCnv::s_p1_guid("D62AFEEE-EF2C-437A-B7BE-CA926D38CCFA");
-
-const pool::Guid TrackParticleTruthCollectionCnv::s_p2_guid("D62AFEEE-EF2C-437A-B7BE-CA926D38CCFB");
-
-const pool::Guid TrackParticleTruthCollectionCnv::s_p3_guid("018F1ACE-8405-7174-9305-46B503B5EF52");
+constexpr pool::Guid s_p0_guid("B35041E8-D980-458E-AC06-79028CF79D5D");
+constexpr pool::Guid s_p1_guid("D62AFEEE-EF2C-437A-B7BE-CA926D38CCFA");
+constexpr pool::Guid s_p2_guid("D62AFEEE-EF2C-437A-B7BE-CA926D38CCFB");
+constexpr pool::Guid s_p3_guid("018F1ACE-8405-7174-9305-46B503B5EF52");
 
 //================================================================
 TrackParticleTruthCollectionCnv::TrackParticleTruthCollectionCnv(ISvcLocator* svcLoc) : 

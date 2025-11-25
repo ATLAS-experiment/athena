@@ -8,8 +8,8 @@
 
 #include <Acts/Material/TrackingGeometryMaterial.hpp>
 #include "GaudiKernel/IAlgTool.h"
-#include "ActsGeometryInterfaces/ActsGeometryContext.h"
-#include "Acts/Plugins/Json/MaterialMapJsonConverter.hpp"
+#include "ActsGeometryInterfaces/GeometryContext.h"
+#include "ActsPlugins/Json/MaterialMapJsonConverter.hpp"
 
 namespace Acts {
   class TrackingGeometry;
@@ -22,11 +22,11 @@ public:
 
   virtual
   void
-  write(const ActsGeometryContext& gctx, const Acts::TrackingGeometryMaterial& detMaterial) const = 0;
+  write(const ActsTrk::GeometryContext& gctx, const Acts::TrackingGeometryMaterial& detMaterial) const = 0;
 
   virtual
   void
-  write(const ActsGeometryContext& gctx, const Acts::TrackingGeometry& tGeometry) const = 0;
+  write(const ActsTrk::GeometryContext& gctx, const Acts::TrackingGeometry& tGeometry) const = 0;
 
 };
 

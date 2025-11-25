@@ -21,12 +21,10 @@
 // Amg
 #include "GeoPrimitives/GeoPrimitives.h"
 //other
-#include "ActsGeometryInterfaces/IActsExtrapolationTool.h"
 #include "Acts/Surfaces/PerigeeSurface.hpp"
 #include "Acts/Surfaces/PlaneSurface.hpp"
 #include "Acts/Surfaces/CurvilinearSurface.hpp"
 
-#include "ActsGeometryInterfaces/IActsExtrapolationTool.h"
 #include "ActsGeometryInterfaces/ITrackingGeometryTool.h"
 #include "Acts/Geometry/GeometryContext.hpp"
 #include "Acts/Geometry/TrackingGeometry.hpp"
@@ -156,7 +154,7 @@ void ActsGeantFollowerHelper::trackParticle(const G4ThreeVector& pos,
 {
   // const EventContext ctx;
   const EventContext &ctx = Gaudi::Hive::currentContext();
-  const ActsGeometryContext &gctx = m_trackingGeometryTool->getGeometryContext(ctx);
+  const ActsTrk::GeometryContext &gctx = m_trackingGeometryTool->getGeometryContext(ctx);
   auto trackingGeometry = m_trackingGeometryTool->trackingGeometry();
   // construct the initial parameters
   Amg::Vector3D npos(pos.x(),pos.y(),pos.z());

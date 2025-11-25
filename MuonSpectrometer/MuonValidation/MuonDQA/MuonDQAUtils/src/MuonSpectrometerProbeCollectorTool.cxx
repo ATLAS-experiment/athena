@@ -1,8 +1,12 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonDQAUtils/MuonSpectrometerProbeCollectorTool.h"
+#include "Particle/TrackParticleContainer.h"
+#include "Particle/TrackParticle.h"
+#include "muonEvent/MuonContainer.h"
+#include "muonEvent/Muon.h"
 
 //================ Constructor =================================================
 namespace Muon {

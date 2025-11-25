@@ -10,11 +10,12 @@
 #include "CollectionBase/CollectionRowBuffer.h"
 
 #include "FileCatalog/IFileCatalog.h"
-#include "CoralBase/MessageStream.h"
+#include "POOLCore/DbPrint.h"
 
 #include "GaudiKernel/IFileMgr.h"
 #include "GaudiKernel/SmartIF.h"
 #include "Gaudi/PluginService.h"
+
 
 #include <string>
 #include <memory>
@@ -24,25 +25,11 @@
 class TFile;
 class IFileMgr;
 
-// Import classes from experimental namespace for the time being
-#if ROOT_VERSION_CODE >= ROOT_VERSION( 6, 35, 0 )
 namespace ROOT {
    class RNTupleModel;
    class RNTupleWriter;
    class RNTupleReader;
 }
-#else
-namespace ROOT::Experimental {
-   class RNTupleModel;
-   class RNTupleWriter;
-   class RNTupleReader;
-}
-namespace ROOT {
-   using RNTupleModel = ROOT::Experimental::RNTupleModel;
-   using RNTupleWriter = ROOT::Experimental::RNTupleWriter;
-   using RNTupleReader = ROOT::Experimental::RNTupleReader;
-}
-#endif
 
 namespace pool {
 
@@ -58,7 +45,7 @@ namespace pool {
          @brief Collection (and CollectionProxy) implementation based on RNTuple
       */
 
-      class RNTCollection :  public ICollection {
+      class RNTCollection :  public ICollection, public APRMessaging {
     
      public:
 	typedef Gaudi::PluginService::Factory<ICollection*( const ICollectionDescription*, ICollection::OpenMode, ISession*)> Factory;
@@ -153,7 +140,6 @@ namespace pool {
         bool                                 m_readOnly;
         
         std::unique_ptr<pool::IFileCatalog>  m_fileCatalog;
-        coral::MessageStream                 m_poolOut;
 
         SmartIF<IFileMgr>                    m_fileMgr;
       };

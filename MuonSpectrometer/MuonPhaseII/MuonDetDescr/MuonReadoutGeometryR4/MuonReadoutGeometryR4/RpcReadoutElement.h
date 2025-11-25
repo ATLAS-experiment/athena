@@ -97,14 +97,14 @@ class RpcReadoutElement : public MuonReadoutElement {
 
 
     /// Returns the position of the strip center
-    Amg::Vector3D stripPosition(const ActsGeometryContext& ctx, const Identifier& measId) const;
-    Amg::Vector3D stripPosition(const ActsGeometryContext& ctx, const IdentifierHash& measHash) const;
+    Amg::Vector3D stripPosition(const ActsTrk::GeometryContext& ctx, const Identifier& measId) const;
+    Amg::Vector3D stripPosition(const ActsTrk::GeometryContext& ctx, const IdentifierHash& measHash) const;
     /// Returns the global position of the strip edge at negative local Y
-    Amg::Vector3D rightStripEdge(const ActsGeometryContext& ctx, const Identifier& measId) const;
-    Amg::Vector3D rightStripEdge(const ActsGeometryContext& ctx, const IdentifierHash& measHash) const;
+    Amg::Vector3D rightStripEdge(const ActsTrk::GeometryContext& ctx, const Identifier& measId) const;
+    Amg::Vector3D rightStripEdge(const ActsTrk::GeometryContext& ctx, const IdentifierHash& measHash) const;
     /// Returns the global posiition of the strip edge at positive local Y
-    Amg::Vector3D leftStripEdge(const ActsGeometryContext& ctx, const Identifier& measId) const;
-    Amg::Vector3D leftStripEdge(const ActsGeometryContext& ctx, const IdentifierHash& measHash) const;
+    Amg::Vector3D leftStripEdge(const ActsTrk::GeometryContext& ctx, const Identifier& measId) const;
+    Amg::Vector3D leftStripEdge(const ActsTrk::GeometryContext& ctx, const IdentifierHash& measHash) const;
 
     enum class EdgeSide{
         readOut,
@@ -115,7 +115,7 @@ class RpcReadoutElement : public MuonReadoutElement {
      *  @param posInStripPlane: Local position of the crossing point on the plane (In gasGap frame)
      *  @param side: Switch indicating whether the readout or the highVoltage side is targeted. */
     double distanceToEdge(const IdentifierHash& measHash, 
-                          const Amg::Vector2D& posInStripPlane,
+                          const Amg::Vector3D& posInStripPlane,
                           const EdgeSide side) const;
 
     /// Constructs the identifier hash from the full measurement Identifier. The
@@ -139,7 +139,7 @@ class RpcReadoutElement : public MuonReadoutElement {
 
 
         /// Access to the StripLayer associated to a given measurement Hash
-        const StripLayer& sensorLayout(const IdentifierHash& measHash) const;
+        const StripLayerPtr& sensorLayout(const IdentifierHash& measHash) const;
         /// @brief Access the associated strip design for a given measurement hash
         const StripDesign& stripDesign(const IdentifierHash& meaHash) const;
     private:

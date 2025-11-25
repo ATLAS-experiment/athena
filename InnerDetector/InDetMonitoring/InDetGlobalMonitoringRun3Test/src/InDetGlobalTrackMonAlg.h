@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -22,6 +22,8 @@
 #include "GaudiKernel/EventContext.h"
 
 #include "PixelGeoModel/IIBLParameterSvc.h"
+#include "xAODTracking/VertexContainer.h"
+#include "xAODJet/JetContainer.h"
 
 
 //Detector Managers

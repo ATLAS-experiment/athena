@@ -23,6 +23,7 @@
 #include "StoreGate/StoreGateSvc.h"
 #include "StoreGate/ReadHandle.h"
 #include "StoreGate/WriteHandle.h"
+#include "StorageSvc/DbType.h"
 
 #include <vector>
 
@@ -46,26 +47,13 @@ StatusCode AthenaPoolAddressProviderSvc::initialize() {
    ATH_CHECK( m_metaDataStore.retrieve() );
    ATH_CHECK( m_clidSvc.retrieve() );
 
-   return(StatusCode::SUCCESS);
-}
-//________________________________________________________________________________
-StatusCode AthenaPoolAddressProviderSvc::finalize() {
-   // Release ClassIDSvc
-   if (!m_clidSvc.release().isSuccess()) {
-      ATH_MSG_WARNING("Cannot release ClassIDSvc.");
-   }
-   // Release MetaDataStore
-   if (!m_metaDataStore.release().isSuccess()) {
-      ATH_MSG_WARNING("Cannot release MetaDataStore.");
-   }
-
-   return(StatusCode::SUCCESS);
+   return StatusCode::SUCCESS;
 }
 //________________________________________________________________________________
 StatusCode AthenaPoolAddressProviderSvc::preLoadAddresses(StoreID::type storeID,
 		IAddressProvider::tadList& tads) {
    if (storeID != StoreID::DETECTOR_STORE) {
-      return(StatusCode::SUCCESS);
+      return StatusCode::SUCCESS;
    }
    ServiceHandle<StoreGateSvc> detectorStoreSvc("DetectorStore", name());
    ATH_CHECK( detectorStoreSvc.retrieve() );
@@ -73,11 +61,11 @@ StatusCode AthenaPoolAddressProviderSvc::preLoadAddresses(StoreID::type storeID,
    SG::ReadHandle<DataHeader> dataHeader("CondProxyProvider", detectorStoreSvc->name());
    if (!dataHeader.isValid()) {
       ATH_MSG_DEBUG("Cannot retrieve DataHeader from DetectorStore.");
-      return(StatusCode::SUCCESS);
+      return StatusCode::SUCCESS;
    }
    ATH_MSG_DEBUG("The current File contains: " << dataHeader->size() << " objects");
    for (const auto& element : *dataHeader) {
-      SG::TransientAddress* tadd = element.getAddress();
+      SG::TransientAddress* tadd = element.getAddress(pool::POOL_StorageType.type());
       if (tadd->clID() == ClassID_traits<DataHeader>::ID()) {
          delete tadd; tadd = nullptr;
       } else {
@@ -87,13 +75,13 @@ StatusCode AthenaPoolAddressProviderSvc::preLoadAddresses(StoreID::type storeID,
       EventSelectorAthenaPoolUtil::registerKeys(element, &*detectorStoreSvc);
    }
 
-   return(StatusCode::SUCCESS);
+   return StatusCode::SUCCESS;
 }
 //________________________________________________________________________________
 StatusCode AthenaPoolAddressProviderSvc::loadAddresses(StoreID::type storeID,
 		IAddressProvider::tadList& tads) {
    if (storeID != StoreID::EVENT_STORE && storeID != StoreID::PILEUP_STORE) {
-      return(StatusCode::SUCCESS);
+      return StatusCode::SUCCESS;
    }
 
    Guid thisFile = Guid::null();
@@ -102,7 +90,7 @@ StatusCode AthenaPoolAddressProviderSvc::loadAddresses(StoreID::type storeID,
       SG::ReadHandle<DataHeader> eventDataHeader(m_dataHeaderKey.value(), eventStore()->name());
       if (!eventDataHeader.isValid()) {
          ATH_MSG_ERROR("Cannot retrieve DataHeader from StoreGate: " << m_dataHeaderKey);
-         return(StatusCode::FAILURE);
+         return StatusCode::FAILURE;
       }
       dataHeader = eventDataHeader.cptr();
    }
@@ -116,16 +104,16 @@ StatusCode AthenaPoolAddressProviderSvc::loadAddresses(StoreID::type storeID,
             ATH_MSG_DEBUG("found AthenaAttribute, name = eventRef_secondary = " << tokenStr);
          } catch (std::exception &e) {
             ATH_MSG_ERROR(e.what());
-            return (StatusCode::FAILURE);
+            return StatusCode::FAILURE;
          }
       } else {
          ATH_MSG_ERROR("Cannot find AthenaAttribute, key = " << m_attrListKey.value());
-         return (StatusCode::FAILURE);
+         return StatusCode::FAILURE;
       }
-      IOpaqueAddress* iop = new GenericAddress(POOL_StorageType, ClassID_traits<DataHeader>::ID(), tokenStr, "SecondaryEventSelector");
+      IOpaqueAddress* iop = new GenericAddress(pool::POOL_StorageType.type(), ClassID_traits<DataHeader>::ID(), tokenStr, "SecondaryEventSelector");
       if (!eventStore()->recordAddress(iop).isSuccess()) {
          ATH_MSG_ERROR("Cannot record address to StoreGate with token string: " << tokenStr);
-         return(StatusCode::FAILURE);
+         return StatusCode::FAILURE;
       }
       ATH_MSG_DEBUG("Created dataHeader SecondaryEventSelector");
    }
@@ -137,7 +125,7 @@ StatusCode AthenaPoolAddressProviderSvc::loadAddresses(StoreID::type storeID,
       if (doRegister) {
          EventSelectorAthenaPoolUtil::registerKeys(element, eventStore());
       }
-      SG::TransientAddress* tadd = element.getAddress();
+      SG::TransientAddress* tadd = element.getAddress(pool::POOL_StorageType.type());
       if (tadd->clID() == ClassID_traits<DataHeader>::ID()) { // self reference
          delete tadd; tadd = nullptr;
       } else {
@@ -147,11 +135,11 @@ StatusCode AthenaPoolAddressProviderSvc::loadAddresses(StoreID::type storeID,
       }
    }
    m_guid = thisFile;
-   return(StatusCode::SUCCESS);
+   return StatusCode::SUCCESS;
 }
 //________________________________________________________________________________
 StatusCode AthenaPoolAddressProviderSvc::updateAddress(StoreID::type /*storeID*/,
                                                        SG::TransientAddress* /*tad*/,
                                                        const EventContext& /*ctx*/) {
-   return(StatusCode::FAILURE);
+   return StatusCode::FAILURE;
 }

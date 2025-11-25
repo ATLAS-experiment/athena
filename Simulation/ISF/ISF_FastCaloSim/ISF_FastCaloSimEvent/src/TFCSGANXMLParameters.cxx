@@ -1,5 +1,5 @@
 /*
- Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+ Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -86,6 +86,7 @@ void TFCSGANXMLParameters::InitialiseFromXML(
                             << layer
                             << ", setting to 1 bin to avoid empty histogram");
                         xBins = 1;  // Remove warning and set a default bin
+                        edges.push_back (edges.back()+1);
                       } else {
                         m_relevantlayers.push_back(layer);
                       }

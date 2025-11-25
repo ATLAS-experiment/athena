@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ByteStreamCnvSvcBase/ByteStreamCnvSvcBase.h"
@@ -13,40 +13,30 @@
 #include "GaudiKernel/IClassIDSvc.h"
 
 //______________________________________________________________________________
-ByteStreamCnvSvcBase::ByteStreamCnvSvcBase(const std::string& name, ISvcLocator* pSvcLocator) :
-   base_class(name, pSvcLocator, ByteStreamAddress::storageType())
-{
-   declareProperty("InitCnvs", m_initCnvs); 
-}
+ByteStreamCnvSvcBase::ByteStreamCnvSvcBase(const std::string& name, ISvcLocator* pSvcLocator)
+  : base_class(name, pSvcLocator, ByteStreamAddress::storageType()) {}
 //______________________________________________________________________________
 /// Standard Destructor
-ByteStreamCnvSvcBase::~ByteStreamCnvSvcBase()   {
-}
+ByteStreamCnvSvcBase::~ByteStreamCnvSvcBase() = default;
 //______________________________________________________________________________
 /// Initialize the service.
-StatusCode ByteStreamCnvSvcBase::initialize()     {
-   if (!::AthCnvSvc::initialize().isSuccess()) {
-      ATH_MSG_FATAL("Cannot initialize AthCnvSvc base class.");
-      return(StatusCode::FAILURE);
-   }
+StatusCode ByteStreamCnvSvcBase::initialize() {
+   ATH_CHECK(::AthCnvSvc::initialize());
 
    ServiceHandle<IIncidentSvc> incsvc("IncidentSvc", this->name());
-   if (!incsvc.retrieve().isSuccess()) {
-      ATH_MSG_FATAL("Cannot get IncidentSvc.");
-      return(StatusCode::FAILURE);
-   }
+   ATH_CHECK(incsvc.retrieve());
    incsvc->addListener(this, "BeginRun", 0, false, true); // true for singleshot
-   return(StatusCode::SUCCESS);
+   return StatusCode::SUCCESS;
 }
 //______________________________________________________________________________
 StatusCode ByteStreamCnvSvcBase::updateServiceState(IOpaqueAddress* pAddress) {
-   if (pAddress != 0) {
+   if (pAddress != nullptr) {
       GenericAddress* pAddr = dynamic_cast<GenericAddress*>(pAddress);
-      if (pAddr != 0) {
-         return(StatusCode::SUCCESS);
+      if (pAddr != nullptr) {
+         return StatusCode::SUCCESS;
       }
    }
-   return(StatusCode::FAILURE);
+   return StatusCode::FAILURE;
 }
 //______________________________________________________________________________
 void ByteStreamCnvSvcBase::handle(const Incident& /*incident*/) {
@@ -56,17 +46,16 @@ void ByteStreamCnvSvcBase::handle(const Incident& /*incident*/) {
       return;
    }
    // Initialize the converters
-   for (const std::string& cnv : m_initCnvs) {
+   for (const std::string& cnv : m_initCnvs.value()) {
       ATH_MSG_DEBUG("Accessing Converter for " << cnv);
       CLID id;
       if (!clidSvc->getIDOfTypeName(cnv, id).isSuccess()) {
          ATH_MSG_WARNING("Cannot get CLID for " << cnv);
       } else {
          IConverter* cnv = converter(id);
-         if (cnv == 0) {
-	    ATH_MSG_WARNING("Cannot get converter for " << cnv);
-         } 
+         if (cnv == nullptr) {
+            ATH_MSG_WARNING("Cannot get converter for " << cnv);
+         }
       }
-   } 
-   return;
+   }
 }

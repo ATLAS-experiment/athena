@@ -315,7 +315,7 @@ void VP1TrackSystem::buildEventSceneGraph(StoreGateSvc* sg, SoSeparator *root)
     		  messageDebug( "MDT chamber Info - technology: " + QString::fromStdString(techStr) + " - stName: " +  QString::fromStdString(stationName) + " - stEta: " + QString::number(stEta) + " - stPhi: " + QString::number(stPhi) + " - ml: " + QString::number(ml) );
 
     		  const MuonGM::MuonReadoutElement* muonDetEl = dynamic_cast<const MuonGM::MuonReadoutElement*>(muonDetManager->getMdtReadoutElement (it->first));
-    		  if (muonDetEl) m_d->chamberT0s[i][muonDetEl->parentStationPV()]=it->second;
+    		  if (muonDetEl) m_d->chamberT0s[i][muonDetEl->getMaterialGeom()->getParent()]=it->second;
     	  }
     	  else if (muonDetManager->cscIdHelper()->is_csc(it->first)){
     		  messageDebug("---> getting CSC T0s");
@@ -328,7 +328,7 @@ void VP1TrackSystem::buildEventSceneGraph(StoreGateSvc* sg, SoSeparator *root)
     		  messageDebug( "MDT chamber Info - technology: " + QString::fromStdString(techStr) + " - stName: " +  QString::fromStdString(stationName) + " - stEta: " + QString::number(stEta) + " - stPhi: " + QString::number(stPhi) );
 
     		  const MuonGM::CscReadoutElement* muonDetEl = dynamic_cast<const MuonGM::CscReadoutElement*>(muonDetManager->getCscReadoutElement (it->first));
-    		  if (muonDetEl) m_d->chamberT0s[i][muonDetEl->parentStationPV()]=it->second;
+    		  if (muonDetEl) m_d->chamberT0s[i][muonDetEl->getMaterialGeom()->getParent()]=it->second;
     	  }
       }
       emit muonChamberT0sChanged(m_d->chamberT0s[i],i);

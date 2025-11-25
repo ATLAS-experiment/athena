@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.AthConfigFlags import AthConfigFlags
 from AthenaConfiguration.Enums import HIMode
@@ -18,8 +18,8 @@ def createHIRecConfigFlags():
   flags.addFlag("HeavyIon.Jet.RecoOutputPtMin", lambda prevFlags: 25000 if prevFlags.Reco.HIMode is HIMode.HI else 8000)
   flags.addFlag("HeavyIon.Jet.TrackJetPtMin", lambda prevFlags: 7000 if prevFlags.Reco.HIMode is HIMode.HI else 4000)
   flags.addFlag("HeavyIon.Jet.HIClusterGeoWeightFile", "auto")
-  flags.addFlag("HeavyIon.Jet.ClusterKey", "HIClusters")
-  flags.addFlag("HeavyIon.Jet.Internal.ClusterKey", "HIClusters_temp")
+  flags.addFlag("HeavyIon.Jet.ClusterKey", lambda prevFlags: "DFHIClusters" if prevFlags.HeavyIon.isDerivation else "HIClusters")
+  flags.addFlag("HeavyIon.Jet.Internal.ClusterKey", lambda prevFlags: "DFHIClusters_temp" if prevFlags.HeavyIon.isDerivation else "HIClusters_temp")
   flags.addFlag("HeavyIon.Jet.WriteHIClusters", lambda prevFlags: prevFlags.Reco.HIMode is not HIMode.UPC)
   flags.addFlag("HeavyIon.Jet.RValues", [2,4])#this are the R's we want to reconstruct
   flags.addFlag("HeavyIon.Jet.CaliRValues", ["2","3","4","10"])#this are the R's that are supported for calibration, if not listed then cali R=0.4 is picked
@@ -33,6 +33,13 @@ def createHIRecConfigFlags():
 
   flags.addFlag("HeavyIon.redoTracking", True)
   flags.addFlag("HeavyIon.redoEgamma", True)
+  # derivation flags
+  flags.addFlag("HeavyIon.isDerivation", False)
+  flags.addFlag("HeavyIon.HIJetPrefix", lambda prevFlags: "DF" if prevFlags.HeavyIon.isDerivation else "")
+  flags.addFlag("HeavyIon.doHIBTagging", True) # to get flavour tagging running on DFAntiKt4HIJets collection in derivations
+  flags.addFlag("HeavyIon.FTagModifiers", lambda prevFlags: ["QGTagging", "NNJVT"] if prevFlags.HeavyIon.doHIBTagging else [] )
+  flags.addFlag("HeavyIon.FTagTruthModifiers", lambda prevFlags: ["JetGhostLabel", "JetGhostInitialLabel", "PartonTruthLabel", "JetDeltaRInitialLabel:5000", "JetDeltaRLabel:5000"] if prevFlags.HeavyIon.doHIBTagging and prevFlags.Input.isMC else [] ) 
+  flags.addFlag("HeavyIon.MinTrackPt", 0.9) # minimal reco track pT (in GeV) to be stored in derivation
 
   # expand as needed
   return flags

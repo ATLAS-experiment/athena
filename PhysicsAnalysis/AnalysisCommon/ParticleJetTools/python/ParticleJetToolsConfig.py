@@ -86,6 +86,24 @@ def getCopyTruthJetParticles(modspec, cflags):
     return truthpartcopy
 
 
+def getCopyTruthJetParticlesGEN(modspec, cflags):
+    """  Build truth constituents as in EVTGEN jobs in the r21 config.
+    IMPORTANT : this is expected to be temporary, only to reproduce the EVTGEN r21 config with the new config. The definitions should be harmonized with reco-level at some point and this function removed.
+    The source for r21 EVTGEN config was in GeneratorFilters/share/common/GenerateTruthJets.py
+    """
+    truthclassif = getMCTruthClassifier()
+
+    if modspec == "":
+        return CompFactory.CopyTruthJetParticles("truthpartcopy",
+                                                 OutputName="JetInputTruthParticlesGEN",
+                                                 MCTruthClassifier=truthclassif)
+    elif modspec=="NoWZ":
+         return CompFactory.CopyTruthJetParticles("truthpartcopywz",
+                                                  OutputName="JetInputTruthParticlesGENNoWZ",
+                                                  MCTruthClassifier=truthclassif,
+                                                  IncludePromptLeptons=False)
+
+
 def _getCommonLabelNames(prefix):
     """Internal unlity to name labels
 
@@ -110,7 +128,8 @@ def _getCommonLabelNames(prefix):
     )
 
 
-def getJetDeltaRFlavorLabelTool(name='jetdrlabeler', jet_pt_min=5000, collection="Final", dr_max=0.3):
+# ATLASRECTS-8290: remove use_barcode here
+def getJetDeltaRFlavorLabelTool(name='jetdrlabeler', jet_pt_min=5000, collection="Final", dr_max=0.3, use_barcode=False):
     """Get the standard flavor tagging delta-R labeling tool
 
     Uses cone matching to B, C and tau truth particles.
@@ -133,6 +152,7 @@ def getJetDeltaRFlavorLabelTool(name='jetdrlabeler', jet_pt_min=5000, collection
         DRMax = dr_max,
         MatchMode = "MinDR",
         JetPtMin = jet_pt_min,
+        useBarcode=use_barcode, # ATLASRECTS-8290: remove this eventually
         )
 
 
@@ -193,7 +213,11 @@ def getJetDeltaRInitialLabelTool(jetdef, modspec):
     return getJetDeltaRFlavorLabelTool(name, jetptmin, collection = "Initial")
 
 
-def getJetGhostFlavorLabelTool(name="jetghostlabeler", collection="Final"):
+# ATLASRECTS-8290: remove use_barcode here
+def getJetGhostFlavorLabelTool(
+        name="jetghostlabeler",
+        collection="Final",
+        use_barcode=False):
 
     prefix_to_name = "HadronGhost"
     if collection != "Final":
@@ -205,6 +229,7 @@ def getJetGhostFlavorLabelTool(name="jetghostlabeler", collection="Final"):
         GhostBName = "GhostBHadrons"+collection,
         GhostCName = "GhostCHadrons"+collection,
         GhostTauName = "GhostTausFinal",
+        useBarcode = use_barcode, # ATLASRECTS-8290: remove this eventually
         PartPtMin = 5000.0
     )
 

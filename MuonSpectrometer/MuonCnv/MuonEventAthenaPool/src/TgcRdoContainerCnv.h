@@ -41,7 +41,7 @@ TgcRdoContainerCnv::createTransient()
    // using the correct persistent type pointer
 
    TgcRdoContainer *trans_cont = 0;
-   static const pool::Guid	p4_guid("176667f0-DEC8-42A4-94AF-B4750829671A");
+   static const pool::Guid	p4_guid("176667F0-DEC8-42A4-94AF-B4750829671A");
    static const pool::Guid	p3_guid("E7D45D90-CB92-4A7D-B5FE-2791CE34FFEE");
    static const pool::Guid	p2_guid("3DA250DA-321C-4DD3-996A-BB0E67A6034D");
    static const pool::Guid	p1_guid("BF9D17EA-AC87-4243-9126-8FC86DDCDAA3");

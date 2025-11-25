@@ -19,10 +19,9 @@ def main(args):
     from MuonSpacePointFormation.SpacePointFormationConfig import MuonSpacePointFormationCfg 
     cfg.merge(MuonSpacePointFormationCfg(flags))
 
-    from MuonPatternRecognitionAlgs.MuonHoughTransformAlgConfig import MuonPatternRecognitionCfg, MuonSegmentFittingAlgCfg
+    from MuonPatternRecognitionAlgs.MuonPatternRecognitionConfig import MuonPatternRecognitionCfg
     cfg.merge(MuonPatternRecognitionCfg(flags))
 
-    cfg.merge(MuonSegmentFittingAlgCfg(flags))
 
     from MuonBucketDump.MuonBucketDumpConfig import MuonBucketDumpCfg
     from MuonPatternRecognitionTest.PatternTestConfig import PatternVisualizationToolCfg
@@ -32,13 +31,12 @@ def main(args):
     executeTest(cfg)
 
 if __name__=="__main__":
-    from MuonGeoModelTestR4.testGeoModel import SetupArgParser
+    from MuonGeoModelTestR4.testGeoModel import SetupArgParser, MuonPhaseIITestDefaults
     parser = SetupArgParser()
     parser.set_defaults(nEvents = -1)
     parser.set_defaults(outRootFile="MuonBucketDump_R3SimHits.root")
-    parser.set_defaults(inputFile=[
-                                   "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonGeomRTT/R3SimHits.pool.root"
-                                    ])
+
+    parser.set_defaults(inputFile=MuonPhaseIITestDefaults.HITS_PG_R3)
     args = parser.parse_args()
     main(args)
 

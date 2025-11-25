@@ -46,7 +46,7 @@ namespace DerivationFramework {
 
   // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
   
-  StatusCode Reco_V0Finder::addBranches() const
+  StatusCode Reco_V0Finder::addBranches(const EventContext& ctx) const
   {
 
     bool callV0Finder = false;
@@ -63,7 +63,6 @@ namespace DerivationFramework {
        }
     }
 
-    const EventContext& ctx = Gaudi::Hive::currentContext();
   // InDetV0 container and its auxilliary store
     //---- Recording section: write the results to StoreGate ---//
     SG::WriteHandle<xAOD::VertexContainer> h_V0( m_v0Key, ctx );

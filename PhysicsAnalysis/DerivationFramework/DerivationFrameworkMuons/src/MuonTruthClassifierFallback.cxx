@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 // Runs on muons without a truth particle link.
 // Finds the nearest stable truth particle and adds its info to the muon.
@@ -10,25 +10,20 @@
 #include "xAODMuon/MuonContainer.h"
 
 namespace {
-    static const SG::AuxElement::Decorator<float> decorator_dR("MCTFallback_dR");
-    static const SG::AuxElement::Decorator<int> decorator_type("MCTFallback_truthType");
-    static const SG::AuxElement::Decorator<int> decorator_origin("MCTFallback_truthOrigin");
+    static const SG::Decorator<float> decorator_dR("MCTFallback_dR");
+    static const SG::Decorator<int> decorator_type("MCTFallback_truthType");
+    static const SG::Decorator<int> decorator_origin("MCTFallback_truthOrigin");
 
-    static const SG::AuxElement::Decorator<float> decorator_pu_dR("MCTFallbackPU_dR");
-    static const SG::AuxElement::Decorator<int> decorator_pu_type("MCTFallbackPU_truthType");
-    static const SG::AuxElement::Decorator<int> decorator_pu_origin("MCTFallbackPU_truthOrigin");
-
-    static const SG::AuxElement::Accessor<int> acc_tT("truthType");
-    static const SG::AuxElement::Accessor<int> acc_tO("truthOrigin");
+    static const SG::Decorator<float> decorator_pu_dR("MCTFallbackPU_dR");
+    static const SG::Decorator<int> decorator_pu_type("MCTFallbackPU_truthType");
+    static const SG::Decorator<int> decorator_pu_origin("MCTFallbackPU_truthOrigin");
+  // TODO Check if these last two should be ReadDecorHandles instead
+    static const SG::Accessor<int> acc_tT("truthType");
+    static const SG::Accessor<int> acc_tO("truthOrigin");
 
 }  // namespace
-// Constructor
-DerivationFramework::MuonTruthClassifierFallback::MuonTruthClassifierFallback(const std::string& t, const std::string& n,
-                                                                              const IInterface* p) :
-    base_class(t, n, p) {
-}
 
-// Athena initialize and finalize
+// Athena initialize
 StatusCode DerivationFramework::MuonTruthClassifierFallback::initialize() {
     ATH_MSG_VERBOSE("initialize() ...");
     ATH_CHECK(m_mcTruthClassifier.retrieve());
@@ -38,17 +33,12 @@ StatusCode DerivationFramework::MuonTruthClassifierFallback::initialize() {
     ATH_CHECK(m_truthPileupSGKey.initialize());
     ATH_CHECK(m_truthMuonSGKey.initialize());
 
-    /// Key properties are overwirrten during initialize
-    m_Truth_dR_Key = m_containerKey.key() + ".MCTFallback_dR";
-    m_Truth_type_Key = m_containerKey.key() + ".MCTFallback_truthType";
-    m_Truth_origin_Key = m_containerKey.key() + ".MCTFallback_truthOrigin";
+    // FIXME These WriteDecorHandles are not being used. The
+    // Decorators above are (incorrectly) used instead.
     ATH_CHECK(m_Truth_dR_Key.initialize());
     ATH_CHECK(m_Truth_type_Key.initialize());
     ATH_CHECK(m_Truth_origin_Key.initialize());
 
-    m_Truth_PU_dR_Key = m_containerKey.key() + ".MCTFallbackPU_dR";
-    m_Truth_PU_type_Key = m_containerKey.key() + ".MCTFallbackPU_truthType";
-    m_Truth_PU_origin_Key = m_containerKey.key() + ".MCTFallbackPU_truthOrigin";
     ATH_CHECK(m_Truth_PU_dR_Key.initialize());
     ATH_CHECK(m_Truth_PU_type_Key.initialize());
     ATH_CHECK(m_Truth_PU_origin_Key.initialize());
@@ -56,9 +46,8 @@ StatusCode DerivationFramework::MuonTruthClassifierFallback::initialize() {
     return StatusCode::SUCCESS;
 }
 
-StatusCode DerivationFramework::MuonTruthClassifierFallback::addBranches() const {
+StatusCode DerivationFramework::MuonTruthClassifierFallback::addBranches(const EventContext& ctx) const {
     // Retrieve main particle collection
-    const EventContext& ctx = Gaudi::Hive::currentContext();
 
     SG::ReadHandle<xAOD::IParticleContainer> parts{m_containerKey, ctx};
     if (!parts.isValid()) {

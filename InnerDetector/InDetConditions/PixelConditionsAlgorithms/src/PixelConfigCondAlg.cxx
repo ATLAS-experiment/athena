@@ -114,6 +114,7 @@ PixelConfigCondAlg::getFileName(const int currentRunNumber) const {
       ATH_MSG_ERROR("Run number outside sensible range: "<<runNumber);
       return "";
     }
+    // coverity[tainted_data]
     while (currentRunNumber>=runNumber) {
       indata >> subfilename;
       if (indata.eof()) { break; }

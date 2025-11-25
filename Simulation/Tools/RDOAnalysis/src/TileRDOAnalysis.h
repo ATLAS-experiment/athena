@@ -34,6 +34,12 @@ public:
   virtual StatusCode finalize() override final;
 
 private:
+  Gaudi::Property<bool> m_doNtuple{this , "doNtuple" , true};
+  Gaudi::Property<std::string> m_ntupleFileName   {this,"NtupleFileName","/ntuples/file1"};
+  Gaudi::Property<std::string> m_ntupleDirName {this,"NtupleDirectoryName", "/TileRDOAnalysis/"};
+  Gaudi::Property<std::string> m_ntupleTreeName {this,"NtupleTreeName", "TileRDOAna"};
+  Gaudi::Property<std::string> m_path {this,"HistPath", "/TileRDOAnalysis/"};
+
   SG::ReadHandleKey<TileRawChannelContainer> m_inputRawChKey{this, "InputRawChKey", "TileRawChannelCnt"};
   SG::ReadHandleKey<TileRawChannelContainer> m_inputMuRcvRawChKey{this, "InputMuRcvRawChKey", "MuRcvRawChCnt"};
   SG::ReadHandleKey<TileMuonReceiverContainer> m_inputMuRcvKey{this, "InputMuRcvKey", "TileMuRcvCnt"};
@@ -132,10 +138,6 @@ private:
 
 
   TTree *m_tree;
-  std::string m_ntupleFileName;
-  std::string m_ntupleDirName;
-  std::string m_ntupleTreeName;
-  std::string m_path;
   ServiceHandle<ITHistSvc> m_thistSvc;
 
 };

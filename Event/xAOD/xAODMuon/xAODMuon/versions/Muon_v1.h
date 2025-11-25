@@ -41,13 +41,13 @@ namespace xAOD {
     /// inject the enums
     #include "xAODMuon/versions/MuonEnums.def"
     /// Default constructor
-    Muon_v1();
+    Muon_v1() = default;
 
     /// Copy constructor
     Muon_v1(const Muon_v1& rhs);
 
     /// Destructor
-    virtual ~Muon_v1();
+    virtual ~Muon_v1() = default;
 
     /// Assignment operator
     Muon_v1& operator=(const Muon_v1& rhs);
@@ -185,16 +185,18 @@ namespace xAOD {
     /// Primarily for use in Python.
     int intParameter(const ParamDef parameter) const;
 
-    /// The Muon Quality information is defined on the MCP twiki: https://twiki.cern.ch/twiki/bin/view/Atlas/MuonSelectionTool#Quality_definition
-    /// @todo Finish documentation
+    /// Muon CP quality accessors.
+    /// These methods get/set the muon's "quality" decoration, which is a bitfield:
+    /// - Bits 0-2 hold the xAOD::Muon::Quality enum (Tight -> VeryLoose).
+    /// - Higher bits may store auxiliary flags (e.g. ID hit-cuts).
+    /// This decoration is currently populated by MuonSelectionTool (see MCP documentation).
+
+    /// get/set the Quality enum in bits 0-2, preserving higher-bit flags
     Quality quality() const;
     void setQuality(Quality);
 
-    /// Returns true if this Muon passes the MCP ID hit cuts (see the MCP twiki for definitions:
-    /// https://twiki.cern.ch/twiki/bin/view/AtlasProtected/MuonPerformance)
+    /// MCP ID hit cuts - get/set the corresponding status bit in the quality decoration.
     bool passesIDCuts() const;
-
-    /// Set whether passes the MCP ID hit cuts.
     void setPassesIDCuts(bool);
 
     /// @}

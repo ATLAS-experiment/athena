@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 #
 # This package is a collection of 'duel-use' tools to calculate
 # high-level flavor tagging discriminants. Because it should work both
@@ -10,13 +10,25 @@
 atlas_subdir( FlavorTagInference )
 
 # External dependencies:
+find_package( lwtnn )
 find_package( ROOT COMPONENTS Core MathCore )
 find_package( onnxruntime )
 find_package( nlohmann_json )
 
+set(TRITON_LIBRARIES "")
+
+if (NOT XAOD_ANALYSIS)
+  find_package(OpenSSL)
+  find_package(gRPC)
+  find_package(Protobuf)
+  find_package(TritonCommon)
+  find_package(TritonClient)
+
+  set(TRITON_LIBRARIES TritonClient::grpcclient_static gRPC::grpc++)
+endif()
+
 # source files, depend on the build
 set(FTISource
-  Root/AssociationEnums.cxx
   Root/BTagTrackIpAccessor.cxx
   Root/ConstituentsLoader.cxx
   Root/CustomGetterUtils.cxx
@@ -47,14 +59,22 @@ if (NOT XAOD_STANDALONE)
     )
 endif()
 
+if (NOT XAOD_ANALYSIS)
+  list(
+    APPEND FTISource
+    Root/SaltModelTriton.cxx
+    )
+endif()
+
+
 # Build a shared library:
 atlas_add_library( FlavorTagInference
   ${FTISource}
   PUBLIC_HEADERS FlavorTagInference
   PRIVATE_INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
-  INCLUDE_DIRS ${ONNXRUNTIME_INCLUDE_DIRS}
+  INCLUDE_DIRS ${ONNXRUNTIME_INCLUDE_DIRS} ${LWTNN_INCLUDE_DIRS}
   PRIVATE_LINK_LIBRARIES ${ROOT_LIBRARIES} PathResolver CxxUtils nlohmann_json::nlohmann_json
-  LINK_LIBRARIES ${ONNXRUNTIME_LIBRARIES} 
+  LINK_LIBRARIES ${ONNXRUNTIME_LIBRARIES} ${LWTNN_LIBRARIES} ${TRITON_LIBRARIES}
     AsgTools
     AsgServicesLib
     AthContainers
@@ -71,9 +91,7 @@ atlas_add_library( FlavorTagInference
 
 if (NOT XAOD_STANDALONE)
   atlas_add_component( FlavorTagInferenceLib
-    src/BTagDecoratorAlg.cxx
     src/JetTagDecoratorAlg.cxx
-    src/BTagConditionalDecoratorAlg.cxx
     src/JetTagConditionalDecoratorAlg.cxx
     src/FoldDecoratorAlg.cxx
     src/components/FlavorTagInference_entries.cxx

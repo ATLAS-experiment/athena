@@ -8,16 +8,13 @@ from AthenaConfiguration.Enums import Format
 from PixelConditionsAlgorithms.ITkPixelConditionsConfig import (
     ITkPixelDCSCondStateAlgCfg, ITkPixelDCSCondStatusAlgCfg, ITkPixelDeadMapCondAlgCfg
 )
-from PixelReadoutGeometry.PixelReadoutGeometryConfig import ITkPixelReadoutManagerCfg
 
 def ITkPixelConditionsSummaryCfg(flags, name="ITkPixelConditionsSummary", **kwargs):
     """Return configured ComponentAccumulator with tool for ITk Pixel Conditions"""
-    acc = ITkPixelReadoutManagerCfg(flags)
-    acc.merge(ITkPixelDCSCondStateAlgCfg(flags))
+    acc = ITkPixelDCSCondStateAlgCfg(flags)
     acc.merge(ITkPixelDCSCondStatusAlgCfg(flags))
     acc.merge(ITkPixelDeadMapCondAlgCfg(flags))
 
-    kwargs.setdefault("PixelReadoutManager", acc.getPrimary())
     kwargs.setdefault("PixelDetEleCollKey", "ITkPixelDetectorElementCollection")
     kwargs.setdefault("PixelDCSStateCondData", "ITkPixelDCSStateCondData")
     kwargs.setdefault("PixelDCSStatusCondData", "ITkPixelDCSStatusCondData")
@@ -33,7 +30,6 @@ def ITkPixelConditionsSummaryCfg(flags, name="ITkPixelConditionsSummary", **kwar
 def ITkByteStreamErrorDetectorElementStatusToolCfg(flags, name = "ITkByteStreamErrorDetectorElementStatusTool",**kwargs) :
     # @TODO bytestream errors for ITk have not been defined yet.
     acc = ComponentAccumulator()
-    kwargs.setdefault("PixelReadoutManager","InDetDD::ITk::PixelReadoutManager")
     kwargs.setdefault("PixelDetEleCollKey","ITkPixelDetectorElementCollection") # @TODO do we need the DetEleColl for the Acts chain ?
     if not flags.Input.isMC and not flags.Overlay.DataOverlay and flags.Input.Format is Format.BS :
         kwargs.setdefault("PixelByteStreamErrs", "PixelByteStreamErrs")

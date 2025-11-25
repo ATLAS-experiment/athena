@@ -171,7 +171,7 @@ ReadFromXmlDom::parseXmlElement(const xercesc::DOMElement* element) {
     }
     SingleHistogramDefinition sx = isTProfile ? parseTProfileText(textContent) : parseTextLine(textContent);
     sx.name = toNative(xercesValues[NAME]);
-    sx.histoType = type;
+    sx.histoType = std::move(type);
     return sx;
   }
   //if get to here and axisDef0 is null, theres a problem

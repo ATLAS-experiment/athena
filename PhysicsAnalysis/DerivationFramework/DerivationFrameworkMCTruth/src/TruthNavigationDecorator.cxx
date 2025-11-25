@@ -7,39 +7,15 @@
 // Add navigation information to small truth collections
 
 #include "TruthNavigationDecorator.h"
-#include "xAODTruth/TruthEventContainer.h"
-#include "xAODTruth/TruthParticleContainer.h"
 #include "TruthUtils/MagicNumbers.h"
-#include <string>
-#include <vector>
-#include <map>
-
-// Constructor
-DerivationFramework::TruthNavigationDecorator::TruthNavigationDecorator(const std::string& t,
-        const std::string& n,
-        const IInterface* p ) :
-    base_class(t,n,p)
-{
-}
-
-// Destructor
-DerivationFramework::TruthNavigationDecorator::~TruthNavigationDecorator() {
-}
+#include <algorithm> //for std::find
 
 // Initialise
 StatusCode DerivationFramework::TruthNavigationDecorator::initialize() {
 
   // Initialise input keys
-  ATH_CHECK( m_inputKeys.initialize() ); 
-  ATH_CHECK( m_truthEventKey.initialize() );  
-
-  // Decorations - dependent on the name of the input keys 
-  // Loop over the container names provided by the user
-  for (const auto& key : m_inputKeys) {
-    m_parentLinksDecorKeys.emplace_back(key.key()+".parentLinks");   
-    m_childLinksDecorKeys.emplace_back(key.key()+".childLinks");  
-  }
-  
+  ATH_CHECK( m_inputKeys.initialize() );
+  ATH_CHECK( m_truthEventKey.initialize() );
   ATH_CHECK( m_parentLinksDecorKeys.initialize() );
   ATH_CHECK( m_childLinksDecorKeys.initialize() );
 
@@ -48,10 +24,9 @@ StatusCode DerivationFramework::TruthNavigationDecorator::initialize() {
 }
 
 // Function to do dressing, implements interface in IAugmentationTool
-StatusCode DerivationFramework::TruthNavigationDecorator::addBranches() const
+StatusCode DerivationFramework::TruthNavigationDecorator::addBranches(const EventContext& ctx) const
 {
-  // Event context 
-  const EventContext& ctx = Gaudi::Hive::currentContext();   
+  // Event context
 
   // Retrieve the truth collections
   SG::ReadHandle<xAOD::TruthEventContainer> truthEvents(m_truthEventKey, ctx);
@@ -65,7 +40,7 @@ StatusCode DerivationFramework::TruthNavigationDecorator::addBranches() const
   inputParticles.reserve(m_inputKeys.size());
   for (const SG::ReadHandleKey<xAOD::TruthParticleContainer>& inputKey : m_inputKeys) {
     inputParticles.push_back(SG::ReadHandle<xAOD::TruthParticleContainer>(inputKey, ctx));
-  }  
+  }
 
   // Build a dictionary of uniqueIDs and element links
   std::map<int,ElementLink<xAOD::TruthParticleContainer> > linkMap;
@@ -103,8 +78,8 @@ StatusCode DerivationFramework::TruthNavigationDecorator::addBranches() const
     seen_particles.clear();
     find_children( event->truthParticle(p) , children , linkMap , seen_particles );
     // Set the maps, so that we can decorate later
-    parentMap[HepMC::uniqueID(event->truthParticle(p))] = parents;
-    childMap[HepMC::uniqueID(event->truthParticle(p))] = children;
+    parentMap[HepMC::uniqueID(event->truthParticle(p))] = std::move(parents);
+    childMap[HepMC::uniqueID(event->truthParticle(p))] = std::move(children);
   } // Loop over truth particles in the big truth collection
 
   // Now final loop over the collections and setting all the decorators

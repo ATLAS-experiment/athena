@@ -13,7 +13,8 @@ def Cfg_METTrack(configFlags, ptCut):
                     doTracks=configFlags.MET.UseTracks)
     cfg_trk.refiners['TrackFilter'].DoLepRecovery=True
     cfg_trk.refiners['TrackFilter'].DoVxSep=configFlags.MET.UseTracks
-    cfg_trk.refiners['TrackFilter'].DoEoverPSel=True
+    cfg_trk.refiners['TrackFilter'].DoEoverPSel=False
+    cfg_trk.refiners['TrackFilter'].InputClusterKey = 'SubtractedCaloCalTopoClusters'
 
     from InDetConfig.InDetTrackSelectionToolConfig import InDetTrackSelectionTool_HITight_Cfg
     

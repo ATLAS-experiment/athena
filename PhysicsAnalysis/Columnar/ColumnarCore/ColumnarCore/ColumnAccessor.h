@@ -197,6 +197,48 @@ namespace columnar
 
 
 
+  // the accessor specialization for type conversions
+  template<ContainerIdConcept CI,typename CT,typename CM>
+    requires (CI::regularObjectId && ColumnTypeTraits<CT,CM>::useConvertOutput)
+  class AccessorTemplate<CI,CT,ColumnAccessMode::output,CM> final
+  {
+  public:
+
+    using ColumnType = typename ColumnTypeTraits<CT,CM>::ColumnType;
+    using UserType = typename ColumnTypeTraits<CT,CM>::UserType;
+
+    AccessorTemplate () = default;
+
+    AccessorTemplate (ColumnarTool<CM>& columnBase, const std::string& name, ColumnInfo&& info = {})
+      : m_base (columnBase, name, std::move (ColumnTypeTraits<CT,CM>::updateColumnInfo(columnBase, info)))
+    {}
+
+    template<typename T>
+      requires requires(T value) {ColumnTypeTraits<CT,CM>::convertOutput (value);}
+    void set (ObjectId<CI,CM> id, T&& value) const noexcept
+    {
+      m_base(id) = ColumnTypeTraits<CT,CM>::convertOutput (std::forward<T>(value));
+    }
+
+    [[nodiscard]] bool isAvailable (ObjectId<CI,CM> id) const noexcept
+    {
+      return m_base.isAvailable (id);
+    }
+
+    [[nodiscard]] std::optional<UserType> getOptional (ObjectId<CI,CM> id) const
+    {
+      if (m_base.isAvailable (id))
+        return operator()(id);
+      else
+        return std::nullopt;
+    }
+
+  private:
+    AccessorTemplate<CI,ColumnType,ColumnAccessMode::output,CM> m_base;
+  };
+
+
+
 
   /// @brief reset a column accessor to point to a new column
   ///

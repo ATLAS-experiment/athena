@@ -5,7 +5,7 @@
 #ifndef RNTUPLEWRITERHELPER_H
 #define RNTUPLEWRITERHELPER_H
 
-#include "AthenaBaseComps/AthMessaging.h"
+#include "POOLCore/DbPrint.h"
 
 #include "ROOT/REntry.hxx"
 #include "ROOT/RField.hxx"
@@ -15,19 +15,9 @@
 
 #include <tuple>
 
-#if ROOT_VERSION_CODE < ROOT_VERSION( 6, 35, 0 )
-namespace ROOT {
-  using REntry = ROOT::Experimental::REntry;
-  using RNTupleWriter = ROOT::Experimental::RNTupleWriter;
-  using RNTupleWriteOptions = ROOT::Experimental::RNTupleWriteOptions;
-  using RNTupleModel = ROOT::Experimental::RNTupleModel;
-  using RFieldBase = ROOT::Experimental::RFieldBase;
-}
-#endif
-
 namespace RootStorageSvc {
 
-class RNTupleWriterHelper : public AthMessaging {
+class RNTupleWriterHelper : public pool::APRMessaging {
  public:
   /// Constructor
   RNTupleWriterHelper(TFile* file, const std::string& ntupleName,

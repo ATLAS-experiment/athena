@@ -32,7 +32,8 @@ namespace IDTPM {
         bool isITk,
         bool doGlobalPlots = false,
         bool doTruthMuPlots = false,
-        bool do1D = false );
+        bool do1D = false, 
+        bool doExpert = false );
 
     /// Constructor B
     /// for only one track type
@@ -44,7 +45,8 @@ namespace IDTPM {
         const std::string& trackType,
         bool isITk,
         bool doGlobalPlots = false,
-        bool doTruthMuPlots = false );
+        bool doTruthMuPlots = false,
+        bool doExpert = false  );
 
     /// Destructor
     virtual ~HitsOnTracksPlots() = default;
@@ -78,6 +80,7 @@ namespace IDTPM {
     bool m_doGlobalPlots{};
     bool m_doTruthMuPlots{};
     bool m_do1D{};
+    bool m_doExpert{};
 
     enum HitParam {
         NInnerMostPixelHits,

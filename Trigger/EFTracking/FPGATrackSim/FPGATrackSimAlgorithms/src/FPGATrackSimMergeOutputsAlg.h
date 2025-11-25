@@ -50,7 +50,9 @@ private:
   SG::WriteHandleKey<FPGATrackSimHitCollection> m_FPGAHitKey{this, "FPGATrackSimHitKey","FPGAHits", "FPGATrackSim Hits key"};
   ToolHandle<FPGATrackSimOverlapRemovalTool> m_overlapRemovalTool {this, "OverlapRemoval", "FPGATrackSimOverlapRemovalTool/FPGATrackSimOverlapRemovalTool_Last", "Last inter-region overlap removal tool"};
 
-  unsigned m_evtloop = 0; // counting
+  double m_evtloop = 0; // for counting, make a double because will be for division
+  unsigned long m_alltracks = 0;
+  unsigned long m_tracksPassOR = 0;
 };
 
 #endif // FPGATrackSim_MERGEOUTPUTSALG_H

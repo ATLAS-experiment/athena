@@ -47,7 +47,7 @@ def IOVDbTestAlgWriteCfg(flags, registerIOV = False):
    from AthenaPoolCnvSvc.PoolCommonConfig import AthenaPoolCnvSvcCfg
    acc.merge( AthenaPoolCnvSvcCfg(flags,
                                   PoolContainerPrefix = "CollectionTree",
-                                  StorageTechnology = "ROOTTREE",
+                                  StorageTechnology = {"*":"ROOTTREE"},
                                   TopLevelContainerName = "<type>",
                                   SubLevelBranchName = "") )
 

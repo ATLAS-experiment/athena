@@ -30,6 +30,7 @@ StatusCode ITkStripRawDataProviderTool::convert(std::vector<const ROBFragment*>&
   if (vecROBFrags.empty()) return StatusCode::SUCCESS;
   // loop over the ROB fragments
   StatusCode sc{StatusCode::SUCCESS};
+  ATH_MSG_DEBUG("vecROBFrags size: " << vecROBFrags.size());
   for (const ROBFragment* robFrag : vecROBFrags) {
     // get the ID of this ROB/ROD
     sc = m_decoder->fillCollection(*robFrag, rdoIDCont, errs, dataItemsPool, ctx);

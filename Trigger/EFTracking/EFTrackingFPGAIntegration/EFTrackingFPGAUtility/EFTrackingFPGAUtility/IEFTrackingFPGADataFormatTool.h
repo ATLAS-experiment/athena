@@ -1,6 +1,6 @@
 /*
-    Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
-*/
+   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+   */
 
 
 #ifndef EFTRACKINGFPGAINTEGRATION_IEFTRACKINGFPGADATAFORMATTOOL_H
@@ -17,37 +17,41 @@
  * @brief Abstrct interface class for EFTrackingFPGADataFromatTool
  */
 class IEFTrackingFPGADataFormatTool : virtual public IAlgTool {
- public:
-  // Interface ID declaration for Gaudi
-  DeclareInterfaceID(IEFTrackingFPGADataFormatTool, 1, 0);
+    public:
+        // Interface ID declaration for Gaudi
+        DeclareInterfaceID(IEFTrackingFPGADataFormatTool, 1, 0);
 
-  virtual StatusCode convertPixelHitsToFPGADataFormat(
-      const PixelRDO_Container &pixelRDO,
-      std::vector<uint64_t> &encodedData,
-      const std::vector<IdentifierHash>& hashList,
-      const EventContext &ctx) const = 0;
+        virtual StatusCode convertPixelHitsToFPGADataFormat(
+                const PixelRDO_Container &pixelRDO,
+                std::vector<uint64_t> &encodedData,
+                const std::vector<IdentifierHash>& hashList,
+                const EventContext &ctx) const = 0;
 
-  virtual StatusCode convertStripHitsToFPGADataFormat(
-      const SCT_RDO_Container &stripRDO,
-      std::vector<uint64_t> &encodedData,
-      const std::vector<IdentifierHash>& hashList,
-      const EventContext &ctx) const = 0;
+        virtual StatusCode convertStripHitsToFPGADataFormat(
+                const SCT_RDO_Container &stripRDO,
+                std::vector<uint64_t> &encodedData,
+                const std::vector<IdentifierHash>& hashList,
+                const EventContext &ctx) const = 0;
 
-  virtual  StatusCode convertFPGATracksToFPGADataFormat(
-        const FPGATrackSimTrackCollection* tracks,
-        std::vector<uint64_t> &encodedData,
-        const EventContext &ctx
-        ) const = 0;
+        virtual  StatusCode convertFPGATracksToFPGADataFormat(
+                const FPGATrackSimTrackCollection* tracks,
+                std::vector<uint64_t> &encodedData,
+                const EventContext &ctx
+                ) const = 0;
 
-  virtual StatusCode convertFPGASliceToFPGADataFormat(
-  const FPGATrackSimHitCollection*  slices,
-  std::vector<uint64_t> &encodedData,
-  const EventContext &ctx) const =0;
+        virtual StatusCode convertFPGASliceToFPGADataFormat(
+                const FPGATrackSimHitCollection*  slices,
+                bool doPixel, 
+                bool doStrip,
+                std::vector<uint64_t> &encodedData,
+                const EventContext &ctx) const =0;
 
-  virtual StatusCode convertFPGAHitsToFPGADataFormat(
-  const FPGATrackSimHitCollection*  hits,
-  std::vector<uint64_t> &encodedData,
-  const EventContext &ctx) const =0;
+        virtual StatusCode convertFPGAHitsToFPGADataFormat(
+                const FPGATrackSimHitCollection*  allHits,
+                bool doPixel, 
+                bool doStrip,
+                std::vector<uint64_t> &encodedData,
+                const EventContext &ctx) const =0;
 
 };
 

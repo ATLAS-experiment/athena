@@ -5,8 +5,8 @@
 // PACKAGE
 #include "ActsGeometry/ActsDetectorElement.h"
 #include "ActsGeometry/ActsWriteTrackingGeometryTransforms.h"
-#include "ActsGeometryInterfaces/IActsTrackingGeometrySvc.h"
-#include "ActsGeometryInterfaces/ActsGeometryContext.h"
+#include "ActsGeometryInterfaces/ITrackingGeometrySvc.h"
+#include "ActsGeometryInterfaces/GeometryContext.h"
 
 
 // ATHENA
@@ -52,7 +52,7 @@ StatusCode ActsWriteTrackingGeometryTransforms::execute() {
   
   auto trackingGeometry = m_trackingGeometryTool->trackingGeometry();
   ATH_MSG_DEBUG("Retrieved tracking Geometry");
-  const ActsGeometryContext& gctx = m_trackingGeometryTool->getGeometryContext(ctx);
+  const ActsTrk::GeometryContext& gctx = m_trackingGeometryTool->getGeometryContext(ctx);
   ATH_MSG_DEBUG("Retrieved geometry context");
 
   std::stringstream ss;
@@ -118,7 +118,7 @@ StatusCode ActsWriteTrackingGeometryTransforms::execute() {
     
     ATH_MSG_DEBUG(geoID<<" "<<ath_geoid<<" "<<bec<<" "<<ld<<" "<<etam<<" "<<phim<<" "<<side);
     
-    const ActsGeometryContext void_gctx;
+    const ActsTrk::GeometryContext& void_gctx = m_trackingGeometryTool->getNominalGeometryContext();
     if (m_writeFullTransform) {
       // iterate over components of transform
       const auto* p = srf->transform(gctx.context()).data();

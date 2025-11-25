@@ -9,8 +9,7 @@
 #include <regex>
 #include <map>
 #include <iostream>
-
-#include <boost/algorithm/string.hpp>
+#include <cstdint>
 
 class TrigTauInfo {
 public:

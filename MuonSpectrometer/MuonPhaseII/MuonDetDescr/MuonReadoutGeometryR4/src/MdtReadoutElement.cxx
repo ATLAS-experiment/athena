@@ -91,7 +91,9 @@ StatusCode MdtReadoutElement::initElement() {
       }
       ATH_CHECK(insertTransform<MdtReadoutElement>(idHash));
 #ifndef SIMULATIONBASE
-      ATH_CHECK(strawSurfaceFactory(idHash, m_pars.boundFactory->makeBounds<Acts::LineBounds>(innerTubeRadius(), 0.5*tubeLength(idHash))));
+      ATH_CHECK(strawSurfaceFactory(idHash, m_pars.boundFactory->
+                              makeBounds<Acts::LineBounds>(tubeRadius(), 
+                                                           0.5*tubeLength(idHash))));
 #endif
       ///Ensure that all linear transformations are rotations
       GeoTrf::Transform3D tubeFrame = layer.tubeTransform(tubeNumber(idHash));
@@ -139,7 +141,7 @@ StatusCode MdtReadoutElement::initElement() {
   return StatusCode::SUCCESS;
 }
 
-Amg::Vector3D MdtReadoutElement::globalTubePos(const ActsGeometryContext& ctx,
+Amg::Vector3D MdtReadoutElement::globalTubePos(const ActsTrk::GeometryContext& ctx,
                                                const IdentifierHash& hash) const {
    return localToGlobalTrans(ctx, hash).translation();
 }
@@ -147,12 +149,12 @@ Amg::Vector3D MdtReadoutElement::globalTubePos(const ActsGeometryContext& ctx,
 Amg::Vector3D MdtReadoutElement::localTubePos(const IdentifierHash& hash) const {
   return toTubeFrame(hash).translation();
 }
-Amg::Vector3D MdtReadoutElement::readOutPos(const ActsGeometryContext& ctx,
+Amg::Vector3D MdtReadoutElement::readOutPos(const ActsTrk::GeometryContext& ctx,
                                             const IdentifierHash& hash) const {
    return localToGlobalTrans(ctx, hash) * 
           (0.5*activeTubeLength(hash) * m_pars.readoutSide * Amg::Vector3D::UnitZ());
 }
-Amg::Vector3D MdtReadoutElement::highVoltPos(const ActsGeometryContext& ctx,
+Amg::Vector3D MdtReadoutElement::highVoltPos(const ActsTrk::GeometryContext& ctx,
                                              const IdentifierHash& hash) const {
    return localToGlobalTrans(ctx, hash) * 
           (-0.5*activeTubeLength(hash) * m_pars.readoutSide * Amg::Vector3D::UnitZ());
@@ -186,7 +188,7 @@ double MdtReadoutElement::tubeLength(const IdentifierHash& hash) const {
 double MdtReadoutElement::wireLength(const IdentifierHash& hash) const {
    return tubeLength(hash) - 2.*m_pars.endPlugLength;
 }
-double MdtReadoutElement::distanceToReadout(const ActsGeometryContext& ctx,
+double MdtReadoutElement::distanceToReadout(const ActsTrk::GeometryContext& ctx,
                                             const IdentifierHash& measHash,
                                             const Amg::Vector3D& globPoint) const {
     return distanceToReadout(measHash, globalToLocalTrans(ctx, measHash) * globPoint);
@@ -206,12 +208,28 @@ void MdtReadoutElement::setComplementaryReadoutEle(const MdtReadoutElement* othe
       m_reOtherMl = other;
 }
 
+#if defined(FLATTEN)
+    // We compile this package with optimization, even in debug builds; otherwise,
+    // the heavy use of Eigen makes it too slow.  However, from here we may call
+    // to out-of-line Eigen code that is linked from other DSOs; in that case,
+    // it would not be optimized.  Avoid this by forcing all Eigen code
+    // to be inlined here if possible.
+    ATH_FLATTEN
+#endif
 Amg::Transform3D MdtReadoutElement::asBuiltRefFrame() const {
       return alignableTransform()->getDefTransform().inverse()*
              getMaterialGeom()->getParent()->getX() *
              getMaterialGeom()->getX();
 }
 
+#if defined(FLATTEN)
+    // We compile this package with optimization, even in debug builds; otherwise,
+    // the heavy use of Eigen makes it too slow.  However, from here we may call
+    // to out-of-line Eigen code that is linked from other DSOs; in that case,
+    // it would not be optimized.  Avoid this by forcing all Eigen code
+    // to be inlined here if possible.
+    ATH_FLATTEN
+#endif
 Amg::Vector3D MdtReadoutElement::bLineReferencePoint() const {
    /* The fix point is the point that's closest to the interaction point. 
    /  Recall that the readout element origin is expressed in the geometric centre & 
@@ -221,6 +239,14 @@ Amg::Vector3D MdtReadoutElement::bLineReferencePoint() const {
                                             (stationEta() >0 || !isBarrel() ? 1. : -1.)*refEle->moduleHeight() * Amg::Vector3D::UnitZ()));
 }
 #ifndef SIMULATIONBASE    
+#if defined(FLATTEN)
+    // We compile this package with optimization, even in debug builds; otherwise,
+    // the heavy use of Eigen makes it too slow.  However, from here we may call
+    // to out-of-line Eigen code that is linked from other DSOs; in that case,
+    // it would not be optimized.  Avoid this by forcing all Eigen code
+    // to be inlined here if possible.
+    ATH_FLATTEN
+#endif
 Amg::Vector3D MdtReadoutElement::wireEndpointAsBuilt(const MdtAsBuiltPar&  params,
                                                      const IdentifierHash& tubeHash,
                                                      const Amg::Vector3D& wireEnd, 
@@ -401,6 +427,15 @@ Amg::Vector3D MdtReadoutElement::applyBlineCorrections(const BLinePar& bline,
    deformedPos[2] = localTubeEndPoint[2] + dt;
    return deformedPos;
 }
+#endif
+
+#if defined(FLATTEN)
+    // We compile this package with optimization, even in debug builds; otherwise,
+    // the heavy use of Eigen makes it too slow.  However, from here we may call
+    // to out-of-line Eigen code that is linked from other DSOs; in that case,
+    // it would not be optimized.  Avoid this by forcing all Eigen code
+    // to be inlined here if possible.
+    ATH_FLATTEN
 #endif
 Amg::Transform3D MdtReadoutElement::fromIdealToDeformed(const IdentifierHash& tubeHash,
                                                         const ActsTrk::DetectorAlignStore* store) const {

@@ -1,3 +1,5 @@
+//// FPGATrackSimDataPrepAlg.cxx
+
 // Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 #include "FPGATrackSimDataPrepAlg.h"
@@ -51,6 +53,14 @@ StatusCode FPGATrackSimDataPrepAlg::initialize()
         }
     }
 
+    // Dump the configuration to make sure it propagated through right
+    const std::vector<Gaudi::Details::PropertyBase*> props = this->getProperties();
+    for( Gaudi::Details::PropertyBase* prop : props ) {
+        if (prop->ownerTypeName()==this->type()) {      
+        ATH_MSG_DEBUG("Property:\t" << prop->name() << "\t : \t" << prop->toString());
+        }
+    }
+
 
     ATH_CHECK(m_hitSGInputTool.retrieve(EnableTool{!m_hitSGInputTool.empty()}));
 
@@ -65,7 +75,7 @@ StatusCode FPGATrackSimDataPrepAlg::initialize()
 
 
     ATH_MSG_DEBUG("initialize() Instantiating root objects");
-    m_logicEventHeader_precluster = m_writeOutputTool->addInputBranch(m_preClusterBranch.value(), true);
+    m_logicEventHeader_precluster = m_writeOutputTool->addInputBranch(m_preClusterBranch.value(), m_writePreClusterBranch);
     m_logicEventHeader = m_writeOutputTool->addInputBranch(m_postClusterBranch.value(), true);
     
     ATH_MSG_DEBUG("initialize() Setting branch");
@@ -137,6 +147,9 @@ StatusCode FPGATrackSimDataPrepAlg::execute()
             if (eventSelector->selectEvent(m_eventHeader)) {
                 ATH_MSG_DEBUG("Event accepted by: " << eventSelector->name());
                 acceptEvent = true;
+                if ((m_writeRegion>=0)&&(m_writeRegion==eventSelector->getRegionID())) {
+                    m_writeOutputTool->activateEventOutput();
+                }
             }
         }
         if constexpr (enableBenchmark) m_chrono->chronoStop("DataPrep: EventSelection");
@@ -313,7 +326,7 @@ StatusCode FPGATrackSimDataPrepAlg::processInputs(SG::WriteHandle<FPGATrackSimHi
     ATH_MSG_DEBUG("Hits conversion done, #unmapped hists = " << m_hits_miss.size());
 
     // At this stage, copy the logicEventHeader.
-    if(m_writeOutputData) *m_logicEventHeader_precluster = *m_logicEventHeader;
+    if(m_writeOutputData && m_writePreClusterBranch) *m_logicEventHeader_precluster = *m_logicEventHeader;
 
     if constexpr (enableBenchmark) m_chrono->chronoStart("DataPrep: Clustering");
     // Clustering

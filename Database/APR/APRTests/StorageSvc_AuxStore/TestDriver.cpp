@@ -49,7 +49,7 @@ TestDriver::TestDriver(const std::string& filename, pool::DbType storage_type)
    : m_fileName(filename),
      m_storageType(storage_type)
 {
-   pool::DbPrintLvl::setLevel( pool::DbPrintLvl::Info );
+   pool::DbPrintLvl::setLevel( MSG::INFO );
 }
 
 

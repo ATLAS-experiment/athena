@@ -1405,6 +1405,9 @@ class athenaExecutor(scriptExecutor):
         # Very simple: if we get ERROR or worse, we're dead, except if ignoreErrors=True
         if worstError['nLevel'] == stdLogLevels['ERROR'] and ('ignoreErrors' in self.conf.argdict and self.conf.argdict['ignoreErrors'].value is True):
             msg.warning('Found ERRORs in the logfile, but ignoring this as ignoreErrors=True (see jobReport for details)')
+        # Act as if ignoreErrors=True if running in MPI, because we want to be tolerant to the occasional event failure
+        elif worstError['nLevel'] >= stdLogLevels['ERROR'] and (not mpi.mpiShouldValidate()):
+            msg.warning(f'Found {worstError['level']} in the logfile in MPI rank {mpi.getMPIRank()} but moving on to be failure-tolerant')
         elif worstError['nLevel'] >= stdLogLevels['ERROR']:
             self._isValidated = False
             msg.error('Fatal error in athena logfile (level {0})'.format(worstError['level']))
@@ -1553,6 +1556,7 @@ class athenaExecutor(scriptExecutor):
                         self._cmd.append('--nprocs=%s' % str(self._athenaMP))
 
         # Add topoptions
+        # Note that _writeAthenaWrapper removes this from the end of _cmd when preparing the options for VTuneCommand, so assumes it comes last.
         if self._skeleton or self._skeletonCA:
             self._cmd += self._topOptionsFiles
             msg.info('Updated script arguments with topoptions: %s', self._cmd)
@@ -1701,13 +1705,20 @@ source ${ATLAS_LOCAL_ROOT_BASE}/user/atlasLocalSetup.sh"""
                         extraOptionsList = self.conf._argdict['vtuneExtraOpts'].value
                     else:
                         extraOptionsList = None
+
+                    # replace the _topOptionsFiles from the Athena command with the AthenaSerialisedConfigurationFile.
+                    if (self._skeleton or self._skeletonCA) and len(self._topOptionsFiles) > 0:
+                        AthenaCommand = self._cmd[:-len(self._topOptionsFiles)]
+                    else:
+                        AthenaCommand = self._cmd
+                    AthenaCommand.append(AthenaSerialisedConfigurationFile)
+
                     msg.debug("requested VTune command basic options: {options}".format(options = defaultOptions))
                     msg.debug("requested VTune command extra options: {options}".format(options = extraOptionsList))
                     command = VTuneCommand(
                         defaultOptions = defaultOptions,
                         extraOptionsList = extraOptionsList,
-                        AthenaSerialisedConfigurationFile = \
-                            AthenaSerialisedConfigurationFile
+                        AthenaCommand = AthenaCommand
                     )
                     msg.debug("VTune command: {command}".format(command = command))
                     print(command, file=wrapper)

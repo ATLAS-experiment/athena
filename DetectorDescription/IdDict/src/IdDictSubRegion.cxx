@@ -17,8 +17,10 @@ IdDictSubRegion::IdDictSubRegion (const std::string& name,
 {
 }
 
-IdDictSubRegion::~IdDictSubRegion () {
-}
+IdDictSubRegion::~IdDictSubRegion () = default;
+
+IdDictSubRegion::IdDictSubRegion (IdDictSubRegion&&) = default;
+IdDictSubRegion& IdDictSubRegion::operator= (IdDictSubRegion&&) = default;
 
 void
 IdDictSubRegion::generate_implementation(const IdDictMgr& /*idd*/,
@@ -40,17 +42,14 @@ IdDictSubRegion::generate_implementation(const IdDictMgr& idd,
   // m_generated_implementation because a subregion is a "reference"
   // and must be looped over to fully implement a region.
 
-  std::vector<IdDictRegionEntry*>::iterator it;
-
-  for (it = m_entries.begin(); it != m_entries.end(); ++it) {
-    IdDictRegionEntry* entry = *it;
+  for (auto& entry : m_entries) {
     entry->generate_implementation(idd, dictionary, region, tag);
   }
 }
 
 void
 IdDictSubRegion::reset_implementation() {
-  for (auto* entry:m_entries) {
+  for (auto& entry : m_entries) {
     entry->reset_implementation();
   }
 }

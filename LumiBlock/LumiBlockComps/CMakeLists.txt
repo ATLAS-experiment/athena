@@ -24,7 +24,7 @@ atlas_add_library( LumiBlockCompsLib
    PRIVATE_INCLUDE_DIRS ${COOL_INCLUDE_DIRS}
    LINK_LIBRARIES ${CORAL_LIBRARIES} AthenaBaseComps
    AthenaKernel xAODLuminosity GaudiKernel StoreGateLib AthenaPoolUtilities ${extra_libs}
-   PRIVATE_LINK_LIBRARIES ${COOL_LIBRARIES} xAODRootAccess )
+   PRIVATE_LINK_LIBRARIES ${COOL_LIBRARIES} xAODRootAccess PersistentDataModel )
 
 atlas_add_component( LumiBlockComps
    src/components/*.cxx

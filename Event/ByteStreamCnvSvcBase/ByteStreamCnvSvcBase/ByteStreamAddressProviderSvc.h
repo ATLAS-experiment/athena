@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef BYTESTREAMCNVSVCBASE_BYTESTREAMADDRESSPROVIDERSVC_H
@@ -38,15 +38,14 @@ public:
 
 private:
    // type and name of the objects to create the address for.
-   Gaudi::Property<std::vector<std::string> > m_typeNames{this,"TypeNames",{},\
-       "Type and Name of objects to create the address for","OrderedSet<std::string>"};
-
+   Gaudi::Property<std::vector<std::string>> m_typeNames{this, "TypeNames", {},
+       "Type and Name of objects to create the address for", "OrderedSet<std::string>"};
 
    ServiceHandle<IClassIDSvc> m_clidSvc;
 
-   std::map<unsigned int, std::set<std::string> > m_clidKey;
+   std::map<unsigned int, std::set<std::string>> m_clidKey;
 
-   int m_storeID;
+   Gaudi::Property<int> m_storeID{this, "StoreID", StoreID::EVENT_STORE, "Store ID"};
 };
 
 #endif

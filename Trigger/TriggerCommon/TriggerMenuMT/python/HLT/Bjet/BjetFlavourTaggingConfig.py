@@ -315,7 +315,7 @@ def OnlineIpAugmenterCfg(
     ca = ComponentAccumulator()
 
     decnames = {
-        n:n.replace('beam',f'EventInfo.{beamSpotPrefix}Beam').replace('spotSigma','Pos').replace('spotCovariance','PosSigma')
+        n:n.replace('beam',f'{beamSpotPrefix}Beam').replace('spotSigma','Pos').replace('spotCovariance','PosSigma')
         for n in [
             'beamspotSigmaX','beamspotSigmaY','beamspotSigmaZ','beamspotCovarianceXY',
         ]

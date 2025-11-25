@@ -1068,9 +1068,7 @@ TauJetsAuxDyn.ClustersMeanEMProbability
 TauJetsAuxDyn.ClustersMeanFirstEngDens
 TauJetsAuxDyn.ClustersMeanPresamplerFrac
 TauJetsAuxDyn.ClustersMeanSecondLambda
-TauJetsAuxDyn.EMFRACTIONATEMSCALE_MOVEE3
 TauJetsAuxDyn.EMFracFixed
-TauJetsAuxDyn.GhostMuonSegmentCount
 TauJetsAuxDyn.LeadClusterFrac
 TauJetsAuxDyn.NNDecayMode
 TauJetsAuxDyn.NNDecayModeProb_1p0n
@@ -1080,11 +1078,8 @@ TauJetsAuxDyn.NNDecayModeProb_3p0n
 TauJetsAuxDyn.NNDecayModeProb_3pXn
 TauJetsAuxDyn.PFOEngRelDiff
 TauJetsAuxDyn.PanTau_DecayModeExtended
-TauJetsAuxDyn.TAU_SEEDTRK_SECMAXSTRIPETOVERPT
 TauJetsAuxDyn.UpsilonCluster
 TauJetsAuxDyn.chargedFELinks
-TauJetsAuxDyn.etHotShotDR1
-TauJetsAuxDyn.etHotShotDR1OverPtLeadTrk
 TauJetsAuxDyn.etHotShotWin
 TauJetsAuxDyn.etHotShotWinOverPtLeadTrk
 TauJetsAuxDyn.etaCombined

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -20,7 +20,8 @@
 #include "L1TopoSimulationUtils/L1TopoDataTypes.h"
 #include "L1TopoSimulationUtils/Kinematics.h"
 
-#include <boost/numeric/conversion/cast.hpp>
+#include <limits>
+#include <stdexcept>
 
 #include <iostream>
 #include <cassert>
@@ -41,7 +42,7 @@ void test1()
 
     for(double ieta : {10*2.30, 10*2.35, 10*2.40}) {
         cluster_var.setEta(ieta);
-        auto cosh_val = TSU::Hyperbolic::Coshleg.at(static_cast<int>(abs(cluster_fix0.eta() - cluster_var.eta())));
+        const auto & cosh_val = TSU::Hyperbolic::Coshleg.at(static_cast<int>(abs(cluster_fix0.eta() - cluster_var.eta())));
         cout<<"delta eta: "
             <<" abs("<<cluster_fix0.eta()<<" - "<<cluster_var.eta()<<")"
             <<" = "<<abs(cluster_fix0.eta() - cluster_var.eta())
@@ -65,6 +66,7 @@ void test2()
 	const bool large = corrfactor>+0.5;
 	const bool small = corrfactor<-0.5;
 	if(small or large) {
+	  // coverity[dead_error_line]
 	  cout<<" et "<<et<<" ["<<iet<<"], "
 	      <<" eta "<<eta<<" ["<<ieta<<"] : "
 	      <<corrfactor<<(large ? " >>>" :
@@ -124,7 +126,10 @@ int floorSqrt(unsigned int x)
         } else // If mid*mid is greater than x
             end = mid - 1;
     }
-    return boost::numeric_cast<int>(ans);
+    if (ans > static_cast<unsigned long int>(std::numeric_limits<int>::max())) {
+      throw std::out_of_range("Value too large for int");
+    }
+    return static_cast<int>(ans);
 }
 int test4_compare(int u, int v){
     int bw_result = TSU::Kinematics::quadraticSumBW(u,v);
@@ -172,7 +177,7 @@ int test4()
 }
 
 
-
+// coverity[root_function]
 int main()
 {  
   test1();

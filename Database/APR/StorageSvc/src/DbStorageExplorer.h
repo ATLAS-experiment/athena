@@ -1,13 +1,13 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-// $Header: /cvs/PF/pool/StorageSvc/src/DbStorageExplorer.h,v 1.16 2010/05/11 00:16:07 frankb Exp $
 #ifndef POOL_DBSTORAGEEXPLORER_H
 #define POOL_DBSTORAGEEXPLORER_H
 
 // Framework include files
 #include "StorageSvc/IStorageExplorer.h"
+#include "AthenaBaseComps/AthMessaging.h"
 
 /*
  *  pool namespace declaration
@@ -32,7 +32,7 @@ namespace pool  {
     * @author  Markus Frank
     * @version 1.0
     */
-  class DbStorageExplorer  : virtual public IStorageExplorer
+  class DbStorageExplorer  : virtual public IStorageExplorer, public AthMessaging
   {
     typedef std::vector<const Token*> TokenVec;
 
@@ -145,16 +145,6 @@ namespace pool  {
       */
     virtual DbStatus disconnect(  FileDescriptor&  refDB);
 
-    /** Access the size of the database: May be undefined for some technologies
-      *
-      * @param    refDB    [IN] Descriptor of the Database access. 
-      *                         This handle was retrieved when connecting 
-      *                         to the logical Database.
-      *
-      * @return                 Database size. std::string::npos in case of failure.
-      */
-    virtual long long int databaseSize(  FileDescriptor&     refDB)  const;
-
     /// Access the containers in a given database.
     /** 
       * @param   refDB     [IN] Reference to Database descriptor 
@@ -165,37 +155,6 @@ namespace pool  {
     virtual DbStatus containers(  FileDescriptor&       refDB,
                                   TokenVec&             conts,
                                   bool                  intern);
-
-    /// Access the container level associations between objects.
-    /** 
-      * @param   refDB     [IN] Reference to Database descriptor 
-      * @param   assocs   [OUT] Vector with tokens to used containers.
-      * @return                 DbStatus code indicating success or failure.
-      */
-    virtual DbStatus associations(FileDescriptor&       refDB,
-                                  TokenVec&             assocs);
-
-    /// Access Shapes known to the database.
-    /** 
-      * @param   refDB     [IN] Reference to Database descriptor 
-      * @param   shapes   [OUT] Vector with shapes to used within the database.
-      * @return                 DbStatus code indicating success or failure.
-      */
-    virtual DbStatus shapes(      FileDescriptor&       refDB,
-                                  std::vector<ShapeH>&  shapes);
-
-    /// Add a persistent parameter to the database
-    /** Add a user specified parameter to the database.
-      * The database must be open in CREATE or UPDATE mode.
-      *
-      *  @param   refDB     [IN] Reference to Database descriptor 
-      *  @param   nam       [IN] Name of the user parameter to be added.
-      *  @param   val       [IN] Value of the user parameter to be added.
-      *  @return                 DbStatus code indicating success or failure.
-      */
-    virtual DbStatus addDbParam(  FileDescriptor& refDB,
-                                  const std::string& nam, 
-                                  const std::string& val);
 
     /// Retrieve existing parameter by name
     /** Retrieve single user specified parameter from the database.
@@ -208,16 +167,6 @@ namespace pool  {
     virtual DbStatus dbParam(     FileDescriptor& refDB,
                                   const std::string& nam, 
                                   std::string& val);
-
-    /// Retrieve all parameters
-    /** Retrieve all user parameters from the database.
-      *
-      *  @param   refDB     [IN] Reference to Database descriptor 
-      *  @param   vals     [OUT] Vector containing all parameter nam/value pairs.
-      *  @return                 DbStatus code indicating success or failure.
-      */
-    virtual DbStatus dbParams(    FileDescriptor& refDB,
-                                  Parameters& vals);
 
     /// Access options for a given database domain.
     /** Domain options are global options, which refer to the

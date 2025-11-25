@@ -203,16 +203,16 @@ namespace ActsTrk {
   {
     ATH_MSG_DEBUG( "Checking truth for seeds ..." );
     for (std::size_t i(0); i<seeds.size(); ++i) {
-      const ActsTrk::Seed* seed = seeds.at(i);
+      ActsTrk::Seed seed = seeds.at(i);
 
       int nMatches = 0;
       int nMeasurements = 0;
       std::unordered_map<std::size_t, int> particleIds {};
 
-      std::size_t seedType = to_underlying(deduceSeedType(*seed));
+      std::size_t seedType = to_underlying(deduceSeedType(seed));
       ++stat[to_underlying(EStatSeeds::kNTotal)][seedType];
 
-      const auto& sps = seed->sp();
+      const auto& sps = seed.sp();
       for ( const xAOD::SpacePoint* sp : sps ) {
 	const auto& measurements = sp->measurements();
 	for (const xAOD::UncalibratedMeasurement* meas : measurements ) {

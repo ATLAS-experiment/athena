@@ -1,0 +1,34 @@
+{
+    "TrkAnaEF" : {
+        "enabled" : true,
+        "TestType"  : "EFTrigger",
+        "RefType"   : "Truth",
+        "TrigTrkKey": "InDetTrackParticles",
+        "MatchingType"  : "TruthMatch",
+	"SelectTruthObject" : "isFromTau",
+	"truthMinTauPt" : 15000.0,
+	"truthMaxTauPt" : 99999.0
+    },
+    "TrkAnaOffl" : {
+        "enabled" : true,
+        "TestType"  : "Offline",
+        "RefType"   : "Truth",
+        "MatchingType"  : "TruthMatch",
+	"SelectTruthObject" : "isFromTau",
+	"truthMinTauPt" : 15000.0,
+	"truthMaxTauPt" : 99999.0
+    },
+    "TrkAnaDoubleRatio" : {
+        "enabled" : true,
+        "TestType"  : "EFTrigger",
+        "RefType"   : "Offline",
+        "TrigTrkKey": "InDetTrackParticles",
+        "MatchingType"  : "EFTruthMatch",
+	"SelectTruthObject" : "isFromTau",
+        "SelectOfflineObject" : "Truth",
+        "plotTrackParameters" : false,
+	"truthMinTauPt" : 15000.0,
+	"truthMaxTauPt" : 99999.0
+    }
+}
+                             

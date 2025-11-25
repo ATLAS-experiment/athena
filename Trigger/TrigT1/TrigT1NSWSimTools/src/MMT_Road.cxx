@@ -2,7 +2,7 @@
  *   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
  */
 
-#include "TrigT1NSWSimTools/MMT_Road.h"
+#include "MMT_Road.h"
 
 MMT_Road::MMT_Road(const char sector, const int roadSize,
                    const int UpX, const int DownX, const int UpUV, const int DownUV,

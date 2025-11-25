@@ -28,7 +28,7 @@ namespace DerivationFramework {
 
       virtual StatusCode initialize();
       
-      virtual StatusCode addBranches() const;
+      virtual StatusCode addBranches(const EventContext& ctx) const;
       
     private:
       /** tools

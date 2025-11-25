@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( LArCellRec )
@@ -14,7 +14,8 @@ atlas_add_component( LArCellRec
                      LINK_LIBRARIES ${CLHEP_LIBRARIES} CaloConditions CaloDetDescrLib CaloEvent CaloIdentifier CaloInterfaceLib
 		             CaloUtilsLib AthAllocators AthenaBaseComps AthenaKernel StoreGateLib CxxUtils Identifier GaudiKernel LArIdentifier
 		             LArRawEvent LArRecConditions AthenaPoolUtilities xAODEventInfo
-		             LArRecEvent LArCablingLib LArElecCalib )
+		             LArRecEvent LArCablingLib LArElecCalib
+                             PersistentDataModel )
 
 # Install files from the package:
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )

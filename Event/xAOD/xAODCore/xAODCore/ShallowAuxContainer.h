@@ -1,7 +1,7 @@
 // Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // $Id: ShallowAuxContainer.h 793737 2017-01-24 20:11:10Z ssnyder $
@@ -14,9 +14,7 @@
 #include "AthContainersInterfaces/IAuxStoreIO.h"
 #include "AthContainersInterfaces/IAuxStoreHolder.h"
 #include "AthContainers/tools/threading.h"
-#ifndef XAOD_STANDALONE
-#   include "AthenaKernel/ILockable.h"
-#endif // not XAOD_STANDALONE
+#include "SGCore/ILockable.h"
 #include "CxxUtils/checker_macros.h"
 
 // Local include(s):
@@ -47,10 +45,8 @@ namespace xAOD {
    ///
    class ShallowAuxContainer : public SG::IAuxStore,
                                public SG::IAuxStoreIO,
-                               public SG::IAuxStoreHolder
-#ifndef XAOD_STANDALONE
-                          , public ILockable
-#endif // not XAOD_STANDALONE
+                               public SG::IAuxStoreHolder,
+                               public ILockable
    {
 
    public:
@@ -145,7 +141,7 @@ namespace xAOD {
       virtual bool insertMove (size_t pos,
                                IAuxStore& other,
                                const SG::auxid_set_t& ignore) override;
- 
+
       /// @}
 
       /// @name Functions implementing the SG::IAuxStoreIO interface

@@ -1,3 +1,6 @@
+/*
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+*/
 #include <boost/tokenizer.hpp>
 #include <cmath>
 #include <string>
@@ -13,6 +16,7 @@
 
 
 //Use spacepoints from a real event, run triplet making outside Athena
+//coverity[root_function]
 int main()
 {
   typedef boost::tokenizer<boost::escaped_list_separator<char>> tokenizer;
@@ -221,7 +225,7 @@ int main()
   pVL.at(31).m_refCoord = 2740.2;
   pVL.at(31).m_minBound = 438.426;
   pVL.at(31).m_maxBound = 562.272;
-  tcs.m_layerGeometry = pVL;
+  tcs.m_layerGeometry = std::move(pVL);
 
   std::vector<int> times;
   for (unsigned int i = 0; i < 10; ++i) {

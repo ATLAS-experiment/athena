@@ -402,7 +402,7 @@ void FPGATrackSimGenScanMonitoring::parseTruthInfo(
 
   // a closure test
   FPGATrackSimTrackPars recovered = bindesc->parSetToTrackPars(m_truthparset);
-  ATH_MSG_DEBUG("parset:" << m_truthparset << " " << m_truthpars
+  ATH_MSG_DEBUG("truth parset:" << m_truthparset << " " << m_truthpars
                           << " ?= " << recovered << " closure:"
                           << " " << recovered[FPGATrackSimTrackPars::IHIP] - m_truthpars[FPGATrackSimTrackPars::IHIP]
                           << " " << recovered[FPGATrackSimTrackPars::IPHI] - m_truthpars[FPGATrackSimTrackPars::IPHI]
@@ -413,7 +413,7 @@ void FPGATrackSimGenScanMonitoring::parseTruthInfo(
   // print if there are multiple tracks for debugging single track MC
   if (m_truthtracks->size() > 1) {
     for (unsigned i = 0; i < m_truthtracks->size(); i++) {
-      ATH_MSG_INFO("Multiple truth" << i << " of " << m_truthtracks->size()
+      ATH_MSG_DEBUG("Multiple truth" << i << " of " << m_truthtracks->size()
                                     << " " << (*m_truthtracks)[i].getPars());
     }
   }

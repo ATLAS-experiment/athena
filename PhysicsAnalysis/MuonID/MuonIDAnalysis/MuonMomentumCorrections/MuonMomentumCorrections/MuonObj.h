@@ -9,6 +9,21 @@
 #include "MuonMomentumCorrections/EnumDef.h"
 #include "MuonAnalysisInterfaces/IMuonSelectionTool.h"
 
+#include "ColumnarCore/ColumnAccessor.h"
+#include "ColumnarCore/ColumnarTool.h"
+#include "ColumnarCore/LinkColumn.h"
+#include <ColumnarCore/ObjectColumn.h>
+#include "ColumnarCore/OptObjectId.h"
+#include "ColumnarEventInfo/EventInfoHelpers.h"
+#include "ColumnarMuon/MuonDef.h"
+#include "ColumnarMuon/MuonTrackHelpers.h"
+#include "ColumnarTracking/TrackHelpers.h"
+#include "ColumnarVariant/VariantAccessor.h"
+#include "ColumnarVariant/VariantDef.h"
+#include "ColumnarVariant/VariantLinkColumn.h"
+
+#include <optional>
+
 namespace
 {
     static constexpr double GeVtoMeV = 1e+3;
@@ -17,45 +32,83 @@ namespace
 
 
 namespace MCP {
+
+    /// Accessors for the MuonCalibTool
+    struct MuonCalibToolAccessors : public columnar::ColumnarTool<> {
+        MuonCalibToolAccessors(columnar::ColumnarTool<>& base) : columnar::ColumnarTool<>(&base) {}
+        columnar::EventInfoAccessor<columnar::ObjectColumn> m_eventInfoCol {*this, "EventInfo"};
+        columnar::MuonAccessor<columnar::ObjectColumn> m_muons {*this, "Muons"};
+        columnar::Track0Accessor<columnar::ObjectColumn> m_tracksID {*this, "InDetTrackParticles"};
+        columnar::Track1Accessor<columnar::ObjectColumn> m_tracksCB {*this, "CombinedMuonTrackParticles"};
+        columnar::Track2Accessor<columnar::ObjectColumn> m_tracksME {*this, "ExtrapolatedMuonTrackParticles"};
+        columnar::Track3Accessor<columnar::ObjectColumn> m_tracksFID {*this, "InDetForwardTrackParticles"};
+
+        columnar::EventInfoHelpers::EventTypeAccessor<> eventTypeAcc {*this};
+        columnar::EventInfoAccessor<uint32_t> runNumberAcc {*this, "runNumber"};
+        columnar::EventInfoAccessor<uint64_t> eventNumberAcc {*this, "eventNumber"};
+        columnar::EventInfoAccessor<unsigned int> acc_rnd{*this, "RandomRunNumber"};
+
+        columnar::MuonAccessor<columnar::RetypeColumn<double,float>> ptAcc {*this, "pt"};
+        columnar::MuonDecorator<float> ptOutDec {*this, "ptOut", {.replacesColumn = "pt"}};
+        columnar::MuonAccessor<columnar::RetypeColumn<double,float>> etaAcc {*this, "eta"};
+        columnar::MuonAccessor<columnar::RetypeColumn<double,float>> phiAcc {*this, "phi"};
+        columnar::MuonAccessor<float> chargeAcc {*this, "charge"};
+        columnar::MuonDecorator<float> chargeOutDec {*this, "chargeOut", {.replacesColumn = "charge"}};
+        columnar::MuonAccessor<columnar::RetypeColumn<xAOD::Muon::MuonType,std::uint16_t>> muonTypeAcc {*this, "muonType"};
+        columnar::MuonAccessor<columnar::RetypeColumn<xAOD::Muon::Author,std::uint16_t>> authorAcc {*this, "author"};
+        columnar::MuonDecorator<float> dec_idPt{*this, "InnerDetectorPt"};
+        columnar::MuonDecorator<float> dec_mePt{*this, "MuonSpectrometerPt"};
+        columnar::MuonDecorator<float> dec_idCharge{*this, "InnerDetectorCharge"};
+        columnar::MuonDecorator<float> dec_meCharge{*this, "MuonSpectrometerCharge"};
+        columnar::MuonAccessor<columnar::OptTrack1Id> combinedTrackParticleLinkAcc{*this, "combinedTrackParticleLink"};
+        columnar::MuonAccessor<columnar::ObjectLink<columnar::MuonTrackDef>> inDetTrackParticleLinkAcc{*this, "inDetTrackParticleLink"};
+        columnar::MuonAccessor<columnar::OptTrack2Id> extrapolatedMuonSpectrometerTrackParticleLinkAcc{*this, "extrapolatedMuonSpectrometerTrackParticleLink"};
+
+        columnar::TrackHelpers::ChargeAccessor<columnar::MuonTrackDef> trkChargeAcc {*this};
+        columnar::TrackHelpers::TrackMomentumAccessors<columnar::MuonTrackDef> trkMomentumAcc {*this};
+        columnar::TrackHelpers::DefiningParametersAccessor<columnar::MuonTrackDef> trkDefiningParametersAcc {*this};
+        columnar::TrackHelpers::DefiningParametersCovAccessor<columnar::MuonTrackDef> trkDefiningParametersCovAcc {*this};
+    };
+
    /// Basic object to cache all relevant information from the track
    struct TrackCalibObj{
         TrackCalibObj() = default;
-        TrackCalibObj(const xAOD::TrackParticle* track, TrackType t, int charge,
+        TrackCalibObj(const MuonCalibToolAccessors& acc, columnar::OptObjectId<columnar::MuonTrackDef> track, TrackType t, int charge,
                       DataYear year, bool isData)
             : type{t},
-              is_valid{track != nullptr},
-              uncalib_pt{(track != nullptr) ? track->pt() * MeVtoGeV : 0},
+              is_valid{track.has_value()},
+              uncalib_pt{(track.has_value()) ? acc.trkMomentumAcc.pt(track.value(),ParticleConstants::muonMassInMeV) * MeVtoGeV : 0},
               calib_pt{uncalib_pt},
-              eta{(track != nullptr) ? track->eta() : FLT_MAX},
-              phi{(track != nullptr) ? track->phi() : FLT_MAX},
-              mass{(track != nullptr) ? track->m() : 0},
+              eta{(track.has_value()) ? acc.trkMomentumAcc.eta(track.value(),ParticleConstants::muonMassInMeV) : FLT_MAX},
+              phi{(track.has_value()) ? acc.trkMomentumAcc.phi(track.value(),ParticleConstants::muonMassInMeV) : FLT_MAX},
+              mass{(track.has_value()) ? ParticleConstants::muonMassInMeV : 0},
               uncalib_charge{charge},
               calib_charge{uncalib_charge},
               year{year},
               isData{isData},
-              pars{(track != nullptr) ? track->definingParameters()
+              pars{(track.has_value()) ? acc.trkDefiningParametersAcc(track.value())
                                       : AmgVector(5)::Zero()},
-              covariance{(track != nullptr)
-                             ? track->definingParametersCovMatrix()
+              covariance{(track.has_value())
+                             ? acc.trkDefiningParametersCovAcc(track.value())
                              : AmgSymMatrix(5)::Zero()} {}
 
-        TrackCalibObj(const xAOD::TrackParticle* track, TrackType t, int charge,
+        TrackCalibObj(const MuonCalibToolAccessors& acc, columnar::OptObjectId<columnar::MuonTrackDef> track, TrackType t, int charge,
                       double eta, double phi, DataYear year, bool isData)
             : type{t},
-              is_valid{track != nullptr},
-              uncalib_pt{(track != nullptr) ? track->pt() * MeVtoGeV : 0},
+              is_valid{track.has_value()},
+              uncalib_pt{(track.has_value()) ? acc.trkMomentumAcc.pt(track.value(),ParticleConstants::muonMassInMeV) * MeVtoGeV : 0},
               calib_pt{uncalib_pt},
               eta{eta},
               phi{phi},
-              mass{(track != nullptr) ? track->m() : 0},
+              mass{(track.has_value()) ? ParticleConstants::muonMassInMeV : 0},
               uncalib_charge{charge},
               calib_charge{uncalib_charge},
               year{year},
               isData{isData},
-              pars{(track != nullptr) ? track->definingParameters()
+              pars{(track.has_value()) ? acc.trkDefiningParametersAcc(track.value())
                                       : AmgVector(5)()},
-              covariance{(track != nullptr)
-                             ? track->definingParametersCovMatrix()
+              covariance{(track.has_value())
+                             ? acc.trkDefiningParametersCovAcc(track.value())
                              : AmgSymMatrix(5)()} {}
 
         TrackCalibObj(TrackType t, int charge, double pt, double eta, double phi, double mass, AmgVector(5) pars, AmgSymMatrix(5) cov, DataYear year, bool isData):
@@ -138,9 +191,11 @@ namespace MCP {
         double rnd_g4{0.};
         double rnd_g_highPt{0.};
 
-        
+        // the resolution category as given by the muon selection tool.
+        // this isn't always read or used, so it is an `std::optional`
+        // to generate an error if it is used without being set.
         using ResolutionCategory = CP::IMuonSelectionTool::ResolutionCategory;
-        ResolutionCategory raw_mst_category{ResolutionCategory::unclassified};
+        std::optional<ResolutionCategory> raw_mst_category;
 
         // Expected resolution number for statistical combination
         double expectedResID{0.};

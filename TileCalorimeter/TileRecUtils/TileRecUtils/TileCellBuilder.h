@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TILERECUTILS_TILECELLBUILDER_H
@@ -160,7 +160,7 @@ private:
                                                              "Output Tile E4 prime container key"};
 
     SG::WriteDecorHandleKey<xAOD::EventInfo> m_EventInfoTileStatusKey{this, "EventInfoTileStatus",
-                                                                      "EventInfo.TileStatus",
+                                                                      m_eventInfoKey, "TileStatus",
                                                                       "Dummy decoration key to aid scheduling"};
 
 

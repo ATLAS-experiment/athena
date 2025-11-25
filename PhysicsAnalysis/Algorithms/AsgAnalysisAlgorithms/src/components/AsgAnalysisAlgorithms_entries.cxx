@@ -30,6 +30,7 @@
 #include <AsgAnalysisAlgorithms/CopyNominalSelectionAlg.h>
 #include <AsgAnalysisAlgorithms/EventCutFlowHistAlg.h>
 #include <AsgAnalysisAlgorithms/EventDecoratorAlg.h>
+#include <AsgAnalysisAlgorithms/NJetDecoratorAlg.h>
 #include <AsgAnalysisAlgorithms/EventFlagSelectionAlg.h>
 #include <AsgAnalysisAlgorithms/EventSelectionByObjectFlagAlg.h>
 #include <AsgAnalysisAlgorithms/EventStatusSelectionAlg.h>
@@ -50,6 +51,7 @@
 #include <AsgAnalysisAlgorithms/TreeFillerAlg.h>
 #include <AsgAnalysisAlgorithms/TreeMakerAlg.h>
 #include <AsgAnalysisAlgorithms/VGammaORAlg.h>
+#include <AsgAnalysisAlgorithms/MetadataHistAlg.h>
 
 // Project include(s).
 #include "AsgTools/AsgComponentFactories.h"
@@ -80,6 +82,7 @@ DECLARE_COMPONENT (CP::BootstrapGeneratorAlg)
 DECLARE_COMPONENT (CP::CopyNominalSelectionAlg)
 DECLARE_COMPONENT (CP::EventCutFlowHistAlg)
 DECLARE_COMPONENT (CP::EventDecoratorAlg)
+DECLARE_COMPONENT (CP::NJetDecoratorAlg)
 DECLARE_COMPONENT (CP::EventFlagSelectionAlg)
 DECLARE_COMPONENT (CP::EventSelectionByObjectFlagAlg)
 DECLARE_COMPONENT (CP::EventStatusSelectionAlg)
@@ -106,3 +109,4 @@ DECLARE_COMPONENT (CP::SystPhotonUnioniserAlg)
 DECLARE_COMPONENT (CP::SystMuonUnioniserAlg)
 DECLARE_COMPONENT (CP::SystTauUnioniserAlg)
 DECLARE_COMPONENT (CP::SystDiTauUnioniserAlg)
+DECLARE_COMPONENT (CP::MetadataHistAlg)

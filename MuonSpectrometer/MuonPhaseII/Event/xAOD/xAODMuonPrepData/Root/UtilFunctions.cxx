@@ -21,7 +21,8 @@
 #include "xAODMuonPrepData/TgcStrip.h"
 #include "xAODMuonPrepData/MMCluster.h"
 #include "xAODMuonPrepData/sTgcMeasurement.h"
-#include "TrkEventPrimitives/ParamDefs.h"
+#include "xAODMuonPrepData/CombinedMuonStrip.h" 
+
 
 namespace {
     template <class MeasType> const Acts::Surface& fetchSurface(const xAOD::UncalibratedMeasurement* meas) {
@@ -39,16 +40,22 @@ namespace {
 namespace xAOD{
     const MuonGMR4::MuonReadoutElement* muonReadoutElement(const UncalibratedMeasurement* meas){
          if (!meas) return nullptr;
+        /// Composite space point EDM
+        if (meas->numDimensions() == 0u) {
+           const auto* comp = static_cast<const CombinedMuonStrip*>(meas);
+           return muonReadoutElement(comp->primaryStrip());
+        }
         switch (meas->type()) {
-            case UncalibMeasType::MdtDriftCircleType:{
+            using enum UncalibMeasType;
+            case MdtDriftCircleType: {
                 return static_cast<const MdtDriftCircle*>(meas)->readoutElement();
-            } case UncalibMeasType::RpcStripType: {
+            } case RpcStripType: {
                 return static_cast<const RpcMeasurement*>(meas)->readoutElement();
-            } case UncalibMeasType::TgcStripType:{
+            } case TgcStripType: {
                 return static_cast<const TgcStrip*>(meas)->readoutElement();
-            } case UncalibMeasType::sTgcStripType:{
+            } case sTgcStripType: {
                 return static_cast<const sTgcMeasurement*>(meas)->readoutElement();
-            } case UncalibMeasType::MMClusterType:{
+            } case MMClusterType: {
                 return static_cast<const MMCluster*>(meas)->readoutElement();
             } default:
 #ifndef NDEBUG
@@ -58,20 +65,26 @@ namespace xAOD{
         }
         return nullptr;
     }
-    const Acts::Surface& muonSurface(const xAOD::UncalibratedMeasurement* meas) {
+    const Acts::Surface& muonSurface(const UncalibratedMeasurement* meas) {
         if (!meas) {
             THROW_EXCEPTION("No measurement passed");
         }
+        /// Composite space point EDM
+        if (meas->numDimensions() == 0u) {
+           const auto* comp = static_cast<const CombinedMuonStrip*>(meas);
+           return muonSurface(comp->primaryStrip());
+        }
         switch (meas->type()) {
-            case UncalibMeasType::MdtDriftCircleType:{
+            using enum UncalibMeasType;
+            case MdtDriftCircleType: {
                 return fetchSurface<MdtDriftCircle>(meas);
-            } case UncalibMeasType::RpcStripType: {
+            } case RpcStripType: {
                 return fetchSurface<RpcMeasurement>(meas);
-            } case UncalibMeasType::TgcStripType:{
+            } case TgcStripType:{
                 return fetchSurface<TgcStrip>(meas);
-            } case UncalibMeasType::sTgcStripType:{
+            } case sTgcStripType: {
                 return fetchSurface<sTgcMeasurement>(meas);
-            } case UncalibMeasType::MMClusterType:{
+            } case MMClusterType:{
                 return fetchSurface<MMCluster>(meas);
             } default:
                 THROW_EXCEPTION("Unsupported measurement given "<<typeid(*meas).name());
@@ -84,24 +97,60 @@ namespace xAOD{
         if (!meas) {
             return detId;
         }
+        /// Composite space point EDM
+        if (meas->numDimensions() == 0u) {
+           const auto* comp = static_cast<const CombinedMuonStrip*>(meas);
+           return identify(comp->primaryStrip());
+        }
         switch (meas->type()) {
-            case UncalibMeasType::MdtDriftCircleType :{
+            using enum UncalibMeasType;
+            case MdtDriftCircleType: {
                 return static_cast<const MdtDriftCircle*>(meas)->identify();
-            } case UncalibMeasType::RpcStripType: {
+            } case RpcStripType: {
                 return static_cast<const RpcMeasurement*>(meas)->identify();
-            } case UncalibMeasType::TgcStripType: {
+            } case TgcStripType: {
                 return static_cast<const TgcStrip*>(meas)->identify();
-            } case UncalibMeasType::MMClusterType: {
+            } case MMClusterType: {
                 return static_cast<const MMCluster*>(meas)->identify();
-            } case UncalibMeasType::sTgcStripType: {
+            } case sTgcStripType: {
                 return static_cast<const sTgcMeasurement*>(meas)->identify();
+            } case Other: {
+                return detId;
             } default: {
-#ifndef NDEBUG
                 THROW_EXCEPTION("Unsupported measurement given "<<typeid(*meas).name());
-#endif
                 break;
             }
         }
         return detId;
+    }
+    IdentifierHash layerHash(const UncalibratedMeasurement* meas) {
+        if (!meas) {
+            return IdentifierHash{};
+        }
+                /// Composite space point EDM
+        if (meas->numDimensions() == 0u) {
+           const auto* comp = static_cast<const CombinedMuonStrip*>(meas);
+           return layerHash(comp->primaryStrip());
+        }
+        switch (meas->type()) {
+            using enum UncalibMeasType;
+            case MdtDriftCircleType: {
+                return static_cast<const MdtDriftCircle*>(meas)->measurementHash();
+            } case RpcStripType: {
+                return static_cast<const RpcMeasurement*>(meas)->layerHash();
+            } case TgcStripType: {
+                return static_cast<const TgcStrip*>(meas)->layerHash();
+            } case MMClusterType: {
+                return static_cast<const MMCluster*>(meas)->layerHash();
+            } case sTgcStripType: {
+                return static_cast<const sTgcMeasurement*>(meas)->layerHash();
+            } case Other: {
+                break;
+            } default: {
+                THROW_EXCEPTION("Unsupported measurement given "<<typeid(*meas).name());
+                break;
+            }
+        }
+        return IdentifierHash{};
     }
 }

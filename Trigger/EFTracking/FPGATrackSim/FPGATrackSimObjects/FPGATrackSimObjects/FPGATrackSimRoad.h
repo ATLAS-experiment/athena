@@ -79,6 +79,7 @@ public:
 
     void setFitParams(const FPGATrackSimTrackPars& v) { m_fitTrackPars = v; }
     void setFitChi2(double v) { m_fitChi2 = v; }
+    void setFitChi2_2d(double chi2_phi, double chi2_eta) { m_fitChi2_phi = chi2_phi; m_fitChi2_eta = chi2_eta; }
 
     ///////////////////////////////////////////////////////////////////////
     // Getters
@@ -105,6 +106,8 @@ public:
 
     const FPGATrackSimTrackPars& getFitParams() const { return m_fitTrackPars; }
     double getFitChi2() const { return m_fitChi2; }
+    double getFitChi2Phi() const { return m_fitChi2_phi; }
+    double getFitChi2Eta() const { return m_fitChi2_eta; }
 
     ///////////////////////////////////////////////////////////////////////
     // Utility
@@ -116,6 +119,10 @@ public:
     size_t getNHits() const;
     std::vector<size_t> getNHits_layer() const;
     size_t getNHitCombos() const;
+
+    // Bin ID, if using FPGATrackSim binning.
+    void setBinIdx(std::vector<unsigned> x) { m_binIdx = std::move(x); }
+    const std::vector<unsigned>& getBinIdx() const { return m_binIdx; }
 
     // Weight of each barcode is the fraction of layers with corresponding hits
     // where pixels are weighted twice as much
@@ -142,17 +149,21 @@ private:
 
     FPGATrackSimTrackPars m_fitTrackPars;
     double m_fitChi2 = 0;
+    double m_fitChi2_phi = 0;
+    double m_fitChi2_eta = 0;
 
     std::vector<std::vector<FPGATrackSimHit>> m_hits; // [layer, hit#] (used for ROOT storing)
     std::vector<std::vector<std::shared_ptr<const FPGATrackSimHit>>> m_hits_trans; //! (transient) [layer, hit#]
     // A list of hits in the road for each layer.
     // These pointers are not owned by the road.
 
+    // bin ID. Just store this as a vector<unsigned>.
+    std::vector<unsigned> m_binIdx;
 
     ///////////////////////////////////////////////////////////////////////
     // Misc
     friend std::ostream& operator<<(std::ostream& os, const FPGATrackSimRoad& road);
-    ClassDefNV(FPGATrackSimRoad, 7);
+    ClassDefNV(FPGATrackSimRoad, 8);
 };
 
 #endif // FPGATrackSimROAD_H
