@@ -181,7 +181,8 @@ DerivationFramework::EGammaCookieCutClusterTool::addBranches(const EventContext&
       for (size_t i = 0; i < m_vecM.size(); i++) {
         int indexDecor = m_storeCookMom ? 2*i+1 : i;
         double m = 0.;
-        bool gotM = cluster->retrieveMoment(m_vecM.at(i), m);
+        bool gotM = cluster->retrieveMoment(
+	     static_cast<xAOD::CaloCluster::MomentType>(m_vecM[i]), m);
         if (!gotM) {
           ATH_MSG_VERBOSE(m_vecMName[i]
                           << " does not exist for the original cluster");
@@ -224,7 +225,8 @@ DerivationFramework::EGammaCookieCutClusterTool::addBranches(const EventContext&
           int indexDecor = m_storeOrigMom ? 2*i : i;
           double m = 0.;
           if (cluster) {
-            bool gotM = cluster->retrieveMoment(m_vecM.at(i), m);
+            bool gotM = cluster->retrieveMoment(
+		 static_cast<xAOD::CaloCluster::MomentType>(m_vecM[i]), m);
             if (!gotM) {
               ATH_MSG_VERBOSE(m_vecMName[i]
                               << " does not exist for the new cluster");
