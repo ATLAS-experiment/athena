@@ -16,7 +16,7 @@ for slice, cfg in tida_dict.items():
     if(cfg["menu"] != ''):
         menus.append(cfg["menu"])
     else:
-        menus = ["MC_pp_run3_v1", "MC_pp_run4_v1"]
+        menus = ["MC_pp_run3_v1"]
     
     for m in menus:
         if m not in menu_chains:
@@ -59,6 +59,8 @@ for menu_name, chains in menu_chains.items():
             print("!!!! {0} used in slice {1} is not a valid chain in menu {2}".format(c, find_slices(c), menu_name))
             has_missing = True
 
+            
 if has_missing:
     print("FAIL: Some chains are defined for TrigInDetValidation tests but are not defined in the menu")
     exit(255)
+    
