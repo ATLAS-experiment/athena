@@ -327,10 +327,6 @@ StatusCode ChamberAssembleTool::buildReadOutElements(MuonDetectorManager &mgr) {
                                              tgcStationIndex("T1E"), tgcStationIndex("T1F"),
                                              tgcStationIndex("T2E"), tgcStationIndex("T2F"),
                                              tgcStationIndex("T3E"), tgcStationIndex("T3F")};
-   const std::unordered_set<Identifier> BOE_ids{m_idHelperSvc->hasMDT() ? m_idHelperSvc->mdtIdHelper().elementID("BOL", 7,7): Identifier{},
-                                                m_idHelperSvc->hasMDT() ? m_idHelperSvc->mdtIdHelper().elementID("BOL", -7,7): Identifier{},
-                                                m_idHelperSvc->hasRPC() ? m_idHelperSvc->rpcIdHelper().elementID("BOL", -8, 7, 1) : Identifier{},
-                                                m_idHelperSvc->hasRPC() ? m_idHelperSvc->rpcIdHelper().elementID("BOL", 8, 7, 1) : Identifier{}};
 
 
    std::unordered_set<Identifier> BIS78_ids{};
@@ -359,7 +355,7 @@ StatusCode ChamberAssembleTool::buildReadOutElements(MuonDetectorManager &mgr) {
    /** Group chambers by sectors && station layer. */
    for (const MuonReadoutElement* readOutEle : allReadOutEles) {
       std::vector<chamberArgs>::iterator exist = std::ranges::find_if(envelopeCandidates, 
-                         [this, readOutEle, &BOE_ids, &stIndicesEM](const chamberArgs& args){
+                         [this, readOutEle, &stIndicesEM](const chamberArgs& args){
                            const MuonReadoutElement* refEle = args.detEles.front();
                            const Identifier refId = refEle->identify();
                            const Identifier testId = readOutEle->identify();
@@ -376,11 +372,6 @@ StatusCode ChamberAssembleTool::buildReadOutElements(MuonDetectorManager &mgr) {
                                stIndicesEM.count(refEle->stationName())) {
                               return true;
                            }
-                           // /// Separate out the BOE chambers
-                           // if (BOE_ids.count(m_idHelperSvc->chamberId(refId)) !=
-                           //     BOE_ids.count(m_idHelperSvc->chamberId(testId))){
-                           //       return false;
-                           // }
                            // /// Summarize all readout element in the same sector & layer
                            /// into a single chamber
                            return readOutEle->chamberIndex() == refEle->chamberIndex();

@@ -203,11 +203,11 @@ typedef struct {
 #endif
 } GL2PScompress;
 
-typedef struct{
+struct GL2PSpdfgroup {
   GL2PSlist* ptrlist{};
   int gsno{}, fontno{}, imno{}, shno{}, maskshno{}, trgroupno{};
   int gsobjno{}, fontobjno{}, imobjno{}, shobjno{}, maskshobjno{}, trgroupobjno{};
-} GL2PSpdfgroup;
+};
 
 typedef struct {
   /* General */
