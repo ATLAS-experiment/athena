@@ -19,8 +19,8 @@ def RoIBResultByteStreamToolCfg(flags, name, writeBS=False):
   acc = ComponentAccumulator()
   tool = CompFactory.RoIBResultByteStreamTool(name)
 
-  if not flags.Trigger.L1.doCTP:
-    # disable CTP ByteStream decoding/encoding as part of RoIBResult
+  if not flags.Trigger.L1.doCTP or flags.Trigger.CTP.UseEDMxAOD:
+    # disable CTP ByteStream decoding/encoding as part of RoIBResult if doCTP is disabled or if CTPResultByteStreamTool is used instead
     tool.CTPModuleId = 0xFF
 
   if flags.Trigger.enableL1MuonPhase1 or not flags.Trigger.L1.doMuon:
@@ -44,6 +44,24 @@ def RoIBResultByteStreamToolCfg(flags, name, writeBS=False):
     # read BS == write RDO
     tool.RoIBResultReadKey=""
     tool.RoIBResultWriteKey="RoIBResult"
+
+  acc.setPrivateTools(tool)
+  return acc
+
+def CTPResultByteStreamToolCfg(flags, name, writeBS=False):
+  acc = ComponentAccumulator()
+  tool = CompFactory.CTPResultByteStreamTool(name)
+  ctp_robid = int(SourceIdentifier(SubDetector.TDAQ_CTP, 1)) # 0x770001
+  tool.ROBIDs = [ctp_robid]
+
+  if writeBS:
+    # write BS == read RDO
+    tool.CTPResultReadKey="CTPResult"
+    tool.CTPResultWriteKey=""
+  else:
+    # read BS == write RDO
+    tool.CTPResultReadKey=""
+    tool.CTPResultWriteKey="CTPResult"
 
   acc.setPrivateTools(tool)
   return acc
@@ -124,7 +142,7 @@ def doRoIBResult(flags):
   if flags.Trigger.L1.doTopo:
     # Currently only RoIBResult path implemented for L1Topo
     return True
-  if flags.Trigger.L1.doCTP:
+  if flags.Trigger.L1.doCTP and not flags.Trigger.CTP.UseEDMxAOD:
     # Currently only RoIBResult path implemented for CTP
     return True
   # Otherwise don't need RoIBResult
@@ -152,6 +170,14 @@ def L1TriggerByteStreamDecoderCfg(flags, returnEDM=False):
           maybeMissingRobs.append(int(SourceIdentifier(SubDetector.TDAQ_CALO_JET_PROC_ROI, module_id)))
         for module_id in roibResultTool.EMModuleIds:
           maybeMissingRobs.append(int(SourceIdentifier(SubDetector.TDAQ_CALO_CLUSTER_PROC_ROI, module_id)))
+
+  # ########################################
+  # # CTP decoding via CTPResult
+  # ########################################
+  if not flags.Trigger.doLVL1 and flags.Trigger.CTP.UseEDMxAOD:
+    ctpResultTool = acc.popToolsAndMerge(CTPResultByteStreamToolCfg(
+        flags, name="CTPResultBSDecoderTool", writeBS=False))
+    decoderTools += [ctpResultTool]
 
   ########################################
   # Run-3 L1Muon decoding (only when running HLT - offline we read it from HLT result)
@@ -285,7 +311,7 @@ def L1TriggerByteStreamDecoderCfg(flags, returnEDM=False):
   # In reconstruction/monitoring jobs add the decoders' output EDM to the output file
   if not flags.Trigger.doHLT:
     from OutputStreamAthenaPool.OutputStreamConfig import addToESD, addToAOD
-    outputEDM = getEDMListFromWriteHandles([tool for tool in decoderAlg.DecoderTools if 'RoIBResult' not in tool.getName()])
+    outputEDM = getEDMListFromWriteHandles([tool for tool in decoderAlg.DecoderTools if ('RoIBResult' not in tool.getName() and 'CTPResult' not in tool.getName())])
     _log.info('Adding the following output EDM to ItemList: %s', outputEDM)
     acc.merge(addToESD(flags, outputEDM))
     acc.merge(addToAOD(flags, outputEDM))
@@ -311,6 +337,12 @@ def L1TriggerByteStreamEncoderCfg(flags):
     muonRoiTool = acc.popToolsAndMerge(MuonRoIByteStreamToolCfg(
       flags, name="L1MuonBSEncoderTool", writeBS=True))
     acc.addPublicTool(muonRoiTool)
+
+  # Phase-I CTP encoding
+  if flags.Trigger.CTP.UseEDMxAOD:
+    ctpResultTool = acc.popToolsAndMerge(CTPResultByteStreamToolCfg(
+      flags, name="CTPResultBSEncoderTool", writeBS=True))
+    acc.addPublicTool(ctpResultTool)
 
   # TODO: Run-3 L1Calo, L1Topo, CTP
 

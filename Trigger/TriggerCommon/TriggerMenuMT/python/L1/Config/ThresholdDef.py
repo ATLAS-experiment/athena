@@ -280,7 +280,7 @@ class ThresholdDef:
             XEThreshold('gMHT%i' % thrV, 'gXE').setXE(thrV)
         
         # gTE
-        for thrV in [3,5,10,200]:
+        for thrV in [5, 10, 200, 280]:
             TEThreshold('gTE%i' % thrV, 'gTE').setTE(thrV)
         
         #gTE from BC+2 (for HI anti-shadowing)
