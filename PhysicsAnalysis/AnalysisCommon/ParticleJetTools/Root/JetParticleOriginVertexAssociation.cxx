@@ -26,7 +26,7 @@ StatusCode JetParticleOriginVertexAssociation::initialize() {
   m_dec_invalid = m_TrackContainerKey.key() + "." + m_prefix.value() +  m_dec_invalid.key();
   m_dec_trk_origin_vtx_idx = m_TrackContainerKey.key() + "." + m_prefix.value() +  m_dec_trk_origin_vtx_idx.key();
 
-  m_dzCut_bool = (m_dzCut > 4);
+  m_dzCut_bool = (m_dzCut == m_dzCutMax);
 
   
   //if (m_dzCut_bool){
@@ -53,7 +53,6 @@ JetParticleOriginVertexAssociation::JetParticleOriginVertexAssociation(const str
         declareProperty("coneSizeFitPar2", m_coneSizeFitPar2=0);
         declareProperty("coneSizeFitPar3", m_coneSizeFitPar3=0);
         declareProperty("dzCut", m_dzCut=10);
-        declareProperty("useMinZ0Vertex", m_useMinZ0Vertex=false);
 
         return;
     }
@@ -159,12 +158,15 @@ JetParticleOriginVertexAssociation::match(const xAOD::JetContainer& jets, const 
             const Vertex* vtx_to_trk = *vertexLink; 
             int matchjetidx = -1;
             double drmin = -1.0;
+            SG::AuxElement::Accessor<float> acc_jvt("Jvt");
             // Loop through jets
             for (unsigned int iJet = 0; iJet < jets.size(); iJet++) {
               //get jet
               const Jet* jet = jets[iJet];
               // if origin of jet is not the same as the vertex associated to the track then continue to next jet
               if (jet->getAssociatedObject<xAOD::Vertex>("OriginVertex") != vtx_to_trk) continue;
+              //cut in jvt
+              if (acc_jvt(*jet) <= 0) continue;
               
               // do dR matching between jet and track
               double match_dr = coneSize(jet->pt());
@@ -311,13 +313,15 @@ JetParticleOriginVertexAssociation::match(const xAOD::JetContainer& jets, const 
           const Vertex* vtx_to_trk = *vertexLink; 
           int matchjetidx = -1;
           double drmin = -1.0;
+          SG::AuxElement::Accessor<float> acc_jvt("Jvt");
           // Loop through jets
           for (unsigned int iJet = 0; iJet < jets.size(); iJet++) {
             //get jet
             const Jet* jet = jets[iJet];
             // if origin of jet is not the same as the vertex associated to the track then continue to next jet
             if (jet->getAssociatedObject<xAOD::Vertex>("OriginVertex") != vtx_to_trk) continue;
-            
+            //cut in jvt
+            if (acc_jvt(*jet) <= 0) continue;
             // do dR matching between jet and track
             double match_dr = coneSize(jet->pt());
             double dr = jet->p4().DeltaR(part->p4());

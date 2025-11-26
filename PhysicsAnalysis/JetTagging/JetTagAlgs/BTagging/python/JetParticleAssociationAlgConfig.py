@@ -11,7 +11,7 @@ from ParticleJetTools.JetParticleAssociationAlgConfig import ( # noqa: F401
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 
-def JetParticleAssociationByVertexCfg(ConfigFlags, jetCollName, partcollname, assocname, dzCut, useMinZ0Vertex, **options):
+def JetParticleAssociationByVertexCfg(ConfigFlags, jetCollName, partcollname, assocname, dzCut, dzCutMax, **options):
 
     acc=ComponentAccumulator()
     # Same values used for the ParticleJetTools.JetParticleAssociationAlgConfig
@@ -21,7 +21,7 @@ def JetParticleAssociationByVertexCfg(ConfigFlags, jetCollName, partcollname, as
     options["InputParticleContainer"] = partcollname
     options["OutputDecoration"] = assocname
     options["dzCut"] = dzCut
-    options["useMinZ0Vertex"] = useMinZ0Vertex
+    options["dzCutMax"] = dzCutMax
     # -- create the association tool
     acc.setPrivateTools(
     CompFactory.JetParticleOriginVertexAssociation(
@@ -39,15 +39,13 @@ def JetParticleAssociationByVertexAlgCfg(
         MinimumJetPt=None,
         MinimumJetPtFlag=None,
         dzCut=10,
-        useMinZ0Vertex=True):
+        dzCutMax=10):
 
     acc=ComponentAccumulator()
     jetcol = JetCollection
     name=(jetcol + "_" + OutputParticleDecoration).lower()
-    if useMinZ0Vertex:
-        decorName="_" + str(dzCut) + "_exclusive_assoc"
-    else:
-        decorName="_" + str(dzCut) + "_inclusive_assoc"
+    
+    decorName="_" + str(dzCut) + "_inclusive_assoc"
     if MinimumJetPt is None:
         MinimumJetPt = ConfigFlags.BTagging.minimumJetPtForTrackAssociation
     if MinimumJetPt > 0.0 and MinimumJetPtFlag is None:
@@ -71,7 +69,7 @@ def JetParticleAssociationByVertexAlgCfg(
                     MinimumJetPt=MinimumJetPt,
                     PassPtFlag=ptflag+decorName,
                     dzCut=dzCut,
-                    useMinZ0Vertex=useMinZ0Vertex,
+                    dzCutMax=dzCutMax,
                 ))
         ]
     ))

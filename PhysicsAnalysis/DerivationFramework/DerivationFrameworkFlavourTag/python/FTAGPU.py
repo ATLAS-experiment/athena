@@ -195,8 +195,7 @@ def FTAGPUCfg(flags):
     acc.merge(JetBTagginglessByVertexAlgCfg(
         flags,
         "AntiKt4EMPFlowByVertexJets",
-        dzCut_vec=[5],
-        useMinZ0Vertex_vec=[False]))
+        dzCut_vec=[9,7,6,5,3,2,1]))
 
     # Output stream
     FTAGPUItemList = FTAGPUSlimmingHelper.GetItemList()

@@ -37,7 +37,7 @@ class JetParticleOriginVertexAssociation : public JetParticleAssociation {
         double m_coneSizeFitPar2;
         double m_coneSizeFitPar3;
         float  m_dzCut;
-        bool   m_useMinZ0Vertex;
+        float  m_dzCutMax;
         bool   m_dzCut_bool;
         Gaudi::Property< std::string > m_prefix{this,"prefix","btagIp_",""};
         SG::ReadHandleKey< xAOD::TrackParticleContainer > m_TrackContainerKey {this,"TrackContainer","InDetTrackParticles","Key for the input track collection"};

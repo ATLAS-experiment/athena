@@ -171,8 +171,7 @@ def JetBTagginglessByVertexAlgCfg(
         JetCollection,
         pv_col='PrimaryVertices',
         trackAugmenterPrefix=None,
-        dzCut_vec=[10],
-        useMinZ0Vertex_vec=[True]):
+        dzCut_vec=[10]):
 
     """
     Run flavour tagging on ByVertex jet collection in derivations.
@@ -190,7 +189,7 @@ def JetBTagginglessByVertexAlgCfg(
         prefix=trackAugmenterPrefix,
         dzCut=max(dzCut_vec),
     ))        
-              
+       
     for networks in cfgFlags.BTagging.NNs.get(JetCollection, []):
         assert isinstance(networks['folds'], list)
         dirnames = [Path(path).parent for path in networks['folds']]
@@ -210,39 +209,37 @@ def JetBTagginglessByVertexAlgCfg(
         if foldHashName := networks.get('hash'):
             args['foldHashName'] = foldHashName
 
+        #make sure the z0 cuts are ordered from biggest to smallest
+        dzCut_vec.sort(reverse=True)
         # we want to run this for different cuts in z0, inclusive/exclusive at the same time
         for dzCut in dzCut_vec:
-            for useMinZ0Vertex in useMinZ0Vertex_vec:
-                acc.merge(JetParticleAssociationByVertexAlgCfg(
-                    ConfigFlags = cfgFlags,
-                    JetCollection = JetCollection,
-                    InputParticleCollection = trackCollection,
-                    OutputParticleDecoration = JetTrackAssociator,
-                    dzCut = dzCut,
-                    useMinZ0Vertex = useMinZ0Vertex,
-                ))
-               
-                if useMinZ0Vertex:
-                    dz_suffix = '_' + str(dzCut) + '_' + 'exclusive_'
-                  
-                else:
-                    dz_suffix = '_' + str(dzCut) + '_' + 'inclusive_'
-                
-                # Remap variables
-                args["remapping"] = {'BTagTrackToJetAssociator':'TracksForBTagging' + dz_suffix + "assoc",
-                                      'GN2v01_pb': 'GN2v01' + dz_suffix + "pb",
-                                      'GN2v01_pc': 'GN2v01' + dz_suffix + "pc",
-                                      'GN2v01_pu': 'GN2v01' + dz_suffix + "pu",
-                                      'GN2v01_ptau': 'GN2v01' + dz_suffix + "ptau",
-                                      'GN2v01_TrackOrigin': 'GN2v01' + dz_suffix + 'TrackOrigin',
-                                      'GN2v01_VertexIndex': 'GN2v01' + dz_suffix + 'VertexIndex',
-                                      'GN2v01_TrackLinks': 'GN2v01' + dz_suffix + 'TrackLinks',
-                                      'btagIp_': 'btagIp_ByVertex1_'}
+            
+            acc.merge(JetParticleAssociationByVertexAlgCfg(
+                ConfigFlags = cfgFlags,
+                JetCollection = JetCollection,
+                InputParticleCollection = trackCollection,
+                OutputParticleDecoration = JetTrackAssociator,
+                dzCut = dzCut,
+                dzCutMax=dzCut_vec[0]
+            ))
+            
+            dz_suffix = '_' + str(dzCut) + '_' + 'inclusive_'
+            
+            # Remap variables
+            args["remapping"] = {'BTagTrackToJetAssociator':'TracksForBTagging' + dz_suffix + "assoc",
+                                    'GN2v01_pb': 'GN2v01' + dz_suffix + "pb",
+                                    'GN2v01_pc': 'GN2v01' + dz_suffix + "pc",
+                                    'GN2v01_pu': 'GN2v01' + dz_suffix + "pu",
+                                    'GN2v01_ptau': 'GN2v01' + dz_suffix + "ptau",
+                                    'GN2v01_TrackOrigin': 'GN2v01' + dz_suffix + 'TrackOrigin',
+                                    'GN2v01_VertexIndex': 'GN2v01' + dz_suffix + 'VertexIndex',
+                                    'GN2v01_TrackLinks': 'GN2v01' + dz_suffix + 'TrackLinks',
+                                    'btagIp_': 'btagIp_ByVertex1_'}
 
-                if '/GN2v01/' in dirname:
-                    args['tag_requirements'] = {'nonzeroTracks'}
+            if '/GN2v01/' in dirname:
+                args['tag_requirements'] = {'nonzeroTracks'}
 
-                acc.merge(MultifoldGNNCfg(**args, suffix=dz_suffix))
+            acc.merge(MultifoldGNNCfg(**args, suffix=dz_suffix))
 
     return acc
 
