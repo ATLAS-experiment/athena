@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 import unittest
 from AthenaConfiguration.AthConfigFlags import AthConfigFlags
@@ -14,7 +14,6 @@ def createTauConfigFlags():
 
     # Switches for enabling/disabling some tools
     tau_cfg.addFlag("Tau.doTJVA", True)
-    tau_cfg.addFlag("Tau.doPi0Clus", True)
     tau_cfg.addFlag("Tau.doPanTau", True)
     tau_cfg.addFlag("Tau.doRNNTrackClass", True)
     tau_cfg.addFlag("Tau.doTauDiscriminant", True)

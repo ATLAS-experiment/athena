@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef XAOD_ANALYSIS
@@ -32,7 +32,7 @@ StatusCode TauShotFinder::initialize() {
   ATH_CHECK(m_caloCellInputContainer.initialize());
   ATH_CHECK(m_removedClusterInputContainer.initialize(SG::AllowEmpty));
   ATH_CHECK(detStore()->retrieve (m_calo_id, "CaloCell_ID"));
-  ATH_CHECK(m_caloMgrKey.initialize());
+
   ATH_MSG_INFO("Find TauShot in context: " << (inEleRM() ? "`EleRM`" : "`Standard`") << ", with Electron cell removal Flag: " << m_removeElectronCells);
   return StatusCode::SUCCESS;
 }
@@ -58,14 +58,12 @@ StatusCode TauShotFinder::executeShotFinder(xAOD::TauJet& tau, xAOD::CaloCluster
   }
   const CaloCellContainer *cellContainer = caloCellInHandle.cptr();
 
-  SG::ReadCondHandle<CaloDetDescrManager> caloMgrHandle{m_caloMgrKey};
-  const CaloDetDescrManager* caloDDMgr = *caloMgrHandle;
   // Select seed cells:
   // -- dR < 0.4, EM1, pt > 100
   // -- largest pt among the neighbours in eta direction 
   // -- no other seed cell as neighbour in eta direction 
   std::vector<const CaloCell*> seedCells;
-  ATH_CHECK(selectSeedCells(tau, *cellContainer, caloDDMgr, seedCells));
+  ATH_CHECK(selectSeedCells(tau, *cellContainer, seedCells));
   ATH_MSG_DEBUG("seedCells.size() = " << seedCells.size());
     
   // Construt shot by merging neighbour cells in phi direction 
@@ -182,9 +180,7 @@ int TauShotFinder::getNPhotons(float eta, float energy) const {
 
 
 StatusCode TauShotFinder::selectCells(const xAOD::TauJet& tau,
-                                                        const CaloCellContainer& cellContainer,
-                                                        const CaloDetDescrManager* detMgr,
-                                                        std::vector<const CaloCell*>& cells) const {
+				      std::vector<const CaloCell*>& cells) const {
   // if in EleRM tau reco, do electron cell removal
   std::vector<const CaloCell*> removed_cells;
   if (m_removeElectronCells && inEleRM()){
@@ -201,24 +197,17 @@ StatusCode TauShotFinder::selectCells(const xAOD::TauJet& tau,
       }
     }
   }
-  // Get only cells within dR < 0.4
-  // -- TODO: change the hardcoded 0.4
-  std::vector<CaloCell_ID::SUBCALO> emSubCaloBlocks;
-  emSubCaloBlocks.push_back(CaloCell_ID::LAREM);
-  boost::scoped_ptr<CaloCellList> cellList(new CaloCellList(detMgr, &cellContainer,emSubCaloBlocks)); 
-  // -- FIXME: tau p4 is corrected to point at tau vertex, but the cells are not 
-  cellList->select(tau.eta(), tau.phi(), 0.4); 
 
-  for (const CaloCell* cell : *cellList) {
-    // Require cells above 100 MeV
+  // retrieve EM1 cells within dR=0.4, pre-selected by TauPi0CreateROI
+  static const SG::ConstAccessor<std::vector<const CaloCell*>> acc_shotCells("shotCells");
+  std::vector<const CaloCell*> shotCells = acc_shotCells(tau);
+  
+  for (const CaloCell* cell : shotCells) {
+  // Require cells above 100 MeV
     // FIXME: cells are not corrected to point at tau vertex
     if (cell->pt() * m_caloWeightTool->wtCell(cell) < 100.) continue;
     // if in EleRM, check the clusters do not include electron activities
     if (m_removeElectronCells && inEleRM() && std::find(removed_cells.cbegin(), removed_cells.cend(), cell) != removed_cells.cend()) continue;
-    
-    // Require cells in EM1 
-    int sampling = cell->caloDDE()->getSampling();
-    if( !( sampling == CaloCell_ID::EMB1 || sampling == CaloCell_ID::EME1 ) ) continue;
     
     cells.push_back(cell);
   }
@@ -228,14 +217,13 @@ StatusCode TauShotFinder::selectCells(const xAOD::TauJet& tau,
 
 
 StatusCode TauShotFinder::selectSeedCells(const xAOD::TauJet& tau,
-                                                            const CaloCellContainer& cellContainer,
-                                                            const CaloDetDescrManager* detMgr,
-                                                            std::vector<const CaloCell*>& seedCells) const {
+					  const CaloCellContainer& cellContainer,
+					  std::vector<const CaloCell*>& seedCells) const {
 
   // Apply pre-selection of the cells
   assert(seedCells.empty());
   std::vector<const CaloCell*> cells;
-  ATH_CHECK(selectCells(tau, cellContainer,detMgr, cells));
+  ATH_CHECK(selectCells(tau, cells));
   std::sort(cells.begin(),cells.end(),ptSort(*this));
 
   std::set<IdentifierHash> seedCellHashes;
