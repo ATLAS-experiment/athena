@@ -28,6 +28,10 @@ def StandaloneMuonOutputCfg(flags):
     aod_items += ["xAOD::MuonSegmentContainer#NCB_MuonSegments"]
     aod_items += ["xAOD::MuonSegmentAuxContainer#NCB_MuonSegmentsAux."]
 
+    if flags.Muon.scheduleActsReco:
+        aod_items += ["xAOD::MuonSegmentContainer#MuonSegmentsFromR4"]
+        aod_items += ["xAOD::MuonSegmentAuxContainer#MuonSegmentsFromR4Aux.-localSegPars.-parentSegment"]
+
     # TrackParticles
     aod_items += ["xAOD::TrackParticleContainer#MuonSpectrometerTrackParticles"]
     aod_items += ["xAOD::TrackParticleAuxContainer#MuonSpectrometerTrackParticlesAux."]
@@ -189,12 +193,12 @@ def MuonReconstructionCfg(flags):
         result.merge(MuonDetailedTrackTruthMakerCfg(flags, name="MuonStandaloneDetailedTrackTruthMaker",
                                                     TrackCollectionNames=track_cols))
 
-        for i in range(len(track_cols)):
-            from TrkConfig.TrkTruthAlgsConfig import TrackTruthSelectorCfg, TrackParticleTruthAlgCfg
-            result.merge(TrackTruthSelectorCfg(flags, tracks=track_cols[i]))
-
-            result.merge(TrackParticleTruthAlgCfg(flags, tracks=track_cols[i],
-                                                  TrackParticleName=track_colstp[i]))
+        if not flags.Muon.scheduleActsReco:
+            for i in range(len(track_cols)):
+                from TrkConfig.TrkTruthAlgsConfig import TrackTruthSelectorCfg, TrackParticleTruthAlgCfg
+                result.merge(TrackTruthSelectorCfg(flags, tracks=track_cols[i]))
+                result.merge(TrackParticleTruthAlgCfg(flags, tracks=track_cols[i],
+                                                    TrackParticleName=track_colstp[i]))
 
         # Check if we're making PRDs
         # FIXME - I think we can remove this flag if we shift this to where PRDs are being created. However, this will involve some refactoring, so temporary fix is this.

@@ -5,6 +5,8 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 
 def MuonDetailedTrackTruthMakerCfg(flags, name="MuonDetailedTrackTruthMaker", **kwargs):
     result = ComponentAccumulator()
+    if flags.Muon.usePhaseIIGeoSetup:
+        return result
     
     PRD_TruthNames = []
     if flags.Detector.EnableRPC:
