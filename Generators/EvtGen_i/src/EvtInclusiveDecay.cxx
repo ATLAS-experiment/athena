@@ -47,6 +47,7 @@
 #include "AthenaKernel/RNGWrapper.h"
 #include "CLHEP/Random/RandFlat.h"
 #include "CLHEP/Vector/LorentzVector.h"
+#include "CxxUtils/checker_macros.h"
 
 #include <stdlib.h>
 #include <sstream>
@@ -374,7 +375,7 @@ StatusCode EvtInclusiveDecay::traverseDecayTree(HepMC::GenParticlePtr p,
   auto v = p->end_vertex();
   if (v) {
     if (visited.insert(v).second) {
-      if ( isToBeRemoved && (v->particles_in().size()>1) && m_checkDecayTree ) {
+      if ( isToBeRemoved && (v->particles_in_size()>1) && m_checkDecayTree ) {
         ATH_MSG_WARNING("Found particle to be decayed with vertex with >1 incoming mother particles in decay tree");
         ATH_MSG_WARNING( ([&p, &v](){  std::stringstream ss;   HepMC::Print::line(ss,p); HepMC::Print::line(ss,v);  return ss.str();})());
       }
@@ -662,7 +663,7 @@ void EvtInclusiveDecay::printHepMC(HepMC::GenEvent* hepMC, std::set<HepMC::GenPa
   unsigned int nTreesFound = 0;
   for (auto p: *hepMC) {
     if ( (!p->production_vertex()) ||
-         (p->production_vertex()->particles_in().size() == 0) ) {
+         (p->production_vertex()->particles_in_size() == 0) ) {
       nTreesFound++;
       std::cout << "\n    Found new partial decay tree:\n" << std::endl;
       unsigned int nParticlesVisited = printTree(std::move(p),visited,1,particleSet);
@@ -709,7 +710,8 @@ std::string EvtInclusiveDecay::pdgName(HepMC::ConstGenParticlePtr p, bool status
 #ifdef HEPMC3
   if (particleSet) for (const auto& pinl: *particleSet) if (pinl&&p) if (pinl.get() == p.get()) inlist=true;
 #else
-  if (particleSet) inlist = (particleSet->find(p) != particleSet->end());
+  auto p_nc ATLAS_THREAD_SAFE = const_cast<HepMC::GenParticlePtr> (p);
+  if (particleSet) inlist = (particleSet->find(p_nc) != particleSet->end());
 #endif
   if (statusHighlighting) {
     if ( ((particleSet!=0) && (inlist)) ||
