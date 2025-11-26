@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TileEvent/TileRawChannel.h"
@@ -1557,6 +1557,7 @@ void TileRawChannelBuilderFitFilterCool::pulseFit(const TileDigits *digit, doubl
           sgpgp += gpval * gpval / err2;
           serr += 1.0 / err2;
         }
+        if (serr == 0) serr = 1;
         dgg = sgg - sg * sg / serr;
         dggp = sggp - sg * sgp / serr;
         dgpgp = sgpgp - sgp * sgp / serr;
