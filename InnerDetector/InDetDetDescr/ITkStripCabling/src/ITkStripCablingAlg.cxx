@@ -33,13 +33,18 @@
 
 // Constructor
 ITkStripCablingAlg::ITkStripCablingAlg(const std::string& name, ISvcLocator* pSvcLocator):
-  AthReentrantAlgorithm(name, pSvcLocator)
+  AthReentrantAlgorithm(name, pSvcLocator)  
 {}
 
 //
 StatusCode
 ITkStripCablingAlg::initialize() {
-  ATH_MSG_INFO("Reading ITk Strip cabling file from " << m_source.value());
+  m_configFilePath = PathResolverFindCalibFile(m_source);
+  if(m_configFilePath.empty()){
+    ATH_MSG_ERROR("Failed to find Calibration file: " << m_source);
+    return StatusCode::FAILURE;
+  }
+  ATH_MSG_INFO("Reading ITk Strip cabling file from " << m_configFilePath);
   // ITkStripID
   ATH_CHECK(detStore()->retrieve(m_idHelper, "SCT_ID"));
   // Write Cond Handle
@@ -63,9 +68,9 @@ ITkStripCablingAlg::execute(const EventContext& ctx) const {
 
   // Construct the output Cond Object and fill it in
   std::unique_ptr<ITkStripCablingData> pCabling = std::make_unique<ITkStripCablingData>();
-  auto inputFile = std::ifstream(m_source.value());
+  auto inputFile = std::ifstream(m_configFilePath);
   if (not inputFile.good()){
-    ATH_MSG_ERROR("The itk cabling file "<<m_source.value()<<" could not be opened.");
+    ATH_MSG_ERROR("The itk cabling file "<<m_configFilePath<<" could not be opened.");
     return StatusCode::FAILURE;
   }
   inputFile>>*pCabling;
