@@ -42,10 +42,8 @@ def TauBuildAlgCfg(flags):
 
     tools.append( result.popToolsAndMerge(tauTools.CellVariablesCfg(flags)) )
     tools.append( result.popToolsAndMerge(tauTools.ElectronVetoVarsCfg(flags)) )
+    tools.append( result.popToolsAndMerge(tauTools.Pi0ClusterFinderCfg(flags)) )
     tools.append( result.popToolsAndMerge(tauTools.TauShotFinderCfg(flags)) )
-
-    if flags.Tau.doPi0Clus:
-        tools.append( result.popToolsAndMerge(tauTools.Pi0ClusterFinderCfg(flags)) )
 
     # TauBuildAlg AKA TauProcessorAlg
     TauProcessorAlg = CompFactory.getComp("TauProcessorAlg")
@@ -216,13 +214,13 @@ def TauOutputCfg(flags):
 
     # AOD specific
     # remove GlobalFELinks - these are links between FlowElement (FE) containers created in jet finding and taus. Since these transient FE containers are not in the AOD, we should not write out these links.
-    removeAODvars = "-VertexedClusters.-mu.-nVtxPU.-ABS_ETA_LEAD_TRACK.-TAU_ABSDELTAPHI.-TAU_ABSDELTAETA.-absipSigLeadTrk.-passThinning.-chargedGlobalFELinks.-neutralGlobalFELinks"
+    removeAODvars = "-VertexedClusters.-shotCells.-mu.-nVtxPU.-ABS_ETA_LEAD_TRACK.-TAU_ABSDELTAPHI.-TAU_ABSDELTAETA.-absipSigLeadTrk.-passThinning.-chargedGlobalFELinks.-neutralGlobalFELinks"
     if not flags.Tau.ActiveConfig.inTauEleRM:
         removeAODvars += f".-{flags.Tau.GNTauScoreName[0]}.-{flags.Tau.GNTauTransScoreName[0]}.-{flags.Tau.GNTauDecorWPNames[0][0]}.-{flags.Tau.GNTauDecorWPNames[0][1]}.-{flags.Tau.GNTauDecorWPNames[0][2]}.-{flags.Tau.GNTauDecorWPNames[0][3]}.-GNTauProbTau.-GNTauProbJet"
     TauAODList += [ "xAOD::TauJetAuxContainer#{}Aux.{}".format(flags.Tau.ActiveConfig.TauJets, removeAODvars) ]
 
     # ESD specific
-    removeESDvars = "-VertexedClusters.-chargedGlobalFELinks.-neutralGlobalFELinks"
+    removeESDvars = "-VertexedClusters.-shotCells.-chargedGlobalFELinks.-neutralGlobalFELinks"
     if not flags.Tau.ActiveConfig.inTauEleRM:
         removeESDvars += f".-{flags.Tau.GNTauScoreName[0]}.-{flags.Tau.GNTauTransScoreName[0]}.-{flags.Tau.GNTauDecorWPNames[0][0]}.-{flags.Tau.GNTauDecorWPNames[0][1]}.-{flags.Tau.GNTauDecorWPNames[0][2]}.-{flags.Tau.GNTauDecorWPNames[0][3]}.-GNTauProbTau.-GNTauProbJet"
     TauESDList += [ "xAOD::TauJetAuxContainer#{}Aux.{}".format(flags.Tau.ActiveConfig.TauJets, removeESDvars) ]
