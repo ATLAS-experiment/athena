@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TileRawChannelMonitorAlgorithm.h"
@@ -184,7 +184,9 @@ StatusCode TileRawChannelMonitorAlgorithm::fillHistograms( const EventContext& c
   int nChannels[Tile::MAX_ROS-1] = {0};
   float partitionTimeSum[Tile::MAX_ROS-1] = {0};
 
+  //coverity[STACK_USE]
   float offlineTime[Tile::MAX_ROS-1][Tile::MAX_DRAWER][Tile::MAX_CHAN][Tile::MAX_GAIN] = {{{{0}}}};
+  //coverity[STACK_USE]
   float offlineAmplitude[Tile::MAX_ROS-1][Tile::MAX_DRAWER][Tile::MAX_CHAN][Tile::MAX_GAIN] = {{{{0}}}};
 
 
