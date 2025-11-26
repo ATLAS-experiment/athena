@@ -75,8 +75,8 @@ def getHistoName(category, args):
     match category:
         case 'Parameters': return par
         case 'Resolutions': return f"{resolution_dict[args.resplot]}_{par}"
-        case 'Efficiencies': return f"eff_vs_truth_{par}"
-        case 'Efficiencies/Technical': return f"eff_vs_truth_{par}"
+        case 'Efficiencies': return f"eff_vs_truth_{par}" if par!="truthMu" else "eff_vs_truthMu"
+        case 'Efficiencies/Technical': return f"eff_vs_truth_{par}" if par!="truthMu" else "eff_vs_truthMu"
         case 'Efficiencies/Purities': return f"eff_vs_offl_{par}"
         case 'FakeRates': return f"fakerate_vs_offl_{par}"
         case 'Duplicates': return f"duplrate_vs_truth_{par}"
