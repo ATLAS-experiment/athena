@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /**************************************************************************
@@ -1212,7 +1212,11 @@ bool RegSelSiLUT::read(std::istream& s) {
   bool newformat = false;
 
   s >> Nmodules;
-
+  if (Nmodules > 1000000u) {
+    std::cerr << "read(): Unreasonable Nmodules " << Nmodules << "\n";
+    return false;
+  }
+ 
   newformat=s.fail();
 
   // couldn't read number of modules - try new format
