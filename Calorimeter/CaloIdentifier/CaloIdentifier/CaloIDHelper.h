@@ -89,8 +89,6 @@ public:
      * @param name Name of this group (only for error reporting).
      * @param ids Set of Identifiers comprising this group.
      * @param end_index The ending index for the context for this group.
-     * @parma msgSvc The global message service
-     *               (may be 0, only for error reporting).
      * @param full_range The @c MultiRange corresponding to this group.
      *                   If supplied, the side of the @c ids set is checked
      *                   against the range's cardinality.
@@ -99,7 +97,6 @@ public:
     int init (const std::string& name,
               const std::set<Identifier>& ids,
               size_type end_index,
-              IMessageSvc* msgSvc,
               const MultiRange* full_range = 0);
 
 
@@ -276,10 +273,6 @@ public:
 
   /// Return the name for this helper.
   const std::string& name() const;
-
-  /// Return the message service for this helper (may be null).
-  IMessageSvc* msgSvc();
-
 
 
 protected:
