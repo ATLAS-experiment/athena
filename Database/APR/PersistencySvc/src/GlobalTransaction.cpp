@@ -1,12 +1,12 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "GlobalTransaction.h"
 #include "DatabaseHandler.h"
-#include "POOLCore/DbPrint.h"
 
-pool::PersistencySvc::GlobalTransaction::GlobalTransaction( pool::PersistencySvc::DatabaseRegistry& registry ):
+pool::PersistencySvc::GlobalTransaction::GlobalTransaction( pool::PersistencySvc::DatabaseRegistry& registry ) :
+  pool::APRMessaging("APR/PersistencySvc"),
   m_type( pool::ITransaction::UNDEFINED ),
   m_databases( registry )
 {}
@@ -38,10 +38,9 @@ pool::PersistencySvc::GlobalTransaction::commit()
           iDb != m_databases.end(); ++iDb ) {
       bool bCommit = (*iDb)->commitTransaction(); // This has to be replaced with a two phase commit
       if ( ! bCommit ) {
-        DbPrint log( "PersistencySvc::GlobalTransaction" );
-        log << MSG::ERROR << "Could not commit the transaction for the database with" << endmsg
-            << "FID = " << (*iDb)->fid() << endmsg
-            << "PFN = " << (*iDb)->pfn() << endmsg;
+        ATH_MSG_ERROR("Could not commit the transaction for the database with:" << endmsg
+                      << "FID = " << (*iDb)->fid() << endmsg
+                      << "PFN = " << (*iDb)->pfn() );
       }
       OK = OK && bCommit;
     }
@@ -61,10 +60,9 @@ pool::PersistencySvc::GlobalTransaction::commitAndHold()
           iDb != m_databases.end(); ++iDb ) {
       bool bCommit = (*iDb)->commitAndHoldTransaction(); // This has to be replaced with a two phase commit
       if ( ! bCommit ) {
-        DbPrint log( "PersistencySvc::GlobalTransaction" );
-        log << MSG::ERROR << "Could not commit and hold the transaction for the database with" << endmsg
+        ATH_MSG_ERROR("Could not commit and hold the transaction for the database with:" << endmsg
             << "FID = " << (*iDb)->fid() << endmsg
-            << "PFN = " << (*iDb)->pfn() << endmsg;
+            << "PFN = " << (*iDb)->pfn() );
       }
       OK = OK && bCommit;
     }

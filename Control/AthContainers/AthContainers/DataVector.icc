@@ -16,6 +16,7 @@
 #include "AthContainers/tools/CompareAndPrint.h"
 #include "AthContainers/tools/ATHCONTAINERS_ASSERT.h"
 #include "CxxUtils/releasing_iterator.h"
+#include "CxxUtils/throw_out_of_range.h"
 #include <limits>
 #include <functional>
 
@@ -769,7 +770,7 @@ DataVector<T, BASE>::at (size_type n)
   // Can't use m_pCont's at here, because we need an iterator.
   // So we have to do the bounds check ourselves.
   if (n >= this->size())
-    throw std::out_of_range ("DataVector::at range check");
+    CxxUtils::throw_out_of_range  (__PRETTY_FUNCTION__, n, this->size(), this);
   return ElementProxy (this->m_pCont.begin() + n, this);
 }
 
@@ -2616,7 +2617,7 @@ typename DATAVECTOR::ElementProxy DATAVECTOR::at (size_type n)
   // Can't use m_pCont's at here, because we need an iterator.
   // So we have to do the bounds check ourselves.
   if (n >= size())
-    throw std::out_of_range ("DataVector::at range check");
+    CxxUtils::throw_out_of_range (__PRETTY_FUNCTION__, n, this->size(), this);
   return ElementProxy (m_pCont.begin() + n, this);
 }
 

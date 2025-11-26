@@ -22,7 +22,7 @@ LArTTL1Container* LArTTL1ContainerCnv::createTransient() {
   LArTTL1Container *transObj = 0;
 
   static const pool::Guid tr_guid("38FAECC7-D0C5-4DD8-8FAE-8D35F0542ECD");
-  static const pool::Guid p1_guid("b859a463-2ea4-4902-b46a-89e5fbc20132");
+  static const pool::Guid p1_guid("B859A463-2EA4-4902-B46A-89E5FBC20132");
 
   if ( compareClassGuid(tr_guid) ) {
 

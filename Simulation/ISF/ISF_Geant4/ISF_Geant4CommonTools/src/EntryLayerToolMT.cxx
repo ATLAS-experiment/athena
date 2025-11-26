@@ -10,6 +10,8 @@
 // ISF includes
 #include "ISF_Event/ISFParticle.h"
 
+thread_local std::unique_ptr<std::array<TrackRecordCollection*, ISF::fNumAtlasEntryLayers>> ISF::EntryLayerToolMT::s_collection;
+
 /** Constructor **/
 ISF::EntryLayerToolMT::EntryLayerToolMT(const std::string& t, const std::string& n, const IInterface* p) :
   base_class(t,n,p),
@@ -121,7 +123,7 @@ ISF::EntryLayer ISF::EntryLayerToolMT::registerParticle(const ISF::ISFParticle& 
   //        -> add it to TrackRecordCollection
   if ( layerHit != ISF::fUnsetEntryLayer) {
     ATH_MSG_VERBOSE( "Particle >>" << particle << "<< hit boundary surface, "
-                     "adding it to '" << (*m_collectionHolder.get())[layerHit]->Name() << "' TrackRecord collection");
+                     "adding it to '" << (*s_collection)[layerHit]->Name() << "' TrackRecord collection");
 
     const Amg::Vector3D   &pos = particle.position();
     const Amg::Vector3D   &mom = particle.momentum();
@@ -139,7 +141,7 @@ ISF::EntryLayer ISF::EntryLayerToolMT::registerParticle(const ISF::ISFParticle& 
     const int id = generationZeroGenParticle ? HepMC::uniqueID(generationZeroGenParticle) : particle.id();
     const int status = generationZeroGenParticle ? generationZeroGenParticle->status() : particle.status();
 
-    (*m_collectionHolder.get())[layerHit]->Emplace(particle.pdgCode(),
+    (*s_collection)[layerHit]->Emplace(particle.pdgCode(),
                                                    status,
                                                    energy,
                                                    hepMom,
@@ -156,14 +158,10 @@ ISF::EntryLayer ISF::EntryLayerToolMT::registerParticle(const ISF::ISFParticle& 
 /** Register the TrackRecordCollection pointer for a layer */
 StatusCode ISF::EntryLayerToolMT::registerTrackRecordCollection(TrackRecordCollection* collection, EntryLayer layer)
 {
-  // Do we need to lock around this code???
-  auto* collectionArray = m_collectionHolder.get();
-  if (not collectionArray) {
+  if (!s_collection) {
     // need to create the array of TrackRecordCollections for this thread
-    auto* temp = new std::array<TrackRecordCollection*, ISF::fNumAtlasEntryLayers>;
-    m_collectionHolder.set(temp);
-    collectionArray = m_collectionHolder.get();
+    s_collection = std::make_unique<std::array<TrackRecordCollection*, ISF::fNumAtlasEntryLayers>>();
   }
-  (*collectionArray)[layer]=collection;
+  (*s_collection)[layer]=collection;
   return StatusCode::SUCCESS;
 }

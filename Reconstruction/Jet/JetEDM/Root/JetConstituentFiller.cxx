@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // JetConstituentFiller.cxx
@@ -99,8 +99,13 @@ extractConstituents(xAOD::Jet& jet, const NameList* pghostlabs,
       Label lab = cui.label();
       // Add to constituent list or associated object list.
       if ( ! cui.isGhost() ) {
-        jet.addConstituent(ppar);
-        jet.setConstituentsSignalState( cui.constitScale() );
+        if (!ppar) {
+          ++nbad;
+        }
+        else {
+          jet.addConstituent(ppar);
+          jet.setConstituentsSignalState( cui.constitScale() );
+        }
       } else {
         if ( partype == MUSEG ) {
           outms[icui].push_back(pms); 

@@ -129,7 +129,7 @@ bool LArIdTranslatorHelper::LoadIdTranslator(const TString& file)
   for(i=0;i<m_nPartitionLayers;i++){
     for(j=0;j<m_nHistCategories;j++){
       sprintf(name,"%s_%s",m_PartitionLayers[i].c_str(),m_HistCategories[j].c_str());
-      m_HistCellmaps[i][j] = std::unique_ptr<TH2I> ((TH2I*)m_file->Get(name));
+      m_HistCellmaps[i][j] = static_cast<TH2I*>(m_file->Get(name));
     }
     
     nbins += (m_HistCellmaps[i][0]->GetXaxis()->GetNbins())*(m_HistCellmaps[i][0]->GetYaxis()->GetNbins());

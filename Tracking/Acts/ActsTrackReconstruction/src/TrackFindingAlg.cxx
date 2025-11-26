@@ -22,7 +22,7 @@
 #include "ActsCalibBase/CalibrationContext.h"
 #include "ActsEvent/TrackContainer.h"
 #include "ActsGeometry/ActsDetectorElement.h"
-#include "ActsGeometryInterfaces/ActsGeometryContext.h"
+#include "ActsGeometryInterfaces/GeometryContext.h"
 #include "src/detail/ExpectedHitUtils.h"
 #include "src/detail/TrackFindingMeasurements.h"
 #include "src/detail/SharedHitCounter.h"
@@ -488,7 +488,7 @@ namespace ActsTrk
     for (unsigned int iseed = 0; iseed < seeds.size(); ++iseed)
       {
         // Get the seed
-        const ActsTrk::Seed& seed = *seeds[iseed];
+        const ActsTrk::Seed seed = seeds[iseed];
 
         category_i = typeIndex * (m_statEtaBins.size() + 1);
         tracksContainerTemp.clear();
@@ -828,7 +828,7 @@ namespace ActsTrk
       ATH_MSG_INFO("CKF results for " << seeds.size() << ' ' << seedType << " seeds:");
     }
     ++nPrinted;
-    m_trackStatePrinter->printSeed(detContext.geometry, *seeds[iseed], seedParameters, measurementIndex, iseed, isKF);
+    m_trackStatePrinter->printSeed(detContext.geometry, seeds[iseed], seedParameters, measurementIndex, iseed, isKF);
   }
 
 namespace {
@@ -854,7 +854,7 @@ struct Collector {
         detail::addToExpectedLayerPattern(*result, *detElem);
       }
     }
-  };
+  }
 };
 }
 
@@ -874,7 +874,7 @@ Acts::Result<void> TrackFindingAlg::extrapolateTrackToReferenceSurface(
         options.geoContext, track, referenceSurface, strategy, logger());
 
     if (!findResult.ok()) {
-      ACTS_ERROR("failed to find track state for extrapolation");
+      ATH_MSG_WARNING("Failed to find track state for extrapolation");
       return findResult.error();
     }
 
@@ -883,7 +883,7 @@ Acts::Result<void> TrackFindingAlg::extrapolateTrackToReferenceSurface(
     options.direction = Acts::Direction::fromScalarZeroAsPositive(distance);
 
     Acts::BoundTrackParameters parameters = track.createParametersFromState(trackState);
-    ACTS_VERBOSE("extrapolating track to reference surface at distance "
+    ATH_MSG_VERBOSE("Extrapolating track to reference surface at distance "
                 << distance << " with direction " << options.direction
                 << " with starting parameters " << parameters);
 
@@ -893,7 +893,7 @@ Acts::Result<void> TrackFindingAlg::extrapolateTrackToReferenceSurface(
 
     auto initRes = propagator.initialize(state, parameters);
     if(!initRes.ok()) {
-      ACTS_ERROR("Failed to initialize propgation state: " << initRes.error().message());
+      ATH_MSG_WARNING("Failed to initialize propagation state: " << initRes.error().message());
       return initRes.error();
     }
 
@@ -902,7 +902,7 @@ Acts::Result<void> TrackFindingAlg::extrapolateTrackToReferenceSurface(
         propagator.propagate(state);
 
     if (!propagateOnlyResult.ok()) {
-      ACTS_ERROR("failed to extrapolate track: " << propagateOnlyResult.error().message());
+      ATH_MSG_WARNING("Failed to extrapolate track: " << propagateOnlyResult.error().message());
       return propagateOnlyResult.error();
     }
 
@@ -910,7 +910,7 @@ Acts::Result<void> TrackFindingAlg::extrapolateTrackToReferenceSurface(
         std::move(state), propagateOnlyResult, referenceSurface, options);
 
     if (!propagateResult.ok()) {
-      ACTS_ERROR("failed to extrapolate track: " << propagateResult.error().message());
+      ATH_MSG_WARNING("Failed to extrapolate track: " << propagateResult.error().message());
       return propagateResult.error();
     }
 

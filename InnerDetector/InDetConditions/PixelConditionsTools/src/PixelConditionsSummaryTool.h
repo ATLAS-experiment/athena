@@ -32,10 +32,10 @@
 #include "PixelConditionsData/PixelDCSStatusData.h"
 #include "PixelConditionsData/PixelTDAQData.h"
 
-#include "PixelReadoutGeometry/IPixelReadoutManager.h"
 #include "StoreGate/ReadCondHandleKey.h"
 #include "InDetReadoutGeometry/SiDetectorElementCollection.h"
 #include "InDetReadoutGeometry/SiDetectorElementStatus.h"
+#include "PixelReadoutGeometry/PixelModuleDesign.h"
 
 #include <string>
 #include <mutex>
@@ -79,6 +79,15 @@ class PixelConditionsSummaryTool: public AthAlgTool, virtual public IDetectorEle
     bool checkChipStatus(IdentifierHash moduleHash, Identifier pixid, const EventContext& ctx) const;
 
   private:
+    uint64_t getBSErrorWord(const InDetDD::PixelModuleDesign *p_design,
+                            const int index,
+                            const EventContext& ctx,
+                            const IInDetConditionsTool::IDCCacheEntry* cacheEntry) const;
+   bool hasBSError(const InDetDD::PixelModuleDesign *p_design,
+                   const IdentifierHash& moduleHash,
+                   const EventContext& ctx,
+                   const IInDetConditionsTool::IDCCacheEntry* cacheEntry) const;
+    const InDetDD::SiDetectorElement *getDetectorEelement(const IdentifierHash& moduleHash, const EventContext& ctx) const;
     const PixelID* m_pixelID{};
 
     std::vector<std::string> m_isActiveStatus;
@@ -108,9 +117,6 @@ class PixelConditionsSummaryTool: public AthAlgTool, virtual public IDetectorEle
 
     SG::ReadCondHandleKey<PixelDeadMapCondData> m_condDeadMapKey
     {this, "PixelDeadMapCondData", "PixelDeadMapCondData", "Pixel deadmap conditions key"};
-
-    ServiceHandle<InDetDD::IPixelReadoutManager> m_pixelReadout
-    {this, "PixelReadoutManager", "PixelReadoutManager", "Pixel readout manager" };
 
     SG::ReadHandleKey<IDCInDetBSErrContainer>  m_BSErrContReadKey
     {this, "PixelByteStreamErrs", "PixelByteStreamErrs", "PixelByteStreamErrs container key"};
@@ -175,9 +181,18 @@ inline InterfaceID& PixelConditionsSummaryTool::interfaceID(){
 inline bool PixelConditionsSummaryTool::checkChipStatus(IdentifierHash moduleHash, Identifier pixid, const EventContext& ctx) const {
   std::bitset<16> chipStatus(SG::ReadCondHandle<PixelDeadMapCondData>(m_condDeadMapKey, ctx)->getChipStatus(moduleHash));
   if (chipStatus.any()) {
-    Identifier moduleID = m_pixelID->wafer_id(pixid);
-    std::bitset<16> circ; 
-    circ.set(m_pixelReadout->getFE(pixid,moduleID));
+
+     const InDetDD::SiDetectorElement *element = getDetectorEelement(moduleHash,ctx);
+     const InDetDD::PixelModuleDesign *p_design = static_cast<const InDetDD::PixelModuleDesign*>(&element->design());
+
+     std::array<InDetDD::PixelDiodeTree::CellIndexType,2> diode_idx
+        = InDetDD::PixelDiodeTree::makeCellIndex(m_pixelID->phi_index(pixid),
+                                                 m_pixelID->eta_index(pixid));
+     InDetDD::PixelDiodeTree::DiodeProxy si_param ( p_design->diodeProxyFromIdx(diode_idx));
+     std::uint32_t chFE = p_design->getFE(si_param);
+
+    std::bitset<16> circ;
+    circ.set(chFE);
     if ((chipStatus&circ).any()) { return false; }
   }
   return true;

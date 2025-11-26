@@ -79,7 +79,7 @@ StatusCode EtaHoughTransformAlg::execute(const EventContext& ctx) const {
     SG::WriteHandle<EtaHoughMaxContainer> writeMaxima(m_maxima, ctx);
     ATH_CHECK(writeMaxima.record(std::make_unique<EtaHoughMaxContainer>()));
 
-    const ActsGeometryContext* gctx{nullptr};
+    const ActsTrk::GeometryContext* gctx{nullptr};
     ATH_CHECK(SG::get(gctx, m_geoCtxKey, ctx));
 
     HoughEventData data{};
@@ -107,7 +107,7 @@ StatusCode EtaHoughTransformAlg::execute(const EventContext& ctx) const {
     return StatusCode::SUCCESS;
 }
 void EtaHoughTransformAlg::preProcess(const EventContext& ctx,
-                                      const ActsGeometryContext& gctx,
+                                      const ActsTrk::GeometryContext& gctx,
                                       const SpacePointContainer& spacePoints,
                                       HoughEventData& data) const {
 

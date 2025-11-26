@@ -1,12 +1,12 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////
 // TruthLinkRepointTool.cxx
 // Truth links on some objects point to the main truth particle
 // container, or to some other container that won't be saved in the
-// output derivation.  This re-points the links from the old 
+// output derivation.  This re-points the links from the old
 // container to the new container (and serves as a chance to clean
 // up / harmonize the names of the decorations).
 
@@ -20,30 +20,15 @@
 
 #include "TruthUtils/MagicNumbers.h"
 
-// Constructor
-DerivationFramework::TruthLinkRepointTool::TruthLinkRepointTool(const std::string& t,
-        const std::string& n,
-        const IInterface* p ) :
-    base_class(t,n,p) {
-}
 StatusCode DerivationFramework::TruthLinkRepointTool::initialize(){
   ATH_CHECK(m_recoKey.initialize());
-  if (m_decOutput.value().empty()) {
-     ATH_MSG_FATAL("Please enter a a valid output decorator");
-     return StatusCode::FAILURE;
-  }
   ATH_CHECK(m_targetKeys.initialize());
-  m_decorKey = m_recoKey.key() + "." + m_decOutput;
   ATH_CHECK(m_decorKey.initialize());
   return StatusCode::SUCCESS;
 }
 
-// Destructor
-DerivationFramework::TruthLinkRepointTool::~TruthLinkRepointTool() = default;
-
 // Function to do dressing, implements interface in IAugmentationTool
-StatusCode DerivationFramework::TruthLinkRepointTool::addBranches() const {
-  const EventContext& ctx = Gaudi::Hive::currentContext();
+StatusCode DerivationFramework::TruthLinkRepointTool::addBranches(const EventContext& ctx) const {
   // Retrieve the truth collections
   std::vector<const xAOD::TruthParticleContainer*> targets{};
   targets.reserve(m_targetKeys.size());
@@ -59,11 +44,11 @@ StatusCode DerivationFramework::TruthLinkRepointTool::addBranches() const {
     }
     targets.emplace_back(readHandle.cptr());
   }
-  
-  
+
+
   SG::ReadHandle<xAOD::IParticleContainer> inputCont{m_recoKey, ctx};
   if (!inputCont.isValid()) {
-    ATH_MSG_FATAL("Failed to retrive "<<m_recoKey.fullKey());
+    ATH_MSG_FATAL("Failed to retrieve "<<m_recoKey.fullKey());
     return StatusCode::FAILURE;
   }
   for ( const xAOD::IParticle* input : *inputCont) {
@@ -71,12 +56,12 @@ StatusCode DerivationFramework::TruthLinkRepointTool::addBranches() const {
     output_decorator(*input) = ElementLink<xAOD::TruthParticleContainer>{};
     for (const xAOD::TruthParticleContainer* target : targets) {
         int index = find_match(truthPart, target);
-        
+
         if (index >=0) output_decorator(*input) = ElementLink<xAOD::TruthParticleContainer>(*target, index);
-        
+
     }
   }
-  
+
   return StatusCode::SUCCESS;
 }
 

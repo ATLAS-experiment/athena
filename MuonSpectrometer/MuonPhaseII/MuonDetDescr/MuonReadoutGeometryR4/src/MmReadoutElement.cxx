@@ -83,7 +83,7 @@ Amg::Transform3D MmReadoutElement::fromGapToChamOrigin(const IdentifierHash& lay
 // to be inlined here if possible.
 [[gnu::flatten]]
 #endif
-Amg::Vector3D MmReadoutElement::stripPosition(const ActsGeometryContext& ctx, const IdentifierHash& measHash) const {
+Amg::Vector3D MmReadoutElement::stripPosition(const ActsTrk::GeometryContext& ctx, const IdentifierHash& measHash) const {
    const IdentifierHash lHash = layerHash(measHash);
    if (static_cast<unsigned int>(lHash) < m_pars.layers.size()) {
       return localToGlobalTrans(ctx, lHash) * stripLayer(lHash).localStripPosition(stripNumber(measHash));
@@ -102,7 +102,7 @@ Amg::Vector3D MmReadoutElement::stripPosition(const ActsGeometryContext& ctx, co
 // to be inlined here if possible.
 [[gnu::flatten]]
 #endif
-Amg::Vector3D MmReadoutElement::leftStripEdge(const ActsGeometryContext& ctx, const IdentifierHash& measHash) const {
+Amg::Vector3D MmReadoutElement::leftStripEdge(const ActsTrk::GeometryContext& ctx, const IdentifierHash& measHash) const {
     const IdentifierHash lHash = layerHash(measHash);
     if (static_cast<unsigned int>(lHash) < m_pars.layers.size()) {
        return localToGlobalTrans(ctx, lHash) * stripLayer(lHash).localStripLeftEdge(stripNumber(measHash));
@@ -120,7 +120,7 @@ Amg::Vector3D MmReadoutElement::leftStripEdge(const ActsGeometryContext& ctx, co
 // to be inlined here if possible.
 [[gnu::flatten]]
 #endif
-Amg::Vector3D MmReadoutElement::rightStripEdge(const ActsGeometryContext& ctx, const IdentifierHash& measHash) const{
+Amg::Vector3D MmReadoutElement::rightStripEdge(const ActsTrk::GeometryContext& ctx, const IdentifierHash& measHash) const{
     const IdentifierHash lHash = layerHash(measHash);
     if (static_cast<unsigned int>(lHash) < m_pars.layers.size()) {
        return localToGlobalTrans(ctx, lHash) * stripLayer(lHash).localStripRightEdge(stripNumber(measHash));

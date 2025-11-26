@@ -334,7 +334,7 @@ StatusCode SGImplSvc::reinitialize()    {
 // add proxy (with IOpaqueAddress that will later be retrieved from P)
 //////////////////////////////////////////////////////////////////////
 StatusCode SGImplSvc::recordAddress(const std::string& skey,
-                                    IOpaqueAddress* pAddress, 
+                                    CxxUtils::RefCountedPtr<IOpaqueAddress> pAddress,
                                     bool clearAddressFlag)
 {
   lock_t lock (m_mutex);
@@ -344,7 +344,7 @@ StatusCode SGImplSvc::recordAddress(const std::string& skey,
   if (dataID == 0)
     {
       warning() << "recordAddress: Invalid Class ID found in IOpaqueAddress @" 
-                << pAddress << ". IOA will not be recorded"
+                << pAddress.get() << ". IOA will not be recorded"
                 << endmsg;
       return StatusCode::FAILURE;
     }
@@ -378,7 +378,8 @@ StatusCode SGImplSvc::recordAddress(const std::string& skey,
     {
       // create the proxy object and register it
       dp = new DataProxy (TransientAddress (dataID, skey,
-                                            pAddress, clearAddressFlag),
+                                            std::move(pAddress),
+                                            clearAddressFlag),
                           m_pDataLoader.get(), true, true);
       m_pStore->addToStore(dataID, dp).ignore();
 
@@ -388,7 +389,7 @@ StatusCode SGImplSvc::recordAddress(const std::string& skey,
     // Note: intentionally not checking dp->isValidAddress()
     {
       // Update proxy with IOpaqueAddress
-      dp->setAddress(pAddress);
+      dp->setAddress(std::move(pAddress));
     }
   else
     {
@@ -397,7 +398,7 @@ StatusCode SGImplSvc::recordAddress(const std::string& skey,
       warning() << "recordAddress: preexisting proxy @" << dp
                 << " with non-NULL IOA found for key " 
                 << skey << " type " << errType << " (" << dataID << "). \n"
-                << "Cannot record IOpaqueAddress @" << pAddress
+                << "Cannot record IOpaqueAddress @" << pAddress.get()
                 << endmsg;
       return StatusCode::FAILURE;
     }
@@ -410,7 +411,8 @@ StatusCode SGImplSvc::recordAddress(const std::string& skey,
 //////////////////////////////////////////////////////////////////////
 // add proxy (with IOpaqueAddress that will later be retrieved from P)
 //////////////////////////////////////////////////////////////////////
-StatusCode SGImplSvc::recordAddress(IOpaqueAddress* pAddress, bool clearAddressFlag)
+StatusCode SGImplSvc::recordAddress(CxxUtils::RefCountedPtr<IOpaqueAddress> pAddress,
+                                    bool clearAddressFlag)
 {
   lock_t lock (m_mutex);
   assert(0 != pAddress);
@@ -421,7 +423,7 @@ StatusCode SGImplSvc::recordAddress(IOpaqueAddress* pAddress, bool clearAddressF
   if (gK.empty()) gK = (pAddress->par())[0];   // FIXME backward compatibility
   if (gK.empty()) gK = createKey(dataID);
 
-  return this->recordAddress(gK, pAddress, clearAddressFlag);
+  return this->recordAddress(gK, std::move(pAddress), clearAddressFlag);
 }    
 
 DataProxy* SGImplSvc::setupProxy(const CLID& dataID, 

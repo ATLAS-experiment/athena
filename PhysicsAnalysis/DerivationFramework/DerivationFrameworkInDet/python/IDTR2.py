@@ -30,7 +30,7 @@ def IDTR2Cfg(flags):
 
     # NewVrtSecInclusive
     from NewVrtSecInclusiveTool.NewVrtSecInclusiveConfig import (
-        MaterialSVFinderToolCfg, DVFinderToolCfg)
+        MaterialSVFinderToolCfg, DVFinderToolCfg, KsFinderToolCfg)
     MaterialSVFinderTool = acc.popToolsAndMerge(
         MaterialSVFinderToolCfg(flags, AugmentingVersionString="_Material"))
     acc.addEventAlgo(CompFactory.Rec.NewVrtSecInclusiveAlg(
@@ -48,6 +48,15 @@ def IDTR2Cfg(flags):
         PrimaryVertexContainer="PrimaryVertices",
         BVertexContainerName="NewVrtSecInclusive_SecondaryVertices_DV",
         BVertexTool=DVFinderTool))
+
+    KsFinderTool = acc.popToolsAndMerge(
+        KsFinderToolCfg(flags, AugmentingVersionString="_Ks"))
+    acc.addEventAlgo(CompFactory.Rec.NewVrtSecInclusiveAlg(
+        name="NewVrtSecInclusive_Ks",
+        TrackParticleContainer="InDetWithLRTTrackParticles",
+        PrimaryVertexContainer="PrimaryVertices",
+        BVertexContainerName="NewVrtSecInclusive_SecondaryVertices_Ks",
+        BVertexTool=KsFinderTool))
 
     # V0Finder
     IDTR2V0ContainerName = "IDTR2RecoV0Candidates"
@@ -143,6 +152,7 @@ def IDTR2Cfg(flags):
 
     for vertexContainer in ["NewVrtSecInclusive_SecondaryVertices_DV",
                             "NewVrtSecInclusive_SecondaryVertices_Material",
+                            "NewVrtSecInclusive_SecondaryVertices_Ks",
                             "IDTR2RecoV0Candidates",
                             "IDTR2RecoKshortCandidates",
                             "IDTR2RecoLambdaCandidates",

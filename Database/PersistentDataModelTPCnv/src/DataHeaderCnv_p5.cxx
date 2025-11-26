@@ -10,11 +10,11 @@
 
 #include "PersistentDataModel/DataHeader.h"
 #include "PersistentDataModelTPCnv/DataHeaderCnv_p5.h"
-#include "CxxUtils/sgkey_t.h"
+#include "SGCore/sgkey_t.h"
 #include <algorithm>
 
 DataHeaderElementCnv_p5::DataHeaderElementCnv_p5() {}
-DataHeaderElementCnv_p5::~DataHeaderElementCnv_p5() {}
+
 
 //______________________________________________________________________________
 void DataHeaderElementCnv_p5::persToTrans(const DataHeaderElement_p5& pers,
@@ -211,10 +211,9 @@ void DataHeaderElementCnv_p5::transToPers(const DataHeaderElement& trans,
      form.insertParam(SG::sgkeyShort (*iter), entry);
    }
 }
-//______________________________________________________________________________
-//______________________________________________________________________________
+
 DataHeaderCnv_p5::DataHeaderCnv_p5() {}
-DataHeaderCnv_p5::~DataHeaderCnv_p5() {}
+
 //______________________________________________________________________________
 void DataHeaderCnv_p5::persToTrans(const DataHeader_p5& pers,
                                    DataHeader& trans,
@@ -273,5 +272,5 @@ void DataHeaderCnv_p5::insertDHRef(DataHeader_p5& pers,
   DataHeaderElement_p5 pEle;
   unsigned int entry = dhForm.size() + 1;
   m_elemCnv.transToPers(tEle, pEle, dhForm, entry);
-  pers.m_dataHeader.push_back(pEle);
+  pers.m_dataHeader.push_back(std::move(pEle));
 }

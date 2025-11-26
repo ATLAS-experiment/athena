@@ -1,11 +1,15 @@
+/*
+*   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+*/
 #ifndef WTAConeParallelHelper_h
 #define WTAConeParallelHelper_h
 
-#include <iostream>
-#include <algorithm>
-#include <map>
+
+
 #include "./WTAObject.h" // Use the WTAObject
 #include "./WTAConeMaker.h" // The base class
+#include <vector>
+#include <memory>
 
 #ifdef BITWISE_SIMULATION
 // 1: Integer type for bitwise simulation
@@ -61,10 +65,8 @@ inline void WTAConeParallelHelper::SetBlockN(unsigned int block_n)
     m_InputTowersPerBlock.clear(); m_OutputJetsPerBlock.clear();
     for(unsigned int i = 0; i < m_BlockN; i++)
     {
-        std::vector<WTATrigObj> tmp_tower_vec;
-        std::vector<WTAJet> tmp_jet_vec;
-        m_InputTowersPerBlock.push_back(tmp_tower_vec);
-        m_OutputJetsPerBlock.push_back(tmp_jet_vec);
+        m_InputTowersPerBlock.emplace_back();
+        m_OutputJetsPerBlock.emplace_back();
     }
 }
 

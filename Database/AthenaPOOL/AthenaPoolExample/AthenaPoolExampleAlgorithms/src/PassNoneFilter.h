@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ATHENAPOOLEXAMPLEALGORITHMS_PASSNONEFILTER_H
@@ -21,11 +21,11 @@ namespace AthPoolEx {
 class PassNoneFilter : public AthAlgorithm {
 public:
    PassNoneFilter(const std::string& name, ISvcLocator* pSvcLocator);
-   virtual ~PassNoneFilter();
+   virtual ~PassNoneFilter() = default;
 
-   virtual StatusCode initialize();
-   virtual StatusCode execute();
-   virtual StatusCode finalize();
+   virtual StatusCode initialize() override final;
+   virtual StatusCode execute() override final;
+   virtual StatusCode finalize() override final;
 };
 
 } // end namespace AthPoolEx

@@ -9,4 +9,4 @@ atlas_add_library (ColumnarMuonLib
 ColumnarMuon/*.h
   INTERFACE
   PUBLIC_HEADERS ColumnarMuon
-  LINK_LIBRARIES ColumnarCoreLib xAODMuon)
+  LINK_LIBRARIES ColumnarCoreLib xAODMuon ColumnarTrackingLib ColumnarVariantLib TruthUtils)

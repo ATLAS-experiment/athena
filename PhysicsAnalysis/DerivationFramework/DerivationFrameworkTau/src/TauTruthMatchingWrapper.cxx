@@ -29,10 +29,9 @@ namespace DerivationFramework {
     return StatusCode::SUCCESS;
   }
 
-  StatusCode TauTruthMatchingWrapper::addBranches() const
+  StatusCode TauTruthMatchingWrapper::addBranches(const EventContext& ctx) const
   {
     // Event context
-    const EventContext& ctx = Gaudi::Hive::currentContext();
 
     // Read handle
     SG::ReadHandle<xAOD::TauJetContainer> xTauContainer(m_tauKey,ctx);

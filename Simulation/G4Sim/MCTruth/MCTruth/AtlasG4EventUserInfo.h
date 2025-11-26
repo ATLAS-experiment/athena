@@ -1,16 +1,16 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MCTRUTH_ATLASG4EVENTUSERINFO_H
 #define MCTRUTH_ATLASG4EVENTUSERINFO_H
 
-#include <memory>
+
 #include "AtlasHepMC/GenEvent_fwd.h"
 #include "AtlasHepMC/GenParticle.h"
 #include "G4VUserEventInformation.hh"
 #include "HitManagement/HitCollectionMap.h"
-
+#include <memory>
 /** @class AtlasG4EventUserInfo
 
  * @brief This class is attached to G4Event objects as
@@ -52,7 +52,7 @@ public:
    * (AthenaTrackingAction/TrackProcessorUserActionBase)::
    * PreUserTrackingAction(...). TODO Rename
    */
-  void SetCurrentPrimaryGenParticle(HepMC::ConstGenParticlePtr p) {m_currentPrimaryGenParticle = p;}
+  void SetCurrentPrimaryGenParticle(HepMC::ConstGenParticlePtr p) {m_currentPrimaryGenParticle = std::move(p);}
 
   /**
    * @brief return a pointer to the GenParticle corresponding to the

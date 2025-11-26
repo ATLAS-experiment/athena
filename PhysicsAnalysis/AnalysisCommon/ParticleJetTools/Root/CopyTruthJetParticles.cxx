@@ -34,11 +34,13 @@ CopyTruthJetParticles::CopyTruthJetParticles(const std::string& name)
   : AsgTool(name) {}
 
 StatusCode CopyTruthJetParticles::initialize() {
-  ATH_CHECK(m_classif.retrieve());
 
   ATH_CHECK(m_truthParticleKey.initialize());
   ATH_CHECK(m_outTruthPartKey.initialize());
   ATH_CHECK(m_dressingNames.initialize());
+
+  // ATLASRECTS-8290: this is for backward compatability, remove eventually
+  if (m_use_barcode) m_uid = SG::ConstAccessor<int>("barcode");
 
   return StatusCode::SUCCESS;
 }
@@ -228,9 +230,11 @@ bool CopyTruthJetParticles::comesFrom( const xAOD::TruthParticle* tp, const int 
   // If it doesn't have a production vertex or has no parents, it doesn't come from much of anything
   if (!tp->prodVtx() || tp->nParents()==0) return false;
   // If we have seen it before, then skip this production vertex
-  if (std::find(used_vertices.begin(),used_vertices.end(), HepMC::uniqueID(tp->prodVtx()))!=used_vertices.end()) return false;
+  // ATLASRECTS-8290: this should be replaced with ->uid()
+  if (std::find(used_vertices.begin(),used_vertices.end(), m_uid(*tp->prodVtx()))!=used_vertices.end()) return false;
   // Add the production vertex to our used list
-  used_vertices.push_back( HepMC::uniqueID(tp->prodVtx()) );
+  // ATLASRECTS-8290: this should be replaced with ->uid()
+  used_vertices.push_back( m_uid(*tp->prodVtx()) );
   // Loop over the parents
   for (size_t par=0;par<tp->nParents();++par){
     // Check for null pointers in case of skimming

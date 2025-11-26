@@ -109,7 +109,7 @@ namespace MuonGMR4 {
         }
         return static_cast<const RadialStripDesign&>(layerPtr->design(true));
     }
-    inline Amg::Vector3D TgcReadoutElement::channelPosition(const ActsGeometryContext& ctx, const Identifier& measId) const {
+    inline Amg::Vector3D TgcReadoutElement::channelPosition(const ActsTrk::GeometryContext& ctx, const Identifier& measId) const {
         return channelPosition(ctx, measurementHash(measId));
     }
 }  // namespace MuonGMR4

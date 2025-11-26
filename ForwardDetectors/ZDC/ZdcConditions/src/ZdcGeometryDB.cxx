@@ -156,6 +156,7 @@ bool ZdcGeoDBGeometryDB::loadGeoDB()
       m_mainJson["Detector"][key]["q"]=q;
       m_mainJson["Detector"][key]["i"]=i;
       m_mainJson["Detector"][key]["j"]=j;
+      //coverity[copy_constructor_call]
       m_mainJson["Detector"][key]["k"]=k;
     }
 

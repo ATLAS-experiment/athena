@@ -60,7 +60,7 @@ class jFexTower2SCellDecorator : public AthReentrantAlgorithm{
         SG::WriteDecorHandleKey<xAOD::jFexTowerContainer> m_TileEtadecorKey    { this, "TileEtadecorKey"    , m_jTowersReadKey, "TileEta"    , "Tile Tower Eta information of the jTower"};
         SG::WriteDecorHandleKey<xAOD::jFexTowerContainer> m_TilePhidecorKey    { this, "TilePhidecorKey"    , m_jTowersReadKey, "TilePhi"    , "Tile Tower Phi information of the jTower"};    
         
-        SG::WriteDecorHandleKey<xAOD::jFexTowerContainer> m_jtowerEtMeVdecorKey{ this, "jtowerEtMeVdecorKey", m_jTowersReadKey, "jtowerEtMeV"       , "jFex Tower Et information in MeV"};
+        SG::WriteDecorHandleKey<xAOD::jFexTowerContainer> m_jtowerEtMeVdecorKey{ this, "jtowerEtMeVdecorKey", m_jTowersReadKey, "jtower2SCellEtMeV"       , "jFex Tower Et information in MeV"};
         SG::WriteDecorHandleKey<xAOD::jFexTowerContainer> m_SCellEtMeVdecorKey { this, "SCellEtMeVdecorKey" , m_jTowersReadKey, "SCellEtMeV"        , "SCell Et sum information in MeV"};
         SG::WriteDecorHandleKey<xAOD::jFexTowerContainer> m_TileEtMeVdecorKey  { this, "TileEtMeVdecorKey"  , m_jTowersReadKey, "TileEtMeV"         , "Tile Et information in MeV"};
         SG::WriteDecorHandleKey<xAOD::jFexTowerContainer> m_jTowerEtdecorKey   { this, "jTowerEtdecorKey"   , m_jTowersReadKey, "emulated_jtowerEt" , "jFex Tower Et information. ENCODED!"};

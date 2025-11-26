@@ -9,7 +9,6 @@
 //====================================================================
 
 // Framework include files
-#include "POOLCore/DbPrint.h"
 #include "RootAuxDynIO/IRootAuxDynIO.h"
 #include "StorageSvc/DbArray.h"
 #include "StorageSvc/DbColumn.h"
@@ -40,26 +39,6 @@ using namespace pool;
 
 static UCharDbArrayAthena s_char_Blob ATLAS_THREAD_SAFE;
 
-namespace {
-/* Temporarily install ROOT error handler to filter out warnings about RNTuple
-   being in development Remove in production
- */
-static struct ErrorHandlerInit {
-  static ErrorHandlerFunc_t m_oldHandler ATLAS_THREAD_SAFE;
-  ErrorHandlerInit() { m_oldHandler = SetErrorHandler(RNTErrorHandler); }
-  static void RNTErrorHandler(int level, Bool_t abort, const char* location,
-                              const char* msg) {
-    // filter out RNTuple warnings, print all other messages
-    if (strstr(msg, "The RNTuple file format will change") == NULL and
-        strstr(msg, "Pre-release format version") == NULL and m_oldHandler) {
-      m_oldHandler(level, abort, location, msg);
-    }
-  }
-} EHI;
-ErrorHandlerFunc_t ErrorHandlerInit::m_oldHandler ATLAS_THREAD_SAFE;
-
-}  // namespace
-
 
 /// Required here for unique_ptr compilation
 RNTupleContainer::FieldDesc::FieldDesc(const DbColumn& c) : DbColumn(c) {}
@@ -85,11 +64,12 @@ const std::string RNTupleContainer::FieldDesc::typeName() {
 }
 
 /// Standard constructor
-RNTupleContainer::RNTupleContainer()
-   : m_type(nullptr),
-     m_dbH(POOL_StorageType), m_rootDb(nullptr),
-     m_ioBytes(0), m_isDirty(false),
-     m_index(0), m_indexSize(0), m_indexBump(0), m_indexMulti( getpid() )
+RNTupleContainer::RNTupleContainer(const std::string& name) :
+   DbContainerImp(name),
+   m_type(nullptr),
+   m_dbH(POOL_StorageType), m_rootDb(nullptr),
+   m_ioBytes(0), m_isDirty(false),
+   m_index(0), m_indexSize(0), m_indexBump(0), m_indexMulti( getpid() )
 { }
 
 
@@ -108,30 +88,25 @@ DbStatus RNTupleContainer::open( DbDatabase& dbH, const std::string& nam,
                                  const DbTypeInfo* info, DbAccessMode mode)
 {
    m_name = nam;
-   DbPrint log(m_name);
    m_fieldDescs.clear();
    m_rootDb = dynamic_cast<RootDatabase*>(dbH.info());
    if( !dbH.isValid() or !info or !m_rootDb ) {
-      log << DbPrintLvl::Error << "Cannot open container '" << m_name << "', invalid Database handle."
-          << DbPrint::endmsg;
+      ATH_MSG_ERROR("Cannot open container '" << m_name << "', invalid Database handle.");
       return pool::Error;
    }
    m_indexBump = m_rootDb->currentIndexMasterID();
 
-   log << DbPrintLvl::Debug << "Opening, mode=" << accessMode(mode)
-       << DbPrint::endmsg;
+   ATH_MSG_DEBUG("Opening, mode=" << accessMode(mode));
    std::string ntupleName(m_name);
    std::replace(ntupleName.begin(), ntupleName.end(), '/', '_');
    std::string fieldName;
 
    m_auxDynTool = Gaudi::PluginService::Factory< RootAuxDynIO::IFactoryTool*() >::create("RootAuxDynIO::FactoryTool");
    if( !m_auxDynTool ) {
-      log << DbPrintLvl::Warning << "Could NOT load RootAuxDynIO::FactoryTool. Dynamic attributes support disabled"
-          << DbPrint::endmsg;
+      ATH_MSG_WARNING("Could NOT load RootAuxDynIO::FactoryTool. Dynamic attributes support disabled");
    }
    const DbTypeInfo::Columns& cols = info->columns();
-   log << DbPrintLvl::Debug << "   attributes# = " << cols.size()
-       << DbPrint::endmsg;
+   ATH_MSG_DEBUG("   attributes# = " << cols.size());
    if (cols.size() == 1) {
       // extract ntuple and field name for grouped containers, notation:
       // "ntuple(column)"
@@ -139,14 +114,12 @@ DbStatus RNTupleContainer::open( DbDatabase& dbH, const std::string& nam,
       if (inx != std::string::npos) {
          std::string::size_type inx2 = nam.find(')');
          if (inx2 == std::string::npos or inx2 != nam.size() - 1) {
-            log << DbPrintLvl::Error << "Misplaced closing ')' in " << m_name
-                << DbPrint::endmsg;
+            ATH_MSG_ERROR("Misplaced closing ')' in " << m_name);
             return pool::Error;
          }
          fieldName = ntupleName.substr(inx + 1, inx2 - inx - 1);
          ntupleName.resize(inx);
-         log << DbPrintLvl::Debug << "Grouped Container '" << ntupleName << "/"
-             << fieldName << "'" << DbPrint::endmsg;
+         ATH_MSG_DEBUG("Grouped Container '" << ntupleName << "/" << fieldName << "'");
       }
    }
    // prepare descriptions for all object data members (aka columns)
@@ -167,19 +140,17 @@ DbStatus RNTupleContainer::open( DbDatabase& dbH, const std::string& nam,
    if( mode & pool::CREATE ) {
       m_ntupleWriter = m_rootDb->getNTupleWriter(ntupleName, true);
       if( m_ntupleWriter ) {
-         log << DbPrintLvl::Debug << "Created container " << m_name
-             << " of type " << ROOTRNTUPLE_StorageType.storageName()
-             << DbPrint::endmsg;
+         ATH_MSG_DEBUG("Created container " << m_name
+             << " of type " << ROOTRNTUPLE_StorageType.storageName());
       } else {
-         log << DbPrintLvl::Error << "Could not create container " << m_name
-             << " of type " << ROOTRNTUPLE_StorageType.storageName()
-             << DbPrint::endmsg;
+         ATH_MSG_ERROR("Could not create container " << m_name
+             << " of type " << ROOTRNTUPLE_StorageType.storageName());
          return pool::Error;
       }
       // Prepare Field descriptions
       for( auto& dsc : m_fieldDescs ) {
-         log << DbPrintLvl::Debug << "Adding new RNTuple Field: name=" << dsc.fieldname 
-             << "  typename=" << dsc.typeName() << DbPrint::endmsg;
+         ATH_MSG_DEBUG("Adding new RNTuple Field: name=" << dsc.fieldname 
+             << "  typename=" << dsc.typeName());
          m_ntupleWriter->addField( dsc.fieldname, dsc.typeName() );
       }
    }
@@ -187,13 +158,9 @@ DbStatus RNTupleContainer::open( DbDatabase& dbH, const std::string& nam,
       // create (and keep in the description object) the rntuple field for reading
       m_ntupleReader = m_rootDb->getNTupleReader(ntupleName);
       if( m_ntupleReader ) {
-         log << DbPrintLvl::Debug << "Created container " << m_name
-             << " for RNTuple reading"
-             << DbPrint::endmsg;
+         ATH_MSG_DEBUG("Created container " << m_name << " for RNTuple reading");
       } else {
-         log << DbPrintLvl::Error << "Could not create container " << m_name
-             << " for RNTuple reading"
-             << DbPrint::endmsg;
+         ATH_MSG_ERROR("Could not create container " << m_name << " for RNTuple reading");
          return pool::Error;
       }
       for( auto& dsc : m_fieldDescs ) {
@@ -216,9 +183,8 @@ DbStatus RNTupleContainer::open( DbDatabase& dbH, const std::string& nam,
       }
    }
 
-   log << DbPrintLvl::Debug << "Opened container " << m_name << " of type "
-       << ROOTRNTUPLE_StorageType.storageName()
-       << DbPrint::endmsg;
+   ATH_MSG_DEBUG("Opened container " << m_name << " of type "
+       << ROOTRNTUPLE_StorageType.storageName());
    m_dbH = dbH;
    m_type = info;
    return Success;
@@ -236,10 +202,8 @@ DbStatus RNTupleContainer::checkAccess(DbDatabase& dbH,
          return Success;
       }
    }
-   DbPrint log(nam);
-   log << DbPrintLvl::Debug << "Cannot access container '" << nam << "', invalid Database handle or "
-       << "container is not of type RNTuple."
-       << DbPrint::endmsg;
+   ATH_MSG_DEBUG("Cannot access container '" << nam 
+      << "', invalid Database handle or container is not of type RNTuple.");
    return pool::Error;
 }
 
@@ -256,24 +220,20 @@ DbStatus RNTupleContainer::initObjectFieldDesc( FieldDesc& dsc )
          if( m_auxDynTool and m_auxDynTool->hasAuxStoreIO(dsc.clazz) ) {
             dsc.auxdyn_writer = m_auxDynTool->getNTupleAuxDynWriter(*dsc.clazz);
             if( !dsc.auxdyn_writer ) {
-               DbPrint log(m_name);
-               log << DbPrintLvl::Error << "Cannot get AuxDyn writer for " << dsc.fieldname
-                   << DbPrint::endmsg;
+               ATH_MSG_ERROR("Cannot get AuxDyn writer for " << dsc.fieldname);
                return pool::Error;
             }
          }
          return Success;
       } else {
-         DbPrint log(m_name);
-         log << DbPrintLvl::Error << "Failed to open the container " << m_name
+         ATH_MSG_ERROR("Failed to open the container " << m_name
              << " of type " << ROOTRNTUPLE_StorageType.storageName() << " Class "
-             << dsc.clazz->GetName() << " is unknown." << DbPrint::endmsg;
+             << dsc.clazz->GetName() << " is unknown.");
       }
    } else {
-      DbPrint log(m_name);
-      log << DbPrintLvl::Error << "Failed to open the container " << m_name
+      ATH_MSG_ERROR("Failed to open the container " << m_name
           << " of type " << ROOTRNTUPLE_StorageType.storageName() << ". Type "
-          << dsc.typeName() << " is unknown." << DbPrint::endmsg;
+          << dsc.typeName() << " is unknown.");
    }
    return pool::Error;
 }
@@ -301,9 +261,7 @@ void RNTupleContainer::useNextRecordId(uint64_t nextID)
 DbStatus RNTupleContainer::writeObject( ActionList::value_type& action )
 {
    if( m_isDirty ) {
-      DbPrint log(m_name);
-      log << DbPrintLvl::Error << "Attempt to write to an RNTuple Container twice in the same transaction! "
-          << DbPrint::endmsg;
+      ATH_MSG_ERROR("Attempt to write to an RNTuple Container twice in the same transaction! ");
       m_ioBytes = -1;
       return pool::Error;
    }
@@ -323,9 +281,7 @@ DbStatus RNTupleContainer::writeObject( ActionList::value_type& action )
                 }
              }
           } catch(const std::exception& exc) {
-             DbPrint err(m_name);
-             err << DbPrintLvl::Error << "Dynamic attributes writing error: " << exc.what()
-                 << DbPrint::endmsg;
+             ATH_MSG_ERROR("Dynamic attributes writing error: " << exc.what());
              p.ptr = nullptr;  // signal an error condition
              break;
           }
@@ -354,21 +310,20 @@ DbStatus RNTupleContainer::writeObject( ActionList::value_type& action )
           break;
       }
       if( !p.ptr ) {
-         DbPrint err( m_name);
-         err << DbPrintLvl::Error
-             << "[RNTupleContainer] Could not write an object of type " << dsc.typeName()
-             << DbPrint::endmsg;
-	 throw std::runtime_error(std::string("[RNTupleContainer] Could not write an object of type  ") + dsc.typeName());
+         ATH_MSG_ERROR("[RNTupleContainer] Could not write an object of type " << dsc.typeName());
+         throw std::runtime_error(std::string("[RNTupleContainer] Could not write an object of type  ") + dsc.typeName());
       }
       m_ntupleWriter->addFieldValue( dsc.fieldname, p.ptr );
       // fill the index field
       m_index = action.link.second;
       m_ntupleWriter->addFieldValue( "index_ref", &m_index );
+      ATH_MSG_VERBOSE("Setting index for " << dsc.fieldname << " to " << std::hex << m_index << std::dec);
       m_indexSize++;
    }
 
    if( !m_ntupleWriter->isGrouped() and m_ntupleWriter->needsCommit() ) {
       num_bytes += m_ntupleWriter->commit();
+      m_isDirty = false;
    }
 
    if ( num_bytes > 0 )  {
@@ -396,8 +351,7 @@ DbStatus RNTupleContainer::loadObject(void** obj_p, ShapeH, Token::OID_t& oid)
        case DbColumn::BLOB:
           {
              // MN: not sure about this one, implement if needed ever
-             DbPrint err(m_name);
-             err << DbPrintLvl::Fatal << "[RNTupleContainer] - BLOB reading not implemented yet" << DbPrint::endmsg;
+             ATH_MSG_FATAL("[RNTupleContainer] - BLOB reading not implemented yet");
              return pool::Error;
           }
        case DbColumn::ANY:
@@ -504,7 +458,6 @@ DbStatus RNTupleContainer::setOption(const DbOption& opt) {
 
 /// Execute transaction action
 DbStatus RNTupleContainer::transAct(Transaction::Action action) {
-  DbPrint log(m_name);
   // Execute action on the base class first
   DbStatus status = DbContainerImp::transAct(action);
   if (!status.isSuccess()) return status;
@@ -520,11 +473,9 @@ DbStatus RNTupleContainer::transAct(Transaction::Action action) {
   return Success;
 }
 
-/// Add single entry to container
-DbStatus RNTupleContainer::save(DbObjectHandle<DbObject>& objH) {
-  // Execute action on the base class first
-  DbStatus status = DbContainerImp::save(objH);
-  // ASM: Do we need to reset rows_written as well?
+/// Store object in location
+DbStatus RNTupleContainer::store(const void* object, DbContainer& cntH, ShapeH shape) {
+  DbStatus status = DbContainerImp::store(object, cntH, shape);
   clearDirty();
   return status;
 }

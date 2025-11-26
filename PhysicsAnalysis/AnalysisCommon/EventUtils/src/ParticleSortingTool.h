@@ -54,7 +54,7 @@ public:
 
 
   /// Implement the method from the ISkimmingTool interface
-  virtual StatusCode addBranches() const final override;
+  virtual StatusCode addBranches(const EventContext& ctx) const final override;
 
 
 

@@ -1,29 +1,9 @@
 # Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
-from Campaigns.Utils import getMCCampaign, Campaign
+from Campaigns.Utils import getDataYear
 from PyUtils.Logging import logging
 msg = logging.getLogger('BJetTriggerByYearContent')
 msg.setLevel(logging.INFO)
-
-def getDataYear(flags):
-    if flags.Input.isMC:
-        campaign = getMCCampaign(flags.Input.Files)
-        dataYear = {
-            Campaign.MC20a: 2016, # prefer over 2015
-            Campaign.MC20d: 2017,
-            Campaign.MC20e: 2018,
-            Campaign.MC21a: 2022,
-            Campaign.MC23a: 2022,
-            Campaign.MC23c: 2023,
-            Campaign.MC23d: 2023,
-            Campaign.MC23e: 2024,
-            Campaign.MC23g: 2025,
-            Campaign.PhaseII: 2030,
-        }[campaign]
-    else:
-        dataYear = flags.Input.DataYear
-    return dataYear
-
 
 def getBJetTriggerContent(flags):
     if flags.Trigger.EDMVersion == 2:

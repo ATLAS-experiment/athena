@@ -109,7 +109,7 @@ G4bool LArG4H6WarmTCCalculator::Process(const G4Step* a_step, std::vector<LArHit
             << region
             << etaBin
             << phiBin;
-  hdata.push_back(larhit);
+  hdata.push_back(std::move(larhit));
 
   return true;
 }

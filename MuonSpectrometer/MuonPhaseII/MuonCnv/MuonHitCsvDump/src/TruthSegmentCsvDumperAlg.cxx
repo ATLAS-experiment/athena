@@ -87,7 +87,7 @@ StatusCode TruthSegmentCsvDumperAlg::execute(){
   const xAOD::MuonSegmentContainer* readTruthSegment{nullptr};
   ATH_CHECK(SG::get(readTruthSegment, m_inSegmentKey, ctx));
 
-  const ActsGeometryContext* gctxHandle{nullptr};
+  const ActsTrk::GeometryContext* gctxHandle{nullptr};
   ATH_CHECK(SG::get(gctxHandle, m_geoCtxKey, ctx));
 
   for (const xAOD::MuonSegment* segment : *readTruthSegment) {

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -251,7 +251,7 @@ StatusCode LArADC2MeVCondAlg::execute(const EventContext& ctx) const{
   ATH_CHECK(writeHandle.record(std::move(lArADC2MeVObj)));
   
   if (nNouA2MeV) ATH_MSG_ERROR("No uA2MeV values for " << nNouA2MeV << " channels");
-  if (nNoDAC2uA) ATH_MSG_ERROR("No DAC2uA values for " << nNouA2MeV << " channels");
+  if (nNoDAC2uA) ATH_MSG_ERROR("No DAC2uA values for " << nNoDAC2uA << " channels");
   if (nNoRamp) {
     if (m_completeDetector) {
       ATH_MSG_ERROR("No Ramp values for " << nNoRamp << " channels * gains " );

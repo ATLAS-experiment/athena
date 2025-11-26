@@ -3,8 +3,10 @@
 */
 
 #include "MCTruthSteppingAction.h"
+#include "MCTruth/AtlasG4EventUserInfo.h"
 #include "MCTruth/TrackHelper.h"
 
+#include "G4Event.hh"
 #include "G4Step.hh"
 #include "G4StepPoint.hh"
 #include "G4TouchableHistory.hh"
@@ -61,7 +63,7 @@ namespace G4UA
   //---------------------------------------------------------------------------
   // Beginning of event
   //---------------------------------------------------------------------------
-  void MCTruthSteppingAction::BeginOfEventAction(const G4Event*)
+  void MCTruthSteppingAction::BeginOfEventAction(const G4Event* event)
   {
     // First time initialization
     if(!m_isInitialized) {
@@ -73,7 +75,9 @@ namespace G4UA
     }
     // Every event initialization
     for (auto& recEnvelope : m_recordingEnvelopes) {
-      recEnvelope.BeginOfEvent();
+      if(auto* eventInfo = static_cast<AtlasG4EventUserInfo*>( event->GetUserInformation())){
+        recEnvelope.BeginOfEvent(eventInfo->GetHitCollectionMap()->Find<TrackRecordCollection>(recEnvelope.GetTrackRecordCollectionName()));
+      }
     }
   }
 

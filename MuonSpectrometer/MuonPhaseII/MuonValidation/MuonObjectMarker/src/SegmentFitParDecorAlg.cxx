@@ -86,7 +86,7 @@ namespace MuonR4 {
 
     StatusCode SegmentFitParDecorAlg::execute(const EventContext& ctx) const {
         const xAOD::MuonSegmentContainer* segmentContainer{nullptr};
-        const ActsGeometryContext* gctx{nullptr};
+        const ActsTrk::GeometryContext* gctx{nullptr};
 
         ATH_CHECK(SG::get(segmentContainer, m_segmentKey, ctx));
         ATH_CHECK(SG::get(gctx, m_geoCtxKey, ctx));

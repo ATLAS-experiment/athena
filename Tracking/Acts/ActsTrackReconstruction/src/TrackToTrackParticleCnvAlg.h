@@ -25,7 +25,7 @@
 
 #include "InDetReadoutGeometry/SiDetectorElementCollection.h"
 
-#include "ActsGeometryInterfaces/IActsExtrapolationTool.h"
+#include "ActsGeometryInterfaces/IExtrapolationTool.h"
 #include "ActsGeometryInterfaces/ITrackingGeometryTool.h"
 
 #include "Acts/Surfaces/PerigeeSurface.hpp"
@@ -42,7 +42,7 @@
 #include "Acts/Propagator/Propagator.hpp"
 #include "Acts/Propagator/Navigator.hpp"
 
-class ActsGeometryContext;
+class GeometryContext;
 
 namespace ActsTrk
 {
@@ -69,7 +69,7 @@ namespace ActsTrk
 						    const typename ActsTrk::TrackContainer::ConstTrackProxy &track,
 						    const Acts::PerigeeSurface &perigee_surface) const;
 
-    ToolHandle<IActsExtrapolationTool> m_extrapolationTool
+    ToolHandle<ActsTrk::IExtrapolationTool> m_extrapolationTool
        {this, "ExtrapolationTool", ""};
    
    PublicToolHandle<ActsTrk::ITrackingGeometryTool> m_trackingGeometryTool{this, "TrackingGeometryTool", "ActsTrackingGeometryTool"};

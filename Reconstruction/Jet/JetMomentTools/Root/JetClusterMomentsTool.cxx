@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "JetMomentTools/JetClusterMomentsTool.h"
@@ -71,6 +71,7 @@ const xAOD::CaloCluster* JetClusterMomentsTool::findLeadingCluster(const xAOD::J
   case xAOD::Type::CaloCluster : {
     for (size_t i_cl = 0; i_cl < jet.numConstituents(); i_cl++){ // loop all constituents
       const xAOD::CaloCluster * cl_current = dynamic_cast<const xAOD::CaloCluster*> (jet.rawConstituent(i_cl));
+      if (!cl_current) continue;
       if (!cl_leading || cl_leading->pt() < cl_current->pt() ) cl_leading = cl_current;
     }
     

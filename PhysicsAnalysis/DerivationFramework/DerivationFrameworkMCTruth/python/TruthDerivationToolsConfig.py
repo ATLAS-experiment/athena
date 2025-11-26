@@ -148,9 +148,10 @@ def TruthD2DecoratorCfg(flags, name, **kwargs):
 def TruthClassificationDecoratorCfg(flags, name, **kwargs):
     """Configure the TruthClassificationDecorator tool"""
     acc = ComponentAccumulator()
+    from MCTruthClassifier.MCTruthClassifierConfig import DFCommonMCTruthClassifierCfg
+    kwargs.setdefault("MCTruthClassifier", acc.addPublicTool(acc.popToolsAndMerge(DFCommonMCTruthClassifierCfg(flags))))
     TruthClassificationDecorator = CompFactory.DerivationFramework.TruthClassificationDecorator
-    acc.addPublicTool(TruthClassificationDecorator(name = name, **kwargs),
-                      primary = True)
+    acc.setPrivateTools(TruthClassificationDecorator(name = name, **kwargs))
     return acc
 
 
@@ -208,6 +209,9 @@ def TruthQGDecorationToolCfg(flags, name, **kwargs):
 def TruthNavigationDecoratorCfg(flags, name, **kwargs):
     """Congigure the truth navigation decorator tool"""
     acc = ComponentAccumulator()
+    kwargs.setdefault("InputCollections", [])
+    kwargs.setdefault("parentDecorKeys", [ key + ".parentLinks" for key in kwargs["InputCollections"] ])
+    kwargs.setdefault("childDecorKeys", [ key + ".childLinks" for key in kwargs["InputCollections"] ])
     TruthNavigationDecorator = CompFactory.DerivationFramework.TruthNavigationDecorator
     acc.addPublicTool(TruthNavigationDecorator(name = name, **kwargs),
                       primary = True)
@@ -241,15 +245,9 @@ def HardScatterCollectionMakerCfg(flags, name, **kwargs):
 #add the 'decoration' tool to dress the main truth collection with the classification
 def DFCommonTruthClassificationToolCfg(flags):
     """dress the main truth collection with the classification"""
-    from MCTruthClassifier.MCTruthClassifierConfig import DFCommonMCTruthClassifierCfg
-    accMCTC = DFCommonMCTruthClassifierCfg(flags)
-    DFCommonTruthClassifier = accMCTC.getPrimary()
-    acc = TruthClassificationDecoratorCfg(flags,
+    return TruthClassificationDecoratorCfg(flags,
                                           name = "DFCommonTruthClassificationTool",
-                                          ParticlesKey = "TruthParticles",
-                                          MCTruthClassifier = DFCommonTruthClassifier)
-    acc.merge(accMCTC)
-    return acc
+                                          ParticlesKey = "TruthParticles")
 
 
 # Hadron origin decoration tools
@@ -257,7 +255,7 @@ def HadronOriginClassifierCfg(flags, name, **kwargs):
     """get the hadron origin classification"""
     acc = ComponentAccumulator()
     HadronOriginClassifier = CompFactory.DerivationFramework.HadronOriginClassifier
-    kwargs.setdfault("DSID", flags.Input.MCChannelNumber)
+    kwargs.setdefault("DSID", flags.Input.MCChannelNumber)
     acc.addPublicTool(HadronOriginClassifier(name = name, **kwargs),
                       primary = True)
     return acc

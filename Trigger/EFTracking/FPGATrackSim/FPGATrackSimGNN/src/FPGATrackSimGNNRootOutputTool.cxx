@@ -184,11 +184,11 @@ StatusCode FPGATrackSimGNNRootOutputTool::fillTree(const std::vector<std::shared
       }
     }
 
-    m_road_hit_uniqueID.push_back(road_hit_uniqueID);
-    m_road_hit_barcode.push_back(road_hit_barcode);
-    m_road_hit_eventIndex.push_back(road_hit_eventIndex);
-    m_road_hit_z.push_back(road_hit_z);
-    m_road_hit_r.push_back(road_hit_r);
+    m_road_hit_uniqueID.push_back(std::move(road_hit_uniqueID));
+    m_road_hit_barcode.push_back(std::move(road_hit_barcode));
+    m_road_hit_eventIndex.push_back(std::move(road_hit_eventIndex));
+    m_road_hit_z.push_back(std::move(road_hit_z));
+    m_road_hit_r.push_back(std::move(road_hit_r));
 
   }
   m_road_tree->Fill();

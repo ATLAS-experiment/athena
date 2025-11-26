@@ -219,6 +219,30 @@ def getLCNeutralFlowElementCreatorAlgorithm(inputFlags,neutralFlowElementOutputN
     
     return LCFlowElementNeutralCreatorAlgorithm 
 
+# Factory function to create the ML-based neutral flow element creator algorithm
+def getPFOClusterMLCorrectionAlgorithmCfg(inputFlags, inputNameBase = "JetETMiss", outputNameBase = "JetETMissClusterMLCorrected"):
+    alg = CompFactory.PFOClusterMLCorrectionAlgorithm("PFOClusterMLCorrectionAlgorithm")
+    suffix = "ParticleFlowObjects"
+    alg.NeutralPFlowInputContainer = inputNameBase + "Neutral" + suffix
+    alg.ChargedPFlowInputContainer = inputNameBase + "Charged" + suffix
+    alg.NeutralPFlowOutputContainer = outputNameBase + "Neutral"  + suffix
+    alg.ChargedPFlowOutputContainer = outputNameBase + "Charged" + suffix
+    
+    return alg
+
+def getNeutralPFOClusterMLCorrectionToolCfg(inputFlags, toolName="NeutralPFOClusterMLCorrectionTool", clusterMLCorrectedEnergyDecorationKey="clusterE_ML"):
+    if toolName == "NeutralPFOClusterMLCorrectionTool":
+        tool = CompFactory.NeutralPFOClusterMLCorrectionTool(toolName)
+        tool.ClusterMLCorrectedEnergyDecorationKey = clusterMLCorrectedEnergyDecorationKey
+    else:
+        raise ValueError(f"Unknown tool name: {toolName}")
+    
+    ca = ComponentAccumulator()
+    ca.setPrivateTools(tool)
+    return ca
+
+
+
 def getEGamFlowElementAssocAlgorithm(inputFlags, algName="", **kwargs):
 
     kwargs.setdefault("neutral_FE_cont_name", "")
@@ -466,6 +490,9 @@ def getOfflinePFAlgorithm(inputFlags):
     PFMomentCalculatorTools=result.popToolsAndMerge(getPFMomentCalculatorTool(inputFlags,[]))
     PFAlgorithm.BaseToolList = [PFMomentCalculatorTools]
     PFAlgorithm.BaseToolList += [getPFLCCalibTool(inputFlags)]
+    if inputFlags.PF.EOverPMode:
+        PFAlgorithm.BaseToolList += [CompFactory.PFRadialEnergyCalculatorTool()]
+
     result.addEventAlgo(PFAlgorithm)
     return result
 

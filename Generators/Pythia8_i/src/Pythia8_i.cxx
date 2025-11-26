@@ -105,7 +105,7 @@ StatusCode Pythia8_i::genInitialize() {
   m_runinfo = std::make_shared<HepMC3::GenRunInfo>();
   /// Here one can fill extra information, e.g. the used tools in a format generator name, version string, comment.
   struct HepMC3::GenRunInfo::ToolInfo generator={std::string("Pythia8"),py8version(),std::string("Used generator")};
-  m_runinfo->tools().push_back(generator);   
+  m_runinfo->tools().push_back(std::move(generator));   
 #endif
 
   bool canInit = true;

@@ -6,15 +6,16 @@
 #define IDDICT_IdDictRegion_H
 
 #include "IdDict/IdDictDictEntry.h"
+#include "IdDict/IdDictFieldImplementation.h"
 
 #include <string>
 #include <vector>
+#include <memory>
 
 class Range;
 class IdDictMgr;
 class IdDictDictionary;
 class IdDictRegionEntry;
-class IdDictFieldImplementation;
 class IdDictRegion;
 
 class IdDictRegion : public IdDictDictEntry{ 
@@ -26,7 +27,13 @@ public:
     IdDictRegion (const std::string& name,
                   const std::string& group,
                   const std::string& tag);
-    virtual ~IdDictRegion () =  default; 
+    virtual ~IdDictRegion ();
+
+    IdDictRegion (IdDictRegion&&);
+    IdDictRegion& operator= (IdDictRegion&&);
+
+    IdDictRegion (const IdDictRegion&) = delete;
+    IdDictRegion& operator= (const IdDictRegion&) = delete;
 
 
     //@}
@@ -67,13 +74,13 @@ public:
     // @{
 
     /// Add entry to the end of the list.
-    void add_entry (IdDictRegionEntry* entry);
+    void add_entry (std::unique_ptr<IdDictRegionEntry> entry);
 
     /// Add entry to the start of the list.
-    void prepend_entry (IdDictRegionEntry* entry);
+    void prepend_entry (std::unique_ptr<IdDictRegionEntry> entry);
 
     /// Non-const access to entry pointers.
-    const std::vector<IdDictRegionEntry*>& entries();
+    const std::vector<std::unique_ptr<IdDictRegionEntry> >& entries();
 
     /// Non-const access to implementation objects.
     IdDictFieldImplementation& implementation(size_t i);
@@ -102,11 +109,11 @@ public:
     /// Set is_empty flag.
     void set_is_empty();
 
-    void find_neighbours (const IdDictDictionary& dictionary);
+    void find_neighbours (IdDictDictionary& dictionary);
 
     virtual void set_index (size_t index) override;
     virtual Range build_range () const override;
-    virtual void resolve_references (const IdDictMgr& idd,
+    virtual void resolve_references (IdDictMgr& idd,
                                      IdDictDictionary& dictionary) override;
     virtual void generate_implementation (const IdDictMgr& idd,
                                           IdDictDictionary& dictionary,
@@ -122,7 +129,7 @@ public:
 
 
 protected:
-    std::vector <IdDictRegionEntry*>        m_entries;
+    std::vector <std::unique_ptr<IdDictRegionEntry> > m_entries;
 private:
     std::vector <IdDictFieldImplementation> m_implementation; 
     size_t                                  m_index{}; 
@@ -292,7 +299,7 @@ bool IdDictRegion::is_empty() const
 
 /// Non-const access to entry pointers.
 inline
-const std::vector<IdDictRegionEntry*>& IdDictRegion::entries()
+const std::vector<std::unique_ptr<IdDictRegionEntry> >& IdDictRegion::entries()
 {
     return m_entries;
 }

@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 #====================================================================
 # DAOD_PHYS.py
 # This defines DAOD_PHYS, an unskimmed DAOD format for Run 3.
@@ -103,8 +103,6 @@ def PHYSCoreCfg(flags, name_tag='PHYS', StreamName='StreamDAOD_PHYS', TriggerLis
                                            "InDetTrackParticles",
                                            "AntiKt4EMTopoJets",
                                            "AntiKt4EMPFlowJets",
-                                           "BTagging_AntiKt4EMPFlow",
-                                           "AntiKt4EMPFlowJets_FTAG",
                                            "MET_Baseline_AntiKt4EMTopo",
                                            "MET_Baseline_AntiKt4EMPFlow",
                                            "TauJets",
@@ -138,7 +136,6 @@ def PHYSCoreCfg(flags, name_tag='PHYS', StreamName='StreamDAOD_PHYS', TriggerLis
                                               "TauJets_MuonRM.dRmax.etOverPtLeadTrk",
                                               "HLT_xAOD__TrigMissingETContainer_TrigEFMissingET.ex.ey",
                                               "HLT_xAOD__TrigMissingETContainer_TrigEFMissingET_mht.ex.ey"]
-
     if addExtraVariables:
         PHYSSlimmingHelper.ExtraVariables += addExtraVariables
 
@@ -150,9 +147,17 @@ def PHYSCoreCfg(flags, name_tag='PHYS', StreamName='StreamDAOD_PHYS', TriggerLis
     PHYSSlimmingHelper.ExtraVariables += GetExtraPLITVariablesForDxAOD()
 
     # boosted jet taggers
-    PHYSSlimmingHelper.ExtraVariables += ["AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets.TopTransformer_ConstScore", 
+    PHYSSlimmingHelper.ExtraVariables += ["AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets.TopTransformer_ConstScore",
                                           "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets.WTransformer_ConstScore", 
-                                          "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets.WTransformer_massdec_ConstScore"]
+                                          "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets.WTransformer_massdec_ConstScore",
+                                          "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets.R10TruthLabel_R22v1_TruthJetMass",
+                                          "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets.R10TruthLabel_R22v1_TruthJetPt",
+                                          "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets.R10TruthLabel_R22v1_TruthGroomedJetMass",
+                                          "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets.R10TruthLabel_R22v1_TruthGroomedJetPt",
+                                          "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets.R10WZTruthLabel_R22v1_TruthJetMass",
+                                          "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets.R10WZTruthLabel_R22v1_TruthJetPt",
+                                          "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets.R10WZTruthLabel_R22v1_TruthGroomedJetMass",
+                                          "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets.R10WZTruthLabel_R22v1_TruthGroomedJetPt"]
 
     # Truth extra content
     if flags.Input.isMC:
@@ -205,7 +210,7 @@ def PHYSCoreCfg(flags, name_tag='PHYS', StreamName='StreamDAOD_PHYS', TriggerLis
         AddRun3TrigNavSlimmingCollectionsToSlimmingHelper(PHYSSlimmingHelper)
 
     # L1 trigger objects
-    from DerivationFrameworkPhys.TriggerMatchingCommonConfig import getDataYear
+    from Campaigns.Utils import getDataYear
     if getDataYear(flags) >= 2024:
         # Run 3 with Phase I jet RoIs.
         from DerivationFrameworkPhys.TriggerMatchingCommonConfig import AddjFexRoIsToSlimmingHelper

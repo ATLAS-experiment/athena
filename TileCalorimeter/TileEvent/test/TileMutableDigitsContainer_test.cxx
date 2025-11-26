@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file TileEvent/test/TileMutableDigitsContainer_test.cxx
@@ -159,7 +159,7 @@ void modify (TileMutableDigitsContainer& cont, float offs)
       }
       TileDigits d (chan->adc_HWID(),
                     std::move (digits));
-      *chan = d;
+      *chan = std::move(d);
     }
   }
 }

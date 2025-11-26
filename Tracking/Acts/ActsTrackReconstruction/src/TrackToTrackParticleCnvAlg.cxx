@@ -4,7 +4,7 @@
 #include "TrackToTrackParticleCnvAlg.h"
 
 #include "ActsGeometryInterfaces/ITrackingGeometryTool.h"
-#include "ActsGeometryInterfaces/ActsGeometryContext.h"
+#include "ActsGeometryInterfaces/GeometryContext.h"
 #include "ActsGeometry/ATLASSourceLink.h"
 #include "ActsGeometry/ATLASMagneticFieldWrapper.h"
 #include "Acts/Definitions/Units.hpp"
@@ -268,7 +268,7 @@ namespace ActsTrk
     MagField::AtlasFieldCache fieldCache;
     field_cond_data->getInitializedCache(fieldCache);
 
-    const ActsGeometryContext &gctx = m_trackingGeometryTool->getNominalGeometryContext();
+    const GeometryContext &gctx = m_trackingGeometryTool->getNominalGeometryContext();
     std::shared_ptr<Acts::PerigeeSurface> perigee_surface {nullptr};
     if (m_expression_strategy == expressionStrategy::BeamLine) {
       perigee_surface = makePerigeeSurface(beamspot_data);

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef LARCELLREC_LARNOISYROALG_H
@@ -51,7 +51,7 @@ class LArNoisyROAlg : public AthReentrantAlgorithm
 
   Gaudi::Property<bool>  m_isMC     { this, "isMC", false, "Are we working with simu?" };
   SG::ReadHandleKey<xAOD::EventInfo> m_eventInfoKey{this,"EventInfoKey","EventInfo"};
-  SG::WriteDecorHandleKey<xAOD::EventInfo> m_eventInfoDecorKey{this,"EventInfoDecorKey","EventInfo.larFlags"};
+  SG::WriteDecorHandleKey<xAOD::EventInfo> m_eventInfoDecorKey{this, "EventInfoDecorKey", m_eventInfoKey, "larFlags"};
   SG::ReadHandleKey<CaloCellContainer> m_CaloCellContainerName {this, "CaloCellContainer", "AllCalo", "input cell container key"};
   SG::WriteHandleKey<LArNoisyROSummary> m_outputKey {this, "OutputKey", "LArNoisyROSummary", "output object key"};
   SG::ReadCondHandleKey<LArBadFebCont> m_knownBadFEBsVecKey {this, "BadFEBsKey", "LArKnownBadFEBs", "key to read the known Bad FEBs"};

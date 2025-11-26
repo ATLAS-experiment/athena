@@ -35,10 +35,10 @@
   <class name="AthenaHitsVector<GenericMuonSimHit>" id="5745A192-1438-11E1-9AE4-001E4F3DA869" />
   <class name="std::vector<GenericMuonSimHit*>" />
 
-  <class name="AthenaHitsVector<sTGCSimHit>" id="9ae1805a-6e3c-11e8-9b02-02163e01bddd" /> 
+  <class name="AthenaHitsVector<sTGCSimHit>" id="9AE1805A-6E3C-11E8-9B02-02163E01BDDD" /> 
   <class name="std::vector<sTGCSimHit*>" /> 
 
-  <class name="AthenaHitsVector<MMSimHit>" id="e7b60352-fdf6-11e8-a11b-02163e018187" />
+  <class name="AthenaHitsVector<MMSimHit>" id="E7B60352-FDF6-11E8-A11B-02163E018187" />
   <class name="std::vector<MMSimHit*>" />
 
   <class name="MDTSimHit" />

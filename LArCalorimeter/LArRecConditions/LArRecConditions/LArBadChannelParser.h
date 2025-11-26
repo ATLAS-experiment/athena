@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef LArBadChannelParser_H
@@ -124,7 +124,7 @@ inline std::vector< std::pair<std::vector<int>, std::vector<T> > > LArBadChannel
     if(stop < input.end())
       (*m_log) << MSG::WARNING << "LArBadChannelParser IGNORED unexpected input on line " << m_linenumber << "." << endmsg;
 
-    result.push_back(parsedData);
+    result.push_back(std::move(parsedData));
     (*m_log) << MSG::VERBOSE << "LArBadChannelParser ACCEPTED line " << m_linenumber << " -\t " << line << endmsg;
   }
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "iLumiCalc.h"
@@ -43,6 +43,7 @@ void print_usage(){
 }
 
 //______________________________________________________________________________
+// coverity[uncaught_except]
 int main(int argc, char * argv[]){
 
   if (argc == 1)print_usage();
@@ -537,7 +538,7 @@ int main(int argc, char * argv[]){
       TList * list = NULL;
       tree = dynamic_cast<TTree*>(file->Get(treename.c_str()));
       if(tree == 0){
-	logger << Root::kERROR << "Tree: " << treename << " doesn't exist in file " << filename << Root::GEndl;
+	logger << Root::kERROR << "Tree: " << treename << " doesn't exist in file " << std::move(filename) << Root::GEndl;
 	exit(-1);
       }else{
 	list = tree->GetUserInfo() ;
@@ -591,6 +592,7 @@ int main(int argc, char * argv[]){
       logger << Root::kINFO << "Using Directory name: " << d3pddirname.c_str() << Root::GEndl;
       dir = dynamic_cast<TDirectoryFile*>(file->GetDirectory(d3pddirname.c_str()));
       if(!dir){
+      //coverity[copy_constructor_call]
 	logger << Root::kERROR << "Directory [" << d3pddirname << "] doesn't exist in file " << filename << Root::GEndl;
 	exit(-1);
       }else{

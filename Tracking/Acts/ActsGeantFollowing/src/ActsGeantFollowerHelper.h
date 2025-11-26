@@ -17,7 +17,7 @@
 #include "Acts/EventData/TrackParameters.hpp"
 #include "Acts/Propagator/SurfaceCollector.hpp"
 #include "ActsGeometryInterfaces/ITrackingGeometryTool.h"
-#include "ActsGeometryInterfaces/IActsExtrapolationTool.h"
+#include "ActsGeometryInterfaces/IExtrapolationTool.h"
 #include "TrkExInterfaces/IExtrapolationEngine.h"
 // FIXME: header-global macro for an array size constant!
 #ifndef MAXPROBES
@@ -56,7 +56,7 @@ class ActsGeantFollowerHelper : public extends<AthAlgTool, IActsGeantFollowerHel
 
 
     ToolHandle<Trk::IExtrapolationEngine>     m_extrapolationEngine{this, "ExtrapolationEngine", ""};
-    ToolHandle<IActsExtrapolationTool>   m_actsExtrapolator{this, "ActsExtrapolator", ""};
+    ToolHandle<ActsTrk::IExtrapolationTool>   m_actsExtrapolator{this, "ActsExtrapolator", ""};
     Gaudi::Property<bool> m_extrapolateDirectly{this, "ExtrapolateDirectly", true};
     Gaudi::Property<bool> m_extrapolateIncrementally{this, "ExtrapolateIncrementally", true};
 

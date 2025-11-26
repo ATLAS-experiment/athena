@@ -35,7 +35,7 @@
 #include "ActsGeometry/ATLASSourceLink.h"
 #include "ActsInterop/Logger.h"
 #include "ActsGeometry/ActsDetectorElement.h"
-#include "ActsGeometryInterfaces/ActsGeometryContext.h"
+#include "ActsGeometryInterfaces/GeometryContext.h"
 #include "Acts/Propagator/DirectNavigator.hpp"
 #include "src/detail/RefittingCalibrator.h"
 

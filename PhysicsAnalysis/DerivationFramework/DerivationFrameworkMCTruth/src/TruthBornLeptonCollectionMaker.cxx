@@ -73,10 +73,9 @@ StatusCode DerivationFramework::TruthBornLeptonCollectionMaker::initialize()
 }
 
 // Selection and collection creation
-StatusCode DerivationFramework::TruthBornLeptonCollectionMaker::addBranches() const
+StatusCode DerivationFramework::TruthBornLeptonCollectionMaker::addBranches(const EventContext& ctx) const
 {
   // Event context
-  const EventContext& ctx = Gaudi::Hive::currentContext();
   
   // Set up for some metadata handling
   static const bool is_sherpa = [this]() {

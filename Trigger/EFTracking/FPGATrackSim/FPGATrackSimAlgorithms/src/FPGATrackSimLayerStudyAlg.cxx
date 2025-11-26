@@ -178,7 +178,7 @@ StatusCode FPGATrackSimLayerStudyAlg::execute ATLAS_NOT_THREAD_SAFE()
         // Apply threshold, of course if threshold is 0 then use all bins
         if (bin.data().hitCnt < m_threshold) {
             if (isTruthBin) {
-                ATH_MSG_DEBUG("gr " << bin.data().hitCnt << " thr=" << m_threshold << " " << bin.idx());}
+                ATH_MSG_DEBUG("Truth bin failed threshold " << bin.data().hitCnt << " thr=" << m_threshold << " " << bin.idx());}
             continue;
         } 
         ATH_MSG_DEBUG("Bin passes threshold " << bin.data().hitCnt << " " << bin.idx());

@@ -1,13 +1,13 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef _MUON_NSW_COMMON_DECODER_H_
 #define _MUON_NSW_COMMON_DECODER_H_
 
-#include <stdint.h>
-#include <vector>
+
 
 #include "eformat/eformat.h"
+#include <vector>
 
 namespace Muon
 {

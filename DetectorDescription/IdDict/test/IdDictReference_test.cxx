@@ -6,7 +6,8 @@
 #include <boost/test/unit_test.hpp>
 namespace utf = boost::unit_test;
 
-#include "IdDict/IdDictDefs.h"
+#include "IdDict/IdDictReference.h"
+#include "IdDict/IdDictSubRegion.h"
 
 
 BOOST_AUTO_TEST_SUITE(IdDictReferenceTest)

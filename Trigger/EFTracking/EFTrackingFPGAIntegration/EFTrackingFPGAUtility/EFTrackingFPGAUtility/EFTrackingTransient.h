@@ -24,28 +24,35 @@ namespace EFTrackingTransient
   // The struct of the StripCluster and PixelCluster are not aligned at the moment
   // They might be aligned in the future for efficient device memory usage
 
+  constexpr uint32_t MAX_PIXEL_CLUSTERS = 326400;
+  constexpr uint32_t MAX_STRIP_CLUSTERS = 307200;
+  constexpr uint16_t CLUSTER_SEG_SIZE = 256;
+  constexpr uint8_t  NUM_PIXEL_WORDS  = 10;
+  constexpr uint8_t  NUM_STRIP_WORDS  = 9;
+  constexpr uint8_t  NUM_PIXEL_FIELDS = 17;
+  constexpr uint8_t  NUM_STRIP_FIELDS = 11;
+  constexpr uint8_t  NUM_PIXEL_ROWS   = 22;
+  constexpr uint8_t  NUM_STRIP_ROWS   = 14;
+  constexpr uint32_t PIXEL_BLOCK_BUF_SIZE	    = (NUM_PIXEL_WORDS*MAX_PIXEL_CLUSTERS/1024+1)*1024;		// align to 1024*sizeof(uint32_t)=4096
+  constexpr uint32_t STRIP_BLOCK_BUF_SIZE	    = (NUM_STRIP_WORDS*MAX_STRIP_CLUSTERS/1024+1)*1024;
+  constexpr uint32_t PIXEL_CONTAINER_BUF_SIZE = ((NUM_PIXEL_ROWS*MAX_PIXEL_CLUSTERS+16)/1024+1)*1024;	// +16: for cluster number word
+  constexpr uint32_t STRIP_CONTAINER_BUF_SIZE = ((NUM_STRIP_ROWS*MAX_STRIP_CLUSTERS+16)/1024+1)*1024;
+
+
+
   constexpr unsigned int MAX_NUM_CLUSTERS = 409600;
-  constexpr unsigned int NUM_PIXEL_WORD = 10;
-  constexpr unsigned int NUM_STRIP_WORD = 9;
   constexpr unsigned int NUM_MAXCLUSTER_WORD_INTRACK = 13;
   constexpr unsigned int MAX_TRACK = 1000;
-
-
-  constexpr unsigned int NUM_PIXEL_ROW = 19;
-  constexpr unsigned int NUM_STRIP_ROW = 14;
-  constexpr unsigned long PIXEL_BLOCK_BUF_SIZE = NUM_PIXEL_WORD * MAX_NUM_CLUSTERS;
-  constexpr unsigned long STRIP_BLOCK_BUF_SIZE = NUM_STRIP_WORD * MAX_NUM_CLUSTERS;
-  constexpr unsigned long PIXEL_CONTAINER_BUF_SIZE = (NUM_PIXEL_ROW*MAX_NUM_CLUSTERS + 4096);
-  constexpr unsigned long STRIP_CONTAINER_BUF_SIZE = (NUM_STRIP_ROW*MAX_NUM_CLUSTERS + 4096);
 
   constexpr unsigned long TRACK_CONTAINER_BUF_SIZE = (NUM_MAXCLUSTER_WORD_INTRACK*MAX_TRACK + 4096);
 
 
   // Optimize these, 
+  constexpr unsigned int MAX_NUM_INPUTCLUSTERS = 409600;
   constexpr unsigned int NUM_MAXINPUT_PIXEL_ROW = 3;
   constexpr unsigned int NUM_MAXINPUT_STRIP_ROW = 2;
-  constexpr unsigned long PIXEL_CONTAINER_INPUT_BUF_SIZE = (NUM_MAXINPUT_PIXEL_ROW*MAX_NUM_CLUSTERS + 4096);
-  constexpr unsigned long STRIP_CONTAINER_INPUT_BUF_SIZE = (NUM_MAXINPUT_STRIP_ROW*MAX_NUM_CLUSTERS + 4096);
+  constexpr unsigned long PIXEL_CONTAINER_INPUT_BUF_SIZE = (NUM_MAXINPUT_PIXEL_ROW*MAX_NUM_INPUTCLUSTERS + 4096);
+  constexpr unsigned long STRIP_CONTAINER_INPUT_BUF_SIZE = (NUM_MAXINPUT_STRIP_ROW*MAX_NUM_INPUTCLUSTERS + 4096);
 
   /**
    * @brief The StripClusters struct contains all xAOD::StripCluster data members

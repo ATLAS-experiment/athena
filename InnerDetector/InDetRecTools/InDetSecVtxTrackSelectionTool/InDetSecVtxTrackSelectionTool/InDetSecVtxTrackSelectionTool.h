@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 //Author: Lianyou Shan <lianyou.shan@cern.ch>
 // -*- c++ -*-
@@ -21,6 +21,7 @@
 #include <atomic>
 #include <limits>
 #include <map>
+#include <cstdint>
 // #include <mutex>
 
 namespace InDet {
@@ -84,7 +85,7 @@ namespace InDet {
 #endif
     
     /// @}
-    virtual void setCutLevel( InDet::CutLevel level, Bool_t overwrite = true ) override
+    virtual void setCutLevel( InDet::CutLevel level, bool overwrite = true ) override
        __attribute__ ((deprecated("For consistency with the athena interface, the cut level is best set through the \"CutLevel\" property.")));
 
   private:
@@ -96,13 +97,13 @@ namespace InDet {
     // first element is cut family, second is the set of cuts
     std::map< std::string, std::vector< std::unique_ptr<SecVtxTrackCut> > > m_trackCuts; //!< First element is the name of the cut family, second element is the set of cuts
 
-    mutable std::atomic<ULong64_t> m_numTracksProcessed = 0; //!< a counter of the number of tracks proccessed
-    mutable std::atomic<ULong64_t> m_numTracksPassed = 0; //!< a counter of the number of tracks that passed all cuts
-    //    mutable std::vector<ULong64_t> m_numTracksPassedCuts ATLAS_THREAD_SAFE; //!< tracks the number of tracks that passed each cut family Guarded by m_mutex
+    mutable std::atomic<uint64_t> m_numTracksProcessed = 0; //!< a counter of the number of tracks proccessed
+    mutable std::atomic<uint64_t> m_numTracksPassed = 0; //!< a counter of the number of tracks that passed all cuts
+    //    mutable std::vector<uint64_t> m_numTracksPassedCuts ATLAS_THREAD_SAFE; //!< tracks the number of tracks that passed each cut family Guarded by m_mutex
     //    mutable std::mutex m_mutex;
 
-    constexpr static Double_t LOCAL_MAX_DOUBLE = 1.0e16;
-    constexpr static Int_t LOCAL_MAX_INT = std::numeric_limits<Int_t>::max();
+    constexpr static double LOCAL_MAX_DOUBLE = 1.0e16;
+    constexpr static int LOCAL_MAX_INT = std::numeric_limits<int>::max();
 
     /// Object used to store the last decision
     asg::AcceptInfo m_acceptInfo; //!< Object that stores detailed selection information
@@ -115,8 +116,8 @@ namespace InDet {
 
 //    ToolHandle< InDet::IInDetTrackSelectionTool > m_trkFilter ;
 #ifndef XAOD_ANALYSIS
-    Bool_t m_initTrkTools = false; //!< Whether to initialize the Trk::Track tools
-    Bool_t m_trackSumToolAvailable = false; //!< Whether the summary tool is available    
+    bool m_initTrkTools = false; //!< Whether to initialize the Trk::Track tools
+    bool m_trackSumToolAvailable = false; //!< Whether the summary tool is available
 #endif // XAOD_ANALYSIS
 
   }; // class InDetSecVtxTrackSelectionTool

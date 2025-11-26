@@ -24,6 +24,7 @@
 #include "EventContainers/IDC_WriteHandleBase.h"
 #include "CxxUtils/AthUnlikelyMacros.h"
 #include "EventContainers/IdentifiableCache.h"
+#include <bit>
 
 template < class T>
 class IdentifiableContainerMT : public DataObject, public EventContainers::IdentifiableContainerBase, public EventContainers::IIdentifiableCont<T>
@@ -103,11 +104,11 @@ public:
         }
 
         const T* cptr () const {
-            return reinterpret_cast<const T*>( m_itr->second );
+            return std::bit_cast<const T*>( m_itr->second );
         }
 
         const T* operator * () const {
-            return reinterpret_cast<const T*>( m_itr->second );
+            return std::bit_cast<const T*>( m_itr->second );
         }
 
         const T* operator ->() const { return (operator*()); }
@@ -258,7 +259,7 @@ template < class T>
 T*  //Please don't do this we want to get rid of this
 IdentifiableContainerMT<T>::removeCollection( IdentifierHash hashId )
 {
-    return reinterpret_cast<T*>(m_link->removeCollection(hashId));
+    return std::bit_cast<T*>(m_link->removeCollection(hashId));
 }
 
 
@@ -288,7 +289,7 @@ template < class T>
 const T*
 IdentifiableContainerMT<T>::indexFindPtr( IdentifierHash hashId ) const
 {
-    return reinterpret_cast<const T* > (IdentifiableContainerBase::indexFindPtr(hashId));
+    return std::bit_cast<const T* > (IdentifiableContainerBase::indexFindPtr(hashId));
 }
 
 // insert collection into container with id hash
@@ -339,7 +340,7 @@ IdentifiableContainerMT<T>::naughtyRetrieve(IdentifierHash hashId, T* &collToRet
 {
    if(ATH_UNLIKELY(m_OnlineMode)) return StatusCode::FAILURE;//NEVER ALLOW FOR EXTERNAL CACHE
    else {
-      auto p = reinterpret_cast<const T* > (m_link->findIndexPtr(hashId));//collToRetrieve can be null on success
+      auto p = std::bit_cast<const T* > (m_link->findIndexPtr(hashId));//collToRetrieve can be null on success
       collToRetrieve = const_cast<T*>(p);
       return StatusCode::SUCCESS;
    }

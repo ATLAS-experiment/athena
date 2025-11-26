@@ -50,7 +50,7 @@ namespace MuonR4{
             /// @param maximum: An (eta) maximum 
             /// @param data: Event data object  
             /// @return a status code 
-            void preProcessMaximum(const ActsGeometryContext& gctx,
+            void preProcessMaximum(const ActsTrk::GeometryContext& gctx,
                                    const MuonR4::HoughMaximum & maximum,
                                    HoughEventData & data) const; 
 
@@ -95,7 +95,7 @@ namespace MuonR4{
             // write handle key for the output segment seeds 
             SG::WriteHandleKey<SegmentSeedContainer> m_segmentSeeds{this, "WriteKey", "MuonHoughStationSegmentSeeds"};
             // access to the ACTS geometry context 
-            SG::ReadHandleKey<ActsGeometryContext> m_geoCtxKey{this, "AlignmentKey", "ActsAlignment", "cond handle key"};
+            SG::ReadHandleKey<ActsTrk::GeometryContext> m_geoCtxKey{this, "AlignmentKey", "ActsAlignment", "cond handle key"};
             /// Pattern visualization tool
             ToolHandle<MuonValR4::IPatternVisualizationTool> m_visionTool{this, "VisualizationTool", ""};
             // steers the target resolution in tan(phi) 

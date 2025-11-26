@@ -121,7 +121,7 @@ bool VertexTrackIsolation::isContainedIn(const xAOD::Vertex* theVtx,
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
-StatusCode VertexTrackIsolation::addBranches() const {
+StatusCode VertexTrackIsolation::addBranches(const EventContext&) const {
 
   const xAOD::TrackParticleContainer* idTrackParticleContainer{};
   const xAOD::VertexContainer* vertexContainer{};

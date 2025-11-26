@@ -4,7 +4,7 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 def SegmentRefitTestCfg(flags,name="SegmentRefitter", **kwargs):
     result = ComponentAccumulator()
-    from MuonPatternRecognitionAlgs.MuonHoughTransformAlgConfig import ActsMuonSegmentRefitAlgCfg
+    from MuonPatternRecognitionAlgs.MuonPatternRecognitionConfig import ActsMuonSegmentRefitAlgCfg
 
     result.merge(ActsMuonSegmentRefitAlgCfg(flags))
     the_alg = CompFactory.MuonValR4.SegmentRefitTest(name, **kwargs)
@@ -27,8 +27,8 @@ if __name__=="__main__":
     parser = SetupArgParser()
     parser.add_argument("--noMonitorPlots", help="If set to true, there're no monitoring plots", default = False,
                                             action='store_true')
-    parser.add_argument("--writeSpacePoints", help="If set to true, the spacepoints in the bucket are saved to disk",
-                                              default=False, action='store_true')
+    parser.add_argument("--dumpObjFiles", help="If set to true, the spacepoints in the bucket are saved to disk",
+                        default=False, action='store_true')
     parser.set_defaults(nEvents = -1)
   
     parser.set_defaults(outRootFile="MsTrkTester.root")
@@ -56,16 +56,15 @@ if __name__=="__main__":
     from MuonSpacePointFormation.SpacePointFormationConfig import MuonSpacePointFormationCfg 
     cfg.merge(MuonSpacePointFormationCfg(flags))
 
-    from MuonPatternRecognitionAlgs.MuonHoughTransformAlgConfig import MuonPatternRecognitionCfg
+    from MuonPatternRecognitionAlgs.MuonPatternRecognitionConfig import MuonPatternRecognitionCfg
     cfg.merge(MuonPatternRecognitionCfg(flags))
     #cfg.merge(SegmentRefitTestCfg(flags))
-    cfg.merge(SegmentExtpTestCfg(flags))
+    cfg.merge(SegmentExtpTestCfg(flags, drawEvent = args.dumpObjFiles ))
    
     from MuonPatternRecognitionTest.PatternTestConfig import PatternVisualizationToolCfg
 
     cfg.getEventAlgo("MuonSegmentFittingAlg").VisualizationTool = cfg.popToolsAndMerge(PatternVisualizationToolCfg(flags, 
-                                                                                        CanvasPreFix="SegmentPlotValid",
-                                                                                        AllCanvasName="AllSegmentFitPlots", displayTruthOnly = True,
-                                                                                        saveSinglePDFs = True, saveSummaryPDF= True))
- 
+                                                                                        CanvasPreFix="SegmentPlotValid", outSubDir="SegmentValidPlots", 
+                                                                                        displayTruthOnly = True, saveSinglePDFs = True, saveSummaryPDF= True))
+
     executeTest(cfg)

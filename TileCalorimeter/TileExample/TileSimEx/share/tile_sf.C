@@ -163,7 +163,7 @@ int tile_sf(TString suff="", bool dofit=true ) {
 
   Make_plots(file_hit, file_truth, output_filename, dofit);
 
-  return 1;
+  return 0;
 
 }
 

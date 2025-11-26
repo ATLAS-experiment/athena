@@ -10,11 +10,6 @@
 
 namespace DerivationFramework {
 
-  EventInfoPixelModuleStatusMonitoring::EventInfoPixelModuleStatusMonitoring(const std::string& type, const std::string& name, const IInterface* parent):
-    base_class(type,name,parent),
-    m_pixelID(nullptr) {
-  }
-
   StatusCode EventInfoPixelModuleStatusMonitoring::initialize() {
 
     if (m_prefix.empty()) {
@@ -63,15 +58,11 @@ namespace DerivationFramework {
     return StatusCode::SUCCESS;
   }
 
-  StatusCode EventInfoPixelModuleStatusMonitoring::finalize() {
-    return StatusCode::SUCCESS;
-  }
 
-  StatusCode EventInfoPixelModuleStatusMonitoring::addBranches() const {
+  StatusCode EventInfoPixelModuleStatusMonitoring::addBranches(const EventContext& ctx) const {
 
     ATH_MSG_DEBUG("Adding Pixel module status in EventInfo");
 
-    const EventContext& ctx = Gaudi::Hive::currentContext();
     SG::ReadHandle<xAOD::EventInfo> eventInfo(m_eventInfoKey,ctx);
     ATH_CHECK(eventInfo.isValid() ? StatusCode::SUCCESS : StatusCode::FAILURE);
 

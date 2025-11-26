@@ -21,14 +21,14 @@ IDTPM::HitsOnTracksPlots::HitsOnTracksPlots(
     const std::string& anaTag,
     const std::string& testType,
     const std::string& refType,
-    bool isITk, bool doGlobalPlots, bool doTruthMuPlots, bool do1D ) :
+    bool isITk, bool doGlobalPlots, bool doTruthMuPlots, bool do1D, bool doExpert ) :
         PlotMgr( dirName, anaTag, pParent ),
         m_testType( testType ), m_refType( refType ),
         m_isITk( isITk ), m_doGlobalPlots( doGlobalPlots ),
-        m_doTruthMuPlots( doTruthMuPlots ), m_do1D( do1D )
+        m_doTruthMuPlots( doTruthMuPlots ), m_do1D( do1D ), m_doExpert( doExpert )
 {
-  /// TODO - dynamically switch b/w NHITPARAMSBASE or NHITPARAMSTOT based on plot detail level
-  m_NHITPARAMS = NHITPARAMSBASE;
+  /// TODO - add expert plots also for Run3 
+  m_NHITPARAMS = m_doExpert ? NHITPARAMSTOT : NHITPARAMSBASE;
   m_NRUN3HITPARAMS = NRUN3HITPARAMSBASE;
 }
 
@@ -41,15 +41,15 @@ IDTPM::HitsOnTracksPlots::HitsOnTracksPlots(
     const std::string& dirName,
     const std::string& anaTag,
     const std::string& trackType,
-    bool isITk, bool doGlobalPlots, bool doTruthMuPlots ) :
+    bool isITk, bool doGlobalPlots, bool doTruthMuPlots, bool doExpert ) :
         PlotMgr( dirName, anaTag, pParent ),
         m_testType( trackType ), m_refType( trackType ),
         m_isITk( isITk ), m_doGlobalPlots( doGlobalPlots ),
-        m_doTruthMuPlots( doTruthMuPlots ), m_do1D( true )
+        m_doTruthMuPlots( doTruthMuPlots ), m_do1D( true ), m_doExpert( doExpert )
 {
-  /// TODO - dynamically switch b/w NHITPARAMSBASE or NHITPARAMSTOT based on plot detail level
-  m_NHITPARAMS = NHITPARAMSBASE;
-  m_NRUN3HITPARAMS = NRUN3HITPARAMSBASE;
+  /// TODO - add expert plots also for Run3
+  m_NHITPARAMS = m_doExpert ? NHITPARAMSTOT : NHITPARAMSBASE;
+  m_NRUN3HITPARAMS =  NRUN3HITPARAMSBASE;
 }
 
 
@@ -180,6 +180,21 @@ StatusCode IDTPM::HitsOnTracksPlots::fillPlots(
   hitP[ NSCTHits ]            = nSCTHits( ptest );
   hitP[ NSCTHoles ]           = nSCTHoles( ptest ); 
   hitP[ NSCTSharedHits ]      = nSCTSharedHits( ptest );
+  hitP[ NInnerMostPixelOutliers ]           = nInnerMostPixelOutliers( ptest );
+  hitP[ NInnerMostPixelEndcapOutliers ]     = nInnerMostPixelEndcapOutliers( ptest );
+  hitP[ NInnerMostPixelSplitHits ]          = nInnerMostPixelSplitHits( ptest );
+  hitP[ NInnerMostPixelSplitEndcapHits ]    = nInnerMostPixelSplitEndcapHits( ptest );
+  hitP[ NExpectedInnerMostPixelHits ]       = nExpectedInnerMostPixelHits( ptest );
+  hitP[ NExpectedNextToInnerMostPixelHits ] = nExpectedNextToInnerMostPixelHits( ptest );
+  hitP[ NPixelOutliers ]      = nPixelOutliers( ptest );
+  hitP[ NPixelContribLayers ] = nPixelContribLayers( ptest );
+  hitP[ NPixelSplitHits ]     = nPixelSplitHits( ptest );
+  hitP[ NPixelGangedHits ]    = nPixelGangedHits( ptest );
+  hitP[ NPixelGangedHitsFlaggedFakes ]      =  nPixelGangedHitsFlaggedFakes( ptest );
+  hitP[ NPixelDeadSensors ]   = nPixelDeadSensors( ptest );
+  hitP[ NSCTOutliers ]        = nSCTOutliers( ptest );
+  hitP[ NSCTDoubleHoles ]     = nSCTDoubleHoles( ptest );
+  hitP[ NSCTDeadSensors ]     = nSCTDeadSensors( ptest );
 
   float hitRun3P[ NRUN3HITPARAMSTOT ];
   hitRun3P[ NTRTHits ]                = ( not m_isITk ) ? nTRTHits( ptest ) : -9999.;

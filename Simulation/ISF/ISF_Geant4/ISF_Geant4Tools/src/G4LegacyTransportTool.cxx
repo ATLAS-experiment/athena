@@ -10,7 +10,6 @@
 #include "CxxUtils/checker_macros.h"
 #include "G4AtlasAlg/G4AtlasRunManager.h"
 #include "G4AtlasTools/G4AtlasActionInitialization.h"
-#include "G4AtlasTools/G4AtlasUserWorkerInitialization.h"
 #include "ISFFluxRecorder.h"
 
 // ISF classes
@@ -131,7 +130,6 @@ void iGeant4::G4LegacyTransportTool::initializeOnce ATLAS_NOT_THREAD_SAFE ()
   std::unique_ptr<G4AtlasActionInitialization> actionInitialization =
     std::make_unique<G4AtlasActionInitialization>(&*m_userActionSvc);
   m_pRunMgr->SetUserInitialization(actionInitialization.release());
-  m_pRunMgr->SetUserInitialization(new G4AtlasUserWorkerInitialization({.m_activateFastSimulation = m_fastSimTool->HasFastSimulationModels()}));
 
   G4UImanager *ui = G4UImanager::GetUIpointer();
 
@@ -340,6 +338,7 @@ StatusCode iGeant4::G4LegacyTransportTool::setupEvent(
   rngWrapper->setSeed( m_randomStreamName, ctx );
   G4Random::setTheEngine(rngWrapper->getEngine(ctx));
   ATH_CHECK(m_senDetTool->BeginOfAthenaEvent(hitCollections));
+  ATH_CHECK(m_userActionSvc->BeginOfAthenaEvent(hitCollections));
 
   m_nrOfEntries++;
   if (m_doTiming) m_eventTimer->Start();
@@ -391,6 +390,7 @@ StatusCode iGeant4::G4LegacyTransportTool::releaseEvent(
   }
 
   ATH_CHECK(m_senDetTool->EndOfAthenaEvent(hitCollections));
+  ATH_CHECK(m_userActionSvc->EndOfAthenaEvent(hitCollections));
   ATH_CHECK(m_fastSimTool->EndOfAthenaEvent());
 
   return StatusCode::SUCCESS;

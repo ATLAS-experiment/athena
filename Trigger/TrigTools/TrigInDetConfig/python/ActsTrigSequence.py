@@ -31,7 +31,7 @@ class ActsTrigSequence(InnerTrackerTrigSequence):
                       #( 'IDCInDetBSErrContainer_Cache' , self.flags.Trigger.ITkTracking.SCTBSErrCacheKey ),
                       #( 'IDCInDetBSErrContainer_Cache' , self.flags.Trigger.ITkTracking.SCTFlaggedCondCacheKey ),
                       ('xAOD::EventInfo', 'EventInfo'),
-                      ( 'ActsGeometryContext' , 'StoreGateSvc+ActsAlignment' ),
+                      ('ActsTrk::GeometryContext' , 'StoreGateSvc+ActsAlignment' ),
                       ('TrigRoiDescriptorCollection', str(self.rois)),
                       ( 'TagInfo' , 'DetectorStore+ProcessingTags' )} )
 
@@ -39,7 +39,7 @@ class ActsTrigSequence(InnerTrackerTrigSequence):
         ViewDataVerifier.DataObjects |= {( 'PixelRDO_Container' , 'StoreGateSvc+ITkPixelRDOs' ),
                                          ( 'SCT_RDO_Container' , 'StoreGateSvc+ITkStripRDOs' ),
                                          ( 'InDetSimDataCollection' , 'ITkPixelSDO_Map'),
-                                         ( 'ActsGeometryContext' , 'StoreGateSvc+ActsAlignment' )}
+                                         ('ActsTrk::GeometryContext' , 'StoreGateSvc+ActsAlignment' )}
         from SGComps.SGInputLoaderConfig import SGInputLoaderCfg
         sgil_load = [( 'PixelRDO_Container' , 'StoreGateSvc+ITkPixelRDOs' ),
                     ( 'SCT_RDO_Container' , 'StoreGateSvc+ITkStripRDOs' ),
@@ -114,7 +114,7 @@ class ActsTrigSequence(InnerTrackerTrigSequence):
             name = viewVerifier + "_" + self.signature,
             DataObjects = {
                 ( 'InDetSimDataCollection' , 'ITkPixelSDO_Map'),
-                ( 'ActsGeometryContext' , 'StoreGateSvc+ActsAlignment' ),
+                ('ActsTrk::GeometryContext' , 'StoreGateSvc+ActsAlignment' ),
                 ( 'InDet::SiDetectorElementStatus' ,   'StoreGateSvc+ITkPixelDetectorElementStatus' ),
                 ( 'InDet::SiDetectorElementStatus' ,   'StoreGateSvc+ITkStripDetectorElementStatus' ),
             }

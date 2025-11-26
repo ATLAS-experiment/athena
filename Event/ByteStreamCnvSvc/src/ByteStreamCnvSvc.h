@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef BYTESTREAMCNVSVC_BYTESTREAMCNVSVC_H
@@ -40,7 +40,7 @@ public:
    ByteStreamCnvSvc(const std::string& name, ISvcLocator* svc);
 
    /// Standard Destructor
-   virtual ~ByteStreamCnvSvc();
+   virtual ~ByteStreamCnvSvc() = default;
 
    /// Gaudi Service Interface method implementations:
    virtual StatusCode initialize() override;
@@ -68,11 +68,11 @@ protected:
 
 private:
    /// name of the service
-   std::string m_ioSvcName;
+   Gaudi::Property<std::string> m_ioSvcName{this, "ByteStreamOutputSvc", "", "ByteStream output service name"};
 
    /// list of service names
-   Gaudi::Property<std::vector<std::string>> m_ioSvcNameList{ this, "ByteStreamOutputSvcList", {}, "", "OrderedSet<T>"};
-   
+   Gaudi::Property<std::vector<std::string>> m_ioSvcNameList{this, "ByteStreamOutputSvcList", {}, "", "OrderedSet<T>"};
+
    /// fill trigger bits
    Gaudi::Property<bool> m_fillTriggerBits{this, "FillTriggerBits", true, "Read in xTrigDecision and use it to fill Trigger bits in event header"};
 
@@ -80,10 +80,10 @@ private:
    std::map<std::string, IByteStreamOutputSvc*> m_ioSvcMap;
 
    /// Event store.
-   ServiceHandle<StoreGateSvc> m_evtStore;
+   ServiceHandle<StoreGateSvc> m_evtStore{this, "EventStore", "StoreGateSvc"};
 
    /// user type
-   std::string m_userType;
+   Gaudi::Property<std::string> m_userType{this, "UserType", "RawEvent", "User type"};
 
    /// Slot-specific state.
    struct SlotData
@@ -111,4 +111,4 @@ private:
    void writeFEA (SlotData& slot);
 };
 
-#endif
+#endif // BYTESTREAMCNVSVC_BYTESTREAMCNVSVC_H

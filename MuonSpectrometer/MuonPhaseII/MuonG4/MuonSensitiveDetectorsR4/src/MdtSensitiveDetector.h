@@ -97,7 +97,7 @@ namespace MuonG4R4 {
          /// Retrieves the matching readout element to a G4 hit
          const MuonGMR4::MdtReadoutElement* getReadoutElement(const G4TouchableHistory* touchHist) const;
          /// Retrieves from the Readoutelement & the touchable history the Identifier
-         Identifier getIdentifier(const ActsGeometryContext& gctx,
+         Identifier getIdentifier(const ActsTrk::GeometryContext& gctx,
                                  const MuonGMR4::MdtReadoutElement* reElement,
                                  const G4TouchableHistory* touchHist) const;
    };

@@ -41,30 +41,26 @@ def ActsTrackingGeometrySvcCfg(flags,
     acc.merge(TRT_ReadoutGeometryCfg(flags))
 
   if flags.Detector.GeometryCalo:
-    # Commented out because Calo is not production ready yet and we don't 
-    # want to turn it on even if the global flag is set
-    #  subDetectors += ["Calo"]
-    #  kwargs.setdefault("CaloVolumeBuilder", CompFactory.ActsCaloTrackingVolumeBuilder())
-
-    # need to configure calo geometry, otherwise we get a crash
-    # Do this even though it's not production ready yet, so the service can
-    # be forced to build the calorimeter later on anyway
+    #No non-blueprint mode exists for calo, so all we do here is 
+    #to setup both the LAr and Tile geometry to enable access to the 
+    #CaloDetDescrManager geometry information. This is needed
+    #for the Acts calo blueprint builder tool
+    #Note that in blueprint mode the calo geometry is built
+    #in initialize of the TrackingGeometrySvc and so we use
+    #a static calo geometry. To avoid errors the flag Lar.doAlign 
+    #must be set to false (when flag values are set)
     from LArGeoAlgsNV.LArGMConfig import LArGMCfg
     acc.merge(LArGMCfg(flags))
     from TileGeoModel.TileGMConfig import TileGMCfg
     acc.merge(TileGMCfg(flags))
 
-  if flags.Muon.usePhaseIIGeoSetup and not flags.Acts.TrackingGeometry.UseBlueprint:
-    subDetectors += ["Muon"]
-    from MuonConfig.MuonGeometryConfig import MuonGeoModelCfg
-    acc.merge(MuonGeoModelCfg(flags))    
-    from ActsMuonDetector.ActsMuonDetectorCfg import  MsTrackingVolumeBuilderCfg
-    kwargs.setdefault("MSVolumeBuilder", acc.popToolsAndMerge(MsTrackingVolumeBuilderCfg(flags)))
-
   #first add the itk builder and then the muon system - this is the correct order
   if flags.Acts.TrackingGeometry.UseBlueprint:    
     if flags.Detector.GeometryITkPixel or flags.Detector.GeometryITkStrip:
       blueprintTools += [acc.popToolsAndMerge(ItkBlueprintNodeBuilderCfg(flags))]
+    if flags.Detector.GeometryCalo:
+      subDetectors += ["Calo"]
+      blueprintTools += [acc.popToolsAndMerge(caloBlueprintNodeBuilderCfg(flags))]
     if flags.Detector.GeometryMuon:
       subDetectors += ["Muon"]
       from MuonConfig.MuonGeometryConfig import MuonGeoModelCfg
@@ -320,6 +316,14 @@ def ItkBlueprintNodeBuilderCfg(flags,
                                    **kwargs) -> ComponentAccumulator:
     result = ComponentAccumulator()
     the_tool = CompFactory.ActsTrk.ItkBlueprintNodeBuilder(name, **kwargs)
+    result.setPrivateTools(the_tool)
+    return result
+
+def caloBlueprintNodeBuilderCfg(flags,
+                                   name: str = "CaloBlueprintNodeBuilder",
+                                   **kwargs) -> ComponentAccumulator:
+    result = ComponentAccumulator()
+    the_tool = CompFactory.ActsTrk.CaloBlueprintNodeBuilder(name, **kwargs)
     result.setPrivateTools(the_tool)
     return result
 

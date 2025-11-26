@@ -3,7 +3,7 @@
   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #include "GeoModelRpcTest.h"
-#include <ActsGeometryInterfaces/ActsGeometryContext.h>
+#include <ActsGeometryInterfaces/GeometryContext.h>
 #include <MuonReadoutGeometryR4/RpcReadoutElement.h>
 #include <EventPrimitives/EventPrimitivesToStringConverter.h>
 #include <fstream>
@@ -13,7 +13,7 @@ namespace {
 // out-of-bounds array access warning from gcc14 in the archflag build.
 // (It should also be addressed in versions of Eigen after 3.4.)
 std::string stripPosToString (const MuonGMR4::RpcReadoutElement* reElement,
-                              const ActsGeometryContext& gctx,
+                              const ActsTrk::GeometryContext& gctx,
                               const IdentifierHash measHash)
 {
   Amg::Vector3D v = reElement->stripPosition(gctx, measHash);
@@ -104,9 +104,9 @@ StatusCode GeoModelRpcTest::finalize() {
 StatusCode GeoModelRpcTest::execute() {
     const EventContext& ctx{Gaudi::Hive::currentContext()};
 
-    const ActsGeometryContext* geoContextHandle{nullptr};
+    const ActsTrk::GeometryContext* geoContextHandle{nullptr};
     ATH_CHECK(SG::get(geoContextHandle, m_geoCtxKey, ctx));
-    const ActsGeometryContext& gctx{*geoContextHandle};
+    const ActsTrk::GeometryContext& gctx{*geoContextHandle};
 
     for (const Identifier& test_me : m_testStations) {
       ATH_MSG_DEBUG("Test retrieval of Rpc detector element "<<m_idHelperSvc->toStringDetEl(test_me));
@@ -171,7 +171,7 @@ StatusCode GeoModelRpcTest::execute() {
    return StatusCode::SUCCESS;
 }
 StatusCode GeoModelRpcTest::dumpToTree(const EventContext& ctx,
-                                       const ActsGeometryContext& gctx, 
+                                       const ActsTrk::GeometryContext& gctx, 
                                        const RpcReadoutElement* reElement){
    
    m_stIndex    = reElement->stationName();
@@ -196,8 +196,11 @@ StatusCode GeoModelRpcTest::dumpToTree(const EventContext& ctx,
    m_stripEtaWidth = reElement->stripEtaWidth();
    m_stripPhiWidth = reElement->stripPhiWidth();
    m_stripEtaLength = reElement->stripEtaLength(); 
-   m_stripPhiLength = reElement->stripPhiLength();     
- 
+   m_stripPhiLength = reElement->stripPhiLength();
+
+   m_envelopeHeight = 2.*reElement->getParameters().halfThickness;
+   m_envelopeWidth  = 2.*reElement->getParameters().halfWidth;
+   m_envelopeLength = 2.*reElement->getParameters().halfLength;
    /// Dump the local to global transformation of the readout element
    const Amg::Transform3D& transform{reElement->localToGlobalTrans(gctx)};
    m_readoutTransform = transform;

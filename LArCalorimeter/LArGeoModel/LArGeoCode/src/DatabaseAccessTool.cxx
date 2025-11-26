@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArGeoCode/DatabaseAccessTool.h"
@@ -67,7 +67,7 @@ double DatabaseAccessTool::getDouble(const std::string & TableName,
   }
   double retval = (*rec)[0]->getDouble(ColumnName);
   if (m==m_cw->recMap.end()) {
-    m_cw->recMap[TableName]=rec;
+    m_cw->recMap[TableName]=std::move(rec);
   }
   return retval;
 }

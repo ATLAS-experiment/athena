@@ -1,9 +1,10 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TruthUtils/HepMCHelpers.h"
 #include "TrigTauMonitorTruthAlgorithm.h"
+#include "TrigDecisionTool/TrigDecisionTool.h"
 #include "AthContainers/ConstAccessor.h"
 #include "AthContainers/Decorator.h"
 

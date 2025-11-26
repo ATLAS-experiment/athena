@@ -25,22 +25,6 @@
 #include <string>
 #include <numeric>
 
-// Constructor
-DerivationFramework::TruthCollectionMaker::TruthCollectionMaker(const std::string& t,
-                                                                const std::string& n,
-                                                                const IInterface* p)
-  : base_class(t,n,p)
-  , m_ntotpart(0)
-  , m_npasspart(0)
-  , m_metaStore( "MetaDataStore", n )
-{
-    declareProperty("MetaDataStore", m_metaStore );
-}
-
-// Destructor
-DerivationFramework::TruthCollectionMaker::~TruthCollectionMaker() {
-}
-
 // Athena initialize and finalize
 StatusCode DerivationFramework::TruthCollectionMaker::initialize()
 {
@@ -51,13 +35,13 @@ StatusCode DerivationFramework::TruthCollectionMaker::initialize()
 
     // Output (new) truth particles
     ATH_CHECK(m_outputParticlesKey.initialize());
-    ATH_MSG_INFO("New truth particles container key: " << m_outputParticlesKey.key() ); 
-    
+    ATH_MSG_INFO("New truth particles container key: " << m_outputParticlesKey.key() );
+
     if (m_partString.empty()) {
         ATH_MSG_FATAL("No selection string provided");
         return StatusCode::FAILURE;
     } else {ATH_MSG_INFO("Truth particle selection string: " << m_partString );}
-    
+
     // Set up the text-parsing machinery for thinning the truth directly according to user cuts
     if (!m_partString.empty()) {
        ATH_CHECK( initializeParser(m_partString) );
@@ -92,10 +76,9 @@ StatusCode DerivationFramework::TruthCollectionMaker::finalize()
 }
 
 // Selection and collection creation
-StatusCode DerivationFramework::TruthCollectionMaker::addBranches() const
+StatusCode DerivationFramework::TruthCollectionMaker::addBranches(const EventContext& ctx) const
 {
     // Event context for AthenaMT
-    const EventContext& ctx = Gaudi::Hive::currentContext();
 
     // Set up for some metadata handling
     // TODO: this isn't MT compliant. This information should go into the config level and avoid meta store
@@ -143,21 +126,21 @@ StatusCode DerivationFramework::TruthCollectionMaker::addBranches() const
     m_ntotpart += nParticles;
 
     // Set up decor readers
-    SG::ReadDecorHandle<xAOD::TruthParticleContainer, unsigned int > originReadDecor(m_originReadDecorKey, ctx);  
+    SG::ReadDecorHandle<xAOD::TruthParticleContainer, unsigned int > originReadDecor(m_originReadDecorKey, ctx);
     SG::ReadDecorHandle<xAOD::TruthParticleContainer, unsigned int > typeReadDecor(m_typeReadDecorKey, ctx);
     SG::ReadDecorHandle<xAOD::TruthParticleContainer, unsigned int > outcomeReadDecor(m_outcomeReadDecorKey, ctx);
     SG::ReadDecorHandle<xAOD::TruthParticleContainer, unsigned int > classificationReadDecor(m_classificationReadDecorKey, ctx);
 
     // Set up decorators
     SG::WriteDecorHandle<xAOD::TruthParticleContainer, ElementLink<xAOD::TruthParticleContainer> > linkDecorator(m_linkDecoratorKey, ctx);
-    SG::WriteDecorHandle<xAOD::TruthParticleContainer, unsigned int > originDecorator(m_originDecoratorKey, ctx);  
+    SG::WriteDecorHandle<xAOD::TruthParticleContainer, unsigned int > originDecorator(m_originDecoratorKey, ctx);
     SG::WriteDecorHandle<xAOD::TruthParticleContainer, unsigned int > typeDecorator(m_typeDecoratorKey, ctx);
     SG::WriteDecorHandle<xAOD::TruthParticleContainer, unsigned int > outcomeDecorator(m_outcomeDecoratorKey, ctx);
     SG::WriteDecorHandle<xAOD::TruthParticleContainer, unsigned int > classificationDecorator(m_classificationDecoratorKey, ctx);
     SG::WriteDecorHandle< xAOD::TruthParticleContainer, int > motherIDDecorator(m_motherIDDecoratorKey, ctx);
     SG::WriteDecorHandle< xAOD::TruthParticleContainer, int > daughterIDDecorator(m_daughterIDDecoratorKey, ctx);
     SG::WriteDecorHandle< xAOD::TruthParticleContainer, int > hadronOriginDecorator(m_hadronOriginDecoratorKey, ctx);
-    
+
     // Execute the text parsers and update the mask
     if (!m_partString.empty()) {
         std::vector<int> entries =  m_parser->evaluateAsVector();
@@ -168,11 +151,11 @@ StatusCode DerivationFramework::TruthCollectionMaker::addBranches() const
             return StatusCode::FAILURE;
         } else {
             // add relevant particles to new collection
-            
+
             //---------------
             //This is some code to *add* new particles. Probably a good idea to break this off as a sub-function, but I'll let James C decide where that should go.
             //---------------
-            
+
             //Let's check if we want to build W/Z bosons
             bool SherpaW = false;
             bool SherpaZ = false;
@@ -188,7 +171,7 @@ StatusCode DerivationFramework::TruthCollectionMaker::addBranches() const
                     SherpaZ = false;
                 }
             }
-            
+
             if ((SherpaW || SherpaZ) && is_sherpa){
                 // Currently only handles un-ambiguous cases
                 std::vector<const xAOD::TruthParticle*>  status_nonPhysical;
@@ -280,7 +263,7 @@ StatusCode DerivationFramework::TruthCollectionMaker::addBranches() const
                 ElementLink<xAOD::TruthParticleContainer> eltp(*truthParticles,i);
                 if (entries[i]==1) {
                     //In TRUTH3, we want to remove all particles but the first and last in a decay chain.  This is off in TRUTH1.  The first and last particles in the decay chain are decorated as such.
-                    
+
                     const xAOD::TruthParticle* theParticle = (*truthParticles)[i];
                     if (m_do_compress){
                         bool same_as_mother = false;
@@ -311,7 +294,7 @@ StatusCode DerivationFramework::TruthCollectionMaker::addBranches() const
                             if ((theParticle->prodVtx()->nIncomingParticles() > 0) && (theParticle->prodVtx()->incomingParticle(0)!=nullptr)) {
                                 motherIDDecorator(*xTruthParticle) = theParticle->prodVtx()->incomingParticle(0)->pdgId();
                             } else {motherIDDecorator(*xTruthParticle) = 0;}
-                        } else {motherIDDecorator(*xTruthParticle) = 0;} 
+                        } else {motherIDDecorator(*xTruthParticle) = 0;}
                         if (theParticle->hasDecayVtx()) {
                             if ((theParticle->decayVtx()->nOutgoingParticles() > 0) && (theParticle->decayVtx()->outgoingParticle(0)!=nullptr)) {
                                 daughterIDDecorator(*xTruthParticle) = theParticle->decayVtx()->outgoingParticle(0)->pdgId();

@@ -26,26 +26,26 @@ inline int MuonReadoutElement::stationPhi() const { return m_stPhi; }
 
 /// Returns the detector center (Which is the same as the detector center of the
 /// first measurement layer)
-inline Amg::Vector3D MuonReadoutElement::center(const ActsGeometryContext& ctx) const {
+inline Amg::Vector3D MuonReadoutElement::center(const ActsTrk::GeometryContext& ctx) const {
     return localToGlobalTrans(ctx).translation();
 }
-inline Amg::Vector3D MuonReadoutElement::center(const ActsGeometryContext& ctx,
+inline Amg::Vector3D MuonReadoutElement::center(const ActsTrk::GeometryContext& ctx,
                                                 const Identifier& id) const {
     return localToGlobalTrans(ctx, id).translation();
 }
-inline Amg::Vector3D MuonReadoutElement::center(const ActsGeometryContext& ctx, 
+inline Amg::Vector3D MuonReadoutElement::center(const ActsTrk::GeometryContext& ctx, 
                                                 const IdentifierHash& hash) const {
     return localToGlobalTrans(ctx, hash).translation();
 }
-inline Amg::Transform3D MuonReadoutElement::globalToLocalTrans(const ActsGeometryContext& ctx, 
+inline Amg::Transform3D MuonReadoutElement::globalToLocalTrans(const ActsTrk::GeometryContext& ctx, 
                                                                const IdentifierHash& hash) const {   
     return localToGlobalTrans(ctx, hash).inverse();
 }
-inline Amg::Transform3D MuonReadoutElement::globalToLocalTrans(const ActsGeometryContext& ctx, 
+inline Amg::Transform3D MuonReadoutElement::globalToLocalTrans(const ActsTrk::GeometryContext& ctx, 
                                                                const Identifier& id) const {
     return globalToLocalTrans(ctx, layerHash(id));
 }
-inline const Amg::Transform3D& MuonReadoutElement::localToGlobalTrans(const ActsGeometryContext& ctx, 
+inline const Amg::Transform3D& MuonReadoutElement::localToGlobalTrans(const ActsTrk::GeometryContext& ctx, 
                                                                       const Identifier& id) const {
     return localToGlobalTrans(ctx, layerHash(id));
 }

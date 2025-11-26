@@ -34,10 +34,6 @@ GeoModelSvc::GeoModelSvc(const std::string &name, ISvcLocator *svc)
 StatusCode GeoModelSvc::initialize ATLAS_NOT_THREAD_SAFE()
 //                                 ^ due to IGeoModelTool::registerCallback
 {
-  // Activate the initialization from SQLite if the overrider has been used
-  if (!m_sqliteDbFullPath.empty())
-    m_sqliteDb = true;
-
   if (!m_sqliteDb && m_supportedGeometry == 0) {
     ATH_MSG_FATAL(
         "The Supported Geometry flag was not set in Job Options! Exiting ...");

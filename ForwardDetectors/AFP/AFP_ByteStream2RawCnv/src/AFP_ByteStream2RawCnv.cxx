@@ -1,11 +1,9 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // AFP_ByteStream2RawCnv includes
 #include "AFP_ByteStream2RawCnv/AFP_ByteStream2RawCnv.h"
-
-#include "AFP_RawEv/AFP_RawDataCommonHead.h"
 
 #include "AFP_RawEv/AFP_SiRawData.h"
 #include "AFP_RawEv/AFP_SiRawCollection.h"
@@ -13,7 +11,9 @@
 #include "AFP_RawEv/AFP_ToFRawData.h"
 #include "AFP_RawEv/AFP_ToFRawCollection.h"
 
-#include <algorithm>
+#include <vector>
+#include <algorithm> //std::find_if
+#include <iterator> //std::prev
 
 const InterfaceID &AFP_ByteStream2RawCnv::interfaceID() {
   static const InterfaceID IID_IAFP_ByteStream2RawCnv("AFP_ByteStream2RawCnv", 1, 0);
@@ -137,9 +137,9 @@ StatusCode AFP_ByteStream2RawCnv::fillCollection(const OFFLINE_FRAGMENTS_NAMESPA
                                            rawContainer);
         collectionHead = collectionToF;
         
-        std::vector<uint16_t> helper;
-        picoTDC1_channels.push_back(helper);
-        picoTDC2_channels.push_back(helper);
+        
+        picoTDC1_channels.emplace_back();
+        picoTDC2_channels.emplace_back();
         picoTDC_hasTrigger.push_back(false);
         ToF_links.push_back(the_link);
       }

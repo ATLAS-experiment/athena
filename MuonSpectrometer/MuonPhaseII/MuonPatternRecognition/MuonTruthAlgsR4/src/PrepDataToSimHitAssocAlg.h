@@ -36,7 +36,7 @@ namespace MuonR4{
             /** @brief IdHelperSvc to decode the Identifiers */
             ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "IdHelperSvc",  "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
             /** @brief Key to the geometry context. Needed to align the hits inside ATLAS */
-            SG::ReadHandleKey<ActsGeometryContext> m_geoCtxKey{this, "AlignmentKey", "ActsAlignment", "cond handle key"};
+            SG::ReadHandleKey<ActsTrk::GeometryContext> m_geoCtxKey{this, "AlignmentKey", "ActsAlignment", "cond handle key"};
             /** @brief The number of standard deviations a measurement may be pulled apart in order to be associated */
             Gaudi::Property<double> m_PullCutOff{this, "AssocPull", 3.};
     };

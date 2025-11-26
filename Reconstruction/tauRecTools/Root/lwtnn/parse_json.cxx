@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "tauRecTools/lwtnn/parse_json.h"
@@ -99,7 +99,7 @@ namespace {
     std::string name = v.second.get<std::string>("name");
     auto offset = v.second.get<double>("offset");
     auto scale = v.second.get<double>("scale");
-    return {name, offset, scale};
+    return {std::move(name), offset, scale};
   }
 
   lwtDev::InputNodeConfig get_input_node(const ptree::value_type& v) {
@@ -277,7 +277,7 @@ namespace {
       LayerConfig sublayer;
       set_defaults(sublayer);
       add_dense_info(sublayer, sub);
-      layer.sublayers.push_back(sublayer);
+      layer.sublayers.push_back(std::move(sublayer));
     }
   }
 
@@ -300,7 +300,7 @@ namespace {
       LayerConfig cfg;
       set_defaults(cfg);
       add_dense_info(cfg, comp);
-      layer.components[component_map.at(comp.first)] = cfg;
+      layer.components[component_map.at(comp.first)] = std::move(cfg);
     }
     layer.activation = get_activation(v.second.get_child("activation"));
     layer.go_backwards = false;
@@ -319,7 +319,7 @@ namespace {
     set_defaults(layer);
     LayerConfig forward_layer;
     LayerConfig backward_layer;
-    for(auto val: v.second){
+    for(const auto& val: v.second){
       if(val.first == "forward_layer"){
         add_component_info(forward_layer, val);
         forward_layer.architecture = get_architecture(val.second.get<std::string>("architecture"));
@@ -329,8 +329,8 @@ namespace {
         backward_layer.architecture = get_architecture(val.second.get<std::string>("architecture"));
       }
     }
-    layer.sublayers.push_back(forward_layer);
-    layer.sublayers.push_back(backward_layer);
+    layer.sublayers.push_back(std::move(forward_layer));
+    layer.sublayers.push_back(std::move(backward_layer));
     layer.return_sequence = v.second.get<bool>("return_sequence");
     layer.merge_mode = v.second.get<std::string>("merge_mode");
     layer.architecture = Architecture::BIDIRECTIONAL;
@@ -345,7 +345,7 @@ namespace {
       }
       emb.index = sub.second.get<int>("index");
       emb.n_out = sub.second.get<int>("n_out");
-      layer.embedding.push_back(emb);
+      layer.embedding.push_back(std::move(emb));
     }
   }
 

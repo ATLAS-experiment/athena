@@ -221,3 +221,75 @@ const Muon::nsw::STGTPSegmentPacket::SegmentData& Muon::nsw::STGTPSegmentPacket:
   }
   return m_segmentData.at(segment);
 }
+
+size_t Muon::nsw::STGTPStripPacket::Size(const int ver){
+  size_t packet_size_w = 0;
+  size_t word_size = 32;
+  switch (ver) {
+    case 1:
+      packet_size_w = Muon::nsw::STGTPStrips::size_v1 / word_size;
+      break;
+    case 2:
+      packet_size_w = Muon::nsw::STGTPStrips::size_v2 / word_size;
+      break;
+    case 3:
+      packet_size_w = Muon::nsw::STGTPStrips::size_v3 / word_size;
+      break;
+    default:
+      packet_size_w = 0;
+      break;
+  }
+  return packet_size_w;
+}
+
+Muon::nsw::STGTPStripPacket::STGTPStripPacket(const std::vector<uint32_t>& payload, const int ver) {
+  size_t packet_size_w = Size(ver);
+
+  if (std::size(payload) != packet_size_w) {
+    throw std::runtime_error(
+                             Muon::nsw::format("Strip packet vector has size {} instead of expected size {}", std::size(payload), packet_size_w));
+  }
+
+  const auto packets = std::span{payload.data(), std::size(payload)};
+  auto readPointer = std::size_t{0};
+  auto decode = [&packets](std::size_t& readPointer, const std::size_t size) {
+    return decode_and_advance<std::uint64_t, std::uint32_t>(packets, readPointer, size);
+  };
+
+  // Skip padding (70 bits)
+  decode(readPointer, Muon::nsw::STGTPStrips::size_padding);
+
+  // Decode 112 strips (6 bits each)
+  for (std::size_t i = Muon::nsw::STGTPStrips::num_strips; i > 0; --i) {
+    const auto index = i - 1;
+    m_stripData.at(index) = decode(readPointer, Muon::nsw::STGTPStrips::size_strip_adc);
+  }
+
+  // Decode 8 offsets (16 bits each)
+  for (std::size_t i = Muon::nsw::STGTPStrips::num_offsets; i > 0; --i) {
+    const auto index = i - 1;
+    m_offsets.at(index) = decode(readPointer, Muon::nsw::STGTPStrips::size_offset);
+  }
+
+  // Decode remaining fields
+  m_phiIdValue = decode(readPointer, Muon::nsw::STGTPStrips::size_phi_id_value);
+  m_phiIdSign = decode(readPointer, Muon::nsw::STGTPStrips::size_phi_id_sign);
+  m_bandId = decode(readPointer, Muon::nsw::STGTPStrips::size_band_id);
+  m_BCID = decode(readPointer, Muon::nsw::STGTPStrips::size_bcid);
+}
+
+std::uint32_t Muon::nsw::STGTPStripPacket::Strip(const std::size_t strip) const {
+  if (strip >= STGTPStrips::num_strips) {
+    throw std::out_of_range(
+                            Muon::nsw::format("Requested strip {} which does not exist (max {})", strip, STGTPStrips::num_strips - 1));
+  }
+  return m_stripData.at(strip);
+}
+
+std::uint32_t Muon::nsw::STGTPStripPacket::Offset(const std::size_t offset) const {
+  if (offset >= STGTPStrips::num_offsets) {
+    throw std::out_of_range(
+                            Muon::nsw::format("Requested offset {} which does not exist (max {})", offset, STGTPStrips::num_offsets - 1));
+  }
+  return m_offsets.at(offset);
+}

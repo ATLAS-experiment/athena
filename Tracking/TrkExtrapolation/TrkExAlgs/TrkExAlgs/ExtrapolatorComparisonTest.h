@@ -22,8 +22,8 @@
 #include "AthenaKernel/RNGWrapper.h"
 #include "TrkExInterfaces/IExtrapolator.h"
 // ACTS
-#include "ActsGeometryInterfaces/IActsExtrapolationTool.h"
-#include "ActsGeometryInterfaces/ActsGeometryContext.h"
+#include "ActsGeometryInterfaces/IExtrapolationTool.h"
+#include "ActsGeometryInterfaces/GeometryContext.h"
 #include "ActsGeometryInterfaces/ITrackingGeometryTool.h"
 #include "TrkExAlgs/PropResultRootWriterSvc.h"
 #include "Acts/EventData/TrackParameters.hpp"
@@ -114,7 +114,7 @@ namespace Trk
       void generatePerigee(std::vector<perigeeParameters>& parameters);
 
       /** The ACTS ExtrapolationTool to be retrieved */
-      ToolHandle<IActsExtrapolationTool> m_extrapolationTool{this, "ExtrapolationTool", "ActsExtrapolationTool"};
+      ToolHandle<ActsTrk::IExtrapolationTool> m_extrapolationTool{this, "ExtrapolationTool", "ActsExtrapolationTool"};
       
       /** The ATLAS Extrapolator to be retrieved */
       ToolHandle<Trk::IExtrapolator> m_atlasExtrapolator {this, "Extrapolator", "Trk::Extrapolator/AtlasExtrapolator"};

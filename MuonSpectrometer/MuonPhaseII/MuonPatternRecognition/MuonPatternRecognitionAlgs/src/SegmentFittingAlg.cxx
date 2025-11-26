@@ -37,6 +37,7 @@ namespace MuonR4 {
         SegmentLineFitter::Config fitCfg{};
         fitCfg.calibrator = m_calibTool.get();
         fitCfg.visionTool = m_visionTool.get();
+        fitCfg.idHelperSvc = m_idHelperSvc.get();
         fitCfg.fitT0 = m_doT0Fit;
         fitCfg.recalibrate = m_recalibInFit;
         fitCfg.useFastFitter = m_useFastFitter;
@@ -56,7 +57,7 @@ namespace MuonR4 {
         return StatusCode::SUCCESS;
     }
     StatusCode SegmentFittingAlg::execute(const EventContext& ctx) const {
-        const ActsGeometryContext* gctx{nullptr};
+        const ActsTrk::GeometryContext* gctx{nullptr};
         ATH_CHECK(SG::get(gctx, m_geoCtxKey, ctx));
         const SegmentSeedContainer* segmentSeeds=nullptr; 
         ATH_CHECK(SG::get(segmentSeeds, m_seedKey, ctx));
@@ -116,7 +117,7 @@ namespace MuonR4 {
 
     std::vector<std::unique_ptr<Segment>>
          SegmentFittingAlg::fitSegmentSeed(const EventContext& ctx,
-                                           const ActsGeometryContext& gctx,
+                                           const ActsTrk::GeometryContext& gctx,
                                            const SegmentSeed* patternSeed) const {
 
         const Amg::Transform3D& locToGlob{patternSeed->msSector()->localToGlobalTrans(gctx)};
@@ -154,7 +155,7 @@ namespace MuonR4 {
         return segments;
     }
    
-    void SegmentFittingAlg::resolveAmbiguities(const ActsGeometryContext& gctx,
+    void SegmentFittingAlg::resolveAmbiguities(const ActsTrk::GeometryContext& gctx,
                                                std::vector<std::unique_ptr<Segment>>& segmentCandidates) const {
         if (segmentCandidates.empty()) {
             return;

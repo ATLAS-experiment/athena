@@ -28,10 +28,11 @@ namespace DerivationFramework {
   class SUSYSignalTagger : public extends<AthAlgTool, IAugmentationTool> {
 
   public:
-    SUSYSignalTagger(const std::string& t, const std::string& n, const IInterface* p);
-    ~SUSYSignalTagger() = default;
+
+    using base_class::base_class;
+
     virtual StatusCode initialize() override final;
-    virtual StatusCode addBranches() const override;
+    virtual StatusCode addBranches(const EventContext& ctx) const override final;
 
   private:
     bool FindSusyHardProc(const xAOD::TruthParticleContainer& truthP, int& pdgid1, int& pdgid2) const;

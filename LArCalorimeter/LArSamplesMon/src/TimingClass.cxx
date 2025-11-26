@@ -581,7 +581,7 @@ void LArSamples::TimingClass::getFebCorrection( const std::string& nrun )
 { 
   // The structure of the Feb correction file is different than what we need
   // The corrections are needed for each slot and not for each feed through
-  // This function rearranges the previously obtained feb correction file to put it in the righ format
+  // This function rearranges the previously obtained feb correction file to put it in the right format
   
   for( int i = 0; i < 4; i++ ){ 
     for( int j = 0; j < 2; j++ ){ 
@@ -607,6 +607,14 @@ void LArSamples::TimingClass::getFebCorrection( const std::string& nrun )
       double n5, n6;
       
       f >> n1 >> n2 >> n3 >> n4 >> n5 >> n6; 
+      if (n1 < 0 || n1 >= 4 ||
+          n2 < 0 || n2 >= 2 ||
+          n3 < 0 || n3 >= 32 ||
+          n4 < 0 || n4 >= 16)
+      {
+        cerr << "Bad line from timing file " << n1 << " " << n2 << " " << n3 << " " << n4 << endl;
+        continue;
+      }
       
       if( f.good() && !f.bad() && !f.fail() ){
 	param[n1][n2][n3][n4] = n5;  
@@ -876,19 +884,24 @@ vector< vector<double> > LArSamples::TimingClass::readTimingFiles(const std::str
       double n5, n6; 
       
       if( f.good() && !f.bad() && !f.fail() ){
-	f >> n1 >> n2 >> n3 >> n4 >> n5 >> n6;     
+	f >> n1 >> n2 >> n3 >> n4 >> n5 >> n6;
+        if (n2 < 0 || n2 >= 2 ||
+            n3 < 0 || n3 >= 32 ||
+            n4 < 0 || n4 >= 16)
+        {
+          cerr << "Bad line from timing file " << n2 << " " << n3 << " " << n4 << endl;
+          continue;
+        }
 	//
-	std::vector<double> tmp;	  
-	tmp.push_back(n1);
-	tmp.push_back(n2);
-	tmp.push_back(n3);
-	tmp.push_back(n4);
-	tmp.push_back(n5);    
-	tmp.push_back(n6);   
-	Data.push_back(tmp);	  
+	Data.push_back(std::vector<double>{static_cast<double>(n1),
+                                           static_cast<double>(n2),
+                                           static_cast<double>(n3),
+                                           static_cast<double>(n4),
+                                           static_cast<double>(n5),
+                                           static_cast<double>(n6)});
 	//
-	h[n2][n3][n4]->Fill( n5, n6 );   
-      }	    	   	    
+	h[n2][n3][n4]->Fill( n5, n6 );
+      }
     }
   }      
   

@@ -40,8 +40,7 @@ namespace pool  {
   IStorageSvc* createStorageSvc(const string& componentName){
     return new DbStorageSvc(componentName);
   }
-  
-  typedef DbObjectHandle<DbObject> ObjHandle;
+
   typedef const DbTypeInfo    *DbTypeInfoH;
   typedef const DbDatabaseObj *DbDatabaseH;
   typedef       DbDatabaseObj *DbDatabaseHNC;
@@ -52,7 +51,8 @@ namespace pool  {
    
 /// Standard Constructor.
 DbStorageSvc::DbStorageSvc(const string& name)
-: m_name(name),
+: APRMessaging(name),
+  m_name(name),
   m_refCount(0),
   m_sesH(),
   m_domH(POOL_StorageType),
@@ -66,11 +66,8 @@ DbStorageSvc::DbStorageSvc(const string& name)
     istringstream buf(als);
     buf >> alimit;
     if ( alimit > 0 && buf.good() )  {
-      DbPrint log(name);
       m_ageLimit = alimit;
-      log << DbPrintLvl::Info    
-          << ">   User defined db age limit ($POOL_STORAGESVC_DB_AGE_LIMIT) set to: " 
-          << m_ageLimit << DbPrint::endmsg;      
+      ATH_MSG_INFO( ">   User defined db age limit ($POOL_STORAGESVC_DB_AGE_LIMIT) set to: " << m_ageLimit );
     }
   }  
   // declareProperty("AgeLimit", m_ageLimit);
@@ -145,8 +142,7 @@ DbStatus DbStorageSvc::getShape( FileDescriptor&       fDesc,
     if ( !dbH.isValid() )  {
       DbStatus sc = dbH.open(m_domH, fDesc.PFN(), fDesc.FID(), pool::READ);
       if ( !sc.isSuccess() )    {
-        DbPrint log( name());
-        log << DbPrintLvl::Error << "Failed to open the Database!" << DbPrint::endmsg;
+        ATH_MSG_ERROR( "Failed to open the Database!" );
         return sc;
       }
     }
@@ -158,9 +154,7 @@ DbStatus DbStorageSvc::getShape( FileDescriptor&       fDesc,
       return SHAPE_NOT_AVAILIBLE;
     }
   }
-  DbPrint err( name());
-  err << DbPrintLvl::Error << "The storage service is not properly initialized." 
-      << DbPrint::endmsg;
+  ATH_MSG_ERROR( "The storage service is not properly initialized." );
   return Error;
 }
 
@@ -174,20 +168,14 @@ DbStatus DbStorageSvc::createShape( const FileDescriptor&  /*fDesc   */,
   DbStatus sc = DbTransform::getShape(shapeID, typ_info);
   shapeH = typ_info;
   if ( !sc.isSuccess() )    {
-    DbPrint log(name());
     const DbTypeInfo* typ = DbTypeInfo::create(shapeID);
     if ( 0 != typ )   {
-      log << DbPrintLvl::Info 
-          << "Building shape according to reflection information using "
-          << "shape ID for:" << DbPrint::endmsg
-          << typ->clazz().Name() 
-          << " [" << shapeID.toString() << "]" 
-          << DbPrint::endmsg;
+      ATH_MSG_INFO( "Building shape according to reflection information using shape ID for: " << endmsg
+                  << typ->clazz().Name() << " [" << shapeID.toString() << "]" );
       shapeH = typ;
       return Success;
     }
-    log << DbPrintLvl::Error << "The shape with ID=" << shapeID.toString() 
-        << " is unknown." << DbPrint::endmsg;
+    ATH_MSG_ERROR( "The shape with ID=" << shapeID.toString() << " is unknown." );
   }
   return sc;
 }
@@ -227,13 +215,10 @@ DbStatus DbStorageSvc::allocate( FileDescriptor&       fDesc,
       }
       return INVALID_CONNECTION_TOKEN;
    }
-   DbPrint err( name());
-   err << DbPrintLvl::Error 
-       << "Cannot allocate persistent object." << DbPrint::endmsg
-       << " Shape Handle :"      << (const void*)shape
-       << " FID="                << fDesc.FID() 
-       << " Cnt="                << refCont
-       << DbPrint::endmsg;
+   ATH_MSG_ERROR( "Cannot allocate persistent object." << endmsg
+       << " Shape Handle :" << (const void*)shape  << endmsg
+       << " FID=" << fDesc.FID() << endmsg
+       << " Cnt=" << refCont );
    return sc;
 }
 
@@ -254,20 +239,14 @@ DbStatus DbStorageSvc::read( const FileDescriptor& fDesc,
          if( dbH.read( token, shape, object).isSuccess() ) {
             return Success;
          } else {
-            DbPrint log( name() );
-            log << DbPrintLvl::Error
-                << "Could not read object: " << token.toString() << DbPrint::endmsg;
+            ATH_MSG_ERROR( "Could not read object: " << token.toString() );
               return Error;
          }
       }
-      DbPrint log( name() );
-      log << DbPrintLvl::Error << "The requested Database: " << token.dbID().toString()
-          << " cannot be opened!" << DbPrint::endmsg;
+      ATH_MSG_ERROR( "The requested Database: " << token.dbID().toString() << " cannot be opened!" );
     }
     else {
-       DbPrint log( name());
-       log << DbPrintLvl::Error << "Wait a minute...You cannot mix the technologies:"
-           << typ.storageName() << " and " << m_domH.type().storageName() << DbPrint::endmsg;
+       ATH_MSG_ERROR( "Wait a minute...You cannot mix the technologies: " << typ.storageName() << " and " << m_domH.type().storageName() );
     }
   }
   return Error;
@@ -275,7 +254,6 @@ DbStatus DbStorageSvc::read( const FileDescriptor& fDesc,
 
 /// Start a new Database Session.
 DbStatus DbStorageSvc::startSession(int accessmode,int technology,SessionH& refSession)  {
-  DbPrint err( name());
   m_type   = DbType(technology).majorType();
   int typ  = DbType(technology).majorType();
   if ( m_type.majorType() == typ )  {  // Maybe implement this later
@@ -286,16 +264,13 @@ DbStatus DbStorageSvc::startSession(int accessmode,int technology,SessionH& refS
         refSession = SessionH(m_domH.ptr());
         return Success;
       }
-      err << DbPrintLvl::Error << "Cannot connect to the domain:"
-          << DbType(technology).storageName() << DbPrint::endmsg;
+      ATH_MSG_ERROR( "Cannot connect to the domain: " << DbType(technology).storageName() );
       return Error;
     }
-    err << DbPrintLvl::Error << "Cannot start the Database session." << DbPrint::endmsg;
+    ATH_MSG_ERROR( "Cannot start the Database session." );
     return Error;
   }
-  err << DbPrintLvl::Error 
-      << "Cannot start database session, the technology type does not match." 
-      << DbPrint::endmsg;
+  ATH_MSG_ERROR( "Cannot start database session, the technology type does not match." );
   return Error;
 }
 
@@ -349,10 +324,7 @@ DbStatus DbStorageSvc::connect(const SessionH session,int mod,FileDescriptor& fD
     if ( !dbH.isValid() )  {
       sc = dbH.open(m_domH, fDesc.PFN(), fDesc.FID(), mod);
       if ( !sc.isSuccess() )    {
-        DbPrint err( name());
-        err << DbPrintLvl::Error 
-            << "Cannot connect to Database: FID=" << fDesc.FID()
-            << " PFN=" << fDesc.PFN() << DbPrint::endmsg;
+        ATH_MSG_ERROR( "Cannot connect to Database: FID=" << fDesc.FID() << " PFN=" << fDesc.PFN() );
         return sc;
       }
     }
@@ -368,14 +340,12 @@ DbStatus DbStorageSvc::connect(const SessionH session,int mod,FileDescriptor& fD
 /// Disconnect from a logical Database unit.
 DbStatus DbStorageSvc::disconnect(FileDescriptor& fDesc) {
   DbConnection* dbc = dynamic_cast<DbConnection*>(fDesc.dbc());
-  DbPrint log( name());
-  log << DbPrintLvl::Debug << "Disconnect request for database: FID=" << fDesc.FID()
-      << " PFN=" << fDesc.PFN() << DbPrint::endmsg;
+  ATH_MSG_DEBUG( "Disconnect request for database: FID=" << fDesc.FID() << " PFN=" << fDesc.PFN() );
   if ( dbc )   {
     DbDatabase  dbH(DbDatabaseHNC(dbc->handle()));
     dbc->release();
     fDesc.setDbc(0);
-    log << DbPrintLvl::Debug << "Closing database: FID=" << fDesc.FID() << DbPrint::endmsg;
+    ATH_MSG_DEBUG( "Closing database: FID=" << fDesc.FID() );
     return dbH.close();
   }
   return Error;
@@ -407,9 +377,7 @@ DbStatus DbStorageSvc::getDomainOption(const SessionH  sessionH, DbOption& opt) 
   if ( m_domH.isValid() && sessionH == SessionH(m_domH.ptr()) )   {
     return m_domH.getOption(opt);
   }
-  DbPrint err( name());
-  err << DbPrintLvl::Error 
-      << "Cannot connect to proper technology domain." << DbPrint::endmsg;
+  ATH_MSG_ERROR( "Cannot connect to proper technology domain." );
   return Error;
 }
 
@@ -419,9 +387,7 @@ DbStorageSvc::setDomainOption(const SessionH  sessionH, const DbOption& opt)  {
   if ( m_domH.isValid() && sessionH == SessionH(m_domH.ptr()) )   {
     return m_domH.setOption(opt);
   }
-  DbPrint err( name());
-  err << DbPrintLvl::Error 
-      << "Cannot connect to proper technology domain." << DbPrint::endmsg;
+  ATH_MSG_ERROR( "Cannot connect to proper technology domain." );
   return Error;
 }
 

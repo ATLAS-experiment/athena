@@ -64,9 +64,8 @@ namespace DerivationFramework {
     }
 
 
-    StatusCode JpsiPlusDs1Cascade::addBranches() const
+    StatusCode JpsiPlusDs1Cascade::addBranches(const EventContext& ctx) const
     {
-      const EventContext& ctx = Gaudi::Hive::currentContext();
       std::vector<Trk::VxCascadeInfo*> cascadeinfoContainer;
       constexpr int topoN = 3;
       std::array<xAOD::VertexContainer*, topoN> Vtxwritehandles;

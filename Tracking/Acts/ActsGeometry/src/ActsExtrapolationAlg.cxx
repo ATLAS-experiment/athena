@@ -19,9 +19,8 @@
 #include "Acts/Utilities/Logger.hpp"
 
 // PACKAGE
-#include "ActsGeometryInterfaces/ActsGeometryContext.h"
+#include "ActsGeometryInterfaces/GeometryContext.h"
 #include "ActsGeometry/IActsPropStepRootWriterSvc.h"
-#include "ActsGeometryInterfaces/IActsExtrapolationTool.h"
 #include "ActsGeometryInterfaces/IActsMaterialTrackWriterSvc.h"
 #include "ActsGeometryInterfaces/ITrackingGeometryTool.h"
 #include "ActsInterop/Logger.h"
@@ -105,11 +104,11 @@ StatusCode ActsExtrapolationAlg::execute(const EventContext &ctx) const {
     pars << d0, z0, phi, theta, qop, t;
     std::optional<Acts::BoundSquareMatrix> cov = std::nullopt;
 
-    ActsPropagationOutput output;
+    using PropagationOutput = ActsTrk::IExtrapolationTool::PropagationOutput;
+    PropagationOutput output;
 
     if (charge != 0.) {
       // Perigee, no alignment -> default geo context
-      ActsGeometryContext gctx = m_trackingGeometryTool->getNominalGeometryContext();
       Acts::GenericBoundTrackParameters startParameters(std::move(surface), std::move(pars), std::move(cov), Acts::ParticleHypothesis::pion());
       output = m_extrapolationTool->propagationSteps(ctx, startParameters);
       if(output.first.size() == 0) {
@@ -121,7 +120,7 @@ StatusCode ActsExtrapolationAlg::execute(const EventContext &ctx) const {
 
       if(m_writeMaterialTracks){
         Acts::RecordedMaterialTrack track;
-        track.first.first = Acts::Vector3(0,0,0);
+        track.first.first = Acts::Vector3::Zero();
         track.first.second = momentum;
         track.second = std::move(output.second);
         m_materialTrackWriterSvc->write(track);

@@ -627,7 +627,6 @@ def FPGATrackSimOverlapRemovalToolCfg(flags,name="FPGATrackSimOverlapRemovalTool
     OR.ORAlgo = "Normal"
     OR.doFastOR =flags.Trigger.FPGATrackSim.ActiveConfig.doFastOR   
     OR.NumOfHitPerGrouping = 5
-    OR.FPGATrackSimMappingSvc = result.getPrimaryAndMerge(FPGATrackSimDataPrepConfig.FPGATrackSimMappingCfg(flags))
     if flags.Trigger.FPGATrackSim.ActiveConfig.useVaryingChi2Cut and flags.Trigger.FPGATrackSim.ActiveConfig.trackNNAnalysis2nd:
         OR.MinChi2 = getChi2CutNN2ndStage(flags.Trigger.FPGATrackSim.region)
     elif flags.Trigger.FPGATrackSim.ActiveConfig.useVaryingChi2Cut and not flags.Trigger.FPGATrackSim.ActiveConfig.trackNNAnalysis2nd:

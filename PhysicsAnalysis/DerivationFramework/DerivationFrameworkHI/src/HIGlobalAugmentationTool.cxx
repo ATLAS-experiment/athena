@@ -7,17 +7,6 @@
 
 namespace DerivationFramework
 {
-  HIGlobalAugmentationTool::HIGlobalAugmentationTool(   const std::string& t,
-                                                                const std::string& n,
-                                                                const IInterface* p ) :   base_class(t,n,p)
-  {
-  }
-
-  // Destructor
-  HIGlobalAugmentationTool::~HIGlobalAugmentationTool()
-  {
-  }
-
   // Athena initialize and finalize
   StatusCode HIGlobalAugmentationTool::initialize()
   {
@@ -56,9 +45,8 @@ namespace DerivationFramework
     return StatusCode::SUCCESS;
   }
 
-  StatusCode HIGlobalAugmentationTool::addBranches() const
+  StatusCode HIGlobalAugmentationTool::addBranches(const EventContext& ctx) const
   {
-    const EventContext& ctx = Gaudi::Hive::currentContext();
     SG::ReadHandle<xAOD::EventInfo> eventInfo (m_eventInfoKey, ctx);
 
     //Load track particle container

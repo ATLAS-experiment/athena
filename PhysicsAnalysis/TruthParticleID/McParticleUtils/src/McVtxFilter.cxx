@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////// 
@@ -181,7 +181,7 @@ bool McVtxFilter::isAccepted( HepMC::ConstGenVertexPtr vtx ) const
        m_parentList.size()       == static_cast<unsigned int>(1) &&
        m_childList.size()        == static_cast<unsigned int>(2) &&
        number_particles_out >= 2 ) {
-    return checkTwoBodyDecay( vtx );
+    return checkTwoBodyDecay( std::move(vtx) );
   } //> two-body decay
 
 
@@ -192,7 +192,7 @@ bool McVtxFilter::isAccepted( HepMC::ConstGenVertexPtr vtx ) const
   if ( checkParentBranch( vtx ) == false ) return false;
 
   ATH_MSG_VERBOSE("trying checkChildBranch(...)");
-  if ( checkChildBranch ( vtx ) == false ) return false;
+  if ( checkChildBranch ( std::move(vtx) ) == false ) return false;
 
   ATH_MSG_VERBOSE("McVtxFilter::isAccepted(...) => DONE");
   return true;

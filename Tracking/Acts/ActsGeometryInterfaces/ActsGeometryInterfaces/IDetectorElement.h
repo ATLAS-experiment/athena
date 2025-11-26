@@ -10,7 +10,7 @@
 #ifndef SIMULATIONBASE 
 #   include "Acts/Geometry/DetectorElementBase.hpp"
 #endif
-#include "ActsGeometryInterfaces/ActsGeometryContext.h"
+#include "ActsGeometryInterfaces/GeometryContext.h"
 #include "ActsGeometryInterfaces/DetectorAlignStore.h"
 #include "Identifier/Identifier.h"
 

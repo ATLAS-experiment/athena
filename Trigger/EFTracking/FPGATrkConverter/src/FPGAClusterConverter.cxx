@@ -696,8 +696,8 @@ StatusCode FPGAClusterConverter::createPixelSPs(xAOD::SpacePointContainer& pixel
 
     // Covariance
     // TODO: check if we need to scale covariance based on rotation matrix like in PixelSpacePointFormationTool.cxx
-    const float & cov_r = p_cl->localCovariance<2>()(0,0);
-    const float & cov_z = p_cl->localCovariance<2>()(1,0);
+    const float cov_r = p_cl->localCovariance<2>()(0,0);
+    const float cov_z = p_cl->localCovariance<2>()(1,0);
 
     pixelSPs.back()->setSpacePoint(
       p_cl->identifierHash(),

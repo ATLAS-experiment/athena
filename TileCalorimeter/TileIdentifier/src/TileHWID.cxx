@@ -731,7 +731,7 @@ int TileHWID::initLevelsFromDict()
   }
 
   // Fing a Tile region
-  IdDictField* field = m_dict->find_field("subdet") ;
+  const IdDictField* field = m_dict->find_field("subdet") ;
   if (field) {
     m_SYSTEM_INDEX = field->index();
   }

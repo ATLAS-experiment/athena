@@ -64,7 +64,8 @@ def PhysCommonAugmentationsCfg(flags,**kwargs):
     acc.merge(EGammaCommonCfg(flags))
     # Jets, di-taus, tau decorations, flavour tagging, MET association
     from DerivationFrameworkJetEtMiss.JetCommonConfig import JetCommonCfg
-    from DerivationFrameworkTau.TauCommonConfig import (AddDiTauLowPtCfg, AddMuonRemovalTauAODReRecoAlgCfg, AddTauIDDecorationCfg, AddDiTauChargeDecoratorCfg, AddDiTauIDDecorationCfg)
+    from DerivationFrameworkTau.TauCommonConfig import (AddMuonRemovalTauAODReRecoAlgCfg, AddTauIDDecorationCfg)
+    from DerivationFrameworkTau.DiTauCommonConfig import (AddDiTauLowPtCfg, AddDiTauChargeDecoratorCfg, AddDiTauIDDecorationCfg)
     from DerivationFrameworkJetEtMiss.METCommonConfig import METCommonCfg 
     acc.merge(JetCommonCfg(flags))
     #We also need to build links between the newly created jet constituents (GlobalFE)
@@ -86,9 +87,8 @@ def PhysCommonAugmentationsCfg(flags,**kwargs):
     acc.merge(AddDiTauChargeDecoratorCfg(flags, DiTauContainerName="DiTauJetsLowPt"))
     if flags.Reco.EnableBTagging:
         from BTagging.FlavorTaggingConfig import FlavorTaggingCfg
-        from DerivationFrameworkFlavourTag.FtagDerivationConfig import BTagLargeRDecoration
         acc.merge(FlavorTaggingCfg(flags, "AntiKt4EMPFlowJets"))
-        acc.merge(BTagLargeRDecoration(flags, "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets"))
+        acc.merge(FlavorTaggingCfg(flags, "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets"))
 
     acc.merge(METCommonCfg(flags))
 

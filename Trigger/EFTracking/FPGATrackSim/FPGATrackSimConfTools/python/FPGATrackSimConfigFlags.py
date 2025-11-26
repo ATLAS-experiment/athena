@@ -141,6 +141,7 @@ def createFPGATrackSimConfigFlags():
     cf.addFlag('writeAdditionalOutputData', True)
     cf.addFlag('regionToWriteDPTree', -1)
     cf.addFlag('writeOutputEventLimit', -1)
+    cf.addFlag('writeRegion', -1)
     cf.addFlag('readOfflineObjects', True)
 
     # ACTS Tracking
@@ -243,7 +244,7 @@ def createBasicFPGATrackSimConfigFlags():
     cf.addFlag('doMissingHitsChecks', False)
     cf.addFlag('idealCoordFitType', 2)
     cf.addFlag('doDeltaGPhis', False)
-    cf.addFlag('chi2cut', 9)
+    cf.addFlag('chi2cut', 2.25)
     cf.addFlag('useVaryingChi2Cut', False)
     cf.addFlag('fitFromRoad', True)
 
@@ -373,7 +374,6 @@ def createGenScanFPGATrackSimConfigFlags():
     cf.addFlag('layerStudy',False)
     cf.addFlag('layerMapFile','')
     cf.addFlag('useLayerRadiiFile',False)
-    cf.addFlag('usePhiShift',False)
     cf.addFlag('noCuts',False)
 
     cf.addFlag('filterInBin', False)

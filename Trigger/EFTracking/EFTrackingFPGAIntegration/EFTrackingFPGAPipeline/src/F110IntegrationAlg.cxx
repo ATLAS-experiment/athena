@@ -35,6 +35,9 @@ namespace EFTrackingFPGAIntegration
         ATH_CHECK(m_FPGAStripRDO.initialize());
         ATH_CHECK(m_FPGAPixelRDO.initialize());
 
+        ATH_CHECK(m_FPGAPixelRDOSize.initialize());
+        ATH_CHECK(m_FPGAStripRDOSize.initialize());
+
         ATH_CHECK(m_FPGAStripOutput.initialize());
         ATH_CHECK(m_FPGAPixelOutput.initialize());
 
@@ -105,8 +108,8 @@ namespace EFTrackingFPGAIntegration
             m_stripL2GOutputBufferList.push_back(cl::Buffer(m_context, CL_MEM_READ_WRITE, EFTrackingTransient::STRIP_BLOCK_BUF_SIZE * sizeof(uint64_t), NULL, &err));
             m_stripL2GEDMOutputBufferList.push_back(cl::Buffer(m_context, CL_MEM_READ_WRITE, EFTrackingTransient::STRIP_BLOCK_BUF_SIZE * sizeof(uint64_t), NULL, &err));
             // EDMPrep
-            m_edmPixelOutputBufferList.push_back(cl::Buffer(m_context, CL_MEM_READ_WRITE, EFTrackingTransient::PIXEL_CONTAINER_BUF_SIZE * sizeof(uint64_t), NULL, &err));
-            m_edmStripOutputBufferList.push_back(cl::Buffer(m_context, CL_MEM_READ_WRITE, EFTrackingTransient::STRIP_CONTAINER_BUF_SIZE * sizeof(uint64_t), NULL, &err));
+            m_edmPixelOutputBufferList.push_back(cl::Buffer(m_context, CL_MEM_READ_WRITE, EFTrackingTransient::PIXEL_CONTAINER_BUF_SIZE * sizeof(uint32_t), NULL, &err));
+            m_edmStripOutputBufferList.push_back(cl::Buffer(m_context, CL_MEM_READ_WRITE, EFTrackingTransient::STRIP_CONTAINER_BUF_SIZE * sizeof(uint32_t), NULL, &err));
         }
 
 
@@ -141,6 +144,10 @@ namespace EFTrackingFPGAIntegration
         auto pixelInput = SG::get(m_FPGAPixelRDO, ctx);
         auto stripInput = SG::get(m_FPGAStripRDO, ctx);
    
+        const int* pixelInputSize{nullptr}, *stripInputSize{nullptr};
+        ATH_CHECK(SG::get(pixelInputSize, m_FPGAPixelRDOSize, ctx));
+        ATH_CHECK(SG::get(stripInputSize, m_FPGAStripRDOSize, ctx));
+
         // logic
         unsigned int nthreads = m_FPGAThreads.value();
 
@@ -193,7 +200,7 @@ namespace EFTrackingFPGAIntegration
         stripClusteringKernel.setArg<cl::Buffer>(0, stripClusterInputBuffer);
         stripClusteringKernel.setArg<cl::Buffer>(1, stripClusterOutputBuffer);
         stripClusteringKernel.setArg<cl::Buffer>(2, stripClusterEDMOutputBuffer);
-        stripClusteringKernel.setArg<unsigned int>(3, (*stripInput).size());
+        stripClusteringKernel.setArg<unsigned int>(3, *stripInputSize);
 
         stripL2GKernel.setArg<cl::Buffer>(0, stripClusterOutputBuffer);
         stripL2GKernel.setArg<cl::Buffer>(1, stripClusterEDMOutputBuffer);
@@ -268,14 +275,14 @@ namespace EFTrackingFPGAIntegration
         readStripOutputDeps.push_back(stripEdmPrepEvt);
 
 
-        SG::WriteHandle<std::vector<uint64_t>> FPGAPixelOutput(m_FPGAPixelOutput, ctx);
-        ATH_CHECK(FPGAPixelOutput.record(std::make_unique<std::vector<uint64_t> >(EFTrackingTransient::PIXEL_CONTAINER_BUF_SIZE, 0)));
+        SG::WriteHandle<std::vector<uint32_t>> FPGAPixelOutput(m_FPGAPixelOutput, ctx);
+        ATH_CHECK(FPGAPixelOutput.record(std::make_unique<std::vector<uint32_t> >(EFTrackingTransient::PIXEL_CONTAINER_BUF_SIZE, 0)));
 
-        SG::WriteHandle<std::vector<uint64_t>> FPGAStripOutput(m_FPGAStripOutput, ctx);
-        ATH_CHECK(FPGAStripOutput.record(std::make_unique<std::vector<uint64_t> >(EFTrackingTransient::STRIP_CONTAINER_BUF_SIZE, 0)));
+        SG::WriteHandle<std::vector<uint32_t>> FPGAStripOutput(m_FPGAStripOutput, ctx);
+        ATH_CHECK(FPGAStripOutput.record(std::make_unique<std::vector<uint32_t> >(EFTrackingTransient::STRIP_CONTAINER_BUF_SIZE, 0)));
 
-        m_acc_queue.enqueueReadBuffer(edmPixelOutputBuffer, CL_FALSE, 0, sizeof(uint64_t) * (*FPGAPixelOutput).size(), (*FPGAPixelOutput).data(), &readPixelOutputDeps, &readPixelOutputEvt);
-        m_acc_queue.enqueueReadBuffer(edmStripOutputBuffer, CL_FALSE, 0, sizeof(uint64_t) * (*FPGAStripOutput).size(), (*FPGAStripOutput).data(), &readStripOutputDeps, &readStripOutputEvt);
+        m_acc_queue.enqueueReadBuffer(edmPixelOutputBuffer, CL_FALSE, 0, sizeof(uint32_t) * (*FPGAPixelOutput).size(), (*FPGAPixelOutput).data(), &readPixelOutputDeps, &readPixelOutputEvt);
+        m_acc_queue.enqueueReadBuffer(edmStripOutputBuffer, CL_FALSE, 0, sizeof(uint32_t) * (*FPGAStripOutput).size(), (*FPGAStripOutput).data(), &readStripOutputDeps, &readStripOutputEvt);
 
 
         // Unlocks mutex so other events can handle their FPGA interactions while this event is waiting
@@ -286,8 +293,8 @@ namespace EFTrackingFPGAIntegration
         std::vector<cl::Event> terminationDeps = { readPixelOutputEvt, readStripOutputEvt };
         cl::Event::waitForEvents(terminationDeps);
 
-        if(pixelInput->size() == 6) (*FPGAPixelOutput)[0] = 0; // if no pixel input, set the first element to 0
-        if(stripInput->size() == 6) (*FPGAStripOutput)[0] = 0; // if no strip input, set the first element to 0
+        if(*pixelInputSize == 6) (*FPGAPixelOutput)[0] = 0; // if no pixel input, set the first element to 0
+        if(*stripInputSize == 6) (*FPGAStripOutput)[0] = 0; // if no strip input, set the first element to 0
 
 
        // calculate the time for the kernel execution

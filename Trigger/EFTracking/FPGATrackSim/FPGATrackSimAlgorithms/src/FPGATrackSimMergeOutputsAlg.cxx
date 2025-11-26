@@ -49,18 +49,18 @@ StatusCode FPGATrackSimMergeOutputsAlg::initialize()
     if (!foundDP) { // only needed for one file
       m_dataprep_tree = (TTree*)(m_files[ifile]->Get("FPGATrackSimDataPrepTree"));
       if (m_dataprep_tree) {
-	if (m_dataprep_tree->GetEntries() > 0) {
-	  foundDP = true;
-	  m_dataprep = new FPGATrackSimLogicalEventInputHeader();
-	  
-	  TBranch *dpb = m_dataprep_tree->GetBranch("LogicalEventInputHeader_PostCluster");
-	  if (!dpb) {
-	    ATH_MSG_ERROR("Could not get LogicalEventInputHeader_PostCluster file " << m_inpaths[ifile]);
-	    return StatusCode::FAILURE;
-	  }
-	  dpb->SetAddress(&m_dataprep);
-	  m_dataprep_tree->SetBranchStatus("LogicalEventInputHeader_Pre*",0);      
-	}
+        if (m_dataprep_tree->GetEntries() > 0) {
+          foundDP = true;
+          m_dataprep = new FPGATrackSimLogicalEventInputHeader();
+          
+          TBranch *dpb = m_dataprep_tree->GetBranch("LogicalEventInputHeader_PostCluster");
+          if (!dpb) {
+            ATH_MSG_ERROR("Could not get LogicalEventInputHeader_PostCluster file " << m_inpaths[ifile]);
+            return StatusCode::FAILURE;
+          }
+          dpb->SetAddress(&m_dataprep);
+          m_dataprep_tree->SetBranchStatus("LogicalEventInputHeader_Pre*",0);      
+        }
       }
     }
 
@@ -71,21 +71,21 @@ StatusCode FPGATrackSimMergeOutputsAlg::initialize()
     for (unsigned iregion = 0; iregion < N; iregion++) {
       m_trees[ifile][iregion] = (TTree*)(m_files[ifile]->Get(Form("FPGATrackSimLogicalEventTree_reg%d",iregion)));
       if (!m_trees[ifile][iregion]) {
-	continue;
+        continue;
       }
       else if (regionsFound[iregion]) {
-	ATH_MSG_ERROR("Found two files with region number " << iregion << " and I do not know which one to use!");
-	return StatusCode::FAILURE;
+        ATH_MSG_ERROR("Found two files with region number " << iregion << " and I do not know which one to use!");
+        return StatusCode::FAILURE;
       }
       else {
-	regionsFound[iregion] = true;
+	      regionsFound[iregion] = true;
       }
 
       m_eventOutputHeaders[ifile][iregion] = new FPGATrackSimLogicalEventOutputHeader();
       TBranch *b = m_trees[ifile][iregion]->GetBranch("LogicalEventOutputHeader");
       if (!b) {
-	ATH_MSG_ERROR("Could not get LogicalEventOutputHeader in file " << m_inpaths[ifile]);
-	return StatusCode::FAILURE;
+	      ATH_MSG_ERROR("Could not get LogicalEventOutputHeader in file " << m_inpaths[ifile]);
+	      return StatusCode::FAILURE;
       }
       b->SetAddress(&m_eventOutputHeaders[ifile][iregion]);      
 

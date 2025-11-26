@@ -244,7 +244,7 @@ BOOST_FIXTURE_TEST_CASE(Fill, EmptyMTJ) {
   copy.visitBackwards(i2b, collect);
   BOOST_CHECK_EQUAL_COLLECTIONS(act.begin(), act.end(), exp.begin(), exp.end());
 }
-
+//coverity[routine_not_emitted]
 BOOST_FIXTURE_TEST_CASE(Dynamic_columns, EmptyMTJ) {
   using namespace Acts::HashedStringLiteral;
   BOOST_CHECK(mtj->has_backends());
@@ -322,6 +322,7 @@ BOOST_FIXTURE_TEST_CASE(Dynamic_columns, EmptyMTJ) {
 
   auto dest_i0 = dest_mtj->addTrackState(kMask);
   auto dest_ts0 = dest_mtj->getTrackState(dest_i0);
+  //coverity[no_matching_function]
   dest_ts0.copyFrom(ts0);
 
   BOOST_CHECK_EQUAL((ro_ts0.component<short, "author"_hash>()),

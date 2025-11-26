@@ -1,9 +1,7 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-///////////////////////////////////////////////////////////////////
-// BatBatmanAugmentationTool.cxx, (c) ATLAS Detector software
 ///////////////////////////////////////////////////////////////////
 // Author: Chris Young (christopher.young@cern.ch)
 ///////////////////////////////////////////////////////////////////
@@ -19,13 +17,6 @@
 
 namespace DerivationFramework {
 
-  BadBatmanAugmentationTool::BadBatmanAugmentationTool(const std::string& t,
-					       const std::string& n,
-					       const IInterface* p) : 
-    base_class(t,n,p)
-  {
-  }
-
   StatusCode BadBatmanAugmentationTool::initialize()
   {
 
@@ -35,21 +26,12 @@ namespace DerivationFramework {
     ATH_CHECK(m_clusterContainer_key.initialize());
     ATH_CHECK(m_isBadBatmanKey.initialize());
 
-    
-    return StatusCode::SUCCESS;
-  }
-
-  StatusCode BadBatmanAugmentationTool::finalize()
-  {
-
-    ATH_MSG_INFO("Finalize BadBatmanAugmentationTool");
 
     return StatusCode::SUCCESS;
   }
 
-  StatusCode BadBatmanAugmentationTool::addBranches() const
+  StatusCode BadBatmanAugmentationTool::addBranches(const EventContext& ctx) const
   {
-    const EventContext& ctx = Gaudi::Hive::currentContext();
     //Running BadBatmanAugmentationTool
 
     //Set the name of the variable to augment
@@ -59,7 +41,7 @@ namespace DerivationFramework {
     auto eventInfo = SG::makeHandle (m_eventInfo_key, ctx);
     if (!eventInfo.isValid()){
       ATH_MSG_WARNING("Invalid  xAOD::EventInfo datahandle"
-		      << m_eventInfo_key.key()); 
+                      << m_eventInfo_key.key());
       return StatusCode::FAILURE;
     }
     auto ei = eventInfo.cptr();
@@ -67,7 +49,7 @@ namespace DerivationFramework {
     auto clusterContainer = SG::makeHandle (m_clusterContainer_key, ctx);
     if(!clusterContainer.isValid()){
       ATH_MSG_WARNING("Invalid  xAOD::CaloClusterContainer datahandle"
-		      << m_clusterContainer_key.key());
+                      << m_clusterContainer_key.key());
       return StatusCode::FAILURE;
     }
     auto clusters = clusterContainer.cptr();

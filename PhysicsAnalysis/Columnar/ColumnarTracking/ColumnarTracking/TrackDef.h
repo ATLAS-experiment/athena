@@ -32,6 +32,11 @@ namespace columnar
       static constexpr std::string_view idName = "track2";
     };
 
+    struct track3 : track
+    {
+      static constexpr std::string_view idName = "track3";
+    };
+
     struct vertex : regularCIBase<xAOD::Vertex,xAOD::VertexContainer>
     {
       static constexpr std::string_view idName = "vertex";
@@ -54,6 +59,10 @@ namespace columnar
   using OptTrack2Id = OptObjectId<ContainerId::track2>;
   template<typename CT,typename CM=ColumnarModeDefault> using Track2Accessor  = AccessorTemplate<ContainerId::track2,CT,ColumnAccessMode::input,CM>;
   template<typename CT,typename CM=ColumnarModeDefault> using Track2Decorator = AccessorTemplate<ContainerId::track2,CT,ColumnAccessMode::output,CM>;
+
+  using OptTrack3Id = OptObjectId<ContainerId::track3>;
+  template<typename CT,typename CM=ColumnarModeDefault> using Track3Accessor  = AccessorTemplate<ContainerId::track3,CT,ColumnAccessMode::input,CM>;
+  template<typename CT,typename CM=ColumnarModeDefault> using Track3Decorator = AccessorTemplate<ContainerId::track3,CT,ColumnAccessMode::output,CM>;
 
   using VertexId = ObjectId<ContainerId::vertex>;
   using OptVertexId = OptObjectId<ContainerId::vertex>;

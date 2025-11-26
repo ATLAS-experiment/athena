@@ -45,6 +45,7 @@
 + Control/RngComps
 + Control/RootUtils
 + Control/SGComps
++ Control/SGCore
 + Control/SGTools
 + Control/StoreGate
 + Control/StoreGateBindings
@@ -55,7 +56,7 @@
 + Database/APR/CollectionUtilities
 + Database/APR/FileCatalog
 + Database/APR/ImplicitCollection
-+ Database/APR/POOLCore 
++ Database/APR/POOLCore
 + Database/APR/PersistencySvc
 + Database/APR/RootCollection
 + Database/APR/RootStorageSvc
@@ -215,4 +216,3 @@
 + PhysicsAnalysis/D3PDTools/AnaAlgorithm
 # Ignore everything else
 - .*
-

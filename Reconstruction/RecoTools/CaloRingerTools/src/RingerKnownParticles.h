@@ -53,7 +53,7 @@ DECLARE_RINGER_KNOWN_PARTICLE( xAOD::Photon    , true  )
 
 // Ringer can be run with IParticles, but it won't use cluster information
 // since it is not available:
-DECLARE_RINGER_KNOWN_PARTICLE( xAOD::IParticle , false )
+DECLARE_RINGER_KNOWN_PARTICLE( xAOD::IParticle , true )
 
 #undef DECLARE_RINGER_KNOWN_PARTICLE
 

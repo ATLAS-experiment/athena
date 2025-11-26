@@ -649,7 +649,7 @@ HGTD_ID::initLevelsFromDict()
         m_padInModuleColumn       = "padInModuleColumn";
     }
     // Get levels
-    IdDictField* field = m_dict->find_field("subdet");
+    const IdDictField* field = m_dict->find_field("subdet");
     if (field) {
         m_INDET_INDEX = field->index();
     }

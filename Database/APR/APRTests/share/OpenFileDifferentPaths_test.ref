@@ -1,16 +1,17 @@
 Creating the test driver.
 [OVAL] Creating a file catalog
-APRFileCatalog      DEBUG addCatalog("xmlcatalog_file:PoolFileCatalog.xml")
+APRFileCatalog      DEBUG addCatalog("xmlcatalog_file:FODP.catalog.xml")
 Loading library test_TestDictionaryDict
 Creating a database
-APRFileCatalog      DEBUG Registering PFN=pool.root of type=ROOT_All GUID=E9143E5C-FDDA-8646-9204-2E4BAE14DC0
+APRFileCatalog      DEBUG Registering PFN=DB.FODP.pool.root of type=ROOT_All GUID=E9143E5C-FDDA-8646-9204-2E4BAE14DC00
 Creating the persistency service
 Writing 100 objects.
 Committing the transaction.
-XMLCatalog           INFO File 'PoolFileCatalog.xml' does not exist. New file created.
+XMLCatalog           INFO File 'FODP.catalog.xml' does not exist. New file created.
 ...done
 Reading objects back from the database.
 Creating the persistency service
+PersistencySvc:...WARNING Opening file './DB.FODP.pool.root' which is already registered in the Catalog as 'DB.FODP.pool.root' (GUID E9143E5C-FDDA-8646-9204-2E4BAE14DC00) - this is not supported and may even lead to a crash!
 Container : SimpleTestClass_Container
 100 objects found in the container.
 Committing the transaction.

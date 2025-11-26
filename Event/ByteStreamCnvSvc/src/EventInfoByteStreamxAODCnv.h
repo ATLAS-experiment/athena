@@ -1,9 +1,9 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef EVENTINFOBYTESTREAMXAODCNV_H
-#define EVENTINFOBYTESTREAMXAODCNV_H
+#ifndef BYTESTREAMCNVSVC_EVENTINFOBYTESTREAMXAODCNV_H
+#define BYTESTREAMCNVSVC_EVENTINFOBYTESTREAMXAODCNV_H
 
 /**
  * @file EventInfoByteStreamxAODCnv.h
@@ -25,7 +25,7 @@ class EventInfoByteStreamxAODCnv : public Converter, public AthMessaging
 {
  public:
   EventInfoByteStreamxAODCnv(ISvcLocator* svcloc);
-  virtual ~EventInfoByteStreamxAODCnv() override {}
+  virtual ~EventInfoByteStreamxAODCnv() override = default;
 
   virtual StatusCode initialize() override;
   virtual StatusCode finalize() override;
@@ -42,4 +42,4 @@ class EventInfoByteStreamxAODCnv : public Converter, public AthMessaging
 
 };
 
-#endif
+#endif // BYTESTREAMCNVSVC_EVENTINFOBYTESTREAMXAODCNV_H

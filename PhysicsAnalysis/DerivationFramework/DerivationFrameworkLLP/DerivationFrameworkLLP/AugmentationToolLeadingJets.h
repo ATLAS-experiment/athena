@@ -2,10 +2,6 @@
   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-///////////////////////////////////////////////////////////////////
-// AugmentationLeadingJets.h, (c) ATLAS Detector software
-///////////////////////////////////////////////////////////////////
-
 #ifndef DERIVATIONFRAMEWORK_AUGMENTATIONTOOLLEADINGJETS_H
 #define DERIVATIONFRAMEWORK_AUGMENTATIONTOOLLEADINGJETS_H
 
@@ -20,18 +16,19 @@
 namespace DerivationFramework {
 
   class AugmentationToolLeadingJets : public extends<AthAlgTool, IAugmentationTool> {
-    public: 
-      AugmentationToolLeadingJets(const std::string& t, const std::string& n, const IInterface* p);
-      virtual StatusCode initialize() override;
-      virtual StatusCode addBranches() const override;
+  public:
 
+    using base_class::base_class;
+
+    virtual StatusCode initialize() override final;
+    virtual StatusCode addBranches(const EventContext& ctx) const override final;
 
   private:
     SG::ReadHandleKey<xAOD::JetContainer> m_jetKey
       { this, "JetKey", "AntiKt4EMTopoJets", "" };
     SG::WriteDecorHandleKey<xAOD::JetContainer> m_decorationKey
       { this, "DecorationKey", m_jetKey, "DFDecoratorLeadingJets", "" };
-  }; 
+  };
 }
 
 #endif // DERIVATIONFRAMEWORK_AUGMENTATIONTOOLLEADINGJETS_H

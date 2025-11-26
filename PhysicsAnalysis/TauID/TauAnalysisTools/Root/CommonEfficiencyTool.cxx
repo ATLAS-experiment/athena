@@ -8,7 +8,6 @@
 // local include(s)
 #include "TauAnalysisTools/CommonEfficiencyTool.h"
 #include "TauAnalysisTools/TauEfficiencyCorrectionsTool.h"
-#include "xAODTruth/TruthParticleContainer.h"
 
 // ROOT include(s)
 #include "TF1.h"

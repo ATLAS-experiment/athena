@@ -116,6 +116,7 @@ private:
   TIDA::Histogram<float> m_hz0eff;
   TIDA::Histogram<float> m_hnVtxeff;
   TIDA::Histogram<float> m_hlbeff;
+  TIDA::Histogram<float> m_hntraxeff;
 
   TIDA::Histogram<float> m_hpTres;
   TIDA::Histogram<float> m_hipTres;

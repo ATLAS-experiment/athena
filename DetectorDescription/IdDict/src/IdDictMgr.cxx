@@ -2,9 +2,8 @@
    Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
  */
 
-// $Header: /DetectorDescription/IdDict/src/IdDictMgr.cxx,v 1.43 2008-12-09 09:49:43 dquarrie Exp $
-
-#include "IdDict/IdDictDefs.h"
+#include "IdDict/IdDictMgr.h"
+#include "IdDict/IdDictDictionary.h"
 #include "Identifier/RangeIterator.h"
 #include "Identifier/MultiRange.h"
 #include "src/Debugger.h"
@@ -50,9 +49,7 @@ IdDictMgr::IdDictMgr()
   m_do_neighbours(true) {
 }
 
-IdDictMgr::~IdDictMgr() {
-  clear();
-}
+IdDictMgr::~IdDictMgr() = default;
 
 const std::string& IdDictMgr::tag() const {
   return m_tag;
@@ -70,8 +67,7 @@ void
 IdDictMgr::set_do_checks(bool do_checks) {
   m_do_checks = do_checks;
   for (const auto& p : m_dictionaries) {
-    IdDictDictionary* d = p.second;
-    d->set_do_checks(do_checks);
+    p.second->set_do_checks(do_checks);
   }
 }
 
@@ -83,8 +79,7 @@ void
 IdDictMgr::set_do_neighbours(bool do_neighbours) {
   m_do_neighbours = do_neighbours;
   for (const auto& p : m_dictionaries) {
-    IdDictDictionary* d = p.second;
-    d->set_do_neighbours(do_neighbours);
+    p.second->set_do_neighbours(do_neighbours);
   }
 }
 
@@ -108,39 +103,40 @@ IdDictMgr::set_DTD_version(const std::string& DTD_version) {
   m_DTD_version = DTD_version;
 }
 
-const IdDictMgr::dictionary_map& IdDictMgr::get_dictionary_map() const {
-  return(m_dictionaries);
+std::vector<const IdDictDictionary*> IdDictMgr::get_dictionaries () const
+{
+  std::vector<const IdDictDictionary*> out;
+  out.reserve (m_dictionaries.size());
+  for (const auto& p : m_dictionaries) {
+    out.push_back (p.second.get());
+  }
+  return out;
 }
 
-IdDictDictionary* IdDictMgr::find_dictionary(const std::string& name) const {
-  dictionary_map::const_iterator it;
-
-  it = m_dictionaries.find(name);
-
-  if (it == m_dictionaries.end()) return(0);
-
-  return((*it).second);
+const IdDictDictionary* IdDictMgr::find_dictionary(const std::string& name) const {
+  auto it = m_dictionaries.find(name);
+  if (it == m_dictionaries.end()) return nullptr;
+  return it->second.get();
 }
 
-void IdDictMgr::add_dictionary(IdDictDictionary* dictionary) {
+IdDictDictionary* IdDictMgr::find_dictionary(const std::string& name) {
+  auto it = m_dictionaries.find(name);
+  if (it == m_dictionaries.end()) return nullptr;
+  return it->second.get();
+}
+
+void IdDictMgr::add_dictionary(std::unique_ptr<IdDictDictionary> dictionary) {
   if (dictionary == 0) return;
 
   const std::string& name = dictionary->name();
 
-  // Delete entry if already there
-  dictionary_map::iterator it = m_dictionaries.find(name);
-  if (it != m_dictionaries.end()) delete (*it).second;
-
-  m_dictionaries[name] = dictionary;
+  m_dictionaries[name] = std::move(dictionary);
 
   if (Debugger::debug()) {
     dictionary_map::iterator it;
 
-    for (it = m_dictionaries.begin(); it != m_dictionaries.end(); ++it) {
-      std::string s = (*it).first;
-      IdDictDictionary* d = (*it).second;
-
-      std::cout << "IdDictMgr::add_dictionary> d[" << s << "]=" << d << std::endl;
+    for (const auto& p : m_dictionaries) {
+      std::cout << "IdDictMgr::add_dictionary> d[" << p.first << "]=" << p.second.get() << std::endl;
     }
   }
 }
@@ -150,13 +146,11 @@ void IdDictMgr::add_subdictionary_name(const std::string& name) {
 }
 
 void IdDictMgr::resolve_references() {
-  dictionary_map::iterator it;
-
-  for (it = m_dictionaries.begin(); it != m_dictionaries.end(); ++it) {
+  for (auto& p : m_dictionaries) {
     // From mgr, only resolve refs for top-level dictionaries
-    IdDictDictionary* dictionary = (*it).second;
-    if (m_subdictionary_names.find(dictionary->name()) != m_subdictionary_names.end()) continue;
-    dictionary->resolve_references(*this);
+    IdDictDictionary& dictionary = *p.second;
+    if (m_subdictionary_names.find(dictionary.name()) != m_subdictionary_names.end()) continue;
+    dictionary.resolve_references(*this);
   }
 }
 
@@ -171,12 +165,11 @@ void IdDictMgr::generate_implementation(const std::string& tag) {
 
   if (!m_generated_implementation) {
     m_tag = tag;
-    dictionary_map::iterator it;
-    for (it = m_dictionaries.begin(); it != m_dictionaries.end(); ++it) {
+    for (auto& p : m_dictionaries) {
       // From mgr, only generate impl for top-level dictionaries
-      IdDictDictionary* dictionary = (*it).second;
-      if (m_subdictionary_names.find(dictionary->name()) != m_subdictionary_names.end()) continue;
-      dictionary->generate_implementation(*this, tag);
+      IdDictDictionary& dictionary = *p.second;
+      if (m_subdictionary_names.find(dictionary.name()) != m_subdictionary_names.end()) continue;
+      dictionary.generate_implementation(*this, tag);
     }
     m_generated_implementation = true;
   }
@@ -187,37 +180,25 @@ void IdDictMgr::reset_implementation() {
 
 
   if (m_generated_implementation) {
-    dictionary_map::iterator it;
-    for (it = m_dictionaries.begin(); it != m_dictionaries.end(); ++it) {
+    for (auto& p : m_dictionaries) {
       // From mgr, only generate impl for top-level dictionaries
-      IdDictDictionary* dictionary = (*it).second;
-      if (m_subdictionary_names.find(dictionary->name()) != m_subdictionary_names.end()) continue;
-      dictionary->reset_implementation();
+      IdDictDictionary& dictionary = *p.second;
+      if (m_subdictionary_names.find(dictionary.name()) != m_subdictionary_names.end()) continue;
+      dictionary.reset_implementation();
     }
     m_generated_implementation = false;
   }
 }
 
 bool IdDictMgr::verify() const {
-  dictionary_map::const_iterator it;
-
-  for (it = m_dictionaries.begin(); it != m_dictionaries.end(); ++it) {
-    const IdDictDictionary* dictionary = (*it).second;
-    if (!dictionary->verify()) return(false);
+  for (auto& p : m_dictionaries) {
+    if (!p.second->verify()) return(false);
   }
 
   return(true);
 }
 
 void IdDictMgr::clear() {
-  dictionary_map::iterator it;
-
-  for (it = m_dictionaries.begin(); it != m_dictionaries.end(); ++it) {
-    IdDictDictionary* dictionary = (*it).second;
-    dictionary->clear();
-    delete dictionary;
-  }
-
   m_dictionaries.clear();
   m_resolved_references = false;
   m_generated_implementation = false;

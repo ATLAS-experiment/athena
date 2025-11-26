@@ -42,7 +42,7 @@ if __name__=="__main__":
    from ByteStreamCnvSvc.ByteStreamConfig import ByteStreamReadCfg
    cfg.merge(ByteStreamReadCfg(flags))
 
-   from ITkPixelByteStreamCnv.ITkPixelDecodingAlgConfig import ITkPixelDecodingAlgCfg
+   from ITkPixelByteStreamCnv.ITkPixelByteStreamCnvConfig import ITkPixelDecodingAlgCfg
    cfg.merge( ITkPixelDecodingAlgCfg(flags) )
 
    from PerfMonComps.PerfMonCompsConfig import PerfMonMTSvcCfg

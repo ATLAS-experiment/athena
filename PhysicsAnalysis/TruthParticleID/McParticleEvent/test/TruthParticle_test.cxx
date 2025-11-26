@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @purpose: test the TruthParticle class
@@ -163,7 +163,7 @@ TruthParticleTest* makeTestData()
   std::vector<long> rdmStates(2);
   rdmStates[0] = 85909879;
   rdmStates[1] = 9707499;
-  evt->weights() = weights;
+  evt->weights() = std::move(weights);
   evt->add_attribute("random_states",std::make_shared<HepMC3::VectorLongIntAttribute>(rdmStates));
 #else
   evt->set_event_scale( -1 );
@@ -236,11 +236,11 @@ TruthParticleTest* makeTestData()
   // filling Data test members
   test->m_evt        = evt;
   test->m_vtx        = vtx;
-  test->m_top        = top;
-  test->m_w          = w;
-  test->m_b          = b;
-  test->m_g1         = g1;
-  test->m_g2         = g2;
+  test->m_top        = std::move(top);
+  test->m_w          = std::move(w);
+  test->m_b          = std::move(b);
+  test->m_g1         = std::move(g1);
+  test->m_g2         = std::move(g2);
   // we subtract one because we don't account for the top
   test->m_nPartsIn   = vtx->particles_in_size() - 1; 
   test->m_nPartsOut  = vtx->particles_out_size();

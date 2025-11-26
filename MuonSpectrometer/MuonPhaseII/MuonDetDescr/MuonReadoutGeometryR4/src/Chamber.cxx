@@ -111,7 +111,7 @@ namespace MuonGMR4{
     double Chamber::halfY() const { return  m_args.bounds->get(BoundEnums::eHalfLengthY); }
     double Chamber::halfZ() const { return m_args.bounds->get(BoundEnums::eHalfLengthZ); }
 
-    std::shared_ptr<Acts::Volume> Chamber::boundingVolume(const ActsGeometryContext& gctx) const {
+    std::shared_ptr<Acts::Volume> Chamber::boundingVolume(const ActsTrk::GeometryContext& gctx) const {
         return std::make_shared<Acts::Volume>(localToGlobalTrans(gctx), bounds());
     }
     std::shared_ptr<Acts::TrapezoidVolumeBounds> Chamber::bounds() const {
@@ -129,10 +129,10 @@ namespace MuonGMR4{
     const Acts::PlaneSurface& Chamber::surface() const {
         return *m_args.surface;
     }
-    const Amg::Transform3D& Chamber::localToGlobalTrans(const ActsGeometryContext& gctx) const {
+    const Amg::Transform3D& Chamber::localToGlobalTrans(const ActsTrk::GeometryContext& gctx) const {
         return surface().transform(gctx.context());
     }
-    Amg::Transform3D Chamber::globalToLocalTrans(const ActsGeometryContext& gctx) const {
+    Amg::Transform3D Chamber::globalToLocalTrans(const ActsTrk::GeometryContext& gctx) const {
         return localToGlobalTrans(gctx).inverse();
     }
     const SpectrometerSector* Chamber::parent() const { return m_parent; }

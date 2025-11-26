@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef FIXLARELECCALIB_H
@@ -8,29 +8,26 @@
 #include "AthenaBaseComps/AthAlgorithm.h"
 #include "CxxUtils/checker_macros.h"
 #include "Identifier/HWIdentifier.h"
-#include "StoreGate/StoreGateSvc.h"
 #include "StoreGate/ReadCondHandleKey.h"
-#include "LArCabling/LArOnOffIdMapping.h"
-#include "LArRecConditions/LArCalibLineMapping.h"
+#include "LArCabling/LArOnOffIdMapping.h" //template argument
+#include "LArRecConditions/LArCalibLineMapping.h" //template argument
+#include "LArRawConditions/LArMphysOverMcalMC.h" //template argument
+#include "LArRawConditions/LArShape32MC.h" //typedef
+#include "LArRawConditions/LArNoiseMC.h" //typedef
+#include "LArRawConditions/LArRampMC.h" //typedef
+#include "LArRawConditions/LArAutoCorrMC.h" //typedef
 #include <string>
+#include <utility> //std::pair
+#include <vector>
 
+
+class LArSingleFloatP;
 class  LArEM_ID ;
 class  LArHEC_ID;
 class  LArFCAL_ID;
 class  LArOnlineID;
 class  LArOnline_SuperCellID;
 class  CaloCell_SuperCell_ID;
-class LArOnOffIdMapping;
-
-#include "LArRawConditions/LArDAC2uAMC.h"
-#include "LArRawConditions/LArShape32MC.h"
-#include "LArRawConditions/LAruA2MeVMC.h"
-#include "LArRawConditions/LArfSamplMC.h"
-#include "LArRawConditions/LArMinBiasMC.h"
-#include "LArRawConditions/LArNoiseMC.h"
-#include "LArRawConditions/LArRampMC.h"
-#include "LArRawConditions/LArAutoCorrMC.h"
-#include "LArRawConditions/LArMphysOverMcalMC.h"
 
 // this class is collection of various fixes, applied to LAr conditions,
 // when some bug was found.

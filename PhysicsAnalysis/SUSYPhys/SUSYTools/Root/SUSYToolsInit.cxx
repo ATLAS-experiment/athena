@@ -1252,7 +1252,58 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
           ATH_MSG_INFO("Only for single-lepton trigger scale factor, fall back to Electron ID:  -> "<< triggerEleID << " with Isolation: " << triggerEleIso);
         }
       }
-      
+
+      // The L1 seed changed from 2023 and beyond, so we need to adjust the trigger key accordingly, the SF are now derived by year so we need to change the year in the key as well.
+
+      if(m_isRun3){
+        // Find year positions (or npos if not present)
+        size_t p22 = m_electronTriggerSFStringSingle.find("2022");
+        size_t p23 = m_electronTriggerSFStringSingle.find("2023");
+        size_t p24 = m_electronTriggerSFStringSingle.find("2024");
+
+        auto next_pos = [&](size_t self) {
+            size_t next = std::string::npos;
+
+            if (self == p22) {
+                if (p23 > self && p23 < next) next = p23;
+                if (p24 > self && p24 < next) next = p24;
+            }
+            else if (self == p23) {
+                if (p22 > self && p22 < next) next = p22;
+                if (p24 > self && p24 < next) next = p24;
+            }
+            else if (self == p24) {
+                if (p22 > self && p22 < next) next = p22;
+                if (p23 > self && p23 < next) next = p23;
+            }
+
+            return next;
+        };
+        std::string SFStringSingle22="";
+        std::string SFStringSingle23="";
+        std::string SFStringSingle24="";
+
+        // Extract 2022,2023,2025 block
+        if (p22 != std::string::npos) {size_t end = next_pos(p22); SFStringSingle22 = m_electronTriggerSFStringSingle.substr(p22, end - p22);}
+        if (p23 != std::string::npos) {size_t end = next_pos(p23); SFStringSingle23 = m_electronTriggerSFStringSingle.substr(p23, end - p23);}
+        if (p24 != std::string::npos) {size_t end = next_pos(p24); SFStringSingle24 = m_electronTriggerSFStringSingle.substr(p24, end - p24);}
+
+        // Remove trailing underscores from tokens if present
+        std::string* toks[] = { &SFStringSingle22, &SFStringSingle23, &SFStringSingle24 };
+        for (auto t : toks) {
+          while (!t->empty() && t->back() == '_') t->pop_back();
+        }
+
+        if(m_mcCampaign == "mc23a") m_electronTriggerSFStringSingle = SFStringSingle22;
+        else if(m_mcCampaign == "mc23d") m_electronTriggerSFStringSingle = SFStringSingle23;
+        else if(m_mcCampaign == "mc23e") m_electronTriggerSFStringSingle = SFStringSingle24;
+        else {
+          ATH_MSG_WARNING("Unknown or unsupported mcCampaign for Run 3: " << m_mcCampaign << ". Please contact the SUSY Bkg Forum for assistance.");
+          ATH_MSG_WARNING("Falling back to 2024 trigger SFs for single-electron triggers.");
+          m_electronTriggerSFStringSingle = SFStringSingle24;
+        }
+      }
+
       
       ATH_MSG_INFO("eSF_keys: " << m_electronTriggerSFStringSingle<< "_"<<triggerEleID<<"_"<<triggerEleIso);
 
@@ -1660,7 +1711,7 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
     // Initialise tau trigger efficiency tool(s)
 
     if (!isData()) {
-      int iTauID = (int) TauAnalysisTools::JETIDNONEUNCONFIGURED;
+      int iTauID = (int) TauAnalysisTools::JETIDNONE;
       if (m_tauId == "rnn001")   iTauID = (int) TauAnalysisTools::JETIDNONE;
       else if (m_tauId == "VeryLoose")   iTauID = (int) TauAnalysisTools::JETIDRNNVERYLOOSE;
       else if (m_tauId == "Loose")  iTauID = (int) TauAnalysisTools::JETIDRNNLOOSE;
@@ -2027,13 +2078,16 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
       ATH_CHECK( AAH::setProperty(m_metSignif.getHandle(), "SoftTermParam", m_softTermParam));
       ATH_CHECK( AAH::setProperty(m_metSignif.getHandle(), "TreatPUJets", m_treatPUJets));
       ATH_CHECK( AAH::setProperty(m_metSignif.getHandle(), "DoPhiReso", m_doPhiReso));
-      ATH_CHECK( AAH::setProperty(m_metSignif.getHandle(), "IsAFII", isAtlfast()));
-      if(jetname == "AntiKt4EMTopo" || jetname =="AntiKt4EMPFlow"){
-        ATH_CHECK( AAH::setProperty(m_metSignif.getHandle(), "JetCollection", jetname) );
-      } else {
-          ATH_MSG_WARNING("Object-based METSignificance recommendations only exist for EMTopo and PFlow, falling back to AntiKt4EMTopo");
-          ATH_CHECK( AAH::setProperty(m_metSignif.getHandle(), "JetCollection", "AntiKt4EMTopo") );
-      }
+      if(jetname != "AntiKt4EMPFlow")
+        ATH_MSG_WARNING("METSignificance recommendations only exist for AntiKt4EMPFlow jets, falling back to this.");
+      ATH_CHECK( AAH::setProperty(m_metSignif.getHandle(), "JetCollection", "AntiKt4EMPFlow"));
+      // This is the only recommended set of jet resolutions for use with R22+ MET Significance until "Consolidated" recommendations are available
+      ATH_CHECK( AAH::setProperty(m_metSignif.getHandle(), "JetCalibConfig", "JES_data2017_2016_2015_Recommendation_PFlow_Aug2018_rel21.config") );
+      ATH_CHECK( AAH::setProperty(m_metSignif.getHandle(), "JetCalibSequence", "JetArea_Residual_EtaJES_GSC_Smear") );
+      ATH_CHECK( AAH::setProperty(m_metSignif.getHandle(), "JetCalibArea", "00-04-81") );
+      ATH_CHECK( AAH::setProperty(m_metSignif.getHandle(), "EgammaESModel", m_isRun3 ? "es2024_Run3_v0" : "es2023_R22_Run2_v1") );
+      ATH_CHECK( AAH::setProperty(m_metSignif.getHandle(), "EgammaDecorrelationModel", "1NP_v1") );
+      ATH_CHECK( AAH::setProperty(m_metSignif.getHandle(), "EgammaUseFastsim", isAtlfast()) );
       // setup a dedicated new muon calib tool for passing down to METSignificance
       ATH_CHECK( AAH::setProperty(m_metSignif.getHandle(), "MuonCalibTool", "CP::MuonCalibTool/calibTool"));
       if (m_isRun3)
@@ -2046,17 +2100,18 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
         ATH_CHECK( AAH::setProperty(m_metSignif.getHandle(), "calibTool.do2StationsHighPt", true));
       ATH_CHECK( AAH::setProperty(m_metSignif.getHandle(), "calibTool.doExtraSmearing", m_muHighPtExtraSmear));
       ATH_CHECK( AAH::setProperty(m_metSignif.getHandle(), "OutputLevel", this->msg().level()));
-#else // AnalysisBase; can just pass the muon calib tool configured above
+#else // AnalysisBase; can just pass the jet/egamma/muon calib tools configured above
       ATH_CHECK( m_metSignif.setProperty("SoftTermParam", m_softTermParam) );
       ATH_CHECK( m_metSignif.setProperty("TreatPUJets", m_treatPUJets) );
       ATH_CHECK( m_metSignif.setProperty("DoPhiReso", m_doPhiReso) );
-      ATH_CHECK( m_metSignif.setProperty("IsAFII", isAtlfast()) );
-      if(jetname == "AntiKt4EMTopo" || jetname =="AntiKt4EMPFlow"){
-        ATH_CHECK( m_metSignif.setProperty("JetCollection", jetname) );
-      } else {
-        ATH_MSG_WARNING("Object-based METSignificance recommendations only exist for EMTopo and PFlow, falling back to AntiKt4EMTopo");
-        ATH_CHECK( m_metSignif.setProperty("JetCollection", "AntiKt4EMTopo") );
-      }
+      if(jetname != "AntiKt4EMPFlow")
+        ATH_MSG_WARNING("METSignificance recommendations only exist for AntiKt4EMPFlow jets, falling back to this.");
+      ATH_CHECK( m_metSignif.setProperty( "JetCollection", "AntiKt4EMPFlow"));
+      // This is the only recommended set of jet resolutions for use with R22+ MET Significance until "Consolidated" recommendations are available
+      ATH_CHECK( m_metSignif.setProperty( "JetCalibConfig", "JES_data2017_2016_2015_Recommendation_PFlow_Aug2018_rel21.config") );
+      ATH_CHECK( m_metSignif.setProperty( "JetCalibSequence", "JetArea_Residual_EtaJES_GSC_Smear") );
+      ATH_CHECK( m_metSignif.setProperty( "JetCalibArea", "00-04-81") );
+      ATH_CHECK( m_metSignif.setProperty("egammaCalibTool", m_egammaCalibTool.getHandle()) );
       // just pass the muon calib tool
       ATH_CHECK( m_metSignif.setProperty("MuonCalibTool",m_muonCalibTool.getHandle()));
       ATH_CHECK( m_metSignif.setProperty("OutputLevel", this->msg().level()) );
@@ -2220,6 +2275,7 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
       ATH_CHECK( m_isoCorrTool.setProperty( "IsMC", !isData()) );
       ATH_CHECK( m_isoCorrTool.setProperty( "AFII_corr", isAtlfast()) );
       ATH_CHECK( m_isoCorrTool.setProperty( "Apply_SC_leakcorr", false) );
+      ATH_CHECK( m_isoCorrTool.setProperty( "FixTimingIssueInCore", true) ); // Similar to https://gitlab.cern.ch/atlas/athena/-/merge_requests/83939
       ATH_CHECK( m_isoCorrTool.setProperty( "CorrFile", "IsolationCorrections/v6/isolation_ptcorrections_rel22_mc20.root") );
       ATH_CHECK( m_isoCorrTool.setProperty( "OutputLevel", this->msg().level()) );
       ATH_CHECK( m_isoCorrTool.retrieve() );

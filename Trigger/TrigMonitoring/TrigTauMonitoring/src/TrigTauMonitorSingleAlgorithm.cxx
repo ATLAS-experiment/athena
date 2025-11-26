@@ -3,6 +3,7 @@
 */
 
 #include "TrigTauMonitorSingleAlgorithm.h"
+#include "TrigDecisionTool/TrigDecisionTool.h"
 
 #include "StoreGate/ReadDecorHandle.h"
 

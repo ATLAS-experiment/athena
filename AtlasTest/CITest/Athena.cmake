@@ -176,9 +176,8 @@ atlas_add_citest( DerivationRun3Data_Train
    SCRIPT RunWorkflowTests_Run3.py --CI -d -w Derivation --tag data_PHYS_PHYSLITE --threads 4 --no-output-checks
    PROPERTIES PROCESSORS 4 )
 
-# Explicitly set maxEvents so that the preExec doesn't get overwritten
 atlas_add_citest( DerivationRun3Data_Train_RNTuple
-   SCRIPT RunWorkflowTests_Run3.py --CI -d -w Derivation -e '--maxEvents=500 --preExec="flags.Output.StorageTechnology.EventData={\\"*\\":\\"ROOTRNTUPLE\\"}" --parallelCompression="False"' --tag data_PHYS_PHYSLITE --threads 4 --no-output-checks
+   SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/test/DerivationRun3Data_Train_RNTuple.sh
    PROPERTIES PROCESSORS 4 )
 
 # Explicitly set maxEvents so that the preExec doesn't get overwritten
@@ -194,9 +193,8 @@ atlas_add_citest( DerivationRun3MC_PHYSLITE
    SCRIPT RunWorkflowTests_Run3.py --CI -d -w Derivation --tag mc_PHYSLITE --threads 4
    PROPERTIES PROCESSORS 4 )
 
-# Explicitly set maxEvents so that the preExec doesn't get overwritten
 atlas_add_citest( DerivationRun3MC_Train_RNTuple
-   SCRIPT RunWorkflowTests_Run3.py --CI -d -w Derivation -e '--maxEvents=500 --preExec="flags.Output.StorageTechnology.EventData={\\"*\\":\\"ROOTRNTUPLE\\"}" --parallelCompression="False"' --tag mc_PHYS_PHYSLITE --threads 4 --no-output-checks
+   SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/test/DerivationRun3MC_Train_RNTuple.sh
    PROPERTIES PROCESSORS 4 )
 
 # Explicitly set maxEvents so that the preExec doesn't get overwritten
@@ -319,6 +317,15 @@ atlas_add_citest( ACTS_Propagation_ITk
 atlas_add_citest( ACTS_Propagation_ITk_Gen3
    SCRIPT ActsITkTest.py --gen3)
 
+atlas_add_citest( ACTS_Propagation_ITk_Calo_Gen3
+   SCRIPT ActsITkCaloTest.py --gen3)
+
+atlas_add_citest( ACTS_Propagation_ITk_Muon_Calo_Gen3
+   SCRIPT ActsITkMuonCaloTest.py --gen3)
+
+atlas_add_citest( ACTS_Propagation_ITk_Muon_Gen3
+   SCRIPT ActsItkMuonTest.py --gen3)
+
 atlas_add_citest( ACTS_Propagation_ID
    SCRIPT ActsExtrapolationAlgTest.py )
 
@@ -432,6 +439,14 @@ atlas_add_citest( ACTS_CheckObjectCounts_Workflow
 atlas_add_citest( ACTS_CheckObjectCounts_Workflow_Gbts
   SCRIPT CheckCountTest.sh ActsCheckObjectCountsGbts )
 
+atlas_add_citest( ACTS_TriggerC100
+  SCRIPT test_trigAna_ActsTriggerC100_build.py
+  LOG_IGNORE_PATTERN "Propagation reached the step count limit|Propagation failed: PropagatorError:. Propagation reached the configured maximum number of steps with the initial parameters")
+
+atlas_add_citest( ACTS_TriggerC230
+  SCRIPT test_trigAna_ActsTriggerC230_build.py
+  LOG_IGNORE_PATTERN "Propagation reached the step count limit|Propagation failed: PropagatorError:. Propagation reached the configured maximum number of steps with the initial parameters")
+
 #################################################################################
 #                 Muon Phase II CI tests
 #################################################################################
@@ -465,6 +480,9 @@ atlas_add_citest( Trigger_athenaHLT_v1PhysP1
 
 atlas_add_citest( Trigger_athenaHLT_v1Cosmic
    SCRIPT test_trigP1_v1Cosmic_build.py )
+
+atlas_add_citest( Trigger_athenaHLT_v1PhysP1_HI
+   SCRIPT test_trigP1_v1PhysP1_HI_run3_build.py )
 
 atlas_add_citest( TriggerConfigFlags
    SCRIPT python -m TriggerJobOpts.TriggerConfigFlags --verbose

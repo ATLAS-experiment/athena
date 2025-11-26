@@ -1,10 +1,8 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
-
-#include <boost/algorithm/string.hpp>
-#include <fstream>
-#include <nlohmann/json.hpp>
+#include "TrigConfJobOptionsSvc.h"
+#include "TrigConfSvcHelper.h"
 
 #include "GaudiKernel/IProperty.h"
 #include "Gaudi/Property.h"
@@ -12,7 +10,19 @@
 #include "TrigConfIO/TrigDBJobOptionsLoader.h"
 #include "TrigConfData/DataStructure.h"
 
-#include "TrigConfJobOptionsSvc.h"
+#include <nlohmann/json.hpp>
+
+#include <fstream>
+#include <format>
+
+
+namespace {
+  void trim_inplace(std::string& s) {
+      auto start = std::find_if_not(s.begin(), s.end(), ::isspace);
+      auto end = std::find_if_not(s.rbegin(), s.rend(), ::isspace).base();
+      s = (start < end) ? std::string(start, end) : "";
+  }
+}
 
 TrigConf::JobOptionsSvc::JobOptionsSvc(const std::string& name, ISvcLocator* pSvcLocator) :
   base_class(name, pSvcLocator),
@@ -49,15 +59,16 @@ StatusCode TrigConf::JobOptionsSvc::initialize()
 
 /**
  * Parse DB connection string and fill private members.
- * Format: `server=TRIGGERDB;smkey=42;lvl1key=43;hltkey=44`
+ * Format: `server=TRIGGERDB;smkey=42;lvl1key=43;hltkey=44` or 
+ *         `server=https://crest.cern.ch/api-v5.0//CONF_DATA_RUN3;smkey=567;lvl1key=258;hltkey=460`
  */
 void TrigConf::JobOptionsSvc::parseDBString(const std::string& s)
 {
   std::string key, val;
   std::istringstream iss(s);
   while (std::getline(std::getline(iss, key, '='), val, ';')) {
-    boost::trim(key);
-    boost::trim(val);
+    trim_inplace(key);
+    trim_inplace(val);
     if (key == "smkey")
       m_smk = std::stoi(val);
     else if (key == "server")
@@ -103,6 +114,13 @@ StatusCode TrigConf::JobOptionsSvc::readOptionsDB(const std::string& db_server, 
 {
   // db job options loader
   TrigConf::TrigDBJobOptionsLoader jodbloader(db_server);
+  std::string crest_server("");
+  std::string crest_api("");
+  std::string dbname("");
+  if(isCrestConnection(db_server, crest_server, crest_api, dbname)) {
+    jodbloader.setCrestTrigDB(dbname);
+    jodbloader.setCrestConnection(crest_server, crest_api);
+  }
 
   TrigConf::DataStructure jo;
   jodbloader.loadJobOptions( smk, jo );

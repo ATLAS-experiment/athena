@@ -88,10 +88,7 @@ namespace PanTau {
         std::vector<double> m_EtaBinEdges;
         std::vector<double> m_EtaBinnedEtCuts;
         
-        std::string m_varTypeName_Sum;
         std::string m_varTypeName_Ratio;
-        std::string m_varTypeName_Isolation;
-        std::string m_varTypeName_Num;
         std::string m_varTypeName_Mean;
         std::string m_varTypeName_StdDev;
         std::string m_varTypeName_HLV;

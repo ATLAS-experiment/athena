@@ -17,7 +17,7 @@
 
 #include "MuonReadoutGeometryR4/MuonDetectorManager.h"
 #include "MuonIdHelpers/IMuonIdHelperSvc.h"
-#include "ActsGeometryInterfaces/ActsGeometryContext.h"
+#include "ActsGeometryInterfaces/GeometryContext.h"
 
 #include "Acts/Utilities/PointerTraits.hpp"
 #include "HitManagement/TimedHitPtr.h"
@@ -70,8 +70,8 @@ namespace MuonR4 {
              */
             xAOD::MuonSimHit* addSDO(const TimedHit& hit, xAOD::MuonSimHitContainer* sdoContainer) const;
 
-            /** @brief Returns the reference to the ActsGeometryContext needed to fetch global positions from the Readout geometry*/
-            const ActsGeometryContext& getGeoCtx(const EventContext& ctx) const;
+            /** @brief Returns the reference to the ActsTrk::GeometryContext needed to fetch global positions from the Readout geometry*/
+            const ActsTrk::GeometryContext& getGeoCtx(const EventContext& ctx) const;
 
             /** @brief DigitContainers are sorted by DigitCollections which are the ensemble of all hits in a given
              *         MuonChamber. To fill the final DigitContainer thread-safely, the DigitCollections shall be cached
@@ -120,7 +120,7 @@ namespace MuonR4 {
             
             SG::ReadHandleKey<xAOD::MuonSimHitContainer> m_simHitKey{this, "SimHitKey", ""};
 
-            SG::ReadHandleKey<ActsGeometryContext> m_geoCtxKey{this, "AlignmentKey", "ActsAlignment", 
+            SG::ReadHandleKey<ActsTrk::GeometryContext> m_geoCtxKey{this, "AlignmentKey", "ActsAlignment", 
                                                                "Geometry context"};
 
             ServiceHandle<PileUpMergeSvc> m_mergeSvc{this, "PileUpMergeSvc", "PileUpMergeSvc", ""};

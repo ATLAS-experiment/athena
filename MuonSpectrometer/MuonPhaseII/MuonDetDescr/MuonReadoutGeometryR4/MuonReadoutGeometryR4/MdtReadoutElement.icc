@@ -97,19 +97,19 @@ inline IdentifierHash MdtReadoutElement::layerHash(const IdentifierHash& measHas
 inline bool MdtReadoutElement::isBarrel() const { return m_isBarrel; }
 
 
-inline Amg::Vector3D MdtReadoutElement::globalTubePos(const ActsGeometryContext& ctx, 
+inline Amg::Vector3D MdtReadoutElement::globalTubePos(const ActsTrk::GeometryContext& ctx, 
                                                       const Identifier& measId) const {
     return globalTubePos(ctx, measurementHash(measId));
 }
-inline Amg::Vector3D MdtReadoutElement::readOutPos(const ActsGeometryContext& ctx,
+inline Amg::Vector3D MdtReadoutElement::readOutPos(const ActsTrk::GeometryContext& ctx,
                                                    const Identifier& measId) const{
     return readOutPos(ctx, measurementHash(measId));
 }
-inline  Amg::Vector3D MdtReadoutElement::highVoltPos(const ActsGeometryContext& ctx,
+inline  Amg::Vector3D MdtReadoutElement::highVoltPos(const ActsTrk::GeometryContext& ctx,
                                                      const Identifier& measId) const {
     return highVoltPos(ctx, measurementHash(measId));
 }
-inline double MdtReadoutElement::distanceToReadout(const ActsGeometryContext& ctx,
+inline double MdtReadoutElement::distanceToReadout(const ActsTrk::GeometryContext& ctx,
                                                    const Identifier& measId,
                                                    const Amg::Vector3D& globPoint) const {
     return distanceToReadout(ctx,measurementHash(measId), globPoint);

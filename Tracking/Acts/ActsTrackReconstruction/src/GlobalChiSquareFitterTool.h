@@ -26,13 +26,13 @@
 #include "Acts/Propagator/Propagator.hpp"
 #include "Acts/Propagator/SympyStepper.hpp"
 #include "Acts/Propagator/StraightLineStepper.hpp"
-
+#include "Acts/Propagator/EigenStepper.hpp"
 #include "Acts/TrackFitting/GlobalChiSquareFitter.hpp"
 
 // PACKAGE
 #include "ActsEvent/TrackContainer.h"
 #include "ActsToolInterfaces/IActsToTrkConverterTool.h"
-#include "ActsGeometryInterfaces/IActsExtrapolationTool.h"
+#include "ActsGeometryInterfaces/IExtrapolationTool.h"
 #include "ActsGeometryInterfaces/ITrackingGeometryTool.h"
 
 #include "ActsCalibrators/TrkMeasurementCalibrator.h"
@@ -146,7 +146,7 @@ class GlobalChiSquareFitterTool
 
     /// Type erased track fitter function.
     using StraightPropagator_t = Acts::Propagator<Acts::StraightLineStepper, Acts::Navigator>;
-    using CurvedPropagator_t   = Acts::Propagator<Acts::SympyStepper, Acts::Navigator>;
+    using CurvedPropagator_t   = Acts::Propagator<Acts::EigenStepper<>, Acts::Navigator>;
 
     using StraightFitter_t = Acts::Experimental::Gx2Fitter<StraightPropagator_t, MutableTrackStateBackend>;
     using CurvedFitter_t   = Acts::Experimental::Gx2Fitter<CurvedPropagator_t, MutableTrackStateBackend>;
@@ -181,7 +181,7 @@ class GlobalChiSquareFitterTool
                                     const Acts::Surface* surface,
                                     detail::SourceLinkType slType) const;
    
-    ToolHandle<IActsExtrapolationTool> m_extrapolationTool{this, "ExtrapolationTool", ""};
+    ToolHandle<ActsTrk::IExtrapolationTool> m_extrapolationTool{this, "ExtrapolationTool", ""};
     PublicToolHandle<ITrackingGeometryTool> m_trackingGeometryTool{this, "TrackingGeometryTool", ""};
     ToolHandle<IActsToTrkConverterTool> m_ATLASConverterTool{this, "ATLASConverterTool", ""};
 

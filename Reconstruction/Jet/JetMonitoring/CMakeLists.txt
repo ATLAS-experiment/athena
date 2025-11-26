@@ -19,7 +19,7 @@ atlas_add_component( JetMonitoring
                      Root/*.cxx
                      src/components/*.cxx
                      INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
-                     LINK_LIBRARIES ${ROOT_LIBRARIES} AsgTools AthContainers AthenaBaseComps AthenaMonitoringKernelLib AthenaMonitoringLib FourMomUtils GaudiKernel JetInterface JetMonitoringLib JetUtils StoreGateLib TrigDecisionInterface xAODEventInfo xAODHIEvent xAODJet
+                     LINK_LIBRARIES ${ROOT_LIBRARIES} AsgTools AthContainers AthenaBaseComps AthenaMonitoringKernelLib AthenaMonitoringLib FourMomUtils GaudiKernel JetInterface JetMonitoringLib JetUtils StoreGateLib TrigDecisionInterface xAODEventInfo xAODHIEvent xAODJet TrigCompositeUtilsLib TrigDecisionToolLib
                      PRIVATE_LINK_LIBRARIES AthenaKernel CxxUtils )
 
 # Install files from the package:

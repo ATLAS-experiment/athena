@@ -167,7 +167,7 @@ void HepMcTupleWriterTool::setupBackend( Gaudi::Details::PropertyBase& /*m_outpu
       "TYP='ROOT' "
       "OPT='RECREATE'" );
   outputFileName.set( updatedProp );
-  outputFileName.setName( propName );
+  outputFileName.setName( std::move(propName) );
   if ( !tSvc->setProperty( outputFileName ).isSuccess() ) {
     ATH_MSG_ERROR("Could not configure the THistSvc's output filename ["<< m_outputFileName.value() << "] !!");
     throw GaudiException( "Could not configure THistSvc output file !!",   name(),  StatusCode::FAILURE );

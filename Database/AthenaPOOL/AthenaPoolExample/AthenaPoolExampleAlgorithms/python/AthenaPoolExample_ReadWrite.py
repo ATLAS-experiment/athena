@@ -46,14 +46,6 @@ acc.merge( AthenaPoolExampleWriteCfg( flags, streamName,
 acc.addEventAlgo( CompFactory.AthPoolEx.ReadData("ReadData", OutputLevel = DEBUG) )
 acc.addEventAlgo( CompFactory.AthPoolEx.ReWriteData("ReWriteData", OutputLevel = DEBUG) )
 
-WriteTag = CompFactory.AthPoolEx.WriteTag("WriteTag", OutputLevel = DEBUG)
-acc.addEventAlgo( WriteTag )
-
-MagicWriteTag = CompFactory.AthPoolEx.WriteTag("MagicWriteTag", OutputLevel = DEBUG)
-MagicWriteTag.Key = "MagicTag"
-MagicWriteTag.Magic = 24
-acc.addEventAlgo( MagicWriteTag )
-
 # Produce xAOD::EventInfo from EventInfo
 from xAODEventInfoCnv.xAODEventInfoCnvConfig import EventInfoCnvAlgCfg
 acc.merge( EventInfoCnvAlgCfg(flags, disableBeamSpot = True) )
@@ -62,7 +54,6 @@ acc.merge( EventInfoCnvAlgCfg(flags, disableBeamSpot = True) )
 streamCA = OutputStreamCfg( flags, streamName, disableEventTag = True,
                             ItemList = [ "ExampleTrackContainer#MyTracks" ] )
 stream = streamCA.getEventAlgo( outputStreamName( streamName ) )
-stream.WritingTool.AttributeListKey = MagicWriteTag.Key
 acc.merge( streamCA )
 
 #--------------------------------------------------------------

@@ -30,7 +30,7 @@ namespace MuonGM {
         m_SCdbaccess = StatusCode::FAILURE;
 
       
-        ATH_MSG_INFO("Start retriving dbObjects with tag = <" << geoTag << "> node <" << geoNode << ">");
+        ATH_MSG_INFO("Start retrieving dbObjects with tag = <" << geoTag << "> node <" << geoNode << ">");
         
         // here putting RDB data in private "objects" form       
         m_dhatyp = std::make_unique<DblQ00Atyp>(m_pRDBAccess, geoTag, geoNode);        

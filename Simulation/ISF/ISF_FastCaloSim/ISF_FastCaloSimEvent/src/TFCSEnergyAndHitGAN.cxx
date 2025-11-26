@@ -210,7 +210,7 @@ void TFCSEnergyAndHitGAN::GetBinning(
 
           if (!correctentry)
             continue;
-          AllBinning.push_back(binsInLayer);
+          AllBinning.push_back(std::move(binsInLayer));
           EtaMaxList.push_back(nodeEtaMax);
         }
       }
@@ -599,7 +599,7 @@ TFCSEnergyAndHitGAN::simulate(TFCSSimulationState &simulstate,
   }
 
   ATH_MSG_VERBOSE("Fill Energies");
-  if (!fillEnergy(simulstate, truth, extrapol, inputs)) {
+  if (!fillEnergy(simulstate, truth, extrapol, std::move(inputs))) {
     ATH_MSG_WARNING("Could not fill energies ");
     // bail out but do not stop the job
     return FCSSuccess;

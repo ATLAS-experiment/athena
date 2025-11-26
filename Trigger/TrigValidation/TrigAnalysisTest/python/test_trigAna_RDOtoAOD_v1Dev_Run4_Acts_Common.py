@@ -9,7 +9,9 @@ def prepare_acts_rdo2aod(pipeline : str):
         'flags.Trigger.AODEDMSet=\'AODFULL\'',
         'flags.Tracking.doPixelDigitalClustering=True',
         'from TrkConfig.TrkConfigFlags import TrackingComponent',
-        'flags.Tracking.recoChain = [TrackingComponent.ActsChain]'
+        'flags.Tracking.recoChain = [TrackingComponent.ActsChain]',
+        'from ActsConfig.ActsConfigFlags import PixelCalibrationStrategy',
+        'flags.Acts.PixelCalibrationStrategy = PixelCalibrationStrategy.Uncalibrated'
     ]
 
     if pipeline == "C230":

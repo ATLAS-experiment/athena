@@ -9,7 +9,7 @@
 
 /// Project include(s).
 #include "AsgMessaging/StatusCode.h"
-#include "CxxUtils/sgkey_t.h"
+#include "SGCore/sgkey_t.h"
 #include "xAODCore/CLASS_DEF.h"
 
 // System include(s).
@@ -94,6 +94,7 @@ public:
 
 // If we're in an offline build, just take the declaration from AthenaKernel.
 #include "AthenaKernel/IProxyDict.h"
+#include "SGTools/DataProxy.h"
 
 #endif // XAOD_STANDALONE
 #endif // XAODROOTACCESS_TOOLS_IPROXYDICT_H

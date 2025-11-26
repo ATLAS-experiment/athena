@@ -60,7 +60,7 @@ namespace MuonValR4{
         if (!insertItr.second) {
             return insertItr.first->second;
         }
-        const ActsGeometryContext& gctx{getGeoCtx(ctx)};
+        const ActsTrk::GeometryContext& gctx{getGeoCtx(ctx)};
 
         const MuonGMR4::MuonDetectorManager* detMgr = getDetMgr();
 

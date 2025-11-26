@@ -11,6 +11,20 @@ log = AthenaLogger(__name__)
 #### Now inmport Data Prep config from other file
 from FPGATrackSimConfTools import FPGATrackSimDataPrepConfig
 
+### return a number 0-19, 0 is most central bin, 19 is most forward (based on absolute value of eta)
+def getEtaBin(flags):
+    etaBin = (flags.Trigger.FPGATrackSim.region >> 6) & 0x1f
+    return etaBin
+
+def getFitWeights(etaBin):
+    weight4Eta = [563.9382667,493.23055,381.835315,264.7819679,179.555554,116.0867029,96.30409326,96.13504916,163.7278321,270.5480971,270.6937626,180.2164132,129.0011743,91.50412962,72.65953377,49.77568766,32.518927,20.38964651,12.97547848,8.05716611]
+    weight4Phi = [5291.005291,4784.688995,4739.336493,4329.004329,3508.77193,3278.688525,4366.812227,6756.756757,10752.68817,14925.37313,16666.66667,16949.15254,17543.85965,16666.66667,19230.76923,20833.33333,20408.16327,20000,20000,18181.81818]
+    weights5Eta = [217.5331768,184.2304061,148.3134888,98.13939253,66.37534817,42.93312711,33.65526204,34.33247487,47.5202135,77.16881734,110.4844013,100.8706594,83.79061435,58.69032222,44.9857434,30.5678705,18.85832071,12.76889006,8.270441607,5.426907903]
+    weights5Phi = [1302.083333,1138.952164,1068.376068,961.5384615,831.9467554,764.5259939,996.0159363,1481.481481,2857.142857,3875.968992,4504.504505,5076.142132,5681.818182,5747.126437,6493.506494,6578.947368,6622.516556,6802.721088,6849.315068,6578.947368]
+
+    assert(etaBin >= 0 and etaBin < 20)
+    return [weight4Eta[etaBin], weight4Phi[etaBin], weights5Eta[etaBin], weights5Phi[etaBin]]
+    
 def getNSubregions(filePath):
     with open(PathResolver.FindCalibFile(filePath), 'r') as f:
         fields = f.readline()
@@ -30,6 +44,8 @@ def FPGATrackSimWriteOutputCfg(flags):
         FPGATrackSimWriteOutput.EventLimit = 0
     else:
         FPGATrackSimWriteOutput.EventLimit = flags.Trigger.FPGATrackSim.writeOutputEventLimit
+    if flags.Trigger.FPGATrackSim.writeRegion>=0: # negative is off
+        FPGATrackSimWriteOutput.RequireActivation=True
     # RECREATE means that that this tool opens the file.
     # HEADER would mean that something else (e.g. THistSvc) opens it and we just add the object.
     FPGATrackSimWriteOutput.RWstatus = "HEADER"
@@ -260,11 +276,13 @@ def FPGATrackSimRoadUnionToolGenScanCfg(flags,name="FPGATrackSimRoadUnionToolGen
         if flags.Trigger.FPGATrackSim.oldRegionDefs:
             BinnnedHits.layerMapFile = flags.Trigger.FPGATrackSim.GenScan.layerMapFile
         else:
+            print("Loading Layer Radii from ", PathResolver.FindCalibDirectory(flags.Trigger.FPGATrackSim.mapsDir),
+                f"regioneta{FPGATrackSimDataPrepConfig.getEtaSideBits(flags)}_lyrradii.json")
             # now assumed to be in the map directory with name = basename for region + _lyrmap.json
             if flags.Trigger.FPGATrackSim.GenScan.useLayerRadiiFile:
                 BinnnedHits.layerRadiiFile =os.path.join(
                 PathResolver.FindCalibDirectory(flags.Trigger.FPGATrackSim.mapsDir),
-                f"{FPGATrackSimDataPrepConfig.getBaseName(flags)}_lyrradii.json")
+                f"regioneta{FPGATrackSimDataPrepConfig.getEtaSideBits(flags)}_lyrradii.json")
             else:   
                 BinnnedHits.layerMapFile =os.path.join(
                 PathResolver.FindCalibDirectory(flags.Trigger.FPGATrackSim.mapsDir),
@@ -320,7 +338,7 @@ def FPGATrackSimRoadUnionToolGenScanCfg(flags,name="FPGATrackSimRoadUnionToolGen
 
     # make the monitoring class
     Monitor = CompFactory.FPGATrackSimGenScanMonitoring(FPGATrackSimDataPrepConfig.nameWithRegionSuffix(flags,"GenScanMonitoring"))
-    Monitor.dir = "/GENSCAN/"
+    Monitor.dir = "/GENSCAN/"+FPGATrackSimDataPrepConfig.nameWithRegionSuffix(flags,"GenScanMonitoring")+"/"
     Monitor.THistSvc = CompFactory.THistSvc()
     Monitor.OutputLevel=flags.Trigger.FPGATrackSim.loglevel
     Monitor.phiScale = 10.0
@@ -339,9 +357,12 @@ def FPGATrackSimRoadUnionToolGenScanCfg(flags,name="FPGATrackSimRoadUnionToolGen
 
     # For the 'track fitter' part of GenScanTool.
     tool.inBinFiltering = flags.Trigger.FPGATrackSim.GenScan.filterInBin
-    tool.phiChi2Weight = flags.Trigger.FPGATrackSim.GenScan.phiChi2Weight
-    tool.etaChi2Weight = flags.Trigger.FPGATrackSim.GenScan.etaChi2Weight
-
+    weights =  getFitWeights(getEtaBin(flags))
+    tool.etaChi2Weight_4hits = weights[0]
+    tool.phiChi2Weight_4hits = weights[1]
+    tool.etaChi2Weight_5hits = weights[2]
+    tool.phiChi2Weight_5hits = weights[3]
+    
     # configure which filers and thresholds to apply
     tool.binFilter=flags.Trigger.FPGATrackSim.GenScan.binFilter
     tool.reversePairDir=flags.Trigger.FPGATrackSim.GenScan.reverse
@@ -542,7 +563,6 @@ def FPGATrackSimOverlapRemovalToolCfg(flags,name="FPGATrackSimOverlapRemovalTool
     OR_1st.ORAlgo = "Normal"
     OR_1st.doFastOR = flags.Trigger.FPGATrackSim.ActiveConfig.doFastOR
     OR_1st.NumOfHitPerGrouping = 3
-    OR_1st.FPGATrackSimMappingSvc = result.getPrimaryAndMerge(FPGATrackSimDataPrepConfig.FPGATrackSimMappingCfg(flags))
     if flags.Trigger.FPGATrackSim.ActiveConfig.useVaryingChi2Cut and not flags.Trigger.FPGATrackSim.ActiveConfig.trackNNAnalysis2nd:
         OR_1st.MinChi2 = getChi2Cut(flags.Trigger.FPGATrackSim.region)
     elif flags.Trigger.FPGATrackSim.ActiveConfig.useVaryingChi2Cut and flags.Trigger.FPGATrackSim.ActiveConfig.trackNNAnalysis2nd:
@@ -588,6 +608,9 @@ def SPRoadFilterToolCfg(flags,secondStage=False,name="FPGATrackSimSpacepointRoad
     SPRoadFilter.setSectors = (flags.Trigger.FPGATrackSim.ActiveConfig.IdealGeoRoads and flags.Trigger.FPGATrackSim.tracking)
     result.setPrivateTools(SPRoadFilter)
     return result
+
+
+
 
 def FPGATrackSimLogicalHitsProcessAlgCfg(inputFlags,name="FPGATrackSimLogicalHitsProcessAlg",**kwargs):
 
@@ -656,6 +679,7 @@ def FPGATrackSimLogicalHitsProcessAlgCfg(inputFlags,name="FPGATrackSimLogicalHit
     theFPGATrackSimLogicalHitsProcessAlg.SlicingEngineTool = result.getPrimaryAndMerge(FPGATrackSimSlicingEngineCfg(flags))
 
     theFPGATrackSimLogicalHitsProcessAlg.HoughRootOutputTool = result.getPrimaryAndMerge(FPGATrackSimHoughRootOutputToolCfg(flags))
+    theFPGATrackSimLogicalHitsProcessAlg.writeRegion=flags.Trigger.FPGATrackSim.writeRegion
 
     LRTRoadFilter = CompFactory.FPGATrackSimLLPRoadFilterTool(FPGATrackSimDataPrepConfig.nameWithRegionSuffix(flags,"FPGATrackSimLLPRoadFilterTool"))
     result.addPublicTool(LRTRoadFilter)
@@ -678,9 +702,28 @@ def FPGATrackSimLogicalHitsProcessAlgCfg(inputFlags,name="FPGATrackSimLogicalHit
         theFPGATrackSimLogicalHitsProcessAlg.doLRT = True
         theFPGATrackSimLogicalHitsProcessAlg.LRTHitFiltering = (not flags.Trigger.FPGATrackSim.ActiveConfig.lrtSkipHitFiltering)
 
-    from FPGATrackSimAlgorithms.FPGATrackSimAlgorithmConfig import FPGATrackSimLogicalHitsProcessAlgMonitoringCfg
-    theFPGATrackSimLogicalHitsProcessAlg.MonTool = result.getPrimaryAndMerge(FPGATrackSimLogicalHitsProcessAlgMonitoringCfg(flags))
 
+    ## new TrackMonitor
+    from FPGATrackSimAlgorithms.FPGATrackSimAlgorithmConfig import FPGATrackSimTrackMonCfg
+    
+    ## (first road monitor)
+    theFPGATrackSimLogicalHitsProcessAlg.FirstStageRoadMonitor = result.getPrimaryAndMerge(FPGATrackSimTrackMonCfg ('first_stage', flags, variety='road'))
+    ## (second road monitor, after road filter 1)
+    theFPGATrackSimLogicalHitsProcessAlg.FirstStageRoadPostFilter1Monitor = result.getPrimaryAndMerge(FPGATrackSimTrackMonCfg ('first_stage_post_filter_1', flags, variety='road'))
+    ## (third road monitor, after overlap removal)
+    theFPGATrackSimLogicalHitsProcessAlg.FirstStageRoadPostOverlapRemovalMonitor = result.getPrimaryAndMerge(FPGATrackSimTrackMonCfg ('first_stage_post_overlap_removal', flags, variety='road'))
+    ## (fourth road monitor, after road filter 2)
+    theFPGATrackSimLogicalHitsProcessAlg.FirstStageRoadPostFilter2Monitor = result.getPrimaryAndMerge(FPGATrackSimTrackMonCfg ('first_stage_post_filter_2', flags, variety='road'))
+    
+    ## (first track monitor, after getting tracks)
+    theFPGATrackSimLogicalHitsProcessAlg.FirstStageTrackMonitor = result.getPrimaryAndMerge(FPGATrackSimTrackMonCfg ('first_stage', flags, variety='track'))
+    ## (second track monitor, after set track parameters to truth)
+    theFPGATrackSimLogicalHitsProcessAlg.FirstStageTrackPostSetTruthMonitor = result.getPrimaryAndMerge(FPGATrackSimTrackMonCfg ('first_stage_post_set_truth', flags, variety='track'))
+    ## (third track monitor, after chi2)
+    theFPGATrackSimLogicalHitsProcessAlg.FirstStageTrackPostChi2Monitor = result.getPrimaryAndMerge(FPGATrackSimTrackMonCfg ('first_stage_post_chi2', flags, variety='track'))
+    ## (fourth track monitor, after overlap removal)
+    theFPGATrackSimLogicalHitsProcessAlg.FirstStageTrackPostOverlapRemovalTrackMonitor = result.getPrimaryAndMerge(FPGATrackSimTrackMonCfg ('first_stage_post_overlap_removal', flags, variety='track'))
+  
     result.addEventAlgo(theFPGATrackSimLogicalHitsProcessAlg)
 
     return result
@@ -795,10 +838,17 @@ def FPGATrackSimSeedingCfg(flags):
     
     # for testing hardware run in F150
     if(flags.Trigger.FPGATrackSim.runF150hw):
+        from EFTrackingFPGAPipeline.F100IntegrationConfig import F100DataEncodingCfg
+        acc.merge(F100DataEncodingCfg(flags))
+
         from EFTrackingFPGAPipeline.F150KernelTesterConfig import KernelTesterCfg, F150EDMConversionAlgCfg
         acc.merge(KernelTesterCfg(flags))
         acc.merge(F150EDMConversionAlgCfg(flags))
 
+
+
+
+        acc.printConfig(withDetails=True, summariseProps=True)
 
     return acc
 
@@ -952,7 +1002,6 @@ if __name__ == "__main__":
 
         # Configure both the dataprep and logical hits algorithms.
         acc.merge(FPGATrackSimDataPrepConfig.FPGATrackSimDataPrepAlgCfg(flags))
-
         from FPGATrackSimConfTools.FPGATrackSimMultiRegionConfig import FPGATrackSimMultiRegionTrackingCfg
         acc.merge(FPGATrackSimMultiRegionTrackingCfg(flags))
 

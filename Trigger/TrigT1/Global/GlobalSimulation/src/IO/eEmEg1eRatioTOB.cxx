@@ -19,8 +19,7 @@ namespace GlobalSim::IOBitwise {
   }
 
   std::string eEmEg1eRatioTOB::to_string() const {
-    return eEmTOB::to_string() +
-      " IeEmEg1eRatioTOB  details not yet implemented";
+    return IeEmEg1eRatioTOB::to_string();
   }
 
 }

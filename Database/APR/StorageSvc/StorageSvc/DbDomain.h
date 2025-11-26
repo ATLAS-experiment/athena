@@ -55,7 +55,7 @@ namespace pool    {
     /// Friend's constructor
     DbDomain(DbDomainObj* dom);
     /// Constructor using Db type
-    DbDomain(const DbType& type)   {   m_type = type.majorType();       }
+    explicit DbDomain(const DbType& type)   {   m_type = type.majorType();       }
     /// Copy constructor
     DbDomain(const DbDomain& copy)      
     : DbHandleBase<DbDomainObj>()              {   *this = copy;        }

@@ -23,11 +23,17 @@ def CreatexAODSlimmedContainerCfg(flags, containerName, **kwargs):
     elif containerName=="TruthPhotons":
         cfg.addEventAlgo(CompFactory.xAODTruthParticleSlimmerPhoton('xAODTruthParticleSlimmerPhoton'))
     elif containerName=="TruthMET":
-        cfg.addEventAlgo(CompFactory.xAODTruthParticleSlimmerMET('xAODTruthParticleSlimmerMET'))
+        from MCTruthClassifier.MCTruthClassifierConfig import DFCommonMCTruthClassifierCfg
+        cfg.addEventAlgo(CompFactory.xAODTruthParticleSlimmerMET(name='xAODTruthParticleSlimmerMET',
+                                                                 MCTruthClassifier=cfg.addPublicTool(cfg.popToolsAndMerge(DFCommonMCTruthClassifierCfg(flags)))
+                                                                 ))
     elif containerName=="TruthLightLeptons":
         cfg.addEventAlgo(CompFactory.xAODTruthParticleSlimmerLightLepton('xAODTruthParticleSlimmerLightLepton'))
     elif containerName=="TruthGen":
-        cfg.addEventAlgo(CompFactory.xAODTruthParticleSlimmerGen('xAODTruthParticleSlimmerGen'))
+        from MCTruthClassifier.MCTruthClassifierConfig import DFCommonMCTruthClassifierCfg
+        cfg.addEventAlgo(CompFactory.xAODTruthParticleSlimmerGen(name='xAODTruthParticleSlimmerGen',
+                                                                 MCTruthClassifier=cfg.addPublicTool(cfg.popToolsAndMerge(DFCommonMCTruthClassifierCfg(flags)))
+                                                                 ))
     else:
         raise NameError("containerName '%s' unknown, bailing out" % (containerName))
     return cfg
@@ -269,7 +275,7 @@ def xAODHTFilterCommonCfg(flags, **kwargs):
     cfg = CreatexAODSlimmedContainerCfg(flags, containerName="TruthGen") # Algs in prefiltSeq
     cfg.merge(CreateTruthJetsCfg(flags, 0.4,"WZ")) # Algs in prefiltSeq
     from MCTruthClassifier.MCTruthClassifierConfig import DFCommonMCTruthClassifierCfg
-    cfg.merge(DFCommonMCTruthClassifierCfg(flags)) # FIXME this Cfg method creates a public MCTruthClassifier tool.
+    kwargs.setdefault("MCTruthClassifier", cfg.addPublicTool(cfg.popToolsAndMerge(DFCommonMCTruthClassifierCfg(flags))))
     # To modify cuts make a new Cfg method depending on this one, where you set the required kwargs
     cfg.addEventAlgo(CompFactory.xAODHTFilter("xAODHTFilter", **kwargs)) # TODO Add to filtSeq
     return cfg

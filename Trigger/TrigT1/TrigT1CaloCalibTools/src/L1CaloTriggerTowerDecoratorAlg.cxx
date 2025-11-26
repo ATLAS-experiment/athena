@@ -18,34 +18,8 @@ namespace LVL1 {
 L1CaloTriggerTowerDecoratorAlg::L1CaloTriggerTowerDecoratorAlg(
     const std::string& name, ISvcLocator* svcLoc)
     : AthAlgorithm(name, svcLoc),
-      m_caloCellEnergy(""),  // disabled by default
-      m_caloCellET(""),      // disabled by default
-      m_caloCellEnergyByLayer("CaloCellEnergyByLayer"),
-      m_caloCellETByLayer("CaloCellETByLayer"),
-      m_caloCellsQuality("CaloCellQuality"),
-      m_caloCellEnergyByLayerByReceiver(""),  // disabled by default
-      m_caloCellETByLayerByReceiver(""),       // disabled by default
       m_ttTools(this)
 {
-  declareProperty("DecorName_caloCellEnergy",
-                  m_caloCellEnergy,  // disabled by default
-                  "Decoration name - leave empty to disable");
-  declareProperty("DecorName_caloCellET", m_caloCellET,  // disabled by default
-                  "Decoration name - leave empty to disable");
-  declareProperty("DecorName_caloCellEnergyByLayer", m_caloCellEnergyByLayer,
-                  "Decoration name - leave empty to disable");
-  declareProperty("DecorName_caloCellETByLayer", m_caloCellETByLayer,
-                  "Decoration name - leave empty to disable");
-  declareProperty("DecorName_caloCellQuality", m_caloCellsQuality,
-                  "Decoration name - leave empty to disable");
-  declareProperty(
-      "DecorName_caloCellEnergyByLayerByReceiver",
-      m_caloCellEnergyByLayerByReceiver,
-      "Decoration name - leave empty to disable");  // disabled by default
-  declareProperty(
-      "DecorName_caloCellETByLayerByReceiver", m_caloCellETByLayerByReceiver,
-      "Decoration name - leave empty to disable");  // disabled by default
-
   declareProperty("TriggerTowerTools", m_ttTools);
 }
 
@@ -58,33 +32,25 @@ StatusCode L1CaloTriggerTowerDecoratorAlg::initialize() {
   const std::string baseName = m_triggerTowerContainerKey.key();
 
   if (!baseName.empty()) {
-    const std::string prefix = baseName + ".";
-    if (!m_caloCellEnergy.empty()) {
-      m_caloCellEnergyKey = prefix + m_caloCellEnergy;
+    if (!m_caloCellEnergyKey.empty()) {
       CHECK(m_caloCellEnergyKey.initialize());
     }
-    if (!m_caloCellET.empty()) {
-      m_caloCellETKey = prefix + m_caloCellET;
+    if (!m_caloCellETKey.empty()) {
       CHECK(m_caloCellETKey.initialize());
     }
-    if (!m_caloCellsQuality.empty()) {
-      m_caloCellsQualityKey = prefix + m_caloCellsQuality;
+    if (!m_caloCellsQualityKey.empty()) {
       CHECK(m_caloCellsQualityKey.initialize());
     }
-    if (!m_caloCellEnergyByLayer.empty()) {
-      m_caloCellEnergyByLayerKey = prefix + m_caloCellEnergyByLayer;
+    if (!m_caloCellEnergyByLayerKey.empty()) {
       CHECK(m_caloCellEnergyByLayerKey.initialize());
     }
-    if (!m_caloCellETByLayer.empty()) {
-      m_caloCellETByLayerKey = prefix + m_caloCellETByLayer;
+    if (!m_caloCellETByLayerKey.empty()) {
       CHECK(m_caloCellETByLayerKey.initialize());
     }
-    if (!m_caloCellEnergyByLayerByReceiver.empty()) {
-      m_caloCellEnergyByLayerByReceiverKey = prefix + m_caloCellEnergyByLayerByReceiver;
+    if (!m_caloCellEnergyByLayerByReceiverKey.empty()) {
       CHECK(m_caloCellEnergyByLayerByReceiverKey.initialize());
     }
-    if (!m_caloCellETByLayerByReceiver.empty()) {
-      m_caloCellETByLayerByReceiverKey = prefix + m_caloCellETByLayerByReceiver;
+    if (!m_caloCellETByLayerByReceiverKey.empty()) {
       CHECK(m_caloCellETByLayerByReceiverKey.initialize());
     }
   }
@@ -107,13 +73,13 @@ L1CaloTriggerTowerDecoratorAlg::execute()
 
      // We have optional Write Decor handles outside the loop
      // And bools to check outside/inside the loop.
-     const bool doCellEnergy = !m_caloCellEnergy.empty();
-     const bool doCellET = !m_caloCellET.empty();
-     const bool doCellsQuality = !m_caloCellsQuality.empty();
-     const bool doCellEnergyByLayer = !m_caloCellEnergyByLayer.empty();
-     const bool doCellETByLayer = !m_caloCellETByLayer.empty();
-     const bool doCellEnergyByLayerByReceiver = !m_caloCellEnergyByLayerByReceiver.empty();
-     const bool doCellETByLayerByReceiver = !m_caloCellETByLayerByReceiver.empty();
+     const bool doCellEnergy = !m_caloCellEnergyKey.empty();
+     const bool doCellET = !m_caloCellETKey.empty();
+     const bool doCellsQuality = !m_caloCellsQualityKey.empty();
+     const bool doCellEnergyByLayer = !m_caloCellEnergyByLayerKey.empty();
+     const bool doCellETByLayer = !m_caloCellETByLayerKey.empty();
+     const bool doCellEnergyByLayerByReceiver = !m_caloCellEnergyByLayerByReceiverKey.empty();
+     const bool doCellETByLayerByReceiver = !m_caloCellETByLayerByReceiverKey.empty();
      std::optional<SG::WriteDecorHandle<xAOD::TriggerTowerContainer, float>>
        caloCellEnergyDecorator;
      std::optional<SG::WriteDecorHandle<xAOD::TriggerTowerContainer, float>>

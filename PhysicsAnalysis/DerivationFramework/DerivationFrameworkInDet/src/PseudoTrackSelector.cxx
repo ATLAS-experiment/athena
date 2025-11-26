@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -24,23 +24,7 @@
 
 namespace DerivationFramework {
 
-  PseudoTrackSelector::PseudoTrackSelector(const std::string& t,
-                                           const std::string& n,
-                                           const IInterface* p) : base_class(t,n,p)
-  {
-    // The default goal of this selector is to create a track collection from a subset of pseudo tracks
-    declareProperty("RecoTrackParticleLocation",            m_in_recoTrackParticleLocation);       /** Reco track collection.   */
-    declareProperty("PseudoTrackParticleLocation",          m_in_pseudoTrackParticleLocation);     /** Pseudo track collection. */
-    declareProperty("OutputRecoReplacedWithPseudo",         m_out_recoReplacedWithPseudo);         /** Output track collection. */
-    declareProperty("OutputRecoReplacedWithPseudoFromB",    m_out_recoReplacedWithPseudoFromB);    /** Output track collection. */
-    declareProperty("OutputRecoReplacedWithPseudoNotFromB", m_out_recoReplacedWithPseudoNotFromB); /** Output track collection. */
-    declareProperty("OutputRecoPlusPseudo",                 m_out_recoPlusPseudo);                 /** Output track collection. */
-    declareProperty("OutputRecoPlusPseudoFromB",            m_out_recoPlusPseudoFromB);            /** Output track collection. */
-    declareProperty("OutputRecoPlusPseudoNotFromB",         m_out_recoPlusPseudoNotFromB);         /** Output track collection. */
-    declareProperty("OutputRecoNoFakes",                    m_out_recoNoFakes);                    /** Output track collection. */
-    declareProperty("OutputRecoNoFakesFromB",               m_out_recoNoFakesFromB);               /** Output track collection. */
-    declareProperty("OutputRecoNoFakesNotFromB",            m_out_recoNoFakesNotFromB);            /** Output track collection. */
-  }
+  // The default goal of this selector is to create a track collection from a subset of pseudo tracks
 
   ///////////////////////////////////////////////////////////////////
   // Initialisation
@@ -64,18 +48,8 @@ namespace DerivationFramework {
     return StatusCode::SUCCESS;
   }
 
-  ///////////////////////////////////////////////////////////////////
-  // Finalize
-  ///////////////////////////////////////////////////////////////////
-
-  StatusCode PseudoTrackSelector::finalize()
+  StatusCode PseudoTrackSelector::addBranches(const EventContext& ctx) const
   {
-    return StatusCode::SUCCESS;
-  }
-
-  StatusCode PseudoTrackSelector::addBranches() const
-  {
-    const EventContext& ctx = Gaudi::Hive::currentContext();
     std::unique_ptr<xAOD::TrackParticleContainer> outputRecoReplacedWithPseudo = std::make_unique<xAOD::TrackParticleContainer>();
     std::unique_ptr<xAOD::TrackParticleAuxContainer> outputRecoReplacedWithPseudoAux = std::make_unique<xAOD::TrackParticleAuxContainer>();
     outputRecoReplacedWithPseudo->setStore(outputRecoReplacedWithPseudoAux.get());

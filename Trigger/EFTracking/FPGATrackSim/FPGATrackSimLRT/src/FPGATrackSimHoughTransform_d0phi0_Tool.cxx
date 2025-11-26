@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 /**
  * @file FPGATrackSimHoughTransform_d0phi0_Tool.cxx
@@ -128,7 +128,7 @@ StatusCode FPGATrackSimHoughTransform_d0phi0_Tool::initialize()
       for (unsigned i = 0; i <= new_size_y; i++) {
 	yBins_scaled.push_back(scale * i);
       }
-      m_yBins_scaled[scale] = yBins_scaled;
+      m_yBins_scaled[scale] = std::move(yBins_scaled);
     }
   }
 

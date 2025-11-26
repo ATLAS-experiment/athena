@@ -180,11 +180,6 @@ def fromRunArgs(runArgs):
             if isinstance(algo, CompFactory.DerivationFramework.DerivationKernel):
                 algo.SkimmingTools = []
 
-    # PerfMonSD
-    if flags.PerfMon.doFullMonMT or flags.PerfMon.doFastMonMT:
-       from PerfMonComps.PerfMonCompsConfig import PerfMonMTSvcCfg
-       cfg.merge(PerfMonMTSvcCfg(flags))
-
     # Write AMI tag into in-file metadata
     from PyUtils.AMITagHelperConfig import AMITagCfg
     cfg.merge(AMITagCfg(flags, runArgs, fixBroken=True))

@@ -248,6 +248,8 @@ def defineInputsMenu():
             ('gXEJWOJ60',1), ('gXEJWOJ70',1), ('gXEJWOJ80',1), ('gXEJWOJ100',1), ('gXEJWOJ110',1), ('gXEJWOJ120',1), ('gXEJWOJ500',1),
             # gTE
             ('gTE3',1), ('gTE5',1), ('gTE10',1), ('gTE200',1),
+            # gESPRESSO
+            ('gESPRESSO280', 1),
 
             # MHT
             ('gMHT500',1),
@@ -258,8 +260,8 @@ def defineInputsMenu():
             #
             # additional heavy ion jTE items
             ('jTE3',1), ('jTE4',1), ('jTE10',1), ('jTE5',1), ('jTE20',1), ('jTE50',1),
-            ('jTE100',1) , ('jTE600',1), ('jTE1500',1), ('jTE4000',1), ('jTE6500',1), ('jTE8300',1), ('jTE9000',1), ('jTE10000',1),('jTE12000',1),
-            ('jTEFWDA1',1), ('jTEFWDC1',1), ('jTEFWDA5',1), ('jTEFWDC5',1), ('jTEFWD6500',1),
+            ('jTE100',1) , ('jTE600',1), ('jTE1500',1), ('jTE4000',1), ('jTE6500',1),
+            ('jTEFWDA1',1), ('jTEFWDC1',1), ('jTEFWDA5',1), ('jTEFWDC5',1), ('jTEFWD2600',1), ('jTEFWD5600',1), ('jTEFWD6300',1), ('jTEFWD6600',1),
            
             # spare energy thresholds for commissioning
         ]
@@ -290,9 +292,6 @@ def defineInputsMenu():
                     TopoMenuDef( 'LATE-MU10s1',                    outputbits = 10 ),
                     TopoMenuDef( '0INVM10-3MU3Vab',                outputbits = 11 ), # BLS
                     TopoMenuDef( '0INVM10-3MU3VFab',               outputbits = 12 ), # BLS
-                    TopoMenuDef( '10INVM200-20DPHI32-2jJ5s',       outputbits = 13 ), # HI, ATR-30727
-                    TopoMenuDef( '15INVM200-20DPHI32-2jJ5s',       outputbits = 14 ), # HI, ATR-30727
-                    TopoMenuDef( '20INVM200-20DPHI32-2jJ5s',       outputbits = 15 ), # HI, ATR-30727
                 ]
             },
 
@@ -311,9 +310,6 @@ def defineInputsMenu():
                     TopoMenuDef( 'ADVAE2A-jJ0s-eTAU0s-MU0s-jXE0s',           outputbits = (8,9), outputlines = ['ADVAE2A-6jJ0s-4eTAU0s-4MU0s-jXE0s-Tight',
                                                                                                                 'ADVAE2A-6jJ0s-4eTAU0s-4MU0s-jXE0s-Loose'] ), # VAE AD
                     TopoMenuDef( '0DR28-eTAU30abl-eTAU20abl',                outputbits = 10 ),
-                    TopoMenuDef( '25INVM200-20DPHI32-2jJ5s',                 outputbits = 11 ), # HI, ATR-30727
-                    TopoMenuDef( '10SUM200-20DPHI32-2jJ5s',                  outputbits = 12 ), # HI, ATR-30727
-                    TopoMenuDef( '15SUM200-20DPHI32-2jJ5s',                  outputbits = 13 ), # HI, ATR-30727
                 ]
             },
             
@@ -333,10 +329,6 @@ def defineInputsMenu():
                     TopoMenuDef( '0INVM9-eEM9ab-eEMab',               outputbits = 9 ),
                     TopoMenuDef( 'INVM_BOOSTDR_Ranges_eEM12sl6',      outputbits = (10,11), outputlines = ['0INVM30-2DR15-eEM12sl1-eEM12sl6',
                                                                                                            '25INVM70-13DR25-eEM12sl1-eEM12sl6']),
-                    TopoMenuDef( '20SUM200-20DPHI32-2jJ5s',           outputbits = 12 ), # HI, ATR-30727
-                    TopoMenuDef( '25SUM200-20DPHI32-2jJ5s',           outputbits = 13 ), # HI, ATR-30727
-                    TopoMenuDef( '15INVM200-15SUM200-20DPHI32-2jJ5s', outputbits = 14 ), # HI, ATR-30727
-                    TopoMenuDef( '20INVM200-20SUM200-20DPHI32-2jJ5s', outputbits = 15 ), # HI, ATR-30727
                 ]
             },
             
@@ -421,12 +413,11 @@ def defineInputsMenu():
                                                                                                   '0INVM10-0DR15-eEM15abl-MU5VFab']), # LFV
                     TopoMenuDef( 'INVM_DR_2MU3VFab',          outputbits = (2,3), outputlines = ['2INVM9-0DR15-2MU3VFab',
                                                                                                  '7INVM11-25DR99-2MU3VFab'] ), # BLS, ATR-21566
-                    TopoMenuDef( '1INVM200-23DPHI32-2eTAU1s', outputbits = 4 ), # ATR-30728
-                    TopoMenuDef( '2INVM200-23DPHI32-2eTAU1s', outputbits = 5 ), # ATR-30728
-                    TopoMenuDef( '3INVM200-23DPHI32-2eTAU1s', outputbits = 6 ), # ATR-30728
-                    TopoMenuDef( '4INVM200-23DPHI32-2eTAU1s', outputbits = 7 ), # ATR-30728
-                    TopoMenuDef( '3SUM200-23DPHI32-2eTAU1s',  outputbits = 8 ), # ATR-30728
-                    TopoMenuDef( '4SUM200-23DPHI32-2eTAU1s',  outputbits = 9 ), # ATR-30728
+                    TopoMenuDef( '23INVM400000-24DPHI32-2eTAU07s', outputbits = 4 ), # HI, ATR-30728
+                    TopoMenuDef( '28INVM400000-24DPHI32-2eTAU07s', outputbits = 5 ), # HI, ATR-30728
+                    TopoMenuDef( '23INVM400000-25DPHI32-2eTAU08s', outputbits = 6 ), # HI, ATR-30728
+                    TopoMenuDef( '33INVM400000-25DPHI32-2eTAU07s', outputbits = 7 ), # HI, ATR-30728
+                    TopoMenuDef( '23INVM400000-27DPHI32-2eTAU07s', outputbits = 8 ), # HI, ATR-30728
                     TopoMenuDef( 'ADBDT-MU0s',outputbits = (13,14), outputlines=['ADBDT-3MU0s-Tight',
                                                                               'ADBDT-3MU0s-Loose']),
                 ]

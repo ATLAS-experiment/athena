@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //#####################################################
@@ -50,7 +50,7 @@ class TBBeamQualityEMFractionTool : public TBBeamQualityTool
   std::vector<double> m_em_fracdensamp; // sample: denominator
   std::string m_em_fracnumdet;          // detector: numerator
   std::string m_em_fracdendet;          // detector: denominator
-  std::map<float,float> m_Mlayer;
+  std::vector<float> m_Mlayer;
   
   float m_em_frac;
   

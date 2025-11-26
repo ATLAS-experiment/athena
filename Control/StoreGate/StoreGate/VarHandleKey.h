@@ -1,10 +1,7 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
-
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
-
-// $Id$
 /**
  * @file StoreGate/VarHandleKey.h
  * @author scott snyder <snyder@bnl.gov>
@@ -61,6 +58,8 @@ class VarHandleKey
   : public Gaudi::DataHandle
 {
 public:
+  constexpr static bool isDecorHandleKey = false;
+
   /**
    * @brief Constructor.
    * @param clid The class ID for the referenced object.

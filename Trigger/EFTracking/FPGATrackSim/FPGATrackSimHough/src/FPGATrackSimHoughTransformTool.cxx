@@ -854,7 +854,7 @@ void FPGATrackSimHoughTransformTool::makeLUT(std::vector<std::vector<std::vector
         LUT_i.input_end = in_max;
         LUT_i.layer = ri;
         LUT_i.output.push_back({xi, yi, ri});
-        v_LUT.at(ri).at(MSB).push_back(LUT_i);
+        v_LUT.at(ri).at(MSB).push_back(std::move(LUT_i));
       }
     }
   }

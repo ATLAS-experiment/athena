@@ -19,6 +19,8 @@
 // Framework includes
 #include "StorageSvc/DbAccessObj.h"
 
+#include "AthenaBaseComps/AthMessaging.h"
+
 /*
  *   POOL namespace declaration
  */
@@ -42,7 +44,7 @@ namespace pool    {
       @author  M.Frank
       @version 1.0
   */
-  class DbSessionObj : public DbAccessObj<DbType, DbDomainObj >   {
+  class DbSessionObj : public DbAccessObj<DbType, DbDomainObj>, public AthMessaging {
   private:
     /// Known Implementation types
     std::map<DbType, IOODatabase*>         m_dbTypes;

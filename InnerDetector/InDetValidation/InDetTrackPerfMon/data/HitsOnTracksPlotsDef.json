@@ -93,6 +93,81 @@
         "type" : "TH1F",
         "xAxis" : { "title" : "N. $TRKTYPE High Threshold TRT Ar Hits", "nBins" : "$TRTHITMAX", "low" : "0.0", "high" : "$TRTHITMAX" },
         "yAxis" : { "title" : "Entries" }
+    },   
+    "$TRKTAG_nInnerMostPixelOutliers" : {
+        "type" : "TH1F",
+        "xAxis" : { "title" : "N. $TRKTYPE InnerMost Pixel Outliers", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX" },
+        "yAxis" : { "title" : "Entries" }
+    },
+    "$TRKTAG_nInnerMostPixelEndcapOutliers" : {
+        "type" : "TH1F",
+        "xAxis" : { "title" : "N. $TRKTYPE InnerMost Pixel Endcap Outliers", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX" },
+        "yAxis" : { "title" : "Entries" }
+    },
+    "$TRKTAG_nInnerMostPixelSplitHits" : {
+        "type" : "TH1F",
+        "xAxis" : { "title" : "N. $TRKTYPE InnerMost Pixel Split Hits", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX" },
+        "yAxis" : { "title" : "Entries" }
+    },
+    "$TRKTAG_nInnerMostPixelSplitEndcapHits" : {
+        "type" : "TH1F",
+        "xAxis" : { "title" : "N. $TRKTYPE InnerMost Pixel Split Endcap Hits", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX" },
+        "yAxis" : { "title" : "Entries" }
+    },
+    "$TRKTAG_nExpectedInnerMostPixelHits" : {
+        "type" : "TH1F",
+        "xAxis" : { "title" : "N. $TRKTYPE Expected InnerMost Pixel Hits", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX" },
+        "yAxis" : { "title" : "Entries" }
+    },
+    "$TRKTAG_nExpectedNextToInnerMostPixelHits" : {
+        "type" : "TH1F",
+        "xAxis" : { "title" : "N. $TRKTYPE Expected Next to InnerMost Pixel Hits", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX" },
+        "yAxis" : { "title" : "Entries" }
+    },
+    "$TRKTAG_nPixelOutliers" : {
+        "type" : "TH1F",
+        "xAxis" : { "title" : "N. $TRKTYPE Pixel Outliers", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX" },
+        "yAxis" : { "title" : "Entries" }
+    },
+    "$TRKTAG_nPixelContribLayers" : {
+        "type" : "TH1F",
+        "xAxis" : { "title" : "N. $TRKTYPE Pixel ContribLayers", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX" },
+        "yAxis" : { "title" : "Entries" }
+    },
+    "$TRKTAG_nPixelSplitHits" : {
+        "type" : "TH1F",
+        "xAxis" : { "title" : "N. $TRKTYPE Pixel Split Hits", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX" },
+        "yAxis" : { "title" : "Entries" }
+    },
+    "$TRKTAG_nPixelGangedHits" : {
+        "type" : "TH1F",
+        "xAxis" : { "title" : "N. $TRKTYPE Pixel Ganged Hits", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX" },
+        "yAxis" : { "title" : "Entries" }
+    },
+    "$TRKTAG_nPixelGangedHitsFlaggedFakes" : {
+        "type" : "TH1F",
+        "xAxis" : { "title" : "N. $TRKTYPE Pixel Ganged Hits Flagged Fakes", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX" },
+        "yAxis" : { "title" : "Entries" }
+    },
+    "$TRKTAG_nPixelDeadSensors" : {
+        "type" : "TH1F",
+        "xAxis" : { "title" : "N. $TRKTYPE Pixel Dead Sensors", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX" },
+        "yAxis" : { "title" : "Entries" }
+    },
+    "$TRKTAG_nSCTOutliers" : {
+        "type" : "TH1F",
+        "xAxis" : { "title" : "N. $TRKTYPE SCT Outliers", "nBins" : "$SCTHITMAX", "low" : "0.0", "high" : "$SCTHITMAX" },
+        "yAxis" : { "title" : "Entries" }
+    },
+    "$TRKTAG_nSCTDoubleHoles" : {
+        "type" : "TH1F",
+        "xAxis" : { "title" : "N. $TRKTYPE SCT Double Holes", "nBins" : "$SCTHITMAX", "low" : "0.0", "high" : "$SCTHITMAX" },
+        "yAxis" : { "title" : "Entries" }
+    },
+    "$TRKTAG_nSCTDeadSensors" : {
+        "type" : "TH1F",
+        "xAxis" : { "title" : "N. $TRKTYPE SCT Dead Sensors", "nBins" : "$SCTHITMAX", "low" : "0.0", "high" : "$SCTHITMAX" },
+        "yAxis" : { "title" : "Entries" }
     },
     "$TRKTAG_nInnerMostPixelHits_vs_$TRK2TAG_pt" : {
         "type" : "TProfile",
@@ -568,6 +643,381 @@
         "type" : "TProfile",
         "xAxis" : { "title" : "Actual <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
         "yAxis" : { "title" : "Average N. $TRKTYPE High Threshold TRT Ar Hits", "nBins" : "$TRTHITMAX", "low" : "0.0", "high" : "$TRTHITMAX" }
+    },
+    "$TRKTAG_nInnerMostPixelOutliers_vs_$TRK2TAG_pt" : {
+        "type" : "TProfile",
+        "xAxis" : { "title" : "$TRK2TYPE p_{T} [GeV]", "nBins" : "100", "low" : "0.0", "high" : "100.0" },
+        "yAxis" : { "title" : "Average N. $TRKTYPE InnerMost Pixel Outliers", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX"  }
+    },
+    "$TRKTAG_nInnerMostPixelEndcapOutliers_vs_$TRK2TAG_pt" : {
+            "type" : "TProfile",
+            "xAxis" : { "title" : "$TRK2TYPE p_{T} [GeV]", "nBins" : "100", "low" : "0.0", "high" : "100.0" },
+            "yAxis" : { "title" : "Average N. $TRKTYPE InnerMost Pixel Endcap Outliers", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX"  }
+    },
+    "$TRKTAG_nInnerMostPixelSplitHits_vs_$TRK2TAG_pt" : {
+            "type" : "TProfile",
+            "xAxis" : { "title" : "$TRK2TYPE p_{T} [GeV]", "nBins" : "100", "low" : "0.0", "high" : "100.0" },
+            "yAxis" : { "title" : "Average N. $TRKTYPE InnerMost Pixel Split Hits", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX"  }
+    },
+    "$TRKTAG_nInnerMostPixelSplitEndcapHits_vs_$TRK2TAG_pt" : {
+            "type" : "TProfile",
+            "xAxis" : { "title" : "$TRK2TYPE p_{T} [GeV]", "nBins" : "100", "low" : "0.0", "high" : "100.0" },
+            "yAxis" : { "title" : "Average N. $TRKTYPE InnerMost Pixel Split Endcap Hits", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX"  }
+    },
+    "$TRKTAG_nExpectedInnerMostPixelHits_vs_$TRK2TAG_pt" : {
+            "type" : "TProfile",
+            "xAxis" : { "title" : "$TRK2TYPE p_{T} [GeV]", "nBins" : "100", "low" : "0.0", "high" : "100.0" },
+            "yAxis" : { "title" : "Average N. $TRKTYPE Expected InnerMost Pixel Hits", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX"  }
+    },
+    "$TRKTAG_nExpectedNextToInnerMostPixelHits_vs_$TRK2TAG_pt" : {
+            "type" : "TProfile",
+            "xAxis" : { "title" : "$TRK2TYPE p_{T} [GeV]", "nBins" : "100", "low" : "0.0", "high" : "100.0" },
+            "yAxis" : { "title" : "Average N. $TRKTYPE Expected next to InnerMost Pixel Hits", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX"  }
+    },
+    "$TRKTAG_nPixelOutliers_vs_$TRK2TAG_pt" : {
+            "type" : "TProfile",
+            "xAxis" : { "title" : "$TRK2TYPE p_{T} [GeV]", "nBins" : "100", "low" : "0.0", "high" : "100.0" },
+            "yAxis" : { "title" : "Average N. $TRKTYPE Pixel Outliers", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX"  }
+    },
+    "$TRKTAG_nPixelContribLayers_vs_$TRK2TAG_pt" : {
+            "type" : "TProfile",
+            "xAxis" : { "title" : "$TRK2TYPE p_{T} [GeV]", "nBins" : "100", "low" : "0.0", "high" : "100.0" },
+            "yAxis" : { "title" : "Average N. $TRKTYPE Pixel Contributing Layers", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX"  }
+    },
+    "$TRKTAG_nPixelSplitHits_vs_$TRK2TAG_pt" : {
+            "type" : "TProfile",
+            "xAxis" : { "title" : "$TRK2TYPE p_{T} [GeV]", "nBins" : "100", "low" : "0.0", "high" : "100.0" },
+            "yAxis" : { "title" : "Average N. $TRKTYPE Pixel Split Hits", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX"  }
+    },
+    "$TRKTAG_nPixelGangedHits_vs_$TRK2TAG_pt" : {
+            "type" : "TProfile",
+            "xAxis" : { "title" : "$TRK2TYPE p_{T} [GeV]", "nBins" : "100", "low" : "0.0", "high" : "100.0" },
+            "yAxis" : { "title" : "Average N. $TRKTYPE Pixel Ganged Hits", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX"  }
+    },
+    "$TRKTAG_nPixelGangedHitsFlaggedFakes_vs_$TRK2TAG_pt" : {
+            "type" : "TProfile",
+            "xAxis" : { "title" : "$TRK2TYPE p_{T} [GeV]", "nBins" : "100", "low" : "0.0", "high" : "100.0" },
+            "yAxis" : { "title" : "Average N. $TRKTYPE Pixel Ganged Hits Flagged Fakes", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX"  }
+    },
+    "$TRKTAG_nPixelDeadSensors_vs_$TRK2TAG_pt" : {
+            "type" : "TProfile",
+            "xAxis" : { "title" : "$TRK2TYPE p_{T} [GeV]", "nBins" : "100", "low" : "0.0", "high" : "100.0" },
+            "yAxis" : { "title" : "Average N. $TRKTYPE Pixel Dead Sensors", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX"  }
+    },
+    "$TRKTAG_nSCTOutliers_vs_$TRK2TAG_pt" : {
+            "type" : "TProfile",
+            "xAxis" : { "title" : "$TRK2TYPE p_{T} [GeV]", "nBins" : "100", "low" : "0.0", "high" : "100.0" },
+            "yAxis" : { "title" : "Average N. $TRKTYPE SCT Outliers", "nBins" : "$SCTHITMAX", "low" : "0.0", "high" : "$SCTHITMAX"  }
+    },
+    "$TRKTAG_nSCTDoubleHoles_vs_$TRK2TAG_pt" : {
+            "type" : "TProfile",
+            "xAxis" : { "title" : "$TRK2TYPE p_{T} [GeV]", "nBins" : "100", "low" : "0.0", "high" : "100.0" },
+            "yAxis" : { "title" : "Average N. $TRKTYPE SCT Double Holes", "nBins" : "$SCTHITMAX", "low" : "0.0", "high" : "$SCTHITMAX"  }
+    },
+    "$TRKTAG_nSCTDeadSensors_vs_$TRK2TAG_pt" : {
+            "type" : "TProfile",
+            "xAxis" : { "title" : "$TRK2TYPE p_{T} [GeV]", "nBins" : "100", "low" : "0.0", "high" : "100.0" },
+            "yAxis" : { "title" : "Average N. $TRKTYPE SCT Dead Sensors", "nBins" : "$SCTHITMAX", "low" : "0.0", "high" : "$SCTHITMAX"  }
+    },
+    "$TRKTAG_nInnerMostPixelOutliers_vs_$TRK2TAG_eta" : {
+            "type" : "TProfile",
+            "xAxis" : { "title" : "$TRK2TYPE #eta", "nBins" : "80", "low" : "-$ETAMAX", "high" : "+$ETAMAX" },
+            "yAxis" : { "title" : "Average N. $TRKTYPE InnerMost Pixel Outliers", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX"  }
+    },
+    "$TRKTAG_nInnerMostPixelEndcapOutliers_vs_$TRK2TAG_eta" : {
+            "type" : "TProfile",
+            "xAxis" : { "title" : "$TRK2TYPE #eta", "nBins" : "80", "low" : "-$ETAMAX", "high" : "+$ETAMAX" },
+            "yAxis" : { "title" : "Average N. $TRKTYPE InnerMost Pixel Endcap Outliers", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX"  }
+    },
+    "$TRKTAG_nInnerMostPixelSplitHits_vs_$TRK2TAG_eta" : {
+            "type" : "TProfile",
+            "xAxis" : { "title" : "$TRK2TYPE #eta", "nBins" : "80", "low" : "-$ETAMAX", "high" : "+$ETAMAX" },
+            "yAxis" : { "title" : "Average N. $TRKTYPE InnerMost Pixel Split Hits", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX"  }
+    },
+    "$TRKTAG_nInnerMostPixelSplitEndcapHits_vs_$TRK2TAG_eta" : {
+            "type" : "TProfile",
+            "xAxis" : { "title" : "$TRK2TYPE #eta", "nBins" : "80", "low" : "-$ETAMAX", "high" : "+$ETAMAX" },
+            "yAxis" : { "title" : "Average N. $TRKTYPE InnerMost Pixel Split Endcap Hits", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX"  }
+    },
+    "$TRKTAG_nExpectedInnerMostPixelHits_vs_$TRK2TAG_eta" : {
+            "type" : "TProfile",
+            "xAxis" : { "title" : "$TRK2TYPE #eta", "nBins" : "80", "low" : "-$ETAMAX", "high" : "+$ETAMAX" },
+            "yAxis" : { "title" : "Average N. $TRKTYPE Expected InnerMost Pixel Hits", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX"  }
+    },
+    "$TRKTAG_nExpectedNextToInnerMostPixelHits_vs_$TRK2TAG_eta" : {
+            "type" : "TProfile",
+            "xAxis" : { "title" : "$TRK2TYPE #eta", "nBins" : "80", "low" : "-$ETAMAX", "high" : "+$ETAMAX" },
+            "yAxis" : { "title" : "Average N. $TRKTYPE Expected next to InnerMost Pixel Hits", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX"  }
+    },
+    "$TRKTAG_nPixelOutliers_vs_$TRK2TAG_eta" : {
+            "type" : "TProfile",
+            "xAxis" : { "title" : "$TRK2TYPE #eta", "nBins" : "80", "low" : "-$ETAMAX", "high" : "+$ETAMAX" },
+            "yAxis" : { "title" : "Average N. $TRKTYPE Pixel Outliers", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX"  }
+    },
+    "$TRKTAG_nPixelContribLayers_vs_$TRK2TAG_eta" : {
+            "type" : "TProfile",
+            "xAxis" : { "title" : "$TRK2TYPE #eta", "nBins" : "80", "low" : "-$ETAMAX", "high" : "+$ETAMAX" },
+            "yAxis" : { "title" : "Average N. $TRKTYPE Pixel Contributing Layers", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX"  }
+    },
+    "$TRKTAG_nPixelSplitHits_vs_$TRK2TAG_eta" : {
+            "type" : "TProfile",
+            "xAxis" : { "title" : "$TRK2TYPE #eta", "nBins" : "80", "low" : "-$ETAMAX", "high" : "+$ETAMAX" },
+            "yAxis" : { "title" : "Average N. $TRKTYPE Pixel Split Hits", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX"  }
+    },
+    "$TRKTAG_nPixelGangedHits_vs_$TRK2TAG_eta" : {
+            "type" : "TProfile",
+            "xAxis" : { "title" : "$TRK2TYPE #eta", "nBins" : "80", "low" : "-$ETAMAX", "high" : "+$ETAMAX" },
+            "yAxis" : { "title" : "Average N. $TRKTYPE Pixel Ganged Hits", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX"  }
+    },
+    "$TRKTAG_nPixelGangedHitsFlaggedFakes_vs_$TRK2TAG_eta" : {
+            "type" : "TProfile",
+            "xAxis" : { "title" : "$TRK2TYPE #eta", "nBins" : "80", "low" : "-$ETAMAX", "high" : "+$ETAMAX" },
+            "yAxis" : { "title" : "Average N. $TRKTYPE Pixel Ganged Hits Flagged Fakes", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX"  }
+    },
+    "$TRKTAG_nPixelDeadSensors_vs_$TRK2TAG_eta" : {
+            "type" : "TProfile",
+            "xAxis" : { "title" : "$TRK2TYPE #eta", "nBins" : "80", "low" : "-$ETAMAX", "high" : "+$ETAMAX" },
+            "yAxis" : { "title" : "Average N. $TRKTYPE Pixel Dead Sensors", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX"  }
+    },
+    "$TRKTAG_nSCTOutliers_vs_$TRK2TAG_eta" : {
+            "type" : "TProfile",
+            "xAxis" : { "title" : "$TRK2TYPE #eta", "nBins" : "80", "low" : "-$ETAMAX", "high" : "+$ETAMAX" },
+            "yAxis" : { "title" : "Average N. $TRKTYPE SCT Outliers", "nBins" : "$SCTHITMAX", "low" : "0.0", "high" : "$SCTHITMAX"  }
+    },
+    "$TRKTAG_nSCTDoubleHoles_vs_$TRK2TAG_eta" : {
+            "type" : "TProfile",
+            "xAxis" : { "title" : "$TRK2TYPE #eta", "nBins" : "80", "low" : "-$ETAMAX", "high" : "+$ETAMAX" },
+            "yAxis" : { "title" : "Average N. $TRKTYPE SCT Double Holes", "nBins" : "$SCTHITMAX", "low" : "0.0", "high" : "$SCTHITMAX"  }
+    },
+    "$TRKTAG_nSCTDeadSensors_vs_$TRK2TAG_eta" : {
+            "type" : "TProfile",
+            "xAxis" : { "title" : "$TRK2TYPE #eta", "nBins" : "80", "low" : "-$ETAMAX", "high" : "+$ETAMAX" },
+            "yAxis" : { "title" : "Average N. $TRKTYPE SCT Dead Sensors", "nBins" : "$SCTHITMAX", "low" : "0.0", "high" : "$SCTHITMAX"  }
+    },
+    "$TRKTAG_nInnerMostPixelOutliers_vs_$TRK2TAG_phi" : {
+            "type" : "TProfile",
+            "xAxis" : { "title" : "$TRK2TYPE #phi", "nBins" : "80", "low" : "-$PI", "high" : "$PI" },
+            "yAxis" : { "title" : "Average N. $TRKTYPE InnerMost Pixel Outliers", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX"  }
+    },
+    "$TRKTAG_nInnerMostPixelEndcapOutliers_vs_$TRK2TAG_phi" : {
+            "type" : "TProfile",
+            "xAxis" : { "title" : "$TRK2TYPE #phi", "nBins" : "80", "low" : "-$PI", "high" : "$PI" },
+            "yAxis" : { "title" : "Average N. $TRKTYPE InnerMost Pixel Endcap Outliers", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX"  }
+    },
+    "$TRKTAG_nInnerMostPixelSplitHits_vs_$TRK2TAG_phi" : {
+            "type" : "TProfile",
+            "xAxis" : { "title" : "$TRK2TYPE #phi", "nBins" : "80", "low" : "-$PI", "high" : "$PI" },
+            "yAxis" : { "title" : "Average N. $TRKTYPE InnerMost Pixel Split Hits", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX"  }
+    },
+    "$TRKTAG_nInnerMostPixelSplitEndcapHits_vs_$TRK2TAG_phi" : {
+            "type" : "TProfile",
+            "xAxis" : { "title" : "$TRK2TYPE #phi", "nBins" : "80", "low" : "-$PI", "high" : "$PI" },
+            "yAxis" : { "title" : "Average N. $TRKTYPE InnerMost Pixel Split Endcap Hits", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX"  }
+    },
+    "$TRKTAG_nExpectedInnerMostPixelHits_vs_$TRK2TAG_phi" : {
+            "type" : "TProfile",
+            "xAxis" : { "title" : "$TRK2TYPE #phi", "nBins" : "80", "low" : "-$PI", "high" : "$PI" },
+            "yAxis" : { "title" : "Average N. $TRKTYPE Expected InnerMost Pixel Hits", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX"  }
+    },
+    "$TRKTAG_nExpectedNextToInnerMostPixelHits_vs_$TRK2TAG_phi" : {
+            "type" : "TProfile",
+            "xAxis" : { "title" : "$TRK2TYPE #phi", "nBins" : "80", "low" : "-$PI", "high" : "$PI" },
+            "yAxis" : { "title" : "Average N. $TRKTYPE Expected next to InnerMost Pixel Hits", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX"  }
+    },
+    "$TRKTAG_nPixelOutliers_vs_$TRK2TAG_phi" : {
+            "type" : "TProfile",
+            "xAxis" : { "title" : "$TRK2TYPE #phi", "nBins" : "80", "low" : "-$PI", "high" : "$PI" },
+            "yAxis" : { "title" : "Average N. $TRKTYPE Pixel Outliers", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX"  }
+    },
+    "$TRKTAG_nPixelContribLayers_vs_$TRK2TAG_phi" : {
+            "type" : "TProfile",
+            "xAxis" : { "title" : "$TRK2TYPE #phi", "nBins" : "80", "low" : "-$PI", "high" : "$PI" },
+            "yAxis" : { "title" : "Average N. $TRKTYPE Pixel Contributing Layers", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX"  }
+    },
+    "$TRKTAG_nPixelSplitHits_vs_$TRK2TAG_phi" : {
+            "type" : "TProfile",
+            "xAxis" : { "title" : "$TRK2TYPE #phi", "nBins" : "80", "low" : "-$PI", "high" : "$PI" },
+            "yAxis" : { "title" : "Average N. $TRKTYPE Pixel Split Hits", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX"  }
+    },
+    "$TRKTAG_nPixelGangedHits_vs_$TRK2TAG_phi" : {
+            "type" : "TProfile",
+            "xAxis" : { "title" : "$TRK2TYPE #phi", "nBins" : "80", "low" : "-$PI", "high" : "$PI" },
+            "yAxis" : { "title" : "Average N. $TRKTYPE Pixel Ganged Hits", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX"  }
+    },
+    "$TRKTAG_nPixelGangedHitsFlaggedFakes_vs_$TRK2TAG_phi" : {
+            "type" : "TProfile",
+            "xAxis" : { "title" : "$TRK2TYPE #phi", "nBins" : "80", "low" : "-$PI", "high" : "$PI" },
+            "yAxis" : { "title" : "Average N. $TRKTYPE Pixel Ganged Hits Flagged Fakes", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX"  }
+    },
+    "$TRKTAG_nPixelDeadSensors_vs_$TRK2TAG_phi" : {
+            "type" : "TProfile",
+            "xAxis" : { "title" : "$TRK2TYPE #phi", "nBins" : "80", "low" : "-$PI", "high" : "$PI" },
+            "yAxis" : { "title" : "Average N. $TRKTYPE Pixel Dead Sensors", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX"  }
+    },
+    "$TRKTAG_nSCTOutliers_vs_$TRK2TAG_phi" : {
+            "type" : "TProfile",
+            "xAxis" : { "title" : "$TRK2TYPE #phi", "nBins" : "80", "low" : "-$PI", "high" : "$PI" },
+            "yAxis" : { "title" : "Average N. $TRKTYPE SCT Outliers", "nBins" : "$SCTHITMAX", "low" : "0.0", "high" : "$SCTHITMAX"  }
+    },
+    "$TRKTAG_nSCTDoubleHoles_vs_$TRK2TAG_phi" : {
+            "type" : "TProfile",
+            "xAxis" : { "title" : "$TRK2TYPE #phi", "nBins" : "80", "low" : "-$PI", "high" : "$PI" },
+            "yAxis" : { "title" : "Average N. $TRKTYPE SCT Double Holes", "nBins" : "$SCTHITMAX", "low" : "0.0", "high" : "$SCTHITMAX"  }
+    },
+    "$TRKTAG_nSCTDeadSensors_vs_$TRK2TAG_phi" : {
+            "type" : "TProfile",
+            "xAxis" : { "title" : "$TRK2TYPE #phi", "nBins" : "80", "low" : "-$PI", "high" : "$PI" },
+            "yAxis" : { "title" : "Average N. $TRKTYPE SCT Dead Sensors", "nBins" : "$SCTHITMAX", "low" : "0.0", "high" : "$SCTHITMAX"  }
+    },
+    "$TRKTAG_nInnerMostPixelOutliers_vs_truthMu" : {
+            "type" : "TProfile",
+            "xAxis" : { "title" : "Truth <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+            "yAxis" : { "title" : "Average N. $TRKTYPE InnerMost Pixel Outliers", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX"  }
+    },
+    "$TRKTAG_nInnerMostPixelEndcapOutliers_vs_truthMu" : {
+            "type" : "TProfile",
+            "xAxis" : { "title" : "Truth <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+            "yAxis" : { "title" : "Average N. $TRKTYPE InnerMost Pixel Endcap Outliers", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX"  }
+    },
+    "$TRKTAG_nInnerMostPixelSplitHits_vs_truthMu" : {
+            "type" : "TProfile",
+            "xAxis" : { "title" : "Truth <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+            "yAxis" : { "title" : "Average N. $TRKTYPE InnerMost Pixel Split Hits", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX"  }
+    },
+    "$TRKTAG_nInnerMostPixelSplitEndcapHits_vs_truthMu" : {
+            "type" : "TProfile",
+            "xAxis" : { "title" : "Truth <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+            "yAxis" : { "title" : "Average N. $TRKTYPE InnerMost Pixel Split Endcap Hits", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX"  }
+    },
+    "$TRKTAG_nExpectedInnerMostPixelHits_vs_truthMu" : {
+            "type" : "TProfile",
+            "xAxis" : { "title" : "Truth <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+            "yAxis" : { "title" : "Average N. $TRKTYPE Expected InnerMost Pixel Hits", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX"  }
+    },
+    "$TRKTAG_nExpectedNextToInnerMostPixelHits_vs_truthMu" : {
+            "type" : "TProfile",
+            "xAxis" : { "title" : "Truth <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+            "yAxis" : { "title" : "Average N. $TRKTYPE Expected next to InnerMost Pixel Hits", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX"  }
+    },
+    "$TRKTAG_nPixelOutliers_vs_truthMu" : {
+            "type" : "TProfile",
+            "xAxis" : { "title" : "Truth <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+            "yAxis" : { "title" : "Average N. $TRKTYPE Pixel Outliers", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX"  }
+    },
+    "$TRKTAG_nPixelContribLayers_vs_truthMu" : {
+            "type" : "TProfile",
+            "xAxis" : { "title" : "Truth <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+            "yAxis" : { "title" : "Average N. $TRKTYPE Pixel Contributing Layers", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX"  }
+    },
+    "$TRKTAG_nPixelSplitHits_vs_truthMu" : {
+            "type" : "TProfile",
+            "xAxis" : { "title" : "Truth <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+            "yAxis" : { "title" : "Average N. $TRKTYPE Pixel Split Hits", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX"  }
+    },
+    "$TRKTAG_nPixelGangedHits_vs_truthMu" : {
+            "type" : "TProfile",
+            "xAxis" : { "title" : "Truth <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+            "yAxis" : { "title" : "Average N. $TRKTYPE Pixel Ganged Hits", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX"  }
+    },
+    "$TRKTAG_nPixelGangedHitsFlaggedFakes_vs_truthMu" : {
+            "type" : "TProfile",
+            "xAxis" : { "title" : "Truth <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+            "yAxis" : { "title" : "Average N. $TRKTYPE Pixel Ganged Hits Flagged Fakes", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX"  }
+    },
+    "$TRKTAG_nPixelDeadSensors_vs_truthMu" : {
+            "type" : "TProfile",
+            "xAxis" : { "title" : "Truth <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+            "yAxis" : { "title" : "Average N. $TRKTYPE Pixel Dead Sensors", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX"  }
+    },
+    "$TRKTAG_nSCTOutliers_vs_truthMu" : {
+            "type" : "TProfile",
+            "xAxis" : { "title" : "Truth <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+            "yAxis" : { "title" : "Average N. $TRKTYPE SCT Outliers", "nBins" : "$SCTHITMAX", "low" : "0.0", "high" : "$SCTHITMAX"  }
+    },
+    "$TRKTAG_nSCTDoubleHoles_vs_truthMu" : {
+            "type" : "TProfile",
+            "xAxis" : { "title" : "Truth <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+            "yAxis" : { "title" : "Average N. $TRKTYPE SCT Double Holes", "nBins" : "$SCTHITMAX", "low" : "0.0", "high" : "$SCTHITMAX"  }
+    },
+    "$TRKTAG_nSCTDeadSensors_vs_truthMu" : {
+            "type" : "TProfile",
+            "xAxis" : { "title" : "Truth <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+            "yAxis" : { "title" : "Average N. $TRKTYPE SCT Dead Sensors", "nBins" : "$SCTHITMAX", "low" : "0.0", "high" : "$SCTHITMAX"  }
+    },
+    "$TRKTAG_nInnerMostPixelOutliers_vs_actualMu" : {
+            "type" : "TProfile",
+            "xAxis" : { "title" : "Actual <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+            "yAxis" : { "title" : "Average N. $TRKTYPE InnerMost Pixel Outliers", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX"  }
+    },
+    "$TRKTAG_nInnerMostPixelEndcapOutliers_vs_actualMu" : {
+            "type" : "TProfile",
+            "xAxis" : { "title" : "Actual <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+            "yAxis" : { "title" : "Average N. $TRKTYPE InnerMost Pixel Endcap Outliers", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX"  }
+    },
+    "$TRKTAG_nInnerMostPixelSplitHits_vs_actualMu" : {
+            "type" : "TProfile",
+            "xAxis" : { "title" : "Actual <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+            "yAxis" : { "title" : "Average N. $TRKTYPE InnerMost Pixel Split Hits", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX"  }
+    },
+    "$TRKTAG_nInnerMostPixelSplitEndcapHits_vs_actualMu" : {
+            "type" : "TProfile",
+            "xAxis" : { "title" : "Actual <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+            "yAxis" : { "title" : "Average N. $TRKTYPE InnerMost Pixel Split Endcap Hits", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX"  }
+    },
+    "$TRKTAG_nExpectedInnerMostPixelHits_vs_actualMu" : {
+            "type" : "TProfile",
+            "xAxis" : { "title" : "Actual <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+            "yAxis" : { "title" : "Average N. $TRKTYPE Expected InnerMost Pixel Hits", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX"  }
+    },
+    "$TRKTAG_nExpectedNextToInnerMostPixelHits_vs_actualMu" : {
+            "type" : "TProfile",
+            "xAxis" : { "title" : "Actual <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+            "yAxis" : { "title" : "Average N. $TRKTYPE Expected next to InnerMost Pixel Hits", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX"  }
+    },
+    "$TRKTAG_nPixelOutliers_vs_actualMu" : {
+            "type" : "TProfile",
+            "xAxis" : { "title" : "Actual <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+            "yAxis" : { "title" : "Average N. $TRKTYPE Pixel Outliers", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX"  }
+    },
+    "$TRKTAG_nPixelContribLayers_vs_actualMu" : {
+            "type" : "TProfile",
+            "xAxis" : { "title" : "Actual <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+            "yAxis" : { "title" : "Average N. $TRKTYPE Pixel Contributing Layers", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX"  }
+    },
+    "$TRKTAG_nPixelSplitHits_vs_actualMu" : {
+            "type" : "TProfile",
+            "xAxis" : { "title" : "Actual <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+            "yAxis" : { "title" : "Average N. $TRKTYPE Pixel Split Hits", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX"  }
+    },
+    "$TRKTAG_nPixelGangedHits_vs_actualMu" : {
+            "type" : "TProfile",
+            "xAxis" : { "title" : "Actual <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+            "yAxis" : { "title" : "Average N. $TRKTYPE Pixel Ganged Hits", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX"  }
+    },
+    "$TRKTAG_nPixelGangedHitsFlaggedFakes_vs_actualMu" : {
+            "type" : "TProfile",
+            "xAxis" : { "title" : "Actual <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+            "yAxis" : { "title" : "Average N. $TRKTYPE Pixel Ganged Hits Flagged Fakes", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX"  }
+    },
+    "$TRKTAG_nPixelDeadSensors_vs_actualMu" : {
+            "type" : "TProfile",
+            "xAxis" : { "title" : "Actual <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+            "yAxis" : { "title" : "Average N. $TRKTYPE Pixel Dead Sensors", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX"  }
+    },
+    "$TRKTAG_nSCTOutliers_vs_actualMu" : {
+            "type" : "TProfile",
+            "xAxis" : { "title" : "Actual <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+            "yAxis" : { "title" : "Average N. $TRKTYPE SCT Outliers", "nBins" : "$SCTHITMAX", "low" : "0.0", "high" : "$SCTHITMAX"  }
+    },
+    "$TRKTAG_nSCTDoubleHoles_vs_actualMu" : {
+            "type" : "TProfile",
+            "xAxis" : { "title" : "Actual <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+            "yAxis" : { "title" : "Average N. $TRKTYPE SCT Double Holes", "nBins" : "$SCTHITMAX", "low" : "0.0", "high" : "$SCTHITMAX"  }
+    },
+    "$TRKTAG_nSCTDeadSensors_vs_actualMu" : {
+            "type" : "TProfile",
+            "xAxis" : { "title" : "Actual <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+            "yAxis" : { "title" : "Average N. $TRKTYPE SCT Dead Sensors", "nBins" : "$SCTHITMAX", "low" : "0.0", "high" : "$SCTHITMAX"  }
     },
     "$TRKTAG_nInnerMostPixelHits_vs_$TRK2TAG_pt_vs_eta" : {
         "type" : "TProfile2D",
@@ -1594,5 +2044,815 @@
         "xAxis" : { "title" : "Actual <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
         "yAxis" : { "title" : "$TRK2TYPE #phi", "nBins" : "160", "low" : "-$PI", "high" : "$PI" },
         "zAxis" : { "title" : "Average N. $TRKTYPE High Threshold TRT Ar Hits", "nBins" : "$TRTHITMAX", "low" : "0.0", "high" : "$TRTHITMAX" }
+    },
+    "$TRKTAG_nInnerMostPixelOutliers_vs_$TRK2TAG_pt_vs_eta" : {
+        "type" : "TProfile2D",
+        "xAxis" : { "title" : "$TRK2TYPE p_{T} [GeV]", "nBins" : "100", "low" : "0.0", "high" : "100.0" },
+        "yAxis" : { "title" : "$TRK2TYPE #eta", "nBins" : "80", "low" : "-$ETAMAX", "high" : "+$ETAMAX" },
+        "zAxis" : { "title" : "Average N. $TRKTYPE InnerMost Pixel Outliers", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX"  }
+    },
+    "$TRKTAG_nInnerMostPixelEndcapOutliers_vs_$TRK2TAG_pt_vs_eta" : {
+            "type" : "TProfile2D",
+            "xAxis" : { "title" : "$TRK2TYPE p_{T} [GeV]", "nBins" : "100", "low" : "0.0", "high" : "100.0" },
+            "yAxis" : { "title" : "$TRK2TYPE #eta", "nBins" : "80", "low" : "-$ETAMAX", "high" : "+$ETAMAX" },
+            "zAxis" : { "title" : "Average N. $TRKTYPE InnerMost Pixel Endcap Outliers", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX"  }
+    },
+    "$TRKTAG_nInnerMostPixelSplitHits_vs_$TRK2TAG_pt_vs_eta" : {
+            "type" : "TProfile2D",
+            "xAxis" : { "title" : "$TRK2TYPE p_{T} [GeV]", "nBins" : "100", "low" : "0.0", "high" : "100.0" },
+            "yAxis" : { "title" : "$TRK2TYPE #eta", "nBins" : "80", "low" : "-$ETAMAX", "high" : "+$ETAMAX" },
+            "zAxis" : { "title" : "Average N. $TRKTYPE InnerMost Pixel Split Hits", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX"  }
+    },
+    "$TRKTAG_nInnerMostPixelSplitEndcapHits_vs_$TRK2TAG_pt_vs_eta" : {
+            "type" : "TProfile2D",
+            "xAxis" : { "title" : "$TRK2TYPE p_{T} [GeV]", "nBins" : "100", "low" : "0.0", "high" : "100.0" },
+            "yAxis" : { "title" : "$TRK2TYPE #eta", "nBins" : "80", "low" : "-$ETAMAX", "high" : "+$ETAMAX" },
+            "zAxis" : { "title" : "Average N. $TRKTYPE InnerMost Pixel Split Endcap Hits", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX"  }
+    },
+    "$TRKTAG_nExpectedInnerMostPixelHits_vs_$TRK2TAG_pt_vs_eta" : {
+            "type" : "TProfile2D",
+            "xAxis" : { "title" : "$TRK2TYPE p_{T} [GeV]", "nBins" : "100", "low" : "0.0", "high" : "100.0" },
+            "yAxis" : { "title" : "$TRK2TYPE #eta", "nBins" : "80", "low" : "-$ETAMAX", "high" : "+$ETAMAX" },
+            "zAxis" : { "title" : "Average N. $TRKTYPE Expected InnerMost Pixel Hits", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX"  }
+    },
+    "$TRKTAG_nExpectedNextToInnerMostPixelHits_vs_$TRK2TAG_pt_vs_eta" : {
+            "type" : "TProfile2D",
+            "xAxis" : { "title" : "$TRK2TYPE p_{T} [GeV]", "nBins" : "100", "low" : "0.0", "high" : "100.0" },
+            "yAxis" : { "title" : "$TRK2TYPE #eta", "nBins" : "80", "low" : "-$ETAMAX", "high" : "+$ETAMAX" },
+            "zAxis" : { "title" : "Average N. $TRKTYPE Expected next to InnerMost Pixel Hits", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX"  }
+    },
+    "$TRKTAG_nPixelOutliers_vs_$TRK2TAG_pt_vs_eta" : {
+            "type" : "TProfile2D",
+            "xAxis" : { "title" : "$TRK2TYPE p_{T} [GeV]", "nBins" : "100", "low" : "0.0", "high" : "100.0" },
+            "yAxis" : { "title" : "$TRK2TYPE #eta", "nBins" : "80", "low" : "-$ETAMAX", "high" : "+$ETAMAX" },
+            "zAxis" : { "title" : "Average N. $TRKTYPE Pixel Outliers", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX"  }
+    },
+    "$TRKTAG_nPixelContribLayers_vs_$TRK2TAG_pt_vs_eta" : {
+            "type" : "TProfile2D",
+            "xAxis" : { "title" : "$TRK2TYPE p_{T} [GeV]", "nBins" : "100", "low" : "0.0", "high" : "100.0" },
+            "yAxis" : { "title" : "$TRK2TYPE #eta", "nBins" : "80", "low" : "-$ETAMAX", "high" : "+$ETAMAX" },
+            "zAxis" : { "title" : "Average N. $TRKTYPE Pixel Contributing Layers", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX"  }
+    },
+    "$TRKTAG_nPixelSplitHits_vs_$TRK2TAG_pt_vs_eta" : {
+            "type" : "TProfile2D",
+            "xAxis" : { "title" : "$TRK2TYPE p_{T} [GeV]", "nBins" : "100", "low" : "0.0", "high" : "100.0" },
+            "yAxis" : { "title" : "$TRK2TYPE #eta", "nBins" : "80", "low" : "-$ETAMAX", "high" : "+$ETAMAX" },
+            "zAxis" : { "title" : "Average N. $TRKTYPE Pixel Split Hits", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX"  }
+    },
+    "$TRKTAG_nPixelGangedHits_vs_$TRK2TAG_pt_vs_eta" : {
+            "type" : "TProfile2D",
+            "xAxis" : { "title" : "$TRK2TYPE p_{T} [GeV]", "nBins" : "100", "low" : "0.0", "high" : "100.0" },
+            "yAxis" : { "title" : "$TRK2TYPE #eta", "nBins" : "80", "low" : "-$ETAMAX", "high" : "+$ETAMAX" },
+            "zAxis" : { "title" : "Average N. $TRKTYPE Pixel Ganged Hits", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX"  }
+    },
+    "$TRKTAG_nPixelGangedHitsFlaggedFakes_vs_$TRK2TAG_pt_vs_eta" : {
+            "type" : "TProfile2D",
+            "xAxis" : { "title" : "$TRK2TYPE p_{T} [GeV]", "nBins" : "100", "low" : "0.0", "high" : "100.0" },
+            "yAxis" : { "title" : "$TRK2TYPE #eta", "nBins" : "80", "low" : "-$ETAMAX", "high" : "+$ETAMAX" },
+            "zAxis" : { "title" : "Average N. $TRKTYPE Pixel Ganged Hits Flagged Fakes", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX"  }
+    },
+    "$TRKTAG_nPixelDeadSensors_vs_$TRK2TAG_pt_vs_eta" : {
+            "type" : "TProfile2D",
+            "xAxis" : { "title" : "$TRK2TYPE p_{T} [GeV]", "nBins" : "100", "low" : "0.0", "high" : "100.0" },
+            "yAxis" : { "title" : "$TRK2TYPE #eta", "nBins" : "80", "low" : "-$ETAMAX", "high" : "+$ETAMAX" },
+            "zAxis" : { "title" : "Average N. $TRKTYPE Pixel Dead Sensors", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX"  }
+    },
+    "$TRKTAG_nSCTOutliers_vs_$TRK2TAG_pt_vs_eta" : {
+            "type" : "TProfile2D",
+            "xAxis" : { "title" : "$TRK2TYPE p_{T} [GeV]", "nBins" : "100", "low" : "0.0", "high" : "100.0" },
+            "yAxis" : { "title" : "$TRK2TYPE #eta", "nBins" : "80", "low" : "-$ETAMAX", "high" : "+$ETAMAX" },
+            "zAxis" : { "title" : "Average N. $TRKTYPE SCT Outliers", "nBins" : "$SCTHITMAX", "low" : "0.0", "high" : "$SCTHITMAX"  }
+    },
+    "$TRKTAG_nSCTDoubleHoles_vs_$TRK2TAG_pt_vs_eta" : {
+            "type" : "TProfile2D",
+            "xAxis" : { "title" : "$TRK2TYPE p_{T} [GeV]", "nBins" : "100", "low" : "0.0", "high" : "100.0" },
+            "yAxis" : { "title" : "$TRK2TYPE #eta", "nBins" : "80", "low" : "-$ETAMAX", "high" : "+$ETAMAX" },
+            "zAxis" : { "title" : "Average N. $TRKTYPE SCT Double Holes", "nBins" : "$SCTHITMAX", "low" : "0.0", "high" : "$SCTHITMAX"  }
+    },
+    "$TRKTAG_nSCTDeadSensors_vs_$TRK2TAG_pt_vs_eta" : {
+            "type" : "TProfile2D",
+            "xAxis" : { "title" : "$TRK2TYPE p_{T} [GeV]", "nBins" : "100", "low" : "0.0", "high" : "100.0" },
+            "yAxis" : { "title" : "$TRK2TYPE #eta", "nBins" : "80", "low" : "-$ETAMAX", "high" : "+$ETAMAX" },
+            "zAxis" : { "title" : "Average N. $TRKTYPE SCT Dead Sensors", "nBins" : "$SCTHITMAX", "low" : "0.0", "high" : "$SCTHITMAX"  }
+    },
+    "$TRKTAG_nInnerMostPixelOutliers_vs_$TRK2TAG_pt_vs_phi" : {
+            "type" : "TProfile2D",
+            "xAxis" : { "title" : "$TRK2TYPE p_{T} [GeV]", "nBins" : "100", "low" : "0.0", "high" : "100.0" },
+            "yAxis" : { "title" : "$TRK2TYPE #phi", "nBins" : "80", "low" : "-$PI", "high" : "$PI" },
+            "zAxis" : { "title" : "Average N. $TRKTYPE InnerMost Pixel Outliers", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX"  }
+    },
+    "$TRKTAG_nInnerMostPixelEndcapOutliers_vs_$TRK2TAG_pt_vs_phi" : {
+            "type" : "TProfile2D",
+            "xAxis" : { "title" : "$TRK2TYPE p_{T} [GeV]", "nBins" : "100", "low" : "0.0", "high" : "100.0" },
+            "yAxis" : { "title" : "$TRK2TYPE #phi", "nBins" : "80", "low" : "-$PI", "high" : "$PI" },
+            "zAxis" : { "title" : "Average N. $TRKTYPE InnerMost Pixel Endcap Outliers", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX"  }
+    },
+    "$TRKTAG_nInnerMostPixelSplitHits_vs_$TRK2TAG_pt_vs_phi" : {
+            "type" : "TProfile2D",
+            "xAxis" : { "title" : "$TRK2TYPE p_{T} [GeV]", "nBins" : "100", "low" : "0.0", "high" : "100.0" },
+            "yAxis" : { "title" : "$TRK2TYPE #phi", "nBins" : "80", "low" : "-$PI", "high" : "$PI" },
+            "zAxis" : { "title" : "Average N. $TRKTYPE InnerMost Pixel Split Hits", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX"  }
+    },
+    "$TRKTAG_nInnerMostPixelSplitEndcapHits_vs_$TRK2TAG_pt_vs_phi" : {
+            "type" : "TProfile2D",
+            "xAxis" : { "title" : "$TRK2TYPE p_{T} [GeV]", "nBins" : "100", "low" : "0.0", "high" : "100.0" },
+            "yAxis" : { "title" : "$TRK2TYPE #phi", "nBins" : "80", "low" : "-$PI", "high" : "$PI" },
+            "zAxis" : { "title" : "Average N. $TRKTYPE InnerMost Pixel Split Endcap Hits", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX"  }
+    },
+    "$TRKTAG_nExpectedInnerMostPixelHits_vs_$TRK2TAG_pt_vs_phi" : {
+            "type" : "TProfile2D",
+            "xAxis" : { "title" : "$TRK2TYPE p_{T} [GeV]", "nBins" : "100", "low" : "0.0", "high" : "100.0" },
+            "yAxis" : { "title" : "$TRK2TYPE #phi", "nBins" : "80", "low" : "-$PI", "high" : "$PI" },
+            "zAxis" : { "title" : "Average N. $TRKTYPE Expected InnerMost Pixel Hits", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX"  }
+    },
+    "$TRKTAG_nExpectedNextToInnerMostPixelHits_vs_$TRK2TAG_pt_vs_phi" : {
+            "type" : "TProfile2D",
+            "xAxis" : { "title" : "$TRK2TYPE p_{T} [GeV]", "nBins" : "100", "low" : "0.0", "high" : "100.0" },
+            "yAxis" : { "title" : "$TRK2TYPE #phi", "nBins" : "80", "low" : "-$PI", "high" : "$PI" },
+            "zAxis" : { "title" : "Average N. $TRKTYPE Expected next to InnerMost Pixel Hits", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX"  }
+    },
+    "$TRKTAG_nPixelOutliers_vs_$TRK2TAG_pt_vs_phi" : {
+            "type" : "TProfile2D",
+            "xAxis" : { "title" : "$TRK2TYPE p_{T} [GeV]", "nBins" : "100", "low" : "0.0", "high" : "100.0" },
+            "yAxis" : { "title" : "$TRK2TYPE #phi", "nBins" : "80", "low" : "-$PI", "high" : "$PI" },
+            "zAxis" : { "title" : "Average N. $TRKTYPE Pixel Outliers", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX"  }
+    },
+    "$TRKTAG_nPixelContribLayers_vs_$TRK2TAG_pt_vs_phi" : {
+            "type" : "TProfile2D",
+            "xAxis" : { "title" : "$TRK2TYPE p_{T} [GeV]", "nBins" : "100", "low" : "0.0", "high" : "100.0" },
+            "yAxis" : { "title" : "$TRK2TYPE #phi", "nBins" : "80", "low" : "-$PI", "high" : "$PI" },
+            "zAxis" : { "title" : "Average N. $TRKTYPE Pixel Contributing Layers", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX"  }
+    },
+    "$TRKTAG_nPixelSplitHits_vs_$TRK2TAG_pt_vs_phi" : {
+            "type" : "TProfile2D",
+            "xAxis" : { "title" : "$TRK2TYPE p_{T} [GeV]", "nBins" : "100", "low" : "0.0", "high" : "100.0" },
+            "yAxis" : { "title" : "$TRK2TYPE #phi", "nBins" : "80", "low" : "-$PI", "high" : "$PI" },
+            "zAxis" : { "title" : "Average N. $TRKTYPE Pixel Split Hits", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX"  }
+    },
+    "$TRKTAG_nPixelGangedHits_vs_$TRK2TAG_pt_vs_phi" : {
+            "type" : "TProfile2D",
+            "xAxis" : { "title" : "$TRK2TYPE p_{T} [GeV]", "nBins" : "100", "low" : "0.0", "high" : "100.0" },
+            "yAxis" : { "title" : "$TRK2TYPE #phi", "nBins" : "80", "low" : "-$PI", "high" : "$PI" },
+            "zAxis" : { "title" : "Average N. $TRKTYPE Pixel Ganged Hits", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX"  }
+    },
+    "$TRKTAG_nPixelGangedHitsFlaggedFakes_vs_$TRK2TAG_pt_vs_phi" : {
+            "type" : "TProfile2D",
+            "xAxis" : { "title" : "$TRK2TYPE p_{T} [GeV]", "nBins" : "100", "low" : "0.0", "high" : "100.0" },
+            "yAxis" : { "title" : "$TRK2TYPE #phi", "nBins" : "80", "low" : "-$PI", "high" : "$PI" },
+            "zAxis" : { "title" : "Average N. $TRKTYPE Pixel Ganged Hits Flagged Fakes", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX"  }
+    },
+    "$TRKTAG_nPixelDeadSensors_vs_$TRK2TAG_pt_vs_phi" : {
+            "type" : "TProfile2D",
+            "xAxis" : { "title" : "$TRK2TYPE p_{T} [GeV]", "nBins" : "100", "low" : "0.0", "high" : "100.0" },
+            "yAxis" : { "title" : "$TRK2TYPE #phi", "nBins" : "80", "low" : "-$PI", "high" : "$PI" },
+            "zAxis" : { "title" : "Average N. $TRKTYPE Pixel Dead Sensors", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX"  }
+    },
+    "$TRKTAG_nSCTOutliers_vs_$TRK2TAG_pt_vs_phi" : {
+            "type" : "TProfile2D",
+            "xAxis" : { "title" : "$TRK2TYPE p_{T} [GeV]", "nBins" : "100", "low" : "0.0", "high" : "100.0" },
+            "yAxis" : { "title" : "$TRK2TYPE #phi", "nBins" : "80", "low" : "-$PI", "high" : "$PI" },
+            "zAxis" : { "title" : "Average N. $TRKTYPE SCT Outliers", "nBins" : "$SCTHITMAX", "low" : "0.0", "high" : "$SCTHITMAX"  }
+    },
+    "$TRKTAG_nSCTDoubleHoles_vs_$TRK2TAG_pt_vs_phi" : {
+            "type" : "TProfile2D",
+            "xAxis" : { "title" : "$TRK2TYPE p_{T} [GeV]", "nBins" : "100", "low" : "0.0", "high" : "100.0" },
+            "yAxis" : { "title" : "$TRK2TYPE #phi", "nBins" : "80", "low" : "-$PI", "high" : "$PI" },
+            "zAxis" : { "title" : "Average N. $TRKTYPE SCT Double Holes", "nBins" : "$SCTHITMAX", "low" : "0.0", "high" : "$SCTHITMAX"  }
+    },
+    "$TRKTAG_nSCTDeadSensors_vs_$TRK2TAG_pt_vs_phi" : {
+            "type" : "TProfile2D",
+            "xAxis" : { "title" : "$TRK2TYPE p_{T} [GeV]", "nBins" : "100", "low" : "0.0", "high" : "100.0" },
+            "yAxis" : { "title" : "$TRK2TYPE #phi", "nBins" : "80", "low" : "-$PI", "high" : "$PI" },
+            "zAxis" : { "title" : "Average N. $TRKTYPE SCT Dead Sensors", "nBins" : "$SCTHITMAX", "low" : "0.0", "high" : "$SCTHITMAX"  }
+    },
+    "$TRKTAG_nInnerMostPixelOutliers_vs_$TRK2TAG_eta_vs_phi" : {
+            "type" : "TProfile2D",
+            "xAxis" : { "title" : "$TRK2TYPE #eta", "nBins" : "80", "low" : "-$ETAMAX", "high" : "+$ETAMAX" },
+            "yAxis" : { "title" : "$TRK2TYPE #phi", "nBins" : "80", "low" : "-$PI", "high" : "$PI" },
+            "zAxis" : { "title" : "Average N. $TRKTYPE InnerMost Pixel Outliers", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX"  }
+    },
+    "$TRKTAG_nInnerMostPixelEndcapOutliers_vs_$TRK2TAG_eta_vs_phi" : {
+            "type" : "TProfile2D",
+            "xAxis" : { "title" : "$TRK2TYPE #eta", "nBins" : "80", "low" : "-$ETAMAX", "high" : "+$ETAMAX" },
+            "yAxis" : { "title" : "$TRK2TYPE #phi", "nBins" : "80", "low" : "-$PI", "high" : "$PI" },
+            "zAxis" : { "title" : "Average N. $TRKTYPE InnerMost Pixel Endcap Outliers", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX"  }
+    },
+    "$TRKTAG_nInnerMostPixelSplitHits_vs_$TRK2TAG_eta_vs_phi" : {
+            "type" : "TProfile2D",
+            "xAxis" : { "title" : "$TRK2TYPE #eta", "nBins" : "80", "low" : "-$ETAMAX", "high" : "+$ETAMAX" },
+            "yAxis" : { "title" : "$TRK2TYPE #phi", "nBins" : "80", "low" : "-$PI", "high" : "$PI" },
+            "zAxis" : { "title" : "Average N. $TRKTYPE InnerMost Pixel Split Hits", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX"  }
+    },
+    "$TRKTAG_nInnerMostPixelSplitEndcapHits_vs_$TRK2TAG_eta_vs_phi" : {
+            "type" : "TProfile2D",
+            "xAxis" : { "title" : "$TRK2TYPE #eta", "nBins" : "80", "low" : "-$ETAMAX", "high" : "+$ETAMAX" },
+            "yAxis" : { "title" : "$TRK2TYPE #phi", "nBins" : "80", "low" : "-$PI", "high" : "$PI" },
+            "zAxis" : { "title" : "Average N. $TRKTYPE InnerMost Pixel Split Endcap Hits", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX"  }
+    },
+    "$TRKTAG_nExpectedInnerMostPixelHits_vs_$TRK2TAG_eta_vs_phi" : {
+            "type" : "TProfile2D",
+            "xAxis" : { "title" : "$TRK2TYPE #eta", "nBins" : "80", "low" : "-$ETAMAX", "high" : "+$ETAMAX" },
+            "yAxis" : { "title" : "$TRK2TYPE #phi", "nBins" : "80", "low" : "-$PI", "high" : "$PI" },
+            "zAxis" : { "title" : "Average N. $TRKTYPE Expected InnerMost Pixel Hits", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX"  }
+    },
+    "$TRKTAG_nExpectedNextToInnerMostPixelHits_vs_$TRK2TAG_eta_vs_phi" : {
+            "type" : "TProfile2D",
+            "xAxis" : { "title" : "$TRK2TYPE #eta", "nBins" : "80", "low" : "-$ETAMAX", "high" : "+$ETAMAX" },
+            "yAxis" : { "title" : "$TRK2TYPE #phi", "nBins" : "80", "low" : "-$PI", "high" : "$PI" },
+            "zAxis" : { "title" : "Average N. $TRKTYPE Expected next to InnerMost Pixel Hits", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX"  }
+    },
+    "$TRKTAG_nPixelOutliers_vs_$TRK2TAG_eta_vs_phi" : {
+            "type" : "TProfile2D",
+            "xAxis" : { "title" : "$TRK2TYPE #eta", "nBins" : "80", "low" : "-$ETAMAX", "high" : "+$ETAMAX" },
+            "yAxis" : { "title" : "$TRK2TYPE #phi", "nBins" : "80", "low" : "-$PI", "high" : "$PI" },
+            "zAxis" : { "title" : "Average N. $TRKTYPE Pixel Outliers", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX"  }
+    },
+    "$TRKTAG_nPixelContribLayers_vs_$TRK2TAG_eta_vs_phi" : {
+            "type" : "TProfile2D",
+            "xAxis" : { "title" : "$TRK2TYPE #eta", "nBins" : "80", "low" : "-$ETAMAX", "high" : "+$ETAMAX" },
+            "yAxis" : { "title" : "$TRK2TYPE #phi", "nBins" : "80", "low" : "-$PI", "high" : "$PI" },
+            "zAxis" : { "title" : "Average N. $TRKTYPE Pixel Contributing Layers", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX"  }
+    },
+    "$TRKTAG_nPixelSplitHits_vs_$TRK2TAG_eta_vs_phi" : {
+            "type" : "TProfile2D",
+            "xAxis" : { "title" : "$TRK2TYPE #eta", "nBins" : "80", "low" : "-$ETAMAX", "high" : "+$ETAMAX" },
+            "yAxis" : { "title" : "$TRK2TYPE #phi", "nBins" : "80", "low" : "-$PI", "high" : "$PI" },
+            "zAxis" : { "title" : "Average N. $TRKTYPE Pixel Split Hits", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX"  }
+    },
+    "$TRKTAG_nPixelGangedHits_vs_$TRK2TAG_eta_vs_phi" : {
+            "type" : "TProfile2D",
+            "xAxis" : { "title" : "$TRK2TYPE #eta", "nBins" : "80", "low" : "-$ETAMAX", "high" : "+$ETAMAX" },
+            "yAxis" : { "title" : "$TRK2TYPE #phi", "nBins" : "80", "low" : "-$PI", "high" : "$PI" },
+            "zAxis" : { "title" : "Average N. $TRKTYPE Pixel Ganged Hits", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX"  }
+    },
+    "$TRKTAG_nPixelGangedHitsFlaggedFakes_vs_$TRK2TAG_eta_vs_phi" : {
+            "type" : "TProfile2D",
+            "xAxis" : { "title" : "$TRK2TYPE #eta", "nBins" : "80", "low" : "-$ETAMAX", "high" : "+$ETAMAX" },
+            "yAxis" : { "title" : "$TRK2TYPE #phi", "nBins" : "80", "low" : "-$PI", "high" : "$PI" },
+            "zAxis" : { "title" : "Average N. $TRKTYPE Pixel Ganged Hits Flagged Fakes", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX"  }
+    },
+    "$TRKTAG_nPixelDeadSensors_vs_$TRK2TAG_eta_vs_phi" : {
+            "type" : "TProfile2D",
+            "xAxis" : { "title" : "$TRK2TYPE #eta", "nBins" : "80", "low" : "-$ETAMAX", "high" : "+$ETAMAX" },
+            "yAxis" : { "title" : "$TRK2TYPE #phi", "nBins" : "80", "low" : "-$PI", "high" : "$PI" },
+            "zAxis" : { "title" : "Average N. $TRKTYPE Pixel Dead Sensors", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX"  }
+    },
+    "$TRKTAG_nSCTOutliers_vs_$TRK2TAG_eta_vs_phi" : {
+            "type" : "TProfile2D",
+            "xAxis" : { "title" : "$TRK2TYPE #eta", "nBins" : "80", "low" : "-$ETAMAX", "high" : "+$ETAMAX" },
+            "yAxis" : { "title" : "$TRK2TYPE #phi", "nBins" : "80", "low" : "-$PI", "high" : "$PI" },
+            "zAxis" : { "title" : "Average N. $TRKTYPE SCT Outliers", "nBins" : "$SCTHITMAX", "low" : "0.0", "high" : "$SCTHITMAX"  }
+    },
+    "$TRKTAG_nSCTDoubleHoles_vs_$TRK2TAG_eta_vs_phi" : {
+            "type" : "TProfile2D",
+            "xAxis" : { "title" : "$TRK2TYPE #eta", "nBins" : "80", "low" : "-$ETAMAX", "high" : "+$ETAMAX" },
+            "yAxis" : { "title" : "$TRK2TYPE #phi", "nBins" : "80", "low" : "-$PI", "high" : "$PI" },
+            "zAxis" : { "title" : "Average N. $TRKTYPE SCT Double Holes", "nBins" : "$SCTHITMAX", "low" : "0.0", "high" : "$SCTHITMAX"  }
+    },
+    "$TRKTAG_nSCTDeadSensors_vs_$TRK2TAG_eta_vs_phi" : {
+            "type" : "TProfile2D",
+            "xAxis" : { "title" : "$TRK2TYPE #eta", "nBins" : "80", "low" : "-$ETAMAX", "high" : "+$ETAMAX" },
+            "yAxis" : { "title" : "$TRK2TYPE #phi", "nBins" : "80", "low" : "-$PI", "high" : "$PI" },
+            "zAxis" : { "title" : "Average N. $TRKTYPE SCT Dead Sensors", "nBins" : "$SCTHITMAX", "low" : "0.0", "high" : "$SCTHITMAX"  }
+    },
+    "$TRKTAG_nInnerMostPixelOutliers_vs_truthMu_vs_$TRK2TAG_pt" : {
+            "type" : "TProfile2D",
+            "xAxis" : { "title" : "Truth <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+            "yAxis" : { "title" : "$TRK2TYPE p_{T} [GeV]", "nBins" : "100", "low" : "0.0", "high" : "100.0" },
+            "zAxis" : { "title" : "Average N. $TRKTYPE InnerMost Pixel Outliers", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX"  }
+    },
+    "$TRKTAG_nInnerMostPixelEndcapOutliers_vs_truthMu_vs_$TRK2TAG_pt" : {
+            "type" : "TProfile2D",
+            "xAxis" : { "title" : "Truth <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+            "yAxis" : { "title" : "$TRK2TYPE p_{T} [GeV]", "nBins" : "100", "low" : "0.0", "high" : "100.0" },
+            "zAxis" : { "title" : "Average N. $TRKTYPE InnerMost Pixel Endcap Outliers", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX"  }
+    },
+    "$TRKTAG_nInnerMostPixelSplitHits_vs_truthMu_vs_$TRK2TAG_pt" : {
+            "type" : "TProfile2D",
+            "xAxis" : { "title" : "Truth <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+            "yAxis" : { "title" : "$TRK2TYPE p_{T} [GeV]", "nBins" : "100", "low" : "0.0", "high" : "100.0" },
+            "zAxis" : { "title" : "Average N. $TRKTYPE InnerMost Pixel Split Hits", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX"  }
+    },
+    "$TRKTAG_nInnerMostPixelSplitEndcapHits_vs_truthMu_vs_$TRK2TAG_pt" : {
+            "type" : "TProfile2D",
+            "xAxis" : { "title" : "Truth <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+            "yAxis" : { "title" : "$TRK2TYPE p_{T} [GeV]", "nBins" : "100", "low" : "0.0", "high" : "100.0" },
+            "zAxis" : { "title" : "Average N. $TRKTYPE InnerMost Pixel Split Endcap Hits", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX"  }
+    },
+    "$TRKTAG_nExpectedInnerMostPixelHits_vs_truthMu_vs_$TRK2TAG_pt" : {
+            "type" : "TProfile2D",
+            "xAxis" : { "title" : "Truth <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+            "yAxis" : { "title" : "$TRK2TYPE p_{T} [GeV]", "nBins" : "100", "low" : "0.0", "high" : "100.0" },
+            "zAxis" : { "title" : "Average N. $TRKTYPE Expected InnerMost Pixel Hits", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX"  }
+    },
+    "$TRKTAG_nExpectedNextToInnerMostPixelHits_vs_truthMu_vs_$TRK2TAG_pt" : {
+            "type" : "TProfile2D",
+            "xAxis" : { "title" : "Truth <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+            "yAxis" : { "title" : "$TRK2TYPE p_{T} [GeV]", "nBins" : "100", "low" : "0.0", "high" : "100.0" },
+            "zAxis" : { "title" : "Average N. $TRKTYPE Expected next to InnerMost Pixel Hits", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX"  }
+    },
+    "$TRKTAG_nPixelOutliers_vs_truthMu_vs_$TRK2TAG_pt" : {
+            "type" : "TProfile2D",
+            "xAxis" : { "title" : "Truth <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+            "yAxis" : { "title" : "$TRK2TYPE p_{T} [GeV]", "nBins" : "100", "low" : "0.0", "high" : "100.0" },
+            "zAxis" : { "title" : "Average N. $TRKTYPE Pixel Outliers", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX"  }
+    },
+    "$TRKTAG_nPixelContribLayers_vs_truthMu_vs_$TRK2TAG_pt" : {
+            "type" : "TProfile2D",
+            "xAxis" : { "title" : "Truth <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+            "yAxis" : { "title" : "$TRK2TYPE p_{T} [GeV]", "nBins" : "100", "low" : "0.0", "high" : "100.0" },
+            "zAxis" : { "title" : "Average N. $TRKTYPE Pixel Contributing Layers", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX"  }
+    },
+    "$TRKTAG_nPixelSplitHits_vs_truthMu_vs_$TRK2TAG_pt" : {
+            "type" : "TProfile2D",
+            "xAxis" : { "title" : "Truth <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+            "yAxis" : { "title" : "$TRK2TYPE p_{T} [GeV]", "nBins" : "100", "low" : "0.0", "high" : "100.0" },
+            "zAxis" : { "title" : "Average N. $TRKTYPE Pixel Split Hits", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX"  }
+    },
+    "$TRKTAG_nPixelGangedHits_vs_truthMu_vs_$TRK2TAG_pt" : {
+            "type" : "TProfile2D",
+            "xAxis" : { "title" : "Truth <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+            "yAxis" : { "title" : "$TRK2TYPE p_{T} [GeV]", "nBins" : "100", "low" : "0.0", "high" : "100.0" },
+            "zAxis" : { "title" : "Average N. $TRKTYPE Pixel Ganged Hits", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX"  }
+    },
+    "$TRKTAG_nPixelGangedHitsFlaggedFakes_vs_truthMu_vs_$TRK2TAG_pt" : {
+            "type" : "TProfile2D",
+            "xAxis" : { "title" : "Truth <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+            "yAxis" : { "title" : "$TRK2TYPE p_{T} [GeV]", "nBins" : "100", "low" : "0.0", "high" : "100.0" },
+            "zAxis" : { "title" : "Average N. $TRKTYPE Pixel Ganged Hits Flagged Fakes", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX"  }
+    },
+    "$TRKTAG_nPixelDeadSensors_vs_truthMu_vs_$TRK2TAG_pt" : {
+            "type" : "TProfile2D",
+            "xAxis" : { "title" : "Truth <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+            "yAxis" : { "title" : "$TRK2TYPE p_{T} [GeV]", "nBins" : "100", "low" : "0.0", "high" : "100.0" },
+            "zAxis" : { "title" : "Average N. $TRKTYPE Pixel Dead Sensors", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX"  }
+    },
+    "$TRKTAG_nSCTOutliers_vs_truthMu_vs_$TRK2TAG_pt" : {
+            "type" : "TProfile2D",
+            "xAxis" : { "title" : "Truth <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+            "yAxis" : { "title" : "$TRK2TYPE p_{T} [GeV]", "nBins" : "100", "low" : "0.0", "high" : "100.0" },
+            "zAxis" : { "title" : "Average N. $TRKTYPE SCT Outliers", "nBins" : "$SCTHITMAX", "low" : "0.0", "high" : "$SCTHITMAX"  }
+    },
+    "$TRKTAG_nSCTDoubleHoles_vs_truthMu_vs_$TRK2TAG_pt" : {
+            "type" : "TProfile2D",
+            "xAxis" : { "title" : "Truth <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+            "yAxis" : { "title" : "$TRK2TYPE p_{T} [GeV]", "nBins" : "100", "low" : "0.0", "high" : "100.0" },
+            "zAxis" : { "title" : "Average N. $TRKTYPE SCT Double Holes", "nBins" : "$SCTHITMAX", "low" : "0.0", "high" : "$SCTHITMAX"  }
+    },
+    "$TRKTAG_nSCTDeadSensors_vs_truthMu_vs_$TRK2TAG_pt" : {
+            "type" : "TProfile2D",
+            "xAxis" : { "title" : "Truth <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+            "yAxis" : { "title" : "$TRK2TYPE p_{T} [GeV]", "nBins" : "100", "low" : "0.0", "high" : "100.0" },
+            "zAxis" : { "title" : "Average N. $TRKTYPE SCT Dead Sensors", "nBins" : "$SCTHITMAX", "low" : "0.0", "high" : "$SCTHITMAX"  }
+    },
+    "$TRKTAG_nInnerMostPixelOutliers_vs_truthMu_vs_$TRK2TAG_eta" : {
+            "type" : "TProfile2D",
+            "xAxis" : { "title" : "Truth <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+            "yAxis" : { "title" : "$TRK2TYPE #eta", "nBins" : "80", "low" : "-$ETAMAX", "high" : "+$ETAMAX" },
+            "zAxis" : { "title" : "Average N. $TRKTYPE InnerMost Pixel Outliers", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX"  }
+    },
+    "$TRKTAG_nInnerMostPixelEndcapOutliers_vs_truthMu_vs_$TRK2TAG_eta" : {
+            "type" : "TProfile2D",
+            "xAxis" : { "title" : "Truth <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+            "yAxis" : { "title" : "$TRK2TYPE #eta", "nBins" : "80", "low" : "-$ETAMAX", "high" : "+$ETAMAX" },
+            "zAxis" : { "title" : "Average N. $TRKTYPE InnerMost Pixel Endcap Outliers", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX"  }
+    },
+    "$TRKTAG_nInnerMostPixelSplitHits_vs_truthMu_vs_$TRK2TAG_eta" : {
+            "type" : "TProfile2D",
+            "xAxis" : { "title" : "Truth <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+            "yAxis" : { "title" : "$TRK2TYPE #eta", "nBins" : "80", "low" : "-$ETAMAX", "high" : "+$ETAMAX" },
+            "zAxis" : { "title" : "Average N. $TRKTYPE InnerMost Pixel Split Hits", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX"  }
+    },
+    "$TRKTAG_nInnerMostPixelSplitEndcapHits_vs_truthMu_vs_$TRK2TAG_eta" : {
+            "type" : "TProfile2D",
+            "xAxis" : { "title" : "Truth <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+            "yAxis" : { "title" : "$TRK2TYPE #eta", "nBins" : "80", "low" : "-$ETAMAX", "high" : "+$ETAMAX" },
+            "zAxis" : { "title" : "Average N. $TRKTYPE InnerMost Pixel Split Endcap Hits", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX"  }
+    },
+    "$TRKTAG_nExpectedInnerMostPixelHits_vs_truthMu_vs_$TRK2TAG_eta" : {
+            "type" : "TProfile2D",
+            "xAxis" : { "title" : "Truth <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+            "yAxis" : { "title" : "$TRK2TYPE #eta", "nBins" : "80", "low" : "-$ETAMAX", "high" : "+$ETAMAX" },
+            "zAxis" : { "title" : "Average N. $TRKTYPE Expected InnerMost Pixel Hits", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX"  }
+    },
+    "$TRKTAG_nExpectedNextToInnerMostPixelHits_vs_truthMu_vs_$TRK2TAG_eta" : {
+            "type" : "TProfile2D",
+            "xAxis" : { "title" : "Truth <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+            "yAxis" : { "title" : "$TRK2TYPE #eta", "nBins" : "80", "low" : "-$ETAMAX", "high" : "+$ETAMAX" },
+            "zAxis" : { "title" : "Average N. $TRKTYPE Expected next to InnerMost Pixel Hits", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX"  }
+    },
+    "$TRKTAG_nPixelOutliers_vs_truthMu_vs_$TRK2TAG_eta" : {
+            "type" : "TProfile2D",
+            "xAxis" : { "title" : "Truth <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+            "yAxis" : { "title" : "$TRK2TYPE #eta", "nBins" : "80", "low" : "-$ETAMAX", "high" : "+$ETAMAX" },
+            "zAxis" : { "title" : "Average N. $TRKTYPE Pixel Outliers", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX"  }
+    },
+    "$TRKTAG_nPixelContribLayers_vs_truthMu_vs_$TRK2TAG_eta" : {
+            "type" : "TProfile2D",
+            "xAxis" : { "title" : "Truth <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+            "yAxis" : { "title" : "$TRK2TYPE #eta", "nBins" : "80", "low" : "-$ETAMAX", "high" : "+$ETAMAX" },
+            "zAxis" : { "title" : "Average N. $TRKTYPE Pixel Contributing Layers", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX"  }
+    },
+    "$TRKTAG_nPixelSplitHits_vs_truthMu_vs_$TRK2TAG_eta" : {
+            "type" : "TProfile2D",
+            "xAxis" : { "title" : "Truth <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+            "yAxis" : { "title" : "$TRK2TYPE #eta", "nBins" : "80", "low" : "-$ETAMAX", "high" : "+$ETAMAX" },
+            "zAxis" : { "title" : "Average N. $TRKTYPE Pixel Split Hits", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX"  }
+    },
+    "$TRKTAG_nPixelGangedHits_vs_truthMu_vs_$TRK2TAG_eta" : {
+            "type" : "TProfile2D",
+            "xAxis" : { "title" : "Truth <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+            "yAxis" : { "title" : "$TRK2TYPE #eta", "nBins" : "80", "low" : "-$ETAMAX", "high" : "+$ETAMAX" },
+            "zAxis" : { "title" : "Average N. $TRKTYPE Pixel Ganged Hits", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX"  }
+    },
+    "$TRKTAG_nPixelGangedHitsFlaggedFakes_vs_truthMu_vs_$TRK2TAG_eta" : {
+            "type" : "TProfile2D",
+            "xAxis" : { "title" : "Truth <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+            "yAxis" : { "title" : "$TRK2TYPE #eta", "nBins" : "80", "low" : "-$ETAMAX", "high" : "+$ETAMAX" },
+            "zAxis" : { "title" : "Average N. $TRKTYPE Pixel Ganged Hits Flagged Fakes", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX"  }
+    },
+    "$TRKTAG_nPixelDeadSensors_vs_truthMu_vs_$TRK2TAG_eta" : {
+            "type" : "TProfile2D",
+            "xAxis" : { "title" : "Truth <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+            "yAxis" : { "title" : "$TRK2TYPE #eta", "nBins" : "80", "low" : "-$ETAMAX", "high" : "+$ETAMAX" },
+            "zAxis" : { "title" : "Average N. $TRKTYPE Pixel Dead Sensors", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX"  }
+    },
+    "$TRKTAG_nSCTOutliers_vs_truthMu_vs_$TRK2TAG_eta" : {
+            "type" : "TProfile2D",
+            "xAxis" : { "title" : "Truth <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+            "yAxis" : { "title" : "$TRK2TYPE #eta", "nBins" : "80", "low" : "-$ETAMAX", "high" : "+$ETAMAX" },
+            "zAxis" : { "title" : "Average N. $TRKTYPE SCT Outliers", "nBins" : "$SCTHITMAX", "low" : "0.0", "high" : "$SCTHITMAX"  }
+    },
+    "$TRKTAG_nSCTDoubleHoles_vs_truthMu_vs_$TRK2TAG_eta" : {
+            "type" : "TProfile2D",
+            "xAxis" : { "title" : "Truth <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+            "yAxis" : { "title" : "$TRK2TYPE #eta", "nBins" : "80", "low" : "-$ETAMAX", "high" : "+$ETAMAX" },
+            "zAxis" : { "title" : "Average N. $TRKTYPE SCT Double Holes", "nBins" : "$SCTHITMAX", "low" : "0.0", "high" : "$SCTHITMAX"  }
+    },
+    "$TRKTAG_nSCTDeadSensors_vs_truthMu_vs_$TRK2TAG_eta" : {
+            "type" : "TProfile2D",
+            "xAxis" : { "title" : "Truth <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+            "yAxis" : { "title" : "$TRK2TYPE #eta", "nBins" : "80", "low" : "-$ETAMAX", "high" : "+$ETAMAX" },
+            "zAxis" : { "title" : "Average N. $TRKTYPE SCT Dead Sensors", "nBins" : "$SCTHITMAX", "low" : "0.0", "high" : "$SCTHITMAX"  }
+    },
+    "$TRKTAG_nInnerMostPixelOutliers_vs_truthMu_vs_$TRK2TAG_phi" : {
+            "type" : "TProfile2D",
+            "xAxis" : { "title" : "Truth <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+            "yAxis" : { "title" : "$TRK2TYPE #phi", "nBins" : "80", "low" : "-$PI", "high" : "$PI" },
+            "zAxis" : { "title" : "Average N. $TRKTYPE InnerMost Pixel Outliers", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX"  }
+    },
+    "$TRKTAG_nInnerMostPixelEndcapOutliers_vs_truthMu_vs_$TRK2TAG_phi" : {
+            "type" : "TProfile2D",
+            "xAxis" : { "title" : "Truth <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+            "yAxis" : { "title" : "$TRK2TYPE #phi", "nBins" : "80", "low" : "-$PI", "high" : "$PI" },
+            "zAxis" : { "title" : "Average N. $TRKTYPE InnerMost Pixel Endcap Outliers", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX"  }
+    },
+    "$TRKTAG_nInnerMostPixelSplitHits_vs_truthMu_vs_$TRK2TAG_phi" : {
+            "type" : "TProfile2D",
+            "xAxis" : { "title" : "Truth <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+            "yAxis" : { "title" : "$TRK2TYPE #phi", "nBins" : "80", "low" : "-$PI", "high" : "$PI" },
+            "zAxis" : { "title" : "Average N. $TRKTYPE InnerMost Pixel Split Hits", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX"  }
+    },
+    "$TRKTAG_nInnerMostPixelSplitEndcapHits_vs_truthMu_vs_$TRK2TAG_phi" : {
+            "type" : "TProfile2D",
+            "xAxis" : { "title" : "Truth <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+            "yAxis" : { "title" : "$TRK2TYPE #phi", "nBins" : "80", "low" : "-$PI", "high" : "$PI" },
+            "zAxis" : { "title" : "Average N. $TRKTYPE InnerMost Pixel Split Endcap Hits", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX"  }
+    },
+    "$TRKTAG_nExpectedInnerMostPixelHits_vs_truthMu_vs_$TRK2TAG_phi" : {
+            "type" : "TProfile2D",
+            "xAxis" : { "title" : "Truth <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+            "yAxis" : { "title" : "$TRK2TYPE #phi", "nBins" : "80", "low" : "-$PI", "high" : "$PI" },
+            "zAxis" : { "title" : "Average N. $TRKTYPE Expected InnerMost Pixel Hits", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX"  }
+    },
+    "$TRKTAG_nExpectedNextToInnerMostPixelHits_vs_truthMu_vs_$TRK2TAG_phi" : {
+            "type" : "TProfile2D",
+            "xAxis" : { "title" : "Truth <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+            "yAxis" : { "title" : "$TRK2TYPE #phi", "nBins" : "80", "low" : "-$PI", "high" : "$PI" },
+            "zAxis" : { "title" : "Average N. $TRKTYPE Expected next to InnerMost Pixel Hits", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX"  }
+    },
+    "$TRKTAG_nPixelOutliers_vs_truthMu_vs_$TRK2TAG_phi" : {
+            "type" : "TProfile2D",
+            "xAxis" : { "title" : "Truth <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+            "yAxis" : { "title" : "$TRK2TYPE #phi", "nBins" : "80", "low" : "-$PI", "high" : "$PI" },
+            "zAxis" : { "title" : "Average N. $TRKTYPE Pixel Outliers", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX"  }
+    },
+    "$TRKTAG_nPixelContribLayers_vs_truthMu_vs_$TRK2TAG_phi" : {
+            "type" : "TProfile2D",
+            "xAxis" : { "title" : "Truth <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+            "yAxis" : { "title" : "$TRK2TYPE #phi", "nBins" : "80", "low" : "-$PI", "high" : "$PI" },
+            "zAxis" : { "title" : "Average N. $TRKTYPE Pixel Contributing Layers", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX"  }
+    },
+    "$TRKTAG_nPixelSplitHits_vs_truthMu_vs_$TRK2TAG_phi" : {
+            "type" : "TProfile2D",
+            "xAxis" : { "title" : "Truth <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+            "yAxis" : { "title" : "$TRK2TYPE #phi", "nBins" : "80", "low" : "-$PI", "high" : "$PI" },
+            "zAxis" : { "title" : "Average N. $TRKTYPE Pixel Split Hits", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX"  }
+    },
+    "$TRKTAG_nPixelGangedHits_vs_truthMu_vs_$TRK2TAG_phi" : {
+            "type" : "TProfile2D",
+            "xAxis" : { "title" : "Truth <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+            "yAxis" : { "title" : "$TRK2TYPE #phi", "nBins" : "80", "low" : "-$PI", "high" : "$PI" },
+            "zAxis" : { "title" : "Average N. $TRKTYPE Pixel Ganged Hits", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX"  }
+    },
+    "$TRKTAG_nPixelGangedHitsFlaggedFakes_vs_truthMu_vs_$TRK2TAG_phi" : {
+            "type" : "TProfile2D",
+            "xAxis" : { "title" : "Truth <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+            "yAxis" : { "title" : "$TRK2TYPE #phi", "nBins" : "80", "low" : "-$PI", "high" : "$PI" },
+            "zAxis" : { "title" : "Average N. $TRKTYPE Pixel Ganged Hits Flagged Fakes", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX"  }
+    },
+    "$TRKTAG_nPixelDeadSensors_vs_truthMu_vs_$TRK2TAG_phi" : {
+            "type" : "TProfile2D",
+            "xAxis" : { "title" : "Truth <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+            "yAxis" : { "title" : "$TRK2TYPE #phi", "nBins" : "80", "low" : "-$PI", "high" : "$PI" },
+            "zAxis" : { "title" : "Average N. $TRKTYPE Pixel Dead Sensors", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX"  }
+    },
+    "$TRKTAG_nSCTOutliers_vs_truthMu_vs_$TRK2TAG_phi" : {
+            "type" : "TProfile2D",
+            "xAxis" : { "title" : "Truth <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+            "yAxis" : { "title" : "$TRK2TYPE #phi", "nBins" : "80", "low" : "-$PI", "high" : "$PI" },
+            "zAxis" : { "title" : "Average N. $TRKTYPE SCT Outliers", "nBins" : "$SCTHITMAX", "low" : "0.0", "high" : "$SCTHITMAX"  }
+    },
+    "$TRKTAG_nSCTDoubleHoles_vs_truthMu_vs_$TRK2TAG_phi" : {
+            "type" : "TProfile2D",
+            "xAxis" : { "title" : "Truth <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+            "yAxis" : { "title" : "$TRK2TYPE #phi", "nBins" : "80", "low" : "-$PI", "high" : "$PI" },
+            "zAxis" : { "title" : "Average N. $TRKTYPE SCT Double Holes", "nBins" : "$SCTHITMAX", "low" : "0.0", "high" : "$SCTHITMAX"  }
+    },
+    "$TRKTAG_nSCTDeadSensors_vs_truthMu_vs_$TRK2TAG_phi" : {
+            "type" : "TProfile2D",
+            "xAxis" : { "title" : "Truth <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+            "yAxis" : { "title" : "$TRK2TYPE #phi", "nBins" : "80", "low" : "-$PI", "high" : "$PI" },
+            "zAxis" : { "title" : "Average N. $TRKTYPE SCT Dead Sensors", "nBins" : "$SCTHITMAX", "low" : "0.0", "high" : "$SCTHITMAX"  }
+    },
+    "$TRKTAG_nInnerMostPixelOutliers_vs_actualMu_vs_$TRK2TAG_pt" : {
+            "type" : "TProfile2D",
+            "xAxis" : { "title" : "Actual <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+            "yAxis" : { "title" : "$TRK2TYPE p_{T} [GeV]", "nBins" : "100", "low" : "0.0", "high" : "100.0" },
+            "zAxis" : { "title" : "Average N. $TRKTYPE InnerMost Pixel Outliers", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX"  }
+    },
+    "$TRKTAG_nInnerMostPixelEndcapOutliers_vs_actualMu_vs_$TRK2TAG_pt" : {
+            "type" : "TProfile2D",
+            "xAxis" : { "title" : "Actual <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+            "yAxis" : { "title" : "$TRK2TYPE p_{T} [GeV]", "nBins" : "100", "low" : "0.0", "high" : "100.0" },
+            "zAxis" : { "title" : "Average N. $TRKTYPE InnerMost Pixel Endcap Outliers", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX"  }
+    },
+    "$TRKTAG_nInnerMostPixelSplitHits_vs_actualMu_vs_$TRK2TAG_pt" : {
+            "type" : "TProfile2D",
+            "xAxis" : { "title" : "Actual <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+            "yAxis" : { "title" : "$TRK2TYPE p_{T} [GeV]", "nBins" : "100", "low" : "0.0", "high" : "100.0" },
+            "zAxis" : { "title" : "Average N. $TRKTYPE InnerMost Pixel Split Hits", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX"  }
+    },
+    "$TRKTAG_nInnerMostPixelSplitEndcapHits_vs_actualMu_vs_$TRK2TAG_pt" : {
+            "type" : "TProfile2D",
+            "xAxis" : { "title" : "Actual <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+            "yAxis" : { "title" : "$TRK2TYPE p_{T} [GeV]", "nBins" : "100", "low" : "0.0", "high" : "100.0" },
+            "zAxis" : { "title" : "Average N. $TRKTYPE InnerMost Pixel Split Endcap Hits", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX"  }
+    },
+    "$TRKTAG_nExpectedInnerMostPixelHits_vs_actualMu_vs_$TRK2TAG_pt" : {
+            "type" : "TProfile2D",
+            "xAxis" : { "title" : "Actual <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+            "yAxis" : { "title" : "$TRK2TYPE p_{T} [GeV]", "nBins" : "100", "low" : "0.0", "high" : "100.0" },
+            "zAxis" : { "title" : "Average N. $TRKTYPE Expected InnerMost Pixel Hits", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX"  }
+    },
+    "$TRKTAG_nExpectedNextToInnerMostPixelHits_vs_actualMu_vs_$TRK2TAG_pt" : {
+            "type" : "TProfile2D",
+            "xAxis" : { "title" : "Actual <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+            "yAxis" : { "title" : "$TRK2TYPE p_{T} [GeV]", "nBins" : "100", "low" : "0.0", "high" : "100.0" },
+            "zAxis" : { "title" : "Average N. $TRKTYPE Expected next to InnerMost Pixel Hits", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX"  }
+    },
+    "$TRKTAG_nPixelOutliers_vs_actualMu_vs_$TRK2TAG_pt" : {
+            "type" : "TProfile2D",
+            "xAxis" : { "title" : "Actual <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+            "yAxis" : { "title" : "$TRK2TYPE p_{T} [GeV]", "nBins" : "100", "low" : "0.0", "high" : "100.0" },
+            "zAxis" : { "title" : "Average N. $TRKTYPE Pixel Outliers", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX"  }
+    },
+    "$TRKTAG_nPixelContribLayers_vs_actualMu_vs_$TRK2TAG_pt" : {
+            "type" : "TProfile2D",
+            "xAxis" : { "title" : "Actual <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+            "yAxis" : { "title" : "$TRK2TYPE p_{T} [GeV]", "nBins" : "100", "low" : "0.0", "high" : "100.0" },
+            "zAxis" : { "title" : "Average N. $TRKTYPE Pixel Contributing Layers", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX"  }
+    },
+    "$TRKTAG_nPixelSplitHits_vs_actualMu_vs_$TRK2TAG_pt" : {
+            "type" : "TProfile2D",
+            "xAxis" : { "title" : "Actual <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+            "yAxis" : { "title" : "$TRK2TYPE p_{T} [GeV]", "nBins" : "100", "low" : "0.0", "high" : "100.0" },
+            "zAxis" : { "title" : "Average N. $TRKTYPE Pixel Split Hits", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX"  }
+    },
+    "$TRKTAG_nPixelGangedHits_vs_actualMu_vs_$TRK2TAG_pt" : {
+            "type" : "TProfile2D",
+            "xAxis" : { "title" : "Actual <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+            "yAxis" : { "title" : "$TRK2TYPE p_{T} [GeV]", "nBins" : "100", "low" : "0.0", "high" : "100.0" },
+            "zAxis" : { "title" : "Average N. $TRKTYPE Pixel Ganged Hits", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX"  }
+    },
+    "$TRKTAG_nPixelGangedHitsFlaggedFakes_vs_actualMu_vs_$TRK2TAG_pt" : {
+            "type" : "TProfile2D",
+            "xAxis" : { "title" : "Actual <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+            "yAxis" : { "title" : "$TRK2TYPE p_{T} [GeV]", "nBins" : "100", "low" : "0.0", "high" : "100.0" },
+            "zAxis" : { "title" : "Average N. $TRKTYPE Pixel Ganged Hits Flagged Fakes", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX"  }
+    },
+    "$TRKTAG_nPixelDeadSensors_vs_actualMu_vs_$TRK2TAG_pt" : {
+            "type" : "TProfile2D",
+            "xAxis" : { "title" : "Actual <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+            "yAxis" : { "title" : "$TRK2TYPE p_{T} [GeV]", "nBins" : "100", "low" : "0.0", "high" : "100.0" },
+            "zAxis" : { "title" : "Average N. $TRKTYPE Pixel Dead Sensors", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX"  }
+    },
+    "$TRKTAG_nSCTOutliers_vs_actualMu_vs_$TRK2TAG_pt" : {
+            "type" : "TProfile2D",
+            "xAxis" : { "title" : "Actual <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+            "yAxis" : { "title" : "$TRK2TYPE p_{T} [GeV]", "nBins" : "100", "low" : "0.0", "high" : "100.0" },
+            "zAxis" : { "title" : "Average N. $TRKTYPE SCT Outliers", "nBins" : "$SCTHITMAX", "low" : "0.0", "high" : "$SCTHITMAX"  }
+    },
+    "$TRKTAG_nSCTDoubleHoles_vs_actualMu_vs_$TRK2TAG_pt" : {
+            "type" : "TProfile2D",
+            "xAxis" : { "title" : "Actual <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+            "yAxis" : { "title" : "$TRK2TYPE p_{T} [GeV]", "nBins" : "100", "low" : "0.0", "high" : "100.0" },
+            "zAxis" : { "title" : "Average N. $TRKTYPE SCT Double Holes", "nBins" : "$SCTHITMAX", "low" : "0.0", "high" : "$SCTHITMAX"  }
+    },
+    "$TRKTAG_nSCTDeadSensors_vs_actualMu_vs_$TRK2TAG_pt" : {
+            "type" : "TProfile2D",
+            "xAxis" : { "title" : "Actual <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+            "yAxis" : { "title" : "$TRK2TYPE p_{T} [GeV]", "nBins" : "100", "low" : "0.0", "high" : "100.0" },
+            "zAxis" : { "title" : "Average N. $TRKTYPE SCT Dead Sensors", "nBins" : "$SCTHITMAX", "low" : "0.0", "high" : "$SCTHITMAX"  }
+    },
+    "$TRKTAG_nInnerMostPixelOutliers_vs_actualMu_vs_$TRK2TAG_eta" : {
+            "type" : "TProfile2D",
+            "xAxis" : { "title" : "Actual <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+            "yAxis" : { "title" : "$TRK2TYPE #eta", "nBins" : "80", "low" : "-$ETAMAX", "high" : "+$ETAMAX" },
+            "zAxis" : { "title" : "Average N. $TRKTYPE InnerMost Pixel Outliers", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX"  }
+    },
+    "$TRKTAG_nInnerMostPixelEndcapOutliers_vs_actualMu_vs_$TRK2TAG_eta" : {
+            "type" : "TProfile2D",
+            "xAxis" : { "title" : "Actual <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+            "yAxis" : { "title" : "$TRK2TYPE #eta", "nBins" : "80", "low" : "-$ETAMAX", "high" : "+$ETAMAX" },
+            "zAxis" : { "title" : "Average N. $TRKTYPE InnerMost Pixel Endcap Outliers", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX"  }
+    },
+    "$TRKTAG_nInnerMostPixelSplitHits_vs_actualMu_vs_$TRK2TAG_eta" : {
+            "type" : "TProfile2D",
+            "xAxis" : { "title" : "Actual <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+            "yAxis" : { "title" : "$TRK2TYPE #eta", "nBins" : "80", "low" : "-$ETAMAX", "high" : "+$ETAMAX" },
+            "zAxis" : { "title" : "Average N. $TRKTYPE InnerMost Pixel Split Hits", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX"  }
+    },
+    "$TRKTAG_nInnerMostPixelSplitEndcapHits_vs_actualMu_vs_$TRK2TAG_eta" : {
+            "type" : "TProfile2D",
+            "xAxis" : { "title" : "Actual <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+            "yAxis" : { "title" : "$TRK2TYPE #eta", "nBins" : "80", "low" : "-$ETAMAX", "high" : "+$ETAMAX" },
+            "zAxis" : { "title" : "Average N. $TRKTYPE InnerMost Pixel Split Endcap Hits", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX"  }
+    },
+    "$TRKTAG_nExpectedInnerMostPixelHits_vs_actualMu_vs_$TRK2TAG_eta" : {
+            "type" : "TProfile2D",
+            "xAxis" : { "title" : "Actual <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+            "yAxis" : { "title" : "$TRK2TYPE #eta", "nBins" : "80", "low" : "-$ETAMAX", "high" : "+$ETAMAX" },
+            "zAxis" : { "title" : "Average N. $TRKTYPE Expected InnerMost Pixel Hits", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX"  }
+    },
+    "$TRKTAG_nExpectedNextToInnerMostPixelHits_vs_actualMu_vs_$TRK2TAG_eta" : {
+            "type" : "TProfile2D",
+            "xAxis" : { "title" : "Actual <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+            "yAxis" : { "title" : "$TRK2TYPE #eta", "nBins" : "80", "low" : "-$ETAMAX", "high" : "+$ETAMAX" },
+            "zAxis" : { "title" : "Average N. $TRKTYPE Expected next to InnerMost Pixel Hits", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX"  }
+    },
+    "$TRKTAG_nPixelOutliers_vs_actualMu_vs_$TRK2TAG_eta" : {
+            "type" : "TProfile2D",
+            "xAxis" : { "title" : "Actual <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+            "yAxis" : { "title" : "$TRK2TYPE #eta", "nBins" : "80", "low" : "-$ETAMAX", "high" : "+$ETAMAX" },
+            "zAxis" : { "title" : "Average N. $TRKTYPE Pixel Outliers", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX"  }
+    },
+    "$TRKTAG_nPixelContribLayers_vs_actualMu_vs_$TRK2TAG_eta" : {
+            "type" : "TProfile2D",
+            "xAxis" : { "title" : "Actual <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+            "yAxis" : { "title" : "$TRK2TYPE #eta", "nBins" : "80", "low" : "-$ETAMAX", "high" : "+$ETAMAX" },
+            "zAxis" : { "title" : "Average N. $TRKTYPE Pixel Contributing Layers", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX"  }
+    },
+    "$TRKTAG_nPixelSplitHits_vs_actualMu_vs_$TRK2TAG_eta" : {
+            "type" : "TProfile2D",
+            "xAxis" : { "title" : "Actual <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+            "yAxis" : { "title" : "$TRK2TYPE #eta", "nBins" : "80", "low" : "-$ETAMAX", "high" : "+$ETAMAX" },
+            "zAxis" : { "title" : "Average N. $TRKTYPE Pixel Split Hits", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX"  }
+    },
+    "$TRKTAG_nPixelGangedHits_vs_actualMu_vs_$TRK2TAG_eta" : {
+            "type" : "TProfile2D",
+            "xAxis" : { "title" : "Actual <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+            "yAxis" : { "title" : "$TRK2TYPE #eta", "nBins" : "80", "low" : "-$ETAMAX", "high" : "+$ETAMAX" },
+            "zAxis" : { "title" : "Average N. $TRKTYPE Pixel Ganged Hits", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX"  }
+    },
+    "$TRKTAG_nPixelGangedHitsFlaggedFakes_vs_actualMu_vs_$TRK2TAG_eta" : {
+            "type" : "TProfile2D",
+            "xAxis" : { "title" : "Actual <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+            "yAxis" : { "title" : "$TRK2TYPE #eta", "nBins" : "80", "low" : "-$ETAMAX", "high" : "+$ETAMAX" },
+            "zAxis" : { "title" : "Average N. $TRKTYPE Pixel Ganged Hits Flagged Fakes", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX"  }
+    },
+    "$TRKTAG_nPixelDeadSensors_vs_actualMu_vs_$TRK2TAG_eta" : {
+            "type" : "TProfile2D",
+            "xAxis" : { "title" : "Actual <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+            "yAxis" : { "title" : "$TRK2TYPE #eta", "nBins" : "80", "low" : "-$ETAMAX", "high" : "+$ETAMAX" },
+            "zAxis" : { "title" : "Average N. $TRKTYPE Pixel Dead Sensors", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX"  }
+    },
+    "$TRKTAG_nSCTOutliers_vs_actualMu_vs_$TRK2TAG_eta" : {
+            "type" : "TProfile2D",
+            "xAxis" : { "title" : "Actual <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+            "yAxis" : { "title" : "$TRK2TYPE #eta", "nBins" : "80", "low" : "-$ETAMAX", "high" : "+$ETAMAX" },
+            "zAxis" : { "title" : "Average N. $TRKTYPE SCT Outliers", "nBins" : "$SCTHITMAX", "low" : "0.0", "high" : "$SCTHITMAX"  }
+    },
+    "$TRKTAG_nSCTDoubleHoles_vs_actualMu_vs_$TRK2TAG_eta" : {
+            "type" : "TProfile2D",
+            "xAxis" : { "title" : "Actual <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+            "yAxis" : { "title" : "$TRK2TYPE #eta", "nBins" : "80", "low" : "-$ETAMAX", "high" : "+$ETAMAX" },
+            "zAxis" : { "title" : "Average N. $TRKTYPE SCT Double Holes", "nBins" : "$SCTHITMAX", "low" : "0.0", "high" : "$SCTHITMAX"  }
+    },
+    "$TRKTAG_nSCTDeadSensors_vs_actualMu_vs_$TRK2TAG_eta" : {
+            "type" : "TProfile2D",
+            "xAxis" : { "title" : "Actual <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+            "yAxis" : { "title" : "$TRK2TYPE #eta", "nBins" : "80", "low" : "-$ETAMAX", "high" : "+$ETAMAX" },
+            "zAxis" : { "title" : "Average N. $TRKTYPE SCT Dead Sensors", "nBins" : "$SCTHITMAX", "low" : "0.0", "high" : "$SCTHITMAX"  }
+    },
+    "$TRKTAG_nInnerMostPixelOutliers_vs_actualMu_vs_$TRK2TAG_phi" : {
+            "type" : "TProfile2D",
+            "xAxis" : { "title" : "Actual <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+            "yAxis" : { "title" : "$TRK2TYPE #phi", "nBins" : "80", "low" : "-$PI", "high" : "$PI" },
+            "zAxis" : { "title" : "Average N. $TRKTYPE InnerMost Pixel Outliers", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX"  }
+    },
+    "$TRKTAG_nInnerMostPixelEndcapOutliers_vs_actualMu_vs_$TRK2TAG_phi" : {
+            "type" : "TProfile2D",
+            "xAxis" : { "title" : "Actual <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+            "yAxis" : { "title" : "$TRK2TYPE #phi", "nBins" : "80", "low" : "-$PI", "high" : "$PI" },
+            "zAxis" : { "title" : "Average N. $TRKTYPE InnerMost Pixel Endcap Outliers", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX"  }
+    },
+    "$TRKTAG_nInnerMostPixelSplitHits_vs_actualMu_vs_$TRK2TAG_phi" : {
+            "type" : "TProfile2D",
+            "xAxis" : { "title" : "Actual <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+            "yAxis" : { "title" : "$TRK2TYPE #phi", "nBins" : "80", "low" : "-$PI", "high" : "$PI" },
+            "zAxis" : { "title" : "Average N. $TRKTYPE InnerMost Pixel Split Hits", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX"  }
+    },
+    "$TRKTAG_nInnerMostPixelSplitEndcapHits_vs_actualMu_vs_$TRK2TAG_phi" : {
+            "type" : "TProfile2D",
+            "xAxis" : { "title" : "Actual <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+            "yAxis" : { "title" : "$TRK2TYPE #phi", "nBins" : "80", "low" : "-$PI", "high" : "$PI" },
+            "zAxis" : { "title" : "Average N. $TRKTYPE InnerMost Pixel Split Endcap Hits", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX"  }
+    },
+    "$TRKTAG_nExpectedInnerMostPixelHits_vs_actualMu_vs_$TRK2TAG_phi" : {
+            "type" : "TProfile2D",
+            "xAxis" : { "title" : "Actual <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+            "yAxis" : { "title" : "$TRK2TYPE #phi", "nBins" : "80", "low" : "-$PI", "high" : "$PI" },
+            "zAxis" : { "title" : "Average N. $TRKTYPE Expected InnerMost Pixel Hits", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX"  }
+    },
+    "$TRKTAG_nExpectedNextToInnerMostPixelHits_vs_actualMu_vs_$TRK2TAG_phi" : {
+            "type" : "TProfile2D",
+            "xAxis" : { "title" : "Actual <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+            "yAxis" : { "title" : "$TRK2TYPE #phi", "nBins" : "80", "low" : "-$PI", "high" : "$PI" },
+            "zAxis" : { "title" : "Average N. $TRKTYPE Expected next to InnerMost Pixel Hits", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX"  }
+    },
+    "$TRKTAG_nPixelOutliers_vs_actualMu_vs_$TRK2TAG_phi" : {
+            "type" : "TProfile2D",
+            "xAxis" : { "title" : "Actual <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+            "yAxis" : { "title" : "$TRK2TYPE #phi", "nBins" : "80", "low" : "-$PI", "high" : "$PI" },
+            "zAxis" : { "title" : "Average N. $TRKTYPE Pixel Outliers", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX"  }
+    },
+    "$TRKTAG_nPixelContribLayers_vs_actualMu_vs_$TRK2TAG_phi" : {
+            "type" : "TProfile2D",
+            "xAxis" : { "title" : "Actual <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+            "yAxis" : { "title" : "$TRK2TYPE #phi", "nBins" : "80", "low" : "-$PI", "high" : "$PI" },
+            "zAxis" : { "title" : "Average N. $TRKTYPE Pixel Contributing Layers", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX"  }
+    },
+    "$TRKTAG_nPixelSplitHits_vs_actualMu_vs_$TRK2TAG_phi" : {
+            "type" : "TProfile2D",
+            "xAxis" : { "title" : "Actual <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+            "yAxis" : { "title" : "$TRK2TYPE #phi", "nBins" : "80", "low" : "-$PI", "high" : "$PI" },
+            "zAxis" : { "title" : "Average N. $TRKTYPE Pixel Split Hits", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX"  }
+    },
+    "$TRKTAG_nPixelGangedHits_vs_actualMu_vs_$TRK2TAG_phi" : {
+            "type" : "TProfile2D",
+            "xAxis" : { "title" : "Actual <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+            "yAxis" : { "title" : "$TRK2TYPE #phi", "nBins" : "80", "low" : "-$PI", "high" : "$PI" },
+            "zAxis" : { "title" : "Average N. $TRKTYPE Pixel Ganged Hits", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX"  }
+    },
+    "$TRKTAG_nPixelGangedHitsFlaggedFakes_vs_actualMu_vs_$TRK2TAG_phi" : {
+            "type" : "TProfile2D",
+            "xAxis" : { "title" : "Actual <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+            "yAxis" : { "title" : "$TRK2TYPE #phi", "nBins" : "80", "low" : "-$PI", "high" : "$PI" },
+            "zAxis" : { "title" : "Average N. $TRKTYPE Pixel Ganged Hits Flagged Fakes", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX"  }
+    },
+    "$TRKTAG_nPixelDeadSensors_vs_actualMu_vs_$TRK2TAG_phi" : {
+            "type" : "TProfile2D",
+            "xAxis" : { "title" : "Actual <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+            "yAxis" : { "title" : "$TRK2TYPE #phi", "nBins" : "80", "low" : "-$PI", "high" : "$PI" },
+            "zAxis" : { "title" : "Average N. $TRKTYPE Pixel Dead Sensors", "nBins" : "$PixHITMAX", "low" : "0.0", "high" : "$PixHITMAX"  }
+    },
+    "$TRKTAG_nSCTOutliers_vs_actualMu_vs_$TRK2TAG_phi" : {
+            "type" : "TProfile2D",
+            "xAxis" : { "title" : "Actual <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+            "yAxis" : { "title" : "$TRK2TYPE #phi", "nBins" : "80", "low" : "-$PI", "high" : "$PI" },
+            "zAxis" : { "title" : "Average N. $TRKTYPE SCT Outliers", "nBins" : "$SCTHITMAX", "low" : "0.0", "high" : "$SCTHITMAX"  }
+    },
+    "$TRKTAG_nSCTDoubleHoles_vs_actualMu_vs_$TRK2TAG_phi" : {
+            "type" : "TProfile2D",
+            "xAxis" : { "title" : "Actual <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+            "yAxis" : { "title" : "$TRK2TYPE #phi", "nBins" : "80", "low" : "-$PI", "high" : "$PI" },
+            "zAxis" : { "title" : "Average N. $TRKTYPE SCT Double Holes", "nBins" : "$SCTHITMAX", "low" : "0.0", "high" : "$SCTHITMAX"  }
+    },
+    "$TRKTAG_nSCTDeadSensors_vs_actualMu_vs_$TRK2TAG_phi" : {
+            "type" : "TProfile2D",
+            "xAxis" : { "title" : "Actual <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+            "yAxis" : { "title" : "$TRK2TYPE #phi", "nBins" : "80", "low" : "-$PI", "high" : "$PI" },
+            "zAxis" : { "title" : "Average N. $TRKTYPE SCT Dead Sensors", "nBins" : "$SCTHITMAX", "low" : "0.0", "high" : "$SCTHITMAX"  }
     }
 }

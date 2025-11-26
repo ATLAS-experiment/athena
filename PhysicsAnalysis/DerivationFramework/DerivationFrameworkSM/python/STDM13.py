@@ -88,18 +88,16 @@ def STDM13Cfg(flags):
         "MET_Baseline_AntiKt4EMPFlow",
         "PrimaryVertices",
         "InDetTrackParticles",
-        "BTagging_AntiKt4EMPFlow",
-        "AntiKt4EMPFlowJets_FTAG",
     ]
 
     STDM13SlimmingHelper.AllVariables = [
         "EventInfo",
         "PrimaryVertices",
         "InDetTrackParticles",
-        "BTagging_AntiKt4EMPFlow",
+
         "AntiKt4TruthDressedWZJets",
         "TruthEvents","TruthHFWithDecayParticles","TruthBoson","TruthBottom", "TruthCharm","TruthElectrons","TruthMuons","TruthTop","TruthTaus","MET_Truth",
-        "TruthPrimaryVertices","TruthHFWithDecayVertices","AntiKt4EMPFlowJets_FTAG",
+        "TruthPrimaryVertices","TruthHFWithDecayVertices",
 ##        "AntiKt4EMPFlowJets"
     ]
 

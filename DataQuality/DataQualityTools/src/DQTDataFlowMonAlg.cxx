@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // ********************************************************************
@@ -38,7 +38,7 @@ DQTDataFlowMonAlg::fillHistograms( const EventContext& ctx ) const
   using namespace Monitored;
 
   auto environment = Scalar("environment", (int) m_environment);
-  auto group = getGroup("default");
+  const auto & group = getGroup("default");
   fill(group, environment);
   
   if( m_environment != Environment_t::tier0Raw ) {

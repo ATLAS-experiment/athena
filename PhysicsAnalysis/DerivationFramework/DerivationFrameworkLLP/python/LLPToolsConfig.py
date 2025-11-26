@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 #==============================================================================
 # Provides configs for the tools used for LLP Derivations
@@ -39,6 +39,31 @@ def JetLargeD0TrackParticleThinningCfg(flags, name, **kwargs):
 def RCJetSubstructureAugCfg(flags, name, **kwargs):
     """Configure the RC jet substructure computation tool"""
     acc = ComponentAccumulator()
+    suffix = kwargs.pop("Suffix", "")
+    if not suffix:
+        raise AttributeError("Suffix not set!")
+    kwargs.setdefault("dec_Qw", "Qw_" + suffix)
+    kwargs.setdefault("dec_Tau1", "Tau1_" + suffix)
+    kwargs.setdefault("dec_Tau2", "Tau2_" + suffix)
+    kwargs.setdefault("dec_Tau3", "Tau3_" + suffix)
+    kwargs.setdefault("dec_Tau4", "Tau4_" + suffix)
+    kwargs.setdefault("dec_Tau21", "Tau21_" + suffix)
+    kwargs.setdefault("dec_Tau32", "Tau32_" + suffix)
+    kwargs.setdefault("dec_Split12", "Split12_" + suffix)
+    kwargs.setdefault("dec_Split23", "Split23_" + suffix)
+    kwargs.setdefault("dec_Split34", "Split34_" + suffix)
+    kwargs.setdefault("dec_ECF1", "ECF1_" + suffix)
+    kwargs.setdefault("dec_ECF2", "ECF2_" + suffix)
+    kwargs.setdefault("dec_ECF3", "ECF3_" + suffix)
+    kwargs.setdefault("dec_ECF4", "ECF4_" + suffix)
+    kwargs.setdefault("dec_C2", "C2_" + suffix)
+    kwargs.setdefault("dec_D2", "D2_" + suffix)
+    kwargs.setdefault("dec_pT", "pT_" + suffix)
+    kwargs.setdefault("dec_m", "m_" + suffix)
+    kwargs.setdefault("dec_NConstits", "NConstits_" + suffix)
+    kwargs.setdefault("dec_eta", "eta_" + suffix)
+    kwargs.setdefault("dec_phi", "phi_" + suffix)
+    kwargs.setdefault("dec_timing", "timing_" + suffix)
     RCJetSubstructureAug = CompFactory.DerivationFramework.RCJetSubstructureAug
     acc.addPublicTool(RCJetSubstructureAug(name, **kwargs),
                       primary = True)
@@ -51,6 +76,7 @@ def AugmentationToolLeadingJetsCfg(flags):
     acc.addPublicTool(CompFactory.DerivationFramework.AugmentationToolLeadingJets(name       = "LLP1AugmentationToolLeadingJets"),
                       primary = True)
     return acc
+
 
 # Vertex constraint tool
 def TrackParametersKVUCfg(flags, name, **kwargs):
@@ -70,10 +96,34 @@ def TrackParametersKVUCfg(flags, name, **kwargs):
                       primary = True)
     return acc
 
+
 # Calo cell cluster decorator
 def TrackParticleCaloCellDecoratorCfg(flags, name, **kwargs):
     """Confiure the isolation decorator tool"""
     acc = ComponentAccumulator()
+    prefix = kwargs.pop("DecorationPrefix", "LLP1")
+    kwargs.setdefault("ClusterAssocContainerName", kwargs["ContainerName"] + "ClusterAssociations")
+    kwargs.setdefault("decCellEtaKey", prefix + "_CaloCellEta")
+    kwargs.setdefault("decCellPhiKey", prefix + "_CaloCellPhi")
+    kwargs.setdefault("decCellRKey", prefix + "_CaloCellR")
+    kwargs.setdefault("decCelldEtaKey", prefix + "_CaloCelldEta")
+    kwargs.setdefault("decCelldPhiKey", prefix + "_CaloCelldPhi")
+    kwargs.setdefault("decCelldRKey", prefix + "_CaloCelldR")
+    kwargs.setdefault("decCellXKey", prefix + "_CaloCellX")
+    kwargs.setdefault("decCellYKey", prefix + "_CaloCellY")
+    kwargs.setdefault("decCellZKey", prefix + "_CaloCellZ")
+    kwargs.setdefault("decCelldXKey", prefix + "_CaloCelldX")
+    kwargs.setdefault("decCelldYKey", prefix + "_CaloCelldY")
+    kwargs.setdefault("decCelldZKey", prefix + "_CaloCelldZ")
+    kwargs.setdefault("decCellTKey", prefix + "_CaloCellTime")
+    kwargs.setdefault("decCellEKey", prefix + "_CaloCellE")
+    kwargs.setdefault("decCellIDKey", prefix + "_CaloCellID")
+    kwargs.setdefault("decCellSamplingKey", prefix + "_CaloCellSampling")
+    kwargs.setdefault("decCellQualityKey", prefix + "_CaloCellQuality")
+    kwargs.setdefault("decCellProvenanceKey", prefix + "_CaloCellProvenance")
+    kwargs.setdefault("decCellGainKey", prefix + "_CaloCellGain")
+    kwargs.setdefault("decCellEneDiffKey", prefix + "_CaloCellEneDiff")
+    kwargs.setdefault("decCellTimeDiffKey", prefix + "_CaloCellTimeDiff")
     TrackParticleCaloCellDecorator = CompFactory.DerivationFramework.TrackParticleCaloCellDecorator
     acc.addPublicTool(TrackParticleCaloCellDecorator(name, **kwargs),
                       primary = True)
@@ -126,8 +176,9 @@ def LLP1TriggerSkimmingToolCfg(flags, name, TriggerListsHelper, **kwargs):
     trig_latemu = ["HLT_mu10_mgonly_L1LATEMU10_J50", "HLT_mu10_mgonly_L1LATEMU10_XE50", "HLT_mu10_mgonly_L1LATE-MU10_XE40", "HLT_mu10_lateMu_L1LATE-MU8F_jJ90", "HLT_mu10_lateMu_L1LATE-MU8F_jXE70"]
     trig_calratio_dispjet_run3 = ["HLT_j30_CLEANllp_momemfrac006_calratio_L1jJ160","HLT_j30_CLEANllp_momemfrac006_calratiormbib_L1jJ160","HLT_j30_CLEANllp_momemfrac006_calratio_L1eTAU140","HLT_j30_CLEANllp_momemfrac006_calratiormbib_L1eTAU140","HLT_j30_CLEANllp_momemfrac006_calratio_L1eTAU80","HLT_j30_CLEANllp_momemfrac006_calratiormbib_L1eTAU80","HLT_j30_CLEANllp_momemfrac006_calratio_L1eTAU60_EMPTY","HLT_j30_CLEANllp_momemfrac006_calratiormbib_L1eTAU60_EMPTY","HLT_j30_CLEANllp_momemfrac006_calratio_L1eTAU60_UNPAIRED_ISO","HLT_j30_CLEANllp_momemfrac006_calratiormbib_L1eTAU60_UNPAIRED_ISO","HLT_j30_CLEANllp_momemfrac012_calratiovar_roiftf_preselj20emf12_L1jJ160"]
     trig_multijet_ht_data22_23 = ["HLT_2j250c_j120c_pf_ftf_presel2j180XXj80_L1J100", "HLT_3j200_pf_ftf_L1J100", "HLT_4j115_pf_ftf_presel4j85_L13J50", "HLT_4j110_pf_ftf_presel4j85_L13J50", "HLT_4j120_L13J50", "HLT_5j70c_pf_ftf_presel5c50_L14J15", "HLT_5j65c_pf_ftf_presel5c55_L14J15", "HLT_5j85_pf_ftf_presel5j50_L14J15", "HLT_5j80_pf_ftf_presel5j50_L14J15", "HLT_5j80_pf_ftf_presel5j55_L14J15", "HLT_6j35c_020jvt_pf_ftf_presel6c25_L14J15", "HLT_6j55c_pf_ftf_presel6j40_L14J15", "HLT_6j70_pf_ftf_presel6j40_L14J15", "HLT_7j45_pf_ftf_presel7j30_L14J15", "HLT_10j40_pf_ftf_presel7j30_L14J15", "HLT_j0_HT1000_L1HT190-J15s5pETA21", "HLT_j0_HT1000_L1J100", "HLT_j0_HT1000_pf_ftf_preselcHT450_L1HT190-J15s5pETA21", "HLT_j0_HT940_pf_ftf_preselcHT450_L1HT190-J15s5pETA21", "HLT_j0_HT1000_pf_ftf_preselj180_L1HT190-J15s5pETA21", "HLT_j0_HT940_pf_ftf_preselj180_L1HT190-J15s5pETA21", "HLT_j0_HT1000_pf_ftf_preselj180_L1J100"] 
+    trig_delayedjets_Run3 = ["HLT_2j100_2timeSig15_L1jJ90", "HLT_2j45_2j55_3timeSig15_L14jJ40", "HLT_j200_2timing15_L1jJ160", "HLT_j200_3timeSig15_L1jJ160", "HLT_j220_j150_2timing15_L1jJ160", "HLT_j250_2timing15_L1jJ160", "HLT_j250_3timeSig15_L1jJ160"]
 
-    triggers = trig_el + trig_mu + trig_g + trig_elmu + trig_mug + trig_VBF_2018 + trig_EJ_Run3 + trig_run3_elmug + trig_dispjet_Run3 + trig_xe + trig_multijet_ht_data22_23 + trig_dedx_Run3 + trig_dt_Run3 + trig_isohighpt_Run3 + trig_latemu + trig_VBF_Run3 + trig_calratio_dispjet_run3
+    triggers = trig_el + trig_mu + trig_g + trig_elmu + trig_mug + trig_VBF_2018 + trig_EJ_Run3 + trig_run3_elmug + trig_dispjet_Run3 + trig_xe + trig_multijet_ht_data22_23 + trig_dedx_Run3 + trig_dt_Run3 + trig_isohighpt_Run3 + trig_latemu + trig_VBF_Run3 + trig_calratio_dispjet_run3 + trig_delayedjets_Run3
 
     #remove duplicates
     triggers = sorted(list(set(triggers)))
@@ -279,7 +330,7 @@ def LRTElectronLHSelectorsCfg(flags):
     from DerivationFrameworkEGamma.EGammaToolsConfig import EGElectronLikelihoodToolWrapperCfg
 
     # decorate electrons with the output of LH very loose
-    ElectronPassLHVeryLooseNoPix = acc.getPrimaryAndMerge(EGElectronLikelihoodToolWrapperCfg(
+    ElectronPassLHVeryLooseNoPix = acc.addPublicTool(acc.popToolsAndMerge(EGElectronLikelihoodToolWrapperCfg(
         flags,
         name="ElectronPassLHVeryLooseNoPix",
         EGammaElectronLikelihoodTool=ElectronLHSelectorVeryLooseNoPix,
@@ -287,9 +338,9 @@ def LRTElectronLHSelectorsCfg(flags):
         CutType="",
         StoreGateEntryName="DFCommonElectronsLHVeryLooseNoPix",
         ContainerName="Electrons",
-        StoreTResult=True))
+        StoreTResult=True)))
 
-    ElectronPassLHVeryLooseNoPixLRT = acc.getPrimaryAndMerge(EGElectronLikelihoodToolWrapperCfg(
+    ElectronPassLHVeryLooseNoPixLRT = acc.addPublicTool(acc.popToolsAndMerge(EGElectronLikelihoodToolWrapperCfg(
         flags,
         name="ElectronPassLHVeryLooseNoPixLRT",
         EGammaElectronLikelihoodTool=ElectronLHSelectorVeryLooseNoPix,
@@ -297,10 +348,10 @@ def LRTElectronLHSelectorsCfg(flags):
         CutType="",
         StoreGateEntryName="DFCommonElectronsLHVeryLooseNoPix",
         ContainerName="LRTElectrons",
-        StoreTResult=True))
+        StoreTResult=True)))
 
     # decorate electrons with the output of LH loose
-    ElectronPassLHLooseNoPix = acc.getPrimaryAndMerge(EGElectronLikelihoodToolWrapperCfg(
+    ElectronPassLHLooseNoPix = acc.addPublicTool(acc.popToolsAndMerge(EGElectronLikelihoodToolWrapperCfg(
         flags,   
         name="ElectronPassLHLooseNoPix",
         EGammaElectronLikelihoodTool=ElectronLHSelectorLooseNoPix,
@@ -308,9 +359,9 @@ def LRTElectronLHSelectorsCfg(flags):
         CutType="",
         StoreGateEntryName="DFCommonElectronsLHLooseNoPix",
         ContainerName="Electrons",
-        StoreTResult=False))
+        StoreTResult=False)))
 
-    ElectronPassLHLooseNoPixLRT = acc.getPrimaryAndMerge(EGElectronLikelihoodToolWrapperCfg(
+    ElectronPassLHLooseNoPixLRT = acc.addPublicTool(acc.popToolsAndMerge(EGElectronLikelihoodToolWrapperCfg(
         flags,   
         name="ElectronPassLHLooseNoPixLRT",
         EGammaElectronLikelihoodTool=ElectronLHSelectorLooseNoPix,
@@ -318,10 +369,10 @@ def LRTElectronLHSelectorsCfg(flags):
         CutType="",
         StoreGateEntryName="DFCommonElectronsLHLooseNoPix",
         ContainerName="LRTElectrons",
-        StoreTResult=False))
+        StoreTResult=False)))
 
     # decorate electrons with the output of LH medium
-    ElectronPassLHMediumNoPix = acc.getPrimaryAndMerge(EGElectronLikelihoodToolWrapperCfg(
+    ElectronPassLHMediumNoPix = acc.addPublicTool(acc.popToolsAndMerge(EGElectronLikelihoodToolWrapperCfg(
         flags,
         name="ElectronPassLHMediumNoPix",
         EGammaElectronLikelihoodTool=ElectronLHSelectorMediumNoPix,
@@ -329,9 +380,9 @@ def LRTElectronLHSelectorsCfg(flags):
         CutType="",
         StoreGateEntryName="DFCommonElectronsLHMediumNoPix",
         ContainerName="Electrons",
-        StoreTResult=False))
+        StoreTResult=False)))
 
-    ElectronPassLHMediumNoPixLRT = acc.getPrimaryAndMerge(EGElectronLikelihoodToolWrapperCfg(
+    ElectronPassLHMediumNoPixLRT = acc.addPublicTool(acc.popToolsAndMerge(EGElectronLikelihoodToolWrapperCfg(
         flags,
         name="ElectronPassLHMediumNoPixLRT",
         EGammaElectronLikelihoodTool=ElectronLHSelectorMediumNoPix,
@@ -339,10 +390,10 @@ def LRTElectronLHSelectorsCfg(flags):
         CutType="",
         StoreGateEntryName="DFCommonElectronsLHMediumNoPix",
         ContainerName="LRTElectrons",
-        StoreTResult=False))
+        StoreTResult=False)))
 
     # decorate electrons with the output of LH tight
-    ElectronPassLHTightNoPix = acc.getPrimaryAndMerge(EGElectronLikelihoodToolWrapperCfg(
+    ElectronPassLHTightNoPix = acc.addPublicTool(acc.popToolsAndMerge(EGElectronLikelihoodToolWrapperCfg(
         flags,
         name="ElectronPassLHTightNoPix",
         EGammaElectronLikelihoodTool=ElectronLHSelectorTightNoPix,
@@ -350,9 +401,9 @@ def LRTElectronLHSelectorsCfg(flags):
         CutType="",
         StoreGateEntryName="DFCommonElectronsLHTightNoPix",
         ContainerName="Electrons",
-        StoreTResult=False))
+        StoreTResult=False)))
 
-    ElectronPassLHTightNoPixLRT = acc.getPrimaryAndMerge(EGElectronLikelihoodToolWrapperCfg(
+    ElectronPassLHTightNoPixLRT = acc.addPublicTool(acc.popToolsAndMerge(EGElectronLikelihoodToolWrapperCfg(
         flags,
         name="ElectronPassLHTightNoPixLRT",
         EGammaElectronLikelihoodTool=ElectronLHSelectorTightNoPix,
@@ -360,7 +411,7 @@ def LRTElectronLHSelectorsCfg(flags):
         CutType="",
         StoreGateEntryName="DFCommonElectronsLHTightNoPix",
         ContainerName="LRTElectrons",
-        StoreTResult=False))
+        StoreTResult=False)))
 
     LRTEGAugmentationTools = [ElectronPassLHVeryLooseNoPix,
                               ElectronPassLHVeryLooseNoPixLRT,

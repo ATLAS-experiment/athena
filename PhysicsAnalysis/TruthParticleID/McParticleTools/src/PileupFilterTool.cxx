@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////// 
@@ -285,7 +285,7 @@ StatusCode PileupFilterTool::shapeGenEvent( McEventCollection* genAod )
 	      pvtx->add_particle_out(evtx->particles_out().front());
 	    }
 	  }//> end if [prod vertex]
-	  evtx->remove_particle_out(p); // disconnect from end vertex	
+	  evtx->remove_particle_out(std::move(p)); // disconnect from end vertex	
 #else 
 	    while ( evtx->particles_out_const_begin() !=  evtx->particles_out_const_end()) {
 	      HepMC::GenVertex::particles_out_const_iterator np = evtx->particles_out_const_begin();
@@ -540,7 +540,7 @@ StatusCode PileupFilterTool::rebuildLinks( const HepMC::GenEvent * mcEvt,
 		
 		msg(MSG::ERROR)<< "=====================================================" << endmsg << "Created a GenVertex - link !" << std::endl;
 		std::stringstream vtxLink("");
-		HepMC::Print::line(vtxLink,linkVtx);
+		HepMC::Print::line(vtxLink,std::move(linkVtx));
 		msg(MSG::ERROR)<< vtxLink.str()<< endmsg<< "====================================================="<< endmsg;
 	      }
 	    }
@@ -552,7 +552,7 @@ StatusCode PileupFilterTool::rebuildLinks( const HepMC::GenEvent * mcEvt,
 	childVtx->add_particle_in(mcPart);
 	msg(MSG::WARNING) << "Odd situation:" << std::endl;
 	std::stringstream vtxDump( "" );
-	HepMC::Print::line(vtxDump,childVtx);
+	HepMC::Print::line(vtxDump,std::move(childVtx));
 	msg(MSG::WARNING) << vtxDump.str() << endmsg;
 	return StatusCode::SUCCESS;
       }//> end if incoming particles

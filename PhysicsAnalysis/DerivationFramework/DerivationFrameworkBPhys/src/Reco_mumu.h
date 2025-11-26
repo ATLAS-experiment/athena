@@ -30,7 +30,7 @@ namespace DerivationFramework {
 
       StatusCode initialize() override;
      
-      StatusCode addBranches() const override;
+      StatusCode addBranches(const EventContext& ctx) const override;
       
     private:
       /** tools

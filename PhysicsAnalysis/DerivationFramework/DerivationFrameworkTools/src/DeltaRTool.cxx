@@ -6,20 +6,10 @@
 //
 
 #include "DerivationFrameworkTools/DeltaRTool.h"
+#include <utility> //for std::pair
 
 namespace DerivationFramework {
 
-  DeltaRTool::DeltaRTool(const std::string& t,
-      const std::string& n,
-      const IInterface* p) : 
-    base_class(t,n,p),
-    m_expression(""),
-    m_2ndExpression("")
-  {
-    declareProperty("ObjectRequirements", m_expression);
-    declareProperty("SecondObjectRequirements", m_2ndExpression); 
-  }
-  
   StatusCode DeltaRTool::initialize()
   {
     if (m_sgName.key().empty()) {
@@ -43,10 +33,9 @@ namespace DerivationFramework {
     return StatusCode::SUCCESS;
   }
 
-  StatusCode DeltaRTool::addBranches() const
+  StatusCode DeltaRTool::addBranches(const EventContext& ctx) const
   {
-    const EventContext& ctx = Gaudi::Hive::currentContext();
-    // Write deltaRs to SG for access by downstream algs     
+    // Write deltaRs to SG for access by downstream algs
     if (evtStore()->contains<std::vector<float> >(m_sgName.key())) { // FIXME Use Handles
       ATH_MSG_ERROR("Tool is attempting to write a StoreGate key " << m_sgName << " which already exists. Please use a different key");
       return StatusCode::FAILURE;
@@ -58,14 +47,14 @@ namespace DerivationFramework {
     ATH_CHECK(writeHandle.record(std::move(deltaRs)));
 
     return StatusCode::SUCCESS;
-  }  
+  }
 
   StatusCode DeltaRTool::getDeltaRs(std::vector<float>* deltaRs, const EventContext& ctx) const
   {
 
     // check the relevant information is available
     if (m_containerName.key().empty()) {
-      ATH_MSG_WARNING("Input container missing - returning zero");  
+      ATH_MSG_WARNING("Input container missing - returning zero");
       deltaRs->push_back(0.0);
       return StatusCode::FAILURE;
     }
@@ -78,13 +67,13 @@ namespace DerivationFramework {
     const xAOD::IParticleContainer* secondParticles(nullptr);
     if (secondContainer) {
       SG::ReadHandle<xAOD::IParticleContainer> particleHdl2{m_containerName2, ctx};
-       secondParticles=particleHdl2.cptr();
+      secondParticles=particleHdl2.cptr();
     }
 
     // get the positions of the elements which pass the requirement
     std::vector<int> entries, entries2;
     if (!m_expression.empty()) {entries = m_parser[kDeltaRToolParser1]->evaluateAsVector();}
-    else {entries.assign(particles->size(),1);} // default: include all elements 
+    else {entries.assign(particles->size(),1);} // default: include all elements
     unsigned int nEntries = entries.size();
     // check the sizes are compatible
     if (particles->size() != nEntries ) {
@@ -93,51 +82,43 @@ namespace DerivationFramework {
     }
     unsigned int nEntries2(0);
     if (secondContainer) {
-        if (!m_2ndExpression.empty()) {entries2 =  m_parser[kDeltaRToolParser2]->evaluateAsVector();}
-	else {entries2.assign(secondParticles->size(),1);} // default: include all elements
-	nEntries2 = entries2.size();
-	// check the sizes are compatible
-	if (secondParticles->size() != nEntries2 ) {
-           ATH_MSG_FATAL("Branch sizes incompatible - returning zero");
-           return StatusCode::FAILURE;
-        }
+      if (!m_2ndExpression.empty()) {entries2 =  m_parser[kDeltaRToolParser2]->evaluateAsVector();}
+      else {entries2.assign(secondParticles->size(),1);} // default: include all elements
+      nEntries2 = entries2.size();
+      // check the sizes are compatible
+      if (secondParticles->size() != nEntries2 ) {
+        ATH_MSG_FATAL("Branch sizes incompatible - returning zero");
+        return StatusCode::FAILURE;
+      }
     }
 
-    // Double loop to get the pairs for which the mass should be calculated	
-    std::vector<std::vector<int> > pairs;
+    // Double loop to get the pairs for which the mass should be calculated
+    std::vector<std::pair<unsigned, unsigned>> pairs;
     if (!secondContainer) {
-      unsigned int outerIt, innerIt;
-      for (outerIt=0; outerIt<nEntries; ++outerIt) {
-        for (innerIt=outerIt+1; innerIt<nEntries; ++innerIt) {
-          std::vector<int> tmpPair;
+      for (unsigned outerIt=0; outerIt<nEntries; ++outerIt) {
+        for (unsigned innerIt=outerIt+1; innerIt<nEntries; ++innerIt) {
           if (entries[outerIt]==1 && entries[innerIt]==1) {
-            tmpPair.push_back(outerIt); tmpPair.push_back(innerIt);
-            pairs.push_back(tmpPair);
+            pairs.emplace_back(outerIt, innerIt);
           }
         }
       }
     }
 
     if (secondContainer) {
-      unsigned int coll1It, coll2It;
-      for (coll1It=0; coll1It<nEntries; ++coll1It) {
-        for (coll2It=0; coll2It<nEntries2; ++coll2It) {
-          std::vector<int> tmpPair;
+      for (unsigned coll1It=0; coll1It<nEntries; ++coll1It) {
+        for (unsigned coll2It=0; coll2It<nEntries2; ++coll2It) {
+          //coverity[copy_paste_error]
           if (entries[coll1It]==1 && entries2[coll2It]==1) {
-            tmpPair.push_back(coll1It); tmpPair.push_back(coll2It);
-            pairs.push_back(tmpPair);
+            pairs.emplace_back(coll1It, coll2It);
           }
         }
       }
     }
 
     // Loop over the pairs; calculate the mass; put into vector and return
-    std::vector<std::vector<int> >::iterator pairIt;
-    for (pairIt=pairs.begin(); pairIt!=pairs.end(); ++pairIt) {
-      unsigned int first = (*pairIt)[0];
-      unsigned int second = (*pairIt)[1];
+    for (const auto & [first, second] : pairs) {
       if (!secondContainer) {
-	float phi1f = ((*particles)[first])->p4().Phi(); float phi2f = ((*particles)[second])->p4().Phi();
+        float phi1f = ((*particles)[first])->p4().Phi(); float phi2f = ((*particles)[second])->p4().Phi();
         float eta1f = ((*particles)[first])->p4().Eta(); float eta2f = ((*particles)[second])->p4().Eta();
         float deltaR = calculateDeltaR(phi1f,phi2f,eta1f,eta2f);
         deltaRs->push_back(deltaR);
@@ -147,14 +128,14 @@ namespace DerivationFramework {
         float eta1f = ((*particles)[first])->p4().Eta(); float eta2f = ((*secondParticles)[second])->p4().Eta();
         float deltaR = calculateDeltaR(phi1f,phi2f,eta1f,eta2f);
         deltaRs->push_back(deltaR);
-      }	
+      }
     }
 
-    return StatusCode::SUCCESS; 
+    return StatusCode::SUCCESS;
 
   }
-  
-  float DeltaRTool::calculateDeltaR(float phi1, float phi2, float eta1, float eta2) 
+
+  float DeltaRTool::calculateDeltaR(float phi1, float phi2, float eta1, float eta2)
   {
     float deltaPhi = fabs(phi1-phi2);
     if (deltaPhi>TMath::Pi()) deltaPhi = 2.0*TMath::Pi() - deltaPhi;

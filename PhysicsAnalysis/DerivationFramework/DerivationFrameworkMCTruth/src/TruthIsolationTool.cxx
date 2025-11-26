@@ -14,18 +14,6 @@
 #include <algorithm>
 #include <cmath>
 
-// Constructor
-DerivationFramework::TruthIsolationTool::TruthIsolationTool(const std::string& t,
-        const std::string& n,
-        const IInterface* p ) :
-  base_class(t,n,p)
-{
-}
-
-// Destructor
-DerivationFramework::TruthIsolationTool::~TruthIsolationTool() {
-}
-
 // Athena initialize
 StatusCode DerivationFramework::TruthIsolationTool::initialize()
 {
@@ -39,7 +27,8 @@ StatusCode DerivationFramework::TruthIsolationTool::initialize()
     std::sort(m_coneSizesSort.begin(), m_coneSizesSort.end(), [](float a, float b){return a>b;});
 
     // Decorations depend on the list of cone sizes
-    for ( auto csize_itr : m_coneSizesSort ) { 
+    // FIXME set decorations properly in the configuration
+    for ( auto csize_itr : m_coneSizesSort ) {
       std::ostringstream sizess;
       if (m_variableR) sizess << "var";
       sizess << m_isoVarNamePrefix.value() << (int)((csize_itr)*100.);
@@ -51,10 +40,9 @@ StatusCode DerivationFramework::TruthIsolationTool::initialize()
 }
 
 // Function to do isolation calc, implements interface in IAugmentationTool
-StatusCode DerivationFramework::TruthIsolationTool::addBranches() const
+StatusCode DerivationFramework::TruthIsolationTool::addBranches(const EventContext& ctx) const
 {
-    // Event context 
-    const EventContext& ctx = Gaudi::Hive::currentContext(); 
+    // Event context
 
     // Retrieve the truth collections
     SG::ReadHandle<xAOD::TruthParticleContainer> isoTruthParticles(m_isoParticlesKey, ctx);
@@ -62,7 +50,7 @@ StatusCode DerivationFramework::TruthIsolationTool::addBranches() const
       ATH_MSG_ERROR("Couldn't retrieve collection with name " << m_isoParticlesKey);
       return StatusCode::FAILURE;
     }
-  
+
     SG::ReadHandle<xAOD::TruthParticleContainer> allTruthParticles(m_allParticlesKey, ctx);
     if (!allTruthParticles.isValid()) {
       ATH_MSG_ERROR("Couldn't retrieve collection with name " << m_allParticlesKey);
@@ -86,8 +74,8 @@ StatusCode DerivationFramework::TruthIsolationTool::addBranches() const
     std::vector<SG::WriteDecorHandle< xAOD::TruthParticleContainer, float > >
       decorator_iso = m_isoDecorKeys.makeHandles (ctx);
 
-    //All isolation must filled for all Particles. 
-    ///Even if this is with some dummy value 
+    //All isolation must filled for all Particles.
+    ///Even if this is with some dummy value
     for ( unsigned int icone = 0; icone < m_coneSizesSort.size(); ++icone ) {
       for (const auto* part : *isoTruthParticles) {
         decorator_iso.at(icone)(*part) = -1;
@@ -144,7 +132,7 @@ void DerivationFramework::TruthIsolationTool::calcIsos(const xAOD::TruthParticle
     return;
 }
 
-float DerivationFramework::TruthIsolationTool::calculateDeltaR2(const xAOD::IParticle *p1, float eta2, float phi2) 
+float DerivationFramework::TruthIsolationTool::calculateDeltaR2(const xAOD::IParticle *p1, float eta2, float phi2)
 {
   //calculate dR^2 this way to hopefully do fewer sqrt and TVector3::Pseudorapidity calls
   float phi1 = p1->phi();

@@ -121,21 +121,22 @@ def BPHY24Cfg(flags):
 
 
     # decorate electrons with the output of LH vloose (nod0)
-    ElectronPassLHvloose = CompFactory.DerivationFramework.EGElectronLikelihoodToolWrapper(name = "ElectronPassLHvloose",
+    from DerivationFrameworkEGamma.EGammaToolsConfig import EGElectronLikelihoodToolWrapperCfg
+    ElectronPassLHvloose = acc.addPublicTool(acc.popToolsAndMerge(EGElectronLikelihoodToolWrapperCfg(flags, name = "ElectronPassLHvloose",
                                             EGammaElectronLikelihoodTool = ElectronLHSelectorLHvloose,
                                             EGammaFudgeMCTool = "",
                                             CutType = "",
                                             StoreGateEntryName = "DFCommonElectronsLHVeryLoose",
                                             ContainerName = "Electrons",
-                                            StoreTResult=False)
+                                            StoreTResult=False)))
 
-    ElectronPassLHvloosenod0 = CompFactory.DerivationFramework.EGElectronLikelihoodToolWrapper(name = "ElectronPassLHvloosenod0",
+    ElectronPassLHvloosenod0 = acc.addPublicTool(acc.popToolsAndMerge(EGElectronLikelihoodToolWrapperCfg(flags, name = "ElectronPassLHvloosenod0",
                                             EGammaElectronLikelihoodTool = ElectronLHSelectorLHvloose_nod0,
                                             EGammaFudgeMCTool = "",
                                             CutType = "",
                                             StoreGateEntryName = "DFCommonElectronsLHVeryLoosenod0",
                                             ContainerName = "Electrons",
-                                            StoreTResult=False)
+                                            StoreTResult=False)))
     augsList += [ElectronPassLHvloose, ElectronPassLHvloosenod0]
 
     BPHY24DiElectronFinder = CompFactory.Analysis.JpsiFinder_ee(

@@ -148,6 +148,9 @@ StatusCode NRPC_RawDataProviderTool::fillCollections(const OFFLINE_FRAGMENTS_NAM
         } else if (data[idata]<6) {
             WARNING_WITH_LINE("NRPC: Corrupted: Number of words from board " << std::hex << data[idata+4] << std::dec << " is <6 :" << data[idata] );
             break;
+        } else if ( idata+data[idata] > data_size) {
+            WARNING_WITH_LINE("NRPC: Corrupted number of words from board " << std::hex << data[idata+4] << std::dec << " is too large :" << std::hex << data[idata] << std::dec );
+            break;
         } else if ( (data[idata+data[idata]-2] & 0x000000ff) != 0xa0) {
             WARNING_WITH_LINE("NRPC: Missing expected trailer a0" );
             break;

@@ -1,19 +1,25 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONCONDDATA_NSWCALIBDBTIMECHARGEDATA_H
 #define MUONCONDDATA_NSWCALIBDBTIMECHARGEDATA_H
 
-// STL includes
-#include <vector>
+
 
 // Athena includes
 #include "AthenaKernel/CondCont.h" 
 #include "AthenaKernel/BaseInfo.h" 
-#include "MuonIdHelpers/IMuonIdHelperSvc.h"
 #include "AthenaBaseComps/AthMessaging.h"
 #include "MuonCondData/Defs.h"
+#include "Identifier/Identifier.h"
+#include "MuonIdHelpers/IMuonIdHelperSvc.h"
+
+// STL includes
+#include <vector>
+#include <map>
+#include <iosfwd>
+
 
 
 class NswCalibDbTimeChargeData: public AthMessaging {  

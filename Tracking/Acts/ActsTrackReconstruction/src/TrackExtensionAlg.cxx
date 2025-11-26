@@ -33,7 +33,7 @@
 #include "ActsCalibrators/xAODUncalibMeasSurfAcc.h"
 #include "ActsEvent/TrackContainer.h"
 #include "ActsGeometry/ATLASMagneticFieldWrapper.h"
-#include "ActsGeometryInterfaces/ActsGeometryContext.h"
+#include "ActsGeometryInterfaces/GeometryContext.h"
 #include "ActsGeometry/ActsDetectorElement.h"
 #include "ActsInterop/Logger.h"
 #include "ActsInterop/TableUtils.h"

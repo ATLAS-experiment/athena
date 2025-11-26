@@ -59,7 +59,8 @@ namespace MuonValR4 {
             if (m_isMC) infoOpts = EventInfoBranch::isMC;
             m_tree.addBranch(std::make_unique<EventInfoBranch>(m_tree, infoOpts));  
         }
-        ATH_CHECK(m_truthSegmentKey.initialize(!m_truthSegmentKey.empty()));
+        
+        ATH_CHECK(m_truthSegmentKey.initialize(!m_truthSegmentKey.empty()));        
         /// The collection of readHandle keys should be either 1 or 2
         ATH_CHECK(m_inSegmentKeys.initialize());
         ATH_CHECK(m_inHoughSegmentSeedKeys.initialize());
@@ -81,7 +82,7 @@ namespace MuonValR4 {
     }
 
 
-    unsigned int MuonHoughTransformTester::countOnSameSide(const ActsGeometryContext& gctx,
+    unsigned int MuonHoughTransformTester::countOnSameSide(const ActsTrk::GeometryContext& gctx,
                                                            const xAOD::MuonSegment& truthSeg,
                                                            const MuonR4::Segment& recoSeg) const{
         unsigned int same{0};
@@ -96,7 +97,7 @@ namespace MuonValR4 {
         return same;
     }
     std::vector<ObjectMatching> 
-            MuonHoughTransformTester::matchWithTruth(const ActsGeometryContext& gctx,
+            MuonHoughTransformTester::matchWithTruth(const ActsTrk::GeometryContext& gctx,
                                                      const xAOD::MuonSegmentContainer* truthSegments,
                                                      const SegmentSeedContainer* seedContainer,
                                                      const SegmentContainer* segmentContainer) const {
@@ -211,15 +212,17 @@ namespace MuonValR4 {
             match.matchedSeeds = {seg->parent()};
             // this seed has been written as well - do not write it in the following loop 
             usedSeeds.insert(seg->parent());
+            match.matchedSeedFoundSegment.push_back(1);
         }
         for (const SegmentSeed* seed: *seedContainer) {
-            // skip seeds that are on segments or seen in the truth loop 
+            // skip seeds that are on segments or seen in the truth loop so these will be seeds without segment 
             if (usedSeeds.count(seed)) {
                 continue;
             }
             ObjectMatching & match = allAssociations.emplace_back(); 
             match.chamber = seed->msSector();
             match.matchedSeeds = {seed}; 
+            match.matchedSeedFoundSegment.push_back(0);
         }
         return allAssociations;
     }
@@ -231,9 +234,9 @@ namespace MuonValR4 {
     StatusCode MuonHoughTransformTester::execute()  {
         
         const EventContext & ctx = Gaudi::Hive::currentContext();
-        const ActsGeometryContext* gctxPtr{nullptr};
+        const ActsTrk::GeometryContext* gctxPtr{nullptr};
         ATH_CHECK(SG::get(gctxPtr, m_geoCtxKey, ctx));
-        const ActsGeometryContext& gctx{*gctxPtr};
+        const ActsTrk::GeometryContext& gctx{*gctxPtr};
 
 
         ConstDataVector<MuonR4::SegmentSeedContainer> segmentSeeds{SG::VIEW_ELEMENTS};
@@ -250,7 +253,10 @@ namespace MuonValR4 {
             segments.insert(segments.end(),readSegments->begin(), readSegments->end());
         }
         const xAOD::MuonSegmentContainer* readTruthSegments{nullptr};
-        ATH_CHECK(SG::get(readTruthSegments , m_truthSegmentKey, ctx));
+
+        if(m_isMC){
+             ATH_CHECK(SG::get(readTruthSegments , m_truthSegmentKey, ctx));
+        }
             
         ATH_MSG_DEBUG("Succesfully retrieved input collections. Seeds: "<<segmentSeeds.size()
                     <<", segments: "<<segments.size() <<", truth segments: "<<(readTruthSegments? readTruthSegments->size() : -1)<<".");
@@ -258,9 +264,9 @@ namespace MuonValR4 {
                                                              segments.asDataVector());
         for (const ObjectMatching& obj : objects) {
             fillChamberInfo(obj.chamber);
-            fillTruthInfo(gctx, obj.truthSegment);
             fillSeedInfo(obj);
             fillSegmentInfo(gctx, obj);
+            if(m_isMC) fillTruthInfo(gctx, obj.truthSegment);
             ATH_CHECK(m_tree.fill(ctx));
         }
         return StatusCode::SUCCESS;
@@ -270,7 +276,7 @@ namespace MuonValR4 {
         m_out_stationSide = msSector->side();
         m_out_stationPhi = msSector->stationPhi();
     }                
-    void MuonHoughTransformTester:: fillTruthInfo(const ActsGeometryContext& gctx,
+    void MuonHoughTransformTester:: fillTruthInfo(const ActsTrk::GeometryContext& gctx,
                                                   const xAOD::MuonSegment* segment) {
         if (!segment) return; 
         m_out_hasTruth = true; 
@@ -371,14 +377,12 @@ namespace MuonValR4 {
             m_out_seed_nHits.push_back(seed->getHitsInMax().size());
             unsigned nMdtSeed{0}, nRpcSeed{0}, nTgcSeed{0}, nMmSeed{0}, nsTgcSeed{0}; 
             unsigned nPrecHits{0}, nEtaHits{0}, nPhiHits{0}, nTrueHits{0}, nTruePrecHits{0}, nTrueEtaHits{0}, nTruePhiHits{0};
-            std::vector<unsigned char> matched{};
+            std::vector<unsigned char> treeIdxs{};
+           
             for (const HoughHitType & houghSP: seed->getHitsInMax()){                
                 if (m_writeSpacePoints){
                     unsigned treeIdx = m_spTester->push_back(*houghSP);
-                    if (treeIdx >= matched.size()){
-                        matched.resize(treeIdx +1);
-                    }
-                    matched[treeIdx] = true;
+                    treeIdxs.push_back(treeIdx);
                 }
                 nPrecHits += isPrecHit(*houghSP);
                 nPhiHits  += houghSP->measuresPhi();
@@ -430,12 +434,13 @@ namespace MuonValR4 {
 
             m_out_seed_ledToSegment.push_back(obj.matchedSeedFoundSegment.at(iseed));
             if (m_writeSpacePoints) {
-                m_spMatchedToPattern[iseed] = std::move(matched);
+                m_spMatchedToPattern[iseed] = std::move(treeIdxs);
+                
             } 
         }
     }
     
-    void MuonHoughTransformTester::fillSegmentInfo(const ActsGeometryContext& gctx,
+    void MuonHoughTransformTester::fillSegmentInfo(const ActsTrk::GeometryContext& gctx,
                                                    const ObjectMatching& obj){
         using namespace SegmentFit;
 

@@ -21,17 +21,24 @@ namespace SG {
    * since it inherits from std::vector, all vector operations are 
    * permitted.
    *
-   * initialization can be done in three ways.
+   * initialization can be done in four ways.
    * 1: with an std::vector<HandleKey> as a parameter
-   *    SG::Cond<foo>::ReadHandleKeyArray  m_foo ( std::vector<ReadCondHandleKey> );
-   *    SG::Cond<foo>::WriteHandleKeyArray m_foo ( std::vector<WriteCondHandleKey> );
+   *    SG::ReadHandleKeyArray<foo>  m_foo ( std::vector<ReadHandleKey>(...) );
+   *    SG::WriteHandleKeyArray<foo> m_foo ( std::vector<WriteCondHandleKey>(...) );
    * 2: with an initializer list of HandleKeys
-   *    SG::Cond<foo>::ReadHandleKeyArray  m_foo { ReadCondHandleKey<foo> k1, ReadCondHandleKey<foo> k2 };
-   *    SG::Cond<foo>::WriteHandleKeyArray m_foo { WriteCondHandleKey<foo> k1, WriteCondHandleKey<foo> k2 };
+   *    SG::ReadHandleKeyArray<foo>  m_foo { ReadHandleKey<foo>(...), ReadHandleKey<foo> (...) };
+   *    SG::WriteHandleKeyArray<foo> m_foo { WriteCondHandleKey<foo> (...), WriteCondHandleKey<foo> (...) };
    * 3: with an initializer list of std::strings, that will be used to
    *    internally create HandleKeys with those initializers
-   *    SG::Cond<foo>::ReadHandleKeyArray  m_foo { "key1", "key2", "key3" };
-   *    SG::Cond<foo>::WriteHandleKeyArray m_foo { "key1", "key2", "key3" };
+   *    SG::ReadHandleKeyArray<foo>  m_foo { "key1", "key2", "key3" };
+   *    SG::WriteHandleKeyArray<foo> m_foo { "key1", "key2", "key3" };
+   * 4: For decorations only: with a container handle and an initializer list
+   *    of std::strings.
+   *    The strings will be used to internally create HandleKeys, all with
+   *    the same container key.
+   *    SG::ReadHandleKey<foo> m_fooCont ("foo");
+   *    SG::ReadDecorHandleKeyArray<foo>  m_foo { m_fooCont, {"key1", "key2", "key3"} };
+   *    SG::WriteDecorHandleKeyArray<foo> m_foo { m_fooCont, {"key1", "key2", "key3"} };
    */
 
   template <class T_Handle, class T_HandleKey, Gaudi::DataHandle::Mode MODE>
@@ -68,6 +75,22 @@ namespace SG {
       VarHandleKeyArrayCommon<T_HandleKey> {key_names} {}
 
     /**
+     * @brief base Constructor that takes an associated container and an
+     * initializer list of std::strings.
+     * @param contKey VarHandleKey of the associated container
+     * @param l initializer list of std::strings used to create the
+     *          VarHandleKeys
+     *
+     * All decorations will be read from the container referenced
+     * by @contKey.
+     */
+    template <class T = T_HandleKey>
+    requires T::isDecorHandleKey
+    HandleKeyArray( VarHandleKey& contKey,
+                    std::initializer_list<std::string> key_names ):
+      VarHandleKeyArrayCommon<T_HandleKey> {contKey, key_names} {}
+
+    /**
      * @brief auto-declaring Property Constructor from a HandleKeyArray 
      * that takes an initializer list of std::strings, and associates the WHKA
      * with the specified Property name
@@ -76,13 +99,38 @@ namespace SG {
      *          HandleKeys
      * @param doc documentation string
      */
-    template <class OWNER, 
-              typename = typename std::enable_if<std::is_base_of<IProperty, OWNER>::value>::type>
+    template <std::derived_from<IProperty> OWNER>
     inline HandleKeyArray( OWNER* owner,
                                 std::string name,
                                 std::initializer_list<std::string> l,
                                 std::string doc="") :
       VarHandleKeyArrayCommon<T_HandleKey> {l} {
+      auto p = owner->declareProperty(std::move(name), *this, std::move(doc));
+      p->template setOwnerType<OWNER>();
+    }
+
+
+    /**
+     * @brief auto-declaring Property Constructor from a HandleKeyArray
+     * that takes an initializer list of std::strings, and associates the WHKA
+     * with the specified Property name
+     * @param name name of Property
+     * @param contKey VarHandleKey of the associated container
+     * @param l initializer list of std::strings used to create the
+     *          HandleKeys
+     * @param doc documentation string
+     *
+     * All decorations will be read from the container referenced
+     * by @contKey.
+     */
+    template <std::derived_from<IProperty> OWNER, class T = T_HandleKey>
+    requires T::isDecorHandleKey
+    inline HandleKeyArray( OWNER* owner,
+                           std::string name,
+                           VarHandleKey& contKey,
+                           std::initializer_list<std::string> l,
+                           std::string doc="") :
+      VarHandleKeyArrayCommon<T_HandleKey> {contKey, l} {
       auto p = owner->declareProperty(std::move(name), *this, std::move(doc));
       p->template setOwnerType<OWNER>();
     }

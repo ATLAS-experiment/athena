@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 /*
 */
@@ -51,6 +51,7 @@
 
 //Header:
 #include "LArCoherentNoisefractionMonAlg.h"
+#include "TrigDecisionTool/TrigDecisionTool.h"
 
 
 /*---------------------------------------------------------*/

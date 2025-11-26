@@ -1748,10 +1748,10 @@ class TopoAlgoDef:
         TeAsymmetry_map = [
         {  
             "algoname"  : "TeAsymmetry-jTENoSort",
-            "deltaAbsMin" : [0,10,0,0],
-            "asymFactor" : [0,0,0.2,0],
-            "asymOffset" : [0,0,0,0],
-            "maxTeProduct": [5000,10000,999999,999999],
+            "deltaAbsMin" : [5, 5, 3, 7],
+            "asymFactor" : [1, 1.05, 1, 0.9],
+            "asymOffset" : [-5, -24, -5, -7],
+            "maxTeProduct": [200, 200, 200, 200],
         }
         ]
 
@@ -1783,12 +1783,12 @@ class TopoAlgoDef:
         TeATIME_map = [
         {  
             "algoname"     : "TeATIME-jTENoSort",
-            "teFlavor"     : [1,1,1,3], # 0 = off, 1 = full jTE, 2 = central jTE, 3 = forward jTE (A+C side)
-            "combination"  : [0,1,2,1], # 0 = require both, 1 = require factor, 2 = require offset, 3 = require any of the two criteria
-            "nextBcOffset" : [10,10,10,10], # offset added to upcoming BC's jTE (in GeV, fractional values down to 100 MeV are possible). 
-                                            # The 'offset' criterion is considered as passed if this sum exceeds the current BC's jTE value,
-                                            # i.e., to require a minimum *increase* in jTE in the next BC this should be a *negative* value!
-            "nextBcFactor" : [2.5,2.5,2.5,2.5] # factor by which upcoming BC's jTE must be larger than current BC's jTE value
+            "teFlavor"     : [2,1,1,3], # 0 = off, 1 = full jTE, 2 = central jTE, 3 = forward jTE (A+C side)
+            "combination"  : [0,0,2,1], # 0 = require both, 1 = require factor, 2 = require offset, 3 = require any of the two criteria
+            "nextBcOffset" : [-2.5,10,10,10], # offset added to upcoming BC's jTE (in GeV, fractional values down to 100 MeV are possible). 
+                                              # The 'offset' criterion is considered as passed if this sum exceeds the current BC's jTE value,
+                                              # i.e., to require a minimum *increase* in jTE in the next BC this should be a *negative* value!
+            "nextBcFactor" : [0.9,2.5,2.5,2.5] # factor by which upcoming BC's jTE must be larger than current BC's jTE value
         }
         ]
 
@@ -2535,25 +2535,31 @@ class TopoAlgoDef:
             MinEt2: float
             DeltaPhiMin: int = 23
             DeltaPhiMax: int = 32
-            MinInvMass: int = 0  # Algorithm uses MinMSqr
-            MaxInvMass : int = 1000  # Algorithm uses MaxMSqr
-            MinSumEt: int = 0
-            MaxSumEt: int = 1000
+            MinInvMassSq: float = 0  # Algorithm uses MinMSqr
+            MaxInvMassSq: float = 1000 ** 2  # Algorithm uses MaxMSqr
+            MinSumEt: float = 0
+            MaxSumEt: float = 1000
 
         def AddInvMassDPhiSumETAlgos(otype: str, nleading, list_of_algos: list[InvMassDPhiSumETAlgoParams]):
             for x in list_of_algos:
                 # Check which parameters are set and choose correct algorithm
-                is_InvMass_set = x.MinInvMass != 0 or x.MaxInvMass != 1000
+                is_InvMass_set = x.MinInvMassSq != 0 or x.MaxInvMassSq != 1000 ** 2
                 is_SumEt_set = x.MinSumEt != 0 or x.MaxSumEt != 1000
                 algoname = AlgConf.InvariantMassDeltaPhiSumEtInclusive1 if is_SumEt_set else AlgConf.InvariantMassDeltaPhiInclusive1
 
-                obj = f'2{otype}{round(x.MinEt1)}s'
+                if float(x.MinEt1) != int(x.MinEt1):
+                    obj = f'2{otype}0{round(x.MinEt1 * 10)}s'  # e.g. MinEt1 = 0.7 → eTAU07
+                else:
+                    obj = f'2{otype}{round(x.MinEt1)}s'  # e.g. MinEt1 = 1 → eTAU1
                 toponame = f'{x.DeltaPhiMin}DPHI{x.DeltaPhiMax}-{obj}' # Always present
                 # Check Min/MaxSumEt only for algorithm which supports it
                 if is_SumEt_set:
                     toponame = f'{x.MinSumEt}SUM{x.MaxSumEt}-{toponame}'
                 if is_InvMass_set:
-                    toponame = f'{x.MinInvMass}INVM{x.MaxInvMass}-{toponame}'
+                    if float(x.MinInvMassSq) != int(x.MinInvMassSq) or float(x.MaxInvMassSq) != int(x.MaxInvMassSq):
+                        toponame = f'{round(x.MinInvMassSq * 10)}INVM{round(x.MaxInvMassSq * 10)}-{toponame}'
+                    else:
+                        toponame = f'{x.MinInvMassSq}INVM{x.MaxInvMassSq}-{toponame}'
                 log.debug('Define %s', toponame)
 
                 alg = algoname(name=toponame, inputs=[f'{otype}s'], outputs=[toponame])
@@ -2562,8 +2568,8 @@ class TopoAlgoDef:
                 alg.addgeneric('MaxTob', nleading)
                 alg.addvariable('MinET1',       x.MinEt1 * _et_conversion)
                 alg.addvariable('MinET2',       x.MinEt2 * _et_conversion)
-                alg.addvariable('MinMSqr',      (x.MinInvMass * _et_conversion) ** 2)  # Algoritm uses InvMass squared
-                alg.addvariable('MaxMSqr',      (x.MaxInvMass * _et_conversion) ** 2)
+                alg.addvariable('MinMSqr',      x.MinInvMassSq * (_et_conversion ** 2))  # Algoritm uses InvMass squared
+                alg.addvariable('MaxMSqr',      x.MaxInvMassSq * (_et_conversion ** 2))
                 alg.addvariable('MinDeltaPhi',  x.DeltaPhiMin * _phi_conversion)
                 alg.addvariable('MaxDeltaPhi',  x.DeltaPhiMax * _phi_conversion)
                 # Set Min/MaxSumEt only for algorithm which supports it
@@ -2574,28 +2580,16 @@ class TopoAlgoDef:
 
         # From ATR-30728
         algo_list = [
-            InvMassDPhiSumETAlgoParams(MinEt1=0.8, MinEt2=0.8, MinInvMass=1, MaxInvMass=200), # 1INVM200-23DPHI32_2eTAU1
-            InvMassDPhiSumETAlgoParams(MinEt1=0.8, MinEt2=0.8, MinInvMass=2, MaxInvMass=200), # 2INVM200-23DPHI32_2eTAU1
-            InvMassDPhiSumETAlgoParams(MinEt1=0.8, MinEt2=0.8, MinInvMass=3, MaxInvMass=200), # 3INVM200-23DPHI32_2eTAU1
-            InvMassDPhiSumETAlgoParams(MinEt1=0.8, MinEt2=0.8, MinInvMass=4, MaxInvMass=200), # 4INVM200-23DPHI32_2eTAU1
-            InvMassDPhiSumETAlgoParams(MinEt1=0.8, MinEt2=0.8, MinSumEt=3,   MaxSumEt=200),   # 3SUM200-23DPHI32_2eTAU1
-            InvMassDPhiSumETAlgoParams(MinEt1=0.8, MinEt2=0.8, MinSumEt=4,   MaxSumEt=200),   # 4SUM200-23DPHI32_2eTAU1
+            InvMassDPhiSumETAlgoParams(MinEt1=0.7, MinEt2=0.7, DeltaPhiMin=24, MinInvMassSq=2.3, MaxInvMassSq=200 ** 2), # 23INVM400000-24DPHI32-2eTAU07
+            InvMassDPhiSumETAlgoParams(MinEt1=0.7, MinEt2=0.7, DeltaPhiMin=24, MinInvMassSq=2.8, MaxInvMassSq=200 ** 2), # 28INVM400000-24DPHI32-2eTAU07
+            InvMassDPhiSumETAlgoParams(MinEt1=0.8, MinEt2=0.8, DeltaPhiMin=25, MinInvMassSq=2.3, MaxInvMassSq=200 ** 2), # 23INVM400000-25DPHI32-2eTAU08
+            InvMassDPhiSumETAlgoParams(MinEt1=0.7, MinEt2=0.7, DeltaPhiMin=25, MinInvMassSq=3.3, MaxInvMassSq=200 ** 2), # 33INVM400000-25DPHI32-2eTAU07
+            InvMassDPhiSumETAlgoParams(MinEt1=0.7, MinEt2=0.7, DeltaPhiMin=27, MinInvMassSq=2.3, MaxInvMassSq=200 ** 2), # 23INVM400000-27DPHI32-2eTAU07
         ]
         AddInvMassDPhiSumETAlgos('eTAU', HW.eTauOutputWidthSort, algo_list)
 
         # From ATR-30727
-        algo_list = [
-            InvMassDPhiSumETAlgoParams(MinEt1=5, MinEt2=5, DeltaPhiMin=20, MinInvMass=10, MaxInvMass=200), # 10INVM200-20DPHI32_2jJ5
-            InvMassDPhiSumETAlgoParams(MinEt1=5, MinEt2=5, DeltaPhiMin=20, MinInvMass=15, MaxInvMass=200), # 15INVM200-20DPHI32_2jJ5
-            InvMassDPhiSumETAlgoParams(MinEt1=5, MinEt2=5, DeltaPhiMin=20, MinInvMass=20, MaxInvMass=200), # 20INVM200-20DPHI32_2jJ5
-            InvMassDPhiSumETAlgoParams(MinEt1=5, MinEt2=5, DeltaPhiMin=20, MinInvMass=25, MaxInvMass=200), # 25INVM200-20DPHI32_2jJ5
-            InvMassDPhiSumETAlgoParams(MinEt1=5, MinEt2=5, DeltaPhiMin=20, MinSumEt=10,   MaxSumEt=200), # 10SUM200-20DPHI32_2jJ5
-            InvMassDPhiSumETAlgoParams(MinEt1=5, MinEt2=5, DeltaPhiMin=20, MinSumEt=15,   MaxSumEt=200), # 15SUM200-20DPHI32_2jJ5
-            InvMassDPhiSumETAlgoParams(MinEt1=5, MinEt2=5, DeltaPhiMin=20, MinSumEt=20,   MaxSumEt=200), # 20SUM200-20DPHI32_2jJ5
-            InvMassDPhiSumETAlgoParams(MinEt1=5, MinEt2=5, DeltaPhiMin=20, MinSumEt=25,   MaxSumEt=200), # 25SUM200-20DPHI32_2jJ5
-            InvMassDPhiSumETAlgoParams(MinEt1=5, MinEt2=5, DeltaPhiMin=20, MinInvMass=15, MaxInvMass=200, MinSumEt=15, MaxSumEt=200), # 15INVM200-15SUM200-20DPHI32_2jJ5
-            InvMassDPhiSumETAlgoParams(MinEt1=5, MinEt2=5, DeltaPhiMin=20, MinInvMass=20, MaxInvMass=200, MinSumEt=20, MaxSumEt=200), # 20INVM200-20SUM200-20DPHI32_2jJ5
-        ]
+        algo_list = []
         AddInvMassDPhiSumETAlgos('jJ', HW.jJetOutputWidthSort, algo_list)
 
         # g-2 tau (ATR-30638)

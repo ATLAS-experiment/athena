@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -15,13 +15,6 @@
 #include <string_view>
 
 namespace DerivationFramework {
-
-  InDetTrackSelectionToolWrapper::InDetTrackSelectionToolWrapper(const std::string& t,
-      const std::string& n,
-      const IInterface* p) :
-    base_class(t,n,p)
-  {
-  }
 
   StatusCode InDetTrackSelectionToolWrapper::initialize()
   {
@@ -46,16 +39,9 @@ namespace DerivationFramework {
     return StatusCode::SUCCESS;
   }
 
-  StatusCode InDetTrackSelectionToolWrapper::finalize()
-  {
-    return StatusCode::SUCCESS;
-  }
 
-  StatusCode InDetTrackSelectionToolWrapper::addBranches() const
+  StatusCode InDetTrackSelectionToolWrapper::addBranches(const EventContext& ctx) const
   {
-
-    // Get current context 
-    const EventContext& ctx = Gaudi::Hive::currentContext();
 
     // retrieve track container
     SG::ReadHandle<xAOD::TrackParticleContainer> tracks(m_tracksKey, ctx);

@@ -162,7 +162,7 @@ ZdcID::initLevelsFromDict()
     }
 
     // Find a ZDC region
-    IdDictField* field = m_dict->find_field("subdet");
+    const IdDictField* field = m_dict->find_field("subdet");
     if (field) {
         m_FORWARD_INDEX = field->index();
     }

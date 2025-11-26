@@ -1,8 +1,7 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-// $Id: DbReflex.cpp 717955 2016-01-15 13:34:52Z mnowak $
 //====================================================================
 //  Package    : StorageSvc (The POOL project)
 //
@@ -29,7 +28,7 @@ mutex_t guidMapMutex;
    This must match the GUIDs in selection.xml files.
    GUIDs should never change, so it is safe to hardcode them here.
 */
-const std::pair<Guid, const char*> GuidToClname[] = {
+constexpr std::pair<Guid, const char*> GuidToClname[] = {
    {Guid("F41DF744-242D-11E6-B472-02163E010CEC"), "xAOD::TrackParticleAuxContainer_v3"}
   ,{Guid("8251F481-EA4C-4852-AE72-BED87E6FD2FB"), "xAOD::MuonAuxContainer_v4"}
   ,{Guid("89AE2C6B-A862-499C-8BDA-11D24FAC83F1"), "xAOD::JetTrigAuxContainer_v1"}
@@ -140,9 +139,9 @@ const TypeH DbReflex::forGuid(const Guid& id)
         if( typ ) {
            Guid g( guid( typ ) );  // call this to update guid->type maps
            if( g != id ) {
-              // inconsistency with XML and hardcoded GUID??
-              log << DbPrintLvl::Error << "GUID query for " << id << " found GUID missmatch! "
-                  << el.second << " -> " << g << DbPrint::endmsg;
+               // inconsistency with XML and hardcoded GUID??
+               log << MSG::ERROR << "GUID query for " << id << " found GUID mismatch! "
+                   << el.second << " -> " << g << endmsg;
            }
         }
         return typ;
@@ -153,7 +152,7 @@ const TypeH DbReflex::forGuid(const Guid& id)
   std::lock_guard<std::mutex> lock (guidScanMutex);
 
   // GUID not in the map: scan all known types. refresh the map
-  log << DbPrintLvl::Warning << " doing GUID scan on ALL types for Class ID=" << id << DbPrint::endmsg;
+  log << MSG::WARNING << " doing GUID scan on ALL types for Class ID=" << id << endmsg;
 
   // disable TClass autoloading/parsing, restore settings on return
   class AutoloadGuard {
@@ -174,18 +173,18 @@ const TypeH DbReflex::forGuid(const Guid& id)
      TypeH t = TypeH::TypeAt(i); // This may change/increase TypeH::TypeSize(), can't optimize
      size_t sz_new = TypeH::TypeSize();
      if (sz_new > sz) {
-        log << DbPrintLvl::Debug << " ROOT gClassTable size increase for " << t.Name() << DbPrint::endmsg;
+        log << MSG::DEBUG << " ROOT gClassTable size increase for " << t.Name() << endmsg;
         sz = sz_new;
      }
      if( t.IsClass() || t.IsStruct() )  {
         Guid g = guid(t);
         if( ::memcmp(&g, &id, sizeof(Guid))==0 )  {
-           log << DbPrintLvl::Debug << "Resolved class ID " << id << " to " << t.Name() << DbPrint::endmsg;
+           log << MSG::DEBUG << "Resolved class ID " << id << " to " << t.Name() << endmsg;
            return t;
         }
      }
   }
 
-  log << DbPrintLvl::Warning << "Type lookup for class ID " << id << " failed" << DbPrint::endmsg; 
+  log << MSG::WARNING << "Type lookup for class ID " << id << " failed" << endmsg; 
   return TypeH();
 }

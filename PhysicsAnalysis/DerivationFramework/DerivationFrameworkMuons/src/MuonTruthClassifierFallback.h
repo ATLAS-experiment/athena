@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef DERIVATIONFRAMEWORK_MuonTruthClassifierFallback_H
 #define DERIVATIONFRAMEWORK_MuonTruthClassifierFallback_H
@@ -19,37 +19,42 @@
 #include "xAODTruth/TruthPileupEventContainer.h"
 
 namespace DerivationFramework {
-    class MuonTruthClassifierFallback : public extends<AthAlgTool, IAugmentationTool> {
-    public:
-        /** Constructor with parameters */
-        MuonTruthClassifierFallback(const std::string& t, const std::string& n, const IInterface* p);
+  class MuonTruthClassifierFallback : public extends<AthAlgTool, IAugmentationTool> {
+  public:
 
-        /** Destructor */
-        ~MuonTruthClassifierFallback() = default;
+    using base_class::base_class;
 
-        // Athena algtool's Hooks
-        StatusCode initialize() override;
+    // Athena algtool's Hooks
+    virtual StatusCode initialize() override;
 
-        virtual StatusCode addBranches() const override;
+    virtual StatusCode addBranches(const EventContext& ctx) const override;
 
-    private:
-        SG::ReadHandleKey<xAOD::IParticleContainer> m_containerKey{this, "ContainerKey", "", "Key of the container to be decorated"};
-        SG::ReadHandleKey<xAOD::TruthEventContainer> m_truthSGKey{this, "TruthSGKey", "TruthEvents", "Key of the truth event container"};
-        SG::ReadHandleKey<xAOD::TruthPileupEventContainer> m_truthPileupSGKey{this, "TruthPileupContainerKey", "TruthPileupEvents",
-                                                                              "Key of the pile-up event container"};
-        SG::ReadHandleKey<xAOD::TruthParticleContainer> m_truthMuonSGKey{this, "TruthMuonContainerKey", "MuonTruthParticles", ""};
+  private:
+    SG::ReadHandleKey<xAOD::IParticleContainer> m_containerKey{this, "ContainerKey", "", "Key of the container to be decorated"};
+    SG::ReadHandleKey<xAOD::TruthEventContainer> m_truthSGKey{this, "TruthSGKey", "TruthEvents", "Key of the truth event container"};
+    SG::ReadHandleKey<xAOD::TruthPileupEventContainer> m_truthPileupSGKey{this, "TruthPileupContainerKey", "TruthPileupEvents",
+      "Key of the pile-up event container"};
+    SG::ReadHandleKey<xAOD::TruthParticleContainer> m_truthMuonSGKey{this, "TruthMuonContainerKey", "MuonTruthParticles", ""};
 
-        /// Key properties are overwirrten during initialize
-        SG::WriteDecorHandleKey<xAOD::IParticleContainer> m_Truth_dR_Key{this, "dRDecoration", ""};
-        SG::WriteDecorHandleKey<xAOD::IParticleContainer> m_Truth_type_Key{this, "typeDecoration", ""};
-        SG::WriteDecorHandleKey<xAOD::IParticleContainer> m_Truth_origin_Key{this, "originDecoration", ""};
-        SG::WriteDecorHandleKey<xAOD::IParticleContainer> m_Truth_PU_dR_Key{this, "dRDecorationPU", ""};
-        SG::WriteDecorHandleKey<xAOD::IParticleContainer> m_Truth_PU_type_Key{this, "typeDecorationPU", ""};
-        SG::WriteDecorHandleKey<xAOD::IParticleContainer> m_Truth_PU_origin_Key{this, "originDecorationPU", ""};
+    // FIXME These WriteDecorHandles are not being used. The
+    // Decorators defined at the top of the .cxx are (incorrectly)
+    // used instead.
+    SG::WriteDecorHandleKey<xAOD::IParticleContainer> m_Truth_dR_Key{
+      this, "dRDecoration", m_containerKey, "MCTFallback_dR"};
+    SG::WriteDecorHandleKey<xAOD::IParticleContainer> m_Truth_type_Key{
+      this, "typeDecoration", m_containerKey, "MCTFallback_truthType"};
+    SG::WriteDecorHandleKey<xAOD::IParticleContainer> m_Truth_origin_Key{
+      this, "originDecoration", m_containerKey, "MCTFallback_truthOrigin"};
+    SG::WriteDecorHandleKey<xAOD::IParticleContainer> m_Truth_PU_dR_Key{
+      this, "dRDecorationPU", m_containerKey, "MCTFallbackPU_dR"};
+    SG::WriteDecorHandleKey<xAOD::IParticleContainer> m_Truth_PU_type_Key{
+      this, "typeDecorationPU", m_containerKey, "MCTFallbackPU_truthType"};
+    SG::WriteDecorHandleKey<xAOD::IParticleContainer> m_Truth_PU_origin_Key{
+      this, "originDecorationPU", m_containerKey, "MCTFallbackPU_truthOrigin"};
 
-        Gaudi::Property<float> m_minPt{this, "MinPt", 2500};
+    Gaudi::Property<float> m_minPt{this, "MinPt", 2500};
 
-        ToolHandle<IMCTruthClassifier> m_mcTruthClassifier{this, "MCTruthClassifierTool", "", "Handle of the MC truth classifier"};
-    };
+    ToolHandle<IMCTruthClassifier> m_mcTruthClassifier{this, "MCTruthClassifierTool", "", "Handle of the MC truth classifier"};
+  };
 }  // namespace DerivationFramework
 #endif  //

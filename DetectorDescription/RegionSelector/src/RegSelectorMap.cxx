@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <cmath>
@@ -743,7 +743,7 @@ void RegSelectorMap::insertList(std::list<RegSelectorMapElement> &dataList, int 
 				 etaminIn,etamaxIn,
 				 phiminIn, phimaxIn,
 				 hashIdIn, robIdIn);
-    dataList.push_back( newElement );
+    dataList.push_back( std::move(newElement) );
   }
 }
 

@@ -70,7 +70,7 @@
 
    <!-- xAOD::TrigT2ZdcSignals auxiliary type(s). -->
    <class name="xAOD::TrigT2ZdcSignalsAuxContainer_v1"
-          id="83B9F174-5E27-11E4-98C2-02163E00A82" />
+          id="83B9F174-5E27-11E4-98C2-02163E00A802" />
    <typedef name="xAOD::TrigT2ZdcSignalsAuxContainer" />
 
 </lcgdict>

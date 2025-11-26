@@ -1,6 +1,6 @@
 #!/bin/env python
 
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 #
 # ----------------------------------------------------------------
 # Script : AtlRunQueryTriggerUtils.py
@@ -354,7 +354,6 @@ def _get_mysql_cursor (host, db, user, passwd=""):
 
 def getTriggerDBCursorForAlias(dbAlias):
 
-    global __cursor_schema
     if dbAlias in __cursor_schema:
         return __cursor_schema[dbAlias] # return the correct cursor and schema name
 

@@ -3,7 +3,7 @@
   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #include "GeoModelsTgcTest.h"
-#include <ActsGeometryInterfaces/ActsGeometryContext.h>
+#include <ActsGeometryInterfaces/GeometryContext.h>
 #include <MuonReadoutGeometryR4/sTgcReadoutElement.h>
 #include <EventPrimitives/EventPrimitivesToStringConverter.h>
 #include <fstream>
@@ -87,9 +87,9 @@ StatusCode GeoModelsTgcTest::finalize() {
 StatusCode GeoModelsTgcTest::execute() {
     const EventContext& ctx{Gaudi::Hive::currentContext()};
 
-    const ActsGeometryContext* geoContextHandle{nullptr};
+    const ActsTrk::GeometryContext* geoContextHandle{nullptr};
     ATH_CHECK(SG::get(geoContextHandle, m_geoCtxKey, ctx));
-    const ActsGeometryContext& gctx{*geoContextHandle};
+    const ActsTrk::GeometryContext& gctx{*geoContextHandle};
 
 
     for (const Identifier& test_me : m_testStations) {
@@ -175,7 +175,7 @@ StatusCode GeoModelsTgcTest::execute() {
 }
 
 StatusCode GeoModelsTgcTest::dumpToTree(const EventContext& ctx,
-                                       const ActsGeometryContext& gctx, 
+                                       const ActsTrk::GeometryContext& gctx, 
                                        const sTgcReadoutElement* reElement){
     
     m_stIndex    = reElement->stationName();

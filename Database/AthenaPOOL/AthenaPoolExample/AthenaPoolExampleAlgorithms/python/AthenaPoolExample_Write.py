@@ -99,15 +99,6 @@ acc.merge( IOVDbSvcCfg( flags ) )
 # Pool writing
 acc.addEventAlgo( CompFactory.AthPoolEx.WriteData("WriteData", OutputLevel = DEBUG) )
 
-WriteTag = CompFactory.AthPoolEx.WriteTag("WriteTag", OutputLevel = DEBUG)
-WriteTag.Magic = 1
-acc.addEventAlgo( WriteTag )
-
-MagicWriteTag = CompFactory.AthPoolEx.WriteTag("MagicWriteTag", OutputLevel = DEBUG)
-MagicWriteTag.Key = "MagicTag"
-MagicWriteTag.Magic = 24
-acc.addEventAlgo( MagicWriteTag )
-
 # ----------------  Output Stream 1 configuration
 from AthenaPoolExampleAlgorithms.AthenaPoolExampleConfig import AthenaPoolExampleWriteCfg
 acc.merge( AthenaPoolExampleWriteCfg( flags, stream1name, writeCatalog = "file:Catalog1.xml",
@@ -117,16 +108,12 @@ stream1ca = OutputStreamCfg( flags, stream1name, disableEventTag = noTag,
                              ItemList = [
                                  'EventInfo#*', 'EventStreamInfo#*',
                                  'ExampleHitContainer#MyHits', 'ExampleHitContainer#PetersHits' ] )
-stream1 = stream1ca.getEventAlgo( outputStreamName( stream1name ) )
-stream1.WritingTool.AttributeListKey = MagicWriteTag.Key
 acc.merge( stream1ca )
 
 # ----------------  Output Stream 2 configuration
 acc.merge( AthenaPoolExampleWriteCfg( flags, stream2name, disableEventTag = noTag ) )
 stream2ca = OutputStreamCfg(flags, stream2name, disableEventTag = noTag,
                             ItemList = ['EventInfo#*', 'ExampleHitContainer#MyHits'] )
-stream2 = stream2ca.getEventAlgo( outputStreamName( stream2name ) )
-stream2.WritingTool.AttributeListKey = "RunEventTag"
 acc.merge( stream2ca )
 
 # ----------------  Output Stream 3 configuration
@@ -137,14 +124,6 @@ stream3ca = OutputStreamCfg(flags, stream3name, disableEventTag = noTag )
 stream3 = stream3ca.getEventAlgo( outputStreamName( stream3name ) )
 stream3.RequireAlgs = [ "PassNoneFilter" ]
 acc.merge( stream3ca )
-
-#--------------------------------------------------------------
-# Set output level threshold (2=DEBUG, 3=INFO, 4=WARNING, 5=ERROR, 6=FATAL)
-#--------------------------------------------------------------
-stream1.WritingTool.OutputLevel = 3
-stream1.HelperTools[0].OutputLevel = 3
-stream2.WritingTool.OutputLevel = 3
-stream2.HelperTools[0].OutputLevel = 3
 
 # Run
 import sys

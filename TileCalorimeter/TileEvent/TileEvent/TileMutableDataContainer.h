@@ -1,6 +1,6 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 /*
  */
@@ -22,7 +22,7 @@
 #include "TileIdentifier/TileRawChannelUnit.h"
 #include "Identifier/IdentifierHash.h"
 #include "AthContainers/DataVector.h"
-#include "AthenaKernel/ILockable.h"
+#include "SGCore/ILockable.h"
 #include "GaudiKernel/StatusCode.h"
 #include <vector>
 #include <memory>
@@ -101,7 +101,7 @@ public:
   // Const version is inherited.
   using BASE::addCollection;
 
-  
+
   /**
    * @brief Add a new channel.
    * @param rch Channel to add.
@@ -130,7 +130,7 @@ public:
    */
   Collection* indexFindPtr (IdentifierHash hash);
 
-  
+
   // Const version is inherited.
   using BASE::indexFindPtr;
 
@@ -140,7 +140,7 @@ public:
    */
   StatusCode status() const;
 
-  
+
   /**
    * @brief Lock this object.
    *
@@ -160,7 +160,7 @@ protected:
    */
   void recycle();
 
-  
+
 private:
   /// Non-const references to collections, indexed by hash value.
   std::vector<Collection*> m_mutableCollections;

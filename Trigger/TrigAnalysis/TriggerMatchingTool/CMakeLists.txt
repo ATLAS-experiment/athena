@@ -12,7 +12,7 @@ atlas_add_library( TriggerMatchingToolLib
    TriggerMatchingTool/*.h Root/*.cxx
    PUBLIC_HEADERS TriggerMatchingTool
    PRIVATE_INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
-   LINK_LIBRARIES AsgTools xAODBase TrigNavStructure TrigDecisionToolLib AnaAlgorithmLib CxxUtils
+   LINK_LIBRARIES AsgTools xAODBase TrigNavStructure TrigDecisionToolLib AnaAlgorithmLib CxxUtils SGCoreLib
    PRIVATE_LINK_LIBRARIES ${Boost_LIBRARIES} FourMomUtils xAODTrigger xAODEgamma)
 
 if( NOT XAOD_STANDALONE )

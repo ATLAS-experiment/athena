@@ -93,6 +93,8 @@ if __name__ == '__main__':
     from GlobalSimAlgCfg_hypo_mult_from_json import GlobalSimulationAlgCfg
     acc.merge(GlobalSimulationAlgCfg(flags, dump='GS_DUMP' in os.environ))
 
+    acc.getService("StoreGateSvc").Dump = True
+    
     if acc.run().isFailure():
         import sys
         sys.exit(1)

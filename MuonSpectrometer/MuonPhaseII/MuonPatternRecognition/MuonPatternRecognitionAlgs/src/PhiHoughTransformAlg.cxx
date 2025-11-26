@@ -80,7 +80,7 @@ std::unique_ptr<SegmentSeed>
         return std::make_unique<SegmentSeed>(etaMax.tanBeta(), etaMax.interceptY(), phiMax.x, phiMax.y, hitsOnMax.size(), std::move(hitsOnMax), etaMax.parentBucket());         
 }
 
-void PhiHoughTransformAlg::preProcessMaximum(const ActsGeometryContext& gctx,
+void PhiHoughTransformAlg::preProcessMaximum(const ActsTrk::GeometryContext& gctx,
                                              const HoughMaximum & maximum,
                                              HoughEventData& eventData) const{
     // reset the event data 
@@ -194,7 +194,7 @@ StatusCode PhiHoughTransformAlg::execute(const EventContext& ctx) const {
     const EtaHoughMaxContainer* maxima{nullptr};
     ATH_CHECK(SG::get(maxima, m_maxima, ctx));
 
-    const ActsGeometryContext* gctx{nullptr};
+    const ActsTrk::GeometryContext* gctx{nullptr};
     ATH_CHECK(SG::get(gctx, m_geoCtxKey, ctx));
 
     // book the event data object

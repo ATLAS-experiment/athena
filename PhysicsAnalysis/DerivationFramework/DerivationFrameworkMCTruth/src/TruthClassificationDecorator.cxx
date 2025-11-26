@@ -15,21 +15,6 @@
 #include <vector>
 #include <string>
 
-// Constructor
-DerivationFramework::TruthClassificationDecorator::TruthClassificationDecorator(const std::string& t,
-                                                                  const std::string& n,
-                                                                  const IInterface* p ) :
-base_class(t,n,p),
-m_ntotpart(0),
-m_classifier("MCTruthClassifier/MCTruthClassifier")
-{
-    declareProperty("MCTruthClassifier", m_classifier);
-}
-
-// Destructor
-DerivationFramework::TruthClassificationDecorator::~TruthClassificationDecorator() {
-}
-
 // Athena initialize and finalize
 StatusCode DerivationFramework::TruthClassificationDecorator::initialize()
 {
@@ -56,11 +41,10 @@ StatusCode DerivationFramework::TruthClassificationDecorator::finalize()
 }
 
 // Selection and collection creation
-StatusCode DerivationFramework::TruthClassificationDecorator::addBranches() const
+StatusCode DerivationFramework::TruthClassificationDecorator::addBranches(const EventContext& ctx) const
 {
-    
+
     // Event context for multi-threading
-    const EventContext& ctx = Gaudi::Hive::currentContext();
 
     // Retrieve truth collections
     SG::ReadHandle<xAOD::TruthParticleContainer> truthParticles(m_particlesKey,ctx);
@@ -68,13 +52,13 @@ StatusCode DerivationFramework::TruthClassificationDecorator::addBranches() cons
         ATH_MSG_ERROR("Couldn't retrieve TruthParticle collection with name " << m_particlesKey);
         return StatusCode::FAILURE;
     }
-  
+
     unsigned int nParticles = truthParticles->size();
     m_ntotpart += nParticles;
-    
+
     // Set up decorators
-    SG::WriteDecorHandle<xAOD::TruthParticleContainer, unsigned int> originDecorator(m_originDecoratorKey, ctx); 
-    SG::WriteDecorHandle<xAOD::TruthParticleContainer, unsigned int> typeDecorator(m_typeDecoratorKey, ctx);  
+    SG::WriteDecorHandle<xAOD::TruthParticleContainer, unsigned int> originDecorator(m_originDecoratorKey, ctx);
+    SG::WriteDecorHandle<xAOD::TruthParticleContainer, unsigned int> typeDecorator(m_typeDecoratorKey, ctx);
     SG::WriteDecorHandle<xAOD::TruthParticleContainer, unsigned int> outcomeDecorator(m_outcomeDecoratorKey, ctx);
     SG::WriteDecorHandle<xAOD::TruthParticleContainer, unsigned int> classificationDecorator(m_classificationDecoratorKey, ctx);
 
@@ -87,11 +71,10 @@ StatusCode DerivationFramework::TruthClassificationDecorator::addBranches() cons
         unsigned int particleOrigin = classification.second;
         typeDecorator(*((*truthParticles)[i])) = particleType;
         originDecorator(*((*truthParticles)[i])) = particleOrigin;
-        outcomeDecorator(*((*truthParticles)[i])) = particleOutCome;  
+        outcomeDecorator(*((*truthParticles)[i])) = particleOutCome;
 
-	classificationDecorator(*((*truthParticles)[i])) = result;
+        classificationDecorator(*((*truthParticles)[i])) = result;
     }
 
     return StatusCode::SUCCESS;
 }
-

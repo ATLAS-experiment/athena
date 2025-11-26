@@ -58,7 +58,8 @@ auto intAccessors = initAccessors<int>(
   "n_isotrack",
   "n_track",
   "n_tracks_lead",
-  "n_tracks_subl"
+  "n_tracks_subl",
+  "IsInDenseEnvironment"
   );
 
 auto int16Accessors = initAccessors<int16_t>("view",
@@ -235,7 +236,8 @@ auto floatAccessors = initAccessors<float>(
   "m_track_core",
   "m_tracks_lead",
   "m_tracks_subl",
-  "omni_score"
+  "omni_score",
+  "TracksExpectedEnergyDeposit"
   );
 
 auto doubleAccessors = initAccessors<double>("ptcone02", "ptcone03", "JetDensityEMPFlow",

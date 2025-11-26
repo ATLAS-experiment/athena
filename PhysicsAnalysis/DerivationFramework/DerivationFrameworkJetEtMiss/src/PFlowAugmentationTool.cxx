@@ -1,9 +1,9 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
-// PFlowAugmentationTool.cxx, (c) ATLAS Detector software
+// PFlowAugmentationTool.cxx
 ///////////////////////////////////////////////////////////////////
 // Author: Fabrice Balli (fabrice.balli@cern.ch), Chris Young (christopher.young@cern.ch)
 //
@@ -13,15 +13,6 @@
 #include "StoreGate/WriteDecorHandle.h"
 
 namespace DerivationFramework {
-
-  PFlowAugmentationTool::PFlowAugmentationTool(const std::string& t,
-                 const std::string& n,
-                 const IInterface* p) : 
-    base_class(t,n,p),
-    m_weightPFOTool("CP::WeightPFOTool/WeightPFOTool")
-  {
-    declareProperty("WeightPFOTool", m_weightPFOTool );
-  }
 
   StatusCode PFlowAugmentationTool::initialize()
   {
@@ -38,21 +29,15 @@ namespace DerivationFramework {
     return StatusCode::SUCCESS;
   }
 
-  StatusCode PFlowAugmentationTool::finalize()
+  StatusCode PFlowAugmentationTool::addBranches(const EventContext& ctx) const
   {
-    return StatusCode::SUCCESS;
-  }
-
-  StatusCode PFlowAugmentationTool::addBranches() const
-  {
-    const EventContext& ctx = Gaudi::Hive::currentContext();
     // Get the vertex.
     const xAOD::Vertex* pv{};
 
     auto vertexContainer = SG::makeHandle (m_vertexContainer_key, ctx);
     if (!vertexContainer.isValid()){
       ATH_MSG_WARNING("Invalid  xAOD::VertexContainer datahandle"
-		      << m_vertexContainer_key.key()); 
+                      << m_vertexContainer_key.key());
       return StatusCode::FAILURE;
     }
     auto pvcont = vertexContainer.cptr();
@@ -108,7 +93,7 @@ namespace DerivationFramework {
         continue;
       }
 
-      // decorate the track properties	
+      // decorate the track properties
       dec_z0(*cpfo) = ptrk->z0();
       dec_vz(*cpfo) = ptrk->vz();
       dec_d0(*cpfo) = ptrk->d0();
@@ -121,7 +106,7 @@ namespace DerivationFramework {
         ATH_CHECK( m_weightPFOTool->fillWeight( *cpfo, weight ) );
       }
 
-      // decorate the computed variables	
+      // decorate the computed variables
       dec_corrP4_pt(*cpfo) = weight*cpfo->pt();
       dec_envWeight(*cpfo) = weight;
     }

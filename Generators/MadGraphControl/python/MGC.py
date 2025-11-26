@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # Pythonized version of MadGraph steering executables
 #    written by Zach Marshall <zach.marshall@cern.ch>
@@ -108,7 +108,6 @@ class MGControl:
         self.MADGRAPH_COMMAND_STACK += ['# All jobs should start in a clean directory']
         self.MADGRAPH_COMMAND_STACK += ['mkdir standalone_test; cd standalone_test']
         self.MADGRAPH_COMMAND_STACK += [' '.join([python,madpath+'/bin/mg5_aMC '+plugin_cmd+' << EOF\n'+process+'\nEOF\n'])]
-        global MADGRAPH_CATCH_ERRORS
         generate = subprocess.Popen([python,madpath+'/bin/mg5_aMC',plugin_cmd,card_loc],stdin=subprocess.PIPE,stderr=subprocess.PIPE if MADGRAPH_CATCH_ERRORS else None)
         (out,err) = generate.communicate()
         error_check(err,generate.returncode)
@@ -185,6 +184,9 @@ class MGControl:
                 self.runCardDict['cudacpp_backend'] = 'cppauto'
             elif MADGRAPH_DEVICES.lower()=='madevent_gpu':
                 self.runCardDict['cudacpp_backend'] = 'cuda'
+                # In case we have "too new" a gcc version for the nvcc version on the node, which should be ok
+                # This patch should be temporary, but is fine while we are validating things at least
+                os.environ['ALLOW_UNSUPPORTED_COMPILER_IN_CUDA'] = 'Y'
             elif MADGRAPH_DEVICES.lower() == 'max':
                 self.mglog.warning('Not fully implemented yet; setting avx')
                 self.runCardDict['cudacpp_backend'] = 'cppauto'

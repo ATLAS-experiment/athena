@@ -57,6 +57,13 @@ StatusCode gFexByteStreamTool::initialize() {
     ATH_CHECK(m_gScalarEJwojReadKey.initialize(gScalarEJwojmode==ConversionMode::Encoding));
     ATH_MSG_DEBUG((gScalarEJwojmode==ConversionMode::Encoding ? "Encoding" : "Decoding") << " gScalarEJwoj ");
 
+    // Conversion mode for gEspresso TOBs
+    ConversionMode gEspressomode = getConversionMode(m_gEspressoReadKey, m_gEspressoWriteKey, msg());
+    ATH_CHECK(gEspressomode!=ConversionMode::Undefined);
+    ATH_CHECK(m_gEspressoWriteKey.initialize(gEspressomode==ConversionMode::Decoding));
+    ATH_CHECK(m_gEspressoReadKey.initialize(gEspressomode==ConversionMode::Encoding));
+    ATH_MSG_DEBUG((gEspressomode==ConversionMode::Encoding ? "Encoding" : "Decoding") << " gEspresso ");
+
     // Conversion mode for gMETComponentsJwoj TOBs
     ConversionMode gMETComponentsJwojmode = getConversionMode(m_gMETComponentsJwojReadKey, m_gMETComponentsJwojWriteKey, msg());
     ATH_CHECK(gMETComponentsJwojmode!=ConversionMode::Undefined);
@@ -179,6 +186,11 @@ StatusCode gFexByteStreamTool::convertFromBS(const std::vector<const ROBF*>& vro
     ATH_CHECK(gScalarEJwojContainer.record(std::make_unique<xAOD::gFexGlobalRoIContainer>(), std::make_unique<xAOD::gFexGlobalRoIAuxContainer>()));
     ATH_MSG_DEBUG("Recorded gFexJetGlobalContainer with key " << gScalarEJwojContainer.key());
 
+    //---gEspresso Container
+    SG::WriteHandle<xAOD::gFexGlobalRoIContainer> gEspressoContainer(m_gEspressoWriteKey, ctx);
+    ATH_CHECK(gEspressoContainer.record(std::make_unique<xAOD::gFexGlobalRoIContainer>(), std::make_unique<xAOD::gFexGlobalRoIAuxContainer>()));
+    ATH_MSG_DEBUG("Recorded gFexJetGlobalContainer with key " << gEspressoContainer.key());
+
     //---MET Components JwoJ Container
     SG::WriteHandle<xAOD::gFexGlobalRoIContainer> gMETComponentsJwojContainer(m_gMETComponentsJwojWriteKey, ctx);
     ATH_CHECK(gMETComponentsJwojContainer.record(std::make_unique<xAOD::gFexGlobalRoIContainer>(), std::make_unique<xAOD::gFexGlobalRoIAuxContainer>()));
@@ -245,6 +257,7 @@ StatusCode gFexByteStreamTool::convertFromBS(const std::vector<const ROBF*>& vro
         std::vector<uint32_t> JWOJ_MST(3, 0);
         std::vector<uint32_t> JWOJ_MET(3, 0);
         std::vector<uint32_t> JWOJ_SCALAR(3, 0);
+        std::vector<uint32_t> GESPRESSO(3, 0);
         std::vector<uint32_t> NC_MET(3, 0);
         std::vector<uint32_t> NC_SCALAR(3, 0);
         std::vector<uint32_t> RMS_MET(3, 0);
@@ -386,6 +399,12 @@ StatusCode gFexByteStreamTool::convertFromBS(const std::vector<const ROBF*>& vro
                                 if (blockType == 0x2) {JWOJ_SCALAR[1] = dataArray[index+iWord];}
                                 if (blockType == 0x3) {JWOJ_SCALAR[2] = dataArray[index+iWord];}
                             }
+                            //Saving gEspresso TOBs into the EDM container
+                            if (iWord == gPos::GESPRESSO_POSITION){
+                                if (blockType == 0x1) {GESPRESSO[0] = dataArray[index+iWord];}
+                                if (blockType == 0x2) {GESPRESSO[1] = dataArray[index+iWord];}
+                                if (blockType == 0x3) {GESPRESSO[2] = dataArray[index+iWord];}
+                            }
                             //Saving Noise Cut MET TOBs into the EDM container
                             if (iWord == gPos::NC_MET_POSITION){
                                 if (blockType == 0x1) {NC_MET[0] = dataArray[index+iWord];}
@@ -426,6 +445,8 @@ StatusCode gFexByteStreamTool::convertFromBS(const std::vector<const ROBF*>& vro
                 fillGlobal(JWOJ_MST, 4, gMSTComponentsJwojContainer);
                 int16_t scalar = fillGlobal(JWOJ_MET, 2, gMETComponentsJwojContainer);
                 fillGlobal(JWOJ_SCALAR, 1, gScalarEJwojContainer, scalar);
+
+                fillGlobal(GESPRESSO, 1, gEspressoContainer, 0);
                                 
                 scalar = fillGlobal(NC_MET, 2, gMETComponentsNoiseCutContainer);
                 fillGlobal(NC_SCALAR, 1, gScalarENoiseCutContainer, scalar);
@@ -463,7 +484,14 @@ int16_t gFexByteStreamTool::fillGlobal(const std::vector<uint32_t> &tob, const i
         if (x & 0x00080000) { x  = 0xFFFF0000 | x;  }
         if (y & 0x00080000) { y  = 0xFFFF0000 | y;  }
         sum_x += x;
+        if (container.key() == "L1_gScalarEJwoj" && y < 0) y = 0;
         sum_y += y;
+    }
+
+    // Special case for gEspresso: in the readout the gEspresso quantity is stored in x. We need to move it to y to armonize this with the other scalar quantities
+    // This is true for the readout only. On the realtime path gEspresso is sent to Topo on y (see https://docs.google.com/spreadsheets/d/15YVVtGofhXMtV7jXRFzWO0FVUtUAjS-X-aQjh3FKE_w/edit?gid=1546010783#gid=1546010783).
+    if  (container.key() == "L1_gEspresso" ) {
+        sum_y = sum_x; 
     }
 
     if (type == 1) {//we are considering the scalar case (sum_x = MET and sum_y = SumEt) 

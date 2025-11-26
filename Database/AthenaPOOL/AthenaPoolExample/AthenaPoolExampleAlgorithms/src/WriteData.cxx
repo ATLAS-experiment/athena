@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /** @file AthenaPoolExampleAlgorithms/src/WriteData.cxx
@@ -10,7 +10,7 @@
 
 #include "WriteData.h"
 
-// the user data-class defintions
+// the user data-class definitions
 #include "AthenaPoolExampleData/ExampleHitContainer.h"
 #include "StoreGate/WriteHandle.h"
 
@@ -20,9 +20,6 @@ using namespace AthPoolEx;
 WriteData::WriteData(const std::string& name, ISvcLocator* pSvcLocator)
   : AthReentrantAlgorithm(name, pSvcLocator)
 {
-}
-//___________________________________________________________________________
-WriteData::~WriteData() {
 }
 //___________________________________________________________________________
 StatusCode WriteData::initialize() {

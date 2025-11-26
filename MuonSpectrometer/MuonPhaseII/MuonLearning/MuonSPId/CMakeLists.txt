@@ -6,17 +6,17 @@ find_package( onnxruntime )
 
 
 # Component(s) in the package:
-atlas_add_component( MuonSPId
-                     src/*.cxx
-                     src/components/*.cxx
-                     LINK_LIBRARIES  AthenaBaseComps GeoPrimitives MuonIdHelpersLib  
-                                     MuonSimEvent xAODMuonSimHit StoreGateLib MdtCalibInterfacesLib
-                                     xAODMuonPrepData MuonSpacePoint xAODMuon MuonTesterTreeLib
-                                     MuonPatternEvent MuonPatternHelpers MuonPatternHelpers 
-                                     MuonInferenceInterfaces
-                                     ${ONNXRUNTIME_LIBRARIES}
-                                     )
-                                     
+atlas_add_component(MuonSPId
+                    src/*.cxx
+                    src/components/*.cxx
+                    LINK_LIBRARIES AthenaBaseComps GeoPrimitives MuonIdHelpersLib  
+                                    MuonSimEvent xAODMuonSimHit StoreGateLib MdtCalibInterfacesLib
+                                    xAODMuonPrepData MuonSpacePoint xAODMuon MuonTesterTreeLib
+                                    MuonPatternEvent MuonPatternHelpers MuonPatternHelpers 
+                                    MuonInferenceInterfaces
+                                    ${ONNXRUNTIME_LIBRARIES}
+                                    )
+
 atlas_install_python_modules( python/*.py)
 
 #atlas_add_test( testMuonSPId
@@ -26,3 +26,4 @@ atlas_install_python_modules( python/*.py)
 #                POST_EXEC_SCRIPT noerror.sh)
 
 # atlas_install_data( models/* )
+

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /** @file ReWriteData.cxx
@@ -10,7 +10,7 @@
 
 #include "ReWriteData.h"
 
-// the user data-class defintions
+// the user data-class definitions
 #include "AthenaPoolExampleData/ExampleHitContainer.h"
 #include "AthenaPoolExampleData/ExampleTrackContainer.h"
 #include "StoreGate/ReadHandle.h"
@@ -24,9 +24,6 @@ using namespace AthPoolEx;
 ReWriteData::ReWriteData(const std::string& name, ISvcLocator* pSvcLocator)
   : AthReentrantAlgorithm(name, pSvcLocator)
 {
-}
-//___________________________________________________________________________
-ReWriteData::~ReWriteData() {
 }
 //___________________________________________________________________________
 StatusCode ReWriteData::initialize() {
@@ -76,16 +73,16 @@ StatusCode ReWriteData::execute (const EventContext& ctx) const {
      eLink3.toContainedElement(*hitCont, (*hitCont)[3]);
      trackObj->getElementLinkVector()->push_back(eLink3);
      ATH_MSG_INFO("Link ElementLinkVector = " << trackObj->getElementLinkVector()->size());
-     for (ElementLinkVector<ExampleHitContainer>::iterator iter = trackObj->getElementLinkVector()->begin(); iter != trackObj->getElementLinkVector()->end(); ++iter) {
-       ATH_MSG_INFO("Element = " << (**iter) << " : " << (**iter)->getX());
+     for (const auto link : *trackObj->getElementLinkVector()) {
+       ATH_MSG_INFO("Element = " << (*link) << " : " << (*link)->getX());
      }
      
      // Print out Navigable elements
      trackObj->getNavigable()->putElement(hitCont.cptr(), *hitCont->begin());
      trackObj->getNavigable()->putElement(hitCont.cptr(), (*hitCont)[5]);
      ATH_MSG_INFO("Link Navigable = " << trackObj->getNavigable()->size());
-     for (Navigable<ExampleHitContainer>::object_iter iter = trackObj->getNavigable()->begin(); iter != trackObj->getNavigable()->end(); ++iter) {
-       ATH_MSG_INFO("Element = " << (*iter) << " : " << (*iter)->getX());
+     for (const auto* elem : *trackObj->getNavigable()) {
+       ATH_MSG_INFO("Element = " << elem << " : " << elem->getX());
      }
 
      // Print out WeightedNavigable elements
@@ -93,8 +90,8 @@ StatusCode ReWriteData::execute (const EventContext& ctx) const {
      trackObj->getWeightedNavigable()->putElement(hitCont.cptr(), (*hitCont)[5], 1.11);
      trackObj->getWeightedNavigable()->putElement(hitCont.cptr(), (*hitCont)[3], 5.55);
      ATH_MSG_INFO("Link Weighted Navigable = " << trackObj->getWeightedNavigable()->size());
-     for (Navigable<ExampleHitContainer, double>::object_iter iter = trackObj->getWeightedNavigable()->begin(); iter != trackObj->getWeightedNavigable()->end(); ++iter) {
-       ATH_MSG_INFO("Element = " << (*iter) << " : " << (*iter)->getX());
+     for (const auto* elem : *trackObj->getWeightedNavigable()) {
+       ATH_MSG_INFO("Element = " << elem << " : " << elem->getX());
      }
      
      // Print out Track info

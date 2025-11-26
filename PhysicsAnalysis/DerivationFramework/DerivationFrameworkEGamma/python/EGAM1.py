@@ -558,7 +558,7 @@ def EGAM1Cfg(flags):
         "PrimaryVertices",
         "InDetTrackParticles",
         "AntiKt4EMPFlowJets",
-        "BTagging_AntiKt4EMPFlow",
+
         "MET_Baseline_AntiKt4EMPFlow",
     ]
     if flags.Input.isMC:

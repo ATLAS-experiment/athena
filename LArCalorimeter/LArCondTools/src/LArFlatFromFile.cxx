@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArFlatFromFile.h"
@@ -44,12 +44,7 @@ void LArFlatFromFile::singleFloatFlat(const char* blobName, const std::string& i
   // we expect line per channel with Id, hash and value
   std::ifstream myfile(input);
   std::string line;
-  std::vector< std::vector<float> >  values;
-  for (unsigned gain=0;gain<nGain;++gain) {
-     std::vector<float> gval(m_hashMax);
-     for (unsigned hs=0;hs<m_hashMax;++hs) gval[hs]=1.0; // default
-     values.push_back(gval);
-  }   
+  std::vector< std::vector<float> >  values(nGain, std::vector<float>(m_hashMax,1.0f));
   unsigned id;
   unsigned hash;
   float value;
@@ -63,12 +58,12 @@ void LArFlatFromFile::singleFloatFlat(const char* blobName, const std::string& i
       }
       const HWIdentifier chid(id);
       if (value < 0) {
-        errIfConnected(chid,hash,blobName);
+        errIfConnected(chid,static_cast<int>(hash),blobName);
         value=1.0; //Default vaue is 1.0, since these are multiplicative constants
         ++nDefault;
       } 
       if (hash >= nGain) {
-        errIfConnected(chid,hash,blobName," Wrong Gain !!!");
+        errIfConnected(chid,static_cast<int>(hash),blobName," Wrong Gain !!!");
         hash=0; 
       }
 

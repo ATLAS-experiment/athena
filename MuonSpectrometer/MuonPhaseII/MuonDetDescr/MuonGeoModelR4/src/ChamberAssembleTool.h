@@ -48,7 +48,7 @@ class ChamberAssembleTool : public extends<AthAlgTool, IMuonReadoutGeomTool> {
        *  @param readoutEles: List of readout elements around which the bounding box shall be built
        *  @param globToLoc: Transformation to go from the global -> local chamber's frame 
        *  @param boundSet: Cache of create bounds to share the same bounds across multiple volumes */
-      TrfWithBounds boundingBox(const ActsGeometryContext& gctx,
+      TrfWithBounds boundingBox(const ActsTrk::GeometryContext& gctx,
                                const std::vector<const MuonReadoutElement*>& readoutEles,
                                const Amg::Transform3D& globToLoc,
                                Acts::VolumeBoundFactory& volBoundSet,

@@ -80,7 +80,8 @@ public:
       iss >> XWGTUP;
       iss >> SCALUP;
       iss >> AQEDUP;
-      iss >> AQCDUP; 
+      iss >> AQCDUP;
+      //coverity [tainted_data] 
       resize();
       for ( int i = 0; i < NUP; ++i ){
         iss >>  IDUP[i];
@@ -187,7 +188,7 @@ public:
     if (!p) return;
     auto barcode = p->attribute<HepMC3::IntAttribute>("barcode");
     if (barcode) {
-      m_vertexBC[barcode->value()] = p;
+      m_vertexBC[barcode->value()] = std::move(p);
     }
   }
 
@@ -206,7 +207,7 @@ public:
     if (!p) return;
     auto barcode = p->attribute<HepMC3::IntAttribute>("barcode");
     if (barcode) {
-      m_particleBC[barcode->value()] = p;
+      m_particleBC[barcode->value()] = std::move(p);
     }
   }
 

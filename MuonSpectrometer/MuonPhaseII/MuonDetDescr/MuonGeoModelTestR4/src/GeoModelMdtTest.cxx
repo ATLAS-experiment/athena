@@ -3,7 +3,7 @@
   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #include "GeoModelMdtTest.h"
-#include <ActsGeometryInterfaces/ActsGeometryContext.h>
+#include <ActsGeometryInterfaces/GeometryContext.h>
 #include <MuonReadoutGeometryR4/MdtReadoutElement.h>
 #include <MuonReadoutGeometryR4/SpectrometerSector.h>
 #include <GeoPrimitives/GeoPrimitivesToStringConverter.h>
@@ -17,7 +17,8 @@ namespace MuonGMR4{
 
 StatusCode GeoModelMdtTest::initialize() {
     ATH_CHECK(m_idHelperSvc.retrieve());
-    ATH_CHECK(m_geoCtxKey.initialize());    
+    ATH_CHECK(m_geoCtxKey.initialize()); 
+    ATH_CHECK(m_cablingKey.initialize(!m_cablingKey.empty()));   
     /// Prepare the TTree dump
     ATH_CHECK(m_tree.init(this));
 
@@ -91,10 +92,10 @@ StatusCode GeoModelMdtTest::finalize() {
 StatusCode GeoModelMdtTest::execute() {
     const EventContext& ctx{Gaudi::Hive::currentContext()};
     
-    const ActsGeometryContext* geoContextHandle{nullptr};
+    const ActsTrk::GeometryContext* geoContextHandle{nullptr};
     ATH_CHECK(SG::get(geoContextHandle, m_geoCtxKey, ctx));
 
-    const ActsGeometryContext& gctx{*geoContextHandle};
+    const ActsTrk::GeometryContext& gctx{*geoContextHandle};
 
     const MdtIdHelper& id_helper{m_idHelperSvc->mdtIdHelper()};
     for (const Identifier& test_me : m_testStations) {
@@ -167,9 +168,10 @@ void GeoModelMdtTest::dumpReadoutSideXML() const {
 
 }
 StatusCode GeoModelMdtTest::dumpToTree(const EventContext& ctx,
-                                       const ActsGeometryContext& gctx, 
+                                       const ActsTrk::GeometryContext& gctx, 
                                        const MdtReadoutElement* readoutEle) {
 
+                                  
    m_stIndex = readoutEle->stationName();
    m_stEta = readoutEle->stationEta();
    m_stPhi = readoutEle->stationPhi();
@@ -186,23 +188,37 @@ StatusCode GeoModelMdtTest::dumpToTree(const EventContext& ctx,
    const Amg::Transform3D& transform {readoutEle->localToGlobalTrans(gctx)};
    m_readoutTransform = transform;
    m_alignableNode  = readoutEle->alignableTransform()->getDefTransform();
-   
+
+   const MuonMDT_CablingMap* cabling{nullptr};
+   ATH_CHECK(SG::get(cabling, m_cablingKey, ctx)); 
    /// Loop over the tubes
    for (unsigned int lay = 1; lay <= readoutEle->numLayers(); ++lay) {
-      for (unsigned int tube = 1; tube <= readoutEle->numTubesInLay(); ++tube) {
-         const IdentifierHash measHash{readoutEle->measurementHash(lay,tube)};
-         if (!readoutEle->isValid(measHash)) continue;
-         const Amg::Transform3D& tubeTransform{readoutEle->localToGlobalTrans(gctx,measHash)};
-         m_tubeLay.push_back(lay);
-         m_tubeNum.push_back(tube);         
-         m_tubeTransform.push_back(tubeTransform);
-         m_tubePosInCh.push_back(readoutEle->msSector()->globalToLocalTrans(gctx) * 
-                                 readoutEle->center(gctx, measHash));
-         m_roPos.push_back(readoutEle->readOutPos(gctx, measHash));
-         m_tubeLength.push_back(readoutEle->tubeLength(measHash));
-         m_activeTubeLength.push_back(readoutEle->activeTubeLength(measHash));
-         m_wireLength.push_back(readoutEle->wireLength(measHash));
-      }
+        for (unsigned int tube = 1; tube <= readoutEle->numTubesInLay(); ++tube) {
+            const IdentifierHash measHash{readoutEle->measurementHash(lay,tube)};
+            if (!readoutEle->isValid(measHash)) continue;
+            const Amg::Transform3D& tubeTransform{readoutEle->localToGlobalTrans(gctx,measHash)};
+            m_tubeLay.push_back(lay);
+            m_tubeNum.push_back(tube);         
+            m_tubeTransform.push_back(tubeTransform);
+            m_tubePosInCh.push_back(readoutEle->msSector()->globalToLocalTrans(gctx) * 
+                                    readoutEle->center(gctx, measHash));
+            m_roPos.push_back(readoutEle->readOutPos(gctx, measHash));
+            m_tubeLength.push_back(readoutEle->tubeLength(measHash));
+            m_activeTubeLength.push_back(readoutEle->activeTubeLength(measHash));
+            m_wireLength.push_back(readoutEle->wireLength(measHash));
+            if (cabling) {
+                MdtCablingData translation{};
+                if (!cabling->convert(readoutEle->measurementId(measHash), translation) ||
+                    !cabling->getOnlineId(translation, msgStream())){
+                    ATH_MSG_FATAL("Cabling translation failed");
+                    return StatusCode::FAILURE;
+                }
+                m_cablingCSM.push_back(translation.csm);
+                m_cablingMROD.push_back(translation.mrod);
+                m_cablingTdcId.push_back(translation.tdcId);
+                m_cablingTdcCh.push_back(translation.channelId);
+            }
+        }
    }
 
    return m_tree.fill(ctx) ? StatusCode::SUCCESS : StatusCode::FAILURE;

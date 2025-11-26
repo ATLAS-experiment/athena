@@ -255,7 +255,7 @@ void testFallThroughLinks( const EventContext& ctx, MsgStream& log ) {
   }
   log << MSG::INFO << "Fall through works with links as expected" << endmsg;
 }
-
+//coverity[root_function]
 int main() {
   using namespace std;
 

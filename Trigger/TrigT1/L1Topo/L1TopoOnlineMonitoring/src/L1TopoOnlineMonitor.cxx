@@ -7,6 +7,7 @@
 
 // Trigger includes
 #include "xAODTrigger/L1TopoSimResults.h"
+#include "xAODTrigger/TrigCompositeAuxContainer.h"
 #include "TrigT1Result/CTP_Decoder.h"
 #include "L1TopoRDO/Helpers.h"
 #include "L1TopoRDO/L1TopoROD.h"
@@ -327,7 +328,7 @@ StatusCode L1TopoOnlineMonitor::doSimMon( DecisionBits& decisionBits, std::vecto
       }
       std::string name = "CableElec_";
       name += std::to_string(l1topo_dec->connectionId());
-      auto monTopoDec = Monitored::Collection(name, topoword);
+      auto monTopoDec = Monitored::Collection(std::move(name), topoword);
       Monitored::Group(m_monTool,monTopoDec);
     }
     else if (l1topo_dec->bitWidth() == 64) {
@@ -543,22 +544,22 @@ StatusCode L1TopoOnlineMonitor::doHwMon( DecisionBits& decisionBits, std::vector
   auto monTopo1Opt0 = Monitored::Collection("HdwTopo1Opt0", topo1Opt0Indices);
   auto monTopo1Opt0Weight = Monitored::Collection("HdwTopo1Opt0_weight", topo1Opt0);
   Monitored::Group(m_monTool, monTopo1Opt0, monTopo1Opt0Weight);
-  multWeights.push_back(topo1Opt0);
+  multWeights.push_back(std::move(topo1Opt0));
 
   auto monTopo1Opt1 = Monitored::Collection("HdwTopo1Opt1", topo1Opt1Indices);
   auto monTopo1Opt1Weight = Monitored::Collection("HdwTopo1Opt1_weight", topo1Opt1);
   Monitored::Group(m_monTool, monTopo1Opt1, monTopo1Opt1Weight);
-  multWeights.push_back(topo1Opt1);
+  multWeights.push_back(std::move(topo1Opt1));
 
   auto monTopo1Opt2 = Monitored::Collection("HdwTopo1Opt2", topo1Opt2Indices);
   auto monTopo1Opt2Weight = Monitored::Collection("HdwTopo1Opt2_weight", topo1Opt2);
   Monitored::Group(m_monTool, monTopo1Opt2, monTopo1Opt2Weight);
-  multWeights.push_back(topo1Opt2);
+  multWeights.push_back(std::move(topo1Opt2));
 
   auto monTopo1Opt3 = Monitored::Collection("HdwTopo1Opt3", topo1Opt3Indices);
   auto monTopo1Opt3Weight = Monitored::Collection("HdwTopo1Opt3_weight", topo1Opt3);
   Monitored::Group(m_monTool, monTopo1Opt3, monTopo1Opt3Weight);
-  multWeights.push_back(topo1Opt3);
+  multWeights.push_back(std::move(topo1Opt3));
   
   // Decisions ---------------------------------------------------------------
   triggerBits = l1topoResult->getDecisions();
@@ -784,7 +785,7 @@ std::vector<std::vector<std::pair<unsigned,unsigned>>> L1TopoOnlineMonitor::getS
 	  for(auto & t1 : l1menu.connector(connName).triggerLines()) {
 	    startbit.push_back(std::make_pair(t1.startbit(),t1.nbits()));
     }
-    startbit_vec.push_back(startbit);
+    startbit_vec.push_back(std::move(startbit));
   }
   return startbit_vec;
 }

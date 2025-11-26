@@ -18,7 +18,7 @@
 
 // PACKAGE
 #include "ActsInterop/Logger.h"
-#include "ActsGeometryInterfaces/ActsGeometryContext.h"
+#include "ActsGeometryInterfaces/GeometryContext.h"
 #include "ActsGeometryInterfaces/IActsMaterialJsonWriterTool.h"
 #include "ActsGeometryInterfaces/IActsMaterialStepConverterTool.h"
 #include "ActsGeometryInterfaces/IActsMaterialTrackWriterSvc.h"
@@ -127,7 +127,7 @@ StatusCode ActsMaterialMapping::finalize() {
     }
   }
   
-  auto context = m_trackingGeometryTool->getNominalGeometryContext();
+  const auto & context = m_trackingGeometryTool->getNominalGeometryContext();
   m_materialJsonWriterTool->write(context, detectorMaterial);
 
   return StatusCode::SUCCESS;

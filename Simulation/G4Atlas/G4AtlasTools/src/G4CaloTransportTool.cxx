@@ -4,6 +4,8 @@
 
 #include "G4CaloTransportTool.h"
 
+#include <memory>
+
 // Geant4 includes for for particle extrapolation
 #include "G4FieldTrack.hh"
 #include "G4FieldTrackUpdator.hh"
@@ -12,6 +14,13 @@
 #include "G4PVPlacement.hh"
 #include "G4PathFinder.hh"
 #include "G4TransportationManager.hh"
+
+thread_local std::unique_ptr<G4PropagatorInField, G4CaloTransportTool::Deleter> G4CaloTransportTool::s_propagator;
+
+void G4CaloTransportTool::Deleter::operator()(G4PropagatorInField* ptr) const {
+  delete ptr->GetNavigatorForPropagating();
+  delete ptr;
+}
 
 G4CaloTransportTool::G4CaloTransportTool(const std::string& type,
                                          const std::string& name,
@@ -23,12 +32,6 @@ StatusCode G4CaloTransportTool::finalize() {
   // Delete the world volume if we created it
   if (m_useSimplifiedGeo)
     delete m_worldVolume;
-
-  // Delete the navigators and propagators for each thread
-  for (auto& mapPair : m_propagatorHolder.getMap()) {
-    delete mapPair.second->GetNavigatorForPropagating();
-    delete mapPair.second;
-  }
 
   return StatusCode::SUCCESS;
 }
@@ -55,11 +58,9 @@ StatusCode G4CaloTransportTool::initializePropagator() {
   }
 
   // Check if we already have propagator set up for the current thread
-  auto propagator = m_propagatorHolder.get();
   // If not, we create one
-  if (!propagator) {
-    propagator = makePropagator();
-    m_propagatorHolder.set(propagator);
+  if (!s_propagator) {
+    s_propagator = std::unique_ptr<G4PropagatorInField, Deleter>(makePropagator());
   } else {
     ATH_MSG_ERROR(
         "G4CaloTransportTool::initializePropagator() Propagator already "
@@ -108,15 +109,13 @@ G4PropagatorInField* G4CaloTransportTool::makePropagator() {
   // Create a new magnetic field propagator
   G4PropagatorInField* propagator =
       new G4PropagatorInField(navigator, fieldMgr);
-
   return propagator;
 }
 
 void G4CaloTransportTool::doStep(G4FieldTrack& fieldTrack) {
 
   // Get the propagator and navigator for the current thread
-  auto propagator = m_propagatorHolder.get();
-  auto navigator = propagator->GetNavigatorForPropagating();
+  auto navigator = s_propagator->GetNavigatorForPropagating();
 
   G4double retSafety = -1.0;
   G4double currentMinimumStep = 10.0 * CLHEP::m;
@@ -143,7 +142,7 @@ void G4CaloTransportTool::doStep(G4FieldTrack& fieldTrack) {
 
   } else {
     /* Charged particles: transport with magnetic field propagator */
-    propagator->ComputeStep(fieldTrack, currentMinimumStep, retSafety,
+    s_propagator->ComputeStep(fieldTrack, currentMinimumStep, retSafety,
                             currentPhysVol);
   }
 
@@ -157,7 +156,7 @@ std::vector<G4FieldTrack> G4CaloTransportTool::transport(
   int pdgId = G4InputTrack.GetDefinition()->GetPDGEncoding();
 
   // Get the navigator for the current thread
-  auto navigator = m_propagatorHolder.get()->GetNavigatorForPropagating();
+  auto navigator = s_propagator->GetNavigatorForPropagating();
 
   // Create a vector to store the output steps
   std::vector<G4FieldTrack> outputStepVector;

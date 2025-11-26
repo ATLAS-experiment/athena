@@ -18,83 +18,84 @@
 #include <vector>
 #include "xAODEventInfo/EventInfo.h"
 #include "xAODTracking/TrackParticleContainer.h"
+#include "xAODTracking/VertexContainer.h"
 // dummy EventContext for AnalysisBase
 #include "AsgTools/CurrentContext.h"
 
 namespace Trk {
-    class IVertexFitter;
-    class TrkVKalVrtFitter;
-    class IVertexCascadeFitter;
-    class VxCascadeInfo;
-    class V0Tools;
+  class IVertexFitter;
+  class TrkVKalVrtFitter;
+  class IVertexCascadeFitter;
+  class VxCascadeInfo;
+  class V0Tools;
 }
 
 namespace DerivationFramework {
-    class CascadeTools;
+  class CascadeTools;
 }
 
 
 namespace DerivationFramework {
 
-    class JpsiPlusV0Cascade : public extends<AthAlgTool, IAugmentationTool>
-    {
+  class JpsiPlusV0Cascade : public extends<AthAlgTool, IAugmentationTool>
+  {
+  public:
+    JpsiPlusV0Cascade(const std::string& t, const std::string& n, const IInterface*  p);
+    ~JpsiPlusV0Cascade();
+    virtual StatusCode initialize() override;
+    virtual StatusCode addBranches(const EventContext & ctx) const override;
+  private:
+    StatusCode performSearch(std::vector<Trk::VxCascadeInfo*>& cascadeinfoContainer, const EventContext& ctx ) const;
 
-        std::string m_vertexContainerKey;
-        std::string m_vertexV0ContainerKey;
-        std::vector<std::string> m_cascadeOutputsKeys;
+    SG::ReadHandleKey<xAOD::EventInfo> m_eventInfo_key{this, "EventInfo", "EventInfo", "Input event information"};
+    SG::ReadHandleKey<xAOD::VertexContainer> m_vertexContainerKey{this, "JpsiVertices", ""};
+    SG::ReadHandleKey<xAOD::VertexContainer> m_vertexV0ContainerKey{this, "V0Vertices", ""};
 
-        std::string   m_VxPrimaryCandidateName;   //!< Name of primary vertex container
+    SG::ReadHandleKey<xAOD::VertexContainer>  m_VxPrimaryCandidateName{this, "VxPrimaryCandidateName", "PrimaryVertices"};   //!< Name of primary vertex container
+    SG::ReadHandleKeyArray<xAOD::TrackParticleContainer> m_RelinkContainers{this, "RelinkTracks", {}, "Track Containers if they need to be relinked through indirect use" };
 
-        double m_jpsiMassLower;
-        double m_jpsiMassUpper;
-        double m_V0MassLower;
-        double m_V0MassUpper;
-        double m_MassLower;
-        double m_MassUpper;
+    SG::WriteHandleKeyArray<xAOD::VertexContainer> m_cascadeOutputsKeys{this, "CascadeVertexCollections", {"JpsiPlusV0CascadeVtx1", "JpsiPlusV0CascadeVtx2"} };
 
-        double m_mass_electron;
-        double m_mass_muon;
-        double m_mass_pion;
-        double m_mass_proton;
-        double m_mass_lambda;
-        double m_mass_ks;
-        double m_mass_jpsi;
-        double m_mass_b0;
-        double m_mass_lambdaB;
-        int m_v0_pid;
-        bool m_constrV0;
-        bool m_constrJpsi;
+    Gaudi::Property<double> m_jpsiMassLower{this, "JpsiMassLowerCut", 0.0};
+    Gaudi::Property<double> m_jpsiMassUpper{this, "JpsiMassUpperCut", 10000.0};
+    Gaudi::Property<double> m_V0MassLower{this, "V0MassLowerCut", 0.0};
+    Gaudi::Property<double> m_V0MassUpper{this, "V0MassUpperCut", 10000.0};
+    Gaudi::Property<double> m_MassLower{this, "MassLowerCut", 0.0};
+    Gaudi::Property<double> m_MassUpper{this, "MassUpperCut", 20000.0};
+    Gaudi::Property<int> m_v0_pid{this, "V0Hypothesis", 310};
+    Gaudi::Property<bool> m_constrV0{this, "ApplyV0MassConstraint", true};
+    Gaudi::Property<bool> m_constrJpsi{this, "ApplyJpsiMassConstraint", true};
 
-        SG::ReadHandleKey<xAOD::EventInfo> m_eventInfo_key{this, "EventInfo", "EventInfo", "Input event information"};
-        ToolHandle < Trk::TrkVKalVrtFitter > m_iVertexFitter;
-        ToolHandle < Analysis::PrimaryVertexRefitter > m_pvRefitter;
-        ToolHandle < Trk::V0Tools > m_V0Tools;
-        ToolHandle < DerivationFramework::CascadeTools > m_CascadeTools;
-        ServiceHandle<IPartPropSvc> m_partPropSvc{this, "PartPropSvc", "PartPropSvc"};
+    PublicToolHandle < Trk::TrkVKalVrtFitter > m_iVertexFitter{this, "TrkVertexFitterTool", "Trk::TrkVKalVrtFitter"};
+    ToolHandle < Analysis::PrimaryVertexRefitter > m_pvRefitter{this, "PVRefitter", "Analysis::PrimaryVertexRefitter"}; // private tool
+    PublicToolHandle < Trk::V0Tools > m_V0Tools{this, "V0Tools", "Trk::V0Tools"};
+    PublicToolHandle < DerivationFramework::CascadeTools > m_CascadeTools{this, "CascadeTools", "DerivationFramework::CascadeTools"};
+    ServiceHandle<IPartPropSvc> m_partPropSvc{this, "PartPropSvc", "PartPropSvc"};
 
-        int         m_jpsi_trk_pdg; // PDG ID for J/psi tracks, can be either 11 or 13
-        bool        m_refitPV;
-        Gaudi::Property<std::string>  m_refPVContainerName;
-        Gaudi::Property<std::string> m_jpsiTrackContainerName;
-        Gaudi::Property<std::string> m_v0TrackContainerName;
-        std::string m_hypoName;               //!< name of the mass hypothesis. E.g. Jpis, Upsi, etc. Will be used as a prefix for decorations
-        //This parameter will allow us to optimize the number of PVs under consideration as the probability
-        //of a useful primary vertex drops significantly the higher you go
-        int         m_PV_max;
-        int         m_DoVertexType;
-        size_t      m_PV_minNTracks;
+    Gaudi::Property<int> m_jpsi_trk_pdg{this, "JpsiTrackPDGID", 13}; // PDG ID for J/psi tracks, can be either 11 or 13
+    Gaudi::Property<bool> m_refitPV{this, "RefitPV",  true};
+    SG::WriteHandleKey<xAOD::VertexContainer> m_refPVContainerName{this, "RefPVContainerName", "RefittedPrimaryVertices"};
+    SG::ReadHandleKey<xAOD::TrackParticleContainer> m_jpsiTrackContainerName{this, "JpsiTrackContainerName", "InDetTrackParticles"};
+    SG::ReadHandleKey<xAOD::TrackParticleContainer> m_v0TrackContainerName{this, "V0TrackContainerName", "InDetTrackParticles"};
+    Gaudi::Property<std::string> m_hypoName{this, "HypothesisName", "Bd"}; //!< name of the mass hypothesis. E.g. Jpis, Upsi, etc. Will be used as a prefix for decorations
+    //This parameter will allow us to optimize the number of PVs under consideration as the probability
+    //of a useful primary vertex drops significantly the higher you go
+    Gaudi::Property<int> m_PV_max{this, "MaxnPV", 999};
+    Gaudi::Property<int> m_DoVertexType{this, "DoVertexType", 7};
+    Gaudi::Property<size_t> m_PV_minNTracks{this, "MinNTracksInPV", 0};
 
-    public:
-        JpsiPlusV0Cascade(const std::string& t, const std::string& n, const IInterface*  p);
-        ~JpsiPlusV0Cascade();
-        StatusCode initialize() override;
-        StatusCode performSearch(std::vector<Trk::VxCascadeInfo*> *cascadeinfoContainer, const EventContext& ctx ) const;
-        virtual StatusCode addBranches() const override;
-        SG::ReadHandleKeyArray<xAOD::TrackParticleContainer> m_RelinkContainers{this, "RelinkTracks", {}, "Track Containers if they need to be relinked through indirect use" };
-
-    };
+    // Locally cached particle mass constants
+    double m_mass_electron{0.};
+    double m_mass_muon{0.};
+    double m_mass_pion{0.};
+    double m_mass_proton{0.};
+    double m_mass_lambda{0.};
+    double m_mass_ks{0.};
+    double m_mass_jpsi{0.};
+    double m_mass_b0{0.};
+    double m_mass_lambdaB{0.};
+  };
 }
 
 
 #endif
-

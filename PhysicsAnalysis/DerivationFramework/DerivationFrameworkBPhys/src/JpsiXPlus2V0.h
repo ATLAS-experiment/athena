@@ -46,7 +46,7 @@ namespace DerivationFramework {
     virtual ~JpsiXPlus2V0() = default;
     virtual StatusCode initialize() override;
     StatusCode performSearch(std::vector<Trk::VxCascadeInfo*>& cascadeinfoContainer, const std::vector<std::pair<const xAOD::Vertex*,V0Enum> >& selectedV0Candidates, const EventContext& ctx) const;
-    virtual StatusCode addBranches() const override;
+    virtual StatusCode addBranches(const EventContext& ctx) const override;
 
   private:
     SG::ReadHandleKey<xAOD::VertexContainer> m_vertexJXContainerKey;

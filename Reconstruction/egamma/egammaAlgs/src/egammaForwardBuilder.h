@@ -41,12 +41,16 @@
 #include "xAODEgamma/Egamma.h"
 #include "xAODEgamma/ElectronContainer.h"
 //
+#include "xAODTracking/VertexContainer.h"
+#include "xAODEventInfo/EventInfo.h"
+//
 #include "egammaCaloUtils/egammaClusterCookieCut.h"
 //
 #include "egammaInterfaces/IEMTrackMatchBuilder.h"
 #include "egammaInterfaces/IegammaBaseTool.h"
 #include "egammaInterfaces/IegammaOQFlagsBuilder.h"
-//
+#include "EgammaAnalysisInterfaces/IegammaMVASvc.h"
+
 #include "EgammaAnalysisInterfaces/IAsgForwardElectronIsEMSelector.h"
 //
 #include <memory>
@@ -73,6 +77,7 @@ public:
 private:
   StatusCode RetrieveEMTrackMatchBuilder();
   StatusCode ExecObjectQualityTool(const EventContext& ctx, xAOD::Egamma* eg) const;
+  std::pair<unsigned int, float> getnPVmu(const EventContext& ctx) const;
 
   /** @brief Convinience wrapper to set track match values in all samplings. */
   void setAllTrackCaloMatchValues(
@@ -97,6 +102,35 @@ private:
     "EMTrackMatchBuilder",
     "Tool that matches tracks to egammaRecs (Fwd)"
   };
+
+  /** @brief Private member flag to do energy calibration. */
+  Gaudi::Property<bool> m_doEnergyCal {
+    this,
+    "doEnergyCal",
+    false,
+    "Boolean to do energy calibration"
+  };
+
+  /** @brief Input primary vertices for fwd energy calibration */
+  SG::ReadHandleKey<xAOD::VertexContainer> m_pVtxKey{
+    this,
+    "PrimaryVerticesContainerKey",
+    "",
+    "Name of the primary vertex container" };
+
+  /** @brief Input EventInfo for fwd energy calibration */
+  SG::ReadHandleKey<xAOD::EventInfo> m_eiKey{
+    this,
+    "EventInfoKey",
+    "",
+    "Name of the EventInfo object" };
+
+  /** @brief Handle to the MVA calibration service **/
+  ServiceHandle<IegammaMVASvc> m_MVACalibSvc{
+    this,
+    "MVACalibSvc",
+    "egammaMVASvc",
+    "calibration service" };
 
   /** @brief Input topo cluster type. */
   SG::ReadHandleKey<xAOD::CaloClusterContainer> m_topoClusterKey{

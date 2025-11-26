@@ -87,7 +87,6 @@ StatusCode FPGATrackSimBinnedHits::fill(
   for (const auto &step : m_bintool->steps()) {
 
     ATH_MSG_DEBUG("fill binning: step num " << stepnum << " " << step->stepName());
-    ATH_MSG_DEBUG("Number of valid bins (full) = " << step->validBinsFull().size());
     for (auto &bin : step->validBinsFull()) {
 
       // skip bin if it is invalid
@@ -160,7 +159,7 @@ StatusCode FPGATrackSimBinnedHits::fill(
         }
         
         if (m_binnedHitsStep[stepnum - 1][step->convertToPrev(bin.idx())].hits.size()!=0)
-        ATH_MSG_DEBUG("Bin Hit Count: step " << step.name()
+        ATH_MSG_VERBOSE("Bin Hit Count: step " << step.name()
           << " binidx = " << bin.idx()
           << " input hits = "  << m_binnedHitsStep[stepnum - 1][step->convertToPrev(bin.idx())].hits.size()
           << " layers=" << m_binnedHitsStep[stepnum][bin.idx()].lyrCnt() 

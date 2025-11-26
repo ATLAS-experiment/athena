@@ -177,7 +177,7 @@ static bool downloadContainer(const std::string& name,
   return true;
 }
 
-static Status::Enum submit(SH::Sample* const sample)
+static Status::Enum submit(SH::Sample* const sample, const bool isFirstSample)
 {
   RCU_REQUIRE(sample);
   using namespace EL::msgEventLoop;
@@ -202,7 +202,17 @@ static Status::Enum submit(SH::Sample* const sample)
 #else
   int ret = TPython::Eval("ELG_prun(ELG_SAMPLE)");
 #endif
-  TPython::Bind(0, "ELG_SAMPLE");   
+  TPython::Bind(0, "ELG_SAMPLE");
+
+  // Tarball is created for the first sample to be submitted 
+  // then the tarball is simply reused for the other samples 
+  // If the returned value is 1 it implies the tarball creation failed 
+  // See EventLoopGrid/data/ELG_prun.py script
+  // Abort any further processing as the tarball was not succesfully created
+  if (isFirstSample && ret == 1){
+    ANA_MSG_ERROR("Failed to create tarball");
+    throw std::runtime_error("PrunDriver.cxx: aborting due to tarball creation issue"); 
+  }
 
   if (ret < 100) {
     sample->meta()->setString("nc_ELG_state_details", 
@@ -334,7 +344,7 @@ static Status::Enum merge(SH::Sample* const sample)
   return Status::DONE;
 }
 
-static void processTask(SH::Sample* const sample)
+static void processTask(SH::Sample* const sample, const bool isFirstSample)
 {
   RCU_REQUIRE(sample);
 
@@ -345,7 +355,7 @@ static void processTask(SH::Sample* const sample)
   Status::Enum status = Status::PENDING;
   switch (state) {
   case JobState::INIT: 
-    status = submit(sample);
+    status = submit(sample, isFirstSample);
     break;
   case JobState::RUN: 
     status = checkPandaTask(sample);
@@ -371,13 +381,16 @@ static void processAllInState(const SH::SampleHandler& sh, JobState::Enum state,
   RCU_REQUIRE(sh.size());
 
   WorkList workList;
+
+  bool isFirstSample = true;
   for (SH::SampleHandler::iterator s = sh.begin(); s != sh.end(); ++s) {
     if (sampleState(*s) == state) {
-      workList.push_back([s]()->void{ processTask(*s); });
+      workList.push_back([s, isFirstSample]()->void{ processTask(*s, isFirstSample); });
+      // Change boolean to false as already processed one sample
+      isFirstSample = false;
     }
-  }    
+  }
   process(workList, nThreads);
-
 }
 
 static std::string formatOutputName(const SH::MetaObject& sampleMeta,

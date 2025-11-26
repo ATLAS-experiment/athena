@@ -26,18 +26,6 @@
 // For a find in the vector
 #include <algorithm>
 
-// Constructor
-DerivationFramework::TruthDecayCollectionMaker::TruthDecayCollectionMaker(const std::string& t,
-                                                                          const std::string& n,
-                                                                          const IInterface* p)
-  : base_class(t,n,p)
-{
-}
-
-// Destructor
-DerivationFramework::TruthDecayCollectionMaker::~TruthDecayCollectionMaker() {
-}
-
 // Athena initialize
 StatusCode DerivationFramework::TruthDecayCollectionMaker::initialize()
 {
@@ -77,10 +65,9 @@ StatusCode DerivationFramework::TruthDecayCollectionMaker::initialize()
 
 
 // Selection and collection creation
-StatusCode DerivationFramework::TruthDecayCollectionMaker::addBranches() const
+StatusCode DerivationFramework::TruthDecayCollectionMaker::addBranches(const EventContext& ctx) const
 {
     // Event context for AthenaMT
-    const EventContext& ctx = Gaudi::Hive::currentContext();
 
     // Retrieve truth collections
     SG::ReadHandle<xAOD::TruthParticleContainer> truthParticles(m_particlesKey,ctx);

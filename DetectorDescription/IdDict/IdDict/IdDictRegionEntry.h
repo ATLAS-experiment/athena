@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef IDDICT_IdDictRegionEntry_H
@@ -15,7 +15,7 @@ class IdDictRegionEntry {
 public: 
     IdDictRegionEntry (); 
     virtual ~IdDictRegionEntry (); 
-    virtual void resolve_references (const IdDictMgr& ,  
+    virtual void resolve_references (IdDictMgr&,
         IdDictDictionary& , IdDictRegion& );
     virtual void generate_implementation (const IdDictMgr& ,  
         IdDictDictionary& , IdDictRegion& , const std::string& );

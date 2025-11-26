@@ -5,12 +5,12 @@
 #include "DerivationFrameworkEGamma/EGElectronLikelihoodToolWrapper.h"
 #include "DerivationFrameworkEGamma/EGPhotonCleaningWrapper.h"
 #include "DerivationFrameworkEGamma/BkgElectronClassification.h"
-#include "DerivationFrameworkEGamma/TruthCaloShowerDecorator.h"
 #include "DerivationFrameworkEGamma/EGElectronAmbiguityTool.h"
 #include "DerivationFrameworkEGamma/PhotonVertexSelectionWrapper.h"
 #include "DerivationFrameworkEGamma/EGammaCookieCutClusterTool.h"
+#include "DerivationFrameworkEGamma/EGammaGSFCalo.h"
 
-using namespace DerivationFramework; 
+using namespace DerivationFramework;
 DECLARE_COMPONENT( PhotonsDirectionTool )
 DECLARE_COMPONENT( EGInvariantMassTool )
 DECLARE_COMPONENT( EGTransverseMassTool )
@@ -18,7 +18,7 @@ DECLARE_COMPONENT( EGSelectionToolWrapper )
 DECLARE_COMPONENT( EGElectronLikelihoodToolWrapper )
 DECLARE_COMPONENT( EGPhotonCleaningWrapper )
 DECLARE_COMPONENT( BkgElectronClassification )
-DECLARE_COMPONENT( TruthCaloShowerDecorator )
 DECLARE_COMPONENT( EGElectronAmbiguityTool )
 DECLARE_COMPONENT( PhotonVertexSelectionWrapper )
 DECLARE_COMPONENT( EGammaCookieCutClusterTool )
+DECLARE_COMPONENT( EGammaGSFCalo )

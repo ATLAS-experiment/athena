@@ -12,7 +12,7 @@
 #include "xAODCaloEvent/CaloClusterContainer.h"
 #include "xAODEventInfo/EventInfo.h"
 #include "xAODTracking/VertexContainer.h"
-#include "CaloClusterCorrection/ICaloClusterMLCalibToolLite.h"
+#include "CaloInterface/ICaloClusterMLCalibToolLite.h"
 
 /**
  * @class CaloClusterMLCalibAlgLite
@@ -39,12 +39,14 @@ private:
 
   SG::ReadHandleKey<xAOD::EventInfo> m_eventInfoKey{this, "EventInfoContainer", "EventInfo", "Input EventInfo container"};
   SG::ReadHandleKey<xAOD::VertexContainer> m_verticesKey{this, "VertexContainer", "PrimaryVertices", "Input vertex container"};
-  SG::ReadHandleKey<xAOD::CaloClusterContainer>    m_clusterInputContainerKey   { this, "InputClusterContainer"  , "CaloCalTopoClusters", "input cluster container key"  };
-  SG::WriteHandleKey<xAOD::CaloClusterContainer>   m_clusterOutputContainerKey  { this, "OutputClusterContainer" , "CaloCalTopoClusters"       , "output cluster container key" };
+  SG::ReadHandleKey<xAOD::CaloClusterContainer>    m_clusterContainerKey   { this, "ClusterContainer"  , "CaloCalTopoClusters", "Cluster container key"  };
 
-  SG::WriteDecorHandleKey<xAOD::CaloClusterContainer> m_clusterMLCalibUncDecorKey{this,"ClusterMLCalibratedEnergyUncKeyName","","ML calibrated cluster energy uncertainty decoration"};
+  SG::WriteDecorHandleKey<xAOD::CaloClusterContainer> m_clusterMLCalibEnergyDecorKey{this,"ClusterMLCalibratedEnergyKeyName","","ML calibrated cluster energy decoration"};
+  SG::WriteDecorHandleKey<xAOD::CaloClusterContainer> m_clusterMLCalibEnergyUncDecorKey{this,"ClusterMLCalibratedEnergyUncKeyName","","ML calibrated cluster energy uncertainty decoration"};
 
   Gaudi::Property<std::vector<float>> m_rapidityRange { this, "RapidityRange", { -2.5, 2.5}, "rapidity range of validity of the ML-based calibration" };
+  // Minimum cluster energy in MeV above which ML calibration will be applied.
+  Gaudi::Property<double> m_minClusterEnergy { this, "MinClusterEnergy", 300.0, "Minimum cluster energy (MeV) to apply ML calibration" };
 };
 
 #endif // CALOREC_CALOCLUSTERMLCALIBALG_H

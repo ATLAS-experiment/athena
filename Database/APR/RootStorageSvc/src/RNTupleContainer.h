@@ -42,8 +42,6 @@ namespace pool {
 
 class RNTupleContainer : public pool::DbContainerImp
 {
-  using DbContainerImp::save;
-
   /// Definition of a field info structure
   struct FieldDesc : public pool::DbColumn
   {
@@ -106,9 +104,7 @@ class RNTupleContainer : public pool::DbContainerImp
    std::unique_ptr<RootAuxDynIO::IFactoryTool>       m_auxDynTool;
 
  public:
-   /// Standard constructor
-  RNTupleContainer();
-
+  explicit RNTupleContainer(const std::string& name);
   virtual ~RNTupleContainer();
 
   /// Close the container and deallocate resources
@@ -177,8 +173,10 @@ class RNTupleContainer : public pool::DbContainerImp
   /// Execute transaction action
   virtual pool::DbStatus transAct(pool::Transaction::Action action) override final;
 
-  /// Add single entry to container
-  virtual pool::DbStatus save(pool::DbObjectHandle<pool::DbObject>& objH) override final;
+  /// Store object in location
+  virtual pool::DbStatus store(const void* object,
+                               pool::DbContainer& cntH,
+                               pool::ShapeH shape) override final;
 
  private:
   /// Init a field description for an object (i.e. find TClass etc.)

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ZdcByteStream/ZdcByteStreamLucrodData.h"
@@ -57,7 +57,7 @@ StatusCode ZdcByteStreamLucrodData::execute() {
   auto zdcLucrodDataContainer = std::make_unique<ZdcLucrodDataContainer>(); 
   
   ATH_MSG_DEBUG("ZdcByteStreamLucrodData::execute::filleContainer");
-  StatusCode sc = fillContainer(listOfRobf,zdcLucrodDataContainer.get());
+  StatusCode sc = fillContainer(std::move(listOfRobf),zdcLucrodDataContainer.get());
   
   if (sc.isFailure()) ATH_MSG_WARNING(" fillContainer failed ");
   else                ATH_MSG_DEBUG  (" fillContainer success ");
@@ -101,7 +101,10 @@ StatusCode ZdcByteStreamLucrodData::fillContainer(std::vector<const ROBFragment*
     
     StatusCode sc = m_ZdcLucrodDecoder.decode(&**rob_it, zld);
     
-    if (sc.isFailure()) ATH_MSG_WARNING(" Conversion from ByteStream to ZdcLucrodData failed ");
+    if (sc.isFailure()){
+      ATH_MSG_WARNING(" Conversion from ByteStream to ZdcLucrodData failed ");
+      delete zld;
+    } 
     else zdcLucrodDataContainer->push_back(zld);
   }
 

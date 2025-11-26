@@ -27,19 +27,8 @@
 namespace {
   static const SG::ConstAccessor<unsigned int> acc_origin("Classification");
 }
-// Constructor
-DerivationFramework::TruthDressingTool::TruthDressingTool(const std::string& t,
-        const std::string& n,
-        const IInterface* p )
-   : base_class(t,n,p)
-{
-}
 
-// Destructor
-DerivationFramework::TruthDressingTool::~TruthDressingTool() {
-}
-
-// Athena initialize and finalize
+// Athena initialize
 StatusCode DerivationFramework::TruthDressingTool::initialize()
 {
     // Initialise handle keys
@@ -71,10 +60,9 @@ StatusCode DerivationFramework::TruthDressingTool::initialize()
 }
 
 // Function to do dressing, implements interface in IAugmentationTool
-StatusCode DerivationFramework::TruthDressingTool::addBranches() const
+StatusCode DerivationFramework::TruthDressingTool::addBranches(const EventContext& ctx) const
 {
     // Get the event context
-    const EventContext& ctx = Gaudi::Hive::currentContext();
 
     // Retrieve the truth collections
     SG::ReadHandle<xAOD::TruthParticleContainer> truthParticles(m_particlesKey,ctx);

@@ -50,7 +50,9 @@ public:
   std::string fileName() { return std::accumulate(m_inpath.value().begin(), m_inpath.value().end(), std::string{}); }
 
   // Not sure this is needed, but it was in the interface.
-  TTree* getEventTree() { return m_EventTree; };
+  TTree* getEventTree() { return m_EventTree; }
+  
+  void activateEventOutput() {m_activated=true;}
 
 private:
   // JO configuration (Converted to Gaudi::Property).
@@ -71,12 +73,16 @@ private:
 
   // Max output events
   Gaudi::Property<int> m_eventLimit {this, "EventLimit", 10000 , "Maximum Number of Events to Output"};
+  
+  // For event level output control
+  Gaudi::Property<bool> m_requireActivation {this, "RequireActivation", false , "Only output if activated on event, good for doing a single region in a large file"};
 
   // internal counters  
   std::atomic<unsigned> m_event = 0;
   std::atomic<unsigned> m_totevent = 0;
   std::atomic<unsigned> m_file = 0;
- 
+  bool m_activated{false}; // static so if any instance is active they all are
+
   // These were protected in the interface but I don't think they have to be.
   std::vector<FPGATrackSimLogicalEventInputHeader*>  m_eventInputHeaders;
   std::vector<FPGATrackSimLogicalEventOutputHeader*> m_eventOutputHeaders;

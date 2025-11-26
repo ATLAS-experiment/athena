@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -40,7 +40,7 @@ inline Scalar perp2() const {
   return ((*this)[0] * (*this)[0] + (*this)[1] * (*this)[1]);
 }
 
-/** perp method - perpenticular length */
+/** perp method - perpendicular length */
 inline Scalar perp() const {
   constexpr int size = Eigen::MatrixBase<Derived>::SizeAtCompileTime;
   constexpr int isVector = Eigen::MatrixBase<Derived>::IsVectorAtCompileTime;

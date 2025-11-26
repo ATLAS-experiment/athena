@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "PyAnalysisExamples/MySelectionAlg.h"
@@ -79,8 +79,8 @@ StatusCode MySelectionAlg::execute()
   ATH_MSG_INFO ( "after  - MyObj: " << obj->getA() );
   delete obj;
 
-  // retrive ElectronContainer
-  ATH_MSG_DEBUG ( "retrive ElectronContainer" );
+  // retrieve ElectronContainer
+  ATH_MSG_DEBUG ( "retrieve ElectronContainer" );
   const ElectronContainer *eCon = nullptr;
   ATH_CHECK( evtStore()->retrieve(eCon, m_ContainerKey) );
 

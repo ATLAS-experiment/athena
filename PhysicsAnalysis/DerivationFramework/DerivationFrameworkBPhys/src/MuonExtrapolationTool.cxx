@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 // MuonExtrapolationTool.cxx
 #include "MuonExtrapolationTool.h"
@@ -8,23 +8,16 @@
 #include "TrkSurfaces/DiscSurface.h"
 #include "TrkSurfaces/CylinderSurface.h"
 #include "TVector2.h"
-#include "xAODMuon/MuonContainer.h"
+#include <memory>
+
 //**********************************************************************
 
 namespace DerivationFramework {
 
 MuonExtrapolationTool::MuonExtrapolationTool(const std::string &t, const std::string& n, const IInterface* p)
-  : 
-    base_class(t, n, p),
-    m_extrapolator("Trk::Extrapolator/AtlasExtrapolator")
-{    
-  declareProperty("EndcapPivotPlaneZ",             m_endcapPivotPlaneZ = 15525.);// z position of pivot plane in endcap region
-  declareProperty("EndcapPivotPlaneMinimumRadius", m_endcapPivotPlaneMinimumRadius = 0.);// minimum radius of pivot plane in endcap region
-  declareProperty("EndcapPivotPlaneMaximumRadius", m_endcapPivotPlaneMaximumRadius = 11977.); // maximum radius of pivot plane in endcap region
-  declareProperty("BarrelPivotPlaneRadius",        m_barrelPivotPlaneRadius = 8000.);// radius of pivot plane in barrel region
-  declareProperty("BarrelPivotPlaneHalfLength",    m_barrelPivotPlaneHalfLength = 9700.);// half length of pivot plane in barrel region
-  declareProperty("Extrapolator", m_extrapolator);
-  declareProperty("MuonCollection", m_muonContainerName = "Muons");
+  :
+    base_class(t, n, p)
+{
 }
 
 //**********************************************************************
@@ -32,6 +25,7 @@ MuonExtrapolationTool::MuonExtrapolationTool(const std::string &t, const std::st
 
 StatusCode MuonExtrapolationTool::initialize()
 {
+  ATH_CHECK(m_muonContainerName.initialize());
   ATH_CHECK(m_extrapolator.retrieve());
   return StatusCode::SUCCESS;
 }
@@ -39,17 +33,17 @@ StatusCode MuonExtrapolationTool::initialize()
 
 //**********************************************************************
 
-bool MuonExtrapolationTool::extrapolateAndDecorateTrackParticle(const xAOD::TrackParticle* particle, float & eta, float & phi) const
+bool MuonExtrapolationTool::extrapolateAndDecorateTrackParticle(const xAOD::TrackParticle* particle, float & eta, float & phi, const EventContext& ctx) const
 {
 
-  // decorators used to access or store the information 
+  // decorators used to access or store the information
   static const SG::AuxElement::Decorator< char > Decorated ("DecoratedPivotEtaPhi");
   static const SG::AuxElement::Decorator< float > Eta ("EtaTriggerPivot");
   static const SG::AuxElement::Decorator< float > Phi ("PhiTriggerPivot");
 
   if (! Decorated.isAvailable(*particle) || !Decorated(*particle)){
     // in the athena release, we can run the extrapolation if needed
-      const Trk::TrackParameters* pTag = extrapolateToTriggerPivotPlane(*particle);
+    const Trk::TrackParameters* pTag = extrapolateToTriggerPivotPlane(*particle, ctx);
       if(!pTag) {
         Decorated(*particle) = false;
         return false;
@@ -92,41 +86,43 @@ const xAOD::TrackParticle* MuonExtrapolationTool::getPreferredTrackParticle (con
 
 }
 
-StatusCode MuonExtrapolationTool::addBranches() const
+StatusCode MuonExtrapolationTool::addBranches(const EventContext& ctx) const
 {
-    const xAOD::MuonContainer* muons{};
-    CHECK(evtStore()->retrieve(muons, m_muonContainerName)); // FIXME Use Handles
-    for(auto muon : *muons){
+    SG::ReadHandle<xAOD::MuonContainer> muonContainer{m_muonContainerName, ctx};
+    if (!muonContainer.isValid()) {
+      ATH_MSG_ERROR("Failed to retrieve MuonContainer with name: " << m_muonContainerName.key());
+      return StatusCode::FAILURE;
+    }
+    for (auto muon : *muonContainer) {
        const xAOD::TrackParticle* track = getPreferredTrackParticle(muon);
        float eta, phi = 0;
-       if( !extrapolateAndDecorateTrackParticle( track, eta, phi )){
+       if( !extrapolateAndDecorateTrackParticle( track, eta, phi, ctx )){
            if( muon->pt() > 3500.){
              //only complain if the muon has sufficient pT to actually reach the pivot plane
              //extrapolation will often fail for muons with pT < 3500 MeV
              ATH_MSG_WARNING("Failed to extrapolate+decorate muon with pivot plane coords - Muon params: pt "<<muon->pt()<<", eta "<< muon->eta()<<", phi "<< muon->phi());
            }
-        }   
+        }
     }
     return StatusCode::SUCCESS;
 }
 
-const Trk::TrackParameters* MuonExtrapolationTool::extrapolateToTriggerPivotPlane(const xAOD::TrackParticle& track) const
+  const Trk::TrackParameters* MuonExtrapolationTool::extrapolateToTriggerPivotPlane(const xAOD::TrackParticle& track, const EventContext& ctx) const
 {
   // BARREL
-  const EventContext& ctx = Gaudi::Hive::currentContext();
   const Trk::Perigee& perigee = track.perigeeParameters();
-  
+
   // create the barrel as a cylinder surface centered at 0,0,0
   Amg::Vector3D barrelCentre(0., 0., 0.);
   Amg::Transform3D matrix = Amg::Transform3D(Amg::RotationMatrix3D::Identity(), barrelCentre);
-  
-  Trk::CylinderSurface* cylinder = 
+
+  Trk::CylinderSurface* cylinder =
     new Trk::CylinderSurface(matrix,
-			     m_barrelPivotPlaneRadius,
-			     m_barrelPivotPlaneHalfLength);
+                             m_barrelPivotPlaneRadius,
+                             m_barrelPivotPlaneHalfLength);
   if (!cylinder) {
     ATH_MSG_WARNING("extrapolateToTriggerPivotPlane :: new Trk::CylinderSurface failed.");
-    return 0;
+    return nullptr;
   }
   // and then attempt to extrapolate our track to this surface, checking for the boundaries of the barrel
   bool boundaryCheck = true;
@@ -134,38 +130,37 @@ const Trk::TrackParameters* MuonExtrapolationTool::extrapolateToTriggerPivotPlan
   const Trk::TrackParameters* p = m_extrapolator->extrapolate(
     ctx, perigee, *surface, Trk::alongMomentum, boundaryCheck, Trk::muon).release();
   delete cylinder;
-  // if the extrapolation worked out (so we are in the barrel) we are done and can return the 
-  // track parameters at this surface. 
+  // if the extrapolation worked out (so we are in the barrel) we are done and can return the
+  // track parameters at this surface.
   if (p) return p;
 
   // if we get here, the muon did not cross the barrel surface
-  // so we assume it is going into the endcap. 
+  // so we assume it is going into the endcap.
   // ENDCAP
 
   // After 2 years of using this code, we realised that ATLAS actually has endcaps on both sides ;-)
-  // So better make sure we place our endcap at the correct side of the detector!  
-  // Hopefully no-one will ever read this comment... 
+  // So better make sure we place our endcap at the correct side of the detector!
+  // Hopefully no-one will ever read this comment...
   float SignOfEta = track.eta() > 0 ? 1. : -1.;
 
   Amg::Vector3D endcapCentre(0., 0., m_endcapPivotPlaneZ);
   // much better!
   matrix = Amg::Transform3D(Amg::RotationMatrix3D::Identity(), SignOfEta * endcapCentre);
-  
-  Trk::DiscSurface* disc = 
-    new Trk::DiscSurface(matrix,
-			 m_endcapPivotPlaneMinimumRadius,
-			 m_endcapPivotPlaneMaximumRadius);
+
+  std::unique_ptr<Trk::DiscSurface> disc =
+    std::make_unique<Trk::DiscSurface>(matrix,
+                                       m_endcapPivotPlaneMinimumRadius,
+                                       m_endcapPivotPlaneMaximumRadius);
   if (!disc) {
-    ATH_MSG_WARNING("extrapolateToTriggerPivotPlane :: new Trk::DiscSurface failed."); 
-    return 0;
+    ATH_MSG_WARNING("extrapolateToTriggerPivotPlane :: new Trk::DiscSurface failed.");
+    return nullptr;
   }
-  
+
   // for the endcap, we turn off the boundary check, extending the EC infinitely to catch stuff heading for the transition region
   boundaryCheck = false;
-  surface = disc;
+  surface = disc.get();
   p = m_extrapolator->extrapolate(
     ctx, perigee, *surface, Trk::alongMomentum, boundaryCheck, Trk::muon).release();
-  delete disc;
   return p;
 }
 }

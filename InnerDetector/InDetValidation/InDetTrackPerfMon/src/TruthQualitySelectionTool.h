@@ -40,7 +40,8 @@ public:
       TrackAnalysisCollections& trkAnaColls ) override;
 
   bool accept(const xAOD::TruthParticle* truth);
-
+  const xAOD::TruthParticle* getParent( const xAOD::TruthParticle* truth, int flav) const;
+  const xAOD::TruthParticle* getParentRec(const xAOD::TruthParticle* truth, int flav, int depth) const;
 private:
 
   ToolHandle< IAthSelectionTool > m_truthTool { this, "truthTool", {}, "Main truth selection tool" };
@@ -72,7 +73,10 @@ private:
   BooleanProperty m_isFromC     { this, "isFromC",  false, "Select particles from C hadron decay" };
   BooleanProperty m_isFromHeavyFlav { this, "isFromHeavyFlav",  false, "Select particles from heavy-flvour (B or C) hadron decay" };
   BooleanProperty m_isFromLightFlav { this, "isFromLightFlav",  false, "Select particles from light-flvour hadron decay" };
-  
+
+  BooleanProperty m_isFromTau { this, "isFromTau", false, "Selects particles from tau hadron decay"};
+  FloatProperty m_minParentPt {this, "minParentPt", -9999., "Min cut on parent truth particles"};
+  FloatProperty m_maxParentPt {this, "maxParentPt", -9999., "Max cut on parent truth particles"};
 };
 
 } // namespace IDTPM

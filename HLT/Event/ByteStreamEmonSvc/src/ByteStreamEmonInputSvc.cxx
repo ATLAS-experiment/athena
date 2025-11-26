@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //===================================================================
@@ -313,8 +313,8 @@ bool ByteStreamEmonInputSvc::getIterator()
     emon::L1TriggerType l1triggerType(static_cast<unsigned char>(m_trigger_type), m_trigger_type > 255);
 
     emon::SelectionCriteria criteria(l1triggerType,
-                                     l1pattern,
-                                     streamTags,
+                                     std::move(l1pattern),
+                                     std::move(streamTags),
                                      emon::StatusWord());
 
     while (true) {
@@ -437,8 +437,9 @@ const RawEvent* ByteStreamEmonInputSvc::nextEvent()
     Dh->setStatus(DataHeader::Input);
 
     // Now add ref to xAOD::EventInfo objects
-    IOpaqueAddress* iop = new ByteStreamAddress(ClassID_traits<xAOD::EventInfo>::ID(), "EventInfo", "");
-    StatusCode ioc = m_sgSvc->recordAddress("EventInfo",iop);
+    CxxUtils::RefCountedPtr<ByteStreamAddress> iop
+      (new ByteStreamAddress(ClassID_traits<xAOD::EventInfo>::ID(), "EventInfo", ""));
+    StatusCode ioc = m_sgSvc->recordAddress("EventInfo",std::move(iop));
     if (ioc.isSuccess()) {
         const SG::DataProxy* ptmp = m_sgSvc->transientProxy(ClassID_traits<xAOD::EventInfo>::ID(), "EventInfo");
         if (ptmp !=0) {
@@ -449,8 +450,9 @@ const RawEvent* ByteStreamEmonInputSvc::nextEvent()
     }
 
 	// Now add ref to xAOD::EventAuxInfo objects
-    IOpaqueAddress* iopaux = new ByteStreamAddress(ClassID_traits<xAOD::EventAuxInfo>::ID(), "EventInfoAux.", "");
-    StatusCode iocaux = m_sgSvc->recordAddress("EventInfoAux.",iopaux);
+    CxxUtils::RefCountedPtr<ByteStreamAddress> iopaux
+      (new ByteStreamAddress(ClassID_traits<xAOD::EventAuxInfo>::ID(), "EventInfoAux.", ""));
+    StatusCode iocaux = m_sgSvc->recordAddress("EventInfoAux.",std::move(iopaux));
     if (iocaux.isSuccess()) {
         const SG::DataProxy* ptmpaux = m_sgSvc->transientProxy(ClassID_traits<xAOD::EventAuxInfo>::ID(), "EventInfoAux.");
         if (ptmpaux !=0) {

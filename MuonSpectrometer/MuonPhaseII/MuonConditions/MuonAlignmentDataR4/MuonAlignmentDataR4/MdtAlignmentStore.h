@@ -1,16 +1,23 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONALIGNMENTDATA_MDTALIGNMENTSTORE_H
 #define MUONALIGNMENTDATA_MDTALIGNMENTSTORE_H
 
 
-#include <MuonAlignmentData/BLinePar.h>
-#include <MuonAlignmentData/MdtAsBuiltPar.h>
 #include <ActsGeometryInterfaces/DetectorAlignStore.h>
 #include <MuonIdHelpers/IMuonIdHelperSvc.h>
+
+#include "Identifier/Identifier.h"
+#include "Identifier/IdentifierHash.h" //for moduleHash
 #include <vector>
+
+class BLinePar;
+class MdtAsBuiltPar;
+namespace Muon{
+  class IMuonIdHelperSvc;
+}
 /**
  *  Helper struct to cache simulatenously the As-built and the
  *  BLine corrections of the Mdts for fast access within the new

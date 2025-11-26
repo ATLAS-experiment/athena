@@ -29,10 +29,8 @@
  *  @version 1.0
  */
 namespace pool   {
-  // Type defintions and forward declarations
-  class DbInstanceCount;
-
-  typedef void DbObject; 
+  // Type definitions
+  typedef void DbObject;
   typedef int  DbAccessMode;
   typedef std::pair< long long, long long > DbLink;
 

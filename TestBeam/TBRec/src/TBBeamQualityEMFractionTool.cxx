@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //#####################################################
@@ -157,14 +157,12 @@ StatusCode TBBeamQualityEMFractionTool::accept(const std::vector<std::string>& p
   // setting up layers (h6)
   
   // setting tmp variables
-  // resetting the numerator and denominato to 0
+  // resetting the numerator and denominator to 0
   
   //long chan =0;
   float numenergy=0;
   float denenergy=0;
-  for (int i=0;i<500;++i) {
-    m_Mlayer[i]=0;
-  }  
+  m_Mlayer.assign (500, 0);
   
   //Accesing the CaloCellContainer
   const CaloCellContainer* cellContainer = nullptr;
@@ -189,19 +187,22 @@ StatusCode TBBeamQualityEMFractionTool::accept(const std::vector<std::string>& p
     
     // This map will have the layers as an index and increment the energy
     // Does this for ALL layers ( all detectors )
-    
-    m_Mlayer[sampling]+=cell_ptr->energy();
+
+    if (sampling >= 0 && sampling < m_Mlayer.size())
+      m_Mlayer[sampling]+=cell_ptr->energy();
     
   } //iterating
   
   // picking out layers of interest and filling numerator and denominator energies.
   
   for (unsigned int i=0;i<m_em_fracnumsamp.size();++i) {
-    numenergy+=m_Mlayer.find(m_em_fracnumsamp[i])->second;
+    if (m_em_fracnumsamp[i] < m_Mlayer.size())
+      numenergy+=m_Mlayer[m_em_fracnumsamp[i]];
   }  
   
   for (unsigned int i=0;i<m_em_fracdensamp.size();++i) {
-    denenergy+=m_Mlayer.find(m_em_fracdensamp[i])->second;
+    if (m_em_fracdensamp[i] < m_Mlayer.size())
+      denenergy+=m_Mlayer[m_em_fracdensamp[i]];
   } 
   
   if (denenergy!=0) {

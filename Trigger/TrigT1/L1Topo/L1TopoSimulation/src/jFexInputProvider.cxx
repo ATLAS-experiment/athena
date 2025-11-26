@@ -20,6 +20,7 @@ using namespace LVL1;
 // jFex to L1Topo conversion factors
 const int jFexInputProvider::m_Et_conversion = 2;            // 200 MeV to 100 MeV
 const double jFexInputProvider::m_sumEt_conversion = 0.01;   // 1 MeV to 100 MeV
+const double jFexInputProvider::m_gXE_conversion = 0.01;   // 1 MeV to 100 MeV
 const int jFexInputProvider::m_phi_conversion = 2;           // 10 x phi to 20 x phi
 const int jFexInputProvider::m_eta_conversion = 4;           // 10 x eta to 40 x eta
 
@@ -48,7 +49,12 @@ jFexInputProvider::initialize() {
    CHECK(m_jTau_EDMKey.initialize(SG::AllowEmpty));
    CHECK(m_jXE_EDMKey.initialize(SG::AllowEmpty));
    CHECK(m_jTE_EDMKey.initialize(SG::AllowEmpty));
-
+   CHECK(m_gXEJWOJ_EDMKey.initialize(SG::AllowEmpty));
+   if (! m_gXEJWOJ_EDMKey.empty() ) {
+    renounce(m_gXEJWOJ_EDMKey); //make this optional, in case no gFEX inputs are available (running without gFEX Sim or bytestream decoding)
+  }
+   
+   
    if (!m_monTool.empty()) ATH_CHECK(m_monTool.retrieve());
 
    return StatusCode::SUCCESS;
@@ -313,10 +319,10 @@ jFexInputProvider::fillXE(TCS::TopoInputEvent& inputEvent) const {
                    );
   }
 
-  unsigned long long global_ExTopoLong = static_cast<unsigned long long>(global_ExTopo);
-  unsigned long long global_EyTopoLong = static_cast<unsigned long long>(global_EyTopo);
-  unsigned long long central_ExTopoLong = static_cast<unsigned long long>(central_ExTopo);
-  unsigned long long central_EyTopoLong = static_cast<unsigned long long>(central_EyTopo);
+  long long global_ExTopoLong = static_cast<long long>(global_ExTopo);
+  long long global_EyTopoLong = static_cast<long long>(global_EyTopo);
+  long long central_ExTopoLong = static_cast<long long>(central_ExTopo);
+  long long central_EyTopoLong = static_cast<long long>(central_EyTopo);
 
   unsigned long long Et2Topo = global_ExTopoLong*global_ExTopoLong + global_EyTopoLong*global_EyTopoLong;
   unsigned long long EtTopo =  std::sqrt( Et2Topo );
@@ -343,6 +349,63 @@ jFexInputProvider::fillXE(TCS::TopoInputEvent& inputEvent) const {
   auto mon_h_jXEC_Phi = Monitored::Scalar("jXECTOBPhi", atan2(jxec.Ey(),jxec.Ex()));
   Monitored::Group(m_monTool, mon_h_jXE_Pt, mon_h_jXE_Phi, mon_h_jXEC_Pt, mon_h_jXEC_Phi); 
 
+  
+  // create cXE (combined XE) last, so we can simply early-exit gracefully if no gFEX inputs are available
+  // this then leaves the internal cXE at its default (0).
+  if (m_gXEJWOJ_EDMKey.empty()) {
+    ATH_MSG_DEBUG("gFex XE input disabled, skip filling combined XE");
+    return StatusCode::SUCCESS;
+  }
+  SG::ReadHandle<xAOD::gFexGlobalRoIContainer> gXEJWOJ_EDM(m_gXEJWOJ_EDMKey);
+  if (! gXEJWOJ_EDM.isValid() ) {
+    //gESPRESSO is only active in HI runs and only available from data. If not present simply skip it.
+    ATH_MSG_DEBUG("gFex input is not available, skip filling cXE");
+    return StatusCode::SUCCESS;
+  }
+  
+  //re-using quantities from jFEX, obtaining gFEX ones
+  //global_ExTopoLong; //jFEX!
+  //global_EyTopoLong; //jFEX!
+  long long gXE_ExTopoLong{0};
+  long long gXE_EyTopoLong{0};
+  
+  for(const xAOD::gFexGlobalRoI* gFexRoI : * gXEJWOJ_EDM) {
+
+    auto globalType = gFexRoI->globalType();
+    if ( globalType != 2 ) { continue; } // 2 = MET components (METx, METy)
+
+    ATH_MSG_DEBUG( "EDM gFex XEJWOJ type: "
+                   << gFexRoI->globalType()
+                   << " Ex: " 
+                   << gFexRoI->METquantityOne() // returns the Ex component in MeV
+                   << " Ey: " 
+		   << gFexRoI->METquantityTwo() // returns the Ey component in MeV
+		   );
+    
+    int ExTopo = gFexRoI->METquantityOne()*m_gXE_conversion;
+    int EyTopo = gFexRoI->METquantityTwo()*m_gXE_conversion;
+
+    gXE_ExTopoLong = static_cast<unsigned long long>(ExTopo);
+    gXE_EyTopoLong = static_cast<unsigned long long>(EyTopo);
+    
+    break;
+  }
+  
+  //construct cXE
+  //note: FW specification interprets weights at 10 bit unsigned fixed point, 2 integer, 8 fractional bits
+  unsigned jWeight = 0.55 * pow(2,8); //TODO: read those from menu
+  unsigned gWeight = 0.45 * pow(2,8);
+  long long cXE_x = (jWeight * global_ExTopoLong + gWeight * gXE_ExTopoLong) >> 8;
+  long long cXE_y = (jWeight * global_EyTopoLong + gWeight * gXE_EyTopoLong) >> 8;
+  
+  unsigned long long cXE_mag2 = cXE_x*cXE_x + cXE_y*cXE_y;
+  unsigned long long cXE_mag = std::sqrt( cXE_mag2 );
+  
+  TCS::jXETOB cxe_tob( cXE_x, cXE_y, cXE_mag, TCS::CXE );
+  inputEvent.setcXE( cxe_tob );
+  
+  //optional: add monitoring of cXE values as done above
+  
   return StatusCode::SUCCESS;
 }
 

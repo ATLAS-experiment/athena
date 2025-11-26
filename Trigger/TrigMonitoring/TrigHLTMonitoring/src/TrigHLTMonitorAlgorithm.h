@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGHLTMONITORING_TRIGHLTMONITORALGORITHM_H
@@ -16,6 +16,9 @@
 #include "StoreGate/ReadHandleKey.h"
 #include "TrigSteeringEvent/TrigRoiDescriptor.h"
 #include "TrigSteeringEvent/TrigRoiDescriptorCollection.h"
+#include "TrigConfInterfaces/ITrigConfigSvc.h"
+#include "TrigCompositeUtils/TrigCompositeUtils.h"
+#include "TrigDecisionTool/TrigDecisionTool.h"
 #include "xAODTrigger/TrigConfKeys.h"
 
 class TrigHLTMonitorAlgorithm : public AthMonitorAlgorithm {

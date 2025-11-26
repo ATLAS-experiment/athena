@@ -594,32 +594,6 @@ SCT_ID::strip_id(int barrel_ec,
 
 //----------------------------------------------------------------------------
 inline Identifier
-SCT_ID::strip_id(const ExpandedIdentifier& id) const {
-  // Build identifier
-  Identifier result((Identifier::value_type) 0);
-
-  // Pack fields independently
-  m_indet_impl.pack(indet_field_value(), result);
-  m_sct_impl.pack(sct_field_value(), result);
-  m_bec_impl.pack(id[m_indices[BARREL_EC]], result);
-  m_lay_disk_impl.pack(id[m_indices[LAYER_DISK]], result);
-  m_phi_mod_impl.pack(id[m_indices[PHI]], result);
-  m_eta_mod_impl.pack(id[m_indices[ETA]], result);
-  m_side_impl.pack(id[m_indices[SIDE]], result);
-  if (m_hasRows) {
-    m_row_impl.pack(id[m_indices[ROW]], result);
-  }
-  m_strip_impl.pack(id[m_indices[STRIP]], result);
-
-  // Do checks
-  if (m_do_checks) {
-    strip_id_checks(id);
-  }
-  return result;
-}
-
-//----------------------------------------------------------------------------
-inline Identifier
 SCT_ID::strip_id(const Identifier& wafer_id, int strip) const {
   // Build identifier
   Identifier result(wafer_id);
@@ -698,22 +672,6 @@ SCT_ID::base_bit() const {
   return (base > 32) ? 32 : base;
   // max base is 32 so we can still read old strip id's and differences
   // from non-SLHC releases.
-}
-
-//----------------------------------------------------------------------------
-inline IdContext
-SCT_ID::wafer_context() const {
-  ExpandedIdentifier id;
-
-  return(IdContext(id, 0, m_indices[SIDE]));
-}
-
-//----------------------------------------------------------------------------
-inline IdContext
-SCT_ID::strip_context() const {
-  ExpandedIdentifier id;
-
-  return(IdContext(id, 0, m_indices[STRIP]));
 }
 
 //----------------------------------------------------------------------------

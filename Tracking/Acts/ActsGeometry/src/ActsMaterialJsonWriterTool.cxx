@@ -2,7 +2,7 @@
   Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "ActsGeometryInterfaces/ActsGeometryContext.h"
+#include "ActsGeometryInterfaces/GeometryContext.h"
 #include "ActsGeometry/ActsMaterialJsonWriterTool.h"
 
 #include "ActsInterop/Logger.h"
@@ -12,6 +12,7 @@
 #include <ios>
 #include <iostream>
 #include <stdexcept>
+
 
 ActsMaterialJsonWriterTool::ActsMaterialJsonWriterTool(const std::string &type, const std::string &name,
                                 const IInterface *parent)
@@ -32,8 +33,8 @@ ActsMaterialJsonWriterTool::initialize()
 }
 
 void
-ActsMaterialJsonWriterTool::write(const ActsGeometryContext& gctx, const Acts::TrackingGeometryMaterial& detMaterial) const
-{
+ActsMaterialJsonWriterTool::write(const ActsTrk::GeometryContext& gctx, 
+                                  const Acts::TrackingGeometryMaterial& detMaterial) const {
   // Setup the converter config
   Acts::MaterialMapJsonConverter::Config cfg;
   cfg.context = gctx.context();
@@ -54,8 +55,8 @@ ActsMaterialJsonWriterTool::write(const ActsGeometryContext& gctx, const Acts::T
 }
 
 void
-ActsMaterialJsonWriterTool::write(const ActsGeometryContext& gctx, const Acts::TrackingGeometry& tGeometry) const
-{
+ActsMaterialJsonWriterTool::write(const ActsTrk::GeometryContext& gctx, 
+                                  const Acts::TrackingGeometry& tGeometry) const {
   // Setup the converter config
   Acts::MaterialMapJsonConverter::Config cfg;
   cfg.context = gctx.context();

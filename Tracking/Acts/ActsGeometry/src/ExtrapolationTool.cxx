@@ -9,7 +9,7 @@
 #include "GaudiKernel/IInterface.h"
 
 // PACKAGE
-#include "ActsGeometryInterfaces/ActsGeometryContext.h"
+#include "ActsGeometryInterfaces/GeometryContext.h"
 #include "ActsGeometry/ActsTrackingGeometrySvc.h"
 #include "ActsGeometry/ActsTrackingGeometryTool.h"
 #include "ActsInterop/Logger.h"
@@ -123,7 +123,7 @@ ExtrapolationTool::initialize()
 }
 
 
-ActsPropagationOutput
+ExtrapolationTool::PropagationOutput
 ExtrapolationTool::propagationSteps(const EventContext& ctx,
                                         const Acts::BoundTrackParameters& startParameters,
                                         Acts::Direction navDir /*= Acts::Direction::Forward()*/,
@@ -133,11 +133,11 @@ ExtrapolationTool::propagationSteps(const EventContext& ctx,
   ATH_MSG_VERBOSE(name() << "::" << __FUNCTION__ << " begin");
 
   Acts::MagneticFieldContext mctx = getMagneticFieldContext(ctx);
-  const ActsGeometryContext& geo_ctx
+  const GeometryContext& geo_ctx
     = m_trackingGeometryTool->getGeometryContext(ctx);
   auto anygctx = geo_ctx.context();
 
-  ActsPropagationOutput output;
+  PropagationOutput output;
 
   auto res = boost::apply_visitor([&](const auto& propagator) -> ResultType {
       using Propagator = std::decay_t<decltype(propagator)>;
@@ -183,7 +183,7 @@ ExtrapolationTool::propagationSteps(const EventContext& ctx,
 
 
 
-std::optional<const Acts::BoundTrackParameters>
+std::optional<Acts::BoundTrackParameters>
 ExtrapolationTool::propagate(const EventContext& ctx,
                                  const Acts::BoundTrackParameters& startParameters,
                                  Acts::Direction navDir /*= Acts::Direction::Forward()*/,
@@ -192,7 +192,7 @@ ExtrapolationTool::propagate(const EventContext& ctx,
   ATH_MSG_VERBOSE(name() << "::" << __FUNCTION__ << " begin");
 
   Acts::MagneticFieldContext mctx = getMagneticFieldContext(ctx);
-  const ActsGeometryContext& geo_ctx
+  const GeometryContext& geo_ctx
     = m_trackingGeometryTool->getGeometryContext(ctx);
   auto anygctx = geo_ctx.context();
 
@@ -219,7 +219,7 @@ ExtrapolationTool::propagate(const EventContext& ctx,
   return parameters;
 }
 
-ActsPropagationOutput
+ExtrapolationTool::PropagationOutput
 ExtrapolationTool::propagationSteps(const EventContext& ctx,
                                         const Acts::BoundTrackParameters& startParameters,
                                         const Acts::Surface& target,
@@ -228,10 +228,10 @@ ExtrapolationTool::propagationSteps(const EventContext& ctx,
 {
   ATH_MSG_VERBOSE(name() << "::" << __FUNCTION__ << " begin");
 
-  ActsPropagationOutput output;
+  PropagationOutput output;
 
   Acts::MagneticFieldContext mctx = getMagneticFieldContext(ctx);
-  const ActsGeometryContext& geo_ctx
+  const GeometryContext& geo_ctx
     = m_trackingGeometryTool->getGeometryContext(ctx);
   auto anygctx = geo_ctx.context();
 
@@ -276,7 +276,7 @@ ExtrapolationTool::propagationSteps(const EventContext& ctx,
   return output;
 }
 
-std::optional<const Acts::BoundTrackParameters>
+std::optional<Acts::BoundTrackParameters>
 ExtrapolationTool::propagate(const EventContext& ctx,
                                  const Acts::BoundTrackParameters& startParameters,
                                  const Acts::Surface& target,
@@ -287,7 +287,7 @@ ExtrapolationTool::propagate(const EventContext& ctx,
   ATH_MSG_VERBOSE(name() << "::" << __FUNCTION__ << " begin");
   
   Acts::MagneticFieldContext mctx = getMagneticFieldContext(ctx);
-  const ActsGeometryContext& geo_ctx
+  const GeometryContext& geo_ctx
     = m_trackingGeometryTool->getGeometryContext(ctx);
   auto anygctx = geo_ctx.context();
 
@@ -342,6 +342,7 @@ OptionsType ExtrapolationTool::prepareOptions(const Acts::GeometryContext& gctx,
   options.stepping.maxStepSize = m_maxStepSize * 1_m;
   options.maxTargetSkipping = m_maxSurfSkip;
   options.surfaceTolerance = m_surfTolerance;
+  options.pathLimit = m_pathLimit * 1_m;
   auto& mInteractor = options.actorList.template get<Acts::MaterialInteractor>();
   mInteractor.multipleScattering = m_interactionMultiScatering;
   mInteractor.energyLoss = m_interactionEloss;

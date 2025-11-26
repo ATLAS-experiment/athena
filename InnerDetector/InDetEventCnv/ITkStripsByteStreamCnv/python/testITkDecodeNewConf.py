@@ -13,9 +13,11 @@ if __name__ == "__main__":
     flags.Detector.GeometryITkStrip = True
     flags.ITk.Geometry.AllLocal = False
 
-    # for debugging
-    from AthenaCommon.Constants import INFO
-    flags.Exec.OutputLevel=INFO
+    # We want to keet the commented code for debugging
+    #from AthenaCommon.Constants import DEBUG
+    #flags.Exec.OutputLevel=DEBUG
+
+    #flags.Output.RDOFileName = "RDO.pool.root"    
 
     flags.lock()
 
@@ -28,7 +30,17 @@ if __name__ == "__main__":
 
     from ITkStripsByteStreamCnv.ITkStripRawDataByteStreamCnvConfig import ITkStripRawDataProviderCfg
     acc.merge(ITkStripRawDataProviderCfg(flags))
+
+    itemList = [] # items to store in RDO
+    acceptAlgs = [] # skimming algs
+
+    # We want to keet the commented code for debugging    
+    #itemList.append(f'SCT_RDO_Container#ITkStripRDOs')    
+    #itemList.append('IDCInDetBSErrContainer#SCT_ByteStreamErrs')
+    
+    #from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
+    #acc.merge(OutputStreamCfg(flags, 'RDO', itemList, AcceptAlgs=acceptAlgs))
               
-    acc.run(maxEvents=2)
+    acc.run(maxEvents=1)
 
     

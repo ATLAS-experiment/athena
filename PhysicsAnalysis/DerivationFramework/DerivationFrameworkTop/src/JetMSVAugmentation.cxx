@@ -35,8 +35,7 @@ StatusCode JetMSVAugmentation::initialize(){
 
 
 
-StatusCode JetMSVAugmentation::addBranches() const{
-  const EventContext& ctx = Gaudi::Hive::currentContext();
+StatusCode JetMSVAugmentation::addBranches(const EventContext& ctx) const{
 
   SG::ReadHandle<xAOD::JetContainer> jets{m_jetCollectionName, ctx};
   if ( !jets.isValid() ) {

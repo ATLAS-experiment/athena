@@ -50,6 +50,9 @@ namespace xAOD {
     ///@brief return true if the cluster (or the majority of its energy) is in the FCAL0
     bool isFCAL(const xAOD::CaloCluster *cluster);
 
+    ///@brief return the associated egamma cluster, that might be cookie-cut cluster (fwd electron)
+    const xAOD::CaloCluster *getCluster(const xAOD::Egamma* eg, bool cook = true);
+
     ///@brief Return a vector of all the elementlinks to the topo clusters associated with the egamma cluster
     std::vector< ElementLink< xAOD::CaloClusterContainer > > getAssociatedTopoClustersLinks(const xAOD::CaloCluster *cluster);
 

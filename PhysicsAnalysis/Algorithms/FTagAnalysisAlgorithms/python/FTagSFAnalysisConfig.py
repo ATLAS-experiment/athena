@@ -9,7 +9,27 @@ from AthenaCommon.Logging import logging
 from FTagAnalysisAlgorithms.FTagHelpers import getRecommendedBTagCalib, getReadFromBTaggingObject
 from CalibrationDataInterface.CDIHelpers import check_CDI_campaign
 from CalibrationDataInterface.MCMCGeneratorHelper import MCMC_dsid_map
-from FTagAnalysisAlgorithms.FTagTrigMatchAnalysisConfig import trigger_set
+from TriggerAnalysisAlgorithms.TriggerAnalysisSFConfig import trigger_set
+
+
+def getBTagOnlineWP(chain, onlineTagger):
+    # We have a chain with something like "..._bdl1d77_..."
+    # Get the substring after the tagger, e.g. bdl1d
+    after = chain.split(onlineTagger)[1]
+    # Get the two first characters, corresponding to the WP
+    wp = after[:2]
+    return 'FixedCutBEff_'+wp
+
+def getBTagOnlineTaggerWP(chain, log):
+    bTagOnlineTaggers = {
+        'bdl1d' : 'OnlineDL1d',
+        'bgn1' : 'OnlineGN1' }
+
+    for tag, bTagOnlineTag in bTagOnlineTaggers.items():
+        if tag in chain:
+            return (bTagOnlineTag, getBTagOnlineWP(chain, tag))
+
+    return ('', '')
 
 
 class FTagJetSFBlock(ConfigBlock):
@@ -76,6 +96,12 @@ class FTagJetSFBlock(ConfigBlock):
         self.addOption ('removeHLTPrefix', True, type=bool,
             info="remove the HLT prefix from trigger chain names, "
             "The default is True.")
+        self.addOption ('bTagOnlineTagger', None, type=str,
+            info="Online tagger to use to configure the CDI access",
+            expertMode=True)
+        self.addOption ('bTagOnlineWP', None, type=str,
+            info="Online working point to use to configure the CDI access",
+            expertMode=True)
         # Peculiar case default value set to None while type is bool 
         # A default value will be assigned by the getReadFromBTaggingObject function 
         # if this flag is not set 
@@ -165,7 +191,7 @@ class FTagJetSFBlock(ConfigBlock):
                         "under development. This is not ready yet for analysis usage!")
 
             triggers = trigger_set(config, self.triggerChainsPerYear,
-                                   self.includeAllYearsPerRun, log)
+                                   self.includeAllYearsPerRun)
             
             for chain in triggers:
                 chain_noHLT = chain.replace("HLT_", "")
@@ -180,10 +206,16 @@ class FTagJetSFBlock(ConfigBlock):
                     # Set nothing for now
                     bTagCalibTriggerFile = ""
 
-                # bTagOnlineTagger, bTagOnlineWP = getBTagOnlineTaggerWP(trigger)
-                # For now configure fixed WP
-                bTagOnlineTagger = "OnlineDL1d"
-                bTagOnlineWP = "FixedCutBEff_77"
+                bTagOnlineTagger, bTagOnlineWP = getBTagOnlineTaggerWP(chain, log)
+                if self.bTagOnlineTagger:
+                    bTagOnlineTagger = self.bTagOnlineTagger
+                if self.bTagOnlineWP:
+                    bTagOnlineWP = self.bTagOnlineWP
+
+                if not bTagOnlineTagger and not bTagOnlineWP:
+                    raise ValueError('Trigger chain ' + chain + ' does not include any of the supported online taggers. '
+                                     'Please make sure to configure manually bTagOnlineTagger and bTagOnlineWP')
+
                 bTagConditionalTagger = "ConditionalOffline" + self.btagger + "Given" + bTagOnlineTagger + "WP" + bTagOnlineWP.split("_")[-1]
                 bTagConditionalWP = self.btagWP
 
@@ -282,8 +314,6 @@ class FTagEventSFBlock(ConfigBlock):
                              'Please configure the Continuous btagWP to retrieve scale factors.')
 
 
-        log = logging.getLogger('FTagEventSFConfig')
-
         selectionName = self.selectionName
         if selectionName is None or selectionName == '':
             selectionName = self.btagger + '_' + self.btagWP
@@ -295,7 +325,7 @@ class FTagEventSFBlock(ConfigBlock):
         triggers = set()
         if self.triggerChainsPerYear:
             triggers = trigger_set(config, self.triggerChainsPerYear,
-                                   self.includeAllYearsPerRun, log)
+                                   self.includeAllYearsPerRun)
         # Always add computation for non-trigger FTAG SF
         triggers.add("")
 

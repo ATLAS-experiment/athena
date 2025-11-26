@@ -111,11 +111,6 @@ def OverlayMainContentCfg(configFlags):
     # Muon system
     from MuonConfig.MuonOverlayConfig import MuonOverlayCfg
     acc.merge(MuonOverlayCfg(configFlags))
-    
-    # Add MT-safe PerfMon
-    if configFlags.PerfMon.doFastMonMT or configFlags.PerfMon.doFullMonMT:
-        from PerfMonComps.PerfMonCompsConfig import PerfMonMTSvcCfg
-        acc.merge(PerfMonMTSvcCfg(configFlags))
 
     # Track overlay
     if configFlags.Overlay.doTrackOverlay:

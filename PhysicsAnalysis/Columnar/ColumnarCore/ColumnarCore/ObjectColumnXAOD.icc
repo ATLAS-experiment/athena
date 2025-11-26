@@ -24,8 +24,11 @@ namespace columnar
 
     using CM = ColumnarModeXAOD;
 
+    AccessorTemplate () = default;
+
     AccessorTemplate (ColumnarTool<CM>& columnBase,
-                      const std::string& name)
+                      const std::string& name,
+                      ColumnInfo&& /*info*/ = {})
       : m_columnBase (&columnBase), m_key (name)
     {
     }
@@ -54,6 +57,11 @@ namespace columnar
       return ObjectRange<CI,CM> (retrieveObject ());
     }
 
+    [[nodiscard]] bool isAvailable (ObjectId<ContainerId::eventContext,CM> /*eventId*/) const noexcept
+    {
+      return !m_key.empty() && m_columnBase && m_columnBase->eventStore().contains< std::remove_cv_t<typename CI::xAODObjectRangeType> >(m_key);
+    }      
+
 
 
     /// Private Members
@@ -71,6 +79,8 @@ namespace columnar
     // holding accessors, I use this "non-tracking" version.
     auto& retrieveObject () const
     {
+      if (m_key.empty())
+        throw std::runtime_error ("no container key set for type " + std::string (CI::idName));
       typename CI::xAODObjectRangeType *container = nullptr;
       if (!m_columnBase->eventStore().retrieve (container, m_key).isSuccess())
         throw std::runtime_error ("failed to retrieve " + m_key);

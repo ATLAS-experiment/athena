@@ -1240,7 +1240,6 @@ void LArCellsEmptyMonitoring::GetMeanCellHits(const char* inputfile, int nlb, in
   std::unique_ptr<LArSamples::Interface> tuple((LArSamples::Interface*)Interface::open(inputfile));
   unsigned int nchannels = tuple->nChannels();
   
-  //TH1F* h1_hits = new TH1F("","",nlb,lbmin,lbmax); // temp histo filled with every event in cell with E>4sig
   double TotalRecordedHits=0;
   std::vector<int, std::allocator<int> > HitsPerLB;
   double var=0;
@@ -1294,28 +1293,30 @@ void LArCellsEmptyMonitoring::GetMeanCellHits(const char* inputfile, int nlb, in
 
   TH1Fp tp_ev = std::make_unique<TH1F>("","",th1_Hits->GetBinContent(th1_Hits->GetMaximumBin())*100,0,th1_Hits->GetBinContent(th1_Hits->GetMaximumBin()));
 
-   for (int i=1;i<=nlb;i++){
-     if(hNLB->GetBinContent(i)>0){
-       nlb_corr++;
-       tp_ev->Fill(th1_Hits->GetBinContent(i));
-       TotalRecordedHits+=th1_Hits->GetBinContent(i);
-       HitsPerLB.push_back(th1_Hits->GetBinContent(i));
-     }
+  for (int i=1;i<=nlb;i++){
+   if(hNLB->GetBinContent(i)>0){
+     nlb_corr++;
+     tp_ev->Fill(th1_Hits->GetBinContent(i));
+     TotalRecordedHits+=th1_Hits->GetBinContent(i);
+     HitsPerLB.push_back(th1_Hits->GetBinContent(i));
    }
-
-   MeanHits = ((double)TotalRecordedHits/(double)nlb_corr)/(double)nCells;
-   // MeanHits = tp_ev->GetMean()/(double)nCells;
-   // rmsHits = tp_ev->GetRMS()/(double)nCells;
-
+  }
+  
+  MeanHits = (nCells==0||nlb_corr==0) ? 0 : static_cast<double>(TotalRecordedHits)/(nlb_corr*nCells);
+  if (nCells > 0){
    for (unsigned int j=0;j<HitsPerLB.size();j++){
      var += (((double)HitsPerLB[j]/(double)nCells) - MeanHits)*(((double)HitsPerLB[j]/(double)nCells) - MeanHits);
    }
-
-   rmsHits = var/nlb_corr;
-   
-   printf("Mean number of hits/cell for 1 LB = %4.3f, RMS = %4.3f\n",MeanHits,rmsHits);
-   printf("Number of cells firing at E > %d sigma = %d\n",nsigma,nCells);
-   printf("Total number of LBs included = %d\n",nlb_corr);
+  } else {
+   std::cout<<"nCells is " << nCells << " in LArCellsEmptyMonitoring::GetMeanCellHits"<<std::endl;
+   return;
+  }
+  if (nlb_corr > 0){
+    rmsHits = var/nlb_corr;
+  }
+  printf("Mean number of hits/cell for 1 LB = %4.3f, RMS = %4.3f\n",MeanHits,rmsHits);
+  printf("Number of cells firing at E > %d sigma = %d\n",nsigma,nCells);
+  printf("Total number of LBs included = %d\n",nlb_corr);
 
 
 }

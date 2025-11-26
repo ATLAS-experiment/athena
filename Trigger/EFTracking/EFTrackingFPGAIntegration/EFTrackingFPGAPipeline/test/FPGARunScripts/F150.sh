@@ -1,0 +1,113 @@
+#!/bin/bash
+
+usage () {
+    [ $# -gt 1 ] && echo $2
+    echo "
+    Command line script to run track reconstruction
+    for the F-100 pipeline as offline-like algorithms (Full-Scan)
+
+    Usage:
+    F100.sh -i <your_input_RDO_file> -o <your_output_AOD_file_name>
+
+    Options:
+    -i  |  --inputRDO       STRING      full path to input RDO file (mandatory)
+    -o  |  --outputAOD      STRING      name of the output AOD file (mandatory)
+    -x  |  --xclbin         STRING      path to the xclbin that needs to be run
+    -b  |  --bdfid          STRING      bdfid of the FPGA to run on
+    -n  |  --nEvents        INT         Number of events to run on (default = -1 aka All)
+    -d  |  --skipEvents     INT         Number of events to skip at the start (default = 0)
+    -t  |  --threads        INT         Number of threads to use (default = 1)
+    -q  |  --doCodeType     STRING      Code type for FPGADataPrep.doCodeType (default = F1X0)
+    -s  |  --skipCheck                  skip checks on output AOD file
+    -c  |  --doClusters                 persistify xAOD cluster and space point containers
+    -k  |  --doSeeds                    persistify xAOD track seed containers
+    -h  |  --help                       this help
+    "
+    [ $# -gt 0 ] && exit $1
+    exit 0
+}
+
+xclbinPath="/eos/project/a/atlas-eftracking/FPGA_compilation/FPGA_compilation_hw/F110/kernels.hw.xclbin"
+bdfid="0000:c3:00.1"
+
+# ttbar sample
+inputRDO="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/RDO/ATLAS-P2-RUN4-03-00-00/mc21_14TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.recon.RDO.e8481_s4149_r14700/RDO.33629020._000047.pool.root.1"
+
+#single muon sample
+# inputRDO="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/EFTracking/ATLAS-P2-RUN4-03-00-00/RDO/reg0_singlemu.root"
+
+outputAOD="AOD.root"
+threads=1
+nEvents="100"
+skipCheck=0
+storeClusters=False
+doSeeds=False
+skipEvents=0
+doCodeType="F1X0"
+
+## parsing flags
+while [ $# -ge 1 ];do
+    case "$1" in
+        --) shift ; break ;;
+        -i  | --inputRDO )      if [ $# -lt 2 ] ; then usage ; fi ; inputRDO="$2"  ; shift ;;
+        -o  | --outputAOD )     if [ $# -lt 2 ] ; then usage ; fi ; outputAOD="$2" ; shift ;;
+        -x  | --xclbin )        if [ $# -lt 2 ] ; then usage ; fi ; xclbinPath="$2" ; shift ;;
+        -n  | --nEvents )       if [ $# -lt 2 ] ; then usage ; fi ; nEvents="$2"   ; shift ;;
+        -d  | --skipEvents )    if [ $# -lt 2 ] ; then usage ; fi ; skipEvents="$2" ; shift ;;
+        -b  | --bdfid )         if [ $# -lt 2 ] ; then usage ; fi ; bdfid="$2" ; shift ;;
+        -s  | --skipCheck )     if [ $# -lt 1 ] ; then usage ; fi ; skipCheck=1 ; shift ;;
+        -c  | --doClusters )    if [ $# -lt 1 ] ; then usage ; fi ; storeClusters=True; shift ;;
+        -k  | --doSeeds )       if [ $# -lt 1 ] ; then usage ; fi ; doSeeds=True; shift ;;
+        -t  | --threads )       if [ $# -lt 2 ] ; then usage ; fi ; threads=${2} ; shift ;;
+        -q  | --doCodeType )    if [ $# -lt 2 ] ; then usage ; fi ; doCodeType="$2" ; shift ;;
+        -h  | --help )          usage 0 ;;
+        *) shift ;;
+        esac
+        shift
+    done
+
+## checking valid inputs
+if [ -z "$inputRDO" ]; then usage ; fi
+if [ -z "$outputAOD" ]; then usage ; fi
+
+if [[ "$inputRDO" == *"*"* ]]; then
+    # Just pass the pattern as is to Reco_tf.py in case of regex-like input
+    inputRDO_arg="$inputRDO"
+else
+    # Check existence for comma-separated files
+    IFS=',' read -ra FILES <<< "$inputRDO"
+    for file in "${FILES[@]}"; do
+        if [[ ! -f "$file" ]]; then
+            echo "Error: File not found: $file"
+            exit 1
+        fi
+    done
+    inputRDO_arg="$inputRDO"
+fi
+
+
+ATHENA_CORE_NUMBER=${threads} Reco_tf.py --CA \
+    --maxEvents ${nEvents} \
+    --skipEvents ${skipEvents} \
+    --preInclude 'InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsValidateF150Flags' \
+    --preExec "flags.Tracking.ITkActsValidateF150Pass.doFPGATrackSim=False;\
+                flags.Tracking.doPixelDigitalClustering=True;\
+                flags.Concurrency.NumConcurrentEvents=${threads};flags.Concurrency.NumThreads=${threads};\
+                flags.Tracking.ITkActsValidateF150Pass.storeTrackSeeds=${doSeeds};\
+                flags.Acts.EDM.PersistifyClusters=${storeClusters};flags.Acts.EDM.PersistifySpacePoints=${storeClusters};\
+                flags.FPGADataPrep.doCodeType=\"${doCodeType}\";flags.FPGADataPrep.bdfID=\"${bdfid}\";flags.FPGADataPrep.xclbin=\"${xclbinPath}\""\
+    --postInclude "ActsConfig.ActsPostIncludes.ACTSClusterPostInclude" \
+    --steering 'doRAWtoALL' \
+    --inputRDOFile ${inputRDO_arg} \
+    --outputAODFile ${outputAOD}
+
+
+rc=$?
+echo "Reco_tf.py result: $rc"
+if [ $rc != 0 ]; then exit $rc; fi
+
+## check output
+if [ "$skipCheck" == "0" ]; then
+    checkxAOD.py ${outputAOD} > ${outputAOD}.checkxAOD.log
+    checkFile.py ${outputAOD} > ${outputAOD}.checkFile.log
+fi

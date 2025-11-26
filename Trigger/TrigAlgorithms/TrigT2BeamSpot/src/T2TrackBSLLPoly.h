@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2019 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2025 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -49,7 +49,7 @@ namespace PESA {
  * Together with 6 omega combinations this gives (4+4*3/2+4+1)*6 = 90
  * monomials.
  *
- * In addition to the 90 coeeficients we also store other information in the
+ * In addition to the 90 coefficients we also store other information in the
  * monitored variables:
  *
  *    - number of tracks
@@ -60,21 +60,7 @@ public:
 
     explicit T2TrackBSLLPoly(double beam_size) : m_beam_size(beam_size) {}
 
-    /**
-     * Return number of bins in the histogram for all plynomial coefficients
-     * (and few other numbers).
-     */
-    static unsigned nbins();
-
-    /**
-     * Return bin number (0-based) for a monomial coefficient given the powers
-     * of the variables in a monomial. Returns negative number for unexpected
-     * input.
-     */
-    static int idx(unsigned power_Bx, unsigned power_By,
-                   unsigned power_tx, unsigned power_ty,
-                   unsigned power_omegax, unsigned power_omegay);
-
+    
     /**
      * Update polynomial coefficients with track data.
      *
@@ -85,7 +71,7 @@ public:
 
 private:
 
-    double m_beam_size;
+    double m_beam_size{};
 };
 
 } // end namespace

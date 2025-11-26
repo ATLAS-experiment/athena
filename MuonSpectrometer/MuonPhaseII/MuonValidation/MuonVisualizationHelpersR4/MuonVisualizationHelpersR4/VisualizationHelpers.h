@@ -4,8 +4,11 @@
 #ifndef MUONR4_MUONVISUALIZATIONHELPERS_H
 #define MUONR4_MUONVISUALIZATIONHELPERS_H
 
-#include <memory>
+
 #include <GeoPrimitives/GeoPrimitives.h>
+///
+#include <memory>
+#include <vector>
 #include <MuonPatternEvent/SegmentFitterEventData.h>
 
 
@@ -25,6 +28,8 @@ namespace MuonValR4 {
     constexpr int objViewEta = Acts::toUnderlying(MuonR4::SegmentFit::AxisDefs::etaCov);
     constexpr int objViewPhi = Acts::toUnderlying(MuonR4::SegmentFit::AxisDefs::phiCov);
     
+    
+    std::vector<std::unique_ptr<TObject>> clone(const std::vector<std::unique_ptr<TObject>>& cloneMe);
     /** @brief Create a TEllipse for drawing a drift circle
      *  @param center: Position of the drift cirle expressed in the chambers frame
      *                  y-coordinate corresponds to the tube layer

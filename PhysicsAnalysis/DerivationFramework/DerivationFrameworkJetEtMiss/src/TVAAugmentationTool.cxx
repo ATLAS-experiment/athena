@@ -7,14 +7,6 @@
 
 namespace DerivationFramework {
 
-  TVAAugmentationTool::TVAAugmentationTool(
-      const std::string& t,
-      const std::string& n,
-      const IInterface* p):
-    base_class(t, n, p)
-  {
-  }
-
   StatusCode TVAAugmentationTool::initialize()
   {
     ATH_MSG_DEBUG("Initialising TVAAugmentationTool " << name() );
@@ -26,9 +18,8 @@ namespace DerivationFramework {
     return StatusCode::SUCCESS;
   }
 
-  StatusCode TVAAugmentationTool::addBranches() const
+  StatusCode TVAAugmentationTool::addBranches(const EventContext& ctx) const
   {
-    const EventContext& ctx = Gaudi::Hive::currentContext();
     SG::WriteDecorHandle<xAOD::TrackParticleContainer, vtxLink_t> vtxDec_handle(m_vtxDec_key, ctx);
 
     SG::ReadHandle<xAOD::VertexContainer> vertices{m_vertexName, ctx};

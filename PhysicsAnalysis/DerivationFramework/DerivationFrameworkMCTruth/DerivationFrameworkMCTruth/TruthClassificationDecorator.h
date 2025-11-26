@@ -19,28 +19,29 @@ class IMCTruthClassifier;
 namespace DerivationFramework {
 
   class TruthClassificationDecorator : public extends<AthAlgTool, IAugmentationTool> {
-    public: 
-      TruthClassificationDecorator(const std::string& t, const std::string& n, const IInterface* p);
-      ~TruthClassificationDecorator();
-      StatusCode initialize();
-      StatusCode finalize();
-      virtual StatusCode addBranches() const;
+  public:
 
-    private:
-      mutable std::atomic<unsigned int> m_ntotpart;
-      SG::ReadHandleKey<xAOD::TruthParticleContainer> m_particlesKey 
-         {this, "ParticlesKey", "TruthParticles", "ReadHandleKey for input TruthParticleContainer"};
-      // Decorator keys
-      SG::WriteDecorHandleKey<xAOD::TruthParticleContainer> m_originDecoratorKey
-         {this, "classifierParticleOrigin", m_particlesKey, "classifierParticleOrigin", "Particle origin decoration"};
-      SG::WriteDecorHandleKey<xAOD::TruthParticleContainer> m_typeDecoratorKey
-         {this, "classifierParticleType", m_particlesKey, "classifierParticleType", "Particle type decoration"};
-      SG::WriteDecorHandleKey<xAOD::TruthParticleContainer> m_outcomeDecoratorKey
-         {this, "classifierParticleOutCome", m_particlesKey, "classifierParticleOutCome", "Particle outcome decoration"};
-      SG::WriteDecorHandleKey<xAOD::TruthParticleContainer> m_classificationDecoratorKey
-         {this, "Classification", m_particlesKey, "Classification", "Classification code decorator"};
-      ToolHandle<IMCTruthClassifier> m_classifier;
-  }; 
+    using base_class::base_class;
+
+    virtual StatusCode initialize() override final;
+    virtual StatusCode finalize() override final;
+    virtual StatusCode addBranches(const EventContext& ctx) const override final;
+
+  private:
+    mutable std::atomic<unsigned int> m_ntotpart{};
+    SG::ReadHandleKey<xAOD::TruthParticleContainer> m_particlesKey
+      {this, "ParticlesKey", "TruthParticles", "ReadHandleKey for input TruthParticleContainer"};
+    // Decorator keys
+    SG::WriteDecorHandleKey<xAOD::TruthParticleContainer> m_originDecoratorKey
+      {this, "classifierParticleOrigin", m_particlesKey, "classifierParticleOrigin", "Particle origin decoration"};
+    SG::WriteDecorHandleKey<xAOD::TruthParticleContainer> m_typeDecoratorKey
+      {this, "classifierParticleType", m_particlesKey, "classifierParticleType", "Particle type decoration"};
+    SG::WriteDecorHandleKey<xAOD::TruthParticleContainer> m_outcomeDecoratorKey
+      {this, "classifierParticleOutCome", m_particlesKey, "classifierParticleOutCome", "Particle outcome decoration"};
+    SG::WriteDecorHandleKey<xAOD::TruthParticleContainer> m_classificationDecoratorKey
+      {this, "Classification", m_particlesKey, "Classification", "Classification code decorator"};
+    PublicToolHandle<IMCTruthClassifier> m_classifier{this, "MCTruthClassifier", "MCTruthClassifier/MCTruthClassifier"};
+  };
 }
 
-#endif // DERIVATIONFRAMEWORK_TRUTHCLASSIFICATIONDECORATOR_H 
+#endif // DERIVATIONFRAMEWORK_TRUTHCLASSIFICATIONDECORATOR_H

@@ -63,7 +63,7 @@ PLR_IDDetDescrCnv::createObj(IOpaqueAddress* /*pAddr*/, DataObject*& pObj)
     // DoChecks flag
     bool doChecks = mgr->do_checks();
 
-    IdDictDictionary* dict = mgr->find_dictionary("InnerDetector");
+    const IdDictDictionary* dict = mgr->find_dictionary("InnerDetector");
     if (!dict) {
         ATH_MSG_ERROR("unable to find idDict for InnerDetector");
         return StatusCode::FAILURE;

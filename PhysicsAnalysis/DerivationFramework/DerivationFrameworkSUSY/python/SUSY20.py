@@ -343,7 +343,7 @@ def SUSY20Cfg(flags):
 		"PrimaryVertices",
 		"TauJets",
 		"AntiKt4EMPFlowJets",
-		"BTagging_AntiKt4EMPFlow",
+		
 		"MET_Baseline_AntiKt4EMPFlow",
 	]
 	

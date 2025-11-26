@@ -8,8 +8,15 @@
 ***************************************************************************/
 
 #include "AtlasDetDescr/AtlasDetectorID.h"
-#include "IdDict/IdDictDefs.h"
 #include "AtlasDetectorIDHelper.h"
+#include "Identifier/IdContext.h"
+#include "Identifier/ExpandedIdentifier.h"
+#include "IdDict/IdDictDictionary.h"
+#include "IdDict/IdDictField.h"
+#include "IdDict/IdDictLabel.h"
+#include "IdDict/IdDictMgr.h"
+#include "IdDict/IdDictRange.h"
+#include "IdDict/IdDictRegion.h"
 #include <stdio.h>
 #include <assert.h>
 #include <format>
@@ -198,7 +205,7 @@ int AtlasDetectorID::register_dict_tag(const IdDictMgr &dict_mgr,
     // Register version of dictionary dict_name
 
     // Access dictionary by name
-    IdDictDictionary *dict = dict_mgr.find_dictionary(dict_name);
+    const IdDictDictionary *dict = dict_mgr.find_dictionary(dict_name);
     if (!dict) {
         ATH_MSG_ERROR(__func__<<":"<<__LINE__<<" No dictionary found");
         return 1;
@@ -229,7 +236,7 @@ bool AtlasDetectorID::reinitialize(const IdDictMgr &dict_mgr) {
     }
     for (unsigned int i = 0; i < m_dict_names.size(); ++i) {
         // Access dictionary by name
-        IdDictDictionary *dict = dict_mgr.find_dictionary(m_dict_names[i]);
+        const IdDictDictionary *dict = dict_mgr.find_dictionary(m_dict_names[i]);
         if (!dict) {
             ATH_MSG_ERROR("reinitialize: could not find dict -  " << m_dict_names[i]);
             return false;
@@ -371,7 +378,7 @@ AtlasDetectorID::show_to_string(const Identifier id, const IdContext *context, c
         return result;
 
     // Find the dictionary to use:
-    IdDictDictionary *dict{nullptr};
+    const IdDictDictionary *dict{nullptr};
     ExpandedIdentifier expId{};
     ExpandedIdentifier prefix{}; // default is null prefix
     Identifier compact = id;
@@ -429,7 +436,7 @@ std::string AtlasDetectorID::print_to_string(Identifier id,
         unsigned int max_index = (context) ? context->end_index() : 999;
 
         // Find the dictionary to use:
-        IdDictDictionary *dict{nullptr};
+        const IdDictDictionary *dict{nullptr};
         ExpandedIdentifier expId;
         ExpandedIdentifier prefix; // default is null prefix
         Identifier compact = id;
@@ -520,7 +527,7 @@ int AtlasDetectorID::initLevelsFromDict(const IdDictMgr &dict_mgr) {
         m_do_neighbours = false;
 
     
-    IdDictField *field{nullptr};
+    const IdDictField *field{nullptr};
 
     // Find out from the dictionary the detector and subdetector
     // levels and id values
@@ -552,12 +559,12 @@ int AtlasDetectorID::initLevelsFromDict(const IdDictMgr &dict_mgr) {
     m_MM_ID = -1;
 
     // Save generic dict for top levels
-    IdDictDictionary *top_dict {nullptr};
+    const IdDictDictionary *top_dict {nullptr};
 
     auto assignSystemId = [this, &field](const std::string& systemName,
                                    int& idToAssign, 
                                    bool mandatory = true) ->bool {
-        IdDictLabel *label = field->find_label(systemName);
+        const IdDictLabel *label = field->find_label(systemName);
         if (label && label->valued()){
             idToAssign = label->value();
             ATH_MSG_VERBOSE("Assign system "<<systemName<<" to "<<idToAssign<<".");
@@ -1036,4 +1043,131 @@ int AtlasDetectorID::initLevelsFromDict(const IdDictMgr &dict_mgr) {
         }
     }
     return 0;
+}
+
+
+ExpandedIdentifier
+AtlasDetectorID::indet_exp           (void) const
+{
+    ExpandedIdentifier result;
+    return (result << m_INDET_ID);
+}
+
+ExpandedIdentifier
+AtlasDetectorID::lar_exp             (void) const
+{
+    ExpandedIdentifier result;
+    return (result << m_LAR_ID);
+}
+
+ExpandedIdentifier
+AtlasDetectorID::tile_exp            (void) const
+{
+    ExpandedIdentifier result;
+    return (result << m_TILE_ID);
+}
+
+ExpandedIdentifier
+AtlasDetectorID::muon_exp            (void) const
+{
+    ExpandedIdentifier result;
+    return (result << m_MUON_ID);
+}
+
+ExpandedIdentifier
+AtlasDetectorID::calo_exp(void) const
+{
+    ExpandedIdentifier result;
+    return (result << m_CALO_ID);
+}
+
+ExpandedIdentifier
+AtlasDetectorID::fwd_exp             (void) const
+{
+    ExpandedIdentifier result;
+    return (result << m_FWD_ID);
+}
+
+ExpandedIdentifier
+AtlasDetectorID::pixel_exp           (void) const
+{
+    ExpandedIdentifier result(indet_exp());
+    return (result << m_PIXEL_ID);
+}
+
+ExpandedIdentifier
+AtlasDetectorID::sct_exp             (void) const
+{
+    ExpandedIdentifier result(indet_exp());
+    return (result << m_SCT_ID);
+}
+
+ExpandedIdentifier
+AtlasDetectorID::trt_exp             (void) const
+{
+    ExpandedIdentifier result(indet_exp());
+    return (result << m_TRT_ID);
+}
+
+ExpandedIdentifier
+AtlasDetectorID::hgtd_exp           (void) const
+{
+    ExpandedIdentifier result(indet_exp());
+    return (result << m_HGTD_ID);
+}
+
+ExpandedIdentifier
+AtlasDetectorID::lumi_exp           (void) const
+{
+    ExpandedIdentifier result(indet_exp());
+    return (result << m_LUMI_ID);
+}
+
+ExpandedIdentifier
+AtlasDetectorID::lar_em_exp          (void) const
+{
+    ExpandedIdentifier result(lar_exp());
+    return (result << m_LAR_EM_ID);
+}
+
+ExpandedIdentifier
+AtlasDetectorID::lar_hec_exp         (void) const
+{
+    ExpandedIdentifier result(lar_exp());
+    return (result << m_LAR_HEC_ID);
+}
+
+ExpandedIdentifier
+AtlasDetectorID::lar_fcal_exp        (void) const
+{
+    ExpandedIdentifier result(lar_exp());
+    return (result << m_LAR_FCAL_ID);
+}
+
+ExpandedIdentifier
+AtlasDetectorID::alfa_exp             (void) const
+{
+    ExpandedIdentifier result(fwd_exp());
+    return (result << m_ALFA_ID);
+}
+
+ExpandedIdentifier
+AtlasDetectorID::bcm_exp             (void) const
+{
+    ExpandedIdentifier result(fwd_exp());
+    return (result << m_BCM_ID);
+}
+
+ExpandedIdentifier
+AtlasDetectorID::lucid_exp           (void) const
+{
+    ExpandedIdentifier result(fwd_exp());
+    return (result << m_LUCID_ID);
+}
+
+ExpandedIdentifier
+AtlasDetectorID::zdc_exp             (void) const
+{
+    ExpandedIdentifier result(fwd_exp());
+    return (result << m_ZDC_ID);
 }

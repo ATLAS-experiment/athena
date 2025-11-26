@@ -24,7 +24,6 @@
 #include "InDetCondTools/ISiLorentzAngleTool.h"
 #include "PixelConditionsData/PixelChargeCalibCondData.h"
 #include "PixelConditionsData/PixelOfflineCalibData.h"
-#include "PixelReadoutGeometry/IPixelReadoutManager.h"
 #include "StoreGate/ReadCondHandleKey.h"
 #include "xAODInDetMeasurement/PixelCluster.h"
 #include "xAODInDetMeasurement/PixelClusterContainer.h"
@@ -163,9 +162,6 @@ private:
              const PixelCalib::PixelOfflineCalibData *offlineCalibData,
              const EventContext& ctx,
              xAOD::PixelCluster* cluster = nullptr) const;
-
-  ServiceHandle<InDetDD::IPixelReadoutManager> m_pixelReadout
-  {this, "PixelReadoutManager", "PixelReadoutManager", "Pixel readout manager" };
 
   ToolHandle<ISiLorentzAngleTool> m_pixelLorentzAngleTool
   {this, "PixelLorentzAngleTool", "SiLorentzAngleTool/PixelLorentzAngleTool", "Tool to retreive Lorentz angle of Pixel"};

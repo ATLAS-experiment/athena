@@ -6,8 +6,6 @@
 #include "libname.h"
 
 #include <stdexcept>
-#include <iostream>
-#include <sstream>
 #include <memory>
 #include <filesystem>
 
@@ -27,8 +25,6 @@
 #include "PersistencySvc/ITokenIterator.h"
 #include "PersistencySvc/IPersistencySvc.h"
 
-
-static const RootType emptyType;
 
 pool::TestDriver::TestDriver( const std::string& catname ):
   m_fileCatalog( 0 ),
@@ -58,14 +54,13 @@ pool::TestDriver::~TestDriver()
 void
 pool::TestDriver::clearCache()
 {
-  for ( std::vector< Token* >::iterator iToken = m_tokens.begin();
-	iToken != m_tokens.end(); ++iToken ) {
-    (*iToken)->release();
-  }
+  for( auto iToken : m_tokens ) iToken->release();
   m_tokens.clear();
 }
 
-
+/*
+  Test writing of several classes defined in the TestDictionary
+  */
 void
 pool::TestDriver::write(pool::DbType storageType)
 {
@@ -89,7 +84,7 @@ pool::TestDriver::write(pool::DbType storageType)
   // Retrieving the class descriptions
   RootType class_SimpleTestClass ( "SimpleTestClass" );
   RootType class_TestClassPrimitives ( "TestClassPrimitives" );
-  RootType class_TestClassSimpleContainers  ( "TestClassSimpleContainers" );
+  RootType class_TestClassSTLContainers  ( "TestClassSTLContainers" );
   RootType class_TestClassVectors ( "TestClassVectors" );
 
   // Defining the placement objects
@@ -103,10 +98,10 @@ pool::TestDriver::write(pool::DbType storageType)
   placementHint_TestClassPrimitives.setContainerName( "TestClassPrimitives_Container" );
   placementHint_TestClassPrimitives.setTechnology( storageType.type() );
 
-  Placement placementHint_TestClassSimpleContainers;
-  placementHint_TestClassSimpleContainers.setFileName( m_fileName2 );
-  placementHint_TestClassSimpleContainers.setContainerName( "TestClassSimpleContainers_Container" );
-  placementHint_TestClassSimpleContainers.setTechnology( storageType.type() );
+  Placement placementHint_TestClassSTLContainers;
+  placementHint_TestClassSTLContainers.setFileName( m_fileName2 );
+  placementHint_TestClassSTLContainers.setContainerName( "TestSTLContainers_Container" );
+  placementHint_TestClassSTLContainers.setTechnology( storageType.type() );
 
   Placement placementHint_TestClassVectors;
   placementHint_TestClassVectors.setFileName( m_fileName2 );
@@ -115,11 +110,11 @@ pool::TestDriver::write(pool::DbType storageType)
 
   std::vector< SimpleTestClass* > v_simpleTestClass;
   std::vector< TestClassPrimitives* > v_testClassPrimitives;
-  std::vector< TestClassSimpleContainers* > v_testClassSimpleContainers;
+  std::vector< TestClassSTLContainers* > v_testClassSTLContainers;
   std::vector< TestClassVectors* > v_testClassVectors;
+
   std::cout << "Writing " << m_events << " objects of each type" << std::endl;
   for ( int i = 0; i < m_events; ++i ) {
-
     ///////////////////////////////////////////////////////////
     SimpleTestClass* object_SimpleTestClass = new SimpleTestClass();
     v_simpleTestClass.push_back( object_SimpleTestClass );
@@ -147,21 +142,17 @@ pool::TestDriver::write(pool::DbType storageType)
     m_testClassPrimitives.push_back( *object_TestClassPrimitives );
 
     ///////////////////////////////////////////////////////////
-    if( storageType.exactMatch(pool::ROOTRNTUPLE_StorageType) ) {
-       std::cout << "Skiping RNTuple test: TestClassSimpleContainers - not all STL continers are supported by RNTuple" << std::endl;
-    } else {
-       TestClassSimpleContainers* object_TestClassSimpleContainers = new TestClassSimpleContainers();
-       v_testClassSimpleContainers.push_back( object_TestClassSimpleContainers );
-       object_TestClassSimpleContainers->setNonZero();
-       Token* token_TestClassSimpleContainers = persistencySvc->registerForWrite( placementHint_TestClassSimpleContainers,
-                                                                                  object_TestClassSimpleContainers,
-                                                                                  class_TestClassSimpleContainers );
-       if ( ! token_TestClassSimpleContainers ) {
-          throw std::runtime_error( "Could not write an object" );
-       }
-       m_tokens.push_back( token_TestClassSimpleContainers );
-       m_testClassSimpleContainers.push_back( *object_TestClassSimpleContainers );
+    TestClassSTLContainers* object_TestClassSTLContainers = new TestClassSTLContainers();
+    v_testClassSTLContainers.push_back( object_TestClassSTLContainers );
+    object_TestClassSTLContainers->setNonZero();
+    Token* token_TestClassSTLContainers = persistencySvc->registerForWrite( placementHint_TestClassSTLContainers,
+                                                                            object_TestClassSTLContainers,
+                                                                            class_TestClassSTLContainers );
+    if ( ! token_TestClassSTLContainers ) {
+       throw std::runtime_error( "Could not write an object" );
     }
+    m_tokens.push_back( token_TestClassSTLContainers );
+    m_testClassSTLContainers.push_back( *object_TestClassSTLContainers );
 
     ///////////////////////////////////////////////////////////
     TestClassVectors* object_TestClassVectors = new TestClassVectors();
@@ -176,44 +167,25 @@ pool::TestDriver::write(pool::DbType storageType)
     m_tokens.push_back( token_TestClassVectors );
     m_testClassVectors.push_back( *object_TestClassVectors );
 
-
-    // Commit and hold the transaction
-    if( ( i + 1 ) % m_eventsToCommitAndHold == 0 or storageType.exactMatch(pool::ROOTRNTUPLE_StorageType) ) {
+    // Commit and hold the transaction every few rows
+    if( (i+1) % m_eventsToCommitAndHold == 0 ) {
       if( ! persistencySvc->session().transaction().commitAndHold() ) {
         throw std::runtime_error( "Could not commit and hold the transaction." );
       }
     }
   }
-
-
-  // Committing the transaction
-  std::cout << "Committing the transaction." << std::endl;
   if ( ! persistencySvc->session().transaction().commit() ) {
     throw std::runtime_error( "Could not commit the transaction." );
   }
 
   // Removing the "cache"
-  for ( std::vector< SimpleTestClass* >::iterator iObject = v_simpleTestClass.begin();
-        iObject != v_simpleTestClass.end(); ++iObject ) {
-    delete *iObject;
-  }
+  for( auto ptr : v_simpleTestClass ) delete ptr;
   v_simpleTestClass.clear();
-  for ( std::vector< TestClassPrimitives* >::iterator iObject = v_testClassPrimitives.begin();
-        iObject != v_testClassPrimitives.end(); ++iObject ) {
-    delete *iObject;
-  }
+  for( auto ptr : v_testClassPrimitives ) delete ptr;
   v_testClassPrimitives.clear();
-  
-  for ( std::vector< TestClassSimpleContainers* >::iterator iObject = v_testClassSimpleContainers.begin();
-        iObject != v_testClassSimpleContainers.end(); ++iObject ) {
-    delete *iObject;
-  }
-  v_testClassSimpleContainers.clear();
-
-  for ( std::vector< TestClassVectors* >::iterator iObject = v_testClassVectors.begin();
-        iObject != v_testClassVectors.end(); ++iObject ) {
-    delete *iObject;
-  }
+  for( auto ptr : v_testClassSTLContainers ) delete ptr;
+  v_testClassSTLContainers.clear();
+  for( auto ptr : v_testClassVectors ) delete ptr;
   v_testClassVectors.clear();
 
   // Start an update transaction
@@ -255,7 +227,7 @@ pool::TestDriver::read()
     if ( data_simpleTestClass == 0 ) {
       throw std::runtime_error( "Could not read the stored data" );
     }
-    SimpleTestClass* object_simpleTestClass = reinterpret_cast< SimpleTestClass* >( data_simpleTestClass );
+    std::unique_ptr<SimpleTestClass> object_simpleTestClass( static_cast< SimpleTestClass* >( data_simpleTestClass ) );
     if ( *object_simpleTestClass != m_simpleTestClass[i] ) {
       std::ostringstream error;
       error << "SimpleTestClass object written is different from object read:" << std::endl << "Original : ";
@@ -264,7 +236,6 @@ pool::TestDriver::read()
       object_simpleTestClass->streamOut( error );
       throw std::runtime_error( error.str() );
     }
-    delete object_simpleTestClass;
     ++j;
 
     ///////////////////////////////////////////////////////////
@@ -272,7 +243,7 @@ pool::TestDriver::read()
     if ( data_testClassPrimitives == 0 ) {
       throw std::runtime_error( "Could not read the stored data" );
     }
-    TestClassPrimitives* object_testClassPrimitives = reinterpret_cast< TestClassPrimitives* >( data_testClassPrimitives );
+    std::unique_ptr<TestClassPrimitives> object_testClassPrimitives( static_cast< TestClassPrimitives* >( data_testClassPrimitives ) );
     if ( *object_testClassPrimitives != m_testClassPrimitives[i] ) {
       std::ostringstream error;
       error << "TestClassPrimitives object written is different from object read:" << std::endl << "Original : ";
@@ -281,38 +252,36 @@ pool::TestDriver::read()
       object_testClassPrimitives->streamOut( error );
       throw std::runtime_error( error.str() );
     }
-    delete object_testClassPrimitives;
     ++j;
 
     //////////////////////////////////////////////////////////
     const Token& token = *( m_tokens.at(numberOfTypes*i + j) );
-    Guid SimpleContainersClassID;
-    SimpleContainersClassID.fromString("4E1F4DBB-1973-1974-1999-204F37331A02");
-    if( token.classID() == SimpleContainersClassID
-        and !pool::ROOTRNTUPLE_StorageType.exactMatch(token.technology()) )
-    {
-       void* data_testClassSimpleContainers = persistencySvc->readObject(token);
-       if ( data_testClassSimpleContainers == 0 ) {
+    Guid STLContainersClassID;
+    STLContainersClassID.fromString("4E1F4DBB-1973-1974-1999-204F37331A02");
+    if( token.classID() == STLContainersClassID ) {
+       void* data_testClassSTLContainers = persistencySvc->readObject(token);
+       if ( data_testClassSTLContainers == 0 ) {
           throw std::runtime_error( "Could not read the stored data" );
        }
-       TestClassSimpleContainers* object_testClassSimpleContainers = reinterpret_cast< TestClassSimpleContainers* >( data_testClassSimpleContainers );
-       if ( *object_testClassSimpleContainers != m_testClassSimpleContainers[i] ) {
+       std::unique_ptr<TestClassSTLContainers> 
+          object_testClassSTLContainers(static_cast<TestClassSTLContainers*>(data_testClassSTLContainers));
+       if ( *object_testClassSTLContainers != m_testClassSTLContainers[i] ) {
           std::ostringstream error;
-          error << "TestClassSimpleContainers object written is different from object read:" << std::endl << "Original : ";
-          m_testClassSimpleContainers[i].streamOut( error );
+          error << "TestClassSTLContainers object written is different from object read:" << std::endl << "Original : ";
+          m_testClassSTLContainers[i].streamOut( error );
           error << std::endl << "Read from persistency : ";
-          object_testClassSimpleContainers->streamOut( error );
+          object_testClassSTLContainers->streamOut( error );
           throw std::runtime_error( error.str() );
        }
-       delete object_testClassSimpleContainers;
        ++j;
     }
+
     ///////////////////////////////////////////////////////////
     void* data_testClassVectors = persistencySvc->readObject( *( m_tokens[numberOfTypes*i + j] ) );
     if ( data_testClassVectors == 0 ) {
       throw std::runtime_error( "Could not read the stored data" );
     }
-    TestClassVectors* object_testClassVectors = reinterpret_cast< TestClassVectors* >( data_testClassVectors );
+    std::unique_ptr<TestClassVectors> object_testClassVectors( static_cast< TestClassVectors* >( data_testClassVectors ) );
     if ( *object_testClassVectors != m_testClassVectors[i] ) {
       std::ostringstream error;
       error << "TestClassVectors object written is different from object read:" << std::endl << "Original : ";
@@ -321,15 +290,6 @@ pool::TestDriver::read()
       object_testClassVectors->streamOut( error );
       throw std::runtime_error( error.str() );
     }
-    delete object_testClassVectors;
-
-    // Commit and hold the transaction
-    if ( ( i + 1 ) % m_eventsToCommitAndHold == 0 ) {
-      if ( ! persistencySvc->session().transaction().commitAndHold() ) {
-        throw std::runtime_error( "Could not commit and hold the transaction." );
-      }
-    }
-
   }
 
   // Committing the transaction
@@ -396,77 +356,6 @@ pool::TestDriver::readCollections()
     delete container;
   }
 
-  std::cout << "Committing the transaction." << std::endl;
-  if ( ! persistencySvc->session().transaction().commit() ) {
-    throw std::runtime_error( "Could not commit the transaction." );
-  }
-
-  catalog.commit();
-}
-
-
-
-void
-pool::TestDriver::readBackUpdatedObjects()
-{
-  pool::IFileCatalog& catalog = *m_fileCatalog;
-  catalog.start();
-  
-  std::cout << "Creating the persistency service" << std::endl;
-  std::unique_ptr< pool::IPersistencySvc > persistencySvc( pool::IPersistencySvc::create(catalog) );
-
-  // Starting a read transaction
-  if ( ! persistencySvc->session().transaction().start( pool::ITransaction::READ ) ) {
-    throw std::runtime_error( "Could not start a read transaction." );
-  }
-
-  auto db = persistencySvc->session().databaseHandle( m_fileName1, pool::DatabaseSpecification::PFN );
-  if ( ! db ) {
-    throw std::runtime_error( "Could not retrieve a database handle" );
-  }
-
-  db->connectForRead(); // will open db in read mode.
-
-  pool::IContainer* container = db->containerHandle( "SimpleTestClass_Container" );
-  if ( ! container ) {
-    throw std::runtime_error( "Could not retrieve the container" );
-  }
-
-  pool::ITokenIterator* tokenIterator = container->tokens();
-  if ( ! tokenIterator ) {
-    throw std::runtime_error( "Could not obtain a token iterator" );
-  }
-
-  int i = 0;
-
-  Token* token = tokenIterator->next();
-  while ( token ) {
-    void* data_simpleTestClass = persistencySvc->readObject( *token );
-    if ( data_simpleTestClass == 0 ) {
-      throw std::runtime_error( "Could not read the stored data" );
-    }
-    SimpleTestClass* object_simpleTestClass = reinterpret_cast< SimpleTestClass* >( data_simpleTestClass );
-    if ( object_simpleTestClass->data != i ) {
-      throw std::runtime_error( "Unexpected data read back" );
-    }
-    delete object_simpleTestClass;
-    token->release();
-    token = tokenIterator->next();
-
-    // Commit and hold the transaction
-    if ( ( i + 1 ) % m_eventsToCommitAndHold == 0 ) {
-      if ( ! persistencySvc->session().transaction().commitAndHold() ) {
-        throw std::runtime_error( "Could not commit and hold the transaction." );
-      }
-    }
-
-    ++i;
-  }
-
-  delete tokenIterator;
-  delete container;
-
-  // Committing
   std::cout << "Committing the transaction." << std::endl;
   if ( ! persistencySvc->session().transaction().commit() ) {
     throw std::runtime_error( "Could not commit the transaction." );

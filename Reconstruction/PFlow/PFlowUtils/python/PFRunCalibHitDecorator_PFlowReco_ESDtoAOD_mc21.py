@@ -13,7 +13,7 @@ if __name__=="__main__":
     #This flag enables CaloCalTopoCluster to be created, in addition to CaloTopoCluster
     cfgFlags.Calo.TopoCluster.doTopoClusterLocalCalib=True
     cfgFlags.Calo.TopoCluster.addCalibrationHitDecoration=True
-    cfgFlags.Tau.doDiTauRec = False #does not run from ESD - tries to use aux variables which do not exist
+    cfgFlags.DiTau.doDiTauRec = False #does not run from ESD - tries to use aux variables which do not exist
     cfgFlags.fillFromArgs()
     cfgFlags.lock()
 

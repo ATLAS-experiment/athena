@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // System include(s):
@@ -51,20 +51,20 @@
 
 /// Type used in the event/store test
 class ClassA {
-   
+
 public:
    int m_var1;
    float m_var2;
-   
+
 }; // class ClassA
 
 /// Type used in the event/store test
 class ClassB : public ClassA {
-   
+
 public:
    int m_var3;
    float m_var4;
-   
+
 }; // class ClassB
 
 // some dummz definitions to test TEvent::keys
@@ -82,10 +82,10 @@ int main() {
 
    // Get the name of the application:
    const char* APP_NAME = "ut_xaodrootaccess_tevent_test";
-   
+
    // Initialise the environment:
    RETURN_CHECK( APP_NAME, xAOD::Init() );
-   
+
    // Create the tested object(s):
    xAOD::TEvent event;
    xAOD::TStore store;
@@ -214,7 +214,7 @@ int main() {
    // test listing object keys
    {
       std::vector<std::string> keys;
-      event.keys<xAOD::FileMetaData>(keys, true);
+      RETURN_CHECK( APP_NAME, event.keys<xAOD::FileMetaData>(keys, true) );
       if (keys.size() != 1) {
          ::Error( APP_NAME,
                XAOD_MESSAGE( "keys<xAOD::FileMetaData>(true).size = %u (!=1)" ),
@@ -224,7 +224,7 @@ int main() {
 
       keys.clear();
       keys.reserve(6);
-      event.keys<DataVector< xAOD::TrackParticle > >(keys);
+      RETURN_CHECK( APP_NAME, event.keys<DataVector< xAOD::TrackParticle > >(keys, false) );
       if (keys.size() != 6) {
          ::Error( APP_NAME,
                XAOD_MESSAGE( "keys<xAOD::TrackParticle >().size = %u (!=6)" ),

@@ -280,6 +280,7 @@ class PhotonCalibrationConfig (ConfigBlock) :
             alg.isolationCorrectionTool.AFII_corr = (
                 0 if self.forceFullSimConfigForIso
                 else config.dataType() is DataType.FastSim)
+            alg.isolationCorrectionTool.FixTimingIssueInCore = True
             alg.egammas = config.readName (self.containerName)
             alg.egammasOut = config.copyName (self.containerName)
             alg.preselection = config.getPreselection (self.containerName, '')

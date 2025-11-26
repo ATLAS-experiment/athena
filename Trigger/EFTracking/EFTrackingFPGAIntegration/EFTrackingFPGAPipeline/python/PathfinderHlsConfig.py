@@ -10,12 +10,12 @@ if __name__ == "__main__":
 
     argumentParser.add_argument(
         "--hitTestVectorPath",
-        default = "/eos/project/a/atlas-eftracking/TestVectors/FPGATrackSim_TVs/Test_Vectors_v0-6-3/F600_Region34_SingleMuon/pattern_reco_output.txt",
+        default = "/eos/project/a/atlas-eftracking/TestVectors/FPGATrackSim_TVs/Test_Vectors_v0-6-3d/F150_Region34_SingleMuon/stripL2G_output.txt",
     )
 
     argumentParser.add_argument(
         "--trackTestVectorPath",
-        default = "/eos/project/a/atlas-eftracking/TestVectors/FPGATrackSim_TVs/Test_Vectors_v0-6-3/F600_Region34_SingleMuon/spacepoint_strips_output.txt",
+        default = "/eos/project/a/atlas-eftracking/TestVectors/FPGATrackSim_TVs/Test_Vectors_v0-6-3d/F150_Region34_SingleMuon/pattern_reco_output.txt",
     )
 
     argumentParser.add_argument(
@@ -78,12 +78,23 @@ if __name__ == "__main__":
     acc.merge(EFTrackingXrtAlgorithmCfg(
         flags, 
         inputInterfaces = [
-            ["loader:{loader_1}", "inputTrackDataStream", 0],
-            ["loader:{loader_2}", "inputHitDataStream", 0],
+            ["configurableLengthWideLoader:{configurableLengthWideLoader_1}", "inputTrackDataStream", 0],
+            ["configurableLengthWideLoader:{configurableLengthWideLoader_2}", "inputHitDataStream", 0],
         ],
         outputInterfaces = [
-            ["unloader:{unloader_1}", "outputDataStream", 1],
+            ["dynamicLengthWideUnloader:{dynamicLengthWideUnloader_1}", "outputDataStream", 1],
         ],
+        vSizeInterfaces = [
+            ["configurableLengthWideLoader:{configurableLengthWideLoader_1}", "inputTrackDataStream", 2],
+            ["configurableLengthWideLoader:{configurableLengthWideLoader_2}", "inputHitDataStream", 2],
+        ],
+        kernelOrder = [
+            [
+                "configurableLengthWideLoader:{configurableLengthWideLoader_1}",
+                "configurableLengthWideLoader:{configurableLengthWideLoader_2}",
+                "dynamicLengthWideUnloader:{dynamicLengthWideUnloader_1}",
+            ],
+        ]
     ))
 
     from EFTrackingFPGAUtility.EFTrackingDataStreamUnloaderAlgorithmConfig import EFTrackingDataStreamUnloaderAlgorithmCfg

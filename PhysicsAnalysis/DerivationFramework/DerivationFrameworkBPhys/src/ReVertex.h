@@ -46,7 +46,7 @@ public:
 
     virtual StatusCode initialize() override;
 
-    virtual StatusCode addBranches() const override;
+    virtual StatusCode addBranches(const EventContext& ctx) const override;
 
    void fitAndStore(xAOD::VertexContainer* vtxContainer,
 		    const xAOD::Vertex* v,

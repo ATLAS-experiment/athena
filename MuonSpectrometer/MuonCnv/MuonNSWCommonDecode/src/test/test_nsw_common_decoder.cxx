@@ -2,11 +2,7 @@
   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-// STL include files
 
-#include <vector>
-#include <string>
-#include <chrono>
 
 // TDAQ include files
 
@@ -19,6 +15,11 @@
 #include "MuonNSWCommonDecode/NSWElink.h"
 #include "MuonNSWCommonDecode/VMMChannel.h"
 #include "MuonNSWCommonDecode/NSWResourceId.h"
+// STL include files
+
+#include <vector>
+#include <string>
+#include <chrono>
 
 // Number of sectors - Module ID, to be checked to avoid confusion with NSW TP
 
@@ -90,7 +91,7 @@ int test_nsw_common_decoder_opt (int argc, char **argv, Params& params)
 	  break;
         case 'd':
 	  det = argv[++i];
-	  params.detectors.push_back (det);
+	  params.detectors.push_back (std::move(det));
 	  break;
         case 'r':
 	  params.print_raw = true;
@@ -114,7 +115,7 @@ int test_nsw_common_decoder_opt (int argc, char **argv, Params& params)
     else
     {
       std::string data_file_name (argv[i]);
-      params.file_names.push_back (data_file_name);
+      params.file_names.push_back (std::move(data_file_name));
     }
   }
 

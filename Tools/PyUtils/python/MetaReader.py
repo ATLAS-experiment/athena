@@ -7,6 +7,8 @@ from AthenaCommon.Logging import logging
 from AthenaConfiguration.AthConfigFlags import isGaudiEnv
 from PyUtils.PoolFile import isRNTuple
 from ROOT import gSystem
+from AthenaConfiguration.Enums import Project
+
 
 msg = logging.getLogger('MetaReader')
 
@@ -135,6 +137,11 @@ def read_metadata(filenames, file_type = None, mode = 'lite', promote = None, me
                         current_file_type = 'POOL'
                         meta_dict[filename]['file_type'] = 'POOL'
 
+                    elif Project.determine() in (
+                            Project.AnalysisBase, Project.AthAnalysis):
+                        raise RuntimeError(
+                            f"{filename} is not a ROOT file, assumed bytestream"
+                            ", this is not supported in Analysis releases")
                     else:
                         current_file_type = 'BS'
                         meta_dict[filename]['file_type'] = 'BS'
@@ -1053,7 +1060,6 @@ def _convert_value(value, aux = None):
                 return _extract_fields_iovmdc(value)
 
             elif cl.__cpp_name__ == 'IOVPayloadContainer_p1':
-                global _gbl_mode
                 if _gbl_mode == 'iov':
                     return _extract_iov_detailed(value)
                 else:

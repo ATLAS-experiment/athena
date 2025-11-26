@@ -59,7 +59,7 @@ namespace MuonR4{
         return StatusCode::SUCCESS;
     }
     StatusCode xAODSegmentCnvAlg::execute(const EventContext& ctx) const {
-        const ActsGeometryContext* gctx{nullptr};
+        const ActsTrk::GeometryContext* gctx{nullptr};
         ATH_CHECK(SG::get(gctx, m_geoCtxKey, ctx));
 
         SG::WriteHandle outContainer{m_writeKey, ctx};
@@ -104,13 +104,21 @@ namespace MuonR4{
             };
             /** @brief Combine the two prds from the space point to a combined muonstrip and link
              *         the latter to the segment. */
-            auto combine = [&prdCombContainer,&appendLink](const xAOD::UncalibratedMeasurement* m1, 
+            auto combine = [this,&prdCombContainer,&appendLink](const xAOD::UncalibratedMeasurement* m1, 
                                                            const xAOD::UncalibratedMeasurement* m2, 
                                                            const State st) {
                 auto cmbMeas = prdCombContainer->push_back(std::make_unique<xAOD::CombinedMuonStrip>());
 
                 cmbMeas->setPrimaryStrip(m1);
                 cmbMeas->setSecondaryStrip(m2);
+                ATH_MSG_VERBOSE("Combine "<<m_idHelperSvc->toString(xAOD::identify(m1))
+                                <<" & "<<m_idHelperSvc->toString(xAOD::identify(m2)));
+                if (m_idHelperSvc->measuresPhi(xAOD::identify(m1)) ==
+                    m_idHelperSvc->measuresPhi(xAOD::identify(m2))) {
+                    THROW_EXCEPTION("Cannot combine "<<m_idHelperSvc->toString(xAOD::identify(m1))
+                                <<" & "<<m_idHelperSvc->toString(xAOD::identify(m2))
+                                <<" "<<CalibratedSpacePoint::toString(st));
+                }
                 appendLink(cmbMeas, st);
             };
             for (const auto& meas : inSegment.measurements()) {
@@ -128,12 +136,15 @@ namespace MuonR4{
                     } case RpcStripType:
                       case TgcStripType: {
                         if (sp->primaryMeasurement() && sp->secondaryMeasurement()) {
-                            combine(sp->primaryMeasurement(), sp->secondaryMeasurement(), meas->fitState());
-                        } else if (sp->dimension() == 2) { // BI - RPC measurements
-                            appendLink(sp->primaryMeasurement(), meas->fitState());
+                            if (sp->primaryMeasurement() != sp->secondaryMeasurement()) {
+                                combine(sp->primaryMeasurement(), sp->secondaryMeasurement(), meas->fitState());
+                            } else {  // BI - RPC measurements
+                                appendLink(sp->primaryMeasurement(), meas->fitState());
+                            }
                         } else {
                             /// It might be that the segment has anoher 1D-measurement 
                             /// in the same gas gap
+                            ATH_MSG_VERBOSE("Append for later combination "<<(*meas));
                             combineMap.emplace_back(sp->primaryMeasurement(), meas->fitState());
                         }
                         break;
@@ -153,28 +164,31 @@ namespace MuonR4{
             // Finally we need to check whether there're measurements left to combine
             for (std::size_t cmbIdx = 0; cmbIdx < combineMap.size(); ++cmbIdx){
                 const xAOD::UncalibratedMeasurement* m1{std::get<0>(combineMap[cmbIdx])};
+                const State s1{std::get<1>(combineMap[cmbIdx])};
                 ATH_MSG_VERBOSE("Find another measurement to combine with "
                                 <<m_idHelperSvc->toString(xAOD::identify(m1)));
                 if (cmbIdx +1 < combineMap.size()){
                     const xAOD::UncalibratedMeasurement* m2{std::get<0>(combineMap[cmbIdx +1])};
+                    const State s2{std::get<1>(combineMap[cmbIdx+1])};
                     ATH_MSG_VERBOSE("Check whether "<<m_idHelperSvc->toString(xAOD::identify(m2))
                                     <<" is a good candidate");
                     if (m1->type() == m2->type() && 
-                        m1->identifierHash() == m2->identifierHash()
-                        && xAOD::layerHash(m1)  == xAOD::layerHash(m2)) {
+                        m1->identifierHash() == m2->identifierHash() && 
+                        xAOD::layerHash(m1)  == xAOD::layerHash(m2) &&
+                        s1 == s2) {
                         /// The first measurement should always be the eta measurement 
                         ATH_MSG_VERBOSE("They match");
                         if (m_idHelperSvc->measuresPhi(xAOD::identify(m1))) {
-                            combine(m2, m1, std::get<1>(combineMap[cmbIdx+1]));
+                            combine(m2, m1, s2);
                         } else {
-                            combine(m1, m2, std::get<1>(combineMap[cmbIdx]));
+                            combine(m1, m2, s1);
                         }
                         ++cmbIdx; // skip the next measurement as it's absorbed here
                         continue;
                     }
                 }
                 ATH_MSG_VERBOSE("No match found");
-                appendLink(m1, std::get<1>(combineMap[cmbIdx]));
+                appendLink(m1, s1);
             }
             combineMap.clear();
         };

@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 """core module for an interactive analysis
 
@@ -153,7 +153,6 @@ def retrieveDet (aClass, aKey=None):
           
     """
     #import workaround    
-    global detStore
     if detStore is None:
         import AthenaPython.PyAthena as PyAthena
         storeGate = PyAthena.py_svc('StoreGateSvc/DetectorStore')  # noqa: F841

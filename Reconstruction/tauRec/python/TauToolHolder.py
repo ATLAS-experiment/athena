@@ -757,12 +757,13 @@ def TauGNNEvaluatorCfg(flags, version=0, applyLooseTrackSel=False, applyTightTra
                                               ApplyLooseTrackSel = applyLooseTrackSel,
                                               ApplyTightTrackSel = applyTightTrackSel,
                                               VertexCorrection = flags.Tau.doVertexCorrection,
-                                              InputLayerScalar = "tau_vars",
-                                              InputLayerTracks = "track_vars",
-                                              InputLayerClusters = "cluster_vars",
+                                              InputLayerScalar = 'tau_vars',
+                                              InputLayerTracks = 'track_vars',
+                                              InputLayerClusters = 'cluster_vars',
                                               NodeNameTau=flags.Tau.GNTauNodeNameTau,
                                               NodeNameJet=flags.Tau.GNTauNodeNameJet,
-                                              TauContainerName = tauContainerName,)
+                                              TauContainerName = tauContainerName,
+                                        )
 
     result.setPrivateTools(myTauGNNEvaluator)
     return result

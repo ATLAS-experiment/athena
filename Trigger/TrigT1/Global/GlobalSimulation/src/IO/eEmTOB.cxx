@@ -22,6 +22,26 @@ namespace GlobalSim::IOBitwise {
 						     m_Seed_bits(eEmTOB.Seed_bits()),
 						     m_UpNotDown_bit(eEmTOB.UpNotDown_bit()),
 						     m_SeedIsMax_bit(eEmTOB.SeedIsMax_bit()){}
+
+  
+  eEmTOB::eEmTOB(const GlobalSim::IOBitwise::ICommonTOB& commonTOB,
+		 const std::bitset<s_RHad_width>& RHad_bits,
+		 const std::bitset<s_WsTot_width>& WsTot_bits, 
+		 const std::bitset<s_REta_width>& REta_bits,
+		 const std::bitset<s_Seed_width>& Seed_bits,
+		 const std::bitset<s_UpNotDown_width>& UpNotDown_bit,
+		 const std::bitset<s_SeedIsMax_width>& SeedIsMax_bit
+		 ) :
+    CommonTOB(commonTOB),
+    m_RHad_bits(RHad_bits),
+    m_WsTot_bits(WsTot_bits),
+    m_REta_bits(REta_bits),
+    m_Seed_bits(Seed_bits),
+    m_UpNotDown_bit(UpNotDown_bit),
+    m_SeedIsMax_bit(SeedIsMax_bit){
+  }
+
+
   
   const std::bitset<eEmTOB::s_RHad_width>& eEmTOB::RHad_bits() const {
     return m_RHad_bits;
@@ -47,14 +67,8 @@ namespace GlobalSim::IOBitwise {
     return m_SeedIsMax_bit;
   }
 
-    std::string eEmTOB::to_string() const {
-      std::stringstream ss;
-      
-      ss << '\n'
-	 << ICommonTOB::to_string()
-	 << " RHad " << RHad_bits()
-	 << " REta " << REta_bits()
-	 << " WsTot " << WsTot_bits();
-      return ss.str();
+  std::string eEmTOB::to_string() const {
+    return IeEmTOB::to_string();
   }
+
 }

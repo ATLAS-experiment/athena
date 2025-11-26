@@ -130,20 +130,39 @@ namespace ActsTrk {
       StripCalibrator strip_preCalibrator;
       HGTDCalibrator hgtd_preCalibrator;
 
-      MeasurementCalibrator(const IOnBoundStateCalibratorTool *pixelTool)
+      MeasurementCalibrator(const IOnBoundStateCalibratorTool *pixelCalibratorTool,
+                            const IOnBoundStateCalibratorTool *stripCalibratorTool,
+                            const IOnBoundStateCalibratorTool *hgtdCalibratorTool)
       {
-         // @TODO add support for real calibrators
 
-         bool calibrate_after_measurement_selection = true;
-         if (pixelTool) {
-            calibrate_after_measurement_selection = pixelTool->calibrateAfterMeasurementSelection();
-            pixelTool->connectPixelCalibrator( calibrate_after_measurement_selection ? pixel_postCalibrator : pixel_preCalibrator );
-         }
-         if (calibrate_after_measurement_selection) {
-            pixel_preCalibrator.template connect<&MeasurementCalibrator::passthrough<2, xAOD::PixelCluster>>(this);
-         }
-         strip_preCalibrator.template connect<&MeasurementCalibrator::passthrough<1, xAOD::StripCluster>>(this);
-         hgtd_preCalibrator.template connect<&MeasurementCalibrator::passthrough<3, xAOD::HGTDCluster>>(this);
+         if (pixelCalibratorTool) {
+             bool calibrate_after_measurement_selection = pixelCalibratorTool->calibrateAfterMeasurementSelection();
+             pixelCalibratorTool->connectPixelCalibrator( calibrate_after_measurement_selection ?
+                                                          pixel_postCalibrator : pixel_preCalibrator );
+             if (calibrate_after_measurement_selection)
+                pixel_preCalibrator.template connect<&MeasurementCalibrator::passthrough<2, xAOD::PixelCluster>>(this);
+          } else
+             pixel_preCalibrator.template connect<&MeasurementCalibrator::passthrough<2, xAOD::PixelCluster>>(this);
+
+          if (stripCalibratorTool) {
+             bool calibrate_after_measurement_selection = stripCalibratorTool->calibrateAfterMeasurementSelection();
+             stripCalibratorTool->connectStripCalibrator( calibrate_after_measurement_selection ?
+                                                          strip_postCalibrator : strip_preCalibrator );
+             if (calibrate_after_measurement_selection)
+                strip_preCalibrator.template connect<&MeasurementCalibrator::passthrough<1, xAOD::StripCluster>>(this);
+          } else
+             strip_preCalibrator.template connect<&MeasurementCalibrator::passthrough<1, xAOD::StripCluster>>(this);
+
+
+          if (hgtdCalibratorTool) {
+             bool calibrate_after_measurement_selection = hgtdCalibratorTool->calibrateAfterMeasurementSelection();
+             hgtdCalibratorTool->connectHGTDCalibrator( calibrate_after_measurement_selection ?
+                                                        hgtd_postCalibrator : hgtd_preCalibrator );
+             if(calibrate_after_measurement_selection)
+                hgtd_preCalibrator.template connect<&MeasurementCalibrator::passthrough<3, xAOD::HGTDCluster>>(this);
+          } else
+             hgtd_preCalibrator.template connect<&MeasurementCalibrator::passthrough<3, xAOD::HGTDCluster>>(this);
+
       }
 
       const PixelCalibrator &pixelPostCalibrator() const  { return pixel_postCalibrator; }

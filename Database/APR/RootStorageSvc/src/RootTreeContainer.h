@@ -140,10 +140,7 @@ namespace pool  {
     void setBranchOffsetTabLen(TBranch* b, int offsettab_len);	
     
   public:
-    /// Standard constructor
-    RootTreeContainer();
-
-    /// Standard destructor
+    explicit RootTreeContainer(const std::string& name);
     virtual ~RootTreeContainer();
 
     /// Close the container and deallocate resources

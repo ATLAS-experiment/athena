@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -114,7 +114,7 @@ def MuonRdoToMuonDigitToolCfg(flags, name="MuonRdoToMuonDigitTool", **kwargs ):
     #Set N BCs and central BC consistently with RPC readout settings
     rpcrdo_decode = CompFactory.Muon.RpcRDO_Decoder("RpcRDO_Decoder", BCZERO=flags.Trigger.L1MuonSim.RPCNBCZ)
     kwargs.setdefault("rpcRdoDecoderTool", rpcrdo_decode)
-    
+
     the_tool = CompFactory.MuonRdoToMuonDigitTool (name, **kwargs)
     result.setPrivateTools(the_tool)
     return result
@@ -130,7 +130,7 @@ def MuonRdo2DigitConfig(flags):
     TGCRdoName = "TGCRDO"+suffix
     MMRdoName = "MMRDO"+suffix
     sTGCRdoName = "sTGCRDO"+suffix
-    
+
     if flags.Input.Format is Format.POOL:
         rdoInputs = [
             ('RpcPadContainer','RPCPAD'),
@@ -152,7 +152,7 @@ def MuonRdo2DigitConfig(flags):
 
     from MuonConfig.MuonGeometryConfig import MuonGeoModelCfg
     acc.merge(MuonGeoModelCfg(flags))
-    
+
     from MuonConfig.MuonByteStreamCnvTestConfig import RpcRdoToRpcDigitCfg, TgcRdoToTgcDigitCfg, STGC_RdoToDigitCfg, MM_RdoToDigitCfg
 
     acc.merge(RpcRdoToRpcDigitCfg(flags, RpcDigitContainer = "RPC_DIGITS_L1", RpcRdoContainer = RPCRdoName ))
@@ -161,7 +161,7 @@ def MuonRdo2DigitConfig(flags):
         acc.merge(STGC_RdoToDigitCfg(flags, sTgcRdoContainer = sTGCRdoName, sTgcDigitContainer = "sTGC_DIGITS_L1"))
     if flags.Detector.GeometryMM:
           acc.merge(MM_RdoToDigitCfg(flags, MmRdoContainer = MMRdoName,  MmDigitContainer = "MM_DIGITS_L1" ))
-    
+
     return acc
 
 def NSWTriggerConfig(flags):
@@ -178,31 +178,18 @@ def NSWTriggerConfig(flags):
         from SGComps.SGInputLoaderConfig import SGInputLoaderCfg
         acc.merge(SGInputLoaderCfg(flags, Load=rdoInputs))
 
-    PadTdsTool = CompFactory.NSWL1.PadTdsOfflineTool("NSWL1__PadTdsOfflineTool", IsMC = flags.Input.isMC, sTGC_DigitContainerName="sTGC_DIGITS_L1")
-    PadTriggerLogicTool = CompFactory.NSWL1.PadTriggerLogicOfflineTool("NSWL1__PadTriggerLogicOfflineTool")
-    StripTdsTool = CompFactory.NSWL1.StripTdsOfflineTool("NSWL1__StripTdsOfflineTool",IsMC=flags.Input.isMC,sTGC_DigitContainerName="sTGC_DIGITS_L1")
-    StripClusterTool = CompFactory.NSWL1.StripClusterTool("NSWL1__StripClusterTool",IsMC=flags.Input.isMC)
-    StripSegmentTool = CompFactory.NSWL1.StripSegmentTool("NSWL1__StripSegmentTool")
+    PadEmulatorTool = CompFactory.NSWL1.PadEmulatorTool("NSWL1__PadEmulatorTool", DoNtuple=flags.Trigger.L1MuonSim.WritesTGCBranches, IsMC = flags.Input.isMC, sTGC_DigitContainerName="sTGC_DIGITS_L1")
     MMTriggerTool = CompFactory.NSWL1.MMTriggerTool("NSWL1__MMTriggerTool",DoNtuple=flags.Trigger.L1MuonSim.WriteMMBranches, IsMC = flags.Input.isMC, MmDigitContainer="MM_DIGITS_L1")
     TriggerProcessorTool = CompFactory.NSWL1.TriggerProcessorTool("NSWL1__TriggerProcessorTool")
-
-    dosTGC =  flags.Trigger.L1MuonSim.doPadTrigger or flags.Trigger.L1MuonSim.doStripTrigger
-    if dosTGC:
-        from RegionSelector.RegSelToolConfig import regSelTool_STGC_Cfg
-        stgcRegSel = acc.popToolsAndMerge(regSelTool_STGC_Cfg( flags ))  # noqa: F841 (adds a conditions algo as a side-effect)
 
     nswAlg = CompFactory.NSWL1.NSWL1Simulation("NSWL1Simulation",
                                                DoNtuple = flags.Trigger.L1MuonSim.WriteNSWDebugNtuple,
                                                DoMM = flags.Trigger.L1MuonSim.doMMTrigger,
                                                DoMMDiamonds = flags.Trigger.L1MuonSim.doMMTrigger,
-                                               DosTGC = dosTGC,
+                                               DosTGC = flags.Trigger.L1MuonSim.doPadTrigger or flags.Trigger.L1MuonSim.doStripTrigger,
                                                DoPad = flags.Trigger.L1MuonSim.doPadTrigger,
+                                               PadEmulatorTool = PadEmulatorTool,
                                                DoStrip = flags.Trigger.L1MuonSim.doStripTrigger,
-                                               PadTdsTool = PadTdsTool,
-                                               PadTriggerTool = PadTriggerLogicTool,
-                                               StripTdsTool = StripTdsTool,
-                                               StripClusterTool = StripClusterTool,
-                                               StripSegmentTool = StripSegmentTool,
                                                MMTriggerTool = MMTriggerTool,
                                                TriggerProcessorTool = TriggerProcessorTool,
                                                NSWTrigRDOContainerName = "L1_NSWTrigContainer" )

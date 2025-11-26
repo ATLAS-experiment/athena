@@ -11,7 +11,6 @@
 //        Author     : M.Frank
 //====================================================================
 // Framework include files
-#include "POOLCore/DbPrint.h"
 
 #include "StorageSvc/DbOption.h"
 #include "StorageSvc/DbSelect.h"
@@ -38,7 +37,8 @@
 
 using namespace pool;
 
-RootKeyContainer::RootKeyContainer() :
+RootKeyContainer::RootKeyContainer(const std::string& name) :
+  DbContainerImp(name),
   m_dir(0),
   m_dbH(POOL_StorageType),
   m_rootDb(0),
@@ -114,7 +114,7 @@ DbStatus RootKeyContainer::fetch(const Token::OID_t& linkH, Token::OID_t& stmt) 
 }
 
 // Fetch next object address of the selection to set token
-DbStatus RootKeyContainer::fetch(DbSelect& sel)   {
+DbStatus RootKeyContainer::fetch(DbSelect& sel) {
   char txt[64];
   Token::OID_t lnk = sel.link();
   const long long int stk_size = DbContainerImp::size();
@@ -127,14 +127,11 @@ DbStatus RootKeyContainer::fetch(DbSelect& sel)   {
       const char* class_name = key->GetClassName();
       const DbTypeInfo* typ = m_dbH.objectShape( DbReflex::forTypeName(class_name) );
       if ( typ )  {
-          sel.setShapeID(typ->shapeID());
-          sel.link() = lnk;
-          return Success;
+        sel.setShapeID(typ->shapeID());
+        sel.link() = lnk;
+        return Success;
       }
-      DbPrint err(m_name);
-      err << DbPrintLvl::Error 
-          << "Failed to find the correct shape identifier for class:"
-          << class_name << DbPrint::endmsg;
+      ATH_MSG_ERROR("Failed to find the correct shape identifier for class:" << class_name);
       return Error;
     }
     else {
@@ -182,9 +179,8 @@ DbStatus RootKeyContainer::load( void** ptr, ShapeH shape,
     oid.second++;
   }
   if ( linkH.second < 0 || (uint64_t)linkH.second <= size() ) {
-    DbPrint log( m_name );
-    log << DbPrintLvl::Debug << "No objects passing selection criteria..." 
-        << " Container has " << size() << " Entries in total." << DbPrint::endmsg;
+    ATH_MSG_DEBUG("No objects passing selection criteria..." 
+                  << " Container has " << size() << " Entries in total.");
   }
   return sc;
 }
@@ -213,43 +209,26 @@ DbStatus RootKeyContainer::loadObject( void** ptr, ShapeH shape,
                }
             }
             else  {
-               DbPrint err(m_name);
-               err << DbPrintLvl::Error 
-                   << "I/O for types with more than 1 data member is not currently supported" << DbPrint::endmsg;
-               err << DbPrintLvl::Error << "Type: " << typ->toString() << DbPrint::endmsg; 
+               ATH_MSG_ERROR("I/O for types with more than 1 data member is not currently supported");
+               ATH_MSG_ERROR("Type: " << typ->toString());
                return Error;
-
-               /*
-                 MN: the code below is probably not working, but leaving it for now as a reference
-
-               RootCallEnv env( *ptr, typ );
-               int nbyte = m_ioHandler->read( key, ptr );
-               if ( nbyte > 0 )  {
-                  m_ioBytes = nbyte;
-                  m_rootDb->addByteCount(RootDatabase::READ_COUNTER, nbyte);
-                  return Success;
-               }
-               */
             }
          }
       }
    }
   m_ioBytes = -1;
-  DbPrint err( m_name);
-  err << DbPrintLvl::Error << "Could not read object \"" << txt 
-      << "\" from directory \"" << m_dir->GetName() << "\"" << DbPrint::endmsg;
+  ATH_MSG_ERROR("Could not read object \"" << txt 
+                << "\" from directory \"" << m_dir->GetName() << "\"");
   return Error;
 }
 
-DbStatus RootKeyContainer::writeObject(ActionList::value_type& action)   {
+DbStatus RootKeyContainer::writeObject(ActionList::value_type& action) {
    if ( m_dir )  {
       char knam[64];
       ::sprintf(knam, "_pool_valid_%08d", static_cast<int>(action.link.second));
       auto typ = static_cast<const DbTypeInfo*>(action.shape);
       if ( 0 == typ )   {
-         DbPrint log(m_name);
-         log << DbPrintLvl::Error << "No type information present when writing an object!"
-             << DbPrint::endmsg;
+         ATH_MSG_ERROR("No type information present when writing an object!");
          return Error;
       }
       else {
@@ -259,9 +238,7 @@ DbStatus RootKeyContainer::writeObject(ActionList::value_type& action)   {
             const std::string& typ_nam = col->typeName();
             TClass*  cl  = TClass::GetClass(typ_nam.c_str());
             if( !cl ) {
-               DbPrint log(m_name);
-               log << DbPrintLvl::Error << "GetClass() failed for type " << typ_nam
-                   << DbPrint::endmsg;
+               ATH_MSG_ERROR("GetClass() failed for type " << typ_nam);
                return Error;
             }
             const void* p = action.dataAtOffset( col->offset() );
@@ -271,23 +248,16 @@ DbStatus RootKeyContainer::writeObject(ActionList::value_type& action)   {
                m_rootDb->addByteCount(RootDatabase::WRITE_COUNTER, nbyte);
                return Success;
             } else {
-               DbPrint err(m_name);
-               err << DbPrintLvl::Error 
-                   << "[RootKeyContainer] Could not write an object" << DbPrint::endmsg;
+               ATH_MSG_ERROR("[RootKeyContainer] Could not write an object");
             }
          } else {
-            DbPrint err(m_name);
-            err << DbPrintLvl::Error 
-                << "I/O for types with more than 1 data member is not currently supported" << DbPrint::endmsg;
-            err << DbPrintLvl::Error << "Type: " << typ->toString() << DbPrint::endmsg;
+            ATH_MSG_ERROR("I/O for types with more than 1 data member is not currently supported");
+            ATH_MSG_ERROR("Type: " << typ->toString());
          }
       }
    }
    else {
-      DbPrint err(m_name);
-      err << DbPrintLvl::Error << "[RootKeyContainer] " 
-          << "Not a valid directory or callback when writing an object" 
-          << DbPrint::endmsg;
+      ATH_MSG_ERROR("[RootKeyContainer] Not a valid directory or callback when writing an object");
    }
    m_ioBytes = -1;
    return Error;
@@ -305,7 +275,6 @@ DbStatus RootKeyContainer::open(DbDatabase&           dbH,
                                 const DbTypeInfo*  /* info */, 
                                 DbAccessMode          mode)  
 {
-  DbPrint log( dir_nam );
   m_name = dir_nam;
 
   // Sanitise the name by replacing '/' with '_' (excluding the slash separating
@@ -328,9 +297,7 @@ DbStatus RootKeyContainer::open(DbDatabase&           dbH,
   }
   sanitisedName.replace(beg + 1, sanitisedObjName.length(), sanitisedObjName);
 
-  log << DbPrintLvl::Debug
-      << "Opening RootKeyContainer, mode=" << accessMode(mode)
-      << DbPrint::endmsg;
+  ATH_MSG_DEBUG("Opening RootKeyContainer, mode=" << accessMode(mode));
 
   if ( dbH.isValid() && dir_nam.length() > 0 )    {
     std::string nam = sanitisedName.starts_with('/') ? sanitisedName.substr(1)
@@ -359,10 +326,8 @@ DbStatus RootKeyContainer::open(DbDatabase&           dbH,
       if ( m_dir )    {
         TClass* cl = m_dir->IsA();
         if ( !cl->InheritsFrom(TDirectory::Class()) )    {
-          log << DbPrintLvl::Error << "Cannot open container. "
-              << "Object with name found, but of the wrong type." << DbPrint::endmsg
-              << "True type is :" << cl->GetName() << " rather than TDirectory."
-              << DbPrint::endmsg;
+          ATH_MSG_ERROR("Cannot open container. Object with name found, but of the wrong type. " << endmsg
+                        << "True type is :" << cl->GetName() << " rather than TDirectory.");
           return Error;
         }
         if (idx2 == std::string::npos) break;
@@ -377,13 +342,11 @@ DbStatus RootKeyContainer::open(DbDatabase&           dbH,
     opt1._getValue(m_policy);
     /// Parent Database handle
     m_dbH = dbH;
-    log << DbPrintLvl::Debug << "Opened container " << m_name << " of type "
-        << ROOTKEY_StorageType.storageName() << " with policy:" << m_policy
-        << DbPrint::endmsg;
+    ATH_MSG_DEBUG("Opened container " << m_name << " of type "
+                  << ROOTKEY_StorageType.storageName() << " with policy:" << m_policy);
     return Success;
   }
-  log << DbPrintLvl::Error << "Cannot open container, invalid Database handle." 
-      << DbPrint::endmsg;
+  ATH_MSG_ERROR("Cannot open container, invalid Database handle.");
   return Error;
 }
 
@@ -398,10 +361,8 @@ DbStatus RootKeyContainer::checkAccess(DbDatabase& dbH,
       return Success;
     }
   }
-  DbPrint log( dir_nam );
-  log << DbPrintLvl::Debug << "Cannot access container '" << dir_nam << "', invalid Database handle or "
-      << "container is not of type Directory."
-      << DbPrint::endmsg;
+  ATH_MSG_DEBUG("Cannot access container '" << dir_nam 
+    << "', invalid Database handle or container is not of type Directory.");
   return Error;
 }
 

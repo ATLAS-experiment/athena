@@ -22,17 +22,6 @@ StatusCode FPGATrackSimOverlapRemovalTool::initialize()
 
   if (!m_monTool.empty()) ATH_CHECK(m_monTool.retrieve());
 
-  // Check if this is 2nd stage
-  if(m_do2ndStage)
-  {
-    m_totLayers = m_FPGATrackSimMapping->PlaneMap_2nd(0)->getNLogiLayers();
-  }
-  else
-  {
-    m_totLayers = m_FPGATrackSimMapping->PlaneMap_1st(0)->getNLogiLayers();
-  }
-  ATH_MSG_DEBUG("Total number of layer: " << m_totLayers);
-
   // Check road OR
   if (m_localMaxWindowSize && !m_roadSliceOR)
       ATH_MSG_WARNING("LocalMaxOR only being run per hough slice (i.e. this tool does nothing) since roadSliceOR is turned off");

@@ -1,3 +1,6 @@
+/*
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+*/
 //
 //   @file    hanconfig.cxx         
 //            navigates through the directory structure of a monitoring 
@@ -183,7 +186,7 @@ std::vector<std::string> split( const std::string& s, const std::string& t=":"  
       pos = s2.find(t);
     }
     
-    tags.push_back(s2);
+    tags.push_back(std::move(s2));
     
     return tags;
 }
@@ -334,11 +337,9 @@ std::vector<std::string> maphist( const std::vector<std::string>& v ) {
       std::string tmp = v[i];
       std::string path = chop( tmp, "Expert/" );
       path += "Chains/";
-      //      std::cerr << " " << v[i] << "\np:" << path << "\t-> " << tmp << std::endl;
       tmp = replace( tmp, "/", "__" );
       path += tmp;
-      mapped.push_back( path );
-      //     std::cerr << i << "\t" << mapped.back() << std::endl;
+      mapped.push_back( std::move(path) );
     }
     else { 
       mapped.push_back( v[i] );
@@ -495,7 +496,7 @@ private:
   std::string m_name;
   std::string m_file;
 
-  int         m_run;
+  int         m_run{};
 
 };
 
@@ -1203,15 +1204,9 @@ int main(int argc, char** argv) {
     }
   }
 
-  //  std::cout << "tags " << tags.size() << " " << tags << std::endl;
 
-  if ( base == "" ) base = dir;
+  if ( base == "" ) base = std::move(dir);
 
-  /// if output file is not defined
-  //  if ( output_file == "" ) return usage( std::cerr, argc, argv );
-  
-  //  dataset data("test_EF");
-  //  files = data.datafiles();
   
   /// check some input files
 

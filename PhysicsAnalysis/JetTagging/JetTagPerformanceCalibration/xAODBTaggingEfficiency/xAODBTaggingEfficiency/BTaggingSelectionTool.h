@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef CPBTAGGINGSELECTIONTOOL_H
@@ -69,7 +69,6 @@ private:
 
   bool m_initialised = false;
   bool m_ErrorOnTagWeightFailure = true;
-  bool m_StoreNConstituents = false;
   bool m_continuous   = false; //Continuous1D
   bool m_continuous2D = false; //Continuous2D
   bool m_useCTag = false; //use c-tagging or b-tagging in 1D

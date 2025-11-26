@@ -400,7 +400,7 @@ def EGAM7Cfg(flags):
         "PrimaryVertices",
         "AntiKt4EMPFlowJets",
         "MET_Baseline_AntiKt4EMPFlow",
-        "BTagging_AntiKt4EMPFlow",
+
     ]
     if flags.Input.isMC:
         EGAM7SlimmingHelper.SmartCollections += [

@@ -29,9 +29,8 @@ namespace DerivationFramework {
     return StatusCode::SUCCESS;
   }
 
-  StatusCode AugmentationToolExample::addBranches() const
+  StatusCode AugmentationToolExample::addBranches(const EventContext& ctx) const
   {
-    const EventContext& ctx = Gaudi::Hive::currentContext();
     // Set up the vector
     std::unique_ptr<std::vector<float> > track_z0_PV(new std::vector<float>());
 

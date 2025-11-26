@@ -21,6 +21,11 @@
 #include "GaudiKernel/PhysicalConstants.h"
 #include "MuonPatternEvent/SegmentFitterEventData.h"
 
+#include "Acts/Visualization/ObjVisualization3D.hpp"
+#include "Acts/Visualization/GeometryView3D.hpp"
+#include "MuonVisualizationHelpersR4/ObjVisualizationHelpers.h"
+
+
 using namespace Acts::UnitLiterals;
 using namespace MuonR4::SegmentFit;
 using namespace Acts::detail::LineHelper;
@@ -37,13 +42,13 @@ namespace MuonValR4{
     StatusCode SegmentExtpTest::execute(const EventContext& ctx) const {
         const xAOD::MuonSegmentContainer* segments{nullptr};
         ATH_CHECK(SG::get(segments, m_readKey, ctx));
-        const ActsGeometryContext* gctx{nullptr};
+        const ActsTrk::GeometryContext* gctx{nullptr};
         ATH_CHECK(SG::get(gctx, m_geoCtxKey, ctx));
         const auto tgContext = gctx->context();
 
         auto extrapolate = [&](const Acts::BoundTrackParameters& start,
                                const MuonR4::SpacePoint& sp) {
-            const auto& trf = sp.msSector()->localToGlobalTrans(*gctx);
+            const Amg::Transform3D& trf = sp.msSector()->localToGlobalTrans(*gctx);
             const Acts::Surface& target = xAOD::muonSurface(sp.primaryMeasurement());
             const Amg::Vector3D n = target.normal(tgContext, 
                                                   Amg::Vector3D::Zero(), 
@@ -63,11 +68,12 @@ namespace MuonValR4{
                   <<"\n, "<<m_idHelperSvc->toString(detEl->identify())
                   << " geoId: "<<target.geometryId()<<", "<<( lambda.value_or(0.) > 0 ? "forward" : "backward"));
            
-            return  m_extrapolationTool->propagate(ctx, start, target, lambda.value_or(0.) > 0 
-                                                                ? Acts::Direction::Forward() 
-                                                                : Acts::Direction::Backward(), 100._m);
+            return m_extrapolationTool->propagate(ctx, start, target, lambda.value_or(0.) > 0 
+                                                            ? Acts::Direction::Forward() 
+                                                            : Acts::Direction::Backward(), 100._m);
 
         };
+        StatusCode retCode = StatusCode::SUCCESS;
         for (const xAOD::MuonSegment* segment : *segments) {
             const MuonR4::Segment* detSeg = MuonR4::detailedSegment(*segment);
 
@@ -78,6 +84,14 @@ namespace MuonValR4{
                                                                                      segment->sector(), 
                                                                                      segment->etaIndex());
             auto startPars = boundSegmentPars(*gctx, *detSeg);
+
+            Acts::ObjVisualization3D visualHelper{};
+            if (m_drawEvent) {
+                /// Draw the reference segment as a red line
+                drawSegmentLine(*gctx, *segment, visualHelper,
+                                Acts::ViewConfig{.color = {220, 0, 0}});
+                drawSegmentMeasurements(*gctx, *segment, visualHelper, Acts::s_viewSurface);
+            }
             
             if (msgLvl(MSG::VERBOSE)) {
 
@@ -97,6 +111,7 @@ namespace MuonValR4{
                 }
                 ATH_MSG_VERBOSE("Run propagation test on "<<sector->identString()<<std::endl<<sstr.str());
             }
+
             for (const auto& meas: detSeg->measurements()) {
                 if (!meas->spacePoint() || 
                     meas->fitState() != MuonR4::CalibratedSpacePoint::State::Valid) {
@@ -104,6 +119,7 @@ namespace MuonValR4{
                 }
                 const auto sp = meas->spacePoint();
                 const Acts::Surface& targetSurf{xAOD::muonSurface(sp->primaryMeasurement())};
+               
                 const auto& bounds = targetSurf.bounds();
                 Amg::Vector2D lPos{Amg::Vector2D::Zero()};
                 const auto trf = targetSurf.transform(tgContext).inverse() *
@@ -138,8 +154,15 @@ namespace MuonValR4{
                    ATH_MSG_FATAL("Failed to propagte to "<<(*meas)
                                 <<",\n lPos: "<<Amg::toString(trf * meas->localPosition())
                                 <<", expected: "<<Amg::toString(lPos)<<", "<<targetSurf.bounds());
-                   return StatusCode::FAILURE;
+                   retCode = StatusCode::FAILURE;
+                   continue;
                 }
+                if (m_drawEvent) {
+                    /// Draw the true intersection from the extrapolator as blue lines
+                    drawBoundParameters(*gctx, *extpPars, visualHelper,
+                                        Acts::ViewConfig{.color = {0, 0, 220}}, 6._cm); 
+                }
+
                 if (targetSurf.type() == Acts::Surface::SurfaceType::Plane) {
                     ATH_MSG_DEBUG("Position on "<<m_idHelperSvc->toString(sp->identify()) 
                                 <<" plane "<<Amg::toString(lPos)<<" vs. "
@@ -148,7 +171,7 @@ namespace MuonValR4{
                     if (dPos.mag() > 0.1_mm) {
                         ATH_MSG_FATAL("Too large deviation on "<<m_idHelperSvc->toString(sp->identify())
                                     <<", "<<Amg::toString(dPos));
-                        return StatusCode::FAILURE;
+                        retCode = StatusCode::FAILURE;
                     }       
                 } else if (targetSurf.type() == Acts::Surface::SurfaceType::Straw) {
                     const double dist = lPos[0];
@@ -159,20 +182,24 @@ namespace MuonValR4{
                                    <<" straight: "<<dist<<", extrapolated: "<<extDist
                                 <<"--> "<<(extDist - dist ) / std::sqrt(cov)
                                 <<", along the tube: "<<lPos[1]<<", extrapolated: "<<extLocZ);
-                    if (std::abs(std::abs(dist) - std::abs(extDist))  / std::sqrt(cov) > 0.05 ||
+                    if (std::abs(dist - extDist)  / std::sqrt(cov) > 0.05 ||
                         std::abs(lPos[1] - extLocZ) > 0.1_mm) {
                         ATH_MSG_FATAL("Too large deviation on "<<m_idHelperSvc->toString(sp->identify())
                                     <<", "<<Amg::toString(lPos)<<" vs. ("<<extDist<<", "<<extLocZ<<")"
-                                    <<", deviate R: "<<(std::abs(std::abs(dist) - std::abs(extDist))  / std::sqrt(cov))
+                                    <<", deviate R: "<<(std::abs(dist -extDist)  / std::sqrt(cov))
                                     <<", deviate Z: "<<std::abs(lPos[1] - extLocZ));
-                        return StatusCode::FAILURE;
+                        retCode = StatusCode::FAILURE;
                     }
                 }
             }
-
+            if (m_drawEvent) {
+                visualHelper.write(std::format("ExtTpTest_{:}_{:}_{:}.obj", 
+                                          ctx.eventID().event_number(), segment->index(), 
+                                          MuonR4::printID(*segment)));
+            }
         }
 
-        return StatusCode::SUCCESS;
+        return retCode;
     }
 
 }

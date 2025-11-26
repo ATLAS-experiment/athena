@@ -20,8 +20,11 @@
 #include <Acts/Seeding/CompositeSpacePointLineFitter.hpp>
 
 namespace MuonR4::SegmentFit {
-    /** @brief The SegmentLineFitter  */
-
+    /** @brief The SegmentLineFitter is a standalone module to fit a straight line to calibrated 
+     *          muon space points. The `CompositeSpacePointLineFitter` from the ACTS toolkit is 
+     *          used to perform the actual fit to the measurements. The SegmentLineFitter is a wrapper
+     *          class taking care of relaunching fits of poor quality but with cleaned measurements and 
+     *          also to put back meaurements on the line that have been missed by the initial line fit. */
     class SegmentLineFitter: public AthMessaging {
         public:
             /** @brief Abrivation of the actual line fitter */
@@ -40,12 +43,16 @@ namespace MuonR4::SegmentFit {
             using FitOpts_t = Fitter_t::FitOptions<HitVec_t, ISpacePointCalibrator>;
             /** @brief Abrivation of the hit selector to choose valid hits */
             using Selector_t = Fitter_t::Selector_t<CalibratedSpacePoint>;
+            /** @brief Abrivation of the fit state flag */
+            using HitState = CalibratedSpacePoint::State;
             /** @brief Configuration object of the ATLAS implementation */
             struct ConfigSwitches{
                 /** @brief Pointer to the calibrator */
                 const ISpacePointCalibrator* calibrator{nullptr};
                 /** @brief Pointer to the visualization tool */
                 const MuonValR4::IPatternVisualizationTool* visionTool{nullptr};
+                /** @brief Pointer to the idHelperSvc */
+                const Muon::IMuonIdHelperSvc* idHelperSvc{nullptr};
                 /** @brief Switch to insert a beamspot constraint if possible */
                 bool doBeamSpot{true};
                 /** @brief Parameters of the beamspot measurement */
@@ -57,6 +64,8 @@ namespace MuonR4::SegmentFit {
                 double recoveryPull{5.};
                 /** @brief Minimum number of precision hits */
                 unsigned nPrecHitCut{3u};
+                /** @brief Maximum trials to recover outliers */
+                unsigned nRecoveryLoops{10u};
             };
             /** @brief Full configuration object */           
             struct Config : public Fitter_t::Config,
@@ -148,7 +157,17 @@ namespace MuonR4::SegmentFit {
             /** @brief Removes all hits from the segment which are obvious outliers. E.g. tubes 
              *         which cannot be crossed by the segment. 
              *  @param candidate: Reference of the segment candidate to prune. */
-            void eraseWrongHits(Result_t& candidate) const;            
+            void eraseWrongHits(Result_t& candidate) const;
+            /** @brief Marks duplicate hits on a strip layer as outliers to avoid
+             *         competing contributions from the same layers in the fit. Hits
+             *         on the same layer are sorted by their chi2 and the worse ones
+             *         are rejected if they don't provide additional information
+             *  @param linePos: Position of the latest segment line 
+             *  @param lineDir: Direction of the latest segment line
+             *  @param hits: List of hit measurements to clean*/
+            void cleanStripLayers(const Amg::Vector3D& linePos,
+                                  const Amg::Vector3D& lineDir,
+                                  HitVec_t& hits) const;
             /** @brief Converts the fit result into a segment object
              *  @param locToGlobTrf: Local to global transform to translate the segment parameters into
              *                       global parameters

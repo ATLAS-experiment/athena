@@ -8,10 +8,11 @@
 #include "TFile.h"
 #include "TH1F.h"
 #include "TH3F.h"
+#include "TMath.h"
 
 void compareHIClusterGeoFiles(const std::string& file1,
                               const std::string& file2, int testOnly = 127,
-                              int* result = 0) {
+                              int* result = 0, float eps = 1e-5) {
   std::unique_ptr<TFile> f1( TFile::Open(file1.c_str()) );
   std::unique_ptr<TFile> f2( TFile::Open(file2.c_str()) );
 
@@ -131,9 +132,15 @@ void compareHIClusterGeoFiles(const std::string& file1,
         a1 = h1->GetZaxis();
         a2 = h2->GetZaxis();
       }
-      if((not a1) or (not a2)){
-        std::cout <<"Histogram pointer a1 or a2 is null in compareHIClusterGeoFiles\n";
-       abort();
+      if((not a1) or (not a2)) {
+        std::cout << "h1 " << h1->GetName() << " has pointer to " << char('W'+d)
+                  << "-axis = " << a1 << ", h2 " << h2->GetName() 
+                  << " has pointer to " << char('W'+d) << "-axis = " << a2 
+                  << std::endl;
+        // different axes
+        hdiff[h] = 3;
+        doBreak = 1;
+        break;
       }
       for (int b = 1; b <= a1->GetNbins() + 1; ++b) {
         if (a1->GetBinLowEdge(b) != a2->GetBinLowEdge(b)) {
@@ -158,7 +165,7 @@ void compareHIClusterGeoFiles(const std::string& file1,
     for (int bx = 1; bx <= h1->GetNbinsX(); ++bx) {
       for (int by = 1; by <= h1->GetNbinsY(); ++by) {
         for (int bz = 1; bz <= h1->GetNbinsZ(); ++bz) {
-          if (h1->GetBinContent(bx, by, bz) != h2->GetBinContent(bx, by, bz)) {
+          if (TMath::Abs(h1->GetBinContent(bx, by, bz) - h2->GetBinContent(bx, by, bz)) > eps) {
             // different bin content
             hdiff[h] = 5;
             std::cout << "h1 " << h1->GetName() << " has "
@@ -200,8 +207,8 @@ void compareHIClusterGeoFiles(const std::string& file1,
 }
 
 int main(int argc, char** argv) {
-  if (argc < 3 || argc > 4) {
-    std::cout << "Syntax: " << argv[0] << " file1 file2 [testOnly]"
+  if (argc < 3 || argc > 5) {
+    std::cout << "Syntax: " << argv[0] << " file1 file2 [testOnly [epsilon]]"
               << std::endl;
     return -1;
   }
@@ -222,6 +229,13 @@ int main(int argc, char** argv) {
     return -1;
   }
 
-  compareHIClusterGeoFiles(argv[1], argv[2], testOnly, &result);
+  float epsilon = (argc > 4 ? std::stof(argv[4]) : 1e-5);
+  if(epsilon < 0.) {
+    std::cout << "Warning: epsilon should be a possitive number, it is now "
+              << epsilon << ", changing to 0.0" << std::endl;
+    epsilon=0.;
+  }
+
+  compareHIClusterGeoFiles(argv[1], argv[2], testOnly, &result, epsilon);
   return result;
 }

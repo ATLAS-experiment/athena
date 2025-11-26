@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef CALIBRATEDTRACKSPROVIDER_H
@@ -47,7 +47,7 @@ namespace CP {
                                        "Which kind of track particle container is parsed. Either the Id tracks (2) or the MS tracks(1)"};
         
         Gaudi::Property<bool> m_useRndNumber{this, "useRndRunNumber", false};
-        SG::ReadDecorHandleKey<xAOD::EventInfo> m_rndNumKey{this, "RandomNumberDecor", "EventInfo.RandomRunNumber",
+        SG::ReadDecorHandleKey<xAOD::EventInfo> m_rndNumKey{this, "RandomNumberDecor", m_eventInfo, "RandomRunNumber",
                                                             "Dependency on the random run number"};
 
     };  // class

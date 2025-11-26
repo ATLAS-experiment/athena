@@ -127,7 +127,9 @@ namespace ParticleJetTools {
     childPt(n.childPt),
     childPdgId(n.childPdgId),
     childPositionDPhi(n.childPositionDPhi),
-    childPositionDEta(n.childPositionDEta)
+    childPositionDEta(n.childPositionDEta),
+    // ATLASRECTS-8290: this is for backward compatability, remove eventually
+    acc_uid(n.useBarcode ? "barcode" : "uid")
   {
   }
 
@@ -156,7 +158,7 @@ namespace ParticleJetTools {
       link.toIndexedElement(*ipc, ip->index());
       links.push_back(link);
     }
-    m_dec(jet) = links;
+    m_dec(jet) = std::move(links);
   }
 
   void setJetLabels(const xAOD::Jet& jet,
@@ -215,7 +217,8 @@ namespace ParticleJetTools {
       decs.positionDPhi(jet) = positionDPhi(labelling_particle, jet, origin);
       decs.positionDEta(jet) = positionDEta(labelling_particle, jet, origin);
       decs.uniqueID(jet) = labelling_particle ?
-        HepMC::uniqueID(labelling_particle) : HepMC::INVALID_PARTICLE_ID;
+        // ATLASRECTS-8290: this should be replaced with ->uid()
+        decs.acc_uid(*labelling_particle) : HepMC::INVALID_PARTICLE_ID;
       decs.childLxy(jet) = partLxy(child_particle, origin);
       decs.childPt(jet) = partPt(child_particle);
       decs.childPdgId(jet) = partPdgId(child_particle);

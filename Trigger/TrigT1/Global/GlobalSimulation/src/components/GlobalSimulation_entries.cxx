@@ -1,44 +1,34 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "../GlobalSimulationAlg.h"
-#include "../GlobalAlgs/Hypothesis/UCL/HypoTestBenchAlg.h"
-#include "../GlobalAlgs/Hypothesis/UCL/InvMassDPhiInc2TestBenchAlg.h"
+#include "../GlobalSimComponents/GlobalSimulationAlg.h"
 
-#include "../GlobalAlgs/Egamma1_LArStrip_Fex.h"
-#include "../GlobalAlgs/Egamma1_LArStrip_Fex_RowAware.h"
-#include "../GlobalAlgs/EMB1CellsFromCaloCells.h"
-#include "../GlobalAlgs/eFexRoIAlgTool.h"
-#include "../GlobalAlgs/ERatioAlgTool.h"
-#include "../GlobalAlgs/Egamma1BDTAlgTool.h"
-#include "../GlobalAlgs/Egamma1eRatioAlgTool.h"
+#include "../FirstChain/Egamma1_LArStrip_Fex.h"
+#include "../FirstChain/Egamma1_LArStrip_Fex_RowAware.h"
+#include "../FirstChain/EMB1CellsFromCaloCells.h"
+#include "../FirstChain/eFexRoIAlgTool.h"
+#include "../FirstChain/Egamma1BDTAlgTool.h"
+#include "../FirstChain/Egamma1eRatioAlgTool.h"
 
-#include "../GlobalAlgs/Hypothesis/UCL/eEmSortSelectCountContainerAlgTool.h"
-#include "../GlobalAlgs/Hypothesis/UCL/eEmSortSelectCountContainerComparator.h"
+#include "../FirstChain/LArCellPreparationAlg.h"
+#include "../FirstChain/LArCellMuxAlg.h"
+#include "../FirstChain/GlobalCellTowerAlgTool.h"
+#include "../FirstChain/eFexCvtrAlgTool.h"
+#include "../FirstChain/eEmMultAlgTool.h"
 
-#include "../GlobalAlgs/FirstChain/LArCellPreparationAlg.h"
-#include "../GlobalAlgs/FirstChain/LArCellMuxAlg.h"
-#include "../GlobalAlgs/FirstChain/GlobalCellTowerAlgTool.h"
-#include "../GlobalAlgs/FirstChain/eFexCvtrAlgTool.h"
-#include "../GlobalAlgs/FirstChain/eEmMultAlgTool.h"
+#include "../FirstChain/eEmMultTestBench.h"
+#include "../FirstChain/eEmMultTestComparator.h"
 
 
 DECLARE_COMPONENT(GlobalSim::GlobalSimulationAlg)
-DECLARE_COMPONENT(GlobalSim::HypoTestBenchAlg)
-DECLARE_COMPONENT(GlobalSim::InvMassDPhiInc2TestBenchAlg)
-
 
 DECLARE_COMPONENT(GlobalSim::Egamma1_LArStrip_Fex)
 DECLARE_COMPONENT(GlobalSim::Egamma1_LArStrip_Fex_RowAware)
 DECLARE_COMPONENT(GlobalSim::EMB1CellsFromCaloCells)
 DECLARE_COMPONENT(GlobalSim::eFexRoIAlgTool)
-DECLARE_COMPONENT(GlobalSim::ERatioAlgTool)
 DECLARE_COMPONENT(GlobalSim::Egamma1BDTAlgTool)
 DECLARE_COMPONENT(GlobalSim::Egamma1eRatioAlgTool)
-
-DECLARE_COMPONENT(GlobalSim::eEmSortSelectCountContainerAlgTool)
-DECLARE_COMPONENT(GlobalSim::eEmSortSelectCountContainerComparator)
 
 DECLARE_COMPONENT(GlobalSim::LArCellPreparationAlg)
 DECLARE_COMPONENT(GlobalSim::LArCellMuxAlg)
@@ -46,3 +36,6 @@ DECLARE_COMPONENT(GlobalSim::GlobalCellTowerAlgTool)
 
 DECLARE_COMPONENT(GlobalSim::eFexCvtrAlgTool)
 DECLARE_COMPONENT(GlobalSim::eEmMultAlgTool)
+
+DECLARE_COMPONENT(GlobalSim::eEmMultTestBench)
+DECLARE_COMPONENT(GlobalSim::eEmMultTestComparator)

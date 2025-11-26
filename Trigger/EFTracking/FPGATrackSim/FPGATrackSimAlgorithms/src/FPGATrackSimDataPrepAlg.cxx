@@ -1,3 +1,5 @@
+//// FPGATrackSimDataPrepAlg.cxx
+
 // Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 #include "FPGATrackSimDataPrepAlg.h"
@@ -48,6 +50,14 @@ StatusCode FPGATrackSimDataPrepAlg::initialize()
     if (!m_description.empty()) {
         while (std::getline(ss, line, '\n')) {
             ATH_MSG_INFO('\t' << line);
+        }
+    }
+
+    // Dump the configuration to make sure it propagated through right
+    const std::vector<Gaudi::Details::PropertyBase*> props = this->getProperties();
+    for( Gaudi::Details::PropertyBase* prop : props ) {
+        if (prop->ownerTypeName()==this->type()) {      
+        ATH_MSG_DEBUG("Property:\t" << prop->name() << "\t : \t" << prop->toString());
         }
     }
 
@@ -137,6 +147,9 @@ StatusCode FPGATrackSimDataPrepAlg::execute()
             if (eventSelector->selectEvent(m_eventHeader)) {
                 ATH_MSG_DEBUG("Event accepted by: " << eventSelector->name());
                 acceptEvent = true;
+                if ((m_writeRegion>=0)&&(m_writeRegion==eventSelector->getRegionID())) {
+                    m_writeOutputTool->activateEventOutput();
+                }
             }
         }
         if constexpr (enableBenchmark) m_chrono->chronoStop("DataPrep: EventSelection");

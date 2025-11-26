@@ -7,6 +7,8 @@ from AthenaCommon.Logging import logging
 from AthenaConfiguration.Enums import LHCPeriod
 from Campaigns.Utils import Campaign
 
+from TriggerAnalysisAlgorithms.TriggerAnalysisSFConfig import trigger_set
+
 
 class TauCalibrationConfig (ConfigBlock):
     """the ConfigBlock for the tau four-momentum correction"""
@@ -36,6 +38,13 @@ class TauCalibrationConfig (ConfigBlock):
         return self.containerName + self.postfix
 
     def makeAlgs (self, config) :
+
+        # protection for EleRM taus, which are available only from 2024 onward
+        if 'EleRM' in self.inputContainer:
+            if config.dataType() is DataType.Data and config.dataYear() <= 2023:
+                raise RuntimeError("EleRM taus are only available from 2024 dataset onward")
+            elif config.dataType() is not DataType.Data and config.campaign() <= Campaign.MC23d:
+                raise RuntimeError("EleRM taus are only available from 2024 dataset onward")
 
         postfix = self.postfix
         if postfix != '' and postfix[0] != '_' :
@@ -223,10 +232,10 @@ class TauWorkingPointConfig (ConfigBlock) :
                 nameFormat = nameFormat + '_muonolr' 
             nameFormat = nameFormat + '.conf'    
 
-        if self.quality not in ['Tight', 'Medium', 'Loose', 'VeryLoose', 'Baseline', 'BaselineForFakes'] :
-            raise ValueError ("invalid tau quality: \"" + self.quality +
-                              "\", allowed values are Tight, Medium, Loose, " +
-                              "VeryLoose, Baseline, BaselineForFakes")
+            if self.quality not in ['Tight', 'Medium', 'Loose', 'VeryLoose', 'Baseline', 'BaselineForFakes'] :
+                raise ValueError ("invalid tau quality: \"" + self.quality +
+                                  "\", allowed values are Tight, Medium, Loose, " +
+                                  "VeryLoose, Baseline, BaselineForFakes")
 
         # Set up the algorithm selecting taus:
         alg = config.createAlgorithm( 'CP::AsgSelectionAlg', 'TauSelectionAlg' )
@@ -351,11 +360,11 @@ class TauWorkingPointConfig (ConfigBlock) :
                     config.addPrivateTool( 'efficiencyCorrectionsTool',
                                 'TauAnalysisTools::TauEfficiencyCorrectionsTool' )
                     alg.efficiencyCorrectionsTool.EfficiencyCorrectionTypes = [4]
-                    if self.quality=="Loose":
+                    if self.quality=="Loose" or self.manual_sel_rnnwp == "loose":
                         JetIDLevel = 7
-                    elif self.quality=="Medium":
+                    elif self.quality=="Medium" or self.manual_sel_rnnwp == "medium":
                         JetIDLevel = 8
-                    elif self.quality=="Tight":
+                    elif self.quality=="Tight" or self.manual_sel_rnnwp == "tight":
                         JetIDLevel = 9
                     else:
                         raise ValueError ("invalid tauID: \"" + self.quality + "\". Allowed values are loose, medium, tight")
@@ -384,15 +393,21 @@ class TauWorkingPointConfig (ConfigBlock) :
                     alg.efficiencyCorrectionsTool.EfficiencyCorrectionTypes = [10]
                     # since all TauSelectionTool config files have loose eRNN, code only this option for now
                     alg.efficiencyCorrectionsTool.EleIDLevel = 2
+                    #overwrite decision in case user selects a WP manually
+                    if self.manual_sel_evetowp == "loose":
+                        alg.efficiencyCorrectionsTool.EleIDLevel = 2
+                    elif self.manual_sel_evetowp == "medium":
+                        alg.efficiencyCorrectionsTool.EleIDLevel = 3
+                        
                     alg.efficiencyCorrectionsTool.useFastSim = config.dataType() is DataType.FastSim
                     alg.efficiencyCorrectionsTool.Campaign = "mc23" if config.geometry() is LHCPeriod.Run3 else "mc20"
                     alg.scaleFactorDecoration = 'tau_EvetoFakeTau_effSF' + selectionPostfix + '_%SYS%'
                     # for 2025-prerec, eVeto recommendations are given separately for Loose and Medium RNN 
-                    if self.quality=="Loose":
+                    if self.quality=="Loose" or self.manual_sel_rnnwp == "loose":
                         JetIDLevel = 7
-                    elif self.quality=="Medium":
+                    elif self.quality=="Medium" or self.manual_sel_rnnwp == "medium":
                         JetIDLevel = 8
-                    elif self.quality=="Tight": 
+                    elif self.quality=="Tight" or self.manual_sel_rnnwp == "tight": 
                         log.warning("eVeto SFs are not available for Tight WP -> fallback to Medium WP")
                         JetIDLevel = 8
                     alg.efficiencyCorrectionsTool.JetIDLevel = JetIDLevel 
@@ -493,36 +508,11 @@ class TauTriggerAnalysisSFBlock (ConfigBlock):
         """Return the instance name for this block"""
         return self.containerName + '_' + self.prefixSF + '_' + self.tauID
 
-    def get_year_data(self, dictionary: dict, year: int | str) -> list:
-        return dictionary.get(int(year), dictionary.get(str(year), []))
-
     def makeAlgs (self, config) :
 
         if config.dataType() is not DataType.Data:
-            log = logging.getLogger('TauJetTriggerSFConfig')
-
-            from TriggerAnalysisAlgorithms.TriggerAnalysisConfig import is_year_in_current_period
-
-            triggers = set()
-            if self.includeAllYearsPerRun:
-                for year in self.triggerChainsPerYear:
-                    if not is_year_in_current_period(config, year):
-                        continue
-                    triggers.update(self.get_year_data(self.triggerChainsPerYear, year))
-            elif config.campaign() is Campaign.MC20a:
-                triggers.update(self.get_year_data(self.triggerChainsPerYear, 2015))
-                triggers.update(self.get_year_data(self.triggerChainsPerYear, 2016))
-            elif config.campaign() is Campaign.MC20d:
-                triggers.update(self.get_year_data(self.triggerChainsPerYear, 2017))
-            elif config.campaign() is Campaign.MC20e:
-                triggers.update(self.get_year_data(self.triggerChainsPerYear, 2018))
-            elif config.campaign() is Campaign.MC23a:
-                triggers.update(self.get_year_data(self.triggerChainsPerYear, 2022))
-            elif config.campaign() is Campaign.MC23d:
-                triggers.update(self.get_year_data(self.triggerChainsPerYear, 2023))
-            else:
-                log.warning("unknown campaign, skipping triggers: %s", str(config.campaign()))
-
+            triggers = trigger_set(config, self.triggerChainsPerYear,
+                                   self.includeAllYearsPerRun)
             for chain in triggers:
                 chain_noHLT = chain.replace("HLT_", "")
                 chain_out = chain_noHLT if self.removeHLTPrefix else chain

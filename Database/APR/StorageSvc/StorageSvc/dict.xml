@@ -21,7 +21,7 @@
   <class name="LongDbArray"    id="1601B72A-87FE-45CF-B128-FE577C0A438C" />
   <class name="ULongDbArray"   id="B228247A-AFEE-449E-BD6D-3A1C43555662" />
   <class name="FloatDbArray"   id="EC636D76-EE64-431A-A046-BEE7A3B73456" />
-  <class name="DoubleDbArray"  id="DF9DDD4F-CBFC-4b75-8A46-FF0A64DD0B2F" />
+  <class name="DoubleDbArray"  id="DF9DDD4F-CBFC-4B75-8A46-FF0A64DD0B2F" />
  </selection>
 
  <exclusion>

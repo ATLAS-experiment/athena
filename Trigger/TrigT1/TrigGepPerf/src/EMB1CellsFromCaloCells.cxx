@@ -1,8 +1,9 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "EMB1CellsFromCaloCells.h"
+#include <algorithm> //copy_if
 
 EMB1CellsFromCaloCells::EMB1CellsFromCaloCells(const std::string& type,
 					       const std::string& name,
@@ -52,7 +53,7 @@ EMB1CellsFromCaloCells::cells(std::vector<std::vector<const CaloCell*>>& cells,
 	       std::back_inserter(emb1_cells),
 	       EMB1_sel);
 
-  cells.push_back(emb1_cells);
+  cells.push_back(std::move(emb1_cells));
    
   return StatusCode::SUCCESS;
 }

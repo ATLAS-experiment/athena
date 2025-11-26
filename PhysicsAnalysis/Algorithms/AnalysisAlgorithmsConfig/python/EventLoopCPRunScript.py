@@ -54,7 +54,7 @@ class EventLoopCPRunScript(CPBaseRunner):
     # This functionality should not be in the runscript, instead should be put into PrintConfiguration alg.
     # This is a temporary solution to dump the full config until PrintConfiguration alg is completely ready.
     def _dumpFullConfig(self):
-        from AnalysisAlgorithmsConfig.SaveConfigUtils import save_algs_from_sequence_ELjob, combine_json_files
+        from AnalysisAlgorithmsConfig.SaveConfigUtils import save_algs_from_sequence_ELjob, combine_tools_and_algorithms_ELjob
         import json
         with(open("_alg_sequence.json", 'w', encoding='utf-8')) as seq_out_file:
             output_dict = {}
@@ -65,7 +65,7 @@ class EventLoopCPRunScript(CPBaseRunner):
                 self.logger.warning(f'Dumping full config failed with: {e}')
                 self.logger.warning('Please also check if "PrintConfiguration" is enabled in the text config.')
             try:
-                combine_json_files(alg_file="_alg_sequence.json", output_file="full_config.json")
+                combine_tools_and_algorithms_ELjob(combine_dictionaries=False, alg_file="_alg_sequence.json", output_file="full_config.json")
                 self.logger.info("Combining full config to full_config.json succeeded")
                 
             except Exception as e:

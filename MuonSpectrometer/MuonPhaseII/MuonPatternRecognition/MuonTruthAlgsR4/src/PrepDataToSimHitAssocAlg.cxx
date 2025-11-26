@@ -21,7 +21,7 @@ namespace MuonR4{
         return StatusCode::SUCCESS;
     }    
     StatusCode PrepDataToSimHitAssocAlg::execute(const EventContext & ctx) const {
-        const ActsGeometryContext* gctx{nullptr};
+        const ActsTrk::GeometryContext* gctx{nullptr};
         const xAOD::MuonSimHitContainer* simHits{nullptr};
         const xAOD::UncalibratedMeasurementContainer* measurements{nullptr};
         ATH_CHECK(SG::get(gctx, m_geoCtxKey, ctx));

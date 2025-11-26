@@ -74,7 +74,7 @@ namespace MuonR4 {
                                             xAOD::MuonSimHitContainer* sdoContainer) const {
     const sTgcIdHelper& idHelper{m_idHelperSvc->stgcIdHelper()};
     CLHEP::HepRandomEngine* rndEngine = getRandomEngine(ctx);
-    const ActsGeometryContext &gctx{getGeoCtx(ctx)};
+    const ActsTrk::GeometryContext &gctx{getGeoCtx(ctx)};
 
     const Muon::DigitEffiData* efficiencyMap{nullptr};
     ATH_CHECK(SG::get(efficiencyMap, m_effiDataKey, ctx));

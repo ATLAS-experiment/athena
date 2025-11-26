@@ -10,18 +10,14 @@ from AthenaConfiguration.Enums import Format, ProductionStep
 from PixelConditionsAlgorithms.PixelConditionsConfig import (
     PixelDCSCondStateAlgCfg, PixelDCSCondStatusAlgCfg, PixelDeadMapCondAlgCfg
 )
-from PixelReadoutGeometry.PixelReadoutGeometryConfig import PixelReadoutManagerCfg
-
 
 @AccumulatorCache
 def PixelConditionsSummaryCfg(flags, name="PixelConditionsSummary", **kwargs):
     """Return configured ComponentAccumulator with tool for Pixel Conditions"""
-    acc = PixelReadoutManagerCfg(flags)
-    acc.merge(PixelDCSCondStateAlgCfg(flags))
+    acc = PixelDCSCondStateAlgCfg(flags)
     acc.merge(PixelDCSCondStatusAlgCfg(flags))
     acc.merge(PixelDeadMapCondAlgCfg(flags))
 
-    kwargs.setdefault("PixelReadoutManager", acc.getPrimary())
     kwargs.setdefault("UseByteStreamFEI4", (not flags.Input.isMC and flags.Input.Format is Format.BS) or flags.Overlay.DataOverlay)
     kwargs.setdefault("UseByteStreamFEI3", (not flags.Input.isMC and flags.Input.Format is Format.BS) or flags.Overlay.DataOverlay)
     if (flags.Overlay.DataOverlay and

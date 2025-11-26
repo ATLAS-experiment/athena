@@ -7,14 +7,27 @@
 def HION2AllVariablesGeneral():
     
     variables  = []
+    variables += ["EventInfo"]
     variables += ["CaloSums"]
     variables += ["PrimaryVertices"]
+    variables += ["InDetTrackParticles"]
+    variables += ["AntiKt4HIJets"]
+    variables += ["Electrons"]
+    variables += ["GSFTrackParticles"]
+    variables += ["egammaClusters"]
+    variables += ["Muons"]
+    variables += ["ExtrapolatedMuonTrackParticles"]
+    variables += ["MuonSpectrometerTrackParticles"]
+    variables += ["CombinedMuonTrackParticles"]
+    variables += ["CaloCalTopoClusters"]
+    variables += ["HIEventShape"]
     
     return variables
 
 def HION2ExtraVariablesGeneral():
     variables  = []
-    variables += ["InDetTrackParticles.qOverP.theta.phi.TrackQuality"]
+    variables += ["InDetTrackParticles.qOverP.theta.phi.d0.z0.vz.chiSquared.numberDoF.TrackQuality.Chi2ToPV.VertexIndex.CovD0.CovZ0.CovTheta"]
+    variables += ["CaloSums.Summary"] # Need to be passed explicitelly
     
     return variables
 
@@ -244,6 +257,8 @@ def HION5ExtraVariables():
         ".".join(["InDetTrackParticles", field]) for field in [
             "truthMatchProbability.x.y.z.vx.vy.vz",
             "numberOfInnermostPixelLayerSplitHits",
+            "numberOfTRTHoles",
+            "expectInnermostPixelLayerHit",
             "numberOfNextToInnermostPixelLayerSplitHits",
             "numberOfNextToInnermostPixelLayerSharedHits",
             "numberOfPixelSplitHits",
@@ -317,7 +332,7 @@ def HION5ExtraVariables():
 
     return variables
 
-def HION5AllVariables():
+def HION5AllVariables(runnumber):
     variables  = []
     variables += ["AntiKt4HITrackJets"]
     variables += ["AntiKt2HIJets"]
@@ -332,6 +347,17 @@ def HION5AllVariables():
     variables += ["ZdcTriggerTowers"]
     variables += ["PeripheralCaloCalTopoClusters"]
     variables += ["MET_Track1000", "MET_Track2000", "MET_Track3000", "MET_Track4000", "MET_Track5000"]
+
+    
+    from CoolConvUtilities.ParticleTypeUtil import getTypeForRun
+    info=getTypeForRun(runnumber)
+    isOxygenOxygenCollision = False
+    if (info.getBeam1Type() == 8) or (info.getBeam2Type() == 8):
+        isOxygenOxygenCollision = True
+
+    if isOxygenOxygenCollision:
+        variables += ["MET_Calo"]
+        variables += ["MET_Track"]
 
     return variables
 
@@ -384,6 +410,7 @@ def HION7AllVarContent():
     variables  = []
     variables += ["CaloSums"]
     variables += ["ZdcModules"]
+    variables += ["ZdcSums"]
     variables += ["PrimaryVertices"]
     variables += ["EventInfo"]
 
@@ -508,7 +535,8 @@ def makeHIJetBranchList():
         'TrackWidthPt4000',
         'Width',
         'MaxConstituentET',
-        'MaxOverMean']
+        'MaxOverMean',
+        'JvtMatched']
     return c
 
 def HION7BasicJetVars(JetColl):

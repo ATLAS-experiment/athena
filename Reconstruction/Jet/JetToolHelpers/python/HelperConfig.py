@@ -37,13 +37,13 @@ def HistoInputCfg(flags, Tname, inputFile, histName, varX, **kwargs):
     
     varTool1 = VarToolCfg(flags, varX)
     kwargs.setdefault("varTool1",varTool1)
-    tname = Tname+"_"+varTool1.name
+    tname = Tname+"_"+varTool1.Name
 
     # 2D histogram if varY provided, else 1D histogram
     varY = kwargs.pop('varY', None)
     if varY:
         varTool2 = VarToolCfg(flags, varY)
-        tname+="_"+varTool2.name
+        tname+="_"+varTool2.Name
         kwargs.setdefault("varTool2",varTool2)
         return CompFactory.JetHelper.HistoInput2D(tname, **kwargs)
     else:

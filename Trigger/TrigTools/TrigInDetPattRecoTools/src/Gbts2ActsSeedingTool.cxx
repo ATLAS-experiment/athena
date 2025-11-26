@@ -7,7 +7,6 @@
 #include "xAODInDetMeasurement/PixelCluster.h"
 
 #include "Gbts2ActsSeedingTool.h"
-#include "GNN_TrackingFilter.h"
 
 #include <optional>
 
@@ -33,7 +32,8 @@ StatusCode Gbts2ActsSeedingTool::finalize() {
 }
 
 StatusCode Gbts2ActsSeedingTool::createSeeds(const EventContext& ctx, const Acts::SpacePointContainer<ActsTrk::SpacePointCollector, Acts::detail::RefHolder>& spContainer, const Acts::Vector3&, const Acts::Vector3&, ActsTrk::SeedContainer& seedContainer) const {
-  
+
+  seedContainer.spacePoints().reserve(spContainer.size());
   std::unique_ptr<GNN_DataStorage> storage = std::make_unique<GNN_DataStorage>(*m_geo, m_mlLUT);
 
     SG::ReadCondHandle<InDet::BeamSpotData> beamSpotHandle { m_beamSpotKey, ctx };
@@ -54,6 +54,7 @@ StatusCode Gbts2ActsSeedingTool::createSeeds(const EventContext& ctx, const Acts
     for(size_t idx=0; idx<spContainer.size(); idx++){
         const auto & sp = spContainer.at(idx);
         const auto & extSP = sp.externalSpacePoint();
+        seedContainer.spacePoints().push_back(&extSP);
         const std::vector<xAOD::DetectorIDHashType>& elementlist = extSP.elementIdList() ;
 
         bool isPixel(elementlist.size() == 1);
@@ -110,78 +111,28 @@ StatusCode Gbts2ActsSeedingTool::createSeeds(const EventContext& ctx, const Acts
 
     ATH_MSG_DEBUG("Created graph with "<<graphStats.first<<" edges and "<<graphStats.second<< " edge links");
 
+    if (graphStats.first == 0 || graphStats.second == 0) return StatusCode::SUCCESS;
+
     int maxLevel = runCCA(graphStats.first, edgeStorage);
 
     ATH_MSG_DEBUG("Reached Level "<<maxLevel<<" after GNN iterations");
+    
+    std::vector<std::tuple<float, int, std::vector<unsigned int> > > vSeedCandidates;
 
-    int minLevel = 3;//a triplet + 2 confirmation
+    extractSeedsFromTheGraph(maxLevel, graphStats.first, spContainer.size(), edgeStorage, vSeedCandidates);
 
-    if(m_LRTmode) {
-        minLevel = 2;//a triplet + 1 confirmation
-    }
+    if (vSeedCandidates.empty()) return StatusCode::SUCCESS;
 
-    if(maxLevel < minLevel) return StatusCode::SUCCESS;
+    seedContainer.reserve(vSeedCandidates.size(), 7.0f);  // 7 SP/seed to optimise allocations (average is 6.1 SP/seed)
 
-    std::vector<GNN_Edge*> vSeeds;
+    for (const auto& seed : vSeedCandidates) {
 
-    vSeeds.reserve(graphStats.first/2);
-
-    for(int edgeIndex = 0; edgeIndex < graphStats.first; edgeIndex++) {
+      if (std::get<1>(seed) != 0) continue;//identified as a clone of a better candidate
       
-      GNN_Edge* pS = &(edgeStorage.at(edgeIndex));
-
-      if(pS->m_level < minLevel) continue;
-
-      vSeeds.push_back(pS);
-    }
-
-    if(vSeeds.empty()) return StatusCode::SUCCESS;
- 
-    std::sort(vSeeds.begin(), vSeeds.end(), GNN_Edge::CompareLevel());
-
-    //backtracking
-
-    TrigFTF_GNN_TrackingFilter tFilter(m_layerGeometry, edgeStorage);
-
-    for(auto pS : vSeeds) {
-        if(pS->m_level == -1) continue;
-
-        TrigFTF_GNN_EdgeState rs(false);
-
-        tFilter.followTrack(pS, rs);
-
-        if(!rs.m_initialized) {
-            continue;
-        }
-
-        if(static_cast<int>(rs.m_vs.size()) < minLevel) continue;
-
-        std::vector<const GNN_Node*> vN;
-
-        for(std::vector<GNN_Edge*>::reverse_iterator sIt=rs.m_vs.rbegin();sIt!=rs.m_vs.rend();++sIt) {
-            (*sIt)->m_level = -1;//mark as collected
-            
-            if(sIt == rs.m_vs.rbegin()) {
-                vN.push_back((*sIt)->m_n1);
-            }
-
-            vN.push_back((*sIt)->m_n2);
-	    
-        }
-
-        if(vN.size()<3) continue;
+      //add seed to output
 	
-        std::vector<const xAOD::SpacePoint*> sps;
-        sps.reserve(vN.size());
-        for (const auto* vNptr : vN) {
-          sps.push_back(&spContainer.at(vNptr->sp_idx()).externalSpacePoint());
-        }
-	
-	//add seed to output
-
-	std::unique_ptr<ActsTrk::Seed> to_add = std::make_unique<ActsTrk::Seed>(std::move(sps));
-	
-        seedContainer.push_back(std::move(to_add));
+      seedContainer.push_back(std::get<2>(seed));
+      
     }
 
     ATH_MSG_DEBUG("GBTS created "<<seedContainer.size()<<" seeds");

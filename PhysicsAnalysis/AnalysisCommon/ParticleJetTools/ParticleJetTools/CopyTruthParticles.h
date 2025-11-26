@@ -44,7 +44,6 @@ protected:
 
   /// Key for output truth particles
   SG::WriteHandleKey<ConstDataVector<xAOD::TruthParticleContainer> > m_outTruthPartKey{this, "OutputName", "TagInputs", "Name of the resulting TruthParticle collection"};
-  
 
 };
 

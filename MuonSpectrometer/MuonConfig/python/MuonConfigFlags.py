@@ -10,15 +10,6 @@ import re
 # - MuonCnvFlags - not sure we need this - it really only configures single properties of the various cablings - we can just do this directly.
 # - MuonCalibFlags - looks like we need this
 
-# MuonByteStream
-# - MuonByteStreamFlags.py - AFAICS this is only used here MuonCnv/MuonCnvExample/python/MuonCablingConfig.py & duplicates global flag functionality.
-
-# MuonRecExample
-# - MuonAlignFlags.py - looks necessary
-# - MuonStandaloneFlags.py - necessary, but should be cleaned up (and probably merged with MuonRecFlags i.e. here)
-# https://gitlab.cern.ch/atlas/athena/blob/master/MuonSpectrometer/MuonReconstruction/MuonRecExample/python/MuonStandaloneFlags.py
-# - MuonRecFlags.py - necessary, but needs cleaning up.
-# https://gitlab.cern.ch/atlas/athena/blob/master/MuonSpectrometer/MuonReconstruction/MuonRecExample/python/MuonRecFlags.py
 
 
 class MMClusterBuilderEnum(FlagEnum):
@@ -50,12 +41,21 @@ def createMuonConfigFlags():
                                                                           prevFlags.GeoModel.SQLiteDB ,
                                                                           prevFlags.GeoModel.SQLiteDBFullPath)["Muon"]["useR4Plugin"] )
     # 1. Digitization
-    mcf.addFlag("Muon.doDigitization",True)
-    mcf.addFlag("Muon.doFastMMDigitization",True) ### The digitization flag is only relevant if usePhaseIIGeoSetup is activated
+    mcf.addFlag("Muon.doFastMMDigitization",True)  ### The digitization flag is only relevant if usePhaseIIGeoSetup is activated
     mcf.addFlag("Muon.doFastsTGCDigitization",True) ### The digitization flag is only relevant if usePhaseIIGeoSetup is activated
 
     
-    # 2. Reco MuonRecFlags    
+    # 2. Reco MuonRecFlags 
+
+    #### If this flag is enabled, the phase II MS track 
+    #### reconstruction algorithms are scheduled   
+    try:
+        #### Use 
+        from TrkConfig.TrkConfigFlags import TrackingComponent
+        mcf.addFlag("Muon.scheduleActsReco", lambda prevFlags: prevFlags.Muon.usePhaseIIGeoSetup and \
+                            prevFlags.Tracking.recoChain[0] in [TrackingComponent.ActsChain , TrackingComponent.ActsLegacyChain ]) 
+    except ImportError:
+        mcf.addFlag("Muon.scheduleActsReco", False)
 
     mcf.addFlag("Muon.doMSVertex", True) # Run MS vertex (arXiv:1311.7070)
     mcf.addFlag("Muon.doSegmentT0Fit",lambda prevFlags : prevFlags.Beam.Type is not BeamType.Collisions) # Fit MDT segments using a variable t0. Used for cosmics and single beam to compensate for large errors on the trigger time.
@@ -150,6 +150,7 @@ def createMuonConfigFlags():
     # configuration of the DESDM_MCP output format 
 
     mcf.addFlag("Muon.DESDM_MCP.doAlignmentFormat", False) # Flag to stear the DESDM_MCP format which switches to a looser event selection for toroid off runs used for alignment. 
+    mcf.addFlag("Muon.DESDM_MCP.doExtendedAlignmentContent", False) # Flag to enable electron, photon and jet containers in DESDM_MCP for dedicate studies of the toroid off data. 
 
     # configuration to write out RPC RDO for trigger timing calibration
     mcf.addFlag("Muon.doWriteRpcRDO", True)

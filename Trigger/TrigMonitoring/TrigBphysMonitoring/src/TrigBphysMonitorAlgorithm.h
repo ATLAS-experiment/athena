@@ -14,6 +14,8 @@
 #include "TrkVKalVrtFitter/TrkVKalVrtFitter.h"
 #include "InDetConversionFinderTools/VertexPointEstimator.h"
 #include "TrkVertexAnalysisUtils/V0Tools.h"
+#include "xAODMuon/MuonContainer.h"
+#include "xAODTracking/VertexContainer.h"
 
 class TrigBphysMonitorAlgorithm : public AthMonitorAlgorithm {
 public:

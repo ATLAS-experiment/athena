@@ -7,13 +7,6 @@
 
 namespace DerivationFramework {
 
-  HadronOriginDecorator::HadronOriginDecorator(const std::string& t, const std::string& n, const IInterface* p):
-    base_class(t,n,p)
-  {
-  }
-
-  HadronOriginDecorator::~HadronOriginDecorator(){}
-
   StatusCode HadronOriginDecorator::initialize(){
     ATH_MSG_VERBOSE( "Initialize" );
     ATH_CHECK( m_particlesKey.initialize() );
@@ -22,10 +15,7 @@ namespace DerivationFramework {
     return StatusCode::SUCCESS;
   }
 
-  StatusCode HadronOriginDecorator::addBranches() const{
-    // Event context for multi-threading
-    const EventContext& ctx = Gaudi::Hive::currentContext();
-
+  StatusCode HadronOriginDecorator::addBranches(const EventContext& ctx) const{
     // Retrieve truth collections
     SG::ReadHandle<xAOD::TruthParticleContainer> truthParticles(m_particlesKey,ctx);
     if (!truthParticles.isValid()) {
@@ -34,7 +24,7 @@ namespace DerivationFramework {
     }
 
     std::map<const xAOD::TruthParticle*, DerivationFramework::HadronOriginClassifier::HF_id>  hadronMap=m_Tool->GetOriginMap();
-    SG::WriteDecorHandle<xAOD::TruthParticleContainer, unsigned int> originDecorator(m_originDecoratorKey, ctx);
+    SG::WriteDecorHandle<xAOD::TruthParticleContainer, int> originDecorator(m_originDecoratorKey, ctx);
     for (auto* truthParticle : *truthParticles) {
       originDecorator(*truthParticle) = (hadronMap.find(truthParticle)!=hadronMap.end()) ? static_cast<int>(hadronMap[truthParticle]) : 6;
     }

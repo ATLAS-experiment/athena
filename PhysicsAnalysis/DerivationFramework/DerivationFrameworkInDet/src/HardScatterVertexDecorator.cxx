@@ -1,10 +1,7 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-/////////////////////////////////////////////////////////////////
-// HardScatterVertexDecorator.cxx, (c) ATLAS Detector software
-///////////////////////////////////////////////////////////////////
 // Author: Matthew Basso (matthew.joseph.basso@cern.ch)
 // A very simple tool for decorating vertices as hardscatter or not-hardscatter
 
@@ -13,34 +10,23 @@
 
 // FrameWork include(s):
 #include "AthLinks/ElementLink.h"
-#include "AsgDataHandles/ReadHandle.h"
-#include "AsgDataHandles/WriteDecorHandle.h"
-#include "AsgTools/CurrentContext.h"
+#include "StoreGate/ReadHandle.h"
+#include "StoreGate/WriteDecorHandle.h"
 
 // EDM include(s):
 #include "xAODTracking/VertexContainer.h"
 
 namespace DerivationFramework {
 
-  HardScatterVertexDecorator::HardScatterVertexDecorator(const std::string& type, const std::string& name, const IInterface* parent) : 
-    base_class(type, name, parent) {
-  }
-
   StatusCode HardScatterVertexDecorator::initialize()
   {
     // Print configuration
     ATH_MSG_DEBUG("Initializing " << name() << "...");
     ATH_MSG_DEBUG("Using VertexContainerName: "      << m_vtxContKey);
-    ATH_MSG_DEBUG("Using HardScatterDecoName: "      << m_evtDecoName);
     ATH_MSG_DEBUG("Using HardScatterSelectionTool: " << m_vtxSelectTool);
 
     if (m_vtxContKey.empty()) {
       ATH_MSG_ERROR("No xAOD::VertexContainer provided!");
-      return StatusCode::FAILURE;
-    }
-
-    if (m_evtDecoName.empty()) {
-      ATH_MSG_ERROR("Hardscatter decoration name cannot be empty!");
       return StatusCode::FAILURE;
     }
 
@@ -54,18 +40,16 @@ namespace DerivationFramework {
     ATH_CHECK(m_evtInfoKey.initialize());
 
     // Instantiate and initialize our event info decorator write
-    m_evtDecoKey = m_evtInfoKey.key() + "." + m_evtDecoName;
-    ATH_CHECK(m_evtDecoKey.initialize());    
+    ATH_CHECK(m_evtDecoKey.initialize());
     // Fetch our InDet::IInDetHardScatterSelectionTool
     ATH_CHECK(m_vtxSelectTool.retrieve());
     return StatusCode::SUCCESS;
   }
 
-  StatusCode HardScatterVertexDecorator::addBranches() const
+  StatusCode HardScatterVertexDecorator::addBranches(const EventContext& ctx) const
   {
     ATH_MSG_DEBUG("In addBranches(...) for " << name() <<  "...");
 
-    const EventContext& ctx = Gaudi::Hive::currentContext();
 
     // Open our vertex container
     SG::ReadHandle<xAOD::VertexContainer> vtxCont(m_vtxContKey, ctx);
@@ -79,7 +63,7 @@ namespace DerivationFramework {
     if (!evtInfo.isValid()) {
       ATH_MSG_ERROR("Unable to retrieve xAOD::EventInfo!");
       return StatusCode::FAILURE;
-    }  
+    }
 
     // Instantiate our WriteDecorHandle
     SG::WriteDecorHandle<xAOD::EventInfo, ElementLink<xAOD::VertexContainer>> evtDeco(m_evtDecoKey, ctx);
@@ -88,6 +72,6 @@ namespace DerivationFramework {
     evtDeco(*evtInfo) = m_vtxSelectTool->getHardScatterLink(vtxCont.get());
 
     return StatusCode::SUCCESS;
-  }  
-  
+  }
+
 } // end: namespace DerivationFramework

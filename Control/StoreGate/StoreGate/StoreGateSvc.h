@@ -18,6 +18,7 @@
 
 #include "AthenaKernel/IHiveStore.h"
 #include "AthenaKernel/IHiveStoreMgr.h"
+#include "CxxUtils/RefCountedPtr.h"
 #include "StoreGate/tools/SGImplSvc.h"
 #include "StoreGate/SGHiveEventSlot.h"
 
@@ -295,9 +296,11 @@ public:
 
   /// Create a proxy object using an IOpaqueAddress and a transient key
   StatusCode recordAddress(const std::string& skey,
-                           IOpaqueAddress* pAddress, bool clearAddressFlag=true);
+                           CxxUtils::RefCountedPtr<IOpaqueAddress> pAddress,
+                           bool clearAddressFlag=true);
   /// Create a proxy object using an IOpaqueAddress
-  StatusCode recordAddress(IOpaqueAddress* pAddress, bool clearAddressFlag=true);
+  StatusCode recordAddress(CxxUtils::RefCountedPtr<IOpaqueAddress> pAddress,
+                           bool clearAddressFlag=true);
 
   /// make a soft link to the object T* already registered (non-const)
   template <typename T, typename TLINK> 

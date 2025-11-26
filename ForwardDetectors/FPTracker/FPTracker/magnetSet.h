@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef FPTRACKER_MAGNETSET_H
@@ -7,8 +7,9 @@
 
 
 #include "Magnet.h"
-#include "FPTrackerConstants.h"
-#include <string>
+#include "FPTrackerConstants.h" //Side
+#include <memory> //std::shared_ptr
+#include <iosfwd> //std::ifstream
 
 namespace FPTracker{
   class ConfigData;

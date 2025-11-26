@@ -218,6 +218,7 @@ bool LArTBH6BeamInfo::fitVect(const dVect &vec, const dVect &vec_z, const dVect 
     return false;
   }
 
+  // coverity[divide_by_zero]  // false positive
   const double inv_denom = 1. / denom;
   a1 = (su*sww - sw*suw) * inv_denom;
   a2 = (s*suw - su*sw) * inv_denom;

@@ -5,13 +5,9 @@
 #ifndef G4DEBUGGINGTOOLS_StepHistogram_H
 #define G4DEBUGGINGTOOLS_StepHistogram_H
 
-//C++
-#include <map>
-#include <string>
 
-//ROOT
-#include "TH1.h"
-#include "TH2.h"
+
+
 
 //G4
 #include "G4UserEventAction.hh"
@@ -22,6 +18,11 @@
 //Athena
 #include "AthenaBaseComps/AthMessaging.h"
 #include "G4DebuggingTools/G4DebuggingHelper.h"
+//C++
+#include <map>
+
+
+class TH1;
 
 namespace G4UA{
   

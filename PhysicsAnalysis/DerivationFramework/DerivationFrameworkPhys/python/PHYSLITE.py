@@ -199,6 +199,9 @@ def CPAlgorithmsCfg(flags):
     subConfig.setOptionValue ('.runFJvtSelection', False)
     subConfig.setOptionValue ('.runJvtSelection', False)
     configSeq += subConfig
+    subConfig = factory.makeConfig ('Jets.Uncertainties')
+    subConfig.setOptionValue ('.containerName', 'AnalysisJets')
+    configSeq += subConfig
     subConfig = factory.makeConfig ('Thinning')
     subConfig.setOptionValue ('.containerName', 'AnalysisJets')
     subConfig.setOptionValue ('.deepCopy', True)

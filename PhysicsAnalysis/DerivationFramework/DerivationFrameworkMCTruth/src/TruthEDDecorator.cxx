@@ -7,45 +7,32 @@
 
 namespace DerivationFramework {
 
-  TruthEDDecorator::TruthEDDecorator(const std::string& t, const std::string& n, const IInterface* p)
-    : base_class(t,n,p)
-  {
-  }
-
-
-  TruthEDDecorator::~TruthEDDecorator(){}
-
-
   StatusCode TruthEDDecorator::initialize(){
 
     ATH_CHECK(m_eventInfoKey.initialize());
     ATH_CHECK(m_eventShapeKeys.initialize());
-    for (size_t i=0;i<m_eventShapeKeys.size();++i){
-      m_eventDensityDecorKeys.emplace_back(m_eventInfoKey.key()+"."+m_eventShapeKeys[i].key()+m_ed_suffix );
-    }
     ATH_CHECK(m_eventDensityDecorKeys.initialize());
 
     return StatusCode::SUCCESS;
   }
 
 
-  StatusCode TruthEDDecorator::addBranches() const{
+  StatusCode TruthEDDecorator::addBranches(const EventContext& ctx) const{
     ATH_MSG_VERBOSE("addBranches()");
 
-    const EventContext& ctx = Gaudi::Hive::currentContext();
 
     SG::ReadHandle<xAOD::EventInfo> eventInfo(m_eventInfoKey, ctx);
     if (!eventInfo.isValid()) {
-        ATH_MSG_ERROR("Couldn't retrieve " << m_eventInfoKey);
-        return StatusCode::FAILURE;
+      ATH_MSG_ERROR("Couldn't retrieve " << m_eventInfoKey);
+      return StatusCode::FAILURE;
     }
 
     for (size_t i=0;i<m_eventShapeKeys.size();++i){
       // Get the event shapes from which we'll get the densities
       SG::ReadHandle<xAOD::EventShape> eventShape(m_eventShapeKeys[i], ctx);
       if (!eventShape.isValid()) {
-	ATH_MSG_ERROR ("Could not retrieve " << m_eventShapeKeys[i]);
-	return StatusCode::FAILURE;
+        ATH_MSG_ERROR ("Could not retrieve " << m_eventShapeKeys[i]);
+        return StatusCode::FAILURE;
       }
 
       // Decorate the densities onto the event info

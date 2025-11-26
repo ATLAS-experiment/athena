@@ -85,41 +85,29 @@ PixelDiodeType PixelReadoutManager::getDiodeType(Identifier id,
   const PixelModuleDesign *p_design = static_cast<const PixelModuleDesign *>(&element->design());
   if (p_design->getReadoutTechnology() == PixelReadoutTechnology::RD53) {
     ATH_MSG_ERROR("RD53 readout technologies not supported!");
-    return PixelDiodeType::NORMAL;
   }
-
-  if (p_design->getReadoutTechnology() == PixelReadoutTechnology::FEI4) {
+  else if (p_design->getReadoutTechnology() == PixelReadoutTechnology::FEI4) {
     if (p_design->numberOfCircuits() == 2) {       // IBL planar
-      if (col == 0 || col == p_design->columnsPerCircuit() - 1) {   // column edge =0,79
+      // col for FEI4 is in [1-80] not [0-79]
+      if (col == 0+1 || col == p_design->columnsPerCircuit() - 1+1) {   // column edge =1,80
         return PixelDiodeType::LONG;
       }
-      return PixelDiodeType::NORMAL;
     }
-    return PixelDiodeType::NORMAL;
   }
-
-  if (p_design->getReadoutTechnology() == PixelReadoutTechnology::FEI3) {
-    if (col > 0 && col < p_design->columnsPerCircuit() - 1) {
-      if (row >= p_design->rowsPerCircuit() / 2 - 1 - 6 - 1 && row <= p_design->rowsPerCircuit() / 2 - 1) {
-        if ((row - (p_design->rowsPerCircuit() / 2 - 1 - 6) + 1) % 2 + 1 == 1) {
-          return PixelDiodeType::LONG;
-        }
-        if ((row - (p_design->rowsPerCircuit() / 2 - 1 - 6) + 1) % 2 + 1 == 2) {
-          return PixelDiodeType::GANGED;
-        }
-      }
-      return PixelDiodeType::NORMAL;
-    } 
-
-    if (col == 0 || col==p_design->columnsPerCircuit() - 1) {
-      if (row >= p_design->rowsPerCircuit() / 2 - 1 - 6 - 1) {
-        return PixelDiodeType::GANGED;
-      }
-      return PixelDiodeType::LONG;
+  else if (p_design->getReadoutTechnology() == PixelReadoutTechnology::FEI3) {
+    const unsigned int rows_per_front_end = p_design->rowsPerCircuit()/2;
+    assert(static_cast<unsigned int>(row) < rows_per_front_end+4);
+    assert(col < p_design->columnsPerCircuit());
+    // the last 4 pixels of the half_matrix (160-163) and the odd rows of the
+    // last 6 rows of the circuit (153-159) are ganged.
+    if (    static_cast<unsigned int>(row)>=rows_per_front_end
+        || (static_cast<unsigned int>(row)>=rows_per_front_end - 1-6 && (row&1) ==1)) {
+       return PixelDiodeType::GANGED;
     }
-
-    ATH_MSG_WARNING("Pixel Type : the col number should be 0-" << p_design->columnsPerCircuit() << ", not " <<col);
-    return PixelDiodeType::NORMAL;
+    // the pixels of the first or last column are long if they are not ganged
+    if (col==0 || col ==p_design->columnsPerCircuit()-1) {
+       return PixelDiodeType::LONG;
+    }
   }
 
   return PixelDiodeType::NORMAL;

@@ -26,10 +26,11 @@ namespace DerivationFramework {
 
   class HadronOriginDecorator : public extends<AthAlgTool, IAugmentationTool> {
   public:
-    HadronOriginDecorator(const std::string& t, const std::string& n, const IInterface* p);
-    ~HadronOriginDecorator();
-    StatusCode initialize();
-    virtual StatusCode addBranches() const;
+
+    using base_class::base_class;
+
+    virtual StatusCode initialize() override final;
+    virtual StatusCode addBranches(const EventContext& ctx) const override final;
 
   private:
     SG::ReadHandleKey<xAOD::TruthParticleContainer> m_particlesKey

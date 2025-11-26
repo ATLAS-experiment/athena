@@ -545,7 +545,6 @@ def EGAM11Cfg(flags):
         "GSFTrackParticles",
         "egammaClusters",
         "AntiKt4HIJets",
-        "BTagging_AntiKt4HI"
      ]
 
     # on MC we also add:
@@ -595,7 +594,7 @@ def EGAM11Cfg(flags):
 
     # track jets
     EGAM11SlimmingHelper.ExtraVariables += [
-        "AntiKt4PV0TrackJets.pt.eta.phi.e.m.btaggingLink.constituentLinks"
+        "AntiKt4PV0TrackJets.pt.eta.phi.e.m.constituentLinks"
     ]
 
     # photons: detailed shower shape variables

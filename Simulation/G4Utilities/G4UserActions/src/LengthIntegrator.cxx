@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LengthIntegrator.h"
@@ -467,8 +467,8 @@ namespace G4UA
 
     std::string volumetype = getVolumeType(matName);
 
-    m_collected_groupedmaterial.push_back(groupmaterial);
-    m_collected_volumetype.push_back(volumetype);
+    m_collected_groupedmaterial.push_back(std::move(groupmaterial));
+    m_collected_volumetype.push_back(std::move(volumetype));
 
     if(m_doHistos){
       // Protect concurrent histo filling

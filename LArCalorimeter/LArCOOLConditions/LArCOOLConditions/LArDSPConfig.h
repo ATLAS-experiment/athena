@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //Dear emacs, this is -*-c++-*-
@@ -8,10 +8,9 @@
 #define LARCOOLCONDITIONS_LARDSPCONIFG_H
 
 #include "LArCOOLConditions/LArCondFlatBase.h"
+#include "PersistentDataModel/AthenaAttributeList.h"
 #include <vector>
 #include <memory>
-
-class AthenaAttributeList;
 
 class LArDSPConfig: 
   public LArCondFlatBase

@@ -112,7 +112,7 @@ inline double sTgcReadoutElement::beamlineRadius(const IdentifierHash& measHash)
 inline sTgcReadoutElement::localCornerArray sTgcReadoutElement::localPadCorners(const Identifier& measId) const { return localPadCorners(measurementHash(measId)); }
 inline sTgcReadoutElement::localCornerArray sTgcReadoutElement::localPadCorners(const IdentifierHash& measHash) const { return padDesign(measHash).padCorners(channelNumber(measHash)); }
 inline sTgcReadoutElement::globalCornerArray 
-    sTgcReadoutElement::globalPadCorners(const ActsGeometryContext& ctx, const Identifier& measId) const { 
+    sTgcReadoutElement::globalPadCorners(const ActsTrk::GeometryContext& ctx, const Identifier& measId) const { 
     return globalPadCorners(ctx, measurementHash(measId)); 
 }
 
@@ -196,7 +196,7 @@ inline Amg::Vector2D sTgcReadoutElement::localChannelPosition(const Identifier& 
     return localChannelPosition(measurementHash(measId)); 
 }
 
-inline Amg::Vector3D sTgcReadoutElement::globalChannelPosition(const ActsGeometryContext& ctx, const Identifier& measId) const {
+inline Amg::Vector3D sTgcReadoutElement::globalChannelPosition(const ActsTrk::GeometryContext& ctx, const Identifier& measId) const {
     return globalChannelPosition(ctx, measurementHash(measId));
 }
 

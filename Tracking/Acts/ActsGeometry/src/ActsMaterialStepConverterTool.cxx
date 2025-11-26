@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ActsGeometry/ActsMaterialStepConverterTool.h"
@@ -8,7 +8,7 @@
 #include "GaudiKernel/EventContext.h"
 
 // PACKAGE
-#include "ActsGeometryInterfaces/IActsTrackingGeometrySvc.h"
+#include "ActsGeometryInterfaces/ITrackingGeometrySvc.h"
 
 // Tracking
 #include "TrkGeometry/MaterialStep.h"
@@ -71,7 +71,7 @@ ActsMaterialStepConverterTool::convertToMaterialTrack(const Trk::MaterialStepCol
 
   recorded.materialInX0 = sum_X0;
   recorded.materialInL0 = sum_L0;
-  recorded.materialInteractions = nStep;
+  recorded.materialInteractions = std::move(nStep);
 
   mTrack = std::make_pair(std::make_pair(v_pos, v_imp), recorded);
 

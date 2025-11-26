@@ -21,10 +21,11 @@ namespace DerivationFramework {
 
   class TruthDressingTool : public extends<AthAlgTool, IAugmentationTool> {
   public:
-    TruthDressingTool(const std::string& t, const std::string& n, const IInterface* p);
-    ~TruthDressingTool();
-    StatusCode initialize();
-    virtual StatusCode addBranches() const;
+
+    using base_class::base_class;
+
+    virtual StatusCode initialize() override final;
+    virtual StatusCode addBranches(const EventContext& ctx) const override final;
 
   private:
     /// ReadHandleKey input collection key

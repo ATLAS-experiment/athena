@@ -1,10 +1,6 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
-
-///////////////////////////////////////////////////////////////////
-// EGSelectionToolWrapper.h, (c) ATLAS Detector software
-///////////////////////////////////////////////////////////////////
 
 #ifndef DERIVATIONFRAMEWORK_EGSELECTIONTOOLWRAPPER_H
 #define DERIVATIONFRAMEWORK_EGSELECTIONTOOLWRAPPER_H
@@ -27,45 +23,37 @@
 
 namespace DerivationFramework {
 
-class EGSelectionToolWrapper : public extends<AthAlgTool, IAugmentationTool>
-{
-public:
-  EGSelectionToolWrapper(const std::string& t,
-                         const std::string& n,
-                         const IInterface* p);
+  class EGSelectionToolWrapper : public extends<AthAlgTool, IAugmentationTool>
+  {
+  public:
 
-  virtual StatusCode initialize() override final;
-  virtual StatusCode addBranches() const override final;
+    using base_class::base_class;
 
-private:
-  ToolHandle<IAsgEGammaIsEMSelector> m_tool{
-    this,
-    "EGammaSelectionTool",
-    "",
-    "Selector tool",
-  };
-  ToolHandle<IElectronPhotonShowerShapeFudgeTool>
+    virtual StatusCode initialize() override final;
+    virtual StatusCode addBranches(const EventContext& ctx) const override final;
+
+  private:
+    ToolHandle<IAsgEGammaIsEMSelector> m_tool{
+      this,
+        "EGammaSelectionTool",
+        "",
+        "Selector tool",
+        };
+    ToolHandle<IElectronPhotonShowerShapeFudgeTool>
     m_fudgeMCTool{ this, "EGammaFudgeMCTool", "", "Fudging tool" };
 
-  SG::ReadHandleKey<xAOD::EgammaContainer> m_ContainerName{ this,
-                                                            "ContainerN"
-                                                            "ame",
-                                                            "",
-                                                            "Input" };
+    SG::ReadHandleKey<xAOD::EgammaContainer> m_ContainerName{ this,
+      "ContainerName", "", "Input" };
 
-  // Write decoration handle keys
-  // these are not really configuarable
-  SG::WriteDecorHandleKey<xAOD::EgammaContainer>
-    m_decoratorPass{ this, "decoratorPass", "", "" };
-  SG::WriteDecorHandleKey<xAOD::EgammaContainer>
-    m_decoratorIsEM{ this, "decoratorIsEM", "", "" };
-  Gaudi::Property<std::string> m_cut{ this, "CutType", "", "cut type" };
+    // Write decoration handle keys
+    // these are not really configuarable
+    SG::WriteDecorHandleKey<xAOD::EgammaContainer> m_decoratorPass{ this,
+      "decoratorPass", m_ContainerName, "", "" };
+    SG::WriteDecorHandleKey<xAOD::EgammaContainer> m_decoratorIsEM{ this,
+      "decoratorIsEM", m_ContainerName, "", "" };
+    Gaudi::Property<std::string> m_cut{ this, "CutType", "", "cut type" };
 
-  Gaudi::Property<std::string> m_sgName{ this,
-                                         "StoreGateEntryName",
-                                         "",
-                                         "Store entry name" };
-};
+  };
 }
 
 #endif // DERIVATIONFRAMEWORK_EGSELECTIONTOOLWRAPPER_H

@@ -18,9 +18,6 @@
 // Geant4 Punchthrough G4 Tool
 #include "G4AtlasInterfaces/IPunchThroughSimWrapper.h"
 
-/* Random generator service include */
-#include "AthenaKernel/IAthRNGSvc.h"
-
 class G4VFastSimulationModel;
 
 class FastCaloSimTool: public FastSimulationBase
@@ -28,12 +25,6 @@ class FastCaloSimTool: public FastSimulationBase
  public:
 
   FastCaloSimTool(const std::string& type, const std::string& name, const IInterface *parent);   //!< Default constructor
-  ~FastCaloSimTool() {}
-
-  /** Begin of an athena event - do any thing that needs to be done at the beginning of each *athena* event. **/
-  virtual StatusCode BeginOfAthenaEvent() override final;
-  /** End of an athena event - do any thing that needs to be done at the end of each *athena* event. **/
-  virtual StatusCode EndOfAthenaEvent() override final;
 
 protected:
   /** Method to make the actual fast simulation model itself, which
@@ -54,10 +45,6 @@ protected:
   // Geant4 Punchthrough G4 Tool
   PublicToolHandle<IPunchThroughSimWrapper> m_PunchThroughSimWrapper{this, "PunchThroughSimWrapper", "PunchThroughSimWrapper", ""};
 
-  // Random generator service
-  ServiceHandle<IAthRNGSvc> m_rndmGenSvc{this, "RandomSvc", "AthRNGSvc", ""};
-  // Random generator engine name
-  Gaudi::Property<std::string> m_randomEngineName{this, "RandomStream", ""};
   // Name of associated CaloCellContainerSD
   Gaudi::Property<std::string> m_CaloCellContainerSDName{this, "CaloCellContainerSDName", "", "Name of the associated CaloCellContainerSD"};
   // Flag to enable G4 transportation

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #include <algorithm>
 #include <random>
@@ -33,11 +33,11 @@ StatusCode ISF::ActsFatrasSimTool::initialize() {
   // setup logger
   m_logger = makeActsAthenaLogger(this, std::string("ActsFatras"),std::string("ActsFatrasSimTool"));
 
-  // retrive tracking geo tool
+  // retrieve tracking geo tool
   ATH_CHECK(m_trackingGeometryTool.retrieve());
   m_trackingGeometry = m_trackingGeometryTool->trackingGeometry();
   
-  //retrive Magnetfield tool
+  //retrieve Magnetfield tool
   ATH_MSG_VERBOSE("Using ATLAS magnetic field service");
   ATH_CHECK( m_fieldCacheCondObjInputKey.initialize());
 
@@ -114,13 +114,10 @@ StatusCode ISF::ActsFatrasSimTool::simulateVector(
   // get Geo and Mag map
   ATH_MSG_VERBOSE(name() << " Getting per event Geo and Mag map");
   Acts::MagneticFieldContext mctx = getMagneticFieldContext(ctx);
-  const ActsGeometryContext& gctx = m_trackingGeometryTool->getNominalGeometryContext();
+  const ActsTrk::GeometryContext& gctx = m_trackingGeometryTool->getNominalGeometryContext();
   auto anygctx = gctx.context();
   // Loop over ISFParticleVector and process each separately
   ATH_MSG_VERBOSE(name() << " Processing particles in ISFParticleVector.");
-  // For sihit creation
-  SiHitCollection pixelSiHits;
-  SiHitCollection sctSiHits;
   for (const auto isfp : particles) {
     // ====ACTSFatras Simulation====
     // //  
@@ -165,16 +162,18 @@ StatusCode ISF::ActsFatrasSimTool::simulateVector(
       auto itr = simulatedFinal.begin();
       // Save hits of isfp
       std::vector<ActsFatras::Hit> particle_hits;
-      std::copy(hits.begin(), hits.begin()+itr->numberOfHits(), std::back_inserter(particle_hits));
-      m_ActsFatrasWriteHandler->createHits(*isfp, m_trackingGeometry,particle_hits,m_pixelSiHits,m_sctSiHits);
+      if (itr->numberOfHits() > 0) {
+        std::copy(hits.begin(), hits.begin()+itr->numberOfHits(), std::back_inserter(particle_hits));
+        m_ActsFatrasWriteHandler->createHits(*isfp, m_trackingGeometry,particle_hits,m_pixelSiHits,m_sctSiHits);
+      }
       // Process secondaries
       auto isKilled = !itr->isAlive();
-      int maxGeneration = (simulatedFinal.back()).particleId().generation();
+      int maxGeneration = simulatedFinal.back().particleId().generation();
       ATH_MSG_DEBUG(name() << " maxGeneration: "<< maxGeneration);
       for (int gen = 0; gen <= maxGeneration; ++gen){
-        ATH_MSG_DEBUG(name() << " start with genration "<< gen << "|" << maxGeneration << ": "<< *itr);
+        ATH_MSG_DEBUG(name() << " start with generation "<< gen << "|" << maxGeneration << ": "<< *itr);
         auto vecsecisfp = std::make_unique<ISF::ISFParticleVector>();
-        while (static_cast<int>(itr->particleId().generation()) == gen){
+        while (itr != simulatedFinal.end() && static_cast<int>(itr->particleId().generation()) == gen) {
           ATH_MSG_DEBUG(name() << " genration "<< gen << "|" << maxGeneration << ": "<< *itr);
           if(itr->isSecondary()){
             // convert final particles to ISF::particle
@@ -220,8 +219,7 @@ StatusCode ISF::ActsFatrasSimTool::simulateVector(
       } 
     }// end of secondaries
     ATH_MSG_VERBOSE(name() << " No. of secondaries: " << secondaries.size());
-    ATH_MSG_DEBUG(name() << " End of particle " << isfp->barcode());
-    m_ActsFatrasWriteHandler->createHits(*isfp, m_trackingGeometry,hits,pixelSiHits,sctSiHits);
+    ATH_MSG_DEBUG(name() << " End of particle " << isfp->id());
 
     std::vector<ActsFatras::Particle>().swap(input);
     std::vector<ActsFatras::Particle>().swap(simulatedInitial);

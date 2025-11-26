@@ -427,7 +427,7 @@ namespace LVL1 {
     ATH_CHECK(l1Menu.isValid());
 
     auto & thr_eTAU = l1Menu->thrExtraInfo().eTAU();
-    int activeAlgo = thr_eTAU.algoVersion() == 0 ? xAOD::eFexTauRoI_v1::Heuristic : xAOD::eFexTauRoI_v1::BDT;
+    int activeAlgo = (thr_eTAU.algoVersion() == 0 || thr_eTAU.algoVersion() == 3) ? xAOD::eFexTauRoI_v1::Heuristic : xAOD::eFexTauRoI_v1::BDT;
     bool omitAltTauContainer = m_eFexTauAltxTOBOutKey.empty() || m_eFexTauAltOutKey.empty();
 
     // Repeat for Tau TOBs and xTOBs

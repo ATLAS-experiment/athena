@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGT1CALOCALIBCONDITIONS_L1CALORAMPRUNPLAN_H
@@ -8,7 +8,7 @@
 #include "TrigT1CaloCalibConditions/AbstractL1CaloPersistentCondition.h"
 #include "GaudiKernel/DataObject.h"
 
-#include <iostream>
+#include <iosfwd>
 #include <vector>
 
 /**

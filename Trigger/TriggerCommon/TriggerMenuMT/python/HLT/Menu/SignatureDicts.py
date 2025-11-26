@@ -344,11 +344,16 @@ JetChainParts = {
        'preselZ116XX3c20XX1c20bg85',
        'preselZ128XX4c85',
        'preselZ219XX6c20',
+       'preselZ197MAXMULT25cXX6c20',
        'preselZ197XX6c20',
+       'preselZ182MAXMULT25cXX6c20',
        'preselZ182XX6c20',
+       'preselZ142MAXMULT25cXX5c20',
        'preselZ142XX5c20',
        'preselZ134XX5c20',
-       'preselZ124XX5c20'
+       'preselZ124XX5c20',
+       'preselVETOMULT11a10',
+       'preselVETOMULT11a15'
      ],
     # Hypo information
     #   If hypoScenario is 'simple', then hypo configuration is handled based on the
@@ -982,10 +987,10 @@ MinBiasChainParts = {
                         'nototpix20', 'nototpix30','nototpix50', 'nototpix70', 'nototpix100', 'nototpix200', 'nototpix500'],
     'pileupInfo'     : ['pusup0', 'pusup7', 'pusup10', 'pusup15', 'pusup20', 'pusup30', 'pusup40','pusup50','pusup60', 'pusup70', 'pusup80', 'pusup90', 'pusup100', 'pusup110', 'pusup120', 'pusup130', 'pusup150', 'pusup180', 'pusup190',
                         'pusup200', 'pusup220', 'pusup240', 'pusup250', 'pusup260', 'pusup270', 'pusup280', 'pusup290', 'pusup300'],
-    'hypoTrkInfo'    : ['trk3','trk5','trk10','trk15',  'trk20', 'trk25',  'trk30', 'trk35', 'trk40', 'trk45', 'trk50', 'trk55', 'trk60', 'trk65', 'trk70', 'trk75', 'trk80', 'trk90',
+    'hypoTrkInfo'    : ['trk2', 'trk3','trk5','trk10','trk15',  'trk20', 'trk25',  'trk30', 'trk35', 'trk40', 'trk45', 'trk50', 'trk55', 'trk60', 'trk65', 'trk70', 'trk75', 'trk80', 'trk90',
                         'trk100', 'trk110', 'trk120', 'trk130', 'trk140', 'trk150', 'trk160', 'trk180', 'trk200', 'trk220', 'trk240', 'trk260', 'trk280', 'trk290',
                          '2trk6', '1trk4', '1trk5', '1trk2', '0trk2'], #ranges for exclusive tracks
-    'hypoPtInfo'     : [ 'pt0p2', 'pt0p5', 'pt1', 'pt2', 'pt4', 'pt6', 'pt8', 'pt10' ],
+    'hypoPtInfo'     : [ 'pt0p2', 'pt0p5', 'pt0p8', 'pt1', 'pt2', 'pt4', 'pt6', 'pt8', 'pt10' ],
     'recoAlg'        : ['mbts', 'sptrk', 'sp', 'noalg', 'perf', 'hmt', 'hmtperf', 'idperf', 'zdcperf', 'afprec', 'afptof', 'afpdz5', 'afpdz10', 'excl', 'pixsptrk'],
     'addInfo'        : ['peb', 'pc'],
     'sigFolder'     : ['MinBias'],
@@ -1394,6 +1399,7 @@ AllowedTopos_comb = [
     'idZmumu','idJpsimumu',
     'dRAA12', 'dRAB15', '03dRAB','02dRAB10','03dRAB10','03dRAB30','03dRAB35','dRAD04', 'dRAF04','dRAB03','dRAB04', 'dRAB05', '02dRAB','02dRAC','03dRAC30','03dRAC35','02dRBC','15dRBC45','50invmAB','60invmAB','afpdijet','18dphiAB','18dphiAC','80mTAC','80mTAD',
     'anomdet','anomdetL','anomdetM','anomdetT',
+    '115masswisoABC','115masswisoABC135',
     '29dphiAA', '29dphiAB', '30dphiAA', '30dphiAB', # g-2 tau triggers
     '90invmAB',# TEST
     '1invmAB5','50invmAB130','50invmBC130', # Jpsiee, Zee/Zeg

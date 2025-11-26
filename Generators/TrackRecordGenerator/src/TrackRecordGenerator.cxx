@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // -------------------------------------------------------------
@@ -193,7 +193,7 @@ StatusCode TrackRecordGenerator::fillEvt(HepMC::GenEvent* event) {
     vertex->add_particle_out( particle );
 
     // Add the vertex to the event.
-    event->add_vertex( vertex );
+    event->add_vertex( std::move(vertex) );
     
     // Add attributes
     HepMC::set_polarization(particle, m_polarization[v]);

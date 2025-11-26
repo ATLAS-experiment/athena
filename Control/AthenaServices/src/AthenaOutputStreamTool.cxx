@@ -291,7 +291,7 @@ void AthenaOutputStreamTool::propagateProvenance( const DataHeader& src_dh )
       for (const DataHeaderElement& dhe : src_dh) {
          if (dhe.getPrimaryClassID() == ClassID_traits<DataHeader>::ID()) {
             pTag = dhe.getKey();
-            dhTransAddr.reset( dhe.getAddress(0) );
+            dhTransAddr.reset( dhe.getAddress( m_conversionSvc->repSvcType() ) );
          }
       }
       // Update dhTransAddr to handle fast merged files.

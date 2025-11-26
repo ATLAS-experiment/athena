@@ -1,6 +1,6 @@
 // Dear emacs, this is -*- c++ -*-
 //
-// Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 //
 #ifndef XAODROOTACCESS_TTREEMGR_H
 #define XAODROOTACCESS_TTREEMGR_H
@@ -35,7 +35,7 @@ namespace xAOD {
 
    public:
       /// Constructor, with an optional access mode selector
-      TTreeMgr( TEvent::EAuxMode mode = TEvent::kUndefinedAccess );
+      TTreeMgr( TEvent::EAuxMode mode = TEvent::kClassAccess );
 
       /// @name Function(s) setting up the input(s) for the tree(s)
       /// @{

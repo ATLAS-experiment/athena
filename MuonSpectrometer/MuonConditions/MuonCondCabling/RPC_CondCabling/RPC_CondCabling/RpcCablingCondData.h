@@ -1,22 +1,24 @@
 /*
-   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
    */
 
 #ifndef RPCCABLINGCONDDATA_H
 #define RPCCABLINGCONDDATA_H
 
-#include <map>
-#include <string>
-#include <vector>
-
 #include "AthenaKernel/CLASS_DEF.h"
 #include "AthenaKernel/CondCont.h"
 #include "GaudiKernel/ServiceHandle.h"
-#include "MuonIdHelpers/RpcIdHelper.h"
+
 #include "RPC_CondCabling/RDOindex.h"
 #include "RPC_CondCabling/RPCPadParameters.h"
-#include "RPC_CondCabling/RPCofflineId.h"
 #include "RPC_CondCabling/SectorLogicSetup.h"
+#include <map>
+#include <string>
+#include <vector>
+#include <set>
+
+class RpcIdHelper;
+struct RPCofflineId;
 
 class RpcCablingCondData {
     friend class RpcCablingCondAlg;

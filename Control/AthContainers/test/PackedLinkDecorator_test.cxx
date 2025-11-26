@@ -784,7 +784,7 @@ void test4()
   EXPECT_EXCEPTION (SG::ExcStoreLocked, vtyp1.getDecorationSpan(v));
 }
 
-
+//coverity[root_function]
 int main()
 {
   std::cout << "AthContainers/PackedLinkDecorator_test\n";

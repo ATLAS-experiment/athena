@@ -40,6 +40,8 @@ StatusCode PhysicsListSvc::initialize( )
       CHECK( m_phys_decay.retrieve() );
     }
 
+  CHECK(m_fastSimulationConstructor.retrieve());
+
   return StatusCode::SUCCESS;
 }
 
@@ -129,6 +131,8 @@ void PhysicsListSvc::CreatePhysicsList()
       ATH_MSG_DEBUG("Registering " << physDecayTool->name());
       m_physicsList->RegisterPhysics(physDecayTool->GetPhysicsOption().release());
     }
+
+  m_physicsList->RegisterPhysics(m_fastSimulationConstructor->GetPhysicsOption().release());
 
   //ConstructProcess();
   ATH_MSG_DEBUG("end of PhysicsListSvc::CreatePhysicsList()");

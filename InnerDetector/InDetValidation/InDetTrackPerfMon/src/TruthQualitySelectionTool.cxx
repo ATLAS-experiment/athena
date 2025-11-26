@@ -37,6 +37,37 @@ StatusCode IDTPM::TruthQualitySelectionTool::selectTracks( TrackAnalysisCollecti
 }
 
 
+
+const xAOD::TruthParticle* IDTPM::TruthQualitySelectionTool::getParent(const xAOD::TruthParticle* truth, int flav) const {
+  return getParentRec( truth, flav, 0 );
+}
+
+const xAOD::TruthParticle* IDTPM::TruthQualitySelectionTool::getParentRec(const xAOD::TruthParticle* truth, int flav, int depth) const {
+
+  if ( truth == nullptr ) return nullptr;
+
+  if ( depth > 30 ) return nullptr;
+
+  if( flav != MC::BQUARK && flav != MC::CQUARK && flav != MC::TAU ) return nullptr;
+
+  if( flav == MC::BQUARK && truth->isBottomHadron() ) return truth;
+
+  if( flav == MC::CQUARK && truth->isCharmHadron() ) return truth;
+
+  if( flav == MC::TAU && MC::isTau(truth) ) return truth;
+
+
+  for(unsigned int p=0; p<truth->nParents(); p++) {
+    const xAOD::TruthParticle* parent = truth->parent(p);
+    if(parent == truth ) continue ; // avoid infinite recursion
+    if( getParentRec(parent, flav, depth+1)!= nullptr ) return parent;
+  }
+
+  return nullptr;
+}
+
+
+
 bool IDTPM::TruthQualitySelectionTool::accept( const xAOD::TruthParticle* truth )
 {
   /// Baseline selection, via AthTruthSelectionTool
@@ -64,13 +95,25 @@ bool IDTPM::TruthQualitySelectionTool::accept( const xAOD::TruthParticle* truth 
   if (m_maxAbsQoPT!=-9999. and std::fabs(qOverPT(*truth)) > m_maxAbsQoPT )  return false;
   if (m_isHadron           and not isHadron(*truth) )                       return false;
   if (m_isPion             and not isPion(*truth) )                         return false;
-  bool isFromBdecay = m_trackTruthOriginTool->isFrom( truth, MC::BQUARK );
-  bool isFromCdecay = m_trackTruthOriginTool->isFrom( truth, MC::CQUARK );
-  bool isFromHeavy = isFromBdecay or isFromCdecay;
-  if( m_isFromB           and not isFromBdecay )              return false;
-  if( m_isFromC           and not isFromCdecay )              return false;
-  if( m_isFromHeavyFlav   and not isFromHeavy )               return false;
-  if( m_isFromLightFlav   and isFromHeavy )                   return false;
+
+  if ( m_isFromTau or m_isFromB or m_isFromC or m_isFromHeavyFlav or m_isFromLightFlav ) {
+    const xAOD::TruthParticle* truthParent = nullptr;
+    if( m_isFromTau ) truthParent = getParent(truth, MC::TAU);
+    if( m_isFromB ) truthParent = getParent(truth, MC::BQUARK);
+    if( m_isFromC ) truthParent = getParent(truth, MC::CQUARK);
+    if(m_isFromHeavyFlav or m_isFromLightFlav){
+      const xAOD::TruthParticle* truthParentB = getParent(truth, MC::BQUARK);
+      const xAOD::TruthParticle* truthParentC = getParent(truth, MC::CQUARK);
+      truthParent = truthParentB ? truthParentB : (truthParentC ? truthParentC : nullptr);
+    }
+    if (m_isFromLightFlav and truthParent ) return false;
+    if (not m_isFromLightFlav and not truthParent) return false;  
+    if (m_minParentPt!=-9999. and truthParent->pt() < m_minParentPt )           return false;
+    if (m_maxParentPt!=-9999. and truthParent->pt() > m_maxParentPt )           return false;
+  }
 
   return true;
 }
+
+
+

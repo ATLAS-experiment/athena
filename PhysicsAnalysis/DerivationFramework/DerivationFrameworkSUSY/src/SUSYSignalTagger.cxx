@@ -15,10 +15,6 @@
 
 namespace DerivationFramework {
 
-  SUSYSignalTagger::SUSYSignalTagger(const std::string& t, const std::string& n, const IInterface* p):
-    base_class(t,n,p){
-  }
-
   StatusCode SUSYSignalTagger::initialize() {
     ATH_CHECK(m_eventInfoName.initialize());
     ATH_CHECK(m_mcName.initialize());
@@ -28,8 +24,7 @@ namespace DerivationFramework {
     return StatusCode::SUCCESS;
   }
 
-  StatusCode SUSYSignalTagger::addBranches() const {
-    const EventContext& ctx = Gaudi::Hive::currentContext();
+  StatusCode SUSYSignalTagger::addBranches(const EventContext& ctx) const{
     SG::ReadHandle<xAOD::EventInfo> eventInfo(m_eventInfoName, ctx);
     if (!eventInfo.isValid()) {
       ATH_MSG_ERROR("could not retrieve event info " <<m_eventInfoName);

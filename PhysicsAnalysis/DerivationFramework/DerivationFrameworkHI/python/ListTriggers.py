@@ -196,6 +196,14 @@ def HION2MinBias2024():
     triggers += ["HLT_mb_sptrk_pc_L1ZDC_A_C_VjTE50"]
     
     return triggers
+
+def HION2MinBiasOxygenOxygen2025():
+    triggers  = []
+    triggers += ["HLT_mb_sptrk_L1TRT_FILLED"]
+    triggers += ["HLT_j20_ionp_L1jJ10"]
+    triggers += ["HLT_j40_ionp_L1jJ20"]
+    
+    return triggers
     
 #################################################################################
 #HION4
@@ -554,7 +562,12 @@ def HION5SkimmingTriggers():
     triggers += ["HLT_g40_loose_L1eEM18"]
     triggers += ["HLT_g40_loose_L1eEM26"]
     triggers += ["HLT_g50_loose_L1eEM26"]
-    
+
+    # 2025 OO
+
+    triggers += ["HLT_mu8_L1MU5VF"]
+    triggers += ["HLT_e10_loose_L1eEM9"]
+
     return triggers
 
 #################################################################################

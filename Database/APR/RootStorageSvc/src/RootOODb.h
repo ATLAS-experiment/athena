@@ -55,7 +55,7 @@ namespace pool  {
     /// Create Root Database object (TFile)
     IDbDatabase* createDatabase();
     /// Create Root Container object
-    IDbContainer* createContainer(const DbType& typ);
+    IDbContainer* createContainer(const std::string& name, const DbType& typ);
   private:
     /// Non-owning cache for the domain pointer
     IDbDomain* m_domainCache{};

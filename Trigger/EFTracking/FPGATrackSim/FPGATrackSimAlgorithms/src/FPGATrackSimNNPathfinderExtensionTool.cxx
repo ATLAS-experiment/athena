@@ -100,7 +100,7 @@ StatusCode FPGATrackSimNNPathfinderExtensionTool::extendTracks(const std::vector
             }
         }
         std::vector<miniRoad> roadsToExtrapolate;
-        roadsToExtrapolate.push_back(road);
+        roadsToExtrapolate.push_back(std::move(road));
 
         std::vector<miniRoad> completedRoads;
 
@@ -120,7 +120,7 @@ StatusCode FPGATrackSimNNPathfinderExtensionTool::extendTracks(const std::vector
             // Check exit condition
             if (currentRoad.getNHits() >= (m_nLayers_1stStage+m_nLayers_2ndStage))
             {
-                completedRoads.push_back(currentRoad);
+                completedRoads.push_back(std::move(currentRoad));
                 continue; // this one is done
             }
             // Other try to find the next hit in this road
@@ -142,7 +142,7 @@ StatusCode FPGATrackSimNNPathfinderExtensionTool::extendTracks(const std::vector
 	      if ((m_useCartesian && (abs(predhit[0]) < 25 && abs(predhit[1]) < 25)) ||
 		  (!m_useCartesian && abs(predhit[0]) < 25))
 		{
-                    completedRoads.push_back(currentRoad);
+                    completedRoads.push_back(std::move(currentRoad));
                     continue;
                 }
             }
@@ -164,7 +164,7 @@ StatusCode FPGATrackSimNNPathfinderExtensionTool::extendTracks(const std::vector
             bool foundhitForRoad = false;
             if(fineID == 215){
                 ATH_MSG_DEBUG("Stopping condition reached");
-                completedRoads.push_back(currentRoad);
+                completedRoads.push_back(std::move(currentRoad));
                 continue;
             }
             // Get the last layer and hit in the road
@@ -178,7 +178,7 @@ StatusCode FPGATrackSimNNPathfinderExtensionTool::extendTracks(const std::vector
             bool lastHitWasReal = lastHit->isReal();
             float lastHitR = lastHit->getR();
             if(layer >= (m_nLayers_1stStage + m_nLayers_2ndStage)) {
-                completedRoads.push_back(currentRoad);
+                completedRoads.push_back(std::move(currentRoad));
                 continue;
             }
             unsigned int hitsInWindow = 0;
@@ -283,7 +283,7 @@ StatusCode FPGATrackSimNNPathfinderExtensionTool::extendTracks(const std::vector
                         }
                     }
                     // Store the hits for now
-                    listofHitsFound.push_back(theseHits);
+                    listofHitsFound.push_back(std::move(theseHits));
                     }
                 }
             }
@@ -391,7 +391,7 @@ StatusCode FPGATrackSimNNPathfinderExtensionTool::extendTracks(const std::vector
                         ATH_MSG_WARNING("Failed making a new road with fake hit");
                         continue;
                     }
-                    roadsToExtrapolate.push_back(newroad);
+                    roadsToExtrapolate.push_back(std::move(newroad));
                 }
             }
         }
@@ -422,9 +422,8 @@ StatusCode FPGATrackSimNNPathfinderExtensionTool::extendTracks(const std::vector
                     emptyHitPtr->setZ(0);
                     emptyHitPtr->setLayer(layer);
                     emptyHitPtr->setHitType(HitType::wildcard);
-                    std::vector<std::shared_ptr<const FPGATrackSimHit>> hitVec;
-                    hitVec.push_back(emptyHitPtr);
-                    roadhits.push_back(hitVec);
+                   
+                    roadhits.emplace_back(1,emptyHitPtr);
                     layer_bitmask_t wclayers = road.getWCLayers();
                     wclayers |= (1 << layer);
                     road.setWCLayers(wclayers);
@@ -432,7 +431,7 @@ StatusCode FPGATrackSimNNPathfinderExtensionTool::extendTracks(const std::vector
             }
             road.setHits(std::move(roadhits));
 
-            m_roads.push_back(road);
+            m_roads.push_back(std::move(road));
         }
     }
     // Copy the roads we found into the output argument and return success.
@@ -483,18 +482,18 @@ StatusCode FPGATrackSimNNPathfinderExtensionTool::fillInputTensorForNN(miniRoad&
         }
         if (thit->isPixel())
         {
-            cleanHits.push_back(thit);
+            cleanHits.push_back(std::move(thit));
         }
         else if (thit->isStrip() && (thit->getHitType() == HitType::spacepoint))
         {
             // This is a proper strips SP, push the first hit back and skip the next one since its a duplicate
-            cleanHits.push_back(thit);
+            cleanHits.push_back(std::move(thit));
             skipHit = true;
         }
         else if (thit->isStrip() && (thit->getHitType() == HitType::guessed))
         {
             // this is a guessed strip SP, push the first hit back and skip the next one since its a duplicate
-            cleanHits.push_back(thit);
+            cleanHits.push_back(std::move(thit));
             skipHit = true;
         }
         else if (thit->isStrip() && (thit->getHitType() == HitType::undefined))
@@ -505,7 +504,7 @@ StatusCode FPGATrackSimNNPathfinderExtensionTool::fillInputTensorForNN(miniRoad&
         else if (thit->isStrip() && thit->isReal())
         {
             // What is left here is a unpaired hit, push it back
-            cleanHits.push_back(thit);
+            cleanHits.push_back(std::move(thit));
         }
         else
         {

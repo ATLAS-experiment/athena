@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #include "MuonCalibStreamCnvSvc/MuonCalibStreamAddressProviderSvc.h"
 
@@ -60,7 +60,7 @@ StatusCode MuonCalibStreamAddressProviderSvc::preLoadAddresses(StoreID::type idp
         ATH_MSG_DEBUG(" created TAD for (type,clid,name,TAD)" << t << " " << id << " " << nm);
 
         // save the clid and key.
-        m_clidKey[id].insert(nm);
+        m_clidKey[id].insert(std::move(nm));
     }
     return StatusCode::SUCCESS;
 }  // MuonCalibStreamAddressProviderSvc::preLoadAddresses()

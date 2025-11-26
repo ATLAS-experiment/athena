@@ -43,4 +43,21 @@ namespace G4UA
     return action;
   }
 
+  /// Calls BeginOfAthenaEvent
+  StatusCode MCTruthSteppingActionTool::BeginOfAthenaEvent(HitCollectionMap& hitCollections)
+  {
+    for(const auto& volCollPair : m_volumeCollectionMap) {
+      hitCollections.Emplace<TrackRecordCollection>(volCollPair.second, volCollPair.second);
+    }
+    return StatusCode::SUCCESS;
+  }
+  /// Calls EndOfAthenaEvent
+  StatusCode MCTruthSteppingActionTool::EndOfAthenaEvent(HitCollectionMap& hitCollections)
+  {
+    for(const auto& volCollPair : m_volumeCollectionMap) {
+      hitCollections.Record<TrackRecordCollection>(volCollPair.second);
+    }
+    return StatusCode::SUCCESS;
+  }
+
 } // namespace G4UA

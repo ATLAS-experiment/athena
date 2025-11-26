@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef XAOD_ANALYSIS
@@ -16,7 +16,7 @@
  * $Date: 2009-03-31 22:21:05 $
  *
  * @brief Defines the ROB data entity. The ROB data is an abstract
- * entity that is used to discase the raw event format from the HLT
+ * entity that is used to decouple the raw event format from the HLT
  * software.
 
  *  -------------------
@@ -30,13 +30,13 @@
 
   /**
      @class ROBData_T
-     @brief templete data class to wrap ROB fragment for accessing ROD data
+     @brief template data class to wrap ROB fragment for accessing ROD data
 
    * This entity represents an abstraction of a ROB to the High-Level
    * Trigger Algorithms layer.
-   * FOr L2UP implementation, the ROBData contains, internally, a
+   * For L2UP implementation, the ROBData contains, internally, a
    * "smart pointer" scheme that guarantees the underlying (buffer) data
-   * persitency until you don't need the ROBData anymore.
+   * persistency until you don't need the ROBData anymore.
    * In the offline/EF scheme, the Fragments are owned by the Event.
    * no need for smart_ptr.
    */
@@ -51,7 +51,7 @@ public:
 
 
   /// Builds a "high-level" ROB Data object
-  ROBData_T(const ROBFragment* rob);
+  explicit ROBData_T(const ROBFragment* rob);
 
   /// Copy Constructor
   ROBData_T(const ROBData_T& other);
@@ -60,10 +60,10 @@ public:
   ROBData_T();
 
   /// Instantiates an iterator over 32-bit integers to the first element
-  iterator begin(void) const;
+  iterator begin() const;
 
   /// Instantiates an iterator over 32-bit integers to the last+1 element
-  iterator end(void) const;
+  iterator end() const;
 
   /// Assignment Operator
   ROBData_T& operator=(const ROBData_T& other);
@@ -103,7 +103,7 @@ public:
     iterator& operator=(const iterator& other);
 
     /// Dereferencing
-    uint32_t operator*(void);
+    uint32_t operator*();
 
     /**
      * winding.
@@ -116,7 +116,7 @@ public:
     iterator& operator+=(const unsigned int& pos);
 
     /// Increment
-    iterator& operator++(void);
+    iterator& operator++();
 
     /// Is not equal.
     bool operator!=(const iterator& other) const;
@@ -132,12 +132,12 @@ private: //Representation
 };
 
 template <class ROBFragment, typename PointerType>
-ROBData_T<ROBFragment, PointerType>::ROBData_T(const ROBFragment* rob) : m_rob(rob), m_data(0) {
+ROBData_T<ROBFragment, PointerType>::ROBData_T(const ROBFragment* rob) : m_rob(rob), m_data(nullptr) {
   m_rob->rod_data(m_data);
 }
 
 template <class ROBFragment, typename PointerType>
-ROBData_T<ROBFragment, PointerType>::ROBData_T() : m_rob(0), m_data(0) {
+ROBData_T<ROBFragment, PointerType>::ROBData_T() : m_rob(nullptr), m_data(nullptr) {
 }
 
 template <class ROBFragment, typename PointerType>
@@ -153,12 +153,12 @@ ROBData_T<ROBFragment, PointerType>& ROBData_T<ROBFragment, PointerType>::operat
 }
 
 template <class ROBFragment, typename PointerType>
-typename ROBData_T<ROBFragment, PointerType>::iterator ROBData_T<ROBFragment, PointerType>::begin(void) const {
+typename ROBData_T<ROBFragment, PointerType>::iterator ROBData_T<ROBFragment, PointerType>::begin() const {
   return iterator(m_data);
 }
 
 template <class ROBFragment, typename PointerType>
-typename ROBData_T<ROBFragment, PointerType>::iterator ROBData_T<ROBFragment, PointerType>::end(void) const {
+typename ROBData_T<ROBFragment, PointerType>::iterator ROBData_T<ROBFragment, PointerType>::end() const {
   return iterator(m_data + m_rob->rod_ndata());
 }
 
@@ -201,7 +201,7 @@ typename ROBData_T<ROBFragment, PointerType>::iterator& ROBData_T<ROBFragment, P
 }
 
 template <class ROBFragment, typename PointerType>
-uint32_t ROBData_T<ROBFragment, PointerType>::iterator::operator*(void) {
+uint32_t ROBData_T<ROBFragment, PointerType>::iterator::operator*() {
   return *m_it;
 }
 
@@ -222,7 +222,7 @@ bool  ROBData_T<ROBFragment, PointerType>::iterator::operator!=(const typename R
   return m_it != other.m_it;
 }
 
-typedef ROBData_T<OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment, OFFLINE_FRAGMENTS_NAMESPACE::PointerType> ROBData;
+using ROBData = ROBData_T<OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment, OFFLINE_FRAGMENTS_NAMESPACE::PointerType>;
 
 #endif //BYTESTREAMDATA_ROBDATA_H
 

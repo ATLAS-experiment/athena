@@ -129,12 +129,7 @@ StatusCode InDetV0FinderTool::initialize()
   }
 
   ATH_CHECK( m_eventInfo_key.initialize(!m_useBeamSpotCond));
-  ATH_CHECK( m_beamSpotKey  .initialize( m_useBeamSpotCond));
-  if(!m_useBeamSpotCond){
-    for (const std::string beam : {"beamPosX", "beamPosY", "beamPosZ"}) {
-        m_beamSpotDecoKey.emplace_back(m_eventInfo_key.key() + "."+beam);
-    }
-  }
+  ATH_CHECK( m_beamSpotKey.initialize( m_useBeamSpotCond));
   ATH_CHECK( m_beamSpotDecoKey.initialize(!m_useBeamSpotCond));
 
 // Get the track selector tool from ToolSvc

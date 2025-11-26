@@ -38,6 +38,11 @@ StatusCode AthenaPoolCnvSvc::initialize() {
    ATH_CHECK(dmcsvc.retrieve());
    // Retrieve PoolSvc
    ATH_CHECK(m_poolSvc.retrieve());
+   StringProperty defContainerType("DefaultContainerType", "ROOTTREEINDEX");
+   if(IProperty* propertyServer = dynamic_cast<IProperty*>(m_poolSvc.get())) {
+      propertyServer->getProperty(&defContainerType).ignore();
+   }
+   m_defContainerType = defContainerType.value();
    // Retrieve ClassIDSvc
    ATH_CHECK(m_clidSvc.retrieve());
    // Register this service for 'I/O' events
@@ -303,10 +308,12 @@ StatusCode AthenaPoolCnvSvc::connectOutput(const std::string& outputConnectionSp
          std::size_t equal = cont.find('='); // Used to remove leading "TTree="
          if (equal == std::string::npos) equal = 0;
          else equal++;
-         std::size_t colon = m_containerPrefixProp.value().find(':');
+         const auto& prefix = m_containerPrefixProp.value();
+         std::size_t colon = prefix.find(':');
          if (colon == std::string::npos) colon = 0; // Used to remove leading technology
          else colon++;
-         const auto& strProp = m_containerPrefixProp.value();
+         const auto defaultContName = (tech == pool::ROOTRNTUPLE_StorageType.type()) ? APRDefaults::RNTupleNames::EventData : APRDefaults::TTreeNames::EventData;
+         const auto& strProp = (prefix == "Default") ? defaultContName : prefix;
          if (merge != std::string::npos && opt == "TREE_AUTO_FLUSH" && 0 == outputConnection.compare(0, merge, file) &&cont.compare(equal, std::string::npos, strProp, colon) == 0 && data != "int" && data != "DbLonglong" && data != "double" && data != "string") {
             flush = atoi(data.c_str());
             if (flush < 0 && m_numberEventsPerWrite.value() > 0) {
@@ -450,8 +457,8 @@ StatusCode AthenaPoolCnvSvc::createAddress(long svcType,
 		const std::string* par,
 		const unsigned long* ip,
 		IOpaqueAddress*& refpAddress) {
-   if (svcType != POOL_StorageType) {
-      ATH_MSG_ERROR("createAddress: svcType != POOL_StorageType " << svcType << " " << POOL_StorageType);
+   if( svcType != repSvcType() ) {
+      ATH_MSG_ERROR("createAddress: svcType != POOL_StorageType " << svcType << " " << repSvcType());
       return(StatusCode::FAILURE);
    }
    std::unique_ptr<Token> token;
@@ -467,7 +474,7 @@ StatusCode AthenaPoolCnvSvc::createAddress(long svcType,
    if (token == nullptr) {
       return(StatusCode::RECOVERABLE);
    }
-   refpAddress = new TokenAddress(POOL_StorageType, clid, "", par[1], IPoolSvc::kInputStream, std::move(token));
+   refpAddress = new TokenAddress(repSvcType(), clid, "", par[1], IPoolSvc::kInputStream, std::move(token));
    return(StatusCode::SUCCESS);
 }
 //______________________________________________________________________________
@@ -475,11 +482,11 @@ StatusCode AthenaPoolCnvSvc::createAddress(long svcType,
 		const CLID& clid,
 		const std::string& refAddress,
 		IOpaqueAddress*& refpAddress) {
-   if (svcType != POOL_StorageType) {
-      ATH_MSG_ERROR("createAddress: svcType != POOL_StorageType " << svcType << " " << POOL_StorageType);
+   if (svcType != repSvcType()) {
+      ATH_MSG_ERROR("createAddress: svcType != POOL_StorageType " << svcType << " " << repSvcType());
       return(StatusCode::FAILURE);
    }
-   refpAddress = new GenericAddress(POOL_StorageType, clid, refAddress);
+   refpAddress = new GenericAddress(repSvcType(), clid, refAddress);
    return(StatusCode::SUCCESS);
 }
 //______________________________________________________________________________
@@ -496,9 +503,7 @@ StatusCode AthenaPoolCnvSvc::convertAddress(const IOpaqueAddress* pAddress,
 }
 //__________________________________________________________________________
 StatusCode AthenaPoolCnvSvc::decodeOutputSpec(std::string& fileSpec, int& outputTech) const {
-  if (fileSpec.starts_with ( "oracle") || fileSpec.starts_with ( "mysql")) {
-      outputTech = pool::POOL_RDBMS_StorageType.type();
-   } else if (fileSpec.starts_with ( "ROOTKEY:")) {
+   if (fileSpec.starts_with ( "ROOTKEY:")) {
       outputTech = pool::ROOTKEY_StorageType.type();
       fileSpec.erase(0, 8);
    } else if (fileSpec.starts_with ( "ROOTTREE:")) {
@@ -520,13 +525,13 @@ StatusCode AthenaPoolCnvSvc::decodeOutputSpec(std::string& fileSpec, int& output
       // This will be used for event data and its data header
       // First we look for an exact file name match
       // If that fails, we look for a wildcard ("*") match
-      // If that also fails, we use the hardcoded default value
+      // If that also fails, we use the default value from PoolSvc
       if (auto it = m_storageTechMap.find(fileName); it != m_storageTechMap.end()) {
          outputTech = it->second;
       } else if (it = m_storageTechMap.find("*"); it != m_storageTechMap.end()) {
          outputTech = it->second;
       } else {
-         outputTech = pool::ROOTTREEINDEX_StorageType.type();
+         outputTech = pool::DbType::getType(m_defContainerType).type();
       }
    }
    return StatusCode::SUCCESS;
@@ -589,7 +594,7 @@ void AthenaPoolCnvSvc::handle(const Incident& incident) {
 }
 //______________________________________________________________________________
 AthenaPoolCnvSvc::AthenaPoolCnvSvc(const std::string& name, ISvcLocator* pSvcLocator) :
-	base_class(name, pSvcLocator, POOL_StorageType) {
+	base_class(name, pSvcLocator, pool::POOL_StorageType.type()) {
 }
 //__________________________________________________________________________
 void AthenaPoolCnvSvc::extractPoolAttributes(const StringArrayProperty& property,
@@ -609,7 +614,7 @@ void AthenaPoolCnvSvc::extractPoolAttributes(const StringArrayProperty& property
          const std::string tag = attrib.tag;
          const std::string val = attrib.value;
          if (tag == "DatabaseName") {
-            databaseName = val;
+            databaseName = std::move(val);
          } else if (tag == "ContainerName") {
             if (databaseName.empty()) {
                databaseName = "*";

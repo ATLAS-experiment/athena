@@ -30,7 +30,7 @@ Token::Token() : m_refCount(1),
 	m_classID(Guid::null()),
 	m_oid(OID_t(~0x0LL, ~0x0LL)),
 	m_type(0) {
-   s_numCount++;
+   s_numCount.fetch_add(1, std::memory_order_relaxed);
 }
 
 /// Copy constructor
@@ -41,7 +41,7 @@ Token::Token(const Token& copy) : m_refCount(1),
 	m_oid(copy.m_oid),
 	m_type(0) {
    copy.setData(this);
-   s_numCount++;
+   s_numCount.fetch_add(1, std::memory_order_relaxed);
 }
 
 /// Copy constructor
@@ -54,11 +54,11 @@ Token::Token(const Token* source) : m_refCount(1),
    if (source != 0) {
       source->setData(this);
    }
-   s_numCount++;
+   s_numCount.fetch_add(1, std::memory_order_relaxed);
 }
 
 /// Move constructor.
-Token::Token(Token&& source)
+Token::Token(Token&& source) noexcept
   : m_refCount (1),
     m_technology (source.m_technology),
     m_dbID (std::move (source.m_dbID)),
@@ -68,12 +68,12 @@ Token::Token(Token&& source)
     m_type (source.m_type),
     m_auxString (std::move (source.m_auxString))
 {
-   s_numCount++;
+   s_numCount.fetch_add(1, std::memory_order_relaxed);
 }
     
 
 Token::~Token() {
-   s_numCount--;
+   s_numCount.fetch_sub(1, std::memory_order_relaxed);
 }
 
 /// Release token: Decrease reference count and eventually delete.
@@ -134,9 +134,9 @@ bool Token::less(const Token& copy) const {
 const std::string Token::toString() const {
    return std::format(
       "[DB={}][CNT={}][CLID={}][TECH={:08X}][OID={:016X}-{:016X}]{}",
-      m_dbID.toString(),
+      m_dbID.to_fixed_string(),
       m_cntID,
-      m_classID.toString(),
+      m_classID.to_fixed_string(),
       m_technology,
       static_cast<uint64_t>(m_oid.first),
       static_cast<uint64_t>(m_oid.second),
@@ -144,9 +144,8 @@ const std::string Token::toString() const {
    );
 }
 
-Token& Token::fromString(const std::string& source)    {
+Token& Token::fromString(const std::string_view src)    {
    m_auxString.clear();
-   std::string_view src{source};
    size_t pos = 0;
    while (pos < src.size()) {
       size_t start = src.find('[', pos);
@@ -156,11 +155,11 @@ Token& Token::fromString(const std::string& source)    {
       if (eq != std::string_view::npos && end != std::string_view::npos) {
          std::string_view label = src.substr(start, eq - start + 1);
          if (label == LABEL_DB) {
-               m_dbID.fromString(std::string(src.substr(eq + 1, end - eq - 1)));
+               m_dbID.fromString(src.substr(eq + 1, end - eq - 1));
          } else if (label == LABEL_CNT) {
                m_cntID = std::string(src.substr(eq + 1, end - eq - 1));
          } else if (label == LABEL_CLID) {
-               m_classID.fromString(std::string(src.substr(eq + 1, end - eq - 1)));
+               m_classID.fromString(src.substr(eq + 1, end - eq - 1));
          } else if (label == LABEL_TECH) {
                std::string_view num_str = src.substr(eq + 1, end - eq - 1);
                int tech = 0;
@@ -207,9 +206,9 @@ Token& Token::fromString(const std::string& source)    {
 const std::string Token::key() const {
    return std::format(
       "[DB={}][CNT={}][CLID={}][TECH={:08X}]",
-      m_dbID.toString(),
+      m_dbID.to_fixed_string(),
       m_cntID,
-      m_classID.toString(),
+      m_classID.to_fixed_string(),
       m_technology & KEY_MASK
    );
 }

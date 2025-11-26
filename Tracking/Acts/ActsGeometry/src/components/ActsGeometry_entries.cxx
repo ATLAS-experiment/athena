@@ -21,6 +21,7 @@
 #include "ActsGeometry/ActsWriteTrackingGeometryTransforms.h"
 #include "../ActsVolumeIdToDetectorElementCollectionMappingAlg.h"
 #include "../ItkBlueprintNodeBuilder.h"
+#include "../CaloBlueprintNodeBuilder.h"
 
 
 DECLARE_COMPONENT(ActsExtrapolationAlg)
@@ -44,4 +45,5 @@ DECLARE_COMPONENT(ActsTrk::ActsVolumeIdToDetectorElementCollectionMappingAlg)
 
 DECLARE_COMPONENT(ActsTrk::ItkBlueprintNodeBuilder)
 DECLARE_COMPONENT(ActsTrk::ExtrapolationTool)
+DECLARE_COMPONENT(ActsTrk::CaloBlueprintNodeBuilder)
 

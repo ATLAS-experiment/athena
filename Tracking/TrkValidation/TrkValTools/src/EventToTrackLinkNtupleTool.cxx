@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //////////////////////////////////////////////////////////////////
@@ -55,8 +55,7 @@ StatusCode Trk::EventToTrackLinkNtupleTool::finalize() {
   return StatusCode::SUCCESS;
 }
 
-void Trk::EventToTrackLinkNtupleTool::registerTrackCollections
-( std::vector<std::string> collections, bool doTruth) {
+void Trk::EventToTrackLinkNtupleTool::registerTrackCollections( const std::vector<std::string> & collections, bool doTruth) {
   m_trackCollections = collections;
   m_doTruth = doTruth;
   m_trackIndexBegin.resize(m_trackCollections.size());

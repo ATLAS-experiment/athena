@@ -106,7 +106,52 @@ def L1CALOCoreCfg(flags, deriv='L1CALO1', **kwargs):
 
     # Decorate the emulated jFEX towers
     if flags.Trigger.L1.dojFex and isNotPool:
+        from L1CaloFEXAlgos.L1CaloFEXAlgosConfig import L1CalojFEXDecoratorCfg
         acc.merge(L1CalojFEXDecoratorCfg(flags,name='jFexTower2SCellEmulatedDecorator',jTowersReadKey=emulatedDataTowersKey,ExtraInfo=extraJfexInfo))
+
+    # determine if enough samples to build SC_ET
+    nsamples=-1
+    if not flags.Input.isMC:
+        from LArConditionsCommon.LArRunFormat import getLArDTInfoForRun
+        runinfo = getLArDTInfoForRun(flags.Input.RunNumbers[0], connstring="COOLONL_LAR/CONDBR2")
+        #
+        for i in range(0,len(runinfo.streamTypes())):
+            log.info("LAr DT runinfo index: %s type: %s nsamples: %s", i, runinfo.streamTypes()[i], runinfo.streamLengths()[i])
+            if "ADC" in runinfo.streamTypes()[i]:
+                nsamples=runinfo.streamLengths()[i]
+
+    # Create SC_ET if sufficient samples in data or it is MC
+    if nsamples==6:
+        # first built the Supercells from the ADC
+        from LArConfiguration.LArElecCalibDBConfig import LArElecCalibDBSCCfg
+        acc.merge(LArElecCalibDBSCCfg(flags, condObjs=["DAC2uA", "HVScaleCorr", "MphysOverMcal", "OFC", "Pedestal", "Ramp", "uA2MeV"]))
+        larLATOMEBuilderAlg=CompFactory.LArLATOMEBuilderAlg("LArLATOMEBuilderAlg2")
+        # for standard runs with baseline corrections
+        baselineCorr = True # need to find a run with no baseline corrections and the correct settings to see what to expect
+        larLATOMEBuilderAlg.isADCBas = True if baselineCorr else False
+        larLATOMEBuilderAlg.LArDigitKey = "SC_ADC_BAS" if baselineCorr else 'SC'
+        # output
+        larLATOMEBuilderAlg.LArRawSCKey = "SC_RECO2"
+        acc.addEventAlgo(larLATOMEBuilderAlg)
+
+        # create SCell_ET without timing applied
+        from LArCellRec.LArRAWtoSuperCellConfig import LArRAWtoSuperCellCfg
+        acc.merge(LArRAWtoSuperCellCfg(flags, name="LArRAWRecotoSuperCell2", mask=True, doReco=True, SCIn="SC_RECO2", SCellContainerOut="SCell_ET") )
+        # build jFEX towers from SC_ET
+        acc.merge(jFexEmulatedTowersCfg(flags, name="jFexEmulatedTowerMakerNoId", SCin="SCell_ET", writeKey="L1_jFexEmulatedNoIdTowers",
+                                        OfflineCaloCell="AllCalo"))
+    elif flags.Input.isMC:
+        # the TriggerTowerDecoration for tile not useable for MC, but we can decorate for LAr
+        # if we do not run the simulation on MC the SCells are written so nothing to do here
+        if isL1CaloSim:
+            # read SCell (default is without timing applied)
+            # Need geometry and conditions for the SCell converter from POOL
+            from LArGeoAlgsNV.LArGMConfig import LArGMCfg
+            acc.merge(LArGMCfg(flags))
+            # build jFEX towers with extra decoration
+            from L1CaloFEXAlgos.FexEmulatedTowersConfig import jFexEmulatedTowersCfg
+            acc.merge(jFexEmulatedTowersCfg(flags, name="jFexEmulatedTowerMakerNoId", SCin="SCell", writeKey="L1_jFexEmulatedNoIdTowers",
+                                            OfflineCaloCell="AllCalo"))
 
     # Emulate eFEX input towers
     if flags.Trigger.L1.doeFex and isNotPool:
@@ -126,7 +171,7 @@ def L1CALOCoreCfg(flags, deriv='L1CALO1', **kwargs):
         # Need to deal with database for MC productions where L1Calo DB was not in global tag
         if flags.Input.isMC:
             from Campaigns.Utils import Campaign
-            print("campaign",flags.Input.MCCampaign)
+            log.info("MC Campaign",flags.Input.MCCampaign)
             if flags.Input.MCCampaign != Campaign.MC23e:
                 if flags.Trigger.L1.doeFex:
                     from IOVDbSvc.IOVDbSvcConfig import addOverride
@@ -138,7 +183,7 @@ def L1CALOCoreCfg(flags, deriv='L1CALO1', **kwargs):
                     acc.merge(addOverride(flags, '/TRIGGER/L1Calo/V1/Calibration/JfexModuleSettings', 'JfexModuleSettings-RUN3-MCDEFAULT-TEST'))
                     acc.merge(addOverride(flags, '/TRIGGER/L1Calo/V1/Calibration/JfexNoiseCuts', 'JfexNoiseCuts-RUN3-MCDEFAULT-TEST'))
 
-    # decorate the eFEX TOBs 
+    # decorate the eFEX TOBs
     if flags.Trigger.L1.doeFex and isNotPool:
         # Temporary fix to ensure the L1 TOBs are decoded by the Trigger
         from TrigDecisionTool.TrigDecisionToolConfig import getRun3NavigationContainerFromInput
@@ -151,7 +196,7 @@ def L1CALOCoreCfg(flags, deriv='L1CALO1', **kwargs):
                                                             eFexEMRoIContainer = 'L1_eEMRoISim',
                                                             eFexTauRoIContainer = 'L1_eTauRoIAltSim',
                                                             ExtraInputs=[]) )
-    
+
     if fillSuperCells:
         acc.addEventAlgo( CompFactory.LVL1.eFexTOBSuperCellDecorator('eFexTOBSuperCellDecoratorSim',
                                                                      eFexEMRoIContainer = 'L1_eEMRoISim',
@@ -494,6 +539,13 @@ def L1CALOCoreCfg(flags, deriv='L1CALO1', **kwargs):
          "L1_jFexEmulatedTowersAux":"xAOD::jFexTowerAuxContainer"}
     )    
     AllVariables += ["L1_jFexEmulatedTowers"]
+
+    # jTowers built from SC_ET aka "NoId"
+    L1CaloSlimmingHelper.AppendToDictionary.update (
+        {"L1_jFexEmulatedNoIdTowers":"xAOD::jFexTowerContainer",
+         "L1_jFexEmulatedNoIdTowersAux":"xAOD::jFexTowerAuxContainer"}
+    )
+    AllVariables += ["L1_jFexEmulatedNoIdTowers"]
 
     # For MC, add emulated gFEX input towers
     if flags.Input.isMC:

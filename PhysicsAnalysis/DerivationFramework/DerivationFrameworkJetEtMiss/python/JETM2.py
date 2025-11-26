@@ -46,7 +46,7 @@ def JETM2ExtraContentCfg(flags):
     from JetRecConfig.JetRecConfig import JetRecCfg, getInputAlgs, getConstitPJGAlg
     from JetRecConfig.JetInputConfig import buildEventShapeAlg
     from JetRecConfig.StandardJetConstits import stdConstitDic as cst
-    from JetRecConfig.StandardSmallRJets import AntiKt4UFOCSSKNoPtCut, AntiKt4EMPFlowNoPtCut, AntiKt4EMTopoNoPtCut
+    from JetRecConfig.StandardSmallRJets import AntiKt4UFOCSSKNoPtCut, AntiKt4EMPFlowNoPtCut, AntiKt4EMPFlowML, AntiKt4EMTopoNoPtCut
     from JetRecConfig.StandardLargeRJets import AntiKt10TruthDressedWZSoftDrop
 
     #=======================================
@@ -63,7 +63,7 @@ def JETM2ExtraContentCfg(flags):
     #=======================================
     # NoPtCut containers
     #=======================================
-    jetList = [AntiKt4UFOCSSKNoPtCut,AntiKt4EMPFlowNoPtCut,AntiKt4EMTopoNoPtCut]
+    jetList = [AntiKt4UFOCSSKNoPtCut,AntiKt4EMPFlowNoPtCut,AntiKt4EMPFlowML,AntiKt4EMTopoNoPtCut]
 
     #=======================================
     # R = 1.0 truth WZ Dressed jets
@@ -123,22 +123,23 @@ def JETM2Cfg(flags):
                                             "Electrons", "Photons", "Muons", "TauJets",
                                             "MET_Baseline_AntiKt4EMPFlow",
                                             "AntiKt4EMTopoNoPtCutJets","AntiKt4EMPFlowJets",
-                                            "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets",
-                                            "AntiKt4EMPFlowJets_FTAG",
-                                            "BTagging_AntiKt4EMPFlow",
-                                            "BTagging_AntiKtVR30Rmax4Rmin02Track"]
+                                            "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets"]
 
     JETM2SlimmingHelper.AllVariables = ["CaloCalFwdTopoTowers",
                                         "CHSGChargedParticleFlowObjects","CHSGNeutralParticleFlowObjects",
+                                        "CHSGlobalClusterMLCorrectedChargedParticleFlowObjects","CHSGlobalClusterMLCorrectedNeutralParticleFlowObjects",
                                         "CSSKGChargedParticleFlowObjects","CSSKGNeutralParticleFlowObjects",
                                         "Kt4EMTopoOriginEventShape","Kt4EMPFlowEventShape","Kt4EMPFlowPUSBEventShape",
                                         "Kt4EMPFlowNeutEventShape","Kt4UFOCSSKEventShape","Kt4UFOCSSKNeutEventShape"]
 
     # Low-level inputs
     from DerivationFrameworkJetEtMiss.CommonJETMXContent import ClusterVariables, FlowElementVariables, UFOVariables, TrackingVariables,  TrackingVariablesHGTD, FELinks
-    JETM2SlimmingHelper.ExtraVariables += [".".join(["CaloCalTopoClusters"] + ClusterVariables)]
+    JETM2SlimmingHelper.ExtraVariables += [".".join(["CaloCalTopoClusters"] + ClusterVariables + ["clusterE_ML.clusterE_ML_unc"])]
+    JETM2SlimmingHelper.ExtraVariables += [".".join(["EMOriginTopoClusters"] + ['calM'])]
     JETM2SlimmingHelper.ExtraVariables += [".".join(["GlobalChargedParticleFlowObjects"] + FlowElementVariables)]
     JETM2SlimmingHelper.ExtraVariables += [".".join(["GlobalNeutralParticleFlowObjects"] + FlowElementVariables)]
+    JETM2SlimmingHelper.ExtraVariables += [".".join(["GlobalClusterMLCorrectedChargedParticleFlowObjects"] + FlowElementVariables)]
+    JETM2SlimmingHelper.ExtraVariables += [".".join(["GlobalClusterMLCorrectedNeutralParticleFlowObjects"] + FlowElementVariables)]
     JETM2SlimmingHelper.ExtraVariables += [".".join(["UFO"] + UFOVariables)]
     JETM2SlimmingHelper.ExtraVariables += [".".join(["UFOCSSK"] + UFOVariables)]
     JETM2SlimmingHelper.ExtraVariables += [".".join(["InDetTrackParticles"] + TrackingVariables)]
@@ -163,14 +164,20 @@ def JETM2Cfg(flags):
                                            "PrimaryVertices.x.y.z.covariance.trackWeights",
                                            "TauJets.clusterLinks",
                                            "Muons.energyLossType.EnergyLoss.ParamEnergyLoss.MeasEnergyLoss.EnergyLossSigma.MeasEnergyLossSigma.ParamEnergyLossSigmaPlus.ParamEnergyLossSigmaMinus.clusterLinks.FSR_CandidateEnergy",
-                                           "MuonSegments.x.y.z.px.py.pz",
-                                           "BTagging_AntiKt4EMPFlow.jetLink",
-                                           "BTagging_AntiKtVR30Rmax4Rmin02Track.jetLink"]
+                                           "MuonSegments.x.y.z.px.py.pz"]
 
     JETM2SlimmingHelper.AppendToDictionary.update({'CSSKGNeutralParticleFlowObjects': 'xAOD::FlowElementContainer',
                                                    'CSSKGNeutralParticleFlowObjectsAux': 'xAOD::ShallowAuxContainer',
                                                    'CSSKGChargedParticleFlowObjects': 'xAOD::FlowElementContainer',
                                                    'CSSKGChargedParticleFlowObjectsAux': 'xAOD::ShallowAuxContainer',
+                                                   'CHSGlobalClusterMLCorrectedNeutralParticleFlowObjects': 'xAOD::FlowElementContainer',
+                                                   'CHSGlobalClusterMLCorrectedNeutralParticleFlowObjectsAux': 'xAOD::ShallowAuxContainer',
+                                                   'CHSGlobalClusterMLCorrectedChargedParticleFlowObjects': 'xAOD::FlowElementContainer',
+                                                   'CHSGlobalClusterMLCorrectedChargedParticleFlowObjectsAux': 'xAOD::ShallowAuxContainer',
+                                                   'GlobalClusterMLCorrectedChargedParticleFlowObjects': 'xAOD::FlowElementContainer',
+                                                   'GlobalClusterMLCorrectedChargedParticleFlowObjectsAux': 'xAOD::ShallowAuxContainer',
+                                                   'GlobalClusterMLCorrectedNeutralParticleFlowObjects': 'xAOD::FlowElementContainer',
+                                                   'GlobalClusterMLCorrectedNeutralParticleFlowObjectsAux': 'xAOD::ShallowAuxContainer',
                                                    'UFO': 'xAOD::FlowElementContainer',
                                                    'UFOAux': 'xAOD::FlowElementAuxContainer',
                                                    'Kt4UFOCSSKEventShape': 'xAOD::EventShape',
@@ -215,7 +222,7 @@ def JETM2Cfg(flags):
     JETM2SlimmingHelper.IncludeBPhysTriggerContent = False
     JETM2SlimmingHelper.IncludeMinBiasTriggerContent = False
 
-    jetOutputList = ["AntiKt4UFOCSSKNoPtCutJets","AntiKt4EMPFlowNoPtCutJets"]
+    jetOutputList = ["AntiKt4UFOCSSKNoPtCutJets","AntiKt4EMPFlowNoPtCutJets", "AntiKt4EMPFlowMLJets"]
     from DerivationFrameworkJetEtMiss.JetCommonConfig import addJetsToSlimmingTool
     addJetsToSlimmingTool(JETM2SlimmingHelper, jetOutputList, JETM2SlimmingHelper.SmartCollections)
 

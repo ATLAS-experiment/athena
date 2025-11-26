@@ -78,6 +78,8 @@ def setupServicesCfg(flags):
 
 def GeoModelMdtTestCfg(flags, name = "GeoModelMdtTest", **kwargs):
     result = ComponentAccumulator()
+    from MuonConfig.MuonCablingConfig import MDTCablingConfigCfg
+    result.merge(MDTCablingConfigCfg(flags))
     the_alg = CompFactory.MuonGMR4.GeoModelMdtTest(name, **kwargs)
     result.addEventAlgo(the_alg, primary = True)
     return result
@@ -220,6 +222,8 @@ def setupGeoR4TestCfg(args,  flags = None):
         flags.Detector.GeometryRPC = False    
     if args.noMdt:
         flags.Detector.GeometryMDT = False
+
+    flags.Acts.TrackingGeometry.UseBlueprint = True
 
     flags.Scheduler.CheckDependencies = True
     flags.Scheduler.ShowDataDeps = True

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #include "xAODBTaggingEfficiency/BTaggingToolUtil.h"
 #include "xAODBTaggingEfficiency/BTaggingSelectionJsonTool.h"
@@ -90,8 +90,8 @@ StatusCode BTaggingSelectionJsonTool::initialize() {
       std::vector<float> cut_values = itr->at("cutvalues").get<std::vector<float>>();
 
       // Add the corresponding mass bins and OP cut values information 
-      m_massbins.push_back(mass_values);
-      m_OPCutValues.push_back(cut_values);
+      m_massbins.push_back(std::move(mass_values));
+      m_OPCutValues.push_back(std::move(cut_values));
     }
   }
 

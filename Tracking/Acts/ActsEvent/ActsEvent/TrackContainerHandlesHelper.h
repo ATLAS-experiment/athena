@@ -11,7 +11,7 @@
 #include "ActsEvent/MultiTrajectory.h"
 #include "ActsEvent/PersistentTrackContainer.h"
 #include "ActsEvent/TrackSummaryContainer.h"
-#include "ActsGeometryInterfaces/ActsGeometryContext.h"
+#include "ActsGeometryInterfaces/GeometryContext.h"
 #include "GaudiKernel/StatusCode.h"
 #include "StoreGate/WriteHandleKey.h"
 #include "StoreGate/ReadHandleKey.h"

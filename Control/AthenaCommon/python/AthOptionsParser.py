@@ -278,16 +278,17 @@ def getArgumentParser(legacy_args=False, **kwargs):
 
 
 class AthOptionsError(SystemExit):
-    def __init__(self, reason=None):
+    def __init__(self, reason=None, message=None):
         import AthenaCommon.ExitCodes as ath_codes
         if reason is None:
             reason = ath_codes.OPTIONS_UNKNOWN
-        try:
-            message = ath_codes.codes[reason]
-        except KeyError:
-            message = ath_codes.codes[ath_codes.OPTIONS_UNKNOWN]
+        if message is None:
+            try:
+                message = ath_codes.codes[reason]
+            except KeyError:
+                message = ath_codes.codes[ath_codes.OPTIONS_UNKNOWN]
 
-        SystemExit.__init__(self, reason, message)
+        super().__init__(reason, message)
 
 
 def _help_and_exit(reason=None):

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonNSW_CablingAlg.h"
@@ -64,7 +64,7 @@ StatusCode MuonNSW_CablingAlg::execute(const EventContext& ctx) const {
         for (const SG::ReadCondHandleKey<CondAttrListCollection>& key : m_readCablingKeys){
             SG::ReadCondHandle<CondAttrListCollection> readHandle{key, ctx};
             if (!readHandle.isValid()) {
-                ATH_MSG_FATAL("Failed to retrive the cabling data from the database "
+                ATH_MSG_FATAL("Failed to retrieve the cabling data from the database "
                             << key.fullKey());
                 return StatusCode::FAILURE;
             }

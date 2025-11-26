@@ -1,10 +1,6 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
-
-///////////////////////////////////////////////////////////////////
-// EvenTInfoBSErrDecorator.h, (c) ATLAS Detector software
-///////////////////////////////////////////////////////////////////
 
 #ifndef DERIVATIONFRAMEWORK_EVENTINFOBSERRDECORATOR_H
 #define DERIVATIONFRAMEWORK_EVENTINFOBSERRDECORATOR_H
@@ -31,37 +27,37 @@ class SCT_ID;
 namespace DerivationFramework {
 
   class EventInfoBSErrDecorator : public extends<AthAlgTool, IAugmentationTool> {
-    public: 
-      EventInfoBSErrDecorator(const std::string& type, const std::string& name, const IInterface* parent);
+  public:
 
-      StatusCode initialize();
-      StatusCode finalize();
-      virtual StatusCode addBranches() const;
+    using base_class::base_class;
 
-    private:
+    virtual StatusCode initialize() override final;
+    virtual StatusCode addBranches(const EventContext& ctx) const override final;
 
-      Gaudi::Property<std::string> m_prefix
-         { this,"DecorationPrefix", "", "" };
-      SG::ReadHandleKey<xAOD::EventInfo> m_eventInfoKey
-         { this, "ContainerName", "EventInfo", ""};
+  private:
 
-      const SCT_ID*          m_sctId = nullptr;
+    Gaudi::Property<std::string> m_prefix
+    { this,"DecorationPrefix", "", "" };
+    SG::ReadHandleKey<xAOD::EventInfo> m_eventInfoKey
+      { this, "ContainerName", "EventInfo", ""};
 
-      ToolHandle<ISCT_ByteStreamErrorsTool> m_byteStreamErrTool{this, "ByteStreamErrTool", "SCT_ByteStreamErrorsTool", "Tool to retrieve SCT ByteStream Errors"};
-      ToolHandle<ISCT_CablingTool> m_cabling{this, "SCT_CablingTool", "SCT_CablingTool", "Tool to retrieve SCT Cabling"};
+    const SCT_ID*          m_sctId{};
 
-      enum EIntDecor {kSCT_BSErr_Ntot,
-                      kSCT_BSErr_bec,
-                      kSCT_BSErr_layer,
-                      kSCT_BSErr_eta,
-                      kSCT_BSErr_phi,
-                      kSCT_BSErr_side,
-                      kSCT_BSErr_rodid,
-                      kSCT_BSErr_channel,
-                      kSCT_BSErr_type,
-                      kNIntDecor};
+    ToolHandle<ISCT_ByteStreamErrorsTool> m_byteStreamErrTool{this, "ByteStreamErrTool", "SCT_ByteStreamErrorsTool", "Tool to retrieve SCT ByteStream Errors"};
+    ToolHandle<ISCT_CablingTool> m_cabling{this, "SCT_CablingTool", "SCT_CablingTool", "Tool to retrieve SCT Cabling"};
 
-      std::vector<SG::WriteDecorHandleKey<xAOD::EventInfo> > m_intDecorKeys;
+    enum EIntDecor {kSCT_BSErr_Ntot,
+      kSCT_BSErr_bec,
+      kSCT_BSErr_layer,
+      kSCT_BSErr_eta,
+      kSCT_BSErr_phi,
+      kSCT_BSErr_side,
+      kSCT_BSErr_rodid,
+      kSCT_BSErr_channel,
+      kSCT_BSErr_type,
+      kNIntDecor};
+
+    std::vector<SG::WriteDecorHandleKey<xAOD::EventInfo> > m_intDecorKeys;
 
   };
 }

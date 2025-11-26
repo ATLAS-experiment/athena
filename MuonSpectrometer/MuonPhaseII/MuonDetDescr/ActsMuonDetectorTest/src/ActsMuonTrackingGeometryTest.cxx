@@ -62,14 +62,14 @@ struct PropagatorRecorder{
 namespace ActsTrk {
 
 
-    Amg::Transform3D ActsMuonTrackingGeometryTest::toLocalTrf(const ActsGeometryContext& gctx, const Identifier& hitId) const {
+    Amg::Transform3D ActsMuonTrackingGeometryTest::toLocalTrf(const ActsTrk::GeometryContext& gctx, const Identifier& hitId) const {
         const MuonGMR4::MuonReadoutElement* reElement = m_r4DetMgr->getReadoutElement(hitId);    
         const IdentifierHash trfHash = reElement->detectorType() == ActsTrk::DetectorType::Mdt ?
                                     reElement->measurementHash(hitId) : reElement->layerHash(hitId);        
         return reElement->globalToLocalTrans(gctx, trfHash);
     }
 
-    Amg::Transform3D ActsMuonTrackingGeometryTest::toGlobalTrf(const ActsGeometryContext& gctx, const Identifier& hitId) const {
+    Amg::Transform3D ActsMuonTrackingGeometryTest::toGlobalTrf(const ActsTrk::GeometryContext& gctx, const Identifier& hitId) const {
     const MuonGMR4::MuonReadoutElement* reElement = m_r4DetMgr->getReadoutElement(hitId);
     const IdentifierHash trfHash = reElement->detectorType() == ActsTrk::DetectorType::Mdt ?
                                     reElement->measurementHash(hitId) : reElement->layerHash(hitId);            
@@ -108,7 +108,7 @@ namespace ActsTrk {
 
         const EventContext& ctx = Gaudi::Hive::currentContext();
 
-        const ActsGeometryContext* gctx{nullptr};
+        const ActsTrk::GeometryContext* gctx{nullptr};
         const AtlasFieldCacheCondObj* fieldCondObj{nullptr};
         const MuonGM::MuonDetectorManager* detMgr{nullptr};
         const xAOD::TruthParticleContainer* truthParticles{nullptr};

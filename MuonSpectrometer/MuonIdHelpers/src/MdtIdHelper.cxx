@@ -45,7 +45,7 @@ int MdtIdHelper::initialize_from_dictionary(const IdDictMgr& dict_mgr) {
 
     if (initLevelsFromDict()) return 1;
 
-    IdDictField* field = m_dict->find_field("multiLayer");
+    const IdDictField* field = m_dict->find_field("multiLayer");
     if (field) {
         m_DETECTORELEMENT_INDEX = field->index();
     } else {
@@ -71,11 +71,11 @@ int MdtIdHelper::initialize_from_dictionary(const IdDictMgr& dict_mgr) {
 
     // save an index to the first region of mdt
 
-    IdDictGroup* mdtGroup = m_dict->find_group("mdt");
+    const IdDictGroup* mdtGroup = m_dict->find_group("mdt");
     if (!mdtGroup) {
         ATH_MSG_ERROR("Cannot find mdt group");
     } else {
-        m_GROUP_INDEX = mdtGroup->regions()[0]->index();
+        m_GROUP_INDEX = mdtGroup->region(0).index();
     }
 
     const IdDictRegion& region = m_dict->region(m_GROUP_INDEX);

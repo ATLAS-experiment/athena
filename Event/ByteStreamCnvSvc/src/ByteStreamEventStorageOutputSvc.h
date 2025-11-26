@@ -1,7 +1,7 @@
-/* Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration */
+/* Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration */
 
-#ifndef EVENT_BYTESTREAMCNVSVC_SRC_BYTESTREAMEVENTSTORAGEOUTPUTSVC_H_
-#define EVENT_BYTESTREAMCNVSVC_SRC_BYTESTREAMEVENTSTORAGEOUTPUTSVC_H_
+#ifndef BYTESTREAMCNVSVC_BYTESTREAMEVENTSTORAGEOUTPUTSVC_H
+#define BYTESTREAMCNVSVC_BYTESTREAMEVENTSTORAGEOUTPUTSVC_H
 
 /** @file ByteStreamEventStorageOutputSvc.h
  *  @brief This file contains the class definition for the
@@ -53,7 +53,7 @@ class ByteStreamEventStorageOutputSvc :
       const std::string& name, ISvcLocator* pSvcLocator);
 
    /// Destructor.
-  virtual ~ByteStreamEventStorageOutputSvc() {}
+  virtual ~ByteStreamEventStorageOutputSvc() = default;
 
   /// Required of all Gaudi Services
   StatusCode initialize() override;
@@ -197,4 +197,4 @@ class ByteStreamEventStorageOutputSvc :
 
 };
 
-#endif  // EVENT_BYTESTREAMCNVSVC_SRC_BYTESTREAMEVENTSTORAGEOUTPUTSVC_H_
+#endif  // BYTESTREAMCNVSVC_BYTESTREAMEVENTSTORAGEOUTPUTSVC_H

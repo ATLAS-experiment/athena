@@ -1,9 +1,7 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-///////////////////////////////////////////////////////////////////
-// BatBatmanAugmentationTool.cxx, (c) ATLAS Detector software
 ///////////////////////////////////////////////////////////////////
 // Author: Chris Young (christopher.young@cern.ch)
 ///////////////////////////////////////////////////////////////////
@@ -27,12 +25,12 @@
 namespace DerivationFramework {
 
   class BadBatmanAugmentationTool : public extends<AthAlgTool, IAugmentationTool> {
-  public: 
-    BadBatmanAugmentationTool(const std::string& t, const std::string& n, const IInterface* p);
+  public:
 
-    StatusCode initialize();
-    StatusCode finalize();
-    virtual StatusCode addBranches() const;
+    using base_class::base_class;
+
+    virtual StatusCode initialize() override final;
+    virtual StatusCode addBranches(const EventContext& ctx) const override final;
 
   private:
 
@@ -40,11 +38,11 @@ namespace DerivationFramework {
     SG::ReadHandleKey<xAOD::CaloClusterContainer> m_clusterContainer_key{this, "CaloCalTopoClusters", "CaloCalTopoClusters", "Input cluster container"};
 
     SG::WriteDecorHandleKey<xAOD::EventInfo> m_isBadBatmanKey {this
-	,"IsBadBatmanKey"
-	,"EventInfo.DFCommonJets_isBadBatman"
-	,"Decoration for isBadBatman flag"};
+      ,"IsBadBatmanKey"
+      ,m_eventInfo_key, "DFCommonJets_isBadBatman"
+      ,"Decoration for isBadBatman flag"};
 
-  }; 
+  };
 }
 
 #endif // DERIVATIONFRAMEWORK_PFLOWAUGMENTATIONTOOL_H

@@ -6,6 +6,7 @@
 
 // CLHEP
 #include "CLHEP/Random/RandFlat.h"
+#include "CLHEP/Random/RandomEngine.h"
 
 //Geant4
 #include "G4Track.hh"
@@ -26,7 +27,7 @@ StatusCode PunchThroughSimWrapper::finalize()
   return StatusCode::SUCCESS;
 }
 
-void PunchThroughSimWrapper::DoPunchThroughSim(G4ParticleTable &ptable, ATHRNG::RNGWrapper* rngWrapper, const double simE, std::vector<double> simEfrac, const G4FastTrack& fastTrack, G4FastStep& fastStep)
+void PunchThroughSimWrapper::DoPunchThroughSim(G4ParticleTable &ptable, CLHEP::HepRandomEngine* rng, const double simE, std::vector<double> simEfrac, const G4FastTrack& fastTrack, G4FastStep& fastStep)
 {
   // Get Geant4 primary track
   const G4Track* G4PrimaryTrack = fastTrack.GetPrimaryTrack(); 
@@ -41,14 +42,14 @@ void PunchThroughSimWrapper::DoPunchThroughSim(G4ParticleTable &ptable, ATHRNG::
   auto secTrackCont = std::make_unique<G4TrackVector>();
 
   // Draw flat random number to compare punchthrough probability
-  double punchThroughClassifierRand = CLHEP::RandFlat::shoot(*rngWrapper);
+  double punchThroughClassifierRand = CLHEP::RandFlat::shoot(rng);
 
   // Calculate probability of punch through using punchThroughClassifier
   double punchThroughProbability = m_PunchThroughG4Classifier->computePunchThroughProbability(fastTrack, simE, simEfrac);
 
   // Safety condition
   if( punchThroughProbability > punchThroughClassifierRand){
-    secKinematicsMapVect = m_PunchThroughG4Tool->computePunchThroughParticles(fastTrack, *rngWrapper, punchThroughProbability, punchThroughClassifierRand);
+    secKinematicsMapVect = m_PunchThroughG4Tool->computePunchThroughParticles(fastTrack, rng, punchThroughProbability, punchThroughClassifierRand);
 
     // Create secondary tracks
     if(secKinematicsMapVect.size()!=0){

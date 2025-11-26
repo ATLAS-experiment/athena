@@ -10,6 +10,7 @@
 #include "StorageSvc/DbSession.h"
 #include "StorageSvc/DbDomain.h"
 #include "StorageSvc/IStorageSvc.h"
+#include "POOLCore/DbPrint.h"
 
 /*
  *   POOL namespace declaration
@@ -35,7 +36,7 @@ namespace pool  {
     * @author  Markus Frank
     * @version 1.0
     */
-  class DbStorageSvc  : virtual public IStorageSvc
+  class DbStorageSvc  : virtual public IStorageSvc, virtual public APRMessaging
   {
     typedef std::vector<const Token*> TokenVec;
   private:

@@ -20,7 +20,7 @@ class PowhegV1(PowhegBase):
         @param error_output list of patterns which if found in the output will be treated as error in the log.
         @param info_output list of patterns which if found in the output will be treated as info in the log.
         """
-        super(PowhegV1, self).__init__(base_directory, "POWHEG-BOX", executable_name, is_reweightable=False, warning_output = [], info_output = [], error_output = [], **kwargs)
+        super(PowhegV1, self).__init__(base_directory, "POWHEG-BOX-NoUserProcesses", executable_name, is_reweightable=False, warning_output = [], info_output = [], error_output = [], **kwargs)
 
     @property
     def default_PDFs(self):

@@ -1,9 +1,9 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////
-// DiphotonVertexDecorator.cxx, (c) ATLAS Detector software
+// DiphotonVertexDecorator.cxx
 ///////////////////////////////////////////////////////////////////
 // To add the diphoton vertex to the evtStore
 
@@ -12,7 +12,6 @@
 #include <string>
 #include "TString.h"
 
-#include "CLHEP/Units/SystemOfUnits.h"
 
 #include "xAODCore/ShallowCopy.h"
 #include "xAODEventInfo/EventInfo.h"
@@ -25,28 +24,7 @@
 
 typedef ElementLink<xAOD::PhotonContainer> phlink_t;
 
-// Constructor
-DerivationFramework::DiphotonVertexDecorator::DiphotonVertexDecorator(const std::string& t,
-							    const std::string& n,
-							    const IInterface* p) : 
-  base_class(t, n, p)
-{
-
- 
-  declareProperty("RemoveCrack",           m_removeCrack    = true);
-  declareProperty("MaxEta",                m_maxEta         = 2.37);
-  declareProperty("MinimumPhotonPt",       m_minPhotonPt    = 20*CLHEP::GeV);
-  declareProperty("IgnoreConvPointing",    m_ignoreConv     = false);
-  declareProperty("TCMatchMaxRat",         m_tcMatch_maxRat = 1.5    );
-  declareProperty("TCMatchDeltaR",         m_tcMatch_dR     = 0.1    );
-
-}
-   
-// Destructor
-DerivationFramework::DiphotonVertexDecorator::~DiphotonVertexDecorator() {
-}  
-
-// Athena initialize and finalize
+// Athena initialize
 StatusCode DerivationFramework::DiphotonVertexDecorator::initialize()
 {
   ATH_CHECK( m_photonVertexSelectionTool.retrieve() );
@@ -57,22 +35,17 @@ StatusCode DerivationFramework::DiphotonVertexDecorator::initialize()
   return StatusCode::SUCCESS;
 }
 
-StatusCode DerivationFramework::DiphotonVertexDecorator::finalize()
-{
-  return StatusCode::SUCCESS;
-}
 
-StatusCode DerivationFramework::DiphotonVertexDecorator::addBranches() const
+StatusCode DerivationFramework::DiphotonVertexDecorator::addBranches(const EventContext& ctx) const
 {
-  const EventContext& ctx = Gaudi::Hive::currentContext();
   ATH_MSG_DEBUG( "DiphotonVertexDecorator::AddingBranches" );
-  
+
   SG::ReadHandle<xAOD::VertexContainer> PV (m_primaryVertexKey, ctx);
 
   if (!PV->empty() && PV->at(0)) {
     ATH_MSG_DEBUG( "Default PV " << PV->at(0) << ", type = " << PV->at(0)->vertexType() << " , z = " << PV->at(0)->z()  );
-  } 
-  
+  }
+
   // Select the two highest pt photons that pass a preselection
 
   SG::ReadHandle<xAOD::PhotonContainer> photons (m_photonKey, ctx);
@@ -103,7 +76,7 @@ StatusCode DerivationFramework::DiphotonVertexDecorator::addBranches() const
   SG::ReadHandle<xAOD::FlowElementContainer> FEHandle(m_FEContainerHandleKey, ctx);
   SG::Decorator<char> passORDec("passOR");
   for(const auto *const fe : *FEHandle) passORDec(*fe) = true;
-  
+
   if (ph1 and ph2)
   {
     vxResult = m_photonVertexSelectionTool->getVertex( *( vertexPhotons.asDataVector()) , m_ignoreConv, true, &yyvertexVtxType, &vertexFailType );
@@ -137,7 +110,7 @@ StatusCode DerivationFramework::DiphotonVertexDecorator::addBranches() const
       const auto *vx = PV->at(iPV);
       auto yyvx = (HggPV.first)->at(iPV);
       //reset vertex type
-      if (vx == newPV) { 
+      if (vx == newPV) {
         //is this the diphoton primary vertex returned from the tool?
         yyvx->setVertexType( xAOD::VxType::PriVtx );
       } else if ( vx->vertexType()==xAOD::VxType::PriVtx || vx->vertexType()==xAOD::VxType::PileUp ) {
@@ -176,12 +149,12 @@ StatusCode DerivationFramework::DiphotonVertexDecorator::addBranches() const
 
   if( !evtStore()->transientContains< xAOD::VertexContainer >( m_diphotonVertexKey.key() ) ){
     ATH_MSG_WARNING("Unable to find transient xAOD::VertexContainer, \"" << m_diphotonVertexKey.key() << "\"");
-  } 
+  }
 
   return StatusCode::SUCCESS;
 }
 
-bool DerivationFramework::DiphotonVertexDecorator::PhotonPreselect(const xAOD::Photon *ph) const 
+bool DerivationFramework::DiphotonVertexDecorator::PhotonPreselect(const xAOD::Photon *ph) const
 {
 
   if (!ph) return false;
@@ -213,7 +186,7 @@ bool DerivationFramework::DiphotonVertexDecorator::PhotonPreselect(const xAOD::P
   if (m_removeCrack && 1.37 <= eta && eta <= 1.52) return false;
 
   if (ph->pt() < m_minPhotonPt) return false;
-  
+
   return true;
 
 }

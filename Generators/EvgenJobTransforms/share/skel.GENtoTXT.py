@@ -1,4 +1,4 @@
-#  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 #
 """Functionality core of the Generate_tf transform"""
 
@@ -598,6 +598,10 @@ if eventsFile or datFile:
     if datFile:
       if ".tar" in os.path.basename(runArgs.inputGeneratorFile):
         inputroot = os.path.basename(runArgs.inputGeneratorFile).split(".tar.")[0]
+      elif ".tgz" in os.path.basename(runArgs.inputGeneratorFile):
+        inputroot = os.path.basename(runArgs.inputGeneratorFile).split(".tgz")[0]
+      elif ".gz" in os.path.basename(runArgs.inputGeneratorFile):
+        inputroot = os.path.basename(runArgs.inputGeneratorFile).split(".gz")[0]
       else:
         inputroot = os.path.basename(runArgs.inputGeneratorFile).split("._")[0]
 
@@ -611,6 +615,10 @@ if eventsFile or datFile:
         if(numberOfFiles<2):
            if ".tar" in os.path.basename(runArgs.inputGeneratorFile):
              inputroot = os.path.basename(runArgs.inputGeneratorFile).split(".tar.")[0]
+           elif ".tgz" in os.path.basename(runArgs.inputGeneratorFile):
+             inputroot = os.path.basename(runArgs.inputGeneratorFile).split(".tgz")[0]
+           elif ".gz" in os.path.basename(runArgs.inputGeneratorFile):
+             inputroot = os.path.basename(runArgs.inputGeneratorFile).split(".gz")[0]
            else:
              inputroot = os.path.basename(runArgs.inputGeneratorFile).split("._")[0]
 
@@ -625,6 +633,10 @@ if eventsFile or datFile:
 #             to make it unique
               if ".tar" in os.path.basename(runArgs.inputGeneratorFile):
                 inputroot = os.path.basename(runArgs.inputGeneratorFile).split(".tar.")[0]
+              elif ".tgz" in os.path.basename(runArgs.inputGeneratorFile):
+                inputroot = os.path.basename(runArgs.inputGeneratorFile).split(".tgz")[0]
+              elif ".gz" in os.path.basename(runArgs.inputGeneratorFile):
+                inputroot = os.path.basename(runArgs.inputGeneratorFile).split(".gz")[0]
               else:
                 input0 = os.path.basename(file).split("._")[0]
                 input1 = (os.path.basename(file).split("._")[1]).split(".")[0]

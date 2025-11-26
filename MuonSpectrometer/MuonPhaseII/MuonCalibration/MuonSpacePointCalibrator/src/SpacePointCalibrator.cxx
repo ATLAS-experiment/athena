@@ -18,6 +18,7 @@
 
 #include "MuonPatternEvent/SegmentFitterEventData.h"
 #include "MuonPatternHelpers/MatrixUtils.h"
+#include "MuonTrackEvent/TrackingHelpers.h"
 
 #include "MuonPrepRawData/NswClusteringUtils.h"
 
@@ -31,6 +32,7 @@
 
 namespace {
     constexpr double c_inv = 1./ Gaudi::Units::c_light;
+    static const SG::Decorator<int> dec_trackSign{"segmentFitDriftSign"};
 }
 
 namespace MuonR4{
@@ -54,7 +56,7 @@ namespace MuonR4{
                                            CalibSpacePointVec& hitsToCalib) const {
         std::vector<int> signs = SeedingAux::strawSigns(trackPos, trackDir,
                                                         hitsToCalib);
-        for (const auto& [spIdx, sp]: Acts::enumerate(hitsToCalib)) {
+        for (const auto [spIdx, sp]: Acts::enumerate(hitsToCalib)) {
             sp->setDriftRadius(sp->driftRadius() * signs[spIdx]);
         }
     }
@@ -71,6 +73,8 @@ namespace MuonR4{
         }
         if (spacePoint.fitState() == State::Outlier) {
             calibSP->setFitState(State::Outlier);
+        } else if (spacePoint.fitState() == State::Duplicate) {
+            calibSP->setFitState(State::Duplicate);
         }
         return calibSP;
     }
@@ -95,7 +99,7 @@ namespace MuonR4{
                                                        const Amg::Vector3D& dirInChamb,
                                                        const double timeOffset) const {
         
-        const ActsGeometryContext* gctx{nullptr};
+        const ActsTrk::GeometryContext* gctx{nullptr};
         if (!SG::get(gctx, m_geoCtxKey, ctx).isSuccess()) {
             return nullptr;
         }
@@ -300,28 +304,28 @@ namespace MuonR4{
         }
         return calibSpacePoints;
     }
-    double SpacePointCalibrator::driftVelocity(const EventContext& ctx,
+    double SpacePointCalibrator::driftVelocity(const Acts::CalibrationContext& ctx,
                                                const CalibratedSpacePoint& spacePoint) const {
         if(spacePoint.type() == xAOD::UncalibMeasType::MdtDriftCircleType) {
-            const MuonCalib::MdtFullCalibData* calibConsts = m_mdtCalibrationTool->getCalibConstants(ctx, spacePoint.spacePoint()->identify());
+            
+            const MuonCalib::MdtFullCalibData* calibConsts = m_mdtCalibrationTool->getCalibConstants(*ctx.get<const EventContext*>(), spacePoint.spacePoint()->identify());
             const std::optional<double> driftTime = calibConsts->rtRelation->tr()->driftTime(spacePoint.driftRadius());
             return calibConsts->rtRelation->rt()->driftVelocity(driftTime.value_or(0.));
         }
         return 0.;
     }
-    double SpacePointCalibrator::driftAcceleration(const EventContext& ctx,
+    double SpacePointCalibrator::driftAcceleration(const Acts::CalibrationContext& ctx,
                                                    const CalibratedSpacePoint& spacePoint) const  {
         if(spacePoint.type() == xAOD::UncalibMeasType::MdtDriftCircleType) {
-            const MuonCalib::MdtFullCalibData* calibConsts = m_mdtCalibrationTool->getCalibConstants(ctx, spacePoint.spacePoint()->identify());
+            const MuonCalib::MdtFullCalibData* calibConsts = m_mdtCalibrationTool->getCalibConstants(*ctx.get<const EventContext*>(), spacePoint.spacePoint()->identify());
             const std::optional<double> driftTime = calibConsts->rtRelation->tr()->driftTime(spacePoint.driftRadius());
             return calibConsts->rtRelation->rt()->driftAcceleration(driftTime.value_or(0.));
         }
         return 0.;
     }
 
-
     std::pair<double, double> SpacePointCalibrator::calibrateMM(const EventContext& ctx, 
-                                                                const ActsGeometryContext& gctx,
+                                                                const ActsTrk::GeometryContext& gctx,
                                                                 const xAOD::MMCluster& cluster, 
                                                                 const Amg::Vector3D& globalPos, 
                                                                 const Amg::Vector3D& globalDir) const {
@@ -349,7 +353,7 @@ namespace MuonR4{
     }
 
     std::pair<double, double> SpacePointCalibrator::calibratesTGC(const EventContext& /*ctx*/, 
-                                                                  const ActsGeometryContext& gctx, 
+                                                                  const ActsTrk::GeometryContext& gctx, 
                                                                   const xAOD::sTgcStripCluster& cluster,
                                                                   std::optional<double> posAlongTheStrip, 
                                                                   const Amg::Vector3D& globalPos, 
@@ -366,7 +370,7 @@ namespace MuonR4{
         return std::make_pair(cluster.localPosition<1>()[0], cluster.localCovariance<1>()(0,0));
     }
     void SpacePointCalibrator::calibrateCombinedPrd(const EventContext& /*ctx*/, 
-                                                    const ActsGeometryContext& /*gctx*/,
+                                                    const ActsTrk::GeometryContext& /*gctx*/,
                                                     const xAOD::CombinedMuonStrip* combinedPrd,
                                                     ActsTrk::MutableTrackContainer::TrackStateProxy state) const {
         const auto sl = ActsTrk::detail::xAODUncalibMeasCalibrator::pack(combinedPrd);
@@ -424,7 +428,7 @@ namespace MuonR4{
         
 
         const auto* muonMeas = ActsTrk::detail::xAODUncalibMeasCalibrator::unpack(link);
-        const ActsGeometryContext* gctx = geoctx.get<const ActsGeometryContext*>();
+        const ActsTrk::GeometryContext* gctx = geoctx.get<const ActsTrk::GeometryContext*>();
         const EventContext* ctx = cctx.get<const EventContext*>();
         ATH_MSG_VERBOSE("Calibrate measurement "<<m_idHelperSvc->toString(xAOD::identify(muonMeas))
                      <<" @ surface "<<trackState.referenceSurface().geometryId());
@@ -446,7 +450,9 @@ namespace MuonR4{
                 calibInput.setClosestApproach(trackPos);
                 //calibInput.setTimeOfFlight(trackPars.parameters()[Acts::eBoundTime]);
                 calibInput.setTrackDirection(trackDir, true);
-                const double driftSign = sign(trackPars.parameters()[Acts::eBoundLoc0]);
+                const double driftSign = m_MdtSignFromSegment ? 
+                                         static_cast<double>(dec_trackSign(*dc)) :
+                                         sign(trackPars.parameters()[Acts::eBoundLoc0]);
 
                 /** Vast majority of the measurements are ordinary drift tubes */
                 if (ATH_LIKELY(muonMeas->numDimensions() == 1)) {
@@ -599,6 +605,16 @@ namespace MuonR4{
                 break;
             } default: {
                 THROW_EXCEPTION("The parsed measurement is not a muon measurement. Please check.");
+            }
+        }
+    }
+    void SpacePointCalibrator::stampSignsOnMeasurements(const xAOD::MuonSegment& segment) const {
+        const auto [segPos, segLine] = makeLine(localSegmentPars(segment));
+        const Segment* detSeg = MuonR4::detailedSegment(segment);
+        for (const auto& meas : detSeg->measurements()) {
+            if (meas->type() == xAOD::UncalibMeasType::MdtDriftCircleType){
+                dec_trackSign(*meas->spacePoint()->primaryMeasurement()) =
+                    SeedingAux::strawSign(segPos, segLine, *meas);
             }
         }
     }

@@ -4,7 +4,7 @@
 atlas_subdir( PersistentDataModel )
 
 # External dependencies:
-find_package( CORAL COMPONENTS CoralBase CoralKernel RelationalAccess )
+find_package( CORAL COMPONENTS CoralBase )
 find_package( UUID )
 
 # Component(s) in the package:
@@ -13,7 +13,7 @@ atlas_add_library( PersistentDataModel
                    PUBLIC_HEADERS PersistentDataModel
                    INCLUDE_DIRS ${CORAL_INCLUDE_DIRS}
                    PRIVATE_INCLUDE_DIRS ${UUID_INCLUDE_DIRS}
-                   LINK_LIBRARIES ${CORAL_LIBRARIES} AthenaKernel CxxUtils GaudiKernel
+                   LINK_LIBRARIES ${CORAL_LIBRARIES} AthenaKernel CxxUtils SGCoreLib GaudiKernel
                    PRIVATE_LINK_LIBRARIES ${UUID_LIBRARIES} SGTools )
 
 atlas_add_dictionary( PersistentDataModelDict
@@ -24,5 +24,10 @@ atlas_add_dictionary( PersistentDataModelDict
 # Unit test for Token legacy OID format support
 atlas_add_test( tokenLegacyOID_test
                 SOURCES test/tokenLegacyOID_test.cxx
+                LINK_LIBRARIES PersistentDataModel
+                POST_EXEC_SCRIPT nopost.sh )
+
+atlas_add_test( guidFallback_test
+                SOURCES test/guidFallback_test.cxx
                 LINK_LIBRARIES PersistentDataModel
                 POST_EXEC_SCRIPT nopost.sh )

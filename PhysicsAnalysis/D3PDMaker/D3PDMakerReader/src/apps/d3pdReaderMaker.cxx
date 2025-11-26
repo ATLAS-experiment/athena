@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -85,7 +85,7 @@ StatusCode extractVariables( const std::string& file_name, const std::string& tr
 
 /// A convenience declaration to save myself some typeing
 namespace po = boost::program_options;
-
+//coverity[root_function]
 int main ATLAS_NOT_THREAD_SAFE ( int argc, char* argv[] ) {
    // Let's disable the ROOT warnings:
    gErrorIgnoreLevel = kError;
@@ -400,7 +400,7 @@ StatusCode extractVariables( const std::string& file_name, const std::string& tr
          std::string key_name = key->GetName();
          if( ( key_name.find( "CollectionTree" ) == key_name.npos ) &&
              ( key->GetClassName() == std::string( "TTree" ) ) ) {
-            name = key_name;
+            name = std::move(key_name);
             std::cout << "Assuming that the D3PD tree is called: " << name
                       << std::endl;
             break;

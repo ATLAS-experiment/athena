@@ -719,9 +719,8 @@ double EnhancedBiasWeighter::getAverageMu() const
 }
 
 
-StatusCode EnhancedBiasWeighter::addBranches() const
+StatusCode EnhancedBiasWeighter::addBranches(const EventContext& ctx) const
 {
-  const EventContext& ctx = Gaudi::Hive::currentContext();
   // Set up the decorator
   SG::AuxElement::Decorator< double >   decoratorEBWeight("EnhancedBiasWeight"); 
   SG::AuxElement::Decorator< double >   decoratorEBLivetime("EnhancedBiasLivetime"); 

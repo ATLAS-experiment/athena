@@ -44,17 +44,6 @@ def FullListOfSmartContainers(flags=None):
       "AntiKt4EMPFlowLowPtJets",
       "AntiKt2LCTopoJets",
       "AntiKtVR30Rmax4Rmin02PV0TrackJets",
-      "BTagging_AntiKt4EMPFlow",
-      "BTagging_AntiKt4EMPFlow_expert",
-      "AntiKt4EMPFlowJets_FTAG",
-      "BTagging_AntiKt4UFOCSSK",
-      "BTagging_AntiKt4UFOCSSK_expert",
-      "BTagging_AntiKtVR30Rmax4Rmin02Track_expert",
-      "AntiKtVR30Rmax4Rmin02Track_FTAG",
-      "BTagging_AntiKt4EMTopo",
-      "BTagging_AntiKtVR30Rmax4Rmin02Track",
-      "BTagging_AntiKt4HI",
-      "BTagging_DFAntiKt4HI",
       "InDetTrackParticles",
       "InDetLargeD0TrackParticles",
       "PrimaryVertices",
@@ -72,6 +61,7 @@ def FullListOfSmartContainers(flags=None):
       "HLT_TrigTauRecMerged_MVA",
       "HLT_BJetTriggerByYearContent",
       "HLT_FULL_EDM",
+      "HLT_DiTauJets",
    ]
 
    if flags is not None and flags.Tracking.doPseudoTracking:

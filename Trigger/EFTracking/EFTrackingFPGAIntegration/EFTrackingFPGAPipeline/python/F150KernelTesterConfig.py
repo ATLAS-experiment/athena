@@ -7,17 +7,19 @@ def KernelTesterCfg(flags, name = 'F150BenchmarkAlg', **kwarg):
     acc = ComponentAccumulator()
 
     kwarg.setdefault('bdfID', flags.FPGADataPrep.bdfID) # On the testbed
-    kwarg.setdefault('xclbin', '/eos/project-a/atlas-eftracking/FPGA_compilation/FPGA_compilation_hw/F150_i/kernels.hw.xclbin')
+    kwarg.setdefault('xclbin', flags.FPGADataPrep.xclbin)
     
-    kwarg.setdefault('RunSlicing', True) 
+    kwarg.setdefault('RunSlicing', False) 
     kwarg.setdefault('RunInsideOut', False) 
     kwarg.setdefault('RunInsideOutOnSlicingEngine', False) 
-    kwarg.setdefault('RunFullF150', False) 
+    kwarg.setdefault('RunFullF150', True) 
+    kwarg.setdefault('outputTextFile', False) 
+    kwarg.setdefault('doEmulation', False) 
 
     kwarg.setdefault('SlicingEngineInputName', 'configurableLengthWideLoader') 
-    kwarg.setdefault('SlicingEngineOutputName', 'dynamicLengthWideUnloader') 
+    kwarg.setdefault('SlicingEngineOutputName', 'dynamicLengthWideUnloader')  
 
-    kwarg.setdefault('InsideOutInputName', 'mem_read') 
+    kwarg.setdefault('InsideOutInputName', 'krnl_mm2s') 
     kwarg.setdefault('InsideOutOutputName', 'mem_write') 
 
     kwarg.setdefault('PixelClusterKernelName','pixel_clustering_tool')
@@ -26,6 +28,8 @@ def KernelTesterCfg(flags, name = 'F150BenchmarkAlg', **kwarg):
     kwarg.setdefault('PixelEDMPrepKernelName', 'PixelEDMPrep')
     kwarg.setdefault('StripEDMPrepKernelName', 'StripEDMPrep')
 
+    kwarg.setdefault('FPGATrackSimHitKey_1st', 'FPGAHits_1st_reg' + str(flags.Trigger.FPGATrackSim.regionList[0]))
+    kwarg.setdefault('FPGATrackSimTrack1stKey', 'FPGATracks_1st_reg' + str(flags.Trigger.FPGATrackSim.regionList[0]))
 
     # Set up Cluster maker tool
     from EFTrackingFPGAPipeline.DataPrepConfig import xAODClusterMakerCfg

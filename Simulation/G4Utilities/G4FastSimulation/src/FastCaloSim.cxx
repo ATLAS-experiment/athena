@@ -10,9 +10,6 @@
 #include "ISF_FastCaloSimEvent/TFCSTruthState.h"
 #include "ISF_FastCaloSimEvent/TFCSExtrapolationState.h"
 
-// Random generator includes
-#include "AthenaKernel/RNGWrapper.h"
-
 // Geant4 particle includes
 #include "G4Gamma.hh"
 #include "G4Electron.hh"
@@ -22,6 +19,7 @@
 
 //Geant4
 #include "G4ParticleTable.hh"
+#include "Randomize.hh"
 
 // HepMCHelpers include
 #include "TruthUtils/HepMCHelpers.h"
@@ -34,8 +32,6 @@
 
 FastCaloSim::FastCaloSim(const std::string& name,
                          G4Region* region,
-                         const ServiceHandle<IAthRNGSvc>& rndmGenSvc,
-                         const std::string& randomEngineName,
                          const PublicToolHandle<IFastCaloSimCaloTransportation>& FastCaloSimCaloTransportation,
                          const PublicToolHandle<IFastCaloSimCaloExtrapolation>& FastCaloSimCaloExtrapolation,
                          const PublicToolHandle<IG4CaloTransportTool>& G4CaloTransportTool,
@@ -44,10 +40,9 @@ FastCaloSim::FastCaloSim(const std::string& name,
                          const std::string& CaloCellContainerSDName,
                          bool doG4Transport,
                          bool doPunchThrough,
-                         FastCaloSimTool * FastCaloSimTool)
+                         FastCaloSimTool * /*FastCaloSimTool*/)
 
 : G4VFastSimulationModel(name, region),
-  m_rndmGenSvc(rndmGenSvc), m_randomEngineName(randomEngineName),
   m_FastCaloSimCaloTransportation(FastCaloSimCaloTransportation), 
   m_FastCaloSimCaloExtrapolation(FastCaloSimCaloExtrapolation),
   m_G4CaloTransportTool(G4CaloTransportTool),
@@ -55,22 +50,8 @@ FastCaloSim::FastCaloSim(const std::string& name,
   m_FastCaloSimSvc(FastCaloSimSvc),
   m_CaloCellContainerSDName(CaloCellContainerSDName),
   m_doG4Transport(doG4Transport),
-  m_doPunchThrough(doPunchThrough),
-  m_FastCaloSimTool(FastCaloSimTool)
+  m_doPunchThrough(doPunchThrough)
 {
-}
-
-void FastCaloSim::StartOfAthenaEvent(const EventContext& ctx ){
-  
-  m_rngWrapper = m_rndmGenSvc->getEngine(m_FastCaloSimTool, m_randomEngineName);
-  m_rngWrapper->setSeed( m_randomEngineName, ctx );
-
-  return;
-}
-
-void FastCaloSim::EndOfAthenaEvent(const EventContext&){
-
-  return;
 }
 
 
@@ -181,7 +162,7 @@ G4bool FastCaloSim::ModelTrigger(const G4FastTrack& fastTrack)
 void FastCaloSim::DoIt(const G4FastTrack& fastTrack, G4FastStep& fastStep)
 {
 
-  TFCSSimulationState simState(*m_rngWrapper);
+  TFCSSimulationState simState(G4Random::getTheEngine());
   TFCSTruthState truthState;
   TFCSExtrapolationState extrapolState;
   
@@ -275,7 +256,7 @@ void FastCaloSim::DoIt(const G4FastTrack& fastTrack, G4FastStep& fastStep)
     for (unsigned int i = 0; i < 24; i++){simEfrac.push_back(simState.Efrac(i));}
 
     // run actual method (no return, it will do fastStep.CreateSecondaryTrack(...) under the hood)
-    m_PunchThroughSimWrapper->DoPunchThroughSim(*ptable, m_rngWrapper, simE, simEfrac, fastTrack, fastStep);
+    m_PunchThroughSimWrapper->DoPunchThroughSim(*ptable, G4Random::getTheEngine(), simE, std::move(simEfrac), fastTrack, fastStep);
   }
 
   // Clean up the auxiliary info from the simulation state

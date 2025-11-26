@@ -125,7 +125,7 @@ StatusCode TrigT1Run3ZDC::execute(const EventContext& ctx) const {
 
   // access LUCROD data
 
-  // use readhandle to retrive lucrodCollection
+  // use readhandle to retrieve lucrodCollection
   SG::ReadHandle<ZdcLucrodDataContainer> lucrodCollection(m_zldContainerName,ctx);
   
   for (const ZdcLucrodData *zld : *lucrodCollection) {
@@ -153,7 +153,7 @@ StatusCode TrigT1Run3ZDC::execute(const EventContext& ctx) const {
         continue;
       }
 
-      // retrive what side, module, and gain we are reading out
+      // retrieve what side, module, and gain we are reading out
       int side = ZdcLucrodMapRun3::getInstance()->getLucrod(
           lucrod_id)["side"][lucrod_channel];
       int module = ZdcLucrodMapRun3::getInstance()->getLucrod(
@@ -178,7 +178,7 @@ StatusCode TrigT1Run3ZDC::execute(const EventContext& ctx) const {
           counter++;
         }
       }
-      // retrive Trig Avg amp for debugging
+      // retrieve Trig Avg amp for debugging
       // from both LG and HG modules
       if (side * gain * module == 3) {
         trigAvgAHG = zld->GetTrigAvgA();

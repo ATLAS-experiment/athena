@@ -452,7 +452,7 @@ int         LArMiniFCAL_ID::initLevelsFromDict()
   m_ETA_INDEX         = 999 ;
   m_PHI_INDEX         = 999 ;
 
-  IdDictField* field = dict()->find_field("subdet") ;
+  const IdDictField* field = dict()->find_field("subdet") ;
   if (field) {
     m_LAR_INDEX = field->index();
   }

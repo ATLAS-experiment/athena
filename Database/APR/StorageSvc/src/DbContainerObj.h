@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //====================================================================
@@ -17,6 +17,7 @@
 #include "StorageSvc/DbDatabase.h"
 #include "StorageSvc/DbAccessObj.h"
 #include "StorageSvc/DbContainer.h"
+#include "POOLCore/DbPrint.h"
 
 /*
  *  POOL namespace declaration
@@ -46,10 +47,8 @@ namespace pool  {
     explicit DbObjectHolder(DbObject* p) : m_obj(p) {}
     int release();
   };
-  class DbContainerObj : public  DbAccessObj<DbObject*, DbObjectHolder >  {
+  class DbContainerObj : public  DbAccessObj<DbObject*, DbObjectHolder >, public APRMessaging {
   private:
-    typedef DbObjectHandle<DbObject> ObjHandle;
-
     /// Pointer to interface of the technology dependent part
     IDbContainer*                 m_info;
     /// Container token
@@ -109,35 +108,17 @@ namespace pool  {
     /// Access options
     DbStatus getOption(DbOption& refOpt);
 
-    /// Remove the transient representation of the object from memory
-    DbStatus remove(ObjHandle& objH);
-    /// Add an object to the container identified by its handle
-    DbStatus save(DbObjectHandle<DbObject>& objH,
-                  const DbTypeInfo* typ);
-
-
     //@{
 
-    /// In place allocation of raw memory
-    void* allocate(unsigned long siz, DbContainer& cntH, ShapeH shape);
+    /// Store object in location
+    DbStatus store(const void* object, DbContainer& cntH, ShapeH shape);
 
     /// In place allocation of object location
     DbStatus allocate(DbContainer& cntH, const void* object, ShapeH shape, Token::OID_t& oid);
 
-    /// In place free of raw memory
-    DbStatus free(void* ptr, DbContainer& cntH);
-
-    /// Save new object in the container and return its handle
-    /** @param  cntH      [IN]   Handle to container object.
-      * @param  linkH     [OUT]  Internal OID to identify object.
-      *
-      * @return DbStatus code indicating success or failure.
-      */
-    DbStatus save(DbContainer& cntH, const void* object, ShapeH shape, Token::OID_t& linkH);
-
     /// Select object in the container identified by its handle
-    DbStatus load( void** ptr, ShapeH shape, 
-                   const Token::OID_t& linkH, 
+    DbStatus load( void** ptr, ShapeH shape,
+                   const Token::OID_t& linkH,
                    Token::OID_t&       oid,
                    bool          any_next);
     //@}

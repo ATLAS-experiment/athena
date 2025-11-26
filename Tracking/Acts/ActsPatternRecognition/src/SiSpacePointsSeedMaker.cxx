@@ -13,7 +13,6 @@
 #include "InDetReadoutGeometry/SiDetectorElement.h"
 #include "SiSPSeededTrackFinderData/SiSpacePointsSeedMakerEventData.h"
 
-#include "ActsEvent/Seed.h"
 #include "SiSpacePoint/SCT_SpacePoint.h"
 #include "SiSpacePoint/PixelSpacePoint.h"
 #include "InDetPrepRawData/PixelClusterCollection.h"
@@ -867,7 +866,8 @@ namespace ActsTrk {
     std::array<const Trk::SpacePoint*, 3> spacePoints {};
     std::array<ITk::SiSpacePointForSeed*, 3> stripSpacePointsForSeeds {};
 
-    for (const ActsTrk::Seed* seed : seedPtrs) {
+    for (const ActsTrk::Seed seedProxy : seedPtrs) {
+      const ActsTrk::Seed* seed = &seedProxy;  // keep old-style seed as pointer
       // Retrieve/make space points
       if (not m_useClusters) {
 	// Get the space point from the element link
@@ -994,7 +994,8 @@ namespace ActsTrk {
     std::array<const Trk::SpacePoint*, 3> spacePoints {nullptr, nullptr, nullptr};
     std::array<ITk::SiSpacePointForSeed*, 3> pixelSpacePointsForSeeds {nullptr, nullptr, nullptr};
 
-    for (const ActsTrk::Seed* seed : seedPtrs) {
+    for (const ActsTrk::Seed seedProxy : seedPtrs) {
+      const ActsTrk::Seed* seed = &seedProxy;  // keep old-style seed as pointer
       std::array<std::size_t, 3> indexes {
 	seed->sp()[0]->index(),
 	  seed->sp()[1]->index(),

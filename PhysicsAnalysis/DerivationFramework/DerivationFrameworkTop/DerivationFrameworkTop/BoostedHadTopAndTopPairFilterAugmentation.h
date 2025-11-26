@@ -30,18 +30,16 @@ namespace DerivationFramework {
   public:
     BoostedHadTopAndTopPairFilterAugmentation(const std::string& t, const std::string& n, const IInterface* p);
     ~BoostedHadTopAndTopPairFilterAugmentation();
-    StatusCode initialize();
-    virtual StatusCode addBranches() const;
-
-
+    virtual StatusCode initialize() override final;
+    virtual StatusCode addBranches(const EventContext& ctx) const override final;
 
   private:
 
     SG::ReadHandleKey<xAOD::EventInfo> m_eventInfoName{this, "EventInfoName", "EventInfo", ""};
-    SG::WriteDecorHandleKey<xAOD::EventInfo> m_ttbarSysPt_HighKey{this, "ttbarSysPt_HighKey", "TTbar350"};
-    SG::WriteDecorHandleKey<xAOD::EventInfo> m_HadTopPt_HighKey{this, "HadTopPt_HighKey", "HadTop350"};
-    SG::WriteDecorHandleKey<xAOD::EventInfo> m_ttbarSysPt_LowKey{this, "ttbarSysPt_LowKey", "TTbar150"};
-    SG::WriteDecorHandleKey<xAOD::EventInfo> m_HadTopPt_LowKey{this, "HadTopPt_LowKey", "HadTop200"};
+    SG::WriteDecorHandleKey<xAOD::EventInfo> m_ttbarSysPt_HighKey{this, "ttbarSysPt_HighKey", m_eventInfoName, "TTbar350"};
+    SG::WriteDecorHandleKey<xAOD::EventInfo> m_HadTopPt_HighKey{this, "HadTopPt_HighKey", m_eventInfoName, "HadTop350"};
+    SG::WriteDecorHandleKey<xAOD::EventInfo> m_ttbarSysPt_LowKey{this, "ttbarSysPt_LowKey", m_eventInfoName, "TTbar150"};
+    SG::WriteDecorHandleKey<xAOD::EventInfo> m_HadTopPt_LowKey{this, "HadTopPt_LowKey", m_eventInfoName, "HadTop200"};
     ToolHandle<DerivationFramework::BoostedHadTopAndTopPairFilterTool> m_filterTool_Low{this, "FilterTool_Low", ""};
     ToolHandle<DerivationFramework::BoostedHadTopAndTopPairFilterTool> m_filterTool_High{this, "FilterTool_High", ""};
 

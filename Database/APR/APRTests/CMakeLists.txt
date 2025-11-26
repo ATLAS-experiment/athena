@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( APRTests )
@@ -52,6 +52,7 @@ _add_test( StorageSvc_MultipleIterators )
 _add_test( StorageSvc_ParallelReadWrite )
 _add_test( StorageSvc_TransientMembers DICTHEADER StorageSvc_TransientMembers/TestClassWithTransients.h )
 _add_test( PersistencySvc_Functionality )
+_add_test( PersistencySvc_ExtraFunctionality )
 _add_test( PersistencySvc_FileCatalogOperations )
 _add_test( PersistencySvc_FileOpenWithoutCatalog )
 _add_test( PersistencySvc_Parameters )

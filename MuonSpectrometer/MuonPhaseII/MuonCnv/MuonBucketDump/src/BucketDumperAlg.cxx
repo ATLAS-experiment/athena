@@ -95,7 +95,7 @@ namespace MuonR4{
             }
         }
 
-        const ActsGeometryContext* gctx{nullptr};
+        const ActsTrk::GeometryContext* gctx{nullptr};
         ATH_CHECK(SG::get(gctx, m_geoCtxKey, ctx));
 
         const SpacePointContainer* spContainer{nullptr};
