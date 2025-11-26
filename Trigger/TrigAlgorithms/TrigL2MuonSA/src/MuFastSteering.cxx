@@ -110,9 +110,8 @@ StatusCode MuFastSteering::initialize()
   ATH_MSG_DEBUG("Multi-TrackMode: " << m_multiTrack << "/ run for endcap RoI -> " << m_doEndcapForl2mt);
 
   //
-  // Initialize the calibration streamer  
-  // 
-  
+  // Initialize the calibration streamer
+  ATH_CHECK(m_calStreamer.retrieve(EnableTool(m_doCalStream)));
   if (m_doCalStream) {
     ATH_CHECK(m_jobOptionsSvc.retrieve());
 
@@ -132,8 +131,6 @@ StatusCode MuFastSteering::initialize()
       ATH_MSG_DEBUG("Could not parse MuonHltCalibrationConfig.MuonCalBufferSize from JobOptionsSvc");
     }
     
-    // retrieve the calibration streamer
-    ATH_CHECK(m_calStreamer.retrieve());
     // set properties
     m_calStreamer->setBufferName(m_calBufferName);
     ATH_MSG_DEBUG("Initialized the Muon Calibration Streamer. Buffer name: " << m_calBufferName 
