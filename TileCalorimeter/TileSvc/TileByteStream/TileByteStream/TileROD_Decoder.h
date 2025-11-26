@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TILEBYTESTREAM_TILEROD_DECODER_H
@@ -933,8 +933,8 @@ void TileROD_Decoder::fillCollection(const ROBData * rob,
   TileRawChannelCollection::ID frag_id = v.identify();
   SG::ReadCondHandle<TileHid2RESrcID> hid2re{m_hid2RESrcIDKey};
   const std::vector<uint32_t> & drawer_info = hid2re->getDrawerInfo(frag_id);
-  int bs_frag_id = drawer_info.size()>1 ? drawer_info[1] : frag_id;
-  int drawer_type = drawer_info.size()>2 ? drawer_info[2] : -1;
+  int bs_frag_id = drawer_info.size()>1 ? static_cast<int>(drawer_info[1]) : frag_id;
+  int drawer_type = drawer_info.size()>2 ? static_cast<int>(drawer_info[2]) : -1;
 
   uint32_t mask = 0xFFFF;
 
