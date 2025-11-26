@@ -367,7 +367,7 @@ Trk::ConeSurface::pathCorrection(const Amg::Vector3D& pos, const Amg::Vector3D& 
   double sgn = posLocal.z() > 0. ? -1. : +1.;
   Amg::Vector3D normalC(cos(phi) * bounds().cosAlpha(), sin(phi) * bounds().cosAlpha(), sgn * bounds().sinAlpha());
   if (applyTransform)
-    normalC = transform() * normalC;
+    normalC = transform().linear() * normalC;
   // back in global frame
   double cAlpha = normalC.dot(mom.unit());
   return (cAlpha != 0.) ? std::abs(1. / cAlpha) : 1.; // ST undefined for cAlpha=0
