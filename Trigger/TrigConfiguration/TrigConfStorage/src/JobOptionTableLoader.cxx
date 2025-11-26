@@ -18,7 +18,6 @@
 #include "RelationalAccess/ICursor.h"
 #include "RelationalAccess/IQuery.h"
 
-#include "boost/lexical_cast.hpp"
 #include "boost/regex.hpp"
 
 #include <set>
@@ -518,7 +517,7 @@ TrigConf::JobOptionTableLoader::assembleSplitParameters2( JobOptionTable& jot, c
 
          const std::string& comp_alias = splitpar.alias;
          std::string par_name(matches[1].first, matches[1].second);
-         unsigned int pos = boost::lexical_cast<unsigned int,std::string>(string(matches[2].first, matches[2].second)) - 1;  // start with __IPC__01 
+         unsigned int pos = static_cast<unsigned int>(std::stoul(std::string(matches[2].first, matches[2].second))) - 1;  // start with __IPC__01 
 
          std::vector<std::string>& values = assembled_params[ AssembledPar(comp_alias, par_name) ];
 

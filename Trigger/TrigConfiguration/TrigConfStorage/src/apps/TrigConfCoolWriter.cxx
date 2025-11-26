@@ -38,8 +38,6 @@
 #include "RelationalAccess/IDatabaseServiceDescription.h"
 #include "RelationalAccess/IDatabaseServiceSet.h"
 
-#include "boost/lexical_cast.hpp"
-
 #include <iomanip>
 #include <stdexcept>
 #include <sstream>
@@ -48,7 +46,6 @@
 
 #include "TrigConfCoolWriter.h"
 
-using boost::lexical_cast;
 using namespace std;
 using namespace cool;
 using namespace TrigConf;
@@ -1516,17 +1513,17 @@ TrigConfCoolWriter::readL1Menu(unsigned int run, CTPConfig & ctpc)
       if ( thr->name()=="JetWeights" ) {
          if(!isRun2) {
             for ( const string& weights : split( thr->cableName(),",")  )
-               ci.addJetWeight( boost::lexical_cast<int, string>(weights) );
+               ci.addJetWeight( std::stoi(weights) );
          }
       }
       else if ( thr->name()=="METSigParams" ) {
          vector<string> metvals = split( thr->cableName(),",");
-         int XSSigmaScale  = boost::lexical_cast<int, string>(metvals[0]);
-         int XSSigmaOffset = boost::lexical_cast<int, string>(metvals[1]);
-         int XEmin         = boost::lexical_cast<int, string>(metvals[2]);
-         int XEmax         = boost::lexical_cast<int, string>(metvals[3]);
-         int TESqrtMin     = boost::lexical_cast<int, string>(metvals[4]);
-         int TESqrtMax     = boost::lexical_cast<int, string>(metvals[5]);
+         int XSSigmaScale  = std::stoi(metvals[0]);
+         int XSSigmaOffset = std::stoi(metvals[1]);
+         int XEmin         = std::stoi(metvals[2]);
+         int XEmax         = std::stoi(metvals[3]);
+         int TESqrtMin     = std::stoi(metvals[4]);
+         int TESqrtMax     = std::stoi(metvals[5]);
          ci.metSigParam().setValues( XSSigmaScale, XSSigmaOffset,
                                      XEmin, XEmax, TESqrtMin, TESqrtMax);
       }

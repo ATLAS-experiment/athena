@@ -4,8 +4,9 @@
 
 #include "TrigConfData/L1ThrExtraInfo.h"
 
-#include <boost/lexical_cast.hpp>
 #include <stdexcept>
+#include <cmath>
+
 
 using namespace std;
 
@@ -819,15 +820,15 @@ TrigConf::L1ThrExtraInfo_MU::load()
    {
       DataStructure ds = m_extraInfo["roads"].getObject("rpc");
       for( const auto & x : ds.data() ) {
-         m_rpcPtMap.emplace( boost::lexical_cast<unsigned int, std::string>(x.first),
-                             boost::lexical_cast<unsigned int, std::string>(x.second.data()));
+        m_rpcPtMap.emplace( static_cast<unsigned int>(std::stoul(x.first)),
+                            static_cast<unsigned int>(std::stoul(x.second.data())));
      }
    }
    {
       DataStructure ds = m_extraInfo["roads"].getObject("tgc");
       for( auto & x : ds.data() ) {
-         m_tgcPtMap.emplace( boost::lexical_cast<unsigned int, std::string>(x.first),
-                             boost::lexical_cast<unsigned int, std::string>(x.second.data()));
+         m_tgcPtMap.emplace( static_cast<unsigned int>(std::stoul(x.first)),
+                             static_cast<unsigned int>(std::stoul(x.second.data())));
       }
    }
    for( auto & x : m_extraInfo["exclusionLists"].data() ) {
@@ -837,7 +838,7 @@ TrigConf::L1ThrExtraInfo_MU::load()
          const std::string & sectorName = list.second.get_child("sectorName").get_value<std::string>();
          std::vector<unsigned int> rois;
          for( auto & roi : list.second.get_child("rois") ) {
-            rois.push_back( boost::lexical_cast<unsigned int, std::string>( roi.second.data() ) );
+            rois.push_back( static_cast<unsigned int>(std::stoul( roi.second.data() )) );
          }
          roisBySector.emplace(sectorName, std::move(rois));
       }

@@ -36,8 +36,6 @@
 #include <stdexcept>
 #include <typeinfo>
 
-#include "boost/lexical_cast.hpp"
-
 using namespace std;
 
 bool TrigConf::ThresholdConfigLoader::load( ThresholdConfig& thrConfig ) {
@@ -227,11 +225,11 @@ bool TrigConf::ThresholdConfigLoader::load( ThresholdConfig& thrConfig ) {
             ttv->setName     (row["TTV.L1TTV_NAME"].data<std::string>());
             ttv->setVersion  (row["TTV.L1TTV_VERSION"].data<int>());
             ttv->setType     (row["TTV.L1TTV_TYPE"].data<std::string>());
-            float ptcut = boost::lexical_cast<float,std::string>(row["TTV.L1TTV_PT_CUT"].data<std::string>());
+            float ptcut = std::stof(row["TTV.L1TTV_PT_CUT"].data<std::string>());
             string emisolation = row["TTV.L1TTV_EM_ISOLATION"].data<std::string>();
             string hadisolation = row["TTV.L1TTV_HAD_ISOLATION"].data<std::string>();
             string hadveto = row["TTV.L1TTV_HAD_VETO"].data<std::string>();
-            float priority = boost::lexical_cast<float,std::string>(row["TTV.L1TTV_PRIORITY"].data<std::string>());
+            float priority = std::stof(row["TTV.L1TTV_PRIORITY"].data<std::string>());
             ttv->setPtcut    (ptcut);
             ttv->setPriority (priority);
 
@@ -245,16 +243,16 @@ bool TrigConf::ThresholdConfigLoader::load( ThresholdConfig& thrConfig ) {
                   throw std::runtime_error( "ThresholdConfigLoader >> ClusterThresholdValue not available" );
                }
 
-               if(hadveto=="USEISOBITS" || boost::lexical_cast<int,std::string>(hadveto)==99 ) {
+               if(hadveto=="USEISOBITS" || std::stoi(hadveto)==99 ) {
                   ctv.setEmIsolation( 63 );
                   ctv.setHadIsolation( 63 );
                   ctv.setHadVeto( 99 );
                   ctv.setIsolationMask( TrigConf::bin2uint(emisolation) );
                   ctv.setUseIsolationMask();
                } else {
-                  ctv.setEmIsolation( boost::lexical_cast<float,std::string>(emisolation) );
-                  ctv.setHadIsolation( boost::lexical_cast<float,std::string>(hadisolation) );
-                  ctv.setHadVeto( boost::lexical_cast<float,std::string>(hadveto) );
+                  ctv.setEmIsolation( std::stof(emisolation) );
+                  ctv.setHadIsolation( std::stof(hadisolation) );
+                  ctv.setHadVeto( std::stof(hadveto) );
                   ctv.setUseIsolationMask( false );
                }
 
