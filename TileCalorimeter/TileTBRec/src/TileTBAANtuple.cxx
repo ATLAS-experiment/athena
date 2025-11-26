@@ -1829,7 +1829,7 @@ StatusCode TileTBAANtuple::storeHitVector(const EventContext& ctx) {
     // determine type of frag
     int fragId = m_tileHWID->frag(hwid);
     drawerMap_iterator itr = m_drawerMap.find(fragId);
-    int drawerIndex = ( itr != m_drawerMap.end() ) ? (*itr).second : -1;
+    int drawerIndex = ( itr != m_drawerMap.end() ) ? static_cast<int>((*itr).second) : -1;
 
     if (drawerIndex < 0) {
       ATH_MSG_WARNING( "frag id 0x" << MSG::hex << fragId << MSG::dec <<" was not found among valid frag IDs when storing HITS!" );
@@ -1871,7 +1871,7 @@ StatusCode TileTBAANtuple::storeHitContainer(const EventContext& ctx) {
     // determine type of frag
     int fragId = hitCollection->identify();
     drawerMap_iterator itr = m_drawerMap.find(fragId);
-    int drawerIndex = ( itr != m_drawerMap.end() ) ? (*itr).second : -1;
+    int drawerIndex = ( itr != m_drawerMap.end() ) ? static_cast<int>((*itr).second) : -1;
 
     if (drawerIndex < 0) {
       if ( !hitCollection->empty() )
@@ -1964,7 +1964,7 @@ void TileTBAANtuple::storeHit(const TileHit *cinp, int fragType, int fragId,
   ATH_MSG_DEBUG( "HIT ene=" << ehit
                  << " time=" << thit
                  << " pmt-1=" << channel
-                 << " index " << m_drawerMap.find(fragId)->second );
+                 << " index " << m_drawerMap.at(fragId) );
 
 }
 StatusCode TileTBAANtuple::ntuple_clear() {
@@ -2419,6 +2419,7 @@ void TileTBAANtuple::getEta() {
 
       int runNumber = 0;
       float eta = 0;
+      //coverity[TAINTED_SCALAR]
       while ((runNumber != m_runNumber) && (!etafile.eof())) {
         etafile >> runNumber >> eta;
       }
