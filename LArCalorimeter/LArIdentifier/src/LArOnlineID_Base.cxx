@@ -552,9 +552,9 @@ int  LArOnlineID_Base::initialize_from_dictionary (const IdDictMgr& dict_mgr)
 
 
         if (m_bec_ft_impl.unpack(min) >= size) {
-            ATH_MSG_DEBUG("Min > " << size + " " << show_to_string(min) <<
-                          " " << m_bec_ft_impl.unpack(min) << " " <<
-                          min_hash);
+	  ATH_MSG_DEBUG("Min > " << size << " " << show_to_string(min) <<
+			" " << m_bec_ft_impl.unpack(min) << " " <<
+			min_hash);
         }
     }
 
