@@ -110,14 +110,12 @@ StatusCode TilePaterMonTool:: initialize()
   int runPeriod = m_cabling->runPeriod();
 
   if (runPeriod==3) {
-    std::vector<int> v = { 0x10d }; // LBA14 is demonstrator in RUN3
-
     if ( m_fragIDsToIgnoreDMUerrors.size() == 0) {
-      m_fragIDsToIgnoreDMUerrors = v;
+      m_fragIDsToIgnoreDMUerrors.push_back (0x10d); // LBA14 is demonstrator in RUN3
     }
 
     if ( m_fragIDsDemonstrators.empty()) {
-      m_fragIDsDemonstrators = std::move(v);
+      m_fragIDsDemonstrators.push_back (0x10d); // LBA14 is demonstrator in RUN3
     }
   }
 
