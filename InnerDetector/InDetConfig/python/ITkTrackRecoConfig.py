@@ -135,7 +135,7 @@ def ITkStoreTrackSeparateContainerCfg(flags,
                                       ClusterSplitProbContainer: str = "") -> ComponentAccumulator:
     result = ComponentAccumulator()
     extension = flags.Tracking.ActiveConfig.extension
-    if hasattr(flags.TrackOverlay, "ActiveConfig"):
+    if flags.hasCategory("TrackOverlay.ActiveConfig"):
        doTrackOverlay = getattr(flags.TrackOverlay.ActiveConfig, "doTrackOverlay", None)
     else:
        doTrackOverlay = flags.Overlay.doTrackOverlay
@@ -220,7 +220,7 @@ def ITkTrackRecoPassCfg(flags,
     extension = flags.Tracking.ActiveConfig.extension
     
     result = ComponentAccumulator()
-    if hasattr(flags.TrackOverlay, "ActiveConfig"):
+    if flags.hasCategory("TrackOverlay.ActiveConfig"):
        doTrackOverlay = getattr(flags.TrackOverlay.ActiveConfig, "doTrackOverlay", None)
     else:
        doTrackOverlay = flags.Overlay.doTrackOverlay
@@ -341,7 +341,7 @@ def ITkTrackFinalCfg(flags,
     if len(InputCombinedITkTracks) == 0:
         return result
     
-    if hasattr(flags.TrackOverlay, "ActiveConfig"):
+    if flags.hasCategory("TrackOverlay.ActiveConfig"):
        doTrackOverlay = getattr(flags.TrackOverlay.ActiveConfig, "doTrackOverlay", None)
     else:
        doTrackOverlay = flags.Overlay.doTrackOverlay
