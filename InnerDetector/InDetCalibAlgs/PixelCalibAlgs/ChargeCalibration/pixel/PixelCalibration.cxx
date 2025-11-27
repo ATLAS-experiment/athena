@@ -62,7 +62,6 @@ int main(int argc, char *argv[]) {
             printError();
             return 1;
         } 
-        
     }
     
     printf("%-14s = %s\n","Directory path",dpath.c_str());
