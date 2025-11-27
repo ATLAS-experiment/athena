@@ -320,7 +320,7 @@ StatusCode FixHepMC::execute() {
         if ( msgLvl( MSG::DEBUG ) ) HepMC::Print::line(ip);
       }
       // Only add to the toremove vector once, even if multiple tests match
-      if (bad_particle) toremove.push_back(ip);
+      if (bad_particle) toremove.push_back(std::move(ip));
     }
 
     // Properties before cleaning
@@ -329,7 +329,7 @@ StatusCode FixHepMC::execute() {
     // Do the cleaning
     if (!toremove.empty()) {
       ATH_MSG_DEBUG("Cleaning event record of " << toremove.size() << " bad particles");
-      for (auto part: toremove) evt->remove_particle(part);
+      for (auto part: toremove) evt->remove_particle(std::move(part));
     }
 
     if(m_purgeUnstableWithoutEndVtx) {
