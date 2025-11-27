@@ -9,7 +9,7 @@
  **/
 
 #include "IdDict/IdDictFieldImplementation.h"
- #include "GaudiKernel/MsgStream.h"
+#include "GaudiKernel/MsgStream.h"
 #include <iostream>
 #include <format>
 #include <string>

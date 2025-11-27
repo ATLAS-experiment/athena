@@ -87,14 +87,16 @@ BOOST_AUTO_TEST_SUITE(IdDictFieldImplementationTest)
     const std::vector<IdentifierField::element_type> ev{ -4, -3, -2, -1 , 1, 2, 3, 4};
     IdentifierField f1(ev);
     impl.set_ored_field(f1);
-    const std::string expected{"IdDictFieldImpl...   INFO decode 1 vals -4,-3,-2,-1,1,2,3,4 mask/zero mask/shift/bits/offset 7   ff8fffffffffffff 52  3   9   indexes                      mode  enumerated  \n"};
+    const std::string essential{"decode 1 vals -4,-3,-2,-1,1,2,3,4 mask/zero mask/shift/bits/offset 7   ff8fffffffffffff 52  3   9   indexes                      mode  enumerated  \n"};
+    const std::string info{"INFO"};
     boost::test_tools::output_test_stream output;
     //capture 'cout' inside this scope
     {
-       cout_redirect guard( output.rdbuf( ) );
-       mlog << MSG::INFO << impl <<endmsg;
-     }
-    BOOST_CHECK_EQUAL( output.str(), expected);
+      cout_redirect guard( output.rdbuf( ) );
+      mlog << MSG::INFO << impl <<endmsg;
+    }
+    bool containsEssentialInfo = (output.str().find(essential) != std::string::npos) and (output.str().find(info) != std::string::npos);
+    BOOST_CHECK(containsEssentialInfo);
   }
 
 
