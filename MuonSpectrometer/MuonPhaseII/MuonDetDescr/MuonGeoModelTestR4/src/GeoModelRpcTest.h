@@ -9,6 +9,7 @@
 #include <StoreGate/ReadHandleKey.h>
 #include <MuonIdHelpers/IMuonIdHelperSvc.h>
 #include <ActsGeometryInterfaces/GeometryContext.h>
+#include <MuonRecToolInterfacesR4/IRootVisualizationService.h>
 #include <MuonTesterTree/MuonTesterTree.h>
 #include <MuonTesterTree/IdentifierBranch.h>
 #include <MuonTesterTree/ThreeVectorBranch.h>
@@ -31,6 +32,10 @@ class GeoModelRpcTest : public AthHistogramAlgorithm{
         unsigned int cardinality() const override final { return 1; }
 
     private:
+      void visualizeStripPanel(const EventContext& ctx,
+                               const StripDesignPtr& design,
+                               const Identifier& detId,
+                               const bool measPhi) const;
       ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "IdHelperSvc", 
                                                 "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
 
@@ -96,6 +101,11 @@ class GeoModelRpcTest : public AthHistogramAlgorithm{
       MuonVal::VectorBranch<uint8_t>& m_stripPosGasGap{m_tree.newVector<uint8_t>("stripPosGasGap")};
       MuonVal::VectorBranch<uint8_t>& m_stripPosNum{m_tree.newVector<uint8_t>("stripPosNum")};
       MuonVal::VectorBranch<uint8_t>& m_stripDblPhi{m_tree.newVector<uint8_t>("stripPosDoubletPhi")};
+
+      /** @brief Service handle of the visualization service */
+      ServiceHandle<MuonValR4::IRootVisualizationService> m_visualSvc{this, "VisualSvc", "MuonValR4::RootVisualizationService"};
+      /** @brief Token to be presented to the visualization service  */
+      MuonValR4::IRootVisualizationService::ClientToken m_clientToken{};
   
 };
 }

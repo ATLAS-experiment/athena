@@ -6,6 +6,7 @@
 #include <ActsGeometryInterfaces/GeometryContext.h>
 #include <MuonReadoutGeometryR4/RpcReadoutElement.h>
 #include <EventPrimitives/EventPrimitivesToStringConverter.h>
+#include <MuonVisualizationHelpersR4/VisualizationHelpers.h>
 #include <fstream>
 
 namespace {
@@ -27,7 +28,13 @@ namespace MuonGMR4{
 
 StatusCode GeoModelRpcTest::initialize() {
     ATH_CHECK(m_idHelperSvc.retrieve());
-    ATH_CHECK(m_geoCtxKey.initialize());    
+    ATH_CHECK(m_geoCtxKey.initialize());
+    
+    m_clientToken.preFixName="GeoModelRpcTest";
+    m_clientToken.subDirectory = "RpcPlots";
+    m_clientToken.canvasLimit = -1;
+    ATH_CHECK(m_visualSvc.retrieve());
+    ATH_CHECK(m_visualSvc->registerClient(m_clientToken));
     /// Prepare the TTree dump
     ATH_CHECK(m_tree.init(this));
 
@@ -101,6 +108,43 @@ StatusCode GeoModelRpcTest::finalize() {
     ATH_CHECK(m_tree.write());
     return StatusCode::SUCCESS;
 }
+void GeoModelRpcTest::visualizeStripPanel(const EventContext& ctx,
+                                          const StripDesignPtr& design,
+                                          const Identifier& detId,
+                                          const bool measPhi) const {
+    if (!design) {
+        return;
+    }
+    const RpcIdHelper& idHelper{m_idHelperSvc->rpcIdHelper()};          
+    const std::string chName = std::format("{:}{:}{:}{:}R{:}Z{:}P{:}{:}",
+                                           m_idHelperSvc->stationNameString(detId),
+                                           std::abs(m_idHelperSvc->stationEta(detId)),
+                                           m_idHelperSvc->stationEta(detId) > 0 ? 'A' : 'C',
+                                           m_idHelperSvc->stationPhi(detId),
+                                           idHelper.doubletR(detId), idHelper.doubletZ(detId),
+                                           idHelper.doubletPhi(detId), measPhi ? "Phi" : "Eta");
+    auto canvas = m_visualSvc->prepareCanvas(ctx, m_clientToken, chName);
+    canvas->expandPad(-design->halfWidth(), -design->shortHalfHeight());
+    canvas->expandPad(design->halfWidth(), design->shortHalfHeight());
+    canvas->setAxisTitles("x [mm]", "y [mm]");
+    canvas->setRangeScale(1.1);
+    using namespace MuonValR4;
+    canvas->add(drawBox(Amg::Vector3D::Zero(),
+                        2.*design->halfWidth(),
+                        2.*design->shortHalfHeight(),
+                        kBlack, hollowFilling));
+    constexpr int oddFill = 3315;
+    constexpr int evenFill = 3351;
+    for (int strip = design->firstStripNumber(); strip <= design->numStrips(); ++strip) {
+        const Amg::Vector2D stripPos = design->center(strip).value_or(Amg::Vector2D::Zero());
+        canvas->add(drawBox(Amg::Vector3D{0., stripPos.x(), stripPos.y()},
+                            design->stripWidth(),
+                              2.*design->shortHalfHeight(), strip % 2 ? kBlue: kRed, 
+                              strip % 2 ? oddFill : evenFill));
+    }
+    canvas->add(drawLabel(std::format("{:}, #{:}-panel", m_idHelperSvc->toStringDetEl(detId),
+                                      measPhi ? "phi" : "eta"), 0.2, 0.05));
+}
 StatusCode GeoModelRpcTest::execute() {
     const EventContext& ctx{Gaudi::Hive::currentContext()};
 
@@ -120,7 +164,10 @@ StatusCode GeoModelRpcTest::execute() {
                       <<". But got instead "<<m_idHelperSvc->toStringDetEl(reElement->identify()));
          return StatusCode::FAILURE;
       }
-      ATH_CHECK(dumpToTree(ctx,gctx,reElement));
+      ATH_CHECK(dumpToTree(ctx, gctx, reElement));
+      visualizeStripPanel(ctx, reElement->getParameters().etaDesign, reElement->identify(), false);
+      visualizeStripPanel(ctx, reElement->getParameters().phiDesign, reElement->identify(), true);
+      
       const Amg::Transform3D globToLocal{reElement->globalToLocalTrans(gctx)};
       const Amg::Transform3D& localToGlob{reElement->localToGlobalTrans(gctx)};
       /// Closure test that the transformations actually close
@@ -131,12 +178,12 @@ StatusCode GeoModelRpcTest::execute() {
         return StatusCode::FAILURE;                  
       }
       const RpcIdHelper& id_helper{m_idHelperSvc->rpcIdHelper()};
-      for (unsigned int gasGap = 1; gasGap <= reElement->nGasGaps(); ++gasGap) {
+      for (unsigned gasGap = 1; gasGap <= reElement->nGasGaps(); ++gasGap) {
         for (int doubPhi = reElement->doubletPhi(); doubPhi <= reElement->doubletPhiMax(); ++doubPhi) {
             for (bool measPhi: {false, true}) {
-                unsigned int numStrip =  (measPhi ? reElement->nPhiStrips() :
-                                                    reElement->nEtaStrips());
-                for (unsigned int strip = 1; strip < numStrip ; ++strip) {
+                unsigned numStrip =  (measPhi ? reElement->nPhiStrips() :
+                                                reElement->nEtaStrips());
+                for (unsigned strip = 1; strip < numStrip ; ++strip) {
                     bool isValid{false};
                     const Identifier chId = id_helper.channelID(reElement->identify(),
                                                                 reElement->doubletZ(),
@@ -208,12 +255,12 @@ StatusCode GeoModelRpcTest::dumpToTree(const EventContext& ctx,
 
    const RpcIdHelper& id_helper{m_idHelperSvc->rpcIdHelper()};
       
-   for (unsigned int gasGap = 1; gasGap <= reElement->nGasGaps(); ++gasGap) {
+   for (unsigned gasGap = 1; gasGap <= reElement->nGasGaps(); ++gasGap) {
         for (int doubPhi = reElement->doubletPhi(); doubPhi <= reElement->doubletPhiMax(); ++doubPhi) {
             for (bool measPhi: {false, true}) {
-                unsigned int numStrip =  (measPhi ? reElement->nPhiStrips() :
+                unsigned numStrip =  (measPhi ? reElement->nPhiStrips() :
                                                     reElement->nEtaStrips());
-                for (unsigned int strip = 1; strip <= numStrip ; ++strip) {
+                for (unsigned strip = 1; strip <= numStrip ; ++strip) {
 
                     bool isValid{false};
                     const Identifier stripID = id_helper.channelID(reElement->identify(), 

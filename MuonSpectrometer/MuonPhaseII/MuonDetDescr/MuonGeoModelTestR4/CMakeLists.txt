@@ -12,7 +12,7 @@ atlas_add_component( MuonGeoModelTestR4
                      src/components/*.cxx src/*.cxx
                      LINK_LIBRARIES AthenaKernel StoreGateLib GeoModelUtilities MuonTesterTreeLib MuonCablingData
                                     GaudiKernel MuonReadoutGeometryR4 AthenaPoolUtilities CxxUtils
-                                    MuonVisualizationHelpersR4)
+                                    MuonVisualizationHelpersR4 MuonRecToolInterfacesR4)
 
 # Some functions here make heavy use of Eigen and are thus very slow in debug
 # builds.  Set up to allow forcing them to compile with optimization and
