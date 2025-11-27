@@ -380,7 +380,7 @@ StatusCode EvtInclusiveDecay::traverseDecayTree(HepMC::GenParticlePtr p,
         ATH_MSG_WARNING( ([&p, &v](){  std::stringstream ss;   HepMC::Print::line(ss,p); HepMC::Print::line(ss,v);  return ss.str();})());
       }
       for (auto itp: *v) {
-        ATH_CHECK(traverseDecayTree(itp,isToBeRemoved,visited,toBeDecayed) );
+        ATH_CHECK(traverseDecayTree(std::move(itp),isToBeRemoved,visited,toBeDecayed) );
       }
 
     }
