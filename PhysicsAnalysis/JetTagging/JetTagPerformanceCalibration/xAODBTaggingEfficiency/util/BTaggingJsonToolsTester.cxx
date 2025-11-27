@@ -66,14 +66,14 @@ int main ATLAS_NOT_THREAD_SAFE (int argc, char* argv[]) {
 
   std::string inputDAOD = argv[1];
   std::string JsonConfigFile = argv[2];
-  std::string TaggerName = argv[3];
+  std::string OutputName = argv[3];
   std::string OperatingPoint = argv[4];
   std::string JetCollection = "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets";
 
   asg::StandaloneToolHandle<IBTaggingSelectionJsonTool> sel_tool("BTaggingSelectionJsonTool/BTagSelTest");
   StatusCode sel_code1 = sel_tool.setProperty( "MaxEta", 2.5 );
   StatusCode sel_code2 = sel_tool.setProperty( "MinPt",  0 );
-  StatusCode sel_code3 = sel_tool.setProperty( "TaggerName", TaggerName );
+  StatusCode sel_code3 = sel_tool.setProperty( "OutputName", OutputName );
   StatusCode sel_code4 = sel_tool.setProperty( "JetAuthor", JetCollection );
   StatusCode sel_code5 = sel_tool.setProperty( "OperatingPoint", OperatingPoint );
   StatusCode sel_code6 = sel_tool.setProperty( "JsonConfigFile", JsonConfigFile );
@@ -92,7 +92,7 @@ int main ATLAS_NOT_THREAD_SAFE (int argc, char* argv[]) {
   if (!containNoSF(JsonConfigFile)) {
     StatusCode code1 = tool.setProperty( "MaxEta", 2.5 );
     StatusCode code2 = tool.setProperty( "MinPt",  0 );
-    StatusCode code3 = tool.setProperty( "TaggerName", TaggerName );
+    StatusCode code3 = tool.setProperty( "OutputName", OutputName );
     StatusCode code4 = tool.setProperty( "JetAuthor", JetCollection );
     StatusCode code5 = tool.setProperty( "OperatingPoint", OperatingPoint );
     StatusCode code6 = tool.setProperty( "JsonConfigFile", JsonConfigFile );
