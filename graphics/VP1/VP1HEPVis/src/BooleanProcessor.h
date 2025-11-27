@@ -776,7 +776,13 @@ int BooleanProcessor::testFaceVsPlane(ExtEdge & edge)
         iedge = m_edges[iedge].inext;
       }
       if (ii[i] == (int)m_nodes.size()) {
-        d3 = d2-d1; d1 = d1/d3; d2 = d2/d3;
+        d3 = d2-d1; 
+        if (d3 == 0){
+          std::cerr<<"d3 is zero in "<<__FILE__<<std::endl;
+          return DEFECTIVE_FACE;
+        }
+        d1 = d1/d3; 
+        d2 = d2/d3;
         m_nodes.push_back(ExtNode(d2*m_nodes[i1].v-d1*m_nodes[i2].v, iedge));
       }
     }
