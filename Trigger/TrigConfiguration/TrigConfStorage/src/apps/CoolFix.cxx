@@ -47,8 +47,6 @@
 
 using namespace std;
 using namespace TrigConf;
-using boost::lexical_cast;
-
 
 void printhelp(std::ostream & o, std::ostream& (*lineend) ( std::ostream& os )) {
   o << "================================================================================\n";
@@ -147,7 +145,7 @@ JobConfig::parseProgramOptions(int argc, char* argv[]) {
       } else {
          if(currentPar == "c" || currentPar == "cooldb")   { cooldb = std::move(stripped); currentPar=""; continue; }
          if(currentPar == "r" || currentPar == "run")      {
-            unsigned int val = boost::lexical_cast<unsigned int,string>(stripped);
+            unsigned int val = static_cast<unsigned int>(std::stoul(stripped));
             switch(runargpos) {
             case 0:
                run = val;
@@ -165,7 +163,7 @@ JobConfig::parseProgramOptions(int argc, char* argv[]) {
          }
          if(currentPar == "triggerdb")                     { triggerdb = std::move(stripped); continue; }
          if(currentPar == "release")                       { release = std::move(stripped); continue; }
-         if(currentPar == "p" || currentPar == "print")    { printlevel = boost::lexical_cast<int,string>(stripped); currentPar=""; continue; }
+         if(currentPar == "p" || currentPar == "print")    { printlevel = std::stoi(stripped); currentPar=""; continue; }
          if(currentPar == "v" || currentPar == "loglevel") {
             if("NIL" == stripped ) { outputlevel = MSGTC::NIL; }
             else if("VERBOSE" == stripped ) { outputlevel = MSGTC::VERBOSE; }
@@ -336,7 +334,7 @@ int main( int argc, char* argv[] ) {
             selectForFixing.clear();
             
          } else {
-            unsigned int selInd = boost::lexical_cast<unsigned int,string>(selection) - 1;
+            unsigned int selInd = static_cast<unsigned int>(std::stoul(selection)) - 1;
             if(selectForFixing.count(selInd)) {
                selectForFixing.erase(selInd);
             } else {

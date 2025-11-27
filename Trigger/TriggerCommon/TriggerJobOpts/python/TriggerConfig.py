@@ -461,7 +461,7 @@ def triggerPOOLOutputCfg(flags):
 
     # Produce trigger bits
     bitsmaker = CompFactory.TriggerBitsMakerTool()
-    decmaker = CompFactory.TrigDec.TrigDecisionMakerMT("TrigDecMakerMT", BitsMakerTool = bitsmaker)
+    decmaker = CompFactory.TrigDec.TrigDecisionMakerMT("TrigDecMakerMT", BitsMakerTool = bitsmaker, UseEDMxAOD=flags.Trigger.CTP.UseEDMxAOD)
     acc.addEventAlgo( decmaker )
 
     # Export trigger metadata during the trigger execution when running with POOL output.

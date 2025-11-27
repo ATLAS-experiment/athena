@@ -7,8 +7,6 @@
 #include <iostream>
 #include <regex>
 
-#include "boost/lexical_cast.hpp"
-
 const std::regex re( "([-\\w.]+)(?:\\[x(\\d+)\\])?$" );
 
 TrigConf::Logic::Logic(NodeType nodeType) :
@@ -58,7 +56,7 @@ TrigConf::LogicLeaf::setContent(const std::string & content) {
    std::smatch sm;
    std::regex_match(content, sm, re);
    m_name = sm[1];
-   m_count = sm[2].length()>0 ? boost::lexical_cast<unsigned int,std::string>(sm[2]) : 1;
+   m_count = sm[2].length() > 0 ? static_cast<unsigned int>(std::stoul(sm[2])) : 1;
 }
 
 
