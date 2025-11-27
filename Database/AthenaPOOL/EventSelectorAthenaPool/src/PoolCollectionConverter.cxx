@@ -12,18 +12,13 @@
 #include "PersistentDataModel/Token.h"
 
 // Pool
-#include "CoralBase/AttributeList.h"
-#include "CoralBase/Attribute.h"
-
 #include "CollectionBase/ICollection.h"
-#include "CollectionBase/ICollectionQuery.h"
 #include "CollectionBase/ICollectionCursor.h"
 #include "CollectionBase/ICollectionDescription.h"
 
 // Gaudi
 #include "GaudiKernel/StatusCode.h"
 
-#include <assert.h>
 #include <exception>
 #include <format>
 
@@ -38,14 +33,14 @@ PoolCollectionConverter::PoolCollectionConverter(const std::string& collectionTy
 	m_contextId(contextId),
 	m_poolSvc(svc),
 	m_poolCollection(nullptr),
-	m_collectionQuery(nullptr),
+	m_collectionCursor(nullptr),
 	m_inputContainer() {
 }
 //______________________________________________________________________________
 PoolCollectionConverter::~PoolCollectionConverter() {
    if (m_poolCollection) {
       m_poolCollection->close();
-      delete m_collectionQuery; m_collectionQuery = nullptr;
+      delete m_collectionCursor; m_collectionCursor = nullptr;
       delete m_poolCollection; m_poolCollection = nullptr;
    }
 }
@@ -108,8 +103,7 @@ StatusCode PoolCollectionConverter::isValid() const {
 }
 //______________________________________________________________________________
 pool::ICollectionCursor& PoolCollectionConverter::selectAll() {
-   delete m_collectionQuery; m_collectionQuery = nullptr;
-   m_collectionQuery = m_poolCollection->newQuery();
-   m_collectionQuery->selectAll();
-   return m_collectionQuery->execute();
+   delete m_collectionCursor; m_collectionCursor = nullptr;
+   m_collectionCursor = &m_poolCollection->cursor();
+   return *m_collectionCursor;
 }

@@ -7,7 +7,6 @@
 #include "CollectionBase/ICollectionDescription.h"
 #include "CollectionBase/CollectionDescription.h"
 #include "CollectionBase/ICollectionColumn.h"
-#include "CollectionBase/ICollectionQuery.h"
 #include "CollectionBase/ICollectionCursor.h"
 #include "CollectionBase/CollectionRowBuffer.h"
 #include "CollectionBase/TokenList.h"

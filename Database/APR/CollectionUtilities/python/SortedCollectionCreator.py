@@ -61,9 +61,7 @@ class SortedCollectionCreator:
             self.readCollectionDescription(iColl)
          self.info("Reading Events from {}".format(inFileName))
 
-         query = iColl.newQuery()
-         query.selectAll()
-         cursor = query.execute()
+         cursor = iColl.cursor()
       
          while cursor.next():
             row = cursor.currentRow()

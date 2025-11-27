@@ -9,7 +9,6 @@
 #include "CollectionBase/CollectionDescription.h"
 #include "CollectionBase/CollectionRowBuffer.h"
 
-#include "FileCatalog/IFileCatalog.h"
 #include "POOLCore/DbPrint.h"
 
 #include "GaudiKernel/IFileMgr.h"
@@ -56,26 +55,12 @@ namespace pool {
         /// @param name The location of the collection file is uniquely defined by the parameters name and connection
         /// @param mode The open mode of the collection
         ///
-        /// - Without use of FileCatalog:
         ///   - The path to the collection file is simply created by the following concatenation:\n
         ///     connection+name+".root"
         ///   - name: Name of the collection file
         ///   - connection:
         ///     - It can be a relative or absolute path
         ///     - In case of an empty connection string it is assumed that the file is located in the current directory
-        ///     - Remote access via rootd: e.g. "root://pcepsft02.cern.ch:9090//localdisk/ \n 
-        ///       Further documentation can be found in the class description of TNetFile
-        ///       (http://root.cern.ch/root/html/TNetFile.html)
-        /// .
-        /// .
-        /// - Utilization of FileCatalog:
-        ///   - This mode is triggered if the name parameter starts with one of the following prefixes
-        ///     "PFN:", "FID:" or "LFN:". 
-        ///   - According to the prefix the name is interpreted as 
-        ///     Physical File Name, unique File ID or Logical File Name
-        ///   - The connection string is interpreted as URI of the FileCatalog. 
-        ///     The collection retrieves the FileCatalog defined by the given URI from FileCatalogMap.
-        ///     A default file catalog (empty connection string) can be defined there.
         
     
         RNTCollection(  const pool::ICollectionDescription* description,
@@ -106,8 +91,8 @@ namespace pool {
         /// Returns an object used to describe the collection properties.
         virtual const ICollectionDescription& description() const final override;
 
-        /// Returns an object used to query the collection.
-        virtual ICollectionQuery*             newQuery() final override;
+        /// Returns a cursor for the collection.
+        virtual ICollectionCursor&         cursor() final override;
 
      private:    
         /// copying unimplemented in this class.
@@ -117,13 +102,6 @@ namespace pool {
         void delayedFileOpen(const std::string& method);
         std::unique_ptr<ROOT::RNTupleReader> getCollectionRNTuple();
         void addField(ROOT::RNTupleModel* model, const std::string& field_name, const std::string& field_type);
-
-        bool fileCatalogRequired() const;
-        std::string retrievePFN() const;
-        std::string retrieveFID();
-        std::string retrieveUniquePFN(const FileCatalog::FileID& fid);
-        std::string retrieveBestPFN(const FileCatalog::FileID& fid)const;  
-        void retrieveFileCatalog()const;
 
         void cleanup();
 
@@ -139,8 +117,6 @@ namespace pool {
         bool                                 m_open;
         bool                                 m_readOnly;
         
-        std::unique_ptr<pool::IFileCatalog>  m_fileCatalog;
-
         SmartIF<IFileMgr>                    m_fileMgr;
       };
    }
