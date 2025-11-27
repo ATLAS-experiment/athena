@@ -159,6 +159,8 @@ class Wc(PowhegRES):
         self.add_keyword("xupbound", 6)
         self.add_keyword("Zmass")
         self.add_keyword("Zwidth")
+        self.add_keyword("wmasslow")
+        self.add_keyword("wmasshigh")
 
     def validate_decays(self):
         """! Validate idvecbos and vdecaymode keywords."""
