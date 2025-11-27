@@ -16,129 +16,201 @@
 namespace SG {
 
 
-/**
- * @brief Constructor.
- * @param key The StoreGate key for the object.
- * @param storeName Name to use for the store, if it's not encoded in sgkey.
- *
- * The provided key may actually start with the name of the store,
- * separated by a "+":  "MyStore+Obj".  If no "+" is present
- * the store named by @c storeName is used.
- */
-template <class T>
-inline
-ReadDecorHandleKey<T>::ReadDecorHandleKey (const std::string& key /*= ""*/)
-                                          //  const std::string& storeName /*= StoreID::storeName(StoreID::EVENT_STORE)*/)
-  // : Base (ClassID_traits<topbase_t>::ID(), key, storeName),
-  : Base (key),
-    m_contHandleKey (contKeyFromKey (key)/*, storeName*/)
-{
-}
+  /**
+   * @brief Constructor.
+   * @param key The StoreGate key for the object.
+   * @param storeName Name to use for the store, if it's not encoded in sgkey.
+   *
+   * The provided key may actually start with the name of the store,
+   * separated by a "+":  "MyStore+Obj".  If no "+" is present
+   * the store named by @c storeName is used.
+   */
+  template <class T>
+  ReadDecorHandleKey<T>::ReadDecorHandleKey (const std::string& key /*= ""*/)
+    //  const std::string& storeName /*= StoreID::storeName(StoreID::EVENT_STORE)*/)
+    // : Base (ClassID_traits<topbase_t>::ID(), key, storeName),
+    : Base (key),
+      m_contHandleKey (contKeyFromKey (key)/*, storeName*/)
+  {
+  }
 
 
-/**
- * @brief auto-declaring Property Constructor.
- * @param owner Owning component.
- * @param name name of the Property
- * @param key  default StoreGate key for the object.
- * @param doc Documentation string.
- *
- * will associate the named Property with this RHK via declareProperty
- *
- * The provided key may actually start with the name of the store,
- * separated by a "+":  "MyStore+Obj".  If no "+" is present
- * the store named by @c storeName is used.
- */
-template <class T>
-template <class OWNER, class K>
-inline
-ReadDecorHandleKey<T>::ReadDecorHandleKey( OWNER* owner,
-                                           const std::string& name,
-                                           const K& key /*={}*/,
-                                           const std::string& doc /*=""*/)
-  : Base (key),
-    m_contHandleKey (contKeyFromKey (key)/*, StoreID::storeName(StoreID::EVENT_STORE) */)
-{
-  owner->declareProperty(name, *this, doc);
-}
+  /**
+   * @brief Constructor with associated container.
+   * @param contKey ReadHandleKey of the associated container
+   * @param decorKey The decoration name.
+   *
+   * The decoration @decorKey will be read from the container referenced
+   * by @contKey.
+   */
+  template <class T>
+  ReadDecorHandleKey<T>::ReadDecorHandleKey (const VarHandleKey& contKey,
+                                             const std::string& decorKey /*= /""*/)
+    : Base (makeContDecorKey (contKey, decorKey)),
+      m_contHandleKey (contKey.key()),
+      m_contBaseKey(&contKey)
+  {
+  }
 
 
-/**
- * @brief Change the key of the object to which we're referring.
- * @param sgkey The StoreGate key for the object.
- * 
- * The provided key may actually start with the name of the store,
- * separated by a "+":  "MyStore+Obj".  If no "+" is present,
- * the store is not changed.
- */
-template <class T>
-ReadDecorHandleKey<T>&
-ReadDecorHandleKey<T>::operator= (const std::string& sgkey)
-{
-  m_contHandleKey = contKeyFromKey (sgkey);
-  Base::operator= (sgkey);
-  return *this;
-}
+  /**
+   * @brief auto-declaring Property Constructor.
+   * @param owner Owning component.
+   * @param name name of the Property
+   * @param key  default StoreGate key for the object.
+   * @param doc Documentation string.
+   *
+   * will associate the named Property with this RDHK via declareProperty
+   *
+   * The provided key may actually start with the name of the store,
+   * separated by a "+":  "MyStore+Obj".  If no "+" is present
+   * the store named by @c storeName is used.
+   */
+  template <class T>
+  template <class OWNER>
+  inline
+  ReadDecorHandleKey<T>::ReadDecorHandleKey(OWNER* owner,
+                                            const std::string& name,
+                                            const std::string& key /*={}*/,
+                                            const std::string& doc /*=""*/)
+    : Base (key),
+      m_contHandleKey (contKeyFromKey (key)/*, StoreID::storeName(StoreID::EVENT_STORE) */)
+  {
+    owner->declareProperty(name, *this, doc);
+  }
 
 
-/**
- * @brief Change the key of the object to which we're referring.
- * @param sgkey The StoreGate key for the object.
- * 
- * The provided key may actually start with the name of the store,
- * separated by a "+":  "MyStore+Obj".  If no "+" is present
- * the store is not changed.  A key name that starts with a "+"
- * is interpreted as a hierarchical key name, not an empty store name.
- *
- * Returns failure the key string format is bad.
- */
-template <class T>
-StatusCode ReadDecorHandleKey<T>::assign (const std::string& sgkey)
-{
-  if (m_contHandleKey.assign (contKeyFromKey (sgkey)).isFailure())
-    return StatusCode::FAILURE;
-  return Base::assign (sgkey);
-}
+  /**
+   * @brief auto-declaring Property Constructor.
+   * @param owner Owning component.
+   * @param name name of the Property
+   * @param key  default StoreGate key for the object.
+   * @param doc Documentation string.
+   *
+   * will associate the named Property with this RHK via declareProperty
+   *
+   * The provided key may actually start with the name of the store,
+   * separated by a "+":  "MyStore+Obj".  If no "+" is present
+   * the store named by @c storeName is used.
+   */
+  template <class T>
+  template <class OWNER>
+  inline
+  ReadDecorHandleKey<T>::ReadDecorHandleKey( OWNER* owner,
+                                             const std::string& name,
+                                             const VarHandleKey& contKey,
+                                             const std::string& decorKey /*= {}*/,
+                                             const std::string& doc /*= ""*/)
+    : Base (makeContDecorKey (contKey, decorKey)),
+      m_contHandleKey (contKey.key()),
+      m_contBaseKey(&contKey)
+  {
+    owner->declareProperty(name, *this, doc);
+  }
 
 
-// /**
-//  * @brief Return the class ID for the referenced object.
-//  *
-//  * Overridden here to return the CLID for @c T instead of @c topbase_t.
-//  */
-// template <class T>
-// inline
-// CLID ReadDecorHandleKey<T>::clid() const
-// {
-//   return ClassID_traits<T>::ID();
-// }
+  /**
+   * @brief Change the key of the object to which we're referring.
+   * @param sgkey The StoreGate key for the object.
+   * 
+   * The provided key may actually start with the name of the store,
+   * separated by a "+":  "MyStore+Obj".  If no "+" is present,
+   * the store is not changed.
+   */
+  template <class T>
+  ReadDecorHandleKey<T>&
+  ReadDecorHandleKey<T>::operator= (const std::string& sgkey)
+  {
+    m_contHandleKey = contKeyFromKey (sgkey);
+    Base::operator= (sgkey);
+    return *this;
+  }
 
 
-/**
- * @brief If this object is used as a property, then this should be called
- *        during the initialize phase.  It will fail if the requested
- *        StoreGate service cannot be found or if the key is blank.
- *
- * @param used If false, then this handle is not to be used.
- *             Instead of normal initialization, the key will be cleared.
- */
-template <class T>
-StatusCode ReadDecorHandleKey<T>::initialize (bool used /*= true*/)
-{
-  if (m_contHandleKey.initialize (used).isFailure())
-    return StatusCode::FAILURE;
-  return Base::initialize (used);
-}
+  /**
+   * @brief Change the key of the object to which we're referring.
+   * @param sgkey The StoreGate key for the object.
+   * 
+   * The provided key may actually start with the name of the store,
+   * separated by a "+":  "MyStore+Obj".  If no "+" is present
+   * the store is not changed.  A key name that starts with a "+"
+   * is interpreted as a hierarchical key name, not an empty store name.
+   *
+   * Returns failure the key string format is bad.
+   */
+  template <class T>
+  StatusCode ReadDecorHandleKey<T>::assign (const std::string& sgkey)
+  {
+    if (m_contHandleKey.assign (contKeyFromKey (sgkey)).isFailure())
+      return StatusCode::FAILURE;
+    return Base::assign (sgkey);
+  }
 
 
-/**
- * @brief Return the handle key for the container.
- */
-template <class T>
-const ReadHandleKey<T>& ReadDecorHandleKey<T>::contHandleKey() const
-{
-  return m_contHandleKey;
-}
+  // /**
+  //  * @brief Return the class ID for the referenced object.
+  //  *
+  //  * Overridden here to return the CLID for @c T instead of @c topbase_t.
+  //  */
+  // template <class T>
+  // inline
+  // CLID ReadDecorHandleKey<T>::clid() const
+  // {
+  //   return ClassID_traits<T>::ID();
+  // }
+
+
+  /**
+   * @brief If this object is used as a property, then this should be called
+   *        during the initialize phase.  It will fail if the requested
+   *        StoreGate service cannot be found or if the key is blank.
+   *
+   * @param used If false, then this handle is not to be used.
+   *             Instead of normal initialization, the key will be cleared.
+   */
+  template <class T>
+  StatusCode ReadDecorHandleKey<T>::initialize (bool used /*= true*/)
+  {
+    if (m_contBaseKey) {
+      std::string decor = this->key();
+      if (auto split = decor.rfind ('.'); split != std::string::npos)
+        decor = decor.substr (split+1);
+      operator = (makeContDecorKey (*m_contBaseKey, decor));
+    }
+
+    if (m_contHandleKey.initialize (used).isFailure())
+      return StatusCode::FAILURE;
+    return Base::initialize (used);
+  }
+
+
+  /**
+   * @brief If this object is used as a property, then this should be called
+   *        during the initialize phase.  This variant will allow the key
+   *        to be blank.
+   * @param Flag to select this variant.  Call like
+   *@code
+   *  ATH_CHECK( key.initialize (SG::AllowEmpty) );
+   @endcode
+  */
+  template <class T>
+  StatusCode ReadDecorHandleKey<T>::initialize (AllowEmptyEnum)
+  {
+    if (this->key().empty()) {
+      return StatusCode::SUCCESS;
+    }
+    return this->initialize (true);
+  }
+
+
+  /**
+   * @brief Return the handle key for the container.
+   */
+  template <class T>
+  const ReadHandleKey<T>& ReadDecorHandleKey<T>::contHandleKey() const
+  {
+    return m_contHandleKey;
+  }
 
 
 } // namespace SG
