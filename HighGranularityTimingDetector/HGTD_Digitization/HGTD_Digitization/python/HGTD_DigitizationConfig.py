@@ -9,6 +9,7 @@ from DigitizationConfig.PileUpMergeSvcConfig import PileUpMergeSvcCfg, PileUpXin
 from DigitizationConfig.PileUpToolsConfig import PileUpToolsCfg
 from DigitizationConfig.TruthDigitizationOutputConfig import TruthDigitizationOutputCfg
 from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
+from HGTD_Calibration.HGTD_CalibrationConfig import HGTD_TdcCalibrationToolCfg
 
 # The earliest bunch crossing time for which interactions will be sent
 # to the HGTD Digitization code.
@@ -51,6 +52,7 @@ def HGTD_DigitizationBasicToolCfg(flags, name="HGTD_DigitizationBasicTool", **kw
     # set up tool handles
     kwargs.setdefault("FrontEnd", acc.popToolsAndMerge(HGTD_FrontEndToolCfg(flags)))
     kwargs.setdefault("SurfaceChargesGenerator", acc.popToolsAndMerge(HGTD_SurfaceChargesGeneratorCfg(flags)))
+    kwargs.setdefault("HGTD_TdcCalibrationTool", acc.popToolsAndMerge(HGTD_TdcCalibrationToolCfg(flags)))
     kwargs.setdefault("InputObjectName", "HGTD_Hits")
     kwargs.setdefault("HGTDDetEleCollKey", "HGTD_DetectorElementCollection")
     if flags.Digitization.DoXingByXingPileUp:
@@ -66,6 +68,12 @@ def HGTD_DigitizationBasicToolCfg(flags, name="HGTD_DigitizationBasicTool", **kw
 def HGTD_DigitizationToolCfg(flags, name="HGTD_DigitizationTool", **kwargs):
     """Return ComponentAccumulator with configured HGTD_DigitizationBasicTool"""
     acc = ComponentAccumulator()
+
+    if flags.HGTD.outputAltirocRDO:
+        kwargs.setdefault("AltirocOutputObject", "HGTD_ALTIROC_RDOs")
+    else:
+        kwargs.setdefault("AltirocOutputObject", "")
+
     if flags.Digitization.PileUp:
         intervals = []
         if not flags.Digitization.DoXingByXingPileUp:
@@ -107,7 +115,7 @@ def HGTD_OutputCfg(flags):
     """Return ComponentAccumulator with Output for HGTD. Not standalone."""
     acc = ComponentAccumulator()
     if flags.Output.doWriteRDO:
-        ItemList = ["HGTD_RDO_Container#*"]
+        ItemList = ["HGTD_RDO_Container#*", "HGTD_ALTIROC_RDO_Container#*"]
         if flags.Digitization.EnableTruth:
             ItemList += ["InDetSimDataCollection#*"]
             acc.merge(TruthDigitizationOutputCfg(flags))

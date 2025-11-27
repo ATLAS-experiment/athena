@@ -18,6 +18,7 @@
 #include "SiDigitization/IFrontEnd.h"
 #include "SiDigitization/ISiChargedDiodesProcessorTool.h"
 #include "SiDigitization/SiChargedDiodeCollection.h"
+#include "HGTD_Calibration/HGTD_TdcCalibrationTool.h"
 
 HGTD_DigitizationTool::HGTD_DigitizationTool(const std::string& type,
                                              const std::string& name,
@@ -53,9 +54,20 @@ StatusCode HGTD_DigitizationTool::initialize() {
   // Initialize ReadHandleKey
   ATH_CHECK(m_hitsContainerKey.initialize(true));
   ATH_CHECK(m_HGTDDetEleCollKey.initialize());
-  ATH_CHECK(m_output_rdo_cont_key.initialize());
   ATH_CHECK(m_output_sdo_coll_key.initialize());
 
+  // Initialize RDO WriteHandleKey if keys not empty
+  if(!m_output_rdo_cont_key.key().empty()){
+    ATH_CHECK(m_output_rdo_cont_key.initialize());
+  }
+
+  // Initialize ALTIROC_RDO WriteHandleKey if keys not empty
+  // Only retrieve TDC calibration tool if it will be used
+  if(!m_output_altiroc_rdo_cont_key.key().empty()){
+    ATH_CHECK(m_output_altiroc_rdo_cont_key.initialize());
+    ATH_CHECK(m_hgtd_tdc_calib_tool.retrieve());
+  }
+  
   return StatusCode::SUCCESS;
 }
 
@@ -154,8 +166,16 @@ StatusCode HGTD_DigitizationTool::prepareEvent(const EventContext& ctx, unsigned
   ATH_MSG_DEBUG("HGTD_DigitizationTool::prepareEvent()");
   // Create the IdentifiableContainer to contain the digit collections Create
   // a new RDO container
-  m_hgtd_rdo_container = SG::makeHandle(m_output_rdo_cont_key, ctx);
-  ATH_CHECK(m_hgtd_rdo_container.record(std::make_unique<HGTD_RDO_Container>(m_id_helper->wafer_hash_max())));
+
+  if(!m_output_rdo_cont_key.key().empty()){
+    m_hgtd_rdo_container = SG::makeHandle(m_output_rdo_cont_key, ctx);
+    ATH_CHECK(m_hgtd_rdo_container.record(std::make_unique<HGTD_RDO_Container>(m_id_helper->wafer_hash_max())));        
+  }
+
+  if(!m_output_altiroc_rdo_cont_key.key().empty()){
+    m_hgtd_altiroc_rdo_container = SG::makeHandle(m_output_altiroc_rdo_cont_key, ctx);
+    ATH_CHECK(m_hgtd_altiroc_rdo_container.record(std::make_unique<HGTD_ALTIROC_RDO_Container>(m_id_helper->wafer_hash_max())));      
+  }
 
   // Create a map for the SDO and register it into StoreGate
   m_sdo_collection_map = SG::makeHandle(m_output_sdo_coll_key, ctx);
@@ -286,10 +306,8 @@ StatusCode HGTD_DigitizationTool::digitizeHitsPerDetectorElement(const EventCont
     // now that the charges have been built, apply all digitization tools
     applyProcessorTools(charged_diode_coll.get(), rndmEngine);
     // at this point, the RDOs and SDOs need to be created!!!
-    std::unique_ptr<HGTD_RDO_Collection> rdo_collection =
-        createRDOCollection(charged_diode_coll.get());
 
-    ATH_CHECK(storeRDOCollection(std::move(rdo_collection)));
+    ATH_CHECK(createAndStoreRDO(charged_diode_coll.get(),det_elem));
 
     createAndStoreSDO(charged_diode_coll.get());
 
@@ -322,29 +340,21 @@ void HGTD_DigitizationTool::applyProcessorTools(
   return;
 }
 
-StatusCode HGTD_DigitizationTool::storeRDOCollection(
-    std::unique_ptr<HGTD_RDO_Collection> coll) {
-  const IdentifierHash identifyHash{coll->identifierHash()};
-  // Create the RDO collection
-  if (m_hgtd_rdo_container
-          ->addCollection(coll.release(), identifyHash).isFailure()) {
-    ATH_MSG_FATAL("HGTD RDO collection could not be added to container!");
-    return StatusCode::FAILURE;
-  }
-  return StatusCode::SUCCESS;
-}
-
-std::unique_ptr<HGTD_RDO_Collection> HGTD_DigitizationTool::createRDOCollection(
-    SiChargedDiodeCollection* charged_diodes) const {
+StatusCode HGTD_DigitizationTool::createAndStoreRDO(SiChargedDiodeCollection* charged_diodes,
+                                                    const InDetDD::SolidStateDetectorElementBase* element) {
 
   IdentifierHash idHash_de = charged_diodes->identifyHash();
 
   std::unique_ptr<HGTD_RDO_Collection> rdo_collection =
       std::make_unique<HGTD_RDO_Collection>(idHash_de);
 
+  std::unique_ptr<HGTD_ALTIROC_RDO_Collection> altiroc_rdo_collection =
+      std::make_unique<HGTD_ALTIROC_RDO_Collection>(idHash_de);
+
   // need the DE identifier
   const Identifier id_de = charged_diodes->identify();
   rdo_collection->setIdentifier(id_de);
+  altiroc_rdo_collection->setIdentifier(id_de);
 
   SiChargedDiodeIterator i_chargedDiode = charged_diodes->begin();
   SiChargedDiodeIterator i_chargedDiode_end = charged_diodes->end();
@@ -381,19 +391,63 @@ std::unique_ptr<HGTD_RDO_Collection> HGTD_DigitizationTool::createRDOCollection(
     // this is the time of the main charge. For now this might be OK as long as
     // the toal deposit just gets transformed into "one charge", but will need a
     // change in the future!!
-    float toa = charge.time();
+    float charge_time = charge.time();
 
     unsigned int dummy_tot = 256;
     unsigned short dummy_bcid = 0;
     unsigned short dummy_l1a = 0;
     unsigned short dummy_l1id = 0;
 
-    std::unique_ptr<HGTD_RDO> p_rdo = std::make_unique<HGTD_RDO>(
-        id_readout, toa, dummy_tot, dummy_bcid, dummy_l1a, dummy_l1id);
 
-    rdo_collection->push_back(p_rdo.release());
+    if(!m_output_rdo_cont_key.key().empty()){
+      std::unique_ptr<HGTD_RDO> p_rdo = std::make_unique<HGTD_RDO>(
+        id_readout, charge_time, dummy_tot, dummy_bcid, dummy_l1a, dummy_l1id);
+
+      rdo_collection->push_back(p_rdo.release());
+    }
+
+    if(!m_output_altiroc_rdo_cont_key.key().empty()){
+      uint8_t toa = m_hgtd_tdc_calib_tool->Time2TOA(element,charge_time);
+      // Check overflow to not store out of range measurements
+      if (m_hgtd_tdc_calib_tool->checkTOAoverflow(toa)){
+        continue;
+      } 
+  
+      uint8_t dummy_crc = 0;
+  
+      std::unique_ptr<HGTD_ALTIROC_RDO> p_altiroc_rdo = 
+        std::make_unique<HGTD_ALTIROC_RDO>(id_readout,
+                                          dummy_crc,
+                                          toa,
+                                          dummy_tot,
+                                          dummy_l1id,
+                                          dummy_bcid);
+  
+      altiroc_rdo_collection->push_back(p_altiroc_rdo.release());
+    }
   }
-  return rdo_collection;
+  
+  // Store the RDO collection
+
+  // Only store the HGTD_RDO if its WriteHandleKey is set 
+  if(!m_output_rdo_cont_key.key().empty()){
+    if (m_hgtd_rdo_container
+            ->addCollection(rdo_collection.release(), rdo_collection->identifierHash()).isFailure()) {
+      ATH_MSG_FATAL("HGTD RDO collection could not be added to container!");
+      return StatusCode::FAILURE;
+    } 
+  }
+   
+  // Only store the HGTD_ALTIROC_RDO if its WriteHandleKey is set 
+  if(!m_output_altiroc_rdo_cont_key.key().empty()){
+    if (m_hgtd_altiroc_rdo_container
+          ->addCollection(altiroc_rdo_collection.release(), altiroc_rdo_collection->identifierHash()).isFailure()) {
+      ATH_MSG_FATAL("HGTD ALTIROC RDO collection could not be added to container!");
+      return StatusCode::FAILURE;
+    }    
+  }
+
+  return StatusCode::SUCCESS;
 }
 
 void HGTD_DigitizationTool::createAndStoreSDO(
