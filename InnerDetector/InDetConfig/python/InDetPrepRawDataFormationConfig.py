@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 # Configuration of InDetPrepRawDataFormation package
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -8,7 +8,7 @@ from AthenaConfiguration.Enums import ProductionStep
 
 def clusterizationInputPrefix(flags):
     """Return clusterization input prefix based on the production step and tracking config"""
-    if hasattr(flags.TrackOverlay, "ActiveConfig"):
+    if flags.hasCategory("TrackOverlay.ActiveConfig"):
        doTrackOverlay = getattr(flags.TrackOverlay.ActiveConfig, "doTrackOverlay", None)
     else:
        doTrackOverlay = flags.Overlay.doTrackOverlay

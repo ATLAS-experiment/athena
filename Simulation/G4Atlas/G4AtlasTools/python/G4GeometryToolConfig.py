@@ -376,7 +376,7 @@ def generateSubDetectorList(flags):
     SubDetectorList=[]
 
     if flags.Beam.Type is BeamType.Cosmics or flags.Sim.CavernBackground not in [CavernBackground.Off, CavernBackground.Signal]:
-        if flags.Beam.Type is BeamType.Cosmics and hasattr(flags, "Sim.ReadTR"):
+        if flags.Beam.Type is BeamType.Cosmics and flags.hasFlag("Sim.ReadTR"):
             SubDetectorList += [ CosmicShortCutCfg(flags) ]
 
     if flags.Detector.GeometryMuon:
