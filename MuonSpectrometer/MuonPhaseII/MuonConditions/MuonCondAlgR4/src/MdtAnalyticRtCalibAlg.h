@@ -9,26 +9,28 @@
 #ifndef MUONCALIBR4_MDTANALYTICCALIBALG_H
 #define MUONCALIBR4_MDTANALYTICCALIBALG_H
 
-#include <AthenaBaseComps/AthHistogramAlgorithm.h>
+#include <AthenaBaseComps/AthReentrantAlgorithm.h>
 
 #include "MuonIdHelpers/IMuonIdHelperSvc.h"
+#include "MuonRecToolInterfacesR4/IRootVisualizationService.h"
 #include "MdtCalibData/MdtCalibDataContainer.h"
+
 
 #include "StoreGate/ReadCondHandleKey.h"
 #include "StoreGate/WriteCondHandleKey.h"
+#include "Acts/Utilities/Helpers.hpp"
 
-class TGraph;
 namespace MuonCalib{
   class SamplePoint;
 }
 namespace MuonCalibR4{
-    class MdtAnalyticRtCalibAlg : public AthHistogramAlgorithm {
+    class MdtAnalyticRtCalibAlg : public AthReentrantAlgorithm {
       public:
-        using AthHistogramAlgorithm::AthHistogramAlgorithm;
+        using AthReentrantAlgorithm::AthReentrantAlgorithm;
         virtual ~MdtAnalyticRtCalibAlg() = default;
 
         virtual StatusCode initialize() override final;
-        virtual StatusCode execute() override final;
+        virtual StatusCode execute(const EventContext& ctx) const override final;
 
         enum class PolyType{
             ChebyChev,
@@ -61,8 +63,12 @@ namespace MuonCalibR4{
           
           std::vector<Identifier> tubeIds(const Identifier& chId) const;
           
-          void saveGraph(const std::string& path, std::unique_ptr<TGraph>&& graph) const;
           ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
+          /** @brief Service handle of the visualization service */
+          ServiceHandle<MuonValR4::IRootVisualizationService> m_visualSvc{this, "VisualSvc", "MuonValR4::RootVisualizationService"};
+          /** @brief Token to be presented to the visualization service  */
+          MuonValR4::IRootVisualizationService::ClientToken m_clientToken{};
+          
           SG::ReadCondHandleKey<MuonCalib::MdtCalibDataContainer> m_readKey{this, "ReadKey", "MdtCalibConstantsR4"};
           SG::WriteCondHandleKey<MuonCalib::MdtCalibDataContainer> m_writeKey{this, "WriteKey", "MdtCalibConstants",
                                                                                             "Conditions object containing the calibrations"};   
@@ -70,9 +76,9 @@ namespace MuonCalibR4{
           /** @brief Maximum order of the polynomial in use */
           Gaudi::Property<unsigned> m_maxOrder{this, "maxOrder", 12};
           /** @brief Toggle the polynomial for the Rt-relation: ChebyChev or Legendre */
-          Gaudi::Property<int> m_polyTypeRt{this, "PolyTypeRt", static_cast<int>(PolyType::ChebyChev)};
+          Gaudi::Property<int> m_polyTypeRt{this, "PolyTypeRt", Acts::toUnderlying(PolyType::ChebyChev)};
           /** @brief Toggle the polynomial for the Rt-relation: ChebyChev or Legendre */
-          Gaudi::Property<int> m_polyTypeTr{this, "PolyTypeTr", static_cast<int>(PolyType::Legendre)};
+          Gaudi::Property<int> m_polyTypeTr{this, "PolyTypeTr", Acts::toUnderlying(PolyType::Legendre)};
           /** @brief Toggle whether the resolution shall be also converted into a polynomial */
           Gaudi::Property<bool> m_fitRtReso{this, "FitRtReso", true};
           /** @brief Assignment of the relative uncertainty on each resolution data point */
