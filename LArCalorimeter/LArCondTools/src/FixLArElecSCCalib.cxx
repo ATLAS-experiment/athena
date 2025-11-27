@@ -352,12 +352,23 @@ StatusCode FixLArElecSCCalib::fix3(const LArOnOffIdMapping *cabling, const LArMC
    spec->extend<unsigned>("version");
    CondAttrListCollection* coll=new CondAttrListCollection(true);
 
+   auto specav = new coral::AttributeListSpecification();
+   specav->extend("MinBiasAverage", "blob");
+   specav->extend<unsigned>("version");
+   CondAttrListCollection* collav=new CondAttrListCollection(true);
+
    unsigned hashMax=m_sonline_idhelper->channelHashMax();
    coral::AttributeList* attrList = new coral::AttributeList(*spec);               
    (*attrList)["version"].setValue(0U);                               
    coral::Blob& blob=(*attrList)["MinBias"].data<coral::Blob>();
    blob.resize(hashMax*sizeof(float));
    float* pblob=static_cast<float*>(blob.startingAddress());
+
+   coral::AttributeList* attrListav = new coral::AttributeList(*specav);               
+   (*attrListav)["version"].setValue(0U);                               
+   coral::Blob& blobav=(*attrListav)["MinBiasAverage"].data<coral::Blob>();
+   blobav.resize(hashMax*sizeof(float));
+   float* pblobav=static_cast<float*>(blobav.startingAddress());
 
    std::unique_ptr<TFile> fin= std::make_unique<TFile>(m_infile.value().c_str());
    TTree *tin=dynamic_cast<TTree*>(fin->Get("m_tree"));
@@ -390,26 +401,37 @@ StatusCode FixLArElecSCCalib::fix3(const LArOnOffIdMapping *cabling, const LArMC
 
 
    // read the ntuple (symmetrized)
-   std::map<Identifier, float> vmap;
+   std::map<Identifier, float> vmap, vmapav;
    for(int icell=0; icell<ncell; ++icell)  {
 
        Identifier32 id32(identifier[icell]); 
        Identifier id(id32);
-       vmap[id] = average[icell];
+       vmapav[id] = average[icell];
+       vmap[id] = rms[icell];
 
    }
    // now fill all SC
    for (unsigned onlHash=0;onlHash<hashMax;++onlHash) {
       const HWIdentifier hwid=m_sonline_idhelper->channel_Id(onlHash);
       const Identifier id = cabling->cnvToIdentifier(hwid);
-      const Identifier idsym = sym->ZPhiSymOfl(id);
-      pblob[onlHash] = vmap[idsym];
+      const HWIdentifier hwid2 = sym->ZPhiSymOfl(id);
+      const Identifier idsym =  cabling->cnvToIdentifier(hwid2);
+      if (vmap.count(idsym)==0 || vmapav.count(idsym)==0) {
+         ATH_MSG_WARNING("Do not have sym value: "<<idsym.get_identifier32().get_compact()<<" "<<vmap[idsym]<<" "<<vmapav[idsym]);
+      } else {
+         pblob[onlHash] = vmap[idsym];
+         pblobav[onlHash] = vmapav[idsym];
+      }
    }
 
    coll->add(0,*attrList);
+   collav->add(0,*attrListav);
   
    ATH_CHECK(detStore()->record(coll,"/LAR/ElecCalibMCSC/MinBias"));
    ATH_MSG_DEBUG("Stored coll with size "<<coll->size()<<" into /LAR/ElecCalibMCSC/MinBias");
+
+   ATH_CHECK(detStore()->record(collav,"/LAR/ElecCalibMCSC/MinBiasAverage"));
+   ATH_MSG_DEBUG("Stored coll with size "<<collav->size()<<" into /LAR/ElecCalibMCSC/MinBiasAverage");
 
      return StatusCode::SUCCESS;
 }
