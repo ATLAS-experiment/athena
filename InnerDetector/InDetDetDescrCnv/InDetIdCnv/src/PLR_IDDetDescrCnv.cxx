@@ -101,8 +101,6 @@ PLR_IDDetDescrCnv::createObj(IOpaqueAddress* /*pAddr*/, DataObject*& pObj)
         // create the helper
         m_plrId = new PLR_ID;
         initHelper = true;
-        // add in message service for printout
-        m_plrId->setMessageSvc(msgSvc());
     }
 
     if (initHelper) {
