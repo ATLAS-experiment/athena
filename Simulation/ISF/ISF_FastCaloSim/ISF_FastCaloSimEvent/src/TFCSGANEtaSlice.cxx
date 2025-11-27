@@ -17,7 +17,6 @@
 #include "TFile.h"
 #include "TTree.h"
 #include "TH1D.h"
-#include "TMath.h"
 
 #include <iostream>
 #include <fstream>
@@ -90,7 +89,7 @@ bool TFCSGANEtaSlice::LoadGAN() {
                     std::to_string(m_pid) + "_eta_" + std::to_string(m_etaMin) +
                     "_" + std::to_string(m_etaMax) + "_High10.*";
     ATH_MSG_DEBUG("Gan input file name " << inputFileName);
-    m_net_all = TFCSNetworkFactory::create(inputFileName);
+    m_net_all = TFCSNetworkFactory::create(std::move(inputFileName));
     if (m_net_all == nullptr)
       success = false;
   } else {
@@ -126,7 +125,7 @@ void TFCSGANEtaSlice::CalculateMeanPointFromDistributionOfR() {
 
     std::string histoName = "r" + std::to_string(layer) + "w";
     TH1D *h1 = (TH1D *)file->Get(histoName.c_str());
-    if (TMath::IsNaN(h1->Integral())) {
+    if (std::isnan(h1->Integral())) {
       histoName = "r" + std::to_string(layer);
       h1 = (TH1D *)file->Get(histoName.c_str());
     }
