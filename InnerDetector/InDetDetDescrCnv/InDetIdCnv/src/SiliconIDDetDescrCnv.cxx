@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "SiliconIDDetDescrCnv.h"
@@ -52,7 +52,6 @@ SiliconIDDetDescrCnv::createObj(IOpaqueAddress* /*pAddr*/, DataObject*& pObj)
 	    // create the helper only once
 	    ATH_MSG_DEBUG(" Create SiliconID. ");
 	    m_siliconId = new SiliconID(pixelID, sctID);
-        m_siliconId->setMessageSvc(msgSvc());
     }
     
     ATH_CHECK( idDictMgr->initializeHelper(*m_siliconId) == 0 );

@@ -96,8 +96,6 @@ SCT_IDDetDescrCnv::createObj(IOpaqueAddress* /*pAddr*/, DataObject*& pObj)
 	// create the helper
 	m_sctId = new SCT_ID;
 	initHelper = true;
-        // add in message service for printout
-        m_sctId->setMessageSvc(msgSvc());
     }
     
     if (initHelper) {

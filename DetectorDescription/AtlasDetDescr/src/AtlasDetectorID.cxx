@@ -490,14 +490,6 @@ void AtlasDetectorID::set_do_neighbours(bool do_neighbours) {
     m_do_neighbours = do_neighbours;
 }
 
-void AtlasDetectorID::setMessageSvc(IMessageSvc *msgSvc) {
-    m_msgSvc = msgSvc;
-}
-
-void AtlasDetectorID::set_quiet(bool quiet) {
-    m_quiet = quiet;
-}
-
 void AtlasDetectorID::setDictVersion(const IdDictMgr &dict_mgr, const std::string &name) {
     const IdDictDictionary *dict = dict_mgr.find_dictionary(name);
     m_dict_version = dict->version();

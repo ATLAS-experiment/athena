@@ -100,8 +100,6 @@ ZdcIDDetDescrCnv::createObj(IOpaqueAddress* /*pAddr*/, DataObject*& pObj)
 	// create the helper
 	m_zdcId = new ZdcID;
 	initHelper = true;
-        // add in message service for printout
-        m_zdcId->setMessageSvc(msgSvc());
     }
     
     if (initHelper) {
