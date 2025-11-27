@@ -546,6 +546,7 @@ namespace MuonCombined {
             std::vector<float>& errorVec = slowMuon->auxdata<std::vector<float>>("hitError");
             std::vector<float>& shiftVec = slowMuon->auxdata<std::vector<float>>("hitShift");
             std::vector<float>& propagationTimeVec = slowMuon->auxdata<std::vector<float>>("hitPropagationTime");
+            std::vector<uint8_t>& passesMDTBetaCutVec = slowMuon->auxdata<std::vector<uint8_t>>("hitPassesMDTBetaCut");
 
             for (const auto& hit : stauExtras->hits) {
                 eTechVec.push_back(hit.eTech);
@@ -558,6 +559,7 @@ namespace MuonCombined {
                 errorVec.push_back(hit.error);
                 shiftVec.push_back(hit.shift);
                 propagationTimeVec.push_back(hit.propagationTime);
+                passesMDTBetaCutVec.push_back(hit.passesMDTBetaCut ? uint8_t{1} : uint8_t{0});
             }
 
             // additional MDT hit info (optional)
