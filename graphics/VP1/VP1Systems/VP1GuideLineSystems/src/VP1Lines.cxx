@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "VP1GuideLineSystems/VP1Lines.h"
@@ -93,7 +93,7 @@ void VP1Lines::Imp::rebuild3DObjects()
 
   // This is here if you want to
   // convert lines into cylinders
-  bool convert = false;
+  constexpr bool convert = false;
   if (convert) {
     SbVec3f p1 = line_vertices->vertex[0].getValue();
     SbVec3f p2 = line_vertices->vertex[1].getValue();
