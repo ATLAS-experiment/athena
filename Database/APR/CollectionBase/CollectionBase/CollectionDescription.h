@@ -8,6 +8,7 @@
 #include "CollectionBase/ICollectionDescription.h"
 
 #include <map>
+#include <vector>
 
 
 namespace pool {
@@ -71,35 +72,6 @@ namespace pool {
     CollectionDescription (CollectionDescription&&) = default;
 
     /**
-     * Equality operator.
-     *
-     * @param rhs Collection description object to compare.
-     */
-    bool operator==( const CollectionDescription& rhs ) const;
-
-    /**
-     * Inequality operator.
-     *
-     * @param rhs Collection description object to compare.
-     */
-    bool operator!=( const CollectionDescription& rhs ) const;
-
-    /**
-     * Check if both Descriptions have the same columns
-     *
-     * @param rhs Collection description object to compare.
-     */
-    virtual bool equals( const ICollectionDescription& rhs ) const;
-
-    /**
-     * Check if all columns from this Description are present in the rhs Description
-     * and if they have the same type
-     *
-     * @param rhs Collection description object to compare.
-     */
-    virtual bool isSubsetOf( const ICollectionDescription& rhs ) const;
-
-    /**
      * Sets the name of the collection.
      *
      * @param name Name of collection.
@@ -143,21 +115,6 @@ namespace pool {
        bool sizeIsFixed = true );
 
     /**
-     * Adds a new column to the collection.
-     * 
-     * @param columnName Name of new column.
-     * @param columnType Data type of new column.
-     * @param maxSize Maximum size of column data type (useful for string or blob data types).
-     * @param sizeIsFixed Flag indicating whether size of column data type is fixed (useful for string or blob data types).
-     */
-    virtual  const ICollectionColumn&   insertColumn(
-       const std::string& columnName, 
-       const std::type_info& columnType,
-       const std::string& annotation = "",
-       int maxSize = 0,
-       bool sizeIsFixed = true );
-
-    /**
      * Adds a new column of type pool::Token to the collection.
      *
      * @param columnName Name of new column.
@@ -166,55 +123,6 @@ namespace pool {
        const std::string& columnName,
        const std::string& annotation = "");
     
-
-    /// add annotation to column
-    virtual  const ICollectionColumn&    annotateColumn(
-       const std::string& columnName,
-       const std::string& annotation ); 
-
-
-   /**
-    * Removes a column from the collection description.
-    *
-    * @param columnName Name of column to be removed.
-    */
-    virtual void dropColumn( const std::string& columnName );
-
-    /**
-     * Renames a column of the collection description.
-     *
-     * @param oldName Old name of column.
-     * @param newName New name of column.
-     */
-    virtual void renameColumn( const std::string& oldName, const std::string& newName );
-
-    /**
-     * Changes the data type of a column in the collection description. Throws and exception if an attempt is 
-     * made to change the data type of the event reference Token column.
-     * 
-     * @param columnName Name of column whose type is to be changed.
-     * @param newType New data type assigned to column.
-     * @param maxSize Maximum size of new data type (useful for string and blob types).
-     * @param sizeIsFixed Flag indicating whether size of new data type is fixed (useful for string and blob types).
-     */
-    virtual void changeColumnType( const std::string& columnName,
-                                   const std::string& newType,
-                                   int maxSize = 0,
-                                   bool sizeIsFixed = true );
-
-    /**
-     * Changes the data type of a column in the collection description. Throws and exception if an attempt is 
-     * made to change the data type of the event reference Token column.
-     * 
-     * @param columnName Name of column whose type is to be changed.
-     * @param newType New data type assigned to column.
-     * @param maxSize Maximum size of new data type (useful for string and blob types).
-     * @param sizeIsFixed Flag indicating whether size of new data type is fixed (useful for string and blob types).
-     */
-    virtual void changeColumnType( const std::string& columnName,
-                                   const std::type_info& newType,
-                                   int maxSize = 0,
-                                   bool sizeIsFixed = true );
 
     /// Returns the name of the collection and the top level collection fragment.
     virtual const std::string& name() const;
@@ -232,40 +140,9 @@ namespace pool {
     virtual const std::string& eventReferenceColumnName() const;
 
     /**
-     * Indicates whether the top level collection fragment contains the event reference column
-     * and is therefore defined as a collection.
-     */
-    virtual bool hasEventReferenceColumn() const;
-
-    /**
-     * Returns the number of columns (including the event reference column if it is used) in 
-     * the collection.
-     */
-    virtual int numberOfColumns() const;
-
-    /**
-     * Returns a description object for a column of the collection, given the name of
-     * the column.
-     *
-     * @param columnName Name of column.
-     */
-    virtual const ICollectionColumn& column( const std::string& columnName ) const;
-
-    /// return pointer to Column or NULL if it's not found (will not throw exceptions)
-    virtual const ICollectionColumn* columnPtr( const std::string& columnName ) const;
-    
-    /**
      * Returns the number of Token columns (including the event reference column if it is used)
      */
     virtual int numberOfTokenColumns() const;
-
-    /**
-     * Returns a description object for a Token column of the collection, given the name of 
-     * the column.
-     *
-     * @param columnName Name of column.
-     */
-    virtual const ICollectionColumn& tokenColumn( const std::string& columnName ) const; 
 
     /**
      * Returns a description object for a Token column of the collection, given the position
@@ -281,26 +158,12 @@ namespace pool {
     virtual int numberOfAttributeColumns() const;
 
     /**
-     * Returns a description object for an Attribute column of the collection, given the name of 
-     * the column.
-     *
-     * @param columnName Name of column.
-     */
-    virtual const ICollectionColumn& attributeColumn( const std::string& columnName ) const; 
-
-    /**
      * Returns a description object for an Attribute column of the collection, given the position
      * of the column.
      *
      * @param columnId Position of column in associated collection fragment.
      */
     virtual const ICollectionColumn& attributeColumn( int columnId ) const;
-
-    /// Returns the Token column description objects.
-    const std::vector< pool::CollectionColumn* >& tokenColumns() const { return m_tokenColumns; }
-
-    /// Returns the Attribute column description objects.
-    const std::vector< pool::CollectionColumn* >& attributeColumns() const { return m_attributeColumns; }
 
     // set column ID, return the ID
     virtual int		setColumnId( const std::string& columnName, int id, const std::string& methodName );
@@ -328,11 +191,6 @@ namespace pool {
     virtual pool::CollectionColumn* column( const std::string& columnName, const std::string& methodName );
     virtual const pool::CollectionColumn* column( const std::string& columnName, const std::string& methodName ) const;
 
- public:
-    /// print out the description (debugging)
-    virtual void                printOut() const;
-
-    
   private:
     /// Name of the collection
     std::string m_name;

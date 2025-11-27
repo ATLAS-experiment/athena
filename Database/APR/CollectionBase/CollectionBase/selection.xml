@@ -4,7 +4,6 @@
   <class name="pool::ICollectionDescription" />
   <class name="pool::CollectionDescription" />
   <class name="pool::ICollectionColumn" />
-  <class name="pool::ICollectionQuery" />
   <class name="pool::ICollectionCursor" />
   <class name="pool::CollectionRowBuffer" />
   <class name="pool::TokenList" />

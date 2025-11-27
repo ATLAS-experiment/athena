@@ -6,8 +6,6 @@
 #define COLLECTIONBASE_ICOLLECTIONDESCRIPTION_H
 
 #include <string>
-#include <vector>
-#include <typeinfo>
 
 
 namespace pool {
@@ -25,10 +23,6 @@ namespace pool {
   {
   public:
     ICollectionDescription() = default;
-    ICollectionDescription (const ICollectionDescription&) = default;
-    ICollectionDescription& operator= (const ICollectionDescription&) = default;
-    ICollectionDescription (ICollectionDescription&&) = default;
-    ICollectionDescription& operator= (ICollectionDescription&&) = default;
 
     /// Returns the name of the collection
     virtual const std::string& name() const = 0;
@@ -46,39 +40,9 @@ namespace pool {
     virtual const std::string& eventReferenceColumnName() const = 0;
 
     /**
-     * Indicates whether the collection contains the event reference column
-     */
-    virtual bool hasEventReferenceColumn() const = 0;
-
-    /**
-     * Returns the number of columns (including the event reference column if it is used) in 
-     * the collection.
-     */
-    virtual int numberOfColumns() const = 0;
-
-    /**
-     * Returns a description object for a column of the collection, given the name of
-     * the column.
-     *
-     * @param columnName Name of column.
-     */
-    virtual const ICollectionColumn& column( const std::string& columnName ) const = 0;
-
-    /// return pointer to Column or NULL if it's not found (will not throw exceptions)
-    virtual const ICollectionColumn* columnPtr( const std::string& columnName ) const = 0;
-    
-    /**
      * Returns the number of Token columns (including the event reference column if it is used) 
      */
     virtual int numberOfTokenColumns() const = 0;
-
-    /**
-     * Returns a description object for a Token column of the collection, given the name of 
-     * the column.
-     *
-     * @param columnName Name of column.
-     */
-    virtual const ICollectionColumn& tokenColumn( const std::string& columnName ) const = 0; 
 
     /**
      * Returns a description object for a Token column of the collection, given the position
@@ -94,38 +58,12 @@ namespace pool {
     virtual int numberOfAttributeColumns( ) const = 0;
 
     /**
-     * Returns a description object for an Attribute column of the collection, given the name of 
-     * the column.
-     *
-     * @param columnName Name of column.
-     */
-    virtual const ICollectionColumn& attributeColumn( const std::string& columnName ) const = 0; 
-
-    /**
      * Returns a description object for an Attribute column of the collection, given the position
      * of the column.
      *
      * @param columnId Position of column in associated collection fragment.
      */
     virtual const ICollectionColumn& attributeColumn( int columnId ) const = 0; 
-
-    /**
-     * Check if both Descriptions have the same columns
-     *
-     * @param rhs Collection description object to compare.
-     */
-    virtual bool equals( const ICollectionDescription& rhs ) const = 0;
-
-    /**
-     * Check if all columns from this Description are present in the rhs Description
-     * and if they have the same type
-     *
-     * @param rhs Collection description object to compare.
-     */
-    virtual bool isSubsetOf( const ICollectionDescription& rhs ) const = 0;
-
-    /// print out the description (optional debugging)
-    virtual void printOut() const {}
 
   protected:
     /// Empty destructor.

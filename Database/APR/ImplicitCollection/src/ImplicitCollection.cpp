@@ -129,7 +129,6 @@ namespace pool {
       delete m_container;
    }
 
-   
 
    ICollection::OpenMode 
    ImplicitCollection::openMode() const{
@@ -137,28 +136,11 @@ namespace pool {
    }
 
 
-   // old method implemented for backward compatibility
-   // and maybe also for the ease of use?
-   ImplicitCollectionIterator*
-   ImplicitCollection::select( const std::string &/* primaryQuery*/,
-                               std::string,
-                               std::string )
-   {
-      // iterator object supporting the collection query interface
-      std::unique_ptr<ImplicitCollectionIterator>
-	 iterquery( new ImplicitCollectionIterator( *m_container, m_description ) );
-      iterquery->execute();
-      return iterquery.release();
-   }
-
-
-
    void
    ImplicitCollection::insertRow(const pool::CollectionRowBuffer& /*inputRowBuffer*/)
    {
       throw std::runtime_error( "Cannot modify the data of a implicit collection. (APR: \" ImplicitCollection::insertRow \" from \" ImplicitCollection \")" );
    }
-
 
 
    void
@@ -191,9 +173,9 @@ namespace pool {
       return m_description;
    }
 
-      
-   ICollectionQuery* ImplicitCollection::newQuery()
+   ICollectionCursor& ImplicitCollection::cursor()
    {
-      return new ImplicitCollectionIterator( *m_container, m_description ); 
+      ImplicitCollectionIterator* cursor = new ImplicitCollectionIterator( *m_container, m_description );
+      return *cursor;//cursor->execute();
    }
 }

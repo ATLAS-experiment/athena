@@ -9,8 +9,8 @@
 
 namespace pool {
 
+  class ICollectionCursor;
   class ICollectionDescription;
-  class ICollectionQuery;
   class CollectionRowBuffer;
 
   /** 
@@ -49,8 +49,8 @@ namespace pool {
     /// Returns an object used to describe the collection properties.
     virtual const ICollectionDescription& description() const = 0;
 
-    /// Returns an object used to query the collection.
-    virtual ICollectionQuery* 		newQuery() = 0;
+    /// Returns an cursor for the collection.
+    virtual ICollectionCursor& 		cursor() = 0;
     
     /// Empty destructor.
     virtual ~ICollection() = default;

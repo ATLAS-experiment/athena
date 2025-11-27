@@ -57,16 +57,6 @@ namespace pool {
     virtual ICollection::OpenMode openMode() const; 
     
 
-    /** Method that returns collection's iterator
-         Throws POOL exception.
-         @param primaryQuery query string passed to the underlying StorageSvc implementation.
-         @param secondaryQuery parameter currently unused
-         @param options type currently unused
-     */
-    ImplicitCollectionIterator* select( const std::string & primaryQuery = "",
-                                        std::string secondaryQuery = "",
-                                        std::string options = "" );
-
     /// Adds a new row of data to the collection. Will always throw exception.
     virtual void insertRow( const pool::CollectionRowBuffer& inputRowBuffer );
 
@@ -88,8 +78,8 @@ namespace pool {
     /// Returns an object used to describe the collection properties.
     virtual const ICollectionDescription& description() const;
 
-    /// Returns an object used to query the collection.
-    virtual ICollectionQuery*                 newQuery();
+    /// Returns a cursor for the collection.
+    virtual ICollectionCursor&         cursor() final override;
 
   protected:
     void open( ICollection::OpenMode mode, ISession* session );
