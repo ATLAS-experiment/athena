@@ -57,6 +57,7 @@ def GetParserArgs() :
     parser.add_argument( '--pipelineRef',       help="Reference pipeline", nargs = '+')
     parser.add_argument( '--variations',        help="List of variations to compare")
     parser.add_argument( '--norm',              help="normalize to unit area", action='store_true')
+    parser.add_argument( '--pu-comparison',     help="compare different PU samples", action='store_true')
     parser.add_argument( '--mu',                help="<mu> value", default = 200)
     parser.add_argument( '--tag',               help="output file tag", default = '')
     parser.add_argument( '--legend-coord',	help="xmin, ymin, xmax, ymax TLegend coordinates", default = [0.65,0.65,0.9,0.87], type = float, nargs = '+')
@@ -147,24 +148,26 @@ def getATLASLabel(args):
     if 'pT1_' in args.test[0]: sample += ' p_{T} = 1 GeV'
 
     subatlas = ROOT.TLatex(.2, .84, "#splitline{#bf{#it{ATLAS}} Simulation Internal}{#splitline{#sqrt{s} = 14 TeV, HL-LHC}{#splitline{ITk Layout: 03-00-01}{<#mu> = %s, %s}}}" %(args.mu, sample))
+    if args.pu_comparison:   
+        subatlas = ROOT.TLatex(.2, .84, "#splitline{#bf{#it{ATLAS}} Simulation Internal}{#splitline{#sqrt{s} = 14 TeV, HL-LHC}{#splitline{ITk Layout: 03-00-01}{%s}}}" %(sample))
     subatlas.SetNDC(1)
     subatlas.SetTextFont(42)
     subatlas.SetTextSize(0.05)
 
     return subatlas
 
-def getPadSizes(args):
+def getPadSizes(args, NRef):
 
     pad_heights = [600*0.65]
-    for nref in range(len(args.ref)-1): pad_heights.append(600*0.35 * (1-0.05-1/3))
+    
+    for nref in range(NRef-1): pad_heights.append(600*0.35 * (1-0.05-1/3))
     pad_heights.append(600*0.35)
 
     return pad_heights
 
-def getCanvas(args,cfg):
+def getCanvas(args,cfg, NRef):
 
-    NRef = len(args.ref)
-    pad_heights = getPadSizes(args)
+    pad_heights = getPadSizes(args, NRef)
     canv_heigh = sum(pad_heights)
     pad_bottom = [(1-sum([pad_heights[j] for j in range(i+1)])/canv_heigh) for i in range(len(pad_heights))]
     canv = ROOT.TCanvas("c","c",600,int(canv_heigh))
@@ -364,7 +367,7 @@ def getTEfficiencyRatio(histos):
 
     return ratio
 
-def drawTEfficiencyOutliers(r, configs, multigraphs, markers, Nref):
+def drawTEfficiencyOutliers(r, configs, multigraphs, markers, NRef):
 
     outliers_index = 0
 
@@ -378,19 +381,19 @@ def drawTEfficiencyOutliers(r, configs, multigraphs, markers, Nref):
 
             if g.GetPointY(i) >  ymax:
                 markers[r].append(ROOT.TMarker(g.GetPointX(i), ymax-(ymax-ymin)*0.05, 26))
-                markers[r][outliers_index].SetMarkerColor(configs[j+Nref]['linecolor'])
+                markers[r][outliers_index].SetMarkerColor(configs[j+NRef]['linecolor'])
                 markers[r][outliers_index].SetMarkerSize(1.2)
                 markers[r][outliers_index].Draw('same')
                 outliers_index += 1
 
             if g.GetPointY(i) < ymin and g.GetPointY(i) > 0: 
                 markers[r].append(ROOT.TMarker(g.GetPointX(i), ymin+(ymax-ymin)*0.05, 32))
-                markers[r][outliers_index].SetMarkerColor(configs[j+Nref]['linecolor'])
+                markers[r][outliers_index].SetMarkerColor(configs[j+NRef]['linecolor'])
                 markers[r][outliers_index].SetMarkerSize(1.2)
                 markers[r][outliers_index].Draw('same')
                 outliers_index += 1
 
-def drawTHOutliers(r, configs, ratios, markers, Nref):
+def drawTHOutliers(r, configs, ratios, markers, NRef):
 
     outliers_index = 0
 
@@ -403,14 +406,14 @@ def drawTHOutliers(r, configs, ratios, markers, Nref):
 
             if ratio.GetBinContent(i) >  ymax: 
                 markers[r].append(ROOT.TMarker(ratio.GetXaxis().GetBinCenter(i), ymax-(ymax-ymin)*0.05, 26))
-                markers[r][outliers_index].SetMarkerColor(configs[j+Nref]['linecolor'])
+                markers[r][outliers_index].SetMarkerColor(configs[j+NRef]['linecolor'])
                 markers[r][outliers_index].SetMarkerSize(1.2)
                 markers[r][outliers_index].Draw('same')
                 outliers_index += 1
 
             if ratio.GetBinContent(i) < ymin and ratio.GetBinContent(i) > 0: 
                 markers[r].append(ROOT.TMarker(ratio.GetXaxis().GetBinCenter(i), ymin+(ymax-ymin)*0.05, 32))
-                markers[r][outliers_index].SetMarkerColor(configs[j+Nref]['linecolor'])
+                markers[r][outliers_index].SetMarkerColor(configs[j+NRef]['linecolor'])
                 markers[r][outliers_index].SetMarkerSize(1.2)
                 markers[r][outliers_index].Draw('same')
                 outliers_index += 1
@@ -423,9 +426,10 @@ def drawRefLine(r, ratios, reflines):
     reflines[r].SetLineWidth(1)
     reflines[r].Draw('same')
 
-def draw(args, configs, tails=False):
+def draw(args, configs, tails=False, pu_comparison=False):
 
-    canv = getCanvas(args,configs[0])
+    NRef = len(args.ref) if not pu_comparison else 1
+    canv = getCanvas(args,configs[0], NRef)
     ATLASLabel = getATLASLabel(args)
     legend = getLegend(args.legend_coord[0],args.legend_coord[1],args.legend_coord[2],args.legend_coord[3]) 
     doComparison = len(configs) > 1
@@ -457,7 +461,7 @@ def draw(args, configs, tails=False):
             legend.Draw()
 
     ATLASLabel.Draw()
-    Nref = len(args.ref)
+
     multigraphs = []
     reflines = []
     markers = []
@@ -470,17 +474,17 @@ def draw(args, configs, tails=False):
         requirement_text.Draw('same')
 
     # Loop over reference histograms to create one ratio per reference
-    for r in range(Nref):
+    for r in range(NRef):
 
-        labelsizescales = [canv.GetPad(1).GetHNDC()/canv.GetPad(i+2).GetHNDC() for i in range(Nref)]
+        labelsizescales = [canv.GetPad(1).GetHNDC()/canv.GetPad(i+2).GetHNDC() for i in range(NRef)]
         canv.cd(r+2)
         ratios = []
         multigraphs.append(ROOT.TMultiGraph())
         markers.append([])
 
-        if not tails:
+        if not tails and not pu_comparison:
 
-            for i in range(Nref, len(configs)):
+            for i in range(NRef, len(configs)):
                 ratio_histos = [histos[r] if not isTProfile(histos[r]) else histos[r].ProjectionX(), histos[i] if not isTProfile(histos[i]) else histos[i].ProjectionX()]
 
                 if isTEfficiencyObj: ratios.append(getTEfficiencyRatio(ratio_histos))
@@ -491,10 +495,10 @@ def draw(args, configs, tails=False):
                     ratios.append(ratio)
 
             for i, ratio in enumerate(ratios):
-                color = configs[i+Nref]['linecolor'] #if len(configs)>2 else ROOT.kBlack
+                color = configs[i+NRef]['linecolor'] #if len(configs)>2 else ROOT.kBlack
                 linestyle = configs[i+1]['linestyle']# if len(configs)>2 else 1
                 markstyle = configs[i+1]['markstyle']# if len(configs)>2 else 20
-                setRatioStyle(ratio, configs[i], color, linestyle, markstyle, ref=configs[r]['pipeline'], labelsizescale = labelsizescales[r], lastpad = (r==Nref-1))
+                setRatioStyle(ratio, configs[i], color, linestyle, markstyle, ref=configs[r]['pipeline'], labelsizescale = labelsizescales[r], lastpad = (r==NRef-1))
 
                 if isTEfficiencyObj:
                     multigraphs[r].Add(ratio,'p')
@@ -504,17 +508,17 @@ def draw(args, configs, tails=False):
 
             if isTEfficiencyObj:
                 xmin, xmax = ratios[0].GetXaxis().GetXmin(), ratios[0].GetXaxis().GetXmax()
-                setRatioStyle(multigraphs[r], configs[i], color, linestyle, markstyle, ref=configs[r]['pipeline'], multigraph=True, labelsizescale = labelsizescales[r], lastpad = (r==Nref-1))
+                setRatioStyle(multigraphs[r], configs[i], color, linestyle, markstyle, ref=configs[r]['pipeline'], multigraph=True, labelsizescale = labelsizescales[r], lastpad = (r==NRef-1))
                 multigraphs[r].Draw('a')
-                drawTEfficiencyOutliers(r, configs, multigraphs, markers, Nref)
+                drawTEfficiencyOutliers(r, configs, multigraphs, markers, NRef)
                 multigraphs[r].GetXaxis().SetLimits(xmin, xmax)
 
             else:
-                drawTHOutliers(r, configs, ratios, markers, Nref)
+                drawTHOutliers(r, configs, ratios, markers, NRef)
 
             drawRefLine(r, ratios, reflines)
 
-            if args.type == 'resolution':
+            if args.type == 'resolution' and not pu_comparison:
                 requirement_line, requirement_text = getURDRequirementLine(ratios[0], 'resolution', canv, labelsizescales[r])
                 urd_lines.append(requirement_line)
                 urd_text.append(requirement_text)
@@ -522,9 +526,8 @@ def draw(args, configs, tails=False):
                 urd_text[r].Draw('same')
 
         else:
-
             for i in [0,2]:
-                ratio_histos = [histos[i],histos[i+1]]
+                ratio_histos = [histos[i],histos[i+1]] 
                 ratio = ratio_histos[0].Clone()
                 ratio.Divide(ratio_histos[1])
                 ratios.append(ratio)
@@ -533,8 +536,8 @@ def draw(args, configs, tails=False):
                 color = configs[i*2]['linecolor']
                 linestyle = configs[i*2]['linestyle']
                 markstyle = configs[i*2]['markstyle']
-                setRatioStyle(ratio, configs[i], color, linestyle, markstyle, ref=configs[r]['pipeline'],labelsizescale = labelsizescales[r], lastpad = (r==Nref-1))
-                ratio.GetYaxis().SetTitle('b-Jet / LF-Jet')
+                setRatioStyle(ratio, configs[i], color, linestyle, markstyle, ref=configs[r]['pipeline'],labelsizescale = labelsizescales[r], lastpad = (r==NRef-1))
+                ratio.GetYaxis().SetTitle('b-Jet / LF-Jet' if tails else '<#mu> = 140/<#mu> = 200')
                 ratio.Draw('same')
 
             drawRefLine(r, ratios, reflines)
@@ -552,8 +555,11 @@ def main():
     pipelinesTest = args.pipelineTest
     trkanalysesRef = args.trkAnalysisRef
     trkanalysesTest = args.trkAnalysisTest
+    doTails = (args.type == 'tails')
+    doPUComparison = args.pu_comparison
+    
 
-    if args.type != 'tails':
+    if doTails and not doPUComparison:
         colors = [ ROOT.kRed, ROOT.kBlue, ROOT.kGreen+2, ROOT.kOrange+7, ROOT.kMagenta, ROOT.kCyan+1, ROOT.kViolet, ROOT.kTeal+2, ROOT.kPink+6, ROOT.kAzure+1]
         linestyles = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10 ]
         markstyles = [ 20, 21, 22, 23, 24, 25, 26, 27, 28, 30 ]
@@ -573,24 +579,24 @@ def main():
             f = ROOT.TFile.Open(inputFiles[i], 'READ')
             configs.append(getConfig(f, pipeline, trkanalyses[i], args, colors[i], markstyles[i], linestyles[i], isReference))
 
-        draw(args, configs, tails = False)
+        draw(args, configs)
 
     else:
 
-        colors = [ROOT.kRed, ROOT.kRed, ROOT.kBlue, ROOT.kBlue]
-        linestyles = [2,1,3,1]
-        markstyles = [20,0,24,0]
-        pipelines = args.pipelineRef+args.pipelineRef+args.pipelineTest+args.pipelineTest
+        colors = [ROOT.kRed, ROOT.kRed, ROOT.kBlue, ROOT.kBlue] 
+        linestyles = [2,1,2,1]
+        markstyles = [20,0,24,0] if doTails else [20, 24, 20, 24]
+        pipelines = args.pipelineRef+args.pipelineRef+args.pipelineTest+args.pipelineTest if doTails else args.pipelineRef+args.pipelineTest
         trkanalyses = args.trkAnalysisRef
         trkanalyses.extend(args.trkAnalysisTest)
-        inputFiles = inputRef+inputRef+inputTest+inputTest
+        inputFiles = inputRef+inputRef+inputTest+inputTest if doTails else inputRef+inputTest
         configs = []
 
         for i,trkana in enumerate(trkanalyses):
             f = ROOT.TFile.Open(inputFiles[i], 'READ')
             configs.append(getConfig(f, pipelines[i], trkanalyses[i], args, colors[i], markstyles[i], linestyles[i]))
 
-        draw(args, configs, tails=True)
+        draw(args, configs, tails=doTails,pu_comparison=doPUComparison)
 
 if __name__ == "__main__":
     main()
