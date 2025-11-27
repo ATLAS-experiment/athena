@@ -59,7 +59,7 @@ namespace JetTagDQA {
     ///////////////////////////////////////////////////////////////////
     // Const methods:
     ///////////////////////////////////////////////////////////////////
-    std::map<const xAOD::TrackParticle*, int> getTrackTruthAssociations(const xAOD::BTagging* btag) const;
+    std::map<const xAOD::TrackParticle*, int> getTrackTruthAssociations(const xAOD::Jet* jet) const;
 
     ///////////////////////////////////////////////////////////////////
     // Non-const methods:
@@ -108,10 +108,8 @@ namespace JetTagDQA {
     float m_JVTCutAntiKt4EMPFlowJets;
     float m_truthMatchProbabilityCut;
 
-    std::string m_dipsName;
-    std::string m_DL1dv01Name;
     std::string m_GN2v01Name;
-    std::string m_GN2Xv01Name;
+    std::string m_GN3XPV01Name;
 
     JetTagDQA::BTaggingValidationPlots m_antiKt4EMTopoPlots;
     JetTagDQA::BTaggingValidationPlots m_antiKt4EMPFlowJetsPlots;
