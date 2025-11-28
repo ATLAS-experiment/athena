@@ -69,11 +69,6 @@ def HGTD_DigitizationToolCfg(flags, name="HGTD_DigitizationTool", **kwargs):
     """Return ComponentAccumulator with configured HGTD_DigitizationBasicTool"""
     acc = ComponentAccumulator()
 
-    if flags.HGTD.outputAltirocRDO:
-        kwargs.setdefault("AltirocOutputObject", "HGTD_ALTIROC_RDOs")
-    else:
-        kwargs.setdefault("AltirocOutputObject", "")
-
     if flags.Digitization.PileUp:
         intervals = []
         if not flags.Digitization.DoXingByXingPileUp:
@@ -83,9 +78,13 @@ def HGTD_DigitizationToolCfg(flags, name="HGTD_DigitizationTool", **kwargs):
         kwargs.setdefault("MergeSvc", "")
     kwargs.setdefault("OnlyUseContainerName", flags.Digitization.PileUp)
     if flags.Common.ProductionStep == ProductionStep.PileUpPresampling:
+        if flags.HGTD.outputAltirocRDO:
+            kwargs.setdefault("AltirocOutputObject", f"{flags.Overlay.BkgPrefix}HGTD_ALTIROC_RDOs")
         kwargs.setdefault("OutputObjectName", f"{flags.Overlay.BkgPrefix}HGTD_RDOs")
         kwargs.setdefault("OutputSDOName", f"{flags.Overlay.BkgPrefix}HGTD_SDO_Map")
     else:
+        if flags.HGTD.outputAltirocRDO:
+            kwargs.setdefault("AltirocOutputObject", "HGTD_ALTIROC_RDOs")
         kwargs.setdefault("OutputObjectName", "HGTD_RDOs")
         kwargs.setdefault("OutputSDOName", "HGTD_SDO_Map")
     pileupTool = acc.popToolsAndMerge(HGTD_DigitizationBasicToolCfg(flags, name, **kwargs))
@@ -96,9 +95,11 @@ def HGTD_DigitizationToolCfg(flags, name="HGTD_DigitizationTool", **kwargs):
 def HGTD_OverlayDigitizationToolCfg(flags, name="HGTD_OverlayDigitizationTool", **kwargs):
     """Return ComponentAccumulator with HGTD_DigitizationTool configured for overlay"""
     kwargs.setdefault("OnlyUseContainerName", False)
-    kwargs.setdefault("OutputObjectName", f"{flags.Overlay.SigPrefix}HGTD_RDOs")
     kwargs.setdefault("OutputSDOName", f"{flags.Overlay.SigPrefix}HGTD_SDO_Map")
     kwargs.setdefault("MergeSvc", "")
+    kwargs.setdefault("OutputObjectName", f"{flags.Overlay.SigPrefix}HGTD_RDOs")
+    if flags.HGTD.outputAltirocRDO:
+        kwargs.setdefault("AltirocOutputObject", f"{flags.Overlay.SigPrefix}HGTD_ALTIROC_RDOs")
     return HGTD_DigitizationBasicToolCfg(flags, name, **kwargs)
 
 
@@ -115,7 +116,9 @@ def HGTD_OutputCfg(flags):
     """Return ComponentAccumulator with Output for HGTD. Not standalone."""
     acc = ComponentAccumulator()
     if flags.Output.doWriteRDO:
-        ItemList = ["HGTD_RDO_Container#*", "HGTD_ALTIROC_RDO_Container#*"]
+        ItemList = ["HGTD_RDO_Container#*"]
+        if flags.HGTD.outputAltirocRDO:
+            ItemList += ["HGTD_ALTIROC_RDO_Container#*"]
         if flags.Digitization.EnableTruth:
             ItemList += ["InDetSimDataCollection#*"]
             acc.merge(TruthDigitizationOutputCfg(flags))

@@ -112,7 +112,7 @@ private:
   SG::WriteHandleKey<HGTD_RDO_Container> m_output_rdo_cont_key{this, "OutputObjectName", "HGTD_RDOs", "Output Object name"};
   
   SG::WriteHandle<HGTD_ALTIROC_RDO_Container> m_hgtd_altiroc_rdo_container; //!< ALTIROC RDO container handle
-  SG::WriteHandleKey<HGTD_ALTIROC_RDO_Container> m_output_altiroc_rdo_cont_key{this, "AltirocOutputObject", "HGTD_ALTIROC_RDOs", "Key of HGTD_ALTIROC_RDO container"};
+  SG::WriteHandleKey<HGTD_ALTIROC_RDO_Container> m_output_altiroc_rdo_cont_key{this, "AltirocOutputObject", "", "Key of HGTD_ALTIROC_RDO container"};
 
   SG::WriteHandle<InDetSimDataCollection> m_sdo_collection_map; //!< SDO Map handle
   SG::WriteHandleKey<InDetSimDataCollection> m_output_sdo_coll_key{this, "OutputSDOName", "HGTD_SDO_Map", "Output SDO container name"};
