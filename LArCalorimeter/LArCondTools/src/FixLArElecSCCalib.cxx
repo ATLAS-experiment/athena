@@ -428,7 +428,7 @@ StatusCode FixLArElecSCCalib::fix3(const LArOnOffIdMapping *cabling, const LArMC
 
    auto szav = collav->size();
    ATH_CHECK(detStore()->record(collav,"/LAR/ElecCalibMCSC/MinBiasAverage"));
-   ATH_MSG_DEBUG("Stored coll with size "<<collav->size()<<" into /LAR/ElecCalibMCSC/MinBiasAverage");
+   ATH_MSG_DEBUG("Stored coll with size "<<szav<<" into /LAR/ElecCalibMCSC/MinBiasAverage");
 
    return StatusCode::SUCCESS;
 }
