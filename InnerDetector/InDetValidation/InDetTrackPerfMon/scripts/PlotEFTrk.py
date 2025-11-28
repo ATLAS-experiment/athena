@@ -559,7 +559,7 @@ def main():
     doPUComparison = args.pu_comparison
     
 
-    if doTails and not doPUComparison:
+    if not doTails and not doPUComparison:
         colors = [ ROOT.kRed, ROOT.kBlue, ROOT.kGreen+2, ROOT.kOrange+7, ROOT.kMagenta, ROOT.kCyan+1, ROOT.kViolet, ROOT.kTeal+2, ROOT.kPink+6, ROOT.kAzure+1]
         linestyles = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10 ]
         markstyles = [ 20, 21, 22, 23, 24, 25, 26, 27, 28, 30 ]
