@@ -98,6 +98,8 @@ class OverlapAnalysisConfig (ConfigBlock):
             info="whether to perform the overlap removal between jets and large-R jets. The default is True.")
         self.addOption ('favourPhotonOverLepton', False, type=bool,
             info="whether to give priority to photons in OR. The default is False.")
+        self.addOption ('allowNoPV', False, type=bool,
+            info="whether to allow proceeding with overlap removal even when no primary vertex is found. The default is False.")
 
     def instanceName (self) :
         """Return the instance name for this block"""
@@ -398,6 +400,7 @@ class OverlapAnalysisConfig (ConfigBlock):
             alg.overlapTool.MuJetORT.UseSlidingDR = self.boostedLeptons
             alg.overlapTool.MuJetORT.EnableUserPriority = self.enableUserPriority
             alg.overlapTool.MuJetORT.OutputPassValue = True
+            alg.overlapTool.MuJetORT.AllowNoPV = self.allowNoPV
 
         # Set up the tau-electron overlap removal.
         if taus and electrons and self.doTauEleOR:
