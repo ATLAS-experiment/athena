@@ -1,9 +1,10 @@
-// Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 #include "./TrigDBHelper.h"
 #include "TrigConfIO/TrigDBCTPFilesLoader.h"
 #include "TrigConfData/DataStructure.h"
 #include <iterator>
+#include <tuple>
 
 TrigConf::TrigDBCTPFilesLoader::TrigDBCTPFilesLoader(const std::string & connection) : 
    TrigDBLoader("TrigDBCTPFilesLoader", connection)
@@ -191,7 +192,7 @@ TrigConf::TrigDBCTPFilesLoader::loadCTPFiles(L1CTPFiles & ctpfiles, std::unique_
    try
    {
       auto & cursor = query->execute();
-      cursor.next();
+      std::ignore = cursor.next();
       const coral::AttributeList& row = cursor.currentRow();
       {
          ctpfiles.set_Ctpcore_LUT(
@@ -268,7 +269,7 @@ TrigConf::TrigDBCTPFilesLoader::loadCTPSMX(L1CTPFiles & ctpfiles, std::unique_pt
    try
    {
       auto & cursor = query->execute();
-      cursor.next();
+      std::ignore = cursor.next();
       const coral::AttributeList& row = cursor.currentRow();
       
       ctpfiles.set_Smx_Output( loadDBFieldIntoString(row, "L1SMX_OUTPUT") );
@@ -295,7 +296,7 @@ TrigConf::TrigDBCTPFilesLoader::loadMUCTPI(L1CTPFiles & ctpfiles, std::unique_pt
    try
    {
       auto & cursor = query->execute();
-      cursor.next();
+      std::ignore = cursor.next();
       const coral::AttributeList& row = cursor.currentRow();
       const coral::Blob & blob = row["L1MF_DATA"].data<coral::Blob>();
       blobToPtree(blob, pt);
@@ -330,14 +331,14 @@ TrigConf::TrigDBCTPFilesLoader::loadMUCTPI(L1CTPFiles & ctpfiles, std::unique_pt
          auto dv = ds.getList(k);
          std::vector<uint32_t> v;
          v.reserve(200);
-         for( auto x : dv ) {
+         for( const auto & x : dv ) {
             v.push_back(std::stoul(x.getValue<std::string>(), nullptr, 0));
          }
          ctpfiles.set_Muctpi_Extra_Ptlut(k, std::move(v));
       } else if(k=="multiplicities_nbits") {
          auto dv = ds.getList(k);
          std::vector<uint32_t> v;
-         for( auto x : dv ) {
+         for( const auto & x : dv ) {
             v.push_back(std::stoul(x.getValue<std::string>(), nullptr, 0));
          }
          ctpfiles.set_Muctpi_Nbits(std::move(v));
@@ -353,7 +354,7 @@ TrigConf::TrigDBCTPFilesLoader::loadTMC(L1CTPFiles & ctpfiles, std::unique_ptr<c
    try
    {
       auto & cursor = query->execute();
-      cursor.next();
+      std::ignore = cursor.next();
       const coral::AttributeList& row = cursor.currentRow();
       const coral::Blob & blob = row["L1TMC_DATA"].data<coral::Blob>();
       blobToPtree(blob, pt);
