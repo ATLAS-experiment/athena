@@ -26,7 +26,7 @@ parser.add_argument( "-T", "--testLabel", default="TEST", help="Label for TEST" 
 parser.add_argument( "-R", "--refLabel", default="REF", help="Label for REFERENCE" )
 parser.add_argument( "-d", "--dirName", default=summaryDirDefault, help="Name of the TDirectory path with plots" )
 parser.add_argument( "-a", "--analyses", default="TrkAnaEF", help="Comma-separeted list of track analyses to process" )
-parser.add_argument( "-o", "--outName", default="TrkAnaSummary_&TrkAnaName&.html", help="Name of the output html files" )
+parser.add_argument( "-o", "--outName", default="TrkAnaSummary.html", help="Name of the output html files" )
 parser.add_argument( "-O", "--outNameLatex", default="TrkAnaSummary.tex", help="Name of the output latex file" )
 parser.add_argument( "-l", "--printLatex", action="store_true", help="Print latex table" )
 MyArgs = parser.parse_args()
@@ -270,7 +270,8 @@ def initializeLatexTable():
 
     return lines
 ## Remove final .html if it exists
-outFile = MyArgs.outName.replace( "_&TrkAnaName&", "" )
+outFile = MyArgs.outName.replace( "&TrkAnaName&", "" ) if "&TrkAnaName&" in MyArgs.outName else MyArgs.outName
+
 if os.path.isfile( outFile ) :
     os.remove( outFile ) 
 
@@ -290,7 +291,7 @@ for anaName in anaList :
     dataDict = {}
     index = []
     anaDirName = MyArgs.dirName.replace( "&TrkAnaName&", anaName )
-    anaOutName = MyArgs.outName.replace( "&TrkAnaName&", anaName )
+    anaOutName = MyArgs.outName.replace( "&TrkAnaName&", anaName ) if "&TrkAnaName&" in MyArgs.outName else MyArgs.outName.replace( ".html", "_"+anaName+".html" )
 
     testFile = ROOT.TFile.Open( MyArgs.testFile, "READ" )
     testMultiplicity = testFile.Get( anaDirName+"Multiplicities/summary" )
