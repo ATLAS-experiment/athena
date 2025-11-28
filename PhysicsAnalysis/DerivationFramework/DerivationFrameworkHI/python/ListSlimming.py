@@ -372,6 +372,7 @@ def HION5AllTruthVariables():
     variables += ["AntiKt4TruthJets"]
     variables += ["TruthElectrons"]
     variables += ["TruthMuons"]
+    variables += ["TruthNeutrinos"]
     return variables
 
 def HION5SmartCollections():
