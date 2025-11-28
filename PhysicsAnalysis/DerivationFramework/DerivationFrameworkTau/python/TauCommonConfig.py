@@ -162,7 +162,7 @@ def AddTauIDDecorationCfg(flags, **kwargs):
     #    wpName = tool.DecorWPNames
 
     if kwargs.pop('evetoFix', True):
-        tools.append( acc.popToolsAndMerge(tauTools.TauWPDecoratorEleRNNFixCfg(flags)) )
+        tools.append( acc.popToolsAndMerge(tauTools.TauWPDecoratorEleRNNCfg(flags)) )
         # Cache tool properties
         doEvetoWP |= tools[-1].UseAbsEta
         # The original RNNEleScore should not be overriden
