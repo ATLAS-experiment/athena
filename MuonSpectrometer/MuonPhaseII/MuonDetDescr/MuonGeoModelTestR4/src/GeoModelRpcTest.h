@@ -32,6 +32,14 @@ class GeoModelRpcTest : public AthHistogramAlgorithm{
         unsigned int cardinality() const override final { return 1; }
 
     private:
+      /** @brief Draw the strips in the panel on a Canvas. The active gasgap
+       *         is drawn as a black hollow box. The contained strips are 
+       *         hatched red & blue rectangles.
+       *  @param ctx: EventContext needed to fetch a canvas from the 
+       *              visualization service.
+       *  @param design: Pointer to the strip design held by the readout element.
+       *  @param detId: Identifier of the associated readout element
+       *  @param measPhi: Flag indicating whether this is an eta or phi panel */
       void visualizeStripPanel(const EventContext& ctx,
                                const StripDesignPtr& design,
                                const Identifier& detId,
@@ -106,6 +114,8 @@ class GeoModelRpcTest : public AthHistogramAlgorithm{
       ServiceHandle<MuonValR4::IRootVisualizationService> m_visualSvc{this, "VisualSvc", "MuonValR4::RootVisualizationService"};
       /** @brief Token to be presented to the visualization service  */
       MuonValR4::IRootVisualizationService::ClientToken m_clientToken{};
+      /** @brief Flag toggling whether the strip planes shall be printed */
+      Gaudi::Property<bool> m_visualStrips{this, "visualizePlanes", false};
   
 };
 }
