@@ -73,11 +73,8 @@ private:
   /** @brief number of cells from cluster with positive energy in PS, EM1 and EM2 */
   std::vector<int> getNPosECells(const xAOD::CaloCluster& cluster) const;
 
-  /** @brief first eta moment in PS, EM1 and EM2 w.r.t cluster eta */
-  std::vector<float> get1stEtaMomWRTCluster(const xAOD::CaloCluster& cluster) const;
-
-  /** @brief second eta moment in PS, EM1 and EM2 w.r.t cluster eta */ 
-  std::vector<float> get2ndEtaMomWRTCluster(const xAOD::CaloCluster& cluster) const;
+  /** @brief eta moment in PS, EM1 and EM2 w.r.t cluster eta */  
+  std::vector<std::vector<float>> getEtaMomWRTCluster(const xAOD::CaloCluster& cluster) const;
 
   Gaudi::Property<double> m_clusterEtCut {this, "ClusterEtCut", 0.5 * Gaudi::Units::GeV, "Et threshould for pi0 candidate clusters"};
   Gaudi::Property<double> m_maxDeltaRNeutral {this, "MaxDeltaRNeutral", 0.2, "max DeltaR for pi0-tau association"};
