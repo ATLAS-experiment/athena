@@ -311,6 +311,7 @@ int processCascade(CascadeEvent & cascadeEvent_ )
      }
   }
   long int fullNPar = getCascadeNPar(cascadeEvent_);
+  if (fullNPar<0) return -1;
   double * fullMatrix   = new double[fullNPar*fullNPar];
   double * iniCovMatrix = new double[fullNPar*fullNPar];for(int ss=0; ss<fullNPar*fullNPar; ss++) iniCovMatrix[ss]=0.;
   double * fullLSide  = new double[fullNPar];
