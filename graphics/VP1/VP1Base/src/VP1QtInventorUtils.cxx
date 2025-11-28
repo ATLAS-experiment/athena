@@ -404,7 +404,7 @@ QImage VP1QtInventorUtils::imageFromRGBFile(const QString& filename)
   //more realistically, limits are probably 4'096
   constexpr int maxheight(10'000);
   constexpr int maxwidth(10'000);
-  auto inbounds = [maxheight, maxwidth](int w, int h)->bool{
+  auto inbounds = [](int w, int h)->bool{
     return (w>0 and w<maxwidth) and (h>0 and h<maxheight);
   };
 	unsigned * imagedata = Imp::read_texture(filename.toStdString().c_str(), &width, &height, &components);
