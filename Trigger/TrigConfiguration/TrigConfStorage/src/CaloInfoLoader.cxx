@@ -32,7 +32,6 @@
 #include <iterator>
 #include <map>
 #include <string>
-#include "boost/lexical_cast.hpp"
 
 using namespace std;
 
@@ -149,7 +148,7 @@ TrigConf::CaloInfoLoader::load( CaloInfo& data ) {
          if(schema <= 6)
             data.setGlobalScale( row["L1CI.L1CI_GLOBAL_SCALE"].data<float>());        
          else
-            data.setGlobalScale( boost::lexical_cast<float,std::string>(row["L1CI.L1CI_GLOBAL_SCALE"].data<std::string>()));
+            data.setGlobalScale( std::stof(row["L1CI.L1CI_GLOBAL_SCALE"].data<std::string>()));
       } else {
             data.setGlobalEmScale( row["L1CI.L1CI_GLOBAL_EM_SCALE"].data<float>() );
             data.setGlobalJetScale( row["L1CI.L1CI_GLOBAL_JET_SCALE"].data<float>() );

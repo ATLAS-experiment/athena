@@ -3,7 +3,7 @@
 if __name__=="__main__":
     
     import argparse
-    parser = argparse.ArgumentParser(prog='python -m PixelCalibAlgs.PixelCalibrationConfig.',
+    parser = argparse.ArgumentParser(prog='python -m PixelCalibAlgs.PixelCalibrationConfig',
                             description="""Calibration tool for pixel.\n\n
                             Example: python -m PixelCalibAlgs.PixelCalibrationConfig --folder "global/path/to/folder/" --thr "threshold_file" --thr_intime "intime_file" 
                                                                                      --tot "tot_file --layers [Blayer, L1, L2, disk] [--saveInfo --runCal --skipPlots]""")
