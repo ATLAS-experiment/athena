@@ -815,49 +815,54 @@ def TauEleRNNEvaluatorCfg(flags, applyLooseTrackSel=False):
     return result
 
 def TauWPDecoratorEleRNNCfg(flags):
-    import PyUtils.RootUtils as ru
-    ROOT = ru.import_root()
-    import cppyy
-    cppyy.load_library('libxAODTau_cDict')
 
     result = ComponentAccumulator()
-    _name = flags.Tau.ActiveConfig.prefix + 'TauWPDecoratorEleRNN'
+
+    from AthenaConfiguration.Enums import ProductionStep
+    # set the instance to run at derivation level
+    if flags.Common.ProductionStep is ProductionStep.Derivation:
+        _name = flags.Tau.ActiveConfig.prefix + 'TauWPDecoratorEleRNNFix_v1'
+        WPConf = flags.Tau.TauEleRNNWPfix
+        NewScoreName = "RNNEleScoreSigTrans_v1"
+        CutEnumVals = []
+        SigEff1P = []
+        SigEff3P = []
+        DecorWPNames = [ "EleRNNLoose_v1", "EleRNNMedium_v1", "EleRNNTight_v1" ]
+        DecorWPCutEffs1P = [0.95, 0.90, 0.85]
+        DecorWPCutEffs3P = [0.98, 0.95, 0.90]
+    else:
+        #this is the instance running in reconstruction level
+        import PyUtils.RootUtils as ru
+        ROOT = ru.import_root()
+        import cppyy
+        cppyy.load_library('libxAODTau_cDict')
+
+        _name = flags.Tau.ActiveConfig.prefix + 'TauWPDecoratorEleRNN'
+        WPConf = flags.Tau.TauEleRNNWPConfig
+        NewScoreName = "RNNEleScoreSigTrans"
+        SigEff1P = [0.95, 0.90, 0.85]
+        SigEff3P = [0.98, 0.95, 0.90]
+        CutEnumVals = [ ROOT.xAOD.TauJetParameters.IsTauFlag.EleRNNLoose,
+                        ROOT.xAOD.TauJetParameters.IsTauFlag.EleRNNMedium,
+                        ROOT.xAOD.TauJetParameters.IsTauFlag.EleRNNTight ]
+        DecorWPNames = []
+        DecorWPCutEffs1P = []
+        DecorWPCutEffs3P = []
 
     TauWPDecorator = CompFactory.getComp("TauWPDecorator")
-    WPConf = flags.Tau.TauEleRNNWPConfig
     myTauEleWPDecorator = TauWPDecorator( name=_name,
                                        flatteningFile1Prong = WPConf[0],
                                        flatteningFile3Prong = WPConf[1],
-                                       CutEnumVals =
-                                       [ ROOT.xAOD.TauJetParameters.IsTauFlag.EleRNNLoose,
-                                         ROOT.xAOD.TauJetParameters.IsTauFlag.EleRNNMedium,
-                                         ROOT.xAOD.TauJetParameters.IsTauFlag.EleRNNTight ],
-                                       SigEff1P = [0.95, 0.90, 0.85],
-                                       SigEff3P = [0.98, 0.95, 0.90],
+                                       CutEnumVals = CutEnumVals,
+                                       DecorWPNames = DecorWPNames,
+                                       SigEff1P = SigEff1P,
+                                       SigEff3P = SigEff3P,
+                                       DecorWPCutEffs1P = DecorWPCutEffs1P,
+                                       DecorWPCutEffs3P = DecorWPCutEffs3P,
                                        UseAbsEta = True ,
                                        ScoreName = "RNNEleScore",
-                                       NewScoreName = "RNNEleScoreSigTrans",
+                                       NewScoreName = NewScoreName,
                                        DefineWPs = True)
-
-    result.setPrivateTools(myTauEleWPDecorator)
-    return result
-
-def TauWPDecoratorEleRNNFixCfg(flags):
-    result = ComponentAccumulator()
-    _name = flags.Tau.ActiveConfig.prefix + 'TauWPDecoratorEleRNNFix_v1'
-
-    TauWPDecorator = CompFactory.getComp("TauWPDecorator")
-    WPConf = flags.Tau.TauEleRNNWPfix
-    myTauEleWPDecorator = TauWPDecorator(name = _name,
-                                         flatteningFile1Prong = WPConf[0],
-                                         flatteningFile3Prong = WPConf[1],
-                                         DecorWPNames = [ "EleRNNLoose_v1", "EleRNNMedium_v1", "EleRNNTight_v1" ],
-                                         DecorWPCutEffs1P = [0.95, 0.90, 0.85],
-                                         DecorWPCutEffs3P = [0.98, 0.95, 0.90],
-                                         UseAbsEta = True,
-                                         ScoreName = "RNNEleScore",
-                                         NewScoreName = "RNNEleScoreSigTrans_v1",
-                                         DefineWPs = True)
 
     result.setPrivateTools(myTauEleWPDecorator)
     return result
