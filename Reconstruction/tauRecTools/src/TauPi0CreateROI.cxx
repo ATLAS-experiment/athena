@@ -64,6 +64,9 @@ StatusCode TauPi0CreateROI::executePi0CreateROI(xAOD::TauJet& tau, CaloConstCell
   // FIXME: tau p4 is corrected to point at tau vertex, but the cells are not
   cellList->select(tau.eta(), tau.phi(), 0.4);
 
+  // take this opportunity to select EM1 cells for shot reconstruction
+  std::vector<const CaloCell*> shotCells;
+ 
   for (const CaloCell* cell : *cellList) {
     // only keep cells that are in Ecal (PS, EM1, EM2 and EM3, both barrel and endcap).
     int sampling = cell->caloDDE()->getSampling();
@@ -77,7 +80,15 @@ StatusCode TauPi0CreateROI::executePi0CreateROI(xAOD::TauJet& tau, CaloConstCell
       pi0CellContainer.push_back(cell);
       addedCellsMap.set(cellHash);
     }
+
+    if (sampling == CaloCell_ID::EMB1 || sampling == CaloCell_ID::EME1) {
+      shotCells.push_back(cell);
+    }
+
   }
+ 
+  static const SG::Accessor<std::vector<const CaloCell*>> acc_shotCells("shotCells");
+  acc_shotCells(tau) = shotCells;
 
   return StatusCode::SUCCESS;
 }
