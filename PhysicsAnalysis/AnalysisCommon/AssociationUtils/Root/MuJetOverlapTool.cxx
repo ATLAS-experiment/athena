@@ -61,6 +61,8 @@ namespace ORUtils
                     "Maximum allowed size of sliding dR cone");
     declareProperty("UseRapidity", m_useRapidity = true,
                     "Calculate delta-R using rapidity");
+    declareProperty("AllowNoPV", m_allowNoPV = false,
+                    "Allow events with no primary vertex");
   }
 
   //---------------------------------------------------------------------------
@@ -113,6 +115,7 @@ namespace ORUtils
       ATH_MSG_DEBUG("Using user-defined JetSumTrackPTDecoration " << m_jetSumTrkPtDec);
     }
 
+    ATH_MSG_DEBUG("AllowNoPV set to " << m_allowNoPV);
     return StatusCode::SUCCESS;
   }
 
@@ -153,11 +156,19 @@ namespace ORUtils
     m_decHelper->initializeDecorations(jets);
 
     // Retrieve the primary vertex for later reference
+    constexpr size_t INVALID_INDEX = std::numeric_limits<size_t>::max();
     size_t vtxIdx = 0;
     if(m_jetNumTrkDec.empty() && m_jetSumTrkPtDec.empty()) {
       auto vtx = getPrimVtx();
-      ATH_CHECK(vtx != nullptr);
-      vtxIdx = vtx->index();
+      if (vtx) { vtxIdx = vtx->index(); }
+      else if (!m_allowNoPV) {
+        ATH_MSG_FATAL("No primary vertex found! Cannot proceed with Mu-Jet OR.");
+        return StatusCode::FAILURE;
+      }
+      else {
+        vtxIdx = INVALID_INDEX;
+        ATH_MSG_DEBUG("No primary vertex found. Skipping the PV-dependent jet track info.");
+      }
     }
 
     // Remove suspicious jets that overlap with muons.
@@ -170,24 +181,26 @@ namespace ORUtils
         // Don't reject user-defined b-tagged jets
         if(m_bJetHelper && m_bJetHelper->isBJet(*jet)) continue;
 
-        // Get the number of tracks and the sumPT of those tracks
-        int nTrk = getNumTracks(*jet, vtxIdx);
-        float sumTrkPt = getSumTrackPt(*jet, vtxIdx);
+        if (vtxIdx != INVALID_INDEX) {
+          // Get the number of tracks and the sumPT of those tracks
+          int nTrk = getNumTracks(*jet, vtxIdx);
+          float sumTrkPt = getSumTrackPt(*jet, vtxIdx);
 
-        // Don't reject jets with high track multiplicity and
-        // high relative PT ratio
-        bool highNumTrk = nTrk >= m_numJetTrk;
-        bool highRelPt = false;
+          // Don't reject jets with high track multiplicity and
+          // high relative PT ratio
+          bool highNumTrk = nTrk >= m_numJetTrk;
+          bool highRelPt = false;
 
-	if (sumTrkPt < FLT_MIN){
-	  highRelPt = (muon->pt()/jet->pt() < m_muJetPtRatio);
-	}
-	else{
-	  highRelPt = (muon->pt()/jet->pt() < m_muJetPtRatio ||
-		       muon->pt()/sumTrkPt < m_muJetTrkPtRatio);
-	}
+	        if (sumTrkPt < FLT_MIN){
+	          highRelPt = (muon->pt()/jet->pt() < m_muJetPtRatio);
+	        }
+	        else{
+	          highRelPt = (muon->pt()/jet->pt() < m_muJetPtRatio ||
+		        muon->pt()/sumTrkPt < m_muJetTrkPtRatio);
+	        }
 
-        if(highNumTrk && (!m_applyRelPt || highRelPt)) continue;
+          if(highNumTrk && (!m_applyRelPt || highRelPt)) continue;
+        } // end part related to PV
 
         if(m_dRMatchCone1->objectsMatch(*muon, *jet)){
           ATH_CHECK( handleOverlap(jet, muon) );
@@ -227,8 +240,11 @@ namespace ORUtils
     else {
       ATH_MSG_WARNING("Failed to retrieve " << m_PVContName);
     }
-    // No PV found. We cannot execute the OR recommendations.
-    ATH_MSG_FATAL("No primary vertex in the PrimaryVertices container!");
+    // No PV found. 
+    if (!m_allowNoPV) {
+      // We cannot execute the OR recommendations.
+      ATH_MSG_FATAL("No primary vertex in the PrimaryVertices container!");
+    }
     return nullptr;
   }
 

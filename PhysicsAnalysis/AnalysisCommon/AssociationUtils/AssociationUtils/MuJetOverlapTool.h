@@ -147,6 +147,9 @@ namespace ORUtils
       /// PV Container to use
       SG::ReadHandleKey<xAOD::VertexContainer> m_PVContName{this, "PVContainerName", "PrimaryVertices", "PV Container to use"};
 
+      // Allow no PVs in the event
+      bool m_allowNoPV;
+
       /// @}
 
       /// @name Utilities
