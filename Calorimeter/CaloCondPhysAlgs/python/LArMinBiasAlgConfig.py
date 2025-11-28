@@ -16,6 +16,7 @@ def LArMinBiasAlgCfg(flags, output='ntuple.root', supercell=False,
     if(supercell):
        from LArCabling.LArCablingConfig import LArOnOffIdMappingSCCfg
        result.merge(LArOnOffIdMappingSCCfg(flags))
+       result.addCondAlgo(CompFactory.CaloSuperCellAlignCondAlg('CaloSuperCellAlignCondAlg'))
 
        rKey="LArOnOffIdMapSC"
     else:   
@@ -24,7 +25,7 @@ def LArMinBiasAlgCfg(flags, output='ntuple.root', supercell=False,
 
        rKey="LArOnOffIdMap"
 
-    result.addCondAlgo(CompFactory.LArMCSymCondAlg("LArMCSymCondAlgSC",SuperCell=supercell,ReadKey=rKey))
+    result.addCondAlgo(CompFactory.LArMCSymCondAlg("LArMCSymCondAlg",SuperCell=supercell,ReadKey=rKey))
 
     from xAODEventInfoCnv.xAODEventInfoCnvConfig import EventInfoCnvAlgCfg
     result.merge(EventInfoCnvAlgCfg(flags, disableBeamSpot=True))
@@ -57,7 +58,7 @@ if __name__=="__main__":
     import argparse
     parser= argparse.ArgumentParser(description="Compute LArMinBias  from hits")
     parser.add_argument('-r', '--run',type=int,default=999999,help="run number")
-    parser.add_argument('-o', '--output',type=str,default="ntuple.root",help="name of th root output file")
+    parser.add_argument('-o', '--output',type=str,default="ntuple.root",help="name of the root output file")
     parser.add_argument('-i', '--input',type=list_of_strings,default=[],help="name of the input files")
     parser.add_argument('-t', '--globaltag', type=str, help="Global conditions tag ")
     parser.add_argument( '--idlow',type=int,default=900311,help="ID of lowPt sample")
@@ -65,6 +66,7 @@ if __name__=="__main__":
     parser.add_argument( '--wlow',type=float,default=0.099791,help="weight of lowPt sample")
     parser.add_argument( '--whigh',type=float,default=0.00209,help="weight of highPt sample")
     parser.add_argument('-s', '--isSC',default=False,action='store_true',help="running for SC ?")
+    parser.add_argument('-g', '--geometrytag',type=str,default="",help="geometry tag to use")
     args = parser.parse_args()
     print(args)
     print(len(args.input))
@@ -75,8 +77,11 @@ if __name__=="__main__":
     print("set the runnumber: ",flags.Input.RunNumbers)
     flags.Input.Files=args.input
     flags.IOVDb.DatabaseInstance="OFLP200"
-    from AthenaConfiguration.TestDefaults import defaultGeometryTags
-    flags.GeoModel.AtlasVersion = defaultGeometryTags.RUN3
+    if args.geometrytag:
+       flags.GeoModel.AtlasVersion = args.geometrytag
+    else:   
+       from AthenaConfiguration.TestDefaults import defaultGeometryTags
+       flags.GeoModel.AtlasVersion = defaultGeometryTags.RUN3
   
     if args.globaltag:
         flags.IOVDb.GlobalTag=args.globaltag
