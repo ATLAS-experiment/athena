@@ -20,6 +20,10 @@ class OverlapAnalysisConfig (ConfigBlock):
             info="whether to set up an element link between overlapping objects. The default is False.")
         self.addOption ('enableUserPriority', False, type=bool,
             info="whether to use the user's custom priority ranking, instead of the recommended one. If set to True, will respect the priorities set with inputLabel (e.g. in SUSYTools, every object gets priority 2, but pre-selected jets get priority 1). The default is False.")
+        self.addOption ('forceOROutputFlags', False, type=bool,
+            info="whether to add the OR decisions to the output in any case. As default, the OR decisions are only added if the OR is a standalone selection and not added to any other selection. The default is False.")
+        self.addOption ('forceOROutputFlagName', '', type=str,
+            info="override the default output name for the OR decisions, which is otherwise automatically constructed dependent on the configuration. The default is '' (empty string), which does not override the default.")
         self.addOption ('bJetLabel', '', type=str,
             info="flag to select b-jets with. If left empty, no b-jets are used in the overlap removal. The default is '' (empty string).")
         self.addOption ('InnerDR', 0.2, type=float,
@@ -59,17 +63,17 @@ class OverlapAnalysisConfig (ConfigBlock):
         self.addOption ('preselectLabel', None, type=str,
             info="label for preselection decorations")
         self.addOption ('jetsSelectionName', None, type=str,
-            info="a possible selection on the jet container.")
+            info="name of the selection on the jet container to create/append the OR decision. Defaults to 'selectionName'.")
         self.addOption ('fatJetsSelectionName', None, type=str,
-            info="a possible selection on the large-R jet container.")
+            info="name of the selection on the large-R jet container to create/append the OR decision. Defaults to 'selectionName'.")
         self.addOption ('electronsSelectionName', None, type=str,
-            info="a possible selection on the electron container.")
+            info="name of the selection on the electron container to create/append the OR decision. Defaults to 'selectionName'.")
         self.addOption ('muonsSelectionName', None, type=str,
-            info="a possible selection on the muon container.")
+            info="name of the selection on the muon container to create/append the OR decision. Defaults to 'selectionName'.")
         self.addOption ('photonsSelectionName', None, type=str,
-            info="a possible selection on the photon container.")
+            info="name of the selection on the photon container to create/append the OR decision. Defaults to 'selectionName'.")
         self.addOption ('tausSelectionName', None, type=str,
-            info="a possible selection on the tau-jet container.")
+            info="name of the selection on the tau-jet container to create/append the OR decision. Defaults to 'selectionName'.")
         self.addOption ('doEleEleOR', False, type=bool,
             info="whether to perform the overlap removal amongst electrons. The default is False.")
         self.addOption ('doEleMuOR', True, type=bool,
@@ -99,6 +103,7 @@ class OverlapAnalysisConfig (ConfigBlock):
         self.addOption ('favourPhotonOverLepton', False, type=bool,
             info="whether to give priority to photons in OR. The default is False.")
 
+
     def instanceName (self) :
         """Return the instance name for this block"""
         if self.selectionName is not None:
@@ -120,12 +125,15 @@ class OverlapAnalysisConfig (ConfigBlock):
 
     def makeAlgs (self, config) :
 
+        import logging, sys
+        log = logging.getLogger('OverlapRemovalConfig')
+
         if self.addToAllSelections is None:
             # we resolve this automatically for the user:
             # - if there is only one OverlapRemoval config block setup registered,
             #   we set addToAllSections to True so that the OR decision is propagated
             #   to all relevant particles
-            # - if there is more than one, than we set it to False
+            # - if there is more than one, then we set it to False
             # this is the desired behaviour in most cases! If not, set addToAllSelections
             # yourself :)
             numORblocks = OverlapAnalysisConfig.get_instance_count()
@@ -155,53 +163,63 @@ class OverlapAnalysisConfig (ConfigBlock):
             outputLabel = self.outputLabel
             inputLabel = self.inputLabel
 
+        # in case of multiple ORs, enforce that users explicitly specify the selection name for each input container: either create a new selection or attach the OR decision to an existing one
+        if OverlapAnalysisConfig.get_instance_count() > 1:
+            # warn about a potential misconfiguration
+            if self.addToAllSelections:
+                log.warning("More than one OverlapRemoval config scheduled but 'addToAllSelections' is set to True. This is probably not what you want.")
+
+            if self.electrons and not self.electronsSelectionName:
+                log.error("More than one OverlapRemoval config scheduled: please explicitly specify the selection name of the OR decision for electrons with 'electronsSelectionName'.")
+                sys.exit(1)
+
+            if self.muons and not self.muonsSelectionName:
+                log.error("More than one OverlapRemoval config scheduled: please explicitly specify the selection name of the OR decision for muons with 'muonsSelectionName'.")
+                sys.exit(1)
+
+            if self.photons and not self.photonsSelectionName:
+                log.error("More than one OverlapRemoval config scheduled: please explicitly specify the selection name of the OR decision for photons with 'photonsSelectionName'.")
+                sys.exit(1)
+
+            if self.taus and not self.tausSelectionName:
+                log.error("More than one OverlapRemoval config scheduled: please explicitly specify the selection name of the OR decision for tau-jets with 'tausSelectionName'.")
+                sys.exit(1)
+
+            if self.jets and not self.jetsSelectionName:
+                log.error("More than one OverlapRemoval config scheduled: please explicitly specify the selection name of the OR decision for jets with 'jetsSelectionName'.")
+                sys.exit(1)
+
+            if self.fatJets and not self.fatJetsSelectionName:
+                log.error("More than one OverlapRemoval config scheduled: please explicitly specify the selection name of the OR decision for large-R jets with 'fatJetsSelectionName'.")
+                sys.exit(1)
+
         # here the logic is:
         # - either the user has provided a specific selection name for the object, and we use that one
-        # - or they haven't and then either
-        #    - we take the selection from 'container.selection' (because it doesn't make sense to apply it to other selections)
-        #    - we use selectionName (which is either specified or '', i.e. everything)
+        # - or they haven't and then we use selectionName (which is either specified or '', i.e. everything)
         if self.jetsSelectionName is not None:
             jetsSelectionName = self.jetsSelectionName
         else:
-            if len(self.jets.split(".")) == 2 and not self.addToAllSelections:
-                jetsSelectionName = self.jets.split(".")[1]
-            else:
-                jetsSelectionName = selectionName
+            jetsSelectionName = selectionName
         if self.fatJetsSelectionName is not None:
             fatJetsSelectionName = self.fatJetsSelectionName
         else:
-            if len(self.fatJets.split(".")) == 2 and not self.addToAllSelections:
-                fatJetsSelectionName = self.fatJets.split(".")[1]
-            else:
-                fatJetsSelectionName = selectionName
+            fatJetsSelectionName = selectionName
         if self.electronsSelectionName is not None:
             electronsSelectionName = self.electronsSelectionName
         else:
-            if len(self.electrons.split(".")) == 2 and not self.addToAllSelections:
-                electronsSelectionName = self.electrons.split(".")[1]
-            else:
-                electronsSelectionName = selectionName
+            electronsSelectionName = selectionName
         if self.muonsSelectionName is not None:
             muonsSelectionName = self.muonsSelectionName
         else:
-            if len(self.muons.split(".")) == 2 and not self.addToAllSelections:
-                muonsSelectionName = self.muons.split(".")[1]
-            else:
-                muonsSelectionName = selectionName
+            muonsSelectionName = selectionName
         if self.photonsSelectionName is not None:
             photonsSelectionName = self.photonsSelectionName
         else:
-            if len(self.photons.split(".")) == 2 and not self.addToAllSelections:
-                photonsSelectionName = self.photons.split(".")[1]
-            else:
-                photonsSelectionName = selectionName
+            photonsSelectionName = selectionName
         if self.tausSelectionName is not None:
             tausSelectionName = self.tausSelectionName
         else:
-            if len(self.taus.split(".")) == 2 and not self.addToAllSelections:
-                tausSelectionName = self.taus.split(".")[1]
-            else:
-                tausSelectionName = selectionName
+            tausSelectionName = selectionName
 
         # For now we have to decorate our selections on the objects in
         # separate algorithms beforehand, so that the overlap
@@ -213,6 +231,27 @@ class OverlapAnalysisConfig (ConfigBlock):
         # kinematic systematics.  While that is technically the case
         # right now, I'd prefer if I didn't force that.
 
+        # helper function to decide whether to propagate OR flags to output
+        def enableOutput(containerName, selectionName):
+            # if we force the output, add them
+            if self.forceOROutputFlags:
+                return True
+
+            # if selection name is '' the OR selection gets automatically applied everywhere, no point in adding to output
+            if selectionName == '':
+                return False
+
+            # if OR decision is added to selection of input container, there is also no point in adding to output
+            if len(containerName.split(".")) > 1 and containerName.split(".")[1] == selectionName:
+                return False
+
+            # otherwise, OR decision is standalone selection, so add it to output
+            return True
+
+        # the logic to define the output name of the OR decision is as follows:
+        # - if the user specified a selection name for the container, use that to construct the output name
+        # - otherwise, use the generic 'select_or_decoration' label defined above
+
         electrons = None
         if self.electrons != "" :
             if self.nominalOnlyUnifiedSelection:
@@ -221,12 +260,12 @@ class OverlapAnalysisConfig (ConfigBlock):
             electrons, alg.preselection = config.readNameAndSelection (self.electrons)
             alg.particles = electrons
             alg.selectionDecoration = inputLabel + ',as_char'
-            # if  OR added to all selections, don't need standalone selection flag
-            config.addOutputVar (self.electrons.split('.')[0],
-                                 outputLabel + '_%SYS%',
-                                 select_or_decoration,
-                                 noSys=self.nominalOnly or self.nominalOnlyUnifiedSelection,
-                                 enabled=(selectionName != '' and not self.addPreselection))
+            if enableOutput(self.electrons, electronsSelectionName):
+                outputName = "select_" + self.electronsSelectionName if self.electronsSelectionName else select_or_decoration
+                config.addOutputVar (self.electrons.split('.')[0],
+                                    outputLabel + '_%SYS%',
+                                    outputName if not self.forceOROutputFlagName else "select_" + self.forceOROutputFlagName,
+                                    noSys=self.nominalOnly or self.nominalOnlyUnifiedSelection)
             if self.nominalOnlyUnifiedSelection:
                 alg.preselection = 'unifiedSelectForOR'
 
@@ -238,11 +277,12 @@ class OverlapAnalysisConfig (ConfigBlock):
             photons, alg.preselection = config.readNameAndSelection (self.photons)
             alg.particles = photons
             alg.selectionDecoration = inputLabel + ',as_char'
-            config.addOutputVar (self.photons.split('.')[0],
-                                 outputLabel + '_%SYS%',
-                                 select_or_decoration,
-                                 noSys=self.nominalOnly or self.nominalOnlyUnifiedSelection,
-                                 enabled=(selectionName != '' and not self.addPreselection))
+            if enableOutput(self.photons, photonsSelectionName):
+                outputName = "select_" + self.photonsSelectionName if self.photonsSelectionName else select_or_decoration
+                config.addOutputVar (self.photons.split('.')[0],
+                                    outputLabel + '_%SYS%',
+                                    outputName if not self.forceOROutputFlagName else "select_" + self.forceOROutputFlagName,
+                                    noSys=self.nominalOnly or self.nominalOnlyUnifiedSelection)
             if self.nominalOnlyUnifiedSelection:
                 alg.preselection = 'unifiedSelectForOR'
 
@@ -254,11 +294,12 @@ class OverlapAnalysisConfig (ConfigBlock):
             muons, alg.preselection = config.readNameAndSelection (self.muons)
             alg.particles = muons
             alg.selectionDecoration = inputLabel + ',as_char'
-            config.addOutputVar (self.muons.split('.')[0],
-                                 outputLabel + '_%SYS%',
-                                 select_or_decoration,
-                                 noSys=self.nominalOnly or self.nominalOnlyUnifiedSelection,
-                                 enabled=(selectionName != '' and not self.addPreselection))
+            if enableOutput(self.muons, muonsSelectionName):
+                outputName = "select_" + self.muonsSelectionName if self.muonsSelectionName else select_or_decoration
+                config.addOutputVar (self.muons.split('.')[0],
+                                    outputLabel + '_%SYS%',
+                                    outputName if not self.forceOROutputFlagName else "select_" + self.forceOROutputFlagName,
+                                    noSys=self.nominalOnly or self.nominalOnlyUnifiedSelection)
             if self.nominalOnlyUnifiedSelection:
                 alg.preselection = 'unifiedSelectForOR'
 
@@ -270,11 +311,12 @@ class OverlapAnalysisConfig (ConfigBlock):
             taus, alg.preselection = config.readNameAndSelection (self.taus)
             alg.particles = taus
             alg.selectionDecoration = inputLabel + ',as_char'
-            config.addOutputVar (self.taus.split('.')[0],
-                                 outputLabel + '_%SYS%',
-                                 select_or_decoration,
-                                 noSys=self.nominalOnly or self.nominalOnlyUnifiedSelection,
-                                 enabled=(selectionName != '' and not self.addPreselection))
+            if enableOutput(self.taus, tausSelectionName):
+                outputName = "select_" + self.tausSelectionName if self.tausSelectionName else select_or_decoration
+                config.addOutputVar (self.taus.split('.')[0],
+                                    outputLabel + '_%SYS%',
+                                    outputName if not self.forceOROutputFlagName else "select_" + self.forceOROutputFlagName,
+                                    noSys=self.nominalOnly or self.nominalOnlyUnifiedSelection)
             if self.nominalOnlyUnifiedSelection:
                 alg.preselection = 'unifiedSelectForOR'
 
@@ -286,11 +328,12 @@ class OverlapAnalysisConfig (ConfigBlock):
             jets, alg.preselection = config.readNameAndSelection (self.jets)
             alg.particles = jets
             alg.selectionDecoration = inputLabel + ',as_char'
-            config.addOutputVar (self.jets.split('.')[0],
-                                 outputLabel + '_%SYS%',
-                                 select_or_decoration,
-                                 noSys=self.nominalOnly or self.nominalOnlyUnifiedSelection,
-                                 enabled=(selectionName != '' and not self.addPreselection))
+            if enableOutput(self.jets, jetsSelectionName):
+                outputName = "select_" + self.jetsSelectionName if self.jetsSelectionName else select_or_decoration
+                config.addOutputVar (self.jets.split('.')[0],
+                                    outputLabel + '_%SYS%',
+                                    outputName if not self.forceOROutputFlagName else "select_" + self.forceOROutputFlagName,
+                                    noSys=self.nominalOnly or self.nominalOnlyUnifiedSelection)
             if self.nominalOnlyUnifiedSelection:
                 alg.preselection = 'unifiedSelectForOR'
 
@@ -302,16 +345,19 @@ class OverlapAnalysisConfig (ConfigBlock):
             fatJets, alg.preselection = config.readNameAndSelection (self.fatJets)
             alg.particles = fatJets
             alg.selectionDecoration = inputLabel + ',as_char'
-            config.addOutputVar (self.fatJets.split('.')[0],
-                                 outputLabel + '_%SYS%',
-                                 select_or_decoration,
-                                 noSys=self.nominalOnly or self.nominalOnlyUnifiedSelection,
-                                 enabled=(selectionName != '' and not self.addPreselection))
+            if enableOutput(self.fatJets, fatJetsSelectionName):
+                outputName = "select_" + self.fatJetsSelectionName if self.fatJetsSelectionName else select_or_decoration
+                config.addOutputVar (self.fatJets.split('.')[0],
+                                    outputLabel + '_%SYS%',
+                                    outputName if not self.forceOROutputFlagName else "select_" + self.forceOROutputFlagName,
+                                    noSys=self.nominalOnly or self.nominalOnlyUnifiedSelection)
             if self.nominalOnlyUnifiedSelection:
                 alg.preselection = 'unifiedSelectForOR'
 
 
+
         # Create the overlap removal algorithm:
+        # Note: we use writeToOutput=False for the selections defined below as we add them manually to the output above already, otherwise they are picked up by createSelectionFlagBranches() of the OutputAnalysisConfig again
         alg = config.createAlgorithm( 'CP::OverlapRemovalAlg', 'OverlapRemovalAlg' )
         alg.OutputLabel = outputLabel
         if self.nominalOnly or self.nominalOnlyUnifiedSelection :
@@ -319,27 +365,27 @@ class OverlapAnalysisConfig (ConfigBlock):
         if electrons :
             alg.electrons = electrons
             alg.electronsDecoration = outputLabel + '_%SYS%,as_char'
-            config.addSelection (self.electrons.split('.')[0], electronsSelectionName, alg.electronsDecoration, preselection=False, comesFrom='or')
+            config.addSelection (self.electrons.split('.')[0], electronsSelectionName, alg.electronsDecoration, preselection=False, comesFrom='or', writeToOutput=False)
         if muons :
             alg.muons = muons
             alg.muonsDecoration = outputLabel + '_%SYS%,as_char'
-            config.addSelection (self.muons.split('.')[0], muonsSelectionName, alg.muonsDecoration, preselection=False, comesFrom='or')
+            config.addSelection (self.muons.split('.')[0], muonsSelectionName, alg.muonsDecoration, preselection=False, comesFrom='or', writeToOutput=False)
         if taus :
             alg.taus = taus
             alg.tausDecoration = outputLabel + '_%SYS%,as_char'
-            config.addSelection (self.taus.split('.')[0], tausSelectionName, alg.tausDecoration, preselection=False, comesFrom='or')
+            config.addSelection (self.taus.split('.')[0], tausSelectionName, alg.tausDecoration, preselection=False, comesFrom='or', writeToOutput=False)
         if jets :
             alg.jets = jets
             alg.jetsDecoration = outputLabel + '_%SYS%,as_char'
-            config.addSelection (self.jets.split('.')[0], jetsSelectionName, alg.jetsDecoration, preselection=False, comesFrom='or')
+            config.addSelection (self.jets.split('.')[0], jetsSelectionName, alg.jetsDecoration, preselection=False, comesFrom='or', writeToOutput=False)
         if photons :
             alg.photons = photons
             alg.photonsDecoration = outputLabel + '_%SYS%,as_char'
-            config.addSelection (self.photons.split('.')[0], photonsSelectionName, alg.photonsDecoration, preselection=False, comesFrom='or')
+            config.addSelection (self.photons.split('.')[0], photonsSelectionName, alg.photonsDecoration, preselection=False, comesFrom='or', writeToOutput=False)
         if fatJets :
             alg.fatJets = fatJets
             alg.fatJetsDecoration = outputLabel + '_%SYS%,as_char'
-            config.addSelection (self.fatJets.split('.')[0], fatJetsSelectionName, alg.fatJetsDecoration, preselection=False, comesFrom='or')
+            config.addSelection (self.fatJets.split('.')[0], fatJetsSelectionName, alg.fatJetsDecoration, preselection=False, comesFrom='or', writeToOutput=False)
 
         # Create its main tool, and set its basic properties:
         config.addPrivateTool( 'overlapTool', 'ORUtils::OverlapRemovalTool' )
@@ -529,41 +575,41 @@ class OverlapAnalysisConfig (ConfigBlock):
                 alg.preselection = '&&'.join (config.getPreselection (self.electrons.split('.')[0], electronsSelectionName, asList=True)
                         + [outputLabel + '_%SYS%,as_char'])
                 alg.selectionDecoration = preselectLabel
-                config.addSelection (self.electrons.split('.')[0], electronsSelectionName, alg.selectionDecoration+',as_char', bits=1, preselection=True, comesFrom='or')
+                config.addSelection (self.electrons.split('.')[0], electronsSelectionName, alg.selectionDecoration+',as_char', bits=1, preselection=True, comesFrom='or', writeToOutput=False)
             if muons :
                 alg = config.createAlgorithm( 'CP::AsgUnionPreselectionAlg','ORMuonsPreselectionAlg')
                 alg.particles = muons
                 alg.preselection = '&&'.join (config.getPreselection (self.muons.split('.')[0], muonsSelectionName, asList=True)
                         + [outputLabel + '_%SYS%,as_char'])
                 alg.selectionDecoration = preselectLabel
-                config.addSelection (self.muons.split('.')[0], muonsSelectionName, alg.selectionDecoration+',as_char', bits=1, preselection=True, comesFrom='or')
+                config.addSelection (self.muons.split('.')[0], muonsSelectionName, alg.selectionDecoration+',as_char', bits=1, preselection=True, comesFrom='or', writeToOutput=False)
             if taus :
                 alg = config.createAlgorithm( 'CP::AsgUnionPreselectionAlg','ORTausPreselectionAlg')
                 alg.particles = taus
                 alg.preselection = '&&'.join (config.getPreselection (self.taus.split('.')[0], tausSelectionName, asList=True)
                         + [outputLabel + '_%SYS%,as_char'])
                 alg.selectionDecoration = preselectLabel
-                config.addSelection (self.taus.split('.')[0], tausSelectionName, alg.selectionDecoration+',as_char', bits=1, preselection=True, comesFrom='or')
+                config.addSelection (self.taus.split('.')[0], tausSelectionName, alg.selectionDecoration+',as_char', bits=1, preselection=True, comesFrom='or', writeToOutput=False)
             if jets :
                 alg = config.createAlgorithm( 'CP::AsgUnionPreselectionAlg','ORJetsPreselectionAlg')
                 alg.particles = jets
                 alg.preselection = '&&'.join (config.getPreselection (self.jets.split('.')[0], jetsSelectionName, asList=True)
                         + [outputLabel + '_%SYS%,as_char'])
                 alg.selectionDecoration = preselectLabel
-                config.addSelection (self.jets.split('.')[0], jetsSelectionName, alg.selectionDecoration+',as_char', bits=1, preselection=True, comesFrom='or')
+                config.addSelection (self.jets.split('.')[0], jetsSelectionName, alg.selectionDecoration+',as_char', bits=1, preselection=True, comesFrom='or', writeToOutput=False)
             if photons :
                 alg = config.createAlgorithm( 'CP::AsgUnionPreselectionAlg','ORPhotonsPreselectionAlg')
                 alg.particles = photons
                 alg.preselection = '&&'.join (config.getPreselection (self.photons.split('.')[0], photonsSelectionName, asList=True)
                         + [outputLabel + '_%SYS%,as_char'])
                 alg.selectionDecoration = preselectLabel
-                config.addSelection (self.photons.split('.')[0], photonsSelectionName, alg.selectionDecoration+',as_char', bits=1, preselection=True, comesFrom='or')
+                config.addSelection (self.photons.split('.')[0], photonsSelectionName, alg.selectionDecoration+',as_char', bits=1, preselection=True, comesFrom='or', writeToOutput=False)
             if fatJets :
                 alg = config.createAlgorithm( 'CP::AsgUnionPreselectionAlg','ORFatJetsPreselectionAlg')
                 alg.particles = fatJets
                 alg.preselection = '&&'.join (config.getPreselection (self.fatJets.split('.')[0], fatJetsSelectionName, asList=True)
                         + [outputLabel + '_%SYS%,as_char'])
                 alg.selectionDecoration = preselectLabel
-                config.addSelection (self.fatJets.split('.')[0], fatJetsSelectionName, alg.selectionDecoration+',as_char', bits=1, preselection=True, comesFrom='or')
+                config.addSelection (self.fatJets.split('.')[0], fatJetsSelectionName, alg.selectionDecoration+',as_char', bits=1, preselection=True, comesFrom='or', writeToOutput=False)
 
 
