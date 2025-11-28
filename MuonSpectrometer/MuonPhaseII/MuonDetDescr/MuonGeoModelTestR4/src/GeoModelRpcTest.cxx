@@ -29,12 +29,13 @@ namespace MuonGMR4{
 StatusCode GeoModelRpcTest::initialize() {
     ATH_CHECK(m_idHelperSvc.retrieve());
     ATH_CHECK(m_geoCtxKey.initialize());
-    
-    m_clientToken.preFixName="GeoModelRpcTest";
-    m_clientToken.subDirectory = "RpcPlots";
-    m_clientToken.canvasLimit = -1;
-    ATH_CHECK(m_visualSvc.retrieve());
-    ATH_CHECK(m_visualSvc->registerClient(m_clientToken));
+    if (m_visualStrips) {
+        m_clientToken.preFixName="GeoModelRpcTest";
+        m_clientToken.subDirectory = "RpcPlots";
+        m_clientToken.canvasLimit = -1;
+        ATH_CHECK(m_visualSvc.retrieve());
+        ATH_CHECK(m_visualSvc->registerClient(m_clientToken));
+    }
     /// Prepare the TTree dump
     ATH_CHECK(m_tree.init(this));
 
@@ -112,7 +113,7 @@ void GeoModelRpcTest::visualizeStripPanel(const EventContext& ctx,
                                           const StripDesignPtr& design,
                                           const Identifier& detId,
                                           const bool measPhi) const {
-    if (!design) {
+    if (!design  || !m_visualStrips) {
         return;
     }
     const RpcIdHelper& idHelper{m_idHelperSvc->rpcIdHelper()};          
