@@ -150,7 +150,8 @@ def muonDecodeCfg(flags, RoIs):
     if not flags.Input.isMC:
       rpcAcc = RpcBytestreamDecodeCfg( flags, name = "RpcRawDataProvider_"+RoIs, RoIs = RoIs, DoSeededDecoding = doSeededDecoding )
       acc.merge( rpcAcc )
-      acc.merge(NrpcBytestreamDecodeCfg( flags, name="NRpcRawDataProvider_"+RoIs ))
+      if flags.Muon.enableNRPC:
+        acc.merge(NrpcBytestreamDecodeCfg( flags, name="NRpcRawDataProvider_"+RoIs ))
     # Get RPC RDO convertor
     rpcAcc = RpcRDODecodeCfg( flags, name= "RpcRdoToRpcPrepData_"+RoIs, RoIs = RoIs, DoSeededDecoding = doSeededDecoding )
     acc.merge( rpcAcc )
