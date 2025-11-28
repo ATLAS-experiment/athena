@@ -9,6 +9,7 @@ from AthenaConfiguration.Enums import LHCPeriod
 from TriggerAnalysisAlgorithms.TriggerAnalysisConfig import TriggerAnalysisBlock
 from TriggerAnalysisAlgorithms.TriggerAnalysisSFConfig import trigger_set
 
+from FTagAnalysisAlgorithms.BJetTriggerByYearContent import getDecoByTrigName
 
 class FTagJetTrigMatchingBlock(ConfigBlock):
     """the ConfigBlock for the FTAG jet trigger matching"""
@@ -59,6 +60,11 @@ class FTagJetTrigMatchingBlock(ConfigBlock):
                 alg.TrigDecisionTool = f"{decisionTool.getType()}/{decisionTool.getName()}"
                 alg.trigger = chain
                 alg.useRun3TriggerEDM = config.geometry() is LHCPeriod.Run3
+                if alg.useRun3TriggerEDM:
+                    decors_to_check = [deco + '_pb' for deco in getDecoByTrigName(chain)]
+                    log.info(f'Configured b-tagging trigger decorations for trigger {chain}: {decors_to_check}')
+                alg.ftagRun3TriggerDecoNames = decors_to_check
+                # alg.OutputLevel = 1 # VERBOSE. for detailed debug
                 # Helper function to implement to provide cut for given trigger
                 # Only used for Run 2
                 #alg.btagThreshold = getBTagThreshold(chain)
