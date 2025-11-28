@@ -18,6 +18,8 @@
 #include "Acts/Geometry/VolumeResizeStrategy.hpp"
 #include <Acts/Geometry/TrackingVolume.hpp>
 #include <Acts/Geometry/TrapezoidVolumeBounds.hpp>
+#include <Acts/Geometry/CuboidVolumeBounds.hpp>
+//#include <Acts/Geometry/ConvexPolygonVolumeBounds.hpp>
 #include <Acts/Surfaces/PlaneSurface.hpp>
 #include <ActsPlugins/GeoModel/GeoModelMaterialConverter.hpp>
 #include <Acts/Visualization/ObjVisualization3D.hpp>
@@ -185,16 +187,33 @@ MuonBlueprintNodeBuilder::buildMuonNode(
         helper.clear();
       }
 
-      auto node = std::make_shared<Acts::Experimental::StaticBlueprintNode>(std::move(vol));
-      for(auto& childNode : innerStructure.first){
-        node->addChild(std::move(childNode));
-        
+      std::shared_ptr<Acts::Experimental::StaticBlueprintNode> node;
+
+      const bool isSingleMdt =
+          (element->readoutEles().size() == 1 &&
+          element->readoutEles().front()->detectorType() == DetectorType::Mdt);
+
+      if (isSingleMdt) {
+          // Take ownership of the single existing node
+          node = std::move(innerStructure.first.front());
+          innerStructure.first.clear();
+      } else {
+          node = std::make_shared<Acts::Experimental::StaticBlueprintNode>(std::move(vol));
+
+          for (auto& childNode : innerStructure.first) {
+              node->addChild(std::move(childNode));
+          }
+          innerStructure.first.clear();
       }
 
+      if (!node) {
+          THROW_EXCEPTION("No blueprint node constructed");
+      }
 
-      
       nodes.emplace_back(std::move(node));
-    }
+
+      }
+
     }, elements);
 
     double halfLengthZ = 0.5 * std::abs(maxZ - minZ);
@@ -248,19 +267,29 @@ MuonBlueprintNodeBuilder::getSensitiveElements(
           mwCfg.mlSurfaces = detSurfaces;
           mwCfg.transform = mdtTransform;
 
-          auto mdtBounds = boundsFactory.makeBounds<Acts::TrapezoidVolumeBounds>(parameters.shortHalfX, 
-          parameters.longHalfX, parameters.halfY, parameters.halfHeight);
+          //check for rectangular or trapezoidal shape bounds 
+          std::shared_ptr<Acts::VolumeBounds> mdtBounds{nullptr};
+          
+          if(std::abs(parameters.shortHalfX - parameters.longHalfX) < Acts::s_epsilon){
 
+            mdtBounds = boundsFactory.makeBounds<Acts::CuboidVolumeBounds>(parameters.shortHalfX, parameters.halfY, parameters.halfHeight);
+           
+          } else {
+            
+              mdtBounds = boundsFactory.makeBounds<Acts::TrapezoidVolumeBounds>(parameters.shortHalfX, 
+              parameters.longHalfX, parameters.halfY, parameters.halfHeight);
+          }
+          
           mwCfg.bounds = mdtBounds;
           using BoundsV = Acts::TrapezoidVolumeBounds::BoundValues;
           mwCfg.binning = {{{Acts::AxisDirection::AxisY, Acts::AxisBoundaryType::Bound,
-                            -mdtBounds->get(BoundsV::eHalfLengthY),
-                            mdtBounds->get(BoundsV::eHalfLengthY),
-                            static_cast<std::size_t>(std::lround(2 * mdtBounds->get(BoundsV::eHalfLengthY) / parameters.tubePitch))}, 2u},
+                            -parameters.halfY,
+                            parameters.halfY,
+                            static_cast<std::size_t>(std::lround(2 * parameters.halfY / parameters.tubePitch))}, 2u},
                             {{Acts::AxisDirection::AxisZ, Acts::AxisBoundaryType::Bound,
-                              -mdtBounds->get(BoundsV::eHalfLengthZ),
-                              mdtBounds->get(BoundsV::eHalfLengthZ),
-                              static_cast<std::size_t>(std::lround(2 * mdtBounds->get(BoundsV::eHalfLengthZ) / parameters.tubePitch))}, 1u}};
+                              -parameters.halfHeight,
+                              parameters.halfHeight,
+                              static_cast<std::size_t>(std::lround(2 * parameters.halfHeight / parameters.tubePitch))}, 1u}};
           Acts::Experimental::MultiWireVolumeBuilder mdtBuilder{mwCfg};
           std::unique_ptr<Acts::TrackingVolume> mdtVolume = mdtBuilder.buildVolume();
 
