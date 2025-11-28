@@ -14,11 +14,14 @@ atlas_add_component(JetTagDerivationUtils
   src/JetMatcherAlg.cxx
   src/FlowSelectorAlg.cxx
   src/MetadataAlg.cxx
+  src/TrigBTagCopierAlg.cxx
   src/components/*.cxx
   LINK_LIBRARIES
   AthenaBaseComps
   xAODBase
   xAODPFlow
+  xAODJet
+  xAODBTagging
   PMGAnalysisInterfacesLib
   xAODCutFlow
   IH5GroupSvc
@@ -33,9 +36,10 @@ atlas_add_component(JetTagDerivationUtils
 atlas_install_python_modules(
   python/MetadataAlgConfig.py
   python/JetMatchingConfig.py
+  python/TrigBTagCopierConfig.py
   POST_BUILD_CMD ${ATLAS_FLAKE8}
   )
-atlas_install_scripts( bin/ftag-test-metadata )
+atlas_install_scripts( bin/ftag-test-metadata bin/ftag-test-TrigCopy )
 
 atlas_add_test( JetTagMetadataAlg
   SCRIPT ftag-test-metadata -m 10 --h5-output test.h5 --json-output test.json

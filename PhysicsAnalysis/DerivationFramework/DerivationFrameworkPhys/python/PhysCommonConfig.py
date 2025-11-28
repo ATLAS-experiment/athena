@@ -92,8 +92,11 @@ def PhysCommonAugmentationsCfg(flags,**kwargs):
 
     acc.merge(METCommonCfg(flags))
 
-    # Trigger matching
+    # Trigger matching and postprocessing
     if flags.Reco.EnableTrigger or flags.Trigger.triggerConfig == 'INFILE':
+        from JetTagDerivationUtils.TrigBTagCopierConfig import TrigBTagCopierAlgCfg
+        acc.merge(TrigBTagCopierAlgCfg(flags))
+
         from DerivationFrameworkPhys.TriggerMatchingCommonConfig import TriggerMatchingCommonRun2Cfg
         from DerivationFrameworkPhys.TriggerMatchingCommonConfig import TriggerMatchingCommonRun2ToRun3Cfg
         from DerivationFrameworkPhys.TriggerMatchingCommonConfig import TriggerMatchingCommonRun3Cfg

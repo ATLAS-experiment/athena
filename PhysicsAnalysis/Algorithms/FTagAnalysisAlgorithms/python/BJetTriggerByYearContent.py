@@ -1,9 +1,35 @@
 # Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 from Campaigns.Utils import getDataYear
-from PyUtils.Logging import logging
+import logging
 msg = logging.getLogger('BJetTriggerByYearContent')
 msg.setLevel(logging.INFO)
+
+run3_year_tagger_map = {
+    2022: 'bdl1d',
+    2023: 'bgn1',
+    2024: 'bgn2',
+    2025: 'bgn2',
+    2026: 'bgn2',
+    2030: 'bgn2', # Some day we'll have something amazing here
+}
+
+run3_tagger_deco_map = {
+    "bdl1r":  ["DL1r"],
+    "bdl1d":  ["DL1d20211216"],
+    "bgn1" :  ["GN120220813"],
+    "bgn2" :  ["GN220240122"],
+}
+
+def getDecoByTrigName(trigName):
+    decoration_list = []
+    for tagger, deco in run3_tagger_deco_map.items():
+        if tagger in trigName:
+            decoration_list += deco
+    if len(decoration_list) == 0:
+        raise ValueError(f"Could not find decorations for trigger name {trigName}, avaialable sub-strings: {list(run3_tagger_deco_map.keys())}")
+    # deduplicate
+    return list(set(decoration_list))
 
 def getBJetTriggerContent(flags):
     if flags.Trigger.EDMVersion == 2:
@@ -41,46 +67,20 @@ def getBJetTriggerContent(flags):
 
         triggerContent += jetCollections[year]
         return triggerContent
-    elif flags.Trigger.EDMVersion == 3:
+    elif flags.Trigger.EDMVersion >= 3: # currently Run 3 and 4 shares the same code block
+        year = getDataYear(flags)
+        msg.debug(f'Configured Run 3 / Run 4 b-jet trigger content for {year}')
+
+        ftagstrs = []
+        ftaggers = run3_tagger_deco_map.get(run3_year_tagger_map[year])
+        for ftagger in ftaggers:
+            ftagstrs.append('.'.join([f'{ftagger}_{p}' for p in ['pb','pc','pu']]))
+        jetstrs = ftagstrs + ['pt', 'eta', 'phi', 'm']
+        jetvars = '.'.join(jetstrs)
         triggerContent = [
             "HLT_AntiKt4EMPFlowJets_subresjesgscIS_ftf_bJets",
-            "HLT_AntiKt4EMPFlowJets_subresjesgscIS_ftf_BTagging",
+            f"HLT_AntiKt4EMPFlowJets_subresjesgscIS_ftf_bJetsAux.{jetvars}",
         ]
-
-        year = getDataYear(flags)
-        msg.debug(f'Configured Run 3 b-jet trigger content for {year}')
-
-        btagstrs = []
-        btaggers = {
-            2022: ['DL1d20211216'],
-            2023: ['GN120220813'],
-            2024: ['GN220240122'],
-            2025: ['GN220240122'],
-            2026: ['GN220240122'],
-        }[year]
-        for btagger in btaggers:
-            btagstrs.append('.'.join([f'{btagger}_{p}' for p in ['pb','pc','pu']]))
-        jetstrs = btagstrs + ['pt', 'eta', 'phi', 'm']
-        btagvars = '.'.join(btagstrs)
-        jetvars = '.'.join(jetstrs)
-        triggerContent.append(f"HLT_AntiKt4EMPFlowJets_subresjesgscIS_ftf_BTaggingAux.{btagvars}")
-        triggerContent.append(f"HLT_AntiKt4EMPFlowJets_subresjesgscIS_ftf_bJetsAux.{jetvars}")
-        return triggerContent
-
-    elif flags.Trigger.EDMVersion >= 4:
-        triggerContent = ["HLT_AntiKt4EMPFlowJets_subresjesgscIS_ftf_bJets"]
-
-        year = getDataYear(flags)
-        msg.debug(f'Configured Run 4 b-jet trigger content for {year}')
-
-        jetstrs = ['pt', 'eta', 'phi', 'm']
-        btaggers = {
-            2030: ['GN220240122'], # Some day we'll have something amazing here
-        }[year]
-        for btagger in btaggers:
-            jetstrs.append('.'.join([f'{btagger}_{p}' for p in ['pb','pc','pu']]))
-        jetvars = '.'.join(jetstrs)
-        triggerContent.append(f"HLT_AntiKt4EMPFlowJets_subresjesgscIS_ftf_bJetsAux.{jetvars}")
         return triggerContent
 
     elif flags.Trigger.EDMVersion == -1:
