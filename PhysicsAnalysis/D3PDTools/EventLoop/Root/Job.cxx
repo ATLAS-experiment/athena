@@ -59,6 +59,7 @@ namespace EL
   const std::string Job::optPerfTree = "nc_EventLoop_PerfTree";
   const std::string Job::optXAODInput = "nc_EventLoop_XAODInput";
   const std::string Job::optXaodAccessMode = "nc_EventLoop_XaodAccessMode";
+  const std::string Job::optOtherMetaDataTreeNamePattern = "nc_EventLoop_otherMetaDataTreeNamePattern";
   const std::string Job::optXaodAccessMode_branch = "branch";
   const std::string Job::optXaodAccessMode_class = "class";
   const std::string Job::optXaodAccessMode_athena = "athena";

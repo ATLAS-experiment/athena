@@ -402,6 +402,12 @@ namespace EL
     static const std::string optXaodAccessMode_class;
     static const std::string optXaodAccessMode_athena;
 
+  public:
+    /// Pattern for other MetaData tree name in input xAODs 
+    /// Can be useful for augmented file reading or excluding non real MetaData trees 
+    /// i.e. trees not containing a branch called EventFormat*
+    static const std::string optOtherMetaDataTreeNamePattern;
+
 
     /// \brief the option to turn on/off the xAOD summary reporting at
     /// the end of the job
