@@ -339,6 +339,16 @@ def LLP1KernelCfg(flags, name='LLP1Kernel', **kwargs):
                                  twoTrkVtxFormingD0Cut       = 1.0))
     LLP1VrtSecInclusiveSuffixes.append(shortLifetimeSuffix)
 
+    # short-lifetime VSI, nod0 for LRSM dHNL analysis
+    shortLifetimeNod0Suffix = "_shortLifetime_nod0"
+    acc.merge(VrtSecInclusiveCfg(flags,
+                                 name = "VrtSecInclusive_InDet"+shortLifetimeNod0Suffix,
+                                 AugmentingVersionString     = shortLifetimeNod0Suffix,
+                                 FillIntermediateVertices    = False,
+                                 TrackLocation               = MergedTrackCollection,
+                                 twoTrkVtxFormingD0Cut       = 0))
+    LLP1VrtSecInclusiveSuffixes.append(shortLifetimeNod0Suffix)
+
     # disappearing track + LRT VSI 
     dissapearingSuffix = "_disappearing"
     acc.merge(VrtSecInclusiveCfg(flags,
