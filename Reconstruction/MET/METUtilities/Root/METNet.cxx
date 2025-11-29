@@ -47,6 +47,7 @@ namespace met {
 
     ATH_CHECK(m_eventInfoKey.initialize());
     ATH_CHECK(m_pvContainerKey.initialize());
+    ATH_CHECK(m_jetContainerKey.initialize());
 
     if( m_netLocation.empty()){
       ATH_MSG_ERROR("NetworkFile property was not specified!");
@@ -63,6 +64,7 @@ namespace met {
 
     if(m_metmaker_loose.empty()){
       asg::AsgToolConfig toolConfig("met::METMaker/metmaker_loose");
+      ATH_CHECK( toolConfig.setProperty("JetContainer", m_jetContainerKey.key()) );
       ATH_CHECK( toolConfig.setProperty("DoPFlow", true) );
       ATH_CHECK( toolConfig.setProperty("JetSelection", "Loose") );
       ATH_CHECK( toolConfig.makePrivateTool(m_metmaker_loose) );
@@ -71,6 +73,7 @@ namespace met {
 
     if(m_metmaker_tight.empty()){
       asg::AsgToolConfig toolConfig("met::METMaker/metmaker_tight");
+      ATH_CHECK( toolConfig.setProperty("JetContainer", m_jetContainerKey.key()) );
       ATH_CHECK( toolConfig.setProperty("DoPFlow", true) );
       ATH_CHECK( toolConfig.setProperty("JetSelection", "Tight") );
       ATH_CHECK( toolConfig.makePrivateTool(m_metmaker_tight) );
@@ -79,6 +82,7 @@ namespace met {
 
     if(m_metmaker_tghtr.empty()){
       asg::AsgToolConfig toolConfig("met::METMaker/metmaker_tghtr");
+      ATH_CHECK( toolConfig.setProperty("JetContainer", m_jetContainerKey.key()) );
       ATH_CHECK( toolConfig.setProperty("DoPFlow", true) );
       ATH_CHECK( toolConfig.setProperty("JetSelection", "Tighter") );
       ATH_CHECK( toolConfig.makePrivateTool(m_metmaker_tghtr) );
@@ -87,6 +91,7 @@ namespace met {
 
     if(m_metmaker_tenac.empty()){
       asg::AsgToolConfig toolConfig("met::METMaker/metmaker_tenac");
+      ATH_CHECK( toolConfig.setProperty("JetContainer", m_jetContainerKey.key()) );
       ATH_CHECK( toolConfig.setProperty("DoPFlow", true) );
       ATH_CHECK( toolConfig.setProperty("JetSelection", "Tenacious") );
       ATH_CHECK( toolConfig.makePrivateTool(m_metmaker_tenac) );

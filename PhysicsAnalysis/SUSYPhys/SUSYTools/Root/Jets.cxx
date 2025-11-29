@@ -17,7 +17,6 @@
 #include "JetInterface/IJetUpdateJvt.h"
 #include "JetInterface/IJetModifier.h"
 #include "JetInterface/IJetDecorator.h"
-#include "JetAnalysisInterfaces/IJetJvtEfficiency.h"
 
 #include "xAODBTagging/BTaggingUtilities.h"
 #include "FTagAnalysisInterfaces/IBTaggingEfficiencyTool.h"
