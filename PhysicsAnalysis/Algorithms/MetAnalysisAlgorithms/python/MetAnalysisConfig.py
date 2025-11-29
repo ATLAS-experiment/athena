@@ -105,6 +105,7 @@ class MetAnalysisConfig (ConfigBlock):
         if self.useJVT:
             config.addPrivateTool( 'makerTool.JvtSelTool', 'CP::NNJvtSelectionTool' )
             alg.makerTool.JvtSelTool.JetContainer = config.readName (self.jets)
+            alg.makerTool.JvtSelTool.JvtMomentName = "NNJvt"
         if self.useFJVT:
             alg.makerTool.JetRejectionDec = 'fjvt_selection'
 

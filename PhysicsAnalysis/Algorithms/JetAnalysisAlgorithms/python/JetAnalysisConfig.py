@@ -258,6 +258,7 @@ class SmallRJetAnalysisConfig (ConfigBlock) :
             alg = config.createAlgorithm('CP::AsgSelectionAlg', 'JvtSelectionAlg')
             config.addPrivateTool('selectionTool', 'CP::NNJvtSelectionTool')
             alg.selectionTool.JetContainer = config.readName(self.containerName)
+            alg.selectionTool.JvtMomentName = "NNJvt"
             alg.selectionTool.WorkingPoint = self.jvtWP
             alg.selectionTool.MaxPtForJvt = 60*GeV
             alg.selectionDecoration = "jvt_selection,as_char"
@@ -288,6 +289,7 @@ class SmallRJetAnalysisConfig (ConfigBlock) :
             alg = config.createAlgorithm('CP::AsgSelectionAlg', 'FJvtSelectionAlg')
             config.addPrivateTool('selectionTool', 'CP::FJvtSelectionTool')
             alg.selectionTool.JetContainer = config.readName(self.containerName)
+            alg.selectionTool.JvtMomentName = "DFCommonJets_fJvt"
             alg.selectionTool.WorkingPoint = self.fJvtWP
             alg.selectionDecoration = "fjvt_selection,as_char"
             alg.particles = config.readName(self.containerName)

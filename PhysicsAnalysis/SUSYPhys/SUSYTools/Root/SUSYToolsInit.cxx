@@ -2022,6 +2022,7 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
       toolName = m_doFwdJVT ? m_metJetSelection+"_fJVT" : m_metJetSelection+"_NOfJVT";
       m_metMaker.setTypeAndName("met::METMaker/METMaker_ST_"+toolName);
 
+      ATH_CHECK( m_metMaker.setProperty("JetContainer", jetcoll) );
       ATH_CHECK( m_metMaker.setProperty("ORCaloTaggedMuons", m_metRemoveOverlappingCaloTaggedMuons) );
       ATH_CHECK( m_metMaker.setProperty("DoSetMuonJetEMScale", m_metDoSetMuonJetEMScale) );
       ATH_CHECK( m_metMaker.setProperty("DoRemoveMuonJets", m_metDoRemoveMuonJets) );
