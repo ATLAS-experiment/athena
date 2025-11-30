@@ -431,8 +431,9 @@ StatusCode HGTD_DigitizationTool::createAndStoreRDO(SiChargedDiodeCollection* ch
 
   // Only store the HGTD_RDO if its WriteHandleKey is set 
   if(!m_output_rdo_cont_key.key().empty()){
+    const IdentifierHash identifyHash{rdo_collection->identifierHash()};
     if (m_hgtd_rdo_container
-            ->addCollection(rdo_collection.release(), rdo_collection->identifierHash()).isFailure()) {
+            ->addCollection(rdo_collection.release(), identifyHash).isFailure()) {
       ATH_MSG_FATAL("HGTD RDO collection could not be added to container!");
       return StatusCode::FAILURE;
     } 
@@ -440,8 +441,9 @@ StatusCode HGTD_DigitizationTool::createAndStoreRDO(SiChargedDiodeCollection* ch
    
   // Only store the HGTD_ALTIROC_RDO if its WriteHandleKey is set 
   if(!m_output_altiroc_rdo_cont_key.key().empty()){
+    const IdentifierHash identifyHash{altiroc_rdo_collection->identifierHash()};
     if (m_hgtd_altiroc_rdo_container
-          ->addCollection(altiroc_rdo_collection.release(), altiroc_rdo_collection->identifierHash()).isFailure()) {
+          ->addCollection(altiroc_rdo_collection.release(), identifyHash).isFailure()) {
       ATH_MSG_FATAL("HGTD ALTIROC RDO collection could not be added to container!");
       return StatusCode::FAILURE;
     }    
