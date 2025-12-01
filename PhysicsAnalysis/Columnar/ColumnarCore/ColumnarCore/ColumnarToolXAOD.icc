@@ -10,6 +10,16 @@
 #include <ColumnarCore/ContainerId.h>
 #include <ColumnarCore/ObjectRange.h>
 
+namespace SG
+{
+  class VarHandleKey;
+}
+
+namespace asg
+{
+  class AsgTool;
+}
+
 namespace columnar
 {
   template<> class ColumnarTool<ColumnarModeXAOD>
@@ -35,7 +45,7 @@ namespace columnar
 
 
     /// @brief add the given sub-tool
-    void addSubtool (ColumnarTool<ColumnarModeXAOD>& /*subtool*/) {};
+    void addSubtool (ColumnarTool<ColumnarModeXAOD>& subtool);
 
 
     /// @brief call the tool for the given event range
@@ -49,11 +59,13 @@ namespace columnar
 
     auto& eventStore () const noexcept {
 #ifdef XAOD_STANDALONE
-      return m_event;
+      return m_sharedData->m_event;
 #else
-      return *m_evtStore;
+      return *m_sharedData->m_evtStore;
 #endif
     }
+
+    void internalAddKey (std::weak_ptr<SG::VarHandleKey> key, bool addMTDependency);
 
 
 
@@ -61,12 +73,20 @@ namespace columnar
     /// ===============
   private:
 
+    struct SharedData final
+    {
 #ifdef XAOD_STANDALONE
-  mutable asg::SgTEvent m_event;
+      mutable asg::SgTEvent m_event;
 #else
-  using StoreGateSvc_t = ServiceHandle<StoreGateSvc>;
-  /// Pointer to StoreGate (event store by default)
-  StoreGateSvc_t m_evtStore {"StoreGateSvc/StoreGateSvc", "ColumnarToolXAOD"};
+      using StoreGateSvc_t = ServiceHandle<StoreGateSvc>;
+      /// Pointer to StoreGate (event store by default)
+      StoreGateSvc_t m_evtStore {"StoreGateSvc/StoreGateSvc", "ColumnarToolXAOD"};
 #endif
+      std::vector<std::pair<std::weak_ptr<SG::VarHandleKey>,bool>> m_keys;
+      std::unordered_set<ColumnarTool<ColumnarModeXAOD>*> m_subtools;
+      std::unordered_set<asg::AsgTool*> m_fulltools;
+      SharedData (ColumnarTool<ColumnarModeXAOD>* self);
+    };
+    std::shared_ptr<SharedData> m_sharedData;
   };
 }

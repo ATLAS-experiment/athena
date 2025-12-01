@@ -477,7 +477,7 @@ public:
     columnar::ClusterHelpers::EtaBEAccessor<> clusterEtaBEAcc {*this};
     columnar::ClusterHelpers::EtaCaloAccessor<> etaCaloAcc {*this};
     columnar::ClusterHelpers::PhiCaloAccessor<> phiCaloAcc {*this};
-    columnar::EventInfoAccessor<columnar::ObjectColumn> m_eventHandle {*this, "EventInfo"};
+    columnar::EventInfoAccessor<columnar::ObjectColumn> m_eventHandle {*this, "EventInfo", {.addMTDependency=true}};
     columnar::EventInfoHelpers::EventTypeAccessor<> eventTypeAcc {*this};
     columnar::EventInfoAccessor<uint32_t> runNumberAcc {*this, "runNumber"};
     columnar::EventInfoAccessor<uint64_t> eventNumberAcc {*this, "eventNumber"};
