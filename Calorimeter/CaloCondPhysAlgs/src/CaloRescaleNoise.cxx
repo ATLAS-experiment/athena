@@ -48,7 +48,7 @@ StatusCode CaloRescaleNoise::initialize()
 
   const CaloIdManager* mgr = nullptr;
   ATH_CHECK( detStore()->retrieve( mgr ) );
-  m_calo_id      = m_isSC ? dynamic_cast<const CaloCell_Base_ID*>(mgr->getCaloCell_SuperCell_ID()) : dynamic_cast<const CaloCell_Base_ID*>(mgr->getCaloCell_ID());
+  m_calo_id      = m_isSC ? static_cast<const CaloCell_Base_ID*>(mgr->getCaloCell_SuperCell_ID()) : static_cast<const CaloCell_Base_ID*>(mgr->getCaloCell_ID());
 
   ATH_CHECK( m_elecNoiseKey.initialize() );
   ATH_CHECK( m_pileupNoiseKey.initialize() );
@@ -113,7 +113,7 @@ StatusCode CaloRescaleNoise::stop()
        ATH_MSG_ERROR("CaloRescaleNoise::stop: caloSCMgrHandle invalid.");
        return StatusCode::FAILURE;
      }
-     calodetdescrmgr = dynamic_cast<const CaloDetDescrManager_Base *>(*caloSCMgrHandle);
+     calodetdescrmgr = static_cast<const CaloDetDescrManager_Base *>(*caloSCMgrHandle);
 
   } else {
      SG::ReadCondHandle<CaloDetDescrManager> caloMgrHandle{m_caloMgrKey, ctx};
@@ -122,7 +122,7 @@ StatusCode CaloRescaleNoise::stop()
        ATH_MSG_ERROR("CaloRescaleNoise::stop: caloMgrHandle invalid.");
        return StatusCode::FAILURE;
      }
-     calodetdescrmgr = dynamic_cast<const CaloDetDescrManager_Base *>(*caloMgrHandle);
+     calodetdescrmgr = static_cast<const CaloDetDescrManager_Base *>(*caloMgrHandle);
   }
 
   int ncell=m_calo_id->calo_cell_hash_max();

@@ -47,12 +47,12 @@ CaloNoiseCompCondAlg::initialize() {
 
    ATH_CHECK( detStore()->retrieve( m_calo_id_man ) );
    m_calosupercell_id = m_calo_id_man->getCaloCell_SuperCell_ID();
-   m_lar_em_id   = m_isSC ? dynamic_cast<const LArEM_Base_ID*>(m_calosupercell_id->em_idHelper()) : 
-                            dynamic_cast<const LArEM_Base_ID*>(m_calo_id_man->getEM_ID());
-   m_lar_hec_id  = m_isSC ? dynamic_cast<const LArHEC_Base_ID*>(m_calosupercell_id->hec_idHelper()) : 
-                            dynamic_cast<const LArHEC_Base_ID*>(m_calo_id_man->getHEC_ID());
-   m_lar_fcal_id = m_isSC ? dynamic_cast<const LArFCAL_Base_ID*>(m_calosupercell_id->fcal_idHelper()) : 
-                            dynamic_cast<const LArFCAL_Base_ID*>(m_calo_id_man->getFCAL_ID());
+   m_lar_em_id   = m_isSC ? static_cast<const LArEM_Base_ID*>(m_calosupercell_id->em_idHelper()) : 
+                            static_cast<const LArEM_Base_ID*>(m_calo_id_man->getEM_ID());
+   m_lar_hec_id  = m_isSC ? static_cast<const LArHEC_Base_ID*>(m_calosupercell_id->hec_idHelper()) : 
+                            static_cast<const LArHEC_Base_ID*>(m_calo_id_man->getHEC_ID());
+   m_lar_fcal_id = m_isSC ? static_cast<const LArFCAL_Base_ID*>(m_calosupercell_id->fcal_idHelper()) : 
+                            static_cast<const LArFCAL_Base_ID*>(m_calo_id_man->getFCAL_ID());
 
    ATH_CHECK(m_LArOFCObjKey.initialize());
    ATH_CHECK(m_shapeKey.initialize());
@@ -123,7 +123,7 @@ CaloNoiseCompCondAlg::execute() {
          return StatusCode::FAILURE;
       }
 
-      m_calo_dd_man  = dynamic_cast<const CaloDetDescrManager_Base*>(*caloSCMgrHandle);
+      m_calo_dd_man  = static_cast<const CaloDetDescrManager_Base*>(*caloSCMgrHandle);
 
    } else {
       SG::ReadCondHandle<CaloDetDescrManager> caloMgrHandle{m_caloMgrKey};
@@ -132,7 +132,7 @@ CaloNoiseCompCondAlg::execute() {
          return StatusCode::FAILURE;
       }
 
-      m_calo_dd_man  = dynamic_cast<const CaloDetDescrManager_Base*>(*caloMgrHandle);
+      m_calo_dd_man  = static_cast<const CaloDetDescrManager_Base*>(*caloMgrHandle);
    }
    m_calocell_id = m_calo_dd_man->getCaloCell_ID();
 
