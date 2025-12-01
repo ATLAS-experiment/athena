@@ -278,8 +278,8 @@ namespace met {
     ColumnarMETMaker();
 
     columnar::MutableMetAccessor<columnar::ObjectColumn> m_outputMetHandle {*this, "OutputMET"};
-    columnar::Met1Accessor<columnar::ObjectColumn> m_inputMetHandle {*this, "METCore"};
-    columnar::ColumnAccessor<columnar::ContainerId::metAssociation,columnar::ObjectColumn> m_metAssocHandle {*this, "MetAssoc"};
+    columnar::Met1Accessor<columnar::ObjectColumn> m_inputMetHandle {*this, "METCore", {.addMTDependency=true}};
+    columnar::ColumnAccessor<columnar::ContainerId::metAssociation,columnar::ObjectColumn> m_metAssocHandle {*this, "MetAssoc", {.addMTDependency=true}};
     columnar::ParticleAccessor<columnar::ObjectColumn> m_particlesHandle {*this, "Particles"};
     columnar::JetAccessor<columnar::ObjectColumn> m_jetsHandle {*this, "Jets"};
     columnar::ElectronAccessor<columnar::ObjectColumn> m_electronsHandle {*this, "Electrons"};

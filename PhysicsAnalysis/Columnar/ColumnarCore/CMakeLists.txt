@@ -14,7 +14,7 @@ if (NOT "${COLUMNAR_DEFAULT_ACCESS_MODE}" LESS 3)
 endif ()
 message ("using columnar mode ${COLUMNAR_DEFAULT_ACCESS_MODE}")
 
-set (extra_libs xAODBase)
+set (extra_libs xAODBase AsgDataHandlesLib)
 
 set (extra_libs ${extra_libs} AsgTools)
 
