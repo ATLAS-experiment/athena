@@ -331,6 +331,7 @@ namespace H5Utils {
     std::array<hsize_t, N> uniform(size_t val) {
       std::array<hsize_t, N> ar;
       ar.fill(val);
+      //coverity[UNINIT:FALSE]
       return ar;
     }
 
