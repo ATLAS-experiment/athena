@@ -31,6 +31,10 @@ def getHIClusterGeoWeightFile(flags):
         else:
             if flags.Input.DataYear == 2022:
                 return 'cluster.geo.DATA_PbPb_2022.root'
+            elif flags.Input.DataYear == 2023:
+                return 'cluster.geo.DATA_PbPb_2023.root'
+            elif flags.Input.DataYear == 2024:
+                return 'cluster.geo.DATA_PbPb_2024.root'
             else:
-                __log.info("Have no cluster.geo weight file for Input.DataYear == "+str(flags.Input.DataYear)+", using cluster.geo.DATA_PbPb_2022.root")
-                return 'cluster.geo.DATA_PbPb_2022.root'
+                __log.info("Have no cluster.geo weight file for Input.DataYear == "+str(flags.Input.DataYear)+", using cluster.geo.DATA_PbPb_2024.root")
+                return 'cluster.geo.DATA_PbPb_2024.root'
