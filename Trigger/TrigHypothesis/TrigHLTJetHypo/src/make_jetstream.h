@@ -46,7 +46,7 @@ make_jetstream(std::vector<std::vector<std::size_t>> indices,
 		    
   }
 
-  auto inds = indices.back();
+  const auto  inds = indices.back();
   indices.pop_back();
 
   auto repeat = repeats.back();
