@@ -249,7 +249,9 @@ auto floatAccessors = initAccessors<float>(
   "LAYERENERGY_TileBar1", "LAYERENERGY_TileBar2",
   "LAYERENERGY_TileExt0", "LAYERENERGY_TileExt1", "LAYERENERGY_TileExt2",
   "LAYERENERGY_TileGap1", "LAYERENERGY_TileGap2", "LAYERENERGY_TileGap3",
-  "TIMING"
+  "TIMING",
+  "AVG_LAR_Q", "AVG_TILE_Q", "BADLARQ_FRAC",
+  "ENG_BAD_CELLS", "ENG_POS", "ISOLATION", "N_BAD_CELLS"
   );
 
 auto doubleAccessors = initAccessors<double>("ptcone02", "ptcone03", "JetDensityEMPFlow",
