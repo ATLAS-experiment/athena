@@ -53,6 +53,7 @@ JetParticleOriginVertexAssociation::JetParticleOriginVertexAssociation(const str
         declareProperty("coneSizeFitPar2", m_coneSizeFitPar2=0);
         declareProperty("coneSizeFitPar3", m_coneSizeFitPar3=0);
         declareProperty("dzCut", m_dzCut=10);
+        declareProperty("dzCutMax", m_dzCutMax=10);
 
         return;
     }

@@ -126,7 +126,6 @@ def FTAGPUCfg(flags):
     })
     FTAGPUSlimmingHelper.SmartCollections = ["AntiKt4EMPFlowJets",
                                             "AntiKt4TruthJets",
-                                            "AntiKt4EMPFlowJets_FTAG",
                                             ]
     #FtagBaseContent.add_baseline_slimming_smartcollections(FTAGPUSlimmingHelper)
     
