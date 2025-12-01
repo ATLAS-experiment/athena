@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "./JetTrigTimer.h"
@@ -48,7 +48,7 @@ std::string JetTrigTimer::read() const{
   auto record = read_bare();
   auto delta = std::get<0>(record);
   auto ncalls = std::get<1>(record);
-  auto units = std::get<2>(record);
+  const auto & units = std::get<2>(record);
   
   std::stringstream ss;
   double avTime  =  ncalls == 0 ? 0. : delta / m_nCalls;
