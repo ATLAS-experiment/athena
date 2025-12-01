@@ -115,7 +115,6 @@ namespace pool {
         TFile*                               m_file;
         ISession*                            m_session;
         bool                                 m_open;
-        bool                                 m_readOnly;
         
         SmartIF<IFileMgr>                    m_fileMgr;
       };
