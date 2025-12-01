@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "BTaggingValidationPlots.h"
@@ -102,7 +102,7 @@ namespace JetTagDQA{
   void BTaggingValidationPlots::fillDiscriminantHistograms(const std::string& tagger_name, const double& discriminant_value, const std::map<std::string, double>& working_points, const int& truth_label, std::map<std::string, TH1*>::const_iterator hist_iter, std::map<std::string, int>::const_iterator label_iter, const bool& pass_nTracksCut, const double& jet_pT, const double& jet_Lxy, const bool& onZprime, const xAOD::EventInfo* event){
     // TODO: GN3XPV01 will not fill any WPs for now. This need to be adapted when WPs as a function of pT and mass are defined.
     if (tagger_name == "GN3XPV01_") {
-      ATH_MSG_WARNING("GN3XPV01 has no WPs defined. Not filling any WP-related histograms.");
+      ATH_MSG_DEBUG("GN3XPV01 has no WPs defined. Not filling any WP-related histograms.");
       return;
     }
     // check if the current histogram is to be filled with this tagger discriminant
