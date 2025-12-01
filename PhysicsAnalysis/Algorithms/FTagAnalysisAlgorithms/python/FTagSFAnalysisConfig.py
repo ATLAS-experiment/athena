@@ -6,7 +6,7 @@ from AnalysisAlgorithmsConfig.ConfigSequence import groupBlocks
 from AnalysisAlgorithmsConfig.ConfigAccumulator import DataType
 from AthenaCommon.Logging import logging
 
-from FTagAnalysisAlgorithms.FTagHelpers import getRecommendedBTagCalib, getReadFromBTaggingObject
+from FTagAnalysisAlgorithms.FTagHelpers import getRecommendedBTagCalib, getRecommendedBTagTrigCalib, getReadFromBTaggingObject
 from CalibrationDataInterface.CDIHelpers import check_CDI_campaign
 from CalibrationDataInterface.MCMCGeneratorHelper import MCMC_dsid_map
 from TriggerAnalysisAlgorithms.TriggerAnalysisSFConfig import trigger_set
@@ -187,9 +187,6 @@ class FTagJetSFBlock(ConfigBlock):
 
         # b-jet trigger-aware SF
         if self.triggerChainsPerYear:
-            log.warning("The configuration of the FTAG trigger-aware SF is still "
-                        "under development. This is not ready yet for analysis usage!")
-
             triggers = trigger_set(config, self.triggerChainsPerYear,
                                    self.includeAllYearsPerRun)
             
@@ -201,10 +198,7 @@ class FTagJetSFBlock(ConfigBlock):
                 if self.bTagCalibTriggerFile is not None :
                     bTagCalibTriggerFile = self.bTagCalibTriggerFile
                 else:
-                    # Interface to retrieve b-jet trigger CDI + tagger-wp to be implemented when available
-                    # bTagCalibTriggerFile = getRecommendedBTagTrigCalib(config.geometry(), trigger)
-                    # Set nothing for now
-                    bTagCalibTriggerFile = ""
+                    bTagCalibTriggerFile = getRecommendedBTagTrigCalib(config.geometry())
 
                 bTagOnlineTagger, bTagOnlineWP = getBTagOnlineTaggerWP(chain, log)
                 if self.bTagOnlineTagger:
