@@ -2,24 +2,24 @@
   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
-#include <iostream>
-
-#include "JetToolHelpers/HistoInput2D.h"
+#include "TH3.h"
+#include "JetToolHelpers/HistoInput3D.h"
 
 namespace JetHelper {
-HistoInput2D::HistoInput2D(const std::string& name)
+HistoInput3D::HistoInput3D(const std::string& name)
     : HistoInputBase{name}
 { }
 
-StatusCode HistoInput2D::initialize()
+StatusCode HistoInput3D::initialize()
 {
     // First deal with the input variables
     // Make sure we haven't already configured the input variables
 
     ATH_CHECK( m_varTool1.retrieve() );
     ATH_CHECK( m_varTool2.retrieve() );
+    ATH_CHECK( m_varTool3.retrieve() );
 
-    if (m_varTool1.empty() || m_varTool2.empty())
+    if (m_varTool1.empty() || m_varTool2.empty() || m_varTool3.empty())
     {
         ATH_MSG_ERROR("Failed to create input variable(s)");        
         return StatusCode::FAILURE;
@@ -45,7 +45,7 @@ StatusCode HistoInput2D::initialize()
         return StatusCode::FAILURE;
     }
 
-    if (m_hist->GetDimension() != 2)
+    if (m_hist->GetDimension() != 3)
     {
         ATH_MSG_ERROR("Read the specified histogram, but it has a dimension of " << m_hist->GetDimension() << " instead of the expected 2");        
         return StatusCode::FAILURE;
@@ -65,6 +65,8 @@ StatusCode HistoInput2D::initialize()
         m_interpNum = InterpType::OnlyX;
     else if (m_interpStr == "OnlyY")
         m_interpNum = InterpType::OnlyY;
+    else if (m_interpStr == "OnlyZ")
+        m_interpNum = InterpType::OnlyZ;
     else
     {
         ATH_MSG_FATAL("Unrecognized interpolation type: " << m_interpStr << " --> options are None/Full/OnlyY/OnlyX");
@@ -72,7 +74,7 @@ StatusCode HistoInput2D::initialize()
     }
 
     // Pre-cache the histogram file in 1D projections if relevant (depends on m_interpType)
-    if (m_interpNum == InterpType::OnlyX || m_interpNum == InterpType::OnlyY)
+    if (m_interpNum == InterpType::OnlyX || m_interpNum == InterpType::OnlyY || m_interpNum == InterpType::OnlyZ)
     {
         ATH_CHECK(cacheProjections());
     }
@@ -87,7 +89,7 @@ StatusCode HistoInput2D::initialize()
     return StatusCode::SUCCESS;
 }
 
-float HistoInput2D::getValue(const xAOD::Jet& jet, const JetContext& event) const
+float HistoInput3D::getValue(const xAOD::Jet& jet, const JetContext& event) const
 {
     float varValue1 {m_varTool1->getValue(jet,event)};
 
@@ -96,21 +98,28 @@ float HistoInput2D::getValue(const xAOD::Jet& jet, const JetContext& event) cons
     float varValue2 {m_varTool2->getValue(jet,event)};
 
     varValue2 = enforceAxisRange(*m_hist->GetYaxis(),varValue2);
+
+    float varValue3 {m_varTool3->getValue(jet,event)};
+
+    varValue3 = enforceAxisRange(*m_hist->GetZaxis(),varValue3);
     
     switch (m_interpNum)
     {
         case InterpType::OnlyX:
-            // Determine the y-bin and use the cached projection to interpolate x
-            return m_cachedProj.at(m_hist->GetYaxis()->FindBin(varValue2))->Interpolate(varValue1);
+            // Determine the y- and z-bin and use the cached projection to interpolate x
+            return m_cachedProj2.at(m_hist->GetYaxis()->FindBin(varValue2)).at(m_hist->GetZaxis()->FindBin(varValue3))->Interpolate(varValue1);
         case InterpType::OnlyY:
-            // Determine the x-bin and use the cached projection to interpolate y
-            return m_cachedProj.at(m_hist->GetXaxis()->FindBin(varValue1))->Interpolate(varValue2);
+            // Determine the x- and zbin and use the cached projection to interpolate y
+            return m_cachedProj2.at(m_hist->GetXaxis()->FindBin(varValue1)).at(m_hist->GetZaxis()->FindBin(varValue3))->Interpolate(varValue2);
+        case InterpType::OnlyZ:
+            // Determine the x- and y-bin and use the cached projection to interpolate z
+            return m_cachedProj2.at(m_hist->GetXaxis()->FindBin(varValue1)).at(m_hist->GetYaxis()->FindBin(varValue2))->Interpolate(varValue3);
         case InterpType::Full:
             // Full interpolation using default HistoInputBase reading function
-            return readFromHisto(varValue1,varValue2);
+            return readFromHisto(varValue1,varValue2,varValue3);
         case InterpType::None:
             // No interpolation at all
-            return m_hist->GetBinContent(m_hist->GetXaxis()->FindBin(varValue1),m_hist->GetYaxis()->FindBin(varValue2));
+            return m_hist->GetBinContent(m_hist->GetXaxis()->FindBin(varValue1),m_hist->GetYaxis()->FindBin(varValue2),m_hist->GetZaxis()->FindBin(varValue3));
         default:
             // Should never get here due to previous checks
             ATH_MSG_ERROR("Unsupported interpolation type");
@@ -118,7 +127,7 @@ float HistoInput2D::getValue(const xAOD::Jet& jet, const JetContext& event) cons
     }
 }
 
-StatusCode HistoInput2D::cacheProjections()
+StatusCode HistoInput3D::cacheProjections()
 {
     // Project histogram from 2D to 1D
     // Intentionally include underflow and overflow bins
@@ -126,10 +135,10 @@ StatusCode HistoInput2D::cacheProjections()
     // Avoids confusion and problems later at cost of a small amount of RAM
 
     //TH2* localHist = dynamic_cast<TH2*>(fullHistogram);
-    TH2* localHist = dynamic_cast<TH2*>(m_hist.get());
+    TH3* localHist = dynamic_cast<TH3*>(m_hist.get());
     if (!localHist)
     {
-        ATH_MSG_FATAL("Failed to convert histogram to a TH2, please check inputs.");
+        ATH_MSG_FATAL("Failed to convert histogram to a TH3, please check inputs.");
         return StatusCode::FAILURE;
     }
     switch (m_interpNum)
@@ -137,15 +146,37 @@ StatusCode HistoInput2D::cacheProjections()
         case InterpType::OnlyX:
             for (Long64_t binY = 0; binY <= localHist->GetNbinsY()+1; ++binY)
             {
-                // Single bin of Y, interpolate across X
-                m_cachedProj.emplace_back(localHist->ProjectionX(Form("projx_%lld",binY),binY,binY));
+    		for (Long64_t binZ = 0; binZ <= localHist->GetNbinsZ()+1; ++binZ)
+    		{
+        		// Single bin of Y and Z, interpolate across X
+        		m_cachedProj.emplace_back(localHist->ProjectionX(Form("projx_%lld_%lld",binY,binZ),binY,binY,binZ,binZ));
+        	}
+		m_cachedProj2.emplace_back(std::move(m_cachedProj));
+		m_cachedProj.clear();
             }
             break;
         case InterpType::OnlyY:
             for (Long64_t binX = 0; binX <= localHist->GetNbinsX()+1; ++binX)
             {
-                // Single bin of X, interpolate across Y
-                m_cachedProj.emplace_back(localHist->ProjectionY(Form("projy_%lld",binX),binX,binX));
+    		for (Long64_t binZ = 0; binZ <= localHist->GetNbinsZ()+1; ++binZ)
+	    	{
+        		// Single bin of X and Z, interpolate across Y
+  		      	m_cachedProj.emplace_back(localHist->ProjectionY(Form("projy_%lld_%lld",binX,binZ),binX,binX,binZ,binZ));
+        	}
+		m_cachedProj2.emplace_back(std::move(m_cachedProj));
+		m_cachedProj.clear();
+            }
+            break;
+        case InterpType::OnlyZ:
+            for (Long64_t binX = 0; binX <= localHist->GetNbinsX()+1; ++binX)
+            {
+    		for (Long64_t binY = 0; binY <= localHist->GetNbinsY()+1; ++binY)
+    		{ 
+    	    		// Single bin of X and Y, interpolate across Z
+    	    		m_cachedProj.emplace_back(localHist->ProjectionZ(Form("projz_%lld_%lld",binX,binY),binX,binX,binY,binY));
+    		} 
+		m_cachedProj2.emplace_back(std::move(m_cachedProj));
+		m_cachedProj.clear(); 
             }
             break;
         default:
@@ -163,7 +194,7 @@ StatusCode HistoInput2D::cacheProjections()
     return StatusCode::SUCCESS;
 }
 
-bool HistoInput2D::runUnitTests() const
+bool HistoInput3D::runUnitTests() const
 {
     // TODO
     return false;

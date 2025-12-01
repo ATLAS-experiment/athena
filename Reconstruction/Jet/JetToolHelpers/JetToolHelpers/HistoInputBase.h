@@ -59,7 +59,8 @@ class HistoInputBase :public asg::AsgTool, virtual public IVarTool
             Full,       // Full interpolation
             None,       // No interpolation
             OnlyX,      // Interpolate only in the x dimension
-            OnlyY       // Interpolate only in the y dimension
+            OnlyY,       // Interpolate only in the y dimension
+            OnlyZ       // Interpolate only in the z dimension
         };
         InterpType m_interpNum{InterpType::UNKNOWN};
     
