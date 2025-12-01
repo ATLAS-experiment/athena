@@ -640,6 +640,8 @@ StatusCode GeoModelSvc::clear() {
       ATH_MSG_DEBUG(key << " material manager released");
     }
   }
+  m_sqliteReader.reset();
+  m_sqliteDbManager.reset();
 
   return StatusCode::SUCCESS;
 }

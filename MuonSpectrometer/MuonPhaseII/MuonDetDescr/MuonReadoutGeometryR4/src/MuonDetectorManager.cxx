@@ -11,6 +11,7 @@
 #include "MuonReadoutGeometryR4/SpectrometerSector.h"
 #include "AthenaBaseComps/AthCheckMacros.h"
 #include <limits>
+#include <cassert>
 
 #ifndef SIMULATIONBASE
 #include "Acts/Utilities/Helpers.hpp"
@@ -153,8 +154,10 @@ unsigned int MuonDetectorManager::getNumTreeTops() const {
     return m_treeTopVector.size();
 }
 PVConstLink MuonDetectorManager::getTreeTop(unsigned int i) const {
+    assert(i < m_treeTopVector.size());
     return m_treeTopVector[i];
 }
+void MuonDetectorManager::clearTreeTops() { m_treeTopVector.clear(); }
 
 void MuonDetectorManager::addTreeTop(PVConstLink pv) {
     m_treeTopVector.push_back(pv);

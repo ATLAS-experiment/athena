@@ -86,7 +86,9 @@ class MuonDetectorManager : public GeoVDetectorManager, public AthMessaging {
     PVConstLink getTreeTop(unsigned int i) const override final;
     /** @brief Adds a new GeoModelVolume with its children as a new top node of the muon system */
     void addTreeTop(PVConstLink pv);
-    /// Returns a pointer to the central MuonIdHelperSvc
+    /** @brief Clears all tree tops helds by the manager  */
+    void clearTreeTops();
+    /** @brief Returns a pointer to the central MuonIdHelperSvc */
     const Muon::IMuonIdHelperSvc* idHelperSvc() const;
     
     /// Returns the list of all detector elements
