@@ -132,33 +132,33 @@ class G4FTFModel2 : public G4VPartonStringModel {
     G4ReactionProduct theProjectile;       
     G4FTFParticipants theParticipants;
        
-    G4Nucleon* TheInvolvedNucleonsOfTarget[250];
-    G4int NumberOfInvolvedNucleonsOfTarget;
+    G4Nucleon* TheInvolvedNucleonsOfTarget[250]{};
+    G4int NumberOfInvolvedNucleonsOfTarget{};
 
-    G4Nucleon* TheInvolvedNucleonsOfProjectile[250];
-    G4int NumberOfInvolvedNucleonsOfProjectile;
+    G4Nucleon* TheInvolvedNucleonsOfProjectile[250]{};
+    G4int NumberOfInvolvedNucleonsOfProjectile{};
 
-    G4FTFParameters* theParameters;
-    G4DiffractiveExcitation* theExcitation;
-    G4ElasticHNScattering* theElastic;
-    G4FTFAnnihilation* theAnnihilation;  
+    G4FTFParameters* theParameters{};
+    G4DiffractiveExcitation* theExcitation{};
+    G4ElasticHNScattering* theElastic{};
+    G4FTFAnnihilation* theAnnihilation{};  
 
     std::vector< G4VSplitableHadron* > theAdditionalString; 
 
-    G4double LowEnergyLimit;
-    G4bool HighEnergyInter;
+    G4double LowEnergyLimit{};
+    G4bool HighEnergyInter{};
 
     G4LorentzVector ProjectileResidual4Momentum;
-    G4int           ProjectileResidualMassNumber;
-    G4int           ProjectileResidualCharge;
-    G4double        ProjectileResidualExcitationEnergy;
+    G4int           ProjectileResidualMassNumber{};
+    G4int           ProjectileResidualCharge{};
+    G4double        ProjectileResidualExcitationEnergy{};
 
     G4LorentzVector TargetResidual4Momentum;
-    G4int           TargetResidualMassNumber;
-    G4int           TargetResidualCharge;
-    G4double        TargetResidualExcitationEnergy;
+    G4int           TargetResidualMassNumber{};
+    G4int           TargetResidualCharge{};
+    G4double        TargetResidualExcitationEnergy{};
 
-    G4bool isDiffractionSwitchedOff;  //AR-Oct2017
+    G4bool isDiffractionSwitchedOff{};  //AR-Oct2017
 };
 
 

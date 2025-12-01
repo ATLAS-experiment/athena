@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef QUIRKS_QuirksPhysicsTool_H
@@ -51,28 +51,28 @@ class QuirksPhysicsTool : public extends<AthAlgTool, IPhysicsOptionTool> {
     virtual void ConstructProcess() override;
 
    private:
-    G4double m_mass;
-    G4double m_charge;
-    G4int m_pdgid;
-    G4double m_stringForce;
-    G4double m_firstStringLength;
-    G4double m_maxBoost;
-    G4double m_maxMergeT;
-    G4double m_maxMergeMag;
+    G4double m_mass{};
+    G4double m_charge{};
+    G4int m_pdgid{};
+    G4double m_stringForce{};
+    G4double m_firstStringLength{};
+    G4double m_maxBoost{};
+    G4double m_maxMergeT{};
+    G4double m_maxMergeMag{};
   };
 
 private:
-    G4double m_mass;
-    G4double m_charge;
-    G4int m_pdgid;
-    G4double m_stringForce;
-    G4double m_firstStringLength;
-    G4double m_maxBoost;
-    G4double m_maxMergeT;
-    G4double m_maxMergeMag;
-    G4int m_enableDebug;
-    G4double m_debugStep;
-    G4int m_numDebugSteps;
+    G4double m_mass{};
+    G4double m_charge{};
+    G4int m_pdgid{};
+    G4double m_stringForce{};
+    G4double m_firstStringLength{};
+    G4double m_maxBoost{};
+    G4double m_maxMergeT{};
+    G4double m_maxMergeMag{};
+    G4int m_enableDebug{};
+    G4double m_debugStep{};
+    G4int m_numDebugSteps{};
 };
 
 #endif // QUIRKS_QuirksPhysicsTool_H
