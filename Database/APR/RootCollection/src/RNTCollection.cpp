@@ -47,8 +47,7 @@ RNTCollection::RNTCollection(
      m_mode( mode ),
      m_file( 0 ),
      m_session( 0 ),
-     m_open( false ),
-     m_readOnly( mode == ICollection::READ ? true : false )
+     m_open( false )
 {
    RNTCollection::open();
 }
