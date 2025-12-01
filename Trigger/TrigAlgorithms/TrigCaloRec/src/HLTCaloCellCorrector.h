@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGCALOREC_HLTCALOCELLCORRECTOR_H
@@ -9,7 +9,6 @@
 #include <CaloEvent/CaloConstCellContainer.h>
 #include <StoreGate/ReadHandleKey.h>
 #include <StoreGate/WriteHandleKey.h>
-#include <xAODHIEvent/HIEventShapeAuxContainer.h>
 #include <xAODHIEvent/HIEventShapeContainer.h>
 
 class HLTCaloCellCorrector : public AthReentrantAlgorithm {
