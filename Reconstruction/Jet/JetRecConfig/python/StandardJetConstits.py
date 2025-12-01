@@ -418,6 +418,9 @@ _stdSeqList = [
     JetInputConstitSeq("EMTopoOrigin", xAODType.CaloCluster, ["EM","Origin"],
                        "CaloCalTopoClusters", "EMOriginTopoClusters", jetinputtype="EMTopo",
                        ),
+    JetInputConstitSeq("MLTopoOrigin", xAODType.CaloCluster, ["ML","Origin"],
+                       "CaloCalTopoClusters", "MLOriginTopoClusters", jetinputtype="EMTopo",
+                       ),
     JetInputConstitSeq("LCTopoOrigin",xAODType.CaloCluster, ["LC","Origin"],
                        "CaloCalTopoClusters", "LCOriginTopoClusters", jetinputtype="LCTopo",
                        ),
@@ -567,6 +570,7 @@ _stdModList = [
     
     JetConstitModifier("Origin", "CaloClusterConstituentsOrigin", prereqs=[inputsFromContext("Vertices")]),
     JetConstitModifier("EM",     "ClusterAtEMScaleTool", ),
+    JetConstitModifier("ML",     "ClusterAtMLScaleTool", ),
     JetConstitModifier("LC",     "", ),
     # Particle flow
     JetConstitModifier("CorrectPFO", "CorrectPFOTool",

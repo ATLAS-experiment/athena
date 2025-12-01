@@ -8,6 +8,7 @@
 #include "JetRecTools/CaloClusterConstituentsOrigin.h"
 #include "JetRecTools/ChargedHadronSubtractionTool.h"
 #include "JetRecTools/ClusterAtEMScaleTool.h"
+#include "JetRecTools/ClusterAtMLScaleTool.h"
 #include "JetRecTools/ConstitTimeCutTool.h"
 #include "JetRecTools/ConstitTimeCutTool.h"
 #include "JetRecTools/ConstituentSubtractorTool.h"
