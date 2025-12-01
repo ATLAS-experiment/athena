@@ -46,7 +46,7 @@ def JETM2ExtraContentCfg(flags):
     from JetRecConfig.JetRecConfig import JetRecCfg, getInputAlgs, getConstitPJGAlg
     from JetRecConfig.JetInputConfig import buildEventShapeAlg
     from JetRecConfig.StandardJetConstits import stdConstitDic as cst
-    from JetRecConfig.StandardSmallRJets import AntiKt4UFOCSSKNoPtCut, AntiKt4EMPFlowNoPtCut, AntiKt4EMPFlowML, AntiKt4EMTopoNoPtCut
+    from JetRecConfig.StandardSmallRJets import AntiKt4UFOCSSKNoPtCut, AntiKt4EMPFlowNoPtCut, AntiKt4EMPFlowML, AntiKt4EMTopoNoPtCut, AntiKt4MLTopo
     from JetRecConfig.StandardLargeRJets import AntiKt10TruthDressedWZSoftDrop
 
     #=======================================
@@ -63,7 +63,7 @@ def JETM2ExtraContentCfg(flags):
     #=======================================
     # NoPtCut containers
     #=======================================
-    jetList = [AntiKt4UFOCSSKNoPtCut,AntiKt4EMPFlowNoPtCut,AntiKt4EMPFlowML,AntiKt4EMTopoNoPtCut]
+    jetList = [AntiKt4UFOCSSKNoPtCut,AntiKt4EMPFlowNoPtCut,AntiKt4EMPFlowML,AntiKt4EMTopoNoPtCut, AntiKt4MLTopo]
 
     #=======================================
     # R = 1.0 truth WZ Dressed jets
@@ -122,7 +122,7 @@ def JETM2Cfg(flags):
     JETM2SlimmingHelper.SmartCollections = ["EventInfo","InDetTrackParticles", "PrimaryVertices",
                                             "Electrons", "Photons", "Muons", "TauJets",
                                             "MET_Baseline_AntiKt4EMPFlow",
-                                            "AntiKt4EMTopoNoPtCutJets","AntiKt4EMPFlowJets",
+                                            "AntiKt4EMTopoNoPtCutJets", "AntiKt4EMPFlowJets",
                                             "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets"]
 
     JETM2SlimmingHelper.AllVariables = ["CaloCalFwdTopoTowers",
@@ -185,7 +185,8 @@ def JETM2Cfg(flags):
                                                    'Kt4UFOCSSKNeutEventShape': 'xAOD::EventShape',
                                                    'Kt4UFOCSSKNeutEventShapeAux': 'xAOD::EventShapeAuxInfo',
                                                    'AntiKt4EMTopoNoPtCutJets': 'xAOD::JetContainer',
-                                                   'AntiKt4EMTopoNoPtCutJetsAux': 'xAOD::JetAuxContainer'})
+                                                   'AntiKt4EMTopoNoPtCutJetsAux': 'xAOD::JetAuxContainer',
+                                                   })
 
     from DerivationFrameworkJetEtMiss.JetCommonConfig import addOriginCorrectedClustersToSlimmingTool
     addOriginCorrectedClustersToSlimmingTool(JETM2SlimmingHelper,writeLC=True,writeEM=True)
@@ -222,7 +223,7 @@ def JETM2Cfg(flags):
     JETM2SlimmingHelper.IncludeBPhysTriggerContent = False
     JETM2SlimmingHelper.IncludeMinBiasTriggerContent = False
 
-    jetOutputList = ["AntiKt4UFOCSSKNoPtCutJets","AntiKt4EMPFlowNoPtCutJets", "AntiKt4EMPFlowMLJets"]
+    jetOutputList = ["AntiKt4UFOCSSKNoPtCutJets","AntiKt4EMPFlowNoPtCutJets", "AntiKt4EMPFlowMLJets", "AntiKt4MLTopoJets"]
     from DerivationFrameworkJetEtMiss.JetCommonConfig import addJetsToSlimmingTool
     addJetsToSlimmingTool(JETM2SlimmingHelper, jetOutputList, JETM2SlimmingHelper.SmartCollections)
 
