@@ -67,14 +67,12 @@ private:
   int getNPhotons( const std::vector<const xAOD::PFO*>& shotVector,
                    const std::vector<unsigned>& shotsInCluster) const;
 
-  /** @brief fraction of cluster enegry in central EM1 cells */
-  float getEM1CoreFrac(const xAOD::CaloCluster& cluster) const;
-  
-  /** @brief number of cells from cluster with positive energy in PS, EM1 and EM2 */
-  std::vector<int> getNPosECells(const xAOD::CaloCluster& cluster) const;
-
   /** @brief eta moment in PS, EM1 and EM2 w.r.t cluster eta */  
-  std::vector<std::vector<float>> getEtaMomWRTCluster(const xAOD::CaloCluster& cluster) const;
+  void getClusterVariables(const xAOD::CaloCluster& cluster,
+		           std::vector<int> &nPosECells,
+			   float &coreEnergyEM1, 
+		           std::vector<float> &deltaEtaFirstMom,
+                           std::vector<float> &secondEtaWRTClusterPositionInLayer) const;
 
   Gaudi::Property<double> m_clusterEtCut {this, "ClusterEtCut", 0.5 * Gaudi::Units::GeV, "Et threshould for pi0 candidate clusters"};
   Gaudi::Property<double> m_maxDeltaRNeutral {this, "MaxDeltaRNeutral", 0.2, "max DeltaR for pi0-tau association"};
