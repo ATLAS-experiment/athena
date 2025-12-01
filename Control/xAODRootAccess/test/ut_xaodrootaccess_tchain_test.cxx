@@ -40,6 +40,7 @@ public:
 /// Helper function, "processing" a TChain
 StatusCode process( xAOD::TEvent& event, xAOD::TStore& store );
 
+//coverity[root_function]
 int main() {
 
    ANA_CHECK_SET_TYPE (int);
