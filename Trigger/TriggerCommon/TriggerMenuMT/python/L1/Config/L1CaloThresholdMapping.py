@@ -39,6 +39,7 @@ threshold_mapping = {
         2:2.7,
         12:7.7,
         20:10.1,
+        28:20, # prospective Run 4 L1 item, ATDAQPPES-19
         30:17.7,
         35:23.2,
         40:29,
@@ -47,6 +48,7 @@ threshold_mapping = {
         60:40,
         70:50,
         80:60,
+        120:90, # prospective Run 4 L1 item, ATDAQPPES-19
         140:100,
     },
     'jTAU': {
@@ -73,6 +75,7 @@ threshold_mapping = {
         50:31,
         55:41,
         60:60,
+        70:62, # prospective Run 4 L1 item, ATDAQPPES-19
         80:65,
         90:81,
         125:121,

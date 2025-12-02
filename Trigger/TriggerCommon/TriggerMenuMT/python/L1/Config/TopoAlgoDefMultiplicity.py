@@ -71,8 +71,9 @@ class TopoAlgoDefMultiplicity:
             'cTAU12M', 'cTAU20M', 'cTAUSPARE1',
         ]
         etauThresholds_2bits = [ 
-            'eTAU20L', 'eTAU20M', 'eTAU30', 'eTAU30M', 'eTAU35', 'eTAU35M', 'eTAU40HM', 'eTAU60', 'eTAU80', 'eTAU140', 
+            'eTAU20L', 'eTAU20M',  'eTAU30', 'eTAU30M', 'eTAU35', 'eTAU35M', 'eTAU40HM', 'eTAU60', 'eTAU80', 'eTAU120', 
             'eTAU40HT', 'eTAU60HM','eTAU60HL', 'eTAU80HL', 
+            'eTAU28', 'eTAU28M', 'eTAU140', # prospective Run 4 L1 item, ATDAQPPES-19
         ]
         jtauThresholds_2bits = [ 
             'jTAU1',
@@ -125,6 +126,7 @@ class TopoAlgoDefMultiplicity:
             'jJ5', 'jJ10', 'jJ20', 'jJ30', 'jJ30p0ETA25', 'jJ40', 'jJ40p0ETA25', 'jJ50', 'jJ55', 'jJ55p0ETA23', 'jJ60',
         ]
         jJThresholds_2bits = [ 
+            'jJ70', # prospective Run 4 L1 item, ATDAQPPES-19
             'jJ70p0ETA23', 'jJ80', 'jJ80p0ETA25', 'jJ85p0ETA21',
             'jJ90', 'jJ125',
             'jJ140', 'jJ160', 'jJ180', 'jJ500',

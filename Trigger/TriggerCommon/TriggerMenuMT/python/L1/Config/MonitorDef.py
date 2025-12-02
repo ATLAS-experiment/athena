@@ -125,16 +125,16 @@ class MonitorDef:
                 "L1_2eEM18M", "L1_2eEM24L",
                 "L1_eEM24L_3eEM12L", "L1_eEM40L_2eEM18L",
                 "L1_eTAU20M", "L1_eTAU30",
-                "L1_eTAU60", "L1_eTAU80", "L1_eTAU140",
+                "L1_eTAU60", "L1_eTAU80",
                 "L1_jTAU20",
                 "L1_cTAU20M", "L1_cTAU35M",
                 "L1_cTAU30M_2cTAU20M",
                 "L1_jJ30", "L1_jJ40", "L1_jJ50",
-                "L1_jJ60", "L1_jJ90", "L1_jJ125",
+                "L1_jJ60", "L1_jJ125",
                 "L1_jJ160", "L1_jJ500",
                 "L1_jJ40p30ETA49", "L1_jJ50p30ETA49",
-                "L1_jJ60p30ETA49", "L1_jJ90p30ETA49", "L1_jJ125p30ETA49",
-                "L1_3jJ90", "L1_4jJ40", "L1_4jJ50",
+                "L1_jJ60p30ETA49", "L1_jJ125p30ETA49",
+                "L1_4jJ40", "L1_4jJ50",
                 "L1_3jJ70p0ETA23", "L1_4jJ40p0ETA25", "L1_5jJ40p0ETA25",
                 "L1_jJ140_3jJ60", "L1_jJ85p0ETA21_3jJ40p0ETA25",
                 "L1_jXE60", "L1_jXE70", "L1_jXE80", "L1_jXE90", "L1_jXE100", "L1_eTAU12",
@@ -166,13 +166,22 @@ class MonitorDef:
                 "L1_10DR-MU14FCH-MU5VF_EMPTY", "L1_DPHI-M70-2eEM12M",
             ]
 
+            # Changed-in-place primary thresholds for Run 4
+            if 'HI' not in menuName:
+                if 'run3' in menuName:
+                    monItems[TBP|TAP|TAV] += ["L1_eTAU140"]
+                    monItems[TBP|TAP|TAV] += ["L1_3jJ90", "L1_jJ90", "L1_jJ90p30ETA49"]
+                else:
+                    monItems[TBP|TAP|TAV] += ["L1_eTAU120"]
+                    monItems[TBP|TAP|TAV] += ["L1_3jJ70", "L1_jJ70"]
+
             topo3_monitems = [
-                "L1_HT190-jJ40s5pETA21",  "L1_jMJJ-500-NFF",
+                "L1_HT190-jJ40s5pETA21", "L1_jMJJ-500-NFF",
                 "L1_LLP-RO-eEM",  "L1_LLP-NOMATCH-eEM",
                 "L1_SC175-SCjJ10",
                 "L1_ZAFB-25DPHI-eEM18M",
                 "L1_jMJJ-300-NFF",
-                "L1_LFV-eEM10L-MU8VF", "L1_LFV-eEM15L-MU5VF",
+                "L1_LFV-eEM10L-MU8VF", "L1_LFV-eEM15L-MU5VF", 
             ]
             # Add triggers that are not in the MC menu
             if 'MC' not in menuName:

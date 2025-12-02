@@ -196,6 +196,7 @@ JetChainParts = {
        'preselj20',
        'preselj50',
        'preselj80',
+       'preselj100',
        'preselj120',
        'preselj140',
        'preselj180',
@@ -223,6 +224,7 @@ JetChainParts = {
        'presel4c40',
        'presel4j45',
        'presel4j50',
+       'presel4j65',
        'presel4j85',
        'presel5c20',
        'presel5j25',
@@ -250,6 +252,7 @@ JetChainParts = {
        'preselc60XXj45XXf40',
        'preselj60XXj45XXf40',
        'presela60XXa40XX2a25',
+       'preselcHT200',
        'preseljHT400',
        'preselcHT400',
        'preseljHT450',
@@ -384,6 +387,7 @@ JetChainParts = {
                       'DJMASS900j50', # alias
                       'DJMASS1000j50', # alias
                       'DJMASS1000j50dphi240', # alias
+                      'DJMASS1000j50dphi250x250deta',
                       'DJMASS1000j50dphi200x400deta', # alias
                       'DJMASS900j50dphi200x400deta', # alias
                       'DJMASS1000j50dphi260x200deta', # alias
@@ -405,6 +409,7 @@ JetChainParts = {
                       'HT500',
                       'HT940',
                       'HT50',
+                      'HT300XX0eta240',
                       'HT300XX10ptXX0eta490',
                       'HT300XX10ptXX0eta490XXveto',
                       'HT300XX15ptXX0eta490',
