@@ -199,7 +199,7 @@ def jetHIRecoSequenceCA(configFlags, clustersKey, towerKey, **jetRecoDict):
     target_jetReco = f'_for_{jetRecoDict["jetDefStr"]}'
 
     SeedPtMin = 25000
-    vnharmonics = []  # FIX: quick fix for HI jet increased rate due to LAr hole, was [2, 3, 4]
+    vnharmonics = [2, 3, 4]
     if jetRecoDict["ionopt"] == "ionp":
         SeedPtMin = 8000
         vnharmonics = []

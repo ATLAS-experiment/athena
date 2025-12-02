@@ -16,6 +16,10 @@
 #include "StoreGate/ReadHandle.h"
 #include "StoreGate/WriteHandle.h"
 
+#include "LArElecCalib/LArProvenance.h"
+#include "AtlasDetDescr/AtlasDetectorID.h"
+#include "CaloDetDescr/CaloDetDescrElement.h"
+
 HIClusterMaker::HIClusterMaker(const std::string& name, ISvcLocator* pSvcLocator)
   : AthReentrantAlgorithm(name,pSvcLocator)
 {
@@ -27,6 +31,8 @@ StatusCode HIClusterMaker::initialize()
   ATH_CHECK( m_towerContainerKey.initialize() );
   ATH_CHECK( m_cellContainerKey.initialize() );
   ATH_CHECK( m_outputKey.initialize() );
+
+  ATH_CHECK( detStore()->retrieve(m_calo_id, "CaloCell_ID") );
 
   return StatusCode::SUCCESS;
 }
@@ -70,6 +76,8 @@ StatusCode HIClusterMaker::execute(const EventContext &ctx) const
     // Make the cluster:
     std::unique_ptr<xAOD::CaloCluster> cl(CaloClusterStoreHelper::makeCluster(cellColl));
 
+    float mirror_cell_sumE = 0;
+
     if ( cellToken.size() == 0 ) continue;
     for(NavigationToken<CaloCell,double,CaloCellIDFcn>::const_iterator cellItr = cellToken.begin(); cellItr != cellToken.end(); ++cellItr )
     {
@@ -79,7 +87,25 @@ StatusCode HIClusterMaker::execute(const EventContext &ctx) const
       //if(m_skipBadCells && (*cellItr)->badcell()) continue;
       //}
 
-      double geoWeight = cellToken.getParameter(*cellItr);
+      double geoWeight = cellToken.getParameter(*cellItr);      
+
+      const CaloCell* cell=*cellItr;
+      std::unique_ptr<const CaloCell> mirroredCell{};
+
+      bool isDeadFEB = (!cell->caloDDE()->is_tile() && LArProv::test(cell->provenance(),LArProv::DEADFEB));
+
+      if (isDeadFEB) {
+         mirroredCell=getMirroredCell(cell,readHandleCell.cptr());
+         if (mirroredCell) {
+           cell=mirroredCell.get();
+           mirror_cell_sumE+= cell->energy()*geoWeight;
+         }
+         else {
+            ATH_MSG_WARNING("Failed to obtain mirrored cell for deadFEB cell with id" << std::hex << cell->ID().get_compact());
+         }
+
+      }//end if dead FEB
+     
       double cell_E_w=(*cellItr)->energy()*geoWeight;
 
       IdentifierHash hashid =(*cellItr)->caloDDE()->calo_hash();
@@ -95,6 +121,11 @@ StatusCode HIClusterMaker::execute(const EventContext &ctx) const
       unsigned int sample = (CaloSampling::CaloSample) (*cellItr)->caloDDE()->getSampling();
       samplingPattern |= (0x1U<<sample);
     }//end cell loop
+
+    ATH_MSG_VERBOSE("Energy Sum of mirror deadFEB: " << mirror_cell_sumE);
+    //decorating cluster with sum of mirror cell energy
+    static const SG::AuxElement::Decorator<float> Mcell_sumE("mcell_sumE");    
+    Mcell_sumE(*cl) = mirror_cell_sumE; 
 
     float eta0=towerItr->eta();
     float phi0=towerItr->phi();
@@ -217,4 +248,36 @@ StatusCode HIClusterMaker::dumpClusters(xAOD::CaloClusterContainer* clusColl)
                << std::setw(15) << sumw );
   }
   return StatusCode::SUCCESS;
+}
+
+std::unique_ptr<const CaloCell> HIClusterMaker::getMirroredCell(const CaloCell* pCell, const CaloCellContainer* ccc) const {
+
+  const Identifier id = pCell->ID();
+  const int subCalo = m_calo_id->sub_calo(id);
+  const int pos_neg = m_calo_id->pos_neg(id);
+  const int sampling = m_calo_id->sampling(id);
+  const int region = m_calo_id->region(id);
+  const int eta = m_calo_id->eta(id);
+  const int phi = m_calo_id->phi(id);
+
+  ATH_MSG_VERBOSE("DeadFEB cell parameter: (" << subCalo << "," << pos_neg << "," << sampling << "," << region << "," << eta << "," << phi << ")");
+
+  const Identifier mirroredID = m_calo_id->cell_id(subCalo,
+                                                   -pos_neg,  // flip to get cell in oposite eta
+                                                   sampling, region, eta, phi);
+
+  const CaloCell* mirroredCell = ccc->findCell(m_calo_id->calo_cell_hash(mirroredID));
+  if (!mirroredCell) {
+    return nullptr;
+  }
+  ATH_MSG_VERBOSE("DeadFEB cell (et,layer,deta,dphi): (" << pCell->et() << "," << pCell->caloDDE()->getSampling() << "," << pCell->caloDDE()->eta() << ","
+                                                      << pCell->caloDDE()->phi() << ")");
+
+  ATH_MSG_VERBOSE("Mirror cell (et,layer,deta,dphi): " << mirroredCell->et() << "," << mirroredCell->caloDDE()->getSampling() << ","
+                                                    << mirroredCell->caloDDE()->eta() << "," << mirroredCell->caloDDE()->phi() << ")");
+
+  // Build a fake-cell with the DDE of the cell we are replacing and
+  // energy,time,etc from the eta-mirrored cell
+  return std::make_unique<const CaloCell>(pCell->caloDDE(), mirroredCell->energy(), mirroredCell->time(), mirroredCell->quality(), mirroredCell->provenance(),
+                                          mirroredCell->gain());
 }
