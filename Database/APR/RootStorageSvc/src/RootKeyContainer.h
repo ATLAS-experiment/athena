@@ -25,7 +25,6 @@ class TClass;
 
 namespace pool  { 
   // Forward declarations
-  union RootDataPtr;
   class RootKeyIOHandler;
 
   /** @class RootKeyContainer RootKeyContainer.h src/RootKeyContainer.h

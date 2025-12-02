@@ -11,8 +11,6 @@
 #include "StorageSvc/FileDescriptor.h"
 
 // Package pool/StorageSvc - implementation
-#include "StorageSvc/DbArray.h"
-#include "StorageSvc/DbBlob.h"
 #include "StorageSvc/DbConnection.h"
 
 #include "StorageSvc/DbContainer.h"

@@ -17,7 +17,6 @@
 #include "StorageSvc/DbDatabase.h"
 #include "StorageSvc/DbColumn.h"
 #include "StorageSvc/DbTypeInfo.h"
-#include "StorageSvc/DbArray.h"
 #include "StorageSvc/Transaction.h"
 #include "StorageSvc/DbReflex.h"
 #include "CxxUtils/checker_macros.h"
@@ -26,7 +25,6 @@
 
 // Local implementation files
 #include "RootTreeContainer.h"
-#include "RootDataPtr.h"
 #include "RootDatabase.h"
 
 // Root include files
@@ -113,10 +111,6 @@ void fixupPackedConversion (TBranch* br)
 
 } // anonymous namespace
 
-// I/O buffers (protected by mutex where used)
-static UCharDbArrayAthena  s_char_Blob ATLAS_THREAD_SAFE;
-static IntDbArray   s_int_Blob ATLAS_THREAD_SAFE;
-
 
 // required out-of-line for unique_ptr compilation
 RootTreeContainer::BranchDesc::BranchDesc( TClass* cl, TBranch* b, TLeaf* l, void* o, const DbColumn* c)
@@ -163,65 +157,47 @@ TBranch* RootTreeContainer::branch(const std::string& nam)  const  {
 
 DbStatus RootTreeContainer::writeObject( ActionList::value_type& action )
 {
-   int icol;
    int num_bytes = 0;
    bool aux_needs_fill = false;
-   Branches::iterator k;
-   for(k=m_branches.begin(), icol=0; k !=m_branches.end(); ++k, ++icol) {
-      BranchDesc& dsc( *k );
-      RootDataPtr p( nullptr );
-      p.cptr = action.dataAtOffset( dsc.column->offset() );
+   for( auto& dsc : m_branches ) {
+      const void* data = action.dataAtOffset( dsc.column->offset() );
+      void* ptr ATLAS_THREAD_SAFE = const_cast<void*>( data );
       switch( dsc.column->typeID() ) {
-       case DbColumn::ANY:
        case DbColumn::POINTER:
-          dsc.object = p.ptr;
-          p.ptr      = &dsc.object;
-          try {
-             if( dsc.auxdyn_writer ) {
-                num_bytes += dsc.auxdyn_writer->writeAuxAttributes( dsc.branch->GetName(),
-                                                                    dsc.object, dsc.rows_written );
-                aux_needs_fill = aux_needs_fill || dsc.auxdyn_writer->needsCommit();
+          {
+             dsc.object = ptr;
+             ptr        = &dsc.object;
+             try {
+                if( dsc.auxdyn_writer ) {
+                   num_bytes += dsc.auxdyn_writer->writeAuxAttributes( dsc.branch->GetName(),
+                                                                       dsc.object, dsc.rows_written );
+                   aux_needs_fill = aux_needs_fill || dsc.auxdyn_writer->needsCommit();
+                }
+             } catch(const std::exception& exc) {
+                ATH_MSG_ERROR("Dynamic attributes writing error: " << exc.what());
+                ptr = nullptr;  // signal error
+                break;
              }
-          } catch(const std::exception& exc) {
-             ATH_MSG_ERROR("Dynamic attributes writing error: " << exc.what());
-             p.ptr = nullptr;  // signal error
-             break;
+             dsc.rows_written++;
           }
-          dsc.rows_written++;
-          break;
-       case DbColumn::BLOB:
-          // MN: not sure if we ever use this case
-          s_char_Blob.m_size    = p.blobSize();
-          s_char_Blob.m_buffer  = (unsigned char*)p.blobData();
-          dsc.object            = &s_char_Blob;
-          p.ptr                 = &dsc.object;
           break;
        case DbColumn::STRING:
        case DbColumn::LONG_STRING:
-          // handling "std::string*" - e.g. ##Links and ##Params
-          // pass the char* from c_str() to ROOT
-          p.cptr =  p.string()->c_str();
-          break;
-       case DbColumn::NTCHAR:
-       case DbColumn::LONG_NTCHAR:
-         {// MN: not sure if we ever use this case
-          void * readVal= p.deref();
-          p.ptr   = readVal;
-          break;
-         }
-       case DbColumn::TOKEN:
-          // p.ptr is "char*" already so just pass it on
+          {
+             const auto* str = static_cast<const std::string*>( data );
+             ptr = const_cast<char*>( str->c_str() );
+          }
           break;
        default:
+          // Other supported types don't need anything special
+          // This includes DbColumn::TOKEN which is read back as string
           break;
       }
-      if ( nullptr == p.ptr )   {
+      if ( !ptr )   {
          ATH_MSG_ERROR("[RootTreeContainer] Could not write an object");
          return Error;
       }
-      //if (p.ptr != dsc.branch->GetAddress()) {
-      dsc.branch->SetAddress(p.ptr);
-      //}
+      dsc.branch->SetAddress(ptr);
       if( isBranchContainer() && !m_treeFillMode ) {
          num_bytes += dsc.branch->Fill();
       }
@@ -246,15 +222,6 @@ DbStatus RootTreeContainer::writeObject( ActionList::value_type& action )
    // else (branch container NOT in tree fill mode)
    // do nothing, the branch was filled in the previous block already
 
-   for(k=m_branches.begin(); k !=m_branches.end(); ++k) {
-      switch ( (*k).column->typeID() )    {
-       case DbColumn::BLOB:
-          s_char_Blob.release(false);
-          break;
-       default:
-          break;
-      }
-   }
    if ( num_bytes > 0 )  {
       m_ioBytes = num_bytes;
       m_rootDb->addByteCount(RootDatabase::WRITE_COUNTER, num_bytes);
@@ -294,29 +261,16 @@ RootTreeContainer::loadObject(void** obj_p, ShapeH /*shape*/, Token::OID_t& oid)
      int numBytesBranch, numBytes = 0;
      bool hasRead(false);
      for( auto& dsc : m_branches ) {
-        RootDataPtr p(nullptr), q(nullptr);
-        int typ = dsc.column->typeID();
+        const int typ = dsc.column->typeID();
         // cout << "LOAD object, typ=" << typ << ",  col offset=" << dsc.column->offset() << endl;
         // associate branch with an object
         switch ( typ )    {
          case DbColumn::STRING:
          case DbColumn::LONG_STRING:
-         case DbColumn::NTCHAR:
-         case DbColumn::LONG_NTCHAR:
-         case DbColumn::TOKEN:
-            // set data pointer to the object data member for this branch
-            p = *obj_p;
-            p.c_str += dsc.column->offset();
+            // For these types we copy to destination without TBranch::SetAddress
             break;
-         case DbColumn::BLOB:
-            dsc.object = &s_char_Blob;
-            p.ptr      = &dsc.object;
-            dsc.branch->SetAddress(p.ptr);
-            break;
-         case DbColumn::ANY:
-         case DbColumn::POINTER:
          default:
-            //dsc.branch->SetAddress( &p.ptr );
+            // For other types we simply set the branch address
             dsc.branch->SetAddress( obj_p );
             break;
         }
@@ -331,24 +285,16 @@ RootTreeContainer::loadObject(void** obj_p, ShapeH /*shape*/, Token::OID_t& oid)
            }
         }
         numBytes += numBytesBranch;
-        if ( numBytesBranch >= 0 )     {
+        if ( numBytesBranch >= 0 ) {
            hasRead=true;
-           switch ( typ )    {
+           switch ( typ ) {
             case DbColumn::STRING:
             case DbColumn::LONG_STRING:
-               // assign to std::string
-               *p.str = (char*) dsc.leaf->GetValuePointer();
-               break;
-            case DbColumn::NTCHAR:
-            case DbColumn::LONG_NTCHAR:
-            case DbColumn::TOKEN:
-               p = *obj_p;
-               q = dsc.leaf->GetValuePointer();
-               ::strcpy(q.c_str, p.c_str);
-               break;
-            case DbColumn::BLOB:
-               p.blob->adopt((char*)s_char_Blob.m_buffer,s_char_Blob.m_size);
-               s_char_Blob.release(false);
+               {
+                  // copy as std::string
+                  auto* ptr = std::launder(reinterpret_cast<std::string*>(static_cast<char*>(*obj_p) + dsc.column->offset()));
+                  *ptr = static_cast<const char*>(dsc.leaf->GetValuePointer());
+               }
                break;
             case DbColumn::POINTER:
                // for AUX store objects with the right interface supply a special store object
@@ -356,6 +302,8 @@ RootTreeContainer::loadObject(void** obj_p, ShapeH /*shape*/, Token::OID_t& oid)
                if( dsc.auxdyn_reader ) {
                   dsc.auxdyn_reader->addReaderToObject( *obj_p, evt_id, &m_rootDb->ioMutex() );
                }
+               break;
+            default:
                break;
            }
         } else {
@@ -472,8 +420,6 @@ DbStatus RootTreeContainer::open( DbDatabase& dbH,
                TClass* cl = nullptr;
                TLeaf* leaf = pBranch->GetLeaf( (*i)->name().c_str() );
                switch ( (*i)->typeID() )    {
-                case DbColumn::ANY:
-                case DbColumn::BLOB:
                 case DbColumn::POINTER:
                    cl = TClass::GetClass(pBranch->GetClassName());
                    if ( nullptr == cl )  {
@@ -515,8 +461,6 @@ DbStatus RootTreeContainer::open( DbDatabase& dbH,
                 case DbColumn::ULONGLONG:
                 case DbColumn::STRING:
                 case DbColumn::LONG_STRING:
-                case DbColumn::NTCHAR:
-                case DbColumn::LONG_NTCHAR:
                 case DbColumn::TOKEN:
                    dsc.leaf = leaf;
                    dsc.branch = pBranch;
@@ -607,15 +551,9 @@ DbStatus RootTreeContainer::open( DbDatabase& dbH,
                 case DbColumn::ULONGLONG:  iret=addBranch(*i,dsc,"/l"); break;
                 case DbColumn::STRING:
                 case DbColumn::LONG_STRING:
-                case DbColumn::NTCHAR:
-                case DbColumn::LONG_NTCHAR:
                 case DbColumn::TOKEN:
                    iret=addBranch(*i,dsc,"/C");
                    break;
-                case DbColumn::BLOB:
-                   iret=addObject(dbH, *i, dsc, "UCharDbArrayAthena", defSplitLevel, defBufferSize, branchOffsetTabLen);
-                   break;
-                case DbColumn::ANY:
                 case DbColumn::POINTER:
                    iret=addObject(dbH, *i, dsc, (*i)->typeName(), containerSplitLevel, defBufferSize, branchOffsetTabLen);
                    break;
