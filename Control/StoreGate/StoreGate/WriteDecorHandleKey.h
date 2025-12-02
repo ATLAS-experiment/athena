@@ -17,6 +17,7 @@
 
 #include "StoreGate/WriteHandleKey.h"
 #include "StoreGate/ReadHandleKey.h"
+#include <concepts>
 
 
 class AthAlgorithm;
@@ -136,8 +137,7 @@ public:
    * separated by a "+":  "MyStore+Obj".  If no "+" is present
    * the store named by @c storeName is used.
    */
-  template <class OWNER,
-            typename = typename std::enable_if<std::is_base_of<IProperty, OWNER>::value>::type>
+  template <std::derived_from<IProperty> OWNER>
   WriteDecorHandleKey( OWNER* owner,
                       const std::string& name,
                       const std::string& key = {},
@@ -156,8 +156,7 @@ public:
    * while @c decorKey gives the name of the decoration itself.
    * If @c decorKey is blank, then the overall key will be blank.
    */
-  template <class OWNER,
-            typename = typename std::enable_if<std::is_base_of<IProperty, OWNER>::value>::type>
+  template <std::derived_from<IProperty> OWNER>
   WriteDecorHandleKey( OWNER* owner,
                       const std::string& name,
                       const VarHandleKey& contKey,

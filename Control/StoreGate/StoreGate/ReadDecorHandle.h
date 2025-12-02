@@ -218,8 +218,8 @@ public:
    * @brief Get a pointer to the start of the auxiliary data array,
    *        for the referenced object.
    */
-  template <class POINTER_TYPE = const_container_pointer_type,
-            typename = std::enable_if_t<!std::is_void_v<POINTER_TYPE> > >
+  template <class POINTER_TYPE = const_container_pointer_type>
+  requires (!std::is_void_v<POINTER_TYPE>)
   POINTER_TYPE
   getDataArray();
 
