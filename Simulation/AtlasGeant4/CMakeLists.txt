@@ -12,6 +12,7 @@ set( AtlasGeant4_TARGET_OBJECTS
     # Generation 1
     G4AtlasToolsLib
     MCTruth
+    G4RunManagement
     # Generation 2
     CaloG4SimLib
     ISF_Geant4Event
@@ -48,6 +49,7 @@ set( AtlasGeant4_TARGET_OBJECTS
 set( AtlasGeant4Component_TARGET_OBJECTS
     # Generation 1
     G4AtlasTools
+    G4RunManagement
     # Generation 2
     CaloG4Sim
     ISF_Geant4CommonTools

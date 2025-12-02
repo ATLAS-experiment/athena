@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef G4ATLASINTERFACES_IUSERACTIONTOOL_H
@@ -11,6 +11,7 @@
 // Framework includes
 #include "GaudiKernel/IAlgTool.h"
 
+class IG4RunTool;
 // Geant4 forward declarations
 class G4UserRunAction;
 class G4VUserPrimaryGeneratorAction;
@@ -56,6 +57,11 @@ namespace G4UA
 
       /// Constructs a user action and populates the user action lists with it.
       virtual StatusCode fillUserAction(G4AtlasUserActions& userActions) = 0;
+
+      /// Pointer to the G4RunTool instance. 
+      /// This is only used by the Sync* user actions to synchronize with the Geant4 run.
+      // Can't use a tool handle here because of circular dependency (G4RunTool <-> UserActionTool).
+      virtual void G4RunTool(IG4RunTool*) {}
 
       virtual StatusCode BeginOfAthenaEvent(HitCollectionMap&) = 0;
       virtual StatusCode EndOfAthenaEvent(HitCollectionMap&) = 0;
