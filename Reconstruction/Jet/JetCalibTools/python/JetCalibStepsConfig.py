@@ -1,8 +1,13 @@
 # Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+## *********************************************
 from AnaAlgorithm.DualUseConfig import isAthena
 if not isAthena:
-    # importing this package will prepare replacement modules missing in AnalysisBase 
+    ## If in AnalysisBase and not in Athena, import JetAnalysisCommon
+    ## which will set-up replacement for some Athena modules and allow standard jet config to be invoked.
+    ## IMPORTANT:  1st import (and define) AlgSequence
+    import AnaAlgorithm.AlgSequence # noqa: F401
     import JetRecConfig.JetAnalysisCommon # noqa: F401
+## *********************************************
 from AthenaCommon import Logging
 jcslog = Logging.logging.getLogger('JetCalibStepsConfig')
 

@@ -39,6 +39,7 @@ from types import  ModuleType
 import ROOT
 
 
+
 # #*******************************************************************
 # reset the base logging class : the one set by xAH breaks AthenaCommon.Logging
 import logging
@@ -195,7 +196,11 @@ class Configured:
         alg=self._anaAlg
         if isinstance(v , Configured):
             # it must be a Tool :
-            alg.addPrivateTool(v.fullname(), v.type)
+            try:
+                alg.addPrivateTool(v.fullname(), v.type)
+            except RuntimeError:
+                # this means the tool is already declared, nothing to do.
+                pass #
             v.assignAllProperties(alg)
         elif isinstance(v, ConfArray ):
             # it is a Tool array 
