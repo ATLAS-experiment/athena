@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthenaPoolCnvSvc/src/TPCnvElt.cxx
@@ -85,8 +85,6 @@ Guid guidFromTypeinfo (const std::type_info& ti)
       else {
         msg << MSG::ERROR << "Could not re-get class by name" << endmsg;
       }
-
-      sleep (10);
 
       cls2 = TClass::GetClass (ti);
       if (cls2) {
