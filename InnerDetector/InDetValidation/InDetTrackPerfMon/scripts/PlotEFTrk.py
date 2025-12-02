@@ -55,12 +55,13 @@ def GetParserArgs() :
     parser.add_argument( '--dim',               help="specify 1D or 2D ", default='1D')
     parser.add_argument( '--pipelineTest',      help="Tested pipeline", nargs = '+')
     parser.add_argument( '--pipelineRef',       help="Reference pipeline", nargs = '+')
-    parser.add_argument( '--variations',        help="List of variations to compare")
     parser.add_argument( '--norm',              help="normalize to unit area", action='store_true')
     parser.add_argument( '--pu-comparison',     help="compare different PU samples", action='store_true')
-    parser.add_argument( '--mu',                help="<mu> value", default = 200)
+    parser.add_argument( '--mu',                help="<mu> value (will be printed in ATLAS legend)", default = 200)
+    parser.add_argument( '--sample',            help="Sample (e.g. 't#bar{t}' / 'single e, p_{T}>10 GeV', ...). Will be printed in ATLAS legend", default = '')
+    parser.add_argument( '--particle',          help="Truth particle (e.g. B-hadrons / #tau, p_{T}>15 GeV). Will be printed in ATLAS legend", default = '')
+    parser.add_argument( '--legend-coord',	    help="xmin, ymin, xmax, ymax TLegend coordinates", default = [0.65,0.65,0.9,0.87], type = float, nargs = '+')
     parser.add_argument( '--tag',               help="output file tag", default = '')
-    parser.add_argument( '--legend-coord',	help="xmin, ymin, xmax, ymax TLegend coordinates", default = [0.65,0.65,0.9,0.87], type = float, nargs = '+')
     parser.print_help()
     return parser.parse_args()
 
@@ -78,9 +79,9 @@ def getHistoName(category, args):
         case 'Resolutions': return f"{resolution_dict[args.resplot]}_{par}"
         case 'Efficiencies': return f"eff_vs_truth_{par}" if par!="truthMu" else "eff_vs_truthMu"
         case 'Efficiencies/Technical': return f"eff_vs_truth_{par}" if par!="truthMu" else "eff_vs_truthMu"
-        case 'Efficiencies/Purities': return f"eff_vs_offl_{par}"
-        case 'FakeRates': return f"fakerate_vs_offl_{par}"
-        case 'Duplicates': return f"duplrate_vs_truth_{par}"
+        case 'Efficiencies/Purities': return f"eff_vs_offl_{par}" if par!="truthMu" else "eff_vs_truthMu"
+        case 'FakeRates': return f"fakerate_vs_offl_{par}" if par!="truthMu" else "fakerate_vs_truthMu"
+        case 'Duplicates': return f"duplrate_vs_truth_{par}" if par!="truthMu" else "duplrate_vs_truthMu"
         case 'Multiplicities': return par
         case 'HitsOnTracks': return par
         case 'PixelClusters': return par
@@ -139,13 +140,16 @@ def getLegend(xmin,ymin,xmax,ymax):
 def getATLASLabel(args):
 
     sample = ''
-    if 'ttbar' in args.test[0]: sample = 't#bar{t}'
-    if 'SingleMu' in args.test[0]: sample = 'single muon'
-    if 'SinglePi' in args.test[0]: sample = 'single pion'
-    if 'SingleEl' in args.test[0]: sample = 'single electron'
-    if 'pT10_' in args.test[0]: sample += ' p_{T} = 10 GeV'
-    if 'pT100' in args.test[0]: sample += ' p_{T} = 100 GeV'
-    if 'pT1_' in args.test[0]: sample += ' p_{T} = 1 GeV'
+    if args.sample == '':
+        if 'ttbar' in args.ref[0]: sample = 't#bar{t}'
+        if 'SingleMu' in args.ref[0]: sample = 'single #mu'
+        if 'SinglePi' in args.ref[0]: sample = 'single #pi'
+        if 'SingleEl' in args.ref[0]: sample = 'single #pi'
+        if 'pT10_' in args.ref[0]: sample += ', p_{T} = 10 GeV'
+        if 'pT100' in args.ref[0]: sample += ', p_{T} = 100 GeV'
+        if 'pT1_' in args.ref[0]: sample += ', p_{T} = 1 GeV'
+    else: sample = args.sample
+    if args.particle != '': sample += f', {args.particle}'
 
     subatlas = ROOT.TLatex(.2, .84, "#splitline{#bf{#it{ATLAS}} Simulation Internal}{#splitline{#sqrt{s} = 14 TeV, HL-LHC}{#splitline{ITk Layout: 03-00-01}{<#mu> = %s, %s}}}" %(args.mu, sample))
     if args.pu_comparison:   
@@ -217,7 +221,7 @@ def getURDRequirementLine(h, type, canv, scale):
     requirement_line.SetLineWidth(1)
 
     shiftup = 0.01*scaleshift if 'rate' not in type else 0.01
-    shiftdn = 0.07*scaleshift if 'rate' not in type else 0.2
+    shiftdn = 0.07*scaleshift if 'rate' not in type else 0.07
     y =  level + shiftup*(ymax-ymin) if level < ymax else ymax - shiftdn *(ymax-ymin)
 
     requirement_text = ROOT.TLatex((.63*(xmax-xmin)+xmin),y, f"#uparrow URD requirement = {level}" if level > ymax else f"URD requirement = {level}")
@@ -280,10 +284,10 @@ def setStyle(h, cfg):
         h.GetYaxis().SetLabelSize(0.05)
         h.GetYaxis().SetTitleSize(0.05)
 
-def setRatioStyle(ratio, cfg, color, linestyle, markstyle, ref='C000', multigraph=False, labelsizescale = 65./35., lastpad = False):
-
+def setRatioStyle(ratio, cfg, color, linestyle, markstyle, ref='C000', multigraph=False, labelsizescale = 65./35., lastpad = False, splittitle = False):
+    if 'vs_truthMu' in cfg['histo']: ratio.GetXaxis().SetTitle('Truth <#mu>')
     ratio.GetXaxis().SetTitleOffset(1.5)
-    ratio.GetYaxis().SetTitle(f'Ratio wrt {ref}')
+    ratio.GetYaxis().SetTitle('#splitline{Ratio wrt}{%s}' %ref if splittitle else 'Ratio wrt %s' %ref)
     ratio.GetYaxis().SetTitleSize(0.05*labelsizescale)
     ratio.GetYaxis().SetNdivisions(505)
     ratio.GetYaxis().SetTitleOffset(1.3*1/labelsizescale)
@@ -498,7 +502,7 @@ def draw(args, configs, tails=False, pu_comparison=False):
                 color = configs[i+NRef]['linecolor'] #if len(configs)>2 else ROOT.kBlack
                 linestyle = configs[i+1]['linestyle']# if len(configs)>2 else 1
                 markstyle = configs[i+1]['markstyle']# if len(configs)>2 else 20
-                setRatioStyle(ratio, configs[i], color, linestyle, markstyle, ref=configs[r]['pipeline'], labelsizescale = labelsizescales[r], lastpad = (r==NRef-1))
+                setRatioStyle(ratio, configs[i], color, linestyle, markstyle, ref=configs[r]['pipeline'], labelsizescale = labelsizescales[r], lastpad = (r==NRef-1), splittitle = (NRef>1))
 
                 if isTEfficiencyObj:
                     multigraphs[r].Add(ratio,'p')
@@ -508,7 +512,7 @@ def draw(args, configs, tails=False, pu_comparison=False):
 
             if isTEfficiencyObj:
                 xmin, xmax = ratios[0].GetXaxis().GetXmin(), ratios[0].GetXaxis().GetXmax()
-                setRatioStyle(multigraphs[r], configs[i], color, linestyle, markstyle, ref=configs[r]['pipeline'], multigraph=True, labelsizescale = labelsizescales[r], lastpad = (r==NRef-1))
+                setRatioStyle(multigraphs[r], configs[i], color, linestyle, markstyle, ref=configs[r]['pipeline'], multigraph=True, labelsizescale = labelsizescales[r], lastpad = (r==NRef-1), splittitle = (NRef>1))
                 multigraphs[r].Draw('a')
                 drawTEfficiencyOutliers(r, configs, multigraphs, markers, NRef)
                 multigraphs[r].GetXaxis().SetLimits(xmin, xmax)
