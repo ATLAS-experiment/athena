@@ -119,10 +119,16 @@ def CommonSimulationCfg(flags, log):
         if flags.Sim.ISF.ReSimulation:
             AcceptAlgNames += ['RenameHitCollections']
     else:
-        AcceptAlgNames = ['G4AtlasAlg']
-        #add the G4AtlasAlg
-        from G4AtlasAlg.G4AtlasAlgConfig import G4AtlasAlgCfg
-        cfg.merge(G4AtlasAlgCfg(flags))
+        if not flags.Sim.UseG4Workers:
+            AcceptAlgNames = ['G4AtlasAlg']
+            #add the G4AtlasAlg
+            from G4AtlasAlg.G4AtlasAlgConfig import G4AtlasAlgCfg
+            cfg.merge(G4AtlasAlgCfg(flags))
+        else:
+            AcceptAlgNames = ['G4RunAlg']
+            #add the G4AtlasAlg
+            from G4AtlasAlg.G4RunAlgConfig import G4RunAlgCfg
+            cfg.merge(G4RunAlgCfg(flags))
         from SimulationConfig.SimEnums import LArParameterization
         if flags.Sim.LArParameterization is LArParameterization.FastCaloSim:
             cfg.getEventAlgo("ISF_CollectionMerger").InputLArEMBHits.data.sort() # temporary workaround

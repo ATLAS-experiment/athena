@@ -41,6 +41,9 @@ def collectSimulationMetadata(flags):
             if "FastCalo.doPunchThrough" in flag and not flags.Sim.FastCalo.doPunchThrough:
                 # This flag is only written to metadata in case PunchThroughG4Tool is set
                 continue
+            if "UseG4Workers" in flag:
+                # This flag is still experimental, and should not be recorded in metadata yet
+                continue
 
             key = flag.split(".")[-1] #use final part of flag as the key
             value = flags._get(flag)

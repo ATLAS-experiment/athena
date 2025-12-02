@@ -1,10 +1,8 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <mutex>
-
-// Framework includes
 
 // Geant4 includes
 #include "G4RunManager.hh"
@@ -26,6 +24,12 @@ namespace G4UA
     , m_userActionTools(this)
   {
     declareProperty("UserActionTools", m_userActionTools);
+  }
+
+  void UserActionSvc::G4RunTool(IG4RunTool* g4RunTool) {
+    for (auto& tool : m_userActionTools) {
+      tool->G4RunTool(g4RunTool);
+    }
   }
 
   //---------------------------------------------------------------------------
