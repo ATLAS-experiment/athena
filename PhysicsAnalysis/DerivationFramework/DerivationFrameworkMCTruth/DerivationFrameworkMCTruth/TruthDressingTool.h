@@ -57,7 +57,7 @@ namespace DerivationFramework {
     SG::WriteDecorHandleKey<xAOD::TruthParticleContainer> m_decorator_nphotonKey
       {this, "nPhotons_dressed", m_dressParticlesKey, "nPhotons_dressed", "nPhotons_dressed decoration"};
     /// To ensure that the algorithm is scheduled after the truth classifier
-    SG::ReadDecorHandleKey<xAOD::TruthParticleContainer> m_truthClassKey{this, "truthClassifierKey", m_dressParticlesKey, "Classification"};
+    SG::ReadDecorHandleKey<xAOD::TruthParticleContainer> m_truthClassKey{this, "truthClassifierKey", m_dressParticlesKey, "truthClassification"};
 
     /// Parameter: Use photons from hadron decays?
     Gaudi::Property<bool> m_usePhotonsFromHadrons

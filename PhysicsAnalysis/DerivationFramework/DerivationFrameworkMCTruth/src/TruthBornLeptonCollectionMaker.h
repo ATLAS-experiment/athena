@@ -46,7 +46,7 @@ namespace DerivationFramework {
     SG::ReadDecorHandleKey<xAOD::TruthParticleContainer> m_outcomeAccessorKey
       {this, "Input_classifierParticleOutCome", m_particlesKey, "classifierParticleOutCome", "Particle outcome decoration"};
     SG::ReadDecorHandleKey<xAOD::TruthParticleContainer> m_classificationAccessorKey
-      {this, "Input_Classification", m_particlesKey, "Classification", "Classification code decoration"};
+      {this, "Input_Classification", m_particlesKey, "truthClassification", "Classification code decoration"};
     //!< Output particle collection key
     SG::WriteHandleKey<xAOD::TruthParticleContainer> m_collectionName
       {this, "NewCollectionName", "", "Name of TruthParticle key for output"};
@@ -58,7 +58,7 @@ namespace DerivationFramework {
     SG::WriteDecorHandleKey<xAOD::TruthParticleContainer> m_outcomeDecoratorKey
       {this, "classifierParticleOutCome", m_collectionName, "classifierParticleOutCome", "Particle outcome decoration"};
     SG::WriteDecorHandleKey<xAOD::TruthParticleContainer> m_classificationDecoratorKey
-      {this, "Classification", m_collectionName, "Classification", "Classification code decoration"};
+      {this, "Classification", m_collectionName, "truthClassification", "Classification code decoration"};
 
     ServiceHandle<StoreGateSvc> m_metaStore; //!< Handle on the metadata store for init
     /// Helper function for finding bare descendents of born leptons

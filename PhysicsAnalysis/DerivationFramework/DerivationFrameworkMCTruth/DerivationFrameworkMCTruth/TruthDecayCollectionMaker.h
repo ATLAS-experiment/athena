@@ -53,7 +53,7 @@ namespace DerivationFramework {
     SG::ReadDecorHandleKey<xAOD::TruthParticleContainer> m_outcomeAccessorKey
       {this, "Input_classifierParticleOutCome", m_particlesKey, "classifierParticleOutCome","Name of the decoration which records the particle outcome as determined by the MCTruthClassifier"};
     SG::ReadDecorHandleKey<xAOD::TruthParticleContainer> m_classificationAccessorKey
-      {this, "Input_Classification", m_particlesKey, "Classification","Name of the decoration which records the particle outcome as determined by the MCTruthClassifier"};
+      {this, "Input_Classification", m_particlesKey, "truthClassification","Name of the decoration which records the particle outcome as determined by the MCTruthClassifier"};
 
     // Write(Decor)HandleKeys
     SG::WriteHandleKey<xAOD::TruthVertexContainer> m_outputVerticesKey
@@ -68,7 +68,7 @@ namespace DerivationFramework {
     SG::WriteDecorHandleKey<xAOD::TruthParticleContainer> m_outcomeDecoratorKey
       {this, "classifierParticleOutCome", m_outputParticlesKey, "classifierParticleOutCome","Name of the decoration which records the particle outcome as determined by the MCTruthClassifier"};
     SG::WriteDecorHandleKey<xAOD::TruthParticleContainer> m_classificationDecoratorKey
-      {this, "Classification", m_outputParticlesKey, "Classification","Name of the decoration which records the particle outcome as determined by the MCTruthClassifier"};
+      {this, "Classification", m_outputParticlesKey, "truthClassification","Name of the decoration which records the particle outcome as determined by the MCTruthClassifier"};
     SG::WriteDecorHandleKey<xAOD::TruthParticleContainer> m_motherIDDecoratorKey
       {this, "motherID", m_outputParticlesKey, "motherID","Name of the decoration which records the ID of the particle's mother"};
     SG::WriteDecorHandleKey<xAOD::TruthParticleContainer> m_daughterIDDecoratorKey

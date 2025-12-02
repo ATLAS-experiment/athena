@@ -74,7 +74,7 @@ StatusCode PileupTruthParticleSlimmer::execute(const EventContext& /*ctx*/) {
     const static SG::AuxElement::Decorator<unsigned int> originDecorator("classifierParticleOrigin");
     const static SG::AuxElement::Decorator<unsigned int> typeDecorator("classifierParticleType");
     const static SG::AuxElement::Decorator<unsigned int> outcomeDecorator("classifierParticleOutCome");
-    const static SG::AuxElement::Decorator<unsigned int> classificationDecorator("Classification");
+    const static SG::AuxElement::Decorator<unsigned int> classificationDecorator("truthClassification");
     const static SG::AuxElement::Decorator<int> parenthadronPIDDecorator("parentHadronID");
 
     // Loop over full TruthParticle container

@@ -62,7 +62,7 @@ namespace DerivationFramework {
     SG::WriteDecorHandleKey<xAOD::TruthParticleContainer> m_outcomeDecoratorKey
       {this, "classifierParticleOutCome", m_outputParticlesKey, "classifierParticleOutCome", "Name of the decoration which records the particle outcome as determined by the MCTruthClassifier"};
     SG::WriteDecorHandleKey<xAOD::TruthParticleContainer> m_classificationDecoratorKey
-      {this, "Classification", m_outputParticlesKey, "Classification", "Name of the decoration which records the particle classification as determined by the MCTruthClassifier"};
+      {this, "Classification", m_outputParticlesKey, "truthClassification", "Name of the decoration which records the particle classification as determined by the MCTruthClassifier"};
     SG::WriteDecorHandleKey<xAOD::TruthParticleContainer> m_motherIDDecoratorKey
       {this, "motherID", m_outputParticlesKey, "motherID", "Name of the decoration which records the ID of the particle's mother"};
     SG::WriteDecorHandleKey<xAOD::TruthParticleContainer> m_daughterIDDecoratorKey
@@ -79,7 +79,7 @@ namespace DerivationFramework {
     SG::ReadDecorHandleKey<xAOD::TruthParticleContainer> m_outcomeReadDecorKey
       {this, "inputClassifierParticleOutCome", m_particlesKey, "classifierParticleOutCome", "Particle outcome"};
     SG::ReadDecorHandleKey<xAOD::TruthParticleContainer> m_classificationReadDecorKey
-      {this, "inputClassification", m_particlesKey, "Classification", "Classification code"};
+      {this, "inputClassification", m_particlesKey, "truthClassification", "Classification code"};
 
     ServiceHandle<StoreGateSvc> m_metaStore{this, "MetaDataStore", "MetaDataStore"}; //!< Handle on the metadata store for init
   };
