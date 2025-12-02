@@ -1185,7 +1185,7 @@ HLT_j40_ion_L1RD0_FILLED:
   stepCounts:
     0: 20
   stepFeatures:
-    0: 66
+    0: 65
 HLT_j40a_pf_jes_ftf_L1jTE5_VjTE200:
   eventCount: 3
   stepCounts:
@@ -1255,13 +1255,13 @@ HLT_j50_ion_L1RD0_FILLED:
   stepCounts:
     0: 19
   stepFeatures:
-    0: 52
+    0: 50
 HLT_j50_ion_L1jTE50:
   eventCount: 19
   stepCounts:
     0: 19
   stepFeatures:
-    0: 52
+    0: 50
 HLT_j50f_ion_L1jJ40p30ETA49:
   eventCount: 0
 HLT_j50f_ion_L1jTE50:
@@ -1313,17 +1313,17 @@ HLT_j75_a2_ion_L1jJ55:
   stepFeatures:
     0: 23
 HLT_j75_ion_L1jJ50:
-  eventCount: 16
+  eventCount: 15
   stepCounts:
-    0: 16
+    0: 15
   stepFeatures:
-    0: 30
+    0: 29
 HLT_j75_ion_L1jJ55:
-  eventCount: 16
+  eventCount: 15
   stepCounts:
-    0: 16
+    0: 15
   stepFeatures:
-    0: 30
+    0: 29
 HLT_j80f_ion_L1jJ60p30ETA49:
   eventCount: 0
 HLT_j85_ion_L1jJ50:
@@ -1331,13 +1331,13 @@ HLT_j85_ion_L1jJ50:
   stepCounts:
     0: 11
   stepFeatures:
-    0: 22
+    0: 21
 HLT_j85_ion_L1jJ55:
   eventCount: 11
   stepCounts:
     0: 11
   stepFeatures:
-    0: 22
+    0: 21
 HLT_j90f_ion_L1jJ90p30ETA49:
   eventCount: 0
 HLT_mb_excl_1trk5_pt0p5_L1TRT_VZDC_A_VZDC_C_VjTE200:
@@ -2513,7 +2513,7 @@ HLT_mu4_j40_ion_L1MU3V:
     1: 12
     2: 12
     3: 11
-    4: 24
+    4: 23
 HLT_mu4_j40_ion_dRAB05_L1MU3V:
   eventCount: 4
   stepCounts:
@@ -2527,7 +2527,7 @@ HLT_mu4_j40_ion_dRAB05_L1MU3V:
     1: 12
     2: 12
     3: 11
-    4: 24
+    4: 23
 HLT_mu4_j50_ion_L1MU3V:
   eventCount: 7
   stepCounts:
@@ -2541,7 +2541,7 @@ HLT_mu4_j50_ion_L1MU3V:
     1: 12
     2: 12
     3: 11
-    4: 18
+    4: 17
 HLT_mu4_j50_ion_dRAB05_L1MU3V:
   eventCount: 3
   stepCounts:
@@ -2555,7 +2555,7 @@ HLT_mu4_j50_ion_dRAB05_L1MU3V:
     1: 12
     2: 12
     3: 11
-    4: 18
+    4: 17
 HLT_mu4_j60_ion_L1MU3V:
   eventCount: 7
   stepCounts:
@@ -2569,7 +2569,7 @@ HLT_mu4_j60_ion_L1MU3V:
     1: 12
     2: 12
     3: 11
-    4: 14
+    4: 15
 HLT_mu4_j60_ion_dRAB05_L1MU3V:
   eventCount: 3
   stepCounts:
@@ -2583,7 +2583,7 @@ HLT_mu4_j60_ion_dRAB05_L1MU3V:
     1: 12
     2: 12
     3: 11
-    4: 14
+    4: 15
 HLT_mu4_j60_ion_dRAB05_L1MU3V_jJ40:
   eventCount: 3
   stepCounts:
@@ -2597,7 +2597,7 @@ HLT_mu4_j60_ion_dRAB05_L1MU3V_jJ40:
     1: 12
     2: 12
     3: 11
-    4: 14
+    4: 15
 HLT_mu4_mu4_idperf_1invmAB5_L12MU3V:
   eventCount: 0
   stepCounts:
@@ -2788,7 +2788,7 @@ HLT_mu6_j50_ion_L1MU3V:
     1: 9
     2: 9
     3: 9
-    4: 16
+    4: 15
 HLT_mu6_j50_ion_dRAB05_L1MU5VF:
   eventCount: 3
   stepCounts:
@@ -2802,7 +2802,7 @@ HLT_mu6_j50_ion_dRAB05_L1MU5VF:
     1: 9
     2: 9
     3: 9
-    4: 16
+    4: 15
 HLT_mu6_mu4_probe_L1MU3V:
   eventCount: 3
   stepCounts:
