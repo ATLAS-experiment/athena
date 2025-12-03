@@ -94,19 +94,19 @@ WriteDecorHandle<T, D>::~WriteDecorHandle()
 {
   // Lock the decoration.  But don't do anything if we haven't touched it.
   if (m_decorated) {
-    const IConstAuxStore* store = this->vectorData()->getConstStore();
-    if (store) {
-      // Lock the decoration and clear its entry in the cache.
-      // Casting away const should be ok because no other thread should
-      // be looking at this decoration yet.
-      try {
+    try {
+      const IConstAuxStore* store = this->vectorData()->getConstStore();
+      if (store) {
+        // Lock the decoration and clear its entry in the cache.
+        // Casting away const should be ok because no other thread should
+        // be looking at this decoration yet.
         auto avd_nc ATLAS_THREAD_SAFE = const_cast<SG::AuxVectorData*> (this->vectorData());
         avd_nc->lockDecoration (auxid());
       }
-      catch (...) {
-        // Don't allow exceptions to propagate out of the dtor.
-        std::abort();
-      }
+    }
+    catch (...) {
+      // Don't allow exceptions to propagate out of the dtor.
+      std::abort();
     }
   }
 }
