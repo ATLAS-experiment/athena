@@ -3,6 +3,7 @@
 */
 
 #include <algorithm>
+#include <optional>
 
 #include <TH1.h>
 #include <TH2.h>
@@ -166,14 +167,14 @@ void GenericMonitoringTool::invokeFillers(const std::vector<std::reference_wrapp
   // If we are using the cache then this may be a proper subset of m_fillers; otherwise will just be m_fillers
   const std::vector<std::shared_ptr<Monitored::HistogramFiller>>* fillerList{&m_fillers};
   // pointer to list of matched fillers, if we need to update the cache (default doesn't create the vector)
-  std::vector<std::shared_ptr<Monitored::HistogramFiller>>* matchedFillerList{nullptr};
+  std::optional<std::vector<std::shared_ptr<Monitored::HistogramFiller>> > matchedFillerList;
   if (m_useCache) {
     const auto match = m_fillerCacheMap.find(fillerKey(monitoredVariables));
     if (match != m_fillerCacheMap.end()) {
       fillerList = &match->second;
     } else {
       // make new cache entry
-      matchedFillerList = new std::vector<std::shared_ptr<Monitored::HistogramFiller>>;
+      matchedFillerList.emplace();
     }
   }
 
