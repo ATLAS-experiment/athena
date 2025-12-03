@@ -323,7 +323,10 @@ struct RAuxStore::impl {
       }
       // The auxiliary property name:
       std::string_view auxName = fieldName;
-      auxName = auxName.substr(auxName.find(':') + 1);
+      std::string::size_type spos = auxName.find(':');
+      if (spos != std::string::npos) {
+        auxName = auxName.substr(spos + 1);
+      }
       // Leave the rest up to the function that is shared with the
       // dynamic fields:
       RETURN_CHECK("xAOD::RAuxStore::scanInputNtuple",
