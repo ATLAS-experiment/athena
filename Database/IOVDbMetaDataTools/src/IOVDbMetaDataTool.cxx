@@ -799,8 +799,11 @@ StatusCode IOVDbMetaDataTool::processInputFileMetaData(const std::string& fileNa
           stop.set_lumi_block(iovRange.stop().event());
           EventIDRange range(start, stop);
 
-          // Insert into CondCont
-          ATH_CHECK(cc->insert(range, std::move(athAttrList), Gaudi::Hive::currentContext()));
+          // Insert into CondCont only if we have a valid EventContext
+          const EventContext& currentCtx = Gaudi::Hive::currentContext();
+          if (currentCtx.valid()) {
+            ATH_CHECK(cc->insert(range, std::move(athAttrList), currentCtx));
+          }
 
           ATH_MSG_DEBUG("Populated ConditionStore for " << folderName << " from file metadata");
         }
