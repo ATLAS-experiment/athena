@@ -799,7 +799,8 @@ namespace Athena_test {
     
     //check we can retrieve the old object with a default unversioned key
     VersionedKey defVK("aVersObj");
-    assert(0 != (pFoo = rSG.retrieve<Foo>((std::string)defVK)));
+    pFoo = rSG.retrieve<Foo>((std::string)defVK);
+    assert(0 != pFoo);
     assert(pFoo->i() == 11);
 
 
@@ -813,7 +814,8 @@ namespace Athena_test {
     auto foo66 = new Foo(66);
     SGASSERTERROR(rSG.record(foo66, (std::string)my2Key).isSuccess());
     VersionedKey my3Key(baseKey, 66);
-    assert(rSG.record(new Foo(66), (std::string)my3Key).isSuccess());
+    foo66 = new Foo(66);
+    assert(rSG.record(foo66, (std::string)my3Key).isSuccess());
 
     //test that a generic retrieve now returns the third recorded object
     //Notice how a generic retrieve will always return the last recorded
