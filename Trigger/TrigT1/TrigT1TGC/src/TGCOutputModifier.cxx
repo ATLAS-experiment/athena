@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // First the corresponding header.
@@ -87,45 +87,44 @@ namespace LVL1TGCTrigger {
 	 LVL1MUONIF::Lvl1MuCTPIInputPhase1::MuonSystem::Forward};
     for(auto isys : tgc_systems){
       auto data = &inTgc2Muctpi->getData(isys); // const std::vector<Lvl1MuVectWithBC>&
-      for(auto bcmu : *data){ // Lvl1MuVectWithBC
-	int bcid = bcmu.first;
-	auto muvec = bcmu.second; // Lvl1MuVect
-	for(size_t i = 0 ; i < muvec.size() ; i++){ // i = system index = MaxSectors * Side + Sectors
-	  auto sectorData = muvec.at(i).get();// std::shared_ptr <Lvl1MuSectorLogicDataPhase1>
-	  if(!sectorData){
-	    ATH_MSG_WARNING("sectorData is null!");
-	    continue;
-	  }
-	  if(isys==LVL1MUONIF::Lvl1MuCTPIInputPhase1::MuonSystem::Endcap){
-	    size_t numberOfSectors = LVL1MUONIF::Lvl1MuCTPIInputPhase1::NumberOfEndcapSector;
-	    size_t isub = (i<numberOfSectors)
-	      ?(LVL1MUONIF::Lvl1MuCTPIInputPhase1::MuonSubSystem::C_side):(LVL1MUONIF::Lvl1MuCTPIInputPhase1::MuonSubSystem::A_side);
-	    size_t isec = i % numberOfSectors;
-	    if(i != inTgc2Muctpi->getSystemIndex(isys,isub,isec)){
-	      ATH_MSG_WARNING("System Index Mismatch!!");
-	      continue;
-	    }
-	    LVL1MUONIF::Lvl1MuEndcapSectorLogicDataPhase1 sldata;
-	    Copy(sectorData,sldata);
-	    Update(muSegDataColl,sldata,isys,isub,isec);
-	    outTgc2Muctpi->setSectorLogicData(sldata,isys,isub,isec,bcid);
-	  }else if(isys==LVL1MUONIF::Lvl1MuCTPIInputPhase1::MuonSystem::Forward){
-	    size_t numberOfSectors = LVL1MUONIF::Lvl1MuCTPIInputPhase1::NumberOfForwardSector;
-	    size_t isub = (i<numberOfSectors)
-	      ?(LVL1MUONIF::Lvl1MuCTPIInputPhase1::MuonSubSystem::C_side):(LVL1MUONIF::Lvl1MuCTPIInputPhase1::MuonSubSystem::A_side);
-	    size_t isec = i % numberOfSectors;
-	    if(i != inTgc2Muctpi->getSystemIndex(isys,isub,isec)){
-	      ATH_MSG_WARNING("System Index Mismatch!!");
-	      continue;
-	    }
-	    LVL1MUONIF::Lvl1MuForwardSectorLogicDataPhase1 sldata;
-	    Copy(sectorData,sldata);
-	    Update(muSegDataColl,sldata,isys,isub,isec);
-	    outTgc2Muctpi->setSectorLogicData(sldata,isys,isub,isec,bcid);
-	  }else{
-	    ATH_MSG_WARNING("Unknown system. Barrel? isys="<<isys);
-	  }
-	}
+      for(const auto & [bcid, muvec] : *data){ // Lvl1MuVectWithBC
+	
+        for(size_t i = 0 ; i < muvec.size() ; i++){ // i = system index = MaxSectors * Side + Sectors
+          auto sectorData = muvec.at(i).get();// std::shared_ptr <Lvl1MuSectorLogicDataPhase1>
+          if(!sectorData){
+            ATH_MSG_WARNING("sectorData is null!");
+            continue;
+          }
+          if(isys==LVL1MUONIF::Lvl1MuCTPIInputPhase1::MuonSystem::Endcap){
+            size_t numberOfSectors = LVL1MUONIF::Lvl1MuCTPIInputPhase1::NumberOfEndcapSector;
+            size_t isub = (i<numberOfSectors)
+              ?(LVL1MUONIF::Lvl1MuCTPIInputPhase1::MuonSubSystem::C_side):(LVL1MUONIF::Lvl1MuCTPIInputPhase1::MuonSubSystem::A_side);
+            size_t isec = i % numberOfSectors;
+            if(i != inTgc2Muctpi->getSystemIndex(isys,isub,isec)){
+              ATH_MSG_WARNING("System Index Mismatch!!");
+              continue;
+            }
+            LVL1MUONIF::Lvl1MuEndcapSectorLogicDataPhase1 sldata;
+            Copy(sectorData,sldata);
+            Update(muSegDataColl,sldata,isys,isub,isec);
+            outTgc2Muctpi->setSectorLogicData(sldata,isys,isub,isec,bcid);
+          }else if(isys==LVL1MUONIF::Lvl1MuCTPIInputPhase1::MuonSystem::Forward){
+            size_t numberOfSectors = LVL1MUONIF::Lvl1MuCTPIInputPhase1::NumberOfForwardSector;
+            size_t isub = (i<numberOfSectors)
+              ?(LVL1MUONIF::Lvl1MuCTPIInputPhase1::MuonSubSystem::C_side):(LVL1MUONIF::Lvl1MuCTPIInputPhase1::MuonSubSystem::A_side);
+            size_t isec = i % numberOfSectors;
+            if(i != inTgc2Muctpi->getSystemIndex(isys,isub,isec)){
+              ATH_MSG_WARNING("System Index Mismatch!!");
+              continue;
+            }
+            LVL1MUONIF::Lvl1MuForwardSectorLogicDataPhase1 sldata;
+            Copy(sectorData,sldata);
+            Update(muSegDataColl,sldata,isys,isub,isec);
+            outTgc2Muctpi->setSectorLogicData(sldata,isys,isub,isec,bcid);
+          }else{
+            ATH_MSG_WARNING("Unknown system. Barrel? isys="<<isys);
+          }
+        }
       }
     }
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "EMB1CellsFromCaloCells.h"
@@ -25,7 +25,7 @@ EMB1CellsFromCaloCells::cells(std::vector<std::vector<const CaloCell*>>& cells,
   auto h_caloCells = SG::makeHandle(m_caloCellsKey, ctx);
   CHECK(h_caloCells.isValid());
 
-  auto allCaloCells = *h_caloCells;
+  const auto & allCaloCells = *h_caloCells;
   
   
   // limit cells to  LAREM CaloCells

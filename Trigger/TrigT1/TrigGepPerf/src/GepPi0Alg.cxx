@@ -1,5 +1,5 @@
 /*
- *   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+ *   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
  */
 
 /*
@@ -47,7 +47,7 @@ StatusCode GepPi0Alg::execute(const EventContext& ctx) const {
   auto h_allCaloCells = SG::makeHandle(m_allCaloCellsKey, ctx);
   CHECK(h_allCaloCells.isValid());
   
-  auto allCaloCells = *h_allCaloCells;
+  const auto & allCaloCells = *h_allCaloCells;
 
  
 
