@@ -21,7 +21,7 @@ class ElectronCalibrationConfig (ConfigBlock) :
     def __init__ (self) :
         super (ElectronCalibrationConfig, self).__init__ ()
         self.setBlockName('Electrons')
-        self.addOption ('inputContainer', '', type=str,  
+        self.addOption ('inputContainer', '', type=str,
             info="select electron input container, by default set to Electrons")
         self.addOption ('containerName', '', type=str,
             noneAction='error',
@@ -212,7 +212,7 @@ class ElectronCalibrationConfig (ConfigBlock) :
             alg.calibrationAndSmearingTool.doScaleCorrection = False
             alg.calibrationAndSmearingTool.useMVACalibration = False
             alg.calibrationAndSmearingTool.decorateEmva = False
-        
+
         if self.minPt > 0 :
             # Set up the the pt selection
             alg = config.createAlgorithm( 'CP::AsgSelectionAlg', 'ElectronPtCutAlg' )
@@ -243,7 +243,7 @@ class ElectronCalibrationConfig (ConfigBlock) :
         else:
             log.warning("You are not applying the isolation corrections")
             log.warning("This is only intended to be used for testing purposes")
-            
+
         # Additional decorations
         if self.writeTrackD0Z0:
             alg = config.createAlgorithm( 'CP::AsgLeptonTrackDecorationAlg',
@@ -505,9 +505,9 @@ class ElectronWorkingPointConfig (ConfigBlock) :
             if self.identificationWP != 'TightLH':
                 raise ValueError(f"convSelection can only be used with TightLH ID, "
                                  f"whereas {self.identificationWP} has been selected. convSelection option will be ignored.")
-            # check if allowed value 
+            # check if allowed value
             allowedValues = ["Veto", "GammaStar", "MatConv"]
-            if self.convSelection not in allowedValues:  
+            if self.convSelection not in allowedValues:
                 raise ValueError(f"convSelection has been set to {self.convSelection}, which is not a valid option. "
                                  f"convSelection option must be one of {allowedValues}.")
 
@@ -596,9 +596,9 @@ class ElectronWorkingPointConfig (ConfigBlock) :
                                  preselection=self.addSelectionToPreselection)
 
         correlationModels = ["SIMPLIFIED", "FULL", "TOTAL", "TOYS"]
-        map_file = 'ElectronEfficiencyCorrection/2015_2025/rel22.2/2025_Run2Rel22_Recommendation_v3/map0.txt' \
+        map_file = 'ElectronEfficiencyCorrection/2015_2025/rel22.2/2025_Run2Rel22_Recommendation_v3/map1.txt' \
                    if config.geometry() is LHCPeriod.Run2 else \
-                   'ElectronEfficiencyCorrection/2015_2025/rel22.2/2025_Run3_Consolidated_Prerecom_v3/map1.txt'
+                   'ElectronEfficiencyCorrection/2015_2025/rel22.2/2025_Run3_Consolidated_Recommendation_v4/map2.txt'
         sfList = []
         # Set up the RECO electron efficiency correction algorithm:
         if config.dataType() is not DataType.Data and not self.noEffSF:
@@ -701,7 +701,7 @@ class ElectronWorkingPointConfig (ConfigBlock) :
                                      'isol_effSF' + postfix)
             sfList += [alg.scaleFactorDecoration]
 
-        if (self.chargeIDSelectionRun2 and config.geometry() < LHCPeriod.Run3 and 
+        if (self.chargeIDSelectionRun2 and config.geometry() < LHCPeriod.Run3 and
             config.dataType() is not DataType.Data and not self.noEffSF):
             alg = config.createAlgorithm( 'CP::ElectronEfficiencyCorrectionAlg',
                                           'ElectronEfficiencyCorrectionAlgEcids' )
@@ -716,7 +716,7 @@ class ElectronWorkingPointConfig (ConfigBlock) :
                 ecids_lh = 'medium'
             elif self.identificationWP == 'TightLH':
                 ecids_lh = 'tight'
-            else:  
+            else:
                 raise ValueError('ECIDS SFs are supported only for ID LooseBLayerLH, MediumLH, or TightLH')
 
             alg.efficiencyCorrectionTool.CorrelationModel = "TOTAL"
@@ -737,7 +737,7 @@ class ElectronWorkingPointConfig (ConfigBlock) :
                 config.addOutputVar (self.containerName, alg.scaleFactorDecoration,
                                      'ecids_effSF' + postfix)
             sfList += [alg.scaleFactorDecoration]
-        
+
         if self.addChargeMisIDSF and config.dataType() is not DataType.Data and not self.noEffSF:
             if config.geometry() >= LHCPeriod.Run3:
                 raise ValueError('Run 3 does not yet have charge mis-ID correction, '
@@ -756,7 +756,7 @@ class ElectronWorkingPointConfig (ConfigBlock) :
                 misid_lh = 'MediumLLH'
             elif self.identificationWP == 'TightLH':
                 misid_lh = 'TightLLH'
-            else:  
+            else:
                 raise ValueError('Charge mis-ID SFs are supported only for ID LooseBLayerLH, MediumLH, or TightLH')
             misid_suffix = '_ECIDSloose' if self.chargeIDSelectionRun2 else ''
 
@@ -785,7 +785,7 @@ class ElectronWorkingPointConfig (ConfigBlock) :
             alg.inScaleFactors = sfList
             alg.outScaleFactor = 'effSF' + postfix + '_%SYS%'
             config.addOutputVar (self.containerName, alg.outScaleFactor, 'effSF' + postfix)
-        
+
 
 
 class ElectronTriggerAnalysisSFBlock (ConfigBlock):
@@ -841,10 +841,10 @@ class ElectronTriggerAnalysisSFBlock (ConfigBlock):
             triggerDict = TriggerDict()
 
             # currently recommended versions
-            version_Run2 = "2015_2018/rel21.2/Precision_Summer2020_v1"
-            map_Run2 = f"{version_Run2}/map4.txt"
+            version_Run2 = "2015_2025/rel22.2/2025_Run2Rel22_Recommendation_v3"
+            map_Run2 = f"ElectronEfficiencyCorrection/{version_Run2}/map1.txt"
             version_Run3 = "2015_2025/rel22.2/2025_Run3_Consolidated_Recommendation_v4"
-            map_Run3 = "2015_2025/rel22.2/2025_Run3_Consolidated_Recommendation_v4/map2.txt"
+            map_Run3 = f"ElectronEfficiencyCorrection/{version_Run3}/map2.txt"
 
             version = version_Run2 if config.geometry() is LHCPeriod.Run2 else version_Run3
             # Dictionary from TrigGlobalEfficiencyCorrection/MapKeys.cfg
@@ -935,7 +935,7 @@ class ElectronTriggerAnalysisSFBlock (ConfigBlock):
                                            'AsgElectronEfficiencyCorrectionTool' )
 
                     # Reproduce config from TrigGlobalEfficiencyAlg
-                    alg.efficiencyCorrectionTool.MapFilePath = "ElectronEfficiencyCorrection/" + (map_Run3 if config.geometry() is LHCPeriod.Run3 else map_Run2)
+                    alg.efficiencyCorrectionTool.MapFilePath = map_Run3 if config.geometry() is LHCPeriod.Run3 else map_Run2
                     alg.efficiencyCorrectionTool.IdKey = self.electronID.replace("LH","")
                     alg.efficiencyCorrectionTool.IsoKey = self.electronIsol
                     alg.efficiencyCorrectionTool.TriggerKey = (
@@ -954,7 +954,7 @@ class ElectronTriggerAnalysisSFBlock (ConfigBlock):
 
 
 class ElectronLRTMergedConfig (ConfigBlock) :
-    def __init__ (self) :  
+    def __init__ (self) :
         super (ElectronLRTMergedConfig, self).__init__ ()
         self.addOption (
             'inputElectrons', 'Electrons', type=str,
