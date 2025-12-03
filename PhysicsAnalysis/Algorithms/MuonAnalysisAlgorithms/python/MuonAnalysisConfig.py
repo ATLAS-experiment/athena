@@ -4,6 +4,7 @@
 from AnalysisAlgorithmsConfig.ConfigBlock import ConfigBlock
 from AthenaCommon.SystemOfUnits	import GeV
 from AnalysisAlgorithmsConfig.ConfigAccumulator import DataType
+from TrackingAnalysisAlgorithms.TrackingAnalysisConfig import InDetTrackCalibrationConfig
 from AthenaConfiguration.Enums import LHCPeriod
 from TrigGlobalEfficiencyCorrection.TriggerLeg_DictHelpers import TriggerDict
 from Campaigns.Utils import Campaign
@@ -43,6 +44,10 @@ class MuonCalibrationConfig (ConfigBlock):
             info="save the d0 significance and z0sinTheta variables so they can be written out")
         self.addOption ('writeColumnarToolVariables', False, type=bool,
             info="whether to add variables needed for running the columnar muon tool(s) on the output n-tuple. (EXPERIMENTAL)",
+            expertMode=True)
+        self.addOption ('runTrackBiasing', False, type=bool,
+            info="EXPERIMENTAL: This enables the InDetTrackBiasingTool, for tracks "
+            "associated to Muons. The the tool does not have run 3 recommendations yet.",
             expertMode=True)
         
     def instanceName (self) :
@@ -123,8 +128,11 @@ class MuonCalibrationConfig (ConfigBlock):
         # Additional decorations
         if self.writeTrackD0Z0:
             alg = config.createAlgorithm( 'CP::AsgLeptonTrackDecorationAlg',
-                                          'LeptonTrackDecorator',
-                                           reentrant=True )
+                                          'LeptonTrackDecorator' )
+            if config.dataType() is not DataType.Data:
+                if self.runTrackBiasing:
+                    InDetTrackCalibrationConfig.makeTrackBiasingTool(config, alg)
+                InDetTrackCalibrationConfig.makeTrackSmearingTool(config, alg)
             alg.particles = config.readName (self.containerName)
 
         alg = config.createAlgorithm( 'CP::AsgEnergyDecoratorAlg', 'EnergyDecorator' )
@@ -137,10 +145,11 @@ class MuonCalibrationConfig (ConfigBlock):
         config.addOutputVar (self.containerName, 'charge', 'charge', noSys=True)
 
         if self.writeTrackD0Z0:
-            config.addOutputVar (self.containerName, 'd0_%SYS%', 'd0', noSys=True)
-            config.addOutputVar (self.containerName, 'd0sig_%SYS%', 'd0sig', noSys=True)
-            config.addOutputVar (self.containerName, 'z0sintheta_%SYS%', 'z0sintheta', noSys=True)
-            config.addOutputVar (self.containerName, 'z0sinthetasig_%SYS%', 'z0sinthetasig', noSys=True)
+            config.addOutputVar (self.containerName, 'd0_%SYS%', 'd0')
+            config.addOutputVar (self.containerName, 'd0sig_%SYS%', 'd0sig')
+            config.addOutputVar (self.containerName, 'z0_%SYS%', 'z0')
+            config.addOutputVar (self.containerName, 'z0sintheta_%SYS%', 'z0sintheta')
+            config.addOutputVar (self.containerName, 'z0sinthetasig_%SYS%', 'z0sinthetasig')
 
         # decorate truth information on the reconstructed object:
         if self.decorateTruth and config.dataType() is not DataType.Data:
