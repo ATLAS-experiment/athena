@@ -13,7 +13,7 @@ atlas_add_library( AsgAnalysisAlgorithmsLib
    LINK_LIBRARIES AthContainers AthContainersInterfaces AsgTools AsgMessagingLib AsgServicesLib CxxUtils xAODBase
      xAODEventInfo xAODCutFlow SelectionHelpersLib SystematicsHandlesLib PATCoreLib
      AnaAlgorithmLib AsgAnalysisInterfaces AssociationUtilsLib GammaORToolsLib
-     EventBookkeeperToolsLib IsolationSelectionLib PMGAnalysisInterfacesLib FakeBkgToolsLib
+     EventBookkeeperToolsLib InDetTrackSystematicsToolsLib IsolationSelectionLib PMGAnalysisInterfacesLib FakeBkgToolsLib
    PRIVATE_LINK_LIBRARIES ${ROOT_LIBRARIES} PATInterfaces xAODCore xAODMetaData xAODJet xAODMuon xAODTau xAODEgamma xAODMissingET
      xAODTracking xAODTruth xAODRootAccess RootCoreUtils TruthUtils )
 

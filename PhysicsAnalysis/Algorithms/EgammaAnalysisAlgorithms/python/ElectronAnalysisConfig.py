@@ -5,6 +5,7 @@ from AnalysisAlgorithmsConfig.ConfigBlock import ConfigBlock
 from AthenaCommon.SystemOfUnits	import GeV
 from AthenaConfiguration.Enums import LHCPeriod
 from AnalysisAlgorithmsConfig.ConfigAccumulator import DataType
+from TrackingAnalysisAlgorithms.TrackingAnalysisConfig import InDetTrackCalibrationConfig
 from TrigGlobalEfficiencyCorrection.TriggerLeg_DictHelpers import TriggerDict, MapKeysDict
 from AthenaCommon.Logging import logging
 
@@ -65,7 +66,12 @@ class ElectronCalibrationConfig (ConfigBlock) :
             "slower first step only has to be run once, while the second is run "
             "once per systematic. ATLASG-2358",
             expertMode=True)
-    
+        self.addOption ('runTrackBiasing', False, type=bool,
+            info="EXPERIMENTAL: This enables the InDetTrackBiasingTool, for "
+            "tracks associated to Electrons. The the tool does not have run 3 "
+            "recommendations yet.",
+            expertMode=True)
+
         self.addOption ('decorateTruth', False, type=bool,
             info="decorate truth particle information on the reconstructed one")
         self.addOption ('decorateCaloClusterEta', False, type=bool,
@@ -241,8 +247,11 @@ class ElectronCalibrationConfig (ConfigBlock) :
         # Additional decorations
         if self.writeTrackD0Z0:
             alg = config.createAlgorithm( 'CP::AsgLeptonTrackDecorationAlg',
-                                          'LeptonTrackDecorator',
-                                           reentrant=True )
+                                          'LeptonTrackDecorator' )
+            if config.dataType() is not DataType.Data:
+                if self.runTrackBiasing:
+                    InDetTrackCalibrationConfig.makeTrackBiasingTool(config, alg)
+                InDetTrackCalibrationConfig.makeTrackSmearingTool(config, alg)
             alg.particles = config.readName (self.containerName)
 
         alg = config.createAlgorithm( 'CP::AsgEnergyDecoratorAlg', 'EnergyDecorator' )
@@ -255,10 +264,11 @@ class ElectronCalibrationConfig (ConfigBlock) :
         config.addOutputVar (self.containerName, 'charge', 'charge', noSys=True)
 
         if self.writeTrackD0Z0:
-            config.addOutputVar (self.containerName, 'd0_%SYS%', 'd0', noSys=True)
-            config.addOutputVar (self.containerName, 'd0sig_%SYS%', 'd0sig', noSys=True)
-            config.addOutputVar (self.containerName, 'z0sintheta_%SYS%', 'z0sintheta', noSys=True)
-            config.addOutputVar (self.containerName, 'z0sinthetasig_%SYS%', 'z0sinthetasig', noSys=True)
+            config.addOutputVar (self.containerName, 'd0_%SYS%', 'd0')
+            config.addOutputVar (self.containerName, 'd0sig_%SYS%', 'd0sig')
+            config.addOutputVar (self.containerName, 'z0_%SYS%', 'z0')
+            config.addOutputVar (self.containerName, 'z0sintheta_%SYS%', 'z0sintheta')
+            config.addOutputVar (self.containerName, 'z0sinthetasig_%SYS%', 'z0sinthetasig')
 
         # decorate truth information on the reconstructed object:
         if self.decorateTruth and config.dataType() is not DataType.Data:
