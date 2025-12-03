@@ -9,8 +9,7 @@ def TrigMuonEFTrackIsolationToolCfg(flags, name = "TrigMuonTrackIsoTool", **kwar
 
     acc = ComponentAccumulator()
     trackIsolation = CompFactory.TrigMuonEFTrackIsolationTool
-    from AthenaCommon.SystemOfUnits import mm
-    kwargs.setdefault('deltaZCut', 2.0*mm)
+    kwargs.setdefault('deltaZCut', flags.Trigger.Muon.IsolationDzCut)
     kwargs.setdefault('removeSelf',True)
     kwargs.setdefault('useAnnulus',False)
     kwargs.setdefault('useVarIso',True)
