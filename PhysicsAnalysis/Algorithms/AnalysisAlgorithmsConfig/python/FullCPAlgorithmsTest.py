@@ -137,7 +137,7 @@ def makeTestSequenceBlocks (dataType, algSeq, isPhyslite,
     configSeq += config.makeConfig( 'Jets.FTagTriggerMatching' )
     configSeq.setOptionValue('.containerName', 'AnaJets')
     configSeq.setOptionValue('.triggerChainsPerYear', bjetTriggerChainsPerYear)
-    
+
     # disabling flavor tagging for Run 4, as the configuration just
     # refuses to work on that
     if geometry is not LHCPeriod.Run4:
@@ -184,6 +184,11 @@ def makeTestSequenceBlocks (dataType, algSeq, isPhyslite,
     configSeq.setOptionValue ('.isolationWP', 'Tight_VarRad')
     configSeq.setOptionValue ('.chargeIDSelectionRun2', True)
     configSeq.setOptionValue ('.addChargeMisIDSF', geometry is LHCPeriod.Run2)
+    configSeq += config.makeConfig('Electrons.TriggerSF')
+    configSeq.setOptionValue('.containerName', 'AnaElectrons')
+    configSeq.setOptionValue('.electronID', 'LooseBLayerLH')
+    configSeq.setOptionValue('.electronIsol', 'Tight_VarRad')
+    configSeq.setOptionValue('.triggerChainsPerYear', triggerChainsPerYear)
 
     configSeq += config.makeConfig ('Electrons.IFFClassification')
     configSeq.setOptionValue ('.containerName', 'AnaElectrons')

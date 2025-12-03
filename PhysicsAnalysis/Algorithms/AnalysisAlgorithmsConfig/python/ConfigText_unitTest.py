@@ -120,6 +120,18 @@ def compareTextBuilder(yamlPath='', *, checkOrder=False) :
     config.setOptions (isolationWP='Tight_VarRad')
     config.setOptions (chargeIDSelectionRun2=True)
     config.setOptions (addChargeMisIDSF=True)
+    # Electrons.TriggerSF
+    config.addBlock ('Electrons.TriggerSF')
+    config.setOptions (containerName='AnaElectrons')
+    config.setOptions (electronID='LooseBLayerLH')
+    config.setOptions (electronIsol='Tight_VarRad')
+    triggerChainsPerYear = {
+        2015: ['HLT_e24_lhmedium_L1EM20VH || HLT_e60_lhmedium || HLT_e120_lhloose', 'HLT_mu20_iloose_L1MU15 || HLT_mu40', 'HLT_2g20_tight'],
+        2016: ['HLT_e26_lhtight_nod0_ivarloose || HLT_e60_lhmedium_nod0 || HLT_e140_lhloose_nod0', 'HLT_mu26_ivarmedium || HLT_mu50', 'HLT_g35_loose_g25_loose'],
+        2017: ['HLT_e26_lhtight_nod0_ivarloose || HLT_e60_lhmedium_nod0 || HLT_e140_lhloose_nod0', 'HLT_2g22_tight_L12EM15VHI', 'HLT_mu50'],
+        2018: ['HLT_e26_lhtight_nod0_ivarloose || HLT_e60_lhmedium_nod0 || HLT_e140_lhloose_nod0', 'HLT_g35_medium_g25_medium_L12EM20VH', 'HLT_mu26_ivarmedium', 'HLT_2mu14'],
+    }
+    config.setOptions (triggerChainsPerYear=triggerChainsPerYear)
     # Electrons.PtEtaSelection
     config.addBlock ('Electrons.PtEtaSelection')
     config.setOptions (containerName='AnaElectrons')
@@ -131,6 +143,7 @@ def compareTextBuilder(yamlPath='', *, checkOrder=False) :
     config.addBlock ('Electrons.MCTCClassification')
     config.setOptions (containerName='AnaElectrons')
     config.setOptions (prefix='truth_')
+
 
     # Photons
     config.addBlock ('Photons', containerName='AnaPhotons')
@@ -353,12 +366,6 @@ def compareTextBuilder(yamlPath='', *, checkOrder=False) :
     config.setOptions (skipOnData=True)
 
     # Trigger
-    triggerChainsPerYear = {
-        2015: ['HLT_e24_lhmedium_L1EM20VH || HLT_e60_lhmedium || HLT_e120_lhloose', 'HLT_mu20_iloose_L1MU15 || HLT_mu40', 'HLT_2g20_tight'],
-        2016: ['HLT_e26_lhtight_nod0_ivarloose || HLT_e60_lhmedium_nod0 || HLT_e140_lhloose_nod0', 'HLT_mu26_ivarmedium || HLT_mu50', 'HLT_g35_loose_g25_loose'],
-        2017: ['HLT_e26_lhtight_nod0_ivarloose || HLT_e60_lhmedium_nod0 || HLT_e140_lhloose_nod0', 'HLT_2g22_tight_L12EM15VHI', 'HLT_mu50'],
-        2018: ['HLT_e26_lhtight_nod0_ivarloose || HLT_e60_lhmedium_nod0 || HLT_e140_lhloose_nod0', 'HLT_g35_medium_g25_medium_L12EM20VH', 'HLT_mu26_ivarmedium', 'HLT_2mu14'],
-    }
     triggerMatchingChainsPerYear = {
         2015: ['HLT_e24_lhmedium_L1EM20VH || HLT_e60_lhmedium || HLT_e120_lhloose', 'HLT_mu20_iloose_L1MU15 || HLT_mu40'],
         2016: ['HLT_e26_lhtight_nod0_ivarloose || HLT_e60_lhmedium_nod0 || HLT_e140_lhloose_nod0', 'HLT_mu26_ivarmedium || HLT_mu50'],
