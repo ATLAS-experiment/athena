@@ -386,11 +386,12 @@ namespace H5Utils {
                        hsize_t batch_size):
     Writer<N,I>(
       group, consumers, WriterConfiguration<N>{
-        name, // name
-        extent, // extent
-        batch_size, // batch_size
-        extent, // chunks
-        defaults::deflate // deflate
+        .name = name, // name
+        .extent = extent, // extent
+        .batch_size = batch_size, // batch_size
+        .chunks = extent, // chunks
+        .deflate = defaults::deflate, // deflate
+        .plist_callbacks = {} // plist_callbacks
       })
   {}
 
