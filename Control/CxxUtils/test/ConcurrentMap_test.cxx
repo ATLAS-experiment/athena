@@ -120,6 +120,8 @@ public:
     };
 
     swap_atomic (m_p, other.m_p);
+    std::lock_guard<std::mutex> g (m_mutex);
+    std::lock_guard<std::mutex> gother (other.m_mutex);
     m_garbage.swap (other.m_garbage);
     std::swap (m_inGrace, other.m_inGrace);
   }
