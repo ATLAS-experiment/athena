@@ -1212,15 +1212,17 @@ bool RegSelSiLUT::read(std::istream& s) {
   bool newformat = false;
 
   s >> Nmodules;
-  if (Nmodules > 1000000u) {
-    std::cerr << "read(): Unreasonable Nmodules " << Nmodules << "\n";
-    return false;
-  }
  
   newformat=s.fail();
 
   // couldn't read number of modules - try new format
-  if ( newformat ) s.clear();
+  if ( newformat )
+    s.clear();
+  else if (Nmodules > 1000000u) {
+    // Old format --- prevent runaway on invalid input.
+    std::cerr << "read(): Unreasonable Nmodules " << Nmodules << "\n";
+    return false;
+  }
 
   unsigned modcount=0;
 
