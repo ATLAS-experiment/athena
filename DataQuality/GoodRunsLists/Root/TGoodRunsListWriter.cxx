@@ -175,10 +175,9 @@ Root::TGoodRunsListWriter::GetXMLStrings()
   m_individuals=true;
 
   /// loop over goodrunslists
-  std::vector< Root::TGoodRunsList >::const_iterator litr = m_grlvec.begin();
-  for (int i=0; litr!=m_grlvec.end(); ++litr, ++i) {
+  for (const TGoodRunsList& grl : m_grlvec) {
     /// set grl to store
-    m_grl = (*litr);
+    m_grl = grl;
     // get xml string for this goodrunslist
     m_xmlstringVec.push_back( this->GetXMLString() );
   }
