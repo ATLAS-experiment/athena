@@ -7,6 +7,7 @@
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
+from AthenaConfiguration.Enums import LHCPeriod
 from AthenaCommon.Logging import logging
 msg = logging.getLogger('PHYSCommonConfig')
 
@@ -89,6 +90,8 @@ def PhysCommonAugmentationsCfg(flags,**kwargs):
         from BTagging.FlavorTaggingConfig import FlavorTaggingCfg
         acc.merge(FlavorTaggingCfg(flags, "AntiKt4EMPFlowJets"))
         acc.merge(FlavorTaggingCfg(flags, "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets"))
+        if flags.GeoModel.Run >= LHCPeriod.Run4:
+            acc.merge(FlavorTaggingCfg(flags, "AntiKt4EMTopoJets"))
 
     acc.merge(METCommonCfg(flags))
 
