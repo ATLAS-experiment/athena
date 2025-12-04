@@ -39,7 +39,7 @@ class VarHandleArraySematics(GaudiConfig2.semantics.SequenceSemantics):
     '''
     Treat VarHandleKeyArrays like arrays of strings
     '''
-    __handled_types__ = ("SG::VarHandleKeyArray",)
+    __handled_types__ = (re.compile(r"SG::HandleKeyArray<.*>$"),)
 
     class _ItemSemantics(GaudiConfig2.semantics.StringSemantics):
         """Semantics for an item (DataHandle) in a VarHandleKeyArray converting to string"""
@@ -58,6 +58,20 @@ class VarHandleArraySematics(GaudiConfig2.semantics.SequenceSemantics):
 
     def __init__(self, cpp_type):
         super().__init__(cpp_type, valueSem = self._ItemSemantics())
+
+        # Example for cpp_type:
+        # SG::HandleKeyArray<SG::ReadHandle<HiveDataObj>, SG::ReadHandleKey<HiveDataObj>,
+        #                    (Gaudi::DataHandle::Mode)4>
+        handle_type = next(GaudiConfig2.semantics.extract_template_args(cpp_type))
+        self._type = next(GaudiConfig2.semantics.extract_template_args(handle_type))
+        self._isCond = 'CondHandle' in handle_type
+
+        if handle_type.startswith("SG::ReadHandle"):
+            self._mode = "R"
+        elif handle_type.startswith("SG::WriteHandle"):
+            self._mode = "W"
+        else:
+            raise TypeError(f"C++ type {cpp_type} not supported")
 
     def merge(self,bb,aa):
         for b in bb:
