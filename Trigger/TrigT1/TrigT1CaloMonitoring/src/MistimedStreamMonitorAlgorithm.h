@@ -124,6 +124,10 @@ private:
   Gaudi::Property<double> m_phiScaleTT{this, "phiScaleTT", 32./M_PI, "Scale factor to convert trigger tower phi to integer binning"};
   Gaudi::Property<bool> m_uselegacy{this, "UseLegacy", false, "Use legacy system" };
   Gaudi::Property<bool> m_usephaseI{this, "UsePhase1", false, "Use phaseI system" };
+  Gaudi::Property<bool> m_isIons{this, "IsIons", false, "Is ions data" };
+  Gaudi::Property<std::vector<std::string>> m_efexItems{this,"EfexTriggers", {"L1_eEM26M"}, "eFex trigger items in BC0"};
+  Gaudi::Property<std::vector<std::string>> m_jfexItems{this,"JfexTriggers", {"L1_jJ160", "L1_jJ500"}, "jFex trigger items in BC0"};
+  Gaudi::Property<std::vector<std::string>> m_gfexItems{this,"GfexTriggers", {"L1_gJ400p0ETA25", "L1_gLJ140p0ETA25"}, "gFex trigger items in BC0"};
   
   // L1Calo Conditions 
   SG::ReadCondHandleKey<L1CaloRunParametersContainer>  m_runParametersContainer{ this, "InputKeyRunParameters", "L1CaloRunParametersContainer"};
@@ -161,6 +165,7 @@ private:
     HLT_mistimemonj400,
     L1_Trigger,
     lateTT,
+    lateTOB,
     InTime,
     EtaPhiOverlap
   };

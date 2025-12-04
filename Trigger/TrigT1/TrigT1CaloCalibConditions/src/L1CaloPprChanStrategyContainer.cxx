@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #include "TrigT1CaloCalibConditions/L1CaloPprChanStrategyContainer.h"
 
@@ -63,10 +63,10 @@ void L1CaloPprChanStrategyContainer::makeTransient(const std::map<std::string, c
     auto chanNum = item.first;
     const auto& attrList = item.second;
     
-    auto strategy = attrList[specificationName(eStrategy)].data<std::string>();
+    const auto & strategy = attrList[specificationName(eStrategy)].data<std::string>();
     auto code = attrList[specificationName(eCode)].data<unsigned int>();
-    auto timingRegime = attrList[specificationName(eTimingRegime)].data<std::string>();
-    auto description = attrList[specificationName(eDescription)].data<std::string>();
+    const auto & timingRegime = attrList[specificationName(eTimingRegime)].data<std::string>();
+    const auto & description = attrList[specificationName(eDescription)].data<std::string>();
 
     addPprChanStrategy(L1CaloPprChanStrategy(chanNum, strategy, code, timingRegime, description));
   }

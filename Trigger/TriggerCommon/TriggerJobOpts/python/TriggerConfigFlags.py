@@ -490,6 +490,9 @@ def createTriggerRecoFlags():
         muonflags.MuonCombined.doCombinedFit = True
         return muonflags
     flags.addFlagsCategory('Trigger.Offline.Combined', __muonCombined, prefix=True)
+    
+    from AthenaCommon.SystemOfUnits import mm
+    flags.addFlag('Trigger.Muon.IsolationDzCut', 2.0*mm, help='Value of dz cut used in muon isolation calculation in the trigger')
 
     def __tau():
         from TrigTauRec.TrigTauConfigFlags import createTrigTauConfigFlags

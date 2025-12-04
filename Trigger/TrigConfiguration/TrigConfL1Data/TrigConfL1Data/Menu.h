@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TrigConf_Menu
@@ -112,9 +112,9 @@ namespace TrigConf {
 
    private:
       ThresholdConfig                m_ThresholdConfig;
-#ifndef __COVERITY__
+
       ItemContainer                  m_TriggerItemVector;
-#endif
+
       std::vector<ThresholdMonitor*> m_ThresholdMonitorVector;
       std::vector<PIT*>              m_PITs;
       std::vector<TIP*>              m_TIPs;
@@ -123,7 +123,7 @@ namespace TrigConf {
    };
 
 
-#ifndef __COVERITY__
+
    inline
    item_by_ctpid_t&           Menu::item_by_ctpid() { return m_TriggerItemVector.get<tag_ctpid>(); }
    inline
@@ -141,7 +141,7 @@ namespace TrigConf {
 
    inline
    int Menu::size() const { return m_TriggerItemVector.size(); }
-#endif
+
 
 }
 
