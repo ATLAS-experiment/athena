@@ -628,7 +628,7 @@ StatusCode Pythia8_i::fillWeights(HepMC::GenEvent *evt){
   evt->set_units(HepMC3::Units::MEV, HepMC3::Units::MM);
 
   evt->weights().resize(fWeights.size(), 1.0);
-  for (auto w: fWeights) {
+  for (const auto & w: fWeights) {
       evt->weight(w.first)=w.second;
   }
 

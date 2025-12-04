@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef PYTHIA8_USERHOOKS_USERSETTING_H
@@ -8,7 +8,6 @@
 #include "Pythia8/Settings.h"
 #include "Pythia8_i/UserHooksFactory.h"
 #include <string>
-#include <iostream>
 #include <stdexcept>
 
 
@@ -68,33 +67,27 @@ namespace Pythia8_UserHooks{
   
   template<>
   inline int UserSetting<int>::uncachedRetrieve(){
-    if(m_settingsPtr->isMode(m_paramName)){
-      return m_settingsPtr->mode(m_paramName);
+    if(not m_settingsPtr->isMode(m_paramName)){
+      throw std::runtime_error("UserSetting " + m_paramName + " does not exist!");
     }
-    
-    throw std::runtime_error("UserSetting " + m_paramName + " does not exist!");
-    return m_param;
+    return m_settingsPtr->mode(m_paramName);
   }
 
 template<>
   inline bool UserSetting<bool>::uncachedRetrieve(){
-    if(m_settingsPtr->isFlag(m_paramName)){
-      return m_settingsPtr->flag(m_paramName);
+    if(not m_settingsPtr->isFlag(m_paramName)){
+      throw std::runtime_error("UserSetting " + m_paramName + " does not exist!");
     }
-
-    throw std::runtime_error("UserSetting " + m_paramName + " does not exist!");
-    return m_param;
+  return m_settingsPtr->flag(m_paramName);
   }
 
   
   template<>
   inline std::string UserSetting<std::string>::uncachedRetrieve(){
-    if(m_settingsPtr->isWord(m_paramName)){
-      return m_settingsPtr->word(m_paramName);
+    if(not m_settingsPtr->isWord(m_paramName)){
+      throw std::runtime_error("UserSetting " + m_paramName + " does not exist!");
     }
-    
-    throw std::runtime_error("UserSetting " + m_paramName + " does not exist!");
-    return m_param;
+    return m_settingsPtr->word(m_paramName);
   }
   
 }

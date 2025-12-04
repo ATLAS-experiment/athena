@@ -62,7 +62,7 @@ StatusCode TrackRecordGenerator::callGenerator() {
 
   ATH_MSG_INFO("retrieved "<<coll->size()<<" TTR hits; will smear position by "<< (m_smearTR>0?m_smearTR:0.) <<" mm and momentum by "<< (m_smearTRp>0?m_smearTRp:0.) <<" radians");
 
-  for (auto iterTTR : *coll) {
+  for (const auto & iterTTR : *coll) {
 
     const HepPDT::ParticleData* particle = particleData(std::abs(iterTTR.GetPDGCode()));
     double mass = particle->mass().value();
