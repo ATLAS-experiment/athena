@@ -6,7 +6,7 @@
 #ifndef HGTD_CONDITIONSALGORITHMS_HGTD_DETECTORELEMENTCONDALG_H
 #define HGTD_CONDITIONSALGORITHMS_HGTD_DETECTORELEMENTCONDALG_H
 
-#include "AthenaBaseComps/AthReentrantAlgorithm.h"
+#include "AthenaBaseComps/AthCondAlgorithm.h"
 
 #include "GeoPrimitives/GeoPrimitives.h"
 #include "HGTD_ReadoutGeometry/HGTD_DetectorElementCollection.h"
@@ -17,7 +17,7 @@
 
 class HGTD_DetectorManager;
 
-class HGTD_DetectorElementCondAlg : public AthReentrantAlgorithm
+class HGTD_DetectorElementCondAlg : public AthCondAlgorithm
 {
  public:
   HGTD_DetectorElementCondAlg(const std::string& name, ISvcLocator* pSvcLocator);
@@ -25,7 +25,6 @@ class HGTD_DetectorElementCondAlg : public AthReentrantAlgorithm
 
   virtual StatusCode initialize() override final;
   virtual StatusCode execute(const EventContext& ctx) const override final;
-  virtual bool isReEntrant() const override final { return false; }
 
  private:
   SG::WriteCondHandleKey<InDetDD::HGTD_DetectorElementCollection> m_writeKey
