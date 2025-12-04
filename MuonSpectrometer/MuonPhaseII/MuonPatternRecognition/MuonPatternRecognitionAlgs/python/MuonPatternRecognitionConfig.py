@@ -47,7 +47,8 @@ def ActsMuonSegmentRefitAlgCfg(flags,name="ActsMuonSegmentRefitAlg", **kwargs):
     result = ComponentAccumulator()
     from MuonTrackFindingAlgs.TrackFindingConfig import SegmentSelectorCfg, MSTrackFitterCfg
     kwargs.setdefault("SegmentSelectionTool", result.popToolsAndMerge(SegmentSelectorCfg(flags)))
-    
+    from MuonSpacePointCalibrator.CalibrationConfig import MuonSpacePointCalibratorCfg
+    kwargs.setdefault("Calibrator", result.popToolsAndMerge(MuonSpacePointCalibratorCfg(flags)))
     kwargs.setdefault("FittingTool", result.popToolsAndMerge(MSTrackFitterCfg(flags,
                                                                               DoStraightLine=True)))       
     from ActsConfig.ActsGeometryConfig import ActsExtrapolationToolCfg
