@@ -2,14 +2,13 @@
   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "CollectionBase/ICollectionService.h"
+#include "CollectionBase/CollectionService.h"
 #include "CollectionBase/CollectionService.h"
 #include "CollectionBase/CollectionDescription.h"
 #include "CollectionBase/ICollection.h"
 #include "CollectionBase/CollectionRowBuffer.h"
 #include "CollectionBase/TokenList.h"
 #include "CollectionBase/ICollectionColumn.h"
-#include "CollectionBase/ICollectionQuery.h"
 #include "CollectionBase/ICollectionCursor.h"
 #include "RootCollection/AttributeListLayout.h"
 
@@ -49,7 +48,6 @@ TestDriver::write ATLAS_NOT_THREAD_SAFE ()
    description.insertColumn( "attr3", "double", "floating point attribute" );
    description.insertColumn( "attr4", "bool" );
    description.insertColumn( "attr64bit", "unsigned long long" );
-   description.printOut();
 
    cout << "Creating Collection" << endl;
    pool::ICollection* collection = serviceHandle->create( description, true );
@@ -113,10 +111,9 @@ TestDriver::read ATLAS_NOT_THREAD_SAFE ()
      throw std::runtime_error( "Could not create a rootCollection object" );
   }
 
-  cout << "Executing query that only selects event reference column (the default)" << endl;
-  pool::ICollectionQuery* query1 = collection->newQuery();
-  pool::ICollectionCursor& cursor1 = query1->execute();
-  cout << "Iterating over query results..." << endl;
+  pool::ICollectionCursor* cursor1_ptr = &collection->cursor();
+  pool::ICollectionCursor& cursor1 = *cursor1_ptr;
+  cout << "Iterating over collection..." << endl;
   int counter = 0;
   while( cursor1.next() && counter < 10 )  {
      std::cout << "Token : " << cursor1.eventRef().toString() << std::endl;
@@ -134,7 +131,7 @@ TestDriver::read ATLAS_NOT_THREAD_SAFE ()
      counter++;
   }
   std::cout << counter << " records read back" << std::endl;
-  delete query1;
+  delete cursor1_ptr;
 
   collection->close();
   delete collection;

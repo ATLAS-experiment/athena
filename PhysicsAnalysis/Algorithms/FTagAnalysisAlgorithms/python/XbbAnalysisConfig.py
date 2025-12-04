@@ -14,7 +14,7 @@ class XbbConfig (ConfigBlock):
         self.addOption('XbbWP', 'FlatMassQCDEff_0p25', type=str,
                        info="the Xbb tagging WP." )
         self.addOption('Xbbtagger', 'GN2Xv01', type=str,
-                       info="the Xbb tagger: GN2Xv01. The default is GN2Xv01")
+                       info="The output name of the Xbb tagger - should match the first level key of the calibration json file." )
         self.addOption('calibFile', None, type=str,
                        info="the calibration json file")
         self.addOption('noEffSF', False, type=bool,
@@ -22,7 +22,7 @@ class XbbConfig (ConfigBlock):
 
     def instanceName (self) :
         """Return the instance name for this block"""
-        return self.containerName + '_' + self.XbbWP
+        return self.containerName + '_' + self.Xbbtagger + '_' + self.XbbWP
 
     def makeAlgs(self, config):
 
@@ -33,7 +33,7 @@ class XbbConfig (ConfigBlock):
         config.addPrivateTool('selectionTool', 'BTaggingSelectionJsonTool' )
         alg.selectionTool.MaxEta = 4.5
         alg.selectionTool.MinPt = 0.
-        alg.selectionTool.TaggerName = self.Xbbtagger
+        alg.selectionTool.OutputName = self.Xbbtagger
         alg.selectionTool.JetAuthor = jetContainer
         alg.selectionTool.OperatingPoint = self.XbbWP
         alg.selectionTool.JsonConfigFile = self.calibFile

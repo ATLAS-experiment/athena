@@ -11,6 +11,7 @@ find_package( ROOT COMPONENTS Core Tree MathCore MathMore Hist RIO Matrix Physic
 find_package( lwtnn REQUIRED )
 find_package( onnxruntime REQUIRED )
 find_package( LibXml2 )
+find_package( HDF5 1.10.6 COMPONENTS CXX REQUIRED)
 
 option(USE_GPU "whether to run FCS on GPU or not" OFF)
 
@@ -42,6 +43,11 @@ atlas_add_root_dictionary( ISF_FastCaloSimEvent _dictSource
                            ISF_FastCaloSimEvent/TFCS2DFunctionTemplateHistogram.h
                            ISF_FastCaloSimEvent/TFCS2DFunctionTemplateInterpolationHistogram.h
                            ISF_FastCaloSimEvent/TFCS2DFunctionTemplateInterpolationExpHistogram.h
+                           ISF_FastCaloSimEvent/TFCSPhiModulationCorrection.h
+                           ISF_FastCaloSimEvent/TFCSBinnedShowerBase.h
+                           ISF_FastCaloSimEvent/TFCSBinnedShower.h
+                           ISF_FastCaloSimEvent/TFCSBinnedShowerONNX.h
+                           ISF_FastCaloSimEvent/TFCSMLCalorimeterSimulator.h
                            ISF_FastCaloSimEvent/TFCSParametrizationBase.h
                            ISF_FastCaloSimEvent/TFCSParametrizationPlaceholder.h
                            ISF_FastCaloSimEvent/TFCSParametrization.h
@@ -71,6 +77,7 @@ atlas_add_root_dictionary( ISF_FastCaloSimEvent _dictSource
                            ISF_FastCaloSimEvent/TFCSLateralShapeParametrization.h
                            ISF_FastCaloSimEvent/TFCSLateralShapeParametrizationHitBase.h
                            ISF_FastCaloSimEvent/TFCSLateralShapeParametrizationHitChain.h
+                           ISF_FastCaloSimEvent/TFCSLateralShapeParametrizationFixedHitChain.h
                            ISF_FastCaloSimEvent/TFCSLateralShapeParametrizationFluctChain.h
                            ISF_FastCaloSimEvent/TFCSCenterPositionCalculation.h
                            ISF_FastCaloSimEvent/TFCSFlatLateralShapeParametrization.h
@@ -115,7 +122,9 @@ if(USE_GPU AND CMAKE_CUDA_COMPILER)
     DEFINITIONS ${CLHEP_DEFINITIONS}
     LINK_LIBRARIES ${CLHEP_LIBRARIES} ${HEPPDT_LIBRARIES} ${ROOT_LIBRARIES} AthContainers AthenaKernel AthenaBaseComps CaloDetDescrLib ${LWTNN_LIBRARIES} ${LIBXML2_LIBRARIES} ${ALL_ONNX_LIBS}
     CaloGeoHelpers CxxUtils TileSimEvent ISF_FastCaloGpuLib TruthUtils
-    PRIVATE_LINK_LIBRARIES GaudiKernel)
+    PRIVATE_DEFINITIONS ${HDF5_CXX_DEFINITIONS}
+    PRIVATE_INCLUDE_DIRS ${HDF5_INCLUDE_DIRS}
+    PRIVATE_LINK_LIBRARIES GaudiKernel ${HDF5_LIBRARIES})
 else()
   atlas_add_library( ISF_FastCaloSimEvent
     ISF_FastCaloSimEvent/*.h ${_dictSource} src/*.cxx
@@ -124,8 +133,11 @@ else()
     DEFINITIONS ${CLHEP_DEFINITIONS}
     LINK_LIBRARIES ${Boost_LIBRARIES} ${CLHEP_LIBRARIES} ${HEPPDT_LIBRARIES} ${ROOT_LIBRARIES} AthContainers AthenaKernel AthenaBaseComps CaloDetDescrLib ${LWTNN_LIBRARIES} ${LIBXML2_LIBRARIES} ${ALL_ONNX_LIBS}
     CaloGeoHelpers CxxUtils TileSimEvent TruthUtils
-    PRIVATE_LINK_LIBRARIES GaudiKernel)
+    PRIVATE_DEFINITIONS ${HDF5_CXX_DEFINITIONS}
+    PRIVATE_INCLUDE_DIRS ${HDF5_INCLUDE_DIRS}
+    PRIVATE_LINK_LIBRARIES GaudiKernel ${HDF5_LIBRARIES})
 endif()
+
 
 atlas_add_dictionary( ISF_FastCaloSimEventDict
    ISF_FastCaloSimEvent/ISF_FastCaloSimEventDict.h

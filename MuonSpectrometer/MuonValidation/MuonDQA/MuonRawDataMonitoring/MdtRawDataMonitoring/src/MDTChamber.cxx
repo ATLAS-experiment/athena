@@ -224,7 +224,7 @@ void MDTChamber::SetMDTHitsPerML_byLayer_Bins(TH2F* h_mdthitspermultilayerLumi, 
     std::string statphi_s = m_hardware_name.substr(5, 2);
 
     if (m_hardware_name == "BME1A14" || m_hardware_name == "BME1C14") statphi_s = "13";
-    std::string_view name_v(m_hardware_name);
+    const std::string_view name_v(m_hardware_name);
     std::string statphi_ml1_s = statphi_s + ",1";
     std::string statphi_ml2_s = statphi_s + ",2";
 
@@ -235,6 +235,7 @@ void MDTChamber::SetMDTHitsPerML_byLayer_Bins(TH2F* h_mdthitspermultilayerLumi, 
     }
 
     std::string stateta_s = m_hardware_name.substr(3, 1);
+    //coverity[use_after_free:FALSE]
     if (name_v.substr(0, 4) == "BMF2") stateta_s = "3";
     if (name_v.substr(0, 4) == "BMF3") stateta_s = "5";
     std::string ecap_layer = m_hardware_name.substr(0, 2) + m_hardware_name.at(4) + stateta_s;

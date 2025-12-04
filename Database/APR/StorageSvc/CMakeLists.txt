@@ -27,10 +27,6 @@ atlas_add_test( StorageSvc_mtShape_test
    LINK_LIBRARIES ${ROOT_LIBRARIES} StorageSvc
    POST_EXEC_SCRIPT nopost.sh )
 
-atlas_add_test( StorageSvc_DbBlob_test
-   SOURCES test/StorageSvc_DbBlob_test.cxx
-   LINK_LIBRARIES StorageSvc )
-
 if( NOT SIMULATIONBASE AND NOT GENERATIONBASE AND NOT XAOD_ANALYSIS )
     atlas_add_test( StorageSvc_getGuid_test
        SOURCES test/StorageSvc_getGuid_test.cxx

@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 #
 # @file D3PDMakerConfig/python/D3PDMakerFlags.py
@@ -29,14 +29,7 @@ _string_prop ('ElectronSGKey',               'AllElectrons')
 _string_prop ('GSFTrackAssocSGKey',          'GSFTrackAssociation')
 _string_prop ('PhotonSGKey',                 'Photons,PhotonCollection')
 _string_prop ('MuonSGKey',                   'Muons')
-_string_prop ('JetSGKey',                    'AntiKt4EMTopoJets,' +
-                                             'AntiKt4TopoEMJets,' +
-                                             'AntiKt4LCTopoJets,' +
-                                             'AntiKt4TopoAODJets,' +
-                                             'AntiKt4H1TopoJets,' +
-                                             'AntiKt4H1TopoAODJets,' +
-                                             'Cone4H1TopoJets,' +
-                                             'Cone4H1TopoAODJets')
+_string_prop ('JetSGKey',                    'AntiKt4EMPFlowJets')
 _string_prop ('TruthJetSGKey',               'AntiKt4H1TruthJets,' +
                                              #'Cone4TruthJets,' +
                                              'AntiKt4TruthJets')

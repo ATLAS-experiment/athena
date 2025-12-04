@@ -198,6 +198,8 @@ namespace met {
     ToolHandle<InDet::IInDetTrackSelectionTool> m_trkseltool;
     ToolHandle<IAsgSelectionTool> m_JvtTool;
 
+    SG::ReadHandleKey<xAOD::JetContainer> m_jetContainer{this, "JetContainer", "", "Name of input jet container (required if JVT decisions computed by internal tool)"};
+
     /// Default constructor:
     METMaker();
 

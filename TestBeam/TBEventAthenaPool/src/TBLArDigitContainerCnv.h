@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // -------------------------------------------------------------------
@@ -13,11 +13,9 @@
 
 #include "TBTPCnv/TBLArDigitContainerCnv_p1.h"
 #include "AthenaPoolCnvSvc/T_AthenaPoolCustomCnv.h"
-//#include "LArRawEvent/LArDigitContainer.h"
 #include "TBEvent/TBLArDigitContainer.h"
 
-//class TBLArDigitContainer;
-//class TBLArDigitContainer_p1;
+
 
 typedef TBLArDigitContainer_p1 TBLArDigitContainerPERS;
 

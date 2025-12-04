@@ -108,8 +108,13 @@ G4bool BCMSensorSD::ProcessHits(G4Step* aStep, G4TouchableHistory* /*ROhist*/)
         produced_in_diamond = 2;
       else if(aStep->GetTrack()->GetLogicalVolumeAtVertex()->GetName() == "Pixel::bcmWallLog")
         produced_in_diamond = 3;
-
-      m_HitColl->Emplace(lP1, lP2, edep, aStep->GetPreStepPoint()->GetGlobalTime(), trHelp.GenerateParticleLink(),
+      // Temporary solution to get EventContext from a Geant4 thread 
+      EventContext const* eventContext{nullptr};
+      if(auto* eventInfo = AtlasG4EventUserInfo::GetEventUserInfo()){
+        eventContext = &eventInfo->GetEventContext();
+      }
+      m_HitColl->Emplace(lP1, lP2, edep, aStep->GetPreStepPoint()->GetGlobalTime(),
+                         eventContext ? trHelp.GenerateParticleLink(*eventContext) : trHelp.GenerateParticleLink(),
                          0, 0, myTouch->GetVolume(1)->GetCopyNo()-951, BEcopyNo - 11950, primaren, produced_in_diamond);
     }
   return true;

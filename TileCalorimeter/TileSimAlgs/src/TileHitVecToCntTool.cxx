@@ -54,8 +54,6 @@ StatusCode TileHitVecToCntTool::initialize() {
 
   ATH_MSG_DEBUG("TileHitVecToCntTool initialization started");
 
-  bool error = false;
-
   ATH_CHECK(m_rndmSvc.retrieve());
 
   // retrieve TileID helper from det store
@@ -176,10 +174,7 @@ StatusCode TileHitVecToCntTool::initialize() {
 
   ATH_MSG_DEBUG("TileHitVecToCntTool initialization completed");
 
-  if (error)
-    return StatusCode::RECOVERABLE;
-  else
-    return StatusCode::SUCCESS;
+  return StatusCode::SUCCESS;
 }
 
 StatusCode TileHitVecToCntTool::createContainers() {

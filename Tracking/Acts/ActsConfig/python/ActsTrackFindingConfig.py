@@ -74,13 +74,6 @@ def ActsMainTrackFindingAlgCfg(flags,
     
     acc.merge( ActsVolumeIdToDetectorCollectionMappingAlgCfg(flags) )
     kwargs.setdefault("ActsVolumeIdToDetectorElementCollectionMapKey", "VolumeIdToDetectorElementCollectionMap")
-    def filterCollections(flags, pixel_col, strip_col) :
-      ret=[]
-      if flags.Detector.GeometryITkPixel:
-        ret += [ pixel_col ]
-      if flags.Detector.GeometryITkStrip:
-        ret += [ strip_col ]
-      return ret
 
     if flags.Detector.EnableITkPixel:
         from PixelConditionsAlgorithms.ITkPixelConditionsConfig import ITkPixelDetectorElementStatusAlgCfg
@@ -88,7 +81,7 @@ def ActsMainTrackFindingAlgCfg(flags,
     if flags.Detector.EnableITkStrip:
         from SCT_ConditionsAlgorithms.ITkStripConditionsAlgorithmsConfig import ITkStripDetectorElementStatusAlgCfg
         acc.merge(ITkStripDetectorElementStatusAlgCfg(flags))
-    kwargs.setdefault("DetElStatus",filterCollections(flags,'ITkStripDetectorElementStatus','ITkPixelDetectorElementStatus'))
+    kwargs.setdefault("DetElStatus", seedOrder(flags, pixel=["ITkPixelDetectorElementStatus"], strip=["ITkStripDetectorElementStatus"]))
 
     # Seed labels and collections.
     # These 3 lists must match element for element, reversed if flags.Acts.useStripSeedsFirst is True.
@@ -128,13 +121,9 @@ def ActsMainTrackFindingAlgCfg(flags,
     if flags.Detector.GeometryITk:
         kwargs.setdefault("etaBins", flags.Tracking.ActiveConfig.etaBins)
     # new default chi2 cuts optimise efficiency vs speed. Set same value as Athena's Xi2maxNoAdd.
-    from InDetConfig.ITkActsHelpers import isFastPrimaryPass
-    if isFastPrimaryPass(flags):
-        kwargs.setdefault("chi2CutOff", [50])
-        kwargs.setdefault("chi2OutlierCutOff", [100])
-    else:
-        kwargs.setdefault("chi2CutOff", [25])
-        kwargs.setdefault("chi2OutlierCutOff", [25])
+    kwargs.setdefault("chi2CutOff", flags.Tracking.ActiveConfig.Xi2max)
+    kwargs.setdefault("chi2OutlierCutOff", flags.Tracking.ActiveConfig.Xi2maxNoAdd)
+
     kwargs.setdefault("branchStopperPtMinFactor", 0.9)
     kwargs.setdefault("branchStopperAbsEtaMaxExtra", 0.1)
 

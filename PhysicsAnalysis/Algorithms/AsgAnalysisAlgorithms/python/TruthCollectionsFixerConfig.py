@@ -108,7 +108,12 @@ class TruthCollectionsFixerBlock(ConfigBlock):
             alg.OutputContainer = container
 
             # in Athena, we further need to remap relevant ElementLinks for containers that have them
-            containers_without_parent_child_links = ["TruthBosonsWithDecayParticles", "TruthTausWithDecayParticles", "BornLeptons", "TruthPileupParticles", "TruthForwardProtons"]
+            containers_without_parent_child_links = [
+                "TruthBosonsWithDecayParticles",
+                "TruthTausWithDecayParticles",
+                "BornLeptons", "TruthPileupParticles",
+                "TruthForwardProtons",
+                "TruthBSMWithDecayParticles"]
             if DualUseConfig.isAthena and container not in containers_without_parent_child_links:
                 alg.LinkPrefixToRemove = "InFile"
                 alg.ParticleLinks = ["parentLinks", "childLinks"]

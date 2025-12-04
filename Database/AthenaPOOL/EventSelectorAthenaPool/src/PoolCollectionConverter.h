@@ -16,7 +16,6 @@
 class IPoolSvc;
 namespace pool {
    class ICollection;
-   class ICollectionQuery;
    class ICollectionCursor;
 }
 class StatusCode;
@@ -60,7 +59,7 @@ private: // data
    unsigned int m_contextId;
    const IPoolSvc* m_poolSvc;
    pool::ICollection* m_poolCollection;
-   pool::ICollectionQuery* m_collectionQuery;
+   pool::ICollectionCursor* m_collectionCursor;
    std::string m_inputContainer;
 
 private: // hide copy and assignment

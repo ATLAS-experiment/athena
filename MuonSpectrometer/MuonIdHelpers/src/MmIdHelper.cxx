@@ -32,7 +32,6 @@ int MmIdHelper::initialize_from_dictionary(const IdDictMgr& dict_mgr) {
     }
 
     // init base object
-    AtlasDetectorID::setMessageSvc(Athena::getMessageSvc());
     if (AtlasDetectorID::initialize_from_dictionary(dict_mgr)) return 1;
 
     // Register version of the MuonSpectrometer dictionary

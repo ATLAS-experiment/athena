@@ -2052,6 +2052,7 @@ SlowMuonsAux.
 SlowMuonsAuxDyn.hitEnergy
 SlowMuonsAuxDyn.hitError
 SlowMuonsAuxDyn.hitIdentifier
+SlowMuonsAuxDyn.hitPassesMDTBetaCut
 SlowMuonsAuxDyn.hitPositionX
 SlowMuonsAuxDyn.hitPositionY
 SlowMuonsAuxDyn.hitPositionZ

@@ -878,12 +878,12 @@ DbStatus RootDatabase::transAct(Transaction::Action action)
                   TList* friendTrees(tree->GetListOfFriends());
                   if (friendTrees != nullptr && !friendTrees->IsEmpty()) {
                      ATH_MSG_DEBUG("BuildIndex for " << APRDefaults::IndexColName << " to " << tree->GetName());
-                     tree->BuildIndex(APRDefaults::IndexColName);
+                     tree->BuildIndex(APRDefaults::IndexColName, true);
                      for (const auto&& obj: *friendTrees) {
                         TTree* friendTree = tree->GetFriend(obj->GetName());
                         if (friendTree != nullptr && friendTree->GetBranch(APRDefaults::IndexColName) != nullptr && friendTree->GetEntries() > 0) {
                            ATH_MSG_DEBUG("BuildIndex for " << APRDefaults::IndexColName << " to " << friendTree->GetName());
-                           friendTree->BuildIndex(APRDefaults::IndexColName);
+                           friendTree->BuildIndex(APRDefaults::IndexColName, true);
                         }
                      }
                   }

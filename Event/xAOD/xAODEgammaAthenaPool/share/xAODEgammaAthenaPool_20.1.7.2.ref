@@ -474,7 +474,7 @@ CondInputLoader      INFO Will create WriteCondHandle dependencies for the follo
     +  ( 'TRTCond::StrawStatusMultChanContainer' , 'ConditionStore+/TRT/Cond/StatusPermanent' ) 
 PyComponentMgr       INFO Initializing PyComponentMgr...
 dumper               INFO Initializing dumper...
-('aaa', '/home/sss/nobackup/referencefiles/xAODEgammaAthenaPool/xAODEgammaAthenaPoolReference-01-00-00/AOD-20.1.7.2-full.pool.root.ref', 'xAODEgammaAthenaPool/xAODEgammaAthenaPoolReference-01-00-00', 'AOD-20.1.7.2-full.pool.root.ref')
+('aaa', '/home/sss/nobackup/referencefiles/xAODEgammaAthenaPool/xAODEgammaAthenaPoolReference-01-01-00/AOD-20.1.7.2-full.pool.root.ref', 'xAODEgammaAthenaPool/xAODEgammaAthenaPoolReference-01-01-00', 'AOD-20.1.7.2-full.pool.root.ref')
 HistogramPersis...WARNING Histograms saving not required.
 AthenaEventLoopMgr   INFO Setup EventSelector service EventSelector
 ApplicationMgr       INFO Application Manager Initialized successfully

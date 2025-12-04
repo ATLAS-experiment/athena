@@ -1,12 +1,12 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ASSOCIATIONUTILS_MUJETOVERLAPTOOL_H
 #define ASSOCIATIONUTILS_MUJETOVERLAPTOOL_H
 
 // Framework includes
-#include "AsgTools/AsgTool.h"
+#include "AsgDataHandles/ReadHandleKey.h"
 
 // EDM includes
 #include "xAODMuon/MuonContainer.h"
@@ -145,7 +145,10 @@ namespace ORUtils
       bool m_useRapidity;
 
       /// PV Container to use
-      std::string m_PVContName;
+      SG::ReadHandleKey<xAOD::VertexContainer> m_PVContName{this, "PVContainerName", "PrimaryVertices", "PV Container to use"};
+
+      // Allow no PVs in the event
+      bool m_allowNoPV;
 
       /// @}
 

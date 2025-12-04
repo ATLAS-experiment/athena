@@ -170,6 +170,8 @@ namespace JiveXML {
               //tell the client his request failed
               svcerr_decode(rqstp->rq_xprt);
               //return immediately from this request
+              //clean up
+              delete DpThreadArgs.rqstp;
               return ;
            }
 
@@ -191,6 +193,8 @@ namespace JiveXML {
               //tell the client his request failed
               svcerr_decode(rqstp->rq_xprt);
               //return immediately from this request
+              //clean up
+              delete DpThreadArgs.rqstp;
               return ;
            }
 
@@ -215,8 +219,11 @@ namespace JiveXML {
       //finish using pthread_detach. Yet, when the thread removes itself from
       //the ThreadCollection, it will detach itself, so no memory is lost.
       retVal = pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
-      if ( ! checkResult(retVal,"request handler setting thread detach state",ServerSvc)) return;
-
+      if ( ! checkResult(retVal,"request handler setting thread detach state",ServerSvc)){
+        //clean up
+        delete DpThreadArgs.rqstp;
+        return;
+      }
       //Create a new thread
       pthread_t dispatchThread;
       retVal = pthread_create(&dispatchThread,&attr,&ONCRPCDispatchThread,new DispatchThreadArguments(DpThreadArgs));

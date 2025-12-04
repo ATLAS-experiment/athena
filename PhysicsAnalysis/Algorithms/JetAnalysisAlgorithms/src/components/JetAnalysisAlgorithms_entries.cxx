@@ -1,6 +1,7 @@
 // AsgExampleTools_entries.cxx
 
 #include <JetAnalysisAlgorithms/JetCalibrationAlg.h>
+#include <JetAnalysisAlgorithms/JetCalibAlg.h>
 #include <JetAnalysisAlgorithms/BJetCalibrationAlg.h>
 #include <JetAnalysisAlgorithms/JetFFSmearingAlg.h>
 #include <JetAnalysisAlgorithms/JetGhostMuonAssociationAlg.h>
@@ -19,6 +20,7 @@
 #include "AsgTools/AsgComponentFactories.h"
 
 DECLARE_COMPONENT (CP::JetCalibrationAlg)
+DECLARE_COMPONENT (CP::JetCalibAlg)
 DECLARE_COMPONENT (CP::BJetCalibrationAlg)
 DECLARE_COMPONENT (CP::JetFFSmearingAlg)
 DECLARE_COMPONENT (CP::JetGhostMuonAssociationAlg)

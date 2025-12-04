@@ -183,9 +183,8 @@ class CaloNoiseCompCondAlg: public AthAlgorithm {
     const LArEM_Base_ID*    m_lar_em_id{};
     const LArHEC_Base_ID*   m_lar_hec_id{};
     const LArFCAL_Base_ID*  m_lar_fcal_id{};
-     
- 
-    const CaloCell_ID* m_calocell_id{};
+
+    const CaloCell_Base_ID* m_calocell_id{};
     const CaloCell_SuperCell_ID* m_calosupercell_id{};
  
     IdentifierHash m_LArHashMax;
@@ -206,6 +205,7 @@ class CaloNoiseCompCondAlg: public AthAlgorithm {
     BooleanProperty  m_DumpDatabaseMG{this, "DumpDatabaseMG", false};
     BooleanProperty  m_DumpDatabaseLG{this, "DumpDatabaseLG", false};
     FloatProperty m_Nminbias{this, "NMinBias", -1};
+    BooleanProperty  m_isSC{this, "SuperCell", false};
   
  
     //Database  
@@ -223,7 +223,8 @@ class CaloNoiseCompCondAlg: public AthAlgorithm {
     float m_MinBiasRMS{};
 
     SG::ReadCondHandleKey<CaloDetDescrManager> m_caloMgrKey {this,"CaloDetDescrManager", "CaloDetDescrManager", "SG Key for CaloDetDescrManager in the Condition Store" };
-    const CaloDetDescrManager* m_calo_dd_man=nullptr; 
+    SG::ReadCondHandleKey<CaloSuperCellDetDescrManager> m_caloSCMgrKey {this,"CaloSuperCellDetDescrManager", "CaloSuperCellDetDescrManager", "SG Key for CaloSuperCellDetDescrManager in the Condition Store" };
+    const CaloDetDescrManager_Base* m_calo_dd_man=nullptr; 
 
     SG::ReadCondHandleKey<LArOnOffIdMapping> m_cablingKey{this,"CablingKey","LArOnOffIdMap","SG Key of LArOnOffIdMapping object"};
     const LArOnOffIdMapping *m_cabling=nullptr;

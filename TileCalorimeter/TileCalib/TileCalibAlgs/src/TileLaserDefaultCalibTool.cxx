@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // Tile includes
@@ -402,6 +402,7 @@ StatusCode TileLaserDefaultCalibTool::execute(){
   } // IF
   
   float normalization[NDIODES][NGAINS];
+  //coverity[STACK_USE]
   float pmt_values[NPARTITIONS][NDRAWERS][NCHANNELS][NGAINS];
   for (int part=0; part<NPARTITIONS; part++){
     for (int draw=0; draw<NDRAWERS; draw++){

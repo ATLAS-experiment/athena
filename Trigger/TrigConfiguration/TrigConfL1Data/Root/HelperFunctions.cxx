@@ -14,7 +14,6 @@
 #include "TrigConfL1Data/TriggerThreshold.h"
 
 #include "boost/algorithm/string.hpp"
-#include "boost/lexical_cast.hpp"
 #include <algorithm>
 #include <boost/algorithm/string/trim.hpp>
 using namespace std;
@@ -179,7 +178,7 @@ namespace {
          {
             std::string se = getSubExpr(logic,pos);
             pos += se.size();
-            uint32_t condIdx = boost::lexical_cast<uint32_t, std::string>(se);
+            uint32_t condIdx = static_cast<uint32_t>(std::stoul(se));
             thisNode = buildObjNode(condIdx, conditions, thrs);
             break;
          }
@@ -216,7 +215,7 @@ TrigConf::buildObjNode(uint32_t condIdx,
 
       } else { // threshold (condDef contains multiplicity, condName, and threshold name)
          // set multiplicity
-         newNode->setMultiplicity(boost::lexical_cast<int,std::string>(condDef[0]));
+         newNode->setMultiplicity(std::stoi(condDef[0]));
          // find trigger threshold in list of all thresholds and set it in the TriggerItemNode
          std::string& name = condDef[2];
          if(thrs.size()>0) {

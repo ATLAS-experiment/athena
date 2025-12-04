@@ -9,7 +9,6 @@
 
 namespace {
 constexpr float el_mass = ParticleConstants::electronMassInMeV;
-constexpr float ph_mass = 0.0;
 
 void
 setFromCluster(xAOD::Egamma& eg)
@@ -22,9 +21,9 @@ setFromCluster(xAOD::Egamma& eg)
   if (eg.type() == xAOD::Type::Electron) {
     const double pt =
       E > el_mass ? sqrt(E * E - el_mass * el_mass) / cosh(eta) : 0;
-    eg.setP4(pt, eta, phi, el_mass);
+    eg.setPtEtaPhi(pt, eta, phi);
   } else {
-    eg.setP4(E / cosh(eta), eta, phi, ph_mass);
+    eg.setPtEtaPhi(E / cosh(eta), eta, phi);
   }
 }
 
@@ -42,7 +41,7 @@ setFromTrkCluster(xAOD::Electron& el)
 
   const double pt =
     E > el_mass ? sqrt(E * E - el_mass * el_mass) / cosh(eta) : 0;
-  el.setP4(pt, eta, phi, el_mass);
+  el.setPtEtaPhi(pt, eta, phi);
 }
 
 void
@@ -57,7 +56,7 @@ setFromTrkCluster(xAOD::Photon& ph)
     eta = momentumAtVertex.eta();
     phi = momentumAtVertex.phi();
   }
-  ph.setP4(E / cosh(eta), eta, phi, ph_mass);
+  ph.setPtEtaPhi(E / cosh(eta), eta, phi);
 }
 }
 

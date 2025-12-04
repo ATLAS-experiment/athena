@@ -538,7 +538,7 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::execute()
     if (m_writeOutputData)  {
         ATH_CHECK(writeOutputData(roads_1st, tracks_1st, dataFlowInfo.get()));
     }
-    
+
     // This one we can do-- by passing in truth and offline tracks via storegate above (*FPGAOfflineTracks).
     if (m_doHoughRootOutput1st) {
         ATH_MSG_DEBUG("Running HoughRootOutputTool in 1st stage.");
@@ -550,7 +550,7 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::execute()
         }
 
         // Create output ROOT file
-        ATH_CHECK(m_houghRootOutputTool->fillTree(roads_1st, truthtracks, *FPGAOfflineTracks, phits_output, m_writeOutNonSPStripHits, m_trackScoreCut.value(), m_NumOfHitPerGrouping, false));
+        ATH_CHECK(m_houghRootOutputTool->fillTree(tracks_1st, truthtracks, *FPGAOfflineTracks, phits_output, m_writeOutNonSPStripHits, false));
     }
 
     // Reset data pointers

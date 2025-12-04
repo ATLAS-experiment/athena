@@ -267,17 +267,20 @@ StatusCode GepCellsHandlerAlg::execute(const EventContext& ctx) const {
 
   // do truncation
   auto itr = gepCellsPerFEB.begin();
+  int nFeb2sInOverflow = 0;
   for ( ;itr != gepCellsPerFEB.end(); ++itr) {
 
 	// LAr FEBs might overflow, so they will get truncated
 	if (m_doTruncationOfOverflowingFEBs && itr->second.size() > m_maxCellsPerFEB && itr->first != "Tile" && !m_writeAllCells) {
 		ATH_MSG_DEBUG("FEB " << itr->first << " is sending " << itr->second.size() << " cells, which is more cells than GEP can receive. Removing all but the possible " << m_maxCellsPerFEB << " cells.");
 		CHECK(removeCellsFromOverloadedFEB(itr->second));
+		++nFeb2sInOverflow;
 	}
   	for (const Gep::GepCaloCell& cell : itr->second)
 		gepCellMap.insert(cell.id, cell); 
   }
   ATH_MSG_DEBUG("GEP is receiving a total of " << gepCellMap.size() << " cells in this event");
+  gepCellMap.setNumberOfOverflowingFEB2s(nFeb2sInOverflow);
 
   SG::WriteHandle<Gep::GepCellMap> h_gepCellMap = SG::makeHandle(m_outputGepCellsKey, ctx);
   ATH_CHECK( h_gepCellMap.record( std::make_unique<Gep::GepCellMap>(gepCellMap) ) );

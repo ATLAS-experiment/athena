@@ -240,66 +240,13 @@ int TauPi0ClusterCreator::getNPhotons(const std::vector<const xAOD::PFO*>& shotP
   return totalPhotons;
 }
 
+void TauPi0ClusterCreator::getClusterVariables(const xAOD::CaloCluster& cluster,
+		                               std::vector<int> &nPosECells,
+					       float &coreEnergyEM1,
+		                               std::vector<float> &deltaEtaFirstMom,
+                                               std::vector<float> &deltaEtaSecondMom) const {
 
-
-std::vector<int> TauPi0ClusterCreator::getNPosECells(const xAOD::CaloCluster& cluster) const {
-  std::vector<int> nPosECells(3, 0);
-
-  const CaloClusterCellLink* cellLinks = cluster.getCellLinks();
-  CaloClusterCellLink::const_iterator cellLink = cellLinks->begin();
-  for (; cellLink != cellLinks->end(); ++cellLink) {
-    const CaloCell* cell = static_cast<const CaloCell*>(*cellLink);
-    int sampling = cell->caloDDE()->getSampling();
-    
-    // layer0: PS, layer1: EM1, layer2: EM2
-    int layer = sampling%4;  
-    if (layer < 3 && cell->e() > 0) {
-      ++nPosECells[layer];
-    }
-  }
-
-  return nPosECells;
-}
-
-
-
-float TauPi0ClusterCreator::getEM1CoreFrac(const xAOD::CaloCluster& cluster) const {
-  float coreEnergyEM1 = 0.;
-  float totalEnergyEM1 = 0.;
-  
-  const CaloClusterCellLink* cellLinks = cluster.getCellLinks();
-  CaloClusterCellLink::const_iterator cellLink = cellLinks->begin();
-  for (; cellLink != cellLinks->end(); ++cellLink) {
-    const CaloCell* cell = static_cast<const CaloCell*>(*cellLink);
-    
-    // Only consider EM1
-    int sampling = cell->caloDDE()->getSampling();
-    if (sampling != 1 && sampling != 5) continue;
-    
-    // Only consider positive cells
-    // FIXME: is the weight needed ?
-    float cellEnergy = cell->e() * cellLink.weight();
-    if (cellEnergy <= 0) continue;
-    
-    totalEnergyEM1 += cellEnergy;
-
-    float deltaEta = cell->eta() - cluster.eta();
-    float deltaPhi = P4Helpers::deltaPhi(cell->phi(), cluster.phi());
-    
-    // Core region: [0.05, 0.05/8]
-    if(std::abs(deltaPhi) > 0.05 || std::abs(deltaEta) > 2 * 0.025/8.) continue;
-    
-    coreEnergyEM1 += cellEnergy;
-  }
-  
-  if (totalEnergyEM1 <= 0.) return 0.;
-  return coreEnergyEM1/totalEnergyEM1;
-}
-
-
-
-std::vector<float> TauPi0ClusterCreator::get1stEtaMomWRTCluster(const xAOD::CaloCluster& cluster) const {
-  std::vector<float> deltaEtaFirstMom (3, 0.);
+  float totalEnergyEM1 = 0.;	
   std::vector<float> totalEnergy (3, 0.);
 
   const CaloClusterCellLink* cellLinks = cluster.getCellLinks();
@@ -314,63 +261,47 @@ std::vector<float> TauPi0ClusterCreator::get1stEtaMomWRTCluster(const xAOD::Calo
 
     // Only consider positive cells
     float cellEnergy = cell->e();
-    if (cellEnergy <= 0) continue;
+    float cellEnergy_weighted = cellEnergy * cellLink.weight();
+    if (cellEnergy <= 0 && cellEnergy_weighted <= 0) continue;
 
-    float deltaEta = cell->eta() - cluster.eta();
-    deltaEtaFirstMom[layer] += deltaEta * cellEnergy;
-    totalEnergy[layer] += cellEnergy;
+    float deltaEta = cell->eta() - cluster.eta(); 
+
+    if (cellEnergy > 0){ 
+      ++nPosECells[layer];
+
+      deltaEtaFirstMom[layer] += deltaEta * cellEnergy;
+      deltaEtaSecondMom[layer] += deltaEta * deltaEta * cellEnergy;
+      totalEnergy[layer] += cellEnergy;
+    }
+
+    // calculate coreEnergyEM1
+    if (sampling != 1 && sampling != 5) continue;
+
+    if( cellEnergy_weighted > 0){
+
+      totalEnergyEM1 += cellEnergy_weighted;
+      float deltaPhi = P4Helpers::deltaPhi(cell->phi(), cluster.phi());
+
+      // Core region: [0.05, 0.05/8]
+      if(std::abs(deltaPhi) > 0.05 || std::abs(deltaEta) > 2 * 0.025/8.) continue;
+      coreEnergyEM1 += cellEnergy_weighted;
+    }
   }
 
   for (int layer=0; layer < 3; ++layer) {
     if (totalEnergy[layer] != 0.) {
       deltaEtaFirstMom[layer]/=std::abs(totalEnergy[layer]);
-    }
-    else {
-      deltaEtaFirstMom[layer]=0.;
-    }
-  }
-  
-  return deltaEtaFirstMom;
-}
-
-
-
-std::vector<float> TauPi0ClusterCreator::get2ndEtaMomWRTCluster(const xAOD::CaloCluster& cluster) const {
-  std::vector<float> deltaEtaSecondMom (3, 0.);
-  std::vector<float> totalEnergy (3, 0.);
-
-  const CaloClusterCellLink* cellLinks = cluster.getCellLinks();
-  CaloClusterCellLink::const_iterator cellLink = cellLinks->begin();
-  for (; cellLink != cellLinks->end(); ++cellLink) {
-    const CaloCell* cell = static_cast<const CaloCell*>(*cellLink);
-    
-    // Only consider PS, EM1, and EM2
-    int sampling = cell->caloDDE()->getSampling();
-    int layer = sampling%4;
-    if (layer >= 3) continue;
-
-    // Only consider positive cells
-    float cellEnergy=cell->e();
-    if (cellEnergy <= 0) continue;
-
-    float deltaEta = cell->eta() - cluster.eta();
-    deltaEtaSecondMom[layer] += deltaEta * deltaEta * cellEnergy;
-    totalEnergy[layer] += cellEnergy;
-  }
-
-  for (int layer=0; layer < 3; ++layer) {
-    if (totalEnergy[layer] != 0.) {
       deltaEtaSecondMom[layer]/=std::abs(totalEnergy[layer]);
     }
     else {
+      deltaEtaFirstMom[layer]=0.;
       deltaEtaSecondMom[layer]=0.;
     }
   }
-  
-  return deltaEtaSecondMom;
+
+  coreEnergyEM1 = (totalEnergyEM1 > 0.) ? coreEnergyEM1/totalEnergyEM1 : 0.;
+
 }
-
-
 
 StatusCode TauPi0ClusterCreator::configureNeutralPFO(const xAOD::CaloCluster& cluster,
                                                      const xAOD::CaloClusterContainer& pi0ClusterContainer,
@@ -402,26 +333,30 @@ StatusCode TauPi0ClusterCreator::configureNeutralPFO(const xAOD::CaloCluster& cl
   
   float eEM2 = cluster.eSample(CaloSampling::EMB2) + cluster.eSample(CaloSampling::EME2);
   neutralPFO.setAttribute<float>(xAOD::PFODetails::PFOAttributes::cellBased_energy_EM2, eEM2);
-  
+ 
+  //-- Get variables
+  std::vector<float> deltaEtaFirstMom (3, 0.);
+  std::vector<float> deltaEtaSecondMom (3, 0.);
+  std::vector<int>   nPosECells(3, 0);
+  float EM1CoreFrac = 0.;
+
+  getClusterVariables(cluster, nPosECells, EM1CoreFrac, deltaEtaFirstMom, deltaEtaSecondMom);
+   
   // -- Number of positive cells in each layer
-  std::vector<int> nPosECells = getNPosECells(cluster);
   neutralPFO.setAttribute<int>(xAOD::PFODetails::PFOAttributes::cellBased_NPosECells_PS,  nPosECells.at(0));
   neutralPFO.setAttribute<int>(xAOD::PFODetails::PFOAttributes::cellBased_NPosECells_EM1, nPosECells.at(1));
   neutralPFO.setAttribute<int>(xAOD::PFODetails::PFOAttributes::cellBased_NPosECells_EM2, nPosECells.at(2));
  
   // -- Core Fraction of the energy in EM1 
-  float EM1CoreFrac = getEM1CoreFrac(cluster);
   neutralPFO.setAttribute<float>(xAOD::PFODetails::PFOAttributes::cellBased_EM1CoreFrac, EM1CoreFrac);
 
   // -- First moment of deltaEta(cluster, cell) in EM1 and EM2 
-  std::vector<float> deltaEtaFirstMom = get1stEtaMomWRTCluster(cluster);
   neutralPFO.setAttribute<float>(xAOD::PFODetails::PFOAttributes::cellBased_firstEtaWRTClusterPosition_EM1, deltaEtaFirstMom.at(1));
   neutralPFO.setAttribute<float>(xAOD::PFODetails::PFOAttributes::cellBased_firstEtaWRTClusterPosition_EM2, deltaEtaFirstMom.at(2));
   
   // -- Second moment of deltaEta(cluster, cell) in EM1 and EM2
-  std::vector<float> secondEtaWRTClusterPositionInLayer = get2ndEtaMomWRTCluster(cluster);
-  neutralPFO.setAttribute<float>(xAOD::PFODetails::PFOAttributes::cellBased_secondEtaWRTClusterPosition_EM1, secondEtaWRTClusterPositionInLayer.at(1));
-  neutralPFO.setAttribute<float>(xAOD::PFODetails::PFOAttributes::cellBased_secondEtaWRTClusterPosition_EM2, secondEtaWRTClusterPositionInLayer.at(2));
+  neutralPFO.setAttribute<float>(xAOD::PFODetails::PFOAttributes::cellBased_secondEtaWRTClusterPosition_EM1, deltaEtaSecondMom.at(1));
+  neutralPFO.setAttribute<float>(xAOD::PFODetails::PFOAttributes::cellBased_secondEtaWRTClusterPosition_EM2, deltaEtaSecondMom.at(2));
 
   // -- Retrieve cluster moments
   using Moment = xAOD::CaloCluster::MomentType;

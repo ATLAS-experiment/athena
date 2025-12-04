@@ -13,23 +13,23 @@ from GaudiKernel.Constants import INFO
 
 
 defaultInputKey = {
-   'Ele'       :'Electrons',
-   'LRTEle'    :'LRTElectrons',
-   'Gamma'     :'Photons',
-   'Tau'       :'TauJets',
-   'LCJet'     :'AntiKt4LCTopoJets',
-   'EMJet'     :'AntiKt4EMTopoJets',
-   'PFlowJet'  :'AntiKt4EMPFlowJets',
-   'PFlowJetHR':'AntiKt4EMPFlowJets',
-   'Muon'      :'Muons',
-   'MuonLRT'   :'MuonsLRT',
-   'Soft'      :'',
-   'Clusters'  :'CaloCalTopoClusters',
-   'Tracks'    :'InDetTrackParticles',
-   'PFlowObj'  :'CHSGParticleFlowObjects',
-   'PFlowObjHR':'CHSGParticleFlowObjects',
-   'PrimVxColl':'PrimaryVertices',
-   'Truth'     :'TruthEvents',
+   'Ele'           :'Electrons',
+   'LRTEle'        :'LRTElectrons',
+   'Gamma'         :'Photons',
+   'Tau'           :'TauJets',
+   'LCJet'         :'AntiKt4LCTopoJets',
+   'EMJet'         :'AntiKt4EMTopoJets',
+   'PFlowJet'      :'AntiKt4EMPFlowJets',
+   'HadronicRecoil':'',
+   'Muon'          :'Muons',
+   'MuonLRT'       :'MuonsLRT',
+   'Soft'          :'',
+   'Clusters'      :'CaloCalTopoClusters',
+   'Tracks'        :'InDetTrackParticles',
+   'PFlowObj'      :'CHSGParticleFlowObjects',
+   'PFlowObjHR'    :'CHSGParticleFlowObjects',
+   'PrimVxColl'    :'PrimaryVertices',
+   'Truth'         :'TruthEvents',
    }
 
 prefix = 'METAssocConfig:   '
@@ -69,7 +69,7 @@ def getAssociator(configFlags, config,suffix,doPFlow=False,doRecoil=False,
         tool = CompFactory.getComp("met::METJetAssocTool")('MET_EMJetAssocTool_'+suffix)
     if config.objType == 'PFlowJet':
         tool = CompFactory.getComp("met::METJetAssocTool")('MET_PFlowJetAssocTool_'+suffix)
-    if config.objType == 'PFlowJetHR':
+    if config.objType == 'HadronicRecoil':
         tool = CompFactory.getComp("met::METJetAssocTool")('MET_PFlowJetAssocTool_HR_'+suffix)
     if config.objType == 'CustomJet':
         tool = CompFactory.getComp("met::METJetAssocTool")('MET_CustomJetAssocTool_'+suffix)

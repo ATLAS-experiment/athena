@@ -33,8 +33,8 @@ phi_module    4
 eta_module    5
 phi_index     6
 eta_index     7
-INFO SCT_ID::initialize_from_dictionary 
-TRT_ID               INFO Initialize from dictionary msgSvc 0
+SCT_ID               INFO initialize_from_dictionary
+TRT_ID               INFO Initialize from dictionary
 CscIdHelper          INFO Initializing CSC hash indices ... 
 CscIdHelper          INFO The channel hash max is 61440
 CscIdHelper          INFO Initializing CSC hash indices for finding neighbors ... 

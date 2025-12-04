@@ -242,8 +242,12 @@ namespace DerivationFramework {
       cellsMuonDx(*mu) = std::move(cells_mu_dx);
       cellsMuonDeDx(*mu) = std::move(cells_mu_dedx);
 
+      if (!larEnergyInCones.empty() && lar_energy_in_cones.empty()) {
+        lar_energy_in_cones.resize(larEnergyInCones.size(), 0.F);
+      }
+
       for (unsigned int icone = 0; icone < larEnergyInCones.size(); ++icone) {
-        larEnergyInCones[icone](*mu) = std::move(lar_energy_in_cones[icone]);
+        larEnergyInCones[icone](*mu) = lar_energy_in_cones[icone];
       }
 
     }

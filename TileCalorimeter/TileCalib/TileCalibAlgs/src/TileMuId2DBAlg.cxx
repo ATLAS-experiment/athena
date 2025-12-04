@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //*****************************************************************************
@@ -67,8 +67,11 @@ StatusCode TileMuId2DBAlg::execute()
   else
     ATH_MSG_INFO ( " TileMuId file didn't open succesfully" );
 
+  //coverity[STACK_USE]
   float noise[4][64][24]; memset(noise,0,sizeof(noise));
+  //coverity[STACK_USE]
   int DSP[4][64][40];     memset(DSP,0,sizeof(DSP));
+  //coverity[STACK_USE]
   int Thr[4][64][40];     memset(Thr,0,sizeof(Thr));
 
   // A1, BC1, D0, A2, BC2, A3, BC3, D1, A4, BC4, A5, BC5, D2, A6, BC6, A7, BC7, D3, A8, BC8, A9, BC9, A10

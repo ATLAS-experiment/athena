@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef G4MyPhysicalVolume_h
@@ -12,11 +12,16 @@
 #include "G4String.hh"
 #include "G4VPVParameterisation.hh"
 
+
 class G4MyPhysicalVolume : public G4VPhysicalVolume {
 
 public:
 
-  G4MyPhysicalVolume( G4RotationMatrix *pRot, const G4ThreeVector &tlate, const G4String& pName, G4LogicalVolume* pLogical, G4VPhysicalVolume* pPhysical ) : G4VPhysicalVolume(pRot, tlate, pName, pLogical, pPhysical)
+  G4MyPhysicalVolume( G4RotationMatrix *pRot, 
+    const G4ThreeVector &tlate, 
+    const G4String& pName, 
+    G4LogicalVolume* pLogical, 
+    G4VPhysicalVolume* pPhysical ) : G4VPhysicalVolume(pRot, tlate, pName, pLogical, pPhysical)
   {
     
   }
@@ -61,7 +66,7 @@ public:
 
 private:
 
-  EVolume fTypeOfVolume;
+  EVolume fTypeOfVolume{kNormal};
 
 };
 #endif

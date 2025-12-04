@@ -1,9 +1,12 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ASSOCIATIONUTILS_ALTMUJETOVERLAPTOOL_H
 #define ASSOCIATIONUTILS_ALTMUJETOVERLAPTOOL_H
+
+// Framework includes
+#include "AsgDataHandles/ReadHandleKey.h"
 
 // EDM includes
 #include "xAODMuon/MuonContainer.h"
@@ -106,6 +109,8 @@ namespace ORUtils
       double m_slidingDRMaxCone;
       /// Calculate deltaR using rapidity
       bool m_useRapidity;
+      /// PV Container to use
+      SG::ReadHandleKey<xAOD::VertexContainer> m_PVContName{this, "PVContainerName", "PrimaryVertices", "PV Container to use"};
 
       //
       // Utilities

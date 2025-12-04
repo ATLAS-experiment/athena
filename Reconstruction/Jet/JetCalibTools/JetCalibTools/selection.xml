@@ -6,7 +6,7 @@
   <class name="MuonInJetCorrectionTool" />
 
   <class name="Pileup1DResidualCalibStep" />
-  <class name="EtaMassJESCalibStep" />
+  <class name="EtaJESCalibStep" />
   <class name="SmearingCalibStep" />
   <class name="InSituCalibStep" />
   <class name="GSCCalibStep" />

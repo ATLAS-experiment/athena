@@ -1,6 +1,6 @@
 /*
  * GL2PS, an OpenGL to PostScript Printing Library
- * Copyright (C) 1999-2024 C. Geuzaine
+ * Copyright (C) 1999-2025 C. Geuzaine
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of either:
@@ -203,11 +203,11 @@ typedef struct {
 #endif
 } GL2PScompress;
 
-typedef struct{
-  GL2PSlist* ptrlist;
-  int gsno, fontno, imno, shno, maskshno, trgroupno;
-  int gsobjno, fontobjno, imobjno, shobjno, maskshobjno, trgroupobjno;
-} GL2PSpdfgroup;
+struct GL2PSpdfgroup {
+  GL2PSlist* ptrlist{};
+  int gsno{}, fontno{}, imno{}, shno{}, maskshno{}, trgroupno{};
+  int gsobjno{}, fontobjno{}, imobjno{}, shobjno{}, maskshobjno{}, trgroupobjno{};
+};
 
 typedef struct {
   /* General */

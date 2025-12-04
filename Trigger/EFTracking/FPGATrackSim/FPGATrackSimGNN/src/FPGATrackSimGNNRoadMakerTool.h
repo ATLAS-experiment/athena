@@ -108,11 +108,16 @@ class FPGATrackSimGNNRoadMakerTool : public AthAlgTool
 
 ///////////////////////////////////////////////////////////////////////
 // Helper: Junctoin Aware BFS visitor
+
+using ColorMap = boost::iterator_property_map<
+        std::vector<boost::default_color_type>::iterator,
+        boost::property_map<boost::adjacency_list<boost::vecS, boost::vecS, boost::bidirectionalS>,  boost::vertex_index_t>::type>;
+
 class JunctionAwareVisitor : public boost::default_bfs_visitor
 {
     public:
         JunctionAwareVisitor(int& current, std::vector<int>& in_control_vars, std::vector<std::vector<int>>& in_comps,
-                             std::unordered_map<Vertex, std::vector<Vertex>>& in_pred_map);
+                             std::unordered_map<Vertex, std::vector<Vertex>>& in_pred_map, ColorMap in_cmap);
 
         template <typename VertexT, typename GraphT>
             void discover_vertex(VertexT v, const GraphT& g);
@@ -120,12 +125,16 @@ class JunctionAwareVisitor : public boost::default_bfs_visitor
         template <typename EdgeT, typename GraphT>
             void examine_edge(EdgeT e, const GraphT& g);
 
+        template <typename VertexT, typename GraphT>
+            void process_edges(VertexT src, VertexT tar, const GraphT& g);
+
     private:
         int& m_current_comp;
         std::vector<int>& m_control_vars;
         std::vector<std::vector<int>>& m_components;
         std::unordered_map<Vertex, std::vector<Vertex>>& m_pred_map;
         int m_initial_comp;
+        ColorMap m_color_map;
         int m_n_iter = 1;
 };
 

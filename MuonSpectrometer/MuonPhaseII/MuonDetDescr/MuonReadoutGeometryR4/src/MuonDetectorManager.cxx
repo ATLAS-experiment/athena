@@ -11,7 +11,11 @@
 #include "MuonReadoutGeometryR4/SpectrometerSector.h"
 #include "AthenaBaseComps/AthCheckMacros.h"
 #include <limits>
+#include <cassert>
 
+#ifndef SIMULATIONBASE
+#include "Acts/Utilities/Helpers.hpp"
+#endif
 namespace {
     using ChIndex = Muon::MuonStationIndex::ChIndex;
     template <class T>
@@ -35,16 +39,16 @@ namespace {
     }
 #ifndef SIMULATIONBASE
     inline unsigned msSectorIdHash(const ChIndex chIndex, const int sector, const int side) {
-        constexpr unsigned chIdxMax = static_cast<unsigned>(ChIndex::ChIndexMax);
-        const unsigned secMax = Muon::MuonStationIndex::numberOfSectors()/2;
-        const unsigned stationPhi = (sector + sector%2) / 2 - 1;
-        return stationPhi + static_cast<unsigned>(chIndex)* secMax + (side <0) * chIdxMax * secMax;
+        using namespace Muon::MuonStationIndex;
+        constexpr unsigned chIdxMax = Acts::toUnderlying(StIndex::StIndexMax);
+        constexpr unsigned secMax = Muon::MuonStationIndex::numberOfSectors();
+        return sector +  secMax* Acts::toUnderlying(toStationIndex(chIndex))* secMax + (side <=0) * chIdxMax * secMax;
     }
 #endif
 }
 
 #define WRITE_SETTER(ELE_TYPE, SETTER, STORAGE_VEC)                                 \
-    StatusCode MuonDetectorManager::SETTER(ElementPtr_t<ELE_TYPE> element) {          \
+    StatusCode MuonDetectorManager::SETTER(ElementPtr_t<ELE_TYPE> element) {        \
         if (!element) {                                                             \
             ATH_MSG_FATAL(__func__ << " -- nullptr is given.");                     \
             return StatusCode::FAILURE;                                             \
@@ -150,8 +154,10 @@ unsigned int MuonDetectorManager::getNumTreeTops() const {
     return m_treeTopVector.size();
 }
 PVConstLink MuonDetectorManager::getTreeTop(unsigned int i) const {
+    assert(i < m_treeTopVector.size());
     return m_treeTopVector[i];
 }
+void MuonDetectorManager::clearTreeTops() { m_treeTopVector.clear(); }
 
 void MuonDetectorManager::addTreeTop(PVConstLink pv) {
     m_treeTopVector.push_back(pv);
@@ -175,11 +181,8 @@ std::vector<ActsTrk::DetectorType> MuonDetectorManager::getDetectorTypes() const
         ATH_MSG_DEBUG("Add new sector "<<(*chSector)<<", hash: "<<hash);
         const auto [element, isNew] = m_envelopesById.insert(std::make_pair(hash, chSector.get()));
         if (!isNew) {
-            ATH_MSG_DEBUG("Conflicting hash: "<<hash<<", inserted: "<<element->second->chambers().size()
-                           <<", "<<chSector->chambers().size());
-            if (element->second->chambers().size() < chSector->chambers().size()) {
-                element->second = chSector.get();
-            }
+            THROW_EXCEPTION("Conflicting hash: "<<hash<<", inserted: \n"<<(*element->second)
+                           <<",\n tried to insert:\n "<<(*chSector));
         }
         m_secEnvelopes.push_back(std::move(chSector));
     }
@@ -205,21 +208,16 @@ std::vector<ActsTrk::DetectorType> MuonDetectorManager::getDetectorTypes() const
     }
     /// @brief: Returns all MuonChambers associated with the readout geometry
     MuonSectorSet MuonDetectorManager::getAllSectors() const{
-        MuonSectorSet sectors{};
-        std::ranges::for_each(m_secEnvelopes,
-                [&sectors](const ElementPtr_t<SpectrometerSector>& ms){ 
-                    sectors.insert(ms.get());
-                });
-        return sectors;
+        return Acts::unpackConstSmartPointers(m_secEnvelopes);
     }
     MuonChamberSet MuonDetectorManager::getAllChambers() const {
         MuonChamberSet chambers{};
         std::ranges::for_each(m_secEnvelopes,
                              [&chambers](const ElementPtr_t<SpectrometerSector>& ms){
-                                std::ranges::for_each(ms->chambers(),
-                                    [&chambers](const SpectrometerSector::ChamberPtr& ch){
-                                        chambers.insert(ch.get());
-                                });
+                                std::ranges::transform(ms->chambers(), std::back_inserter(chambers),
+                                                       [](const SpectrometerSector::ChamberPtr& ch){
+                                                            return ch.get();
+                                                       });
                             });
         return chambers;
     }

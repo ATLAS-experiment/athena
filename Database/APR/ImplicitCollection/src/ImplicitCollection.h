@@ -54,42 +54,32 @@ namespace pool {
     ImplicitCollection& operator= (const ImplicitCollection&) = delete;
 
     /// Return openMode
-    virtual ICollection::OpenMode openMode() const; 
+    virtual ICollection::OpenMode openMode() const override;
     
 
-    /** Method that returns collection's iterator
-         Throws POOL exception.
-         @param primaryQuery query string passed to the underlying StorageSvc implementation.
-         @param secondaryQuery parameter currently unused
-         @param options type currently unused
-     */
-    ImplicitCollectionIterator* select( const std::string & primaryQuery = "",
-                                        std::string secondaryQuery = "",
-                                        std::string options = "" );
-
     /// Adds a new row of data to the collection. Will always throw exception.
-    virtual void insertRow( const pool::CollectionRowBuffer& inputRowBuffer );
+    virtual void insertRow( const pool::CollectionRowBuffer& inputRowBuffer ) override;
 
     /// Commits the last changes made to the collection. Will always return true.
-    void commit(bool reopen=false);
+    void commit(bool reopen=false) override;
 
     /// Aborts the last changes made to the collection.  Will always return true.
     void rollback();
 
     ///  no-op at the moment
-    void close();
+    void close() override;
 
     ///  no-op at the moment
-    void open();
+    void open() override;
 
     /// Checks if the collection is open.
-    bool isOpen() const;
+    bool isOpen() const override;
 
     /// Returns an object used to describe the collection properties.
-    virtual const ICollectionDescription& description() const;
+    virtual const ICollectionDescription& description() const override;
 
-    /// Returns an object used to query the collection.
-    virtual ICollectionQuery*                 newQuery();
+    /// Returns a cursor for the collection.
+    virtual ICollectionCursor&         cursor() final override;
 
   protected:
     void open( ICollection::OpenMode mode, ISession* session );

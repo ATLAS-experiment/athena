@@ -16,10 +16,11 @@
 // Framework include files
 #include "StorageSvc/DbTypeInfo.h"
 #include "StorageSvc/DbContainer.h"
-#include "StorageSvc/DbToken.h"
 #include "StorageSvc/DbReflex.h"
 #include "DbContainerObj.h"
+
 #include "CxxUtils/checker_macros.h"
+#include "PersistentDataModel/Token.h"
 
 #include <memory>
 #include <stdexcept>

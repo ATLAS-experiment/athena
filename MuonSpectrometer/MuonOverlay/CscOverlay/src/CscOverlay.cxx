@@ -213,6 +213,8 @@ StatusCode CscOverlay::overlayContainer(const CscRawDataContainer *bkgContainer,
       ATH_MSG_ERROR("Adding overlaid Collection with hashId " << hashId << " failed");
       return StatusCode::FAILURE;
     } else {
+      //intentional release, the outputContainer owns it now.
+      //coverity[RESOURCE_LEAK]
       (void)outputCollection.release();
     }
   }

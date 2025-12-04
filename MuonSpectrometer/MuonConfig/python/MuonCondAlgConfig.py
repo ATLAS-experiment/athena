@@ -15,15 +15,47 @@ def MdtCondDbAlgCfg(flags, **kwargs):
     folders = []
     if not flags.Muon.useMdtDcsData:
         return result ## avoid adding algo to the component accumulator
-    else:
-        kwargs["isOnline"] = False
-        if flags.Input.isMC:
-            kwargs['isData'] = False
-            folders          = ["/MDT/DCS/DROPPEDCH", "/MDT/DCS/PSLVCHSTATE"]
 
-            # TODO: probably will be used in the future but disable for now
-            kwargs['ReadKey_MC_DE'] = ''
-            kwargs['ReadKey_MC_DT'] = ''
+    kwargs["isOnline"] = False
+    if flags.Input.isMC:
+        kwargs['isData'] = False
+        folders          = ["/MDT/DCS/DROPPEDCH", "/MDT/DCS/PSLVCHSTATE"]
+
+        # TODO: probably will be used in the future but disable for now
+        kwargs['ReadKey_MC_DE'] = ''
+        kwargs['ReadKey_MC_DT'] = ''
+
+        # disable the rest
+        kwargs['ReadKey_DataR1_DC'] = ''
+        kwargs['ReadKey_DataR1_HV'] = ''
+        kwargs['ReadKey_DataR1_LV'] = ''
+        kwargs['ReadKey_DataR1_V0'] = ''
+        kwargs['ReadKey_DataR1_V1'] = ''
+        kwargs['ReadKey_DataR2_HV'] = ''
+        kwargs['ReadKey_DataR2_LV'] = ''
+    else:
+        kwargs['isData'] = True
+        kwargs['isRun1'] = flags.IOVDb.DatabaseInstance == 'COMP200'
+        kwargs['useRun1SetPoints'] = False
+        if kwargs['isRun1'] and kwargs['useRun1SetPoints']:
+            folders = ["/MDT/DCS/PSV0SETPOINTS", "/MDT/DCS/PSV1SETPOINTS"]
+
+            # disable the rest
+            kwargs['ReadKey_DataR1_DC'] = ''
+            kwargs['ReadKey_DataR1_HV'] = ''
+            kwargs['ReadKey_DataR1_LV'] = ''
+            kwargs['ReadKey_DataR2_HV'] = ''
+            kwargs['ReadKey_DataR2_LV'] = ''
+        if kwargs['isRun1']:
+            folders = ["/MDT/DCS/PSHVMLSTATE", "/MDT/DCS/PSLVCHSTATE", "/MDT/DCS/DROPPEDCH"]
+
+            # disable the rest
+            kwargs['ReadKey_DataR1_V0'] = ''
+            kwargs['ReadKey_DataR1_V1'] = ''
+            kwargs['ReadKey_DataR2_HV'] = ''
+            kwargs['ReadKey_DataR2_LV'] = ''
+        else:
+            folders = ["/MDT/DCS/HV", "/MDT/DCS/LV"]
 
             # disable the rest
             kwargs['ReadKey_DataR1_DC'] = ''
@@ -31,44 +63,12 @@ def MdtCondDbAlgCfg(flags, **kwargs):
             kwargs['ReadKey_DataR1_LV'] = ''
             kwargs['ReadKey_DataR1_V0'] = ''
             kwargs['ReadKey_DataR1_V1'] = ''
-            kwargs['ReadKey_DataR2_HV'] = ''
-            kwargs['ReadKey_DataR2_LV'] = ''
-        else:
-            kwargs['isData'] = True
-            kwargs['isRun1'] = flags.IOVDb.DatabaseInstance == 'COMP200'
-            kwargs['useRun1SetPoints'] = False
-            if kwargs['isRun1'] and kwargs['useRun1SetPoints']:
-                folders = ["/MDT/DCS/PSV0SETPOINTS", "/MDT/DCS/PSV1SETPOINTS"]
 
-                # disable the rest
-                kwargs['ReadKey_DataR1_DC'] = ''
-                kwargs['ReadKey_DataR1_HV'] = ''
-                kwargs['ReadKey_DataR1_LV'] = ''
-                kwargs['ReadKey_DataR2_HV'] = ''
-                kwargs['ReadKey_DataR2_LV'] = ''
-            if kwargs['isRun1']:
-                folders = ["/MDT/DCS/PSHVMLSTATE", "/MDT/DCS/PSLVCHSTATE", "/MDT/DCS/DROPPEDCH"]
-
-                # disable the rest
-                kwargs['ReadKey_DataR1_V0'] = ''
-                kwargs['ReadKey_DataR1_V1'] = ''
-                kwargs['ReadKey_DataR2_HV'] = ''
-                kwargs['ReadKey_DataR2_LV'] = ''
-            else:
-                folders = ["/MDT/DCS/HV", "/MDT/DCS/LV"]
-
-                # disable the rest
-                kwargs['ReadKey_DataR1_DC'] = ''
-                kwargs['ReadKey_DataR1_HV'] = ''
-                kwargs['ReadKey_DataR1_LV'] = ''
-                kwargs['ReadKey_DataR1_V0'] = ''
-                kwargs['ReadKey_DataR1_V1'] = ''
-
-            # disable MC folders
-            kwargs['ReadKey_MC_DC'] = ''
-            kwargs['ReadKey_MC_DE'] = ''
-            kwargs['ReadKey_MC_DT'] = ''
-            kwargs['ReadKey_MC_NC'] = ''
+        # disable MC folders
+        kwargs['ReadKey_MC_DC'] = ''
+        kwargs['ReadKey_MC_DE'] = ''
+        kwargs['ReadKey_MC_DT'] = ''
+        kwargs['ReadKey_MC_NC'] = ''
     
     alg = CompFactory.MdtCondDbAlg(**kwargs)
     result.merge( addFolders(flags, folders , detDb="DCS_OFL", className='CondAttrListCollection') )

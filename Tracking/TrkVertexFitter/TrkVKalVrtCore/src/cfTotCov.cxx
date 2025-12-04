@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // Calculates COVF(21) - symmetric 6x6 covariance matrix
@@ -38,13 +38,16 @@ int afterFit(VKVertex *vk, double *ader, double * dcv, double * ptot, double * V
     ptot[0] = 0.;
     ptot[1] = 0.;
     ptot[2] = 0.;
-    double constBF = Trk::vkalMagFld::getMagFld(vk->refIterV,CONTROL) * Trk::vkalMagFld::getCnvCst() ;
+
+    double vBx,vBy,vBz,constBF;
+    Trk::vkalMagFld::getMagFld(vk->refIterV[0],vk->refIterV[1],vk->refIterV[2],vBx,vBy,vBz,CONTROL);
 
     for (i = 1; i <= NTRK; ++i) {
         VKTrack *trk=vk->TrackList[i-1].get();
         invR = trk->fitP[2];
 	cth = 1. / tan(trk->fitP[0]);
-	pt = constBF / std::abs(invR);
+	constBF=Trk::vkalMagFld::getEffField(vBx, vBy, vBz, trk->fitP[1], trk->fitP[0]) * Trk::vkalMagFld::getCnvCst();
+	pt = std::abs( constBF / invR);
 	px = pt * cos(trk->fitP[1]);
 	py = pt * sin(trk->fitP[1]);
 	pz = pt * cth;
@@ -93,13 +96,16 @@ int afterFitWithIniPar(VKVertex *vk, double *ader, double * dcv, double * ptot, 
     ptot[0] = 0.;
     ptot[1] = 0.;
     ptot[2] = 0.;
-    double constBF = Trk::vkalMagFld::getMagFld(vk->refIterV,CONTROL) * Trk::vkalMagFld::getCnvCst() ;
+
+    double vBx,vBy,vBz,constBF;
+    Trk::vkalMagFld::getMagFld(vk->refIterV[0],vk->refIterV[1],vk->refIterV[2],vBx,vBy,vBz,CONTROL);
 
     for (i = 1; i <= NTRK; ++i) {
         VKTrack *trk=vk->TrackList[i-1].get();
         invR = trk->iniP[2];
 	cth = 1. / tan(trk->iniP[0]);
-	pt = constBF / std::abs(invR);
+        constBF=Trk::vkalMagFld::getEffField(vBx, vBy, vBz, trk->fitP[1], trk->fitP[0]) * Trk::vkalMagFld::getCnvCst();
+	pt = std::abs( constBF/invR );
 	px = pt * cos(trk->iniP[1]);
 	py = pt * sin(trk->iniP[1]);
 	pz = pt * cth;

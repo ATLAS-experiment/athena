@@ -28,7 +28,7 @@ if __name__ == "__main__":
     from ByteStreamCnvSvc.ByteStreamConfig import ByteStreamReadCfg
     acc.merge(ByteStreamReadCfg(flags))
 
-    from ITkStripsByteStreamCnv.ITkStripRawDataByteStreamCnvConfig import ITkStripRawDataProviderCfg
+    from ITkStripsByteStreamCnv.ITkStripByteStreamCnvConfig import ITkStripRawDataProviderCfg
     acc.merge(ITkStripRawDataProviderCfg(flags))
 
     itemList = [] # items to store in RDO

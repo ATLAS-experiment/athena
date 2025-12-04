@@ -233,6 +233,7 @@ bool Calib::totFitting    (const pix::PixelMapping &pm, const std::string &inTot
                 
                 
                 //For long and ganged pixels (combined)
+                n_fit = 0;
                 do{
                     
                     //size will be modified in the condition..
@@ -246,6 +247,21 @@ bool Calib::totFitting    (const pix::PixelMapping &pm, const std::string &inTot
                     
                     pixLongParams = getParams(functlong.get() ,3 );
                     pixLongParamsQuality = getParams_quality(functlong.get() );
+
+                    if(m_savefile){
+                        
+                        m_wFile->cd();
+                        if( !m_wFile->Get(rodName+"/"+modName+"/TOTfits/"+subdir) ){
+                            m_wFile->mkdir(rodName+"/"+modName+"/TOTfits/"+subdir,rodName);
+                        }
+
+                        m_wFile->cd(rodName+"/"+modName+"/TOTfits/"+subdir);
+                        
+                        graphTitles(graflong, TString(modName+" - "+subdir+" - long+ganged pixels: Fit: "+std::to_string(n_fit)).Data(), "TOT");
+                        
+                        graflong->Write(TString("long_ganged_fit_"+std::to_string(n_fit)), TObject::kWriteDelete);
+                        n_fit++;                     
+                    }
                     
                     //delete the TF1                
                     functlong.reset();
@@ -563,7 +579,7 @@ bool Calib::fillThresholds(const pix::PixelMapping &pm, const std::string &inThr
         }
     } 
 
-    //Will strat looping over the RODs
+    //Will start looping over the RODs
     TIter rodItr = getRodIterator(riThrFile);
     TKey* rodKey;
     while ((rodKey=static_cast<TKey*>(rodItr()))) {

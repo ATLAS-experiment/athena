@@ -2,8 +2,6 @@
 /*
   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
-/*
- */
 /**
  * @file TileEvent/TileMutableDataContainer.h
  * @author scott snyder <snyder@bnl.gov>
@@ -128,6 +126,7 @@ public:
    * @brief Look up a (non-const) collection via hash.
    * @param hash Hash value to find.
    */
+  //coverity[BAD_OVERRIDE]
   Collection* indexFindPtr (IdentifierHash hash);
 
 

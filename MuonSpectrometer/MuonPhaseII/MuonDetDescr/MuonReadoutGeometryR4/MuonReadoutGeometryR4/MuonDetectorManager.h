@@ -86,7 +86,9 @@ class MuonDetectorManager : public GeoVDetectorManager, public AthMessaging {
     PVConstLink getTreeTop(unsigned int i) const override final;
     /** @brief Adds a new GeoModelVolume with its children as a new top node of the muon system */
     void addTreeTop(PVConstLink pv);
-    /// Returns a pointer to the central MuonIdHelperSvc
+    /** @brief Clears all tree tops helds by the manager  */
+    void clearTreeTops();
+    /** @brief Returns a pointer to the central MuonIdHelperSvc */
     const Muon::IMuonIdHelperSvc* idHelperSvc() const;
     
     /// Returns the list of all detector elements
@@ -120,8 +122,8 @@ class MuonDetectorManager : public GeoVDetectorManager, public AthMessaging {
         bool operator()(const SpectrometerSector* a, const SpectrometerSector* b) const;
         bool operator()(const Chamber* a, const Chamber* b) const;
     };
-    using MuonSectorSet = std::set<const SpectrometerSector*, MSEnvelopeSorter>;
-    using MuonChamberSet = std::set<const Chamber*, MSEnvelopeSorter>;
+    using MuonSectorSet = std::vector<const SpectrometerSector*>;
+    using MuonChamberSet = std::vector<const Chamber*>;
     /// @brief: Returns all MuonChambers associated with the readout geometry
     MuonSectorSet getAllSectors() const;
     MuonChamberSet getAllChambers() const;

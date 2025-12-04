@@ -91,6 +91,19 @@ def EGammaLRTCfg(flags):
         LRTEGAugmentationTools.extend([LRTElectronPassECIDS])
 
     # ==================================================
+    # Calo cell recovery tool
+    if flags.Derivation.Egamma.addMissingCellInfo:
+        from DerivationFrameworkCalo.DerivationFrameworkCaloConfig import EgammaCoreCellRecoveryCfg
+
+        CoreCellRecoveryTool = acc.addPublicTool(acc.popToolsAndMerge(
+            EgammaCoreCellRecoveryCfg(flags,
+                                      name            = "LRTCoreCellRecoveryTool",
+                                      SGKey_photons   = "",
+                                      SGKey_electrons = "LRTElectrons")
+        ))
+        LRTEGAugmentationTools.append(CoreCellRecoveryTool)
+
+    # ==================================================
     # Truth Related tools
     if flags.Input.isMC:
         # Decorate Electron with bkg electron type/origin

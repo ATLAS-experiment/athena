@@ -10,7 +10,6 @@
 
 // Framework include files
 #include "RootAuxDynIO/IRootAuxDynIO.h"
-#include "StorageSvc/DbArray.h"
 #include "StorageSvc/DbColumn.h"
 #include "StorageSvc/DbDatabase.h"
 #include "StorageSvc/DbOption.h"
@@ -20,7 +19,6 @@
 
 // Local implementation files
 #include "RNTupleContainer.h"
-#include "RootDataPtr.h"
 #include "RootDatabase.h"
 #include "RNTupleWriterHelper.h"
 
@@ -37,8 +35,6 @@
 using std::string;
 using namespace pool;
 
-static UCharDbArrayAthena s_char_Blob ATLAS_THREAD_SAFE;
-
 
 /// Required here for unique_ptr compilation
 RNTupleContainer::FieldDesc::FieldDesc(const DbColumn& c) : DbColumn(c) {}
@@ -50,12 +46,8 @@ const std::string RNTupleContainer::FieldDesc::typeName() {
   switch (tid) {
     case DbColumn::STRING:
     case DbColumn::LONG_STRING:
-    case DbColumn::NTCHAR:
     case DbColumn::TOKEN:
       return "std::string";
-      break;
-    case BLOB:
-      return "UCharDbArrayAthena";
       break;
     default:
       break;
@@ -131,8 +123,7 @@ DbStatus RNTupleContainer::open( DbDatabase& dbH, const std::string& nam,
       dsc.sgkey = dsc.fieldname;  // remember the original name (usually coming from SG Key)
       for (auto& c : dsc.fieldname)
          if (!std::isalnum(c)) c = '_';
-      if (dsc.typeID() == DbColumn::BLOB or dsc.typeID() == DbColumn::ANY or
-          dsc.typeID() == DbColumn::POINTER) {
+      if (dsc.typeID() == DbColumn::POINTER) {
          if (initObjectFieldDesc(dsc) != Success) return pool::Error;
       }
    }
@@ -268,11 +259,11 @@ DbStatus RNTupleContainer::writeObject( ActionList::value_type& action )
    m_isDirty = true;
    int num_bytes = 0;
    for( auto& dsc : m_fieldDescs ) {
-      RootDataPtr p( action.dataAtOffset( dsc.offset() ) );
+      const void* data = action.dataAtOffset( dsc.offset() );
+      void* ptr ATLAS_THREAD_SAFE = const_cast<void*>( data );
       switch( dsc.typeID() ) {
-       case DbColumn::ANY:
        case DbColumn::POINTER:
-          dsc.object            = p.ptr;
+          dsc.object = ptr;
           try {
              if( dsc.auxdyn_writer ) {
                 auto attrList = dsc.auxdyn_writer->collectAuxAttributes( dsc.fieldname, dsc.object );
@@ -282,38 +273,31 @@ DbStatus RNTupleContainer::writeObject( ActionList::value_type& action )
              }
           } catch(const std::exception& exc) {
              ATH_MSG_ERROR("Dynamic attributes writing error: " << exc.what());
-             p.ptr = nullptr;  // signal an error condition
+             ptr = nullptr;  // signal an error condition
              break;
           }
           dsc.rows_written++;
           break;
-       case DbColumn::BLOB:
-          // MN: BLOBs not really tested
-          s_char_Blob.m_size    = p.blobSize();
-          s_char_Blob.m_buffer  = (unsigned char*)p.blobData();
-          dsc.object            = &s_char_Blob;
-          p.ptr                 = dsc.object;
-          break;
        case DbColumn::STRING:
        case DbColumn::LONG_STRING:
           dsc.str.clear();  // just to be on the safe side
-          // p.ptr is pointing to std::string already
+          // ptr is pointing to std::string already
           break;
-       case DbColumn::NTCHAR:
        case DbColumn::TOKEN:
-          // copy char* to the string buffer dsc.str and make p.ptr point to it
-          dsc.str = p.c_str;
-          p.ptr = &dsc.str;
+          // copy char* to the string buffer dsc.str and make ptr point to it
+          // We read this type back as string
+          dsc.str = static_cast<const char*>( data );
+          ptr = &dsc.str;
           break;
        default:
-          // native types are simply passed in p.ptr
+          // native types are simply passed in ptr
           break;
       }
-      if( !p.ptr ) {
+      if( !ptr ) {
          ATH_MSG_ERROR("[RNTupleContainer] Could not write an object of type " << dsc.typeName());
          throw std::runtime_error(std::string("[RNTupleContainer] Could not write an object of type  ") + dsc.typeName());
       }
-      m_ntupleWriter->addFieldValue( dsc.fieldname, p.ptr );
+      m_ntupleWriter->addFieldValue( dsc.fieldname, ptr );
       // fill the index field
       m_index = action.link.second;
       m_ntupleWriter->addFieldValue( "index_ref", &m_index );
@@ -346,28 +330,22 @@ DbStatus RNTupleContainer::loadObject(void** obj_p, ShapeH, Token::OID_t& oid)
    int numBytes = 0;
    for( auto& dsc : m_fieldDescs ) {
       // read the object
-      RootDataPtr p(*obj_p);
+      void* obj = *obj_p;
       switch( dsc.typeID() ) {
-       case DbColumn::BLOB:
-          {
-             // MN: not sure about this one, implement if needed ever
-             ATH_MSG_FATAL("[RNTupleContainer] - BLOB reading not implemented yet");
-             return pool::Error;
-          }
-       case DbColumn::ANY:
-       case DbColumn::POINTER:
-          // MN: should not need any special action here
-          break;
+       case DbColumn::STRING:
+       case DbColumn::LONG_STRING:
+          // copy as std::string
+          obj = static_cast<char*>(obj) + dsc.offset();
        default:
-          p.c_str += dsc.offset();
+          // Other supported types don't need anything special
           break;
       }
-      if( !p.ptr ) {
+      if( !obj ) {
          // create the object for the user and pass ownership to them
-         p.ptr = dsc.view->GetField().CreateObject<void>().release();
-         *obj_p = p.ptr;
+         obj = dsc.view->GetField().CreateObject<void>().release();
+         *obj_p = obj;
       }
-      dsc.view->BindRawPtr( p.ptr );
+      dsc.view->BindRawPtr( obj );
       // read into the object
       (*dsc.view)(evt_id);
       numBytes += 1;
@@ -464,9 +442,6 @@ DbStatus RNTupleContainer::transAct(Transaction::Action action) {
 
   for (auto& desc : m_fieldDescs) {
     desc.rows_written = 0;
-    if (desc.typeID() == DbColumn::BLOB) {
-      s_char_Blob.release(false);
-    }
   }
   clearDirty();
 

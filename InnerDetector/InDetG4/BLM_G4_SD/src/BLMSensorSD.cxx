@@ -87,6 +87,11 @@ G4bool BLMSensorSD::ProcessHits(G4Step* aStep, G4TouchableHistory* /*ROhist*/)
   if(BEcopyNo == 2009)
     {
       TrackHelper trHelp(aStep->GetTrack());
+      // Temporary solution to get EventContext from a Geant4 thread 
+      EventContext const* eventContext{nullptr};
+      if(auto* eventInfo = AtlasG4EventUserInfo::GetEventUserInfo()){
+        eventContext = &eventInfo->GetEventContext();
+      }
       //primary or not
       int primaren = 0;
       if(trHelp.IsPrimary())
@@ -106,7 +111,8 @@ G4bool BLMSensorSD::ProcessHits(G4Step* aStep, G4TouchableHistory* /*ROhist*/)
       else if(aStep->GetTrack()->GetLogicalVolumeAtVertex()->GetName() == "Pixel::blmWallLog")
         produced_in_diamond = 3;
 
-      m_HitColl->Emplace(lP1, lP2, edep, aStep->GetPreStepPoint()->GetGlobalTime(), trHelp.GenerateParticleLink(),
+      m_HitColl->Emplace(lP1, lP2, edep, aStep->GetPreStepPoint()->GetGlobalTime(),
+                         eventContext ? trHelp.GenerateParticleLink(*eventContext) : trHelp.GenerateParticleLink(),
                          0, 0, myTouch->GetVolume(1)->GetCopyNo()-222, 0, primaren, produced_in_diamond);
     }
   return true;

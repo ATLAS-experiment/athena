@@ -121,31 +121,21 @@ namespace DerivationFramework {
 
     mutable std::once_flag m_Seen;
     unsigned short m_nDecor = 0;
-    const std::vector<xAOD::CaloCluster::MomentType> m_vecM{
-      xAOD::CaloCluster::CENTER_X,
-      xAOD::CaloCluster::CENTER_Y,
-      xAOD::CaloCluster::CENTER_Z,
-      xAOD::CaloCluster::SECOND_LAMBDA,
-      xAOD::CaloCluster::LATERAL,
-      xAOD::CaloCluster::LONGITUDINAL,
-      xAOD::CaloCluster::ENG_FRAC_MAX,
-      xAOD::CaloCluster::SECOND_R,
-      xAOD::CaloCluster::CENTER_LAMBDA,
-      xAOD::CaloCluster::SECOND_ENG_DENS,
-      xAOD::CaloCluster::SIGNIFICANCE
+
+    /** @brief The cluster moments to be added */
+    Gaudi::Property<std::vector<int>> m_vecM{
+      this,
+      "Moments",
+      {},
+      "The moments to be added"
     };
-    const std::vector<std::string> m_vecMName{
-      "CENTER_X",
-      "CENTER_Y",
-      "CENTER_Z",
-      "SECOND_LAMBDA",
-      "LATERAL",
-      "LONGITUDINAL",
-      "ENG_FRAC_MAX",
-      "SECOND_R",
-      "CENTER_LAMBDA",
-      "SECOND_ENG_DENS",
-      "SIGNIFICANCE"
+
+    /** @brief Name of the cluster moments to be added */
+    Gaudi::Property<std::vector<std::string>> m_vecMName{
+      this,
+      "MomentNames",
+      {},
+      "The names of the moments to be added"
     };
 
     ToolHandleArray<CaloClusterCollectionProcessor> m_clusterCorrectionTools {

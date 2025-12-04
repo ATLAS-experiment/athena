@@ -247,7 +247,7 @@ def defineInputsMenu():
             ('gXENC70',1), ('gXENC100',1),
             ('gXEJWOJ60',1), ('gXEJWOJ70',1), ('gXEJWOJ80',1), ('gXEJWOJ100',1), ('gXEJWOJ110',1), ('gXEJWOJ120',1), ('gXEJWOJ500',1),
             # gTE
-            ('gTE3',1), ('gTE5',1), ('gTE10',1), ('gTE200',1),
+            ('gTE5',1), ('gTE10',1), ('gTE200',1), ('gTE280',1), 
             # gESPRESSO
             ('gESPRESSO280', 1),
 
@@ -377,7 +377,7 @@ def defineInputsMenu():
                     TopoMenuDef( '0DETA24-eTAU30s2-eTAU12s2',             outputbits = 11 ),
                     TopoMenuDef( '0DETA24-4DPHI99-eTAU30ab-eTAU12ab',     outputbits = 12 ),
                     TopoMenuDef( '23DPHI32-2eEM1s',                       outputbits = 13 ), # HI, ATR-29784
-                    TopoMenuDef( '23DPHI32-2eTAU1s',                      outputbits = 14 ), # HI, ATR-29784
+                    TopoMenuDef( '26DPHI32-2eTAU1s',                      outputbits = 14 ), # HI, ATR-29784
                     TopoMenuDef( '23DPHI32-2jTAU1s',                      outputbits = 15 ), # HI, ATR-29784
                 ]
             },

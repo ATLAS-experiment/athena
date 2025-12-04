@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TileDigitsMonitorAlgorithm.h"
@@ -541,7 +541,7 @@ void TileDigitsMonitorAlgorithm::checkBCID(const std::vector<std::reference_wrap
       auto monBCID  = Monitored::Scalar<int>("BCID_" + std::to_string(dmu), dmuBCID);
       fill(m_tools[m_bcidGroups[partition][drawer][gain]], monBCID);
 
-      if ((dmuBCID == rodBCID) || (dmuBCID == rodBCID - 1)
+      if ((dmuBCID == rodBCID) || (rodBCID > 0 && dmuBCID == rodBCID - 1)
           || ((rodBCID == 0) && ((dmuBCID == 3563) || (dmuBCID == 3564)))) {
 
         auto monBCIDErr = Monitored::Scalar<int>("BCID_err_" + std::to_string(dmu), 1);

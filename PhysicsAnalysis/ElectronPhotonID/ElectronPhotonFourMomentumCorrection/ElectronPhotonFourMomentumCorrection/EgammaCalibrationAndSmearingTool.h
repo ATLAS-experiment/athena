@@ -21,6 +21,7 @@
 #include "ColumnarCore/ColumnAccessor.h"
 #include "ColumnarCluster/ClusterHelpers.h"
 #include "ColumnarCore/LinkColumn.h"
+#include "ColumnarCore/MomentumAccessors.h"
 #include "ColumnarCore/VectorColumn.h"
 #include "ColumnarEgamma/EgammaHelpers.h"
 #include "ColumnarEventInfo/EventInfoHelpers.h"
@@ -455,13 +456,12 @@ public:
     Accessors(columnar::ColumnarTool<>& tool) : columnar::ColumnarTool<>(&tool) {}
 
     columnar::MutableEgammaAccessor<columnar::ObjectColumn> m_egammaHandle {*this, "EGamma"};
-    columnar::EgammaHelpers::EnergyAccessor<> eAcc {*this};
+    columnar::MomentumAccessors<columnar::ContainerId::egamma> momAcc;
     columnar::EgammaAccessor<columnar::RetypeColumn<double,float>> ptAcc {*this, "pt"};
     columnar::EgammaDecorator<float> ptOutDec {*this, "ptOut", {.replacesColumn = "pt"}};
     columnar::EgammaDecorator<float> decEmva;
     columnar::EgammaAccessor<columnar::RetypeColumn<double,float>> etaAcc {*this, "eta"};
     columnar::EgammaAccessor<columnar::RetypeColumn<double,float>> phiAcc {*this, "phi"};
-    columnar::EgammaAccessor<columnar::RetypeColumn<double,float>> mAcc {*this, "m"};
     columnar::EgammaAccessor<uint16_t> authorAcc {*this, "author"};
     columnar::EgammaAccessor<std::vector<columnar::OptTrackId>> electronTrackAcc;
     columnar::EgammaAccessor<std::vector<columnar::OptVertexId>> photonVertexAcc;
@@ -477,7 +477,7 @@ public:
     columnar::ClusterHelpers::EtaBEAccessor<> clusterEtaBEAcc {*this};
     columnar::ClusterHelpers::EtaCaloAccessor<> etaCaloAcc {*this};
     columnar::ClusterHelpers::PhiCaloAccessor<> phiCaloAcc {*this};
-    columnar::EventInfoAccessor<columnar::ObjectColumn> m_eventHandle {*this, "EventInfo"};
+    columnar::EventInfoAccessor<columnar::ObjectColumn> m_eventHandle {*this, "EventInfo", {.addMTDependency=true}};
     columnar::EventInfoHelpers::EventTypeAccessor<> eventTypeAcc {*this};
     columnar::EventInfoAccessor<uint32_t> runNumberAcc {*this, "runNumber"};
     columnar::EventInfoAccessor<uint64_t> eventNumberAcc {*this, "eventNumber"};

@@ -47,6 +47,7 @@ public:
   CaloCellList(const CaloDetDescrManager& mgr, const CaloCellContainer& cell_container);
   CaloCellList(const CaloDetDescrManager* mgr, const CaloCellContainer* cell_container, const CaloCell_ID::SUBCALO caloNum);
   CaloCellList(const CaloDetDescrManager* mgr, const CaloCellContainer* cell_container, const std::vector<CaloCell_ID::SUBCALO>& caloNums);
+  CaloCellList(const CaloSuperCellDetDescrManager* mgr, const CaloCellContainer* cell_container);
 
   ~CaloCellList() = default;
 
@@ -76,7 +77,7 @@ private:
                 CaloCell_ID::CaloSample sam = CaloCell_ID::Unknown);
 
   const CaloCellContainer& m_cellcont;
-  const CaloDetDescrManager& m_mgr;
+  const CaloDetDescrManager_Base& m_mgr;
   std::vector<CaloCell_ID::SUBCALO> m_caloNums;
   vector_type m_theCellVector;
   double m_energy;

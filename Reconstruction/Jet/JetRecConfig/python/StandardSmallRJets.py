@@ -196,6 +196,14 @@ AntiKt4EMTopoNoPtCut = JetDefinition("AntiKt",0.4,cst.EMTopoOrigin,
                                      lock = True
 )
 
+AntiKt4MLTopo = JetDefinition("AntiKt",0.4,cst.MLTopoOrigin,
+                                     infix = "",
+                                     ghostdefs = standardghosts+flavourghosts,
+                                     modifiers = ("CaloEnergies", "Sort")+("Filter:1",)+truthmods+standardmods+clustermods+("JetPtAssociation","jetiso",),
+                                     ptmin = 1,
+                                     lock = True
+)
+
 AntiKt4UFOCSSKLowPt = JetDefinition("AntiKt",0.4,cst.UFOCSSK,
                                     infix = "LowPt",
                                     ghostdefs = standardghosts+flavourghosts,

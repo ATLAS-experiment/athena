@@ -303,18 +303,18 @@ LVL1::TrigT1MBTS::execute()
    unsigned int cableWordC = single_triggers_C + (triggersEBC<<m_cablestart_c);
 
    // Record the CTP trigger word in StoreGate.
-   MbtsCTP *mbtsACTP = new MbtsCTP(cableWordA);
-   MbtsCTP *mbtsCCTP = new MbtsCTP(cableWordC);
+   auto mbtsACTP = std::make_unique<MbtsCTP>(cableWordA);
+   auto mbtsCCTP = std::make_unique<MbtsCTP>(cableWordC);
 
    // Methods used in CTPsimulation are added for testing
    ATH_MSG_DEBUG( " (in CTPSimulation) mbtsA cable word 0 is: 0x" << std::hex << std::setw( 8 ) << std::setfill( '0' ) << mbtsACTP->cableWord0()  );
-   ATH_MSG_DEBUG( " (in CTPSimulation) Mult of mbtsA is: "<< static_cast<int>( (mbtsACTP->cableWord0() >> m_cablestart_a) & static_cast<unsigned int>( pow( 2, 3 ) - 1 ) )  );
+   ATH_MSG_DEBUG( " (in CTPSimulation) Mult of mbtsA is: "<< static_cast<int>( (mbtsACTP->cableWord0() >> m_cablestart_a) & static_cast<unsigned int>( std::pow( 2, 3 ) - 1 ) )  );
    ATH_MSG_DEBUG( " mbtsC cable " << mbtsCCTP->print()  );
    ATH_MSG_DEBUG( " (in CTPSimulation) mbtsC cable word 0 is: 0x" << std::hex << std::setw( 8 ) << std::setfill( '0' ) << mbtsCCTP->cableWord0()  );
-   ATH_MSG_DEBUG( " (in CTPSimulation) Mult of mbtsC is: "<< static_cast<int>( (mbtsCCTP->cableWord0() >> m_cablestart_c) & static_cast<unsigned int>( pow( 2, 3 ) - 1 ) )  );
+   ATH_MSG_DEBUG( " (in CTPSimulation) Mult of mbtsC is: "<< static_cast<int>( (mbtsCCTP->cableWord0() >> m_cablestart_c) & static_cast<unsigned int>( std::pow( 2, 3 ) - 1 ) )  );
 
-   ATH_CHECK(evtStore()->record(mbtsACTP, DEFAULT_MbtsACTPLocation, false));
-   ATH_CHECK(evtStore()->record(mbtsCCTP, DEFAULT_MbtsCCTPLocation, false));
+   ATH_CHECK(evtStore()->record(std::move(mbtsACTP), DEFAULT_MbtsACTPLocation, false));
+   ATH_CHECK(evtStore()->record(std::move(mbtsCCTP), DEFAULT_MbtsCCTPLocation, false));
    
    return StatusCode::SUCCESS;
 }

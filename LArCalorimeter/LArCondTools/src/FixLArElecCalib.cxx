@@ -2000,7 +2000,6 @@ StatusCode FixLArElecCalib::fix12(const LArOnOffIdMapping *cabling) {
 
    // Fix12 is for filling the  MinBiasRMS and MinBiasAverage  from ntuple
 
-   // Will try to regenerate from scratch
    // Create new container 
    std::unique_ptr<LArMinBiasMC> minbias = std::make_unique<LArMinBiasMC>();
    ATH_CHECK( minbias->setGroupingType("Single", msg()) );
@@ -2015,14 +2014,15 @@ StatusCode FixLArElecCalib::fix12(const LArOnOffIdMapping *cabling) {
      ATH_MSG_ERROR("Can't read tree m_tree");
      return StatusCode::FAILURE;
    }
+   const int     nindex=1833;
    int           ncell;
-   int           identifier[2862];   
-   int           layer[2862];   
-   int           region[2862]; 
-   int           ieta[2862];   
-   float         eta[2862];   
-   double        average[2862];   
-   double        rms[2862];   
+   int           identifier[nindex];   
+   int           layer[nindex];   
+   int           region[nindex]; 
+   int           ieta[nindex];   
+   float         eta[nindex];   
+   double        average[nindex];   
+   double        rms[nindex];   
    TBranch        *b_ncell;   //!
    TBranch        *b_identifier;   //!
    TBranch        *b_layer;   //!
@@ -2042,7 +2042,7 @@ StatusCode FixLArElecCalib::fix12(const LArOnOffIdMapping *cabling) {
    tin->SetBranchAddress("rms", rms, &b_rms);
    tin->GetEntry(0);
 
-
+   if(ncell>nindex) ncell=nindex;
    for(int icell=0; icell<ncell; ++icell)  {
 
        Identifier32 id32(identifier[icell]); 
@@ -2058,10 +2058,12 @@ StatusCode FixLArElecCalib::fix12(const LArOnOffIdMapping *cabling) {
 
      ATH_MSG_INFO ( "Stored container " << minbias->totalNumberOfConditions() << " conditions, key LArMinBias " );
      ATH_CHECK( detStore()->record(std::move(minbias),"LArMinBias") );
-     ATH_CHECK( detStore()->symLink(minbias.get(), dynamic_cast<ILArMinBias*>(minbias.get())) );
+     //ATH_CHECK( detStore()->symLink(minbias.get(), dynamic_cast<ILArMinBias*>(minbias.get())) );
+     ATH_CHECK( detStore()->symLink(ClassID_traits<LArMinBiasMC>::ID(),"LArMinBias",ClassID_traits<ILArMinBias>::ID()));
      ATH_MSG_INFO ( "Stored container " << minbias_av->totalNumberOfConditions() << " conditions, key LArMinBiasAverage " );
      ATH_CHECK( detStore()->record(std::move(minbias_av),"LArMinBiasAverage") );
-     ATH_CHECK( detStore()->symLink(minbias_av.get(), dynamic_cast<ILArMinBiasAverage*>(minbias_av.get())) );
+     //ATH_CHECK( detStore()->symLink(minbias_av.get(), dynamic_cast<ILArMinBiasAverage*>(minbias_av.get())) );
+     ATH_CHECK( detStore()->symLink(ClassID_traits<LArMinBiasAverageMC>::ID(),"LArMinBiasAverage",ClassID_traits<ILArMinBiasAverage>::ID()));
 
      return StatusCode::SUCCESS;
 }

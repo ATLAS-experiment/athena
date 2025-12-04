@@ -148,9 +148,17 @@ def EGammaCookieCutClusterToolCfg(flags, name = 'EGCookieCutTool', **kwargs):
     kwargs.setdefault('StoreCookedMoments', False)
     kwargs.setdefault('StoreInputMoments', False)
     electronKey = kwargs.setdefault("SGKey_electrons", flags.Egamma.Keys.Output.ForwardElectrons)
-    # TODO Need to keep this in sync with EGammaCookieCutClusterTool::m_vecMName (make into a property?)
-    momentNames = ["SECOND_LAMBDA", "LATERAL", "LONGITUDINAL", "ENG_FRAC_MAX",
-                   "SECOND_R", "CENTER_LAMBDA", "SECOND_ENG_DENS", "SIGNIFICANCE"]
+    momentNames = [
+        "CENTER_X", "CENTER_Y", "CENTER_Z",
+        "SECOND_LAMBDA", "LATERAL", "LONGITUDINAL", "ENG_FRAC_MAX",
+        "SECOND_R", "CENTER_LAMBDA", "SECOND_ENG_DENS", "SIGNIFICANCE" ]
+    import ROOT
+    moments = [
+        ROOT.xAOD.CaloCluster.CENTER_X, ROOT.xAOD.CaloCluster.CENTER_Y, ROOT.xAOD.CaloCluster.CENTER_Z,
+        ROOT.xAOD.CaloCluster.SECOND_LAMBDA, ROOT.xAOD.CaloCluster.LATERAL, ROOT.xAOD.CaloCluster.LONGITUDINAL, ROOT.xAOD.CaloCluster.ENG_FRAC_MAX,
+        ROOT.xAOD.CaloCluster.SECOND_R, ROOT.xAOD.CaloCluster.CENTER_LAMBDA, ROOT.xAOD.CaloCluster.SECOND_ENG_DENS, ROOT.xAOD.CaloCluster.SIGNIFICANCE ]
+    kwargs.setdefault("MomentNames", momentNames)
+    kwargs.setdefault("Moments", moments)
     cookedMoments = [ "cookiecut" + moment for moment in momentNames] if kwargs['StoreCookedMoments'] else []
     originalMoments = [ "original" + moment for moment in momentNames] if kwargs['StoreInputMoments'] else []
     electronDecorations = [i for sublist in zip(cookedMoments, originalMoments) for i in sublist]

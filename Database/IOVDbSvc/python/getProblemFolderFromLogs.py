@@ -26,10 +26,15 @@ if __name__ == "__main__":
                         help='Out file for logs (default: log.out)')
     parser.add_argument('--path', default='cool_crest_compare',
                         help='Path to compare (default: cool_crest_compare)')
+    parser.add_argument('--debug', default='',
+                        help='Set debug output')
 
     args = parser.parse_args()
     server = "{0}:{1}".format(args.host, args.port)
     fOut="log.out"
+    isDebug=False
+    if args.debug:
+        isDebug=bool(args.debug)
     appPath=args.path
     if args.out:
       fOut=args.out
@@ -37,6 +42,7 @@ if __name__ == "__main__":
       print("Error: input file is not exists")
       sys.exit()
     data = {}
+    st=""
     # Parce athena log and found all folders and other parameters for compare data
     with open(args.input) as inp_file:
         while line := inp_file.readline():
@@ -64,16 +70,17 @@ if __name__ == "__main__":
                         folder = folder[:folder.find('\'')]
                     el['db']=db.strip()
                     data[folder.strip()]=el
-            if line.rstrip().find('INFO Retrieved object: folder ')>0:
-                st = line.rstrip()[line.rstrip().find('INFO Retrieved object: folder '):]
+            if line.rstrip().find('Retrieved object: folder ')>0:
+                st = line.rstrip()[line.rstrip().find('Retrieved object: folder '):]
                 st = st[st.find('/'):]
                 sFolder = st[:st.find(' ')]
                 st= st[st.find('IOV ')+4:]
                 st=st[:st.find(' ')]
                 el = data[sFolder.strip()]
                 el['timestamp']=st
-                data[sFolder]=el
-    print(data)
+                data[sFolder.strip()]=el
+    if isDebug:
+        print(data)
     print("List of commands for compare:")
     # run compare
     for elem in data.keys():
@@ -90,12 +97,14 @@ if __name__ == "__main__":
           print('Compare folder name:', elem, file=f)
           print(command,file=f)
         os.system(command)
-    # parse output of compare folders (CREST and COOL)    
+    #parse output of compare folders (CREST and COOL)    
     print("Problem folders:")
     curFolder=""
     coolProblem=[]
     crestProblem=[]
     difFolder=[]
+    correctFolder=[]
+    allFolder=[]
     with open(fOut) as log_file:
         while line := log_file.readline():
             if line.find('Compare folder name:')>-1:
@@ -106,7 +115,9 @@ if __name__ == "__main__":
                     curFolder=""
                 curFolder=line.rstrip()[line.rstrip().find('Compare folder name:')+20:]
                 curFolder=curFolder.lstrip()
+                allFolder.append(curFolder)
             if line.rstrip().find('is the same in COOL and CREST')>0:
+                correctFolder.append(curFolder)
                 curFolder=""
             if line.find('CREST output file problem')>-1:
                 if curFolder != "":
@@ -122,18 +133,17 @@ if __name__ == "__main__":
                 command = appPath + ' -g '+ args.gtag+' -G '+args.gcooltag+ ' -f '+ fld + ' -c '+ js['db']+' -t ' + js['timestamp']+' -C '+server
                 print(command)
                 curFolder=""
-            if line.rstrip().find('NO IOVs retrieved for the folder')>0:
-                fld = line.rstrip()[(line.rstrip().find('NO IOVs retrieved for the folder')+32):]
-                fld=fld.lstrip()
-                js=data[fld]
-                command = appPath + ' -g '+ args.gtag+' -G '+args.gcooltag+ ' -f '+ fld + ' -c '+ js['db']+' -t ' + js['timestamp']+' -C '+server
-                print(command)
-                curFolder=""
-    print("Total number of folders:",len(data)," Different data:",len(difFolder)," Cool problem:",len(coolProblem)," Crest problem:",len(crestProblem))
+    print("Total number of folders in logs:",len(data)," Total number of folders which compare (used):",len(allFolder)," Correct folders:",len(correctFolder)," Different folders:",len(difFolder)," COOL problems:",len(coolProblem)," CREST problems:",len(crestProblem))
     if len(difFolder)>0:
         print("Different data:",difFolder)
     if len(coolProblem)>0:
-        print("Different data:",coolProblem)
+        print("COOL problem folders:",coolProblem)
     if len(crestProblem)>0:
-        print("Different data:",crestProblem)
+        print("CREST problem folders:",crestProblem)
+    if len(correctFolder)>0 and isDebug:
+        print("Correct folders:",correctFolder)
+    if len(allFolder)>0 and isDebug:
+        print("Full folder list:",allFolder)
+    if isDebug:
+        print("Total list folders in log:",list(data.keys()))
 

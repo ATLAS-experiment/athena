@@ -29,6 +29,8 @@ if __name__=="__main__":
                                             action='store_true')
     parser.add_argument("--dumpObjFiles", help="If set to true, the spacepoints in the bucket are saved to disk",
                         default=False, action='store_true')
+    parser.add_argument("--noPerfMon", help="If set to true, disable performance monitoring.",
+                                              default=False, action='store_true')
     parser.set_defaults(nEvents = -1)
   
     parser.set_defaults(outRootFile="MsTrkTester.root")
@@ -37,7 +39,7 @@ if __name__=="__main__":
     args = parser.parse_args()
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
     flags = initConfigFlags()
-    flags.PerfMon.doFullMonMT = True
+    flags.PerfMon.doFullMonMT = not args.noPerfMon
     flags.Muon.doFastMMDigitization = False
     flags.Acts.TrackingGeometry.UseBlueprint = False
 

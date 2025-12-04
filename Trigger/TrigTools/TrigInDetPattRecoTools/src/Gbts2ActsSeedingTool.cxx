@@ -131,7 +131,8 @@ StatusCode Gbts2ActsSeedingTool::createSeeds(const EventContext& ctx, const Acts
       
       //add seed to output
 	
-      seedContainer.push_back(std::get<2>(seed));
+      auto newseed = seedContainer.push_back(std::get<2>(seed));
+      newseed.quality() = std::get<0>(seed);
       
     }
 

@@ -1,13 +1,13 @@
 # Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 from AthenaCommon import Logging
-from ..powheg_V2 import PowhegV2
+from ..powheg_RES import PowhegRES
 
 ## Get handle to Athena logging
 logger = Logging.logging.getLogger("PowhegControl")
 
 
-class Wc(PowhegV2):
+class Wc(PowhegRES):
     """! Default Powheg configuration for single W-boson production plus one jet.
 
     Create a configurable object with all applicable Powheg options.
@@ -159,6 +159,8 @@ class Wc(PowhegV2):
         self.add_keyword("xupbound", 6)
         self.add_keyword("Zmass")
         self.add_keyword("Zwidth")
+        self.add_keyword("wmasslow")
+        self.add_keyword("wmasshigh")
 
     def validate_decays(self):
         """! Validate idvecbos and vdecaymode keywords."""

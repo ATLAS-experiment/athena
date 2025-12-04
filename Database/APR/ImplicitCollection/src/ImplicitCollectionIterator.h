@@ -5,7 +5,6 @@
 #ifndef IMPLICITCOLLECTION_COLLECTIONITERATOR_H
 #define IMPLICITCOLLECTION_COLLECTIONITERATOR_H
 
-#include "CollectionBase/ICollectionQuery.h"
 #include "CollectionBase/ICollectionCursor.h"
 #include "CollectionBase/CollectionRowBuffer.h"
 
@@ -27,23 +26,14 @@ namespace pool {
     * @class ImplicitCollectionIterator ImplicitCollectionIterator.h Implicitcollection/ImplicitCollectionIterator.h
     *
     * Iterator over an implicit collection.
-    * Single class implementing both Query and Cursor interfaces
-    * to simplify backward compatibility
+    * Class implementing Cursor interface
     */
-   class ATLAS_NOT_THREAD_SAFE ImplicitCollectionIterator : public ICollectionQuery,
-                                                            public ICollectionCursor
+   class ATLAS_NOT_THREAD_SAFE ImplicitCollectionIterator : public ICollectionCursor
    {
   public:
      /// Constructor
      ImplicitCollectionIterator(IContainer& container,
                                 const pool::ICollectionDescription& description );
-
-     // ------------------- Query interface
-     
-     /// Processes the query and returns a cursor over the query result.
-     /// this method returns self
-     virtual pool::ICollectionCursor& execute();
-
 
      // ------------------- Cursor interface 
 
@@ -80,10 +70,6 @@ namespace pool {
 
      // ------------------- Unimplemented methods
 
-     virtual void selectAllAttributes() {}
-     virtual void selectAllTokens() {}
-     virtual void selectAll() {}
-
      virtual void close() {}
 
 
@@ -98,5 +84,3 @@ namespace pool {
 }
 
 #endif
-
-

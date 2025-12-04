@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "./DataStructs.h"
@@ -35,7 +35,7 @@ StatusCode TrigL1FexJetMonitorAlgorithm::fillHistograms(const EventContext& ctx)
     return sc;
   }
   
-  auto groupTool = getGroup(m_groupName);
+  const auto &groupTool = getGroup(m_groupName);
     
   for (const auto& jd : jetData) {
     Monitored::Scalar<float> et{jd.m_et_label, jd.m_et};

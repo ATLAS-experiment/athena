@@ -67,8 +67,7 @@ StatusCode LArBarrelPresamplerCalculator::initialize()
     {
       const double Birks_LAr_density = 1.396;
       m_birksLaw = new LArG4BirksLaw(Birks_LAr_density,m_Birksk);
-      ATH_MSG_DEBUG(" LArBarrelPresamplerCalculator: Birks' law ON ");
-      ATH_MSG_DEBUG(" LArBarrelPresamplerCalculator:   parameter k    " << m_birksLaw->k());
+      ATH_MSG_INFO("Use Birks_LAr_density="<<Birks_LAr_density<<", Birksk="<<(double)m_Birksk);
     }
   else
     {

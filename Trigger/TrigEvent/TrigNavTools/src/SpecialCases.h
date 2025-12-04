@@ -22,7 +22,8 @@ namespace SpecialCases {
       "HLT_2mu6_bUpsimumu",
       "HLT_2mu6_bUpsimumu_delayed",
       // below: excluded for the further investigation
-      "HLT_mu11_nomucomb_2mu4noL1_nscan03_L1MU11_2MU6"
+      "HLT_mu11_nomucomb_2mu4noL1_nscan03_L1MU11_2MU6",
+      "HLT_mu11_nomucomb_2mu4noL1_nscan03_L1MU11_2MU6_bTau"
   };
 
   // config hacks patterns

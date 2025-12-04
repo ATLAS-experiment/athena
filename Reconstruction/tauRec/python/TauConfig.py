@@ -30,16 +30,17 @@ def TauBuildAlgCfg(flags):
         tools.append( result.popToolsAndMerge(tauTools.TauVertexFinderCfg(flags)) )
 
     tools.append( result.popToolsAndMerge(tauTools.TauAxisCfg(flags)) )
+
+    # track classification + association 
     tools.append( result.popToolsAndMerge(tauTools.TauTrackFinderCfg(flags)) )
-
-    tools.append( result.popToolsAndMerge(tauTools.TauClusterFinderCfg(flags)) )
-    tools.append( result.popToolsAndMerge(tauTools.TauVertexedClusterDecoratorCfg(flags)) )
-
     if flags.Beam.Type is not BeamType.Cosmics and flags.Tau.doRNNTrackClass:
         tools.append( result.popToolsAndMerge(tauTools.TauTrackRNNClassifierCfg(flags)) )
 
-    tools.append( result.popToolsAndMerge(tauTools.TauShotFinderCfg(flags)) )
+    # cluster association + vertex correction
+    tools.append( result.popToolsAndMerge(tauTools.TauClusterFinderCfg(flags)) )
+    tools.append( result.popToolsAndMerge(tauTools.TauVertexedClusterDecoratorCfg(flags)) )
 
+    # this needs to go before the TauCaloAlgCfg
     if flags.Tau.doPi0Clus:
         tools.append( result.popToolsAndMerge(tauTools.Pi0ClusterFinderCfg(flags)) )
 
@@ -49,9 +50,6 @@ def TauBuildAlgCfg(flags):
                                Key_jetInputContainer          = flags.Tau.ActiveConfig.SeedJetCollection,
                                Key_tauOutputContainer         = flags.Tau.ActiveConfig.TauJets_tmp,
                                Key_tauTrackOutputContainer    = flags.Tau.ActiveConfig.TauTracks,
-                               Key_tauShotClusOutputContainer = flags.Tau.ActiveConfig.TauShotClusters,
-                               Key_tauShotClusLinkContainer   = flags.Tau.ActiveConfig.TauShotClustersLinks,
-                               Key_tauShotPFOOutputContainer  = flags.Tau.ActiveConfig.TauShotPFOs,
                                Key_tauPi0CellOutputContainer  = flags.Tau.ActiveConfig.TauCommonPi0Cells,
                                MaxEta                         = flags.Tau.SeedMaxEta,
                                MinPt                          = flags.Tau.SeedMinPt,
@@ -124,7 +122,7 @@ def TauRunnerAlgCfg(flags):
     import tauRec.TauToolHolder as tauTools
 
     tools = []
-
+    tools.append( result.popToolsAndMerge(tauTools.TauShotFinderCfg(flags)) )
     tools.append( result.popToolsAndMerge(tauTools.Pi0ClusterCreatorCfg(flags)) )
     tools.append( result.popToolsAndMerge(tauTools.Pi0ClusterScalerCfg(flags)) )
     tools.append( result.popToolsAndMerge(tauTools.Pi0ScoreCalculatorCfg(flags)) )
@@ -181,6 +179,9 @@ def TauRunnerAlgCfg(flags):
                              Key_chargedPFOOutputContainer  = flags.Tau.ActiveConfig.TauChargedPFOs,
                              Key_vertexOutputContainer      = flags.Tau.ActiveConfig.TauSecondaryVertices,
                              Key_pi0Container               = flags.Tau.ActiveConfig.TauFinalPi0s,
+                             Key_tauShotClusOutputContainer = flags.Tau.ActiveConfig.TauShotClusters,
+                             Key_tauShotClusLinkContainer   = flags.Tau.ActiveConfig.TauShotClustersLinks,
+                             Key_tauShotPFOOutputContainer  = flags.Tau.ActiveConfig.TauShotPFOs,
                              Tools                          = tools)
 
     result.addEventAlgo(RunnerAlg)
@@ -219,13 +220,13 @@ def TauOutputCfg(flags):
 
     # AOD specific
     # remove GlobalFELinks - these are links between FlowElement (FE) containers created in jet finding and taus. Since these transient FE containers are not in the AOD, we should not write out these links.
-    removeAODvars = "-VertexedClusters.-mu.-nVtxPU.-ABS_ETA_LEAD_TRACK.-TAU_ABSDELTAPHI.-TAU_ABSDELTAETA.-absipSigLeadTrk.-passThinning.-chargedGlobalFELinks.-neutralGlobalFELinks"
+    removeAODvars = "-VertexedClusters.-shotCells.-mu.-nVtxPU.-ABS_ETA_LEAD_TRACK.-TAU_ABSDELTAPHI.-TAU_ABSDELTAETA.-absipSigLeadTrk.-passThinning.-chargedGlobalFELinks.-neutralGlobalFELinks"
     if not flags.Tau.ActiveConfig.inTauEleRM:
         removeAODvars += f".-{flags.Tau.GNTauScoreName[0]}.-{flags.Tau.GNTauTransScoreName[0]}.-{flags.Tau.GNTauDecorWPNames[0][0]}.-{flags.Tau.GNTauDecorWPNames[0][1]}.-{flags.Tau.GNTauDecorWPNames[0][2]}.-{flags.Tau.GNTauDecorWPNames[0][3]}.-GNTauProbTau.-GNTauProbJet"
     TauAODList += [ "xAOD::TauJetAuxContainer#{}Aux.{}".format(flags.Tau.ActiveConfig.TauJets, removeAODvars) ]
 
     # ESD specific
-    removeESDvars = "-VertexedClusters.-chargedGlobalFELinks.-neutralGlobalFELinks"
+    removeESDvars = "-VertexedClusters.-shotCells.-chargedGlobalFELinks.-neutralGlobalFELinks"
     if not flags.Tau.ActiveConfig.inTauEleRM:
         removeESDvars += f".-{flags.Tau.GNTauScoreName[0]}.-{flags.Tau.GNTauTransScoreName[0]}.-{flags.Tau.GNTauDecorWPNames[0][0]}.-{flags.Tau.GNTauDecorWPNames[0][1]}.-{flags.Tau.GNTauDecorWPNames[0][2]}.-{flags.Tau.GNTauDecorWPNames[0][3]}.-GNTauProbTau.-GNTauProbJet"
     TauESDList += [ "xAOD::TauJetAuxContainer#{}Aux.{}".format(flags.Tau.ActiveConfig.TauJets, removeESDvars) ]
@@ -282,6 +283,9 @@ def TauReconstructionCfg(flags):
     minimalghosts = ["Track","MuonSegment","Truth"]
 
     #Check if the specific jet collection is needed based on flags
+    if flags.Tau.TauRec.SeedJetCollection == "AntiKt4MLTopoJets":
+        from JetRecConfig.StandardSmallRJets import AntiKt4MLTopo
+        result.merge(JetRecCfg(flags, AntiKt4MLTopo))
     if flags.Tau.TauRec.SeedJetCollection == "AntiKt4EMPFlowMLJets":
         from JetRecConfig.StandardSmallRJets import AntiKt4EMPFlowML
         result.merge(JetRecCfg(flags, AntiKt4EMPFlowML))

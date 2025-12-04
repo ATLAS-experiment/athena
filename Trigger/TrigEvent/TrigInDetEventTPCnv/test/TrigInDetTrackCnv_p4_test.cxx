@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file TrigInDetEventTPCnv/test/TrigInDetTrackCnv_p4_test.cxx
@@ -184,7 +184,6 @@ void test1 ATLAS_NOT_THREAD_SAFE ()
 void make_dd()
 {
   auto pix_id = std::make_unique<PixelID>();
-  pix_id->setMessageSvc(Athena::getMessageSvc());
   IdDictParser parser;
   parser.register_external_entity ("InnerDetector",
                                    "IdDictInnerDetector.xml");

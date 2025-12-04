@@ -54,6 +54,7 @@ StatusCode LArBarrelCalculator::initialize()
   ATH_MSG_DEBUG("LArBarrelCalculator: Beginning initialization ");
   if (m_BirksLaw) {
     const double Birks_LAr_density = 1.396;
+    ATH_MSG_INFO("Use Birks_LAr_density="<<Birks_LAr_density<<", Birksk="<<(double)m_Birksk);
     m_birksLaw = new LArG4BirksLaw(Birks_LAr_density,m_Birksk);
   }
 

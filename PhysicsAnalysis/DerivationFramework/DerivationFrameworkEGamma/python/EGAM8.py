@@ -162,8 +162,7 @@ def EGAM8KernelCfg(flags, name="EGAM8Kernel", **kwargs):
         EGammaCookieCutClusterToolCfg(flags,
                                       name,
                                       StoreInputMoments=True,
-                                      StoreCookedMoments=True,
-                                      OutputLevel = 3))
+                                      StoreCookedMoments=True))
     acc.addPublicTool(cookieCutTool)
     augmentationTools.append(cookieCutTool)
 

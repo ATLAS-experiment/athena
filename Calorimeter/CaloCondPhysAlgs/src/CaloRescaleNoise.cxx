@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CaloRescaleNoise.h"
@@ -7,11 +7,11 @@
 #include "CaloIdentifier/CaloGain.h"
 #include "CaloEvent/CaloCell.h"
 #include "Identifier/Identifier.h"
-#include "CaloIdentifier/CaloCell_ID.h"
+#include "CaloIdentifier/CaloCell_Base_ID.h"
+#include "CaloIdentifier/CaloCell_SuperCell_ID.h"
 
 #include "TTree.h"
 #include <cstdio>
-
 
 
 //Constructor
@@ -48,7 +48,7 @@ StatusCode CaloRescaleNoise::initialize()
 
   const CaloIdManager* mgr = nullptr;
   ATH_CHECK( detStore()->retrieve( mgr ) );
-  m_calo_id      = mgr->getCaloCell_ID();
+  m_calo_id      = m_isSC ? static_cast<const CaloCell_Base_ID*>(mgr->getCaloCell_SuperCell_ID()) : static_cast<const CaloCell_Base_ID*>(mgr->getCaloCell_ID());
 
   ATH_CHECK( m_elecNoiseKey.initialize() );
   ATH_CHECK( m_pileupNoiseKey.initialize() );
@@ -57,6 +57,7 @@ StatusCode CaloRescaleNoise::initialize()
   ATH_CHECK( m_cablingKey.initialize());
   ATH_CHECK( m_onlineScaleCorrKey.initialize() );
   ATH_CHECK( m_caloMgrKey.initialize() );
+  ATH_CHECK( m_caloSCMgrKey.initialize(m_isSC) );
 
   m_tree = new TTree("mytree","Calo Noise ntuple");
   m_tree->Branch("iCool",&m_iCool,"iCool/I");
@@ -103,13 +104,26 @@ StatusCode CaloRescaleNoise::stop()
   SG::ReadCondHandle<ILArHVScaleCorr> onlineScaleCorr (m_onlineScaleCorrKey, ctx);
   SG::ReadCondHandle<CaloNoise> elecNoise   (m_elecNoiseKey,   ctx);
   SG::ReadCondHandle<CaloNoise> pileupNoise (m_pileupNoiseKey, ctx);
-  SG::ReadCondHandle<CaloDetDescrManager> caloMgrHandle{m_caloMgrKey, ctx};
-  if( not caloMgrHandle.isValid()){
-    std::fclose(fp);
-    ATH_MSG_ERROR("CaloRescaleNoise::stop: caloMgrHandle invalid.");
-    return StatusCode::FAILURE;
+
+  const CaloDetDescrManager_Base *calodetdescrmgr=nullptr;
+  if(m_isSC){
+     SG::ReadCondHandle<CaloSuperCellDetDescrManager> caloSCMgrHandle{m_caloSCMgrKey, ctx};
+     if( not caloSCMgrHandle.isValid()){
+       std::fclose(fp);
+       ATH_MSG_ERROR("CaloRescaleNoise::stop: caloSCMgrHandle invalid.");
+       return StatusCode::FAILURE;
+     }
+     calodetdescrmgr = static_cast<const CaloDetDescrManager_Base *>(*caloSCMgrHandle);
+
+  } else {
+     SG::ReadCondHandle<CaloDetDescrManager> caloMgrHandle{m_caloMgrKey, ctx};
+     if( not caloMgrHandle.isValid()){
+       std::fclose(fp);
+       ATH_MSG_ERROR("CaloRescaleNoise::stop: caloMgrHandle invalid.");
+       return StatusCode::FAILURE;
+     }
+     calodetdescrmgr = static_cast<const CaloDetDescrManager_Base *>(*caloMgrHandle);
   }
-  const CaloDetDescrManager* calodetdescrmgr = *caloMgrHandle;
 
   int ncell=m_calo_id->calo_cell_hash_max();
   ATH_MSG_INFO ( " start loop over Calo cells " << ncell );
@@ -158,7 +172,8 @@ StatusCode CaloRescaleNoise::stop()
        m_layer = m_calo_id->calo_sample(id);
 
        int ngain;
-       if (subCalo<3) ngain=3;    
+       if (m_isSC) ngain=1;
+       else if (subCalo<3) ngain=3;    
        else ngain=4;
 
        float hvcorr=1.;
@@ -208,7 +223,8 @@ StatusCode CaloRescaleNoise::stop()
              m_elecNoiseRescaled = m_elecNoise ;
           }
 
-          if (iCool<48) fprintf(fp,"%5d %5d %5d %8.3f %8.3f\n",iCool,ii,gain,m_elecNoiseRescaled,m_pileupNoise);
+          // for SC debugging
+          if (iCool<48) fprintf(fp,"%10d %5d %5d %8.3f %8.3f\n",id.get_identifier32().get_compact(),ii,gain,m_elecNoiseRescaled,m_pileupNoise);
 
           m_tree->Fill();
 

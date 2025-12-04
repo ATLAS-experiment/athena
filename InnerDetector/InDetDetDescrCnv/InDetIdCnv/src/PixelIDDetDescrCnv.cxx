@@ -95,8 +95,6 @@ PixelIDDetDescrCnv::createObj(IOpaqueAddress* /*pAddr*/, DataObject*& pObj)
 	// create the helper
 	m_pixelId = new PixelID;
 	initHelper = true;
-        // add in message service for printout
-        m_pixelId->setMessageSvc(msgSvc());
     }
 
     if (initHelper) {

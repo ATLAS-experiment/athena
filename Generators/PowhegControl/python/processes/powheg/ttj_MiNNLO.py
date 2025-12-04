@@ -70,7 +70,7 @@ class ttj_MiNNLO(PowhegV2):
         self.add_keyword("bornonly")
         self.add_keyword("bornsuppfact", -1)
         self.add_keyword("bornzerodamp")
-        self.add_keyword("bottommass")
+        self.add_keyword("bottommass",0)
         self.add_keyword("bottomthr")
         self.add_keyword("bottomthrpdf")
         self.add_keyword("charmthr")
@@ -136,6 +136,7 @@ class ttj_MiNNLO(PowhegV2):
         self.add_keyword("ncall2", 20000000)
         self.add_keyword("ncall2rm")
         self.add_keyword("nubound", 5000000)
+        self.add_keyword("bwcutoff",50)
         self.add_keyword("par_2gsupp")
         self.add_keyword("par_diexp")
         self.add_keyword("par_dijexp")
@@ -201,7 +202,6 @@ class ttj_MiNNLO(PowhegV2):
         # Accordingly, MadSpin will run or not run.
         if "MadSpin" in self.decay_mode:
             self.externals["MadSpin"].parameters_by_keyword("powheg_top_decays_enabled")[0].value = False
-            self.externals["MadSpin"].parameters_by_keyword("MadSpin_model")[0].value = "loop_sm-no_b_mass"
             self.externals["MadSpin"].parameters_by_keyword("MadSpin_nFlavours")[0].value = 5
 
         # Calculate appropriate decay mode numbers

@@ -98,10 +98,23 @@ def fromRunArgs(runArgs):
             print("Provide them!")
             sys.exit(1)
         else:
-            rawpath = "/eos/atlas/atlastier0/rucio/%s/%s/%s/%s.%s.%s.merge.RAW/" % (runArgs.project,runArgs.stream,runArgs.runnr.zfill(8),runArgs.project,runArgs.runnr.zfill(8),runArgs.stream)
+
+            # the arquitecture behind the path is the one below. The star "*" is different depending on the stream rates
+            # for express_express the ending should be "merge.RAW/"
+            # for other streams could be "daq.RAW/"
+            rawpath = "/eos/atlas/atlastier0/rucio/%s/%s/%s/%s.%s.%s.%s" % (runArgs.project,runArgs.stream,runArgs.runnr.zfill(8),runArgs.project,runArgs.runnr.zfill(8),runArgs.stream,runArgs.step)
+            if len(glob.glob(rawpath)) == 0:
+                print("ERROR: Any folder under \"%s\". Please check that the path is correct" % rawpath)
+                sys.exit(1)  
+            elif len(glob.glob(rawpath)) > 1:
+                print("ERROR: More than one folder under '%s'. Please specify the correct one with \"step\" argument in the transform" % rawpath)
+                for f in glob.glob(rawpath):
+                    print(f"\t- {f}")
+                sys.exit(1)  
+
             globedFiles = glob.glob(rawpath+"*")
             if not globedFiles:
-                print("ERROR: Not able to find any file under %s. Please check that the path is correct or files exists" % (rawpath))
+                print("ERROR: Not able to find any file under %s. Please check that the files exists" % (rawpath))
                 sys.exit(1)            
             
             myFile.append(random.choice(globedFiles))

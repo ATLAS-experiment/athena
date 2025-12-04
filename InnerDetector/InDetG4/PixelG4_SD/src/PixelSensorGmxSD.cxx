@@ -105,6 +105,14 @@ G4bool PixelSensorGmxSD::ProcessHits(G4Step* aStep, G4TouchableHistory* /*ROhist
   lP2[SiHit::xDep] = localPosition2[0]*CLHEP::mm;
 
   TrackHelper trHelp(aStep->GetTrack());
+  // Temporary solution to get EventContext from a Geant4 thread 
+  EventContext const* eventContext{nullptr};
+  if(auto* eventInfo = AtlasG4EventUserInfo::GetEventUserInfo()){
+    eventContext = &eventInfo->GetEventContext();
+  }
+  auto mcParticleLink = eventContext ? 
+    trHelp.GenerateParticleLink(*eventContext) : 
+    trHelp.GenerateParticleLink();
 
     if(m_sqlreader){
         //if sqlite inputs, Identifier indices come from PhysVol Name  
@@ -117,7 +125,7 @@ G4bool PixelSensorGmxSD::ProcessHits(G4Step* aStep, G4TouchableHistory* /*ROhist
                      lP2,
                      edep,
                      aStep->GetPreStepPoint()->GetGlobalTime(),//use the global time. i.e. the time from the beginning of the event
-                     trHelp.GenerateParticleLink(),
+                     std::move(mcParticleLink),
                      hitIdOfWafer);
         return true;
         
@@ -131,7 +139,7 @@ G4bool PixelSensorGmxSD::ProcessHits(G4Step* aStep, G4TouchableHistory* /*ROhist
                      lP2,
                      edep,
                      aStep->GetPreStepPoint()->GetGlobalTime(),
-                     trHelp.GenerateParticleLink(),
+                     std::move(mcParticleLink),
                      id);
   return true; 
 }

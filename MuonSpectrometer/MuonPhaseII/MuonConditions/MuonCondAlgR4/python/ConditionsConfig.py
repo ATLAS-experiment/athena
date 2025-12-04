@@ -35,7 +35,7 @@ def MdtAnalyticRtCalibAlgCfg(flags, name="MdtAnalyticCalibDbAlg",
     kwargs.setdefault("OutStream", "MDTANALYTICRTS")
     kwargs.setdefault("saveDiagnosticHist", True)
     if kwargs["saveDiagnosticHist"]:
-        from MuonGeoModelTestR4.testGeoModel import setupHistSvcCfg
+        from MuonConfig.MuonConfigUtils import setupHistSvcCfg
         result.merge(setupHistSvcCfg(flags, outFile=diagnosticsFile, outStream=kwargs["OutStream"]))
     the_alg = CompFactory.MuonCalibR4.MdtAnalyticRtCalibAlg(name, **kwargs)
     result.addCondAlgo(the_alg, primary = True)

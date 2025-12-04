@@ -926,12 +926,12 @@ class TestEgammaCalibrationAndSmearingTool(unittest.TestCase):
         # Create event info (simulation)
         ei = self.factory.create_eventinfo(True, 100000)
         # Define input-output data pairs for testing
-        input_output_data = [(self.factory.create_electron(0.1, 0.1, 100E3), 101053.4674736316),
-                             (self.factory.create_electron(0.2, 0.2, 100E3), 100540.24199785857),
-                             (self.factory.create_electron(0.2, 0.3, 100E3), 100332.9293682001),
-                             (self.factory.create_electron(-0.3, 0.4, 10E3), 9499.888427826565),
-                             (self.factory.create_electron(1.4, 0.5, 50E3), 53255.52231154057),
-                             (self.factory.create_electron(1.5, 0.0, 50E3), 62729.97046978042),
+        input_output_data = [(self.factory.create_electron(0.1, 0.1, 100E3), 101053.46747492359),
+                             (self.factory.create_electron(0.2, 0.2, 100E3), 100540.24199915715),
+                             (self.factory.create_electron(0.2, 0.3, 100E3), 100332.92936950138),
+                             (self.factory.create_electron(-0.3, 0.4, 10E3), 9499.888441569878),
+                             (self.factory.create_electron(1.4, 0.5, 50E3), 53255.52231399214),
+                             (self.factory.create_electron(1.5, 0.0, 50E3), 62729.97047186172),
                              ]
 
         for electron, expected_energy in input_output_data:

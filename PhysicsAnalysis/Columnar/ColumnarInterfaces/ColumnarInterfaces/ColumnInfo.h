@@ -167,6 +167,15 @@ namespace columnar
     /// That is actually the more common case, which is also simpler to
     /// handle in columnar code.
     std::string variantLinkKeyColumn {};
+
+
+    /// @brief whether to add data dependencies in AthenaMT
+    ///
+    /// In AthenaMT we need to track data dependencies between
+    /// algorithms, but we usually only want to use a subset of the data
+    /// dependencies used in columnar code. This flag indicates that
+    /// this accessor should be added as a data dependency in AthenaMT.
+    bool addMTDependency = false;
   };
 }
 

@@ -28,6 +28,8 @@ def PixelConditionsSummaryCfg(flags, name="PixelConditionsSummary", **kwargs):
 
     if flags.InDet.usePixelDCS:
         pixel_states_active =  [ 'READY', 'ON' ]     # 'UNKNOWN', 'TRANSITION', 'UNDEFINED', 'DISABLED', 'LOCKED_OUT', 'OFF' states should be masked.
+        if flags.InDet.useHVActiveStates:
+            pixel_states_active =  [ 'READY', 'ON', 'UNDEFINED' ]     # 'UNKNOWN', 'TRANSITION', 'DISABLED', 'LOCKED_OUT', 'OFF' states should be masked.
 
         kwargs.setdefault("IsActiveStates", pixel_states_active)
         kwargs.setdefault("IsActiveStatus", [ 'OK', 'WARNING', 'ERROR', 'FATAL' ])

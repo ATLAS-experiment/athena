@@ -7,6 +7,7 @@
 #include <MuonReadoutGeometryR4/MdtReadoutElement.h>
 #include <MuonReadoutGeometryR4/SpectrometerSector.h>
 #include <GeoPrimitives/GeoPrimitivesToStringConverter.h>
+#include <MuonVisualizationHelpersR4/VisualizationHelpers.h>
 
 #include <fstream>
 
@@ -14,14 +15,19 @@ using namespace ActsTrk;
 
 namespace MuonGMR4{
 
-
 StatusCode GeoModelMdtTest::initialize() {
     ATH_CHECK(m_idHelperSvc.retrieve());
     ATH_CHECK(m_geoCtxKey.initialize()); 
     ATH_CHECK(m_cablingKey.initialize(!m_cablingKey.empty()));   
     /// Prepare the TTree dump
     ATH_CHECK(m_tree.init(this));
-
+    if (m_visualTubes) {
+        m_clientToken.preFixName="GeoModelMdtTest";
+        m_clientToken.subDirectory = "MdtPlots";
+        m_clientToken.canvasLimit = -1;
+        ATH_CHECK(m_visualSvc.retrieve());
+        ATH_CHECK(m_visualSvc->registerClient(m_clientToken));
+    }
     const MdtIdHelper& idHelper{m_idHelperSvc->mdtIdHelper()};
     auto translateTokenList = [this, &idHelper](const std::vector<std::string>& chNames){
         
@@ -85,6 +91,46 @@ StatusCode GeoModelMdtTest::initialize() {
     ATH_CHECK(detStore()->retrieve(m_detMgr));
     return StatusCode::SUCCESS;
 }
+void GeoModelMdtTest::visualizeTubeLayer(const EventContext& ctx,
+                                         const MuonGMR4::MdtReadoutElement& reEle,
+                                         const unsigned layer) const {
+    if (!m_visualTubes) {
+        return;
+    }
+     
+    const double h = reEle.moduleHeight();
+    const double wL = reEle.moduleWidthL();
+    const double wS = reEle.moduleWidthS();
+
+    const MdtIdHelper& idHelper{m_idHelperSvc->mdtIdHelper()};
+    const Identifier detId = reEle.identify();
+    const std::string chName = std::format("{:}{:}{:}{:}M{:}T{:}",
+                                           m_idHelperSvc->stationNameString(detId),
+                                           std::abs(m_idHelperSvc->stationEta(detId)),
+                                           m_idHelperSvc->stationEta(detId) > 0 ? 'A' : 'C',
+                                           m_idHelperSvc->stationPhi(detId),
+                                           idHelper.multilayer(detId), layer);
+    auto canvas = m_visualSvc->prepareCanvas(ctx, m_clientToken, chName);
+    canvas->expandPad(-0.5*wL, -0.5*h);
+    canvas->expandPad( 0.5*wL, 0.5*h);
+    canvas->setAxisTitles("x [mm]", "y [mm]");
+    canvas->setRangeScale(1.1);
+    using namespace MuonValR4;
+    /// Draw first the bounding lines
+    canvas->add(drawLine(Amg::Vector3D{0., -0.5*wL, 0.5*h}, Amg::Vector3D{0., 0.5*wL, 0.5*h}, kBlack, kSolid));
+    canvas->add(drawLine(Amg::Vector3D{0., -0.5*wS, -0.5*h}, Amg::Vector3D{0., 0.5*wS, -0.5*h}, kBlack, kSolid));
+    canvas->add(drawLine(Amg::Vector3D{0., -0.5*wL, 0.5*h}, Amg::Vector3D{0., -0.5*wS, -0.5*h}, kBlack, kSolid));
+    canvas->add(drawLine(Amg::Vector3D{0.,  0.5*wL, 0.5*h}, Amg::Vector3D{0., 0.5*wS, -0.5*h}, kBlack, kSolid));
+    for (unsigned int tube = 1 ; tube <= reEle.numTubesInLay(); ++ tube) {
+        const IdentifierHash measHash = reEle.measurementHash(layer, tube);
+        if (!reEle.isValid(measHash)) {
+            continue;
+        }
+        canvas->add(drawBox(reEle.localTubePos(measHash), reEle.tubeLength(measHash), reEle.tubeRadius()));
+    } 
+    canvas->add(drawLabel(std::format("{:}, layer: {:}", m_idHelperSvc->toStringDetEl(detId), layer), 0.2, 0.05));
+}
+     
 StatusCode GeoModelMdtTest::finalize() {
     ATH_CHECK(m_tree.write());
     return StatusCode::SUCCESS;
@@ -121,6 +167,7 @@ StatusCode GeoModelMdtTest::execute() {
             return StatusCode::FAILURE;         
       }
       for (unsigned int lay = 1 ; lay <= reElement->numLayers() ; ++lay ) {
+        visualizeTubeLayer(ctx, *reElement, lay);
          for (unsigned int tube = 1; tube <=reElement->numTubesInLay(); ++tube ){
             const Identifier tube_id = id_helper.channelID(test_me,ml,lay,tube);                 
             /// Test the forward -> backward conversion

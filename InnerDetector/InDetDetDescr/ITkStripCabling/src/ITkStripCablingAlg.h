@@ -35,7 +35,7 @@ class SCT_ID;
 
 class ITkStripCablingAlg: public AthReentrantAlgorithm {
  public:
-  ITkStripCablingAlg(const std::string& name, ISvcLocator* svc);
+  ITkStripCablingAlg(const std::string& name, ISvcLocator* svc);  
   virtual ~ITkStripCablingAlg() = default;
   virtual StatusCode initialize() override;
   virtual StatusCode execute(const EventContext& ctx) const override;
@@ -43,7 +43,8 @@ class ITkStripCablingAlg: public AthReentrantAlgorithm {
   virtual bool isClonable() const override { return true; };
   
 private:
-  StringProperty m_source{this, "DataSource", "ITkStripCabling.dat", "A data file for the ITkStrip cabling"};
+  StringProperty m_source{this, "DataSource", "", "A data file for the ITkStrip cabling"};
+  std::string m_configFilePath={};
   SG::WriteCondHandleKey<ITkStripCablingData> m_writeKey{this, "WriteKey", "ITkStripCablingData", "Key of output (derived) conditions data"};
   const SCT_ID* m_idHelper{nullptr};
 };

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "Pythia8_i/UserHooksFactory.h"
@@ -76,6 +76,7 @@ namespace Pythia8{
       }
 
       //check the leg is connected to the hard system
+      //coverity[NEGATIVE_RETURNS:FALSE]
       int iMother = e[i].mother1();
       if(e[iMother].status() != -41)
         throw std::runtime_error("Pythia8::VetoedShower::doVetoISREmission: Unexpected status code in ISR");
@@ -113,6 +114,8 @@ namespace Pythia8{
       }
 
       // Make sure radiation from the hard system
+      //i cannot be negative here
+      //coverity[NEGATIVE_RETURNS:FALSE]
       int  iMother = e[i].mother1();
       int  sysSize = partonSystemsPtr->sizeOut(0);
       bool hardSys = false;

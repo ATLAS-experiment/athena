@@ -192,6 +192,9 @@ class ItemDef:
         # Item for gESPRESSO algorithm
         gESPRESSO = Not(d.gESPRESSO280)
 
+        # Item for gESPRESSO BC+1 algorithm
+        gRISTRETTO = Not(d.gTE280) | Not(d.gESPRESSO280)
+
         MenuItem('L1_EM3'       ).setLogic( d.EM3        & physcond).setTriggerType( TT.calo )
         MenuItem('L1_EM12'      ).setLogic( d.EM12       & physcond).setTriggerType( TT.calo )
         MenuItem('L1_EM15'      ).setLogic( d.EM15       & physcond).setTriggerType( TT.calo )
@@ -236,7 +239,7 @@ class ItemDef:
         MenuItem('L1_eEM15_EMPTY'       ).setLogic(d.eEM15 & cosmiccond     ).setTriggerType( TT.calo )
         # ATR-29025
         MenuItem('L1_DPHI-2eEM1_VjTE200_EMPTY'  ).setLogic(d.TOPO_23DPHI32_2eEM1s  & Not(d.jTE200) & cosmiccond ).setTriggerType( TT.calo )
-        MenuItem('L1_DPHI-2eTAU1_VjTE200_EMPTY' ).setLogic(d.TOPO_23DPHI32_2eTAU1s & Not(d.jTE200) & cosmiccond ).setTriggerType( TT.calo )
+        MenuItem('L1_DPHI-2eTAU1_VjTE200_EMPTY' ).setLogic(d.TOPO_26DPHI32_2eTAU1s & Not(d.jTE200) & cosmiccond ).setTriggerType( TT.calo )
 
         MenuItem('L1_eEM22A'    ).setLogic( d.eEM22A     & physcond).setTriggerType( TT.calo )
         MenuItem('L1_eEM22C'    ).setLogic( d.eEM22C     & physcond).setTriggerType( TT.calo )
@@ -564,6 +567,8 @@ class ItemDef:
         MenuItem('L1_jTAU30M' ).setLogic( d.jTAU30M  & physcond).setTriggerType( TT.calo )
         MenuItem('L1_cTAU12M' ).setLogic( d.cTAU12M  & physcond).setTriggerType( TT.calo )
         MenuItem('L1_cTAU20M' ).setLogic( d.cTAU20M  & physcond).setTriggerType( TT.calo )
+        MenuItem('L1_eTAU28'  ).setLogic( d.eTAU28   & physcond).setTriggerType( TT.calo ) # prospective Run 4 L1 item, ATDAQPPES-19
+        MenuItem('L1_eTAU28M'  ).setLogic( d.eTAU28M   & physcond).setTriggerType( TT.calo ) # prospective Run 4 L1 item, ATDAQPPES-19
         MenuItem('L1_eTAU30'  ).setLogic( d.eTAU30   & physcond).setTriggerType( TT.calo )
         MenuItem('L1_cTAU30M' ).setLogic( d.cTAU30M  & physcond).setTriggerType( TT.calo )
         MenuItem('L1_eTAU35'  ).setLogic( d.eTAU35   & physcond).setTriggerType( TT.calo )
@@ -577,8 +582,9 @@ class ItemDef:
         MenuItem('L1_eTAU60'  ).setLogic( d.eTAU60   & physcond).setTriggerType( TT.calo )
         MenuItem('L1_eTAU70'  ).setLogic( d.eTAU70   & physcond).setTriggerType( TT.calo )
         MenuItem('L1_eTAU80'  ).setLogic( d.eTAU80   & physcond).setTriggerType( TT.calo )
+        MenuItem('L1_eTAU120' ).setLogic( d.eTAU120  & physcond).setTriggerType( TT.calo ) # prospective Run 4 L1 item, ATDAQPPES-19
         MenuItem('L1_eTAU140' ).setLogic( d.eTAU140  & physcond).setTriggerType( TT.calo )
-
+        
         MenuItem('L1_eTAU1_EMPTY').setLogic(d.eTAU1 & cosmiccond).setTriggerType(TT.calo)
         MenuItem('L1_eTAU2_EMPTY').setLogic(d.eTAU2 & cosmiccond).setTriggerType(TT.calo)
         MenuItem('L1_eTAU12_EMPTY').setLogic(d.eTAU12 & cosmiccond).setTriggerType(TT.calo)
@@ -593,9 +599,10 @@ class ItemDef:
         MenuItem('L1_eTAU80_2eTAU60').setLogic(d.eTAU80 & d.eTAU60.x(2) & physcond).setTriggerType(TT.calo)
         MenuItem('L1_cTAU30M_2cTAU20M_4jJ30p0ETA25').setLogic(d.cTAU30M & d.cTAU20M.x(2) & d.jJ300ETA25.x(4) & physcond).setTriggerType(TT.calo)
         MenuItem('L1_cTAU35M_2cTAU30M_2jJ55_3jJ50').setLogic(d.cTAU35M & d.cTAU30M.x(2) & d.jJ55.x(2) & d.jJ50.x(3) & physcond).setTriggerType(TT.calo)
+        MenuItem('L1_eTAU28M_2eTAU20M'   ).setLogic( d.eTAU28M & d.eTAU20M.x(2)     & physcond).setTriggerType(TT.calo) # prospective Run 4 L1 item, ATDAQPPES-19
         # ATR-29439
         MenuItem('L1_cTAU30M_2cTAU20M_3jJ30p0ETA25').setLogic(d.cTAU30M & d.cTAU20M.x(2) & d.jJ300ETA25.x(3) & physcond).setTriggerType(TT.calo)
-        
+
         #UPC TAU
         MenuItem('L1_2TAU1_VTE50' ).setLogic( d.HA1.x(2)      & Not(d.TE50) & physcond).setTriggerType(TT.calo)
         MenuItem('L1_2TAU2_VTE50' ).setLogic( d.HA2.x(2)      & Not(d.TE50) & physcond).setTriggerType(TT.calo)
@@ -744,9 +751,11 @@ class ItemDef:
         MenuItem('L1_jJ5_EMPTY').setLogic(d.jJ5 & cosmiccond).setTriggerType(TT.calo)
         MenuItem('L1_TEA_jJ5').setLogic(d.jJ5 & TeATIME & physcond).setTriggerType(TT.calo)
         MenuItem('L1_ESP_jJ5').setLogic(d.jJ5 & gESPRESSO & physcond).setTriggerType(TT.calo)
+        MenuItem('L1_RIS_jJ5').setLogic(d.jJ5 & gRISTRETTO & physcond).setTriggerType(TT.calo)
         MenuItem('L1_jJ5p30ETA49').setLogic(d.jJ530ETA49 & physcond).setTriggerType(TT.calo)
         MenuItem('L1_TEA_jJ5p30ETA49').setLogic(d.jJ530ETA49 & TeATIME & physcond).setTriggerType(TT.calo)
         MenuItem('L1_ESP_jJ5p30ETA49').setLogic(d.jJ530ETA49 & gESPRESSO & physcond).setTriggerType(TT.calo)
+        MenuItem('L1_RIS_jJ5p30ETA49').setLogic(d.jJ530ETA49 & gRISTRETTO & physcond).setTriggerType(TT.calo)
         MenuItem('L1_jJ10'          ).setLogic( d.jJ10         & physcond).setTriggerType(TT.calo)
         MenuItem('L1_jJ10_EMPTY'    ).setLogic( d.jJ10         & cosmiccond).setTriggerType(TT.calo)
         MenuItem('L1_jJ10p30ETA49'  ).setLogic( d.jJ1030ETA49  & physcond).setTriggerType(TT.calo)
@@ -1040,7 +1049,6 @@ class ItemDef:
         MenuItem('L1_jJ80_jXE120' ).setLogic( d.jJ80 & d.jXE120 & physcond).setTriggerType(TT.calo)
 
         # phase1 TE
-        MenuItem('L1_gTE3'     ).setLogic( d.gTE3 & physcond).setTriggerType(TT.calo)
         MenuItem('L1_gTE5'     ).setLogic( d.gTE5 & physcond).setTriggerType(TT.calo)
         MenuItem('L1_gTE10'     ).setLogic( d.gTE10 & physcond).setTriggerType(TT.calo)
         MenuItem('L1_gTE200'     ).setLogic( d.gTE200 & physcond).setTriggerType(TT.calo)
@@ -1057,8 +1065,10 @@ class ItemDef:
         MenuItem('L1_TeAsymmetry3-jTENoSort' ).setLogic( d.TOPO_TeAsymmetry_jTENoSort_ParamSet3 & physcond).setTriggerType(TT.calo)
         MenuItem('L1_TEA_TeAsymmetry-jTENoSort').setLogic(d.TOPO_TeAsymmetry_jTENoSort_ParamSet0 & TeATIME & physcond).setTriggerType(TT.calo)
         MenuItem('L1_ESP_TeAsymmetry-jTENoSort').setLogic(d.TOPO_TeAsymmetry_jTENoSort_ParamSet0 & gESPRESSO & physcond).setTriggerType(TT.calo)
+        MenuItem('L1_RIS_TeAsymmetry-jTENoSort').setLogic(d.TOPO_TeAsymmetry_jTENoSort_ParamSet0 & gRISTRETTO & physcond).setTriggerType(TT.calo)
         MenuItem('L1_TeATIME-jTENoSort' ).setLogic( d.TOPO_TeATIME_jTENoSort_ParamSet0 & physcond).setTriggerType(TT.calo)
         MenuItem('L1_ESPRESSO' ).setLogic( d.gESPRESSO280 & physcond).setTriggerType(TT.calo)
+        MenuItem('L1_RISTRETTO' ).setLogic( d.gTE280 & physcond).setTriggerType(TT.calo)
 
         # additional jTE items for 2023 heavy ion runs
         MenuItem('L1_jTE3'     ).setLogic( d.jTE3  & physcond).setTriggerType(TT.calo)
@@ -1577,7 +1587,6 @@ class ItemDef:
         MenuItem('L1_VZDC_A_ZDC_C_TE3_VTE200' ).setLogic( PHYS_VZDC_A_ZDC_C & d.TE3 & Not(d.TE200)   & physcond)
         MenuItem('L1_VZDC_A_ZDC_C_jTE3_VjTE200' ).setLogic(  PHYS_VZDC_A_ZDC_C &d.jTE3 &  Not(d.jTE200) & physcond)
         MenuItem('L1_VZDC_A_ZDC_C_jTE3_VjTE200_GAP_A' ).setLogic(  PHYS_VZDC_A_ZDC_C &d.jTE3 &  Not(d.jTE200) & GAPA  & physcond)
-        MenuItem('L1_VZDC_A_ZDC_C_gTE3_VjTE200' ).setLogic(  PHYS_VZDC_A_ZDC_C &d.gTE3 &  Not(d.jTE200) & physcond)
         MenuItem('L1_1ZDC_A_1ZDC_C_TE3_VTE200' ).setLogic( PHYS_1TO4ZDC_A_1TO4ZDC_C & d.TE3 &  Not(d.TE200)   & physcond)
         MenuItem('L1_1ZDC_A_1ZDC_C_jTE3_VjTE200' ).setLogic( PHYS_1TO4ZDC_A_1TO4ZDC_C & d.jTE3 &  Not(d.jTE200)   & physcond)
         MenuItem('L1_1ZDC_A_1ZDC_C_jTE3_VjTE200_GAP_A' ).setLogic( PHYS_1TO4ZDC_A_1TO4ZDC_C & d.jTE3 &  Not(d.jTE200) & GAPA  & physcond)
@@ -1590,7 +1599,6 @@ class ItemDef:
         MenuItem('L1_ZDC_A_VZDC_C_TE3_VTE200' ).setLogic( PHYS_ZDC_A_VZDC_C & d.TE3 & Not(d.TE200)   & physcond)
         MenuItem('L1_ZDC_A_VZDC_C_jTE3_VjTE200' ).setLogic( PHYS_ZDC_A_VZDC_C & d.jTE3 & Not(d.jTE200)  & physcond)
         MenuItem('L1_ZDC_A_VZDC_C_jTE3_VjTE200_GAP_C' ).setLogic( PHYS_ZDC_A_VZDC_C & d.jTE3 & Not(d.jTE200) & GAPC  & physcond)
-        MenuItem('L1_ZDC_A_VZDC_C_gTE3_VjTE200' ).setLogic( PHYS_ZDC_A_VZDC_C & d.gTE3 & Not(d.jTE200)  & physcond)
         MenuItem('L1_1ZDC_A_1ZDC_C_jTE3_VjTE200_GAP_C' ).setLogic( PHYS_1TO4ZDC_A_1TO4ZDC_C & d.jTE3 & Not(d.jTE200) & GAPC  & physcond)
         MenuItem('L1_ZDC_1XOR5_jTE3_VjTE200_GAP_C' ).setLogic(  PHYS_ZDC_1TO4XOR5 & d.jTE3 & Not(d.jTE200) & GAPC  & physcond)
 
@@ -1697,6 +1705,8 @@ class ItemDef:
         MenuItem('L1_ESP_ZDC_XOR_jJ10p30ETA49_VjTE200'       ).setLogic( ZDC_XOR            & gESPRESSO & d.jJ1030ETA49 & Not(d.jTE200) & physcond)
         MenuItem('L1_ESP_ZDC_XOR_jJ5p30ETA49_VjTE200'        ).setLogic( ZDC_XOR            & gESPRESSO & d.jJ530ETA49  & Not(d.jTE200) & physcond)
 
+        MenuItem('L1_RIS_ZDC_XOR_jJ10_VjTE200' ).setLogic( ZDC_XOR & gRISTRETTO & d.jJ10 & Not(d.jTE200) & physcond)
+
         # UPC HMT with TeAsymmetry and TeATIME for 2025
         MenuItem('L1_TEA_ASYM0_TRT_ZDC_XOR_VjTE200' ).setLogic( d.TOPO_TeAsymmetry_jTENoSort_ParamSet0 & d.NIMTRT & ZDC_XOR & TeATIME & Not(d.jTE200) & physcond)
         MenuItem('L1_TEA_ASYM1_TRT_ZDC_XOR_VjTE200' ).setLogic( d.TOPO_TeAsymmetry_jTENoSort_ParamSet1 & d.NIMTRT & ZDC_XOR & TeATIME & Not(d.jTE200) & physcond)
@@ -1725,11 +1735,40 @@ class ItemDef:
         MenuItem('L1_eTAU2_TRT_VZDC_A_VZDC_C_VjTE200' ).setLogic( d.eTAU2 & d.NIMTRT & PHYS_VZDC_A_VZDC_C & Not(d.jTE200) & physcond)
         MenuItem('L1_eTAU2_TRT_ZDC_OR_VjTE200'        ).setLogic( d.eTAU2 & d.NIMTRT & ZDC_OR             & Not(d.jTE200) & physcond)
 
+        MenuItem('L1_RIS_eEM2'  ).setLogic( d.eEM2  & gRISTRETTO & physcond)
+        MenuItem('L1_RIS_eTAU2' ).setLogic( d.eTAU2 & gRISTRETTO & physcond)
+
         # Items for further TeATIME tuning - possibly non-spike'y
         MenuItem('L1_CALMTEA_eEM2'          ).setLogic( d.eEM2  & Not(d.TOPO_TeATIME_jTENoSort_ParamSet1) & physcond)
         MenuItem('L1_CALMTEA_eTAU2'         ).setLogic( d.eTAU2 & Not(d.TOPO_TeATIME_jTENoSort_ParamSet1) & physcond)
         MenuItem('L1_CALMTEA_eEM2_VjTE200'  ).setLogic( d.eEM2  & Not(d.TOPO_TeATIME_jTENoSort_ParamSet1) & Not(d.jTE200) & physcond)
         MenuItem('L1_CALMTEA_eTAU2_VjTE200' ).setLogic( d.eTAU2 & Not(d.TOPO_TeATIME_jTENoSort_ParamSet1) & Not(d.jTE200) & physcond)
+
+        # Items for further TeATIME tuning - possibly non-spike'y
+        MenuItem('L1_MATCHA_eEM2'          ).setLogic( d.eEM2  & Not(d.TOPO_TeATIME_jTENoSort_ParamSet2) & physcond)
+        MenuItem('L1_MATCHA_eTAU2'         ).setLogic( d.eTAU2 & Not(d.TOPO_TeATIME_jTENoSort_ParamSet2) & physcond)
+        MenuItem('L1_MATCHA_eEM2_VjTE200'  ).setLogic( d.eEM2  & Not(d.TOPO_TeATIME_jTENoSort_ParamSet2) & Not(d.jTE200) & physcond)
+        MenuItem('L1_MATCHA_eTAU2_VjTE200' ).setLogic( d.eTAU2 & Not(d.TOPO_TeATIME_jTENoSort_ParamSet2) & Not(d.jTE200) & physcond)
+
+        MenuItem('L1_MATCHA_eEM2_EMPTY'          ).setLogic( d.eEM2  & Not(d.TOPO_TeATIME_jTENoSort_ParamSet2) & cosmiccond)
+        MenuItem('L1_MATCHA_eTAU2_EMPTY'         ).setLogic( d.eTAU2 & Not(d.TOPO_TeATIME_jTENoSort_ParamSet2) & cosmiccond)
+        MenuItem('L1_MATCHA_eEM2_VjTE200_EMPTY'  ).setLogic( d.eEM2  & Not(d.TOPO_TeATIME_jTENoSort_ParamSet2) & Not(d.jTE200) & cosmiccond)
+        MenuItem('L1_MATCHA_eTAU2_VjTE200_EMPTY' ).setLogic( d.eTAU2 & Not(d.TOPO_TeATIME_jTENoSort_ParamSet2) & Not(d.jTE200) & cosmiccond)
+
+        MenuItem('L1_MATCHA_eEM5_VjTE200'       ).setLogic( d.eEM5  & Not(d.TOPO_TeATIME_jTENoSort_ParamSet2) & Not(d.jTE200) & physcond)
+        MenuItem('L1_MATCHA_eEM5_VjTE200_EMPTY' ).setLogic( d.eEM5  & Not(d.TOPO_TeATIME_jTENoSort_ParamSet2) & Not(d.jTE200) & cosmiccond)
+
+        MenuItem('L1_CALMTEA_DPHI-2eTAU1_VjTE200'       ).setLogic( d.TOPO_26DPHI32_2eTAU1s & Not(d.TOPO_TeATIME_jTENoSort_ParamSet1) & Not(d.jTE200) & physcond)
+        MenuItem('L1_CALMTEA_DPHI-2eTAU1_VjTE200_EMPTY' ).setLogic( d.TOPO_26DPHI32_2eTAU1s & Not(d.TOPO_TeATIME_jTENoSort_ParamSet1) & Not(d.jTE200) & cosmiccond)
+
+        MenuItem('L1_MATCHA_DPHI-2eTAU1_VjTE200'        ).setLogic( d.TOPO_26DPHI32_2eTAU1s & Not(d.TOPO_TeATIME_jTENoSort_ParamSet2) & Not(d.jTE200) & physcond)
+        MenuItem('L1_MATCHA_DPHI-2eTAU1_VjTE200_EMPTY'  ).setLogic( d.TOPO_26DPHI32_2eTAU1s & Not(d.TOPO_TeATIME_jTENoSort_ParamSet2) & Not(d.jTE200) & cosmiccond)
+
+        MenuItem('L1_CALMTEA_23INVM-27DPHI-2eTAU1_VjTE200'       ).setLogic( d.TOPO_23INVM400000_27DPHI32_2eTAU07s & Not(d.TOPO_TeATIME_jTENoSort_ParamSet1) & Not(d.jTE200) & physcond)
+        MenuItem('L1_CALMTEA_23INVM-27DPHI-2eTAU1_VjTE200_EMPTY' ).setLogic( d.TOPO_23INVM400000_27DPHI32_2eTAU07s & Not(d.TOPO_TeATIME_jTENoSort_ParamSet1) & Not(d.jTE200) & cosmiccond)
+
+        MenuItem('L1_MATCHA_23INVM-27DPHI-2eTAU1_VjTE200'        ).setLogic( d.TOPO_23INVM400000_27DPHI32_2eTAU07s & Not(d.TOPO_TeATIME_jTENoSort_ParamSet2) & Not(d.jTE200) & physcond)
+        MenuItem('L1_MATCHA_23INVM-27DPHI-2eTAU1_VjTE200_EMPTY'  ).setLogic( d.TOPO_23INVM400000_27DPHI32_2eTAU07s & Not(d.TOPO_TeATIME_jTENoSort_ParamSet2) & Not(d.jTE200) & cosmiccond)
 
         # ATR-30727
         MenuItem('L1_eTAU1_jJ5_VjTE200' ).setLogic( d.eTAU1 & d.jJ5 & Not(d.jTE200)   & physcond)
@@ -2247,6 +2286,8 @@ class ItemDef:
             MenuItem('L1_jJ90_DETA20-jJ90J').setLogic( d.jJ50 & d.TOPO_0DETA20_jJ90s1_jJs2 & physcond)
             MenuItem('L1_HT190-jJ40s5pETA21').setLogic( d.TOPO_HT190_jJ40s5pETA21   & physcond)
             MenuItem('L1_SC175-SCjJ10').setLogic(  d.TOPO_SC175_SCjJ10abpETA26 & physcond)
+            MenuItem('L1_HT150-jJ50s5pETA32').setLogic( d.TOPO_HT150_jJ50s5pETA32   & physcond) # prospective Run 4 L1 item, ATDAQPPES-19
+
 
             #ATR-30179
             MenuItem('L1_cTAU30M_3DR35-MU8F-eTAU30').setLogic( d.cTAU30M & d.TOPO_3DR35_MU8Fab_eTAU30ab & physcond)
@@ -2266,11 +2307,11 @@ class ItemDef:
             MenuItem('L1_BPH-8M15-2MU3V-BO'    ).setLogic( d.TOPO_8INVM15_2CMU3Vab & physcond)           # 96% for Upsi
             #ATR-29784
             MenuItem('L1_DPHI-2eEM1').setLogic( d.TOPO_23DPHI32_2eEM1s & physcond)
-            MenuItem('L1_DPHI-2eTAU1').setLogic( d.TOPO_23DPHI32_2eTAU1s & physcond)
+            MenuItem('L1_DPHI-2eTAU1').setLogic( d.TOPO_26DPHI32_2eTAU1s & physcond)
             MenuItem('L1_DPHI-2eEM1_VjTE200').setLogic( d.TOPO_23DPHI32_2eEM1s & Not(d.jTE200) & physcond)
-            MenuItem('L1_DPHI-2eTAU1_VjTE200').setLogic( d.TOPO_23DPHI32_2eTAU1s & Not(d.jTE200) & physcond)
+            MenuItem('L1_DPHI-2eTAU1_VjTE200').setLogic( d.TOPO_26DPHI32_2eTAU1s & Not(d.jTE200) & physcond)
             MenuItem('L1_DPHI-2eEM1_VjTE200_GAP_AANDC').setLogic( d.TOPO_23DPHI32_2eEM1s & Not(d.jTE200) & GAPAC & physcond)
-            MenuItem('L1_DPHI-2eTAU1_VjTE200_GAP_AANDC').setLogic( d.TOPO_23DPHI32_2eTAU1s & Not(d.jTE200) & GAPAC & physcond)
+            MenuItem('L1_DPHI-2eTAU1_VjTE200_GAP_AANDC').setLogic( d.TOPO_26DPHI32_2eTAU1s & Not(d.jTE200) & GAPAC & physcond)
             MenuItem('L1_DPHI-2jTAU1').setLogic( d.TOPO_23DPHI32_2jTAU1s & physcond)
 
             # ATR-30728
@@ -2299,6 +2340,9 @@ class ItemDef:
             MenuItem('L1_BTAG-MU5VFjJ40_2jJ30p0ETA25').setLogic( d.TOPO_0DR04_MU5VFab_CjJ40ab & d.jJ300ETA25.x(2) & physcond)
             MenuItem('L1_BTAG-MU5VFjJ40_2jJ30p0ETA25_jJ50p0ETA25').setLogic( d.TOPO_0DR04_MU5VFab_CjJ40ab & d.jJ300ETA25.x(2) & d.jJ500ETA25 & physcond)
             MenuItem('L1_BTAG-MU5VFjJ40_2jJ40p0ETA25_jJ50p0ETA25').setLogic( d.TOPO_0DR04_MU5VFab_CjJ40ab & d.jJ400ETA25.x(2) & d.jJ500ETA25 & physcond)
+
+            # ATR-31830
+            MenuItem('L1_110INVM150-eEM50s-eEM10s-2DISAMB-jJ60s').setLogic(  d.TOPO_110INVM150_eEM50s_eEM10s_2DISAMB_jJ60s & physcond)
 
         except NameError as ex:
             exc_type, exc_value, exc_traceback = sys.exc_info()
