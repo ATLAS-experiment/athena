@@ -8,7 +8,7 @@
 #include <memory>
 
 PixelDCSCondStatusAlg::PixelDCSCondStatusAlg(const std::string& name, ISvcLocator* pSvcLocator):
-  ::AthReentrantAlgorithm(name, pSvcLocator)
+  ::AthCondAlgorithm(name, pSvcLocator)
 {
 }
 

@@ -11,7 +11,7 @@
 #ifndef PIXELCABLINGCONDALG_H
 #define PIXELCABLINGCONDALG_H
 
-#include "AthenaBaseComps/AthReentrantAlgorithm.h"
+#include "AthenaBaseComps/AthCondAlgorithm.h"
 
 #include "StoreGate/ReadCondHandleKey.h"
 #include "AthenaPoolUtilities/AthenaAttributeList.h"
@@ -30,14 +30,13 @@
 #include <string>
 #include <istream>
 
-class PixelCablingCondAlg : public AthReentrantAlgorithm {
+class PixelCablingCondAlg : public AthCondAlgorithm {
   public:
     PixelCablingCondAlg(const std::string& name, ISvcLocator* pSvcLocator);
     virtual ~PixelCablingCondAlg() = default;
 
     virtual StatusCode initialize() override final;
     virtual StatusCode execute(const EventContext& ctx) const override final;
-    virtual bool isReEntrant() const override final { return false; }
 
   private:
     const PixelID* m_pixelID{nullptr};
