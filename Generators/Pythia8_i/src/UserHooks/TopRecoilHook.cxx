@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // PowhegHooksBB4L.h 
@@ -122,12 +122,14 @@ namespace Pythia8 {
     
       // List relevant properties.
       if (m_doList) {
-	std::cout << "\n now event with sizeOld = " << sizeOld << ", iSys = "
-		  << iSys << ", sizeOut = " << sizeOut << scientific
-		  << setprecision(3)
-		  << ", weight with W = " << wtW << " and with t = " << wtT << std::endl;
-	partonSystemsPtr->list();
-	event.list();
+        std::ios oldState(nullptr);
+	      std::cout << "\n now event with sizeOld = " << sizeOld << ", iSys = "
+		      << iSys << ", sizeOut = " << sizeOut << scientific
+		      << setprecision(3)
+		      << ", weight with W = " << wtW << " and with t = " << wtT << std::endl;
+	      partonSystemsPtr->list();
+	      event.list();
+	      std::cout.copyfmt(oldState);
       }
     
       // Accept/reject emission. Smooth suppression or step function.
