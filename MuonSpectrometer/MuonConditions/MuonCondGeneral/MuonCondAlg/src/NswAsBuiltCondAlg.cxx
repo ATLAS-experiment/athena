@@ -10,7 +10,7 @@
 #include <fstream>
 
  NswAsBuiltCondAlg::NswAsBuiltCondAlg(const std::string& algName, ISvcLocator* pSvcLocator):
-    AthReentrantAlgorithm{algName, pSvcLocator} {
+    AthCondAlgorithm{algName, pSvcLocator} {
 }
 StatusCode NswAsBuiltCondAlg::initialize() {
     ATH_CHECK(m_readMmAsBuiltParamsKey.initialize(m_MmJsonPath.value().empty() && !m_readMmAsBuiltParamsKey.empty()));

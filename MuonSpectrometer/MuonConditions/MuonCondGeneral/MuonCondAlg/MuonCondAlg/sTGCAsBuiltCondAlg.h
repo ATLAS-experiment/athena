@@ -6,7 +6,7 @@
 #define MUONCONDALG_sTGCAsBuiltCondAlg_H
 
 // Athena includes
-#include "AthenaBaseComps/AthReentrantAlgorithm.h"
+#include "AthenaBaseComps/AthCondAlgorithm.h"
 #include "AthenaPoolUtilities/CondAttrListCollection.h"
 #include "MuonAlignmentData/sTGCAsBuiltData.h"
 #include "MuonIdHelpers/IMuonIdHelperSvc.h"
@@ -18,13 +18,12 @@
 /**
  * Conditions algorithm to load the alternativ sTGC as built constants.
 */
-class sTGCAsBuiltCondAlg : public AthReentrantAlgorithm {
+class sTGCAsBuiltCondAlg : public AthCondAlgorithm {
 public:
-    using AthReentrantAlgorithm::AthReentrantAlgorithm;
+    using AthCondAlgorithm::AthCondAlgorithm;
     virtual ~sTGCAsBuiltCondAlg() = default;
     virtual StatusCode initialize() override;
     virtual StatusCode execute(const EventContext& ctx) const override;
-    virtual bool isReEntrant() const override { return false; }
 
 private:
     /// Parse efficiency data from COOL

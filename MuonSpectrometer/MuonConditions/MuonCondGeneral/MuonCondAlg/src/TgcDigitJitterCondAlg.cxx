@@ -10,7 +10,7 @@
 
 // constructor
 TgcDigitJitterCondAlg::TgcDigitJitterCondAlg(const std::string& name, ISvcLocator* pSvcLocator) :
-    AthReentrantAlgorithm(name, pSvcLocator) {}
+    AthCondAlgorithm(name, pSvcLocator) {}
 
 // Initialize
 StatusCode TgcDigitJitterCondAlg::initialize() {

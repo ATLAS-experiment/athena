@@ -10,7 +10,7 @@
 #define MUONCONDSVC_MUONALIGNMENTERRORDBALG_H
 
 #include <GaudiKernel/EventIDRange.h>
-#include "AthenaBaseComps/AthReentrantAlgorithm.h"
+#include "AthenaBaseComps/AthCondAlgorithm.h"
 #include "StoreGate/ReadCondHandleKey.h"
 #include "StoreGate/WriteCondHandleKey.h"
 #include "AthenaPoolUtilities/CondAttrListCollection.h"
@@ -20,7 +20,7 @@
 #include "MuonIdHelpers/IMuonIdHelperSvc.h"
 #include "MuonIdHelpers/MuonIdHelper.h"
 #include "MuonCalibITools/IIdToFixedIdTool.h"
-class MuonAlignmentErrorDbAlg : public AthReentrantAlgorithm {
+class MuonAlignmentErrorDbAlg : public AthCondAlgorithm {
 public:
 
     MuonAlignmentErrorDbAlg(const std::string& name, ISvcLocator* pSvcLocator);
@@ -29,7 +29,6 @@ public:
 
     StatusCode initialize() override;
     StatusCode execute(const EventContext& ctx) const override;
-    bool isReEntrant() const override { return false; }
 
 private:
     std::tuple<std::string, EventIDRange> getDbClobContent(const EventContext& ctx) const;

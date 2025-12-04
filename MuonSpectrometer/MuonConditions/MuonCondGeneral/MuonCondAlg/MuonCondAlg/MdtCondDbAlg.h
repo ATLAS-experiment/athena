@@ -7,7 +7,7 @@
 
 
 // Athena includes
-#include "AthenaBaseComps/AthReentrantAlgorithm.h"
+#include "AthenaBaseComps/AthCondAlgorithm.h"
 #include "AthenaPoolUtilities/CondAttrListCollection.h"
 #include "MuonCondData/MdtCondDbData.h"
 #include "CxxUtils/StringUtils.h"
@@ -16,13 +16,12 @@
 #include "StoreGate/WriteCondHandleKey.h"
 
 
-class MdtCondDbAlg : public AthReentrantAlgorithm {
+class MdtCondDbAlg : public AthCondAlgorithm {
 public:
     MdtCondDbAlg(const std::string& name, ISvcLocator* svc);
     virtual ~MdtCondDbAlg() = default;
     virtual StatusCode initialize() override;
     virtual StatusCode execute(const EventContext&) const override;
-    virtual bool isReEntrant() const override { return false; }
 
 private:
     using writeHandle_t = SG::WriteCondHandle<MdtCondDbData>;

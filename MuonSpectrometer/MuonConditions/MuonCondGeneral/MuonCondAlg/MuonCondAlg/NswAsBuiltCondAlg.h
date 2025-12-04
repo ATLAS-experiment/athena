@@ -4,21 +4,20 @@
 #ifndef MUONCONDALG_MUONNSWASBUILTCONDALG_H
 #define MUONCONDALG_MUONNSWASBUILTCONDALG_H
 
-#include "AthenaBaseComps/AthReentrantAlgorithm.h"
+#include "AthenaBaseComps/AthCondAlgorithm.h"
 #include "AthenaPoolUtilities/CondAttrListCollection.h"
 #include "StoreGate/ReadCondHandleKey.h"
 #include "StoreGate/WriteCondHandleKey.h"
 #include "MuonAlignmentData/NswAsBuiltDbData.h"
 
 
-class NswAsBuiltCondAlg : public AthReentrantAlgorithm {
+class NswAsBuiltCondAlg : public AthCondAlgorithm {
 public:
     NswAsBuiltCondAlg(const std::string& name, ISvcLocator* pSvcLocator);
     virtual ~NswAsBuiltCondAlg() = default;
     virtual StatusCode initialize() override;
     virtual StatusCode execute(const EventContext& ctx) const override;
 
-    virtual bool isReEntrant() const override final { return false; }
 
 private:
     SG::ReadCondHandleKey<CondAttrListCollection> m_readMmAsBuiltParamsKey{this, "ReadMmAsBuiltParamsKey", "/MUONALIGN/ASBUILTPARAMS/MM",

@@ -10,7 +10,7 @@
 #include <iterator>
 
 MuonAlignmentErrorDbAlg::MuonAlignmentErrorDbAlg(const std::string& name, ISvcLocator* pSvcLocator) :
-    AthReentrantAlgorithm(name, pSvcLocator) {}
+    AthCondAlgorithm(name, pSvcLocator) {}
 
 StatusCode MuonAlignmentErrorDbAlg::initialize() {
     ATH_MSG_DEBUG("initialize " << name());

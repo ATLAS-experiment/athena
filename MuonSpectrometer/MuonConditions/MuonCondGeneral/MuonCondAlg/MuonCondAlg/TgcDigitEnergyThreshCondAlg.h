@@ -8,21 +8,20 @@
 
 #include <nlohmann/json.hpp>
 
-#include "AthenaBaseComps/AthReentrantAlgorithm.h"
+#include "AthenaBaseComps/AthCondAlgorithm.h"
 #include "AthenaPoolUtilities/CondAttrListCollection.h"
 #include "MuonCondData/TgcDigitThresholdData.h"
 #include "MuonIdHelpers/IMuonIdHelperSvc.h"
 #include "StoreGate/ReadCondHandleKey.h"
 #include "StoreGate/WriteCondHandleKey.h"
 
-class TgcDigitEnergyThreshCondAlg : public AthReentrantAlgorithm
+class TgcDigitEnergyThreshCondAlg : public AthCondAlgorithm
 {
  public:
     TgcDigitEnergyThreshCondAlg (const std::string& name, ISvcLocator* pSvcLocator);
     virtual ~TgcDigitEnergyThreshCondAlg() = default;
     virtual StatusCode initialize() override;
     virtual StatusCode execute(const EventContext& ctx) const override;
-    virtual bool isReEntrant() const override { return false; }
  private:
     /// Load the threshold constants from the JSON blob
     StatusCode parseDataFromJSON(const nlohmann::json& lines,

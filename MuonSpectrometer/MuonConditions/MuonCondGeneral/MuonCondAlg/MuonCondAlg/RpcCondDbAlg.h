@@ -16,7 +16,7 @@
 #include "GaudiKernel/ServiceHandle.h"
 
 // Athena includes
-#include "AthenaBaseComps/AthReentrantAlgorithm.h"
+#include "AthenaBaseComps/AthCondAlgorithm.h"
 #include "AthenaPoolUtilities/CondAttrListCollection.h"
 #include "MuonCondData/RpcCondDbData.h"
 #include "CxxUtils/StringUtils.h"
@@ -24,13 +24,12 @@
 #include "StoreGate/ReadCondHandleKey.h"
 #include "StoreGate/WriteCondHandleKey.h"
 
-class RpcCondDbAlg : public AthReentrantAlgorithm {
+class RpcCondDbAlg : public AthCondAlgorithm {
 public:
     RpcCondDbAlg(const std::string &name, ISvcLocator *svc);
     virtual ~RpcCondDbAlg() = default;
     virtual StatusCode initialize() override;
     virtual StatusCode execute(const EventContext &) const override;
-    virtual bool isReEntrant() const override { return false; }
 
 private:
     template <class WriteCont>

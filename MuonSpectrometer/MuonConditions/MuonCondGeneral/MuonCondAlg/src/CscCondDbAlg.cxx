@@ -12,7 +12,7 @@
 
 // constructor
 CscCondDbAlg::CscCondDbAlg(const std::string& name, ISvcLocator* pSvcLocator) :
-    AthReentrantAlgorithm(name, pSvcLocator) {}
+    AthCondAlgorithm(name, pSvcLocator) {}
 
 // Initialize
 StatusCode CscCondDbAlg::initialize() {

@@ -6,7 +6,7 @@
 #define MUONCONDALG_sTgcDigitEffiCondAlg_H
 
 // Athena includes
-#include "AthenaBaseComps/AthReentrantAlgorithm.h"
+#include "AthenaBaseComps/AthCondAlgorithm.h"
 #include "AthenaPoolUtilities/CondAttrListCollection.h"
 #include "MuonCondData/DigitEffiData.h"
 #include "MuonIdHelpers/IMuonIdHelperSvc.h"
@@ -18,13 +18,12 @@
 /**
  * Conditions algorithm to load the sTGC efficiency constants that are used in digitization.
 */
-class sTgcDigitEffiCondAlg : public AthReentrantAlgorithm {
+class sTgcDigitEffiCondAlg : public AthCondAlgorithm {
 public:
     sTgcDigitEffiCondAlg(const std::string& name, ISvcLocator* svc);
     virtual ~sTgcDigitEffiCondAlg() = default;
     virtual StatusCode initialize() override;
     virtual StatusCode execute(const EventContext& ctx) const override;
-    virtual bool isReEntrant() const override { return false; }
 
 private:
     /// Parse efficiency data from COOL

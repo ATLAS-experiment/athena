@@ -11,7 +11,7 @@
 
 #include <fstream>
 NswPassivationDbAlg::NswPassivationDbAlg(const std::string& name, ISvcLocator* pSvcLocator):
-    AthReentrantAlgorithm{name, pSvcLocator} {}
+    AthCondAlgorithm{name, pSvcLocator} {}
 
 StatusCode NswPassivationDbAlg::initialize() {
     ATH_MSG_DEBUG( "initializing " << name() );                
