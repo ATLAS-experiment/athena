@@ -161,53 +161,46 @@ StatusCode MistimedStreamMonitorAlgorithm::fillHistograms( const EventContext& c
   cutFlowX=HLT_mistimemonj400;
   fill(m_packageName,cutFlowX);
   
-  //Only select events which passed the L1_J100, L1_jJ160, L1_eEM26M, L1_j5400, L1_gLJ140p0ETA25 or L1_gJ400p0ETA25
-  //Adjustable depending on which trigger we are interested 
-  if (m_usephaseI) {
-    if(! ( (m_trigDec->isPassed("L1_eEM26M")) or
-         (m_trigDec->isPassed("L1_gLJ140p0ETA25")) or
-         (m_trigDec->isPassed("L1_gJ400p0ETA25")) or
-         (m_trigDec->isPassed("L1_jJ160")) or
-         (m_trigDec->isPassed("L1_jJ500")) 
-         ) ){ 
-      ATH_MSG_DEBUG("TrigDec doesn't pass");
-      return StatusCode::SUCCESS;
-    }
-  }
-
-  else if (m_uselegacy) {
-    if(! (m_trigDec->isPassed("L1_J100")) ){ 
-      ATH_MSG_DEBUG("TrigDec doesn't pass");
-      return StatusCode::SUCCESS;
-    }
-  }
-
-  else {
-    ATH_MSG_ERROR("No trigger selected...aborting"); 
-    return StatusCode::FAILURE;
-  }
-
-  //Define trigger for subsequent cuts
+  //Only select events which passed a proper trigger
+  //Adjustable depending on which trigger we are interested
   bool legacyTrigger= false;
   bool phase1Trigger= false;
   std::string trigger = ""; 
-
-  if ((m_uselegacy) and (m_trigDec->isPassed("L1_J100")) ) {
-    legacyTrigger= true;
+  
+  if (m_usephaseI) {
+    for (const auto &item: m_efexItems) {
+      if (m_trigDec->isPassed( item )) {
+	phase1Trigger= true;
+	trigger = "eFex";
+      }
+    }
+    for (const auto &item: m_jfexItems) {
+      if (m_trigDec->isPassed( item )) {
+	phase1Trigger= true;
+	trigger = "jFex";
+      }
+    }
+    for (const auto &item: m_gfexItems) {
+      if (m_trigDec->isPassed( item )) {
+	phase1Trigger= true;
+	trigger = "gFex";
+      }
+    }
   }
-  else if (m_usephaseI) {
-    if (m_trigDec->isPassed("L1_eEM26M")) {
-      phase1Trigger= true;
-      trigger = "eFex";
+  else if (m_uselegacy) {
+    if (m_trigDec->isPassed("L1_J100")) {
+      legacyTrigger= true;
     }
-    if ((m_trigDec->isPassed("L1_jJ160"))or (m_trigDec->isPassed("L1_jJ500"))) {
-      phase1Trigger= true;
-      trigger = "jFex";
-    }
-    if ( (m_trigDec->isPassed("L1_gJ400p0ETA25")) or (m_trigDec->isPassed("L1_gLJ140p0ETA25")) ) {
-      phase1Trigger= true;
-      trigger = "gFex";
-    }
+  }
+  else {
+    ATH_MSG_ERROR("No system selected, this should not happen, abort."); 
+    return StatusCode::FAILURE;
+  }
+
+  // Reject event if no trigger fired
+  if ( (legacyTrigger==false) and (phase1Trigger==false) ) {
+    ATH_MSG_DEBUG("TrigDec doesn't pass");
+    return StatusCode::SUCCESS;
   }
   
   cutFlowX=L1_Trigger;
@@ -426,11 +419,18 @@ StatusCode MistimedStreamMonitorAlgorithm::fillHistograms( const EventContext& c
     } 
   }
   
-  if(  (good3Counter < 2) or ((trigger == "eFex") and (eFexoutoftimeCounter < 2)) ){
+  if ((good3Counter < 2) and (m_isIons == false)) {
     //reject events with less than 2 pulses nicely peaking in slice 3 
     return StatusCode::SUCCESS;
   }
   cutFlowX=lateTT;
+  fill(m_packageName,cutFlowX);
+  
+  if ((trigger == "eFex") and (eFexoutoftimeCounter < 2)) {
+    //for eFEX triggers, require at least two late TOBs
+    return StatusCode::SUCCESS;
+  }
+  cutFlowX=lateTOB;
   fill(m_packageName,cutFlowX);
 
   if( (good2Counter > 3)  or 
@@ -485,13 +485,12 @@ StatusCode MistimedStreamMonitorAlgorithm::fillHistograms( const EventContext& c
     overlap = true; 
   }
 
-  if(overlap==false){
+  if ((overlap==false) and (m_isIons == false)) {
     //reject events where BCID and BCID+1 are spatially separated
     return StatusCode::SUCCESS;
   }
   cutFlowX= EtaPhiOverlap;
   fill(m_packageName,cutFlowX);
-     
   
   // scope for mutable error event per lumi block tt counter
   // it allows only one event per lumiblock
