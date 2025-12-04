@@ -1339,20 +1339,6 @@
        <hist1D name="BTag_AntiKt4EMTopoJets_SV_SV1_masssvx_incl" type="TH1F" plotopts="" tests="KS"/>
        <hist1D name="BTag_AntiKt4EMTopoJets_SV_SV1_efracsvx_incl" type="TH1F" plotopts="" tests="KS"/>
        <hist1D name="BTag_AntiKt4EMTopoJets_SV_SV1_Lxy_incl" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMTopoJets_SV_JetFitter_mass_incl" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMTopoJets_SV_JetFitter_energyFraction_incl" type="TH1F" plotopts="" tests="KS"/>
-      </TDirectory>
-     </TDirectory>
-     <TDirectory name="tagger_IP3D">
-      <TDirectory name="other">
-       <hist1D name="BTag_AntiKt4EMTopoJets_tagger_IP3D_pb" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMTopoJets_tagger_IP3D_pc" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMTopoJets_tagger_IP3D_pu" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMTopoJets_tagger_IP3D_NTracks_incl" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMTopoJets_tagger_IP3D_gradeOfTracks_incl" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMTopoJets_tagger_IP3D_valD0wrtPVofTracks" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMTopoJets_tagger_IP3D_valZ0wrtPVofTracks" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMTopoJets_tagger_IP3D_sigD0wrtPVofTracks" type="TH1F" plotopts="" tests="KS"/>
       </TDirectory>
      </TDirectory>
      <TDirectory name="tagger_GN2v01">
@@ -1361,13 +1347,6 @@
        <hist1D name="BTag_AntiKt4EMTopoJets_tagger_GN2v01_pc" type="TH1F" plotopts="" tests="KS"/>
        <hist1D name="BTag_AntiKt4EMTopoJets_tagger_GN2v01_pu" type="TH1F" plotopts="" tests="KS"/>
        <hist1D name="BTag_AntiKt4EMTopoJets_tagger_GN2v01_ptau" type="TH1F" plotopts="" tests="KS"/>
-      </TDirectory>
-     </TDirectory>
-     <TDirectory name="tagger_SV1">
-      <TDirectory name="other">
-       <hist1D name="BTag_AntiKt4EMTopoJets_tagger_SV1_pb" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMTopoJets_tagger_SV1_pc" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMTopoJets_tagger_SV1_pu" type="TH1F" plotopts="" tests="KS"/>
       </TDirectory>
      </TDirectory>
     </TDirectory>
