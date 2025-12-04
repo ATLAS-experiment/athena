@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -210,7 +210,7 @@ CP::SystematicSet BTaggingEigenVectorRecompositionTool::affectingSystematics() c
 // no systematics for now, proxy for later
 StatusCode BTaggingEigenVectorRecompositionTool::applySystematicVariation( const CP::SystematicSet & systConfig )
 {
-  for (auto syst : systConfig) {
+  for (const auto & syst : systConfig) {
     CP::SystematicSet myset;
     ATH_MSG_WARNING("applySystematicVariation was called for " << syst.name() << " but BTaggingEigenVectorRecompositionTool does not apply Systematic Variations");
     //the truth tagging tool provides results for all possible systematic variations in its results objects, the user does not need to call each one seperatly.

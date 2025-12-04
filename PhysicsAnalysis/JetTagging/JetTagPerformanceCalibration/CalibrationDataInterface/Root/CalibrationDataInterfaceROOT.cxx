@@ -2638,7 +2638,7 @@ Analysis::CalibrationDataInterfaceROOT::retrieveContainer(const string& label, c
       // The choices are stored with the container object; but first we need to know what flavour we are dealing with.
       string flavour = dir.substr(dir.find_last_of("/")+1);
 
-      for (auto entry : m_excludeFromCovMatrix[flavour]) {
+      for (const auto & entry : m_excludeFromCovMatrix[flavour]) {
         newEigenVariation->excludeNamedUncertainty(entry, cnt);
       }
       newEigenVariation->initialize();
@@ -2665,7 +2665,7 @@ Analysis::CalibrationDataInterfaceROOT::retrieveContainer(const string& label, c
         // now to see if it's completely empty or not
         if (m_eigenVariationsMap.empty()){
           std::shared_ptr<CalibrationDataGlobalEigenVariations> newEigenVariation(new CalibrationDataGlobalEigenVariations(m_filenameSF, m_taggerName, OP, author, m_flavours, histoContainer, m_useRecommendedEVExclusions));
-          for (auto entry : m_excludeFromCovMatrix[label]) {
+          for (const auto & entry : m_excludeFromCovMatrix[label]) {
             newEigenVariation->excludeNamedUncertainty(entry, label); // <---- custom exclude named uncertainties method for global variations
           }
 

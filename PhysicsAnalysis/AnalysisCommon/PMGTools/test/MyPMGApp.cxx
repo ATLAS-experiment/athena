@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /// Example standalone executable using POOL to read an xAOD
@@ -156,7 +156,7 @@ int main(int argc, char *argv[])
     if (debug) { std::cout << "correction from Interface" << reweight << std::endl; }
 
     // Test the PMGTruthWeightTool interface
-    auto weightNames = truthWeightTool->getWeightNames();
+    const auto & weightNames = truthWeightTool->getWeightNames();
     ANA_MSG_INFO("Event #" << i << ": found " << weightNames.size() << " weights for this event");
 
   }
