@@ -11,7 +11,7 @@
 
 template<class T>
 TileCalibCondAlg<T>::TileCalibCondAlg(const std::string& name, ISvcLocator* pSvcLocator) :
-  AthAlgorithm(name, pSvcLocator)
+  AthCondAlgorithm(name, pSvcLocator)
 {
 
 }
@@ -30,9 +30,9 @@ StatusCode TileCalibCondAlg<T>::initialize() {
 }
 
 template<class T>
-StatusCode TileCalibCondAlg<T>::execute() {
+StatusCode TileCalibCondAlg<T>::execute(const EventContext& ctx) const {
 
-  SG::WriteCondHandle<TileCalibData<T> > calibData{m_calibDataKey};
+  SG::WriteCondHandle<TileCalibData<T> > calibData{m_calibDataKey, ctx};
 
   if (calibData.isValid()) {
     ATH_MSG_DEBUG("Found valid TileCalibData: " << calibData.key());

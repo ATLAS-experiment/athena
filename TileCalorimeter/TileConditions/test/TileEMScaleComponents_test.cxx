@@ -436,7 +436,7 @@ void testTileCalibEms(void) {
 
 
 
-void testTileCalibEmsCondAlg(ISvcLocator* svcLoc) {
+void testTileCalibEmsCondAlg(ISvcLocator* svcLoc, const EventContext& ctx) {
 
   std::cout << "\nTest TileCalibEmsCondAlg\n";
 
@@ -466,12 +466,12 @@ void testTileCalibEmsCondAlg(ISvcLocator* svcLoc) {
   assert( (alg->setProperty("TileEMScale", TILE_TEST_ALG_EMS)).isSuccess() );
   assert( (alg->initialize()).isSuccess() );
 
-  assert( (alg->execute()).isSuccess() );
+  assert( (alg->execute(ctx)).isSuccess() );
 
   SG::ReadCondHandleKey<TileEMScale> emScaleKey{TILE_TEST_ALG_EMS};
   assert(emScaleKey.initialize().isSuccess());
 
-  SG::ReadCondHandle<TileEMScale> emScale{emScaleKey};
+  SG::ReadCondHandle<TileEMScale> emScale{emScaleKey, ctx};
   assert(emScale.isValid());
 
   EventIDRange eventRange;
@@ -488,7 +488,7 @@ void testTileCalibEmsCondAlg(ISvcLocator* svcLoc) {
 
 
 
-void testTileCondToolEmscale(ISvcLocator* svcLoc) {
+void testTileCondToolEmscale(ISvcLocator* svcLoc, const EventContext& ctx) {
 
   std::cout << "\nTest TileCondToolEmscale\n";
 
@@ -496,7 +496,7 @@ void testTileCondToolEmscale(ISvcLocator* svcLoc) {
     SG::WriteCondHandleKey<TileEMScale> emScaleKey{TILE_TEST_EMS};
     assert(emScaleKey.initialize().isSuccess());
 
-    SG::WriteCondHandle<TileEMScale> emScale{emScaleKey};
+    SG::WriteCondHandle<TileEMScale> emScale{emScaleKey, ctx};
     std::unique_ptr<TileEMScale> calibData = getCalibEms();
     assert(emScale.record(EVENT_RANGE, calibData.release()).isSuccess());
   }
@@ -551,8 +551,8 @@ int main ATLAS_NOT_THREAD_SAFE () {
 
 
   testTileCalibEms();
-  testTileCalibEmsCondAlg(svcLoc);
-  testTileCondToolEmscale(svcLoc);
+  testTileCalibEmsCondAlg(svcLoc, ctx);
+  testTileCondToolEmscale(svcLoc, ctx);
 
   return 0;
 }
