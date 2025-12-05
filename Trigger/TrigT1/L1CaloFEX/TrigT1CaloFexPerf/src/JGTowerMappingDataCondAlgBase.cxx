@@ -16,7 +16,7 @@
 namespace LVL1
 {
   JGTowerMappingDataCondAlgBase::JGTowerMappingDataCondAlgBase(const std::string &name, ISvcLocator *pSvcLocator)
-      : AthReentrantAlgorithm(name, pSvcLocator)
+      : AthCondAlgorithm(name, pSvcLocator)
   {
   }
 

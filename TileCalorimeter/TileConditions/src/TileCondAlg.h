@@ -9,7 +9,7 @@
 #include "TileConditions/TileSamplingFraction.h"
 #include "TileConditions/ITileCondProxy.h"
 
-#include "AthenaBaseComps/AthReentrantAlgorithm.h"
+#include "AthenaBaseComps/AthCondAlgorithm.h"
 #include "StoreGate/ReadCondHandleKey.h"
 #include "StoreGate/WriteCondHandleKey.h"
 
@@ -18,10 +18,10 @@
  * @brief Condition algorithm to prepare Tile conditions object and put it into conditions store
  */
 template<class CONDDATA, class CALIBDATA>
-class TileCondAlg: public AthReentrantAlgorithm {
+class TileCondAlg: public AthCondAlgorithm {
   public:
 
-    using AthReentrantAlgorithm::AthReentrantAlgorithm;
+    using AthCondAlgorithm::AthCondAlgorithm;
 
     virtual StatusCode initialize() override;
     virtual StatusCode execute(const EventContext& ctx) const override;

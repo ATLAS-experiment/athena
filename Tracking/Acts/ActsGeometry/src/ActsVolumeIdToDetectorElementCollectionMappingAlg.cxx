@@ -18,7 +18,7 @@
 
 namespace ActsTrk {
 ActsVolumeIdToDetectorElementCollectionMappingAlg::ActsVolumeIdToDetectorElementCollectionMappingAlg(const std::string& name, ISvcLocator* pSvcLocator) :
-    AthReentrantAlgorithm(name, pSvcLocator) {}
+    AthCondAlgorithm(name, pSvcLocator) {}
 
 ActsVolumeIdToDetectorElementCollectionMappingAlg::~ActsVolumeIdToDetectorElementCollectionMappingAlg() = default;
 

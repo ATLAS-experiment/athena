@@ -5,7 +5,7 @@
 #ifndef LARHVPATHOLOGYDBCONDALG
 #define LARHVPATHOLOGYDBCONDALG
 
-#include "AthenaBaseComps/AthReentrantAlgorithm.h"
+#include "AthenaBaseComps/AthCondAlgorithm.h"
 #include "StoreGate/ReadHandle.h"
 #include "StoreGate/WriteHandle.h"
 #include "StoreGate/ReadCondHandle.h"
@@ -26,7 +26,7 @@ class LArHVLineID;
 class Identifier;
 class TClass;
 
-class LArHVPathologyDbCondAlg: public AthReentrantAlgorithm
+class LArHVPathologyDbCondAlg: public AthCondAlgorithm
 {
  public: 
   LArHVPathologyDbCondAlg(const std::string& name, ISvcLocator* pSvcLocator);

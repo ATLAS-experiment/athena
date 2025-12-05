@@ -11,7 +11,7 @@
 #ifndef PIXELSIPROPERTIESCONDALG
 #define PIXELSIPROPERTIESCONDALG
 
-#include "AthenaBaseComps/AthReentrantAlgorithm.h"
+#include "AthenaBaseComps/AthCondAlgorithm.h"
 
 #include "StoreGate/ReadCondHandleKey.h"
 #include "StoreGate/WriteCondHandleKey.h"
@@ -22,7 +22,7 @@
 #include "InDetIdentifier/PixelID.h"
 #include "InDetReadoutGeometry/SiDetectorElementCollection.h"
 
-class PixelSiPropertiesCondAlg : public AthReentrantAlgorithm {  
+class PixelSiPropertiesCondAlg : public AthCondAlgorithm {  
   public:
     PixelSiPropertiesCondAlg(const std::string& name, ISvcLocator* pSvcLocator);
     virtual ~PixelSiPropertiesCondAlg() = default;
