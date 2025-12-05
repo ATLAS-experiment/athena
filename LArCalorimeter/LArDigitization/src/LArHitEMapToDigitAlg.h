@@ -54,13 +54,12 @@ class LArHEC_ID;
 class LArFCAL_ID;
 class CaloCell_ID;
 
-#define MAXADC 4096       // Maximal Adc count + 1 ( used for the overflows)
 
 class LArHitEMapToDigitAlg : public AthReentrantAlgorithm
 {
 public:
-  // Constructor
-  LArHitEMapToDigitAlg(const std::string& name, ISvcLocator* pSvcLocator);
+  // delegate Constructor
+  using AthReentrantAlgorithm::AthReentrantAlgorithm;
 
   // initialize all condition keys
   virtual StatusCode initialize();
@@ -127,9 +126,24 @@ protected:
   Gaudi::Property<bool> m_useLegacyRandomSeeds{this, "UseLegacyRandomSeeds", false,
        "Use MC16-style random number seeding"};
 
-  enum CaloNum{EM,HEC,FCAL,EMIW};
-  double m_LowGainThresh[4]{};
-  double m_HighGainThresh[4]{};
+  enum CaloNum{EM=0,HEC,FCAL,EMIW};
+  std::array<Gaudi::Property<double>,4> m_LowGainThresh {{
+        {this,"LowGainThreshEM",3900,"ADC counts in medium gain"},
+        {this,"LowGainThreshHEC",2500,"ADC counts in medium gain"},
+        {this,"LowGainThreshFCAL",2000,"ADC counts in medium gain"},
+        {this,"LowGainThreshEMECIW",3900,"ADC counts in medium gain"}
+  }};
+
+
+  std::array<Gaudi::Property<double>,4> m_HighGainThresh {{
+        {this,"HighGainThreshEM",1300,"ADC counts in medium gain"},
+        {this,"HighGainThreshHEC",0,"ADC counts in medium gain"},
+        {this,"HighGainThreshFCAL",1100,"ADC counts in medium gain"},
+        {this,"HighGainThreshEMECIW",1300,"ADC counts in medium gain"}
+  }};
+
+  Gaudi::Property<unsigned> m_maxADC{this,"maxADC",4096,"Maxium ADC value +1 (for overflow)"};
+
   // Some properties for digits production
   Gaudi::Property<double> m_EnergyThresh{this, "EnergyThresh", -99.,
        "Hit energy threshold (default=-99)"};           // Zero suppression energy threshold
