@@ -3,7 +3,7 @@
 */
 
 // Framework includes
-#include "FourMomUtils/xAODP4Helpers.h"
+#include "ColumnarCore/MomentumHelpers.h"
 
 // Local includes
 #include "AssociationUtils/DeltaRMatcher.h"
@@ -19,13 +19,22 @@ namespace ORUtils
       m_useRapidity(useRapidity)
   {}
 
+  StatusCode DeltaRMatcher::setObjectTypes (xAODType::ObjectType type1,
+                                      xAODType::ObjectType type2)
+  {
+    columnar::resetObjectType (m_momAcc1, *this, type1);
+    columnar::resetObjectType (m_momAcc2, *this, type2);
+    return StatusCode::SUCCESS;
+  }
+
   //---------------------------------------------------------------------------
   // Check if particles match in dR
   //---------------------------------------------------------------------------
-  bool DeltaRMatcher::objectsMatch(const xAOD::IParticle& p1,
-                                   const xAOD::IParticle& p2) const
+  bool DeltaRMatcher::objectsMatch(columnar::Particle1Id p1,
+                                   columnar::Particle2Id p2,
+                                   bool /*swapArgs*/) const
   {
-    return xAOD::P4Helpers::isInDeltaR(p1, p2, m_dR, m_useRapidity);
+    return columnar::isInDeltaR(m_momAcc1, p1, m_momAcc2, p2, m_dR, m_useRapidity);
   }
 
   //---------------------------------------------------------------------------
@@ -36,17 +45,27 @@ namespace ORUtils
     : m_c1(c1), m_c2(c2), m_maxCone(maxCone), m_useRapidity(useRapidity)
   {}
 
+  StatusCode SlidingDeltaRMatcher::setObjectTypes (xAODType::ObjectType type1,
+                                                   xAODType::ObjectType type2)
+  {
+    columnar::resetObjectType (m_momAcc1, *this, type1);
+    columnar::resetObjectType (m_momAcc2, *this, type2);
+    return StatusCode::SUCCESS;
+  }
+
   //---------------------------------------------------------------------------
   // Check if particles match in sliding dR
   //---------------------------------------------------------------------------
-  bool SlidingDeltaRMatcher::objectsMatch(const xAOD::IParticle& p1,
-                                          const xAOD::IParticle& p2) const
+  bool SlidingDeltaRMatcher::objectsMatch(columnar::Particle1Id p1,
+                                          columnar::Particle2Id p2,
+                                          bool swapArgs) const
   {
     // Calculate the dR cone to match with
-    double dR = m_c1 + (m_c2 / p1.pt());
+    double pt1 = swapArgs ? m_momAcc2.pt(p2) : m_momAcc1.pt(p1);
+    double dR = m_c1 + (m_c2 / pt1);
     // Apply upper limit to the dR match cone
     dR = std::min(dR, m_maxCone);
-    return xAOD::P4Helpers::isInDeltaR(p1, p2, dR, m_useRapidity);
+    return columnar::isInDeltaR(m_momAcc1, p1, m_momAcc2, p2, dR, m_useRapidity);
   }
 
 } // namespace ORUtils

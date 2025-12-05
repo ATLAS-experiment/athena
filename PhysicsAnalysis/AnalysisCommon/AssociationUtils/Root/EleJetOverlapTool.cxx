@@ -68,12 +68,14 @@ namespace ORUtils
                       m_bJetLabel << " for electrons below "
                       << m_maxElePtForBJetAwareOR/GeV << " GeV");
       }
-      m_bJetHelper = std::make_unique<BJetHelper>(m_bJetLabel);
+      resetAccessor (m_accessors->m_bJetAcc, *m_accessors, m_bJetLabel);
     }
 
     // Initialize the dR matchers
     ATH_MSG_DEBUG("Configuring ele-jet inner cone size " << m_innerDR);
     m_dRMatchCone1 = std::make_unique<DeltaRMatcher>(m_innerDR, m_useRapidity);
+    ATH_CHECK (m_dRMatchCone1->setObjectTypes (xAODType::ObjectType::Electron, xAODType::ObjectType::Jet));
+    addSubtool(*m_dRMatchCone1);
     if(m_useSlidingDR) {
       ATH_MSG_DEBUG("Configuring sliding outer cone for ele-jet OR with " <<
                     "constants C1 = " << m_slidingDRC1 << ", C2 = " <<
@@ -86,6 +88,8 @@ namespace ORUtils
       ATH_MSG_DEBUG("Configuring ele-jet outer cone size " << m_outerDR);
       m_dRMatchCone2 = std::make_unique<DeltaRMatcher>(m_outerDR, m_useRapidity);
     }
+    ATH_CHECK (m_dRMatchCone2->setObjectTypes (xAODType::ObjectType::Electron, xAODType::ObjectType::Jet));
+    addSubtool(*m_dRMatchCone2);
 
     // Additional debug printouts
     if(m_applyPtRatio) {
@@ -99,22 +103,15 @@ namespace ORUtils
   // Identify overlaps
   //---------------------------------------------------------------------------
   StatusCode EleJetOverlapTool::
-  findOverlaps(const xAOD::IParticleContainer& cont1,
-               const xAOD::IParticleContainer& cont2) const
+  findOverlaps(columnar::Particle1Range cont1,
+               columnar::Particle2Range cont2,
+               columnar::EventContextId /*eventContext*/) const
   {
     // Check the container types
-    if(typeid(cont1) != typeid(xAOD::ElectronContainer) &&
-       typeid(cont1) != typeid(ConstDataVector<xAOD::ElectronContainer>)) {
-      ATH_MSG_ERROR("First container arg is not an ElectronContainer!");
-      return StatusCode::FAILURE;
-    }
-    if(typeid(cont2) != typeid(xAOD::JetContainer) &&
-       typeid(cont2) != typeid(ConstDataVector<xAOD::JetContainer>)) {
-      ATH_MSG_ERROR("Second container arg is not of type JetContainer!");
-      return StatusCode::FAILURE;
-    }
-    ATH_CHECK( findOverlaps(static_cast<const xAOD::ElectronContainer&>(cont1),
-                            static_cast<const xAOD::JetContainer&>(cont2)) );
+    ATH_CHECK (checkForXAODContainer<xAOD::ElectronContainer>(cont1, "First container arg is not an ElectronContainer!"));
+    ATH_CHECK (checkForXAODContainer<xAOD::JetContainer>(cont2, "Second container arg is not of type JetContainer!"));
+
+    ATH_CHECK( internalFindOverlaps(cont1, cont2) );
     return StatusCode::SUCCESS;
   }
 
@@ -122,28 +119,29 @@ namespace ORUtils
   // Identify overlaps
   //---------------------------------------------------------------------------
   StatusCode EleJetOverlapTool::
-  findOverlaps(const xAOD::ElectronContainer& electrons,
-               const xAOD::JetContainer& jets) const
+  internalFindOverlaps(columnar::Particle1Range electrons,
+                       columnar::Particle2Range jets) const
   {
     ATH_MSG_DEBUG("Removing overlapping electrons and jets");
+    auto& acc = *m_accessors;
 
     // Initialize output decorations if necessary
-    m_decHelper->initializeDecorations(electrons);
-    m_decHelper->initializeDecorations(jets);
+    initializeDecorations(electrons);
+    initializeDecorations(jets);
 
     // First flag overlapping jets
     for(const auto electron : electrons){
-      if(!m_decHelper->isSurvivingObject(*electron)) continue;
+      if(!isSurvivingObject(electron)) continue;
 
       for(const auto jet : jets){
-        if(!m_decHelper->isSurvivingObject(*jet)) continue;
+        if(!isSurvivingObject(jet)) continue;
         // Don't reject user-defined b-tagged jets below an electron pT threshold
-        if(m_bJetHelper && m_bJetHelper->isBJet(*jet) &&
-           electron->pt() < m_maxElePtForBJetAwareOR) continue;
+        if(!m_bJetLabel.empty() && acc.m_bJetAcc(jet) &&
+           electron(acc.m_elePtAcc) < m_maxElePtForBJetAwareOR) continue;
         // Don't reject jets with high relative PT
-        if(m_applyPtRatio && (electron->pt()/jet->pt() < m_eleJetPtRatio)) continue;
+        if(m_applyPtRatio && (electron(acc.m_elePtAcc)/jet(acc.m_jetPtAcc) < m_eleJetPtRatio)) continue;
 
-        if(m_dRMatchCone1->objectsMatch(*jet, *electron)){
+        if(m_dRMatchCone1->objectsMatch(jet, electron)){
           ATH_CHECK( handleOverlap(jet, electron) );
         }
       }
@@ -151,12 +149,12 @@ namespace ORUtils
 
     // Now flag overlapping electrons
     for(const auto jet: jets){
-      if(!m_decHelper->isSurvivingObject(*jet)) continue;
+      if(!isSurvivingObject(jet)) continue;
 
       for(const auto electron : electrons){
-        if(!m_decHelper->isSurvivingObject(*electron)) continue;
+        if(!isSurvivingObject(electron)) continue;
 
-        if(m_dRMatchCone2->objectsMatch(*electron, *jet)){
+        if(m_dRMatchCone2->objectsMatch(electron, jet)){
           ATH_CHECK( handleOverlap(electron, jet) );
         }
       }
