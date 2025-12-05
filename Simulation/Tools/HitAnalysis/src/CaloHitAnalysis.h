@@ -56,7 +56,7 @@ private:
   TH2* m_h_r_e{};
   TH1* m_h_calib_eta{};
   TH1* m_h_calib_phi{};
-  TH2* m_h_calib_rz{};
+  TH2* m_h_calib_zr{};
   TH2* m_h_calib_etaphi{};
   TH1* m_h_calib_eEM{};
   TH1* m_h_calib_eNonEM{};

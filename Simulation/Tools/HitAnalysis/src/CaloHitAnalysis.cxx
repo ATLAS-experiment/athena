@@ -122,8 +122,8 @@ StatusCode CaloHitAnalysis::initialize() {
   m_h_calib_phi = new TH1D("h_calib_phi", "calib. hits phi", 50,-3.1416,3.1416);
   m_h_calib_phi->StatOverflows();
 
-  m_h_calib_rz = new TH2D("h_calib_rz", "calib. hits r vs z", 100,-7000,7000,1000, 0,6000);
-  m_h_calib_rz->StatOverflows();
+  m_h_calib_zr = new TH2D("h_calib_zr", "calib. hits z vs r", 100,-7000,7000,1000, 0,6000);
+  m_h_calib_zr->StatOverflows();
 
   m_h_calib_etaphi = new TH2D("h_calib_etaphi", "calib. hits eta vs phi",50,-5.,5., 50,-3.1416,3.1416);
   m_h_calib_etaphi->StatOverflows();
@@ -149,7 +149,7 @@ StatusCode CaloHitAnalysis::initialize() {
   if (m_calib) {
     CHECK(m_thistSvc->regHist(m_path + m_h_calib_eta->GetName(), m_h_calib_eta));
     CHECK(m_thistSvc->regHist(m_path + m_h_calib_phi->GetName(), m_h_calib_phi));
-    CHECK(m_thistSvc->regHist(m_path + m_h_calib_rz->GetName(), m_h_calib_rz));
+    CHECK(m_thistSvc->regHist(m_path + m_h_calib_zr->GetName(), m_h_calib_zr));
     CHECK(m_thistSvc->regHist(m_path + m_h_calib_etaphi->GetName(), m_h_calib_etaphi));
     CHECK(m_thistSvc->regHist(m_path + m_h_calib_eEM->GetName(), m_h_calib_eEM));
     CHECK(m_thistSvc->regHist(m_path + m_h_calib_eNonEM->GetName(), m_h_calib_eNonEM));
@@ -232,14 +232,14 @@ StatusCode CaloHitAnalysis::execute() {
           m_h_cell_e->Fill(tot_e);
           m_h_cell_eta->Fill(ddElement->eta());
           m_h_cell_phi->Fill(ddElement->phi()) ;
-          m_h_cell_radius->Fill(ddElement->z());
+          m_h_cell_radius->Fill(ddElement->r());
           m_h_cell_layer->Fill(ddElement->getSampling());
           m_h_cell_eta_Eweight->Fill(ddElement->eta(),tot_e);
           m_h_cell_phi_Eweight->Fill(ddElement->phi(),tot_e) ;
-          m_h_cell_radius_Eweight->Fill(ddElement->z(),tot_e);
+          m_h_cell_radius_Eweight->Fill(ddElement->r(),tot_e);
           m_h_cell_layer_Eweight->Fill(ddElement->getSampling(),tot_e);
           m_h_xy->Fill(ddElement->x(), ddElement->y());
-          m_h_zr->Fill(ddElement->r(), ddElement->r());
+          m_h_zr->Fill(ddElement->z(), ddElement->r());
           m_h_etaphi->Fill(ddElement->eta(), ddElement->phi());
 
           if (m_expert) {
@@ -325,38 +325,43 @@ StatusCode CaloHitAnalysis::execute() {
           GeoCaloCalibHit geoHit(*hit_i, LArCalibKey[j], caloMgr);
           if (!geoHit) continue;
           const CaloDetDescrElement* Element = geoHit.getDetDescrElement();
-          double eta = Element->eta();
-          double phi = Element->phi();
-          double radius = Element->r();
-          double z = Element->z();
-          double emEnergy = geoHit.energyEM();
-          double nonEmEnergy = geoHit.energyNonEM();
-          double invEnergy = geoHit.energyInvisible();
-          double escEnergy = geoHit.energyEscaped();
-          double totEnergy = geoHit.energyTotal();
-          double particleID = (*hit_i).particleID();
+          if (Element) {
+	  	double eta = Element->eta();
+          	double phi = Element->phi();
+          	double radius = Element->r();
+          	double z = Element->z();
+          	double emEnergy = geoHit.energyEM();
+          	double nonEmEnergy = geoHit.energyNonEM();
+          	double invEnergy = geoHit.energyInvisible();
+          	double escEnergy = geoHit.energyEscaped();
+          	double totEnergy = geoHit.energyTotal();
+          	double particleID = (*hit_i).particleID();
 
-          m_h_calib_eta->Fill(eta);
-          m_h_calib_phi->Fill(phi);
-          m_h_calib_rz->Fill(z,radius);
-          m_h_calib_etaphi->Fill(eta,phi);
-          m_h_calib_eEM->Fill(emEnergy);
-          m_h_calib_eNonEM->Fill(nonEmEnergy);
-          m_h_calib_eInv->Fill(invEnergy);
-          m_h_calib_eEsc->Fill(escEnergy);
-          m_h_calib_eTot->Fill(totEnergy);
-          m_h_calib_eTotpartID->Fill(particleID, totEnergy);
+          	m_h_calib_eta->Fill(eta);
+          	m_h_calib_phi->Fill(phi);
+          	m_h_calib_zr->Fill(z, radius);
+          	m_h_calib_etaphi->Fill(eta,phi);
+          	m_h_calib_eEM->Fill(emEnergy);
+          	m_h_calib_eNonEM->Fill(nonEmEnergy);
+          	m_h_calib_eInv->Fill(invEnergy);
+          	m_h_calib_eEsc->Fill(escEnergy);
+          	m_h_calib_eTot->Fill(totEnergy);
+          	m_h_calib_eTotpartID->Fill(particleID, totEnergy);
 
-          m_calib_eta->push_back(eta);
-          m_calib_phi->push_back(phi);
-          m_calib_radius->push_back(radius);
-          m_calib_z->push_back(z);
-          m_calib_eEM->push_back(emEnergy);
-          m_calib_eNonEM->push_back(nonEmEnergy);
-          m_calib_eInv->push_back(invEnergy);
-          m_calib_eEsc->push_back(escEnergy);
-          m_calib_eTot->push_back(totEnergy);
-          m_calib_partID->push_back(particleID);
+          	m_calib_eta->push_back(eta);
+          	m_calib_phi->push_back(phi);
+          	m_calib_radius->push_back(radius);
+          	m_calib_z->push_back(z);
+          	m_calib_eEM->push_back(emEnergy);
+          	m_calib_eNonEM->push_back(nonEmEnergy);
+          	m_calib_eInv->push_back(invEnergy);
+          	m_calib_eEsc->push_back(escEnergy);
+          	m_calib_eTot->push_back(totEnergy);
+          	m_calib_partID->push_back(particleID);
+	  }
+	  else {
+		  ATH_MSG_WARNING("CaloDetDescrElement is NULL");
+	  }
         }
       }
     }
