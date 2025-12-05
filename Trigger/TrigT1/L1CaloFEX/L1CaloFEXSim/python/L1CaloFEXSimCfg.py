@@ -247,8 +247,10 @@ def L1CaloFEXSimCfg(flags, eFexTowerInputs = ["L1_eFexDataTowers","L1_eFexEmulat
             decoderAlg = CompFactory.L1TriggerByteStreamDecoderAlg(name="L1TriggerByteStreamDecoder", DecoderTools=[inputgFexTool], MaybeMissingROBs=maybeMissingRobs)
             acc.addEventAlgo(decoderAlg)
 
-        from L1CaloFEXAlgos.FexEmulatedTowersConfig import gFexEmulatedTowersCfg
-        acc.merge(gFexEmulatedTowersCfg(flags,name="L1_gFexEmulatedTowers"))
+        # only create emulated towers if not a POOL file or not EmulatedTowers collection
+        if not Format.POOL or "L1_gFexEmulatedTowers" not in flags.Input.Collections:
+            from L1CaloFEXAlgos.FexEmulatedTowersConfig import gFexEmulatedTowersCfg
+            acc.merge(gFexEmulatedTowersCfg(flags,name="L1_gFexEmulatedTowers"))
 
         gFEXTowerSummer = CompFactory.LVL1.gFexTowerSummer('gFexTowerSummer')
         gFEXTowerSummer.gFexDataTowers = "L1_gFexEmulatedTowers" if flags.Input.isMC else "L1_gFexDataTowers"
