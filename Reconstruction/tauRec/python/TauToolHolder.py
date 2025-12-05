@@ -11,7 +11,7 @@
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.AccumulatorCache import AccumulatorCache
-from AthenaConfiguration.Enums import ProductionStep
+from AthenaConfiguration.Enums import ProductionStep, LHCPeriod
 from AthenaCommon.SystemOfUnits import GeV, deg
 
 ########################################################################
@@ -168,9 +168,14 @@ def TauTrackRNNClassifierCfg(flags):
     if flags.Tau.associateLRT and not flags.Tau.classifyLRT:
         _classifyLRT = False
 
+    _skipBadTrack = False
+    if flags.GeoModel.Run is LHCPeriod.Run4:
+        _skipBadTrack = True
+
     myTauTrackClassifier = TauTrackRNNClassifier( name = _name,
                                                   Classifiers = [ result.popToolsAndMerge(TauTrackRNNCfg(flags)) ],
-                                                  classifyLRT = _classifyLRT )
+                                                  classifyLRT = _classifyLRT,
+                                                  SkipBadTracks = _skipBadTrack)
 
     result.setPrivateTools(myTauTrackClassifier)
     return result
