@@ -14,7 +14,7 @@
 #define LARRECUTILS_LARROIMAPCONDALG_H
 
 
-#include "AthenaBaseComps/AthReentrantAlgorithm.h"
+#include "AthenaBaseComps/AthCondAlgorithm.h"
 #include "LArRecConditions/LArRoIMap.h"
 #include "LArRecConditions/LArFebRodMapping.h"
 #include "LArCabling/LArOnOffIdMapping.h"
@@ -34,10 +34,10 @@ class LArFCAL_ID;
  * @brief Conditions algorithm producing LArRoIMap.
  */
 class LArRoIMapCondAlg
-  : public AthReentrantAlgorithm
+  : public AthCondAlgorithm
 {
 public:
-  using AthReentrantAlgorithm::AthReentrantAlgorithm;
+  using AthCondAlgorithm::AthCondAlgorithm;
 
   
   /**

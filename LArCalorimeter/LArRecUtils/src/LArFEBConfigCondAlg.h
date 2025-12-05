@@ -5,7 +5,7 @@
 #ifndef LARRECUTILS_LARFEBCONFIGCONDALG
 #define LARRECUTILS_LARFEBCONFIGCONDALG
 
-#include "AthenaBaseComps/AthReentrantAlgorithm.h"
+#include "AthenaBaseComps/AthCondAlgorithm.h"
 #include "AthenaKernel/IOVSvcDefs.h"
 #include "LArRecConditions/LArFebConfig.h"
 #include "StoreGate/CondHandleKeyArray.h"
@@ -16,7 +16,7 @@
 
 class LArOnlineID;
 
-class LArFEBConfigCondAlg: public AthReentrantAlgorithm {
+class LArFEBConfigCondAlg: public AthCondAlgorithm {
 
  public:
   LArFEBConfigCondAlg(const std::string& name, ISvcLocator* pSvcLocator); 
