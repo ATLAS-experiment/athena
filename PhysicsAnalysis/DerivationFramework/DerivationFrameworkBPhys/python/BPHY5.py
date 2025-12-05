@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 #====================================================================
 # BPHY5.py
@@ -19,7 +19,10 @@ BpipiContainerName   = "BPHY5BJpsipipiXCandidates"
 BdJpsiKstContainerName = "BPHY5BdJpsiKstCandidates"
 
 def BPHY5Kernel(flags, Decays="BsB+BdKstBpipiX"):
-   from DerivationFrameworkBPhys.commonBPHYMethodsCfg import (BPHY_V0ToolCfg,  BPHY_InDetDetailedTrackSelectorToolCfg, BPHY_VertexPointEstimatorCfg, BPHY_TrkVKalVrtFitterCfg)
+   from DerivationFrameworkBPhys.commonBPHYMethodsCfg import (
+      BPHY_V0ToolCfg, BPHY_InDetDetailedTrackSelectorToolCfg,
+      BPHY_VertexPointEstimatorCfg, BPHY_TrkVKalVrtFitterCfg,
+      AugOriginalCountsCfg)
    from JpsiUpsilonTools.JpsiUpsilonToolsConfig import PrimaryVertexRefittingToolCfg
    acc = ComponentAccumulator()
    isSimulation = flags.Input.isMC
@@ -40,11 +43,6 @@ def BPHY5Kernel(flags, Decays="BsB+BdKstBpipiX"):
        from DerivationFrameworkInDet.InDetToolsConfig import InDetLRTMergeCfg
        acc.merge(InDetLRTMergeCfg(flags))
 
-   BPHY5_AugOriginalCounts = CompFactory.DerivationFramework.AugOriginalCounts(
-       name = "BPHY5_AugOriginalCounts",
-       VertexContainer = "PrimaryVertices",
-       TrackContainer = "InDetTrackParticles",
-       TrackLRTContainer = "InDetLargeD0TrackParticles" if doLRT else "")
    toRelink = ["InDetTrackParticles", "InDetLargeD0TrackParticles"] if doLRT else []
    MuonReLink = [ "Muons", "MuonsLRT" ] if doLRT else []
 
@@ -101,6 +99,9 @@ def BPHY5Kernel(flags, Decays="BsB+BdKstBpipiX"):
          MassMax               = 3600.0,
          Chi2Max               = 200, Do3d = False,
          DoVertexType =1)
+
+   BPHY5_AugOriginalCounts = acc.popToolsAndMerge(
+      AugOriginalCountsCfg(flags, name = "BPHY5_AugOriginalCounts"))
 
    BPHY5BsJpsiKK = CompFactory.Analysis.JpsiPlus2Tracks(name = "BPHY5BsJpsiKK",
          kaonkaonHypothesis          = True,

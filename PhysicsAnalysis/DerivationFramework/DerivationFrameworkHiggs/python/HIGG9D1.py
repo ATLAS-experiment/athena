@@ -22,14 +22,6 @@ def HIGG9D1KernelCfg(flags, name='HIGG9D1Kernel', **kwargs):
     else:
         log_HIGG9D1.info("flags.Tracking.doLargeD0 is False")
 
-    # Adds primary vertex counts and track counts to EventInfo before they are thinned
-    HIGG9D1_AugOriginalCounts = CompFactory.DerivationFramework.AugOriginalCounts(
-       name              = "HIGG9D1_AugOriginalCounts",
-       VertexContainer   = "PrimaryVertices",
-       TrackContainer    = "InDetTrackParticles",
-       TrackLRTContainer = "InDetLargeD0TrackParticles" if doLRT else "" )
-    acc.addPublicTool(HIGG9D1_AugOriginalCounts)
-
     mainMuonInput = "StdWithLRTMuons" if doLRT else "Muons"
     mainIDInput   = "InDetWithLRTTrackParticles" if doLRT else "InDetTrackParticles"
     if doLRT:
@@ -47,7 +39,16 @@ def HIGG9D1KernelCfg(flags, name='HIGG9D1Kernel', **kwargs):
     MuonToRelink = [ "Muons", "MuonsLRT" ] if doLRT else []
     TrkToRelink = ["InDetTrackParticles", "InDetLargeD0TrackParticles"] if doLRT else []
 
-    from DerivationFrameworkBPhys.commonBPHYMethodsCfg import (BPHY_V0ToolCfg,  BPHY_InDetDetailedTrackSelectorToolCfg, BPHY_VertexPointEstimatorCfg, BPHY_TrkVKalVrtFitterCfg)
+    from DerivationFrameworkBPhys.commonBPHYMethodsCfg import (
+        BPHY_V0ToolCfg,  BPHY_InDetDetailedTrackSelectorToolCfg,
+        BPHY_VertexPointEstimatorCfg, BPHY_TrkVKalVrtFitterCfg,
+        AugOriginalCountsCfg)
+
+    # Adds primary vertex counts and track counts to EventInfo before they are thinned
+    HIGG9D1_AugOriginalCounts = acc.popToolsAndMerge(
+        AugOriginalCountsCfg(flags, name = "HIGG9D1_AugOriginalCounts"))
+    acc.addPublicTool(HIGG9D1_AugOriginalCounts)
+
     V0Tools = acc.popToolsAndMerge(BPHY_V0ToolCfg(flags, "HIGG9D1"))
     vkalvrt = acc.popToolsAndMerge(BPHY_TrkVKalVrtFitterCfg(flags, "HIGG9D1"))
     acc.addPublicTool(vkalvrt)
