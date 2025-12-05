@@ -81,7 +81,7 @@ bool TFCSGANEtaSlice::LoadGAN() {
                     std::to_string(m_pid) + "_eta_" + std::to_string(m_etaMin) +
                     "_" + std::to_string(m_etaMax) + "_All.*";
     ATH_MSG_DEBUG("Gan input file name " << inputFileName);
-    m_net_all = TFCSNetworkFactory::create(inputFileName);
+    m_net_all = TFCSNetworkFactory::create(std::move(inputFileName));
     if (m_net_all == nullptr)
       success = false;
   } else if (m_pid == 2212) {
