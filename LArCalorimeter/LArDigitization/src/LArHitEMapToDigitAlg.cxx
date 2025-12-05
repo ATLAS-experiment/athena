@@ -20,29 +20,6 @@
 using CLHEP::RandFlat;
 using CLHEP::RandGaussZiggurat;
 
-LArHitEMapToDigitAlg::LArHitEMapToDigitAlg(const std::string& name, ISvcLocator* pSvcLocator) :
-   AthReentrantAlgorithm(name,pSvcLocator)
-{
-  // default properties
-  m_LowGainThresh[EM]    = 3900;//ADC counts in MediumGain
-  m_HighGainThresh[EM]   = 1300;//ADC counts in MediumGain
-  m_LowGainThresh[HEC]   = 2500;//ADC counts in MediumGain
-  m_HighGainThresh[HEC]  = 0;//-> high-gain never used for HEC
-  m_LowGainThresh[FCAL]  = 2000.;//ADC counts in Medium Gain
-  m_HighGainThresh[FCAL] = 1100.;//ADCcounts in MediumGain
-  m_LowGainThresh[EMIW]    = 3900;//ADC counts in MediumGain
-  m_HighGainThresh[EMIW]   = 1300;//ADC counts in MediumGain
-  // given the enum, it seems complicated to do it with modern configuration
-  declareProperty("LowGainThreshEM",m_LowGainThresh[EM],"Medium/Low gain transition in EM");
-  declareProperty("HighGainThreshEM",m_HighGainThresh[EM],"Medium/High gain transition in EM");
-  declareProperty("LowGainThreshHEC",m_LowGainThresh[HEC],"Medium/Low gain transition in HEC");
-  declareProperty("HighGainThreshHEC",m_HighGainThresh[HEC],"Medium/High gain transition in HEC");
-  declareProperty("LowGainThreshFCAL",m_LowGainThresh[FCAL],"Medium/Low gain transition in FCAL");
-  declareProperty("HighGainThreshFCAL",m_HighGainThresh[FCAL],"Medium/High gain transition in FCAL");
-  declareProperty("LowGainThreshEMECIW",m_LowGainThresh[EMIW],"Medium/Low gain transition in EMEC IW");
-  declareProperty("HighGainThreshEMECIW",m_HighGainThresh[EMIW],"Medium/High gain transition in EMEC IW");
-}
-
 StatusCode LArHitEMapToDigitAlg::initialize()
 {
 
@@ -601,14 +578,14 @@ StatusCode LArHitEMapToDigitAlg::MakeDigit(
 //          add possibility to saturate at 0 for negative signals
 //
     if (xAdc <0)  Adc=0;
-    else if (xAdc >= MAXADC) Adc=MAXADC;
+    else if (xAdc >= m_maxADC) Adc=m_maxADC;
     else Adc = (short) xAdc;
 
     AdcSample[i]=Adc;
 
     if(m_doDigiTruth){
       if (xAdc_DigiHSTruth <0)  Adc_DigiHSTruth=0;
-      else if (xAdc_DigiHSTruth >= MAXADC) Adc_DigiHSTruth=MAXADC;
+      else if (xAdc_DigiHSTruth >= m_maxADC) Adc_DigiHSTruth=m_maxADC;
       else Adc_DigiHSTruth = (short) xAdc_DigiHSTruth;
       AdcSample_DigiHSTruth[i] = Adc_DigiHSTruth;
     }
