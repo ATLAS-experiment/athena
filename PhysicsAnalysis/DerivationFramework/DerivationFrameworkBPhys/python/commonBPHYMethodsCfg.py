@@ -25,9 +25,17 @@ def BPHY_InDetDetailedTrackSelectorToolCfg(flags, BPHYDerivationName):
 
 def Thin_vtxTrkCfg(flags, name, **kwargs):
     acc = ComponentAccumulator()
-    acc.addPublicTool(CompFactory.DerivationFramework.Thin_vtxTrk(name, **kwargs),
-                      primary = True)
-    return acc 
+    acc.addPublicTool(CompFactory.DerivationFramework.Thin_vtxTrk(name, **kwargs))
+    return acc
+
+def AugOriginalCountsCfg(flags, name="AugOriginalCounts", **kwargs):
+    acc = ComponentAccumulator()
+    kwargs.setdefault("TrackLRTContainer",
+                      "InDetLargeD0TrackParticles"
+                      if flags.Tracking.doLargeD0 else "")
+    acc.setPrivateTools(
+        CompFactory.DerivationFramework.AugOriginalCounts(name, **kwargs))
+    return acc
 
 def getDefaultAllVariables():
     return ["EventInfo"]

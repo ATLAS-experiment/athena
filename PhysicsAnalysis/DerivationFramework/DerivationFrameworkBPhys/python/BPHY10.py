@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 #====================================================================
 # BPHY10.py
@@ -13,16 +13,16 @@ streamName = "StreamDAOD_BPHY10"
 
 def BPHY10Cfg(flags):
     from AthenaServices.PartPropSvcConfig import PartPropSvcCfg
-    from DerivationFrameworkBPhys.commonBPHYMethodsCfg import (BPHY_V0ToolCfg,  BPHY_InDetDetailedTrackSelectorToolCfg, BPHY_VertexPointEstimatorCfg, BPHY_TrkVKalVrtFitterCfg)
+    from DerivationFrameworkBPhys.commonBPHYMethodsCfg import (
+        BPHY_V0ToolCfg,  BPHY_InDetDetailedTrackSelectorToolCfg,
+        BPHY_VertexPointEstimatorCfg, BPHY_TrkVKalVrtFitterCfg,
+        AugOriginalCountsCfg)
     from JpsiUpsilonTools.JpsiUpsilonToolsConfig import PrimaryVertexRefittingToolCfg
 
     acc = ComponentAccumulator()
     acc.getPrimaryAndMerge(PartPropSvcCfg(flags))
     isSimulation = flags.Input.isMC
-    BPHY10_AugOriginalCounts = CompFactory.DerivationFramework.AugOriginalCounts(
-                              name = "BPHY10_AugOriginalCounts",
-                              VertexContainer = "PrimaryVertices",
-                              TrackContainer = "InDetTrackParticles" )
+
     V0Tools = acc.popToolsAndMerge(BPHY_V0ToolCfg(flags, BPHYDerivationName))
     vkalvrt = acc.popToolsAndMerge(BPHY_TrkVKalVrtFitterCfg(flags, BPHYDerivationName))        # VKalVrt vertex fitter
     acc.addPublicTool(vkalvrt)
@@ -209,6 +209,9 @@ def BPHY10Cfg(flags):
     CascadeCollections += BPHY10JpsiLambda.CascadeVertexCollections
     CascadeCollections += BPHY10JpsiLambdabar.CascadeVertexCollections
 
+    BPHY10_AugOriginalCounts = acc.popToolsAndMerge(
+        AugOriginalCountsCfg(flags, name = "BPHY10_AugOriginalCounts"))
+    
     if not isSimulation: #Only Skim Data
        BPHY10_SelectBdJpsiKstEvent = CompFactory.DerivationFramework.xAODStringSkimmingTool(
                     name = "BPHY10_SelectBdJpsiKstEvent",
@@ -224,11 +227,10 @@ def BPHY10Cfg(flags):
        acc.addPublicTool(BPHY10_SelectBdJpsiKstEvent)
        acc.addPublicTool(BPHY10SkimmingOR)
 
-
     augTools = [BPHY10JpsiSelectAndWrite,  BPHY10_Select_Jpsi2mumu,
-                          BPHY10BdKstSelectAndWrite, BPHY10_Select_Bd2JpsiKst, BPHY10_Select_Bd2JpsiKstbar,
-                          BPHY10_Reco_V0Finder, BPHY10JpsiKshort, BPHY10JpsiLambda, BPHY10JpsiLambdabar,
-                          BPHY10_AugOriginalCounts]
+                BPHY10BdKstSelectAndWrite, BPHY10_Select_Bd2JpsiKst, BPHY10_Select_Bd2JpsiKstbar,
+                BPHY10_Reco_V0Finder, BPHY10JpsiKshort, BPHY10JpsiLambda, BPHY10JpsiLambdabar,
+                BPHY10_AugOriginalCounts]
     for t in  augTools : acc.addPublicTool(t)
     #from AthenaCommon.Constants import DEBUG
     acc.addEventAlgo(CompFactory.DerivationFramework.DerivationKernel("BPHY10Kernel",

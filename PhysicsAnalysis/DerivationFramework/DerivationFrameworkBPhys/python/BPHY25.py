@@ -13,21 +13,20 @@ streamName = "StreamDAOD_BPHY25"
 
 def BPHY25Cfg(flags):
     from AthenaServices.PartPropSvcConfig import PartPropSvcCfg
-    from DerivationFrameworkBPhys.commonBPHYMethodsCfg import (BPHY_V0ToolCfg,  BPHY_InDetDetailedTrackSelectorToolCfg, BPHY_VertexPointEstimatorCfg, BPHY_TrkVKalVrtFitterCfg)
+    from DerivationFrameworkBPhys.commonBPHYMethodsCfg import (
+        BPHY_V0ToolCfg, BPHY_InDetDetailedTrackSelectorToolCfg,
+        BPHY_VertexPointEstimatorCfg, BPHY_TrkVKalVrtFitterCfg,
+        AugOriginalCountsCfg)
     from JpsiUpsilonTools.JpsiUpsilonToolsConfig import PrimaryVertexRefittingToolCfg
     acc = ComponentAccumulator()
     acc.getPrimaryAndMerge(PartPropSvcCfg(flags))
     isSimulation = flags.Input.isMC
 
-    doLRT = True
     # Adds primary vertex counts and track counts to EventInfo before they are thinned
-    BPHY25_AugOriginalCounts = CompFactory.DerivationFramework.AugOriginalCounts(
-       name              = "BPHY25_AugOriginalCounts",
-       VertexContainer   = "PrimaryVertices",
-       TrackContainer    = "InDetTrackParticles",
-       TrackLRTContainer = "InDetLargeD0TrackParticles" if doLRT else "" )
-    acc.addPublicTool(BPHY25_AugOriginalCounts)
+    BPHY25_AugOriginalCounts = acc.popToolsAndMerge(
+        AugOriginalCountsCfg(flags, name = "BPHY25_AugOriginalCounts"))
 
+    doLRT = flags.Tracking.doLargeD0
     mainIDInput = "InDetWithLRTTrackParticles" if doLRT else "InDetTrackParticles"
     if doLRT:
         from DerivationFrameworkInDet.InDetToolsConfig import InDetLRTMergeCfg
@@ -690,7 +689,9 @@ def BPHY25Cfg(flags):
     BPHY25_SelectEvent = CompFactory.DerivationFramework.AnyVertexSkimmingTool(name = "BPHY25_SelectEvent", VertexContainerNames = passedCandidates)
     acc.addPublicTool(BPHY25_SelectEvent)
 
-    augmentation_tools = [BPHY25_AugOriginalCounts, BPHY25_Reco_mumu, BPHY25FourTrackReco_B0, BPHY25ThreeTrackReco_Bpm, BPHY25Select_Jpsi, BPHY25Select_mumu] + list_obj
+    augmentation_tools = [BPHY25_AugOriginalCounts, BPHY25_Reco_mumu,
+                          BPHY25FourTrackReco_B0, BPHY25ThreeTrackReco_Bpm,
+                          BPHY25Select_Jpsi, BPHY25Select_mumu] + list_obj
     for t in augmentation_tools : acc.addPublicTool(t)
 
     acc.addEventAlgo(CompFactory.DerivationFramework.DerivationKernel(
