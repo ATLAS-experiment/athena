@@ -747,8 +747,9 @@ namespace DerivationFramework {
       chi2_V3_decor(*cascadeVertices[2])     = m_V0Tools->chisq(jxVtx);
       ndof_V3_decor(*cascadeVertices[2])     = m_V0Tools->ndof(jxVtx);
 
-      double Mass_Moth = m_CascadeTools->invariantMass(moms[topoN-1]);
-      ATH_CHECK(helper.FillCandwithRefittedVertices(m_refitPV, defaultPVContainer.cptr(), m_refitPV ? refPvContainer.ptr() : 0, &(*m_pvRefitter), m_PV_max, m_DoVertexType, cascade_info, topoN-1, Mass_Moth, vtx));
+      if(m_cascadeFitWithPV==0) {
+	ATH_CHECK(helper.FillCandwithRefittedVertices(m_refitPV, defaultPVContainer.cptr(), m_refitPV ? refPvContainer.ptr() : 0, &(*m_pvRefitter), m_PV_max, m_DoVertexType, cascade_info, topoN-1, m_massMainV, vtx));
+      }
 
       for(size_t i=0; i<topoN; i++) {
         VtxWriteHandles[i].ptr()->push_back(cascadeVertices[i]);
