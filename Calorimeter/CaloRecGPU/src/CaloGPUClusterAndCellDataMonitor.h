@@ -88,10 +88,9 @@ class CaloGPUClusterAndCellDataMonitor :
 
   StatusCode add_data(const EventContext & ctx,
                       const CaloRecGPU::ConstantDataHolder & constant_data,
-                      const CaloRecGPU::Helpers::CPU_object<CaloRecGPU::CellInfoArr> & cell_info,
-                      const CaloRecGPU::Helpers::CPU_object<CaloRecGPU::CellStateArr> & cell_state,
-                      const CaloRecGPU::Helpers::CPU_object<CaloRecGPU::ClusterInfoArr> & clusters,
-                      const CaloRecGPU::Helpers::CPU_object<CaloRecGPU::ClusterMomentsArr> & moments,
+                      const CaloRecGPU::CellInfoArr * cell_info,
+                      const CaloRecGPU::ClusterInfoArr * clusters,
+                      const std::vector<int> & cells_prefix_sum,
                       const std::string & tool_name) const;
 
 
@@ -108,21 +107,13 @@ class CaloGPUClusterAndCellDataMonitor :
   */
   bool filter_tool_by_name(const std::string & tool_name) const;
 
-  StatusCode convert_to_GPU_data_structures(const EventContext & ctx,
-                                            const CaloRecGPU::ConstantDataHolder & constant_data,
-                                            const xAOD::CaloClusterContainer * cluster_collection_ptr,
-                                            CaloRecGPU::Helpers::CPU_object<CaloRecGPU::CellInfoArr> & cell_info,
-                                            CaloRecGPU::Helpers::CPU_object<CaloRecGPU::CellStateArr> & cell_state,
-                                            CaloRecGPU::Helpers::CPU_object<CaloRecGPU::ClusterInfoArr> & clusters,
-                                            CaloRecGPU::Helpers::CPU_object<CaloRecGPU::ClusterMomentsArr> & moments) const;
-
-  ///Remove invalid clusters, reorder by ET and update the tags accordingly.
-  StatusCode compactify_clusters(const EventContext & ctx,
-                                 const CaloRecGPU::ConstantDataHolder & constant_data,
-                                 const CaloRecGPU::Helpers::CPU_object<CaloRecGPU::CellInfoArr> & cell_info,
-                                 CaloRecGPU::Helpers::CPU_object<CaloRecGPU::CellStateArr> & cell_state,
-                                 CaloRecGPU::Helpers::CPU_object<CaloRecGPU::ClusterInfoArr> & clusters,
-                                 CaloRecGPU::Helpers::CPU_object<CaloRecGPU::ClusterMomentsArr> & moments) const;
+  ///Update the cell representation so the cells-in-clusters are ordered by index
+  ///and have a prefix sum.
+  StatusCode update_cell_representation(const EventContext & ctx,
+                                        const CaloRecGPU::ConstantDataHolder & constant_data,
+                                        const CaloRecGPU::CellInfoArr * cell_info,
+                                        CaloRecGPU::ClusterInfoArr * clusters,
+                                        std::vector<int> & cells_prefix_sum) const;
 
 
   struct sample_comparisons_holder
@@ -157,24 +148,16 @@ class CaloGPUClusterAndCellDataMonitor :
   StatusCode match_clusters(sample_comparisons_holder & sch,
                             const CaloRecGPU::ConstantDataHolder & constant_data,
                             const CaloRecGPU::CellInfoArr & cell_info,
-                            const CaloRecGPU::CellStateArr & cell_state_1,
-                            const CaloRecGPU::CellStateArr & cell_state_2,
                             const CaloRecGPU::ClusterInfoArr & cluster_info_1,
                             const CaloRecGPU::ClusterInfoArr & cluster_info_2,
-                            const CaloRecGPU::ClusterMomentsArr & /*moments_1*/,
-                            const CaloRecGPU::ClusterMomentsArr & /*moments_2*/,
                             const bool match_in_energy,
                             const bool match_without_shared) const;
 
   StatusCode match_clusters_perfectly(sample_comparisons_holder & sch,
                                       const CaloRecGPU::ConstantDataHolder & constant_data,
                                       const CaloRecGPU::CellInfoArr & cell_info,
-                                      const CaloRecGPU::CellStateArr & cell_state_1,
-                                      const CaloRecGPU::CellStateArr & cell_state_2,
                                       const CaloRecGPU::ClusterInfoArr & cluster_info_1,
                                       const CaloRecGPU::ClusterInfoArr & cluster_info_2,
-                                      const CaloRecGPU::ClusterMomentsArr & /*moments_1*/,
-                                      const CaloRecGPU::ClusterMomentsArr & /*moments_2*/,
                                       const bool match_without_shared) const;
                                     
   //--------------------------------------------------
@@ -206,6 +189,10 @@ class CaloGPUClusterAndCellDataMonitor :
   /** @brief Monitoring tool.
     */
   ToolHandle< GenericMonitoringTool > m_moniTool { this, "MonitoringTool", "", "Monitoring tool" };
+  
+  /** @brief Cell indices to fill as disabled cells (useful if the cell vector is always missing the same cells).
+   */
+  Gaudi::Property<std::vector<int>> m_missingCellsToFill {this, "MissingCellsToFill", {}, "Force fill these cells as disabled on empty containers."};
 
   //--------------------------------------------------
   //
@@ -280,9 +267,8 @@ class CaloGPUClusterAndCellDataMonitor :
   struct per_tool_storage
   {
     CaloRecGPU::CellInfoArr cell_info;
-    CaloRecGPU::CellStateArr cell_state;
     CaloRecGPU::ClusterInfoArr clusters;
-    CaloRecGPU::ClusterMomentsArr moments;
+    std::vector<int> cells_prefix_sum;
   };
 
   /** @brief Stores the intermediate results needed for tool-level matching.

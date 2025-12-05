@@ -640,6 +640,84 @@ namespace CaloRecGPU
     }
 
   };
+  
+  /*! @class Tag_1_13_32_18
+  
+      A tag with a bit flag, then 13 bits (for a counter),
+      then 32 bits (for a float) and finally 18 bits (for a cell index)
+  */
+  struct Tag_1_13_32_18 : public GenericTagBase
+  {
+   public:
+
+    using GenericTagBase::GenericTagBase;
+
+   protected:
+
+    constexpr static carrier s_flag_mask          = 0x8000000000000000ULL;
+    constexpr static carrier s_13_bit_mask        = 0x7FFC000000000000ULL;
+    constexpr static carrier s_32_bit_mask        = 0x0003FFFFFFFC0000ULL;
+    constexpr static carrier s_18_bit_mask        = 0x000000000003FFFFULL;
+    
+    constexpr static unsigned int s_18_bit_offset = 0;
+    constexpr static unsigned int s_32_bit_offset = s_18_bit_offset + 18;
+    constexpr static unsigned int s_13_bit_offset = s_32_bit_offset + 32;
+        
+   public:
+
+    [[nodiscard]] constexpr bool get_flag() const
+    {
+      return value & s_flag_mask;
+    }
+    
+    [[nodiscard]] constexpr carrier set_flag() const
+    {
+      return value | s_flag_mask;
+    }
+    
+    [[nodiscard]] constexpr carrier unset_flag() const
+    {
+      return value & (~s_flag_mask);
+    }
+        
+    [[nodiscard]] constexpr carrier make_flag(const bool flag) const
+    {
+      return (value & (~(s_flag_mask * (!flag)))) | (s_flag_mask * flag);
+    }
+        
+    [[nodiscard]] constexpr uint32_t get_13_bits() const
+    {
+      return (value & s_13_bit_mask) >> s_13_bit_offset;
+    }
+    
+    [[nodiscard]] constexpr uint32_t get_32_bits() const
+    {
+      return (value & s_32_bit_mask) >> s_32_bit_offset;
+    }
+
+    [[nodiscard]] constexpr uint32_t get_18_bits() const
+    {
+      return (value & s_18_bit_mask) >> s_18_bit_offset;
+    }
+    
+    [[nodiscard]] static constexpr carrier make_generic_tag(const uint32_t bits_18, const uint32_t bits_32,
+                                                            const uint32_t bits_13, const bool flag)
+    {
+      constexpr uint32_t bits_18_mask = 0x0003FFFFU;
+      constexpr uint32_t bits_13_mask = 0x00001FFFU;
+      
+      carrier ret = bits_13 & bits_13_mask;
+      
+      ret = (ret << 32) | bits_32;
+      
+      ret = (ret << 18) | (bits_18 & bits_18_mask);
+      
+      ret = ret | (s_flag_mask * flag);
+
+      return ret;
+    }
+
+  };
 }
 
 #endif

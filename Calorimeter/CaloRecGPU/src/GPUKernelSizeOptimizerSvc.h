@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 //
 // Dear emacs, this is -*- c++ -*-
 //
@@ -54,7 +54,7 @@ class GPUKernelSizeOptimizerSvc : public extends <AthService, IGPUKernelSizeOpti
   /** @brief Whether the device + environment in use support cooperative groups. */
   virtual bool can_use_cooperative_groups() const override
   {
-    return m_coopgroup_support;
+    return (!m_overrideCooperativeGroups && m_coopgroup_support);
   }
 
   /** @brief Whether the device + environment in use support dynamic parallelism. */
@@ -127,6 +127,14 @@ class GPUKernelSizeOptimizerSvc : public extends <AthService, IGPUKernelSizeOpti
   /** @brief If @c m_outputSizes is @p true, the file to which the kernel sizes should be output.
    */
   Gaudi::Property<std::string> m_outputFile {this, "OutputFile", "sizes.json", "Kernel size output file"};
+  
+  /** @brief If @p true, forces @c can_use_cooperative_groups to always return @p false.
+   *  Defaults to @p false.
+   *  
+   *  GPU algorithms may implement alternative code paths when cooperative groups are not supported.
+   *  This allows easier testing of the performance impact of such a fallback.
+   */
+  Gaudi::Property<bool> m_overrideCooperativeGroups {this, "OverrideCooperativeGroups", false, "Disable cooperative group support (to force fallback to alternative iteration method)."};
 
   struct KernelsEntry
   {

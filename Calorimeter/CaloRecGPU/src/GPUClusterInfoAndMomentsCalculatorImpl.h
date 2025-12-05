@@ -18,115 +18,6 @@
 
 namespace ClusterMomentsCalculator
 {
-  inline CUDA_HOS_DEV void partial_kahan_babushka_neumaier_sum(const float & to_add, float & sum, float & corr)
-  {
-    const float t = sum + to_add;
-
-    const bool test = fabsf(sum) >= fabsf(to_add);
-
-    const float opt_1 = (sum - t) + to_add;
-    const float opt_2 = (to_add - t) + sum;
-
-    corr += (test) * opt_1 + (!test) * opt_2;
-
-    sum = t;
-  }
-
-
-  //There are some extra operations, yes,
-  //but we benefit from added precision
-  //that can compensate for not using doubles...
-  template < class ... Floats, class disabler = std::enable_if_t < (std::is_same_v<std::decay_t<Floats>, float> && ...) >>
-  CUDA_HOS_DEV float sum_kahan_babushka_neumaier(const Floats & ... fs)
-  {
-    float ret = 0.f;
-    float corr = 0.f;
-
-    (partial_kahan_babushka_neumaier_sum(fs, ret, corr), ...);
-
-    return ret + corr;
-  }
-
-  //Algorithm that calculates a * b + c * d with better precision using FMA,
-  //following "Error bounds on complex floating-point multiplication with an FMA"
-  //by Jeannerod et. al.
-  inline CUDA_HOS_DEV
-  float product_sum_cornea_harrison_tang(const float a, const float b, const float c, const float d)
-  {
-    using namespace std;
-
-    const float w_1 = a * b;
-    const float w_2 = c * d;
-
-    const float e_1 = fmaf(a, b, -w_1);
-    const float e_2 = fmaf(c, d, -w_2);
-
-    return sum_kahan_babushka_neumaier(w_1, w_2, e_1, e_2);
-  }
-
-  //Generalization of the Cornea-Harrison-Tang algorithm for dot products.
-  inline CUDA_HOS_DEV
-  float corrected_dot_product(const float a_1, const float a_2, const float a_3,
-                              const float b_1, const float b_2, const float b_3)
-  {
-    using namespace std;
-
-    const float w_1 = a_1 * b_1;
-    const float w_2 = a_2 * b_2;
-    const float w_3 = a_3 * b_3;
-
-    const float e_1 = fmaf(a_1, b_1, -w_1);
-    const float e_2 = fmaf(a_2, b_2, -w_2);
-    const float e_3 = fmaf(a_3, b_3, -w_3);
-
-    return sum_kahan_babushka_neumaier(w_1, w_2, w_3, e_1, e_2, e_3);
-  }
-
-  inline CUDA_HOS_DEV
-  float corrected_dot_product(const float (&a)[3], const float (&b)[3])
-  {
-    return corrected_dot_product(a[0], a[1], a[2], b[0], b[1], b[2]);
-  }
-
-  //Cross product using the Cornea-Harrison-Tang algorithm
-  inline CUDA_HOS_DEV
-  void corrected_cross_product(float (&res)[3], const float a1, const float a2, const float a3, const float b1, const float b2, const float b3)
-  {
-    res[0] = product_sum_cornea_harrison_tang(a2, b3, -a3, b2);
-    res[1] = product_sum_cornea_harrison_tang(a3, b1, -a1, b3);
-    res[2] = product_sum_cornea_harrison_tang(a1, b2, -a2, b1);
-  }
-
-  inline CUDA_HOS_DEV
-  void corrected_cross_product(float (&res)[3], const float (&x)[3], const float (&y)[3])
-  {
-    corrected_cross_product(res, x[0], x[1], x[2], y[0], y[1], y[2]);
-  }
-
-  //Magnitude of a cross product using the generalization of the Cornea-Harrison-Tang algorithm
-  inline CUDA_HOS_DEV
-  float corrected_magn_cross_product(const float a1, const float a2, const float a3, const float b1, const float b2, const float b3)
-  {
-    using namespace std;
-
-    const float r_1 = product_sum_cornea_harrison_tang(a2, b3, -a3, b2);
-    const float r_2 = product_sum_cornea_harrison_tang(a3, b1, -a1, b3);
-    const float r_3 = product_sum_cornea_harrison_tang(a1, b2, -a2, b1);
-
-#ifdef __CUDA_ARCH__
-    return norm3df(r_1, r_2, r_3);
-#else
-    return hypot(r_1, r_2, r_3);
-#endif
-
-  }
-
-  inline CUDA_HOS_DEV
-  float corrected_magn_cross_product(const float (&x)[3], const float (&y)[3])
-  {
-    return corrected_magn_cross_product(x[0], x[1], x[2], y[0], y[1], y[2]);
-  }
-
   struct RealSymmetricMatrixSolverIterative
   //Following the Eigen implementation too...
   {
@@ -203,7 +94,7 @@ namespace ClusterMomentsCalculator
           const float q_w_3 = em_0_2 * b;
           const float q_c_3 = fmaf(em_0_2, b, -q_w_3);
 
-          const float q = sum_kahan_babushka_neumaier(q_w_1, q_w_2, -q_w_3, q_c_1, q_c_2, -q_c_3);
+          const float q = CaloRecGPU::Helpers::sum_kahan_babushka_neumaier(q_w_1, q_w_2, -q_w_3, q_c_1, q_c_2, -q_c_3);
 
           temp_diag[1] = fmaf( em_0_2, q, b);
           temp_diag[2] = fmaf(-em_0_2, q, c);
@@ -293,36 +184,36 @@ namespace ClusterMomentsCalculator
               givens_c = -t * givens_s;
             }
 
-          const float sdk  = product_sum_cornea_harrison_tang(givens_s,
-                                                              temp_diag[k],
-                                                              givens_c,
-                                                              temp_subdiag[k]);
+          const float sdk  = CaloRecGPU::Helpers::product_sum_cornea_harrison_tang(givens_s,
+                                                                       temp_diag[k],
+                                                                       givens_c,
+                                                                       temp_subdiag[k]);
                                                               
-          const float dkp1 = product_sum_cornea_harrison_tang(givens_s,
-                                                              temp_subdiag[k],
-                                                              givens_c,
-                                                              temp_diag[k + 1]);
+          const float dkp1 = CaloRecGPU::Helpers::product_sum_cornea_harrison_tang(givens_s,
+                                                                       temp_subdiag[k],
+                                                                       givens_c,
+                                                                       temp_diag[k + 1]);
 
-          temp_diag[k] = product_sum_cornea_harrison_tang(givens_c,
-                                                          product_sum_cornea_harrison_tang(givens_c,
-                                                                                           temp_diag[k],
-                                                                                           -givens_s,
-                                                                                           temp_subdiag[k]),
-                                                          -givens_s,
-                                                          product_sum_cornea_harrison_tang(givens_c,
-                                                                                           temp_subdiag[k],
-                                                                                           -givens_s,
-                                                                                           temp_diag[k + 1])
-                                                         );
-          temp_diag[k + 1] = product_sum_cornea_harrison_tang(givens_s, sdk,  givens_c, dkp1);
-          temp_subdiag[k] = product_sum_cornea_harrison_tang(givens_c, sdk, -givens_s, dkp1);
+          temp_diag[k] = CaloRecGPU::Helpers::product_sum_cornea_harrison_tang(givens_c,
+                                                                   CaloRecGPU::Helpers::product_sum_cornea_harrison_tang(givens_c,
+                                                                                                   temp_diag[k],
+                                                                                                   -givens_s,
+                                                                                                   temp_subdiag[k]),
+                                                                   -givens_s,
+                                                                   CaloRecGPU::Helpers::product_sum_cornea_harrison_tang(givens_c,
+                                                                                                   temp_subdiag[k],
+                                                                                                   -givens_s,
+                                                                                                   temp_diag[k + 1])
+                                                                 );
+          temp_diag[k + 1] = CaloRecGPU::Helpers::product_sum_cornea_harrison_tang(givens_s, sdk,  givens_c, dkp1);
+          temp_subdiag[k]  = CaloRecGPU::Helpers::product_sum_cornea_harrison_tang(givens_c, sdk, -givens_s, dkp1);
 
           if (k > start)
             {
-              temp_subdiag[k - 1] = product_sum_cornea_harrison_tang(givens_c,
-                                                                     temp_subdiag[k - 1],
-                                                                     -givens_s,
-                                                                     z);
+              temp_subdiag[k - 1] = CaloRecGPU::Helpers::product_sum_cornea_harrison_tang(givens_c,
+                                                                              temp_subdiag[k - 1],
+                                                                              -givens_s,
+                                                                              z);
             }
 
           x = temp_subdiag[k];
@@ -345,8 +236,8 @@ namespace ClusterMomentsCalculator
               const float c_1_old = c_1;
               const float c_2_old = c_2;
                
-              c_1 = product_sum_cornea_harrison_tang(givens_c, c_1_old, -givens_s, c_2_old);
-              c_2 = product_sum_cornea_harrison_tang(givens_s, c_1_old,  givens_c, c_2_old);
+              c_1 = CaloRecGPU::Helpers::product_sum_cornea_harrison_tang(givens_c, c_1_old, -givens_s, c_2_old);
+              c_2 = CaloRecGPU::Helpers::product_sum_cornea_harrison_tang(givens_s, c_1_old,  givens_c, c_2_old);
             }
         }
     }
@@ -400,7 +291,7 @@ namespace ClusterMomentsCalculator
 
           if (iter_count > max_iter)
             {
-              printf("OUT OF ITERS! %d %d\n", start, end);
+              //printf("OUT OF ITERS! %d %d\n", start, end);
               break;
             }
 
@@ -456,7 +347,7 @@ namespace ClusterMomentsCalculator
     {
       using namespace std;
 
-      shift = sum_kahan_babushka_neumaier(a_orig, b_orig, c_orig) / 3.f;
+      shift = CaloRecGPU::Helpers::sum_kahan_babushka_neumaier(a_orig, b_orig, c_orig) / 3.f;
       a = a_orig - shift;
       b = b_orig - shift;
       c = c_orig - shift;
@@ -498,14 +389,14 @@ namespace ClusterMomentsCalculator
       const float corr_ee = fmaf(e, e, -ee);
 
       const float c_0 = fmaf(2 * d, f * e,
-                             product_sum_cornea_harrison_tang(ab,  c, -a, ee) +
-                             product_sum_cornea_harrison_tang(-b, ff, -c, dd)   );
+                             CaloRecGPU::Helpers::product_sum_cornea_harrison_tang(ab,  c, -a, ee) +
+                             CaloRecGPU::Helpers::product_sum_cornea_harrison_tang(-b, ff, -c, dd)   );
       //Consider using some other strategy to select the best pairs
       //to minimize error here?
 
-      const float c_1 = sum_kahan_babushka_neumaier(ab, -dd, ac, -ff, bc, -ee, corr_ab, -corr_dd, corr_ac, -corr_ff, corr_bc, corr_ee);
+      const float c_1 = CaloRecGPU::Helpers::sum_kahan_babushka_neumaier(ab, -dd, ac, -ff, bc, -ee, corr_ab, -corr_dd, corr_ac, -corr_ff, corr_bc, corr_ee);
 
-      const float c_2 = sum_kahan_babushka_neumaier(a, b, c);
+      const float c_2 = CaloRecGPU::Helpers::sum_kahan_babushka_neumaier(a, b, c);
 
       constexpr float inv_3 = 1.f / 3.f;
 
@@ -515,7 +406,7 @@ namespace ClusterMomentsCalculator
 
       const float half_b = 0.5f * (fma(c_2_over_3, fma(2.f * c_2_over_3, c_2_over_3, -c_1), c_0));
 
-      const float q = max(product_sum_cornea_harrison_tang(a_over_3, a_over_3 * a_over_3, -half_b, half_b), 0.f);
+      const float q = max(CaloRecGPU::Helpers::product_sum_cornea_harrison_tang(a_over_3, a_over_3 * a_over_3, -half_b, half_b), 0.f);
 
       //None of what we are doing here is the best choice.
       //We would need to perform a proper, formal, numerical analysis
@@ -612,8 +503,8 @@ namespace ClusterMomentsCalculator
           vec_2[2] = e;
         }
 
-      corrected_cross_product(res, representative, vec_1);
-      corrected_cross_product(vec_1, representative, vec_2);
+      CaloRecGPU::Helpers::corrected_cross_product(res, representative, vec_1);
+      CaloRecGPU::Helpers::corrected_cross_product(vec_1, representative, vec_2);
       //Can safely override previous value...
 
 #ifdef __CUDA_ARCH__
@@ -699,7 +590,7 @@ namespace ClusterMomentsCalculator
 #else
               const float base_norm = 1.f / hypot(res[j][0], res[j][1], res[j][2]);
 #endif
-              const float extra_factor = 1.f - corrected_dot_product(res[k], res[j]);
+              const float extra_factor = 1.f - CaloRecGPU::Helpers::corrected_dot_product(res[k], res[j]);
 
               const float norm = base_norm / extra_factor;
 
@@ -715,7 +606,7 @@ namespace ClusterMomentsCalculator
               //but does eivecs.col(l) -= eivecs.col(k).dot(eivecs.col(l))*eivecs.col(l)
               //which... does not ortho-normalize anything.
 
-              const float prod = corrected_dot_product(res[k], res[j]);
+              const float prod = CaloRecGPU::Helpers::corrected_dot_product(res[k], res[j]);
 
               res[j][0] -= res[k][0] * prod;
               res[j][1] -= res[k][1] * prod;
@@ -738,7 +629,7 @@ namespace ClusterMomentsCalculator
               extract_one(second_e, res[j], extra_vector);
             }
 
-          corrected_cross_product(res[1], res[2], res[0]);
+          CaloRecGPU::Helpers::corrected_cross_product(res[1], res[2], res[0]);
 
 #ifdef __CUDA_ARCH__
           const float norm = rnorm3df(res[1][0], res[1][1], res[1][2]);
@@ -806,8 +697,7 @@ namespace ClusterMomentsCalculator
                                             const IGPUKernelSizeOptimizer & optimizer,
                                             size_t (&times)[num_time_measurements],
                                             const bool synchronize = false,
-                                            CaloRecGPU::CUDA_Helpers::CUDAStreamPtrHolder stream = {},
-                                            const bool defer_instead_of_oversize = false);
+                                            CaloRecGPU::CUDA_Helpers::CUDAStreamPtrHolder stream = {});
 }
 
 #endif
