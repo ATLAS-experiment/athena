@@ -12,7 +12,7 @@
 #include <fstream>
 
 PixeldEdxAlg::PixeldEdxAlg(const std::string& name, ISvcLocator* pSvcLocator):
-  ::AthAlgorithm(name, pSvcLocator){ }
+  ::AthCondAlgorithm(name, pSvcLocator){ }
 
 StatusCode PixeldEdxAlg::initialize() {
   ATH_MSG_DEBUG("PixeldEdxAlg::initialize()");
@@ -25,10 +25,10 @@ StatusCode PixeldEdxAlg::initialize() {
   return StatusCode::SUCCESS;
 }
 
-StatusCode PixeldEdxAlg::execute() {
-  ATH_MSG_DEBUG("PixeldEdxAlg::execute()");
+StatusCode PixeldEdxAlg::execute(const EventContext& ctx) const {
+  ATH_MSG_DEBUG("PixeldEdxAlg::execute(const EventContext& ctx) const");
 
-  SG::WriteCondHandle<PixeldEdxData> writeHandle(m_writeKey);
+  SG::WriteCondHandle<PixeldEdxData> writeHandle(m_writeKey, ctx);
   if (writeHandle.isValid()) {
     ATH_MSG_DEBUG("CondHandle " << writeHandle.fullKey() << " is already valid.. In theory this should not be called, but may happen if multiple concurrent events are being processed out of order.");
     return StatusCode::SUCCESS; 
@@ -47,7 +47,7 @@ StatusCode PixeldEdxAlg::execute() {
   std::string bb_type;
 
   if (m_readfromcool) {
-    SG::ReadCondHandle<AthenaAttributeList> readHandle(m_readKey);
+    SG::ReadCondHandle<AthenaAttributeList> readHandle(m_readKey, ctx);
     const AthenaAttributeList* readCdo = *readHandle; 
     if (readCdo==nullptr) {
       ATH_MSG_FATAL("Null pointer to the read conditions object");
