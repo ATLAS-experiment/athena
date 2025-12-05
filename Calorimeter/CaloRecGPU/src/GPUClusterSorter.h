@@ -5,15 +5,15 @@
 //
 
 
-#ifndef CALORECGPU_BASICGPUCLUSTERINFOCALCULATOR_H
-#define CALORECGPU_BASICGPUCLUSTERINFOCALCULATOR_H
+#ifndef CALORECGPU_GPUCLUSTERSORTER_H
+#define CALORECGPU_GPUCLUSTERSORTER_H
 
 #include "CxxUtils/checker_macros.h"
 
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "CaloRecGPU/CaloClusterGPUProcessor.h"
 #include "CaloRecGPU/CaloGPUTimed.h"
-#include "BasicGPUClusterInfoCalculatorImpl.h"
+#include "GPUClusterSorterImpl.h"
 #include "CaloRecGPU/CaloGPUCUDAInitialization.h"
 
 #include "GaudiKernel/ServiceHandle.h"
@@ -23,20 +23,19 @@
 #include "CLHEP/Units/SystemOfUnits.h"
 
 /**
- * @class BasicGPUClusterInfoCalculator
+ * @class GPUClusterSorter
  * @author Nuno Fernandes <nuno.dos.santos.fernandes@cern.ch>
- * @date 11 August 2022
- * @brief Standard tool to calculate cluster info (energy, transverse energy, pseudo-rapidity and azimuthal angle)
- *        and apply E/ET cuts on clusters if desired.
+ * @date 26 October 2025
+ * @brief Sorts clusters by ET (with possible cut) and creates the list of cells per cluster.
  */
 
 
-class BasicGPUClusterInfoCalculator:
+class GPUClusterSorter:
   public extends<AthAlgTool, CaloClusterGPUProcessor>, public CaloGPUTimed, public CaloGPUCUDAInitialization
 {
  public:
 
-  BasicGPUClusterInfoCalculator(const std::string & type, const std::string & name, const IInterface * parent);
+  GPUClusterSorter(const std::string & type, const std::string & name, const IInterface * parent);
 
   virtual StatusCode initialize() override
   {
@@ -54,7 +53,7 @@ class BasicGPUClusterInfoCalculator:
 
   virtual StatusCode finalize() override;
 
-  virtual ~BasicGPUClusterInfoCalculator() = default;
+  virtual ~GPUClusterSorter() = default;
   
  private:
 
@@ -78,4 +77,4 @@ class BasicGPUClusterInfoCalculator:
 
 };
 
-#endif //CALORECGPU_TOPOAUTOMATONCLUSTERING_H
+#endif //CALORECGPU_GPUCLUSTERSORTER_H

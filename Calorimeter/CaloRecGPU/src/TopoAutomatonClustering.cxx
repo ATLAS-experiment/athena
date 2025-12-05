@@ -260,8 +260,6 @@ StatusCode TopoAutomatonClustering::execute(const EventContext & ctx, const Cons
   {
     return boost::chrono::duration_cast<boost::chrono::microseconds>(after - before).count();
   };
-
-  static_assert(sizeof(TopoAutomatonGrowingTemporaries) <= sizeof(ClusterMomentsArr), "We store the temporaries in the cluster moments, so the sizes must be compatible!");
   
   const auto start = clock_type::now();
   
