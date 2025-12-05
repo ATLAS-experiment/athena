@@ -79,6 +79,10 @@ FilterReporter ::
     std::cerr << e.what() << "\n";
     std::abort();
   }
+  catch (const SG::ExcBadAuxVar& e) {
+    std::cerr << e.what() << "\n";
+    std::abort();
+  }
   catch (const GaudiException& e) {
     std::cerr << e.what() << "\n";
     std::abort();
