@@ -46,6 +46,8 @@ namespace ORUtils
     if(m_useDRMatching){
       ATH_MSG_DEBUG("Configuring removal of electrons in delta R cone of " << m_maxDR);
       m_dRMatcher = std::make_unique<DeltaRMatcher>(m_maxDR, m_useRapidity);
+      ATH_CHECK (m_dRMatcher->setObjectTypes (xAODType::ObjectType::Electron, xAODType::ObjectType::Muon));
+      addSubtool(*m_dRMatcher);
     }
 
     return StatusCode::SUCCESS;
@@ -55,22 +57,15 @@ namespace ORUtils
   // Identify overlaps
   //---------------------------------------------------------------------------
   StatusCode EleMuSharedTrkOverlapTool::
-  findOverlaps(const xAOD::IParticleContainer& cont1,
-               const xAOD::IParticleContainer& cont2) const
+  findOverlaps(columnar::Particle1Range cont1,
+               columnar::Particle2Range cont2,
+               columnar::EventContextId /*eventContext*/) const
   {
     // Check the container types
-    if(typeid(cont1) != typeid(xAOD::ElectronContainer) &&
-       typeid(cont1) != typeid(ConstDataVector<xAOD::ElectronContainer>)) {
-      ATH_MSG_ERROR("First container arg is not of type ElectronContainer!");
-      return StatusCode::FAILURE;
-    }
-    if(typeid(cont2) != typeid(xAOD::MuonContainer) &&
-       typeid(cont2) != typeid(ConstDataVector<xAOD::MuonContainer>)) {
-      ATH_MSG_ERROR("Second container arg is not of type MuonContainer!");
-      return StatusCode::FAILURE;
-    }
-    ATH_CHECK( findOverlaps(static_cast<const xAOD::ElectronContainer&>(cont1),
-                            static_cast<const xAOD::MuonContainer&>(cont2)) );
+    ATH_CHECK( checkForXAODContainer<xAOD::ElectronContainer>(cont1, "First container arg is not of type ElectronContainer!") );
+    ATH_CHECK( checkForXAODContainer<xAOD::MuonContainer>(cont2, "Second container arg is not of type MuonContainer!") );
+
+    ATH_CHECK( internalFindOverlaps(cont1, cont2) );
     return StatusCode::SUCCESS;
   }
 
@@ -78,14 +73,15 @@ namespace ORUtils
   // Identify overlaps between electrons and muons
   //---------------------------------------------------------------------------
   StatusCode EleMuSharedTrkOverlapTool::
-  findOverlaps(const xAOD::ElectronContainer& electrons,
-               const xAOD::MuonContainer& muons) const
+  internalFindOverlaps(columnar::Particle1Range electrons,
+                       columnar::Particle2Range muons) const
   {
     ATH_MSG_DEBUG("Removing overlapping electrons and muons");
+    auto& acc = *m_accessors;
 
     // Initialize output decorations if necessary
-    m_decHelper->initializeDecorations(electrons);
-    m_decHelper->initializeDecorations(muons);
+    initializeDecorations(electrons);
+    initializeDecorations(muons);
 
     // If removing calo-muons that overlap with electrons,
     // then we need to do it in a separate loop first.
@@ -93,21 +89,18 @@ namespace ORUtils
 
       // Loop over electrons
       for(const auto electron : electrons){
-        if(!m_decHelper->isSurvivingObject(*electron)) continue;
+        if(!isSurvivingObject(electron)) continue;
 
         // Get the original ID track
-        const xAOD::TrackParticle* elTrk =
-          xAOD::EgammaHelpers::getOriginalTrackParticle(electron);
+        auto elTrk = getOriginalTrackParticle(electron);
 
         // Loop over input calo muons
         for(const auto muon : muons) {
-          if(!m_decHelper->isSurvivingObject(*muon)) continue;
-          if(muon->muonType() != xAOD::Muon::CaloTagged) continue;
+          if(!isSurvivingObject(muon)) continue;
+          if(muon(acc.m_muonTypeAcc) != xAOD::Muon::CaloTagged) continue;
 
           // Get the muon ID track
-          const xAOD::TrackParticle* muTrk =
-            muon->trackParticle(xAOD::Muon::InnerDetectorTrackParticle);
-
+          auto muTrk = muon(acc.m_muonTrkAcc);
           // Flag the calo muon as overlapping if they share the track
           if(elTrk == muTrk) {
             ATH_CHECK( handleOverlap(muon, electron) );
@@ -118,25 +111,23 @@ namespace ORUtils
 
     // Loop over muons
     for(const auto muon : muons){
-      if(!m_decHelper->isSurvivingObject(*muon)) continue;
+      if(!isSurvivingObject(muon)) continue;
 
       // Get the muon ID track
-      const xAOD::TrackParticle* muTrk =
-        muon->trackParticle(xAOD::Muon::InnerDetectorTrackParticle);
+      auto muTrk = muon(acc.m_muonTrkAcc);
 
       // Loop over electrons
       for(const auto electron : electrons) {
-        if(!m_decHelper->isSurvivingObject(*electron)) continue;
+        if(!isSurvivingObject(electron)) continue;
 
         // Get the original ID track
-        const xAOD::TrackParticle* elTrk =
-          xAOD::EgammaHelpers::getOriginalTrackParticle(electron);
+        auto elTrk = getOriginalTrackParticle(electron);
 
         // Flag the electron as overlapping if they share the track
         // or if they are DR matched
         bool removeEle = (elTrk == muTrk);
         if( (m_useDRMatching)
-            && (m_dRMatcher->objectsMatch(*electron, *muon)) ){
+            && (m_dRMatcher->objectsMatch(electron, muon)) ){
           removeEle = true;
         }
         if(removeEle){
@@ -145,6 +136,16 @@ namespace ORUtils
       }
     }
     return StatusCode::SUCCESS;
+  }
+
+  [[nodiscard]] columnar::ObjectLink<EleMuSharedTrkOverlapTool::MyTrackDef> EleMuSharedTrkOverlapTool::
+  getOriginalTrackParticle(columnar::Particle1Id electron) const
+  {
+    auto& acc = *m_accessors;
+    auto elGsfTrk = electron(acc.m_eleTrackAcc);
+    if (elGsfTrk.size() == 0 || !elGsfTrk[0].has_value())
+      throw std::runtime_error("Electron has no associated track");
+    return elGsfTrk[0].value()(acc.m_gsfOriginalTrackAcc);
   }
 
 } // namespace ORUtils

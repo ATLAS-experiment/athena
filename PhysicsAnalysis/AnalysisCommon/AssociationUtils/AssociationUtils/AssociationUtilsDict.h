@@ -22,7 +22,6 @@
 #include "AssociationUtils/TauAntiTauJetOverlapTool.h"
 #include "AssociationUtils/ObjLinkOverlapTool.h"
 #include "AssociationUtils/ToolBox.h"
-#include "AssociationUtils/BJetHelper.h"
 #include "AssociationUtils/DeltaRMatcher.h"
 #include "AssociationUtils/MuJetGhostDRMatcher.h"
 #include "AssociationUtils/OverlapDecorationHelper.h"
