@@ -19,7 +19,7 @@ namespace InDetDD {
   class SCT_DetectorManager;
 }
 
-// SCT_AlignCondAlg cannot inherit AthReentrantAlgorithm.
+// SCT_AlignCondAlg cannot inherit AthCondAlgorithm.
 // SCT_AlignCondAlg::execute uses the following methods.
 //  InDetDD::InDetDetectorManager::align
 //   InDetDD::InDetDetectorManager::processAlignmentContainer
