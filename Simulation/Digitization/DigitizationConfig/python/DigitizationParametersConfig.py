@@ -107,14 +107,18 @@ def writeDigitizationMetadata(flags):
 
 def readDigitizationParameters(flags):
     """Read digitization parameters metadata"""
-    from IOVDbSvc.IOVDbSvcConfig import addFolders
+    from IOVDbSvc.IOVDbSvcConfig import addFolders, IOVDbSvcCfg
 
-    # Direct in-file metadata mode: IOVDbMetaDataTool populates ConditionStore from file metadata
-    # Exception: In overlay mode, always use IOVDbSvc since background file may not have parameters in metadata
-    if flags.IOVDb.WriteParametersAsMetaData and not flags.Common.isOverlay:
-        return ComponentAccumulator()
+    # Direct in-file metadata mode: IOVDbMetaDataTool populates ConditionStore from file metadata or Payloads
+    # In overlay + direct metadata mode: OverlaySteering sets up IOVDbMetaDataTool.Payloads with pileup metadata,
+    # which will populate ConditionStore during job execution
+    # We still need to register the folder with CondInputLoader for multithreaded scheduling
+    if flags.IOVDb.WriteParametersAsMetaData:
+        result = IOVDbSvcCfg(flags)
+        result.getCondAlgo('CondInputLoader').Load |= {('AthenaAttributeList', folderName)}
+        return result
 
-    # Sqlite mode or overlay mode: use IOVDbSvc to read and populate ConditionStore
+    # Sqlite mode: use IOVDbSvc to read and populate ConditionStore
     if flags.Digitization.ReadParametersFromDB:
         # Reading from intermediate sqlite file DigitParams.db (during digitization job)
         return addFolders(flags, folderName, detDb="DigitParams.db", db="DIGPARAM", className="AthenaAttributeList")
