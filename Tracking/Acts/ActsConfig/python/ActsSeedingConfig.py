@@ -133,9 +133,11 @@ def ActsStripSeedingToolCfg(flags,
 
     impactMax = 20. * ActsUnits.mm
     collisionRegionAbsMax = 200. * ActsUnits.mm
+    deltaRMiddleMaxSPRange = 150 * ActsUnits.mm
     if flags.Tracking.ActiveConfig.extension in ["ActsLargeRadius", "ActsValidateLargeRadiusSeeds", "ActsValidateLargeRadiusStandalone"]:
         impactMax = 300. * ActsUnits.mm
         collisionRegionAbsMax = 500. * ActsUnits.mm
+        deltaRMiddleMaxSPRange = 50 * ActsUnits.mm
 
     
     ## For ITkStrip, change properties that have to be modified w.r.t. the default values
@@ -154,7 +156,7 @@ def ActsStripSeedingToolCfg(flags,
     kwargs.setdefault("interactionPointCut" , False)
     kwargs.setdefault("zBinsCustomLooping" , [7, 8, 6, 9, 5, 10, 4, 11, 3, 12, 2])
     kwargs.setdefault("deltaRMiddleMinSPRange" , 30 * ActsUnits.mm)
-    kwargs.setdefault("deltaRMiddleMaxSPRange" , 150 * ActsUnits.mm)
+    kwargs.setdefault("deltaRMiddleMaxSPRange" , deltaRMiddleMaxSPRange)
     kwargs.setdefault("useDetailedDoubleMeasurementInfo" , True)
     kwargs.setdefault("maxPtScattering", float("inf"))
     # For SeedFilterConfig
