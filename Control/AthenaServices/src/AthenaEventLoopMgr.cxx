@@ -15,7 +15,7 @@
 // Athena includes
 #include "AthenaBaseComps/AthMsgStreamMacros.h"
 #include "AthenaKernel/errorcheck.h"
-#include "AthenaKernel/IEventSeek.h"
+#include "AthenaKernel/IEvtSelectorSeek.h"
 #include "AthenaKernel/IAthenaEvtLoopPreSelectTool.h"
 #include "AthenaKernel/ExtendedEventContext.h"
 #include "AthenaKernel/EventContextClid.h"
@@ -34,7 +34,6 @@
 #include "GaudiKernel/EventContext.h"
 #include "GaudiKernel/EventIDBase.h"
 #include "GaudiKernel/ThreadLocalContext.h"
-#include "GaudiKernel/Algorithm.h"
 #include "GaudiKernel/AppReturnCode.h"
 
 #include "StoreGate/StoreGateSvc.h"
@@ -44,9 +43,6 @@
 #include "EventInfo/EventType.h"
 
 #include "xAODEventInfo/EventInfo.h"             
-#include "xAODEventInfo/EventAuxInfo.h"          
-#include "xAODEventInfo/EventInfoContainer.h"    
-#include "xAODEventInfo/EventInfoAuxContainer.h" 
 #include "EventInfoUtils/EventInfoFromxAOD.h"
 
 #include "ClearStorePolicy.h"
