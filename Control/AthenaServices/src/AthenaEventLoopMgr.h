@@ -177,6 +177,8 @@ public:
   void handle(const Incident& inc);
   /// Execute certain algorithms/sequences in PreFork
   StatusCode execAtPreFork(const EventContext& ctx) const;
+  /// Called from ApplicationMgr::stopRun() to terminate the loop
+  StatusCode stopRun() override;
 
   using AthMessaging::msg;
   using AthMessaging::msgLvl;
