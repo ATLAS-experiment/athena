@@ -240,12 +240,12 @@ class MuonWorkingPointConfig (ConfigBlock) :
             quality = xAODMuonEnums.Quality.VeryLoose
         elif self.quality == 'HighPt' :
             quality = 4
-        elif self.quality == 'LowPtEfficiency' :
+        elif self.quality == 'LowPt' :
             quality = 5
         else :
             raise ValueError ("invalid muon quality: \"" + self.quality +
                               "\", allowed values are Tight, Medium, Loose, " +
-                              "VeryLoose, HighPt, LowPtEfficiency")
+                              "VeryLoose, HighPt, LowPt")
 
         # The setup below is inappropriate for Run 1
         if config.geometry() is LHCPeriod.Run1:
