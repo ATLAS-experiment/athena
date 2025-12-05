@@ -8,7 +8,7 @@
 #ifndef LARCALIWAVEAVERAGE_H
 #define LARCALIWAVEAVERAGE_H
 
-#include "AthenaBaseComps/AthAlgorithm.h"
+#include "AthenaBaseComps/AthCondAlgorithm.h"
 #include "StoreGate/StoreGateSvc.h"
 #include "CaloIdentifier/LArEM_ID.h"
 #include "Identifier/HWIdentifier.h"
@@ -20,7 +20,7 @@
 
 #include <string>
 
-class LArCaliWaveAverage:public AthAlgorithm {
+class LArCaliWaveAverage:public AthCondAlgorithm {
 
 public:
 
@@ -28,7 +28,7 @@ public:
   ~LArCaliWaveAverage();
   
   StatusCode initialize() override final;
-  StatusCode execute() override final;
+  StatusCode execute(const EventContext& ctx) const override final;
   StatusCode stop() override final;
   StatusCode finalize()override final {return StatusCode::SUCCESS;}
 

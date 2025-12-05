@@ -18,7 +18,7 @@
 using WaveMap = std::map<int, LArCaliWave>;
   
 LArCaliWaveAverage::LArCaliWaveAverage(const std::string& name, ISvcLocator* pSvcLocator) :
-  AthAlgorithm(name, pSvcLocator),
+  AthCondAlgorithm(name, pSvcLocator),
   m_onlineHelper(nullptr),
   m_emId(nullptr),
   m_hecId(nullptr),
@@ -67,7 +67,7 @@ StatusCode LArCaliWaveAverage::initialize() {
   return StatusCode::SUCCESS;
 }
 
-StatusCode LArCaliWaveAverage::execute() {
+StatusCode LArCaliWaveAverage::execute(const EventContext& /*ctx*/) const {
   ATH_MSG_INFO ( "execute()" );
   return StatusCode::SUCCESS;
 }
