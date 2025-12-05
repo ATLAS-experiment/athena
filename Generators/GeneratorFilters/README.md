@@ -16,7 +16,7 @@ You can find a list of the harmonised filters [on this Twiki page](https:// twik
 
 ## Usage in the event generation JOs
 
-For standard usage in JOs there is no significant difference to the format used in release 21. For each filter, a common fragment is provided and should be used in production. You can find [an example JO here](https:/gitlab.cern.ch/atlas-physics/pmg/mcjoboptions/-/blob/master/421xxx/ 421431/mc.PhPy8EG_AZNLOCTEQ6L1_Wplusenu_xAODElecFilt.py).
+For standard usage in JOs there is no significant difference to the format used in release 21. For each filter, a common fragment is provided and should be used in production. You can find [an example JO here](https://gitlab.cern.ch/atlas-physics/pmg/mcjoboptions/-/blob/master/421xxx/421431/mc.PhPy8EG_AZNLOCTEQ6L1_Wplusenu_xAODElecFilt.py).
 
 For your JOs, include the common fragment for the filter. The fragment defines the filter and adds it to the appropriate place in the filtering sequence for you. You can then modify values for any cuts as needed. For example:
 
