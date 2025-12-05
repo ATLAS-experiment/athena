@@ -119,7 +119,7 @@ RoIsUnpackingEmulationTool::parseInputFileLine(const std::string& line, unsigned
 
 RoIsUnpackingEmulationTool::FakeRoI
 RoIsUnpackingEmulationTool::parseInputRoI(const std::string& roi, unsigned lineNumber, unsigned roiNumber) {
-  RoIsUnpackingEmulationTool::FakeRoI result;
+  RoIsUnpackingEmulationTool::FakeRoI result{};
   std::stringstream inputRoi(roi);
   std::string roiElement;
   unsigned roiElementNumber = 0;
