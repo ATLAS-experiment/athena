@@ -4,15 +4,15 @@
 #ifndef MuonG4TrfCache_GeoModelTrfCacheAlg_h
 #define MuonG4TrfCache_GeoModelTrfCacheAlg_h
 
-#include "AthenaBaseComps/AthReentrantAlgorithm.h"
+#include "AthenaBaseComps/AthCondAlgorithm.h"
 #include "ActsGeometryInterfaces/DetectorAlignStore.h"
 #include "MuonReadoutGeometryR4/MuonDetectorManager.h"
 #include "StoreGate/WriteCondHandleKey.h"
 
 namespace MuonG4{
-    class GeoModelTrfCacheAlg : public AthReentrantAlgorithm {
+    class GeoModelTrfCacheAlg : public AthCondAlgorithm {
         public:
-            using AthReentrantAlgorithm::AthReentrantAlgorithm;
+            using AthCondAlgorithm::AthCondAlgorithm;
 
             virtual StatusCode initialize() override final;
             virtual StatusCode execute(const EventContext& ctx) const override final;

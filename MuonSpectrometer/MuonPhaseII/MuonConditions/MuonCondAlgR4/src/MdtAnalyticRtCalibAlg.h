@@ -9,7 +9,7 @@
 #ifndef MUONCALIBR4_MDTANALYTICCALIBALG_H
 #define MUONCALIBR4_MDTANALYTICCALIBALG_H
 
-#include <AthenaBaseComps/AthReentrantAlgorithm.h>
+#include <AthenaBaseComps/AthCondAlgorithm.h>
 
 #include "MuonIdHelpers/IMuonIdHelperSvc.h"
 #include "MuonRecToolInterfacesR4/IRootVisualizationService.h"
@@ -24,9 +24,9 @@ namespace MuonCalib{
   class SamplePoint;
 }
 namespace MuonCalibR4{
-    class MdtAnalyticRtCalibAlg : public AthReentrantAlgorithm {
+    class MdtAnalyticRtCalibAlg : public AthCondAlgorithm {
       public:
-        using AthReentrantAlgorithm::AthReentrantAlgorithm;
+        using AthCondAlgorithm::AthCondAlgorithm;
         virtual ~MdtAnalyticRtCalibAlg() = default;
 
         virtual StatusCode initialize() override final;
