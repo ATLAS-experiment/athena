@@ -89,6 +89,9 @@ REvent::~REvent() {
 ///
 StatusCode REvent::readFrom(std::string_view fileName) {
 
+  ATH_MSG_INFO("REvent::readFrom:  fileName " << fileName);
+
+
   // Clear the cached input objects.
   m_inputObjects.clear();
   m_inputMissingObjects.clear();
@@ -106,6 +109,11 @@ StatusCode REvent::readFrom(std::string_view fileName) {
 
   // Clear out the current object.
   m_inputEventFormat = {};
+
+
+  ATH_MSG_DEBUG("Create RNTupleReader for \"" << METADATA_NTUPLE_NAME
+                                               << "\" in file: " << fileName);
+
 
   // Set up a reader for the metadata ntuple.
   // Since some types are non-xAOD types and so not 'visible' when running in AnalysisBase
