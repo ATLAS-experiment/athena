@@ -400,6 +400,9 @@ def addMCSignatures(chains):
         ChainProp(name="HLT_j165_0eta290_020jvt_bgn260_j55_0eta290_020jvt_bgn260_pf_ftf_preselj140bgtwo85XXj45bgtwo85_L1jJ160", l1SeedThresholds=['FSNOSEED','FSNOSEED'], groups=PrimaryPhIGroup+MultiBjetGroup),
         # Run 2 HH4b low-threshold chain
         ChainProp(name="HLT_2j35c_020jvt_bgn260_2j35c_020jvt_pf_ftf_presel2j25XX2j25bgtwo85_L14jJ40p0ETA25", l1SeedThresholds=['FSNOSEED','FSNOSEED'], groups=PrimaryPhIGroup+MultiBjetGroup),
+        # Run 2 HH4b low-threshold chain, without presel R4 TDR inpired menu
+        ChainProp(name="HLT_2j35c_020jvt_bgn260_2j35c_020jvt_pf_ftf_L14jJ40p0ETA25", l1SeedThresholds=['FSNOSEED','FSNOSEED'], groups=PrimaryPhIGroup+MultiBjetGroup),
+        
         # HT-seeded
         ChainProp(name='HLT_2j45_0eta290_020jvt_bgn270_j0_HT290_j0_DJMASS700j35_pf_ftf_L1HT150-jJ50s5pETA32_jMJJ-400-CF', l1SeedThresholds=['FSNOSEED']*3, groups=PrimaryPhIGroup+MultiBjetGroup+Topo3Group),
         
@@ -417,6 +420,8 @@ def addMCSignatures(chains):
         ChainProp(name='HLT_j75c_020jvt_j50c_020jvt_j25c_020jvt_j20c_020jvt_SHARED_2j20c_020jvt_bgn277_pf_ftf_presel2c20XX2c20bgtwo85_L1jJ85p0ETA21_3jJ40p0ETA25', l1SeedThresholds=['FSNOSEED']*5, groups=PrimaryPhIGroup+MultiBjetGroup, monGroups=['idMon:t0']),
         # 2b asymmetric b-jet pt for with looser b-tagging (ATR-28870)
         ChainProp(name='HLT_j75c_020jvt_j50c_020jvt_j25c_020jvt_j20c_020jvt_SHARED_2j20c_020jvt_bgn280_pf_ftf_presel2c20XX2c20bgtwo85_L1jJ85p0ETA21_3jJ40p0ETA25', l1SeedThresholds=['FSNOSEED']*5, groups=PrimaryPhIGroup+MultiBjetGroup, monGroups=['idMon:t0']),
+        # 2b asymmetric b-jet pt for with looser b-tagging without presel - R4 TDR inspired menu
+        ChainProp(name='HLT_j75c_020jvt_j50c_020jvt_j25c_020jvt_j20c_020jvt_SHARED_2j20c_020jvt_bgn280_pf_ftf_L1jJ85p0ETA21_3jJ40p0ETA25', l1SeedThresholds=['FSNOSEED']*5, groups=PrimaryPhIGroup+MultiBjetGroup, monGroups=['idMon:t0']),
         # Candidates for allhad ttbar delayed stream
         ChainProp(name='HLT_5j35c_020jvt_j25c_020jvt_SHARED_j25c_020jvt_bgn260_pf_ftf_presel5c25XXc25bgtwo85_L14jJ40', l1SeedThresholds=['FSNOSEED']*3, groups=PrimaryPhIGroup+MultiBjetGroup),
         ChainProp(name='HLT_5j45c_020jvt_j25c_020jvt_SHARED_j25c_020jvt_bgn260_pf_ftf_presel5c25XXc25bgtwo85_L14jJ40', l1SeedThresholds=['FSNOSEED']*3, groups=PrimaryPhIGroup+MultiBjetGroup),
@@ -489,6 +494,11 @@ def addMCSignatures(chains):
         ChainProp(name='HLT_mu11_mu6_bBmumux_BpmumuKp_L12MU5VF', l1SeedThresholds=['MU8VF', 'MU5VF'], groups=BphysicsGroup+PrimaryL1MuGroup),
         ChainProp(name='HLT_mu11_mu6_bUpsimumu_L12MU5VF', l1SeedThresholds=['MU8VF', 'MU5VF'], groups=BphysicsGroup+PrimaryL1MuGroup),
     ]
+
+    chains['Monitor'] = [
+        ChainProp(name='HLT_noalg_CostMonDS_L1All',        l1SeedThresholds=['FSNOSEED'], stream=['CostMonitoring'], groups=['PS:NoBulkMCProd', 'Primary:CostAndRate', 'RATE:Monitoring', 'BW:Other']), # HLT_costmonitor
+    ]
+
 
     chainsMC['UnconventionalTracking'] = [
         # hit-based DV 
@@ -639,7 +649,8 @@ def addMCSignatures(chains):
         ChainProp(name='HLT_e10_lhloose_mu10_L1eEM10L_MU5VF', l1SeedThresholds=['eEM10L','MU5VF'], groups=PrimaryPhIGroup+EgammaMuonGroup),
         ChainProp(name='HLT_e7_lhloose_mu20_L1MU12FCH', l1SeedThresholds=['eEM7','MU12FCH'], groups=PrimaryPhIGroup+EgammaMuonGroup),
         ChainProp(name='HLT_tau25_mediumGNTau_probe_L1eTAU12_j65c_020jvt_j40c_020jvt_j25c_020jvt_j20c_020jvt_SHARED_j20c_020jvt_bgn285_pf_ftf_presel2c20XX1c20bgtwo85XX1c20gntau90_L1jJ85p0ETA21_3jJ40p0ETA25', l1SeedThresholds=['PROBEeTAU12']+5*['FSNOSEED'], groups=PrimaryPhIGroup+MuonTauGroup),
-
+        # without presel
+        ChainProp(name='HLT_tau25_mediumGNTau_probe_L1eTAU12_j65c_020jvt_j40c_020jvt_j25c_020jvt_j20c_020jvt_SHARED_j20c_020jvt_bgn285_pf_ftf_L1jJ85p0ETA21_3jJ40p0ETA25', l1SeedThresholds=['PROBEeTAU12']+5*['FSNOSEED'], groups=PrimaryPhIGroup+MuonTauGroup),
     ]
 
     chainsMC['Streaming'] += [
