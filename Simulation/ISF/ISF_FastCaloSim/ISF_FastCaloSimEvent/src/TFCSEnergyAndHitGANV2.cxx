@@ -152,7 +152,7 @@ bool TFCSEnergyAndHitGANV2::fillEnergy(
   ATH_MSG_DEBUG("energy voxels size = " << outputs.size());
 
   double totalEnergy = 0;
-  for (auto output : outputs) {
+  for (const auto & output : outputs) {
     totalEnergy += output.second;
   }
   if (totalEnergy < 0) {
