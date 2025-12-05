@@ -16,7 +16,7 @@
 #include "GaudiKernel/ServiceHandle.h"
 
 // Athena includes
-#include "AthenaBaseComps/AthReentrantAlgorithm.h"
+#include "AthenaBaseComps/AthCondAlgorithm.h"
 #include "AthenaPoolUtilities/CondAttrListCollection.h"
 #include "MuonCondData/CscCondDbData.h"
 #include "MuonIdHelpers/IMuonIdHelperSvc.h"
@@ -24,13 +24,12 @@
 #include "StoreGate/WriteCondHandleKey.h"
 #include "CxxUtils/StringUtils.h"
 
-class CscCondDbAlg : public AthReentrantAlgorithm {
+class CscCondDbAlg : public AthCondAlgorithm {
 public:
     CscCondDbAlg(const std::string &name, ISvcLocator *svc);
     virtual ~CscCondDbAlg() = default;
     virtual StatusCode initialize() override;
     virtual StatusCode execute(const EventContext &) const override;
-    virtual bool isReEntrant() const override { return false; }
 
 private:
     typedef SG::WriteCondHandle<CscCondDbData> writeHandle_t;

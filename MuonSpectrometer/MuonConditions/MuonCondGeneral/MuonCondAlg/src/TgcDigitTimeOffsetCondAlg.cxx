@@ -10,7 +10,7 @@
 #include <string_view>
 
 TgcDigitTimeOffsetCondAlg::TgcDigitTimeOffsetCondAlg(const std::string& name, ISvcLocator* pSvcLocator)
-: AthReentrantAlgorithm(name, pSvcLocator) {
+: AthCondAlgorithm(name, pSvcLocator) {
 }
 
 StatusCode TgcDigitTimeOffsetCondAlg::initialize() {

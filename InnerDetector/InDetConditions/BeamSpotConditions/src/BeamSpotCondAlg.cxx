@@ -18,7 +18,7 @@ const EventIDRange BeamSpotCondAlg::alwaysValid { EventIDBase { 1,
                                                 };
 
 BeamSpotCondAlg::BeamSpotCondAlg( const std::string& name, ISvcLocator* pSvcLocator ) 
-  : AthReentrantAlgorithm( name, pSvcLocator )
+  : AthCondAlgorithm( name, pSvcLocator )
 { }
 
 

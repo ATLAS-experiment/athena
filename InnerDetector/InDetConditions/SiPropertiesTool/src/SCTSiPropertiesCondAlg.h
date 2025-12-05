@@ -5,7 +5,7 @@
 #ifndef SCTSIPROPERTIESCONDALG
 #define SCTSIPROPERTIESCONDALG
 
-#include "AthenaBaseComps/AthReentrantAlgorithm.h"
+#include "AthenaBaseComps/AthCondAlgorithm.h"
 
 #include "InDetConditionsSummaryService/ISiliconConditionsTool.h"
 #include "InDetReadoutGeometry/SiDetectorElementCollection.h"
@@ -19,7 +19,7 @@
 
 class SCT_ID;
 
-class SCTSiPropertiesCondAlg : public AthReentrantAlgorithm 
+class SCTSiPropertiesCondAlg : public AthCondAlgorithm 
 {  
  public:
   SCTSiPropertiesCondAlg(const std::string& name, ISvcLocator* pSvcLocator);
@@ -27,7 +27,6 @@ class SCTSiPropertiesCondAlg : public AthReentrantAlgorithm
   virtual StatusCode initialize() override final;
   virtual StatusCode execute(const EventContext& ctx) const override;
   virtual StatusCode finalize() override final;
-  virtual bool isReEntrant() const override final { return false; }
 
  private:
   DoubleProperty m_temperatureMin{this, "TemperatureMin", -80., "Minimum temperature allowed in Celcius."};

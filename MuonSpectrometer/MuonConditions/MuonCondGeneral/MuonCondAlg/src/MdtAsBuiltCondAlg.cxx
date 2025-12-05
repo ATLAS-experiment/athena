@@ -11,7 +11,7 @@
 #include "GeoModelKernel/throwExcept.h"
 
 MdtAsBuiltCondAlg::MdtAsBuiltCondAlg(const std::string& name, ISvcLocator* pSvcLocator):
-        AthReentrantAlgorithm{name, pSvcLocator} {}
+        AthCondAlgorithm{name, pSvcLocator} {}
 
 StatusCode MdtAsBuiltCondAlg::initialize(){
     ATH_CHECK(m_readKey.initialize(m_readFromJSON.value().empty()));

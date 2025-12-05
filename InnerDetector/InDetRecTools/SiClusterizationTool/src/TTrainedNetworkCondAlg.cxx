@@ -20,7 +20,7 @@
 namespace InDet {
 
   TTrainedNetworkCondAlg::TTrainedNetworkCondAlg (const std::string& name, ISvcLocator* pSvcLocator)
-    : ::AthReentrantAlgorithm( name, pSvcLocator )
+    : ::AthCondAlgorithm( name, pSvcLocator )
   {}
 
   StatusCode TTrainedNetworkCondAlg::initialize() {

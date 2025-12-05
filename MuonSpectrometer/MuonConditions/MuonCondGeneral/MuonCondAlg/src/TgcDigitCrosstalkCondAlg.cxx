@@ -10,7 +10,7 @@
 #include <string_view>
 
 TgcDigitCrosstalkCondAlg::TgcDigitCrosstalkCondAlg(const std::string& name, ISvcLocator* pSvcLocator)
-: AthReentrantAlgorithm(name, pSvcLocator) {
+: AthCondAlgorithm(name, pSvcLocator) {
 }
 
 StatusCode TgcDigitCrosstalkCondAlg::initialize() {

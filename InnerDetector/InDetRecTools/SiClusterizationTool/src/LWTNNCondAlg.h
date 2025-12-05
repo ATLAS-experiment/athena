@@ -5,7 +5,7 @@
 #ifndef _InDet_LWTNNCondAlg_H_
 #define _InDet_LWTNNCondAlg_H_
 
-#include "AthenaBaseComps/AthReentrantAlgorithm.h"
+#include "AthenaBaseComps/AthCondAlgorithm.h"
 #include "StoreGate/ReadCondHandleKey.h"
 #include "StoreGate/WriteCondHandleKey.h"
 
@@ -28,7 +28,7 @@ namespace InDet {
 
   /**
   */
-class LWTNNCondAlg : public AthReentrantAlgorithm {
+class LWTNNCondAlg : public AthCondAlgorithm {
 
  public:
 
@@ -38,7 +38,6 @@ class LWTNNCondAlg : public AthReentrantAlgorithm {
   StatusCode initialize() override final;
   StatusCode execute(const EventContext& ctx) const override final;
   StatusCode finalize() override final;
-  virtual bool isReEntrant() const override final { return false; }
 
  private:
 //  TTrainedNetwork* retrieveNetwork(TFile &input_file, const std::string& folder) const;

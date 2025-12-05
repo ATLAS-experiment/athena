@@ -7,7 +7,7 @@
 #ifndef SCT_CONDITIONSPARAMETERCONDALG
 #define SCT_CONDITIONSPARAMETERCONDALG
 
-#include "AthenaBaseComps/AthReentrantAlgorithm.h"
+#include "AthenaBaseComps/AthCondAlgorithm.h"
 
 #include "StoreGate/ReadCondHandleKey.h"
 #include "AthenaPoolUtilities/CondAttrListVec.h"
@@ -17,7 +17,7 @@
 
 #include "Gaudi/Property.h"
 
-class SCT_ConditionsParameterCondAlg : public AthReentrantAlgorithm 
+class SCT_ConditionsParameterCondAlg : public AthCondAlgorithm 
 {  
  public:
   SCT_ConditionsParameterCondAlg(const std::string& name, ISvcLocator* pSvcLocator);
@@ -25,7 +25,6 @@ class SCT_ConditionsParameterCondAlg : public AthReentrantAlgorithm
   virtual StatusCode initialize() override final;
   virtual StatusCode execute(const EventContext& ctx) const override final;
   virtual StatusCode finalize() override final;
-  virtual bool isReEntrant() const override final { return false; }
  private:
   SG::ReadCondHandleKey<CondAttrListVec> m_readKey{this, "ReadKey", "/SCT/DAQ/Configuration/Chip", "Key of input (raw) chip conditions folder"};
   SG::WriteCondHandleKey<SCT_CondParameterData> m_writeKey{this, "WriteKey", "SCT_CondParameterData", "Key of output (derived) average threshold conditions data"};

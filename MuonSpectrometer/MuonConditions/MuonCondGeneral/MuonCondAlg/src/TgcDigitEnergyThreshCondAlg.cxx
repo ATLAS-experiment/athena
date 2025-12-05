@@ -10,7 +10,7 @@
 
 
 TgcDigitEnergyThreshCondAlg::TgcDigitEnergyThreshCondAlg(const std::string& name, ISvcLocator* pSvcLocator) :
-    AthReentrantAlgorithm(name, pSvcLocator) {}
+    AthCondAlgorithm(name, pSvcLocator) {}
 
 StatusCode TgcDigitEnergyThreshCondAlg::initialize() {
     ATH_MSG_DEBUG("initializing " << name());

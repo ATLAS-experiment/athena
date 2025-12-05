@@ -28,7 +28,7 @@ const std::string SCT_ConfigurationCondAlg::s_coolMurFolderName2{"/SCT/DAQ/Confi
 const std::string SCT_ConfigurationCondAlg::s_coolChannelFolderName2Slim{"/SCT/DAQ/Config/ChipSlim"};
 
 SCT_ConfigurationCondAlg::SCT_ConfigurationCondAlg(const std::string& name, ISvcLocator* pSvcLocator)
-  : ::AthReentrantAlgorithm(name, pSvcLocator)
+  : ::AthCondAlgorithm(name, pSvcLocator)
 {
 }
 

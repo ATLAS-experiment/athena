@@ -9,7 +9,7 @@
 #include <nlohmann/json.hpp>
 
 // Athena includes
-#include "AthenaBaseComps/AthReentrantAlgorithm.h"
+#include "AthenaBaseComps/AthCondAlgorithm.h"
 #include "AthenaPoolUtilities/CondAttrListCollection.h"
 #include "MuonCondData/TgcDigitJitterData.h"
 #include "StoreGate/ReadCondHandleKey.h"
@@ -17,13 +17,12 @@
 
 
 
-class TgcDigitJitterCondAlg : public AthReentrantAlgorithm {
+class TgcDigitJitterCondAlg : public AthCondAlgorithm {
 public:
     TgcDigitJitterCondAlg(const std::string& name, ISvcLocator* svc);
     virtual ~TgcDigitJitterCondAlg() = default;
     virtual StatusCode initialize() override;
     virtual StatusCode execute(const EventContext& ctx) const override;
-    virtual bool isReEntrant() const override { return false; }
 
 private:
     /// Load the Jitter constants from the JSON format

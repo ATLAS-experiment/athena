@@ -13,7 +13,7 @@
 #include <map>
 
 SCT_DetectorElementCondAlg::SCT_DetectorElementCondAlg(const std::string& name, ISvcLocator* pSvcLocator)
-  : ::AthReentrantAlgorithm(name, pSvcLocator)
+  : ::AthCondAlgorithm(name, pSvcLocator)
   , m_readKey{"SCTAlignmentStore", "SCTAlignmentStore"}
   , m_detManagerName("SCT")
 {

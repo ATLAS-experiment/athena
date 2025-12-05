@@ -19,7 +19,7 @@
 #include "CoolLumiUtilities/FillParamsCondData.h"
 #include "CoolLumiUtilities/BunchLumisCondData.h"
 #include "CoolLumiUtilities/BunchGroupCondData.h"
-#include "AthenaBaseComps/AthReentrantAlgorithm.h"
+#include "AthenaBaseComps/AthCondAlgorithm.h"
 #include "AthenaPoolUtilities/CondAttrListCollection.h"
 #include "PersistentDataModel/AthenaAttributeList.h"
 #include "StoreGate/ReadCondHandleKey.h"
@@ -32,11 +32,11 @@
  * @brief Conditions algorithm for luminosity data.
  */
 class LuminosityCondAlg
-  : public AthReentrantAlgorithm
+  : public AthCondAlgorithm
 {
 public:
   /// Forward base class ctor.
-  using AthReentrantAlgorithm::AthReentrantAlgorithm;
+  using AthCondAlgorithm::AthCondAlgorithm;
 
 
   /// Gaudi initialize method.
@@ -45,7 +45,6 @@ public:
 
   /// Algorithm execute method.
   virtual StatusCode execute (const EventContext& ctx) const override;
-  virtual bool isReEntrant() const override final { return false; }
 
 
 private:

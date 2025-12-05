@@ -70,7 +70,7 @@ namespace { //anonymous namespace introduces file-scoped functions
 }//namespace
 
 SCT_ConditionsParameterCondAlg::SCT_ConditionsParameterCondAlg(const std::string& name, ISvcLocator* pSvcLocator)
-  : ::AthReentrantAlgorithm(name, pSvcLocator)
+  : ::AthCondAlgorithm(name, pSvcLocator)
 {
 }
 

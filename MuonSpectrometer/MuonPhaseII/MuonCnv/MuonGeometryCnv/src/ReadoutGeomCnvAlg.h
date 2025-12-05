@@ -5,7 +5,7 @@
 #define MUONGEOMETRYCNV_ReadoutGeomCnvAlg_H
 
 #include "TrkSurfaces/Surface.h" // Work around cppcheck false positive
-#include <AthenaBaseComps/AthReentrantAlgorithm.h>
+#include <AthenaBaseComps/AthCondAlgorithm.h>
 #include <StoreGate/WriteCondHandleKey.h>
 #include <StoreGate/ReadCondHandleKey.h>
 #include <StoreGate/CondHandleKeyArray.h>
@@ -29,14 +29,13 @@
 */
 
 namespace MuonGMR4{
-class ReadoutGeomCnvAlg : public AthReentrantAlgorithm {
+class ReadoutGeomCnvAlg : public AthCondAlgorithm {
     public:
-        using AthReentrantAlgorithm::AthReentrantAlgorithm;
+        using AthCondAlgorithm::AthCondAlgorithm;
         ~ReadoutGeomCnvAlg() = default;
 
         StatusCode execute(const EventContext& ctx) const override;
         StatusCode initialize() override;
-        bool isReEntrant() const override { return false; }
     
     private:
         struct ConstructionCache: public GeoDeDuplicator {
