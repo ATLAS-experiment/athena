@@ -23,6 +23,8 @@ namespace CP {
 
   private:
     SG::ReadHandleKey<xAOD::DiTauJetContainer> m_ditausKey { this, "ditaus", "", "the input ditau jet container" };
+ 
+    SG::WriteDecorHandleKey<xAOD::DiTauJetContainer> m_nSubjetsKey{this, "nSubjets", "nSubjets", "decoration for the number of subjets"};  
 
     SG::WriteDecorHandleKey<xAOD::DiTauJetContainer> m_omniScoreKey{this, "omniScore", "omniScore", "decoration name for the ditau ID"};
       

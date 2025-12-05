@@ -17,6 +17,10 @@ namespace CP {
       m_omniScoreKey = m_ditausKey.key() + "." + m_omniScoreKey.key();
     }
 
+    if (m_nSubjetsKey.contHandleKey().key() == m_nSubjetsKey.key()) {
+      m_nSubjetsKey = m_ditausKey.key() + "." + m_nSubjetsKey.key();
+    }
+
     // leading subjet info	  
     if (m_leadSubjetPtKey.contHandleKey().key() == m_leadSubjetPtKey.key()) {
       m_leadSubjetPtKey = m_ditausKey.key() + "." + m_leadSubjetPtKey.key();
@@ -68,6 +72,7 @@ namespace CP {
     }
 
     ANA_CHECK(m_ditausKey.initialize());
+    ANA_CHECK(m_nSubjetsKey.initialize());
     ANA_CHECK(m_omniScoreKey.initialize());
     ANA_CHECK(m_leadSubjetPtKey.initialize());
     ANA_CHECK(m_leadSubjetEtaKey.initialize());
@@ -88,6 +93,8 @@ namespace CP {
   StatusCode DiTauExtraVariablesAlg::execute(const EventContext &ctx) const {
 
     SG::ReadHandle<xAOD::DiTauJetContainer> ditaus(m_ditausKey, ctx);
+
+    SG::WriteDecorHandle<xAOD::DiTauJetContainer, float> nSubjets(m_nSubjetsKey, ctx);
 
     SG::WriteDecorHandle<xAOD::DiTauJetContainer, float> omniScoreHandle(m_omniScoreKey, ctx);
 
@@ -112,6 +119,8 @@ namespace CP {
 
       // always require at least 2 subjets to have a good ditau	    
       if(ditau->nSubjets() < 2) continue;
+ 
+      nSubjets(*ditau) = ditau->nSubjets(); 
 
       if ( acc_OmniScore.isAvailable(*ditau) ) {
         omniScoreHandle(*ditau) = acc_OmniScore(*ditau);
