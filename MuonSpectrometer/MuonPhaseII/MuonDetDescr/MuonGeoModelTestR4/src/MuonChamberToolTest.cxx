@@ -246,6 +246,15 @@ namespace MuonGMR4 {
                 return edges;
         }
     }
+
+#if defined(FLATTEN) && defined(__GNUC__)
+// We compile this function with optimization, even in debug builds; otherwise,
+// the heavy use of Eigen makes it too slow.  However, from here we may call
+// to out-of-line Eigen code that is linked from other DSOs; in that case,
+// it would not be optimized.  Avoid this by forcing all Eigen code
+// to be inlined here if possible.
+[[gnu::flatten]]
+#endif
     bool MuonChamberToolTest::hasOverlap(const std::array<Amg::Vector3D, 8>& chamberEdges,
                                          const Acts::Volume& volume) const {
         
@@ -264,12 +273,17 @@ namespace MuonGMR4 {
             return false;
         }
         const double stepLength = 1. / m_overlapSamples;
+
+        const Acts::VolumeBounds& volBounds = volume.volumeBounds();
+        const Acts::Transform3& itransform = volume.itransform();
         for (unsigned edge1 = 1; edge1 < chamberEdges.size(); ++edge1) {
             for (unsigned edge2 = 0; edge2 < edge1; ++edge2) {
                 for (unsigned step = 0 ; step <= m_overlapSamples; ++step) {
                     const double section = stepLength * step;
                     const Amg::Vector3D testPoint = section* chamberEdges[edge1] + (1. -section) *chamberEdges[edge2];
-                    if (volume.inside(testPoint)) {
+                    // Using acts::Volume::inside is horribly slow in dbg builds.
+                    Acts::Vector3 posInVolFrame = itransform * testPoint;
+                    if (volBounds.inside (posInVolFrame)) {
                         return true;
                     }
                 }
