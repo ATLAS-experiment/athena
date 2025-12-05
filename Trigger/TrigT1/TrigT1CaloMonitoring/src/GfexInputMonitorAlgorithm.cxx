@@ -27,7 +27,7 @@ StatusCode GfexInputMonitorAlgorithm::fillHistograms( const EventContext& ctx ) 
 
 	ATH_MSG_DEBUG("GfexInputMonitorAlgorithm::fillHistograms");
 
-	// Access gFex gTower container
+	// Access gFex data gTower container
 	SG::ReadHandle<xAOD::gFexTowerContainer> gFexTowerContainer{m_gFexTowerContainerKey, ctx};
 	if(!gFexTowerContainer.isValid()){
 		ATH_MSG_ERROR("No gFex Tower container found in storegate  "<< m_gFexTowerContainerKey);
@@ -68,7 +68,8 @@ StatusCode GfexInputMonitorAlgorithm::fillHistograms( const EventContext& ctx ) 
     auto FillTree = Monitored::Scalar<bool>("FillTree",true);
 
     unsigned int nTowers = 0;
-    for(const xAOD::gFexTower* gfexTowerRoI : *gFexTowerContainer){
+
+    for(const xAOD::gFexTower* gfexTowerRoI : *gFexTowerContainer){ //data gfex towers
 		// working with "local" fiber number, iFiber
         unsigned int towerID = gfexTowerRoI->gFEXtowerID();
         unsigned int offset = (towerID > 20000) ? 20000 : (towerID > 10000 && towerID < 20000) ? 10000 : 0;
@@ -94,7 +95,7 @@ StatusCode GfexInputMonitorAlgorithm::fillHistograms( const EventContext& ctx ) 
         float phi = gfexTowerRoI->phi();
         if (eta == 0.0 && phi == 0.0) continue; // skip the disconnected fibers
 
-        if(!emulatedTowers.empty()) {
+        if(!emulatedTowers.empty()) { 
             Towereta = eta; Towerphi = phi;
             TowerId=gfexTowerRoI->gFEXtowerID();
             // compare to emulated towers
@@ -106,12 +107,28 @@ StatusCode GfexInputMonitorAlgorithm::fillHistograms( const EventContext& ctx ) 
                 continue;
             }
 
-            const auto eTower = eTowerItr->second;
+            const auto eTower = eTowerItr->second; //accessing the emulated tower from the map created earlier
             refTowerET = eTower->towerEt();
             refTowerSat = eTower->isSaturated();
 
             if(refTowerET != Toweret) {
                 Decision = "ETMismatch";
+                fill("errors",FillTree,Decision,lbn,evtNumber,TowerId,Towereta,Towerphi,Toweret,refTowerET,refTowerSat,Towersaturationflag);
+                if (dataType==1) {
+                    Decision = "ETMismatch_Tile";
+                    fill("errorsTile",Towereta,Towerphi);
+                }
+                else {
+                    Decision = "ETMismatch_SCell";
+                    if (std::abs(eta) >= 3.2 ){ //FPGAc
+                        Towerphi = phi- 0.1;
+                        fill("errorsSCell",Towereta,Towerphi);	
+                        Towerphi = phi + 0.1;
+                        fill("errorsSCell",Towereta,Towerphi);	
+                    } else { //FPGA a&b
+                        fill("errorsSCell",Towereta,Towerphi);	
+                    }
+                }
                 fill("errors",FillTree,Decision,lbn,evtNumber,TowerId,Towereta,Towerphi,Toweret,refTowerET,refTowerSat,Towersaturationflag);
             }
             if(refTowerSat != Towersaturationflag) {
