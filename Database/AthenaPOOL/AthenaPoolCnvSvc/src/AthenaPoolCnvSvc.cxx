@@ -62,6 +62,7 @@ StatusCode AthenaPoolCnvSvc::initialize() {
             ATH_MSG_WARNING(std::format("Invalid MaxFileSize value: {}", std::string(start, end)));
          }
          std::string databaseName = maxFileSizeSpec.substr(0, maxFileSizeSpec.find_first_of(" 	="));
+         std::unique_lock<std::mutex> lock(m_mutex);
          m_databaseMaxFileSize.emplace(std::move(databaseName), maxFileSize);
       } else {
          if (auto [ptr, ec] = std::from_chars(maxFileSizeSpec.data(), maxFileSizeSpec.data() + maxFileSizeSpec.size(), m_domainMaxFileSize); ec != std::errc{}) {
@@ -611,18 +612,16 @@ void AthenaPoolCnvSvc::extractPoolAttributes(const StringArrayProperty& property
       valueString.clear();
       using Gaudi::Utils::AttribStringParser;
       for (const AttribStringParser::Attrib& attrib : AttribStringParser (propertyValue)) {
-         const std::string tag = attrib.tag;
-         const std::string val = attrib.value;
-         if (tag == "DatabaseName") {
-            databaseName = std::move(val);
-         } else if (tag == "ContainerName") {
+         if (attrib.tag == "DatabaseName") {
+            databaseName = attrib.value;
+         } else if (attrib.tag == "ContainerName") {
             if (databaseName.empty()) {
                databaseName = "*";
             }
-            containerName = std::move(val);
+            containerName = attrib.value;
          } else {
-            attributeName = std::move(tag);
-            valueString = std::move(val);
+            attributeName = attrib.tag;
+            valueString = attrib.value;
          }
       }
       if (!attributeName.empty() && !valueString.empty()) {
