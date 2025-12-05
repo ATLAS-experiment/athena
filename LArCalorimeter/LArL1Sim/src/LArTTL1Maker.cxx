@@ -29,16 +29,12 @@
 #include "CaloIdentifier/CaloIdManager.h"
 #include "CaloIdentifier/CaloLVL1_ID.h"
 #include "CaloIdentifier/LArID.h"
-#include "CaloTriggerTool/CaloTriggerTowerService.h"
 //
 // ........ Gaudi needed includes
 //
 #include "GaudiKernel/IChronoStatSvc.h"
 #include "GaudiKernel/IIncidentSvc.h"
 #include "PathResolver/PathResolver.h"
-
-// trigger time
-#include "AthenaKernel/ITriggerTime.h"
 
 //
 #include <cmath>
@@ -50,101 +46,6 @@ namespace {
 constexpr double crossingTime = 25 /* nanosecond */;
 constexpr double crossingRate = 1. / crossingTime;
 }  // namespace
-
-LArTTL1Maker::LArTTL1Maker(const std::string& name, ISvcLocator* pSvcLocator)
-    : AthAlgorithm(name, pSvcLocator),
-      m_ttSvc("CaloTriggerTowerService"),
-      m_fSamplKey("LArfSamplSym"),
-      m_EmTTL1ContainerName{"LArTTL1EM"},
-      m_HadTTL1ContainerName{"LArTTL1HAD"},
-      m_xxxHitContainerName{SG::ReadHandleKey<LArHitContainer>("LArHitEMB"),
-                            SG::ReadHandleKey<LArHitContainer>("LArHitEMEC"),
-                            SG::ReadHandleKey<LArHitContainer>("LArHitHEC"),
-                            SG::ReadHandleKey<LArHitContainer>("LArHitFCAL")}
-
-// + -------------------------------------------------------------------- +
-// + Author ........: F. Ledroit                                          +
-// + Creation date .: 09/01/2003                                          +
-// + Subject: TTL1 Maker constructor                                     +
-// + -------------------------------------------------------------------- +
-{
-  //
-  // ........ default values of private data
-  //
-  m_chronSvc = nullptr;
-  m_useTriggerTime = false;
-  // m_triggerTimeToolName   = "CosmicTriggerTimeTool";
-  // p_triggerTimeTool       = 0;
-
-  m_BeginRunPriority = 100;
-
-  m_lvl1Helper = nullptr;
-  m_emHelper = nullptr;
-  m_hecHelper = nullptr;
-  m_fcalHelper = nullptr;
-
-  m_NoiseOnOff = true;
-  m_PileUp = false;
-  m_noEmCalibMode = false;
-  m_noHadCalibMode = false;
-  m_chronoTest = false;
-  m_debugThresh = 5000.;
-
-  m_calibCoeffEmb.resize(s_NBETABINS);
-  m_calibCoeffEmec.resize(s_NBETABINS);
-  m_calibCoeffHec.resize(s_NBETABINS);
-  for (int ieta = 0; ieta < s_NBETABINS; ieta++) {
-    m_calibCoeffEmb[ieta] = 1.;
-    m_calibCoeffEmec[ieta] = 1.;
-    m_calibCoeffHec[ieta] = 1.;
-  }
-  const int nEta = 4;
-  m_calibCoeffFcalEm.resize(nEta);
-  m_calibCoeffFcalHad.resize(nEta);
-  for (int ieta = 0; ieta < nEta; ieta++) {
-    m_calibCoeffFcalEm[ieta] = .03;
-    m_calibCoeffFcalHad[ieta] = .03;
-  }
-
-  //
-  // ........ declare the private data as properties
-  //
-
-  declareProperty("EmBarrelHitContainerName", m_xxxHitContainerName[0]);
-  declareProperty("EmEndCapHitContainerName", m_xxxHitContainerName[1]);
-  declareProperty("HecHitContainerName", m_xxxHitContainerName[2]);
-  declareProperty("ForWardHitContainerName", m_xxxHitContainerName[3]);
-
-  declareProperty("EmTTL1ContainerName", m_EmTTL1ContainerName);
-  declareProperty("HadTTL1ContainerName", m_HadTTL1ContainerName);
-
-  declareProperty("NoiseOnOff", m_NoiseOnOff);
-
-  declareProperty("PileUp", m_PileUp);
-  declareProperty("UseTriggerTime", m_useTriggerTime);
-  declareProperty("TriggerTimeToolName", m_triggerTimeTool);
-
-  declareProperty("EmBarrelCalibrationCoeffs", m_calibCoeffEmb);
-  declareProperty("EmEndCapCalibrationCoeffs", m_calibCoeffEmec);
-  declareProperty("HECCalibrationCoeffs", m_calibCoeffHec);
-  declareProperty("EmFcalCalibrationCoeffs", m_calibCoeffFcalEm);
-  declareProperty("HadFcalCalibrationCoeffs", m_calibCoeffFcalHad);
-
-  declareProperty("NoEmCalibrationMode", m_noEmCalibMode);
-  declareProperty("NoHadCalibrationMode", m_noHadCalibMode);
-  declareProperty("ChronoTest", m_chronoTest);
-  declareProperty("DebugThreshold", m_debugThresh);
-
-  declareProperty("TruthHitsContainer", m_truthHitsContainer = "",
-                  "Specify a value to get a pair of LArTTL1 containers with "
-                  "the truth hits in them");
-  declareProperty("LArfSamplKey", m_fSamplKey);
-
-  //
-  return;
-}
-
-LArTTL1Maker::~LArTTL1Maker() {}
 
 StatusCode LArTTL1Maker::initialize() {
   // +======================================================================+
