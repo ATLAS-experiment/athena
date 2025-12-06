@@ -1,15 +1,9 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // Local includes
 #include "AssociationUtils/BaseOverlapTool.h"
-
-namespace
-{
-  /// Unit conversion constant
-  const float invGeV = 1e-3;
-}
 
 namespace ORUtils
 {
