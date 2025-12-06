@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // System include(s):
@@ -77,7 +77,7 @@ namespace xAOD {
    class TrackParticle_v1 { };
    typedef TrackParticle_v1 TrackParticle;
 }
-
+//coverity[UNCAUGHT_EXCEPT]
 int main() {
 
    // Get the name of the application:
