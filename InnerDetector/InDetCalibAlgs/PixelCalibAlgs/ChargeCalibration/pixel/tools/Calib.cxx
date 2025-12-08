@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //***********************************************************************************************
@@ -11,6 +11,7 @@
 
 
 #include "Calib.h"
+#include <format>
 
 bool Calib::totFitting    (const pix::PixelMapping &pm, const std::string &inTotFile, std::map<unsigned int , std::vector<std::unique_ptr<CalibFrontEndInfo>> > &map_info){
     
@@ -36,10 +37,10 @@ bool Calib::totFitting    (const pix::PixelMapping &pm, const std::string &inTot
         
         //Here we combine long and ganged pixels 
         for(unsigned int pixel=0; pixel<2; pixel++){
-            TString title = "FE"+std::to_string(FE)+"_pixType"+std::to_string(pixel);
-            std::unique_ptr<TH1F> htot = std::make_unique<TH1F>(title+"_tot", title+"_tot", m_totnbins, m_totLo, m_totHi);
+            std::string title = "FE"+std::to_string(FE)+"_pixType"+std::to_string(pixel);
+            std::unique_ptr<TH1F> htot = std::make_unique<TH1F>((title+"_tot").c_str(), (title+"_tot").c_str(), m_totnbins, m_totLo, m_totHi);
             htot->SetDirectory(0);
-            std::unique_ptr<TH1F> htotsig = std::make_unique<TH1F>(title+"_totsig", title+"_totsig", m_totsigNBins, m_totsigLo, m_totsigHi);
+            std::unique_ptr<TH1F> htotsig = std::make_unique<TH1F>((title+"_totsig").c_str(), (title+"_totsig").c_str(), m_totsigNBins, m_totsigLo, m_totsigHi);
             htotsig->SetDirectory(0);
             //cppcheck-suppress containerOutOfBounds
             histogramsTOT.at(FE).push_back(std::move(htot));
@@ -55,20 +56,20 @@ bool Calib::totFitting    (const pix::PixelMapping &pm, const std::string &inTot
     while ((rodKey=static_cast<TKey*>(rodItr()))) {
         TDirectoryFile* rodDir = static_cast<TDirectoryFile*>(rodKey->ReadObj());
         TIter modItr = getModuleIterator(rodDir);
-        const TString rodName(rodKey->GetName());
-        printf("%s\n",rodName.Data());
+        const std::string rodName(rodKey->GetName());
+        printf("%s\n",rodName.c_str());
         TKey* modKey;
         while ((modKey=static_cast<TKey*>(modItr()))) {
-            const TString modName(modKey->GetName());
+            const std::string modName(modKey->GetName());
             
             if (not moduleInPart(modName)) continue;
-            if (not pm.contains(std::string(modName))) continue;
+            if (not pm.contains(modName)) continue;
             
-            if( m_runOneMOD and strcmp(modName, m_testMOD) != 0){
+            if( m_runOneMOD and (modName == m_testMOD)){
                 continue;
             }    
             
-            printf("  -> %s\n",modName.Data());
+            printf("  -> %s\n",modName.c_str());
             
             //creates arrays for the Tgraph
             std::array<std::array<float, m_ncharge>, m_nFE> totArrI{};
@@ -151,7 +152,7 @@ bool Calib::totFitting    (const pix::PixelMapping &pm, const std::string &inTot
             // loop over FE and create a graph for fitting            
             for(unsigned int FE = 0; FE < m_nFE; FE++) {
 
-                TString subdir(((FE < 10) ? "FE0" : "FE") +std::to_string(FE));
+                std::string subdir(((FE < 10) ? "FE0" : "FE") +std::to_string(FE));
                 
                 std::vector<float> v_Q;
                 std::vector<float> v_Qerr;
@@ -201,17 +202,17 @@ bool Calib::totFitting    (const pix::PixelMapping &pm, const std::string &inTot
                     if(m_savefile){
                         
                         m_wFile->cd();
-                        if( !m_wFile->Get(rodName+"/"+modName+"/TOTfits/"+subdir) ){
-                            m_wFile->mkdir(rodName+"/"+modName+"/TOTfits/"+subdir,rodName);
+                        if( !m_wFile->Get((rodName+"/"+modName+"/TOTfits/"+subdir).c_str()) ){
+                            m_wFile->mkdir((rodName+"/"+modName+"/TOTfits/"+subdir).c_str(),rodName.c_str());
                         }
 
-                        m_wFile->cd(rodName+"/"+modName+"/TOTfits/"+subdir);
+                        m_wFile->cd((rodName+"/"+modName+"/TOTfits/"+subdir).c_str());
                         
-                        graphTitles(graphnormal, TString(modName+" - "+subdir+" - normal pixels: Fit: "+std::to_string(n_fit)).Data(), "TOT");
-                        graphTitles(graphsig   , TString(modName+" - "+subdir+" - normal pixels: Fit: "+std::to_string(n_fit)).Data(), "Charge smearing");
+                        graphTitles(graphnormal, std::string(modName+" - "+subdir+" - normal pixels: Fit: "+std::to_string(n_fit)).c_str(), "TOT");
+                        graphTitles(graphsig   , std::string(modName+" - "+subdir+" - normal pixels: Fit: "+std::to_string(n_fit)).c_str(), "Charge smearing");
                         
-                        graphnormal->Write(TString("normal_fit_"+std::to_string(n_fit)), TObject::kWriteDelete);
-                        graphsig->Write(TString("smearing_fit_"+std::to_string(n_fit)), TObject::kWriteDelete);  
+                        graphnormal->Write(std::string("normal_fit_"+std::to_string(n_fit)).c_str(), TObject::kWriteDelete);
+                        graphsig->Write(std::string("smearing_fit_"+std::to_string(n_fit)).c_str(), TObject::kWriteDelete);
                         n_fit++;                     
                     }
                                         
@@ -251,15 +252,15 @@ bool Calib::totFitting    (const pix::PixelMapping &pm, const std::string &inTot
                     if(m_savefile){
                         
                         m_wFile->cd();
-                        if( !m_wFile->Get(rodName+"/"+modName+"/TOTfits/"+subdir) ){
-                            m_wFile->mkdir(rodName+"/"+modName+"/TOTfits/"+subdir,rodName);
+                        if( !m_wFile->Get((rodName+"/"+modName+"/TOTfits/"+subdir).c_str()) ){
+                            m_wFile->mkdir((rodName+"/"+modName+"/TOTfits/"+subdir).c_str(),rodName.c_str());
                         }
 
-                        m_wFile->cd(rodName+"/"+modName+"/TOTfits/"+subdir);
+                        m_wFile->cd((rodName+"/"+modName+"/TOTfits/"+subdir).c_str());
                         
-                        graphTitles(graflong, TString(modName+" - "+subdir+" - long+ganged pixels: Fit: "+std::to_string(n_fit)).Data(), "TOT");
+                        graphTitles(graflong, std::string(modName+" - "+subdir+" - long+ganged pixels: Fit: "+std::to_string(n_fit)).c_str(), "TOT");
                         
-                        graflong->Write(TString("long_ganged_fit_"+std::to_string(n_fit)), TObject::kWriteDelete);
+                        graflong->Write(std::string("long_ganged_fit_"+std::to_string(n_fit)).c_str(), TObject::kWriteDelete);
                         n_fit++;                     
                     }
                     
@@ -385,8 +386,8 @@ bool Calib::fillTiming(const pix::PixelMapping &pm, const std::string &inTimFile
         histogramsTIM.push_back( std::vector< std::unique_ptr<TH1F> >() );
         
         for(unsigned int pixel=0; pixel<3; pixel++){
-            TString title = "FE"+std::to_string(FE)+"_pixType"+std::to_string(pixel);
-            std::unique_ptr<TH1F> h = std::make_unique<TH1F>(title+"_thr", title+"_thr", m_timnbins, m_timLo, m_timHi);
+            std::string title = "FE"+std::to_string(FE)+"_pixType"+std::to_string(pixel);
+            std::unique_ptr<TH1F> h = std::make_unique<TH1F>((title+"_thr").c_str(), (title+"_thr").c_str(), m_timnbins, m_timLo, m_timHi);
             h->SetDirectory(0);
             //cppcheck-suppress containerOutOfBounds
             histogramsTIM.at(FE).push_back(std::move(h));
@@ -397,24 +398,24 @@ bool Calib::fillTiming(const pix::PixelMapping &pm, const std::string &inTimFile
     TIter rodItr = getRodIterator(timFile);
     TKey* rodKey;
     while ((rodKey=static_cast<TKey*>(rodItr()))) {
-        const TString rodName(rodKey->GetName());
+        const std::string rodName(rodKey->GetName());
         TDirectoryFile* rodDir = static_cast<TDirectoryFile*>(rodKey->ReadObj());
         TKey* modKey;
         TIter modItr=getModuleIterator(rodDir);
 
         // Looping over the MODs of each ROD
         while ((modKey=static_cast<TKey*>(modItr()))) {
-            TString modName(modKey->GetName());
+            std::string modName(modKey->GetName());
             
             if ( not moduleInPart(modName)){
                 continue;
             } 
             if ( not pm.contains(std::string(modName))){
-                printf("Error - Module %s not found in the PixelMapping tool\n",modName.Data());
+                printf("Error - Module %s not found in the PixelMapping tool\n",modName.c_str());
                 continue;
             } 
             
-            if( m_runOneMOD and strcmp(modName, m_testMOD) != 0){
+            if( m_runOneMOD and (modName == m_testMOD)){
                 continue;
             }           
             
@@ -484,7 +485,7 @@ bool Calib::fillTiming(const pix::PixelMapping &pm, const std::string &inTimFile
             }
             else{
                 for(unsigned int FE = 0; FE < m_nFE; FE++){
-                    TString subdir(((FE < 10) ? "FE0" : "FE") +std::to_string(FE));
+                    std::string subdir(((FE < 10) ? "FE0" : "FE") +std::to_string(FE));
                     for(unsigned int pixel=0; pixel<3; pixel++){
                         
                         // Saving information for the calibration
@@ -493,11 +494,11 @@ bool Calib::fillTiming(const pix::PixelMapping &pm, const std::string &inTimFile
                         if(m_savefile){
                             
                             m_wFile->cd();
-                            if( !m_wFile->Get(rodName+"/"+modName+"/Thresholds/"+subdir) ){
-                                m_wFile->mkdir(rodName+"/"+modName+"/Thresholds/"+subdir,rodName);
+                            if( !m_wFile->Get((rodName+"/"+modName+"/Thresholds/"+subdir).c_str()) ){
+                                m_wFile->mkdir((rodName+"/"+modName+"/Thresholds/"+subdir).c_str(),rodName.c_str());
                             }
 
-                            m_wFile->cd(rodName+"/"+modName+"/Thresholds/"+subdir);
+                            m_wFile->cd((rodName+"/"+modName+"/Thresholds/"+subdir).c_str());
 
                             histogramsTIM.at(FE).at(pixel)->SetTitle("Intime;Pixel intime;Counts");
 
@@ -506,7 +507,7 @@ bool Calib::fillTiming(const pix::PixelMapping &pm, const std::string &inTimFile
                             else if(pixel == 1) type = "long";
                             else if(pixel == 2) type = "ganged";
                             
-                            histogramsTIM.at(FE).at(pixel)->Write(TString("intime_"+type).Data(), TObject::kWriteDelete);
+                            histogramsTIM.at(FE).at(pixel)->Write(std::string("intime_"+type).c_str(), TObject::kWriteDelete);
                         }
                         
                         // Reset histograms for next front end
@@ -567,10 +568,10 @@ bool Calib::fillThresholds(const pix::PixelMapping &pm, const std::string &inThr
         histogramsSIG.push_back( std::vector< std::unique_ptr<TH1F> >() );
         
         for(unsigned int pixel=0; pixel<3; pixel++){
-            TString title = "FE"+std::to_string(FE)+"_pixType"+std::to_string(pixel);
-            std::unique_ptr<TH1F> hthr = std::make_unique<TH1F>(title+"_thr", title+"_thr", m_thrnbins, m_thrLo, m_thrHi);
+            std::string title = "FE"+std::to_string(FE)+"_pixType"+std::to_string(pixel);
+            std::unique_ptr<TH1F> hthr = std::make_unique<TH1F>((title+"_thr").c_str(), (title+"_thr").c_str(), m_thrnbins, m_thrLo, m_thrHi);
             hthr->SetDirectory(0);
-            std::unique_ptr<TH1F> hsig = std::make_unique<TH1F>(title+"_sig", title+"_sig", m_thrnbins, m_sigLo, m_sigHi);
+            std::unique_ptr<TH1F> hsig = std::make_unique<TH1F>((title+"_sig").c_str(), (title+"_sig").c_str(), m_thrnbins, m_sigLo, m_sigHi);
             hsig->SetDirectory(0);
             //cppcheck-suppress containerOutOfBounds
             histogramsTHR.at(FE).push_back(std::move(hthr));
@@ -583,24 +584,24 @@ bool Calib::fillThresholds(const pix::PixelMapping &pm, const std::string &inThr
     TIter rodItr = getRodIterator(riThrFile);
     TKey* rodKey;
     while ((rodKey=static_cast<TKey*>(rodItr()))) {
-        const TString rodName(rodKey->GetName());
+        const std::string rodName(rodKey->GetName());
         TDirectoryFile* rodDir = (TDirectoryFile*)rodKey->ReadObj();
         TKey* modKey;
         TIter modItr=getModuleIterator(rodDir);
 
         // Looping over the MODs of each ROD
         while ((modKey=static_cast<TKey*>(modItr()))) {
-            TString modName(modKey->GetName());
+            std::string modName(modKey->GetName());
             
             if ( not moduleInPart(modName)){
                 continue;
             } 
             if ( not pm.contains(std::string(modName))){
-                printf("Error - Module %s not found in the PixelMapping tool\n",modName.Data());
+                printf("Error - Module %s not found in the PixelMapping tool\n",modName.c_str());
                 continue;
             } 
             
-            if( m_runOneMOD and strcmp(modName, m_testMOD) != 0){
+            if( m_runOneMOD and (modName == m_testMOD)){
                 continue;
             } 
             
@@ -648,7 +649,7 @@ bool Calib::fillThresholds(const pix::PixelMapping &pm, const std::string &inThr
                 map_info[modID] = std::vector<std::unique_ptr<CalibFrontEndInfo>> ();
                 
                 for(unsigned int FE = 0; FE < m_nFE; FE++){
-                    TString subdir(((FE < 10) ? "FE0" : "FE") +std::to_string(FE));
+                    std::string subdir(((FE < 10) ? "FE0" : "FE") +std::to_string(FE));
                     map_info[modID].push_back( std::unique_ptr<CalibFrontEndInfo>() );
                     std::unique_ptr<CalibFrontEndInfo> p = std::make_unique<CalibFrontEndInfo>(modID,FE,std::string(modName),std::string(rodKey->GetName()));
                     map_info[modID].at(FE) = std::move(p);
@@ -663,11 +664,11 @@ bool Calib::fillThresholds(const pix::PixelMapping &pm, const std::string &inThr
                         if(m_savefile){
                             
                             m_wFile->cd();
-                            if( !m_wFile->Get(rodName+"/"+modName+"/Thresholds/"+subdir) ){
-                                m_wFile->mkdir(rodName+"/"+modName+"/Thresholds/"+subdir,rodName);
+                            if( !m_wFile->Get((rodName+"/"+modName+"/Thresholds/"+subdir).c_str()) ){
+                                m_wFile->mkdir((rodName+"/"+modName+"/Thresholds/"+subdir).c_str(),rodName.c_str());
                             }
 
-                            m_wFile->cd(rodName+"/"+modName+"/Thresholds/"+subdir);
+                            m_wFile->cd((rodName+"/"+modName+"/Thresholds/"+subdir).c_str());
 
                             histogramsTHR.at(FE).at(pixel)->SetTitle("Threshold;Pixel threshold;Counts");
                             histogramsSIG.at(FE).at(pixel)->SetTitle("Sigma;Pixel sigma;Counts");
@@ -677,8 +678,8 @@ bool Calib::fillThresholds(const pix::PixelMapping &pm, const std::string &inThr
                             else if(pixel == 1) type = "long";
                             else if(pixel == 2) type = "ganged";
                             
-                            histogramsTHR.at(FE).at(pixel)->Write(TString("thres_"+type).Data(), TObject::kWriteDelete);
-                            histogramsSIG.at(FE).at(pixel)->Write(TString("sigma_"+type).Data(), TObject::kWriteDelete);  
+                            histogramsTHR.at(FE).at(pixel)->Write(std::string("thres_"+type).c_str(), TObject::kWriteDelete);
+                            histogramsSIG.at(FE).at(pixel)->Write(std::string("sigma_"+type).c_str(), TObject::kWriteDelete);
                         }                        
                         
                         // Reset histograms for next front end
@@ -777,13 +778,15 @@ TIter Calib::getModuleIterator( TDirectoryFile* rodDir) {
     return TIter(modKeyList);
 }
 
-TH2F* Calib::get2DHistogramFromPath( TDirectoryFile* rodDir, const TString & moduleName, const TString & histName, int charge) {
-    TString suffix = (charge<0) ? ("") : (TString("/C") + charge);
-    TString fullHistoPath = moduleName + "/" + histName + "/A0/B0" + suffix;
-    TDirectoryFile *histDir = static_cast<TDirectoryFile *>(rodDir->GetDirectory(fullHistoPath));
+TH2F* Calib::get2DHistogramFromPath( TDirectoryFile* rodDir, const std::string & moduleName, const std::string & histName, int charge) {
+    std::string suffix;
+    if (charge >= 0)
+      suffix = std::format ("/C{}", charge);
+    std::string fullHistoPath = moduleName + "/" + histName + "/A0/B0" + suffix;
+    TDirectoryFile *histDir = static_cast<TDirectoryFile *>(rodDir->GetDirectory(fullHistoPath.c_str()));
     
     if(!histDir){
-        printf("Error - Directory \"%s\" not found. Exiting..\n",fullHistoPath.Data());
+        printf("Error - Directory \"%s\" not found. Exiting..\n",fullHistoPath.c_str());
         return nullptr;
     }
     TH2F *pTH2 = static_cast<TH2F*>((static_cast<TKey*>(histDir->GetListOfKeys()->First()))->ReadObj());
@@ -792,11 +795,11 @@ TH2F* Calib::get2DHistogramFromPath( TDirectoryFile* rodDir, const TString & mod
     return pTH2;
 }
 
-bool Calib::moduleInPart(const TString & modName) {
+bool Calib::moduleInPart(const std::string & modName) {
     if (modName == "DSP_ERRORS") {
         return false;
     }
-    return modName.BeginsWith(m_MODprefixes[m_whichPart]);
+    return modName.starts_with(m_MODprefixes[m_whichPart]);
 }
 
 
@@ -819,7 +822,7 @@ std::vector<float> Calib::getParams_quality(const TF1 *f){
 }
 
 void Calib::graphTitles(const std::unique_ptr<TGraphErrors> &graph, const std::string &name, const std::string &Yname){
-    graph->SetTitle(TString(name)+";Charge;"+TString(Yname));
+    graph->SetTitle((std::string(name)+";Charge;"+std::string(Yname)).c_str());
     graph->SetMarkerStyle(20);
 }
         
