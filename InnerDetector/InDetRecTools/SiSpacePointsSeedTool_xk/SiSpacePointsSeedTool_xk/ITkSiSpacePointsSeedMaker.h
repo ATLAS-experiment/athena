@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////////////////////
@@ -258,8 +258,8 @@ namespace ITk
     ServiceHandle<ITHistSvc> m_thistSvc;
     TTree* m_outputTree;
     mutable std::mutex m_mutex;
-    mutable std::string          m_treeName               ATLAS_THREAD_SAFE;
-    mutable TString              m_treeFolder             ATLAS_THREAD_SAFE;
+            std::string          m_treeName;
+            std::string          m_treeFolder;
     mutable float                  m_d0                   ATLAS_THREAD_SAFE = 0;
     mutable float                  m_z0                   ATLAS_THREAD_SAFE = 0;
     mutable float                  m_pt                   ATLAS_THREAD_SAFE = 0;
