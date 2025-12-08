@@ -7,12 +7,15 @@
 #include "G4Trd.hh"
 #include "MuonSimEvent/RpcHitIdHelper.h"
 #include <string>
+#include "G4Exception.hh"
 #include "G4Geantino.hh"
 #include "G4ChargedGeantino.hh"
 
 //#include "SimHelpers/DetectorGeometryHelper.h"
+#include "MCTruth/AtlasG4EventUserInfo.h"
 #include "MCTruth/TrackHelper.h"
 #include <sstream>
+
 
 #include "GeoPrimitives/CLHEPtoEigenConverter.h"
 #include "GeoPrimitives/GeoPrimitivesHelpers.h"
@@ -21,14 +24,17 @@
 // construction/destruction
 RPCSensitiveDetector::RPCSensitiveDetector(const std::string& name, const std::string& hitCollectionName, unsigned int nGasGaps)
   : G4VSensitiveDetector( name )
-  , m_myRPCHitColl( hitCollectionName )
+  , m_hitCollectionName( hitCollectionName )
 {
   m_muonHelper = RpcHitIdHelper::GetHelper(nGasGaps);
 }
 
 void RPCSensitiveDetector::Initialize(G4HCofThisEvent*)
 {
-  if (!m_myRPCHitColl.isValid()) m_myRPCHitColl = std::make_unique<RPCSimHitCollection>();
+  m_myRPCHitColl = nullptr;
+  if (auto* eventInfo = AtlasG4EventUserInfo::GetEventUserInfo()) {
+    m_myRPCHitColl = eventInfo->GetHitCollectionMap()->Find<RPCSimHitCollection>(m_hitCollectionName);
+  }
   //FIXME probably only need to call this bit at start of the event
   //loop rather than the start of each G4Event.
   if (verboseLevel>5) G4cout << "Initializing SD"  << G4endl;
@@ -36,6 +42,12 @@ void RPCSensitiveDetector::Initialize(G4HCofThisEvent*)
 }
 
 G4bool RPCSensitiveDetector::ProcessHits(G4Step* aStep,G4TouchableHistory*) {
+
+  if (!m_myRPCHitColl) {
+    G4Exception("RPCSensitiveDetector::ProcessHits", "RPCHitCollectionMissing", FatalException,
+                "Hit collection not initialized; did SetupEvent run?");
+    return false;
+  }
 
   G4Track* track = aStep->GetTrack();
 
@@ -287,4 +299,3 @@ G4bool RPCSensitiveDetector::ProcessHits(G4Step* aStep,G4TouchableHistory*) {
 
   return true;
 }
-

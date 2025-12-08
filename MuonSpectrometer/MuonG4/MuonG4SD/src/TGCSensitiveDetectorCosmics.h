@@ -66,10 +66,10 @@ We describe in the following, how each field of the identifier is retrieved.
 #define TGCSensitiveDetectorCosmics_H
 
 #include "G4VSensitiveDetector.hh"
-#include "StoreGate/WriteHandle.h"
 
 #include "MuonSimEvent/TGCSimHitCollection.h"
 #include "MuonSimEvent/TgcHitIdHelper.h"
+#include <string>
 #include <gtest/gtest_prod.h>
 
 class TGCSensitiveDetectorCosmics: public G4VSensitiveDetector {
@@ -79,7 +79,6 @@ FRIEND_TEST( TGCSensitiveDetectorCosmicstest, ProcessHits );
  public:
   /** construction/destruction */
   TGCSensitiveDetectorCosmics(const std::string& name, const std::string& hitCollectionName);
-  ~TGCSensitiveDetectorCosmics() {}
 
   /** member functions */
   void Initialize(G4HCofThisEvent* HCE) override final;
@@ -94,7 +93,8 @@ FRIEND_TEST( TGCSensitiveDetectorCosmicstest, ProcessHits );
   double m_globalTime;
 
   /** member data */
-  SG::WriteHandle<TGCSimHitCollection>  m_myTGCHitColl;
+  std::string m_hitCollectionName;
+  TGCSimHitCollection*  m_myTGCHitColl{nullptr};
   const TgcHitIdHelper* m_muonHelper;
 };
 

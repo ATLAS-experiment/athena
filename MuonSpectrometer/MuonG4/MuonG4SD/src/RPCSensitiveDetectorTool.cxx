@@ -4,11 +4,26 @@
 
 #include "RPCSensitiveDetectorTool.h"
 #include "RPCSensitiveDetector.h"
+
+#include "HitManagement/HitCollectionMap.h"
+#include "MuonSimEvent/RPCSimHitCollection.h"
 #include <TString.h> // for Form
 
 RPCSensitiveDetectorTool::RPCSensitiveDetectorTool(const std::string& type, const std::string& name, const IInterface* parent)
   : SensitiveDetectorBase( type , name , parent )
 {
+}
+
+StatusCode RPCSensitiveDetectorTool::SetupEvent(HitCollectionMap& hitCollections)
+{
+  hitCollections.Emplace<RPCSimHitCollection>(m_outputCollectionNames[0]);
+  return StatusCode::SUCCESS;
+}
+
+StatusCode RPCSensitiveDetectorTool::Gather(HitCollectionMap& hitCollections)
+{
+  hitCollections.Record<RPCSimHitCollection>(m_outputCollectionNames[0]);
+  return StatusCode::SUCCESS;
 }
 
 G4VSensitiveDetector* RPCSensitiveDetectorTool::makeSD() const

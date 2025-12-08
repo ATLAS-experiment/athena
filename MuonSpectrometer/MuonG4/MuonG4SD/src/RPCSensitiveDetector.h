@@ -87,10 +87,10 @@ We describe here how each field of the identifier is determined.
 #define RPCSensitiveDetector_H
 
 #include "G4VSensitiveDetector.hh"
-#include "StoreGate/WriteHandle.h"
 
 #include "MuonSimEvent/RPCSimHitCollection.h"
 #include "MuonSimEvent/RpcHitIdHelper.h"
+#include <string>
 #include <gtest/gtest_prod.h>
 
 class RPCSensitiveDetector : public G4VSensitiveDetector {
@@ -100,7 +100,6 @@ FRIEND_TEST( RPCSensitiveDetectortest, ProcessHits );
 public:
     /** construction/destruction */
     RPCSensitiveDetector(const std::string& name, const std::string& hitCollectionName, unsigned int nGasGaps);
-    ~RPCSensitiveDetector()=default;
 
     /** member functions */
     void Initialize(G4HCofThisEvent*) override final;
@@ -108,7 +107,8 @@ public:
     
 private:
     /** member data */
-    SG::WriteHandle<RPCSimHitCollection> m_myRPCHitColl;
+    std::string m_hitCollectionName;
+    RPCSimHitCollection* m_myRPCHitColl{nullptr};
     const RpcHitIdHelper* m_muonHelper{nullptr};
 };
 

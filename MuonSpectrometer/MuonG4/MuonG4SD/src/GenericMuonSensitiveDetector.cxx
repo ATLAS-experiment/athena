@@ -3,8 +3,11 @@
 */
 
 #include "GenericMuonSensitiveDetector.h"
+#include "MCTruth/AtlasG4EventUserInfo.h"
 #include "MCTruth/TrackHelper.h"
 
+
+#include "G4Exception.hh"
 #include "G4Track.hh"
 
 #include <string>
@@ -14,7 +17,7 @@
 // construction/destruction
 GenericMuonSensitiveDetector::GenericMuonSensitiveDetector(const std::string& name, const std::string& hitCollectionName)
   : G4VSensitiveDetector( name )
-  , m_GenericMuonHitCollection( hitCollectionName )
+  , m_hitCollectionName( hitCollectionName )
 {
   G4cout << " creating a GenericMuonSensitiveDetector: "<<name << G4endl;
 }
@@ -22,11 +25,19 @@ GenericMuonSensitiveDetector::GenericMuonSensitiveDetector(const std::string& na
 // Implemenation of memebr functions
 void GenericMuonSensitiveDetector::Initialize(G4HCofThisEvent*) 
 {
-  if (!m_GenericMuonHitCollection.isValid()) m_GenericMuonHitCollection = std::make_unique<GenericMuonSimHitCollection>();
+  m_GenericMuonHitCollection = nullptr;
+  if (auto* eventInfo = AtlasG4EventUserInfo::GetEventUserInfo()) {
+    m_GenericMuonHitCollection = eventInfo->GetHitCollectionMap()->Find<GenericMuonSimHitCollection>(m_hitCollectionName);
+  }
 }
 
 G4bool GenericMuonSensitiveDetector::ProcessHits(G4Step* aStep,G4TouchableHistory* /*ROHist*/) 
 {
+  if (!m_GenericMuonHitCollection) {
+    G4Exception("GenericMuonSensitiveDetector::ProcessHits", "GenericMuonHitCollectionMissing", FatalException,
+                "Hit collection not initialized; did SetupEvent run?");
+    return false;
+  }
   G4cout << "Hit in a sensitive layer!!!!! " << G4endl;
   G4Track* currentTrack = aStep->GetTrack();
   const G4AffineTransform trans = currentTrack->GetTouchable()->GetHistory()->GetTopTransform(); // from global to local
@@ -57,4 +68,3 @@ G4bool GenericMuonSensitiveDetector::ProcessHits(G4Step* aStep,G4TouchableHistor
 
   return true;
 }
-

@@ -73,8 +73,8 @@ We describe in the following, how each field of the identifier is retrieved.
 #define MDTSENSITIVEDETECTOR_H
 
 #include "G4VSensitiveDetector.hh"
-#include "StoreGate/WriteHandle.h"
 #include "MuonSimEvent/MDTSimHitCollection.h"
+#include <string>
 #include <gtest/gtest_prod.h>
 
 class G4TouchableHistory;
@@ -89,7 +89,6 @@ FRIEND_TEST( MDTSensitiveDetectortest, GetIdentifier );
 public:
     /** construction/destruction */
     MDTSensitiveDetector(const std::string& name, const std::string& hitCollectionName, const unsigned int nTubesMax);
-    ~MDTSensitiveDetector()=default;
     
     /** member functions */
     void   Initialize(G4HCofThisEvent* HCE) override final;
@@ -99,7 +98,8 @@ private:
     int  GetIdentifier(const G4TouchableHistory* touchHist);
                  
     /** member data */
-    SG::WriteHandle<MDTSimHitCollection> m_MDTHitColl;
+    std::string m_hitCollectionName;
+    MDTSimHitCollection* m_MDTHitColl{nullptr};
     const MdtHitIdHelper*      m_muonHelper;
 
     double                     m_driftRadius;

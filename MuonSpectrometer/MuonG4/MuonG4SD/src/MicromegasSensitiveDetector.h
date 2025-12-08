@@ -6,8 +6,8 @@
 #define MicromegasSensitiveDetector_H
 
 #include "G4VSensitiveDetector.hh"
-#include "StoreGate/WriteHandle.h"
 #include "MuonSimEvent/MMSimHitCollection.h"
+#include <string>
 #include <gtest/gtest_prod.h>
 
 class MicromegasHitIdHelper;
@@ -19,7 +19,6 @@ FRIEND_TEST( MicromegasSensitiveDetectortest, ProcessHits );
 public:
     /** construction/destruction */
     MicromegasSensitiveDetector(const std::string& name, const std::string& hitCollectionName);
-    ~MicromegasSensitiveDetector() {}
     
     /** member functions */
     void   Initialize(G4HCofThisEvent* HCE) override final;
@@ -27,7 +26,8 @@ public:
     
 private:
 
-    SG::WriteHandle<MMSimHitCollection> m_MMSimHitCollection;
+    std::string m_hitCollectionName;
+    MMSimHitCollection* m_MMSimHitCollection{nullptr};
     const MicromegasHitIdHelper* m_muonHelper;
 
 };
