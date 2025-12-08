@@ -4,7 +4,9 @@
 
 #include "TGCSensitiveDetector.h"
 #include "MuonSimEvent/TgcHitIdHelper.h"
+#include "MCTruth/AtlasG4EventUserInfo.h"
 #include "MCTruth/TrackHelper.h"
+#include "G4Exception.hh"
 #include "G4Geantino.hh"
 #include "G4ChargedGeantino.hh"
 
@@ -15,7 +17,7 @@
 // construction/destruction
 TGCSensitiveDetector::TGCSensitiveDetector(const std::string& name, const std::string& hitCollectionName)
   : G4VSensitiveDetector( name )
-  , m_myTGCHitColl( hitCollectionName )
+  , m_hitCollectionName( hitCollectionName )
 {
   m_muonHelper = TgcHitIdHelper::GetHelper();
 }
@@ -23,10 +25,19 @@ TGCSensitiveDetector::TGCSensitiveDetector(const std::string& name, const std::s
 // Implemenation of member functions
 void TGCSensitiveDetector::Initialize(G4HCofThisEvent*)
 {
-  if (!m_myTGCHitColl.isValid()) m_myTGCHitColl = std::make_unique<TGCSimHitCollection>();
+  m_myTGCHitColl = nullptr;
+  if (auto* eventInfo = AtlasG4EventUserInfo::GetEventUserInfo()) {
+    m_myTGCHitColl = eventInfo->GetHitCollectionMap()->Find<TGCSimHitCollection>(m_hitCollectionName);
+  }
 }
 
 G4bool TGCSensitiveDetector::ProcessHits(G4Step* aStep,G4TouchableHistory*) {
+
+  if (!m_myTGCHitColl) {
+    G4Exception("TGCSensitiveDetector::ProcessHits", "TGCHitCollectionMissing", FatalException,
+                "Hit collection not initialized; did SetupEvent run?");
+    return false;
+  }
 
   G4Track* track = aStep->GetTrack();
 
@@ -251,4 +262,3 @@ G4bool TGCSensitiveDetector::ProcessHits(G4Step* aStep,G4TouchableHistory*) {
                         aStep->GetPreStepPoint()->GetKineticEnergy());
   return true;
 }
-

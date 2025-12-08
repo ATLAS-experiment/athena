@@ -7,9 +7,12 @@
 #include <string>
 #include <sstream>
 #include "MuonSimEvent/CscHitIdHelper.h"
+#include "MCTruth/AtlasG4EventUserInfo.h"
 #include "MCTruth/TrackHelper.h"
+#include "G4Exception.hh"
 #include "G4Geantino.hh"
 #include "G4ChargedGeantino.hh"
+
 
 #include "GeoPrimitives/CLHEPtoEigenConverter.h"
 
@@ -17,7 +20,7 @@
 CSCSensitiveDetector::CSCSensitiveDetector(const std::string& name,
                                            const std::string& hitCollectionName)
   : G4VSensitiveDetector( name )
-  , m_myCSCHitColl( hitCollectionName )
+  , m_hitCollectionName( hitCollectionName )
 {
   m_muonHelper = CscHitIdHelper::GetHelper();
 }
@@ -25,10 +28,19 @@ CSCSensitiveDetector::CSCSensitiveDetector(const std::string& name,
 // Implemenation of memebr functions
 void CSCSensitiveDetector::Initialize(G4HCofThisEvent*)
 {
-  if (!m_myCSCHitColl.isValid()) m_myCSCHitColl = std::make_unique<CSCSimHitCollection>();
+  m_myCSCHitColl = nullptr;
+  if (auto* eventInfo = AtlasG4EventUserInfo::GetEventUserInfo()) {
+    m_myCSCHitColl = eventInfo->GetHitCollectionMap()->Find<CSCSimHitCollection>(m_hitCollectionName);
+  }
 }
 
 G4bool CSCSensitiveDetector::ProcessHits(G4Step* aStep,G4TouchableHistory* /*ROHist*/) {
+
+  if (!m_myCSCHitColl) {
+    G4Exception("CSCSensitiveDetector::ProcessHits", "CSCHitCollectionMissing", FatalException,
+                "Hit collection not initialized; did SetupEvent run?");
+    return false;
+  }
 
   G4Track* currentTrack = aStep->GetTrack();
 

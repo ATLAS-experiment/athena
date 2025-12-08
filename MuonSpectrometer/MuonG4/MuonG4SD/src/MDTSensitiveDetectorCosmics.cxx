@@ -4,7 +4,9 @@
 
 #include "MDTSensitiveDetectorCosmics.h"
 #include "MuonSimEvent/MdtHitIdHelper.h"
+#include "MCTruth/AtlasG4EventUserInfo.h"
 #include "MCTruth/TrackHelper.h"
+#include "G4Exception.hh"
 #include "G4Geantino.hh"
 #include "G4ChargedGeantino.hh"
 #include "MuonIdHelpers/MdtIdHelper.h"
@@ -12,6 +14,7 @@
 #include <string>
 #include <iostream>
 #include <limits>
+
 
 #include "GeoPrimitives/CLHEPtoEigenConverter.h"
 
@@ -26,7 +29,7 @@ typedef std::istringstream my_isstream;
 MDTSensitiveDetectorCosmics::MDTSensitiveDetectorCosmics(const std::string& name, const std::string& hitCollectionName, const unsigned int nTubesMax)
   : G4VSensitiveDetector( name )
   , m_momMag(0.)
-  , m_MDTHitColl( hitCollectionName )
+  , m_hitCollectionName( hitCollectionName )
   , m_driftRadius(0.)
   , m_globalTime(0.)
   , m_DEFAULT_TUBE_RADIUS( std::numeric_limits<double>::max() )
@@ -37,7 +40,10 @@ MDTSensitiveDetectorCosmics::MDTSensitiveDetectorCosmics(const std::string& name
 // Implemenation of member functions
 void MDTSensitiveDetectorCosmics::Initialize(G4HCofThisEvent*)
 {
-  if (!m_MDTHitColl.isValid()) m_MDTHitColl = std::make_unique<MDTSimHitCollection>();
+  m_MDTHitColl = nullptr;
+  if (auto* eventInfo = AtlasG4EventUserInfo::GetEventUserInfo()) {
+    m_MDTHitColl = eventInfo->GetHitCollectionMap()->Find<MDTSimHitCollection>(m_hitCollectionName);
+  }
   m_driftRadius = m_DEFAULT_TUBE_RADIUS;
   // START OF COSMICS SPECIFIC CODE
   m_mom = Amg::Vector3D(0.,0.,0.);
@@ -46,6 +52,12 @@ void MDTSensitiveDetectorCosmics::Initialize(G4HCofThisEvent*)
 }
 
 G4bool MDTSensitiveDetectorCosmics::ProcessHits(G4Step* aStep,G4TouchableHistory* /*ROHist*/) {
+
+  if (!m_MDTHitColl) {
+    G4Exception("MDTSensitiveDetectorCosmics::ProcessHits", "MDTCosmicHitCollectionMissing", FatalException,
+                "Hit collection not initialized; did SetupEvent run?");
+    return false;
+  }
 
   G4Track* currentTrack = aStep->GetTrack();
 

@@ -6,8 +6,8 @@
 #define GenericMuonSensitiveDetector_H
 
 #include "G4VSensitiveDetector.hh"
-#include "StoreGate/WriteHandle.h"
 #include "MuonSimEvent/GenericMuonSimHitCollection.h"
+#include <string>
 #include <gtest/gtest_prod.h>
 
 class GenericMuonSensitiveDetector : public G4VSensitiveDetector {
@@ -16,7 +16,6 @@ class GenericMuonSensitiveDetector : public G4VSensitiveDetector {
 public:
     /** construction/destruction */
     GenericMuonSensitiveDetector(const std::string& name, const std::string& hitCollectionName);
-    ~GenericMuonSensitiveDetector() {}
     
     /** member functions */
     void   Initialize(G4HCofThisEvent* HCE) override final;
@@ -24,7 +23,8 @@ public:
     
 private:
 
-    SG::WriteHandle<GenericMuonSimHitCollection> m_GenericMuonHitCollection;
+    std::string m_hitCollectionName;
+    GenericMuonSimHitCollection* m_GenericMuonHitCollection{nullptr};
 
 };
 

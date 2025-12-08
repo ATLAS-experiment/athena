@@ -7,7 +7,9 @@
 #include <string>
 #include <sstream>
 #include "MuonSimEvent/CscHitIdHelper.h"
+#include "MCTruth/AtlasG4EventUserInfo.h"
 #include "MCTruth/TrackHelper.h"
+#include "G4Exception.hh"
 #include "G4Geantino.hh"
 #include "G4ChargedGeantino.hh"
 
@@ -23,7 +25,7 @@ CSCSensitiveDetectorCosmics::CSCSensitiveDetectorCosmics(const std::string& name
   , m_momMag(0.)
   , m_globalTime(0.)
   // END OF COSMICS-SPECIFIC CODE
-  , m_myCSCHitColl( hitCollectionName )
+  , m_hitCollectionName( hitCollectionName )
 {
   m_muonHelper = CscHitIdHelper::GetHelper();
 }
@@ -31,7 +33,10 @@ CSCSensitiveDetectorCosmics::CSCSensitiveDetectorCosmics(const std::string& name
 // Implemenation of memebr functions
 void CSCSensitiveDetectorCosmics::Initialize(G4HCofThisEvent*)
 {
-  if (!m_myCSCHitColl.isValid()) m_myCSCHitColl = std::make_unique<CSCSimHitCollection>();
+  m_myCSCHitColl = nullptr;
+  if (auto* eventInfo = AtlasG4EventUserInfo::GetEventUserInfo()) {
+    m_myCSCHitColl = eventInfo->GetHitCollectionMap()->Find<CSCSimHitCollection>(m_hitCollectionName);
+  }
   // START OF COSMICS-SPECIFIC CODE
   m_mom = Amg::Vector3D(0.,0.,0.);
   m_globH = Amg::Vector3D(0.,0.,0.);
@@ -39,6 +44,12 @@ void CSCSensitiveDetectorCosmics::Initialize(G4HCofThisEvent*)
 }
 
 G4bool CSCSensitiveDetectorCosmics::ProcessHits(G4Step* aStep,G4TouchableHistory* /*ROHist*/) {
+
+  if (!m_myCSCHitColl) {
+    G4Exception("CSCSensitiveDetectorCosmics::ProcessHits", "CSCCosmicHitCollectionMissing", FatalException,
+                "Hit collection not initialized; did SetupEvent run?");
+    return false;
+  }
 
   G4Track* currentTrack = aStep->GetTrack();
 

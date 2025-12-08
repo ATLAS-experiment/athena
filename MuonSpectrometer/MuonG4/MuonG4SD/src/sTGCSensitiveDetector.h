@@ -6,10 +6,10 @@
 #define sTGCSensitiveDetector_H
 
 #include "G4VSensitiveDetector.hh"
-#include "StoreGate/WriteHandle.h"
 #include "MuonSimEvent/sTGCSimHitCollection.h"
 #include "MuonSimEvent/sTgcHitIdHelper.h"
 #include "AthenaBaseComps/AthMessaging.h"
+#include <string>
 #include <gtest/gtest_prod.h>
 
 class sTgcHitIdHelper;
@@ -24,7 +24,6 @@ public:
     sTGCSensitiveDetector(const std::string& name, 
                           const std::string& hitCollectionName,
                           unsigned baseDepth);
-    ~sTGCSensitiveDetector() = default;
     
     /** member functions */
     void   Initialize(G4HCofThisEvent* HCE) override final;
@@ -32,7 +31,8 @@ public:
     
 private:
 
-    SG::WriteHandle<sTGCSimHitCollection> m_sTGCSimHitCollection;
+    std::string m_hitCollectionName;
+    sTGCSimHitCollection* m_sTGCSimHitCollection{nullptr};
     const sTgcHitIdHelper* m_muonHelper{sTgcHitIdHelper::GetHelper()};
     /** @brief basic depth to travel along the G4 history. For jobs run with the legacy geometry database,
      *         it's zero. Otherwise, in the new sqlite workflow it's 1 */

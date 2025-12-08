@@ -4,7 +4,9 @@
 
 #include "MicromegasSensitiveDetector.h"
 #include "MuonSimEvent/MicromegasHitIdHelper.h"
+#include "MCTruth/AtlasG4EventUserInfo.h"
 #include "MCTruth/TrackHelper.h"
+#include "G4Exception.hh"
 #include "G4Geantino.hh"
 #include "G4ChargedGeantino.hh"
 
@@ -17,7 +19,7 @@
 // construction/destruction
 MicromegasSensitiveDetector::MicromegasSensitiveDetector(const std::string& name, const std::string& hitCollectionName)
   : G4VSensitiveDetector( name )
-  , m_MMSimHitCollection( hitCollectionName )
+  , m_hitCollectionName( hitCollectionName )
 {
   m_muonHelper = MicromegasHitIdHelper::GetHelper();
   //m_muonHelper->PrintFields();
@@ -26,11 +28,19 @@ MicromegasSensitiveDetector::MicromegasSensitiveDetector(const std::string& name
 // Implemenation of memebr functions
 void MicromegasSensitiveDetector::Initialize(G4HCofThisEvent*) 
 {
-  if (!m_MMSimHitCollection.isValid()) m_MMSimHitCollection = std::make_unique<MMSimHitCollection>();
+  m_MMSimHitCollection = nullptr;
+  if (auto* eventInfo = AtlasG4EventUserInfo::GetEventUserInfo()) {
+    m_MMSimHitCollection = eventInfo->GetHitCollectionMap()->Find<MMSimHitCollection>(m_hitCollectionName);
+  }
 }
 
 G4bool MicromegasSensitiveDetector::ProcessHits(G4Step* aStep,G4TouchableHistory* /*ROHist*/) 
 {
+  if (!m_MMSimHitCollection) {
+    G4Exception("MicromegasSensitiveDetector::ProcessHits", "MicromegasHitCollectionMissing", FatalException,
+                "Hit collection not initialized; did SetupEvent run?");
+    return false;
+  }
   G4Track* currentTrack = aStep->GetTrack();
   int charge=currentTrack->GetDefinition()->GetPDGCharge();
   bool geantinoHit = (currentTrack->GetDefinition()==G4Geantino::GeantinoDefinition()) ||
@@ -103,4 +113,3 @@ G4bool MicromegasSensitiveDetector::ProcessHits(G4Step* aStep,G4TouchableHistory
 
   return true;
 }
-
