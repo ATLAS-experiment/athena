@@ -13,7 +13,7 @@
 
 #include "GaudiKernel/ISvcLocator.h"
 
-#include "AthenaBaseComps/AthReentrantAlgorithm.h"
+#include "AthenaBaseComps/AthCondAlgorithm.h"
 
 #include "StoreGate/ReadCondHandleKey.h"
 #include "StoreGate/WriteCondHandleKey.h"
@@ -27,7 +27,7 @@
 
 
 
-class RegSelCondAlg_Tile : public AthReentrantAlgorithm {
+class RegSelCondAlg_Tile : public AthCondAlgorithm {
   
 public:
   
