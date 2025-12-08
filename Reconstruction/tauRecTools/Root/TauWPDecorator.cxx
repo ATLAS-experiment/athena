@@ -136,7 +136,7 @@ StatusCode TauWPDecorator::initialize() {
     return StatusCode::FAILURE;
   }
   for (size_t wpIndex=0; wpIndex < m_decorWPs.size(); ++wpIndex) {
-    m_charDecors.emplace_back(SG::AuxElement::Accessor<char>( m_decorWPs[wpIndex] ));
+    m_charDecors.emplace_back(SG::Accessor<char>( m_decorWPs[wpIndex] ));
     // temporarily need both accessor and decoration
     if (!m_tauContainerName.empty()) {
       m_decorHandleKeys.emplace_back(m_tauContainerName + "." + m_decorWPs[wpIndex]);
