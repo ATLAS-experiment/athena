@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrkTrack/Track.h"
@@ -200,15 +200,13 @@ namespace Trk {
     ATH_MSG_DEBUG("initial nIterations: "<<m_nIterations);
 
     // loop over AlignModules
-    int imod(0);
     for (std::vector<AlignModule*>::const_iterator moduleIt=alignModules.begin();
-   moduleIt!=alignModules.end(); ++moduleIt,imod++) {
+   moduleIt!=alignModules.end(); ++moduleIt) {
 
       // loop over AlignPar
-      int ipar(0);
       DataVector<AlignPar>* alignPars=m_alignModuleTool->getAlignPars(*moduleIt);
       for (DataVector<AlignPar>::iterator alignParIt=alignPars->begin();
-     alignParIt!=alignPars->end(); ++alignParIt,ipar++) {
+     alignParIt!=alignPars->end(); ++alignParIt) {
 
   for (int ishift=0;ishift<2;ishift++) {
 
