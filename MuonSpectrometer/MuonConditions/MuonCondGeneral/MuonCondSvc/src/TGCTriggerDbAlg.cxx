@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonCondSvc/TGCTriggerDbAlg.h"
@@ -7,7 +7,7 @@
 #include "StoreGate/WriteCondHandle.h"
 
 TGCTriggerDbAlg::TGCTriggerDbAlg(const std::string& name, ISvcLocator* pSvcLocator) :
-  AthAlgorithm(name, pSvcLocator)
+  AthCondAlgorithm(name, pSvcLocator)
 {}
 
 StatusCode TGCTriggerDbAlg::initialize(){
@@ -23,9 +23,9 @@ StatusCode TGCTriggerDbAlg::initialize(){
   return StatusCode::SUCCESS;
 }
 
-StatusCode TGCTriggerDbAlg::execute()
+StatusCode TGCTriggerDbAlg::execute(const EventContext& ctx) const
 {
-  SG::WriteCondHandle<TGCTriggerData> writeHandle{m_writeKey};
+  SG::WriteCondHandle<TGCTriggerData> writeHandle{m_writeKey, ctx};
   if (writeHandle.isValid()) {
     ATH_MSG_DEBUG("CondHandle " << writeHandle.fullKey() << " is already valid."
 		  << ". In theory this should not be called, but may happen"
@@ -36,7 +36,7 @@ StatusCode TGCTriggerDbAlg::execute()
   auto writeCdo = std::make_unique<TGCTriggerData>();
 
   // Big wheel
-  SG::ReadCondHandle<CondAttrListCollection> readHandle_bw(m_readKey_bw);
+  SG::ReadCondHandle<CondAttrListCollection> readHandle_bw(m_readKey_bw, ctx);
   const CondAttrListCollection* readCdo_bw(*readHandle_bw);
   
   if (readCdo_bw == nullptr) {
@@ -56,7 +56,7 @@ StatusCode TGCTriggerDbAlg::execute()
   fillReadMapBw(writeCdo.get(), readCdo_bw);
 
   // EIFI
-  SG::ReadCondHandle<CondAttrListCollection> readHandle_eifi(m_readKey_eifi);
+  SG::ReadCondHandle<CondAttrListCollection> readHandle_eifi(m_readKey_eifi, ctx);
   const CondAttrListCollection* readCdo_eifi(*readHandle_eifi);
   
   if (readCdo_eifi == nullptr) {
@@ -76,7 +76,7 @@ StatusCode TGCTriggerDbAlg::execute()
   fillTrigBitEifi(writeCdo.get(), readCdo_eifi);
  
   // Tile
-  SG::ReadCondHandle<CondAttrListCollection> readHandle_tile(m_readKey_tile);
+  SG::ReadCondHandle<CondAttrListCollection> readHandle_tile(m_readKey_tile, ctx);
   const CondAttrListCollection* readCdo_tile = *readHandle_tile;
   if (readCdo_tile == nullptr) {
     ATH_MSG_ERROR("Null pointer to the read conditions object");
@@ -120,7 +120,7 @@ StatusCode TGCTriggerDbAlg::finalize(){
 
 
 void TGCTriggerDbAlg::fillReadMapBw(TGCTriggerData* writeCdo,
-                                    const CondAttrListCollection* readCdo)
+                                    const CondAttrListCollection* readCdo) const
 {
   const uint8_t kNMODULETYPE = 12;
   const uint8_t modulenumber[kNMODULETYPE]    = {0, 1, 2, 2, 3, 4, 5, 5, 6, 7, 8, 8};
@@ -241,7 +241,7 @@ void TGCTriggerDbAlg::fillReadMapBw(TGCTriggerData* writeCdo,
 }
 
 void TGCTriggerDbAlg::fillTrigBitEifi(TGCTriggerData* writeCdo,
-                                      const CondAttrListCollection* readCdo)
+                                      const CondAttrListCollection* readCdo) const
 {
   const std::string sidename[TGCTriggerData::N_SIDE] = {"A","C"};
 
@@ -356,7 +356,7 @@ void TGCTriggerDbAlg::fillTrigBitEifi(TGCTriggerData* writeCdo,
 }
 
 void TGCTriggerDbAlg::fillTrigBitTile(TGCTriggerData* writeCdo,
-                                      const CondAttrListCollection* readCdo)
+                                      const CondAttrListCollection* readCdo) const
 {
 
   bool first = true;
