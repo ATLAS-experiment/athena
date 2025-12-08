@@ -9,7 +9,7 @@
 
 TRTAlignCondAlg::TRTAlignCondAlg(const std::string& name
 				 , ISvcLocator* pSvcLocator )
-  : ::AthAlgorithm(name,pSvcLocator)
+  : ::AthCondAlgorithm(name,pSvcLocator)
 {
 }
 
@@ -35,11 +35,10 @@ StatusCode TRTAlignCondAlg::initialize()
   return StatusCode::SUCCESS;
 }
 
-StatusCode TRTAlignCondAlg::execute()
+StatusCode TRTAlignCondAlg::execute(const EventContext& ctx) const
 {
   ATH_MSG_DEBUG("execute " << name());
 
-  const EventContext& ctx = Gaudi::Hive::currentContext();
   // ____________ Construct Write Cond Handles and check their validity ____________
   SG::WriteCondHandle<InDetDD::TRT_DetElementContainer> writeHandleDetElCont{m_writeKeyDetElCont, ctx};
   if (writeHandleDetElCont.isValid()) {

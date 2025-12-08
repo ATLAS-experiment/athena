@@ -20,7 +20,7 @@
  * @author Peter Hansen <phansen@nbi.dk>
  **/
 TRTCondWrite::TRTCondWrite(const std::string &name, ISvcLocator *pSvcLocator)
-    : AthAlgorithm(name, pSvcLocator) {}
+    : AthCondAlgorithm(name, pSvcLocator) {}
 
 StatusCode TRTCondWrite::initialize()
 {
@@ -71,7 +71,7 @@ StatusCode TRTCondWrite::initialize()
     return StatusCode::SUCCESS;
 }
 
-StatusCode TRTCondWrite::execute()
+StatusCode TRTCondWrite::execute(const EventContext& ctx) const
 {
 
     // Read from text file?
@@ -82,7 +82,7 @@ StatusCode TRTCondWrite::execute()
         {
             ATH_MSG_INFO(" Read calibration constants from text file " << m_par_caltextfile);
             int format = 0;
-            if (StatusCode::SUCCESS != readTextFile(m_par_caltextfile, format))
+            if (StatusCode::SUCCESS != readTextFile(ctx, m_par_caltextfile, format))
             {
                 ATH_MSG_FATAL("Could not read calibration objects from text file " << m_par_caltextfile);
                 return StatusCode::FAILURE;
@@ -144,7 +144,7 @@ StatusCode TRTCondWrite::checkTextFile(const std::string &filename, int &format)
     return sc;
 }
 
-StatusCode TRTCondWrite::readTextFile(const std::string &filename, int &format)
+StatusCode TRTCondWrite::readTextFile(const EventContext& ctx, const std::string &filename, int &format) const
 {
 
     StatusCode sc = StatusCode::SUCCESS;
@@ -176,13 +176,13 @@ StatusCode TRTCondWrite::readTextFile(const std::string &filename, int &format)
         }
         ATH_MSG_INFO("Reading calibration data from text file " << filename << " format " << format);
         // force format 1 here
-        sc = readTextFile_Format1(infile);
+        sc = readTextFile_Format1(ctx, infile);
     }
     infile.close();
     return sc;
 }
 
-StatusCode TRTCondWrite::readTextFile_Format1(std::istream &infile)
+StatusCode TRTCondWrite::readTextFile_Format1(const EventContext& ctx, std::istream &infile) const
 {
 
     enum ReadMode
@@ -261,7 +261,7 @@ StatusCode TRTCondWrite::readTextFile_Format1(std::istream &infile)
 
     // Record the containers for access via ReadCondHandle during reconstruction
     const EventIDRange rangeW = IOVInfRange();
-    SG::WriteCondHandle<RtRelationContainer> rtWriteHandle{m_rtWriteKey};
+    SG::WriteCondHandle<RtRelationContainer> rtWriteHandle{m_rtWriteKey, ctx};
     if (rtWriteHandle.isValid())
     {
         ATH_MSG_DEBUG(" RtRelationContainer already available ");
@@ -278,7 +278,7 @@ StatusCode TRTCondWrite::readTextFile_Format1(std::istream &infile)
         ATH_MSG_INFO("Recorded RT Container for key " << m_rtWriteKey.fullKey() << " with range " << rtWriteHandle.getRange());
     }
 
-    SG::WriteCondHandle<StrawT0Container> t0WriteHandle{m_t0WriteKey};
+    SG::WriteCondHandle<StrawT0Container> t0WriteHandle{m_t0WriteKey, ctx};
     if (t0WriteHandle.isValid())
     {
         ATH_MSG_DEBUG(" StrawT0Container already available ");
