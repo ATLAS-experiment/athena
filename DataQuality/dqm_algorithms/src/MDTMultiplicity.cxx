@@ -1,10 +1,6 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
-
-// **********************************************************************
-// $Id: MDTMultiplicity.cxx,v 2.0 2008/10/08 Valerio Consorti
-// **********************************************************************
 
 #include "dqm_algorithms/MDTMultiplicity.h"
 
@@ -25,6 +21,7 @@
 #include <map>
 #include <vector>
 #include <string>
+#include <format>
 
 static dqm_algorithms::MDTMultiplicity staticInstance;
 
@@ -256,17 +253,9 @@ MDTMultiplicity::execute( const std::string& name, const TObject& object, const 
     if(diff2>redTh) count+=2;
     if(diff3>redTh && pos3>0) count+=2; 
 
-    i=0;
-    std::string tag_n_r;
-    std::string peak_tag = "-Peak";
-    char numb_n_r[4];
-
     result->tags_["00-Number_of_found_peaks"] = peak.size();
-    for(i=0;i<peak.size();i++){
-      if(i<10) snprintf(numb_n_r,sizeof(numb_n_r),"0%u",(i+1));
-      if(i>=10) snprintf(numb_n_r,sizeof(numb_n_r),"%u",(i+1));
-      tag_n_r=(std::string)numb_n_r+peak_tag;
-      result->tags_[tag_n_r] = peak[i];
+    for(size_t p=0; p<peak.size(); p++){
+      result->tags_[std::format ("{:02d}-Peak", p+1)] = peak[p];
     };
   };
 
@@ -274,14 +263,14 @@ MDTMultiplicity::execute( const std::string& name, const TObject& object, const 
     i=0;
     k=0;
     std::vector<double> diff;
-    std::vector<double> peak_corrispondence;
+    std::vector<double> peak_correspondence;
     for(i=0;i<peak.size();i++){
       diff1=9999;
-      peak_corrispondence.push_back(99999);
+      peak_correspondence.push_back(99999);
       diff.push_back(99999);
       for(k=0;k<peak_ref.size();k++){
         if(std::abs(peak[i]-peak_ref[k])<=diff1){
-          peak_corrispondence[i]=k;
+          peak_correspondence[i]=k;
           diff[i]=std::abs(peak[i]-peak_ref[k]);
           diff1=std::abs(peak[i]-peak_ref[k]);
         };
@@ -293,29 +282,14 @@ MDTMultiplicity::execute( const std::string& name, const TObject& object, const 
       if(diff[i]>redTh) count+=2;
     };
 
-    //if(peak.size()!=peak_ref.size()) count+=10;
-
-    std::string tag;
-    std::string run_tag ="a-";
-    std::string ref_tag ="b-";
-    std::string multi = "Peak";
-    char numb[4];
-
     result->tags_["a-00-Number_of_found_peaks"] = peak.size();
     result->tags_["b-00-Number_of_found_peaks_ref"] = peak_ref.size();
 
-    for(i=0;i<peak.size();i++){
-      if(i<10) snprintf(numb,sizeof(numb),"0%u",(i+1));
-      if(i>=10) snprintf(numb,sizeof(numb),"%u",(i+1));
-      tag=run_tag+(std::string)numb+multi;
-      result->tags_[tag] = peak[i];
+    for(size_t p=0; p<peak.size(); p++){
+      result->tags_[std::format ("a-{:02d}Peak", p+1)] = peak[p];
     };
-    i=0;
-    for(i=0;i<peak_ref.size();i++){
-      if(i<10) snprintf(numb,sizeof(numb),"0%u",(i+1));
-      if(i>=10) snprintf(numb,sizeof(numb),"%u",(i+1));
-      tag=ref_tag+(std::string)numb+multi;
-      result->tags_[tag] = peak_ref[i];
+    for(size_t p=0; p<peak_ref.size(); p++){
+      result->tags_[std::format ("b-{:02d}Peak", p+1)] = peak_ref[p];
     };
   };
 
