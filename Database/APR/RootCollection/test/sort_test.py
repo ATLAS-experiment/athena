@@ -8,7 +8,7 @@
 from AthenaCommon import Logging
 Logging.log.setLevel(0)
 
-from CollectionUtilities.SortedCollectionCreator import SortedCollectionCreator
+from CollectionSvc.SortedCollectionCreator import SortedCollectionCreator
 sorter = SortedCollectionCreator(name="SortEvents")
 
 # Read test_collection.root (RootCollection) created by ttree_rw_test, sort it and write as RootCollection

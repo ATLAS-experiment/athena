@@ -12,9 +12,9 @@
 #include "PersistentDataModel/Token.h"
 
 // Pool
-#include "CollectionBase/ICollection.h"
-#include "CollectionBase/ICollectionCursor.h"
-#include "CollectionBase/ICollectionDescription.h"
+#include "CollectionSvc/ICollection.h"
+#include "CollectionSvc/ICollectionCursor.h"
+#include "CollectionSvc/ICollectionDescription.h"
 
 // Gaudi
 #include "GaudiKernel/StatusCode.h"
