@@ -16,8 +16,6 @@
 
 #include "gFexTowerBuilder.h"
 
-#include <stdio.h>
-
 #include <algorithm>
 #include <fstream>
 #include <iostream>
@@ -88,6 +86,7 @@ namespace LVL1 {
 
         // building Scell ID pointers
         std::unordered_map<uint64_t, const CaloCell*> map_ScellID2ptr;
+	map_ScellID2ptr.reserve(ScellContainer->size());
 
         for (const CaloCell* scell : *ScellContainer) {
             const uint64_t ID = scell->ID().get_compact();
@@ -96,6 +95,7 @@ namespace LVL1 {
 
         // building Tile ID pointers
         std::unordered_map<uint32_t, const xAOD::TriggerTower*> map_TileID2ptr;
+	map_TileID2ptr.reserve(triggerTowerContainer->size());
 
         for (const xAOD::TriggerTower* tower : *triggerTowerContainer) {
             map_TileID2ptr[tower->coolId()] = tower;
@@ -110,13 +110,9 @@ namespace LVL1 {
             // Note input fpga distinguishes between LAr (0,1,2), Tile (3) and duplicated channels (4)
             if (source == 0) {
 
-                const std::unordered_map<uint32_t, std::vector<uint64_t> >*
-                        ptr_TTower2Cells;
-                ptr_TTower2Cells = &m_map_TTower2SCells;
-
                 // check if the towerID exists in the LAr map
-                auto it_TTower2SCells = (*ptr_TTower2Cells).find(towerID);
-                if (it_TTower2SCells == (*ptr_TTower2Cells).end()) {
+                auto it_TTower2SCells = m_map_TTower2SCells.find(towerID);
+                if (it_TTower2SCells == m_map_TTower2SCells.end()) {
                     ATH_MSG_ERROR("gFEX ID: " << towerID
                                               << " not found on map m_map_TTower2SCells");
                     return StatusCode::FAILURE;
@@ -253,6 +249,7 @@ namespace LVL1 {
             std::stringstream oneLine(line);
             // reading elements
             std::vector<float> elements;
+	    elements.reserve(5);
             std::string element;
             while (std::getline(oneLine, element, ' ')) {
                 elements.push_back(std::stof(element));
@@ -294,12 +291,11 @@ namespace LVL1 {
         // loading the mapping information into an unordered_map <Fex Tower ID, vector
         // of SCell IDs>
         while (std::getline(file, line)) {
-            std::vector<uint64_t> SCellvector;
-            SCellvector.clear();
-
             // removing the header of the file (it is just information!)
             if (line[0] == '#')
                 continue;
+
+	    std::vector<uint64_t> SCellvector;
 
             // Splitting line in different substrings
             std::stringstream oneSCellID(line);
@@ -363,15 +359,14 @@ namespace LVL1 {
         // loading the mapping information into an unordered_map <Fex Tower ID, vector
         // of Tile IDs>
         while (std::getline(myfile, myline)) {
-
-            std::vector<uint32_t> Tilevector;
-            Tilevector.clear();
             // removing the header of the file
             myline.erase(myline.begin(),
                          std::find_if(myline.begin(), myline.end(),
                                       [](int ch) { return !std::isspace(ch); }));
             if (myline[0] == '#')
                 continue;
+
+	    std::vector<uint32_t> Tilevector;
 
             // Splitting myline in different substrings
             std::stringstream oneTileID(myline);
