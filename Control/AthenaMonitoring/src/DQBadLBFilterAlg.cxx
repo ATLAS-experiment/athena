@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "DQBadLBFilterAlg.h"
@@ -8,7 +8,7 @@
 #include "CoralBase/AttributeListException.h"
 
 DQBadLBFilterAlg::DQBadLBFilterAlg(const std::string& name, ISvcLocator* pSvcLocator)
-: AthAlgorithm( name, pSvcLocator )
+: AthCondAlgorithm( name, pSvcLocator )
 , m_ignoreRecoverable(true)
 , m_readKey("/GLOBAL/DETSTATUS/DEFECTS")
 , m_writeKey("")
@@ -44,10 +44,10 @@ StatusCode DQBadLBFilterAlg::initialize()
   return StatusCode::SUCCESS;
 }
 
-StatusCode DQBadLBFilterAlg::execute() {
+StatusCode DQBadLBFilterAlg::execute(const EventContext& ctx) const {
   // from pixel example code ...
   // Write Cond Handle
-  SG::WriteCondHandle<AthenaAttributeList> writeHandle{m_writeKey};
+  SG::WriteCondHandle<AthenaAttributeList> writeHandle{m_writeKey, ctx};
   // Do we have a valid Write Cond Handle for current time?
   if(writeHandle.isValid()) {
     // in theory this should never be called in MT
@@ -56,10 +56,10 @@ StatusCode DQBadLBFilterAlg::execute() {
   }
 
   ATH_MSG_DEBUG( "Creating AthenaAttributeList object."  );
-  std::unique_ptr<AthenaAttributeList> attribListW = std::make_unique<AthenaAttributeList>(*m_attribListSpec);
+  auto attribListW = std::make_unique<AthenaAttributeList>(*const_cast<const coral::AttributeListSpecification*>(m_attribListSpec));
   (*attribListW)["Accept"].setValue(true);
 
-  SG::ReadCondHandle<CondAttrListCollection> readHandle{m_readKey};
+  SG::ReadCondHandle<CondAttrListCollection> readHandle{m_readKey, ctx};
   const CondAttrListCollection* attrListCol{*readHandle};
   if (attrListCol == nullptr) {
     ATH_MSG_ERROR("Unable to retrieve defect information");
