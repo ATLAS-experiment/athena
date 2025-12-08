@@ -16,9 +16,8 @@ from CoolConvUtilities import AtlCoolLib, AtlCoolTool
 from pycrest.api.crest_api import CrestApi
 from pycrest.api.crest_fs_api import CrestApiFs
 from hep.crest.client.models import (
-    IovSetDto, HTTPResponse, TagMetaSetDto, TagMetaDto, TagSetDto, TagDto, GlobalTagDto,
-    GlobalTagSetDto, GlobalTagMapDto, GlobalTagMapSetDto, StoreSetDto, StoreDto, RunLumiInfoDto, RunLumiSetDto)
-from hep.crest.client import ApiException
+    TagMetaSetDto, TagMetaDto, TagDto, GlobalTagDto,
+    GlobalTagMapDto, GlobalTagMapSetDto, StoreSetDto, StoreDto)
 
 import logging
 log = logging.getLogger('dmtest_condwriter')
@@ -101,7 +100,7 @@ def store_in_crest(parser):
     # Instantiate the CREST API
     if host.startswith(tempfile.gettempdir()):
         api_instance = CrestApiFs(host)
-        log.debug(f'>== Using CREST file system')
+        log.debug('>== Using CREST file system')
     else:
         log.debug(f'>== Using CREST server: {host}')
         api_instance = CrestApi(host=host)
@@ -323,7 +322,7 @@ def main():
 
     # If host is not found, do COOL storage
     if args.host is None:
-        mytool = createTestDB('dmtest_condwriter.py',False,3,4,[])
+        createTestDB('dmtest_condwriter.py',False,3,4,[])
     else:
         store_in_crest(parser)
 
