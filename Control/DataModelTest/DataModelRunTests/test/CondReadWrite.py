@@ -6,14 +6,13 @@
 # Date: April 2025, from old config version of Aug 2018
 # Purpose: Test reading of conditions that are written during runtime
 #
-import argparse
+import os
+import shutil
+import sys
 import tempfile
 
-from DataModelRunTests.DataModelTestConfig import \
-    DataModelTestFlags, DataModelTestCfg, TestOutputCfg
-
+from DataModelRunTests.DataModelTestConfig import DataModelTestCfg
 from AthenaConfiguration.AllConfigFlags import initConfigFlags
-from AthenaCommon.Constants import INFO
 
 def CondReadWriteCfg (flags):
     from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
@@ -25,7 +24,7 @@ def CondReadWriteCfg (flags):
     ## Setup writer alg that writes new conditions on given LB
 
     if args.condDB == 'cool':
-        cmds = { 6 : "dmtest_condwriter.py --rs=0 --ls=8  'sqlite://;schema=condtest_rw.db;dbname=OFLP200' AttrList_noTag 42" }
+        cmds = { 6 : f"dmtest_condwriter.py --rs=0 --ls=8  'sqlite://;schema={condtest_rw};dbname=OFLP200' AttrList_noTag 42" }
     else:
         cmds = { 6 : f"dmtest_condwriter.py --rs=0 --ls=8 --tag=Test_AttrList_noTag --xint=42 --gtag=TEST-HLT-CREST --label='/DMTest/TestAttrList' --host={cond_src}" }
 
@@ -61,11 +60,6 @@ if flags.Concurrency.NumThreads >= 1:
     flags.Scheduler.ShowDataDeps = True
 flags.lock()
 
-## Cleanup previous file
-import os, shutil
-if os.path.isfile("condtest_rw.db"):
-    os.remove("condtest_rw.db")
-
 ## Check if CREST_URL is set, fail otherwise
 crest_url = os.getenv("CREST_URL")
 if not crest_url:
@@ -74,6 +68,9 @@ if not crest_url:
 
 if args.condDB == 'cool':
     condtest_rw = 'condtest_rw.db'
+    ## Cleanup previous file
+    if os.path.isfile(condtest_rw):
+        os.remove(condtest_rw)
 elif args.condDB == 'crest':
     condtest_rw = 'CALO_OFL'
     cond_src = crest_url
@@ -84,8 +81,8 @@ elif args.condDB == 'crestfs':
 
 ## Write some initial IOVs and values
 if args.condDB == 'cool':
-    os.system("dmtest_condwriter.py --r=0 --ls=0 --lu=4  'sqlite://;schema=condtest_rw.db;dbname=OFLP200' AttrList_noTag 10")
-    os.system("dmtest_condwriter.py --rs=0 --ls=5 'sqlite://;schema=condtest_rw.db;dbname=OFLP200' AttrList_noTag 20")
+    os.system(f"dmtest_condwriter.py --r=0 --ls=0 --lu=4  'sqlite://;schema={condtest_rw};dbname=OFLP200' AttrList_noTag 10")
+    os.system(f"dmtest_condwriter.py --rs=0 --ls=5 'sqlite://;schema={condtest_rw};dbname=OFLP200' AttrList_noTag 20")
 else:
     os.system(f"dmtest_condwriter.py --r=0 --ls=0 --tag=Test_AttrList_noTag --xint=10 --gtag=TEST-HLT-CREST --label='/DMTest/TestAttrList' --host={cond_src}")
     os.system(f"dmtest_condwriter.py --rs=0 --ls=5 --tag=Test_AttrList_noTag --xint=20 --gtag=TEST-HLT-CREST --label='/DMTest/TestAttrList' --host={cond_src}")
@@ -125,5 +122,4 @@ if args.condDB == 'crest':
 if args.condDB == 'crestfs' and os.path.isdir(tmp_crestfs):
     shutil.rmtree(tmp_crestfs)
 
-import sys
 sys.exit (sc.isFailure())
