@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef POOLSVC_IPOOLSVC_H
@@ -11,7 +11,7 @@
  **/
 
 #include "GaudiKernel/IService.h"
-#include "CollectionBase/ICollection.h"
+#include "CollectionSvc/ICollection.h"
 #include "PersistencySvc/ITransaction.h"
 #include "DataModelRoot/RootType.h"
 

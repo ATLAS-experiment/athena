@@ -5,9 +5,9 @@
 #ifndef RNTCOLLECTION_H
 #define RNTCOLLECTION_H
 
-#include "CollectionBase/ICollection.h"
-#include "CollectionBase/CollectionDescription.h"
-#include "CollectionBase/CollectionRowBuffer.h"
+#include "CollectionSvc/ICollection.h"
+#include "CollectionSvc/CollectionDescription.h"
+#include "CollectionSvc/CollectionRowBuffer.h"
 
 #include "POOLCore/DbPrint.h"
 

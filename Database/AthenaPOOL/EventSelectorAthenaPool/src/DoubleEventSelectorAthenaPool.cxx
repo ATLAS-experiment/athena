@@ -18,9 +18,9 @@
 #include "GaudiKernel/FileIncident.h"
 
 // Pool
-#include "CollectionBase/ICollectionCursor.h"
-#include "CollectionBase/CollectionRowBuffer.h"
-#include "CollectionBase/TokenList.h"
+#include "CollectionSvc/ICollectionCursor.h"
+#include "CollectionSvc/CollectionRowBuffer.h"
+#include "CollectionSvc/TokenList.h"
 #include "PersistentDataModel/DataHeader.h"
 #include "PersistentDataModel/Token.h"
 #include "PersistentDataModel/AthenaAttributeList.h"

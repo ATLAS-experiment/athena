@@ -9,8 +9,8 @@
 #include "PersistentDataModel/Token.h"
 #include "RootUtils/APRDefaults.h"
 
-#include "CollectionBase/ICollectionColumn.h"
-#include "CollectionBase/CollectionBaseNames.h"
+#include "CollectionSvc/ICollectionColumn.h"
+#include "CollectionSvc/CollectionNames.h"
 #include "POOLCore/SystemTools.h"
 
 #include "GaudiKernel/Bootstrap.h"
@@ -34,7 +34,7 @@
 
 using namespace std;
 using namespace pool::RootCollection;
-using namespace pool::CollectionBaseNames;
+using namespace pool::CollectionNames;
 
 RNTCollection::RNTCollection(
    const pool::ICollectionDescription* description,
@@ -305,7 +305,7 @@ void RNTCollection::open()  try
       model->SetDescription( rntupleName );
       for( int col_id = 0; col_id < m_description.numberOfTokenColumns(); col_id++ ) {
          std::string columnName = m_description.tokenColumn(col_id).name();
-         addField( model.get(), columnName, CollectionBaseNames::tokenTypeName );
+         addField( model.get(), columnName, CollectionNames::tokenTypeName );
       }
       for( int col_id = 0; col_id < m_description.numberOfAttributeColumns(); col_id++ ) {
          const ICollectionColumn& column = m_description.attributeColumn(col_id);

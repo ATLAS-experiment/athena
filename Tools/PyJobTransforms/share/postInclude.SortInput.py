@@ -19,7 +19,7 @@ tmpCollFile = locals().get("AthenaInputSortCollName", "sortedEventRefs" + str(os
 sortTag     = locals().get("AthenaInputSortTag",      "LumiBlockN")
 sortOrd     = locals().get("AthenaInputSortOrder",    "Ascending")
 
-from CollectionUtilities.SortedCollectionCreator import SortedCollectionCreator
+from CollectionSvc.SortedCollectionCreator import SortedCollectionCreator
 sorter = SortedCollectionCreator(name="SortEvents")
 # Sort Inputs based on one of the EventInfoTag attributes
 # Store sorted event collection in a temporary file

@@ -4,7 +4,7 @@
 atlas_subdir( StorageSvc )
 
 # External dependencies:
-find_package( ROOT COMPONENTS Core Tree MathCore Hist RIO Thread pthread )
+find_package( ROOT COMPONENTS Core Thread )
 find_package( UUID )
 
 # Component(s) in the package:

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ROOTCOLLECTION_ATTRIBUTELISTLAYOUT_H
@@ -28,7 +28,6 @@ struct AttributeListLayout :  public TObject
 
   
   std::vector< std::pair<std::string, std::string> >    m_layout;
-  std::vector< std::string >                            m_annotations;
   std::string                                           m_eventRefColumnName;
   
   ClassDef(AttributeListLayout,3);

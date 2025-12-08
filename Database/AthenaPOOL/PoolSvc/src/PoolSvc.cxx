@@ -19,7 +19,7 @@
 #include "PersistentDataModel/Placement.h"
 #include "PersistentDataModel/Token.h"
 
-#include "CollectionBase/CollectionService.h"
+#include "CollectionSvc/CollectionService.h"
 
 #include "FileCatalog/IFileCatalog.h"
 #include "POOLCore/DbPrint.h"
