@@ -26,7 +26,7 @@ namespace Analysis {
 
 
   JetTagCalibCondAlg::JetTagCalibCondAlg (const std::string& name, ISvcLocator* pSvcLocator)
-    : ::AthAlgorithm( name, pSvcLocator ),
+    : ::AthCondAlgorithm( name, pSvcLocator ),
     m_poolsvc("PoolSvc", name),
     m_Likelihood_smoothNTimes(1),
     m_JetFitterNN_calibrationDirectory("JetFitter"),
@@ -416,21 +416,19 @@ namespace Analysis {
   }
 
 
-  StatusCode JetTagCalibCondAlg::execute() {
+  StatusCode JetTagCalibCondAlg::execute(const EventContext& ctx) const {
     ATH_MSG_DEBUG("execute " << name());
 
     // Write Cond Handle
-    SG::WriteCondHandle<JetTagCalibCondData > histoWriteHandle{m_writeKey};
+    SG::WriteCondHandle<JetTagCalibCondData > histoWriteHandle{m_writeKey, ctx};
     //For serial Athena. Execute() should not be called in AthenaMT
     if (histoWriteHandle.isValid()) {
       ATH_MSG_DEBUG("#BTAG# Write CondHandle "<< histoWriteHandle.fullKey() << " is already valid");
       return StatusCode::SUCCESS;
     }
 
-    m_mappedAlias.clear();
-
     // Read Cond Handle - GUID
-    SG::ReadCondHandle<CondAttrListCollection> readHandle{m_readKey};
+    SG::ReadCondHandle<CondAttrListCollection> readHandle{m_readKey, ctx};
     const CondAttrListCollection* atrcol{*readHandle};
     if(atrcol==nullptr) {
       ATH_MSG_ERROR("#BTAG# Cannot retrieve CondAttrListCollection for " << m_readKey.key());
@@ -470,10 +468,7 @@ namespace Analysis {
       return StatusCode::FAILURE;
     }
 
-    StatusCode sc = createHistoMap(pfile.get(), writeCdo.get());
-    if(sc != StatusCode::SUCCESS){
-    // do nothing for the moment
-    }
+    const std::vector<std::string>& mappedAlias = createHistoMap(pfile.get(), writeCdo.get());
 
     for(uint i=0;i<m_taggers.size();i++) {
       std::string tagger = m_taggers[i];
@@ -482,12 +477,12 @@ namespace Analysis {
       std::vector<std::string> histnames = m_taggersHists[i];
       for(unsigned int h=0; h<histnames.size(); ++h){
 	std::string hname = histnames[h];
-	for(uint j=0;j<m_mappedAlias.size();j++) {
-          std::string fname = writeCdo->fullHistoName(m_mappedAlias[j],hname);
+	for(uint j=0;j<mappedAlias.size();j++) {
+          std::string fname = writeCdo->fullHistoName(mappedAlias[j],hname);
           ATH_MSG_DEBUG( "#BTAG# Retrieving " << tagger <<":"<< fname );
           std::string channel = writeCdo->channelName(fname);
           std::string hname = writeCdo->histoName(fname);
-          std::string hFullName(m_directoryMap[tagger]);
+          std::string hFullName(m_directoryMap.at(tagger));
           hFullName+="/"; hFullName+=channel; 
           hFullName+="/"; hFullName+=hname;
           ATH_MSG_DEBUG( "#BTAG#     histo name in physical file= " << hFullName );
@@ -580,10 +575,11 @@ namespace Analysis {
     return StatusCode::SUCCESS;
   }
  
-  StatusCode JetTagCalibCondAlg::createHistoMap(TFile* pfile, JetTagCalibCondData * histosCdo){
+  std::vector<std::string> JetTagCalibCondAlg::createHistoMap(TFile* pfile, JetTagCalibCondData * histosCdo) const {
 
     ATH_MSG_DEBUG("#BTAG# in createHistoMap" );
     std::vector< std::string > channels;
+    std::vector< std::string > mappedAlias;
 
     for(unsigned int j=0; j<m_originalChannels.size(); ++j){
       channels.push_back(m_originalChannels[j]);
@@ -597,7 +593,7 @@ namespace Analysis {
 
       for(unsigned int j=0; j<m_originalChannels.size(); ++j){
         /// get all aliases
-        std::map<std::string, std::vector<std::string> >::iterator ialiaslist 
+        std::map<std::string, std::vector<std::string> >::const_iterator ialiaslist
           = m_channelAliasesMultiMap.find(m_originalChannels[j]);
 	if(ialiaslist == m_channelAliasesMultiMap.end()){
 	  ATH_MSG_DEBUG( "#BTAG#  no alias for original channel" << m_originalChannels[j] );
@@ -633,7 +629,7 @@ namespace Analysis {
 	  std::string hFullName(tagger); 
 	  hFullName+="/"; hFullName+=aliasentry; 
           // Check if jet collection already in channel alias map
-          if (std::count(m_mappedAlias.begin(), m_mappedAlias.end(), aliasentry) > 0) {
+          if (std::count(mappedAlias.begin(), mappedAlias.end(), aliasentry) > 0) {
 	    ATH_MSG_DEBUG( "#BTAG# found alias entry in Map " << aliasentry );
             histosCdo->addChannelAlias(m_originalChannels[j],aliasentry);
             foundalias=true;
@@ -651,7 +647,7 @@ namespace Analysis {
 		  channels.push_back(aliasentry);
 	        }
                 histosCdo->addChannelAlias(m_originalChannels[j],aliasentry);
-                m_mappedAlias.push_back(std::move(aliasentry));
+                mappedAlias.push_back(std::move(aliasentry));
 	      }
 	      foundalias=true;
 	      break;
@@ -680,7 +676,7 @@ namespace Analysis {
     //print alias map
     histosCdo->printAliasesStatus();
 
-    return StatusCode::SUCCESS;
+    return mappedAlias;
 
   }
 
@@ -723,7 +719,7 @@ namespace Analysis {
      return StatusCode::SUCCESS;
   }
 
-  void JetTagCalibCondAlg::smoothAndNormalizeHistogram(TH1* h, const std::string& hname) {
+  void JetTagCalibCondAlg::smoothAndNormalizeHistogram(TH1* h, const std::string& hname) const {
     //Select small part of NewLikelihoodTool to reproduce CalibrationBroker behaviour (smooth and normalize histogram)
     if(h) {
       double norm = h->Integral();
@@ -764,7 +760,7 @@ namespace Analysis {
     }
   }
 
-void JetTagCalibCondAlg::smoothASH2D(TH2* input2D, int m1, int m2) {
+void JetTagCalibCondAlg::smoothASH2D(TH2* input2D, int m1, int m2) const {
 
   ATH_MSG_DEBUG("Smoothing a two dimensional histogram "<< input2D->GetName()
               << " " << m1 << " " << m2);
