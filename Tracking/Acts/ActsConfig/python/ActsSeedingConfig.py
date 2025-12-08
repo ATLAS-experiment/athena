@@ -236,10 +236,15 @@ def ActsPixelGbtsSeedingToolCfg(flags,
                                 name: str = "ActsPixelGbtsSeedingTool", 
                                 **kwargs) -> ComponentAccumulator:
     acc = ComponentAccumulator()
+    if "layerNumberTool" not in kwargs:
+        from TrigFastTrackFinder.TrigFastTrackFinderConfig import ITkTrigL2LayerNumberToolCfg
+        ntargs = {"UseNewLayerScheme": True}
+        kwargs.setdefault(
+            "layerNumberTool",
+            acc.popToolsAndMerge(ITkTrigL2LayerNumberToolCfg(flags, **ntargs))
+        )
     ## For ITkPixel, use default values for ActsTrk::GbtsSeedingTool
     kwargs.setdefault("ConnectorInputFile" , find_datafile("binTables_ITK_RUN4.txt"))
-
-    kwargs.setdefault('PixelDetectorElements', 'ITkPixelDetectorElementCollection')
 
     acc.setPrivateTools(CompFactory.ActsTrk.GbtsSeedingTool(name = name, **kwargs))
     return acc
