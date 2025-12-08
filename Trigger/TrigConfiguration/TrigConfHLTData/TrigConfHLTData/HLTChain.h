@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TrigConf_HLTChain
@@ -168,15 +168,15 @@ namespace TrigConf {
    private:
 
 
-      unsigned int      m_chain_hash_id;       //!< hash value from m_chain_name, this is used to identify the chain in the HLTResult
-      int               m_chain_counter;       //!< chain counter
-      int               m_chain_version;       //!< chain version
+      unsigned int      m_chain_hash_id{};       //!< hash value from m_chain_name, this is used to identify the chain in the HLTResult
+      int               m_chain_counter{};       //!< chain counter
+      int               m_chain_version{};       //!< chain version
       std::string       m_level;               //!< trigger level
       std::string       m_lower_chain_name;    //!< name of the lower trigger chain (or the LVL1 trigger item)
-      int               m_lower_chain_counter; //!< counter of the lower trigger chain (or the ID of the LVL1 trigger item)
+      int               m_lower_chain_counter{}; //!< counter of the lower trigger chain (or the ID of the LVL1 trigger item)
       std::vector<int>  m_lower_chain_counters;//!< counters of the lower trigger items if more than 1
-      unsigned int      m_lower_chain_hash_id; //!< hash value from m_lower_chain_name, this is used to match to a chain from the previous trigger level
-      int               m_EB_after_step;       //!< EB_after_step flag 
+      unsigned int      m_lower_chain_hash_id{}; //!< hash value from m_lower_chain_name, this is used to match to a chain from the previous trigger level
+      int               m_EB_after_step{};       //!< EB_after_step flag 
       std::vector<size_t> m_leg_multiplicities;//!< Number of objects required per leg. NOTE: Run3 only quantity
       HLTPrescale       m_prescales;
 
