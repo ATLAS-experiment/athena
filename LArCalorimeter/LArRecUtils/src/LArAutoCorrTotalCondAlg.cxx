@@ -14,7 +14,7 @@
 
 LArAutoCorrTotalCondAlg::LArAutoCorrTotalCondAlg(const std::string &name,
                                                  ISvcLocator *pSvcLocator)
-    : ::AthAlgorithm(name, pSvcLocator),
+    : ::AthCondAlgorithm(name, pSvcLocator),
       m_LArADC2MeVObjKey("LArADC2MeV"),
       m_LArOnOffIdMappingObjKey("LArOnOffIdMap"),
       m_LArShapeObjKey("LArShapeSym"),
@@ -85,10 +85,10 @@ StatusCode LArAutoCorrTotalCondAlg::initialize() {
   return StatusCode::SUCCESS;
 }
 
-StatusCode LArAutoCorrTotalCondAlg::execute() {
+StatusCode LArAutoCorrTotalCondAlg::execute(const EventContext& ctx) const {
 
   // WriteHandle setup
-  SG::WriteCondHandle<LArAutoCorrTotal> writeHandle(m_LArAutoCorrTotalObjKey);
+  SG::WriteCondHandle<LArAutoCorrTotal> writeHandle(m_LArAutoCorrTotalObjKey, ctx);
   // So the following should not be called usually?!
   if (writeHandle.isValid()) {
     ATH_MSG_DEBUG(
@@ -111,7 +111,7 @@ StatusCode LArAutoCorrTotalCondAlg::execute() {
   // Mapping helper
   const LArOnOffIdMapping *larOnOffIdMapping = nullptr;
   SG::ReadCondHandle<LArOnOffIdMapping> larOnOffIdMappingHdl{
-    m_LArOnOffIdMappingObjKey
+    m_LArOnOffIdMappingObjKey, ctx
   };
   larOnOffIdMapping = *larOnOffIdMappingHdl;
   if (larOnOffIdMapping == nullptr) {
@@ -119,18 +119,18 @@ StatusCode LArAutoCorrTotalCondAlg::execute() {
   }
 
   // Get pointers to inputs
-  SG::ReadCondHandle<ILArShape> ShapeHdl{ m_LArShapeObjKey };
+  SG::ReadCondHandle<ILArShape> ShapeHdl{ m_LArShapeObjKey, ctx };
   // FIXME: should check if handle is properly created and/or check if handle is
   // properly retrieved
   // operator star of a ReadCondHandle returns a const pointer to type T
   const ILArShape *larShape{ *ShapeHdl };
   writeHandle.addDependency(ShapeHdl);
 
-  SG::ReadCondHandle<ILArAutoCorr> AutoCorrHdl{ m_LArAutoCorrObjKey };
+  SG::ReadCondHandle<ILArAutoCorr> AutoCorrHdl{ m_LArAutoCorrObjKey, ctx };
   const ILArAutoCorr *larAutoCorr{ *AutoCorrHdl };
   writeHandle.addDependency(AutoCorrHdl);
 
-  SG::ReadCondHandle<LArADC2MeV> ADC2MeVHdl{ m_LArADC2MeVObjKey };
+  SG::ReadCondHandle<LArADC2MeV> ADC2MeVHdl{ m_LArADC2MeVObjKey, ctx };
   const LArADC2MeV *larADC2MeV = nullptr;
   larADC2MeV = *ADC2MeVHdl;
   if (larADC2MeV == nullptr) {
@@ -149,20 +149,20 @@ StatusCode LArAutoCorrTotalCondAlg::execute() {
 
   if (!m_NoPile) {
     if (m_isMC) {
-      SG::ReadCondHandle<ILArNoise> NoiseHdl{ m_LArNoiseObjKey };
+      SG::ReadCondHandle<ILArNoise> NoiseHdl{ m_LArNoiseObjKey, ctx };
       larNoise = *NoiseHdl;
       writeHandle.addDependency(NoiseHdl);
     } else {
-      SG::ReadCondHandle<ILArPedestal> PedestalHdl{ m_LArPedestalObjKey };
+      SG::ReadCondHandle<ILArPedestal> PedestalHdl{ m_LArPedestalObjKey, ctx };
       larPedestal = *PedestalHdl;
       writeHandle.addDependency(PedestalHdl);
     }
 
-    SG::ReadCondHandle<ILArfSampl> fSamplHdl{ m_LArfSamplObjKey };
+    SG::ReadCondHandle<ILArfSampl> fSamplHdl{ m_LArfSamplObjKey, ctx };
     larfSampl = *fSamplHdl;
     writeHandle.addDependency(fSamplHdl);
 
-    SG::ReadCondHandle<ILArMinBias> MinBiasHdl{ m_LArMinBiasObjKey };
+    SG::ReadCondHandle<ILArMinBias> MinBiasHdl{ m_LArMinBiasObjKey, ctx };
     larMinBias = *MinBiasHdl;
     writeHandle.addDependency(MinBiasHdl);
   }

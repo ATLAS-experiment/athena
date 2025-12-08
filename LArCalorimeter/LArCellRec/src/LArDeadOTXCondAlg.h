@@ -8,7 +8,7 @@
 
 
 #include "StoreGate/ReadCondHandleKey.h"
-#include "AthenaBaseComps/AthAlgorithm.h"
+#include "AthenaBaseComps/AthCondAlgorithm.h"
 #include "LArRecConditions/LArBadChannelCont.h"
 #include "LArCabling/LArOnOffIdMapping.h"
 #include "CaloDetDescr/CaloDetDescrManager.h"
@@ -19,12 +19,12 @@ class CaloCellContainer;
 class LArOnlineID;
 class CaloCell_ID;
 
-class LArDeadOTXCondAlg : public AthAlgorithm  {
+class LArDeadOTXCondAlg : public AthCondAlgorithm  {
 public:
-  using AthAlgorithm::AthAlgorithm;
+  using AthCondAlgorithm::AthCondAlgorithm;
 
   virtual StatusCode initialize() override final;
-  virtual StatusCode execute() override final;
+  virtual StatusCode execute(const EventContext& ctx) const override final;
   
  private: 
   SG::ReadCondHandleKey<LArBadFebCont>     m_MFKey{this, "keyMF", "LArBadFeb", "Key for missing FEBs"};

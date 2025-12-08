@@ -21,9 +21,8 @@ StatusCode CaloAlignCondAlg::initialize()
   return StatusCode::SUCCESS;
 }
 
-StatusCode CaloAlignCondAlg::execute()
+StatusCode CaloAlignCondAlg::execute(const EventContext& ctx) const
 {
-  const EventContext& ctx = Gaudi::Hive::currentContext();
   // ____________ Construct Write Cond Handle and check its validity ____________
   SG::WriteCondHandle<CaloDetDescrManager> writeCaloMgrHandle{m_writeCaloMgrKey,ctx};
   if (writeCaloMgrHandle.isValid()) {

@@ -17,7 +17,7 @@
 
 
 TileBadChannelsCondAlg::TileBadChannelsCondAlg(const std::string& name, ISvcLocator* pSvcLocator) :
-  AthAlgorithm(name, pSvcLocator)
+  AthCondAlgorithm(name, pSvcLocator)
 {
 }
 
@@ -71,9 +71,9 @@ StatusCode TileBadChannelsCondAlg::initialize() {
 }
 
 
-StatusCode TileBadChannelsCondAlg::execute() {
+StatusCode TileBadChannelsCondAlg::execute(const EventContext& ctx) const {
 
-  SG::WriteCondHandle<TileBadChannels> badChannels{m_badChannelsKey};
+  SG::WriteCondHandle<TileBadChannels> badChannels{m_badChannelsKey, ctx};
 
   if (badChannels.isValid()) {
     ATH_MSG_DEBUG("Found valid TileBadChannels: " << badChannels.key());
