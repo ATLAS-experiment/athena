@@ -21,7 +21,6 @@
 // Athena headers
 #include "AthenaBaseComps/AthMessaging.h"
 #include "AthenaKernel/IAthenaEvtLoopPreSelectTool.h"
-#include "AthenaKernel/IEvtSelectorSeek.h"
 #include "AthenaKernel/IConditionsCleanerSvc.h"
 #ifndef EVENTINFO_EVENTID_H
 # include "EventInfo/EventID.h"  /* number_type */
@@ -158,33 +157,33 @@ public:
   /// Standard Destructor
   virtual ~AthenaEventLoopMgr();
   /// implementation of IAppMgrUI::initalize
-  virtual StatusCode initialize();
+  virtual StatusCode initialize() override;
   /// implementation of IAppMgrUI::finalize
-  virtual StatusCode finalize();
+  virtual StatusCode finalize() override;
   /// implementation of IAppMgrUI::nextEvent. maxevt==0 returns immediately
-  virtual StatusCode nextEvent(int maxevt);
+  virtual StatusCode nextEvent(int maxevt) override;
   /// implementation of IEventProcessor::executeEvent(EventContext&& ctx)
-  virtual StatusCode executeEvent( EventContext && ctx );
+  virtual StatusCode executeEvent( EventContext && ctx ) override;
   /// implementation of IEventProcessor::executeRun(int maxevt)
-  virtual StatusCode executeRun(int maxevt);
+  virtual StatusCode executeRun(int maxevt) override;
   /// Seek to a given event.
-  virtual StatusCode seek(int evt);
+  virtual StatusCode seek(int evt) override;
   /// Return the current event count.
-  virtual int curEvent() const;
+  virtual int curEvent() const override;
   /// Return the size of the collection.
-  virtual int size();
+  virtual int size() override;
   /// IIncidentListenet interfaces
-  void handle(const Incident& inc);
+  virtual void handle(const Incident& inc) override;
   /// Execute certain algorithms/sequences in PreFork
   StatusCode execAtPreFork(const EventContext& ctx) const;
   /// Called from ApplicationMgr::stopRun() to terminate the loop
-  StatusCode stopRun() override;
+  virtual StatusCode stopRun() override;
 
   using AthMessaging::msg;
   using AthMessaging::msgLvl;
 
   //FIXME hack to workaround pylcgdict problem...
-  virtual const std::string& name() const { return Service::name(); } //FIXME 
+  virtual const std::string& name() const override { return Service::name(); } //FIXME 
 
   virtual void modifyEventContext(EventContext& ctx, const EventID& eID, bool consume_modifier_stream);
 
