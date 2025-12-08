@@ -722,90 +722,93 @@ StatusCode IOVDbMetaDataTool::processInputFileMetaData(const std::string& fileNa
   // Only do this if IOVDbSvc hasn't registered the folder (checked by CondCont existence).
   // Note: We're already holding m_mutex lock, so we populate ConditionStore directly
   // without calling addPayload() to avoid deadlock.
-  constexpr std::array folderNames{"/Digitization/Parameters", "/Simulation/Parameters"};
-  for (std::string_view folderName : folderNames) {
-    // Skip if folder doesn't exist in MetaDataStore (e.g., old files without these folders)
-    if (!m_metaDataStore->contains<IOVMetaDataContainer>(std::string(folderName))) {
-      continue;
-    }
-
-    // Skip if folder is in Payloads (write-only mode for overlay)
-    // When Payloads contains entries for a folder, we're explicitly providing the data
-    // and don't need to read from input file
-    bool inPayloads = false;
-    for (const auto& [key, value] : m_payloads) {
-      if (key.find(std::string(folderName) + ":") == 0) {
-        inPayloads = true;
-        break;
+  //
+  // This can only be done when we have a valid EventContext (i.e., during event processing),
+  // not during file opening when this method is typically called.
+  const EventContext& currentCtx = Gaudi::Hive::currentContext();
+  if (currentCtx.valid()) {
+    constexpr std::array folderNames{"/Digitization/Parameters", "/Simulation/Parameters"};
+    for (std::string_view folderName : folderNames) {
+      // Skip if folder doesn't exist in MetaDataStore (e.g., old files without these folders)
+      if (!m_metaDataStore->contains<IOVMetaDataContainer>(std::string(folderName))) {
+        continue;
       }
-    }
-    if (inPayloads) {
-      ATH_MSG_DEBUG("Folder " << folderName << " is in Payloads, skipping auto-read from input");
-      continue;
-    }
 
-    // Check MetaDataStore (merged view of metadata from all input files)
-    IOVMetaDataContainer* contMaster = nullptr;
-    if (m_metaDataStore->retrieve(contMaster, std::string(folderName)).isSuccess() && contMaster) {
-      const IOVPayloadContainer* payloadMaster = contMaster->payloadContainer();
-      if (payloadMaster && payloadMaster->size() > 0) {
-        // Ensure ConditionStore is available
-        if (!m_condStore.isValid()) {
-          ATH_CHECK(m_condStore.retrieve());
+      // Skip if folder is in Payloads (write-only mode for overlay)
+      // When Payloads contains entries for a folder, we're explicitly providing the data
+      // and don't need to read from input file
+      bool inPayloads = false;
+      for (const auto& [key, value] : m_payloads) {
+        if (key.find(std::string(folderName) + ":") == 0) {
+          inPayloads = true;
+          break;
         }
+      }
+      if (inPayloads) {
+        ATH_MSG_DEBUG("Folder " << folderName << " is in Payloads, skipping auto-read from input");
+        continue;
+      }
 
-        // Check if CondCont already exists - if so, IOVDbSvc is managing it
-        if (m_condStore->contains<CondCont<AthenaAttributeList>>(std::string(folderName))) {
-          ATH_MSG_DEBUG("CondCont for " << folderName << " already exists, skipping");
-          continue;
-        }
-
-        // Get the first payload (should only be one for parameter folders)
-        const CondAttrListCollection* coll = dynamic_cast<const CondAttrListCollection*>(*(payloadMaster->begin()));
-        if (coll) {
-          // Create new CondCont using CondContFactory
-          CondCont<AthenaAttributeList>* cc = nullptr;
-          ServiceHandle<Athena::IRCUSvc> rcuSvc("Athena::RCUSvc", name());
-          ATH_CHECK(rcuSvc.retrieve());
-
-          SG::DataObjectSharedPtr<DataObject> cb =
-            CondContainer::CondContFactory::Instance().Create(*rcuSvc,
-                                                               ClassID_traits<AthenaAttributeList>::ID(),
-                                                               std::string(folderName));
-          if (!cb) {
-            ATH_MSG_ERROR("Failed to create CondCont for " << folderName);
-            return StatusCode::FAILURE;
+      // Check MetaDataStore (merged view of metadata from all input files)
+      IOVMetaDataContainer* contMaster = nullptr;
+      if (m_metaDataStore->retrieve(contMaster, std::string(folderName)).isSuccess() && contMaster) {
+        const IOVPayloadContainer* payloadMaster = contMaster->payloadContainer();
+        if (payloadMaster && payloadMaster->size() > 0) {
+          // Ensure ConditionStore is available
+          if (!m_condStore.isValid()) {
+            ATH_CHECK(m_condStore.retrieve());
           }
 
-          if (m_condStore->recordObject(cb, std::string(folderName), true, false) == nullptr) {
-            ATH_MSG_ERROR("Failed to record CondCont for " << folderName);
-            return StatusCode::FAILURE;
+          // Check if CondCont already exists - if so, IOVDbSvc is managing it
+          if (m_condStore->contains<CondCont<AthenaAttributeList>>(std::string(folderName))) {
+            ATH_MSG_DEBUG("CondCont for " << folderName << " already exists, skipping");
+            continue;
           }
 
-          // Retrieve the CondCont
-          ATH_CHECK(m_condStore->retrieve(cc, std::string(folderName)));
+          // Get the first payload (should only be one for parameter folders)
+          const CondAttrListCollection* coll = dynamic_cast<const CondAttrListCollection*>(*(payloadMaster->begin()));
+          if (coll) {
+            // Create new CondCont using CondContFactory
+            CondCont<AthenaAttributeList>* cc = nullptr;
+            ServiceHandle<Athena::IRCUSvc> rcuSvc("Athena::RCUSvc", name());
+            ATH_CHECK(rcuSvc.retrieve());
 
-          // Extract AthenaAttributeList from CondAttrListCollection and insert into CondCont
-          auto itr = coll->begin();
-          const coral::AttributeList& attrList = itr->second;
-          auto athAttrList = std::make_unique<AthenaAttributeList>(attrList);
+            SG::DataObjectSharedPtr<DataObject> cb =
+              CondContainer::CondContFactory::Instance().Create(*rcuSvc,
+                                                                 ClassID_traits<AthenaAttributeList>::ID(),
+                                                                 std::string(folderName));
+            if (!cb) {
+              ATH_MSG_ERROR("Failed to create CondCont for " << folderName);
+              return StatusCode::FAILURE;
+            }
 
-          // Create EventIDRange from the collection's IOV
-          IOVRange iovRange = coll->minRange();
-          EventIDBase start, stop;
-          start.set_run_number(iovRange.start().run());
-          start.set_lumi_block(iovRange.start().event());
-          stop.set_run_number(iovRange.stop().run());
-          stop.set_lumi_block(iovRange.stop().event());
-          EventIDRange range(start, stop);
+            if (m_condStore->recordObject(cb, std::string(folderName), true, false) == nullptr) {
+              ATH_MSG_ERROR("Failed to record CondCont for " << folderName);
+              return StatusCode::FAILURE;
+            }
 
-          // Insert into CondCont only if we have a valid EventContext
-          const EventContext& currentCtx = Gaudi::Hive::currentContext();
-          if (currentCtx.valid()) {
+            // Retrieve the CondCont
+            ATH_CHECK(m_condStore->retrieve(cc, std::string(folderName)));
+
+            // Extract AthenaAttributeList from CondAttrListCollection and insert into CondCont
+            auto itr = coll->begin();
+            const coral::AttributeList& attrList = itr->second;
+            auto athAttrList = std::make_unique<AthenaAttributeList>(attrList);
+
+            // Create EventIDRange from the collection's IOV
+            IOVRange iovRange = coll->minRange();
+            EventIDBase start, stop;
+            start.set_run_number(iovRange.start().run());
+            start.set_lumi_block(iovRange.start().event());
+            stop.set_run_number(iovRange.stop().run());
+            stop.set_lumi_block(iovRange.stop().event());
+            EventIDRange range(start, stop);
+
+            // Insert into CondCont (we already checked that currentCtx is valid)
             ATH_CHECK(cc->insert(range, std::move(athAttrList), currentCtx));
-          }
 
-          ATH_MSG_DEBUG("Populated ConditionStore for " << folderName << " from file metadata");
+            ATH_MSG_DEBUG("Populated ConditionStore for " << folderName << " from file metadata");
+          }
         }
       }
     }
