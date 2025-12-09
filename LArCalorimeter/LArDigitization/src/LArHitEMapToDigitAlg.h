@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef LARDIGITIZATION_LARHITEMPATTODIGITALG_H
@@ -142,6 +142,15 @@ protected:
         {this,"HighGainThreshEMECIW",1300,"ADC counts in medium gain"}
   }};
 
+
+  //std::array<Gaudi::Property<std::pair<CaloGain::CaloGain, CaloGain::CaloGain> >,4>  m_gainRange {{
+   std::array<Gaudi::Property<std::pair<int,int> >,4>  m_gainRange {{   
+      {this,"GainRangeEM",{CaloGain::LARHIGHGAIN,CaloGain::LARLOWGAIN},"Range of gains"},
+      {this,"GainRangeHEC",{CaloGain::LARMEDIUMGAIN,CaloGain::LARLOWGAIN},"Range of gains"},
+      {this,"GainRangeFCAL",{CaloGain::LARHIGHGAIN,CaloGain::LARLOWGAIN},"Range of gains"},
+      {this,"GainRangeEMECIW",{CaloGain::LARHIGHGAIN,CaloGain::LARLOWGAIN},"Range of gains"},
+    }};
+  
   Gaudi::Property<unsigned> m_maxADC{this,"maxADC",4096,"Maxium ADC value +1 (for overflow)"};
 
   // Some properties for digits production

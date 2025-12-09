@@ -193,8 +193,10 @@ def LArHitEMapToDigitAlgCfg(flags, name="LArHitEMapToDigitAlg", **kwargs):
     kwargs.setdefault("RandomSeedOffset", flags.Digitization.RandomSeedOffset)
     if (not flags.Digitization.HighGainFCal) and (not flags.Common.isOverlay):
         kwargs.setdefault("HighGainThreshFCAL", 0)
+        kwargs.setdefault("GainRangeFCAL",[1,2])
     if (not flags.Digitization.HighGainEMECIW) and (not flags.Common.isOverlay):
         kwargs.setdefault("HighGainThreshEMECIW", 0)
+        kwargs.setdefault("GainRangeEMECIW",[1,2])
     kwargs.setdefault("RndmEvtOverlay", flags.Common.isOverlay)
     if flags.Common.ProductionStep == ProductionStep.PileUpPresampling:
         kwargs.setdefault("DigitContainer", flags.Overlay.BkgPrefix + "LArDigitContainer_MC")

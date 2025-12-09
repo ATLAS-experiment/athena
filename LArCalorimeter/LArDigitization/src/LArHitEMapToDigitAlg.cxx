@@ -72,9 +72,43 @@ StatusCode LArHitEMapToDigitAlg::initialize()
 
   ATH_CHECK(m_DigitContainerName.initialize());
   ATH_CHECK(m_DigitContainerName_DigiHSTruth.initialize(m_doDigiTruth));
-  return StatusCode::SUCCESS;
 
+  // Check consistency of gain-ranges and gain-switching thresholds:
+  std::array<std::pair<int,std::string>,4> iCaloToStr{{{EM,"EM"},{HEC,"HEC"},{FCAL,"FCAL"},{EMIW,"EMIW"}}};
+
+  for (int iCalo = EM; iCalo <= EMIW; ++iCalo) {
+    if ((m_gainRange[iCalo].value().first == CaloGain::LARHIGHGAIN) == (m_HighGainThresh[iCalo] != 0))
+      ATH_MSG_INFO("jobO consistency check: " << iCaloToStr[iCalo] << " has " << ((m_gainRange[iCalo].value().first == CaloGain::LARHIGHGAIN) ? "" : "no ")
+                                              << " HIGH gain and high Gain threshold=" << m_HighGainThresh[iCalo]);
+    else {
+      ATH_MSG_ERROR("jobO inconsistency! " << iCaloToStr[iCalo] << " has" << ((m_gainRange[iCalo].value().first == CaloGain::LARHIGHGAIN) ? "" : "no ")
+                                           << " HIGH gain but high Gain threshold=" << m_HighGainThresh[iCalo]);
+      return StatusCode::FAILURE;
+    }
+    if ((m_gainRange[iCalo].value().second == CaloGain::LARLOWGAIN) == (m_LowGainThresh[iCalo] <= m_maxADC))
+      ATH_MSG_INFO("jobO consistency check: Calo " << iCaloToStr[iCalo] << " has" << ((m_gainRange[iCalo].value().first == CaloGain::LARHIGHGAIN) ? "" : "no ")
+                                                   << " LOW gain and high Gain threshold=" << m_LowGainThresh[iCalo] << " (maxADC=" << m_maxADC << ")");
+    else {
+      ATH_MSG_ERROR("jobO inconsistency! Calo " << iCaloToStr[iCalo] << " has" << ((m_gainRange[iCalo].value().first == CaloGain::LARHIGHGAIN) ? "" : "no ")
+                                                << " LOW gain but high Gain threshold=" << m_LowGainThresh[iCalo] << " (maxADC=" << m_maxADC << ")");
+      return StatusCode::FAILURE;
+    }
+
+    if (m_gainRange[iCalo].value().first == m_gainRange[iCalo].value().second) {
+      ATH_MSG_ERROR(" Calo " << iCaloToStr[iCalo] << " configured to have only one gain. This is not supported.");
+      return Status::FAILURE;
+    }
+    if (m_HighGainThresh[iCalo] >= m_LowGainThresh[iCalo] ) {
+      ATH_MSG_ERROR(" Calo " << iCaloToStr[iCalo] << " High gain threshold > low gain threshold! " << m_HighGainThresh[iCalo] << " >= " << m_LowGainThresh[iCalo]);
+      return Status::FAILURE;  
+    }
+
+
+  } //end  iCalo loop
+
+  return StatusCode::SUCCESS;
 }
+
 
 StatusCode LArHitEMapToDigitAlg::execute(const EventContext& context) const {
 
@@ -196,7 +230,6 @@ StatusCode LArHitEMapToDigitAlg::MakeDigit(
   short Adc;
   short Adc_DigiHSTruth;
 
-  CaloGain::CaloGain igain;
   std::vector<short> AdcSample(m_NSamples);
   std::vector<short> AdcSample_DigiHSTruth(m_NSamples);
 
@@ -232,17 +265,15 @@ StatusCode LArHitEMapToDigitAlg::MakeDigit(
   SG::ReadCondHandle<LArBadChannelCont> bch{m_bcContKey,ctx};
   const LArBadChannelCont* bcCont{*bch};
 
-  int iCalo=0;
-  if(m_larem_id->is_lar_em(cellId)) {
-     if (m_larem_id->is_em_endcap_inner(cellId)) iCalo=EMIW;
-     else iCalo=EM;
-  }
-  if(m_larem_id->is_lar_hec(cellId))  iCalo=HEC;
-  if(m_larem_id->is_lar_fcal(cellId)) iCalo=FCAL;
+  int iCalo = EM;
+  if (m_larem_id->is_lar_hec(cellId))
+    iCalo = HEC;
+  else if (m_larem_id->is_lar_fcal(cellId))
+    iCalo = FCAL;
+  else if (m_larem_id->is_em_endcap_inner(cellId))
+    iCalo = EMIW;
 
-  CaloGain::CaloGain  initialGain = CaloGain::LARHIGHGAIN;
-  if (iCalo==HEC) initialGain = CaloGain::LARMEDIUMGAIN;
-
+  CaloGain::CaloGain  initialGain=static_cast<CaloGain::CaloGain>(m_gainRange[iCalo].value().first); 
   CaloGain::CaloGain rndmGain = CaloGain::LARHIGHGAIN;
 
 // ........ retrieve data (1/2) ................................
@@ -358,40 +389,41 @@ StatusCode LArHitEMapToDigitAlg::MakeDigit(
     float Samp2_DigiHSTruth=Samples_DigiHSTruth[sampleGainChoice-ihecshift]*MeV2GeV;
     if ( Samp2_DigiHSTruth <= m_EnergyThresh ) createDigit_DigiHSTruth = false;
   }
+
+  CaloGain::CaloGain gainChoosingGain=static_cast<CaloGain::CaloGain>(m_gainRange[iCalo].value().second-1);
     //We choose the gain in applying thresholds on the 3rd Sample (index "2")
-    //converted in ADC counts in MediumGain (index "1" of (ADC2MEV)).
+    //converted in ADC counts in the second-lowest gain (eg MEDIUM gain for run 1,2,3, HIGH gain for run 4) 
     //Indeed, thresholds in ADC counts are defined with respect to the MediumGain.
     //
     //              1300              3900
     // ---------------|----------------|--------------> ADC counts in MediumGain
     //    HighGain  <---  MediumGain  --->  LowGain
 
-  float pseudoADC3;
-  float Pedestal = pedestal->pedestal(ch_id,CaloGain::LARMEDIUMGAIN);
+  float Pedestal = pedestal->pedestal(ch_id,gainChoosingGain);
   if (Pedestal <= (1.0+LArElecCalib::ERRORCODE)) {
-   ATH_MSG_DEBUG(" Pedestal not found for medium gain ,cellID " << cellId <<  " assume 1000 ");
+   ATH_MSG_DEBUG(" Pedestal not found, cellID " << m_larem_id->show_to_string(cellId) <<  " assume 1000 ");
    Pedestal=1000.;
   }
-  auto polynom_adc2mev = adc2MeVs->ADC2MEV(cellId,CaloGain::LARMEDIUMGAIN);
+  auto polynom_adc2mev = adc2MeVs->ADC2MEV(cellId,gainChoosingGain);
   if ( polynom_adc2mev.size() < 2) {
     ATH_MSG_WARNING(" No medium gain ramp found for cell " << m_larem_id->show_to_string(cellId) << " no digit produced...");
     return StatusCode::SUCCESS;
   }
-  pseudoADC3 = Samples[sampleGainChoice-ihecshift]/(polynom_adc2mev[1])/SF + Pedestal ;
-  //
-  // ......... try a gain
-  //
-  if (pseudoADC3 <= m_HighGainThresh[iCalo]) {
-    igain = CaloGain::LARHIGHGAIN;
-  } else if (pseudoADC3 <= m_LowGainThresh[iCalo]) {
-    igain = CaloGain::LARMEDIUMGAIN;
-  } else {
-    igain = CaloGain::LARLOWGAIN;
+  const float pseudoADC3 = Samples[sampleGainChoice-ihecshift]/(polynom_adc2mev[1])/SF + Pedestal ;
+
+  CaloGain::CaloGain igain = gainChoosingGain;
+  //if we are not yet already in the highest gain and we are below high-gain theshold, switch to high gain
+  if (gainChoosingGain>m_gainRange[iCalo].value().first && pseudoADC3 < m_HighGainThresh[iCalo]) {
+        igain=CaloGain::LARHIGHGAIN;
   }
 
- // check that select gain is never lower than random gain in case of overlay
-  if (rndmGain==CaloGain::LARMEDIUMGAIN && igain==CaloGain::LARHIGHGAIN) igain=CaloGain::LARMEDIUMGAIN;
-  if (rndmGain==CaloGain::LARLOWGAIN ) igain=CaloGain::LARLOWGAIN;
+  else if (gainChoosingGain<m_gainRange[iCalo].value().second && pseudoADC3 > m_LowGainThresh[iCalo]) {
+        igain=CaloGain::LARLOWGAIN;
+  }
+
+
+ // check that select gain is never lower (higher index number) than random gain in case of overlay
+  igain=std::max(rndmGain,igain);
 
 //
 // recompute Samples if igain != HIGHGAIN
