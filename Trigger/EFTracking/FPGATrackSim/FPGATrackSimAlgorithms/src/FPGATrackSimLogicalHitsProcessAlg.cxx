@@ -412,7 +412,14 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::execute()
       }
       else { roadsToTrack(roads_1st, tracks_1st, m_FPGATrackSimMapping->PlaneMap_1st(0)); }
     }
-        
+    
+    // calculateTruth() before any monitors
+    // this explicitly calculates barcode, barcodeFrac and eventIndex
+    ATH_MSG_DEBUG("doMultiTruth = " << m_doMultiTruth);
+    if (m_doMultiTruth)
+        for (auto &track : tracks_1st)
+            track.calculateTruth();
+     
     //// (first track monitor, after getting tracks)
     /// create a vector of references from a vector of instances
     monitorTracks(m_1st_stage_track_monitor, tracks_1st);
