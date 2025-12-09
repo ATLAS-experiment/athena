@@ -203,7 +203,7 @@ namespace MuonR4::SegmentFit{
                                                     return hit->type() == xAOD::UncalibMeasType::MdtDriftCircleType;
                                                 });
             SeedSolution patternSeed{};
-            patternSeed.seedHits.resize(2*m_hitLayers.mdtHits().size());
+            patternSeed.seedHits = m_segmentSeed->getHitsInMax();
             patternSeed.solutionSigns.resize(2*m_hitLayers.mdtHits().size());
             patternSeed.y0 = m_segmentSeed->interceptY();
             patternSeed.theta = m_segmentSeed->tanBeta();
@@ -285,8 +285,7 @@ namespace MuonR4::SegmentFit{
         SeedSolution solCandidate{};
         static_cast<TangentLine&>(solCandidate) = LineSeeder_t::constructTangentLine(*topHit, *bottomHit, ambi);
 
-        Amg::Vector3D flipedDir = Amg::AngleAxis3D{solCandidate.theta, topHit->sensorDirection()} * topHit->planeNormal();
-        solCandidate.theta = flipedDir.theta();
+        solCandidate.theta = LineSeeder_t::makeDirection(*bottomHit, solCandidate.theta).theta();
 
         if (!isValidLine(solCandidate)) {
             return std::nullopt;
@@ -302,6 +301,7 @@ namespace MuonR4::SegmentFit{
             calibBottom = m_cfg.calibrator->calibrate(ctx, bottomHit, m_line.position(), m_line.direction(), t0);
             calibTop = m_cfg.calibrator->calibrate(ctx, topHit, m_line.position(), m_line.direction(), t0);
             static_cast<TangentLine&>(solCandidate) = LineSeeder_t::constructTangentLine(*calibTop, *calibBottom, ambi);
+            solCandidate.theta = LineSeeder_t::makeDirection(*calibBottom, solCandidate.theta).theta();
             if (!isValidLine(solCandidate)) {
                 ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<": Recalibrated segment seed is invalid");
                 return std::nullopt;

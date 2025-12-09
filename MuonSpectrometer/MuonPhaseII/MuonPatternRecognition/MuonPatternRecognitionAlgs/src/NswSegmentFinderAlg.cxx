@@ -76,11 +76,11 @@ StatusCode NswSegmentFinderAlg::initialize() {
     fitCfg.calibrator = m_calibTool.get();
     fitCfg.visionTool = m_visionTool.get();
     fitCfg.idHelperSvc = m_idHelperSvc.get();
+    fitCfg.parsToUse = {ParamDefs::x0, ParamDefs::y0, ParamDefs::theta, ParamDefs::phi};
     
     m_lineFitter = std::make_unique<SegmentFit::SegmentLineFitter>(name(), std::move(fitCfg));
 
     if(m_dumpSeedStatistics){
-
         m_seedCounter = std::make_unique<SeedStatistics>();
     }
 
@@ -195,9 +195,9 @@ inline NswSegmentFinderAlg::HitWindow
 }
 
 void NswSegmentFinderAlg::constructPrelimnarySeeds(const Amg::Vector3D& beamSpot,
-                                                             const HitLaySpan_t& combinatoricLayers,
-                                                             const UsedHitSpan_t& usedHits,
-                                                             InitialSeedVec_t& seedHitsFromLayers) const {
+                                                   const HitLaySpan_t& combinatoricLayers,
+                                                   const UsedHitSpan_t& usedHits,
+                                                   InitialSeedVec_t& seedHitsFromLayers) const {
     /// Assign enough memory to the vector
     seedHitsFromLayers.clear();
     std::size_t maxSize{1};

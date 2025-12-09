@@ -241,10 +241,10 @@ class NswSegmentFinderAlg : public AthReentrantAlgorithm {
         DoubleProperty m_minPullThreshold{this, "maxPull", 5.};
         
         //minimum number of hits required to form a seed after extension
-        DoubleProperty m_minSeedHits{this, "minSeedHits", 6.};
+        UnsignedIntegerProperty m_minSeedHits{this, "minSeedHits", 4};
 
         //maximum number of MM Clusters that are invalid in the seed
-        DoubleProperty m_maxInvalidClusters{this, "maxInvalidClusters", 4.};
+        UnsignedIntegerProperty m_maxInvalidClusters{this, "maxInvalidClusters", 4};
 
         //reject also hits from the seed even if it does not lead to succesful segment
         BooleanProperty m_markHitsFromSeed{this, "markHitsFromSeed", true};
@@ -253,13 +253,13 @@ class NswSegmentFinderAlg : public AthReentrantAlgorithm {
         UnsignedIntegerProperty m_maxUsed{this, "maxHitIsUsed", 6};
 
         //minimum number of strips required for MMClusers not to be invalid
-        DoubleProperty m_minClusSize{this, "minClusterSize", 1.};
+        UnsignedIntegerProperty m_minClusSize{this, "minClusterSize", 1};
 
         //maximum number of chi2 cut for the segment
         DoubleProperty m_maxChi2{this, "maxChi2", 6.};
 
         // maximum number of clusters in the layer for the seed finding
-        DoubleProperty m_maxClustersInLayer{this, "maxClustersInLayer", 8};
+        UnsignedIntegerProperty m_maxClustersInLayer{this, "maxClustersInLayer", 8};
 
         //maximum number of dY window size for killing hits on the layer from the segments 
         DoubleProperty m_maxdYWindow{this, "maxdYWindow", 4.*Gaudi::Units::cm};  
