@@ -41,7 +41,7 @@ if __name__=="__main__":
         print("  ",x.GetName(),"=",x.GetValue())
         c.addGenericParameter(x.GetName(),x.GetValue())
 
-    r = a.execute("testAlg",h,c)
+    r = a.execute("testAlg",h,c)  # noqa: F821
 
     print("RESULTS:")
     print("---------------------")
