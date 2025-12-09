@@ -78,7 +78,7 @@ class CaloRingerJetsReader : public CaloRingerInputReader,
      * @brief Jet collections.
      **/
     SG::ReadHandleKey<xAOD::JetContainer> m_inputJetContainerKey{
-      this, "inputKey", "AntiKt4EMPFlowJets", "Input jet container"
+      this, "inputKey", "AntiKt4EMTopoJets", "Input jet container"
     };
     // SG::ReadHandleKey<xAOD::JetContainer> m_inputJetContainerKey;
 
