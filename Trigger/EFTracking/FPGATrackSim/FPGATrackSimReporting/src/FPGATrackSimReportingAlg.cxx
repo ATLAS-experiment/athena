@@ -248,7 +248,7 @@ void FPGATrackSim::FPGATrackSimReportingAlg::printxAODClusters(SG::ReadHandle<Da
         "|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|\n";
     unsigned int counter = 0;
     std::map<int, int> counterMap;
-    for (const auto& cluster : *clusterContainer)
+    for (const xAOD::PixelCluster* cluster : *clusterContainer)
     {
         ++counter;
 
@@ -283,7 +283,7 @@ void FPGATrackSim::FPGATrackSimReportingAlg::printxAODClusters(SG::ReadHandle<Da
         "|--------------------------------------------------------------------------------------------------------------------------------------|\n";
     unsigned int counter = 0;
     std::map<int, int> counterMap;
-    for (const auto& cluster : *clusterContainer)
+    for (const xAOD::StripCluster* cluster : *clusterContainer)
     {
         ++counter;
 
