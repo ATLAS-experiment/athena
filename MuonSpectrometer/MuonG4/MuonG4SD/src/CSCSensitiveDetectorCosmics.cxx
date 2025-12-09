@@ -247,6 +247,10 @@ G4bool CSCSensitiveDetectorCosmics::ProcessHits(G4Step* aStep,G4TouchableHistory
   // END OF COSMICS SPECIFIC CODE
 
   TrackHelper trHelp(aStep->GetTrack());
+  EventContext const* eventContext{nullptr};
+  if(auto* eventInfo = AtlasG4EventUserInfo::GetEventUserInfo()){
+    eventContext = &eventInfo->GetEventContext();
+  }
 
   /** construct the hit identifier */
   HitID CSCid = m_muonHelper->BuildCscHitId(stationName, stationPhi,
@@ -255,7 +259,7 @@ G4bool CSCSensitiveDetectorCosmics::ProcessHits(G4Step* aStep,G4TouchableHistory
   /** insert hit in collection */
   m_myCSCHitColl->Emplace(CSCid, m_globalTime, energyDeposit,
                           HitStart, HitEnd, lundcode,
-                          trHelp.GenerateParticleLink(), kinEnergy);
+                          eventContext ? trHelp.GenerateParticleLink(*eventContext) : trHelp.GenerateParticleLink(), kinEnergy);
 
   // #ifndef CSCG4_DEBUG
   //

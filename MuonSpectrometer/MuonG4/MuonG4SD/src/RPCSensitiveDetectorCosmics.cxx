@@ -343,6 +343,10 @@ G4bool RPCSensitiveDetectorCosmics::ProcessHits(G4Step* aStep,G4TouchableHistory
 
   // retrieve track barcode
   TrackHelper trHelp(aStep->GetTrack());
+  EventContext const* eventContext{nullptr};
+  if(auto* eventInfo = AtlasG4EventUserInfo::GetEventUserInfo()){
+    eventContext = &eventInfo->GetEventContext();
+  }
 
   //construct new rpc hit
   m_vertex = Amg::Hep3VectorToEigen( aStep->GetTrack()->GetVertexPosition() );
@@ -351,13 +355,17 @@ G4bool RPCSensitiveDetectorCosmics::ProcessHits(G4Step* aStep,G4TouchableHistory
   (((m_vertex.mag()) < 100) ? (m_globalTime  = globalTime) : (m_globalTime = tof));
 
   m_myRPCHitColl->Emplace(RPCid_eta, m_globalTime,
-                          localPosition, trHelp.GenerateParticleLink(), localPostPosition,
+                          localPosition,
+                          eventContext ? trHelp.GenerateParticleLink(*eventContext) : trHelp.GenerateParticleLink(),
+                          localPostPosition,
                           aStep->GetTotalEnergyDeposit(),
                           aStep->GetStepLength(),
                           currentTrack->GetDefinition()->GetPDGEncoding(),
                           aStep->GetPreStepPoint()->GetKineticEnergy());
   m_myRPCHitColl->Emplace(RPCid_phi, m_globalTime,
-                        localPosition, trHelp.GenerateParticleLink(), localPostPosition,
+                        localPosition,
+                        eventContext ? trHelp.GenerateParticleLink(*eventContext) : trHelp.GenerateParticleLink(),
+                        localPostPosition,
                         aStep->GetTotalEnergyDeposit(),
                         aStep->GetStepLength(),
                         currentTrack->GetDefinition()->GetPDGEncoding(),

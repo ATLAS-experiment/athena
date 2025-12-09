@@ -282,16 +282,24 @@ G4bool RPCSensitiveDetector::ProcessHits(G4Step* aStep,G4TouchableHistory*) {
 
   // retrieve track barcode
   TrackHelper trHelp(aStep->GetTrack());
+  EventContext const* eventContext{nullptr};
+  if(auto* eventInfo = AtlasG4EventUserInfo::GetEventUserInfo()){
+    eventContext = &eventInfo->GetEventContext();
+  }
 
   //construct new rpc hit
   m_myRPCHitColl->Emplace(RPCid_eta, globalTime,
-                        localPosition, trHelp.GenerateParticleLink(), localPostPosition,
+                        localPosition,
+                        eventContext ? trHelp.GenerateParticleLink(*eventContext) : trHelp.GenerateParticleLink(),
+                        localPostPosition,
                         aStep->GetTotalEnergyDeposit(),
                         aStep->GetStepLength(),
                         track->GetDefinition()->GetPDGEncoding(),
                         aStep->GetPreStepPoint()->GetKineticEnergy());
   m_myRPCHitColl->Emplace(RPCid_phi, globalTime,
-                        localPosition, trHelp.GenerateParticleLink(), localPostPosition,
+                        localPosition,
+                        eventContext ? trHelp.GenerateParticleLink(*eventContext) : trHelp.GenerateParticleLink(),
+                        localPostPosition,
                         aStep->GetTotalEnergyDeposit(),
                         aStep->GetStepLength(),
                         track->GetDefinition()->GetPDGEncoding(),

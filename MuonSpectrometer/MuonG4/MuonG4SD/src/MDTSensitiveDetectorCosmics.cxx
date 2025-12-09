@@ -174,7 +174,12 @@ G4bool MDTSensitiveDetectorCosmics::ProcessHits(G4Step* aStep,G4TouchableHistory
     TrackHelper trHelp(aStep->GetTrack());
 
     // construct new mdt hit
-    m_MDTHitColl->Emplace(MDTid, m_globalTime, m_driftRadius, m_localPosition, trHelp.GenerateParticleLink(),
+    EventContext const* eventContext{nullptr};
+    if(auto* eventInfo = AtlasG4EventUserInfo::GetEventUserInfo()){
+      eventContext = &eventInfo->GetEventContext();
+    }
+    m_MDTHitColl->Emplace(MDTid, m_globalTime, m_driftRadius, m_localPosition,
+                          eventContext ? trHelp.GenerateParticleLink(*eventContext) : trHelp.GenerateParticleLink(),
                           aStep->GetStepLength(),
                           aStep->GetTotalEnergyDeposit(),
                           currentTrack->GetDefinition()->GetPDGEncoding(),

@@ -251,11 +251,15 @@ G4bool TGCSensitiveDetector::ProcessHits(G4Step* aStep,G4TouchableHistory*) {
 
   // construct new tgc hit
   TrackHelper trHelp(aStep->GetTrack());
+  EventContext const* eventContext{nullptr};
+  if(auto* eventInfo = AtlasG4EventUserInfo::GetEventUserInfo()){
+    eventContext = &eventInfo->GetEventContext();
+  }
   m_myTGCHitColl->Emplace(TGCid,
                         globalTime,
                         localPosition,
                         localDireCos,
-                        trHelp.GenerateParticleLink(),
+                        eventContext ? trHelp.GenerateParticleLink(*eventContext) : trHelp.GenerateParticleLink(),
                         aStep->GetTotalEnergyDeposit(),
                         aStep->GetStepLength(),
                         track->GetDefinition()->GetPDGEncoding(),

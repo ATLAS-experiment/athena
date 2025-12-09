@@ -202,11 +202,15 @@ G4bool TGCSensitiveDetectorCosmics::ProcessHits(G4Step* aStep,G4TouchableHistory
 
   // construct new mdt hit
   TrackHelper trHelp(aStep->GetTrack());
+  EventContext const* eventContext{nullptr};
+  if(auto* eventInfo = AtlasG4EventUserInfo::GetEventUserInfo()){
+    eventContext = &eventInfo->GetEventContext();
+  }
   m_myTGCHitColl->Emplace(TGCid,
                         m_globalTime,
                         localPosition,
                         localDireCos,
-                        trHelp.GenerateParticleLink(),
+                        eventContext ? trHelp.GenerateParticleLink(*eventContext) : trHelp.GenerateParticleLink(),
                         aStep->GetTotalEnergyDeposit(),
                         aStep->GetStepLength());
   return true;
