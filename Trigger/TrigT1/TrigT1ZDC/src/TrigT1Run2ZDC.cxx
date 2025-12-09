@@ -5,7 +5,7 @@
 #include <stdexcept>
 #include <bitset>
 #include "TrigT1Run2ZDC.h"
-
+#include "AthContainers/ConstAccessor.h"
 
 using json = nlohmann::json;
 
@@ -82,15 +82,16 @@ namespace LVL1 {
        
        ATH_MSG_DEBUG("ZDC Side " << zdcModule->zdcSide() << ", Module: " << zdcModule->zdcModule() << " and Energy: " << zdcModuleCalibEnergyHandle(*zdcModule));
        // Side A
+       static const SG::ConstAccessor<uint16_t> lucrodTriggerAmpAcc("LucrodTriggerAmp");
        if (zdcModule->zdcSide() > 0)
         {
-          moduleEnergy.at(zdcModule->zdcModule()) = (!m_energyToADCScaleFactor && zdcModule->isAvailable<uint16_t>("LucrodTriggerAmp")) ? static_cast<float>(zdcModule->auxdataConst<uint16_t>("LucrodTriggerAmp")) : zdcModuleCalibEnergyHandle(*zdcModule);
+          moduleEnergy.at(zdcModule->zdcModule()) = (!m_energyToADCScaleFactor && lucrodTriggerAmpAcc.isAvailable(*zdcModule)) ? static_cast<float>(lucrodTriggerAmpAcc(*zdcModule)) : zdcModuleCalibEnergyHandle(*zdcModule);
         }
 
        // Side C
        if (zdcModule->zdcSide() < 0)
         {
-          moduleEnergy.at(zdcModule->zdcModule() + 4) = (!m_energyToADCScaleFactor && zdcModule->isAvailable<uint16_t>("LucrodTriggerAmp")) ? static_cast<float>(zdcModule->auxdataConst<uint16_t>("LucrodTriggerAmp")) : zdcModuleCalibEnergyHandle(*zdcModule);
+          moduleEnergy.at(zdcModule->zdcModule() + 4) = (!m_energyToADCScaleFactor && lucrodTriggerAmpAcc.isAvailable(*zdcModule)) ? static_cast<float>(lucrodTriggerAmpAcc(*zdcModule)) : zdcModuleCalibEnergyHandle(*zdcModule);
         }
        }
      }
