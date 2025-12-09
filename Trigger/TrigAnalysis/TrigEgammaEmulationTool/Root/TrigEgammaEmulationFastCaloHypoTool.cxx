@@ -51,7 +51,7 @@ bool TrigEgammaEmulationFastCaloHypoTool::decide(  const Trig::TrigData &input )
   const TrigRoiDescriptor *roiDescriptor = input.roi;
   bool pass = false;
   int PassedCuts=0;
-  float rCore, F1, F3, Weta2, Wstot, hadET_T2Calo, energyRatio = -1;
+  float rCore = 0, F1 =0 , F3 = 0, Weta2 = 0, Wstot = 0 , hadET_T2Calo = 0, energyRatio = -1;
 
 
   // when leaving scope it will ship data to monTool
