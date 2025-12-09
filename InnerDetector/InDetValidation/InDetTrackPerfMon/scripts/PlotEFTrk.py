@@ -475,11 +475,6 @@ def draw(args, configs, tails=False, pu_comparison=False):
     urd_lines = []
     urd_text = []
 
-    if 'rate' in args.type and 'C000' in args.ref[0] and args.param != 'truthMu':
-        requirement_line, requirement_text = getURDRequirementLine(histos[0].GetPaintedGraph(), 'rate', canv, 1)
-        requirement_line.Draw('same')
-        requirement_text.Draw('same')
-
     # Loop over reference histograms to create one ratio per reference
     for r in range(NRef):
 
