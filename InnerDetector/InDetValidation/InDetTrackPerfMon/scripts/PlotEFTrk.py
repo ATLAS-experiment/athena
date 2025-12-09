@@ -146,7 +146,7 @@ def getATLASLabel(args):
         if 'ttbar' in args.ref[0]: sample = 't#bar{t}'
         if 'SingleMu' in args.ref[0]: sample = 'single #mu'
         if 'SinglePi' in args.ref[0]: sample = 'single #pi'
-        if 'SingleEl' in args.ref[0]: sample = 'single #pi'
+        if 'SingleEl' in args.ref[0]: sample = 'single e'
         if 'pT10_' in args.ref[0]: sample += ', p_{T} = 10 GeV'
         if 'pT100' in args.ref[0]: sample += ', p_{T} = 100 GeV'
         if 'pT1_' in args.ref[0]: sample += ', p_{T} = 1 GeV'
