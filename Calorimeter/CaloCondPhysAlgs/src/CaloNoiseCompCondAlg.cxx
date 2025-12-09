@@ -22,7 +22,7 @@ using Gaudi::Units::GeV;
 //////////////////////////////////////////////////
 
 CaloNoiseCompCondAlg::CaloNoiseCompCondAlg(const std::string& name, ISvcLocator* pSvcLocator):
-  AthAlgorithm( name, pSvcLocator),
+  AthCondAlgorithm( name, pSvcLocator),
     m_atlas_id(nullptr),
     m_calo_id_man(nullptr),
     m_lar_em_id(nullptr),
@@ -112,10 +112,10 @@ CaloNoiseCompCondAlg::initialize() {
 //////////////////////////////////////////////////
 
 StatusCode 
-CaloNoiseCompCondAlg::execute() {
-   
-   const EventContext& ctx = Gaudi::Hive::currentContext();
+CaloNoiseCompCondAlg::stop() {
 
+   const EventContext& ctx = Gaudi::Hive::currentContext();
+   
    if(m_isSC) {
       SG::ReadCondHandle<CaloSuperCellDetDescrManager> caloSCMgrHandle{m_caloSCMgrKey};
       if(!caloSCMgrHandle.isValid()) {
@@ -276,7 +276,6 @@ CaloNoiseCompCondAlg::initContainers()
   //initialize the maps m_ElecNoiseContainer and m_ScaleContainer 
   //(assuming type of elements of the containers is the same for LAr)
 
-  MsgStream log( msgSvc(), name() );
   ATH_MSG_INFO( "initContainers() begin " );
 
   // intialise indices
@@ -376,7 +375,6 @@ CaloNoiseCompCondAlg::initIndex() {
       }
       else
       {
-        MsgStream log( msgSvc(), name() );
         ATH_MSG_WARNING("CaloNoiseCompCondAlg::chooseIndex  wrong id ! " << m_lar_em_id->show_to_string(id));
         continue ;
       }
@@ -453,7 +451,6 @@ CaloNoiseCompCondAlg::index(const IdentifierHash &idCaloHash)
 StatusCode 
 CaloNoiseCompCondAlg::initData(const LArADC2MeV *adc2mev)
 {
-  MsgStream log( msgSvc(), name() );
 
   StatusCode sc ;
   sc = this->initContainers();
@@ -496,7 +493,6 @@ CaloNoiseCompCondAlg::initData(const LArADC2MeV *adc2mev)
 StatusCode 
 CaloNoiseCompCondAlg::initAdc2MeV(const LArADC2MeV *adc2mev) 
 {
-  MsgStream log( msgSvc(), name() );
   ATH_MSG_INFO( "initAdc2MeV() begin " );
   for (unsigned int it=0; it<m_adc2mevContainer.size(); ++it)
   { 
@@ -580,7 +576,6 @@ CaloNoiseCompCondAlg::initPileUpNoise()
   // initialize the parameters (the same for each event for each Identifier) 
   // for the calculation of the PileUp noise
 
-  MsgStream log( msgSvc(), name() );
   ATH_MSG_DEBUG( "initPileUpNoise() begin " );
   ATH_MSG_INFO( "N events of Minimum Bias per bunch crossing =  " << m_Nminbias);
   //::::::::::::::::::::::::::::::::::::::
@@ -661,7 +656,6 @@ E=SUMi { OFCi * (short[ (PulseShapei*Ehit/Adc2MeV(gain) + Noisei(gain)
       {
         sigma=-std::sqrt(-sigma);
         //:::::::::::::::::
-        //      MsgStream log(msgSvc(), name());
         //      if(igain==0) log << MSG::ERROR 
         //	  <<m_lar_em_id->show_to_string(id)<<" gain "<<igain
         //	  <<" : negative root square => WRONG noise "
@@ -974,13 +968,11 @@ CaloNoiseCompCondAlg::checkCellDatabase(const Identifier & id, int igain, std::v
   {
     if (!m_Shape.valid()) 
     {
-      MsgStream log(msgSvc(), name());
       ATH_MSG_WARNING( "  Shape pointer null -> PileUp will be 0 for " <<m_lar_em_id->show_to_string(id) );
       StatusDatabase=StatusCode::FAILURE;
     }
     if (m_Shape.size()==0) 
     {      
-      //      MsgStream log(msgSvc(), name());
       //      log<<MSG::WARNING
       //       <<"  Shape vector empty -> PileUp will be 0 for "
       //       <<m_lar_em_id->show_to_string(id)<<endreq;
@@ -1004,7 +996,6 @@ CaloNoiseCompCondAlg::checkCellDatabase(const Identifier & id, int igain, std::v
      && m_OFC.size()!=m_AutoCorr.size()+1)
   {
     m_nsamples=std::min(m_OFC.size(),m_AutoCorr.size()+1);
-    MsgStream log( msgSvc(), name() );
     ATH_MSG_DEBUG( "AutoCorr and OFC vectors have not the same " <<"number of elements" <<" ("<<m_AutoCorr.size()<<"/"<<m_OFC.size() <<" ) => will take into account only " << m_nsamples << " samples !" );
   }
 
@@ -1024,7 +1015,6 @@ CaloNoiseCompCondAlg::checkCellDatabase(const Identifier & id, int igain, std::v
   {
     if (m_fSampl<0.000001) 
     {
-      MsgStream log(msgSvc(), name());
       ATH_MSG_WARNING("  fSampl null -> PileUp will be 0 for " <<m_lar_em_id->show_to_string(id) );
       StatusDatabase=StatusCode::FAILURE;
     }
@@ -1092,14 +1082,12 @@ CaloNoiseCompCondAlg::elecNoiseRMS(const CaloDetDescrElement* caloDDE,
   } 
 
   if (gain==CaloGain::INVALIDGAIN || gain==CaloGain::UNKNOWNGAIN) {
-    MsgStream log( msgSvc(), name() );
     ATH_MSG_WARNING( " ask noise for invalid/unknown gain, will return noise for high gain " );
     igain=static_cast<int>(CaloGain::LARHIGHGAIN);
   }
 
   if (iCalo<0 || index<0)
   {
-    MsgStream log(msgSvc(), name());
     ATH_MSG_WARNING( "CaloNoiseCompCondAlg::elecNoiseRMS  wrong id ! " << "iCalo="<<iCalo << "index="<<index << "id:" << m_lar_em_id->show_to_string(caloDDE->identify()) );
     return 0.;
   } 
@@ -1128,7 +1116,6 @@ CaloNoiseCompCondAlg::elecNoiseRMS(const CaloDetDescrElement* caloDDE,
       {
 	++shift_gain;
 	if(shift_gain<=igain) retry=true;
-	MsgStream log(msgSvc(), name());
 	ATH_MSG_WARNING( "noise is missing for this cell " << m_lar_em_id->show_to_string(caloDDE->identify()) << " at this gain (" <<gain_wanted<<"), return the noise at next gain (" <<gain_shifted<<")" );
       }
       //:::::::::::::::::
@@ -1287,7 +1274,6 @@ CaloNoiseCompCondAlg::adc2mev(const CaloDetDescrElement* caloDDE,
   else if(iCalo==CaloCell_ID::TILE)
   {
     //TILE_PART
-    MsgStream log( msgSvc(), name() );
     ATH_MSG_WARNING("CaloNoiseCompCondAlg::adc2mev(id,gain) : NOT IMPLEMENTED !" <<"for TILE (-> returns 1. for the moment)" );    
     factor=1.; 
   }  

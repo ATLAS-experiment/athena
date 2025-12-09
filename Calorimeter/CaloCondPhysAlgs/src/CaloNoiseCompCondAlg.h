@@ -11,7 +11,7 @@
 #ifndef CALOCONDPHYSALGS_CaloNoiseCompCondAlg_H
 #define CALOCONDPHYSALGS_CaloNoiseCompCondAlg_H
 
-#include "AthenaBaseComps/AthAlgorithm.h"
+#include "AthenaBaseComps/AthCondAlgorithm.h"
 #include "CaloDetDescr/CaloDetDescrManager.h" //read handle
 #include "CaloIdentifier/CaloCell_ID.h" //use of enum in namespace
 #include "CaloConditions/CaloNoise.h" //write handle
@@ -57,7 +57,7 @@ enum CaloNumbers {
 
 namespace CLHEP { class HepRandomEngine; }
 
-class CaloNoiseCompCondAlg: public AthAlgorithm {
+class CaloNoiseCompCondAlg: public AthCondAlgorithm {
 
    public:
 
@@ -69,9 +69,12 @@ class CaloNoiseCompCondAlg: public AthAlgorithm {
     /** standard Athena-Algorithm method */
     virtual StatusCode          initialize() override final;
     /** standard Athena-Algorithm method */
-    virtual StatusCode          execute() override final;
+    virtual StatusCode          execute(const EventContext& /*ctx*/) const override final {return StatusCode::SUCCESS;};
     /** standard Athena-Algorithm method */
     virtual StatusCode          finalize() override final {return StatusCode::SUCCESS;};
+ 
+    // all the meat is here:
+    virtual StatusCode          stop() override final;
 
     //-------------- user interfaces ------------------------------------------
     // Note on NMinBias : if you use the interface without it or if you take -1, 
@@ -295,7 +298,7 @@ class CaloNoiseCompCondAlg: public AthAlgorithm {
       calculatePileUpNoise(const IdentifierHash &idCaloHash,
           		 const float &Nminbias);
  
-    using AthAlgorithm::index;
+    using AthCondAlgorithm::index;
     int  index(const IdentifierHash &idCaloHash);
 
     CaloCell_ID::SUBCALO caloNum(const IdentifierHash idCaloHash);  
