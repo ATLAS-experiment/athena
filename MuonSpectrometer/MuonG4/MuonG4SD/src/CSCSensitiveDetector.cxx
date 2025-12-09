@@ -212,11 +212,14 @@ G4bool CSCSensitiveDetector::ProcessHits(G4Step* aStep,G4TouchableHistory* /*ROH
   /** construct the hit identifier */
   HitID CSCid = m_muonHelper->BuildCscHitId(stationName, stationPhi,
                                           stationEta, multiLayer, wireLayer);
-
+  EventContext const* eventContext{nullptr};
+  if(auto* eventInfo = AtlasG4EventUserInfo::GetEventUserInfo()){
+    eventContext = &eventInfo->GetEventContext();
+  }
   /** insert hit in collection */
   m_myCSCHitColl->Emplace(CSCid, globalTime, energyDeposit,
                           HitStart, HitEnd, lundcode,
-                          trHelp.GenerateParticleLink(), kinEnergy);
+                          eventContext ? trHelp.GenerateParticleLink(*eventContext) : trHelp.GenerateParticleLink(),kinEnergy);
 
   return true;
 }

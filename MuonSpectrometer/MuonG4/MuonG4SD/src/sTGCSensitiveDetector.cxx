@@ -110,8 +110,12 @@ G4bool sTGCSensitiveDetector::ProcessHits(G4Step* aStep,G4TouchableHistory* /*RO
 
   int sTgcId = m_muonHelper->BuildsTgcHitId(subType, iPhi, iRing, mLayer,nLayer, iSide);
   TrackHelper trHelp(aStep->GetTrack());
+  EventContext const* eventContext{nullptr};
+  if(auto* eventInfo = AtlasG4EventUserInfo::GetEventUserInfo()){
+    eventContext = &eventInfo->GetEventContext();
+  }
   m_sTGCSimHitCollection->Emplace(sTgcId,globalTime,position,pdgCode,direction,depositEnergy,
-                                  trHelp.GenerateParticleLink(),
+                                  eventContext ? trHelp.GenerateParticleLink(*eventContext) : trHelp.GenerateParticleLink(),
                                   preStep->GetKineticEnergy(),preposition);
 
   return true;

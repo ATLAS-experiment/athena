@@ -98,8 +98,13 @@ G4bool MicromegasSensitiveDetector::ProcessHits(G4Step* aStep,G4TouchableHistory
   int MmId = m_muonHelper->BuildMicromegasHitId(subType, iPhi, iRing, mLayer,nLayer, iSide);
  
   TrackHelper trHelp(aStep->GetTrack());
+  EventContext const* eventContext{nullptr};
+  if(auto* eventInfo = AtlasG4EventUserInfo::GetEventUserInfo()){
+    eventContext = &eventInfo->GetEventContext();
+  }
 
-  m_MMSimHitCollection->Emplace(MmId, globalTime,position,pdgCode,eKin,direction,depositEnergy,trHelp.GenerateParticleLink());
+  m_MMSimHitCollection->Emplace(MmId, globalTime,position,pdgCode,eKin,direction,depositEnergy,
+                                eventContext ? trHelp.GenerateParticleLink(*eventContext) : trHelp.GenerateParticleLink());
 
   //    G4cout << "MMs "<<m_muonHelper->GetStationName(MmId)
   // 	            << " "<<m_muonHelper->GetFieldValue("PhiSector")
