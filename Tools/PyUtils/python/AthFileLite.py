@@ -233,7 +233,7 @@ class AthBSFile(object):
                 v = md.split('IOVDbGlobalTag:')[1].strip()
                 bs_metadata[k] = v
             elif '=' in md:
-                k,v = md.split('=')
+                k,v = md.split('=', 1)
                 bs_metadata[k] = v
 
         # for bwd/fwd compat...

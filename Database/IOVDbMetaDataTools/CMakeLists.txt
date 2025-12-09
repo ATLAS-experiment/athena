@@ -3,6 +3,9 @@
 # Declare the package name:
 atlas_subdir( IOVDbMetaDataTools )
 
+# External dependencies:
+find_package( nlohmann_json )
+
 atlas_add_library( IOVDbMetaDataToolsLib
                    INTERFACE
                    PUBLIC_HEADERS IOVDbMetaDataTools
@@ -12,7 +15,7 @@ atlas_add_library( IOVDbMetaDataToolsLib
 atlas_add_component( IOVDbMetaDataTools
                      src/IOVDbMetaDataTool.cxx
                      src/components/*.cxx
-                     LINK_LIBRARIES AthenaBaseComps AthenaKernel  IOVDbDataModel IOVDbMetaDataToolsLib StoreGateLib )
+                     LINK_LIBRARIES AthenaBaseComps AthenaKernel  IOVDbDataModel IOVDbMetaDataToolsLib StoreGateLib nlohmann_json::nlohmann_json )
 
 # Install files from the package:
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
