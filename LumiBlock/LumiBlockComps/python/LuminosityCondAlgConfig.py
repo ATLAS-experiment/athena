@@ -58,10 +58,20 @@ def LuminosityCondAlgCfg (flags, useOnlineLumi=None, suffix=None):
 
 
 def luminosityCondAlgMCCfg (flags, name, result):
-    from DigitizationConfig.DigitizationParametersConfig import readDigitizationParameters
-    result.merge(readDigitizationParameters(flags))
+    from AthenaConfiguration.Enums import Format
+
+    # Only read digitization parameters from conditions DB if NOT ByteStream input
+    # For ByteStream input, the metadata will be read from BS metadata instead
+    if flags.Input.Format != Format.BS:
+        from DigitizationConfig.DigitizationParametersConfig import readDigitizationParameters
+        result.merge(readDigitizationParameters(flags))
+        digitizationFolderKey = '/Digitization/Parameters'
+    else:
+        # For ByteStream input, don't use conditions folder - will read from BS metadata
+        digitizationFolderKey = ''
+
     return { 'LuminosityFolderInputKey' : '',
-             'DigitizationFolderInputKey' : '/Digitization/Parameters',
+             'DigitizationFolderInputKey' : digitizationFolderKey,
              'OnlineLumiCalibrationInputKey' : '',
              'BunchLumisInputKey' : '',
              'BunchGroupInputKey' : '',

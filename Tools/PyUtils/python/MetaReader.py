@@ -537,7 +537,7 @@ def read_metadata(filenames, file_type = None, mode = 'lite', promote = None, me
                         bs_metadata[k] = v
 
                     elif '=' in md:
-                        k, v = md.split('=')
+                        k, v = md.split('=', 1)  # Split on first '=' only
                         bs_metadata[k] = v
 
                 bs_metadata['detectorMask'] = getattr(data_reader, 'detectorMask')()

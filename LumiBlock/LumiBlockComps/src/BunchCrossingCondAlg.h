@@ -22,6 +22,8 @@
 #include "TrigConfInterfaces/ILVL1ConfigSvc.h"
 #include "LumiBlockData/LuminosityCondData.h"
 #include "TrigConfData/L1BunchGroupSet.h"
+#include "ByteStreamData/ByteStreamMetadataContainer.h"
+#include "StoreGate/ReadHandleKey.h"
 
 /**
  * @brief Conditions algorithm to unpack fill parameters from COOL.
@@ -49,6 +51,11 @@ private:
   SG::ReadCondHandleKey<AthenaAttributeList> m_fillParamsFolderKey{ this, "FillParamsFolderKey", "/TDAQ/OLC/LHC/FILLPARAMS", "" };
   SG::ReadCondHandleKey<LuminosityCondData> m_lumiCondDataKey{this, "LumiCondData", "LuminosityCondData", "Lumi cond data key"};
   SG::ReadCondHandleKey<TrigConf::L1BunchGroupSet> m_bunchGroupCondDataKey{this, "L1BunchGroupCondData", "L1BunchGroup", "Bunch group cond data key"};
+
+  /// ByteStream metadata (for reading IOV metadata from BS files in MC mode)
+  SG::ReadHandleKey<ByteStreamMetadataContainer> m_byteStreamMetadataKey
+  { this, "ByteStreamMetadataKey", "",
+    "ByteStream metadata (for reading IOV metadata from BS files in MC mode)" };
   /// Output conditions object.
   SG::WriteCondHandleKey<BunchCrossingCondData> m_outputKey{this, "OutputKey", "BunchCrossingData", "Key of output CDO" };
 

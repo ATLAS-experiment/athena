@@ -12,10 +12,13 @@
 #include "LuminosityCondAlg.h"
 #include "AthenaPoolUtilities/CondAttrListCollection.h"
 #include "StoreGate/ReadCondHandle.h"
+#include "StoreGate/ReadHandle.h"
 #include "StoreGate/WriteCondHandle.h"
 #include "CoolKernel/IObject.h"
 #include "AthenaKernel/IOVInfiniteRange.h"
 #include "CxxUtils/get_unaligned.h"
+#include "ByteStreamData/ByteStreamMetadata.h"
+#include <nlohmann/json.hpp>
 #include <sstream>
 
 
@@ -62,8 +65,11 @@ LuminosityCondAlg::initialize()
   ATH_CHECK( m_onlineLumiCalibrationInputKey.initialize(!m_isMC) );
   ATH_CHECK( m_luminosityFolderInputKey.initialize(!m_isMC) );
 
-  // May be empty if configured for data.
-  ATH_CHECK( m_mcDigitizationInputKey.initialize(m_isMC) );
+  // May be empty if configured for data, or for MC ByteStream (will use BS metadata instead).
+  ATH_CHECK( m_mcDigitizationInputKey.initialize(m_isMC && !m_mcDigitizationInputKey.empty()) );
+  // ByteStream metadata is only used in MC mode, but we initialize with AllowEmpty always
+  // since the code may try to access it. For data mode, it will just be unused.
+  ATH_CHECK( m_byteStreamMetadataKey.initialize(SG::AllowEmpty) );
   ATH_CHECK( m_eventInfoKey.initialize(m_isMC) );
   ATH_CHECK( m_actualMuKey.initialize(m_isMC) );
   ATH_CHECK( m_averageMuKey.initialize(m_isMC) );
@@ -102,15 +108,80 @@ LuminosityCondAlg::execute (const EventContext& ctx) const
                                      eventinfo->timeStampNSOffset(),
                                      eventinfo->lumiBlock()+1));
 
-
-    SG::ReadCondHandle<AthenaAttributeList> digitizationFolder(m_mcDigitizationInputKey, ctx);
     luminosityCondData.addDependency(range);
-    
+
     const float avgMu = eventinfo->averageInteractionsPerCrossing();
-    const auto& attr = (**digitizationFolder)[std::string("BeamIntensityPattern")];
-    const std::string& sbunches = attr.data<std::string>();
+    std::string sbunches;
+
+    // Try to read from digitization folder first (traditional source for POOL files)
+    bool foundInDigitization = false;
+
+    if (!m_mcDigitizationInputKey.empty()) {
+      SG::ReadCondHandle<AthenaAttributeList> digitizationFolder(m_mcDigitizationInputKey, ctx);
+
+      if (digitizationFolder.isValid()) {
+        try {
+          const auto& attr = (**digitizationFolder)[std::string("BeamIntensityPattern")];
+          sbunches = attr.data<std::string>();
+          foundInDigitization = true;
+          ATH_MSG_DEBUG("Read BeamIntensityPattern from Digitization folder");
+        } catch (const std::exception& e) {
+          ATH_MSG_DEBUG("Could not read from Digitization folder: " << e.what());
+        }
+      }
+    }
+
+    // Fall back to ByteStream metadata if not found in digitization folder
+    if (!foundInDigitization) {
+      SG::ReadHandle<ByteStreamMetadataContainer> bsMetadata(m_byteStreamMetadataKey, ctx);
+
+      if (bsMetadata.isValid() && !bsMetadata->empty()) {
+        const ByteStreamMetadata* metadata = bsMetadata->at(0);
+        const std::vector<std::string>& freeStrings = metadata->getFreeMetaDataStrings();
+
+        // Look for IOVMeta./Digitization/Parameters= in freeMetaDataStrings
+        for (const std::string& str : freeStrings) {
+          if (str.find("IOVMeta./Digitization/Parameters=") == 0) {
+            // Extract JSON string after the '=' sign
+            size_t eqPos = str.find('=');
+            if (eqPos != std::string::npos && eqPos + 1 < str.size()) {
+              std::string jsonStr = str.substr(eqPos + 1);
+
+              try {
+                nlohmann::json iovMetadata = nlohmann::json::parse(jsonStr);
+
+                // Extract BeamIntensityPattern from the JSON
+                // The JSON structure is: {"iovs": [{"attrs": {"chan65535": {"BeamIntensityPattern": "..."}}}]}
+                if (iovMetadata.contains("iovs") && iovMetadata["iovs"].is_array() && !iovMetadata["iovs"].empty()) {
+                  const auto& firstIov = iovMetadata["iovs"][0];
+                  if (firstIov.contains("attrs")) {
+                    // Look through all channels for BeamIntensityPattern
+                    for (const auto& chanItem : firstIov["attrs"].items()) {
+                      const auto& chanAttrs = chanItem.value();
+                      if (chanAttrs.contains("BeamIntensityPattern")) {
+                        sbunches = chanAttrs["BeamIntensityPattern"].get<std::string>();
+                        ATH_MSG_INFO("Read BeamIntensityPattern from ByteStream metadata");
+                        break;
+                      }
+                    }
+                    if (!sbunches.empty()) break;
+                  }
+                }
+              } catch (const std::exception& e) {
+                ATH_MSG_WARNING("Failed to parse IOV metadata from ByteStream: " << e.what());
+              }
+            }
+          }
+        }
+      }
+
+      if (sbunches.empty()) {
+        ATH_MSG_ERROR("Could not read BeamIntensityPattern from either Digitization folder or ByteStream metadata");
+      }
+    }
+
     std::vector<float> bunchpattern = tokenize(sbunches);
-    
+
     if (bunchpattern.size() != LuminosityCondData::TOTAL_LHC_BCIDS) {
       ATH_MSG_ERROR("Decoding MC bunch structure failed, improper number of LHC BCIDs");
       bunchpattern = std::vector<float>(LuminosityCondData::TOTAL_LHC_BCIDS, 1.);
