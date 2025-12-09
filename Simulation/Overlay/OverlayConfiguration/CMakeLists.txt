@@ -7,7 +7,7 @@ atlas_subdir( OverlayConfiguration )
 atlas_install_python_modules( python/*.py
                               POST_BUILD_CMD ${ATLAS_FLAKE8} )
 
-atlas_install_runtime( scripts/*.py test/OverlayTest.py
+atlas_install_scripts( scripts/*.py test/OverlayTest.py
                        POST_BUILD_CMD ${ATLAS_FLAKE8} )
 
 # Setup and run tests
