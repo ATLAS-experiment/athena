@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 __author__ = "Will Buttinger"
 __doc__ = """
@@ -10,7 +11,6 @@ Example: checkPRW.py --outPRWFile=my.prw.root --inDsTxt=my.datasets.txt  path/to
 """
 import argparse
 import os
-import pyAMI
 import re
 
 def main():
@@ -131,7 +131,7 @@ def main():
     for dsid,nevents in aodDatasets.items():
       #get the sum of weights from the tool
       
-      total=0;
+      total=0
       for p in periodNumbers:
         if p==-1: continue
         hist = out.GetInputHistogram(int(dsid),p)
@@ -150,8 +150,8 @@ def main():
       
     
     if args.outPRWFile:
-        out.Initialize();
-        out.WriteToFile(args.outPRWFile);
+        out.Initialize()
+        out.WriteToFile(args.outPRWFile)
     
     
     return 0

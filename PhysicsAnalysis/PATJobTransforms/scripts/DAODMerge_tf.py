@@ -1,6 +1,6 @@
 #! /usr/bin/env python
 
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 ## DAODMerge_tf.py - Dervied AOD merger capable of merging different flavours
 #  of DAOD in the one job
@@ -11,7 +11,7 @@ import time
 
 # Setup core logging here
 from PyJobTransforms.trfLogger import msg
-msg.info('logging set in %s' % sys.argv[0])
+msg.info('logging set in %s', sys.argv[0])
 
 from PyJobTransforms.transform import transform
 from PyJobTransforms.trfArgs import addAthenaArguments, addDetectorArguments
@@ -26,14 +26,14 @@ ListOfDefaultPositionalKeys=['--AMIConfig', '--AMITag', '--DBRelease', '--argJSO
 @sigUsrStackTrace
 def main():
     
-    msg.info('This is %s' % sys.argv[0])
+    msg.info('This is %s', sys.argv[0])
 
     trf = getTransform()
     trf.parseCmdLineArgs(sys.argv[1:])
     trf.execute()
     trf.generateReport()
 
-    msg.info("%s stopped at %s, trf exit code %d" % (sys.argv[0], time.asctime(), trf.exitCode))
+    msg.info("%s stopped at %s, trf exit code %d", sys.argv[0], time.asctime(), trf.exitCode)
     sys.exit(trf.exitCode)
 
 def getTransform():
