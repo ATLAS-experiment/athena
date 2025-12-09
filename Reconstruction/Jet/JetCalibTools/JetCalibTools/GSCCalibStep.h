@@ -10,22 +10,20 @@
 #ifndef JETCALIBTOOLS_GSCCALIBSTEP_H
 #define JETCALIBTOOLS_GSCCALIBSTEP_H 1
 
-#include <string.h>
-
-#include <TString.h>
-#include <TEnv.h>
+#include <string>
 
 #include "AsgTools/AsgTool.h"
 #include "AsgTools/AsgToolMacros.h"
 #include "AsgTools/ToolHandle.h"
 #include <AsgTools/PropertyWrapper.h>
 
-#include "xAODEventInfo/EventInfo.h"
+#include "AsgDataHandles/ReadDecorHandle.h"
+#include "AsgDataHandles/ReadHandleKey.h"
 
-#include "JetAnalysisInterfaces/IJetCalibTool.h"
 #include "JetAnalysisInterfaces/IJetCalibStep.h"
 #include "JetAnalysisInterfaces/IVarTool.h"
-#include "JetToolHelpers/InputVariable.h"
+
+#include "xAODTracking/VertexContainer.h"
 
 class GSCCalibStep
   : public asg::AsgTool,
@@ -51,13 +49,22 @@ private:
   ToolHandleArray<JetHelper::IVarTool> m_histTool_nTrk = {this , "histTool_nTrk", {}, "nTrk histo reader" };
   ToolHandleArray<JetHelper::IVarTool> m_histTool_trackWIDTH = {this , "histTool_trackWIDTH", {}, "trackWIDTH histo reader" };
 
+  /// Properties for the punch-through correction:
+  Gaudi::Property<bool> m_applyPunchThrough {this, "applyPunchThrough", false, "Boolean to turn on punch-through corretion"};
+  Gaudi::Property<std::vector<double>> m_punchThroughEtaBins {this, "PunchThroughEtaBins", {}, "Eta bins for punch through correction"};
+  Gaudi::Property<float> m_punchThroughMinPt{ this, "punchThroughMinPt", 50000., "Threshold for punch-through correction"};
 
+  /// Functions for retrieving the correction factors
   float getChargedFractionResponse(const xAOD::Jet& jet, const JetHelper::JetContext& jc, uint etabin) const;
   float getTile0Response(const xAOD::Jet& jet, const JetHelper::JetContext& jc, uint etabin) const;
   float getEM3Response(const xAOD::Jet& jet, const JetHelper::JetContext& jc, uint etabin) const;
   float getPunchThroughResponse(const xAOD::Jet& jet, const JetHelper::JetContext& jc, double eta_det) const;
   float getNTrkResponse(const xAOD::Jet& jet, const JetHelper::JetContext& jc, uint etabin) const;
   float getTrackWIDTHResponse(const xAOD::Jet& jet, const JetHelper::JetContext& jc, uint etabin) const;
+
+  /// Retrieve hard scatter vertex for its index. Return nullptr if one cannot be found
+  const xAOD::Vertex *findHSVertex(const xAOD::VertexContainer& vertices) const;
+  SG::ReadHandleKey<xAOD::VertexContainer> m_vertexContainer_key{this, "VertexContainer", "PrimaryVertices", "SG key for input vertex container"};
 
 }; 
 
