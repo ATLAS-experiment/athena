@@ -979,7 +979,7 @@ the
 repository in GIT. To keep the repo tidy, we follow a
 fork-and-merge-upstream model like athena; you can follow the
 [instructions
-here](https://atlassoftwaredocs.web.cern.ch/athena/git/gitlab-fork/).
+here](https://atlas-software.docs.cern.ch/athena/git/gitlab-fork/).
 Note that every model needs a corresponding info `.txt` file. These
 should include a link to the model, a description, and links to the
 relevant websites or papers describing the model. Please include the
