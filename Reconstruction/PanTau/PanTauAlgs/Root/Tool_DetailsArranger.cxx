@@ -26,7 +26,7 @@ StatusCode PanTau::Tool_DetailsArranger::initialize() {
   ATH_CHECK( HelperFunctions::bindToolHandle( m_Tool_InformationStore, m_Tool_InformationStoreName ) );
     
   ATH_CHECK( m_Tool_InformationStore->getInfo_Double("TauConstituents_Types_DeltaRCore",                      m_CoreCone) );
-  ATH_CHECK( m_Tool_InformationStore->getInfo_VecDouble("TauConstituents_BinEdges_Eta",                       m_EtaBinEdges) );
+  ATH_CHECK( m_Tool_InformationStore->getInfo_VecDouble("Common_BinEdges_Eta",                       m_EtaBinEdges) );
   ATH_CHECK( m_Tool_InformationStore->getInfo_VecDouble("TauConstituents_Selection_Neutral_EtaBinned_EtCut",  m_EtaBinnedEtCuts) );
   ATH_CHECK( m_Tool_InformationStore->getInfo_String("FeatureExtractor_VarTypeName_varTypeName_Ratio",        m_varTypeName_Ratio) );
   ATH_CHECK( m_Tool_InformationStore->getInfo_String("FeatureExtractor_VarTypeName_varTypeName_Mean",         m_varTypeName_Mean) );

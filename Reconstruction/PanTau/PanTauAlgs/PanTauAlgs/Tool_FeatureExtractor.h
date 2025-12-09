@@ -76,7 +76,7 @@ namespace PanTau {
         
         
         //! Helper members
-        std::vector<double> m_Config_CellBased_BinEdges_Eta;
+        std::vector<double> m_Config_BinEdges_Eta;
         std::vector<double> m_Config_CellBased_EtaBinned_Pi0MVACut_1prong;
         std::vector<double> m_Config_CellBased_EtaBinned_Pi0MVACut_3prong;
         

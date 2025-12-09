@@ -45,7 +45,7 @@ StatusCode PanTau::Tool_FeatureExtractor::initialize() {
     
   ATH_CHECK( m_Tool_InformationStore->getInfo_Int("FeatureExtractor_UseEmptySeeds",                           m_Config_UseEmptySeeds) );
     
-  ATH_CHECK( m_Tool_InformationStore->getInfo_VecDouble("CellBased_BinEdges_Eta",               m_Config_CellBased_BinEdges_Eta) );
+  ATH_CHECK( m_Tool_InformationStore->getInfo_VecDouble("Common_BinEdges_Eta",               m_Config_BinEdges_Eta) );
   ATH_CHECK( m_Tool_InformationStore->getInfo_VecDouble("CellBased_EtaBinned_Pi0MVACut_1prong", m_Config_CellBased_EtaBinned_Pi0MVACut_1prong) );
   ATH_CHECK( m_Tool_InformationStore->getInfo_VecDouble("CellBased_EtaBinned_Pi0MVACut_3prong", m_Config_CellBased_EtaBinned_Pi0MVACut_3prong) );
     
@@ -325,7 +325,7 @@ StatusCode PanTau::Tool_FeatureExtractor::calculateFeatures(PanTau::PanTauSeed* 
     if(tauConstituentType != PanTau::TauConstituent::t_Charged) {
       double mvaCorrection = 0.0;
       double  etaCurConst = list_TypeConstituents_SortBDT[iTypeConst]->p4().Eta();
-      int     etaBinIndex = m_HelperFunctions.getBinIndex(m_Config_CellBased_BinEdges_Eta, std::abs(etaCurConst));
+      int     etaBinIndex = m_HelperFunctions.getBinIndex(m_Config_BinEdges_Eta, std::abs(etaCurConst));
       int     numTrack    = inSeed->getTauJet()->nTracks();
       if(numTrack == 1) { mvaCorrection = m_Config_CellBased_EtaBinned_Pi0MVACut_1prong.at(etaBinIndex); }
       else              { mvaCorrection = m_Config_CellBased_EtaBinned_Pi0MVACut_3prong.at(etaBinIndex); }
