@@ -34,7 +34,7 @@ to get the most up-to date nightly or
 ```
 asetup Athena,22.0.104
 ``` 
-to get a stable release. Recent releases can be found [like this](https://gitlab.cern.ch/atlas/athena/-/tags?sort=updated_desc&search=release) and the search will filter by name. Release numbering is explained [here](https://atlassoftwaredocs.web.cern.ch/athena/athena-releases/).
+to get a stable release. Recent releases can be found [like this](https://gitlab.cern.ch/atlas/athena/-/tags?sort=updated_desc&search=release) and the search will filter by name. Release numbering is explained [here](https://atlas-software.docs.cern.ch/athena/developers/releases/).
 
 An athena release is always needed, regardless of the running mode. 
 
@@ -145,7 +145,7 @@ You may wish to add additional functionality to the package or change histogram 
 Such changes require a `local working copy` of the package to implement the changes.
 ## Obtaining a working copy
 
-Please follow the [ATLAS GitLab workflow tutorial](https://atlassoftwaredocs.web.cern.ch/gittutorial/git-clone/) for detailed instructions on how to get such a copy - both sparse checkouts and full checkouts with package filters are supported. 
+Please follow the [ATLAS GitLab workflow tutorial](https://atlas-software.docs.cern.ch/athena/git/) for detailed instructions on how to get such a copy - both sparse checkouts and full checkouts with package filters are supported. 
 
 So, for example: 
 1. Create an (empty) sparse checkout: 
@@ -180,7 +180,7 @@ A quick pointer around the package:
 ## Testing your changes 
 Now, you need to compile your changes.
 
-This is done using the standard ATLAS build procedure with cmake, see for example [the gitlab tutorial](https://atlassoftwaredocs.web.cern.ch/gittutorial/branch-and-change/) for details. 
+This is done using the standard ATLAS build procedure with cmake, see for example [the gitlab tutorial](https://atlas-software.docs.cern.ch/athena/git/develop/) for details. 
 
 For a full checkout, this could look like: 
 ```
@@ -194,4 +194,4 @@ cd -
 In addition to just test-running the code, we recommend to also run the unit tests provided with the package when you have made changes. You can do this by typing `ctest` in the build folder after having compiled. 
 
 ## Making a merge request
-If you have made a modification that may be useful to more users, please consider [making a merge request](https://atlassoftwaredocs.web.cern.ch/gittutorial/merge-request/) into `main` to share your work with others!
+If you have made a modification that may be useful to more users, please consider [making a merge request](https://atlas-software.docs.cern.ch/athena/git/merge-request/) into `main` to share your work with others!

@@ -19,7 +19,7 @@ setupATLAS
 lsetup git
 ```
 ### Sparse Checkout
-Fork the repository, more details see the [ATLAS tutorial](https://atlassoftwaredocs.web.cern.ch/gittutorial/gitlab-fork/).
+Fork the repository, more details see the [ATLAS tutorial](https://atlas-software.docs.cern.ch/athena/git/).
 Athena is a large framework, very often you want to checkout a few packages to work on instead of a full checkout. 
 To do the sparse checkout and add a specific package in Athena:
 ```
@@ -84,7 +84,7 @@ Private and protected data members of classes must begin with "m_":
 - no other variables should begin with "m_"
 - Don't define variable names start with an "_" or have "__" in them   
 
-All output should happen through an ATH_MSG_(DEBUG/VERBOSE/INFO/WARNING/ERROR/FATAL), more details see [Message Services](https://atlassoftwaredocs.web.cern.ch/ABtutorial/basic_messaging/).
+All output should happen through an ATH_MSG_(DEBUG/VERBOSE/INFO/WARNING/ERROR/FATAL), more details see [Message Services](https://atlas-software.docs.cern.ch/analysis/analysis_tutorial/AnalysisSWTutorial/basic_messaging/).
 
 ## Cabling Services
 The [TgcRawData](https://gitlab.cern.ch/atlas/athena/-/blob/main/MuonSpectrometer/MuonRDO/MuonRDO/TgcRawData.h) 

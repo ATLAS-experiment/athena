@@ -9,7 +9,7 @@
  *
  * @brief This class is a general container which can hold objects of
  * accessed by an IdentifierHash
- * For more information for the use of this class see https://atlassoftwaredocs.web.cern.ch/guides/trigger/idc/
+ * For more information for the use of this class see https://atlas-software.docs.cern.ch/athena/trigger/developers/idc
  *
  * @author A E Barton <abarton@cern.ch>
  *
