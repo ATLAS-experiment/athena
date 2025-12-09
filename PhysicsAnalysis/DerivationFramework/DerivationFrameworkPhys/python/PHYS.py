@@ -135,7 +135,9 @@ def PHYSCoreCfg(flags, name_tag='PHYS', StreamName='StreamDAOD_PHYS', TriggerLis
                                               "TauJets.dRmax.etOverPtLeadTrk",
                                               "TauJets_MuonRM.dRmax.etOverPtLeadTrk",
                                               "HLT_xAOD__TrigMissingETContainer_TrigEFMissingET.ex.ey",
-                                              "HLT_xAOD__TrigMissingETContainer_TrigEFMissingET_mht.ex.ey"]
+                                              "HLT_xAOD__TrigMissingETContainer_TrigEFMissingET_mht.ex.ey",
+                                              "HLT_AnomDet_ComboHypo.adScore"]
+
     if addExtraVariables:
         PHYSSlimmingHelper.ExtraVariables += addExtraVariables
 
