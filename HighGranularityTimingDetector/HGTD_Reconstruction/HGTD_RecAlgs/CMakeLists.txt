@@ -1,10 +1,10 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( HGTD_RecAlgs )
 
-find_package( ROOT COMPONENTS TMVA )
 find_package( Acts COMPONENTS Core )
+find_package( ROOT COMPONENTS TMVA )
 
 # Component(s) in the package:
 atlas_add_component( HGTD_RecAlgs
