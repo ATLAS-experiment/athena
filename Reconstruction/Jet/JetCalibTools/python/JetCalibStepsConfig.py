@@ -111,6 +111,20 @@ def etajesStep(flags, **configDic):
                                           )
     return jesstep
 
+def jmsStep(flags, **configDic):
+
+    histoParams = configDic.pop('histoParams')
+    histoParams['inputFile'] = PathResolver.FindCalibFile(configDic.pop('HistoFile'))
+
+    configDic["histoReaderJMS"] = HistoInputCfg(flags, "HistToolJMS", **histoParams)
+    configDic['varToolX'] = VarToolCfg(flags, var=histoParams['varX'], Tname="VarToolX_JMS")
+    configDic['varToolZ'] = VarToolCfg(flags, var=histoParams['varZ'], Tname="VarToolZ_JMS")
+
+    jmsstep = CompFactory.JMSCalibStep("JMSCalib",
+                                       **configDic
+                                       )
+    return jmsstep
+
 def insituStep(flags, **configDic):
 
     histEtaInterCalib = configDic.pop('histEtaInterCalib')
@@ -138,6 +152,7 @@ calibStepDic = dict(
     JetArea = None,
     Residual = puresidualStep,
     EtaJES = etajesStep,
+    JMS = jmsStep,
     GSC = gscStep,
     Insitu = insituStep,
     Smear = smearingStep,
