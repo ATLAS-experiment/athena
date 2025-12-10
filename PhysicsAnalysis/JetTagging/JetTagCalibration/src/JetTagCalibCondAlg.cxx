@@ -476,8 +476,8 @@ namespace Analysis {
       ATH_MSG_DEBUG( "#BTAG# registrating tagger "<< m_taggers[i]);
       std::vector<std::string> histnames = m_taggersHists[i];
       for(unsigned int h=0; h<histnames.size(); ++h){
-	std::string hname = histnames[h];
-	for(uint j=0;j<mappedAlias.size();j++) {
+	      std::string hname = histnames[h];
+	      for(uint j=0;j<mappedAlias.size();j++) {
           std::string fname = writeCdo->fullHistoName(mappedAlias[j],hname);
           ATH_MSG_DEBUG( "#BTAG# Retrieving " << tagger <<":"<< fname );
           std::string channel = writeCdo->channelName(fname);
@@ -492,6 +492,10 @@ namespace Analysis {
             if (tagger.find("DL1")!=std::string::npos ) {
               ATH_MSG_DEBUG("#BTAG# Build DL1 NN config for tagger " << tagger << " and jet collection " << channel << " and write it in condition data");
               TObjString* cal_string = dynamic_cast<TObjString*>(hPointer.get());
+              if (not cal_string) {
+                ATH_MSG_WARNING("JetTagCalibCondAlg::execute: hPointer cannot be cast to TObjString");
+                continue;
+              }
               std::istringstream nn_config_sstream(cal_string->GetString().Data());
               lwt::JSONConfig nn_config = lwt::parse_json(nn_config_sstream);
               ATH_MSG_DEBUG("#BTAG# Layers size << " << nn_config.layers.size());
@@ -546,6 +550,7 @@ namespace Analysis {
                   continue;
                 }
                 h->SetDirectory(nullptr);
+                //coverity[RESOURCE_LEAK]
                 (void)hPointer.release();
                 if (tagger == "IP2D" || tagger == "IP3D" || tagger == "SV1") {
                   ATH_MSG_VERBOSE("#BTAG# Smoothing histogram " << hname << " ...");
@@ -575,110 +580,93 @@ namespace Analysis {
     return StatusCode::SUCCESS;
   }
  
-  std::vector<std::string> JetTagCalibCondAlg::createHistoMap(TFile* pfile, JetTagCalibCondData * histosCdo) const {
-
+std::vector<std::string> 
+JetTagCalibCondAlg::createHistoMap(TFile* pfile, JetTagCalibCondData * histosCdo) const {
     ATH_MSG_DEBUG("#BTAG# in createHistoMap" );
-    std::vector< std::string > channels;
+    std::vector< std::string > channels(m_originalChannels);
     std::vector< std::string > mappedAlias;
-
-    for(unsigned int j=0; j<m_originalChannels.size(); ++j){
-      channels.push_back(m_originalChannels[j]);
-    }
-
     std::string folder(m_readKey.key());
-    
-
+    //coverity[unreachable:FALSE]
     for(uint i=0;i<m_taggers.size();++i) {
       std::string tagger = m_taggers[i];
-
       for(unsigned int j=0; j<m_originalChannels.size(); ++j){
         /// get all aliases
         std::map<std::string, std::vector<std::string> >::const_iterator ialiaslist
           = m_channelAliasesMultiMap.find(m_originalChannels[j]);
-	if(ialiaslist == m_channelAliasesMultiMap.end()){
-	  ATH_MSG_DEBUG( "#BTAG#  no alias for original channel" << m_originalChannels[j] );
-	  if(!objectTDirExists(tagger+"/"+m_originalChannels[j], pfile)){
-	    ATH_MSG_WARNING( "#BTAG# no calibration for jet collection " << m_originalChannels[j]
-			   << " consider using aliases " );
-	  }
-	  continue;
-	}
-	std::vector<std::string> aliaslist = ialiaslist->second;
-	if(aliaslist.size() == 1){
-	  if("none" == aliaslist[0]){
-	    ATH_MSG_DEBUG("#BTAG#  no alias for original channel" << m_originalChannels[j]);
-				
+	      if(ialiaslist == m_channelAliasesMultiMap.end()){
+	        ATH_MSG_DEBUG( "#BTAG#  no alias for original channel" << m_originalChannels[j] );
+	        if(!objectTDirExists(tagger+"/"+m_originalChannels[j], pfile)){
+	          ATH_MSG_WARNING( "#BTAG# no calibration for jet collection " << m_originalChannels[j]
+			       << " consider using aliases " );
+	        }
+	        continue;
+	      }
+	      std::vector<std::string> aliaslist = ialiaslist->second;
+	      if(aliaslist.size() == 1){
+	        if("none" == aliaslist[0]){
+            ATH_MSG_DEBUG("#BTAG#  no alias for original channel" << m_originalChannels[j]);
             if(objectTDirExists(tagger+"/"+m_originalChannels[j], pfile)){
-	      ATH_MSG_WARNING( "#BTAG# no calibration for jet collection " << m_originalChannels[j]
-				     << " consider using aliases " );
+              ATH_MSG_WARNING( "#BTAG# no calibration for jet collection " << m_originalChannels[j]
+                 << " consider using aliases " );
             }
             continue;
-	  }
-	}
-
-	bool foundalias=false;
-
-	for(unsigned int k=0; k<aliaslist.size(); ++k){
-	  std::string aliasentry = aliaslist[k];
-	  if("none" == aliasentry){
-	    ATH_MSG_DEBUG("#BTAG# first alias entry is none - replace with original channel" 
-				<< m_originalChannels[j] );
-            aliasentry= m_originalChannels[j];
-	  }
-	  /// now see if the jet collection exists in db
-	  std::string hFullName(tagger); 
-	  hFullName+="/"; hFullName+=aliasentry; 
+	        }
+	      }
+	      bool foundalias=false;
+        for(unsigned int k=0; k<aliaslist.size(); ++k){
+          std::string aliasentry = aliaslist[k];
+          if("none" == aliasentry){
+            ATH_MSG_DEBUG("#BTAG# first alias entry is none - replace with original channel" 
+              << m_originalChannels[j] );
+                  aliasentry= m_originalChannels[j];
+          }
+          /// now see if the jet collection exists in db
+          std::string hFullName(tagger); 
+          hFullName+="/"; hFullName+=aliasentry; 
           // Check if jet collection already in channel alias map
           if (std::count(mappedAlias.begin(), mappedAlias.end(), aliasentry) > 0) {
-	    ATH_MSG_DEBUG( "#BTAG# found alias entry in Map " << aliasentry );
+            ATH_MSG_DEBUG( "#BTAG# found alias entry in Map " << aliasentry );
             histosCdo->addChannelAlias(m_originalChannels[j],aliasentry);
             foundalias=true;
             break;
-          }
-          else {
+          } else {
             if (objectTDirExists(hFullName, pfile)) {
-	      ATH_MSG_DEBUG( "#BTAG# found alias entry in DB " << aliasentry );
+	            ATH_MSG_DEBUG( "#BTAG# found alias entry in DB " << aliasentry );
               if("none"!=aliaslist[k]){
-		std::vector<std::string>::const_iterator pos = find(channels.begin(), 
+		            std::vector<std::string>::const_iterator pos = find(channels.begin(), 
 								channels.end(), aliasentry);
-		if(pos==channels.end()) {
-		  ATH_MSG_DEBUG("#BTAG# Alias is pointing to undefined channel: " <<  aliasentry
-				    << ". Adding it to channel list.");
-		  channels.push_back(aliasentry);
-	        }
+                if(pos==channels.end()) {
+                  ATH_MSG_DEBUG("#BTAG# Alias is pointing to undefined channel: " <<  aliasentry
+                          << ". Adding it to channel list.");
+                  channels.push_back(aliasentry);
+                }
                 histosCdo->addChannelAlias(m_originalChannels[j],aliasentry);
                 mappedAlias.push_back(std::move(aliasentry));
-	      }
-	      foundalias=true;
-	      break;
-	    }
-	    else{
-	      ATH_MSG_DEBUG( "#BTAG# no alias entry " << aliasentry 
-		       << " trying next alias ");
-	    }
-	  }
-	}
-	if(!foundalias){
-	  ATH_MSG_WARNING( "#BTAG# none of the aliases exist for jet collection " 
-			 << m_originalChannels[j]);
-	}
-
+	          }
+	          foundalias=true;
+	          break;
+	        } else {
+	          ATH_MSG_DEBUG( "#BTAG# no alias entry " << aliasentry 
+		         << " trying next alias ");
+          }
+        }
       }
-      break ; /// check alias for the first tagger. same jet collections for all taggers for now
-
+      if(!foundalias){
+        ATH_MSG_WARNING( "#BTAG# none of the aliases exist for jet collection " 
+           << m_originalChannels[j]);
+      }
     }
-
-    ATH_MSG_DEBUG( "#BTAG# final registered channels " );
-    for(uint i=0;i<channels.size();++i) {
-      ATH_MSG_DEBUG( "#BTAG# Channel " << channels[i] );
-    }
-
-    //print alias map
-    histosCdo->printAliasesStatus();
-
-    return mappedAlias;
-
+    break ; /// check alias for the first tagger. same jet collections for all taggers for now
   }
+
+  ATH_MSG_DEBUG( "#BTAG# final registered channels " );
+  for(uint i=0;i<channels.size();++i) {
+    ATH_MSG_DEBUG( "#BTAG# Channel " << channels[i] );
+  }
+    //print alias map
+  histosCdo->printAliasesStatus();
+  return mappedAlias;
+}
 
 
 
