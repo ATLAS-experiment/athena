@@ -64,7 +64,6 @@ private:
   int m_sector{};
   TGCRegionType m_region{TGCRegionType::FORWARD};
 
-  ToolHandle<ITGCTriggerDbTool> m_condDbTool;
   TGCArguments* m_tgcArgs{};
 };
 
