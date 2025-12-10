@@ -12,12 +12,6 @@
 <!ENTITY PIXHIT "20">
 <!ENTITY SIHIT "30">
 
-<!-- bins for resolutions -->
-<!ENTITY D0RES "2.00">
-<!ENTITY Z0RES "10.0">
-<!ENTITY PHIRES "0.010">
-<!ENTITY Z0SINRES "1.00">
-
 <!-- Number of tracks vs MU -->
 <!ENTITY EXPMU "260">
 <!ENTITY EXPTRK "3000">
