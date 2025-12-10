@@ -17,7 +17,7 @@
 #include "StoreGate/DataHandle.h"
 #include "CaloUtils/CaloClusterCollectionProcessor.h"
 #include "CaloRecGPU/CaloClusterGPUProcessor.h"
-
+#include "CaloRecUtilities.h"
 #include "AthenaMonitoringKernel/Monitored.h"
 
 #include "CLHEP/Units/SystemOfUnits.h"
@@ -281,45 +281,7 @@ bool CaloGPUClusterAndCellDataMonitor::filter_tool_by_name(const std::string & t
   return m_toolsToCheckFor.count(tool_name) > 0;
 }
 
-namespace
-{
-  ///@class multi_class_holder
-  ///A convenient way to handle a compile-time list of types,
-  ///useful for several metaprogramming techniques...
-  template <class ... Args>
-  struct multi_class_holder
-  {
-    static constexpr size_t size()
-    {
-      return sizeof...(Args);
-    }
-  };
 
-  template <class F, class ... Types, class ... Args>
-  void apply_to_multi_class(F && f, const multi_class_holder<Types...> &, Args && ... args)
-  {
-    size_t i = 0;
-    (std::forward<F>(f)(Types{}, i++, std::forward<Args>(args)...), ...);
-  }
-
-  static float float_unhack(const unsigned int bits)
-  {
-    float res;
-    std::memcpy(&res, &bits, sizeof(float));
-    //In C++20, we should bit-cast. For now, for our platform, works.
-    return res;
-  }
-
-  static double protect_from_zero(const double x)
-  {
-    return x == 0 ? 1e-15 : x;
-  }
-
-  static float protect_from_zero(const float x)
-  {
-    return x == 0 ? 1e-7 : x;
-  }
-}
 
 
 StatusCode CaloGPUClusterAndCellDataMonitor::update_cell_representation(const EventContext &,
