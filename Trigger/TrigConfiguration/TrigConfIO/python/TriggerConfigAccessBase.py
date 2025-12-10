@@ -190,7 +190,7 @@ class ConfigDBLoader(ConfigLoader):
             if not versionTag.startswith(versionTagPrefix):
                 raise RuntimeError( "Tag format error: Trigger schema version tag %s does not start with %s", versionTag, versionTagPrefix) 
 
-            vstr = versionTag[len(versionTagPrefix)]
+            vstr = versionTag[len(versionTagPrefix):]
 
             if not vstr.isdigit():
                 raise RuntimeError( "Invalid argument when interpreting the version part %s of schema tag %s is %s", vstr, versionTag, type(vstr))
