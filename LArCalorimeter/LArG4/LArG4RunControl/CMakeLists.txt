@@ -1,6 +1,4 @@
-################################################################################
-# Package: LArG4RunControl
-################################################################################
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( LArG4RunControl )
@@ -8,11 +6,6 @@ atlas_subdir( LArG4RunControl )
 # External dependencies:
 find_package( CLHEP )
 find_package( ROOT COMPONENTS Core Tree MathCore Hist RIO pthread )
-
-string(REPLACE "-Wl,--as-needed" "" CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS}")
-
-# this line failed automatic conversion in cmt2cmake :
-# macro_prepend LArG4RunControlDict_shlibflags " -lLArG4RunControl "
 
 # Component(s) in the package:
 atlas_add_library( LArG4RunControl
