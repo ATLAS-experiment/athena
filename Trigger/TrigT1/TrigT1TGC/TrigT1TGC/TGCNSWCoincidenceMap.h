@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
  */
 
 #ifndef TGCNSWCoincidenceMap_h
@@ -56,16 +56,16 @@ private:
   std::vector<short int> m_EtaDtheta_CW[N_dEta][N_Dtheta];
   std::vector<short int> m_Offset_Eta;
   std::vector<short int> m_Offset_Phi;
-
-
+  
   std::string m_verName;
-  int m_side;
-  int m_octant;
-  int m_module;
-  int m_sector;
-  TGCRegionType m_region;
+  int m_side{};
+  int m_octant{};
+  int m_module{};
+  int m_sector{};
+  TGCRegionType m_region{TGCRegionType::FORWARD};
 
-  TGCArguments* m_tgcArgs;
+  ToolHandle<ITGCTriggerDbTool> m_condDbTool;
+  TGCArguments* m_tgcArgs{};
 };
 
 

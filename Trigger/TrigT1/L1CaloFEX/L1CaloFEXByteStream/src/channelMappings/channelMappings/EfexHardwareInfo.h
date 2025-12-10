@@ -9,7 +9,7 @@
 class EfexHardwareInfo {
     public:
         //Blank Invalid Constructor
-        EfexHardwareInfo();
+        EfexHardwareInfo() = default;
         //Constructor
         EfexHardwareInfo(const std::string & efexlabel,
                         int fibre,
@@ -29,12 +29,12 @@ class EfexHardwareInfo {
         //Prints
         void            printInfo() const;
     private:
-        bool m_valid;
-        std::string m_efexlabel; 
-        int m_fibre;
-        int m_inputconnector;
-        std::string m_mpodlabel;
-        int m_overlap;
+        bool m_valid{};
+        std::string m_efexlabel{"invalid"}; 
+        int m_fibre{-1};
+        int m_inputconnector{-1};
+        std::string m_mpodlabel{"invalid"};
+        int m_overlap{};
 
 };
 #endif

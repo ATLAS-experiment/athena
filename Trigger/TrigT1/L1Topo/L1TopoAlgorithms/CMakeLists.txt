@@ -12,8 +12,7 @@ include( "cmake/advae2a-build.cmake" )
 
 # Make sure that the executable of the package gets linked against all of its
 # dependencies:
-string( REPLACE "-Wl,--as-needed" "" CMAKE_EXE_LINKER_FLAGS
-   "${CMAKE_EXE_LINKER_FLAGS}" )
+atlas_disable_as_needed()
 
 # Special treatment for xAOD libraries
 if( NOT TRIGCONF_STANDALONE )

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGHLTJETHYPO_PRODUCTGEN_H
@@ -21,7 +21,7 @@ class ProductGen{
  private:
   std::vector<std::size_t> m_ends;
   std::vector<std::size_t> m_counters;
-  std::size_t m_ncounters;
+  std::size_t m_ncounters{};
   bool m_done{true};
   bool atEnd(){return (m_counters == m_ends);}
 };
