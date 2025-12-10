@@ -60,6 +60,8 @@ double finalTauP(const xAOD::TauJet& xTau);
 double tauLeadTrackEta(const xAOD::TauJet& xTau);
 /** return truth match tau pt in GeV (if hadronic truth tau match)*/
 double truthTauPt(const xAOD::TauJet& xTau);
+/** return truth match visible tau pt in GeV (if hadronic truth tau match)*/
+double truthVisTauPt(const xAOD::TauJet& xTau);
 /** return truth match tau eta (if hadronic truth tau match)*/
 double truthTauAbsEta(const xAOD::TauJet& xTau);
 /** return truth decay mode (if hadronic truth tau match)*/
