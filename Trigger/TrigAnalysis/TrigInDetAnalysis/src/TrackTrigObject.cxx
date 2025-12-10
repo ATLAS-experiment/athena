@@ -9,8 +9,13 @@
 
 
 #include "TrigInDetAnalysis/TrackTrigObject.h"
+#include "TrigInDetAnalysis/Track.h"
 
 ClassImp(TrackTrigObject)
+
+TrackTrigObject::TrackTrigObject() :
+m_eta(0), m_phi(0), m_pt(0), m_z0(0), m_type(), m_id(0)
+{ }
 
 TrackTrigObject::TrackTrigObject(double eta, double phi, double pt, double z0, 
 				 int type, unsigned long id) :
