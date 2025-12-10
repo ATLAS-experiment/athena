@@ -70,8 +70,7 @@ StatusCode BTaggingSelectionTool::initialize() {
   TString pathtofile =  PathResolverFindCalibFile(m_CutFileName);
   m_inf = TFile::Open(pathtofile, "read");
   if (0==m_inf) {
-
-    ATH_MSG_ERROR( "BTaggingSelectionTool couldn't access tagging cut definitions" );
+    ATH_MSG_ERROR( "BTaggingSelectionTool couldn't access the CDI file" );
     return StatusCode::FAILURE;
   }
 
@@ -96,7 +95,6 @@ StatusCode BTaggingSelectionTool::initialize() {
     return StatusCode::FAILURE;
  }
 
- 
  // Operating point reading
  TString cutname = m_OP;
  m_continuous   = false;
@@ -190,9 +188,9 @@ StatusCode BTaggingSelectionTool::initialize() {
       //The WP is not important. This is just to retrieve the c-fraction. 
       ANA_CHECK(ExtractTaggerProperties(m_tagger, m_taggerName, workingpoints.at(0)));
 
- } else {  // FixedCut Working Point: load only one WP
+ } else {
     if(m_useCTag){
-      ATH_MSG_WARNING( "Running in FixedCut WP and using c-tagging");
+      ATH_MSG_WARNING( "Running in FixedCut WP for c-tagging, make sure to use  b-veto to select c-tagged jet properly.");
     }
     ANA_CHECK(ExtractTaggerProperties(m_tagger,m_taggerName, m_OP));
  }
@@ -251,47 +249,57 @@ StatusCode BTaggingSelectionTool::ExtractTaggerProperties(taggerproperties &tagg
   //retrieve the "fraction" used in the DL1 log likelihood from the CDI, if its not there, use the hard coded values
   // (backwards compatibility)
   if( (m_taggerEnum == Tagger::DL1) || (m_taggerEnum == Tagger::GN1) || (m_taggerEnum == Tagger::GN2)){
-
-    TString fraction_data_name = taggerName+"/"+m_jetAuthor+"/"+OP+"/fraction";
-    TVector *fraction_data = dynamic_cast<TVector*> (m_inf->Get(fraction_data_name));
     
-    double fraction = -1;
-    if(fraction_data!=nullptr){
-      fraction = fraction_data[0](0);
-    }else{
-      if("DL1"    ==taggerName){ fraction = 0.08; }
-      if("DL1mu"  ==taggerName){ fraction = 0.08; }
-      if("DL1rnn" ==taggerName){ fraction = 0.03; }
+    const TString basePath = taggerName + "/" + m_jetAuthor + "/" + OP;
+    TVector* fraction_b_data = dynamic_cast<TVector*>( m_inf->Get(basePath + "/fraction_b") );
+    if (!fraction_b_data) {
+        ATH_MSG_ERROR("Failed to retrieve fraction_b");
+        return StatusCode::FAILURE;
     }
-    tagger.fraction_c = fraction;
-    tagger.fraction_b = fraction;
+    double fraction_b = (*fraction_b_data)(0);
+    
+    TVector* fraction_c_data = dynamic_cast<TVector*>( m_inf->Get(basePath + "/fraction") );
+    if (!fraction_c_data) {
+        fraction_c_data = dynamic_cast<TVector*>( m_inf->Get(basePath + "/fraction_c") );
+    }
+    double fraction_c = -1;
+    if (fraction_c_data) {
+      fraction_c = (*fraction_c_data)(0);
+    } else{
+      if("DL1"    ==taggerName){ fraction_c = 0.08; }
+      if("DL1mu"  ==taggerName){ fraction_c = 0.08; }
+      if("DL1rnn" ==taggerName){ fraction_c = 0.03; }
+      else {
+        ATH_MSG_ERROR("Failed to retrieve fraction_c");
+      }
+    }
 
     double fraction_tau = 0.;
     double fraction_tau_cTag = 0.;
-    TString fraction_tau_name = taggerName+"/"+m_jetAuthor+"/"+OP+"/fraction_tau";
-    TVector *fraction_tau_data = dynamic_cast<TVector*> (m_inf->Get(fraction_tau_name));
+    TVector* fraction_tau_data = dynamic_cast<TVector*>( m_inf->Get(basePath + "/fraction_tau") );
+    TVector* fraction_tau_cTag_data = dynamic_cast<TVector*>( m_inf->Get(basePath + "/fraction_tau_cTag") );
     if (m_taggerEnum == Tagger::GN2 && !(taggerName.find("GN2v00") != std::string::npos)){
-      if( fraction_tau_data != nullptr ) {
-        if (m_useCTag){
-          // tau fraction for c-tagging 
-          fraction_tau_cTag = fraction_tau_data[0](0);
-        }
-        else{
-          // tau fraction for b-tagging 
-          fraction_tau = fraction_tau_data[0](0);
-        }
-      }
-      else {
-        // For GN2v01 taggers and onwards the fraction_tau should be in the CDI file 
-        ATH_MSG_ERROR("Tagger fraction_tau is not available");
+      if( !fraction_tau_data ) {
+        ATH_MSG_ERROR("Failed to retrive fraction_tau");
         return StatusCode::FAILURE;
       }
+      if ( m_useCTag && !fraction_tau_cTag_data) {
+        ATH_MSG_ERROR("Runnint c-tagging WP, but failed to retrive fraction_tau_cTag");
+      }
+          
+      fraction_tau = fraction_tau_data[0](0);
+      fraction_tau_cTag = fraction_tau_cTag_data[0](0);
     }
+
+    tagger.fraction_b = fraction_b;
+    tagger.fraction_c = fraction_c;
     tagger.fraction_tau = fraction_tau;
     tagger.fraction_tau_cTag = fraction_tau_cTag;
 
-    delete fraction_data;
+    delete fraction_b_data;
+    delete fraction_c_data;
     delete fraction_tau_data;
+    delete fraction_tau_cTag_data;
   }
   return StatusCode::SUCCESS;
 }
