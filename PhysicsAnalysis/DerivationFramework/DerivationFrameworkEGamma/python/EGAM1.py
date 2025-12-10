@@ -36,12 +36,12 @@ def EGAM1SkimmingToolCfg(flags):
     )
     print("EGAM1 skimming expression: ", expression)
 
-    acc.setPrivateTools(
-        CompFactory.DerivationFramework.xAODStringSkimmingTool(
-            name="EGAM1SkimmingTool", expression=expression
-        )
-    )
+    skimmingTool = CompFactory.DerivationFramework.xAODStringSkimmingTool(
+        name="EGAM1SkimmingTool", expression=expression)
+    if flags.Trigger.EDMVersion < 0:
+        skimmingTool.TrigDecisionTool=None
 
+    acc.setPrivateTools(skimmingTool)
     return acc
 
 
@@ -486,7 +486,6 @@ def EGAM1Cfg(flags):
     # multiple times in a train
 
     from DerivationFrameworkPhys.TriggerListsHelper import TriggerListsHelper
-
     EGAM1TriggerListsHelper = TriggerListsHelper(flags)
 
     # configure skimming/thinning/augmentation tools
@@ -523,15 +522,14 @@ def EGAM1Cfg(flags):
     ]
 
     # for trigger studies we also add trigger containers
-    MenuType = None
+    MenuType = ""
     if flags.Trigger.EDMVersion == 2:
         MenuType = "Run2"
     elif flags.Trigger.EDMVersion == 3:
         MenuType = "Run3"
-    else:
-        MenuType = ""
-    EGAM1SlimmingHelper.AllVariables += ExtraContainersTrigger[MenuType]
-    EGAM1SlimmingHelper.AllVariables += ExtraContainersElectronTrigger[MenuType]
+    if MenuType:
+        EGAM1SlimmingHelper.AllVariables += ExtraContainersTrigger[MenuType]
+        EGAM1SlimmingHelper.AllVariables += ExtraContainersElectronTrigger[MenuType]
 
     # and on MC we also add:
     if flags.Input.isMC:

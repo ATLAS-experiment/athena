@@ -30,12 +30,12 @@ def EGAM8SkimmingToolCfg(flags):
     )
     print("EGAM8 skimming expression: ", expression)
 
-    acc.setPrivateTools(
-        CompFactory.DerivationFramework.xAODStringSkimmingTool(
-            name="EGAM8SkimmingTool", expression=expression
-        )
-    )
+    skimmingTool = CompFactory.DerivationFramework.xAODStringSkimmingTool(
+        name="EGAM8SkimmingTool", expression=expression)
+    if flags.Trigger.EDMVersion < 0:
+        skimmingTool.TrigDecisionTool=None
 
+    acc.setPrivateTools(skimmingTool)
     return acc
 
 
