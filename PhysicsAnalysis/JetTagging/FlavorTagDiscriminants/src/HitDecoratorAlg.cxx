@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -27,12 +27,9 @@ namespace FlavorTagDiscriminants {
     ATH_CHECK( m_HitContainerKey.initialize() );
 
     // Initialize decorator
-    m_OutputHitXKey = m_HitContainerKey.key() + "." + m_OutputHitXKey.key();
-    CHECK( m_OutputHitXKey.initialize() );
-    m_OutputHitYKey = m_HitContainerKey.key() + "." + m_OutputHitYKey.key();
-    CHECK( m_OutputHitYKey.initialize() );
-    m_OutputHitZKey = m_HitContainerKey.key() + "." + m_OutputHitZKey.key();
-    CHECK( m_OutputHitZKey.initialize() );
+    ATH_CHECK( m_OutputHitXKey.initialize() );
+    ATH_CHECK( m_OutputHitYKey.initialize() );
+    ATH_CHECK( m_OutputHitZKey.initialize() );
 
     return StatusCode::SUCCESS;
   }
