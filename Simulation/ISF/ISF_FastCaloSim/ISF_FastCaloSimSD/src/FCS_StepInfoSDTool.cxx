@@ -220,7 +220,7 @@ G4VSensitiveDetector* FCS_StepInfoSDTool::makeSD() const {
 //---------------------------------------------------------------------------
 // Create one LAr SD
 //---------------------------------------------------------------------------
-std::unique_ptr<FCS_StepInfoSD> FCS_StepInfoSDTool::makeOneLArSD(
+FCS_StepInfoSD* FCS_StepInfoSDTool::makeOneLArSD(
     const std::string& sdName, ILArCalculatorSvc* calc,
     const std::vector<std::string>& volumes) const {
   ATH_MSG_VERBOSE(name() << " makeOneSD");
@@ -243,23 +243,24 @@ std::unique_ptr<FCS_StepInfoSD> FCS_StepInfoSDTool::makeOneLArSD(
     config.verboseLevel = 5;
   }
   // Create the simple SD
-  std::unique_ptr<FCS_StepInfoSD> sd =
-      std::make_unique<LArFCS_StepInfoSD>(sdName, config);
+  auto sd = std::make_unique<LArFCS_StepInfoSD>(sdName, config);
+  auto* sdPtr = sd.get();
   sd->setupHelpers(m_larEmID, m_larFcalID, m_larHecID, m_tileID);
 
-  // Assign the volumes to the SD
-  if (this->assignSD(sd.get(), parsedVolumes).isFailure()) {
+  // Assign the volumes to the SD, this will give ownership of the pointer to Geant
+  if (this->assignSD(std::move(sd), parsedVolumes).isFailure()) {
     // TODO: can I just return NULL here?
     throw GaudiException("Failed to assign sd: " + sdName, name(),
                          StatusCode::FAILURE);
   }
-  return sd;
+  // cppcheck-suppress returnDanglingLifetime
+  return sdPtr;
 }
 
 //---------------------------------------------------------------------------
 // Create one Tile SD
 //---------------------------------------------------------------------------
-std::unique_ptr<FCS_StepInfoSD> FCS_StepInfoSDTool::makeOneTileSD(
+FCS_StepInfoSD* FCS_StepInfoSDTool::makeOneTileSD(
     const std::string& sdName, ITileCalculator* calc,
     const std::vector<std::string>& volumes) const {
   ATH_MSG_VERBOSE(name() << " makeOneSD");
@@ -278,17 +279,18 @@ std::unique_ptr<FCS_StepInfoSD> FCS_StepInfoSDTool::makeOneTileSD(
     config.verboseLevel = 5;
   }
   // Create the simple SD
-  std::unique_ptr<FCS_StepInfoSD> sd =
-      std::make_unique<TileFCS_StepInfoSD>(sdName, config);
+  auto sd = std::make_unique<TileFCS_StepInfoSD>(sdName, config);
+  auto* sdPtr = sd.get();
   sd->setupHelpers(m_larEmID, m_larFcalID, m_larHecID, m_tileID);
 
-  // Assign the volumes to the SD
-  if (this->assignSD(sd.get(), volumes).isFailure()) {
+  // Assign the volumes to the SD, this will give ownership of the pointer to Geant
+  if (this->assignSD(std::move(sd), volumes).isFailure()) {
     // TODO: can I just return NULL here?
     throw GaudiException("Failed to assign sd: " + sdName, name(),
                          StatusCode::FAILURE);
   }
-  return sd;
+  // cppcheck-suppress returnDanglingLifetime
+  return sdPtr;
 }
 
 }  // namespace FCS_Param
