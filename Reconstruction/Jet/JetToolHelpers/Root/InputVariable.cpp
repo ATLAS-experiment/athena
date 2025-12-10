@@ -54,6 +54,23 @@ std::unique_ptr<InputVariable> InputVariable::createVariable(const std::string& 
                     return std::abs(jet.rapidity());
                 });
 
+	if (name == "absDetEta")
+            return std::make_unique<InputVariable>(name,
+                [](const xAOD::Jet& jet, const JetContext&) {
+		  return std::abs(jet.getAttribute<float>("DetectorEta"));
+                });
+
+	if (name == "LOGmOe")
+	    return std::make_unique<InputVariable>(name,
+                [](const xAOD::Jet& jet, const JetContext&) {
+		  if(jet.m() / jet.e() < 0){
+		    return -1.e-6;
+		  }
+		  else{
+		    return std::log(jet.m() / jet.e());
+		  }
+                });
+
         if (type == "float")
             return std::make_unique<InputVariableAttribute<float>>(name);
             

@@ -7,6 +7,7 @@
 
   <class name="Pileup1DResidualCalibStep" />
   <class name="EtaJESCalibStep" />
+  <class name="JMSCalibStep" />
   <class name="SmearingCalibStep" />
   <class name="InSituCalibStep" />
   <class name="GSCCalibStep" />
