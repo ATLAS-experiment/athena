@@ -93,6 +93,7 @@ def getHistoPath(cfg):
 
     histopath = f"InDetTrackPerfMonPlots/{cfg['trkAnalysis']}/{cfg['chain']}/Tracks/{cfg['category']}/{cfg['histo']}" if 'Clusters' not in cfg['category'] else f"InDetTrackPerfMonPlots/{cfg['trkAnalysis']}/Offline/{cfg['category']}/{cfg['histo']}"
     h = cfg['input'].Get(histopath) 
+    print(histopath)
     if cfg['norm']: h.Scale(1./h.Integral())
     print(cfg['input'])
 
@@ -475,6 +476,11 @@ def draw(args, configs, tails=False, pu_comparison=False):
     urd_lines = []
     urd_text = []
 
+    if 'rate' in args.type and 'C000' in args.ref[0] and args.param != 'truthMu':
+        requirement_line, requirement_text = getURDRequirementLine(histos[0].GetPaintedGraph(), 'rate', canv, 1)
+        requirement_line.Draw('same')
+        requirement_text.Draw('same')
+
     # Loop over reference histograms to create one ratio per reference
     for r in range(NRef):
 
@@ -504,6 +510,7 @@ def draw(args, configs, tails=False, pu_comparison=False):
 
                 if isTEfficiencyObj:
                     multigraphs[r].Add(ratio,'p')
+                    multigraphs[r].GetXaxis().SetTitle(ratio.GetXaxis().GetTitle())
 
                 else:
                     ratio.Draw('same')
