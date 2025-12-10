@@ -5,17 +5,18 @@
 atlas_subdir( AsgAnalysisAlgorithms )
 
 find_package( ROOT COMPONENTS Core Hist Tree )
+find_package( Lhapdf )
 
 atlas_add_library( AsgAnalysisAlgorithmsLib
    AsgAnalysisAlgorithms/*.h AsgAnalysisAlgorithms/*.icc Root/*.cxx
    PUBLIC_HEADERS AsgAnalysisAlgorithms
-   PRIVATE_INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
+   PRIVATE_INCLUDE_DIRS ${ROOT_INCLUDE_DIRS} ${LHAPDF_INCLUDE_DIRS}
    LINK_LIBRARIES AthContainers AthContainersInterfaces AsgTools AsgMessagingLib AsgServicesLib CxxUtils xAODBase
      xAODEventInfo xAODCutFlow SelectionHelpersLib SystematicsHandlesLib PATCoreLib
      AnaAlgorithmLib AsgAnalysisInterfaces AssociationUtilsLib GammaORToolsLib
      EventBookkeeperToolsLib InDetTrackSystematicsToolsLib IsolationSelectionLib PMGAnalysisInterfacesLib FakeBkgToolsLib
    PRIVATE_LINK_LIBRARIES ${ROOT_LIBRARIES} PATInterfaces xAODCore xAODMetaData xAODJet xAODMuon xAODTau xAODEgamma xAODMissingET
-     xAODTracking xAODTruth xAODRootAccess RootCoreUtils TruthUtils )
+     xAODTracking xAODTruth xAODRootAccess RootCoreUtils TruthUtils ${LHAPDF_LIBRARIES})
 
 atlas_add_dictionary( AsgAnalysisAlgorithmsDict
    AsgAnalysisAlgorithms/AsgAnalysisAlgorithmsDict.h
@@ -24,7 +25,8 @@ atlas_add_dictionary( AsgAnalysisAlgorithmsDict
 
 atlas_add_component( AsgAnalysisAlgorithms
    src/components/*.cxx
-   LINK_LIBRARIES AsgAnalysisAlgorithmsLib )
+   INCLUDE_DIRS  ${LHAPDF_INCLUDE_DIRS}
+   LINK_LIBRARIES AsgAnalysisAlgorithmsLib ${LHAPDF_LIBRARIES})
 
 atlas_install_data( data/* )
 atlas_install_python_modules( python/*.py )
