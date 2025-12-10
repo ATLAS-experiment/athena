@@ -85,12 +85,12 @@ namespace GlobalSim {
     // A neighborhood is a collection of CellData objects which
     // contain cell eta, phi and Et.
     
-    auto neighborhoodTOBs = std::make_unique<IOBitwise::IeEmNbhoodTOBContainer>();
+    auto neighborhoodTOBs = std::make_unique<IOBitwise::eEmNbhoodTOBContainer>();
     auto phimax = std::make_unique<std::vector<int>>();
     
     CHECK(findNeighborhoods_RowAware(rois, cells, *neighborhoodTOBs, *phimax));
     
-    SG::WriteHandle<GlobalSim::IOBitwise::IeEmNbhoodTOBContainer> h_neighborhoodTOBs(m_neighKey, ctx);
+    SG::WriteHandle<GlobalSim::IOBitwise::eEmNbhoodTOBContainer> h_neighborhoodTOBs(m_neighKey, ctx);
     SG::WriteHandle<std::vector<int> > h_phimax(m_phimaxKey, ctx);
 
     auto dumper = GlobalSim::LArStripNeighborhoodDumper();
@@ -113,7 +113,7 @@ namespace GlobalSim {
   StatusCode
   Egamma1_LArStrip_Fex_RowAware::findNeighborhoods_RowAware(const std::vector<const xAOD::eFexEMRoI*>& rois,
 							    const std::vector<const CaloCell*>& cells,
-							    IOBitwise::IeEmNbhoodTOBContainer& neighborhoodTOBs,
+							    IOBitwise::eEmNbhoodTOBContainer& neighborhoodTOBs,
 							    std::vector<int>& phimax) const{
     
     for (const auto& roi : rois) {
@@ -127,7 +127,7 @@ namespace GlobalSim {
   StatusCode
   Egamma1_LArStrip_Fex_RowAware::findNeighborhood_RowAware(const xAOD::eFexEMRoI* roi,
 							   const std::vector<const CaloCell*>& cells,
-							   IOBitwise::IeEmNbhoodTOBContainer& neighborhoodTOBs,
+							   IOBitwise::eEmNbhoodTOBContainer& neighborhoodTOBs,
 							   std::vector<int>& phimax) const {
     
     // this member function constructs an LArStripNeighborhood.
