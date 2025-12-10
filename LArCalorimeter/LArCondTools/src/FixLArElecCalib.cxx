@@ -2016,13 +2016,13 @@ StatusCode FixLArElecCalib::fix12(const LArOnOffIdMapping *cabling) {
    }
    const int     nindex=1833;
    int           ncell;
-   int           identifier[nindex];   
-   int           layer[nindex];   
-   int           region[nindex]; 
-   int           ieta[nindex];   
-   float         eta[nindex];   
-   double        average[nindex];   
-   double        rms[nindex];   
+   std::vector<int>    identifier(2862);
+   std::vector<int>    layer(2862);
+   std::vector<int>    region(2862);
+   std::vector<int>    ieta(2862);
+   std::vector<float>  eta(2862);
+   std::vector<double> average(2862);
+   std::vector<double> rms(2862);
    TBranch        *b_ncell;   //!
    TBranch        *b_identifier;   //!
    TBranch        *b_layer;   //!
@@ -2033,13 +2033,13 @@ StatusCode FixLArElecCalib::fix12(const LArOnOffIdMapping *cabling) {
    TBranch        *b_rms;   //!
    tin->SetMakeClass(1);
    tin->SetBranchAddress("ncell", &ncell, &b_ncell);
-   tin->SetBranchAddress("identifier", identifier, &b_identifier);
-   tin->SetBranchAddress("layer", layer, &b_layer);
-   tin->SetBranchAddress("region", region, &b_region);
-   tin->SetBranchAddress("ieta", ieta, &b_ieta);
-   tin->SetBranchAddress("eta", eta, &b_eta);
-   tin->SetBranchAddress("average", average, &b_average);
-   tin->SetBranchAddress("rms", rms, &b_rms);
+   tin->SetBranchAddress("identifier", identifier.data(), &b_identifier);
+   tin->SetBranchAddress("layer", layer.data(), &b_layer);
+   tin->SetBranchAddress("region", region.data(), &b_region);
+   tin->SetBranchAddress("ieta", ieta.data(), &b_ieta);
+   tin->SetBranchAddress("eta", eta.data(), &b_eta);
+   tin->SetBranchAddress("average", average.data(), &b_average);
+   tin->SetBranchAddress("rms", rms.data(), &b_rms);
    tin->GetEntry(0);
 
    if(ncell>nindex) ncell=nindex;
