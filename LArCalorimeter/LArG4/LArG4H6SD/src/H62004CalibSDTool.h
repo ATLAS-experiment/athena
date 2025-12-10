@@ -29,7 +29,7 @@ namespace LArG4
                          const IInterface* parent);
     protected:
       /// Override helper method to create one SD
-      std::unique_ptr<LArG4CalibSD>
+      LArG4CalibSD*
       makeOneSD(const std::string& name, ILArCalibCalculatorSvc* calc,
                 const std::vector<std::string>& volumes) const;
   };

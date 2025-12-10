@@ -95,7 +95,7 @@ TEST_F(SDWrappertest, EndOfAthenaEvent)
   p.get()->setupHelpers(&m_EM, &m_FCAL, &m_HEC);//add helpers(&m_EM, &m_FCAL, &m_HEC), which can convert a set of numbers stored in LArG4Identifier object into a compact number stored in a Identifier object 
   p.get()->m_timeBins.insert( std::pair<G4int, LArG4SimpleSD::hits_t*>(0,hits) );//insert the hit container hits into the container of hit container
 
-  sd5.m_sdList.push_back( std::move(p) );//insert the std::unique_ptr<LArG4SimpleSD> object p into the container m_sdList
+  sd5.m_sdList.push_back( p.get() );//insert the std::unique_ptr<LArG4SimpleSD> object p into the container m_sdList
   sd5.EndOfAthenaEvent();//invoke the tested member function, which will put the hit in another container m_hitColl. Next few lines will test if the hit was placed well
 
   LArHit* a = *((sd5.m_hitColl)->begin());//access the hit defined before

@@ -55,13 +55,13 @@ namespace LArG4
       public:
 
         /// Alias to the SD list type
-        using SDList_t = std::vector< std::unique_ptr<SDType> >;
+        using SDList_t = std::vector< SDType* >;
 
         /// Construct the wrapper from the output collection name
         SDWrapper(const std::string& name, const std::string& hitCollectionName, const std::string& deadHitCollectionName="");
 
         /// Add an SD to this wrapper
-        void addSD(std::unique_ptr<SDType> sd);
+        void addSD(SDType* sd);
 
         /// Add a (non-owned) fast-sim SD by name
         void addFastSimSD(const std::string& fastSimSDName);
@@ -93,7 +93,7 @@ namespace LArG4
         /// The hit container handle
         SG::WriteHandle<HitContainerType> m_deadHitColl;
 
-        /// The list of sensitive detectors that I own and manage
+        /// The list of sensitive detectors that I manage
         SDList_t m_sdList;
 
         /// A fastsim SD name that I do not own but invoke in order to

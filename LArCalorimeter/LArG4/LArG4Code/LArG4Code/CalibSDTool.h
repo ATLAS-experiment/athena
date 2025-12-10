@@ -61,7 +61,7 @@ namespace LArG4
       virtual StatusCode initializeCalculators() { return StatusCode::SUCCESS; }
 
       /// Helper method to create one SD
-      std::unique_ptr<LArG4CalibSD>
+      LArG4CalibSD*
       makeOneSD(const std::string& name, ILArCalibCalculatorSvc* calc,
                 const std::vector<std::string>& volumes) const;
 

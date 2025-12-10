@@ -83,7 +83,7 @@ namespace LArG4
         // I still think we can do better than this, though.
         // UPDATE: this is thread-safe now
         ATH_MSG_DEBUG("Creating EscapedEnergyProcessing and adding to registry");
-	std::unique_ptr<CaloG4::VEscapedEnergyProcessing> eep(new EscapedEnergyProcessing(uninstSD.get()));
+	      std::unique_ptr<CaloG4::VEscapedEnergyProcessing> eep(new EscapedEnergyProcessing(uninstSD));
         CaloG4::EscapedEnergyRegistry* registry = CaloG4::EscapedEnergyRegistry::GetInstance();
         registry->AddAndAdoptProcessing( "LAr::", std::move(eep) );
 
