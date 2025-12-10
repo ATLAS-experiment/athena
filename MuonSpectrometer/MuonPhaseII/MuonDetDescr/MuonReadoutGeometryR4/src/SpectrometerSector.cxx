@@ -46,7 +46,7 @@ bool SpectrometerSector::operator<(const SpectrometerSector& other) const {
     return m_args.id < other.m_args.id; 
 }
 int8_t SpectrometerSector::side() const {
-    return m_args.chambers.front()->stationEta() > 0 ? 1 : -1;
+    return Acts::copySign(1, chambers().front()->stationEta());
 }
 const SpectrometerSector::defineArgs& SpectrometerSector::parameters() const { return m_args; }
 const Muon::IMuonIdHelperSvc* SpectrometerSector::idHelperSvc() const { return m_args.chambers.front()->idHelperSvc();}

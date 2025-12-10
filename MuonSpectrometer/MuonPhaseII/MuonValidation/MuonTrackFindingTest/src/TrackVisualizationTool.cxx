@@ -5,7 +5,6 @@
 
 #include "MuonTrackFindingTools/MsTrackSeeder.h"
 #include "MuonTrackEvent/TrackingHelpers.h"
-#include "MuonPatternHelpers/MatrixUtils.h"
 #include "MuonDetDescrUtils/MuonSectorMapping.h"
 #include "MuonVisualizationHelpersR4/VisualizationHelpers.h"
 #include "MuonVisualizationHelpersR4/ObjVisualizationHelpers.h"

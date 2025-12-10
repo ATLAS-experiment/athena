@@ -2,13 +2,11 @@
   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #include "MuonPRDTestR4/TrackContainerModule.h"
-#include "MuonPatternHelpers/MatrixUtils.h"
 
 #include "StoreGate/ReadHandle.h"
 #include "ActsInterop/UnitConverters.h"
 
 using namespace Acts;
-using namespace MuonR4;
 namespace MuonValR4{
     TrackContainerModule::TrackContainerModule(MuonTesterTree& tree,
                                                const std::string& inContainer,
@@ -29,7 +27,7 @@ namespace MuonValR4{
         for (const auto track : *tracks) {
             const Amg::Vector3D trkP4 = ActsTrk::convertMomFromActs(track.fourMomentum()).first;
             const double chi2 = track.chi2();
-            const int q = sign(track.qOverP());
+            const int q = track.charge();
             const unsigned nDoF = track.nDoF();
 
             m_trackPt += trkP4.perp();
