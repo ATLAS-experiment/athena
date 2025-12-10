@@ -3,7 +3,7 @@
 # Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 ## Transform for making PRW Config files
-# @version $Id: PRWConfig_tf.py  ... author: will $ 
+# @version $Id: PRWConfig_tf.py  ... author: will $
 
 import sys
 import time
@@ -20,10 +20,10 @@ import PyJobTransforms.trfArgClasses as trfArgClasses
 @stdTrfExceptionHandler
 @sigUsrStackTrace
 def main():
-    
-    msg.info('This is %s', sys.argv[0])
-    
-    trf = getTransform()    
+
+    msg.info('This is %s' % sys.argv[0])
+
+    trf = getTransform()
     trf.parseCmdLineArgs(sys.argv[1:])
     trf.execute()
     trf.generateReport()
@@ -33,8 +33,8 @@ def main():
 
 ## Get the base transform with all arguments added
 def getTransform():
-    trf = transform(executor = athenaExecutor(name = 'athena', 
-                                              skeletonFile='PATJobTransforms/skeleton.AODtoNTUP_PILEUP.py'))
+    trf = transform(executor = athenaExecutor(name = 'athena',
+                                              skeletonCA='PATJobTransforms.AODtoNTUP_PILEUP_Skeleton'))
 
     trf.parser.defineArgGroup("PRWConfig_tf","PRWConfig_tf options")
 
@@ -44,7 +44,7 @@ def getTransform():
     trf.parser.add_argument("--outputNTUP_PILEUPFile",type=trfArgClasses.argFactory(trfArgClasses.argNTUPFile,io='output',type='hist',multipleOK=False),help="The output filename",group="PRWConfig_tf")
 
     return trf
-    
+
 
 if __name__ == '__main__':
     main()

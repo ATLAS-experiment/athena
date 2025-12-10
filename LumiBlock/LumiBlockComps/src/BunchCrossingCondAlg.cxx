@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration.
  */
 
 #include "BunchCrossingCondAlg.h"
@@ -7,7 +7,11 @@
 #include "AthenaKernel/IOVInfiniteRange.h"
 #include "CoralBase/Blob.h"
 #include "StoreGate/ReadCondHandle.h"
+#include "StoreGate/ReadHandle.h"
 #include "StoreGate/WriteCondHandle.h"
+#include "ByteStreamData/ByteStreamMetadata.h"
+#include <nlohmann/json.hpp>
+#include <charconv>
 #include <cstdint>
 
 #include "CoralBase/AttributeListException.h"
@@ -18,7 +22,12 @@ StatusCode BunchCrossingCondAlg::initialize() {
     ATH_CHECK( m_trigConfigSvc.retrieve() );
   }
   ATH_CHECK( m_bunchGroupCondDataKey.initialize( m_mode == 2 && !m_bunchGroupCondDataKey.empty() ) );
-  ATH_CHECK( m_fillParamsFolderKey.initialize( m_mode == 0 || m_mode == 1 ) );
+  // For MC mode, only initialize fill params key if it's not empty (will be empty for BS input)
+  ATH_CHECK( m_fillParamsFolderKey.initialize( (m_mode == 0 || m_mode == 1) && !m_fillParamsFolderKey.empty() ) );
+  // ByteStream metadata is only used in MC mode (mode==1), and may or may not be present (e.g., in tests)
+  if (m_mode == 1) {
+    ATH_CHECK( m_byteStreamMetadataKey.initialize(SG::AllowEmpty) );
+  }
   ATH_CHECK( m_lumiCondDataKey.initialize( m_mode == 3 ) );
   ATH_CHECK( m_outputKey.initialize() );
   return StatusCode::SUCCESS;
@@ -107,27 +116,77 @@ StatusCode BunchCrossingCondAlg::execute (const EventContext& ctx) const {
 
   if (m_mode == 0 || m_mode == 1) { // use FILLPARAMS (data) or /Digitization/Parameters (MC)
 
-    SG::ReadCondHandle<AthenaAttributeList> fillParamsHdl (m_fillParamsFolderKey, ctx);
-    writeHdl.addDependency(fillParamsHdl);
-
-    const AthenaAttributeList* attrList=*fillParamsHdl;
-
+    std::string sbunches;
+    const AthenaAttributeList* attrList = nullptr;
 
     if (m_mode == 1) {
+      // MC case: try digitization folder first, then ByteStream metadata
       ATH_MSG_INFO("Assuming MC case");
-      ATH_MSG_INFO("Got AttributeList with size " << attrList->size());
-      std::string sbunches;
-      try {
-        const coral::Attribute& attr=(*attrList)[std::string("BeamIntensityPattern")];
-        if (attr.isNull()) {
-          ATH_MSG_ERROR("Got NULL attribute for BeamIntensityPattern");
+      bool foundInDigitization = false;
+
+      if (!m_fillParamsFolderKey.empty()) {
+        SG::ReadCondHandle<AthenaAttributeList> fillParamsHdl (m_fillParamsFolderKey, ctx);
+        writeHdl.addDependency(fillParamsHdl);
+        const AthenaAttributeList* attrList=*fillParamsHdl;
+
+        if (attrList) {
+          ATH_MSG_INFO("Got AttributeList with size " << attrList->size());
+          try {
+            const coral::Attribute& attr=(*attrList)[std::string("BeamIntensityPattern")];
+            if (!attr.isNull()) {
+              sbunches = attr.data< std::string >();
+              foundInDigitization = true;
+              ATH_MSG_DEBUG("Read BeamIntensityPattern from Digitization folder");
+            }
+          } catch (coral::AttributeListException& e) {
+            ATH_MSG_DEBUG("Could not read from Digitization folder: " << e.what());
+          }
+        }
+      }
+
+      // Fall back to ByteStream metadata if not found in digitization folder
+      if (!foundInDigitization) {
+        SG::ReadHandle<ByteStreamMetadataContainer> bsMetadata(m_byteStreamMetadataKey, ctx);
+
+        if (bsMetadata.isValid() && !bsMetadata->empty()) {
+          const ByteStreamMetadata* metadata = bsMetadata->at(0);
+          const std::vector<std::string>& freeStrings = metadata->getFreeMetaDataStrings();
+
+          for (const std::string& str : freeStrings) {
+            if (str.find("IOVMeta./Digitization/Parameters=") == 0) {
+              size_t eqPos = str.find('=');
+              if (eqPos != std::string::npos && eqPos + 1 < str.size()) {
+                std::string jsonStr = str.substr(eqPos + 1);
+
+                try {
+                  nlohmann::json iovMetadata = nlohmann::json::parse(jsonStr);
+
+                  if (iovMetadata.contains("iovs") && iovMetadata["iovs"].is_array() && !iovMetadata["iovs"].empty()) {
+                    const auto& firstIov = iovMetadata["iovs"][0];
+                    if (firstIov.contains("attrs")) {
+                      for (const auto& chanItem : firstIov["attrs"].items()) {
+                        const auto& chanAttrs = chanItem.value();
+                        if (chanAttrs.contains("BeamIntensityPattern")) {
+                          sbunches = chanAttrs["BeamIntensityPattern"].get<std::string>();
+                          ATH_MSG_INFO("Read BeamIntensityPattern from ByteStream metadata");
+                          break;
+                        }
+                      }
+                      if (!sbunches.empty()) break;
+                    }
+                  }
+                } catch (const std::exception& e) {
+                  ATH_MSG_WARNING("Failed to parse IOV metadata from ByteStream: " << e.what());
+                }
+              }
+            }
+          }
+        }
+
+        if (sbunches.empty()) {
+          ATH_MSG_ERROR("Could not read BeamIntensityPattern from either Digitization folder or ByteStream metadata");
           return StatusCode::FAILURE;
         }
-        sbunches = attr.data< std::string >();
-      } catch (coral::AttributeListException& e) {
-        ATH_MSG_ERROR(e.what());
-        ATH_MSG_ERROR("Failed to get Attribute 'BeamIntensityPattern' from AttributeList in " << m_fillParamsFolderKey);
-        return StatusCode::FAILURE;
       }
       
       const float minBunchIntensity=0.001;
@@ -180,6 +239,10 @@ StatusCode BunchCrossingCondAlg::execute (const EventContext& ctx) const {
       }
     }
     else { // mode == 0, Data-case
+      SG::ReadCondHandle<AthenaAttributeList> fillParamsHdl (m_fillParamsFolderKey, ctx);
+      writeHdl.addDependency(fillParamsHdl);
+      attrList = *fillParamsHdl;
+
       if ((*attrList)["BCIDmasks"].isNull()) {
         ATH_MSG_ERROR( "BunchCode is NULL in " << m_fillParamsFolderKey.key() << "!" );
         return StatusCode::FAILURE;

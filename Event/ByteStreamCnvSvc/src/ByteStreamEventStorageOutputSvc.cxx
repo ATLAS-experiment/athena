@@ -25,6 +25,8 @@
 
 #include "StoreGate/ReadHandle.h"
 
+#include "EventInfoMgt/ITagInfoMgr.h"
+
 
 ByteStreamEventStorageOutputSvc::ByteStreamEventStorageOutputSvc(
     const std::string& name, ISvcLocator* pSvcLocator)
@@ -38,6 +40,8 @@ ByteStreamEventStorageOutputSvc::initialize() {
 
   ATH_CHECK(m_eventInfoKey.initialize());
   ATH_CHECK(m_byteStreamMetadataKey.initialize());
+  ATH_CHECK(m_tagInfoMgr.retrieve());
+  ATH_CHECK(m_metaDataStore.retrieve());
 
   // register this service for 'I/O' events
   ATH_CHECK(m_ioMgr.retrieve());
@@ -392,6 +396,38 @@ ByteStreamEventStorageOutputSvc::updateDataWriterParameters(
 
   for (const auto& tag : eventInfo.detDescrTags())
     params.fmdStrings.push_back(tag.first + ' ' + tag.second);
+
+  // Get beam metadata from TagInfo
+  std::string beamTypeStr = m_tagInfoMgr->findInputTag("beam_type");
+  if (!beamTypeStr.empty()) {
+    ATH_MSG_DEBUG("Got beam_type from input file metadata: " << beamTypeStr);
+    if (beamTypeStr == "collisions") {
+      params.rPar.beam_type = 1;
+    } else if (beamTypeStr == "cosmics") {
+      params.rPar.beam_type = 0;
+    }
+  }
+
+  std::string beamEnergyStr = m_tagInfoMgr->findInputTag("beam_energy");
+  if (!beamEnergyStr.empty()) {
+    try {
+      params.rPar.beam_energy = std::stoul(beamEnergyStr);
+      ATH_MSG_DEBUG("Got beam_energy from input file metadata: " << params.rPar.beam_energy);
+    } catch (const std::exception& e) {
+      ATH_MSG_WARNING("Could not convert beam_energy '" << beamEnergyStr << "' to number: " << e.what());
+    }
+  }
+
+  // Get IOV metadata strings from MetaDataStore
+  const std::vector<std::string>* iovMetaStrings = m_metaDataStore->tryRetrieve<std::vector<std::string>>("IOVMetaDataStrings");
+  if (iovMetaStrings != nullptr) {
+    ATH_MSG_DEBUG("Retrieved " << iovMetaStrings->size() << " IOV metadata strings from MetaDataStore");
+    for (const std::string& str : *iovMetaStrings) {
+      params.fmdStrings.push_back(str);
+    }
+  } else {
+    ATH_MSG_DEBUG("No IOV metadata strings found in MetaDataStore (this is normal if not configured)");
+  }
 
   params.rPar.trigger_type = eventInfo.level1TriggerType();
   params.rPar.detector_mask_LS = eventInfo.detectorMask();
