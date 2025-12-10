@@ -107,6 +107,9 @@ StatusCode PixelDistortionAlg::execute(const EventContext& ctx) const {
         input >> std::hex >> idmod >> std::dec;
         hashID = m_pixelID->wafer_hash((Identifier)idmod); 
       }
+      //Values read in from file should be tested to ensure they are within sensible limits
+      //we assume however that the file is a trusted source.
+      //coverity[TAINTED_SCALAR]
       Identifier modId = m_pixelID->wafer_id((IdentifierHash)hashID);
       ids[hashID] = modId.get_compact();
       ATH_MSG_DEBUG("Identifier = 0x" << std::hex << ids[hashID] << std::dec);

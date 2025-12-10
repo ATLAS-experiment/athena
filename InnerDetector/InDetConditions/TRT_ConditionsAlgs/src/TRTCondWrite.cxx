@@ -233,6 +233,9 @@ StatusCode TRTCondWrite::readTextFile_Format1(const EventContext& ctx, std::istr
             {
 
                 TRTCond::RtRelation *rt = TRTCond::RtRelationFactory::readFromFile(is);
+                //Values read in should have their values checked against sensible limits.
+                //We assume the input is trusted however.
+                //coverity[TAINTED_SCALAR]
                 rtCdo->set(id, rt);
                 delete rt;
                 ++nrtrelations;
@@ -244,6 +247,9 @@ StatusCode TRTCondWrite::readTextFile_Format1(const EventContext& ctx, std::istr
                 is >> t0 >> t0err;
                 if (t0 > 0)
                 {
+                    //Values read in should have their values checked against sensible limits.
+                    //We assume the input is trusted however.
+                    //coverity[TAINTED_SCALAR]
                     t0Cdo->setT0(id, t0, t0err);
                     ++nstrawt0;
                 }
