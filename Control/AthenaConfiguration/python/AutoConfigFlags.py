@@ -248,7 +248,8 @@ def getSpecialConfigurationMetadata(flags):
                                         'SimulationJobOptions/preInclude.GMSB.py' : 'Sleptons.SleptonsConfig.GMSB_Cfg',
                                         'SimulationJobOptions/preInclude.Qball.py' : 'Monopole.MonopoleConfig.QballCfg',
                                         'SimulationJobOptions/preInclude.RHadronsPythia8.py' : 'RHadrons.RHadronsConfig.RHadronsCfg',
-                                        'SimulationJobOptions/preInclude.fcp.py' : 'Monopole.MonopoleConfig.fcpCfg' }
+                                        'SimulationJobOptions/preInclude.fcp.py' : 'Monopole.MonopoleConfig.fcpCfg',
+                                        'SimulationJobOptions/preInclude.Dyon.py' : 'Monopole.MonopoleConfig.DyonCfg' }
     legacyPreIncludeToCAPreInclude = { 'SimulationJobOptions/preInclude.AMSB.py' : None,
                                        'SimulationJobOptions/preInclude.Monopole.py' :  'Monopole.MonopoleConfig.MonopolePreInclude',
                                        'SimulationJobOptions/preInclude.Quirks.py' : None,
@@ -256,7 +257,8 @@ def getSpecialConfigurationMetadata(flags):
                                        'SimulationJobOptions/preInclude.GMSB.py' : None,
                                        'SimulationJobOptions/preInclude.Qball.py' : 'Monopole.MonopoleConfig.QballPreInclude',
                                        'SimulationJobOptions/preInclude.RHadronsPythia8.py' : 'RHadrons.RHadronsConfig.RHadronsPreInclude',
-                                       'SimulationJobOptions/preInclude.fcp.py' : 'Monopole.MonopoleConfig.fcpPreInclude' }
+                                       'SimulationJobOptions/preInclude.fcp.py' : 'Monopole.MonopoleConfig.fcpPreInclude',
+                                       'SimulationJobOptions/preInclude.Dyon.py' : 'Monopole.MonopoleConfig.DyonPreInclude' }
     specialConfigString = ''
     from AthenaConfiguration.Enums import ProductionStep
     inputFiles = flags.Input.Files

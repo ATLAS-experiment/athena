@@ -26,6 +26,7 @@
 #include "StoreGate/WriteCondHandleKey.h"
 #include "CoralBase/Blob.h"
 #include "xAODEventInfo/EventInfo.h"
+#include "ByteStreamData/ByteStreamMetadataContainer.h"
 
 
 /**
@@ -177,6 +178,10 @@ private:
   SG::ReadCondHandleKey<AthenaAttributeList> m_mcDigitizationInputKey
   { this, "DigitizationFolderInputKey", "/Digitization/Parameters",
     "Digitization parameters metadata folder." };
+
+  SG::ReadHandleKey<ByteStreamMetadataContainer> m_byteStreamMetadataKey
+  { this, "ByteStreamMetadataKey", "",
+    "ByteStream metadata (for reading IOV metadata from BS files in MC mode)" };
 
   SG::ReadHandleKey<xAOD::EventInfo> m_eventInfoKey 
   { this, "EventInfoKey", "EventInfo", "EventInfo key, used to read in simulated mu in MC" };

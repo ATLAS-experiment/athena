@@ -26,12 +26,14 @@
 #include "ByteStreamData/RawEvent.h"
 #include "EventStorage/EventStorageRecords.h"
 #include "StoreGate/ReadHandleKey.h"
+#include "StoreGate/StoreGateSvc.h"
 #include "xAODEventInfo/EventInfo.h"
 
 #include "GaudiKernel/extends.h"
 #include "GaudiKernel/IIoComponent.h"
-#include "GaudiKernel/IIoComponentMgr.h" 
+#include "GaudiKernel/IIoComponentMgr.h"
 #include "GaudiKernel/ServiceHandle.h"
+#include "EventInfoMgt/ITagInfoMgr.h"
 
 
 class EventInfo;
@@ -145,6 +147,8 @@ class ByteStreamEventStorageOutputSvc :
     "Key for bytestream metadata object in metadata store"};
 
   ServiceHandle< IIoComponentMgr > m_ioMgr{"IoComponentMgr", name()};
+  ServiceHandle< ITagInfoMgr > m_tagInfoMgr{"TagInfoMgr", name()};
+  ServiceHandle< StoreGateSvc > m_metaDataStore{"StoreGateSvc/MetaDataStore", name()};
 
  private:  // data
   //! number of event counter

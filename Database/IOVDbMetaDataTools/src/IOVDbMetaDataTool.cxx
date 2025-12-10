@@ -30,6 +30,7 @@
 #include "AthenaKernel/ClassID_traits.h"
 #include "AthenaKernel/IRCUSvc.h"
 #include "CoralBase/AttributeListSpecification.h"
+#include "nlohmann/json.hpp"
 
 
 IOVDbMetaDataTool::IOVDbMetaDataTool(const std::string& type,
@@ -235,6 +236,53 @@ StatusCode IOVDbMetaDataTool::beginInputFile(const SG::SourceID& sid)
 
 StatusCode IOVDbMetaDataTool::endInputFile(const SG::SourceID&)
 {
+  return StatusCode::SUCCESS;
+}
+
+StatusCode IOVDbMetaDataTool::serializeIOVMetadataToBSMetadata()
+{
+  // Check if we have folders to serialize to ByteStream metadata
+  if (m_foldersToSerializeToBSMetadata.value().empty()) {
+    ATH_MSG_DEBUG("No folders configured for serialization");
+    return StatusCode::SUCCESS;
+  }
+
+  // Collect IOV metadata strings first
+  std::vector<std::string> iovMetaStrings;
+  for (const std::string& folderName : m_foldersToSerializeToBSMetadata.value()) {
+    IOVMetaDataContainer* container = findMetaDataContainer(folderName);
+    if (!container) {
+      ATH_MSG_WARNING("Could not find IOVMetaDataContainer for folder " << folderName << ", skipping");
+      continue;
+    }
+
+    std::string jsonStr = serializeContainerToJSON(container);
+    if (!jsonStr.empty()) {
+      iovMetaStrings.push_back("IOVMeta." + folderName + "=" + jsonStr);
+      ATH_MSG_DEBUG("Serialized folder " << folderName << " (" << jsonStr.size() << " bytes JSON)");
+    }
+  }
+
+  if (iovMetaStrings.empty()) {
+    ATH_MSG_DEBUG("No IOV metadata serialized");
+    return StatusCode::SUCCESS;
+  }
+
+  // Store the IOV metadata strings in MetaDataStore for ByteStreamCnvSvc to retrieve
+  // Check if the object already exists and update it, or create a new one
+  if (m_metaDataStore->contains<std::vector<std::string>>("IOVMetaDataStrings")) {
+    // Retrieve existing and append
+    std::vector<std::string>* existingStrings = nullptr;
+    ATH_CHECK(m_metaDataStore->retrieve(existingStrings, "IOVMetaDataStrings"));
+    existingStrings->insert(existingStrings->end(), iovMetaStrings.begin(), iovMetaStrings.end());
+    ATH_MSG_DEBUG("Appended " << iovMetaStrings.size() << " IOV metadata strings to existing collection");
+  } else {
+    // Create new
+    auto iovMetaData = std::make_unique<std::vector<std::string>>(std::move(iovMetaStrings));
+    ATH_CHECK(m_metaDataStore->record(std::move(iovMetaData), "IOVMetaDataStrings"));
+    ATH_MSG_DEBUG("Stored " << iovMetaStrings.size() << " IOV metadata strings in MetaDataStore");
+  }
+
   return StatusCode::SUCCESS;
 }
 
@@ -814,7 +862,96 @@ StatusCode IOVDbMetaDataTool::processInputFileMetaData(const std::string& fileNa
     }
   }
 
+  // Serialize requested IOV folders to ByteStream metadata
+  ATH_CHECK(serializeIOVMetadataToBSMetadata());
+
   return StatusCode::SUCCESS;
+}
+
+//--------------------------------------------------------------------------
+
+std::string
+IOVDbMetaDataTool::serializeContainerToJSON(const IOVMetaDataContainer* container) const
+{
+  const IOVPayloadContainer* payloads = container->payloadContainer();
+  if (!payloads || payloads->size() == 0) {
+    ATH_MSG_WARNING("No payloads for folder " << container->folderName());
+    return "";
+  }
+
+  using json = nlohmann::json;
+  json jsonData;
+
+  jsonData["folder"] = container->folderName();
+  jsonData["description"] = container->folderDescription();
+  jsonData["iovs"] = json::array();
+
+  // Serialize each IOV payload
+  for (const CondAttrListCollection* coll : *payloads) {
+    json iov;
+
+    // Get IOV range
+    IOVRange range = coll->minRange();
+    IOVTime start = range.start();
+    IOVTime stop = range.stop();
+
+    // IOV range
+    if (start.isRunEvent()) {
+      iov["range"]["start"] = {{"run", start.run()}, {"event", start.event()}};
+      iov["range"]["stop"] = {{"run", stop.run()}, {"event", stop.event()}};
+    } else {
+      iov["range"]["start"] = {{"timestamp", start.timestamp()}};
+      iov["range"]["stop"] = {{"timestamp", stop.timestamp()}};
+    }
+
+    // Attributes (serialize each channel)
+    iov["attrs"] = json::object();
+    for (const auto& chanAttrPair : *coll) {
+      CondAttrListCollection::ChanNum chan = chanAttrPair.first;
+      const coral::AttributeList& attrList = chanAttrPair.second;
+
+      std::string chanKey = "chan" + std::to_string(chan);
+      iov["attrs"][chanKey] = json::object();
+
+      for (const auto& attr : attrList) {
+        std::string attrName = attr.specification().name();
+
+        // Serialize attribute value based on type
+        const std::type_info& type = attr.specification().type();
+        if (type == typeid(std::string)) {
+          iov["attrs"][chanKey][attrName] = attr.data<std::string>();
+        } else if (type == typeid(int)) {
+          iov["attrs"][chanKey][attrName] = attr.data<int>();
+        } else if (type == typeid(unsigned int)) {
+          iov["attrs"][chanKey][attrName] = attr.data<unsigned int>();
+        } else if (type == typeid(long)) {
+          iov["attrs"][chanKey][attrName] = attr.data<long>();
+        } else if (type == typeid(unsigned long)) {
+          iov["attrs"][chanKey][attrName] = attr.data<unsigned long>();
+        } else if (type == typeid(long long)) {
+          iov["attrs"][chanKey][attrName] = attr.data<long long>();
+        } else if (type == typeid(unsigned long long)) {
+          iov["attrs"][chanKey][attrName] = attr.data<unsigned long long>();
+        } else if (type == typeid(float)) {
+          iov["attrs"][chanKey][attrName] = attr.data<float>();
+        } else if (type == typeid(double)) {
+          iov["attrs"][chanKey][attrName] = attr.data<double>();
+        } else if (type == typeid(bool)) {
+          iov["attrs"][chanKey][attrName] = attr.data<bool>();
+        } else {
+          // For other types, convert to string representation
+          std::ostringstream oss;
+          attr.toOutputStream(oss);
+          iov["attrs"][chanKey][attrName] = oss.str();
+          ATH_MSG_DEBUG("Attribute " << attrName << " has unsupported type, converted to string: " << oss.str());
+        }
+      }
+    }
+
+    jsonData["iovs"].push_back(iov);
+  }
+
+  return jsonData.dump();
 }
 
 //--------------------------------------------------------------------------
@@ -889,3 +1026,5 @@ IOVDbMetaDataTool::overrideIOV (CondAttrListCollection*& coll) const
     return StatusCode::SUCCESS;
 }
 
+
+//--------------------------------------------------------------------------
