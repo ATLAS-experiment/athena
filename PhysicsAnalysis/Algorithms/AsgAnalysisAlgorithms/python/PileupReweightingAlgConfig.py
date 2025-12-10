@@ -30,7 +30,7 @@ def McEventWeightCfg(flags, name="MyWeights", **kwargs):
 
 def PileupReweightingToolCfg(flags, name="PileupReweightingTool", commonPRW=True, **kwargs):
     acc = ComponentAccumulator()
-    from Campaigns.Utils import getMCCampaign
+    from Campaigns.Utils import getMCCampaign,Campaign
     campaign = getMCCampaign(flags.Input.Files)
 
     if not hasattr(kwargs, "LumiCalcFiles"):

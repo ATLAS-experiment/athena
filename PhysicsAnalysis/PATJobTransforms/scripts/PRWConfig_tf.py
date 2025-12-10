@@ -21,7 +21,7 @@ import PyJobTransforms.trfArgClasses as trfArgClasses
 @sigUsrStackTrace
 def main():
 
-    msg.info('This is %s' % sys.argv[0])
+    msg.info('This is %s' , sys.argv[0])
 
     trf = getTransform()
     trf.parseCmdLineArgs(sys.argv[1:])

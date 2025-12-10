@@ -153,7 +153,7 @@ StatusCode BunchCrossingCondAlg::execute (const EventContext& ctx) const {
           const std::vector<std::string>& freeStrings = metadata->getFreeMetaDataStrings();
 
           for (const std::string& str : freeStrings) {
-            if (str.find("IOVMeta./Digitization/Parameters=") == 0) {
+            if (str.starts_with("IOVMeta./Digitization/Parameters=")) {
               size_t eqPos = str.find('=');
               if (eqPos != std::string::npos && eqPos + 1 < str.size()) {
                 std::string jsonStr = str.substr(eqPos + 1);

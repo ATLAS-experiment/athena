@@ -141,7 +141,7 @@ LuminosityCondAlg::execute (const EventContext& ctx) const
 
         // Look for IOVMeta./Digitization/Parameters= in freeMetaDataStrings
         for (const std::string& str : freeStrings) {
-          if (str.find("IOVMeta./Digitization/Parameters=") == 0) {
+          if (str.starts_with("IOVMeta./Digitization/Parameters=")) {
             // Extract JSON string after the '=' sign
             size_t eqPos = str.find('=');
             if (eqPos != std::string::npos && eqPos + 1 < str.size()) {
