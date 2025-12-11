@@ -3,6 +3,8 @@
 */
 
 #include "eEmEg1BDTTOB.h"
+#include <sstream>
+
 
 namespace GlobalSim::IOBitwise {
 
@@ -19,7 +21,10 @@ namespace GlobalSim::IOBitwise {
   }
   
   std::string eEmEg1BDTTOB::to_string() const {
-    return IeEmEg1BDTTOB::to_string();
+    auto ss = std::stringstream();
+    
+    ss << "eEmEg1BDTTOB: m_eGamma1BDT_bits " << m_eGamma1BDT_bits << '\n';
+    return ss.str();
   }
   
 }
