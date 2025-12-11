@@ -41,6 +41,14 @@ namespace MuonValR4{
                                       const double xPos, const double yPos,
                                       const unsigned int fontSize) {
         auto tl = std::make_unique<TLatex>(xPos, yPos, text.c_str());
+        tl->SetTextFont(43); 
+        tl->SetTextSize(fontSize); 
+        return tl;
+    }
+    std::unique_ptr<TLatex> drawLabelNDC(const std::string& text, 
+                                      const double xPos, const double yPos,
+                                      const unsigned int fontSize) {
+        auto tl = std::make_unique<TLatex>(xPos, yPos, text.c_str());
         tl->SetNDC();
         tl->SetTextFont(43); 
         tl->SetTextSize(fontSize); 
@@ -91,12 +99,12 @@ namespace MuonValR4{
     }
     std::unique_ptr<TLatex> drawAtlasLabel(const double xPos, const double yPos,
                                            const std::string& status) {
-        return drawLabel( "#font[72]{ATLAS} "+status, xPos, yPos);
+        return drawLabelNDC( "#font[72]{ATLAS} "+status, xPos, yPos);
     }
     std::unique_ptr<TLatex> drawLumiSqrtS(const double xPos,
                                           const double yPos,
                                           const std::string_view sqrtS,
                                           const std::string_view lumi) {
-        return drawLabel(std::format("#sqrt{{s}}={0} TeV {1}{2}", sqrtS, lumi, lumi.empty() ? "" : "fb^{-1}"), xPos, yPos);
+        return drawLabelNDC(std::format("#sqrt{{s}}={0} TeV {1}{2}", sqrtS, lumi, lumi.empty() ? "" : "fb^{-1}"), xPos, yPos);
     }
 }
