@@ -34,14 +34,14 @@ namespace GlobalSim {
   
     // read in LArStrip neighborhood TOBs from the event store
     auto in =
-      SG::ReadHandle<IOBitwise::IeEmNbhoodTOBContainer>(m_nbhdTOBContainerReadKey,
-						    ctx);
+      SG::ReadHandle<IOBitwise::eEmNbhoodTOBContainer>(m_nbhdTOBContainerReadKey,
+						       ctx);
     CHECK(in.isValid());
 
     ATH_MSG_DEBUG("read in " << (*in).size() << " neighborhoods");
 
-    SG::WriteHandle<IOBitwise::IeEmEg1BDTTOBContainer> h_BDTResult(m_BDTResultKey, ctx);
-    CHECK(h_BDTResult.record(std::make_unique<IOBitwise::IeEmEg1BDTTOBContainer>()));
+    SG::WriteHandle<IOBitwise::eEmEg1BDTTOBContainer> h_BDTResult(m_BDTResultKey, ctx);
+    CHECK(h_BDTResult.record(std::make_unique<IOBitwise::eEmEg1BDTTOBContainer>()));
     
     for (const auto nbhdTOB : *in) {
       auto c_phi = combine_phi(nbhdTOB);
@@ -83,7 +83,7 @@ namespace GlobalSim {
 
   
   std::vector<double>
-  Egamma1BDTAlgTool::combine_phi(const IOBitwise::IeEmNbhoodTOB* nbhdTOB) const  {
+  Egamma1BDTAlgTool::combine_phi(const IOBitwise::eEmNbhoodTOB* nbhdTOB) const  {
     auto result = std::vector<double>();
 
     const auto& phi_low = nbhdTOB->Neighbourhood().phi_low();

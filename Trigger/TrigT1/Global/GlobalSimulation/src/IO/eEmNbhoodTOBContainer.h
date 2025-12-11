@@ -16,6 +16,9 @@
 
 #include "AthContainers/DataVector.h"
 
+DATAVECTOR_BASE(GlobalSim::IOBitwise::eEmNbhoodTOB,
+		GlobalSim::IOBitwise::eEmTOB);
+
 namespace GlobalSim {
   namespace IOBitwise {
     /// Property: Defining the container object

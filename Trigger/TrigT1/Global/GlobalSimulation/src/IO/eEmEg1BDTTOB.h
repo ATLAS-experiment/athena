@@ -12,7 +12,7 @@
 #ifndef GLOBALSIM_EEMEGAMMA1BDTTOB_H
 #define GLOBALSIM_EEMEGAMMA1BDTTOB_H
 
-#include "IeEmEg1BDTTOB.h"
+#include "IeEmEg1BDTTOB.h" // constains const static parameters
 #include "eEmTOB.h"
 #include "AthenaKernel/CLASS_DEF.h"
 
@@ -20,7 +20,7 @@
 
 namespace GlobalSim::IOBitwise {
   /*! @copydoc IeEmEg1BDTTOB */
-  class eEmEg1BDTTOB : virtual public IeEmEg1BDTTOB, private eEmTOB {
+  class eEmEg1BDTTOB : public eEmTOB {
     
   public:
     /**
@@ -34,7 +34,7 @@ namespace GlobalSim::IOBitwise {
      * constructor, the CommonTOB constructor is used to initialise the common bits.
      */
     eEmEg1BDTTOB(const xAOD::eFexEMRoI& eFexTOB,
-		 std::bitset<s_eGamma1BDT_width> eGamma1BDT_bits);
+		 std::bitset<IeEmEg1BDTTOB::s_eGamma1BDT_width> eGamma1BDT_bits);
     /**
      * @brief Constructor taking an eEmTOB and eGamma1 BDT output bits to initialise bits..
      * @param[in] eEmTOB The input eEmTOB defining the common/eFex bits.
@@ -46,19 +46,19 @@ namespace GlobalSim::IOBitwise {
      * constructor, the CommonTOB constructor is used to initialise the common bits.
      */
     eEmEg1BDTTOB(const IeEmTOB& eEmTOB,
-		 std::bitset<s_eGamma1BDT_width> eGamma1BDT_bits);
+		 std::bitset<IeEmEg1BDTTOB::s_eGamma1BDT_width> eGamma1BDT_bits);
 
     //! @copydoc IeEmEg1BDTTOB::~IeEmEg1BDTTOB()
     virtual ~eEmEg1BDTTOB(){};
 
     //! @copydoc IeEmEg1BDTTOB::eGamma1BDT_bits()
-    virtual std::bitset<s_eGamma1BDT_width> eGamma1BDT_bits() const override;
+    virtual std::bitset<IeEmEg1BDTTOB::s_eGamma1BDT_width> eGamma1BDT_bits() const;
 
     //! @copydoc IeEmEg1BDTTOB::to_string() 
-    virtual std::string to_string() const override;
+    virtual std::string to_string() const;
   private:
     /// Property: Bitset to hold the eGamma1BDT bits
-    std::bitset<s_eGamma1BDT_width> m_eGamma1BDT_bits;
+    std::bitset<IeEmEg1BDTTOB::s_eGamma1BDT_width> m_eGamma1BDT_bits;
   };
 }//End of namespace
 
