@@ -184,7 +184,7 @@ public:
    * the store is not changed.  A key name that starts with a slash
    * is interpreted as a hierarchical key name, not an empty store name.
    *
-   * Returns failure the key string format is bad.
+   * Returns failure if the key string format is bad.
    */
   virtual StatusCode assign (const std::string& sgkey) override;
 
