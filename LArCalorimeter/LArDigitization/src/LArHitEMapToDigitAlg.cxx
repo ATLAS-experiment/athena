@@ -130,24 +130,21 @@ StatusCode LArHitEMapToDigitAlg::execute(const EventContext& context) const {
      hitmapPtr_DigiHSTruth = hitmap_DigitHSTruth.cptr();
    }
 
-   int it,it_end;
-   it =  0;
-   it_end = hitmapPtr->GetNbCells();
-
+   const size_t nCells=hitmapPtr->GetNbCells();
    // Prepare Output
    //
    // For the standard one lets use a DataPool
    auto DigitContainer = std::make_unique<LArDigitContainer>(SG::VIEW_ELEMENTS);
-   DigitContainer->reserve(it_end);
+   DigitContainer->reserve(nCells);
    DataPool<LArDigit> dataItemsPool(context);
-   dataItemsPool.reserve(it_end);
+   dataItemsPool.reserve(nCells);
    //
-   // HSTruth outputt might not be needed so avoid doing anything
+   // HSTruth output might not be needed so avoid doing anything
    // in that case
    std::unique_ptr<LArDigitContainer> DigitContainer_DigiHSTruth = nullptr;
    if (m_doDigiTruth){
      DigitContainer_DigiHSTruth = std::make_unique<LArDigitContainer>();
-     DigitContainer_DigiHSTruth->reserve(it_end);
+     DigitContainer_DigiHSTruth->reserve(nCells);
    }
    //
    const std::vector<std::pair<float,float> >* TimeE;
@@ -158,7 +155,7 @@ StatusCode LArHitEMapToDigitAlg::execute(const EventContext& context) const {
    ATHRNG::RNGWrapper::SeedingOptionType seedingmode=m_useLegacyRandomSeeds ? ATHRNG::RNGWrapper::MC16Seeding : ATHRNG::RNGWrapper::SeedingDefault;
    rngWrapper->setSeedLegacy( m_randomStreamName, context, m_randomSeedOffset, seedingmode );
 
-   for( ; it!=it_end;++it) // now loop on cells
+   for (size_t it=0;it<nCells;++it) 
    {
       const LArHitList& hitlist = hitmapPtr->GetCell(it);
 
@@ -223,17 +220,13 @@ StatusCode LArHitEMapToDigitAlg::MakeDigit(
     const std::vector<std::pair<float, float>>* TimeE_DigiHSTruth) const {
   bool createDigit_DigiHSTruth = true;
 
-  int sampleGainChoice{2};
-  if (m_firstSample<0) sampleGainChoice-=m_firstSample;
-
+ 
   int i;
   short Adc;
   short Adc_DigiHSTruth;
 
   std::vector<short> AdcSample(m_NSamples);
   std::vector<short> AdcSample_DigiHSTruth(m_NSamples);
-
-  float MeV2GeV=0.001;   // to convert hit from MeV to GeV before apply GeV->ADC
 
   float SF=1.;
   float SigmaNoise;
@@ -328,7 +321,7 @@ StatusCode LArHitEMapToDigitAlg::MakeDigit(
  if(m_RndmEvtOverlay && rndmEvtDigit ) // no overlay if missing random digit
  {
   rndmGain= rndmEvtDigit->gain();
-  auto polynom_adc2mev =adc2MeVs->ADC2MEV(cellId,rndmEvtDigit->gain());
+  auto polynom_adc2mev =adc2MeVs->ADC2MEV(ch_id,rndmEvtDigit->gain());
   if (polynom_adc2mev.size() > 1) {
      float adc2energy = SF * polynom_adc2mev[1];
      const std::vector<short> & rndm_digit_samples = rndmEvtDigit->samples() ;
@@ -373,54 +366,12 @@ StatusCode LArHitEMapToDigitAlg::MakeDigit(
     ATH_MSG_WARNING(" No ramp found for this random cell " << m_larem_id->show_to_string(cellId) << " for gain " << rndmEvtDigit->gain());
   }
  }
-//...................................................................
 
-//
-//........ choice of the gain
-//
-//
-// fix the shift +1 if HEC  and nSamples 4 and firstSample 0
-  int ihecshift=0;
-  if(iCalo == HEC && m_NSamples.value() == 4 && m_firstSample.value() == 0) ihecshift=1;
-  float samp2=Samples[sampleGainChoice-ihecshift]*MeV2GeV;
-  if ( samp2 <= m_EnergyThresh ) return(StatusCode::SUCCESS);
 
-  if(m_doDigiTruth){
-    float Samp2_DigiHSTruth=Samples_DigiHSTruth[sampleGainChoice-ihecshift]*MeV2GeV;
-    if ( Samp2_DigiHSTruth <= m_EnergyThresh ) createDigit_DigiHSTruth = false;
+  CaloGain::CaloGain igain=chooseGain(Samples,ch_id,static_cast<CaloNum>(iCalo),pedestal,adc2MeVs,SF);
+  if (igain==CaloGain::INVALIDGAIN) {
+        return StatusCode::FAILURE;
   }
-
-  CaloGain::CaloGain gainChoosingGain=static_cast<CaloGain::CaloGain>(m_gainRange[iCalo].value().second-1);
-    //We choose the gain in applying thresholds on the 3rd Sample (index "2")
-    //converted in ADC counts in the second-lowest gain (eg MEDIUM gain for run 1,2,3, HIGH gain for run 4) 
-    //Indeed, thresholds in ADC counts are defined with respect to the MediumGain.
-    //
-    //              1300              3900
-    // ---------------|----------------|--------------> ADC counts in MediumGain
-    //    HighGain  <---  MediumGain  --->  LowGain
-
-  float Pedestal = pedestal->pedestal(ch_id,gainChoosingGain);
-  if (Pedestal <= (1.0+LArElecCalib::ERRORCODE)) {
-   ATH_MSG_DEBUG(" Pedestal not found, cellID " << m_larem_id->show_to_string(cellId) <<  " assume 1000 ");
-   Pedestal=1000.;
-  }
-  auto polynom_adc2mev = adc2MeVs->ADC2MEV(cellId,gainChoosingGain);
-  if ( polynom_adc2mev.size() < 2) {
-    ATH_MSG_WARNING(" No medium gain ramp found for cell " << m_larem_id->show_to_string(cellId) << " no digit produced...");
-    return StatusCode::SUCCESS;
-  }
-  const float pseudoADC3 = Samples[sampleGainChoice-ihecshift]/(polynom_adc2mev[1])/SF + Pedestal ;
-
-  CaloGain::CaloGain igain = gainChoosingGain;
-  //if we are not yet already in the highest gain and we are below high-gain theshold, switch to high gain
-  if (gainChoosingGain>m_gainRange[iCalo].value().first && pseudoADC3 < m_HighGainThresh[iCalo]) {
-        igain=CaloGain::LARHIGHGAIN;
-  }
-
-  else if (gainChoosingGain<m_gainRange[iCalo].value().second && pseudoADC3 > m_LowGainThresh[iCalo]) {
-        igain=CaloGain::LARLOWGAIN;
-  }
-
 
  // check that select gain is never lower (higher index number) than random gain in case of overlay
   igain=std::max(rndmGain,igain);
@@ -547,12 +498,12 @@ StatusCode LArHitEMapToDigitAlg::MakeDigit(
             //
 // ......... convert into adc counts  ................................
 //
-  Pedestal = pedestal->pedestal(ch_id,igain);
+  float Pedestal = pedestal->pedestal(ch_id,igain);
   if (Pedestal <= (1.0+LArElecCalib::ERRORCODE)) {
      ATH_MSG_WARNING(" pedestal not found for cellId " << cellId << " assume 1000" );
      Pedestal=1000.;
   }
-  polynom_adc2mev = adc2MeVs->ADC2MEV(cellId,igain);
+  const auto polynom_adc2mev = adc2MeVs->ADC2MEV(cellId,igain);
   if (polynom_adc2mev.size() < 2) {
     ATH_MSG_WARNING(" No ramp found for requested gain " << igain << " for cell " << m_larem_id->show_to_string(cellId) << " no digit made...");
     return StatusCode::SUCCESS;
@@ -663,8 +614,6 @@ StatusCode LArHitEMapToDigitAlg::ConvertHits2Samples(const EventContext& ctx,
    int nsamples_der ;
    int i ;
    int j ;
-   float energy ;
-   float time ;
 
    SG::ReadCondHandle<ILArShape> shapeHdl(m_shapeKey, ctx);
    const ILArShape* shape=*shapeHdl;
@@ -689,21 +638,12 @@ StatusCode LArHitEMapToDigitAlg::ConvertHits2Samples(const EventContext& ctx,
   {
        ATH_MSG_DEBUG(Shape[i] << " ");
   }
-#endif
-
-  std::vector<std::pair<float,float> >::const_iterator first = TimeE->begin();
-  std::vector<std::pair<float,float> >::const_iterator last  = TimeE->end();
-
-  while (first != last)
-  {
-   energy = (*first).first;
-   time   = (*first).second;
-
-#ifndef NDEBUG
   ATH_MSG_DEBUG("m_NSamples, m_usePhase " << m_NSamples << " " << m_usePhase);
 #endif
 
-   // fix the shift +1 if HEC  and nSamples 4 and firstSample 0
+
+for (const auto& [energy, time] : *TimeE) {
+  // fix the shift +1 if HEC  and nSamples 4 and firstSample 0
    // in case of data overlay this should NOT  be done as the pulse shape read from the database is already shifted
    //   but this should still be done in case of MC overlay
    int ihecshift=0;
@@ -779,10 +719,53 @@ StatusCode LArHitEMapToDigitAlg::ConvertHits2Samples(const EventContext& ctx,
       }
 
    }     // else if of m_usePhase
-
-   ++first;
-  }         // loop over hits
+  } // loop over hits
 
    return StatusCode::SUCCESS;
 
+}
+
+CaloGain::CaloGain LArHitEMapToDigitAlg::chooseGain(const staticVecDouble_t& samples, const HWIdentifier ch_id, const CaloNum iCalo,
+                                                    const ILArPedestal* pedestal, const LArADC2MeV* adc2MeVs, const float SF) const {
+
+  int sampleGainChoice{2};
+  if (m_firstSample < 0)
+    sampleGainChoice -= m_firstSample;
+
+  // fix the shift +1 if HEC  and nSamples 4 and firstSample 0
+  if (iCalo == HEC && m_NSamples.value() == 4 && m_firstSample.value() == 0)
+    sampleGainChoice -= 1;  // ihecshift
+
+  CaloGain::CaloGain gainChoosingGain = static_cast<CaloGain::CaloGain>(m_gainRange[iCalo].value().second - 1);
+  // We choose the gain in applying thresholds on the 3rd Sample (index "2")
+  // converted in ADC counts in the second-lowest gain (eg MEDIUM gain for run 1,2,3, HIGH gain for run 4)
+  // Indeed, thresholds in ADC counts are defined with respect to the MediumGain.
+  //
+  //               1300              3900
+  //  ---------------|----------------|--------------> ADC counts in MediumGain
+  //     HighGain  <---  MediumGain  --->  LowGain
+
+  float Pedestal = pedestal->pedestal(ch_id, gainChoosingGain);
+  if (Pedestal <= (1.0 + LArElecCalib::ERRORCODE)) {
+    ATH_MSG_DEBUG(" Pedestal not found for channel " << m_laronline_id->channel_name(ch_id) << " assume 1000 ");
+    Pedestal = 1000.;
+  }
+  const auto& polynom_adc2mev = adc2MeVs->ADC2MEV(ch_id, gainChoosingGain);
+  if (polynom_adc2mev.size() < 2) {
+    ATH_MSG_WARNING(" No ramp found for channel  " << m_laronline_id->channel_name(ch_id) << ", gain " << gainChoosingGain << ",  no digit produced...");
+    return CaloGain::INVALIDGAIN;
+  }
+  const float pseudoADC3 = samples[sampleGainChoice] / (polynom_adc2mev[1]) / SF + Pedestal;
+
+  CaloGain::CaloGain igain = gainChoosingGain;
+  // if we are not yet already in the highest gain and we are below high-gain theshold, switch to high gain
+  if (gainChoosingGain > m_gainRange[iCalo].value().first && pseudoADC3 < m_HighGainThresh[iCalo]) {
+    igain = CaloGain::LARHIGHGAIN;
+  }
+
+  else if (gainChoosingGain < m_gainRange[iCalo].value().second && pseudoADC3 > m_LowGainThresh[iCalo]) {
+    igain = CaloGain::LARLOWGAIN;
+  }
+
+  return igain;
 }

@@ -25,6 +25,11 @@ from DigitizationConfig.TruthDigitizationOutputConfig import TruthDigitizationOu
 from CaloConditions.CaloConditionsConfig import CaloTriggerTowerCfg
 from SGComps.AddressRemappingConfig import InputOverwriteCfg
 
+# Enum of CaloGains
+from ROOT.CaloGain import CaloGain
+
+
+
 def useLArFloat(flags):
     """Return bool for simplified transient LArHit with float E,time"""
     # temporary, remapping to LArHitFloat does not seeem to work
@@ -193,10 +198,10 @@ def LArHitEMapToDigitAlgCfg(flags, name="LArHitEMapToDigitAlg", **kwargs):
     kwargs.setdefault("RandomSeedOffset", flags.Digitization.RandomSeedOffset)
     if (not flags.Digitization.HighGainFCal) and (not flags.Common.isOverlay):
         kwargs.setdefault("HighGainThreshFCAL", 0)
-        kwargs.setdefault("GainRangeFCAL",[1,2])
+        kwargs.setdefault("GainRangeFCAL",[int(CaloGain.LARMEDIUMGAIN),int(CaloGain.LARLOWGAIN)])
     if (not flags.Digitization.HighGainEMECIW) and (not flags.Common.isOverlay):
         kwargs.setdefault("HighGainThreshEMECIW", 0)
-        kwargs.setdefault("GainRangeEMECIW",[1,2])
+        kwargs.setdefault("GainRangeEMECIW",[int(CaloGain.LARMEDIUMGAIN),int(CaloGain.LARLOWGAIN)])
     kwargs.setdefault("RndmEvtOverlay", flags.Common.isOverlay)
     if flags.Common.ProductionStep == ProductionStep.PileUpPresampling:
         kwargs.setdefault("DigitContainer", flags.Overlay.BkgPrefix + "LArDigitContainer_MC")
