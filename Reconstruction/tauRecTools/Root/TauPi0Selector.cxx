@@ -43,12 +43,12 @@ StatusCode TauPi0Selector::executePi0nPFO(xAOD::TauJet& pTau, xAOD::PFOContainer
     int etaBin = getEtaBin( neutralPFO->cluster(0)->eta() );
     
     // Apply Et cut
-    if (neutralPFO->p4().Et() < m_clusterEtCut[etaBin]) continue;
+    if (neutralPFO->p4().Et() < m_pi0EtCut[etaBin]) continue;
     
     // Apply BDT score cut
-    double BDTScore = neutralPFO->bdtPi0Score();
-    if ((pTau.nTracks() == 1 && BDTScore < m_clusterBDTCut_1prong[etaBin]) || 
-        (pTau.nTracks() > 1 && BDTScore < m_clusterBDTCut_mprong[etaBin])) continue;
+    float BDTScore = neutralPFO->bdtPi0Score();
+    if ((pTau.nTracks() == 1 && BDTScore < m_pi0BDTCut_1prong[etaBin]) || 
+        (pTau.nTracks() > 1 && BDTScore < m_pi0BDTCut_mprong[etaBin])) continue;
 
     int nHitsInEM1 = 0;
     if (!neutralPFO->attribute(xAOD::PFODetails::cellBased_NHitsInEM1, nHitsInEM1)) { 
