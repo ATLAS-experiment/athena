@@ -406,11 +406,10 @@ def AddLargeRJetD2Cfg(flags):
 def DFCommonTruthEDDecoratorCfg(flags, name="DFCommonTruthEDDecorator", **kwargs):
     """Truth energy density decorator"""
     acc = ComponentAccumulator()
-    eventInfoKey = kwargs.setdefault("EventInfoName", "EventInfo")
+    kwargs.setdefault("EventInfoName", "EventInfo")
     kwargs.setdefault("EventShapeKeys", ["TruthIsoCentralEventShape","TruthIsoForwardEventShape"])
     suffix = kwargs.pop("DecorationSuffix", "_rho")
-    kwargs.setdefault("EnergyDensityDecorKeys", [ eventInfoKey + "." + x + suffix for x in kwargs["EventShapeKeys"] ])
-    # FIXME Once WriteDecorHandleKeyArray is updated the above line can be simplified
+    kwargs.setdefault("EnergyDensityDecorKeys", [ x + suffix for x in kwargs["EventShapeKeys"] ])
     acc.setPrivateTools(CompFactory.DerivationFramework.TruthEDDecorator(name, **kwargs))
     return acc
 
