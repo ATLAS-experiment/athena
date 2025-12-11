@@ -77,6 +77,7 @@ We describe in the following, how each field of the identifier is retrieved.
 #include <string>
 #include <gtest/gtest_prod.h>
 
+class AtlasG4EventUserInfo;
 class G4TouchableHistory;
 class MdtHitIdHelper;
 class MDTSimHit;
@@ -100,6 +101,7 @@ private:
     /** member data */
     std::string m_hitCollectionName;
     MDTSimHitCollection* m_MDTHitColl{nullptr};
+    AtlasG4EventUserInfo* m_g4UserEventInfo{nullptr};
     const MdtHitIdHelper*      m_muonHelper;
 
     double                     m_driftRadius;

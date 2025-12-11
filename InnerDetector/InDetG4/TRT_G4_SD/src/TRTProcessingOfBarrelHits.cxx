@@ -224,14 +224,10 @@ bool TRTProcessingOfBarrelHits::ProcessHit(G4Step* pStep)
   hitID += (moduleID << 10);
   hitID += (layerID << 5);
   hitID += strawID;
-  // Temporary solution to get EventContext from a Geant4 thread 
-  EventContext const* eventContext{nullptr};
-  if(auto* eventInfo = AtlasG4EventUserInfo::GetEventUserInfo()){
-    eventContext = &eventInfo->GetEventContext();
-  }
 
   m_pSensitiveDetector->m_hitID = hitID;
-  m_pSensitiveDetector->m_partLink = eventContext ? trHelp.GenerateParticleLink(*eventContext) : trHelp.GenerateParticleLink();
+  auto* eventInfo = m_pSensitiveDetector->m_g4UserEventInfo;
+  m_pSensitiveDetector->m_partLink =  trHelp.GenerateParticleLink(eventInfo ? eventInfo->GetEventStore() : nullptr);
   m_pSensitiveDetector->m_preStepX = preStepX;
   m_pSensitiveDetector->m_preStepY = preStepY;
   m_pSensitiveDetector->m_preStepZ = preStepZ;

@@ -10,6 +10,7 @@
 #include <string>
 #include <gtest/gtest_prod.h>
 
+class AtlasG4EventUserInfo;
 class MicromegasHitIdHelper;
 
 class MicromegasSensitiveDetector : public G4VSensitiveDetector {
@@ -28,6 +29,7 @@ private:
 
     std::string m_hitCollectionName;
     MMSimHitCollection* m_MMSimHitCollection{nullptr};
+    AtlasG4EventUserInfo* m_g4UserEventInfo{nullptr};
     const MicromegasHitIdHelper* m_muonHelper;
 
 };

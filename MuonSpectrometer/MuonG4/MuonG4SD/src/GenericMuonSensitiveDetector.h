@@ -10,6 +10,8 @@
 #include <string>
 #include <gtest/gtest_prod.h>
 
+class AtlasG4EventUserInfo;
+
 class GenericMuonSensitiveDetector : public G4VSensitiveDetector {
  FRIEND_TEST( GenericMuonSensitiveDetectortest, Initialize );
  FRIEND_TEST( GenericMuonSensitiveDetectortest, ProcessHits );
@@ -25,6 +27,7 @@ private:
 
     std::string m_hitCollectionName;
     GenericMuonSimHitCollection* m_GenericMuonHitCollection{nullptr};
+    AtlasG4EventUserInfo* m_g4UserEventInfo{nullptr};
 
 };
 

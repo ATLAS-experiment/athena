@@ -43,6 +43,7 @@ void MDTSensitiveDetectorCosmics::Initialize(G4HCofThisEvent*)
   m_MDTHitColl = nullptr;
   if (auto* eventInfo = AtlasG4EventUserInfo::GetEventUserInfo()) {
     m_MDTHitColl = eventInfo->GetHitCollectionMap()->Find<MDTSimHitCollection>(m_hitCollectionName);
+    m_g4UserEventInfo = eventInfo;
   }
   m_driftRadius = m_DEFAULT_TUBE_RADIUS;
   // START OF COSMICS SPECIFIC CODE
@@ -174,12 +175,8 @@ G4bool MDTSensitiveDetectorCosmics::ProcessHits(G4Step* aStep,G4TouchableHistory
     TrackHelper trHelp(aStep->GetTrack());
 
     // construct new mdt hit
-    EventContext const* eventContext{nullptr};
-    if(auto* eventInfo = AtlasG4EventUserInfo::GetEventUserInfo()){
-      eventContext = &eventInfo->GetEventContext();
-    }
     m_MDTHitColl->Emplace(MDTid, m_globalTime, m_driftRadius, m_localPosition,
-                          eventContext ? trHelp.GenerateParticleLink(*eventContext) : trHelp.GenerateParticleLink(),
+                          trHelp.GenerateParticleLink(m_g4UserEventInfo ? m_g4UserEventInfo->GetEventStore() : nullptr),
                           aStep->GetStepLength(),
                           aStep->GetTotalEnergyDeposit(),
                           currentTrack->GetDefinition()->GetPDGEncoding(),

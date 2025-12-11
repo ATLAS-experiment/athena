@@ -7,6 +7,8 @@
 
 
 #include <GaudiKernel/EventContext.h>
+#include "AthenaKernel/ExtendedEventContext.h"
+#include "AthenaKernel/IProxyDict.h"
 #include "AtlasHepMC/GenEvent_fwd.h"
 #include "AtlasHepMC/GenParticle.h"
 #include "HitManagement/HitCollectionMap.h"
@@ -29,6 +31,7 @@ public:
   AtlasG4EventUserInfo(const EventContext& ctx)
     : G4VUserEventInformation()
     , m_eventContext(ctx)
+    , m_eventStore(Atlas::getExtendedEventContext(ctx).proxy())
   {}
 
   /**
@@ -119,6 +122,8 @@ public:
 
   const EventContext& GetEventContext() const { return m_eventContext; }
 
+  IProxyDict* GetEventStore() { return m_eventStore; }
+
   void Print() const {}
 
   // Static helper method to get the AtlasG4EventUserInfo from G4EventManager
@@ -136,6 +141,7 @@ public:
 
 private:
   const EventContext& m_eventContext;
+  IProxyDict* m_eventStore{};
   HepMC::GenEvent *m_theEvent{};
   HepMC::ConstGenParticlePtr m_currentPrimaryGenParticle{};
   HepMC::GenParticlePtr m_currentGenParticle{};

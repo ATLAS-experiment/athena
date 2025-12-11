@@ -28,6 +28,7 @@ void GenericMuonSensitiveDetector::Initialize(G4HCofThisEvent*)
   m_GenericMuonHitCollection = nullptr;
   if (auto* eventInfo = AtlasG4EventUserInfo::GetEventUserInfo()) {
     m_GenericMuonHitCollection = eventInfo->GetHitCollectionMap()->Find<GenericMuonSimHitCollection>(m_hitCollectionName);
+    m_g4UserEventInfo = eventInfo;
   }
 }
 
@@ -62,14 +63,10 @@ G4bool GenericMuonSensitiveDetector::ProcessHits(G4Step* aStep,G4TouchableHistor
   float StepLength=post_Step->GetStepLength();
 
   TrackHelper trHelp(aStep->GetTrack());
-  EventContext const* eventContext{nullptr};
-  if(auto* eventInfo = AtlasG4EventUserInfo::GetEventUserInfo()){
-    eventContext = &eventInfo->GetEventContext();
-  }
 
   //G4cout << aHit->print() << G4endl;
   m_GenericMuonHitCollection->Emplace( 0 /* HitID id generic*/,globalTime,globalpreTime,position,local_position,preposition,local_preposition,pdgCode,eKin,direction,depositEnergy,StepLength,
-                                      eventContext ? trHelp.GenerateParticleLink(*eventContext) : trHelp.GenerateParticleLink());
+                                      trHelp.GenerateParticleLink(m_g4UserEventInfo ? m_g4UserEventInfo->GetEventStore() : nullptr));
 
   return true;
 }

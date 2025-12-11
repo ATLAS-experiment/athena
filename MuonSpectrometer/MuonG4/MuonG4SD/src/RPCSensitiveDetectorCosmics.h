@@ -93,6 +93,8 @@ We describe here how each field of the identifier is determined.
 #include <string>
 #include <gtest/gtest_prod.h>
 
+class AtlasG4EventUserInfo;
+
 class RPCSensitiveDetectorCosmics : public G4VSensitiveDetector {
 FRIEND_TEST( RPCSensitiveDetectorCosmicstest, Initialize );
 FRIEND_TEST( RPCSensitiveDetectorCosmicstest, ProcessHits );
@@ -109,6 +111,7 @@ private:
     /** member data */
     std::string m_hitCollectionName;
     RPCSimHitCollection* m_myRPCHitColl{nullptr};
+    AtlasG4EventUserInfo* m_g4UserEventInfo{nullptr};
     const RpcHitIdHelper* m_muonHelper;
     double m_globalTime;
     bool m_isGeoModel;
