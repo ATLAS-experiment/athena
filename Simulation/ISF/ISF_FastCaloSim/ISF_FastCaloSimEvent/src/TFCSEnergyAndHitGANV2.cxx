@@ -680,6 +680,7 @@ void TFCSEnergyAndHitGANV2::test_path(const std::string &path,
 
   fGAN->ls();
   fGAN->Close();
+  delete fGAN;
 
   ATH_MSG_NOCLASS(logger, "Open " << outname);
   fGAN = TFile::Open(outname.c_str());
@@ -690,6 +691,7 @@ void TFCSEnergyAndHitGANV2::test_path(const std::string &path,
   ATH_MSG_NOCLASS(logger, "Before running GAN2->simulate()");
   GAN2->simulate(*simulstate, truth, extrapol);
   simulstate->Print();
+  delete fGAN;
 }
 
 int TFCSEnergyAndHitGANV2::GetBinsInFours(double const &bins) {

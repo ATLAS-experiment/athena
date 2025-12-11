@@ -96,10 +96,11 @@ void TFCSGANXMLParameters::InitialiseFromXML(
                         minAlpha = 0;
                       }
                       // Create histogram and add to binning map
-                      m_binning.emplace(
+                      auto itr = m_binning.emplace(
                           layer,
                           TH2D(name.c_str(), name.c_str(), xBins, edges.data(),
                                binsInAlpha, minAlpha, M_PI));
+                      itr.first->second.SetDirectory(nullptr);
                     }
                   }
                 }
