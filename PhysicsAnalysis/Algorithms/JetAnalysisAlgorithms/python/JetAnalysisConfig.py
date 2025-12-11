@@ -74,10 +74,8 @@ class PreJetAnalysisConfig (ConfigBlock) :
 
         # NB: I'm assuming that the truth tagging is done in PHYSLITE, if not this will
         # need to change
-        if self.runTruthJetTagging or (
-            self.runTruthJetTagging is None
-            and config.dataType() is not DataType.Data
-        ):
+        if (self.runTruthJetTagging or (self.runTruthJetTagging is None)
+        ) and config.dataType() is not DataType.Data:
             # Decorate jets with isHS labels (required to retrieve Jvt SFs)
             alg = config.createAlgorithm( 'CP::JetDecoratorAlg', 'JetPileupLabelAlg' )
             config.addPrivateTool( 'decorator', 'JetPileupLabelingTool' )
