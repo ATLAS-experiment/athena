@@ -588,9 +588,9 @@ def Pi0SelectorCfg(flags):
 
     TauPi0Selector = CompFactory.getComp("TauPi0Selector")
     TauPi0Selector = TauPi0Selector(name = _name,
-                                    ClusterEtCut         = flags.Tau.pi0EtCuts,
-                                    ClusterBDTCut_1prong = flags.Tau.pi0MVACuts_1prong,
-                                    ClusterBDTCut_mprong = flags.Tau.pi0MVACuts_mprong)
+                                    Pi0EtCut         = flags.Tau.pi0EtCuts,
+                                    Pi0BDTCut_1prong = flags.Tau.pi0MVACuts_1prong,
+                                    Pi0BDTCut_mprong = flags.Tau.pi0MVACuts_mprong)
 
     result.setPrivateTools(TauPi0Selector)
     return result
