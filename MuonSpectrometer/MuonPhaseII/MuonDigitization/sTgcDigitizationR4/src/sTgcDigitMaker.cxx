@@ -488,8 +488,8 @@ sTgcDigitMaker::sTgcDigitVec sTgcDigitMaker::executeDigi(const DigiConditions& c
       if (m_doPadSharing && (isNeighX || isNeighY)){
         // Phi == 1 at the right in the local geometry
         // In local coordinates, the pad to the right has phi' = phi - 1
-        unsigned int newPhi = diff.x() > 0 ? padEtaPhi.second-1 : padEtaPhi.second+1;
-        unsigned int newEta = diff.y() > 0 ? padEtaPhi.first+1 : padEtaPhi.first-1;
+        unsigned int newPhi = padEtaPhi.second - Acts::copySign(1, diff.x());
+        unsigned int newEta = padEtaPhi.first  + Acts::copySign(1, diff.y());
         bool validEta = newEta > 0 && newEta < readoutElement->numPadEta(padHitId) + 1;
         bool validPhi = newPhi > 0 && newPhi < readoutElement->numPadPhi(padHitId) + 1;
     

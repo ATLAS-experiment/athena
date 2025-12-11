@@ -337,7 +337,7 @@ StatusCode ReadoutGeomCnvAlg::buildRpc(const ActsTrk::GeometryContext& gctx, Con
         newElement->m_phistripwidth = copyMe->stripPhiWidth();
         newElement->m_etastripwidth = copyMe->stripEtaWidth();
         newElement->m_phistrippitch = copyMe->stripPhiPitch();
-        newElement->m_etastrippitch =  (aSide > 0 ? 1. : -1.) *copyMe->stripEtaPitch();
+        newElement->m_etastrippitch =  Acts::copySign(1., aSide)*copyMe->stripEtaPitch();
         newElement->m_phistriplength = copyMe->stripPhiLength();
         newElement->m_etastriplength = copyMe->stripEtaLength();
 

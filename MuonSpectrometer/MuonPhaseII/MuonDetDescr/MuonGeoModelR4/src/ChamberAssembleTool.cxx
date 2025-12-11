@@ -26,9 +26,6 @@
 
 using namespace Acts::UnitLiterals;
 namespace {
-   constexpr int sign(int numb) { 
-      return numb > 0 ? 1 : (numb == 0 ? 0 : -1);
-   }
    /** @brief Project a position in the x-y plane. */
    Amg::Vector3D projectIntoXY(const Amg::Vector3D& v) {
       return Amg::Vector3D{v.x(), v.y(), 0.};
@@ -361,7 +358,8 @@ StatusCode ChamberAssembleTool::buildReadOutElements(MuonDetectorManager &mgr) {
                            const Identifier testId = readOutEle->identify();
                            /// Check that the two readout elements are on the same side.
                            /// Exception BOG eta 0 -> attributes to positive sectors
-                           if (sign(refEle->stationEta()) * sign(readOutEle->stationEta()) <0) {
+                           if (Acts::copySign(1, refEle->stationEta()) * 
+                               Acts::copySign(1, readOutEle->stationEta()) < 0) {
                                  return false;
                            }
                            /// The two readout elements shall be located in the same sector
