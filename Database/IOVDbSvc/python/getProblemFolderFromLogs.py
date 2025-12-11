@@ -39,6 +39,7 @@ if __name__ == "__main__":
       sys.exit()
     data = {}
     st=""
+    noUsedData=[]
     # Parce athena log and found all folders and other parameters for compare data
     with open(args.input) as inp_file:
         while line := inp_file.readline():
@@ -76,6 +77,10 @@ if __name__ == "__main__":
                     el = data[sFolder.strip()]
                     el['tag']=sTag
                     data[sFolder.strip()]=el
+            if line.rstrip().find(' is requested but no data retrieved')>0:
+                st = line.rstrip()[:line.rstrip().find(' is requested but no data retrieved')]
+                st = st[st.find('WARNING Folder')+14:]
+                noUsedData.append(st.strip())
             if line.rstrip().find('Retrieved object: folder ')>0:
                 st = line.rstrip()[line.rstrip().find('Retrieved object: folder '):]
                 st = st[st.find('/'):]
@@ -166,7 +171,9 @@ if __name__ == "__main__":
                             command +=' -T '+js['tag']
                 print(command)
                 curFolder=""
-    print("Total number of folders in logs:",len(data)," Total number of folders which compare (used):",len(allFolder)," Correct folders:",len(correctFolder)," Different folders:",len(difFolder)," COOL problems:",len(coolProblem)," CREST problems:",len(crestProblem), "Unknown problems:", len(unknowProblem))
+    unCompared=data.keys()-allFolder
+    compList=set(unCompared)-set(noUsedData)
+    print("Total number of folders in logs:",len(data),"; Total number of folders which compare (used):",len(allFolder), "; Total number of unread folders:", len(noUsedData),"; Correct folders:",len(correctFolder),"; Different folders:",len(difFolder),"; COOL problems:",len(coolProblem),"; CREST problems:",len(crestProblem), "; Unknown problems:", len(unknowProblem))
     if len(difFolder)>0:
         print("Different data:",difFolder)
     if len(coolProblem)>0:
@@ -175,6 +182,13 @@ if __name__ == "__main__":
         print("CREST problem folders:",crestProblem)
     if len(unknowProblem)>0:
         print("Unknown problem folders:",unknowProblem)
+    if len(compList)>0:
+        if len(unCompared):
+            print("Incomparable folders:",unCompared)
+        if len(noUsedData)>0:
+            print("Unread (Unused) folders:",noUsedData)
+    elif len(noUsedData)>0:
+        print("Unread (Unused) folders:",noUsedData)
     if len(correctFolder)>0 and args.debug:
         print("Correct folders:",correctFolder)
     if len(allFolder)>0 and args.debug:

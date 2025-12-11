@@ -54,7 +54,7 @@ public:
   m_gTagCrest(gTagCrest),
   m_gTagCool(gTagCool),
   m_folder(folder),
-  m_log(m_msgSvc.get(), "IOVDbFolder_test"),
+  m_log(0, "IOVDbFolder_test"),
   m_clidSvc("ClassIDSvc","test"),
   m_crest_tag(""),
   m_crest_folder_desc(""),
@@ -109,7 +109,7 @@ public:
     ServiceHandle<ITagInfoMgr> tagInfoMgr{"TagInfoMgr","TagInfoMgr"};
     IOVDbParser parser(m_folder+m_crest_folder_desc,m_log);
     IOVDbConn connection(m_cool_con_str, true, m_log);
-    IOVDbFolder f(&(connection), parser, m_log, m_clidSvc.get(), nullptr, false, false, "COOL_DATABASE","http://unknown","unknown",true);
+    IOVDbFolder f(&(connection), parser, m_log, &(*m_clidSvc), nullptr, false, false, "COOL_DATABASE","http://unknown","unknown",true);
     f.preLoadFolder(tagInfoMgr.get() , 0, 0);
     for (uint64_t vkey : m_vList) {
     	f.loadCache(vkey, 0,m_gTagCool, true);
@@ -137,7 +137,7 @@ public:
     }    
     IOVDbParser parser(m_folder+m_crest_folder_desc,m_log);
     IOVDbConn connection("", true, m_log);
-    IOVDbFolder f(&(connection), parser, m_log, m_clidSvc.get(), nullptr, false, false, "CREST",m_crest_str,m_crest_tag,true);
+    IOVDbFolder f(&(connection), parser, m_log, &(*m_clidSvc), nullptr, false, false, "CREST",m_crest_str,m_crest_tag,true);
     f.preLoadFolder(tagInfoMgr.get() , 0, 0);
     for (uint64_t vkey : m_vList) {
       f.loadCache(vkey, 0,m_gTagCrest, true);
