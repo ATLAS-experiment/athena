@@ -81,9 +81,10 @@ void TFCSGANXMLParameters::InitialiseFromXML(
                       if (m_symmetrisedAlpha && binsInAlpha > 1) {
                         minAlpha = 0;
                       }
-                      m_binning[layer] =
+                      auto& h = m_binning[layer] =
                           TH2D(name.c_str(), name.c_str(), xBins, &edges[0],
                                binsInAlpha, minAlpha, TMath::Pi());
+                      h.SetDirectory(nullptr);
                     }
                   }
                 }
