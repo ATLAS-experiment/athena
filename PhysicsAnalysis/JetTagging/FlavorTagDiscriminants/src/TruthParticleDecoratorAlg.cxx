@@ -35,19 +35,12 @@ namespace FlavorTagDiscriminants {
     ATH_CHECK( m_TruthContainerKey.initialize() );
     ATH_CHECK( m_TruthPVsKey.initialize() );
 
-    // Prepare decorators
-    m_dec_origin_label = m_TruthContainerKey.key() + "." + m_dec_origin_label.key();
-    m_dec_type_label = m_TruthContainerKey.key() + "." + m_dec_type_label.key();
-    m_dec_source_label = m_TruthContainerKey.key() + "." + m_dec_source_label.key();
-    m_dec_vertex_index = m_TruthContainerKey.key() + "." + m_dec_vertex_index.key();
-    m_dec_parent_uniqueID = m_TruthContainerKey.key() + "." + m_dec_parent_uniqueID.key();
+    ATH_CHECK( m_dec_origin_label.initialize() );
+    ATH_CHECK( m_dec_type_label.initialize() );
+    ATH_CHECK( m_dec_source_label.initialize() );
+    ATH_CHECK( m_dec_vertex_index.initialize() );
+    ATH_CHECK( m_dec_parent_uniqueID.initialize() );
 
-    CHECK( m_dec_origin_label.initialize() );
-    CHECK( m_dec_type_label.initialize() );
-    CHECK( m_dec_source_label.initialize() );
-    CHECK( m_dec_vertex_index.initialize() );
-    CHECK( m_dec_parent_uniqueID.initialize() );
-    
     // Retrieve tools
     ATH_CHECK( m_truthOriginTool.retrieve() );
 
