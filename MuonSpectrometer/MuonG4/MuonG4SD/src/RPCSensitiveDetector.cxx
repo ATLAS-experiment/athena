@@ -34,6 +34,7 @@ void RPCSensitiveDetector::Initialize(G4HCofThisEvent*)
   m_myRPCHitColl = nullptr;
   if (auto* eventInfo = AtlasG4EventUserInfo::GetEventUserInfo()) {
     m_myRPCHitColl = eventInfo->GetHitCollectionMap()->Find<RPCSimHitCollection>(m_hitCollectionName);
+    m_g4UserEventInfo = eventInfo;
   }
   //FIXME probably only need to call this bit at start of the event
   //loop rather than the start of each G4Event.
@@ -282,15 +283,11 @@ G4bool RPCSensitiveDetector::ProcessHits(G4Step* aStep,G4TouchableHistory*) {
 
   // retrieve track barcode
   TrackHelper trHelp(aStep->GetTrack());
-  EventContext const* eventContext{nullptr};
-  if(auto* eventInfo = AtlasG4EventUserInfo::GetEventUserInfo()){
-    eventContext = &eventInfo->GetEventContext();
-  }
 
   //construct new rpc hit
   m_myRPCHitColl->Emplace(RPCid_eta, globalTime,
                         localPosition,
-                        eventContext ? trHelp.GenerateParticleLink(*eventContext) : trHelp.GenerateParticleLink(),
+                        trHelp.GenerateParticleLink(m_g4UserEventInfo ? m_g4UserEventInfo->GetEventStore() : nullptr),
                         localPostPosition,
                         aStep->GetTotalEnergyDeposit(),
                         aStep->GetStepLength(),
@@ -298,7 +295,7 @@ G4bool RPCSensitiveDetector::ProcessHits(G4Step* aStep,G4TouchableHistory*) {
                         aStep->GetPreStepPoint()->GetKineticEnergy());
   m_myRPCHitColl->Emplace(RPCid_phi, globalTime,
                         localPosition,
-                        eventContext ? trHelp.GenerateParticleLink(*eventContext) : trHelp.GenerateParticleLink(),
+                        trHelp.GenerateParticleLink(m_g4UserEventInfo ? m_g4UserEventInfo->GetEventStore() : nullptr),
                         localPostPosition,
                         aStep->GetTotalEnergyDeposit(),
                         aStep->GetStepLength(),

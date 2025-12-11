@@ -73,12 +73,7 @@ G4bool SctSensorGmxSD::ProcessHits(G4Step *aStep, G4TouchableHistory * /* not us
   
   // get the HepMcParticleLink from the TrackHelper
   TrackHelper trHelp(aStep->GetTrack());
-  // Temporary solution to get EventContext from a Geant4 thread 
-  EventContext const* eventContext{nullptr};
-  if(auto* eventInfo = AtlasG4EventUserInfo::GetEventUserInfo()){
-    eventContext = &eventInfo->GetEventContext();
-  }
-  auto particleLink = eventContext ? trHelp.GenerateParticleLink(*eventContext) : trHelp.GenerateParticleLink();
+  auto particleLink = trHelp.GenerateParticleLink(m_g4UserEventInfo ? m_g4UserEventInfo->GetEventStore() : nullptr);
 
   if(m_sqlreader){
     //if sqlite inputs, Identifier indices come from PhysVol Name  

@@ -12,6 +12,7 @@
 #include <string>
 #include <gtest/gtest_prod.h>
 
+class AtlasG4EventUserInfo;
 class sTgcHitIdHelper;
 
 class sTGCSensitiveDetector : public G4VSensitiveDetector,
@@ -33,6 +34,7 @@ private:
 
     std::string m_hitCollectionName;
     sTGCSimHitCollection* m_sTGCSimHitCollection{nullptr};
+    AtlasG4EventUserInfo* m_g4UserEventInfo{nullptr};
     const sTgcHitIdHelper* m_muonHelper{sTgcHitIdHelper::GetHelper()};
     /** @brief basic depth to travel along the G4 history. For jobs run with the legacy geometry database,
      *         it's zero. Otherwise, in the new sqlite workflow it's 1 */

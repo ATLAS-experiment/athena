@@ -58,6 +58,8 @@ We describe in the following, how each field of the identifier is retrieved.
 #include <string>
 #include <gtest/gtest_prod.h>
 
+class AtlasG4EventUserInfo;
+
 class CSCSensitiveDetector : public G4VSensitiveDetector {
 
 FRIEND_TEST( CSCSensitiveDetectortest, Initialize );
@@ -74,6 +76,7 @@ private:
     /** member data */
     std::string m_hitCollectionName;
     CSCSimHitCollection*  m_myCSCHitColl{nullptr};
+    AtlasG4EventUserInfo* m_g4UserEventInfo{nullptr};
     const CscHitIdHelper* m_muonHelper;
 };
 

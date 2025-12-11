@@ -34,6 +34,7 @@ void RPCSensitiveDetectorCosmics::Initialize(G4HCofThisEvent*)
   m_myRPCHitColl = nullptr;
   if (auto* eventInfo = AtlasG4EventUserInfo::GetEventUserInfo()) {
     m_myRPCHitColl = eventInfo->GetHitCollectionMap()->Find<RPCSimHitCollection>(m_hitCollectionName);
+    m_g4UserEventInfo = eventInfo;
   }
   if (verboseLevel>1) G4cout << "Initializing SD" << G4endl;
   // FIXME this next bit probebly only needs to be done once pre job
@@ -343,10 +344,6 @@ G4bool RPCSensitiveDetectorCosmics::ProcessHits(G4Step* aStep,G4TouchableHistory
 
   // retrieve track barcode
   TrackHelper trHelp(aStep->GetTrack());
-  EventContext const* eventContext{nullptr};
-  if(auto* eventInfo = AtlasG4EventUserInfo::GetEventUserInfo()){
-    eventContext = &eventInfo->GetEventContext();
-  }
 
   //construct new rpc hit
   m_vertex = Amg::Hep3VectorToEigen( aStep->GetTrack()->GetVertexPosition() );
@@ -356,7 +353,7 @@ G4bool RPCSensitiveDetectorCosmics::ProcessHits(G4Step* aStep,G4TouchableHistory
 
   m_myRPCHitColl->Emplace(RPCid_eta, m_globalTime,
                           localPosition,
-                          eventContext ? trHelp.GenerateParticleLink(*eventContext) : trHelp.GenerateParticleLink(),
+                          trHelp.GenerateParticleLink(m_g4UserEventInfo ? m_g4UserEventInfo->GetEventStore() : nullptr),
                           localPostPosition,
                           aStep->GetTotalEnergyDeposit(),
                           aStep->GetStepLength(),
@@ -364,7 +361,7 @@ G4bool RPCSensitiveDetectorCosmics::ProcessHits(G4Step* aStep,G4TouchableHistory
                           aStep->GetPreStepPoint()->GetKineticEnergy());
   m_myRPCHitColl->Emplace(RPCid_phi, m_globalTime,
                         localPosition,
-                        eventContext ? trHelp.GenerateParticleLink(*eventContext) : trHelp.GenerateParticleLink(),
+                        trHelp.GenerateParticleLink(m_g4UserEventInfo ? m_g4UserEventInfo->GetEventStore() : nullptr),
                         localPostPosition,
                         aStep->GetTotalEnergyDeposit(),
                         aStep->GetStepLength(),

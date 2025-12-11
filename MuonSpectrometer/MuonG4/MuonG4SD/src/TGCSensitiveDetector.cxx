@@ -28,6 +28,7 @@ void TGCSensitiveDetector::Initialize(G4HCofThisEvent*)
   m_myTGCHitColl = nullptr;
   if (auto* eventInfo = AtlasG4EventUserInfo::GetEventUserInfo()) {
     m_myTGCHitColl = eventInfo->GetHitCollectionMap()->Find<TGCSimHitCollection>(m_hitCollectionName);
+    m_g4UserEventInfo = eventInfo;
   }
 }
 
@@ -251,15 +252,12 @@ G4bool TGCSensitiveDetector::ProcessHits(G4Step* aStep,G4TouchableHistory*) {
 
   // construct new tgc hit
   TrackHelper trHelp(aStep->GetTrack());
-  EventContext const* eventContext{nullptr};
-  if(auto* eventInfo = AtlasG4EventUserInfo::GetEventUserInfo()){
-    eventContext = &eventInfo->GetEventContext();
-  }
+
   m_myTGCHitColl->Emplace(TGCid,
                         globalTime,
                         localPosition,
                         localDireCos,
-                        eventContext ? trHelp.GenerateParticleLink(*eventContext) : trHelp.GenerateParticleLink(),
+                        trHelp.GenerateParticleLink(m_g4UserEventInfo ? m_g4UserEventInfo->GetEventStore() : nullptr),
                         aStep->GetTotalEnergyDeposit(),
                         aStep->GetStepLength(),
                         track->GetDefinition()->GetPDGEncoding(),

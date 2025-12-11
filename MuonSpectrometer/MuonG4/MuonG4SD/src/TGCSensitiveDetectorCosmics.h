@@ -72,6 +72,8 @@ We describe in the following, how each field of the identifier is retrieved.
 #include <string>
 #include <gtest/gtest_prod.h>
 
+class AtlasG4EventUserInfo;
+
 class TGCSensitiveDetectorCosmics: public G4VSensitiveDetector {
 FRIEND_TEST( TGCSensitiveDetectorCosmicstest, Initialize );
 FRIEND_TEST( TGCSensitiveDetectorCosmicstest, ProcessHits );
@@ -95,6 +97,7 @@ FRIEND_TEST( TGCSensitiveDetectorCosmicstest, ProcessHits );
   /** member data */
   std::string m_hitCollectionName;
   TGCSimHitCollection*  m_myTGCHitColl{nullptr};
+  AtlasG4EventUserInfo* m_g4UserEventInfo{nullptr};
   const TgcHitIdHelper* m_muonHelper;
 };
 

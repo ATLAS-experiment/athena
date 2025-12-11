@@ -31,6 +31,7 @@ void CSCSensitiveDetector::Initialize(G4HCofThisEvent*)
   m_myCSCHitColl = nullptr;
   if (auto* eventInfo = AtlasG4EventUserInfo::GetEventUserInfo()) {
     m_myCSCHitColl = eventInfo->GetHitCollectionMap()->Find<CSCSimHitCollection>(m_hitCollectionName);
+    m_g4UserEventInfo = eventInfo;
   }
 }
 
@@ -212,14 +213,10 @@ G4bool CSCSensitiveDetector::ProcessHits(G4Step* aStep,G4TouchableHistory* /*ROH
   /** construct the hit identifier */
   HitID CSCid = m_muonHelper->BuildCscHitId(stationName, stationPhi,
                                           stationEta, multiLayer, wireLayer);
-  EventContext const* eventContext{nullptr};
-  if(auto* eventInfo = AtlasG4EventUserInfo::GetEventUserInfo()){
-    eventContext = &eventInfo->GetEventContext();
-  }
   /** insert hit in collection */
   m_myCSCHitColl->Emplace(CSCid, globalTime, energyDeposit,
                           HitStart, HitEnd, lundcode,
-                          eventContext ? trHelp.GenerateParticleLink(*eventContext) : trHelp.GenerateParticleLink(),kinEnergy);
+                          trHelp.GenerateParticleLink(m_g4UserEventInfo ? m_g4UserEventInfo->GetEventStore() : nullptr),kinEnergy);
 
   return true;
 }

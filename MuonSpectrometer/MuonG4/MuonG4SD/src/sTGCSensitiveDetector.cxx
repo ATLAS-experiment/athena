@@ -32,6 +32,7 @@ void sTGCSensitiveDetector::Initialize(G4HCofThisEvent*)
   m_sTGCSimHitCollection = nullptr;
   if (auto* eventInfo = AtlasG4EventUserInfo::GetEventUserInfo()) {
     m_sTGCSimHitCollection = eventInfo->GetHitCollectionMap()->Find<sTGCSimHitCollection>(m_hitCollectionName);
+    m_g4UserEventInfo = eventInfo;
   }
 }
 
@@ -110,12 +111,9 @@ G4bool sTGCSensitiveDetector::ProcessHits(G4Step* aStep,G4TouchableHistory* /*RO
 
   int sTgcId = m_muonHelper->BuildsTgcHitId(subType, iPhi, iRing, mLayer,nLayer, iSide);
   TrackHelper trHelp(aStep->GetTrack());
-  EventContext const* eventContext{nullptr};
-  if(auto* eventInfo = AtlasG4EventUserInfo::GetEventUserInfo()){
-    eventContext = &eventInfo->GetEventContext();
-  }
+
   m_sTGCSimHitCollection->Emplace(sTgcId,globalTime,position,pdgCode,direction,depositEnergy,
-                                  eventContext ? trHelp.GenerateParticleLink(*eventContext) : trHelp.GenerateParticleLink(),
+                                  trHelp.GenerateParticleLink(m_g4UserEventInfo ? m_g4UserEventInfo->GetEventStore() : nullptr),
                                   preStep->GetKineticEnergy(),preposition);
 
   return true;

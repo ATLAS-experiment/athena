@@ -13,6 +13,7 @@
 #include <GaudiKernel/EventContext.h>
 
 // Athena headers
+#include "AthenaKernel/IProxyDict.h"
 #include "MCTruth/AtlasG4EventUserInfo.h"
 #include "MCTruth/TrackHelper.h"
 
@@ -44,6 +45,7 @@ void PixelSensorSD::Initialize(G4HCofThisEvent *)
   if(auto* eventManger = G4EventManager::GetEventManager()){
     if(auto* eventInfo = static_cast<AtlasG4EventUserInfo*>(eventManger->GetUserInformation())){
       m_HitColl = eventInfo->GetHitCollectionMap()->Find<SiHitCollection>(m_HitCollName);
+      m_g4UserEventInfo = eventInfo;
     }
   }
 }
@@ -314,17 +316,12 @@ G4bool PixelSensorSD::ProcessHits(G4Step* aStep, G4TouchableHistory* /*ROhist*/)
   // get the HepMcParticleLink from the TrackHelper
 
   TrackHelper trHelp(aStep->GetTrack());
-  // Temporary solution to get EventContext from a Geant4 thread 
-  EventContext const* eventContext{nullptr};
-  if(auto* eventInfo = AtlasG4EventUserInfo::GetEventUserInfo()){
-    eventContext = &eventInfo->GetEventContext();
-  }
-
+  // Temporary solution to get EventContext from a Geant4 thread
   m_HitColl->Emplace(lP1,
                      lP2,
                      edep,
                      aStep->GetPreStepPoint()->GetGlobalTime(),
-                     eventContext ? trHelp.GenerateParticleLink(*eventContext) : trHelp.GenerateParticleLink(),
+                     trHelp.GenerateParticleLink(m_g4UserEventInfo ? m_g4UserEventInfo->GetEventStore() : nullptr),
                      0,BrlEcap,LayerDisk,etaMod,phiMod,side);
   return true;
 }

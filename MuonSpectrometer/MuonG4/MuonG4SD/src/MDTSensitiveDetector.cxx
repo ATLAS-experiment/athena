@@ -37,6 +37,7 @@ void MDTSensitiveDetector::Initialize(G4HCofThisEvent*)
   m_MDTHitColl = nullptr;
   if (auto* eventInfo = AtlasG4EventUserInfo::GetEventUserInfo()) {
     m_MDTHitColl = eventInfo->GetHitCollectionMap()->Find<MDTSimHitCollection>(m_hitCollectionName);
+    m_g4UserEventInfo = eventInfo;
   }
   m_driftRadius = m_DEFAULT_TUBE_RADIUS;
 }
@@ -127,14 +128,10 @@ G4bool MDTSensitiveDetector::ProcessHits(G4Step* aStep,G4TouchableHistory* /*ROH
     int MDTid = GetIdentifier(touchHist);
 
     TrackHelper trHelp(aStep->GetTrack());
-    EventContext const* eventContext{nullptr};
-    if(auto* eventInfo = AtlasG4EventUserInfo::GetEventUserInfo()){
-      eventContext = &eventInfo->GetEventContext();
-    }
 
     // construct new mdt hit
     m_MDTHitColl->Emplace(MDTid, m_globalTime, m_driftRadius, m_localPosition,
-                          eventContext ? trHelp.GenerateParticleLink(*eventContext) : trHelp.GenerateParticleLink(),
+                          trHelp.GenerateParticleLink(m_g4UserEventInfo ? m_g4UserEventInfo->GetEventStore() : nullptr),
                           aStep->GetStepLength(),
                           aStep->GetTotalEnergyDeposit(),
                           currentTrack->GetDefinition()->GetPDGEncoding(),
