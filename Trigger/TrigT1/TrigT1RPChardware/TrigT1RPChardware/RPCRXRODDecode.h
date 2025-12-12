@@ -77,8 +77,6 @@ private:
     //
     /// RPC data markers
     ubit16 m_field{0xf000}; //!< field map of word identifier
-    ubit16 m_noRecord16{9999};
-    RODword m_noRecord32{0xdeadcafe};
 
     ubit16 m_reserved4{0xe000};
     //
