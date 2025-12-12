@@ -251,9 +251,13 @@ namespace dqi
             std::cerr << "WARNING: setInput() has not been set; cannot publish regex results" << std::endl;
             continue;
           }
-          resultList = dynamic_cast<TSeqCollection*>(tmpRegex[parname]->Clone());
+          resultList = static_cast<TSeqCollection*>(tmpRegex[parname]->Clone());
           (*m_outputMap)[storename + extra] = resultList;
           DQParMap_t::const_iterator i = m_dqPars.find(parname);
+          if (i == m_dqPars.end()) {
+            std::cerr << "WARNING: Can't find parname in m_dqPars" << std::endl;
+            continue;
+          }
           parentName = i->second->getName();
           bool use_full_name = false;
           if (m_config)
