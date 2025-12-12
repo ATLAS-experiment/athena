@@ -914,36 +914,35 @@ IOVDbMetaDataTool::serializeContainerToJSON(const IOVMetaDataContainer* containe
       iov["attrs"][chanKey] = json::object();
 
       for (const auto& attr : attrList) {
-        std::string attrName = attr.specification().name();
-
+        auto & thisAttribute = iov["attrs"][chanKey][attr.specification().name()];
         // Serialize attribute value based on type
         const std::type_info& type = attr.specification().type();
         if (type == typeid(std::string)) {
-          iov["attrs"][chanKey][attrName] = attr.data<std::string>();
+          thisAttribute = attr.data<std::string>();
         } else if (type == typeid(int)) {
-          iov["attrs"][chanKey][attrName] = attr.data<int>();
+          thisAttribute = attr.data<int>();
         } else if (type == typeid(unsigned int)) {
-          iov["attrs"][chanKey][attrName] = attr.data<unsigned int>();
+          thisAttribute = attr.data<unsigned int>();
         } else if (type == typeid(long)) {
-          iov["attrs"][chanKey][attrName] = attr.data<long>();
+          thisAttribute = attr.data<long>();
         } else if (type == typeid(unsigned long)) {
-          iov["attrs"][chanKey][attrName] = attr.data<unsigned long>();
+          thisAttribute = attr.data<unsigned long>();
         } else if (type == typeid(long long)) {
-          iov["attrs"][chanKey][attrName] = attr.data<long long>();
+          thisAttribute = attr.data<long long>();
         } else if (type == typeid(unsigned long long)) {
-          iov["attrs"][chanKey][attrName] = attr.data<unsigned long long>();
+          thisAttribute = attr.data<unsigned long long>();
         } else if (type == typeid(float)) {
-          iov["attrs"][chanKey][attrName] = attr.data<float>();
+          thisAttribute = attr.data<float>();
         } else if (type == typeid(double)) {
-          iov["attrs"][chanKey][attrName] = attr.data<double>();
+          thisAttribute = attr.data<double>();
         } else if (type == typeid(bool)) {
-          iov["attrs"][chanKey][attrName] = attr.data<bool>();
+          thisAttribute = attr.data<bool>();
         } else {
           // For other types, convert to string representation
           std::ostringstream oss;
           attr.toOutputStream(oss);
-          iov["attrs"][chanKey][attrName] = oss.str();
-          ATH_MSG_DEBUG("Attribute " << attrName << " has unsupported type, converted to string: " << oss.str());
+          thisAttribute = oss.str();
+          ATH_MSG_DEBUG("Attribute " << attr.specification().name() << " has unsupported type, converted to string: " << oss.str());
         }
       }
     }
