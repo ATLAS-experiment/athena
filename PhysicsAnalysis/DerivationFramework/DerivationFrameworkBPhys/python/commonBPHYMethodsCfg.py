@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -25,7 +25,8 @@ def BPHY_InDetDetailedTrackSelectorToolCfg(flags, BPHYDerivationName):
 
 def Thin_vtxTrkCfg(flags, name, **kwargs):
     acc = ComponentAccumulator()
-    acc.addPublicTool(CompFactory.DerivationFramework.Thin_vtxTrk(name, **kwargs))
+    acc.addPublicTool(CompFactory.DerivationFramework.Thin_vtxTrk(name, **kwargs),
+                      primary = True)
     return acc
 
 def AugOriginalCountsCfg(flags, name="AugOriginalCounts", **kwargs):
