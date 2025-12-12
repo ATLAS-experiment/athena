@@ -25,6 +25,7 @@
 #include <map>
 #include <numeric>
 #include <algorithm>
+#include <string_view>
 
 using namespace CaloRecGPU;
 
@@ -480,19 +481,19 @@ static void build_similarity_map_helper(const CaloRecGPU::ClusterInfoArr & clust
               ++it_2;
             }
         }
-
-      if (this_index_1 == this_index_2 && this_index_1 >= 0)
+      
+      if (this_index_1 == this_index_2 and this_index_1 >= 0)
         {
           match(this_index_1, cluster_weights_1, cluster_weights_2);
           cluster_weights_1.clear();
           cluster_weights_2.clear();
         }
-      else if (this_index_1 > this_index_2)
+      else if ((this_index_1 > this_index_2) and this_index_2 >= 0)
         {
           not_match(true, this_index_2, cluster_weights_2);
           cluster_weights_2.clear();
         }
-      else if (this_index_2 > this_index_1)
+      else if ((this_index_2 > this_index_1) and this_index_1 >= 0 )
         {
           not_match(false, this_index_1, cluster_weights_1);
           cluster_weights_1.clear();
@@ -1405,16 +1406,16 @@ StatusCode CaloGPUClusterAndCellDataMonitor::initialize_plotted_variables()
   m_comparedCellTypesToDo.resize(BasicCellTypes::size(), false);
   m_extraThingsToDo.resize(ExtraThingsSize, false);
 
-  auto string_contains = [](const std::string & container, const std::string & contained) -> bool
+  auto string_contains = [](std::string_view container, std::string_view contained) -> bool
   {
     return container.find(contained) != std::string::npos;
   };
 
   auto search_lambda = [&](const auto & prop, const size_t count, bool & check,
                            const std::string & str, std::vector<bool> & to_do,
-                           const std::string & prefix = "", const std::string & suffix = "")
+                           std::string_view prefix = "", std::string_view  suffix = "")
   {
-    if (string_contains(str, prefix + prop.name() + suffix))
+    if (string_contains(str, std::string(prefix) + prop.name() + std::string(suffix)))
       {
         to_do[count] = true;
         check = true;

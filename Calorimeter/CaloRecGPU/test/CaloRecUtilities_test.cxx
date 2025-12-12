@@ -19,7 +19,9 @@ ATLAS_NO_CHECK_FILE_THREAD_SAFETY;
 #include "../src/CaloRecUtilities.h"
 #include <vector>
 #include <string>
+#include <string_view>
 #include <map>
+
 using namespace CaloRecGPU;
 using std::string_literals::operator""s;
 
@@ -43,7 +45,7 @@ BOOST_AUTO_TEST_SUITE(UtilitiesTest)
  BOOST_AUTO_TEST_CASE(apply_to_multi_class_test){
  
  //utility 'contains': true if 'str' contains 'search'
- auto contains = [](const std::string & str, const std::string & search)->bool{
+ auto contains = [](std::string_view str, std::string_view search)->bool{
    return (str.find(search)!=std::string::npos);
  };
  //Mixing up Cell/Cluster properties here,but this isn't important for the test
@@ -60,9 +62,9 @@ BOOST_AUTO_TEST_SUITE(UtilitiesTest)
  using  BasicCellProperties = multi_class_holder <Property1, Property2 >;
  //example lambda used in CaloGPUClusterAndCellDataMonitor.cxx
  auto search_lambda = [&](const auto & prop, const size_t count, bool & check,
-    const std::string & str, std::vector<bool> & to_do, const std::string & prefix = "", 
-    const std::string & suffix = ""){
-    if (contains(str, prefix + prop.name() + suffix)){
+    const std::string & str, std::vector<bool> & to_do, std::string_view prefix = "", 
+    std::string_view suffix = ""){
+    if (contains(str, std::string(prefix) + prop.name() + std::string(suffix))){
       to_do[count] = true;
       check = true;
     }
