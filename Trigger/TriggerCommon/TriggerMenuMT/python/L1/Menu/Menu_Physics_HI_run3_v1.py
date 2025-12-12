@@ -275,6 +275,8 @@ def defineMenu():
         'L1_AFP_A_OR_C_jJ20', 'L1_AFP_A_AND_C_jJ20',
         'L1_AFP_A_OR_C_jJ30', 'L1_AFP_A_AND_C_jJ30',
 
+        'L1_AFP_A_AND_C_TOF_jJ20',
+        'L1_AFP_A_AND_C_TOF_jJ30',
         'L1_AFP_A_AND_C_TOF_jJ50', 'L1_AFP_A_AND_C_TOF_T0T1_jJ50', 
         'L1_AFP_A_AND_C_TOF_jJ60', 'L1_AFP_A_AND_C_TOF_T0T1_jJ60',
         'L1_AFP_A_AND_C_TOF_jJ90', 'L1_AFP_A_AND_C_TOF_T0T1_jJ90', 
