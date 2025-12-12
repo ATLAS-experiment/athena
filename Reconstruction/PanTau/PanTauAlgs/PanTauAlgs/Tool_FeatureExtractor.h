@@ -94,11 +94,8 @@ namespace PanTau {
         static const std::string varTypeName_Shots()        {return "Shots";}
         
         std::string m_varTypeName_Ratio;
-        std::string m_varTypeName_Mean;
         std::string m_varTypeName_StdDev;
         std::string m_varTypeName_HLV;
-        std::string m_varTypeName_Angle;
-        std::string m_varTypeName_DeltaR;
         std::string m_varTypeName_JetMoment;
         std::string m_varTypeName_Combined;
         std::string m_varTypeName_Basic;
