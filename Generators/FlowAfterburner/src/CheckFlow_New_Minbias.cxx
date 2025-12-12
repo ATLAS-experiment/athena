@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // File:  Generators/FlowAfterburnber/CheckFlow_New_Minbias.h
@@ -336,28 +336,31 @@ StatusCode CheckFlow_New_Minbias::execute() {
 
 // Calculate the event by event vn and also the reconstructed Psi_n angles 
 // Also make correlation histos between Psi_n_truth and Psi_n_reco
-  float cos_n[6],sin_n[6],cos_n_pt[6],sin_n_pt[6];
-  float  Psi_n_reco_pos[6],Psi_n_reco_neg[6]; 
-  for(int ihar=0;ihar<6;ihar++){
-    cos_n[ihar] = ( cos_n_pos[ihar]+ cos_n_neg[ihar] )  /  (ngenerated_pos+ngenerated_neg);
-    sin_n[ihar] = ( sin_n_pos[ihar]+ sin_n_neg[ihar] )  /  (ngenerated_pos+ngenerated_neg);
-
-    float psi_reco=std::atan2(sin_n[ihar],cos_n[ihar])/(ihar+1);
-    m_hist_Psi_n_ebe[ihar][ib_imp]->Fill( (ihar+1)*(psi_reco-Psi_n[ihar])  );
-    m_hist_vn_ebe   [ihar][ib_imp]->Fill(std::sqrt(cos_n[ihar]*cos_n[ihar] +sin_n[ihar]*sin_n[ihar] ));
-
-    Psi_n_reco_pos[ihar]=std::atan2(sin_n_pos[ihar],cos_n_pos[ihar])/ (ihar+1);
-    Psi_n_reco_neg[ihar]=std::atan2(sin_n_neg[ihar],cos_n_neg[ihar])/ (ihar+1);
-    Psi_n_reco    [ihar]=psi_reco;
-
-
-    cos_n_pt[ihar] = ( cos_n_pt_pos[ihar]+ cos_n_pt_neg[ihar] )  /  (ngenerated_pt_pos+ngenerated_pt_neg);
-    sin_n_pt[ihar] = ( sin_n_pt_pos[ihar]+ sin_n_pt_neg[ihar] )  /  (ngenerated_pt_pos+ngenerated_pt_neg);
-
-    psi_reco=std::atan2(sin_n_pt[ihar],cos_n_pt[ihar])/(ihar+1);
-    m_hist_Psi_n_ebe_pt[ihar][ib_imp]->Fill( (ihar+1)*(psi_reco-Psi_n[ihar])  );
+  float cos_n[6]{},sin_n[6]{},cos_n_pt[6]{},sin_n_pt[6]{};
+  float  Psi_n_reco_pos[6]{},Psi_n_reco_neg[6]{}; 
+  const auto total = ngenerated_pos+ngenerated_neg;
+  const auto nTotalPt = ngenerated_pt_pos+ngenerated_pt_neg;
+  if ((total != 0) and (nTotalPt != 0))[[likely]]{
+    for(int ihar=0;ihar<6;ihar++){
+      cos_n[ihar] = ( cos_n_pos[ihar]+ cos_n_neg[ihar] )  /  total;
+      sin_n[ihar] = ( sin_n_pos[ihar]+ sin_n_neg[ihar] )  /  total;
+  
+      float psi_reco=std::atan2(sin_n[ihar],cos_n[ihar])/(ihar+1);
+      m_hist_Psi_n_ebe[ihar][ib_imp]->Fill( (ihar+1)*(psi_reco-Psi_n[ihar])  );
+      m_hist_vn_ebe   [ihar][ib_imp]->Fill(std::sqrt(cos_n[ihar]*cos_n[ihar] +sin_n[ihar]*sin_n[ihar] ));
+  
+      Psi_n_reco_pos[ihar]=std::atan2(sin_n_pos[ihar],cos_n_pos[ihar])/ (ihar+1);
+      Psi_n_reco_neg[ihar]=std::atan2(sin_n_neg[ihar],cos_n_neg[ihar])/ (ihar+1);
+      Psi_n_reco    [ihar]=psi_reco;
+  
+  
+      cos_n_pt[ihar] = ( cos_n_pt_pos[ihar]+ cos_n_pt_neg[ihar] )  /  nTotalPt;
+      sin_n_pt[ihar] = ( sin_n_pt_pos[ihar]+ sin_n_pt_neg[ihar] )  /  nTotalPt;
+  
+      psi_reco=std::atan2(sin_n_pt[ihar],cos_n_pt[ihar])/(ihar+1);
+      m_hist_Psi_n_ebe_pt[ihar][ib_imp]->Fill( (ihar+1)*(psi_reco-Psi_n[ihar])  );
+    }
   }
-
 
 // Make the plots for the correlation between Psi_n truth (for different n)  (same for Psi_n reco)
   for(int ihar=0;ihar<6;ihar++){
