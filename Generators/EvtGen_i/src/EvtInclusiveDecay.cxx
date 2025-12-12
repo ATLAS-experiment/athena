@@ -717,17 +717,19 @@ std::string EvtInclusiveDecay::pdgName(HepMC::ConstGenParticlePtr p, bool status
     if ( ((particleSet!=0) && (inlist)) ||
          ((particleSet==0) && isToBeDecayed(p,false)) )
       buf << "\033[7m";   // reverse
-    if (!MC::isStable(p)) {
+    if (p and !MC::isStable(p)) {
       if (MC::isDecayed(p))
         buf << "\033[33m";   // yellow
       else
         buf << "\033[31m";   // red
     }
   }
-  buf << p->pdg_id();
-  buf << "/" << HepPID::particleName(p->pdg_id());
-  if (statusHighlighting) {
-    buf << "\033[0m";   // revert color attributes
+  if (p){
+    buf << p->pdg_id();
+    buf << "/" << HepPID::particleName(p->pdg_id());
+    if (statusHighlighting) {
+      buf << "\033[0m";   // revert color attributes
+    }
   }
   return buf.str();
 }
