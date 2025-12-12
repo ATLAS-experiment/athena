@@ -10,8 +10,6 @@ find_package( Tauolapp COMPONENTS TauolaFortran TauolaHepMC3 )
 else()
 find_package( Tauolapp COMPONENTS TauolaFortran TauolaHepMC )
 endif()
-# test
-find_package( EPOS4 )
 
 # Component(s) in the package:
 atlas_add_component( Tauolapp_i
