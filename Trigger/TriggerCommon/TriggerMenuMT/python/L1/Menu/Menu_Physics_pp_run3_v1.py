@@ -337,7 +337,8 @@ def defineMenu():
 
         'L1_DPHI-M70-2eEM12M', 'L1_DPHI-M70-2eEM15M', #ATR-19302
         'L1_DPHI-M70-2eEM9', 'L1_DPHI-M70-2eEM9L', # ATR-21637 (no or loose shower shape cuts)
-                
+        'L1_0DPHI32-2M5-eEM9M-eEM6M', # #ATR-32259
+
 
         #ATR-28563
         'L1_LLPDPHI-jXE40-jJ40',
@@ -345,6 +346,9 @@ def defineMenu():
 
         #ATR-30656
         'L1_cTAU30M_3DR35-MU8F-eTAU30',
+
+        # ATR-31830
+        'L1_110INVM150-eEM50s-eEM10s-2DISAMB-jJ60s',
         
         ]
 

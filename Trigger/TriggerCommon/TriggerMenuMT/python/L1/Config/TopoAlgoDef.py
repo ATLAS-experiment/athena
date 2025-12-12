@@ -688,8 +688,8 @@ class TopoAlgoDef:
             tm.registerTopoAlgo(alg)
 
 
-        # DM/DPHI for eEM
-        # output lines = 0INVM70-27DPHI32-eEM12sm1-eEM12sm6, 0INVM70-27DPHI32-eEM15sm1-eEM15sm6
+        # DM/DPHI for eEM, ATR-19302 (0INVM70...) and ATR-32259 (2INVM4...)
+        # output lines = 0INVM70-27DPHI32-eEM12sm1-eEM12sm6, 0INVM70-27DPHI32-eEM15sm1-eEM15sm6, 2INVM4-0DPHI32-eEM9sm1-eEM6sm6
         # Parameter ordering
         # 1. MinEt1
         # 2. MinEt2
@@ -700,16 +700,16 @@ class TopoAlgoDef:
         eINVM_DPHIMap = [
         {  
             "algoname"  : "INVM_DPHI_eEMsm6",
-            "minInvm"   : 0,
-            "maxInvm"   : 70,
-            "minDphi"   : 27,
-            "maxDphi"   : 32,
+            "minInvm"   : [0, 0, 2],
+            "maxInvm"   : [70, 70, 5],
+            "minDphi"   : [27, 27, 0],
+            "maxDphi"   : [32, 32, 32],
             "otype1"    : "eEM",
             "olist1"    : "sm",
-            "ocut1List" : [ 12, 15 ],
+            "ocut1List" : [ 12, 15, 9 ],
             "nleading1" : 1,
             "otype2"    : "eEM",
-            "ocut2List" : [ 12, 15 ],
+            "ocut2List" : [ 12, 15, 6 ],
             "olist2"    : "sm",
             "nleading2" : 6
 
@@ -724,7 +724,7 @@ class TopoAlgoDef:
             inputList = [d.otype1 + d.olist1, d.otype2 + d.olist1]
             toponames=[]
             for bitId, ocut1Value in enumerate(d.ocut1List):
-                toponames.append ("%iINVM%i-%iDPHI%i-%s%s%s%s-%s%s%s%s"  % (d.minInvm, d.maxInvm, d.minDphi, d.maxDphi,
+                toponames.append ("%iINVM%i-%iDPHI%i-%s%s%s%s-%s%s%s%s"  % (d.minInvm[bitId], d.maxInvm[bitId], d.minDphi[bitId], d.maxDphi[bitId],
                                                                 d.otype1, str(ocut1Value) , d.olist1, str(d.nleading1) if d.olist1=="sm" else "",
                                                                 d.otype2, str(d.ocut2List[bitId]) , d.olist2, str(d.nleading2) if d.olist2=="sm" else ""))
             alg = AlgConf.InvariantMassDeltaPhiInclusive2( name = d.algoname, inputs = inputList, outputs = toponames )  
@@ -735,11 +735,11 @@ class TopoAlgoDef:
             alg.addgeneric('NumResultBits', len(toponames))
             for bitId in range(len(toponames)):
                 alg.addvariable('MinET1', get_threshold_cut(d.otype1, d.ocut1List[bitId]) * _et_conversion, bitId)
-                alg.addvariable('MinET2', get_threshold_cut(d.otype1, d.ocut2List[bitId]) * _et_conversion, bitId)
-                alg.addvariable('MinMSqr', d.minInvm * d.minInvm * _et_conversion * _et_conversion, bitId)
-                alg.addvariable('MaxMSqr', d.maxInvm * d.maxInvm * _et_conversion * _et_conversion, bitId)
-                alg.addvariable('MinDeltaPhi', d.minDphi * _phi_conversion, bitId)
-                alg.addvariable('MaxDeltaPhi', d.maxDphi * _phi_conversion, bitId)
+                alg.addvariable('MinET2', get_threshold_cut(d.otype2, d.ocut2List[bitId]) * _et_conversion, bitId)
+                alg.addvariable('MinMSqr', d.minInvm[bitId] * d.minInvm[bitId] * _et_conversion * _et_conversion, bitId)
+                alg.addvariable('MaxMSqr', d.maxInvm[bitId] * d.maxInvm[bitId] * _et_conversion * _et_conversion, bitId)
+                alg.addvariable('MinDeltaPhi', d.minDphi[bitId] * _phi_conversion, bitId)
+                alg.addvariable('MaxDeltaPhi', d.maxDphi[bitId] * _phi_conversion, bitId)
             
             tm.registerTopoAlgo(alg)    
 
@@ -754,12 +754,12 @@ class TopoAlgoDef:
             "ocut1a"   : 50,
             "ocut1b"   : 10,
             "olist1": "s",
-            "nleading1": HW.eEmOutputWidthSelect,
-            "inputwidth1": HW.eEmOutputWidthSelect,
+            "nleading1": HW.eEmOutputWidthSort,
+            "inputwidth1": HW.eEmOutputWidthSort,
             "otype2"  : "jJ",
             "ocut2"   : 60,
-            "nleading2": HW.jJetOutputWidthSelect,
-            "inputwidth2": HW.jJetOutputWidthSelect,
+            "nleading2": 3,
+            "inputwidth2": HW.jJetOutputWidthSort,
             "olist2": "s",
         }
         ]

@@ -1572,7 +1572,7 @@ bool MuFastSteering::storeMuonSA(const xAOD::MuonRoI*                roi,
       mdtId.push_back(mdtHit.Id.getString());
     }
   }
-  SG::AuxElement::Accessor< std::vector<std::string> > accessor_mdthitid( "mdtHitId" );
+  static const SG::Accessor< std::vector<std::string> > accessor_mdthitid( "mdtHitId" );
   accessor_mdthitid( *muonSA ) = mdtId;
 
   //CSC hits
@@ -1606,7 +1606,7 @@ bool MuFastSteering::storeMuonSA(const xAOD::MuonRoI*                roi,
       }
     }
   }
-  SG::AuxElement::Accessor< std::vector<float> > accessor_cschitresol( "cscHitResolution" );
+  static const SG::Accessor< std::vector<float> > accessor_cschitresol( "cscHitResolution" );
   accessor_cschitresol( *muonSA ) = cscResol;
 
   // RPC hits
@@ -2130,15 +2130,6 @@ StatusCode MuFastSteering::updateMonitor(const xAOD::MuonRoI*                   
   std::vector<float> r_inner, r_middle, r_outer;
   std::vector<float> f_residuals;
 
-  t_eta.clear();
-  t_phi.clear();
-  f_eta.clear();
-  f_phi.clear();
-  r_inner.clear();
-  r_middle.clear();
-  r_outer.clear();
-  f_residuals.clear();
-
   auto track_eta	= Monitored::Collection("TrackEta", t_eta);
   auto track_phi	= Monitored::Collection("TrackPhi", t_phi);
   auto failed_eta	= Monitored::Collection("FailedRoIEta", f_eta);
@@ -2156,7 +2147,7 @@ StatusCode MuFastSteering::updateMonitor(const xAOD::MuonRoI*                   
 
   const float ZERO_LIMIT = 1e-5;
 
-  if( trackPatterns.size() > 0 ) {
+  if( !trackPatterns.empty() ) {
 
     efficiency  = 1;
 
@@ -2215,6 +2206,3 @@ StatusCode MuFastSteering::updateMonitor(const xAOD::MuonRoI*                   
 
   return StatusCode::SUCCESS;
 }
-
-
-
