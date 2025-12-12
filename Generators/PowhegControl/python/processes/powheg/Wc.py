@@ -33,6 +33,9 @@ class Wc(PowhegRES):
         # Add all keywords for this process, overriding defaults if required
         self.add_keyword("alphaem")
         self.add_keyword("alphas_from_lhapdf")
+        self.add_keyword("alphas_from_pdf")
+        self.add_keyword("cmass")
+        self.add_keyword("bmass")
         self.add_keyword("bornktmin", 5.0)
         self.add_keyword("bornonly")
         self.add_keyword("bornsuppfact")
@@ -76,6 +79,7 @@ class Wc(PowhegRES):
         self.add_keyword("frensc2min")
         self.add_keyword("fullrwgt")
         self.add_keyword("fullrwgtmode")
+        self.add_keyword("gfermi")
         self.add_keyword("hdamp")
         self.add_keyword("hfact")
         self.add_keyword("icsimax")
@@ -161,6 +165,9 @@ class Wc(PowhegRES):
         self.add_keyword("Zwidth")
         self.add_keyword("wmasslow")
         self.add_keyword("wmasshigh")
+        self.add_keyword("wmass")
+        self.add_keyword("wwidth")
+        self.add_keyword("zmass")
 
     def validate_decays(self):
         """! Validate idvecbos and vdecaymode keywords."""
