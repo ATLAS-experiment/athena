@@ -2039,7 +2039,7 @@ namespace dqutils
     std::string AlgoName = getStringName(pathname + "/" + nameHis + "_/Config/name", file_version);
     int ww = 550;
     int wh = 490;
-    found = display.find("TCanvas", found + 1);
+    found = display.find("TCanvas");
     if (found != std::string::npos) {
       std::size_t found1 = display.find_first_of(',', found + 1);
       ww = std::atoi((display.substr(found + 8, found1 - found - 8)).c_str());
