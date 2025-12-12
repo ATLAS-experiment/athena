@@ -191,8 +191,8 @@ class MonitorDef:
                     #AFP
                     "L1_AFP_A_AND_C_TOF_T0T1",
                     "L1_AFP_FSA_BGRP12", "L1_AFP_FSC_BGRP12",
-                    "L1_AFP_FSA_TOF_T0_BGRP12", "L1_AFP_FSA_TOF_T1_BGRP12", "L1_AFP_FSA_TOF_T2_BGRP12", "L1_AFP_FSA_TOF_T3_BGRP12",
-                    "L1_AFP_FSC_TOF_T0_BGRP12", "L1_AFP_FSC_TOF_T1_BGRP12", "L1_AFP_FSC_TOF_T2_BGRP12", "L1_AFP_FSC_TOF_T3_BGRP12",
+                    "L1_AFP_FSA_TOF_T0_BGRP12", "L1_AFP_FSA_TOF_T1_BGRP12",
+                    "L1_AFP_FSC_TOF_T0_BGRP12", "L1_AFP_FSC_TOF_T1_BGRP12",
                     "L1_AFP_A_OR_C_EMPTY",
                     "L1_AFP_NSA_BGRP12", "L1_AFP_NSC_BGRP12",
                     "L1_AFP_A", "L1_AFP_C", "L1_AFP_A_AND_C",

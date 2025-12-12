@@ -2118,8 +2118,10 @@ class ItemDef:
         MenuItem('L1_AFP_A_OR_C_MBTS_2').setLogic( (AFP_A | AFP_C) & MBTS_2 & physcond )
 
         MenuItem('L1_AFP_A_AND_C_TOF_J20').setLogic( AFP_TOF_A & AFP_TOF_C & d.J20 & physcond )
+        MenuItem('L1_AFP_A_AND_C_TOF_jJ20').setLogic( AFP_TOF_A & AFP_TOF_C & d.jJ20 & physcond )
         MenuItem('L1_AFP_A_AND_C_TOF_T0T1_J20').setLogic( (d.AFP_FSA_TOF_T0 | d.AFP_FSA_TOF_T1) & (d.AFP_FSC_TOF_T0 | d.AFP_FSC_TOF_T1) & d.J20 & physcond )
         MenuItem('L1_AFP_A_AND_C_TOF_J30').setLogic( AFP_TOF_A & AFP_TOF_C & d.J30 & physcond )
+        MenuItem('L1_AFP_A_AND_C_TOF_jJ30').setLogic( AFP_TOF_A & AFP_TOF_C & d.jJ30 & physcond )
         MenuItem('L1_AFP_A_AND_C_TOF_T0T1_J30').setLogic( (d.AFP_FSA_TOF_T0 | d.AFP_FSA_TOF_T1) & (d.AFP_FSC_TOF_T0 | d.AFP_FSC_TOF_T1) & d.J30 & physcond )
         MenuItem('L1_AFP_A_AND_C_TOF_J50').setLogic( AFP_TOF_A & AFP_TOF_C & d.J50 & physcond )
         MenuItem('L1_AFP_A_AND_C_TOF_T0T1_J50').setLogic( (d.AFP_FSA_TOF_T0 | d.AFP_FSA_TOF_T1) & (d.AFP_FSC_TOF_T0 | d.AFP_FSC_TOF_T1) & d.J50 & physcond )
