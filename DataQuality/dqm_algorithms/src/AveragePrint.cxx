@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "dqm_algorithms/AveragePrint.h"
@@ -92,7 +92,9 @@ namespace dqm_algorithms {
 				Total_entries += Bin_entries;
 				Average_value += Bin_value;
 			}
-			Average_value = Average_value / Total_entries;
+                        if (Total_entries > 0) {
+                          Average_value = Average_value / Total_entries;
+                        }
 			std::string Average_name = Form("%s_Average", name.c_str());
 			result->tags_[Average_name.c_str()] = Average_value;
 		}
