@@ -21,10 +21,10 @@ namespace CaloRecGPU{
 
 // Apply: f(Types{}, index, args...)
 template<class F, class... Types, class... Args>
-void apply_to_multi_class(F&& f, multi_class_holder<Types...>, Args&&... args){
+void apply_to_multi_class(F&& f, multi_class_holder<Types...>, Args&... args){
   auto&& func = std::forward<F>(f);  // avoid forwarding F multiple times
   [&]<std::size_t... I>(std::index_sequence<I...>) {
-    (func(Types{}, I, std::forward<Args>(args)...), ...);
+    (func(Types{}, I, args...), ...); // avoid forwarding args multiple times
   }(std::make_index_sequence<sizeof...(Types)>{});
 }
 
