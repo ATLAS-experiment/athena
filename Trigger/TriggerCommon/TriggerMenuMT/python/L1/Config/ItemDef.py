@@ -2218,6 +2218,8 @@ class ItemDef:
             #ATR-19302:
             MenuItem('L1_DPHI-M70-2eEM12M' ).setLogic( d.TOPO_0INVM70_27DPHI32_eEM12sm1_eEM12sm6 & physcond)
             MenuItem('L1_DPHI-M70-2eEM15M' ).setLogic( d.TOPO_0INVM70_27DPHI32_eEM15sm1_eEM15sm6 & physcond)
+            #ATR-32259
+            MenuItem('L1_0DPHI32-2M5-eEM9M-eEM6M' ).setLogic( d.TOPO_2INVM5_0DPHI32_eEM9sm1_eEM6sm6 & physcond)
             #ATR-21637
             MenuItem('L1_DPHI-M70-2eEM9' ).setLogic( d.TOPO_0INVM70_27DPHI32_eEM9s1_eEM9s6 & physcond)
             MenuItem('L1_DPHI-M70-2eEM9L' ).setLogic( d.TOPO_0INVM70_27DPHI32_eEM9sl1_eEM9sl6 & physcond)
