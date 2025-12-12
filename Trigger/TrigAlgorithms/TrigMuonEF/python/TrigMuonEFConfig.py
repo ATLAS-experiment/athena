@@ -29,7 +29,7 @@ def TrigMuonEFTrackIsolationAlgCfg(flags, name = "TrigMuonEFTrackIsolation", **k
     kwargs.setdefault('useVarIso', True)
     kwargs.setdefault('MuonContName', 'MuonsIso')
     kwargs.setdefault('ptcone02Name', 'MuonsIso.ptcone02')
-    kwargs.setdefault('ptcone02Name', 'MuonsIso.ptcone03')
+    kwargs.setdefault('ptcone03Name', 'MuonsIso.ptcone03')
 
     isoAlg = trackIsolationAlg(name, **kwargs)
     acc.addEventAlgo(isoAlg)
