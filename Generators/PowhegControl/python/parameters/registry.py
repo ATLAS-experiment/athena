@@ -840,6 +840,7 @@ class Registry(metaclass=Singleton):
         self.add_default("4q_SF", 0, hidden=True, description="ZZj_MiNNLO decay mode (all combinations of light quarks (u,d,s,c,b) of same flavour) [1:enabled]")
         self.add_default("wmasslow", 2.0, description="Wc process parameter")
         self.add_default("wmasshigh", 13000, description="Wc process parameter")
+        self.add_default("resum_profile", 1, description="Wc process parameter")
 
         # SMEFT operator coefficients, all set to zero by default
         for coefficient_name in ["ReGEw", "ImGEw", "ReGEe", "ImGEe"]:
