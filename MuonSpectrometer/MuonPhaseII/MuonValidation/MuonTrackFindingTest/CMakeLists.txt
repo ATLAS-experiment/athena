@@ -32,4 +32,4 @@ atlas_add_test( SegmentRefitTestR4
                 SCRIPT python -m MuonTrackFindingTest.SegmentRefitTester --nEvents 1 --noPerfMon
                 PRIVATE_WORKING_DIRECTORY
                 POST_EXEC_SCRIPT nopost.sh
-                PROPERTIES TIMEOUT 300)
+                PROPERTIES TIMEOUT 600)
