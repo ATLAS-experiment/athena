@@ -21,9 +21,10 @@ namespace GlobalSim::IOBitwise {
   }
   
   std::string eEmEg1BDTTOB::to_string() const {
+
     auto ss = std::stringstream();
-    
-    ss << "eEmEg1BDTTOB: m_eGamma1BDT_bits " << m_eGamma1BDT_bits << '\n';
+    ss <<  eEmTOB::to_string() << '\n'
+       << "eEmEg1BDTTOB: m_eGamma1BDT_bits " << m_eGamma1BDT_bits << '\n';
     return ss.str();
   }
   
