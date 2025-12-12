@@ -27,9 +27,9 @@ def KernelTesterCfg(flags, name = 'F150BenchmarkAlg', **kwarg):
     kwarg.setdefault('StripL2GKernelName','l2g_strip_tool')
     kwarg.setdefault('PixelEDMPrepKernelName', 'PixelEDMPrep')
     kwarg.setdefault('StripEDMPrepKernelName', 'StripEDMPrep')
-
-    kwarg.setdefault('FPGATrackSimHitKey_1st', 'FPGAHits_1st_reg' + str(flags.Trigger.FPGATrackSim.regionList[0]))
-    kwarg.setdefault('FPGATrackSimTrack1stKey', 'FPGATracks_1st_reg' + str(flags.Trigger.FPGATrackSim.regionList[0]))
+    from FPGATrackSimConfTools.FPGATrackSimHelperFunctions import convertRegionsExpressionToArray
+    kwarg.setdefault('FPGATrackSimHitKey_1st', 'FPGAHits_1st_reg' + str(convertRegionsExpressionToArray(flags.Trigger.FPGATrackSim.regionList)[0]))
+    kwarg.setdefault('FPGATrackSimTrack1stKey', 'FPGATracks_1st_reg' + str(convertRegionsExpressionToArray(flags.Trigger.FPGATrackSim.regionList)[0]))
 
     # Set up Cluster maker tool
     from EFTrackingFPGAPipeline.DataPrepConfig import xAODClusterMakerCfg
@@ -110,10 +110,6 @@ if __name__ == "__main__":
     flags.Input.Files = ["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/RDO/ATLAS-P2-RUN4-03-00-00/mc21_14TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.recon.RDO.e8481_s4149_r14700/RDO.33629020._000047.pool.root.1"]
     
     flags.fillFromArgs()
-    
-    # Additional (necessary) flag re-configuration for mutliregion tracking
-    from FPGATrackSimConfTools.FPGATrackSimAnalysisConfig import ConfigureMultiRegionFlags
-    ConfigureMultiRegionFlags(flags)
     
     flags.Trigger.FPGATrackSim.tracking = False
     flags.Trigger.FPGATrackSim.Hough.genScan = True
