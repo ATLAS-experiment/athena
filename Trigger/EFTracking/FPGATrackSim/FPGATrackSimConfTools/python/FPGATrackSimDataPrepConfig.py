@@ -166,7 +166,8 @@ def FPGATrackSimDataPrepOutputCfg(flags):
     FPGATrackSimWriteOutput = CompFactory.FPGATrackSimOutputHeaderTool("FPGATrackSimWriteOutputDataPrep")
     FPGATrackSimWriteOutput.InFileName = ["test.root"]
     FPGATrackSimWriteOutput.OutputTreeName = "FPGATrackSimDataPrepTree"    
-    writeThis=flags.Trigger.FPGATrackSim.writeAdditionalOutputData and ((flags.Trigger.FPGATrackSim.regionToWriteDPTree in flags.Trigger.FPGATrackSim.regionList) or (flags.Trigger.FPGATrackSim.regionToWriteDPTree < 0))
+    from FPGATrackSimConfTools.FPGATrackSimHelperFunctions import convertRegionsExpressionToArray
+    writeThis=flags.Trigger.FPGATrackSim.writeAdditionalOutputData and ((flags.Trigger.FPGATrackSim.regionToWriteDPTree in convertRegionsExpressionToArray(flags.Trigger.FPGATrackSim.regionList)) or (flags.Trigger.FPGATrackSim.regionToWriteDPTree < 0))
     
     if not writeThis:
         FPGATrackSimWriteOutput.EventLimit = 0
@@ -394,7 +395,8 @@ def FPGATrackSimDataPrepAlgCfg(inputFlags):
     
 
     theFPGATrackSimDataPrepAlg.RawToLogicalHitsTools = []
-    for region in flags.Trigger.FPGATrackSim.regionList:
+    from FPGATrackSimConfTools.FPGATrackSimHelperFunctions import convertRegionsExpressionToArray
+    for region in convertRegionsExpressionToArray(flags.Trigger.FPGATrackSim.regionList):
         flagsForEachRegion = inputFlags.clone()
         flagsForEachRegion = flagsForEachRegion.cloneAndReplace("Trigger.FPGATrackSim.ActiveConfig", "Trigger.FPGATrackSim." + inputFlags.Trigger.FPGATrackSim.algoTag,keepOriginal=True)
         flagsForEachRegion.Trigger.FPGATrackSim.region = region

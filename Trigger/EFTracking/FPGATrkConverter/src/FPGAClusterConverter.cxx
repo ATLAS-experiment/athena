@@ -421,7 +421,7 @@ StatusCode FPGAClusterConverter::createPixelCluster(const FPGATrackSimHit& h,con
   ATH_MSG_DEBUG("\t\tGlobal position: x=" << globalPosition.x() << " y=" << globalPosition.y()  << " z=" << globalPosition.z() );
 
   cl.setMeasurement<2>(hash, localPosition, localCovariance);
-  ATH_MSG_INFO("rdoIdentifier: " << h.getRdoIdentifier());
+  ATH_MSG_DEBUG("rdoIdentifier: " << h.getRdoIdentifier());
   cl.setIdentifier( h.getRdoIdentifier() );
   cl.setRDOlist(rdoList);
   cl.globalPosition() = globalPosition; 
