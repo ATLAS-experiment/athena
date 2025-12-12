@@ -34,11 +34,13 @@ HGTD_GmxInterface::HGTD_GmxInterface(HGTD_DetectorManager *detectorManager,
 int HGTD_GmxInterface::sensorId(std::map<std::string, int> &index) const
 {
     const HGTD_ID* hgtdIdHelper = dynamic_cast<const HGTD_ID *> (m_commonItems->getIdHelper());
-    bool newIdenSche = hgtdIdHelper->get_useNewIdentifierScheme(); // to choise which identification scheme will be used
-    
     // Return the Simulation HitID (nothing to do with "ATLAS Identifiers" aka "Offline Identifiers"
-    int hitIdOfWafer;
-
+    int hitIdOfWafer{-1};
+    if (not hgtdIdHelper) {
+      ATH_MSG_ERROR("HGTD_GmxInterface::sensorId: Dynamic cast of helper failed.");
+      return hitIdOfWafer;
+    }
+    bool newIdenSche = hgtdIdHelper->get_useNewIdentifierScheme(); // to choise which identification scheme will be used
     if(newIdenSche){
         hitIdOfWafer = SiHitIdHelper::GetHelper()->buildHitId(HGTD_HitIndex,
                                                                   index["endcap"],
