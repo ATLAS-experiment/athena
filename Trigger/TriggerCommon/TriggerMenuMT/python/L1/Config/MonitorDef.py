@@ -200,8 +200,8 @@ class MonitorDef:
                     #AFP
                     "L1_AFP_A_AND_C_TOF_T0T1",
                     "L1_AFP_FSA_BGRP12", "L1_AFP_FSC_BGRP12",
-                    "L1_AFP_FSA_TOF_T0_BGRP12", "L1_AFP_FSA_TOF_T1_BGRP12", "L1_AFP_FSA_TOF_T2_BGRP12", "L1_AFP_FSA_TOF_T3_BGRP12",
-                    "L1_AFP_FSC_TOF_T0_BGRP12", "L1_AFP_FSC_TOF_T1_BGRP12", "L1_AFP_FSC_TOF_T2_BGRP12", "L1_AFP_FSC_TOF_T3_BGRP12",
+                    "L1_AFP_FSA_TOF_T0_BGRP12", "L1_AFP_FSA_TOF_T1_BGRP12",
+                    "L1_AFP_FSC_TOF_T0_BGRP12", "L1_AFP_FSC_TOF_T1_BGRP12",
                     "L1_AFP_A_OR_C_EMPTY",
                     "L1_AFP_NSA_BGRP12", "L1_AFP_NSC_BGRP12",
                     "L1_AFP_A", "L1_AFP_C", "L1_AFP_A_AND_C",
@@ -410,12 +410,8 @@ class MonitorDef:
                     #
                     "L1_1ZDC_A_1ZDC_C_VjTE200", "L1_ZDC_1XOR5_VjTE200",
                     "L1_ZDC_XOR_VjTE200",
-                    "L1_VZDC_A_VZDC_C_jTE10_VjTE200", "L1_ZDC_XOR_jTE10_VjTE200",
-                    "L1_1ZDC_NZDC_jTE10_VjTE200",
-                    "L1_TRT_ZDC_XOR_jTE5_VjTE200",
                     #
-                    # "L1_ZDC_XOR_jJ5_VjTE200", "L1_VZDC_A_VZDC_C_jJ5_VjTE200", "L1_1ZDC_NZDC_jJ5_VjTE200",
-                    "L1_1ZDC_NZDC_jJ10_VjTE200", "L1_ZDC_XOR_jJ10_VjTE200", "L1_VZDC_A_VZDC_C_jJ10_VjTE200",
+                    "L1_ZDC_XOR_jJ10_VjTE200",
                     #
                     "L1_ZDC_HELT20_jTEFWD2600",
                     "L1_ZDC_HELT35_jTEFWD2600",
@@ -432,30 +428,6 @@ class MonitorDef:
                     "L1_ESP_jJ5",
                     "L1_ESP_jJ5p30ETA49",
                     #
-                    'L1_TEA_1ZDC_NZDC_jJ10_VjTE200',
-                    'L1_TEA_1ZDC_NZDC_jJ5_VjTE200',
-                    'L1_TEA_5ZDC_A_5ZDC_C_jJ10_VjTE200',
-                    'L1_TEA_5ZDC_A_5ZDC_C_jJ5_VjTE200',
-                    'L1_TEA_VZDC_A_VZDC_C_jJ10_VjTE200',
-                    'L1_TEA_VZDC_A_VZDC_C_jJ10p30ETA49_VjTE200',
-                    'L1_TEA_VZDC_A_VZDC_C_jJ5_VjTE200',
-                    'L1_TEA_VZDC_A_VZDC_C_jJ5p30ETA49_VjTE200',
-                    'L1_TEA_ZDC_5XOR_jJ10_VjTE200',
-                    'L1_TEA_ZDC_5XOR_jJ5_VjTE200',
-                    'L1_TEA_ZDC_XOR_jJ10_VjTE200',
-                    'L1_TEA_ZDC_XOR_jJ10p30ETA49_VjTE200',
-                    'L1_TEA_ZDC_XOR_jJ5_VjTE200',
-                    'L1_TEA_ZDC_XOR_jJ5p30ETA49_VjTE200',
-                    #
-                    'L1_TEA_ASYM0_TRT_ZDC_XOR_VjTE200',
-                    'L1_TEA_ASYM1_TRT_ZDC_XOR_VjTE200',
-                    'L1_TEA_ASYM2_TRT_ZDC_XOR_VjTE200',
-                    'L1_TEA_ASYM3_TRT_ZDC_XOR_VjTE200',
-                    'L1_TEA_ASYM0_ZDC_XOR_VjTE200',
-                    'L1_TEA_ASYM1_ZDC_XOR_VjTE200',
-                    'L1_TEA_ASYM2_ZDC_XOR_VjTE200',
-                    'L1_TEA_ASYM3_ZDC_XOR_VjTE200',
-                    #
                     'L1_TeATIME-jTENoSort',
                     'L1_ESPRESSO',
                     'L1_TeAsymmetry-jTENoSort',
@@ -468,6 +440,11 @@ class MonitorDef:
 
                     'L1_CALMTEA_eEM2_VjTE200',
                     'L1_CALMTEA_eTAU2_VjTE200',
+
+                    'L1_MATCHA_eTAU2',
+                    'L1_MATCHA_eTAU2_VjTE200',
+                    'L1_MATCHA_eTAU2_EMPTY',
+                    'L1_MATCHA_eTAU2_VjTE200_EMPTY',
 
                     'L1_ESP_1ZDC_NZDC_jJ10_VjTE200',
                     'L1_ESP_5ZDC_A_5ZDC_C_jJ10_VjTE200',
@@ -489,42 +466,13 @@ class MonitorDef:
                     'L1_ESP_ASYM2_ZDC_XOR_VjTE200',
                     'L1_ESP_ASYM3_ZDC_XOR_VjTE200',
 
-                    'L1_MATCHA_eEM2',
-                    'L1_MATCHA_eTAU2',
-
-                    'L1_MATCHA_eEM2_VjTE200',
-                    'L1_MATCHA_eTAU2_VjTE200',
-
-                    'L1_MATCHA_eEM5_VjTE200',
-
-                    'L1_MATCHA_eEM2_EMPTY',
-                    'L1_MATCHA_eTAU2_EMPTY',
-
-                    'L1_MATCHA_eEM2_VjTE200_EMPTY',
-                    'L1_MATCHA_eTAU2_VjTE200_EMPTY',
-
                     'L1_23INVM-27DPHI-2eTAU1_VjTE200',
 
                     'L1_CALMTEA_DPHI-2eTAU1_VjTE200',
                     'L1_CALMTEA_DPHI-2eTAU1_VjTE200_EMPTY',
 
-                    'L1_MATCHA_DPHI-2eTAU1_VjTE200',
-                    'L1_MATCHA_DPHI-2eTAU1_VjTE200_EMPTY',
-
                     'L1_CALMTEA_23INVM-27DPHI-2eTAU1_VjTE200',
                     'L1_CALMTEA_23INVM-27DPHI-2eTAU1_VjTE200_EMPTY',
-
-                    'L1_MATCHA_23INVM-27DPHI-2eTAU1_VjTE200',
-                    'L1_MATCHA_23INVM-27DPHI-2eTAU1_VjTE200_EMPTY',
-
-                    'L1_RISTRETTO',
-                    'L1_RIS_TeAsymmetry-jTENoSort',
-                    'L1_RIS_eEM2',
-                    'L1_RIS_eTAU2',
-                    'L1_RIS_jJ5',
-                    'L1_RIS_jJ5p30ETA49',
-
-                    'L1_RIS_ZDC_XOR_jJ10_VjTE200',
                 ])
 
                 # HI HLT menu: Add triggers that are not in the MC menu

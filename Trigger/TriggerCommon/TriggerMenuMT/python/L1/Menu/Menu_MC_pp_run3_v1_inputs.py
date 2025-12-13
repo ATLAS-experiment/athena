@@ -35,7 +35,6 @@ def defineInputsMenu():
                             ]
                         elif group["fpga"]==1 and group["clock"]==1:
                             group["algorithms"] += [
-                                    TopoMenuDef( '110INVM150-eEM50s-eEM10s-2DISAMB-jJ60s', outputbits = 10),
                             ]
                 if conn["name"] == "Topo3El":
                     for group in conn["algorithmGroups"]:

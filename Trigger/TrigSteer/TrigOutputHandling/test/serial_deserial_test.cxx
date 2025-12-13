@@ -1,6 +1,6 @@
 
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #include <iostream>
 
@@ -123,10 +123,10 @@ void testTrigEMContainerInsert(StoreGateSvc* pStore) {
   auto em = new xAOD::TrigEMClusterContainer();
   auto emAux = new xAOD::TrigEMClusterAuxContainer();
   em->setStore( emAux );
-  SG::AuxElement::Accessor< int >   testInt( "testInt" );
-  SG::AuxElement::Accessor< float > testFloat( "testFloat" );
-  SG::AuxElement::Accessor< float > testSmallFloat( "testSmallFloat" );
-  SG::AuxElement::Accessor< ElementLink<xAOD::BTaggingContainer> > testTypedElementLink( "testTypedElementLink" );
+  static const SG::Accessor< int >   testInt( "testInt" );
+  static const SG::Accessor< float > testFloat( "testFloat" );
+  static const SG::Accessor< float > testSmallFloat( "testSmallFloat" );
+  static const SG::Accessor< ElementLink<xAOD::BTaggingContainer> > testTypedElementLink( "testTypedElementLink" );
 
 
   auto fill = [&]( double x) {
@@ -179,10 +179,10 @@ void testTrigEMContainerReadAndCheck(StoreGateSvc* pStore) {
   VALUE( emback ) NOT_EXPECTED ( nullptr );
 
 
-  SG::AuxElement::ConstAccessor< int > testIntReader( "testInt" );
-  SG::AuxElement::ConstAccessor< float > testFloatReader( "testFloat" );
-  SG::AuxElement::ConstAccessor< float > testSmallFloatReader( "testSmallFloat" );
-  SG::AuxElement::ConstAccessor< ElementLink<xAOD::BTaggingContainer> > testTypedElementLinkReader( "testTypedElementLink" );
+  static const SG::ConstAccessor< int > testIntReader( "testInt" );
+  static const SG::ConstAccessor< float > testFloatReader( "testFloat" );
+  static const SG::ConstAccessor< float > testSmallFloatReader( "testSmallFloat" );
+  static const SG::ConstAccessor< ElementLink<xAOD::BTaggingContainer> > testTypedElementLinkReader( "testTypedElementLink" );
 
   VALUE ( emback->size() ) EXPECTED ( 30 ); // as many fills were made
 
@@ -273,8 +273,4 @@ void testRoIDescriptorReadAndCheck(StoreGateSvc* pStore) {
   VALUE( rc->at(1)->etaPlus() ) EXPECTED( 0.3 );
   VALUE( rc->at(1)->phiMinus() ) EXPECTED( -0.23 );
   VALUE( rc->at(1)->phiPlus() ) EXPECTED( 0.197 );
-
-
-
-
 }

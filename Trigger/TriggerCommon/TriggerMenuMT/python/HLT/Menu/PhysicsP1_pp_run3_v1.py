@@ -107,12 +107,8 @@ def addPhysicsP1Chains(chains):
         # all mu
         ChainProp(name='HLT_noalg_L1AFP_FSA_TOF_T0_BGRP12', l1SeedThresholds=['FSNOSEED'], stream=['Main'], groups=MinBiasGroup+SupportGroup),
         ChainProp(name='HLT_noalg_L1AFP_FSA_TOF_T1_BGRP12', l1SeedThresholds=['FSNOSEED'], stream=['Main'], groups=MinBiasGroup+SupportGroup),
-        ChainProp(name='HLT_noalg_L1AFP_FSA_TOF_T2_BGRP12', l1SeedThresholds=['FSNOSEED'], stream=['Main'], groups=MinBiasGroup+SupportGroup),
-        ChainProp(name='HLT_noalg_L1AFP_FSA_TOF_T3_BGRP12', l1SeedThresholds=['FSNOSEED'], stream=['Main'], groups=MinBiasGroup+SupportGroup),
         ChainProp(name='HLT_noalg_L1AFP_FSC_TOF_T0_BGRP12', l1SeedThresholds=['FSNOSEED'], stream=['Main'], groups=MinBiasGroup+SupportGroup),
         ChainProp(name='HLT_noalg_L1AFP_FSC_TOF_T1_BGRP12', l1SeedThresholds=['FSNOSEED'], stream=['Main'], groups=MinBiasGroup+SupportGroup),
-        ChainProp(name='HLT_noalg_L1AFP_FSC_TOF_T2_BGRP12', l1SeedThresholds=['FSNOSEED'], stream=['Main'], groups=MinBiasGroup+SupportGroup),
-        ChainProp(name='HLT_noalg_L1AFP_FSC_TOF_T3_BGRP12', l1SeedThresholds=['FSNOSEED'], stream=['Main'], groups=MinBiasGroup+SupportGroup),
     ]
 
     for sig,chainsInSig in chainsP1.items():
