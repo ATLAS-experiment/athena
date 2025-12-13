@@ -206,14 +206,12 @@ StatusCode GeoModelMdtTest::visualizeTubeStaggering(const EventContext& ctx, con
 
                 if(tube == 1){
                     Identifier tube2 = idHelper.channelID(test_me, readEle->multilayer(), layer, 2);
-                    ATH_MSG_ALWAYS("processing tube" << m_idHelperSvc->toString(tube_id)
+                    ATH_MSG_VERBOSE("processing tube" << m_idHelperSvc->toString(tube_id)
                                     << " " << Amg::toString(tubePos) << " " << Amg::toString(chamber->globalToLocalTrans(gctx) * readEle->readOutPos(gctx, tube2)) << " " << 
                                     Amg::toString(chamber->localToGlobalTrans(gctx).linear() * locDir));
                 }
                 if(tube==1 && layer ==1 && idHelper.stationPhi(tube_id)==1){
-                    ATH_MSG_ALWAYS(Amg::toString(chamber->localToGlobalTrans(gctx).linear() * Amg::Vector3D::UnitX())
-                                    << " " << Amg::toString(chamber->localToGlobalTrans(gctx).linear() * Amg::Vector3D::UnitY())
-                                    << " " << Amg::toString(chamber->localToGlobalTrans(gctx).linear() * Amg::Vector3D::UnitZ()) );
+                    ATH_MSG_VERBOSE(Amg::toString(chamber->localToGlobalTrans(gctx)));
                 }
 
                 // In the chamber coordinate system z points to the next tube layer, x points along the tube and y points to the next tube in the same layer 
