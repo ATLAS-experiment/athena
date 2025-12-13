@@ -42,7 +42,8 @@ namespace {
         using namespace Muon::MuonStationIndex;
         constexpr unsigned chIdxMax = Acts::toUnderlying(StIndex::StIndexMax);
         constexpr unsigned secMax = Muon::MuonStationIndex::numberOfSectors();
-        return sector +  secMax* Acts::toUnderlying(toStationIndex(chIndex))* secMax + (side <=0) * chIdxMax * secMax;
+        return sector +  secMax* Acts::toUnderlying(toStationIndex(chIndex))* secMax + 
+               (Acts::copySign(1,side) == 1) * chIdxMax * secMax;
     }
 #endif
 }
