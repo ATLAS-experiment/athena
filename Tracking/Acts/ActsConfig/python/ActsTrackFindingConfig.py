@@ -172,7 +172,12 @@ def ActsMainTrackFindingAlgCfg(flags,
 
     if 'TrackParamsEstimationTool' not in kwargs:
         from ActsConfig.ActsTrackParamsEstimationConfig import ActsTrackParamsEstimationToolCfg
-        kwargs.setdefault('TrackParamsEstimationTool', acc.popToolsAndMerge(ActsTrackParamsEstimationToolCfg(flags)))
+
+        tpe_tool_kwargs = {}
+        if flags.Tracking.ActiveConfig.extension in ['ActsLargeRadius', 'ActsValidateLargeRadiusStandalone']:
+            tpe_tool_kwargs["allowPropagatorFailure"] = True
+
+        kwargs.setdefault('TrackParamsEstimationTool', acc.popToolsAndMerge(ActsTrackParamsEstimationToolCfg(flags, **tpe_tool_kwargs)))
         
     if 'ExtrapolationTool' not in kwargs:
         from ActsConfig.ActsGeometryConfig import ActsExtrapolationToolCfg
@@ -271,18 +276,27 @@ def ActsTrackFindingCfg(flags,
     stripSeedKeys = [f'{flags.Tracking.ActiveConfig.extension}StripSeeds']
     pixelDetElements = ['ITkPixelDetectorElementCollection']
     stripDetElements = ['ITkStripDetectorElementCollection']
+
+    pixelRefit = [False]
+    stripRefit = [False]
+    if flags.Tracking.ActiveConfig.extension in ['ActsLargeRadius', 'ActsValidateLargeRadiusStandalone']:
+        stripRefit = [True]
+
     if pixelSeedLabels is None:
         pixelSeedKeys = None
         pixelDetElements = None
+        pixelRefit = None
     if stripSeedLabels is None:
         stripSeedKeys = None
         stripDetElements = None
+        stripRefit = None
 
     kwargs.setdefault('ACTSTracksLocation', f"{flags.Tracking.ActiveConfig.extension}Tracks")
     kwargs.setdefault('UncalibratedMeasurementContainerKeys', isdet(flags, pixel=[pixelClusters], strip=[stripClusters], hgtd=[hgtdClusters]))
     kwargs.setdefault('SeedLabels', seedOrder(flags, pixel=pixelSeedLabels, strip=stripSeedLabels))
     kwargs.setdefault('SeedContainerKeys', seedOrder(flags, pixel=pixelSeedKeys, strip=stripSeedKeys))
     kwargs.setdefault('DetectorElementsKeys', seedOrder(flags, pixel=pixelDetElements, strip=stripDetElements))
+    kwargs.setdefault("refitSeeds", seedOrder(flags, pixel=pixelRefit, strip=stripRefit))
 
     acc.merge(ActsMainTrackFindingAlgCfg(flags,
                                          name=f"{flags.Tracking.ActiveConfig.extension}TrackFindingAlg",

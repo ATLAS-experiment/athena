@@ -6,7 +6,7 @@ input_rdo=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/RDO/A
 n_events=5
 log_file="reco.log"
 
-ignore_pattern="ActsLowPtTrackFindingAlg.+ERROR.+Propagation.+reached.+the.+step.+count.+limit,ActsLowPtTrackFindingAlg.+ERROR.+Propagation.+failed:.+PropagatorError:..+Propagation.+reached.+the.+configured.+maximum.+number.+of.+steps.+with.+the.+initial.+parameters,ActsLargeRadiusTrackFindingAlg.+ERROR.+Propagation.+reached.+the.+step.+count.+limit,ActsLargeRadiusTrackFindingAlg.+ERROR.+Propagation.+failed:.+PropagatorError:..+Propagation.+reached.+the.+configured.+maximum.+number.+of.+steps.+with.+the.+initial.+parameters"
+ignore_pattern="ActsLowPtTrackFindingAlg.+ERROR.+Propagation.+reached.+the.+step.+count.+limit,ActsLowPtTrackFindingAlg.+ERROR.+Propagation.+failed:.+PropagatorError:..+Propagation.+reached.+the.+configured.+maximum.+number.+of.+steps.+with.+the.+initial.+parameters,ActsLargeRadiusTrackFindingAlg.+ERROR.+Propagation.+reached.+the.+step.+count.+limit,ActsLargeRadiusTrackFindingAlg.+ERROR.+Propagation.+failed:.+PropagatorError:.*"
 
 export ATHENA_CORE_NUMBER=1
 Reco_tf.py \
