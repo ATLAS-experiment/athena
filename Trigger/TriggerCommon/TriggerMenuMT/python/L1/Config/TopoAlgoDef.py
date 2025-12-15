@@ -1741,14 +1741,14 @@ class TopoAlgoDef:
             alg.addvariable('MaxDeltaEta', d.maxDeta*_eta_conversion, 0)
             tm.registerTopoAlgo(alg)
 
-        # ATR-30401
+        # ATR-30401 and ATR-32084
         # topoitems will be the following:
         # 0DPHI10_jXE40delay_jJ40s
         # 0DPHI99_jXE40delay_jJ40s
         DPHI_jXE40delay_jJ40s_map = [
         {  
-            "algoname"  : "DPHI_jXE40delay_jJ40s",
-            "Delay1"    : 1,
+            "algoname"  : "DPHI_jXE40delay%s_jJ40s",
+            "Delay1"    : [1,2,3],
             "Delay2"    : 0,
             "InputWidth1": HW.metOutputWidth,
             "InputWidth2": HW.jJetOutputWidthSort,
@@ -1767,27 +1767,31 @@ class TopoAlgoDef:
             for k in x:
                 setattr(d,k,x[k])
             inputList = ['jXEs', 'jJs']
-            toponames = []
-            for bitId in range(len(d.phi_thresholds)):
-                toponames.append("0DPHI%d-jXE40delay-jJ40s"  % (d.phi_thresholds[bitId]))
-            
-            alg = AlgConf.DeltaPhiIncl2( name = d.algoname, inputs = inputList, outputs =  toponames )
-            
-            alg.addgeneric('InputWidth1', d.InputWidth1)
-            alg.addgeneric('InputWidth2', d.InputWidth2)
-            alg.addgeneric('MaxTob1', d.MaxTob1)
-            alg.addgeneric('MaxTob2', d.MaxTob2)
-            alg.addgeneric('NumResultBits', len(toponames) )
-            alg.addgeneric('Delay1', d.Delay1)
-            alg.addgeneric('Delay2', d.Delay2)
+
+            for delay1 in d.Delay1:
+                toponames = []
+                delaySuffix =  str(delay1) if delay1 > 1 else ""
+                for bitId in range(len(d.phi_thresholds)):
+                    toponames.append("0DPHI%d-jXE40delay%s-jJ40s"  % (d.phi_thresholds[bitId], delaySuffix) )
+
+                algName = d.algoname %  delaySuffix
+                alg = AlgConf.DeltaPhiIncl2( name = algName, inputs = inputList, outputs =  toponames )
+
+                alg.addgeneric('InputWidth1', d.InputWidth1)
+                alg.addgeneric('InputWidth2', d.InputWidth2)
+                alg.addgeneric('MaxTob1', d.MaxTob1)
+                alg.addgeneric('MaxTob2', d.MaxTob2)
+                alg.addgeneric('NumResultBits', len(toponames) )
+                alg.addgeneric('Delay1', delay1)
+                alg.addgeneric('Delay2', d.Delay2)
 
 
-            for bitId in range(len(toponames)):
-                alg.addvariable('MinET1', d.MinET1, bitId)
-                alg.addvariable('MinET2', d.MinET2, bitId)
-                alg.addvariable('MinDeltaPhi', d.MinDeltaPhi, bitId)
-                alg.addvariable('MaxDeltaPhi', d.phi_thresholds[bitId]*_phi_conversion, bitId)
-            tm.registerTopoAlgo(alg)
+                for bitId in range(len(toponames)):
+                    alg.addvariable('MinET1', d.MinET1, bitId)
+                    alg.addvariable('MinET2', d.MinET2, bitId)
+                    alg.addvariable('MinDeltaPhi', d.MinDeltaPhi, bitId)
+                    alg.addvariable('MaxDeltaPhi', d.phi_thresholds[bitId]*_phi_conversion, bitId)
+                tm.registerTopoAlgo(alg)
 
         # ATR-31097
         TeAsymmetry_map = [
