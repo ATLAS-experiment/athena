@@ -260,32 +260,26 @@ void TauPi0ClusterCreator::getClusterVariables(const xAOD::CaloCluster& cluster,
     if (layer >= 3) continue;
 
     // Only consider positive cells
-    float cellEnergy = cell->e();
-    float cellEnergy_weighted = cellEnergy * cellLink.weight();
-    if (cellEnergy <= 0 && cellEnergy_weighted <= 0) continue;
+    float cellEnergy_weighted = cell->e() * cellLink.weight();
+    if (cellEnergy_weighted <= 0) continue;
+
+    ++nPosECells[layer];
 
     float deltaEta = cell->eta() - cluster.eta(); 
 
-    if (cellEnergy > 0){ 
-      ++nPosECells[layer];
-
-      deltaEtaFirstMom[layer] += deltaEta * cellEnergy;
-      deltaEtaSecondMom[layer] += deltaEta * deltaEta * cellEnergy;
-      totalEnergy[layer] += cellEnergy;
-    }
+    deltaEtaFirstMom[layer] += deltaEta * cellEnergy_weighted;
+    deltaEtaSecondMom[layer] += deltaEta * deltaEta * cellEnergy_weighted;
+    totalEnergy[layer] += cellEnergy_weighted;
 
     // calculate coreEnergyEM1
     if (sampling != 1 && sampling != 5) continue;
 
-    if( cellEnergy_weighted > 0){
+    totalEnergyEM1 += cellEnergy_weighted;
+    float deltaPhi = P4Helpers::deltaPhi(cell->phi(), cluster.phi());
 
-      totalEnergyEM1 += cellEnergy_weighted;
-      float deltaPhi = P4Helpers::deltaPhi(cell->phi(), cluster.phi());
-
-      // Core region: [0.05, 0.05/8]
-      if(std::abs(deltaPhi) > 0.05 || std::abs(deltaEta) > 2 * 0.025/8.) continue;
-      coreEnergyEM1 += cellEnergy_weighted;
-    }
+    // Core region: [0.05, 0.05/8]
+    if(std::abs(deltaPhi) > 0.05 || std::abs(deltaEta) > 2 * 0.025/8.) continue;
+    coreEnergyEM1 += cellEnergy_weighted;
   }
 
   for (int layer=0; layer < 3; ++layer) {
