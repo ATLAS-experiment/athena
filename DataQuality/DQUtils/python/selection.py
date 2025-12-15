@@ -3,7 +3,7 @@
 from DQUtils.quick_retrieve import make_fieldselection, make_selection_vector
 
 from pyparsing import (Word, Literal, oneOf, QuotedString, Optional, 
-    operatorPrecedence, opAssoc, nums, alphanums, StringStart, StringEnd,
+    infixNotation, opAssoc, nums, alphanums, StringStart, StringEnd,
     Combine, CaselessLiteral)
 
 # Taken from "Good usage of setWhitespaceChars" on pyparsing's discussion
@@ -70,7 +70,7 @@ def make_parser(payload_specification):
             return cool.CompositeSelection(connective, vec)
         return thunk
 
-    expr = StringStart() + operatorPrecedence( operand,
+    expr = StringStart() + infixNotation( operand,
         [(andop, 2, opAssoc.LEFT, logic_builder(cool.CompositeSelection.AND)),
          (orop,  2, opAssoc.LEFT, logic_builder(cool.CompositeSelection.OR)),]
         ) + StringEnd()
