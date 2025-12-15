@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -17,6 +17,7 @@
 #include <SelectionHelpers/OutOfValidityHelper.h>
 #include <SystematicsHandles/SysCopyHandle.h>
 #include <SystematicsHandles/SysListHandle.h>
+#include <SystematicsHandles/SysWriteDecorHandle.h>
 
 namespace CP
 {
@@ -68,6 +69,11 @@ namespace CP
   private:
     SysReadSelectionHandle m_preselection {
       this, "preselection", "", "the preselection to apply"};
+
+    /// \brief decoration for calorimeter cluster energy resolution
+  private:
+    SysWriteDecorHandle<float> m_caloClusterEnergyResoHandle {
+      this, "caloClusterEnergyReso", "caloClusterEnergyReso_%SYS%", "decoration for calorimeter cluster energy resolution" };
 
     /// \brief the helper for OutOfValidity results
   private:
