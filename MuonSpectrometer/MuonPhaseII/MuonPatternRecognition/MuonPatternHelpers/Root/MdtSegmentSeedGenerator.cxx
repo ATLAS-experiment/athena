@@ -49,11 +49,10 @@ namespace MuonR4::SegmentFit{
         return isGoodDC(*hits[hitIdx]) || moveToNextHit(hits, hitIdx);
     }
 
-    std::ostream& MdtSegmentSeedGenerator::SeedSolution::print(std::ostream& ostr) const{
+    void MdtSegmentSeedGenerator::SeedSolution::print(std::ostream& ostr) const{
         ostr<<"two circle solution with ";
         ostr<<"theta: "<<(theta / 1._degree) <<" pm "<<(dTheta / 1._degree)<<", ";
         ostr<<"y0: "<<y0<<" pm "<<dY0;
-        return ostr;
     }
     const MdtSegmentSeedGenerator::Config& MdtSegmentSeedGenerator::config() const {
         return m_cfg;
