@@ -19,6 +19,7 @@ def defineMenu():
         'L1_eEM1', 'L1_eEM2',
         'L1_eEM5', 'L1_eEM9', 'L1_eEM12', 'L1_eEM18', 'L1_eEM15',
         'L1_eEM12L', 'L1_eEM18L', 'L1_eEM26', 'L1_eEM26M',
+        'L1_eEM28M',
         # ATR-22061
         "L1_eEM9_EMPTY",
         "L1_eEM15_EMPTY",
@@ -29,6 +30,8 @@ def defineMenu():
         "L1_eEM5_EMPTY",
         # 2025 HI
         "L1_eTAU2_EMPTY",
+        # ATR-32259
+        'L1_eEM26L',
         ## 
         # MU
         ##
@@ -40,13 +43,46 @@ def defineMenu():
         'L1_MU3V_EMPTY', 'L1_2MU5VF_EMPTY', 'L1_MU3V_FIRSTEMPTY', 'L1_MU8VF_EMPTY',
         'L1_MU3V_UNPAIRED_ISO',
 
+        # ATR-32259: L1 items for L1BKeePrimary
+        'L1_MU18VFCH', 'L1_MU8VF_2MU5VF', 
+
         ##
         # combined lepton (e and mu)
         # new calo
         #'L1_2eEM7', 'L1_2eEM9', 'L1_2eEM15',
         'L1_2eEM12', 'L1_2eEM18',
 
-        
+        # ATR-32259: L1 items for L1BKeePrimary, L1BKeePrescaled
+        'L1_2eEM10L_MU8F', 'L1_2eEM18M', 'L1_2eEM24L', 'L1_eEM18L_MU8F', 'L1_eEM24L_3eEM12L',
+        'L1_2eEM18L',
+
+        # combined jet
+        # ATR-32259: L1 items for L1BKeePrimary, L1BKeePrescaled
+        'L1_3jJ40p0ETA25_jXE80',
+
+        # jJ
+        # ATR-32259: L1 items for L1BKeePrimary, L1BKeePrescaled
+        'L1_3jJ70p0ETA23', 'L1_4jJ40', 'L1_jJ140_3jJ60',
+        'L1_jJ55p0ETA23_2jJ40p30ETA49', 'L1_jJ80p0ETA25_2jJ55_jJ50p30ETA49',
+        'L1_3jJ55p0ETA23',
+
+        # combined tau - lepton
+        # ATR-32259: L1 items for L1BKeePrimary, L1BKeePrescaled
+        'L1_MU8F_cTAU20M_3jJ30', 'L1_eEM18M_2cTAU20M_4jJ30', 
+
+        # multi tau, new calo
+        # ATR-32259: L1 items for L1BKeePrimary, L1BKeePrescaled
+        'L1_cTAU30M_2cTAU20M_4jJ30p0ETA25', 'L1_cTAU35M_2cTAU30M_2jJ55_3jJ50', 
+        'L1_eTAU80_2eTAU60',
+
+        # combined tau - xe 
+        # ATR-32259: L1 items for L1BKeePrimary, L1BKeePrescaled
+        'L1_eEM18M_2cTAU20M_jXE70', 'L1_eTAU60_2cTAU20M_jXE80',
+
+        # Phase1 combined em - jet
+        # ATR-32259: L1 items for L1BKeePrimary, L1BKeePrescaled
+        'L1_eEM22M_3jJ50', 'L1_eEM24L_3jJ50',
+
         # combined mu - jet
         'L1_MU3V_jJ40',
         'L1_MU3V_jJ50',
@@ -311,6 +347,18 @@ def defineMenu():
         # TOPO items
         #--------------------------------
 
+        #ATR-32259: L1 items for L1BKeePrimary
+        'L1_BPH-0M9-eEM9-eEM7_2MU3V', 'L1_BPH-2M9-2DR15-2MU5VF',
+        'L1_BPH-0M9-eEM9-eEM7_MU5VF', 'L1_BPH-2M9-0DR15-2MU3V',
+        'L1_BPH-2M9-0DR15-C-MU5VFMU3V', 'L1_BPH-2M9-0DR15-MU5VFMU3V',
+        'L1_BPH-2M9-0DR15-2MU3VF', 
+
+        'L1_JPSI-1M5-eEM15',
+
+        'L1_LFV-MU5VF',
+
+        'L1_jJ90_DETA20-jJ90J',
+
         'L1_LAR-ZEE-eEM',
         #ATR-30145
         'L1_JPSI-1M5-eEM9',
@@ -414,6 +462,15 @@ def defineMenu():
         'L1_ESP_ASYM1_ZDC_XOR_VjTE200',
         'L1_ESP_ASYM2_ZDC_XOR_VjTE200',
         'L1_ESP_ASYM3_ZDC_XOR_VjTE200',
+
+        # tau
+        #ATR-32259: L1 items for L1BKeePrimary
+        'L1_cTAU30M_2cTAU20M_DR-eTAU30eTAU20-jJ55', 'L1_cTAU30M_3DR35-MU8F-eTAU30', 
+        
+        'L1_eEM22M_jMJJ-300',
+
+        'L1_jMJJ-500-NFF', 'L1_jMJJ-700',
+
     ]
 
 
