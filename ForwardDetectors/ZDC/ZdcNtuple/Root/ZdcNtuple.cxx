@@ -54,7 +54,7 @@ ZdcNtuple :: ZdcNtuple (const std::string& name, ISvcLocator *pSvcLocator)
   declareProperty("flipDelay",  flipDelay = 0, "comment");
   declareProperty("reprocZdc",  reprocZdc = 0, "comment");
   declareProperty("auxSuffix",  auxSuffix = "", "comment");
-  declareProperty("nsamplesZdc",  nsamplesZdc = 24, "number of samples, 7 = most of Run 2, 24 = Run 3");
+  declareProperty("nsamplesZdc",  nsamplesZdc = 24, "number of samples, 7 = most of Run 2, 24,32,40 = Run 3");
   declareProperty("lhcf2022", lhcf2022 = false,"LHCf2022 general config");
   declareProperty("lhcf2022afp", lhcf2022afp = false,"LHCf2022 AFP-specific config");
   declareProperty("lhcf2022zdc", lhcf2022zdc = false,"LHCf2022 ZDC-specific config");
@@ -150,9 +150,21 @@ StatusCode ZdcNtuple :: initialize ()
 	    
 	    if (nsamplesZdc == 24)
 	      {
-		ANA_MSG_INFO("Setting up forr 24 samples");
+		ANA_MSG_INFO("Setting up for 24 samples");
 		m_outputTree->Branch("zdc_raw", &t_raw24, "zdc_raw[2][4][2][2][24]/s"); // 24 samples
 		m_outputTree->Branch("rpd_raw", &t_rpdRaw, "rpd_raw[2][16][24]/s"); // 24 samples
+	      }
+	    if (nsamplesZdc == 32)
+	      {
+		ANA_MSG_INFO("Setting up for 32 samples");
+		m_outputTree->Branch("zdc_raw", &t_raw32, "zdc_raw[2][4][2][2][32]/s"); // 24 samples
+		m_outputTree->Branch("rpd_raw", &t_rpdRaw32, "rpd_raw[2][16][32]/s"); // 24 samples
+	      }
+	    if (nsamplesZdc == 40)
+	      {
+		ANA_MSG_INFO("Setting up for 40 samples");
+		m_outputTree->Branch("zdc_raw", &t_raw40, "zdc_raw[2][4][2][2][40]/s"); // 24 samples
+		m_outputTree->Branch("rpd_raw", &t_rpdRaw40, "rpd_raw[2][16][40]/s"); // 24 samples
 	      }
 	  }
 	

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -267,8 +267,12 @@ Root::TGoodRunsListWriter::WriteLumiRangeCollection(xmlTextWriterPtr writer)
   }
 
   /* Write DTD section */
-  xmlTextWriterWriteDTD(writer, (xmlChar *)"LumiRangeCollection", NULL,
-                        (xmlChar *)"http://atlas-runquery.cern.ch/LumiRangeCollection.dtd", NULL);
+  rc = xmlTextWriterWriteDTD(writer, (xmlChar *)"LumiRangeCollection", NULL,
+                             (xmlChar *)"http://atlas-runquery.cern.ch/LumiRangeCollection.dtd", NULL);
+  if (rc < 0) {
+    m_logger << kWARNING << "testXmlwriterDoc: Error at xmlTestWriterWriteDTD" << GEndl;
+    return kFALSE;
+  }
 
   /* Write a comment as child of LumiRangeCollection.
    * Please observe, that the input to the xmlTextWriter functions

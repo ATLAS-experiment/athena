@@ -13,7 +13,7 @@
 using TrigConf::L1BunchGroupSet;
 
 TrigConf::BunchGroupCondAlg::BunchGroupCondAlg(const std::string& name, ISvcLocator* pSvcLocator) :
-   AthReentrantAlgorithm(name, pSvcLocator)
+   AthCondAlgorithm(name, pSvcLocator)
 {}
 
 

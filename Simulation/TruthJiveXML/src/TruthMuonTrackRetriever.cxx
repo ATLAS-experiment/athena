@@ -59,7 +59,7 @@ namespace JiveXML {
     const TrackRecordCollection* TrackRecordColl = NULL ;
     //Loop over all the collections and try a retrieve (more efficenct than
     //contain-retrieve combination)
-    for (auto CollNameItr : m_TrackRecCollNames ) {
+    for (const auto & CollNameItr : m_TrackRecCollNames ) {
       //be verbose
       ATH_MSG_DEBUG( "Trying to retrieve " << CollNameItr );
       //try to retrieve

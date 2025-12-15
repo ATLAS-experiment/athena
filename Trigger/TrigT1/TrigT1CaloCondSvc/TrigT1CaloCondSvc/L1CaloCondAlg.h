@@ -5,7 +5,7 @@
 
 #include "TString.h"
 #include "AthenaPoolUtilities/CondAttrListCollection.h"
-#include "AthenaBaseComps/AthAlgorithm.h"
+#include "AthenaBaseComps/AthCondAlgorithm.h"
 #include "AthenaKernel/IOVInfiniteRange.h"
 #include "StoreGate/CondHandleKeyArray.h"
 
@@ -24,7 +24,7 @@
 #include "TrigT1CaloCalibConditions/L1CaloReadoutConfigContainerJSON.h"
 
 
-class L1CaloCondAlg: public ::AthAlgorithm { 
+class L1CaloCondAlg: public ::AthCondAlgorithm { 
  public: 
     // this is a standard algorithm constructor
 
@@ -33,7 +33,7 @@ class L1CaloCondAlg: public ::AthAlgorithm {
 
   // these are the functions inherited from Algorithm
   virtual StatusCode initialize () override;
-  virtual StatusCode execute () override;
+  virtual StatusCode execute (const EventContext& ctx) const override;
 
 
  private: 
@@ -92,9 +92,9 @@ class L1CaloCondAlg: public ::AthAlgorithm {
   SG::WriteCondHandleKey<L1CaloReadoutConfigContainerJSON>  m_readoutConfigContainerJSON{ this, "OutputKeyReadoutConfigJSON", "L1CaloReadoutConfigContainerJSON"};
 
 
-  template <typename T> StatusCode updateCond(SG::WriteCondHandleKey<T>& wkey,
+  template <typename T> StatusCode updateCond(const EventContext& ctx, const SG::WriteCondHandleKey<T>& wkey,
           const std::vector<std::reference_wrapper<const SG::ReadCondHandleKey<CondAttrListCollection>>>& rkeys,
-          std::unique_ptr<T> obj = nullptr);
+          std::unique_ptr<T> obj = nullptr) const;
 
 
 }; 

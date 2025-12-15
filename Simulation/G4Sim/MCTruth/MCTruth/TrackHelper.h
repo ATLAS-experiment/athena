@@ -10,6 +10,8 @@
 
 #include "GeneratorObjects/HepMcParticleLink.h"
 
+class IProxyDict;
+
 class G4Track;
 class TrackInformation;
 
@@ -30,7 +32,7 @@ public:
    * at the first GenEvent in the McEventCollection.
    */
   inline HepMcParticleLink GenerateParticleLink();
-  inline HepMcParticleLink GenerateParticleLink(const EventContext&);
+  inline HepMcParticleLink GenerateParticleLink(IProxyDict*);
  private:
   inline std::tuple<int, HepMcParticleLink::UniqueIDFlag> particleIdentifierAndFlag() const;
 
@@ -56,14 +58,17 @@ HepMcParticleLink TrackHelper::GenerateParticleLink()
                            flag);
 }
 
-HepMcParticleLink TrackHelper::GenerateParticleLink(const EventContext& ctx)
+HepMcParticleLink TrackHelper::GenerateParticleLink(IProxyDict* proxy)
 {
   const auto [identifier, flag] = particleIdentifierAndFlag();
+  if(!proxy) {
+    return GenerateParticleLink();
+  }
   return HepMcParticleLink(identifier,
                            0,
                            HepMcParticleLink::IS_POSITION,
                            flag,
-                           ctx);
+                           proxy);
 }
 
 #endif // MCTRUTH_TRACKHELPER_H

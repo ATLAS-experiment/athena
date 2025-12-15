@@ -9,13 +9,9 @@
 /////////////////////////////////////////////////////////////////// 
 
 #include "JetCalibTools/GSCCalibStep.h"
-#include "PathResolver/PathResolver.h"
-#include "AsgDataHandles/ReadDecorHandle.h"
 
 GSCCalibStep::GSCCalibStep(const std::string& name)
   : asg::AsgTool( name ){ }
-
-
 
 /////////////////////////////////////////////////////////////////// 
 // Public methods: 
@@ -32,7 +28,9 @@ StatusCode GSCCalibStep::initialize() {
   ATH_CHECK( m_histTool_PunchThrough.retrieve());
   ATH_CHECK( m_histTool_nTrk.retrieve());
   ATH_CHECK( m_histTool_trackWIDTH.retrieve());
- 
+
+  ATH_CHECK(m_vertexContainer_key.initialize());
+
   return StatusCode::SUCCESS;
 }
 
@@ -41,15 +39,24 @@ StatusCode GSCCalibStep::calibrate(xAOD::JetContainer& jets) const {
 
   ATH_MSG_DEBUG("calibrating jet collection.");
 
+  // Retrieve the primary vertex location:
+  SG::ReadHandle<xAOD::VertexContainer> vertexHandle = SG::makeHandle (m_vertexContainer_key);
+  const xAOD::VertexContainer& vertices = *vertexHandle;
+  const xAOD::Vertex *HSvertex = findHSVertex(vertices);
+  if(!HSvertex) {
+    ATH_MSG_WARNING("Invalid primary vertex found, will not continue applying the GSC.");
+    return StatusCode::FAILURE;
+  }
+  int PVindex = HSvertex->index();
+  ATH_MSG_DEBUG("PV index:" << PVindex);
+
+  // Calibrate the jets
   for (xAOD::Jet* jet : jets){ 
 
     JetHelper::JetContext jc;
 
     xAOD::JetFourMom_t jetconstitP4 = jet->getAttribute<xAOD::JetFourMom_t>("JetConstitScaleMomentum");
     std::vector<float> samplingFrac = jet->getAttribute<std::vector<float> >("EnergyPerSampling");
-    // get Primary Vertex index
-    int PVindex = 0;
-    ATH_MSG_DEBUG("PV index:" << PVindex);
     // get detector Eta
     float detectorEta = jet->getAttribute<float>("DetectorEta");
     // get trackWIDTHPVX
@@ -120,7 +127,7 @@ StatusCode GSCCalibStep::calibrate(xAOD::JetContainer& jets) const {
     jc.setValue("Nsegments", Nsegments);
 
     float getGSCCorrection = 1.0;
-    int etabin = fabs(detectorEta)/0.1;// m_binSize in old version
+    int etabin = std::abs(detectorEta)/0.1;// m_binSize in old version
 
     const xAOD::JetFourMom_t startingP4 = jet->getAttribute<xAOD::JetFourMom_t>(m_jetInScale);
     jet->setJetP4(startingP4);
@@ -142,6 +149,11 @@ StatusCode GSCCalibStep::calibrate(xAOD::JetContainer& jets) const {
     getGSCCorrection*=1./getNTrkResponse(*jet, jc, etabin);
     jet->setJetP4( startingP4*getGSCCorrection );
     getGSCCorrection*=1./getTrackWIDTHResponse(*jet, jc, etabin);
+
+    if(m_applyPunchThrough && startingP4.Pt() >= m_punchThroughMinPt){
+      jet->setJetP4( startingP4*getGSCCorrection );
+      getGSCCorrection*=1./getPunchThroughResponse(*jet, jc, std::abs(detectorEta));
+    }
 
     ATH_MSG_DEBUG("GSC full correction: " << getGSCCorrection);
 
@@ -179,13 +191,11 @@ float GSCCalibStep::getEM3Response(const xAOD::Jet& jet, const JetHelper::JetCon
 
 float GSCCalibStep::getPunchThroughResponse(const xAOD::Jet& jet, const JetHelper::JetContext& jc, double eta_det) const {
   int etabin=-99;
-  std::vector<float> punchThroughEtaBins = {0.0, 1.3, 1.9};//variable in old version
-
-  if (punchThroughEtaBins.empty() || m_histTool_PunchThrough.size() != punchThroughEtaBins.size()-1) 
+  if (m_punchThroughEtaBins.empty() || m_histTool_PunchThrough.size() != m_punchThroughEtaBins.size()-1)
     ATH_MSG_WARNING("Please check that the punch through eta binning is properly set in your config file");
-  if ( eta_det >= punchThroughEtaBins.back() || jc.getValue<float>("Nsegments") < 20 ) return 1;
-  for (uint i=0; i<punchThroughEtaBins.size()-1; ++i) {
-    if(eta_det >= punchThroughEtaBins[i] && eta_det < punchThroughEtaBins[i+1]) etabin = i;
+  if ( eta_det >= m_punchThroughEtaBins[m_punchThroughEtaBins.size()-1] || jc.getValue<int>("Nsegments") < 20 ) return 1;
+  for (uint i=0; i<m_punchThroughEtaBins.size()-1; ++i) {
+    if(eta_det >= m_punchThroughEtaBins[i] && eta_det < m_punchThroughEtaBins[i+1]) etabin = i;
   }
   if(etabin<0) {
     ATH_MSG_WARNING("There was a problem determining the eta bin to use for the punch through correction.");
@@ -200,18 +210,7 @@ float GSCCalibStep::getPunchThroughResponse(const xAOD::Jet& jet, const JetHelpe
 float GSCCalibStep::getNTrkResponse(const xAOD::Jet& jet, const JetHelper::JetContext& jc, uint etabin) const {
   if (jc.getValue<int>("nTrk")<=0) return 1; //nTrk < 0 is unphysical, nTrk = 0 is a special case, so return 1 for nTrk <= 0
   if ( etabin >= m_histTool_nTrk.size() ) return 1.;
-  double nTrkResponse;
-  /*if(m_turnOffTrackCorrections){
-    if(pT>=m_turnOffStartingpT && pT<=m_turnOffEndpT){
-      double responseatStartingpT = m_histTool_nTrk[etabin]->getValue(jet, jc);
-      nTrkResponse = (1-responseatStartingpT)/(m_turnOffEndpT-m_turnOffStartingpT);
-      nTrkResponse *= pT;
-      nTrkResponse += 1 - (m_turnOffEndpT*(1-responseatStartingpT)/(m_turnOffEndpT-m_turnOffStartingpT));
-      return nTrkResponse;
-    }
-    else if(pT>m_turnOffEndpT) return 1;
-  } TODO */
-  nTrkResponse = m_histTool_nTrk[etabin]->getValue(jet, jc);
+  double nTrkResponse = m_histTool_nTrk[etabin]->getValue(jet, jc);
   return nTrkResponse;
 }
 
@@ -219,18 +218,22 @@ float GSCCalibStep::getTrackWIDTHResponse(const xAOD::Jet& jet, const JetHelper:
   if (jc.getValue<float>("trackWIDTH")<=0) return 1;
   if ( etabin >= m_histTool_trackWIDTH.size() ) return 1.;
   //jets with no tracks are assigned a trackWIDTH of -1, we use the trackWIDTH=0 correction in those cases
-  double trackWIDTHResponse;
-  /*if(m_turnOffTrackCorrections){
-    if(pT>=m_turnOffStartingpT && pT<=m_turnOffEndpT){
-      double responseatStartingpT = readPtJetPropertyHisto(m_turnOffStartingpT, trackWIDTH, *m_respFactorstrackWIDTH[etabin]);
-      trackWIDTHResponse = (1-responseatStartingpT)/(m_turnOffEndpT-m_turnOffStartingpT);
-      trackWIDTHResponse *= pT;
-      trackWIDTHResponse += 1 - (m_turnOffEndpT*(1-responseatStartingpT)/(m_turnOffEndpT-m_turnOffStartingpT));
-      return trackWIDTHResponse;
-    }
-    else if(pT>m_turnOffEndpT) return 1;
-  } TODO */
-  trackWIDTHResponse = m_histTool_trackWIDTH[etabin]->getValue(jet, jc);
+  double trackWIDTHResponse = m_histTool_trackWIDTH[etabin]->getValue(jet, jc);
   return trackWIDTHResponse;
 }
 
+const xAOD::Vertex *GSCCalibStep::findHSVertex(const xAOD::VertexContainer& vertices) const {
+  for ( const xAOD::Vertex* vertex : vertices ) {
+    if(vertex->vertexType() == xAOD::VxType::PriVtx) {
+      ATH_MSG_VERBOSE("GSCCalibStep " << name() << " Found HS vertex at index: "<< vertex->index());
+      return vertex;
+    }
+  }
+  if (vertices.size()==1) {
+    ATH_MSG_VERBOSE("GSCCalibStep " << name() << " Found no HS vertex, return dummy");
+    if (vertices.back()->vertexType() == xAOD::VxType::NoVtx)
+      return vertices.back();
+  }
+  ATH_MSG_VERBOSE("No vertex found in container.");
+  return nullptr;
+}

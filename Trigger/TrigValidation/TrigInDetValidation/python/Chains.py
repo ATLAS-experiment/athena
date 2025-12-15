@@ -117,7 +117,7 @@ class Chains:
 
             ],
             "signature": ["Bjet"],
-            "menu": ''
+            "menu": 'Dev_pp_run3_v1'
         }
 
         d["fsjet"] = {
@@ -128,7 +128,7 @@ class Chains:
 
             ],
             "signature": ["Jet"],
-            "menu": ''
+            "menu": 'Dev_pp_run3_v1'
         }
 
         d["minbias"] = {

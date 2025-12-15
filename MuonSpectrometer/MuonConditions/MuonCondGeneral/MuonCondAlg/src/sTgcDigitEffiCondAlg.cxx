@@ -10,7 +10,7 @@
 #include <fstream>
 
 sTgcDigitEffiCondAlg::sTgcDigitEffiCondAlg(const std::string& name, ISvcLocator* pSvcLocator) :
-    AthReentrantAlgorithm(name, pSvcLocator) {}
+    AthCondAlgorithm(name, pSvcLocator) {}
 
 // Initialize
 StatusCode sTgcDigitEffiCondAlg::initialize() {

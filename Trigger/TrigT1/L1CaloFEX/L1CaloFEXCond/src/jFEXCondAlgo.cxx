@@ -24,7 +24,7 @@ namespace jDBdefaults = LVL1::jFEXCoolDBDefaults;
 namespace LVL1 {
     
 //Default Constructor
-jFEXCondAlgo::jFEXCondAlgo(const std::string& name, ISvcLocator* svc) : AthReentrantAlgorithm(name, svc){}
+jFEXCondAlgo::jFEXCondAlgo(const std::string& name, ISvcLocator* svc) : AthCondAlgorithm(name, svc){}
 
 StatusCode jFEXCondAlgo::initialize() {
     

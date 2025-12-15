@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ELECTRON_DECORATOR_ALG_HH
@@ -36,29 +36,29 @@ namespace FlavorTagDiscriminants {
     // Decorators for electrons
 
     SG::WriteDecorHandleKey< xAOD::ElectronContainer > m_dec_electron_et {
-      this, "ftag_et", "ftag_et", 
+      this, "ftag_et", m_ElectronContainerKey, "ftag_et",
         "Transverse energy of the electron"};
-    
+
     SG::WriteDecorHandleKey< xAOD::ElectronContainer > m_dec_electron_deltaPOverP {
-      this, "ftag_deltaPOverP", "ftag_deltaPOverP", 
+      this, "ftag_deltaPOverP", m_ElectronContainerKey, "ftag_deltaPOverP",
         "Momentum lost by the electron track between the perigee and the last measurement point divided by the momentum at the perigee"};
-    
+
     SG::WriteDecorHandleKey< xAOD::ElectronContainer > m_dec_electron_isoPtOverPt {
-      this, "ftag_ptVarCone30OverPt", "ftag_ptVarCone30OverPt", 
+      this, "ftag_ptVarCone30OverPt", m_ElectronContainerKey, "ftag_ptVarCone30OverPt",
         "Ratio of isolated pt to pt"};
-    
+
     SG::WriteDecorHandleKey< xAOD::ElectronContainer > m_dec_electron_energyOverP {
-      this, "ftag_energyOverP", "ftag_energyOverP", 
+      this, "ftag_energyOverP", m_ElectronContainerKey, "ftag_energyOverP",
         "Ratio of cluster energy energy to track momentum"};
-    
+
     SG::WriteDecorHandleKey< xAOD::ElectronContainer > m_dec_electron_z0 {
-      this, "ftag_z0AlongBeamspot", "ftag_z0AlongBeamspot", 
+      this, "ftag_z0AlongBeamspot", m_ElectronContainerKey, "ftag_z0AlongBeamspot",
         "Electron z0 along beamspot"};
 
     SG::WriteDecorHandleKey< xAOD::ElectronContainer > m_dec_electron_z0_significance {
-      this, "ftag_z0AlongBeamspotSignificance", "ftag_z0AlongBeamspotSignificance", 
+      this, "ftag_z0AlongBeamspotSignificance", m_ElectronContainerKey, "ftag_z0AlongBeamspotSignificance",
         "Electron z0 significance along beamspot"};
-    
+
     SG::AuxElement::ConstAccessor<float> m_pt_varcone30{"ptvarcone30_Nonprompt_All_MaxWeightTTVALooseCone_pt1000"};
 
     const xAOD::Vertex* primary(const xAOD::VertexContainer& vertices) const;

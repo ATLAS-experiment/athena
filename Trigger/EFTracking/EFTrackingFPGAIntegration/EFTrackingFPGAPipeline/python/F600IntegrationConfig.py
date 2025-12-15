@@ -112,10 +112,6 @@ if __name__ == "__main__":
     
     flags.fillFromArgs()
     
-    # Additional (necessary) flag re-configuration for mutliregion tracking
-    from FPGATrackSimConfTools.FPGATrackSimAnalysisConfig import ConfigureMultiRegionFlags
-    ConfigureMultiRegionFlags(flags)
-    
     if (flags.Trigger.FPGATrackSim.pipeline.startswith('F-6')):
         print("You are trying to run an F-6* pipeline! I am auto-configuring the Inside-Out for you. Whether you wanted to or not")
         flags.Trigger.FPGATrackSim.Hough.genScan=True

@@ -192,6 +192,8 @@ public:
     //should test upper limits on x here...but what is sensible? 1Mb? 100Mb?
 		if ((image->type & 0xFF00) == 0x0100) {
 			size_t x = ((size_t)image->ysize * (size_t)image->zsize) * sizeof(unsigned);
+			//cid 13609 complaining there is no input sanitising
+			//coverity[TAINTED_SCALAR]
 			image->rowStart = (unsigned *)malloc(x);
 			image->rowSize = (int *)malloc(x);
 			if (image->rowStart == NULL || image->rowSize == NULL) {
@@ -318,6 +320,8 @@ public:
 		lptr = base;
 		for (y=0; y<image->ysize; ++y) {
 			if (image->zsize>=4) {
+			  //cid 13919 complaining that there was no input sanitising
+			  //coverity[TAINTED_SCALAR]
 				ImageGetRow(image,rbuf,y,0);
 				ImageGetRow(image,gbuf,y,1);
 				ImageGetRow(image,bbuf,y,2);

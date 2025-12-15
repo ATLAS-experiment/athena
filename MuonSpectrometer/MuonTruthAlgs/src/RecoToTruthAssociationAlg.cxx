@@ -68,7 +68,18 @@ StatusCode RecoToTruthAssociationAlg::initialize() {
 
     m_inputDecorKey.emplace_back(m_truthMuKey, SG::AuxTypeRegistry::instance().getName(acc_origin.auxid()));
     m_inputDecorKey.emplace_back(m_truthMuKey, SG::AuxTypeRegistry::instance().getName(acc_type.auxid()));
-    m_inputDecorKey.emplace_back(m_truthMuKey, SG::AuxTypeRegistry::instance().getName(truthMdtHitsAcc.auxid()));
+    if (m_idHelperSvc->hasMDT()) {
+        m_inputDecorKey.emplace_back(m_truthMuKey, SG::AuxTypeRegistry::instance().getName(truthMdtHitsAcc.auxid()));
+    }
+    if (m_idHelperSvc->hasRPC()) {
+        m_inputDecorKey.emplace_back(m_truthMuKey, SG::AuxTypeRegistry::instance().getName(truthRpcHitsAcc.auxid()));
+    }
+    if (m_idHelperSvc->hasTGC()) {
+        m_inputDecorKey.emplace_back(m_truthMuKey, SG::AuxTypeRegistry::instance().getName(truthTgcHitsAcc.auxid()));
+    }
+    if (m_idHelperSvc->hasCSC()) {
+        m_inputDecorKey.emplace_back(m_truthMuKey, SG::AuxTypeRegistry::instance().getName(truthCscHitsAcc.auxid()));
+    }
 
     ATH_CHECK(m_inputDecorKey.initialize());
     return StatusCode::SUCCESS;

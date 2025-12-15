@@ -5,11 +5,10 @@
 #ifndef ROOTCOLLECTION_ROOTCOLLECTION_H
 #define ROOTCOLLECTION_ROOTCOLLECTION_H
 
-#include "CollectionBase/ICollection.h"
-#include "CollectionBase/CollectionDescription.h"
-#include "CollectionBase/CollectionRowBuffer.h"
+#include "CollectionSvc/ICollection.h"
+#include "CollectionSvc/CollectionDescription.h"
+#include "CollectionSvc/CollectionRowBuffer.h"
 
-//#include "FileCatalog/IFileCatalog.h"
 #include "POOLCore/DbPrint.h"
 
 #include "GaudiKernel/IFileMgr.h"

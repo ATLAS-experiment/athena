@@ -9,7 +9,7 @@
 
 `DumpGeo` is an Athena algorithm inheriting from the class AthAlgorithm. Internally, it calls the package `GeoExporter` to dump the GeoModel tree resulting from any Geometry TAGs into a local SQLite file.
 
-You can run these intructions on any `lxplus`-like machine (Alma9 or CC7) where the Athena framework is installed, or on macOS with Athena running inside a [a Lima container/light VM](https://atlassoftwaredocs.web.cern.ch/athena/lima/)
+You can run these intructions on any `lxplus`-like machine (Alma9 or CC7) where the Athena framework is installed, or on macOS with Athena running inside a [a Lima container/light VM](https://atlas-software.docs.cern.ch/athena/containers/lima/).
 
 
 ## Setup 

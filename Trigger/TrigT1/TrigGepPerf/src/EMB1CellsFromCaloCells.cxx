@@ -26,7 +26,7 @@ EMB1CellsFromCaloCells::cells(std::vector<std::vector<const CaloCell*>>& cells,
   auto h_caloCells = SG::makeHandle(m_caloCellsKey, ctx);
   CHECK(h_caloCells.isValid());
 
-  auto allCaloCells = *h_caloCells;
+  const auto & allCaloCells = *h_caloCells;
   
   
   // limit cells to  LAREM CaloCells

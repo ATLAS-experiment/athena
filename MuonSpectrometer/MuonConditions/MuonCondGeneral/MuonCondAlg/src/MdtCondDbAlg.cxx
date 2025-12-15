@@ -16,7 +16,7 @@ using namespace MuonCond;
 using namespace CxxUtils;
 // constructor
 MdtCondDbAlg::MdtCondDbAlg(const std::string& name, ISvcLocator* pSvcLocator) :
-    AthReentrantAlgorithm(name, pSvcLocator) {}
+    AthCondAlgorithm(name, pSvcLocator) {}
 
 // Initialize
 StatusCode MdtCondDbAlg::initialize() {

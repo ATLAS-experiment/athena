@@ -39,7 +39,7 @@ public:
   bool AddEnergy(const Identifier cellid, const float energy, const float time);
   bool BuildWindows(const McEventCollection* mcCollptr,
                     float deta, float dphi, float ptmin);
-  int GetNbCells(void) const;
+  size_t GetNbCells(void) const {return m_emap.size(); }
   inline const LArHitList& GetCell(const unsigned int index) const {return m_emap[index];} ;
   inline const std::vector<std::pair<float,float> >& GetTimeE(const IdentifierHash index) const { return  m_emap[index].getData();}
 

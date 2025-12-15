@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ISF_FastCaloSimEvent/TFCSSimpleLWTNNHandler.h"
@@ -66,7 +66,7 @@ TFCSSimpleLWTNNHandler::NetworkOutputs TFCSSimpleLWTNNHandler::compute(
                   << " An LWTNN neural network can only handle one node.");
   };
   std::map<std::string, double> flat_inputs;
-  for (auto node : inputs) {
+  for (const auto & node : inputs) {
     flat_inputs = node.second;
   }
   // Now we have flattened, we can compute.

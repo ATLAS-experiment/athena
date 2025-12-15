@@ -152,7 +152,7 @@ WriteDecorHandleKey<T>::operator= (const std::string& sgkey)
  * the store is not changed.  A key name that starts with a "+"
  * is interpreted as a hierarchical key name, not an empty store name.
  *
- * Returns failure the key string format is bad.
+ * Returns failure if the key string format is bad.
  */
 template <class T>
 StatusCode WriteDecorHandleKey<T>::assign (const std::string& sgkey)

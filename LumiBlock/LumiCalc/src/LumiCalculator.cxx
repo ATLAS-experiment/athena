@@ -975,7 +975,11 @@ void  LumiCalculator::IntegrateLumi ATLAS_NOT_THREAD_SAFE (const xAOD::LumiBlock
       
       //-------------------------------
       // Calculate livetime from a dedicated not rare trigger if user requested
-      CoolQuery::L1CountFolderData l1count = Livetime_map.find(currentVK)->second;
+      auto livetime_it = Livetime_map.find(currentVK);
+      if (livetime_it == Livetime_map.end()) {
+        throw std::runtime_error("LumiCalculator::IntegrateLumi Start or End times not found in map.");
+      }
+      CoolQuery::L1CountFolderData l1count = livetime_it->second;
 
       m_livetime_beforeprescale = l1count.BeforePrescale;
       m_livetime_afterprescale = l1count.AfterPrescale;

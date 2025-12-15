@@ -16,7 +16,7 @@ for slice, cfg in tida_dict.items():
     if(cfg["menu"] != ''):
         menus.append(cfg["menu"])
     else:
-        menus = ["MC_pp_run3_v1"]
+        menus = ["MC_pp_run3_v1","Dev_pp_run3_v1"]
     
     for m in menus:
         if m not in menu_chains:

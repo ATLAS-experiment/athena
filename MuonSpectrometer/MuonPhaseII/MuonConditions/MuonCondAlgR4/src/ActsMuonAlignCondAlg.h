@@ -4,7 +4,7 @@
 #ifndef MUONCONDALGR4_ACTSMUONALIGNCONDALG_H
 #define MUONCONDALGR4_ACTSMUONALIGNCONDALG_H
 
-#include <AthenaBaseComps/AthReentrantAlgorithm.h>
+#include <AthenaBaseComps/AthCondAlgorithm.h>
 #include <StoreGate/CondHandleKeyArray.h>
 #include <StoreGate/WriteCondHandle.h>
 
@@ -26,13 +26,12 @@
  *  a GeoAlignmentStore. The store is filled with the AlignableTransforms of the ReadoutGeometry
  *  which are connected with the A-line transformations of the ALineContainer.
  **/
-class ActsMuonAlignCondAlg: public AthReentrantAlgorithm {
+class ActsMuonAlignCondAlg: public AthCondAlgorithm {
 public:
       ActsMuonAlignCondAlg(const std::string& name, ISvcLocator* pSvcLocator);
       virtual ~ActsMuonAlignCondAlg() = default;
       virtual StatusCode initialize() override;
       virtual StatusCode execute(const EventContext& ctx) const override;
-      virtual bool isReEntrant() const override { return false; }
 
 private:
     /// Returns the Identifier serving as key to find the alignment parameters connected with

@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 #====================================================================
 # BPHY28.py
@@ -25,7 +25,10 @@ def BPHY28Kernel(flags):
    thinTrkVtxList    = [] # List of reconstructed candidates to use for the thinning of tracks from vertices
 
 
-   from DerivationFrameworkBPhys.commonBPHYMethodsCfg import (BPHY_V0ToolCfg,  BPHY_InDetDetailedTrackSelectorToolCfg, BPHY_VertexPointEstimatorCfg, BPHY_TrkVKalVrtFitterCfg)
+   from DerivationFrameworkBPhys.commonBPHYMethodsCfg import (
+      BPHY_V0ToolCfg, BPHY_InDetDetailedTrackSelectorToolCfg,
+      BPHY_VertexPointEstimatorCfg, BPHY_TrkVKalVrtFitterCfg,
+      AugOriginalCountsCfg)
    from JpsiUpsilonTools.JpsiUpsilonToolsConfig import PrimaryVertexRefittingToolCfg
    acc = ComponentAccumulator()
    isSimulation = flags.Input.isMC
@@ -59,12 +62,8 @@ def BPHY28Kernel(flags):
    toRelink = ["InDetTrackParticles", "InDetLargeD0TrackParticles"] if doLRT else []
    MuonReLink = [ "Muons", "MuonsLRT" ] if doLRT else []
 
-
-   BPHY28_AugOriginalCounts = CompFactory.DerivationFramework.AugOriginalCounts(
-      name = "BPHY28_AugOriginalCounts",
-      VertexContainer = "PrimaryVertices",
-      TrackContainer = "InDetTrackParticles",
-      TrackLRTContainer = "InDetLargeD0TrackParticles" if doLRT else "")
+   BPHY28_AugOriginalCounts = acc.popToolsAndMerge(
+      AugOriginalCountsCfg(flags, name = "BPHY28_AugOriginalCounts"))
    augList += [ BPHY28_AugOriginalCounts ]
 
    BPHY28MuMuFinder = CompFactory.Analysis.JpsiFinder(

@@ -33,6 +33,7 @@ def initConfigFlags():
     acf.addFlag('Exec.FPE', 0, help='FPE check mode: -2 (no FPE check), -1 (abort with core-dump), 0 (FPE Auditor w/o stack-tace) , >0 (number of stack-traces printed by the job)')
     acf.addFlag('Exec.EventTimeOut', 0, help='per-event timeout (in ns) after which the job is aborted (0 means no timeout)')
     acf.addFlag('Exec.EventPrintoutInterval', 1, help='interval of event heartbeat printouts from the loop manager')
+    acf.addFlag('Exec.StopOnSignal', [], help='List of signal names that can be used to stop the job gracefully. See SignalMonitorSvc in GaudiUtils.' )
 
     #Custom messaging for components, see Utils.setupLoggingLevels
     acf.addFlag('Exec.VerboseMessageComponents', [], help='verbose output for listed components (wildcards)')

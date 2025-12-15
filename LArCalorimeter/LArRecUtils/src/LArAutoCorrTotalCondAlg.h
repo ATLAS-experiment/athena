@@ -5,7 +5,7 @@
 #ifndef LARAUTOCORRTOTALCONDALG_H
 #define LARAUTOCORRTOTALCONDALG_H
 
-#include "AthenaBaseComps/AthAlgorithm.h"
+#include "AthenaBaseComps/AthCondAlgorithm.h"
 #include "StoreGate/ReadCondHandleKey.h"
 #include "StoreGate/WriteCondHandleKey.h"
 
@@ -23,13 +23,13 @@
 
 class LArAutoCorrTotal;
 
-class LArAutoCorrTotalCondAlg : public AthAlgorithm {
+class LArAutoCorrTotalCondAlg : public AthCondAlgorithm {
 public:
   LArAutoCorrTotalCondAlg(const std::string &name, ISvcLocator *pSvcLocator);
   virtual ~LArAutoCorrTotalCondAlg() override;
 
   virtual StatusCode initialize() override;
-  virtual StatusCode execute() override;
+  virtual StatusCode execute(const EventContext& ctx) const override;
 
 private:
 

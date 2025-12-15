@@ -2,11 +2,11 @@
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
-def SegmentRefitTestCfg(flags,name="SegmentRefitter", **kwargs):
+def SegmentRefitTestCfg(flags,name="SegmentRefitter", drawEvent=False, **kwargs):
     result = ComponentAccumulator()
     from MuonPatternRecognitionAlgs.MuonPatternRecognitionConfig import ActsMuonSegmentRefitAlgCfg
 
-    result.merge(ActsMuonSegmentRefitAlgCfg(flags))
+    result.merge(ActsMuonSegmentRefitAlgCfg(flags, drawEvent=drawEvent))
     the_alg = CompFactory.MuonValR4.SegmentRefitTest(name, **kwargs)
     result.addEventAlgo(the_alg, primary = True)
     return result
@@ -60,7 +60,7 @@ if __name__=="__main__":
 
     from MuonPatternRecognitionAlgs.MuonPatternRecognitionConfig import MuonPatternRecognitionCfg
     cfg.merge(MuonPatternRecognitionCfg(flags))
-    #cfg.merge(SegmentRefitTestCfg(flags))
+    cfg.merge(SegmentRefitTestCfg(flags, drawEvent = args.dumpObjFiles))
     cfg.merge(SegmentExtpTestCfg(flags, drawEvent = args.dumpObjFiles ))
    
     from MuonPatternRecognitionTest.PatternTestConfig import PatternVisualizationToolCfg

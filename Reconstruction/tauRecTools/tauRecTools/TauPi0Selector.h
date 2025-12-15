@@ -34,10 +34,10 @@ private:
   /** @brief Get eta bin of Pi0Cluster */
   int getEtaBin(double eta) const;
 
-  Gaudi::Property<std::vector<double>> m_clusterEtCut{this, "ClusterEtCut", {}};
+  Gaudi::Property<std::vector<float>> m_pi0EtCut{this, "Pi0EtCut", {}};
   Gaudi::Property<double> m_maxDeltaRNeutral {this, "MaxDeltaRNeutral", 0.2, "max DeltaR for pi0-tau association"};
-  Gaudi::Property<std::vector<double>> m_clusterBDTCut_1prong{this, "ClusterBDTCut_1prong", {}};
-  Gaudi::Property<std::vector<double>> m_clusterBDTCut_mprong{this, "ClusterBDTCut_mprong", {}};
+  Gaudi::Property<std::vector<float>> m_pi0BDTCut_1prong{this, "Pi0BDTCut_1prong", {}};
+  Gaudi::Property<std::vector<float>> m_pi0BDTCut_mprong{this, "Pi0BDTCut_mprong", {}};
   
 
 };

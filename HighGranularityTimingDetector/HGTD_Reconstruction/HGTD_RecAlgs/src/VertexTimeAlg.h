@@ -60,30 +60,30 @@ private:
   };
 
   SG::WriteDecorHandleKey<xAOD::VertexContainer> m_vxHasTime_key{
-    this, "VertexHasValidTime", "PrimaryVertices.hasValidTime",
+    this, "VertexHasValidTime", m_primVxCont_key, "hasValidTime",
     "Specifies if the vertex has a valid time"
   };
 
   SG::WriteDecorHandleKey<xAOD::VertexContainer> m_vxTime_key{
-    this, "VertexTime", "PrimaryVertices.time", "Time assigned to vertices"
+    this, "VertexTime", m_primVxCont_key, "time", "Time assigned to vertices"
   };
 
   SG::WriteDecorHandleKey<xAOD::VertexContainer> m_vxTimeRes_key{
-    this, "VertexTimeResolution", "PrimaryVertices.timeResolution",
+    this, "VertexTimeResolution", m_primVxCont_key, "timeResolution",
     "Time resolution assigned to vertices"
   };
 
   SG::ReadDecorHandleKey<xAOD::TrackParticleContainer> m_trackValidTime_key{
-    this, "TrackHasValidTime", "InDetTrackParticles.hasValidTime",
+    this, "TrackHasValidTime", m_trackCont_key, "hasValidTime",
     "Specifies if the track has a valid precision time"
   };
 
   SG::ReadDecorHandleKey<xAOD::TrackParticleContainer> m_trackTime_key{
-    this, "TrackTime", "InDetTrackParticles.time", "Time assigned to tracks"
+    this, "TrackTime", m_trackCont_key, "time", "Time assigned to tracks"
   };
 
   SG::ReadDecorHandleKey<xAOD::TrackParticleContainer> m_trackTimeRes_key{
-    this, "TrackTimeResolution", "InDetTrackParticles.timeResolution",
+    this, "TrackTimeResolution", m_trackCont_key, "timeResolution",
     "Time resolution assigned to tracks"
   };
 

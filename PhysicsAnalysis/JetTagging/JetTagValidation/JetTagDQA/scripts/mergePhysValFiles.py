@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 #----------------------------------------------------------------------
 #stand-alone script to merge specific directories of NTUP_PHYSVAL files 
@@ -8,7 +9,7 @@
 #Nov 2020
 #----------------------------------------------------------------------
 
-import getopt,os,sys,glob,argparse,ROOT,time
+import os,glob,argparse,ROOT,time
 from ROOT import gDirectory
 
 start = time.process_time()

@@ -22,7 +22,7 @@
 #include "GaudiKernel/IIncidentListener.h"
 #include "IOVDbMetaDataTools/IIOVDbMetaDataTool.h"
 
-#include <string>  
+#include <string>
 #include <shared_mutex>
 
 class StoreGateSvc;
@@ -106,8 +106,14 @@ private:
 
     /// Modify a Payload for a particular folder - replaces one of the
     /// internal attributes
-    StatusCode  modifyPayload (const std::string& folderName, 
+    StatusCode  modifyPayload (const std::string& folderName,
                                CondAttrListCollection*& payload) const;
+
+    /// Serialize IOVMetaDataContainer to JSON format for ByteStream metadata
+    std::string serializeContainerToJSON(const IOVMetaDataContainer* container) const;
+
+    /// Serialize IOV metadata to ByteStream metadata (called from processInputFileMetaData)
+    StatusCode serializeIOVMetadataToBSMetadata();
 
     /// Handles to the meta data stores
     typedef ServiceHandle<StoreGateSvc> StoreGateSvc_t;
@@ -141,6 +147,11 @@ private:
     // Special keys: "folder:beginRun" and "folder:endRun" specify IOV range
     Gaudi::Property<std::map<std::string, std::string>> m_payloads{
         this, "Payloads", {}, "Direct payload registration (format: {folder:key: value})"};
+
+    // Folders to serialize to ByteStream metadata
+    Gaudi::Property<std::vector<std::string>> m_foldersToSerializeToBSMetadata{
+        this, "FoldersToSerializeToBSMetadata", {},
+        "List of folder names to serialize to ByteStream metadata as JSON"};
 
     // mutex for R/W locking of the entire tool (and supposedly all metadata objects it works with)
     mutable std::shared_mutex    m_mutex;

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigOutputHandling/HLTResultMTMaker.h"
@@ -210,7 +210,7 @@ void HLTResultMTMaker::validatePEBInfo(HLT::HLTResultMT& hltResult) const {
       }
       auto monRemovedROBsSubDet = Monitored::Collection(
         "PEB_RemovedROBs_SubDet", removedSubDets,
-        [](const eformat::SubDetector sd){return eformat::helper::SubDetectorDictionary.string(sd);});
+        [](const eformat::SubDetector sd) -> const std::string & {return eformat::helper::SubDetectorDictionary.string(sd);});
       Monitored::Group(m_monTool, monRemovedROBsSubDet);
     } else {
       ATH_MSG_VERBOSE("No disabled ROBs were requested by StreamTag " << st.type << "_" << st.name);
@@ -223,7 +223,7 @@ void HLTResultMTMaker::validatePEBInfo(HLT::HLTResultMT& hltResult) const {
       std::vector<eformat::SubDetector> removedSubDetsVec(removedSubDets.begin(),removedSubDets.end());
       auto monRemovedSubDets = Monitored::Collection(
         "PEB_RemovedSubDets", removedSubDetsVec,
-        [](const eformat::SubDetector sd){return eformat::helper::SubDetectorDictionary.string(sd);});
+        [](const eformat::SubDetector sd)-> const std::string & {return eformat::helper::SubDetectorDictionary.string(sd);});
       Monitored::Group(m_monTool, monRemovedSubDets);
     } else {
       ATH_MSG_VERBOSE("No disabled SubDets were requested by StreamTag " << st.type << "_" << st.name);

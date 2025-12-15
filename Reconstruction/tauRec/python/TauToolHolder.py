@@ -588,9 +588,9 @@ def Pi0SelectorCfg(flags):
 
     TauPi0Selector = CompFactory.getComp("TauPi0Selector")
     TauPi0Selector = TauPi0Selector(name = _name,
-                                    ClusterEtCut         = flags.Tau.pi0EtCuts,
-                                    ClusterBDTCut_1prong = flags.Tau.pi0MVACuts_1prong,
-                                    ClusterBDTCut_mprong = flags.Tau.pi0MVACuts_mprong)
+                                    Pi0EtCut         = flags.Tau.pi0EtCuts,
+                                    Pi0BDTCut_1prong = flags.Tau.pi0MVACuts_1prong,
+                                    Pi0BDTCut_mprong = flags.Tau.pi0MVACuts_mprong)
 
     result.setPrivateTools(TauPi0Selector)
     return result
@@ -818,11 +818,12 @@ def TauWPDecoratorEleRNNCfg(flags):
 
     result = ComponentAccumulator()
 
+    WPConf = flags.Tau.TauEleRNNWPConfig
+
     from AthenaConfiguration.Enums import ProductionStep
     # set the instance to run at derivation level
     if flags.Common.ProductionStep is ProductionStep.Derivation:
         _name = flags.Tau.ActiveConfig.prefix + 'TauWPDecoratorEleRNNFix_v1'
-        WPConf = flags.Tau.TauEleRNNWPfix
         NewScoreName = "RNNEleScoreSigTrans_v1"
         CutEnumVals = []
         SigEff1P = []
@@ -838,7 +839,6 @@ def TauWPDecoratorEleRNNCfg(flags):
         cppyy.load_library('libxAODTau_cDict')
 
         _name = flags.Tau.ActiveConfig.prefix + 'TauWPDecoratorEleRNN'
-        WPConf = flags.Tau.TauEleRNNWPConfig
         NewScoreName = "RNNEleScoreSigTrans"
         SigEff1P = [0.95, 0.90, 0.85]
         SigEff3P = [0.98, 0.95, 0.90]

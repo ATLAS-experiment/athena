@@ -586,7 +586,7 @@ StatusCode CscCalibMonToolPed::postProc()
 
     //Retrieve DataVector of amplitude histograms
     const CscCalibReportPed * pedReport = dynamic_cast<const CscCalibReportPed *>(repCont->front());
-    if(pedReport->getLabel() != "pedAmps")
+    if((not pedReport) or (pedReport->getLabel() != "pedAmps"))
     {
       ATH_MSG_WARNING( "Incorrect object retrieved from  container."
                        << " Aborting hist retrieval."  );

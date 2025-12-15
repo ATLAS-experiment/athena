@@ -13,6 +13,7 @@
 // Base class
 #include "G4VSensitiveDetector.hh"
 
+class AtlasG4EventUserInfo;
 // G4 needed classes
 class G4Step;
 
@@ -41,6 +42,7 @@ class BCMSensorSD : public G4VSensitiveDetector
  private:
   std::string m_HitCollName; //!< Name of the hit collection
   SiHitCollection* m_HitColl{nullptr}; //!< Pointer to the hit collection
+  AtlasG4EventUserInfo* m_g4UserEventInfo{nullptr};
 };
 
 #endif

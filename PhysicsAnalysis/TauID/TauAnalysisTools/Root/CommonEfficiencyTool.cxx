@@ -458,6 +458,11 @@ void CommonEfficiencyTool::ReadInputs(const TFile& fFile)
         m_fX = &truthTauPt;
         ATH_MSG_DEBUG("using truth pT for x-axis");
       }
+      if (sTitle == "truth visible pt")
+      {
+        m_fX = &truthVisTauPt;
+	ATH_MSG_DEBUG("using truth visible pT for x-axis");
+      }
       if (sTitle == "|eta|")
       {
         m_fX = &finalTauAbsEta;

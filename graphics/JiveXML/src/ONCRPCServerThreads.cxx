@@ -195,6 +195,7 @@ namespace JiveXML {
               //return immediately from this request
               //clean up
               delete DpThreadArgs.rqstp;
+              DpThreadArgs.rqstp = nullptr;
               return ;
            }
 
@@ -206,35 +207,41 @@ namespace JiveXML {
         
       //Check for errors in all pthread functions
       int retVal = 0;
-
+      auto ok = [&ServerSvc, &DpThreadArgs](int retVal, const char * msg)->bool{
+        if ( ! checkResult(retVal,msg,ServerSvc)){
+          //clean up
+          delete DpThreadArgs.rqstp;
+          DpThreadArgs.rqstp = nullptr;
+          return false;
+        } 
+        return true;
+      };
       //Generate thread attributes
-      pthread_attr_t attr; retVal = pthread_attr_init (&attr);
-      if ( ! checkResult(retVal,"request handler initializing thread attributes",ServerSvc)) return ;
+      pthread_attr_t attr; 
+      retVal = pthread_attr_init (&attr);
+      if ( ! ok(retVal,"request handler initializing thread attributes")) return;
 
       //Removing the limit on the thread memory usage as a test. Suspect that some threads do not have enough memory to finish and therefore eat up all the memory.
       //retVal = pthread_attr_setstacksize(&attr,10*PTHREAD_STACK_MIN);
-      if ( ! checkResult(retVal,"request handler setting thread stacksize",ServerSvc)) return ;
+      if ( ! ok(retVal,"request handler setting thread stacksize")) return;
+      
       
       //NOTE: All threads are first created joinable, so we can wait for the to
       //finish using pthread_detach. Yet, when the thread removes itself from
       //the ThreadCollection, it will detach itself, so no memory is lost.
       retVal = pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
-      if ( ! checkResult(retVal,"request handler setting thread detach state",ServerSvc)){
-        //clean up
-        delete DpThreadArgs.rqstp;
-        return;
-      }
+      if ( ! ok(retVal,"request handler setting thread detach state")) return;
       //Create a new thread
       pthread_t dispatchThread;
       retVal = pthread_create(&dispatchThread,&attr,&ONCRPCDispatchThread,new DispatchThreadArguments(DpThreadArgs));
-      if ( ! checkResult(retVal,"request handler creating dispatch thread",ServerSvc)) return;
+      if ( ! ok(retVal,"request handler creating dispatch thread")) return;
 
       //And wait till it has registered itself with the ThreadCollection
       dispatchThreads->WaitAdd();
 
       //release thread attributs
       retVal = pthread_attr_destroy(&attr);
-      if ( ! checkResult(retVal,"request handler destroying thread attributes",ServerSvc)) return;
+      if ( ! ok(retVal,"request handler destroying thread attributes")) return;
 
     } catch (std::exception &e){
       std::ostringstream msg; msg << "Caught exception in RequestHandler: " << e.what();

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArReadoutGeometry/EMBAccordionDetails.h"
@@ -79,7 +79,8 @@ void EMBAccordionDetails::Clockwork::getRPhi()
   const double dl=0.001;
   const double inv_dl = 1 / dl;
   double cenx[15],ceny[15];
-  double sum1[5000],sumx[5000];
+  std::vector<double> sum1(5000);
+  std::vector<double> sumx(5000);
   NRphi=5000;
   Rmin=1500.;
   dR=0.10;

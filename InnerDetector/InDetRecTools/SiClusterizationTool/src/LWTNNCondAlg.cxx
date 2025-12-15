@@ -33,7 +33,7 @@
 namespace InDet {
 
   LWTNNCondAlg::LWTNNCondAlg (const std::string& name, ISvcLocator* pSvcLocator)
-    : ::AthReentrantAlgorithm( name, pSvcLocator )
+    : ::AthCondAlgorithm( name, pSvcLocator )
   {}
 
   StatusCode LWTNNCondAlg::initialize() {

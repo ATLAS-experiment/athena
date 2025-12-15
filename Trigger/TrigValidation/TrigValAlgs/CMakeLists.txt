@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( TrigValAlgs )
@@ -13,7 +13,8 @@ atlas_add_component( TrigValAlgs
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
 atlas_install_scripts( share/dumpTriggerInfo.py
                        share/generateTrigNavGraph.py
-                       share/trigEDMChecker.py )
+                       share/trigEDMChecker.py
+                       POST_BUILD_CMD ${ATLAS_FLAKE8} )
 
 # Tests:
 atlas_add_test( TrigEDMChecker

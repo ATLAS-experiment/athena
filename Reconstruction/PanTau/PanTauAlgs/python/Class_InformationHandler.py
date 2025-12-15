@@ -80,9 +80,8 @@ class InformationHandler:
 
 
     def setupInfo_VecDouble(self, flags):
-        self.m_Infos_VecDouble["TauConstituents_BinEdges_Eta"]                       = flags.Tau.PanTau.TauConstituents_BinEdges_Eta
+        self.m_Infos_VecDouble["Common_BinEdges_Eta"]                       = flags.Tau.PanTau.Common_BinEdges_Eta
         self.m_Infos_VecDouble["TauConstituents_Selection_Neutral_EtaBinned_EtCut"]  = flags.Tau.PanTau.TauConstituents_Selection_Neutral_EtaBinned_EtCut
-        self.m_Infos_VecDouble["CellBased_BinEdges_Eta"]                             = flags.Tau.PanTau.CellBased_BinEdges_Eta
         self.m_Infos_VecDouble["CellBased_EtaBinned_Pi0MVACut_1prong"]               = flags.Tau.PanTau.CellBased_EtaBinned_Pi0MVACut_1prong
         self.m_Infos_VecDouble["CellBased_EtaBinned_Pi0MVACut_3prong"]               = flags.Tau.PanTau.CellBased_EtaBinned_Pi0MVACut_3prong
         self.m_Infos_VecDouble["ModeDiscriminator_BinEdges_Pt"]                      = flags.Tau.PanTau.ModeDiscriminator_BinEdges_Pt

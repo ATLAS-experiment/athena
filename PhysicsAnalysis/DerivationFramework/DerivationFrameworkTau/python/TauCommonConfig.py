@@ -198,9 +198,8 @@ def AddTauIDDecorationCfg(flags, **kwargs):
 
     if tools:
         kwargs.setdefault("DoEvetoWP", doEvetoWP)
-        kwargs.setdefault("ScoreDecorationKeys", [tauContainerKey + "." + score for score in scoreNames])
-        kwargs.setdefault("WPDecorationKeys", [tauContainerKey + "." + WP for WP in WPNames])
-        # FIXME The above syntax can be simplified once WriteDecorHandleKeyArray is updated
+        kwargs.setdefault("ScoreDecorationKeys", scoreNames)
+        kwargs.setdefault("WPDecorationKeys", WPNames)
 
         for tool in tools:
             acc.addPublicTool(tool)

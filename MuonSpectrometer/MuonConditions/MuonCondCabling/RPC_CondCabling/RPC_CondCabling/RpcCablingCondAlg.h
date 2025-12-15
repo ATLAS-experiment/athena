@@ -5,7 +5,7 @@
 #ifndef MUONCONDALG_RPCCABLINGCONDALG_H
 #define MUONCONDALG_RPCCABLINGCONDALG_H
 
-#include "AthenaBaseComps/AthAlgorithm.h"
+#include "AthenaBaseComps/AthCondAlgorithm.h"
 #include "AthenaPoolUtilities/CondAttrListCollection.h"
 #include "GaudiKernel/ServiceHandle.h"
 #include "MuonIdHelpers/IMuonIdHelperSvc.h"
@@ -18,13 +18,13 @@
 #include <string>
 #include <list>
 
-class RpcCablingCondAlg : public AthAlgorithm {
+class RpcCablingCondAlg : public AthCondAlgorithm {
 public:
     RpcCablingCondAlg(const std::string& name, ISvcLocator* pSvcLocator);
 
     virtual ~RpcCablingCondAlg() = default;
     virtual StatusCode initialize() override;
-    virtual StatusCode execute() override;
+    virtual StatusCode execute(const EventContext& ctx) const override;
 
 private:
     typedef std::array<int, 64> sectorMap_t;

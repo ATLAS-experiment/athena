@@ -86,6 +86,10 @@ def createActsLargeRadiusTrackingPassFlags():
     deactivateAthenaComponents(icf)
     activateActsComponents(icf)
     setActsDefaultTunings(icf)
+
+    # Override acts default values
+    icf.Xi2max = [100]
+    icf.Xi2maxNoAdd = [200]
     
     # Mark as secondary pass 
     icf.isSecondaryPass = True

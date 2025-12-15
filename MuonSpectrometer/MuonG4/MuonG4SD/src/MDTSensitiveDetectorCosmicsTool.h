@@ -13,7 +13,8 @@ class MDTSensitiveDetectorCosmicsTool : public SensitiveDetectorBase {
 
 public:
     MDTSensitiveDetectorCosmicsTool(const std::string& type, const std::string& name, const IInterface *parent);
-    ~MDTSensitiveDetectorCosmicsTool()=default;
+    virtual StatusCode SetupEvent(HitCollectionMap& hitCollections) override;
+    virtual StatusCode Gather(HitCollectionMap& hitCollections) override;
 protected:
     G4VSensitiveDetector* makeSD() const override final;
 private:

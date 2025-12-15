@@ -1,12 +1,10 @@
-###
-# Copyright (C) 2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 #
 # stand-alone script to rename histograms in FTag NTUP_PHYSVAL files produced before ~ April 2021 to the new scheme
 # author: judith.hoefer@cern.ch
 # Mar 2021
 ###
 
-import os
 import ROOT
 
 # run this on the unmerged files

@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
  */
 
 
@@ -37,9 +37,9 @@
 namespace dqutils {
   void
   MonitoringFile::HLTJetPostProcess(const std::string& inFilename, bool /* isIncremental */) {
-    bool dbgLevel = false;
+    //bool dbgLevel = false;
 
-    if (dbgLevel) std::cout << "--> HLTJetPostProcess: Begin HLTJet post-processing" << std::endl;
+    //if (dbgLevel) std::cout << "--> HLTJetPostProcess: Begin HLTJet post-processing" << std::endl;
 
     //open root file
     TFile* f = TFile::Open(inFilename.c_str(), "UPDATE");
@@ -70,7 +70,7 @@ namespace dqutils {
     f->Close();
     delete f;
 
-    if (dbgLevel) std::cout << "--> HLTJetPostProcess: End HLTJet post-processing " << std::endl;
+    //if (dbgLevel) std::cout << "--> HLTJetPostProcess: End HLTJet post-processing " << std::endl;
 
     return;
   }

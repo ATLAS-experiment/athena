@@ -2424,12 +2424,12 @@ static void gl2psPrintPostScriptPixmap(GLfloat x, GLfloat y, GL2PSimage *im)
   /* FIXME: should we define an option for these? Or just keep the
      8-bit per component case? */
 
-  //TK: covertity does not like how we hardcode some options here but
+  //TK: coverity does not like how we hardcode some options here but
   //keep the code below. But since this is some complex code lifted
   //from somewhere else, we want to keep it that way at the moment:
 
-  int greyscale = 0; /* set to 1 to output greyscale image */
-  int nbit = 8; /* number of bits per color compoment (2, 4 or 8) */
+  const int greyscale = 0; /* set to 1 to output greyscale image */
+  const int nbit = 8; /* number of bits per color compoment (2, 4 or 8) */
 
   if((width <= 0) || (height <= 0)) return;
 
@@ -2438,6 +2438,7 @@ static void gl2psPrintPostScriptPixmap(GLfloat x, GLfloat y, GL2PSimage *im)
   gl2psPrintf("%d %d scale\n", width, height);
 
   if(greyscale){ /* greyscale */
+    //coverity[DEADCODE]
     gl2psPrintf("/picstr %d string def\n", width);
     gl2psPrintf("%d %d %d\n", width, height, 8);
     gl2psPrintf("[ %d 0 0 -%d 0 %d ]\n", width, height, height);
@@ -2456,6 +2457,7 @@ static void gl2psPrintPostScriptPixmap(GLfloat x, GLfloat y, GL2PSimage *im)
     gl2psPrintf("%%%% nbhex digit          :%d\n", nbhex);
   }
   else if(nbit == 2){ /* color, 2 bits for r and g and b; rgbs following each other */
+    //coverity[DEADCODE]
     nrgb = width  * 3;
     nbits = nrgb * nbit;
     nbyte = nbits / 8;

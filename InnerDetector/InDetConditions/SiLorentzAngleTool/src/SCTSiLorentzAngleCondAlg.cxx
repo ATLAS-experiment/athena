@@ -21,7 +21,7 @@
 // STL include
 
 SCTSiLorentzAngleCondAlg::SCTSiLorentzAngleCondAlg(const std::string& name, ISvcLocator* pSvcLocator):
-  ::AthReentrantAlgorithm(name, pSvcLocator),
+  ::AthCondAlgorithm(name, pSvcLocator),
   m_maxHash{0}
 {
 }

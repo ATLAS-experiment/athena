@@ -27,9 +27,6 @@ StatusCode runOverlapRemoval(std::vector<FPGATrackSimTrack>& tracks, const float
   std::vector<int> track_passOR_barcodefrac;
   track_passOR_counter.clear();
   track_passOR_barcodefrac.clear();
-  int track_barcodefrac_num;
-  int track_barcodefrac_den;
-  float track_barcodefrac = -999;
   int ntrack_passOR_total = 0;
   int trackMuon_gt0pt5_passOR = 0;
   float tmp_TrueTrack_BCF = -999;
@@ -93,29 +90,25 @@ StatusCode runOverlapRemoval(std::vector<FPGATrackSimTrack>& tracks, const float
     }
     findMinChi2MaxHit(duplicates, tracks, flags_OR, minChi2);
   
+    
     // Monitoring 
     ntrack++;
     track_passOR_counter.push_back(ntrack);
-    track_barcodefrac_num = 0;
-    for(auto& hit : fit1.getFPGATrackSimHits())
-      {
-	      if(hit.getBarcode() == 10001) track_barcodefrac_num++;
-      }
-    track_barcodefrac_den = fit1.getFPGATrackSimHits().size();
-    if (track_barcodefrac_den > 0){
-      track_barcodefrac = (float)track_barcodefrac_num/(float)track_barcodefrac_den;
-    }
-    fit1.setBarcodeFrac(track_barcodefrac);
-    track_passOR_barcodefrac.push_back(track_barcodefrac);
+    // barcodeFrac should be set in the track upstream e.g in FPGATrackSimLogicalHitsProcessAlg.cxx using calculateTruth()
+    if (fit1.getBarcodeFrac() < 0)
+      ANA_MSG_WARNING("barcodeFrac not set!");
+    track_passOR_barcodefrac.push_back(fit1.getBarcodeFrac());
+    // check if the track passes OR and has barcodeFrac > 0.5
     if(fit1.getBarcodeFrac() > 0.5 && fit1.passedOR()) {
+      // count how many muon tracks satisfy the condition
       trackMuon_gt0pt5_passOR++;
+      // for the first passing track, record its barcodeFrac
       if(trackMuon_gt0pt5_passOR == 1) { 
         tmp_TrueTrack_BCF = fit1.getBarcodeFrac(); 
       }
-      if(trackMuon_gt0pt5_passOR > 1) { 
-        if (fit1.getBarcodeFrac() > tmp_TrueTrack_BCF) {
-          tmp_TrueTrack_BCF = fit1.getBarcodeFrac();
-        }
+      // for subsequent passing tracks, keep the largest barcodeFrac
+      else if (fit1.getBarcodeFrac() > tmp_TrueTrack_BCF) {
+        tmp_TrueTrack_BCF = fit1.getBarcodeFrac();
       }
     }
 

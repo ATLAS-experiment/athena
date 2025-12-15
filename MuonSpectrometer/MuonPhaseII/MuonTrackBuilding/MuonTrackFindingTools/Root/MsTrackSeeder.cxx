@@ -2,7 +2,6 @@
   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #include "MuonTrackFindingTools/MsTrackSeeder.h"
-#include "MuonPatternHelpers/MatrixUtils.h"
 #include "MuonTrackEvent/TrackingHelpers.h"
 #include "MuonDetDescrUtils/MuonSectorMapping.h"
 #include "MuonTruthHelpers/MuonSimHitHelpers.h"
@@ -165,7 +164,7 @@ namespace MuonR4{
                                         m_cfg.barrelRadius).value_or(10. * Gaudi::Units::km);
         } else {
             lambda = Amg::intersect<2>(projPos, projDir, Amg::Vector2D::UnitY(), 
-                                       sign(projPos[1])* m_cfg.endcapDiscZ).value_or(10. * Gaudi::Units::km);
+                                       Acts::copySign(m_cfg.endcapDiscZ, projPos[1])).value_or(10. * Gaudi::Units::km);
         }
         return projPos + lambda * projDir;  
     }
@@ -179,7 +178,7 @@ namespace MuonR4{
             return false;
         } else if (loc == Endcap && (0 > projPos[0] || projPos[0] > m_cfg.endcapDiscRadius)) {
             ATH_MSG_VERBOSE(__func__<<"()  "<<__LINE__<<" - Position "<<Amg::toString(projPos)<<
-            " exceeds endcap boundaries ("<<m_cfg.endcapDiscRadius<<", "<<(sign(projPos[1])*m_cfg.endcapDiscZ)<<")");
+            " exceeds endcap boundaries ("<<m_cfg.endcapDiscRadius<<", "<<Acts::copySign(m_cfg.endcapDiscZ, projPos[1])<<")");
             return false;
         }
         return true;
@@ -339,7 +338,7 @@ namespace MuonR4{
         ATH_MSG_DEBUG(__func__<<"() "<<__LINE__<<" - Estimated radius "<<r / Gaudi::Units::m<<" [m] --> P: "<<
                         (P / Gaudi::Units::GeV)<<" [GeV]");        
 
-        if (truthMuon && sign(P) !=  truthMuon->charge() && truthMuon->abseta() < 2.5 && 
+        if (truthMuon && Acts::copySign(1.f, P) !=  truthMuon->charge() && truthMuon->abseta() < 2.5 && 
                 (truthMuon->abseta() < 1.3 || truthMuon->abseta() > 1.4) ) {
             ATH_MSG_WARNING("Invalid charge, pT: "<<(truthMuon->pt() / Gaudi::Units::GeV)<<" [GeV], eta: "
                     <<truthMuon->eta()<<", phi: "<<(truthMuon->phi() / 1._degree)<<", q: "<<truthMuon->charge());
@@ -374,7 +373,7 @@ namespace MuonR4{
             coords[Acts::toUnderlying(eSector)] = ringOverlap(treeSector); 
             /** Enumeration to indicate whether the segment is expressed on the negative endcap (-1),
              *  the barrel (0) or the positive endcap */
-            coords[Acts::toUnderlying(eDetSection)] =  Acts::toUnderlying(loc) * sign(refPoint[1]);
+            coords[Acts::toUnderlying(eDetSection)] =  Acts::copySign(Acts::toUnderlying(loc), refPoint[1]);
             /** Coordinate on the cylinder */
             coords[Acts::toUnderlying(ePosOnCylinder)] = refPoint[Location::Barrel == loc];
             ATH_MSG_VERBOSE("Add segment "<<print(*segment)<<", seed quality: "

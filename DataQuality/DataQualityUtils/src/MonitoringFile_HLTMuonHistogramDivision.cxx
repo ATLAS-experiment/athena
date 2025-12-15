@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
  */
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -367,7 +367,7 @@ namespace dqutils {
       trigger[INDMET] = "MET";
       trigger[INDJET] = "Jet";
 
-      int maxindep = 0; // YY 20.01.2012
+      //int maxindep = 0; // YY 20.01.2012
 
       // YY added:
       TString ESchainName = "_ES";
@@ -687,6 +687,7 @@ namespace dqutils {
       for (unsigned int i = 0; i < chainsMSonly.size(); i++) {
         TString chainName = chainsMSonly.at(i);
 
+#if 0
         for (int trg = 0; trg < maxindep; trg++) {
           sden = nd_dir + chainName + "_Turn_On_Curve_wrt_MuidSA" + trigger[trg] + "_Triggered_Denominator";
 
@@ -754,6 +755,7 @@ namespace dqutils {
             }
           }//alg
         }//trg
+#endif
         mf.Write();
 
         for (int alg = 0; alg < 3; alg++) {

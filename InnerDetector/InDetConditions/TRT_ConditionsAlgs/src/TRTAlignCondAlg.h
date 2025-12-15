@@ -5,7 +5,7 @@
 #ifndef TRTCONDITIONSALGS_TRTALIGNCONDALG_H
 #define TRTCONDITIONSALGS_TRTALIGNCONDALG_H
 
-#include "AthenaBaseComps/AthAlgorithm.h"
+#include "AthenaBaseComps/AthCondAlgorithm.h"
 #include "StoreGate/ReadCondHandleKey.h"
 #include "StoreGate/WriteCondHandleKey.h"
 #include "TRT_ReadoutGeometry/TRT_DetElementCollection.h"
@@ -20,14 +20,14 @@ namespace InDetDD {
   class TRT_DetectorManager;
 }
 
-class TRTAlignCondAlg : public AthAlgorithm
+class TRTAlignCondAlg : public AthCondAlgorithm
 {
  public:
   TRTAlignCondAlg(const std::string& name, ISvcLocator* pSvcLocator);
   virtual ~TRTAlignCondAlg() override;
 
   virtual StatusCode initialize() override;
-  virtual StatusCode execute() override;
+  virtual StatusCode execute(const EventContext& ctx) const override;
 
  private:
   SG::ReadCondHandleKey<CondAttrListCollection> m_readKeyDynamicGlobal{this, "ReadKeyDynamicGlobal","/TRT/AlignL1/TRT","Read handle for global alignment conditions"};

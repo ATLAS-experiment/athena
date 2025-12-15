@@ -5,7 +5,7 @@
 #ifndef CALOCELLCORRECTION_CALOCELLPEDCORRCONDALG_H
 #define CALOCELLCORRECTION_CALOCELLPEDCORRCONDALG_H
 
-#include "AthenaBaseComps/AthReentrantAlgorithm.h"
+#include "AthenaBaseComps/AthCondAlgorithm.h"
 
 #include "StoreGate/ReadCondHandleKey.h"
 #include "StoreGate/WriteCondHandleKey.h"
@@ -15,15 +15,14 @@
 
 class CaloCell_ID;
 
-class CaloCellPedCorrCondAlg: public AthReentrantAlgorithm {
+class CaloCellPedCorrCondAlg: public AthCondAlgorithm {
  public:
-  using AthReentrantAlgorithm::AthReentrantAlgorithm;
+  using AthCondAlgorithm::AthCondAlgorithm;
   virtual ~CaloCellPedCorrCondAlg() = default;
 
   StatusCode initialize() override final;
   StatusCode execute(const EventContext& ctx) const override final;
   StatusCode finalize() override final {return StatusCode::SUCCESS;}
-  virtual bool isReEntrant() const override final { return false; }
 
  private:
   //SG Keys and other properties:

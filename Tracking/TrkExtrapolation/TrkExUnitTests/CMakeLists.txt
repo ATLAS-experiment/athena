@@ -14,5 +14,5 @@ atlas_add_component( TrkExUnitTests
                      LINK_LIBRARIES ${ROOT_LIBRARIES} AthenaBaseComps AtlasDetDescr CxxUtils GeoPrimitives Identifier HGTD_Identifier InDetReadoutGeometry GaudiKernel InDetIdentifier TrkGeometry TrkEventPrimitives TrkNeutralParameters TrkParameters TrkExInterfaces TrkExUtils TrkValInterfaces )
 
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
-atlas_install_runtime( scripts/RunExEngine*.py )
+atlas_install_scripts( scripts/RunExEngine*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
 

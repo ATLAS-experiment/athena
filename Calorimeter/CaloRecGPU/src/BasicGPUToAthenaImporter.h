@@ -44,12 +44,6 @@ class BasicGPUToAthenaImporter :
 
  private:
 
-  /** @brief If @p true, do not delete the GPU data representation.
-   *  Defaults to @p true.
-   *
-   */
-  Gaudi::Property<bool> m_keepGPUData {this, "KeepGPUData", true, "Keep GPU allocated data"};
-
   /**
   * @brief if set to true, cluster properties are (re-)calculated using @p CaloClusterKineHelper::calculateKine.
   * Else, the GPU-calculated values are used. Default is @p false.

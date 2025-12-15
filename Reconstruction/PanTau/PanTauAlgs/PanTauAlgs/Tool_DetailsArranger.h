@@ -84,21 +84,7 @@ namespace PanTau {
 	
 	static const constexpr float MASS_PI0 = ParticleConstants::piZeroMassInMeV;
         
-        double m_CoreCone = 0.0;
-        std::vector<double> m_EtaBinEdges;
-        std::vector<double> m_EtaBinnedEtCuts;
-        
-        std::string m_varTypeName_Ratio;
-        std::string m_varTypeName_Mean;
-        std::string m_varTypeName_StdDev;
-        std::string m_varTypeName_HLV;
-        std::string m_varTypeName_Angle;
-        std::string m_varTypeName_DeltaR;
-        std::string m_varTypeName_JetMoment;
-        std::string m_varTypeName_Combined;
         std::string m_varTypeName_Basic;
-        std::string m_varTypeName_PID;
-        std::string m_varTypeName_Shots;
 
 	bool m_init=false;
   public:

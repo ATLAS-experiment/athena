@@ -1,15 +1,9 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // Local includes
 #include "AssociationUtils/BaseOverlapTool.h"
-
-namespace
-{
-  /// Unit conversion constant
-  const float invGeV = 1e-3;
-}
 
 namespace ORUtils
 {
@@ -44,39 +38,36 @@ namespace ORUtils
                   " UserPrio " << m_enableUserPrio);
 
     // Initialize the decoration helper
-    m_decHelper = std::make_unique<OverlapDecorationHelper>
+    m_decHelper1 = std::make_unique<OverlapDecorationHelper<columnar::ContainerId::particle1>>
       (m_inputLabel, m_outputLabel, m_outputPassValue);
+    addSubtool(*m_decHelper1);
+    m_decHelper2 = std::make_unique<OverlapDecorationHelper<columnar::ContainerId::particle2>>
+      (m_inputLabel, m_outputLabel, m_outputPassValue);
+    addSubtool(*m_decHelper2);
 
     // Initialize the obj-link helper
     if(m_linkOverlapObjects)
-      m_objLinkHelper = std::make_unique<OverlapLinkHelper>("overlapObject");
+    {
+      m_objLinkHelper1 = std::make_unique<OverlapLinkHelper<columnar::ContainerId::particle1>>("overlapObject");
+      addSubtool(*m_objLinkHelper1);
+      m_objLinkHelper2 = std::make_unique<OverlapLinkHelper<columnar::ContainerId::particle2>>("overlapObject");
+      addSubtool(*m_objLinkHelper2);
+    }
 
     // Initialize the derived tool
     ATH_CHECK( initializeDerived() );
 
+    ATH_CHECK ( initializeColumns() );
+
     return StatusCode::SUCCESS;
   }
 
-  //---------------------------------------------------------------------------
-  // Handle overlap condition
-  //---------------------------------------------------------------------------
-  StatusCode BaseOverlapTool::
-  handleOverlap(const xAOD::IParticle* testParticle,
-                const xAOD::IParticle* refParticle) const
+  void BaseOverlapTool::callEvents (columnar::EventContextRange events) const
   {
-    // Apply user-priority override
-    if(!m_enableUserPrio ||
-       m_decHelper->getObjectPriority(*testParticle) <=
-       m_decHelper->getObjectPriority(*refParticle))
+    auto& baseAcc = *m_baseAccessors;
+    for (auto event : events)
     {
-      ATH_MSG_DEBUG("  Found overlap " << testParticle->type() <<
-                    " pt " << testParticle->pt()*invGeV);
-      m_decHelper->setObjectFail(*testParticle);
-      if(m_objLinkHelper) {
-        ATH_CHECK( m_objLinkHelper->addObjectLink(*testParticle, *refParticle) );
-      }
+      ANA_CHECK_THROW (findOverlaps (baseAcc.m_particles1Acc (event), baseAcc.m_particles2Acc (event), event));
     }
-    return StatusCode::SUCCESS;
   }
-
 } // namespace ORUtils

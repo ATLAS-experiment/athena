@@ -5,7 +5,7 @@
 #ifndef SCT_SILICONHVCONDALG
 #define SCT_SILICONHVCONDALG
 
-#include "AthenaBaseComps/AthReentrantAlgorithm.h"
+#include "AthenaBaseComps/AthCondAlgorithm.h"
 
 #include "StoreGate/ReadCondHandleKey.h"
 #include "StoreGate/WriteCondHandleKey.h"
@@ -15,7 +15,7 @@
 
 class SCT_ID;
 
-class SCT_SiliconHVCondAlg : public AthReentrantAlgorithm
+class SCT_SiliconHVCondAlg : public AthCondAlgorithm
 {  
  public:
   SCT_SiliconHVCondAlg(const std::string& name, ISvcLocator* pSvcLocator);
@@ -23,7 +23,6 @@ class SCT_SiliconHVCondAlg : public AthReentrantAlgorithm
   virtual StatusCode initialize() override final;
   virtual StatusCode execute(const EventContext& ctx) const override final;
   virtual StatusCode finalize() override final;
-  virtual bool isReEntrant() const override final { return false; }
 
  private:
   BooleanProperty m_useState{this, "UseState", true, "Flag to use state conditions folder"};

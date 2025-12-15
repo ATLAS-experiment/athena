@@ -30,6 +30,7 @@
 #include "AthenaKernel/ClassID_traits.h"
 #include "AthenaKernel/IRCUSvc.h"
 #include "CoralBase/AttributeListSpecification.h"
+#include "nlohmann/json.hpp"
 
 
 IOVDbMetaDataTool::IOVDbMetaDataTool(const std::string& type,
@@ -235,6 +236,53 @@ StatusCode IOVDbMetaDataTool::beginInputFile(const SG::SourceID& sid)
 
 StatusCode IOVDbMetaDataTool::endInputFile(const SG::SourceID&)
 {
+  return StatusCode::SUCCESS;
+}
+
+StatusCode IOVDbMetaDataTool::serializeIOVMetadataToBSMetadata()
+{
+  // Check if we have folders to serialize to ByteStream metadata
+  if (m_foldersToSerializeToBSMetadata.value().empty()) {
+    ATH_MSG_DEBUG("No folders configured for serialization");
+    return StatusCode::SUCCESS;
+  }
+
+  // Collect IOV metadata strings first
+  std::vector<std::string> iovMetaStrings;
+  for (const std::string& folderName : m_foldersToSerializeToBSMetadata.value()) {
+    IOVMetaDataContainer* container = findMetaDataContainer(folderName);
+    if (!container) {
+      ATH_MSG_WARNING("Could not find IOVMetaDataContainer for folder " << folderName << ", skipping");
+      continue;
+    }
+
+    std::string jsonStr = serializeContainerToJSON(container);
+    if (!jsonStr.empty()) {
+      iovMetaStrings.push_back("IOVMeta." + folderName + "=" + jsonStr);
+      ATH_MSG_DEBUG("Serialized folder " << folderName << " (" << jsonStr.size() << " bytes JSON)");
+    }
+  }
+
+  if (iovMetaStrings.empty()) {
+    ATH_MSG_DEBUG("No IOV metadata serialized");
+    return StatusCode::SUCCESS;
+  }
+
+  // Store the IOV metadata strings in MetaDataStore for ByteStreamCnvSvc to retrieve
+  // Check if the object already exists and update it, or create a new one
+  if (m_metaDataStore->contains<std::vector<std::string>>("IOVMetaDataStrings")) {
+    // Retrieve existing and append
+    std::vector<std::string>* existingStrings = nullptr;
+    ATH_CHECK(m_metaDataStore->retrieve(existingStrings, "IOVMetaDataStrings"));
+    existingStrings->insert(existingStrings->end(), iovMetaStrings.begin(), iovMetaStrings.end());
+    ATH_MSG_DEBUG("Appended " << iovMetaStrings.size() << " IOV metadata strings to existing collection");
+  } else {
+    // Create new
+    auto iovMetaData = std::make_unique<std::vector<std::string>>(std::move(iovMetaStrings));
+    ATH_CHECK(m_metaDataStore->record(std::move(iovMetaData), "IOVMetaDataStrings"));
+    ATH_MSG_DEBUG("Stored " << iovMetaStrings.size() << " IOV metadata strings in MetaDataStore");
+  }
+
   return StatusCode::SUCCESS;
 }
 
@@ -722,96 +770,187 @@ StatusCode IOVDbMetaDataTool::processInputFileMetaData(const std::string& fileNa
   // Only do this if IOVDbSvc hasn't registered the folder (checked by CondCont existence).
   // Note: We're already holding m_mutex lock, so we populate ConditionStore directly
   // without calling addPayload() to avoid deadlock.
-  constexpr std::array folderNames{"/Digitization/Parameters", "/Simulation/Parameters"};
-  for (std::string_view folderName : folderNames) {
-    // Skip if folder doesn't exist in MetaDataStore (e.g., old files without these folders)
-    if (!m_metaDataStore->contains<IOVMetaDataContainer>(std::string(folderName))) {
-      continue;
-    }
-
-    // Skip if folder is in Payloads (write-only mode for overlay)
-    // When Payloads contains entries for a folder, we're explicitly providing the data
-    // and don't need to read from input file
-    bool inPayloads = false;
-    for (const auto& [key, value] : m_payloads) {
-      if (key.find(std::string(folderName) + ":") == 0) {
-        inPayloads = true;
-        break;
+  //
+  // This can only be done when we have a valid EventContext (i.e., during event processing),
+  // not during file opening when this method is typically called.
+  const EventContext& currentCtx = Gaudi::Hive::currentContext();
+  if (currentCtx.valid()) {
+    constexpr std::array folderNames{"/Digitization/Parameters", "/Simulation/Parameters"};
+    for (std::string_view folderName : folderNames) {
+      // Skip if folder doesn't exist in MetaDataStore (e.g., old files without these folders)
+      if (!m_metaDataStore->contains<IOVMetaDataContainer>(std::string(folderName))) {
+        continue;
       }
-    }
-    if (inPayloads) {
-      ATH_MSG_DEBUG("Folder " << folderName << " is in Payloads, skipping auto-read from input");
-      continue;
-    }
 
-    // Check MetaDataStore (merged view of metadata from all input files)
-    IOVMetaDataContainer* contMaster = nullptr;
-    if (m_metaDataStore->retrieve(contMaster, std::string(folderName)).isSuccess() && contMaster) {
-      const IOVPayloadContainer* payloadMaster = contMaster->payloadContainer();
-      if (payloadMaster && payloadMaster->size() > 0) {
-        // Ensure ConditionStore is available
-        if (!m_condStore.isValid()) {
-          ATH_CHECK(m_condStore.retrieve());
+      // Skip if folder is in Payloads (write-only mode for overlay)
+      // When Payloads contains entries for a folder, we're explicitly providing the data
+      // and don't need to read from input file
+      bool inPayloads = false;
+      for (const auto& [key, value] : m_payloads) {
+        if (key.find(std::string(folderName) + ":") == 0) {
+          inPayloads = true;
+          break;
         }
+      }
+      if (inPayloads) {
+        ATH_MSG_DEBUG("Folder " << folderName << " is in Payloads, skipping auto-read from input");
+        continue;
+      }
 
-        // Check if CondCont already exists - if so, IOVDbSvc is managing it
-        if (m_condStore->contains<CondCont<AthenaAttributeList>>(std::string(folderName))) {
-          ATH_MSG_DEBUG("CondCont for " << folderName << " already exists, skipping");
-          continue;
-        }
-
-        // Get the first payload (should only be one for parameter folders)
-        const CondAttrListCollection* coll = dynamic_cast<const CondAttrListCollection*>(*(payloadMaster->begin()));
-        if (coll) {
-          // Create new CondCont using CondContFactory
-          CondCont<AthenaAttributeList>* cc = nullptr;
-          ServiceHandle<Athena::IRCUSvc> rcuSvc("Athena::RCUSvc", name());
-          ATH_CHECK(rcuSvc.retrieve());
-
-          SG::DataObjectSharedPtr<DataObject> cb =
-            CondContainer::CondContFactory::Instance().Create(*rcuSvc,
-                                                               ClassID_traits<AthenaAttributeList>::ID(),
-                                                               std::string(folderName));
-          if (!cb) {
-            ATH_MSG_ERROR("Failed to create CondCont for " << folderName);
-            return StatusCode::FAILURE;
+      // Check MetaDataStore (merged view of metadata from all input files)
+      IOVMetaDataContainer* contMaster = nullptr;
+      if (m_metaDataStore->retrieve(contMaster, std::string(folderName)).isSuccess() && contMaster) {
+        const IOVPayloadContainer* payloadMaster = contMaster->payloadContainer();
+        if (payloadMaster && payloadMaster->size() > 0) {
+          // Ensure ConditionStore is available
+          if (!m_condStore.isValid()) {
+            ATH_CHECK(m_condStore.retrieve());
           }
 
-          if (m_condStore->recordObject(cb, std::string(folderName), true, false) == nullptr) {
-            ATH_MSG_ERROR("Failed to record CondCont for " << folderName);
-            return StatusCode::FAILURE;
+          // Check if CondCont already exists - if so, IOVDbSvc is managing it
+          if (m_condStore->contains<CondCont<AthenaAttributeList>>(std::string(folderName))) {
+            ATH_MSG_DEBUG("CondCont for " << folderName << " already exists, skipping");
+            continue;
           }
 
-          // Retrieve the CondCont
-          ATH_CHECK(m_condStore->retrieve(cc, std::string(folderName)));
+          // Get the first payload (should only be one for parameter folders)
+          const CondAttrListCollection* coll = dynamic_cast<const CondAttrListCollection*>(*(payloadMaster->begin()));
+          if (coll) {
+            // Create new CondCont using CondContFactory
+            CondCont<AthenaAttributeList>* cc = nullptr;
+            ServiceHandle<Athena::IRCUSvc> rcuSvc("Athena::RCUSvc", name());
+            ATH_CHECK(rcuSvc.retrieve());
 
-          // Extract AthenaAttributeList from CondAttrListCollection and insert into CondCont
-          auto itr = coll->begin();
-          const coral::AttributeList& attrList = itr->second;
-          auto athAttrList = std::make_unique<AthenaAttributeList>(attrList);
+            SG::DataObjectSharedPtr<DataObject> cb =
+              CondContainer::CondContFactory::Instance().Create(*rcuSvc,
+                                                                 ClassID_traits<AthenaAttributeList>::ID(),
+                                                                 std::string(folderName));
+            if (!cb) {
+              ATH_MSG_ERROR("Failed to create CondCont for " << folderName);
+              return StatusCode::FAILURE;
+            }
 
-          // Create EventIDRange from the collection's IOV
-          IOVRange iovRange = coll->minRange();
-          EventIDBase start, stop;
-          start.set_run_number(iovRange.start().run());
-          start.set_lumi_block(iovRange.start().event());
-          stop.set_run_number(iovRange.stop().run());
-          stop.set_lumi_block(iovRange.stop().event());
-          EventIDRange range(start, stop);
+            if (m_condStore->recordObject(cb, std::string(folderName), true, false) == nullptr) {
+              ATH_MSG_ERROR("Failed to record CondCont for " << folderName);
+              return StatusCode::FAILURE;
+            }
 
-          // Insert into CondCont only if we have a valid EventContext
-          const EventContext& currentCtx = Gaudi::Hive::currentContext();
-          if (currentCtx.valid()) {
+            // Retrieve the CondCont
+            ATH_CHECK(m_condStore->retrieve(cc, std::string(folderName)));
+
+            // Extract AthenaAttributeList from CondAttrListCollection and insert into CondCont
+            auto itr = coll->begin();
+            const coral::AttributeList& attrList = itr->second;
+            auto athAttrList = std::make_unique<AthenaAttributeList>(attrList);
+
+            // Create EventIDRange from the collection's IOV
+            IOVRange iovRange = coll->minRange();
+            EventIDBase start, stop;
+            start.set_run_number(iovRange.start().run());
+            start.set_lumi_block(iovRange.start().event());
+            stop.set_run_number(iovRange.stop().run());
+            stop.set_lumi_block(iovRange.stop().event());
+            EventIDRange range(start, stop);
+
+            // Insert into CondCont (we already checked that currentCtx is valid)
             ATH_CHECK(cc->insert(range, std::move(athAttrList), currentCtx));
-          }
 
-          ATH_MSG_DEBUG("Populated ConditionStore for " << folderName << " from file metadata");
+            ATH_MSG_DEBUG("Populated ConditionStore for " << folderName << " from file metadata");
+          }
         }
       }
     }
   }
 
+  // Serialize requested IOV folders to ByteStream metadata
+  ATH_CHECK(serializeIOVMetadataToBSMetadata());
+
   return StatusCode::SUCCESS;
+}
+
+//--------------------------------------------------------------------------
+
+std::string
+IOVDbMetaDataTool::serializeContainerToJSON(const IOVMetaDataContainer* container) const
+{
+  const IOVPayloadContainer* payloads = container->payloadContainer();
+  if (!payloads || payloads->size() == 0) {
+    ATH_MSG_WARNING("No payloads for folder " << container->folderName());
+    return "";
+  }
+
+  using json = nlohmann::json;
+  json jsonData;
+
+  jsonData["folder"] = container->folderName();
+  jsonData["description"] = container->folderDescription();
+  jsonData["iovs"] = json::array();
+
+  // Serialize each IOV payload
+  for (const CondAttrListCollection* coll : *payloads) {
+    json iov;
+
+    // Get IOV range
+    IOVRange range = coll->minRange();
+    IOVTime start = range.start();
+    IOVTime stop = range.stop();
+
+    // IOV range
+    if (start.isRunEvent()) {
+      iov["range"]["start"] = {{"run", start.run()}, {"event", start.event()}};
+      iov["range"]["stop"] = {{"run", stop.run()}, {"event", stop.event()}};
+    } else {
+      iov["range"]["start"] = {{"timestamp", start.timestamp()}};
+      iov["range"]["stop"] = {{"timestamp", stop.timestamp()}};
+    }
+
+    // Attributes (serialize each channel)
+    iov["attrs"] = json::object();
+    for (const auto& chanAttrPair : *coll) {
+      CondAttrListCollection::ChanNum chan = chanAttrPair.first;
+      const coral::AttributeList& attrList = chanAttrPair.second;
+
+      std::string chanKey = "chan" + std::to_string(chan);
+      iov["attrs"][chanKey] = json::object();
+
+      for (const auto& attr : attrList) {
+        auto & thisAttribute = iov["attrs"][chanKey][attr.specification().name()];
+        // Serialize attribute value based on type
+        const std::type_info& type = attr.specification().type();
+        if (type == typeid(std::string)) {
+          thisAttribute = attr.data<std::string>();
+        } else if (type == typeid(int)) {
+          thisAttribute = attr.data<int>();
+        } else if (type == typeid(unsigned int)) {
+          thisAttribute = attr.data<unsigned int>();
+        } else if (type == typeid(long)) {
+          thisAttribute = attr.data<long>();
+        } else if (type == typeid(unsigned long)) {
+          thisAttribute = attr.data<unsigned long>();
+        } else if (type == typeid(long long)) {
+          thisAttribute = attr.data<long long>();
+        } else if (type == typeid(unsigned long long)) {
+          thisAttribute = attr.data<unsigned long long>();
+        } else if (type == typeid(float)) {
+          thisAttribute = attr.data<float>();
+        } else if (type == typeid(double)) {
+          thisAttribute = attr.data<double>();
+        } else if (type == typeid(bool)) {
+          thisAttribute = attr.data<bool>();
+        } else {
+          // For other types, convert to string representation
+          std::ostringstream oss;
+          attr.toOutputStream(oss);
+          thisAttribute = oss.str();
+          ATH_MSG_DEBUG("Attribute " << attr.specification().name() << " has unsupported type, converted to string: " << oss.str());
+        }
+      }
+    }
+
+    jsonData["iovs"].push_back(iov);
+  }
+
+  return jsonData.dump();
 }
 
 //--------------------------------------------------------------------------
@@ -886,3 +1025,5 @@ IOVDbMetaDataTool::overrideIOV (CondAttrListCollection*& coll) const
     return StatusCode::SUCCESS;
 }
 
+
+//--------------------------------------------------------------------------

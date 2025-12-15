@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <boost/functional/hash.hpp>
@@ -407,7 +407,6 @@ StatusCode Run2ToRun3TrigNavConverterV2::extractTECtoChainMapping(TEIdToChainsMa
   for (auto ptrChain : m_configSvc->chains())
   {
     std::string chainName = ptrChain->name();
-
 
     if (not m_chainsToSave.empty())
     {
@@ -1355,7 +1354,7 @@ StatusCode Run2ToRun3TrigNavConverterV2::linkTrkNode(ConvProxySet_t &convProxies
           ElementLink<TrigRoiDescriptorCollection> ROIElementLink = proxy->imNode->objectLink<TrigRoiDescriptorCollection>(TrigCompositeUtils::roiString());
           if (ROIElementLink.isValid())
           {
-            SG::AuxElement::Decorator<ElementLink<TrigRoiDescriptorCollection>> viewBookkeeper("viewIndex");
+            static const SG::Decorator<ElementLink<TrigRoiDescriptorCollection>> viewBookkeeper("viewIndex");
             auto [sgKey, sgCLID, sgName] = getSgKey(run2Nav, trk);
             if (sgCLID == m_TrackParticleContainerCLID || sgCLID == m_TauTrackContainerCLID)
             {

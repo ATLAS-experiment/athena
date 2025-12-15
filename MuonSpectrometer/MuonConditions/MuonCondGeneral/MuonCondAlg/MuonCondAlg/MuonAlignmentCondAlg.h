@@ -5,7 +5,7 @@
 #ifndef MUONCONDALG_MUONALIGNMENTCONDALG_H
 #define MUONCONDALG_MUONALIGNMENTCONDALG_H
 
-#include "AthenaBaseComps/AthReentrantAlgorithm.h"
+#include "AthenaBaseComps/AthCondAlgorithm.h"
 #include "AthenaPoolUtilities/CondAttrListCollection.h"
 #include "CoralBase/Blob.h"
 #include "StoreGate/CondHandleKeyArray.h"
@@ -18,13 +18,12 @@
 #include "nlohmann/json.hpp"
 
 
-class MuonAlignmentCondAlg : public AthReentrantAlgorithm {
+class MuonAlignmentCondAlg : public AthCondAlgorithm {
 public:
     MuonAlignmentCondAlg(const std::string& name, ISvcLocator* pSvcLocator);
     virtual ~MuonAlignmentCondAlg() = default;
     virtual StatusCode initialize() override;
     virtual StatusCode execute(const EventContext& ctx) const override;
-    virtual bool isReEntrant() const override { return false; }
 
 private:
     /** Attaches the dependencies of the Alignment keys onto the A & Bline container*/

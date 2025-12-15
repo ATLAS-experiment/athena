@@ -55,10 +55,9 @@ void PanTau::Tool_InformationStore::ABRDefaultInit(){
   // In Config_PanTau.py, this was called "vector<float> values". This was changed to "double".
   // The "Units.GeV" (import AthenaCommon.SystemOfUnits as Units) was now replaced by "GeV" (#include "CLHEP/Units/SystemOfUnits.h", using CLHEP::GeV)
   MapVecDouble m04 = {
-    {"TauConstituents_BinEdges_Eta",{0.000, 0.800, 1.400, 1.500, 1.900, 9.900}},
+    {"Common_BinEdges_Eta",{0.000, 0.800, 1.400, 1.500, 1.900, 9.900}},
     {"TauConstituents_Selection_Neutral_EtaBinned_EtCut",{2.1*GeV, 2.5*GeV, 2.6*GeV, 2.4*GeV, 1.9*GeV}},
     // Eta Binned    P I 0 - B D T   C U T S
-    {"CellBased_BinEdges_Eta",{0.000, 0.800, 1.400, 1.500, 1.900, 9.900}},
     {"CellBased_EtaBinned_Pi0MVACut_1prong",{0.46, 0.39, 0.51, 0.47, 0.54}},
     {"CellBased_EtaBinned_Pi0MVACut_3prong",{0.47, 0.52, 0.60, 0.55, 0.50}},
     // P T   B I N S

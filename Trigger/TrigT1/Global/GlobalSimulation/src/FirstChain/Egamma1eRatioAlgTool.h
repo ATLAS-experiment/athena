@@ -11,10 +11,8 @@
 
 #include "../GlobalSimComponents/IGlobalSimAlgTool.h"
 #include "../IO/LArStripNeighborhoodContainer.h"
-#include "../IO/IeEmNbhoodTOBContainer.h"
-#include "../IO/IeEmNbhoodTOB.h"
-#include "../IO/IeEmEg1eRatioTOBContainer.h"
-#include "../IO/IeEmEg1eRatioTOB.h"
+#include "../IO/eEmNbhoodTOBContainer.h"
+#include "../IO/eEmEg1eRatioTOBContainer.h"
 
 #include "ap_int.h"
 #include "ap_fixed.h"
@@ -50,14 +48,14 @@ namespace GlobalSim {
 	     "flag to enable dumps"};
 
     // input to the  eRatio Algorithm
-    SG::ReadHandleKey<IOBitwise::IeEmNbhoodTOBContainer>
+    SG::ReadHandleKey<IOBitwise::eEmNbhoodTOBContainer>
     m_nbhdTOBContainerReadKey {
       this,
       "LArNeighborhoodTOBContainerReadKey",
       "stripNeighborhoodTOBContainer",
       "key to read inLArNeighborhoodTOBsReadKeys"};
 
-    SG::WriteHandleKey<IOBitwise::IeEmEg1eRatioTOBContainer>
+    SG::WriteHandleKey<IOBitwise::eEmEg1eRatioTOBContainer>
     m_eRatioResultKey {
       this,
       "eRatioResultKey",
@@ -75,7 +73,7 @@ namespace GlobalSim {
       "eRatioSimpleKey",
       "eRatioSimple"};
     
-    std::vector<double> combine_phi(const IOBitwise::IeEmNbhoodTOB*) const;
+    std::vector<double> combine_phi(const IOBitwise::eEmNbhoodTOB*) const;
     ap_int<16> secondPeakSearch(const std::vector<ap_int<16>>& input, const ap_int<16> peak,
 				const int startCell, const int endCell,
 				const ap_int<16> noiseMargin) const;

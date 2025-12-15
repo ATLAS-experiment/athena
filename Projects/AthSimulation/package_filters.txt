@@ -61,10 +61,8 @@
 + Control/StoreGateBindings
 + Control/xAODRootAccess
 + Control/xAODRootAccessInterfaces
-+ Database/APR/CollectionBase
-+ Database/APR/CollectionUtilities
++ Database/APR/CollectionSvc
 + Database/APR/FileCatalog
-+ Database/APR/ImplicitCollection
 + Database/APR/POOLCore
 + Database/APR/PersistencySvc
 + Database/APR/RootCollection

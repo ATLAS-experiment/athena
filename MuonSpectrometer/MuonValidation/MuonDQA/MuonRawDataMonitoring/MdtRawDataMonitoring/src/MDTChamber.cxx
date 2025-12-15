@@ -235,7 +235,7 @@ void MDTChamber::SetMDTHitsPerML_byLayer_Bins(TH2F* h_mdthitspermultilayerLumi, 
     }
 
     std::string stateta_s = m_hardware_name.substr(3, 1);
-    //coverity[use_after_free:FALSE]
+    //coverity[WRAPPER_ESCAPE:FALSE]
     if (name_v.substr(0, 4) == "BMF2") stateta_s = "3";
     if (name_v.substr(0, 4) == "BMF3") stateta_s = "5";
     std::string ecap_layer = m_hardware_name.substr(0, 2) + m_hardware_name.at(4) + stateta_s;
@@ -251,6 +251,7 @@ void MDTChamber::SetMDTHitsPerML_byLayer_Bins(TH2F* h_mdthitspermultilayerLumi, 
 
     // Setting BMF by hand because of irregular naming convention. BMF and BMG chambers alternate; historical BMF naming is BMF1,2,3 but BMG
     // it is 2,4,6
+    //coverity[WRAPPER_ESCAPE:FALSE]
     if (name_v.substr(0, 5) == "BMF2A") ecap_layer = "BMA3";
     if (name_v.substr(0, 5) == "BMF3A") ecap_layer = "BMA5";
     if (name_v.substr(0, 5) == "BMF2C") ecap_layer = "BMC3";

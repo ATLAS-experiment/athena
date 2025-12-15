@@ -34,9 +34,9 @@ def AddDiTauIDDecorationCfg(flags, **kwargs):
     diTauWPDecorator = acc.popToolsAndMerge(DiTauTools.DiTauWPDecoratorCfg(
             flags,
             ))
-    decorWPNames = diTauWPDecorator.DecorWPNames
-    diTauContainerName = kwargs.setdefault("DiTauContainerName", "DiTauJets")
-    wpDecorationKeys = [diTauContainerName + "." + WP for WP in decorWPNames] # FIXME Once WriteDecorHandleKeyArrays are updated, this can switch to wpDecorationKeys = diTauWPDecorator.DecorWPNames
+
+    kwargs.setdefault("DiTauContainerName", "DiTauJets")
+    wpDecorationKeys = diTauWPDecorator.DecorWPNames
     decorWPCuts = diTauWPDecorator.DecorWPCuts
     acc.addPublicTool(diTauOnnxScoreCalculator)
     acc.addPublicTool(diTauWPDecorator)

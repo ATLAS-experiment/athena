@@ -11,6 +11,8 @@
 // EDM includes
 #include "xAODTau/TauJetContainer.h"
 #include "xAODMuon/MuonContainer.h"
+#include "ColumnarMuon/MuonDef.h"
+#include "ColumnarTau/TauJetDef.h"
 
 // Local includes
 #include "AssociationUtils/IOverlapTool.h"
@@ -45,14 +47,15 @@ namespace ORUtils
       /// @brief Identify overlapping taus and loose muons.
       /// TODO: add description of the method.
       virtual StatusCode
-      findOverlaps(const xAOD::IParticleContainer& cont1,
-                   const xAOD::IParticleContainer& cont2) const override;
+      findOverlaps(columnar::Particle1Range cont1,
+                   columnar::Particle2Range cont2,
+                   columnar::EventContextId eventContext) const override;
 
       /// @brief Identify overlapping taus and loose muons.
       /// See the documentation in the above method.
       virtual StatusCode
-      findOverlaps(const xAOD::TauJetContainer& taus,
-                   const xAOD::MuonContainer& muons) const;
+      internalFindOverlaps(columnar::Particle1Range taus,
+                           columnar::Particle2Range muons) const;
 
     protected:
 
@@ -74,6 +77,16 @@ namespace ORUtils
       float m_minMuPt;
       /// Tau PT threshold to compare to combined muons only
       float m_minTauPtMuComb;
+
+      /// Columnar accessors
+      struct Accessors final : columnar::ColumnarTool<>
+      {
+        columnar::Particle1Accessor<float> m_tauPtAcc {*this, "pt"};
+        columnar::Particle2Accessor<float> m_muPtAcc {*this, "pt"};
+        columnar::Particle2Accessor<columnar::RetypeColumn<xAOD::Muon::MuonType,std::uint16_t>> m_muonTypeAcc {*this, "muonType"};
+        using ColumnarTool::ColumnarTool;
+      };
+      std::unique_ptr<Accessors> m_accessors {std::make_unique<Accessors> (this)};
 
       //
       // Utilities

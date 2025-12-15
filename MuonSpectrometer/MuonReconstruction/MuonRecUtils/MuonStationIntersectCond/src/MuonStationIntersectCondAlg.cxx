@@ -5,7 +5,7 @@
 #include "MuonStationIntersectCondAlg.h"
 
 MuonStationIntersectCondAlg::MuonStationIntersectCondAlg(const std::string& name, ISvcLocator* pSvcLocator) :
-    AthReentrantAlgorithm(name, pSvcLocator) {}
+    AthCondAlgorithm(name, pSvcLocator) {}
 StatusCode MuonStationIntersectCondAlg::initialize() {
     ATH_CHECK(m_idHelperSvc.retrieve());
     ATH_CHECK(m_writeKey.initialize());

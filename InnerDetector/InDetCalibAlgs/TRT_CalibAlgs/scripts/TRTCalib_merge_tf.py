@@ -1,11 +1,11 @@
 #!/usr/bin/env python
 
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 __doc__ = """JobTransform to run TRT R-t Calibration jobs"""
 
 
-import sys, os, glob, subprocess, tarfile, json
+import sys
 from PyJobTransforms.transform import transform
 from PyJobTransforms.trfExe import athenaExecutor
 from PyJobTransforms.trfArgs import addAthenaArguments, addDetectorArguments

@@ -3,11 +3,9 @@
 */
 #include <iostream>
 #include "channelMappings/EfexHardwareInfo.h"
-EfexHardwareInfo::EfexHardwareInfo()
-:m_valid(false), m_efexlabel("invalid") , m_fibre(-1), m_inputconnector(-1),
-m_mpodlabel("invalid")
-{    
-}
+
+
+
 EfexHardwareInfo::EfexHardwareInfo(const std::string & efexlabel,
                                 int fibre,
                                 int inputconnector,

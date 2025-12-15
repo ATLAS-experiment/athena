@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 # ====================================================================
 # EGAM4.py
 # This defines DAOD_EGAM4, a skimmed DAOD format for Run 3.
@@ -46,12 +46,12 @@ def EGAM4SkimmingToolCfg(flags):
     expression = "( " + expression1a + " ) || ( " + expression1b + " )"
     print("EGAM4 skimming expression: ", expression)
 
-    acc.setPrivateTools(
-        CompFactory.DerivationFramework.xAODStringSkimmingTool(
-            name="EGAM4SkimmingTool", expression=expression
-        )
-    )
+    skimmingTool = CompFactory.DerivationFramework.xAODStringSkimmingTool(
+        name="EGAM4SkimmingTool", expression=expression)
+    if flags.Trigger.EDMVersion < 0:
+        skimmingTool.TrigDecisionTool=None
 
+    acc.setPrivateTools(skimmingTool)
     return acc
 
 
@@ -345,18 +345,18 @@ def EGAM4Cfg(flags):
     ]
 
     # for trigger studies we also add:
-    MenuType = None
+    MenuType = ""
     if flags.Trigger.EDMVersion == 2:
         MenuType = "Run2"
     elif flags.Trigger.EDMVersion == 3:
         MenuType = "Run3"
-    else:
-        MenuType = ""
-    EGAM4SlimmingHelper.AllVariables += ExtraContainersTrigger[MenuType]
-    EGAM4SlimmingHelper.AllVariables += ExtraContainersPhotonTrigger[MenuType]
-    EGAM4SlimmingHelper.AllVariables += ExtraContainersMuonTrigger[MenuType]
-    if not flags.Input.isMC:
-        EGAM4SlimmingHelper.AllVariables += ExtraContainersTriggerDataOnly[MenuType]
+
+    if MenuType:
+        EGAM4SlimmingHelper.AllVariables += ExtraContainersTrigger[MenuType]
+        EGAM4SlimmingHelper.AllVariables += ExtraContainersPhotonTrigger[MenuType]
+        EGAM4SlimmingHelper.AllVariables += ExtraContainersMuonTrigger[MenuType]
+        if not flags.Input.isMC:
+            EGAM4SlimmingHelper.AllVariables += ExtraContainersTriggerDataOnly[MenuType]
 
     # and on MC we also add:
     if flags.Input.isMC:

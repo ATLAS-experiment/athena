@@ -14,7 +14,7 @@
  */
 
 //Athena includes
-#include "AthenaBaseComps/AthReentrantAlgorithm.h"
+#include "AthenaBaseComps/AthCondAlgorithm.h"
 #include "ITkPixelCabling/ITkPixelCablingData.h"
 
 #include "StoreGate/WriteCondHandleKey.h"
@@ -39,7 +39,7 @@ namespace InDetDD{
  *
  */
 
-class ITkPixelCablingAlg: public AthReentrantAlgorithm {
+class ITkPixelCablingAlg: public AthCondAlgorithm {
  public:
   ITkPixelCablingAlg(const std::string& name, ISvcLocator* svc);
   virtual ~ITkPixelCablingAlg() = default;

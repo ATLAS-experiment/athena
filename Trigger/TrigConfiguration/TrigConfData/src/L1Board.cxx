@@ -78,8 +78,9 @@ TrigConf::L1Board::type() const
       return "TOPO";
    case BoardType::MERGER:
       return "MERGER";
+   default:
+      return "";
    }
-   return "";
 }
 
 bool

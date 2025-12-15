@@ -5,7 +5,7 @@
 #ifndef TRIGCONFIGSVC__L1PRESCALECONDALG
 #define TRIGCONFIGSVC__L1PRESCALECONDALG
 
-#include "AthenaBaseComps/AthReentrantAlgorithm.h"
+#include "AthenaBaseComps/AthCondAlgorithm.h"
 #include "CxxUtils/checker_macros.h"
 
 #include "StoreGate/ReadCondHandleKey.h"
@@ -30,16 +30,13 @@ namespace TrigConf {
     * * DB-based menu description where the DB keys are provided as algorithm job-properties: for reprocessing grid jobs with new menus
     * * DB-based menu description where the DB keys are taken from COOL: for offline reconstruction jobs
     */
-   class L1PrescaleCondAlg : public AthReentrantAlgorithm {
+   class L1PrescaleCondAlg : public AthCondAlgorithm {
    public:
       L1PrescaleCondAlg(const std::string& name, ISvcLocator* pSvcLocator);
       virtual ~L1PrescaleCondAlg() override = default;
 
       virtual StatusCode initialize() override;
       virtual StatusCode execute(const EventContext& ctx) const override;
-
-      // avoids running CondAlg multiple times for the same input (ATEAM-617)
-      virtual bool isReEntrant() const override final { return false; }
 
    private:
       

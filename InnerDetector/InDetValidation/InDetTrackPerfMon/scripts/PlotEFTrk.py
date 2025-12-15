@@ -45,10 +45,11 @@ def GetParserArgs() :
     parser.add_argument( '-o', '--output',      help="Output directory")
     parser.add_argument( '--trkAnalysisTest',   help='IDTPM TrackAnalysis for test (e.g. TrkAnaEF)', nargs = '+')
     parser.add_argument( '--trkAnalysisRef',    help='IDTPM TrackAnalysis for reference (e.g. TrkAnaEF)', nargs = '+')
+    parser.add_argument( '--chain',		        help="Trigger chain (or Offline)", default = 'Offline')
     parser.add_argument( '-t','--type',         help="type of plot (eff, tech_eff, purity, resolution, fakerate, duplrate, num, summary)")
     parser.add_argument( '-p','--param',        help="parameter (e.g pt/eta for efficiencies, d0_vs_truth_eta for resolutions, ...)")
     parser.add_argument( '--resplot',           help="which resolution plot ('resHelp','pullHelp','pullwidth','pullmean','res','resmean','corr')", default=None)
-    parser.add_argument( '--log',               help="log scale on x axis, y axis or bot (x, y, xy)")
+    parser.add_argument( '--log',               help="log scale on x axis, y axis or bot (x, y, xy)", default = '')
     parser.add_argument( '--ymax',              help="maximum value for y-axis ", default = 0)
     parser.add_argument( '--ymin',              help="minimum value for y-axis ", default = 0)
     parser.add_argument( '--ratioyrange',       help="range of ratio y-axis", default = None, nargs = '+', type = float)
@@ -90,20 +91,21 @@ def getHistoName(category, args):
 
 def getHistoPath(cfg):
 
-    histopath = f"InDetTrackPerfMonPlots/{cfg['trkAnalysis']}/Offline/Tracks/{cfg['category']}/{cfg['histo']}" if 'Clusters' not in cfg['category'] else f"InDetTrackPerfMonPlots/{cfg['trkAnalysis']}/Offline/{cfg['category']}/{cfg['histo']}"
+    histopath = f"InDetTrackPerfMonPlots/{cfg['trkAnalysis']}/{cfg['chain']}/Tracks/{cfg['category']}/{cfg['histo']}" if 'Clusters' not in cfg['category'] else f"InDetTrackPerfMonPlots/{cfg['trkAnalysis']}/Offline/{cfg['category']}/{cfg['histo']}"
     h = cfg['input'].Get(histopath) 
     if cfg['norm']: h.Scale(1./h.Integral())
     print(cfg['input'])
 
     return h
 
-def getConfig (input, pipeline, trkana, args, color, markstyle, linestyle, isRef=False):
+def getConfig (input, chain, pipeline, trkana, args, color, markstyle, linestyle, isRef=False):
 
     category = category_dict[args.type.split('_vs_')[0]] #Efficiencies, Resolutions, FakeRates, ...
     histo = getHistoName(category, args)
  
     config_dict = {
         'pipeline'      : pipeline,
+        'chain'         : chain,
         'isReference'   : isRef,
         'input'         : input,
         'trkAnalysis'   : trkana,
@@ -144,7 +146,7 @@ def getATLASLabel(args):
         if 'ttbar' in args.ref[0]: sample = 't#bar{t}'
         if 'SingleMu' in args.ref[0]: sample = 'single #mu'
         if 'SinglePi' in args.ref[0]: sample = 'single #pi'
-        if 'SingleEl' in args.ref[0]: sample = 'single #pi'
+        if 'SingleEl' in args.ref[0]: sample = 'single e'
         if 'pT10_' in args.ref[0]: sample += ', p_{T} = 10 GeV'
         if 'pT100' in args.ref[0]: sample += ', p_{T} = 100 GeV'
         if 'pT1_' in args.ref[0]: sample += ', p_{T} = 1 GeV'
@@ -207,7 +209,7 @@ def getCanvas(args,cfg, NRef):
 
     return canv
 
-def getURDRequirementLine(h, type, canv, scale):
+def getURDRequirementLine(h, type, canv, scale, logx = False):
 
     scaleshift = canv.GetPad(1).GetHNDC()/canv.GetPad(2).GetHNDC()
 
@@ -223,8 +225,9 @@ def getURDRequirementLine(h, type, canv, scale):
     shiftup = 0.01*scaleshift if 'rate' not in type else 0.01
     shiftdn = 0.07*scaleshift if 'rate' not in type else 0.07
     y =  level + shiftup*(ymax-ymin) if level < ymax else ymax - shiftdn *(ymax-ymin)
+    x = (.63*(xmax-xmin)+xmin) if not logx else math.exp( math.log(xmin) + 0.63*(math.log(xmax) - math.log(xmin)) )
 
-    requirement_text = ROOT.TLatex((.63*(xmax-xmin)+xmin),y, f"#uparrow URD requirement = {level}" if level > ymax else f"URD requirement = {level}")
+    requirement_text = ROOT.TLatex(x,y, f"#uparrow URD requirement = {level}" if level > ymax else f"URD requirement = {level}")
     requirement_text.SetTextFont(42)
     requirement_text.SetTextSize(0.04*scale if 'rate' not in type else 0.04)
     requirement_text.SetTextColor(ROOT.kRed)
@@ -472,11 +475,6 @@ def draw(args, configs, tails=False, pu_comparison=False):
     urd_lines = []
     urd_text = []
 
-    if 'rate' in args.type:
-        requirement_line, requirement_text = getURDRequirementLine(histos[0].GetPaintedGraph(), 'rate', canv, 1)
-        requirement_line.Draw('same')
-        requirement_text.Draw('same')
-
     # Loop over reference histograms to create one ratio per reference
     for r in range(NRef):
 
@@ -522,8 +520,8 @@ def draw(args, configs, tails=False, pu_comparison=False):
 
             drawRefLine(r, ratios, reflines)
 
-            if args.type == 'resolution' and not pu_comparison:
-                requirement_line, requirement_text = getURDRequirementLine(ratios[0], 'resolution', canv, labelsizescales[r])
+            if args.type == 'resolution' and not pu_comparison and 'C000' in args.ref[0]:
+                requirement_line, requirement_text = getURDRequirementLine(ratios[0], 'resolution', canv, labelsizescales[r], logx = ('x' in args.log))
                 urd_lines.append(requirement_line)
                 urd_text.append(requirement_text)
                 urd_lines[r].Draw('same')
@@ -552,7 +550,7 @@ def draw(args, configs, tails=False, pu_comparison=False):
 def main():
 
     args = GetParserArgs()
-
+    chain = args.chain
     inputTest = args.test
     inputRef = args.ref
     pipelinesRef = args.pipelineRef
@@ -581,7 +579,7 @@ def main():
         for i,pipeline in enumerate(pipelines):
             isReference = (i<len(pipelinesRef))
             f = ROOT.TFile.Open(inputFiles[i], 'READ')
-            configs.append(getConfig(f, pipeline, trkanalyses[i], args, colors[i], markstyles[i], linestyles[i], isReference))
+            configs.append(getConfig(f, chain, pipeline, trkanalyses[i], args, colors[i], markstyles[i], linestyles[i], isReference))
 
         draw(args, configs)
 
@@ -598,7 +596,7 @@ def main():
 
         for i,trkana in enumerate(trkanalyses):
             f = ROOT.TFile.Open(inputFiles[i], 'READ')
-            configs.append(getConfig(f, pipelines[i], trkanalyses[i], args, colors[i], markstyles[i], linestyles[i]))
+            configs.append(getConfig(f, chain, pipelines[i], trkanalyses[i], args, colors[i], markstyles[i], linestyles[i]))
 
         draw(args, configs, tails=doTails,pu_comparison=doPUComparison)
 

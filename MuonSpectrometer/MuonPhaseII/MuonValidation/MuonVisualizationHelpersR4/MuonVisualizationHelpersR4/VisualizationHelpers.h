@@ -111,6 +111,15 @@ namespace MuonValR4 {
                                       const double xPos, 
                                       const double yPos,
                                       const unsigned int fontSize = 18);
+    /** @brief Create a TLatex label,
+     *  @param text: Label text
+     *  @param xPos: x-position of the label on the Canvas in NDC  coordinates
+     *  @param yPos: y-position of the label on the Canvas in NDC  coordinates
+     *  @param fontSize: Size of the label font */
+    std::unique_ptr<TLatex> drawLabelNDC(const std::string& text, 
+                                      const double xPos, 
+                                      const double yPos,
+                                      const unsigned int fontSize = 18);
     /** @brief Create a ATLAS label
      *  @param xPos: x-position of the label on the Canvas
      *  @param yPos: y-position of the label on the Canvas

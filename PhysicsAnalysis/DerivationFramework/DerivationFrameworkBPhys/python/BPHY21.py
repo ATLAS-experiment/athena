@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 #====================================================================
 # BPHY21.py
 #====================================================================
@@ -12,7 +12,10 @@ BPHYDerivationName = "BPHY21"
 streamName = "StreamDAOD_BPHY21"
 
 def BPHY21Cfg(flags):
-    from DerivationFrameworkBPhys.commonBPHYMethodsCfg import (BPHY_V0ToolCfg,  BPHY_InDetDetailedTrackSelectorToolCfg, BPHY_VertexPointEstimatorCfg, BPHY_TrkVKalVrtFitterCfg)
+    from DerivationFrameworkBPhys.commonBPHYMethodsCfg import (
+        BPHY_V0ToolCfg,  BPHY_InDetDetailedTrackSelectorToolCfg,
+        BPHY_VertexPointEstimatorCfg, BPHY_TrkVKalVrtFitterCfg,
+        AugOriginalCountsCfg)
     from JpsiUpsilonTools.JpsiUpsilonToolsConfig import PrimaryVertexRefittingToolCfg
     acc = ComponentAccumulator()
     isSimulation = flags.Input.isMC
@@ -25,10 +28,6 @@ def BPHY21Cfg(flags):
     vpest = acc.popToolsAndMerge(BPHY_VertexPointEstimatorCfg(flags, BPHYDerivationName))
     acc.addPublicTool(vpest)
 
-    BPHY21_AugOriginalCounts = CompFactory.DerivationFramework.AugOriginalCounts(
-                        name = "BPHY21_AugOriginalCounts",
-                        VertexContainer = "PrimaryVertices",
-                        TrackContainer = "InDetTrackParticles")
     #====================================================================
     # TriggerCounting for Kernel1
     #====================================================================
@@ -94,6 +93,9 @@ def BPHY21Cfg(flags):
         LxyMin                = 0.1,
         DoVertexType          = 1)
 
+    BPHY21_AugOriginalCounts = acc.popToolsAndMerge(
+        AugOriginalCountsCfg(flags, name = "BPHY21_AugOriginalCounts"))
+
     if not isSimulation: #Only Skim Data
         BPHY21_TriggerSkim = CompFactory.DerivationFramework.TriggerSkimmingTool(name = "BPHY21_TriggerSkim",
                                                         TriggerListOR = BPHY21_triggerList)
@@ -107,8 +109,10 @@ def BPHY21Cfg(flags):
         acc.addPublicTool(BPHY21_TriggerSkim)
         acc.addPublicTool(BPHY21_SkimmingOR)
 
-    augTools = [BPHY21_JpsiSelectAndWrite, BPHY21_Select_Jpsi2mumu, BPHY21_AugOriginalCounts]
+    augTools = [BPHY21_JpsiSelectAndWrite, BPHY21_Select_Jpsi2mumu,
+                BPHY21_AugOriginalCounts]
     for t in  augTools : acc.addPublicTool(t)
+
     acc.addEventAlgo(CompFactory.DerivationFramework.DerivationKernel("BPHY21Kernel",
                                                     AugmentationTools = augTools,
                                                     #Only skim if not MC

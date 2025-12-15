@@ -11,6 +11,10 @@
 // EDM includes
 #include "xAODBase/IParticle.h"
 
+// Columnar includes
+#include "ColumnarCore/ParticleDef.h"
+#include "ColumnarCore/MomentumAccessors.h"
+
 // Local includes
 #include "AssociationUtils/IObjectAssociator.h"
 
@@ -23,7 +27,7 @@ namespace ORUtils
   /// I am considering abstracting matching with an interface.
   /// @author Steve Farrell <Steven.Farrell@cern.ch>
   ///
-  class DeltaRMatcher : public IParticleAssociator
+  class DeltaRMatcher final : public IParticleAssociator
   {
 
     public:
@@ -31,14 +35,23 @@ namespace ORUtils
       /// Constructor
       DeltaRMatcher(double dR, bool useRapidity=true);
 
+      /// Set the object types to be used in the association.
+      virtual StatusCode setObjectTypes (xAODType::ObjectType type1,
+                                   xAODType::ObjectType type2) override;
+
       /// Check if particles match in dR
       virtual bool objectsMatch
-      (const xAOD::IParticle& p1, const xAOD::IParticle& p2) const override;
+      (columnar::Particle1Id p1, columnar::Particle2Id p2, bool swapArgs = false) const override;
+      using IParticleAssociator::objectsMatch;
 
     private:
 
       double m_dR;
       bool m_useRapidity;
+
+      /// Columnar accessors
+      columnar::MomentumAccessors<columnar::ContainerId::particle1> m_momAcc1;
+      columnar::MomentumAccessors<columnar::ContainerId::particle2> m_momAcc2;
 
   }; // class DeltaRMatcher
 
@@ -51,7 +64,7 @@ namespace ORUtils
   /// Assumes that you're only using rapidity (for now).
   /// @author Steve Farrell <Steven.Farrell@cern.ch>
   ///
-  class SlidingDeltaRMatcher : public IParticleAssociator
+  class SlidingDeltaRMatcher final : public IParticleAssociator
   {
 
     public:
@@ -64,10 +77,14 @@ namespace ORUtils
                            double maxCone = std::numeric_limits<double>::max(),
                            bool useRapidity=true);
 
+      /// Set the object types to be used in the association.
+      virtual StatusCode setObjectTypes (xAODType::ObjectType type1,
+                                   xAODType::ObjectType type2) override;
+
       /// @brief Check if particles match in dR.
       /// The dR cone is calculated as dR = c1 + (c2/p1.pt())
       virtual bool objectsMatch
-      (const xAOD::IParticle& p1, const xAOD::IParticle& p2) const override;
+      (columnar::Particle1Id p1, columnar::Particle2Id p2, bool swapArgs = false) const override;
 
     private:
 
@@ -80,6 +97,10 @@ namespace ORUtils
 
       /// Toggle rapidity usage
       bool m_useRapidity;
+
+      /// Columnar accessors
+      columnar::MomentumAccessors<columnar::ContainerId::particle1> m_momAcc1;
+      columnar::MomentumAccessors<columnar::ContainerId::particle2> m_momAcc2;
 
   }; // class SlidingDeltaRMatcher
 

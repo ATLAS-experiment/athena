@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #include "TrigT1CaloCalibConditions/L1CaloRunParametersContainer.h"
 
@@ -75,16 +75,16 @@ void L1CaloRunParametersContainer::makeTransient(const std::map<std::string, con
     auto chanNum = item.first;
     const auto& attrList = item.second;
     
-    auto runType = attrList[specificationName(erunType)].data<std::string>();
-    auto runActionName = attrList[specificationName(erunActionName)].data<std::string>();
+    const auto & runType = attrList[specificationName(erunType)].data<std::string>();
+    const auto & runActionName = attrList[specificationName(erunActionName)].data<std::string>();
     auto runActionVersion = attrList[specificationName(erunActionVersion)].data<unsigned int>();
-    auto readoutConfig = attrList[specificationName(ereadoutConfig)].data<std::string>();
+    const auto & readoutConfig = attrList[specificationName(ereadoutConfig)].data<std::string>();
     auto readoutConfigID = attrList[specificationName(ereadoutConfigID)].data<unsigned int>();
-    auto ttcConfiguration = attrList[specificationName(ettcConfiguration)].data<std::string>();
+    const auto & ttcConfiguration = attrList[specificationName(ettcConfiguration)].data<std::string>();
     auto ttcConfigurationID = attrList[specificationName(ettcConfigurationID)].data<unsigned int>();
-    auto triggerMenu = attrList[specificationName(etriggerMenu)].data<std::string>();
-    auto calibration = attrList[specificationName(ecalibration)].data<std::string>();
-    auto conditions = attrList[specificationName(econditions)].data<std::string>();
+    const auto & triggerMenu = attrList[specificationName(etriggerMenu)].data<std::string>();
+    const auto & calibration = attrList[specificationName(ecalibration)].data<std::string>();
+    const auto & conditions = attrList[specificationName(econditions)].data<std::string>();
 
     addRunParameters(L1CaloRunParameters(chanNum, runType, runActionName, runActionVersion, readoutConfig, readoutConfigID, ttcConfiguration, ttcConfigurationID, triggerMenu, calibration, conditions));
   }

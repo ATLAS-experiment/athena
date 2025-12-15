@@ -17,7 +17,6 @@
 #include "xAODMuonPrepData/UtilFunctions.h"
 
 #include "MuonPatternEvent/SegmentFitterEventData.h"
-#include "MuonPatternHelpers/MatrixUtils.h"
 #include "MuonTrackEvent/TrackingHelpers.h"
 
 #include "MuonPrepRawData/NswClusteringUtils.h"
@@ -452,7 +451,7 @@ namespace MuonR4{
                 calibInput.setTrackDirection(trackDir, true);
                 const double driftSign = m_MdtSignFromSegment ? 
                                          static_cast<double>(dec_trackSign(*dc)) :
-                                         sign(trackPars.parameters()[Acts::eBoundLoc0]);
+                                         Acts::copySign(1.,trackPars.parameters()[Acts::eBoundLoc0]);
 
                 /** Vast majority of the measurements are ordinary drift tubes */
                 if (ATH_LIKELY(muonMeas->numDimensions() == 1)) {

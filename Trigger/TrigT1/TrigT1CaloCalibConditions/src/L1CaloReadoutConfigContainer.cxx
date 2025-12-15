@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #include "TrigT1CaloCalibConditions/L1CaloReadoutConfigContainer.h"
 
@@ -152,7 +152,7 @@ void L1CaloReadoutConfigContainer::makeTransient(const std::map<std::string, con
     auto chanNum = item.first;
     const auto& attrList = item.second;
     
-    auto description = attrList[specificationName(edescription)].data<std::string>();
+    const auto & description = attrList[specificationName(edescription)].data<std::string>();
     auto baselinePointer = attrList[specificationName(ebaselinePointer)].data<unsigned int>();
     auto numFadcSlices = attrList[specificationName(enumFadcSlices)].data<unsigned int>();
     auto l1aFadcSlice = attrList[specificationName(el1aFadcSlice)].data<unsigned int>();
@@ -193,9 +193,9 @@ void L1CaloReadoutConfigContainer::makeTransient(const std::map<std::string, con
     auto bcOffsetJemSum = attrList[specificationName(ebcOffsetJemSum)].data<unsigned int>();
     auto bcOffsetCmx = attrList[specificationName(ebcOffsetCmx)].data<int>();
     auto bcOffsetTopo = attrList[specificationName(ebcOffsetTopo)].data<int>();
-    auto formatTypePpm = attrList[specificationName(eformatTypePpm)].data<std::string>();
-    auto formatTypeCpJep = attrList[specificationName(eformatTypeCpJep)].data<std::string>();
-    auto formatTypeTopo = attrList[specificationName(eformatTypeTopo)].data<std::string>();
+    const auto & formatTypePpm = attrList[specificationName(eformatTypePpm)].data<std::string>();
+    const auto & formatTypeCpJep = attrList[specificationName(eformatTypeCpJep)].data<std::string>();
+    const auto & formatTypeTopo = attrList[specificationName(eformatTypeTopo)].data<std::string>();
     auto compressionThresholdPpm = attrList[specificationName(ecompressionThresholdPpm)].data<unsigned int>();
     auto compressionThresholdCpJep = attrList[specificationName(ecompressionThresholdCpJep)].data<unsigned int>();
     auto compressionThresholdTopo = attrList[specificationName(ecompressionThresholdTopo)].data<unsigned int>();

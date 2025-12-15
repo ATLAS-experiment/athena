@@ -4,7 +4,7 @@
 #ifndef MUONCONDALG_ILINESCONDALG_H
 #define MUONCONDALG_ILINESCONDALG_H
 
-#include "AthenaBaseComps/AthReentrantAlgorithm.h"
+#include "AthenaBaseComps/AthCondAlgorithm.h"
 #include "AthenaPoolUtilities/CondAttrListCollection.h"
 #include "CoralBase/Blob.h"
 #include "StoreGate/CondHandleKeyArray.h"
@@ -14,14 +14,13 @@
 #include "MuonIdHelpers/IMuonIdHelperSvc.h"
 #include "nlohmann/json.hpp"
 
-class CscILinesCondAlg : public AthReentrantAlgorithm {
+class CscILinesCondAlg : public AthCondAlgorithm {
 
     public:
         CscILinesCondAlg(const std::string& name, ISvcLocator* pSvcLocator);
         virtual ~CscILinesCondAlg() = default;
         virtual StatusCode initialize() override;
         virtual StatusCode execute(const EventContext& ctx) const override;
-        virtual bool isReEntrant() const override { return false;}
    
     private:
         SG::ReadCondHandleKey<CondAttrListCollection> m_readKey{this, "ReadKey", "/MUONALIGN/CSC/ILINES",

@@ -47,7 +47,7 @@ using TubeContainerPtr = MdtFullCalibData::TubeContainerPtr;
 using RegionGranularity = MdtCalibDataContainer::RegionGranularity;
 
 MdtCalibDbAlg::MdtCalibDbAlg(const std::string &name, ISvcLocator *pSvcLocator) :
-    AthReentrantAlgorithm(name, pSvcLocator) {}
+    AthCondAlgorithm(name, pSvcLocator) {}
 
 StatusCode MdtCalibDbAlg::initialize() {
     ATH_MSG_DEBUG("initialize " << name());

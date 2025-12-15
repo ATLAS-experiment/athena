@@ -13,7 +13,7 @@
 
 
 NswUncertDbAlg::NswUncertDbAlg(const std::string& name, ISvcLocator* svc):
-    AthReentrantAlgorithm{name, svc}{}
+    AthCondAlgorithm{name, svc}{}
 
 StatusCode NswUncertDbAlg::initialize() {
     ATH_CHECK(m_readKeysDb.initialize(m_readFromJSON.value().empty()));

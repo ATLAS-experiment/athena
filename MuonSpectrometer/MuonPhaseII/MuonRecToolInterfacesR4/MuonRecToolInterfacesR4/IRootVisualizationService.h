@@ -5,7 +5,7 @@
 #define MUONRECTOOLINTERFACESR4_IROOTVISUALIZATIONSERVICE_H
 
 #include <GaudiKernel/IService.h>
-
+#include <cstdint>
 
 class TObject;
 class EventContext;

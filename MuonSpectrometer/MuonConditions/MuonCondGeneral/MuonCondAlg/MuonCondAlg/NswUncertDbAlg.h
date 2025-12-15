@@ -9,7 +9,7 @@
 #include <nlohmann/json.hpp>
 
 // Athena includes
-#include "AthenaBaseComps/AthReentrantAlgorithm.h"
+#include "AthenaBaseComps/AthCondAlgorithm.h"
 #include "StoreGate/CondHandleKeyArray.h"
 #include "StoreGate/WriteCondHandleKey.h"
 #include "MuonIdHelpers/IMuonIdHelperSvc.h"
@@ -20,14 +20,13 @@
 
 
 
-class NswUncertDbAlg: public AthReentrantAlgorithm {
+class NswUncertDbAlg: public AthCondAlgorithm {
 
 public:
     NswUncertDbAlg(const std::string& name, ISvcLocator* svc);
     virtual ~NswUncertDbAlg() = default;
     virtual StatusCode initialize() override;
     virtual StatusCode execute (const EventContext&) const override;
-    virtual bool isReEntrant() const override { return false; }
 
  
 private:

@@ -8,9 +8,9 @@
 
 #include "PersistentDataModel/Token.h"
 
-#include "CollectionBase/CollectionRowBuffer.h"
-#include "CollectionBase/ICollectionDescription.h"
-#include "CollectionBase/ICollectionCursor.h"
+#include "CollectionSvc/CollectionRowBuffer.h"
+#include "CollectionSvc/ICollectionDescription.h"
+#include "CollectionSvc/ICollectionCursor.h"
 
 class TTree;
 class TBranch;

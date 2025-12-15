@@ -17,7 +17,8 @@ class MuonPhaseIITestDefaults:
     HITS_PG_R4_MSOnly = []
     ### BS file taken in MD3 2025 with a pile-up of >120
     DATA_BS = ["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonRecRTT/data25_13p6TeV.00508073.physics_Main.daq.RAW._lb0277._SFO-14._0001.data" ]
-    
+    ###
+    RDO_ZMUMU_R3 = ["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonGeomRTT/myRDO.R3.pool.root"]
     ###
     ###     Layout files
     ###

@@ -5,7 +5,7 @@
 #ifndef TRTPHASECONDALG_H
 #define TRTPHASECONDALG_H
 
-#include "AthenaBaseComps/AthAlgorithm.h"
+#include "AthenaBaseComps/AthCondAlgorithm.h"
 #include "StoreGate/WriteCondHandleKey.h"
 #include "GaudiKernel/ToolHandle.h"
 #include "TRT_ConditionsData/AverageT0.h"
@@ -14,7 +14,7 @@
 
 class TRT_ID;
 
-class TRTPhaseCondAlg : public AthAlgorithm
+class TRTPhaseCondAlg : public AthCondAlgorithm
 {
  public:
   typedef TRTCond::StrawT0MultChanContainer StrawT0Container ;
@@ -22,7 +22,7 @@ class TRTPhaseCondAlg : public AthAlgorithm
   virtual ~TRTPhaseCondAlg() override;
 
   virtual StatusCode initialize() override;
-  virtual StatusCode execute() override;
+  virtual StatusCode execute(const EventContext& ctx) const override;
   virtual StatusCode finalize() override;
 
 

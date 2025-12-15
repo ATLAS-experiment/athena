@@ -3,6 +3,7 @@
 */
 
 #include "eEmEg1eRatioTOB.h"
+#include <sstream>
 
 namespace GlobalSim::IOBitwise {
 
@@ -19,7 +20,13 @@ namespace GlobalSim::IOBitwise {
   }
 
   std::string eEmEg1eRatioTOB::to_string() const {
-    return IeEmEg1eRatioTOB::to_string();
+
+    auto ss = std::stringstream();
+    ss <<  eEmTOB::to_string() << '\n';
+    ss << m_eGamma1eRatio_bits;
+    return ss.str();
+    
+
   }
 
 }
