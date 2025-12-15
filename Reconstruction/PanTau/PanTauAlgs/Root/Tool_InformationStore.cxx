@@ -41,7 +41,6 @@ void PanTau::Tool_InformationStore::ABRDefaultInit(){
     {"FeatureExtractor_VarTypeName_varTypeName_Mean", "Mean"},
     {"FeatureExtractor_VarTypeName_varTypeName_StdDev", "StdDev"},
     {"FeatureExtractor_VarTypeName_varTypeName_HLV", "HLV"},
-    {"FeatureExtractor_VarTypeName_varTypeName_Angle", "Angle"},
     {"FeatureExtractor_VarTypeName_varTypeName_DeltaR", "DeltaR"},
     {"FeatureExtractor_VarTypeName_varTypeName_JetMoment", "JetMoment"},
     {"FeatureExtractor_VarTypeName_varTypeName_Combined", "Combined"},

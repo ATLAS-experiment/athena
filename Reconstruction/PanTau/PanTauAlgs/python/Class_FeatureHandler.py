@@ -89,7 +89,6 @@ class FeatureHandler:
         self.m_VarTypeName_Mean         = "Mean"
         self.m_VarTypeName_StdDev       = "StdDev"
         self.m_VarTypeName_HLV          = "HLV"
-        self.m_VarTypeName_Angle        = "Angle"
         self.m_VarTypeName_DeltaR       = "DeltaR"
         self.m_VarTypeName_JetMoment    = "JetMoment"
         self.m_VarTypeName_Combined     = "Combined"
@@ -103,7 +102,6 @@ class FeatureHandler:
         self.m_DefaultValues[self.m_VarTypeName_Mean]         = -0.2
         self.m_DefaultValues[self.m_VarTypeName_StdDev]       = -0.2
         self.m_DefaultValues[self.m_VarTypeName_HLV]          = -4000.0
-        self.m_DefaultValues[self.m_VarTypeName_Angle]        = -0.2
         self.m_DefaultValues[self.m_VarTypeName_DeltaR]       = -0.2
         self.m_DefaultValues[self.m_VarTypeName_JetMoment]    = -0.2
         self.m_DefaultValues[self.m_VarTypeName_Combined]     = -10.0
@@ -169,8 +167,6 @@ class FeatureHandler:
         Variables += ["BDTValue_1p0n_vs_1p1n"]
         Variables += ["BDTValue_1p1n_vs_1pXn"]
         Variables += ["BDTValue_3p0n_vs_3pXn"]
-        Variables += ["SumCharge"]
-        Variables += ["AbsCharge"]
         for iVar in Variables:
             curDefVal = self.m_DefaultValues[self.m_VarTypeName_Basic]
             if iVar == "isPanTauCandidate":
@@ -234,21 +230,6 @@ class FeatureHandler:
     
     
     def addTypeSpecificFeatures_Shots(self):
-        Variables = []
-        Variables += ["nPhotons"]
-        Variables += ["EtSumShotsOverConstEt"]
-        
-        MaxNum = 4
-        
-        for iVar in Variables:
-            for iNum in range(1, MaxNum):
-                featName = iVar + "_BDTSort_" + str(iNum)
-                curDefVal = self.m_DefaultValues[self.m_VarTypeName_Shots]
-                    
-                self.addToFeatures_FullName(self.m_ConstituentTypeName_Neutral + "_" + self.m_VarTypeName_Shots + "_" + featName, self.m_VarTypeName_Shots, "F", curDefVal)
-                self.addToFeatures_FullName(self.m_ConstituentTypeName_Pi0Neut + "_" + self.m_VarTypeName_Shots + "_" + featName, self.m_VarTypeName_Shots, "F", curDefVal)
-                #end loop over iNum
-        #end loop over variables
         
         Variables = []
         Variables += ["NPhotonsInSeed"]
@@ -268,13 +249,6 @@ class FeatureHandler:
         Variables_WithEnergyTypes += ["1stBDTEtOver"]
         for iVar in Variables_WithEnergyTypes:
             self.addToFeatures_AllTypes_AllEnergyVariants(iVar, self.m_VarTypeName_Ratio, "F")
-        #end loop over variables with energy types
-        
-        Variables = []
-        Variables += ["1stBDTEtOverTypeEt"]
-        Variables += ["EFOsOverTotalEFOs"]
-        for iVar in Variables:
-            self.addToFeatures_AllTypes(iVar, self.m_VarTypeName_Ratio, "F")
         #end loop over variables with energy types
     #end addTypeSpecificFeatures_Ratios
     
@@ -302,29 +276,10 @@ class FeatureHandler:
             self.addToFeatures_AllTypes(iVar, self.m_VarTypeName_HLV, "F", curDefVal)
             
         #end loop over variables
-        
-        VariablesVec = []
-        VariablesVec += ["Constituents_pt"]
-        VariablesVec += ["Constituents_eta"]
-        VariablesVec += ["Constituents_phi"]
-        VariablesVec += ["Constituents_m"]
-        
-        for iVecVar in VariablesVec:
-            featName = "BDTSort_" + iVecVar
-            curDefVal   = -4000.
-            if iVecVar == "Constituents_eta" or iVecVar == "Constituents_phi":
-                curDefVal = -9.
-            if iVecVar == "Constituents_m":
-                curDefVal = -200.
-            self.addToFeatures_AllTypes(featName, self.m_VarTypeName_HLV, "V", curDefVal)
-                
-                
-        #end loop over variables
     #end addTypeSpecificFeatures_HLV
     
     def addTypeSpecificFeatures_JetMoment(self):
         Variables = []
-        Variables += ["EtDR"]
         Variables += ["EtDRxTotalEt"]
         for iVar in Variables:
             self.addToFeatures_AllTypes(iVar, self.m_VarTypeName_JetMoment, "F")
@@ -338,11 +293,8 @@ class FeatureHandler:
         Types += ["Pi0Neut"]
         
         Variables = []
-        Variables += [ ["Log1st", "EtOver", "Et"] ]
         Variables += [ ["Log", "EtOver", "Et"] ]
-        Variables += [ ["Angle", "To", ""] ]
         Variables += [ ["DeltaR1st", "To1st", ""] ]
-        Variables += [ ["Angle1st", "To1st", ""] ]
         for iType in Types:
             for jType in Types:
                 
@@ -372,16 +324,8 @@ class FeatureHandler:
         Variables_WithEnergyTypes = []
         Variables_WithEnergyTypes += [ ["Mean", "Et_Wrt"] ]
         
-        Variables = []
-        Variables += [ ["InvMass", ""] ]
         for iType in iTypes:
             for jType in jTypes:
-                
-                for iVar in Variables:
-                    featName = iVar[0] + iType + jType + iVar[1]
-                    self.addToFeatures(featName, self.m_VarTypeName_Combined, "F")
-                #end loop over variables
-                
                 for iVar in Variables_WithEnergyTypes:
                     featName = iVar[0] + iType + jType + iVar[1]
                     for iEnergyType in self.m_EnergyVariantsList:

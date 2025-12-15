@@ -131,9 +131,6 @@ StatusCode PanTau::Tool_FeatureExtractor::calculateBasicFeatures(PanTau::PanTauS
     
   std::string featurePrefix = m_varTypeName_Basic;
   std::string name = "CellBased_" + featurePrefix;
-  
-  double SumCharge = 0;
-  double AbsCharge = 0;
     
   //! Loop over types to fill
   //!     - multiplicity of that type
@@ -148,19 +145,7 @@ StatusCode PanTau::Tool_FeatureExtractor::calculateBasicFeatures(PanTau::PanTauS
     std::string     typeName        = PanTau::TauConstituent::getTypeName((PanTau::TauConstituent::Type)iType);
     unsigned int    nConstituents   = curList.size();
     featureMap->addFeature(name + "_N" + typeName + "Consts", nConstituents);        
-        
-    //count charge, i.e. skip if not charged
-    if(iType != static_cast<int>(PanTau::TauConstituent::t_Charged)) continue;
-    for(unsigned int iConst=0; iConst<nConstituents; iConst++) {
-      PanTau::TauConstituent* curConstituent = curList[iConst];
-      SumCharge += curConstituent->getCharge();
-      AbsCharge += std::abs(static_cast<double>(curConstituent->getCharge()));
-    }
   }
-    
-  //store charge
-  featureMap->addFeature(name + "_SumCharge", SumCharge);
-  featureMap->addFeature(name + "_AbsCharge", AbsCharge);
     
   //! Fill the proto vector (i.e. sum momentum of constituents)
   //proto 4-vector (just the sum of all constituents)
@@ -181,7 +166,6 @@ StatusCode PanTau::Tool_FeatureExtractor::addConstituentMomenta(PanTau::PanTauSe
   for(int iType=0; iType<static_cast<int>(PanTau::TauConstituent::t_nTypes); iType++) {
     bool isOK;
     std::vector<PanTau::TauConstituent*>    list_TypeConstituents   = inSeed->getConstituentsOfType(iType, isOK); // list of constituents of current type
-    unsigned int                            n_Constituents_Type     = list_TypeConstituents.size();          // number of objects of current type
     TLorentzVector                          tlv_TypeConstituents    = inSeed->getSubsystemHLV(iType, isOK); // summed hlv of objects of current type
     std::string                             curTypeName             = PanTau::TauConstituent::getTypeName((PanTau::TauConstituent::Type)iType);
     std::string name = "CellBased_" + curTypeName + "_" + prefixVARType;
@@ -195,24 +179,7 @@ StatusCode PanTau::Tool_FeatureExtractor::addConstituentMomenta(PanTau::PanTauSe
       tauFeatureMap->addFeature(name + "_SumPhi", tlv_TypeConstituents.Phi());
       tauFeatureMap->addFeature(name + "_SumM",   tlv_TypeConstituents.M());
     }
-    
-    //store 4-vectors of current type (bdt sort)
-    std::vector<double> curConstsBDT_pt    = std::vector<double>(0);
-    std::vector<double> curConstsBDT_eta   = std::vector<double>(0);
-    std::vector<double> curConstsBDT_phi   = std::vector<double>(0);
-    std::vector<double> curConstsBDT_m     = std::vector<double>(0);
-    for(unsigned int iConst=0; iConst<n_Constituents_Type; iConst++) {
-      TLorentzVector tlv_curConstBDT = list_TypeConstituents_SortBDT[iConst]->p4();
-      curConstsBDT_pt.push_back(tlv_curConstBDT.Perp());
-      curConstsBDT_eta.push_back(tlv_curConstBDT.Eta());
-      curConstsBDT_phi.push_back(tlv_curConstBDT.Phi());
-      curConstsBDT_m.push_back(tlv_curConstBDT.M());
-    }
-    tauFeatureMap->addVecFeature(name + "_BDTSort_Constituents_pt", curConstsBDT_pt);
-    tauFeatureMap->addVecFeature(name + "_BDTSort_Constituents_eta", curConstsBDT_eta);
-    tauFeatureMap->addVecFeature(name + "_BDTSort_Constituents_phi", curConstsBDT_phi);
-    tauFeatureMap->addVecFeature(name + "_BDTSort_Constituents_m", curConstsBDT_m);
-    
+   
   } //end loop over constituent types
     
   return StatusCode::SUCCESS;
@@ -254,8 +221,6 @@ StatusCode PanTau::Tool_FeatureExtractor::calculateFeatures(PanTau::PanTauSeed* 
   //! Prepare variables for information from eflow Objects
   //! //////////////////////////////////////////
     
-  // ===> hlv for the leading EFOs and the summed HLV
-  TLorentzVector              tlv_TypeConstituents;
   // ===> Sum of Et, Et^2, E and E^2
   double                      sum_Et                      = 0;
   double                      sum_Et2                     = 0;
@@ -278,7 +243,6 @@ StatusCode PanTau::Tool_FeatureExtractor::calculateFeatures(PanTau::PanTauSeed* 
     //ready to calc stuff
     //basically update each of the prepared sum_* and num_* variables above,
     // the sum HLV and the pointers to 1st, 2nd, 3rd leading constituents of current type
-    tlv_TypeConstituents += tlv_curConst;
         
     //helpers to reduce function calls
     double hlp_Et               = tlv_curConst.Et();
@@ -340,35 +304,21 @@ StatusCode PanTau::Tool_FeatureExtractor::calculateFeatures(PanTau::PanTauSeed* 
   //only execute if the constituent type is neutral
   if(PanTau::TauConstituent::isNeutralType(tauConstituentType)) {
         
-    TLorentzVector          totalTLV_SumShots       = TLorentzVector(0., 0., 0., 0.);
     unsigned int            totalPhotonsInSeed      = 0;
-        
-    std::vector<TLorentzVector> allShotTLVs = std::vector<TLorentzVector>(0);
         
     for(unsigned int iConst=0; iConst<list_TypeConstituents_SortBDT.size(); iConst++) {
             
       PanTau::TauConstituent*                 curConst            = list_TypeConstituents_SortBDT.at(iConst);
-      TLorentzVector                          tlv_CurConst        = curConst->p4();
       std::vector<PanTau::TauConstituent*>    shotConstituents    = curConst->getShots();
       unsigned int                            nShots              = shotConstituents.size();
             
       unsigned int totalPhotonsInNeutral = 0;
-      TLorentzVector tlv_SumShots = TLorentzVector(0., 0., 0., 0.);
             
       for(unsigned int iShot=0; iShot<nShots; iShot++) {
 	PanTau::TauConstituent* curShot = shotConstituents.at(iShot);
 	totalPhotonsInNeutral += curShot->getNPhotonsInShot();
-	tlv_SumShots += curShot->p4();
-	allShotTLVs.push_back(curShot->p4());
       }//end loop over shots
-      totalTLV_SumShots   += tlv_SumShots;
       totalPhotonsInSeed  += totalPhotonsInNeutral;
-            
-      std::string iConstStr = m_HelperFunctions.convertNumberToString(static_cast<double>(iConst+1));
-                       
-      tauFeatureMap->addFeature("CellBased_" + curTypeName + "_" + prefixVARType + "_nPhotons_BDTSort_" + iConstStr, totalPhotonsInNeutral);
-
-      if(tlv_CurConst.Et() > 0.) tauFeatureMap->addFeature("CellBased_" + curTypeName + "_" + prefixVARType + "_EtSumShotsOverConstEt_BDTSort_" + iConstStr, tlv_SumShots.Et() / tlv_CurConst.Et());
             
     }//end loop over constituents in tau
     
@@ -385,8 +335,6 @@ StatusCode PanTau::Tool_FeatureExtractor::calculateFeatures(PanTau::PanTauSeed* 
     
   if(tlv_1st_BDT.Pt() != 0) addFeatureWrtSeedEnergy(tauFeatureMap, "CellBased_" + curTypeName + "_" + prefixVARType + "_1stBDTEtOver",   tlv_1st_BDT.Et(), variants_SeedEt);
     
-  if(tlv_1st_BDT.Pt() != 0 && sum_Et > 0.) tauFeatureMap->addFeature("CellBased_" + curTypeName + "_" + prefixVARType + "_1stBDTEtOverTypeEt",    tlv_1st_BDT.Et() / sum_Et);    
-    
   //! Standard deviations ///////////////////////////////////////////
   prefixVARType =  m_varTypeName_StdDev;
 
@@ -402,7 +350,6 @@ StatusCode PanTau::Tool_FeatureExtractor::calculateFeatures(PanTau::PanTauSeed* 
     
   if(sum_Et > 0.) {
     //Using transverse energy
-    tauFeatureMap->addFeature("CellBased_" + curTypeName + "_" + prefixVARType + "_EtDR",            sum_EtxDR / sum_Et);
     tauFeatureMap->addFeature("CellBased_" + curTypeName + "_" + prefixVARType + "_EtDRxTotalEt",    (sum_EtxDR / sum_Et) * variants_SeedEt.at("EtAllConsts"));
   }
 
@@ -421,17 +368,12 @@ StatusCode PanTau::Tool_FeatureExtractor::addCombinedFeatures(PanTau::PanTauSeed
   int et_Pi0Neut      = PanTau::TauConstituent::t_Pi0Neut;
   int et_Neutral      = PanTau::TauConstituent::t_Neutral;
     
-  bool foundIt;
-  std::vector<PanTau::TauConstituent*>    list_NeutralConstituents = inSeed->getConstituentsOfType(et_Neutral, foundIt);
-    
   // Prepare the list of names for EFO Types & 
   // the 4 momenta of the different sub systems 
   // (ie. charged, neutral subsystem, etc...)
-  std::string    name_EFOType[PanTau::TauConstituent::t_nTypes];
   double         num_EFOs[PanTau::TauConstituent::t_nTypes];
   TLorentzVector tlv_System[PanTau::TauConstituent::t_nTypes];
   TLorentzVector tlv_1stEFO[PanTau::TauConstituent::t_nTypes];
-  TLorentzVector tlv_2ndEFO[PanTau::TauConstituent::t_nTypes];
     
   // get input objects to calc combined features
   bool tlv_Sys_OK[PanTau::TauConstituent::t_nTypes];
@@ -439,17 +381,14 @@ StatusCode PanTau::Tool_FeatureExtractor::addCombinedFeatures(PanTau::PanTauSeed
     
   //initialize arrays with default values
   for(unsigned int iType=0; iType<(unsigned int)PanTau::TauConstituent::t_nTypes; iType++) {
-    name_EFOType[iType] = "";
     num_EFOs[iType]     = 0.;
     tlv_System[iType]   = TLorentzVector();
     tlv_1stEFO[iType]   = TLorentzVector();
-    tlv_2ndEFO[iType]   = TLorentzVector();
     tlv_Sys_OK[iType]   = false;
     tlv_1st_OK[iType]   = false;
   }
     
   for(int iType=0; iType<static_cast<int>(PanTau::TauConstituent::t_nTypes); iType++) {
-    name_EFOType[iType] = PanTau::TauConstituent::getTypeName((PanTau::TauConstituent::Type)iType);
         
     tlv_System[iType] = inSeed->getSubsystemHLV(iType, tlv_Sys_OK[iType]);
     if (!tlv_Sys_OK[iType]) continue;
@@ -466,10 +405,6 @@ StatusCode PanTau::Tool_FeatureExtractor::addCombinedFeatures(PanTau::PanTauSeed
     } else {
       tlv_1st_OK[iType] = false;
     }
-        
-    if (typeConstituents.size() > 1) {
-      tlv_2ndEFO[iType] = typeConstituents.at(1)->p4();
-    } 
   }    
     
   // From the extracted input, calc combined features
@@ -502,14 +437,6 @@ StatusCode PanTau::Tool_FeatureExtractor::addCombinedFeatures(PanTau::PanTauSeed
 	sum_Et_Denom = tlv_System[type_Denom].Et();
       }
             
-      // Fraction of leading EFO of system A wrt complete system B
-      // this is not symmetric wrt system A and B, hence do this for all combinations
-      if(tlv_1st_OK[type_Nom]) {
-	if(tlv_1stEFO[type_Nom].Et() > 0. && sum_Et_Denom > 0.) {
-	  tauFeatures->addFeature("CellBased_" + prefixVARType + "_Log1st" + typeName_Nom + "EtOver" + typeName_Denom + "Et", std::log10(tlv_1stEFO[type_Nom].Et() / sum_Et_Denom) );
-	}
-      }
-            
       //following features symmetric in system A-B, hence skip multi calculation
       if(jType <= iType) continue;
             
@@ -517,18 +444,11 @@ StatusCode PanTau::Tool_FeatureExtractor::addCombinedFeatures(PanTau::PanTauSeed
       if(sum_Et_Denom > 0. && sum_Et_Nom > 0.) {
 	tauFeatures->addFeature("CellBased_" + prefixVARType + "_Log" + typeName_Nom + "EtOver" + typeName_Denom + "Et",   std::log10(sum_Et_Nom / sum_Et_Denom) );
       }//end check for div by zero
-            
-      //Angles between systems
-      if(tlv_Sys_OK[type_Nom] && tlv_Sys_OK[type_Denom]) {
-	tauFeatures->addFeature("CellBased_" + prefixVARType + "_Angle" + typeName_Nom + "To" + typeName_Denom, tlv_System[type_Nom].Angle( tlv_System[type_Denom].Vect()) );
-      }//end check for valid system pointer            
       
       if(tlv_1st_OK[type_Nom] && tlv_1st_OK[type_Denom]) {
 	//Delta R between 1st and 1st EFO
 	tauFeatures->addFeature("CellBased_" + prefixVARType + "_DeltaR1st" + typeName_Nom + "To1st" + typeName_Denom, tlv_1stEFO[type_Nom].DeltaR( tlv_1stEFO[type_Denom] ) );
 	
-	//Angles between 1st and 1st EFO
-	tauFeatures->addFeature("CellBased_" + prefixVARType + "_Angle1st" + typeName_Nom + "To1st" + typeName_Denom, tlv_1stEFO[type_Nom].Angle( tlv_1stEFO[type_Denom].Vect() ) );
       } //end check for valid leading efo
             
     }//end loop over system B
@@ -559,10 +479,6 @@ StatusCode PanTau::Tool_FeatureExtractor::addCombinedFeatures(PanTau::PanTauSeed
 	double mean_cTypenTypeEt = ( tlv_System[et_c].Et() + tlv_System[et_n].Et() ) / (num_EFOs[et_c] + num_EFOs[et_n]);
 	addFeatureWrtSeedEnergy(tauFeatures, "CellBased_" + prefixVARType + "_Mean" + name_cType + name_nType + "Et_Wrt", mean_cTypenTypeEt, variants_SeedEt);
       }
-            
-      //invariant masses
-      tauFeatures->addFeature("CellBased_" + prefixVARType + "_InvMass"  + name_cType + name_nType,   ( tlv_System[et_c]  +  tlv_System[et_n] ).M() );
-            
     }//end loop neutral types
   }//end loop charged types
     
