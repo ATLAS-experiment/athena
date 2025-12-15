@@ -262,6 +262,7 @@ class ElectronCalibrationConfig (ConfigBlock) :
         config.addOutputVar (self.containerName, 'phi', 'phi', noSys=True)
         config.addOutputVar (self.containerName, 'e_%SYS%', 'e')
         config.addOutputVar (self.containerName, 'charge', 'charge', noSys=True)
+        config.addOutputVar (self.containerName, 'caloClusterEnergyReso_%SYS%', 'caloClusterEnergyReso', noSys=True)
 
         if self.writeTrackD0Z0:
             config.addOutputVar (self.containerName, 'd0_%SYS%', 'd0')

@@ -293,6 +293,7 @@ class PhotonCalibrationConfig (ConfigBlock) :
         config.addOutputVar (self.containerName, 'eta', 'eta', noSys=True)
         config.addOutputVar (self.containerName, 'phi', 'phi', noSys=True)
         config.addOutputVar (self.containerName, 'e_%SYS%', 'e')
+        config.addOutputVar (self.containerName, 'caloClusterEnergyReso_%SYS%', 'caloClusterEnergyReso', noSys=True)
 
         # decorate truth information on the reconstructed object:
         if self.decorateTruth and config.dataType() is not DataType.Data:
