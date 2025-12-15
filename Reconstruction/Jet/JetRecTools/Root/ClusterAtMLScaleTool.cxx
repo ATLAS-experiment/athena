@@ -31,10 +31,8 @@ StatusCode ClusterAtMLScaleTool::setClustersToMLScale(xAOD::CaloClusterContainer
         }
         else
         {
-            ATH_MSG_WARNING("No ML energy decoration '" << m_clusterMLCorrectedEnergyKey.value() 
-                    << "' found for cluster with index " << cl->index()
-                    << ". Cluster energy is set to EM energy.");
-            cl->setCalE( cl->rawE() );
+            ATH_MSG_ERROR("No ML energy decoration '" << m_clusterMLCorrectedEnergyKey.value() << "' found for cluster with index " << cl->index() << ".");
+            return StatusCode::FAILURE;
         }
             
         cl->setCalM( cl->rawM() );
