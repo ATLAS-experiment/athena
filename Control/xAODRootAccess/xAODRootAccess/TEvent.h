@@ -42,7 +42,7 @@ class TChainStateTracker;
 class TFileMerger;
 class TEvent;
 class TTreeMgr;
-::TTree *MakeTransientTree ATLAS_NOT_THREAD_SAFE(TEvent &, const char *);
+::TTree* MakeTransientTree ATLAS_NOT_THREAD_SAFE(TEvent &, const char* );
 
 /// @short Tool for accessing xAOD files outside of Athena
 ///
@@ -59,7 +59,7 @@ class TTreeMgr;
 class TEvent : public Event {
 
   // Declare the friend functions/classes:
-  friend ::TTree *MakeTransientTree(TEvent &, const char *);
+  friend ::TTree* MakeTransientTree(TEvent &, const char* );
   friend class ::xAODTEventBranch;
   friend class ::xAODTMetaBranch;
   friend class xAOD::TFileMerger;
@@ -77,9 +77,9 @@ public:
   /// Default constructor
   TEvent(EAuxMode mode = kClassAccess);
   /// Constructor connecting the object to an input TFile
-  TEvent(::TFile *file, EAuxMode mode = kClassAccess);
+  TEvent(::TFile* file, EAuxMode mode = kClassAccess);
   /// Constructor connecting the objects to an input TTree/TChain
-  TEvent(::TTree *tree, EAuxMode mode = kClassAccess);
+  TEvent(::TTree* tree, EAuxMode mode = kClassAccess);
   /// Destructor
   virtual ~TEvent();
 
@@ -96,19 +96,22 @@ public:
   /// @name Setup functions
   /// @{
 
-  /// Default name of the event tree
-  static const char *const EVENT_TREE_NAME;
 
-  /// Connect the object to a new input file
-  StatusCode readFrom(::TFile *file, bool useTreeCache = true,
+  /// Set up the reading of an input file from TFile
+  /// This method implements the interface from Event
+  StatusCode readFrom(::TFile& inFile) override;
+
+  /// This is the 'native' interface for reading from a TFile, 
+  /// allowing the specification of TTree cache use and the event tree name
+  StatusCode readFrom(::TFile* file, bool useTreeCache = true,
                       std::string_view treeName = EVENT_TREE_NAME);
   /// Connect the object to a new input tree/chain
-  StatusCode readFrom(::TTree *tree, bool useTreeCache = true);
+  StatusCode readFrom(::TTree* tree, bool useTreeCache = true);
   /// Connect the object to an output file
-  StatusCode writeTo(::TFile *file, int autoFlush = 200,
+  StatusCode writeTo(::TFile* file, int autoFlush = 200,
                      std::string_view treeName = EVENT_TREE_NAME);
   /// Finish writing to an output file
-  StatusCode finishWritingTo(::TFile *file);
+  StatusCode finishWritingTo(::TFile* file);
 
   /// @}
 
@@ -119,7 +122,7 @@ public:
   using Event::record;
 
   /// Add an auxiliary store object to the output
-  SG::IAuxStore *recordAux(const std::string &key,
+  SG::IAuxStore* recordAux(const std::string& key,
                            SG::IAuxStoreHolder::AuxStoreType type =
                                SG::IAuxStoreHolder::AST_ContainerStore);
 
@@ -129,9 +132,9 @@ public:
   /// @{
 
   /// Get how many entries are available from the current input file(s)
-  ::Long64_t getEntries() const;
+  ::Long64_t getEntries() const override;
   /// Function loading a given entry of the input TTree
-  ::Int_t getEntry(::Long64_t entry, ::Int_t getall = 0);
+  ::Int_t getEntry(::Long64_t entry, ::Int_t getall = 0) override;
 
   /// Get how many files are available on the currently defined input
   ::Long64_t getFiles() const;
@@ -153,31 +156,31 @@ protected:
   bool hasOutput() const override;
 
   /// Function determining the list keys associated with a type name
-  StatusCode getNames(const std::string &targetClassName,
-                      std::vector<std::string> &vkeys,
+  StatusCode getNames(const std::string& targetClassName,
+                      std::vector<std::string>& vkeys,
                       bool metadata) const override;
 
   /// Function setting up access to a particular object
-  StatusCode connectObject(const std::string &key, bool silent) override;
+  StatusCode connectObject(const std::string& key, bool silent) override;
   /// Function setting up access to a particular metadata object
-  StatusCode connectMetaObject(const std::string &key, bool silent) override;
+  StatusCode connectMetaObject(const std::string& key, bool silent) override;
   /// Function setting up access to a set of auxiliary branches
-  StatusCode connectAux(const std::string &prefix, bool standalone) override;
+  StatusCode connectAux(const std::string& prefix, bool standalone) override;
   /// Function setting up access to a set of auxiliary branches for a
   /// metadata object
-  StatusCode connectMetaAux(const std::string &prefix,
+  StatusCode connectMetaAux(const std::string& prefix,
                             bool standalone) override;
 
   /// Function connecting a DV object to its auxiliary store
-  StatusCode setAuxStore(const std::string &key, Details::IObjectManager &mgr,
+  StatusCode setAuxStore(const std::string& key, Details::IObjectManager& mgr,
                          bool metadata) override;
 
   /// Record an object into a connected output file
-  StatusCode record(void *obj, const std::string &typeName,
-                    const std::string &key, bool overwrite, bool metadata,
+  StatusCode record(void* obj, const std::string& typeName,
+                    const std::string& key, bool overwrite, bool metadata,
                     bool isOwner) override;
   /// Record an auxiliary store into a connected output file
-  StatusCode recordAux(TVirtualManager &mgr, const std::string &key,
+  StatusCode recordAux(TVirtualManager& mgr, const std::string& key,
                        bool metadata) override;
 
   /// @}
@@ -186,31 +189,31 @@ protected:
   StatusCode initStats();
 
   /// Internal function for adding an auxiliary store object to the output
-  StatusCode record(std::unique_ptr<TAuxStore> store, const std::string &key);
+  StatusCode record(std::unique_ptr<TAuxStore> store, const std::string& key);
   /// Function adding dynamic variable reading capabilities to an auxiliary
   /// store object
-  StatusCode setUpDynamicStore(TObjectManager &mgr, ::TTree *tree);
+  StatusCode setUpDynamicStore(TObjectManager& mgr, ::TTree* tree);
   /// Function saving the dynamically created auxiliary properties
-  StatusCode putAux(::TTree &outTree, TVirtualManager &mgr, bool metadata);
+  StatusCode putAux(::TTree& outTree, TVirtualManager& mgr, bool metadata);
   /// Function setting up an existing auxiliary store for writing
-  StatusCode recordAux(TAuxStore *store, const std::string &key);
+  StatusCode recordAux(TAuxStore* store, const std::string& key);
 
   /// The auxiliary access mode
   EAuxMode m_auxMode;
 
   /// The main tree that we are reading from
-  ::TTree *m_inTree = nullptr;
+  ::TTree* m_inTree = nullptr;
   /// Internal status flag showing that an input file is open, but it
   /// doesn't contain an event tree
   bool m_inTreeMissing = false;
   /// The (optional) chain provided as input
-  ::TChain *m_inChain = nullptr;
+  ::TChain* m_inChain = nullptr;
   /// Optional object for tracking the state changes of an input TChain
   std::unique_ptr<TChainStateTracker> m_inChainTracker;
   /// The number of the currently open tree in the input chain
   ::Int_t m_inTreeNumber = -1;
   /// Pointer to the metadata tree in the input file
-  ::TTree *m_inMetaTree = nullptr;
+  ::TTree* m_inMetaTree = nullptr;
   /// The entry to look at from the input tree
   ::Long64_t m_entry = -1;
 

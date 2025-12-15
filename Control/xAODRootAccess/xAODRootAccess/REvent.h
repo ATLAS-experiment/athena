@@ -37,7 +37,12 @@ class REvent : public Event {
   /// @name Setup functions
   /// @{
 
-  /// Set up the reading of an input file
+  /// Set up the reading of an input file from TFile
+  /// This method implements the interface from Event
+  StatusCode readFrom(TFile& inFile) override;
+  
+  /// Set up the reading of an input file via a file name. 
+  /// This can be considered the 'native' interface as an RNTupleReader opens a file with a name
   StatusCode readFrom(std::string_view fileName);
 
   /// @}
@@ -46,9 +51,9 @@ class REvent : public Event {
   /// @{
 
   /// Get how many entries are available from the current input file(s)
-  ::Long64_t getEntries() const;
+  ::Long64_t getEntries() const override;
   /// Function loading a given entry of the input TTree
-  ::Int_t getEntry(::Long64_t entry, ::Int_t getall = 0);
+  ::Int_t getEntry(::Long64_t entry, ::Int_t getall = 0) override;
 
   /// @}
 

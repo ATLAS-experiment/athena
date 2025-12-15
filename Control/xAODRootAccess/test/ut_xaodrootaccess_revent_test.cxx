@@ -10,6 +10,7 @@
 
 // ROOT include(s):
 #include <TError.h>
+#include <TFile.h>
 #include <TSystem.h>
 
 // EDM that the package uses anyway:
@@ -21,7 +22,8 @@
 // Local include(s):
 #include "xAODRootAccess/Init.h"
 
-#include "xAODRootAccess/REvent.h"
+// #include "xAODRootAccess/REvent.h"
+#include "xAODRootAccess/Event.h"
 #include "xAODRootAccess/TStore.h"
 #include "xAODRootAccess/RAuxStore.h"
 #include "xAODRootAccess/TAuxStore.h"
@@ -88,23 +90,30 @@ int main() {
    
    // Create the tested object(s):
    
-   xAOD::Experimental::REvent event;
+   // xAOD::Experimental::REvent event;
    xAOD::TStore store;
-
-   // Set debug level 
-   event.msg().setLevel(MSG::DEBUG);
-
 
    // Read from test file
    ::Info( APP_NAME, XAOD_MESSAGE( "run readFrom for file %s" ), gSystem->Getenv( "ASG_TEST_FILE_RUN2_LITE_RNTUPLE_MC" )); 
-   ::Info( APP_NAME, XAOD_MESSAGE( "run readFrom for file %s" ), gSystem->Getenv( "ASG_TEST_FILE_RUN2_LITE_RNTUPLE_MC" )); 
-   RETURN_CHECK( APP_NAME, event.readFrom( gSystem->Getenv( "ASG_TEST_FILE_RUN2_LITE_RNTUPLE_MC" ) ) );
 
-   ::Info( APP_NAME, XAOD_MESSAGE( "ran readFrom for file %s" ), gSystem->Getenv( "ASG_TEST_FILE_RUN2_LITE_RNTUPLE_MC" )); 
+   // Connect an input file to the event:
+   std::unique_ptr< ::TFile > ifile( ::TFile::Open( "$ASG_TEST_FILE_RUN2_LITE_RNTUPLE_MC", "READ" ) );
+   if( ! ifile ) {
+      ::Error( APP_NAME, XAOD_MESSAGE( "File %s couldn't be opened..." ),
+               gSystem->Getenv( "ASG_TEST_FILE_RUN2_LITE_RNTUPLE_MC" ) );
+      return 1;
+   }
 
+   std::unique_ptr<xAOD::Event> event = xAOD::Event::createAndReadFrom(*ifile);
+
+   // Try resetting the ifile pointer to make sure things still work
+   ifile.reset();
+
+   // Set debug level 
+   event->msg().setLevel(MSG::DEBUG);
 
    // Read in the first event:
-   if( event.getEntry( 0 ) < 0 ) {
+   if( event->getEntry( 0 ) < 0 ) {
       ::Error( APP_NAME, XAOD_MESSAGE( "Couldn't load entry 0 from file %s" ),
                gSystem->Getenv( "ASG_TEST_FILE_RUN2_LITE_RNTUPLE_MC" ) );
       return 1;
@@ -112,8 +121,8 @@ int main() {
 
    // Try to retrieve some objects:
    const xAOD::AuxContainerBase* c = 0;
-   RETURN_CHECK( APP_NAME, event.retrieve( c, "AnalysisElectronsAux." ) );
-   RETURN_CHECK( APP_NAME, event.retrieve( c, "AnalysisMuonsAux." ) );
+   RETURN_CHECK( APP_NAME, event->retrieve( c, "AnalysisElectronsAux." ) );
+   RETURN_CHECK( APP_NAME, event->retrieve( c, "AnalysisMuonsAux." ) );
    
    // Record some objects into TStore:
    ClassA* objA = new ClassA();
@@ -122,13 +131,13 @@ int main() {
    RETURN_CHECK( APP_NAME, store.record( objB, "MyObjB" ) );
 
    // Print what's in the event now:
-   Info( APP_NAME, "Event contents:\n\n%s\n\n", event.dump().c_str() );
+   Info( APP_NAME, "Event contents:\n\n%s\n\n", event->dump().c_str() );
 
    // They should now be accessible through EventIO:
    const ClassA* dummy1 = 0;
-   RETURN_CHECK( APP_NAME, event.retrieve( dummy1, "MyObjA" ) );
+   RETURN_CHECK( APP_NAME, event->retrieve( dummy1, "MyObjA" ) );
    const ClassB* dummy2 = 0;
-   RETURN_CHECK( APP_NAME, event.retrieve( dummy2, "MyObjB" ) );
+   RETURN_CHECK( APP_NAME, event->retrieve( dummy2, "MyObjB" ) );
 
    // Try to get them through the TVirtualEvent interface:
    xAOD::TVirtualEvent* vevent = xAOD::TActiveEvent::event();
@@ -141,34 +150,34 @@ int main() {
    SIMPLE_ASSERT( vevent->retrieve( dummy1, 0x1234 ) == false );
 
    // Test the functions used by the smart pointers:
-   if( event.getName( objA ) != "MyObjA" ) {
+   if( event->getName( objA ) != "MyObjA" ) {
       ::Error( APP_NAME,
                XAOD_MESSAGE( "getName(objA) = \"%s\" (!=\"MyObjA\")" ),
-               event.getName( objA ).c_str() );
+               event->getName( objA ).c_str() );
       return 1;
    }
 
-   if( event.getName( xAOD::Utils::hash( "MyObjB" ) ) != "MyObjB" ) {
+   if( event->getName( xAOD::Utils::hash( "MyObjB" ) ) != "MyObjB" ) {
       ::Error( APP_NAME,
                XAOD_MESSAGE( "Couldn't retrieve the name for hashed "
                              "\"MyObjB\"" ) );
       return 1;
    }
 
-   if( event.getName( ( void* ) 0x12345678 ) != "" ) {
+   if( event->getName( ( void* ) 0x12345678 ) != "" ) {
       ::Error( APP_NAME,
                XAOD_MESSAGE( "Found a name for an imaginary pointer?!?" ) );
       return 1;
    }
 
-   if( event.getName( 0x12345678 ) != "" ) {
+   if( event->getName( 0x12345678 ) != "" ) {
       ::Error( APP_NAME,
                XAOD_MESSAGE( "Found a name for an imaginary hash?!?" ) );
       return 1;
    }
 
    // This is not supposed to work:
-   if( event.retrieve( dummy1, "MyObjB" ).isSuccess() ) {
+   if( event->retrieve( dummy1, "MyObjB" ).isSuccess() ) {
       ::Error( APP_NAME, XAOD_MESSAGE( "Something strange happened" ) );
       return 1;
    }
@@ -177,7 +186,7 @@ int main() {
    store.clear();
 
    // Now this is not supposed to work either:
-   if( event.retrieve( dummy2, "MyObjB" ).isSuccess() ) {
+   if( event->retrieve( dummy2, "MyObjB" ).isSuccess() ) {
       ::Error( APP_NAME, XAOD_MESSAGE( "Something strange happened" ) );
       return 1;
    }
@@ -194,18 +203,18 @@ int main() {
 
    // Try to retrieve it in all possible ways:
    ConstDataVector< DataVector< ClassA > >* cdv1 = 0;
-   if ( event.retrieve( cdv1, "ConstDataVector" ).isSuccess() ) {
+   if ( event->retrieve( cdv1, "ConstDataVector" ).isSuccess() ) {
       ::Error( APP_NAME, XAOD_MESSAGE( "Non-const retrieval of ConstDataVector should not work" ) );
       return 1;
    }
    const ConstDataVector< DataVector< ClassA > >* cdv2 = 0;
-   RETURN_CHECK( APP_NAME, event.retrieve( cdv2, "ConstDataVector" ) );
+   RETURN_CHECK( APP_NAME, event->retrieve( cdv2, "ConstDataVector" ) );
    const DataVector< ClassA >* cdv3 = 0;
-   RETURN_CHECK( APP_NAME, event.retrieve( cdv3, "ConstDataVector" ) );
+   RETURN_CHECK( APP_NAME, event->retrieve( cdv3, "ConstDataVector" ) );
 
    // But this should not work:
    DataVector< ClassA >* cdv4 = 0;
-   if( event.retrieve( cdv4, "ConstDataVector" ).isSuccess() ) {
+   if( event->retrieve( cdv4, "ConstDataVector" ).isSuccess() ) {
       ::Error( APP_NAME, XAOD_MESSAGE( "Non-const retrieval of ConstDataVector should not work" ) );
       return 1;
    }
