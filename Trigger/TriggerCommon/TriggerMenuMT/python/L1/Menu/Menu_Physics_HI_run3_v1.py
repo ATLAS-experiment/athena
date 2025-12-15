@@ -354,6 +354,7 @@ def defineMenu():
         'L1_BPH-2M9-0DR15-2MU3VF', 
 
         'L1_JPSI-1M5-eEM15',
+        'L1_0DPHI32-2M5-eEM9M-eEM6M',
 
         'L1_LFV-MU5VF',
 
