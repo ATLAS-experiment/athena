@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 #====================================================================
 # BPHY18.py
 #====================================================================
@@ -30,17 +30,21 @@ def BPHY18Cfg(flags):
     vpest = acc.popToolsAndMerge(BPHY_VertexPointEstimatorCfg(flags, BPHYDerivationName))
     acc.addPublicTool(vpest)
 
-    BPHY18TriggerSkim = CompFactory.DerivationFramework.TriggerSkimmingTool(
-        name = "BPHY18TriggerSkim",
-        TriggerListOR = [
-            "HLT_e5_lhvloose_e3_lhvloose_bBeeM6000_L1BKeePrimary",
-            "HLT_2e5_bBeeM6000_L1BKeePrimary",
-            "HLT_e5_lhvloose_bBeeM6000_L1BKeePrimary",
-            "HLT_e5_lhvloose_e3_lhvloose_bBeeM6000_L1BKeePrescaled",
-            "HLT_2e5_bBeeM6000_L1BKeePrescaled",
-            "HLT_e5_lhvloose_bBeeM6000_L1BKeePrescaled"
-        ]
-    )
+    skimmingTools = []
+
+    if flags.Trigger.EDMVersion >= 0:
+        BPHY18TriggerSkim = CompFactory.DerivationFramework.TriggerSkimmingTool(
+            name = "BPHY18TriggerSkim",
+            TriggerListOR = [
+                "HLT_e5_lhvloose_e3_lhvloose_bBeeM6000_L1BKeePrimary",
+                "HLT_2e5_bBeeM6000_L1BKeePrimary",
+                "HLT_e5_lhvloose_bBeeM6000_L1BKeePrimary",
+                "HLT_e5_lhvloose_e3_lhvloose_bBeeM6000_L1BKeePrescaled",
+                "HLT_2e5_bBeeM6000_L1BKeePrescaled",
+                "HLT_e5_lhvloose_bBeeM6000_L1BKeePrescaled"
+            ]
+        )
+        skimmingTools += [BPHY18TriggerSkim]
 
     ElectronLHSelectorLHvloose_nod0 = CompFactory.AsgElectronLikelihoodTool("ElectronLHSelectorLHvloosenod0",
             primaryVertexContainer = "PrimaryVertices",
@@ -203,14 +207,16 @@ def BPHY18Cfg(flags):
                        Chi2Max               = 100.0
                        )
 
-    BPHY18_SelectBeeKstEvent = CompFactory.DerivationFramework.xAODStringSkimmingTool(
-                       name = "BPHY18_SelectBeeKstEvent",
-                       expression = "(count(BeeKstCandidates.passed_Bd > 0) + count(BeeKstCandidates.passed_Bdbar > 0)) > 0")
+    from DerivationFrameworkTools.DerivationFrameworkToolsConfig import (
+        xAODStringSkimmingToolCfg)
+    BPHY18_SelectBeeKstEvent = acc.getPrimaryAndMerge(xAODStringSkimmingToolCfg(
+        flags, name = "BPHY18_SelectBeeKstEvent",
+        expression = "(count(BeeKstCandidates.passed_Bd > 0) + count(BeeKstCandidates.passed_Bdbar > 0)) > 0"))
+    skimmingTools += [BPHY18_SelectBeeKstEvent]
 
     BPHY18SkimmingAND = CompFactory.DerivationFramework.FilterCombinationAND(
-        "BPHY18SkimmingAND",
-        FilterList = [BPHY18_SelectBeeKstEvent, BPHY18TriggerSkim])
-    extraTools += [BPHY18_SelectBeeKstEvent, BPHY18TriggerSkim, BPHY18SkimmingAND]
+        "BPHY18SkimmingAND", FilterList = skimmingTools)
+
     BPHY18_thinningTool_Tracks = CompFactory.DerivationFramework.Thin_vtxTrk(
                                 name                       = "BPHY18_thinningTool_Tracks",
                                 TrackParticleContainerName = "InDetTrackParticles",
@@ -271,7 +277,10 @@ def BPHY18Cfg(flags):
     if isSimulation:
         thinningCollection += [BPHY18TruthThinTool,BPHY18TruthThinNoChainTool]
 
-    for t in augTools + skimTools + thinningCollection + extraTools: acc.addPublicTool(t)
+    for t in (augTools + skimTools + skimmingTools + thinningCollection +
+              extraTools):
+        acc.addPublicTool(t)
+
     acc.addEventAlgo(CompFactory.DerivationFramework.DerivationKernel("BPHY18Kernel",
                                                     AugmentationTools = augTools,
                                                     #Only skim if not MC
