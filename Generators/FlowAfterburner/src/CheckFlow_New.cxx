@@ -293,7 +293,9 @@ StatusCode CheckFlow_New::execute() {
   const auto nTotalPt =  ngenerated_pt_pos+ngenerated_pt_neg;
   if ((total != 0) and (nTotalPt !=0)) [[likely]]{
     for(int ihar=0;ihar<6;ihar++){
+      //coverity[DIVIDE_BY_ZERO:FALSE]
       cos_n[ihar] = ( cos_n_pos[ihar]+ cos_n_neg[ihar] )  /  total;
+      //coverity[DIVIDE_BY_ZERO:FALSE]
       sin_n[ihar] = ( sin_n_pos[ihar]+ sin_n_neg[ihar] )  /  total;
   
       float psi_reco=std::atan2(sin_n[ihar],cos_n[ihar])/(ihar+1);
@@ -304,8 +306,9 @@ StatusCode CheckFlow_New::execute() {
       Psi_n_reco_neg[ihar]=std::atan2(sin_n_neg[ihar],cos_n_neg[ihar])/ (ihar+1);
       Psi_n_reco    [ihar]=psi_reco;
   
-  
+      //coverity[DIVIDE_BY_ZERO:FALSE]
       cos_n_pt[ihar] = ( cos_n_pt_pos[ihar]+ cos_n_pt_neg[ihar] )  /  nTotalPt;
+      //coverity[DIVIDE_BY_ZERO:FALSE]
       sin_n_pt[ihar] = ( sin_n_pt_pos[ihar]+ sin_n_pt_neg[ihar] )  /  nTotalPt;
   
       psi_reco=std::atan2(sin_n_pt[ihar],cos_n_pt[ihar])/(ihar+1);
