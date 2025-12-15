@@ -209,6 +209,14 @@ void myText(TString txt, float x, float y, Color_t color, bool drawRatio=true, f
 }
 
 TGraphErrors * h_RejvEff(TH1 *hsig, TH1 *hbkg, bool isSV1, bool drawCtag=false) {
+  if (!hsig) {
+    std::cerr << "ERROR in h_RejvEff: hsig is NULL" << std::endl;
+    return nullptr;
+  }
+  if (!hbkg) {
+    std::cerr << "ERROR in h_RejvEff: hbkg is NULL" << std::endl;
+    return nullptr;
+  }
   int nbins = hsig->GetNbinsX();
   int inf = 0;
   int sup = nbins+1;
@@ -594,6 +602,16 @@ void plotGraphs(const vector<TString>& InputFileNames,
       TH1F *MVX_b = (TH1F*)f->Get(hname_b);
       TH1F *MVX_u = (TH1F*)f->Get(hname_u);
       
+      if (!MVX_b) {
+        std::cerr << "ERROR: Histogram not found: " << hname_b << std::endl;
+        continue;
+      }
+
+      if (!MVX_u) {
+        std::cerr << "ERROR: Histogram not found: " << hname_u << std::endl;
+        continue;
+      }
+      
       hb.push_back(MVX_b);
       hu.push_back(MVX_u);
       bool isSV1 = false;
@@ -857,10 +875,11 @@ void plotGraphs(const vector<TString>& InputFileNames,
       gSystem->Exec("mkdir "+HistoDir);
     } 
 
-    if(drawCtag) {Histo = HistoDir+taggers[i]+"-cVSb.pdf";}
-    else {Histo = HistoDir+taggers[i]+".pdf";}
-    //cout << "Saving Histo = " << Histo.Data() << endl;
-    c1->SaveAs(Histo.Data(),"RECREATE");
+    TString histo_name = HistoDir+taggers[i];
+    if(drawCtag) histo_name += "-cVSb";
+    //cout << "Saving Histo = " << histo.Data() << endl;
+    c1->SaveAs(histo_name + ".pdf");
+    c1->SaveAs(histo_name + ".png");
    
   } // tagger i
 
@@ -1244,8 +1263,10 @@ void plotGraphsEffVsVar(TString var_name, const vector<TString>& InputFileNames,
           gSystem->Exec("mkdir "+HistoDir+"eff_vs_"+var_name);
         } 
     
-        plot_name = HistoDir+"eff_vs_"+var_name+"/eff_vs_"+var_name+"_"+taggers[i]+"_"+truth_labels[i_truthlabel]+"-jets"+"_"+tagger_WPs[i_WP]+"_WP.pdf";
-        c2->SaveAs(plot_name.Data(),"RECREATE");
+        TString plot_name;
+        plot_name = HistoDir+"eff_vs_"+var_name+"/eff_vs_"+var_name+"_"+taggers[i]+"_"+truth_labels[i_truthlabel]+"-jets"+"_"+tagger_WPs[i_WP]+"_WP";
+        c2->SaveAs(plot_name + ".pdf");
+        c2->SaveAs(plot_name + ".png");
 
       }
     } 
