@@ -228,7 +228,7 @@ namespace MuonR4::SegmentFit{
                                            const Amg::Transform3D& localToGlobal,
                                            Result_t& fitResult) const {
 
-        if (countPrecHits(fitResult.measurements) < m_cfg.nPrecHitCut
+        if (countPrecHits(fitResult.measurements) < m_cfg.nPrecHitCut || fitResult.nDoF == 0
             || fitResult.nIter > m_fitter.config().maxIter) {
             ATH_MSG_VERBOSE(__func__<<"() - "<<__LINE__ 
                             <<": No degree of freedom available. What shall be removed?!. nDoF: "
