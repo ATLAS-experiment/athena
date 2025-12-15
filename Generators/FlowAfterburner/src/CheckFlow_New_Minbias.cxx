@@ -60,7 +60,7 @@ StatusCode CheckFlow_New_Minbias::initialize(){
   CHECK( rootHistSvc.retrieve() );
   std::string histPath = "/FlowOutPut/";
   std::vector<TH1*> hist_vec;
-  char name[100],name1[100];
+  char name[100]{},name1[100]{};
 
 
   for (int ihar=0;ihar<6;ihar++){
@@ -203,12 +203,12 @@ StatusCode CheckFlow_New_Minbias::execute() {
   const float pt_binvals[]={0.0,0.25,0.5,1.0,1.5,2.0,2.5,3.0,3.5,4.0,6.0,8.0,12.0,16.0,20.0,30.0,40.0};
   const float b_bin_vals[]={0.0,3.4955,4.9315,6.0375,6.9695,7.7895,8.5335,9.2135,9.8515,10.4485,11.0175,11.554,12.070,12.560,13.033,13.492,13.944,14.409,14.929,15.6425};
   const float eta_bin_max = 4.0; 
-  const HijingEventParams *hijing_pars;
+  const HijingEventParams *hijing_pars{};
 
 
   CHECK(evtStore()->retrieve(hijing_pars, "Hijing_event_params"));
   float b = hijing_pars->get_b();
-  float Psi_n[6],Psi_n_reco[6];
+  float Psi_n[6]{},Psi_n_reco[6]{};
   for(int ihar=0;ihar<6;ihar++){Psi_n[ihar]=hijing_pars->get_psi(ihar+1);}
   ATH_MSG_INFO("SOUMYA  "<<hijing_pars->get_psi(1)<<"   "<<hijing_pars->get_psi(2)<<"   "\
                          <<hijing_pars->get_psi(3)<<"   "<<hijing_pars->get_psi(4)<<"   "\
@@ -228,25 +228,11 @@ StatusCode CheckFlow_New_Minbias::execute() {
 
   double ngenerated_pos = 0,ngenerated_pt_pos=0;
   double ngenerated_neg = 0,ngenerated_pt_neg=0;
-  double cos_n_pos[6],sin_n_pos[6],cos_n_pt_pos[6],sin_n_pt_pos[6];
-  double cos_n_neg[6],sin_n_neg[6],cos_n_pt_neg[6],sin_n_pt_neg[6];
-  double cos_ID1[6],sin_ID1[6],tot_ID1=0.0;
-  double cos_ID2[6],sin_ID2[6],tot_ID2=0.0;
-  for(int ihar=0;ihar<6;ihar++){
-    cos_n_pos   [ihar]=0;
-    sin_n_pos   [ihar]=0;
-    cos_n_pt_pos[ihar]=0;
-    sin_n_pt_pos[ihar]=0;
-    cos_n_neg   [ihar]=0;
-    sin_n_neg   [ihar]=0;
-    cos_n_pt_neg[ihar]=0;
-    sin_n_pt_neg[ihar]=0;
-    cos_ID1     [ihar]=0;
-    sin_ID1     [ihar]=0;
-    cos_ID2     [ihar]=0;
-    sin_ID2     [ihar]=0;
-  }
-
+  double cos_n_pos[6]{},sin_n_pos[6]{},cos_n_pt_pos[6]{},sin_n_pt_pos[6]{};
+  double cos_n_neg[6]{},sin_n_neg[6]{},cos_n_pt_neg[6]{},sin_n_pt_neg[6]{};
+  double cos_ID1[6]{},sin_ID1[6]{},tot_ID1=0.0;
+  double cos_ID2[6]{},sin_ID2[6]{},tot_ID2=0.0;
+  
 
   // Iterate over MC particles 
   std::vector<HepMC::ConstGenParticlePtr> particles;
@@ -263,7 +249,7 @@ StatusCode CheckFlow_New_Minbias::execute() {
     
     if( (std::abs(rapid) >= m_rapcut_min) && 
         (std::abs(rapid) <= m_rapcut_max) &&
-	(std::abs(pt)    >= m_ptcut_min ) &&
+	      (std::abs(pt)    >= m_ptcut_min ) &&
         (std::abs(pt)    <= m_ptcut_max)) {
       
       for(int ihar=0;ihar<6;ihar++){
@@ -342,7 +328,9 @@ StatusCode CheckFlow_New_Minbias::execute() {
   const auto nTotalPt = ngenerated_pt_pos+ngenerated_pt_neg;
   if ((total != 0) and (nTotalPt != 0))[[likely]]{
     for(int ihar=0;ihar<6;ihar++){
+      //coverity[DIVIDE_BY_ZERO:FALSE]
       cos_n[ihar] = ( cos_n_pos[ihar]+ cos_n_neg[ihar] )  /  total;
+      //coverity[DIVIDE_BY_ZERO:FALSE]
       sin_n[ihar] = ( sin_n_pos[ihar]+ sin_n_neg[ihar] )  /  total;
   
       float psi_reco=std::atan2(sin_n[ihar],cos_n[ihar])/(ihar+1);
@@ -353,8 +341,9 @@ StatusCode CheckFlow_New_Minbias::execute() {
       Psi_n_reco_neg[ihar]=std::atan2(sin_n_neg[ihar],cos_n_neg[ihar])/ (ihar+1);
       Psi_n_reco    [ihar]=psi_reco;
   
-  
+      //coverity[DIVIDE_BY_ZERO:FALSE]
       cos_n_pt[ihar] = ( cos_n_pt_pos[ihar]+ cos_n_pt_neg[ihar] )  /  nTotalPt;
+      //coverity[DIVIDE_BY_ZERO:FALSE]
       sin_n_pt[ihar] = ( sin_n_pt_pos[ihar]+ sin_n_pt_neg[ihar] )  /  nTotalPt;
   
       psi_reco=std::atan2(sin_n_pt[ihar],cos_n_pt[ihar])/(ihar+1);
