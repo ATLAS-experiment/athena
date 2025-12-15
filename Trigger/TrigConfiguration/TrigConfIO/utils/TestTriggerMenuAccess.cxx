@@ -178,7 +178,7 @@ testL1Menu_Topo(const TrigConf::L1Menu & l1menu, bool printdetail)
       cout << "Number of topo algorithms: " << l1menu.topoAlgorithmNames("TOPO").size() << endl;
       cout << "Number of topo algorithm outputs: " << l1menu.topoAlgorithmOutputNames("TOPO").size() << endl;
 
-      auto tl = l1menu.connector("LegacyTopo1").triggerLines(0,0)[0];
+      const auto & tl = l1menu.connector("LegacyTopo1").triggerLines(0,0)[0];
       auto & topoAlg = l1menu.algorithmFromTriggerline(tl.name());
       topoAlg.print();
 
@@ -697,7 +697,7 @@ void usage() {
   cout << "\n";
   cout << "If no input is specified, the default Dev_pp_run3_v1 menu file will be taken from the release\n\n";
 }
-
+//coverity[root_function]
 int main(int argc, char** argv) {
    bool help { false };
    string filename{""};
@@ -733,7 +733,7 @@ int main(int argc, char** argv) {
 
       // inputs
       if(currentParameter == "file" || currentParameter == "f") {
-         filename = currentWord;
+         filename = std::move(currentWord);
          continue;
       }
       if(currentParameter == "smk") {
@@ -741,7 +741,7 @@ int main(int argc, char** argv) {
          continue;
       }
       if(currentParameter == "db") {
-         dbalias = currentWord;
+         dbalias = std::move(currentWord);
          continue;
       }
       listofUnknownArguments += " " + currentWord;

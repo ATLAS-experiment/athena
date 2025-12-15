@@ -74,6 +74,11 @@ class CaloCPUOutput :
   Gaudi::Property<bool> m_saveCellInfo{this, "AlsoOutputCellInfo", false,
                                        "Whether to output cell energies, gains, times, etc., as this information is repeated in the GPU side too."};
   
+  /**
+   * @brief Whether to output cell assignment as tags instead of a list of indices per cluster. True by default.
+   */
+  Gaudi::Property<bool> m_outputTags{this, "OutputCellsAsTags", true, "Whether to output cell assignment as tags instead of a list of indices per cluster."};
+  
     /**
    * @brief vector of names of the cell containers to use as input.
    */

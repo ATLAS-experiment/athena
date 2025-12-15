@@ -9,7 +9,7 @@
 #ifndef MDTCALIBDBCOOLSTRTOOL_MDTCALIBDBALG_H
 #define MDTCALIBDBCOOLSTRTOOL_MDTCALIBDBALG_H
 
-#include "AthenaBaseComps/AthReentrantAlgorithm.h"
+#include "AthenaBaseComps/AthCondAlgorithm.h"
 
 #include "AthenaKernel/IAthRNGSvc.h"
 #include "AthenaPoolUtilities/CondAttrListCollection.h"
@@ -30,13 +30,12 @@
 #include "nlohmann/json.hpp"
 #include "zlib.h"
 
-class MdtCalibDbAlg : public AthReentrantAlgorithm {
+class MdtCalibDbAlg : public AthCondAlgorithm {
 public:
     MdtCalibDbAlg(const std::string& name, ISvcLocator* pSvcLocator);
     virtual ~MdtCalibDbAlg() = default;
     virtual StatusCode initialize() override;
     virtual StatusCode execute(const EventContext& ctx) const override;
-    virtual bool isReEntrant() const override { return false; }
 
 private:
     StatusCode declareDependency(const EventContext& ctx, 

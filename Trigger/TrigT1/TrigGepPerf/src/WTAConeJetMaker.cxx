@@ -13,7 +13,7 @@
   //  for(const auto &TopoTower: inTopoTowers)
    for(unsigned int i = 0; i < inTopoTowersN; i++)
    {
-     const auto TopoTower = inTopoTowers[i];
+     const auto & TopoTower = inTopoTowers[i];
      WTATrigObj this_tower(TopoTower.vec.Pt(), TopoTower.vec.Eta(), TopoTower.vec.Phi(), TopoTower.vec.M(), i);
      input_towers.push_back(this_tower);
    }
@@ -54,7 +54,7 @@
      {
       thisjet.constituentsIndices.push_back(constituent.idx());
      }
-     GepJetList.push_back(thisjet);
+     GepJetList.push_back(std::move(thisjet));
    }
  
    return GepJetList;

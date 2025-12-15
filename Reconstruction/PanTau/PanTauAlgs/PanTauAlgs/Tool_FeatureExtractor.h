@@ -76,15 +76,12 @@ namespace PanTau {
         
         
         //! Helper members
-        std::vector<double> m_Config_CellBased_BinEdges_Eta;
+        std::vector<double> m_Config_BinEdges_Eta;
         std::vector<double> m_Config_CellBased_EtaBinned_Pi0MVACut_1prong;
         std::vector<double> m_Config_CellBased_EtaBinned_Pi0MVACut_3prong;
         
         //make these configured via python! (super trick ;))
-        static const std::string varTypeName_Sum()          {return "Sum";}
         static const std::string varTypeName_Ratio()        {return "Ratio";}
-        static const std::string varTypeName_Isolation()    {return "Isolation";}
-        static const std::string varTypeName_Num()          {return "Num";}
         static const std::string varTypeName_Mean()         {return "Mean";}
         static const std::string varTypeName_StdDev()       {return "StdDev";}
         static const std::string varTypeName_HLV()          {return "HLV";}
@@ -96,15 +93,9 @@ namespace PanTau {
         static const std::string varTypeName_PID()          {return "PID";}
         static const std::string varTypeName_Shots()        {return "Shots";}
         
-        std::string m_varTypeName_Sum;
         std::string m_varTypeName_Ratio;
-        std::string m_varTypeName_Isolation;
-        std::string m_varTypeName_Num;
-        std::string m_varTypeName_Mean;
         std::string m_varTypeName_StdDev;
         std::string m_varTypeName_HLV;
-        std::string m_varTypeName_Angle;
-        std::string m_varTypeName_DeltaR;
         std::string m_varTypeName_JetMoment;
         std::string m_varTypeName_Combined;
         std::string m_varTypeName_Basic;

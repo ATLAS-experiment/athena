@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "JetUncertainties/Helpers.h"
@@ -108,6 +108,7 @@ TString findFilePath(const TString& fileName, const TString& path, const TString
     
     // Next, try PathResolver in a few configurations
     // PathResolver #1: versioned CalibArea (most users should be in this case)
+    //coverity[copy_paste_error]
     if (pathToGet == "" && calibArea != "")
         pathToGet = TString(PathResolverFindCalibFile(Form("JetUncertainties/%s/%s",calibArea.Data(),fileName.Data())).c_str());
     // PathResolver #2: unversioned CalibArea (legacy support)

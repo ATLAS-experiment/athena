@@ -96,8 +96,6 @@ HGTD_IDDetDescrCnv::createObj(IOpaqueAddress* /*pAddr*/, DataObject*& pObj)
         // create the helper
         m_hgtdId = std::make_unique<HGTD_ID>();
         initHelper = true;
-        // add in message service for printout
-        m_hgtdId->setMessageSvc(msgSvc());        
         if(dict->version() == "P2-RUN4"){
             m_hgtdId->set_useNewIdentifierScheme(true); 
         }

@@ -145,7 +145,7 @@ public:
     T_Buffer_t target=tmp_array[(nTargetLayers-1)];
     const double sumLastLayer =
       std::accumulate(&target[0], &target[nTarget], 0.0 );
-    const double normFact = sumLastLayer ? 1.0/sumLastLayer : 0.0;
+    const double normFact = (sumLastLayer != 0.) ? 1.0/sumLastLayer : 0.0;
     for (unsigned i = 0; i < nTarget; ++i)
       norm_target[i] = normFact * target[i];
     // copy the half buffer to the front of the full buffer
@@ -161,6 +161,8 @@ public:
     const
   {
       const static int MAX_LAYER_LENGTH = 1000;
+      //in test function should be ok
+      //coverity[stack_use_local_overflow]
       double tmpdata[2*MAX_LAYER_LENGTH];
       double * tmp_array[2] = {
         &(tmpdata[0]), &(tmpdata[MAX_LAYER_LENGTH]) };
@@ -361,7 +363,7 @@ void check(std::vector<double> &&in, const std::vector<double> &expect) {
      ++expect_iter;
    }
  }
-
+//coverity[root_function]
 int main()
 {
   Test2 test(4,{16,8,3,2});

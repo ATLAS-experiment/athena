@@ -5,6 +5,9 @@
 #ifndef ASSOCIATIONUTILS_OVERLAPTOOLDR_H
 #define ASSOCIATIONUTILS_OVERLAPTOOLDR_H
 
+// Framework includes
+#include "AsgTools/PropertyWrapper.h"
+
 // Local includes
 #include "AssociationUtils/IOverlapTool.h"
 #include "AssociationUtils/BaseOverlapTool.h"
@@ -36,8 +39,10 @@ namespace ORUtils
       /// Flags all objects in cont1 which are found to overlap
       /// with any object in cont2 within the configured dR window.
       virtual StatusCode
-      findOverlaps(const xAOD::IParticleContainer& cont1,
-                   const xAOD::IParticleContainer& cont2) const override;
+      findOverlaps(columnar::Particle1Range cont1,
+                   columnar::Particle2Range cont2,
+                   columnar::EventContextId eventContext) const override;
+      using IOverlapTool::findOverlaps;
 
     protected:
 
@@ -61,6 +66,11 @@ namespace ORUtils
       /// is fixed.
       bool m_swapContainerPrecedence;
 
+      Gaudi::Property<unsigned> m_objectType1{this, "ObjectType1", 0,
+        "The xAOD::Type::ObjectType enum value for the first particle type"};
+      Gaudi::Property<unsigned> m_objectType2{this, "ObjectType2", 0,
+        "The xAOD::Type::ObjectType enum value for the second particle type"};
+
       /// @}
 
       /// @name Utilities
@@ -70,6 +80,9 @@ namespace ORUtils
       std::unique_ptr<DeltaRMatcher> m_dRMatcher;
 
       /// @}
+
+      template<columnar::ContainerIdConcept CI1,columnar::RegularContainerIdConcept CI2,typename CM>
+      StatusCode internalFindOverlaps(columnar::ObjectRange<CI1,CM> testCont, columnar::ObjectRange<CI2,CM> refCont) const;
 
   }; // class DeltaROverlapTool
 

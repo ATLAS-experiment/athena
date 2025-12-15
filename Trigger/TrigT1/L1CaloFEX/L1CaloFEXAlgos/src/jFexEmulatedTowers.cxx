@@ -24,7 +24,6 @@
 #include <sstream>
 #include <algorithm>
 #include <string>
-#include <stdio.h> 
 
 namespace LVL1 {
 
@@ -39,8 +38,7 @@ StatusCode jFexEmulatedTowers::initialize() {
     
     ATH_CHECK( m_SCellKey.initialize() );
     ATH_CHECK( m_triggerTowerKey.initialize() );
-    ATH_CHECK( m_jTowersWriteKey.initialize() );
-    
+    ATH_CHECK( m_jTowersWriteKey.initialize() );    
 
     //Reading from CVMFS Fiber mapping
     ATH_CHECK(ReadFibersfromFile(m_FiberMapping));    
@@ -111,8 +109,26 @@ StatusCode jFexEmulatedTowers::execute(const EventContext& ctx) const {
         return StatusCode::SUCCESS;
     }
 
+    std::optional<SG::ReadDecorHandle<xAOD::TriggerTowerContainer, std::vector<float>>> cellEtByLayer_handle;
+    if (!m_CaloCellKey.empty()) {
+      cellEtByLayer_handle.emplace(m_readTileOfflineDecorKey, ctx);
+    }
+    std::optional<SG::WriteDecorHandle<xAOD::jFexTowerContainer, float>> jTowerCaloCellSumEt;
+    if (!m_caloCellSumETdecorKey.empty()) {
+      jTowerCaloCellSumEt.emplace(m_caloCellSumETdecorKey, ctx);
+    }
+    std::optional<SG::WriteDecorHandle<xAOD::jFexTowerContainer, int>> jTowerEtMeV;
+    if (!m_jtowerEtMeVdecorKey.empty()) {
+      jTowerEtMeV.emplace(m_jtowerEtMeVdecorKey , ctx);
+    }
+    std::optional<SG::WriteDecorHandle<xAOD::jFexTowerContainer, int>> jTowerEtTimingMeV;
+    if (!m_jtowerEtTimingMeVdecorKey.empty()) {
+      jTowerEtTimingMeV.emplace(m_jtowerEtTimingMeVdecorKey , ctx);
+    }
+
     // building Scell ID pointers
     std::unordered_map< uint64_t, const CaloCell*> map_ScellID2ptr;
+    map_ScellID2ptr.reserve(ScellContainer->size());
     
     for(const CaloCell* scell : *ScellContainer){
         const uint64_t ID = scell->ID().get_compact();
@@ -145,7 +161,6 @@ StatusCode jFexEmulatedTowers::execute(const EventContext& ctx) const {
         unsigned int source       = static_cast<int>(f_source);
         unsigned int iEta         = static_cast<int>(f_iEta);
         unsigned int iPhi         = static_cast<int>(f_iPhi);
-        
         
         uint16_t Total_Et_encoded = 0;
         uint16_t Total_Et_Timing_encoded = 0;
@@ -189,10 +204,10 @@ StatusCode jFexEmulatedTowers::execute(const EventContext& ctx) const {
 
                 const CaloCell* myCell = it_ScellID2ptr->second;
                 int val =  std::round(myCell->energy()/(12.5*std::cosh(myCell->eta()))); // 12.5 is b.c. energy is in units of 12.5MeV per count
-                bool isMasked = m_apply_masking ? ((myCell)->provenance()&0x80) : false;
-                bool isInvalid = (m_apply_masking&&m_isDATA) ? ((myCell)->provenance()&0x40) : false;
+                bool isMasked = m_apply_masking ? (myCell->provenance()&0x80) : false;
+                bool isInvalid = (m_apply_masking&&m_isDATA) ? (myCell->provenance()&0x40) : false;
                 bool isSaturated = (m_isDATA) ? myCell->quality() : false; // saturation algorithm not implemented in MC yet
-                bool passTiming = ( (myCell)->provenance() & 0x200 );
+                bool passTiming = ( myCell->provenance() & 0x200 );
 
                 invalid &= isInvalid;
                 masked &= isMasked;
@@ -245,7 +260,6 @@ StatusCode jFexEmulatedTowers::execute(const EventContext& ctx) const {
             // using floating point for MC until determine correct procedure for MC values re invalid/masking
             if(!m_isDATA) Total_Et_encoded = jFEXCompression::Compress( Total_Et_float, masked );
 
-	    //
 	    Total_Et_decoded = jFEXCompression::Expand( Total_Et_encoded );
 	    Total_Et_Timing_decoded = jFEXCompression::Expand( Total_Et_Timing_encoded );
         }
@@ -266,30 +280,25 @@ StatusCode jFexEmulatedTowers::execute(const EventContext& ctx) const {
                 if(m_isDATA) ATH_MSG_WARNING("Tile cool ID: "<<TileID<< " not found in the xAOD::TriggerTower, skipping");
                 continue;
             }
-            else{
-                Total_Et_encoded = (it_TileID2ptr->second)->cpET();
 
-		//
-		Total_Et_decoded = Total_Et_encoded * 500;
-		Total_Et_Timing_decoded = Total_Et_encoded * 500;
+	    Total_Et_encoded = (it_TileID2ptr->second)->cpET();
 
-		// get the offline reconstructed energy from xAODTriggerTower decoration
-		if ( !m_CaloCellKey.empty() ) {
-		  SG::ReadDecorHandle<xAOD::TriggerTowerContainer, std::vector<float>> cellEtByLayer_handle(m_readTileOfflineDecorKey, ctx);
-		  if ( cellEtByLayer_handle.isAvailable() ) {
-		    std::vector<float> cellEtByLayer = cellEtByLayer_handle(*it_TileID2ptr->second);
-		    // Stored in GeV, see TrigT1CaloCalibTools/src/L1CaloCells2TriggerTowers.cxx
-		    caloCellSumET = 1000.0 * std::accumulate(cellEtByLayer.begin(), cellEtByLayer.end(), 0.0);
-		  }
-		}
+	    Total_Et_decoded = Total_Et_encoded * 500;
+	    Total_Et_Timing_decoded = Total_Et_encoded * 500;
+
+	    // get the offline reconstructed energy from xAODTriggerTower decoration
+	    if ( !m_CaloCellKey.empty() ) {
+	      if ( cellEtByLayer_handle->isAvailable() ) {
+		const std::vector<float>& cellEtByLayer = (*cellEtByLayer_handle)(*it_TileID2ptr->second);
+		// Stored in GeV, see TrigT1CaloCalibTools/src/L1CaloCells2TriggerTowers.cxx
+		caloCellSumET = 1000.0 * std::accumulate(cellEtByLayer.begin(), cellEtByLayer.end(), 0.0);
+	      }
 	    }
         } // end of Tile
         std::vector<uint16_t> vtower_ET;
-        vtower_ET.clear();
         vtower_ET.push_back(Total_Et_encoded);
         
         std::vector<char> vtower_SAT;
-        vtower_SAT.clear();
         
         //Needs to be updated with Saturation flag from LAr CaloCell container, not ready yet!
         vtower_SAT.push_back(jTower_sat);  
@@ -302,17 +311,14 @@ StatusCode jFexEmulatedTowers::execute(const EventContext& ctx) const {
         } else {
 	  // decorate with offline energy
 	  if (!m_caloCellSumETdecorKey.empty()) {
-	    SG::WriteDecorHandle<xAOD::jFexTowerContainer, float> jTowerCaloCellSumEt (m_caloCellSumETdecorKey, ctx);
-	    (jTowerCaloCellSumEt) (*jTowersContainer->back()) = caloCellSumET;
+	    (*jTowerCaloCellSumEt) (*jTowersContainer->back()) = caloCellSumET;
 	  }
 	  // decorate tower energies in MeV without/with timing cut
 	  if (!m_jtowerEtMeVdecorKey.empty()) {
-	    SG::WriteDecorHandle<xAOD::jFexTowerContainer, int >   jTowerEtMeV (m_jtowerEtMeVdecorKey , ctx);
-	    (jTowerEtMeV) (*jTowersContainer->back()) = Total_Et_decoded;
+	    (*jTowerEtMeV) (*jTowersContainer->back()) = Total_Et_decoded;
 	  }
 	  if (!m_jtowerEtTimingMeVdecorKey.empty()) {
-	    SG::WriteDecorHandle<xAOD::jFexTowerContainer, int >   jTowerEtTimingMeV (m_jtowerEtTimingMeVdecorKey , ctx);
-	    (jTowerEtTimingMeV) (*jTowersContainer->back()) = Total_Et_Timing_decoded;
+	    (*jTowerEtTimingMeV) (*jTowersContainer->back()) = Total_Et_Timing_decoded;
 	  }
 	}
     } // firmware tower map
@@ -323,10 +329,8 @@ StatusCode jFexEmulatedTowers::execute(const EventContext& ctx) const {
 
 
 StatusCode jFexEmulatedTowers::ReadFibersfromFile(const std::string & fileName){
-    
-    
-    
-    //openning file with ifstream
+
+    //opening file with ifstream
     std::ifstream file(fileName);
     
     if ( !file.is_open() ){
@@ -346,6 +350,7 @@ StatusCode jFexEmulatedTowers::ReadFibersfromFile(const std::string & fileName){
         
         //reading elements
         std::vector<float> elements;
+	elements.reserve(10);
         std::string element;
         while(std::getline(oneLine, element, ' '))
         {
@@ -377,10 +382,8 @@ constexpr unsigned int jFexEmulatedTowers::mapIndex(unsigned int jfex, unsigned 
 }
 
 StatusCode  jFexEmulatedTowers::ReadSCfromFile(const std::string& fileName){
-    
-    
-    
-    //openning file with ifstream
+
+    //opening file with ifstream
     std::ifstream file(fileName);
     
     if ( !file.is_open() ){
@@ -391,14 +394,12 @@ StatusCode  jFexEmulatedTowers::ReadSCfromFile(const std::string& fileName){
     std::string line;
     //loading the mapping information into an unordered_map <Fex Tower ID, vector of SCell IDs>
     while ( std::getline (file, line) ) {
-        std::vector<uint64_t> SCellvectorEM;
-        SCellvectorEM.clear();
-        std::vector<uint64_t> SCellvectorHAD;
-        SCellvectorHAD.clear();
-
         //removing the header of the file (it is just information!)
         if(line[0] == '#') continue;
-        
+
+	std::vector<uint64_t> SCellvectorEM;
+	std::vector<uint64_t> SCellvectorHAD;
+
         //Splitting line in different substrings
         std::stringstream oneSCellID(line);
         
@@ -455,7 +456,7 @@ bool jFexEmulatedTowers::isBadSCellID(const std::string& ID) const{
 
 StatusCode  jFexEmulatedTowers::ReadTilefromFile(const std::string& fileName){
     
-    //openning file with ifstream
+    //opening file with ifstream
     std::ifstream file(fileName);
     
     if ( !file.is_open() ){

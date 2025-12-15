@@ -176,6 +176,8 @@ def sTGCAsBuiltCondAlgCfg(flags, name = "sTGCAsBuiltCondAlg", **kwargs):
 
 def MdtAsBuiltCondAlgCfg(flags, name="MdtAsBuiltCondAlg", **kwargs):
     result = ComponentAccumulator()
+    if not flags.Detector.GeometryMDT:
+        return result
     from IOVDbSvc.IOVDbSvcConfig import addFolders
     if "readFromJSON" not in kwargs or not kwargs["readFromJSON"]:
         result.merge(addFolders( flags, '/MUONALIGN/MDT/ASBUILTPARAMS' , 'MUONALIGN_OFL', className='CondAttrListCollection'))

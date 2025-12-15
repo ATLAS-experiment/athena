@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "JetUncertainties/JetUncertaintiesTool.h"
@@ -220,7 +220,8 @@ void PlotCorrelationHistos(const TString& outFile, TCanvas* canvas, TFile* outHi
                 }
             }
         //meanDiff /= histo->GetNbinsX()*histo->GetNbinsY();
-        meanDiff /= numValidBins;
+        if (numValidBins > 0)
+          meanDiff /= numValidBins;
         
         // Set the range to the maximum (rounded up to nearest multiple of 5) if requested
         if (fixedRangeDiff < 1.e-3)

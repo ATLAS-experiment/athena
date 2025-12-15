@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef JIVEXML_DATATYPE_H
@@ -29,7 +29,7 @@ namespace JiveXML{
        * Templated constructor -- this is resolved at compile time
        * so the constructor must be implemented in the header.
        */
-      template < class T > DataType(T t){ 
+      template < class T > DataType(const T & t){ 
         /// Generate a stringstream object
         std::ostringstream ost;
         /// Generically stream the type object into it

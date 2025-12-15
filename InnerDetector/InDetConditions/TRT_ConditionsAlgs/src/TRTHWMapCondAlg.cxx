@@ -8,7 +8,7 @@
 
 TRTHWMapCondAlg::TRTHWMapCondAlg(const std::string& name
 				 , ISvcLocator* pSvcLocator )
-  : ::AthAlgorithm(name,pSvcLocator)
+  : ::AthCondAlgorithm(name,pSvcLocator)
 {}
 TRTHWMapCondAlg::~TRTHWMapCondAlg()= default;
 
@@ -25,13 +25,13 @@ StatusCode TRTHWMapCondAlg::initialize()
   return StatusCode::SUCCESS;
 }
 
-StatusCode TRTHWMapCondAlg::execute() 
+StatusCode TRTHWMapCondAlg::execute(const EventContext& ctx) const 
 {
   ATH_MSG_DEBUG("execute " << name());
 
   // ____________ Construct Write Cond Handle and check its validity ____________
 
-  SG::WriteCondHandle<TRTCond::HWMap> writeHandle{m_WriteKey};
+  SG::WriteCondHandle<TRTCond::HWMap> writeHandle{m_WriteKey, ctx};
 
   // Do we have a valid Write Cond Handle for current time?
   if(writeHandle.isValid()) {
@@ -52,11 +52,11 @@ StatusCode TRTHWMapCondAlg::execute()
 
   EventIDRange rangeBarrel, rangeEndcap;
 
-  if(StatusCode::SUCCESS != build_BarrelHVLinePadMaps(rangeBarrel, writeCdo.get() ) ) {
+  if(StatusCode::SUCCESS != build_BarrelHVLinePadMaps(ctx, rangeBarrel, writeCdo.get() ) ) {
      ATH_MSG_ERROR ("Problem filling barrel map.");
      return StatusCode::FAILURE;     
   }
-  if(StatusCode::SUCCESS != build_EndcapHVLinePadMaps(rangeEndcap, writeCdo.get() ) ) {
+  if(StatusCode::SUCCESS != build_EndcapHVLinePadMaps(ctx, rangeEndcap, writeCdo.get() ) ) {
      ATH_MSG_ERROR ("Problem filling endcap map.");
      return StatusCode::FAILURE;     
   }
@@ -160,7 +160,7 @@ StatusCode TRTHWMapCondAlg::finalize()
 //////////
 /// Build HV-line/pad map for Barrel
 /////
-StatusCode TRTHWMapCondAlg::build_BarrelHVLinePadMaps(EventIDRange& range, TRTCond::HWMap* writeCdo) const{
+StatusCode TRTHWMapCondAlg::build_BarrelHVLinePadMaps(const EventContext& ctx, EventIDRange& range, TRTCond::HWMap* writeCdo) const{
   StatusCode sc(StatusCode::SUCCESS);
 
     std::map< std::string, std::vector<int> > fuseBoxPadMapEven;
@@ -328,7 +328,7 @@ StatusCode TRTHWMapCondAlg::build_BarrelHVLinePadMaps(EventIDRange& range, TRTCo
     ATH_MSG_INFO("TRT Barrel HV-line/pad map successfully built - "
 		 << writeCdo->get_Barrel_HV_Names()->size() << " channels.");
 
-  SG::ReadCondHandle<CondAttrListCollection> readBarrelHandle{m_BarrelReadKey};
+  SG::ReadCondHandle<CondAttrListCollection> readBarrelHandle{m_BarrelReadKey, ctx};
   if(!readBarrelHandle.range(range)) {
     ATH_MSG_ERROR("Failed to retrieve validity range for " << readBarrelHandle.key());
     return StatusCode::FAILURE;
@@ -362,7 +362,7 @@ StatusCode TRTHWMapCondAlg::build_BarrelHVLinePadMaps(EventIDRange& range, TRTCo
 //////////
 /// Build HV-line/pad maps for Endcaps
 /////
-StatusCode TRTHWMapCondAlg::build_EndcapHVLinePadMaps(EventIDRange& range, TRTCond::HWMap* writeCdo) const{
+StatusCode TRTHWMapCondAlg::build_EndcapHVLinePadMaps(const EventContext& ctx, EventIDRange& range, TRTCond::HWMap* writeCdo) const{
   StatusCode sc(StatusCode::SUCCESS);
 
   // Loop through all possible pads
@@ -442,7 +442,7 @@ StatusCode TRTHWMapCondAlg::build_EndcapHVLinePadMaps(EventIDRange& range, TRTCo
 
   // Get the CondAttrListCollection for Endcap A
   EventIDRange rangeA;
-  SG::ReadCondHandle<CondAttrListCollection> readEndAHandle{m_EndAReadKey};
+  SG::ReadCondHandle<CondAttrListCollection> readEndAHandle{m_EndAReadKey, ctx};
   if(!readEndAHandle.range(rangeA)) {
     ATH_MSG_ERROR("Failed to retrieve validity range for " << readEndAHandle.key());
     return StatusCode::FAILURE;
@@ -472,7 +472,7 @@ StatusCode TRTHWMapCondAlg::build_EndcapHVLinePadMaps(EventIDRange& range, TRTCo
 
   // Get the CondAttrListCollection for Endcap C
   EventIDRange rangeC;
-  SG::ReadCondHandle<CondAttrListCollection> readEndCHandle{m_EndCReadKey};
+  SG::ReadCondHandle<CondAttrListCollection> readEndCHandle{m_EndCReadKey, ctx};
   const CondAttrListCollection* DCSCondFolder1{*readEndCHandle};
   if(!readEndCHandle.range(rangeC)) {
     ATH_MSG_ERROR("Failed to retrieve validity range for " << readEndCHandle.key());

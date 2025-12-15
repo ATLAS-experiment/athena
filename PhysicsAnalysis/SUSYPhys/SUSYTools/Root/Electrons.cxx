@@ -485,7 +485,9 @@ float SUSYObjDef_xAOD::GetSignalElecSF(const xAOD::Electron& el,
       else if (this->treatAsYear()==2016) trigMChains = m_v_trigs16_cache_singleEle;
       else if (this->treatAsYear()==2017) trigMChains = m_v_trigs17_cache_singleEle;
       else if (this->treatAsYear()==2018) trigMChains = m_v_trigs18_cache_singleEle;
-      else trigMChains = m_v_trigs22_cache_singleEle;
+      else if (this->treatAsYear()==2022) trigMChains = m_v_trigs22_cache_singleEle;
+      else if (this->treatAsYear()==2023) trigMChains = m_v_trigs23_cache_singleEle;
+      else trigMChains = m_v_trigs24_cache_singleEle;
       theExpr=m_electronTriggerSFStringSingle;
     }
     else{
@@ -558,12 +560,12 @@ double SUSYObjDef_xAOD::GetEleTriggerEfficiencySF(const xAOD::Electron& el, cons
   double trig_sf(1.);
 
   std::string single_str = "SINGLE_E";
-  std::string single_str_2022 = "2022_";
+  std::string single_Run3 = "202";  
   std::string dilep_str  = "DI_E";
   std::string multi_str  = "MULTI_L";
 
   CP::CorrectionCode result;
-  if ( trigExpr.find(single_str) != std::string::npos || trigExpr.find(single_str_2022) != std::string::npos)
+  if ( trigExpr.find(single_str) != std::string::npos || trigExpr.find(single_Run3) != std::string::npos)
     result = m_elecEfficiencySFTool_trig_singleLep->getEfficiencyScaleFactor(el, trig_sf);
   else if ( trigExpr.find(dilep_str) != std::string::npos )
     ATH_MSG_ERROR( "Use GetTriggerGlobalEfficiency for logical OR of lepton triggers");
@@ -590,14 +592,14 @@ double SUSYObjDef_xAOD::GetEleTriggerEfficiencySF(const xAOD::Electron& el, cons
 double SUSYObjDef_xAOD::GetEleTriggerEfficiency(const xAOD::Electron& el, const std::string& trigExpr) const {
 
   std::string single_str = "SINGLE_E";
-  std::string single_str_2022 = "2022_";
+  std::string single_Run3 = "202";  
   std::string dilep_str  = "DI_E";
   std::string multi_str  = "MULTI_L";
 
   double trig_eff(1.);
 
   CP::CorrectionCode result;
-  if ( trigExpr.find(single_str) != std::string::npos || trigExpr.find(single_str_2022) != std::string::npos)
+  if ( trigExpr.find(single_str) != std::string::npos || trigExpr.find(single_Run3) != std::string::npos)
     result = m_elecEfficiencySFTool_trigEff_singleLep->getEfficiencyScaleFactor(el, trig_eff);
   else if ( trigExpr.find(dilep_str) != std::string::npos )
     ATH_MSG_ERROR( "Use GetTriggerGlobalEfficiency for logical OR of lepton triggers");

@@ -79,6 +79,7 @@ class DiTauCalibrationConfig (ConfigBlock):
                                          reentrant=True )
            alg.ditaus = config.readName (self.containerName)
            config.addOutputVar (self.containerName, 'omniScore', 'omniScore', noSys=True)
+           config.addOutputVar (self.containerName, 'nSubjets', 'nSubjets', noSys=True) 
            config.addOutputVar (self.containerName, 'leadSubjetPt', 'leadSubjetPt', noSys=True)
            config.addOutputVar (self.containerName, 'leadSubjetEta', 'leadSubjetEta', noSys=True)
            config.addOutputVar (self.containerName, 'leadSubjetPhi', 'leadSubjetPhi', noSys=True)

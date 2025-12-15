@@ -30,7 +30,43 @@ def OverlayMainCfg(configFlags):
 def OverlayMainContentCfg(configFlags):
     """Main overlay content"""
 
-    acc = writeDigitizationParameters(configFlags)
+    from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
+    acc = ComponentAccumulator()
+
+    # Handle overlay digitization metadata writing (must come before reading setup)
+    if hasattr(configFlags, '_Overlay_pileupDigitizationMetadata'):
+        if configFlags.IOVDb.WriteParametersAsMetaData:
+            # Direct metadata mode: use standard parameter writer
+            from IOVDbMetaDataTools.ParameterWriterConfig import writeParametersToMetaData
+            from DigitizationConfig.DigitizationParametersConfig import folderName
+            from AthenaCommon.Logging import logging
+            logOverlay = logging.getLogger('OverlayMetadataConfig')
+            logOverlay.info('Writing overlay digitization parameters directly to in-file metadata (bypassing DigitParams.db)')
+
+            pileupDict = configFlags._Overlay_pileupDigitizationMetadata
+            runNumber = configFlags.Input.RunNumbers[0]
+            runNumberEnd = configFlags.Input.RunNumbers[-1]
+            if runNumberEnd == runNumber:
+                runNumberEnd += 1
+
+            # Convert pileup dictionary to string parameters
+            params = {}
+            for key in pileupDict:
+                value = str(pileupDict[key])
+                params[key] = value
+                logOverlay.info('DigitizationMetaData: setting "%s" to be %s', key, value)
+
+            acc.merge(writeParametersToMetaData(configFlags, folderName, params, runNumber, runNumberEnd))
+        else:
+            # Sqlite mode: create DigitParams.db first
+            from OverlayConfiguration.OverlayMetadata import writeOverlayDigitizationMetadata
+            writeOverlayDigitizationMetadata(configFlags, configFlags._Overlay_pileupDigitizationMetadata)
+
+    # Setup reading digitization parameters (mode-dependent)
+    # In sqlite mode, this reads from DigitParams.db (created above if pileup metadata exists)
+    # Only needed if we actually have pileup metadata to read
+    if not configFlags.IOVDb.WriteParametersAsMetaData and hasattr(configFlags, '_Overlay_pileupDigitizationMetadata'):
+        acc.merge(writeDigitizationParameters(configFlags))
 
     if not configFlags.Overlay.ByteStream:
         acc.merge(IOVDbMetaDataToolWithRunNumberOverrideCfg(configFlags))

@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 
@@ -44,10 +44,12 @@ def MmReadoutGeomToolCfg(flags, name="MmReadoutGeomTool", **kwargs):
 
 def ChamberAssebmbleToolCfg(flags,name="MuonChamberAssembleTool", **kwargs):
     result = ComponentAccumulator()
-    kwargs.setdefault("GeoUtilTool", result.getPrimaryAndMerge(MuonGeoUtilityToolCfg(flags)))
+    from AthenaConfiguration.Enums import LHCPeriod
+    kwargs.setdefault("run4Layout", flags.GeoModel.Run >= LHCPeriod.Run4)
     the_tool = CompFactory.MuonGMR4.ChamberAssembleTool(name, **kwargs)
     result.setPrivateTools(the_tool)
     return result
+
 def MuonDetectorToolCfg(flags, name="MuonDetectorToolR4", **kwargs):
     result = ComponentAccumulator()
     sub_detTools = []
@@ -71,7 +73,6 @@ def MuonDetectorToolCfg(flags, name="MuonDetectorToolR4", **kwargs):
         sub_detTools.append(result.popToolsAndMerge(ChamberAssebmbleToolCfg(flags)))
         print("MuonDetectorToolCfg: Adding ChamberAssebmbleTool to MuonDetectorTool")
     kwargs.setdefault("ReadoutEleBuilders", sub_detTools)
-    print(sub_detTools)
     the_tool = CompFactory.MuonGMR4.MuonDetectorTool(name = name, **kwargs)
     result.setPrivateTools(the_tool)
     return result
@@ -81,7 +82,6 @@ def MuonGeoModelCfg(flags):
     from AtlasGeoModel.GeoModelConfig import GeoModelCfg
     geoModelSvc = result.getPrimaryAndMerge(GeoModelCfg(flags))
     geoModelSvc.DetectorTools+=[result.popToolsAndMerge(MuonDetectorToolCfg(flags))]
-    print("MuonGeoModelCfg: Adding MuonDetectorTool to GeoModelSvc")
     return result
 
 def MuonAlignStoreCfg(flags):
@@ -91,12 +91,15 @@ def MuonAlignStoreCfg(flags):
     result.merge(ActsMuonAlignCondAlgCfg(flags))
     from ActsAlignmentAlgs.AlignmentAlgsConfig import ActsAlignStoreProviderAlgCfg
     
-    from ROOT.ActsTrk import DetectorType 
+    from MuonG4TrfCache.MuonTrfCacheConfig import MuonTransformCacheCfg
+    result.merge(MuonTransformCacheCfg(flags))
 
+    setCondDep = flags.Muon.enableAlignment or flags.Sim.ReleaseGeoModel
+    from ROOT.ActsTrk import DetectorType
     if flags.Detector.GeometryMDT:  
         result.merge(ActsAlignStoreProviderAlgCfg(flags, 
                                                   name="ActsDetAlignmentAlgMdt",
-                                                  CondAlignStore="MdtActsAlignContainer" if flags.Muon.enableAlignment else "",
+                                                  CondAlignStore="MdtActsAlignContainer" if setCondDep else "",
                                                   EventAlignStore="MdtActsAlignContainer",
                                                   SplitPhysVolCache = False,
                                                   SplitActsTrfCache = False,
@@ -105,7 +108,7 @@ def MuonAlignStoreCfg(flags):
     if flags.Detector.GeometryRPC:  
         result.merge(ActsAlignStoreProviderAlgCfg(flags, 
                                                   name="ActsDetAlignmentAlgRpc",
-                                                  CondAlignStore="RpcActsAlignContainer" if flags.Muon.enableAlignment else "",
+                                                  CondAlignStore="RpcActsAlignContainer" if setCondDep else "",
                                                   EventAlignStore="RpcActsAlignContainer",
                                                   SplitPhysVolCache = False,
                                                   SplitActsTrfCache = False,
@@ -114,7 +117,7 @@ def MuonAlignStoreCfg(flags):
     if flags.Detector.GeometryTGC:  
         result.merge(ActsAlignStoreProviderAlgCfg(flags, 
                                                   name="ActsDetAlignmentAlgTgc",
-                                                  CondAlignStore="TgcActsAlignContainer" if flags.Muon.enableAlignment else "",
+                                                  CondAlignStore="TgcActsAlignContainer" if setCondDep else "",
                                                   EventAlignStore="TgcActsAlignContainer",
                                                   SplitPhysVolCache = False,
                                                   SplitActsTrfCache = False,
@@ -123,7 +126,7 @@ def MuonAlignStoreCfg(flags):
     if flags.Detector.GeometrysTGC: 
         result.merge(ActsAlignStoreProviderAlgCfg(flags, 
                                                   name="ActsDetAlignmentAlgSTGC",
-                                                  CondAlignStore="sTgcActsAlignContainer" if flags.Muon.enableAlignment else "",
+                                                  CondAlignStore="sTgcActsAlignContainer" if setCondDep else "",
                                                   EventAlignStore="sTgcActsAlignContainer",
                                                   SplitPhysVolCache = False,
                                                   SplitActsTrfCache = False,
@@ -133,7 +136,7 @@ def MuonAlignStoreCfg(flags):
     if flags.Detector.GeometryMM:
         result.merge(ActsAlignStoreProviderAlgCfg(flags, 
                                                   name="ActsDetAlignmentAlgMM",
-                                                  CondAlignStore="MmActsAlignContainer" if flags.Muon.enableAlignment or \
+                                                  CondAlignStore="MmActsAlignContainer" if setCondDep or \
                                                                                            flags.Muon.applyMMPassivation else "",
                                                   EventAlignStore="MmActsAlignContainer",
                                                   SplitPhysVolCache = False,

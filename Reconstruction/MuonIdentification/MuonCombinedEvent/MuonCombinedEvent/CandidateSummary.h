@@ -49,10 +49,12 @@ namespace MuGirlNS {
         double shift{0.};
         bool measuresEta{false};
         double propagationTime{0.};
+        bool passesMDTBetaCut{false};
+
 
         StauHit() = default;
         StauHit(StauHitTechnology tech, double tof, double ix, double iy, double iz, Identifier iid, double ie, double er = -1., 
-            double sh = 0., bool isEta = false, double propTime = 0.):
+		double sh = 0., bool isEta = false, double propTime = 0., bool passMDTBetaCut = false):
             eTech(tech),
             mToF(tof),
             x(ix),
@@ -63,7 +65,8 @@ namespace MuGirlNS {
             error(er),
             shift(sh),
             measuresEta(isEta),
-            propagationTime(propTime) {} 
+            propagationTime(propTime),
+            passesMDTBetaCut(passMDTBetaCut) {}
     };
 
     // conditional decoration of SlowMuon container with MDT ADC counts and drift radii

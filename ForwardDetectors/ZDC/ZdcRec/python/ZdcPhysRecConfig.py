@@ -158,7 +158,7 @@ if __name__ == '__main__':
 
     # If number of events is known from runArgs or input configuration
     # Use an explicit number if known, or get it from athena configuration if possible
-    n_events = int(flags.Exec.MaxEvents) if 'flags' in locals() and hasattr(flags.Exec, "MaxEvents") else -1
+    n_events = int(flags.Exec.MaxEvents) if 'flags' in locals() and flags.hasFlag("Exec.MaxEvents") else -1
 
     print(f"Total time: {end_time - start_time:.2f} seconds")
     if n_events > 0:

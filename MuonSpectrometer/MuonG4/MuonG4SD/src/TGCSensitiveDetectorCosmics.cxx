@@ -5,7 +5,9 @@
 #include "TGCSensitiveDetectorCosmics.h"
 #include <string>
 #include "MuonSimEvent/TgcHitIdHelper.h"
+#include "MCTruth/AtlasG4EventUserInfo.h"
 #include "MCTruth/TrackHelper.h"
+#include "G4Exception.hh"
 #include "G4Geantino.hh"
 #include "G4ChargedGeantino.hh"
 
@@ -16,7 +18,7 @@ TGCSensitiveDetectorCosmics::TGCSensitiveDetectorCosmics(const std::string& name
   : G4VSensitiveDetector( name )
   , m_momMag(0)
   , m_globalTime(0)
-  , m_myTGCHitColl( hitCollectionName )
+  , m_hitCollectionName( hitCollectionName )
 {
   m_muonHelper = TgcHitIdHelper::GetHelper();
 }
@@ -24,7 +26,11 @@ TGCSensitiveDetectorCosmics::TGCSensitiveDetectorCosmics(const std::string& name
 // Implemenation of member functions
 void TGCSensitiveDetectorCosmics::Initialize(G4HCofThisEvent*)
 {
-  if (!m_myTGCHitColl.isValid()) m_myTGCHitColl = std::make_unique<TGCSimHitCollection>();
+  m_myTGCHitColl = nullptr;
+  if (auto* eventInfo = AtlasG4EventUserInfo::GetEventUserInfo()) {
+    m_myTGCHitColl = eventInfo->GetHitCollectionMap()->Find<TGCSimHitCollection>(m_hitCollectionName);
+    m_g4UserEventInfo = eventInfo;
+  }
   // START OF COSMICS-SPECIFIC CODE
   m_mom = Amg::Vector3D(0.,0.,0.);
   m_globH = Amg::Vector3D(0.,0.,0.);
@@ -32,6 +38,12 @@ void TGCSensitiveDetectorCosmics::Initialize(G4HCofThisEvent*)
 }
 
 G4bool TGCSensitiveDetectorCosmics::ProcessHits(G4Step* aStep,G4TouchableHistory*) {
+
+  if (!m_myTGCHitColl) {
+    G4Exception("TGCSensitiveDetectorCosmics::ProcessHits", "TGCCosmicHitCollectionMissing", FatalException,
+                "Hit collection not initialized; did SetupEvent run?");
+    return false;
+  }
 
   G4Track* track = aStep->GetTrack();
 
@@ -191,13 +203,13 @@ G4bool TGCSensitiveDetectorCosmics::ProcessHits(G4Step* aStep,G4TouchableHistory
 
   // construct new mdt hit
   TrackHelper trHelp(aStep->GetTrack());
+
   m_myTGCHitColl->Emplace(TGCid,
                         m_globalTime,
                         localPosition,
                         localDireCos,
-                        trHelp.GenerateParticleLink(),
+                        trHelp.GenerateParticleLink(m_g4UserEventInfo ? m_g4UserEventInfo->GetEventStore() : nullptr),
                         aStep->GetTotalEnergyDeposit(),
                         aStep->GetStepLength());
   return true;
 }
-

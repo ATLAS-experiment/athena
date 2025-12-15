@@ -28,6 +28,7 @@
       <field name="m_inMetaTree" transient="true" />
       <field name="m_entry" transient="true" />
       <field name="m_outTree" transient="true" />
+      <field name="m_otherMetaDataTreeNamePattern" transient="true" />
    </class>
 
    <!-- And things that it depends on: -->

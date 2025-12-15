@@ -21,9 +21,8 @@ def createPanTauConfigFlags():
     flags.addFlag("DecayModeDeterminator_BDTCutValue_R3XX_CellBased", -0.08)
     flags.addFlag("ModeDiscriminator_TMVAMethod", "BDTG")
 
-    flags.addFlag("TauConstituents_BinEdges_Eta", [0.000, 0.800, 1.400, 1.500, 1.900, 9.900])
+    flags.addFlag("Common_BinEdges_Eta", [0.000, 0.800, 1.400, 1.500, 1.900, 9.900])
     flags.addFlag("TauConstituents_Selection_Neutral_EtaBinned_EtCut", [2.1*Units.GeV, 2.5*Units.GeV, 2.6*Units.GeV, 2.4*Units.GeV, 1.9*Units.GeV])
-    flags.addFlag("CellBased_BinEdges_Eta", [0.000, 0.800, 1.400, 1.500, 1.900, 9.900])
     flags.addFlag("CellBased_EtaBinned_Pi0MVACut_1prong", [0.46, 0.39, 0.51, 0.47, 0.54])
     flags.addFlag("CellBased_EtaBinned_Pi0MVACut_3prong", [0.47, 0.52, 0.60, 0.55, 0.50])
     flags.addFlag("ModeDiscriminator_BinEdges_Pt", [10*Units.GeV, 100000*Units.GeV])

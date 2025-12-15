@@ -4,7 +4,7 @@
 
 #include "JetMatcherAlg.h"
 #include "AthenaBaseComps/AthMsgStreamMacros.h"
-
+#include <vector>
 #include <memory>
 
 namespace ftag {

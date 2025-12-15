@@ -1,6 +1,8 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
+
+#include <G4Event.hh>
 
 // Local includes
 #include "G4AtlasEventAction.h"
@@ -23,6 +25,13 @@ namespace G4UA
     // Loop over my pre-actions and apply each one in turn
     for(auto action : m_eventActions){
       action->BeginOfEventAction(event);
+      if(event->IsAborted()) {
+        if(event->GetUserInformation()) {
+          // no user information means an empty event, skip message
+          G4cout << "G4AtlasEventAction: Event was aborted in BeginOfEventAction, skipping further actions" << G4endl;
+        }
+        break;
+      }
     }
   }
 
@@ -34,6 +43,13 @@ namespace G4UA
     // Loop over my post-actions and apply each one in turn
     for(auto action : m_eventActions){
       action->EndOfEventAction(event);
+      if(event->IsAborted()) {
+        if(event->GetUserInformation()) {
+          // no user information means an empty event, skip message
+          G4cout << "G4AtlasEventAction: Event was aborted in EndOfEventAction, skipping further actions" << G4endl;
+        }
+        break;
+      }
     }
   }
 

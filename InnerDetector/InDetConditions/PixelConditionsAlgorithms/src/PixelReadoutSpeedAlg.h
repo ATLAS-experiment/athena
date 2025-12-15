@@ -11,7 +11,7 @@
 #ifndef PIXELREADOUTSPEEDALG_H
 #define PIXELREADOUTSPEEDALG_H
 
-#include "AthenaBaseComps/AthReentrantAlgorithm.h"
+#include "AthenaBaseComps/AthCondAlgorithm.h"
 
 #include "StoreGate/ReadCondHandleKey.h"
 #include "AthenaPoolUtilities/AthenaAttributeList.h"
@@ -21,7 +21,7 @@
 
 #include "Gaudi/Property.h"
 
-class PixelReadoutSpeedAlg : public AthReentrantAlgorithm {
+class PixelReadoutSpeedAlg : public AthCondAlgorithm {
   public:
     PixelReadoutSpeedAlg(const std::string& name, ISvcLocator* pSvcLocator);
     virtual ~PixelReadoutSpeedAlg() = default;

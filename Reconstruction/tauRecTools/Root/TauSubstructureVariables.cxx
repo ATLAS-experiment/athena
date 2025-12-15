@@ -34,6 +34,9 @@ StatusCode TauSubstructureVariables::execute(xAOD::TauJet& tau) const {
   //*****************************************************
   // New cluster-based variables
   float totalEnergy(0.);
+  float PSSEnergy(0.);
+  float EMEnergy(0.);
+  float HADEnergy(0.);
 
   TLorentzVector leadClusVec;
   TLorentzVector subLeadClusVec;
@@ -50,12 +53,32 @@ StatusCode TauSubstructureVariables::execute(xAOD::TauJet& tau) const {
   tau.setDetail(xAOD::TauJetParameters::numTopoClusters, static_cast<int>(vertexedClusterList.size()));
 
   for (const xAOD::CaloVertexedTopoCluster& vertexedCluster : vertexedClusterList){
+    // Tell clang to optimize assuming that FP operations may trap.
+    CXXUTILS_TRAPPING_FP;
+    // It is at EM/LC scale for EM/LC seed jets
+    float clEnergy = vertexedCluster.e();
+
+    const xAOD::CaloCluster& cluster = vertexedCluster.clust();
+
+    // Calculate the fractions of energy in different calorimeter layers
+    float PreSampler = cluster.eSample(CaloSampling::PreSamplerB) + cluster.eSample(CaloSampling::PreSamplerE);
+    float EMLayer1   = cluster.eSample(CaloSampling::EMB1) + cluster.eSample(CaloSampling::EME1);
+    float EMLayer2   = cluster.eSample(CaloSampling::EMB2) + cluster.eSample(CaloSampling::EME2);
+
+    float Energy = cluster.rawE();
+    float PSSF = (Energy != 0.) ? (PreSampler + EMLayer1) / Energy : 0.;
+    float EM2F = (Energy != 0.) ? EMLayer2 / Energy : 0.;
+    float EMF = PSSF + EM2F;
+
+    PSSEnergy += PSSF * clEnergy;
+    EMEnergy  += EMF * clEnergy;
+    HADEnergy += (Energy != 0.) ? (1 - EMF) * clEnergy : 0.;
+
     TLorentzVector clusterP4 = vertexedCluster.p4();
 
     totalEnergy += clusterP4.E();
     
     if (tauAxis.DeltaR(clusterP4) < 0.2) {
-      const xAOD::CaloCluster& cluster = vertexedCluster.clust();
       double clusEnergyBE = ( cluster.energyBE(0) + cluster.energyBE(1) + cluster.energyBE(2) );
 		    
       if (clusEnergyBE > clusELead) {
@@ -80,41 +103,6 @@ StatusCode TauSubstructureVariables::execute(xAOD::TauJet& tau) const {
   }
   if (clusESubLead > 0.) {
     approxSubstructure4Vec += subLeadClusVec;
-  }
-
-  // now sort cluster by energy
-  auto compare = [](const xAOD::CaloVertexedTopoCluster& left, const xAOD::CaloVertexedTopoCluster& right) {
-    return left.e() > right.e();
-  };
-  std::sort(vertexedClusterList.begin(), vertexedClusterList.end(), compare);
-
-  // calculate calorimeter energies in different layers
-  float PSSEnergy(0.);
-  float EMEnergy(0.);
-  float HADEnergy(0.);
-
-  for (const xAOD::CaloVertexedTopoCluster& vertexedCluster : vertexedClusterList) {
-    // Tell clang to optimize assuming that FP operations may trap.
-    CXXUTILS_TRAPPING_FP;
-
-    // It is at EM/LC scale for EM/LC seed jets
-    float clEnergy = vertexedCluster.e();
-
-    const xAOD::CaloCluster& cluster = vertexedCluster.clust();
-    
-    // Calculate the fractions of energy in different calorimeter layers
-    float PreSampler = cluster.eSample(CaloSampling::PreSamplerB) + cluster.eSample(CaloSampling::PreSamplerE);
-    float EMLayer1   = cluster.eSample(CaloSampling::EMB1) + cluster.eSample(CaloSampling::EME1);
-    float EMLayer2   = cluster.eSample(CaloSampling::EMB2) + cluster.eSample(CaloSampling::EME2);
-
-    float Energy = cluster.rawE();
-    float PSSF = (Energy != 0.) ? (PreSampler + EMLayer1) / Energy : 0.;
-    float EM2F = (Energy != 0.) ? EMLayer2 / Energy : 0.;
-    float EMF = PSSF + EM2F;
-
-    PSSEnergy += PSSF * clEnergy;
-    EMEnergy  += EMF * clEnergy;
-    HADEnergy += (Energy != 0.) ? (1 - EMF) * clEnergy : 0.;
   }
 
   // calculate trk momentum

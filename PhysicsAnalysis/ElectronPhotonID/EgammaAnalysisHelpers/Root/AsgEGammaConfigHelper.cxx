@@ -90,7 +90,7 @@ Helper(const std::string& input, TEnv& env)
       end = env_input.find(';');
       T myValue{}; //default init
       if (AsgConfigHelper::strtof(env_input.substr(0, end), myValue)) {
-        CutVector.push_back(myValue);
+        CutVector.push_back(std::move(myValue));
       }
       if (end != std::string::npos) {
         env_input = env_input.substr(end + 1);

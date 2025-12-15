@@ -20,7 +20,6 @@
 #include "TrigConfL1Data/TIP.h"
 #include "TrigConfL1Data/L1DataDef.h"
 
-#include "boost/lexical_cast.hpp"
 #include "boost/algorithm/string.hpp"
 
 #include <iostream>
@@ -251,7 +250,7 @@ TrigConf::MenuLoader::constructTree(const LogicExpression& def, const std::vecto
    switch (def.state()) {
    case LogicExpression::kELEMENT: {
       top_node = new TriggerItemNode(TriggerItemNode::OBJ);
-      unsigned int pos = boost::lexical_cast<unsigned int,std::string>(def.element());
+      unsigned int pos = static_cast<unsigned int>(std::stoul(def.element()));
       // find all related information
       for(ThrInfo ti : thr_infos) {
          if(ti.thrPos==pos) {

@@ -4,12 +4,11 @@
 
 #include "G4CosmicFilter/G4CosmicFilter.h"
 
-#include "MCTruth/TrackHelper.h"
+#include "MCTruth/AtlasG4EventUserInfo.h"
 #include "TrackRecord/TrackRecordCollection.h"
 
 #include "G4RunManager.hh"
 #include "G4Event.hh"
-#include "StoreGate/ReadHandle.h"
 
 #include "GaudiKernel/Bootstrap.h"
 #include "GaudiKernel/ISvcLocator.h"
@@ -24,21 +23,23 @@ namespace G4UA
   {
   }
 
-  void G4CosmicFilter::EndOfEventAction(const G4Event*)
+  void G4CosmicFilter::EndOfEventAction(const G4Event* event)
   {
-    int counter(0);
-
     m_report.ntot++;
-
-    SG::ReadHandle <TrackRecordCollection> coll(m_config.collectionName);
-    if (! coll.isValid() )
+    auto* coll = [&] () -> TrackRecordCollection* {
+      auto* eventInfo = static_cast<AtlasG4EventUserInfo*>( event->GetUserInformation());
+      return eventInfo ?
+        eventInfo->GetHitCollectionMap()->Find<TrackRecordCollection>(m_config.collectionName) :
+        nullptr;
+    }();
+    if (!coll)
       {
         ATH_MSG_WARNING( "Cannot retrieve TrackRecordCollection " << m_config.collectionName );
         G4RunManager::GetRunManager()->AbortEvent();
         return;
       }
 
-    counter = coll->size();
+    int counter = coll->size();
 
     if (m_config.PDGId!=0 || m_config.ptMin>0 || m_config.ptMax>0)
       {

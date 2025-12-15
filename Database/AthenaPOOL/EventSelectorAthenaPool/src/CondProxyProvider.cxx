@@ -23,7 +23,7 @@
 #include "StoreGate/StoreGateSvc.h"
 
 // Pool
-#include "CollectionBase/ICollectionCursor.h"
+#include "CollectionSvc/ICollectionCursor.h"
 #include "StorageSvc/DbType.h"
 
 #include <vector>

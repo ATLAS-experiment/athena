@@ -14,11 +14,6 @@
 
 #include <chrono>
 
-CondAlgX::CondAlgX( const std::string& name, 
-            ISvcLocator* pSvcLocator ) : 
-  ::AthAlgorithm( name, pSvcLocator )
-{
-}
 
 StatusCode CondAlgX::initialize() {
   ATH_MSG_DEBUG("initialize " << name());
@@ -33,11 +28,10 @@ StatusCode CondAlgX::initialize() {
   return StatusCode::SUCCESS;
 }
 
-StatusCode CondAlgX::execute() {
+StatusCode CondAlgX::execute(const EventContext& ctx) const {
   ATH_MSG_DEBUG("execute " << name());
-  const EventContext& ctx = Gaudi::Hive::currentContext();
   
-  SG::ReadHandle<xAOD::EventInfo> evt( m_evt );
+  SG::ReadHandle<xAOD::EventInfo> evt( m_evt, ctx );
   if (!evt.isValid()) {
     ATH_MSG_ERROR ("Could not retrieve EventInfo");
     return StatusCode::FAILURE;
@@ -68,7 +62,7 @@ StatusCode CondAlgX::execute() {
 
   EventIDRange r;
   IASCIICondDbSvc::dbData_t val;
-  if (m_cds->getRange(wch.dbKey(), getContext(), r, val).isFailure()) {
+  if (m_cds->getRange(wch.dbKey(), ctx, r, val).isFailure()) {
     ATH_MSG_ERROR("  could not find dbKey \"" << wch.dbKey() 
 		  << "\" in CondSvc registry");
     return StatusCode::FAILURE;

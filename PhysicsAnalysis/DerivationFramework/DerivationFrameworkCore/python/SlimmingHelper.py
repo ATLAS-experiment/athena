@@ -429,7 +429,7 @@ class SlimmingHelper:
                         from DerivationFrameworkJetEtMiss.AntiKt4EMTopoJetsCPContent import AntiKt4EMTopoJetsCPContent
                         items.extend(AntiKt4EMTopoJetsCPContent)
                         from DerivationFrameworkFlavourTag.BTaggingContent import BTaggingStandardContent
-                        items.extend(BTaggingStandardContent("AntiKt4EMTopoJets", self.flags))
+                        items.extend(BTaggingStandardContent(self.flags, "AntiKt4EMTopoJets"))
                 elif collectionName=="AntiKt4EMTopoLowPtJets":
                         from DerivationFrameworkJetEtMiss.AntiKt4EMTopoLowPtJetsCPContent import AntiKt4EMTopoLowPtJetsCPContent
                         items.extend(AntiKt4EMTopoLowPtJetsCPContent)
@@ -440,10 +440,10 @@ class SlimmingHelper:
                         from DerivationFrameworkJetEtMiss.AntiKt4EMPFlowJetsCPContent import AntiKt4EMPFlowJetsCPContent
                         items.extend(AntiKt4EMPFlowJetsCPContent)
                         from DerivationFrameworkFlavourTag.BTaggingContent import BTaggingStandardContent
-                        items.extend(BTaggingStandardContent("AntiKt4EMPFlowJets", self.flags))
+                        items.extend(BTaggingStandardContent(self.flags, "AntiKt4EMPFlowJets"))
                 elif collectionName=="AntiKt4EMPFlowJets_FTAG_expert":
                         from DerivationFrameworkFlavourTag.BTaggingContent import BTaggingExpertContent
-                        items.extend(BTaggingExpertContent("AntiKt4EMPFlowJets", self.flags))
+                        items.extend(BTaggingExpertContent(self.flags, "AntiKt4EMPFlowJets"))
                 elif collectionName=="AntiKt4EMPFlowLowPtJets":
                         from DerivationFrameworkJetEtMiss.AntiKt4EMPFlowLowPtJetsCPContent import AntiKt4EMPFlowLowPtJetsCPContent
                         items.extend(AntiKt4EMPFlowLowPtJetsCPContent)
@@ -454,10 +454,10 @@ class SlimmingHelper:
                         from DerivationFrameworkJetEtMiss.AntiKt4UFOCSSKJetsCPContent import AntiKt4UFOCSSKJetsCPContent
                         items.extend(AntiKt4UFOCSSKJetsCPContent)
                         from DerivationFrameworkFlavourTag.BTaggingContent import BTaggingStandardContent
-                        items.extend(BTaggingStandardContent("AntiKt4UFOCSSKJets", self.flags))
+                        items.extend(BTaggingStandardContent(self.flags, "AntiKt4UFOCSSKJets"))
                 elif collectionName=="AntiKt4UFOCSSKJets_FTAG_expert":
                         from DerivationFrameworkFlavourTag.BTaggingContent import BTaggingExpertContent
-                        items.extend(BTaggingExpertContent("AntiKt4UFOCSSKJets", self.flags))
+                        items.extend(BTaggingExpertContent(self.flags, "AntiKt4UFOCSSKJets"))
                 elif collectionName=="AntiKt4UFOCSSKLowPtJets":
                         from DerivationFrameworkJetEtMiss.AntiKt4UFOCSSKLowPtJetsCPContent import AntiKt4UFOCSSKLowPtJetsCPContent
                         items.extend(AntiKt4UFOCSSKLowPtJetsCPContent)
@@ -504,13 +504,10 @@ class SlimmingHelper:
                         from DerivationFrameworkJetEtMiss.AntiKt10UFOCSSKSoftDropBeta100Zcut10JetsCPContent import AntiKt10UFOCSSKSoftDropBeta100Zcut10JetsCPContent
                         items.extend(AntiKt10UFOCSSKSoftDropBeta100Zcut10JetsCPContent)
                         from DerivationFrameworkFlavourTag.BTaggingContent import BTaggingLargeRContent
-                        items.extend(BTaggingLargeRContent("AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets", self.flags))
+                        items.extend(BTaggingLargeRContent(self.flags, "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets"))
                 elif collectionName=="AntiKtVR30Rmax4Rmin02PV0TrackJets":
                         from DerivationFrameworkJetEtMiss.AntiKtVR30Rmax4Rmin02PV0TrackJetsCPContent import AntiKtVR30Rmax4Rmin02PV0TrackJetsCPContent
                         items.extend(AntiKtVR30Rmax4Rmin02PV0TrackJetsCPContent)
-                elif collectionName=="AntiKtVR30Rmax4Rmin02Track_FTAG":
-                        from DerivationFrameworkFlavourTag.BTaggingContent import BTaggingVRContent
-                        items.extend(BTaggingVRContent("AntiKtVR30Rmax4Rmin02PV0TrackJets", self.flags))
                 elif collectionName=="InDetTrackParticles":
                         from DerivationFrameworkInDet.InDetTrackParticlesCPContent import InDetTrackParticlesCPContent
                         items.extend(InDetTrackParticlesCPContent)
@@ -606,7 +603,7 @@ class SlimmingHelper:
                         else:
                                 items.extend(JetTriggerContentRun3TLA)
                 elif collectionName=="HLT_BJetTriggerByYearContent":
-                        from DerivationFrameworkTrigger.BJetTriggerByYearContent import getBJetTriggerContent
+                        from FTagAnalysisAlgorithms.BJetTriggerByYearContent import getBJetTriggerContent
                         items.extend(getBJetTriggerContent(self.flags))
                 elif collectionName=="HLT_FULL_EDM":
                         from DerivationFrameworkTrigger.TrigSlimmingHelper import addTrigEDMSetToOutput

@@ -20,17 +20,11 @@ namespace GlobalSim{
 
     /** @brief Main constructor */
     GlobalLArCell(uint32_t ID, 
-                  std::string FEB2, 
+                  const std::string & FEB2, 
                   int channel);
 
-    /** @brief copy constructor (explicitly defaulted) */
-    GlobalLArCell(const GlobalLArCell&) = default;
+    /** copy & move c'tor, assignment, and destructor are automatically generated*/
 
-    /** @brief copy assignment operator (explicitly defaulted) */
-    GlobalLArCell& operator=(const GlobalLArCell&) = default;
-
-    /** @brief default destructor */
-    ~GlobalLArCell() { };
 
     // ----- setter functions -----
 
@@ -148,7 +142,7 @@ namespace GlobalSim{
   {}
 
   inline GlobalLArCell::GlobalLArCell(uint32_t ID,
-          std::string FEB2,
+          const std::string & FEB2,
           int channel) :
     m_id(ID),
     m_feb2(FEB2),

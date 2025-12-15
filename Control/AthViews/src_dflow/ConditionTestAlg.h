@@ -15,13 +15,13 @@
 #include <string>
 
 // FrameWork includes
-#include "AthenaBaseComps/AthAlgorithm.h"
+#include "AthenaBaseComps/AthCondAlgorithm.h"
 #include "AthExHive/CondDataObj.h"
 
 namespace AthViews {
 
 class ConditionTestAlg
-  : public ::AthAlgorithm
+  : public ::AthCondAlgorithm
 { 
 
   /////////////////////////////////////////////////////////////////// 
@@ -41,9 +41,9 @@ class ConditionTestAlg
   //ConditionTestAlg &operator=(const ConditionTestAlg &alg); 
 
   // Athena algorithm's Hooks
-  virtual StatusCode  initialize();
-  virtual StatusCode  execute();
-  virtual StatusCode  finalize();
+  virtual StatusCode  initialize() override;
+  virtual StatusCode  execute(const EventContext& ctx) const override;
+  virtual StatusCode  finalize() override;
 
   /////////////////////////////////////////////////////////////////// 
   // Private data: 

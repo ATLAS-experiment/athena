@@ -3,10 +3,12 @@
 */
 
 #include "sTGCSensitiveDetector.h"
+#include "MCTruth/AtlasG4EventUserInfo.h"
 #include "MCTruth/TrackHelper.h"
 #include "G4Geantino.hh"
 #include "G4ChargedGeantino.hh"
 
+#include "G4Exception.hh"
 #include "G4Track.hh"
 
 #include "GeoPrimitives/CLHEPtoEigenConverter.h"
@@ -14,23 +16,33 @@
 
 #include <string>
 
+
 // construction/destruction
 sTGCSensitiveDetector::sTGCSensitiveDetector(const std::string& name, 
                                              const std::string& hitCollectionName,
                                              unsigned baseDepth): 
     G4VSensitiveDetector( name ),
     AthMessaging{name},
-    m_sTGCSimHitCollection( hitCollectionName ),
+    m_hitCollectionName( hitCollectionName ),
     m_baseDepth{baseDepth} {}
 
 // Implemenation of memebr functions
 void sTGCSensitiveDetector::Initialize(G4HCofThisEvent*)
 {
-  if (!m_sTGCSimHitCollection.isValid()) m_sTGCSimHitCollection = std::make_unique<sTGCSimHitCollection>();
+  m_sTGCSimHitCollection = nullptr;
+  if (auto* eventInfo = AtlasG4EventUserInfo::GetEventUserInfo()) {
+    m_sTGCSimHitCollection = eventInfo->GetHitCollectionMap()->Find<sTGCSimHitCollection>(m_hitCollectionName);
+    m_g4UserEventInfo = eventInfo;
+  }
 }
 
 G4bool sTGCSensitiveDetector::ProcessHits(G4Step* aStep,G4TouchableHistory* /*ROHist*/)
 {
+  if (!m_sTGCSimHitCollection) {
+    G4Exception("sTGCSensitiveDetector::ProcessHits", "sTGCHitCollectionMissing", FatalException,
+                "Hit collection not initialized; did SetupEvent run?");
+    return false;
+  }
   G4Track* currentTrack = aStep->GetTrack();
   int charge=currentTrack->GetDefinition()->GetPDGCharge();
 
@@ -99,10 +111,10 @@ G4bool sTGCSensitiveDetector::ProcessHits(G4Step* aStep,G4TouchableHistory* /*RO
 
   int sTgcId = m_muonHelper->BuildsTgcHitId(subType, iPhi, iRing, mLayer,nLayer, iSide);
   TrackHelper trHelp(aStep->GetTrack());
+
   m_sTGCSimHitCollection->Emplace(sTgcId,globalTime,position,pdgCode,direction,depositEnergy,
-                                  trHelp.GenerateParticleLink(),
+                                  trHelp.GenerateParticleLink(m_g4UserEventInfo ? m_g4UserEventInfo->GetEventStore() : nullptr),
                                   preStep->GetKineticEnergy(),preposition);
 
   return true;
 }
-

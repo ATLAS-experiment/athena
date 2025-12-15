@@ -99,6 +99,7 @@ namespace EFTrackingFPGAIntegration
             ATH_MSG_DEBUG("Strip RDO[" << i << "]: " << std::hex << FPGAStripRDO->at(i) << std::dec);
           }
         }
+        ATH_MSG_DEBUG("Done F100DataEncodingAlg");
 
 
        

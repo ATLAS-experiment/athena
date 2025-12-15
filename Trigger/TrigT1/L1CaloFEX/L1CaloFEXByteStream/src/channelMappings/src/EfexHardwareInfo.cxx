@@ -1,15 +1,15 @@
+/*
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+*/
 #include <iostream>
-#include <string>
 #include "channelMappings/EfexHardwareInfo.h"
-EfexHardwareInfo::EfexHardwareInfo()
-:m_valid(false), m_efexlabel("invalid") , m_fibre(-1), m_inputconnector(-1),
-m_mpodlabel("invalid")
-{    
-}
-EfexHardwareInfo::EfexHardwareInfo(std::string efexlabel,
+
+
+
+EfexHardwareInfo::EfexHardwareInfo(const std::string & efexlabel,
                                 int fibre,
                                 int inputconnector,
-                                std::string mpod)
+                                const std::string & mpod)
 :m_valid(true), m_efexlabel(efexlabel) , m_fibre(fibre), m_inputconnector(inputconnector),
 m_mpodlabel(mpod),m_overlap(-99)
 {    

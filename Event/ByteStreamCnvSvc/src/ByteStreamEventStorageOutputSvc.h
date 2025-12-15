@@ -1,7 +1,7 @@
-/* Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration */
+/* Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration */
 
-#ifndef EVENT_BYTESTREAMCNVSVC_SRC_BYTESTREAMEVENTSTORAGEOUTPUTSVC_H_
-#define EVENT_BYTESTREAMCNVSVC_SRC_BYTESTREAMEVENTSTORAGEOUTPUTSVC_H_
+#ifndef BYTESTREAMCNVSVC_BYTESTREAMEVENTSTORAGEOUTPUTSVC_H
+#define BYTESTREAMCNVSVC_BYTESTREAMEVENTSTORAGEOUTPUTSVC_H
 
 /** @file ByteStreamEventStorageOutputSvc.h
  *  @brief This file contains the class definition for the
@@ -26,12 +26,14 @@
 #include "ByteStreamData/RawEvent.h"
 #include "EventStorage/EventStorageRecords.h"
 #include "StoreGate/ReadHandleKey.h"
+#include "StoreGate/StoreGateSvc.h"
 #include "xAODEventInfo/EventInfo.h"
 
 #include "GaudiKernel/extends.h"
 #include "GaudiKernel/IIoComponent.h"
-#include "GaudiKernel/IIoComponentMgr.h" 
+#include "GaudiKernel/IIoComponentMgr.h"
 #include "GaudiKernel/ServiceHandle.h"
+#include "EventInfoMgt/ITagInfoMgr.h"
 
 
 class EventInfo;
@@ -53,7 +55,7 @@ class ByteStreamEventStorageOutputSvc :
       const std::string& name, ISvcLocator* pSvcLocator);
 
    /// Destructor.
-  virtual ~ByteStreamEventStorageOutputSvc() {}
+  virtual ~ByteStreamEventStorageOutputSvc() = default;
 
   /// Required of all Gaudi Services
   StatusCode initialize() override;
@@ -145,6 +147,8 @@ class ByteStreamEventStorageOutputSvc :
     "Key for bytestream metadata object in metadata store"};
 
   ServiceHandle< IIoComponentMgr > m_ioMgr{"IoComponentMgr", name()};
+  ServiceHandle< ITagInfoMgr > m_tagInfoMgr{"TagInfoMgr", name()};
+  ServiceHandle< StoreGateSvc > m_metaDataStore{"StoreGateSvc/MetaDataStore", name()};
 
  private:  // data
   //! number of event counter
@@ -197,4 +201,4 @@ class ByteStreamEventStorageOutputSvc :
 
 };
 
-#endif  // EVENT_BYTESTREAMCNVSVC_SRC_BYTESTREAMEVENTSTORAGEOUTPUTSVC_H_
+#endif  // BYTESTREAMCNVSVC_BYTESTREAMEVENTSTORAGEOUTPUTSVC_H

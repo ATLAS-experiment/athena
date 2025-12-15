@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 #====================================================================
 # BPHY24.py
@@ -24,7 +24,10 @@ def BPHY24Cfg(flags):
     finalCandidateList = []
 
     from AthenaServices.PartPropSvcConfig import PartPropSvcCfg
-    from DerivationFrameworkBPhys.commonBPHYMethodsCfg import (BPHY_V0ToolCfg,  BPHY_InDetDetailedTrackSelectorToolCfg, BPHY_VertexPointEstimatorCfg, BPHY_TrkVKalVrtFitterCfg)
+    from DerivationFrameworkBPhys.commonBPHYMethodsCfg import (
+        BPHY_V0ToolCfg, BPHY_InDetDetailedTrackSelectorToolCfg,
+        BPHY_VertexPointEstimatorCfg, BPHY_TrkVKalVrtFitterCfg,
+        AugOriginalCountsCfg)
     from JpsiUpsilonTools.JpsiUpsilonToolsConfig import PrimaryVertexRefittingToolCfg
     acc = ComponentAccumulator()
     PartPropSvcName = acc.getPrimaryAndMerge(PartPropSvcCfg(flags))
@@ -38,19 +41,16 @@ def BPHY24Cfg(flags):
     vpest = acc.popToolsAndMerge(BPHY_VertexPointEstimatorCfg(flags, BPHYDerivationName))
     acc.addPublicTool(vpest)
     PVrefit = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(flags))
-    acc.addPublicTool(PVrefit)
-
-
-    BPHY24_AugOriginalCounts = CompFactory.DerivationFramework.AugOriginalCounts(
-                        name = "BPHY24_AugOriginalCounts",
-                        VertexContainer = "PrimaryVertices",
-                        TrackContainer = "InDetTrackParticles" )
+    acc.addPublicTool(PVrefit) 
     
     bSkim = "(count(BPHY24JpsimmKshortCascadeSV1.Bd_mass) + count(BPHY24JpsieeKshortCascadeSV1.Bd_mass)) > 0"
 
     BPHY24_Skim_Bcandidates = CompFactory.DerivationFramework.xAODStringSkimmingTool( name  = "BPHY24_Skim_Bcandidates",
                                                                          expression = bSkim )
     skimList += [ BPHY24_Skim_Bcandidates ]
+
+    BPHY24_AugOriginalCounts = acc.popToolsAndMerge(
+        AugOriginalCountsCfg(flags, name = "BPHY24_AugOriginalCounts"))
     augsList += [ BPHY24_AugOriginalCounts ]
 
     # LRT track merge
@@ -121,21 +121,22 @@ def BPHY24Cfg(flags):
 
 
     # decorate electrons with the output of LH vloose (nod0)
-    ElectronPassLHvloose = CompFactory.DerivationFramework.EGElectronLikelihoodToolWrapper(name = "ElectronPassLHvloose",
+    from DerivationFrameworkEGamma.EGammaToolsConfig import EGElectronLikelihoodToolWrapperCfg
+    ElectronPassLHvloose = acc.addPublicTool(acc.popToolsAndMerge(EGElectronLikelihoodToolWrapperCfg(flags, name = "ElectronPassLHvloose",
                                             EGammaElectronLikelihoodTool = ElectronLHSelectorLHvloose,
                                             EGammaFudgeMCTool = "",
                                             CutType = "",
                                             StoreGateEntryName = "DFCommonElectronsLHVeryLoose",
                                             ContainerName = "Electrons",
-                                            StoreTResult=False)
+                                            StoreTResult=False)))
 
-    ElectronPassLHvloosenod0 = CompFactory.DerivationFramework.EGElectronLikelihoodToolWrapper(name = "ElectronPassLHvloosenod0",
+    ElectronPassLHvloosenod0 = acc.addPublicTool(acc.popToolsAndMerge(EGElectronLikelihoodToolWrapperCfg(flags, name = "ElectronPassLHvloosenod0",
                                             EGammaElectronLikelihoodTool = ElectronLHSelectorLHvloose_nod0,
                                             EGammaFudgeMCTool = "",
                                             CutType = "",
                                             StoreGateEntryName = "DFCommonElectronsLHVeryLoosenod0",
                                             ContainerName = "Electrons",
-                                            StoreTResult=False)
+                                            StoreTResult=False)))
     augsList += [ElectronPassLHvloose, ElectronPassLHvloosenod0]
 
     BPHY24DiElectronFinder = CompFactory.Analysis.JpsiFinder_ee(

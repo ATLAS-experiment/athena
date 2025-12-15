@@ -41,7 +41,7 @@ class FPGAClusterConverter : public extends<AthAlgTool,IFPGAClusterConverter>
  {
   public:
  
-    FPGAClusterConverter(const std::string& type, const std::string& name, const IInterface*);
+    FPGAClusterConverter(const std::string& type, const std::string& name, const IInterface* parent);
     virtual ~FPGAClusterConverter() = default;
     virtual StatusCode initialize() override final;
 
@@ -78,7 +78,6 @@ class FPGAClusterConverter : public extends<AthAlgTool,IFPGAClusterConverter>
     virtual StatusCode createPixelSPs(xAOD::SpacePointContainer& pixelSPs, xAOD::PixelClusterContainer& clustersCont ) const override final;
 
     virtual StatusCode getRdoList(std::vector<Identifier> &rdoList, const FPGATrackSimCluster& cluster) const override final;
-    virtual StatusCode getRdoList(std::vector<Identifier> &rdoList, const FPGATrackSimHit& hit) const override final;
     virtual StatusCode getStripsInfo(const xAOD::StripCluster& cl, float& halfStripLength, Amg::Vector3D& stripDirection, Amg::Vector3D& stripCenter) const override final;
 
     SG::ReadHandleKey<FPGATrackSimClusterCollection> m_FPGAClusterKey{this, "FPGATrackSimClusterKey","FPGAClusters","FPGATrackSim Clusters key"};

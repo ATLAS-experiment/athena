@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ///@author fledroit
@@ -52,9 +52,6 @@ public:
     /// any idHelper with the following method:
     virtual bool		do_neighbours   	() const = 0;
     virtual void		set_do_neighbours	(bool do_neighbours) = 0;
-
-    // setting pointer to the MessageSvc
-    virtual void                setMessageSvc  (IMessageSvc* msgSvc) = 0;
 
     virtual void                setDictVersion  (const IdDictMgr& dict_mgr, const std::string& name) = 0;
 };

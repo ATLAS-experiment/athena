@@ -114,7 +114,7 @@ def PoolWriteCfg(flags):
             # E.g., temporary RDO files that are used in Run-2 simulation.
             # For those, we have to use ZLIB
             from AthenaConfiguration.Enums import LHCPeriod
-            if "RDO" in stream and hasattr(flags, "GeoModel") and flags.GeoModel.Run < LHCPeriod.Run3:
+            if "RDO" in stream and flags.hasCategory("GeoModel") and flags.GeoModel.Run < LHCPeriod.Run3:
                 tempFileCompressionSetting = (1,1) # ZLIB at level 1
             logger.info(f"Stream {stream} is marked as temporary, overwriting the compression settings to {tempFileCompressionSetting}")
         compAlg, compLvl = tempFileCompressionSetting if isTemporaryStream else (compAlg, compLvl)

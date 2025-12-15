@@ -97,7 +97,7 @@ void MPIClusterSvc::handle(const Incident& inc) {
     const std::string fileName = fileInc->fileName();
     // Convert the hash into a signed int64. Just a hash so this doesn't matter.
     m_lastInputFileHash = static_cast<std::int64_t>(xxh3::hash64(fileName));
-    m_mpiLog_addFile.run(m_lastInputFileHash, fileName);
+    m_mpiLog_addFile.run(m_lastInputFileHash, std::move(fileName));
   }
   return;
 }

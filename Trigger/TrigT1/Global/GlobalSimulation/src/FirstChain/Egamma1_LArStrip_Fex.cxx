@@ -83,11 +83,11 @@ namespace GlobalSim {
     // A neighborhood is a collection of CellData objects which
     // contain cell eta, phi and Et.
     
-    auto neighborhoodTOBs = std::make_unique<IOBitwise::IeEmNbhoodTOBContainer>();
+    auto neighborhoodTOBs = std::make_unique<IOBitwise::eEmNbhoodTOBContainer>();
     
     CHECK(findNeighborhoods(rois, cells, *neighborhoodTOBs));
 
-    SG::WriteHandle<GlobalSim::IOBitwise::IeEmNbhoodTOBContainer> h_neighborhoodTOBs(m_neighKey, ctx);
+    SG::WriteHandle<GlobalSim::IOBitwise::eEmNbhoodTOBContainer> h_neighborhoodTOBs(m_neighKey, ctx);
 
     //BROKEN ATMa
     auto dumper = GlobalSim::LArStripNeighborhoodDumper();
@@ -111,7 +111,7 @@ namespace GlobalSim {
   StatusCode
   Egamma1_LArStrip_Fex::findNeighborhoods(const std::vector<const xAOD::eFexEMRoI*>& rois,
 					  const std::vector<const CaloCell*>& cells,
-					  IOBitwise::IeEmNbhoodTOBContainer& neighborhoodTOBs) const{
+					  IOBitwise::eEmNbhoodTOBContainer& neighborhoodTOBs) const{
     
     for (const auto& roi : rois) {
       CHECK(findNeighborhood(roi, cells, neighborhoodTOBs));
@@ -124,7 +124,7 @@ namespace GlobalSim {
   StatusCode
   Egamma1_LArStrip_Fex::findNeighborhood(const xAOD::eFexEMRoI* roi,
 					 const std::vector<const CaloCell*>& cells,
-					 IOBitwise::IeEmNbhoodTOBContainer& neighborhoodTOBs) const {
+					 IOBitwise::eEmNbhoodTOBContainer& neighborhoodTOBs) const {
     
     // this member function constructs an LArStripNeighborhood.
     // 

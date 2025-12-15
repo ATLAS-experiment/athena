@@ -199,7 +199,7 @@ PoolFilePeeker::PoolFilePeeker(const char* filename, const bool vbs) {
           m_fmd.m_beamEnergy=atoi(objValue.c_str());
         }
         if (objKey=="beam_type") {
-          m_fmd.m_beamType=objValue;
+          m_fmd.m_beamType=std::move(objValue);
         }
 
       }

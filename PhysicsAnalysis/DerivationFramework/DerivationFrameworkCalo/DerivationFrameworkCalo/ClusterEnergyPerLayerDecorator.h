@@ -1,10 +1,6 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
-
-///////////////////////////////////////////////////////////////////
-// ClusterEnergyPerLayerDecorator.h, (c) ATLAS Detector software
-///////////////////////////////////////////////////////////////////
 
 #ifndef DERIVATIONFRAMEWORK_ClusterEnergyPerLayerDecorator_H
 #define DERIVATIONFRAMEWORK_ClusterEnergyPerLayerDecorator_H
@@ -30,18 +26,14 @@ namespace DerivationFramework {
 class ClusterEnergyPerLayerDecorator : public extends<AthAlgTool, IAugmentationTool>
 {
 public:
-  ClusterEnergyPerLayerDecorator(const std::string& t,
-                                 const std::string& n,
-                                 const IInterface* p);
-  ~ClusterEnergyPerLayerDecorator();
-  StatusCode initialize();
-  StatusCode finalize();
-  virtual StatusCode addBranches(const EventContext& ctx) const;
+
+  using base_class::base_class;
+
+  virtual StatusCode initialize() override final;
+  virtual StatusCode addBranches(const EventContext& ctx) const override final;
 
 private:
-  int m_eta_size = 0;
-  int m_phi_size = 0;
-  std::vector<unsigned int> m_layers;
+  Gaudi::Property<std::vector<unsigned int>> m_layers{this, "layers", { 0, 1, 2, 3 } };
 
   SG::ReadHandleKey<xAOD::EgammaContainer>
     m_SGKey_photons{ this, "SGKey_photons", "", "SG key of photon container" };
@@ -70,20 +62,20 @@ private:
   SG::WriteDecorHandleKeyArray<xAOD::EgammaContainer>
     m_SGKey_photons_decorations{
       this,
-      "SGKey_photons_decorations_noConf",
-      {},
-      "SG keys for photon decorations not really configurable"
+      "SGKey_photons_decorations",
+      m_SGKey_photons, {},
+      "SG keys for photon decorations"
     };
 
   SG::WriteDecorHandleKeyArray<xAOD::EgammaContainer>
     m_SGKey_electrons_decorations{
       this,
-      "SGKey_electrons_decorations_noConf",
-      {},
-      "SG keys for electrons decorations not really configurable"
+      "SGKey_electrons_decorations",
+      m_SGKey_electrons, {},
+      "SG keys for electrons decorations"
     };
 
-  const CaloFillRectangularCluster* m_tool = nullptr;
+  const CaloFillRectangularCluster* m_tool{};
 
   std::vector<float> decorateObject(const EventContext& ctx,
                                     const xAOD::Egamma* egamma,

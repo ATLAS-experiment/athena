@@ -15,7 +15,7 @@
 #include "GaudiKernel/ToolHandle.h"
 
 // Athena includes
-#include "AthenaBaseComps/AthReentrantAlgorithm.h"
+#include "AthenaBaseComps/AthCondAlgorithm.h"
 #include "StoreGate/ReadCondHandleKey.h"
 #include "StoreGate/WriteCondHandleKey.h"
 
@@ -28,15 +28,14 @@
 class CondAttrListCollection;
 
 
-class NswDcsDbAlg: public AthReentrantAlgorithm{
+class NswDcsDbAlg: public AthCondAlgorithm{
 
 public:
 
-	using AthReentrantAlgorithm::AthReentrantAlgorithm;
+	using AthCondAlgorithm::AthCondAlgorithm;
 	virtual ~NswDcsDbAlg() = default;
 	virtual StatusCode initialize() override;
 	virtual StatusCode execute (const EventContext&) const override;
-	virtual bool isReEntrant() const override { return false; }
 
  
 private:

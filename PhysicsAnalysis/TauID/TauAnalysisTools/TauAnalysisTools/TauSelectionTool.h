@@ -149,7 +149,7 @@ private:
   Gaudi::Property<float> m_iNTrack{this, "NTrack", NAN};
   Gaudi::Property<float> m_dEleRNNSigTransMin{this, "EleRNNSigTransMin", NAN};
   Gaudi::Property<float> m_dEleRNNSigTransMax{this, "EleRNNSigTransMax", NAN};
-  Gaudi::Property<int> m_iJetIDWP{this, "JetIDWP", 0};
+  Gaudi::Property<int> m_iJetIDWP{this, "JetIDWP", 1}; // this corresponds to JETIDNONE
   Gaudi::Property<int> m_iEleIDWP{this, "EleIDWP", 0};
   Gaudi::Property<int> m_iEleIDVersion{this, "EleIDVersion", 1};
   Gaudi::Property<bool> m_bMuonOLR{this, "MuonOLR", false};

@@ -134,8 +134,7 @@ IdDictRange::resolve_references(IdDictMgr& /*idd*/,
   if (!m_resolved_references) {
     m_field = dictionary.find_field(m_field_name);
     if (m_field == nullptr) {
-      m_field = new IdDictField (m_field_name);
-      dictionary.add_field(m_field);
+      m_field = dictionary.add_field(std::make_unique<IdDictField> (m_field_name));
     }
 
     if (m_specification == unknown) {

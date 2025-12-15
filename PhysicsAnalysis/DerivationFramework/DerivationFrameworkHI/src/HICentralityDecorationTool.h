@@ -19,10 +19,11 @@ namespace DerivationFramework {
   class HICentralityDecorationTool : public extends<AthAlgTool, IAugmentationTool> {
 
   public:
-    HICentralityDecorationTool(const std::string& type, const std::string& name, const IInterface* parent);
+
+    using base_class::base_class;
 
     // Athena algtool's Hooks
-    StatusCode  initialize() override final;
+    virtual StatusCode  initialize() override final;
 
     virtual StatusCode addBranches(const EventContext& ctx) const override;
 

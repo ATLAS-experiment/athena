@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 /* Dear emacs, this is -*-c++-*- */
 #ifndef _ExpressionParserUser_H_
@@ -107,7 +107,8 @@ class ExpressionParserUser :  public ExpressionParserUserBase<T_Base, NUM_PARSER
 {
 public:
    template <typename...Args>
-   ExpressionParserUser(Args...args) : ExpressionParserUserBase<T_Base,NUM_PARSER>(args...) {}
+   ExpressionParserUser(Args&&...args)
+    : ExpressionParserUserBase<T_Base,NUM_PARSER>(std::forward<Args>(args)...) {}
    StatusCode initializeParser(const ExpressionParsing::SelectionArg<NUM_PARSER> &selection_string);
 
 };

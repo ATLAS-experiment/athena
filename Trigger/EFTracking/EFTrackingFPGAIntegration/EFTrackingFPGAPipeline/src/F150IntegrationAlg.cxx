@@ -60,21 +60,29 @@ namespace EFTrackingFPGAIntegration
             // Input
             m_pixelClusterInputBufferList.push_back(cl::Buffer(m_context, CL_MEM_READ_ONLY, EFTrackingTransient::PIXEL_CONTAINER_INPUT_BUF_SIZE * sizeof(uint64_t), nullptr, &err));
             m_stripClusterInputBufferList.push_back(cl::Buffer(m_context, CL_MEM_READ_ONLY, EFTrackingTransient::STRIP_CONTAINER_INPUT_BUF_SIZE * sizeof(uint64_t), nullptr, &err));
-
             
             m_pixelClusterOutputBufferList.push_back(cl::Buffer(m_context, CL_MEM_READ_WRITE, EFTrackingTransient::PIXEL_BLOCK_BUF_SIZE * sizeof(uint64_t), nullptr, &err));
             m_stripClusterOutputBufferList.push_back(cl::Buffer(m_context, CL_MEM_READ_WRITE, EFTrackingTransient::STRIP_BLOCK_BUF_SIZE * sizeof(uint64_t), nullptr, &err));
             m_pixelClusterEDMOutputBufferList.push_back(cl::Buffer(m_context, CL_MEM_READ_WRITE,EFTrackingTransient::PIXEL_BLOCK_BUF_SIZE * sizeof(uint64_t), nullptr, &err));
             m_stripClusterEDMOutputBufferList.push_back(cl::Buffer(m_context, CL_MEM_READ_WRITE, EFTrackingTransient::STRIP_BLOCK_BUF_SIZE * sizeof(uint64_t), nullptr, &err));
            
+            m_stripL2GInputBufferList.push_back(cl::Buffer(m_context, CL_MEM_READ_WRITE, EFTrackingTransient::STRIP_BLOCK_BUF_SIZE * sizeof(uint64_t), nullptr, &err));
+            m_stripL2GEDMInputBufferList.push_back(cl::Buffer(m_context, CL_MEM_READ_WRITE, EFTrackingTransient::STRIP_BLOCK_BUF_SIZE * sizeof(uint64_t), nullptr, &err));
             m_stripL2GOutputBufferList.push_back(cl::Buffer(m_context, CL_MEM_READ_WRITE, EFTrackingTransient::STRIP_BLOCK_BUF_SIZE * sizeof(uint64_t), nullptr, &err));
             m_stripL2GEDMOutputBufferList.push_back(cl::Buffer(m_context, CL_MEM_READ_WRITE, EFTrackingTransient::STRIP_BLOCK_BUF_SIZE * sizeof(uint64_t), nullptr, &err));
+            
             // EDMPrep
-            m_edmPixelOutputBufferList.push_back(cl::Buffer(m_context, CL_MEM_READ_WRITE, EFTrackingTransient::PIXEL_CONTAINER_BUF_SIZE * sizeof(uint64_t), nullptr, &err));
-            m_edmStripOutputBufferList.push_back(cl::Buffer(m_context, CL_MEM_READ_WRITE, EFTrackingTransient::STRIP_CONTAINER_BUF_SIZE * sizeof(uint64_t), nullptr, &err));
+            m_edmPixelInputBufferList.push_back(cl::Buffer(m_context, CL_MEM_READ_WRITE, EFTrackingTransient::PIXEL_BLOCK_BUF_SIZE * sizeof(uint64_t), nullptr, &err));
+            m_edmStripInputBufferList.push_back(cl::Buffer(m_context, CL_MEM_READ_WRITE, EFTrackingTransient::STRIP_BLOCK_BUF_SIZE * sizeof(uint64_t), nullptr, &err));
+
+            m_edmPixelOutputBufferList.push_back(cl::Buffer(m_context, CL_MEM_READ_WRITE, EFTrackingTransient::PIXEL_CONTAINER_BUF_SIZE * sizeof(uint32_t), nullptr, &err));
+            m_edmStripOutputBufferList.push_back(cl::Buffer(m_context, CL_MEM_READ_WRITE, EFTrackingTransient::STRIP_CONTAINER_BUF_SIZE * sizeof(uint32_t), nullptr, &err));
 
 
+            m_slicingEngineInputBufferList.push_back(cl::Buffer(m_context, CL_MEM_READ_WRITE, EFTrackingTransient::PIXEL_BLOCK_BUF_SIZE * sizeof(uint64_t), nullptr, &err));
             m_slicingEngineOutputBufferList.push_back(cl::Buffer(m_context, CL_MEM_READ_WRITE, EFTrackingTransient::TRACK_CONTAINER_BUF_SIZE * sizeof(uint64_t), nullptr, &err));
+ 
+            m_insideOutInputBufferList.push_back(cl::Buffer(m_context, CL_MEM_READ_WRITE,EFTrackingTransient::TRACK_CONTAINER_BUF_SIZE * sizeof(uint64_t), nullptr, &err));
             m_insideOutOutputBufferList.push_back(cl::Buffer(m_context, CL_MEM_READ_WRITE, EFTrackingTransient::TRACK_CONTAINER_BUF_SIZE * sizeof(uint64_t), nullptr, &err));
         }
 
@@ -186,6 +194,7 @@ namespace EFTrackingFPGAIntegration
         size_t stripL2GIndex = ctx.slot() % m_stripL2GKernels.size();
         size_t pixelEDMIndex = ctx.slot() % m_pixelEdmPrepKernels.size();
         size_t stripEDMIndex = ctx.slot() % m_stripEdmPrepKernels.size();
+        size_t slicingInIndex = ctx.slot() % m_slicingEngineInputKernels.size();
         size_t slicingOutIndex = ctx.slot() % m_slicingEngineOutputKernels.size();
         size_t insideOutInputIndex = ctx.slot() % m_insideOutInputKernels.size();
         size_t insideOutOutputIndex = ctx.slot() % m_insideOutOutputKernels.size();
@@ -197,33 +206,45 @@ namespace EFTrackingFPGAIntegration
         cl::Kernel &stripL2GKernel  = m_stripL2GKernels[stripL2GIndex];
         cl::Kernel &pixelEdmPrepKernel = m_pixelEdmPrepKernels[pixelEDMIndex];
         cl::Kernel &stripEdmPrepKernel = m_stripEdmPrepKernels[stripEDMIndex];
+        cl::Kernel &slicingEngineInputKernel = m_slicingEngineInputKernels[slicingInIndex];
         cl::Kernel &slicingEngineOutputKernel = m_slicingEngineOutputKernels[slicingOutIndex];
         cl::Kernel &insideOutInputKernel = m_insideOutInputKernels[insideOutInputIndex];
         cl::Kernel &insideOutOutputKernel = m_insideOutOutputKernels[insideOutOutputIndex];
 
 
         // Set kernel arguments
+        // Pixel clustering: (0=input, 1=raw out, 2=EDM out)
         pixelClusteringKernel.setArg(0, m_pixelClusterInputBufferList[bufferIndex]);
+        pixelClusteringKernel.setArg(1, m_pixelClusterOutputBufferList[bufferIndex]); 
         pixelClusteringKernel.setArg(2, m_pixelClusterEDMOutputBufferList[bufferIndex]);
-        
+
+        // Strip clustering: (0=input, 1=raw out, 2=EDM out, 3=size)
         stripClusteringKernel.setArg(0, m_stripClusterInputBufferList[bufferIndex]);
         stripClusteringKernel.setArg(1, m_stripClusterOutputBufferList[bufferIndex]);
         stripClusteringKernel.setArg(2, m_stripClusterEDMOutputBufferList[bufferIndex]);
         stripClusteringKernel.setArg(3, static_cast<unsigned int>((*stripInput).size()));
 
-        stripL2GKernel.setArg(0, m_stripClusterOutputBufferList[bufferIndex]);
-        stripL2GKernel.setArg(1, m_stripClusterEDMOutputBufferList[bufferIndex]);
+        // Strip L2G: (0=clusters in, 1=EDM in, 2=clusters out, 3=EDM out)
+        stripL2GKernel.setArg(0, m_stripL2GInputBufferList[bufferIndex]);   
+        stripL2GKernel.setArg(1, m_stripL2GEDMInputBufferList[bufferIndex]); 
         stripL2GKernel.setArg(2, m_stripL2GOutputBufferList[bufferIndex]);
         stripL2GKernel.setArg(3, m_stripL2GEDMOutputBufferList[bufferIndex]);
 
-        pixelEdmPrepKernel.setArg(0, m_pixelClusterEDMOutputBufferList[bufferIndex]);
+        // EDM prep: (0=in, 1=out)
+        pixelEdmPrepKernel.setArg(0, m_edmPixelInputBufferList[bufferIndex]);  
         pixelEdmPrepKernel.setArg(1, m_edmPixelOutputBufferList[bufferIndex]);
-        stripEdmPrepKernel.setArg(0, m_stripL2GEDMOutputBufferList[bufferIndex]);
+
+        stripEdmPrepKernel.setArg(0, m_edmStripInputBufferList[bufferIndex]);  
         stripEdmPrepKernel.setArg(1, m_edmStripOutputBufferList[bufferIndex]);
 
+        // SE: input + output
+        // input: (0=in buffer, 2=NWords), output: (1=out buffer)
+        slicingEngineInputKernel.setArg(0, m_slicingEngineInputBufferList[bufferIndex]);
         slicingEngineOutputKernel.setArg(1, m_slicingEngineOutputBufferList[bufferIndex]);
-        
-        insideOutInputKernel.setArg(0,  m_slicingEngineOutputBufferList[bufferIndex]);
+        // Arg 2 (NWords) is set later after we compute it.
+
+        // IO: input + output
+        insideOutInputKernel.setArg(0,  m_insideOutInputBufferList[bufferIndex]); 
         insideOutOutputKernel.setArg(0, m_insideOutOutputBufferList[bufferIndex]);
 
 
@@ -237,167 +258,126 @@ namespace EFTrackingFPGAIntegration
         std::vector<cl::Event> evt_vec_strip_input{evt_write_strip_input};
 
 
-        cl::Event evt_pixel_clustering;
-        cl::Event evt_strip_clustering;
+        cl::Event evt_pixel_clustering,  evt_strip_clustering;
         cl::Event evt_strip_l2g;
-        cl::Event evt_pixel_l2g;
-        cl::Event evt_edm_prep;
-        cl::Event evt_pixel_edm_prep;
-        cl::Event evt_strip_edm_prep;
-        cl::Event evt_slicing_done;
-        cl::Event evt_insideoutInput_done;
-        cl::Event evt_insideoutOutput_done;
+        cl::Event evt_pixel_edm_prep, evt_strip_edm_prep;
+        cl::Event evt_copy_strip_clusters_to_l2g_in, evt_copy_strip_edm_to_l2g_in;
+        cl::Event evt_copy_pix_edm_in, evt_copy_str_edm_in;
+
         {
             Athena::Chrono chrono("Kernel execution", m_chronoSvc.get());
             acc_queue.enqueueTask(pixelClusteringKernel, &evt_vec_pixel_input, &evt_pixel_clustering);
             acc_queue.enqueueTask(stripClusteringKernel, &evt_vec_strip_input, &evt_strip_clustering);
 
-            std::vector<cl::Event> evt_vec_strip_clustering{evt_strip_clustering};
-            acc_queue.enqueueTask(stripL2GKernel, &evt_vec_strip_clustering, &evt_strip_l2g);
+            std::vector<cl::Event> after_strip_cluster { evt_strip_clustering };
+            acc_queue.enqueueCopyBuffer(m_stripClusterOutputBufferList[bufferIndex], m_stripL2GInputBufferList[bufferIndex], 0, 0, EFTrackingTransient::STRIP_BLOCK_BUF_SIZE * sizeof(uint64_t), &after_strip_cluster, &evt_copy_strip_clusters_to_l2g_in);
+            acc_queue.enqueueCopyBuffer(m_stripClusterEDMOutputBufferList[bufferIndex], m_stripL2GEDMInputBufferList[bufferIndex],0, 0, EFTrackingTransient::STRIP_BLOCK_BUF_SIZE * sizeof(uint64_t),&after_strip_cluster, &evt_copy_strip_edm_to_l2g_in);
 
-            std::vector<cl::Event> evt_vec_pixelEDM{evt_pixel_clustering};
-            std::vector<cl::Event> evt_vec_strip_l2g{evt_strip_l2g};
-            acc_queue.enqueueTask(pixelEdmPrepKernel, &evt_vec_pixelEDM, &evt_pixel_edm_prep);
-            acc_queue.enqueueTask(stripEdmPrepKernel, &evt_vec_strip_l2g, &evt_strip_edm_prep);
+            std::vector<cl::Event> l2g_inputs {evt_copy_strip_clusters_to_l2g_in, evt_copy_strip_edm_to_l2g_in};
+            acc_queue.enqueueTask(stripL2GKernel, &l2g_inputs, &evt_strip_l2g);
             
-            acc_queue.enqueueTask(slicingEngineOutputKernel, nullptr, &evt_slicing_done);
-            
-            // Execute
-            ATH_MSG_DEBUG("Executing IO Kernel");
-            std::vector<cl::Event> evt_vec_slicing{evt_slicing_done};
-            acc_queue.enqueueTask(insideOutInputKernel,  &evt_vec_slicing, &evt_insideoutInput_done);
-            acc_queue.enqueueTask(insideOutOutputKernel, nullptr, &evt_insideoutOutput_done);
+            std::vector<cl::Event> after_pix_cluster { evt_pixel_clustering };
+            acc_queue.enqueueCopyBuffer( m_pixelClusterEDMOutputBufferList[bufferIndex], m_edmPixelInputBufferList[bufferIndex], 0, 0, EFTrackingTransient::PIXEL_BLOCK_BUF_SIZE * sizeof(uint64_t), &after_pix_cluster, &evt_copy_pix_edm_in);
+
+            std::vector<cl::Event> after_l2g { evt_strip_l2g };
+            acc_queue.enqueueCopyBuffer(m_stripL2GEDMOutputBufferList[bufferIndex], m_edmStripInputBufferList[bufferIndex], 0, 0, EFTrackingTransient::STRIP_BLOCK_BUF_SIZE * sizeof(uint64_t), &after_l2g, &evt_copy_str_edm_in);
+
+            std::vector<cl::Event> after_pix_edm_in { evt_copy_pix_edm_in };
+            std::vector<cl::Event> after_str_edm_in { evt_copy_str_edm_in };
+            acc_queue.enqueueTask(pixelEdmPrepKernel, &after_pix_edm_in, &evt_pixel_edm_prep);
+            acc_queue.enqueueTask(stripEdmPrepKernel, &after_str_edm_in, &evt_strip_edm_prep);
 
         }
-
         cl::Event evt_pixel_cluster_output;
         cl::Event evt_strip_cluster_output;
-        cl::Event evt_track_output;
-        
+
         std::vector<cl::Event> evt_vec_pixel_edm_prep {evt_pixel_edm_prep};
         std::vector<cl::Event> evt_vec_strip_edm_prep {evt_strip_edm_prep};
-        std::vector<cl::Event> evt_vec_insideout_output {evt_insideoutOutput_done};
-
-
 
         // output handles
-        SG::WriteHandle<std::vector<uint64_t>> FPGAPixelOutput(m_FPGAPixelOutput, ctx);
-        ATH_CHECK(FPGAPixelOutput.record(std::make_unique<std::vector<uint64_t> >(EFTrackingTransient::PIXEL_CONTAINER_BUF_SIZE, 0)));
+        SG::WriteHandle<std::vector<uint32_t>> FPGAPixelOutput(m_FPGAPixelOutput, ctx);
+        ATH_CHECK(FPGAPixelOutput.record(std::make_unique<std::vector<uint32_t> >(EFTrackingTransient::PIXEL_CONTAINER_BUF_SIZE, 0)));
 
-        SG::WriteHandle<std::vector<uint64_t>> FPGAStripOutput(m_FPGAStripOutput, ctx);
-        ATH_CHECK(FPGAStripOutput.record(std::make_unique<std::vector<uint64_t> >(EFTrackingTransient::STRIP_CONTAINER_BUF_SIZE, 0)));
+        SG::WriteHandle<std::vector<uint32_t>> FPGAStripOutput(m_FPGAStripOutput, ctx);
+        ATH_CHECK(FPGAStripOutput.record(std::make_unique<std::vector<uint32_t> >(EFTrackingTransient::STRIP_CONTAINER_BUF_SIZE, 0)));
 
-        SG::WriteHandle<std::vector<uint64_t>> FPGATrackOutput(m_FPGATrackOutput, ctx);
-        ATH_CHECK(FPGATrackOutput.record(std::make_unique<std::vector<uint64_t> >(EFTrackingTransient::TRACK_CONTAINER_BUF_SIZE, 0)));
+        acc_queue.enqueueReadBuffer(m_edmPixelOutputBufferList[bufferIndex],  CL_FALSE, 0, sizeof(uint32_t) * (*FPGAPixelOutput).size(), (*FPGAPixelOutput).data(), &evt_vec_pixel_edm_prep, &evt_pixel_cluster_output);
+        acc_queue.enqueueReadBuffer(m_edmStripOutputBufferList[bufferIndex],  CL_FALSE, 0, sizeof(uint32_t) * (*FPGAStripOutput).size(), (*FPGAStripOutput).data(), &evt_vec_strip_edm_prep, &evt_strip_cluster_output);
 
-        acc_queue.enqueueReadBuffer(m_edmPixelOutputBufferList[bufferIndex],  CL_FALSE, 0, sizeof(uint64_t) * (*FPGAPixelOutput).size(), (*FPGAPixelOutput).data(), &evt_vec_pixel_edm_prep, &evt_pixel_cluster_output);
-        acc_queue.enqueueReadBuffer(m_edmStripOutputBufferList[bufferIndex],  CL_FALSE, 0, sizeof(uint64_t) * (*FPGAStripOutput).size(), (*FPGAStripOutput).data(), &evt_vec_strip_edm_prep, &evt_strip_cluster_output);
-        acc_queue.enqueueReadBuffer(m_insideOutOutputBufferList[bufferIndex], CL_FALSE, 0, sizeof(uint64_t) * (*FPGATrackOutput).size(), (*FPGATrackOutput).data(), &evt_vec_insideout_output, &evt_track_output);
+        // Read the clusters out for now
+        cl::Event evt_read_pixel_cluster_raw;
+        std::vector<uint64_t> pixelClusterOut(EFTrackingTransient::PIXEL_BLOCK_BUF_SIZE, 0);
+        std::vector<cl::Event> after_pix_cluster { evt_pixel_clustering };
+        acc_queue.enqueueReadBuffer(m_pixelClusterOutputBufferList[bufferIndex], CL_FALSE, 0, sizeof(uint64_t) * pixelClusterOut.size(), pixelClusterOut.data(), &after_pix_cluster, &evt_read_pixel_cluster_raw);
 
-        std::vector<cl::Event> wait_for_reads = { evt_pixel_cluster_output, evt_strip_cluster_output, evt_track_output };
+        std::vector<cl::Event> wait_for_reads = { evt_pixel_cluster_output, evt_read_pixel_cluster_raw };
         cl::Event::waitForEvents(wait_for_reads);
-
-
-        dumpHexData((*FPGATrackOutput), "HW_F150i_Stream_insideOut.txt", ctx);
-
-
-        // ---------- Read remaining device buffers & dump to hex ----------
-
-        // Helper to query buffer size (bytes) -> element count
-        auto bufferElemCount = [](const cl::Buffer& b) -> size_t {
-            size_t bytes = 0;
-            b.getInfo(CL_MEM_SIZE, &bytes);
-            return bytes / sizeof(uint64_t);
-        };
-
-        // Host scratch areas (sized dynamically from device buffers)
-        std::vector<uint64_t> pixelClusterEDMOut(bufferElemCount(m_pixelClusterEDMOutputBufferList[bufferIndex]), 0);
-        std::vector<uint64_t> stripClusterOut    (bufferElemCount(m_stripClusterOutputBufferList[bufferIndex]),     0);
-        std::vector<uint64_t> stripClusterEDMOut (bufferElemCount(m_stripClusterEDMOutputBufferList[bufferIndex]),  0);
-        std::vector<uint64_t> stripL2GOut        (bufferElemCount(m_stripL2GOutputBufferList[bufferIndex]),         0);
-        std::vector<uint64_t> stripL2GEDMOut     (bufferElemCount(m_stripL2GEDMOutputBufferList[bufferIndex]),      0);
-        std::vector<uint64_t> slicingEngineOut   (bufferElemCount(m_slicingEngineOutputBufferList[bufferIndex]),     0);
-
-        // Read events for the above
-        cl::Event evt_read_pixel_cluster_edm;
-        cl::Event evt_read_strip_cluster;
-        cl::Event evt_read_strip_cluster_edm;
-        cl::Event evt_read_strip_l2g;
-        cl::Event evt_read_strip_l2g_edm;
-        cl::Event evt_read_slicing_out;
-
-        // Dependencies: make each read wait on the kernel that produced the buffer
-        std::vector<cl::Event> deps_pixel_clust_edm { evt_pixel_clustering };  // pixelClusteringKernel -> pixelClusterEDM
-        std::vector<cl::Event> deps_strip_clust     { evt_strip_clustering  }; // stripClusteringKernel -> strip cluster buffers
-        std::vector<cl::Event> deps_strip_l2g       { evt_strip_l2g         }; // stripL2GKernel -> strip L2G buffers
-        std::vector<cl::Event> deps_slicing         { evt_slicing_done      }; // slicingEngineOutputKernel -> slicing buffer
-
-        // Enqueue reads of intermediate / remaining buffers
-        acc_queue.enqueueReadBuffer(
-            m_pixelClusterEDMOutputBufferList[bufferIndex], CL_FALSE, 0,
-            sizeof(uint64_t) * pixelClusterEDMOut.size(), pixelClusterEDMOut.data(),
-            &deps_pixel_clust_edm, &evt_read_pixel_cluster_edm);
-
-        acc_queue.enqueueReadBuffer(
-            m_stripClusterOutputBufferList[bufferIndex], CL_FALSE, 0,
-            sizeof(uint64_t) * stripClusterOut.size(), stripClusterOut.data(),
-            &deps_strip_clust, &evt_read_strip_cluster);
-
-        acc_queue.enqueueReadBuffer(
-            m_stripClusterEDMOutputBufferList[bufferIndex], CL_FALSE, 0,
-            sizeof(uint64_t) * stripClusterEDMOut.size(), stripClusterEDMOut.data(),
-            &deps_strip_clust, &evt_read_strip_cluster_edm);
-
-        acc_queue.enqueueReadBuffer(
-            m_stripL2GOutputBufferList[bufferIndex], CL_FALSE, 0,
-            sizeof(uint64_t) * stripL2GOut.size(), stripL2GOut.data(),
-            &deps_strip_l2g, &evt_read_strip_l2g);
-
-        acc_queue.enqueueReadBuffer(
-            m_stripL2GEDMOutputBufferList[bufferIndex], CL_FALSE, 0,
-            sizeof(uint64_t) * stripL2GEDMOut.size(), stripL2GEDMOut.data(),
-            &deps_strip_l2g, &evt_read_strip_l2g_edm);
-
-        acc_queue.enqueueReadBuffer(
-            m_slicingEngineOutputBufferList[bufferIndex], CL_FALSE, 0,
-            sizeof(uint64_t) * slicingEngineOut.size(), slicingEngineOut.data(),
-            &deps_slicing, &evt_read_slicing_out);
-
-        // Wait for *all* reads (existing finals + new intermediates)
-        std::vector<cl::Event> all_reads = {
-            // existing final outputs:
-            evt_pixel_cluster_output, evt_strip_cluster_output, evt_track_output,
-            // new reads:
-            evt_read_pixel_cluster_edm,
-            evt_read_strip_cluster, evt_read_strip_cluster_edm,
-            evt_read_strip_l2g, evt_read_strip_l2g_edm,
-            evt_read_slicing_out
-        };
-        cl::Event::waitForEvents(all_reads);
-
-        // Dump everything to hex files (include inputs for completeness)
-        dumpHexData((*pixelInput), "HW_F150i_Stream_pixelInput_event.txt", ctx);
-        dumpHexData((*stripInput), "HW_F150i_Stream_stripInput_event.txt", ctx);
-
-        // Final container outputs (already read into WriteHandles)
-        dumpHexData((*FPGAPixelOutput), "HW_F150i_Stream_pixelEDM_event.txt", ctx);
-        dumpHexData((*FPGAStripOutput), "HW_F150i_Stream_stripEDM_event.txt", ctx);
-
-        // Intermediates
-        dumpHexData(pixelClusterEDMOut,  "HW_F150i_Stream_pixelClusterEDM_event.txt", ctx);
-        dumpHexData(stripClusterOut,     "HW_F150i_Stream_stripCluster_event.txt", ctx);
-        dumpHexData(stripClusterEDMOut,  "HW_F150i_Stream_stripClusterEDM_event.txt", ctx);
-        dumpHexData(stripL2GOut,         "HW_F150i_Stream_stripL2G_event.txt", ctx);
-        dumpHexData(stripL2GEDMOut,      "HW_F150i_Stream_stripL2GEDM_event.txt", ctx);
-        dumpHexData(slicingEngineOut,    "HW_F150i_Stream_slicingEngineOut_event.txt", ctx);
-
-
-
+        
         mnt_timer_Total.stop();
 
         if(pixelInput->size() == 6) (*FPGAPixelOutput)[0] = 0; // if no pixel input, set the first element to 0
         if(stripInput->size() == 6) (*FPGAStripOutput)[0] = 0; // if no strip input, set the first element to 0
 
+
+        // Scan the pixel clustering words to see where the footer is
+        // scan footer
+        int nWords = static_cast<int>(pixelClusterOut.size()) - 1;
+        for (; nWords >= 0; --nWords)
+        {
+            if (pixelClusterOut[nWords] == 0xcd00000000000000) break;
+        }
+        if (nWords < 0) 
+        {
+            ATH_MSG_ERROR("Footer 0xcd00000000000000 not found in pixelClusterOut");
+            return StatusCode::FAILURE;
+        }
+        if (nWords > 0) nWords += 3;  // account for 3-word footer
+
+        // Padd the output with zero to the next 8th word
+        for (int i = 0; i < 8 && (nWords + i) < static_cast<int>(pixelClusterOut.size()); ++i)
+        {
+            pixelClusterOut[nWords + i] = 0;
+        }
+
+        cl::Event evt_write_se_in;
+        cl::Event evt_se_input_done, evt_se_output_done;
+        cl::Event evt_insideoutInput_done, evt_insideoutOutput_done;
+        cl::Event evt_track_output;
+
+        {
+            // set NWords (arg 2) for SE input kernel
+            slicingEngineInputKernel.setArg(2, static_cast<unsigned long long>(nWords));
+
+            // write SE input buffer
+            acc_queue.enqueueWriteBuffer(m_slicingEngineInputBufferList[bufferIndex], CL_FALSE, 0, pixelClusterOut.size() * sizeof(uint64_t), pixelClusterOut.data(), nullptr, &evt_write_se_in);
+
+            // run SE kernels (input then output)
+            
+            std::vector<cl::Event> after_se_write { evt_write_se_in };
+            acc_queue.enqueueTask(slicingEngineInputKernel,  &after_se_write, &evt_se_input_done);
+            acc_queue.enqueueTask(slicingEngineOutputKernel, nullptr,         &evt_se_output_done);
+            
+            // copy SE out → IO input
+            cl::Event evt_copy_se_to_io_in;
+
+            std::vector<cl::Event> after_se_out { evt_se_output_done };
+            acc_queue.enqueueCopyBuffer(m_slicingEngineOutputBufferList[bufferIndex],  m_insideOutInputBufferList[bufferIndex], 0, 0, EFTrackingTransient::TRACK_CONTAINER_BUF_SIZE * sizeof(uint64_t),     &after_se_out, &evt_copy_se_to_io_in);
+
+            std::vector<cl::Event> after_io_in { evt_copy_se_to_io_in };
+            acc_queue.enqueueTask(insideOutInputKernel,  &after_io_in, &evt_insideoutInput_done);
+            acc_queue.enqueueTask(insideOutOutputKernel, nullptr, &evt_insideoutOutput_done);
+        }
+
+                
+        SG::WriteHandle<std::vector<uint64_t>> FPGATrackOutput(m_FPGATrackOutput, ctx);
+        ATH_CHECK(FPGATrackOutput.record(std::make_unique<std::vector<uint64_t> >(EFTrackingTransient::TRACK_CONTAINER_BUF_SIZE, 0)));
+
+        // read back tracks (you already do this—just make it depend on IO out)
+        std::vector<cl::Event> evt_vec_insideout_output { evt_insideoutOutput_done };
+        acc_queue.enqueueReadBuffer(m_insideOutOutputBufferList[bufferIndex], CL_FALSE, 0, sizeof(uint64_t) * (*FPGATrackOutput).size(), (*FPGATrackOutput).data(), &evt_vec_insideout_output, &evt_track_output);
+
+        std::vector<cl::Event> wait_for_Trackreads = { evt_track_output };
+        cl::Event::waitForEvents(wait_for_Trackreads);
 
         // calculate the time for the kernel execution
         // get the time of writing pixel input buffer

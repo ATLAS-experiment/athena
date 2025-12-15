@@ -132,8 +132,8 @@ StatusCode F1X0XRTIntegrationAlg::initialize()
 
     // Final EDM containers (outputs)
     // PixelEDM(arg1) and StripEDM(arg1) are the output BOs
-    m_edmPixelOutputBOList.emplace_back(xrt::bo{m_xrtDevice, EFTrackingTransient::PIXEL_CONTAINER_BUF_SIZE * sizeof(uint64_t), xrt::bo::flags::normal, gid(kPEDM, 1)});
-    m_edmStripOutputBOList.emplace_back(xrt::bo{m_xrtDevice, EFTrackingTransient::STRIP_CONTAINER_BUF_SIZE * sizeof(uint64_t), xrt::bo::flags::normal, gid(kSEDM, 1)});
+    m_edmPixelOutputBOList.emplace_back(xrt::bo{m_xrtDevice, EFTrackingTransient::PIXEL_CONTAINER_BUF_SIZE * sizeof(uint32_t), xrt::bo::flags::normal, gid(kPEDM, 1)});
+    m_edmStripOutputBOList.emplace_back(xrt::bo{m_xrtDevice, EFTrackingTransient::STRIP_CONTAINER_BUF_SIZE * sizeof(uint32_t), xrt::bo::flags::normal, gid(kSEDM, 1)});
   }
 
   return StatusCode::SUCCESS;
@@ -323,11 +323,11 @@ StatusCode F1X0XRTIntegrationAlg::execute(const EventContext &ctx) const
   ATH_MSG_DEBUG("Kernel execution time: " << (ns_between(t_k0, t_kend) / 1e6) << " ms");
 
   // Output handles and readbacks
-  SG::WriteHandle<std::vector<uint64_t>> FPGAPixelOutput(m_FPGAPixelOutput, ctx);
-  ATH_CHECK(FPGAPixelOutput.record(std::make_unique<std::vector<uint64_t>>(EFTrackingTransient::PIXEL_CONTAINER_BUF_SIZE, 0)));
+  SG::WriteHandle<std::vector<uint32_t>> FPGAPixelOutput(m_FPGAPixelOutput, ctx);
+  ATH_CHECK(FPGAPixelOutput.record(std::make_unique<std::vector<uint32_t>>(EFTrackingTransient::PIXEL_CONTAINER_BUF_SIZE, 0)));
 
-  SG::WriteHandle<std::vector<uint64_t>> FPGAStripOutput(m_FPGAStripOutput, ctx);
-  ATH_CHECK(FPGAStripOutput.record(std::make_unique<std::vector<uint64_t>>(EFTrackingTransient::STRIP_CONTAINER_BUF_SIZE, 0)));
+  SG::WriteHandle<std::vector<uint32_t>> FPGAStripOutput(m_FPGAStripOutput, ctx);
+  ATH_CHECK(FPGAStripOutput.record(std::make_unique<std::vector<uint32_t>>(EFTrackingTransient::STRIP_CONTAINER_BUF_SIZE, 0)));
 
   const auto t_ro0 = std::chrono::steady_clock::now();
   bo_pix_edm_cont.sync(XCL_BO_SYNC_BO_FROM_DEVICE);

@@ -46,8 +46,8 @@ namespace EFTrackingFPGAIntegration
         SG::ReadHandleKey<std::vector<uint64_t>> m_FPGAPixelRDO{this, "FPGAEncodedPixelKey", "FPGAEncodedPixelRDOs", "Pixel RDO converted to FPGA format"};
         SG::ReadHandleKey<std::vector<uint64_t>> m_FPGAStripRDO{this, "FPGAEncodedStripKey", "FPGAEncodedStripRDOs", "Strip RDO converted to FPGA format"};
 
-        SG::WriteHandleKey<std::vector<uint64_t>> m_FPGAPixelOutput{this, "FPGAOutputPixelKey", "FPGAPixelOutput", "Pixel output from FPGA format"};
-        SG::WriteHandleKey<std::vector<uint64_t>> m_FPGAStripOutput{this, "FPGAOutputStripKey", "FPGAStripOutput", "Strip output from FPGA format"};
+        SG::WriteHandleKey<std::vector<uint32_t>> m_FPGAPixelOutput{this, "FPGAOutputPixelKey", "FPGAPixelOutput", "Pixel output from FPGA format"};
+        SG::WriteHandleKey<std::vector<uint32_t>> m_FPGAStripOutput{this, "FPGAOutputStripKey", "FPGAStripOutput", "Strip output from FPGA format"};
         SG::WriteHandleKey<std::vector<uint64_t>> m_FPGATrackOutput{this, "FPGAOutputTrackKey", "FPGATrackOutput", "Track output from FPGA format"};
 
         Gaudi::Property<int> m_FPGAThreads{this, "FPGAThreads", 1, "number of FPGA threads to initialize"}; 
@@ -105,12 +105,23 @@ namespace EFTrackingFPGAIntegration
         std::vector<cl::Buffer> m_pixelClusterEDMOutputBufferList;
         std::vector<cl::Buffer> m_stripClusterEDMOutputBufferList;
         // L2G
+        std::vector<cl::Buffer> m_stripL2GInputBufferList;
+        std::vector<cl::Buffer> m_stripL2GEDMInputBufferList;
         std::vector<cl::Buffer> m_stripL2GOutputBufferList;
         std::vector<cl::Buffer> m_stripL2GEDMOutputBufferList;
+
+        // EDM prep
+        std::vector<cl::Buffer> m_edmPixelInputBufferList;
+        std::vector<cl::Buffer> m_edmStripInputBufferList;
         std::vector<cl::Buffer> m_edmPixelOutputBufferList;
         std::vector<cl::Buffer> m_edmStripOutputBufferList;
 
+        // Slicing
+        std::vector<cl::Buffer> m_slicingEngineInputBufferList;
         std::vector<cl::Buffer> m_slicingEngineOutputBufferList;
+
+        // insideout
+        std::vector<cl::Buffer> m_insideOutInputBufferList;
         std::vector<cl::Buffer> m_insideOutOutputBufferList;
 
         // Command queue

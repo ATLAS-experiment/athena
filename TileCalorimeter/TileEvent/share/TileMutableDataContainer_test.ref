@@ -1,10 +1,4 @@
 TileMutableDataContainer_test
 TileHWID             INFO initialize_from_dictionary 
-Athena::getMessageSvc: WARNING MessageSvc not found, will use std::cout
-Athena::getMessageSvc: WARNING MessageSvc not found, will use std::cout
 TileTBID             INFO initialize_from_dictionary 
-Athena::getMessageSvc: WARNING MessageSvc not found, will use std::cout
-Athena::getMessageSvc: WARNING MessageSvc not found, will use std::cout
-Athena::getMessageSvc: WARNING MessageSvc not found, will use std::cout
-Athena::getMessageSvc: WARNING MessageSvc not found, will use std::cout
 test1

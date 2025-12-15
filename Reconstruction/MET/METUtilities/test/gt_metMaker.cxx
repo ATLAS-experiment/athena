@@ -69,6 +69,7 @@ namespace met {
   }; // METMakerTest
 
   TEST_F( METMakerTest, TestInitialize ){
+    ASSERT_TRUE(tool.setProperty("JetContainer", "dummyjets") == StatusCode::SUCCESS);
     ASSERT_TRUE(tool.initialize().isSuccess());
   }
 

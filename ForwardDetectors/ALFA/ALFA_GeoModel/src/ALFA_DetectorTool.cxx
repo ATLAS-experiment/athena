@@ -1,19 +1,25 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
-
-#include "GeoModelUtilities/GeoModelExperiment.h"
-#include "GaudiKernel/IService.h"
-#include "GaudiKernel/ISvcLocator.h"
-#include "GaudiKernel/MsgStream.h"
-#include "StoreGate/StoreGateSvc.h"
-#include "RDBAccessSvc/IRDBAccessSvc.h"
-#include "GeoModelKernel/GeoFullPhysVol.h"
-#include "GeoModelUtilities/StoredPhysVol.h"
-
 #include "ALFA_DetectorTool.h"
 #include "ALFA_DetectorFactory.h" 
 #include "ALFA_GeoModel/ALFA_DetectorManager.h" 
+
+#include "GeoModelUtilities/GeoModelExperiment.h"
+
+#include "GaudiKernel/IService.h"
+#include "GaudiKernel/ISvcLocator.h"
+#include "GaudiKernel/MsgStream.h"
+
+#include "GeoModelKernel/GeoFullPhysVol.h"
+#include "GeoModelUtilities/StoredPhysVol.h"
+
+#include "StoreGate/StoreGateSvc.h"
+#include "RDBAccessSvc/IRDBAccessSvc.h"
+#include "AthenaPoolUtilities/CondAttrListCollection.h"
+
+
+
 
 using namespace std;
 

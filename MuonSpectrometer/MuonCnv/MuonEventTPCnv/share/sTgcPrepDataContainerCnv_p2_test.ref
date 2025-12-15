@@ -57,8 +57,8 @@ eta_index     7
  DEBUG PixelID::initialize_from_dict 
  DEBUG Wafer range -> 2/1/0/0/0:21/-6:6 | 2/1/0/1/0:37/-6:6 | 2/1/0/2/0:51/-6:6 | 2/1/-2,2/0:2/0:47/0
  DEBUG Pixel range -> 2/1/0/0/0:21/-6:6/0:327/0:191 | 2/1/0/1/0:37/-6:6/0:327/0:143 | 2/1/0/2/0:51/-6:6/0:327/0:143 | 2/1/-2,2/0:2/0:47/0/0:327/0:143
-INFO SCT_ID::initialize_from_dictionary 
-TRT_ID               INFO Initialize from dictionary msgSvc 0
+SCT_ID               INFO initialize_from_dictionary
+TRT_ID               INFO Initialize from dictionary
  DEBUG (Re)initialize
  DEBUG decode index and bit fields for each level: 
  DEBUG indet     decode 1 vals 2,4,5,7,10,11,12,13 mask/zero mask/shift/bits/offset 7   1fffffffffffffff 61 3  0  indexes 0 0 1 2 0 3 0 0 4 5 6 7 mode  enumerated  

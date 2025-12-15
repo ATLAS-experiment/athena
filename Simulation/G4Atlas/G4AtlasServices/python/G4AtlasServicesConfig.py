@@ -56,3 +56,9 @@ def PhysicsListSvcCfg(flags, name="PhysicsListSvc", **kwargs):
         kwargs.setdefault("UnstableAntiNeutrons", True) # Fix for ATLASSIM-6634 - consider fixing for FullG4 also
     result.addService(CompFactory.PhysicsListSvc(name, **kwargs), primary = True)
     return result
+
+
+def UserLimitsSvcCfg(flags, name="UserLimitsSvc", **kwargs):
+    result = ComponentAccumulator()
+    result.addService(CompFactory.UserLimitsSvc(name, **kwargs), primary = True)
+    return result

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef BYTESTREAMCNVSVC_BYTESTREAMDATAWRITER_H
@@ -121,7 +121,7 @@ public:
 
 
     ByteStreamDataWriter() {}
-    virtual ~ByteStreamDataWriter() {}
+    virtual ~ByteStreamDataWriter() = default;
 
     // abstract class cannot be copied
     ByteStreamDataWriter(const ByteStreamDataWriter&) = delete;

@@ -49,7 +49,6 @@ StatusCode PixelClusteringTool::initialize()
   ATH_MSG_DEBUG("   " << m_checkGanged );
     
   ATH_CHECK(m_pixelLorentzAngleTool.retrieve());
-  ATH_CHECK(m_pixelReadout.retrieve());
 
   ATH_CHECK(m_chargeDataKey.initialize(not m_chargeDataKey.empty()));
 
@@ -67,12 +66,12 @@ PixelClusteringTool::PixelClusteringTool(
 {}
 
 StatusCode
-PixelClusteringTool::makeCluster(const EventContext& ctx,
-				 PixelClusteringTool::Cluster &cluster,
+PixelClusteringTool::makeCluster(PixelClusteringTool::Cluster &cluster,
 				 const InDetDD::SiDetectorElement* element,
 				 const InDetDD::PixelModuleDesign& design,
 				 const PixelChargeCalibCondData *calibData,
 				 const PixelChargeCalibCondData::CalibrationStrategy calibStrategy,
+				 const double lorentz_shift,
 				 xAOD::PixelCluster& xaodcluster) const
 { 
 
@@ -117,17 +116,15 @@ PixelClusteringTool::makeCluster(const EventContext& ctx,
     InDetDD::PixelDiodeTree::DiodeProxyWithPosition si_param ( design.diodeProxyFromIdxCachePosition(diode_idx));
 
     if (calibData) {
+      // Retrieving the calibration only depends on FE and not per cell (can be further optimized)
+      // Single FE modules could have an optimized getCharge function where the calib constants are cached
+      std::uint32_t feValue = design.getFE(si_param);
+      auto diode_type = design.getDiodeType(si_param);
       if (m_isITk){
         if (design.getReadoutTechnology() != InDetDD::PixelReadoutTechnology::RD53) {
     ATH_MSG_ERROR("Chip type is not recognized!");
     return StatusCode::FAILURE;
         }
-
-        // The calibration strategy is updated for each element
-        // Retrieving the calibration only depends on FE and not per cell (can be further optimized)
-        // Single FE modules could have an optimized getCharge function where the calib constants are cached
-        std::uint32_t feValue = design.getFE(si_param);
-        auto diode_type = design.getDiodeType(si_param);
 
         charge = calibData->getCharge(diode_type,
               calibStrategy,
@@ -136,11 +133,9 @@ PixelClusteringTool::makeCluster(const EventContext& ctx,
               tot);
         chargeList.push_back(charge);
       } else {
-        Identifier moduleID = m_pixelID->wafer_id(id);
-        IdentifierHash moduleHash = m_pixelID->wafer_hash(moduleID);
-        charge = calibData->getCharge(m_pixelReadout->getDiodeType(id),
+        charge = calibData->getCharge(diode_type,
                                       moduleHash,
-                                      m_pixelReadout->getFE(id, moduleID),
+                                      feValue,
                                       tot);
 
         // These numbers are taken from the Cluster Maker Tool
@@ -196,9 +191,8 @@ PixelClusteringTool::makeCluster(const EventContext& ctx,
   double phiWidth = rowmax_diode.xPhiMax() - rowmin_diode.xPhiMin(); // design.widthFromColumnRange(colmin, colmax);
 
   // ask for Lorentz correction, get global position
-  double shift = m_pixelLorentzAngleTool->getLorentzShift(moduleHash, ctx);
   const Amg::Vector2D localPos = pos_acc;
-  Amg::Vector2D locpos(localPos[Trk::locX]+shift, localPos[Trk::locY]);
+  Amg::Vector2D locpos(localPos[Trk::locX]+lorentz_shift, localPos[Trk::locY]);
   // find global position of element
   const Amg::Transform3D& T = element->surface().transform();
   double Ax[3] = {T(0,0),T(1,0),T(2,0)};
@@ -298,15 +292,17 @@ PixelClusteringTool::makeClusters(const EventContext& ctx,
   // Get the calibration strategy for this module. 
   // Default to RD53 if the calibData is not available. That is fine because it won't be used anyway
   auto calibrationStrategy = calibData ? calibData->getCalibrationStrategy(element.identifyHash()) : PixelChargeCalibCondData::CalibrationStrategy::RD53;
+
+  double lorentz_shift = m_pixelLorentzAngleTool->getLorentzShift(element.identifyHash(), ctx);
   
   for (typename IPixelClusteringTool::Cluster& cl : clusters) {
     xAOD::PixelCluster* xaodCluster = *itrContainer;
-    ATH_CHECK(makeCluster(ctx,
-			  cl,
+    ATH_CHECK(makeCluster(cl,
 			  &element,
 			  design,
 			  calibData,
 			  calibrationStrategy,
+			  lorentz_shift,
 			  *xaodCluster));
     ++itrContainer;
   }

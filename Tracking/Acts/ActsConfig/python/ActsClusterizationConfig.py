@@ -60,9 +60,6 @@ def ActsPixelClusteringToolCfg(flags,
         acc.merge(ITkPixelOfflineCalibCondAlgCfg(flags))        
         kwargs.setdefault('PixelChargeCalibCondData', 'ITkPixelChargeCalibCondData')
 
-    from PixelReadoutGeometry.PixelReadoutGeometryConfig import ITkPixelReadoutManagerCfg
-    acc.merge(ITkPixelReadoutManagerCfg(flags))
-    
     if "PixelLorentzAngleTool" not in kwargs:
         from SiLorentzAngleTool.ITkPixelLorentzAngleConfig import ITkPixelLorentzAngleToolCfg
         kwargs.setdefault("PixelLorentzAngleTool", acc.popToolsAndMerge( ITkPixelLorentzAngleToolCfg(flags) ))

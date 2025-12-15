@@ -123,6 +123,8 @@ def L1CALOCoreCfg(flags, deriv='L1CALO1', **kwargs):
     # Create SC_ET if sufficient samples in data or it is MC
     if nsamples==6:
         # first built the Supercells from the ADC
+        from LArConfiguration.LArElecCalibDBConfig import LArElecCalibDBSCCfg
+        acc.merge(LArElecCalibDBSCCfg(flags, condObjs=["DAC2uA", "HVScaleCorr", "MphysOverMcal", "OFC", "Pedestal", "Ramp", "uA2MeV"]))
         larLATOMEBuilderAlg=CompFactory.LArLATOMEBuilderAlg("LArLATOMEBuilderAlg2")
         # for standard runs with baseline corrections
         baselineCorr = True # need to find a run with no baseline corrections and the correct settings to see what to expect
@@ -518,11 +520,9 @@ def L1CALOCoreCfg(flags, deriv='L1CALO1', **kwargs):
          "L1_jFexDataTowers":"xAOD::jFexTowerContainer",
          "L1_jFexDataTowersAux":"xAOD::jFexTowerAuxContainer",
          "L1_gFexDataTowers":"xAOD::gFexTowerContainer",
-         "L1_gFexDataTowersAux":"xAOD::gFexTowerAuxContainer",
-         "L1_gFexDataTowers50":"xAOD::gFexTowerContainer",
-         "L1_gFexDataTowers50Aux":"xAOD::gFexTowerAuxContainer"}
+         "L1_gFexDataTowersAux":"xAOD::gFexTowerAuxContainer"}
     )
-    AllVariables += ["L1_eFexDataTowers","L1_jFexDataTowers","L1_gFexDataTowers","L1_gFexDataTowers50"]
+    AllVariables += ["L1_eFexDataTowers","L1_jFexDataTowers","L1_gFexDataTowers"]
 
     # Emulated eFEX input tower data from LATOME
     L1CaloSlimmingHelper.AppendToDictionary.update (

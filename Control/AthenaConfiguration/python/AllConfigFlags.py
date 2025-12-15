@@ -33,6 +33,7 @@ def initConfigFlags():
     acf.addFlag('Exec.FPE', 0, help='FPE check mode: -2 (no FPE check), -1 (abort with core-dump), 0 (FPE Auditor w/o stack-tace) , >0 (number of stack-traces printed by the job)')
     acf.addFlag('Exec.EventTimeOut', 0, help='per-event timeout (in ns) after which the job is aborted (0 means no timeout)')
     acf.addFlag('Exec.EventPrintoutInterval', 1, help='interval of event heartbeat printouts from the loop manager')
+    acf.addFlag('Exec.StopOnSignal', [], help='List of signal names that can be used to stop the job gracefully. See SignalMonitorSvc in GaudiUtils.' )
 
     #Custom messaging for components, see Utils.setupLoggingLevels
     acf.addFlag('Exec.VerboseMessageComponents', [], help='verbose output for listed components (wildcards)')
@@ -362,6 +363,7 @@ def initConfigFlags():
         acf.addFlag("IOVDb.CleanerRingSize",lambda prevFlags : 0 if prevFlags.Trigger.doHLT else 2*max(1, prevFlags.Concurrency.NumConcurrentEvents), help='size of ring-buffer for conditions cleaner')
         acf.addFlag("IOVDb.SqliteInput","",help="Folders found in this file will be used instead of the production db")
         acf.addFlag("IOVDb.SqliteFolders",(),help="Folders listed here will be taken from the IOVDb.SqliteInput file instead of the production db. If empty, all folders found in the file are used.")
+        acf.addFlag("IOVDb.WriteParametersAsMetaData", False, help="Write simulation/digitization parameters directly as in-file metadata (True) or via intermediate sqlite files (False)")
 
 #PoolSvc Flags:
     acf.addFlag("PoolSvc.MaxFilesOpen", lambda prevFlags : 2 if prevFlags.MP.UseSharedReader else 0, help='maximum number of open files')

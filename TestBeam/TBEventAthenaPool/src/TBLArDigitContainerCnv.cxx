@@ -1,10 +1,9 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TBLArDigitContainerCnv.h"
 #include "TBTPCnv/TBLArDigitContainer_p1.h"
-//#include "LArRawEvent/LArDigitContainer.h"
 
 
 TBLArDigitContainerCnv::TBLArDigitContainerCnv(ISvcLocator* svcLoc) : 
@@ -27,25 +26,23 @@ TBLArDigitContainer* TBLArDigitContainerCnv::createTransient() {
    MsgStream log(msgSvc(), "TBLArDigitContainerCnv" );
    constexpr pool::Guid p0_guid("B15FFDA0-206D-4062-8B5F-582A1ECD5502"); // GUID of the transient object
    constexpr pool::Guid p1_guid("9F58DDD2-ACDC-4ECF-A714-779B05F94649");  // GUID of the persistent object
-   TBLArDigitContainer* trans=new TBLArDigitContainer();
+   auto trans = std::make_unique<TBLArDigitContainer>();
+   TBLArDigitContainer* result{};
    if (compareClassGuid(p0_guid)) {
      log << MSG::DEBUG << "Read version p0 of TBLArDigitContainer. GUID=" 
          << m_classID.toString() << endmsg;
-     return poolReadObject<TBLArDigitContainer>();
-   }
-   else if (compareClassGuid(p1_guid)) {
+     result = poolReadObject<TBLArDigitContainer>();
+   } else if (compareClassGuid(p1_guid)) {
      log << MSG::DEBUG << "Reading TBLArDigitContainer_p1. GUID=" 
          << m_classID.toString() << endmsg;
-     TBLArDigitContainer_p1* pers=poolReadObject<TBLArDigitContainer_p1>();
-     m_converter.persToTrans(pers,trans, log);
-     delete pers;
-     return trans;
-   }
-   else {
+     std::unique_ptr<TBLArDigitContainer_p1> pers (poolReadObject<TBLArDigitContainer_p1>());
+     m_converter.persToTrans(pers.get(),trans.get(), log);
+     result = trans.release();
+   } else {
      log << MSG::ERROR << "Unsupported persistent version of TBLArDigitContainer. GUID="
      << m_classID.toString() << endmsg;
      throw std::runtime_error("Unsupported persistent version of Data Collection");
    }
-   return trans;
+   return result;
 }
 

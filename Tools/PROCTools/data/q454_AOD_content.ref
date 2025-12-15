@@ -2052,6 +2052,7 @@ SlowMuonsAux.
 SlowMuonsAuxDyn.hitEnergy
 SlowMuonsAuxDyn.hitError
 SlowMuonsAuxDyn.hitIdentifier
+SlowMuonsAuxDyn.hitPassesMDTBetaCut
 SlowMuonsAuxDyn.hitPositionX
 SlowMuonsAuxDyn.hitPositionY
 SlowMuonsAuxDyn.hitPositionZ
@@ -2124,7 +2125,6 @@ TauJetsAuxDyn.ClustersMeanFirstEngDens
 TauJetsAuxDyn.ClustersMeanPresamplerFrac
 TauJetsAuxDyn.ClustersMeanSecondLambda
 TauJetsAuxDyn.EMFracFixed
-TauJetsAuxDyn.GhostMuonSegmentCount
 TauJetsAuxDyn.LeadClusterFrac
 TauJetsAuxDyn.NNDecayMode
 TauJetsAuxDyn.NNDecayModeProb_1p0n
@@ -2158,7 +2158,6 @@ TauJets_EleRMAuxDyn.ClustersMeanFirstEngDens
 TauJets_EleRMAuxDyn.ClustersMeanPresamplerFrac
 TauJets_EleRMAuxDyn.ClustersMeanSecondLambda
 TauJets_EleRMAuxDyn.EMFracFixed
-TauJets_EleRMAuxDyn.GhostMuonSegmentCount
 TauJets_EleRMAuxDyn.LeadClusterFrac
 TauJets_EleRMAuxDyn.NNDecayMode
 TauJets_EleRMAuxDyn.NNDecayModeProb_1p0n

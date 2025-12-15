@@ -338,9 +338,9 @@ def createTriggerFlags(doTriggerRecoFlags):
             raise RuntimeError('Trigger.availableRecoMetadata is ill-defined if Trigger.doHLT==True')
         # RAW: check if keys are in COOL
         elif flags.Input.Format is Format.BS:
-            from TrigConfigSvc.TriggerConfigAccess import getKeysFromCool
-            keys = getKeysFromCool(flags.Input.RunNumbers[0], lbNr = 1)  # currently only checking first file
-            return ( (['L1'] if 'L1PSK' in keys else []) +
+            from TrigConfigSvc.TriggerConfigAccess import getKeysFromConditions
+            keys = getKeysFromConditions(flags.Input.RunNumbers[0], lbNr = 1, flags = flags)  # currently only checking first file
+            return ( (['L1'] if 'LVL1PSK' in keys else []) +
                      (['HLT'] if 'HLTPSK' in keys else []) )
         # POOL: metadata (do not distinguish L1/HLT yet, see discussions on GitLab commit f83ae2bc)
         else:
@@ -490,6 +490,9 @@ def createTriggerRecoFlags():
         muonflags.MuonCombined.doCombinedFit = True
         return muonflags
     flags.addFlagsCategory('Trigger.Offline.Combined', __muonCombined, prefix=True)
+    
+    from AthenaCommon.SystemOfUnits import mm
+    flags.addFlag('Trigger.Muon.IsolationDzCut', 2.0*mm, help='Value of dz cut used in muon isolation calculation in the trigger')
 
     def __tau():
         from TrigTauRec.TrigTauConfigFlags import createTrigTauConfigFlags

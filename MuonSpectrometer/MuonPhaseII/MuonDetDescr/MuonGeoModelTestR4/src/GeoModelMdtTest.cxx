@@ -7,6 +7,7 @@
 #include <MuonReadoutGeometryR4/MdtReadoutElement.h>
 #include <MuonReadoutGeometryR4/SpectrometerSector.h>
 #include <GeoPrimitives/GeoPrimitivesToStringConverter.h>
+#include <MuonVisualizationHelpersR4/VisualizationHelpers.h>
 
 #include <fstream>
 
@@ -14,14 +15,27 @@ using namespace ActsTrk;
 
 namespace MuonGMR4{
 
-
 StatusCode GeoModelMdtTest::initialize() {
     ATH_CHECK(m_idHelperSvc.retrieve());
     ATH_CHECK(m_geoCtxKey.initialize()); 
     ATH_CHECK(m_cablingKey.initialize(!m_cablingKey.empty()));   
     /// Prepare the TTree dump
     ATH_CHECK(m_tree.init(this));
-
+    if(m_visualTubes || m_visualStaggering) {
+        ATH_CHECK(m_visualSvc.retrieve());
+    }
+    if (m_visualTubes) {
+        m_clientTokenLayerVis.preFixName="GeoModelMdtTest_Layer";
+        m_clientTokenLayerVis.subDirectory = "MdtLayerPlots";
+        m_clientTokenLayerVis.canvasLimit = -1;
+        ATH_CHECK(m_visualSvc->registerClient(m_clientTokenLayerVis));
+    }
+    if(m_visualStaggering) {
+        m_clientTokenStaggeringVis.preFixName="GeoModelMdtTest_Staggering";
+        m_clientTokenStaggeringVis.subDirectory = "MdtStaggeringPlots";
+        m_clientTokenStaggeringVis.canvasLimit = -1;
+        ATH_CHECK(m_visualSvc->registerClient(m_clientTokenStaggeringVis));
+    }
     const MdtIdHelper& idHelper{m_idHelperSvc->mdtIdHelper()};
     auto translateTokenList = [this, &idHelper](const std::vector<std::string>& chNames){
         
@@ -85,6 +99,140 @@ StatusCode GeoModelMdtTest::initialize() {
     ATH_CHECK(detStore()->retrieve(m_detMgr));
     return StatusCode::SUCCESS;
 }
+void GeoModelMdtTest::visualizeTubeLayer(const EventContext& ctx,
+                                         const MuonGMR4::MdtReadoutElement& reEle,
+                                         const unsigned layer) const {
+    if (!m_visualTubes) {
+        return;
+    }
+     
+    const double h = reEle.moduleHeight();
+    const double wL = reEle.moduleWidthL();
+    const double wS = reEle.moduleWidthS();
+
+    const MdtIdHelper& idHelper{m_idHelperSvc->mdtIdHelper()};
+    const Identifier detId = reEle.identify();
+    const std::string chName = std::format("{:}{:}{:}{:}M{:}T{:}",
+                                           m_idHelperSvc->stationNameString(detId),
+                                           std::abs(m_idHelperSvc->stationEta(detId)),
+                                           m_idHelperSvc->stationEta(detId) > 0 ? 'A' : 'C',
+                                           m_idHelperSvc->stationPhi(detId),
+                                           idHelper.multilayer(detId), layer);
+    auto canvas = m_visualSvc->prepareCanvas(ctx, m_clientTokenLayerVis, chName);
+    canvas->expandPad(-0.5*wL, -0.5*h);
+    canvas->expandPad( 0.5*wL, 0.5*h);
+    canvas->setAxisTitles("x [mm]", "y [mm]");
+    canvas->setRangeScale(1.1);
+    using namespace MuonValR4;
+    /// Draw first the bounding lines
+    canvas->add(drawLine(Amg::Vector3D{0., -0.5*wL, 0.5*h}, Amg::Vector3D{0., 0.5*wL, 0.5*h}, kBlack, kSolid));
+    canvas->add(drawLine(Amg::Vector3D{0., -0.5*wS, -0.5*h}, Amg::Vector3D{0., 0.5*wS, -0.5*h}, kBlack, kSolid));
+    canvas->add(drawLine(Amg::Vector3D{0., -0.5*wL, 0.5*h}, Amg::Vector3D{0., -0.5*wS, -0.5*h}, kBlack, kSolid));
+    canvas->add(drawLine(Amg::Vector3D{0.,  0.5*wL, 0.5*h}, Amg::Vector3D{0., 0.5*wS, -0.5*h}, kBlack, kSolid));
+    for (unsigned int tube = 1 ; tube <= reEle.numTubesInLay(); ++ tube) {
+        const IdentifierHash measHash = reEle.measurementHash(layer, tube);
+        if (!reEle.isValid(measHash)) {
+            continue;
+        }
+        canvas->add(drawBox(reEle.localTubePos(measHash), reEle.tubeLength(measHash), reEle.tubeRadius()));
+    } 
+    canvas->add(drawLabel(std::format("{:}, layer: {:}", m_idHelperSvc->toStringDetEl(detId), layer), 0.2, 0.05));
+}
+
+StatusCode GeoModelMdtTest::visualizeTubeStaggering(const EventContext& ctx, const ActsTrk::GeometryContext& gctx) const {
+    const MuonMDT_CablingMap* cabling{nullptr};
+    ATH_CHECK(SG::get(cabling, m_cablingKey,ctx));
+    if (!cabling){
+        return StatusCode::SUCCESS;
+    }
+
+    std::unordered_map<Identifier, std::shared_ptr<MuonValR4::IRootVisualizationService::ICanvasObject>> canvases{};
+    const MdtIdHelper& idHelper{m_idHelperSvc->mdtIdHelper()};
+    for (const Identifier& test_me : m_testStations) {
+        Identifier chamberId = idHelper.elementID(test_me);
+        ATH_MSG_DEBUG("Preparing canvases to draw the tube mapping per chamber");
+        const MdtReadoutElement* readEle = m_detMgr->getMdtReadoutElement(test_me);
+        if (!readEle) {
+            ATH_MSG_DEBUG("Detector element does not exist. ");
+            continue;
+        }
+        if(canvases.count(chamberId)) continue;
+        const std::string canName = std::format("{:}{:}{:}{:}",
+                                                m_idHelperSvc->stationNameString(readEle->identify()),
+                                                std::abs(m_idHelperSvc->stationEta(readEle->identify())),
+                                                m_idHelperSvc->stationEta(readEle->identify()) > 0 ? 'A' : 'C',
+                                                m_idHelperSvc->stationPhi(readEle->identify()));
+        canvases.insert(std::make_pair(chamberId,
+                                        m_visualSvc->prepareCanvas(ctx, m_clientTokenStaggeringVis, canName)));
+        
+        canvases[chamberId] -> add(MuonValR4::drawLabelNDC(m_idHelperSvc->toStringChamber(test_me),0.4,0.85,30));
+
+    }
+
+    for (const Identifier& test_me : m_testStations) {
+        Identifier chamberId = idHelper.elementID(test_me);
+        const MdtReadoutElement* readEle = m_detMgr->getMdtReadoutElement(test_me);
+        if (!readEle) {
+            ATH_MSG_DEBUG("Detector element does not exist. ");
+            continue;
+        }
+        auto canvas = canvases[chamberId];
+        const Chamber* chamber = m_detMgr->getChamber(readEle->identify());
+        const double r = readEle->tubeRadius();
+        for(uint tube = 1 ; tube <= readEle->numTubesInLay(); ++tube){
+            for(uint layer = 1 ; layer <= readEle->numLayers() ; ++ layer){
+                bool is_valid{false};
+                const Identifier tube_id = idHelper.channelID(test_me, readEle->multilayer(), 
+                                                              layer, tube, is_valid);
+                const IdentifierHash tube_hash = readEle->measurementHash(tube_id);
+                if (!readEle->isValid(tube_hash)) {
+                    continue;
+                }
+                
+                /// Create the cabling object
+                MdtCablingData cabling_data{};
+                cabling->convert(tube_id,cabling_data);
+                /// Test if the online channel can be found
+                if (!cabling->getOnlineId(cabling_data, msgStream())) {
+                    // to be uncommented once BIS1 has the correct number of tubes
+                    //ATH_MSG_WARNING("Could no retrieve a valid online channel for "<<m_idHelperSvc->toString(tube_id));
+                    continue;
+                    return StatusCode::FAILURE;
+                }
+
+
+                const Amg::Vector3D tubePos = chamber->globalToLocalTrans(gctx) * readEle->readOutPos(gctx, tube_id);
+                const Amg::Vector3D locDir{Amg::Vector3D::UnitY()};
+
+                if(tube == 1){
+                    Identifier tube2 = idHelper.channelID(test_me, readEle->multilayer(), layer, 2);
+                    ATH_MSG_VERBOSE("processing tube" << m_idHelperSvc->toString(tube_id)
+                                    << " " << Amg::toString(tubePos) << " " << Amg::toString(chamber->globalToLocalTrans(gctx) * readEle->readOutPos(gctx, tube2)) << " " << 
+                                    Amg::toString(chamber->localToGlobalTrans(gctx).linear() * locDir));
+                }
+                if(tube==1 && layer ==1 && idHelper.stationPhi(tube_id)==1){
+                    ATH_MSG_VERBOSE(Amg::toString(chamber->localToGlobalTrans(gctx)));
+                }
+
+                // In the chamber coordinate system z points to the next tube layer, x points along the tube and y points to the next tube in the same layer 
+                // If one looks from the readout side and the readout side is at positive local x one looks in negative x direction therefore one needs to invert the sign of y coordinate, e.g. the tube staggering flips.
+                const double x{tubePos.y() * -1. * tubePos.x()/std::abs(tubePos.x()) * std::copysign(1.0, idHelper.stationEta(tube_id))   };
+                const double y{tubePos.z()};
+                canvas->expandPad(x -r , y -r);
+                canvas->expandPad(x +r , y +r);
+                if (tube == 1 && layer == 1) {
+                    canvas->add(MuonValR4::drawDriftCircle(Amg::Vector3D{0., x, y}, r, kRed, MuonValR4::fullFilling));
+                } else {
+                    canvas->add(MuonValR4::drawDriftCircle(Amg::Vector3D{0., x, y}, r, kBlack, MuonValR4::hollowFilling));
+                }
+                canvas->add(MuonValR4::drawLabel(std::to_string(cabling_data.channelId),x ,y, 3));
+            }
+        }
+
+    }
+    return StatusCode::SUCCESS;
+}
+     
 StatusCode GeoModelMdtTest::finalize() {
     ATH_CHECK(m_tree.write());
     return StatusCode::SUCCESS;
@@ -96,6 +244,8 @@ StatusCode GeoModelMdtTest::execute() {
     ATH_CHECK(SG::get(geoContextHandle, m_geoCtxKey, ctx));
 
     const ActsTrk::GeometryContext& gctx{*geoContextHandle};
+
+    if(m_visualStaggering)ATH_CHECK(visualizeTubeStaggering(ctx, gctx));
 
     const MdtIdHelper& id_helper{m_idHelperSvc->mdtIdHelper()};
     for (const Identifier& test_me : m_testStations) {
@@ -121,6 +271,7 @@ StatusCode GeoModelMdtTest::execute() {
             return StatusCode::FAILURE;         
       }
       for (unsigned int lay = 1 ; lay <= reElement->numLayers() ; ++lay ) {
+        visualizeTubeLayer(ctx, *reElement, lay);
          for (unsigned int tube = 1; tube <=reElement->numTubesInLay(); ++tube ){
             const Identifier tube_id = id_helper.channelID(test_me,ml,lay,tube);                 
             /// Test the forward -> backward conversion

@@ -237,7 +237,21 @@ auto floatAccessors = initAccessors<float>(
   "m_tracks_lead",
   "m_tracks_subl",
   "omni_score",
-  "TracksExpectedEnergyDeposit"
+  "TracksExpectedEnergyDeposit",
+  "LAYERENERGY_EMB1", "LAYERENERGY_EMB2", "LAYERENERGY_EMB3", "LAYERENERGY_EME1",
+  "LAYERENERGY_EME2", "LAYERENERGY_EME3",
+  "LAYERENERGY_FCAL0", "LAYERENERGY_FCAL1", "LAYERENERGY_FCAL2",
+  "LAYERENERGY_HEC0", "LAYERENERGY_HEC1", "LAYERENERGY_HEC2", "LAYERENERGY_HEC3",
+  "LAYERENERGY_MINIFCAL0", "LAYERENERGY_MINIFCAL1",
+  "LAYERENERGY_MINIFCAL2", "LAYERENERGY_MINIFCAL3",
+  "LAYERENERGY_PreSamplerB", "LAYERENERGY_PreSamplerE",
+  "LAYERENERGY_TILE0", "LAYERENERGY_TileBar0",
+  "LAYERENERGY_TileBar1", "LAYERENERGY_TileBar2",
+  "LAYERENERGY_TileExt0", "LAYERENERGY_TileExt1", "LAYERENERGY_TileExt2",
+  "LAYERENERGY_TileGap1", "LAYERENERGY_TileGap2", "LAYERENERGY_TileGap3",
+  "TIMING",
+  "AVG_LAR_Q", "AVG_TILE_Q", "BADLARQ_FRAC",
+  "ENG_BAD_CELLS", "ENG_POS", "ISOLATION", "N_BAD_CELLS"
   );
 
 auto doubleAccessors = initAccessors<double>("ptcone02", "ptcone03", "JetDensityEMPFlow",

@@ -6,7 +6,7 @@
 #define MUONCONDALG_MmCTPCondDbAlg_H
 
 // Athena includes
-#include "AthenaBaseComps/AthReentrantAlgorithm.h"
+#include "AthenaBaseComps/AthCondAlgorithm.h"
 #include "AthenaPoolUtilities/CondAttrListCollection.h"
 #include "MuonIdHelpers/IMuonIdHelperSvc.h"
 #include "StoreGate/CondHandleKeyArray.h"
@@ -14,14 +14,13 @@
 #include <nlohmann/json.hpp>
 #include "MuonCondData/mmCTPClusterCalibData.h"
 
-class MmCTPCondDbAlg : public AthReentrantAlgorithm {
+class MmCTPCondDbAlg : public AthCondAlgorithm {
 public:
     //No need for individual constructor
-    using AthReentrantAlgorithm::AthReentrantAlgorithm ;
+    using AthCondAlgorithm::AthCondAlgorithm ;
     virtual ~MmCTPCondDbAlg() = default;
     virtual StatusCode initialize() override final;
     virtual StatusCode execute(const EventContext& ctx) const override final;
-    virtual bool isReEntrant() const override final{ return false; }
 
 private:
     /// Parse data from COOL

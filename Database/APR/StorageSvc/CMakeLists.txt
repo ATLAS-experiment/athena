@@ -4,7 +4,7 @@
 atlas_subdir( StorageSvc )
 
 # External dependencies:
-find_package( ROOT COMPONENTS Core Tree MathCore Hist RIO Thread pthread )
+find_package( ROOT COMPONENTS Core Thread )
 find_package( UUID )
 
 # Component(s) in the package:
@@ -26,10 +26,6 @@ atlas_add_test( StorageSvc_mtShape_test
    INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
    LINK_LIBRARIES ${ROOT_LIBRARIES} StorageSvc
    POST_EXEC_SCRIPT nopost.sh )
-
-atlas_add_test( StorageSvc_DbBlob_test
-   SOURCES test/StorageSvc_DbBlob_test.cxx
-   LINK_LIBRARIES StorageSvc )
 
 if( NOT SIMULATIONBASE AND NOT GENERATIONBASE AND NOT XAOD_ANALYSIS )
     atlas_add_test( StorageSvc_getGuid_test

@@ -67,6 +67,7 @@ public:
 
   Gaudi::Property<bool> m_classifyLRT{this, "classifyLRT", true}; 
   Gaudi::Property<bool> m_classifyOnlyCoreTracks{this, "ClassifyOnlyCoreTracks", false};
+  Gaudi::Property<bool> m_skipBadTracks{this, "SkipBadTracks", false};
 
 }; // class TauTrackRNNClassifier
   

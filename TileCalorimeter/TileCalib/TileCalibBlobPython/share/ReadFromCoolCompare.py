@@ -26,13 +26,8 @@
 from TileCalibBlobPython import TileCalibTools
 from TileCalibBlobObjs.Classes import TileCalibUtils
 import os, sys, getopt
+from builtins import input
 os.environ['TERM'] = 'linux'
-
-try:
-    from builtins import input
-except ImportError:
-    # old python 2 without builtins
-    input=raw_input
 
 # main defaults are here - can be modified from command line
 run=999999999

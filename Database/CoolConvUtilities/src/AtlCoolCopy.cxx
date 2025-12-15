@@ -2561,12 +2561,13 @@ cool::ValidityKey AtlCoolCopy::timeVal(const char* input) {
       // calculating the time since epoch for 2/1/1970 midnight (no DST)
       cool::ValidityKey itime=static_cast<cool::ValidityKey>(mktime(&mytm));
       strptime("1970-01-02:00:00:00","%Y-%m-%d:%T",&mytm2);
-      cool::ValidityKey caltime=static_cast<cool::ValidityKey>(mktime(&mytm2));
-      if (caltime == static_cast<cool::ValidityKey>(-1)) {
+      time_t tm = mktime(&mytm2);
+      if (tm == static_cast<time_t>(-1)) {
         std::cout << 
           "ERROR in mktime" << std::endl;
         return 0;
       }
+      cool::ValidityKey caltime=static_cast<cool::ValidityKey>(tm);
       itime+=24*60*60-caltime;
       return itime*static_cast<cool::ValidityKey>(1.E9);
     } else {

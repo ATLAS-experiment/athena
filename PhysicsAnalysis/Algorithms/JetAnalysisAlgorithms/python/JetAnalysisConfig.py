@@ -74,10 +74,8 @@ class PreJetAnalysisConfig (ConfigBlock) :
 
         # NB: I'm assuming that the truth tagging is done in PHYSLITE, if not this will
         # need to change
-        if self.runTruthJetTagging or (
-            self.runTruthJetTagging is None
-            and config.dataType() is not DataType.Data
-        ):
+        if (self.runTruthJetTagging or (self.runTruthJetTagging is None)
+        ) and config.dataType() is not DataType.Data:
             # Decorate jets with isHS labels (required to retrieve Jvt SFs)
             alg = config.createAlgorithm( 'CP::JetDecoratorAlg', 'JetPileupLabelAlg' )
             config.addPrivateTool( 'decorator', 'JetPileupLabelingTool' )
@@ -135,9 +133,6 @@ class SmallRJetAnalysisConfig (ConfigBlock) :
             info="whether to calculate the JVT efficiency. The default is True.")
         self.addOption ('runFJvtEfficiency', False, type=bool,
             info="whether to calculate the forward JVT efficiency. The default is False.")
-        self.addOption ('runJERsystematicsOnData', False, type=bool,
-            info="whether to run the All/Full JER model variations also on data samples. Expert option!",
-            expertMode=True)
         self.addOption ('recalibratePhyslite', True, type=bool,
             info="whether to run the CP::JetCalibrationAlg on PHYSLITE derivations. "
             "The default is True.")
@@ -261,6 +256,7 @@ class SmallRJetAnalysisConfig (ConfigBlock) :
             alg = config.createAlgorithm('CP::AsgSelectionAlg', 'JvtSelectionAlg')
             config.addPrivateTool('selectionTool', 'CP::NNJvtSelectionTool')
             alg.selectionTool.JetContainer = config.readName(self.containerName)
+            alg.selectionTool.JvtMomentName = "NNJvt"
             alg.selectionTool.WorkingPoint = self.jvtWP
             alg.selectionTool.MaxPtForJvt = 60*GeV
             alg.selectionDecoration = "jvt_selection,as_char"
@@ -291,6 +287,7 @@ class SmallRJetAnalysisConfig (ConfigBlock) :
             alg = config.createAlgorithm('CP::AsgSelectionAlg', 'FJvtSelectionAlg')
             config.addPrivateTool('selectionTool', 'CP::FJvtSelectionTool')
             alg.selectionTool.JetContainer = config.readName(self.containerName)
+            alg.selectionTool.JvtMomentName = "DFCommonJets_fJvt"
             alg.selectionTool.WorkingPoint = self.fJvtWP
             alg.selectionDecoration = "fjvt_selection,as_char"
             alg.particles = config.readName(self.containerName)
@@ -421,13 +418,8 @@ class LargeRJetAnalysisConfig (ConfigBlock) :
         self.addOption ('recalibratePhyslite', True, type=bool,
             info="whether to run the CP::JetCalibrationAlg on PHYSLITE "
             "derivations. The default is True.")
-        self.addOption ('systematicsModelJER', "Full", type=str)
-        self.addOption ('systematicsModelJMS', "Full", type=str)
         self.addOption ('systematicsModelJMR', "Full", type=str,
             info="the NP reduction scheme to use for JMR: Full, Simple. The default is Full.")
-        self.addOption ('runJERsystematicsOnData', False, type=bool,
-            info="whether to run the All/Full JER model variations also on data samples. Expert option!",
-            expertMode=True)
         # Adding these options to override the jet uncertainty config file when we have new recommendations
         # Calibration tool options
         self.addOption ('calibToolConfigFile', None, type=str,
@@ -693,8 +685,7 @@ def makeSmallRJetAnalysisConfig( seq, containerName, jetCollection, jetInput,
                                  runJvtUpdate = None, runNNJvtUpdate = None,
                                  runJvtSelection = None, runFJvtSelection = None,
                                  jvtWP = None, fJvtWP = None,
-                                 runJvtEfficiency = None, runFJvtEfficiency = None,
-                                 systematicsModelJES = None, systematicsModelJER = None):
+                                 runJvtEfficiency = None, runFJvtEfficiency = None):
     """Add algorithms for the R=0.4 jets.
 
       Keyword arguments
@@ -709,8 +700,6 @@ def makeSmallRJetAnalysisConfig( seq, containerName, jetCollection, jetInput,
         fJvtWP -- Defines the fJvt WP to apply on the jets
         runJvtEfficiency -- Determines whether or not to calculate the JVT efficiency
         runFJvtEfficiency -- Determines whether or not to calculate the forward JVT efficiency
-        systematicsModelJES -- Which NP systematicsModelJES scheme should be used (All, Global, Category, Scenario)
-        systematicsModelJER -- Which variant of the systematicsModelJES should be used (All, Full, Simple). Note that not all combinations of systematicsModelJES and systematicsModelJER are valid!
     """
 
     if jetInput not in ["EMTopo", "EMPFlow", "HI"]:

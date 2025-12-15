@@ -32,6 +32,7 @@ private:
   double m_minPt;
 
   std::string m_taggerName;
+  std::string m_outputName;
   std::string m_OP;
   std::string m_jetAuthor;
   std::string m_json_config_path;

@@ -156,6 +156,7 @@ ActsTrk::MutableTrackSummaryContainer::MutableTrackSummaryContainer(
 }
 
 // move assignment operator
+//coverity[exn_spec_violation]
 ActsTrk::MutableTrackSummaryContainer& ActsTrk::MutableTrackSummaryContainer::operator = (
     ActsTrk::MutableTrackSummaryContainer&& other) noexcept {
   //NB. restoreDecorations may throw a GaudiException, resulting in a call to terminate()

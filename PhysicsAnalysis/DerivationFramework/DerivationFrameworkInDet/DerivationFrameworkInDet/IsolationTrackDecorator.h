@@ -3,7 +3,7 @@
 */
 
 ///////////////////////////////////////////////////////////////////
-// IsolationTrackDecorator.h, (c) ATLAS Detector software
+// IsolationTrackDecorator.h
 ///////////////////////////////////////////////////////////////////
 
 /*
@@ -44,20 +44,17 @@ namespace DerivationFramework {
       @author daiya.akiyama@cern.ch
   */
   class IsolationTrackDecorator : public extends<ExpressionParserUser<AthAlgTool>, IAugmentationTool> {
-    
-  public: 
-    /** Constructor with parameters */
-    IsolationTrackDecorator( const std::string& t, const std::string& n, const IInterface* p);
-    
-    /** Destructor */
-    virtual ~IsolationTrackDecorator() = default;
- 
+
+  public:
+
+    using base_class::base_class;
+
     // Athena algtool's Hooks
-    virtual StatusCode initialize() override;
-    virtual StatusCode finalize() override;
-    
-    virtual StatusCode addBranches(const EventContext& ctx) const override;
-    
+    virtual StatusCode initialize() override final;
+    virtual StatusCode finalize() override final;
+
+    virtual StatusCode addBranches(const EventContext& ctx) const override final;
+
   private:
     SG::ReadHandleKey<xAOD::TrackParticleContainer> m_trackContainerKey {
       this, "TargetContainer", "InDetTrackParticles", "track particle container name"};
@@ -73,7 +70,7 @@ namespace DerivationFramework {
       this, "DiffPtvarcone", xAOD::Iso::ptvarcone20 - xAOD::Iso::ptcone20, "difference between Iso::ptvarcone20 and Iso::ptcone20"};
     IntegerProperty m_selFlagValue {
       this, "SelectionFlagValue", 1, "selection flag value"};
-  
+
     /// Athena configured tools
     ToolHandle<xAOD::ITrackIsolationTool> m_trackIsolationTool {this, "TrackIsolationTool", ""};
     ToolHandle<xAOD::ICaloTopoClusterIsolationTool> m_caloIsolationTool {this, "CaloIsolationTool", ""};
@@ -83,7 +80,7 @@ namespace DerivationFramework {
     std::vector<xAOD::Iso::IsolationType> m_topoetconeTypes;
     IntegerArrayProperty m_iso {
       this, "iso", {}, "isolation types vector<int>"};
-    xAOD::TrackCorrection m_trkCorrList; 
+    xAOD::TrackCorrection m_trkCorrList;
     xAOD::CaloCorrection m_topoconeCorrList;
     xAOD::CaloCorrection m_topoclusCorrList;
 
@@ -98,6 +95,6 @@ namespace DerivationFramework {
     SG::WriteDecorHandleKey<xAOD::TrackParticleContainer> m_dec_trkFlagKey {
       this, "dec_trkFlagKey", ""};
 
-  }; 
+  };
 }
 #endif //

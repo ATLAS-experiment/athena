@@ -13,7 +13,7 @@
 #include "StoreGate/WriteCondHandle.h"
 
 TileEMScaleCondAlg::TileEMScaleCondAlg(const std::string& name, ISvcLocator* pSvcLocator) :
-  AthAlgorithm(name, pSvcLocator),
+  AthCondAlgorithm(name, pSvcLocator),
   m_useOflLasFib(false),
   m_maxChannels(0),
   m_maxGains(0),
@@ -133,9 +133,9 @@ StatusCode TileEMScaleCondAlg::initialize() {
 }
 
 
-StatusCode TileEMScaleCondAlg::execute() {
+StatusCode TileEMScaleCondAlg::execute(const EventContext& ctx) const {
 
-  SG::WriteCondHandle<TileEMScale> calibEms{m_calibEmsKey};
+  SG::WriteCondHandle<TileEMScale> calibEms{m_calibEmsKey, ctx};
 
   if (calibEms.isValid()) {
     ATH_MSG_DEBUG("Found valid TileEMScale: " << calibEms.key());

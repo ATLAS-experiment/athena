@@ -49,6 +49,13 @@ def egammaForwardBuilderCfg(flags, name='egammaForwardElectron', **kwargs):
         kwargs["ObjectQualityTool"] = egOQ.popPrivateTools()
         acc.merge(egOQ)
 
+    if flags.Egamma.doForwardCalib:
+        kwargs["doEnergyCal"] = True
+        kwargs["PrimaryVerticesContainerKey"] = "PrimaryVertices"
+        kwargs["EventInfoKey"] = "EventInfo"
+        from egammaMVACalib.egammaMVACalibConfig import egammaMVASvcCfg
+        kwargs["MVACalibSvc"] = acc.getPrimaryAndMerge(egammaMVASvcCfg(flags))
+
     kwargs.setdefault("ElectronOutputName",
                       flags.Egamma.Keys.Output.ForwardElectrons)
     kwargs.setdefault("TopoClusterName",

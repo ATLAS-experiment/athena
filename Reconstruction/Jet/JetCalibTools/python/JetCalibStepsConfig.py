@@ -1,8 +1,13 @@
 # Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+## *********************************************
 from AnaAlgorithm.DualUseConfig import isAthena
 if not isAthena:
-    # importing this package will prepare replacement modules missing in AnalysisBase 
+    ## If in AnalysisBase and not in Athena, import JetAnalysisCommon
+    ## which will set-up replacement for some Athena modules and allow standard jet config to be invoked.
+    ## IMPORTANT:  1st import (and define) AlgSequence
+    import AnaAlgorithm.AlgSequence # noqa: F401
     import JetRecConfig.JetAnalysisCommon # noqa: F401
+## *********************************************
 from AthenaCommon import Logging
 jcslog = Logging.logging.getLogger('JetCalibStepsConfig')
 
@@ -61,11 +66,15 @@ def gscStep(flags, **configDict):
         histTool_Tile0 = [dict(varX = "pt", varY = "Tile0", histName=f"AntiKt4EMPFlow_Tile0_interpolation_resp_eta_{j}", inputFile=defaultFileGSC) for j in range(18)],
         histTool_nTrk=[dict(varX = "pt", varY = dict(Name="nTrk", Type="int",), histName=f"AntiKt4EMPFlow_nTrk_interpolation_resp_eta_{j}", inputFile=defaultFileGSC) for j in range(25)],
         histTool_trackWIDTH=[dict(varX = "pt", varY = "trackWIDTH", histName=f"AntiKt4EMPFlow_trackWIDTH_interpolation_resp_eta_{j}", inputFile=defaultFileGSC) for j in range(25)],
+        histTool_PunchThrough=[dict(varX = "e", varY = dict(Name="Nsegments", Type="int",), histName=f"AntiKt4EMPFlow_PunchThrough_interpolation_resp_eta_{j}", inputFile=defaultFileGSC) for j in range(2)],
     )
 
-    # Build the hist tools
-    for key in ['histTool_EM3', 'histTool_CharFrac', 'histTool_Tile0', 'histTool_nTrk', 'histTool_trackWIDTH']:
+    gsc_steps = ['histTool_EM3', 'histTool_CharFrac', 'histTool_Tile0', 'histTool_nTrk', 'histTool_trackWIDTH']
+    if configDict['applyPunchThrough']:
+        gsc_steps.append('histTool_PunchThrough')
 
+    # Build the hist tools
+    for key in gsc_steps:
         # Use defaultHistTools by default
         if key not in configDict:
             toolArray = defaultHistTools[key]
@@ -99,12 +108,26 @@ def etajesStep(flags, **configDic):
 
     pVars = configDic.pop("ParametrizedVars")
 
-    jesstep = CompFactory.EtaMassJESCalibStep("EtaMassJESCalib",
-                                              VarToolE= VarToolCfg(flags,  var=pVars['varE']),
-                                              VarToolEta= VarToolCfg(flags, var=pVars["varEta"]),
-                                              **configDic
-                                              )
+    jesstep = CompFactory.EtaJESCalibStep("EtaJESCalib",
+                                          VarToolE= VarToolCfg(flags,  var=pVars['varE']),
+                                          VarToolEta= VarToolCfg(flags, var=pVars["varEta"]),
+                                          **configDic
+                                          )
     return jesstep
+
+def jmsStep(flags, **configDic):
+
+    histoParams = configDic.pop('histoParams')
+    histoParams['inputFile'] = PathResolver.FindCalibFile(configDic.pop('HistoFile'))
+
+    configDic["histoReaderJMS"] = HistoInputCfg(flags, "HistToolJMS", **histoParams)
+    configDic['varToolX'] = VarToolCfg(flags, var=histoParams['varX'], Tname="VarToolX_JMS")
+    configDic['varToolZ'] = VarToolCfg(flags, var=histoParams['varZ'], Tname="VarToolZ_JMS")
+
+    jmsstep = CompFactory.JMSCalibStep("JMSCalib",
+                                       **configDic
+                                       )
+    return jmsstep
 
 def insituStep(flags, **configDic):
 
@@ -133,6 +156,7 @@ calibStepDic = dict(
     JetArea = None,
     Residual = puresidualStep,
     EtaJES = etajesStep,
+    JMS = jmsStep,
     GSC = gscStep,
     Insitu = insituStep,
     Smear = smearingStep,

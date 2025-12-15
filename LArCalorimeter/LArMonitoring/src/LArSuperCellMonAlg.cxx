@@ -165,6 +165,10 @@ StatusCode LArSuperCellMonAlg::fillHistograms(const EventContext& ctx) const{
     bool SCpassPF =   LArProv::test(SCprov,LArProv::SCPASSBCIDMAX);// SCprov & 0x40;
 
     const CaloCell* superCellRef = superCellRefCont->findCell( SCcaloDDE->identifyHash() );
+    if (not superCellRef){
+      ATH_MSG_WARNING("cell not found in  LArSuperCellMonAlg::fillHistograms");
+      continue;
+    }
     float SCetRef = superCellRef->et();
     float SCetDiff = SCet - SCetRef;
     float resolution = -1000;
@@ -196,7 +200,7 @@ StatusCode LArSuperCellMonAlg::fillHistograms(const EventContext& ctx) const{
     // only when the new signal passes BCID
 
     // per layer
-    auto layerName=m_layerNames[iLyr];
+    const auto & layerName=m_layerNames[iLyr];
     auto LMSCet = Monitored::Scalar<float>(nameHistos[iLyr][0],SCet);
     auto LMSCt = Monitored::Scalar<float>(nameHistos[iLyr][1],SCt);
     auto LMSCprov = Monitored::Scalar<int>(nameHistos[iLyr][2],SCprov);

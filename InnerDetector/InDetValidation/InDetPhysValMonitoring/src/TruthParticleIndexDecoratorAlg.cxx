@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TruthParticleIndexDecoratorAlg.h"
@@ -18,7 +18,6 @@ TruthParticleIndexDecoratorAlg::initialize() {
      ATH_MSG_FATAL("Empty truth index name.");
      return StatusCode::FAILURE;
   }
-  m_indexDecor = m_truthParticleName.key()+"."+m_indexDecor.key();
   ATH_CHECK( m_indexDecor.initialize() );
   return StatusCode::SUCCESS;
 }

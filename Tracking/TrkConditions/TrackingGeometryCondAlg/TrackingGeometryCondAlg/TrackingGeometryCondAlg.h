@@ -6,7 +6,7 @@
 #ifndef TRACKINGGEOMETRYCONDALG_H
 #define TRACKINGGEOMETRYCONDALG_H
 
-#include "AthenaBaseComps/AthAlgorithm.h"
+#include "AthenaBaseComps/AthCondAlgorithm.h"
 #include "StoreGate/ReadCondHandleKey.h"
 #include "StoreGate/WriteCondHandleKey.h"
 #include "AthenaPoolUtilities/CondAttrListCollection.h"
@@ -19,13 +19,13 @@
 #include "GaudiKernel/ToolHandle.h"
 
 namespace Trk{
-class TrackingGeometryCondAlg : public AthAlgorithm
+class TrackingGeometryCondAlg : public AthCondAlgorithm
 {
 public:
   TrackingGeometryCondAlg(const std::string& name, ISvcLocator* pSvcLocator);
   virtual ~TrackingGeometryCondAlg() override = default;
   virtual StatusCode initialize() override final;
-  virtual StatusCode execute() override final; 
+  virtual StatusCode execute(const EventContext& ctx) const override final; 
 
 private:
 

@@ -15,7 +15,7 @@
 #include <memory>
 
 TrigConf::L1PrescaleCondAlg::L1PrescaleCondAlg(const std::string& name, ISvcLocator* pSvcLocator) :
-   AthReentrantAlgorithm(name, pSvcLocator)
+   AthCondAlgorithm(name, pSvcLocator)
 {}
 
 

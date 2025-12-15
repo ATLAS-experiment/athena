@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // AthMessaging.h 
@@ -150,7 +150,6 @@ inline
 bool
 AthMessaging::msgLvl (const MSG::Level lvl) const
 {
-  if (!m_initialized.test_and_set()) initMessaging();
   if (m_lvl <= lvl) {
     msg() << lvl;
     return true;

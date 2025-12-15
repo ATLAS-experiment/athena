@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <utility>
@@ -12,7 +12,7 @@
 
 // constructor
 CscCondDbAlg::CscCondDbAlg(const std::string& name, ISvcLocator* pSvcLocator) :
-    AthReentrantAlgorithm(name, pSvcLocator) {}
+    AthCondAlgorithm(name, pSvcLocator) {}
 
 // Initialize
 StatusCode CscCondDbAlg::initialize() {
@@ -576,8 +576,9 @@ StatusCode CscCondDbAlg::recordParameterRMS(IdentifierHash chanHash, std::string
 
 // recordParameterStatus
 StatusCode CscCondDbAlg::recordParameterStatus(IdentifierHash chanHash, std::string data, CscCondDbData* writeCdo) const {
-    unsigned int token;
+    int token{};
     if (getParameter(chanHash, std::move(data), token).isFailure()) return StatusCode::FAILURE;
+    //setChannelStatus takes signed int token argument
     writeCdo->setChannelStatus(chanHash, token);
     return StatusCode::SUCCESS;
 }

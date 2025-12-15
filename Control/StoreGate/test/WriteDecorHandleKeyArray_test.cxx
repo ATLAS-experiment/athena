@@ -111,6 +111,12 @@ void test1()
   assert (k2[0].storeHandle().name() == "StoreGateSvc");
   assert (!k2[0].storeHandle().isSet());
 
+  assert (k2.assign ({"dec10", "dec11", "dec12"}).isSuccess());
+  assert (k2.size() == 3);
+  assert (k2[0].key() == "aaa.dec10");
+  assert (k2[1].key() == "aaa.dec11");
+  assert (k2[2].key() == "aaa.dec12");
+
   EXPECT_EXCEPTION(SG::ExcBadHandleKey,
                    (SG::WriteDecorHandleKeyArray<MyObj> {ok, {"aaa.dec1", "aaa.dec2"}}));
 }

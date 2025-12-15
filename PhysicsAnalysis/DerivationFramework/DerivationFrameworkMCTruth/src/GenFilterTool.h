@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /*
@@ -34,10 +34,11 @@ namespace DerivationFramework {
   class GenFilterTool : public extends<AthAlgTool, IAugmentationTool> {
 
   public:
-    GenFilterTool(const std::string& t, const std::string& n, const IInterface* p);
-    ~GenFilterTool();
-    virtual StatusCode addBranches(const EventContext& ctx) const override final;
+
+    using base_class::base_class;
+
     virtual StatusCode initialize() override final;
+    virtual StatusCode addBranches(const EventContext& ctx) const override final;
 
   private:
     StatusCode getGenFiltVars(const EventContext& ctx, float& genFiltHT, float& genFiltHTinclNu, float& genFiltMET, float& genFiltPTZ, float& genFiltFatJ) const;
@@ -68,7 +69,7 @@ namespace DerivationFramework {
     Gaudi::Property<float> m_MinLepPt{this,"MinLeptonPt", 25.*Gaudi::Units::GeV};  //!< Min pT for the truth leptons
     Gaudi::Property<float> m_MaxLepEta{this, "MaxLeptonEta", 2.5}; //!< Max eta for the truth leptons
 
-    PublicToolHandle<IMCTruthClassifier> m_classif{this, "TruthClassifier", "MCTruthClassifier/DFCommonTruthClassifier"};
+    PublicToolHandle<IMCTruthClassifier> m_classif{this, "TruthClassifier", ""};
   }; /// class
 
 } /// namespace

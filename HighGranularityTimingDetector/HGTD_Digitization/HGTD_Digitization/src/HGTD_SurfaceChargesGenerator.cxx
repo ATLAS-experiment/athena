@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration.
  *
  * @file HGTD_SurfaceChargesGenerator.h
  *
@@ -23,6 +23,7 @@
 #include "ReadoutGeometryBase/SiLocalPosition.h"
 #include "ReadoutGeometryBase/SolidStateDetectorElementBase.h"
 #include "SiDigitization/SiChargedDiodeCollection.h"
+#include "GaudiKernel/SystemOfUnits.h"
 
 HGTD_SurfaceChargesGenerator::HGTD_SurfaceChargesGenerator(
     const std::string &type, const std::string &name, const IInterface *parent)
@@ -34,7 +35,7 @@ StatusCode HGTD_SurfaceChargesGenerator::initialize() {
 
   m_small_step_length.setValue(m_small_step_length.value() * CLHEP::micrometer);
 
-  ATH_CHECK(m_hgtd_timing_resolution_tool.retrieve());
+  ATH_CHECK(m_hgtd_time_resolution_tool.retrieve());
 
   return StatusCode::SUCCESS;
 }
@@ -109,7 +110,7 @@ void HGTD_SurfaceChargesGenerator::createSurfaceChargesFromHit(
 
   float tot_eloss = hit.energyLoss();
   // FIXME using the mean ionization energy in Silicon
-  const float tot_charge = tot_eloss / (3.62 * CLHEP::eV);
+  const float tot_charge = tot_eloss / (3.62 * CLHEP::eV) * Gaudi::Units::eplus;
 
   float charge_per_step = tot_charge / static_cast<float>(n_steps);
 
@@ -120,11 +121,10 @@ void HGTD_SurfaceChargesGenerator::createSurfaceChargesFromHit(
                 << tot_eloss << ", " << element_r);
 
   if (m_smear_meantime) {
-    // Smearing based on radius and luminosity, and substract the time shift
-    // due to pulse leading edge (0.408 ns)
-    time_of_flight = m_hgtd_timing_resolution_tool->calculateTime(
-                         time_of_flight, tot_eloss, element_r, rndm_engine) -
-                     0.408;
+    time_of_flight += CLHEP::RandGaussZiggurat::shoot(
+        rndm_engine, 0.0f,
+        m_hgtd_time_resolution_tool->timeResolution(tot_charge, element_r,
+                                                    0.0));
   }
   ATH_MSG_DEBUG(">>>>>>> after processing, t: " << time_of_flight);
 

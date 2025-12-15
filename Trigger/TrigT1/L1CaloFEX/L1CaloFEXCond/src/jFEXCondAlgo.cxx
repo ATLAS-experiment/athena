@@ -1,5 +1,5 @@
 /*
- Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+ Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 //***************************************************************************
 //             Interface for jFEXCondAlgo - Tool to read the COOL DB for jFEX
@@ -24,7 +24,7 @@ namespace jDBdefaults = LVL1::jFEXCoolDBDefaults;
 namespace LVL1 {
     
 //Default Constructor
-jFEXCondAlgo::jFEXCondAlgo(const std::string& name, ISvcLocator* svc) : AthReentrantAlgorithm(name, svc){}
+jFEXCondAlgo::jFEXCondAlgo(const std::string& name, ISvcLocator* svc) : AthCondAlgorithm(name, svc){}
 
 StatusCode jFEXCondAlgo::initialize() {
     
@@ -97,7 +97,7 @@ StatusCode jFEXCondAlgo::execute(const EventContext& ctx) const {
                     return StatusCode::FAILURE;
                 }
                 
-                jJCalibParams[mod] = v_tmp;
+                jJCalibParams[mod] = std::move(v_tmp);
                 mod++;
             }
             

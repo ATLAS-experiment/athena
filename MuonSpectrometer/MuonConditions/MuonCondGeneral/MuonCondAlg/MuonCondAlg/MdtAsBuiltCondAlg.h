@@ -5,7 +5,7 @@
 #ifndef MUONCONDALG_MDTASBUILTCONDALG_H
 #define MUONCONDALG_MDTASBUILTCONDALG_H
 
-#include "AthenaBaseComps/AthReentrantAlgorithm.h"
+#include "AthenaBaseComps/AthCondAlgorithm.h"
 #include "AthenaPoolUtilities/CondAttrListCollection.h"
 #include "CoralBase/Blob.h"
 #include "StoreGate/CondHandleKeyArray.h"
@@ -15,13 +15,12 @@
 #include "MuonIdHelpers/IMuonIdHelperSvc.h"
 #include "nlohmann/json.hpp"
 
-class MdtAsBuiltCondAlg: public AthReentrantAlgorithm {
+class MdtAsBuiltCondAlg: public AthCondAlgorithm {
     public:
         MdtAsBuiltCondAlg(const std::string& name, ISvcLocator* pSvcLocator);
         virtual ~MdtAsBuiltCondAlg() = default;
         virtual StatusCode initialize() override;
         virtual StatusCode execute(const EventContext& ctx) const override;
-        virtual bool isReEntrant() const override { return false;}
     
     private:
         StatusCode parseDataFromJSON(const nlohmann::json& lines,

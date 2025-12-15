@@ -20,7 +20,7 @@ Specify the number of threads with `--threads` for multi-threaded operation.
 
 ### Local Installation (optional):
 
-In case you would like to run with a modified version of the monitoring, you would need first to perform a partial check-out of the `TrigTauMonitoring` package, following the instructions from the [ATLAS Git tutorial](https://atlassoftwaredocs.web.cern.ch/gittutorial/git-clone/).
+In case you would like to run with a modified version of the monitoring, you would need first to perform a partial check-out of the `TrigTauMonitoring` package, following the instructions from the [ATLAS Git tutorial](https://atlas-software.docs.cern.ch/athena/git/).
 
 ### Run on the GRID :
 

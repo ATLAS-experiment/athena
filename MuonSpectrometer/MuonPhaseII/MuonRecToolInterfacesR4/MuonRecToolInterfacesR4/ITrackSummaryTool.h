@@ -8,7 +8,13 @@
 #include <GaudiKernel/EventContext.h>
 
 #include "ActsEvent/TrackContainer.h"
+#include "xAODMuon/MuonSegment.h"
 #include "xAODBase/IParticle.h"
+
+
+namespace Trk {
+    class Track;
+}
 
 namespace MuonR4{
     struct HitSummary;
@@ -37,17 +43,25 @@ namespace MuonR4{
              *                    shall be made. */
             virtual HitSummary makeSummary(const EventContext& ctx,
                                            const ConstTrack_t trackProxy) const = 0;
-            /** @brief Creates a summary from the passed track seed. the summary values from
-             *         the associated segments are copied as on-track values for the corresponding layer
+            /** @brief Creates a summary from a list of passed segments that are associated
+             *         to a track seed, a truth particle or a reconstructed track
              *  @param ctx: EventContext to fetch conditions such that holes
              *              associated to dead modules are ignored
-             *  @param seed: Reference to the MS track seed */
+             *  @param segments: List of segments from which the summary shall be created*/
             virtual HitSummary makeSummary(const EventContext& ctx,
-                                            const MsTrackSeed& seed) const = 0;
+                                           const std::vector<const xAOD::MuonSegment*>& segments) const = 0;
+            /** @brief Creates a summary from a Trk::Track object produced by the legacy reconstruction software.
+             *         The associated hits are categorized the same way as for the ActsTrk::Tracks 
+             *         (Serves purely validation purposes)
+             * @param ctx: EventContext to fetch conditions such that holes
+             *             associated to dead modules are ignored
+             * @param trk: Reference to the MS track for which the summary shall be produced */
+            virtual HitSummary makeSummary(const EventContext& ctx,
+                                           const Trk::Track& trk) const = 0;
             /** @brief Decorates the hit summary to the parsed track (xAOD::TrackParticle, xAOD::Muon or xAOD::TruthParticle)
              *         using the categories defined in the xAOD::MuonSummaryType enum */
             virtual void copySummary(const HitSummary& summary,
-                                    xAOD::IParticle& track) const = 0;
+                                     const xAOD::IParticle& track) const = 0;
 
     };
 }

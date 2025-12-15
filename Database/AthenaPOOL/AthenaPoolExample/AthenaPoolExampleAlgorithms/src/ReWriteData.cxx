@@ -73,7 +73,7 @@ StatusCode ReWriteData::execute (const EventContext& ctx) const {
      eLink3.toContainedElement(*hitCont, (*hitCont)[3]);
      trackObj->getElementLinkVector()->push_back(eLink3);
      ATH_MSG_INFO("Link ElementLinkVector = " << trackObj->getElementLinkVector()->size());
-     for (const auto& link : *trackObj->getElementLinkVector()) {
+     for (const auto link : *trackObj->getElementLinkVector()) {
        ATH_MSG_INFO("Element = " << (*link) << " : " << (*link)->getX());
      }
      

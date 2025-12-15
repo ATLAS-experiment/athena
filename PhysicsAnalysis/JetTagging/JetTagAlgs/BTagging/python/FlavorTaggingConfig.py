@@ -100,7 +100,7 @@ def FlavorTaggingCfg(
     else:
         acc.merge(BTagTrackAugmenterAlgCfg(
             cfgFlags,
-            TrackCollection='InDetTrackParticles',
+            TrackCollection=trackCollection,
             PrimaryVertexCollectionName=pv_col,
             prefix=trackAugmenterPrefix,
         ))

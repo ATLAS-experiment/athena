@@ -45,9 +45,8 @@ test_tool_init(ORUtils.TauLooseMuOverlapTool, verbose=verbose)
 test_tool_init(ORUtils.TauAntiTauJetOverlapTool, verbose=verbose)
 
 # Try creating some helper objects
-bjetHelper = ORUtils.BJetHelper('isBJet')
 DeltaRMatcher = ORUtils.DeltaRMatcher(0.4)
 slidingMatcher = ORUtils.SlidingDeltaRMatcher(0.04, 10.)
 ghostMatcher = ORUtils.MuJetGhostDRMatcher(0.4)
-decHelper = ORUtils.OverlapDecorationHelper('selected', 'overlaps')
-linkHelper = ORUtils.OverlapLinkHelper('overlapLink')
+# decHelper = ORUtils.OverlapDecorationHelper('selected', 'overlaps')
+# linkHelper = ORUtils.OverlapLinkHelper('overlapLink')

@@ -688,8 +688,8 @@ class TopoAlgoDef:
             tm.registerTopoAlgo(alg)
 
 
-        # DM/DPHI for eEM
-        # output lines = 0INVM70-27DPHI32-eEM12sm1-eEM12sm6, 0INVM70-27DPHI32-eEM15sm1-eEM15sm6
+        # DM/DPHI for eEM, ATR-19302 (0INVM70...) and ATR-32259 (2INVM4...)
+        # output lines = 0INVM70-27DPHI32-eEM12sm1-eEM12sm6, 0INVM70-27DPHI32-eEM15sm1-eEM15sm6, 2INVM4-0DPHI32-eEM9sm1-eEM6sm6
         # Parameter ordering
         # 1. MinEt1
         # 2. MinEt2
@@ -700,16 +700,16 @@ class TopoAlgoDef:
         eINVM_DPHIMap = [
         {  
             "algoname"  : "INVM_DPHI_eEMsm6",
-            "minInvm"   : 0,
-            "maxInvm"   : 70,
-            "minDphi"   : 27,
-            "maxDphi"   : 32,
+            "minInvm"   : [0, 0, 2],
+            "maxInvm"   : [70, 70, 5],
+            "minDphi"   : [27, 27, 0],
+            "maxDphi"   : [32, 32, 32],
             "otype1"    : "eEM",
             "olist1"    : "sm",
-            "ocut1List" : [ 12, 15 ],
+            "ocut1List" : [ 12, 15, 9 ],
             "nleading1" : 1,
             "otype2"    : "eEM",
-            "ocut2List" : [ 12, 15 ],
+            "ocut2List" : [ 12, 15, 6 ],
             "olist2"    : "sm",
             "nleading2" : 6
 
@@ -724,7 +724,7 @@ class TopoAlgoDef:
             inputList = [d.otype1 + d.olist1, d.otype2 + d.olist1]
             toponames=[]
             for bitId, ocut1Value in enumerate(d.ocut1List):
-                toponames.append ("%iINVM%i-%iDPHI%i-%s%s%s%s-%s%s%s%s"  % (d.minInvm, d.maxInvm, d.minDphi, d.maxDphi,
+                toponames.append ("%iINVM%i-%iDPHI%i-%s%s%s%s-%s%s%s%s"  % (d.minInvm[bitId], d.maxInvm[bitId], d.minDphi[bitId], d.maxDphi[bitId],
                                                                 d.otype1, str(ocut1Value) , d.olist1, str(d.nleading1) if d.olist1=="sm" else "",
                                                                 d.otype2, str(d.ocut2List[bitId]) , d.olist2, str(d.nleading2) if d.olist2=="sm" else ""))
             alg = AlgConf.InvariantMassDeltaPhiInclusive2( name = d.algoname, inputs = inputList, outputs = toponames )  
@@ -735,14 +735,59 @@ class TopoAlgoDef:
             alg.addgeneric('NumResultBits', len(toponames))
             for bitId in range(len(toponames)):
                 alg.addvariable('MinET1', get_threshold_cut(d.otype1, d.ocut1List[bitId]) * _et_conversion, bitId)
-                alg.addvariable('MinET2', get_threshold_cut(d.otype1, d.ocut2List[bitId]) * _et_conversion, bitId)
-                alg.addvariable('MinMSqr', d.minInvm * d.minInvm * _et_conversion * _et_conversion, bitId)
-                alg.addvariable('MaxMSqr', d.maxInvm * d.maxInvm * _et_conversion * _et_conversion, bitId)
-                alg.addvariable('MinDeltaPhi', d.minDphi * _phi_conversion, bitId)
-                alg.addvariable('MaxDeltaPhi', d.maxDphi * _phi_conversion, bitId)
+                alg.addvariable('MinET2', get_threshold_cut(d.otype2, d.ocut2List[bitId]) * _et_conversion, bitId)
+                alg.addvariable('MinMSqr', d.minInvm[bitId] * d.minInvm[bitId] * _et_conversion * _et_conversion, bitId)
+                alg.addvariable('MaxMSqr', d.maxInvm[bitId] * d.maxInvm[bitId] * _et_conversion * _et_conversion, bitId)
+                alg.addvariable('MinDeltaPhi', d.minDphi[bitId] * _phi_conversion, bitId)
+                alg.addvariable('MaxDeltaPhi', d.maxDphi[bitId] * _phi_conversion, bitId)
             
             tm.registerTopoAlgo(alg)    
 
+        # ATR-31830
+        INVM_DISAMB_Map = [
+        {
+            "algoname": "110INVM150-eEM50s-eEM10s-2DISAMB-jJ60s",
+            "disamb" :  2,
+            "minInvm"   : 110,
+            "maxInvm"   : 150,
+            "otype1"  : "eEM",
+            "ocut1a"   : 50,
+            "ocut1b"   : 10,
+            "olist1": "s",
+            "nleading1": HW.eEmOutputWidthSort,
+            "inputwidth1": HW.eEmOutputWidthSort,
+            "otype2"  : "jJ",
+            "ocut2"   : 60,
+            "nleading2": 3,
+            "inputwidth2": HW.jJetOutputWidthSort,
+            "olist2": "s",
+        }
+        ]
+        for x in INVM_DISAMB_Map:
+            class d:
+                pass
+            for k in x:
+                setattr(d,k,x[k])
+            inputList = [d.otype1 + d.olist1, d.otype2 + d.olist2]
+            obj1a = "-%s%s%s" % (d.otype1, str(d.ocut1a), d.olist1)
+            obj1b = "-%s%s%s" % (d.otype1, str(d.ocut1b), d.olist1)
+            obj2 = "%s%s%s"  % (d.otype2, str(d.ocut2), d.olist2)
+            toponame = "%iINVM%i%s%s-%sDISAMB-%s"  % (d.minInvm, d.maxInvm, obj1a, obj1b, str(d.disamb) if d.disamb>0 else "", obj2)
+            
+            alg = AlgConf.InvariantMassInclusive1Disambiguation2( name = d.algoname, inputs = inputList, outputs = [ toponame ] )
+            alg.addgeneric('InputWidth1', d.inputwidth1)
+            alg.addgeneric('InputWidth2', d.inputwidth2)
+            alg.addgeneric('MaxTob1', d.nleading1)
+            alg.addgeneric('MaxTob2', d.nleading2)
+            alg.addgeneric('NumResultBits', 1)
+            alg.addvariable('MinET1a', get_threshold_cut(d.otype1, d.ocut1a)*_et_conversion, 0)
+            alg.addvariable('MinET1b', get_threshold_cut(d.otype1, d.ocut1b)*_et_conversion, 0)
+            alg.addvariable('MinET2', get_threshold_cut(d.otype2, d.ocut2)*_et_conversion, 0)
+            alg.addvariable('MinMSqr', d.minInvm * d.minInvm * _et_conversion * _et_conversion, 0)
+            alg.addvariable('MaxMSqr', d.maxInvm * d.maxInvm * _et_conversion * _et_conversion, 0)
+            alg.addvariable('DisambDRSqrMin', d.disamb*d.disamb*_dr_conversion*_dr_conversion, 0)
+
+            tm.registerTopoAlgo(alg)
 
         # Boosted DM/DPHI for eEM
         # output lines = 0INVM70-0DPHI12-eEM9sl1-eEM9sl6, 
@@ -1783,12 +1828,12 @@ class TopoAlgoDef:
         TeATIME_map = [
         {  
             "algoname"     : "TeATIME-jTENoSort",
-            "teFlavor"     : [1,1,1,3], # 0 = off, 1 = full jTE, 2 = central jTE, 3 = forward jTE (A+C side)
-            "combination"  : [0,1,2,1], # 0 = require both, 1 = require factor, 2 = require offset, 3 = require any of the two criteria
-            "nextBcOffset" : [10,10,10,10], # offset added to upcoming BC's jTE (in GeV, fractional values down to 100 MeV are possible). 
-                                            # The 'offset' criterion is considered as passed if this sum exceeds the current BC's jTE value,
-                                            # i.e., to require a minimum *increase* in jTE in the next BC this should be a *negative* value!
-            "nextBcFactor" : [2.5,2.5,2.5,2.5] # factor by which upcoming BC's jTE must be larger than current BC's jTE value
+            "teFlavor"     : [2,1,2,3], # 0 = off, 1 = full jTE, 2 = central jTE, 3 = forward jTE (A+C side)
+            "combination"  : [0,0,0,1], # 0 = require both, 1 = require factor, 2 = require offset, 3 = require any of the two criteria
+            "nextBcOffset" : [-2.5,10,10,10], # offset added to upcoming BC's jTE (in GeV, fractional values down to 100 MeV are possible). 
+                                              # The 'offset' criterion is considered as passed if this sum exceeds the current BC's jTE value,
+                                              # i.e., to require a minimum *increase* in jTE in the next BC this should be a *negative* value!
+            "nextBcFactor" : [0.9,2.5,2.5,2.5] # factor by which upcoming BC's jTE must be larger than current BC's jTE value
         }
         ]
 
@@ -2500,8 +2545,8 @@ class TopoAlgoDef:
         algolist=[
             { "minDphi": 23, "maxDphi": 32, "mult": 2, "otype1" : "eEM",
                 "ocut1": 1, "olist1": "s", "nleading1": HW.eEmOutputWidthSort, "minET1":0.9, "otype2" : "", "minET2":0.8},#23DPHI32_2eEM1s
-            { "minDphi": 23, "maxDphi": 32, "mult": 2, "otype1" : "eTAU",
-                "ocut1": 1, "olist1": "s", "nleading1": HW.eTauOutputWidthSort,"minET1":0.8,"otype2" : "","minET2":0.8},#23DPHI32_2eTAU1s
+            { "minDphi": 26, "maxDphi": 32, "mult": 2, "otype1" : "eTAU",
+                "ocut1": 1, "olist1": "s", "nleading1": HW.eTauOutputWidthSort,"minET1":0.8,"otype2" : "","minET2":0.8},#26DPHI32_2eTAU1s
             { "minDphi": 23, "maxDphi": 32, "mult": 2, "otype1" : "jTAU",
                 "ocut1": 1, "olist1": "s", "nleading1": HW.jTauOutputWidthSort,"minET1":1.4,"otype2" : "","minET2":1.4},#23DPHI32_2jTAU1s
         ]
@@ -2581,10 +2626,10 @@ class TopoAlgoDef:
         # From ATR-30728
         algo_list = [
             InvMassDPhiSumETAlgoParams(MinEt1=0.7, MinEt2=0.7, DeltaPhiMin=24, MinInvMassSq=2.3, MaxInvMassSq=200 ** 2), # 23INVM400000-24DPHI32-2eTAU07
-            InvMassDPhiSumETAlgoParams(MinEt1=0.6, MinEt2=0.6, DeltaPhiMin=24, MinInvMassSq=2.8, MaxInvMassSq=200 ** 2), # 28INVM400000-24DPHI32-2eTAU06
-            InvMassDPhiSumETAlgoParams(MinEt1=0.6, MinEt2=0.6, DeltaPhiMin=25, MinInvMassSq=2.3, MaxInvMassSq=200 ** 2), # 23INVM400000-25DPHI32-2eTAU06
-            InvMassDPhiSumETAlgoParams(MinEt1=0.5, MinEt2=0.5, DeltaPhiMin=25, MinInvMassSq=3.3, MaxInvMassSq=200 ** 2), # 33INVM400000-25DPHI32-2eTAU05
-            InvMassDPhiSumETAlgoParams(MinEt1=0.5, MinEt2=0.5, DeltaPhiMin=27, MinInvMassSq=2.3, MaxInvMassSq=200 ** 2), # 23INVM400000-27DPHI32-2eTAU05
+            InvMassDPhiSumETAlgoParams(MinEt1=0.7, MinEt2=0.7, DeltaPhiMin=24, MinInvMassSq=2.8, MaxInvMassSq=200 ** 2), # 28INVM400000-24DPHI32-2eTAU07
+            InvMassDPhiSumETAlgoParams(MinEt1=0.8, MinEt2=0.8, DeltaPhiMin=25, MinInvMassSq=2.3, MaxInvMassSq=200 ** 2), # 23INVM400000-25DPHI32-2eTAU08
+            InvMassDPhiSumETAlgoParams(MinEt1=0.7, MinEt2=0.7, DeltaPhiMin=25, MinInvMassSq=3.3, MaxInvMassSq=200 ** 2), # 33INVM400000-25DPHI32-2eTAU07
+            InvMassDPhiSumETAlgoParams(MinEt1=0.7, MinEt2=0.7, DeltaPhiMin=27, MinInvMassSq=2.3, MaxInvMassSq=200 ** 2), # 23INVM400000-27DPHI32-2eTAU07
         ]
         AddInvMassDPhiSumETAlgos('eTAU', HW.eTauOutputWidthSort, algo_list)
 

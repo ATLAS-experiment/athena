@@ -113,7 +113,7 @@ StatusCode ReadData::execute (const EventContext& ctx) const {
            ATH_MSG_INFO("ElementLink1 = " << x);
            ATH_MSG_INFO("ElementLink2 = " << track->getElement2()->getX());
            ATH_MSG_INFO("Link ElementLinkVector = " << track->getElementLinkVector()->size());
-           for (const auto& link : *track->getElementLinkVector()) {
+           for (const auto link : *track->getElementLinkVector()) {
              ATH_MSG_INFO("Element = " << (*link) << " : " << (*link)->getX());
            }
            ATH_MSG_INFO("Link Navigable = " << track->getNavigable()->size());

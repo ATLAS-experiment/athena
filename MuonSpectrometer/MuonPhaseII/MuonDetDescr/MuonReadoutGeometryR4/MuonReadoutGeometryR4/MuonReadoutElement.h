@@ -184,10 +184,10 @@ class MuonReadoutElement : public GeoVDetectorElement, public AthMessaging, publ
      StatusCode createGeoTransform();
 #ifndef SIMULATIONBASE
      //Creates a MuonSurfaceCache for straw surfaces using the given Bounds and Identifier Hash
-     StatusCode strawSurfaceFactory(const IdentifierHash& hash, std::shared_ptr<Acts::LineBounds> lBounds);
+     StatusCode strawSurfaceFactory(const IdentifierHash& hash, std::shared_ptr<const Acts::LineBounds> lBounds);
 
      //Creates a MuonSurfaceCache for plane surface using the given Bounds and Identifier Hash
-     StatusCode planeSurfaceFactory(const IdentifierHash& hash, std::shared_ptr<Acts::PlanarBounds> pBounds);
+     StatusCode planeSurfaceFactory(const IdentifierHash& hash, std::shared_ptr<const Acts::PlanarBounds> pBounds);
 #endif     
      /// Returns the hash that is associated with the surface cache holding the transformation that is
      /// placing the ReadoutElement inside the ATLAS coordinate system.

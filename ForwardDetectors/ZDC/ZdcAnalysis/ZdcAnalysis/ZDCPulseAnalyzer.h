@@ -18,7 +18,7 @@
 #include <string>
 #include <memory>
 #include <tuple>
-
+#include <functional>
 
 class ATLAS_NOT_THREAD_SAFE ZDCPulseAnalyzer
 {
@@ -49,6 +49,7 @@ public:
         RepassPulseBit        = 17, // 0x20000
         ArmSumIncludeBit      = 18, // 0x40000
 	FailSigCutBit         = 19, // 0x80000
+	UnderFlowExclusionBit = 20, // 0x100000
         N_STATUS_BITS
        };
 
@@ -74,8 +75,6 @@ private:
 
   //  Static data
   //
-  bool m_quietFits{};
-  bool m_saveFitFunc{};
   
   static TH1* s_undelayedFitHist;
   static TH1* s_delayedFitHist;
@@ -97,7 +96,10 @@ private:
   float m_tmin{};
   float m_tmax{};
 
-  std::string m_fitFunction{};
+  bool m_quietFits{true};
+  bool m_saveFitFunc{false};
+
+  std::string m_fitFunction;
   size_t m_2ndDerivStep{1};
   size_t m_peak2ndDerivMinSample{};
   size_t m_peak2ndDerivMinTolerance{1};
@@ -141,7 +143,11 @@ private:
 
   float m_chisqDivAmpCutLG{}; // maximum good LG chisq / amplitude
   float m_chisqDivAmpCutHG{}; // maximum good HG chisq / amplitude
-
+  float m_chisqDivAmpOffsetLG{}; // maximum good LG chisq / amplitude
+  float m_chisqDivAmpOffsetHG{}; // maximum good HG chisq / amplitude
+  float m_chisqDivAmpPowerLG{}; // maximum good LG chisq / amplitude
+  float m_chisqDivAmpPowerHG{}; // maximum good HG chisq / amplitude
+  
   float m_T0CutLowLG{};  // minimum good corrected time for LG fits
   float m_T0CutHighLG{}; // maximum good corrected time for LG fits
 
@@ -177,7 +183,14 @@ private:
   unsigned int m_postExclHGADCThresh{0};
   unsigned int m_postExclLGADCThresh{0};
   unsigned int m_maxSamplesPostExcl{0};
-
+  
+  bool m_enableUnderflowExclHG{false};
+  bool m_enableUnderflowExclLG{false};
+  unsigned int m_underFlowExclSamplesPreHG{0};
+  unsigned int m_underFlowExclSamplesPostHG{0};
+  unsigned int m_underFlowExclSamplesPreLG{0};
+  unsigned int m_underFlowExclSamplesPostLG{0};
+  
   //
   unsigned int m_timingCorrMode{NoTimingCorr};
   float m_timingCorrRefADC{500};
@@ -231,36 +244,37 @@ private:
   // -----------------------
   // Statuses
   //
-  bool m_haveData{};
+  bool m_haveData{false};
 
-  bool m_havePulse{};
-  bool m_useLowGain{};
-  bool m_fail{};
-  bool m_HGOverflow{};
+  bool m_havePulse{false};
+  bool m_useLowGain{false};
+  bool m_fail{false};
+  bool m_HGOverflow{false};
 
-  bool m_HGUnderflow{};
-  bool m_PSHGOverUnderflow{};
-  bool m_LGOverflow{};
-  bool m_LGUnderflow{};
+  bool m_HGUnderflow{false};
+  bool m_PSHGOverUnderflow{false};
+  bool m_LGOverflow{false};
+  bool m_LGUnderflow{false};
 
-  bool m_prePulse{};
-  bool m_postPulse{};
-  bool m_fitFailed{};
-  bool m_badChisq{};
+  bool m_prePulse{false};
+  bool m_postPulse{false};
+  bool m_fitFailed{false};
+  bool m_badChisq{false};
 
-  bool m_badT0{};
-  bool m_ExcludeEarly{};
-  bool m_ExcludeLate{};
-  bool m_preExpTail{};
+  bool m_badT0{false};
+  bool m_ExcludeEarly{false};
+  bool m_ExcludeLate{false};
+  bool m_preExpTail{false};
 
-  bool m_fixPrePulse{};
-  bool m_fitMinAmp{};
-  bool m_repassPulse{};
-  bool m_failSigCut{};
+  bool m_fixPrePulse{false};
+  bool m_fitMinAmp{false};
+  bool m_repassPulse{false};
+  bool m_failSigCut{false};
+  bool m_underflowExclusion{false};
 
   // -----------------------
 
-  bool  m_backToHG_pre{};
+  bool  m_backToHG_pre{false};
   float m_baselineCorr{};
 
   // Pulse analysis
@@ -381,13 +395,14 @@ private:
 
   bool ScanAndSubtractSamples();
 
+  using ChisqCutLambdatype = std::function<bool(float,float,float)>;
   bool AnalyzeData(size_t nSamples, size_t preSample,
                    const std::vector<float>& samples,        // The samples used for this event
 		   const std::vector<bool>& useSamples,        // The samples used for this event
                    float peak2ndDerivMinThresh,
                    float noiseSig,                           // The "resolution" on the ADC value
                    const std::vector<float>& toCorrParams,   // The parameters used to correct the t0
-                   float maxChisqDivAmp,                     // The maximum chisq / amplitude ratio
+                   ChisqCutLambdatype chisqCutLambda, // Lambda to apply chisq cut
                    float minT0Corr, float maxT0Corr          // The minimum and maximum corrected T0 values
                   );
 
@@ -603,8 +618,9 @@ public:
   bool preExpTail()     const {return m_preExpTail;}
   bool fitMinimumAmplitude() const {return m_fitMinAmp;}
   bool repassPulse() const {return m_repassPulse;}
-  bool armSumInclude() const {return havePulse() && !(fitFailed() || badChisq() || badT0() || fitMinimumAmplitude() || LGOverflow() || failSigCut());}
+  bool armSumInclude() const {return havePulse() && !(failed() || fitFailed() || badChisq() || badT0() || fitMinimumAmplitude() || LGOverflow() || LGUnderflow() || failSigCut());}
   bool failSigCut() const {return m_failSigCut;}
+  bool underflowExclusion() const {return m_underflowExclusion;}
 
   // ------------------------------------------------------------
 

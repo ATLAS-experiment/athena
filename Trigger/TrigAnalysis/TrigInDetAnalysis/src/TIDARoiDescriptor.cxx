@@ -6,13 +6,13 @@
  **     @author  mark sutton
  **     @date    Tue 10 Nov 2009 10:15:40 GMT 
  **
- **     Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+ **     Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
  **/
 
 
-#include <cmath>
 
 #include "TrigInDetAnalysis/TIDARoiDescriptor.h"
+#include <sstream>
 
 ClassImp( TIDARoiDescriptor )
 
@@ -64,6 +64,7 @@ double  TIDARoiDescriptor::exitpoint( double tz0, double teta, double& zexit, do
 TIDARoiDescriptor::TIDARoiDescriptor( bool fullscan ) 
   :  m_fullscan(fullscan), 
      m_l1Id(0), m_roiId(0), m_roiWord(0),
+     m_cached(false), m_dphi(0),
      m_zedPlusR(0),
      m_zedMinusR(0),
      m_rPlusZed(0),

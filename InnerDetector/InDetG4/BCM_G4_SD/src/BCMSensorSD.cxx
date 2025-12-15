@@ -42,6 +42,7 @@ void BCMSensorSD::Initialize(G4HCofThisEvent *)
   if(auto* eventManger = G4EventManager::GetEventManager()){
     if(auto* eventInfo = static_cast<AtlasG4EventUserInfo*>(eventManger->GetUserInformation())){
       m_HitColl = eventInfo->GetHitCollectionMap()->Find<SiHitCollection>(m_HitCollName);
+      m_g4UserEventInfo = eventInfo;
     }
   }
 }
@@ -108,8 +109,9 @@ G4bool BCMSensorSD::ProcessHits(G4Step* aStep, G4TouchableHistory* /*ROhist*/)
         produced_in_diamond = 2;
       else if(aStep->GetTrack()->GetLogicalVolumeAtVertex()->GetName() == "Pixel::bcmWallLog")
         produced_in_diamond = 3;
-
-      m_HitColl->Emplace(lP1, lP2, edep, aStep->GetPreStepPoint()->GetGlobalTime(), trHelp.GenerateParticleLink(),
+      // Temporary solution to get EventContext from a Geant4 thread 
+      m_HitColl->Emplace(lP1, lP2, edep, aStep->GetPreStepPoint()->GetGlobalTime(),
+                         trHelp.GenerateParticleLink(m_g4UserEventInfo ? m_g4UserEventInfo->GetEventStore() : nullptr),
                          0, 0, myTouch->GetVolume(1)->GetCopyNo()-951, BEcopyNo - 11950, primaren, produced_in_diamond);
     }
   return true;

@@ -1,6 +1,7 @@
 Py:Athena            INFO including file "DataModelRunTests/xAODRootTest.py"
 xAOD::Init                INFO    Environment initialised for data access
 Athena::getMessageSvc: WARNING MessageSvc not found, will use std::cout
+xAOD::Experimen...   INFO REvent::readFrom:  fileName xaoddata.rntup.root
 xAOD::Experimen...WARNING Auxiliary store "ctrigAux." is of an unknown type: DMTest::CTrigAuxContainer_v1
 ---> Event 0
 cvec

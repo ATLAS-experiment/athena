@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration.
  *
  * @file HGTD_EventTPCnv/src/HGTD_RDO_ContainerCnv_p1.cxx
  * @author Alexander Leopold <alexander.leopold@cern.ch>
@@ -84,8 +84,10 @@ void HGTD_RDO_ContainerCnv_p1::transToPers(
           &((persistent_container->m_rdo_list)
                 .at(rdo_i + collection_separator_index_begin));
 
-      const HGTD_RDO* trans_rdo =
-          dynamic_cast<const HGTD_RDO*>(collection.at(rdo_i));
+      const HGTD_RDO* trans_rdo = dynamic_cast<const HGTD_RDO*>(collection.at(rdo_i));
+      if (not trans_rdo){
+        continue;
+      }
 
       rdo_converter.transToPers(trans_rdo, pers_rdo, log);
     }

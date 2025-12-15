@@ -273,7 +273,12 @@ def DESDMCPOutputCfg(flags, **kwargs):
         container_items+=["xAOD::MuonContainer#{muon}".format(muon = muon), 
                           "xAOD::MuonAuxContainer#{muon}Aux.".format(muon = muon)]
     
-    
+    if flags.Muon.DESDM_MCP.doExtendedAlignmentContent:
+        container_items+=['xAOD::ElectronContainer#Electrons','xAOD::ElectronAuxContainer#ElectronsAux.',
+                      'xAOD::PhotonContainer#Photons','xAOD::PhotonAuxContainer#PhotonsAux.',
+                      'xAOD::JetContainer#AntiKt4EMPFlowJets','xAOD::JetAuxContainer#AntiKt4EMPFlowJetsAux.-PseudoJet',
+                      'xAOD::MissingETContainer#MET_Core_AntiKt4EMPFlow','xAOD::MissingETAuxContainer#MET_Core_AntiKt4EMPFlowAux.']
+
     trackParticleAuxExclusions="-clusterAssociation.-trackParameterCovarianceMatrices.-parameterX.-parameterY.-parameterZ.-parameterPX.-parameterPY.-parameterPZ.-parameterPosition"
 
     if flags.Muon.DESDM_MCP.doAlignmentFormat:

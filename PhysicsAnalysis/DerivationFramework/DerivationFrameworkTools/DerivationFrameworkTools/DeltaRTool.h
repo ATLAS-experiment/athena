@@ -22,23 +22,24 @@ namespace DerivationFramework {
 
   enum EDeltaRToolParser {kDeltaRToolParser1,kDeltaRToolParser2,kDeltaRToolParserNum};
   class DeltaRTool : public extends<ExpressionParserUser<AthAlgTool,kDeltaRToolParserNum>, IAugmentationTool> {
-    public:
-      DeltaRTool(const std::string& t, const std::string& n, const IInterface* p);
+  public:
 
-      StatusCode initialize();
-      StatusCode finalize();
-      virtual StatusCode addBranches(const EventContext& ctx) const;
+    using base_class::base_class;
 
-    private:
-      std::string m_expression;
-      std::string m_2ndExpression;
-      SG::WriteHandleKey<std::vector<float> > m_sgName {this,"StoreGateEntryName","","SG key of output object"};
-      SG::ReadHandleKey<xAOD::IParticleContainer> m_containerName  {this,"ContainerName","","SG key of first container"};
-      SG::ReadHandleKey<xAOD::IParticleContainer> m_containerName2 {this,"SecondContainerName","","SG key of first container"};
-      
-      StatusCode getDeltaRs(std::vector<float>*, const EventContext& ctx) const;
-      static float calculateDeltaR(float,float,float,float) ;
-  }; 
+    virtual StatusCode initialize() override final;
+    virtual StatusCode finalize() override final;
+    virtual StatusCode addBranches(const EventContext& ctx) const override final;
+
+  private:
+    Gaudi::Property<std::string> m_expression{this, "ObjectRequirements", ""};
+    Gaudi::Property<std::string> m_2ndExpression{this, "SecondObjectRequirements", ""};
+    SG::WriteHandleKey<std::vector<float> > m_sgName {this,"StoreGateEntryName","","SG key of output object"};
+    SG::ReadHandleKey<xAOD::IParticleContainer> m_containerName  {this,"ContainerName","","SG key of first container"};
+    SG::ReadHandleKey<xAOD::IParticleContainer> m_containerName2 {this,"SecondContainerName","","SG key of first container"};
+
+    StatusCode getDeltaRs(std::vector<float>*, const EventContext& ctx) const;
+    static float calculateDeltaR(float,float,float,float) ;
+  };
 }
 
 #endif // DERIVATIONFRAMEWORK_DELTARTOOL_H

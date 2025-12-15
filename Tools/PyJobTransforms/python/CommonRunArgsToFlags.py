@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # Reset preload libs for proper execution of child-processes (ATR-26769).
 # We only put this here because this is executed by all CA transform skeletons:
@@ -27,8 +27,13 @@ def commonRunArgsToFlags(runArgs,configFlags):
         configFlags.GeoModel.SQLiteDB=runArgs.geometrySQLite
 
     if hasattr(runArgs,"geometrySQLiteFullPath"):
-        configFlags.GeoModel.SQLiteDBFullPath=runArgs.geometrySQLiteFullPath
-        configFlags.GeoModel.SQLiteDB=True
+        if not hasattr(runArgs,"geometrySQLite") or not runArgs.geometrySQLite:
+            from AthenaCommon.Logging import logging
+            logger = logging.getLogger('CommonRunArgsToFlags')
+            logger.warning('geometrySQLiteFullPath flag ignored because the reading from SQLite GometryDB was not activated')
+            logger.warning('To activate the reading from SQLite GeometryDB use --geometrySQLite=True')
+        else:
+            configFlags.GeoModel.SQLiteDBFullPath=runArgs.geometrySQLiteFullPath
 
     if hasattr(runArgs,"triggerConfig"): 
         configFlags.Trigger.triggerConfig=runArgs.triggerConfig
@@ -74,3 +79,6 @@ def commonRunArgsToFlags(runArgs,configFlags):
 
     if hasattr(runArgs,"mpi"):
         configFlags.Exec.MPI = runArgs.mpi
+
+    if hasattr(runArgs,"stopOnSignal"):
+        configFlags.Exec.StopOnSignal = runArgs.stopOnSignal

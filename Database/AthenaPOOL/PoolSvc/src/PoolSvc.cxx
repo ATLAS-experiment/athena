@@ -19,8 +19,7 @@
 #include "PersistentDataModel/Placement.h"
 #include "PersistentDataModel/Token.h"
 
-#include "CollectionBase/CollectionFactory.h"
-#include "CollectionBase/CollectionDescription.h"
+#include "CollectionSvc/CollectionService.h"
 
 #include "FileCatalog/IFileCatalog.h"
 #include "POOLCore/DbPrint.h"
@@ -498,27 +497,25 @@ pool::ICollection* PoolSvc::createCollection(const std::string& collectionType,
    }
 
    // access to these variables is locked below:
-   pool::CollectionFactory* collFac ATLAS_THREAD_SAFE = pool::CollectionFactory::get();
+   pool::CollectionService collSvc ATLAS_THREAD_SAFE = pool::CollectionService();
    pool::ICollection* collPtr ATLAS_THREAD_SAFE = nullptr;
 
-   pool::CollectionDescription collDes(collection, collectionType, collectionType == "ImplicitCollection" ? connection : "");
    if (collectionType == "RootCollection" &&
 	   m_persistencySvcVec[contextId]->session().defaultConnectionPolicy().writeModeForNonExisting() != pool::DatabaseConnectionPolicy::RAISE_ERROR) {
       ATH_MSG_INFO("Writing RootCollection - do not pass session pointer");
       std::scoped_lock lock(m_pool_mut);
-      collPtr = collFac->create(collDes,  pool::ICollection::READ);
+      collPtr = collSvc.handle(collection, collectionType, "", true);
    } else {
       // Try to open APR EventTags Collection in the input file - first as RootCollection, then as RNTCollection
       std::scoped_lock lock(m_pool_mut);
       std::string       tree_error, rntuple_error;
       try {
-         collPtr = collFac->create(collDes, pool::ICollection::READ, &m_persistencySvcVec[contextId]->session());
+         collPtr = collSvc.handle(collection, collectionType, collectionType == "ImplicitCollection" ? connection : "", true, &m_persistencySvcVec[contextId]->session());
       } catch (std::exception &e) {
          tree_error = e.what();
       }
       if( !collPtr ) try {
-         collDes.setType("RNTCollection");
-         collPtr = collFac->create(collDes, pool::ICollection::READ, &m_persistencySvcVec[contextId]->session());
+         collPtr = collSvc.handle(collection, "RNTCollection", collectionType == "ImplicitCollection" ? connection : "", true, &m_persistencySvcVec[contextId]->session());
       } catch (std::exception &e) {
          if (insertFile) {
             std::unique_ptr<pool::IDatabase> dbH = getDbHandle(contextId, connection);

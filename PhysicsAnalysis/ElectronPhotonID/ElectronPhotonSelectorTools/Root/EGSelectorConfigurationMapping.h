@@ -61,16 +61,16 @@ const std::map<std::string, std::string> LHPointToConfFile = {
     "ElectronLikelihoodTightTriggerConfig_NoPix.conf" },
   { "VeryLooseLHElectron_HI",
     "ElectronPhotonSelectorTools/offline/mc23_20230728_HI/"
-    "ElectronLikelihoodVeryLooseOfflineConfig2023_HI_Smooth.conf" },
+    "ElectronLikelihoodVeryLooseOfflineConfig2023_HI_Smooth_fixed.conf" },
   { "LooseLHElectron_HI",
     "ElectronPhotonSelectorTools/offline/mc23_20230728_HI/"
-    "ElectronLikelihoodLooseOfflineConfig2023_HI_Smooth.conf" },
+    "ElectronLikelihoodLooseOfflineConfig2023_HI_Smooth_fixed.conf" },
   { "MediumLHElectron_HI",
     "ElectronPhotonSelectorTools/offline/mc23_20230728_HI/"
-    "ElectronLikelihoodMediumOfflineConfig2023_HI_Smooth.conf" },
+    "ElectronLikelihoodMediumOfflineConfig2023_HI_Smooth_fixed.conf" },
   { "TightLHElectron_HI",
     "ElectronPhotonSelectorTools/offline/mc23_20230728_HI/"
-    "ElectronLikelihoodTightOfflineConfig2023_HI_Smooth.conf" },
+    "ElectronLikelihoodTightOfflineConfig2023_HI_Smooth_fixed.conf" },
 };
 const std::map<std::string, std::string> PhotonCutPointToConfFile = {
   { "LoosePhoton",
@@ -140,7 +140,7 @@ const std::map<std::string, std::string> ElectronDNNPointToConfFile = {
   { "VeryLooseDNNnoCFElectron",
     "ElectronPhotonSelectorTools/offline/mc20_20240628/"
     "ElectronDNNMulticlassVeryLoose.conf"},
-  { "VeryLooseNoCF97DNNElectron", 
+  { "VeryLooseNoCF97DNNElectron",
     "ElectronPhotonSelectorTools/offline/mc20_20240628/"
     "ElectronDNNMulticlassLoose97_cutBL.conf"},
   { "LooseNoCFDNNElectron",
@@ -151,7 +151,7 @@ const std::map<std::string, std::string> ElectronDNNPointToConfFile = {
     "ElectronDNNMulticlassMedium.conf"},
   { "TightNoCFDNNElectron",
     "ElectronPhotonSelectorTools/offline/mc20_20240628/"
-    "ElectronDNNMulticlassTight.conf"}   
+    "ElectronDNNMulticlassTight.conf"}
 };
 }
 ////////////////////////////////////////////

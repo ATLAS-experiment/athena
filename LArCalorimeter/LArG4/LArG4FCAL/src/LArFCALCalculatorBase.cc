@@ -45,6 +45,7 @@ StatusCode LArFCALCalculatorBase::initialize()
 
   if (m_BirksLaw) {
     const double Birks_LAr_density = 1.396;
+    ATH_MSG_INFO("Use Birks_LAr_density="<<Birks_LAr_density<<", Birksk="<<(double)m_Birksk);
     m_birksLaw = std::make_unique<LArG4BirksLaw>(Birks_LAr_density,m_Birksk);
   }
   if(m_doHV) {

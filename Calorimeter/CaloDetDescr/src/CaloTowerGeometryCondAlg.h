@@ -4,22 +4,21 @@
 #ifndef CALODETDESC_CALOTOWERGEOMETRYCONDALG_H
 #define CALODETDESC_CALOTOWERGEOMETRYCONDALG_H
 
-#include "AthenaBaseComps/AthReentrantAlgorithm.h"
+#include "AthenaBaseComps/AthCondAlgorithm.h"
 #include "StoreGate/ReadCondHandleKey.h"
 #include "StoreGate/WriteCondHandleKey.h"
 #include "CaloDetDescr/CaloTowerGeometry.h"
 #include "CaloDetDescr/CaloDetDescrManager.h"
 
-class CaloTowerGeometryCondAlg : public AthReentrantAlgorithm {
+class CaloTowerGeometryCondAlg : public AthCondAlgorithm {
 
  public: 
-  using AthReentrantAlgorithm::AthReentrantAlgorithm;
+  using AthCondAlgorithm::AthCondAlgorithm;
   virtual ~CaloTowerGeometryCondAlg() = default;
 
   StatusCode initialize() override final;
   StatusCode execute(const EventContext& ctx) const override final;
   StatusCode finalize() override final {return StatusCode::SUCCESS;}
-  virtual bool isReEntrant() const override final { return false; }
 
 
  private:

@@ -21,7 +21,7 @@ using namespace MuonGMR4;
      }
 
 ActsMuonAlignCondAlg::ActsMuonAlignCondAlg(const std::string& name, ISvcLocator* pSvcLocator):
-    AthReentrantAlgorithm{name, pSvcLocator}{}
+    AthCondAlgorithm{name, pSvcLocator}{}
 
 StatusCode ActsMuonAlignCondAlg::initialize() {
     

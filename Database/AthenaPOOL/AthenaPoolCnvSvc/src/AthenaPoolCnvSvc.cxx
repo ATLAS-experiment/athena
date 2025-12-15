@@ -38,6 +38,11 @@ StatusCode AthenaPoolCnvSvc::initialize() {
    ATH_CHECK(dmcsvc.retrieve());
    // Retrieve PoolSvc
    ATH_CHECK(m_poolSvc.retrieve());
+   StringProperty defContainerType("DefaultContainerType", "ROOTTREEINDEX");
+   if(IProperty* propertyServer = dynamic_cast<IProperty*>(m_poolSvc.get())) {
+      propertyServer->getProperty(&defContainerType).ignore();
+   }
+   m_defContainerType = defContainerType.value();
    // Retrieve ClassIDSvc
    ATH_CHECK(m_clidSvc.retrieve());
    // Register this service for 'I/O' events
@@ -57,6 +62,7 @@ StatusCode AthenaPoolCnvSvc::initialize() {
             ATH_MSG_WARNING(std::format("Invalid MaxFileSize value: {}", std::string(start, end)));
          }
          std::string databaseName = maxFileSizeSpec.substr(0, maxFileSizeSpec.find_first_of(" 	="));
+         std::unique_lock<std::mutex> lock(m_mutex);
          m_databaseMaxFileSize.emplace(std::move(databaseName), maxFileSize);
       } else {
          if (auto [ptr, ec] = std::from_chars(maxFileSizeSpec.data(), maxFileSizeSpec.data() + maxFileSizeSpec.size(), m_domainMaxFileSize); ec != std::errc{}) {
@@ -303,10 +309,12 @@ StatusCode AthenaPoolCnvSvc::connectOutput(const std::string& outputConnectionSp
          std::size_t equal = cont.find('='); // Used to remove leading "TTree="
          if (equal == std::string::npos) equal = 0;
          else equal++;
-         std::size_t colon = m_containerPrefixProp.value().find(':');
+         const auto& prefix = m_containerPrefixProp.value();
+         std::size_t colon = prefix.find(':');
          if (colon == std::string::npos) colon = 0; // Used to remove leading technology
          else colon++;
-         const auto& strProp = m_containerPrefixProp.value();
+         const auto defaultContName = (tech == pool::ROOTRNTUPLE_StorageType.type()) ? APRDefaults::RNTupleNames::EventData : APRDefaults::TTreeNames::EventData;
+         const auto& strProp = (prefix == "Default") ? defaultContName : prefix;
          if (merge != std::string::npos && opt == "TREE_AUTO_FLUSH" && 0 == outputConnection.compare(0, merge, file) &&cont.compare(equal, std::string::npos, strProp, colon) == 0 && data != "int" && data != "DbLonglong" && data != "double" && data != "string") {
             flush = atoi(data.c_str());
             if (flush < 0 && m_numberEventsPerWrite.value() > 0) {
@@ -518,13 +526,13 @@ StatusCode AthenaPoolCnvSvc::decodeOutputSpec(std::string& fileSpec, int& output
       // This will be used for event data and its data header
       // First we look for an exact file name match
       // If that fails, we look for a wildcard ("*") match
-      // If that also fails, we use the hardcoded default value
+      // If that also fails, we use the default value from PoolSvc
       if (auto it = m_storageTechMap.find(fileName); it != m_storageTechMap.end()) {
          outputTech = it->second;
       } else if (it = m_storageTechMap.find("*"); it != m_storageTechMap.end()) {
          outputTech = it->second;
       } else {
-         outputTech = pool::ROOTTREEINDEX_StorageType.type();
+         outputTech = pool::DbType::getType(m_defContainerType).type();
       }
    }
    return StatusCode::SUCCESS;
@@ -604,18 +612,16 @@ void AthenaPoolCnvSvc::extractPoolAttributes(const StringArrayProperty& property
       valueString.clear();
       using Gaudi::Utils::AttribStringParser;
       for (const AttribStringParser::Attrib& attrib : AttribStringParser (propertyValue)) {
-         const std::string tag = attrib.tag;
-         const std::string val = attrib.value;
-         if (tag == "DatabaseName") {
-            databaseName = std::move(val);
-         } else if (tag == "ContainerName") {
+         if (attrib.tag == "DatabaseName") {
+            databaseName = attrib.value;
+         } else if (attrib.tag == "ContainerName") {
             if (databaseName.empty()) {
                databaseName = "*";
             }
-            containerName = std::move(val);
+            containerName = attrib.value;
          } else {
-            attributeName = std::move(tag);
-            valueString = std::move(val);
+            attributeName = attrib.tag;
+            valueString = attrib.value;
          }
       }
       if (!attributeName.empty() && !valueString.empty()) {

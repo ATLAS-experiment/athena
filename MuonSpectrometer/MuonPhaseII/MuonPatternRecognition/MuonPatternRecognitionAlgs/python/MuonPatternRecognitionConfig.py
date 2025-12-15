@@ -38,7 +38,6 @@ def MuonSegmentFittingAlgCfg(flags, name = "MuonSegmentFittingAlg", **kwargs):
     kwargs.setdefault("recalibInFit", False)
     kwargs.setdefault("useFastFitter", False)
     kwargs.setdefault("doBeamspotConstraint", True)
-    
     theAlg = CompFactory.MuonR4.SegmentFittingAlg(name, **kwargs)
     result.addEventAlgo(theAlg, primary=True)
     return result
@@ -47,7 +46,8 @@ def ActsMuonSegmentRefitAlgCfg(flags,name="ActsMuonSegmentRefitAlg", **kwargs):
     result = ComponentAccumulator()
     from MuonTrackFindingAlgs.TrackFindingConfig import SegmentSelectorCfg, MSTrackFitterCfg
     kwargs.setdefault("SegmentSelectionTool", result.popToolsAndMerge(SegmentSelectorCfg(flags)))
-    
+    from MuonSpacePointCalibrator.CalibrationConfig import MuonSpacePointCalibratorCfg
+    kwargs.setdefault("Calibrator", result.popToolsAndMerge(MuonSpacePointCalibratorCfg(flags)))
     kwargs.setdefault("FittingTool", result.popToolsAndMerge(MSTrackFitterCfg(flags,
                                                                               DoStraightLine=True)))       
     from ActsConfig.ActsGeometryConfig import ActsExtrapolationToolCfg

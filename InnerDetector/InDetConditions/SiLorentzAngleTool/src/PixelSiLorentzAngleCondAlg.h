@@ -11,7 +11,7 @@
 #ifndef PIXELSILORENTZANGLECONDALG
 #define PIXELSILORENTZANGLECONDALG
 
-#include "AthenaBaseComps/AthReentrantAlgorithm.h"
+#include "AthenaBaseComps/AthCondAlgorithm.h"
 
 #include "StoreGate/ReadCondHandleKey.h"
 #include "StoreGate/WriteCondHandleKey.h"
@@ -32,7 +32,7 @@
 #include "MagFieldElements/AtlasFieldCache.h"
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class PixelSiLorentzAngleCondAlg: public AthReentrantAlgorithm {
+class PixelSiLorentzAngleCondAlg: public AthCondAlgorithm {
   public:
     PixelSiLorentzAngleCondAlg(const std::string& name, ISvcLocator* pSvcLocator);
     virtual ~PixelSiLorentzAngleCondAlg() = default;

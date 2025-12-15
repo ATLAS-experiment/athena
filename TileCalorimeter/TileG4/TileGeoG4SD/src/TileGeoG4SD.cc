@@ -23,8 +23,8 @@
 #include "G4Step.hh"
 #include "G4Geantino.hh"
 
-TileGeoG4SD::TileGeoG4SD(G4String name, const std::string& hitCollectionName, ITileCalculator* tileCalculator)
-  : G4VSensitiveDetector(std::move(name))
+TileGeoG4SD::TileGeoG4SD(const G4String& name, const std::string& hitCollectionName, ITileCalculator* tileCalculator)
+  : G4VSensitiveDetector(name)
   , m_calc(tileCalculator)
   , m_hitCollectionName(hitCollectionName)
 {

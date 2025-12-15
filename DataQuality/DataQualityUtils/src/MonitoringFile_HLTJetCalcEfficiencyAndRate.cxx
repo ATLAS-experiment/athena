@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
  */
 
 /* Methods to perform post-processing on run_nnnnnn/HLT/JetMon* histograms
@@ -34,9 +34,9 @@
 namespace dqutils {
   void
   MonitoringFile::HLTJetCalcEfficiencyAndRate(TFile* f, TString& run_dir) {
-    bool dbgLevel = false;
+    //bool dbgLevel = false;
 
-    if (dbgLevel) std::cout << "--> HLTJetCalcEfficiencyAndRate: Calculate jet trigger efficiency and rate" << std::endl;
+    //if (dbgLevel) std::cout << "--> HLTJetCalcEfficiencyAndRate: Calculate jet trigger efficiency and rate" << std::endl;
 
     f->cd("/");
     TIter next_run(f->GetListOfKeys());
@@ -121,12 +121,12 @@ namespace dqutils {
           snum = akt4topo_dir + "/" + hnumname;
           sden = akt4topo_dir + "/" + (*itT) + (*itO) + "_den";
 
-          if (!f->Get(snum)) {
-            if (dbgLevel) std::cerr << "--> HLTJetPostProcess: no such histogram " << snum << std::endl;
-          }
-          if (!f->Get(sden)) {
-            if (dbgLevel) std::cerr << "--> HLTJetPostProcess: no such histogram " << sden << std::endl;
-          }
+          //if (!f->Get(snum)) {
+          //  if (dbgLevel) std::cerr << "--> HLTJetPostProcess: no such histogram " << snum << std::endl;
+          //}
+          //if (!f->Get(sden)) {
+          //  if (dbgLevel) std::cerr << "--> HLTJetPostProcess: no such histogram " << sden << std::endl;
+          //}
 
           if (f->Get(snum) && f->Get(sden)) {
             hnum = dynamic_cast<TH1F*>(f->Get(snum));
@@ -134,12 +134,12 @@ namespace dqutils {
             hden = dynamic_cast<TH1F*>(f->Get(sden));
             hden->Sumw2();
 
-            Int_t nbins_num = hnum->GetNbinsX();
-            Int_t nbins_den = hden->GetNbinsX();
-            if (nbins_num != nbins_den) {
-              if (dbgLevel) std::cerr << "--> HLTJetPostProcess: cannot divide histogram " << hnum->GetName()
-                                      << " by " << hden->GetName() << ". Different number of bins." << std::endl;
-            }
+            //Int_t nbins_num = hnum->GetNbinsX();
+            //Int_t nbins_den = hden->GetNbinsX();
+            //if (nbins_num != nbins_den) {
+            //  if (dbgLevel) std::cerr << "--> HLTJetPostProcess: cannot divide histogram " << hnum->GetName()
+            //                          << " by " << hden->GetName() << ". Different number of bins." << std::endl;
+            //}
 
             // divide num, den with binomial errors
             // note: replacing the numerator by quotient

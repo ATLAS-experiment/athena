@@ -14,15 +14,16 @@
 //====================================================================
 
 // Framework include files
-#include "StorageSvc/DbHeap.h"
 #include "StorageSvc/DbTypeInfo.h"
 #include "StorageSvc/DbContainer.h"
-#include "StorageSvc/DbToken.h"
 #include "StorageSvc/DbReflex.h"
 #include "DbContainerObj.h"
+
 #include "CxxUtils/checker_macros.h"
+#include "PersistentDataModel/Token.h"
 
 #include <memory>
+#include <stdexcept>
 
 using namespace std;
 using namespace pool;
@@ -164,26 +165,23 @@ DbStatus DbContainer::fetch(DbSelect& sel) {
   return isValid() ? m_ptr->fetch(sel) : Error;
 }
 
+/// Store object in location
+DbStatus DbContainer::store(const void* object, const DbTypeInfo* typ) {
+  if ( isValid() )  {
+    return m_ptr->store(object, *this, typ);
+  }
+  throw std::runtime_error("DbContainer::store failed: invalid container");
+}
+
 /// In place allocation of object location
 DbStatus DbContainer::allocate(const void* object, ShapeH shape, Token::OID_t& oid) {
-  if ( isValid() && object ) return m_ptr->allocate(*this, object, shape, oid);
-  throw bad_alloc();
-}
-
-/// In place allocation of raw memory
-void* DbContainer::allocate(unsigned long siz, const DbTypeInfo* typ) {
-  if ( isValid() )  {
-    void* ptr = m_ptr->allocate(siz, *this, typ);
-    if ( ptr )    {
-      return ptr;
-    }
+  if ( !isValid() ) {
+    throw std::runtime_error("DbContainer::allocate failed: invalid container");
   }
-  throw bad_alloc();
-}
-
-/// In place free of raw memory
-DbStatus DbContainer::free(void* ptr) {
-  return isValid() ? m_ptr->free(ptr, *this) : Error;
+  if ( !object ) {
+    throw std::runtime_error("DbContainer::allocate failed: null object pointer");
+  }
+  return m_ptr->allocate(*this, object, shape, oid);
 }
 
 /// Load object in the container identified by its handle
@@ -197,65 +195,4 @@ DbStatus DbContainer::load( void** ptr,
     return sc;
   }
   return Error;
-}
-
-/// Save new object in the container and return its handle
-DbStatus DbContainer::save(const void* object, ShapeH shape, Token::OID_t& linkH) {
-  return isValid() && object ? m_ptr->save(*this, object, shape, linkH) : Error;
-}
-
-/// Save object in the container identified by its handle
-DbStatus DbContainer::_save(DbObjectHandle<DbObject>& objH, const DbTypeInfo* typ) {
-  if ( isValid() && objH.isValid() )    {
-    const DbContainer& cnt = objH.containedIn();
-    // Object MUST be allocated on this container!
-    if ( cnt.info() == m_ptr->info() ) {
-      return m_ptr->save( objH, typ );
-    }
-  }
-  return Error;
-}
-
-/// Remove the transient representation of the object from memory
-DbStatus DbContainer::_remove(DbObjectHandle<DbObject>& objH)   {
-  return isValid() && objH.isValid() ? m_ptr->remove(objH) : Error;
-}
-
-/// Load object in the container identified by its link handle
-DbStatus DbContainer::_load(DbObjectHandle<DbObject>& objH,
-                            const Token::OID_t& linkH,
-                            const DbTypeInfo* typ,
-                            bool any_next)
-{
-   if( typ ) {
-      TypeH cl = typ->clazz();
-      if( cl ) {
-         DbObject* ptr = DbHeap::allocate( cl.SizeOf(), this, 0, 0 );
-         if( ptr ) {
-            ptr = cl.Construct(ptr);
-            Token::OID_t oid;
-            if ( m_ptr->load(&ptr, typ, linkH, oid, any_next).isSuccess() )  {
-               objH._setObject( ptr );
-               objH.oid() = oid;
-               return Success;
-            }
-            cl.Class()->Destructor(ptr, true);
-            this->free( ptr );
-            objH._setObject(0);
-         }
-      }
-   }
-   return Error;
-}
-
-/// Load object in the container identified by its link handle
-DbStatus DbContainer::_loadNext(DbObjectHandle<DbObject>& objH,
-                                Token::OID_t& linkH,
-                                const DbTypeInfo* typ)
-{
-   if( _load( objH, linkH, typ, true ).isSuccess() ) {
-      linkH =  objH.oid();
-      return Success;
-   }
-   return Error;
 }

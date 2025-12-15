@@ -103,13 +103,11 @@ namespace EFTrackingFPGAIntegration
             cl::Event m_slicingEngineOutputEndEvent ATLAS_THREAD_SAFE;
             cl::Event m_insideOutEndEvent ATLAS_THREAD_SAFE;
 
-
             // Kernels
             mutable cl::Kernel m_slicingEngineInput ATLAS_THREAD_SAFE;
             mutable cl::Kernel m_slicingEngineOutput ATLAS_THREAD_SAFE;
             mutable cl::Kernel m_insideOutInput ATLAS_THREAD_SAFE;
             mutable cl::Kernel m_insideOutOutput ATLAS_THREAD_SAFE;
-
 
             // Buffers
             mutable cl::Buffer m_slicingEngineInputBuffer ATLAS_THREAD_SAFE;
@@ -136,9 +134,15 @@ namespace EFTrackingFPGAIntegration
             mutable cl::Buffer m_pixelClusterEDMOutputBuffer ATLAS_THREAD_SAFE;
             mutable cl::Buffer m_stripClusterEDMOutputBuffer ATLAS_THREAD_SAFE;
             // L2G
+            mutable cl::Buffer m_stripL2GInputBuffer ATLAS_THREAD_SAFE;
+            mutable cl::Buffer m_stripL2GEDMInputBuffer ATLAS_THREAD_SAFE;
+
             mutable cl::Buffer m_stripL2GOutputBuffer ATLAS_THREAD_SAFE;
             mutable cl::Buffer m_stripL2GEDMOutputBuffer ATLAS_THREAD_SAFE;
             // EDMPrep
+            mutable cl::Buffer m_edmPixelInputBuffer ATLAS_THREAD_SAFE;
+            mutable cl::Buffer m_edmStripInputBuffer ATLAS_THREAD_SAFE;
+
             mutable cl::Buffer m_edmPixelOutputBuffer ATLAS_THREAD_SAFE;
             mutable cl::Buffer m_edmStripOutputBuffer ATLAS_THREAD_SAFE;
 
@@ -147,16 +151,16 @@ namespace EFTrackingFPGAIntegration
 
             SG::ReadHandleKey<int> m_FPGAPixelRDOSize{this, "FPGAEncodedPixelSizeKey", "FPGAEncodedPixelSizeRDOs", "Pixel RDO converted to FPGA format"};
             SG::ReadHandleKey<int> m_FPGAStripRDOSize{this, "FPGAEncodedStripSizeKey", "FPGAEncodedStripSizeRDOs", "Strip RDO converted to FPGA format"};
-            
-            SG::WriteHandleKey<std::vector<uint64_t>> m_FPGAPixelOutput{this, "FPGAOutputPixelKey", "FPGAPixelOutput", "Pixel output from FPGA format"};
-            SG::WriteHandleKey<std::vector<uint64_t>> m_FPGAStripOutput{this, "FPGAOutputStripKey", "FPGAStripOutput", "Strip output from FPGA format"};
 
+            SG::WriteHandleKey<std::vector<uint32_t>> m_FPGAPixelOutput{this, "FPGAOutputPixelKey", "FPGAPixelOutput", "Pixel output from FPGA format"};
+            SG::WriteHandleKey<std::vector<uint32_t>> m_FPGAStripOutput{this, "FPGAOutputStripKey", "FPGAStripOutput", "Strip output from FPGA format"};
             // Command queue
             cl::CommandQueue m_queue;
 
             std::string get_cu_name(const std::string& kernel_name, int cu);
 
             void dumpHexData(std::span<const uint64_t> data, const std::string &dataDescriptor, const EventContext &ctx) const;
+            void dumpHexData(std::span<const uint32_t> data, const std::string &dataDescriptor, const EventContext &ctx) const;
     };
 }
 

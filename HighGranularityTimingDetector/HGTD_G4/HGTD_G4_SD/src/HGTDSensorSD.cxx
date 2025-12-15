@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // HGTD Sensitive Detector.
@@ -56,7 +56,10 @@ G4bool HGTDSensorSD::ProcessHits(G4Step* aStep, G4TouchableHistory* /*ROhist*/)
     // Get the Touchable History:
     //
     const G4TouchableHistory*  myTouch = dynamic_cast<const G4TouchableHistory*>(aStep->GetPreStepPoint()->GetTouchable());
-
+    if (not myTouch){
+      G4cout << "HGTDSensorSD::ProcessHits: Dynamic cast failed"<<G4endl;
+      return false;
+    }
     if(verboseLevel>5){
         for (int i=0;i<myTouch->GetHistoryDepth();i++){
             std::string detname = myTouch->GetVolume(i)->GetLogicalVolume()->GetName();

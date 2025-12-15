@@ -32,6 +32,9 @@ public:
     IdDictGroup (const std::string& name); 
     ~IdDictGroup (); 
 
+    IdDictGroup (const IdDictGroup&) = delete;
+    IdDictGroup& operator= (const IdDictGroup&) = delete;
+
 
     //@}
     // ==================================
@@ -54,7 +57,7 @@ public:
     ///  Get MultiRange for this group
     MultiRange build_multirange () const; 
 
-    void add_dictentry (IdDictDictEntry* entry);
+    void add_dictentry (std::unique_ptr<IdDictDictEntry> entry);
 
     void resolve_references (IdDictMgr& idd,
                              IdDictDictionary& dictionary,
@@ -117,7 +120,7 @@ private:
     void add_tree_field (const IdDictRegion& re, unsigned ifield, unsigned inode);
 
     std::string                   m_name;  
-    std::vector<IdDictDictEntry*> m_entries;  // just the RegionEntries
+    std::vector<std::unique_ptr<IdDictDictEntry> > m_entries;  // just the RegionEntries
     std::vector<IdDictRegion*>    m_regions;  // regions derived from entries
     bool m_generated_implementation;
 

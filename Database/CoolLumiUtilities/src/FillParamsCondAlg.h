@@ -15,7 +15,7 @@
 
 
 #include "CoolLumiUtilities/FillParamsCondData.h"
-#include "AthenaBaseComps/AthReentrantAlgorithm.h"
+#include "AthenaBaseComps/AthCondAlgorithm.h"
 #include "PersistentDataModel/AthenaAttributeList.h"
 #include "StoreGate/ReadCondHandleKey.h"
 #include "StoreGate/WriteCondHandleKey.h"
@@ -25,11 +25,11 @@
  * @brief Conditions algorithm to unpack fill parameters from COOL.
  */
 class FillParamsCondAlg
-  : public AthReentrantAlgorithm
+  : public AthCondAlgorithm
 {
 public:
   /// Forward base class ctor.
-  using AthReentrantAlgorithm::AthReentrantAlgorithm;
+  using AthCondAlgorithm::AthCondAlgorithm;
 
 
   /// Gaudi initialize method.
@@ -38,7 +38,6 @@ public:
 
   /// Algorithm execute method.
   virtual StatusCode execute (const EventContext& ctx) const override final;
-  virtual bool isReEntrant() const override final { return false; }
 
 private:
   /// Input conditions object.

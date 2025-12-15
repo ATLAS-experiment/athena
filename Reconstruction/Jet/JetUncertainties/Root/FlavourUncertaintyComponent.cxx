@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "JetUncertainties/FlavourUncertaintyComponent.h"
@@ -230,7 +230,7 @@ StatusCode FlavourUncertaintyComponent::initialize(TFile* histFile)
             int nJets = -1;
             if (getNjetFromKey(gluonFractionKeys.at(iKey),nJets).isFailure())
                 return StatusCode::FAILURE;
-            if (nJets > nJetsMax)
+            if (nJets > nJetsMax && nJets < 1000)
                 nJetsMax = nJets;
         }
 
@@ -507,6 +507,7 @@ double FlavourUncertaintyComponent::getFlavourCompositionUncertainty(const xAOD:
     
     //calculating the uncertainty
     const double gluonFracError = getGluonFractionError(pT,eta,nJets);
+    //coverity[divide_by_zero]
     const double flavorCompUnc  = gluonFracError*fabs(Rq-Rg)/Rsample;
     
     return flavorCompUnc;
@@ -677,7 +678,6 @@ void FlavourUncertaintyComponent::getGluonKeys(TFile* analysisFile, std::vector<
     }
     while (TKey* key = dynamic_cast<TKey*>(nextkey()))
     {
-        if (!key) continue;
         const TString keyName = key->GetName();
         //Ignoring histograms which doesn't contain user-defined pattern
         if (m_analysisHistPattern != "" && !keyName.Contains(m_analysisHistPattern)) continue;

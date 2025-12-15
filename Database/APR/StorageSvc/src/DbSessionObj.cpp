@@ -37,13 +37,13 @@ DbSessionObj::~DbSessionObj()  {
 
 // Open session
 DbStatus DbSessionObj::open()   {
-  ATH_MSG_INFO( "    Open     DbSession    " );
+  ATH_MSG_INFO( "    Open     DbSession" );
   return Success;
 }
 
 // close session
 DbStatus DbSessionObj::close()   {
-  ATH_MSG_INFO( "    Closed   DbSession    " );
+  ATH_MSG_INFO( "    Closed   DbSession" );
   return Success;
 }
 

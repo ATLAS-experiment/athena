@@ -65,7 +65,6 @@ namespace InDet {
   }
 
   StatusCode NnClusterizationFactory::initialize() {
-    ATH_CHECK(m_pixelReadout.retrieve());
     ATH_CHECK(m_chargeDataKey.initialize());
     ATH_CHECK(m_pixelLorentzAngleTool.retrieve());
     m_assembleInput =   ( m_doRunI ?  &NnClusterizationFactory::assembleInputRunI :  &NnClusterizationFactory::assembleInputRunII );
@@ -803,15 +802,26 @@ namespace InDet {
     std::vector<int>::const_iterator totRecreated = totListRecreated.begin();
     // Recreate both charge list and ToT list to correct for the IBL ToT overflow (and later for small hits):
     ATH_MSG_VERBOSE("Charge list is not filled ... re-creating it.");
+    IdentifierHash moduleHash = element->identifyHash(); // wafer hash
+
     for ( ; rdosBegin!= rdosEnd and  tot != totList.end(); ++tot, ++rdosBegin, ++totRecreated ){
-         // recreate the charge: should be a method of the calibSvc
+       // recreate the charge: should be a method of the calibSvc
       int tot0 = *tot;
       Identifier pixid = *rdosBegin;
-      Identifier moduleID = pixelID.wafer_id(pixid);
-      IdentifierHash moduleHash = pixelID.wafer_hash(moduleID); // wafer hash
-      unsigned int FE = m_pixelReadout->getFE(pixid, moduleID);
-      InDetDD::PixelDiodeType type = m_pixelReadout->getDiodeType(pixid);
-      float charge = calibData->getCharge(type, moduleHash, FE, tot0);
+      assert( element->identifyHash() == pixelID.wafer_hash(pixelID.wafer_id(pixid)));
+
+      std::array<InDetDD::PixelDiodeTree::CellIndexType,2> diode_idx
+         = InDetDD::PixelDiodeTree::makeCellIndex(pixelID.phi_index(pixid),
+                                                  pixelID.eta_index(pixid));
+      InDetDD::PixelDiodeTree::DiodeProxy si_param ( design->diodeProxyFromIdx(diode_idx));
+      std::uint32_t feValue = design->getFE(si_param);
+      auto diode_type = design->getDiodeType(si_param);
+      if (   design->getReadoutTechnology() == InDetDD::PixelReadoutTechnology::FEI3
+          && design->numberOfConnectedCells(  design->readoutIdOfCell(InDetDD::SiCellId(diode_idx[0],diode_idx[1])))>1) {
+         diode_type = InDetDD::PixelDiodeType::GANGED;
+      }
+
+      float charge = calibData->getCharge(diode_type, moduleHash, feValue, tot0);
       chListRecreated.push_back(charge);
       totListRecreated.push_back(tot0);
     }

@@ -47,6 +47,14 @@ FPGATrackSimLogicalHitsProcessAlg::FPGATrackSimLogicalHitsProcessAlg (const std:
 
 StatusCode FPGATrackSimLogicalHitsProcessAlg::initialize()
 {
+    // Dump the configuration to make sure it propagated through right
+    const std::vector<Gaudi::Details::PropertyBase*> props = this->getProperties();
+    for( Gaudi::Details::PropertyBase* prop : props ) {
+        if (prop->ownerTypeName()==this->type()) {      
+        ATH_MSG_DEBUG("Property:\t" << prop->name() << "\t : \t" << prop->toString());
+        }
+    }
+  
     std::stringstream ss(m_description);
     std::string line;
     ATH_MSG_INFO("Tag config:");
@@ -187,6 +195,9 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::execute()
       return StatusCode::SUCCESS;
     }
     ATH_MSG_INFO("Event accepted by: " << m_evtSel->name());
+    if ((m_writeRegion>=0)&&(m_writeRegion==m_evtSel->getRegionID())) {
+        m_writeOutputTool->activateEventOutput();
+    }
 
     // Event passes cuts, count it. technically, DataPrep does this now.
     m_evt++;
@@ -401,12 +412,19 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::execute()
       }
       else { roadsToTrack(roads_1st, tracks_1st, m_FPGATrackSimMapping->PlaneMap_1st(0)); }
     }
-        
+    
+    // calculateTruth() before any monitors
+    // this explicitly calculates barcode, barcodeFrac and eventIndex
+    ATH_MSG_DEBUG("doMultiTruth = " << m_doMultiTruth);
+    if (m_doMultiTruth)
+        for (auto &track : tracks_1st)
+            track.calculateTruth();
+     
     //// (first track monitor, after getting tracks)
     /// create a vector of references from a vector of instances
     monitorTracks(m_1st_stage_track_monitor, tracks_1st);
     if constexpr (enableBenchmark) m_chrono->chronoStop("1st Stage: Getting Tracks");
-
+    
 
     // set track parameters to truth
     if constexpr (enableBenchmark) m_chrono->chronoStart("1st Stage: Set Track Parameters to Truth");
@@ -527,7 +545,7 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::execute()
     if (m_writeOutputData)  {
         ATH_CHECK(writeOutputData(roads_1st, tracks_1st, dataFlowInfo.get()));
     }
-    
+
     // This one we can do-- by passing in truth and offline tracks via storegate above (*FPGAOfflineTracks).
     if (m_doHoughRootOutput1st) {
         ATH_MSG_DEBUG("Running HoughRootOutputTool in 1st stage.");
@@ -539,7 +557,7 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::execute()
         }
 
         // Create output ROOT file
-        ATH_CHECK(m_houghRootOutputTool->fillTree(roads_1st, truthtracks, *FPGAOfflineTracks, phits_output, m_writeOutNonSPStripHits, m_trackScoreCut.value(), m_NumOfHitPerGrouping, false));
+        ATH_CHECK(m_houghRootOutputTool->fillTree(tracks_1st, truthtracks, *FPGAOfflineTracks, phits_output, m_writeOutNonSPStripHits, false));
     }
 
     // Reset data pointers
@@ -564,7 +582,7 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::writeOutputData(  const std::vecto
 
     if (!m_writeOutputData) return StatusCode::SUCCESS;
     m_logicEventOutputHeader->reserveFPGATrackSimRoads_1st(roads_1st.size());
-    m_logicEventOutputHeader->addFPGATrackSimRoads_1st(roads_1st);
+    m_logicEventOutputHeader->addFPGATrackSimRoads_1st(roads_1st);   
 
     m_logicEventOutputHeader->reserveFPGATrackSimTracks_1st(tracks_1st.size());
     m_logicEventOutputHeader->addFPGATrackSimTracks_1st(tracks_1st);

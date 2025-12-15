@@ -140,16 +140,7 @@ def EventInfoBeamSpotDecoratorAlgCfg(flags, name="EventInfoBeamSpotDecoratorAlg"
     from BeamSpotConditions.BeamSpotConditionsConfig import BeamSpotCondAlgCfg
     result.merge(BeamSpotCondAlgCfg(flags))
 
-    kwargs.setdefault("beamPosXKey", f"{eventInfoKey}.beamPosX")
-    kwargs.setdefault("beamPosYKey", f"{eventInfoKey}.beamPosY")
-    kwargs.setdefault("beamPosZKey", f"{eventInfoKey}.beamPosZ")
-    kwargs.setdefault("beamPosSigmaXKey", f"{eventInfoKey}.beamPosSigmaX")
-    kwargs.setdefault("beamPosSigmaYKey", f"{eventInfoKey}.beamPosSigmaY")
-    kwargs.setdefault("beamPosSigmaZKey", f"{eventInfoKey}.beamPosSigmaZ")
-    kwargs.setdefault("beamPosSigmaXYKey", f"{eventInfoKey}.beamPosSigmaXY")
-    kwargs.setdefault("beamTiltXZKey", f"{eventInfoKey}.beamTiltXZ")
-    kwargs.setdefault("beamTiltYZKey", f"{eventInfoKey}.beamTiltYZ")
-    kwargs.setdefault("beamStatusKey", f"{eventInfoKey}.beamStatus")
+    kwargs.setdefault("EventInfoKey", eventInfoKey)
 
     result.addEventAlgo(CompFactory.xAODMaker.EventInfoBeamSpotDecoratorAlg(name, **kwargs))
 

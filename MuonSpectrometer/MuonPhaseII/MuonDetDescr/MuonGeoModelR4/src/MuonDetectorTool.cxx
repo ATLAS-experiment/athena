@@ -13,12 +13,6 @@
 
 
 namespace MuonGMR4 {
-MuonDetectorTool::MuonDetectorTool(const std::string &type,
-                                   const std::string &name,
-                                   const IInterface *parent)
-    : GeoModelTool(type, name, parent) {
-    declareInterface<IGeoModelTool>(this);
-}
 
 MuonDetectorTool::~MuonDetectorTool() = default;
 /**
@@ -46,20 +40,22 @@ StatusCode MuonDetectorTool::create() {
     while (!cursor.atEnd()) {
         std::string volName = cursor.getName();
         ATH_MSG_VERBOSE("Check whether "<<volName<<" belongs to the muon world. ");
-        if (std::find(m_treeTopNodes.value().begin(), 
-                      m_treeTopNodes.value().end(),volName) != m_treeTopNodes.value().end()) {
+        if (std::ranges::find(m_treeTopNodes.value(), volName) != m_treeTopNodes.value().end()) {
             m_manager->addTreeTop(cursor.getVolume());
         }
         cursor.next();
     }
     ATH_CHECK(detStore()->record(m_manager, m_manager->getName()));
-    ATH_CHECK(detStore()->retrieve(theExpt, "ATLAS"));
     theExpt->addManager(m_manager);
 
     return StatusCode::SUCCESS;
 }
 
 StatusCode MuonDetectorTool::clear() {
+    if (m_clearTopsOnly) {
+        m_manager->clearTreeTops();
+        return StatusCode::SUCCESS;
+    }
     SG::DataProxy *proxy = detStore()->proxy(
         ClassID_traits<MuonDetectorManager>::ID(), m_manager->getName());
     if (proxy) {

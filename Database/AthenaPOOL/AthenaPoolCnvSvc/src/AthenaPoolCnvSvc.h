@@ -217,6 +217,9 @@ private: // properties
    long long m_domainMaxFileSize=std::numeric_limits<long long>::max();
    std::map<std::string, long long> m_databaseMaxFileSize;
 
+   /// Default container type (from PoolSvc)
+   std::string m_defContainerType{};
+
 protected: // properties
    /// PersSvcPerOutput, boolean property to use multiple persistency services, one per output stream.
    /// default = true.

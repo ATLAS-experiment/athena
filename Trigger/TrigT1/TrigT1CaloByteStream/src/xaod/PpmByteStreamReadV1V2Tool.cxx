@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // ===========================================================================
@@ -896,7 +896,7 @@ StatusCode PpmByteStreamReadV1V2Tool::processPpmStandardR4V1_(State& state) cons
 
 StatusCode PpmByteStreamReadV1V2Tool::processPpmStandardR3V1_(State& state) const
 {
-    for(auto lut : state.m_ppLuts) {
+    for(const auto & lut : state.m_ppLuts) {
       CHECK(addTriggerTowerV1_(
         state,
         state.m_subBlockHeader.crate(),

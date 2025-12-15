@@ -1509,19 +1509,17 @@ namespace dqutils {
       return false;
     }
 
-    int counter = 0;
     int nEntries = int(md->GetEntries());
 
-    while (counter < nEntries) {
+    if (nEntries > 0) {
       try {
-        md->GetEntry(counter);
+        md->GetEntry(0);
       } catch (const std::exception& e) {
         std::cerr << "Exception: \"" << e.what() << "\" in directory \"" << dir->GetName() << "\"\n" << std::flush;
         return false;
       }
 
       return true;
-      ++counter;
     }
 
     return false;

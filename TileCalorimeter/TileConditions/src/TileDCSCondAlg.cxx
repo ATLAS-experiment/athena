@@ -1,6 +1,6 @@
 //Dear emacs, this is -*- c++ -*-
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // Tile includes
@@ -20,7 +20,7 @@
 #include <fstream>
 
 TileDCSCondAlg::TileDCSCondAlg(const std::string& name, ISvcLocator* pSvcLocator) :
-  AthReentrantAlgorithm(name, pSvcLocator),
+  AthCondAlgorithm(name, pSvcLocator),
   m_cabling(nullptr)
 {
 
@@ -344,6 +344,7 @@ int TileDCSCondAlg::readConfig(const std::string& fileName,
     file >> s >> ind >> line;
 
     if (file.eof() || file.fail()) break;
+    if (ind > 1000000) break;
 
     for (ros = 1; ros < TileCalibUtils::MAX_ROS; ++ros) {
       pos = line.find(compName[ros]);

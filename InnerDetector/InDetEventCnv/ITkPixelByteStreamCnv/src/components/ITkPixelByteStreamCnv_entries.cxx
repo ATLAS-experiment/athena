@@ -9,6 +9,7 @@
 #include "src/ITkPixelRawContBytestreamCnv.h"
 #include "src/ITkPixelTranslatorAlg.h"
 #include "src/ITkPixelCnvTool.h"
+#include "src/ITkPixelDataRateMonTool.h"
 
 //This is a converter - needs special macro
 DECLARE_CONVERTER( ITkPixelRawContByteStreamCnv )
@@ -20,3 +21,4 @@ DECLARE_COMPONENT( ITkPixelHitSortingTool)
 DECLARE_COMPONENT( ITkPixelDecodingAlg )
 DECLARE_COMPONENT( ITkPixelTranslatorAlg )
 DECLARE_COMPONENT( ITkPixelCnvTool )
+DECLARE_COMPONENT( ITkPixelDataRateMonTool )

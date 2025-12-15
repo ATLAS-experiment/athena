@@ -689,7 +689,7 @@ StatusCode AthenaMtesEventLoopMgr::executeRun(int maxevt)
 StatusCode AthenaMtesEventLoopMgr::stopRun() {
   // Set the application return code
   SmartIF<IProperty> appmgr(serviceLocator());
-  if(Gaudi::setAppReturnCode(appmgr, Gaudi::ReturnCode::ScheduledStop).isFailure()) {
+  if(Gaudi::setAppReturnCode(appmgr, Gaudi::ReturnCode::ScheduledStop, true).isFailure()) {
     error() << "Could not set return code of the application ("
             << Gaudi::ReturnCode::ScheduledStop << ")" << endmsg;
   }

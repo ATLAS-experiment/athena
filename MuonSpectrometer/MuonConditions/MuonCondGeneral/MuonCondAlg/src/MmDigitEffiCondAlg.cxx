@@ -10,7 +10,7 @@
 #include <fstream>
 
 MmDigitEffiCondAlg::MmDigitEffiCondAlg(const std::string& name, ISvcLocator* pSvcLocator) :
-    AthReentrantAlgorithm(name, pSvcLocator) {}
+    AthCondAlgorithm(name, pSvcLocator) {}
 
 // Initialize
 StatusCode MmDigitEffiCondAlg::initialize() {

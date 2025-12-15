@@ -18,7 +18,7 @@
 #include <fstream>
 
 MuonDetectorCondAlg::MuonDetectorCondAlg(const std::string &name, ISvcLocator *pSvcLocator) : 
-    AthReentrantAlgorithm(name, pSvcLocator) {}
+    AthCondAlgorithm(name, pSvcLocator) {}
 
 StatusCode MuonDetectorCondAlg::initialize() {
     ATH_MSG_DEBUG("Initializing ...");

@@ -87,11 +87,13 @@ We describe here how each field of the identifier is determined.
 #define RPCSensitiveDetectorCosmics_H
 
 #include "G4VSensitiveDetector.hh"
-#include "StoreGate/WriteHandle.h"
 
 #include "MuonSimEvent/RPCSimHitCollection.h"
 #include "MuonSimEvent/RpcHitIdHelper.h"
+#include <string>
 #include <gtest/gtest_prod.h>
+
+class AtlasG4EventUserInfo;
 
 class RPCSensitiveDetectorCosmics : public G4VSensitiveDetector {
 FRIEND_TEST( RPCSensitiveDetectorCosmicstest, Initialize );
@@ -100,7 +102,6 @@ FRIEND_TEST( RPCSensitiveDetectorCosmicstest, ProcessHits );
 public:
     /** construction/destruction */
     RPCSensitiveDetectorCosmics(const std::string& name, const std::string& hitCollectionName, unsigned int nGasGaps);
-    ~RPCSensitiveDetectorCosmics()=default;
 
     /** member functions */
     void Initialize(G4HCofThisEvent*) override final;
@@ -108,7 +109,9 @@ public:
     
 private:
     /** member data */
-    SG::WriteHandle<RPCSimHitCollection> m_myRPCHitColl;
+    std::string m_hitCollectionName;
+    RPCSimHitCollection* m_myRPCHitColl{nullptr};
+    AtlasG4EventUserInfo* m_g4UserEventInfo{nullptr};
     const RpcHitIdHelper* m_muonHelper;
     double m_globalTime;
     bool m_isGeoModel;

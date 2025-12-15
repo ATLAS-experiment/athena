@@ -20,6 +20,12 @@ public:
                      const std::string& tag);
     virtual ~IdDictSubRegion (); 
 
+    IdDictSubRegion (IdDictSubRegion&&);
+    IdDictSubRegion& operator= (IdDictSubRegion&&);
+
+    IdDictSubRegion (const IdDictSubRegion&) = delete;
+    IdDictSubRegion& operator= (const IdDictSubRegion&) = delete;
+
 
     //@}
     // ==================================

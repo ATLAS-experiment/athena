@@ -89,6 +89,9 @@ REvent::~REvent() {
 ///
 StatusCode REvent::readFrom(std::string_view fileName) {
 
+  ATH_MSG_INFO("REvent::readFrom:  fileName " << fileName);
+
+
   // Clear the cached input objects.
   m_inputObjects.clear();
   m_inputMissingObjects.clear();
@@ -107,8 +110,17 @@ StatusCode REvent::readFrom(std::string_view fileName) {
   // Clear out the current object.
   m_inputEventFormat = {};
 
+
+  ATH_MSG_DEBUG("Create RNTupleReader for \"" << METADATA_NTUPLE_NAME
+                                               << "\" in file: " << fileName);
+
+
   // Set up a reader for the metadata ntuple.
-  m_metaReader = ROOT::RNTupleReader::Open(METADATA_NTUPLE_NAME, fileName);
+  // Since some types are non-xAOD types and so not 'visible' when running in AnalysisBase
+  //   we need to protect for unknown types with SetEmulateUnknownTypes(true)
+  ROOT::RNTupleDescriptor::RCreateModelOptions opts;
+  opts.SetEmulateUnknownTypes(true);
+  m_metaReader = ROOT::RNTupleReader::Open(opts, METADATA_NTUPLE_NAME, fileName);
   if (!m_metaReader) {
     ATH_MSG_ERROR("Couldn't find \"" << METADATA_NTUPLE_NAME
                                      << "\" tree in input file: " << fileName);
@@ -545,11 +557,14 @@ StatusCode REvent::connectMetaObject(const std::string& key, bool silent) {
   auto mgr = std::make_unique<RObjectManager>(
       m_metaReader->GetView(key_to_read, ptr, className), FIRST_ENTRY,
       std::make_unique<THolder>(ptr, realClass));
+  // For metadata, we must read in the first entry - entry number already set by FIRST_ENTRY in constructor
+  mgr->getEntry();
   RObjectManager* mgrPtr = mgr.get();
   m_inputMetaObjects[key] = std::move(mgr);
 
   // If it's an auxiliary store object, set it up correctly.
   if (Details::isAuxStore(*(mgrPtr->holder()->getClass()))) {
+    // For reading in of the dynamic variables for metadata
     ATH_CHECK(setUpDynamicStore(*mgrPtr, *m_metaReader));
   }
 
@@ -557,15 +572,17 @@ StatusCode REvent::connectMetaObject(const std::string& key, bool silent) {
   if (Details::hasAuxStore(*(mgrPtr->holder()->getClass()))) {
     ATH_CHECK(connectMetaAux(
         key + "Aux.", Details::isStandalone(*(mgrPtr->holder()->getClass()))));
+    static constexpr bool METADATA = true;
+    ATH_CHECK(setAuxStore(key, *mgrPtr, METADATA));
   }
 
   // Return gracefully.
   return StatusCode::SUCCESS;
-}
+} // connectMetaObject
 
 /// This function is used internally to connect an auxiliary object to
 /// the input. Based on the configuration of the object it will either
-/// use TAuxStore, or the EDM object that was used to write the auxiliary
+/// use RAuxStore, or the EDM object that was used to write the auxiliary
 /// information in Athena.
 ///
 /// @param prefix The prefix (main branch name) of the auxiliary data

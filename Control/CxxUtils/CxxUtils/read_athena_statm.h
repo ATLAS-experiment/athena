@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /*
@@ -13,6 +13,7 @@
 struct athena_statm {
   unsigned int vm_pages;
   unsigned int rss_pages;
+  unsigned int shr_pages;
 };
 #ifdef __cplusplus
 extern "C"

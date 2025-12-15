@@ -65,6 +65,7 @@ StatusCode FPGATrackSimHoughRootOutputTool::bookTree()
   m_tree->Branch("eventindex",&m_eventindex);
   m_tree->Branch("isRealHit",&m_realHit);
   m_tree->Branch("isPixel",&m_isPixel);
+  m_tree->Branch("isSP",&m_isSP);
   m_tree->Branch("layer",&m_layer);
   m_tree->Branch("isBarrel",&m_isBarrel);
   m_tree->Branch("etawidth",&m_etawidth);
@@ -82,6 +83,8 @@ StatusCode FPGATrackSimHoughRootOutputTool::bookTree()
   m_tree->Branch("fakelabel",&m_fakelabel);
   m_tree->Branch("passesOR",&m_passesOR);
   m_tree->Branch("roadChi2",&m_roadChi2);
+  m_tree->Branch("roadChi2ndof",&m_roadChi2ndof);
+  m_tree->Branch("roadNCoords",&m_roadNCoords);
   m_tree->Branch("nMissingHits",&m_nMissingHits);
   m_tree->Branch("NTracksORMinusRoads",&m_NTracksORMinusRoads);
 
@@ -420,7 +423,9 @@ StatusCode FPGATrackSimHoughRootOutputTool::fillTree(const std::vector<FPGATrack
       mtv.reserve( m_FPGATrackSimMapping->PlaneMap_1st(road.getSubRegion())->getNLogiLayers());
     }
 
-    m_roadChi2.push_back(track_cands[iroad].getChi2ndof());
+    m_roadChi2ndof.push_back(track_cands[iroad].getChi2ndof());
+    m_roadChi2.push_back(track_cands[iroad].getChi2());
+    m_roadNCoords.push_back(track_cands[iroad].getNCoords());
 
     m_nMissingHits.push_back(track_cands[iroad].getNMissing());
 
@@ -436,6 +441,12 @@ StatusCode FPGATrackSimHoughRootOutputTool::fillTree(const std::vector<FPGATrack
     for (FPGATrackSimHit hit : hits) {
 
       m_realHit.push_back(hit.isReal());
+      if (hit.getHitType() == HitType::spacepoint) {
+        m_isSP.push_back(true);
+      }
+      else {
+        m_isSP.push_back(false);
+      }
       FPGATrackSimMultiTruth truth = hit.getTruth();
 
       truth.assign_equal_normalization();
@@ -614,6 +625,7 @@ void FPGATrackSimHoughRootOutputTool::ResetVectors() {
   m_barcodefrac.clear();
   m_eventindex.clear();
   m_realHit.clear();
+  m_isSP.clear();
   m_isPixel.clear();
   m_layer.clear();
   m_isBarrel.clear();
@@ -625,6 +637,8 @@ void FPGATrackSimHoughRootOutputTool::ResetVectors() {
   m_diskLayer.clear();
   m_passesOR.clear();
   m_roadChi2.clear();
+  m_roadChi2ndof.clear();
+  m_roadNCoords.clear();
   m_nMissingHits.clear();
   m_truth_d0.clear();
   m_truth_z0.clear();

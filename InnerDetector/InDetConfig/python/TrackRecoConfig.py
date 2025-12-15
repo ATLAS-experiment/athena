@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.Enums import BeamType, Format
@@ -309,7 +309,7 @@ def TRTStandalonePassRecoCfg(flags,
 def StoreTrackSeparateContainerCfg(flags, TrackContainer="",
                                    ClusterSplitProbContainer=""):
     result = ComponentAccumulator()
-    if hasattr(flags.TrackOverlay, "ActiveConfig"):
+    if flags.hasCategory("TrackOverlay.ActiveConfig"):
        doTrackOverlay = getattr(flags.TrackOverlay.ActiveConfig, "doTrackOverlay", None)
     else:
        doTrackOverlay = flags.Overlay.doTrackOverlay
@@ -423,7 +423,7 @@ def TrackRecoPassCfg(flags, extension="",
                      StatTrackTruthCollections=None,
                      ClusterSplitProbContainer=""):
     result = ComponentAccumulator()
-    if hasattr(flags.TrackOverlay, "ActiveConfig"):
+    if flags.hasCategory("TrackOverlay.ActiveConfig"):
        doTrackOverlay = getattr(flags.TrackOverlay.ActiveConfig, "doTrackOverlay", None)
     else:
        doTrackOverlay = flags.Overlay.doTrackOverlay
@@ -526,7 +526,7 @@ def TrackFinalCfg(flags,
                   StatTrackCollections=None,
                   StatTrackTruthCollections=None):
     result = ComponentAccumulator()
-    if hasattr(flags.TrackOverlay, "ActiveConfig"):
+    if flags.hasCategory("TrackOverlay.ActiveConfig"):
        doTrackOverlay = getattr(flags.TrackOverlay.ActiveConfig, "doTrackOverlay", None)
     else:
        doTrackOverlay = flags.Overlay.doTrackOverlay

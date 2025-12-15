@@ -7,14 +7,27 @@
 def HION2AllVariablesGeneral():
     
     variables  = []
+    variables += ["EventInfo"]
     variables += ["CaloSums"]
     variables += ["PrimaryVertices"]
+    variables += ["InDetTrackParticles"]
+    variables += ["AntiKt4HIJets"]
+    variables += ["Electrons"]
+    variables += ["GSFTrackParticles"]
+    variables += ["egammaClusters"]
+    variables += ["Muons"]
+    variables += ["ExtrapolatedMuonTrackParticles"]
+    variables += ["MuonSpectrometerTrackParticles"]
+    variables += ["CombinedMuonTrackParticles"]
+    variables += ["CaloCalTopoClusters"]
+    variables += ["HIEventShape"]
     
     return variables
 
 def HION2ExtraVariablesGeneral():
     variables  = []
-    variables += ["InDetTrackParticles.qOverP.theta.phi.TrackQuality"]
+    variables += ["InDetTrackParticles.qOverP.theta.phi.d0.z0.vz.chiSquared.numberDoF.TrackQuality.Chi2ToPV.VertexIndex.CovD0.CovZ0.CovTheta"]
+    variables += ["CaloSums.Summary"] # Need to be passed explicitelly
     
     return variables
 
@@ -359,6 +372,7 @@ def HION5AllTruthVariables():
     variables += ["AntiKt4TruthJets"]
     variables += ["TruthElectrons"]
     variables += ["TruthMuons"]
+    variables += ["TruthNeutrinos"]
     return variables
 
 def HION5SmartCollections():
@@ -397,6 +411,7 @@ def HION7AllVarContent():
     variables  = []
     variables += ["CaloSums"]
     variables += ["ZdcModules"]
+    variables += ["ZdcSums"]
     variables += ["PrimaryVertices"]
     variables += ["EventInfo"]
 
@@ -521,7 +536,8 @@ def makeHIJetBranchList():
         'TrackWidthPt4000',
         'Width',
         'MaxConstituentET',
-        'MaxOverMean']
+        'MaxOverMean',
+        'JvtMatched']
     return c
 
 def HION7BasicJetVars(JetColl):

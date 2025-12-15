@@ -7,7 +7,7 @@
 
 
 // Athena includes
-#include <AthenaBaseComps/AthReentrantAlgorithm.h>
+#include <AthenaBaseComps/AthCondAlgorithm.h>
 #include <StoreGate/ReadCondHandleKey.h>
 #include <StoreGate/WriteCondHandleKey.h>
 
@@ -21,7 +21,7 @@
 class CondAttrListCollection;
 
 
-class NswPassivationDbAlg: public AthReentrantAlgorithm{
+class NswPassivationDbAlg: public AthCondAlgorithm{
 
 public:
 
@@ -29,7 +29,6 @@ public:
     virtual ~NswPassivationDbAlg() = default;
     virtual StatusCode initialize() override;
     virtual StatusCode execute (const EventContext&) const override;
-    virtual bool isReEntrant() const override { return false; }
 
  
 private:

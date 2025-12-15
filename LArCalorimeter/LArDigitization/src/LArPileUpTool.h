@@ -1,6 +1,6 @@
 //Dear emacs, this is -*-c++-*-
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef LARDIGITIZATION_LARPILEUPTOOL_H
@@ -99,9 +99,6 @@ private:
   StatusCode fillMapFromHit(const EventContext& ctx,float tbunch,bool isSignal, perEventData_t& data) const;
 
   StatusCode fillMapFromHit(SubEventIterator iEvt, float bunchTime, bool isSignal, perEventData_t& data) const;
-
-
-#define MAXADC 4096       // Maximal Adc count + 1 ( used for the overflows)
 
 
   StatusCode AddHit(const Identifier cellId, const float energy, const float time, const bool iSignal, perEventData_t& data) const;

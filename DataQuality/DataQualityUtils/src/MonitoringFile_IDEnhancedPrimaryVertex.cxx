@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
  */
 
 // **********************************************************************
@@ -220,6 +220,7 @@ namespace dqutils {
     int fitResKFactorMethod = 2; // set by hand for now
     if (fitResKFactorMethod == 1) {
       //Fit with a pol2
+      //coverity[DEADCODE]
       kgs_z_vs_ntrk->Fit("pol2", "Q", "", minFitRange, maxFitRange);
       kgs_z_vs_ntrk->GetFunction("pol2")->SetLineColor(kRed);
       kgs_z_ntrk_fit = kgs_z_vs_ntrk->GetFunction("pol2");
@@ -230,6 +231,7 @@ namespace dqutils {
       kgs_z_vs_ntrk->GetFunction("pol1")->SetLineColor(kRed);
       kgs_z_ntrk_fit = kgs_z_vs_ntrk->GetFunction("pol1");
       kgs_z_ntrk_fit_er = kgs_z_ntrk_fit->GetParErrors();
+      //coverity[DEADCODE]
     } else if (fitResKFactorMethod == 3) {
       TF1* kgsFitFcn = new TF1("kgsFitFcn", scaleFactorFitFcn, minFitRange, maxFitRange, 3);
       kgsFitFcn->SetParameter(0, minFitRange);
@@ -297,6 +299,7 @@ namespace dqutils {
       double pr_er = 0.0;
       float val(0.);
       if (fitResKFactorMethod == 1) {
+        //coverity[DEADCODE]
         pr_er = error_func(bin_count, kgs_z_ntrk_fit_er);
       } else if (fitResKFactorMethod == 2) {
         val = h_Vrt_err_vs_Something->GetXaxis()->GetBinCenter(bin_count);
@@ -304,6 +307,7 @@ namespace dqutils {
         pr_er = TMath::Sqrt(pr_er);
 //       cout << "val = " << val << ", pr_er = " << pr_er << ", p0er = " << kgs_z_ntrk_fit_er[0] << ", p1er = "<<
 // kgs_z_ntrk_fit_er[1] << endl;
+        //coverity[DEADCODE]
       } else if (fitResKFactorMethod == 3) {
         val = h_Vrt_err_vs_Something->GetXaxis()->GetBinCenter(bin_count);
         //approximately the error on the plateau

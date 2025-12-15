@@ -59,7 +59,7 @@ def _gen_jobo(dct):
             flags.GeoModel.AtlasVersion = 'ATLAS-R3S-2021-03-02-00'
             flags.IOVDb.GlobalTag = 'CONDBR2-BLKPA-2023-03'
     else:
-        if flags.GeoModel.AtlasVersion != 0:
+        if flags.GeoModel.AtlasVersion:
             if flags.GeoModel.AtlasVersion.find ('ATLAS-GEO-1') >= 0:
                 flags.GeoModel.AtlasVersion = 'ATLAS-R1-2012-03-00-00'
 

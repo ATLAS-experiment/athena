@@ -30,12 +30,12 @@ def EGAM8SkimmingToolCfg(flags):
     )
     print("EGAM8 skimming expression: ", expression)
 
-    acc.setPrivateTools(
-        CompFactory.DerivationFramework.xAODStringSkimmingTool(
-            name="EGAM8SkimmingTool", expression=expression
-        )
-    )
+    skimmingTool = CompFactory.DerivationFramework.xAODStringSkimmingTool(
+        name="EGAM8SkimmingTool", expression=expression)
+    if flags.Trigger.EDMVersion < 0:
+        skimmingTool.TrigDecisionTool=None
 
+    acc.setPrivateTools(skimmingTool)
     return acc
 
 
@@ -162,8 +162,7 @@ def EGAM8KernelCfg(flags, name="EGAM8Kernel", **kwargs):
         EGammaCookieCutClusterToolCfg(flags,
                                       name,
                                       StoreInputMoments=True,
-                                      StoreCookedMoments=True,
-                                      OutputLevel = 3))
+                                      StoreCookedMoments=True))
     acc.addPublicTool(cookieCutTool)
     augmentationTools.append(cookieCutTool)
 

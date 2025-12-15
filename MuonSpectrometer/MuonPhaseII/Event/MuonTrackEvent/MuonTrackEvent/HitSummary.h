@@ -11,6 +11,7 @@
 #include "Acts/Utilities/Helpers.hpp"
 
 #include <ostream>
+#include <cstdint>
 
 namespace MuonR4{
     /** @brief Summary struct to hold the hit counts on the track per MS layer. Summaries

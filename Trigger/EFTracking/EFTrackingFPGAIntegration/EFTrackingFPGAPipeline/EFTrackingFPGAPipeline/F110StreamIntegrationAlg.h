@@ -47,17 +47,12 @@ namespace EFTrackingFPGAIntegration
         SG::ReadHandleKey<int> m_FPGAPixelRDOSize{this, "FPGAEncodedPixelSizeKey", "FPGAEncodedPixelSizeRDOs", "Pixel RDO converted to FPGA format"};
         SG::ReadHandleKey<int> m_FPGAStripRDOSize{this, "FPGAEncodedStripSizeKey", "FPGAEncodedStripSizeRDOs", "Strip RDO converted to FPGA format"};
 
-        SG::WriteHandleKey<std::vector<uint64_t>> m_FPGAPixelOutput{this, "FPGAOutputPixelKey", "FPGAPixelOutput", "Pixel output from FPGA format"};
-        SG::WriteHandleKey<std::vector<uint64_t>> m_FPGAStripOutput{this, "FPGAOutputStripKey", "FPGAStripOutput", "Strip output from FPGA format"};
-
+        SG::WriteHandleKey<std::vector<uint32_t>> m_FPGAPixelOutput{this, "FPGAOutputPixelKey", "FPGAPixelOutput", "Pixel output from FPGA format"};
+        SG::WriteHandleKey<std::vector<uint32_t>> m_FPGAStripOutput{this, "FPGAOutputStripKey", "FPGAStripOutput", "Strip output from FPGA format"};
+        
         Gaudi::Property<int> m_FPGAThreads{this, "FPGAThreads", 1, "number of FPGA threads to initialize"}; 
         
         Gaudi::Property<std::string> m_xclbin{this, "xclbin", "", "xclbin path and name"}; //!< Path and name of the xclbin file
-
-
-        Gaudi::Property<std::string> m_pixelEdmKernelName{this, "PixelEDMPrepKernelName", "", "Name of the FPGA kernel"}; //!< Name of the FPGA kernel
-
-        Gaudi::Property<std::string> m_stripEdmKernelName{this, "StripEDMPrepKernelName", "", "Name of the FPGA kernel"}; //!< Name of the FPGA kernel
 
         Gaudi::Property<std::string> m_pixelStartClusterKernelName{this, "PixelStartClusterKernelName", "", "Name of the pixel clustering start kernel"}; //!< Name of the pixel clustering kernel start
         Gaudi::Property<std::string> m_pixelEndClusterKernelName{this, "PixelEndClusterKernelName", "", "Name of the pixel clustering end kernel"}; //!< Name of the pixel clustering kernel start
@@ -69,13 +64,11 @@ namespace EFTrackingFPGAIntegration
         mutable std::atomic<ulonglong> m_numEvents{0};          //!< Number of events processed
         mutable std::atomic<cl_ulong> m_pixelInputTime{0};      //!< Time for pixel input buffer write
         mutable std::atomic<cl_ulong> m_stripInputTime{0};      //!< Time for strip input buffer write
-        mutable std::atomic<cl_ulong> m_pixelClusteringTime{0}; //!< Time for pixel clustering
-        mutable std::atomic<cl_ulong> m_stripClusteringTime{0}; //!< Time for strip clustering
-        mutable std::atomic<cl_ulong> m_pixelEdmPrepTime{0};    //!< Time for pixel EDM preparation
-        mutable std::atomic<cl_ulong> m_stripEdmPrepTime{0};    //!< Time for strip EDM preparation
+
+        mutable std::atomic<cl_ulong> m_pixelPipelineTime{0};   //!< Time for pixel pipeline
+        mutable std::atomic<cl_ulong> m_stripPipelineTime{0};   //!< Time for strip pipeline
         mutable std::atomic<cl_ulong> m_pixelOutputTime{0};     //!< Time for pixel output buffer read
         mutable std::atomic<cl_ulong> m_stripOutputTime{0};     //!< Time for strip output buffer read
-        mutable std::atomic<cl_ulong> m_kernelTime{0};          //!< Time for kernel execution
 
         // Kernels
         // Clustering
@@ -84,16 +77,10 @@ namespace EFTrackingFPGAIntegration
         mutable std::vector<cl::Kernel> m_stripStartClusteringKernels ATLAS_THREAD_SAFE;
         mutable std::vector<cl::Kernel> m_stripEndClusteringKernels ATLAS_THREAD_SAFE;
 
-        // EDM prep
-        mutable std::vector<cl::Kernel> m_pixelEdmPrepKernels ATLAS_THREAD_SAFE;
-        mutable std::vector<cl::Kernel> m_stripEdmPrepKernels ATLAS_THREAD_SAFE;
-
         // Buffers for input
         std::vector<cl::Buffer> m_pixelClusterInputBufferList;
         std::vector<cl::Buffer> m_stripClusterInputBufferList;
-        // Buffers for Clustering
-        std::vector<cl::Buffer> m_pixelClusterEDMOutputBufferList;
-        std::vector<cl::Buffer> m_stripClusterEDMOutputBufferList;
+
         // EDMPrep
         std::vector<cl::Buffer> m_edmPixelOutputBufferList;
         std::vector<cl::Buffer> m_edmStripOutputBufferList;

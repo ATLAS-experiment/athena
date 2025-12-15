@@ -19,6 +19,15 @@ def getRecommendedBTagCalib(geometry):
     else:
         raise ValueError(f"LHCPeriod {geometry} does not have a recommended FTag calibration file!")
 
+def getRecommendedBTagTrigCalib(geometry):
+    """return the recommended bjet trigger calibration files
+    for a given LHCPeriod 'geometry'
+    """
+    if geometry is LHCPeriod.Run3:
+        return "xAODBTaggingEfficiency/13p6TeV-Online/online-MC23_2025-11-26_v2_smooth.root"
+    else:
+        raise ValueError(f"LHCPeriod {geometry} does not have a recommended bjet trigger calibration file!")
+
 def getReadFromBTaggingObject(flags, jetCollection, defaultReadFromBTaggingObject):
     
     if defaultReadFromBTaggingObject is not None: 
@@ -34,7 +43,7 @@ def getReadFromBTaggingObject(flags, jetCollection, defaultReadFromBTaggingObjec
     # Define the default value (since default is None) to be used 
     # in case we do not have enough information at our disposal 
     # to determine the strategy to adopt
-    defaultReadFromBTaggingObject = True
+    defaultReadFromBTaggingObject = False
     
     # No auto configuration flag thus using default value 
     if flags is None: 

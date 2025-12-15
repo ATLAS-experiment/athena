@@ -7,6 +7,8 @@ from AthenaCommon.Logging import logging
 from AthenaConfiguration.Enums import LHCPeriod
 from Campaigns.Utils import Campaign
 
+from TriggerAnalysisAlgorithms.TriggerAnalysisSFConfig import trigger_set
+
 
 class TauCalibrationConfig (ConfigBlock):
     """the ConfigBlock for the tau four-momentum correction"""
@@ -506,36 +508,11 @@ class TauTriggerAnalysisSFBlock (ConfigBlock):
         """Return the instance name for this block"""
         return self.containerName + '_' + self.prefixSF + '_' + self.tauID
 
-    def get_year_data(self, dictionary: dict, year: int | str) -> list:
-        return dictionary.get(int(year), dictionary.get(str(year), []))
-
     def makeAlgs (self, config) :
 
         if config.dataType() is not DataType.Data:
-            log = logging.getLogger('TauJetTriggerSFConfig')
-
-            from TriggerAnalysisAlgorithms.TriggerAnalysisConfig import is_year_in_current_period
-
-            triggers = set()
-            if self.includeAllYearsPerRun:
-                for year in self.triggerChainsPerYear:
-                    if not is_year_in_current_period(config, year):
-                        continue
-                    triggers.update(self.get_year_data(self.triggerChainsPerYear, year))
-            elif config.campaign() is Campaign.MC20a:
-                triggers.update(self.get_year_data(self.triggerChainsPerYear, 2015))
-                triggers.update(self.get_year_data(self.triggerChainsPerYear, 2016))
-            elif config.campaign() is Campaign.MC20d:
-                triggers.update(self.get_year_data(self.triggerChainsPerYear, 2017))
-            elif config.campaign() is Campaign.MC20e:
-                triggers.update(self.get_year_data(self.triggerChainsPerYear, 2018))
-            elif config.campaign() is Campaign.MC23a:
-                triggers.update(self.get_year_data(self.triggerChainsPerYear, 2022))
-            elif config.campaign() is Campaign.MC23d:
-                triggers.update(self.get_year_data(self.triggerChainsPerYear, 2023))
-            else:
-                log.warning("unknown campaign, skipping triggers: %s", str(config.campaign()))
-
+            triggers = trigger_set(config, self.triggerChainsPerYear,
+                                   self.includeAllYearsPerRun)
             for chain in triggers:
                 chain_noHLT = chain.replace("HLT_", "")
                 chain_out = chain_noHLT if self.removeHLTPrefix else chain

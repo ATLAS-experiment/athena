@@ -28,6 +28,8 @@ namespace columnar
                   const std::string& name, ColumnInfo&& info = {})
       : m_accessor(name)
     {
+      if (info.addMTDependency)
+        throw std::runtime_error ("adding MT dependencies not yet supported for individual decorations");
       ColumnTypeTraits<CT,ColumnarModeXAOD>::updateColumnInfo (columnBase, info);
       if (!info.replacesColumn.empty())
         m_accessor = info.replacesColumn;

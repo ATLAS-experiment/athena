@@ -53,22 +53,24 @@ def sTgcMonitoringConfig(inputFlags,NSW_PadTrigKey=''):
     OverviewGroup.defineHistogram('etaPadTrigger,phiPadTrigger;padTrigger_Map_per_etaPhi', type = 'TH2F', title = '; #eta (trig); #phi (trig); Entries', path = '', xbins = 100, xmin = -3., xmax = 3., ybins = 100, ymin = -math.pi, ymax = math.pi, opt = 'kAlwaysCreate')
     OverviewGroup.defineHistogram('etaPadTrigger;padTrigger_Map_per_eta', type = 'TH1F', title = '; #eta (trig); Entries', path = '', xbins = 100, xmin = -3., xmax = 3., opt = 'kAlwaysCreate')       
     
-    for tIdx in tech:
-        OverviewGroup.defineHistogram(f'{tIdx}Sector,{tIdx}Feb;Feb_vs_sector_{tIdx}', type = 'TH2F', title = ';Sector; FEB; Hits', path = '', xbins = 33, xmin = -16.5, xmax = 16.5, ybins = 24, ymin = -0.5, ymax = 23.5, ylabels = FebLabels, opt='kAlwaysCreate')  
-
     #OccupancyShifterGroup = helper.addGroup(sTgcMonAlg, 'OccupancyShifter', globalPath + 'Expert/Occupancy/')
     sTgcTimingGroup = helper.addGroup(sTgcMonAlg, 'sTgcTiming', globalPath + 'Expert/Timing/')
-    LBShifterGroup = helper.addGroup(sTgcMonAlg, 'LBShifterGroup', globalPath + 'Shifter/Lumiblock/')            
+    LBShifterGroup = helper.addGroup(sTgcMonAlg, 'LBShifterGroup', globalPath + 'Shifter/OccupancyGlobal/')            
     sTgcPadTriggerShifterGroup = helper.addGroup(sTgcMonAlg, 'padTriggerShifter', globalPath + 'Shifter/')
-    sTgcPadTriggerShifterGroup.defineHistogram('lb,sector;OccupancySector_vs_LB', type = 'TH2F', title = '; LB; Sector; Number of triggers', path = 'PadTrigger/Triggers', xbins = 100, xmin = -0.5, xmax = 99.5, ybins = 2*sectorMax + 1, ymin = -sectorMax - 0.5, ymax = sectorMax + 0.5, opt = 'kAlwaysCreate,kAddBinsDynamically', weight = 'numberOfTriggers')
-    sTgcPadTriggerShifterGroup.defineHistogram('lb,relBCID;RelBCID_vs_LB', type = 'TH2F', title = '; LB; Trigger relBCID; Pad Trigger hits', path = 'PadTrigger/Triggers', xbins = 100, xmin = -0.5, xmax = 99.5, ybins = 7, ymin = -0.5, ymax = 6.5, opt = 'kAlwaysCreate,kAddBinsDynamically')
-    sTgcPadTriggerShifterGroup.defineHistogram('sector,hitPfebs;OccupancypFEB_vs_Sector', type = 'TH2F', title = '; Sector; Hit pFEB; Pad Trigger hits associated to reco muons', path = 'PadTrigger/Hits', xbins = 2*sectorMax + 1, xmin = -sectorMax - 0.5, xmax = sectorMax + 0.5, ybins = 25, ymin = -0.5, ymax = 24.5, opt = 'kAlwaysCreate')
-    sTgcPadTriggerShifterGroup.defineHistogram('sector,hitRelBCID;relBCID_vs_Sector', type = 'TH2F', title = '; Sector; Hit relBCID; Pad Trigger hits associated to reco muons', path = 'PadTrigger/Hits', xbins = 2*sectorMax + 1, xmin = -sectorMax - 0.5, xmax = sectorMax + 0.5, ybins = 7, ymin = -0.5, ymax = 6.5, opt = 'kAlwaysCreate')
+    OverviewGroup.defineHistogram('lb,sector;OccupancySector_vs_LB', type = 'TH2F', title = '; LB; Sector; Number of triggers', path = '', xbins = 100, xmin = -0.5, xmax = 99.5, ybins = 2*sectorMax + 1, ymin = -sectorMax - 0.5, ymax = sectorMax + 0.5, opt = 'kAlwaysCreate,kAddBinsDynamically', weight = 'numberOfTriggers')
       
     # Expert
     OccupancyGroup = helper.addGroup(sTgcMonAlg, 'Occupancy', globalPath + 'Expert/Occupancy')
+    LBExpertGroup = helper.addGroup(sTgcMonAlg, 'LBExpertGroup', globalPath + 'Expert/Lumiblock/')            
     sTgcPadTriggerExpertGroup = helper.addGroup(sTgcMonAlg, 'padTriggerExpert', globalPath + 'Expert/')
+    sTgcPadTriggerExpertGroup.defineHistogram('sector,hitPfebs;OccupancypFEB_vs_Sector', type = 'TH2F', title = '; Sector; Hit pFEB; Pad Trigger hits associated to reco muons', path = 'PadTrigger/Hits', xbins = 2*sectorMax + 1, xmin = -sectorMax - 0.5, xmax = sectorMax + 0.5, ybins = 25, ymin = -0.5, ymax = 24.5, opt = 'kAlwaysCreate')
+    sTgcPadTriggerExpertGroup.defineHistogram('sector,hitRelBCID;relBCID_vs_Sector', type = 'TH2F', title = '; Sector; Hit relBCID; Pad Trigger hits associated to reco muons', path = 'PadTrigger/Hits', xbins = 2*sectorMax + 1, xmin = -sectorMax - 0.5, xmax = sectorMax + 0.5, ybins = 7, ymin = -0.5, ymax = 6.5, opt = 'kAlwaysCreate')
+    sTgcPadTriggerExpertGroup.defineHistogram('lb,relBCID;RelBCID_vs_LB', type = 'TH2F', title = '; LB; Trigger relBCID; Pad Trigger hits', path = 'PadTrigger/Triggers', xbins = 100, xmin = -0.5, xmax = 99.5, ybins = 7, ymin = -0.5, ymax = 6.5, opt = 'kAlwaysCreate,kAddBinsDynamically')
     padTriggerOccupancyGroup = helper.addGroup(sTgcMonAlg, 'padTriggerOccupancy', globalPath + 'Expert/PadTrigger/Hits/')
+
+    for tIdx in tech:
+        OccupancyGroup.defineHistogram(f'{tIdx}Sector,{tIdx}Feb;Feb_vs_sector_{tIdx}', type = 'TH2F', title = ';Sector; FEB; Hits', path = f'{tIdx[0].capitalize()+tIdx[1:]}', xbins = 33, xmin = -16.5, xmax = 16.5, ybins = 24, ymin = -0.5, ymax = 23.5, ylabels = FebLabels, opt='kAlwaysCreate')  
+        LBShifterGroup.defineHistogram(f'{tIdx}Lb,{tIdx}Sector;Summary_LB_vs_Sector_{tIdx}',type = 'TH2F',title = ';LB; Sector; Hits', path = '', xbins = 100, xmin = -0.5, xmax = 99.5, ybins = 33, ymin = -16.5, ymax = 16.5, opt = 'kAlwaysCreate, kAddBinsDynamically')
 
     layerCounter=0
     for layerIndex in range(1, layerMax + 1):
@@ -91,7 +93,7 @@ def sTgcMonitoringConfig(inputFlags,NSW_PadTrigKey=''):
                 if sizeCounter==1:
                     sTgcPadTriggerShifterGroup.defineHistogram(f'hitLayer,xPosStrip_{sideIndex}_layer_{layerIndex},yPosStrip_{sideIndex}_layer_{layerIndex};strip_efficiency_per_mm_squared_Wheel{sideIndex}_layer{layerIndex}', type = 'TEfficiency', title = f'{sideIndex}L{layerIndex}; sTgc-GlobalX-Strip (on track) [mm]; sTgc-GlobalY-Strip (on track) [mm]; Efficiency sTGC strip {sideIndex}L{layerIndex}', path = 'StripEfficiency', xbins = 500, xmin = -5000., xmax = 5000., ybins = 500, ymin = -5000., ymax = 5000., opt = 'kAlwaysCreate')
                 if layerCounter==1:
-                    sTgcPadTriggerShifterGroup.defineHistogram(f'phiIds_{sideIndex}_{sizeIndex},bandIds_{sideIndex}_{sizeIndex};bandIds_vs_phiIds_Side{sideIndex}_Size{sizeIndex}', type = 'TH2F', title = f'{sideIndex}{sizeIndex}; Trigger phiID; Trigger bandID; Pad Trigger hits', path = 'PadTrigger/Triggers', xbins = 65, xmin = -32.5, xmax = 32.5, ybins = 101, ymin = -0.5, ymax = 100.5, opt = 'kAlwaysCreate')
+                    sTgcPadTriggerExpertGroup.defineHistogram(f'phiIds_{sideIndex}_{sizeIndex},bandIds_{sideIndex}_{sizeIndex};bandIds_vs_phiIds_Side{sideIndex}_Size{sizeIndex}', type = 'TH2F', title = f'{sideIndex}{sizeIndex}; Trigger phiID; Trigger bandID; Pad Trigger hits', path = 'PadTrigger/Triggers', xbins = 65, xmin = -32.5, xmax = 32.5, ybins = 101, ymin = -0.5, ymax = 100.5, opt = 'kAlwaysCreate')
 
     sideCounter=0
     for sideIndex in side:
@@ -109,17 +111,17 @@ def sTgcMonitoringConfig(inputFlags,NSW_PadTrigKey=''):
             sTgcPadTriggerExpertGroup.defineHistogram(f'hitRelBCID_{sideIndex}_sector_{sectorIndex},hitPfebs_{sideIndex}_sector_{sectorIndex};pFEB_vs_relBCID_Side{sideIndex}_Sector{sectorIndex}', type = 'TH2F', title = f'{sideIndex}' + f'{sectorIndex}'.zfill(2) + '; Hit relBCID; Hit pFEB; Pad Trigger hits associated to reco muons', path = 'PadTrigger/Hits/PFEBvsRelBCID', xbins = 7, xmin = -0.5, xmax = 6.5, ybins = 25, ymin = -0.5, ymax = 24.5, opt = 'kAlwaysCreate')
 
             for tIdx in tech:
-                LBShifterGroup.defineHistogram(f'{tIdx}LBsector{sideIndex}{sectorIndex},{tIdx}FEBsector{sideIndex}{sectorIndex};LB_vs_FEB_perSector_{tIdx}_{sideIndex}'+f'{sectorIndex}'.zfill(2), type = 'TH2F', title = 'FEB vs LB; LB; FEB', path = f'{tIdx[0].capitalize()+tIdx[1:]}', xbins = 100, xmin = -0.5, xmax = 99.5, ybins = 24, ymin = -0.5, ymax = 23.5, ylabels = FebLabels, opt = 'kAlwaysCreate,kAddBinsDynamically')        
+                LBExpertGroup.defineHistogram(f'{tIdx}LBsector{sideIndex}{sectorIndex},{tIdx}FEBsector{sideIndex}{sectorIndex};LB_vs_FEB_perSector_{tIdx}_{sideIndex}'+f'{sectorIndex}'.zfill(2), type = 'TH2F', title = 'FEB vs LB; LB; FEB', path = f'{tIdx[0].capitalize()+tIdx[1:]}'+'/Side'+f'{sideIndex}', xbins = 100, xmin = -0.5, xmax = 99.5, ybins = 24, ymin = -0.5, ymax = 23.5, ylabels = FebLabels, opt = 'kAlwaysCreate,kAddBinsDynamically')        
                 outdir = sideIndex+f'{sectorIndex}'.zfill(2)
-                OccupancyGroup.defineHistogram(f'{tIdx}layer_{sideIndex}{sectorIndex},{tIdx}quad_{sideIndex}{sectorIndex};{tIdx}_quad_occupancy_per_layer_{sideIndex}{sectorIndex}', type = 'TH2F', title = f'{tIdx} layers vs quad; Layer; Quad; Hits', path = f'{tIdx[0].capitalize()+tIdx[1:]}', xbins = layerMax, xmin = 0.5, xmax = layerMax + 0.5, ybins = stationEtaMax, ymin = 0.5, ymax = stationEtaMax + 0.5, opt = 'kAlwaysCreate')
+                OccupancyGroup.defineHistogram(f'{tIdx}layer_{sideIndex}{sectorIndex},{tIdx}quad_{sideIndex}{sectorIndex};{tIdx}_quad_occupancy_per_layer_{sideIndex}{sectorIndex}'.zfill(2), type = 'TH2F', title = f'{tIdx} layers vs quad; Layer; Quad; Hits', path = f'{tIdx[0].capitalize()+tIdx[1:]}'+'/Side'+f'{sideIndex}', xbins = layerMax, xmin = 0.5, xmax = layerMax + 0.5, ybins = stationEtaMax, ymin = 0.5, ymax = stationEtaMax + 0.5, opt = 'kAlwaysCreate')
                 sTgcTimingGroup.defineHistogram(f'{tIdx}Timing{sideIndex}{sectorIndex},{tIdx}FEB{sideIndex}{sectorIndex};{tIdx}_timing_{outdir}', type = 'TH2F', title = f'{tIdx} FEBs vs Timing; Time [ns]; FEB; Hits', path = f'{tIdx[0].capitalize()+tIdx[1:]}/Sector', xbins = 9, xmin = -112.5, xmax = 112.5, ybins = 24, ymin = -0.5, ymax = 23.5, ylabels = FebLabels, opt = 'kAlwaysCreate')
 
             stationEtaCounter=0
             for stationEtaIndex in range(1, stationEtaMax + 1):
                 stationEtaCounter+=1
-                padChargeGroup = helper.addGroup(sTgcMonAlg, f'padCharge_{sideIndex}{sectorIndex}_quad_{stationEtaIndex}', globalPath + f'Expert/Charge/{sideIndex}' + f'{sectorIndex}'.zfill(2) + '/Pad')
-                stripChargeGroup = helper.addGroup(sTgcMonAlg, f'stripCharge_{sideIndex}{sectorIndex}_quad_{stationEtaIndex}', globalPath + f'Expert/Charge/{sideIndex}' + f'{sectorIndex}'.zfill(2) + '/Strip')
-                wireGroupChargeGroup = helper.addGroup(sTgcMonAlg, f'wireGroupCharge_{sideIndex}{sectorIndex}_quad_{stationEtaIndex}', globalPath + f'Expert/Charge/{sideIndex}' + f'{sectorIndex}'.zfill(2) + '/Wire')
+                padChargeGroup = helper.addGroup(sTgcMonAlg, f'padCharge_{sideIndex}{sectorIndex}_quad_{stationEtaIndex}', globalPath + f'Expert/Charge/Pad/{sideIndex}' + f'{sectorIndex}'.zfill(2))
+                stripChargeGroup = helper.addGroup(sTgcMonAlg, f'stripCharge_{sideIndex}{sectorIndex}_quad_{stationEtaIndex}', globalPath + f'Expert/Charge/Strip/{sideIndex}' + f'{sectorIndex}'.zfill(2))
+                wireGroupChargeGroup = helper.addGroup(sTgcMonAlg, f'wireGroupCharge_{sideIndex}{sectorIndex}_quad_{stationEtaIndex}', globalPath + f'Expert/Charge/Wire/{sideIndex}' + f'{sectorIndex}'.zfill(2))
                 residualGroup = helper.addGroup(sTgcMonAlg, f'sTgcResiduals_{sideIndex}{sectorIndex}_quad_{stationEtaIndex}', globalPath + f'Expert/Residuals/{sideIndex}' + f'{sectorIndex}'.zfill(2)+'/')
                 
                 if sideCounter==1 and sectorCounter==1:

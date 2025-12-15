@@ -290,11 +290,13 @@ StatusCode FPGADataFormatTool::convertPixelRDO(
         const EventContext &/*ctx*/
         ) const {
 
+    constexpr int maxChannels = 1000;
     bool filledHeader = false;
     for (const InDetRawDataCollection<PixelRDORawData>* pixel_rdoCollection : pixelRDO) 
     {
         if (pixel_rdoCollection == nullptr) { continue; }
 
+        int nChannels = 0;
         // loop on all RDOs
         for (const PixelRDORawData* pixelRawData : *pixel_rdoCollection) 
         {
@@ -316,7 +318,7 @@ StatusCode FPGADataFormatTool::convertPixelRDO(
 
             // Get the pixel word
             auto pixelWord = FPGADataFormatUtilities::fill_PIXEL_EF_RDO (
-                    (pixelRawData == pixel_rdoCollection->back()), // last
+                    (pixelRawData == pixel_rdoCollection->back()) || (nChannels == maxChannels), // last
                     m_pixelId->phi_index(rdoId), // ROW
                     m_pixelId->eta_index(rdoId), // COL
                     pixelRawData->getToT(), // TOT
@@ -326,6 +328,9 @@ StatusCode FPGADataFormatTool::convertPixelRDO(
 
             // Push the word into the vector
             encodedData.push_back(FPGADataFormatUtilities::get_dataformat_PIXEL_EF_RDO(pixelWord));
+
+            if(nChannels == maxChannels) break;
+            nChannels++;
             //}
     } // end for each RDO in the collection
 

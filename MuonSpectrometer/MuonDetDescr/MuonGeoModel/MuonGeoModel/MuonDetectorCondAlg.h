@@ -5,7 +5,7 @@
 #ifndef MUONGEOMODEL_MUONDETECTORCONDALG_H
 #define MUONGEOMODEL_MUONDETECTORCONDALG_H
 
-#include "AthenaBaseComps/AthReentrantAlgorithm.h"
+#include "AthenaBaseComps/AthCondAlgorithm.h"
 #include "GaudiKernel/ToolHandle.h"
 #include "MuonAlignmentData/CorrContainer.h"
 #include "MuonAlignmentData/NswAsBuiltDbData.h"
@@ -17,7 +17,7 @@
 #include "StoreGate/WriteCondHandleKey.h"
 #include "MuonIdHelpers/IMuonIdHelperSvc.h"
 
-class MuonDetectorCondAlg : public AthReentrantAlgorithm {
+class MuonDetectorCondAlg : public AthCondAlgorithm {
 
   public:
     // Standard Constructor
@@ -28,7 +28,6 @@ class MuonDetectorCondAlg : public AthReentrantAlgorithm {
 
     virtual StatusCode initialize() override final;
     virtual StatusCode execute(const EventContext& ctx) const override final;
-    virtual bool isReEntrant() const override final { return false; }
 
   private:
     StatusCode copyInertMaterial(MuonGM::MuonDetectorManager& detMgr) const;

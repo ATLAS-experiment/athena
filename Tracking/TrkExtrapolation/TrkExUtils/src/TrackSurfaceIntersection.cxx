@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -13,6 +13,7 @@
 // STD
 #include <iomanip>
 #include <iostream>
+#include <sstream>
 
 // constructor
 Trk::TrackSurfaceIntersection::TrackSurfaceIntersection(
@@ -60,33 +61,29 @@ Trk::TrackSurfaceIntersection::operator=(const TrackSurfaceIntersection& other)
 MsgStream&
 Trk::operator<<(MsgStream& sl, const Trk::TrackSurfaceIntersection& tsfi)
 {
-  const std::streamsize ss = sl.precision();
-  sl << std::setiosflags(std::ios::fixed);
-  sl << std::setprecision(7);
-  sl << MSG::DEBUG << "Trk::TrackSurfaceIntersection  " << std::endl;
-  sl << "    position  [mm]   =  (" << tsfi.position().x() << ", "
-     << tsfi.position().y() << ", " << tsfi.position().z() << ")" << std::endl;
-  sl << "    direction [mm]   =  (" << tsfi.direction().x() << ", "
-     << tsfi.direction().y() << ", " << tsfi.direction().z() << ")"
-     << std::endl;
-  sl << "    delta pathlength =   " << tsfi.pathlength() << std::endl;
-  sl.precision(ss);
+  std::ostringstream os;
+  os<<tsfi;
+  sl<<os.str();
   return sl;
 }
 
 std::ostream&
 Trk::operator<<(std::ostream& sl, const Trk::TrackSurfaceIntersection& tsfi)
 {
-  const std::streamsize ss = sl.precision();
-  sl << std::setiosflags(std::ios::fixed);
-  sl << std::setprecision(7);
-  sl << "Trk::TrackSurfaceIntersection  " << std::endl;
-  sl << "    position  [mm]   =  (" << tsfi.position().x() << ", "
-     << tsfi.position().y() << ", " << tsfi.position().z() << ")" << std::endl;
-  sl << "    direction [mm]   =  (" << tsfi.direction().x() << ", "
-     << tsfi.direction().y() << ", " << tsfi.direction().z() << ")"
-     << std::endl;
-  sl << "    delta pathlength =   " << tsfi.pathlength() << std::endl;
-  sl.precision(ss);
+  const auto old_flags = sl.flags();
+  const auto old_prec  = sl.precision();
+
+  sl.setf(std::ios::fixed, std::ios::floatfield);
+  sl.precision(7);
+
+  sl << "Trk::TrackSurfaceIntersection\n"
+     << "    position  [mm] = (" << tsfi.position().x() << ", "
+     << tsfi.position().y() << ", " << tsfi.position().z() << ")\n"
+     << "    direction      = (" << tsfi.direction().x() << ", "
+     << tsfi.direction().y() << ", " << tsfi.direction().z() << ")\n"
+     << "    pathlength [mm] = " << tsfi.pathlength() << '\n';
+
+  sl.flags(old_flags);
+  sl.precision(old_prec);
   return sl;
 }

@@ -139,6 +139,7 @@ def createActsConfigFlags():
     
     # SpacePoint
     actscf.addFlag("Acts.SpacePointStrategy", SpacePointStrategy.ActsTrk, type=SpacePointStrategy)  # Define SpacePoint Strategy
+    actscf.addFlag('Acts.SpacePoints.useBeamSpotConstraintStrips', True)
 
     # Seeding
     actscf.addFlag("Acts.SeedingStrategy", SeedingStrategy.GridTriplet, type=SeedingStrategy)  # Define Seeding Strategy

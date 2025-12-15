@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "DerivationFrameworkEGamma/BkgElectronClassification.h"
@@ -12,14 +12,6 @@
 
 namespace DerivationFramework {
 
-BkgElectronClassification::BkgElectronClassification(const std::string& t,
-                                                     const std::string& n,
-                                                     const IInterface* p)
-  : base_class(t, n, p)
-{
-
-}
-
 StatusCode
 BkgElectronClassification::initialize()
 {
@@ -30,20 +22,6 @@ BkgElectronClassification::initialize()
 
   ATH_CHECK(m_electronContainer.initialize());
   ATH_CHECK(m_truthContainer.initialize());
-
-  const std::string baseName = m_electronContainer.key();
-  m_truthPdgId = baseName + ".truthPdgId";
-  //
-  m_firstEgMotherTruthType = baseName + ".firstEgMotherTruthType";
-  m_firstEgMotherTruthOrigin = baseName + ".firstEgMotherTruthOrigin";
-  m_firstEgMotherTruthParticleLink =
-    baseName + ".firstEgMotherTruthParticleLink";
-  m_firstEgMotherPdgId = baseName + ".firstEgMotherPdgId";
-  //
-  m_lastEgMotherTruthType = baseName + ".lastEgMotherTruthType";
-  m_lastEgMotherTruthOrigin = baseName + ".lastEgMotherTruthOrigin";
-  m_lastEgMotherTruthParticleLink = baseName + ".lastEgMotherTruthParticleLink";
-  m_lastEgMotherPdgId = baseName + ".lastEgMotherPdgId";
 
   ATH_CHECK(m_truthPdgId.initialize());
   //

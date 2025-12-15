@@ -22,7 +22,7 @@
 
 MuonNSW_CablingAlg::MuonNSW_CablingAlg(const std::string& name,
                                      ISvcLocator* pSvcLocator)
-    : AthReentrantAlgorithm(name, pSvcLocator) {}
+    : AthCondAlgorithm(name, pSvcLocator) {}
 
 StatusCode MuonNSW_CablingAlg::initialize() {
     ATH_MSG_DEBUG("initialize " << name());

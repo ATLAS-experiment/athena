@@ -25,10 +25,11 @@ namespace DerivationFramework {
 
   class TruthDecayCollectionMaker : public extends<AthAlgTool, IAugmentationTool> {
   public:
-    TruthDecayCollectionMaker(const std::string& t, const std::string& n, const IInterface* p);
-    ~TruthDecayCollectionMaker();
-    StatusCode initialize();
-    virtual StatusCode addBranches(const EventContext& ctx) const;
+
+    using base_class::base_class;
+
+    virtual StatusCode initialize() override final;
+    virtual StatusCode addBranches(const EventContext& ctx) const override final;
 
   private:
     Gaudi::Property<std::vector<int> > m_pdgIdsToKeep //!< List of PDG IDs to build this collection from

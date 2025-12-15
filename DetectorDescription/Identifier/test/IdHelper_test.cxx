@@ -50,10 +50,6 @@ public:
     void set_do_neighbours(bool do_neighbours) override{
       m_doNeighbours = do_neighbours;
     }
-    // setting pointer to the MessageSvc
-    void setMessageSvc(IMessageSvc* ) override {
-    //nop
-    }
     //
     void setDictVersion(const IdDictMgr& , const std::string& name) override{
       m_version = name;

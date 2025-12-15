@@ -4,7 +4,7 @@
 
 #include "RootCollection.h"
 #include "CollectionCommon.h"
-#include "RootCollectionQuery.h"
+#include "RootCollectionCursor.h"
 
 #include "CoralBase/Attribute.h"
 #include "CoralBase/AttributeList.h"
@@ -14,20 +14,18 @@
 #include "PersistentDataModel/Token.h"
 #include "RootUtils/APRDefaults.h"
 
-#include "CollectionBase/ICollectionColumn.h"
-#include "CollectionBase/CollectionBaseNames.h"
+#include "CollectionSvc/ICollectionColumn.h"
+#include "CollectionSvc/CollectionNames.h"
 
 #include "GaudiKernel/Bootstrap.h"
 #include "GaudiKernel/ISvcLocator.h"
 #include "GaudiKernel/IFileMgr.h"
 #include "GaudiKernel/IService.h"
 
-#include "TFile.h"
-#include "TNetFile.h"
 #include "TTree.h"
-#include "TSocket.h"
-#include "TMessage.h"
+#include "TFile.h"
 #include "TDirectory.h"
+#include "TSystem.h"
 
 #include <exception>
 #include <map>
@@ -215,15 +213,6 @@ namespace pool {
              const TObject* tree = getCollectionTree();
              if( tree )
                 m_mode = ICollection::UPDATE;
-             else {
-                // probably supposed to unregister if the collection was not created
-                m_mode = ICollection::CREATE_AND_OVERWRITE;
-                if(m_fileCatalog){
-                   m_fileCatalog->start();
-                   m_fileCatalog->deleteFID( m_fileCatalog->lookupPFN(m_fileName) );
-                   m_fileCatalog->commit();
-                }
-             }
           }
           if( m_mode != ICollection::READ ) {
              if( !m_schemaWritten ) {
@@ -264,64 +253,11 @@ namespace pool {
 
       if( m_open ) close();
 
-      if( !m_fileCatalog
-        && m_fileName.starts_with ( "PFN:")
-        && m_description.connection().empty() )
+      if( m_fileName.starts_with ( "PFN:") && m_description.connection().empty() )
       {
         // special case with no catalog and PFN specified
         // create the collection with exactly PFN file name
         m_fileName = m_description.name().substr(4);   // remove the PFN: prefix
-      }
-      else if( fileCatalogRequired() ) {
-        m_fileName = "";
-
-        if(!m_fileCatalog)
-           m_fileCatalog = make_unique<pool::IFileCatalog>();
-        
-        if( m_mode == ICollection::CREATE ){
-          string fid = retrieveFID();
-          if(fid!="")
-            throw std::runtime_error( "Cannot REATE already registered collections. (APR: \" RootCollection::open \" from \" RootCollection \")" );
-          else{
-            m_fileName = retrievePFN();
-            FileCatalog::FileID dummy;
-            m_fileCatalog->start();
-            m_fileCatalog->registerPFN( m_fileName, myFileType, dummy);
-            m_fileCatalog->commit();
-          }
-        }
-
-        else if(m_mode == ICollection::CREATE_AND_OVERWRITE){
-          string fid = retrieveFID();
-          if(fid!="")
-            m_fileName = retrieveUniquePFN(fid);
-          else{
-            m_fileName = retrievePFN();
-            FileCatalog::FileID dummy;
-            m_fileCatalog->start();
-            m_fileCatalog->registerPFN( m_fileName, myFileType, dummy);
-            m_fileCatalog->commit();
-          }
-        }
-
-        else if(m_mode == ICollection::UPDATE){
-          string fid = retrieveFID();
-          if(fid!="")
-            m_fileName = retrieveUniquePFN(fid);
-          else
-            throw std::runtime_error( "Cannot UPDATE non registered collections. (APR: \" RootCollection::open \" from \" RootCollection \")" );
-        }
-
-        else if(m_mode == ICollection::READ) {
-          string fid = retrieveFID();
-          if(fid!="") {
-             string dummy;
-             m_fileCatalog->start();
-             m_fileCatalog->getFirstPFN(fid, dummy, dummy);
-             m_fileCatalog->commit();
-          }else
-             throw std::runtime_error( "Cannot READ non registered collections. (APR: \" RootCollection::open \" from \" RootCollection \")" );
-        }
       }
 
       TDirectory::TContext dirctxt;
@@ -439,7 +375,7 @@ namespace pool {
         m_schemaWritten = false;
         for( int col_id = 0; col_id < m_description.numberOfTokenColumns(); col_id++ ) {
              std::string columnName = m_description.tokenColumn(col_id).name();
-             addTreeBranch( columnName, CollectionBaseNames::tokenTypeName );
+             addTreeBranch( columnName, CollectionNames::tokenTypeName );
         }
         for( int col_id = 0; col_id < m_description.numberOfAttributeColumns(); col_id++ ) {
              const ICollectionColumn& column = m_description.attributeColumn(col_id);
@@ -482,73 +418,33 @@ namespace pool {
     }
 
      
-    bool RootCollection::fileCatalogRequired() const
-    {
-      return m_name.find("PFN:")==0 || 
-        m_name.find("FID:")==0 || 
-        m_name.find("LFN:")==0; 
-    }
-
-     
-    string RootCollection::retrievePFN() const {
-      if (m_name.substr (0, 4) != "PFN:")
-        throw std::runtime_error( "In CREATE mode a PFN has to be provided. (APR: \" RootCollection::retrievePFN \" from \" RootCollection \")" );
-      return m_name.substr(4,string::npos);
-    }
-
-     
-    string  RootCollection::retrieveFID() {
-
-      FileCatalog::FileID fid="";
-      string fileType="";        
-
-      if (m_name.substr (0, 4) == "PFN:") {
-        string pfn = m_name.substr(4,string::npos);
-        m_fileCatalog->start();
-        m_fileCatalog->lookupFileByPFN(pfn,fid,fileType);
-        m_fileCatalog->commit();
-      }
-      else if (m_name.substr (0, 4) == "LFN:") {
-        string lfn = m_name.substr(4,string::npos);
-        m_fileCatalog->start();
-        m_fileCatalog->lookupFileByLFN(lfn,fid);
-        m_fileCatalog->commit();
-      }
-      else if (m_name.substr (0, 4) == "FID:") {
-        fid = m_name.substr(4,string::npos);
-      }else
-        throw std::runtime_error( "A FID, PFN or and LFN has to be provided. (APR: \" RootCollection::retrieveFID \" from \" RootCollection \")" );
-      return fid;
-    }
-
-
-   string RootCollection::retrieveUniquePFN(const FileCatalog::FileID& fid)
-   {
-      IFileCatalog::Files       pfns;
-      m_fileCatalog->start();
-      m_fileCatalog->getPFNs(fid, pfns);
-      m_fileCatalog->commit();
-      if( pfns.empty() )
-        throw std::runtime_error( "This exception should never have been thrown, please send a bug report. (APR: \" RootCollection::retrieveUniquePFN \" from \" RootCollection \")" );
-      if( pfns.size() > 1 )
-        throw std::runtime_error( "Cannot UPDATE or CREATE_AND_OVERWRITE since there are replicas. (APR: \" RootCollection::retrieveUniquePFN \" from \" RootCollection \")" );
-      return pfns[0].first;
-    }
-
-   
     const ICollectionDescription& RootCollection::description() const
     {
       return m_description;
     }
 
-     
-    ICollectionQuery* RootCollection::newQuery()
+    ICollectionCursor& RootCollection::cursor()
     {
        if( !isOpen() ) {
-          throw std::runtime_error( "Attempt to query a closed collection. (APR: \" RootCollection::newQuery \" from \" RootCollection \")" );
+          throw std::runtime_error( "Attempt to get cursor for a closed collection. (APR: \" RootCollection::cursor \" from \" RootCollection \")" );
        }
-       return new RootCollectionQuery( m_description, m_tree );
-    }
 
+       pool::TokenList outputTokenList;
+       coral::AttributeList outputAttributeList;
+       for( int j = 0; j < m_description.numberOfAttributeColumns(); j++ )    {
+          outputAttributeList.extend( m_description.attributeColumn( j ).name() , m_description.attributeColumn( j ).type() );
+       }
+       for( int j = 0; j < m_description.numberOfTokenColumns(); j++ )    {
+          outputTokenList.extend( m_description.tokenColumn( j ).name() );
+       }
+
+       TEventList* eventList = 0;
+
+       // Create collection row buffer
+       pool::CollectionRowBuffer collectionRowBuffer( outputTokenList, outputAttributeList );
+
+       ICollectionCursor* cursor = new RootCollectionCursor( m_description, collectionRowBuffer, m_tree, eventList );
+       return *cursor;
+    }
   }
 }

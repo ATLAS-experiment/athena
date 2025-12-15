@@ -87,7 +87,7 @@ namespace {
   void checkForDev(asg::AsgMessaging& asgmsg,
                    const std::string& logical_file_name) {
 
-    asgmsg.msg(MSG::DEBUG) << "Trying to locate " << logical_file_name << endmsg;
+    if (asgmsg.msgLvl(MSG::DEBUG)) asgmsg.msg(MSG::DEBUG) << "Trying to locate " << logical_file_name << endmsg;
 
     if (logical_file_name.starts_with("dev/")) {
       const char* env = std::getenv(pathResolverEnvVar);
@@ -127,17 +127,16 @@ namespace {
 
 
 asg::AsgMessaging& PathResolver::asgMsg() {
+
 #ifdef XAOD_STANDALONE
    static thread_local asg::AsgMessaging asgMsg("PathResolver");
 #else
    static asg::AsgMessaging asgMsg ATLAS_THREAD_SAFE ("PathResolver");
 #endif
-/// In AnalysisBase this method is not available
-#ifndef XAOD_ANALYSIS
-   asgMsg.setLevel(m_level);   
-#else
-   asgMsg.msg().setLevel(m_level);
-#endif
+
+   // Set default OutputLevel unless user already set one
+   if (m_level==MSG::NIL) setOutputLevel(MSG::INFO);
+
    return asgMsg;
 }
 
@@ -159,7 +158,7 @@ bool PathResolver::PR_find( const std::string& logical_file_name, const std::str
   const std::string searchPath = std::format("./{}{}", path_separator, search_list);
 
   // iterate through search list
-  for (const auto& r : searchPath | std::views::split(path_separator)) {
+  for (const auto r : searchPath | std::views::split(path_separator)) {
     std::string_view path(r.begin(), r.end());
     const bool is_http = path.starts_with("http//");
     if( (is_http || path.starts_with("https//")) &&
@@ -173,10 +172,10 @@ bool PathResolver::PR_find( const std::string& logical_file_name, const std::str
       const fs::path targetPath = locationToDownloadTo / file;
       fs::path targetDir = targetPath;
       targetDir.remove_filename();
-      msg(MSG::DEBUG) << "Attempting http download of " << fileToDownload << " to " << targetDir << endmsg;
+      if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG) << "Attempting http download of " << fileToDownload << " to " << targetDir << endmsg;
 
       if (!is_directory(targetDir)) {
-        msg(MSG::DEBUG) << "Creating directory " << targetDir  << endmsg;
+        if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG) << "Creating directory " << targetDir  << endmsg;
         if(!fs::create_directories(targetDir)) {
           msg(MSG::ERROR) << "Unable to create directories to write file to " << targetDir << endmsg;
           return false;
@@ -186,7 +185,7 @@ bool PathResolver::PR_find( const std::string& logical_file_name, const std::str
       if (!download_file(fileToDownload, targetPath, asgMsg())) {
         msg(MSG::WARNING) << "Unable to download file " << fileToDownload << endmsg;
       } else {
-        msg(MSG::DEBUG) << "Successfully downloaded " << fileToDownload << endmsg;
+        if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG) << "Successfully downloaded " << fileToDownload << endmsg;
         result = targetPath;
         return true;
       }
@@ -306,6 +305,11 @@ std::string PathResolver::find_calib_directory (const std::string& logical_file_
 
 void PathResolver::setOutputLevel(MSG::Level level) {
    m_level = level;
+#ifndef XAOD_ANALYSIS
+   asgMsg().setLevel(m_level);
+#else
+   asgMsg().msg().setLevel(m_level);
+#endif
 }
 
 std::string PathResolverFindXMLFile (const std::string& logical_file_name)

@@ -9,6 +9,7 @@
 #include "StoreGate/ReadHandleKey.h"
 #include "StoreGate/ReadDecorHandleKey.h"
 #include "StoreGate/WriteDecorHandleKeyArray.h"
+#include "StoreGate/ReadDecorHandleKeyArray.h"
 
 #include "xAODMuon/MuonSegmentContainer.h"
 #include "xAODMeasurementBase/UncalibratedMeasurementContainer.h"
@@ -33,8 +34,12 @@ namespace MuonR4{
             Gaudi::Property<std::string> m_writeMarker{this, "writeMarker", "matchedToTruthSeg"};
             /** @brief Key to indicate the associated MuonSegment link */
             Gaudi::Property<std::string> m_segLink{this, "SegmentLinkKey", "truthSegmentLinks"};
-            /** @brief Key to the segment container to fetch the marked segments */
+            /** @brief Decoration key of the prd -> simHit association */
+            Gaudi::Property<std::string> m_simLink{this, "SimHitLink", "simHitLink"};
+            /** @brief Key to the prd containers in the event */
             SG::ReadHandleKeyArray<xAOD::UncalibratedMeasurementContainer> m_measKeys{this, "PrdContainer",{}};
+            /** @brief Dependency on the sim hit decoration */
+            SG::ReadDecorHandleKeyArray<xAOD::UncalibratedMeasurementContainer> m_prdLinkKeys{this, "PrdLinkKeys", {}};
             /** @brief Key to the marker decoration. Will be copied from writeMarker */
             SG::WriteDecorHandleKeyArray<xAOD::UncalibratedMeasurementContainer> m_writeMarkKeys{this, "OutMarkerKeys", {}};
             /** @brief Key to the segment link decoration. */

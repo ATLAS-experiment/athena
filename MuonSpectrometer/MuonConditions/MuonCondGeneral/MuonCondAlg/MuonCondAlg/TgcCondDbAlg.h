@@ -13,7 +13,7 @@
 #include <nlohmann/json.hpp>
 
 // Athena includes
-#include "AthenaBaseComps/AthReentrantAlgorithm.h"
+#include "AthenaBaseComps/AthCondAlgorithm.h"
 #include "AthenaPoolUtilities/CondAttrListCollection.h"
 #include "MuonCondData/TgcCondDbData.h"
 #include "CxxUtils/StringUtils.h"
@@ -23,13 +23,12 @@
 
 
 
-class TgcCondDbAlg : public AthReentrantAlgorithm {
+class TgcCondDbAlg : public AthCondAlgorithm {
 public:
     TgcCondDbAlg(const std::string& name, ISvcLocator* svc);
     virtual ~TgcCondDbAlg() = default;
     virtual StatusCode initialize() override;
     virtual StatusCode execute(const EventContext& ctx) const override;
-    virtual bool isReEntrant() const override { return false; }
 
 private:
     /// Load the detector status from cool

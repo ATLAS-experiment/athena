@@ -16,12 +16,10 @@
 #include "StorageSvc/DbSelect.h"
 #include "StorageSvc/DbColumn.h"
 #include "StorageSvc/DbTypeInfo.h"
-#include "StorageSvc/DbArray.h"
 #include "StorageSvc/DbReflex.h"
 
 // Local implementation files
 #include "RootDatabase.h"
-#include "RootCallEnv.h"
 #include "RootKeyContainer.h"
 #include "RootKeyIOHandler.h"
 
@@ -30,8 +28,6 @@
 #include "TFile.h"
 #include "TClass.h"
 #include "TKey.h"
-
-#include "RootDataPtr.h"
 
 #include <algorithm>
 

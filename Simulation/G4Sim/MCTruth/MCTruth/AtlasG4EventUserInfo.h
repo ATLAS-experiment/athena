@@ -6,10 +6,16 @@
 #define MCTRUTH_ATLASG4EVENTUSERINFO_H
 
 
+#include <GaudiKernel/EventContext.h>
+#include "AthenaKernel/ExtendedEventContext.h"
+#include "AthenaKernel/IProxyDict.h"
 #include "AtlasHepMC/GenEvent_fwd.h"
 #include "AtlasHepMC/GenParticle.h"
-#include "G4VUserEventInformation.hh"
 #include "HitManagement/HitCollectionMap.h"
+
+#include <G4EventManager.hh>
+#include "G4VUserEventInformation.hh"
+
 #include <memory>
 /** @class AtlasG4EventUserInfo
 
@@ -22,8 +28,10 @@
  */
 class AtlasG4EventUserInfo: public G4VUserEventInformation {
 public:
-  AtlasG4EventUserInfo()
+  AtlasG4EventUserInfo(const EventContext& ctx)
     : G4VUserEventInformation()
+    , m_eventContext(ctx)
+    , m_eventStore(Atlas::getExtendedEventContext(ctx).proxy())
   {}
 
   /**
@@ -112,9 +120,28 @@ public:
    */
   void SetHitCollectionMap(std::shared_ptr<HitCollectionMap> hitCollections) {  m_hitCollectionMap = hitCollections; }
 
+  const EventContext& GetEventContext() const { return m_eventContext; }
+
+  IProxyDict* GetEventStore() { return m_eventStore; }
+
   void Print() const {}
 
+  // Static helper method to get the AtlasG4EventUserInfo from G4EventManager
+  static AtlasG4EventUserInfo* GetEventUserInfo()
+  {
+      // Event manager may be null in unit tests.
+      G4EventManager* eventManager = G4EventManager::GetEventManager();
+      if (!eventManager) {
+          return nullptr;
+      }
+      // User info may be null
+      return static_cast<AtlasG4EventUserInfo*>(eventManager->GetUserInformation());
+  }
+
+
 private:
+  const EventContext& m_eventContext;
+  IProxyDict* m_eventStore{};
   HepMC::GenEvent *m_theEvent{};
   HepMC::ConstGenParticlePtr m_currentPrimaryGenParticle{};
   HepMC::GenParticlePtr m_currentGenParticle{};

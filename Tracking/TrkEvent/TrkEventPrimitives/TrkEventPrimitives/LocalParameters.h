@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -16,8 +16,10 @@
 #include "TrkEventPrimitives/DefinedParameter.h"
 #include "TrkEventPrimitives/ProjectionMatricesSet.h"
 //
-#include <cmath>
 #include <array>
+#include <vector>
+#include <iosfwd> //std::ostream
+
 
 class MsgStream;
 

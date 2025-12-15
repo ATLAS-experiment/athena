@@ -43,16 +43,16 @@ StatusCode SensitiveDetectorBase::initializeSD()
     }
 
   // Make the SD stored by this tool
-  auto* sd = makeSD();
+  auto sd = std::unique_ptr<G4VSensitiveDetector>(makeSD());
   if(!sd)
     {
       ATH_MSG_ERROR("Failed to create SD!");
       return StatusCode::FAILURE;
     }
-  setSD(sd);
+  setSD(sd.get());
 
   // Assign the SD to our list of volumes
-  ATH_CHECK( assignSD( getSD(), m_volumeNames.value() ) );
+  ATH_CHECK( assignSD( std::move(sd), m_volumeNames.value() ) );
 
   ATH_MSG_DEBUG( "Initialized and added SD " << name() );
   return StatusCode::SUCCESS;
@@ -62,7 +62,7 @@ StatusCode SensitiveDetectorBase::initializeSD()
 // Assign an SD to a list of volumes
 //-----------------------------------------------------------------------------
 StatusCode SensitiveDetectorBase::
-assignSD(G4VSensitiveDetector* sd, const std::vector<std::string>& volumes) const
+assignSD(std::unique_ptr<G4VSensitiveDetector> sd, const std::vector<std::string>& volumes) const
 {
   // Propagate verbosity setting to the SD
   if(msgLvl(MSG::VERBOSE)) sd->SetVerboseLevel(10);
@@ -71,7 +71,9 @@ assignSD(G4VSensitiveDetector* sd, const std::vector<std::string>& volumes) cons
   // Add the sensitive detector to the SD manager in G4 for SDs,
   // even if it has no volumes associated to it.
   auto sdMgr = G4SDManager::GetSDMpointer();
-  sdMgr->AddNewDetector(sd);
+  auto sdPtr = sd.get();
+  // SDManager is now the SD owner
+  sdMgr->AddNewDetector(sd.release());
 
   if(!volumes.empty()) {
     bool gotOne = false;
@@ -87,7 +89,7 @@ assignSD(G4VSensitiveDetector* sd, const std::vector<std::string>& volumes) cons
         ATH_MSG_VERBOSE("Check whether "<<logVol->GetName()<<" belongs to the set of sensitive detectors "<<volumeName);
         if( matchStrings( volumeName.data(), logVol->GetName() ) ){
           ++numFound;
-          SetSensitiveDetector(logVol, sd);
+          SetSensitiveDetector(logVol, sdPtr);
         }
         
       }

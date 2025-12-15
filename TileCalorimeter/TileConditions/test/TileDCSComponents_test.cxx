@@ -224,7 +224,7 @@ void prepareDCSFolder(const std::string& key, const FolderData<T>& folderData) {
   for (const auto& coolChannelData : folderData) {
 
     unsigned int coolChannel = coolChannelData.first;
-    const auto nameValuePairs = coolChannelData.second;
+    const auto& nameValuePairs = coolChannelData.second;
 
     coral::AttributeList attributeList;
 

@@ -19,9 +19,7 @@ class MuonDetectorTool final : public GeoModelTool {
 
    public:
     // Constructor
-    MuonDetectorTool(const std::string &type, const std::string &name,
-                     const IInterface *parent);
-
+    using GeoModelTool::GeoModelTool;
     // Destructor
     virtual ~MuonDetectorTool() override final;
 
@@ -38,14 +36,13 @@ class MuonDetectorTool final : public GeoModelTool {
     ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{
         this, "IdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
 
-    ToolHandleArray<IMuonReadoutGeomTool> m_detTechTools{
-        this,
-        "ReadoutEleBuilders",
-        {},
-        "SubTools to build the readoutElements for each technology"};
+    ToolHandleArray<IMuonReadoutGeomTool> m_detTechTools{this, "ReadoutEleBuilders",
+        {}, "SubTools to build the readoutElements for each technology"};
 
-    ServiceHandle<IGeoDbTagSvc> m_geoDbTagSvc{this, "GeoDbTagSvc",
-                                              "GeoDbTagSvc"};
+    ServiceHandle<IGeoDbTagSvc> m_geoDbTagSvc{this, "GeoDbTagSvc", "GeoDbTagSvc"};
+    /** @brief Flag if set to true, the invoke of clear only removes the tree tops 
+     *         from the detector manager instead of the entire object */
+    Gaudi::Property<bool> m_clearTopsOnly{this, "clearTreeTops", true};
     MuonDetectorManager *m_manager{nullptr};
 };
 }  // namespace MuonGMR4

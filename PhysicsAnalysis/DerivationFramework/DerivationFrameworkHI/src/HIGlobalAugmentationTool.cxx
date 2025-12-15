@@ -7,17 +7,6 @@
 
 namespace DerivationFramework
 {
-  HIGlobalAugmentationTool::HIGlobalAugmentationTool(   const std::string& t,
-                                                                const std::string& n,
-                                                                const IInterface* p ) :   base_class(t,n,p)
-  {
-  }
-
-  // Destructor
-  HIGlobalAugmentationTool::~HIGlobalAugmentationTool()
-  {
-  }
-
   // Athena initialize and finalize
   StatusCode HIGlobalAugmentationTool::initialize()
   {

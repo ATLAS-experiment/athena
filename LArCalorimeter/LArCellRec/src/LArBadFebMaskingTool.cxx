@@ -26,6 +26,7 @@ PURPOSE:
 #include "LArRecEvent/LArEventBitInfo.h"
 #include "GaudiKernel/ThreadLocalContext.h"
 #include "StoreGate/WriteDecorHandle.h"
+#include "LArElecCalib/LArProvenance.h"
 
 /////////////////////////////////////////////////////////////////////
 // INITIALIZE:
@@ -121,7 +122,6 @@ StatusCode LArBadFebMaskingTool::process (CaloCellContainer* theCont,
   SG::ReadCondHandle<LArBadFebCont> badFebHdl{m_badFebKey,ctx};
   const LArBadFebCont* badFebs=*badFebHdl;
 
-
 // loop over all Febs
 
   for (HWIdentifier febId : m_onlineID->feb_range()) {
@@ -141,7 +141,7 @@ StatusCode LArBadFebMaskingTool::process (CaloCellContainer* theCont,
 
 
       LArBadFeb febstatus = badFebs->status(febId);
-      inError = febstatus.inError();
+      inError = febstatus.inError() || febstatus.deadAll();
 
       if (toMask1 || inError) {
          m_mask++;
@@ -165,7 +165,7 @@ StatusCode LArBadFebMaskingTool::process (CaloCellContainer* theCont,
                 aCell->setTime(0.);
                 uint16_t qua=0;
                 aCell->setQuality(qua);
-                uint16_t provenance = (aCell->provenance() | 0x0800);
+                const uint16_t provenance = (aCell->provenance() | LArProv::MASKED | LArProv::DEADFEB);// 0x0800 | 0x4000 
                 aCell->setProvenance(provenance);
               }
 

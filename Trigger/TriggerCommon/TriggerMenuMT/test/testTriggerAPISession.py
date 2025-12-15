@@ -1,9 +1,9 @@
 #!/usr/bin/env python
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 import unittest
 
-from TriggerMenuMT.TriggerAPI import TriggerAPISession,TriggerPeriod,TriggerType,TriggerAPI
+from TriggerMenuMT.TriggerAPI import TriggerAPISession, TriggerType
 
 class TriggerAPISessionTest(unittest.TestCase):
 

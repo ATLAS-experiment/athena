@@ -85,7 +85,7 @@ def FTAG3Cfg(flags, skimmingTools=None):
     from BTagging.FlavorTaggingConfig import FlavorTaggingCfg
 
     #add SV1 info for gbb
-    extra_SmartCollections = [ "AntiKtVR30Rmax4Rmin02PV0TrackJets","AntiKtVR30Rmax4Rmin02Track_FTAG" ]
+    extra_SmartCollections = [ "AntiKtVR30Rmax4Rmin02PV0TrackJets" ]
     extra_AllVariables = [ "AntiKt10LCTopoTrimmedPtFrac5SmallR20Jets"]
     trigger_option = 'FTAG3'
     acc.merge(FTAG1CoreCfg(flags, FTAG3_name_tag, extra_SmartCollections, extra_AllVariables, trigger_option, TriggerListsHelper = FTAG3TriggerListsHelper))

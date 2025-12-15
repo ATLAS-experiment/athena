@@ -228,7 +228,7 @@ StatusCode TrigCompositeUtils::AlgToChainTool::getChainsForAllAlgs(const EventCo
             }
         }
 
-        algToChain[algSeqPair.first] = activeChains;
+        algToChain[algSeqPair.first] = std::move(activeChains);
     }
 
     return StatusCode::SUCCESS;

@@ -1,5 +1,6 @@
 # Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
+from abc import ABC, abstractmethod
 import os
 import json
 import re
@@ -40,13 +41,13 @@ class ConfigType(Enum):
     def __ne__(self, other):
         return not self.__eq__(other)
 
-class ConfigLoader:
+class ConfigLoader(ABC):
     """ 
     ConfigLoader derived classes hold the information of the configuration source
     and define the method to load the configuration
     """ 
-    def __init__(self,configType):
-        self.configType = configType
+    def __init__(self,configType: ConfigType):
+        self.configType: ConfigType = configType
     def confirmConfigType(self,config):
         """
         checks that the in-file specification of the configuration type matches the expected type
@@ -54,11 +55,23 @@ class ConfigLoader:
         if config['filetype'] != self.configType:
             raise RuntimeError("Can not load file with filetype '%s' when expecting '%s'" % (config['filetype'], self.configType.filetype))
 
+    @abstractmethod
+    def load(self) -> dict[str, Any]:
+        pass
+
+    @abstractmethod
+    def getWriteFilename(self) -> str:
+        pass
+
+    @abstractmethod
+    def setQuery(self, query):
+        pass
+
 class ConfigFileLoader(ConfigLoader):
     def __init__(self, configType, filename ):
         super(ConfigFileLoader,self).__init__(configType) 
         self.filename = filename
-    def load(self):
+    def load(self) -> dict[str, Any]:
         with open(self.filename, 'r') as fp:
             config = json.load(fp)
             self.confirmConfigType(config)
@@ -76,7 +89,7 @@ class ConfigDirectLoader(ConfigLoader):
     def __init__(self, configType,  jsonString):
         super(ConfigDirectLoader,self).__init__(configType) 
         self.jsonString = jsonString
-    def load(self):
+    def load(self) -> dict[str, Any]:
         config = json.loads(self.jsonString)
         self.confirmConfigType(config)
         return config
@@ -90,7 +103,7 @@ class ConfigDBLoader(ConfigLoader):
         super().__init__(configType)
         self.dbalias = dbalias
         self.dbkey = dbkey
-        self.query = None
+        self.query = {}
         self.schema = None
 
     def setQuery(self, query):
@@ -116,27 +129,29 @@ class ConfigDBLoader(ConfigLoader):
     def getConnectionParameters(dbalias):
         dblookupFile = ConfigDBLoader.getResolvedFileName("dblookup.xml", "CORAL_DBLOOKUP_PATH")
         dbp = ET.parse(dblookupFile)
-        listOfServices = None
+        listOfServices = []
+        foundAlias = False
         for logSvc in dbp.iter("logicalservice"):
             if logSvc.attrib["name"] != dbalias:
                 continue
+            foundAlias = True
             listOfServices = [ serv.attrib["name"] for serv in logSvc.iter("service") ]
             if len(listOfServices) == 0:
                 raise RuntimeError("DB %s has no services listed in %s" % (dbalias, dblookupFile))
             break
-        if listOfServices is None:
+        if not foundAlias:
             raise RuntimeError("DB %s not available in %s" % (dbalias, dblookupFile))
         
         if "FRONTIER_SERVER" not in os.environ:
             # remove all frontier connnections in the list if the environment FRONTIER_SERVER variable does not exist
             # this speeds up the resolution of the connection specification (dbalias)
-            listOfServices = [svc for svc in listOfServices if not svc.startswith("frontier:")]
+            listOfServices: list[str] = [svc for svc in listOfServices if not svc.startswith("frontier:")]
 
         # now get the account and pw for oracle connections
-        credentials = dict.fromkeys(listOfServices)
+        credentials: dict[str, Any] = dict.fromkeys(listOfServices)
 
         for svc in filter(lambda s : s.startswith("frontier:"), listOfServices):
-            credentials[svc] = dict()
+            credentials[svc] = {}
             credentials[svc]["user"] = svc
             credentials[svc]["password"] = ""
 
@@ -192,7 +207,7 @@ class ConfigDBLoader(ConfigLoader):
             if not versionTag.startswith(versionTagPrefix):
                 raise RuntimeError( "Tag format error: Trigger schema version tag %s does not start with %s", versionTag, versionTagPrefix) 
 
-            vstr = versionTag[len(versionTagPrefix)]
+            vstr = versionTag[len(versionTagPrefix):]
 
             if not vstr.isdigit():
                 raise RuntimeError( "Invalid argument when interpreting the version part %s of schema tag %s is %s", vstr, versionTag, type(vstr))
@@ -212,7 +227,7 @@ class ConfigDBLoader(ConfigLoader):
             queryStr = queryStr.format(**qdict)
 
         # bind vars
-        bindVars = coral.AttributeList()
+        bindVars = coral.AttributeList()  # type: ignore
         bindVarsInQuery = re.findall(r":(\w*)", queryStr)
         if len(bindVarsInQuery) > 0 and qdict is None:
             log.error("Query has bound-variable syntax but no value dictionary is provided. Query: %s", queryStr)
@@ -255,14 +270,14 @@ class ConfigDBLoader(ConfigLoader):
 
         return self.query[maxDefVersion]
 
-    def load(self):
+    def load(self) -> dict[str, Any]:
         credentials: dict[str,Any] = ConfigDBLoader.getConnectionParameters(self.dbalias)
 
         if not credentials:
             log.error("No TriggerDB connections found for %s", self.dbalias)
             raise RuntimeError(f"No TriggerDB connections found for {self.dbalias}")
 
-        svc = coral.ConnectionService() 
+        svc = coral.ConnectionService() # type: ignore
         svcconfig = svc.configuration()
         svcconfig.disablePoolAutomaticCleanUp()
         svcconfig.setConnectionTimeOut(0)
@@ -272,7 +287,7 @@ class ConfigDBLoader(ConfigLoader):
             log.debug("Trying credentials %s",credential)
 
             try: 
-                session = svc.connect(credential, coral.access_ReadOnly)
+                session = svc.connect(credential, coral.access_ReadOnly) # type: ignore
             except Exception as e:
                 log.warning("Failed to establish connection: %s",e)
                 failureMode = max(1, failureMode)
@@ -335,14 +350,14 @@ class ConfigDBLoader(ConfigLoader):
             raise RuntimeError("Query failed for unknown reason")
 
     # proposed filename when writing config to file
-    def getWriteFilename(self):
+    def getWriteFilename(self) -> str:
         return "{basename}_{schema}_{dbkey}.json".format(basename = self.configType.basename, schema = self.schema, dbkey = self.dbkey)
 
 class ConfigCrestLoader(ConfigLoader):
-    def __init__(self, *, configType, dbalias, dbkey, crestServer):
+    def __init__(self, *, configType: ConfigType, dbname: str, dbkey: int, crestServer: str):
         super().__init__(configType)
         self.crestServer = crestServer
-        self.dbalias = dbalias
+        self.dbname = dbname
         self.dbkey = dbkey
         self.schema = ""
 
@@ -387,62 +402,72 @@ class ConfigCrestLoader(ConfigLoader):
         self.confirmConfigType(config)
         return config
 
-    @staticmethod
-    def _getDBSchemaName(dbalias) -> str:
-        dblookupFile = ConfigDBLoader.getResolvedFileName("dblookup.xml", "CORAL_DBLOOKUP_PATH")
-        dbp = ET.parse(dblookupFile)
-        for logSvc in dbp.iter("logicalservice"):
-            if logSvc.attrib["name"] != dbalias:
-                continue
-            oracleServer = ""
-            for serv in logSvc.iter("service"):
-                if serv.attrib["name"].startswith("oracle://"):
-                    oracleService = serv.attrib["name"]
-                    oracleServer = oracleService.split('/')[3]
-                    return oracleServer
-            raise RuntimeError(f"DB {dbalias} has no oracle services listed in {dblookupFile}")
-        raise RuntimeError(f"DB {dbalias} is not listed in {dblookupFile}")
-
-    def load(self) -> dict:
+    def load(self) -> dict[str, Any]:
         # see SCHEMA_MAP in https://gitlab.cern.ch/crest-db/crest/-/blob/master/src/main/java/hep/crest/server/repositories/triggerdb/TriggerDb.java
-        self.schema = ConfigCrestLoader._getDBSchemaName(self.dbalias)
-        crest_conn = TriggerCrestUtil.getCrestConnection(self.schema)
+        crest_conn = TriggerCrestUtil.getCrestConnection(self.dbname)
         if crest_conn is None:
-            raise RuntimeError(f"Oracle db {self.schema} is not accessible through the crest server {self.crestServer}")
+            raise RuntimeError(f"Cannot resolve CREST connection for dbname {self.dbname}")
         hash = f"triggerdb://{crest_conn}/{self.configType.crestkey}/{self.dbkey}"
         config = self._get_payload(hash=hash)
         return config
 
     # proposed filename when writing config to file
     def getWriteFilename(self):
-        return "{basename}_{schema}_{dbkey}.json".format(basename = self.configType.basename, schema = self.schema, dbkey = self.dbkey)
+        schema = TriggerCrestUtil.crestconn_dbname_mapping.get(self.dbname, self.dbname)
+        return "{basename}_{schema}_{dbkey}.json".format(basename = self.configType.basename, schema = schema, dbkey = self.dbkey)
 
 class TriggerConfigAccess:
     """ 
     base class to hold the configuration (dict)
     and provides basic functions to access and print
     """
-    def __init__(self, configType, mainkey, filename = None, jsonString = None, dbalias = None, dbkey = None, useCrest=False, crestServer=""):
-        self._getLoader(configType = configType, filename = filename, jsonString = jsonString, dbalias = dbalias, dbkey = dbkey, 
+    def __init__(self, configType: ConfigType, mainkey: str, filename: str = "", jsonString: str = "", 
+                 dbalias: str = "", dbkey: int = 0, useCrest: bool = False, crestServer: str = ""):
+        self.loader: ConfigLoader = TriggerConfigAccess._getLoader(configType = configType, filename = filename, jsonString = jsonString, dbalias = dbalias, dbkey = dbkey, 
                         useCrest=useCrest, crestServer=crestServer)
         self._mainkey = mainkey
         self._config = None
 
-    def _getLoader(self, *, configType, filename = None, jsonString = None, dbalias = None, dbkey = None,
-                   useCrest:bool = False, crestServer:str = ""):
-        if filename:
-            self.loader = ConfigFileLoader( configType, filename )
-        elif dbalias and dbkey:
-            if useCrest:
-                self.loader = ConfigCrestLoader(configType=configType, dbalias=dbalias, dbkey=dbkey, crestServer=crestServer)
+    @staticmethod
+    def _isCrestConnection(dbalias: str, useCrest: bool, crestServer: str) -> dict[str, str]:
+        """ Determine whether the connection is a CREST connection
+        """
+        connParams: dict[str, str] = {}
+        if dbalias.startswith("http://") or dbalias.startswith("https://"):
+            # expect a complete crest connection string, consisting of server and dbname
+            if (match := re.match(r'^(http[s]?://[^/]+/api-v\d+\.\d+)/(.+)$', dbalias)):
+                connParams["crest_server"] = match.group(1)
+                connParams["dbname"] = match.group(2)
             else:
-                self.loader = ConfigDBLoader( configType, dbalias, dbkey)
+                raise RuntimeError(f"Invalid CREST connection string: {dbalias}")
+        elif dbalias in TriggerCrestUtil.allCrestConnections():
+            connParams["crest_server"] = crestServer
+            connParams["dbname"] = dbalias
+        elif useCrest:
+            connParams["crest_server"] = crestServer
+            if (dbname := TriggerCrestUtil.getCrestConnection(dbalias)) is not None:
+                connParams["dbname"] = dbname
+            else:
+                raise RuntimeError(f"Cannot resolve CREST connection '{dbalias}'")
+        return connParams
+
+    @staticmethod
+    def _getLoader(*, configType, filename: str = "", jsonString: str = "", dbalias: str = "", dbkey: int = 0,
+                   useCrest: bool = False, crestServer: str = "") -> ConfigLoader:
+
+        if filename:
+            return ConfigFileLoader(configType, filename )
+        elif dbalias and dbkey>0:
+            if (connParams := TriggerConfigAccess._isCrestConnection(dbalias, useCrest, crestServer)):
+                return ConfigCrestLoader(configType=configType, dbname=connParams["dbname"], dbkey=dbkey, crestServer=connParams["crest_server"])
+            else:
+                return ConfigDBLoader(configType, dbalias, dbkey)
         elif jsonString:
-            self.loader = ConfigDirectLoader( configType, jsonString )
+            return ConfigDirectLoader(configType, jsonString )
         else:
             raise RuntimeError("Neither input file, nor JSON nor db alias and key provided")
 
-    def load(self):
+    def load(self) -> None:
         self._config = self.loader.load()
 
     def __str__(self):
@@ -476,9 +501,9 @@ class TriggerConfigAccess:
         log.info("Configuration name: {0}".format(self.name()))
         log.info("Configuration size: {0}".format(len(self)))
 
-    def writeFile(self, filename = None):
+    def writeFile(self, filename: str | None = None):
         if filename is None:
-            filename: str = self.loader.getWriteFilename()
+            filename = self.loader.getWriteFilename()
         with open(filename, 'w') as fh:
             json.dump(self.config(), fh, indent = 4, separators=(',', ': '))
             log.info("Wrote file %s", filename)

@@ -20,6 +20,7 @@
 #include "CaloIdentifier/LArNeighbours.h"
 #include "CaloGeoHelpers/CaloSampling.h"
 #include <ranges>
+#include <array>
 
 
 class CaloNeighbours;
@@ -390,16 +391,16 @@ private:
   const LArFCAL_Base_ID*      m_fcalHelper;
   const LArMiniFCAL_ID*       m_minifcalHelper;
   const Tile_Base_ID*         m_tileHelper;
-  const CaloIDHelper*         m_helpers[NSUBCALO];
+  std::array<const CaloIDHelper*, NSUBCALO> m_helpers;
 
-  size_type                     m_cell_hash_max;
-  size_type                     m_region_hash_max;
-  size_type                     m_cell_min[NSUBCALO];
-  size_type                     m_cell_max[NSUBCALO];
-  size_type                     m_reg_min[NSUBCALO];
-  size_type                     m_reg_max[NSUBCALO];
-  std::vector<Identifier>       m_cell_vec;
-  std::vector<Identifier>       m_region_vec;
+  size_type                       m_cell_hash_max;
+  size_type                       m_region_hash_max;
+  std::array<size_type, NSUBCALO> m_cell_min;
+  std::array<size_type, NSUBCALO> m_cell_max;
+  std::array<size_type, NSUBCALO> m_reg_min;
+  std::array<size_type, NSUBCALO> m_reg_max;
+  std::vector<Identifier>         m_cell_vec;
+  std::vector<Identifier>         m_region_vec;
 
 private:
   // Avoid coverity warnings.

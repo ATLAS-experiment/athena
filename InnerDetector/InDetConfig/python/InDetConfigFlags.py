@@ -23,6 +23,8 @@ def createInDetConfigFlags():
         not(prevFlags.Beam.Type is BeamType.Cosmics or
             prevFlags.Tracking.PrimaryPassConfig is PrimaryPassConfig.VtxBeamSpot)))
     icf.addFlag("InDet.useDCS", True)
+    # InDet.useHVActiveStates = True, This allows the pixel reconstruction if the DCS state is also UNDEFINED
+    icf.addFlag("InDet.useHVActiveStates", False)
     icf.addFlag("InDet.usePixelDCS", lambda prevFlags: (
         prevFlags.InDet.useDCS and prevFlags.Detector.EnablePixel))
     icf.addFlag("InDet.useSctDCS", lambda prevFlags: (

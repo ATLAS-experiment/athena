@@ -61,6 +61,7 @@ namespace DerivationFramework {
     m_v0VtxOutputKey(""),
     m_TrkParticleCollection("InDetTrackParticles"),
     m_VxPrimaryCandidateName("PrimaryVertices"),
+    m_pvContainerName("PrimaryVertices"),
     m_refPVContainerName("RefittedPrimaryVertices"),
     m_eventInfo_key("EventInfo"),
     m_RelinkContainers({"InDetTrackParticles","InDetLargeD0TrackParticles"}),
@@ -128,6 +129,8 @@ namespace DerivationFramework {
     m_constrD0(false),
     m_constrJXV0(false),
     m_constrMainV(false),
+    m_cascadeFitWithPV(0),
+    m_firstDecayAtPV(false),
     m_doPostMainVContrFit(false),
     m_JXSubVtx(false),
     m_JXV0SubVtx(false),
@@ -164,6 +167,7 @@ namespace DerivationFramework {
     declareProperty("OutputV0VtxCollection",      m_v0VtxOutputKey);
     declareProperty("TrackParticleCollection",    m_TrkParticleCollection);
     declareProperty("VxPrimaryCandidateName",     m_VxPrimaryCandidateName);
+    declareProperty("PVContainerName",            m_pvContainerName);
     declareProperty("RefPVContainerName",         m_refPVContainerName);
     declareProperty("EventInfoKey",               m_eventInfo_key);
     declareProperty("RelinkTracks",               m_RelinkContainers);
@@ -232,6 +236,8 @@ namespace DerivationFramework {
     declareProperty("ApplyD0MassConstraint",      m_constrD0); // only for D0
     declareProperty("ApplyJXV0MassConstraint",    m_constrJXV0);
     declareProperty("ApplyMainVMassConstraint",   m_constrMainV);
+    declareProperty("DoCascadeFitWithPV",         m_cascadeFitWithPV);
+    declareProperty("FirstDecayAtPV",             m_firstDecayAtPV);
     declareProperty("DoPostMainVContrFit",        m_doPostMainVContrFit); // only effective when m_constrMainV=false
     declareProperty("HasJXSubVertex",             m_JXSubVtx);
     declareProperty("HasJXV0SubVertex",           m_JXV0SubVtx);
@@ -318,8 +324,9 @@ namespace DerivationFramework {
     ATH_CHECK( m_vertexJXContainerKey.initialize() );
     ATH_CHECK( m_vertexV0ContainerKey.initialize(SG::AllowEmpty) );
     ATH_CHECK( m_VxPrimaryCandidateName.initialize() );
-    ATH_CHECK( m_TrkParticleCollection.initialize() );
+    ATH_CHECK( m_pvContainerName.initialize() );
     ATH_CHECK( m_refPVContainerName.initialize() );
+    ATH_CHECK( m_TrkParticleCollection.initialize() );
     ATH_CHECK( m_cascadeOutputKeys.initialize() );
     ATH_CHECK( m_cascadeOutputKeys_mvc.initialize() );
     ATH_CHECK( m_eventInfo_key.initialize() );
@@ -390,6 +397,14 @@ namespace DerivationFramework {
       trackCols.push_back(handle.cptr());
     }
 
+    // Get default PV container
+    SG::ReadHandle<xAOD::VertexContainer> defaultPVContainer(m_VxPrimaryCandidateName, ctx);
+    ATH_CHECK( defaultPVContainer.isValid() );
+
+    // Get PV container
+    SG::ReadHandle<xAOD::VertexContainer> pvContainer(m_pvContainerName,ctx);
+    ATH_CHECK( pvContainer.isValid() );
+
     // Get Jpsi+X container
     SG::ReadHandle<xAOD::VertexContainer> jxContainer(m_vertexJXContainerKey, ctx);
     ATH_CHECK( jxContainer.isValid() );
@@ -424,7 +439,7 @@ namespace DerivationFramework {
 	    else if(elem.second==KS && m_massKs>0) disV_mass += - p4_v0.M() + m_massKs;
 	  }
 	  // A rough mass window cut, as V0 and track3 are not from a common vertex
-	  if(disV_mass > m_DisplacedMassLower-400. && disV_mass < m_DisplacedMassUpper+400.) {
+	  if(disV_mass > m_DisplacedMassLower-500. && disV_mass < m_DisplacedMassUpper+500.) {
 	    auto disVtx = getXiCandidate(elem.first,elem.second,TP);
 	    if(disVtx.V0vtx && disVtx.track) disVtxContainer.push_back(disVtx);
 	  }
@@ -512,7 +527,7 @@ namespace DerivationFramework {
       // Iterate over displaced vertices
       if(m_disVDaug_num==2) {
 	for(auto&& V0Candidate : selectedV0Candidates) {
-	  std::vector<std::pair<Trk::VxCascadeInfo*, Trk::VxCascadeInfo*> > result = fitMainVtx(jxVtx, massesJX, V0Candidate.first, V0Candidate.second, trackContainer.cptr(), trackCols);
+	  std::vector<std::pair<Trk::VxCascadeInfo*, Trk::VxCascadeInfo*> > result = fitMainVtx(jxVtx, massesJX, V0Candidate.first, V0Candidate.second, trackContainer.cptr(), trackCols, defaultPVContainer.cptr(), pvContainer.cptr());
 	  for(auto cascade_info_pair : result) {
 	    if(cascade_info_pair.first) cascadeinfoContainer.push_back(cascade_info_pair);
 	  }
@@ -520,7 +535,7 @@ namespace DerivationFramework {
       } // m_disVDaug_num==2
       else if(m_disVDaug_num==3) {
 	for(auto&& disVtx : disVtxContainer) {
-	  std::vector<std::pair<Trk::VxCascadeInfo*, Trk::VxCascadeInfo*> > result = fitMainVtx(jxVtx, massesJX, disVtx, trackContainer.cptr(), trackCols);
+	  std::vector<std::pair<Trk::VxCascadeInfo*, Trk::VxCascadeInfo*> > result = fitMainVtx(jxVtx, massesJX, disVtx, trackContainer.cptr(), trackCols, defaultPVContainer.cptr(), pvContainer.cptr());
 	  for(auto cascade_info_pair : result) {
 	    if(cascade_info_pair.first) cascadeinfoContainer.push_back(cascade_info_pair);
 	  }
@@ -571,13 +586,13 @@ namespace DerivationFramework {
     // retrieve primary vertices
     //----------------------------------------------------
     const xAOD::Vertex* primaryVertex(nullptr);
-    SG::ReadHandle<xAOD::VertexContainer> pvContainer(m_VxPrimaryCandidateName, ctx);
-    ATH_CHECK( pvContainer.isValid() );
-    if (pvContainer.cptr()->size()==0) {
-      ATH_MSG_WARNING("You have no primary vertices: " << pvContainer.cptr()->size());
+    SG::ReadHandle<xAOD::VertexContainer> defaultPVContainer(m_VxPrimaryCandidateName, ctx);
+    ATH_CHECK( defaultPVContainer.isValid() );
+    if (defaultPVContainer.cptr()->size()==0) {
+      ATH_MSG_WARNING("You have no primary vertices: " << defaultPVContainer.cptr()->size());
       return StatusCode::RECOVERABLE;
     }
-    else primaryVertex = (*pvContainer.cptr())[0];
+    else primaryVertex = (*defaultPVContainer.cptr())[0];
 
     //----------------------------------------------------
     // Record refitted primary vertices
@@ -937,9 +952,10 @@ namespace DerivationFramework {
 
       chi2_V2_decor(*cascadeVertices[ijx])     = m_V0Tools->chisq(jxVtx);
       ndof_V2_decor(*cascadeVertices[ijx])     = m_V0Tools->ndof(jxVtx);
-      
-      double Mass_Moth = m_CascadeTools->invariantMass(moms[topoN-1]);
-      ATH_CHECK(helper.FillCandwithRefittedVertices(m_refitPV, pvContainer.cptr(), m_refitPV ? refPvContainer.ptr() : 0, &(*m_pvRefitter), m_PV_max, m_DoVertexType, cascade_info_pair.first, topoN-1, Mass_Moth, vtx));
+
+      if(m_cascadeFitWithPV==0) {
+	ATH_CHECK(helper.FillCandwithRefittedVertices(m_refitPV, defaultPVContainer.cptr(), m_refitPV ? refPvContainer.ptr() : 0, &(*m_pvRefitter), m_PV_max, m_DoVertexType, cascade_info_pair.first, topoN-1, m_massMainV, vtx));
+      }
 
       for(size_t i=0; i<topoN; i++) {
         VtxWriteHandles[i].ptr()->push_back(cascadeVertices[i]);
@@ -1104,8 +1120,9 @@ namespace DerivationFramework {
 	chi2_V2_decor(*cascadeVertices_mvc[ijx_mvc])     = m_V0Tools->chisq(jxVtx_mvc);
 	ndof_V2_decor(*cascadeVertices_mvc[ijx_mvc])     = m_V0Tools->ndof(jxVtx_mvc);
 
-	double Mass_Moth_mvc = m_CascadeTools->invariantMass(moms_mvc[topoN-1]);
-	ATH_CHECK(helper.FillCandwithRefittedVertices(m_refitPV, pvContainer.cptr(), m_refitPV ? refPvContainer.ptr() : 0, &(*m_pvRefitter), m_PV_max, m_DoVertexType, cascade_info_pair.second, topoN-1, Mass_Moth_mvc, vtx_mvc));
+	if(m_cascadeFitWithPV==0) {
+	  ATH_CHECK(helper.FillCandwithRefittedVertices(m_refitPV, defaultPVContainer.cptr(), m_refitPV ? refPvContainer.ptr() : 0, &(*m_pvRefitter), m_PV_max, m_DoVertexType, cascade_info_pair.second, topoN-1, m_massMainV, vtx_mvc));
+	}
 
 	for(size_t i=0; i<topoN; i++) {
 	  VtxWriteHandles_mvc[i].ptr()->push_back(cascadeVertices_mvc[i]);
@@ -1190,7 +1207,7 @@ namespace DerivationFramework {
 	const std::vector<std::vector<TLorentzVector> > &moms = cascade_info->getParticleMoms();
 	const std::vector<xAOD::Vertex*> &cascadeVertices = cascade_info->vertices();
 	double lxy_SV1_sub = m_CascadeTools->lxy(moms[0],cascadeVertices[0],cascadeVertices[1]);
-	if(lxy_SV1_sub > m_lxyV0_cut) {
+	if(lxy_SV1_sub > 0.2) {
 	  TLorentzVector totalMom;
 	  for(size_t it=0; it<moms[1].size(); it++) totalMom += moms[1][it];
 	  double disV_mass = totalMom.M();
@@ -1295,7 +1312,7 @@ namespace DerivationFramework {
     return D0;
   }
 
-  std::vector<std::pair<Trk::VxCascadeInfo*,Trk::VxCascadeInfo*> > JpsiXPlusDisplaced::fitMainVtx(const xAOD::Vertex* JXvtx, const std::vector<double>& massesJX, const xAOD::Vertex* V0vtx, const V0Enum V0, const xAOD::TrackParticleContainer* trackContainer, const std::vector<const xAOD::TrackParticleContainer*>& trackCols) const {
+  std::vector<std::pair<Trk::VxCascadeInfo*,Trk::VxCascadeInfo*> > JpsiXPlusDisplaced::fitMainVtx(const xAOD::Vertex* JXvtx, const std::vector<double>& massesJX, const xAOD::Vertex* V0vtx, const V0Enum V0, const xAOD::TrackParticleContainer* trackContainer, const std::vector<const xAOD::TrackParticleContainer*>& trackCols, const xAOD::VertexContainer* defaultPVContainer, const xAOD::VertexContainer* pvContainer) const {
     std::vector<std::pair<Trk::VxCascadeInfo*,Trk::VxCascadeInfo*> > result;
 
     std::vector<const xAOD::TrackParticle*> tracksJX;
@@ -1338,6 +1355,17 @@ namespace DerivationFramework {
       p4_moth += V0_helper.refTrk(it,massesV0[it]);
       p4_v0 += V0_helper.refTrk(it,massesV0[it]);
     }
+
+    xAOD::BPhysHelper::pv_type pvtype = xAOD::BPhysHelper::PV_MIN_A0;
+    if(m_cascadeFitWithPV==1)      pvtype = xAOD::BPhysHelper::PV_MAX_SUM_PT2;
+    else if(m_cascadeFitWithPV==2) pvtype = xAOD::BPhysHelper::PV_MIN_A0;
+    else if(m_cascadeFitWithPV==3) pvtype = xAOD::BPhysHelper::PV_MIN_Z0;
+    else if(m_cascadeFitWithPV==4) pvtype = xAOD::BPhysHelper::PV_MIN_Z0_BA;
+    xAOD::BPhysHelper JX_helper(JXvtx);
+    const xAOD::Vertex* origPv_xAOD = (m_cascadeFitWithPV>=1 && m_cascadeFitWithPV<=4) ? JX_helper.origPv(pvtype) : nullptr;
+    const xAOD::Vertex* pv_xAOD = (m_cascadeFitWithPV>=1 && m_cascadeFitWithPV<=4) ? JX_helper.pv(pvtype) : nullptr;
+    std::unique_ptr<Trk::RecVertex> pv_AOD;
+    if(pv_xAOD) pv_AOD = std::make_unique<Trk::RecVertex>(pv_xAOD->position(),pv_xAOD->covariancePosition(),pv_xAOD->numberDoF(),pv_xAOD->chiSquared());
 
     SG::AuxElement::Decorator<float>       chi2_V1_decor("ChiSquared_V1");
     SG::AuxElement::Decorator<int>         ndof_V1_decor("nDoF_V1");
@@ -1436,7 +1464,7 @@ namespace DerivationFramework {
 	}
       }
       // Do the work
-      std::unique_ptr<Trk::VxCascadeInfo> fit_result = std::unique_ptr<Trk::VxCascadeInfo>( m_iVertexFitter->fitCascade(*state) );
+      std::unique_ptr<Trk::VxCascadeInfo> fit_result = std::unique_ptr<Trk::VxCascadeInfo>( m_iVertexFitter->fitCascade(*state, pv_AOD.get(), pv_AOD.get() && m_firstDecayAtPV ? true : false) );
 
       if (fit_result) {
 	for(auto& v : fit_result->vertices()) {
@@ -1600,7 +1628,7 @@ namespace DerivationFramework {
 	  }
 	}
 	// Do the work
-	std::unique_ptr<Trk::VxCascadeInfo> fit_result = std::unique_ptr<Trk::VxCascadeInfo>( m_iVertexFitter->fitCascade(*state) );
+	std::unique_ptr<Trk::VxCascadeInfo> fit_result = std::unique_ptr<Trk::VxCascadeInfo>( m_iVertexFitter->fitCascade(*state, pv_AOD.get(), pv_AOD.get() && m_firstDecayAtPV ? true : false) );
 
 	if (fit_result) {
 	  for(auto& v : fit_result->vertices()) {
@@ -1760,7 +1788,7 @@ namespace DerivationFramework {
 	  }
 	}
 	// Do the work
-	std::unique_ptr<Trk::VxCascadeInfo> fit_result = std::unique_ptr<Trk::VxCascadeInfo>( m_iVertexFitter->fitCascade(*state) );
+	std::unique_ptr<Trk::VxCascadeInfo> fit_result = std::unique_ptr<Trk::VxCascadeInfo>( m_iVertexFitter->fitCascade(*state, pv_AOD.get(), pv_AOD.get() && m_firstDecayAtPV ? true : false) );
 
 	if (fit_result) {
 	  for(auto& v : fit_result->vertices()) {
@@ -2004,7 +2032,7 @@ namespace DerivationFramework {
 	  }
 	}
 	// Do the work
-	std::unique_ptr<Trk::VxCascadeInfo> fit_result = std::unique_ptr<Trk::VxCascadeInfo>( m_iVertexFitter->fitCascade(*state) );
+	std::unique_ptr<Trk::VxCascadeInfo> fit_result = std::unique_ptr<Trk::VxCascadeInfo>( m_iVertexFitter->fitCascade(*state, pv_AOD.get(), pv_AOD.get() && m_firstDecayAtPV ? true : false) );
 
 	if (fit_result) {
 	  for(auto& v : fit_result->vertices()) {
@@ -2156,7 +2184,7 @@ namespace DerivationFramework {
 		  }
 		}
 		// Do the work
-		std::unique_ptr<Trk::VxCascadeInfo> fit_result_mvc = std::unique_ptr<Trk::VxCascadeInfo>( m_iVertexFitter->fitCascade(*state_mvc) );
+		std::unique_ptr<Trk::VxCascadeInfo> fit_result_mvc = std::unique_ptr<Trk::VxCascadeInfo>( m_iVertexFitter->fitCascade(*state_mvc, pv_AOD.get(), pv_AOD.get() && m_firstDecayAtPV ? true : false) );
 
 		if (fit_result_mvc) {
 		  for(auto& v : fit_result_mvc->vertices()) {
@@ -2209,10 +2237,68 @@ namespace DerivationFramework {
       } // loop over DpmCandidates
     } // for m_extraTrk1MassHypo>0 && m_extraTrk2MassHypo>0 && m_extraTrk3MassHypo>0
 
+    if(pv_xAOD) {
+      for(auto cascade_info_pair : result) {
+	if(cascade_info_pair.first && cascade_info_pair.first->getParticleMoms().size()>0) {
+	  size_t index = cascade_info_pair.first->getParticleMoms().size() - 1;
+	  const std::vector<TLorentzVector> &mom = cascade_info_pair.first->getParticleMoms()[index];
+	  const Amg::MatrixX &cov = cascade_info_pair.first->getCovariance()[index];
+	  const xAOD::Vertex* mainVertex = cascade_info_pair.first->vertices()[index];
+	  xAOD::BPhysHypoHelper vtx(m_hypoName, mainVertex);
+	  bool isInDefaultPVCont = false;
+	  for(const xAOD::Vertex* pvVtx : *defaultPVContainer) {
+	    if(pv_xAOD == pvVtx) { isInDefaultPVCont = true; break; }
+	  }
+	  if(isInDefaultPVCont) vtx.setPv( pv_xAOD, defaultPVContainer, pvtype );
+	  else vtx.setPv( pv_xAOD, pvContainer, pvtype );
+	  if(origPv_xAOD) vtx.setOrigPv( origPv_xAOD, defaultPVContainer, pvtype );
+	  vtx.setLxy    ( m_CascadeTools->lxy      (mom, vtx.vtx(), pv_xAOD), pvtype );
+	  vtx.setLxyErr ( m_CascadeTools->lxyError (mom, cov, vtx.vtx(), pv_xAOD), pvtype );
+	  vtx.setA0     ( m_CascadeTools->a0       (mom, vtx.vtx(), pv_xAOD), pvtype );
+	  vtx.setA0Err  ( m_CascadeTools->a0Error  (mom, cov, vtx.vtx(), pv_xAOD), pvtype );
+	  vtx.setA0xy   ( m_CascadeTools->a0xy     (mom, vtx.vtx(), pv_xAOD), pvtype );
+	  vtx.setA0xyErr( m_CascadeTools->a0xyError(mom, cov, vtx.vtx(), pv_xAOD), pvtype );
+	  vtx.setZ0     ( m_CascadeTools->a0z      (mom, vtx.vtx(), pv_xAOD), pvtype );
+	  vtx.setZ0Err  ( m_CascadeTools->a0zError (mom, cov, vtx.vtx(), pv_xAOD), pvtype );
+	  vtx.setRefitPVStatus( 0, pvtype );
+	  // Proper decay times
+	  vtx.setTau( m_CascadeTools->tau(mom, vtx.vtx(), pv_xAOD), pvtype, xAOD::BPhysHypoHelper::TAU_INV_MASS );
+	  vtx.setTauErr( m_CascadeTools->tauError(mom, cov, vtx.vtx(), pv_xAOD), pvtype, xAOD::BPhysHypoHelper::TAU_INV_MASS );
+	  vtx.setTau( m_CascadeTools->tau(mom, vtx.vtx(), pv_xAOD, m_massMainV), pvtype, xAOD::BPhysHypoHelper::TAU_CONST_MASS );
+	  vtx.setTauErr( m_CascadeTools->tauError(mom, cov, vtx.vtx(), pv_xAOD, m_massMainV), pvtype, xAOD::BPhysHypoHelper::TAU_CONST_MASS );
+
+	  if(cascade_info_pair.second && cascade_info_pair.second->getParticleMoms().size()>0) {
+	    index = cascade_info_pair.second->getParticleMoms().size() - 1;
+	    const std::vector<TLorentzVector> &mom_mvc = cascade_info_pair.second->getParticleMoms()[index];
+	    const Amg::MatrixX &cov_mvc = cascade_info_pair.second->getCovariance()[index];
+	    const xAOD::Vertex* mainVertex_mvc = cascade_info_pair.second->vertices()[index];
+	    xAOD::BPhysHypoHelper vtx_mvc(m_hypoName, mainVertex_mvc);
+	    if(isInDefaultPVCont) vtx_mvc.setPv( pv_xAOD, defaultPVContainer, pvtype );
+	    else vtx_mvc.setPv( pv_xAOD, pvContainer, pvtype );
+	    if(origPv_xAOD) vtx.setOrigPv( origPv_xAOD, defaultPVContainer, pvtype );
+	    vtx_mvc.setLxy    ( m_CascadeTools->lxy      (mom_mvc, vtx_mvc.vtx(), pv_xAOD), pvtype );
+	    vtx_mvc.setLxyErr ( m_CascadeTools->lxyError (mom_mvc, cov_mvc, vtx_mvc.vtx(), pv_xAOD), pvtype );
+	    vtx_mvc.setA0     ( m_CascadeTools->a0       (mom_mvc, vtx_mvc.vtx(), pv_xAOD), pvtype );
+	    vtx_mvc.setA0Err  ( m_CascadeTools->a0Error  (mom_mvc, cov_mvc, vtx_mvc.vtx(), pv_xAOD), pvtype );
+	    vtx_mvc.setA0xy   ( m_CascadeTools->a0xy     (mom_mvc, vtx_mvc.vtx(), pv_xAOD), pvtype );
+	    vtx_mvc.setA0xyErr( m_CascadeTools->a0xyError(mom_mvc, cov_mvc, vtx_mvc.vtx(), pv_xAOD), pvtype );
+	    vtx_mvc.setZ0     ( m_CascadeTools->a0z      (mom_mvc, vtx_mvc.vtx(), pv_xAOD), pvtype );
+	    vtx_mvc.setZ0Err  ( m_CascadeTools->a0zError (mom_mvc, cov_mvc, vtx_mvc.vtx(), pv_xAOD), pvtype );
+	    vtx_mvc.setRefitPVStatus( 0, pvtype );
+	    // Proper decay times
+	    vtx_mvc.setTau( m_CascadeTools->tau(mom_mvc, vtx_mvc.vtx(), pv_xAOD), pvtype, xAOD::BPhysHypoHelper::TAU_INV_MASS );
+	    vtx_mvc.setTauErr( m_CascadeTools->tauError(mom_mvc, cov_mvc, vtx_mvc.vtx(), pv_xAOD), pvtype, xAOD::BPhysHypoHelper::TAU_INV_MASS );
+	    vtx_mvc.setTau( m_CascadeTools->tau(mom_mvc, vtx_mvc.vtx(), pv_xAOD, m_massMainV), pvtype, xAOD::BPhysHypoHelper::TAU_CONST_MASS );
+	    vtx_mvc.setTauErr( m_CascadeTools->tauError(mom_mvc, cov_mvc, vtx_mvc.vtx(), pv_xAOD, m_massMainV), pvtype, xAOD::BPhysHypoHelper::TAU_CONST_MASS );
+	  }
+	}
+      }
+    }
+
     return result;
   }
 
-  std::vector<std::pair<Trk::VxCascadeInfo*,Trk::VxCascadeInfo*> > JpsiXPlusDisplaced::fitMainVtx(const xAOD::Vertex* JXvtx, const std::vector<double>& massesJX, const XiCandidate& disVtx, const xAOD::TrackParticleContainer* trackContainer, const std::vector<const xAOD::TrackParticleContainer*>& trackCols) const {
+  std::vector<std::pair<Trk::VxCascadeInfo*,Trk::VxCascadeInfo*> > JpsiXPlusDisplaced::fitMainVtx(const xAOD::Vertex* JXvtx, const std::vector<double>& massesJX, const XiCandidate& disVtx, const xAOD::TrackParticleContainer* trackContainer, const std::vector<const xAOD::TrackParticleContainer*>& trackCols, const xAOD::VertexContainer* defaultPVContainer, const xAOD::VertexContainer* pvContainer) const {
     std::vector<std::pair<Trk::VxCascadeInfo*,Trk::VxCascadeInfo*> > result;
 
     std::vector<const xAOD::TrackParticle*> tracksJX;
@@ -2258,6 +2344,17 @@ namespace DerivationFramework {
     }
     p4_disV += disVtx.p4_V0track1; p4_disV += disVtx.p4_V0track2; p4_disV += disVtx.p4_disVtrack;
     p4_moth += p4_disV;
+
+    xAOD::BPhysHelper::pv_type pvtype = xAOD::BPhysHelper::PV_MIN_A0;
+    if(m_cascadeFitWithPV==1)      pvtype = xAOD::BPhysHelper::PV_MAX_SUM_PT2;
+    else if(m_cascadeFitWithPV==2) pvtype = xAOD::BPhysHelper::PV_MIN_A0;
+    else if(m_cascadeFitWithPV==3) pvtype = xAOD::BPhysHelper::PV_MIN_Z0;
+    else if(m_cascadeFitWithPV==4) pvtype = xAOD::BPhysHelper::PV_MIN_Z0_BA;
+    xAOD::BPhysHelper JX_helper(JXvtx);
+    const xAOD::Vertex* origPv_xAOD = (m_cascadeFitWithPV>=1 && m_cascadeFitWithPV<=4) ? JX_helper.origPv(pvtype) : nullptr;
+    const xAOD::Vertex* pv_xAOD = (m_cascadeFitWithPV>=1 && m_cascadeFitWithPV<=4) ? JX_helper.pv(pvtype) : nullptr;
+    std::unique_ptr<Trk::RecVertex> pv_AOD;
+    if(pv_xAOD) pv_AOD = std::make_unique<Trk::RecVertex>(pv_xAOD->position(),pv_xAOD->covariancePosition(),pv_xAOD->numberDoF(),pv_xAOD->chiSquared());
 
     SG::AuxElement::Decorator<float>       chi2_V0_decor("ChiSquared_V0");
     SG::AuxElement::Decorator<int>         ndof_V0_decor("nDoF_V0");
@@ -2367,7 +2464,7 @@ namespace DerivationFramework {
 	}
       }
       // Do the work
-      std::unique_ptr<Trk::VxCascadeInfo> fit_result = std::unique_ptr<Trk::VxCascadeInfo>( m_iVertexFitter->fitCascade(*state) );
+      std::unique_ptr<Trk::VxCascadeInfo> fit_result = std::unique_ptr<Trk::VxCascadeInfo>( m_iVertexFitter->fitCascade(*state, pv_AOD.get(), pv_AOD.get() && m_firstDecayAtPV ? true : false) );
 
       if (fit_result) {
 	for(auto& v : fit_result->vertices()) {
@@ -2515,7 +2612,7 @@ namespace DerivationFramework {
 	  }
 	}
 	// Do the work
-	std::unique_ptr<Trk::VxCascadeInfo> fit_result = std::unique_ptr<Trk::VxCascadeInfo>( m_iVertexFitter->fitCascade(*state) );
+	std::unique_ptr<Trk::VxCascadeInfo> fit_result = std::unique_ptr<Trk::VxCascadeInfo>( m_iVertexFitter->fitCascade(*state, pv_AOD.get(), pv_AOD.get() && m_firstDecayAtPV ? true : false) );
 
 	if (fit_result) {
 	  for(auto& v : fit_result->vertices()) {
@@ -2574,6 +2671,39 @@ namespace DerivationFramework {
 	}
       } // loop over trackContainer
     } // m_extraTrk1MassHypo>0
+
+    if(pv_xAOD) {
+      for(auto cascade_info_pair : result) {
+	if(cascade_info_pair.first && cascade_info_pair.first->getParticleMoms().size()>0) {
+	  size_t index = cascade_info_pair.first->getParticleMoms().size() - 1;
+	  const std::vector<TLorentzVector> &mom = cascade_info_pair.first->getParticleMoms()[index];
+	  const Amg::MatrixX &cov = cascade_info_pair.first->getCovariance()[index];
+	  const xAOD::Vertex* mainVertex = cascade_info_pair.first->vertices()[index];
+	  xAOD::BPhysHypoHelper vtx(m_hypoName, mainVertex);
+	  bool isInDefaultPVCont = false;
+	  for(const xAOD::Vertex* pvVtx : *defaultPVContainer) {
+	    if(pv_xAOD == pvVtx) { isInDefaultPVCont = true; break; }
+	  }
+	  if(isInDefaultPVCont) vtx.setPv( pv_xAOD, defaultPVContainer, pvtype );
+	  else vtx.setPv( pv_xAOD, pvContainer, pvtype );
+	  if(origPv_xAOD) vtx.setOrigPv( origPv_xAOD, defaultPVContainer, pvtype );
+	  vtx.setLxy    ( m_CascadeTools->lxy      (mom, vtx.vtx(), pv_xAOD), pvtype );
+	  vtx.setLxyErr ( m_CascadeTools->lxyError (mom, cov, vtx.vtx(), pv_xAOD), pvtype );
+	  vtx.setA0     ( m_CascadeTools->a0       (mom, vtx.vtx(), pv_xAOD), pvtype );
+	  vtx.setA0Err  ( m_CascadeTools->a0Error  (mom, cov, vtx.vtx(), pv_xAOD), pvtype );
+	  vtx.setA0xy   ( m_CascadeTools->a0xy     (mom, vtx.vtx(), pv_xAOD), pvtype );
+	  vtx.setA0xyErr( m_CascadeTools->a0xyError(mom, cov, vtx.vtx(), pv_xAOD), pvtype );
+	  vtx.setZ0     ( m_CascadeTools->a0z      (mom, vtx.vtx(), pv_xAOD), pvtype );
+	  vtx.setZ0Err  ( m_CascadeTools->a0zError (mom, cov, vtx.vtx(), pv_xAOD), pvtype );
+	  vtx.setRefitPVStatus( 0, pvtype );
+	  // Proper decay times
+	  vtx.setTau( m_CascadeTools->tau(mom, vtx.vtx(), pv_xAOD), pvtype, xAOD::BPhysHypoHelper::TAU_INV_MASS );
+	  vtx.setTauErr( m_CascadeTools->tauError(mom, cov, vtx.vtx(), pv_xAOD), pvtype, xAOD::BPhysHypoHelper::TAU_INV_MASS );
+	  vtx.setTau( m_CascadeTools->tau(mom, vtx.vtx(), pv_xAOD, m_massMainV), pvtype, xAOD::BPhysHypoHelper::TAU_CONST_MASS );
+	  vtx.setTauErr( m_CascadeTools->tauError(mom, cov, vtx.vtx(), pv_xAOD, m_massMainV), pvtype, xAOD::BPhysHypoHelper::TAU_CONST_MASS );
+	}
+      }
+    }
 
     return result;
   }

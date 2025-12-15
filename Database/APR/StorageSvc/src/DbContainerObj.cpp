@@ -21,6 +21,7 @@
 #include "StorageSvc/DbTypeInfo.h"
 #include "StorageSvc/DbContainer.h"
 #include <memory>
+#include <stdexcept>
 #include <atomic>
 using namespace std;
 using namespace pool;
@@ -202,77 +203,40 @@ DbStatus DbContainerObj::getOption(DbOption& refOpt) {
   return hasAccess() ? m_info->getOption(refOpt) : Error;
 }
 
-/// In place allocation of raw memory
-void* DbContainerObj::allocate(unsigned long siz, 
+/// Store object in location
+DbStatus DbContainerObj::store(const void* object,
                                DbContainer& cntH,
                                ShapeH shape)
 {
   if ( !isReadOnly() && hasAccess() )  {
     m_dbH.setAge(0);
-    return m_info->allocate(siz, cntH, shape);
+    return m_info->store(object, cntH, shape);
   }
-  return 0;
+  return Error;
 }
 
 /// In place allocation of raw memory
 DbStatus DbContainerObj::allocate(DbContainer& cntH,
                                   const void* object,
                                   ShapeH shape,
-                                  Token::OID_t& oid) 
+                                  Token::OID_t& oid)
 {
-  if ( !isReadOnly() && hasAccess() )  {
-    m_dbH.setAge(0);
-    if ( object )  {
-      return m_info->allocate(cntH, object, shape, oid);
-    }
+  if ( isReadOnly() ) {
+    throw std::runtime_error("DbContainerObj::allocate failed: container is read-only");
   }
-  throw bad_alloc();
-}
-
-/// In place free of raw memory
-DbStatus DbContainerObj::free(void* ptr, DbContainer& cntH)   {
+  if ( !hasAccess() ) {
+    throw std::runtime_error("DbContainerObj::allocate failed: no access to container");
+  }
+  if ( !object ) {
+    throw std::runtime_error("DbContainerObj::allocate failed: null object pointer");
+  }
   m_dbH.setAge(0);
-  return hasAccess() ? m_info->free(ptr, cntH) : Error;
+  return m_info->allocate(cntH, object, shape, oid);
 }
 
 /// Retrieve persistent type information
 const DbTypeInfo* DbContainerObj::objectShape(const Guid& guid) {
   return m_dbH.objectShape(guid);
-}
-
-/// Add entry to container
-DbStatus DbContainerObj::save(DbObjectHandle<DbObject>& objH, const DbTypeInfo* typ) {
-  if ( !isReadOnly() && hasAccess() && m_isOpen && objH.isValid() ) {
-    if ( m_info->save(objH).isSuccess() ) {
-      if ( m_dbH.addShape(typ).isSuccess() ) {
-        m_dbH.setAge(0);
-        return Success;
-      }
-    }
-  }
-  return Error;
-}
-
-/// Remove transient object representation 
-DbStatus DbContainerObj::remove(ObjHandle& objH) {
-  if ( hasAccess() && objH.isValid() && m_isOpen )    {
-    DbObject* it = objH.ptr();
-    DbObjectHolder holder(it);
-    objH._setObject(0);
-    Base::remove(&holder);
-    m_dbH.setAge(0);
-    return Success;
-  }
-  return Error;
-}
-
-/// Save new object in the container and return its handle
-DbStatus DbContainerObj::save(DbContainer&  cntH, const void* object, ShapeH shape, Token::OID_t& linkH)  {
-  if ( !isReadOnly() && hasAccess() && object && m_isOpen ) {
-    m_dbH.setAge(0);
-    return m_info->save(cntH, object, shape, linkH);
-  }
-  return Error;
 }
 
 /// Select object in the container identified by its handle

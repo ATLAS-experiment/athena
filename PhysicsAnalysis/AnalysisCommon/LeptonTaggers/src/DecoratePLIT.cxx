@@ -117,12 +117,18 @@ namespace Prompt {
     SG::ReadHandle<xAOD::TrackParticleContainer> tracks(m_tracksKey, ctx);
     SG::ReadHandle<xAOD::CaloClusterContainer> caloclusters(m_caloclustersKey, ctx);
 
-    // Make sure all the decorations are added as long as tracks exist.
-    if (!tracks->empty()) {
-      m_dec_trk_dr_lepton.getDecorationArray (*tracks);
-      m_dec_trk_electron_track.getDecorationArray (*tracks);
-      m_dec_trk_muon_track.getDecorationArray (*tracks);
-      m_dec_trk_dr_leptontrack.getDecorationArray (*tracks);
+    // Define decorators
+    SG::WriteDecorHandle<xAOD::TrackParticleContainer, float> dec_trk_dr_lepton{m_dec_trk_dr_lepton, ctx};
+    SG::WriteDecorHandle<xAOD::TrackParticleContainer, char> dec_trk_electron_track{m_dec_trk_electron_track, ctx};
+    SG::WriteDecorHandle<xAOD::TrackParticleContainer, char> dec_trk_muon_track{m_dec_trk_muon_track, ctx};
+    SG::WriteDecorHandle<xAOD::TrackParticleContainer, float> dec_trk_dr_leptontrack{m_dec_trk_dr_leptontrack, ctx};
+
+    // Make sure the decorations are filled for every track
+    for (const xAOD::TrackParticle* track : *tracks) { 
+      dec_trk_dr_lepton(*track) = -999.0;
+      dec_trk_dr_leptontrack(*track) = -999.0;
+      dec_trk_electron_track(*track) = static_cast<char>(false); 
+      dec_trk_muon_track(*track) = static_cast<char>(false); 
     }
 
     if (!m_electronsKey.empty()) {
@@ -134,7 +140,8 @@ namespace Prompt {
         }
         SG::ReadHandle<xAOD::ElectronContainer> electrons(m_electronsKey, ctx);
         for (const xAOD::Electron* elec : *electrons) {
-            if (!predictElec(*elec, *tracks, *caloclusters, dec_el_plit_output, ctx)) {
+            if (!predictElec(dec_trk_dr_lepton, dec_trk_dr_leptontrack, dec_trk_electron_track, dec_trk_muon_track,
+		             *elec, *tracks, *caloclusters, dec_el_plit_output, ctx)) {
                 ATH_MSG_ERROR("DecoratePLIT::execute - failed to predict electron");
                 return StatusCode::FAILURE;
             }
@@ -148,7 +155,8 @@ namespace Prompt {
         }
         SG::ReadHandle<xAOD::MuonContainer> muons(m_muonsKey, ctx);
         for (const xAOD::Muon* muon : *muons) {
-            if (!predictMuon(*muon, *tracks, dec_mu_plit_output, ctx)) {
+            if (!predictMuon(dec_trk_dr_lepton, dec_trk_dr_leptontrack, dec_trk_electron_track, dec_trk_muon_track,
+			     *muon, *tracks, dec_mu_plit_output, ctx)) {
                 ATH_MSG_ERROR("DecoratePLIT::execute - failed to predict muon");
                 return StatusCode::FAILURE;
             }
@@ -175,10 +183,20 @@ namespace Prompt {
     ATH_CHECK(m_acc_trk_muon_track.initialize());
     ATH_CHECK(m_acc_trk_electron_track.initialize());
 
+    ATH_CHECK(m_dec_trk_dr_lepton.initialize());
+    ATH_CHECK(m_dec_trk_electron_track.initialize());
+    ATH_CHECK(m_dec_trk_muon_track.initialize());
+    ATH_CHECK(m_dec_trk_dr_leptontrack.initialize());
+
     return StatusCode::SUCCESS;
+
   }
 
   StatusCode DecoratePLIT::predictMuon(
+    SG::WriteDecorHandle<xAOD::TrackParticleContainer, float> &dec_trk_dr_lepton,
+    SG::WriteDecorHandle<xAOD::TrackParticleContainer, float> &dec_trk_dr_leptontrack,
+    SG::WriteDecorHandle<xAOD::TrackParticleContainer, char> &dec_trk_electron_track,
+    SG::WriteDecorHandle<xAOD::TrackParticleContainer, char> &dec_trk_muon_track,
     const xAOD::Muon &muon,
     const xAOD::TrackParticleContainer &tracks,
     std::vector<SG::WriteDecorHandle<xAOD::MuonContainer, float>> &dec_mu_plit_output,
@@ -242,7 +260,8 @@ namespace Prompt {
     const xAOD::TrackParticle *muonTrack = muon.primaryTrackParticle();
     std::vector<const xAOD::IParticle *> parts;
 
-    if(!fillParticles(parts, muon, muonTrack, tracks, ctx)) {
+    if(!fillParticles(dec_trk_dr_lepton, dec_trk_dr_leptontrack, dec_trk_electron_track, dec_trk_muon_track,
+		      parts, muon, muonTrack, tracks, ctx)) {
       ATH_MSG_ERROR("DecoratePLIT::execute - failed to fill particles");
       return StatusCode::FAILURE;
     }
@@ -411,6 +430,10 @@ namespace Prompt {
   }
 
   StatusCode DecoratePLIT::predictElec(
+    SG::WriteDecorHandle<xAOD::TrackParticleContainer, float> &dec_trk_dr_lepton,
+    SG::WriteDecorHandle<xAOD::TrackParticleContainer, float> &dec_trk_dr_leptontrack,
+    SG::WriteDecorHandle<xAOD::TrackParticleContainer, char> &dec_trk_electron_track,
+    SG::WriteDecorHandle<xAOD::TrackParticleContainer, char> &dec_trk_muon_track,
     const xAOD::Electron &electron,
     const xAOD::TrackParticleContainer &tracks,
     const xAOD::CaloClusterContainer &caloclusters,
@@ -490,7 +513,8 @@ namespace Prompt {
 
     // decorate and fill track particles around the electron
     std::vector<const xAOD::IParticle *> parts;
-    if (!fillParticles(parts, electron, electronTrack, tracks, ctx)) {
+    if (!fillParticles(dec_trk_dr_lepton, dec_trk_dr_leptontrack, dec_trk_electron_track, dec_trk_muon_track,
+		       parts, electron, electronTrack, tracks, ctx)) {
       ATH_MSG_ERROR("DecoratePLIT::execute - failed to fill particles");
       return StatusCode::FAILURE;
     }
@@ -743,6 +767,10 @@ namespace Prompt {
   }
 
   StatusCode DecoratePLIT::fillParticles (
+      SG::WriteDecorHandle<xAOD::TrackParticleContainer, float> &dec_trk_dr_lepton,
+      SG::WriteDecorHandle<xAOD::TrackParticleContainer, float> &dec_trk_dr_leptontrack,
+      SG::WriteDecorHandle<xAOD::TrackParticleContainer, char> &dec_trk_electron_track,
+      SG::WriteDecorHandle<xAOD::TrackParticleContainer, char> &dec_trk_muon_track,
       std::vector<const xAOD::IParticle *> &parts,
       const xAOD::IParticle &lepton,
       const xAOD::TrackParticle *trackLep,
@@ -781,7 +809,8 @@ namespace Prompt {
       bool isUsedForElectron = tracksUsedForElectron.count(track);
       bool isUsedForMuon = tracksUsedForMuon.count(track);
 
-      if (!decorateTrack(*track, dr_lepton, isUsedForElectron, isUsedForMuon, trackLep)) {
+      if (!decorateTrack(dec_trk_dr_lepton, dec_trk_dr_leptontrack, dec_trk_electron_track, dec_trk_muon_track,
+			 *track, dr_lepton, isUsedForElectron, isUsedForMuon, trackLep)) {
         ATH_MSG_ERROR("DecoratePLIT::fillParticles - failed to decorate track");
         return StatusCode::FAILURE;
       }
@@ -799,6 +828,10 @@ namespace Prompt {
   }
 
   StatusCode DecoratePLIT::decorateTrack(
+      SG::WriteDecorHandle<xAOD::TrackParticleContainer, float> &dec_trk_dr_lepton,
+      SG::WriteDecorHandle<xAOD::TrackParticleContainer, float> &dec_trk_dr_leptontrack,
+      SG::WriteDecorHandle<xAOD::TrackParticleContainer, char> &dec_trk_electron_track,
+      SG::WriteDecorHandle<xAOD::TrackParticleContainer, char> &dec_trk_muon_track,
       const xAOD::TrackParticle& track,
       float dr_lepton,
       bool isUsedForElectron,
@@ -806,9 +839,9 @@ namespace Prompt {
       const xAOD::TrackParticle* trackLep) const
   {
       // Apply values to decorators
-      m_dec_trk_dr_lepton(track) = dr_lepton;
-      m_dec_trk_electron_track(track) = static_cast<char>(isUsedForElectron);
-      m_dec_trk_muon_track(track) = static_cast<char>(isUsedForMuon);
+      dec_trk_dr_lepton(track) = dr_lepton;
+      dec_trk_electron_track(track) = static_cast<char>(isUsedForElectron);
+      dec_trk_muon_track(track) = static_cast<char>(isUsedForMuon);
 
       float dr_leptontrack = -99;
       if (trackLep) {
@@ -816,7 +849,7 @@ namespace Prompt {
               dr_leptontrack = track.p4().DeltaR(trackLep->p4());
           }
       }
-      m_dec_trk_dr_leptontrack(track) = dr_leptontrack;
+      dec_trk_dr_leptontrack(track) = dr_leptontrack;
 
       return StatusCode::SUCCESS;
   }

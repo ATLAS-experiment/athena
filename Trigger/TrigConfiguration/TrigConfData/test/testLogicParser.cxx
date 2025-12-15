@@ -1,3 +1,6 @@
+/*
+   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+*/
 #include "TrigConfData/LogicParser.h"
 
 #include <vector>
@@ -38,7 +41,7 @@ testPatterns(const std::vector<std::string> & patterns,
 }
 
 
-
+//coverity[root_function]
 int main() {
 
    cout << endl;

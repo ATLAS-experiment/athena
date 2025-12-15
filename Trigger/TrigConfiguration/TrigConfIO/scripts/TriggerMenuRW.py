@@ -23,8 +23,8 @@ def main():
     parser.add_argument("-l", "--loglevel",  dest="loglevel", help="Log level [DEBUG, INFO, WARNING] (default INFO)", default = "INFO")
     parser.add_argument("--use-crest",  dest="useCrest", action="store_true",
                         help="Uses CREST to access the TriggerDB")
-    parser.add_argument("--crest-server", dest="crestServer", type=str, default="http://crest-04.cern.ch/api-v5.0", 
-                        help="CREST server (default: http://crest-04.cern.ch/api-v5.0)")
+    parser.add_argument("--crest-server", dest="crestServer", type=str, default="http://crest.cern.ch/api-v5.0", 
+                        help="CREST server (default: http://crest.cern.ch/api-v5.0)")
     
     args = parser.parse_args()
 

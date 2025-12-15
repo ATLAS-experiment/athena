@@ -11,6 +11,8 @@
 // EDM includes
 #include "xAODTau/TauJetContainer.h"
 #include "xAODEgamma/ElectronContainer.h"
+#include "ColumnarTau/TauJetDef.h"
+#include "ColumnarEgamma/EgammaDef.h"
 
 // Local includes
 #include "AssociationUtils/IOverlapTool.h"
@@ -45,14 +47,15 @@ namespace ORUtils
       /// @brief Identify overlapping taus and loose electrons.
       /// TODO: add description of the method.
       virtual StatusCode
-      findOverlaps(const xAOD::IParticleContainer& cont1,
-                   const xAOD::IParticleContainer& cont2) const override;
+      findOverlaps(columnar::Particle1Range cont1,
+                   columnar::Particle2Range cont2,
+                   columnar::EventContextId eventContext) const override;
 
       /// @brief Identify overlapping taus and loose electrons.
       /// See the documentation in the above method.
       virtual StatusCode
-      findOverlaps(const xAOD::TauJetContainer& taus,
-                   const xAOD::ElectronContainer& electrons) const;
+      internalFindOverlaps(columnar::Particle1Range taus,
+                           columnar::Particle2Range electrons) const;
 
     protected:
 
@@ -61,7 +64,7 @@ namespace ORUtils
 
     protected:
 
-      StatusCode checkElectronID(const xAOD::Electron& electron, bool& pass) const;
+      StatusCode checkElectronID(columnar::Particle2Id electron, bool& pass) const;
 
     private:
 
@@ -84,6 +87,15 @@ namespace ORUtils
       //
       // Utilities
       //
+
+      /// Columnar accessors
+      struct Accessors final : columnar::ColumnarTool<>
+      {
+        columnar::Particle2Accessor<char> m_eleIDAcc;
+        columnar::Particle2Accessor<char> m_altEleIDAcc;
+        using ColumnarTool::ColumnarTool;
+      };
+      std::unique_ptr<Accessors> m_accessors {std::make_unique<Accessors> (this)};
 
       /// Delta-R matcher
       std::unique_ptr<DeltaRMatcher> m_dRMatcher;

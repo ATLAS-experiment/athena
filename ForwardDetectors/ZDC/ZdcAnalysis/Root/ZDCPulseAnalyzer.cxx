@@ -52,6 +52,10 @@ const ZDCJSONConfig::JSONParamList ZDCPulseAnalyzer::JSONConfigParams = {
   {"T0CutsLG", {JSON::value_t::array, 2, true, true}},
   {"chisqDivAmpCutHG", {JSON::value_t::number_float, 1, true, true}},
   {"chisqDivAmpCutLG", {JSON::value_t::number_float, 1, true, true}},
+  {"chisqDivAmpOffsetHG", {JSON::value_t::number_float, 1, true, true}},
+  {"chisqDivAmpOffsetLG", {JSON::value_t::number_float, 1, true, true}},
+  {"chisqDivAmpPowerHG", {JSON::value_t::number_float, 1, true, true}},
+  {"chisqDivAmpPowerLG", {JSON::value_t::number_float, 1, true, true}},
   {"gainFactorHG", {JSON::value_t::number_float, 1, true, true}},
   {"gainFactorLG", {JSON::value_t::number_float, 1, true, true}},
   {"noiseSigmaHG", {JSON::value_t::number_float, 1, true, true}},
@@ -64,6 +68,8 @@ const ZDCJSONConfig::JSONParamList ZDCPulseAnalyzer::JSONConfigParams = {
   {"ampMinSignifHGLG", {JSON::value_t::array, 2, true, false}},
   {"enablePreExclusion", {JSON::value_t::array, 3, false, false}},
   {"enablePostExclusion", {JSON::value_t::array, 3, false, false}},
+  {"enableUnderflowExclusionHG", {JSON::value_t::array, 2, true, false}},
+  {"enableUnderflowExclusionLG", {JSON::value_t::array, 2, true, false}},
   {"enableTimingCorrection", {JSON::value_t::array, 2, false, false}},
   {"timeCorrCoeffHG", {JSON::value_t::array, 0, true, false}},
   {"timeCorrCoeffLG", {JSON::value_t::array, 0, true, false}},
@@ -255,9 +261,18 @@ void ZDCPulseAnalyzer::SetDefaults()
   m_noiseSigHG = 1;
   m_noiseSigLG = 1;
 
+  m_sigMinLG = 0;
+  m_sigMinHG = 0;
+  
   m_timeCutMode = 0;
   m_chisqDivAmpCutLG = 100;
   m_chisqDivAmpCutHG = 100;
+
+  m_chisqDivAmpOffsetLG = 1e-6;
+  m_chisqDivAmpOffsetHG = 150;
+
+  m_chisqDivAmpPowerLG = 1.2;
+  m_chisqDivAmpPowerHG = 1.2;
 
   m_LGT0CorrParams.assign(4, 0);
   m_HGT0CorrParams.assign(4, 0);
@@ -291,6 +306,7 @@ void ZDCPulseAnalyzer::SetDefaults()
   m_timingCorrMode = NoTimingCorr;
   m_haveNonlinCorr = false;
   m_quietFits = true;
+  m_saveFitFunc = false;
   m_fitOptions = "s";
 }
 
@@ -314,6 +330,7 @@ void ZDCPulseAnalyzer::Reset(bool repass)
     m_adjTimeRangeEvent = false;
     m_backToHG_pre      = false;
     m_fixPrePulse       = false;
+    m_underflowExclusion = false;
 
     m_minADCLG = -1;
     m_maxADCLG = -1;
@@ -426,9 +443,6 @@ void ZDCPulseAnalyzer::Reset(bool repass)
   m_fitPostT0lo   = 0;
 
   m_fitPulls.clear();
-  
-  m_sigMinLG = 0;
-  m_sigMinHG = 0;
   
   m_samplesSub.clear();
   m_samplesDeriv2nd.clear();
@@ -930,9 +944,16 @@ bool ZDCPulseAnalyzer::ScanAndSubtractSamples()
 	if ((int) isample < m_firstHGOverFlowSample) m_firstHGOverFlowSample = isample;
       }
       else if (ADCHG < m_HGUnderflowADC) {
-	m_HGUnderflow = true;
-	
-	if (isample == m_preSampleIdx) m_PSHGOverUnderflow  = true;
+	if (m_enableUnderflowExclHG && (isample < m_underFlowExclSamplesPreHG ||
+					isample >= m_NSamplesAna - m_underFlowExclSamplesPostHG)) {
+	  m_useSampleHG[isample] = false;
+	  m_underflowExclusion = true;
+	}
+	else {
+	  m_HGUnderflow = true;
+	  
+	  if (isample == m_preSampleIdx) m_PSHGOverUnderflow  = true;
+	}
       }
     }
 
@@ -963,8 +984,15 @@ bool ZDCPulseAnalyzer::ScanAndSubtractSamples()
       }
       
       if (ADCLG == 0) {
-	m_LGUnderflow = true;
-	m_fail = true;
+	if (m_enableUnderflowExclLG && (isample < m_underFlowExclSamplesPreLG ||
+					isample >= m_NSamplesAna - m_underFlowExclSamplesPostLG)) {
+	  m_underflowExclusion = true;
+	  m_useSampleLG[isample] = false;
+	}
+	else {
+	  m_LGUnderflow = true;
+	  m_fail = true;
+	}
       }
     }
   }
@@ -1034,9 +1062,19 @@ bool ZDCPulseAnalyzer::DoAnalysis(bool repass)
   if (m_useLowGain) {
     //    (*m_msgFunc_p)(ZDCMsg::Verbose, "ZDCPulseAnalyzer:: " + m_tag + " using low gain data ");
 
+    auto chisqCutLambda = [cut = m_chisqDivAmpCutLG,
+			   offset = m_chisqDivAmpOffsetLG,
+			   power = m_chisqDivAmpPowerLG]
+      (float chisq, float amp, unsigned int fitNDoF)->bool
+    {
+      double ratio = chisq / (std::pow(amp, power) + offset);
+      if (chisq/fitNDoF > 2 && ratio > cut) return false;
+      else return true;
+    };
+    
     bool result = AnalyzeData(m_NSamplesAna, m_preSampleIdx, m_ADCSamplesLGSub, m_useSampleLG,
 			      deriv2ndThreshLG, m_noiseSigLG, m_LGT0CorrParams, 
-                              m_chisqDivAmpCutLG, m_T0CutLowLG, m_T0CutHighLG);
+                              chisqCutLambda, m_T0CutLowLG, m_T0CutHighLG);
     if (result) {
       //
       // +++BAC
@@ -1070,10 +1108,20 @@ bool ZDCPulseAnalyzer::DoAnalysis(bool repass)
   }
   else {
     //    (*m_msgFunc_p)(ZDCMsg::Verbose, "ZDCPulseAnalyzer:: " + m_tag + " using high gain data ");
+    auto chisqCutLambda = [cut = m_chisqDivAmpCutHG,
+			   offset = m_chisqDivAmpOffsetHG,
+			   power = m_chisqDivAmpPowerHG, tag = m_tag]
+      (float chisq, float amp, unsigned int fitNDoF)->bool
+    {
+      double ratio = chisq / (std::pow(amp, power) + offset);
 
+      if (chisq/float(fitNDoF) > 2 && ratio > cut) return false;
+      else return true;
+    };
+    
     bool result = AnalyzeData(m_NSamplesAna, m_preSampleIdx, m_ADCSamplesHGSub, m_useSampleHG,
 			      deriv2ndThreshHG, m_noiseSigHG, m_HGT0CorrParams, 
-                              m_chisqDivAmpCutHG, m_T0CutLowHG, m_T0CutHighHG);
+                              chisqCutLambda, m_T0CutLowHG, m_T0CutHighHG);
     if (result) {
       // +++BAC
       //
@@ -1126,7 +1174,7 @@ bool ZDCPulseAnalyzer::AnalyzeData(size_t nSamples, size_t preSampleIdx,
                                    float peak2ndDerivMinThresh,
 				   float noiseSig,
                                    const std::vector<float>& t0CorrParams,   // The parameters used to correct the t0
-                                   float maxChisqDivAmp,                     // The maximum chisq / amplitude ratio
+                                   ChisqCutLambdatype chisqCutLambda,             // Lambda to perform the selection
                                    float minT0Corr, float maxT0Corr          // The minimum and maximum corrected T0 values
                                   )
 {
@@ -1328,10 +1376,6 @@ bool ZDCPulseAnalyzer::AnalyzeData(size_t nSamples, size_t preSampleIdx,
       //
       float prePulseSig = -m_samplesDeriv2nd[isample]/(std::sqrt(6.0)*noiseSig);
 
-      // std::cout << m_tag << ", for sample " << isample << ", 2nd derivative = " << m_samplesDeriv2nd[isample]
-      // 		<< " 0.05 * m_minDeriv2nd) = " << 0.05 * m_minDeriv2nd
-      // 		<< ", prePulseSig = " << prePulseSig << std::endl;
-      
       if ((prePulseSig > 6 && m_samplesDeriv2nd[isample] < 0.05 * m_minDeriv2nd) ||
 	  m_samplesDeriv2nd[isample]  < 0.5*m_minDeriv2nd)
       {
@@ -1344,7 +1388,6 @@ bool ZDCPulseAnalyzer::AnalyzeData(size_t nSamples, size_t preSampleIdx,
     }
 
     if (m_prePulse) {
-      //      std::cout << m_tag << ": prepulse sigma = " << m_prePulseSig << ", pre exp sigma = " << m_preExpSig << std::endl;
       m_prePulseSig = maxPrepulseSig;
       
       if (m_preExpTail) {
@@ -1518,10 +1561,10 @@ bool ZDCPulseAnalyzer::AnalyzeData(size_t nSamples, size_t preSampleIdx,
       m_badT0 = failFixedCut;
     }
     
-    // Now check for valid chisq and valid time
+    // Now check for valid chisq using lambda function
     //
-    if (m_fitChisq/m_fitNDoF > 2 && m_fitChisq / (m_fitAmplitude + 1.0e-6) > maxChisqDivAmp) m_badChisq = true;
-  }
+    //    if (m_fitChisq/m_fitNDoF > 2 && m_fitChisq / (m_fitAmplitude + 1.0e-6) > maxChisqDivAmp) m_badChisq = true;
+    if (!chisqCutLambda(m_fitChisq, m_fitAmplitude, m_fitNDoF)) m_badChisq = true;  }
 
   return !m_fitFailed;
 }
@@ -1707,9 +1750,12 @@ void ZDCPulseAnalyzer::DoFit(bool refitLG)
       m_fitMinAmp = true;
     }
 
-    float sigMinCut = fitLG ? m_sigMinLG : m_sigMinHG;
-    if (m_fitAmpError > 1e-6) {
-      if (m_fitAmplitude/m_fitAmpError < sigMinCut) m_failSigCut = true;
+    if (m_haveSignifCuts) {
+      float sigMinCut = fitLG ? m_sigMinLG : m_sigMinHG;
+
+      if (m_fitAmpError > 1e-6) {
+	if (m_fitAmplitude/m_fitAmpError < sigMinCut) m_failSigCut = true;
+      }
     }
   }
   else {
@@ -2153,18 +2199,20 @@ void ZDCPulseAnalyzer::dumpConfiguration() const    // setting
     (*m_msgFunc_p)(ZDCMsg::Info, ostrStream.str()); ostrStream.str(""); ostrStream.clear();
   }
 
-  ostrStream << "m_fixTau1 = " << m_fixTau1 <<  ", m_fixTau2 = " << m_fixTau2 << ", m_nominalTau1 = " << m_nominalTau1
-	     << ", m_nominalTau2 = " << m_nominalTau2 <<  ", m_nominalT0HG = " << m_nominalT0HG
-	     << ",  m_nominalT0LG = " << m_nominalT0LG;
-  (*m_msgFunc_p)(ZDCMsg::Info, ostrStream.str()); ostrStream.str(""); ostrStream.clear();
-
-  ostrStream << "m_HGOverflowADC = " << m_HGOverflowADC << ",  m_HGUnderflowADC = " << m_HGUnderflowADC
-	     << ",  m_LGOverflowADC = "<< m_LGOverflowADC;
-  (*m_msgFunc_p)(ZDCMsg::Info, ostrStream.str()); ostrStream.str(""); ostrStream.clear();
-
-  ostrStream << "m_chisqDivAmpCutLG = " << m_chisqDivAmpCutLG << ",  m_chisqDivAmpCutHG=" << m_chisqDivAmpCutHG
-	     << ", t0Cuts HG = [" << m_T0CutLowHG << ", " << m_T0CutHighHG << "], t0Cuts LG = ["
+  ostrStream <<"Fit function = " << m_fitFunction <<  "fixTau1 = " << m_fixTau1 <<  ", fixTau2 = " << m_fixTau2
+	     << ", nominalTau1 = " << m_nominalTau1 << ", nominalTau2 = " << m_nominalTau2 << "\n"
+	     << ", nominalT0HG = " << m_nominalT0HG << ",  nominalT0LG = " << m_nominalT0LG
+    	     << ", t0Cuts HG = [" << m_T0CutLowHG << ", " << m_T0CutHighHG << "], t0Cuts LG = ["
 	     << m_T0CutLowLG << ", " << m_T0CutHighLG << "]";
+  (*m_msgFunc_p)(ZDCMsg::Info, ostrStream.str()); ostrStream.str(""); ostrStream.clear();
+
+  ostrStream << "HGOverflowADC = " << m_HGOverflowADC << ",  HGUnderflowADC = " << m_HGUnderflowADC
+	     << ",  LGOverflowADC = "<< m_LGOverflowADC;
+  (*m_msgFunc_p)(ZDCMsg::Info, ostrStream.str()); ostrStream.str(""); ostrStream.clear();
+
+  ostrStream << "chisqDivAmpCutHG = " << m_chisqDivAmpCutHG << ",  chisqDivAmpCutLG=" << m_chisqDivAmpCutLG
+	     << ", chisqDivAmpOffsetHG = " << m_chisqDivAmpOffsetHG << ", chisqDivAmpOffsetLG = " << m_chisqDivAmpOffsetLG
+	     << ", chisqDivAmpPowerHG = " << m_chisqDivAmpPowerHG << ", chisqDivAmpPowerLG = " << m_chisqDivAmpPowerLG;
   (*m_msgFunc_p)(ZDCMsg::Info, ostrStream.str()); ostrStream.str(""); ostrStream.clear();
 
   if ( m_enableRepass) {
@@ -2180,6 +2228,21 @@ void ZDCPulseAnalyzer::dumpConfiguration() const    // setting
   if (m_enablePostExcl) {
     ostrStream << "Post-exclusion enabled for up to " << m_maxSamplesPostExcl << ", samples with ADC threshold HG = "
 	       << m_postExclHGADCThresh << ", LG = " << m_postExclLGADCThresh;
+    (*m_msgFunc_p)(ZDCMsg::Info, ostrStream.str()); ostrStream.str(""); ostrStream.clear();
+  }
+
+  if (m_enableUnderflowExclHG) {
+    ostrStream << "High gain Underflow pre- and post-exclusion enabled for up to " << m_underFlowExclSamplesPreHG
+	       << ", and " << m_underFlowExclSamplesPostHG << " samples, respectively";
+    (*m_msgFunc_p)(ZDCMsg::Info, ostrStream.str()); ostrStream.str(""); ostrStream.clear();
+  }
+  if (m_enableUnderflowExclLG) {
+    ostrStream << "Low gain Underflow pre- and post-exclusion enabled for up to " << m_underFlowExclSamplesPreLG
+	       << ", and " << m_underFlowExclSamplesPostLG << " samples, respectively";
+    (*m_msgFunc_p)(ZDCMsg::Info, ostrStream.str()); ostrStream.str(""); ostrStream.clear();
+  }
+  if (m_haveSignifCuts) {
+    ostrStream << "Minimum significance cuts applied: HG min. sig. = " << m_sigMinHG << ", LG min. sig. " << m_sigMinLG;
     (*m_msgFunc_p)(ZDCMsg::Info, ostrStream.str()); ostrStream.str(""); ostrStream.clear();
   }
 
@@ -2212,6 +2275,7 @@ unsigned int ZDCPulseAnalyzer::GetStatusMask() const
   if (repassPulse()) statusMask |= 1 << RepassPulseBit;
   if (armSumInclude()) statusMask |= 1 << ArmSumIncludeBit;
   if (failSigCut()) statusMask |= 1 << FailSigCutBit;
+  if (underflowExclusion()) statusMask |= 1<<UnderFlowExclusionBit;
 
   return statusMask;
 }
@@ -2498,6 +2562,10 @@ std::pair<bool, std::string> ZDCPulseAnalyzer::ConfigFromJSON(const JSON& config
     }
     else if (key == "chisqDivAmpCutHG") m_chisqDivAmpCutHG = value;
     else if (key == "chisqDivAmpCutLG") m_chisqDivAmpCutLG = value;
+    else if (key == "chisqDivAmpOffsetHG") m_chisqDivAmpOffsetHG = value;
+    else if (key == "chisqDivAmpOffsetLG") m_chisqDivAmpOffsetLG = value;
+    else if (key == "chisqDivAmpPowerHG") m_chisqDivAmpPowerHG = value;
+    else if (key == "chisqDivAmpPowerLG") m_chisqDivAmpPowerLG = value;
     else if (key == "gainFactorHG") m_gainFactorHG = value;
     else if (key == "gainFactorLG") m_gainFactorLG = value;
     else if (key == "noiseSigmaHG") m_noiseSigHG = value;
@@ -2527,6 +2595,16 @@ std::pair<bool, std::string> ZDCPulseAnalyzer::ConfigFromJSON(const JSON& config
       m_maxSamplesPostExcl  = value[0];
       m_postExclHGADCThresh = value[1];
       m_postExclLGADCThresh = value[2];
+    }
+    else if (key == "enableUnderflowExclusionHG") {
+      m_enableUnderflowExclHG = true;
+      m_underFlowExclSamplesPreHG  = value[0];
+      m_underFlowExclSamplesPostHG = value[1];
+    }
+    else if (key == "enableUnderflowExclusionLG") {
+      m_enableUnderflowExclLG = true;
+      m_underFlowExclSamplesPreLG  = value[0];
+      m_underFlowExclSamplesPostLG = value[1];
     }
     else if (key == "ampMinSignifHGLG") {
       m_haveSignifCuts = true;

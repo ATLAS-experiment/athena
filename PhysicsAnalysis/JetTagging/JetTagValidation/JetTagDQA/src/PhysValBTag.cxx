@@ -66,10 +66,8 @@ namespace JetTagDQA {
     declareProperty( "JVTCutAntiKt4EMPFlowJets", m_JVTCutAntiKt4EMPFlowJets = 0.2);
     declareProperty( "truthMatchProbabilityCut", m_truthMatchProbabilityCut = 0.75);
 
-    declareProperty( "dipsTaggerName", m_dipsName = "dipsLoose20220314v2");
-    declareProperty( "DL1dv01TaggerName", m_DL1dv01Name = "DL1dv01");
     declareProperty( "GN2v01TaggerName", m_GN2v01Name = "GN2v01");
-    declareProperty( "GN2Xv01TaggerName", m_GN2Xv01Name = "GN2Xv01");
+    declareProperty( "GN3XPV01TaggerName", m_GN3XPV01Name = "GN3XPV01");
 
   }
 
@@ -107,7 +105,7 @@ namespace JetTagDQA {
 				      m_JVTCutLargerEtaAntiKt4EMTopoJets,
 				      m_JVTCutAntiKt4EMPFlowJets,
 				      m_truthMatchProbabilityCut);
-      plot->setTaggerNames(m_dipsName, m_DL1dv01Name, m_GN2v01Name, m_GN2Xv01Name);
+      plot->setTaggerNames(m_GN2v01Name, m_GN3XPV01Name);
     }
    
     return StatusCode::SUCCESS;
@@ -225,7 +223,7 @@ namespace JetTagDQA {
       if (jetException != StatusCode::SUCCESS) continue;
 
       int nJets_withCut = 0;
-      int nJets_containing_moun = 0; 
+      int nJets_containing_muon = 0; 
       int nJets_containing_SV = 0; 
       std::map<std::string, int> nJetsThatPassedWPCuts;
       plot->initializeNJetsThatPassedWPCutsMap(nJetsThatPassedWPCuts);
@@ -248,42 +246,41 @@ namespace JetTagDQA {
                     && jet->pt() > 20e3 && jet->pt() < 60e3
                     && std::abs(jet->eta()) > 2.4 && std::abs(jet->eta()) < m_jetEtaCut ) continue;
         }
-        // get the btagging
-        const xAOD::BTagging* btag = xAOD::BTaggingUtilities::getBTagging( *jet );
+
         // count the jets that pass the cuts
         nJets_withCut++;
 
         // get the jet truth label
         int truth_label(1000);
         if(!m_isData){
-	  SG::ConstAccessor<int> acc(label_name);
-	  if(acc.isAvailable(*jet)) jet->getAttribute(label_name, truth_label);
+	        SG::ConstAccessor<int> acc(label_name);
+	        if(acc.isAvailable(*jet)) jet->getAttribute(label_name, truth_label);
         }
 
         // fill the jet related histograms
         plot->fillJetKinVars(jet, truth_label, m_onZprime, event);
 
         // fill the jet, btag & vertex related plots
-        if (btag && name!=m_jetNameR10){ //small-R jets
+        if (name!=m_jetNameR10){ //small-R jets
 
           // fill other variables
           bool contains_muon;
           double jet_Lxy = -1;
-          plot->fillOther(jet, btag, contains_muon, jet_Lxy, truth_label, event);
-          if(contains_muon) nJets_containing_moun++;
+          plot->fillOther(jet, contains_muon, jet_Lxy, truth_label, event);
+          if(contains_muon) nJets_containing_muon++;
 
           // get the track to truth associations
-          std::map<const xAOD::TrackParticle*, int> track_truth_associations = getTrackTruthAssociations(btag);
+          std::map<const xAOD::TrackParticle*, int> track_truth_associations = getTrackTruthAssociations(jet);
 
           // fill track related variables
           int num_HF_tracks_in_jet;
-          plot->fillTrackVariables(jet, btag, myVertex, track_truth_associations, contains_muon, truth_label, num_HF_tracks_in_jet, event);
+          plot->fillTrackVariables(jet, myVertex, track_truth_associations, contains_muon, truth_label, num_HF_tracks_in_jet, event);
           // fill SV related vars
           bool contains_SV;
-          plot->fillSVVariables(btag, track_truth_associations, contains_muon, truth_label, num_HF_tracks_in_jet, contains_SV, event);
+          plot->fillSVVariables(jet, track_truth_associations, contains_muon, truth_label, num_HF_tracks_in_jet, contains_SV, event);
           if(contains_SV) nJets_containing_SV++;
           // fill discriminant related vars
-          plot->fillDiscriminantVariables(btag, jet, jet_Lxy, truth_label, contains_muon, m_onZprime, nJetsThatPassedWPCuts, event);
+          plot->fillDiscriminantVariables(jet, jet_Lxy, truth_label, m_onZprime, nJetsThatPassedWPCuts, event);
         }
         else if (jet && name==m_jetNameR10){ // large-R jets
           //fill track and hit information
@@ -292,12 +289,12 @@ namespace JetTagDQA {
           plot->fillDiscriminantVariables_for_largeRjet(jet, truth_label, m_onZprime, nJetsThatPassedWPCuts, event);
         }
         else{
-          ATH_MSG_WARNING("btag (obtained by xAOD::BTaggingUtilities::getBTagging(*jet)) is a null pointer.");
+          ATH_MSG_WARNING("jet is a null pointer.");
         }
       }
 
       // fill multiplicities
-      plot->fillMultiplicities(nJets_withCut, tracks->size(), npv, myVertex->nTrackParticles(), nJets_containing_moun, nJets_containing_SV, nJetsThatPassedWPCuts, event);
+      plot->fillMultiplicities(nJets_withCut, tracks->size(), npv, myVertex->nTrackParticles(), nJets_containing_muon, nJets_containing_SV, nJetsThatPassedWPCuts, event);
       // fill PV variables
       plot->fillPVVariables(PV_x, PV_y, PV_z, event);
 
@@ -321,23 +318,23 @@ namespace JetTagDQA {
   // Const methods:
   ///////////////////////////////////////////////////////////////////
 
-  std::map<const xAOD::TrackParticle*, int> PhysValBTag::getTrackTruthAssociations(const xAOD::BTagging* btag) const {
+  std::map<const xAOD::TrackParticle*, int> PhysValBTag::getTrackTruthAssociations(const xAOD::Jet* jet) const {
 
     // define the return vector
     std::map<const xAOD::TrackParticle*, int> truthValues;
 
-    // get the track links from the btag
-    static const SG::ConstAccessor<std::vector<ElementLink<xAOD::TrackParticleContainer> > >
-      BTagTrackToJetAssociatorAcc("BTagTrackToJetAssociator");
-    std::vector< ElementLink< xAOD::TrackParticleContainer > > assocTracks =
-      BTagTrackToJetAssociatorAcc(*btag);
+    // get the track links from the jet
+    static const SG::ConstAccessor<std::vector<ElementLink<xAOD::IParticleContainer> > >
+      JetToTrackAssociatorAcc("TracksForBTagging");
+    std::vector< ElementLink< xAOD::IParticleContainer > > assocTracks =
+      JetToTrackAssociatorAcc(*jet);
 
-    // loop over the tracks associated to the btag and get the truth values
+    // loop over the tracks associated to the jet and get the truth values
     for(unsigned int i = 0; i < assocTracks.size(); i++) {
       if (!assocTracks.at(i).isValid()) continue;
 
       // get the curent track
-      const xAOD::TrackParticle* track = *(assocTracks.at(i));  
+      const xAOD::TrackParticle* track = static_cast<const xAOD::TrackParticle*>(*(assocTracks.at(i)));  
 
       // only try accessing the truth values if not on data
       int origin = 0;
@@ -347,39 +344,6 @@ namespace JetTagDQA {
 
       // add the truth values to the vector
       truthValues.insert( std::make_pair( track, origin ) );
-    }
-
-    // also loop over the tracks associated to the MSV vertices -> can be missing in the other track list
-    // get the MSV vertices
-    static const SG::ConstAccessor<std::vector< ElementLink< xAOD::VertexContainer > > >
-      MSV_verticesAcc("MSV_vertices");
-    std::vector< ElementLink< xAOD::VertexContainer > > MSV_vertices =
-      MSV_verticesAcc.withDefault(*btag, std::vector< ElementLink< xAOD::VertexContainer > >());
-
-    // loop over the MSV vertices
-    for (unsigned int i = 0; i < MSV_vertices.size(); i++) {
-      if (!MSV_vertices.at(i).isValid()) continue;
-      const xAOD::Vertex* vtx = *(MSV_vertices.at(i));
-
-      // get the track links
-      std::vector<ElementLink<DataVector<xAOD::TrackParticle> > > MSV_assocTracks = vtx->trackParticleLinks();
-
-      // loop over the tracks
-      for(unsigned int i = 0; i < MSV_assocTracks.size(); i++) {
-        if (!MSV_assocTracks.at(i).isValid()) continue;
-
-        // get the curent track
-        const xAOD::TrackParticle* track = *(MSV_assocTracks.at(i));  
-        
-        // only try accessing the truth values if not on data
-        int origin = 0;
-        if(!m_isData && m_doTrackTruth){
-          origin = m_trackTruthOriginTool->getTrackOrigin(track);
-        }
-
-        // add the truth values to the vector
-        truthValues.insert( std::make_pair( track, origin ) );
-      }
     }
 
     // return

@@ -10,7 +10,7 @@
 #ifndef MuonNSW_CABLING_MuonNSW_CABLINGALG_H
 #define MuonNSW_CABLING_MuonNSW_CABLINGALG_H
 
-#include "AthenaBaseComps/AthReentrantAlgorithm.h"
+#include "AthenaBaseComps/AthCondAlgorithm.h"
 #include "AthenaPoolUtilities/CondAttrListCollection.h"
 #include "MuonCablingData/Nsw_CablingMap.h"
 #include "MuonIdHelpers/IMuonIdHelperSvc.h"
@@ -19,14 +19,13 @@
 #include "StoreGate/WriteCondHandleKey.h"
 
 
-class MuonNSW_CablingAlg : public AthReentrantAlgorithm {
+class MuonNSW_CablingAlg : public AthCondAlgorithm {
    public:
     MuonNSW_CablingAlg(const std::string& name, ISvcLocator* pSvcLocator);
     virtual ~MuonNSW_CablingAlg() = default;
     virtual StatusCode initialize() override;
     virtual StatusCode execute(const EventContext& ctx) const override;
 
-    virtual bool isReEntrant() const override final { return false; }
 
    private:
     ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};

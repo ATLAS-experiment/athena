@@ -9,7 +9,6 @@
 #include "IdDict/IdDictMgr.h"
 #include "IdDict/IdDictRegion.h"
 #include "CxxUtils/StrFormat.h"
-#include "GaudiKernel/MsgStream.h"
 #include "Identifier/IdentifierHash.h"
 #include "Identifier/RangeIterator.h"
 #include <algorithm>
@@ -72,9 +71,6 @@ CaloLVL1_ID::layer_context 		() const
 
 int  CaloLVL1_ID::get_id  (const IdentifierHash& hash_id, Identifier& id, const IdContext* context) const
 {
-  MsgStream log(m_msgSvc, "CaloLVL1_ID" );
-  std::stringstream strm;
-  std::string strg;
   int result = 1;
   id.clear();
 
@@ -91,16 +87,7 @@ int  CaloLVL1_ID::get_id  (const IdentifierHash& hash_id, Identifier& id, const 
 	} 
       else 
 	{
-	  strm << hash_id;
-	  strg = " hash_id out of range "+strm.str();
-	  if(m_msgSvc)
-	    {
-	      log << MSG::ERROR << strg << endmsg;
-	    }
-	  else
-	    {
-	      std::cout << strg << std::endl;
-	    }
+	  ATH_MSG_ERROR("hash_id out of range " << hash_id);
 	}
     }
     else if (m_PHI_INDEX == end) {
@@ -110,16 +97,7 @@ int  CaloLVL1_ID::get_id  (const IdentifierHash& hash_id, Identifier& id, const 
       } 
       else 
 	{
-	  strm << hash_id;
-	  strg = " hash_id out of range "+strm.str();
-	  if(m_msgSvc)
-	    {
-	      log << MSG::ERROR << strg << endmsg;
-	    }
-	  else
-	    {
-	      std::cout << strg << std::endl;
-	    }
+	  ATH_MSG_ERROR("hash_id out of range " << hash_id);
 	}
     }
     else if(m_LAYER_INDEX == end) { 
@@ -129,16 +107,7 @@ int  CaloLVL1_ID::get_id  (const IdentifierHash& hash_id, Identifier& id, const 
       } 
       else 
 	{
-	  strm << hash_id;
-	  strg = " hash_id out of range "+strm.str();
-	  if(m_msgSvc)
-	    {
-	      log << MSG::ERROR << strg << endmsg;
-	    }
-	  else
-	    {
-	      std::cout << strg << std::endl;
-	    }
+	  ATH_MSG_ERROR("hash_id out of range " << hash_id);
 	}
     }
   }
@@ -196,29 +165,17 @@ int  CaloLVL1_ID::get_hash  (const Identifier& id, IdentifierHash& hash_id, cons
 
 int  CaloLVL1_ID::initialize_from_dictionary (const IdDictMgr& dict_mgr)
 {
-  MsgStream log(m_msgSvc, "CaloLVL1_ID" );
-  std::string strg = "initialize_from_dictionary";
-  if(m_msgSvc) {
-    log << MSG::INFO << strg << endmsg;
-  }
-  else {
-    std::cout << strg << std::endl;
-  }
+  ATH_MSG_INFO("initialize_from_dictionary");
 
   // Check whether this helper should be reinitialized
   if (!reinitialize(dict_mgr)) {
-    if(m_msgSvc)log << MSG::DEBUG << "Request to reinitialize not satisfied - tags have not changed" << endmsg;
+    ATH_MSG_DEBUG("Request to reinitialize not satisfied - tags have not changed");
     return (0);
   }
   else {
-    if(m_msgSvc)log << MSG::DEBUG << "(Re)initialize" << endmsg;
+    ATH_MSG_DEBUG("(Re)initialize");
   }
 
-  std::stringstream strm;
-  std::stringstream strm1;
-  std::stringstream strm2;
-  std::string strg1;
-  std::string strg2;
   
   // init base object
   if(AtlasDetectorID::initialize_from_dictionary(dict_mgr)) return (1);
@@ -229,14 +186,7 @@ int  CaloLVL1_ID::initialize_from_dictionary (const IdDictMgr& dict_mgr)
   m_dict = dict_mgr.find_dictionary ("Calorimeter"); 
   if(!m_dict) 
     {
-      strg= " initialize_from_dict - cannot access LVL1Calorimeter dictionary ";
-      if(m_msgSvc) {
-	log << MSG::ERROR << strg << endmsg;
-      }
-      else 
-	{
-	  std::cout << strg << std::endl;
-	}
+      ATH_MSG_ERROR("initialize_from_dict - cannot access LVL1Calorimeter dictionary");
       return(1);
     }
   
@@ -248,16 +198,7 @@ int  CaloLVL1_ID::initialize_from_dictionary (const IdDictMgr& dict_mgr)
     int caloValue   = -1;
     if (m_dict->get_label_value("subdet", "Calorimeter", caloValue)) 
       {
-	strm << m_dict->name();
-	strg= "Could not get value for label 'Calorimeter' of field 'subdet' in dictionary "+strm.str(); 
-	if(m_msgSvc)
-	  {
-	    log << MSG::ERROR << strg << endmsg;
-	  }
-	else
-	  {
-	    std::cout << strg << std::endl;
-	  }
+	ATH_MSG_ERROR("Could not get value for label 'Calorimeter' of field 'subdet' in dictionary " << m_dict->name());
         return (1);
       }
 
@@ -267,17 +208,7 @@ int  CaloLVL1_ID::initialize_from_dictionary (const IdDictMgr& dict_mgr)
     // positive half  FLG 12 Jul 07: negative side -> problem for test beam
     if (m_dict->get_label_value("DetZside", "positive_lvl1_side", lvl1CaloValue)) 
       {
-	strm << m_dict->name();
-	//	strg = " Could not get value for label 'negative_lvl1_side' of field 'DetZside in dictionary"+strm.str();
-	strg = " Could not get value for label 'positive_lvl1_side' of field 'DetZside in dictionary"+strm.str();
-	if(m_msgSvc)
-	  {
-	    log << MSG::ERROR << strg << endmsg;
-	  }
-	else
-	  {
-	    std::cout << strg << std::endl;
-	  }
+	ATH_MSG_ERROR("Could not get value for label 'positive_lvl1_side' of field 'DetZside in dictionary" << m_dict->name());
 	return (1);
     }
 
@@ -300,31 +231,9 @@ int  CaloLVL1_ID::initialize_from_dictionary (const IdDictMgr& dict_mgr)
     // Setup hash tables for finding neighbors
     if(init_neighbors()) return (1);     
 
-    strm1 << (std::string)m_full_tower_range; 
-    strm2 << (std::string)m_full_layer_range;
-    strg  = " CaloLVL1_ID::initialize_from_dict : ";
-    strg1 = " tower range -> "+strm1.str();
-    strg2 = " layer range -> "+strm2.str();
-    if(m_msgSvc)
-      {
-	log << MSG::DEBUG << strg << endmsg;
-	log << MSG::DEBUG << strg1 << endmsg;
-	log << MSG::DEBUG << strg2 << endmsg;
-      }
-    else
-      {
-	std::cout << strg << std::endl;
-	std::cout << strg1 << std::endl;
-	std::cout << strg2 << std::endl;
-      }
-
-      //std::cout << " CaloLVL1_ID::initialize_from_dict : " 
-      //        << std::endl;
-      //std::cout << " tower range -> "  << (std::string)m_full_tower_range
-      //        << std::endl;
-      //std::cout << " layer range -> "  << (std::string)m_full_layer_range
-      //        << std::endl;
-
+    ATH_MSG_DEBUG("CaloLVL1_ID::initialize_from_dict : ");
+    ATH_MSG_DEBUG(" tower range -> " << (std::string)m_full_tower_range);
+    ATH_MSG_DEBUG(" layer range -> " << (std::string)m_full_layer_range);
 
     // Setup for hash calculation
 
@@ -351,21 +260,7 @@ int  CaloLVL1_ID::initialize_from_dictionary (const IdDictMgr& dict_mgr)
     m_pnz_reg_impl.set_bits(bits, bits_offset);
     int size = (1 << bits);
 
-//      std::cout << "pnz_reg        "  
-//  	    << m_pnz_reg_impl.show_to_string() << std::endl; 
-//      std::cout << "size " << size << std::endl;
-    
-
-    //    std::cout << "pnz_reg "  << m_pnz_reg_impl.decode_index()  << " " 
-    //      << (std::string)m_pnz_reg_impl.ored_field()  << " " 
-    //      << std::hex << m_pnz_reg_impl.mask() << " " 
-    //      << m_pnz_reg_impl.zeroing_mask() << " " 
-    //      << std::dec << m_pnz_reg_impl.shift()
-    //      << " " << m_pnz_reg_impl.bits() << " " <<m_pnz_reg_impl.bits_offset()
-    //      << std::endl;
-
-
-    // Set up vector as lookup table for hash calculation. 
+    // Set up vector as lookup table for hash calculation.
     m_hash_calcs.resize(size);
 
     for (unsigned int i = 0; i < m_region_hash_max; ++i) {
@@ -384,29 +279,9 @@ int  CaloLVL1_ID::initialize_from_dictionary (const IdDictMgr& dict_mgr)
 
       if (m_pnz_reg_impl.unpack(min) >= size) 
 	{
-	  strm << size;
-	  strm1 << show_to_string(min);
-	  strm2 << m_pnz_reg_impl.unpack(min);
-	  strg = "Min > "+strm.str();
-	  strg1= " "+strm1.str();
-	  strg2= " "+strm2.str();
-	  if(m_msgSvc)
-	    {
-	      log << MSG::DEBUG << strg << endmsg;
-	      log << MSG::DEBUG << strg1 << endmsg;
-	      log << MSG::DEBUG << strg2 << endmsg;
-	    }
-	  else
-	    {
-	      std::cout << strg << std::endl;
-	      std::cout << strg1 << std::endl;
-	      std::cout << strg2 << std::endl;
-	    }	  
-	    //std::cout << "min > " << size << " " 
-	    //    << i << " "
-	    //	    << show_to_string(min) << " " 
-	    //	    << m_pnz_reg_impl.unpack(min) << " " 
-	    //	    << std::endl;
+	  ATH_MSG_DEBUG("Min > " << size);
+	  ATH_MSG_DEBUG(" " << show_to_string(min));
+	  ATH_MSG_DEBUG(" " << m_pnz_reg_impl.unpack(min));
 	}
     }
 
@@ -415,30 +290,9 @@ int  CaloLVL1_ID::initialize_from_dictionary (const IdDictMgr& dict_mgr)
 	Identifier id = tower_id(i);
 	if (tower_hash(id) != i) 
 	  {
-	    strm << show_to_string(id);
-	    strm1 << tower_hash(id);
-	    strm2 << i;
-	    strg = " *****  Error tower ranges, id, hash, i = "+strm.str();
-	    strg1= " , "+strm1.str();
-	    strg2= " , "+strm2.str();
-	    if(m_msgSvc)
-	      {
-		log << MSG::ERROR << strg << endmsg;
-		log << MSG::ERROR << strg1 << endmsg;
-		log << MSG::ERROR << strg2 << endmsg;
-	      }
-	    else
-	      {
-		std::cout << strg << std::endl;
-		std::cout << strg1 << std::endl;
-		std::cout << strg2 << std::endl;
-	      }
-	    
-	    //std::cout << "tower ranges, id, hash, i = " 
-	    //	      << show_to_string(id) << ", " 
-	    //	      << tower_hash(id) << ", " 
-	    //	      << i
-	    //	      << std::endl;
+	    ATH_MSG_ERROR("*****  Error tower ranges, id, hash, i = " << show_to_string(id));
+	    ATH_MSG_ERROR(" , " << tower_hash(id));
+	    ATH_MSG_ERROR(" , " << i);
 	  }
     }
     
@@ -696,33 +550,9 @@ void CaloLVL1_ID::layer_id_checks   ( const Identifier towerId,
 
 int   CaloLVL1_ID::initLevelsFromDict()
 {
-  MsgStream log(m_msgSvc, "CaloLVL1_ID" );
-  std::stringstream strm;
-  std::stringstream strm1;
-  std::stringstream strm2;
-  std::stringstream strm3;
-  std::stringstream strm4;
-  std::stringstream strm5;
-  std::stringstream strm6;
-  std::stringstream strm7;
-  std::string strg;
-  std::string strg1;
-  std::string strg2;
-  std::string strg3;
-  std::string strg4;
-  std::string strg5;
-  std::string strg6;
-  std::string strg7;
   if(!m_dict) 
     {
-      strg= "initLevelsFromDict - dictionary NOT initialized ";
-      if(m_msgSvc) {
-	log << MSG::ERROR << strg << endmsg;
-      }
-      else 
-	{
-	  std::cout << strg << std::endl;
-	}
+      ATH_MSG_ERROR("initLevelsFromDict - dictionary NOT initialized");
       return (1);
     }
 
@@ -744,14 +574,7 @@ int   CaloLVL1_ID::initLevelsFromDict()
     }
   else 
     {
-      strg = "initLevelsFromDict - unable to find lvl1 region ";
-      if(m_msgSvc) {
-	log << MSG::ERROR << strg << endmsg;
-      }
-      else 
-	{
-	  std::cout << strg << std::endl;
-	}      
+      ATH_MSG_ERROR("initLevelsFromDict - unable to find lvl1 region ");
       return (1);
     }
   
@@ -762,15 +585,7 @@ int   CaloLVL1_ID::initLevelsFromDict()
   }
   else 
     {
-      strg=  "initLevelsFromDict - unable to find 'subdet' field ";
-      if(m_msgSvc) 
-	{
-	  log << MSG::ERROR << strg << endmsg;
-	}
-      else 
-	{
-	  std::cout << strg << std::endl;
-	}	
+      ATH_MSG_ERROR("initLevelsFromDict - unable to find 'subdet' field ");
       return (1);
     }
   
@@ -780,15 +595,7 @@ int   CaloLVL1_ID::initLevelsFromDict()
   }
   else 
     {
-      strg= "initLevelsFromDict - unable to find 'DetZside' field ";
-      if(m_msgSvc) 
-	{
-	  log << MSG::ERROR << strg << endmsg;
-	}
-      else 
-	{
-	  std::cout << strg << std::endl;
-	}	
+      ATH_MSG_ERROR("initLevelsFromDict - unable to find 'DetZside' field ");
       return (1);
     }
  
@@ -798,14 +605,7 @@ int   CaloLVL1_ID::initLevelsFromDict()
   }
   else 
     {
-      strg=  "initLevelsFromDict - unable to find 'LVL1sampling' field ";
-      if(m_msgSvc) {
-	log << MSG::ERROR << strg << endmsg;
-      }
-      else 
-	{
-	  std::cout << strg << std::endl;
-	}	
+      ATH_MSG_ERROR("initLevelsFromDict - unable to find 'LVL1sampling' field ");
       return (1);
     }
   
@@ -815,20 +615,9 @@ int   CaloLVL1_ID::initLevelsFromDict()
   }
   else 
     {
-      
-      strg="initLevelsFromDict - unable to find 'region' field ";
-      if(m_msgSvc) 
-	{
-	  log << MSG::ERROR << strg << endmsg;
-	}
-      else 
-	{
-	  std::cout << strg << std::endl;
-	}      
+      ATH_MSG_ERROR("initLevelsFromDict - unable to find 'region' field ");
       return (1);
   }
-
-  /* std::cout << "m_region= " << m_REGION_INDEX << std::endl; */
 
   field = m_dict->find_field("eta") ;
   if (field) {
@@ -836,15 +625,7 @@ int   CaloLVL1_ID::initLevelsFromDict()
   }
   else 
     {
-      strg= "initLevelsFromDict - unable to find 'eta' field ";
-      if(m_msgSvc) 
-	{
-	  log << MSG::ERROR << strg << endmsg;
-	}
-      else 
-	{
-	  std::cout << strg << std::endl;
-	}		
+      ATH_MSG_ERROR("initLevelsFromDict - unable to find 'eta' field ");
       return (1);
     }
   
@@ -854,16 +635,7 @@ int   CaloLVL1_ID::initLevelsFromDict()
   }
   else 
     {
-      
-      strg= "initLevelsFromDict - unable to find 'phi' field ";
-      if(m_msgSvc) 
-	{
-	  log << MSG::ERROR << strg << endmsg;
-	}
-      else 
-	{
-	  std::cout << strg << std::endl;
-	}          
+      ATH_MSG_ERROR("initLevelsFromDict - unable to find 'phi' field ");
       return (1);
     }
   
@@ -873,14 +645,7 @@ int   CaloLVL1_ID::initLevelsFromDict()
   }
   else 
     {
-      strg= "initLevelsFromDict - unable to find 'layer' field ";
-      if(m_msgSvc) {
-	log << MSG::ERROR << strg << endmsg;
-      }
-      else 
-	{
-	  std::cout << strg << std::endl;
-	}		
+      ATH_MSG_ERROR("initLevelsFromDict - unable to find 'layer' field ");
       return (1);
     }
   
@@ -896,59 +661,21 @@ int   CaloLVL1_ID::initLevelsFromDict()
   m_phi_impl      = region.implementation(m_PHI_INDEX);
   m_layer_impl    = region.implementation(m_LAYER_INDEX);
 
-  if (!m_quiet) {
-    strm1 << m_calo_impl.show_to_string();
-    strm2 << m_lvl1_impl.show_to_string();
-    strm3 << m_sampling_impl.show_to_string();
-    strm4 << m_region_impl.show_to_string();
-    strm5 << m_eta_impl.show_to_string();
-    strm6 << m_phi_impl.show_to_string();
-    strm7 << m_layer_impl.show_to_string();
-    strg = "decode index and bit fields for each level: ";
-    strg1= "calo  "+strm1.str();
-    strg2= "detzside  "+strm2.str();
-    strg3= "samp  "+strm3.str();
-    strg4= "reg  "+strm4.str();
-    strg5= "eta  "+strm5.str();
-    strg6= "phi  "+strm6.str();
-    strg7= "layer  "+strm7.str();
-    if(m_msgSvc) 
-    {
-      log << MSG::DEBUG << strg << endmsg;
-      log << MSG::DEBUG << strg1 << endmsg;
-      log << MSG::DEBUG << strg2 << endmsg;
-      log << MSG::DEBUG << strg3 << endmsg;
-      log << MSG::DEBUG << strg4 << endmsg;
-      log << MSG::DEBUG << strg5 << endmsg;
-      log << MSG::DEBUG << strg6 << endmsg;
-      log << MSG::DEBUG << strg7 << endmsg;
-    }
-    else 
-    {
-      std::cout << strg << std::endl;
-      std::cout << strg1 << std::endl;
-      std::cout << strg2 << std::endl;
-      std::cout << strg3 << std::endl;
-      std::cout << strg4 << std::endl;
-      std::cout << strg5 << std::endl;
-      std::cout << strg6 << std::endl;
-      std::cout << strg7 << std::endl;
-    }
-  }
-  
+  ATH_MSG_DEBUG("decode index and bit fields for each level: ");
+  ATH_MSG_DEBUG("calo  " << m_calo_impl.show_to_string());
+  ATH_MSG_DEBUG("detzside  " << m_lvl1_impl.show_to_string());
+  ATH_MSG_DEBUG("samp  " << m_sampling_impl.show_to_string());
+  ATH_MSG_DEBUG("reg  " << m_region_impl.show_to_string());
+  ATH_MSG_DEBUG("eta  " << m_eta_impl.show_to_string());
+  ATH_MSG_DEBUG("phi  " << m_phi_impl.show_to_string());
+  ATH_MSG_DEBUG("layer  " << m_layer_impl.show_to_string());
+
   return(0) ;
 }
 
 
 int   CaloLVL1_ID::init_hashes()
 {
-  MsgStream log(m_msgSvc, "CaloLVL1_ID" );
-  std::stringstream strm;
-  std::stringstream strm1;
-  std::stringstream strm2;
-  std::string strg;
-  std::string strg1;
-  std::string strg2;
   // tower hash
   m_tower_hash_max = m_full_tower_range.cardinality();
   m_tower_vec.resize(m_tower_hash_max);
@@ -968,40 +695,14 @@ int   CaloLVL1_ID::init_hashes()
 				       exp_id[m_PHI_INDEX] ) ;
       if(!(ids.insert(tow_id)).second)
 	{
-	  if(m_msgSvc)
-	    {
-	      log << MSG::ERROR << " init_hashes "
-		  << " duplicated id for TT id. nids= " << nids
-		  << " compact Id  " << endmsg; 
-	    }
-	  else
-	    {
-	      std::cout << " CaloLVL1_ID::init_hashes "
-	  		<< " Error: duplicated id for TT id. nids= " << nids
-	  		<< " compact Id " ;
-	      (*first).show();
-	      std::cout << " " << show_to_string(tow_id) << std::endl; 
-	    }
+	  ATH_MSG_ERROR("init_hashes duplicated id for TT id. nids= " << nids << " compact Id " << show_to_string(tow_id));
 	}
       nids++;
     }
   }
   if(ids.size() != m_tower_hash_max) 
     {
-      if( m_msgSvc)
-	{
-	  log << MSG::ERROR << " init_hashes "
-	      << " set size NOT EQUAL to hash max. size " << ids.size()
-	      << " hash max " << m_tower_hash_max
-	      << endmsg;
-	}
-      else
-	{
-	  std::cout << " CaloLVL1_ID::init_hashes "
-		    << " Error: set size NOT EQUAL to hash max. size " << ids.size()
-		    << " hash max " << m_tower_hash_max
-		    << std::endl;
-	}
+      ATH_MSG_ERROR("init_hashes set size NOT EQUAL to hash max. size " << ids.size() << " hash max " << m_tower_hash_max);
       return (1);
   }
 
@@ -1035,40 +736,14 @@ int   CaloLVL1_ID::init_hashes()
 					   exp_id[m_LAYER_INDEX] );
 	  if(!(ids.insert(lay_id)).second)
 	    {
-	      if(m_msgSvc)
-		{
-		  log << MSG::ERROR << " init_hashes "
-		      << " duplicated id for extended TT id. nids= " << nids
-		      << " compact Id  " << show_to_string(lay_id) << endmsg; 
-		}
-	      else
-		{
-		  std::cout << " CaloLVL1_ID::init_hashes "
-			    << " Error: duplicated id for extended TT id. nids= " << nids
-			    << " compact Id  " ;
-		  (*first).show();
-		  std::cout << show_to_string(lay_id) << std::endl;
-		}
+	      ATH_MSG_ERROR("init_hashes duplicated id for extended TT id. nids= " << nids << " compact Id " << show_to_string(lay_id));
 	    }
 	  nids++;
 	}
     }
   if(ids.size() != m_layer_hash_max) 
     {
-      if( m_msgSvc)
-	{
-	  log << MSG::ERROR << " init_hashes "
-	      << "  set size NOT EQUAL to hash max. size " << ids.size()
-	      << " hash max " << m_layer_hash_max
-	      << endmsg;
-	}
-      else
-	{
-	  std::cout << " CaloLVL1_ID::init_hashes "
-		    << " Error: set size NOT EQUAL to hash max. size " << ids.size()
-		    << " hash max " << m_layer_hash_max
-		    << std::endl;
-	}
+      ATH_MSG_ERROR("init_hashes set size NOT EQUAL to hash max. size " << ids.size() << " hash max " << m_layer_hash_max);
       return (1);
   }
 
@@ -1098,41 +773,14 @@ int   CaloLVL1_ID::init_hashes()
 					exp_id[m_REGION_INDEX] );
       if(!(ids.insert(reg_id)).second)
 	{
-	  if(m_msgSvc)
-	    {
-	      log << MSG::ERROR << " LArEM_ID::init_hashes "
-		  << "  duplicated id for region id. nids= " << nids
-		  << " compact Id  " << endmsg;
-	    }
-	  else
-	    {
-	      std::cout << " LArEM_ID::init_hashes "
-			<< " Error: duplicated id for region id. nids= " << nids
-			<< " compact Id  " ;
-	      (*first).show();
-	      std::cout << " " << show_to_string(reg_id) << std::endl;
-	      std::cout << std::endl;
-	    }
+	  ATH_MSG_ERROR("init_hashes duplicated id for region id. nids= " << nids << " compact Id " << show_to_string(reg_id));
 	}
       nids++;
     }
   }
   if(ids.size() != m_region_hash_max) 
     {
-      if(m_msgSvc)
-	{
-	  log << MSG::ERROR << " LArEM_ID::init_hashes "
-	      << "  set size NOT EQUAL to region hash max. size " << ids.size()
-	      << " region hash max " << m_region_hash_max
-	      << endmsg;
-	}
-      else
-	{
-	  std::cout << " LArEM_ID::init_hashes "
-		    << " Error: set size NOT EQUAL to region hash max. size " << ids.size()
-		    << " region hash max " << m_region_hash_max
-		    << std::endl;
-	}
+      ATH_MSG_ERROR("init_hashes set size NOT EQUAL to region hash max. size " << ids.size() << " region hash max " << m_region_hash_max);
       return (1);
     }
   nids=0;
@@ -1150,10 +798,6 @@ int   CaloLVL1_ID::init_hashes()
 
 int   CaloLVL1_ID::init_neighbors()
 {
-  MsgStream log(m_msgSvc, "CaloLVL1_ID" );
-  //  std::cout << " CaloLVL1_ID::init_neighbors " << std::endl;
-  //  std::cout << " m_tower_hash_max, NOT_VALID_HASH = " << m_tower_hash_max << " " << NOT_VALID_HASH << std::endl;
-
   m_prev_phi_vec.resize(m_tower_hash_max, NOT_VALID_HASH);
   m_next_phi_vec.resize(m_tower_hash_max, NOT_VALID_HASH);
   m_prev_eta_vec.resize(m_tower_hash_max, NOT_VALID_HASH);
@@ -1190,16 +834,7 @@ int   CaloLVL1_ID::init_neighbors()
 				exp_id[m_PHI_INDEX]);
       if (get_hash(id, hash_id,&tcontext)) 
 	{
-	  if( m_msgSvc )
-	    {
-	      log << MSG::ERROR << " init_neighbors - unable to get hash, compact = " << endmsg;
-	    }
-	  else
-	    {
-	      std::cout << " CaloLVL1_ID::init_neighbors - unable to get hash, compact = ";
-	      exp_id.show();
-	      std::cout << std::endl;
-	    }
+	  ATH_MSG_ERROR("init_neighbors - unable to get hash, compact");
 	  return (1);
 	}
       
@@ -1218,18 +853,8 @@ int   CaloLVL1_ID::init_neighbors()
 	// forward to compact -> hash
 	if (get_hash(id, hash_id,&tcontext)) 
 	  {
-	  if( m_msgSvc )
-	    {
-	      log << MSG::ERROR << " init_neighbors - unable to get previous phi hash, exp/compact " << endmsg;
-	    }
-	  else
-	    {
-	      std::cout << " CaloLVL1_ID::init_neighbors - unable to get previous phi hash, exp/compact ";
-	      exp_id.show();
-	      std::cout << " " 
-			<< std::endl;
-	    }
-	  return (1);
+	    ATH_MSG_ERROR("init_neighbors - unable to get previous phi hash, exp/compact");
+	    return (1);
 	  }
 	m_prev_phi_vec[index] = hash_id;
       }
@@ -1242,17 +867,7 @@ int   CaloLVL1_ID::init_neighbors()
 	// forward to compact -> hash
 	if (get_hash(id, hash_id,&tcontext)) 
 	  {
-	    if(m_msgSvc)
-	      {
-		log << MSG::ERROR << " init_neighbors - unable to get next phi hash, exp/compact "<<endmsg;
-	      }
-	    else
-	      {
-		std::cout << " CaloLVL1_ID::init_neighbors - unable to get next phi hash, exp/compact ";
-		exp_id.show();
-		std::cout << " " 
-			  << std::endl;
-	      }
+	    ATH_MSG_ERROR("init_neighbors - unable to get next phi hash, exp/compact");
 	    return (1);
 	}
 	m_next_phi_vec[index] = hash_id;
@@ -1265,17 +880,7 @@ int   CaloLVL1_ID::init_neighbors()
 	// forward to compact -> hash
 	if (get_hash(id, hash_id,&tcontext)) 
 	  {
-	    if( m_msgSvc )
-	      {
-		log << MSG::ERROR << " init_neighbors - unable to get previous eta hash, exp/compact "<< endmsg;
-	      }
-	    else
-	      {
-		std::cout << " CaloLVL1_ID::init_neighbors - unable to get previous eta hash, exp/compact ";
-		exp_id.show();
-		std::cout << " " 
-			  << std::endl;
-	      }
+	    ATH_MSG_ERROR("init_neighbors - unable to get previous eta hash, exp/compact");
 	    return (1);
 	  }
 	m_prev_eta_vec[index] = hash_id;
@@ -1289,17 +894,7 @@ int   CaloLVL1_ID::init_neighbors()
 	// forward to compact -> hash
 	if (get_hash(id, hash_id,&tcontext)) 
 	  {
-	    if( m_msgSvc )
-	      {
-		log << MSG::ERROR << " init_neighbors - unable to get next eta hash, exp/compact ";
-	      }
-	    else
-	      {
-		std::cout << " CaloLVL1_ID::init_neighbors - unable to get next eta hash, exp/compact ";
-		exp_id.show();
-		std::cout << " " 
-			  << std::endl;
-	      }
+	    ATH_MSG_ERROR("init_neighbors - unable to get next eta hash, exp/compact");
 	    return (1);
 	  }
 	m_next_eta_vec[index] = hash_id;

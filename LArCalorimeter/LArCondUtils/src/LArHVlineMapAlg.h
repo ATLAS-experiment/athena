@@ -5,7 +5,7 @@
 #ifndef LARCONDUTILS_LARHVLINEMAPALG_H
 #define LARCONDUTILS_LARHVLINEMAPALG_H
 
-#include "AthenaBaseComps/AthReentrantAlgorithm.h"
+#include "AthenaBaseComps/AthCondAlgorithm.h"
 #include "StoreGate/WriteCondHandleKey.h"
 #include "StoreGate/ReadCondHandleKey.h"
 #include "LArCabling/LArOnOffIdMapping.h"
@@ -20,7 +20,7 @@
 class HWIdentifier;
 class CaloCell_ID;
 
-class LArHVlineMapAlg:public AthReentrantAlgorithm {
+class LArHVlineMapAlg:public AthCondAlgorithm {
  
  public: 
    LArHVlineMapAlg(const std::string& name, ISvcLocator* pSvcLocator);

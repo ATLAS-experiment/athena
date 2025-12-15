@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //////////////////////////////////////////////////////////////////
@@ -37,8 +37,8 @@ class IEventPropertyNtupleTool : virtual public IAlgTool {
   static const InterfaceID& interfaceID();
 
   //! make active track collections known to tool, such that a delayed addition to tree is possible
-  virtual void registerTrackCollections ( std::vector<std::string>,
-                                                bool ) = 0;
+  virtual void registerTrackCollections ( const std::vector<std::string> & collections,
+                                                bool doTruth) = 0;
 
   /*
     virtual void registerTrackParticleCollections ( std::vector<std::string>,

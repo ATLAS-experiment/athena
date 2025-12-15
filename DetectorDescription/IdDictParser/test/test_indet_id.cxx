@@ -483,7 +483,7 @@ int main (int argc, char* argv[])  {
         std::cout << "Unable to verify dictionary " << dictionary->name() << std::endl;
       }
       Identifier packedB((Identifier::value_type)0);
-      dictionary->pack32 (id, 0, 6, packedB); 
+      if (dictionary->pack32 (id, 0, 6, packedB)) std::abort();
       std::cout << "b=[" << packedB << "]" << std::endl; 
       ExpandedIdentifier id2;
       dictionary->unpack ("pixel", packedB, ExpandedIdentifier (), 6, id2);

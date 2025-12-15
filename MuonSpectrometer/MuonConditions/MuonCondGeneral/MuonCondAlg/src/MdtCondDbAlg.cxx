@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonCondAlg/MdtCondDbAlg.h"
@@ -16,7 +16,7 @@ using namespace MuonCond;
 using namespace CxxUtils;
 // constructor
 MdtCondDbAlg::MdtCondDbAlg(const std::string& name, ISvcLocator* pSvcLocator) :
-    AthReentrantAlgorithm(name, pSvcLocator) {}
+    AthCondAlgorithm(name, pSvcLocator) {}
 
 // Initialize
 StatusCode MdtCondDbAlg::initialize() {
@@ -473,7 +473,7 @@ StatusCode MdtCondDbAlg::loadMcDeadTubes(const EventContext& ctx, MdtCondDbData&
         std::string chamber_name = *(static_cast<const std::string*>((atr["Chamber_Name"]).addressOfData()));
 
         auto tokens = tokenize(dead_tube, " ");
-        Identifier ChamberId = identifyChamber(chamber_name);
+        Identifier ChamberId = identifyChamber(std::move(chamber_name));
 
         for (auto & token : tokens) {
             int ml = atoi(token.substr(0, 1));

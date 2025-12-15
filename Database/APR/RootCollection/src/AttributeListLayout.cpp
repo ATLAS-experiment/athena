@@ -5,8 +5,8 @@
 #include "RootCollection.h"
 #include "RootCollection/AttributeListLayout.h"
 
-#include "CollectionBase/CollectionDescription.h"
-#include "CollectionBase/CollectionColumn.h"
+#include "CollectionSvc/CollectionDescription.h"
+#include "CollectionSvc/CollectionColumn.h"
 
 #include "POOLCore/DbPrint.h"
 #include "CoralBase/Attribute.h"
@@ -27,13 +27,11 @@ AttributeListLayout::AttributeListLayout( const pool::ICollectionDescription& de
    for( int col_id = 0; col_id < desc.numberOfTokenColumns(); col_id++ ) {
          const ICollectionColumn&        column = desc.tokenColumn(col_id);
          m_layout.push_back( make_pair( column.name(), column.type() ) );
-         m_annotations.push_back( column.annotation() );
    }
 
    for( int col_id = 0; col_id < desc.numberOfAttributeColumns(); col_id++ ) {
          const ICollectionColumn& column = desc.attributeColumn(col_id);
          m_layout.push_back( make_pair( column.name(), column.type() ) );
-         m_annotations.push_back( column.annotation() );
    }
    m_eventRefColumnName = desc.eventReferenceColumnName();
 }
@@ -46,15 +44,13 @@ void AttributeListLayout::fillDescription( pool::CollectionDescription& desc )
    }
    desc.setEventReferenceColumnName( m_eventRefColumnName );
       
-   size_t        annots_n = m_annotations.size();
    for( size_t i = 0; i < m_layout.size(); i++ ) {
       std::string column_name = m_layout[i].first;
       if( !i && column_name == "EVENT_REFERENCE" ) {
          // apparently some older collections stored "EVENT_REFERENCE" in the description
          column_name = m_eventRefColumnName;
       }
-      const std::string& annotation = ( i<annots_n? m_annotations[i] : "" ); 
-      desc.insertColumn( column_name, m_layout[i].second, annotation );
+      desc.insertColumn( column_name, m_layout[i].second );
    }
 }
 

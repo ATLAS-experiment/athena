@@ -4,7 +4,7 @@
 #ifndef BEAMSPOT_CONDITIONSALGS_BEAMSPOTCONDALG_H
 #define BEAMSPOT_CONDITIONSALGS_BEAMSPOTCONDALG_H 1
 
-#include "AthenaBaseComps/AthReentrantAlgorithm.h"
+#include "AthenaBaseComps/AthCondAlgorithm.h"
 #include "StoreGate/ReadCondHandleKey.h"
 #include "StoreGate/WriteCondHandleKey.h"
 #include "AthenaPoolUtilities/AthenaAttributeList.h"
@@ -14,7 +14,7 @@
 
 #include "BeamSpotConditionsData/BeamSpotData.h"
 
-class BeamSpotCondAlg : public AthReentrantAlgorithm
+class BeamSpotCondAlg : public AthCondAlgorithm
 {
  public:
   BeamSpotCondAlg( const std::string& name, ISvcLocator* pSvcLocator );
@@ -23,7 +23,6 @@ class BeamSpotCondAlg : public AthReentrantAlgorithm
   //IS EXECUTED:
   virtual StatusCode  initialize() override final; //once, before any input is loaded
   virtual StatusCode execute(const EventContext& ctx) const override final;//per event
-  virtual bool isReEntrant() const override final { return false; }
   static const EventIDRange alwaysValid;
 
  private:

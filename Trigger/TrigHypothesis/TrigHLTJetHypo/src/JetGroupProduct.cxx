@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "./JetGroupProduct.h"
@@ -53,7 +53,7 @@ void JetGroupProduct::init(const std::vector<std::size_t>& siblings,
   }
 
 
-  auto streamer = make_jetstream(condIndices, repeats, 0);
+  auto streamer = make_jetstream(std::move(condIndices), std::move(repeats), 0);
   m_jetstreamer.reset(new JetStreamer(std::move(streamer)));
 }
   

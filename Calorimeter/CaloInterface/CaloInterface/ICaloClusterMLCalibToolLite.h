@@ -17,7 +17,7 @@ public:
 
   virtual StatusCode inference(const xAOD::CaloClusterContainer &clusters,
                                int nPrimVtx,
-                               double avgMu,
+                               float avgMu,
                                std::vector<double> &clusterE_ML,
                                std::vector<double> &clusterE_ML_Unc) const = 0;
 };

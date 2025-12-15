@@ -23,7 +23,7 @@ namespace FPGATrackSim {
         SG::ReadHandle<FPGATrackSimTrackCollection> tracksHandle{m_FPGATrackCollectionKey, ctx};
         SG::ReadHandle<xAOD::PixelClusterContainer> pixelClustersHandle{m_pixelClusterContainerKey, ctx};
         SG::ReadHandle<xAOD::SpacePointContainer> spacePointsHandle{m_spacePointContainerKey, ctx};
-	
+    
         ATH_CHECK(tracksHandle.isValid());
         ATH_CHECK(pixelClustersHandle.isValid());
         ATH_CHECK(spacePointsHandle.isValid());
@@ -32,46 +32,50 @@ namespace FPGATrackSim {
         ATH_CHECK(seedHandle.record(std::make_unique<ActsTrk::SeedContainer>()));
         ActsTrk::SeedContainer* seeds = seedHandle.ptr();
 
-
-        std::multimap<xAOD::DetectorIDHashType, Acts::SpacePointIndex2> spacePointMap;
+        // Use a map since identifiers are unique
+        std::map<Identifier::value_type, Acts::SpacePointIndex2> spacePointMap;
         seeds->spacePoints().reserve(spacePointsHandle->size());
-        // Populate the multimap with Pixel cluster hashID as key.
-        // Only space points with one measurement are considered (i.e. pixels)
+        
+        // Populate the map with pixel cluster identifier (rdoID) as key.
+        // Only space points with one measurement are considered (i.e. pixels). In case strips are needed the code should not be based on the one-measurement-per-space-point assumption.
         for (const xAOD::SpacePoint* spacePoint : *spacePointsHandle) {
             if (!spacePoint->measurements().empty()) {
-            seeds->spacePoints().push_back(spacePoint);
-            spacePointMap.emplace(spacePoint->measurements().at(0)->identifierHash(), seeds->spacePoints().size()-1ul);
+                seeds->spacePoints().push_back(spacePoint);
+                const auto identifier = spacePoint->measurements().at(0)->identifier();
+                
+                // Check for duplicates (shouldn't happen if all works as expected)
+                auto [it, inserted] = spacePointMap.emplace(identifier, seeds->spacePoints().size()-1ul);
+                if (!inserted) {
+                    ATH_MSG_ERROR("Duplicate identifier 0x" << std::hex << identifier << std::dec 
+                                  << " found for space point. Keeping first occurrence.");
+                }
             }
         }
 
         seeds->reserve(tracksHandle->size());
         // loop over the tracks and make seeds based on the hits in FPGATrackSimTracks
         for (const auto& track : *tracksHandle) {
-            std::vector<const FPGATrackSimHit*> hitsToStoreInSeed;
             std::vector<Acts::SpacePointIndex2> spacePointsToStoreInSeed;
             for (const FPGATrackSimHit& hit : track.getFPGATrackSimHits()) {
                 if (hit.isReal() && hit.isPixel()) {
-                    ATH_MSG_DEBUG("Hit coordinates in module " << hit.getIdentifierHash() << ": (" << hit.getPhiCoord() << ", " << hit.getEtaCoord() << ")");
-                    // find in the multimap the SP that matches this globalPosition
-                    auto range = spacePointMap.equal_range(hit.getIdentifierHash());
-                    for (auto it = range.first; it != range.second; ++it) {
-                        const xAOD::SpacePoint* spacePoint = seeds->spacePoints().at(it->second);
-                        constexpr float kEpsilon = std::numeric_limits<float>::epsilon();
-                        if (std::abs(hit.getPhiCoord() - spacePoint->measurements().at(0)->localPosition<2>()[0]) < kEpsilon &&
-                            std::abs(hit.getEtaCoord() - spacePoint->measurements().at(0)->localPosition<2>()[1]) < kEpsilon) {
-                            spacePointsToStoreInSeed.push_back(it->second);
-                            if (spacePointsToStoreInSeed.size() == m_maxSpacePointsPerSeed) break; // stop if max reached
-                        }
-                        else
-                        {
-                            // printout SP coordinates to see why the above check fails
-                            ATH_MSG_DEBUG("SpacePoint coordinates: (" << spacePoint->measurements().at(0)->localPosition<2>()[0] << ", " << spacePoint->measurements().at(0)->localPosition<2>()[1] << ")");
-                        }
+                    ATH_MSG_DEBUG("Hit coordinates in module " << hit.getRdoIdentifier() 
+                                  << ": (" << hit.getPhiCoord() << ", " << hit.getEtaCoord() << ")");
+                    
+                    // map lookup
+                    auto it = spacePointMap.find(hit.getRdoIdentifier());
+                    if (it != spacePointMap.end()) {
+                        spacePointsToStoreInSeed.push_back(it->second);
+                    } else {
+                        ATH_MSG_ERROR("No SP found for hit identifier 0x"
+                                      << std::hex << hit.getRdoIdentifier() << std::dec);
                     }
-                    if (spacePointsToStoreInSeed.size() == m_maxSpacePointsPerSeed) break; // stop in case we reach the maximum number of space points allowed
+                    
+                    // stop in case we reach the maximum number of space points allowed
+                    if (spacePointsToStoreInSeed.size() == m_maxSpacePointsPerSeed) break; 
                 }
             }
-            // construct seed based on the space points stored in the vector
+            
+            // Construct seed based on the space points stored in the vector
             if (spacePointsToStoreInSeed.size() >= m_minSpacePointsPerSeed) { // check that seeds contains at least the minimum number of desired space points
                 auto seed = seeds->push_back(spacePointsToStoreInSeed);
                 seed.vertexZ() = track.getZ0();

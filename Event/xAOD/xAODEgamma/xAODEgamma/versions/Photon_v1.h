@@ -62,6 +62,22 @@ namespace xAOD {
 
     /// @brief The type of the object as a simple enumeration
     virtual Type::ObjectType type() const override final; //Always a Photon .
+
+    /// @}
+
+    /// @name xAOD::IParticle functions
+    /// These are already virtual due to IParticle
+    /// @{
+
+    /// @brief The invariant mass of the particle
+    virtual double           m() const override final;
+
+    /// The total energy of the particle
+    virtual double           e() const  override final;
+
+    /// @brief The true rapidity (y) of the particle
+    virtual double           rapidity() const override final;
+
     /// @}
 
     /// @name xAOD::vertex Pointers to  vertices

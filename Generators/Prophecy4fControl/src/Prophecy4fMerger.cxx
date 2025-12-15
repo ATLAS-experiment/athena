@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #include "Prophecy4fMerger.h"
 #include "TLorentzRotation.h"
@@ -11,8 +11,9 @@ namespace LHEF {
 using Reader = Pythia8::Reader;
 using Writer = Pythia8::Writer;
 }
-#include <string>
+#include <cmath>
 #include <iostream>
+#include <algorithm>
 #include <AsgMessaging/MessageCheck.h>
 
 using namespace asg::msgUserCode;
@@ -282,11 +283,11 @@ void Prophecy4fMerger::merge(){
         }
         writeLHE.hepeup = readH.hepeup;
 
-        double P4_Z[5][2] = {{0}}; // momentum and mass of Zi i=1,2 set to 0 P4_Z[5] = (px, py, pz, E, mZ)
-        double P4_l[5][5];
+        double P4_Z[5][2]{}; // momentum and mass of Zi i=1,2 set to 0 P4_Z[5] = (px, py, pz, E, mZ)
+        double P4_l[5][5]{};
     
         double Pph[5] = {-999., -999., -999., -999., -999.};
-        double daughter2[5][5];
+        double daughter2[5][5]{};
     
         for(int i=0; i<nup_org; i++){
             if(readH.hepeup.IDUP[i]==m_higgsID) {

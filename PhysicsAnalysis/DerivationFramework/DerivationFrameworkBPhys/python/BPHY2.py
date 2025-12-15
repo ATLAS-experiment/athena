@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 #====================================================================
 # BPHY2.py
@@ -13,13 +13,12 @@ streamName = "StreamDAOD_BPHY2"
 
 
 def BPHY2Cfg(flags):
-    from DerivationFrameworkBPhys.commonBPHYMethodsCfg import (BPHY_V0ToolCfg,  BPHY_InDetDetailedTrackSelectorToolCfg, BPHY_VertexPointEstimatorCfg, BPHY_TrkVKalVrtFitterCfg)
+    from DerivationFrameworkBPhys.commonBPHYMethodsCfg import (
+        BPHY_V0ToolCfg,  BPHY_InDetDetailedTrackSelectorToolCfg,
+        BPHY_VertexPointEstimatorCfg, BPHY_TrkVKalVrtFitterCfg,
+        AugOriginalCountsCfg)
     from JpsiUpsilonTools.JpsiUpsilonToolsConfig import PrimaryVertexRefittingToolCfg
     acc = ComponentAccumulator()
-    BPHY2_AugOriginalCounts = CompFactory.DerivationFramework.AugOriginalCounts(
-       name = "BPHY2_AugOriginalCounts",
-       VertexContainer = "PrimaryVertices",
-       TrackContainer = "InDetTrackParticles" )
     isSimulation = flags.Input.isMC
  
     V0Tools = acc.popToolsAndMerge(BPHY_V0ToolCfg(flags, BPHYDerivationName))
@@ -122,6 +121,9 @@ def BPHY2Cfg(flags):
       MassMin                    = 5000.0,
       MassMax                    = 5800.0,
       Chi2Max                    = 200)
+
+    BPHY2_AugOriginalCounts = acc.popToolsAndMerge(
+        AugOriginalCountsCfg(flags, name = "BPHY2_AugOriginalCounts"))
  
     #Thinning tools
  
@@ -164,14 +166,17 @@ def BPHY2Cfg(flags):
 
 
     thiningCollection = [BPHY2_thinningTool_Tracks, BPHY2_thinningTool_TracksPsi, BPHY2_thinningTool_PV, BPHY2MuonTPThinningTool]
-    augCollection = [ BPHY2JpsiSelectAndWrite, BPHY2BsKKSelectAndWrite, BPHY2_Select_Psi2mumu, BPHY2_Select_Jpsi2mumu, BPHY2_Select_Bs2JpsiKK, BPHY2_AugOriginalCounts]
+    augCollection = [BPHY2JpsiSelectAndWrite, BPHY2BsKKSelectAndWrite,
+                     BPHY2_Select_Psi2mumu, BPHY2_Select_Jpsi2mumu,
+                     BPHY2_Select_Bs2JpsiKK, BPHY2_AugOriginalCounts]
+    for t in  augCollection + thiningCollection : acc.addPublicTool(t)
+    
     acc.addEventAlgo(CompFactory.DerivationFramework.DerivationKernel("BPHY2Kernel",
                                                      AugmentationTools = augCollection,
                                                      #Only skim if not MC
                                                      SkimmingTools     = [BPHY2SkimmingOR] if not isSimulation else [],
                                                      ThinningTools     = thiningCollection))
  
-    for t in  augCollection + thiningCollection : acc.addPublicTool(t)
     from DerivationFrameworkCore.SlimmingHelper import SlimmingHelper
     from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
     from xAODMetaDataCnv.InfileMetaDataConfig import SetupMetaDataForStreamCfg

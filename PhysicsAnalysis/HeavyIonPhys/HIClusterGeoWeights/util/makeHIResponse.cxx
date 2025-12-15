@@ -131,6 +131,7 @@ int main(int argc, char **argv) {
   std::unique_ptr<TH3F> response;
   std::unique_ptr<TH3F> offset;
   std::unique_ptr<TH3F> entries;
+  std::unique_ptr<TH2F> etaPhiMap;
 
   // loop over runs
   for (unsigned int r = 0; r < runs.size(); r++) {
@@ -152,7 +153,6 @@ int main(int argc, char **argv) {
     std::cout << "Opened " << filesNum << " file" << (filesNum > 1 ? "s" : "") << " with pattern " << fileNamePattern 
     << ", processing the run " << run << std::endl;
 
-    std::unique_ptr<TH2F> etaPhiMap;
     std::unique_ptr<TH2F> sums;
 
     // for each file matching the pattern

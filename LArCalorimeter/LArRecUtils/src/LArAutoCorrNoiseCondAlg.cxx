@@ -12,7 +12,7 @@
 #include "GaudiKernel/EventIDRange.h"
 
 LArAutoCorrNoiseCondAlg::LArAutoCorrNoiseCondAlg( const std::string& name, ISvcLocator* pSvcLocator )
-    : ::AthAlgorithm( name, pSvcLocator )
+    : ::AthCondAlgorithm( name, pSvcLocator )
     , m_LArOnOffIdMappingObjKey( "LArOnOffIdMap" )
     , m_LArMCSymObjKey( "LArMCSym" )
     , m_LArAutoCorrObjKey( "LArAutoCorrSym" )
@@ -49,11 +49,11 @@ StatusCode LArAutoCorrNoiseCondAlg::initialize()
   return StatusCode::SUCCESS;
 }
 
-StatusCode LArAutoCorrNoiseCondAlg::execute()
+StatusCode LArAutoCorrNoiseCondAlg::execute(const EventContext& ctx) const
 {
 
   // WriteHandle setup
-  SG::WriteCondHandle<LArAutoCorrNoise> writeHandle( m_LArAutoCorrNoiseObjKey );
+  SG::WriteCondHandle<LArAutoCorrNoise> writeHandle( m_LArAutoCorrNoiseObjKey, ctx );
   if ( writeHandle.isValid() ) {
     ATH_MSG_DEBUG( "CondHandle " << writeHandle.fullKey() << " is already valid." );
     return StatusCode::SUCCESS;
@@ -72,7 +72,7 @@ StatusCode LArAutoCorrNoiseCondAlg::execute()
   }
   // Mapping helper
   const LArOnOffIdMapping*              larOnOffIdMapping = nullptr;
-  SG::ReadCondHandle<LArOnOffIdMapping> larOnOffIdMappingHdl{m_LArOnOffIdMappingObjKey};
+  SG::ReadCondHandle<LArOnOffIdMapping> larOnOffIdMappingHdl{m_LArOnOffIdMappingObjKey, ctx};
   larOnOffIdMapping = *larOnOffIdMappingHdl;
   if ( larOnOffIdMapping == nullptr ) {
     ATH_MSG_ERROR( "Failed to retrieve LArOnOffIdMapping object" );
@@ -81,19 +81,19 @@ StatusCode LArAutoCorrNoiseCondAlg::execute()
   // MC symmetrization helper
   const LArMCSym*              larMCsym = nullptr;
   if ( !m_isSuperCell && m_MCsym ) {
-  SG::ReadCondHandle<LArMCSym> larMCsymHdl{m_LArMCSymObjKey};
-  larMCsym = *larMCsymHdl;
-  if ( larMCsym == nullptr ) {
-    ATH_MSG_ERROR( "Failed to retrieve LArMCSym object" );
-    return StatusCode::FAILURE;
-  }
+    SG::ReadCondHandle<LArMCSym> larMCsymHdl{m_LArMCSymObjKey, ctx};
+    larMCsym = *larMCsymHdl;
+    if ( larMCsym == nullptr ) {
+      ATH_MSG_ERROR( "Failed to retrieve LArMCSym object" );
+      return StatusCode::FAILURE;
+    }
   }
 
   // Get pointers to inputs
   // Retrieve validity ranges and determine their intersection
   EventIDRange rangeAutoCorr;
 
-  SG::ReadCondHandle<ILArAutoCorr> AutoCorrHdl{m_LArAutoCorrObjKey};
+  SG::ReadCondHandle<ILArAutoCorr> AutoCorrHdl{m_LArAutoCorrObjKey, ctx};
   const ILArAutoCorr*              larAutoCorr{*AutoCorrHdl};
   if ( !AutoCorrHdl.range( rangeAutoCorr ) ) {
     ATH_MSG_ERROR( "Failed to retrieve validity range for " << AutoCorrHdl.key() );

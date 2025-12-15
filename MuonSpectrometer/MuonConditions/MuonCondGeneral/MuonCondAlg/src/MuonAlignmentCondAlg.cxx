@@ -19,7 +19,7 @@
 #include "SGTools/TransientAddress.h"
 
 MuonAlignmentCondAlg::MuonAlignmentCondAlg(const std::string& name, ISvcLocator* pSvcLocator) :
-    AthReentrantAlgorithm(name, pSvcLocator) {
+    AthCondAlgorithm(name, pSvcLocator) {
    
 }
 

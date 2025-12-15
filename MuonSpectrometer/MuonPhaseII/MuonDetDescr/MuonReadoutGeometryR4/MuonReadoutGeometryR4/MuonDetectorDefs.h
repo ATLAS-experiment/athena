@@ -18,9 +18,24 @@
 
 #include <functional>
 
+#ifndef SIMULATIONBASE
+#   include "Acts/Geometry/VolumeBounds.hpp"
+#endif
+
+namespace Acts{
+    class VolumeBounds;
+}
+
 //// This header contains common helper utilities and definitions
-namespace MuonGMR4 {   
- 
+namespace MuonGMR4 {
+    /** @brief Returns the half-X length @ negative Y for the parsed volume bounds (Trapezoid/ Cuboid) */
+    double halfXlowY(const Acts::VolumeBounds& bounds);
+    /** @brief Returns the half-Y length @ posiive Y for the parsed volume bounds (Trapezoid/ Cuboid) */
+    double halfXhighY(const Acts::VolumeBounds& bounds);
+    /** @brief Returns the half-Y length for the parsed volume bounds (Trapezoid/ Cuboid) */
+    double halfY(const Acts::VolumeBounds& bounds);
+    /** @brief Returns the half-Z length for the parsed volume bounds (Trapezoid/ Cuboid) */
+    double halfZ(const Acts::VolumeBounds& bounds);
 }  // namespace MuonGMR4
 
 #endif

@@ -159,7 +159,7 @@ private:
   {
     Accessors(AsgPhotonEfficiencyCorrectionTool& tool) : columnar::ColumnarTool<>(&tool) {}
 
-    columnar::EventInfoAccessor<columnar::ObjectColumn> eventInfoAcc {*this, "EventInfo"};
+    columnar::EventInfoAccessor<columnar::ObjectColumn> eventInfoAcc {*this, "EventInfo", {.addMTDependency=true}};
     columnar::EgammaAccessor<columnar::ObjectColumn> photonsAcc {*this, "Photons"};
     columnar::ClusterAccessor<columnar::ObjectColumn> clusterAcc {*this, "egammaClusters"};
     columnar::VertexAccessor<columnar::ObjectColumn> verticesAcc {*this, "GSFConversionVertices"};

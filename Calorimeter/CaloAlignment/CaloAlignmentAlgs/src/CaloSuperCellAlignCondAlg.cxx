@@ -20,9 +20,8 @@ StatusCode CaloSuperCellAlignCondAlg::initialize()
   return StatusCode::SUCCESS;
 }
 
-StatusCode CaloSuperCellAlignCondAlg::execute()
+StatusCode CaloSuperCellAlignCondAlg::execute(const EventContext& ctx) const
 {
-  const EventContext& ctx = Gaudi::Hive::currentContext();
   // ____________ Construct Write Cond Handle and check its validity ____________
   SG::WriteCondHandle<CaloSuperCellDetDescrManager> writeCaloSuperCellMgrHandle{m_writeCaloSuperCellMgrKey,ctx};
   if (writeCaloSuperCellMgrHandle.isValid()) {

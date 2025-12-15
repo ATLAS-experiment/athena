@@ -64,7 +64,6 @@ bool RecordingEnvelope::Initialize()
 void RecordingEnvelope::BeginOfEvent(TrackRecordCollection* trackRecordCollection)
 {
   m_trackRecordCollection = trackRecordCollection;
-  return;
 }
 void RecordingEnvelope::AddTrackRecord(const G4Step* aStep)
 {
@@ -85,6 +84,4 @@ void RecordingEnvelope::AddTrackRecord(const G4Step* aStep)
   G4VPhysicalVolume *preVol=preStep->GetPhysicalVolume();
 
   m_trackRecordCollection->Emplace(pdgcode,status,ener,mom,pos,time,barcode,id,preVol->GetName());
-
-  return;
 }

@@ -222,43 +222,43 @@ private:
 // ReadDecorHandle<T, D> makeHandle (const ReadDecorHandleKey<T>& key);
 
 
-// /**
-//  * @brief Return a @c ReadDecorHandle referencing @c key for an explicit context.
-//  * @param key The key object holding the clid/key/store.
-//  * @param ctx The event context.
-//  *
-//  * This will raise an exception if the StoreGate key is blank,
-//  * or if the event store cannot be found.
-//  *
-//  * If the default event store has been requested, then the thread-specific
-//  * store from the event context will be used.
-//  *
-//  * The type of the decoration must be included as an explicit template parameter:
-//  *
-//  *@code
-//  *   auto handle = SG::makeHandle<float> (key, ctx);
-//  @endcode
-//  *
-//  * Note that @c D comes first in the argument list.  It's given explicitly,
-//  * while @c T is inferred from @c key.
-//  */
-// template <class D, class T>
-// ReadDecorHandle<T, D> makeHandle (const ReadDecorHandleKey<T>& key,
-//                                   const EventContext& ctx);
+/**
+ * @brief Return a @c ReadDecorHandle referencing @c key for an explicit context.
+ * @param key The key object holding the clid/key/store.
+ * @param ctx The event context.
+ *
+ * This will raise an exception if the StoreGate key is blank,
+ * or if the event store cannot be found.
+ *
+ * If the default event store has been requested, then the thread-specific
+ * store from the event context will be used.
+ *
+ * The type of the decoration must be included as an explicit template parameter:
+ *
+ *@code
+ *   auto handle = SG::makeHandle<float> (key, ctx);
+ @endcode
+ *
+ * Note that @c D comes first in the argument list.  It's given explicitly,
+ * while @c T is inferred from @c key.
+ */
+template <class D, class T>
+ReadDecorHandle<T, D> makeHandle (const ReadDecorHandleKey<T>& key,
+                                  const EventContext& ctx);
 
 
-// /**
-//  * @brief These two signatures are to catch cases where the explicit
-//  *        template argument is omitted from the @c makeHandle call
-//  *        and give an error tailored to that.  Otherwise, the @c makeHandle
-//  *        call for @c ReadHandle would match, potentially giving a much
-//  *        more confusing error.
-//  */
-// template <class T>
-// void makeHandle (const ReadDecorHandleKey<T>& key);
-// template <class T>
-// void makeHandle (const ReadDecorHandleKey<T>& key,
-//                  const EventContext& ctx);
+/**
+ * @brief These two signatures are to catch cases where the explicit
+ *        template argument is omitted from the @c makeHandle call
+ *        and give an error tailored to that.  Otherwise, the @c makeHandle
+ *        call for @c ReadHandle would match, potentially giving a much
+ *        more confusing error.
+ */
+template <class T>
+void makeHandle (const ReadDecorHandleKey<T>& key);
+template <class T>
+void makeHandle (const ReadDecorHandleKey<T>& key,
+                 const EventContext& ctx);
 
 
 } // namespace SG

@@ -128,6 +128,19 @@ private:
   virtual void fillHistogram(const xAOD::DiTauJet& xTau, TH1F& hHist) const override;
 };
 
+// class to perform ditau ID selection based on WPs
+class DiTauSelectionCutOmniIDWP
+  : public DiTauSelectionCut
+{
+public:
+  DiTauSelectionCutOmniIDWP(DiTauSelectionTool* tDTST);
+  virtual void setAcceptInfo (asg::AcceptInfo& info) const override;
+  virtual bool accept(const xAOD::DiTauJet& xTau,
+                      asg::AcceptData& accept) override;
+private:
+  virtual void fillHistogram(const xAOD::DiTauJet& xTau, TH1F& hHist) const override;
+};
+
 }
 
 #endif // TAUANALYSISTOOLS_DITAUSELECTIONCUTS_H

@@ -9,10 +9,6 @@
  * @brief Adds cell-level features as decorations to e/gamma objects.
  */
 
-/////////////////////////////////////////////////////////////////
-// CaloCellDecorator.cxx, (c) ATLAS Detector software
-///////////////////////////////////////////////////////////////////
-
 #include "DerivationFrameworkCalo/CaloCellDecorator.h"
 #include "CaloIdentifier/CaloCell_ID.h"
 #include "CaloUtils/CaloClusterStoreHelper.h"
@@ -33,49 +29,18 @@ DerivationFramework::CaloCellDecorator::initialize()
   ATH_CHECK(m_cablingKey.initialize());
 
   // Setup for photons
+  ATH_CHECK(m_SGKey_photons.initialize(SG::AllowEmpty));
   if (!m_SGKey_photons.key().empty()) {
-    const std::string key = m_SGKey_photons.key();
-    ATH_MSG_INFO("Using " << key << " for photons");
-    ATH_CHECK(m_SGKey_photons.initialize());
-
-    m_SGKey_photons_decorations.emplace_back(key + ".cells_E");
-    m_SGKey_photons_decorations.emplace_back(key + ".cells_time");
-    m_SGKey_photons_decorations.emplace_back(key + ".cells_eta");
-    m_SGKey_photons_decorations.emplace_back(key + ".cells_phi");
-    m_SGKey_photons_decorations.emplace_back(key + ".cells_x");
-    m_SGKey_photons_decorations.emplace_back(key + ".cells_y");
-    m_SGKey_photons_decorations.emplace_back(key + ".cells_z");
-    m_SGKey_photons_decorations.emplace_back(key + ".cells_gain");
-    m_SGKey_photons_decorations.emplace_back(key + ".cells_layer");
-    m_SGKey_photons_decorations.emplace_back(key + ".cells_quality");
-    m_SGKey_photons_decorations.emplace_back(key + ".cells_onlId");
-    m_SGKey_photons_decorations.emplace_back(key + ".ncells");
-
-    ATH_CHECK(m_SGKey_photons_decorations.initialize());
+    ATH_MSG_INFO("Using " << m_SGKey_photons.key() << " for photons");
   }
+  ATH_CHECK(m_SGKey_photons_decorations.initialize(!m_SGKey_photons.key().empty()));
 
   // Setup for electrons
+  ATH_CHECK(m_SGKey_electrons.initialize(SG::AllowEmpty));
   if (!m_SGKey_electrons.key().empty()) {
-    const std::string key = m_SGKey_electrons.key();
-    ATH_MSG_INFO("Using " << key << " for electrons");
-    ATH_CHECK(m_SGKey_electrons.initialize());
-
-    m_SGKey_electrons_decorations.emplace_back(key + ".cells_E");
-    m_SGKey_electrons_decorations.emplace_back(key + ".cells_time");
-    m_SGKey_electrons_decorations.emplace_back(key + ".cells_eta");
-    m_SGKey_electrons_decorations.emplace_back(key + ".cells_phi");
-    m_SGKey_electrons_decorations.emplace_back(key + ".cells_x");
-    m_SGKey_electrons_decorations.emplace_back(key + ".cells_y");
-    m_SGKey_electrons_decorations.emplace_back(key + ".cells_z");
-    m_SGKey_electrons_decorations.emplace_back(key + ".cells_gain");
-    m_SGKey_electrons_decorations.emplace_back(key + ".cells_layer");
-    m_SGKey_electrons_decorations.emplace_back(key + ".cells_quality");
-    m_SGKey_electrons_decorations.emplace_back(key + ".cells_onlId");
-    m_SGKey_electrons_decorations.emplace_back(key + ".ncells");
-
-    ATH_CHECK(m_SGKey_electrons_decorations.initialize());
-
+    ATH_MSG_INFO("Using " << m_SGKey_electrons.key() << " for electrons");
   }
+  ATH_CHECK(m_SGKey_electrons_decorations.initialize(!m_SGKey_electrons.key().empty()));
 
   return StatusCode::SUCCESS;
 
@@ -89,65 +54,65 @@ DerivationFramework::CaloCellDecorator::addBranches(const EventContext& ctx) con
 
     // Decorate photons
     ATH_CHECK(
-      DerivationFramework::CaloCellDecorator::decorateCells(
-        m_SGKey_photons,
-        m_SGKey_photons_decorations,
-        ctx
-      )
-    );
+              DerivationFramework::CaloCellDecorator::decorateCells(
+                                                                    m_SGKey_photons,
+                                                                    m_SGKey_photons_decorations,
+                                                                    ctx
+                                                                    )
+              );
 
   }
-    
+
   if (!m_SGKey_electrons.key().empty()) {
 
     // Decorate electrons
     ATH_CHECK(
-      DerivationFramework::CaloCellDecorator::decorateCells(
-        m_SGKey_electrons,
-        m_SGKey_electrons_decorations,
-        ctx
-      )
-    );
+              DerivationFramework::CaloCellDecorator::decorateCells(
+                                                                    m_SGKey_electrons,
+                                                                    m_SGKey_electrons_decorations,
+                                                                    ctx
+                                                                    )
+              );
 
   }
 
   return StatusCode::SUCCESS;
 }
 
-StatusCode 
+StatusCode
 DerivationFramework::CaloCellDecorator::decorateCells(
-  const SG::ReadHandleKey<xAOD::EgammaContainer>& contKey,
-  const SG::WriteDecorHandleKeyArray<xAOD::EgammaContainer>& decorKeys,
-  const EventContext& ctx) const
+                                                      const SG::ReadHandleKey<xAOD::EgammaContainer>& contKey,
+                                                      const SG::WriteDecorHandleKeyArray<xAOD::EgammaContainer>& decorKeys,
+                                                      const EventContext& ctx) const
 {
 
   // Retrieve container
   SG::ReadHandle<xAOD::EgammaContainer> egammaContainer(contKey, ctx);
 
   // Setup decorators
-  SG::WriteDecorHandle<xAOD::EgammaContainer, std::vector<float>> 
+  SG::WriteDecorHandle<xAOD::EgammaContainer, std::vector<float>>
     decoration0(decorKeys[0], ctx);
-  SG::WriteDecorHandle<xAOD::EgammaContainer, std::vector<float>> 
+  SG::WriteDecorHandle<xAOD::EgammaContainer, std::vector<float>>
     decoration1(decorKeys[1], ctx);
-  SG::WriteDecorHandle<xAOD::EgammaContainer, std::vector<float>> 
+  SG::WriteDecorHandle<xAOD::EgammaContainer, std::vector<float>>
     decoration2(decorKeys[2], ctx);
-  SG::WriteDecorHandle<xAOD::EgammaContainer, std::vector<float>> 
+  SG::WriteDecorHandle<xAOD::EgammaContainer, std::vector<float>>
     decoration3(decorKeys[3], ctx);
-  SG::WriteDecorHandle<xAOD::EgammaContainer, std::vector<float>> 
+  SG::WriteDecorHandle<xAOD::EgammaContainer, std::vector<float>>
     decoration4(decorKeys[4], ctx);
-  SG::WriteDecorHandle<xAOD::EgammaContainer, std::vector<float>> 
+  SG::WriteDecorHandle<xAOD::EgammaContainer, std::vector<float>>
     decoration5(decorKeys[5], ctx);
-  SG::WriteDecorHandle<xAOD::EgammaContainer, std::vector<float>> 
+  SG::WriteDecorHandle<xAOD::EgammaContainer, std::vector<float>>
     decoration6(decorKeys[6], ctx);
-  SG::WriteDecorHandle<xAOD::EgammaContainer, std::vector<int>> 
+  SG::WriteDecorHandle<xAOD::EgammaContainer, std::vector<int>>
     decoration7(decorKeys[7], ctx);
-  SG::WriteDecorHandle<xAOD::EgammaContainer, std::vector<int>> 
+  SG::WriteDecorHandle<xAOD::EgammaContainer, std::vector<int>>
     decoration8(decorKeys[8], ctx);
-  SG::WriteDecorHandle<xAOD::EgammaContainer, std::vector<int>> 
+  SG::WriteDecorHandle<xAOD::EgammaContainer, std::vector<int>>
     decoration9(decorKeys[9], ctx);
-  SG::WriteDecorHandle<xAOD::EgammaContainer, std::vector<uint64_t>> 
+  SG::WriteDecorHandle<xAOD::EgammaContainer, std::vector<uint64_t>>
     decoration10(decorKeys[10], ctx);
-  SG::WriteDecorHandle<xAOD::EgammaContainer, int> 
+  SG::WriteDecorHandle<xAOD::EgammaContainer, int>
     decoration11(decorKeys[11], ctx);
 
   // Loop through egamma objects and decorate
@@ -155,7 +120,7 @@ DerivationFramework::CaloCellDecorator::decorateCells(
   for (const auto* egamma : *importedEgamma) {
     const xAOD::CaloCluster *cluster = egamma->caloCluster();
     DerivationFramework::CaloCellDecorator::cell_decorations res =
-    getDecorations(cluster, ctx);
+      getDecorations(cluster, ctx);
 
     // Decorate
     decoration0(*egamma) = res.cells_E;
@@ -178,8 +143,8 @@ DerivationFramework::CaloCellDecorator::decorateCells(
 
 DerivationFramework::CaloCellDecorator::cell_decorations
 DerivationFramework::CaloCellDecorator::getDecorations(
-  const xAOD::CaloCluster* cluster,
-  const EventContext& ctx) const
+                                                       const xAOD::CaloCluster* cluster,
+                                                       const EventContext& ctx) const
 {
 
   DerivationFramework::CaloCellDecorator::cell_decorations decorations;
@@ -193,7 +158,7 @@ DerivationFramework::CaloCellDecorator::getDecorations(
     const LArOnOffIdMapping* cabling{nullptr};
     if (!SG::get(cabling, m_cablingKey, ctx).isSuccess()){
       ATH_MSG_ERROR("Do not have mapping object " << m_cablingKey.key());
-      throw std::runtime_error("Cabling retrieval failed");    
+      throw std::runtime_error("Cabling retrieval failed");
     }
 
     for (const CaloCell* cell : *cluster) {
@@ -238,9 +203,9 @@ DerivationFramework::CaloCellDecorator::getDecorations(
 
       // Keep online ID to debug
       decorations.cells_onlId.push_back(
-          (uint64_t)(cabling->createSignalChannelID(cell->caloDDE()->identify()))
-          .get_compact()
-      );
+                                        (uint64_t)(cabling->createSignalChannelID(cell->caloDDE()->identify()))
+                                        .get_compact()
+                                        );
     }
   }
 

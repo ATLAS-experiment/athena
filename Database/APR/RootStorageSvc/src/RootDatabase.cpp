@@ -878,12 +878,12 @@ DbStatus RootDatabase::transAct(Transaction::Action action)
                   TList* friendTrees(tree->GetListOfFriends());
                   if (friendTrees != nullptr && !friendTrees->IsEmpty()) {
                      ATH_MSG_DEBUG("BuildIndex for " << APRDefaults::IndexColName << " to " << tree->GetName());
-                     tree->BuildIndex(APRDefaults::IndexColName);
+                     tree->BuildIndex(APRDefaults::IndexColName, true);
                      for (const auto&& obj: *friendTrees) {
                         TTree* friendTree = tree->GetFriend(obj->GetName());
                         if (friendTree != nullptr && friendTree->GetBranch(APRDefaults::IndexColName) != nullptr && friendTree->GetEntries() > 0) {
                            ATH_MSG_DEBUG("BuildIndex for " << APRDefaults::IndexColName << " to " << friendTree->GetName());
-                           friendTree->BuildIndex(APRDefaults::IndexColName);
+                           friendTree->BuildIndex(APRDefaults::IndexColName, true);
                         }
                      }
                   }
@@ -1066,6 +1066,7 @@ RootDatabase::getNTupleWriter(const std::string& ntuple_name, bool create)
    auto& writer = m_ntupleWriterMap[ntuple_name];
    if( !writer and create ) {
       writer = std::make_unique<RootStorageSvc::RNTupleWriterHelper>(m_file, ntuple_name, m_rntBufferedWriteEnabled, m_rntWriterMetricsEnabled);
+      ATH_MSG_DEBUG("Created new RNTuple: " << ntuple_name  << " in file: " << m_file->GetName());
    }
    if( writer and create ) {
       // treat the create flag as an indication of a new container client and count them

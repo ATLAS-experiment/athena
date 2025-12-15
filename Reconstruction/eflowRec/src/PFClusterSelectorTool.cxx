@@ -3,7 +3,7 @@
 */
 #include "CaloIdentifier/CaloCell_ID.h"
 #include "eflowRec/eflowRecCluster.h"
-#include "eflowRec/PFClusterSelectorTool.h"
+#include "PFClusterSelectorTool.h"
 #include "xAODCaloEvent/CaloCluster.h"
 #include <exception>
 

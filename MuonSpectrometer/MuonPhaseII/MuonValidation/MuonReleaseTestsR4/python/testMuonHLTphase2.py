@@ -30,12 +30,15 @@ if __name__ == "__main__":
                              "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/TriggerTest/valid1.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.recon.RDO.e8514_e8528_s4159_s4114_r14799_tid34171421_00/RDO.34171421._000016.pool.root.1"]
 
     # Set phase2 geometry 
-    from MuonGeoModelTestR4.testGeoModel import geoModelFileDefault, configureDefaultTagsCfg
+    from MuonGeoModelTestR4.testGeoModel import MuonPhaseIITestDefaults, configureDefaultTagsCfg
     flags.GeoModel.SQLiteDB = True
-    flags.GeoModel.SQLiteDBFullPath = geoModelFileDefault(useR4Layout = (args.defaultGeoFile == "RUN4"))
+    flags.GeoModel.SQLiteDBFullPath = MuonPhaseIITestDefaults.GEODB_R4 if args.defaultGeoFile == "RUN4" else MuonPhaseIITestDefaults.GEODB_R3
 
     # Set default geometry tag and default condition tag
     configureDefaultTagsCfg(flags)
+
+    # Schedule Phase2 muon reconstruction chain
+    flags.Trigger.Offline.SA.Muon.scheduleActsReco=True
         
     # Configure monitoring
     if vars(args).get('perfmon', None) is None:
@@ -47,6 +50,8 @@ if __name__ == "__main__":
     flags.Trigger.selectChains = ["HLT_mu26_ivarmedium_L1MU14FCH", "HLT_mu22_mu8noL1_L1MU14FCH", "HLT_2mu14_L12MU8F"]
 
     import sys
-    from TriggerJobOpts.runHLT import athenaCfg  
+    from TriggerJobOpts.runHLT import athenaCfg 
+
+    cfg =  athenaCfg(flags, parser = parser)
     
-    sys.exit(athenaCfg(flags, parser = parser).run().isFailure())
+    sys.exit(cfg.run().isFailure())

@@ -31,8 +31,8 @@ namespace xAOD {
    class RDataSourceEvent final : public TEvent {
 
    public:
-      /// Default constructor
-      RDataSourceEvent();
+      // Inherit the base class's constructor(s).
+      using TEvent::TEvent;
 
       /// Get the available columm and type names from the input
       std::vector< std::pair< std::string, std::string > > columnAndTypeNames();

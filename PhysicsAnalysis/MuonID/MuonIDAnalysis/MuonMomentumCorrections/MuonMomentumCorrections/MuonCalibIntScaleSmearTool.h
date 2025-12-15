@@ -8,6 +8,7 @@
 // C++ includes
 #include <map>
 #include <vector>
+#include <limits>
 
 // Framework include(s):
 #include "AsgDataHandles/ReadHandleKey.h"

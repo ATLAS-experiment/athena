@@ -10,7 +10,7 @@
 #include <MuonReadoutGeometryR4/MuonReadoutElement.h>
 #include <MuonReadoutGeometryR4/Chamber.h>
 #include <ActsGeometryInterfaces/GeometryDefs.h>
-#include <Acts/Geometry/TrapezoidVolumeBounds.hpp>
+#include <Acts/Geometry/VolumeBounds.hpp>
 
 namespace Acts {
     class Volume;
@@ -47,8 +47,7 @@ namespace MuonGMR4 {
             /// Used in pattern recognition. 
             struct chamberLocation{
                 public:
-                    using enum Acts::TrapezoidVolumeBounds::BoundValues;
-                    using BoundPtr_t = std::shared_ptr<const Acts::TrapezoidVolumeBounds>;
+                    using BoundPtr_t = std::shared_ptr<const Acts::VolumeBounds>;
                     /** @brief Standard constructor taking the position of the readout element inside the 
                      *         sector frame, the pointer to the readout element itself and the volume
                      *          bounds enclosing the element volume.
@@ -75,18 +74,17 @@ namespace MuonGMR4 {
                              minZ() <= pos.z() &&  maxZ() >= pos.z();
                     }
                      /** @brief Returns the minimum y covered by the chamber location */
-                     double minY() const { return m_origin.y() - m_bounds->get(eHalfLengthY); }
+                     double minY() const { return m_origin.y() - MuonGMR4::halfY(*m_bounds); }
                      /** @brief Returns the maximum u covered by the chamber location */
-                     double maxY() const { return m_origin.y() + m_bounds->get(eHalfLengthY); }
+                     double maxY() const { return m_origin.y() + MuonGMR4::halfY(*m_bounds); }
                      /** @brief Returns the minimum y covered by the chamber location */
-                     double minZ() const { return m_origin.z() - m_bounds->get(eHalfLengthZ); }
+                     double minZ() const { return m_origin.z() - MuonGMR4::halfZ(*m_bounds); }
                      /** @brief Returns the maximum u covered by the chamber location */
-                     double maxZ() const { return m_origin.z() + m_bounds->get(eHalfLengthZ); }
+                     double maxZ() const { return m_origin.z() + MuonGMR4::halfZ(*m_bounds); }
                      /** @brief Calculate the strip / tube length at a given position in the y-z plane */
                      double width(const double y0) const {
-                        const double tanPhiHalf = 0.5*(m_bounds->get(eHalfLengthXposY) - m_bounds->get(eHalfLengthXnegY)) 
-                                                / m_bounds->get(eHalfLengthY); 
-                        return m_bounds->get(eHalfLengthXnegY) + tanPhiHalf * (y0 - minY());
+                        const double tanPhiHalf = 0.5*(MuonGMR4::halfXhighY(*m_bounds)- MuonGMR4::halfXlowY(*m_bounds)) / MuonGMR4::halfZ(*m_bounds); 
+                        return MuonGMR4::halfXlowY(*m_bounds) + tanPhiHalf * (y0 - minY());
                      }
                      /** @brief Returns the poter to the associate readout element  */
                      const MuonReadoutElement* readoutEle() const { return m_reEle; }
@@ -107,11 +105,13 @@ namespace MuonGMR4 {
                 /// List of readout elements in the chamber
                 ChamberSet chambers{};
                 /** @brief Surrouding box chamber bounds */
-                std::shared_ptr<Acts::TrapezoidVolumeBounds> bounds{};
-                /// Surface in the centre of the chamber plane
+                std::shared_ptr<Acts::VolumeBounds> bounds{};
+                /// @brief Surface in the centre of the chamber plane
                 std::shared_ptr<const Acts::PlaneSurface> surface{};
-                
+                /// @brief 2D pattern navigation structure                
                 std::vector<chamberLocation> detectorLocs{}; 
+                /// @brief Unique Identifier integer of the sector
+                unsigned id{0};
             };
 
             /** @brief Standard constructor taking the defining parameters */
@@ -161,7 +161,7 @@ namespace MuonGMR4 {
               * @param gctx: Geometry context carrrying the alignment transformations */
             std::shared_ptr<Acts::Volume> boundingVolume(const ActsTrk::GeometryContext& gctx) const;
             /** @brief Returns the volume bounds */
-            std::shared_ptr<Acts::TrapezoidVolumeBounds> bounds() const;
+            std::shared_ptr<Acts::VolumeBounds> bounds() const;
             /** @brief Returns the list of all associated readout elements */
             Chamber::ReadoutSet readoutEles() const;
             /// returns the list of all MDT chambers in the sector for fast navigation

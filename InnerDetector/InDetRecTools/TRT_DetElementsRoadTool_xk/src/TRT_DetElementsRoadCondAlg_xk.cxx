@@ -21,7 +21,7 @@
 ///////////////////////////////////////////////////////////////////
 
 InDet::TRT_DetElementsRoadCondAlg_xk::TRT_DetElementsRoadCondAlg_xk(const std::string& name, ISvcLocator* pSvcLocator)
-  : ::AthReentrantAlgorithm(name, pSvcLocator)
+  : ::AthCondAlgorithm(name, pSvcLocator)
 {
 }
 

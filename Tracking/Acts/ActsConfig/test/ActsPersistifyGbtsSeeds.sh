@@ -33,7 +33,7 @@ Reco_tf.py \
     --postExec "from OutputStreamAthenaPool.OutputStreamConfig import addToAOD;toAOD=['xAOD::TrackParticleContainer#SiSPSeedSegments*','xAOD::TrackParticleAuxContainer#SiSPSeedSegments*'];cfg.merge(addToAOD(flags,toAOD))" \
     --maxEvents ${n_events} \
     --multithreaded
-
+    
 reco_rc=$?
 if [ $reco_rc != 0 ]; then
     exit $reco_rc

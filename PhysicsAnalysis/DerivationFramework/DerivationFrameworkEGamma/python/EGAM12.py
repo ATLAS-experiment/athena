@@ -88,11 +88,11 @@ def EGAM12KernelCfg(flags, name="EGAM12Kernel", **kwargs):
     # but taus are missing in HI derivations so need to do differently
 
     # Decorate if jet passed JVT criteria
-    from JetJvtEfficiency.JetJvtEfficiencyToolConfig import getJvtEffToolCfg
+    from JetJvtEfficiency.JetJvtEfficiencyToolConfig import getJvtSelToolCfg
 
     algName = "DFJet_EventCleaning_passJvtAlg"
-    passJvtTool = acc.popToolsAndMerge(getJvtEffToolCfg(flags, "AntiKt4EMTopo"))
-    passJvtTool.PassJVTKey = "AntiKt4EMTopoJets.DFCommonJets_passJvt"
+    passJvtTool = acc.popToolsAndMerge(getJvtSelToolCfg(flags, "AntiKt4EMTopoJets"))
+    passJvtTool.PassFlagName = "DFCommonJets_passJvt"
     acc.addEventAlgo(
         CompFactory.JetDecorationAlg(
             algName, JetContainer="AntiKt4EMTopoJets", Decorators=[passJvtTool]

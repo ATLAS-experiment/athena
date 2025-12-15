@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "JetTagTools/NewLikelihoodTool.h"
@@ -89,12 +89,12 @@ namespace Analysis {
         sLen = sEnd - sPos;
         std::string word = grades.substr(sPos,sLen);
         ATH_MSG_DEBUG("#BTAG# --> grade = " << word);
-        gradeList.push_back(word);
+        gradeList.push_back(std::move(word));
         sPos = grades.find_first_not_of(delimUds, sEnd);
       }
     }
     // add the histogram name at the end of the list:
-    gradeList.push_back(hhname);
+    gradeList.push_back(std::move(hhname));
     return gradeList;
   }
 

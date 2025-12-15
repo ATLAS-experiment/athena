@@ -121,15 +121,19 @@ void test1()
   tad2.setAlias (std::move(a));
   assert (a.size() == 0);
   assert (tad2.alias().size() == 2);
-  assert (std::ranges::binary_search (tad2.alias(), "key2") == false);
-  assert (std::ranges::binary_search (tad2.alias(), "key3a") == true);
+
+  const std::string s_key2 = "key2";
+  const std::string s_key3 = "key3";
+  const std::string s_key3a = "key3a";
+  assert (std::ranges::binary_search (tad2.alias(), s_key2) == false);
+  assert (std::ranges::binary_search (tad2.alias(), s_key3a) == true);
   tad2.setAlias (std::vector<std::string> {"key3", "key4"});
   assert (tad2.alias().size() == 2);
-  assert (std::ranges::binary_search (tad2.alias(), "key2") == false);
-  assert (std::ranges::binary_search (tad2.alias(), "key3") == true);
+  assert (std::ranges::binary_search (tad2.alias(), s_key2) == false);
+  assert (std::ranges::binary_search (tad2.alias(), s_key3) == true);
   tad2.removeAlias ("key3");
   assert (tad2.alias().size() == 1);
-  assert (std::ranges::binary_search (tad2.alias(), "key3") == false);
+  assert (std::ranges::binary_search (tad2.alias(), s_key3) == false);
 
   TestAddress ad1(1);
   SG::TransientAddress tad3 (123, "key", &ad1);

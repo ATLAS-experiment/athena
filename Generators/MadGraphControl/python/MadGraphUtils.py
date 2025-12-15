@@ -146,8 +146,7 @@ def generate(process_dir='PROC_mssm_0', grid_pack=False, gridpack_compile=False,
 
     # if f2py not available
     if get_reweight_card(process_dir=process_dir) is not None:
-        from distutils.spawn import find_executable
-        if find_executable('f2py') is not None:
+        if shutil.which('f2py') is not None:
             mglog.info('Found f2py, will use it for reweighting')
         else:
             raise RuntimeError('Could not find f2py, needed for reweighting')
