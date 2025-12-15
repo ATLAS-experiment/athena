@@ -746,21 +746,22 @@ class TopoAlgoDef:
         # ATR-31830
         INVM_DISAMB_Map = [
         {
-            "algoname": "110INVM150-eEM50s-eEM10s-2DISAMB-jJ60s",
-            "disamb" :  2,
-            "minInvm"   : 110,
-            "maxInvm"   : 150,
+            "algoname": "INVM-eEMs-2DISAMB-jJs",#"110INVM150-eEM50s-eEM10s-2DISAMB-jJ60s",
+            "disamb" :  [2, 2],
+            "minInvm"   : [110, 110],
+            "maxInvm"   : [150, 150],
             "otype1"  : "eEM",
-            "ocut1a"   : 50,
-            "ocut1b"   : 10,
+            "ocut1a"   : [50, 40],
+            "ocut1b"   : [10, 10],
             "olist1": "s",
             "nleading1": HW.eEmOutputWidthSort,
             "inputwidth1": HW.eEmOutputWidthSort,
             "otype2"  : "jJ",
-            "ocut2"   : 60,
+            "ocut2"   : [60, 60],
             "nleading2": 3,
             "inputwidth2": HW.jJetOutputWidthSort,
             "olist2": "s",
+            "numResultBits": 2,
         }
         ]
         for x in INVM_DISAMB_Map:
@@ -769,23 +770,28 @@ class TopoAlgoDef:
             for k in x:
                 setattr(d,k,x[k])
             inputList = [d.otype1 + d.olist1, d.otype2 + d.olist2]
-            obj1a = "-%s%s%s" % (d.otype1, str(d.ocut1a), d.olist1)
-            obj1b = "-%s%s%s" % (d.otype1, str(d.ocut1b), d.olist1)
-            obj2 = "%s%s%s"  % (d.otype2, str(d.ocut2), d.olist2)
-            toponame = "%iINVM%i%s%s-%sDISAMB-%s"  % (d.minInvm, d.maxInvm, obj1a, obj1b, str(d.disamb) if d.disamb>0 else "", obj2)
-            
-            alg = AlgConf.InvariantMassInclusive1Disambiguation2( name = d.algoname, inputs = inputList, outputs = [ toponame ] )
+
+            toponames = []
+            for bitId in range(d.numResultBits):
+                obj1a = "-%s%s%s" % (d.otype1, str(d.ocut1a[bitId]), d.olist1)
+                obj1b = "-%s%s%s" % (d.otype1, str(d.ocut1b[bitId]), d.olist1)
+                obj2 = "%s%s%s"  % (d.otype2, str(d.ocut2[bitId]), d.olist2)
+                toponames.append( "%iINVM%i%s%s-%sDISAMB-%s"  % (d.minInvm[bitId], d.maxInvm[bitId], obj1a, obj1b, str(d.disamb[bitId]) if d.disamb[bitId]>0 else "", obj2) )
+
+            alg = AlgConf.InvariantMassInclusive1Disambiguation2( name = d.algoname, inputs = inputList, outputs = toponames  )
             alg.addgeneric('InputWidth1', d.inputwidth1)
             alg.addgeneric('InputWidth2', d.inputwidth2)
             alg.addgeneric('MaxTob1', d.nleading1)
             alg.addgeneric('MaxTob2', d.nleading2)
-            alg.addgeneric('NumResultBits', 1)
-            alg.addvariable('MinET1a', get_threshold_cut(d.otype1, d.ocut1a)*_et_conversion, 0)
-            alg.addvariable('MinET1b', get_threshold_cut(d.otype1, d.ocut1b)*_et_conversion, 0)
-            alg.addvariable('MinET2', get_threshold_cut(d.otype2, d.ocut2)*_et_conversion, 0)
-            alg.addvariable('MinMSqr', d.minInvm * d.minInvm * _et_conversion * _et_conversion, 0)
-            alg.addvariable('MaxMSqr', d.maxInvm * d.maxInvm * _et_conversion * _et_conversion, 0)
-            alg.addvariable('DisambDRSqrMin', d.disamb*d.disamb*_dr_conversion*_dr_conversion, 0)
+            alg.addgeneric('NumResultBits', d.numResultBits)
+
+            for bitId in range(d.numResultBits):
+                alg.addvariable('MinET1a', get_threshold_cut(d.otype1, d.ocut1a[bitId])*_et_conversion, bitId)
+                alg.addvariable('MinET1b', get_threshold_cut(d.otype1, d.ocut1b[bitId])*_et_conversion, bitId)
+                alg.addvariable('MinET2', get_threshold_cut(d.otype2, d.ocut2[bitId])*_et_conversion, bitId)
+                alg.addvariable('MinMSqr', d.minInvm[bitId] * d.minInvm[bitId] * _et_conversion * _et_conversion, bitId)
+                alg.addvariable('MaxMSqr', d.maxInvm[bitId] * d.maxInvm[bitId] * _et_conversion * _et_conversion, bitId)
+                alg.addvariable('DisambDRSqrMin', d.disamb[bitId]*d.disamb[bitId]*_dr_conversion*_dr_conversion, bitId)
 
             tm.registerTopoAlgo(alg)
 
