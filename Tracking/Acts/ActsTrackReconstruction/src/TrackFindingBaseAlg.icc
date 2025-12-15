@@ -56,8 +56,14 @@ namespace ActsTrk {
     {
       const auto fittedSeed = fittedSeedCollection->getTrack(0);
       const auto trackState = paramsAtOutermostSurface ? fittedSeed.outermostTrackState()
-                                                       : fittedSeed.innermostTrackState().value();
-      const auto boundParameters = fittedSeed.createParametersFromState(trackState);
+                                                       : fittedSeed.innermostTrackState();
+      if (!trackState) {
+        ATH_MSG_VERBOSE("Missing "
+                        << (paramsAtOutermostSurface ? "outermost" : "innermost")
+                        << " track state");
+        return nullptr;
+      }
+      const auto boundParameters = fittedSeed.createParametersFromState(trackState.value());
 
       // Check pTmin requirement
       const double etaSeed = -std::log(std::tan(0.5 * boundParameters.parameters()[Acts::eBoundTheta]));
