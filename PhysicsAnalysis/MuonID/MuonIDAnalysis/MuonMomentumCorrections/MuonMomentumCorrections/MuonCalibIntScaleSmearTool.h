@@ -61,7 +61,7 @@ namespace CP {
         SG::ReadHandleKey<xAOD::EventInfo> m_eventInfo{this, "EventInfoContName", "EventInfo", "event info key"};
         
         // Release scheme 
-        Gaudi::Property<std::string> m_release{this, "release", "Recs2025_03_26_Run2Run3", "Release"};
+        Gaudi::Property<std::string> m_release{this, "release", "Recs2025_12_11_Run2Run3", "Release"};
 
         // Systematics scheme 
         Gaudi::Property<std::string> m_sysScheme{this, "systematicScheme", "Corr_Scale", "Systematic scheme to be configured"};
