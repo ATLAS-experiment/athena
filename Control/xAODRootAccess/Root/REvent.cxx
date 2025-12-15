@@ -66,10 +66,6 @@ std::string getFirstFieldMatch(ROOT::RNTupleReader& reader,
 
 namespace xAOD::Experimental {
 
-// Initialise some static data.
-static const char* const EVENT_NTUPLE_NAME = "EventData";
-static const char* const METADATA_NTUPLE_NAME = "MetaData";
-
 REvent::REvent() : Event("xAOD::Experimental::REvent") {}
 
 REvent::~REvent() {
@@ -81,6 +77,12 @@ REvent::~REvent() {
   m_outputObjects.clear();
 }
 
+/// Implementation of interface method taking a TFile object. Forwards to the method with a string view below.
+StatusCode REvent::readFrom(TFile& inFile) {
+  ATH_CHECK(readFrom(inFile.GetName()));
+  return StatusCode::SUCCESS;
+}
+
 /// This function takes care of connecting the event object to a new input
 /// file. It reads in the metadata of the input file needed for reading
 /// the file.
@@ -90,7 +92,6 @@ REvent::~REvent() {
 StatusCode REvent::readFrom(std::string_view fileName) {
 
   ATH_MSG_INFO("REvent::readFrom:  fileName " << fileName);
-
 
   // Clear the cached input objects.
   m_inputObjects.clear();
@@ -111,22 +112,21 @@ StatusCode REvent::readFrom(std::string_view fileName) {
   m_inputEventFormat = {};
 
 
-  ATH_MSG_DEBUG("Create RNTupleReader for \"" << METADATA_NTUPLE_NAME
+  ATH_MSG_DEBUG("Create RNTupleReader for \"" << METADATA_OBJECT_NAME
                                                << "\" in file: " << fileName);
-
 
   // Set up a reader for the metadata ntuple.
   // Since some types are non-xAOD types and so not 'visible' when running in AnalysisBase
   //   we need to protect for unknown types with SetEmulateUnknownTypes(true)
   ROOT::RNTupleDescriptor::RCreateModelOptions opts;
   opts.SetEmulateUnknownTypes(true);
-  m_metaReader = ROOT::RNTupleReader::Open(opts, METADATA_NTUPLE_NAME, fileName);
+  m_metaReader = ROOT::RNTupleReader::Open(opts, METADATA_OBJECT_NAME, fileName);
   if (!m_metaReader) {
-    ATH_MSG_ERROR("Couldn't find \"" << METADATA_NTUPLE_NAME
+    ATH_MSG_ERROR("Couldn't find \"" << METADATA_OBJECT_NAME
                                      << "\" tree in input file: " << fileName);
     return StatusCode::FAILURE;
   }
-  ATH_MSG_DEBUG("Created RNTupleReader for \"" << METADATA_NTUPLE_NAME
+  ATH_MSG_DEBUG("Created RNTupleReader for \"" << METADATA_OBJECT_NAME
                                                << "\" in file: " << fileName);
 
   // Make sure that the xAOD::EventFormat dictonary is loaded.
@@ -174,7 +174,7 @@ StatusCode REvent::readFrom(std::string_view fileName) {
   };
 
   // Read in the metadata from the "main" metadata ntuple.
-  const StatusCode sc = readEventFormatMetadata(METADATA_NTUPLE_NAME);
+  const StatusCode sc = readEventFormatMetadata(METADATA_OBJECT_NAME);
   if (sc.isRecoverable()) {
     m_inputNTupleIsMissing = true;
     return StatusCode::SUCCESS;
@@ -197,7 +197,7 @@ StatusCode REvent::readFrom(std::string_view fileName) {
       // Make sure the key corresponds to a metadata ntuple but
       // do not add the current metadata tree in the list of other trees
       // and do not add the metadata tree handlers to the list
-      if ((keyName != METADATA_NTUPLE_NAME) &&
+      if ((keyName != METADATA_OBJECT_NAME) &&
           (keyName.find("MetaData") != std::string::npos) &&
           (keyName.find("MetaDataHdr") == std::string::npos)) {
         // Make sure key corresponds to an RNTuple
@@ -225,13 +225,13 @@ StatusCode REvent::readFrom(std::string_view fileName) {
   }
 
   // Set up the main ntuple reader.
-  m_eventReader = ROOT::RNTupleReader::Open(EVENT_NTUPLE_NAME, fileName);
+  m_eventReader = ROOT::RNTupleReader::Open(EVENT_RNTUPLE_NAME, fileName);
   if (!m_eventReader) {
-    ATH_MSG_ERROR("Couldn't access RNTuple \"" << EVENT_NTUPLE_NAME
+    ATH_MSG_ERROR("Couldn't access RNTuple \"" << EVENT_RNTUPLE_NAME
                                                << "\" in file: " << fileName);
     return StatusCode::FAILURE;
   }
-  ATH_MSG_DEBUG("Created RNTupleReader for \"" << EVENT_NTUPLE_NAME
+  ATH_MSG_DEBUG("Created RNTupleReader for \"" << EVENT_RNTUPLE_NAME
                                                << "\" in file: " << fileName);
 
   // Init the statistics collection.
@@ -578,7 +578,7 @@ StatusCode REvent::connectMetaObject(const std::string& key, bool silent) {
 
   // Return gracefully.
   return StatusCode::SUCCESS;
-} // connectMetaObject
+}
 
 /// This function is used internally to connect an auxiliary object to
 /// the input. Based on the configuration of the object it will either
