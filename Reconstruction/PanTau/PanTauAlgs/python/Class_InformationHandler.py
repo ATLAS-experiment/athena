@@ -132,7 +132,6 @@ class InformationHandler:
         self.m_Infos_String["FeatureExtractor_VarTypeName_varTypeName_Mean"]        = theFeatureHandler.m_VarTypeName_Mean
         self.m_Infos_String["FeatureExtractor_VarTypeName_varTypeName_StdDev"]      = theFeatureHandler.m_VarTypeName_StdDev
         self.m_Infos_String["FeatureExtractor_VarTypeName_varTypeName_HLV"]         = theFeatureHandler.m_VarTypeName_HLV
-        self.m_Infos_String["FeatureExtractor_VarTypeName_varTypeName_Angle"]       = theFeatureHandler.m_VarTypeName_Angle
         self.m_Infos_String["FeatureExtractor_VarTypeName_varTypeName_DeltaR"]      = theFeatureHandler.m_VarTypeName_DeltaR
         self.m_Infos_String["FeatureExtractor_VarTypeName_varTypeName_JetMoment"]   = theFeatureHandler.m_VarTypeName_JetMoment
         self.m_Infos_String["FeatureExtractor_VarTypeName_varTypeName_Combined"]    = theFeatureHandler.m_VarTypeName_Combined

@@ -85,7 +85,6 @@ namespace PanTau {
         static const std::string varTypeName_Mean()         {return "Mean";}
         static const std::string varTypeName_StdDev()       {return "StdDev";}
         static const std::string varTypeName_HLV()          {return "HLV";}
-        static const std::string varTypeName_Angle()        {return "Angle";}
         static const std::string varTypeName_DeltaR()       {return "DeltaR";}
         static const std::string varTypeName_JetMoment()    {return "JetMoment";}
         static const std::string varTypeName_Combined()     {return "Combined";}
