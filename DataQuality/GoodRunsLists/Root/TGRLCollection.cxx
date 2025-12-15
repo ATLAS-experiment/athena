@@ -254,7 +254,7 @@ Root::TGRLCollection::GetOverlapWith( const TGoodRunsList& other ) const
     overlapgrl.SetVersion(itr->GetVersion());
     overlapgrl.SetMetaData(itr->GetMetaData());
     overlapgrl.Compress();
-    overlapvec.push_back(overlapgrl); // also push_back if empty!
+    overlapvec.push_back(std::move(overlapgrl)); // also push_back if empty!
   }
 
   return overlapvec;

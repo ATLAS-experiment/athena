@@ -130,8 +130,16 @@ namespace dqutils {
 
           if (f->Get(snum) && f->Get(sden)) {
             hnum = dynamic_cast<TH1F*>(f->Get(snum));
+            if (not hnum){
+              std::cerr<<"MonitoringFile::HLTJetCalcEfficiencyAndRate: Dynamic cast of hnum failed"<<std::endl;
+              continue;
+            }
             hnum->Sumw2();
             hden = dynamic_cast<TH1F*>(f->Get(sden));
+            if (not hden){
+              std::cerr<<"MonitoringFile::HLTJetCalcEfficiencyAndRate: Dynamic cast of hden failed"<<std::endl;
+              continue;
+            }
             hden->Sumw2();
 
             //Int_t nbins_num = hnum->GetNbinsX();
