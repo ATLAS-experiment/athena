@@ -123,6 +123,7 @@ class Registry(metaclass=Singleton):
         self.add_default("CKM_Vus", powheg_atlas_common.CKM.Vus, description="CKM element: Vus")
         self.add_default("clobberlhe", -1, frozen=True, description="allow LHE files to be overwritten. [1:enabled]")
         self.add_default("Cmass", powheg_atlas_common.mass.c, name="mass_c", description="c-quark mass in GeV")
+        self.add_default("cmass", powheg_atlas_common.mass.c, name="mass_c", description="c-quark mass in GeV")        
         self.add_default("c_mass", powheg_atlas_common.mass.c, description="WZj_MiNNLO, ZZj_MiNNLO: charm mass for reshuffling momentum at event generation level (used if massive_leptons=1)")
         self.add_default("cmass_lhe", powheg_atlas_common.mass.c, name="mass_c", description="c-quark mass in GeV (for momentum reshuffling)")
         self.add_default("collremnsamp\"", -1, name="collremnsamp", description="[-1:use Powheg default]")
