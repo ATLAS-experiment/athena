@@ -143,8 +143,11 @@ def BPHY1Kernel(flags):
         
 
     SelectExpression = "count(BPHY1OniaCandidates.passed_Jpsi) > 0 || count(BPHY1OniaCandidates.passed_Psi) > 0 || count(BPHY1OniaCandidates.passed_Upsi) > 0"
-    BPHY1_SelectEvent = CompFactory.DerivationFramework.xAODStringSkimmingTool(name = "BPHY1_SelectEvent", expression = SelectExpression)
-    acc.addPublicTool(BPHY1_SelectEvent)
+    from DerivationFrameworkTools.DerivationFrameworkToolsConfig import (
+        xAODStringSkimmingToolCfg)
+    BPHY1_SelectEvent = acc.getPrimaryAndMerge(xAODStringSkimmingToolCfg(
+        flags, name = "BPHY1_SelectEvent", expression = SelectExpression))
+
     acc.addEventAlgo(CompFactory.DerivationFramework.DerivationKernel("BPHY1Kernel",
                             SkimmingTools = [BPHY1_SelectEvent],
                             ThinningTools     = BPHY1ThinningTools,

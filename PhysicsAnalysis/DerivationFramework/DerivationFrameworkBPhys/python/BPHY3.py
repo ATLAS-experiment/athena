@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 #====================================================================
 # BPHY3.py
 #====================================================================
@@ -105,7 +105,11 @@ def BPHY3Cfg(flags):
                     Chi2Max               = 1)
 
     expression = "count(BPHY3VertexCandidates.passed_PiPi) > 0 || count(BPHY3VertexCandidates.passed_KPi) > 0 || count(BPHY3VertexCandidates.passed_PiK) > 0 || count(BPHY3VertexCandidates.passed_KK) > 0 || count(BPHY3VertexCandidates.passed_PP) > 0"
-    BPHY3_SelectEvent = CompFactory.DerivationFramework.xAODStringSkimmingTool(name = "BPHY3_SelectEvent",  expression = expression)
+    from DerivationFrameworkTools.DerivationFrameworkToolsConfig import (
+        xAODStringSkimmingToolCfg)
+    BPHY3_SelectEvent = acc.getPrimaryAndMerge(xAODStringSkimmingToolCfg(
+        flags, name = "BPHY3_SelectEvent", expression = expression))
+
     BPHY3Thin_vtxTrk = CompFactory.DerivationFramework.Thin_vtxTrk(
                     name                       = "BPHY3Thin_vtxTrk",
                     TrackParticleContainerName = "InDetTrackParticles",

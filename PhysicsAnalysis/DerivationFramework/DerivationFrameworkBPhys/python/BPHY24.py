@@ -45,8 +45,10 @@ def BPHY24Cfg(flags):
     
     bSkim = "(count(BPHY24JpsimmKshortCascadeSV1.Bd_mass) + count(BPHY24JpsieeKshortCascadeSV1.Bd_mass)) > 0"
 
-    BPHY24_Skim_Bcandidates = CompFactory.DerivationFramework.xAODStringSkimmingTool( name  = "BPHY24_Skim_Bcandidates",
-                                                                         expression = bSkim )
+    from DerivationFrameworkTools.DerivationFrameworkToolsConfig import (
+        xAODStringSkimmingToolCfg)
+    BPHY24_Skim_Bcandidates = acc.getPrimaryAndMerge(xAODStringSkimmingToolCfg(
+        flags, name  = "BPHY24_Skim_Bcandidates", expression = bSkim ))
     skimList += [ BPHY24_Skim_Bcandidates ]
 
     BPHY24_AugOriginalCounts = acc.popToolsAndMerge(
@@ -366,61 +368,63 @@ def BPHY24Cfg(flags):
               BPHY24TrackIsolationDecoratorJpsiee,
               BPHY24TrackIsolationDecoratorJpsimumu]
 
-    trigger_list = [ # Pure muon triggers
-    "HLT_mu11_mu6_bDimu",
-    "HLT_mu11_mu6_bDimu2700",
-    "HLT_mu11_mu6_bDimu_L1LFV-MU11",
-    "HLT_mu11_mu6_bDimu2700_L1LFV-MU11",
-    "HLT_mu11_mu6_bBmumuxv2",
-    "HLT_mu10_mu6_bBmumuxv2",
-    "HLT_mu10_mu6_bBmumuxv2_delayed",
-    "HLT_2mu6_bBmumuxv2",
-    "HLT_2mu6_bBmumuxv2_delayed",
-    "HLT_2mu6_bBmumuxv2_L1LFV-MU6",
-    "HLT_mu6_mu4_bBmumuxv2",
-    "HLT_mu6_mu4_bBmumuxv2_delayed",
-    "HLT_2mu4_bBmumuxv2",
-    "HLT_mu11_mu6_bJpsimumu",
-    "HLT_2mu10_bJpsimumu",
-    "HLT_mu11_mu6_bJpsimumu_L1LFV-MU11",
-    "HLT_2mu6_bJpsimumu_L1BPH-2M9-2MU6_BPH-2DR15-2MU6",
-    "HLT_2mu6_bJpsimumu_delayed_L1BPH-2M9-2MU6_BPH-2DR15-2MU6",
-    "HLT_2mu10_bJpsimumu_noL2",
-    "HLT_mu10_mu6_bJpsimumu",
-    "HLT_mu10_mu6_bJpsimumu_delayed",
-    "HLT_2mu6_bJpsimumu",
-    "HLT_2mu6_bJpsimumu_delayed",
-    "HLT_mu6_mu4_bJpsimumu",
-    "HLT_mu6_mu4_bJpsimumu_Lxy0_L1BPH-2M9-MU6MU4_BPH-0DR15-MU6MU4",
-    "HLT_2mu4_bJpsimumu",
-    "HLT_mu6_2mu4_bJpsi",
-    "HLT_mu6_2mu4_bJpsi_delayed",
-    "HLT_2mu14",
-    "HLT_2mu10",
-    # dielectron triggers
-    "HLT_2e5_lhvloose_nod0_bBeexM6000t",  #37,143,877  inb
-    "HLT_e5_lhvloose_nod0_bBeexM6000t",  #37,143,877
-    "HLT_e5_lhvloose_nod0_bBeexM6000t_2mu4_nomucomb_L1BPH-0DR3-EM7J15_2MU4",   #37,312,506
-    "HLT_e5_lhvloose_nod0_bBeexM6000t_mu6_nomucomb_L1BPH-0DR3-EM7J15_MU6",   #27,041,892
-    "HLT_e5_lhvloose_nod0_bBeexM6000_mu6_nomucomb_L1BPH-0DR3-EM7J15_MU6",   #149,100	
-    "HLT_e9_lhloose_bBeexM2700_2mu4_nomucomb_L1BPH-0DR3-EM7J15_2MU4",   #2,681,764
-    "HLT_e9_lhloose_bBeexM2700_mu6_nomucomb_L1BPH-0DR3-EM7J15_MU6",   #1,979,362
-    "HLT_e9_lhloose_bBeexM6000_2mu4_nomucomb_L1BPH-0DR3-EM7J15_2MU4",   #3,359,105
-    "HLT_e9_lhloose_bBeexM6000_mu6_nomucomb_L1BPH-0DR3-EM7J15_MU6",   #2,426,663
-    "HLT_e9_lhloose_e5_lhloose_bBeexM2700_2mu4_nomucomb_L1BPH-0M9-EM7-EM5_2MU4",   #2,950,935
-    "HLT_e9_lhloose_e5_lhloose_bBeexM2700_mu6_nomucomb_L1BPH-0M9-EM7-EM5_MU6",   #2,928,030
-    "HLT_e9_lhloose_e5_lhloose_bBeexM6000_2mu4_nomucomb_L1BPH-0M9-EM7-EM5_2MU4",   #3,647,507
-    "HLT_e9_lhloose_e5_lhloose_bBeexM6000_mu6_nomucomb_L1BPH-0M9-EM7-EM5_MU6",   #3,605,371
-    "HLT_e9_lhvloose_nod0_e5_lhvloose_nod0_bBeexM6000t_2mu4_nomucomb_L1BPH-0M9-EM7-EM5_2MU4",   #40,169,436
-    "HLT_e9_lhvloose_nod0_e5_lhvloose_nod0_bBeexM6000t_mu6_nomucomb_L1BPH-0M9-EM7-EM5_MU6",   #37,312,506
-    "HLT_e9_lhvloose_nod0_e5_lhvloose_nod0_bBeexM6000_mu6_nomucomb_L1BPH-0M9-EM7-EM5_MU6",   #677,340
-    ]
+    if flags.Trigger.EDMVersion >= 0:
+        trigger_list = [ # Pure muon triggers
+            "HLT_mu11_mu6_bDimu",
+            "HLT_mu11_mu6_bDimu2700",
+            "HLT_mu11_mu6_bDimu_L1LFV-MU11",
+            "HLT_mu11_mu6_bDimu2700_L1LFV-MU11",
+            "HLT_mu11_mu6_bBmumuxv2",
+            "HLT_mu10_mu6_bBmumuxv2",
+            "HLT_mu10_mu6_bBmumuxv2_delayed",
+            "HLT_2mu6_bBmumuxv2",
+            "HLT_2mu6_bBmumuxv2_delayed",
+            "HLT_2mu6_bBmumuxv2_L1LFV-MU6",
+            "HLT_mu6_mu4_bBmumuxv2",
+            "HLT_mu6_mu4_bBmumuxv2_delayed",
+            "HLT_2mu4_bBmumuxv2",
+            "HLT_mu11_mu6_bJpsimumu",
+            "HLT_2mu10_bJpsimumu",
+            "HLT_mu11_mu6_bJpsimumu_L1LFV-MU11",
+            "HLT_2mu6_bJpsimumu_L1BPH-2M9-2MU6_BPH-2DR15-2MU6",
+            "HLT_2mu6_bJpsimumu_delayed_L1BPH-2M9-2MU6_BPH-2DR15-2MU6",
+            "HLT_2mu10_bJpsimumu_noL2",
+            "HLT_mu10_mu6_bJpsimumu",
+            "HLT_mu10_mu6_bJpsimumu_delayed",
+            "HLT_2mu6_bJpsimumu",
+            "HLT_2mu6_bJpsimumu_delayed",
+            "HLT_mu6_mu4_bJpsimumu",
+            "HLT_mu6_mu4_bJpsimumu_Lxy0_L1BPH-2M9-MU6MU4_BPH-0DR15-MU6MU4",
+            "HLT_2mu4_bJpsimumu",
+            "HLT_mu6_2mu4_bJpsi",
+            "HLT_mu6_2mu4_bJpsi_delayed",
+            "HLT_2mu14",
+            "HLT_2mu10",
+            # dielectron triggers
+            "HLT_2e5_lhvloose_nod0_bBeexM6000t",  #37,143,877  inb
+            "HLT_e5_lhvloose_nod0_bBeexM6000t",  #37,143,877
+            "HLT_e5_lhvloose_nod0_bBeexM6000t_2mu4_nomucomb_L1BPH-0DR3-EM7J15_2MU4",   #37,312,506
+            "HLT_e5_lhvloose_nod0_bBeexM6000t_mu6_nomucomb_L1BPH-0DR3-EM7J15_MU6",   #27,041,892
+            "HLT_e5_lhvloose_nod0_bBeexM6000_mu6_nomucomb_L1BPH-0DR3-EM7J15_MU6",   #149,100
+            "HLT_e9_lhloose_bBeexM2700_2mu4_nomucomb_L1BPH-0DR3-EM7J15_2MU4",   #2,681,764
+            "HLT_e9_lhloose_bBeexM2700_mu6_nomucomb_L1BPH-0DR3-EM7J15_MU6",   #1,979,362
+            "HLT_e9_lhloose_bBeexM6000_2mu4_nomucomb_L1BPH-0DR3-EM7J15_2MU4",   #3,359,105
+            "HLT_e9_lhloose_bBeexM6000_mu6_nomucomb_L1BPH-0DR3-EM7J15_MU6",   #2,426,663
+            "HLT_e9_lhloose_e5_lhloose_bBeexM2700_2mu4_nomucomb_L1BPH-0M9-EM7-EM5_2MU4",   #2,950,935
+            "HLT_e9_lhloose_e5_lhloose_bBeexM2700_mu6_nomucomb_L1BPH-0M9-EM7-EM5_MU6",   #2,928,030
+            "HLT_e9_lhloose_e5_lhloose_bBeexM6000_2mu4_nomucomb_L1BPH-0M9-EM7-EM5_2MU4",   #3,647,507
+            "HLT_e9_lhloose_e5_lhloose_bBeexM6000_mu6_nomucomb_L1BPH-0M9-EM7-EM5_MU6",   #3,605,371
+            "HLT_e9_lhvloose_nod0_e5_lhvloose_nod0_bBeexM6000t_2mu4_nomucomb_L1BPH-0M9-EM7-EM5_2MU4",   #40,169,436
+            "HLT_e9_lhvloose_nod0_e5_lhvloose_nod0_bBeexM6000t_mu6_nomucomb_L1BPH-0M9-EM7-EM5_MU6",   #37,312,506
+            "HLT_e9_lhvloose_nod0_e5_lhvloose_nod0_bBeexM6000_mu6_nomucomb_L1BPH-0M9-EM7-EM5_MU6",   #677,340
+        ]
 
-    BPHY24TrigSkimmingTool = CompFactory.DerivationFramework.TriggerSkimmingTool(   name     = "BPHY24TrigSkimmingTool",
-                                                                TriggerListOR               = trigger_list,
-                                                                TriggerListORHLTOnly        = ["HLT_2e5_lhvloose_nod0_bBeexM6000t","HLT_e5_lhvloose_nod0_bBeexM6000t"] )
-    acc.addPublicTool(BPHY24TrigSkimmingTool)
-    skimList += [BPHY24TrigSkimmingTool]
+        BPHY24TrigSkimmingTool = CompFactory.DerivationFramework.TriggerSkimmingTool(
+            name = "BPHY24TrigSkimmingTool",
+            TriggerListOR = trigger_list,
+            TriggerListORHLTOnly = ["HLT_2e5_lhvloose_nod0_bBeexM6000t","HLT_e5_lhvloose_nod0_bBeexM6000t"] )
+        acc.addPublicTool(BPHY24TrigSkimmingTool)
+        skimList += [BPHY24TrigSkimmingTool]
 
     # ID tracks
     BPHY24_Thin_VtxTracks = CompFactory.DerivationFramework.Thin_vtxTrk( name     = "BPHY24_Thin_VtxTracks",
