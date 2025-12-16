@@ -29,7 +29,7 @@ class TrigMuonEFTrackIsolationHypoAlg
 	this, "EFMuonsName", "MuonEFInfo", "Name of EF muons conatiner" };
 
    SG::ReadDecorHandleKey<xAOD::MuonContainer> m_muonIso20Key {
-	this, "MuonIso02Name", "Muons.ptcone03", "Isolation in ptcone02" };
+	this, "MuonIso02Name", "Muons.ptcone02", "Isolation in ptcone02" };
 
    SG::ReadDecorHandleKey<xAOD::MuonContainer> m_muonIso30Key {
 	this, "MuonIso03Name", "Muons.ptcone03", "Isolation in ptcone03" };
