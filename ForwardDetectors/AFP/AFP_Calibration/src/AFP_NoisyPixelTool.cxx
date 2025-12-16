@@ -3,6 +3,7 @@
 */
 
 #include "AFP_Calibration/AFP_NoisyPixelTool.h"
+#include <iostream>
 
 int AFP_NoisyPixelTool::Identify(std::shared_ptr<const TH2F> input, std::vector<TH2F>& output) const
 {
@@ -266,7 +267,10 @@ std::tuple<TH2F,TH2F,TH2F,TH2F> AFP_NoisyPixelTool::findLEffAndNoisyPixels(std::
 					av_leff=sum/8.;
 				}
 				
-				
+				if ((av_leff == 0) or (av_noisy == 0))[[unlikely]]{
+				  std::cerr<< "AFP_NoisyPixelTool::findLEffAndNoisyPixels: denominator is zero\n";
+				  continue;
+				} 
 				double ratio_leff  = input->GetBinContent(row_ID,col_ID)/av_leff;
 				double ratio_noisy = input->GetBinContent(row_ID,col_ID)/av_noisy;
 				tmp_eff_leff.SetBinContent(row_ID,col_ID,100.*ratio_leff);
@@ -317,7 +321,7 @@ void AFP_NoisyPixelTool::filterLEffPixelsAroundNoisy(std::shared_ptr<const TH2F>
 				if(npix==0)
 				{
 					re_av=0;
-					for(auto legpix : legit_pixels)
+					for(const auto & legpix : legit_pixels)
 					{
 						re_av+=input->GetBinContent(legpix.first,legpix.second);
 					}
@@ -328,7 +332,10 @@ void AFP_NoisyPixelTool::filterLEffPixelsAroundNoisy(std::shared_ptr<const TH2F>
 				{
 					re_av/=npix;
 				}
-						
+				if (re_av == 0)[[unlikely]]{
+				  std::cerr<< "AFP_NoisyPixelTool::findLEffAndNoisyPixels: re_av denominator is zero\n";
+				  continue;
+				} 
 				double ratio_noisy = m_sensitivity+input->GetBinContent(row_ID,col_ID)/re_av;
 				double ratio_leff  = input->GetBinContent(row_ID,col_ID)/re_av; 
 				if(re_av==1)
