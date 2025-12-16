@@ -59,7 +59,9 @@ def BTaggingLargeRContent(flags, jetcol):
     LargeRJetTruthAux = [
         "R10TruthLabel_R22v1",
         "R10TruthLabel_R22v1_TruthJetMass",
-        "R10TruthLabel_R22v1_TruthJetPt"
+        "R10TruthLabel_R22v1_TruthJetPt",
+        "HadronGhostExtendedTruthLabelID",
+        "HadronGhostTruthLabelPt",
     ]
     jetContent = _getVariableList(jetcol, LargeRJetTruthAux)
 
