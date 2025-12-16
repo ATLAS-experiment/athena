@@ -59,8 +59,7 @@ namespace PanTau {
         StatusCode addConstituentMomenta(PanTau::PanTauSeed* inSeed) const;
         
         //Function to calculate features based on two sets of constituents
-        StatusCode addCombinedFeatures(PanTau::PanTauSeed* inSeed,
-				       const std::map<std::string, double>& variants_SeedEt) const;
+        StatusCode addCombinedFeatures(PanTau::PanTauSeed* inSeed) const; 
         
         //Function to fill the variants_SeedEt member
         static void fillVariantsSeedEt(const std::vector<PanTau::TauConstituent*>& tauConstituents,
