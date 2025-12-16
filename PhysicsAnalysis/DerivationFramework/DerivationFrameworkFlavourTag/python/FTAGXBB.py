@@ -25,24 +25,23 @@ def FTAGXBBKernelCfg(flags, name='FTAGXBBKernel', **kwargs):
     skimmingTools = []
 
     # filter large-R jets
-    UFOjets_skimming_expression = 'count( AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets.pt > 150*GeV ) >= 1' 
-    FTAGXBBUFOjetsSkimmingTool = CompFactory.DerivationFramework.xAODStringSkimmingTool(
-            name = "FTAGXBBUFOjetsSkimmingTool",
-            expression = UFOjets_skimming_expression )
-    acc.addPublicTool(FTAGXBBUFOjetsSkimmingTool)
+    UFOjets_skimming_expression = 'count( AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets.pt > 150*GeV ) >= 1'
+    from DerivationFrameworkTools.DerivationFrameworkToolsConfig import (
+        xAODStringSkimmingToolCfg)
+    FTAGXBBUFOjetsSkimmingTool = acc.getPrimaryAndMerge(xAODStringSkimmingToolCfg(
+        flags, name = "FTAGXBBUFOjetsSkimmingTool",
+        expression = UFOjets_skimming_expression))
 
     # Trigger skimming
-    acc.merge(FTAGXBBTriggerSkimmingToolCfg(flags, skimmingTools))
+    if flags.Trigger.EDMVersion >= 0:
+        acc.merge(FTAGXBBTriggerSkimmingToolCfg(flags, skimmingTools))
 
     # thinning tools
     thinningTools = []
 
-    skimmingTools += [
-        FTAGXBBUFOjetsSkimmingTool,
-        ]
+    skimmingTools += [FTAGXBBUFOjetsSkimmingTool]
 
-    thinningTools = [
-            ]
+    thinningTools = []
 
     # Finally the kernel itself
     DerivationKernel = CompFactory.DerivationFramework.DerivationKernel
