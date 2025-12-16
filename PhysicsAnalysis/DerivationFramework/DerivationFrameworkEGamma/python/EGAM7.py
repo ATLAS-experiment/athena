@@ -35,13 +35,10 @@ def EGAM7SkimmingToolCfg(flags):
     # off-line based selection
     expression = "count(Electrons.pt > 4.5*GeV) >= 1"
     print("EGAM7 offline skimming expression: ", expression)
-    EGAM7_OfflineSkimmingTool = CompFactory.DerivationFramework.xAODStringSkimmingTool(
-        name="EGAM7_OfflineSkimmingTool", expression=expression
-    )
-    if flags.Trigger.EDMVersion < 0:
-        EGAM7_OfflineSkimmingTool.TrigDecisionTool=None
-
-    acc.addPublicTool(EGAM7_OfflineSkimmingTool)
+    from DerivationFrameworkTools.DerivationFrameworkToolsConfig import (
+        xAODStringSkimmingToolCfg)
+    EGAM7_OfflineSkimmingTool = acc.getPrimaryAndMerge(xAODStringSkimmingToolCfg(
+        flags, name = "EGAM7_OfflineSkimmingTool", expression = expression))
     skimmingTools += [EGAM7_OfflineSkimmingTool]
 
     # trigger-based selection

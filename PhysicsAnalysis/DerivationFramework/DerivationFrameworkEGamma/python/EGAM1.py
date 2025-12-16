@@ -24,8 +24,6 @@ from DerivationFrameworkEGamma.TriggerContent import (
 
 def EGAM1SkimmingToolCfg(flags):
     """Configure the EGAM1 skimming tool"""
-    acc = ComponentAccumulator()
-
     expression = " || ".join(
         [
             "(count( EGAM1_DiElectronMass1 > 50.0*GeV ) >= 1)",
@@ -36,13 +34,10 @@ def EGAM1SkimmingToolCfg(flags):
     )
     print("EGAM1 skimming expression: ", expression)
 
-    skimmingTool = CompFactory.DerivationFramework.xAODStringSkimmingTool(
-        name="EGAM1SkimmingTool", expression=expression)
-    if flags.Trigger.EDMVersion < 0:
-        skimmingTool.TrigDecisionTool=None
-
-    acc.setPrivateTools(skimmingTool)
-    return acc
+    from DerivationFrameworkTools.DerivationFrameworkToolsConfig import (
+        xAODStringSkimmingToolCfg)
+    return xAODStringSkimmingToolCfg(
+        flags, name = "EGAM1SkimmingTool", expression = expression)
 
 
 def EGAM1ZeeMassTool1Cfg(flags):
@@ -459,8 +454,7 @@ def EGAM1KernelCfg(flags, name="EGAM1Kernel", **kwargs):
         thinningTools.append(EGAM1TruthThinningTool)
 
     # skimming
-    skimmingTool = acc.popToolsAndMerge(EGAM1SkimmingToolCfg(flags))
-    acc.addPublicTool(skimmingTool)
+    skimmingTool = acc.getPrimaryAndMerge(EGAM1SkimmingToolCfg(flags))
 
     # setup the kernel
     acc.addEventAlgo(
