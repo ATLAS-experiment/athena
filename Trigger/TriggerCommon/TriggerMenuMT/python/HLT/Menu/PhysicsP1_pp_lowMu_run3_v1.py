@@ -15,6 +15,7 @@ from .Physics_pp_run3_v1 import (
     MultiElectronGroup,
     SingleElectronGroup,
     Topo2Group,
+    #Topo3Group,
     MinBiasGroup,
     SupportGroup,
     SupportPhIGroup,
@@ -29,7 +30,9 @@ from .Physics_pp_run3_v1 import (
     SingleBjetGroup,
     JetPhaseIStreamersGroup,
     TagAndProbeGroup,
-    BphysicsGroup
+    BphysicsGroup,
+    BphysElectronGroup,
+    EOFBeePhIGroup
 )
 from . import P1_run3_v1
 
@@ -64,6 +67,7 @@ def getLowMuPhysicsSignatures():
 
         #-- 2 mu
         ChainProp(name='HLT_2mu4_L12MU3V', stream=[PhysicsStream, 'express'], groups=MultiMuonGroup+PrimaryL1MuGroup, monGroups=['muonMon:shifter','muonMon:online']),
+        ChainProp(name='HLT_2mu4_L12MU3VF', stream=[PhysicsStream, 'express'], groups=MultiMuonGroup+PrimaryL1MuGroup, monGroups=['muonMon:shifter','muonMon:online']),
         ChainProp(name='HLT_mu4_mu6_L12MU3V', stream=[PhysicsStream], groups=MultiMuonGroup+PrimaryL1MuGroup),
         ChainProp(name='HLT_mu4_mu4noL1_L1MU3V', stream=[PhysicsStream], l1SeedThresholds=['MU3V','FSNOSEED'], groups=MultiMuonGroup+SupportGroup, monGroups=['muonMon:shifter','muonMon:online']),
 
@@ -76,15 +80,31 @@ def getLowMuPhysicsSignatures():
         ChainProp(name='HLT_mu4_mu6_probe_L1MU3V',  l1SeedThresholds=['MU3V', 'PROBEMU3V'], groups=SingleMuonGroup+TagAndProbeGroup),
 
         #BLS
+        ChainProp(name='HLT_2mu4_l2io_invmDimu_L12MU3VF', l1SeedThresholds=['MU3VF'], stream=[PhysicsStream], groups=MultiMuonGroup+SupportGroup+['RATE:CPS_2MU3VF']),
         ChainProp(name='HLT_2mu4_l2io_invmDimu_L12MU3V', stream=[PhysicsStream], groups=PrimaryL1MuGroup+MultiMuonGroup, monGroups=['bphysMon:shifter']),
         ChainProp(name='HLT_mu14_mu14_idtp_idZmumu_L12MU8F', stream=[PhysicsStream], groups=PrimaryL1MuGroup+MultiMuonGroup,  monGroups=['idMon:shifter','idMon:t0']),
         ChainProp(name='HLT_mu4_mu4_idperf_1invmAB5_L12MU3V',      l1SeedThresholds=['MU3V', 'MU3V'],  stream=[PhysicsStream], groups=MultiMuonGroup+SupportGroup, monGroups=['idMon:t0']),
+
+        #----------- LRT mu (ATR-32273)
+        ChainProp(name='HLT_mu4_LRT_d0loose_L1MU3V', groups=PrimaryL1MuGroup+SingleMuonGroup, monGroups=['muonMon:online']),
+        ChainProp(name='HLT_mu20_LRT_d0loose_L1MU14FCH',  groups=PrimaryL1MuGroup+SingleMuonGroup, monGroups=['muonMon:online']),
     ]
 
     chains['Bphysics'] += [
 
         #BLS triggers
-        ChainProp(name='HLT_2mu4_bDimu_L12MU3V', stream=[PhysicsStream], groups=PrimaryL1MuGroup+BphysicsGroup, monGroups=['bphysMon:online','bphysMon:shifter']),
+        ChainProp(name='HLT_2mu4_bDimu_L12MU3V', stream=[PhysicsStream], groups=PrimaryL1MuGroup+BphysicsGroup+["RATE:CPS_2MU3V"], monGroups=['bphysMon:online','bphysMon:shifter']),
+        ChainProp(name='HLT_2mu4_bJpsimumu_L12MU3V', l1SeedThresholds=['MU3V'], stream=[PhysicsStream], groups=BphysicsGroup+['RATE:CPS_2MU3V'], monGroups=['bphysMon:online','bphysMon:t0']),
+        ChainProp(name='HLT_2mu4_bJpsimumu_Lxy0_L12MU3V', l1SeedThresholds=['MU3V'], stream=[PhysicsStream], groups=BphysicsGroup+['RATE:CPS_2MU3V']),
+        ChainProp(name='HLT_2mu4_bBmumu_Lxy0_L12MU3V', l1SeedThresholds=['MU3V'], stream=[PhysicsStream], groups=BphysicsGroup+['RATE:CPS_2MU3V']),
+        ChainProp(name='HLT_2mu4_bBmumu_L12MU3V', l1SeedThresholds=['MU3V'], stream=[PhysicsStream], groups=BphysicsGroup+['RATE:CPS_2MU3V']),
+        ChainProp(name='HLT_2mu4_bJpsimumu_L12MU3VF', l1SeedThresholds=['MU3VF'], stream=[PhysicsStream], groups=BphysicsGroup+['RATE:CPS_2MU3VF']),
+        ChainProp(name='HLT_2mu4_bJpsimumu_Lxy0_L12MU3VF', l1SeedThresholds=['MU3VF'], stream=[PhysicsStream], groups=BphysicsGroup+['RATE:CPS_2MU3VF']),
+        ChainProp(name='HLT_2mu4_bBmumu_Lxy0_L12MU3VF', l1SeedThresholds=['MU3VF'], stream=[PhysicsStream], groups=BphysicsGroup+['RATE:CPS_2MU3VF']),
+        ChainProp(name='HLT_2mu4_bBmumu_L12MU3VF', l1SeedThresholds=['MU3VF'], stream=[PhysicsStream], groups=BphysicsGroup+['RATE:CPS_2MU3VF']),
+        ChainProp(name='HLT_2mu4_bDimu_L12MU3VF', l1SeedThresholds=['MU3VF'], stream=[PhysicsStream], groups=BphysicsGroup+['RATE:CPS_2MU3VF']),
+        ChainProp(name='HLT_2mu4_bBmumux_BpmumuKp_L12MU3V', l1SeedThresholds=['MU3V'], stream=[PhysicsStream], groups=BphysicsGroup+['RATE:CPS_2MU3V']),
+        ChainProp(name='HLT_2mu4_bBmumux_BpmumuKp_L12MU3VF', l1SeedThresholds=['MU3VF'], stream=[PhysicsStream], groups=BphysicsGroup+['RATE:CPS_2MU3VF']),
 
 
 
@@ -157,6 +177,19 @@ def getLowMuPhysicsSignatures():
         ChainProp(name='HLT_e5_lhtight_e9_etcut_1invmAB5_L1JPSI-1M5-eEM9', stream=[PhysicsStream,'express'], l1SeedThresholds=['eEM5','eEM9'], groups=SupportPhIGroup+MultiElectronGroup+Topo2Group+['RATE:CPS_JPSI-1M5-eEM9'], monGroups=['egammaMon:shifter_topo']),
         ChainProp(name='HLT_e5_lhtight_e4_etcut_1invmAB5_L1JPSI-1M5-eEM9', stream=[PhysicsStream,'express'], l1SeedThresholds=['eEM5','eEM5'], groups=SupportPhIGroup+MultiElectronGroup+Topo2Group+['RATE:CPS_JPSI-1M5-eEM9'], monGroups=['egammaMon:shifter_topo']),
         ChainProp(name='HLT_e5_lhtight_e4_etcut_1invmAB5_L1RD0_FILLED', stream=[PhysicsStream,'express'], l1SeedThresholds=['eEM5','eEM5'], groups=SupportPhIGroup+MultiElectronGroup+Topo2Group, monGroups=['egammaMon:shifter_topo']),
+        ChainProp(name='HLT_e9_lhvloose_e6_lhvloose_L10DPHI32-2M5-eEM9M-eEM6M', stream=[PhysicsStream,'express'], l1SeedThresholds=['eEM9','eEM5'], groups=SupportPhIGroup+MultiElectronGroup+Topo2Group, monGroups=['egammaMon:shifter_topo']),
+        ChainProp(name='HLT_e9_lhloose_e6_lhloose_L10DPHI32-2M5-eEM9M-eEM6M', stream=[PhysicsStream,'express'], l1SeedThresholds=['eEM9','eEM5'], groups=SupportPhIGroup+MultiElectronGroup+Topo2Group, monGroups=['egammaMon:shifter_topo']),
+        #ATR-32259
+        ChainProp(name='HLT_2e5_lhvloose_bBeeM6000_L1BKeePrimary', l1SeedThresholds=['eEM5'], stream=['Main','express'], groups=SupportPhIGroup+BphysElectronGroup, monGroups=['bphysMon:online','bphysMon:shifter']),
+        ChainProp(name='HLT_2e5_lhvloose_bBeeM6000_L1BKeePrescaled', l1SeedThresholds=['eEM5'], stream=['Main'], groups=EOFBeePhIGroup+BphysElectronGroup),
+        ChainProp(name='HLT_e5_lhvloose_bBeeM6000_L1BKeePrimary', l1SeedThresholds=['eEM5'], stream=['Main','express'], groups=SupportPhIGroup+BphysElectronGroup, monGroups=['bphysMon:online']),
+        ChainProp(name='HLT_e5_lhvloose_bBeeM6000_L1BKeePrescaled', l1SeedThresholds=['eEM5'], stream=['Main'], groups=EOFBeePhIGroup+BphysElectronGroup),
+        ChainProp(name='HLT_e5_lhvloose_e3_lhvloose_bBeeM6000_L1BKeePrimary', l1SeedThresholds=['eEM5','eEM5'], stream=['Main'], groups=SupportPhIGroup+BphysElectronGroup, monGroups=['bphysMon:online','bphysMon:shifter']),
+        ChainProp(name='HLT_e5_lhvloose_e3_lhvloose_bBeeM6000_L1BKeePrescaled', l1SeedThresholds=['eEM5','eEM5'], stream=['Main'], groups=EOFBeePhIGroup+BphysElectronGroup),
+
+        #----------- Electron LRT chains (ATR-32273)
+        ChainProp(name='HLT_e10_lhloose_nopix_lrtmedium_L1eEM9', groups=PrimaryPhIGroup+SingleElectronGroup),
+        ChainProp(name='HLT_e30_lhloose_nopix_lrtmedium_L1eEM26M', groups=PrimaryPhIGroup+SingleElectronGroup),
     ]
 
     chains['Jet'] = [

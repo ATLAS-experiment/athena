@@ -347,7 +347,13 @@ def defineInputsMenu():
                                                                                              '400INVM-0DPHI20-AjJ60s6-AjJ50s6'] ),
                     TopoMenuDef( 'DPHI_jXE40delay_jJ40s', outputbits = (8, 9), outputlines = ['0DPHI10-jXE40delay-jJ40s',
                                                                                               '0DPHI99-jXE40delay-jJ40s'] ), 
-                    TopoMenuDef( '110INVM150-eEM50s-eEM10s-2DISAMB-jJ60s', outputbits = 10), # ATR-31830
+                    #versions with larger delay between jXE and jJet (ATR-32084)
+                    TopoMenuDef( 'DPHI_jXE40delay2_jJ40s', outputbits = (10, 11), outputlines = ['0DPHI10-jXE40delay2-jJ40s',
+                                                                                              '0DPHI99-jXE40delay2-jJ40s'] ),
+                    TopoMenuDef( 'DPHI_jXE40delay3_jJ40s', outputbits = (12, 13), outputlines = ['0DPHI10-jXE40delay3-jJ40s',
+                                                                                              '0DPHI99-jXE40delay3-jJ40s'] ),
+                    TopoMenuDef( 'INVM-eEMs-2DISAMB-jJs', outputbits = (14,15), outputlines = ['110INVM150-eEM50s-eEM10s-2DISAMB-jJ60s', # ATR-31830
+                                                                                                '110INVM150-eEM40s-eEM10s-2DISAMB-jJ60s' ] ),
                 ]
             }
         ]
