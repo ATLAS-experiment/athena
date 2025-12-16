@@ -1,14 +1,14 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # Simple script to run a
 # Tau job
 #
-# Usefull for quick testing using EMPFlow jets for tau seeding
+# Usefull for quick testing using EMPFlowML jets for tau seeding
 # run with
 #
-# athena --CA runTauOnly_EMPFlow.py 
+# athena --CA runTauOnly_EMPFlowML.py 
 # or
-# python runTauOnly_EMPFlow.py
+# python runTauOnly_EMPFlowML.py
 
 import sys
 
