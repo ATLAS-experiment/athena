@@ -51,13 +51,11 @@ def EGAM5SkimmingToolCfg(flags):
     # 2nd selection: off-line, based on mT(enu)
     expression2 = "count(EGAM5_ENuTransverseMass > 40*GeV)>=1"
     print("EGAM5 offline skimming expression: ", expression2)
-    EGAM5_OfflineSkimmingTool = CompFactory.DerivationFramework.xAODStringSkimmingTool(
-        name="EGAM5_OfflineSkimmingTool", expression=expression2
-    )
-    if flags.Trigger.EDMVersion < 0:
-        EGAM5_OfflineSkimmingTool.TrigDecisionTool=None
 
-    acc.addPublicTool(EGAM5_OfflineSkimmingTool)
+    from DerivationFrameworkTools.DerivationFrameworkToolsConfig import (
+        xAODStringSkimmingToolCfg)
+    EGAM5_OfflineSkimmingTool = acc.getPrimaryAndMerge(xAODStringSkimmingToolCfg(
+        flags, name = "EGAM5_OfflineSkimmingTool", expression = expression2))
     skimmingTools += [EGAM5_OfflineSkimmingTool]
 
     # 3rd selection: mix of off-line and on-line criteria
@@ -78,13 +76,10 @@ def EGAM5SkimmingToolCfg(flags):
         expression3 = "( " + expression3a + " ) && ( " + expression3b + " )"
         print("EGAM5 mixed offline-online skimming expression: ", expression3)
 
-        EGAM5_OnlineOfflineSkimmingTool = (
-            CompFactory.DerivationFramework.xAODStringSkimmingTool(
-                name="EGAM5_OnlineOfflineSkimmingTool", expression=expression3
-            )
-        )
-
-        acc.addPublicTool(EGAM5_OnlineOfflineSkimmingTool)
+        EGAM5_OnlineOfflineSkimmingTool = acc.getPrimaryAndMerge(
+            xAODStringSkimmingToolCfg(
+                flags, name = "EGAM5_OnlineOfflineSkimmingTool",
+                expression = expression3))
         skimmingTools += [EGAM5_OnlineOfflineSkimmingTool]
 
     # do the OR of previous selections

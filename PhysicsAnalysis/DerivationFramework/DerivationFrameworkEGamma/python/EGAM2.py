@@ -41,13 +41,10 @@ def EGAM2SkimmingToolCfg(flags):
     expression = expression_calib + " || " + expression_TP
     print("EGAM2 offline skimming expression: ", expression)
 
-    EGAM2_OfflineSkimmingTool = CompFactory.DerivationFramework.xAODStringSkimmingTool(
-        name="EGAM2_OfflineSkimmingTool", expression=expression
-    )
-    if flags.Trigger.EDMVersion < 0:
-        EGAM2_OfflineSkimmingTool.TrigDecisionTool = None
-
-    acc.addPublicTool(EGAM2_OfflineSkimmingTool)
+    from DerivationFrameworkTools.DerivationFrameworkToolsConfig import (
+        xAODStringSkimmingToolCfg)
+    EGAM2_OfflineSkimmingTool = acc.getPrimaryAndMerge(xAODStringSkimmingToolCfg(
+        flags, name = "EGAM2_OfflineSkimmingTool", expression = expression))
     skimmingTools += [EGAM2_OfflineSkimmingTool]
 
     # trigger-based selection

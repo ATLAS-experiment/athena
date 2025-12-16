@@ -27,7 +27,6 @@ from DerivationFrameworkEGamma.TriggerContent import (
 
 def EGAM4SkimmingToolCfg(flags):
     """Configure the EGAM4 skimming tool"""
-    acc = ComponentAccumulator()
 
     # mumugamma: one reco photon (ET>10 GeV) and OS muon pair w/ m>40 GeV
     expression1a = " && ".join(
@@ -46,13 +45,10 @@ def EGAM4SkimmingToolCfg(flags):
     expression = "( " + expression1a + " ) || ( " + expression1b + " )"
     print("EGAM4 skimming expression: ", expression)
 
-    skimmingTool = CompFactory.DerivationFramework.xAODStringSkimmingTool(
-        name="EGAM4SkimmingTool", expression=expression)
-    if flags.Trigger.EDMVersion < 0:
-        skimmingTool.TrigDecisionTool=None
-
-    acc.setPrivateTools(skimmingTool)
-    return acc
+    from DerivationFrameworkTools.DerivationFrameworkToolsConfig import (
+        xAODStringSkimmingToolCfg)
+    return xAODStringSkimmingToolCfg(flags, name = "EGAM4SkimmingTool",
+                                     expression = expression)
 
 
 def EGAM4mumuMassToolCfg(flags):
@@ -274,8 +270,7 @@ def EGAM4KernelCfg(flags, name="EGAM4Kernel", **kwargs):
             thinningTools.append(EGAM4TPThinningTool)
 
     # skimming
-    skimmingTool = acc.popToolsAndMerge(EGAM4SkimmingToolCfg(flags))
-    acc.addPublicTool(skimmingTool)
+    skimmingTool = acc.getPrimaryAndMerge(EGAM4SkimmingToolCfg(flags))
 
     # setup the kernel
     acc.addEventAlgo(

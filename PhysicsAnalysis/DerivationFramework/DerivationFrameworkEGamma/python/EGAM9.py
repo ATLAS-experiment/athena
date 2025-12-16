@@ -68,15 +68,10 @@ def EGAM9SkimmingToolCfg(flags):
 
     # off-line based selection
     print("EGAM9 offline skimming expression: ", expression)
-    EGAM9_OfflineSkimmingTool = (
-        CompFactory.DerivationFramework.xAODStringSkimmingTool(
-            name="EGAM9_OfflineSkimmingTool", expression=expression
-        )
-    )
-    if flags.Trigger.EDMVersion < 0:
-        EGAM9_OfflineSkimmingTool.TrigDecisionTool=None
-    
-    acc.addPublicTool(EGAM9_OfflineSkimmingTool)
+    from DerivationFrameworkTools.DerivationFrameworkToolsConfig import (
+        xAODStringSkimmingToolCfg)
+    EGAM9_OfflineSkimmingTool = acc.getPrimaryAndMerge(xAODStringSkimmingToolCfg(
+        flags, name = "EGAM9_OfflineSkimmingTool", expression = expression))    
     skimmingTools += [EGAM9_OfflineSkimmingTool]
 
     # do the AND of trigger-based and offline-based selection

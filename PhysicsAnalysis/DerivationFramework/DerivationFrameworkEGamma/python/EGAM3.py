@@ -28,7 +28,6 @@ from DerivationFrameworkEGamma.TriggerContent import (
 
 def EGAM3SkimmingToolCfg(flags):
     """Configure the EGAM3 skimming tool"""
-    acc = ComponentAccumulator()
 
     # eegamma or eee selection for photon efficiency studies, ee triggers
     expression1a = " && ".join(
@@ -79,14 +78,10 @@ def EGAM3SkimmingToolCfg(flags):
     )
     print("EGAM3 skimming expression: ", expression)
 
-    skimmingTool = CompFactory.DerivationFramework.xAODStringSkimmingTool(
-        name="EGAM3SkimmingTool", expression=expression)
-    if flags.Trigger.EDMVersion < 0:
-        skimmingTool.TrigDecisionTool=None
-
-    acc.setPrivateTools(skimmingTool)
-
-    return acc
+    from DerivationFrameworkTools.DerivationFrameworkToolsConfig import (
+        xAODStringSkimmingToolCfg)
+    return xAODStringSkimmingToolCfg(flags, name = "EGAM3SkimmingTool",
+                                     expression = expression)
 
 
 def EGAM3eeMassTool1Cfg(flags):
@@ -397,8 +392,7 @@ def EGAM3KernelCfg(flags, name="EGAM3Kernel", **kwargs):
             thinningTools.append(EGAM3TPThinningTool)
 
     # skimming
-    skimmingTool = acc.popToolsAndMerge(EGAM3SkimmingToolCfg(flags))
-    acc.addPublicTool(skimmingTool)
+    skimmingTool = acc.getPrimaryAndMerge(EGAM3SkimmingToolCfg(flags))
 
     # setup the kernel
     acc.addEventAlgo(
