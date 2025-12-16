@@ -123,10 +123,8 @@ namespace pool  {
                    bool          any_next);
     //@}
 
-    /// Perform selection. The statement belongs to the container afterwards.
-    DbStatus select(DbSelect& sel);
-    /// Fetch next object address of the selection to set token
-    DbStatus fetch(DbSelect& sel);
+    /// Fetch next object address to set token
+    DbStatus next(Token::OID_t& linkH);
   };
 }       // End namespace pool
 #endif  // POOL_DBCONTAINEROBJ_H

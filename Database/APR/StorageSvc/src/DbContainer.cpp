@@ -155,14 +155,9 @@ DbContainer::objectShape(const Guid& guid) {
   return isValid() ? m_ptr->objectShape(guid) : 0;
 }
 
-/// Perform selection
-DbStatus DbContainer::select(DbSelect& sel) {
-  return isValid() ? m_ptr->select(sel) : Error;
-}
-
-/// Fetch next object address of the selection to set token
-DbStatus DbContainer::fetch(DbSelect& sel) {
-  return isValid() ? m_ptr->fetch(sel) : Error;
+/// Fetch next object address to set token
+DbStatus DbContainer::next(Token::OID_t& linkH) {
+  return isValid() ? m_ptr->next(linkH) : Error;
 }
 
 /// Store object in location

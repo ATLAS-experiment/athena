@@ -15,7 +15,6 @@
 // Framework include files
 #include "PersistentDataModel/Token.h"
 #include "DbStorageSvc.h"
-#include "DbStorageExplorer.h"
 #include "POOLCore/DbPrint.h"
 #include "StorageSvc/DbReflex.h"
 #include "StorageSvc/DbTypeInfo.h"
@@ -60,7 +59,6 @@ DbStorageSvc::DbStorageSvc(const string& name)
   m_type(POOL_StorageType)
 {
   static const char * const als = getenv("POOL_STORAGESVC_DB_AGE_LIMIT");  
-  m_explorer = new DbStorageExplorer(name+".Explorer", m_domH, this);
   if ( als )    {
     int alimit = 2;
     istringstream buf(als);
@@ -75,7 +73,6 @@ DbStorageSvc::DbStorageSvc(const string& name)
 
 /// Standard destructor.
 DbStorageSvc::~DbStorageSvc() {
-  delete m_explorer;
   m_domH.close();
   m_domH = 0;
   m_sesH = 0;
@@ -100,9 +97,6 @@ unsigned int DbStorageSvc::release()   {
 DbStatus DbStorageSvc::queryInterface(const Guid& riid, void** ppvInterface)  {
   if ( IStorageSvc::interfaceID() == riid )  {
     *ppvInterface = static_cast<IStorageSvc*>(this);
-  }
-  else if ( IStorageExplorer::interfaceID() == riid )  {
-    return m_explorer->queryInterface(riid, ppvInterface);
   }
   addRef();
   return DbStatus::Success;

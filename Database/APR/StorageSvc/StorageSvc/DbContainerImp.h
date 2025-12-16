@@ -50,11 +50,10 @@ namespace pool    {
       const void*         object;
       const Shape*        shape;
       Token::OID_t        link;
-      AccessMode          action;
 
-      DbAction() : object(nullptr), shape(nullptr), action(NONE)   { }
-      DbAction(const void* obj, const Shape* s, const Token::OID_t&  l, AccessMode a)
-            : object(obj), shape(s), link(l), action(a)   { }
+      DbAction() : object(nullptr), shape(nullptr) { }
+      DbAction(const void* obj, const Shape* s, const Token::OID_t&  l)
+            : object(obj), shape(s), link(l) { }
 
       const void*       dataAtOffset(size_t offset) {
          return static_cast<const char*>(object) + offset;
@@ -65,32 +64,15 @@ namespace pool    {
     
   private:
     /// Transaction fifo storage for writing
-    ActionList            m_stack;
+    ActionList            m_writeStack;
     /// Current size of the transaction stack
     size_t                m_size;
-    /// Number of objects to be written out during open transaction
-    size_t                m_writeSize;
-    /// Accumulated stack entry types
-    int                   m_stackType;
   protected:
     /// Container name
     std::string           m_name;
-    /// Flag to indicate if object updates are supported
-    bool                  m_canUpdate;
-    /// Flag to indicate if object removals are supported
-    bool                  m_canDestroy;
 
     /// Standard destructor
     virtual ~DbContainerImp();
-    /// Access accumulated stack entry types
-    int stackType()   const
-    { return m_stackType;                                                     }
-    /// Access stack size
-    size_t stackSize()  const   
-    { return m_size;                                                          }
-    /// Internal: get access to stack entry
-    ActionList::value_type* stackEntry(size_t which) 
-    { return (which <= m_size) ? &(*(m_stack.begin()+which)) : 0;             }
     /// Commit single entry to container
     virtual DbStatus writeObject(ActionList::value_type& /* entry */)  
     { return Error;                                                   }
@@ -138,8 +120,8 @@ namespace pool    {
                               const void* object,
                               ShapeH shape,
                               Token::OID_t& oid) override;
-    /// Fetch next object address of the selection to set token
-    virtual DbStatus fetch(DbSelect&      sel) override;
+    /// Fetch next object address to set token
+    virtual DbStatus next(Token::OID_t& linkH) override;
 
     /// Find object within the container and load it into memory
     /** @param  ptr    [IN/OUT]  ROOT-style address of the pointer to object
@@ -155,10 +137,6 @@ namespace pool    {
                            const Token::OID_t& lnkH,
                            Token::OID_t&       oid,
                            bool                any_next) override;
-    /// Clear Transaction stack containing transaction requests
-    virtual DbStatus clearStack();
-    /// Fetch refined object address. Default implementation returns identity
-    virtual DbStatus fetch(const Token::OID_t& linkH, Token::OID_t& stmt);
 
     /// Find object by object identifier and load it into memory
     /** @param  ptr    [IN/OUT]  ROOT-style address of the pointer to object

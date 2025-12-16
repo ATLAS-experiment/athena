@@ -7,9 +7,9 @@
 
 #include <iostream>
 #include <stdexcept>
+#include <vector>
 
 #include "StorageSvc/IStorageSvc.h"
-#include "StorageSvc/IStorageExplorer.h"
 #include "StorageSvc/DbType.h"
 #include "StorageSvc/DbOption.h"
 #include "StorageSvc/FileDescriptor.h"
@@ -42,7 +42,6 @@ namespace pool {
 
      pool::Session*             session = nullptr;
      pool::IStorageSvc*         storageSvc = nullptr;
-     pool::IStorageExplorer*    storageExplorer = nullptr;
 
      std::vector< std::string > args;
      std::vector< std::string > fileNames;

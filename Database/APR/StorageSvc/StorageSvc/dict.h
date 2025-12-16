@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // Package pool/StorageSvc - interfaces
@@ -19,7 +19,6 @@
 #include "StorageSvc/DbSession.h"
 
 #include "StorageSvc/DbReflex.h"
-#include "StorageSvc/DbSelect.h"
 #include "StorageSvc/DbOption.h"
 #include "StorageSvc/DbString.h"
 #include "StorageSvc/DbColumn.h"

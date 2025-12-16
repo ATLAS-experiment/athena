@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //
@@ -29,7 +29,6 @@ namespace pool    {
   class DbDatabase;
   class DbContainer;
   class DbOption;
-  class DbSelect;
 
   typedef const class Shape        *ShapeH;
 
@@ -84,10 +83,8 @@ namespace pool    {
     /// Check if we can access the container for reading with the given type
     virtual DbStatus checkAccess(DbDatabase&        dbH,
                                  const std::string& nam) const = 0;
-    /// Define selection
-    virtual DbStatus select(DbSelect& sel) = 0;
-    /// Fetch next object address of the selection to set token
-    virtual DbStatus fetch(DbSelect& sel) = 0;
+    /// Fetch next object address to set token
+    virtual DbStatus next(Token::OID_t& linkH) = 0;
 
     /// Find object within the container and load it into memory
     /** @param  ptr    [IN/OUT]  ROOT-style address of the pointer to object

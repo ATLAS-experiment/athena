@@ -22,11 +22,13 @@
 #include "StorageSvc/DbType.h"
 #include "StorageSvc/Shape.h"
 #include "StorageSvc/IStorageSvc.h"
-#include "StorageSvc/IStorageExplorer.h"
 #include "StorageSvc/FileDescriptor.h"
+#include "StorageSvc/DatabaseConnection.h"
+#include "StorageSvc/DbDatabase.h"
 #include "StorageSvc/DbReflex.h"
 #include "StorageSvc/DbString.h"
 #include "StorageSvc/DbOption.h"
+#include "StorageSvc/pool.h"
 #include <iostream>
 
 using namespace pool;
@@ -109,17 +111,11 @@ void test(const DbType storageType, const std::string& filename) {
       throw std::runtime_error( "Could not create a persistent shape." );
    }
 
-   // Get IStorageExplorer IFace to set options
-   void *p = nullptr;
-   storSvc->queryInterface( IStorageExplorer::interfaceID(), &p );
-   IStorageExplorer *storage = (IStorageExplorer*)p;
-   if( !storage ) {
-      throw std::runtime_error( "Failed to retrieve IStorageExplorer" );
-   }
    // Set container for master index (enables index synchronization between TTrees)
-   //DbOption masterIdxOpt("INDEX_MASTER", "", containerNameA.c_str());
    DbOption masterIdxOpt("INDEX_MASTER", "", "*");
-   storage->setDatabaseOption(fd, masterIdxOpt);
+   DbDatabase dbH(static_cast<DbDatabaseObj*>(connection->handle()));
+   dbH.setOption(masterIdxOpt);
+   //storage->setDatabaseOption(fd, masterIdxOpt);
 
    // Commit here to test empty commits
    if( ! ( storSvc->endTransaction( connection, pool::Transaction::TRANSACT_COMMIT ).isSuccess() ) ) {

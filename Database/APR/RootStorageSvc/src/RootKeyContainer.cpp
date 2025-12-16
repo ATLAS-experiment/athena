@@ -13,7 +13,6 @@
 // Framework include files
 
 #include "StorageSvc/DbOption.h"
-#include "StorageSvc/DbSelect.h"
 #include "StorageSvc/DbColumn.h"
 #include "StorageSvc/DbTypeInfo.h"
 #include "StorageSvc/DbReflex.h"
@@ -42,8 +41,6 @@ RootKeyContainer::RootKeyContainer(const std::string& name) :
   m_policy(TObject::kOverwrite),    // On update write new versions
   m_ioBytes(-1)
 {
-  m_canDestroy = true;
-  m_canUpdate  = true;
 }
 
 /// Standard destructor
@@ -96,35 +93,19 @@ DbStatus RootKeyContainer::transAct(Transaction::Action action)
    return Success;
 }
    
-
-// Interface Implementation: Find entry in container
-DbStatus RootKeyContainer::fetch(const Token::OID_t& linkH, Token::OID_t& stmt) {
+// Fetch next object address to set token
+DbStatus RootKeyContainer::next(Token::OID_t& linkH) {
   char txt[64];
-  ::sprintf(txt, "_pool_valid_%08d", static_cast<int>(linkH.second));
-  const TKey* key = (const TKey*)m_dir->GetListOfKeys()->FindObject(txt);
-  if ( key )    {
-    stmt = linkH;
-    return Success;
-  }
-  return Error;
-}
-
-// Fetch next object address of the selection to set token
-DbStatus RootKeyContainer::fetch(DbSelect& sel) {
-  char txt[64];
-  Token::OID_t lnk = sel.link();
   const long long int stk_size = DbContainerImp::size();
   const long long int cnt_size = nextRecordId()-stk_size;
-  for(int j=lnk.second; j < cnt_size; ++j) {
-    ++lnk.second;
-    ::sprintf(txt, "_pool_valid_%08d", static_cast<int>(lnk.second));
+  for(int j=linkH.second; j < cnt_size; ++j) {
+    ++linkH.second;
+    ::sprintf(txt, "_pool_valid_%08d", static_cast<int>(linkH.second));
     const TKey* key = (TKey*)m_dir->GetListOfKeys()->FindObject(txt);
     if ( key )    {
       const char* class_name = key->GetClassName();
       const DbTypeInfo* typ = m_dbH.objectShape( DbReflex::forTypeName(class_name) );
       if ( typ )  {
-        sel.setShapeID(typ->shapeID());
-        sel.link() = lnk;
         return Success;
       }
       ATH_MSG_ERROR("Failed to find the correct shape identifier for class:" << class_name);
@@ -133,21 +114,6 @@ DbStatus RootKeyContainer::fetch(DbSelect& sel) {
     else {
       // Here we are if key names have holes due to deletes
       // Try to get the next one.
-    }
-  }
-  // The object was not yet saved and is still on the
-  // commit stack.
-  lnk = sel.link();
-  for(long long int i=0; i < stk_size; ++i)  {
-    ActionList::value_type* ent = stackEntry(size_t(i));
-    bool take_it = ent->link.second > lnk.second;
-    if ( ent->action == WRITE && take_it )  {
-      ShapeH shape = ent->shape;
-      if ( shape )  {
-        sel.setShapeID(shape->shapeID());
-        sel.link() = ent->link;
-        return Success;
-      }
     }
   }
   return Error;
@@ -359,14 +325,6 @@ DbStatus RootKeyContainer::checkAccess(DbDatabase& dbH,
   }
   ATH_MSG_DEBUG("Cannot access container '" << dir_nam 
     << "', invalid Database handle or container is not of type Directory.");
-  return Error;
-}
-
-// Define selection
-DbStatus RootKeyContainer::select(DbSelect& /* crit */) {
-  if ( 0 != m_dir )    {
-    return Success;
-  }
   return Error;
 }
 

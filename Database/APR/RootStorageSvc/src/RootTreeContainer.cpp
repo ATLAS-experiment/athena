@@ -13,7 +13,6 @@
 
 // Framework include files
 #include "StorageSvc/DbOption.h"
-#include "StorageSvc/DbSelect.h"
 #include "StorageSvc/DbDatabase.h"
 #include "StorageSvc/DbColumn.h"
 #include "StorageSvc/DbTypeInfo.h"
@@ -230,18 +229,6 @@ DbStatus RootTreeContainer::writeObject( ActionList::value_type& action )
    ATH_MSG_ERROR("[RootTreeContainer] Could not write an object");
    m_ioBytes = -1;
    return Error;
-}
-
-
-/// Fetch refined object address. Default implementation returns identity
-DbStatus RootTreeContainer::fetch(const Token::OID_t& linkH, Token::OID_t& stmt)  {
-  return DbContainerImp::fetch(linkH, stmt);
-}
-
-// Fetch next object address of the selection to set token
-DbStatus RootTreeContainer::fetch(DbSelect& sel)  {
-  sel.link().second++;
-  return DbContainerImp::fetch(sel.link(), sel.link());
 }
 
 
@@ -604,16 +591,6 @@ DbStatus RootTreeContainer::checkAccess(DbDatabase& dbH,
    ATH_MSG_DEBUG("Cannot access container '" << nam << "', invalid Database handle or "
        << "container is not of type Tree/Branch.");
    return Error;
-}
-
-
-// Define selection
-DbStatus  RootTreeContainer::select(DbSelect& sel)    {
-  if ( nullptr != m_tree )  {
-    sel.link().second = -1;
-    return Success;
-  }
-  return Error;
 }
 
 

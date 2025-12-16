@@ -13,13 +13,14 @@
 
 #include "StorageSvc/Shape.h"
 #include "StorageSvc/IStorageSvc.h"
-#include "StorageSvc/IStorageExplorer.h"
-#include "StorageSvc/DbSelect.h"
 #include "StorageSvc/DbReflex.h"
 #include "StorageSvc/DatabaseConnection.h"
 #include "StorageSvc/FileDescriptor.h"
+#include "StorageSvc/DbDatabase.h"
+#include "StorageSvc/DbContainer.h"
 #include "StorageSvc/DbType.h"
 #include "StorageSvc/DbOption.h"
+#include "StorageSvc/pool.h"
 #include "POOLCore/DbPrint.h"
 
 #include <stdexcept>
@@ -85,15 +86,9 @@ std::string TestDriver::testWriting()
    }
    pool::DatabaseConnection* connection = fd.dbc();
 
-   void *pVoid;
-   pool::DbStatus sc = storSvc->queryInterface( pool::IStorageExplorer::interfaceID(), &pVoid );
-   pool::IStorageExplorer* storageExplorer = (pool::IStorageExplorer*)pVoid;
-   if ( !( sc == pool::DbStatus::Success && storageExplorer ) ) {
-     storSvc->release();
-     throw std::runtime_error( "Could not retrieve a IStorageExplorer interface" );
-   }
    pool::DbOption opt("TREE_AUTO_FLUSH", "CollectionTree", 10);
-   storageExplorer->setDatabaseOption(fd, opt);
+   DbDatabase dbH(static_cast<DbDatabaseObj*>(connection->handle()));
+   dbH.setOption(opt);
 
    SG::auxid_t ityp1 = SG::AuxTypeRegistry::instance().getAuxID<int> ("anInt");
    SG::auxid_t ityp2 = SG::AuxTypeRegistry::instance().getAuxID<int> ("int2");
@@ -191,13 +186,6 @@ TestDriver::testReading(const string& testTypeID)
     throw std::runtime_error( "Could not create a StorageSvc object" );
   }
   storSvc->addRef();
-  void* pVoid = 0;
-  pool::DbStatus sc = storSvc->queryInterface( pool::IStorageExplorer::interfaceID(), &pVoid );
-  pool::IStorageExplorer* storageExplorer = (pool::IStorageExplorer*)pVoid;
-  if ( !( sc == pool::DbStatus::Success && storageExplorer ) ) {
-    storSvc->release();
-    throw std::runtime_error( "Could not retrieve a IStorageExplorer interface" );
-  }
 
   SG::auxid_t ityp1 = SG::AuxTypeRegistry::instance().getAuxID<int> ("anInt");
   SG::auxid_t ityp2 = SG::AuxTypeRegistry::instance().getAuxID<int> ("int2");
@@ -210,14 +198,18 @@ TestDriver::testReading(const string& testTypeID)
   }
 
   pool::FileDescriptor* fd = new pool::FileDescriptor( m_fileName, m_fileName );
-  sc = storSvc->connect( sessionHandle, pool::READ, *fd );
+  pool::DbStatus sc = storSvc->connect( sessionHandle, pool::READ, *fd );
   if ( sc != pool::DbStatus::Success ) {
     throw std::runtime_error( "Could not start a connection." );
   }
-
+  pool::DatabaseConnection* connection = fd->dbc();
+  DbDatabase dbH(static_cast<DbDatabaseObj*>(connection->handle()));
+  if ( !dbH.isValid() )  {
+    throw std::runtime_error( "Database is not valid" );
+  }
   // Fetch the containers
   std::vector<const Token*> containerTokens;
-  storageExplorer->containers( *fd, containerTokens );
+  dbH.containers(containerTokens, false );
   if ( containerTokens.size() != 1 ) {
     throw std::runtime_error( "Unexpected number of containers" );
   }
@@ -228,13 +220,15 @@ TestDriver::testReading(const string& testTypeID)
   }
 
   // Fetch the objects in the container.
-  pool::DbSelect selectionObject;
-  sc = storageExplorer->select( *fd, containerToken->contID(), selectionObject );
+  DbContainer cntH(containerToken->technology());
+  Token::OID_t linkH(containerToken->oid());
+  sc = cntH.open(dbH, containerToken->contID(), 0, containerToken->technology(), pool::READ);
   int iObject = 0;
-  if ( sc.isSuccess() ) {
-    Token* objectToken = 0;
-    while ( storageExplorer->next( selectionObject, objectToken ).isSuccess() ) {
-      const Guid& guid = objectToken->classID();
+  if ( sc.isSuccess() && cntH.isValid() ) {
+    Token* objectToken = new Token(cntH.token());
+    const Guid& guid = objectToken->classID();
+    while ( cntH.next(linkH).isSuccess() ) {
+      objectToken->oid() = linkH;
       const pool::Shape* shape = 0;
       if ( storSvc->getShape( *fd, guid, shape ) != pool::IStorageSvc::IS_PERSISTENT_SHAPE ) {
 	throw std::runtime_error( "Could not fetch the persistent shape" );
@@ -278,8 +272,8 @@ TestDriver::testReading(const string& testTypeID)
       
       ++iObject;
       delete object; 
-      objectToken->release();
     }
+    objectToken->release();
   }
   cout << "Objects read: " << iObject << endl;
   if ( iObject != nObjects ) {
@@ -296,6 +290,5 @@ TestDriver::testReading(const string& testTypeID)
   if ( ! ( storSvc->endSession( sessionHandle ).isSuccess() ) ) {
     throw std::runtime_error( "Could not end correctly the session." );
   }
-  storageExplorer->release();
   storSvc->release();
 }

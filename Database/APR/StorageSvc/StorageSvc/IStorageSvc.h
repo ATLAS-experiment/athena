@@ -25,6 +25,8 @@ namespace pool  {
 
   // Forward declarations
   class FileDescriptor;
+  class DbOption;
+
   typedef class Session            *SessionH;
   typedef class DatabaseConnection *ConnectionH;
   typedef const class Shape        *ShapeH;
@@ -267,6 +269,34 @@ namespace pool  {
       * @return                 DbStatus code indicating success or failure.
       */
     virtual DbStatus endTransaction( ConnectionH conn, Transaction::Action typ) = 0;
+
+    /// Access options for a given database domain.
+    /** Domain options are global options, which refer to the
+      * database technology and not to a particular connection.
+      *
+      * Note: The options depend on the underlying implementation
+      * and are not normalized.
+      *
+      *  @param   sessionH  [IN] Session context to be used to open the Database.
+      *  @param   opt       [IN] Reference to option object.
+      *
+      *  @return DbStatus code indicating success or failure.
+      */
+    virtual DbStatus getDomainOption(const SessionH  sessionH, DbOption& opt) = 0;
+
+    /// Set options for a given database domain.
+    /** Domain options are global options, which refer to the
+      * database technology and not to a particular connection.
+      *
+      * Note: The options depend on the underlying implementation
+      * and are not normalized.
+      *
+      *  @param   sessionH  [IN] Session context to be used to open the Database.
+      *  @param   opt       [IN] Reference to option object.
+      *
+      *  @return DbStatus code indicating success or failure.
+      */
+    virtual DbStatus setDomainOption(const SessionH  sessionH, const DbOption& opt) = 0;
 
     /// DbStatus code definitions
     enum : unsigned {

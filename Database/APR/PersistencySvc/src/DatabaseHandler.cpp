@@ -6,25 +6,24 @@
 #include "Container.h"
 #include "PersistentDataModel/Token.h"
 #include "StorageSvc/IStorageSvc.h"
-#include "StorageSvc/IStorageExplorer.h"
 #include "StorageSvc/Transaction.h"
 #include "StorageSvc/Shape.h"
+#include "StorageSvc/DbDatabase.h"
 #include "StorageSvc/DbOption.h"
 #include "StorageSvc/DbReflex.h"
 #include "StorageSvc/DbTypeInfo.h"
+#include "StorageSvc/DbConnection.h"
 
 #include <exception>
 #include <memory>
 
 pool::PersistencySvc::DatabaseHandler::DatabaseHandler( pool::IStorageSvc& storageSvc,
-                                                        pool::IStorageExplorer& storageExplorer,
                                                         pool::Session* session,
                                                         long technology,
                                                         const std::string& fid,
                                                         const std::string& pfn,
                                                         long accessmode ):
   m_storageSvc( storageSvc ),
-  m_storageExplorer( storageExplorer ),
   m_session( session ),
   m_fileDescriptor( fid, pfn ),
   m_technology( technology ),
@@ -86,7 +85,9 @@ pool::PersistencySvc::DatabaseHandler::containers()
 {
    std::vector< std::string > result;
    std::vector<const Token*> containerTokens;
-   m_storageExplorer.containers( m_fileDescriptor, containerTokens );
+   pool::DatabaseConnection* connection = m_fileDescriptor.dbc();
+   DbDatabase dbH(static_cast<DbDatabaseObj*>(connection->handle()));
+   dbH.containers(containerTokens, false);
    for ( std::vector<const Token*>::const_iterator iToken = containerTokens.begin();
          iToken != containerTokens.end(); ++iToken ) {
       Token tok (*iToken);
@@ -104,7 +105,6 @@ pool::PersistencySvc::DatabaseHandler::container( const std::string& containerNa
          iName != allContainers.end(); ++iName ) {
       if ( *iName == containerName ) {
          return new pool::PersistencySvc::Container( m_fileDescriptor,
-                                                     m_storageExplorer,
                                                      m_technology,
                                                      containerName );
       }
@@ -196,7 +196,9 @@ pool::PersistencySvc::DatabaseHandler::attribute( const std::string& attributeNa
                                                   const std::string& option )
 {
   pool::DbOption databaseOption( attributeName, option );
-  pool::DbStatus sc = m_storageExplorer.getDatabaseOption( m_fileDescriptor, databaseOption );
+  pool::DatabaseConnection* connection = m_fileDescriptor.dbc();
+  DbDatabase dbH(static_cast<DbDatabaseObj*>(connection->handle()));
+  pool::DbStatus sc = dbH.getOption(databaseOption);
   if ( !sc.isSuccess() ) return false;
   if ( databaseOption.i_getValue( typeInfo, data ).isSuccess() ) {
     return true;
@@ -216,8 +218,9 @@ pool::PersistencySvc::DatabaseHandler::setAttribute( const std::string& attribut
   pool::DbOption databaseOption( attributeName, option );
   pool::DbStatus sc = databaseOption.i_setValue( typeInfo, const_cast<void*>( data ) );
   if ( !sc.isSuccess() ) return false;
-  sc = m_storageExplorer.setDatabaseOption( m_fileDescriptor,
-                                            databaseOption );
+  pool::DatabaseConnection* connection = m_fileDescriptor.dbc();
+  DbDatabase dbH(static_cast<DbDatabaseObj*>(connection->handle()));
+  sc = dbH.setOption(databaseOption);
   if ( !sc.isSuccess() ) {
     return false;
   }
