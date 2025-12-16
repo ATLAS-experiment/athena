@@ -50,6 +50,10 @@ namespace {
         }
         return 0.;
     }
+    inline std::string sTgcChannelType(const int chType) {
+          return chType == sTgcIdHelper::Strip ? "S" : 
+                 chType == sTgcIdHelper::Wire ? "W" : "P";
+    }
 }
 
 namespace MuonR4 {
@@ -66,6 +70,7 @@ StatusCode NswSegmentFinderAlg::initialize() {
     ATH_CHECK(m_idHelperSvc.retrieve());
     ATH_CHECK(m_calibTool.retrieve());
     ATH_CHECK(m_visionTool.retrieve(DisableTool{m_visionTool.empty()}));
+    ATH_CHECK(detStore()->retrieve(m_detMgr));
 
     if (!(m_idHelperSvc->hasMM() || m_idHelperSvc->hasSTGC())) {
         ATH_MSG_ERROR("MM or STGC not part of initialized detector layout");
@@ -395,23 +400,40 @@ NswSegmentFinderAlg::findSegmentsFromMaximum(const HoughMaximum &max,
 
     if (m_visionTool.isEnabled()) {
         MuonValR4::IPatternVisualizationTool::PrimitiveVec primitives{};
-        const auto truthHits = getMatchingSimHits(max.getHitsInMax());
         constexpr double legX{0.2};
         double legY{0.8};
         for (const SpacePoint* sp : max.getHitsInMax()) {
-            const auto* mmClust = static_cast<const xAOD::MMCluster*>(sp->primaryMeasurement());
-            const xAOD::MuonSimHit* simHit = getTruthMatchedHit(*mmClust);
-            if (!simHit || !MC::isMuon(simHit)) continue;
-            const MuonGMR4::MmReadoutElement* reEle = mmClust->readoutElement();
-            const MuonGMR4::StripDesign& design = reEle->stripLayer(mmClust->measurementHash()).design();
+            const xAOD::MuonSimHit* simHit = getTruthMatchedHit(*sp->primaryMeasurement());
+            if (!simHit) {
+                continue;
+            }
+
+            const MuonGMR4::MuonReadoutElement* reEle = m_detMgr->getReadoutElement(simHit->identify());
             const Amg::Transform3D toChamb = reEle->msSector()->globalToLocalTrans(gctx) * 
-                                             reEle->localToGlobalTrans(gctx, simHit->identify());
+                                             reEle->localToGlobalTrans(gctx, sp->identify());
+
             const Amg::Vector3D hitPos = toChamb * xAOD::toEigen(simHit->localPosition());
             const Amg::Vector3D hitDir = toChamb.linear() * xAOD::toEigen(simHit->localDirection());
             const double pull = std::sqrt(SeedingAux::chi2Term(hitPos, hitDir, *sp));
-            const double pull2 = (mmClust->localPosition<1>().x() - simHit->localPosition().x()) / std::sqrt(mmClust->localCovariance<1>().x());
-            primitives.push_back(MuonValR4::drawLabel(std::format("ml: {:1d}, gap: {:1d}, {:}, pull: {:.2f} / {:.2f}", reEle->multilayer(), mmClust->gasGap(), 
-                                !design.hasStereoAngle() ? "X" : design.stereoAngle() >0 ? "U": "V",pull, pull2),legX,legY,14));
+     
+            if(sp->type() == xAOD::UncalibMeasType::MMClusterType) {
+                const auto* mmClust = static_cast<const xAOD::MMCluster*>(sp->primaryMeasurement());
+                const MuonGMR4::MmReadoutElement* mmEle = mmClust->readoutElement();
+                const auto& design = mmEle->stripLayer(mmClust->measurementHash()).design();
+                std::string stereoDesign{!design.hasStereoAngle() ? "X" : design.stereoAngle() >0 ? "U": "V"};
+                primitives.push_back(MuonValR4::drawLabel(std::format("ml: {:1d}, gap: {:1d}, {:}, pull: {:.2f}", 
+                                                                      mmEle->multilayer(), mmClust->gasGap(), 
+                                                                      stereoDesign, pull), legX, legY, 14));
+            } else if(sp->type() == xAOD::UncalibMeasType::sTgcStripType) {
+                const auto* sTgcMeas = static_cast<const xAOD::sTgcMeasurement*>(sp->primaryMeasurement());          
+                std::string channelString = sp->secondaryMeasurement() == nullptr ?
+                                            sTgcChannelType(sTgcMeas->channelType()) :
+                                            std::format("{:}/{:}",  sTgcChannelType(sTgcMeas->channelType()),
+                                                         sTgcChannelType(static_cast<const xAOD::sTgcMeasurement*>(sp->secondaryMeasurement())->channelType()));
+                primitives.push_back(MuonValR4::drawLabel(std::format("ml: {:1d}, gap: {:1d}, type: {:}, pull: {:.2f}", 
+                                            sTgcMeas->readoutElement()->multilayer(), sTgcMeas->gasGap(), 
+                                            channelString, pull), legX, legY, 14));
+            }
             legY-=0.05;           
         }
         m_visionTool->visualizeBucket(ctx, *max.parentBucket(),
@@ -419,8 +441,7 @@ NswSegmentFinderAlg::findSegmentsFromMaximum(const HoughMaximum &max,
     }
 
     UsedHitMarker_t allUsedHits = emptyBookKeeper(stripHitsLayers); 
-      
-
+ 
     const Amg::Transform3D globToLocal = max.msSector()->globalToLocalTrans(gctx);
     std::array<const SpacePoint*, 4> seedHits{};
 
@@ -674,7 +695,6 @@ void NswSegmentFinderAlg::SeedStatistics::addToStat(const MuonGMR4::Spectrometer
     key.chIdx = msSector->chamberIndex();
     key.phi = msSector->stationPhi();
     key.eta = msSector->chambers().front()->stationEta();
-    key.side = msSector->side();
 
     auto &entry = m_seedStat[key]; 
     entry.nSeeds    += seeds;
@@ -686,9 +706,9 @@ void NswSegmentFinderAlg::SeedStatistics::printTableSeedStats(MsgStream& msg) co
 
 
    msg<<MSG::ALWAYS<<"Seed statistics per sector:"<<endmsg;
-   msg<<MSG::ALWAYS<<"------------------------------------------------------------"<<endmsg;
-   msg<<MSG::ALWAYS<<"| Chamber | Phi | Eta | Side |   Seeds | ExtSeeds | Segments |"<<endmsg;
-   msg<<MSG::ALWAYS<<"------------------------------------------------------------"<<endmsg;
+   msg<<MSG::ALWAYS<<"-----------------------------------------------------"<<endmsg;
+   msg<<MSG::ALWAYS<<"| Chamber | Phi | Eta | Seeds | ExtSeeds | Segments |"<<endmsg;
+   msg<<MSG::ALWAYS<<"-----------------------------------------------------"<<endmsg;
 
    using Muon::MuonStationIndex::ChIndex;
 
@@ -700,7 +720,6 @@ void NswSegmentFinderAlg::SeedStatistics::printTableSeedStats(MsgStream& msg) co
         msg<<MSG::ALWAYS << "| " << std::setw(3) << (sector.chIdx == ChIndex::EIL ? "EIL" :"EIS")
                         <<"  | " << std::setw(2) << sector.phi
                         << " | " << std::setw(3) << sector.eta
-                        << " | " << std::setw(4) << (sector.side > 0 ? "A" : "C")
                         << " | " << std::setw(7) << stats.nSeeds
                         << " | " << std::setw(8) << stats.nExtSeeds
                         << " | " << std::setw(8) << stats.nSegments

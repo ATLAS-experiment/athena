@@ -81,25 +81,24 @@ class NswSegmentFinderAlg : public AthReentrantAlgorithm {
         };
 
         /** @brief sector's field to dump the seed statistics */
-        struct SectorField{  
-          chIdx_t chIdx{0};      
-          int phi{0};
-          int eta{0};
-          int8_t side{1};
-
-          bool operator<(SectorField const& o) const noexcept {
-             if(chIdx != o.chIdx) return chIdx < o.chIdx;
-             if(eta != o.eta) return eta < o.eta;              
-             if(side != o.side) return side < o.side;
+          struct SectorField{  
+            chIdx_t chIdx{};      
+            int8_t phi{0};
+            int8_t eta{0};
+            bool operator<(SectorField const& o) const noexcept {
+              if(chIdx != o.chIdx) {
+                return chIdx < o.chIdx;
+              }
+              if(eta != o.eta) {
+                return eta < o.eta;              
+              }
               return phi < o.phi;
-          }
+            }
+          };
+          using SeedStatistic_T = std::map<SectorField, SeedField>;
+          SeedStatistic_T m_seedStat{};
 
-        };
-
-        using SeedStatistic_T = std::map<SectorField, SeedField>;
-        SeedStatistic_T m_seedStat{};
-
-        std::mutex m_mutex{};
+          std::mutex m_mutex{};
 
         };
 
@@ -268,6 +267,8 @@ class NswSegmentFinderAlg : public AthReentrantAlgorithm {
         BooleanProperty m_dumpSeedStatistics{this, "dumpStatistics", true};
 
         std::unique_ptr<SeedStatistics> m_seedCounter ATLAS_THREAD_SAFE{};
+
+        const MuonGMR4::MuonDetectorManager* m_detMgr{};
         
        
 };
