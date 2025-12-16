@@ -23,18 +23,21 @@ def FTAG3KernelCfg(flags, name='FTAG3Kernel', **kwargs):
 
     # skimming tools
     skimmingTools = []
+    from DerivationFrameworkTools.DerivationFrameworkToolsConfig import (
+        xAODStringSkimmingToolCfg)
+
     # filter leptons
     lepton_skimming_expression = 'count( (Muons.pt > 5*GeV) && (0 == Muons.muonType || 1 == Muons.muonType || 4 == Muons.muonType) ) >=1'
-    FTAG3LeptonSkimmingTool = CompFactory.DerivationFramework.xAODStringSkimmingTool(
-            name = "FTAG3LeptonSkimmingTool",
-            expression = lepton_skimming_expression )
-    acc.addPublicTool(FTAG3LeptonSkimmingTool)
+    FTAG3LeptonSkimmingTool = acc.getPrimaryAndMerge(
+        xAODStringSkimmingToolCfg(flags, name = "FTAG3LeptonSkimmingTool",
+                                  expression = lepton_skimming_expression))
+
     # filter large-R jets
     UFOjets_skimming_expression = 'count( AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets.pt > 150*GeV ) >= 1' 
-    FTAG3UFOjetsSkimmingTool = CompFactory.DerivationFramework.xAODStringSkimmingTool(
-            name = "FTAG3UFOjetsSkimmingTool",
-            expression = UFOjets_skimming_expression )
-    acc.addPublicTool(FTAG3UFOjetsSkimmingTool)
+    FTAG3UFOjetsSkimmingTool = acc.getPrimaryAndMerge(
+        xAODStringSkimmingToolCfg(flags, name = "FTAG3UFOjetsSkimmingTool",
+                                  expression = UFOjets_skimming_expression))
+
     # filter single-jet triggers for data
     if not flags.Input.isMC:
         acc.merge(FTAG3TriggerSkimmingToolCfg(flags, skimmingTools))
