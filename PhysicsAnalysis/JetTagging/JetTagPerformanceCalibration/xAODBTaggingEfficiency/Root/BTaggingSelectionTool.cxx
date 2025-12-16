@@ -250,13 +250,12 @@ StatusCode BTaggingSelectionTool::ExtractTaggerProperties(taggerproperties &tagg
   // (backwards compatibility)
   if( (m_taggerEnum == Tagger::DL1) || (m_taggerEnum == Tagger::GN1) || (m_taggerEnum == Tagger::GN2)){
     
+    double fraction_b = -1;
     const TString basePath = taggerName + "/" + m_jetAuthor + "/" + OP;
     TVector* fraction_b_data = dynamic_cast<TVector*>( m_inf->Get(basePath + "/fraction_b") );
-    if (!fraction_b_data) {
-        ATH_MSG_ERROR("Failed to retrieve fraction_b");
-        return StatusCode::FAILURE;
+    if (fraction_b_data) {
+        fraction_b = (*fraction_b_data)(0);
     }
-    double fraction_b = (*fraction_b_data)(0);
     
     TVector* fraction_c_data = dynamic_cast<TVector*>( m_inf->Get(basePath + "/fraction") );
     if (!fraction_c_data) {
@@ -279,15 +278,12 @@ StatusCode BTaggingSelectionTool::ExtractTaggerProperties(taggerproperties &tagg
     TVector* fraction_tau_data = dynamic_cast<TVector*>( m_inf->Get(basePath + "/fraction_tau") );
     TVector* fraction_tau_cTag_data = dynamic_cast<TVector*>( m_inf->Get(basePath + "/fraction_tau_cTag") );
     if (m_taggerEnum == Tagger::GN2 && !(taggerName.find("GN2v00") != std::string::npos)){
-      if( !fraction_tau_data ) {
-        ATH_MSG_ERROR("Failed to retrive fraction_tau");
-        return StatusCode::FAILURE;
+      if( fraction_tau_data ) {
+        fraction_tau = fraction_tau_data[0](0);
       }
       if ( m_useCTag && !fraction_tau_cTag_data) {
         ATH_MSG_ERROR("Runnint c-tagging WP, but failed to retrive fraction_tau_cTag");
-      }
-          
-      fraction_tau = fraction_tau_data[0](0);
+      }    
       fraction_tau_cTag = fraction_tau_cTag_data[0](0);
     }
 
