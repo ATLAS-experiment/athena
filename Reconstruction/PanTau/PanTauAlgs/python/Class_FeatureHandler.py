@@ -133,7 +133,6 @@ class FeatureHandler:
         #fill member variables
         self.addSingleVariables()
         self.addMultiplicities()
-        self.addFourMomentum()
         self.addTypeSpecificFeatures_PID()
         self.addTypeSpecificFeatures_Shots()
         self.addTypeSpecificFeatures_Ratios()
@@ -141,7 +140,6 @@ class FeatureHandler:
         self.addTypeSpecificFeatures_HLV()
         self.addTypeSpecificFeatures_JetMoment()
         self.addCombinedFeatures_TypeVsType()
-        self.addCombinedFeatures_SelectedTypes()
         
     #end init
     
@@ -190,31 +188,7 @@ class FeatureHandler:
         self.addToFeatures("N" + self.m_ConstituentTypeName_All     + "Consts", self.m_VarTypeName_Basic, "F")
         
     #end def addMultiplicities
-    
-    
-    def addFourMomentum(self):
-        Variables = []
-        Variables += ["pt"]
-        Variables += ["eta"]
-        Variables += ["phi"]
-        Variables += ["m"]
-        
-        Types = []
-        Types += ["ProtoMomentumCore"]
-        
-        for iVar in Variables:
-            for iType in Types:
-                curFeatName = iType + "_" + iVar
-                curDefVal   = -4000.
-                if iVar == "eta" or iVar == "phi":
-                    curDefVal = -9.
-                if iVar == "m":
-                    curDefVal = -200.
-                self.addToFeatures(curFeatName, self.m_VarTypeName_Basic, "F", curDefVal)
-            #end loop types
-        #end loop vars 
-    #end def addFourMomentum
-    
+   
     def addTypeSpecificFeatures_PID(self):
         Variables = ["BDTValues"]
         
@@ -263,17 +237,9 @@ class FeatureHandler:
     
     def addTypeSpecificFeatures_HLV(self):
         Variables = []
-        Variables += ["SumPt"]
-        Variables += ["SumEta"]
-        Variables += ["SumPhi"]
         Variables += ["SumM"]
         for iVar in Variables:
-            curDefVal   = -4000.
-            if iVar == "SumEta" or iVar == "SumPhi":
-                curDefVal = -9.
-            if iVar == "SumM":
-                curDefVal = -200.
-            self.addToFeatures_AllTypes(iVar, self.m_VarTypeName_HLV, "F", curDefVal)
+            self.addToFeatures_AllTypes(iVar, self.m_VarTypeName_HLV, "F", -200.)
             
         #end loop over variables
     #end addTypeSpecificFeatures_HLV
@@ -311,31 +277,6 @@ class FeatureHandler:
             #end loop over jType
         #end loop over iType
     #end addCombinedFeatures_TypeVsType
-    
-    
-    def addCombinedFeatures_SelectedTypes(self):
-        iTypes = []
-        iTypes += ["Charged"]
-        
-        jTypes = []
-        jTypes += ["Pi0Neut"]
-        jTypes += ["Neutral"]
-        
-        Variables_WithEnergyTypes = []
-        Variables_WithEnergyTypes += [ ["Mean", "Et_Wrt"] ]
-        
-        for iType in iTypes:
-            for jType in jTypes:
-                for iVar in Variables_WithEnergyTypes:
-                    featName = iVar[0] + iType + jType + iVar[1]
-                    for iEnergyType in self.m_EnergyVariantsList:
-                        featNameWithEnergy = featName + iEnergyType
-                        self.addToFeatures(featNameWithEnergy, self.m_VarTypeName_Combined, "F")
-                #end loop over variables for energy types
-                
-            #end loop over jTypes
-        #end loop over iTypes
-    #end addCombinedFeatures_SelectedTypes
         
 #end class config_FeatureCalculator
 
