@@ -397,11 +397,15 @@ def createTrackingConfigFlags():
                 PrimaryPassConfig.HighPileup] or
             prevFlags.Tracking.doMinBias or
             prevFlags.Tracking.doLowMu)))
-    icf.addFlag("Tracking.doTrackSegmentsDisappearing",
-                lambda prevFlags: (
-                    not((prevFlags.Tracking.PrimaryPassConfig is
-                         PrimaryPassConfig.HeavyIon) or
-                        prevFlags.Beam.Type is BeamType.Cosmics)))
+
+    def doTrackSegmentsDisappearing(flags):
+        if flags.GeoModel.Run <= LHCPeriod.Run3:
+            return not((flags.Tracking.PrimaryPassConfig is
+                        PrimaryPassConfig.HeavyIon) or
+                       flags.Beam.Type is BeamType.Cosmics)
+        else:  # Disappearing tracks disabled for Run4
+            return False
+    icf.addFlag("Tracking.doTrackSegmentsDisappearing", doTrackSegmentsDisappearing)
 
     # Turn running of doVeryLowPt third pass on and off
     icf.addFlag("Tracking.doVeryLowPt", False)

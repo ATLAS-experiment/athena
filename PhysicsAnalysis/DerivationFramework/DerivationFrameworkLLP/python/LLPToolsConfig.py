@@ -80,20 +80,29 @@ def AugmentationToolLeadingJetsCfg(flags):
 
 # Vertex constraint tool
 def TrackParametersKVUCfg(flags, name, **kwargs):
-    """Confiure the vertex constraint tool"""
+    """Configure the vertex constraint tool"""
     acc = ComponentAccumulator()
 
-    if 'IPEstimator' not in kwargs:
+    if "IPEstimator" not in kwargs:
         from TrkConfig.TrkVertexFitterUtilsConfig import AtlasTrackToVertexIPEstimatorCfg
-        kwargs['IPEstimator'] = acc.popToolsAndMerge(AtlasTrackToVertexIPEstimatorCfg(flags))
+        kwargs.setdefault("IPEstimator", acc.popToolsAndMerge(
+            AtlasTrackToVertexIPEstimatorCfg(flags)))
 
-    if 'VertexTrackUpdator' not in kwargs:
+    if "VertexTrackUpdator" not in kwargs:
         from TrkConfig.TrkVertexFitterUtilsConfig import KalmanVertexTrackUpdatorCfg
-        kwargs['VertexTrackUpdator']= acc.popToolsAndMerge(KalmanVertexTrackUpdatorCfg(flags,
-                                                                                       SkipInvertibleCheck = True))
-    TrackParametersKVU = CompFactory.DerivationFramework.TrackParametersKVU
-    acc.addPublicTool(TrackParametersKVU(name, **kwargs),
-                      primary = True)
+        kwargs.setdefault("VertexTrackUpdator", acc.popToolsAndMerge(
+            KalmanVertexTrackUpdatorCfg(flags, SkipInvertibleCheck = True)))
+
+    if "LinearizedTrackFactory" not in kwargs:
+        from TrkConfig.TrkVertexFitterUtilsConfig import AtlasFullLinearizedTrackFactoryCfg
+        kwargs.setdefault("LinearizedTrackFactory", acc.popToolsAndMerge(
+            AtlasFullLinearizedTrackFactoryCfg(flags)))
+
+    if "TrackExtrapolator" not in kwargs:
+        from TrkConfig.AtlasExtrapolatorConfig import AtlasExtrapolatorCfg
+        kwargs.setdefault("TrackExtrapolator", acc.popToolsAndMerge(AtlasExtrapolatorCfg(flags)))
+
+    acc.setPrivateTools(CompFactory.DerivationFramework.TrackParametersKVU(name, **kwargs))
     return acc
 
 
