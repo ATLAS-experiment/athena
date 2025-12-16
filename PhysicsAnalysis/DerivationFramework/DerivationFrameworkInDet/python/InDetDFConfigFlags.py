@@ -12,5 +12,6 @@ def createInDetDFConfigFlags():
     # can only run if recommendations available
     iddcf.addFlag("Derivation.InDet.doTrackSystematics", lambda prevFlags:
                   prevFlags.Input.isMC and
-                  prevFlags.Input.MCCampaign not in [Campaign.MC23g])
+                  prevFlags.Input.MCCampaign not in [Campaign.MC23g,
+                                                     Campaign.PhaseII])
     return iddcf
