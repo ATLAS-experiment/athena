@@ -170,9 +170,6 @@ namespace pool  {
       */
     virtual DbStatus setOption(const DbOption& opt) override;
 
-    /// Define selection
-    virtual DbStatus select(DbSelect& sel) override;
-
     /// Number of entries within the container
     virtual uint64_t size() override;
 
@@ -196,12 +193,6 @@ namespace pool  {
 
     /// clear the dirty status (used after containing TTree was Filled)
     void        clearDirty() { m_isDirty = false; }
-
-    /// Fetch next object address of the selection to set token
-    virtual DbStatus fetch(DbSelect& sel) override;
-
-    /// Fetch refined object address. Default implementation returns identity
-    virtual DbStatus fetch(const Token::OID_t& linkH, Token::OID_t& stmt) override;
 
     /// Find object by object identifier and load it into memory
     /** @param  ptr    [IN/OUT]  ROOT-style address of the pointer to object

@@ -13,7 +13,6 @@
 #include "StorageSvc/DbColumn.h"
 #include "StorageSvc/DbDatabase.h"
 #include "StorageSvc/DbOption.h"
-#include "StorageSvc/DbSelect.h"
 #include "StorageSvc/DbTypeInfo.h"
 #include "StorageSvc/Transaction.h"
 
@@ -359,23 +358,6 @@ DbStatus RNTupleContainer::loadObject(void** obj_p, ShapeH, Token::OID_t& oid)
    m_rootDb->addByteCount(RootDatabase::READ_COUNTER, numBytes);
    return Success;
 }
-
-
-// Initiate reading with a selection
-DbStatus  RNTupleContainer::select(DbSelect& sel)
-{
-   sel.link().second = -1;
-   return Success;
-}
-
-
-// Fetch next object address of the selection to set token
-DbStatus RNTupleContainer::fetch(DbSelect& sel)
-{
-   sel.link().second++;
-   return DbContainerImp::fetch(sel.link(), sel.link());
-}
-
 
 /// Access options
 DbStatus RNTupleContainer::getOption(DbOption& opt) {

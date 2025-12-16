@@ -163,13 +163,6 @@ class RNTupleContainer : public pool::DbContainerImp
 
   virtual void useNextRecordId(uint64_t nextID) override final;
 
-  /// Define selection
-  virtual pool::DbStatus select(pool::DbSelect& sel) override final;
-
-  /// Equivalent to next()
-  using pool::DbContainerImp::fetch;
-  virtual pool::DbStatus fetch(pool::DbSelect& sel) override final;
-
   /// Execute transaction action
   virtual pool::DbStatus transAct(pool::Transaction::Action action) override final;
 

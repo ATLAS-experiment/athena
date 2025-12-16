@@ -73,16 +73,12 @@ namespace pool  {
     /// Check if we can access the container for reading with the given type
     virtual DbStatus checkAccess(DbDatabase& dbH,
                                  const std::string& nam) const override final;
-    /// Define selection
-    virtual DbStatus select(DbSelect& sel) override;
     /// Number of entries within the container
     virtual uint64_t size() override;
     /// Number of record in the container
     virtual uint64_t nextRecordId() override;
-    /// Fetch next object address of the selection to set token
-    virtual DbStatus fetch(DbSelect& sel) override;
-    /// Fetch a column identified by its link in the container
-    virtual DbStatus fetch( const Token::OID_t& linkH, Token::OID_t& stmt) override;
+    /// Fetch next object address to set token
+    virtual DbStatus next(Token::OID_t& linkH) override;
 
     /// Find object by object identifier and load it into memory
    /** @param  ptr    [IN/OUT]  ROOT-style address of the pointer to object

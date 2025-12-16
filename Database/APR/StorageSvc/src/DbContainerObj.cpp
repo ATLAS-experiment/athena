@@ -17,7 +17,6 @@
 #include "DbContainerObj.h"
 #include "StorageSvc/IDbContainer.h"
 #include "StorageSvc/DbDomain.h"
-#include "StorageSvc/DbSelect.h"
 #include "StorageSvc/DbTypeInfo.h"
 #include "StorageSvc/DbContainer.h"
 #include <memory>
@@ -254,23 +253,11 @@ DbStatus DbContainerObj::load( void** ptr, ShapeH shape,
   return Error;
 }
 
-/// Perform selection
-DbStatus DbContainerObj::select(DbSelect& sel) {
+/// Fetch next object address to set token
+DbStatus DbContainerObj::next(Token::OID_t& linkH) {
   if ( hasAccess() )   {
     m_dbH.setAge(0);
-    sel.setShapeID(token()->classID());
-    sel.link() = token()->oid();
-    return m_info->select(sel);
-  }
-  return Error;
-}
-
-/// Fetch next object address of the selection to set token
-DbStatus DbContainerObj::fetch(DbSelect& sel) {
-  // retireDatabase(this);  // Uncomment to enforce database retirement.
-  if ( hasAccess() )   {
-    m_dbH.setAge(0);
-    return m_info->fetch(sel);
+    return m_info->next(linkH);
   }
   return Error;
 }

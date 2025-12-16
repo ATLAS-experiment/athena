@@ -18,7 +18,6 @@
 namespace pool  {
 
   // Forward declarations
-  class DbStorageExplorer;
   class DbOption;
 
   /** @class DbStorageSvc DbStorageSvc.h POOLCore/DbStorageSvc.h
@@ -52,8 +51,6 @@ namespace pool  {
     int                 m_ageLimit;
     /// Technology type
     DbType              m_type;
-    /// Reference to storage explorer object
-    DbStorageExplorer*  m_explorer;
   public:
 
     /// Standard Constructor: Constructs an object of type DbStorageSvc.
@@ -95,8 +92,6 @@ namespace pool  {
 
     /// IService implementation: Retrieve name of the service               
     virtual const std::string& name() const    { return m_name;  }
-
-    /**@name IStorageExplorer interface                           */
 
     /// Register object for write
     /**

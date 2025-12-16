@@ -19,7 +19,6 @@ namespace pool {
   // forward declarations
   class Session;
   class IStorageSvc;
-  class IStorageExplorer;
   class IContainer;
 
   namespace PersistencySvc {
@@ -35,7 +34,6 @@ namespace pool {
     public:
       /// Constructor. Connects to the database
       DatabaseHandler( IStorageSvc& storageSvc,
-                       IStorageExplorer& storageExplorer,
                        Session* session,
                        long technology,
                        const std::string& fid,
@@ -99,8 +97,6 @@ namespace pool {
     private:
       /// IStorageSvc reference
       IStorageSvc&      m_storageSvc;
-      /// IStorageExplorer reference
-      IStorageExplorer& m_storageExplorer;
       /// Pointer to the session for this database
       Session*          m_session;
       /// File descriptor for this database

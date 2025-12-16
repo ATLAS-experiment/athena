@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <iostream>
@@ -8,10 +8,12 @@
 #include "PersistencySvc/SimpleUtilityBase.h"
 
 #include "StorageSvc/IStorageSvc.h"
-#include "StorageSvc/IStorageExplorer.h"
+#include "StorageSvc/DbDatabase.h"
 #include "StorageSvc/DbType.h"
 #include "StorageSvc/DbOption.h"
 #include "StorageSvc/FileDescriptor.h"
+#include "StorageSvc/DatabaseConnection.h"
+#include "StorageSvc/pool.h"
 
 #include "TError.h"
 
@@ -30,11 +32,10 @@ SimpleUtilityBase::SimpleUtilityBase( int argc, char* argv[] ):
 
 SimpleUtilityBase::~SimpleUtilityBase()
 {
-   if( storageExplorer ) {
-      if( session ) storageExplorer->endSession( session );
-      storageExplorer->release();
+   if( storageSvc ) {
+      if( session ) storageSvc->endSession( session );
+      storageSvc->release();
    }
-   if( storageSvc ) storageSvc->release();
 }
 
 
@@ -56,26 +57,14 @@ void SimpleUtilityBase::startSession ATLAS_NOT_THREAD_SAFE ()
    if( !storageSvc ) {
       throw std::runtime_error( "Could not create a StorageSvc object" );
    }
-   storageSvc->addRef();
-   void* pVoid = 0;
-   pool::DbStatus sc = storageSvc->queryInterface( pool::IStorageExplorer::interfaceID(), &pVoid );
-   storageExplorer = static_cast<pool::IStorageExplorer*>(pVoid);
-   if( !( sc.isSuccess() && storageExplorer ) ) {
-      throw std::runtime_error( "Could not retrieve a IStorageExplorer interface" );
-   }
    long technologyId = pool::DbType::getType( technologyName ).majorType();
-   if( ! storageExplorer->startSession( pool::READ, technologyId, session ).isSuccess() ) {
+   if( ! storageSvc->startSession( pool::READ, technologyId, session ).isSuccess() ) {
       throw std::runtime_error( "Could not start a new session" );
    }
    if( technologyId == pool::ROOT_StorageType.majorType() ) {
       // Disable warnings about unknown classes when opening the file
       // ----  (NOT needed when nostreamers option is used)
       gErrorIgnoreLevel = kError;
-
-      // Tell ROOT to not autoload dictionaries (speedup)
-      pool::DbOption        no_streamers("FILE_READSTREAMERINFO", "", 0);
-      //  (DISABLED! Seems to break ROOT 5.20 ability to read 5.18 files)
-      // storageExplorer->setDomainOption(session, no_streamers);
    }
 }
 
@@ -84,14 +73,16 @@ std::string SimpleUtilityBase::readFileGUID( const std::string& pfn )
 {
    std::string fid;
    pool::FileDescriptor fd( fid, pfn );
-   if( ! storageExplorer->connect( session, pool::READ, fd ).isSuccess() ) {
+   if( ! storageSvc->connect( session, pool::READ, fd ).isSuccess() ) {
       throw std::runtime_error( "Could not open file \"" + pfn + "\"" );
    }
-   if( ! storageExplorer->dbParam( fd, "FID", fid ).isSuccess() ) {
-      storageExplorer->disconnect( fd );
+   pool::DatabaseConnection* connection = fd.dbc();
+   DbDatabase dbH(static_cast<DbDatabaseObj*>(connection->handle()));
+   if( ! dbH.param( "FID", fid ).isSuccess() ) {
+      storageSvc->disconnect( fd );
       throw std::runtime_error( "Could not retrieve the FID from file \"" + pfn + "\"" );
    }
-   storageExplorer->disconnect( fd );
+   storageSvc->disconnect( fd );
    return fid;
 }
 

@@ -27,7 +27,6 @@ namespace pool  {
 
   // Forward declarations
   class IDbContainer;
-  class DbSelect;
   class DbDatabase;
   class DbTypeInfo;
   class DbContainerObj;
@@ -134,10 +133,8 @@ namespace pool  {
       * interface.
       */
     //@{ 
-    /// Perform selection. The statement belongs to the container afterwards.
-    DbStatus select(DbSelect& sel);
-    /// Fetch next object address of the selection to set token
-    DbStatus fetch(DbSelect& sel);
+    /// Fetch next object address to set token
+    DbStatus next(Token::OID_t& linkH);
     //@}
 
     /** Access objects using pointer and shape

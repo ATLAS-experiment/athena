@@ -12,13 +12,14 @@
 
 #include "StorageSvc/Shape.h"
 #include "StorageSvc/IStorageSvc.h"
-#include "StorageSvc/IStorageExplorer.h"
-#include "StorageSvc/DbSelect.h"
 #include "StorageSvc/DbReflex.h"
 #include "StorageSvc/DatabaseConnection.h"
 #include "StorageSvc/FileDescriptor.h"
+#include "StorageSvc/DbDatabase.h"
+#include "StorageSvc/DbContainer.h"
 #include "StorageSvc/DbType.h"
 #include "StorageSvc/DbString.h"
+#include "StorageSvc/pool.h"
 
 #include <stdexcept>
 #include <iostream>
@@ -145,13 +146,6 @@ TestDriver::testReading()
     throw std::runtime_error( "Could not create a StorageSvc object" );
   }
   storSvc->addRef();
-  void* pVoid = 0;
-  pool::DbStatus sc = storSvc->queryInterface( pool::IStorageExplorer::interfaceID(), &pVoid );
-  pool::IStorageExplorer* storageExplorer = (pool::IStorageExplorer*)pVoid;
-  if ( !( sc == pool::DbStatus::Success && storageExplorer ) ) {
-    storSvc->release();
-    throw std::runtime_error( "Could not retrieve a IStorageExplorer interface" );
-  }
 
   pool::Session* sessionHandle = 0;
   if ( ! ( storSvc->startSession( pool::READ, m_storageType.type(), sessionHandle ).isSuccess() ) ) {
@@ -159,15 +153,20 @@ TestDriver::testReading()
   }
 
   pool::FileDescriptor* fd = new pool::FileDescriptor( m_filename, m_filename );
-  sc = storSvc->connect( sessionHandle, pool::READ, *fd );
+  pool::DbStatus sc = storSvc->connect( sessionHandle, pool::READ, *fd );
   if ( sc != pool::DbStatus::Success ) {
     throw std::runtime_error( "Could not start a connection." );
   }
 
+  pool::DatabaseConnection* connection = fd->dbc();
+  DbDatabase dbH(static_cast<DbDatabaseObj*>(connection->handle()));
+  if ( !dbH.isValid() )  {
+    throw std::runtime_error( "Database is not valid" );
+  }
   // Fetch the containers
   std::vector<const Token*> containerTokens;
   containerTokens.reserve(2);
-  storageExplorer->containers( *fd, containerTokens );
+  dbH.containers( containerTokens, false );
   if ( containerTokens.size() != 2 ) {
     throw std::runtime_error( "Unexpected number of containers" );
   }
@@ -190,15 +189,16 @@ TestDriver::testReading()
   }
   if( !strContToken )  throw std::runtime_error( "Could not find the String container in the DB");
 
-
   // Fetch the objects in the container.
-  pool::DbSelect selectionObject;
-  sc = storageExplorer->select( *fd, m_objContainerName, selectionObject );
+  DbContainer objCntH(objContToken->technology());
+  Token::OID_t objLinkH(objContToken->oid());
+  sc = objCntH.open(dbH, m_objContainerName, 0, objContToken->technology(), pool::READ);
   int iObject = 0;
-  if ( sc.isSuccess() ) {
-    Token* objectToken = 0;
-    while ( storageExplorer->next( selectionObject, objectToken ).isSuccess() ) {
-      const Guid& guid = objectToken->classID();
+  if ( sc.isSuccess() && objCntH.isValid() ) {
+    Token* objectToken = new Token(objCntH.token());
+    const Guid& guid = objectToken->classID();
+    while ( objCntH.next(objLinkH).isSuccess() ) {
+      objectToken->oid() = objLinkH;
       const pool::Shape* shape = 0;
       if ( storSvc->getShape( *fd, guid, shape ) != pool::IStorageSvc::IS_PERSISTENT_SHAPE ) {
 	throw std::runtime_error( "Could not fetch the persistent shape" );
@@ -222,19 +222,22 @@ TestDriver::testReading()
       }
       delete object;
       ++iObject;
-      objectToken->release();
     }
+    objectToken->release();
   }
   if ( iObject != m_nObjects ) {
      throw std::runtime_error( std::string("Read ") + std::to_string(iObject) + " instead of " + std::to_string(m_nObjects));
   }
 
   // Read the Strings
-  sc = storageExplorer->select( *fd, m_strContainerName, selectionObject );
-  if( sc.isSuccess() ) {
-     Token* stringToken = nullptr;
-     while( storageExplorer->next( selectionObject, stringToken ).isSuccess() ) {
-        const Guid& guid = stringToken->classID();
+  DbContainer strCntH(strContToken->technology());
+  Token::OID_t strLinkH(strContToken->oid());
+  sc = strCntH.open(dbH, m_strContainerName, 0, strContToken->technology(), pool::READ);
+  if ( sc.isSuccess() && strCntH.isValid() ) {
+     Token* stringToken = new Token(strCntH.token());
+     const Guid& guid = stringToken->classID();
+     while ( strCntH.next(strLinkH).isSuccess() ) {
+        stringToken->oid() = strLinkH;
         const pool::Shape* shape = 0;
         if ( storSvc->getShape( *fd, guid, shape ) != pool::IStorageSvc::IS_PERSISTENT_SHAPE ) {
            throw std::runtime_error( "Could not retrieve the String shape" );
@@ -260,8 +263,8 @@ TestDriver::testReading()
            cout << "Read back string: " << *reinterpret_cast<std::string*>(ptr) << endl;
         }
 
-        stringToken->release();
      }
+     stringToken->release();
   }
 
   
@@ -274,6 +277,5 @@ TestDriver::testReading()
   if ( ! ( storSvc->endSession( sessionHandle ).isSuccess() ) ) {
     throw std::runtime_error( "Could not end correctly the session." );
   }
-  storageExplorer->release();
   storSvc->release();
 }
