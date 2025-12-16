@@ -567,13 +567,10 @@ namespace MuonR4{
                         setState<1, ActsTrk::MutableTrackStateBackend>(ProjectorType::e1DimNoTime, 
                                                                        muonMeas->localPosition<1>(), 
                                                                        muonMeas->localCovariance<1>(), link, trackState);
-
-                } else if(stgcClust->channelType() == sTgcIdHelper::sTgcChannelTypes::Pad) {
+                } else if (stgcClust->channelType() == sTgcIdHelper::sTgcChannelTypes::Pad) {
                         setState<2, ActsTrk::MutableTrackStateBackend>(ProjectorType::e2DimNoTime, 
                                                                        stgcClust->localPosition<2>(), 
                                                                        stgcClust->localCovariance<2>(), link, trackState);
-
-                
                 } else { // strips
                     const auto stgCluster = static_cast<const xAOD::sTgcStripCluster*>(muonMeas);
                     std::pair<double, double> calibPosCov{calibratesTGC(*ctx, *gctx, *stgCluster, std::nullopt, trackPos, trackDir)};
@@ -581,8 +578,7 @@ namespace MuonR4{
                         AmgVector(1) pos{calibPosCov.first};
                         AmgSymMatrix(1) cov{calibPosCov.second};
                         setState<1, ActsTrk::MutableTrackStateBackend>(ProjectorType::e1DimNoTime, 
-                                                                   pos, 
-                                                                   cov, link, trackState);
+                                                                       pos, cov, link, trackState);
                     } else {
                         ATH_MSG_WARNING("sTGC time calibration to be implemented...");
                         AmgVector(2) pos{AmgVector(2)::Zero()};
@@ -594,13 +590,9 @@ namespace MuonR4{
                         cov(1,1) = std::pow(25 /*ns*/, 2);
 
                         setState<2, ActsTrk::MutableTrackStateBackend>(ProjectorType::e1DimWithTime, 
-                                                                    pos, 
-                                                                    cov, link, trackState);
+                                                                       pos, cov, link, trackState);
                     }
-                    break; 
-                
                 }
-                THROW_EXCEPTION("sTGC measurements are not yet implemented");
                 break;
             } default: {
                 THROW_EXCEPTION("The parsed measurement is not a muon measurement. Please check.");
