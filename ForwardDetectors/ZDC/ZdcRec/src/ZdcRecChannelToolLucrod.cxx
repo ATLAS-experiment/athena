@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /*
@@ -138,7 +138,7 @@ int ZdcRecChannelToolLucrod::convertLucrod2ZM(const ZdcLucrodDataContainer* lucr
 	  chan_id = m_zdcId->channel_id(side,module,type,channel);
 	  const uint32_t chan_hash = chan_id.get_identifier32().get_compact();
 
-	  
+	  //find is unnecessary here, should be revisited
 	  hashmapType::iterator iter = digits_map.find(chan_hash);
 	  if (iter == digits_map.end())
 	    {
@@ -146,8 +146,7 @@ int ZdcRecChannelToolLucrod::convertLucrod2ZM(const ZdcLucrodDataContainer* lucr
 	      Nchan++;
 	      xAOD::ZdcModule* new_mod = new xAOD::ZdcModule();
 	      zdcModules->push_back(xAOD::ZdcModuleContainer::unique_type(new_mod));
-	      digits_map.insert(std::pair<uint32_t,xAOD::ZdcModule*>(chan_hash,new_mod));
-	      iter = digits_map.find(chan_hash);
+	      std::tie(iter, std::ignore) = digits_map.emplace(chan_hash,new_mod);
 	      (*iter).second->setZdcId(chan_hash);
 	      (*iter).second->setZdcSide(side);
 	      (*iter).second->setZdcModule(module);

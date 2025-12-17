@@ -315,8 +315,8 @@ void ZDC_PileUpTool::addEmptyWaveforms(xAOD::ZdcModuleContainer *zdcModuleContai
 
 TimedHitCollection<ZDC_SimFiberHit> ZDC_PileUpTool::doZDClightGuideCuts(const ZDC_SimFiberHit_Collection* hitCollection){
 
-  ZDC_SimFiberHit* newHits[2][4] = {{nullptr}};
-  ZDC_SimFiberHit_Collection* newCollection = new ZDC_SimFiberHit_Collection("ZDC_SimFiberHit_Collection_Temp");
+  ZDC_SimFiberHit* newHits[2][4]{};
+  auto newCollection = std::make_unique<ZDC_SimFiberHit_Collection>("ZDC_SimFiberHit_Collection_Temp");
 
   for(ZDC_SimFiberHit hit : *hitCollection){
     Identifier id = hit.getID();
@@ -357,8 +357,9 @@ TimedHitCollection<ZDC_SimFiberHit> ZDC_PileUpTool::doZDClightGuideCuts(const ZD
 
   //Now insert one hit per detector in the new collection
   TimedHitCollection<ZDC_SimFiberHit> newTimedCollection;
-  newTimedCollection.insert(0.0, newCollection);
-  //coverity[leaked_storage]
+  //coverity[RESOURCE_LEAK]
+  newTimedCollection.insert(0.0, newCollection.release());
+  //coverity[RESOURCE_LEAK]
   return newTimedCollection;
 }
 
