@@ -55,12 +55,16 @@ def BPHY24Cfg(flags):
         AugOriginalCountsCfg(flags, name = "BPHY24_AugOriginalCounts"))
     augsList += [ BPHY24_AugOriginalCounts ]
 
-    # LRT track merge
-    from DerivationFrameworkInDet.InDetToolsConfig import InDetLRTMergeCfg
-    acc.merge(InDetLRTMergeCfg(flags))
+    mainIDInput = "InDetTrackParticles"
+    originalTrackCond = ["InDetTrackParticles", "GSFTrackParticles"]
+    if flags.Tracking.doLargeD0:
+        # LRT track merge
+        from DerivationFrameworkInDet.InDetToolsConfig import InDetLRTMergeCfg
+        acc.merge(InDetLRTMergeCfg(flags))
 
-    mainIDInput = "InDetWithLRTTrackParticles"
-    originalTrackCond = ["InDetTrackParticles", "InDetLargeD0TrackParticles","GSFTrackParticles"]
+        mainIDInput = "InDetWithLRTTrackParticles"
+        originalTrackCond += ["InDetLargeD0TrackParticles"]
+
     BPHY24_Finder_DiMuon = CompFactory.Analysis.JpsiFinder( name    = "BPHY24_Finder_DiMuon",
                                              muAndMu                     = True,
                                              muAndTrack                  = False,
@@ -436,13 +440,14 @@ def BPHY24Cfg(flags):
     thinList += [ BPHY24_Thin_VtxTracks ]
   
     # LRT ID tracks
-    BPHY24_Thin_VtxTracks_LRT = CompFactory.DerivationFramework.Thin_vtxTrk( name     = "BPHY24_Thin_VtxTracks_LRT",
-                                                                StreamName = streamName,
-                                                                TrackParticleContainerName = "InDetLargeD0TrackParticles",
-                                                                VertexContainerNames       = finalCandidateList,
-                                                                IgnoreFlags                = True )
-                                                                # PassFlags                  = thinPassFlagsList )
-    thinList += [ BPHY24_Thin_VtxTracks_LRT ]
+    if flags.Tracking.doLargeD0:
+        BPHY24_Thin_VtxTracks_LRT = CompFactory.DerivationFramework.Thin_vtxTrk(
+            name     = "BPHY24_Thin_VtxTracks_LRT",
+            StreamName = streamName,
+            TrackParticleContainerName = "InDetLargeD0TrackParticles",
+            VertexContainerNames       = finalCandidateList,
+            IgnoreFlags                = True )
+        thinList += [ BPHY24_Thin_VtxTracks_LRT ]
     
     # GSF tracks
     BPHY24_Thin_VtxTracks_GSF = CompFactory.DerivationFramework.Thin_vtxTrk( name    = "BPHY24_Thin_VtxTracks_GSF",
