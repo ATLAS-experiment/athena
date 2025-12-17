@@ -33,19 +33,30 @@ namespace ftag {
     VariableMule<char,JC> m_chars{0};
     VariableMule<IPLV,JC> m_iparticles{{}};
     SG::ReadHandleKey<JC> m_targetJet {this, "targetJet", "", "target jet"};
-    SG::ReadHandleKeyArray<JC> m_sourceJets;
-    Gaudi::Property<std::string> m_dRKey {
-      this, "dR", "deltaRToMatchedJet", "decorator for delta R to match"};
-    Gaudi::Property<std::string> m_dEtaKey {
-      this, "dEta", "deltaEtaToMatchedJet", "decorator for delta Eta to match"};
-    Gaudi::Property<std::string> m_dPhiKey {
-      this, "dPhi", "deltaPhiToMatchedJet", "decorator for delta Phi to match"};
-    Gaudi::Property<std::string> m_dPtKey {
-      this, "dPt", "deltaPtToMatchedJet", "decorator for delta pt to match"};
-    Gaudi::Property<std::string> m_linkKey {
-      this, "particleLink", "", "decorator for matched IParticle"};
-    Gaudi::Property<std::string> m_matchKey {
-      this, "match", "jetIsMatched", "1 if matched, 0 if not"};
+    SG::ReadHandleKeyArray<JC> m_sourceJets {
+      this, "sourceJets", {}, "source jets"
+    };
+    SG::WriteDecorHandleKey<JC> m_drDecorator {
+      this, "dR", m_targetJet, "deltaRToMatchedJet",
+      "decorator for delta R to match"};
+    SG::WriteDecorHandleKey<JC> m_dEtaDecorator {
+      this, "dEta", m_targetJet, "deltaEtaToMatchedJet",
+      "decorator for delta Eta to match"};
+    SG::WriteDecorHandleKey<JC> m_dPhiDecorator {
+      this, "dPhi", m_targetJet, "deltaPhiToMatchedJet",
+      "decorator for delta Phi to match"};
+    SG::WriteDecorHandleKey<JC> m_dPtDecorator {
+      this, "dPt", m_targetJet, "deltaPtToMatchedJet",
+      "decorator for delta pt to match"};
+    SG::WriteDecorHandleKey<JC> m_linkDecorator {
+      this, "particleLink", m_targetJet, "",
+      "decorator for matched IParticle"};
+    SG::WriteDecorHandleKey<JC> m_matchDecorator {
+      this, "match", m_targetJet, "jetIsMatched",
+      "1 if matched, 0 if not"};
+    SG::WriteDecorHandleKey<JC> m_nMatchDecoragor {
+      this, "nMatch", m_targetJet, "nMatches",
+      "number of matches"};
     Gaudi::Property<float> m_ptPriorityWithDeltaR {
       this, "ptPriorityWithDeltaR", -1,
       "Give priority to higher pt truth jets, with some delta-R cut"
@@ -53,14 +64,9 @@ namespace ftag {
     Gaudi::Property<float> m_sourceMinimumPt {
       this, "sourceMinimumPt", 0, "Set minimum pt value for incoming jets"
     };
-    SG::WriteDecorHandleKey<JC> m_drDecorator;
-    SG::WriteDecorHandleKey<JC> m_dEtaDecorator;
-    SG::WriteDecorHandleKey<JC> m_dPhiDecorator;
-    SG::WriteDecorHandleKey<JC> m_dPtDecorator;
-    SG::WriteDecorHandleKey<JC> m_linkDecorator;
-    SG::WriteDecorHandleKey<JC> m_matchDecorator;
     using JV = std::vector<const xAOD::IParticle*>;
-    std::function<const xAOD::IParticle*(const xAOD::IParticle*, const JV&)> m_jetSelector;
+    using Match = std::pair<unsigned int, const xAOD::IParticle*>;
+    std::function<Match(const xAOD::IParticle*, const JV&)> m_jetSelector;
   };
 
 } // end namespace ftag

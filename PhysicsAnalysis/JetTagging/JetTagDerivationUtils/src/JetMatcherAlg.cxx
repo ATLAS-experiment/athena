@@ -13,7 +13,6 @@ namespace ftag {
                                ISvcLocator* pSvcLocator):
     AthReentrantAlgorithm(name, pSvcLocator)
   {
-    declareProperty("sourceJets", m_sourceJets);
     declareProperty("floatsToCopy", m_floats.toCopy);
     declareProperty("doublesToCopy", m_doubles.toCopy);
     declareProperty("intsToCopy", m_ints.toCopy);
@@ -36,11 +35,6 @@ namespace ftag {
     ATH_CHECK(m_ulongs.initialize(this, sources, target));
     ATH_CHECK(m_chars.initialize(this, sources, target));
     ATH_CHECK(m_iparticles.initialize(this, sources, target));
-    m_drDecorator = target + "." + m_dRKey;
-    m_dEtaDecorator = target + "." + m_dEtaKey;
-    m_dPhiDecorator = target + "." + m_dPhiKey;
-    m_dPtDecorator = target + "." + m_dPtKey;
-    m_matchDecorator = target + "." + m_matchKey;
     ATH_CHECK(m_targetJet.initialize());
     ATH_CHECK(m_sourceJets.initialize());
     ATH_CHECK(m_drDecorator.initialize());
@@ -48,30 +42,32 @@ namespace ftag {
     ATH_CHECK(m_dPhiDecorator.initialize());
     ATH_CHECK(m_dPtDecorator.initialize());
     ATH_CHECK(m_matchDecorator.initialize());
-    if (!m_linkKey.empty()) {
-      m_linkDecorator = target + "." + m_linkKey;
+    ATH_CHECK(m_nMatchDecoragor.initialize());
+    if (!m_linkDecorator.empty()) {
       ATH_CHECK(m_linkDecorator.initialize());
     }
     // choose jet selection option
     using Part = xAOD::IParticle;
     float ptMin = m_sourceMinimumPt.value();
     if (float drMax = m_ptPriorityWithDeltaR.value(); drMax > 0) {
-      m_jetSelector = [drMax, ptMin](const Part* tj, const JV& sv) -> const Part* {
-        // jets are already sorted by pt, so we can take the first match
+      m_jetSelector = [drMax, ptMin](const Part* tj, const JV& sv) -> Match {
+        std::vector<std::pair<float, const Part*>> jets;
         for (const auto* sj: sv) {
-          // Dont match if its the same jet - this only happens if matching to the same jc
-          // which we only do if trying to find things such as distance to nearest jet
-          if(sj == tj) continue;
+          // Dont match if its the same jet - this only happens if
+          // matching to the same jc which we only do if trying to
+          // find things such as distance to nearest jet
+          if (sj == tj) continue;
+          if (sj->pt() < ptMin) continue;
           if (tj->p4().DeltaR(sj->p4()) < drMax) {
-            if ( sj->pt() > ptMin) {
-              return sj;
-            }
+            jets.emplace_back(sj->pt(), sj);
           }
         }
-        return nullptr;
+        auto sItr = std::ranges::max_element(jets);
+        if (sItr == jets.end()) return {jets.size(), nullptr};
+        return {jets.size(), sItr->second};
       };
     } else {
-      m_jetSelector = [ptMin](const Part* tj, const JV& sv) -> const Part* {
+      m_jetSelector = [ptMin](const Part* tj, const JV& sv) -> Match {
         std::vector<std::pair<float, const Part*>> jets;
         for (const auto* sj: sv) {
           if(sj == tj) continue;
@@ -80,8 +76,8 @@ namespace ftag {
           }
         }
         auto sItr = std::min_element(jets.begin(), jets.end());
-        if (sItr == jets.end()) return nullptr;
-        return sItr->second;
+        if (sItr == jets.end()) return {jets.size(), nullptr};
+        return {jets.size(), sItr->second};
       };
     }
     return StatusCode::SUCCESS;
@@ -107,6 +103,7 @@ namespace ftag {
     SG::WriteDecorHandle<JC,float> dphiDecorator(m_dPhiDecorator, cxt);
     SG::WriteDecorHandle<JC,float> dPtDecorator(m_dPtDecorator, cxt);
     SG::WriteDecorHandle<JC,char> matchDecorator(m_matchDecorator, cxt);
+    SG::WriteDecorHandle<JC,unsigned> nMatchDecorator(m_nMatchDecoragor, cxt);
     std::optional<SG::WriteDecorHandle<JC,IPLV>> linkDecorator;
     if (!m_linkDecorator.empty()) linkDecorator.emplace(m_linkDecorator, cxt);
     auto targetJets = getJetVector(targetJetGet);
@@ -120,7 +117,8 @@ namespace ftag {
     std::sort(sourceJets.begin(), sourceJets.end(), descending_pt);
     std::vector<MatchedPair<JC>> matches;
     for (const xAOD::IParticle* target: targetJets) {
-      const xAOD::IParticle* source = m_jetSelector(target, sourceJets);
+      const auto [n_matches, source] = m_jetSelector(target, sourceJets);
+      nMatchDecorator(*target) = n_matches;
       if (source) {
         drDecorator(*target) = source->p4().DeltaR(target->p4());
         detaDecorator(*target) = source->eta() - target->eta();
