@@ -1997,6 +1997,68 @@ class TopoAlgoDef:
             alg.addvariable('AnomalyScoreThresh', d.AnomalyScoreThresh[bitId], bitId)
         tm.registerTopoAlgo(alg)
 
+
+        #ARTEMIS (VAE-based anomaly trigger)
+        # output lines: 'ARTEMIS-6jJ0s-4eTAU0s-4MU0s-jXE0s-Tight', 
+        #               'ARTEMIS-6jJ0s-4eTAU0s-4MU0s-jXE0s-Loose'
+        #Ordering -
+        #1. jJetx6
+        #2. eTAUx4
+        #3. MUx4
+        #4. jXEx1
+        algo = {
+              "algoname" : "ARTEMIS-jJ0s-eTAU0s-MU0s-jXE0s",
+              "otype1" : "jJ", "olist1": "s", "inputwidth1": 6, "nleading1": 6,
+              "otype2" : "eTAU", "olist2": "s", "inputwidth2": 6, "nleading2": 4,
+              "otype3" : "MU", "olist3": "s", "inputwidth3": 6, "nleading3": 4,
+              "otype4" : "jXE", "olist4": "s", "inputwidth4": 1, "nleading4": 1,
+              "WPList" : ["Tight", "Loose"],
+              "MinET1" : 15, # jJets in GeV (= 100MeV steps after conversion)
+              "MinET2" : 0, # eTaus
+              "MinET3" : 0, # muons
+              "MinET4" : 0, # jXE
+              "MaxET1" : 90, # jJets in GeV (= 100MeV steps after conversion)
+              "MaxET2" : 0, # eTaus
+              "MaxET3" : 0, # muons
+              "MaxET4" : 0, # jXE
+              "AnomalyScoreThresh" : [1521991, 1333204], #corresponds to Tight and Loose WPs (500Hz,1kHz est.)
+        }
+        class d:
+            pass
+        for k in algo:
+            setattr (d, k, algo[k])
+        toponames = []
+        for WP in d.WPList:
+            toponames.append("ARTEMIS-%s%s0%s-%s%s0%s-%s%s0%s-%s0%s-%s" %(str(d.nleading1), d.otype1, d.olist1, 
+                                                                          str(d.nleading2), d.otype2, d.olist2, 
+                                                                          str(d.nleading3), d.otype3, d.olist3, 
+                                                                          d.otype4, d.olist4, 
+                                                                          WP) )
+        inputList = [d.otype1 + d.olist1, d.otype2 + d.olist2, d.otype3 + d.olist3, d.otype4 + d.olist4]
+        alg = AlgConf.ARTEMIS_2A( name = d.algoname, inputs = inputList, outputs = toponames)
+        alg.addgeneric('InputWidth1', d.inputwidth1)
+        alg.addgeneric('InputWidth2', d.inputwidth2)
+        alg.addgeneric('InputWidth3', d.inputwidth3)
+        alg.addgeneric('InputWidth4', d.inputwidth4)
+        alg.addgeneric('MaxTob1', d.nleading1)
+        alg.addgeneric('MaxTob2', d.nleading2)
+        alg.addgeneric('MaxTob3', d.nleading3)
+        alg.addgeneric('MaxTob4', d.nleading4)
+        alg.addgeneric('NumResultBits', len(toponames))
+        alg.addgeneric('Version', 1)
+        alg.addvariable('MinET1', d.MinET1 * _et_conversion)
+        alg.addvariable('MinET2', d.MinET2 * _et_conversion)
+        alg.addvariable('MinET3', d.MinET3 * _et_conversion)
+        alg.addvariable('MinET4', d.MinET4 * _et_conversion)
+        alg.addvariable('MaxET1', d.MinET1 * _et_conversion)
+        alg.addvariable('MaxET2', d.MinET2 * _et_conversion)
+        alg.addvariable('MaxET3', d.MinET3 * _et_conversion)
+        alg.addvariable('MaxET4', d.MinET4 * _et_conversion)
+        for bitId in range(len(toponames)):
+            alg.addvariable('AnomalyScoreThresh', d.AnomalyScoreThresh[bitId], bitId)
+        tm.registerTopoAlgo(alg)
+
+
         algolist=[
             { "disamb": 2,
               "otype1" : "eTAU",  "ocut1": 20, "olist1": "ab","nleading1": HW.eTauOutputWidthSelect, "inputwidth1": HW.eTauOutputWidthSelect,
