@@ -22,16 +22,17 @@
 #include "AtlasHepMC/GenVertex.h"
 #include "AtlasHepMC/GenParticle.h"
 
-#include <stdlib.h>
-#include <iostream>
-#include <fstream>
-
 #include "AthenaKernel/RNGWrapper.h"
 #include "CLHEP/Vector/LorentzVector.h"
 
 #include "reportingUtils.h"
 #include "starlightconstants.h"
 #include "starlightparticlecodes.h"
+
+#include <stdlib.h>
+#include <iostream>
+#include <fstream>
+#include <cmath>
 
 namespace{
   static const std::string starlight_stream = "STARLIGHT";
@@ -284,7 +285,12 @@ Starlight_i::starlight2lhef()
            }
 
       // avg pt is the correct scale here
-      ptscale /= static_cast<float> (ipart);
+      if (ipart == 0)[[unlikely]]{
+        ATH_MSG_WARNING( "Starlight_i::starlight2lhef: ipart is zero.");
+        ptscale = 0;
+      } else {
+        ptscale /= static_cast<float> (ipart);
+      }
       lheStream << "     4  9999  1.000000e+00  "<<ptscale<<"  7.297e-03  2.569093e-01\n";
 
       if(m_doTauolappLheFormat){
