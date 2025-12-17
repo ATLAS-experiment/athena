@@ -223,6 +223,8 @@ namespace MuonGM {
         void setYTranslation(const float y);
         void setZTranslation(const float z);
 
+        /** returns the MuonStripDesign class for the given identifier */
+        const MuonStripDesign* getDesign(const Identifier& id) const;
         
         inline bool isMirrored() const {return m_mirrored;}       
         inline bool isDescrAtNegZ() const {return m_descratzneg;}
@@ -230,8 +232,6 @@ namespace MuonGM {
         const RpcIdHelper& m_idHelper{idHelperSvc()->rpcIdHelper()};
         bool m_mirrored{false};
         bool m_descratzneg{false};
-        /** returns the MuonStripDesign class for the given identifier */
-        const MuonStripDesign* getDesign(const Identifier& id) const;
 
         int m_dbR{0};
         int m_dbZ{0};
