@@ -1,5 +1,4 @@
 #include "../FPGATrackSimRawHitsWrapperAlg.h"
-#include "../FPGATrackSimRawNtupleWrapperAlg.h"
 #include "../FPGATrackSimReadRawRandomHitsTool.h"
 #include "../FPGATrackSimInputHeaderTool.h"
 #include "FPGATrackSimInput/FPGATrackSimRawToLogicalHitsTool.h"
@@ -17,6 +16,5 @@ DECLARE_COMPONENT( FPGATrackSimOutputHeaderTool )
 
 DECLARE_COMPONENT( FPGATrackSimDumpDetStatusAlgo )
 DECLARE_COMPONENT( FPGATrackSimRawHitsWrapperAlg )
-DECLARE_COMPONENT( FPGATrackSimRawNtupleWrapperAlg )
 DECLARE_COMPONENT( FPGATrackSimDumpOutputStatAlg )
 
