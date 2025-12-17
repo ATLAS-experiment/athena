@@ -95,40 +95,41 @@ def TRIG9KernelCfg(flags, name='TRIG9Kernel', **kwargs):
     etau  = '('+e22+' && '+tau20+')'
     skim_expression = '('+mutau+') || ('+etau+')'
 
-    EventSkimmingTool = CompFactory.DerivationFramework.xAODStringSkimmingTool(
-        name="EventSkimmingTool", expression=skim_expression,
-    )
-    acc.addPublicTool(EventSkimmingTool)
+    from DerivationFrameworkTools.DerivationFrameworkToolsConfig import (
+        xAODStringSkimmingToolCfg)
+    EventSkimmingTool = acc.getPrimaryAndMerge(xAODStringSkimmingToolCfg(
+        flags, name="EventSkimmingTool", expression=skim_expression))
     skimmingTools.append(EventSkimmingTool)
 
-    # Pieces of trigger names to keep
-    trig_keys = ['mediumRNN','mediumGNTau']
-    # Add specific triggers
-    additional_triggers = [    
-        "HLT_mu24_ivarmedium_L1MU14FCH",
-        "HLT_mu26_ivarmedium_L1MU14FCH",
-        "HLT_e26_lhtight_ivarloose_L1EM22VHI",
-        "HLT_e26_lhtight_ivarloose_L1eEM26M",
-    ]
-    trig_keys += additional_triggers
-    triggers = [t for t in trig_all for k in trig_keys if k in t]
+    if flags.Trigger.EDMVersion >= 0:
+        # Pieces of trigger names to keep
+        trig_keys = ['mediumRNN','mediumGNTau']
+        # Add specific triggers
+        additional_triggers = [
+            "HLT_mu24_ivarmedium_L1MU14FCH",
+            "HLT_mu26_ivarmedium_L1MU14FCH",
+            "HLT_e26_lhtight_ivarloose_L1EM22VHI",
+            "HLT_e26_lhtight_ivarloose_L1eEM26M",
+        ]
+        trig_keys += additional_triggers
+        triggers = [t for t in trig_all for k in trig_keys if k in t]
 
-    # remove not used triggers
-    trig_veto = ['HLT_g','HLT_e17_','HLT_e24_','HLT_mu14_',]
-    final_triggers = [t for t in triggers for k in trig_veto if k not in t]
+        # remove not used triggers
+        trig_veto = ['HLT_g','HLT_e17_','HLT_e24_','HLT_mu14_',]
+        final_triggers = [t for t in triggers for k in trig_veto if k not in t]
 
-    #remove duplicates
-    final_triggers = sorted(list(set(final_triggers)))
-    print('TRIG9 list of triggers used for skimming:')
-    for trig in final_triggers: print(trig)
+        #remove duplicates
+        final_triggers = sorted(list(set(final_triggers)))
+        print('TRIG9 list of triggers used for skimming:')
+        for trig in final_triggers: print(trig)
 
-    TriggerSkimmingTool = CompFactory.DerivationFramework.TriggerSkimmingTool
-    TRIG9TriggerSkimmingTool = TriggerSkimmingTool(name = "TRIG9TriggerPreSkimmingTool", 
-                                                   TriggerListAND = [],
-                                                   TriggerListOR  = final_triggers)
-    acc.addPublicTool(TRIG9TriggerSkimmingTool)
+        TriggerSkimmingTool = CompFactory.DerivationFramework.TriggerSkimmingTool
+        TRIG9TriggerSkimmingTool = TriggerSkimmingTool(name = "TRIG9TriggerPreSkimmingTool",
+                                                       TriggerListAND = [],
+                                                       TriggerListOR  = final_triggers)
+        acc.addPublicTool(TRIG9TriggerSkimmingTool)
 
-    skimmingTools.append(TRIG9TriggerSkimmingTool)
+        skimmingTools.append(TRIG9TriggerSkimmingTool)
 
     DerivationKernel = CompFactory.DerivationFramework.DerivationKernel
     acc.addEventAlgo(DerivationKernel(name,

@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 #!/usr/bin/env python
 #====================================================================
 # DAOD_TRIG10.py
@@ -41,16 +41,12 @@ def TRIG10LepTrigSkimmingToolCfg(flags):
 def TRIG10StringSkimmingToolCfg(flags):
     """Configure the string skimming tool"""
 
-    acc = ComponentAccumulator()
-
     cutExpression = "(count(Electrons.DFCommonElectronsLHLoose && Electrons.pt > (24 * GeV) && abs(Electrons.eta) < 2.47) + count(Muons.DFCommonMuonPassPreselection && Muons.pt > (24*GeV) && abs(Muons.eta) < 2.47) ) >= 1"
 
-    TRIG10StringSkimmingTool = CompFactory.DerivationFramework.xAODStringSkimmingTool(name       = "TRIG10StringSkimmingTool",
-                                                                                      expression = cutExpression)
-
-    acc.addPublicTool(TRIG10StringSkimmingTool, primary = True)
-
-    return(acc)
+    from DerivationFrameworkTools.DerivationFrameworkToolsConfig import (
+        xAODStringSkimmingToolCfg)
+    return xAODStringSkimmingToolCfg(flags, name = "TRIG10StringSkimmingTool",
+                                     expression = cutExpression)
 
 
 # Main algorithm config
@@ -59,15 +55,26 @@ def TRIG10KernelCfg(flags, name='TRIG10Kernel', **kwargs):
     acc = ComponentAccumulator()
 
     # Skimming
-    TRIG10MetTrigSkimmingTool = acc.getPrimaryAndMerge(TRIG10MetTrigSkimmingToolCfg(flags))
-    TRIG10LepTrigSkimmingTool  = acc.getPrimaryAndMerge(TRIG10LepTrigSkimmingToolCfg(flags))
     TRIG10StringSkimmingTool  = acc.getPrimaryAndMerge(TRIG10StringSkimmingToolCfg(flags))
+    filterListLep = [TRIG10StringSkimmingTool]
 
-    TRIG10LepTrigStringSkimmingTool = CompFactory.DerivationFramework.FilterCombinationAND(name="TRIG10LepTrigStringSkimmingTool", FilterList=[TRIG10LepTrigSkimmingTool,   TRIG10StringSkimmingTool] )
+    if flags.Trigger.EDMVersion >= 0:
+        TRIG10LepTrigSkimmingTool  = acc.getPrimaryAndMerge(TRIG10LepTrigSkimmingToolCfg(flags))
+        filterListLep += [TRIG10LepTrigSkimmingTool]
+
+    TRIG10LepTrigStringSkimmingTool = (
+        CompFactory.DerivationFramework.FilterCombinationAND(
+            name="TRIG10LepTrigStringSkimmingTool", FilterList=filterListLep))
     acc.addPublicTool(TRIG10LepTrigStringSkimmingTool)
-    TRIG10SkimmingTool = CompFactory.DerivationFramework.FilterCombinationOR(name="TRIG10SkimmingTool",
-                        FilterList=[TRIG10LepTrigStringSkimmingTool, TRIG10MetTrigSkimmingTool])
-    acc.addPublicTool(TRIG10SkimmingTool, primary = True)
+    filterList = [TRIG10LepTrigStringSkimmingTool]
+
+    if flags.Trigger.EDMVersion >= 0:
+        TRIG10MetTrigSkimmingTool = acc.getPrimaryAndMerge(TRIG10MetTrigSkimmingToolCfg(flags))
+        filterList += [TRIG10MetTrigSkimmingTool]
+
+    TRIG10SkimmingTool = CompFactory.DerivationFramework.FilterCombinationOR(
+        name="TRIG10SkimmingTool", FilterList=filterList)
+    acc.addPublicTool(TRIG10SkimmingTool)
 
     # Common augmentations
     from DerivationFrameworkPhys.PhysCommonConfig import PhysCommonAugmentationsCfg
