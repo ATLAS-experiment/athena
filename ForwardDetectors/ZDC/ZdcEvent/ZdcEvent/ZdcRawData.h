@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //***************************************************************************
@@ -26,48 +26,46 @@
 
 #include <string>
 #include <vector>
-
-#include <inttypes.h>
+#include <iosfwd>
 
 class ZdcRawData
 {
 public:
 
     /* Constructor: */
-    ZdcRawData(){}
+    ZdcRawData() = default;
     ZdcRawData(const Identifier& id);
-
+    //copy constructor
+    ZdcRawData(const ZdcRawData & z) noexcept = default;
+    //move constructor
+    ZdcRawData(ZdcRawData && z) noexcept = default;
     /* Destructor */
-    virtual ~ZdcRawData() {}
-
+    virtual ~ZdcRawData() = default;
+    ///Copy assignment
+    ZdcRawData& operator=(ZdcRawData & z) noexcept = default;
+    ///Move assignment
+    ZdcRawData& operator=(ZdcRawData && z) noexcept = default;
+    
     /*  Inline accessor methods: */
-    inline Identifier   identify(void)  const   { return m_id;   }
+    inline Identifier   identify()  const   { return m_id;   }
 
-    /*
-    Identifier         side_ID (void)  const;
-    Identifier         module_ID  (void)  const;
-    Identifier         type_ID  (void)  const;
-    Identifier         channel_ID (void)  const;
-    Identifier         gain_ID (void)  const;
-    Identifier         delay_ID (void)  const;
-    */
 
-    virtual std::string whoami   (void) const   { return "ZdcRawData"; }
-    virtual void        print    (void) const;
-    // Convertion operator to a std::string 
+    virtual std::string whoami   () const   { return "ZdcRawData"; }
+    virtual void        print    () const;
+    // Conversion operator to a std::string 
     // Can be used in a cast operation : (std::string) ZdcRawData
     virtual operator std::string() const;
   
     static void print_to_stream ( const std::vector<double>& val,
                                   const std::string & label, 
-                                  std::ostringstream & text);
+                                  std::ostream & text);
 
     static void print_to_stream ( const std::vector<int>& val,
                                   const std::string & label, 
-                                  std::ostringstream & text);
+                                  std::ostream & text);
 private:
 
-    Identifier m_id; // Hardware (online) ID of the adc
+    Identifier m_id{}; // Hardware (online) ID of the adc
 };
 
 #endif  //ZDCEVENT_ZDCRAWDATA_H
