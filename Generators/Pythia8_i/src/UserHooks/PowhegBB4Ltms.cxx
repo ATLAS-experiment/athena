@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // PowhegHooksBB4L.h 
@@ -127,7 +127,7 @@ namespace Pythia8 {
 	m_topresscale = findresscale(i_top, e);
       else 
 	m_topresscale = 1e30;
-      if (i_top != -1) 
+      if (i_atop != -1) 
 	m_atopresscale = findresscale(i_atop, e);
       else 
 	m_atopresscale = 1e30;
