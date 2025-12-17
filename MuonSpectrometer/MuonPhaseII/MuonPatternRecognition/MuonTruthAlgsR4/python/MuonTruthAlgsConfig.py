@@ -126,6 +126,11 @@ def TruthSegmentToTruthPartAssocCfg(flags, name="MuonTruthSegmentToTruthAssocAlg
     if flags.Detector.GeometryMM: hitDecors+=["truthMMHits"]
     if flags.Detector.GeometrysTGC: hitDecors+=["truthStgcHits"]
     kwargs.setdefault("SimHitIds", hitDecors)
+    from ActsConfig.ActsGeometryConfig import ActsExtrapolationToolCfg
+    kwargs.setdefault("ExtrapolationTool", result.popToolsAndMerge(ActsExtrapolationToolCfg(flags, MaxSteps=100000)))
+    from ActsConfig.ActsGeometryConfig import ActsTrackingGeometryToolCfg
+    kwargs.setdefault("TrackingGeometryTool", result.getPrimaryAndMerge(ActsTrackingGeometryToolCfg(flags)))
+
     the_alg = CompFactory.MuonR4.TruthSegToTruthPartAssocAlg(name, **kwargs)
     result.addEventAlgo(the_alg, primary = True)
     return result
