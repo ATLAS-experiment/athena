@@ -12,7 +12,6 @@ Matrix files accumulate track information from training muons, for generating se
 
 * FPGATrackSimMatrixGenAlgo: Core matrix file generation code.
 * FPGATrackSimMatrixMergeAlgo: Algorithm to merge matrix files.
-* FPGATrackSimMatrixReductionAlgo: Reduces second-stage matrices to first-stage ones.
 * FPGATrackSimMatrixAccumulator: The actual "matrix" object, which is stored in the matrix files.
 * FPGATrackSimMatrixIO: Utility functions to read and write matrix files.
 
