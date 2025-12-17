@@ -489,9 +489,8 @@ class LargeRJetAnalysisConfig (ConfigBlock) :
         if self.uncertToolConfigPathJMR is not None:
             config_file = self.uncertToolConfigPathJMR
         else:
-            if config.geometry() in [LHCPeriod.Run2, LHCPeriod.Run3]:
-                config_file = "rel22/Summer2025_PreRec/" + config_file
-            else:
+            config_file = "rel22/Summer2025_PreRec/" + config_file
+            if config.geometry() is LHCPeriod.Run4:
                 log.warning("Uncertainties for UFO jets are not for Run 4!")
 
         # MC type:
@@ -500,7 +499,7 @@ class LargeRJetAnalysisConfig (ConfigBlock) :
                 mc_type = "MC20AF3"
             else:
                 mc_type = "MC20"
-        elif config.geometry() is LHCPeriod.Run3:
+        elif config.geometry() >= LHCPeriod.Run3:
             if config.dataType() is DataType.FastSim:
                 mc_type = "MC23AF3"
             else:
