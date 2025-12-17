@@ -72,7 +72,7 @@ namespace InDet {
     // retrieve the number of hidden layers from the LayerInfo histogram
     unsigned int  n_hidden = ownedRetrievedHistos.at(layer_info)->GetNbinsX()-2;
     ATH_MSG_VERBOSE(" Retrieving calibration: " << folder  << " for NN with: " << n_hidden << " hidden layers.");
-
+    //coverity[INEFFICIENT_RESERVE:FALSE]
     ownedRetrievedHistos.reserve( ownedRetrievedHistos.size() + n_hidden*2 );
     for (unsigned int  i=0; i<=n_hidden; ++i) {
       std::stringstream folder_name; 
