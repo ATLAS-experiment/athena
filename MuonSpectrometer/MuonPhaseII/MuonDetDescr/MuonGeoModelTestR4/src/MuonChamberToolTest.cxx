@@ -544,11 +544,12 @@ namespace MuonGMR4 {
                 
                 for(unsigned int strip = 1; strip <= nStrips; ++strip){
                     const Identifier stripId = idHelper.channelID(stgc.identify(), stgc.multilayer(), gasGap, nch, strip);
-                     ATH_CHECK(pointInside(chamber, detVol, stgc.globalChannelPosition(gctx, stripId), "channel position", stripId));
+                    const IdentifierHash stripHash = stgc.measurementHash(stripId);
+                     ATH_CHECK(pointInside(chamber, detVol, stgc.globalChannelPosition(gctx, stripHash), "channel position", stripId));
                 
                     if(channelType == sTgcReadoutElement::ReadoutChannelType::Wire || channelType == sTgcReadoutElement::ReadoutChannelType::Strip){
-                        ATH_CHECK(pointInside(chamber, detVol, stgc.rightStripEdge(gctx, stgc.measurementHash(stripId)), "channel position", stripId));
-                        ATH_CHECK(pointInside(chamber, detVol, stgc.leftStripEdge(gctx, stgc.measurementHash(stripId)), "channel position", stripId));
+                        ATH_CHECK(pointInside(chamber, detVol, stgc.rightStripEdge(gctx, stripHash), "channel position", stripId));
+                        ATH_CHECK(pointInside(chamber, detVol, stgc.leftStripEdge(gctx, stripHash), "channel position", stripId));
                     }
                 }
             }            
