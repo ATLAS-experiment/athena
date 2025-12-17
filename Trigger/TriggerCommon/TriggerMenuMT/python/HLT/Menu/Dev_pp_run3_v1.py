@@ -325,6 +325,15 @@ def getDevSignatures():
         ChainProp(name='HLT_3j45_j45_L14jJ40', l1SeedThresholds=['FSNOSEED']*2, groups=MultiJetGroup+DevGroup),
         ChainProp(name='HLT_j220_j150_L1jJ160', l1SeedThresholds=['FSNOSEED']*2, groups=MultiJetGroup+DevGroup),
 
+        # ATR-32293 DJ chains without timing hypo for 2026 data-taking
+        ChainProp(name='HLT_j200_L1jJ160', l1SeedThresholds=['FSNOSEED'], groups=SingleJetGroup+DevGroup),
+        ChainProp(name='HLT_j220_L1jJ160', l1SeedThresholds=['FSNOSEED'], groups=SingleJetGroup+DevGroup),
+        ChainProp(name='HLT_j250_L1jJ160', l1SeedThresholds=['FSNOSEED'], groups=SingleJetGroup+DevGroup),
+        ChainProp(name='HLT_2j100_L1jJ90', l1SeedThresholds=['FSNOSEED'], groups=MultiJetGroup+DevGroup),
+        ChainProp(name='HLT_j45_L14jJ40', l1SeedThresholds=['FSNOSEED'], groups=MultiJetGroup+DevGroup),
+        ChainProp(name='HLT_2j45_L14jJ40', l1SeedThresholds=['FSNOSEED'], groups=MultiJetGroup+DevGroup),
+        ChainProp(name='HLT_2j45_2j55_L14jJ40', l1SeedThresholds=['FSNOSEED']*2, groups=MultiJetGroup+DevGroup),
+
         ### END PURE TEST CHAINS
 
         
