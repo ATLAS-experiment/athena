@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ALFA_LocRecEvent_h
@@ -11,9 +11,7 @@ class ALFA_LocRecEvent {
   
 public:
   
-	ALFA_LocRecEvent();
-	~ALFA_LocRecEvent();
-  
+	ALFA_LocRecEvent() = default;  
   
 	ALFA_LocRecEvent(int iAlgoNum, int pot_num, float x, float y, float fOverU, float fOverV, int iNumU, int iNumV, std::vector<int> iFibSel);
 
@@ -30,15 +28,15 @@ public:
 
 private:
   
-	int m_iAlgoNum;
-	int m_pot_num;
-	float m_x;
-	float m_y;
+	int m_iAlgoNum{};
+	int m_pot_num{};
+	float m_x{};
+	float m_y{};
 
-	float m_fOverU;
-	float m_fOverV;
-	int m_iNumU;
-	int m_iNumV;
+	float m_fOverU{};
+	float m_fOverV{};
+	int m_iNumU{};
+	int m_iNumV{};
 
 	std::vector<int> m_iFibSel;
 };
