@@ -1,11 +1,10 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ALFA_ODHit_h
 #define ALFA_ODHit_h
 
-// #include "GeneratorObjects/HepMcParticleLink.h"
 
 class ALFA_ODHit
 {
@@ -16,10 +15,9 @@ class ALFA_ODHit
 		     );
   
   // needed by athenaRoot
-  ALFA_ODHit();
+  ALFA_ODHit() = default;
   
-  // Destructor: FIXME POOL 
-  virtual ~ALFA_ODHit();
+
   
   bool operator < (const ALFA_ODHit& obj) const
     {return m_hitID < obj.m_hitID;}
@@ -80,25 +78,23 @@ class ALFA_ODHit
           
   
  private:
-  int m_hitID; // To identify the hit
-  //int trackID;
-//  HepMcParticleLink m_partLink; // link to the particle generating the hit
-  int m_particleEncoding;         // PDG id 
-  float m_kineticEnergy;          // kin energy of the particle
-  float m_energyDeposit;          // energy deposit by the hit
-  float m_preStepX;
-  float m_preStepY;
-  float m_preStepZ;
-  float m_postStepX;
-  float m_postStepY;
-  float m_postStepZ;
-  float m_globalTime;
+  int m_hitID{0xffff}; // To identify the hit
+  int m_particleEncoding{};         // PDG id 
+  float m_kineticEnergy{};          // kin energy of the particle
+  float m_energyDeposit{};          // energy deposit by the hit
+  float m_preStepX{};
+  float m_preStepY{};
+  float m_preStepZ{};
+  float m_postStepX{};
+  float m_postStepY{};
+  float m_postStepZ{};
+  float m_globalTime{};
   
-  int m_sign_fiber;
-  int m_OD_side;
-  int m_n_plate;
-  int m_n_fiber;
-  int m_n_station;
+  int m_sign_fiber{};
+  int m_OD_side{};
+  int m_n_plate{};
+  int m_n_fiber{};
+  int m_n_station{};
 };
 
 
