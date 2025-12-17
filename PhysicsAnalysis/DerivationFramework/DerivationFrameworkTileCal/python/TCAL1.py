@@ -110,7 +110,7 @@ def TCAL1TileCellsMuonDecoratorCfg(flags, **kwargs):
     kwargs.setdefault("CellsMuonDx", prefix + "cells_muon_dx")
     kwargs.setdefault("CellsMuonDeDx", prefix + "cells_muon_dedx")
     if len(kwargs['ClusterContainer']) > 0:
-        kwargs.setdefault("LArEnergyInCone", [f"{kwargs['MuonContainer']}.{prefix}elarcone{str(int(x*100))}" for x in kwargs['DeltaRCones']])
+        kwargs.setdefault("LArEnergyInCone", [f"{prefix}elarcone{str(int(x*100))}" for x in kwargs['DeltaRCones']])
 
     kwargs.setdefault('SelectMuons', flags.Beam.Type is BeamType.Collisions)
     kwargs.setdefault('MinMuonPt', 10 * GeV)
