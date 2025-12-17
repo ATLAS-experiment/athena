@@ -1,6 +1,6 @@
 # Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
-
+from GeneratorConfig.Sequences import EvgenSequence, EvgenSequenceFactory
 
 
 def ParticleGunBaseCfg(flags):
@@ -131,3 +131,99 @@ def ParticleGun_TestBeam_SingleParticleCfg(flags):
         phi=0)
     result.addEventAlgo(pg)
     return result
+
+
+def _makeMomentumSampler(PG, samplerType="EEtaMPhi", **kwargs):
+    """
+    Factory for the various PG momentum samplers.
+    kwargs are passed through to the corresponding sampler.
+    """
+    from math import pi
+
+    if samplerType == "EEtaMPhi":
+        # energy: float or sequence, eta/phi can be scalar or range
+        return PG.EEtaMPhiSampler(
+            energy=kwargs["energy"],
+            eta=kwargs.get("eta"),
+            mass=kwargs.get("mass", 0),
+            phi=kwargs.get("phi", [0, 2*pi]),
+        )
+
+    if samplerType == "PtEtaMPhi":
+        # pt: float or [min,max], eta: float or [min,max]
+        return PG.PtEtaMPhiSampler(
+            pt=kwargs["pt"],
+            eta=kwargs.get("eta"),
+            mass=kwargs.get("mass", 0),
+            phi=kwargs.get("phi", [0, 2*pi]),
+        )
+
+    if samplerType == "EThetaMPhi":
+        # energy, theta: can be scalars or cyclic samplers
+        return PG.EThetaMPhiSampler(
+            energy=kwargs["energy"],
+            theta=kwargs["theta"],
+            mass=kwargs.get("mass", 0),
+            phi=kwargs.get("phi", [0, 2*pi]),
+        )
+
+    raise ValueError(f"Unknown samplerType '{samplerType}'")
+
+
+def ParticleGun_SteeredSingleParticleCfg(
+    flags,
+    *,
+    pid,
+    samplerType="EEtaMPhi",
+    randomStream="SINGLE",
+    randomSeed=None,
+    **kwargs,
+):
+    """
+    Generic single-particle gun configuration steered via arguments.
+
+    Parameters
+    ----------
+    pid : int or sequence
+        PDG ID (or sampler) for the primary particle.
+    samplerType : str
+        Which momentum sampler to use: "EEtaMPhi", "PtEtaMPhi", "EThetaMPhi".
+    randomStream : str
+        Name of the random stream (defaults to "SINGLE").
+    randomSeed : int or None
+        Random seed (defaults to flags.Random.SeedOffset if None).
+    momKwargs : dict
+        Keyword arguments passed to the momentum sampler factory.
+        E.g. for samplerType="EEtaMPhi":
+            energy=50000, eta=0
+        for samplerType="PtEtaMPhi":
+            pt=[4000, 100000], eta=[-2.5, 2.5]
+    """
+    import ParticleGun as PG
+    ca = ComponentAccumulator(EvgenSequenceFactory(EvgenSequence.Generator))
+
+    # Announce generator to service
+    from GeneratorConfig.GeneratorInfoSvcConfig import GeneratorInfoSvcCfg
+    ca.merge(GeneratorInfoSvcCfg(flags, Generators=["ParticleGun"]), sequenceName=EvgenSequence.Generator.value)
+
+    if randomSeed is None:
+        randomSeed = flags.Random.SeedOffset
+
+    pg = PG.ParticleGun(
+        randomStream=randomStream,
+        randomSeed=randomSeed,
+    )
+
+    # Select the particle type
+    pg.sampler.pid = pid
+
+    # Select the momentum sampler
+    pg.sampler.mom = _makeMomentumSampler(
+        PG,
+        samplerType=samplerType,
+        **kwargs,
+    )
+
+    ca.addEventAlgo(pg)
+
+    return ca
