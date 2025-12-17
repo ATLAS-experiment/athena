@@ -264,7 +264,7 @@ def HadronOriginClassifierCfg(flags, name, **kwargs):
 def HadronOriginDecoratorCfg(flags, name, **kwargs):
     """decorate with the hadron origin classification"""
     acc = ComponentAccumulator()
-    if not hasattr(kwargs, "ToolName"):
+    if "ToolName" not in kwargs:
         kwargs.setdefault("ToolName", acc.getPrimaryAndMerge(HadronOriginClassifierCfg(flags,
                                                                                        name="DFCommonHadronOriginClassifier")))
     acc.addPublicTool(CompFactory.DerivationFramework.HadronOriginDecorator
