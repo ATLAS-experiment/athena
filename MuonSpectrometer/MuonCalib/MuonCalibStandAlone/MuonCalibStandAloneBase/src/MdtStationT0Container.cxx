@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonCalibStandAloneBase/MdtStationT0Container.h"
@@ -95,6 +95,8 @@ void MdtStationT0Container::readT0File(const std::string& file_name) {
         infile >> ml >> ly >> tb;
 
         // t0 //
+        //assume file is trusted source
+        //coverity[TAINTED_SCALAR]
         infile >> m_t0[ml - 1][ly - 1][tb - 1];
         infile >> m_adc[ml - 1][ly - 1][tb - 1];
 
