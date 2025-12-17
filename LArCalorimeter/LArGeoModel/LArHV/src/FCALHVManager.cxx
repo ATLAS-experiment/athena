@@ -147,8 +147,8 @@ int  FCALHVManager::FCALHVData::index  (const FCALHVLine& line)
 
 
 FCALHVManager::FCALHVManager()
-  : m_c (std::make_unique<Clockwork> (this))
 {
+  m_c = std::make_unique<Clockwork> (this);
 }
 
 FCALHVManager::~FCALHVManager()
