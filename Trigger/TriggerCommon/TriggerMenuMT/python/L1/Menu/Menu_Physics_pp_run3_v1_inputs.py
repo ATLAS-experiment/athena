@@ -309,7 +309,10 @@ def defineInputsMenu():
                     TopoMenuDef( 'DR_eTAU30ab_eTAU20ab',                     outputbits = (7), outputlines = ['0DR28-eTAU30ab-eTAU20ab'] ),
                     TopoMenuDef( 'ADVAE2A-jJ0s-eTAU0s-MU0s-jXE0s',           outputbits = (8,9), outputlines = ['ADVAE2A-6jJ0s-4eTAU0s-4MU0s-jXE0s-Tight',
                                                                                                                 'ADVAE2A-6jJ0s-4eTAU0s-4MU0s-jXE0s-Loose'] ), # VAE AD
-                    TopoMenuDef( '0DR28-eTAU30abl-eTAU20abl',                outputbits = 10 ),
+                    TopoMenuDef( 'ARTEMIS-jJ0s-eTAU0s-MU0s-jXE0s',           outputbits = (10,11), outputlines = ['ARTEMIS-6jJ0s-4eTAU0s-4MU0s-jXE0s-Tight',
+                                                                                                                  'ARTEMIS-6jJ0s-4eTAU0s-4MU0s-jXE0s-Loose'] ), # VAE AD mk 2
+                   
+                    TopoMenuDef( '0DR28-eTAU30abl-eTAU20abl',                outputbits = 12 ),
                 ]
             },
             
