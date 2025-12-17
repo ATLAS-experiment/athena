@@ -2,10 +2,11 @@
 *   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #include "./GepCellTowerAlg.h"
-#include "./Cluster.h"
-
 #include "CaloDetDescr/CaloDetDescrManager.h"
 #include "xAODCaloEvent/CaloClusterAuxContainer.h"
+#include "xAODCaloEvent/CaloTower.h"
+#include "xAODCaloEvent/CaloTowerContainer.h"
+#include "xAODCaloEvent/CaloTowerAuxContainer.h"
 
 GepCellTowerAlg::GepCellTowerAlg( const std::string& name, ISvcLocator* pSvcLocator ) : 
    AthReentrantAlgorithm( name, pSvcLocator ){
@@ -53,57 +54,74 @@ StatusCode GepCellTowerAlg::execute(const EventContext& context) const {
   CHECK(h_outputCaloClusters.record(std::make_unique<xAOD::CaloClusterContainer>(),
                                     std::make_unique<xAOD::CaloClusterAuxContainer>()));
 
+  // Use the indexing and cell energy accumulation functionality 
+  // already implemented in xAOD::CaloTower and xAOD::CaloTowerContainer
+  std::vector<std::vector<unsigned int>> cell_ids;
+  auto customTowers = std::make_unique<xAOD::CaloTowerContainer>();
+  auto aux = std::make_unique<xAOD::CaloTowerAuxContainer>();
+  customTowers->setStore(aux.get());
+
   // Define tower array (98 eta bins x 64 phi bins)
   static constexpr int nEta{98};
   static constexpr int nPhi{64};
-  //avoid stack use of 605kb
-  auto tow = new Gep::Cluster[nEta][nPhi]();
+  customTowers->configureGrid(nEta,-4.9,4.9,nPhi);
+
+  int nTowers = customTowers->nTowers();
+  cell_ids.resize(nTowers);
+
+  for (int iTower=0; iTower < nTowers; ++iTower) {
+      auto tower = std::make_unique<xAOD::CaloTower>();
+      customTowers->push_back(std::move(tower));
+      customTowers->at(iTower)->reset();
+  }
+
   // Single loop over cells to accumulate energy into the correct tower
   for (const auto& cell : cells) {
       if (cell.sigma < 2) continue;
       if (cell.isBadCell()) continue;
 
-      // Compute eta and phi indices (binning in steps of 0.1)
-      int eta_index = static_cast<int>(std::floor(cell.eta * 10)) + 49;
-      int phi_index = static_cast<int>(std::floor(cell.phi * 10)) + 32;
-
-      // Ensure indices are within bounds
-      if (eta_index < 0 || eta_index >= nEta || phi_index < 0 || phi_index >= nPhi) continue;
-
-      // Accumulate cell data into the corresponding tower
-      TLorentzVector cellsVector;
-      cellsVector.SetPtEtaPhiE(cell.et, cell.eta, cell.phi, cell.e);
-      tow[eta_index][phi_index].vec += cellsVector;
-      tow[eta_index][phi_index].cell_id.push_back(cell.id);
+      int idx = customTowers->index(cell.eta,cell.phi);
+      // Internally, this results in the cell et being added to the energy (i.e. e, not et) of a
+      // 4-vector with the eta and phi set to the center point of the tower
+      // Effectively accumulating the et of the tower's constituent cells
+      customTowers->at(idx)->addEnergy(cell.et);
+      cell_ids[idx].push_back(cell.id);
   }
 
-  // Collect non-empty towers into a vector
-  std::vector<Gep::Cluster> customTowers;
-  for (int i = 0; i < nEta; ++i) {
-      for (int j = 0; j < nPhi; ++j) {
-          if (tow[i][j].vec.Et() > 0) {
-              customTowers.push_back(tow[i][j]);
-          }
-      }
-  }
-  delete [] tow;
   // Store the Gep clusters to a CaloClusters, and write out.
-  h_outputCaloClusters->reserve(customTowers.size());
+  for(auto tower: *customTowers){
+    auto p4 = tower->p4();
+    // This is equivalent to checking the et of the tower 
+    // since e() is the sum of the et of all constituent cells
+    if ( p4.E() == 0 ) continue;
 
-  for(const auto& gepclus: customTowers){
     // store the calCluster to fix up the Aux container:
     auto *ptr = h_outputCaloClusters->push_back(std::make_unique<xAOD::CaloCluster>());
-    ptr->setE(gepclus.vec.E());
-    ptr->setEta(gepclus.vec.Eta());
-    ptr->setPhi(gepclus.vec.Phi());
-    ptr->setTime(gepclus.time);
 
-    CaloClusterCellLink *cccl = new CaloClusterCellLink();
+    // Unlike what was done here, downstream code will assume that e 
+    // is the energy and et is the transverse energy,
+    // so we need to "flip" e and et and make a proper 4-vector here
+    // reminder - p4.e() was until now the et of the tower
+    double eta = p4.Eta();
+    double phi = p4.Phi();
+    double e = p4.E() * std::cosh(eta);
 
-    for (auto cell_id : gepclus.cell_id)
+    // ptr is a massless pseudo-particle with energy e
+    // representing a tower. The eta,phi coordinates are
+    // the center of the tower.
+    // When downstream code reads its et, it will
+    // get the measured energy in the tower.
+    ptr->setE(e);
+    ptr->setEta(eta);
+    ptr->setPhi(phi);
+    ptr->setTime(0);
+
+    auto cccl = std::make_unique<CaloClusterCellLink>();
+
+    for (auto cell_id : cell_ids[tower->index()])
       cccl->addCell(cell_map->at(cell_id).index, 1.0);
 
-    ptr->addCellLink(std::make_unique<CaloClusterCellLink>(*cccl));
+    ptr->addCellLink(std::move(cccl));
   }
 
   setFilterPassed(true,context); //if got here, assume that means algorithm passed
