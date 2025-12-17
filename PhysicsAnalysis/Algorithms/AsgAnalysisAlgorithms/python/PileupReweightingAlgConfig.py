@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 
@@ -30,17 +30,16 @@ def McEventWeightCfg(flags, name="MyWeights", **kwargs):
 
 def PileupReweightingToolCfg(flags, name="PileupReweightingTool", commonPRW=True, **kwargs):
     acc = ComponentAccumulator()
-    from Campaigns.Utils import getMCCampaign,Campaign
+    from Campaigns.Utils import getMCCampaign
     campaign = getMCCampaign(flags.Input.Files)
 
-    if not hasattr(kwargs, "LumiCalcFiles"):
-        from PileupReweighting.AutoconfigurePRW import defaultConfigFiles,getConfigurationFiles,getLumicalcFiles
-        kwargs.setdefault("LumiCalcFiles", getLumicalcFiles(campaign))
-    if not hasattr(kwargs, "ConfigFiles"):
-        if campaign in [Campaign.MC23a,Campaign.MC23c]:
-            kwargs.setdefault("ConfigFiles", defaultConfigFiles(campaign))
-        else:
-            kwargs.setdefault("ConfigFiles", getConfigurationFiles(files=flags.Input.Files))
+    from PileupReweighting.AutoconfigurePRW import defaultConfigFiles,getConfigurationFiles,getLumicalcFiles
+    kwargs.setdefault("LumiCalcFiles", getLumicalcFiles(campaign))
+    if commonPRW:
+        kwargs.setdefault("ConfigFiles", defaultConfigFiles(campaign))
+    else:
+        kwargs.setdefault("ConfigFiles", getConfigurationFiles(files=flags.Input.Files))
+
     acc.setPrivateTools(CompFactory.CP.PileupReweightingTool(**kwargs))
     return acc
 
