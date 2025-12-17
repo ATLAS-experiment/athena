@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # art-include: main/Athena
-# art-description: DAOD building SUSY20 data18
+# art-description: DAOD building STDM17 data18
 # art-type: grid
 # art-output: *.pool.root
 # art-output: checkFile*.txt
@@ -13,19 +13,19 @@ set -e
 Derivation_tf.py \
 --inputAODFile /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/CampaignInputs/data18/AOD/data18_13TeV.00357772.physics_Main.merge.AOD.r13286_p4910/1000events.AOD.27655096._000455.pool.root.1 \
 --outputDAODFile art.pool.root \
---formats SUSY20 \
+--formats STDM17 \
 --maxEvents -1 \
 
 echo "art-result: $? reco"
 
-checkFile.py DAOD_SUSY20.art.pool.root > checkFile_SUSY20.txt
+checkFile.py DAOD_STDM17.art.pool.root > checkFile_STDM17.txt
 
 echo "art-result: $?  checkfile"
 
-checkxAOD.py DAOD_SUSY20.art.pool.root > checkxAOD_SUSY20.txt
+checkxAOD.py DAOD_STDM17.art.pool.root > checkxAOD_STDM17.txt
 
 echo "art-result: $?  checkxAOD"
 
-checkIndexRefs.py DAOD_SUSY20.art.pool.root > checkIndexRefs_SUSY20.txt 2>&1
+checkIndexRefs.py DAOD_STDM17.art.pool.root > checkIndexRefs_STDM17.txt 2>&1
 
 echo "art-result: $?  checkIndexRefs"

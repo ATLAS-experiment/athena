@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # art-include: main/Athena
-# art-description: DAOD building TRIG8 mc23
+# art-description: DAOD building TRIG8 mc20
 # art-type: grid
 # art-output: *.pool.root
 # art-output: checkFile*.txt
@@ -11,7 +11,7 @@
 set -e
 
 Derivation_tf.py \
---inputAODFile /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/CampaignInputs/mc23/AOD/mc23_13p6TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.recon.AOD.e8514_s4159_r14799/1000events.AOD.34124794._001345.pool.root.1 \
+--inputAODFile /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/CampaignInputs/mc20/AOD/mc20_13TeV.410470.PhPy8EG_A14_ttbar_hdamp258p75_nonallhad.recon.AOD.e6337_s3681_r13145/1000events.AOD.27121237._002005.pool.root.1 \
 --outputDAODFile art.pool.root \
 --formats TRIG8 \
 --maxEvents -1 \

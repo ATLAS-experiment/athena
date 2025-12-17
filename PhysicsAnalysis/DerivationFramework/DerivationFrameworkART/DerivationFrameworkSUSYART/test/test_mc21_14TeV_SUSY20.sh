@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # art-include: main/Athena
-# art-description: DAOD building SUSY20 data22
+# art-description: DAOD building SUSY20 mc21_14TeV_
 # art-type: grid
 # art-output: *.pool.root
 # art-output: checkFile*.txt
@@ -11,7 +11,7 @@
 set -e
 
 Derivation_tf.py \
---inputAODFile /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/CampaignInputs/data22/AOD/data22_13p6TeV.00431906.physics_Main.merge.AOD.r13928_p5279/1000events.AOD.30220215._001367.pool.root.1 \
+--inputAODFile /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/AOD/ATLAS-P2-RUN4-04-00-00/mc21_14TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.recon.AOD.e8481_s4494_r16436/AOD.44098360._000011.pool.root.1 \
 --outputDAODFile art.pool.root \
 --formats SUSY20 \
 --maxEvents -1 \
