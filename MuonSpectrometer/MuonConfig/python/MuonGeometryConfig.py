@@ -170,6 +170,20 @@ def sTGCAsBuiltCondAlgCfg(flags, name = "sTGCAsBuiltCondAlg", **kwargs):
     the_alg = CompFactory.sTGCAsBuiltCondAlg(name,**kwargs)
     result.addCondAlgo(the_alg, primary=True)
     return result
+
+# since the MM as built 2 corrections are not supossed to run in standart reco job just a fragment to activate them in a postExex is provided
+def activateMmAsBuilt2PostExec(flags, cfg, **kwargs):
+    #### Do not apply the as-built correction if not activated
+    name = "MmAsBuilt2CondAlg"
+    if flags.GeoModel.Run != LHCPeriod.Run3:
+        return
+    kwargs.setdefault("readFromJSON","")
+    kwargs.setdefault("WriteKey","MmAsBuilt2")
+    the_alg = CompFactory.sTGCAsBuiltCondAlg(name,**kwargs)
+    cfg.addCondAlgo(the_alg, primary=True)
+
+    cfg.getCondAlgo("MuonDetectorCondAlg").applyMmAsBuilt2=True
+    cfg.getCondAlgo("MuonDetectorCondAlg").ReadMmAsBuilt2Key = kwargs["WriteKey"] 
         
         
 

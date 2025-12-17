@@ -31,6 +31,7 @@ StatusCode MuonDetectorCondAlg::initialize() {
     ATH_CHECK(m_readMdtAsBuiltKey.initialize(m_applyMdtAsBuilt));
     ATH_CHECK(m_readNswAsBuiltKey.initialize(m_applyNswAsBuilt));
     ATH_CHECK(m_readsTGCAsBuiltKey.initialize(m_applysTGCAsBuilt));
+    ATH_CHECK(m_readMmAsBuilt2Key.initialize(m_applyMmAsBuilt2));
     ATH_CHECK(m_condMmPassivKey.initialize(m_applyMmPassivation));
     ATH_CHECK(m_idHelperSvc.retrieve());
     ATH_CHECK(m_writeDetectorManagerKey.initialize());
@@ -136,6 +137,16 @@ StatusCode MuonDetectorCondAlg::execute(const EventContext& ctx) const {
         }
         writeHandle.addDependency(readsTGCAsBuilt);
         MuonMgrData->setsTGCAsBuilt(*readsTGCAsBuilt);
+    }
+
+    if(!m_readMmAsBuilt2Key.empty()){
+        SG::ReadCondHandle<sTGCAsBuiltData> readMmAsBuilt2{m_readMmAsBuilt2Key, ctx};
+        if(!readMmAsBuilt2.isValid()){
+            ATH_MSG_ERROR("Cannot find conditions data container for MM as-built 2");
+            return StatusCode::FAILURE;
+        }
+        writeHandle.addDependency(readMmAsBuilt2);
+        MuonMgrData->setMmAsBuilt2(*readMmAsBuilt2);
     }
 
 
