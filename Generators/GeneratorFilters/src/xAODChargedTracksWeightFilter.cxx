@@ -162,7 +162,10 @@ double xAODChargedTracksWeightFilter::get_nch_weight(int nch) const {
     if( nch > m_nchmax || nch < m_nchmin ) return 1;
 
     auto w_fc = m_spline.value(nch);
-
+    if (w_fc == 0.)[[unlikely]]{
+      ATH_MSG_WARNING("xAODChargedTracksWeightFilter::get_nch_weight: w_fc is zero.");
+      return 0.;
+    }
     return m_min_weight/w_fc;
 }
 

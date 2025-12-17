@@ -173,7 +173,10 @@ double ChargedTracksWeightFilter::get_nch_weight(int nch) const {
   if( nch > m_nchmax || nch < m_nchmin ) return 1;
 
   auto w_fc = m_spline.value(nch);
-
+  if (w_fc == 0)[[unlikely]]{
+    ATH_MSG_WARNING("ChargedTracksWeightFilter::get_nch_weight: w_fc divisor is zero.");
+    return 0.;
+  }
   return m_min_weight/w_fc;
 }
 
