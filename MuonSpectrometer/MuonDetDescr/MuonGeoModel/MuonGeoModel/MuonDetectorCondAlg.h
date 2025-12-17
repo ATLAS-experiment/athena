@@ -36,7 +36,9 @@ class MuonDetectorCondAlg : public AthCondAlgorithm {
     Gaudi::Property<bool> m_applyNswAsBuilt{this, "applyNswAsBuilt", true, 
                                             "Toggles the application of the Nsw as-built parameters"};
     Gaudi::Property<bool> m_applysTGCAsBuilt{this, "applysTGCAsBuilt", false, 
-                                            "Toggles the application of the alternative sTGC as-built parameters"};
+                                            "Toggles the application of the sTGC as-built parameters"};
+    Gaudi::Property<bool> m_applyMmAsBuilt2{this, "applyMmAsBuilt2", false,
+                                            "Toggles the application of the alternative MM as-built parameters"};
 
     Gaudi::Property<bool> m_applyMdtAsBuilt{this, "applyMdtAsBuilt", true, 
                                             "Toggles the application of the Mdt as-built parameters"};
@@ -58,6 +60,7 @@ class MuonDetectorCondAlg : public AthCondAlgorithm {
     SG::ReadCondHandleKey<MdtAsBuiltContainer> m_readMdtAsBuiltKey{this, "ReadMdtAsBuiltKey", "MdtAsBuiltContainer", "Key of output muon alignment MDT/AsBuilt condition data"};
     SG::ReadCondHandleKey<NswAsBuiltDbData> m_readNswAsBuiltKey{this, "ReadNswAsBuiltKey", "NswAsBuiltDbData", "Key of NswAsBuiltDbData object containing conditions data for NSW as-built params!"};
     SG::ReadCondHandleKey<sTGCAsBuiltData> m_readsTGCAsBuiltKey{this, "ReadsTGCAsBuiltKey", "sTGCAsBuilt", "Key of sTGCAsBuiltData object containing conditions data for the sTGC as-built model!"};
+    SG::ReadCondHandleKey<sTGCAsBuiltData> m_readMmAsBuilt2Key{this, "ReadMmAsBuilt2Key", "", "Key of sTGCAsBuiltData object containing conditions data for the sTGC as-built model!"};
     SG::ReadCondHandleKey<NswPassivationDbData> m_condMmPassivKey {this, "condMmPassivKey", "NswPassivationDbData", "Key of NswPassivationDbData object containing passivation data for MMs"};
 
     // Write Handle
