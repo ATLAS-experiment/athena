@@ -654,8 +654,7 @@ int IdDictDictionary::reset(size_t index1,
     }
   }
 
-  size_t field_index = 0;
-  for (size_t i = index1; i <= index2; ++i, ++field_index) {
+  for (size_t i = index1; i <= index2; ++i) {
     const IdDictFieldImplementation& impl = region.implementation(i);
 
     size_t position = Identifier::NBITS - impl.bits_offset() - impl.bits();
