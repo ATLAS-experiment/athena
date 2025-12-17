@@ -12,7 +12,6 @@ if __name__=="__main__":
     parser.add_argument("--noPerfMon", help="If set to true, full perfmonMT is enabled",
                                               default=False, action='store_true')
     parser.set_defaults(nEvents = -1)
-    parser.set_defaults(noSTGC=True)
  
     parser.set_defaults(outRootFile="HoughTransformTester.root")
     from MuonGeoModelTestR4.testGeoModel import MuonPhaseIITestDefaults
@@ -25,7 +24,9 @@ if __name__=="__main__":
     flags.PerfMon.doFullMonMT = not args.noPerfMon
     flags.PerfMon.OutputJSON="perfmonmt_MuonR4Reco.json"
 
-    flags.Muon.doFastMMDigitization = True
+    flags.Muon.doFastMMDigitization = False
+    flags.Muon.doFastsTGCDigitization = False
+
     flags, cfg = setupGeoR4TestCfg(args,flags)
   
     

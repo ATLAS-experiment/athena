@@ -47,8 +47,9 @@
 #include <map>
 #include <format>
 
-#include <GaudiKernel/SystemOfUnits.h>
 
+#include "Acts/Definitions/Units.hpp"
+using namespace Acts::UnitLiterals;
 
 namespace {
     using SubDetAlignment = ActsTrk::GeometryContext::AlignmentStorePtr;
@@ -382,7 +383,7 @@ StatusCode ReadoutGeomCnvAlg::buildRpc(const ActsTrk::GeometryContext& gctx, Con
             const int layerHash = newElement->layerHash(gapId);
             const Amg::Transform3D refTrf{copyMe->localToGlobalTrans(gctx, gapId)* 
                                           (m_idHelperSvc->measuresPhi(gapId) ? 
-                                                Amg::getRotateZ3D(90*Gaudi::Units::deg) :
+                                                Amg::getRotateZ3D(90_degree) :
                                                 Amg::Transform3D::Identity())};
             ATH_MSG_VERBOSE("Assign transform: "<<m_idHelperSvc->toString(gapId)<<", "<<Amg::toString(refTrf));
             newElement->m_surfaceData->m_layerTransforms[surfaceHash] = refTrf;
@@ -596,7 +597,9 @@ StatusCode  ReadoutGeomCnvAlg::buildSTGC(const ActsTrk::GeometryContext& gctx, C
             const IdentifierHash layerHash = MuonGMR4::sTgcReadoutElement::createHash(layer,channelType::Strip,0);
             
             const MuonGMR4::StripLayer& stripLayer{copyMe->stripLayer(layerHash)};
-            newRE->m_Xlg[layer -1] =  stripLayer.toOrigin() * Amg::getRotateY3D(90. * Gaudi::Units::deg) * Amg::getTranslateX3D( layer%2 ? - 0.01 : 0.01 ); 
+            newRE->m_Xlg[layer -1] =  stripLayer.toOrigin() * 
+                                      Amg::getRotateY3D(90._degree) * 
+                                      Amg::getTranslateX3D( layer%2 ? - 0.01 : 0.01 ); 
            
             const MuonGMR4::StripDesign& copyEtaDesign{stripLayer.design()}; 
             ATH_MSG_VERBOSE("Layer: "<<layer<<" "<<copyEtaDesign);
@@ -727,8 +730,8 @@ StatusCode ReadoutGeomCnvAlg::buildMdt(const ActsTrk::GeometryContext& gctx, Con
         newElement->setParentMuonStation(station);
 
         /// 1 cm is added as safety margin to the Mdt multilayer envelope
-        newElement->setLongSsize(2*pars.longHalfX - 1.*Gaudi::Units::cm);
-        newElement->setSsize(2*pars.shortHalfX - 1.*Gaudi::Units::cm);
+        newElement->setLongSsize(2*pars.longHalfX - 1._cm);
+        newElement->setSsize(2*pars.shortHalfX - 1._cm);
         newElement->setLongRsize(2*pars.halfY);
         newElement->setRsize(2*pars.halfY);
         newElement->setZsize(2*pars.halfHeight);
@@ -941,7 +944,7 @@ StatusCode ReadoutGeomCnvAlg::dumpAndCompare(const ActsTrk::GeometryContext& gct
                                                                   doubPhi, gasGap, measPhi, strip);
                     
                     const Amg::Transform3D refTrans{refEle.localToGlobalTrans(gctx, stripId) * 
-                                                    (measPhi ? Amg::getRotateZ3D(90*Gaudi::Units::deg) : 
+                                                    (measPhi ? Amg::getRotateZ3D(90_degree) : 
                                                                Amg::Transform3D::Identity())};
                     const Amg::Transform3D& testTrans{testEle.transform(stripId)};
                     if (strip == 1 && !Amg::isIdentity(refTrans.inverse()*testTrans)) {
@@ -1005,7 +1008,7 @@ StatusCode ReadoutGeomCnvAlg::dumpAndCompare(const ActsTrk::GeometryContext& gct
             if (!refEle.numChannels(layHash)) continue;
             const Amg::Transform3D refLayerTrf = refEle.localToGlobalTrans(gctx, refEle.constructHash(0, gasGap, false)) *
                                                                             (!isStrip ? Amg::Transform3D::Identity()
-                                                                                      : Amg::getRotateZ3D(-90.*Gaudi::Units::deg));
+                                                                                      : Amg::getRotateZ3D(-90._degree));
             const Amg::Transform3D& testLayerTrf = testEle.transform(layId);
             if (!Amg::isIdentity(refLayerTrf.inverse()* testLayerTrf)) {
                 ATH_MSG_FATAL("The transformations in "<<m_idHelperSvc->toString(layId)
@@ -1068,47 +1071,52 @@ StatusCode ReadoutGeomCnvAlg::dumpAndCompare(const ActsTrk::GeometryContext& gct
                 <<GeoTrf::toString(refEle.localToGlobalTrans(gctx), true));
     const sTgcIdHelper& idHelper{m_idHelperSvc->stgcIdHelper()};
     for (unsigned int gasGap = 1; gasGap <= refEle.numLayers(); ++gasGap) {
-        for (int chType : {sTgcIdHelper::sTgcChannelTypes::Pad , sTgcIdHelper::sTgcChannelTypes::Strip, sTgcIdHelper::sTgcChannelTypes::Wire}) {
-            const Identifier layID = idHelper.channelID(refEle.identify(),
-                                                    refEle.multilayer(),
-                                                    gasGap, chType, 1);
-            const unsigned int numChannel = refEle.numChannels(layID);
+        for (int chType : {sTgcIdHelper::sTgcChannelTypes::Pad , 
+                            sTgcIdHelper::sTgcChannelTypes::Strip, 
+                            sTgcIdHelper::sTgcChannelTypes::Wire}) {
+            const IdentifierHash layHash = refEle.createHash(gasGap, chType, 1);
+            const unsigned int numChannel = refEle.numChannels(layHash);
             constexpr unsigned firstCh = 1;
             for (unsigned int channel = firstCh; channel < numChannel ; ++channel) {
-                Identifier chID;
+                Identifier chID{};
                 bool isValid = false;
                 if(chType == sTgcIdHelper::sTgcChannelTypes::Pad) {
-                    const int etaIndex = refEle.padDesign(layID).padNumber(channel).first;
-                    const int phiIndex = refEle.padDesign(layID).padNumber(channel).second;
+                    const int etaIndex = refEle.padDesign(layHash).padNumber(channel).first;
+                    const int phiIndex = refEle.padDesign(layHash).padNumber(channel).second;
                     chID = idHelper.padID(refEle.identify(),
-                                            refEle.multilayer(),
-                                            gasGap, chType, etaIndex, phiIndex, isValid);
+                                          refEle.multilayer(),
+                                          gasGap, chType, etaIndex, phiIndex, isValid);
                 } else {
                     chID = idHelper.channelID(refEle.identify(),
-                                            refEle.multilayer(),
-                                            gasGap, chType, channel, isValid);
+                                              refEle.multilayer(),
+                                              gasGap, chType, channel, isValid);
                 }
 
                 if(!isValid) {
                     ATH_MSG_WARNING("Invalid Identifier detected: " << m_idHelperSvc->toString(chID));
+                    return StatusCode::FAILURE;
                 } 
-
-                const Amg::Transform3D& refTrans{refEle.localToGlobalTrans(gctx, chID)};
+                const IdentifierHash measHash = refEle.measurementHash(chID);
+                Amg::Transform3D refTrans{refEle.localToGlobalTrans(gctx, refEle.layerHash(measHash))*
+                                        Amg::getRotateZ3D( -1.*(chType != sTgcIdHelper::sTgcChannelTypes::Strip)* 90._degree)};
                 const Amg::Transform3D& testTrans{testEle.transform(chID)};
                 if (channel == firstCh && (!Amg::doesNotDeform(testTrans.inverse()*refTrans)
-                                        || (testTrans.inverse()*refTrans).translation().perp() > std::numeric_limits<float>::epsilon() ) ) {
-                    ATH_MSG_ERROR(__func__<<"() "<<__LINE__<<" - Transformation for "<<m_idHelperSvc->toString(chID)<<std::endl
+                                        || (testTrans.inverse()*refTrans).translation().perp() > 
+                                            std::numeric_limits<float>::epsilon() ) ) {
+                    ATH_MSG_ERROR(__func__<<"() "<<__LINE__<<" - Transformation for "
+                        <<m_idHelperSvc->toString(chID)<<std::endl
                         <<" *** ref:  "<<GeoTrf::toString(refTrans, true)<<std::endl
                         <<" *** test: "<<GeoTrf::toString(testTrans, true));
                         return StatusCode::FAILURE;
                 }
+                const Amg::Vector3D refChannelPos = refEle.globalChannelPosition(gctx, measHash);
+
                 if (chType == sTgcIdHelper::sTgcChannelTypes::Pad) {  
                     const Amg::Transform3D& testPadTrans{testEle.transform(chID)};
-                    const Amg::Vector3D refChannelPos = refEle.globalChannelPosition(gctx, chID);
                     Amg::Vector3D testChannelPos(Amg::Vector3D::Zero()); 
                     testEle.stripGlobalPosition(chID, testChannelPos);
                     
-                    const std::array<Amg::Vector3D,4> refPadCorners = refEle.globalPadCorners(gctx, chID);
+                    const std::array<Amg::Vector3D,4> refPadCorners = refEle.globalPadCorners(gctx, measHash);
                     std::array<Amg::Vector3D,4> testPadCorners{make_array<Amg::Vector3D, 4>(Amg::Vector3D::Zero())};
                     testEle.padGlobalCorners(chID, testPadCorners);              
                     for (unsigned int cornerIdx = 0; cornerIdx < refPadCorners.size(); ++cornerIdx) {
@@ -1135,7 +1143,6 @@ StatusCode ReadoutGeomCnvAlg::dumpAndCompare(const ActsTrk::GeometryContext& gct
                                     <<" channel position "<<Amg::toString(refChannelPos));
                 }
                 else if (chType == sTgcIdHelper::sTgcChannelTypes::Strip){
-                    const Amg::Vector3D refChannelPos = refEle.globalChannelPosition(gctx, chID);
                     Amg::Vector3D testChannelPos{Amg::Vector3D::Zero()}; 
                     testEle.stripGlobalPosition(chID, testChannelPos);
                     if ((refChannelPos - testChannelPos).mag() > 1. * Gaudi::Units::micrometer){
@@ -1148,7 +1155,6 @@ StatusCode ReadoutGeomCnvAlg::dumpAndCompare(const ActsTrk::GeometryContext& gct
                     ATH_MSG_VERBOSE("Agreement between new and old geometry for channel "<<m_idHelperSvc->toString(chID)
                                     <<" channel position "<<Amg::toString(refChannelPos));
                 } else { // wire
-                    const Amg::Vector3D refChannelPos = refEle.globalChannelPosition(gctx, chID);
                     Amg::Vector3D testChannelPos{Amg::Vector3D::Zero()}; 
                     testEle.stripGlobalPosition(chID, testChannelPos);
                     Amg::Vector3D localRefPos {testTrans.inverse()*refChannelPos};

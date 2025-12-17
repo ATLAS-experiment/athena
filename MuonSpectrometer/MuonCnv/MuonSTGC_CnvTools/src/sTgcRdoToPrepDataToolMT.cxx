@@ -225,11 +225,11 @@ StatusCode Muon::sTgcRdoToPrepDataToolMT::processCollection(const EventContext& 
             if (!m_xAODPadKey.empty() && chType == sTgcIdHelper::sTgcChannelTypes::Pad) {
                 outHit = xAODcontainers.pad->push_back(std::make_unique<xAOD::sTgcPadHit>());
                 xAOD::MeasMatrix<2> lCov{xAOD::MeasMatrix<2>::Identity()};
-                lCov(0,0) = prd->localCovariance()(0,0);
+                lCov(1,1) = prd->localCovariance()(0,0);
                 /// Currently there's no 2D covariance yet
                 // lCov(1,1) = prd->localCovariance()(1,1);                
                 outHit->setMeasurement<2>(m_idHelperSvc->detElementHash(prdId), 
-                                          xAOD::toStorage(prd->localPosition()),
+                                          xAOD::toStorage(Eigen::Rotation2D{-M_PI_2}*prd->localPosition()),
                                           std::move(lCov));
             } else if (chType == sTgcIdHelper::sTgcChannelTypes::Wire && !m_xAODWireKey.empty()) {
                outHit = xAODcontainers.wire->push_back(std::make_unique<xAOD::sTgcWireHit>());
@@ -244,7 +244,10 @@ StatusCode Muon::sTgcRdoToPrepDataToolMT::processCollection(const EventContext& 
                 continue;
             }
             if (chType != sTgcIdHelper::sTgcChannelTypes::Pad){
-               xAOD::MeasVector<1> lPos = prd->localPosition().x() * xAOD::MeasVector<1>::UnitX();
+               /// In the R4 layout both phi & eta measurements are expressed on the same surface. However, the
+               ///  rotation from eta -> phi is clockwise  --> minus sign in prd creation
+               const double locPos = (chType == sTgcIdHelper::sTgcChannelTypes::Wire ? -1. : 1.) * prd->localPosition().x();
+               xAOD::MeasVector<1> lPos = locPos * xAOD::MeasVector<1>::UnitX();
                xAOD::MeasMatrix<1> lCov{};
                lCov(0,0) = prd->localCovariance()(0,0);
                outHit->setMeasurement<1>(m_idHelperSvc->detElementHash(prdId),

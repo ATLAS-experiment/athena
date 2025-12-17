@@ -6,7 +6,6 @@
 #include "xAODMuonViews/ChamberViewer.h"
 #include "TruthUtils/HepMCHelpers.h"
 #include "CLHEP/Random/RandGaussZiggurat.h"
-
 namespace MuonR4 {
   StatusCode sTgcDigitizationTool::initialize() {
     ATH_MSG_DEBUG("sTgcDigitizationTool::initialize()");
@@ -23,7 +22,7 @@ namespace MuonR4 {
     ATH_CHECK(m_condThrshldsKey.initialize(m_useCondThresholds));
     ATH_CHECK(m_smearingTool.retrieve());
     ATH_CHECK(m_calibrationTool.retrieve());
-
+    
     if (m_doSmearing) {
       ATH_MSG_INFO("Running in smeared mode!");
     }
@@ -38,7 +37,7 @@ namespace MuonR4 {
     }
     double meanGasGain = 2.15 * 1E-4 * std::exp(6.88*m_runVoltage);
     sTgcDigitMaker::digitMode mode = static_cast<sTgcDigitMaker::digitMode>(m_digitMode.value());
-    m_digitizer = std::make_unique<sTgcDigitMaker>(m_idHelperSvc.get(), mode, meanGasGain, m_doPadSharing);
+    m_digitizer = std::make_unique<sTgcDigitMaker>(m_detMgr, mode, meanGasGain, m_doPadSharing);
     ATH_CHECK(m_digitizer->initialize());
     
     return StatusCode::SUCCESS;
@@ -81,7 +80,7 @@ namespace MuonR4 {
     const NswCalibDbThresholdData* thresholdData{nullptr};
     ATH_CHECK(SG::get(thresholdData, m_condThrshldsKey, ctx));
 
-    DigiConditions digiCond{m_detMgr, efficiencyMap, thresholdData, rndEngine};
+    DigiConditions digiCond{efficiencyMap, thresholdData, rndEngine};
     DigiCache digitCache{};
   
     double earliestEventTime = std::numeric_limits<double>::max();
@@ -292,17 +291,20 @@ namespace MuonR4 {
                                       sTgcSimDigitVec& unmergedDigits, 
                                       const bool isNeighbourOn) const {
 
-    const MuonGMR4::MuonDetectorManager* detMgr{digiCond.detMgr};
     const sTgcIdHelper& idHelper{m_idHelperSvc->stgcIdHelper()};
     /// Sort Digits in the unmergedDigits vector by gasgap -> channelType -> time
-    std::stable_sort(unmergedDigits.begin(), unmergedDigits.end(),
+    std::ranges::stable_sort(unmergedDigits,
       [&idHelper](const sTgcSimDigitHit& a, const sTgcSimDigitHit& b) {
         const int layA = idHelper.gasGap(a.identify()); 
         const int layB = idHelper.gasGap(b.identify());
-        if (layA != layB) return layA < layB;
+        if (layA != layB) {
+          return layA < layB;
+        }
         const int chA = idHelper.channel(a.identify());
         const int chB = idHelper.channel(b.identify());
-        if (chA != chB) return chA < chB;
+        if (chA != chB) {
+          return chA < chB;
+        }
         return a.time() < b.time();
       }
     );
@@ -312,7 +314,9 @@ namespace MuonR4 {
     savedDigits.reserve(premerged.capacity());
 
     auto passNeigbourLogic = [&](const sTgcSimDigitHit& candidate) {
-      if (!isNeighbourOn || savedDigits.empty()) return false;
+      if (!isNeighbourOn || savedDigits.empty()) {
+        return false;
+      }
       if (savedDigits.back().identify() == candidate.identify() &&
           std::abs(savedDigits.back().time() - candidate.time()) < vmmDeadTime) {
             ATH_MSG_VERBOSE("Digits are too close in time ");
@@ -320,22 +324,27 @@ namespace MuonR4 {
       }
       const Identifier digitId = candidate.identify();
       const int channel = idHelper.channel(digitId);
-      const int maxChannel = detMgr->getsTgcReadoutElement(digitId)->numChannels(digitId);
+      const MuonGMR4::sTgcReadoutElement* reEle = m_detMgr->getsTgcReadoutElement(digitId);
+      const IdentifierHash hitHash = reEle->measurementHash(digitId);
+      const int maxChannel = reEle->numChannels(hitHash);
       for (int neighbour : {std::max(1, channel -1), std::min(maxChannel, channel+1)}) {
         /// Catch the cases where the channel is 1 or maxChannel
-        if (neighbour == channel) continue;
+        if (neighbour == channel) {
+          continue;
+        }
         const Identifier neighbourId = idHelper.channelID(digitId, 
-                                                          idHelper.multilayer(digitId),
+                                                          reEle->multilayer(),
                                                           idHelper.gasGap(digitId), 
                                                           idHelper.channelType(digitId), neighbour);
         const double threshold = m_useCondThresholds ? getChannelThreshold(ctx, neighbourId, *digiCond.thresholdData)  
                                                       : m_chargeThreshold.value();          
-        if (std::find_if(savedDigits.begin(), savedDigits.end(), [&](const sTgcSimDigitHit& known){
+        if (std::ranges::any_of(savedDigits, [&](const sTgcSimDigitHit& known){
             return known.identify() == neighbourId && 
                     known.getDigit().charge() > threshold &&
                     std::abs(known.time() - candidate.time()) <  m_hitTimeMergeThreshold;
-        }) != savedDigits.end()) return true;
-      
+        })) {
+          return true;
+        }
       }
       return false;
     };

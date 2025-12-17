@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef STGC_DIGITIZATIONR4_STGCFASTDIGITOOL_H
 #define STGC_DIGITIZATIONR4_STGCFASTDIGITOOL_H
@@ -13,7 +13,7 @@
 namespace MuonR4{
     class sTgcFastDigiTool final: public MuonDigitizationTool {
         public:
-            sTgcFastDigiTool(const std::string& type, const std::string& name, const IInterface* pIID);
+            using MuonDigitizationTool::MuonDigitizationTool;
 
             StatusCode initialize() override final;
             StatusCode finalize() override final;
