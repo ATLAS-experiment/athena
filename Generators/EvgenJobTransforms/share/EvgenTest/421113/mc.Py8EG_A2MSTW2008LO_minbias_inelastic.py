@@ -8,7 +8,6 @@ class Sample(EvgenConfig):
         self.description = "Inelastic minimum bias, with the A2 MSTW2008LO tune and EvtGen"
         self.keywords = ["QCD", "minBias", "SM"]
         self.contact = ["spyros.argyropoulos@cern.ch"]
-        self.generators = ["Pythia8"]
         self.nEventsPerJob = 1000
 
     def setupProcess(self, flags):
