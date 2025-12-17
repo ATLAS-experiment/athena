@@ -49,7 +49,7 @@ def TauTruthToolsCfg(flags):
     acc = ComponentAccumulator()
 
     # Ensure that we are running on MC
-    if not flags.Input.isMC:
+    if not flags.Input.isMC and not flags.Overlay.DataOverlay:
         # FIXME If this happens it indicates an issue with the configuration in the caller, so better to throw an exception?!
         return acc
 
