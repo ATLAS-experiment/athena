@@ -69,7 +69,8 @@ ResultTypeWrapper<ReturnArgs...>::type Statement::run(ParamArgs... params) {
                     m_creationPoint.file_name(), m_creationPoint.line()));
   }
   // bind parameters
-  int param_idx = 1;
+  // (gcc16 will warn that param_idx is unused if params is empty.)
+  [[maybe_unused]] int param_idx = 1;
   try {
     // Using post-increment, which returns the current value of param_idx
     // then increments before the next call to bind
