@@ -4,6 +4,7 @@
 #include "METUtilities/METSignificance.h"
 #include "METUtilities/METNet.h"
 #include "METUtilities/ColumnarMETMaker.h"
+#include "METUtilities/METNetSig.h"
 // Algs
 #ifndef XAOD_STANDALONE
 #include "../METMakerAlg.h"
@@ -18,6 +19,7 @@ DECLARE_COMPONENT( METMaker )
 DECLARE_COMPONENT( METSystematicsTool )
 DECLARE_COMPONENT( METSignificance )
 DECLARE_COMPONENT( METNet )
+DECLARE_COMPONENT( METNetSig )
 DECLARE_COMPONENT( ColumnarMETMaker )
 
 #ifndef XAOD_STANDALONE
