@@ -26,6 +26,7 @@
 #include "ATOOLS/Org/Exception.H"
 #include "ATOOLS/Org/Run_Parameter.H"
 
+#include <utility> //std::ignore
 #include <cstdio>
 #include <cstring>
 #include <mutex>
@@ -374,7 +375,7 @@ Atlas_RNG::Atlas_RNG(CLHEP::HepRandomEngine* engine) :
 {
 }
 
-Atlas_RNG::~Atlas_RNG() { std::remove(m_filename.c_str()); }
+Atlas_RNG::~Atlas_RNG() { std::ignore = std::remove(m_filename.c_str()); }
 
 double Atlas_RNG::Get(){
 
