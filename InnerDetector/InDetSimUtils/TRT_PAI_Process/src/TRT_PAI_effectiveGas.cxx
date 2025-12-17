@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TRT_PAI_Process.h"
@@ -48,7 +48,10 @@ TRT_PAI_effectiveGas::TRT_PAI_effectiveGas(TRT_PAI_gasMixture * gm,
     Aeff += w * pe->getAtomicA();
     Zeff += w * pe->getAtomicZ();
   }
-
+  if (wtot == 0.)[[unlikely]]{
+    ATH_MSG_ERROR("TRT_PAI_effectiveGas::TRT_PAI_effectiveGas: wtot is zero.");
+    return;
+  }
   Aeff /= wtot;
   Zeff /= wtot;
 
