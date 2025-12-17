@@ -16,7 +16,8 @@ formatList = ["PHYSVAL","PHYS","PHYSLITE",
               "STDM6","STDM7","STDM13","STDM16","STDM17",
               "SUSY20",
               "TRIG8","TRIG9","TRIG10",
-              "MUON1", "MUON5"
+              "MUON1", "MUON5",
+              "TCAL1"
 ]
 
 truthFormatList = ["TRUTH0", "TRUTH1", "TRUTH3"]
