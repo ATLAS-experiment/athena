@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MdtCalibT0/MTT0PatternRecognition.h"
@@ -42,7 +42,7 @@ namespace MuonCalib {
         // if there are still not enough bins for the background estimate we have a problem
         if (max - min < m_settings->MinBackgroundBins()) {
             MsgStream log(Athena::getMessageSvc(), "MTT0PattternRecognition");
-            log << MSG::WARNING << "estimate_background() - Rising edge is to glose to lower histogram range!" << endmsg;
+            log << MSG::WARNING << "estimate_background() - Rising edge is to close to lower histogram range!" << endmsg;
             m_error = true;
             return false;
         }
@@ -65,7 +65,14 @@ namespace MuonCalib {
                 if (chi2 > 5 * referece_chi2) break;
             }
         }
-        m_background /= n_bins;
+        if (n_bins == 0){
+          //messaging should be revisited in this whole class
+          MsgStream log(Athena::getMessageSvc(), "MTT0PattternRecognition");
+          log << MSG::WARNING << "n_bins is zero" << endmsg;
+          m_background =0.;       
+        } else {
+          m_background /= n_bins;
+        }
         // store lower edge of fit range
         m_fit_min = hist->GetBinCenter(min);
         m_t0_est = 0.5 * (scale_min + hist->GetBinCenter(max));
