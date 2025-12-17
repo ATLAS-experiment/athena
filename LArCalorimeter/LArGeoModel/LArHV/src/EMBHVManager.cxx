@@ -159,8 +159,8 @@ int  EMBHVManager::EMBHVData::index  (const EMBHVElectrode& electrode)
 
 
 EMBHVManager::EMBHVManager()
-  : m_c (std::make_unique<Clockwork> (this))
 {
+  m_c = std::make_unique<Clockwork> (this);
 }
 
 EMBHVManager::~EMBHVManager()

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArHV/EMECHVModule.h"
@@ -53,7 +53,7 @@ EMECHVModule::EMECHVModule(const EMECHVManager *manager
 			   , unsigned int iEta
 			   , unsigned int iPhi
 			   , unsigned int iSector)
-  : m_c(new Clockwork(manager,this,iWheel,iSide,iEta,iPhi,iSector))
+  : m_c (std::make_unique<Clockwork> (manager,this,iWheel,iSide,iEta,iPhi,iSector))
 {
 }
 
@@ -83,10 +83,7 @@ const EMECHVElectrode& EMECHVModule::getElectrode(unsigned int iElectrode) const
   return *(m_c->electrodes[iElectrode]);
 }
 
-EMECHVModule::~EMECHVModule()
-{
-  delete m_c;
-}
+EMECHVModule::~EMECHVModule() = default;
 
 unsigned int EMECHVModule::getSideIndex() const
 {
