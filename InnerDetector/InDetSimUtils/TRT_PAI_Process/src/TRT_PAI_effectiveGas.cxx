@@ -9,6 +9,7 @@
 #include "TRT_PAI_element.h"
 #include "TRT_PAI_utils.h"
 #include "TRT_PAI_physicsConstants.h"
+#include "CxxUtils/trapping_fp.h"
 
 #include <vector>
 #include <iostream>
@@ -30,6 +31,9 @@ TRT_PAI_effectiveGas::TRT_PAI_effectiveGas(TRT_PAI_gasMixture * gm,
     m_lnEmax(std::log(Emax)),
     m_eps(eps)
 {
+  // Tell clang to optimize assuming that FP may trap.
+  CXXUTILS_TRAPPING_FP;
+
   using namespace TRT_PAI_physicsConstants;
 
   TRT_PAI_element* pe;
