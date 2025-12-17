@@ -21,7 +21,7 @@ def HepMCtoXAODTruthCfg(flags):
     acc = ComponentAccumulator()
 
     # Only run for MC input
-    if flags.Input.isMC is False:
+    if flags.Input.isMC is False and flags.Overlay.DataOverlay is False:
         raise RuntimeError("Common MC truth building requested for non-MC input")
 
     # Local steering flag to identify EVNT input

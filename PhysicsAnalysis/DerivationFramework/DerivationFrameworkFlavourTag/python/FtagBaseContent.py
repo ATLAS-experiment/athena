@@ -210,8 +210,9 @@ def addCommonAugmentation(flags, cfg, helper, target = "AntiKt4EMPFlowJets"):
 
     helper.ExtraVariables += ['.'.join([target] + truth_labels)]
 
-    # add flow energy decorator
-    cfg.merge(
-        FlowEnergyDecoratorCfg(
+    if not flags.HeavyIon.isDerivation:
+        # add flow energy decorator
+        cfg.merge(
+            FlowEnergyDecoratorCfg(
+            )
         )
-    )

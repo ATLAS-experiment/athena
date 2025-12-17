@@ -28,7 +28,7 @@ def HION15SkimmingToolCfg(flags):
     isSmallSystem = False
     if (info.getBeam1Type() < 11) or (info.getBeam2Type() < 11):
         isSmallSystem = True
-    if not flags.Input.isMC:
+    if not flags.Input.isMC and not flags.Overlay.DataOverlay:
         print('project: ', flags.Input.ProjectName,', isSmallSystem: ', isSmallSystem)
         TriggerDict = ListTriggers.GetTriggers(flags.Input.ProjectName, isSmallSystem)
         for i, key in enumerate(TriggerDict):
@@ -87,7 +87,7 @@ def HION15Cfg(flags):
     AllVars += ListSlimming.HION15ExtraContainersTrigger()
     ExtraVars = ListSlimming.HION15BasicJetVars(JetColl)
     from DerivationFrameworkFlavourTag import FtagBaseContent
-    if flags.Input.isMC:
+    if flags.Input.isMC or flags.Overlay.DataOverlay:
         AllVars += ListSlimming.HION15AllVarTruthContent()
         if flags.HeavyIon.doHIBTagging:
             FtagBaseContent.add_truth_to_SlimmingHelper(HION15SlimmingHelper)
