@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "UserHooksUtils.h"
@@ -119,7 +119,7 @@ namespace Pythia8{
       }
       
       // normalise the boost vector to the CMS frame...
-      double norm = -1./eCMS;
+      double norm = (eCMS == 0.)? 0 : -1./eCMS;
       m_pxCMS *= norm;
       m_pyCMS *= norm;
       m_pzCMS *= norm;

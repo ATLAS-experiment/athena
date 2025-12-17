@@ -57,12 +57,12 @@ namespace Pythia8_UserHooks{
   
   template<>
   inline double UserSetting<double>::uncachedRetrieve(){
-    if(m_settingsPtr->isParm(m_paramName)){
-      return m_settingsPtr->parm(m_paramName);
+    auto result = m_param;
+    if(not m_settingsPtr->isParm(m_paramName)){
+      throw std::runtime_error("UserSetting " + m_paramName + " does not exist!");    
     }
-    
-    throw std::runtime_error("UserSetting " + m_paramName + " does not exist!");
-    return m_param;
+    result = m_settingsPtr->parm(m_paramName);
+    return result;
   }
   
   template<>
