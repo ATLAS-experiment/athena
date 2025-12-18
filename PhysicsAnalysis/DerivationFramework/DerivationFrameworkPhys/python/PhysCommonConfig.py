@@ -68,6 +68,7 @@ def PhysCommonAugmentationsCfg(flags,**kwargs):
     from DerivationFrameworkTau.TauCommonConfig import (AddMuonRemovalTauAODReRecoAlgCfg, AddTauIDDecorationCfg)
     from DerivationFrameworkTau.DiTauCommonConfig import (AddDiTauLowPtCfg, AddDiTauChargeDecoratorCfg, AddDiTauIDDecorationCfg)
     from DerivationFrameworkJetEtMiss.METCommonConfig import METCommonCfg 
+    from DerivationFrameworkJetEtMiss.METCommonConfig import HadRecoilMETCfg
     acc.merge(JetCommonCfg(flags))
     #We also need to build links between the newly created jet constituents (GlobalFE)
     #and electrons,photons,muons and taus
@@ -94,6 +95,7 @@ def PhysCommonAugmentationsCfg(flags,**kwargs):
             acc.merge(FlavorTaggingCfg(flags, "AntiKt4EMTopoJets"))
 
     acc.merge(METCommonCfg(flags))
+    acc.merge(HadRecoilMETCfg(flags))
 
     # Trigger matching and postprocessing
     if flags.Reco.EnableTrigger or flags.Trigger.triggerConfig == 'INFILE':
