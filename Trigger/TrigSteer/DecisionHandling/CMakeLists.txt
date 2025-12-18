@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( DecisionHandling )
@@ -39,4 +39,6 @@ atlas_install_data( share/*.ref)
 
 atlas_add_test( test_ComboHypoTool
     SOURCES test/test_ComboHypoTool.cxx
-    LINK_LIBRARIES AthenaKernel CxxUtils DecisionHandlingLib GaudiKernel SGTools StoreGateLib TestTools TrigCompositeUtilsLib xAODBase xAODEgamma xAODJet xAODMuon xAODTrigger )
+    LINK_LIBRARIES AthenaKernel CxxUtils DecisionHandlingLib GaudiKernel SGTools StoreGateLib TestTools TrigCompositeUtilsLib xAODBase xAODEgamma xAODJet xAODMuon xAODTrigger
+    LOG_SELECT_PATTERN "^Combo|^HLT_"
+    ENVIRONMENT "JOBOPTSEARCHPATH=${CMAKE_CURRENT_SOURCE_DIR}/share" )
