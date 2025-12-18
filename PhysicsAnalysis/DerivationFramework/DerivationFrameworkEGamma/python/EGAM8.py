@@ -348,7 +348,7 @@ def EGAM8KernelCfg(flags, name="EGAM8Kernel", **kwargs):
         thinningTools.append(EGAM8TruthThinningTool)
 
     # skimming
-    skimmingTool = acc.popToolsAndMerge(EGAM8SkimmingToolCfg(flags))
+    skimmingTool = acc.getPrimaryAndMerge(EGAM8SkimmingToolCfg(flags))
 
     # setup the kernel
     acc.addEventAlgo(
