@@ -485,9 +485,10 @@ bool TrigComboHypoTool::fillKineInfo(TrigComboHypoTool::KineInfo& kinematics, Co
       ATH_MSG_ERROR("link for IParticle not valid");
       return false;
     }
-    eta = (*pLink)->p4().Eta();
-    phi = (*pLink)->p4().Phi();
-    pt  = (*pLink)->p4().Pt();
+    auto p4 = (*pLink)->p4();
+    eta = p4.Eta();
+    phi = p4.Phi();
+    pt  = p4.Pt();
   }
   ATH_MSG_VERBOSE("      Filled kinematics with pt " << pt*invGeV << ", eta " << eta << ", phi " << phi);
   kinematics = std::make_tuple(eta,phi,pt);
