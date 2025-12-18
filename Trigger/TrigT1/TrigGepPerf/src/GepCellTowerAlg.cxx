@@ -81,6 +81,7 @@ StatusCode GepCellTowerAlg::execute(const EventContext& context) const {
       if (cell.isBadCell()) continue;
 
       int idx = customTowers->index(cell.eta,cell.phi);
+      if (idx < 0) continue;
       // Internally, this results in the cell et being added to the energy (i.e. e, not et) of a
       // 4-vector with the eta and phi set to the center point of the tower
       // Effectively accumulating the et of the tower's constituent cells
