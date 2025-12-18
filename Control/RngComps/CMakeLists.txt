@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( RngComps )
@@ -16,7 +16,7 @@ atlas_add_component( RngComps src/*.h src/*.cxx src/components/*.cxx
    AtlasCLHEP_RandomGenerators )
 
 # Test(s) in the package:
-set( RNGCOMPS_REFERENCE_TAG RngComps/RngCompsReference-01-00-03 ) 
+set( RNGCOMPS_REFERENCE_TAG RngComps/RngCompsReference-01-00-04 )
  
 atlas_add_test( AtRndmGen_test
    SOURCES test/AtRndmGen_test.cxx
