@@ -12,7 +12,7 @@
 #ifndef GLOBALSIM_COMMONTOB_H
 #define GLOBALSIM_COMMONTOB_H
 
-#include "ICommonTOB.h"
+#include "ICommonTOB.h" // const statics
 #include "xAODTrigger/eFexEMRoI.h"
 #include "AthenaKernel/CLASS_DEF.h"
 
@@ -20,14 +20,14 @@
 
 namespace GlobalSim::IOBitwise{
   /*! @copydoc ICommonTOB */
-  class CommonTOB : virtual public ICommonTOB {
+  class CommonTOB {
 
   public:
     /** 
      * @brief Constructor taking an eFexROITOB to initialise common bits
      * @param[in] eFexTOB The input eFexRoI TOB defining the common/eFex bits.
      *
-     * To be used to create, and initilise a CommonTOB from an existing eFexTOB
+     * To be used to create and initialise a CommonTOB from an existing eFexTOB
      */
     CommonTOB(const xAOD::eFexEMRoI& eFexTOB);
     /** 
@@ -36,7 +36,7 @@ namespace GlobalSim::IOBitwise{
      *
      * To be used to create and initilaise a CommonTOB from an existing CommonTOB
      */
-    CommonTOB(const GlobalSim::IOBitwise::ICommonTOB& CommonTOB);
+    CommonTOB(const GlobalSim::IOBitwise::CommonTOB& CommonTOB);
 
     /**
      * @brief Constructor taking raw bitsets to initialise common bits
@@ -46,21 +46,21 @@ namespace GlobalSim::IOBitwise{
      *
      * To be used to create and initialise a CommonTOB from individual 4-vector bitsets.
      */
-    CommonTOB(const std::bitset<CommonTOB::s_et_width>& et_bits,
-	      const std::bitset<CommonTOB::s_eta_width>& eta_bits,
-	      const std::bitset<CommonTOB::s_phi_width>& phi_bits);
+    CommonTOB(const std::bitset<ICommonTOB::s_et_width>& et_bits,
+	      const std::bitset<ICommonTOB::s_eta_width>& eta_bits,
+	      const std::bitset<ICommonTOB::s_phi_width>& phi_bits);
     
     //! @copydoc ICommonTOB::~ICommonTOB()
     virtual ~CommonTOB(){};
 
     //! @copydoc ICommonTOB::et_bits() 
-    virtual std::bitset<s_et_width> et_bits() const override;
+    virtual std::bitset<ICommonTOB::s_et_width> et_bits() const;
     //! @copydoc ICommonTOB::eta_bits()
-    virtual std::bitset<s_eta_width> eta_bits() const override;
+    virtual std::bitset<ICommonTOB::s_eta_width> eta_bits() const;
     //! @copydoc ICommonTOB::phi_bits()
-    virtual std::bitset<s_phi_width> phi_bits() const override; 
+    virtual std::bitset<ICommonTOB::s_phi_width> phi_bits() const; 
 
-    virtual std::string to_string() const override;
+    virtual std::string to_string() const;
   private:
     /// Property: eT bitset within the common TOB word
     std::bitset<ICommonTOB::s_et_width> m_et_bits;

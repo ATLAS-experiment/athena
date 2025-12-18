@@ -55,8 +55,6 @@ namespace GlobalSim::IOBitwise{
     virtual std::string to_string() const = 0;
   };
 
-  using ICommonTOBContainer = std::vector<std::shared_ptr<ICommonTOB>>;
-  
   /** @brief Output stream operator*/
 
 } //End of namespace 
@@ -65,6 +63,5 @@ std::ostream& operator << (std::ostream&,
 			   const GlobalSim::IOBitwise::ICommonTOB&);
 
 CLASS_DEF( GlobalSim::IOBitwise::ICommonTOB , 220265942 , 1 )
-CLASS_DEF( GlobalSim::IOBitwise::ICommonTOBContainer , 1229615490 , 1 )
 
 #endif //GLOBALSIM_ICOMMONTOB_H

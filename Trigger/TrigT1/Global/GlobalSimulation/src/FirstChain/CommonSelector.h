@@ -6,7 +6,7 @@
 #define GLOBALSIM_COMMONMULTSELECTOR_H
 
 #include "ICommonSelector.h"
-#include "../IO/ICommonTOB.h"  // bitset widths
+#include "../IO/CommonTOB.h"  // bitset widths
 
 #include <string>
 #include <climits>
@@ -18,7 +18,7 @@ namespace  GlobalSim {
    *
    */
 
-  using GlobalSim::IOBitwise::ICommonTOB;
+  using GlobalSim::IOBitwise::CommonTOB;
   
   class CommonSelector : public ICommonSelector {
   public:
@@ -36,7 +36,7 @@ namespace  GlobalSim {
 
     virtual ~CommonSelector() = default;
 
-    virtual bool select(const ICommonTOB&) const override;
+    virtual bool select(const CommonTOB&) const override;
 
     virtual std::string to_string() const override;
 
