@@ -32,17 +32,18 @@ def JETM3SkimmingToolCfg(flags):
     muofflinesel = '(count((Muons.pt > 20*GeV) && (Muons.DFCommonMuonPassPreselection)) >= 2)'
 
     # TrigDecisionTool not used in skimming via xAODStringSkimmingTool here but with dedicated TriggerSkimmingTool
-    # Explicitely set to "" here to be able to run over HL-LHC samples
-    JETM3OfflineSkimmingTool_ele = CompFactory.DerivationFramework.xAODStringSkimmingTool(name = "JETM3OfflineSkimmingTool_ele",
-                                                                                          expression = elofflinesel,
-                                                                                          TrigDecisionTool="")
-    JETM3OfflineSkimmingTool_mu = CompFactory.DerivationFramework.xAODStringSkimmingTool( name = "JETM3OfflineSkimmingTool_mu",
-                                                                                          expression = muofflinesel,
-                                                                                          TrigDecisionTool="")
-    
-    acc.addPublicTool(JETM3OfflineSkimmingTool_ele)
-    acc.addPublicTool(JETM3OfflineSkimmingTool_mu)
+    # Explicitly set to "" here to be able to run over HL-LHC samples
+    from DerivationFrameworkTools.DerivationFrameworkToolsConfig import (
+            xAODStringSkimmingToolCfg)
+    JETM3OfflineSkimmingTool_ele = acc.getPrimaryAndMerge(xAODStringSkimmingToolCfg(
+        flags, name = "JETM3OfflineSkimmingTool_ele",
+        expression = elofflinesel, TrigDecisionTool=""))
+    JETM3OfflineSkimmingTool_mu = acc.getPrimaryAndMerge(xAODStringSkimmingToolCfg(
+        flags, name = "JETM3OfflineSkimmingTool_mu",
+        expression = muofflinesel, TrigDecisionTool=""))
 
+    filterList = [JETM3OfflineSkimmingTool_ele, JETM3OfflineSkimmingTool_mu]
+    
     if not flags.Input.isMC:
 
         JETM3TriggerSkimmingTool_ele = CompFactory.DerivationFramework.TriggerSkimmingTool(name = "JETM3TriggerSkimmingTool_ele", TriggerListOR = electronTriggers)
@@ -55,13 +56,12 @@ def JETM3SkimmingToolCfg(flags):
         acc.addPublicTool(JETM3SkimmingTool_ele)
         acc.addPublicTool(JETM3SkimmingTool_mu)
 
-        # Combine electron and muon channel
-        JETM3SkimmingTool = CompFactory.DerivationFramework.FilterCombinationOR(name="JETM3SkimmingTool", FilterList=[JETM3SkimmingTool_ele, JETM3SkimmingTool_mu])
-        acc.addPublicTool(JETM3SkimmingTool, primary = True)
-    else:
+        filterList = [JETM3SkimmingTool_ele, JETM3SkimmingTool_mu]
 
-        JETM3SkimmingTool = CompFactory.DerivationFramework.FilterCombinationOR(name="JETM3SkimmingTool", FilterList=[JETM3OfflineSkimmingTool_ele, JETM3OfflineSkimmingTool_mu])
-        acc.addPublicTool(JETM3SkimmingTool, primary = True)
+    # Combine electron and muon channel
+    JETM3SkimmingTool = CompFactory.DerivationFramework.FilterCombinationOR(
+        name="JETM3SkimmingTool", FilterList=filterList)
+    acc.addPublicTool(JETM3SkimmingTool, primary = True)
 
     return(acc)
 
