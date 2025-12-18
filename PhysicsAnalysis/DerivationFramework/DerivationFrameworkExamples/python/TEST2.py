@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 # TEST2.py - derivation framework example demonstrating skimming via means of string 
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
@@ -8,14 +8,11 @@ from AthenaCommon.CFElements import seqAND
 
 def TEST2SkimmingToolCfg(flags):
     """Configure the example skimming tool"""
-    from TrigDecisionTool.TrigDecisionToolConfig import TrigDecisionToolCfg
-    acc = ComponentAccumulator()
-    tdt = acc.getPrimaryAndMerge(TrigDecisionToolCfg(flags))
-    acc.addPublicTool(CompFactory.DerivationFramework.xAODStringSkimmingTool(name       = "TEST2StringSkimmingTool",
-                                                                             expression = "count(Muons.pt > (1 * GeV)) >= 1",
-                                                                             TrigDecisionTool=tdt), 
-                      primary = True)
-    return(acc)                          
+    from DerivationFrameworkTools.DerivationFrameworkToolsConfig import (
+        xAODStringSkimmingToolCfg)
+    return xAODStringSkimmingToolCfg(
+        flags, name = "TEST2StringSkimmingTool",
+        expression = "count(Muons.pt > (1 * GeV)) >= 1")
 
 def TEST2KernelCfg(flags, name='TEST2Kernel', **kwargs):
     """Configure the derivation framework driving algorithm (kernel)"""
