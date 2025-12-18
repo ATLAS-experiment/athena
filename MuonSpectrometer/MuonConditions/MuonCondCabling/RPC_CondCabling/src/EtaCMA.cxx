@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "GaudiKernel/MsgStream.h"
@@ -58,6 +58,7 @@ bool EtaCMA::cable_CMA_channels(HalfType side) {
         for (int i = pivot_start_ch(); i <= pivot_stop_ch(); ++i) {
             int strip_number = (m_active_pivot_chs) ? 1 : pivot_start_st();
             RPClink::iterator found = m_pivot_RPCs.find(i);
+            if (found == m_pivot_RPCs.end()) continue;
             RPCchamber* rpc = (*found).second;
             int final_strip = rpc->eta_strips();
             if (i == pivot_stop_ch()) final_strip = pivot_stop_st();
@@ -90,6 +91,7 @@ bool EtaCMA::cable_CMA_channels(HalfType side) {
         for (int i = lowPt_start_ch(); i <= lowPt_stop_ch(); ++i) {
             int strip_number = (m_active_lowPt_chs) ? 1 : lowPt_start_st();
             RPClink::iterator found = m_lowPt_RPCs.find(i);
+            if (found == m_lowPt_RPCs.end()) continue;
             RPCchamber* rpc = (*found).second;
             int final_strip = rpc->eta_strips();
             if (i == lowPt_stop_ch()) final_strip = lowPt_stop_st();
@@ -122,6 +124,9 @@ bool EtaCMA::cable_CMA_channels(HalfType side) {
         for (int i = highPt_start_ch(); i <= highPt_stop_ch(); ++i) {
             int strip_number = (m_active_highPt_chs) ? 1 : highPt_start_st();
             RPClink::iterator found = m_highPt_RPCs.find(i);
+            if (found == m_highPt_RPCs.end()){
+              continue;
+            }
             RPCchamber* rpc = (*found).second;
             int final_strip = rpc->eta_strips();
             if (i == highPt_stop_ch()) final_strip = highPt_stop_st();
@@ -526,6 +531,7 @@ bool EtaCMA::doInversion(SectorLogicSetup& setup) {
 
 bool EtaCMA::end_at_RPC_Z_boundary(void) const {
     RPClink::const_iterator found = m_pivot_RPCs.find(pivot_stop_ch());
+    if (found == m_pivot_RPCs.end()) return false;
     return (*found).second->eta_strips() == pivot_stop_st();
 }
 
