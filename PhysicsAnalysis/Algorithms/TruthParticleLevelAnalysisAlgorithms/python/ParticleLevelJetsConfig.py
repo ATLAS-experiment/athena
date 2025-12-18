@@ -33,23 +33,27 @@ class ParticleLevelJetsBlock(ConfigBlock):
         alg = config.createAlgorithm( 'CP::AsgEnergyDecoratorAlg', 'ParticleLevelEnergyDecorator' )
         alg.particles = self.containerName
 
+        # For some decorations the type is not known at initialization
+        # time, in which case we need to pass it in manually. We could
+        # also pass in the type for all decorations, but is not
+        # necessary and introduces the possibility of a type mismatch.
         outputVars = [
-            ['pt', 'pt'],
-            ['eta', 'eta'],
-            ['phi', 'phi'],
-            ['e_%SYS%', 'e'],
-            ['GhostBHadronsFinalCount', 'nGhosts_bHadron'],
-            ['GhostCHadronsFinalCount', 'nGhosts_cHadron'],
+            ['pt', 'pt', None],
+            ['eta', 'eta', None],
+            ['phi', 'phi', None],
+            ['e_%SYS%', 'e', None],
+            ['GhostBHadronsFinalCount', 'nGhosts_bHadron', 'int'],
+            ['GhostCHadronsFinalCount', 'nGhosts_cHadron', 'int'],
         ]
         
         if self.outputTruthLabelIDs:
             outputVars += [
-                ['HadronConeExclTruthLabelID', 'HadronConeExclTruthLabelID'],
-                ['PartonTruthLabelID', 'PartonTruthLabelID'],
+                ['HadronConeExclTruthLabelID', 'HadronConeExclTruthLabelID', None],
+                ['PartonTruthLabelID', 'PartonTruthLabelID', None],
             ]
 
-        for decoration, branch in outputVars:
-            config.addOutputVar (self.containerName, decoration, branch, noSys=True)
+        for decoration, branch, auxType in outputVars:
+            config.addOutputVar (self.containerName, decoration, branch, noSys=True, auxType=auxType)
 
         if "AntiKt4" in self.containerName:
             config.addOutputVar('EventInfo', 'num_truth_bjets_nocuts', 'num_truth_bjets_nocuts', noSys=True)

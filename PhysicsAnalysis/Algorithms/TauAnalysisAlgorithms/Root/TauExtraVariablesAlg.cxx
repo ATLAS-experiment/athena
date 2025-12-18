@@ -21,6 +21,9 @@ namespace CP {
     ANA_CHECK(m_tausKey.initialize());
     ANA_CHECK(m_nTracksChargedKey.initialize());
 
+    // register type for output
+    SG::ConstAccessor<int> (m_nTracksChargedKey.key().substr (m_nTracksChargedKey.key().find_last_of(".") + 1));
+
     return StatusCode::SUCCESS;
   }
 

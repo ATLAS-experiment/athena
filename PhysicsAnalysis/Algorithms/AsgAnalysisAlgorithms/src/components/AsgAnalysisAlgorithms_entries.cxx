@@ -24,7 +24,6 @@
 #include <AsgAnalysisAlgorithms/AsgUnionPreselectionAlg.h>
 #include <AsgAnalysisAlgorithms/AsgUnionSelectionAlg.h>
 #include <AsgAnalysisAlgorithms/AsgViewFromSelectionAlg.h>
-#include <AsgAnalysisAlgorithms/AsgxAODMetNTupleMakerAlg.h>
 #include <AsgAnalysisAlgorithms/AsgxAODNTupleMakerAlg.h>
 #include <AsgAnalysisAlgorithms/BootstrapGeneratorAlg.h>
 #include <AsgAnalysisAlgorithms/CopyNominalSelectionAlg.h>
@@ -77,7 +76,6 @@ DECLARE_COMPONENT (CP::AsgShallowCopyAlg)
 DECLARE_COMPONENT (CP::AsgUnionPreselectionAlg)
 DECLARE_COMPONENT (CP::AsgUnionSelectionAlg)
 DECLARE_COMPONENT (CP::AsgViewFromSelectionAlg)
-DECLARE_COMPONENT (CP::AsgxAODMetNTupleMakerAlg)
 DECLARE_COMPONENT (CP::AsgxAODNTupleMakerAlg)
 DECLARE_COMPONENT (CP::BootstrapGeneratorAlg)
 DECLARE_COMPONENT (CP::CopyNominalSelectionAlg)

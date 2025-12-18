@@ -56,13 +56,13 @@ class ParticleLevelTausBlock(ConfigBlock):
         # output branches to be scheduled only once
         if ParticleLevelTausBlock.get_instance_count() == 1 or 'pt' not in config.getOutputVars(self.containerName):
             outputVars = [
-                ['pt', 'pt'],
-                ['eta', 'eta'],
-                ['phi', 'phi'],
-                ['e', 'e'],
-                ['charge', 'charge'],
+                ['pt', 'pt', 'float'],
+                ['eta', 'eta', 'float'],
+                ['phi', 'phi', 'float'],
+                ['e', 'e', 'float'],
+                ['charge', 'charge', 'float'],
             ]
             if self.saveUID:
-                outputVars += [['uid', 'uid']]
-            for decoration, branch in outputVars:
-                config.addOutputVar (self.containerName, decoration, branch, noSys=True)
+                outputVars += [['uid', 'uid', 'int']]
+            for decoration, branch, auxType in outputVars:
+                config.addOutputVar (self.containerName, decoration, branch, noSys=True, auxType=auxType)

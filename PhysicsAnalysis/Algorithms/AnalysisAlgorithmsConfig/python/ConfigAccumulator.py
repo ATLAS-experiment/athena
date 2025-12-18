@@ -66,12 +66,13 @@ class OutputConfig :
     """all the data for a given variables in the output that has been registered"""
 
     def __init__ (self, origContainerName, variableName,
-                  *, noSys, enabled) :
+                  *, noSys, enabled, auxType) :
         self.origContainerName = origContainerName
         self.outputContainerName = None
         self.variableName = variableName
         self.noSys = noSys
         self.enabled = enabled
+        self.auxType = auxType
 
     def __repr__ (self):
         return f'OutputConfig("{self.outputContainerName}.{self.variableName}" [enabled={self.enabled}])'
@@ -767,7 +768,7 @@ class ConfigAccumulator :
 
 
     def addOutputVar (self, containerName, variableName, outputName,
-                      *, noSys=False, enabled=True) :
+                      *, noSys=False, enabled=True, auxType=None) :
         """add an output variable for the given container to the output
         """
 
@@ -776,7 +777,7 @@ class ConfigAccumulator :
         baseConfig = self._containerConfig[containerName].outputs
         if outputName in baseConfig :
             raise KeyError ("duplicate output variable name: " + outputName)
-        config = OutputConfig (containerName, variableName, noSys=noSys, enabled=enabled)
+        config = OutputConfig (containerName, variableName, noSys=noSys, enabled=enabled, auxType=auxType)
         baseConfig[outputName] = config
 
 

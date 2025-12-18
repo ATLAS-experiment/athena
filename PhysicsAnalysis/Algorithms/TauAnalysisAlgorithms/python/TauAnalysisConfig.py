@@ -112,8 +112,8 @@ class TauCalibrationConfig (ConfigBlock):
         config.addOutputVar (self.containerName, 'phi', 'phi', noSys=True)
         config.addOutputVar (self.containerName, 'e_%SYS%', 'e')
         config.addOutputVar (self.containerName, 'charge', 'charge', noSys=True)
-        config.addOutputVar (self.containerName, 'NNDecayMode', 'NNDecayMode', noSys=True)
-        config.addOutputVar (self.containerName, 'passTATTauMuonOLR', 'passTATTauMuonOLR', noSys=True)
+        config.addOutputVar (self.containerName, 'NNDecayMode', 'NNDecayMode', noSys=True, auxType='int')
+        config.addOutputVar (self.containerName, 'passTATTauMuonOLR', 'passTATTauMuonOLR', noSys=True, auxType='char')
         config.addOutputVar (self.containerName, 'TESCompatibility', 'TESCompatibility')  
         if self.decorateExtraVariables:
             config.addOutputVar (self.containerName, 'nTracksCharged', 'nTracksCharged', noSys=True)
