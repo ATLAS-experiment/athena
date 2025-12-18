@@ -187,7 +187,15 @@ def PHYSCoreCfg(flags, name_tag='PHYS', StreamName='StreamDAOD_PHYS', TriggerLis
 
     ## AFP content - SiT and ToF hits to then be used with AfpAnalysisToolbox reconstruction
     PHYSSlimmingHelper.AllVariables += [ 'AFPSiHitContainer', 'AFPToFHitContainer' ]
-    
+
+    ## Hadronic Recoil content
+    PHYSSlimmingHelper.AppendToDictionary.update({'MET_Core_AntiKt4EMPFlowHR':'xAOD::MissingETContainer', 'MET_Core_AntiKt4EMPFlowHRAux':'xAOD::MissingETAuxContainer',
+                                                   'METAssoc_AntiKt4EMPFlowHR':'xAOD::MissingETAssociationMap', 'METAssoc_AntiKt4EMPFlowHRAux':'xAOD::MissingETAuxAssociationMap'})
+
+    PHYSSlimmingHelper.AllVariables += ['METAssoc_AntiKt4EMPFlowHR']
+
+    PHYSSlimmingHelper.ExtraVariables += ['Muons.UEcorr_Pt','Electrons.UEcorr_Pt','MET_Core_AntiKt4EMPFlowHR.name.mpx.mpy.sumet.source']
+
     # Trigger content
     PHYSSlimmingHelper.IncludeTriggerNavigation = False
     PHYSSlimmingHelper.IncludeJetTriggerContent = False
