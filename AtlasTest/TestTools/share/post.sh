@@ -54,10 +54,6 @@ fi
 
 # consider these name pairs identical in the diff
 read -d '' II <<EOF
-s/^StoreGateSvc_Impl VERBOSE/StoreGateSvc      VERBOSE/
-s/^StoreGateSvc_Impl   DEBUG/StoreGateSvc        DEBUG/
-s/StoreGateSvc_Impl/StoreGateSvc/
-s/SGImplSvc/StoreGateSvc/
 s/SG::DataProxyHolder::sgkey_t/sgkey_t/
 s/Conversion service:/Conversion service /      # printout change (Gaudi!1598)
 s!(ERROR|INFO|WARNING|FATAL) [^ ]*/!\\\\1 ../!
