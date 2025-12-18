@@ -381,8 +381,14 @@ unsigned int PoolSvc::getInputContext(const std::string& label, unsigned int max
    return(id);
 }
 //__________________________________________________________________________
-const std::map<std::string, unsigned int>& PoolSvc::getInputContextMap() const {
+std::map<std::string, unsigned int> PoolSvc::getInputContextMap() const {
+   std::lock_guard<CallMutex> lock(m_pool_mut);
    return(m_inputContextLabel);
+}
+//__________________________________________________________________________
+unsigned int PoolSvc::getInputContextMapSize() const {
+   std::lock_guard<CallMutex> lock(m_pool_mut);
+   return(m_inputContextLabel.size());
 }
 //__________________________________________________________________________
 const coral::Context* PoolSvc::context() const {
