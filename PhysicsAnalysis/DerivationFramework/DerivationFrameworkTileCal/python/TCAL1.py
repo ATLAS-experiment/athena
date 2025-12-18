@@ -134,10 +134,6 @@ def TCAL1StringSkimmingToolCfg(flags, **kwargs):
 
     prefix = kwargs.pop('Prefix', 'TCAL1_')
 
-    from TrigDecisionTool.TrigDecisionToolConfig import TrigDecisionToolCfg
-    acc = ComponentAccumulator()
-    tdt = acc.getPrimaryAndMerge(TrigDecisionToolCfg(flags))
-
     selectionExpression = ""
     if flags.Beam.Type is BeamType.Collisions:
         selectionExpression = f'(Muons.ptvarcone30_Nonprompt_All_MaxWeightTTVA_pt500 + 0.4 * Muons.neflowisol20) / Muons.pt < 0.18 && Muons.{prefix}SelectedMuon'
@@ -148,12 +144,10 @@ def TCAL1StringSkimmingToolCfg(flags, **kwargs):
 
     kwargs.setdefault('name', 'TCAL1StringSkimmingTool')
     kwargs.setdefault('expression', skimmingExpression)
-    kwargs.setdefault('TrigDecisionTool', tdt)
 
-    xAODStringSkimmingTool = CompFactory.DerivationFramework.xAODStringSkimmingTool
-    acc.addPublicTool(xAODStringSkimmingTool(**kwargs), primary = True)
-
-    return acc
+    from DerivationFrameworkTools.DerivationFrameworkToolsConfig import (
+        xAODStringSkimmingToolCfg)
+    return xAODStringSkimmingToolCfg(flags, **kwargs)
 
 
 def TCAL1MuonTPThinningToolCfg(flags, streamName, **kwargs):
