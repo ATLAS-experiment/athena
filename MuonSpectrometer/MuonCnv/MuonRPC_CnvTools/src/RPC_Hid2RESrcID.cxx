@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "RPC_Hid2RESrcID.h"
@@ -65,7 +65,11 @@ uint32_t RPC_Hid2RESrcID::getRodID(const int& side, const int& slogic, const int
     // this method returns a RESrcID for the ROD, for a given RPC pad ID
     const RpcCablingCondData::RDOmap& pad_map = readCdo->give_RDOs();
     int key = side * 10000 + slogic * 100 + padId;
-    RDOindex index = (*pad_map.find(key)).second;
+    auto pPair = pad_map.find(key);
+    if (pPair == pad_map.end()) {
+      return 0xffffffff;
+    }
+    RDOindex index = pPair->second;
     uint8_t rodIndex = (uint8_t)index.RODid();
 
     eformat::SubDetector detid = (side == 1) ? eformat::MUON_RPC_BARREL_A_SIDE : eformat::MUON_RPC_BARREL_C_SIDE;

@@ -529,7 +529,7 @@ int main (int argc, char **argv)
 
   if ((err = test_nsw_common_decoder_init ()) != ERR_NOERR)
     return err;
-
+  //coverity[TAINTED_SCALAR]
   if ((err = test_nsw_common_decoder_loop (params, statistics)) != ERR_NOERR)
     return err;
 
