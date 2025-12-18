@@ -178,23 +178,13 @@ def BPHY12Cfg(flags):
                        MassMax               = 10000.,
                        Chi2Max               = 1000.
                        )
-
-    
-    BPHY12_SelectBmumuKstEvent = CompFactory.DerivationFramework.xAODStringSkimmingTool(
-                       name = "BPHY12_SelectBmumuKstEvent",
-                       expression = "(count(BPHY12_BdKstarKpiMuMu_Candidates.passed_Bd > 0) + count(BPHY12_BdKstarKpiMuMu_Candidates.passed_Bdbar > 0)) > 0")
-          
-    extraTools += [BPHY12_SelectBmumuKstEvent]
     
     if skimTruth or not isSimulation: #Only Skim Data
-        filterlist = [BPHY12_SelectBmumuKstEvent]
-        for t in  filterlist : acc.addPublicTool(t)
-        #====================================================================
-        # Make event selection based on an OR of the input skimming tools (though it seems we only have one here!)
-        #====================================================================
-        BPHY12SkimmingOR = CompFactory.DerivationFramework.FilterCombinationOR(
-            name       = "BPHY12SkimmingOR",
-            FilterList = filterlist) #OR of all your different filters
+        from DerivationFrameworkTools.DerivationFrameworkToolsConfig import (
+            xAODStringSkimmingToolCfg)
+        BPHY12_SelectBmumuKstEvent = acc.getPrimaryAndMerge(xAODStringSkimmingToolCfg(
+            flags, name = "BPHY12_SelectBmumuKstEvent",
+            expression = "(count(BPHY12_BdKstarKpiMuMu_Candidates.passed_Bd > 0) + count(BPHY12_BdKstarKpiMuMu_Candidates.passed_Bdbar > 0)) > 0"))
 
     BPHY12Thin_vtxTrk = CompFactory.DerivationFramework.Thin_vtxTrk(
             name                       = "BPHY12Thin_vtxTrk",
@@ -227,7 +217,7 @@ def BPHY12Cfg(flags):
     augTools = [BPHY12_SelectAndWrite_DiMuon, BPHY12_Select_DiMuons,
                 BPHY12_SelectAndWrite_BdKstarKpiMuMu, BPHY12_Select_BdKstarKpiMuMu, BPHY12_Select_BdKstarKpiMuMu_anti,
                 BPHY12_ReVertex_Kstar, BPHY12_Select_KstarKpi, BPHY12_Select_KstarKpi_anti]
-    skimTools = [BPHY12SkimmingOR] if skimTruth or not isSimulation else []
+    skimTools = [BPHY12_SelectBmumuKstEvent] if skimTruth or not isSimulation else []
 
 
     acc.addEventAlgo(CompFactory.DerivationFramework.DerivationKernel(

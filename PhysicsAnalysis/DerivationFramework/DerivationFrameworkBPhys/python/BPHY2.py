@@ -152,17 +152,21 @@ def BPHY2Cfg(flags):
                                                                          MuonKey                 = "Muons",
                                                                          StreamName = streamName,
                                                                          InDetTrackParticlesKey  = "InDetTrackParticles")
+
     if not isSimulation: #Only Skim Data
-       BPHY2_SelectBsJpsiKKEvent = CompFactory.DerivationFramework.xAODStringSkimmingTool(
-       name = "BPHY2_SelectBsJpsiKKEvent",
-       expression = "count(BPHY2BsJpsiKKCandidates.passed_Bs > 0) > 0")
+        from DerivationFrameworkTools.DerivationFrameworkToolsConfig import (
+            xAODStringSkimmingToolCfg)
+        BPHY2_SelectBsJpsiKKEvent = acc.getPrimaryAndMerge(xAODStringSkimmingToolCfg(
+            flags, name = "BPHY2_SelectBsJpsiKKEvent",
+            expression = "count(BPHY2BsJpsiKKCandidates.passed_Bs > 0) > 0"))
  
-       #====================================================================
-       # Make event selection based on an OR of the input skimming tools
-       #====================================================================
-       BPHY2SkimmingOR = CompFactory.DerivationFramework.FilterCombinationOR("BPHY2SkimmingOR",
-                                                                    FilterList = [BPHY2_SelectBsJpsiKKEvent ])
-       acc.addPublicTool(BPHY2SkimmingOR)
+        #====================================================================
+        # Make event selection based on an OR of the input skimming tools
+        #====================================================================
+        BPHY2SkimmingOR = CompFactory.DerivationFramework.FilterCombinationOR(
+            "BPHY2SkimmingOR",
+            FilterList = [BPHY2_SelectBsJpsiKKEvent ])
+        acc.addPublicTool(BPHY2SkimmingOR)
 
 
     thiningCollection = [BPHY2_thinningTool_Tracks, BPHY2_thinningTool_TracksPsi, BPHY2_thinningTool_PV, BPHY2MuonTPThinningTool]

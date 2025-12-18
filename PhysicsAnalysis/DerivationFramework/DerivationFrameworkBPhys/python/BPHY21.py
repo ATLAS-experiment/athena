@@ -97,16 +97,20 @@ def BPHY21Cfg(flags):
         AugOriginalCountsCfg(flags, name = "BPHY21_AugOriginalCounts"))
 
     if not isSimulation: #Only Skim Data
-        BPHY21_TriggerSkim = CompFactory.DerivationFramework.TriggerSkimmingTool(name = "BPHY21_TriggerSkim",
-                                                        TriggerListOR = BPHY21_triggerList)
-        BPHY21_SelectJpsiEvent = CompFactory.DerivationFramework.xAODStringSkimmingTool(
-          name = "BPHY21_SelectJpsiEvent",
-          expression = "count(BPHY21_JpsiCandidates.passed_Jpsi) > 0")
-
-        BPHY21_SkimmingOR = CompFactory.DerivationFramework.FilterCombinationOR("BPHY21_SkimmingOR",
-                 FilterList = [ BPHY21_TriggerSkim, BPHY21_SelectJpsiEvent] )
-        acc.addPublicTool(BPHY21_SelectJpsiEvent)
+        BPHY21_TriggerSkim = CompFactory.DerivationFramework.TriggerSkimmingTool(
+            name = "BPHY21_TriggerSkim",
+            TriggerListOR = BPHY21_triggerList)
         acc.addPublicTool(BPHY21_TriggerSkim)
+
+        from DerivationFrameworkTools.DerivationFrameworkToolsConfig import (
+            xAODStringSkimmingToolCfg)
+        BPHY21_SelectJpsiEvent = acc.getPrimaryAndMerge(xAODStringSkimmingToolCfg(
+            flags, name = "BPHY21_SelectJpsiEvent",
+            expression = "count(BPHY21_JpsiCandidates.passed_Jpsi) > 0"))
+
+        BPHY21_SkimmingOR = CompFactory.DerivationFramework.FilterCombinationOR(
+            "BPHY21_SkimmingOR",
+            FilterList = [ BPHY21_TriggerSkim, BPHY21_SelectJpsiEvent] )
         acc.addPublicTool(BPHY21_SkimmingOR)
 
     augTools = [BPHY21_JpsiSelectAndWrite, BPHY21_Select_Jpsi2mumu,
