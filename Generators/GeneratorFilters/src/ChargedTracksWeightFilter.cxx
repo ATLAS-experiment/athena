@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "GeneratorFilters/ChargedTracksWeightFilter.h"
@@ -182,7 +182,7 @@ double ChargedTracksWeightFilter::get_nch_weight(int nch) const {
 
 
 void ChargedTracksWeightFilter::weight_event(double weight) {
-
+  if (weight == 0.) return;
   for (auto event : *(events())){
     if(!event) continue;
 
