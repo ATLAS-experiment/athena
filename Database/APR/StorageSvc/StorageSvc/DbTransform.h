@@ -9,7 +9,7 @@
 #include <string>
 
 // Framework includes
-#include "StorageSvc/DbStatus.h"
+#include "GaudiKernel/StatusCode.h"
 
 class Guid;
 
@@ -31,18 +31,18 @@ namespace pool  {
     DbTransform()   {}
   public:
     /// Get the main shape matching the class GUID
-    static DbStatus getShape    (const Guid&        shape_Guid,
+    static StatusCode getShape    (const Guid&        shape_Guid,
                                  const DbTypeInfo*& shape);
     /// Get the shape matching the class GUID and the exact type shape given as string rep
     static const DbTypeInfo* getShape(const Guid& shape_Guid, const std::string& rep);
     /// Access entry in shape registry
-    static DbStatus regShape    (const DbTypeInfo*  shape);
+    static StatusCode regShape    (const DbTypeInfo*  shape);
 
    /// keep shape until the end
     static void ownShape(const DbTypeInfo*  shape);
     
    /// Access entry in shape registry
-    static DbStatus removeShape (const DbTypeInfo*  shape);
+    static StatusCode removeShape (const DbTypeInfo*  shape);
   };
 }      // End namespace pool
 #endif // POOL_DBTRANSFORM_H

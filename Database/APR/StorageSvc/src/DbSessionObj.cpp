@@ -36,15 +36,15 @@ DbSessionObj::~DbSessionObj()  {
 }
 
 // Open session
-DbStatus DbSessionObj::open()   {
+StatusCode DbSessionObj::open()   {
   ATH_MSG_INFO( "    Open     DbSession" );
-  return Success;
+  return StatusCode::SUCCESS;
 }
 
 // close session
-DbStatus DbSessionObj::close()   {
+StatusCode DbSessionObj::close()   {
   ATH_MSG_INFO( "    Closed   DbSession" );
-  return Success;
+  return StatusCode::SUCCESS;
 }
 
 // Access different implementations

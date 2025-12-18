@@ -1,8 +1,7 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-// $Id: DbDomain.h 726071 2016-02-25 09:23:05Z krasznaa $
 //====================================================================
 //  DbDomain and related class definitions
 //--------------------------------------------------------------------
@@ -21,6 +20,7 @@
 #include <vector>
 
 class Token;
+class StatusCode;
 
 /*
  *  POOL namespace declaration
@@ -97,13 +97,13 @@ namespace pool    {
       * @param  technology    [IN]  Technology identifier of this domain.
       * @param  mod           [IN]  Access mode: READ, UPDATE, CREATE etc.
       *
-      * @return DbStatus code indicating success or failure.
+      * @return StatusCode code indicating success or failure.
       */
-    DbStatus open(DbSession&  sesH, 
+    StatusCode open(DbSession&  sesH, 
                   const DbType&     technology,
                   DbAccessMode      mod=pool::READ);
     /// Close domain
-    DbStatus close();
+    StatusCode close();
     /// Access to access mode
     DbAccessMode openMode() const;
     /// Access to session handle
@@ -114,13 +114,13 @@ namespace pool    {
     const DbDatabaseObj* find(const std::string& db_name) const;
           DbDatabaseObj* find(const std::string& db_name);
     /// Add domain to session
-    DbStatus add(const std::string& nam, DbDatabaseObj* db);
+    StatusCode add(const std::string& nam, DbDatabaseObj* db);
     /// Find domain in session
-    DbStatus remove(DbDatabaseObj* db);
+    StatusCode remove(DbDatabaseObj* db);
     /// Increase the age of all open databases
-    DbStatus ageOpenDbs();
+    StatusCode ageOpenDbs();
     /// Check if databases are present, which aged a lot and need to be closed
-    DbStatus closeAgedDbs();
+    StatusCode closeAgedDbs();
     /// Set the maximal allowed age limit for files in this domain
     void setAgeLimit(int value);
     /// Access the maximal age limit
@@ -132,16 +132,16 @@ namespace pool    {
     /// Set domain specific options
     /** @param refOpt   [IN]  Reference to option object
       *
-      * @return DbStatus code indicating success or failure.  
+      * @return StatusCode code indicating success or failure.  
       */
-    DbStatus setOption(const DbOption& refOpt);
+    StatusCode setOption(const DbOption& refOpt);
 
     /// Access domain specific options
     /** @param refOpt   [IN]  Reference to option object
       *
-      * @return DbStatus code indicating success or failure.  
+      * @return StatusCode code indicating success or failure.  
       */
-    DbStatus getOption(DbOption& refOpt) const;
+    StatusCode getOption(DbOption& refOpt) const;
 
     /// Allow access to the Database implementation
     IOODatabase* db();

@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( StorageSvc )
@@ -12,8 +12,8 @@ atlas_add_library( StorageSvc src/*.cpp
    PUBLIC_HEADERS StorageSvc
    INCLUDE_DIRS ${UUID_INCLUDE_DIRS}
    PRIVATE_INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
-   LINK_LIBRARIES ${UUID_LIBRARIES} CxxUtils DataModelRoot
-   PersistentDataModel
+   LINK_LIBRARIES ${UUID_LIBRARIES} CxxUtils DataModelRoot GaudiKernel
+   PersistentDataModel AthenaKernel
    PRIVATE_LINK_LIBRARIES ${ROOT_LIBRARIES} AthContainers POOLCore )
 
 atlas_add_dictionary( StorageSvcDict

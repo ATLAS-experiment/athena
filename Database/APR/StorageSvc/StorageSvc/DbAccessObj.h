@@ -1,8 +1,7 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-// $Id: DbAccessObj.h 726071 2016-02-25 09:23:05Z krasznaa $
 //====================================================================
 //  DbAccessObj Base class definitions
 //--------------------------------------------------------------------
@@ -17,6 +16,7 @@
 #include "StorageSvc/pool.h"
 #include "StorageSvc/DbType.h"
 #include "StorageSvc/IOODatabase.h"
+#include "GaudiKernel/StatusCode.h"
 
 // STL include files
 #include <map>
@@ -120,13 +120,9 @@ namespace pool    {
       return m_keys.size();
     }
     /// Object cleanup: remove all entries
-    DbStatus clearEntries()   {
-      Keys k = m_keys;
-      for(iterator j = k.begin(); j != k.end(); ++j )  {
-        (*j).second->release();
-      }
+    void clearEntries()   {
+      for( auto k : m_keys ) k.second->release();
       m_keys.clear();
-      return Success;
     }
     /// Find object by key (CONST)
     const TYPE* find(const KEY& key)  const   {
@@ -139,26 +135,26 @@ namespace pool    {
       return (m_keys.end() == i) ? 0 : (*i).second;
     }
     /// Add entry to container
-    DbStatus add(const KEY& key, TYPE* val)   {
+    StatusCode add(const KEY& key, TYPE* val)   {
       iterator i = m_keys.find(key);
       if ( m_keys.end() == i )    {
         m_keys.insert(std::make_pair(key, val));
         val->addRef();
-        return Success;
+        return StatusCode::SUCCESS;
       }
-      return Error;
+      return StatusCode::FAILURE;
     }
     /// Remove entry from container
-    DbStatus remove(const TYPE* val)    {
+    StatusCode remove(const TYPE* val)    {
       for (iterator j = m_keys.begin(); j != m_keys.end(); ++j )    {
         if ( (*j).second == val ) {
           TYPE* p = (*j).second;
           m_keys.erase(j);
           p->release();
-          return Success;
+          return StatusCode::SUCCESS;
         }
       }
-      return Error;
+      return StatusCode::FAILURE;
     }
     iterator begin()              {      return m_keys.begin();   }
     const_iterator begin()  const {      return m_keys.begin();   }

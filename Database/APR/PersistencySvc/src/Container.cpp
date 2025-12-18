@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "Container.h"
@@ -65,17 +65,11 @@ pool::PersistencySvc::Container::attributeOfType( const std::string& attributeNa
   }
   DbDatabase  dbH( static_cast<DbDatabaseObj*>(dbc->handle()));
   DbContainer cntH(dbH.find(this->name()));
-  if ( !cntH.isValid() )  {
-    cntH.open(dbH, this->name(), 0, dbH.type(), pool::READ);
-  }
-  pool::DbStatus sc = cntH.getOption(containerOption);
-  if ( !sc.isSuccess() ) return false;
-  if ( containerOption.i_getValue( typeInfo, data ).isSuccess() ) {
-    return true;
-  }
-  else {
+  if( !cntH.isValid() and !cntH.open(dbH, this->name(), 0, dbH.type(), pool::READ).isSuccess() ) {
     return false;
   }
+  if( !cntH.getOption(containerOption).isSuccess() ) return false;
+  return containerOption.i_getValue( typeInfo, data ).isSuccess();
 }
 
 
@@ -86,22 +80,15 @@ pool::PersistencySvc::Container::setAttributeOfType( const std::string& attribut
                                                      const std::string& option )
 {
   pool::DbOption containerOption( attributeName, option );
-  pool::DbStatus sc = containerOption.i_setValue( typeInfo, const_cast<void*>( data ) );
-  if ( !sc.isSuccess() ) return false;
+  if( !containerOption.i_setValue(typeInfo, const_cast<void*>( data )).isSuccess() ) return false;
   DbConnection* dbc = dynamic_cast<DbConnection*>(m_fileDescriptor.dbc());
   if ( !dbc ) {
      return false;
   }
   DbDatabase  dbH( static_cast<DbDatabaseObj*>(dbc->handle()));
   DbContainer cntH(dbH.find(this->name()));
-  if ( !cntH.isValid() )  {
-    cntH.open(dbH, this->name(), 0, dbH.type(), pool::READ);
-  }
-  sc = cntH.setOption(containerOption);
-  if ( sc.isSuccess() ) {
-    return true;
-  }
-  else {
+  if( !cntH.isValid() and !cntH.open(dbH, this->name(), 0, dbH.type(), pool::READ).isSuccess() ) {
     return false;
   }
+  return cntH.setOption(containerOption).isSuccess();
 }

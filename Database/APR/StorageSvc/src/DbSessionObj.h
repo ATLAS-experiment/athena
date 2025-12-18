@@ -1,8 +1,7 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-// $Id: DbSessionObj.h 726071 2016-02-25 09:23:05Z krasznaa $
 //====================================================================
 //  DbSessionObj object definition
 //--------------------------------------------------------------------
@@ -56,9 +55,9 @@ namespace pool    {
     /// Allow access to the Database implementation
     IOODatabase* db(const DbType& typ) ;
     /// Open session
-    DbStatus open();
+    StatusCode open();
     /// Close Database session
-    DbStatus close();
+    StatusCode close();
   };
 }       // End namespace pool
 #endif  // POOL_DBSESSIONOBJ_H

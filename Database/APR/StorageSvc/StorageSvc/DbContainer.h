@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //====================================================================
@@ -19,6 +19,8 @@
 #include "StorageSvc/Transaction.h"
 
 #include <cstdint>
+
+class StatusCode;
 
 /*
  * POOL namespace declaration
@@ -89,7 +91,7 @@ namespace pool  {
     /// Access the token of the container object
     const Token* token() const;
     /// Close the container the handle points to
-    DbStatus close();
+    StatusCode close();
 
     /// Open the container residing in \<file\> with given name and access mode
     /** @param   dbH     [IN]    Valid handle to database object
@@ -101,11 +103,11 @@ namespace pool  {
       *
       * @return Status code indicating success or failure.
       */
-    DbStatus open(DbDatabase&        dbH, 
-                  const std::string&  nam, 
-                  const DbTypeInfo*   typ, 
-                  const DbType&       dbtyp,
-                  DbAccessMode        mod);
+    StatusCode open(DbDatabase&         dbH,
+                    const std::string&  nam,
+                    const DbTypeInfo*   typ,
+                    const DbType&       dbtyp,
+                    DbAccessMode        mod);
 
     /// Check if we can access the residing in \<file\> container for reading with the given type
     /** @param   dbH     [IN]    Valid handle to database object
@@ -114,18 +116,18 @@ namespace pool  {
       *
       * @return Status code indicating success or failure.
       */
-    DbStatus checkAccess(DbDatabase&        dbH,
-                         const std::string& nam,
-                         const DbType&      dbtyp);
+    StatusCode checkAccess(DbDatabase&        dbH,
+                           const std::string& nam,
+                           const DbType&      dbtyp);
 
     /// Check if the container was opened
     bool isOpen() const;
     /// Execute Database Transaction Action
-    DbStatus transAct(Transaction::Action action);
+    StatusCode transAct(Transaction::Action action);
     /// Pass options to the implementation
-    DbStatus setOption(const DbOption& refOpt);
+    StatusCode setOption(const DbOption& refOpt);
     /// Access options
-    DbStatus getOption(DbOption& refOpt);
+    StatusCode getOption(DbOption& refOpt);
 
     /** Access objects through select staements.                            
       * This access type is ideal for relational Databases.
@@ -134,16 +136,16 @@ namespace pool  {
       */
     //@{ 
     /// Fetch next object address to set token
-    DbStatus next(Token::OID_t& linkH);
+    StatusCode next(Token::OID_t& linkH);
     //@}
 
     /** Access objects using pointer and shape
       */
     //@{
     /// In place allocation of object location
-    DbStatus allocate(const void* object, ShapeH shape, Token::OID_t& oid);
+    StatusCode allocate(const void* object, ShapeH shape, Token::OID_t& oid);
     /// Select object in the container identified by its handle
-    DbStatus load(void** ptr, ShapeH shape, const Token::OID_t& lH);
+    StatusCode load(void** ptr, ShapeH shape, const Token::OID_t& lH);
     //@}
 
     /** Access objects by handle directly.
@@ -151,7 +153,7 @@ namespace pool  {
     */
     //@{
     /// Store object in location
-    DbStatus store(const void* object, const DbTypeInfo* typ);
+    StatusCode store(const void* object, const DbTypeInfo* typ);
     //@}
   };
 }       // End namespace pool

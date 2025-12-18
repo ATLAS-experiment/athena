@@ -1,12 +1,11 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef PERSISTENCYSVC_TOKENITERATOR_H
 #define PERSISTENCYSVC_TOKENITERATOR_H
 
 #include "PersistencySvc/ITokenIterator.h"
-#include "GaudiKernel/implements.h"
 
 #include <string>
 

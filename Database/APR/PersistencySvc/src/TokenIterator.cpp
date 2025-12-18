@@ -8,22 +8,23 @@
 #include "StorageSvc/DbConnection.h"
 #include "StorageSvc/FileDescriptor.h"
 
+#include "GaudiKernel/StatusCode.h"
+
 #include <exception>
 
 pool::PersistencySvc::TokenIterator::TokenIterator( FileDescriptor& fileDescriptor,
                                                     const std::string& containerName) :
   m_container( nullptr ), m_refToken ( nullptr )
 {
-   DbStatus sc = Error;
    pool::DatabaseConnection* connection = fileDescriptor.dbc();
    DbDatabase dbH(static_cast<DbDatabaseObj*>(connection->handle()));
    if ( dbH.isValid() )  {
       m_refToken = new Token(dbH.cntToken(containerName));
       m_container = new DbContainer(m_refToken->technology());
-      sc = m_container->open(dbH, m_refToken->contID(), 0, m_refToken->technology(), pool::READ);
    }
-   if( sc.isError() )
+   if( !dbH.isValid() || !m_container->open(dbH, m_refToken->contID(), 0, m_refToken->technology(), pool::READ).isSuccess() ) {
       throw std::runtime_error( "Selection from " + fileDescriptor.PFN() + "(" + containerName + ") failed (APR: \" TokenIterator::TokenIterator() \" from \" PersistencySvc \")" );
+   }
 }
 
 pool::PersistencySvc::TokenIterator::~TokenIterator()

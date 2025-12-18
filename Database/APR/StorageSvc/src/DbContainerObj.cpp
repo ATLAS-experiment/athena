@@ -19,6 +19,8 @@
 #include "StorageSvc/DbDomain.h"
 #include "StorageSvc/DbTypeInfo.h"
 #include "StorageSvc/DbContainer.h"
+#include "GaudiKernel/StatusCode.h"
+
 #include <memory>
 #include <stdexcept>
 #include <atomic>
@@ -32,7 +34,7 @@ void retireDatabase(DbContainerObj* c)  {
   static std::atomic<int> i=0;
   if ( (++i%2)==0 )  {
     c->database().setAge(20);
-    c->database().containedIn().closeAgedDbs();
+    c->database().containedIn().closeAgedDbs().ignore();
   }
 }
 
@@ -76,7 +78,7 @@ DbContainerObj::~DbContainerObj()     {
    string id = m_dbH.isValid() ? m_dbH.logon() : name();
    clearEntries();
    releasePtr(m_info);
-   m_dbH.remove(this);
+   m_dbH.remove(this).ignore();
    ATH_MSG_DEBUG("--> Deaccess DbContainer  " 
       << accessMode(mode()) 
       << " [" << type().storageName() << "] " 
@@ -111,13 +113,13 @@ uint64_t DbContainerObj::size()   {
 }
 
 /// Open Database container
-DbStatus DbContainerObj::open(const DbTypeInfo* typ)   {
+StatusCode DbContainerObj::open(const DbTypeInfo* typ)   {
   if ( !m_isOpen )    {
     if ( 0 == m_info )  {
       m_info = db()->createContainer(name(), type());
     }
     if ( 0 != m_info && 0 != typ && database().isValid() )  {
-      DbStatus sc = info()->open(database(), name(), typ, mode());
+      StatusCode sc = info()->open(database(), name(), typ, mode());
       if ( sc.isSuccess())  {
         if ( mode() != pool::READ )  {
           Token tok;
@@ -127,19 +129,19 @@ DbStatus DbContainerObj::open(const DbTypeInfo* typ)   {
           tok.setClassID(typ->shapeID());
           sc = database().makeLink(&tok, tok.oid());
           if ( !sc.isSuccess() )   {
-            m_info->close();
+            m_info->close().ignore();
             return sc;
           }
           sc = database().addShape(typ);
           if ( !sc.isSuccess() )  {
-            m_info->close();
+            m_info->close().ignore();
             return sc;
           }
         }
         m_tokH = database().cntToken(name());
         if ( m_tokH )    {
           m_isOpen = true;
-          return Success;
+          return StatusCode::SUCCESS;
         }
       }
       return sc;
@@ -148,12 +150,12 @@ DbStatus DbContainerObj::open(const DbTypeInfo* typ)   {
   else if ( typ ) {
     return m_dbH.addShape(typ);
   }
-  return Error;
+  return StatusCode::FAILURE;
 }
 
 /// Check if we can access the container
-DbStatus DbContainerObj::checkAccess() {
-  DbStatus result = Error;
+StatusCode DbContainerObj::checkAccess() {
+  StatusCode result = StatusCode::FAILURE;
   auto container = db()->createContainer(name(), type());
   if( database().isValid() && container ) {
     result = container->checkAccess(database(), name());
@@ -163,47 +165,47 @@ DbStatus DbContainerObj::checkAccess() {
 }
 
 /// Close Database container
-DbStatus DbContainerObj::close()   {
+StatusCode DbContainerObj::close()   {
   if ( retire().isSuccess() )    {
-    m_dbH.remove(this);
-    return Success;
+    return m_dbH.remove(this);
   }
-  return Error;
+  return StatusCode::FAILURE;
 }
+
 /// Close Database container
-DbStatus DbContainerObj::retire()   {
+StatusCode DbContainerObj::retire()   {
   if ( m_isOpen )    {
     if ( 0 != m_info )    {
       if ( m_info->close() )   {
         m_isOpen = false;
         releasePtr(m_info);
-        return Success;
+        return StatusCode::SUCCESS;
       }
       releasePtr(m_info);
     }
     m_isOpen = false;
-    return Error;
+    return StatusCode::FAILURE;
   }
-  return Success;
+  return StatusCode::SUCCESS;
 }
 
 /// Execute Transaction Action
-DbStatus DbContainerObj::transAct(Transaction::Action action) {
-   return m_info?  m_info->transAct(action) : Success;
+StatusCode DbContainerObj::transAct(Transaction::Action action) {
+   return m_info?  m_info->transAct(action) : StatusCode::SUCCESS;
 }
 
 /// Pass options to the implementation
-DbStatus DbContainerObj::setOption(const DbOption& refOpt) {
-  return hasAccess() ? m_info->setOption(refOpt) : Error;
+StatusCode DbContainerObj::setOption(const DbOption& refOpt) {
+  return hasAccess() ? m_info->setOption(refOpt) : StatusCode::FAILURE;
 }
 
 /// Access options
-DbStatus DbContainerObj::getOption(DbOption& refOpt) {
-  return hasAccess() ? m_info->getOption(refOpt) : Error;
+StatusCode DbContainerObj::getOption(DbOption& refOpt) {
+  return hasAccess() ? m_info->getOption(refOpt) : StatusCode::FAILURE;
 }
 
 /// Store object in location
-DbStatus DbContainerObj::store(const void* object,
+StatusCode DbContainerObj::store(const void* object,
                                DbContainer& cntH,
                                ShapeH shape)
 {
@@ -211,11 +213,11 @@ DbStatus DbContainerObj::store(const void* object,
     m_dbH.setAge(0);
     return m_info->store(object, cntH, shape);
   }
-  return Error;
+  return StatusCode::FAILURE;
 }
 
 /// In place allocation of raw memory
-DbStatus DbContainerObj::allocate(DbContainer& cntH,
+StatusCode DbContainerObj::allocate(DbContainer& cntH,
                                   const void* object,
                                   ShapeH shape,
                                   Token::OID_t& oid)
@@ -239,7 +241,7 @@ const DbTypeInfo* DbContainerObj::objectShape(const Guid& guid) {
 }
 
 /// Select object in the container identified by its handle
-DbStatus DbContainerObj::load( void** ptr, ShapeH shape,
+StatusCode DbContainerObj::load( void** ptr, ShapeH shape,
                                const Token::OID_t& linkH, 
                                Token::OID_t& oid,
                                bool any_next)
@@ -250,14 +252,14 @@ DbStatus DbContainerObj::load( void** ptr, ShapeH shape,
     // Specific implementation may overwrite OID
     return m_info->load(ptr, shape, linkH, oid, any_next);
   }
-  return Error;
+  return StatusCode::FAILURE;
 }
 
 /// Fetch next object address to set token
-DbStatus DbContainerObj::next(Token::OID_t& linkH) {
+StatusCode DbContainerObj::next(Token::OID_t& linkH) {
   if ( hasAccess() )   {
     m_dbH.setAge(0);
     return m_info->next(linkH);
   }
-  return Error;
+  return StatusCode::FAILURE;
 }

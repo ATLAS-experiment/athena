@@ -28,11 +28,7 @@ class TClass;
 namespace RootAuxDynIO { class IRootAuxDynReader; class IRNTupleAuxDynWriter; }
 namespace RootStorageSvc { class RNTupleWriterHelper; }
 namespace ROOT { class RNTupleReader; }
-
-// Forward declaration
-namespace pool {
-  class RootDatabase;
-}
+namespace pool { class RootDatabase; }
 
 /** @class RNTupleContainer RNTupleContainer.h src/RNTupleContainer.h
  *
@@ -108,30 +104,30 @@ class RNTupleContainer : public pool::DbContainerImp
   virtual ~RNTupleContainer();
 
   /// Close the container and deallocate resources
-  virtual pool::DbStatus close() override final;
+  virtual StatusCode close() override final;
 
   /// Open the container for object access
-  virtual pool::DbStatus open(pool::DbDatabase& dbH, const std::string& nam,
-                        const pool::DbTypeInfo* info,
-                        pool::DbAccessMode mod) override final;
+  virtual StatusCode open(pool::DbDatabase& dbH, const std::string& nam,
+                          const pool::DbTypeInfo* info,
+                          pool::DbAccessMode mod) override final;
 
   /// Check if we can access the container for reading with the given type
-  virtual pool::DbStatus checkAccess(pool::DbDatabase& dbH,
-                               const std::string& nam) const override final;
+  virtual StatusCode checkAccess(pool::DbDatabase& dbH,
+                                 const std::string& nam) const override final;
 
   /// Access options
   /** @param opt      [IN]  Reference to option object.
    *
    * @return DbStatus code indicating success or failure.
    */
-  virtual pool::DbStatus getOption(pool::DbOption& opt) override final;
+  virtual StatusCode getOption(pool::DbOption& opt) override final;
 
   /// Set options
   /** @param opt      [IN]  Reference to option object.
    *
    * @return DbStatus code indicating success or failure.
    */
-  virtual pool::DbStatus setOption(const pool::DbOption& opt) override final;
+  virtual StatusCode setOption(const pool::DbOption& opt) override final;
 
   /// Number of entries within the container
   virtual uint64_t size() override final;
@@ -153,27 +149,27 @@ class RNTupleContainer : public pool::DbContainerImp
    *
    *  @return Status code indicating success or failure.
    */
-  virtual pool::DbStatus loadObject(void** ptr, pool::ShapeH shape,
-                              Token::OID_t& oid) override final;
+  virtual StatusCode loadObject(void** ptr, pool::ShapeH shape,
+                                Token::OID_t& oid) override final;
 
   /// Commit single entry to container
-  virtual pool::DbStatus writeObject(ActionList::value_type&) override final;
+  virtual StatusCode writeObject(ActionList::value_type&) override final;
 
   virtual uint64_t nextRecordId() override final;
 
   virtual void useNextRecordId(uint64_t nextID) override final;
 
   /// Execute transaction action
-  virtual pool::DbStatus transAct(pool::Transaction::Action action) override final;
+  virtual StatusCode transAct(pool::Transaction::Action action) override final;
 
   /// Store object in location
-  virtual pool::DbStatus store(const void* object,
-                               pool::DbContainer& cntH,
-                               pool::ShapeH shape) override final;
+  virtual StatusCode store(const void* object,
+                                 pool::DbContainer& cntH,
+                                 pool::ShapeH shape) override final;
 
  private:
   /// Init a field description for an object (i.e. find TClass etc.)
-  pool::DbStatus initObjectFieldDesc(FieldDesc& dsc);
+  StatusCode initObjectFieldDesc(FieldDesc& dsc);
 };
 
 #endif

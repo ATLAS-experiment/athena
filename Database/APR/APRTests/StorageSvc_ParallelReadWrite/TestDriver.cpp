@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TestDriver.h"
@@ -9,7 +9,7 @@
 
 #include "PersistentDataModel/Guid.h"
 #include "PersistentDataModel/Token.h"
-
+#include "GaudiKernel/StatusCode.h"
 
 #include "StorageSvc/Shape.h"
 #include "StorageSvc/IStorageSvc.h"
@@ -26,6 +26,7 @@
 #include <sstream>
 #include <memory>
 
+using namespace pool;
 
 static const std::string file1 = "PARR.test1.pool.root";
 static const std::string file2 = "PARR.test2.pool.root";
@@ -76,12 +77,9 @@ TestDriver::testWriting()
 
     // Creating the persistent shape.
     Guid guid = pool::DbReflex::guid(class_SimpleTestClass);
-    const pool::Shape* shape = 0;
-    if ( storSvc->getShape( fd, guid, shape ) == pool::IStorageSvc::SHAPE_NOT_AVAILIBLE ) {
-      storSvc->createShape( fd, container, guid, shape );
-    }
-    if ( ! shape ) {
-      throw std::runtime_error( "Could not create a persistent shape." );
+    const pool::Shape* shape = storSvc->createShape(guid);
+    if( !shape ) {
+        throw std::runtime_error( "Could not create a persistent shape." );
     }
   
     // Writing the object.
@@ -123,7 +121,6 @@ TestDriver::testParallelReadWrite()
     throw std::runtime_error( "Could not create a StorageSvc object" );
   }
   storSvc->addRef();
-
   pool::Session* sessionHandle = 0;
   if ( ! ( storSvc->startSession( pool::UPDATE, pool::ROOT_StorageType.type(), sessionHandle ).isSuccess() ) ) {
     throw std::runtime_error( "Could not start a session." );
@@ -132,8 +129,7 @@ TestDriver::testParallelReadWrite()
 
   // Open the file to read
   pool::FileDescriptor fd1( file1, file1 );
-  pool::DbStatus sc = storSvc->connect( sessionHandle, pool::READ, fd1 );
-  if ( sc != pool::DbStatus::Success ) {
+  if( !storSvc->connect( sessionHandle, pool::READ, fd1 ).isSuccess() ) {
     throw std::runtime_error( "Could not start a connection." );
   }
 
@@ -150,8 +146,7 @@ TestDriver::testParallelReadWrite()
   }
   // Fetch the containers
   std::vector<const Token*> containerTokens;
-  dbH.containers( containerTokens, false );
-  if ( containerTokens.size() != 1 ) {
+  if( !dbH.containers( containerTokens, false ).isSuccess() or containerTokens.size() != 1 ) {
     throw std::runtime_error( "Unexpected number of containers" );
   }
   const Token* containerToken = containerTokens.front();
@@ -171,7 +166,7 @@ TestDriver::testParallelReadWrite()
   // Fetch the objects in the container.
   DbContainer cntH(containerToken->technology());
   Token::OID_t linkH(containerToken->oid());
-  sc = cntH.open(dbH, containerToken->contID(), 0, containerToken->technology(), pool::READ);
+  StatusCode sc = cntH.open(dbH, containerToken->contID(), 0, containerToken->technology(), pool::READ);
   int iObject = 0;
   if ( sc.isSuccess() && cntH.isValid() ) {
     Token* objectToken = new Token(cntH.token());
@@ -180,16 +175,16 @@ TestDriver::testParallelReadWrite()
       objectToken->oid() = linkH;
       // Read the object from one file
       const pool::Shape* shape = 0;
-      if ( storSvc->getShape( fd1, guid, shape ) != pool::IStorageSvc::IS_PERSISTENT_SHAPE ) {
-	throw std::runtime_error( "Could not fetch the persistent shape" );
+      if( !storSvc->getShape( fd1, guid, shape ).isSuccess() ) {
+	      throw std::runtime_error( "Could not fetch the persistent shape" );
       }
       RootType classType = pool::DbReflex::forGuid(guid);
       if(!classType){
-	throw std::runtime_error( "Could not resolve the class by guid" );
+	      throw std::runtime_error( "Could not resolve the class by guid" );
       }
       void* ptr = 0;
       if ( ! ( storSvc->read( fd1, *objectToken, shape, &ptr ) ).isSuccess() ) {
-	throw std::runtime_error( "failed to read an object back from the persistency" );
+	      throw std::runtime_error( "failed to read an object back from the persistency" );
       }
 
       if ( shape->shapeID().toString() != "4E1F4DBB-1973-1974-1999-204F37331A01" ) {
@@ -197,7 +192,7 @@ TestDriver::testParallelReadWrite()
       }
       SimpleTestClass* object = reinterpret_cast< SimpleTestClass* >(ptr);
       if ( object->data != iObject ) {
-	throw std::runtime_error( "Object read different from object written" );
+	      throw std::runtime_error( "Object read different from object written" );
       }
 
       // Write a new object into the other file.
@@ -207,12 +202,9 @@ TestDriver::testParallelReadWrite()
 
       // Creating the persistent shape.
       Guid guidw = pool::DbReflex::guid(class_SimpleTestClass);
-      const pool::Shape* shapew = 0;
-      if ( storSvc->getShape( fd2, guidw, shapew ) == pool::IStorageSvc::SHAPE_NOT_AVAILIBLE ) {
-	storSvc->createShape( fd2, container, guidw, shapew );
-      }
-      if ( ! shapew ) {
-	throw std::runtime_error( "Could not create a persistent shape." );
+      const pool::Shape* shapew = storSvc->createShape(guidw);
+      if( !shapew ) {
+	        throw std::runtime_error( "Could not create a persistent shape." );
       }
       
       // Writing the object.
@@ -220,7 +212,7 @@ TestDriver::testParallelReadWrite()
       if ( ! ( storSvc->allocate( fd2,
 				  container, pool::ROOTTREE_StorageType.type(),
 				  myObject, shapew, tokenw ).isSuccess() ) ) {
-	throw std::runtime_error( "Could not write an object" );
+	      throw std::runtime_error( "Could not write an object" );
       }
       tokenw->setClassID( guidw );
       tokenw->release();
@@ -281,8 +273,7 @@ TestDriver::testReading()
   }
 
   pool::FileDescriptor fd( file2, file2 );
-  pool::DbStatus sc = storSvc->connect( sessionHandle, pool::READ, fd );
-  if ( sc != pool::DbStatus::Success ) {
+  if( !storSvc->connect( sessionHandle, pool::READ, fd ).isSuccess() ) {
     throw std::runtime_error( "Could not start a connection." );
   }
 
@@ -293,8 +284,7 @@ TestDriver::testReading()
   }
   // Fetch the containers
   std::vector<const Token*> containerTokens;
-  dbH.containers( containerTokens, false );
-  if ( containerTokens.size() != 1 ) {
+  if( !dbH.containers( containerTokens, false ).isSuccess() or containerTokens.size() != 1 ) {
     throw std::runtime_error( "Unexpected number of containers" );
   }
   const Token* containerToken = containerTokens.front();
@@ -306,7 +296,7 @@ TestDriver::testReading()
   // Fetch the objects in the container.
   DbContainer cntH(containerToken->technology());
   Token::OID_t linkH(containerToken->oid());
-  sc = cntH.open(dbH, containerToken->contID(), 0, containerToken->technology(), pool::READ);
+  StatusCode sc = cntH.open(dbH, containerToken->contID(), 0, containerToken->technology(), pool::READ);
   int iObject = 0;
   if ( sc.isSuccess() && cntH.isValid() ) {
     Token* objectToken = new Token(cntH.token());
@@ -314,16 +304,16 @@ TestDriver::testReading()
     while ( cntH.next(linkH).isSuccess() ) {
       objectToken->oid() = linkH;
       const pool::Shape* shape = 0;
-      if ( storSvc->getShape( fd, guid, shape ) != pool::IStorageSvc::IS_PERSISTENT_SHAPE ) {
-	throw std::runtime_error( "Could not fetch the persistent shape" );
+      if( !storSvc->getShape( fd, guid, shape ).isSuccess() ) {
+	      throw std::runtime_error( "Could not fetch the persistent shape" );
       }
       RootType classType = pool::DbReflex::forGuid(guid);
       if(!classType){
-	throw std::runtime_error( "Could not resolve the class by guid" );
+	      throw std::runtime_error( "Could not resolve the class by guid" );
       }      
       void* ptr = 0;
       if ( ! ( storSvc->read( fd, *objectToken, shape, &ptr ) ).isSuccess() ) {
-	throw std::runtime_error( "failed to read an object back from the persistency" );
+	      throw std::runtime_error( "failed to read an object back from the persistency" );
       }
 
       if ( shape->shapeID().toString() != "4E1F4DBB-1973-1974-1999-204F37331A01" ) {

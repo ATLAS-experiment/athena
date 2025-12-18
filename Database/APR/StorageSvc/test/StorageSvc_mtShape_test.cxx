@@ -41,7 +41,7 @@ void worker(int thread_id) {
    {
       const DbTypeInfo* typ_info = 0;
       const string guidstr("00000000-0000-0001-0000-000000000000");
-      DbTransform::getShape(Guid(guidstr), typ_info);
+      DbTransform::getShape(Guid(guidstr), typ_info).ignore();
       cout << "get for " << guidstr << " = " << typ_info << "  " << (typ_info? typ_info->toString() : "") << endl;
    }
 }

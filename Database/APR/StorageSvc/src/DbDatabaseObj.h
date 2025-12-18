@@ -102,7 +102,8 @@ namespace pool    {
 
   private:
     /// Perform cleanup of internal data structures
-    DbStatus cleanup();
+    void cleanup();
+    
   public:
     /// Standard constructor of a Database obejct
     DbDatabaseObj( DbDomain&          dom,
@@ -127,24 +128,24 @@ namespace pool    {
     const Token* token() const        {  return m_token;        }
 
     /// Open Database object
-    DbStatus open();
+    StatusCode open();
     /// Re-open database with changing access permissions
-    DbStatus reopen(DbAccessMode mode);
+    StatusCode reopen(DbAccessMode mode);
     /// Close database object
-    DbStatus close();
+    StatusCode close();
     /// End database access, but still leave database accessible
-    DbStatus retire();
+    StatusCode retire();
     /// Execute Database Transaction action
-    DbStatus transAct(Transaction::Action action);
+    StatusCode transAct(Transaction::Action action);
 
     /// read an object referenced by the token
-    DbStatus read(const Token& token, ShapeH shape, void** object);
+    StatusCode read(const Token& token, ShapeH shape, void** object);
     /// Expand OID into a full Token, based on the Links table.
-    DbStatus getLink(const Token::OID_t& oid, Token* pTok);
+    StatusCode getLink(const Token::OID_t& oid, Token* pTok);
     /// Retrieve container name from link container (using token oid, rather than contID)
     std::string cntName(Token& token);
     /// Add association link to link container
-    DbStatus makeLink(Token* pToken, Token::OID_t& refLink);
+    StatusCode makeLink(Token* pToken, Token::OID_t& refLink);
     /// Retrieve persistent type information by class handle
     const DbTypeInfo* objectShape(const TypeH& classH);
     /// Retrieve persistent type information by shape identifier
@@ -152,28 +153,28 @@ namespace pool    {
     /// Retrieve persistent type information by container
     const DbTypeInfo* contShape(const std::string& nam);
     /// Add persistent type to the Database
-    DbStatus addShape (const DbTypeInfo* pType);
+    StatusCode addShape (const DbTypeInfo* pType);
     /// Access local container token (if container exists)
     const Token* cntToken(const std::string& cntName);
     /// Allow access to all known containers
-    DbStatus containers(std::vector<const Token*>& conts, bool intern);
-    DbStatus containers(std::vector<IDbContainer*>& conts, bool intern);
+    StatusCode containers(std::vector<const Token*>& conts, bool intern);
+    StatusCode containers(std::vector<IDbContainer*>& conts, bool intern);
     /// Allow access to all known associations between containers
-    DbStatus associations(std::vector<const Token*>& conts);
+    StatusCode associations(std::vector<const Token*>& conts);
     /// Allow access to all known shapes used by the database
-    DbStatus shapes(std::vector<const DbTypeInfo*>& shaps);
+    StatusCode shapes(std::vector<const DbTypeInfo*>& shaps);
     /// Retrieve the number of user parameters
     int nParam();
     /// Add a persistent parameter to the file
-    DbStatus addParam(const std::string& nam, const std::string& val);
+    StatusCode addParam(const std::string& nam, const std::string& val);
     /// Retrieve existing parameter by name
-    DbStatus param(const std::string& nam, std::string& val);
+    StatusCode param(const std::string& nam, std::string& val);
     /// Retrieve all parameters
-    DbStatus params(std::vector< std::pair<std::string, std::string> >& vals);
+    StatusCode params(std::vector< std::pair<std::string, std::string> >& vals);
     /// Set options
-    DbStatus setOption(const DbOption& refOpt);
+    StatusCode setOption(const DbOption& refOpt);
     /// Access options
-    DbStatus getOption(DbOption& refOpt);
+    StatusCode getOption(DbOption& refOpt);
 
     /// Update database age
     void setAge(int value);

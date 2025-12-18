@@ -18,7 +18,6 @@
 #include "StorageSvc/DbAccessObj.h"
 #include "StorageSvc/DbContainer.h"
 #include "POOLCore/DbPrint.h"
-
 /*
  *  POOL namespace declaration
  */
@@ -55,7 +54,7 @@ namespace pool  {
     const Token*                  m_tokH;
     /// Handle to hosting Database
     DbDatabase                    m_dbH;
-    /// Flag indication DbStatus of technology dependent container
+    /// Flag indication StatusCode of technology dependent container
     bool                          m_isOpen;
 
     /// Check database access
@@ -94,37 +93,37 @@ namespace pool  {
     /// Size of the Database container (=# of objects)
     uint64_t size();
     /// Open the container
-    DbStatus open(const DbTypeInfo* typ);
+    StatusCode open(const DbTypeInfo* typ);
     /// Check if we can access the container
-    DbStatus checkAccess();
+    StatusCode checkAccess();
     /// Close the container
-    DbStatus close();
+    StatusCode close();
     /// Retire the container
-    DbStatus retire();
+    StatusCode retire();
     /// Execute Database Transaction Action
-    DbStatus transAct(Transaction::Action);
+    StatusCode transAct(Transaction::Action);
     /// Pass options to the implementation
-    DbStatus setOption(const DbOption& opt);
+    StatusCode setOption(const DbOption& opt);
     /// Access options
-    DbStatus getOption(DbOption& refOpt);
+    StatusCode getOption(DbOption& refOpt);
 
     //@{
 
     /// Store object in location
-    DbStatus store(const void* object, DbContainer& cntH, ShapeH shape);
+    StatusCode store(const void* object, DbContainer& cntH, ShapeH shape);
 
     /// In place allocation of object location
-    DbStatus allocate(DbContainer& cntH, const void* object, ShapeH shape, Token::OID_t& oid);
+    StatusCode allocate(DbContainer& cntH, const void* object, ShapeH shape, Token::OID_t& oid);
 
     /// Select object in the container identified by its handle
-    DbStatus load( void** ptr, ShapeH shape,
-                   const Token::OID_t& linkH,
-                   Token::OID_t&       oid,
-                   bool          any_next);
+    StatusCode load( void** ptr, ShapeH shape,
+                     const Token::OID_t& linkH,
+                     Token::OID_t&       oid,
+                     bool          any_next);
     //@}
 
     /// Fetch next object address to set token
-    DbStatus next(Token::OID_t& linkH);
+    StatusCode next(Token::OID_t& linkH);
   };
 }       // End namespace pool
 #endif  // POOL_DBCONTAINEROBJ_H

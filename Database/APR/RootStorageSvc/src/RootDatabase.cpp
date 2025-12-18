@@ -22,6 +22,8 @@
 #include "GaudiKernel/Bootstrap.h"
 #include "GaudiKernel/ISvcLocator.h"
 #include "GaudiKernel/IFileMgr.h"
+#include "GaudiKernel/StatusCode.h"
+#include "AthenaKernel/errorcheck.h"
 
 #include <string>
 #include <cerrno>
@@ -41,7 +43,8 @@
 
 using namespace pool;
 using namespace std;
-
+constexpr const static auto SUCCESS = StatusCode::SUCCESS;
+constexpr const static auto FAILURE = StatusCode::FAILURE;
 
 /// Standard Constructor
 RootDatabase::RootDatabase() :
@@ -88,7 +91,7 @@ long long int RootDatabase::size()  const   {
 }
 
 /// Callback after successful open of a database object
-DbStatus RootDatabase::onOpen(DbDatabase& dbH, DbAccessMode mode)  {
+StatusCode RootDatabase::onOpen(DbDatabase& dbH, DbAccessMode mode)  {
   m_dbH = dbH;
   std::string par_val;
   if ( !dbH.param("FORMAT_VSN", par_val).isSuccess() )  {
@@ -106,11 +109,11 @@ DbStatus RootDatabase::onOpen(DbDatabase& dbH, DbAccessMode mode)  {
   else  {
     ATH_MSG_ERROR("Unknown Root file ...");
   }
-  return Success;
+  return SUCCESS;
 }
 
 // Open a new root Database: Access the TFile
-DbStatus RootDatabase::open(const DbDomain& domH,const std::string& nam,DbAccessMode mode)
+StatusCode RootDatabase::open(const DbDomain& domH,const std::string& nam,DbAccessMode mode)
 {
   const char* fname = nam.c_str();
   Bool_t result = ( mode == pool::READ ) ? kFALSE : gSystem->AccessPathName(fname, kFileExists);
@@ -120,18 +123,18 @@ DbStatus RootDatabase::open(const DbDomain& domH,const std::string& nam,DbAccess
   DbOption opt4("DEFAULT_AUTOSAVE","");
   DbOption opt5("DEFAULT_BUFFERSIZE","");
   DbOption opt6("TREE_BRANCH_OFFSETTAB_LEN","");
-  domH.getOption(opt1);
-  domH.getOption(opt2);
-  domH.getOption(opt3);
-  domH.getOption(opt4);
-  domH.getOption(opt5);
-  domH.getOption(opt6);
-  opt1._getValue(m_defCompression);
-  opt2._getValue(m_defCompressionAlg);
-  opt3._getValue(m_defSplitLevel);
-  opt4._getValue(m_defAutoSave);
-  opt5._getValue(m_defBufferSize);
-  opt6._getValue(m_branchOffsetTabLen);
+  CHECK( domH.getOption(opt1) );
+  CHECK( domH.getOption(opt2) );
+  CHECK( domH.getOption(opt3) );
+  CHECK( domH.getOption(opt4) );
+  CHECK( domH.getOption(opt5) );
+  CHECK( domH.getOption(opt6) );
+  CHECK( opt1._getValue(m_defCompression) );
+  CHECK( opt2._getValue(m_defCompressionAlg) );
+  CHECK( opt3._getValue(m_defSplitLevel) );
+  CHECK( opt4._getValue(m_defAutoSave) );
+  CHECK( opt5._getValue(m_defBufferSize) );
+  CHECK( opt6._getValue(m_branchOffsetTabLen) );
   //gDebug = 2;
   TDirectory::TContext dirCtxt(0);
 
@@ -228,17 +231,17 @@ DbStatus RootDatabase::open(const DbDomain& domH,const std::string& nam,DbAccess
                   << " if it does not exists. ");
   }
 
-  if( !m_file ) return Error;
+  if( !m_file ) return FAILURE;
 
   if( mode != pool::READ ) {
      m_file->SetCompressionLevel(m_defCompression);
      m_file->SetCompressionAlgorithm(m_defCompressionAlg);
   }
-  return Success;
+  return SUCCESS;
 }
 
 /// Re-open database with changing access permissions
-DbStatus RootDatabase::reopen(DbAccessMode mode)   {
+StatusCode RootDatabase::reopen(DbAccessMode mode)   {
   int result = -1;
   if ( m_file )   {
     TDirectory::TContext dirCtxt(0);
@@ -252,7 +255,7 @@ DbStatus RootDatabase::reopen(DbAccessMode mode)   {
       ATH_MSG_ERROR("Failed to reopen file: " << name() << " in mode " << accessMode(mode));
     }
   }
-  return (0 == result) ? Success : Error;
+  return (0 == result) ? SUCCESS : FAILURE;
 }
 
 void RootDatabase::printErrno(const char* nam, int err) {
@@ -275,7 +278,7 @@ void RootDatabase::printErrno(const char* nam, int err) {
 }
 
 /// Close the root Database: in CREATE/Update mode write the file header...
-DbStatus RootDatabase::close(DbAccessMode /* mode */ )  {
+StatusCode RootDatabase::close(DbAccessMode /* mode */ )  {
    int err(0);
    int fclose_rc = 0;
    if( m_file ) {
@@ -336,9 +339,9 @@ DbStatus RootDatabase::close(DbAccessMode /* mode */ )  {
       }    
    }
    if( fclose_rc == 0 ) {
-      if( !deletePtr(m_file).isSuccess() ) err = 1;
+      deletePtr(m_file);
    }
-   return (err == 0 ? Success : Error);
+   return (err == 0 ? SUCCESS : FAILURE);
 }
 
 /// Do some statistics: add number of bytes read/written/other
@@ -381,12 +384,12 @@ TTree* RootDatabase::getTree(const std::string &name) {
 
 
 /// Access options
-DbStatus RootDatabase::getOption(DbOption& opt)  {
+StatusCode RootDatabase::getOption(DbOption& opt)  {
   const char* n = opt.name().c_str();
   switch( ::toupper(n[0]) )  {
     case 'C':
       if ( !m_file )
-        return Error;
+        return FAILURE;
       else if ( !strcasecmp(n, "COMPRESSION_LEVEL") )     // int
         return opt._setValue(int(m_file->GetCompressionLevel()));
       else if ( !strcasecmp(n, "COMPRESSION_ALGORITHM") ) // int
@@ -396,7 +399,7 @@ DbStatus RootDatabase::getOption(DbOption& opt)  {
       else if ( !strcasecmp(n, "CONTAINER_SPLITLEVEL") )  {
         if (!opt.option().size()) {
           ATH_MSG_ERROR("Must set option to container name to set CONTAINER_SPLITLEVEL");
-          return Error;
+          return FAILURE;
         }
         const string containerName = opt.option();
         int containerSplitLevel=m_defSplitLevel;
@@ -409,7 +412,7 @@ DbStatus RootDatabase::getOption(DbOption& opt)  {
       break;
     case 'B':
       if ( !m_file )
-        return Error;
+        return FAILURE;
       else if ( !strcasecmp(n,"BEST_BUFFER") )            // int
         return opt._setValue(int(m_file->GetBestBuffer()));
       else if ( !strcasecmp(n,"BYTES_WRITTEN") )          // double
@@ -439,7 +442,7 @@ DbStatus RootDatabase::getOption(DbOption& opt)  {
       break;
     case 'F':
       if ( !m_file )
-        return Error;
+        return FAILURE;
       else if ( !strcasecmp(n,"FILEBYTES_WRITTEN") )      // double
         return opt._setValue(double(m_file->GetFileBytesWritten()));
       else if ( !strcasecmp(n,"FILEBYTES_READ") )         // double
@@ -461,10 +464,10 @@ DbStatus RootDatabase::getOption(DbOption& opt)  {
       break;
     case 'G':
       if ( !m_file )
-        return Error;
+        return FAILURE;
       else if ( !strcasecmp(n,"GET_OBJECT") )  {          // void*
         const char* key = "";
-        opt._getValue(key);
+        CHECK( opt._getValue(key) );
         return opt._setValue((void*)m_file->Get(key));
       }
       break;
@@ -482,13 +485,13 @@ DbStatus RootDatabase::getOption(DbOption& opt)  {
       break;
     case 'N':
       if ( !m_file )
-        return Error;
+        return FAILURE;
       else if ( !strcasecmp(n,"NKEYS") )                  // int
         return opt._setValue(int(m_file->GetNkeys()));
       break;
     case 'R':
       if ( !m_file )
-        return Error;
+        return FAILURE;
       else if ( !strcasecmp(n,"READ_CALLS") )             // int
         return opt._setValue(int(m_file->GetReadCalls()));
       else if ( !strcasecmp(n, "RNTUPLE_BUFFERED_WRITE_ENABLED") ) // int
@@ -508,7 +511,7 @@ DbStatus RootDatabase::getOption(DbOption& opt)  {
       } else if( !strcasecmp(n+5,"CACHE_SIZE") ) {
           if (!m_treeNameWithCache.size())
               return opt._setValue((int)0);
-          if ( !m_file ) return Error;
+          if ( !m_file ) return FAILURE;
           TTree* tr = getTree( m_treeNameWithCache );
           if (tr) return opt._setValue((int)tr->GetCacheSize());
           return opt._setValue((int)0);
@@ -521,44 +524,44 @@ DbStatus RootDatabase::getOption(DbOption& opt)  {
     default:
       break;
   }
-  return Error;  
+  return FAILURE;  
 }
 
 /// Set options
-DbStatus RootDatabase::setOption(const DbOption& opt)  {
+StatusCode RootDatabase::setOption(const DbOption& opt)  {
   const char* n = opt.name().c_str();
   switch( ::toupper(n[0]) )  {
     case 'C':
       if ( !m_file )
-        return Error;
+        return FAILURE;
       else if ( !strcasecmp(n, "CD") )  {
         const char* key = "";
-        opt._getValue(key);
+        CHECK( opt._getValue(key) );
         m_file->cd(key);
-        return Success;
+        return SUCCESS;
       }
       else if ( !strcasecmp(n, "COMPRESSION_LEVEL") )  {
         int val=1;
-        opt._getValue(val);
+        CHECK( opt._getValue(val) );
         m_file->SetCompressionLevel(val);
-        return Success;
+        return SUCCESS;
       }
       else if ( !strcasecmp(n, "COMPRESSION_ALGORITHM") )  {
         int val=1;
-        opt._getValue(val);
+        CHECK( opt._getValue(val) );
         m_file->SetCompressionAlgorithm(val);
-        return Success;
+        return SUCCESS;
       }
       else if ( !strcasecmp(n, "CONTAINER_SPLITLEVEL") )  {
         if (!opt.option().size()) {
           ATH_MSG_ERROR("Must set option to container name to set CONTAINER_SPLITLEVEL");
-          return Error;
+          return FAILURE;
         }
         string containerName = opt.option();
         int val=m_defSplitLevel;
-        opt._getValue(val);
+        CHECK( opt._getValue(val) );
         m_customSplitLevel.insert(pair< std::string, int>(containerName, val) );
-        return Success;
+        return SUCCESS;
       }
       break;
     case 'D':
@@ -577,32 +580,32 @@ DbStatus RootDatabase::setOption(const DbOption& opt)  {
       break;
     case 'F':
       if ( !m_file )
-        return Error;
+        return FAILURE;
       else if ( !strcasecmp(n,"FILEBYTES_WRITTEN") )   {
         double val = 0;
-        opt._getValue(val);
+        CHECK( opt._getValue(val) );
         Long64_t v = (Long64_t)val;
         m_file->SetFileBytesWritten(v);
-        return Success;
+        return SUCCESS;
       }
       else if ( !strcasecmp(n,"FILEBYTES_READ") )  {
         double val = 0;
-        opt._getValue(val);
+        CHECK( opt._getValue(val) );
         Long64_t v = (Long64_t)val;
         m_file->SetFileBytesRead(v);
-        return Success;
+        return SUCCESS;
       }
       else if ( !strcasecmp(n,"FILECACHE_WRITE") )  {
         double val = 0;
-        opt._getValue(val);
+        CHECK( opt._getValue(val) );
         Long64_t v = (Long64_t)val;
         new TFileCacheWrite(m_file, v); //TFile will take ownership and delete its TFileCacheWrite
-        return Success;
+        return SUCCESS;
       }
       else if ( !strcasecmp(n,"FILEFORWARD_COMPATIBILITY") ) {
         ATH_MSG_INFO("Setting ROOT TFile bit for forward compatibility, see ATEAM-1001");
         m_file->SetBit(TFile::k630forwardCompatibility);
-        return Success;
+        return SUCCESS;
       }
       break;
     case 'I':
@@ -611,10 +614,10 @@ DbStatus RootDatabase::setOption(const DbOption& opt)  {
           if( opt._getValue(s).isSuccess() and s ) {
              m_indexMaster = s;
              ATH_MSG_DEBUG("INDEX_MASTER set to " << m_indexMaster);
-             return Success;
+             return SUCCESS;
           }
           ATH_MSG_DEBUG("INDEX_MASTER: s=" << (void*)s);
-          return Error;
+          return FAILURE;
        }
       break;
     case 'M':
@@ -625,15 +628,15 @@ DbStatus RootDatabase::setOption(const DbOption& opt)  {
       break;
     case 'P':
       if ( !m_file )
-        return Error;
+        return FAILURE;
       else if ( !strcasecmp(n,"PRINT") )  {
         m_file->Print();
-        return Success;
+        return SUCCESS;
       }
       break;
     case 'R':
       if ( !m_file )
-        return Error;
+        return FAILURE;
       // This block can be used for RNTuple options...
       // RNTuple has a conceptual separation between reading and writing.
       // Reading goes through RNTupleReader/RPageSource, while
@@ -655,7 +658,7 @@ DbStatus RootDatabase::setOption(const DbOption& opt)  {
        }
        else if ( !strcasecmp(n+5,"MAX_SIZE") )  {
 	        long long int max_size = TTree::GetMaxTreeSize();
-	        DbStatus sc = opt._getValue(max_size);
+	        StatusCode sc = opt._getValue(max_size);
 	        if ( sc.isSuccess() )  {
 	            TTree::SetMaxTreeSize(max_size);
           }
@@ -663,29 +666,29 @@ DbStatus RootDatabase::setOption(const DbOption& opt)  {
        }
        else if ( !strcasecmp(n+5,"MAX_VIRTUAL_SIZE") )  {
           ATH_MSG_DEBUG("Request virtual tree size");
-          if ( !m_file ) return Error;
+          if ( !m_file ) return FAILURE;
           ATH_MSG_DEBUG("File name " << name());
 
           int virtMaxSize = 0;
-          opt._getValue(virtMaxSize);
+          CHECK( opt._getValue(virtMaxSize) );
           if (!opt.option().size()) {
              ATH_MSG_ERROR("Must set option to tree name to start TREE_MAX_VIRTUAL_SIZE");
-             return Error;
+             return FAILURE;
           }
           TTree* tree = getTree( opt.option() );
           if (!tree) {
              ATH_MSG_DEBUG("Could not find tree " << opt.option() << ", no TREE_MAX_VIRTUAL_SIZE will be set");
-             return Success;
+             return SUCCESS;
           }
           ATH_MSG_DEBUG("Got tree " << tree->GetName());
           tree->SetMaxVirtualSize(virtMaxSize);
-          return Success;
+          return SUCCESS;
        }
        else if ( !strcasecmp(n+5,"AUTO_FLUSH") )  {
           return setAutoFlush(opt);
        }
        else if ( !strcasecmp(n+5,"CACHE_LEARN_EVENTS") )  {
-          DbStatus s = opt._getValue(m_defTreeCacheLearnEvents);
+          StatusCode s = opt._getValue(m_defTreeCacheLearnEvents);
           if( s.isSuccess() ) {
              TTree *tree = getTree(APRDefaults::TTreeNames::EventData);
              if (tree != nullptr && tree->GetAutoFlush() > 0) {
@@ -701,20 +704,20 @@ DbStatus RootDatabase::setOption(const DbOption& opt)  {
        }
        else if ( !strcasecmp(n+5,"CACHE") )  {
            ATH_MSG_DEBUG("Request tree cache");
-           if( !m_file ) return Error;
+           if( !m_file ) return FAILURE;
            ATH_MSG_DEBUG("File name " << name());
 
            int cacheSize = 0;
-           opt._getValue(cacheSize);
+           CHECK( opt._getValue(cacheSize) );
            if (!opt.option().size()) {
                ATH_MSG_ERROR("Must set option to tree name to start TREE_CACHE");
-               return Error;
+               return FAILURE;
            }
            m_treeNameWithCache = opt.option();
            TTree* tr = getTree( m_treeNameWithCache );
            if (!tr) {
                ATH_MSG_DEBUG("Could not find tree " << m_treeNameWithCache << ", no TREE_CACHE will be set");
-               return Success;
+               return SUCCESS;
            } else {
               ATH_MSG_DEBUG("Got tree " << tr->GetName() << " read entry " << tr->GetReadEntry());
            }
@@ -734,9 +737,9 @@ DbStatus RootDatabase::setOption(const DbOption& opt)  {
                             << " Nevents to learn with: " << m_defTreeCacheLearnEvents);
            } else if (cacheSize != 0) {
                ATH_MSG_ERROR("Could not get cache");
-               return Error;
+               return FAILURE;
            }
-           return Success;
+           return SUCCESS;
        }
        else if ( !strcasecmp(n+5, "ADD_FRIEND") )  {
          char *s = nullptr;
@@ -752,40 +755,40 @@ DbStatus RootDatabase::setOption(const DbOption& opt)  {
            TTree* tree1 = (TTree*)m_file->Get(s);
            TTree* tree2 = (TTree*)m_file->Get(s2);
            if (!tree1 || !tree2) {
-              return Error;
+              return FAILURE;
            }
            tree1->AddFriend(tree2);
            ATH_MSG_DEBUG("ADD_FRIEND set to " << s << " and " << s2);
-           return Success;
+           return SUCCESS;
          }
-         return Error;
+         return FAILURE;
        }
       break;
     default:
       break;
   }
-  return Error;  
+  return FAILURE;  
 }
 
 /// Set TTree AutoFlush value.  For Branch Containers enable TTree Fill mode
-DbStatus RootDatabase::setAutoFlush(const DbOption& opt)
+StatusCode RootDatabase::setAutoFlush(const DbOption& opt)
 {
    ATH_MSG_DEBUG("Request TREE_AUTO_FLUSH ");
-   if ( !m_file ) return Error;
+   if ( !m_file ) return FAILURE;
    ATH_MSG_DEBUG("File name " << name());
    if (!opt.option().size()) {
       ATH_MSG_ERROR("TREE_AUTO_FLUSH database option requires TTree name in option parameter");
-      return Error;
+      return FAILURE;
    } 
    string treeName = opt.option();
    int val=0;
-   DbStatus sc = opt._getValue(val);
+   StatusCode sc = opt._getValue(val);
    if( sc.isSuccess() )  {
       ATH_MSG_DEBUG("Demand to set AUTO_FLUSH for TTree: " << treeName << " with value: " << val);
       map< string, int >::iterator  tafit = m_autoFlushTrees.find( treeName );
       if( tafit != m_autoFlushTrees.end() && tafit->second == val ) {
          ATH_MSG_DEBUG(" -- AUTO_FLUSH already set, skipping");
-         return Success;
+         return SUCCESS;
       }
       m_autoFlushTrees[treeName] = val;
       // set Tree Fill mode for any branch containers already registered
@@ -847,15 +850,15 @@ void RootDatabase::registerBranchContainer(RootTreeContainer* cont)
 
 
 /// Execute Database Transaction action
-DbStatus RootDatabase::transAct(Transaction::Action action)
+StatusCode RootDatabase::transAct(Transaction::Action action)
 {
    // We only care about writing actions here
    if( action != Transaction::TRANSACT_COMMIT and action != Transaction::TRANSACT_FLUSH )
-      return Success;
+      return SUCCESS;
 
    // MN: maybe !m_file should be an error
    if( m_file == nullptr or !m_file->IsWritable() )
-      return Success;
+      return SUCCESS;
 
    // Flush the RNTuples from the DB level, so every ntuple is flushed only once
    for( auto& writer : m_ntupleWriterMap ) {
@@ -863,7 +866,7 @@ DbStatus RootDatabase::transAct(Transaction::Action action)
       if( wr->isGrouped() and wr->needsCommit() ) wr->commit();
    }
 
-   if( fillBranchContainerTrees() != Success ) return Error;
+   CHECK( fillBranchContainerTrees() );
 
    // process flush to write file
    if( action == Transaction::TRANSACT_FLUSH ) {
@@ -898,7 +901,7 @@ DbStatus RootDatabase::transAct(Transaction::Action action)
    }
    // process commits only
    if( action != Transaction::TRANSACT_COMMIT )
-      return Success;
+      return SUCCESS;
 
    // process commits
    ATH_MSG_DEBUG("DB Action Commit in " << name());
@@ -912,7 +915,7 @@ DbStatus RootDatabase::transAct(Transaction::Action action)
    if( !m_indexMaster.empty() ) {
       ATH_MSG_DEBUG("Synchronizing indexes to master: " <<  m_indexMaster << " in " << m_file->GetName());
       std::vector<IDbContainer*> containers;
-      m_dbH.containers(containers);
+      CHECK( m_dbH.containers(containers) );
       m_indexMasterID = 0;
       if( m_indexMaster == "*" ) {
          // find the biggest index ID
@@ -940,7 +943,7 @@ DbStatus RootDatabase::transAct(Transaction::Action action)
          }
       }
    }
-   return Success;
+   return SUCCESS;
 }
 
 
@@ -974,7 +977,7 @@ void RootDatabase::increaseBasketsSize(TTree* tree)
 }
 
 
-DbStatus RootDatabase::fillBranchContainerTrees()
+StatusCode RootDatabase::fillBranchContainerTrees()
 {
    // check all TTrees with branch containers, if they need Filling
    for( map< TTree*, ContainerSet_t >::iterator treeIt = m_containersInTree.begin(),
@@ -1010,7 +1013,7 @@ DbStatus RootDatabase::fillBranchContainerTrees()
                addByteCount( RootDatabase::WRITE_COUNTER, num_bytes );
             } else {
                ATH_MSG_ERROR("Write to " << m_file->GetName() << " tree:" << tree->GetName() << " failed");
-                return Error;
+                return FAILURE;
             }
             for( ContainerSet_t::iterator cIt = containers.begin(); cIt != containers.end(); ++cIt ) {
                (*cIt)->clearDirty();
@@ -1023,7 +1026,7 @@ DbStatus RootDatabase::fillBranchContainerTrees()
                       << " was not filled in this transaction. This is required by TREE_AUTO_FLUSH option.");
                }
             }
-             return Error;
+             return FAILURE;
          }
       } else { // not TreeFillMode
          uint64_t maxbranchlen = 0;
@@ -1033,7 +1036,7 @@ DbStatus RootDatabase::fillBranchContainerTrees()
          if( maxbranchlen > 0 )  tree->SetEntries( maxbranchlen );
       }
    }
-   return Success;
+   return SUCCESS;
 }
 
 
