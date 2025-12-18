@@ -51,10 +51,10 @@ class ParticleLevelNeutrinosBlock(ConfigBlock):
         # output branches to be scheduled only once
         if ParticleLevelNeutrinosBlock.get_instance_count() == 1 or 'pt' not in config.getOutputVars(self.containerName):
             outputVars = [
-                ['pt', 'pt'],
-                ['eta', 'eta'],
-                ['phi', 'phi'],
-                ['e', 'e'],
+                ['pt', 'pt', 'float'],
+                ['eta', 'eta', 'float'],
+                ['phi', 'phi', 'float'],
+                ['e', 'e', 'float'],
             ]
-            for decoration, branch in outputVars:
-                config.addOutputVar (self.containerName, decoration, branch, noSys=True)
+            for decoration, branch, auxType in outputVars:
+                config.addOutputVar (self.containerName, decoration, branch, noSys=True, auxType=auxType)

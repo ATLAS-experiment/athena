@@ -447,6 +447,7 @@ SAVE
     config.setOptions (treeName='analysis')
     config.setOptions (vars=[
         'EventInfo.actualInteractionsPerCrossing -> actualMuScaled',
+        'OutMuons_NOSYS.muonType -> mu_muonType type=uint16' #types are typically not needed, but if needed this is how you add them
     ])
     config.setOptions (metVars=[
         'AnaMET_%SYS%.met -> met_%SYS%',

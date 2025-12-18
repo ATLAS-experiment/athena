@@ -8,6 +8,15 @@
 
 namespace CP {
 
+// accessors and decorators
+// these are done at file-level to register types with output algorithms
+static const SG::ConstAccessor<int> acc_flav(
+    "HadronConeExclTruthLabelID");
+static const SG::Decorator<int> dec_nBJets(
+    "num_truth_bjets_nocuts");
+static const SG::Decorator<int> dec_nCJets(
+    "num_truth_cjets_nocuts");
+
 StatusCode ParticleLevelJetsAlg::initialize() {
 
   ANA_CHECK(m_jetsKey.initialize());
@@ -20,16 +29,6 @@ StatusCode ParticleLevelJetsAlg::execute(const EventContext &ctx) const {
 
   SG::ReadHandle<xAOD::JetContainer> jets(m_jetsKey, ctx);
   SG::ReadHandle<xAOD::EventInfo> eventInfo(m_eventInfoKey, ctx);
-
-  // accessors
-  static const SG::ConstAccessor<int> acc_flav(
-      "HadronConeExclTruthLabelID");
-
-  // decorators
-  static const SG::Decorator<int> dec_nBJets(
-      "num_truth_bjets_nocuts");
-  static const SG::Decorator<int> dec_nCJets(
-      "num_truth_cjets_nocuts");
 
   // the number of b- and c-jets without any event cuts applied
   int num_bjets(0), num_cjets(0);

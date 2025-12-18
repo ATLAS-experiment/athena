@@ -242,7 +242,7 @@ class PileupReweightingBlock (ConfigBlock):
                 config.addOutputVar ('EventInfo', var, var, noSys=True)
 
             if config.dataType() is not DataType.Data:
-                config.addOutputVar ('EventInfo', 'PileupWeight_%SYS%', 'weight_pileup')
+                config.addOutputVar ('EventInfo', 'PileupWeight_%SYS%', 'weight_pileup', auxType='float')
                 if config.geometry() is LHCPeriod.Run2:
                     config.addOutputVar ('EventInfo', 'beamSpotWeight', 'weight_beamspot', noSys=True)
             return

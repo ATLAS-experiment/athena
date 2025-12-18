@@ -45,6 +45,8 @@ class OutputAnalysisConfig (ConfigBlock):
         self.addOption ('containersOnlyForDSIDs', {}, type=None,
             info="specify which DSIDs are allowed to produce a given container. "
             "This works like 'onlyForDSIDs': pass a list of DSIDs or regexps.")
+        self.addOption ('nonContainers', ['EventInfo'], type=None,
+            info="a list of container names that are not actual containers but should be treated as non-containers.")
         self.addOption ('treeName', 'analysis', type=str,
             info="name of the output TTree to save. The default is analysis.")
         self.addOption ('streamName', 'ANALYSIS', type=str,
@@ -91,11 +93,12 @@ class OutputAnalysisConfig (ConfigBlock):
     def branchSortOrder (rule):
         return rule.split('->')[1].strip()
 
-    def createOutputAlgs (self, config, name, vars, isMet=False):
+    def createOutputAlgs (self, config, name, vars):
         """A helper function to create output algorithm"""
-        alg = config.createAlgorithm('CP::AsgxAODMetNTupleMakerAlg' if isMet else 'CP::AsgxAODNTupleMakerAlg', name)
+        alg = config.createAlgorithm('CP::AsgxAODNTupleMakerAlg', name)
         alg.TreeName = self.treeName
         alg.RootStreamName = self.streamName
+        alg.NonContainers = list(self.nonContainers)
         branchList = list(vars)
         branchList.sort(key=self.branchSortOrder)
         branchList_nosys = [branch for branch in branchList if "%SYS%" not in branch]
@@ -255,7 +258,15 @@ class OutputAnalysisConfig (ConfigBlock):
                         outputName += "_NOSYS"
                 else :
                     outputName += '_%SYS%'
-                myVars.add(f"{outputConfig.outputContainerName}.{outputConfig.variableName} -> {outputName}")
+                branchDecl = f"{outputConfig.outputContainerName}.{outputConfig.variableName} -> {outputName}"
+                if outputConfig.auxType is not None :
+                    branchDecl += f" type={outputConfig.auxType}"
+                if config.isMetContainer (outputConfig.origContainerName) and outputConfig.prefix not in self.containersFullMET:
+                    if "Truth" in outputConfig.origContainerName:
+                        branchDecl += f" metTerm={self.truthMetTermName}"
+                    else:
+                        branchDecl += f" metTerm={self.metTermName}"
+                myVars.add(branchDecl)
 
         # Add an ntuple dumper algorithm:
         treeMaker = config.createAlgorithm( 'CP::TreeMakerAlg', 'TreeMaker' )
@@ -265,15 +276,21 @@ class OutputAnalysisConfig (ConfigBlock):
         #treeMaker.TreeAutoFlush = 0
 
         if self.vars or autoVars:
-            ntupleMaker = self.createOutputAlgs(config, 'NTupleMaker', self.vars | autoVars)
+            self.createOutputAlgs(config, 'NTupleMaker', self.vars | autoVars)
 
         if self.metVars or autoMetVars:
-            ntupleMaker = self.createOutputAlgs(config, 'MetNTupleMaker', self.metVars | autoMetVars, isMet=True)
-            ntupleMaker.termName = self.metTermName
+            userMetVars = set ()
+            if self.metVars :
+                for var in self.metVars:
+                    userMetVars.add(var + " metTerm=" + self.metTermName)
+            self.createOutputAlgs(config, 'MetNTupleMaker', userMetVars | autoMetVars)
 
         if config.dataType() is not DataType.Data and (self.truthMetVars or autoTruthMetVars):
-            ntupleMaker = self.createOutputAlgs(config, 'TruthMetNTupleMaker', self.truthMetVars | autoTruthMetVars, isMet=True)
-            ntupleMaker.termName = self.truthMetTermName
+            userTruthMetVars = set ()
+            if self.truthMetVars :
+                for var in self.truthMetVars:
+                    userTruthMetVars.add(var + " metTerm=" + self.truthMetTermName)
+            self.createOutputAlgs(config, 'TruthMetNTupleMaker', userTruthMetVars | autoTruthMetVars)
 
         treeFiller = config.createAlgorithm( 'CP::TreeFillerAlg', 'TreeFiller' )
         treeFiller.TreeName = self.treeName

@@ -57,14 +57,14 @@ class ParticleLevelPhotonsBlock(ConfigBlock):
         # output branches to be scheduled only once
         if ParticleLevelPhotonsBlock.get_instance_count() == 1 or 'pt' not in config.getOutputVars(self.containerName):
             outputVars = [
-                ['pt', 'pt'],
-                ['eta', 'eta'],
-                ['phi', 'phi'],
-                ['e', 'e'],
-                ['classifierParticleType', 'type'],
-                ['classifierParticleOrigin', 'origin'],
+                ['pt', 'pt', 'float'],
+                ['eta', 'eta', 'float'],
+                ['phi', 'phi', 'float'],
+                ['e', 'e', 'float'],
+                ['classifierParticleType', 'type', 'unsigned'],
+                ['classifierParticleOrigin', 'origin', 'unsigned'],
             ]
             if self.saveUID:
-                outputVars += [['uid', 'uid']]
-            for decoration, branch in outputVars:
-                config.addOutputVar (self.containerName, decoration, branch, noSys=True)
+                outputVars += [['uid', 'uid', 'int']]
+            for decoration, branch, auxType in outputVars:
+                config.addOutputVar (self.containerName, decoration, branch, noSys=True, auxType=auxType)

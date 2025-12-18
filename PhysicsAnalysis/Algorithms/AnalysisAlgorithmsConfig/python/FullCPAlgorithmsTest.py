@@ -474,6 +474,7 @@ def makeTestSequenceBlocks (dataType, algSeq, isPhyslite,
     configSeq.setOptionValue ('.treeName', 'analysis')
     configSeq.setOptionValue ('.vars', [
         'EventInfo.actualInteractionsPerCrossing -> actualMuScaled',
+        'OutMuons_NOSYS.muonType -> mu_muonType type=uint16' #types are typically not needed, but if needed this is how you add them
     ])
     configSeq.setOptionValue ('.metVars', [
         'AnaMET_%SYS%.met -> met_%SYS%',
