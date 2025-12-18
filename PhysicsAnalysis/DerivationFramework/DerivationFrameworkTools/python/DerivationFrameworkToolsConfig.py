@@ -31,6 +31,10 @@ def xAODStringSkimmingToolCfg(flags, name, **kwargs):
     acc = ComponentAccumulator()
     if flags.Trigger.EDMVersion < 0:
         kwargs.setdefault("TrigDecisionTool", None)
+    else:
+        from TrigDecisionTool.TrigDecisionToolConfig import TrigDecisionToolCfg
+        kwargs.setdefault("TrigDecisionTool", acc.getPrimaryAndMerge(
+            TrigDecisionToolCfg(flags)))
     acc.addPublicTool(
         CompFactory.DerivationFramework.xAODStringSkimmingTool(name, **kwargs),
         primary = True)
