@@ -468,10 +468,13 @@ def BPHY15Cfg(flags):
    
    #--------------------------------------------------------------------
    if not isSimulation: #Only Skim Data
-      BPHY15_SelectBcJpsipiEvent = CompFactory.DerivationFramework.xAODStringSkimmingTool(
-                           name = "BPHY15_SelectBcJpsipiEvent",
-                           expression = "( count(BPHY15BcJpsipiCandidates.passed_Bc) > 0)")
-      acc.addPublicTool(BPHY15_SelectBcJpsipiEvent)
+      from DerivationFrameworkTools.DerivationFrameworkToolsConfig import (
+         xAODStringSkimmingToolCfg)
+      BPHY15_SelectBcJpsipiEvent = acc.getPrimaryAndMerge(
+         xAODStringSkimmingToolCfg(
+            flags, name = "BPHY15_SelectBcJpsipiEvent",
+            expression = "( count(BPHY15BcJpsipiCandidates.passed_Bc) > 0)"))
+
       BPHY15_AnyVertexSkimmingTool = CompFactory.DerivationFramework.AnyVertexSkimmingTool("BPHY15_AnyVertexSkimmingTool", UseHandles = True,
                                                                         VertexContainerNames =CascadeCollections )
       acc.addPublicTool(BPHY15_AnyVertexSkimmingTool)

@@ -213,19 +213,21 @@ def BPHY10Cfg(flags):
         AugOriginalCountsCfg(flags, name = "BPHY10_AugOriginalCounts"))
     
     if not isSimulation: #Only Skim Data
-       BPHY10_SelectBdJpsiKstEvent = CompFactory.DerivationFramework.xAODStringSkimmingTool(
-                    name = "BPHY10_SelectBdJpsiKstEvent",
-                    expression = "(count(BPHY10BdJpsiKstCandidates.passed_Bd > 0) + count(BPHY10BdJpsiKstCandidates.passed_Bdbar > 0)) >0")
+        from DerivationFrameworkTools.DerivationFrameworkToolsConfig import (
+            xAODStringSkimmingToolCfg)
+        BPHY10_SelectBdJpsiKstEvent = acc.getPrimaryAndMerge(xAODStringSkimmingToolCfg(
+            flags, name = "BPHY10_SelectBdJpsiKstEvent",
+            expression = "(count(BPHY10BdJpsiKstCandidates.passed_Bd > 0) + count(BPHY10BdJpsiKstCandidates.passed_Bdbar > 0)) >0"))
 
-       BPHY10_cascadeCheck = CompFactory.DerivationFramework.AnyVertexSkimmingTool("BPHY10_AnyVertexSkimmingTool",
-                                                                        VertexContainerNames =CascadeCollections,
-                                                                        UseHandles = True )
-       BPHY10SkimmingOR = CompFactory.DerivationFramework.FilterCombinationOR(
-                                "BPHY10SkimmingOR",
-                                FilterList = [BPHY10_cascadeCheck, BPHY10_SelectBdJpsiKstEvent])
-       acc.addPublicTool(BPHY10_cascadeCheck)
-       acc.addPublicTool(BPHY10_SelectBdJpsiKstEvent)
-       acc.addPublicTool(BPHY10SkimmingOR)
+        BPHY10_cascadeCheck = CompFactory.DerivationFramework.AnyVertexSkimmingTool(
+            "BPHY10_AnyVertexSkimmingTool",
+            VertexContainerNames =CascadeCollections,
+            UseHandles = True )
+        BPHY10SkimmingOR = CompFactory.DerivationFramework.FilterCombinationOR(
+            "BPHY10SkimmingOR",
+            FilterList = [BPHY10_cascadeCheck, BPHY10_SelectBdJpsiKstEvent])
+        acc.addPublicTool(BPHY10_cascadeCheck)
+        acc.addPublicTool(BPHY10SkimmingOR)
 
     augTools = [BPHY10JpsiSelectAndWrite,  BPHY10_Select_Jpsi2mumu,
                 BPHY10BdKstSelectAndWrite, BPHY10_Select_Bd2JpsiKst, BPHY10_Select_Bd2JpsiKstbar,

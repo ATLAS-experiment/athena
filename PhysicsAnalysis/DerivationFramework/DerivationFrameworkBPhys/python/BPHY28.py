@@ -164,10 +164,11 @@ def BPHY28Kernel(flags):
 
 
    if not isSimulation: #Only Skim Data
-      BPHY28_SelectBsKKMuMuEvent = CompFactory.DerivationFramework.xAODStringSkimmingTool(
-         name = "BPHY28_SelectBsKKMuMuEvent",
-         expression = "count(BPHY28BsKKMuMuCandidates.passed_Bs) > 0")
-
+      from DerivationFrameworkTools.DerivationFrameworkToolsConfig import (
+         xAODStringSkimmingToolCfg)
+      BPHY28_SelectBsKKMuMuEvent = acc.getPrimaryAndMerge(xAODStringSkimmingToolCfg(
+         flags, name = "BPHY28_SelectBsKKMuMuEvent",
+         expression = "count(BPHY28BsKKMuMuCandidates.passed_Bs) > 0"))
       skimList += [ BPHY28_SelectBsKKMuMuEvent ]
 
 
