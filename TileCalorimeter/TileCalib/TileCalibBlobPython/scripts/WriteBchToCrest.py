@@ -2,8 +2,15 @@
 
 # Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 #
-# WriteBchToCrest.py
+# File:    WriteBchToCrest.py
 # Sanya Solodkov <Sanya.Solodkov@cern.ch>, 2025-10-30
+#
+# Purpose: Prepare JSON file with new bad channel status
+# actual masking/unmasking of channels is done by
+# external script specified in --execfile= option
+# All modules are always written, for channels which are not
+# mentioned in input file previous status is copied from CREST DB
+#
 
 import getopt,sys,os,bisect
 os.environ['TERM'] = 'linux'
@@ -22,22 +29,19 @@ def usage():
     print ("-L, --endlumi=  specify lumi block number for last iov in multi-iov mode, default is 0")
     print ("-A, --adjust    in multi-iov mode adjust iov boundaries to nearest iov available in DB, default is False")
     print ("-M, --module=   specify module to use in multi-IOV update, default is all")
-    #print ("-m, --mode=     specify update mode: 1 or 2; if not set - choosen automatically, depending on schema")
     print ("-c, --comment=    specify comment which should be written to DB, in multi-iov mode it is appended to old comment")
     print ("-C, --Comment=    specify comment which should be written to DB, in mutli-iov mode it overwrites old comment")
     print ("-U, --user=       specify username for comment")
     print ("-x, --execfile=   specify python file which should be executed, default is bch.py")
     print ("-i, --inschema=   specify name of input JSON file or CREST_SERVER_PATH")
     print ("-o, --outschema=  specify name of output JSON file, default is tileCalib.json")
+    print ("-s, --schema=     the same as --o, --outschema")
     print ("-n, --online      write additional file with online bad channel status")
     print ("-p, --upd4        write additional file with CURRENT UPD4 tag")
     print ("-v, --verbose     verbose mode")
-    print ("-s, --schema=     specify input/output schema to use when both input and output schemas are the same")
-    #print ("-S, --server=     specify server - ORACLE or FRONTIER, default is FRONTIER")
-    #print ("-u  --update      set this flag if output file should be updated, otherwise it'll be recreated")
 
-letters = "hr:l:b:e:L:AM:m:S:s:i:o:t:f:x:c:C:U:npvu"
-keywords = ["help","run=","lumi=","begin=","end=","endlumi=","adjust","module=","mode=","server=","schema=","inschema=","outschema=","tag=","folder=","execfile=","comment=","Comment=","user=","online","upd4","verbose","update"]
+letters = "hr:l:b:e:L:AM:s:i:o:t:f:x:c:C:U:npv"
+keywords = ["help","run=","lumi=","begin=","end=","endlumi=","adjust","module=","schema=","inschema=","outschema=","tag=","folder=","execfile=","comment=","Comment=","user=","online","upd4","verbose"]
 
 try:
     opts, extraparams = getopt.getopt(sys.argv[1:], letters, keywords)
@@ -49,12 +53,8 @@ except getopt.GetoptError as err:
 # defaults
 run = -1
 lumi = 0
-mode = 0
-server = ''
-schema = 'tileCalib.json'
-oraSchema = 'CREST'
-inSchema = oraSchema
-outSchema = schema
+inSchema = 'CREST'
+outSchema = 'tileCalib.json'
 folderPath =  "/TILE/OFL02/STATUS/ADC"
 onlSuffix = None
 curSuffix = None
@@ -63,7 +63,6 @@ execFile = "bch.py"
 comment = ""
 Comment = None
 verbose = False
-update = False
 iov = False
 beg = 0
 end = 2147483647
@@ -82,11 +81,7 @@ for o, a in opts:
         folderPath = a
     elif o in ("-t","--tag"):
         tag = a
-    elif o in ("-S","--server"):
-        server = a
     elif o in ("-s","--schema"):
-        schema = a
-        inSchema = a
         outSchema = a
     elif o in ("-i","--inschema"):
         inSchema = a
@@ -96,8 +91,6 @@ for o, a in opts:
         onlSuffix = True
     elif o in ("-p","--upd4"):
         curSuffix = True
-    elif o in ("-u","--update"):
-        update = True
     elif o in ("-r","--run"):
         run = int(a)
     elif o in ("-l","--lumi"):
@@ -114,8 +107,6 @@ for o, a in opts:
         adjust = True
     elif o in ("-M","--module"):
         moduleList = a.split(",")
-    elif o in ("-m","--mode"):
-        mode = int(a)
     elif o in ("-x","--execfile"):
         execFile = a
     elif o in ("-c","--comment"):
@@ -134,13 +125,6 @@ for o, a in opts:
         raise RuntimeError("unhandeled option")
 
 onl=("/TILE/ONL01" in folderPath)
-if not len(outSchema):
-    outSchema = schema
-else:
-    schema = outSchema
-if not len(inSchema):
-    inSchema = schema
-update = update or (inSchema==outSchema)
 
 from TileCalibBlobPython import TileCalibCrest
 from TileCalibBlobPython import TileCalibTools
