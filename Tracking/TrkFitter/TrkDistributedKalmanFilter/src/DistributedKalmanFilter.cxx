@@ -957,9 +957,9 @@ Trk::DistributedKalmanFilter::fit(
         C[0] = rSurf.center().x();
         C[1] = rSurf.center().y();
         C[2] = rSurf.center().z();
-        mx = rSurf.transform().rotation().block(0, 0, 3, 1);
-        my = rSurf.transform().rotation().block(0, 1, 3, 1);
-        mz = rSurf.transform().rotation().block(0, 2, 3, 1);
+        mx = rSurf.transform().rotation().block<3,1>(0, 0);
+        my = rSurf.transform().rotation().block<3,1>(0, 1);
+        mz = rSurf.transform().rotation().block<3,1>(0, 2);
         for (i = 0; i < 3; i++) {
           M[i][0] = mx[i];
           M[i][1] = my[i];

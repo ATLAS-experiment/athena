@@ -184,7 +184,7 @@ double CascadeTools::lxyError(const std::vector<TLorentzVector> &particleMom, co
   unsigned int ndim = 3*NTrk+3;
   Amg::MatrixX W_mat(3*NTrk+6,3*NTrk+6); W_mat.setZero();
   W_mat.block(0,0,ndim,ndim) = cov;
-  W_mat.block(3*NTrk+3,3*NTrk+3,3,3) = PV->covariancePosition();
+  W_mat.block<3,3>(3*NTrk+3,3*NTrk+3) = PV->covariancePosition();
   Amg::MatrixX V_err = D_vec.transpose() * W_mat * D_vec;
 
   double LxyErrsq = V_err(0,0);
@@ -239,7 +239,7 @@ double CascadeTools::tauError(const std::vector<TLorentzVector> &particleMom, co
   unsigned int ndim = 3*NTrk+3;
   Amg::MatrixX W_mat(3*NTrk+6,3*NTrk+6); W_mat.setZero();
   W_mat.block(0,0,ndim,ndim) = cov;
-  W_mat.block(3*NTrk+3,3*NTrk+3,3,3) = PV->covariancePosition();
+  W_mat.block<3,3>(3*NTrk+3,3*NTrk+3) = PV->covariancePosition();
   Amg::MatrixX V_err = D_vec.transpose() * W_mat * D_vec;
 
   double tauErrsq = V_err(0,0);
@@ -293,7 +293,7 @@ double CascadeTools::tauError(const std::vector<TLorentzVector> &particleMom, co
   unsigned int ndim = 3*NTrk+3;
   Amg::MatrixX W_mat(3*NTrk+6,3*NTrk+6); W_mat.setZero();
   W_mat.block(0,0,ndim,ndim) = cov;
-  W_mat.block(3*NTrk+3,3*NTrk+3,3,3) = PV->covariancePosition();
+  W_mat.block<3,3>(3*NTrk+3,3*NTrk+3) = PV->covariancePosition();
   Amg::MatrixX V_err = D_vec.transpose() * W_mat * D_vec;
 
   double tauErrsq = V_err(0,0);
@@ -384,7 +384,7 @@ double CascadeTools::a0zError(const std::vector<TLorentzVector> &particleMom, co
   unsigned int ndim = 3*NTrk+3;
   Amg::MatrixX W_mat(3*NTrk+6,3*NTrk+6); W_mat.setZero();
   W_mat.block(0,0,ndim,ndim) = cov;
-  W_mat.block(3*NTrk+3,3*NTrk+3,3,3) = PV->covariancePosition();
+  W_mat.block<3,3>(3*NTrk+3,3*NTrk+3) = PV->covariancePosition();
   Amg::MatrixX V_err = D_vec.transpose() * W_mat * D_vec;
 
   double a0zErrsq = V_err(0,0);
@@ -437,7 +437,7 @@ double CascadeTools::a0xyError(const std::vector<TLorentzVector> &particleMom, c
   unsigned int ndim = 3*NTrk+3;
   Amg::MatrixX W_mat(3*NTrk+6,3*NTrk+6); W_mat.setZero();
   W_mat.block(0,0,ndim,ndim) = cov;
-  W_mat.block(3*NTrk+3,3*NTrk+3,3,3) = PV->covariancePosition();
+  W_mat.block<3,3>(3*NTrk+3,3*NTrk+3) = PV->covariancePosition();
   Amg::MatrixX V_err = D_vec.transpose() * W_mat * D_vec;
 
   double a0xyErrsq = V_err(0,0);
@@ -494,7 +494,7 @@ double CascadeTools::a0Error(const std::vector<TLorentzVector> &particleMom, con
   unsigned int ndim = 3*NTrk+3;
   Amg::MatrixX W_mat(3*NTrk+6,3*NTrk+6); W_mat.setZero();
   W_mat.block(0,0,ndim,ndim) = cov;
-  W_mat.block(3*NTrk+3,3*NTrk+3,3,3) = PV->covariancePosition();
+  W_mat.block<3,3>(3*NTrk+3,3*NTrk+3) = PV->covariancePosition();
   Amg::MatrixX V_err = D_vec.transpose() * W_mat * D_vec;
 
   double a0Errsq = V_err(0,0);
