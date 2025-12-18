@@ -11,7 +11,6 @@ from InDetConfig.InDetTrackSelectionToolConfig import InDetTrackSelectionTool_HI
 #Skiming
 def HION2SkimmingToolCfg(flags):
     """Configure the example skimming tool"""
-    from TrigDecisionTool.TrigDecisionToolConfig import TrigDecisionToolCfg
     acc = ComponentAccumulator()
     
     ExtraData  = []
@@ -31,11 +30,10 @@ def HION2SkimmingToolCfg(flags):
     
     expression = ' ( ' +' || '.join(triggers) + ' )'
     
-    tdt = acc.getPrimaryAndMerge(TrigDecisionToolCfg(flags))
-    acc.addPublicTool(CompFactory.DerivationFramework.xAODStringSkimmingTool(name       = "HION2StringSkimmingTool",
-                                                                             expression = expression,
-                                                                             TrigDecisionTool=tdt), 
-                                                                             primary = True) 
+    from DerivationFrameworkTools.DerivationFrameworkToolsConfig import (
+        xAODStringSkimmingToolCfg)
+    acc.addPublicTool(acc.getPrimaryAndMerge(xAODStringSkimmingToolCfg(
+        flags, name = "HION2StringSkimmingTool", expression = expression)), primary = True)
     return(acc)
 
 #########################################################################################

@@ -107,12 +107,10 @@ def HION7SkimmingToolCfg(flags):
     else:
         expression = expression + 'count('+JetColl+'AntiKt2HIJets.pt > 15000) > 1 || count('+JetColl+'AntiKt4HIJets.pt > 15000) > 1'
 
-    from TrigDecisionTool.TrigDecisionToolConfig import TrigDecisionToolCfg    
-    tdt = acc.getPrimaryAndMerge(TrigDecisionToolCfg(flags))
-    acc.addPublicTool(CompFactory.DerivationFramework.xAODStringSkimmingTool(name       = "HION7StringSkimmingTool",
-                                                                             expression = expression,
-                                                                             TrigDecisionTool=tdt), 
-                      primary = True)
+    from DerivationFrameworkTools.DerivationFrameworkToolsConfig import (
+        xAODStringSkimmingToolCfg)
+    acc.addPublicTool(acc.getPrimaryAndMerge(xAODStringSkimmingToolCfg(
+        flags, name = "HION7StringSkimmingTool", expression = expression)), primary = True)
 
     return(acc)                             
 
