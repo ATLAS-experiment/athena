@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 # ====================================================================
 # EGAM10.py
 # This defines DAOD_EGAM10, a skimmed DAOD format for Run 3.
@@ -42,9 +42,11 @@ def EGAM10SkimmingToolCfg(flags):
     # off-line based selection
     photonSelection = "(count(" + photonRequirements + ") >= 1)"
     print("EGAM10 offline skimming expression: ", photonSelection)
-    EGAM10_OfflineSkimmingTool = CompFactory.DerivationFramework.xAODStringSkimmingTool(
-        name="EGAM10_OfflineSkimmingTool", expression=photonSelection, TrigDecisionTool="",
-    )
+    from DerivationFrameworkTools.DerivationFrameworkToolsConfig import (
+        xAODStringSkimmingToolCfg)
+    EGAM10_OfflineSkimmingTool = acc.getPrimaryAndMerge(xAODStringSkimmingToolCfg(
+        flags, name="EGAM10_OfflineSkimmingTool", expression=photonSelection))
+    filterList = [EGAM10_OfflineSkimmingTool]
 
     # trigger-based selection
     MenuType = None
@@ -65,22 +67,18 @@ def EGAM10SkimmingToolCfg(flags):
         EGAM10_TriggerSkimmingTool = CompFactory.DerivationFramework.TriggerSkimmingTool(
             name="EGAM10_TriggerSkimmingTool", TriggerListOR=allTriggers
         )
-
-        # do the AND of trigger-based and offline-based selection
-        print("EGAM10 skimming is logical AND of previous selections")
-        EGAM10_SkimmingTool = CompFactory.DerivationFramework.FilterCombinationAND(
-            name="EGAM10_SkimmingTool",
-            FilterList=[EGAM10_OfflineSkimmingTool, EGAM10_TriggerSkimmingTool],
-        )
-
-        acc.addPublicTool(EGAM10_OfflineSkimmingTool)
         acc.addPublicTool(EGAM10_TriggerSkimmingTool)
-        acc.addPublicTool(EGAM10_SkimmingTool, primary=True)
+        filterList += [EGAM10_TriggerSkimmingTool]
     else:
         print("Unknown Trigger.EDMVersion ", flags.Trigger.EDMVersion)
         print("Will not apply trigger-based skimming")
-        acc.addPublicTool(EGAM10_OfflineSkimmingTool, primary=True)
 
+    # do the AND of trigger-based and offline-based selection
+    print("EGAM10 skimming is logical AND of previous selections")
+    EGAM10_SkimmingTool = CompFactory.DerivationFramework.FilterCombinationAND(
+        name="EGAM10_SkimmingTool", FilterList=filterList)
+
+    acc.addPublicTool(EGAM10_SkimmingTool, primary=True)
     return acc
 
 

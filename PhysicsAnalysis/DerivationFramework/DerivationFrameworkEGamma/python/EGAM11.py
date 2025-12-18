@@ -20,8 +20,6 @@ from DerivationFrameworkEGamma.PhotonsCPDetailedContent import (
 
 def EGAM11SkimmingToolCfg(flags):
     """Configure the EGAM11 skimming tool"""
-    acc = ComponentAccumulator()
-
     expression = " || ".join(
         [
             "(count( EGAM11_DiElectronMass1 > 50.0*GeV ) >= 1)",
@@ -32,13 +30,10 @@ def EGAM11SkimmingToolCfg(flags):
     )
     print("EGAM11 skimming expression: ", expression)
 
-    acc.setPrivateTools(
-        CompFactory.DerivationFramework.xAODStringSkimmingTool(
-            name="EGAM11SkimmingTool", expression=expression, TrigDecisionTool=""
-        )
-    )
-
-    return acc
+    from DerivationFrameworkTools.DerivationFrameworkToolsConfig import (
+        xAODStringSkimmingToolCfg)
+    return xAODStringSkimmingToolCfg(flags, name="EGAM11SkimmingTool",
+                                     expression=expression, TrigDecisionTool=None)
 
 
 def EGAM11ZeeMassTool1Cfg(flags):
@@ -495,8 +490,7 @@ def EGAM11KernelCfg(flags, name="EGAM11Kernel", **kwargs):
         thinningTools.append(EGAM11TruthThinningTool)
 
     # skimming
-    skimmingTool = acc.popToolsAndMerge(EGAM11SkimmingToolCfg(flags))
-    acc.addPublicTool(skimmingTool)
+    skimmingTool = acc.getPrimaryAndMerge(EGAM11SkimmingToolCfg(flags))
 
     # setup the kernel
     acc.addEventAlgo(

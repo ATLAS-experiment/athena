@@ -24,18 +24,13 @@ addCaloDecorations = False
 
 def EGAM12SkimmingToolCfg(flags):
     """Configure the EGAM12 skimming tool"""
-    acc = ComponentAccumulator()
-
     # off-line based selection
     expression = "count(Electrons.pt > 4.5*GeV) >= 1"
     print("EGAM12 offline skimming expression: ", expression)
-    EGAM12_OfflineSkimmingTool = CompFactory.DerivationFramework.xAODStringSkimmingTool(
-        name="EGAM12_OfflineSkimmingTool", expression=expression, TrigDecisionTool=""
-    )
-
-    acc.addPublicTool(EGAM12_OfflineSkimmingTool, primary=True)
-
-    return acc
+    from DerivationFrameworkTools.DerivationFrameworkToolsConfig import (
+        xAODStringSkimmingToolCfg)
+    return xAODStringSkimmingToolCfg(flags, name="EGAM12_OfflineSkimmingTool",
+                                     expression=expression, TrigDecisionTool=None)
 
 
 def EGAM12KernelCfg(flags, name="EGAM12Kernel", **kwargs):
