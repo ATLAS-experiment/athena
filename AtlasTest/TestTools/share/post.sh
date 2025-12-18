@@ -68,7 +68,6 @@ s/([0-9][0-9]* ms total)/(xx ms total)/
 s/[[][0-9;]*m//g
 s/INFO set[(][)]/INFO set([])/  #py2 vs py3
 s/^RootDatabase[^ ]\\+/RootDatabase/   #logging change in APR RootStorageSvc
-s/^.*(DEBUG DB Action Commit).*$/\\\\1/
 EOF
 
 # Patterns that cannot be ignored
