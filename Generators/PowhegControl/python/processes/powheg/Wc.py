@@ -107,7 +107,6 @@ class Wc(PowhegRES):
         self.add_keyword("maxseeds")
         self.add_keyword("min_W_mass", 2.5)
         self.add_keyword("minlo_nnll")
-        self.add_keyword("minlo", 1)
         self.add_keyword("mintupbratlim")
         self.add_keyword("mintupbxless")
         self.add_keyword("ncall1", 20000)
