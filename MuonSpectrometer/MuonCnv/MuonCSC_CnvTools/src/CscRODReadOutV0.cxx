@@ -84,6 +84,7 @@ double CscRODReadOutV0::findCharge() {
     int n = 0;
     for (int i = 0; i < N_SAMPLE; i++) {
         if (auto amplitude = signal_amplitude(time[i]); amplitude !=0){
+           //coverity[DIVIDE_BY_ZERO:FALSE]
            adcCount = adcCount + amp[i] / amplitude;
         } else {
           continue;
