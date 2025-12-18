@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "RPC_CondCabling/RPCchamberdata.h"
@@ -39,10 +39,13 @@ void RPCchamberdata::reset_data() { m_fail = true; }
 bool RPCchamberdata::confirm_connectors(ViewType side, RPCchamber::chamberParameters& params) {
     int strips = (side == ViewType::Phi) ? params.phiStrips : params.etaStrips;
 
-    if (side == ViewType::Phi)
+    if (side == ViewType::Phi){
+        if (params.stripsInPhiCon == 0) return false;
         params.phiConnectors = strips / params.stripsInPhiCon;
-    else
-        params.etaConnectors = strips / params.stripsInEtaCon;
+        } else {
+          if (params.stripsInEtaCon == 0) return false;
+          params.etaConnectors = strips / params.stripsInEtaCon;
+        }
 
     int connectors = (side == ViewType::Phi) ? params.phiConnectors : params.etaConnectors;
     int strips_in_conn = (side == ViewType::Phi) ? params.stripsInPhiCon : params.stripsInEtaCon;
