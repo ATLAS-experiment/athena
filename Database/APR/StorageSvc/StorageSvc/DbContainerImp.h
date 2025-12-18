@@ -16,6 +16,7 @@
 #include "StorageSvc/pool.h"
 #include "StorageSvc/IDbContainer.h"
 #include "POOLCore/DbPrint.h"
+#include "GaudiKernel/StatusCode.h"
 
 // STL include files
 #include <map>
@@ -74,10 +75,10 @@ namespace pool    {
     /// Standard destructor
     virtual ~DbContainerImp();
     /// Commit single entry to container
-    virtual DbStatus writeObject(ActionList::value_type& /* entry */)  
-    { return Error;                                                   }
+    virtual StatusCode writeObject(ActionList::value_type& /* entry */)  
+    { return StatusCode::FAILURE;                                                   }
     /// Execute object modification requests during a transaction
-    virtual DbStatus commitTransaction();
+    virtual StatusCode commitTransaction();
 
   public:
     explicit DbContainerImp(const std::string& name);
@@ -93,35 +94,35 @@ namespace pool    {
     /// Suggest next Record ID for tbe next object written - used only with synced indexes
     virtual void useNextRecordId(uint64_t) override {};
     /// Close the container and deallocate resources
-    virtual DbStatus close() override;
+    virtual StatusCode close() override;
 
     /// Access options
     /** @param opt      [IN]  Reference to option object.
       *
-      * @return DbStatus code indicating success or failure.  
+      * @return StatusCode code indicating success or failure.  
       */
-    virtual DbStatus getOption(DbOption& opt) override;
+    virtual StatusCode getOption(DbOption& opt) override;
 
     /// Set options
     /** @param opt      [IN]  Reference to option object.
       *
-      * @return DbStatus code indicating success or failure.  
+      * @return StatusCode code indicating success or failure.  
       */
-    virtual DbStatus setOption(const DbOption& opt) override;
+    virtual StatusCode setOption(const DbOption& opt) override;
 
     /// Execute Transaction Action
-    virtual DbStatus transAct(Transaction::Action) override;
+    virtual StatusCode transAct(Transaction::Action) override;
     /// Store object in location
-    virtual DbStatus store(      const void* object,
+    virtual StatusCode store(      const void* object,
                                  DbContainer&  cntH,
                                  ShapeH shape) override;
     /// In place allocation of object location
-    virtual DbStatus allocate(DbContainer& cntH,
+    virtual StatusCode allocate(DbContainer& cntH,
                               const void* object,
                               ShapeH shape,
                               Token::OID_t& oid) override;
     /// Fetch next object address to set token
-    virtual DbStatus next(Token::OID_t& linkH) override;
+    virtual StatusCode next(Token::OID_t& linkH) override;
 
     /// Find object within the container and load it into memory
     /** @param  ptr    [IN/OUT]  ROOT-style address of the pointer to object
@@ -133,7 +134,7 @@ namespace pool    {
       *                          will differ from the preferred oid.
       * @return Status code indicating success or failure.
       */
-    virtual DbStatus load( void** ptr, ShapeH shape,
+    virtual StatusCode load( void** ptr, ShapeH shape,
                            const Token::OID_t& lnkH,
                            Token::OID_t&       oid,
                            bool                any_next) override;
@@ -145,7 +146,7 @@ namespace pool    {
       *
       * @return Status code indicating success or failure.
       */
-    virtual DbStatus loadObject(void** ptr, ShapeH shape, Token::OID_t& oid) = 0;
+    virtual StatusCode loadObject(void** ptr, ShapeH shape, Token::OID_t& oid) = 0;
 
   };
 }       // End namespace pool

@@ -8,7 +8,6 @@
  * @brief Test BranchContainer in Branch Fill Mode with Indexing
  */
 
-
 /*
   This test will write different number of objects (in this case DbStrings)
   (3 objects to Container A and 1 object to Container B to the same Database, in one transaction)
@@ -17,6 +16,7 @@
 
 #include "PersistentDataModel/Guid.h"
 #include "PersistentDataModel/Token.h"
+#include "GaudiKernel/StatusCode.h"
 
 #include "AthenaKernel/getMessageSvc.h"
 #include "StorageSvc/DbType.h"
@@ -102,21 +102,21 @@ void test(const DbType storageType, const std::string& filename) {
    }
    // Create shape for DbString
    Guid guid = pool::DbReflex::guid(class_String);
-   const pool::Shape* shape = 0;
-   if ( storSvc->getShape( fd, guid, shape ) == pool::IStorageSvc::SHAPE_NOT_AVAILIBLE ) {
+   const pool::Shape* shape = nullptr;
+   if( !storSvc->getShape( fd, guid, shape ).isSuccess() ) {
       cout << "need to create a Shape for DbString" << endl;
-      storSvc->createShape( fd, containerNameA, guid, shape );
-   }
-   if( ! shape ) {
-      throw std::runtime_error( "Could not create a persistent shape." );
+      shape = storSvc->createShape(guid);
+      if( !shape ) {
+         throw std::runtime_error( "Could not create a persistent shape." );
+      }
    }
 
    // Set container for master index (enables index synchronization between TTrees)
    DbOption masterIdxOpt("INDEX_MASTER", "", "*");
    DbDatabase dbH(static_cast<DbDatabaseObj*>(connection->handle()));
-   dbH.setOption(masterIdxOpt);
-   //storage->setDatabaseOption(fd, masterIdxOpt);
-
+   if( !dbH.setOption(masterIdxOpt).isSuccess() ) {
+     throw std::runtime_error( "Could not set master index option" );
+   }
    // Commit here to test empty commits
    if( ! ( storSvc->endTransaction( connection, pool::Transaction::TRANSACT_COMMIT ).isSuccess() ) ) {
       throw std::runtime_error( "Empty commit FAILED" );
@@ -191,17 +191,17 @@ void test(const DbType storageType, const std::string& filename) {
    if( !storSvc->startSession( pool::READ, storageType.type(), sessionHandle ).isSuccess() ) {
       throw std::runtime_error( "Could not start the read session." );
    }
-   if( storSvc->connect( sessionHandle, pool::READ, fd ) != pool::DbStatus::Success ) {
+   if( !storSvc->connect( sessionHandle, pool::READ, fd ).isSuccess() ) {
       throw std::runtime_error( "Could not start a read connection." );
    }
    // get shape again
    shape = nullptr;
-   if ( storSvc->getShape( fd, guid, shape ) == pool::IStorageSvc::SHAPE_NOT_AVAILIBLE ) {
+   if( !storSvc->getShape( fd, guid, shape ).isSuccess() ) {
       cout << "need to create a Shape for DbString" << endl;
-      storSvc->createShape( fd, containerNameA, guid, shape );
-   }
-   if( ! shape ) {
-      throw std::runtime_error( "Could not create a persistent shape." );
+      shape = storSvc->createShape(guid);
+      if( !shape ) {
+         throw std::runtime_error( "Could not create a persistent shape." );
+      }
    }
 
    pool::DbString readString;

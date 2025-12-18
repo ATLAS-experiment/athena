@@ -18,6 +18,7 @@
 #include "StorageSvc/DbContainerImp.h"
 
 // Forward declarations
+class StatusCode;
 namespace CINT { class IOHandler; }
 class TDirectory;
 class TBuffer;
@@ -57,28 +58,28 @@ namespace pool  {
 
   protected:
     /// Commit single entry to container
-    virtual DbStatus writeObject(ActionList::value_type&) override;
+    virtual StatusCode writeObject(ActionList::value_type&) override;
   public:
     explicit RootKeyContainer(const std::string& name);
     virtual ~RootKeyContainer();
     RootKeyContainer(const RootKeyContainer&) = delete;
     RootKeyContainer& operator=(const RootKeyContainer&) = delete;
     /// Close the container and deallocate resources
-    virtual DbStatus close() override;
+    virtual StatusCode close() override;
     /// Open the container for object access
-    virtual DbStatus open(DbDatabase& dbH,
-                          const std::string& nam, 
-                          const DbTypeInfo* info,
-                          DbAccessMode mod) override;
+    virtual StatusCode open(DbDatabase& dbH,
+                            const std::string& nam, 
+                            const DbTypeInfo* info,
+                            DbAccessMode mod) override;
     /// Check if we can access the container for reading with the given type
-    virtual DbStatus checkAccess(DbDatabase& dbH,
+    virtual StatusCode checkAccess(DbDatabase& dbH,
                                  const std::string& nam) const override final;
     /// Number of entries within the container
     virtual uint64_t size() override;
     /// Number of record in the container
     virtual uint64_t nextRecordId() override;
     /// Fetch next object address to set token
-    virtual DbStatus next(Token::OID_t& linkH) override;
+    virtual StatusCode next(Token::OID_t& linkH) override;
 
     /// Find object by object identifier and load it into memory
    /** @param  ptr    [IN/OUT]  ROOT-style address of the pointer to object
@@ -87,36 +88,36 @@ namespace pool  {
       *
       * @return Status code indicating success or failure.
       */
-    virtual DbStatus loadObject( void** ptr, ShapeH shape, 
-                                 Token::OID_t& oid) override;
+    virtual StatusCode loadObject( void** ptr, ShapeH shape,
+                                   Token::OID_t& oid) override;
 
     /// Interface Implementation: Find entry in container
-    virtual DbStatus load( void** ptr, ShapeH shape,
-                           const Token::OID_t& linkH,
-                           Token::OID_t& oid,
-                           bool          any_next) override;
+    virtual StatusCode load( void** ptr, ShapeH shape,
+                             const Token::OID_t& linkH,
+                             Token::OID_t& oid,
+                             bool          any_next) override;
 
     /// Access options
     /** @param opt      [IN]  Reference to option object.
       *
-      * @return DbStatus code indicating success or failure.  
+      * @return StatusCode code indicating success or failure.  
       */
-    virtual DbStatus getOption(DbOption& opt) override;
+    virtual StatusCode getOption(DbOption& opt) override;
 
     /// Set options
     /** @param opt      [IN]  Reference to option object.
       *
-      * @return DbStatus code indicating success or failure.  
+      * @return StatusCode code indicating success or failure.  
       */
-    virtual DbStatus setOption(const DbOption& opt) override;
+    virtual StatusCode setOption(const DbOption& opt) override;
 
     /// Execute end of object modification requests during a transaction
     /** @param refTr    [IN]  Transaction reference
       *
-      * @return DbStatus code indicating success or failure.  
+      * @return StatusCode code indicating success or failure.  
       */
     /// Execute transaction action
-    virtual DbStatus transAct(Transaction::Action action) override;
+    virtual StatusCode transAct(Transaction::Action action) override;
   };
 }
 #endif //POOL_ROOTKEYCONTAINER_H

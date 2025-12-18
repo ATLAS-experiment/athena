@@ -33,7 +33,7 @@ SimpleUtilityBase::SimpleUtilityBase( int argc, char* argv[] ):
 SimpleUtilityBase::~SimpleUtilityBase()
 {
    if( storageSvc ) {
-      if( session ) storageSvc->endSession( session );
+      if( session ) storageSvc->endSession( session ).ignore();
       storageSvc->release();
    }
 }
@@ -63,7 +63,6 @@ void SimpleUtilityBase::startSession ATLAS_NOT_THREAD_SAFE ()
    }
    if( technologyId == pool::ROOT_StorageType.majorType() ) {
       // Disable warnings about unknown classes when opening the file
-      // ----  (NOT needed when nostreamers option is used)
       gErrorIgnoreLevel = kError;
    }
 }
@@ -78,11 +77,10 @@ std::string SimpleUtilityBase::readFileGUID( const std::string& pfn )
    }
    pool::DatabaseConnection* connection = fd.dbc();
    DbDatabase dbH(static_cast<DbDatabaseObj*>(connection->handle()));
-   if( ! dbH.param( "FID", fid ).isSuccess() ) {
-      storageSvc->disconnect( fd );
+   StatusCode sc = dbH.param( "FID", fid );
+   if( !storageSvc->disconnect( fd ).isSuccess() or !sc.isSuccess() ) {
       throw std::runtime_error( "Could not retrieve the FID from file \"" + pfn + "\"" );
    }
-   storageSvc->disconnect( fd );
    return fid;
 }
 

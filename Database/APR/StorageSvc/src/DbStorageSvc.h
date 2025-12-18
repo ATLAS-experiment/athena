@@ -1,8 +1,7 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-// $Header: /cvs/PF/pool/StorageSvc/src/DbStorageSvc.h,v 1.36 2008/03/04 18:34:59 frankb Exp $
 #ifndef POOL_DBSTORAGESVC_H
 #define POOL_DBSTORAGESVC_H
 
@@ -74,7 +73,7 @@ namespace pool  {
     DbDomain& domainHdl()                                 {   return m_domH;  }
 
     /// IInterface implementation: Query interfaces of Interface
-    virtual DbStatus queryInterface(const Guid& riid, void** ppvUnknown);
+    virtual StatusCode queryInterface(const Guid& riid, void** ppvUnknown);
 
     /// IInterface implementation: Reference Interface instance               
     virtual unsigned int addRef();
@@ -85,10 +84,10 @@ namespace pool  {
     /**@name IService interface                                   */
 
     /// IService implementation override: Initilize Service
-    virtual DbStatus initialize();
+    virtual StatusCode initialize();
 
     /// IService implementation override: Finalize Service     
-    virtual DbStatus finalize();
+    virtual StatusCode finalize();
 
     /// IService implementation: Retrieve name of the service               
     virtual const std::string& name() const    { return m_name;  }
@@ -103,14 +102,14 @@ namespace pool  {
       * @param   refpTok  [OUT] Reference to location for storing the
       *                         pointer of the persistent object token.
       *
-      * @return                 DbStatus code indicating success or failure.
+      * @return                 StatusCode code indicating success or failure.
       */
-    virtual DbStatus allocate(      FileDescriptor&       refDB,
-                                    const std::string&    refCont,
-                                    int                   technology,
-                                    const void*           object,
-                                    ShapeH                shapeH,
-                                    Token*&               refpTok);
+    virtual StatusCode allocate( FileDescriptor&       refDB,
+                                 const std::string&    refCont,
+                                 int                   technology,
+                                 const void*           object,
+                                 ShapeH                shapeH,
+                                 Token*&               refpTok);
 
     /// Read a persistent object from the medium.
     /** Reading an object does not create the object.
@@ -119,12 +118,12 @@ namespace pool  {
       * @param   persToken [IN] Reference to persistent token information.
       * @param   object   [OUT] Pointer to persistent data pointer.
       * @param   shapeH    [IN] Desired object shape to be read
-      * @return                 DbStatus code indicating success or failure.
+      * @return                 StatusCode code indicating success or failure.
       */
-    virtual DbStatus read(          const FileDescriptor& refDB,
-                                    const Token&          persToken,
-                                    ShapeH                shapeH,
-                                    void**                object);
+    virtual StatusCode read(     const FileDescriptor& refDB,
+                                 const Token&          persToken,
+                                 ShapeH                shapeH,
+                                 void**                object);
 
     /// Get container name for object
     /**
@@ -146,28 +145,19 @@ namespace pool  {
       * @param   shapeH   [OUT] Handle to persistent mapping of a given
       *                         object type.
       *
-      * @return                 DbStatus code indicating success or failure.
+      * @return                 StatusCode code indicating success or failure.
       */
-    virtual DbStatus getShape(    FileDescriptor&       refDB,
+    virtual StatusCode getShape(  FileDescriptor&       refDB,
                                   const Guid&           objType,
                                   ShapeH&               shapeH);
 
-    /// Create a persistent shape a given Database container location.
-    /** This request involves Database actions. On creation of a 
-      * shape the corresponding Database container is created.
-      *
-      * @param   refDB     [IN] Reference to Database descriptor 
-      * @param   cntName   [IN] Shape/Container name.
+    /// Create a Shape representation based on a ShapeID
+    /**
       * @param   shapeID   [IN] Shape identifier.
-      * @param   shapeH   [OUT] Handle to persistent mapping of a given
-      *                         object type.
       *
-      * @return                 DbStatus code indicating success or failure.
+      * @return            Handle to persistent mapping of a given object type.
       */
-    virtual DbStatus createShape( const FileDescriptor& refDB,
-                                  const std::string&    cntName,
-                                  const Guid&           shapeID,
-                                  ShapeH&               shapeH);
+    virtual ShapeH     createShape( const Guid& shapeID ) override final;
 
     /// Start a new Database Session.
     /** The Database session handles Databases of one given type. This
@@ -185,11 +175,11 @@ namespace pool  {
       *                         This handle may later be used to open a
       *                         new Database connection.
       *
-      * @return                 DbStatus code indicating success or failure.
+      * @return                 StatusCode code indicating success or failure.
       */
-    virtual DbStatus startSession(int                 mode,
-                                  int                 tech,
-                                  SessionH&           session);
+    virtual StatusCode startSession(int                 mode,
+                                    int                 tech,
+                                    SessionH&           session);
 
     /// End the Database session.
     /** The  request to end a Database session requires, that all pending 
@@ -202,9 +192,9 @@ namespace pool  {
       *                         session. This handle was retrieved when 
       *                         starting the session. 
       *
-      * @return                 DbStatus code indicating success or failure.
+      * @return                 StatusCode code indicating success or failure.
       */
-    virtual DbStatus endSession(  const SessionH       session);
+    virtual StatusCode endSession(  const SessionH       session);
 
     /// Check the existence of a logical Database unit.
     /** 
@@ -216,11 +206,11 @@ namespace pool  {
       *                         On successful return the Database handle is
       *                         valid.
       *
-      * @return                 DbStatus code indicating success or failure.
+      * @return                 StatusCode code indicating success or failure.
       */
-    virtual DbStatus existsConnection(const SessionH        sessionH, 
-                                      int                   mode,
-                                      const FileDescriptor& refDB);
+    virtual StatusCode existsConnection(const SessionH        sessionH,
+                                        int                   mode,
+                                        const FileDescriptor& refDB);
 
     /// Connect to a logical Database unit.
     /** A connection is equivalent to the triple (OCISession, OCIServer, 
@@ -236,11 +226,11 @@ namespace pool  {
       *                         On successful return the Database handle is
       *                         valid.
       *
-      * @return                 DbStatus code indicating success or failure.
+      * @return                 StatusCode code indicating success or failure.
       */
-    virtual DbStatus connect(     const SessionH      sessionH, 
-                                  int                 mode,
-                                  FileDescriptor&     refDB);
+    virtual StatusCode connect( const SessionH      sessionH,
+                                int                 mode,
+                                FileDescriptor&     refDB);
 
     /// Disconnect from a logical Database unit.
     /** The  request for disconnect requires, that all pending Transactions
@@ -254,19 +244,19 @@ namespace pool  {
       *                         On successful return the Database handle will
       *                         be invalidated.
       *
-      * @return                 DbStatus code indicating success or failure.
+      * @return                 StatusCode code indicating success or failure.
       */
-    virtual DbStatus disconnect(  FileDescriptor&  refDB);
+    virtual StatusCode disconnect(  FileDescriptor&  refDB);
 
     /// Query the access mode of a Database unit.
     /**
       * @param    refDB    [IN] Descriptor of the Database to be queried. 
       * @param    mode    [OUT] Open mod to the database.
       *
-      * @return                 DbStatus code indicating success or failure.
+      * @return                 StatusCode code indicating success or failure.
       */
-    virtual DbStatus openMode(    FileDescriptor&     refDB,
-                                  int&                mode );
+    virtual StatusCode openMode( FileDescriptor&     refDB,
+                                 int&                mode );
 
 
     /// End/Finish an existing Transaction sequence.
@@ -283,10 +273,10 @@ namespace pool  {
       *                         underlying technology supports the necessary
       *                         features.
       *
-      * @return                 DbStatus code indicating success or failure.
+      * @return                 StatusCode code indicating success or failure.
       */
-    virtual DbStatus endTransaction( ConnectionH conn,
-                                     Transaction::Action typ);
+    virtual StatusCode endTransaction( ConnectionH conn,
+                                       Transaction::Action typ);
 
     /// Access options for a given database domain.
     /** Domain options are global options, which refer to the
@@ -298,10 +288,10 @@ namespace pool  {
       *  @param   sessionH  [IN] Session context to be used to open the Database.
       *  @param   opt       [IN] Reference to option object.
       *
-      *  @return DbStatus code indicating success or failure.  
+      *  @return StatusCode code indicating success or failure.  
       */
-    virtual DbStatus getDomainOption(const SessionH  sessionH, 
-                                     DbOption&       opt);
+    virtual StatusCode getDomainOption(const SessionH  sessionH,
+                                       DbOption&       opt);
 
     /// Set options for a given database domain.
     /** Domain options are global options, which refer to the
@@ -313,10 +303,10 @@ namespace pool  {
       *  @param   sessionH  [IN] Session context to be used to open the Database.
       *  @param   opt       [IN] Reference to option object.
       *
-      *  @return DbStatus code indicating success or failure.  
+      *  @return StatusCode code indicating success or failure.
       */
-    virtual DbStatus setDomainOption(const SessionH  sessionH, 
-                                     const DbOption& opt);
+    virtual StatusCode setDomainOption(const SessionH  sessionH, 
+                                       const DbOption& opt);
   };
 }       // End namespace pool
 #endif  // POOL_DBSTORAGESVC_H

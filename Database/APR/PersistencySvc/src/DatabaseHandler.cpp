@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "DatabaseHandler.h"
@@ -13,6 +13,7 @@
 #include "StorageSvc/DbReflex.h"
 #include "StorageSvc/DbTypeInfo.h"
 #include "StorageSvc/DbConnection.h"
+#include "POOLCore/DbPrint.h"
 
 #include <exception>
 #include <memory>
@@ -39,10 +40,9 @@ pool::PersistencySvc::DatabaseHandler::DatabaseHandler( pool::IStorageSvc& stora
 pool::PersistencySvc::DatabaseHandler::~DatabaseHandler()
 {
    int mode = 0;
-   pool::DbStatus sc = m_storageSvc.openMode(m_fileDescriptor, mode);
-   if ( sc.isSuccess() ) {
+   if( m_storageSvc.openMode(m_fileDescriptor, mode).isSuccess() ) {
      rollBackTransaction();
-     m_storageSvc.disconnect( m_fileDescriptor );
+     m_storageSvc.disconnect( m_fileDescriptor ).ignore();
    }
 }
 
@@ -68,7 +68,7 @@ pool::PersistencySvc::DatabaseHandler::commitAndHoldTransaction()
 void
 pool::PersistencySvc::DatabaseHandler::rollBackTransaction()
 {
-   m_storageSvc.endTransaction( m_fileDescriptor.dbc(), Transaction::TRANSACT_ROLLBACK );
+   m_storageSvc.endTransaction( m_fileDescriptor.dbc(), Transaction::TRANSACT_ROLLBACK ).ignore();
 }
 
 
@@ -87,7 +87,10 @@ pool::PersistencySvc::DatabaseHandler::containers()
    std::vector<const Token*> containerTokens;
    pool::DatabaseConnection* connection = m_fileDescriptor.dbc();
    DbDatabase dbH(static_cast<DbDatabaseObj*>(connection->handle()));
-   dbH.containers(containerTokens, false);
+   if( !dbH.containers(containerTokens, false).isSuccess() ) {
+      DbPrint log( m_fileDescriptor.PFN() );
+      log << MSG::ERROR << "Could not retrieve the list of containers." << endmsg;
+   }
    for ( std::vector<const Token*>::const_iterator iToken = containerTokens.begin();
          iToken != containerTokens.end(); ++iToken ) {
       Token tok (*iToken);
@@ -151,12 +154,11 @@ pool::PersistencySvc::DatabaseHandler::writeObject( const std::string& container
   if ( ! object ) return token;
 
   // Get the persistent shape.
-  const pool::Shape* shape = 0;
+  const pool::Shape* shape = nullptr;
   Guid guid = DbReflex::guid(type);
-  if ( m_storageSvc.getShape( m_fileDescriptor, guid, shape ) == pool::IStorageSvc::SHAPE_NOT_AVAILIBLE ) {
-    m_storageSvc.createShape( m_fileDescriptor, containerName, guid, shape );
+  if( !m_storageSvc.getShape( m_fileDescriptor, guid, shape ).isSuccess() ) {
+     shape = m_storageSvc.createShape( guid );
   }
-
   if ( shape )  {
     if ( m_storageSvc.allocate( m_fileDescriptor,
                                 containerName,
@@ -177,14 +179,14 @@ pool::PersistencySvc::DatabaseHandler::readObject( const Token& token, void* obj
   void* result( object );
 
   // Get the persistent shape
-  const pool::Shape* shape = 0;
-  if ( m_storageSvc.getShape( m_fileDescriptor, token.classID(), shape ) != pool::IStorageSvc::IS_PERSISTENT_SHAPE )
+  const pool::Shape* shape = nullptr;
+  if( !m_storageSvc.getShape( m_fileDescriptor, token.classID(), shape ).isSuccess() ) {
     return result;
-
-  if (! m_storageSvc.read( m_fileDescriptor, token, shape, &result ).isSuccess() ) {
-    result = 0;
   }
-
+  if( !m_storageSvc.read( m_fileDescriptor, token, shape, &result ).isSuccess() ) {
+    return nullptr;
+  }
+  
   return result;
 }
 
@@ -198,14 +200,8 @@ pool::PersistencySvc::DatabaseHandler::attribute( const std::string& attributeNa
   pool::DbOption databaseOption( attributeName, option );
   pool::DatabaseConnection* connection = m_fileDescriptor.dbc();
   DbDatabase dbH(static_cast<DbDatabaseObj*>(connection->handle()));
-  pool::DbStatus sc = dbH.getOption(databaseOption);
-  if ( !sc.isSuccess() ) return false;
-  if ( databaseOption.i_getValue( typeInfo, data ).isSuccess() ) {
-    return true;
-  }
-  else {
-    return false;
-  }
+  if( !dbH.getOption(databaseOption).isSuccess() ) return false;
+  return databaseOption.i_getValue( typeInfo, data ).isSuccess();
 }
 
 
@@ -216,15 +212,8 @@ pool::PersistencySvc::DatabaseHandler::setAttribute( const std::string& attribut
                                                      const std::string& option )
 {
   pool::DbOption databaseOption( attributeName, option );
-  pool::DbStatus sc = databaseOption.i_setValue( typeInfo, const_cast<void*>( data ) );
-  if ( !sc.isSuccess() ) return false;
+  if( !databaseOption.i_setValue( typeInfo, const_cast<void*>( data ) ).isSuccess() ) return false;
   pool::DatabaseConnection* connection = m_fileDescriptor.dbc();
   DbDatabase dbH(static_cast<DbDatabaseObj*>(connection->handle()));
-  sc = dbH.setOption(databaseOption);
-  if ( !sc.isSuccess() ) {
-    return false;
+  return dbH.setOption(databaseOption).isSuccess();
   }
-  else {
-    return true;
-  }
-}

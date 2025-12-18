@@ -1,8 +1,7 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-// $Id: DbOption.cpp 726071 2016-02-25 09:23:05Z krasznaa $
 //====================================================================
 //  Implementation file of a Database options
 //--------------------------------------------------------------------
@@ -15,6 +14,7 @@
 // Framework include files
 #include "StorageSvc/pool.h"
 #include "StorageSvc/DbOption.h"
+#include "GaudiKernel/StatusCode.h"
 
 // C++ include files
 #include <iostream>
@@ -23,15 +23,15 @@ using namespace pool;
 
 namespace {
   template <class T, class Q> struct Marshal {
-    static DbStatus get(const void* from, void* to)   {
+    static StatusCode get(const void* from, void* to)   {
       *(Q*)to = *(T*)from;  
-     return Success;
-   }
+      return StatusCode::SUCCESS;
+    }
   };
   template <>
-    inline DbStatus Marshal<double, float>::get(const void* from, void* to)  {
+    inline StatusCode Marshal<double, float>::get(const void* from, void* to)  {
     *(float*)to = float(*(double*)from);  
-    return Success;
+    return StatusCode::SUCCESS;
   }
 }
 
@@ -47,7 +47,7 @@ std::string DbOption::typeName() const  {
 }
 
 /// Set the option value
-DbStatus DbOption::i_setValue(const std::type_info& typ, const void* value)  {
+StatusCode DbOption::i_setValue(const std::type_info& typ, const void* value)  {
   if ( typ == typeid(bool) )
     return setValue(DbColumn::BOOL, value);
   else if ( typ == typeid(char) )
@@ -92,11 +92,11 @@ DbStatus DbOption::i_setValue(const std::type_info& typ, const void* value)  {
     return setValue(DbColumn::NTCHAR, value);
   else
     std::cout << "DbOption::getValue> unknown data type" << std::endl;
-  return Error;
+  return StatusCode::FAILURE;
 }
 
 /// Set the option value
-DbStatus DbOption::i_getValue(const std::type_info& typ, void* value) const {
+StatusCode DbOption::i_getValue(const std::type_info& typ, void* value) const {
   //const char* n = typ.name();
   if ( typ == typeid(bool) )
     return getValue(DbColumn::BOOL, value);
@@ -142,11 +142,11 @@ DbStatus DbOption::i_getValue(const std::type_info& typ, void* value) const {
     return getValue(DbColumn::NTCHAR, value);
   else
     std::cout << "DbOption::getValue> unknown data type" << std::endl;
-  return Error;
+  return StatusCode::FAILURE;
 }
 
 /// Set the option value
-DbStatus DbOption::setValue(DbColumn::Type typ, const void* value) {
+StatusCode DbOption::setValue(DbColumn::Type typ, const void* value) {
   m_type = typ;
   switch(type())   {
   case DbColumn::UCHAR:
@@ -171,27 +171,27 @@ DbStatus DbOption::setValue(DbColumn::Type typ, const void* value) {
     return Marshal<long long int,long long int>::get(value,&m_value.val_long);
   case DbColumn::BOOL:
     m_value.val_int = *(bool*)value ? 1 : 0;
-    return Success;
+    return StatusCode::SUCCESS;
   case DbColumn::FLOAT:
     return Marshal<float,double>::get(value,&m_value.val_double);
   case DbColumn::DOUBLE:
     return Marshal<double,double>::get(value,&m_value.val_double);
   case DbColumn::NTCHAR:
     m_value.val_pchar = *(char**)value;
-    return Success;
+    return StatusCode::SUCCESS;
   case DbColumn::POINTER:
   case DbColumn::ANY:
     m_value.val_pvoid = *(void**)value;
-    return Success;
+    return StatusCode::SUCCESS;
   case DbColumn::UNKNOWN:
   default:
     std::cout << "DbOption::setValue> unknown data type" << std::endl;
   }
-  return Error;
+  return StatusCode::FAILURE;
 }
 
 /// Set the option value
-DbStatus DbOption::getValue(DbColumn::Type /*typ*/, void* value) const  {
+StatusCode DbOption::getValue(DbColumn::Type /*typ*/, void* value) const  {
   switch(type())   {
   case DbColumn::UCHAR:
     return Marshal<int, unsigned char>::get(&m_value.val_int, value);
@@ -215,7 +215,7 @@ DbStatus DbOption::getValue(DbColumn::Type /*typ*/, void* value) const  {
     return Marshal<long long int, long long int>::get(&m_value.val_int, value);
   case DbColumn::BOOL:
     *(bool*)value = m_value.val_int == 1;
-    return Success;
+    return StatusCode::SUCCESS;
   case DbColumn::FLOAT:
     return Marshal<double, float>::get(&m_value.val_int, value);
   case DbColumn::DOUBLE:
@@ -224,10 +224,10 @@ DbStatus DbOption::getValue(DbColumn::Type /*typ*/, void* value) const  {
   case DbColumn::POINTER:
   case DbColumn::ANY:
     *(void**)value = m_value.val_pvoid;
-    return Success;
+    return StatusCode::SUCCESS;
   case DbColumn::UNKNOWN:
   default:
     std::cout << "DbOption::getValue> unknown data type" << std::endl;
   }
-  return Error;
+  return StatusCode::FAILURE;
 }

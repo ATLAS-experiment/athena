@@ -3,7 +3,7 @@ Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "POOLCore/DbPrint.h"
-
+#include "AthenaKernel/getMessageSvc.h"
 
 using namespace pool;
 

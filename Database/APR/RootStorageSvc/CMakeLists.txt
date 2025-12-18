@@ -15,7 +15,7 @@ atlas_add_component( RootStorageSvc
                    INCLUDE_DIRS ${ROOT_INCLUDE_DIRS} ${VDT_INCLUDE_DIRS}
                    PRIVATE_LINK_LIBRARIES ${ROOT_LIBRARIES} RootUtils RootUtilsPyROOT
                                           RootAuxDynIOHeaders StorageSvc POOLCore
-                                          GaudiKernel CxxUtils AthenaBaseComps
+                                          GaudiKernel AthenaKernel CxxUtils AthenaBaseComps
                 ) 
 
 atlas_add_test( branchContIdx_test

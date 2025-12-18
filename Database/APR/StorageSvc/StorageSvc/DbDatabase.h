@@ -24,6 +24,8 @@
 #include <string>
 #include <map>
 
+class StatusCode;
+
 /*
  *  POOL namespace declaration
  */
@@ -118,9 +120,9 @@ namespace pool  {
     IOODatabase* db();
     const IOODatabase* db()   const;
     /// Add domain to session
-    DbStatus add(const std::string& name, DbContainerObj* cnt);
+    StatusCode add(const std::string& name, DbContainerObj* cnt);
     /// Find domain in session
-    DbStatus remove(const DbContainerObj* cnt);
+    StatusCode remove(const DbContainerObj* cnt);
     /// Select container object in Database
     const DbContainerObj* find(const std::string& nam) const;
     /// Select container object in Database
@@ -139,7 +141,7 @@ namespace pool  {
       * @param   mode      [IN]  Open mode (Default=READ).
       * @return Status code indicating success or failure.
       */
-    DbStatus open(DbDomain&          domH,
+    StatusCode open(DbDomain&          domH,
                   const std::string& pfn,
                   const std::string& fid,
                   DbAccessMode mode = pool::READ);
@@ -147,47 +149,47 @@ namespace pool  {
     /** @param   mode      [IN]  Open mode (Valid modes are READ, UPDATE).
       * @return Status code indicating success or failure.
       */
-    DbStatus reopen(DbAccessMode mode = pool::READ);
+    StatusCode reopen(DbAccessMode mode = pool::READ);
     /// Close Database
-    DbStatus close();
+    StatusCode close();
     /// End database access, but still leave database accessible
-    DbStatus retire();
+    StatusCode retire();
     /// Check if the database was opened
     bool isOpen() const;
     /// Commit/Rollback Database Transaction
     /** @param   action     [IN]  action to perform
       * @return Status code indicating success or failure.
       */
-    DbStatus transAct(Transaction::Action action);
+    StatusCode transAct(Transaction::Action action);
     /// Set options
     /** @param   refOpt    [IN]  Reference to option object.
       * @return Status code indicating success or failure.
       */
-    DbStatus setOption(const DbOption& refOpt);
+    StatusCode setOption(const DbOption& refOpt);
     /// Access options
     /** @param   refOpt    [IN]  Reference to option object.
       * @return Status code indicating success or failure.
       */
-    DbStatus getOption(DbOption& refOpt);
+    StatusCode getOption(DbOption& refOpt);
     /// Add a persistent parameter to the file
-    DbStatus addParam(const std::string& nam, const std::string& val);
+    StatusCode addParam(const std::string& nam, const std::string& val);
     /// Retrieve the number of user parameters
     int nParam();
     /// Retrieve existing parameter by name
-    DbStatus param(const std::string& nam, std::string& val);
+    StatusCode param(const std::string& nam, std::string& val);
     /// Retrieve all parameters
-    DbStatus params(Parameters& vals);
+    StatusCode params(Parameters& vals);
 
     /// read an object referenced by the token
-    DbStatus read(const Token& token, ShapeH shape, void** object);
+    StatusCode read(const Token& token, ShapeH shape, void** object);
     /// Expand OID into a full Token, based on the Links table.
-    DbStatus getLink(const Token::OID_t& oid, Token* pTok);
+    StatusCode getLink(const Token::OID_t& oid, Token* pTok);
     /// Retrieve container name from link container (using token oid, rather than contID)
     std::string cntName(Token& token);
     /// Add association link to link container
-    DbStatus makeLink(Token* pToken, Token::OID_t& linkH);
+    StatusCode makeLink(Token* pToken, Token::OID_t& linkH);
     /// Add persistent shape to the Database
-    DbStatus addShape (const DbTypeInfo* pShape);
+    StatusCode addShape (const DbTypeInfo* pShape);
     /// Retrieve persistent type information by class handle
     const DbTypeInfo* objectShape(const RootType& typeH);
     /// Retrieve persistent type information by name
@@ -197,12 +199,12 @@ namespace pool  {
     /// Access local container token (if container exists)
     const Token* cntToken(const std::string& cntName);
     /// Allow access to all known containers
-    DbStatus containers(std::vector<const Token*>& conts, bool intern=false);
-    DbStatus containers(std::vector<IDbContainer*>& conts, bool intern=false);
+    StatusCode containers(std::vector<const Token*>& conts, bool intern=false);
+    StatusCode containers(std::vector<IDbContainer*>& conts, bool intern=false);
     /// Allow access to all known associations between containers
-    DbStatus associations(std::vector<const Token*>& assocs);
+    StatusCode associations(std::vector<const Token*>& assocs);
     /// Allow access to all known shapes used by the database
-    DbStatus shapes(std::vector<const DbTypeInfo*>& shaps);
+    StatusCode shapes(std::vector<const DbTypeInfo*>& shaps);
     /// Let the implementation access the internals
     IDbDatabase* info();
     const IDbDatabase* info()  const;

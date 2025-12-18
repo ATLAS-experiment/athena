@@ -15,6 +15,7 @@
 
 // Framework include files
 #include "StorageSvc/DbColumn.h"
+#include "GaudiKernel/StatusCode.h"
 
 /*
  *  POOL namespace declaration
@@ -60,9 +61,9 @@ namespace pool  {
     std::string       m_opt;
 
     /// Set the option value
-    DbStatus i_setValue(const std::type_info& typ, const void* value);
+    StatusCode i_setValue(const std::type_info& typ, const void* value);
     /// Set the option value
-    DbStatus i_getValue(const std::type_info& typ, void* value) const;
+    StatusCode i_getValue(const std::type_info& typ, void* value) const;
 
   public:
     /// Initializing constructor 
@@ -70,7 +71,7 @@ namespace pool  {
                                 const std::string& opt, 
                                 T value)
     : m_type(DbColumn::UNKNOWN), m_name(nam), m_opt(opt)
-    { i_setValue(typeid(T), &value);                        }
+    { i_setValue(typeid(T), &value).ignore();               }
     /// Initializing constructor with type definition
     DbOption(const std::string& nam, const std::string& opt="");
     /// Default copy constructor
@@ -83,17 +84,17 @@ namespace pool  {
     /// Integer type identifier
     DbColumn::Type type() const         { return m_type;    }
     /// Set the option value
-    template<class T> DbStatus _setValue(T value)
+    template<class T> StatusCode _setValue(T value)
     { return i_setValue(typeid(T), &value);                 }
     /// Set the option value
-    template<class T> DbStatus _getValue(T& value) const
+    template<class T> StatusCode _getValue(T& value) const
     { return i_getValue(typeid(T), &value);                 }
     /// Access to OS independent type name
     std::string typeName() const;
     /// Set the option value
-    DbStatus setValue(DbColumn::Type typ, const void* value);
+    StatusCode setValue(DbColumn::Type typ, const void* value);
     /// Set the option value
-    DbStatus getValue(DbColumn::Type typ, void* value) const;
+    StatusCode getValue(DbColumn::Type typ, void* value) const;
   };
 }       // End namespace pool
 #endif  // POOL_DbOption_H

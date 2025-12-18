@@ -68,7 +68,7 @@ void pool::debugBreak()   {
   }
 }
 
-/// Translate acce mode to string
+/// Translate access mode to string
 const char* pool::accessMode(pool::DbAccessMode mode)   {
   if      ( mode & pool::READ      ) 
     return "READ     ";

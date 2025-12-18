@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //====================================================================
@@ -11,11 +11,12 @@
 //====================================================================
 #ifndef POOL_IDBDATABASE_H
 #define POOL_IDBDATABASE_H
-// $Header: /cvs/PF/pool/StorageSvc/StorageSvc/IDbDatabase.h,v 1.18 2007/11/28 16:19:32 frankb Exp $
 
 // Framework include files
 #include "StorageSvc/pool.h"
 #include "StorageSvc/Transaction.h"
+
+class StatusCode;
 
 /*
  *  POOL namespace declaration
@@ -48,23 +49,23 @@ namespace pool    {
     /// Set options
     /** @param refOpt   [IN]  Reference to option object.
       *
-      * @return DbStatus code indicating success or failure.  
+      * @return StatusCode code indicating success or failure.  
       */
-    virtual DbStatus setOption(const DbOption& refOpt) = 0;
+    virtual StatusCode setOption(const DbOption& refOpt) = 0;
 
     /// Access options
     /** @param refOpt   [IN]  Reference to option object.
       *
-      * @return DbStatus code indicating success or failure.  
+      * @return StatusCode code indicating success or failure.  
       */
-    virtual DbStatus getOption(DbOption& refOpt) = 0;
+    virtual StatusCode getOption(DbOption& refOpt) = 0;
 
     /// Close database access
     /** @param mode     [IN]  Desired session access mode.
       *
-      * @return DbStatus code indicating success or failure.  
+      * @return StatusCode code indicating success or failure.  
       */
-    virtual DbStatus close(DbAccessMode mode)  = 0;
+    virtual StatusCode close(DbAccessMode mode)  = 0;
 
     /// Open Database object
     /** @param domH     [IN]  Handle to valid domain object
@@ -72,9 +73,9 @@ namespace pool    {
       * @param nam      [IN]  Name of the database to be opened.
       * @param mode     [IN]  Desired session access mode.
       *
-      * @return DbStatus code indicating success or failure.  
+      * @return StatusCode code indicating success or failure.  
       */
-    virtual DbStatus open(const DbDomain&     domH, 
+    virtual StatusCode open(const DbDomain&     domH, 
                           const std::string&  nam, 
                           DbAccessMode        mode)  = 0;
 
@@ -82,23 +83,23 @@ namespace pool    {
     /** @param dbH      [IN]  Handle to valid database object
       * @param mode     [IN]  Desired session access mode.
       *
-      * @return DbStatus code indicating success or failure.  
+      * @return StatusCode code indicating success or failure.  
       */
-    virtual DbStatus onOpen(DbDatabase& dbH, 
+    virtual StatusCode onOpen(DbDatabase& dbH, 
                             DbAccessMode      mode) = 0;
 
     /// Re-open database with changing access permissions
     /** @param mode     [IN]  Desired session access mode.
       *
-      * @return DbStatus code indicating success or failure.  
+      * @return StatusCode code indicating success or failure.  
       */
-    virtual DbStatus reopen(DbAccessMode mode) = 0;
+    virtual StatusCode reopen(DbAccessMode mode) = 0;
 
     /// Execute Database Transaction action
     /** @param   action     [IN]  action to perform
       * @return Status code indicating success or failure.
       */
-    virtual DbStatus transAct(Transaction::Action action) = 0;
+    virtual StatusCode transAct(Transaction::Action action) = 0;
  };
 }      // End namespace pool
 #endif // POOL_IDBDATABASE_H

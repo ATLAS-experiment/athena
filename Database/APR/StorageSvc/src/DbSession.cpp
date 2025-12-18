@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //====================================================================
@@ -57,45 +57,46 @@ void DbSession::switchPtr(DbSessionObj* obj) {
 }
 
 /// Open session by handle
-DbStatus DbSession::open()  {
+StatusCode DbSession::open()  {
   if ( 0 == m_ptr )   {
     switchPtr(new DbSessionObj());
   }
-  return (isValid()) ? m_ptr->open() : Error;
+  return (isValid()) ? m_ptr->open() : StatusCode::FAILURE;
 }
 
 /// Close session by handle
-DbStatus DbSession::close() {
+StatusCode DbSession::close() {
+  StatusCode rc = StatusCode::SUCCESS;
   if ( m_ptr )       {
     m_ptr->clearEntries();
-    m_ptr->close();
+    rc = m_ptr->close();
   }
   switchPtr(0);
-  return Success;
+  return rc;
 }
 
 /// Add domain to session
-DbStatus DbSession::add(DbDomainObj* dom)   {
-  DbStatus sc = Error;
-  if ( isValid() && dom )    {
-    sc = m_ptr->add(dom->type().type(), dom);
-    if ( sc.isSuccess() )  {
+StatusCode DbSession::add(DbDomainObj* dom)   {
+  if( isValid() && dom )    {
+    StatusCode sc = m_ptr->add(dom->type().type(), dom);
+    if( sc.isSuccess() )  {
       m_ptr->addRef();
     }
+    return sc;
   }
-  return sc;
+  return StatusCode::FAILURE;
 }
 
 /// Remove domain from current session
-DbStatus DbSession::remove(const DbDomainObj* dom) {
-  DbStatus sc = Error;
+StatusCode DbSession::remove(const DbDomainObj* dom) {
   if ( isValid() && dom )    {
-    sc = m_ptr->remove(dom);
+    StatusCode sc = m_ptr->remove(dom);
     if ( isValid() && sc.isSuccess() )  {
       if (m_ptr->release() == 0) m_ptr = 0;
     }
+    return sc;
   }
-  return sc;
+  return StatusCode::FAILURE;
 }
 
 /// Add reference count to object if present

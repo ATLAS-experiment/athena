@@ -26,6 +26,8 @@
 #include <vector>
 #include <atomic>
 
+class StatusCode;
+
 /*
  *  POOL namespace declaration
  */
@@ -71,7 +73,7 @@ namespace pool  {
     virtual ~DbTypeInfo();
 
     /// Load type information object from string representation
-    DbStatus i_fromString(const std::string& string_rep);
+    StatusCode i_fromString(const std::string& string_rep);
     /// try to add a new shape
     static DbTypeInfo* regShape(const Guid& guid, const TypeH& type, Columns& cols);
    
@@ -112,7 +114,7 @@ namespace pool  {
     /// Create string representation of the type information object
     const std::string toString() const;
     /// Allow usage of base classes
-    DbStatus declareBase(const DbTypeInfo* pInfo); 
+    StatusCode declareBase(const DbTypeInfo* pInfo); 
   };
 }      // End namespace pool
 #endif // POOL_DBTYPEINFO_H

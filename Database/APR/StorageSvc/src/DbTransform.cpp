@@ -5,7 +5,9 @@
 #include "PersistentDataModel/Guid.h"
 #include "StorageSvc/DbTransform.h"
 #include "StorageSvc/DbTypeInfo.h"
+#include "GaudiKernel/StatusCode.h"
 #include "CxxUtils/checker_macros.h"
+
 #include <algorithm>
 #include <map>
 #include <mutex>
@@ -64,15 +66,15 @@ const ShapeVector allShapes() {
 
 
 /// Access shape registry
-DbStatus DbTransform::getShape(const Guid& shape_Guid, const DbTypeInfo*& shape)
+StatusCode DbTransform::getShape(const Guid& shape_Guid, const DbTypeInfo*& shape)
 {
    shared_lock_t lock(shapesMutex);
    ShapeVector& v = _Init::shape(shape_Guid);
    if ( v.size() > 0 ) {
       shape = *(v.begin());
-      return Success;
+      return StatusCode::SUCCESS;
    }
-   return Error;
+   return StatusCode::FAILURE;
 }
 
 
@@ -91,17 +93,17 @@ const DbTypeInfo* DbTransform::getShape(const Guid& shape_Guid, const std::strin
 /// Register a new shape in the registry
 // This method does nothing if one tries to register the same *pointer* - very unlikely after 'new()'
 // May result in duplicate identical shapes registered (in MT case) but that should be OK
-DbStatus DbTransform::regShape(const DbTypeInfo*  shape)  {
+StatusCode DbTransform::regShape(const DbTypeInfo*  shape)  {
   if ( shape )    {
     lock_guard_t lock(shapesMutex); 
     ShapeVector& v = _Init::shape(shape->shapeID());
     ShapeVector::iterator i=find(v.begin(), v.end(), shape);
     if ( i == v.end() ) {
       v.push_back(shape);
-      return Success;
+      return StatusCode::SUCCESS;
     }
   }
-  return Error;
+  return StatusCode::FAILURE;
 }
 
 /// keep shape until the end
@@ -114,17 +116,17 @@ void DbTransform::ownShape(const DbTypeInfo*  shape)  {
 }
 
 /// Access entry in shape registry
-DbStatus DbTransform::removeShape (const DbTypeInfo* shape)  {
+StatusCode DbTransform::removeShape (const DbTypeInfo* shape)  {
   if ( shape )    {
     lock_guard_t lock(shapesMutex); 
-    if (_Init::shapes().size() == 0) return Success;
+    if (_Init::shapes().size() == 0) return StatusCode::SUCCESS;
     ShapeVector& v = _Init::shape(shape->shapeID());
     ShapeVector::iterator i=find(v.begin(), v.end(), shape);
     if ( i != v.end() ) {
       v.erase(i);
-      return Success;
+      return StatusCode::SUCCESS;
     }
   }
-  return Error;
+  return StatusCode::FAILURE;
 }
 

@@ -10,8 +10,8 @@
 //
 //        Author     : M.Frank
 //====================================================================
-// Framework include files
 
+// Framework include files
 #include "StorageSvc/DbOption.h"
 #include "StorageSvc/DbColumn.h"
 #include "StorageSvc/DbTypeInfo.h"
@@ -28,9 +28,14 @@
 #include "TClass.h"
 #include "TKey.h"
 
+#include "GaudiKernel/StatusCode.h"
+#include "AthenaKernel/errorcheck.h"
+
 #include <algorithm>
 
 using namespace pool;
+constexpr const static auto SUCCESS = StatusCode::SUCCESS;
+constexpr const static auto FAILURE = StatusCode::FAILURE;
 
 RootKeyContainer::RootKeyContainer(const std::string& name) :
   DbContainerImp(name),
@@ -46,7 +51,7 @@ RootKeyContainer::RootKeyContainer(const std::string& name) :
 /// Standard destructor
 RootKeyContainer::~RootKeyContainer()   {
   releasePtr(m_ioHandler);
-  RootKeyContainer::close();
+  RootKeyContainer::close().ignore();
 }
 
 uint64_t RootKeyContainer::nextRecordId()    {
@@ -81,20 +86,19 @@ uint64_t RootKeyContainer::size()    {
 }
 
 /// Execute transaction action
-DbStatus RootKeyContainer::transAct(Transaction::Action action) 
+StatusCode RootKeyContainer::transAct(Transaction::Action action) 
 {
    // execure action on the base class first
-   DbStatus status = DbContainerImp::transAct(action);
-   if( !status.isSuccess() ) return status;
-
-   if( action != Transaction::TRANSACT_FLUSH ) return Success;
-   if( !m_dir ) return Error;
-   m_dir->SaveSelf();
-   return Success;
+   CHECK( DbContainerImp::transAct(action) );
+   if( action == Transaction::TRANSACT_FLUSH ) {
+     if( !m_dir ) return FAILURE;
+     m_dir->SaveSelf();
+   }
+   return SUCCESS;
 }
    
 // Fetch next object address to set token
-DbStatus RootKeyContainer::next(Token::OID_t& linkH) {
+StatusCode RootKeyContainer::next(Token::OID_t& linkH) {
   char txt[64];
   const long long int stk_size = DbContainerImp::size();
   const long long int cnt_size = nextRecordId()-stk_size;
@@ -106,26 +110,26 @@ DbStatus RootKeyContainer::next(Token::OID_t& linkH) {
       const char* class_name = key->GetClassName();
       const DbTypeInfo* typ = m_dbH.objectShape( DbReflex::forTypeName(class_name) );
       if ( typ )  {
-        return Success;
+        return SUCCESS;
       }
       ATH_MSG_ERROR("Failed to find the correct shape identifier for class:" << class_name);
-      return Error;
+      return FAILURE;
     }
     else {
       // Here we are if key names have holes due to deletes
       // Try to get the next one.
     }
   }
-  return Error;
+  return FAILURE;
 } 
 
 // Interface Implementation: Find entry in container
-DbStatus RootKeyContainer::load( void** ptr, ShapeH shape,
-                                 const Token::OID_t& linkH,
-                                 Token::OID_t& oid,
-                                 bool          any_next)
+StatusCode RootKeyContainer::load( void** ptr, ShapeH shape,
+                                   const Token::OID_t& linkH,
+                                   Token::OID_t& oid,
+                                   bool any_next)
 {
-  DbStatus sc = Error;
+  StatusCode sc = FAILURE;
   oid.second = linkH.second;
   for(long long int cnt = oid.second,last=nextRecordId(); cnt <= last; ++cnt) {
     char txt[64];
@@ -136,7 +140,7 @@ DbStatus RootKeyContainer::load( void** ptr, ShapeH shape,
        return sc;
     }
     if ( !any_next )  {
-      return Error;
+      return FAILURE;
     }
     oid.second++;
   }
@@ -147,7 +151,7 @@ DbStatus RootKeyContainer::load( void** ptr, ShapeH shape,
   return sc;
 }
 
-DbStatus RootKeyContainer::loadObject( void** ptr, ShapeH shape,
+StatusCode RootKeyContainer::loadObject( void** ptr, ShapeH shape,
                                        Token::OID_t&   oid )
 {
    char txt[64];
@@ -167,13 +171,13 @@ DbStatus RootKeyContainer::loadObject( void** ptr, ShapeH shape,
                   /// Update statistics
                   m_ioBytes = nbyte;
                   m_rootDb->addByteCount(RootDatabase::READ_COUNTER, nbyte);
-                  return Success;
+                  return SUCCESS;
                }
             }
             else  {
                ATH_MSG_ERROR("I/O for types with more than 1 data member is not currently supported");
                ATH_MSG_ERROR("Type: " << typ->toString());
-               return Error;
+               return FAILURE;
             }
          }
       }
@@ -181,17 +185,17 @@ DbStatus RootKeyContainer::loadObject( void** ptr, ShapeH shape,
   m_ioBytes = -1;
   ATH_MSG_ERROR("Could not read object \"" << txt 
                 << "\" from directory \"" << m_dir->GetName() << "\"");
-  return Error;
+  return FAILURE;
 }
 
-DbStatus RootKeyContainer::writeObject(ActionList::value_type& action) {
+StatusCode RootKeyContainer::writeObject(ActionList::value_type& action) {
    if ( m_dir )  {
       char knam[64];
       ::sprintf(knam, "_pool_valid_%08d", static_cast<int>(action.link.second));
       auto typ = static_cast<const DbTypeInfo*>(action.shape);
       if ( 0 == typ )   {
          ATH_MSG_ERROR("No type information present when writing an object!");
-         return Error;
+         return FAILURE;
       }
       else {
          TDirectory::TContext dirCtxt(m_dir);
@@ -201,14 +205,14 @@ DbStatus RootKeyContainer::writeObject(ActionList::value_type& action) {
             TClass*  cl  = TClass::GetClass(typ_nam.c_str());
             if( !cl ) {
                ATH_MSG_ERROR("GetClass() failed for type " << typ_nam);
-               return Error;
+               return FAILURE;
             }
             const void* p = action.dataAtOffset( col->offset() );
             int nbyte = m_ioHandler->write(cl, knam, p, m_policy);
             if ( nbyte > 1) {
                m_ioBytes = nbyte;
                m_rootDb->addByteCount(RootDatabase::WRITE_COUNTER, nbyte);
-               return Success;
+               return SUCCESS;
             } else {
                ATH_MSG_ERROR("[RootKeyContainer] Could not write an object");
             }
@@ -222,20 +226,20 @@ DbStatus RootKeyContainer::writeObject(ActionList::value_type& action) {
       ATH_MSG_ERROR("[RootKeyContainer] Not a valid directory or callback when writing an object");
    }
    m_ioBytes = -1;
-   return Error;
+   return FAILURE;
 }
 
-DbStatus RootKeyContainer::close()   {
+StatusCode RootKeyContainer::close()   {
   m_dbH = DbDatabase(POOL_StorageType);
   m_rootDb = 0;
   m_dir = 0;
   return DbContainerImp::close();
 }
 
-DbStatus RootKeyContainer::open(DbDatabase&           dbH, 
-                                const std::string&    dir_nam, 
-                                const DbTypeInfo*  /* info */, 
-                                DbAccessMode          mode)  
+StatusCode RootKeyContainer::open(DbDatabase&           dbH,
+                                  const std::string&    dir_nam,
+                                  const DbTypeInfo*  /* info */,
+                                  DbAccessMode          mode)
 {
   m_name = dir_nam;
 
@@ -270,7 +274,7 @@ DbStatus RootKeyContainer::open(DbDatabase&           dbH,
     m_rootDb = dynamic_cast<RootDatabase*>(idb);
     if (!m_rootDb) {
       m_dir = 0;
-      return Error;
+      return FAILURE;
     }
     m_dir  = m_rootDb->file();
     do  {
@@ -282,7 +286,7 @@ DbStatus RootKeyContainer::open(DbDatabase&           dbH,
       }
       else if ( 0==dir ) {
         m_dir = 0;
-        return Error;
+        return FAILURE;
       }
       m_dir = dir;
       if ( m_dir )    {
@@ -290,7 +294,7 @@ DbStatus RootKeyContainer::open(DbDatabase&           dbH,
         if ( !cl->InheritsFrom(TDirectory::Class()) )    {
           ATH_MSG_ERROR("Cannot open container. Object with name found, but of the wrong type. " << endmsg
                         << "True type is :" << cl->GetName() << " rather than TDirectory.");
-          return Error;
+          return FAILURE;
         }
         if (idx2 == std::string::npos) break;
         idx1  = idx2+1;
@@ -300,36 +304,36 @@ DbStatus RootKeyContainer::open(DbDatabase&           dbH,
     if (m_dir)
       m_dir->cd();
     DbOption opt1("DEFAULT_WRITEPOLICY","");
-    dbH.getOption(opt1);
-    opt1._getValue(m_policy);
+    CHECK( dbH.getOption(opt1) );
+    CHECK( opt1._getValue(m_policy) );
     /// Parent Database handle
     m_dbH = dbH;
     ATH_MSG_DEBUG("Opened container " << m_name << " of type "
                   << ROOTKEY_StorageType.storageName() << " with policy:" << m_policy);
-    return Success;
+    return SUCCESS;
   }
   ATH_MSG_ERROR("Cannot open container, invalid Database handle.");
-  return Error;
+  return FAILURE;
 }
 
 /// This is a specialized method that checks if we can access the underlying TDirectory
-DbStatus RootKeyContainer::checkAccess(DbDatabase& dbH,
-                                       const std::string& dir_nam) const
+StatusCode RootKeyContainer::checkAccess(DbDatabase& dbH,
+                                         const std::string& dir_nam) const
 {
   if ( dbH.isValid() )    {
     IDbDatabase* idb = dbH.info();
     auto rootDb = dynamic_cast<RootDatabase*>(idb);
     if (rootDb && rootDb->file()->Get<TDirectory>(dir_nam.c_str())) {
-      return Success;
+      return SUCCESS;
     }
   }
   ATH_MSG_DEBUG("Cannot access container '" << dir_nam 
     << "', invalid Database handle or container is not of type Directory.");
-  return Error;
+  return FAILURE;
 }
 
 /// Access options
-DbStatus RootKeyContainer::getOption(DbOption& opt) {
+StatusCode RootKeyContainer::getOption(DbOption& opt) {
   if ( m_dir )  {
     const char* n = opt.name().c_str();
     if ( !strcasecmp(n,"BYTES_IO") )  {
@@ -397,49 +401,48 @@ DbStatus RootKeyContainer::getOption(DbOption& opt) {
       }
     }
   }
-  return Error;  
+  return FAILURE;  
 }
 
 
 /// Set options
-DbStatus RootKeyContainer::setOption(const DbOption& opt)  { 
+StatusCode RootKeyContainer::setOption(const DbOption& opt)  { 
   if ( m_dir )  {
     const char* n = opt.name().c_str();
     if ( !strcasecmp(n, "DEFAULT_WRITEPOLICY") ) {
-      opt._getValue(m_policy);
-      return Success;
+      return opt._getValue(m_policy);
     }
     else if ( ::toupper(n[0]) == 'D' )  {
       switch(::toupper(n[4]))   {
       case 'C':
         if ( !strcasecmp(n+4,"CLOSE") )  {
           m_dir->Close(opt.option().c_str());
-          return Success;
+          return SUCCESS;
         }
         break;
       case 'D':
         if ( !strcasecmp(n+4,"DELETEOBJ") )  {
           m_dir->Delete(opt.option().c_str());
-          return Success;
+          return SUCCESS;
         }
         break;
       case 'P':
         if ( !strcasecmp(n+4,"PRINT") )  {
           m_dir->Print(opt.option().c_str());
           std::cout << std::endl;
-          return Success;
+          return SUCCESS;
         }
         else if ( !strcasecmp(n+4,"PURGE") )  {
           int val=1;
-          opt._getValue(val);
+          CHECK( opt._getValue(val) );
           if ( val > 0 )  {
             m_dir->Purge(val);
-            return Success;
+            return SUCCESS;
           }
         }
         break;
       }
     }
   }
-  return Error;  
+  return FAILURE;  
 }
