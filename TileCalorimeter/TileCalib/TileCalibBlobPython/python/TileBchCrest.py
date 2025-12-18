@@ -166,8 +166,6 @@ class TileBchMgr(TileCalibLogger):
             else:
                 fT = 2
 
-        if ros!=-2:
-            self.__updateFromDb(db,folderPath,tag,runLumi,fT,-2)
         self.__updateFromDb(db,folderPath,tag,runLumi,fT,ros,module)
         #=== update TileBchStatus::isBad() definition from DB
         self.log().info("Updating TileBchStatus::isBad() definition from DB")

@@ -1,8 +1,15 @@
 #!/bin/env python
 
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 #
-# WriteCalibToCrest.py
+# File:    WriteCalibToCrest.py
+# Sanya Solodkov <Sanya.Solodkov@cern.ch>, 2025-02-04
+#
+# Purpose: Prepare JSON file with new calibration constants
+# reading them from ascii file specified after --txtfile= option
+# All modules are always written, for channels which are not
+# mentioned in ascii file previous values are copied from CREST DB
+#
 # modified Siarhei Harkusha 2025-05-19
 # modified Laura Sargsyan 2025-09-16
 # various fixes Sanya Solodkov 2025-10-17
@@ -44,13 +51,11 @@ def usage():
     print ("-k, --keep=     field numbers or channel numbers to ignore, e.g. '0,2,3,EBch0,EBch1,EBch12,EBch13,EBspD4ch18,EBspD4ch19,EBspC10ch4,EBspC10ch5' ")
     print ("-i, --inschema=   specify name of input JSON file or CREST_SERVER_PATH")
     print ("-o, --outschema=  specify name of output JSON file, default is tileCalib.json")
-    print ("-s, --schema=     specify input/output schema to use when both input and output schemas are the same")
-    #print ("-S, --server=     specify server - ORACLE or FRONTIER, default is FRONTIER")
-    #print ("-u  --update      set this flag if output sqlite file should be updated, otherwise it'll be recreated")
+    print ("-s, --schema=     the same as --o, --outschema")
     print ("-w, --swap=       specify pair of modules which will be swapped in multi-IOV update, e.g. swap=EBA61,EBA63")
 
-letters = "hr:l:R:L:b:e:AD:S:s:i:o:t:T:f:F:C:G:n:v:x:m:M:U:p:dcazZuw:k:"
-keywords = ["help","run=","lumi=","run2=","lumi2=","begin=","end=","adjust","module=","server=","schema=","inschema=","outschema=","tag=","outtag=","folder=","outfolder=","nchannel=","ngain=","nval=","version=","txtfile=","comment=","Comment=","user=","prefix=","default","channel","all","zero","allzero","update","swap=","keep="]
+letters = "hr:l:R:L:b:e:AD:s:i:o:t:T:f:F:C:G:n:v:x:m:M:U:p:dcazZw:k:"
+keywords = ["help","run=","lumi=","run2=","lumi2=","begin=","end=","adjust","module=","schema=","inschema=","outschema=","tag=","outtag=","folder=","outfolder=","nchannel=","ngain=","nval=","version=","txtfile=","comment=","Comment=","user=","prefix=","default","channel","all","zero","allzero","swap=","keep="]
 
 try:
     opts, extraparams = getopt.getopt(sys.argv[1:],letters,keywords)
@@ -64,8 +69,6 @@ run = -1
 lumi = 0
 run2 = -1
 lumi2 = 0
-server = ''
-schema = 'tileCalib.json'
 inSchema = 'CREST'
 outSchema = 'tileCalib.json'
 folderPath =  "/TILE/OFL02/TIME/CHANNELOFFSET/GAP/LAS"
@@ -86,7 +89,6 @@ txtFile= ""
 comment = ""
 Comment = None
 prefix = ""
-update = False
 keep=[]
 iov = False
 beg = 0
@@ -113,11 +115,7 @@ for o, a in opts:
         tag = a
     elif o in ("-T","--outtag"):
         outtag = a
-    elif o in ("-S","--server"):
-        server = a
     elif o in ("-s","--schema"):
-        schema = a
-        inSchema = a
         outSchema = a
     elif o in ("-i","--inschema"):
         inSchema = a
@@ -141,8 +139,6 @@ for o, a in opts:
         zero = True
     elif o in ("-Z","--allzero"):
         allzero = True
-    elif o in ("-u","--update"):
-        update = True
     elif o in ("-w","--swap"):
         swap += a.split(",")
     elif o in ("-r","--run"):
@@ -194,14 +190,6 @@ if len(swap)>0:
             moduleSwap[m1]=TileBchCrest.TileBchMgr.decodeModule(None,m2)
 else:
     swap=False
-
-if not len(outSchema):
-    outSchema=schema
-else:
-    schema=outSchema
-if not len(inSchema):
-    inSchema=schema
-update = update or (inSchema==outSchema)
 
 if outfolderPath is None:
     outfolderPath=folderPath
@@ -433,7 +421,7 @@ else:
     typeName = 'Flt'
 
 if blobWriter2:
-    blobWriter2 = TileCalibCrest.TileBlobWriterCrest(outSchema,outfolderPath,typeName,(True if len(outtag) else False))
+    blobWriter2 = TileCalibCrest.TileBlobWriterCrest(outSchema,outfolderPath,typeName)
 
 comments = []
 blobWriters = []
@@ -446,7 +434,7 @@ for since in iovList:
     nvalUpdated += [0]
     #commentsSplit+=[blobReader.getComment(since,True)]
     commentsSplit+=[blobReader.getComment(since)]
-    blobWriters += [TileCalibCrest.TileBlobWriterCrest(outSchema,outfolderPath,typeName,(True if len(outtag) else False))]
+    blobWriters += [TileCalibCrest.TileBlobWriterCrest(outSchema,outfolderPath,typeName)]
 log.info( "\n" )
 
 if len(txtFile)>0:
