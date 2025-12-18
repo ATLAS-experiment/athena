@@ -5,7 +5,6 @@
 /** @file ReWriteData.cxx
  *  @brief This file contains the implementation for the ReWriteData class.
  *  @author Peter van Gemmeren <gemmeren@anl.gov>
- *  $Id: ReWriteData.cxx,v 1.18 2008-12-10 21:28:11 gemmeren Exp $
  **/
 
 #include "ReWriteData.h"
@@ -74,7 +73,7 @@ StatusCode ReWriteData::execute (const EventContext& ctx) const {
      trackObj->getElementLinkVector()->push_back(eLink3);
      ATH_MSG_INFO("Link ElementLinkVector = " << trackObj->getElementLinkVector()->size());
      for (const auto link : *trackObj->getElementLinkVector()) {
-       ATH_MSG_INFO("Element = " << (*link) << " : " << (*link)->getX());
+       ATH_MSG_INFO("Element = " << (*link)->getX());
      }
      
      // Print out Navigable elements
@@ -82,7 +81,7 @@ StatusCode ReWriteData::execute (const EventContext& ctx) const {
      trackObj->getNavigable()->putElement(hitCont.cptr(), (*hitCont)[5]);
      ATH_MSG_INFO("Link Navigable = " << trackObj->getNavigable()->size());
      for (const auto* elem : *trackObj->getNavigable()) {
-       ATH_MSG_INFO("Element = " << elem << " : " << elem->getX());
+       ATH_MSG_INFO("Element = " << elem->getX());
      }
 
      // Print out WeightedNavigable elements
@@ -91,7 +90,7 @@ StatusCode ReWriteData::execute (const EventContext& ctx) const {
      trackObj->getWeightedNavigable()->putElement(hitCont.cptr(), (*hitCont)[3], 5.55);
      ATH_MSG_INFO("Link Weighted Navigable = " << trackObj->getWeightedNavigable()->size());
      for (const auto* elem : *trackObj->getWeightedNavigable()) {
-       ATH_MSG_INFO("Element = " << elem << " : " << elem->getX());
+       ATH_MSG_INFO("Element = " << elem->getX());
      }
      
      // Print out Track info
