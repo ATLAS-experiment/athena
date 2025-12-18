@@ -13,6 +13,8 @@
 
 namespace GlobalSim {
 
+  using eEmEg1BDTTOB = IOBitwise::eEmEg1BDTTOB;
+
   Egamma1BDTAlgTool::Egamma1BDTAlgTool(const std::string& type,
 				       const std::string& name,
 				       const IInterface* parent) :
@@ -70,7 +72,7 @@ namespace GlobalSim {
       }
 
       //Extract the bits (one by one) from the ap_fixed<10,5> object -> Bitset<10>
-      std::bitset<IOBitwise::IeEmEg1BDTTOB::s_eGamma1BDT_width> result;
+      std::bitset<eEmEg1BDTTOB::s_eGamma1BDT_width> result;
       for (int i=0;i<scores[0].length();i++){
 	result[i] = scores[0][0];
       }
