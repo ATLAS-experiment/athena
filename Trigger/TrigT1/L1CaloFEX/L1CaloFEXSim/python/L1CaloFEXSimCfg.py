@@ -248,7 +248,7 @@ def L1CaloFEXSimCfg(flags, eFexTowerInputs = ["L1_eFexDataTowers","L1_eFexEmulat
             acc.addEventAlgo(decoderAlg)
 
         # only create emulated towers if not a POOL file or not EmulatedTowers collection
-        if not Format.POOL or "L1_gFexEmulatedTowers" not in flags.Input.Collections:
+        if not Format.POOL or ("L1_gFexEmulatedTowers" not in flags.Input.Collections and sCellType in flags.Input.Collections):
             from L1CaloFEXAlgos.FexEmulatedTowersConfig import gFexEmulatedTowersCfg
             acc.merge(gFexEmulatedTowersCfg(flags,name="L1_gFexEmulatedTowers"))
 
