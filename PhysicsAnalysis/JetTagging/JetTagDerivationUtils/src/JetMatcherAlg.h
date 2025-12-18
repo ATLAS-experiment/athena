@@ -52,7 +52,7 @@ namespace ftag {
       this, "particleLink", m_targetJet, "",
       "decorator for matched IParticle"};
     SG::WriteDecorHandleKey<JC> m_matchDecorator {
-      this, "match", m_targetJet, "jetIsMatched",
+      this, "isMatched", m_targetJet, "jetIsMatched",
       "1 if matched, 0 if not"};
     SG::WriteDecorHandleKey<JC> m_nMatchDecoragor {
       this, "nMatch", m_targetJet, "nMatches",
