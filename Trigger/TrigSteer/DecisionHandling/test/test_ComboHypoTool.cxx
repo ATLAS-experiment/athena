@@ -51,13 +51,11 @@ int main ATLAS_NOT_THREAD_SAFE () {
 
   // initialize Gaudi, SG
   ISvcLocator* pSvcLoc{nullptr};
-  assert( Athena_test::initGaudi(pSvcLoc) );
-  StoreGateSvc* pSG(nullptr);
-  assert( pSvcLoc->service("StoreGateSvc", pSG, true).isSuccess() );
+  assert( Athena_test::initGaudi("test_ComboHypoTool.txt", pSvcLoc) );
+  SmartIF<StoreGateSvc> pSG{pSvcLoc->service("StoreGateSvc")};
+  assert( pSG );
 
   SmartIF<IMessageSvc> msgSvc{pSvcLoc};
-  msgSvc->setOutputLevel(MSG::DEBUG);
-
   MsgStream log(msgSvc, "ComboHypoToolTest");
 
   // Create a context
