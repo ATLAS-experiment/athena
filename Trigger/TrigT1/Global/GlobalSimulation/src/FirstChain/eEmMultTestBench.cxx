@@ -1,7 +1,7 @@
 //  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 #include "eEmMultTestBench.h"
-#include "../IO/IeEmTOB.h"
+#include "../IO/IeEmTOB.h" // static constants
 #include "../IO/eEmTOB.h"
 #include "../IO/CommonTOB.h"
 #include "../IO/TipWord_clid.h"
@@ -72,7 +72,7 @@ namespace GlobalSim {
 
         
     auto padded_line = std::string();
-    auto tobs = std::make_unique<GlobalSim::IOBitwise::IeEmTOBContainer>();
+    auto tobs = std::make_unique<GlobalSim::IOBitwise::eEmTOBContainer>();
 
     while (true) {
       std::getline(m_tob_stream, padded_line);
@@ -90,7 +90,7 @@ namespace GlobalSim {
 
     }
 
-    using WH_TOB = SG::WriteHandle<GlobalSim::IOBitwise::IeEmTOBContainer>;
+    using WH_TOB = SG::WriteHandle<GlobalSim::IOBitwise::eEmTOBContainer>;
     auto h_write_tobs = WH_TOB(m_eEmTOBContainer_WriteKey);    
     CHECK(h_write_tobs.record(std::move(tobs)));
 
@@ -112,7 +112,7 @@ namespace GlobalSim {
 
 
 
-  IeEmTOB*
+  eEmTOB*
   eEmMultTestBench::make_tob(const std::string& trimmed_line) const {
     ATH_MSG_INFO("in make_tob> line: " <<trimmed_line);
 

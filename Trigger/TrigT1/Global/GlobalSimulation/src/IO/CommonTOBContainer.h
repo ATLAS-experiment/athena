@@ -6,28 +6,23 @@
  * @file GlobalSimulation/eEmTOBContainer.h
  * @author P. Sherwood, peter@cern.ch
  * @date October 2025
- * @brief Interface container class to hold eEmTOBs
+ * @brief Interface container class to hold CommonTOBs
  */
 
-#ifndef GLOBALSIM_EMETOBCONTAINER_H
-#define GLOBALSIM_EMETOBCONTAINER_H
+#ifndef GLOBALSIM_COMMONTOBCONTAINER_H
+#define GLOBALSIM_COMMONTOBCONTAINER_H
 
-#include "eEmTOB.h"
 #include "CommonTOB.h"
 
-
 #include "AthContainers/DataVector.h"
-
 
 namespace GlobalSim {
   namespace IOBitwise {
 
-    using eEmTOBContainer = DataVector<GlobalSim::IOBitwise::eEmTOB>;
+    using CommonTOBContainer = DataVector<GlobalSim::IOBitwise::CommonTOB>;
   }
 }
 
-
-CLASS_DEF( GlobalSim::IOBitwise::eEmTOBContainer , 1271357431 , 1 )
-
+CLASS_DEF( GlobalSim::IOBitwise::CommonTOBContainer , 1123153720 , 1 )
 
 #endif

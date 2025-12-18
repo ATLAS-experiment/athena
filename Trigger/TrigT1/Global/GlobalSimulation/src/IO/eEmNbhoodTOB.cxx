@@ -23,7 +23,7 @@ namespace GlobalSim::IOBitwise {
     std::stringstream ss;
     
     ss << '\n'
-       << IeEmTOB::to_string()
+       << eEmTOB::to_string()
        << "\n"
        << "Neighbourhood content:\n"
        << Neighbourhood().to_string();

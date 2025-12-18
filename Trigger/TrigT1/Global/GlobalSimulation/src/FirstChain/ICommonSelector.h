@@ -9,7 +9,7 @@
 
 namespace GlobalSim {
   namespace IOBitwise{
-    class ICommonTOB;
+    class CommonTOB;
   }
 }
 
@@ -19,13 +19,13 @@ namespace  GlobalSim {
    *
    */
   
-  using GlobalSim::IOBitwise::ICommonTOB;
+  using GlobalSim::IOBitwise::CommonTOB;
 
   class ICommonSelector {
   public:
     
     virtual ~ICommonSelector() = default;
-    virtual bool select(const ICommonTOB&) const = 0;
+    virtual bool select(const CommonTOB&) const = 0;
     virtual std::string to_string() const = 0;
 
   };

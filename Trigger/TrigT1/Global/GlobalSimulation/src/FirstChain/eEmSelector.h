@@ -17,7 +17,7 @@ namespace  GlobalSim {
    *
    */
 
-  using GlobalSim::IOBitwise::IeEmTOB;
+  using GlobalSim::IOBitwise::eEmTOB;
 
   
   class ICutter {
@@ -43,7 +43,7 @@ namespace  GlobalSim {
     
     virtual ~eEmSelector() = default;
     
-    virtual bool select(const IeEmTOB&) const override;
+    virtual bool select(const eEmTOB&) const override;
 
     virtual std::string to_string() const override;
 

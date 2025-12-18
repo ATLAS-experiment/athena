@@ -46,7 +46,7 @@ namespace GlobalSim::IOBitwise {
      * eGamma1 eRatio result bits are set here, eFexRoI threshold bits are set in the eEmTOB 
      * constructor, the CommonTOB constructor is used to initialise the common bits.
      */
-    eEmEg1eRatioTOB(const IeEmTOB& eEmTOB,
+    eEmEg1eRatioTOB(const eEmTOB& eEmTOB,
 		    std::bitset<IeEmEg1eRatioTOB::s_eGamma1eRatio_width> eGamma1eRatio_bits);
 
     //! @copydoc IeEmEg1eRatioTOB::~IeEmEg1eRatioTOB()
