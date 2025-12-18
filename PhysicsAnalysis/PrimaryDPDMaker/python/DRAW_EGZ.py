@@ -1,5 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
-
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 #!/usr/bin/env python
 # ====================================================================
@@ -15,7 +14,7 @@ from AthenaCommon.Logging import logging
 from PrimaryDPDMaker.DRAWCommonByteStream import DRAWCommonByteStreamCfg
 
 
-def DRAW_EGZKernelCfg(configFlags, name='DRAW_EGZKernel', **kwargs):
+def DRAW_EGZKernelCfg(flags, name='DRAW_EGZKernel', **kwargs):
     """Configure DRAW_EGZ kerne"""
 
     mlog = logging.getLogger(name)
@@ -75,15 +74,15 @@ def DRAW_EGZKernelCfg(configFlags, name='DRAW_EGZKernel', **kwargs):
     mlog.info('DRAW_EGZ selection '+draw_egz)
 
     # The skimming tool
-    skimmingTool = CompFactory.DerivationFramework.xAODStringSkimmingTool(
-        name='DRAW_EGZSkimmingTool',
-        expression=draw_egz)
-    acc.addPublicTool(skimmingTool)
+    from DerivationFrameworkTools.DerivationFrameworkToolsConfig import (
+        xAODStringSkimmingToolCfg)
+    skimmingTool = acc.getPrimaryAndMerge(xAODStringSkimmingToolCfg(
+        flags, name='DRAW_EGZSkimmingTool', expression=draw_egz))
 
     # The main kernel algo
     DRAW_EGZKernel = CompFactory.DerivationFramework.DerivationKernel(
         name='DRAW_EGZKernel',
-        doChronoStat=(configFlags.Concurrency.NumThreads <= 1),
+        doChronoStat=(flags.Concurrency.NumThreads <= 1),
         AugmentationTools=augmentationTools,
         SkimmingTools=[skimmingTool])
 
