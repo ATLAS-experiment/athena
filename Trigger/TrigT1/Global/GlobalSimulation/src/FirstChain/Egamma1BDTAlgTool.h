@@ -15,7 +15,6 @@
 #include "../IO/eEmNbhoodTOB.h"
 #include "../IO/eEmEg1BDTTOBContainer.h"
 #include "../IO/eEmEg1BDTTOB.h"
-#include "../IO/IeEmEg1BDTTOB.h" // constains const static parameters
 
 
 #include "ap_int.h"

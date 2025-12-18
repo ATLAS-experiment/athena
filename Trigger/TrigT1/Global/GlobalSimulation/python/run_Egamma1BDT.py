@@ -92,7 +92,7 @@ if __name__ == '__main__':
                                      dump=True))
 
     from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
-    acc.merge(OutputStreamCfg(flags, 'AOD', ["IOBitwise::IeEmEg1BDTTOBContainer#BDTResult"]))
+    acc.merge(OutputStreamCfg(flags, 'AOD', ["IOBitwise::eEmEg1BDTTOBContainer#BDTResult"]))
     
     if acc.run().isFailure():
         import sys

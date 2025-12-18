@@ -115,11 +115,11 @@ namespace GlobalSim {
 	ATH_MSG_DEBUG("eRatio (sp/p) is " << eRatio);
 
 	//Make a bitset to hold the result
-	std::bitset<IOBitwise::IeEmEg1eRatioTOB::s_eGamma1eRatio_width> result = 0;
+	std::bitset<IOBitwise::eEmEg1eRatioTOB::s_eGamma1eRatio_width> result = 0;
 	//Sanity check to make sure we are in range 0-1
 	if(eRatio >= 0. && eRatio <= 1.0){
 	  //Convert to 0-2047. If s_eGamma1eRatio_width changes this will change.
-	  int eRatioPower = (1 << IOBitwise::IeEmEg1eRatioTOB::s_eGamma1eRatio_width) -1;
+	  int eRatioPower = (1 << IOBitwise::eEmEg1eRatioTOB::s_eGamma1eRatio_width) -1;
 	  h_eRatio->push_back((int)(eRatio*eRatioPower));
 	  result = (int)(eRatio*eRatioPower);
 	} else {
