@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( ReweightUtils )
@@ -51,7 +51,7 @@ atlas_add_test( ut_ParticleScaleFactorTool_test
    LINK_LIBRARIES ${ROOT_LIBRARIES} AsgTools AsgAnalysisInterfaces
    PATInterfaces xAODEgamma CxxUtils
    PROPERTIES TIMEOUT 600
-   LOG_IGNORE_PATTERN "Package.AsgTool...  DEBUG|WARNING MessageSvc not found")
+   LOG_IGNORE_PATTERN "Package.AsgTool...\\s+DEBUG|WARNING MessageSvc not found")
 
 # Install files from the package:
 atlas_install_python_modules( python/*.py  POST_BUILD_CMD ${ATLAS_FLAKE8} )
