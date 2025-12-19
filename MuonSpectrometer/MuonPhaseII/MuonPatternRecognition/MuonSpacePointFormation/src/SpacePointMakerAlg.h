@@ -10,6 +10,7 @@
 #include "GeoPrimitives/GeoPrimitives.h"
 #include "MuonSpacePoint/SpacePoint.h"
 #include "StoreGate/WriteHandleKey.h"
+#include "Acts/Utilities/PointerTraits.hpp"
 
 
 
@@ -21,13 +22,21 @@
 #include "xAODMuonPrepData/TgcStripContainer.h"
 #include "xAODMuonPrepData/MMClusterContainer.h"
 #include "xAODMuonPrepData/sTgcMeasContainer.h"
+#include <xAODMuonViews/ChamberViewer.h>
 
 
 namespace MuonR4{
+
     class SpacePointMakerAlg: public AthReentrantAlgorithm {
         public:
-            using AthReentrantAlgorithm::AthReentrantAlgorithm; 
+            template <Acts::PointerConcept Prd_t>
+            using PrdVec_t = std::vector<Prd_t>;
+            template <typename T>
+            using EtaPhi2DHits = std::array<PrdVec_t<T>, 3>;
+            template <typename T>
+            using EtaPhi2DHitsVec = std::vector<EtaPhi2DHits<T>>;
 
+            using AthReentrantAlgorithm::AthReentrantAlgorithm; 
             ~SpacePointMakerAlg() = default;
 
             StatusCode execute(const EventContext& ctx) const override;
@@ -102,7 +111,7 @@ namespace MuonR4{
              *  @param ctx: Event context of the current event
              *  @param key: ReadHandleKey to access the container of data type <ContType>
              *  @param fillContainer: Global container into which all space points are filled. */
-            template <class ContType> 
+            template <typename ContType> 
                 StatusCode loadContainerAndSort(const EventContext& ctx,
                                                 const SG::ReadHandleKey<ContType>& key,
                                                 PreSortedSpacePointMap& fillContainer) const;
@@ -113,15 +122,23 @@ namespace MuonR4{
              *          points are built intsead of 2D ones
              * @param etaHits: List of all presorted eta measurements in a gas gap
              * @param phiHits: List of all presorted phi measurements in a gas gap */
-            template <class PrdType>
-                bool passOccupancy2D(const std::vector<const PrdType*>& etaHits,
-                                     const std::vector<const PrdType*>& phiHits) const;
+            template <typename PrdType>
+                bool passOccupancy2D(const PrdVec_t<PrdType>& etaHits,
+                                     const PrdVec_t<PrdType>& phiHits) const;
+            /** @brief Splits the chamber hits of the viewer per gas gap
+             * @param viewer: Chamber viewer containing all hits in the chamber
+             *  @return Vector of gas gap hit collections. Each entry contains 3 vectors:
+             *          - eta hits
+             *          - phi hits
+             *          - 2D hits */
+            template <typename ContType>
+                EtaPhi2DHitsVec<typename ContType::const_value_type> splitHitsPerGasGap(xAOD::ChamberViewer<ContType>& viewer) const;
             /** @brief Fills all space points that are beloni */
-            template <class PrdType> 
+            template <typename PrdType> 
                 void fillUncombinedSpacePoints(const ActsTrk::GeometryContext& gctx,
                                                const Amg::Transform3D& sectorTrans,
-                                               const std::vector<const PrdType*>& prdsToFill,
-                                               std::vector<SpacePoint>& outColl) const;          
+                                               const PrdVec_t<PrdType*>& prdsToFill,
+                                               std::vector<SpacePoint>& outColl) const; 
             /** @brief Distribute the premade spacepoints per chamber into their individual SpacePoint
              *         buckets. A new bucket is created everytime if the hit to fill is along the z-axis 
              *         farther away from the first point in the bucket than the <spacePointWindowSize>.
