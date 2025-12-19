@@ -6,13 +6,13 @@
 #define GLOBALSIM_EEMSELECTOR_H
 
 #include "IeEmSelector.h"
-#include "../IO/IeEmTOB.h"  // bitset widths
 
 #include <climits>
+#include <memory>
 
 namespace  GlobalSim {
   /**
-   * @brief Implementaton of IeEmSelector. Selects IeEmTOBs following
+   * @brief Implementaton of IeEmSelector. Selects eEmTOBs following
    * hypo block VHDL code using window cuts on et, eta and phi.
    *
    */

@@ -27,12 +27,12 @@ namespace GlobalSim::IOBitwise {
 
   
   eEmTOB::eEmTOB(const GlobalSim::IOBitwise::CommonTOB& commonTOB,
-		 const std::bitset<IeEmTOB::s_RHad_width>& RHad_bits,
-		 const std::bitset<IeEmTOB::s_WsTot_width>& WsTot_bits, 
-		 const std::bitset<IeEmTOB::s_REta_width>& REta_bits,
-		 const std::bitset<IeEmTOB::s_Seed_width>& Seed_bits,
-		 const std::bitset<IeEmTOB::s_UpNotDown_width>& UpNotDown_bit,
-		 const std::bitset<IeEmTOB::s_SeedIsMax_width>& SeedIsMax_bit
+		 const std::bitset<eEmTOB::s_RHad_width>& RHad_bits,
+		 const std::bitset<eEmTOB::s_WsTot_width>& WsTot_bits, 
+		 const std::bitset<eEmTOB::s_REta_width>& REta_bits,
+		 const std::bitset<eEmTOB::s_Seed_width>& Seed_bits,
+		 const std::bitset<eEmTOB::s_UpNotDown_width>& UpNotDown_bit,
+		 const std::bitset<eEmTOB::s_SeedIsMax_width>& SeedIsMax_bit
 		 ) :
     CommonTOB(commonTOB),
     m_RHad_bits(RHad_bits),
@@ -45,27 +45,27 @@ namespace GlobalSim::IOBitwise {
 
 
   
-  const std::bitset<IeEmTOB::s_RHad_width>& eEmTOB::RHad_bits() const {
+  const std::bitset<eEmTOB::s_RHad_width>& eEmTOB::RHad_bits() const {
     return m_RHad_bits;
   }
 
-  const std::bitset<IeEmTOB::s_WsTot_width>& eEmTOB::WsTot_bits() const {
+  const std::bitset<eEmTOB::s_WsTot_width>& eEmTOB::WsTot_bits() const {
     return m_WsTot_bits;
   }
   
-  const std::bitset<IeEmTOB::s_REta_width>& eEmTOB::REta_bits() const {
+  const std::bitset<eEmTOB::s_REta_width>& eEmTOB::REta_bits() const {
     return m_REta_bits;
   }
 
-  const std::bitset<IeEmTOB::s_Seed_width>& eEmTOB::Seed_bits() const {
+  const std::bitset<eEmTOB::s_Seed_width>& eEmTOB::Seed_bits() const {
     return m_Seed_bits;
   }
   
-  const std::bitset<IeEmTOB::s_UpNotDown_width>& eEmTOB::UpNotDown_bit() const {
+  const std::bitset<eEmTOB::s_UpNotDown_width>& eEmTOB::UpNotDown_bit() const {
     return m_UpNotDown_bit;
   }
   
-  const std::bitset<IeEmTOB::s_SeedIsMax_width>& eEmTOB::SeedIsMax_bit() const {
+  const std::bitset<eEmTOB::s_SeedIsMax_width>& eEmTOB::SeedIsMax_bit() const {
     return m_SeedIsMax_bit;
   }
 
