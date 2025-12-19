@@ -45,8 +45,6 @@ namespace TCS {
       parType_t      p_maxEt4 = { 0 };
       parType_t      p_AnomalyScoreThresh[2] = { 0, 0 };
 
-      unsigned int   p_ScaleSqr_DropBits = 7;
-
    };
    
 }
