@@ -118,7 +118,7 @@ private:
     
      /// Initialze the tree with the output file. The stream corresponds to the stream
     /// of the file e.g MDTTester HighEtaTester
-    StatusCode init(ServiceHandle<ITHistSvc> hist_svc);
+    StatusCode init(const ServiceHandle<ITHistSvc> & hist_svc);
     
     using DataDependency = IMuonTesterBranch::DataDependency;
     std::vector<DataDependency> m_dependencies{};

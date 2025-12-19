@@ -117,7 +117,7 @@ bool MuonTesterTree::fill(const EventContext& ctx) {
     m_filled = true;
     return true;
 }
-StatusCode MuonTesterTree::init(ServiceHandle<ITHistSvc> hist_svc) {
+StatusCode MuonTesterTree::init(const ServiceHandle<ITHistSvc> & hist_svc) {
     if (fileStream().empty()) {
         ATH_MSG_ERROR("The file stream of " << name() << " has not been set yet" );
         return StatusCode::FAILURE;
