@@ -1,9 +1,8 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 
-#include "TrkFitterInterfaces/IGlobalTrackFitter.h"
 #include "TrkFitterInterfaces/ITrackFitter.h"
 #include "TrkAlignGenTools/ConstrainedTrackProvider.h"
 #include "TrkPseudoMeasurementOnTrack/PseudoMeasurementOnTrack.h"
@@ -22,61 +21,10 @@ namespace Trk {
   ConstrainedTrackProvider::ConstrainedTrackProvider(const std::string& type,
                const std::string& name,
                const IInterface* parent)
-
     : AthAlgTool(type,name,parent)
-    , m_trackFitter("Trk::GlobalChi2Fitter/InDetTrackFitter")
-    , m_scalepmaptogev(false)
-    , m_doTrackSelection (true)
-    , m_constrainedTracks(0)
-    , m_passconstrainedRequirements(0)
-    , m_unconstrainedTracks(0)
-    , m_inputTrackCollection("Tracks")
-    , m_constraintInputFile_P(nullptr)
-    , m_etaphiMap_P(nullptr)
-    , m_constraintInputFile_d0(nullptr)
-    , m_etaphiMap_d0(nullptr)
-    , m_constraintInputFile_z0(nullptr)
-    , m_etaphiMap_z0(nullptr)
-    , m_CorrectMeanD0()
-    , m_SelectByCharge()
-    , m_SelectPositive(false)
    {
     declareInterface<ITrackCollectionProvider>(this);
-    declareProperty("doTrackSelection",         m_doTrackSelection                 );
-    declareProperty("TrackFitter",              m_trackFitter                      );
-    declareProperty("InputTracksCollection",    m_inputTrackCollection             );
-    declareProperty("RunOutlierRemoval",        m_runOutlierRemoval      = true    );
-    declareProperty("MaxRetrievalErrors",       m_maxRetrievalErrors     = 10      );
-    declareProperty("UseConstrainedTrkOnly",    m_useConstrainedTrkOnly  = false   );
-    declareProperty("MinPt",                    m_minPt         = 15.0             );
-    declareProperty("MaxPt",                    m_maxPt         = 100.0            );
-    declareProperty("SelectByCharge",           m_SelectByCharge = false           );
-    declareProperty("SelectPositive",           m_SelectPositive = true            );
-    declareProperty("MinPIXHits",               m_minPIXHits    = 0                ); //1
-    declareProperty("MinSCTHits",               m_minSCTHits    = 0                ); //6
-    declareProperty("MinTRTHits",               m_minTRTHits    = 0                );
-    declareProperty("Maxd0",                    m_maxd0         = 500.             );
-    declareProperty("Maxz0",                    m_maxz0         = 500.             );
-    declareProperty("CorrectMomentum",          m_CorrectMomentum         = true              );
-    declareProperty("MomentumConstraintFileName", m_constraintFileName_P  = "Constraint.root" );
-    declareProperty("MomentumConstraintHistName", m_constraintHistName_P  = "EtaPhiMap"       );
-    declareProperty("CorrectD0",                  m_CorrectD0             = false             );
-    declareProperty("CorrectMeanD0",              m_CorrectMeanD0         = false             );
-    declareProperty("d0ConstraintFileName",       m_constraintFileName_d0 = "Constraint.root" );
-    declareProperty("d0ConstraintHistName",       m_constraintHistName_d0 = "EtaPhiMap"       );
-    declareProperty("CorrectZ0",                  m_CorrectZ0             = false             );
-    declareProperty("z0ConstraintFileName",       m_constraintFileName_z0 = "Constraint.root" );
-    declareProperty("z0ConstraintHistName",       m_constraintHistName_z0 = "EtaPhiMap"       );
-    declareProperty("UseConstraintError",         m_useConstraintError = true   ,"Bla bla "   );
-    declareProperty("ReduceConstraintUncertainty",m_reduceConstraintUncertainty = 1., "Reduce the uncertainty on teh track parmater constraint by this amount"  );
-    declareProperty("ReduceConstraintUncert_z0"  ,m_reduceConstraintUncert_z0 = 1.,   "Reduce the uncertainty on z0 track parameter constraint by this amount"  );
-    declareProperty("DeltaScaling",               m_deltaScaling = 1.);
-    declareProperty("ScalePMapToGeV"             ,m_scalepmaptogev);
   }
-
-  //________________________________________________________________________
-  ConstrainedTrackProvider::~ConstrainedTrackProvider()
-  = default;
 
   //________________________________________________________________________
   StatusCode ConstrainedTrackProvider::initialize()
@@ -97,13 +45,13 @@ namespace Trk {
 
     if(m_CorrectMomentum){
 
-      m_constraintInputFile_P = new TFile(m_constraintFileName_P.c_str() ,"read");
+      m_constraintInputFile_P = new TFile(m_constraintFileName_P.value().c_str(), "read");
       if ( m_constraintInputFile_P->IsZombie() || !(m_constraintInputFile_P->IsOpen()) ) {
         ATH_MSG_FATAL( " Problem reading TFile " << m_constraintFileName_P );
         return StatusCode::FAILURE;
       }
       ATH_MSG_INFO("Opened  file containing the deltaSagitta constraints" << m_constraintFileName_P);
-      m_etaphiMap_P = (TH2F*)m_constraintInputFile_P->Get(m_constraintHistName_P.c_str());
+      m_etaphiMap_P = static_cast<TH2F*>(m_constraintInputFile_P->Get(m_constraintHistName_P.value().c_str()));
       if(!m_etaphiMap_P){
         ATH_MSG_FATAL( " Problem getting constraints Hist.  Name " << m_constraintHistName_P );
         m_constraintInputFile_P->Close();
@@ -116,13 +64,13 @@ namespace Trk {
 
     if(m_CorrectD0){
 
-      m_constraintInputFile_d0 = new TFile(m_constraintFileName_d0.c_str() ,"read");
+      m_constraintInputFile_d0 = new TFile(m_constraintFileName_d0.value().c_str(), "read");
       if ( m_constraintInputFile_d0->IsZombie() || !(m_constraintInputFile_d0->IsOpen()) ) {
         ATH_MSG_FATAL( " Problem reading TFile " << m_constraintFileName_d0 );
         return StatusCode::FAILURE;
       }
       ATH_MSG_INFO("Opened file containing the d0 constraints" << m_constraintFileName_d0);
-      m_etaphiMap_d0 = (TH2F*)m_constraintInputFile_d0->Get(m_constraintHistName_d0.c_str());
+      m_etaphiMap_d0 = static_cast<TH2F*>(m_constraintInputFile_d0->Get(m_constraintHistName_d0.value().c_str()));
       if(!m_etaphiMap_d0){
         ATH_MSG_FATAL( " Problem getting constraints Hist.  Name " << m_constraintHistName_d0 );
         m_constraintInputFile_d0->Close();
@@ -135,13 +83,13 @@ namespace Trk {
 
     if(m_CorrectZ0){
 
-      m_constraintInputFile_z0 = new TFile(m_constraintFileName_z0.c_str() ,"read");
+      m_constraintInputFile_z0 = new TFile(m_constraintFileName_z0.value().c_str(),"read");
       if ( m_constraintInputFile_z0->IsZombie() || !(m_constraintInputFile_z0->IsOpen()) ) {
         ATH_MSG_FATAL( " Problem reading TFile " << m_constraintFileName_z0 );
         return StatusCode::FAILURE;
       }
       ATH_MSG_INFO("Opened  file containing the z0 constraints" << m_constraintFileName_z0);
-      m_etaphiMap_z0 = (TH2F*)m_constraintInputFile_z0->Get(m_constraintHistName_z0.c_str());
+      m_etaphiMap_z0 = static_cast<TH2F*>(m_constraintInputFile_z0->Get(m_constraintHistName_z0.value().c_str()));
       if(!m_etaphiMap_z0){
         ATH_MSG_FATAL( " Problem getting constraints Hist.  Name " << m_constraintHistName_z0 );
         m_constraintInputFile_z0->Close();
@@ -152,13 +100,8 @@ namespace Trk {
 
     }
 
-    /* Commented to enable the scaling of the uncertainty
-     *
-     if(m_reduceConstraintUncertainty<=0){
-      ATH_MSG_FATAL( " reduceConstraintUncertainty  is  <= 0 it must be >0 . Currently  " << m_reduceConstraintUncertainty );
-      return StatusCode::FAILURE;
-    }
-    */
+    ATH_CHECK( m_inputKey.initialize() );
+    ATH_CHECK( m_outputKey.initialize() );
 
     return StatusCode::SUCCESS;
   }
@@ -191,34 +134,33 @@ namespace Trk {
 
   StatusCode ConstrainedTrackProvider::trackCollection(const TrackCollection*& finalTracks)
   {
-
-
-    const TrackCollection* originalTracks = nullptr;
-
-    if ( StatusCode::SUCCESS != evtStore()->retrieve(originalTracks, m_inputTrackCollection) ){
-      ATH_MSG_WARNING(" Can't retrieve " << m_inputTrackCollection << " from the StoreGate ");
-      finalTracks = originalTracks; // return empty collection
-      return StatusCode::SUCCESS;
+    SG::ReadHandle<TrackCollection> originalTracks(m_inputKey);
+    if (!originalTracks.isValid()) {
+      ATH_MSG_WARNING(" Can't retrieve " << m_inputKey);
+      finalTracks = nullptr; // return empty collection
+      return StatusCode::FAILURE;
     }
 
-    TrackCollection* trackCollection = new TrackCollection;
+    SG::WriteHandle<TrackCollection> trackCollection(m_outputKey);
+    ATH_CHECK(trackCollection.record(std::make_unique<TrackCollection>()));
+    if (!trackCollection.isValid()) {
+      ATH_MSG_ERROR("Could not record output TrackCollection " << trackCollection.name() << " to store " << trackCollection.store());
+      return StatusCode::FAILURE;
+    }
 
     ATH_MSG_DEBUG("Input track collection size:  " << originalTracks->size());
 
-    TrackCollection::const_iterator trackIt   = originalTracks->begin();
-    TrackCollection::const_iterator trackItE  = originalTracks->end();
     int trackCount = 0;
-
-    for ( ; trackIt != trackItE; ++trackIt ) {
+    for (const Trk::Track* track : *originalTracks) {
       trackCount++;
       ATH_MSG_DEBUG("Dealing with track:  " << trackCount << " / " << originalTracks->size());
 
       bool acceptedTrack = true;
-      if (m_doTrackSelection) acceptedTrack = passTrackSelection( *trackIt );
+      if (m_doTrackSelection) acceptedTrack = passTrackSelection( track );
 
       if( acceptedTrack ){
 	ATH_MSG_DEBUG("Track selection OK for track: " << trackCount);
-        const Trk::Perigee* measuredPerigee =  (*trackIt)->perigeeParameters();
+        const Trk::Perigee* measuredPerigee =  track->perigeeParameters();
         if(!measuredPerigee){
           ATH_MSG_DEBUG(" no measuredPerigee");
           continue;
@@ -289,14 +231,14 @@ namespace Trk {
         if (pmot) vecOfMB.push_back(pmot);
 
         // Add the remaining hits;
-        DataVector<const Trk::MeasurementBase>::const_iterator it    = (*trackIt)->measurementsOnTrack()->begin();
-        DataVector<const Trk::MeasurementBase>::const_iterator itend = (*trackIt)->measurementsOnTrack()->end();
+        DataVector<const Trk::MeasurementBase>::const_iterator it    = track->measurementsOnTrack()->begin();
+        DataVector<const Trk::MeasurementBase>::const_iterator itend = track->measurementsOnTrack()->end();
         for (;it!=itend;++it)
           vecOfMB.push_back(*it);
 
         if(m_runOutlierRemoval){
-          it    = (*trackIt)->outliersOnTrack()->begin();
-          itend = (*trackIt)->outliersOnTrack()->end();
+          it    = track->outliersOnTrack()->begin();
+          itend = track->outliersOnTrack()->end();
           // Add the remaining hits;
           for (;it!=itend;++it)
             vecOfMB.push_back(*it);
@@ -327,7 +269,6 @@ namespace Trk {
 			  << "  z0: " << constrainedPerigee->parameters()[Trk::z0] );
           }
 
-	  const Track* track = *trackIt;
 	  constrainedFittedTrack->setTrackSummary( std::make_unique<Trk::TrackSummary> (*track->trackSummary()) );
 
           trackCollection->push_back(constrainedFittedTrack);
@@ -344,7 +285,7 @@ namespace Trk {
         Trk::Track* unconstrainedFittedTrack =
           m_trackFitter
             ->fit(Gaudi::Hive::currentContext(),
-                  **trackIt,
+                  *track,
                   m_runOutlierRemoval,
                   Trk::pion)
             .release();
@@ -359,17 +300,8 @@ namespace Trk {
       }
     }
 
-
-    if (StatusCode::SUCCESS != evtStore()->record(trackCollection, "AlignmentConstrainedTracks")){
-      ATH_MSG_WARNING("Problem with recording AlignmentConstrainedTracks to StoreGate!");
-      delete trackCollection;
-      return StatusCode::SUCCESS;
-    }
-
     ATH_MSG_INFO ("Size of the trackCollection in this event : " << trackCollection->size() );
-    //track Collection cannot be null here; it has already been dereferenced
-    finalTracks = trackCollection;
-
+    finalTracks = trackCollection.cptr();
     return StatusCode::SUCCESS;
 
   }
@@ -402,7 +334,7 @@ namespace Trk {
     const double z0     = perigee->parameters()[Trk::z0];
     const double d0     = perigee->parameters()[Trk::d0];
     double pt          = 0.;
-    if ( qoverP != 0 ) pt = fabs(1.0/qoverP)*sin(perigee->parameters()[Trk::theta]);
+    if ( qoverP != 0 ) pt = std::abs(1.0/qoverP)*sin(perigee->parameters()[Trk::theta]);
 
     ATH_MSG_DEBUG( "== TrackSelection == track pt  : "<< pt );
     double charge(0);
@@ -441,8 +373,8 @@ namespace Trk {
     if( nPixHits < m_minPIXHits ||
         nSCTHits < m_minSCTHits ||
         nTRTHits < m_minTRTHits ||
-        d0 > m_maxd0    ||
-        z0 > m_maxz0    ) {
+        std::abs(d0) > m_maxd0    ||
+        std::abs(z0) > m_maxz0    ) {
       ATH_MSG_DEBUG("This track did not pass cuts --- nPixHits: " << nPixHits << " nSCTHits: " << nSCTHits <<
 		    " nTRTHits: " << nTRTHits << " idd0atIP: " << d0 << " idz0atIP: " << z0  );
      return false;
@@ -462,7 +394,7 @@ namespace Trk {
     else
       charge = -1.;
 
-    double pt   = fabs(1./(measuredPerigee->parameters()[Trk::qOverP]))* sin(measuredPerigee->parameters()[Trk::theta]) *1e-3;
+    double pt   = std::abs(1./(measuredPerigee->parameters()[Trk::qOverP]))* sin(measuredPerigee->parameters()[Trk::theta]) *1e-3;
     double eta = -log(tan(measuredPerigee->parameters()[Trk::theta]/2.));
     double phi = measuredPerigee->parameters()[Trk::phi];
     double perr =  (*measuredPerigee->covariance())( Trk::qOverP, Trk::qOverP );
@@ -570,7 +502,6 @@ namespace Trk {
       *m_logStream<<"*************************************************************"<<std::endl;
       *m_logStream<<"******        ConstrainedTrackProvider Summary       ******"<<std::endl;
       *m_logStream<<"*"<<std::endl;
-      *m_logStream<<"* number of combined muons failed in refit:                           " << m_passconstrainedRequirements   << std::endl;
       *m_logStream<<"* number of combined muons failed in refit:                           " << m_constrainedTracks   << std::endl;
       *m_logStream<<"* number of combined muons succeeded in refit:                        " << m_unconstrainedTracks      << std::endl;
 
