@@ -339,6 +339,8 @@ class MuonWorkingPointConfig (ConfigBlock) :
             alg.efficiencyScaleFactorTool.WorkingPoint = 'BadMuonVeto_HighPt'
             if config.geometry() >= LHCPeriod.Run3:
                 alg.efficiencyScaleFactorTool.CalibrationRelease = '220817_Preliminary_r22run3' # not available as part of '230123_Preliminary_r22run3'!
+            else:
+                 alg.efficiencyScaleFactorTool.CalibrationRelease = '230213_Preliminary_r22run2'
             alg.efficiencyScaleFactorTool.BreakDownSystematics = self.systematicBreakdown
             alg.muons = config.readName (self.containerName)
             alg.preselection = config.getPreselection (self.containerName, self.selectionName)
