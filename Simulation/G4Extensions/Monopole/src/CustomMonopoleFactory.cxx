@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // class header
@@ -60,9 +60,10 @@ void CustomMonopoleFactory::loadCustomMonopoles()
       end_idx = line.find_first_of( "\t ", beg_idx);
       if (end_idx == std::string::npos) continue;
       char *endptr;
-      pdgCode  = strtol(line.substr( beg_idx, end_idx - beg_idx ).c_str(), &endptr, 0);
+      const std::string numberTxt = line.substr( beg_idx, end_idx - beg_idx );
+      pdgCode  = strtol(numberTxt.c_str(), &endptr, 0);
       if (endptr[0] != '\0') {
-        throw std::invalid_argument("CustomMonopoleFactory::loadCustomMonopoles: Could not convert string to int: " + line.substr( beg_idx, end_idx - beg_idx ));
+        throw std::invalid_argument("CustomMonopoleFactory::loadCustomMonopoles: Could not convert string to int: " + numberTxt);
       }
 
       G4cout << "CustomMonopoleFactory: pdgCode = " << pdgCode << G4endl;
