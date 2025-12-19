@@ -15,7 +15,7 @@ AthenaEventLoopMgr   INFO   ===>>>  start of run 0    <<<===
 AthenaEventLoopMgr   INFO   ===>>>  start processing event #1, run #0 0 events processed so far  <<<===
 dflow_alg1           INFO evtinfo handle...
 dflow_alg1           INFO name: [EventInfo]
-dflow_alg1           INFO store [StoreGateSvc]
+dflow_alg1           INFO store [StoreGateSvc_Impl]
 dflow_alg1           INFO clid: [45903698]
 dflow_alg1           INFO ei: [Run,Evt,Lumi,Time,BunchCross,DetMask] = [0,1,0,0:0,0,0x0000000000000000]
 dflow_alg1           INFO retrieving event-info...
@@ -23,7 +23,7 @@ dflow_alg1           INFO evt-info.runnbr: 0
 dflow_alg1           INFO evt-info.evtnbr: 1
 dflow_alg1           INFO myint handle...
 dflow_alg1           INFO name: [dflow_int]
-dflow_alg1           INFO store [StoreGateSvc]
+dflow_alg1           INFO store [StoreGateSvc_Impl]
 dflow_alg1           INFO clid: [244260744]
 dflow_alg1           INFO val: 1
 dflow_alg1           INFO modify myint by value...
@@ -31,12 +31,12 @@ dflow_alg1           INFO val: 21
 dflow_alg2           INFO ================================
 dflow_alg2           INFO myint r-handle...
 dflow_alg2           INFO name: [dflow_int]
-dflow_alg2           INFO store [StoreGateSvc]
+dflow_alg2           INFO store [StoreGateSvc_Impl]
 dflow_alg2           INFO clid: [244260744]
 dflow_alg2           INFO val: 21
 dflow_alg2           INFO myint w-handle...
 dflow_alg2           INFO name: [dflow_int2]
-dflow_alg2           INFO store [StoreGateSvc]
+dflow_alg2           INFO store [StoreGateSvc_Impl]
 dflow_alg2           INFO clid: [244260744]
 dflow_alg2           INFO val: 1021
 dflow_alg2           INFO ints w-handle...
@@ -46,12 +46,12 @@ dflow_alg2           INFO val[1]= 21
 dflow_alg3           INFO ================================
 dflow_alg3           INFO myint r-handle...
 dflow_alg3           INFO name: [dflow_int2]
-dflow_alg3           INFO store [StoreGateSvc]
+dflow_alg3           INFO store [StoreGateSvc_Impl]
 dflow_alg3           INFO clid: [244260744]
 dflow_alg3           INFO val: 1021
 dflow_alg3           INFO ints r-handle...
 dflow_alg3           INFO name: [dflow_ints]
-dflow_alg3           INFO store [StoreGateSvc]
+dflow_alg3           INFO store [StoreGateSvc_Impl]
 dflow_alg3           INFO clid: [22592129]
 dflow_alg3           INFO ints w-handle...
 dflow_alg3           INFO size:4
@@ -84,13 +84,13 @@ dflow_alg3           INFO valid:0
 dflow_alg3           INFO -- testing RWVar<T> semantics...
 dflow_alg3           INFO name: dflow_int2
 dflow_alg3           INFO valid:0
-dflow_alg3           INFO good, caught: [SG::ExcConstObject: Tried to retrieve non-const pointer to const object via VarHandleKey: StoreGateSvc+dflow_int2[244260744]]
+dflow_alg3           INFO good, caught: [SG::ExcConstObject: Tried to retrieve non-const pointer to const object via VarHandleKey: StoreGateSvc_Impl+dflow_int2[244260744]]
 dflow_alg3           INFO valid:0
 AthenaEventLoopMgr   INFO   ===>>>  done processing event #1, run #0 1 events processed so far  <<<===
 AthenaEventLoopMgr   INFO   ===>>>  start processing event #2, run #0 1 events processed so far  <<<===
 dflow_alg1           INFO evtinfo handle...
 dflow_alg1           INFO name: [EventInfo]
-dflow_alg1           INFO store [StoreGateSvc]
+dflow_alg1           INFO store [StoreGateSvc_Impl]
 dflow_alg1           INFO clid: [45903698]
 dflow_alg1           INFO ei: [Run,Evt,Lumi,Time,BunchCross,DetMask] = [0,2,0,0:0,0,0x0000000000000000]
 dflow_alg1           INFO retrieving event-info...
@@ -98,7 +98,7 @@ dflow_alg1           INFO evt-info.runnbr: 0
 dflow_alg1           INFO evt-info.evtnbr: 2
 dflow_alg1           INFO myint handle...
 dflow_alg1           INFO name: [dflow_int]
-dflow_alg1           INFO store [StoreGateSvc]
+dflow_alg1           INFO store [StoreGateSvc_Impl]
 dflow_alg1           INFO clid: [244260744]
 dflow_alg1           INFO val: 2
 dflow_alg1           INFO modify myint by value...
@@ -106,12 +106,12 @@ dflow_alg1           INFO val: 22
 dflow_alg2           INFO ================================
 dflow_alg2           INFO myint r-handle...
 dflow_alg2           INFO name: [dflow_int]
-dflow_alg2           INFO store [StoreGateSvc]
+dflow_alg2           INFO store [StoreGateSvc_Impl]
 dflow_alg2           INFO clid: [244260744]
 dflow_alg2           INFO val: 22
 dflow_alg2           INFO myint w-handle...
 dflow_alg2           INFO name: [dflow_int2]
-dflow_alg2           INFO store [StoreGateSvc]
+dflow_alg2           INFO store [StoreGateSvc_Impl]
 dflow_alg2           INFO clid: [244260744]
 dflow_alg2           INFO val: 1022
 dflow_alg2           INFO ints w-handle...
@@ -121,12 +121,12 @@ dflow_alg2           INFO val[1]= 22
 dflow_alg3           INFO ================================
 dflow_alg3           INFO myint r-handle...
 dflow_alg3           INFO name: [dflow_int2]
-dflow_alg3           INFO store [StoreGateSvc]
+dflow_alg3           INFO store [StoreGateSvc_Impl]
 dflow_alg3           INFO clid: [244260744]
 dflow_alg3           INFO val: 1022
 dflow_alg3           INFO ints r-handle...
 dflow_alg3           INFO name: [dflow_ints]
-dflow_alg3           INFO store [StoreGateSvc]
+dflow_alg3           INFO store [StoreGateSvc_Impl]
 dflow_alg3           INFO clid: [22592129]
 dflow_alg3           INFO ints w-handle...
 dflow_alg3           INFO size:4
@@ -159,13 +159,13 @@ dflow_alg3           INFO valid:0
 dflow_alg3           INFO -- testing RWVar<T> semantics...
 dflow_alg3           INFO name: dflow_int2
 dflow_alg3           INFO valid:0
-dflow_alg3           INFO good, caught: [SG::ExcConstObject: Tried to retrieve non-const pointer to const object via VarHandleKey: StoreGateSvc+dflow_int2[244260744]]
+dflow_alg3           INFO good, caught: [SG::ExcConstObject: Tried to retrieve non-const pointer to const object via VarHandleKey: StoreGateSvc_Impl+dflow_int2[244260744]]
 dflow_alg3           INFO valid:0
 AthenaEventLoopMgr   INFO   ===>>>  done processing event #2, run #0 2 events processed so far  <<<===
 AthenaEventLoopMgr   INFO   ===>>>  start processing event #3, run #0 2 events processed so far  <<<===
 dflow_alg1           INFO evtinfo handle...
 dflow_alg1           INFO name: [EventInfo]
-dflow_alg1           INFO store [StoreGateSvc]
+dflow_alg1           INFO store [StoreGateSvc_Impl]
 dflow_alg1           INFO clid: [45903698]
 dflow_alg1           INFO ei: [Run,Evt,Lumi,Time,BunchCross,DetMask] = [0,3,0,0:0,0,0x0000000000000000]
 dflow_alg1           INFO retrieving event-info...
@@ -173,7 +173,7 @@ dflow_alg1           INFO evt-info.runnbr: 0
 dflow_alg1           INFO evt-info.evtnbr: 3
 dflow_alg1           INFO myint handle...
 dflow_alg1           INFO name: [dflow_int]
-dflow_alg1           INFO store [StoreGateSvc]
+dflow_alg1           INFO store [StoreGateSvc_Impl]
 dflow_alg1           INFO clid: [244260744]
 dflow_alg1           INFO val: 3
 dflow_alg1           INFO modify myint by value...
@@ -181,12 +181,12 @@ dflow_alg1           INFO val: 23
 dflow_alg2           INFO ================================
 dflow_alg2           INFO myint r-handle...
 dflow_alg2           INFO name: [dflow_int]
-dflow_alg2           INFO store [StoreGateSvc]
+dflow_alg2           INFO store [StoreGateSvc_Impl]
 dflow_alg2           INFO clid: [244260744]
 dflow_alg2           INFO val: 23
 dflow_alg2           INFO myint w-handle...
 dflow_alg2           INFO name: [dflow_int2]
-dflow_alg2           INFO store [StoreGateSvc]
+dflow_alg2           INFO store [StoreGateSvc_Impl]
 dflow_alg2           INFO clid: [244260744]
 dflow_alg2           INFO val: 1023
 dflow_alg2           INFO ints w-handle...
@@ -196,12 +196,12 @@ dflow_alg2           INFO val[1]= 23
 dflow_alg3           INFO ================================
 dflow_alg3           INFO myint r-handle...
 dflow_alg3           INFO name: [dflow_int2]
-dflow_alg3           INFO store [StoreGateSvc]
+dflow_alg3           INFO store [StoreGateSvc_Impl]
 dflow_alg3           INFO clid: [244260744]
 dflow_alg3           INFO val: 1023
 dflow_alg3           INFO ints r-handle...
 dflow_alg3           INFO name: [dflow_ints]
-dflow_alg3           INFO store [StoreGateSvc]
+dflow_alg3           INFO store [StoreGateSvc_Impl]
 dflow_alg3           INFO clid: [22592129]
 dflow_alg3           INFO ints w-handle...
 dflow_alg3           INFO size:4
@@ -234,13 +234,13 @@ dflow_alg3           INFO valid:0
 dflow_alg3           INFO -- testing RWVar<T> semantics...
 dflow_alg3           INFO name: dflow_int2
 dflow_alg3           INFO valid:0
-dflow_alg3           INFO good, caught: [SG::ExcConstObject: Tried to retrieve non-const pointer to const object via VarHandleKey: StoreGateSvc+dflow_int2[244260744]]
+dflow_alg3           INFO good, caught: [SG::ExcConstObject: Tried to retrieve non-const pointer to const object via VarHandleKey: StoreGateSvc_Impl+dflow_int2[244260744]]
 dflow_alg3           INFO valid:0
 AthenaEventLoopMgr   INFO   ===>>>  done processing event #3, run #0 3 events processed so far  <<<===
 AthenaEventLoopMgr   INFO   ===>>>  start processing event #4, run #0 3 events processed so far  <<<===
 dflow_alg1           INFO evtinfo handle...
 dflow_alg1           INFO name: [EventInfo]
-dflow_alg1           INFO store [StoreGateSvc]
+dflow_alg1           INFO store [StoreGateSvc_Impl]
 dflow_alg1           INFO clid: [45903698]
 dflow_alg1           INFO ei: [Run,Evt,Lumi,Time,BunchCross,DetMask] = [0,4,0,0:0,0,0x0000000000000000]
 dflow_alg1           INFO retrieving event-info...
@@ -248,7 +248,7 @@ dflow_alg1           INFO evt-info.runnbr: 0
 dflow_alg1           INFO evt-info.evtnbr: 4
 dflow_alg1           INFO myint handle...
 dflow_alg1           INFO name: [dflow_int]
-dflow_alg1           INFO store [StoreGateSvc]
+dflow_alg1           INFO store [StoreGateSvc_Impl]
 dflow_alg1           INFO clid: [244260744]
 dflow_alg1           INFO val: 4
 dflow_alg1           INFO modify myint by value...
@@ -256,12 +256,12 @@ dflow_alg1           INFO val: 24
 dflow_alg2           INFO ================================
 dflow_alg2           INFO myint r-handle...
 dflow_alg2           INFO name: [dflow_int]
-dflow_alg2           INFO store [StoreGateSvc]
+dflow_alg2           INFO store [StoreGateSvc_Impl]
 dflow_alg2           INFO clid: [244260744]
 dflow_alg2           INFO val: 24
 dflow_alg2           INFO myint w-handle...
 dflow_alg2           INFO name: [dflow_int2]
-dflow_alg2           INFO store [StoreGateSvc]
+dflow_alg2           INFO store [StoreGateSvc_Impl]
 dflow_alg2           INFO clid: [244260744]
 dflow_alg2           INFO val: 1024
 dflow_alg2           INFO ints w-handle...
@@ -271,12 +271,12 @@ dflow_alg2           INFO val[1]= 24
 dflow_alg3           INFO ================================
 dflow_alg3           INFO myint r-handle...
 dflow_alg3           INFO name: [dflow_int2]
-dflow_alg3           INFO store [StoreGateSvc]
+dflow_alg3           INFO store [StoreGateSvc_Impl]
 dflow_alg3           INFO clid: [244260744]
 dflow_alg3           INFO val: 1024
 dflow_alg3           INFO ints r-handle...
 dflow_alg3           INFO name: [dflow_ints]
-dflow_alg3           INFO store [StoreGateSvc]
+dflow_alg3           INFO store [StoreGateSvc_Impl]
 dflow_alg3           INFO clid: [22592129]
 dflow_alg3           INFO ints w-handle...
 dflow_alg3           INFO size:4
@@ -309,13 +309,13 @@ dflow_alg3           INFO valid:0
 dflow_alg3           INFO -- testing RWVar<T> semantics...
 dflow_alg3           INFO name: dflow_int2
 dflow_alg3           INFO valid:0
-dflow_alg3           INFO good, caught: [SG::ExcConstObject: Tried to retrieve non-const pointer to const object via VarHandleKey: StoreGateSvc+dflow_int2[244260744]]
+dflow_alg3           INFO good, caught: [SG::ExcConstObject: Tried to retrieve non-const pointer to const object via VarHandleKey: StoreGateSvc_Impl+dflow_int2[244260744]]
 dflow_alg3           INFO valid:0
 AthenaEventLoopMgr   INFO   ===>>>  done processing event #4, run #0 4 events processed so far  <<<===
 AthenaEventLoopMgr   INFO   ===>>>  start processing event #5, run #0 4 events processed so far  <<<===
 dflow_alg1           INFO evtinfo handle...
 dflow_alg1           INFO name: [EventInfo]
-dflow_alg1           INFO store [StoreGateSvc]
+dflow_alg1           INFO store [StoreGateSvc_Impl]
 dflow_alg1           INFO clid: [45903698]
 dflow_alg1           INFO ei: [Run,Evt,Lumi,Time,BunchCross,DetMask] = [0,5,0,0:0,0,0x0000000000000000]
 dflow_alg1           INFO retrieving event-info...
@@ -323,7 +323,7 @@ dflow_alg1           INFO evt-info.runnbr: 0
 dflow_alg1           INFO evt-info.evtnbr: 5
 dflow_alg1           INFO myint handle...
 dflow_alg1           INFO name: [dflow_int]
-dflow_alg1           INFO store [StoreGateSvc]
+dflow_alg1           INFO store [StoreGateSvc_Impl]
 dflow_alg1           INFO clid: [244260744]
 dflow_alg1           INFO val: 5
 dflow_alg1           INFO modify myint by value...
@@ -331,12 +331,12 @@ dflow_alg1           INFO val: 25
 dflow_alg2           INFO ================================
 dflow_alg2           INFO myint r-handle...
 dflow_alg2           INFO name: [dflow_int]
-dflow_alg2           INFO store [StoreGateSvc]
+dflow_alg2           INFO store [StoreGateSvc_Impl]
 dflow_alg2           INFO clid: [244260744]
 dflow_alg2           INFO val: 25
 dflow_alg2           INFO myint w-handle...
 dflow_alg2           INFO name: [dflow_int2]
-dflow_alg2           INFO store [StoreGateSvc]
+dflow_alg2           INFO store [StoreGateSvc_Impl]
 dflow_alg2           INFO clid: [244260744]
 dflow_alg2           INFO val: 1025
 dflow_alg2           INFO ints w-handle...
@@ -346,12 +346,12 @@ dflow_alg2           INFO val[1]= 25
 dflow_alg3           INFO ================================
 dflow_alg3           INFO myint r-handle...
 dflow_alg3           INFO name: [dflow_int2]
-dflow_alg3           INFO store [StoreGateSvc]
+dflow_alg3           INFO store [StoreGateSvc_Impl]
 dflow_alg3           INFO clid: [244260744]
 dflow_alg3           INFO val: 1025
 dflow_alg3           INFO ints r-handle...
 dflow_alg3           INFO name: [dflow_ints]
-dflow_alg3           INFO store [StoreGateSvc]
+dflow_alg3           INFO store [StoreGateSvc_Impl]
 dflow_alg3           INFO clid: [22592129]
 dflow_alg3           INFO ints w-handle...
 dflow_alg3           INFO size:4
@@ -384,13 +384,13 @@ dflow_alg3           INFO valid:0
 dflow_alg3           INFO -- testing RWVar<T> semantics...
 dflow_alg3           INFO name: dflow_int2
 dflow_alg3           INFO valid:0
-dflow_alg3           INFO good, caught: [SG::ExcConstObject: Tried to retrieve non-const pointer to const object via VarHandleKey: StoreGateSvc+dflow_int2[244260744]]
+dflow_alg3           INFO good, caught: [SG::ExcConstObject: Tried to retrieve non-const pointer to const object via VarHandleKey: StoreGateSvc_Impl+dflow_int2[244260744]]
 dflow_alg3           INFO valid:0
 AthenaEventLoopMgr   INFO   ===>>>  done processing event #5, run #0 5 events processed so far  <<<===
 AthenaEventLoopMgr   INFO   ===>>>  start processing event #6, run #0 5 events processed so far  <<<===
 dflow_alg1           INFO evtinfo handle...
 dflow_alg1           INFO name: [EventInfo]
-dflow_alg1           INFO store [StoreGateSvc]
+dflow_alg1           INFO store [StoreGateSvc_Impl]
 dflow_alg1           INFO clid: [45903698]
 dflow_alg1           INFO ei: [Run,Evt,Lumi,Time,BunchCross,DetMask] = [0,6,0,0:0,0,0x0000000000000000]
 dflow_alg1           INFO retrieving event-info...
@@ -398,7 +398,7 @@ dflow_alg1           INFO evt-info.runnbr: 0
 dflow_alg1           INFO evt-info.evtnbr: 6
 dflow_alg1           INFO myint handle...
 dflow_alg1           INFO name: [dflow_int]
-dflow_alg1           INFO store [StoreGateSvc]
+dflow_alg1           INFO store [StoreGateSvc_Impl]
 dflow_alg1           INFO clid: [244260744]
 dflow_alg1           INFO val: 6
 dflow_alg1           INFO modify myint by value...
@@ -406,12 +406,12 @@ dflow_alg1           INFO val: 26
 dflow_alg2           INFO ================================
 dflow_alg2           INFO myint r-handle...
 dflow_alg2           INFO name: [dflow_int]
-dflow_alg2           INFO store [StoreGateSvc]
+dflow_alg2           INFO store [StoreGateSvc_Impl]
 dflow_alg2           INFO clid: [244260744]
 dflow_alg2           INFO val: 26
 dflow_alg2           INFO myint w-handle...
 dflow_alg2           INFO name: [dflow_int2]
-dflow_alg2           INFO store [StoreGateSvc]
+dflow_alg2           INFO store [StoreGateSvc_Impl]
 dflow_alg2           INFO clid: [244260744]
 dflow_alg2           INFO val: 1026
 dflow_alg2           INFO ints w-handle...
@@ -421,12 +421,12 @@ dflow_alg2           INFO val[1]= 26
 dflow_alg3           INFO ================================
 dflow_alg3           INFO myint r-handle...
 dflow_alg3           INFO name: [dflow_int2]
-dflow_alg3           INFO store [StoreGateSvc]
+dflow_alg3           INFO store [StoreGateSvc_Impl]
 dflow_alg3           INFO clid: [244260744]
 dflow_alg3           INFO val: 1026
 dflow_alg3           INFO ints r-handle...
 dflow_alg3           INFO name: [dflow_ints]
-dflow_alg3           INFO store [StoreGateSvc]
+dflow_alg3           INFO store [StoreGateSvc_Impl]
 dflow_alg3           INFO clid: [22592129]
 dflow_alg3           INFO ints w-handle...
 dflow_alg3           INFO size:4
@@ -459,13 +459,13 @@ dflow_alg3           INFO valid:0
 dflow_alg3           INFO -- testing RWVar<T> semantics...
 dflow_alg3           INFO name: dflow_int2
 dflow_alg3           INFO valid:0
-dflow_alg3           INFO good, caught: [SG::ExcConstObject: Tried to retrieve non-const pointer to const object via VarHandleKey: StoreGateSvc+dflow_int2[244260744]]
+dflow_alg3           INFO good, caught: [SG::ExcConstObject: Tried to retrieve non-const pointer to const object via VarHandleKey: StoreGateSvc_Impl+dflow_int2[244260744]]
 dflow_alg3           INFO valid:0
 AthenaEventLoopMgr   INFO   ===>>>  done processing event #6, run #0 6 events processed so far  <<<===
 AthenaEventLoopMgr   INFO   ===>>>  start processing event #7, run #0 6 events processed so far  <<<===
 dflow_alg1           INFO evtinfo handle...
 dflow_alg1           INFO name: [EventInfo]
-dflow_alg1           INFO store [StoreGateSvc]
+dflow_alg1           INFO store [StoreGateSvc_Impl]
 dflow_alg1           INFO clid: [45903698]
 dflow_alg1           INFO ei: [Run,Evt,Lumi,Time,BunchCross,DetMask] = [0,7,0,0:0,0,0x0000000000000000]
 dflow_alg1           INFO retrieving event-info...
@@ -473,7 +473,7 @@ dflow_alg1           INFO evt-info.runnbr: 0
 dflow_alg1           INFO evt-info.evtnbr: 7
 dflow_alg1           INFO myint handle...
 dflow_alg1           INFO name: [dflow_int]
-dflow_alg1           INFO store [StoreGateSvc]
+dflow_alg1           INFO store [StoreGateSvc_Impl]
 dflow_alg1           INFO clid: [244260744]
 dflow_alg1           INFO val: 7
 dflow_alg1           INFO modify myint by value...
@@ -481,12 +481,12 @@ dflow_alg1           INFO val: 27
 dflow_alg2           INFO ================================
 dflow_alg2           INFO myint r-handle...
 dflow_alg2           INFO name: [dflow_int]
-dflow_alg2           INFO store [StoreGateSvc]
+dflow_alg2           INFO store [StoreGateSvc_Impl]
 dflow_alg2           INFO clid: [244260744]
 dflow_alg2           INFO val: 27
 dflow_alg2           INFO myint w-handle...
 dflow_alg2           INFO name: [dflow_int2]
-dflow_alg2           INFO store [StoreGateSvc]
+dflow_alg2           INFO store [StoreGateSvc_Impl]
 dflow_alg2           INFO clid: [244260744]
 dflow_alg2           INFO val: 1027
 dflow_alg2           INFO ints w-handle...
@@ -496,12 +496,12 @@ dflow_alg2           INFO val[1]= 27
 dflow_alg3           INFO ================================
 dflow_alg3           INFO myint r-handle...
 dflow_alg3           INFO name: [dflow_int2]
-dflow_alg3           INFO store [StoreGateSvc]
+dflow_alg3           INFO store [StoreGateSvc_Impl]
 dflow_alg3           INFO clid: [244260744]
 dflow_alg3           INFO val: 1027
 dflow_alg3           INFO ints r-handle...
 dflow_alg3           INFO name: [dflow_ints]
-dflow_alg3           INFO store [StoreGateSvc]
+dflow_alg3           INFO store [StoreGateSvc_Impl]
 dflow_alg3           INFO clid: [22592129]
 dflow_alg3           INFO ints w-handle...
 dflow_alg3           INFO size:4
@@ -534,13 +534,13 @@ dflow_alg3           INFO valid:0
 dflow_alg3           INFO -- testing RWVar<T> semantics...
 dflow_alg3           INFO name: dflow_int2
 dflow_alg3           INFO valid:0
-dflow_alg3           INFO good, caught: [SG::ExcConstObject: Tried to retrieve non-const pointer to const object via VarHandleKey: StoreGateSvc+dflow_int2[244260744]]
+dflow_alg3           INFO good, caught: [SG::ExcConstObject: Tried to retrieve non-const pointer to const object via VarHandleKey: StoreGateSvc_Impl+dflow_int2[244260744]]
 dflow_alg3           INFO valid:0
 AthenaEventLoopMgr   INFO   ===>>>  done processing event #7, run #0 7 events processed so far  <<<===
 AthenaEventLoopMgr   INFO   ===>>>  start processing event #8, run #0 7 events processed so far  <<<===
 dflow_alg1           INFO evtinfo handle...
 dflow_alg1           INFO name: [EventInfo]
-dflow_alg1           INFO store [StoreGateSvc]
+dflow_alg1           INFO store [StoreGateSvc_Impl]
 dflow_alg1           INFO clid: [45903698]
 dflow_alg1           INFO ei: [Run,Evt,Lumi,Time,BunchCross,DetMask] = [0,8,0,0:0,0,0x0000000000000000]
 dflow_alg1           INFO retrieving event-info...
@@ -548,7 +548,7 @@ dflow_alg1           INFO evt-info.runnbr: 0
 dflow_alg1           INFO evt-info.evtnbr: 8
 dflow_alg1           INFO myint handle...
 dflow_alg1           INFO name: [dflow_int]
-dflow_alg1           INFO store [StoreGateSvc]
+dflow_alg1           INFO store [StoreGateSvc_Impl]
 dflow_alg1           INFO clid: [244260744]
 dflow_alg1           INFO val: 8
 dflow_alg1           INFO modify myint by value...
@@ -556,12 +556,12 @@ dflow_alg1           INFO val: 28
 dflow_alg2           INFO ================================
 dflow_alg2           INFO myint r-handle...
 dflow_alg2           INFO name: [dflow_int]
-dflow_alg2           INFO store [StoreGateSvc]
+dflow_alg2           INFO store [StoreGateSvc_Impl]
 dflow_alg2           INFO clid: [244260744]
 dflow_alg2           INFO val: 28
 dflow_alg2           INFO myint w-handle...
 dflow_alg2           INFO name: [dflow_int2]
-dflow_alg2           INFO store [StoreGateSvc]
+dflow_alg2           INFO store [StoreGateSvc_Impl]
 dflow_alg2           INFO clid: [244260744]
 dflow_alg2           INFO val: 1028
 dflow_alg2           INFO ints w-handle...
@@ -571,12 +571,12 @@ dflow_alg2           INFO val[1]= 28
 dflow_alg3           INFO ================================
 dflow_alg3           INFO myint r-handle...
 dflow_alg3           INFO name: [dflow_int2]
-dflow_alg3           INFO store [StoreGateSvc]
+dflow_alg3           INFO store [StoreGateSvc_Impl]
 dflow_alg3           INFO clid: [244260744]
 dflow_alg3           INFO val: 1028
 dflow_alg3           INFO ints r-handle...
 dflow_alg3           INFO name: [dflow_ints]
-dflow_alg3           INFO store [StoreGateSvc]
+dflow_alg3           INFO store [StoreGateSvc_Impl]
 dflow_alg3           INFO clid: [22592129]
 dflow_alg3           INFO ints w-handle...
 dflow_alg3           INFO size:4
@@ -609,13 +609,13 @@ dflow_alg3           INFO valid:0
 dflow_alg3           INFO -- testing RWVar<T> semantics...
 dflow_alg3           INFO name: dflow_int2
 dflow_alg3           INFO valid:0
-dflow_alg3           INFO good, caught: [SG::ExcConstObject: Tried to retrieve non-const pointer to const object via VarHandleKey: StoreGateSvc+dflow_int2[244260744]]
+dflow_alg3           INFO good, caught: [SG::ExcConstObject: Tried to retrieve non-const pointer to const object via VarHandleKey: StoreGateSvc_Impl+dflow_int2[244260744]]
 dflow_alg3           INFO valid:0
 AthenaEventLoopMgr   INFO   ===>>>  done processing event #8, run #0 8 events processed so far  <<<===
 AthenaEventLoopMgr   INFO   ===>>>  start processing event #9, run #0 8 events processed so far  <<<===
 dflow_alg1           INFO evtinfo handle...
 dflow_alg1           INFO name: [EventInfo]
-dflow_alg1           INFO store [StoreGateSvc]
+dflow_alg1           INFO store [StoreGateSvc_Impl]
 dflow_alg1           INFO clid: [45903698]
 dflow_alg1           INFO ei: [Run,Evt,Lumi,Time,BunchCross,DetMask] = [0,9,0,0:0,0,0x0000000000000000]
 dflow_alg1           INFO retrieving event-info...
@@ -623,7 +623,7 @@ dflow_alg1           INFO evt-info.runnbr: 0
 dflow_alg1           INFO evt-info.evtnbr: 9
 dflow_alg1           INFO myint handle...
 dflow_alg1           INFO name: [dflow_int]
-dflow_alg1           INFO store [StoreGateSvc]
+dflow_alg1           INFO store [StoreGateSvc_Impl]
 dflow_alg1           INFO clid: [244260744]
 dflow_alg1           INFO val: 9
 dflow_alg1           INFO modify myint by value...
@@ -631,12 +631,12 @@ dflow_alg1           INFO val: 29
 dflow_alg2           INFO ================================
 dflow_alg2           INFO myint r-handle...
 dflow_alg2           INFO name: [dflow_int]
-dflow_alg2           INFO store [StoreGateSvc]
+dflow_alg2           INFO store [StoreGateSvc_Impl]
 dflow_alg2           INFO clid: [244260744]
 dflow_alg2           INFO val: 29
 dflow_alg2           INFO myint w-handle...
 dflow_alg2           INFO name: [dflow_int2]
-dflow_alg2           INFO store [StoreGateSvc]
+dflow_alg2           INFO store [StoreGateSvc_Impl]
 dflow_alg2           INFO clid: [244260744]
 dflow_alg2           INFO val: 1029
 dflow_alg2           INFO ints w-handle...
@@ -646,12 +646,12 @@ dflow_alg2           INFO val[1]= 29
 dflow_alg3           INFO ================================
 dflow_alg3           INFO myint r-handle...
 dflow_alg3           INFO name: [dflow_int2]
-dflow_alg3           INFO store [StoreGateSvc]
+dflow_alg3           INFO store [StoreGateSvc_Impl]
 dflow_alg3           INFO clid: [244260744]
 dflow_alg3           INFO val: 1029
 dflow_alg3           INFO ints r-handle...
 dflow_alg3           INFO name: [dflow_ints]
-dflow_alg3           INFO store [StoreGateSvc]
+dflow_alg3           INFO store [StoreGateSvc_Impl]
 dflow_alg3           INFO clid: [22592129]
 dflow_alg3           INFO ints w-handle...
 dflow_alg3           INFO size:4
@@ -684,13 +684,13 @@ dflow_alg3           INFO valid:0
 dflow_alg3           INFO -- testing RWVar<T> semantics...
 dflow_alg3           INFO name: dflow_int2
 dflow_alg3           INFO valid:0
-dflow_alg3           INFO good, caught: [SG::ExcConstObject: Tried to retrieve non-const pointer to const object via VarHandleKey: StoreGateSvc+dflow_int2[244260744]]
+dflow_alg3           INFO good, caught: [SG::ExcConstObject: Tried to retrieve non-const pointer to const object via VarHandleKey: StoreGateSvc_Impl+dflow_int2[244260744]]
 dflow_alg3           INFO valid:0
 AthenaEventLoopMgr   INFO   ===>>>  done processing event #9, run #0 9 events processed so far  <<<===
 AthenaEventLoopMgr   INFO   ===>>>  start processing event #10, run #0 9 events processed so far  <<<===
 dflow_alg1           INFO evtinfo handle...
 dflow_alg1           INFO name: [EventInfo]
-dflow_alg1           INFO store [StoreGateSvc]
+dflow_alg1           INFO store [StoreGateSvc_Impl]
 dflow_alg1           INFO clid: [45903698]
 dflow_alg1           INFO ei: [Run,Evt,Lumi,Time,BunchCross,DetMask] = [0,10,0,0:0,0,0x0000000000000000]
 dflow_alg1           INFO retrieving event-info...
@@ -698,7 +698,7 @@ dflow_alg1           INFO evt-info.runnbr: 0
 dflow_alg1           INFO evt-info.evtnbr: 10
 dflow_alg1           INFO myint handle...
 dflow_alg1           INFO name: [dflow_int]
-dflow_alg1           INFO store [StoreGateSvc]
+dflow_alg1           INFO store [StoreGateSvc_Impl]
 dflow_alg1           INFO clid: [244260744]
 dflow_alg1           INFO val: 10
 dflow_alg1           INFO modify myint by value...
@@ -706,12 +706,12 @@ dflow_alg1           INFO val: 30
 dflow_alg2           INFO ================================
 dflow_alg2           INFO myint r-handle...
 dflow_alg2           INFO name: [dflow_int]
-dflow_alg2           INFO store [StoreGateSvc]
+dflow_alg2           INFO store [StoreGateSvc_Impl]
 dflow_alg2           INFO clid: [244260744]
 dflow_alg2           INFO val: 30
 dflow_alg2           INFO myint w-handle...
 dflow_alg2           INFO name: [dflow_int2]
-dflow_alg2           INFO store [StoreGateSvc]
+dflow_alg2           INFO store [StoreGateSvc_Impl]
 dflow_alg2           INFO clid: [244260744]
 dflow_alg2           INFO val: 1030
 dflow_alg2           INFO ints w-handle...
@@ -721,12 +721,12 @@ dflow_alg2           INFO val[1]= 30
 dflow_alg3           INFO ================================
 dflow_alg3           INFO myint r-handle...
 dflow_alg3           INFO name: [dflow_int2]
-dflow_alg3           INFO store [StoreGateSvc]
+dflow_alg3           INFO store [StoreGateSvc_Impl]
 dflow_alg3           INFO clid: [244260744]
 dflow_alg3           INFO val: 1030
 dflow_alg3           INFO ints r-handle...
 dflow_alg3           INFO name: [dflow_ints]
-dflow_alg3           INFO store [StoreGateSvc]
+dflow_alg3           INFO store [StoreGateSvc_Impl]
 dflow_alg3           INFO clid: [22592129]
 dflow_alg3           INFO ints w-handle...
 dflow_alg3           INFO size:4
@@ -759,7 +759,7 @@ dflow_alg3           INFO valid:0
 dflow_alg3           INFO -- testing RWVar<T> semantics...
 dflow_alg3           INFO name: dflow_int2
 dflow_alg3           INFO valid:0
-dflow_alg3           INFO good, caught: [SG::ExcConstObject: Tried to retrieve non-const pointer to const object via VarHandleKey: StoreGateSvc+dflow_int2[244260744]]
+dflow_alg3           INFO good, caught: [SG::ExcConstObject: Tried to retrieve non-const pointer to const object via VarHandleKey: StoreGateSvc_Impl+dflow_int2[244260744]]
 dflow_alg3           INFO valid:0
 AthenaEventLoopMgr   INFO   ===>>>  done processing event #10, run #0 10 events processed so far  <<<===
 ApplicationMgr       INFO Application Manager Stopped successfully

@@ -1,36 +1,34 @@
 
 
 ApplicationMgr       INFO Application Manager Configured successfully
-EventLoopMgr      WARNING Unable to locate service "EventSelector" 
-EventLoopMgr      WARNING No events will be processed from external input.
 ApplicationMgr       INFO Application Manager Initialized successfully
 ApplicationMgr Ready
 StoreGateSvc      VERBOSE Initializing StoreGateSvc
-StoreGateSvc      VERBOSE Initializing StoreGateSvc
+StoreGateSvc_Impl VERBOSE Initializing StoreGateSvc_Impl
 *** StoreGateSvcClient_test record BEGINS ***
  object modifiable when retrieved
 Now we expect to see an error message:
 ----Error Message Starts--->>
-StoreGateSvc WARNING  setupProxy:: error setting up proxy for key pFoo1 and clid 8101
+StoreGateSvc_Impl WARNING  setupProxy:: error setting up proxy for key pFoo1 and clid 8101
 <<---Error Message Ends-------
 Now we expect to see an error message:
 ----Error Message Starts--->>
-StoreGateSvc WARNING record_impl: failed for key=pFoo2, type Foo (CLID 8101)
+StoreGateSvc_Impl WARNING record_impl: failed for key=pFoo2, type Foo (CLID 8101)
 <<---Error Message Ends-------
  object modifiable when retrieved
  object not modifiable when retrieved
  object modifiable when retrieved
 Now we expect to see an error message:
 ----Error Message Starts--->>
-StoreGateSvc WARNING  setupProxy:: error setting up proxy for key silly and clid 8101
+StoreGateSvc_Impl WARNING  setupProxy:: error setting up proxy for key silly and clid 8101
 <<---Error Message Ends-------
 Now we expect to see an error message:
 ----Error Message Starts--->>
-StoreGateSvc WARNING  setupProxy:: error setting up proxy for key silly and clid 8101
+StoreGateSvc_Impl WARNING  setupProxy:: error setting up proxy for key silly and clid 8101
 <<---Error Message Ends-------
 Now we expect to see an error message:
 ----Error Message Starts--->>
-StoreGateSvc WARNING  setupProxy:: error setting up proxy for key silly and clid 8101
+StoreGateSvc_Impl WARNING  setupProxy:: error setting up proxy for key silly and clid 8101
 <<---Error Message Ends-------
  object modifiable when retrieved
  object not modifiable when retrieved
@@ -42,7 +40,7 @@ StoreGateSvc WARNING  setupProxy:: error setting up proxy for key silly and clid
  object not modifiable when retrieved
 Now we expect to see an error message:
 ----Error Message Starts--->>
-StoreGateSvc WARNING  setupProxy:: error setting up proxy for key Const and clid 8101
+StoreGateSvc_Impl WARNING  setupProxy:: error setting up proxy for key Const and clid 8101
 <<---Error Message Ends-------
  object modifiable when retrieved
  object modifiable when retrieved
@@ -84,8 +82,8 @@ Now we expect to see an error message:
 ----Error Message Starts--->>
 StoreGateSvc      WARNING retrieve(const): No valid proxy for object UnLockedxxx  of type Foo(CLID 8101)
 <<---Error Message Ends-------
-StoreGateSvc        DEBUG retrieve(range): no object found  of type NotThere(CLID 8103)
-StoreGateSvc        DEBUG retrieve(range): Can't initialize iterator for object range  of type NotThere(CLID 8103)
+StoreGateSvc_Impl   DEBUG retrieve(range): no object found  of type NotThere(CLID 8103)
+StoreGateSvc_Impl   DEBUG retrieve(range): Can't initialize iterator for object range  of type NotThere(CLID 8103)
 *** StoreGateSvcClient_test retrieve OK ***
 
 
@@ -104,16 +102,16 @@ StoreGateSvc      WARNING retrieve(default): No valid proxy for default object
 <<---Error Message Ends-------
 Now we expect to see an error message:
 ----Error Message Starts--->>
-StoreGateSvc WARNING addSymLink: no target DataProxy found. Sorry, can't link to a non-existing data object
+StoreGateSvc_Impl WARNING addSymLink: no target DataProxy found. Sorry, can't link to a non-existing data object
 <<---Error Message Ends-------
 Now we expect to see an error message:
 ----Error Message Starts--->>
-StoreGateSvc WARNING addSymLink: no target DataProxy found. Sorry, can't link to a non-existing data object
+StoreGateSvc_Impl WARNING addSymLink: no target DataProxy found. Sorry, can't link to a non-existing data object
 <<---Error Message Ends-------
 StoreGateSvc        DEBUG Retrieved non-const pointer to object UnLocked  of type Base(CLID 8100)
 Now we expect to see an error message:
 ----Error Message Starts--->>
-StoreGateSvc WARNING addSymLink: no target DataProxy found. Sorry, can't link to a non-existing data object
+StoreGateSvc_Impl WARNING addSymLink: no target DataProxy found. Sorry, can't link to a non-existing data object
 <<---Error Message Ends-------
 StoreGateSvc        DEBUG retrieve(default): Retrieved const pointer to default object 
  of type Base(CLID 8100)
@@ -159,7 +157,7 @@ StoreGateSvc      WARNING retrieve(non-const): No valid proxy for object pFooKey
  object modifiable when retrieved
 Now we expect to see an error message:
 ----Error Message Starts--->>
-StoreGateSvc WARNING  setupProxy:: error setting up proxy for key pCreateFoo1 and clid 8101
+StoreGateSvc_Impl WARNING  setupProxy:: error setting up proxy for key pCreateFoo1 and clid 8101
 <<---Error Message Ends-------
 StoreGateSvc        DEBUG Retrieved non-const pointer to object pCreateFoo1  of type Foo(CLID 8101)
 *** StoreGateSvcClient_test testCreate OK ***
@@ -172,15 +170,15 @@ StoreGateSvc        DEBUG Retrieved non-const pointer to object pCreateFoo1  of 
 
 Testing dump: 
  -------->>
-StoreGateSvc: <<<<<<<<<<<<<<<<< Data Store Dump >>>>>>>>>>>>>>> 
-StoreGateSvc: StoreGateSvc()::dump() which is NOT LOADED 
-StoreGateSvc: Found 1 proxy for ClassID 8100 (Base): 
-StoreGateSvc: Found 17 proxies for ClassID 8101 (Foo): 
-StoreGateSvc: flags: (INVALID, UNLOCKED, reset ) --- data:        0x0 --- key: silly
-StoreGateSvc: <<<<<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>>>> 
+StoreGateSvc_Impl: <<<<<<<<<<<<<<<<< Data Store Dump >>>>>>>>>>>>>>> 
+StoreGateSvc_Impl: SGImplSvc()::dump() which is NOT LOADED 
+StoreGateSvc_Impl: Found 1 proxy for ClassID 8100 (Base): 
+StoreGateSvc_Impl: Found 17 proxies for ClassID 8101 (Foo): 
+StoreGateSvc_Impl: flags: (INVALID, UNLOCKED, reset ) --- data:        0x0 --- key: silly
+StoreGateSvc_Impl: <<<<<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>>>> 
 
 <<--------
-StoreGateSvc        DEBUG Clearing store with forceRemove=1
+StoreGateSvc_Impl   DEBUG Clearing store with forceRemove=1
  object modifiable when retrieved
 StoreGateSvc        DEBUG Retrieved non-const pointer to object d1  of type B1(CLID 8111)
 StoreGateSvc        DEBUG Retrieved non-const pointer to object d1Alias  of type D1(CLID 8112)
@@ -192,10 +190,10 @@ Found key = d1Alias for object D1 in StoreGate
 Found key = d2 for object D1 in StoreGate 
 StoreGateSvc        DEBUG Retrieved non-const pointer to object dd  of type D1(CLID 8112)
 StoreGateSvc        DEBUG Retrieved non-const pointer to object dd  of type B1(CLID 8111)
-StoreGateSvc        DEBUG Clearing store with forceRemove=0
+StoreGateSvc_Impl   DEBUG Clearing store with forceRemove=0
 StoreGateSvc        DEBUG Retrieved non-const pointer to object dd  of type D1(CLID 8112)
 StoreGateSvc        DEBUG Retrieved non-const pointer to object dd  of type B1(CLID 8111)
-StoreGateSvc        DEBUG Clearing store with forceRemove=1
+StoreGateSvc_Impl   DEBUG Clearing store with forceRemove=1
 
 *** StoreGateSvcClient_test transientSwap BEGINS ***
  object modifiable when retrieved
@@ -217,14 +215,14 @@ StoreGateSvc        DEBUG Retrieved non-const pointer to object ;00;aVersObj  of
 StoreGateSvc        DEBUG Retrieved non-const pointer to object ;88;aVersObj  of type Foo(CLID 8101)
 Now we expect to see an error message:
 ----Error Message Starts--->>
-StoreGateSvc WARNING  setupProxy:: error setting up proxy for key ;88;aVersObj and clid 8101
+StoreGateSvc_Impl WARNING  setupProxy:: error setting up proxy for key ;88;aVersObj and clid 8101
 <<---Error Message Ends-------
  object modifiable when retrieved
 StoreGateSvc        DEBUG Retrieved non-const pointer to object aVersObj  of type Foo(CLID 8101)
 *** StoreGateSvcClient_test VersionedKey OK ***
 
 
-StoreGateSvc        DEBUG Clearing store with forceRemove=1
+StoreGateSvc_Impl   DEBUG Clearing store with forceRemove=1
 *** test_DVL_conversions
  object modifiable when retrieved
 StoreGateSvc        DEBUG Retrieved non-const pointer to object contd  of type DataVector<C>(CLID 82734623)
@@ -240,24 +238,23 @@ StoreGateSvc        DEBUG Retrieved const pointer to object dvl  of type CV(CLID
 StoreGateSvc        DEBUG Retrieved const pointer to object dvl2  of type CV(CLID 82734625)
 *** test_copy_conversions
  object modifiable when retrieved
-SG::DataProxy_castWARNING Request for a non-const object via copying conversion; requested CLID = 82734628, proxy primary ID is 82734627
 StoreGateSvc        DEBUG Retrieved const pointer to object x  of type Athena_test::Y(CLID 82734628)
 StoreGateSvc      WARNING retrieve(const): No valid proxy for object x  of type Athena_test::A(CLID 82734609)
 
 *** StoreGateSvcClient_test Keys BEGINS ***
-StoreGateSvc        DEBUG Clearing store with forceRemove=0
+StoreGateSvc_Impl   DEBUG Clearing store with forceRemove=0
  object not modifiable when retrieved
  object modifiable when retrieved
  object not modifiable when retrieved
  object modifiable when retrieved
-StoreGateSvc        DEBUG Clearing store with forceRemove=0
-StoreGateSvc        DEBUG Clearing store with forceRemove=1
+StoreGateSvc_Impl   DEBUG Clearing store with forceRemove=0
+StoreGateSvc_Impl   DEBUG Clearing store with forceRemove=1
  object not modifiable when retrieved
  object modifiable when retrieved
  object not modifiable when retrieved
  object modifiable when retrieved
-StoreGateSvc        DEBUG Clearing store with forceRemove=0
-StoreGateSvc        DEBUG Clearing store with forceRemove=1
+StoreGateSvc_Impl   DEBUG Clearing store with forceRemove=0
+StoreGateSvc_Impl   DEBUG Clearing store with forceRemove=1
 
 *** StoreGateSvcClient_test Keys ENDS ***
 
@@ -269,17 +266,17 @@ StoreGateSvc        DEBUG Clearing store with forceRemove=1
  object modifiable when retrieved
  object modifiable when retrieved
  object modifiable when retrieved
-StoreGateSvc      VERBOSE called associateAux_impl for key BVec
+StoreGateSvc_Impl VERBOSE called associateAux_impl for key BVec
 StoreGateSvc        DEBUG Retrieved non-const pointer to object BVec  of type TestVector<BX>(CLID 82735621)
-StoreGateSvc      VERBOSE called associateAux_impl for key BVec
+StoreGateSvc_Impl VERBOSE called associateAux_impl for key BVec
 StoreGateSvc        DEBUG Retrieved non-const pointer to object BVec  of type TestVector<BX>(CLID 82735621)
-StoreGateSvc      VERBOSE called associateAux_impl for key CVec
+StoreGateSvc_Impl VERBOSE called associateAux_impl for key CVec
 StoreGateSvc        DEBUG Retrieved const pointer to object CVec  of type TestVector<BX>(CLID 82735621)
-StoreGateSvc      VERBOSE called associateAux_impl for key ErrorVec
+StoreGateSvc_Impl VERBOSE called associateAux_impl for key ErrorVec
 StoreGateSvc        DEBUG Retrieved const pointer to object ErrorVec  of type TestVector<BX>(CLID 82735621)
  object modifiable when retrieved
  object modifiable when retrieved
-StoreGateSvc      VERBOSE called associateAux_impl for key BStand
+StoreGateSvc_Impl VERBOSE called associateAux_impl for key BStand
 StoreGateSvc        DEBUG Retrieved non-const pointer to object BStand  of type BX(CLID 82835621)
 *** StoreGateSvcClient_test retrieveAux OK ***
 
@@ -294,16 +291,16 @@ StoreGateSvc        DEBUG Retrieved non-const pointer to object BStand  of type 
 
 *** StoreGateSvcClient_test testRecordObject BEGINS ***
 >>> test duplicate record1
-StoreGateSvc WARNING  setupProxy:: error setting up proxy for key obj101 and clid 8101
+StoreGateSvc_Impl WARNING  setupProxy:: error setting up proxy for key obj101 and clid 8101
 <<< test duplicate record1
 >>> test duplicate record2
-StoreGateSvc WARNING record_impl: failed for key=obj999, type Foo (CLID 8101)
+StoreGateSvc_Impl WARNING record_impl: failed for key=obj999, type Foo (CLID 8101)
 <<< test duplicate record2
 >>> test duplicate error
-StoreGateSvc   ERROR StoreGateSvc::recordObject: existing object found with 8101[Foo] obj101 but neither clid 543543[] nor key obj101xxx match.
+StoreGateSvc_Impl   ERROR SGImplSvc::recordObject: existing object found with 8101[Foo] obj101 but neither clid 543543[] nor key obj101xxx match.
 <<< test duplicate error
-StoreGateSvc        DEBUG Clearing store with forceRemove=0
-StoreGateSvc        DEBUG Clearing store with forceRemove=0
+StoreGateSvc_Impl   DEBUG Clearing store with forceRemove=0
+StoreGateSvc_Impl   DEBUG Clearing store with forceRemove=0
 
 *** StoreGateSvcClient_test testRecordObject OK ***
 
@@ -312,11 +309,11 @@ StoreGateSvc        DEBUG Clearing store with forceRemove=0
 *** StoreGateSvcClient_test testWriteAux OK ***
 *** test_lock
  object modifiable when retrieved
-StoreGateSvc        DEBUG Clearing store with forceRemove=0
+StoreGateSvc_Impl   DEBUG Clearing store with forceRemove=0
  object modifiable when retrieved
 StoreGateSvc      VERBOSE Finalizing StoreGateSvc
-StoreGateSvc      VERBOSE Finalizing StoreGateSvc
-StoreGateSvc        DEBUG Clearing store with forceRemove=1
+StoreGateSvc_Impl VERBOSE Finalizing StoreGateSvc_Impl
+StoreGateSvc_Impl   DEBUG Clearing store with forceRemove=1
 *** StoreGateSvcClient_test record BEGINS ***
 Now we expect to see an error message:
 ----Error Message Starts--->>
