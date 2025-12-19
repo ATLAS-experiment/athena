@@ -117,8 +117,7 @@ StatusCode PpmByteStreamReadV1V2Tool::convert(
   ROBIterator rob = robFrags.begin();
   ROBIterator robEnd = robFrags.end();
 
-  int robCounter = 1;
-  for (; rob != robEnd; ++rob, ++robCounter) {
+  for (; rob != robEnd; ++rob) {
 
     StatusCode sc = processRobFragment_(state, rob, RequestType::PPM);
     if (!sc.isSuccess()) {
