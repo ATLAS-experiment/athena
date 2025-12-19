@@ -73,6 +73,8 @@ assignSD(std::unique_ptr<G4VSensitiveDetector> sd, const std::vector<std::string
   auto sdMgr = G4SDManager::GetSDMpointer();
   auto sdPtr = sd.get();
   // SDManager is now the SD owner
+  //for later use
+  auto sdName = sd->GetName();
   sdMgr->AddNewDetector(sd.release());
 
   if(!volumes.empty()) {
@@ -100,7 +102,7 @@ assignSD(std::unique_ptr<G4VSensitiveDetector> sd, const std::vector<std::string
       }
       else {
         ATH_MSG_VERBOSE("Found " << numFound << " copies of LV " << volumeName <<
-                        "; SD " << sd->GetName() << " assigned.");
+                        "; SD " << sdName << " assigned.");
         gotOne = true;
       }
 
