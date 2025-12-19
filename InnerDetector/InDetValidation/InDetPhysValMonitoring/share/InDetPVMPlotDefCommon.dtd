@@ -60,7 +60,7 @@
 <!-- Tracking Recommendation Plots -->
 <!ENTITY EtaBinsTrkRec "100">
 
-<!ENTITY d0TrkRec     "300.0">
+<!ENTITY d0TrkRec     "10.0">
 <!ENTITY d0BinsTrkRec "4800">
 
 <!ENTITY prodRTrkRec     "300.0">
