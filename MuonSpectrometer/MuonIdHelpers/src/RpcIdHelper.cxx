@@ -44,7 +44,7 @@ int RpcIdHelper::initialize_from_dictionary(const IdDictMgr& dict_mgr) {
         m_DOUBLETR_INDEX = field->index();
     } else {
         ATH_MSG_ERROR("initLevelsFromDict - unable to find 'doubletR' field ");
-        status = 1;
+        return 1;
     }
 
     field = m_dict->find_field("doubletZ");
@@ -52,7 +52,7 @@ int RpcIdHelper::initialize_from_dictionary(const IdDictMgr& dict_mgr) {
         m_DOUBLETZ_INDEX = field->index();
     } else {
         ATH_MSG_ERROR("initLevelsFromDict - unable to find 'doubletZ' field ");
-        status = 1;
+        return 1;
     }
 
     field = m_dict->find_field("doubletPhi");
@@ -60,7 +60,7 @@ int RpcIdHelper::initialize_from_dictionary(const IdDictMgr& dict_mgr) {
         m_DOUBLETPHI_INDEX = field->index();
     } else {
         ATH_MSG_ERROR("initLevelsFromDict - unable to find 'doubletPhi' field ");
-        status = 1;
+        return 1;
     }
 
     field = m_dict->find_field("rpcGasGap");
@@ -68,7 +68,7 @@ int RpcIdHelper::initialize_from_dictionary(const IdDictMgr& dict_mgr) {
         m_GASGAP_INDEX = field->index();
     } else {
         ATH_MSG_ERROR("initLevelsFromDict - unable to find 'rpcGasGap' field ");
-        status = 1;
+        return 1;
     }
 
     field = m_dict->find_field("rpcMeasuresPhi");
@@ -76,7 +76,7 @@ int RpcIdHelper::initialize_from_dictionary(const IdDictMgr& dict_mgr) {
         m_MEASURESPHI_INDEX = field->index();
     } else {
         ATH_MSG_ERROR("initLevelsFromDict - unable to find 'rpcMeasuresPhi' field ");
-        status = 1;
+        return 1;
     }
 
     field = m_dict->find_field("rpcStrip");
@@ -84,7 +84,7 @@ int RpcIdHelper::initialize_from_dictionary(const IdDictMgr& dict_mgr) {
         m_CHANNEL_INDEX = field->index();
     } else {
         ATH_MSG_ERROR("initLevelsFromDict - unable to find 'rpcStrip' field ");
-        status = 1;
+        return 1;
     }
 
     // reinitialze the module context
@@ -95,6 +95,7 @@ int RpcIdHelper::initialize_from_dictionary(const IdDictMgr& dict_mgr) {
     const IdDictGroup* rpcGroup = m_dict->find_group("rpc");
     if (!rpcGroup) {
         ATH_MSG_ERROR("Cannot find rpc group");
+        return 1;
     } else {
         m_GROUP_INDEX = rpcGroup->region(0).index();
     }
@@ -146,6 +147,7 @@ int RpcIdHelper::initialize_from_dictionary(const IdDictMgr& dict_mgr) {
                      << "MultiRange size is " << muon_range.size());
     } else {
         ATH_MSG_ERROR("Muon MultiRange is empty");
+        return 1;
     }
 
     // Build MultiRange down to "detectorElement" for all mdt regions
@@ -217,7 +219,7 @@ int RpcIdHelper::initialize_from_dictionary(const IdDictMgr& dict_mgr) {
     // test to see that the multi range is not empty
     if (m_full_module_range.size() == 0) {
         ATH_MSG_ERROR("RPC MultiRange ID is empty for modules");
-        status = 1;
+        return 1;
     } else {
         ATH_MSG_DEBUG(" full module range size is " << m_full_module_range.size());
     }
@@ -225,26 +227,26 @@ int RpcIdHelper::initialize_from_dictionary(const IdDictMgr& dict_mgr) {
     /// test to see that the detectorElement multi range is not empty
     if (m_full_detectorElement_range.size() == 0) {
         ATH_MSG_ERROR("MDT MultiRange ID is empty for detector elements");
-        status = 1;
+        return 1;
     }
 
     // test to see that the multi range is not empty
     if (m_full_channel_range.size() == 0) {
         ATH_MSG_ERROR("RPC MultiRange ID is empty for channels");
-        status = 1;
+        return 1;
     } else {
         ATH_MSG_DEBUG(" full channel range size is " << m_full_channel_range.size());
     }
 
     // Setup the hash tables for RPC
     ATH_MSG_INFO("Initializing RPC hash indices ... ");
-    status = init_hashes();
-    status = init_detectorElement_hashes();  // doubletZ
-    status = init_id_to_hashes();
+    status += init_hashes();
+    status += init_detectorElement_hashes();  // doubletZ
+    status += init_id_to_hashes();
 
     // Setup hash tables for finding neighbors
     ATH_MSG_INFO("Initializing RPC hash indices for finding neighbors ... ");
-    status = init_neighbors();
+    status += init_neighbors();
 
     // retrieve the maximum number of gas gaps
     ExpandedIdentifier expId;
@@ -268,7 +270,7 @@ int RpcIdHelper::initialize_from_dictionary(const IdDictMgr& dict_mgr) {
     }
     if (m_gasGapMax == UINT_MAX) {
         ATH_MSG_ERROR("No maximum number of RPC gas gaps was retrieved");
-        status = 1;
+        return 1;
     } else {
         ATH_MSG_DEBUG(" Maximum number of RPC gas gaps is " << m_gasGapMax);
     }
