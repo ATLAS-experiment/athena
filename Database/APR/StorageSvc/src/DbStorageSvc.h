@@ -73,13 +73,13 @@ namespace pool  {
     DbDomain& domainHdl()                                 {   return m_domH;  }
 
     /// IInterface implementation: Query interfaces of Interface
-    virtual StatusCode queryInterface(const Guid& riid, void** ppvUnknown);
+    virtual StatusCode queryInterface(const Guid& riid, void** ppvUnknown) override final;
 
     /// IInterface implementation: Reference Interface instance               
-    virtual unsigned int addRef();
+    virtual unsigned int addRef() override final;
 
     /// IInterface implementation: Release Interface instance                 
-    virtual unsigned int release();
+    virtual unsigned int release() override final;
 
     /**@name IService interface                                   */
 
@@ -109,7 +109,7 @@ namespace pool  {
                                  int                   technology,
                                  const void*           object,
                                  ShapeH                shapeH,
-                                 Token*&               refpTok);
+                                 Token*&               refpTok) override final;
 
     /// Read a persistent object from the medium.
     /** Reading an object does not create the object.
@@ -123,7 +123,7 @@ namespace pool  {
     virtual StatusCode read(     const FileDescriptor& refDB,
                                  const Token&          persToken,
                                  ShapeH                shapeH,
-                                 void**                object);
+                                 void**                object) override final;
 
     /// Get container name for object
     /**
@@ -132,7 +132,7 @@ namespace pool  {
       * @return                 std::string container name.
       */
     virtual std::string getContName(FileDescriptor& refDB,
-                                    Token&          persToken);
+                                    Token&          persToken) override final;
 
     /// Retrieve persistent shape from Storage manager.
     /** The persistent shape is saved at write time to a Database.
@@ -149,7 +149,7 @@ namespace pool  {
       */
     virtual StatusCode getShape(  FileDescriptor&       refDB,
                                   const Guid&           objType,
-                                  ShapeH&               shapeH);
+                                  ShapeH&               shapeH) override final;
 
     /// Create a Shape representation based on a ShapeID
     /**
@@ -179,7 +179,7 @@ namespace pool  {
       */
     virtual StatusCode startSession(int                 mode,
                                     int                 tech,
-                                    SessionH&           session);
+                                    SessionH&           session) override final;
 
     /// End the Database session.
     /** The  request to end a Database session requires, that all pending 
@@ -194,7 +194,7 @@ namespace pool  {
       *
       * @return                 StatusCode code indicating success or failure.
       */
-    virtual StatusCode endSession(  const SessionH       session);
+    virtual StatusCode endSession(  const SessionH       session) override final;
 
     /// Check the existence of a logical Database unit.
     /** 
@@ -210,7 +210,7 @@ namespace pool  {
       */
     virtual StatusCode existsConnection(const SessionH        sessionH,
                                         int                   mode,
-                                        const FileDescriptor& refDB);
+                                        const FileDescriptor& refDB) override final;
 
     /// Connect to a logical Database unit.
     /** A connection is equivalent to the triple (OCISession, OCIServer, 
@@ -230,7 +230,7 @@ namespace pool  {
       */
     virtual StatusCode connect( const SessionH      sessionH,
                                 int                 mode,
-                                FileDescriptor&     refDB);
+                                FileDescriptor&     refDB) override final;
 
     /// Disconnect from a logical Database unit.
     /** The  request for disconnect requires, that all pending Transactions
@@ -246,7 +246,7 @@ namespace pool  {
       *
       * @return                 StatusCode code indicating success or failure.
       */
-    virtual StatusCode disconnect(  FileDescriptor&  refDB);
+    virtual StatusCode disconnect(  FileDescriptor&  refDB) override final;
 
     /// Query the access mode of a Database unit.
     /**
@@ -256,7 +256,7 @@ namespace pool  {
       * @return                 StatusCode code indicating success or failure.
       */
     virtual StatusCode openMode( FileDescriptor&     refDB,
-                                 int&                mode );
+                                 int&                mode ) override final;
 
 
     /// End/Finish an existing Transaction sequence.
@@ -276,7 +276,7 @@ namespace pool  {
       * @return                 StatusCode code indicating success or failure.
       */
     virtual StatusCode endTransaction( ConnectionH conn,
-                                       Transaction::Action typ);
+                                       Transaction::Action typ) override final;
 
     /// Access options for a given database domain.
     /** Domain options are global options, which refer to the
@@ -291,7 +291,7 @@ namespace pool  {
       *  @return StatusCode code indicating success or failure.  
       */
     virtual StatusCode getDomainOption(const SessionH  sessionH,
-                                       DbOption&       opt);
+                                       DbOption&       opt) override final;
 
     /// Set options for a given database domain.
     /** Domain options are global options, which refer to the
@@ -306,7 +306,7 @@ namespace pool  {
       *  @return StatusCode code indicating success or failure.
       */
     virtual StatusCode setDomainOption(const SessionH  sessionH, 
-                                       const DbOption& opt);
+                                       const DbOption& opt) override final;
   };
 }       // End namespace pool
 #endif  // POOL_DBSTORAGESVC_H
