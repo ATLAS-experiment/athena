@@ -62,7 +62,7 @@ public:
   PerigeeSurface& operator=(PerigeeSurface&& slsf) noexcept = default;
 
   /**Destructor*/
-  virtual ~PerigeeSurface() = default;
+  virtual ~PerigeeSurface();
 
   /**Constructor from GlobalPosition*/
   PerigeeSurface(const Amg::Vector3D& gp);

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -144,6 +144,9 @@ Trk::DiscSurface::DiscSurface(const Trk::TrkDetElementBase& detelement)
   , m_bounds(nullptr)
   , m_referencePoint(nullptr)
 {}
+
+// Out-of-line dtor.
+Trk::DiscSurface::~DiscSurface() = default;
 
 Trk::DiscSurface&
 Trk::DiscSurface::operator=(const DiscSurface& dsf)
