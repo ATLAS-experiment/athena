@@ -244,8 +244,8 @@ namespace MuonR4{
                 continue;
             }
             ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - Created new start parameters "<<Amg::toString(fourPos)<<", "
-                        <<Amg::toString(threeMom / 1_GeV) <<", pT: "<<(threeMom.perp() / 1_GeV)
-                        <<", eta: "<<threeMom.eta()<<", phi: "<<(threeMom.phi() / 1_degree)<<", q: "<<bkgMuon->charge());
+                        <<Amg::toString(threeMom) <<", pT: "<<(threeMom.perp() / 1_GeV)
+                        <<" GeV, eta: "<<threeMom.eta()<<", phi: "<<(threeMom.phi() / 1_degree)<<", q: "<<bkgMuon->charge());
             
             for (std::size_t sIdx =0 ; sIdx < pileUpSegments.size(); ++sIdx) {
                 // Skip already matched segments
