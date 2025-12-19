@@ -91,8 +91,6 @@ PP="$PP"'| Jobname = .* Machine ='
 # ignore slug pid printout
 PP="$PP"'|Atlas Detector Simulation, Reconstruction and Analysis Running on'
 PP="$PP"'|Athena job with pid +[[:digit:]]+'
-#ignore DllClassManager DEBUG messages
-PP="$PP"'|DllClassManager     DEBUG'
 # ignore slug Library printout
 PP="$PP"'|Library of +[[:digit:]]+ at +[[:digit:]]+'
 PP="$PP"'|Library compiled on +[[:digit:]]'
@@ -139,8 +137,6 @@ PP="$PP"'|^HistogramPersis...   INFO *.CnvServices.:'
 PP="$PP"'|^HistogramPersis.*Histograms saving not required.'
 PP="$PP"'|^StatusCodeSvc'
 PP="$PP"'|^ApplicationMgr +INFO Successfully loaded'
-PP="$PP"'|^IncidentSvc +DEBUG Service base class'
-PP="$PP"'|^IncidentSvc         DEBUG Adding .* listener '.*' with priority .*'
 PP="$PP"'|MessageSvc not found, will use std::cerr'
 PP="$PP"'|^Py:Athena            INFO executing ROOT6Setup'
 #ignore personal .athenarc files
