@@ -6,8 +6,6 @@
 #ifndef ATLASHEPMC_GENEVENT_H
 #define ATLASHEPMC_GENEVENT_H
 #ifdef HEPMC3
-#undef private
-#undef protected
 #include "HepMC3/GenEvent.h"
 #include "HepMC3/GenHeavyIon.h"
 #include "HepMC3/GenPdfInfo.h"

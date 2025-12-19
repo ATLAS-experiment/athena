@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // McEventCollectionCnv_p1.h
@@ -11,21 +11,34 @@
 #ifndef GENERATOROBJECTSTPCNV_MCEVENTCOLLECTIONCNV_P1_H
 #define GENERATOROBJECTSTPCNV_MCEVENTCOLLECTIONCNV_P1_H
 
+#include <sstream>
+
 // STL includes
-#ifdef __clang__
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wkeyword-macro"
+#ifndef HEPMC3
+# ifdef __clang__
+#  pragma clang diagnostic push
+#  pragma clang diagnostic ignored "-Wkeyword-macro"
+# endif
+# if __GNUC__ >= 16
+#  pragma GCC diagnostic push
+#  pragma GCC diagnostic ignored "-Wkeyword-macro"
+# endif
+# define private public
+# define protected public
 #endif
-#define private public
-#define protected public
 #include "AtlasHepMC/GenEvent.h"
 #include "AtlasHepMC/GenVertex.h"
 #include "AtlasHepMC/GenParticle.h"
-#ifdef __clang__
-#pragma clang diagnostic pop
+#ifndef HEPMC3
+# undef private
+# undef protected
+# ifdef __clang__
+#  pragma clang diagnostic pop
+# endif
+# if __GNUC__ >= 16
+#  pragma GCC diagnostic pop
+# endif
 #endif
-#undef private
-#undef protected
 #include "GeneratorObjects/McEventCollection.h"
 
 // AthenaPoolCnvSvc includes
