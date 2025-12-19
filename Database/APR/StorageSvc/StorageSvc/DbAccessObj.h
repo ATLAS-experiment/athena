@@ -121,7 +121,7 @@ namespace pool    {
     }
     /// Object cleanup: remove all entries
     void clearEntries()   {
-      for( auto k : m_keys ) k.second->release();
+      for( const auto & k : m_keys ) k.second->release();
       m_keys.clear();
     }
     /// Find object by key (CONST)

@@ -1022,7 +1022,7 @@ namespace CP
               return StatusCode::FAILURE;
             }
             allBranches.insert(outputData.branchName);
-            outputBranches.push_back(outputData);
+            outputBranches.push_back(std::move(outputData));
          }
       }
 
