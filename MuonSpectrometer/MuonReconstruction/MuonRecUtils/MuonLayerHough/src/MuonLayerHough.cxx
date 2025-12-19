@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-20215 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonLayerHough/MuonLayerHough.h"
@@ -526,9 +526,12 @@ namespace MuonHough {
         double ex_r = ex.getGlobalR();
         float theta_ref = ref.getGlobalTheta();
         if (!doparabolic || ref_z == 0 || theta_ref == 0) {  // do linear extrapolation
-            if (!ex.isEndcap()) {                            // if extrapolate to barell
+            if (!ex.isEndcap()) {                            // if extrapolate to barrel
                 return ex_z - ex_r / ref_r * ref_z;
             } else {  // if extrapolate to endcap
+                if (ref_z == 0.)[[unlikely]]{
+                  throw std::runtime_error("MuonLayerHough.cxx: extrapolate: ref_z is zero!");
+                }
                 return ex_r - ex_z * ref_r / ref_z;
             }
         } else {  // do parabolic

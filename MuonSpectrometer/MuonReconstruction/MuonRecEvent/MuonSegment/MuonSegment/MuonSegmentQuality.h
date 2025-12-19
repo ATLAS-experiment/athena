@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -36,10 +36,18 @@ namespace Muon {
     /** Default Constructor needed for POOL */   
     MuonSegmentQuality();
 
-    /** Constructor */   
+    /** Constructor */
+    
     MuonSegmentQuality( double chi2, int ndof, const std::vector<Identifier>& channelsWithoutHit, bool isStrict=false );
     MuonSegmentQuality( double chi2, int ndof, std::vector<Identifier>&& channelsWithoutHit, bool isStrict=false );
-
+    /* Copy constructor*/
+    MuonSegmentQuality(const MuonSegmentQuality &) = default;
+    /* Move constructor*/
+    MuonSegmentQuality(MuonSegmentQuality &&) = default;
+    /** Move assignment */
+    MuonSegmentQuality & operator = (MuonSegmentQuality &&) = default;
+    /** Copy assignment */
+    MuonSegmentQuality & operator = (const MuonSegmentQuality &) = default;
     /** Destructor */
     virtual ~MuonSegmentQuality() {}
   
