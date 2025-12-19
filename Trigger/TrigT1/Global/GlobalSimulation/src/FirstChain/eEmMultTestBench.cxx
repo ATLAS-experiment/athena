@@ -1,7 +1,6 @@
 //  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 #include "eEmMultTestBench.h"
-#include "../IO/IeEmTOB.h" // static constants
 #include "../IO/eEmTOB.h"
 #include "../IO/CommonTOB.h"
 #include "../IO/TipWord_clid.h"
@@ -129,12 +128,12 @@ namespace GlobalSim {
 			    std::bitset<s_phi_width>(phi));
 
 
-    const auto&  s_RHad_width = IeEmTOB::s_RHad_width;
-    const auto&  s_REta_width = IeEmTOB::s_REta_width;
-    const auto&  s_WsTot_width = IeEmTOB::s_WsTot_width;
-    const auto&  s_Seed_width = IeEmTOB::s_Seed_width;
-    const auto&  s_UpNotDown_width = IeEmTOB::s_UpNotDown_width;
-    const auto&  s_SeedIsMax_width = IeEmTOB::s_SeedIsMax_width;
+    const auto&  s_RHad_width = eEmTOB::s_RHad_width;
+    const auto&  s_REta_width = eEmTOB::s_REta_width;
+    const auto&  s_WsTot_width = eEmTOB::s_WsTot_width;
+    const auto&  s_Seed_width = eEmTOB::s_Seed_width;
+    const auto&  s_UpNotDown_width = eEmTOB::s_UpNotDown_width;
+    const auto&  s_SeedIsMax_width = eEmTOB::s_SeedIsMax_width;
 
 
     return 

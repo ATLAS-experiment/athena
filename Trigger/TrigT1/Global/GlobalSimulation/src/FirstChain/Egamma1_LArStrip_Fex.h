@@ -15,7 +15,6 @@
 
 #include "../IO/LArStripNeighborhoodContainer.h"
 #include "../IO/eEmNbhoodTOBContainer.h"
-// #include "../IO/IeEmTOB.h"
 
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "xAODEventInfo/EventInfo.h"
