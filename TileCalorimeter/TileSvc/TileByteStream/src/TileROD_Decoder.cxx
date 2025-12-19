@@ -3529,8 +3529,7 @@ uint32_t TileROD_Decoder::fillCollectionHLT(const ROBData * rob,
               correctAmplitude = false;
               rChUnit = (TileRawChannelUnit::UNIT) (unit); // Offline units in simulated data
               if (!m_demoFragIDs.empty()) {
-                const_cast<Gaudi::Property<std::vector<int>> &> ( m_demoFragIDs ) = {}; // No demonstator cabling in MC
-                ATH_MSG_INFO("Disable channel remapping for demonstrator in MC");
+                ATH_MSG_WARNING("DemoFragIDs is not supported in MC"); // No demonstator cabling in MC
               }
             }
             
