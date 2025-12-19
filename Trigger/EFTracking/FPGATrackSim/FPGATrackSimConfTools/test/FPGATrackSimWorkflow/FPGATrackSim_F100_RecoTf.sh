@@ -30,6 +30,8 @@ skipCheck=0
 storeClusters=False
 doSeeds="0"
 skipEvents=0
+writeAdditionalOutputData=False
+threads=1
 
 ## parsing flags
 while [ $# -ge 1 ];do
@@ -40,8 +42,10 @@ while [ $# -ge 1 ];do
         -n  | --nEvents )       if [ $# -lt 2 ] ; then usage ; fi ; nEvents="$2"   ; shift ;;
         -d  | --skipEvents )    if [ $# -lt 2 ] ; then usage ; fi ; skipEvents="$2" ; shift ;;
         -s  | --skipCheck )     if [ $# -lt 1 ] ; then usage ; fi ; skipCheck=1    ;;
-        -c  | --doClusters )    if [ $# -lt 1 ] ; then usage ; fi ; storeClusters=True; shift ;;
+        -c  | --doClusters )    if [ $# -lt 1 ] ; then usage ; fi ; storeClusters=True;;
         -k  | --doSeeds )       if [ $# -lt 1 ] ; then usage ; fi ; doSeeds="1" ;;
+        -w  | --writeUpstreamData ) if [ $# -lt 1 ] ; then usage ; fi ; writeAdditionalOutputData=True ;;
+        -j  | --threads )        if [ $# -lt 2 ] ; then usage ; fi ; threads="$2" ; shift ;;
         -h  | --help )          usage 0 ;;
         *) shift ;;
     esac
@@ -67,7 +71,6 @@ else
     inputRDO_arg="$inputRDO"
 fi
 
-export ATHENA_CORE_NUMBER=1
 source FPGATrackSim_CommonEnv.sh
 ## running reconstruction
 Reco_tf.py --CA \
@@ -77,12 +80,16 @@ Reco_tf.py --CA \
     --preExec "flags.Tracking.doPixelDigitalClustering=True;\
                 flags.Tracking.ITkActsValidateF100Pass.storeTrackSeeds=${doSeeds};\
                 flags.Trigger.FPGATrackSim.mapsDir=\"${MAPS_5L}\";\
-                flags.Trigger.FPGATrackSim.writeAdditionalOutputData=False;\
-                flags.Acts.EDM.PersistifyClusters=${storeClusters};flags.Acts.EDM.PersistifySpacePoints=${storeClusters};"\
+                flags.Trigger.FPGATrackSim.writeAdditionalOutputData=${writeAdditionalOutputData};\
+                flags.Acts.EDM.PersistifyClusters=${storeClusters};\
+                flags.Acts.EDM.PersistifySpacePoints=${storeClusters};\
+                flags.Tracking.doPixelDigitalClustering=True;flags.Concurrency.NumThreads=${threads};\
+                flags.Concurrency.NumConcurrentEvents=${threads};"\
     --postInclude "ActsConfig.ActsPostIncludes.ACTSClusterPostInclude" \
     --steering 'doRAWtoALL' \
     --inputRDOFile "${inputRDO_arg}" \
-    --outputAODFile ${outputAOD}
+    --outputAODFile ${outputAOD} \
+    --perfmon fullmonmt
 
 rc=$?
 echo "Reco_tf.py result: $rc"
