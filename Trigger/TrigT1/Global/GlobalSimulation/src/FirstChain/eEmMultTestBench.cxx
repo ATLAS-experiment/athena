@@ -119,9 +119,9 @@ namespace GlobalSim {
     std::string et, eta, phi, RHad, WsTot, REta, seed, UpNotDown, SeedIsMax;
     ss >> et;
 
-    const auto& s_et_width = ICommonTOB::s_et_width;
-    const auto& s_eta_width = ICommonTOB::s_eta_width;
-    const auto& s_phi_width = ICommonTOB::s_phi_width;
+    const auto& s_et_width = CommonTOB::s_et_width;
+    const auto& s_eta_width = CommonTOB::s_eta_width;
+    const auto& s_phi_width = CommonTOB::s_phi_width;
 
     auto common = CommonTOB(std::bitset<s_et_width>(et),
 			    std::bitset<s_eta_width>(eta),

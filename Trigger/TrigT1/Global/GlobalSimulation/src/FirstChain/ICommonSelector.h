@@ -15,7 +15,7 @@ namespace GlobalSim {
 
 namespace  GlobalSim {
   /**
-   * @brief PABC to selector class for ICommonTOBs.
+   * @brief PABC to selector class for CommonTOBs.
    *
    */
   

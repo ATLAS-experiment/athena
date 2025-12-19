@@ -5,6 +5,11 @@
 #include "GlobalCellTowerAlgTool.h"
 #include "GlobalLArCell.h"
 
+#include "../IO/CommonTOB.h"
+
+#include <bitset>
+
+
 namespace GlobalSim {
   
   // Main constructor
@@ -60,12 +65,12 @@ namespace GlobalSim {
         for (int phiBin = 0; phiBin < nPhi; ++phiBin) {
 
            if (towerEnergies[etaBin][phiBin] == 0) continue;
-           int energyBits = std::clamp(static_cast<int>(towerEnergies[etaBin][phiBin]), 0, (1 << IOBitwise::ICommonTOB::s_et_width) - 1);
+           int energyBits = std::clamp(static_cast<int>(towerEnergies[etaBin][phiBin]), 0, (1 << IOBitwise::CommonTOB::s_et_width) - 1);
 
 
-	   towers->emplace_back(new IOBitwise::CommonTOB(std::bitset<IOBitwise::ICommonTOB::s_et_width>(energyBits),
-							 std::bitset<IOBitwise::ICommonTOB::s_eta_width>(etaBin),
-							 std::bitset<IOBitwise::ICommonTOB::s_phi_width>(phiBin)));
+	   towers->emplace_back(new IOBitwise::CommonTOB(std::bitset<IOBitwise::CommonTOB::s_et_width>(energyBits),
+							 std::bitset<IOBitwise::CommonTOB::s_eta_width>(etaBin),
+							 std::bitset<IOBitwise::CommonTOB::s_phi_width>(phiBin)));
         }
     }
 
