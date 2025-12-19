@@ -4,16 +4,7 @@
 
 #include "MuonRDO/MdtCsm.h"
 #include "GaudiKernel/MsgStream.h"
-
-// Default constructor
-MdtCsm::MdtCsm() :
-  DataVector<MdtAmtHit>(), 
-  m_Id(),
-  m_idHash(),
-  m_SubDetId(0),
-  m_MrodId(0),
-  m_CsmId(0)
-{ }
+#include <iostream>
 
 // Partialconstructor
 MdtCsm::MdtCsm(const Identifier id, const IdentifierHash idHash) :
