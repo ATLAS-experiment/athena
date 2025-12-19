@@ -89,6 +89,7 @@ namespace CP {
       /// The branches to write into this output tree
       Gaudi::Property<std::vector<std::string>> m_branches {this, "Branches", {}, "Branches to write to the output tree"};
       Gaudi::Property<std::vector<std::string>> m_nonContainers {this, "NonContainers", {"EventInfo"}, "List of objects that are single elements, not containers"};
+      Gaudi::Property<int> m_defaultBasketSize {this, "DefaultBasketSize", 0, "Default basket size for tree branches (0 means ROOT default)"};
 
       /// @}
 

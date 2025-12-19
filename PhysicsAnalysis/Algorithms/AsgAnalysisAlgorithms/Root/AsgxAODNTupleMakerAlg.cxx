@@ -45,6 +45,8 @@ namespace CP {
          return StatusCode::FAILURE;
       }
       // Call the setup function.
+      if (m_defaultBasketSize != 0)
+         m_processorList.defaultBasketSize = m_defaultBasketSize;
       ATH_CHECK( m_processorList.setupTree (m_branches, {m_nonContainers.value().begin(), m_nonContainers.value().end()}, *m_systematicsService, *m_tree) );
 
       // Return gracefully.
