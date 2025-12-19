@@ -1,5 +1,6 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
+import os
 from AthenaCommon import Logging
 from ..powheg_RES import PowhegRES
 
@@ -22,6 +23,8 @@ class VV_pol(PowhegRES):
         @param kwargs          dictionary of arguments from Generate_tf.
         """
         super(VV_pol, self).__init__(base_directory, "VV_pol", **kwargs)
+        
+        os.environ['LD_LIBRARY_PATH'] = os.environ.get("RECOLA_SMPATH", "") + "/lib64/" + ":" + os.environ.get("RECOLA_SMPATH", "") + "/lib/" + ":" + os.environ.get("LD_LIBRARY_PATH", "")
 
         # Add parameter validation functions
         self.validation_functions.append("validate_process")
