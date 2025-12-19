@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -78,6 +78,9 @@ Trk::ConeSurface::ConeSurface(const Amg::Transform3D& htrans)
   , m_referencePoint(nullptr)
   , m_rotSymmetryAxis(nullptr)
 {}
+
+// Out-of-line dtor.
+Trk::ConeSurface::~ConeSurface() = default ;
 
 Trk::ConeSurface&
 Trk::ConeSurface::operator=(const ConeSurface& csf)

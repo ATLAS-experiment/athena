@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////
@@ -70,6 +70,8 @@ Trk::PerigeeSurface::PerigeeSurface(const PerigeeSurface& pesf, const Amg::Trans
   }
 }
 
+// Out-of-line dtor.
+Trk::PerigeeSurface::~PerigeeSurface() = default;
 
 // assignment operator
 Trk::PerigeeSurface&
