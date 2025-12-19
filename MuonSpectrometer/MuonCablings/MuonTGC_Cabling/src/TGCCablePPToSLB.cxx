@@ -14,7 +14,9 @@ namespace MuonTGC_Cabling {
 
 // Constructor & Destructor
 TGCCablePPToSLB::TGCCablePPToSLB(const std::string& filename)
-  : TGCCable(TGCCable::PPToSLB) {
+  : TGCCable(TGCCable::PPToSLB),
+    m_database{{{nullptr}}}
+{
   m_database[TGCId::Endcap][TGCId::WT] = std::make_unique<TGCDatabasePPToSL>(filename,"PP EWT");
   m_database[TGCId::Endcap][TGCId::WD] = std::make_unique<TGCDatabasePPToSL>(filename,"PP EWD");
   m_database[TGCId::Endcap][TGCId::ST] = std::make_unique<TGCDatabasePPToSL>(filename,"PP EST");
@@ -29,6 +31,7 @@ TGCCablePPToSLB::TGCCablePPToSLB(const std::string& filename)
   m_database[TGCId::Forward][TGCId::SI] = std::make_unique<TGCDatabasePPToSL>(filename,"PP FSI");
 }
 
+TGCCablePPToSLB::~TGCCablePPToSLB() = default;
 
 TGCChannelId* TGCCablePPToSLB::getChannel(const TGCChannelId* channelId,
                                           bool orChannel) const {

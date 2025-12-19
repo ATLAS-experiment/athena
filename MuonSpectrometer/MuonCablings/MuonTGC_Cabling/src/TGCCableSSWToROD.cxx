@@ -35,6 +35,8 @@ TGCCableSSWToROD& TGCCableSSWToROD::operator = (const TGCCableSSWToROD& right) {
   return *this;
 }
 
+TGCCableSSWToROD::~TGCCableSSWToROD() = default;
+
 TGCModuleMap* TGCCableSSWToROD::getModule(const TGCModuleId* moduleId) const {
   if(moduleId){
     if(moduleId->getModuleIdType()==TGCModuleId::SSW)
