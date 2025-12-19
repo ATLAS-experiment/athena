@@ -446,7 +446,7 @@ _stdSeqList = [
     JetInputConstitSeq("GPFlowML", xAODType.FlowElement,["CHS"] , 'GlobalClusterMLCorrectedParticleFlowObjects', 'CHSGlobalClusterMLCorrectedParticleFlowObjects', label = 'EMPFlow',),
 
     # GPFlow are the same than EMPFlow except they have pflow linked to elec or muons filtered out.
-    JetInputConstitSeq("GPFlow", xAODType.FlowElement,["CorrectPFO", "CHS"] , 'GlobalParticleFlowObjects', 'CHSGParticleFlowObjects',
+    JetInputConstitSeq("GPFlow", xAODType.FlowElement,["CHS"] , 'GlobalParticleFlowObjects', 'CHSGParticleFlowObjects',
                        label='EMPFlow'),
     
     JetInputConstitSeq("GPFlow_noElectrons", xAODType.FlowElement,["CorrectPFO", "CHS"] , 'GlobalParticleFlowObjects_noElectrons', 'CHSGParticleFlowObjects_noElectrons',
