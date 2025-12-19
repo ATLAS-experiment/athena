@@ -18,7 +18,7 @@
  *
  * Only monitors the Execute event type.
  */
-class TrigCostAuditor : virtual public Gaudi::Auditor, public AthMessaging {
+class TrigCostAuditor : public Gaudi::Auditor, public AthMessaging {
 
   using AthMessaging::msg;
 
