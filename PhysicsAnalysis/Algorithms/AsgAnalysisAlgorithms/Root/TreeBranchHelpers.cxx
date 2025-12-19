@@ -323,14 +323,14 @@ namespace CP
       // The regular expression used to extract the needed info. The logic
       // is supposed to be:
       //
-      // (match[1]).(match[2])<any whitespace>-><any whitespace>(match[3])[<any whitespace>type=(match[5])][<any whitespace>metTerm=(match[7])]
+      // (match[1]).(match[2])<any whitespace>-><any whitespace>(match[3])[<any whitespace>type=(match[5])][<any whitespace>metTerm=(match[7])][<any whitespace>basketSize=(match[9])]
       //
       // Like:
       //    "Electrons.eta  -> el_eta"
       //    "Electrons.eta  -> el_eta type=float"
       //    "MissingET.px   -> met_px metTerm=Final"
       static const std::regex
-         re( "\\s*([\\w%]+)\\.([\\w%]+)\\s*->\\s*([\\w%]+)(\\s+type=([\\w%]+))?(\\s+metTerm=([\\w%]+))?" );
+         re( "\\s*([\\w%]+)\\.([\\w%]+)\\s*->\\s*([\\w%]+)(\\s+type=([\\w%]+))?(\\s+metTerm=([\\w%]+))?(\\s+basketSize=([\\w%]+))?" );
 
       // Interpret this branch declaration.
       std::smatch match;
@@ -344,6 +344,14 @@ namespace CP
       branchName = match[ 3 ];
       typeName = match[ 5 ];
       metTermName = match[ 7 ];
+      if (match[9].matched) {
+        try {
+          basketSize = std::stoi(match[9]);
+        } catch (const std::exception& ) {
+          msg << MSG::ERROR << "Could not parse basket size value: " << match[9] << endmsg;
+          return StatusCode::FAILURE;
+        }
+      }
       return StatusCode::SUCCESS;
     }
 
@@ -602,6 +610,8 @@ namespace CP
         // Create the primitive branch.
         br = tree.Branch( outputData.branchName.c_str(), m_data->toPtr(),
                           typeDesc.str().c_str() );
+        if (branchConfig.basketSize.has_value())
+          br->SetBasketSize(branchConfig.basketSize.value());
 
       } else {
 
@@ -629,6 +639,8 @@ namespace CP
         // Create the object branch.
         m_dataPtr = m_data->toPtr();
         br = tree.Branch( outputData.branchName.c_str(), cl->GetName(), &m_dataPtr );
+        if (branchConfig.basketSize.has_value())
+          br->SetBasketSize(branchConfig.basketSize.value());
 
       }
 
@@ -708,6 +720,8 @@ namespace CP
             << endmsg;
         return StatusCode::FAILURE;
       }
+      if (branchConfig.basketSize.has_value())
+        br->SetBasketSize(branchConfig.basketSize.value());
 
       // Return gracefully.
       return StatusCode::SUCCESS;
@@ -935,6 +949,8 @@ namespace CP
       for ( const std::string& branchDecl : branches ) {
         branchConfigs.emplace_back();
         ATH_CHECK( branchConfigs.back().parse( branchDecl, msg() ) );
+        if (!branchConfigs.back().basketSize.has_value())
+          branchConfigs.back().basketSize = defaultBasketSize;
       }
 
       // This will loop over all branches, collect the name of any

@@ -78,6 +78,9 @@ namespace CP
       /// whether we only want to write out the nominal
       bool nominalOnly = false;
 
+      /// the basket size for this branch
+      std::optional<int> basketSize;
+
       /// MET ONLY: the name of the MET term to write out
       std::string metTermName;
 
@@ -510,6 +513,9 @@ namespace CP
 
       /// the non-containers
       std::unordered_set<std::string> m_nonContainers;
+
+      /// the default basket size
+      std::optional<int> defaultBasketSize;
 
       /// object processors
       std::unordered_map< std::string, std::unique_ptr<IObjectProcessor>> m_processors;
