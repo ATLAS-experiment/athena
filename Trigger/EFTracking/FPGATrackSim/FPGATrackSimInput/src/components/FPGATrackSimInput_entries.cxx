@@ -1,5 +1,5 @@
 #include "../FPGATrackSimRawHitsWrapperAlg.h"
-#include "../FPGATrackSimReadRawRandomHitsTool.h"
+#include "FPGATrackSimInput/FPGATrackSimReadRawRandomHitsTool.h"
 #include "../FPGATrackSimInputHeaderTool.h"
 #include "FPGATrackSimInput/FPGATrackSimRawToLogicalHitsTool.h"
 #include "../FPGATrackSimDetectorTool.h"

@@ -392,7 +392,7 @@ def FPGATrackSimDataPrepAlgCfg(inputFlags):
     theFPGATrackSimDataPrepAlg.useInternalTruthTracks = flags.Trigger.FPGATrackSim.useFPGATruthTrackMatching
     theFPGATrackSimDataPrepAlg.recordHits = not flags.Trigger.FPGATrackSim.pipeline.startswith('F-1')
     theFPGATrackSimDataPrepAlg.writeRegion = flags.Trigger.FPGATrackSim.writeRegion
-    
+    theFPGATrackSimDataPrepAlg.isDataPrepPipeline = True if flags.Tracking.ActiveConfig.extension == "ActsValidateF100" else False
 
     theFPGATrackSimDataPrepAlg.RawToLogicalHitsTools = []
     from FPGATrackSimConfTools.FPGATrackSimHelperFunctions import convertRegionsExpressionToArray
@@ -626,11 +626,12 @@ def FPGATrackSimClusteringCfg(flags): # to be used in the Reco_tf configuration
                                             'FPGAActsTracks' : [f'{flags.Tracking.ActiveConfig.extension}Tracks',f'SiSPTracksSeedSegments{flags.Tracking.ActiveConfig.extension}PixelTracks'],
                                             'isDataPrep': True} ))
     
+    if flags.Trigger.FPGATrackSim.writeAdditionalOutputData and flags.Tracking.ActiveConfig.extension in ["ActsValidateF100"]:
+        acc.addService(CompFactory.THistSvc(Output = [f"EXPERT DATAFILE='{flags.Trigger.FPGATrackSim.outputMonitorFile}', OPT='RECREATE'"]))
+        acc.addService(CompFactory.THistSvc(Output = ["FPGATRACKSIMOUTPUT DATAFILE='dataprep.root', OPT='RECREATE'"]))
     return acc
 
 def FPGATrackSimDataPrepFlagCfg(flags): # to be used in the Reco_tf configuration
-    flags.Scheduler.ShowDataDeps=True
-    flags.Scheduler.CheckDependencies=True
     
     flags.Trigger.FPGATrackSim.readOfflineObjects=False
     flags.Trigger.FPGATrackSim.doMultiTruth=False
