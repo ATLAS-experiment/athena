@@ -12,7 +12,6 @@
 #ifndef GLOBALSIM_EEMTOB_H
 #define GLOBALSIM_EEMTOB_H
 
-#include "IeEmTOB.h"  // contains static constants
 #include "CommonTOB.h"
 #include "AthenaKernel/CLASS_DEF.h"
 
@@ -81,7 +80,7 @@ namespace GlobalSim::IOBitwise {
     //! @copydoc IeEmTOB::Seed_bits()
     virtual const std::bitset<s_Seed_width>& Seed_bits() const;
     //! @copydoc IeEmTOB::UpNotDown_bit()
-    virtual const std::bitset<IeEmTOB::s_UpNotDown_width>& UpNotDown_bit() const;
+    virtual const std::bitset<s_UpNotDown_width>& UpNotDown_bit() const;
     //! @copydoc IeEmTOB::SeedIsMax_bit()
     virtual const std::bitset<s_SeedIsMax_width>& SeedIsMax_bit() const;
 

@@ -8,7 +8,7 @@
 namespace GlobalSim::IOBitwise {
 
   CommonTOB::CommonTOB(const xAOD::eFexEMRoI& eFexTOB):
-    m_et_bits(static_cast<ulong>(eFexTOB.et())/ICommonTOB::s_eFex_granularity),
+    m_et_bits(static_cast<ulong>(eFexTOB.et())/CommonTOB::s_eFex_granularity),
     m_eta_bits(eFexTOB.iEtaTopo()),
     m_phi_bits(eFexTOB.iPhiTopo()){
   }
@@ -18,22 +18,22 @@ namespace GlobalSim::IOBitwise {
     m_eta_bits(tob.eta_bits()),
     m_phi_bits(tob.phi_bits()){}
 
-  CommonTOB::CommonTOB(const std::bitset<ICommonTOB::s_et_width>& et_bits,
-		       const std::bitset<ICommonTOB::s_eta_width>& eta_bits,
-		       const std::bitset<ICommonTOB::s_phi_width>& phi_bits):
+  CommonTOB::CommonTOB(const std::bitset<CommonTOB::s_et_width>& et_bits,
+		       const std::bitset<CommonTOB::s_eta_width>& eta_bits,
+		       const std::bitset<CommonTOB::s_phi_width>& phi_bits):
     m_et_bits(et_bits),
     m_eta_bits(eta_bits),
     m_phi_bits(phi_bits){}
 
-  std::bitset<ICommonTOB::s_et_width> CommonTOB::et_bits() const {
+  std::bitset<CommonTOB::s_et_width> CommonTOB::et_bits() const {
     return m_et_bits;
   }
 
-  std::bitset<ICommonTOB::s_eta_width> CommonTOB::eta_bits() const {
+  std::bitset<CommonTOB::s_eta_width> CommonTOB::eta_bits() const {
     return m_eta_bits;
   }
 
-  std::bitset<ICommonTOB::s_phi_width> CommonTOB::phi_bits() const {
+  std::bitset<CommonTOB::s_phi_width> CommonTOB::phi_bits() const {
     return m_phi_bits;
   }
 

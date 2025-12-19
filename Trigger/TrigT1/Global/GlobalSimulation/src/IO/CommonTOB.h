@@ -12,7 +12,6 @@
 #ifndef GLOBALSIM_COMMONTOB_H
 #define GLOBALSIM_COMMONTOB_H
 
-#include "ICommonTOB.h" // const statics
 #include "xAODTrigger/eFexEMRoI.h"
 #include "AthenaKernel/CLASS_DEF.h"
 
@@ -23,6 +22,23 @@ namespace GlobalSim::IOBitwise{
   class CommonTOB {
 
   public:
+
+    
+    ///Size of the eT bitset
+    static constexpr std::size_t s_et_width{13};
+    ///Size of the eta bitset
+    static constexpr std::size_t s_eta_width{10};
+    ///Size of the phi bitset
+    static constexpr std::size_t s_phi_width{9};
+
+    static constexpr std::size_t s_eFex_granularity{100}; // MeV
+
+    static constexpr ulong max_et{(1UL << s_et_width)-1};
+    // Errors if 0 or small
+    static_assert(max_et != 0 && max_et <(1ULL << 63),
+		  "Overflow or UB detected!");
+
+    
     /** 
      * @brief Constructor taking an eFexROITOB to initialise common bits
      * @param[in] eFexTOB The input eFexRoI TOB defining the common/eFex bits.
@@ -46,28 +62,28 @@ namespace GlobalSim::IOBitwise{
      *
      * To be used to create and initialise a CommonTOB from individual 4-vector bitsets.
      */
-    CommonTOB(const std::bitset<ICommonTOB::s_et_width>& et_bits,
-	      const std::bitset<ICommonTOB::s_eta_width>& eta_bits,
-	      const std::bitset<ICommonTOB::s_phi_width>& phi_bits);
+    CommonTOB(const std::bitset<s_et_width>& et_bits,
+	      const std::bitset<s_eta_width>& eta_bits,
+	      const std::bitset<s_phi_width>& phi_bits);
     
     //! @copydoc ICommonTOB::~ICommonTOB()
     virtual ~CommonTOB(){};
 
     //! @copydoc ICommonTOB::et_bits() 
-    virtual std::bitset<ICommonTOB::s_et_width> et_bits() const;
+    virtual std::bitset<s_et_width> et_bits() const;
     //! @copydoc ICommonTOB::eta_bits()
-    virtual std::bitset<ICommonTOB::s_eta_width> eta_bits() const;
+    virtual std::bitset<s_eta_width> eta_bits() const;
     //! @copydoc ICommonTOB::phi_bits()
-    virtual std::bitset<ICommonTOB::s_phi_width> phi_bits() const; 
+    virtual std::bitset<s_phi_width> phi_bits() const; 
 
     virtual std::string to_string() const;
   private:
     /// Property: eT bitset within the common TOB word
-    std::bitset<ICommonTOB::s_et_width> m_et_bits;
+    std::bitset<s_et_width> m_et_bits;
     /// Property: eta bitset within the common TOB word
-    std::bitset<ICommonTOB::s_eta_width> m_eta_bits;
+    std::bitset<s_eta_width> m_eta_bits;
     /// Property: phi bitset within the common TOB word
-    std::bitset<ICommonTOB::s_phi_width> m_phi_bits;
+    std::bitset<s_phi_width> m_phi_bits;
   };
 
 } //End of namespace

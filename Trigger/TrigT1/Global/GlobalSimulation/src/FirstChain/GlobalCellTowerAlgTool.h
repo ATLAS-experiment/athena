@@ -12,16 +12,15 @@
 */
 
 #include "AthenaBaseComps/AthAlgTool.h"
-#include "GaudiKernel/ToolHandle.h"
 
 #include "../GlobalSimComponents/IGlobalSimAlgTool.h"
-#include "../IO/CommonTOB.h"
 #include "../IO/CommonTOBContainer.h"
-#include "../IO/ICommonTOB.h"  // static constants
 #include "GlobalLArCellContainer.h"
-#include <bitset>
+
+#include "StoreGate/ReadHandleKey.h"
+#include "StoreGate/WriteHandleKey.h"
+
 #include <string>
-#include <cassert>
 
 namespace GlobalSim {
 

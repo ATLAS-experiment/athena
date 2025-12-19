@@ -13,7 +13,7 @@
 
 namespace  GlobalSim {
   /**
-   * @brief Implementaton of ICommonSelector. Selects ICommonTOBs following
+   * @brief Implementaton of ICommonSelector. Selects CommonTOBs following
    * hypo block VHDL code using window cuts on et, eta and phi.
    *
    */

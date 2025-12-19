@@ -15,10 +15,6 @@
 
 #include <string>
 
-namespace  GlobalSim::IOBitwise {
-  class ICommonTOB;
-}
-
 namespace GlobalSim {
 
   /**
