@@ -19,7 +19,7 @@ class TGCCableSLBToHPB : public TGCCable
 {
  public:
   TGCCableSLBToHPB(const std::string& filename);
-  virtual ~TGCCableSLBToHPB() = default;
+  virtual ~TGCCableSLBToHPB();
   
   virtual TGCChannelId* getChannel(const TGCChannelId* channelId,
 				   bool orChannel=false) const;
@@ -30,7 +30,7 @@ class TGCCableSLBToHPB : public TGCCable
 				   bool orChannel=false) const;
 
  private:
-  TGCCableSLBToHPB(void) {}
+  TGCCableSLBToHPB(void) = delete;
   virtual TGCChannelId* getChannelIn(const TGCChannelId* hpbin, 
 				     bool orChannel=false) const;
   virtual TGCChannelId* getChannelOut(const TGCChannelId* slbout,
@@ -38,7 +38,7 @@ class TGCCableSLBToHPB : public TGCCable
   virtual TGCModuleMap* getModuleIn(const TGCModuleId* hpb) const;
   virtual TGCModuleMap* getModuleInforHPB(const TGCModuleId* hpb, TGCId::ModuleType moduleType) const;
   virtual TGCModuleMap* getModuleOut(const TGCModuleId* slb) const;
-  std::array<std::array<std::unique_ptr<TGCDatabase>, TGCId::MaxModuleType>, TGCId::MaxRegionType> m_database{{{nullptr}}};
+  std::array<std::array<std::unique_ptr<TGCDatabase>, TGCId::MaxModuleType>, TGCId::MaxRegionType> m_database;
 };
   
 }  // end of namespace

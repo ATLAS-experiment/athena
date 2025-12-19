@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonTGC_Cabling/TGCCableInPP.h"
@@ -13,7 +13,9 @@ namespace MuonTGC_Cabling {
 
 // Constructor & Destructor
 TGCCableInPP::TGCCableInPP(const std::string& filename)
-  : TGCCable(TGCCable::InPP) {
+  : TGCCable(TGCCable::InPP),
+    m_database{{{nullptr}}}
+{
   m_database[TGCId::Endcap][TGCId::WD] = std::make_unique<TGCDatabaseInPP>(filename, "EWD");
   m_database[TGCId::Endcap][TGCId::WT] = std::make_unique<TGCDatabaseInPP>(filename, "EWT");
   m_database[TGCId::Endcap][TGCId::SD] = std::make_unique<TGCDatabaseInPP>(filename, "ESD");
@@ -27,7 +29,10 @@ TGCCableInPP::TGCCableInPP(const std::string& filename)
   m_database[TGCId::Forward][TGCId::WI] = std::make_unique<TGCDatabaseInPP>(filename, "FWI");
   m_database[TGCId::Forward][TGCId::SI] = std::make_unique<TGCDatabaseInPP>(filename, "FSI");
 }
-  
+
+
+TGCCableInPP::~TGCCableInPP() = default;
+
 
 TGCChannelId* TGCCableInPP::getChannel(const TGCChannelId* channelId,
                                        const bool orChannel) const {

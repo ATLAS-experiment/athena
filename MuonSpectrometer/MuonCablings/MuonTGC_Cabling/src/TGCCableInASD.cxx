@@ -12,7 +12,9 @@ namespace MuonTGC_Cabling {
 
 // Constructor & Destructor
 TGCCableInASD::TGCCableInASD(const std::string& filename)
-  : TGCCable(TGCCable::InASD) {
+  : TGCCable(TGCCable::InASD),
+    m_database{{{nullptr}}}
+{
   m_database[TGCId::Endcap][TGCId::WD] = std::make_unique<TGCDatabaseASDToPP>(filename,"EWD");
   m_database[TGCId::Endcap][TGCId::WT] = std::make_unique<TGCDatabaseASDToPP>(filename,"EWT");
   m_database[TGCId::Endcap][TGCId::SD] = std::make_unique<TGCDatabaseASDToPP>(filename,"ESD");
@@ -27,6 +29,8 @@ TGCCableInASD::TGCCableInASD(const std::string& filename)
   m_database[TGCId::Forward][TGCId::SI] = std::make_unique<TGCDatabaseASDToPP>(filename,"FSI");
 }
   
+TGCCableInASD::~TGCCableInASD() = default;
+
 TGCChannelId* TGCCableInASD::getChannel(const TGCChannelId* channelId,
 					bool orChannel) const {
   if(channelId){
