@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonCondAlg/NswCalibDbAlg.h"
@@ -230,8 +230,10 @@ NswCalibDbAlg::processNSWT0Data(const EventContext& ctx) const {
 
     } else if(!m_readKey_stgc_t0.empty()){
       ATH_MSG_DEBUG("LOAD NSW sTGC T0 FROM DB");
-      std::unique_ptr<TTree> tree; 
+      std::unique_ptr<TTree> tree;
+      //check failure implies tree is nullptr, and will exit  
       ATH_CHECK(loadT0ToTree(ctx, m_readKey_stgc_t0, wrHdl, tree));
+      //coverity[FORWARD_NULL:FALSE]
       ATH_CHECK(loadT0Data(tree, wrCdo.get(), T0Tech::STGC));
 
     } else {

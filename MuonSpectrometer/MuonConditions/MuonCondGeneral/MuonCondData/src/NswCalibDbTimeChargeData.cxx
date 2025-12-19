@@ -119,9 +119,14 @@ NswCalibDbTimeChargeData::getChannelIds(const CalibDataType type, const std::str
 
     return chnls;
 }
-const NswCalibDbTimeChargeData::CalibConstants* NswCalibDbTimeChargeData::getCalibForChannel(const CalibDataType type, const Identifier& channelId) const {
+const NswCalibDbTimeChargeData::CalibConstants* 
+NswCalibDbTimeChargeData::getCalibForChannel(const CalibDataType type, const Identifier& channelId) const {
     const ChannelCalibMap& calibMap =  type == CalibDataType::PDO ? m_pdo_data : m_tdo_data;    
     const int array_idx = identToModuleIdx(channelId);
+    if (array_idx < 0){
+      ATH_MSG_ERROR("NswCalibDbTimeChargeData::getCalibForChannel: array index is negative.");
+      return nullptr;
+    }
     const unsigned int channel = (m_idHelperSvc->isMM(channelId) ? 
                                   m_idHelperSvc->mmIdHelper().channel(channelId) : 
                                   m_idHelperSvc->stgcIdHelper().channel(channelId)) -1;
