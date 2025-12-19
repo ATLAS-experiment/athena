@@ -46,7 +46,7 @@ int TgcIdHelper::initialize_from_dictionary(const IdDictMgr& dict_mgr) {
         m_GASGAP_INDEX = field->index();
     } else {
         ATH_MSG_ERROR("initLevelsFromDict - unable to find 'tgcGasGap' field ");
-        status = 1;
+        return 1;
     }
 
     field = m_dict->find_field("isStrip");
@@ -54,7 +54,7 @@ int TgcIdHelper::initialize_from_dictionary(const IdDictMgr& dict_mgr) {
         m_ISSTRIP_INDEX = field->index();
     } else {
         ATH_MSG_ERROR("initLevelsFromDict - unable to find 'isStrip' field ");
-        status = 1;
+        return 1;
     }
 
     field = m_dict->find_field("channel");
@@ -62,7 +62,7 @@ int TgcIdHelper::initialize_from_dictionary(const IdDictMgr& dict_mgr) {
         m_CHANNEL_INDEX = field->index();
     } else {
         ATH_MSG_ERROR("initLevelsFromDict - unable to find channel' field ");
-        status = 1;
+        return 1;
     }
 
     // reinitialize the module ndex
@@ -72,6 +72,7 @@ int TgcIdHelper::initialize_from_dictionary(const IdDictMgr& dict_mgr) {
     const IdDictGroup* tgcGroup = m_dict->find_group("tgc");
     if (!tgcGroup) {
         ATH_MSG_ERROR("Cannot find tgc group");
+        return 1;
     } else {
         m_GROUP_INDEX = tgcGroup->region(0).index();
     }
@@ -101,7 +102,7 @@ int TgcIdHelper::initialize_from_dictionary(const IdDictMgr& dict_mgr) {
     const IdDictDictionary* atlasDict = dict_mgr.find_dictionary("ATLAS");
     if (atlasDict->get_label_value("subdet", "MuonSpectrometer", muonField)) {
         ATH_MSG_ERROR("Could not get value for label 'MuonSpectrometer' of field 'subdet' in dictionary " << atlasDict->name());
-        return (1);
+        return 1;
     }
 
     // Build MultiRange down to "technology" for all (muon) regions
@@ -114,6 +115,7 @@ int TgcIdHelper::initialize_from_dictionary(const IdDictMgr& dict_mgr) {
                      << "MultiRange size is " << muon_range.size());
     } else {
         ATH_MSG_ERROR("Muon MultiRange is empty");
+        return 1;
     }
 
     // Build MultiRange down to "detector element" for all mdt regions
@@ -127,6 +129,7 @@ int TgcIdHelper::initialize_from_dictionary(const IdDictMgr& dict_mgr) {
                      << "Multilayer MultiRange size is " << muon_detectorElement_range.size());
     } else {
         ATH_MSG_ERROR("Muon TGC detector element MultiRange is empty");
+        return 1;
     }
 
     // Build MultiRange down to "channel" for all TGC regions
@@ -139,12 +142,13 @@ int TgcIdHelper::initialize_from_dictionary(const IdDictMgr& dict_mgr) {
                      << "MultiRange size is " << muon_channel_range.size());
     } else {
         ATH_MSG_ERROR("Muon MultiRange is empty for channels");
+        return 1;
     }
 
     // build TGC module ranges
     // Find the regions that have a "technology field" that matches the TGC and save them
     int tgcField = -1;
-    status = m_dict->get_label_value("technology", "TGC", tgcField);
+    status += m_dict->get_label_value("technology", "TGC", tgcField);
 
     for (int i = 0; i < (int)muon_range.size(); ++i) {
         const Range& range = muon_range[i];
@@ -182,31 +186,31 @@ int TgcIdHelper::initialize_from_dictionary(const IdDictMgr& dict_mgr) {
     // test to see that the multi range is not empty
     if (m_full_module_range.size() == 0) {
         ATH_MSG_ERROR("TGC MultiRange ID is empty for modules");
-        status = 1;
+        return 1;
     }
 
     /// test to see that the detector element multi range is not empty
 
     if (m_full_detectorElement_range.size() == 0) {
         ATH_MSG_ERROR("TGC MultiRange ID is empty for detector elements");
-        status = 1;
+        return 1;
     }
 
     // test to see that the multi range is not empty
     if (m_full_channel_range.size() == 0) {
         ATH_MSG_ERROR("TGC MultiRange ID is empty for channels");
-        status = 1;
+        return 1;
     }
 
     // Setup the hash tables for TGC
     ATH_MSG_INFO("Initializing TGC hash indices ... ");
-    status = init_hashes();
-    status = init_detectorElement_hashes();  // same as module hash
-    status = init_id_to_hashes();
+    status += init_hashes();
+    status += init_detectorElement_hashes();  // same as module hash
+    status += init_id_to_hashes();
 
     // Setup hash tables for finding neighbors
     ATH_MSG_INFO("Initializing TGC hash indices for finding neighbors ... ");
-    status = init_neighbors();
+    status += init_neighbors();
 
     m_init = true;
     return (status);
