@@ -14,9 +14,17 @@ from JetTagTools.JetFitterVariablesFactoryConfig import JetFitterVariablesFactor
 from BTagging.JetSecVtxFindingAlgConfig import JetSecVtxFindingAlgCfg
 from BTagging.JetSecVertexingAlgConfig import JetSecVertexingAlgCfg
 from FlavorTagDiscriminants.FTagElectronAssociationConfig import FTagElectronAssociationCfg
+from JetTagDerivationUtils.CopyJetParentInfoConfig import (
+    CopyJetParentInfoCfg
+)
 
 from pathlib import Path
 import re
+
+
+_parent_collections = {
+    'AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets': 'AntiKt10UFOCSSKJets'
+}
 
 
 def _addDepsByDirname(cfgFlags, dirname: str, jetCollection: str) -> ComponentAccumulator:
@@ -48,6 +56,14 @@ def _addDepsByDirname(cfgFlags, dirname: str, jetCollection: str) -> ComponentAc
             cfgFlags,
             jetCollection=jetCollection,
         ))
+    if "X" in modset:
+        acc.merge(
+            CopyJetParentInfoCfg(
+                cfgFlags,
+                jetCollection,
+                parents=_parent_collections[jetCollection]
+            )
+        )
     return acc
 
 def _get_flip_config(nn_path):
