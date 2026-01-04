@@ -33,9 +33,7 @@ atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
 if( NOT GENERATIONBASE )
   atlas_add_test( Factory_test
                   SOURCES test/Factory_test.cxx
-                  INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
-		              LINK_LIBRARIES CollectionSvc PersistentDataModel
-                  ${ROOT_LIBRARIES}
+		  LINK_LIBRARIES CollectionSvc PersistentDataModel
                   PROPERTIES TIMEOUT 300 )
 
   atlas_add_test( collSorting_test
