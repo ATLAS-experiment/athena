@@ -224,7 +224,7 @@ StatusCode CaloRescaleNoise::stop()
           }
 
           // for SC debugging
-          if (iCool<48) fprintf(fp,"%10d %5d %5d %8.3f %8.3f\n",id.get_identifier32().get_compact(),ii,gain,m_elecNoiseRescaled,m_pileupNoise);
+          if (iCool<48) fprintf(fp,"%10u %5d %5d %8.3f %8.3f\n",id.get_identifier32().get_compact(),ii,gain,m_elecNoiseRescaled,m_pileupNoise);
 
           m_tree->Fill();
 
