@@ -76,7 +76,7 @@ namespace MuonR4 {
       ToolHandle<Muon::INSWCalibSmearingTool> m_smearingTool{this, "SmearingTool", "Muon::NSWCalibSmearingTool/STGCCalibSmearingTool"};
       ToolHandle<Muon::INSWCalibTool> m_calibrationTool{this, "CalibrationTool", "Muon::NSWCalibTool/STGCCalibTool"};
 
-      Gaudi::Property<bool> m_digitizeMuonOnly{this, "ProcessTrueMuonsOnly", true};
+      Gaudi::Property<bool> m_digitizeMuonOnly{this, "ProcessTrueMuonsOnly", false};
       Gaudi::Property<bool> m_useTimeWindow{this, "UseTimeWindow", true};
       Gaudi::Property<bool> m_doSmearing{this, "doSmearing", false};
       Gaudi::Property<bool> m_doToFCorrection{this,"doToFCorrection", true};
