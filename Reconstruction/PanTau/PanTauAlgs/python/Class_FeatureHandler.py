@@ -259,7 +259,6 @@ class FeatureHandler:
         Types += ["Pi0Neut"]
         
         Variables = []
-        Variables += [ ["Log", "EtOver", "Et"] ]
         Variables += [ ["DeltaR1st", "To1st", ""] ]
         for iType in Types:
             for jType in Types:

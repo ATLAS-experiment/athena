@@ -405,20 +405,8 @@ StatusCode PanTau::Tool_FeatureExtractor::addCombinedFeatures(PanTau::PanTauSeed
       std::string typeName_Nom    = PanTau::TauConstituent::getTypeName((PanTau::TauConstituent::Type)type_Nom);
       std::string typeName_Denom  = PanTau::TauConstituent::getTypeName((PanTau::TauConstituent::Type)type_Denom);
             
-      double sum_Et_Nom   = 0.0;
-      double sum_Et_Denom = 0.0;
-      if(tlv_Sys_OK[type_Nom] && tlv_Sys_OK[type_Denom]) {
-	sum_Et_Nom   = tlv_System[type_Nom].Et();
-	sum_Et_Denom = tlv_System[type_Denom].Et();
-      }
-            
       //following features symmetric in system A-B, hence skip multi calculation
       if(jType <= iType) continue;
-            
-      //Energy ratios between systems
-      if(sum_Et_Denom > 0. && sum_Et_Nom > 0.) {
-	tauFeatures->addFeature("CellBased_" + prefixVARType + "_Log" + typeName_Nom + "EtOver" + typeName_Denom + "Et",   std::log10(sum_Et_Nom / sum_Et_Denom) );
-      }//end check for div by zero
       
       if(tlv_1st_OK[type_Nom] && tlv_1st_OK[type_Denom]) {
 	//Delta R between 1st and 1st EFO

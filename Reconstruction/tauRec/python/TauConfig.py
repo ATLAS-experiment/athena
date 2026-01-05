@@ -41,8 +41,7 @@ def TauBuildAlgCfg(flags):
     tools.append( result.popToolsAndMerge(tauTools.TauVertexedClusterDecoratorCfg(flags)) )
 
     # this needs to go before the TauCaloAlgCfg
-    if flags.Tau.doPi0Clus:
-        tools.append( result.popToolsAndMerge(tauTools.Pi0ClusterFinderCfg(flags)) )
+    tools.append( result.popToolsAndMerge(tauTools.Pi0ClusterFinderCfg(flags)) )
 
     # TauBuildAlg AKA TauProcessorAlg
     TauProcessorAlg = CompFactory.getComp("TauProcessorAlg")
