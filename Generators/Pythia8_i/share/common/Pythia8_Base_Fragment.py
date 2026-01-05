@@ -58,12 +58,16 @@ check_reset_proc_number(opts)
 
 ## Revert the recoil strategy to the old default of 1, ie. 'recoil to color'
 #In 8.314, the default option was changed to 0, 'recoil to top' and we revert it back unless 'recoil to top' 
-#is explicitly needed for the samples. This flag was introduced in 8.310, and the reverting back is done for versions >8.314.
+#is explicitly needed for the samples. This flag was introduced in 8.310, and the reverting back is done for versions >=8.314.
 
 if "PYTHIA8VER" in os.environ:
     verph8str = str(os.environ['PYTHIA8VER'])[:3]
     verph8 = int(verph8str)
-    if verph8 > 314:
-        genSeq.Pythia8.Commands += ["TimeShower:recoilStrategyRF=1"]
+    if verph8 >= 314:
+        genSeq.Pythia8.Commands += ["TimeShower:recoilStrategyRF = 1"]
 
+## Revert the StringFragmentation:stopMass value from 0.8GeV back to the old default of 1.0GeV
+#In 8.316, the default value was changed to 0.8GeV and the reverting back is done for versions >=8.316.
 
+    if verph8 >= 316:    
+        genSeq.Pythia8.Commands += ["StringFragmentation:stopMass = 1.0"]
