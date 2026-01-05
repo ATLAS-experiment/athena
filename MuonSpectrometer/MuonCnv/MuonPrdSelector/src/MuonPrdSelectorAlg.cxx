@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonPrdSelector/MuonPrdSelectorAlg.h"
@@ -165,29 +165,19 @@ StatusCode MuonPrdSelectorAlg::selectMDTs() {
   m_mdtPRDs_out->cleanup();
   
   
-  Muon::MdtPrepDataContainer::const_iterator mdtColl = m_mdtPRDs_in->begin();
-  Muon::MdtPrepDataContainer::const_iterator last_mdtColl = m_mdtPRDs_in->end();
+  for (const Muon::MdtPrepDataCollection* mdtColl : *m_mdtPRDs_in) {
 
-  unsigned int i_mdtColl(0);
-  
-  
-  for( ; mdtColl!=last_mdtColl ; ++mdtColl, ++i_mdtColl ){ //for each collection
-
-    Identifier ID = (*mdtColl)->identify() ;
-    IdentifierHash hashID = (*mdtColl)->identifyHash();
-    Muon::MdtPrepDataCollection * driftCircleColl = new Muon::MdtPrepDataCollection(hashID);
-    (driftCircleColl)->setIdentifier(ID);
+    Identifier ID = mdtColl->identify() ;
+    IdentifierHash hashID = mdtColl->identifyHash();
+    auto driftCircleColl = std::make_unique<Muon::MdtPrepDataCollection>(hashID);
+    driftCircleColl->setIdentifier(ID);
    
-    Muon::MdtPrepDataCollection::const_iterator mdtItr = (*mdtColl)->begin();
-    Muon::MdtPrepDataCollection::const_iterator mdtEnd = (*mdtColl)->end();
-    int i = 0;
-    
-    for(; mdtItr != mdtEnd; ++mdtItr,i++ ) { //for each hit in the collection
-      Identifier hitID =(*mdtItr)->identify();
+    for (const Muon::MdtPrepData* mdt : *mdtColl) {
+      Identifier hitID =mdt->identify();
 
       if (!m_muonIdCutTool->isCut(hitID)){ //write event to new collection
 
-	driftCircleColl->push_back(new Muon::MdtPrepData(**mdtItr));
+	driftCircleColl->push_back(new Muon::MdtPrepData(*mdt));
 	ATH_MSG_DEBUG( "Writing Event."  );
       }
       else
@@ -196,9 +186,9 @@ StatusCode MuonPrdSelectorAlg::selectMDTs() {
     }	      
 	  
 
-    Identifier newID = (driftCircleColl)->identify();
+    Identifier newID = driftCircleColl->identify();
     ATH_MSG_DEBUG( "Adding New Collection to MDT list:" << newID  );
-    if (StatusCode::SUCCESS != m_mdtPRDs_out->addCollection(driftCircleColl,hashID )) {
+    if (StatusCode::SUCCESS != m_mdtPRDs_out->addCollection(driftCircleColl.release(),hashID )) {
       ATH_MSG_ERROR( "Couldn't record MDT Drift Circle Collection with hash=" << hashID
                      << " in StoreGate!"  );
       continue;
@@ -220,29 +210,19 @@ StatusCode MuonPrdSelectorAlg::selectRPCs() {
   m_rpcPRDs_out->cleanup();
   
   
-  Muon::RpcPrepDataContainer::const_iterator rpcColl = m_rpcPRDs_in->begin();
-  Muon::RpcPrepDataContainer::const_iterator last_rpcColl = m_rpcPRDs_in->end();
+  for (const Muon::RpcPrepDataCollection* rpcColl : *m_rpcPRDs_in) {
 
-  unsigned int i_rpcColl(0);
-  
-  
-  for( ; rpcColl!=last_rpcColl ; ++rpcColl, ++i_rpcColl ){ //for each collection
-
-    Identifier ID = (*rpcColl)->identify() ;
-    IdentifierHash hashID = (*rpcColl)->identifyHash();
-    Muon::RpcPrepDataCollection * rpcPrdColl = new Muon::RpcPrepDataCollection(hashID);
-    (rpcPrdColl)->setIdentifier(ID);
+    Identifier ID = rpcColl->identify() ;
+    IdentifierHash hashID = rpcColl->identifyHash();
+    auto rpcPrdColl = std::make_unique<Muon::RpcPrepDataCollection>(hashID);
+    rpcPrdColl->setIdentifier(ID);
    
-    Muon::RpcPrepDataCollection::const_iterator rpcItr = (*rpcColl)->begin();
-    Muon::RpcPrepDataCollection::const_iterator rpcEnd = (*rpcColl)->end();
-    int i = 0;
-    
-    for(; rpcItr != rpcEnd; ++rpcItr,i++ ) { //for each hit in the collection
-      Identifier hitID =(*rpcItr)->identify();
+    for (const Muon::RpcPrepData* rpc : *rpcColl) {
+      Identifier hitID = rpc->identify();
 
       if (!m_muonIdCutTool->isCut(hitID)){ //write event to new collection
 
-	rpcPrdColl->push_back(new Muon::RpcPrepData(**rpcItr));
+	rpcPrdColl->push_back(new Muon::RpcPrepData(*rpc));
 	ATH_MSG_DEBUG( "Writing Event."  );
       }
       else
@@ -251,9 +231,9 @@ StatusCode MuonPrdSelectorAlg::selectRPCs() {
     }	      
 	  
 
-    Identifier newID = (rpcPrdColl)->identify();
+    Identifier newID = rpcPrdColl->identify();
     ATH_MSG_DEBUG( "Adding New Collection to RPC list:" << newID  );
-    if (StatusCode::SUCCESS != m_rpcPRDs_out->addCollection(rpcPrdColl,hashID )) {
+    if (StatusCode::SUCCESS != m_rpcPRDs_out->addCollection(rpcPrdColl.release(),hashID )) {
       ATH_MSG_ERROR( "Couldn't record RPC Drift Circle Collection with hashID=" << hashID
                      << " in StoreGate!"  );
       continue;
@@ -275,29 +255,19 @@ StatusCode MuonPrdSelectorAlg::selectTGCs() {
   m_tgcPRDs_out->cleanup();
   
   
-  Muon::TgcPrepDataContainer::const_iterator tgcColl = m_tgcPRDs_in->begin();
-  Muon::TgcPrepDataContainer::const_iterator last_tgcColl = m_tgcPRDs_in->end();
+  for (const Muon::TgcPrepDataCollection* tgcColl : *m_tgcPRDs_in) {
 
-  unsigned int i_tgcColl(0);
-  
-  
-  for( ; tgcColl!=last_tgcColl ; ++tgcColl, ++i_tgcColl ){ //for each collection
-
-    Identifier ID = (*tgcColl)->identify() ;
-    IdentifierHash hashID = (*tgcColl)->identifyHash();
-    Muon::TgcPrepDataCollection * tgcPrdColl = new Muon::TgcPrepDataCollection(hashID);
-    (tgcPrdColl)->setIdentifier(ID);
+    Identifier ID = tgcColl->identify() ;
+    IdentifierHash hashID = tgcColl->identifyHash();
+    auto tgcPrdColl = std::make_unique<Muon::TgcPrepDataCollection>(hashID);
+    tgcPrdColl->setIdentifier(ID);
    
-    Muon::TgcPrepDataCollection::const_iterator tgcItr = (*tgcColl)->begin();
-    Muon::TgcPrepDataCollection::const_iterator tgcEnd = (*tgcColl)->end();
-    int i = 0;
-    
-    for(; tgcItr != tgcEnd; ++tgcItr,i++ ) { //for each hit in the collection
-      Identifier hitID =(*tgcItr)->identify();
+    for (const Muon::TgcPrepData* tgc : *tgcColl) {
+      Identifier hitID = tgc->identify();
 
       if (!m_muonIdCutTool->isCut(hitID)){ //write event to new collection
 
-	tgcPrdColl->push_back(new Muon::TgcPrepData(**tgcItr));
+	tgcPrdColl->push_back(new Muon::TgcPrepData(*tgc));
 	ATH_MSG_DEBUG( "Writing Event."  );
       }
       else
@@ -306,9 +276,9 @@ StatusCode MuonPrdSelectorAlg::selectTGCs() {
     }	      
 	  
 
-    Identifier newID = (tgcPrdColl)->identify();
+    Identifier newID = tgcPrdColl->identify();
     ATH_MSG_DEBUG( "Adding New Collection to TGC list:" << newID  );
-    if (StatusCode::SUCCESS != m_tgcPRDs_out->addCollection(tgcPrdColl,hashID )) {
+    if (StatusCode::SUCCESS != m_tgcPRDs_out->addCollection(tgcPrdColl.release(),hashID )) {
       ATH_MSG_ERROR( "Couldn't record TGC Drift Circle Collection with hashID=" << hashID
                      << " in StoreGate!"  );
       continue;
@@ -329,29 +299,19 @@ StatusCode MuonPrdSelectorAlg::selectCSCs() {
   m_cscPRDs_out->cleanup();
   
   
-  Muon::CscStripPrepDataContainer::const_iterator cscColl = m_cscPRDs_in->begin();
-  Muon::CscStripPrepDataContainer::const_iterator last_cscColl = m_cscPRDs_in->end();
+  for (const Muon::CscStripPrepDataCollection* cscColl : *m_cscPRDs_in) {
 
-  unsigned int i_cscColl(0);
-  
-  
-  for( ; cscColl!=last_cscColl ; ++cscColl, ++i_cscColl ){ //for each collection
-
-    Identifier ID = (*cscColl)->identify() ;
-    IdentifierHash hashID = (*cscColl)->identifyHash();
-    Muon::CscStripPrepDataCollection * cscPrdColl = new Muon::CscStripPrepDataCollection(hashID);
-    (cscPrdColl)->setIdentifier(ID);
+    Identifier ID = cscColl->identify() ;
+    IdentifierHash hashID = cscColl->identifyHash();
+    auto cscPrdColl = std::make_unique<Muon::CscStripPrepDataCollection>(hashID);
+    cscPrdColl->setIdentifier(ID);
    
-    Muon::CscStripPrepDataCollection::const_iterator cscItr = (*cscColl)->begin();
-    Muon::CscStripPrepDataCollection::const_iterator cscEnd = (*cscColl)->end();
-    int i = 0;
-    
-    for(; cscItr != cscEnd; ++cscItr,i++ ) { //for each hit in the collection
-      Identifier hitID =(*cscItr)->identify();
+    for (const Muon::CscStripPrepData* csc : *cscColl) {
+      Identifier hitID = csc->identify();
 
       if (!m_muonIdCutTool->isCut(hitID)){ //write event to new collection
 
-	cscPrdColl->push_back(new Muon::CscStripPrepData(**cscItr));
+	cscPrdColl->push_back(new Muon::CscStripPrepData(*csc));
 	ATH_MSG_DEBUG( "Writing Event."  );
       }
       else
@@ -359,9 +319,9 @@ StatusCode MuonPrdSelectorAlg::selectCSCs() {
     }	      
 	  
 
-    Identifier newID = (cscPrdColl)->identify();
+    Identifier newID = cscPrdColl->identify();
     ATH_MSG_DEBUG( "Adding New Collection to CSC list:" << newID  );
-    if (StatusCode::SUCCESS != m_cscPRDs_out->addCollection(cscPrdColl,hashID )) {
+    if (StatusCode::SUCCESS != m_cscPRDs_out->addCollection(cscPrdColl.release(),hashID )) {
       ATH_MSG_ERROR( "Couldn't record CSC Collection with hashID=" << hashID
                      << " in StoreGate!"  );
       continue;
