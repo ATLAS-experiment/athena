@@ -362,17 +362,17 @@ namespace Analysis {
                     bool passesDiTrack(true);
                     if (m_diTrackMassUpper>0.0 || m_diTrackMassLower>0.0) {
                         massCuts.clear();
-                        if(m_kkMassHyp)   massCuts.push_back(getInvariantMass(*trkItr1,kMass,*trkItr2,kMass));
-                        if(m_pipiMassHyp) massCuts.push_back(getInvariantMass(*trkItr1,piMass,*trkItr2,piMass));
+                        if(m_kkMassHyp)   massCuts.push_back(JpsiUpsilonCommon::getInvariantMass(*trkItr1,kMass,*trkItr2,kMass));
+                        if(m_pipiMassHyp) massCuts.push_back(JpsiUpsilonCommon::getInvariantMass(*trkItr1,piMass,*trkItr2,piMass));
                         if(m_kpiMassHyp){
-			   massCuts.push_back(getInvariantMass(*trkItr1,kMass,*trkItr2,piMass));
-			   massCuts.push_back(getInvariantMass(*trkItr1,piMass,*trkItr2,kMass));
+			   massCuts.push_back(JpsiUpsilonCommon::getInvariantMass(*trkItr1,kMass,*trkItr2,piMass));
+			   massCuts.push_back(JpsiUpsilonCommon::getInvariantMass(*trkItr1,piMass,*trkItr2,kMass));
                         }
                         if(m_kpMassHyp){
-			   massCuts.push_back(getInvariantMass(*trkItr1,kMass,*trkItr2,piMass));
-			   massCuts.push_back(getInvariantMass(*trkItr1,piMass,*trkItr2,kMass));
+			   massCuts.push_back(JpsiUpsilonCommon::getInvariantMass(*trkItr1,kMass,*trkItr2,piMass));
+			   massCuts.push_back(JpsiUpsilonCommon::getInvariantMass(*trkItr1,piMass,*trkItr2,kMass));
                         }
-                        if(!m_manualMassHypo.empty()) massCuts.push_back(getInvariantMass(*trkItr1, m_manualMassHypo[2], *trkItr2, m_manualMassHypo[3]));
+                        if(!m_manualMassHypo.empty()) massCuts.push_back(JpsiUpsilonCommon::getInvariantMass(*trkItr1, m_manualMassHypo[2], *trkItr2, m_manualMassHypo[3]));
                         passesDiTrack = JpsiUpsilonCommon::cutRangeOR(massCuts, m_diTrackMassLower, m_diTrackMassUpper);
 
                     }
@@ -383,17 +383,17 @@ namespace Analysis {
                     if (m_trkQuadrupletMassUpper>0.0 || m_trkQuadrupletMassLower>0.0) {
                         massCuts.clear();
                         
-                        if(m_kkMassHyp) massCuts.push_back(  getInvariantMass(QuadletTracks, m_mumukkMasses) );
-                        if(m_pipiMassHyp) massCuts.push_back(getInvariantMass(QuadletTracks, m_mumupipiMasses));
+                        if(m_kkMassHyp) massCuts.push_back(  JpsiUpsilonCommon::getInvariantMass(QuadletTracks, m_mumukkMasses) );
+                        if(m_pipiMassHyp) massCuts.push_back(JpsiUpsilonCommon::getInvariantMass(QuadletTracks, m_mumupipiMasses));
                         if(m_kpiMassHyp){
-                           massCuts.push_back(getInvariantMass(QuadletTracks, m_mumukpiMasses));
-                           massCuts.push_back(getInvariantMass(QuadletTracks, m_mumupikMasses));
+                           massCuts.push_back(JpsiUpsilonCommon::getInvariantMass(QuadletTracks, m_mumukpiMasses));
+                           massCuts.push_back(JpsiUpsilonCommon::getInvariantMass(QuadletTracks, m_mumupikMasses));
                         }
                         if(m_kpMassHyp){
-                           massCuts.push_back(getInvariantMass(QuadletTracks, m_mumukpMasses));
-                           massCuts.push_back(getInvariantMass(QuadletTracks, m_mumupkMasses));
+                           massCuts.push_back(JpsiUpsilonCommon::getInvariantMass(QuadletTracks, m_mumukpMasses));
+                           massCuts.push_back(JpsiUpsilonCommon::getInvariantMass(QuadletTracks, m_mumupkMasses));
                         }
-                        if(!m_manualMassHypo.empty()) massCuts.push_back(getInvariantMass(QuadletTracks, m_manualMassHypo));
+                        if(!m_manualMassHypo.empty()) massCuts.push_back(JpsiUpsilonCommon::getInvariantMass(QuadletTracks, m_manualMassHypo));
 
                         passes4TrackMass = JpsiUpsilonCommon::cutRangeOR(massCuts, m_trkQuadrupletMassLower, m_trkQuadrupletMassUpper);
                     }
@@ -492,74 +492,6 @@ namespace Analysis {
         return opposite;
     }
 
-   
-  
-    // ---------------------------------------------------------------------------------
-    // getInvariantMass: returns invariant mass given a pair of tracks and their mass
-    // hypothesis. Each track must have a separate mass hypothesis in
-    // the vector, and they must be in the same order as the tracks in the track vector.
-    // Otherwise it will go horribly wrong.
-    // ---------------------------------------------------------------------------------
-    
-    double JpsiPlus2Tracks::getInvariantMass(const xAOD::TrackParticle* trk1, double mass1, const xAOD::TrackParticle* trk2, double mass2){
-        const auto trk1V = trk1->p4();
-        double px1 = trk1V.Px();
-        double py1 = trk1V.Py();
-        double pz1 = trk1V.Pz();
-        double e1 = sqrt(px1*px1+py1*py1+pz1*pz1+mass1*mass1);
-        const auto trk2V = trk2->p4();
-        double px2 = trk2V.Px();
-        double py2 = trk2V.Py();
-        double pz2 = trk2V.Pz();
-        double e2 = sqrt(px2*px2+py2*py2+pz2*pz2+mass2*mass2);
-        double pxSum=px1+px2;
-        double pySum=py1+py2;
-        double pzSum=pz1+pz2;
-        double eSum=e1+e2;
-        double M=sqrt((eSum*eSum)-(pxSum*pxSum)-(pySum*pySum)-(pzSum*pzSum)); 
-        
-        return M;
-        
-    }
-
-    double JpsiPlus2Tracks::getInvariantMass(const std::vector<const xAOD::TrackParticle*> &trk,
-                                             const std::vector<double> &masses)
-    {
-        assert(trk.size() == masses.size() && trk.size()==4);
-        const auto trk1V = trk[0]->p4();
-        double px1 = trk1V.Px();
-        double py1 = trk1V.Py();
-        double pz1 = trk1V.Pz();
-        double e1 = sqrt(px1*px1+py1*py1+pz1*pz1+masses[0]*masses[0]);
-
-        const auto trk2V = trk[1]->p4();
-        double px2 = trk2V.Px();
-        double py2 = trk2V.Py();
-        double pz2 = trk2V.Pz();
-        double e2 = sqrt(px2*px2+py2*py2+pz2*pz2+masses[1]*masses[1]);
-        
-        const auto trk3V = trk[2]->p4();
-        double px3 = trk3V.Px();
-        double py3 = trk3V.Py();
-        double pz3 = trk3V.Pz();
-        double e3 = sqrt(px3*px3+py3*py3+pz3*pz3+masses[2]*masses[2]);
-        
-        const auto trk4V = trk[3]->p4();
-        double px4 = trk4V.Px();
-        double py4 = trk4V.Py();
-        double pz4 = trk4V.Pz();
-        double e4 = sqrt(px4*px4+py4*py4+pz4*pz4+masses[3]*masses[3]);
-        
-        double pxSum=px1+px2+px3+px4;
-        double pySum=py1+py2+py3+py4;
-        double pzSum=pz1+pz2+pz3+pz4;
-        double eSum=e1+e2+e3+e4;
-        
-        double M=sqrt((eSum*eSum)-(pxSum*pxSum)-(pySum*pySum)-(pzSum*pzSum));
-        
-        return M;
-        
-    }
     
     bool  JpsiPlus2Tracks::passCuts(xAOD::BPhysHelper &bHelper, std::span<const double> masses, std::string_view str) const{
        
