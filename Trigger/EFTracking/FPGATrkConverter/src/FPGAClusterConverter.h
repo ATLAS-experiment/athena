@@ -45,13 +45,13 @@ class FPGAClusterConverter : public extends<AthAlgTool,IFPGAClusterConverter>
     virtual ~FPGAClusterConverter() = default;
     virtual StatusCode initialize() override final;
 
-    virtual StatusCode convertHits(const std::vector<FPGATrackSimHit>& ,
+    virtual StatusCode convertHits(const FPGATrackSimHitCollection& ,
                                     InDet::PixelClusterCollection &,
                                     InDet::SCT_ClusterCollection &) const override final;
     virtual StatusCode convertHits(const std::vector<const FPGATrackSimHit*>&,
                                     InDet::PixelClusterCollection &,
                                     InDet::SCT_ClusterCollection &) const override final;
-    virtual StatusCode convertHits(const std::vector<FPGATrackSimHit>& hits,
+    virtual StatusCode convertHits(const FPGATrackSimHitCollection& hits,
                                     xAOD::PixelClusterContainer& pixelCont,
                                     xAOD::StripClusterContainer& SCTCont) const override final;
     virtual StatusCode convertClusters(const std::vector<FPGATrackSimCluster>& ,

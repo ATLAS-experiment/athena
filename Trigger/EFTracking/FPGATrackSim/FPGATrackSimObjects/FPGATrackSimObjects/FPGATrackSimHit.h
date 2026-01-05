@@ -34,11 +34,11 @@
 
 #include "GeneratorObjects/HepMcParticleLink.h"
 #include "Identifier/Identifier.h"
-
+#include "AthContainers/AuxElement.h"
  // Some types are inclusive of others. For example, clustered implies mapped.
 enum class HitType { unmapped, mapped, clustered, wildcard, guessed, undefined, extrapolated, spacepoint };
 
-class FPGATrackSimHit
+class FPGATrackSimHit : public SG::AuxElement
 {
 public:
 

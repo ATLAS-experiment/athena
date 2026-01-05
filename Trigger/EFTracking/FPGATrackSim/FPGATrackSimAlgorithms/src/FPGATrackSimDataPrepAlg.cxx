@@ -114,7 +114,7 @@ StatusCode FPGATrackSimDataPrepAlg::execute(const EventContext& ctx) const
     
     // Local storage for clusters and unmapped hits
     FPGATrackSimClusterCollection clusters;
-    std::vector<FPGATrackSimHit> hits_miss;
+    std::vector<std::unique_ptr<FPGATrackSimHit>> hits_miss;
 
     // Read inputs
     bool done = false;
@@ -240,7 +240,7 @@ StatusCode FPGATrackSimDataPrepAlg::execute(const EventContext& ctx) const
         // If and when we set up code to run over more than one region/tower at a time this will need to be updated
         FPGAHits->reserve(hits.size());
         for (const auto& hit : hits) {
-            if (hit.isReal()) FPGAHits->push_back(hit);
+            if (hit.isReal()) FPGAHits->push_back(new FPGATrackSimHit(hit));
         }
         if constexpr (enableBenchmark) m_chrono->chronoStop("DataPrep: record hits");
     }
@@ -324,7 +324,7 @@ StatusCode FPGATrackSimDataPrepAlg::processInputs(
     const FPGATrackSimEventInputHeader& eventHeader,
     FPGATrackSimLogicalEventInputHeader& logicEventHeader,
     FPGATrackSimLogicalEventInputHeader& logicEventHeader_precluster,
-    std::vector<FPGATrackSimHit>& hits_miss,
+    std::vector<std::unique_ptr<FPGATrackSimHit>>& hits_miss,
     FPGATrackSimClusterCollection& clusters,
     SG::WriteHandle<FPGATrackSimHitCollection> &FPGAHitUnmapped,
     SG::WriteHandle<FPGATrackSimClusterCollection> &FPGAClusters) const
@@ -341,10 +341,11 @@ StatusCode FPGATrackSimDataPrepAlg::processInputs(
     if constexpr (enableBenchmark) m_chrono->chronoStop("DataPrep: RawToLogical");
 
     
-    for (const FPGATrackSimHit& hit : hits_miss) FPGAHitUnmapped->push_back(hit);
+    for (auto& hit : hits_miss) FPGAHitUnmapped->push_back(std::move(hit));
+    hits_miss.clear();
 
 
-    ATH_MSG_DEBUG("Hits conversion done, #unmapped hists = " << hits_miss.size());
+    ATH_MSG_DEBUG("Hits conversion done, #unmapped hists = " << FPGAHitUnmapped->size());
 
     // At this stage, copy the logicEventHeader.
     if(m_writeOutputData && m_writePreClusterBranch) {

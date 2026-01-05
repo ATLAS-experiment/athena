@@ -121,7 +121,9 @@ StatusCode FPGATrackSimMergeOutputsAlg::execute() {
   m_dataprep_tree->GetEntry(m_evtloop); 
   for (const auto & tower : m_dataprep->towers()) {    
     const std::vector<FPGATrackSimHit> hits = tower.hits();
-    FPGAHits_Handle->insert(FPGAHits_Handle->end(), make_move_iterator(hits.begin()), make_move_iterator(hits.end()));
+    for (auto& hit : hits) {
+      FPGAHits_Handle->push_back(std::make_unique<FPGATrackSimHit>(std::move(hit)));
+    }
   }
 
   for (unsigned ivec = 0; ivec < m_eventOutputHeaders.size(); ivec++) {

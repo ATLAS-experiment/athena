@@ -31,7 +31,7 @@ StatusCode FPGAActsTrkConverter::findProtoTracks(const EventContext& ctx,
                   const xAOD::PixelClusterContainer & pixelContainer,
                   const xAOD::StripClusterContainer & stripContainer,
                   std::vector<ActsTrk::ProtoTrack> & foundProtoTracks,
-                  const std::vector<std::vector<FPGATrackSimHit>>& hitsInRoads,
+                  const FPGATrackSimHitContainer& hitsInRoads,
                   const std::vector<FPGATrackSimRoad>& roads) const {
 
     ATH_MSG_INFO("Creating Acts proto-tracks from FPGA roads...");
@@ -82,7 +82,12 @@ StatusCode FPGAActsTrkConverter::findProtoTracks(const EventContext& ctx,
     if (not track.passedOR()) continue;
     std::vector<ActsTrk::ATLASUncalibSourceLink> points;
     const std::vector <FPGATrackSimHit>& hits = track.getFPGATrackSimHits();
-    ATH_CHECK(findPrototrackMeasurements(ctx, pixelContainer, stripContainer, pixelClusterMap, stripClusterMap, points, hits));
+    auto hitCollection = std::make_unique<FPGATrackSimHitCollection>();
+    hitCollection->reserve(hits.size());
+    for (const auto& hit : hits) {
+      hitCollection->push_back(new FPGATrackSimHit(hit));
+    }
+    ATH_CHECK(findPrototrackMeasurements(ctx, pixelContainer, stripContainer, pixelClusterMap, stripClusterMap, points, *hitCollection));
     if (points.size()) {
       ATH_MSG_DEBUG("\tMaking a proto-track with " << points.size() << " clusters");
       std::unique_ptr<Acts::BoundTrackParameters> inputPerigee = makeParams(track);
@@ -98,26 +103,26 @@ StatusCode FPGAActsTrkConverter::findPrototrackMeasurements( const EventContext&
                                                              const std::multimap<xAOD::DetectorIdentType, const xAOD::PixelCluster*> & pixelClusterMap,
                                                               const std::multimap<xAOD::DetectorIdentType, const xAOD::StripCluster*> & stripClusterMap,
                                                              std::vector<ActsTrk::ATLASUncalibSourceLink>& measurements,
-                                                             const std::vector <FPGATrackSimHit>& hits) const {
+                                                             const FPGATrackSimHitCollection& hits) const {
   if (hits.empty()) {
   ATH_MSG_ERROR("Found FPGATrack without hits");
   return StatusCode::FAILURE;
   }
 
-  for (const FPGATrackSimHit& h : hits) {
-    if (h.isReal()) {
-      if (h.isPixel()) {
+  for (const FPGATrackSimHit* h : hits) {
+    if (h->isReal()) {
+      if (h->isPixel()) {
         ATH_MSG_DEBUG("Looking for Pixel cluster to match");
-        auto range = pixelClusterMap.equal_range(h.getRdoIdentifier());
+        auto range = pixelClusterMap.equal_range(h->getRdoIdentifier());
         for (auto it = range.first; it != range.second; ++it) {
-          ATH_CHECK(matchTrackMeasurements<xAOD::PixelCluster>(ctx, *(it->second), h, measurements, pixelContainer));
+          ATH_CHECK(matchTrackMeasurements<xAOD::PixelCluster>(ctx, *(it->second), *h, measurements, pixelContainer));
         }
       }
-      else if (h.isStrip()) {
+      else if (h->isStrip()) {
         ATH_MSG_DEBUG("Looking for Strip cluster to match");
-        auto range = stripClusterMap.equal_range(h.getRdoIdentifier());
+        auto range = stripClusterMap.equal_range(h->getRdoIdentifier());
         for (auto it = range.first; it != range.second; ++it) {
-          ATH_CHECK(matchTrackMeasurements<xAOD::StripCluster>(ctx, *(it->second), h, measurements, stripContainer));
+          ATH_CHECK(matchTrackMeasurements<xAOD::StripCluster>(ctx, *(it->second), *h, measurements, stripContainer));
         }
       }
       else {

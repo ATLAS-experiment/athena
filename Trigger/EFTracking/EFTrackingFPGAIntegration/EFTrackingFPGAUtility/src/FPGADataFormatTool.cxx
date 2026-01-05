@@ -96,7 +96,7 @@ StatusCode FPGADataFormatTool::convertFPGASlices(
 
     for (size_t i = 0; i < hitsinSlice->size(); i++)
     {
-        const FPGATrackSimHit& hit = hitsinSlice->at(i);
+        const FPGATrackSimHit& hit = *hitsinSlice->at(i);
 
         if((doPixel && hit.isPixel()) || (doStrip && hit.isStrip()))
             organizedHits[hit.getIdentifier()].push_back(&hit);
@@ -164,7 +164,7 @@ StatusCode FPGADataFormatTool::convertFPGAHits(
 
     for (size_t i = 0; i < allHits->size(); i++)
     {
-        const FPGATrackSimHit& hit = allHits->at(i);
+        const FPGATrackSimHit& hit = *allHits->at(i);
 
         if((doPixel && hit.isPixel()) || (doStrip && hit.isStrip()))
             organizedHits[hit.getIdentifier()].push_back(&hit);

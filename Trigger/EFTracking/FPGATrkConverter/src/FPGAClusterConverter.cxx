@@ -40,15 +40,15 @@ StatusCode FPGAClusterConverter::initialize() {
 
 // Functions converting collections of FPGATrackSim Hits or Clusters into InDet or xAOD cluster collections / containers
 
-StatusCode FPGAClusterConverter::convertHits(const std::vector<FPGATrackSimHit>& hits,
+StatusCode FPGAClusterConverter::convertHits(const FPGATrackSimHitCollection& hits,
                                               InDet::PixelClusterCollection& pixelColl,
                                               InDet::SCT_ClusterCollection& SCTColl) const {
   ATH_MSG_DEBUG("Found " << hits.size() << " FPGATrackSimHits [InDet]");
   // reserve some memory
   pixelColl.reserve(hits.size());
   SCTColl.reserve(hits.size());
-  for(const FPGATrackSimHit& h : hits) {
-
+  for(const auto& hit : hits) {
+      const FPGATrackSimHit & h = *hit;
       std::vector<Identifier> rdoList{Identifier(h.getRdoIdentifier())};
 
       std::unique_ptr<InDet::PixelCluster> pixelCl{};
@@ -126,15 +126,15 @@ StatusCode FPGAClusterConverter::convertHits(const std::vector<const FPGATrackSi
 }
 
 
-StatusCode FPGAClusterConverter::convertHits(const std::vector<FPGATrackSimHit>& hits,
+StatusCode FPGAClusterConverter::convertHits(const FPGATrackSimHitCollection& hits,
                                               xAOD::PixelClusterContainer& pixelCont,
                                               xAOD::StripClusterContainer& SCTCont) const {
   ATH_MSG_DEBUG("Found " << hits.size() << " FPGATrackSimHits [xAOD]");
     // reserve some memory
   pixelCont.reserve(hits.size());
   SCTCont.reserve(hits.size());
-  for(const FPGATrackSimHit& h : hits) {
-
+  for(const auto& hit : hits) {
+      const FPGATrackSimHit & h = *hit;
       std::vector<Identifier> rdoList{Identifier(h.getIdentifier())};
 
       if (h.isPixel()) {
