@@ -109,7 +109,7 @@ namespace columnar
     /// situations return true, when it should return false.
     [[nodiscard]] bool operator == (const ObjectLink<CI,CM>& obj) const
     {
-      return m_link == obj.m_link;
+      return getXAODObject() == obj.getXAODObject();
     }
 
     /// return the ObjectId if it is in the given container or `nullopt` otherwise
