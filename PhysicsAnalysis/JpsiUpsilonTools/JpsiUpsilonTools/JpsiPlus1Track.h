@@ -45,9 +45,6 @@ namespace Analysis {
         virtual StatusCode initialize() override;
         
         static const InterfaceID& interfaceID() { return IID_JpsiPlus1Track;};
-        static double getInvariantMass(const std::vector<const xAOD::TrackParticle*> &trk, double mass1,
-                                             double mass2, double mass3);
- 
 
       
         //-------------------------------------------------------------------------------------
