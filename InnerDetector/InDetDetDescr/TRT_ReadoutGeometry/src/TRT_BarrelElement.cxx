@@ -125,7 +125,7 @@ HepGeom::Transform3D TRT_BarrelElement::calculateStrawTransform(int straw, GeoAl
 
 HepGeom::Transform3D TRT_BarrelElement::calculateLocalStrawTransform(int straw) const
 {
-  const TRTCond::StrawDxContainer* container = conditions()->dxContainer();
+  const TRTCond::StrawDxContainer* container = m_dxContainer? m_dxContainer : conditions()->dxContainer();
   HepGeom::Transform3D rc ;
   if(!container) {
     // std::cout << " TRT_BarrelElement: no local transform found " << std::endl;

@@ -31,6 +31,10 @@
 class TRT_ID;
 class GeoAlignmentStore;
 
+namespace TRTCond {
+  class StrawDxContainer;
+}
+
 namespace InDetDD {
 
   class SurfaceCacheBase;
@@ -169,6 +173,8 @@ namespace InDetDD {
     /** Return the TRT_Conditions object associated to this Detector element */
     const TRT_Conditions* conditions() const;
 
+    void setDxContainer(const TRTCond::StrawDxContainer* dxContainer) {m_dxContainer=dxContainer;}
+
     /** to be overloaded by the extended classes */
     virtual HepGeom::Transform3D calculateStrawTransform(int straw, GeoAlignmentStore* alignStore=nullptr) const = 0;
 
@@ -206,6 +212,7 @@ namespace InDetDD {
     unsigned int m_nstraws = 0;
     const TRT_ID*                                       m_idHelper=nullptr;
     const TRT_Conditions*                               m_conditions=nullptr;
+    const TRTCond::StrawDxContainer*                    m_dxContainer=nullptr;
     CxxUtils::CachedUniquePtr<Trk::Surface> m_surface;
    // Amg cache for the straw surfaces
     std::vector<CxxUtils::CachedUniquePtr<Trk::StraightLineSurface>> m_strawSurfaces{};
