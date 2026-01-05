@@ -112,12 +112,13 @@ bool sTgcDigitMaker::getIonizationPoint(const TimedHit& hit,
       ionization = std::move(ionizationAdj);
     }
   } else {
-    ATH_MSG_DEBUG("Failed to get the distance between the wire and hit");
+    ATH_MSG_DEBUG("Failed to get the distance between the wire " << wireNumber << " and hit " << Amg::toString(hitOnWire2D, 2));
     return false;
   }
 
   // Do not digitize hits that are too far from the nearest wire
   if (distToWire > wireDesign.stripPitch()) {
+    ATH_MSG_DEBUG("Distance to nearest wire: " << distToWire << " greater than wirePitch.");
     return false;
   }
 
@@ -536,7 +537,7 @@ sTgcDigitMaker::Ionization sTgcDigitMaker::pointClosestApproach(const MuonGMR4::
   const double wirePitch = wireDesign.stripPitch();
   const double wirePosX = wireDesign.firstStripPos().x() + (wireNumber - 1) * wirePitch;
   const Amg::Vector3D wireDir{stripLayer.to3D(wireDesign.stripDir(),true)};
-  const Amg::Vector3D wirePos(locHitPos.x(), wirePosX, 0.);
+  const Amg::Vector3D wirePos(locHitPos.x(), -wirePosX, 0.);
 
   // Use Amg::intersect to find closest point on hit segment to wire plane
   std::optional<double> scaleHit = Amg::intersect<3>(locHitPos, locHitDir, Amg::Vector3D::UnitZ(), 0);
@@ -544,7 +545,11 @@ sTgcDigitMaker::Ionization sTgcDigitMaker::pointClosestApproach(const MuonGMR4::
     ATH_MSG_DEBUG("The track segment is parallel to the wire, position of digit is undefined");
     ionization.posOnSegment = locHitPos;
     ionization.posOnWire = wirePos;
-    ionization.distance = std::hypot(locHitPos.y() - wirePosX, locHitPos.z());
+    ionization.distance = std::hypot(locHitPos.y() + wirePosX, locHitPos.z());
+    if (ionization.distance > wirePitch) {
+      ATH_MSG_DEBUG(" localHitPos: " << Amg::toString(locHitPos, 2) << " localHitDir: " << Amg::toString(locHitDir, 2) << " scaleHit: " << scaleHit.value() 
+                      << " wirePos: " << Amg::toString(wirePos, 2) << " IonizationDistance: " << ionization.distance);
+    }
     return ionization;
   }
   // Position on hit segment
