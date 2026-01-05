@@ -61,7 +61,7 @@ std::string MuonTesterBranch::eraseWhiteSpaces(const std::string& In) {
 std::vector<MuonTesterBranch::DataDependency> MuonTesterBranch::data_dependencies() { return m_dependencies;}
 
 template <> 
-[[noreturn]] bool& VectorBranch<bool>::get(size_t) {
+bool& VectorBranch<bool>::get(size_t) {
     THROW_EXCEPTION("For boolean branches the get() operator is cumbersome");
 }
 }
