@@ -1,9 +1,9 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef TAUREC_TAUPROCESSORALG_H
-#define TAUREC_TAUPROCESSORALG_H
+#ifndef TAUREC_TAUBUILDERALG_H
+#define TAUREC_TAUBUILDERALG_H
 
 #include "tauRecTools/ITauToolBase.h"
 
@@ -33,14 +33,14 @@
 
 class CaloCell_ID;
 
-class TauProcessorAlg: public AthReentrantAlgorithm
+class TauBuilderAlg: public AthReentrantAlgorithm
 {
  public:
   //-----------------------------------------------------------------
   // Contructor and destructor
   //-----------------------------------------------------------------
-  TauProcessorAlg( const std::string &name, ISvcLocator *pSvcLocator );
-  ~TauProcessorAlg();
+  TauBuilderAlg( const std::string &name, ISvcLocator *pSvcLocator );
+  ~TauBuilderAlg();
 
   //-----------------------------------------------------------------
   // Gaudi algorithm hooks
@@ -72,4 +72,4 @@ class TauProcessorAlg: public AthReentrantAlgorithm
 
 };
 
-#endif // TAUREC_TAUPROCESSORALG_H
+#endif // TAUREC_TAUBUILDERALG_H

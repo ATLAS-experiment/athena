@@ -44,18 +44,18 @@ def TauBuildAlgCfg(flags):
     if flags.Tau.doPi0Clus:
         tools.append( result.popToolsAndMerge(tauTools.Pi0ClusterFinderCfg(flags)) )
 
-    # TauBuildAlg AKA TauProcessorAlg
-    TauProcessorAlg = CompFactory.getComp("TauProcessorAlg")
-    BuildAlg = TauProcessorAlg(name                           = flags.Tau.ActiveConfig.prefix+"TauCoreBuilderAlg",
-                               Key_jetInputContainer          = flags.Tau.ActiveConfig.SeedJetCollection,
-                               Key_tauOutputContainer         = flags.Tau.ActiveConfig.TauJets_tmp,
-                               Key_tauTrackOutputContainer    = flags.Tau.ActiveConfig.TauTracks,
-                               Key_tauPi0CellOutputContainer  = flags.Tau.ActiveConfig.TauCommonPi0Cells,
-                               MaxEta                         = flags.Tau.SeedMaxEta,
-                               MinPt                          = flags.Tau.SeedMinPt,
-                               MaxNTracks                     = flags.Tau.MaxNTracks,
-                               Tools                          = tools,
-                               CellMakerTool                  = result.popToolsAndMerge(tauTools.TauCellFinalizerCfg(flags)))
+    # TauBuilderAlg
+    TauBuilderAlg = CompFactory.getComp("TauBuilderAlg")
+    BuildAlg = TauBuilderAlg(name                           = flags.Tau.ActiveConfig.prefix+"TauCoreBuilderAlg",
+                             Key_jetInputContainer          = flags.Tau.ActiveConfig.SeedJetCollection,
+                             Key_tauOutputContainer         = flags.Tau.ActiveConfig.TauJets_tmp,
+                             Key_tauTrackOutputContainer    = flags.Tau.ActiveConfig.TauTracks,
+                             Key_tauPi0CellOutputContainer  = flags.Tau.ActiveConfig.TauCommonPi0Cells,
+                             MaxEta                         = flags.Tau.SeedMaxEta,
+                             MinPt                          = flags.Tau.SeedMinPt,
+                             MaxNTracks                     = flags.Tau.MaxNTracks,
+                             Tools                          = tools,
+                             CellMakerTool                  = result.popToolsAndMerge(tauTools.TauCellFinalizerCfg(flags)))
 
     if flags.GeoModel.Run is LHCPeriod.Run4:
         BuildAlg.PixelDetEleCollKey="ITkPixelDetectorElementCollection"

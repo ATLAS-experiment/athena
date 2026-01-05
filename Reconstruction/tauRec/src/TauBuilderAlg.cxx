@@ -1,8 +1,8 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "TauProcessorAlg.h"
+#include "TauBuilderAlg.h"
 #include "xAODTau/TauJetAuxContainer.h"
 #include "xAODTau/TauTrackAuxContainer.h"
 #include "xAODCaloEvent/CaloClusterAuxContainer.h"
@@ -15,20 +15,20 @@ using Gaudi::Units::GeV;
 //-----------------------------------------------------------------------------
 // Constructor
 //-----------------------------------------------------------------------------
-TauProcessorAlg::TauProcessorAlg(const std::string &name,
-				 ISvcLocator * pSvcLocator) :
+TauBuilderAlg::TauBuilderAlg(const std::string &name,
+			     ISvcLocator * pSvcLocator) :
   AthReentrantAlgorithm(name, pSvcLocator) {
 }
 
 //-----------------------------------------------------------------------------
 // Destructor
 //-----------------------------------------------------------------------------
-TauProcessorAlg::~TauProcessorAlg() = default;
+TauBuilderAlg::~TauBuilderAlg() = default;
 
 //-----------------------------------------------------------------------------
 // Initializer
 //-----------------------------------------------------------------------------
-StatusCode TauProcessorAlg::initialize() {
+StatusCode TauBuilderAlg::initialize() {
     
   ATH_CHECK( m_jetInputContainer.initialize() );
   ATH_CHECK( m_tauOutputContainer.initialize() );
@@ -72,7 +72,7 @@ StatusCode TauProcessorAlg::initialize() {
 //-----------------------------------------------------------------------------
 // Execution
 //-----------------------------------------------------------------------------
-StatusCode TauProcessorAlg::execute(const EventContext& ctx) const {
+StatusCode TauBuilderAlg::execute(const EventContext& ctx) const {
 
   /// record output containers
   SG::WriteHandle<xAOD::TauJetContainer> tauHandle( m_tauOutputContainer, ctx );

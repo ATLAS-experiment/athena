@@ -1,6 +1,6 @@
 # tauRec package
 
-This package is the python steering package for tau reconstruction and the c++ algorithms. This package has two algorithms: the TauProcessorAlg (also referred to as TauBuilder in some places) and  the TauRunnerAlg that call tools defined in tauRecTools. This page contains a quick summary of the structure with links to the relevant code. For more details please see the [tauRec r22 tWiki page](https://twiki.cern.ch/twiki/bin/view/AtlasProtected/TauRecR22).
+This package is the python steering package for tau reconstruction and the c++ algorithms. This package has two algorithms: the TauBuilderAlg and  the TauRunnerAlg that call tools defined in tauRecTools. This page contains a quick summary of the structure with links to the relevant code. For more details please see the [tauRec r22 tWiki page](https://twiki.cern.ch/twiki/bin/view/AtlasProtected/TauRecR22).
 
 ### Tau Reconstruction chain:
 
