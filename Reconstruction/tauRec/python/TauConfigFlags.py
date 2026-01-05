@@ -15,7 +15,6 @@ def createTauConfigFlags():
     # Switches for enabling/disabling some tools
     tau_cfg.addFlag("Tau.doVertexCorrection", True)
     tau_cfg.addFlag("Tau.doTJVA", True)
-    tau_cfg.addFlag("Tau.doPi0Clus", True)
     tau_cfg.addFlag("Tau.doPanTau", True)
     tau_cfg.addFlag("Tau.doRNNTrackClass", True)
     tau_cfg.addFlag("Tau.doTauDiscriminant", True)
