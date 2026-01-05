@@ -170,7 +170,9 @@ StatusCode FPGATrackSim::FPGATrackSimRegionMergingAlg::mergeRoads(const std::vec
             const FPGATrackSimRoadCollection* roadCollection = inputRoads[i];
             const FPGATrackSimHitContainer* hitsInRoadsContainer = inputHitsInRoads[i];
             outputRoads->insert(outputRoads->end(), roadCollection->begin(), roadCollection->end());
-            outputHitsInRoads->insert(outputHitsInRoads->end(), hitsInRoadsContainer->begin(), hitsInRoadsContainer->end());
+            for (const auto& hitVec : *hitsInRoadsContainer) {
+                outputHitsInRoads->push_back(hitVec);
+            }
         }
         if constexpr (enableBenchmark) m_chrono->chronoStop("Merging Roads and HitsInRoads");
 

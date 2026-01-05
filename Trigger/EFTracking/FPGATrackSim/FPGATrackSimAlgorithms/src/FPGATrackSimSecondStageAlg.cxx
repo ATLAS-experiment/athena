@@ -9,7 +9,6 @@
 #include "FPGATrackSimSecondStageAlg.h"
 
 #include "FPGATrackSimObjects/FPGATrackSimCluster.h"
-#include "FPGATrackSimObjects/FPGATrackSimHit.h"
 #include "FPGATrackSimObjects/FPGATrackSimDataFlowInfo.h"
 #include "FPGATrackSimObjects/FPGATrackSimRoad.h"
 #include "FPGATrackSimObjects/FPGATrackSimTrack.h"
@@ -153,7 +152,7 @@ StatusCode FPGATrackSimSecondStageAlg::execute()
     std::vector<std::shared_ptr<const FPGATrackSimHit>> phits_2nd;
     phits_2nd.reserve(FPGAHits->size());
     for (const auto& hit : *FPGAHits) {
-        phits_2nd.push_back(std::make_shared<const FPGATrackSimHit>(hit));
+        phits_2nd.push_back(std::make_shared<const FPGATrackSimHit>(*hit));
     }
 
     std::vector<std::shared_ptr<const FPGATrackSimTrack>> tracks_1st;
@@ -187,22 +186,21 @@ StatusCode FPGATrackSimSecondStageAlg::execute()
     m_slicedHitHeader->newEvent(eventInfo);
 
     // Get second stage roads from tracks.
-    std::vector<std::shared_ptr<const FPGATrackSimRoad>> prefilter_roads;
-    std::vector<std::shared_ptr<const FPGATrackSimRoad>> roads = std::move(prefilter_roads);
+    std::vector<std::shared_ptr<const FPGATrackSimRoad>> roads;
 
     if constexpr (enableBenchmark) m_chrono->chronoStart("2nd Stage: TrackExtension");
     // Use the track extension tool to actually produce a new set of roads.
     ATH_CHECK(m_trackExtensionTool->extendTracks(phits_2nd, tracks_1st, roads));
 
     for (auto const &road : roads) {
-        std::vector<FPGATrackSimHit> road_hits;
+        auto road_hits = std::make_unique<FPGATrackSimHitCollection>();
         ATH_MSG_DEBUG("Hough Road X Y: " << road->getX() << " " << road->getY());
         for (size_t l = 0; l < road->getNLayers(); ++l) {
             for (const auto &layerH : road->getHits(l)) {
-                road_hits.push_back(*layerH);
+                road_hits->push_back(new FPGATrackSimHit(*layerH));
             }
         }
-        FPGAHitsInRoads_2nd->push_back(std::move(road_hits));
+        FPGAHitsInRoads_2nd->push_back(std::move(*road_hits));
         FPGARoads_2nd->push_back(*road);
     }
 

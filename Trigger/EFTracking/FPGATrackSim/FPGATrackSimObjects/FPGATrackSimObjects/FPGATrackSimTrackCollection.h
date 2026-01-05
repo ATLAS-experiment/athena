@@ -5,7 +5,6 @@
 #ifndef FPGATRACKSIMTRACKCOLLECTION_H
 #define FPGATRACKSIMTRACKCOLLECTION_H
 
-#include "AthContainers/DataVector.h"
 #include "AthenaKernel/CLASS_DEF.h"
 #include "FPGATrackSimObjects/FPGATrackSimTrack.h"
 

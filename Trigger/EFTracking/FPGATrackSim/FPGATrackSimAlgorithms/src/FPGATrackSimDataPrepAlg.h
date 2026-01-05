@@ -122,7 +122,7 @@ class FPGATrackSimDataPrepAlg : public ::AthReentrantAlgorithm
         StatusCode processInputs(const FPGATrackSimEventInputHeader& eventHeader,
                         FPGATrackSimLogicalEventInputHeader& logicEventHeader,
                         FPGATrackSimLogicalEventInputHeader& logicEventHeader_precluster,
-                        std::vector<FPGATrackSimHit>& hits_miss,
+                        std::vector<std::unique_ptr<FPGATrackSimHit>>& hits_miss,
                         FPGATrackSimClusterCollection& clusters,
                         SG::WriteHandle<FPGATrackSimHitCollection> &FPGAHitUnmapped,
                         SG::WriteHandle<FPGATrackSimClusterCollection> &FPGAClusters) const;

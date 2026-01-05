@@ -220,15 +220,15 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::execute()
     phits_1st.reserve(FPGAHits->size());
     phits_2nd.reserve(FPGAHits->size());
     ATH_MSG_DEBUG("Incoming Hits: " << FPGAHits->size());
-    for (const FPGATrackSimHit& hit : *(FPGAHits.cptr())) {
-        phits_all.emplace_back(&hit, [](const FPGATrackSimHit*){});
+    for (const FPGATrackSimHit* hit : *(FPGAHits.cptr())) {
+        phits_all.emplace_back(hit, [](const FPGATrackSimHit*){});
     }
 
     // Use the slicing engine tool to do the stage-based separation. Does not use the pmap.
     m_slicingEngineTool->sliceHits(phits_all, phits_1st, phits_2nd);
     // record 1st stage hits in SG
     for (auto& hit : phits_1st) {
-        FPGAHits_1st->push_back(*hit);
+        FPGAHits_1st->push_back(new FPGATrackSimHit(*hit));
     }
 
     if(m_writeOutputData) *m_slicedStripHeaderPreSP = *m_slicedStripHeader;
@@ -248,12 +248,12 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::execute()
         (m_secondStageStrips ? phits_2nd : phits_1st).emplace_back(&hit, [](const FPGATrackSimHit*){});
     }
     for (auto& hit : phits_2nd) {
-        FPGAHits_2nd->push_back(*hit);
+        FPGAHits_2nd->push_back(new FPGATrackSimHit(*hit));
     }
 
     // Add all hits including SPs to this for the HoughRootOutputTool
-    for (const FPGATrackSimHit& hit : *(FPGAHits_2nd.cptr())) {
-        phits_output.emplace_back(&hit, [](const FPGATrackSimHit*){});
+    for (const FPGATrackSimHit* hit : *(FPGAHits_2nd.cptr())) {
+        phits_output.emplace_back(hit, [](const FPGATrackSimHit*){});
     }
 
     if constexpr (enableBenchmark) m_chrono->chronoStop("1st Stage: Split hits to 1st and 2nd stage");
@@ -451,14 +451,14 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::execute()
 
     // Loop over roads and store them in SG (after track finding to also copy the sector information)
     for (auto const& road : roads_1st) {
-        std::vector<FPGATrackSimHit> road_hits;
+        auto road_hits = std::make_unique<FPGATrackSimHitCollection>();
         ATH_MSG_DEBUG("Hough Road X Y: " << road->getX() << " " << road->getY());
         for (size_t l = 0; l < road->getNLayers(); ++l) {
             for (const auto& layerH : road->getHits(l)) {
-                road_hits.push_back(*layerH);
+                road_hits->push_back(new FPGATrackSimHit(*layerH));
             }
         }
-        FPGAHitsInRoads_1st->push_back(std::move(road_hits));
+        FPGAHitsInRoads_1st->push_back(std::move(*road_hits));
         FPGARoads_1st->push_back(*road);
     }
 
@@ -527,7 +527,7 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::execute()
             ATH_MSG_DEBUG("Doing hit filtering based on prompt tracks.");
             ATH_CHECK(m_LRTRoadFilterTool->filterUsedHits(tracks_1st, phits_1st, remainingHits));
 
-            for (const auto &Hit : remainingHits) FPGAHitsFiltered_1st->push_back(*Hit);
+            for (const auto &Hit : remainingHits) FPGAHitsFiltered_1st->push_back(new FPGATrackSimHit(*Hit));
 
         } else {
             ATH_MSG_DEBUG("No hit filtering requested; using all hits for LRT.");
