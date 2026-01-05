@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TILEBYTESTREAM_TILEROD_DECODER_H
@@ -1133,8 +1133,7 @@ void TileROD_Decoder::fillCollection(const ROBData * rob,
               rChUnit = (TileRawChannelUnit::UNIT) (unit); // Offline units in simulated data
 
               if (!m_demoFragIDs.empty()) {
-                const_cast<Gaudi::Property<std::vector<int>> &> ( m_demoFragIDs ) = {}; // No demonstator cabling in MC
-                ATH_MSG_INFO("Disable channel remapping for demonstrator in MC");
+                ATH_MSG_WARNING("DemoFragIDs is not supported in MC"); // No demonstator cabling in MC
               }
             }
 
