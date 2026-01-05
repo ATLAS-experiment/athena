@@ -116,11 +116,12 @@ StatusCode TRTAlignCondAlg::execute(const EventContext& ctx) const
     writeHandleDetElCont.addDependency(readHandleRegular);
   }
 
+  const TRTCond::StrawDxContainer* readCdoSpecial = nullptr;
   {
     // Special folder
     SG::ReadCondHandle<TRTCond::StrawDxContainer> readHandleSpecial{m_readKeySpecial,ctx};
     // Get CDO and store it into container
-    const TRTCond::StrawDxContainer* readCdoSpecial{*readHandleSpecial};
+    readCdoSpecial = *readHandleSpecial;
     if(!readCdoSpecial) {
       ATH_MSG_ERROR("Null pointer to the read conditions object: Special");
       return StatusCode::FAILURE;
@@ -191,6 +192,7 @@ StatusCode TRTAlignCondAlg::execute(const EventContext& ctx) const
 
   // Update all detector elements caches
   for (InDetDD::TRT_BaseElement* newEl : *(writeCdoDetElCont->getElements())) {
+    newEl->setDxContainer(readCdoSpecial);
     newEl->updateAllCaches(writeCdoAlignStore.get());
   }
 
