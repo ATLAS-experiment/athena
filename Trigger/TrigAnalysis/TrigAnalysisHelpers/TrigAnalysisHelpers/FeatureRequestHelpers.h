@@ -74,7 +74,7 @@ namespace FeatureRequestHelpers {
     const TrigCompositeUtils::NavGraph& navGraph,
     const Trig::FeatureRequestDescriptor& frd,
     const CLID clid,  
-    const TrigCompositeUtils::DecisionIDContainer chainIDs, 
+    const TrigCompositeUtils::DecisionIDContainer& chainIDs,
     const EventContext& ctx,
     const asg::EventStoreType* eventStore = nullptr);
 
@@ -92,7 +92,7 @@ namespace FeatureRequestHelpers {
     // Following are passed down from typelessGetFeatures
     const Trig::FeatureRequestDescriptor& frd,
     const CLID clid,  
-    const TrigCompositeUtils::DecisionIDContainer chainIDs, 
+    const TrigCompositeUtils::DecisionIDContainer& chainIDs,
     const EventContext& ctx,
     const asg::EventStoreType* eventStore = nullptr);
 
