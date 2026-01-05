@@ -25,6 +25,8 @@
 #include "CxxUtils/AthUnlikelyMacros.h"
 #include "EventContainers/IdentifiableCache.h"
 #include <bit>
+#include <span>
+#include <ranges>
 
 template < class T>
 class IdentifiableContainerMT : public DataObject, public EventContainers::IdentifiableContainerBase, public EventContainers::IIdentifiableCont<T>
@@ -215,11 +217,17 @@ public:
         return IdentifiableContainerBase::numberOfCollections();
     }
 
-    const std::vector < EventContainers::hashPair<T> >& GetAllHashPtrPair() const{
+    auto GetAllHashPtrPair() const{
         static_assert(sizeof(const T*) == sizeof(const void*) && std::is_pointer<const T*>::value);
         static_assert(sizeof(EventContainers::hashPair<T>) == sizeof(EventContainers::hashPair<void>));
-        return reinterpret_cast<const std::vector < EventContainers::hashPair<T> >&>
-                (m_link->getAllHashPtrPair());
+        const auto& void_vec = m_link->getAllHashPtrPair();  // std::vector<hashPair<void>>
+        return void_vec | std::views::transform([](const auto& item) {
+        // We construct a temporary hashPair<T> for each element
+        return EventContainers::hashPair<T>{
+            item.first,
+            static_cast<const T*>(item.second)
+        };
+    });
     }
     
     ///Returns a collection of all hashes availiable in this IDC.

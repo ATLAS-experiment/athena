@@ -216,7 +216,7 @@ public:
             orig++;
         }
         int orig2=0;
-        const auto& directaccess = container.GetAllHashPtrPair();
+        const auto directaccess = container.GetAllHashPtrPair();
         for(const auto &[hashId, ptr] : directaccess){
             int j =0;
             if(hashes[orig2] != hashId){
