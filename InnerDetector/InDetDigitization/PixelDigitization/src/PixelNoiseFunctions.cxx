@@ -98,7 +98,7 @@ namespace PixelDigitization{
   }
   
   void 
-  randomNoise(SiChargedDiodeCollection& chargedDiodes, const ITkPixSimulationParameters & chipData,
+  ITkRandomNoise(SiChargedDiodeCollection& chargedDiodes, const ITkPixSimulationParameters & chipData,
     int nBcid,
     const PixelChargeCalibCondData *chargeCalibData, CLHEP::HepRandomEngine* rndmEngine, 
     InDetDD::IPixelReadoutManager * pixelReadout) {
@@ -107,12 +107,64 @@ namespace PixelDigitization{
     const std::vector<float> &noiseShape = chipData.noiseShape();
     // protection to the overflow ToT, that depends on the sensor technology
     float overflowToT = std::numeric_limits<float>::max();
-    return randomNoise(chargedDiodes, totalNoiseOccupancy, noiseShape, overflowToT, chargeCalibData, rndmEngine, pixelReadout);
+    return ITkRandomNoise(chargedDiodes, totalNoiseOccupancy, noiseShape, overflowToT, chargeCalibData, rndmEngine, pixelReadout);
   }
+
 
 
   void 
   randomNoise(SiChargedDiodeCollection& chargedDiodes, const double totalNoiseOccupancy, const std::vector<float> &noiseShape, float overflowToT,
+              const PixelChargeCalibCondData *chargeCalibData, CLHEP::HepRandomEngine* rndmEngine, InDetDD::IPixelReadoutManager * pixelReadout){
+   const InDetDD::PixelModuleDesign* p_design =
+      static_cast<const InDetDD::PixelModuleDesign*>(&(chargedDiodes.element())->design());
+
+    const PixelID* pixelId = static_cast<const PixelID*>(chargedDiodes.element()->getIdHelper());
+    const IdentifierHash moduleHash = pixelId->wafer_hash(chargedDiodes.identify()); // wafer hash
+    const auto nCircuits = p_design->numberOfCircuits();
+    const auto nColumns = p_design->columnsPerCircuit();
+    const auto nRows = p_design->rowsPerCircuit();
+    const auto totalCells = nCircuits * nColumns * nRows;
+    int nNoise = CLHEP::RandPoisson::shoot(rndmEngine, totalCells * totalNoiseOccupancy);
+    //prepare to enter loop
+    const auto technology = p_design->getReadoutTechnology();
+    for (int i = 0; i < nNoise; i++) {
+      int circuit = CLHEP::RandFlat::shootInt(rndmEngine, nCircuits);
+      int column = CLHEP::RandFlat::shootInt(rndmEngine, nColumns);
+      int row = CLHEP::RandFlat::shootInt(rndmEngine, nRows);
+      if (row > 159 && technology == InDetDD::PixelReadoutTechnology::FEI3) {
+        row += 8;
+      } // jump over ganged pixels - rowsPerCircuit == 320 above
+
+      InDetDD::SiReadoutCellId roCell(row, nColumns * circuit + column);
+      Identifier noisyID = chargedDiodes.element()->identifierFromCellId(roCell);
+
+      if (roCell.isValid()) {
+        InDetDD::SiCellId diodeNoise = roCell;
+        float x = static_cast<float>(CLHEP::RandFlat::shoot(rndmEngine, 0., 1.));  // returns double
+        size_t bin{};
+        for (size_t j = 1; j < noiseShape.size(); j++) {
+          if (x > noiseShape[j - 1] && x <= noiseShape[j]) {
+            bin = j - 1;
+            break;
+          }
+        }
+        float noiseToTm = bin + 1.5f;
+        float noiseToT = CLHEP::RandGaussZiggurat::shoot(rndmEngine, noiseToTm, 1.f);
+        if (noiseToT < 1.f) { continue; }  // throw away unphysical noise
+        noiseToT = std::min(noiseToT, overflowToT);
+        InDetDD::PixelDiodeType type = pixelReadout->getDiodeType(noisyID);
+        if (type == InDetDD::PixelDiodeType::NONE) continue;
+        float chargeShape = chargeCalibData->getCharge(type, moduleHash, circuit, noiseToT);
+        chargedDiodes.add(diodeNoise, SiCharge(chargeShape, 0, SiCharge::noise));
+      }
+    }
+    return;
+  }
+
+
+
+  void 
+  ITkRandomNoise(SiChargedDiodeCollection& chargedDiodes, const double totalNoiseOccupancy, const std::vector<float> &noiseShape, float overflowToT,
               const PixelChargeCalibCondData *chargeCalibData, CLHEP::HepRandomEngine* rndmEngine, InDetDD::IPixelReadoutManager * pixelReadout){
    const InDetDD::PixelModuleDesign* p_design =
       static_cast<const InDetDD::PixelModuleDesign*>(&(chargedDiodes.element())->design());
@@ -149,7 +201,8 @@ namespace PixelDigitization{
       //    ? InDetDD::SiReadoutCellId(nRows + row, nColumns * (circuit - 2) + column)
       //    : InDetDD::SiReadoutCellId(row, nColumns * circuit + column);
 
-      InDetDD::SiReadoutCellId roCell = InDetDD::SiReadoutCellId(row + nRows*(CircuitsPerCol), column + nColumns*(CircuitsPerRow));
+      //InDetDD::SiReadoutCellId roCell = InDetDD::SiReadoutCellId(row + nRows*(CircuitsPerCol), column + nColumns*(CircuitsPerRow));
+      InDetDD::SiReadoutCellId roCell = InDetDD::SiReadoutCellId(row, column + nColumns*(CircuitsPerRow));
      
 
 
