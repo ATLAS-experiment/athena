@@ -94,7 +94,7 @@ class TauWPDecorator : public TauRecToolBase {
     Gaudi::Property<std::vector<float>> m_decorWPEffs3p{this, "DecorWPCutEffs3P", {}, "Efficiency of each WP to be docorated for 3-prong taus"};        
     // for WPs not implemented in the EDM (i.e. not encoded in IsTauFlag)
     // use Accessors unless necessary
-    std::vector<SG::AuxElement::Accessor<char>> m_charDecors;
+    std::vector<SG::Accessor<char>> m_charDecors;
     // when data handles are required (currently in tau trigger offline monitoring), need to use Write(Read)DecorHandleKeys
     // redundant with above accessors, will be improved in the future but has implications for DAOD workflow
     Gaudi::Property<std::string> m_tauContainerName{this, "TauContainerName", "", "Name of TauJetContainer, must be set when using "};
