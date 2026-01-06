@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <cstdlib>
@@ -799,7 +799,13 @@ int main(int argc, char** argv) {
         std::cout<<"ios_base exception "<<e.what()<<" caught in TestTriggerMenuAccess.\n";
         return 1;
       }
-      success = testL1Menu(l1menu);
+      try {
+        success = testL1Menu(l1menu);
+      }
+      catch (const std::exception& e) {
+        std::cerr << e.what() << "\n";
+        return 1;
+      }
    } else {
       // load from file
       TrigConf::JsonFileLoader fileLoader;
@@ -807,7 +813,13 @@ int main(int argc, char** argv) {
       if(filetype == "l1menu") {
          TrigConf::L1Menu l1menu;
          fileLoader.loadFile( filename, l1menu);
-         success = testL1Menu(l1menu);
+         try {
+           success = testL1Menu(l1menu);
+         }
+         catch (const std::exception& e) {
+           std::cerr << e.what() << "\n";
+           return 1;
+         }
       } else if(filetype == "hltmenu") {
          TrigConf::HLTMenu hltmenu;
          fileLoader.loadFile( filename, hltmenu);
