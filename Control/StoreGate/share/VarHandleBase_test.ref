@@ -1,67 +1,51 @@
 
 
-Initializing Gaudi ApplicationMgr using job opts /home/sss/atlas/rootaccess/build/joboptions/StoreGate/VarHandleBase_test.txt
-JobOptionsSvc        INFO # =======> /home/sss/atlas/rootaccess/build/joboptions/StoreGate/VarHandleBase_test.txt
-JobOptionsSvc        INFO # (1,1): ApplicationMgr.ExtSvc = ["StoreGateSvc/StoreGateSvc"]
-JobOptionsSvc        INFO # (2,1): ApplicationMgr.ExtSvc = ["StoreGateSvc/OtherStore"]
-JobOptionsSvc        INFO # (3,1): OtherStore.ProxyProviderSvc = ""
-JobOptionsSvc        INFO Job options successfully read in from /home/sss/atlas/rootaccess/build/joboptions/StoreGate/VarHandleBase_test.txt
-ApplicationMgr    SUCCESS 
-====================================================================================================================================
-                                                   Welcome to ApplicationMgr (GaudiCoreSvc v27r1p99)
-                                          running on karma on Wed Nov  3 21:06:32 2021
-====================================================================================================================================
-ApplicationMgr       INFO Application Manager Configured successfully
-ClassIDSvc           INFO getRegistryEntries: read 813 CLIDRegistry entries for module ALL
-EventLoopMgr      WARNING Unable to locate service "EventSelector" 
-EventLoopMgr      WARNING No events will be processed from external input.
-ApplicationMgr       INFO Application Manager Initialized successfully
+ApplicationMgr        INFO Application Manager Configured successfully
+ApplicationMgr        INFO Application Manager Initialized successfully
 ApplicationMgr Ready
 test1
-ClassIDSvc           INFO getRegistryEntries: read 973 CLIDRegistry entries for module ALL
-ServiceManager      FATAL No Service factory for BazSvc available.
-                    ERROR FILE:LINE (StatusCode SG::VarHandleKey::initialize(bool)): code FAILURE: Cannot locate store: BazSvc
-ServiceManager      FATAL No Service factory for BazSvc available.
-                    ERROR FILE:LINE (StatusCode SG::VarHandleKey::initialize(bool)): code FAILURE: Cannot locate store: BazSvc
+ServiceManager       FATAL No Service factory for BazSvc available.
+                     ERROR FILE:LINE (StatusCode SG::VarHandleKey::initialize(bool)): code FAILURE: Cannot locate store: BazSvc
+ServiceManager       FATAL No Service factory for BazSvc available.
+                     ERROR FILE:LINE (StatusCode SG::VarHandleKey::initialize(bool)): code FAILURE: Cannot locate store: BazSvc
 test2
 test3
 test4
-ServiceManager      FATAL No Service factory for FooSvc available.
-                    ERROR FILE:LINE (StatusCode SG::VarHandleKey::initialize(bool)): code FAILURE: Cannot locate store: FooSvc
-VarHandle(FooSv...  ERROR FILE:LINE (StatusCode SG::VarHandleBase::initialize(bool)): code FAILURE: m_ownedKey->initialize()
-                    ERROR FILE:LINE (StatusCode SG::VarHandleKey::initialize(bool)): code FAILURE: Cannot initialize a Read/Write/Update handle with a null key.
-VarHandle(FooSv...  ERROR FILE:LINE (StatusCode SG::VarHandleBase::initialize(bool)): code FAILURE: m_ownedKey->initialize()
+ServiceManager       FATAL No Service factory for FooSvc available.
+                     ERROR FILE:LINE (StatusCode SG::VarHandleKey::initialize(bool)): code FAILURE: Cannot locate store: FooSvc
+VarHandle(FooSv...   ERROR FILE:LINE (StatusCode SG::VarHandleBase::initialize(bool)): code FAILURE: m_ownedKey->initialize()
+                     ERROR FILE:LINE (StatusCode SG::VarHandleKey::initialize(bool)): code FAILURE: Cannot initialize a Read/Write/Update handle with a null key.
+VarHandle(FooSv...   ERROR FILE:LINE (StatusCode SG::VarHandleBase::initialize(bool)): code FAILURE: m_ownedKey->initialize()
 test5
-ServiceManager      FATAL No Service factory for FooSvc available.
-                    ERROR FILE:LINE (StatusCode SG::VarHandleKey::initialize(bool)): code FAILURE: Cannot locate store: FooSvc
-VarHandle(FooSv...  ERROR FILE:LINE (StatusCode SG::VarHandleBase::initialize(bool)): code FAILURE: m_ownedKey->initialize()
-VarHandle(FooSv...  ERROR FILE:LINE (StatusCode SG::VarHandleBase::setState()): code FAILURE: initialize()
-VarHandle(FooSv...WARNING FILE:LINE (void*SG::VarHandleBase::typeless_dataPointer_impl(bool)): could not get proxy for key foo
-VarHandle(FooSv...WARNING FILE:LINE (void*SG::VarHandleBase::typeless_dataPointer_impl(bool)):  try using a ReadHandle
+ServiceManager       FATAL No Service factory for FooSvc available.
+                     ERROR FILE:LINE (StatusCode SG::VarHandleKey::initialize(bool)): code FAILURE: Cannot locate store: FooSvc
+VarHandle(FooSv...   ERROR FILE:LINE (StatusCode SG::VarHandleBase::initialize(bool)): code FAILURE: m_ownedKey->initialize()
+VarHandle(FooSv...   ERROR FILE:LINE (StatusCode SG::VarHandleBase::setState()): code FAILURE: initialize()
+VarHandle(FooSv... WARNING FILE:LINE (void*SG::VarHandleBase::typeless_dataPointer_impl(bool)): could not get proxy for key foo
+VarHandle(FooSv... WARNING FILE:LINE (void*SG::VarHandleBase::typeless_dataPointer_impl(bool)):  try using a ReadHandle
 test6
 test7
-ServiceManager      FATAL No Service factory for FooSvc available.
-                    ERROR FILE:LINE (StatusCode SG::VarHandleKey::initialize(bool)): code FAILURE: Cannot locate store: FooSvc
-VarHandle(FooSv...  ERROR FILE:LINE (StatusCode SG::VarHandleBase::record_impl(std::unique_ptr<DataObject>, void*, bool, bool)): code FAILURE: m_ownedKey->initialize()
-VarHandle(FooSv...  ERROR FILE:LINE (StatusCode SG::VarHandleBase::record_impl(std::unique_ptr<DataObject>, void*, bool, bool)): code FAILURE: recordObject failed
-VarHandle(FooSv...  ERROR FILE:LINE (StatusCode SG::VarHandleBase::record_impl(std::unique_ptr<DataObject>, void*, bool, bool)): code FAILURE: Attempt to record an object with a null key
+ServiceManager       FATAL No Service factory for FooSvc available.
+                     ERROR FILE:LINE (StatusCode SG::VarHandleKey::initialize(bool)): code FAILURE: Cannot locate store: FooSvc
+VarHandle(FooSv...   ERROR FILE:LINE (StatusCode SG::VarHandleBase::record_impl(std::unique_ptr<DataObject>, void*, bool, bool)): code FAILURE: m_ownedKey->initialize()
+VarHandle(FooSv...   ERROR FILE:LINE (StatusCode SG::VarHandleBase::record_impl(std::unique_ptr<DataObject>, void*, bool, bool)): code FAILURE: recordObject failed
+VarHandle(FooSv...   ERROR FILE:LINE (StatusCode SG::VarHandleBase::record_impl(std::unique_ptr<DataObject>, void*, bool, bool)): code FAILURE: Attempt to record an object with a null key
 test8
-VarHandle(FooSv...WARNING FILE:LINE (void*SG::VarHandleBase::typeless_dataPointer_impl(bool)): could not get proxy for key foo
-VarHandle(FooSv...WARNING FILE:LINE (void*SG::VarHandleBase::typeless_dataPointer_impl(bool)):  try using a ReadHandle
-VarHandle(FooSv...WARNING FILE:LINE (void*SG::VarHandleBase::typeless_dataPointer_fromProxy(SG::DataProxy*, bool) const): Proxy  [293847295/foo] is in an invalid state
-VarHandle(FooSv...WARNING FILE:LINE (void*SG::VarHandleBase::typeless_dataPointer_fromProxy(SG::DataProxy*, bool) const): Request for an invalid object; requested CLID = 293847295, proxy primary ID is 293847296
+VarHandle(FooSv... WARNING FILE:LINE (void*SG::VarHandleBase::typeless_dataPointer_impl(bool)): could not get proxy for key foo
+VarHandle(FooSv... WARNING FILE:LINE (void*SG::VarHandleBase::typeless_dataPointer_impl(bool)):  try using a ReadHandle
+VarHandle(FooSv... WARNING FILE:LINE (void*SG::VarHandleBase::typeless_dataPointer_fromProxy(SG::DataProxy*, bool) const): Proxy  [293847295/foo] is in an invalid state
+VarHandle(FooSv... WARNING FILE:LINE (void*SG::VarHandleBase::typeless_dataPointer_fromProxy(SG::DataProxy*, bool) const): Request for an invalid object; requested CLID = 293847295, proxy primary ID is 293847296
 test9
-VarHandleBase @0x7fff34567950 store=FooSvc, clid=293847295, key=foo----------- ptr@0, proxy@0
 test10
-ServiceManager      FATAL No Service factory for FooSvc available.
-VarHandle(Store...  ERROR FILE:LINE (const void*SG::VarHandleBase::put_impl(const EventContext*, std::unique_ptr<DataObject>, const void*, bool, bool, IProxyDict*&) const): code FAILURE: recordObject failed
-VarHandle(FooSv...  ERROR FILE:LINE (const void*SG::VarHandleBase::put_impl(const EventContext*, std::unique_ptr<DataObject>, const void*, bool, bool, IProxyDict*&) const): code FAILURE: Attempt to record an object with a null key
+ServiceManager       FATAL No Service factory for FooSvc available.
+VarHandle(Store...   ERROR FILE:LINE (const void*SG::VarHandleBase::put_impl(const EventContext*, std::unique_ptr<DataObject>, const void*, bool, bool, IProxyDict*&) const): code FAILURE: recordObject failed
+VarHandle(FooSv...   ERROR FILE:LINE (const void*SG::VarHandleBase::put_impl(const EventContext*, std::unique_ptr<DataObject>, const void*, bool, bool, IProxyDict*&) const): code FAILURE: Attempt to record an object with a null key
 test11
-VarHandle(FooSv...  ERROR FILE:LINE (const void*SG::VarHandleBase::get_impl(const EventContext*, bool) const): code FAILURE: get_impl called for a non-read handle.
-VarHandle(FooSv...  ERROR FILE:LINE (const void*SG::VarHandleBase::get_impl(const EventContext*, bool) const): code FAILURE: Cannot initialize a Read/Write/Update handle with a null key.
-ServiceManager      FATAL No Service factory for FooSvc available.
-VarHandle(FooSv...  ERROR FILE:LINE (const void*SG::VarHandleBase::get_impl(const EventContext*, bool) const): code FAILURE: Cannot find proxy for 293847295/foo
+VarHandle(FooSv...   ERROR FILE:LINE (const void*SG::VarHandleBase::get_impl(const EventContext*, bool) const): code FAILURE: get_impl called for a non-read handle.
+VarHandle(FooSv...   ERROR FILE:LINE (const void*SG::VarHandleBase::get_impl(const EventContext*, bool) const): code FAILURE: Cannot initialize a Read/Write/Update handle with a null key.
+ServiceManager       FATAL No Service factory for FooSvc available.
+VarHandle(FooSv...   ERROR FILE:LINE (const void*SG::VarHandleBase::get_impl(const EventContext*, bool) const): code FAILURE: Cannot find proxy for 293847295/foo
 test12
-VarHandle(FooSv...  ERROR FILE:LINE (StatusCode SG::VarHandleBase::symLink_impl(unsigned int, const std::string&)): code FAILURE: symlink: Handle not valid.
-VarHandle(FooSv...  ERROR FILE:LINE (StatusCode SG::VarHandleBase::symLink_impl(unsigned int, const std::string&)): code FAILURE: symlink: Handle not valid.
+VarHandle(FooSv...   ERROR FILE:LINE (StatusCode SG::VarHandleBase::symLink_impl(unsigned int, const std::string&)): code FAILURE: symlink: Handle not valid.
+VarHandle(FooSv...   ERROR FILE:LINE (StatusCode SG::VarHandleBase::symLink_impl(unsigned int, const std::string&)): code FAILURE: symlink: Handle not valid.
 test13

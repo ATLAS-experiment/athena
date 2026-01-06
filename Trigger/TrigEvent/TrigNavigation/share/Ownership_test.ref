@@ -1,166 +1,120 @@
 
 
-Initializing Gaudi ApplicationMgr using job opts ../share/test.txt
-JobOptionsSvc        INFO # =======> /afs/cern.ch/user/s/ssnyder/atlas-work3/Trigger/TrigEvent/TrigNavigation/share/../share/test.txt
-JobOptionsSvc        INFO # (2,1): ApplicationMgr.Dlls += ["StoreGate", "TrigNavigation", "TrigSerializeCnvSvc"]
-JobOptionsSvc        INFO # (3,1): ApplicationMgr.ExtSvc += ["ClassIDSvc"]
-JobOptionsSvc        INFO # (4,1): ApplicationMgr.ExtSvc += ["TrigSerializeCnvSvc"]
-JobOptionsSvc        INFO # (5,1): ApplicationMgr.ExtSvc += ["StoreGateSvc", "StoreGateSvc/DetectorStore", "StoreGateSvc/HistoryStore"]
-JobOptionsSvc        INFO # (6,1): ApplicationMgr.ExtSvc += ["ActiveStoreSvc"]
-JobOptionsSvc        INFO # (7,1): ApplicationMgr.ExtSvc += ["ToolSvc"]
-JobOptionsSvc        INFO # (8,1): AuditorSvc.Auditors += ["AlgContextAuditor"]
-JobOptionsSvc        INFO # (9,1): StoreGateSvc.OutputLevel = 0
-JobOptionsSvc        INFO # (10,1): StoreGateSvc.ActivateHistory = 0
-JobOptionsSvc        INFO # (14,1): MessageSvc.useColors = 0
-JobOptionsSvc        INFO # (31,1): ToolSvc.Navigation.ClassesToPreregister = ["TestA#EverEmptyButPresent", "TestA#AgainPresentButEmpty", "TestA#", "TrigNavTest::TestBContainer#BContainer1", "TrigNavTest::TestBContainer#BContainer2", "TestDContainer#DContainer1"]
-JobOptionsSvc        INFO # (34,1): ToolSvc.Navigation.OutputLevel = 1
-JobOptionsSvc        INFO # (35,1): Holder_test.OutputLevel = 1
-JobOptionsSvc        INFO # (36,1): RoICache_test.OutputLevel = 3
-JobOptionsSvc        INFO Job options successfully read in from ../share/test.txt
-ApplicationMgr    SUCCESS 
-====================================================================================================================================
-                                                   Welcome to ApplicationMgr (GaudiCoreSvc v30r0)
-                                          running on lxplus020.cern.ch on Sat Dec  9 18:30:52 2017
-====================================================================================================================================
-ApplicationMgr       INFO Successfully loaded modules : StoreGate, TrigNavigation, TrigSerializeCnvSvc
-ApplicationMgr       INFO Application Manager Configured successfully
-ClassIDSvc           INFO  getRegistryEntries: read 1529 CLIDRegistry entries for module ALL
-TrigSerializeCn...   INFO initialize()
-EventLoopMgr      WARNING Unable to locate service "EventSelector" 
-EventLoopMgr      WARNING No events will be processed from external input.
-HistogramPersis...WARNING Histograms saving not required.
-ApplicationMgr       INFO Application Manager Initialized successfully
+ApplicationMgr        INFO Application Manager Configured successfully
+TrigSerializeCn...    INFO initialize()
+ApplicationMgr        INFO Application Manager Initialized successfully
 ApplicationMgr Ready
-ToolSvc.Navigation  DEBUG Property update for OutputLevel : new value = 1
-ClassIDSvc           INFO  getRegistryEntries: read 372 CLIDRegistry entries for module ALL
-ToolSvc.Navigation  DEBUG Recognized CLID : TestA and key: EverEmptyButPresent
-ToolSvc.Navigation  DEBUG Recognized CLID : TestA and key: AgainPresentButEmpty
-ToolSvc.Navigation  DEBUG Recognized CLID : TestA and key: 
-ToolSvc.Navigation  DEBUG Recognized CLID : TrigNavTest::TestBContainer and key: BContainer1
-ToolSvc.Navigation  DEBUG Recognized CLID : TrigNavTest::TestBContainer and key: BContainer2
-ToolSvc.Navigation  DEBUG Recognized CLID : TestDContainer and key: DContainer1
-ToolSvc.NavigationVERBOSE type: TestA(6421) container: DataVector<TestA>(64210)label: "" subTypeIndex: 0 container not allocated yet
-ToolSvc.NavigationVERBOSE type: TestC(7800) container: DataVector<TestC>(78001)label: "" subTypeIndex: 0 container not allocated yet
-ToolSvc.NavigationVERBOSE type: TrigNavTest::TestBContainer(96422) container: TrigNavTest::TestBContainer(96422)label: "" subTypeIndex: 0 container not allocated yet
-ToolSvc.NavigationVERBOSE type: TrigNavTest::TestBContainerView(96423) container: TrigNavTest::TestBContainerView(96423)label: "" subTypeIndex: 0 container not allocated yet
-ToolSvc.NavigationVERBOSE type: TestDContainer(96477) container: TestDContainer(96477)label: "" subTypeIndex: 0 container not allocated yet
-ToolSvc.Navigation  DEBUG  successfully initialized Navigation 
-Ownership_test       INFO LINE:87 Start of the test: testing if the insert operation on an empty container makes it a view container
-ToolSvc.Navigation  DEBUG Navigation reset done
-ToolSvc.NavigationVERBOSE NavigationCore::prepare Compile time known types : type: TestA(6421) container: DataVector<TestA>(64210)label: "" subTypeIndex: 0 container not allocated yet
-ToolSvc.NavigationVERBOSE NavigationCore::prepare Compile time known types : type: TestC(7800) container: DataVector<TestC>(78001)label: "" subTypeIndex: 0 container not allocated yet
-ToolSvc.NavigationVERBOSE NavigationCore::prepare Compile time known types : type: TrigNavTest::TestBContainer(96422) container: TrigNavTest::TestBContainer(96422)label: "" subTypeIndex: 0 container not allocated yet
-ToolSvc.NavigationVERBOSE NavigationCore::prepare Compile time known types : type: TrigNavTest::TestBContainerView(96423) container: TrigNavTest::TestBContainerView(96423)label: "" subTypeIndex: 0 container not allocated yet
-ToolSvc.NavigationVERBOSE NavigationCore::prepare Compile time known types : type: TestDContainer(96477) container: TestDContainer(96477)label: "" subTypeIndex: 0 container not allocated yet
-ToolSvc.NavigationVERBOSE NavigationCore::prepare Preregistering objects #:6
-ToolSvc.NavigationVERBOSE NavigationCore::prepare preregistering objects of clid: 6421 label: EverEmptyButPresent
-ToolSvc.NavigationVERBOSE NavigationCore::prepare creating handler for type (CLID): 6421 label: EverEmptyButPresent index: 0
-ToolSvc.Navigation  DEBUG createHolder: creating holder for CLID: 6421 label: EverEmptyButPresent and index: 0
-ToolSvc.NavigationVERBOSE Holder created, registering 0x108ab00 type: TestA(6421) container: DataVector<TestA>(64210)label: "EverEmptyButPresent" subTypeIndex: 0 container not allocated yet
-ToolSvc.Navigation  DEBUG registerHolder for OK type: TestA(6421) container: DataVector<TestA>(64210)label: "EverEmptyButPresent" subTypeIndex: 0 container not allocated yet
-ToolSvc.NavigationVERBOSE NavigationCore::prepare preregistering objects of clid: 6421 label: AgainPresentButEmpty
-ToolSvc.NavigationVERBOSE NavigationCore::prepare creating handler for type (CLID): 6421 label: AgainPresentButEmpty index: 1
-ToolSvc.Navigation  DEBUG createHolder: creating holder for CLID: 6421 label: AgainPresentButEmpty and index: 1
-ToolSvc.NavigationVERBOSE Holder created, registering 0x1083590 type: TestA(6421) container: DataVector<TestA>(64210)label: "AgainPresentButEmpty" subTypeIndex: 1 container not allocated yet
-ToolSvc.Navigation  DEBUG registerHolder for OK type: TestA(6421) container: DataVector<TestA>(64210)label: "AgainPresentButEmpty" subTypeIndex: 1 container not allocated yet
-ToolSvc.NavigationVERBOSE NavigationCore::prepare preregistering objects of clid: 6421 label: 
-ToolSvc.NavigationVERBOSE NavigationCore::prepare creating handler for type (CLID): 6421 label:  index: 2
-ToolSvc.Navigation  DEBUG createHolder: creating holder for CLID: 6421 label:  and index: 2
-ToolSvc.NavigationVERBOSE Holder created, registering 0x1089d60 type: TestA(6421) container: DataVector<TestA>(64210)label: "" subTypeIndex: 2 container not allocated yet
-ToolSvc.Navigation  DEBUG registerHolder for OK type: TestA(6421) container: DataVector<TestA>(64210)label: "" subTypeIndex: 2 container not allocated yet
-ToolSvc.NavigationVERBOSE NavigationCore::prepare preregistering objects of clid: 96422 label: BContainer1
-ToolSvc.NavigationVERBOSE NavigationCore::prepare creating handler for type (CLID): 96422 label: BContainer1 index: 0
-ToolSvc.Navigation  DEBUG createHolder: creating holder for CLID: 96422 label: BContainer1 and index: 0
-ToolSvc.NavigationVERBOSE Holder created, registering 0x10869c0 type: TrigNavTest::TestBContainer(96422) container: TrigNavTest::TestBContainer(96422)label: "BContainer1" subTypeIndex: 0 container not allocated yet
-ToolSvc.Navigation  DEBUG registerHolder for OK type: TrigNavTest::TestBContainer(96422) container: TrigNavTest::TestBContainer(96422)label: "BContainer1" subTypeIndex: 0 container not allocated yet
-ToolSvc.NavigationVERBOSE NavigationCore::prepare preregistering objects of clid: 96422 label: BContainer2
-ToolSvc.NavigationVERBOSE NavigationCore::prepare creating handler for type (CLID): 96422 label: BContainer2 index: 1
-ToolSvc.Navigation  DEBUG createHolder: creating holder for CLID: 96422 label: BContainer2 and index: 1
-ToolSvc.NavigationVERBOSE Holder created, registering 0x1078f60 type: TrigNavTest::TestBContainer(96422) container: TrigNavTest::TestBContainer(96422)label: "BContainer2" subTypeIndex: 1 container not allocated yet
-ToolSvc.Navigation  DEBUG registerHolder for OK type: TrigNavTest::TestBContainer(96422) container: TrigNavTest::TestBContainer(96422)label: "BContainer2" subTypeIndex: 1 container not allocated yet
-ToolSvc.NavigationVERBOSE NavigationCore::prepare preregistering objects of clid: 96477 label: DContainer1
-ToolSvc.NavigationVERBOSE NavigationCore::prepare creating handler for type (CLID): 96477 label: DContainer1 index: 0
-ToolSvc.Navigation  DEBUG createHolder: creating holder for CLID: 96477 label: DContainer1 and index: 0
-ToolSvc.NavigationVERBOSE Holder created, registering 0x107ab80 type: TestDContainer(96477) container: TestDContainer(96477)label: "DContainer1" subTypeIndex: 0 container not allocated yet
-ToolSvc.Navigation  DEBUG registerHolder for OK type: TestDContainer(96477) container: TestDContainer(96477)label: "DContainer1" subTypeIndex: 0 container not allocated yet
-ToolSvc.Navigation  DEBUG NavigationCore::prepare Navigation structure prepared for next event
-Ownership_test       INFO LINE:98 Test progress fine:  Objects prepared
-Ownership_test       INFO LINE:107 Test progress fine:  Event wise container has ownership policy OWN
-ToolSvc.Navigation  DEBUG attachFeature: of clid: 96477(TestDContainer) to TE: 23 label: "DContainer1" memory management: 3
-ToolSvc.NavigationVERBOSE getting Holder for label: DContainer1
-ToolSvc.Navigation  DEBUG Getting holder for type: 96477 label: DContainer1
-ToolSvc.NavigationVERBOSE got Holder: 0x107ab80
-Ownership_test       INFO LINE:123 Test progress fine:  After attachFeture the container is VIEW
-Ownership_test       INFO LINE:128 End of the test: testing if the insert operation on an empty container makes it a view container
-Ownership_test       INFO LINE:59 Start of the test: noMixTest
-ToolSvc.Navigation  DEBUG Navigation reset done
-ToolSvc.NavigationVERBOSE NavigationCore::prepare Compile time known types : type: TestA(6421) container: DataVector<TestA>(64210)label: "" subTypeIndex: 0 container not allocated yet
-ToolSvc.NavigationVERBOSE NavigationCore::prepare Compile time known types : type: TestC(7800) container: DataVector<TestC>(78001)label: "" subTypeIndex: 0 container not allocated yet
-ToolSvc.NavigationVERBOSE NavigationCore::prepare Compile time known types : type: TrigNavTest::TestBContainer(96422) container: TrigNavTest::TestBContainer(96422)label: "" subTypeIndex: 0 container not allocated yet
-ToolSvc.NavigationVERBOSE NavigationCore::prepare Compile time known types : type: TrigNavTest::TestBContainerView(96423) container: TrigNavTest::TestBContainerView(96423)label: "" subTypeIndex: 0 container not allocated yet
-ToolSvc.NavigationVERBOSE NavigationCore::prepare Compile time known types : type: TestDContainer(96477) container: TestDContainer(96477)label: "" subTypeIndex: 0 container not allocated yet
-ToolSvc.NavigationVERBOSE NavigationCore::prepare Preregistering objects #:6
-ToolSvc.NavigationVERBOSE NavigationCore::prepare preregistering objects of clid: 6421 label: EverEmptyButPresent
-ToolSvc.NavigationVERBOSE NavigationCore::prepare creating handler for type (CLID): 6421 label: EverEmptyButPresent index: 0
-ToolSvc.Navigation  DEBUG createHolder: creating holder for CLID: 6421 label: EverEmptyButPresent and index: 0
-ToolSvc.NavigationVERBOSE Holder created, registering 0x107ab80 type: TestA(6421) container: DataVector<TestA>(64210)label: "EverEmptyButPresent" subTypeIndex: 0 container not allocated yet
-ToolSvc.Navigation  DEBUG registerHolder for OK type: TestA(6421) container: DataVector<TestA>(64210)label: "EverEmptyButPresent" subTypeIndex: 0 container not allocated yet
-ToolSvc.NavigationVERBOSE NavigationCore::prepare preregistering objects of clid: 6421 label: AgainPresentButEmpty
-ToolSvc.NavigationVERBOSE NavigationCore::prepare creating handler for type (CLID): 6421 label: AgainPresentButEmpty index: 1
-ToolSvc.Navigation  DEBUG createHolder: creating holder for CLID: 6421 label: AgainPresentButEmpty and index: 1
-ToolSvc.NavigationVERBOSE Holder created, registering 0x1078f60 type: TestA(6421) container: DataVector<TestA>(64210)label: "AgainPresentButEmpty" subTypeIndex: 1 container not allocated yet
-ToolSvc.Navigation  DEBUG registerHolder for OK type: TestA(6421) container: DataVector<TestA>(64210)label: "AgainPresentButEmpty" subTypeIndex: 1 container not allocated yet
-ToolSvc.NavigationVERBOSE NavigationCore::prepare preregistering objects of clid: 6421 label: 
-ToolSvc.NavigationVERBOSE NavigationCore::prepare creating handler for type (CLID): 6421 label:  index: 2
-ToolSvc.Navigation  DEBUG createHolder: creating holder for CLID: 6421 label:  and index: 2
-ToolSvc.NavigationVERBOSE Holder created, registering 0x10869c0 type: TestA(6421) container: DataVector<TestA>(64210)label: "" subTypeIndex: 2 container not allocated yet
-ToolSvc.Navigation  DEBUG registerHolder for OK type: TestA(6421) container: DataVector<TestA>(64210)label: "" subTypeIndex: 2 container not allocated yet
-ToolSvc.NavigationVERBOSE NavigationCore::prepare preregistering objects of clid: 96422 label: BContainer1
-ToolSvc.NavigationVERBOSE NavigationCore::prepare creating handler for type (CLID): 96422 label: BContainer1 index: 0
-ToolSvc.Navigation  DEBUG createHolder: creating holder for CLID: 96422 label: BContainer1 and index: 0
-ToolSvc.NavigationVERBOSE Holder created, registering 0x108ab00 type: TrigNavTest::TestBContainer(96422) container: TrigNavTest::TestBContainer(96422)label: "BContainer1" subTypeIndex: 0 container not allocated yet
-ToolSvc.Navigation  DEBUG registerHolder for OK type: TrigNavTest::TestBContainer(96422) container: TrigNavTest::TestBContainer(96422)label: "BContainer1" subTypeIndex: 0 container not allocated yet
-ToolSvc.NavigationVERBOSE NavigationCore::prepare preregistering objects of clid: 96422 label: BContainer2
-ToolSvc.NavigationVERBOSE NavigationCore::prepare creating handler for type (CLID): 96422 label: BContainer2 index: 1
-ToolSvc.Navigation  DEBUG createHolder: creating holder for CLID: 96422 label: BContainer2 and index: 1
-ToolSvc.NavigationVERBOSE Holder created, registering 0x1084ba0 type: TrigNavTest::TestBContainer(96422) container: TrigNavTest::TestBContainer(96422)label: "BContainer2" subTypeIndex: 1 container not allocated yet
-ToolSvc.Navigation  DEBUG registerHolder for OK type: TrigNavTest::TestBContainer(96422) container: TrigNavTest::TestBContainer(96422)label: "BContainer2" subTypeIndex: 1 container not allocated yet
-ToolSvc.NavigationVERBOSE NavigationCore::prepare preregistering objects of clid: 96477 label: DContainer1
-ToolSvc.NavigationVERBOSE NavigationCore::prepare creating handler for type (CLID): 96477 label: DContainer1 index: 0
-ToolSvc.Navigation  DEBUG createHolder: creating holder for CLID: 96477 label: DContainer1 and index: 0
-ToolSvc.NavigationVERBOSE Holder created, registering 0x1079510 type: TestDContainer(96477) container: TestDContainer(96477)label: "DContainer1" subTypeIndex: 0 container not allocated yet
-ToolSvc.Navigation  DEBUG registerHolder for OK type: TestDContainer(96477) container: TestDContainer(96477)label: "DContainer1" subTypeIndex: 0 container not allocated yet
-ToolSvc.Navigation  DEBUG NavigationCore::prepare Navigation structure prepared for next event
-Ownership_test       INFO LINE:67 Test progress fine:  Objects prepared
-ToolSvc.Navigation  DEBUG attachFeature: of clid: 96422(TrigNavTest::TestBContainer) to TE: 23 label: "BContainer1" memory management: 3
-ToolSvc.NavigationVERBOSE getting Holder for label: BContainer1
-ToolSvc.Navigation  DEBUG Getting holder for type: 96422 label: BContainer1
-ToolSvc.NavigationVERBOSE got Holder: 0x108ab00
-Ownership_test       INFO LINE:75 Test progress fine:  After attachFeture the container is VIEW
-ToolSvc.Navigation  DEBUG attachFeature: of clid: 96422(TrigNavTest::TestBContainer) to TE: 23 label: "BContainer1" memory management: 3
-ToolSvc.NavigationVERBOSE getting Holder for label: BContainer1
-ToolSvc.Navigation  DEBUG Getting holder for type: 96422 label: BContainer1
-ToolSvc.NavigationVERBOSE got Holder: 0x108ab00
-HolderFactory     WARNING insert::do_it objects can not be inserted because of ownership issues. Destination container has already 3 objects  and ownership policy OWN no action is performed, potential memory leak
-HolderFactory     WARNING HolderImp::add  insert failed 
-Ownership_test       INFO LINE:81 Test progress fine:  The attachFeature was unsuccesfull (as expected)
-Ownership_test       INFO LINE:83 End of the test: noMixTest
-Ownership_test       INFO LINE:132 Start of the test: testing if the xAOD view container works
-Ownership_test       INFO LINE:136 Test progress fine:  Objects prepared
-Ownership_test       INFO LINE:143 Test progress fine:  View filled
-Ownership_test       INFO LINE:145 Test progress fine:  TE in place - attaching
-ToolSvc.Navigation  DEBUG attachFeature: of clid: 96423(TrigNavTest::TestBContainerView) to TE: 23 label: "BView" memory management: 3
-ToolSvc.NavigationVERBOSE getting Holder for label: BView
-ToolSvc.Navigation  DEBUG Getting holder for type: 96423 label: BView
-ToolSvc.Navigation  DEBUG createHolder: creating holder for CLID: 96423 label: BView and index: 0
-ToolSvc.Navigation  DEBUG getHolder: predefined holder got
-ToolSvc.Navigation  DEBUG registerHolder for OK type: TrigNavTest::TestBContainerView(96423) container: TrigNavTest::TestBContainerView(96423)label: "BView" subTypeIndex: 0 container not allocated yet
-ToolSvc.NavigationVERBOSE got Holder: 0x107da00
-Ownership_test       INFO LINE:151 Test progress fine:  First View attach worked
-ToolSvc.Navigation  DEBUG attachFeature: of clid: 96423(TrigNavTest::TestBContainerView) to TE: 23 label: "BView" memory management: 3
-ToolSvc.NavigationVERBOSE getting Holder for label: BView
-ToolSvc.Navigation  DEBUG Getting holder for type: 96423 label: BView
-ToolSvc.NavigationVERBOSE got Holder: 0x107da00
-Ownership_test       INFO LINE:157 Test progress fine:  Second View attach worked
-Ownership_test       INFO LINE:160 End of the test: testing if the xAOD view container works
-Ownership_test       INFO LINE:219 Test progress fine:  END all went fine
+ToolSvc.Navigation   DEBUG Recognized CLID : TestA and key: EverEmptyButPresent
+ToolSvc.Navigation   DEBUG Recognized CLID : TestA and key: AgainPresentButEmpty
+ToolSvc.Navigation   DEBUG Recognized CLID : TestA and key: 
+ToolSvc.Navigation   DEBUG Recognized CLID : TrigNavTest::TestBContainer and key: BContainer1
+ToolSvc.Navigation   DEBUG Recognized CLID : TrigNavTest::TestBContainer and key: BContainer2
+ToolSvc.Navigation   DEBUG Recognized CLID : TestDContainer and key: DContainer1
+ToolSvc.Navigation VERBOSE type: TestA(6421) container: DataVector<TestA>(64210)label: "" subTypeIndex: 0 container not allocated yet
+ToolSvc.Navigation VERBOSE type: TestC(7800) container: DataVector<TestC>(78001)label: "" subTypeIndex: 0 container not allocated yet
+ToolSvc.Navigation VERBOSE type: TrigNavTest::TestBContainer(96422) container: TrigNavTest::TestBContainer(96422)label: "" subTypeIndex: 0 container not allocated yet
+ToolSvc.Navigation VERBOSE type: TrigNavTest::TestBContainerView(96423) container: TrigNavTest::TestBContainerView(96423)label: "" subTypeIndex: 0 container not allocated yet
+ToolSvc.Navigation VERBOSE type: TestDContainer(96477) container: TestDContainer(96477)label: "" subTypeIndex: 0 container not allocated yet
+ToolSvc.Navigation   DEBUG  successfully initialized Navigation
+Ownership_test        INFO LINE Start of the test: testing if the insert operation on an empty container makes it a view container
+ToolSvc.Navigation   DEBUG Navigation reset done
+ToolSvc.Navigation VERBOSE NavigationCore::prepare Compile time known types : type: TestA(6421) container: DataVector<TestA>(64210)label: "" subTypeIndex: 0 container not allocated yet
+ToolSvc.Navigation VERBOSE NavigationCore::prepare Compile time known types : type: TestC(7800) container: DataVector<TestC>(78001)label: "" subTypeIndex: 0 container not allocated yet
+ToolSvc.Navigation VERBOSE NavigationCore::prepare Compile time known types : type: TrigNavTest::TestBContainer(96422) container: TrigNavTest::TestBContainer(96422)label: "" subTypeIndex: 0 container not allocated yet
+ToolSvc.Navigation VERBOSE NavigationCore::prepare Compile time known types : type: TrigNavTest::TestBContainerView(96423) container: TrigNavTest::TestBContainerView(96423)label: "" subTypeIndex: 0 container not allocated yet
+ToolSvc.Navigation VERBOSE NavigationCore::prepare Compile time known types : type: TestDContainer(96477) container: TestDContainer(96477)label: "" subTypeIndex: 0 container not allocated yet
+ToolSvc.Navigation VERBOSE NavigationCore::prepare Preregistering objects #:6
+ToolSvc.Navigation VERBOSE NavigationCore::prepare preregistering objects of clid: 6421 label: EverEmptyButPresent
+ToolSvc.Navigation VERBOSE NavigationCore::prepare creating handler for type (CLID): 6421 label: EverEmptyButPresent index: 0
+ToolSvc.Navigation   DEBUG createHolder: creating holder for CLID: 6421 label: EverEmptyButPresent and index: 0
+ToolSvc.Navigation   DEBUG registerHolder for OK type: TestA(6421) container: DataVector<TestA>(64210)label: "EverEmptyButPresent" subTypeIndex: 0 container not allocated yet
+ToolSvc.Navigation VERBOSE NavigationCore::prepare preregistering objects of clid: 6421 label: AgainPresentButEmpty
+ToolSvc.Navigation VERBOSE NavigationCore::prepare creating handler for type (CLID): 6421 label: AgainPresentButEmpty index: 1
+ToolSvc.Navigation   DEBUG createHolder: creating holder for CLID: 6421 label: AgainPresentButEmpty and index: 1
+ToolSvc.Navigation   DEBUG registerHolder for OK type: TestA(6421) container: DataVector<TestA>(64210)label: "AgainPresentButEmpty" subTypeIndex: 1 container not allocated yet
+ToolSvc.Navigation VERBOSE NavigationCore::prepare preregistering objects of clid: 6421 label: 
+ToolSvc.Navigation VERBOSE NavigationCore::prepare creating handler for type (CLID): 6421 label:  index: 2
+ToolSvc.Navigation   DEBUG createHolder: creating holder for CLID: 6421 label:  and index: 2
+ToolSvc.Navigation   DEBUG registerHolder for OK type: TestA(6421) container: DataVector<TestA>(64210)label: "" subTypeIndex: 2 container not allocated yet
+ToolSvc.Navigation VERBOSE NavigationCore::prepare preregistering objects of clid: 96422 label: BContainer1
+ToolSvc.Navigation VERBOSE NavigationCore::prepare creating handler for type (CLID): 96422 label: BContainer1 index: 0
+ToolSvc.Navigation   DEBUG createHolder: creating holder for CLID: 96422 label: BContainer1 and index: 0
+ToolSvc.Navigation   DEBUG registerHolder for OK type: TrigNavTest::TestBContainer(96422) container: TrigNavTest::TestBContainer(96422)label: "BContainer1" subTypeIndex: 0 container not allocated yet
+ToolSvc.Navigation VERBOSE NavigationCore::prepare preregistering objects of clid: 96422 label: BContainer2
+ToolSvc.Navigation VERBOSE NavigationCore::prepare creating handler for type (CLID): 96422 label: BContainer2 index: 1
+ToolSvc.Navigation   DEBUG createHolder: creating holder for CLID: 96422 label: BContainer2 and index: 1
+ToolSvc.Navigation   DEBUG registerHolder for OK type: TrigNavTest::TestBContainer(96422) container: TrigNavTest::TestBContainer(96422)label: "BContainer2" subTypeIndex: 1 container not allocated yet
+ToolSvc.Navigation VERBOSE NavigationCore::prepare preregistering objects of clid: 96477 label: DContainer1
+ToolSvc.Navigation VERBOSE NavigationCore::prepare creating handler for type (CLID): 96477 label: DContainer1 index: 0
+ToolSvc.Navigation   DEBUG createHolder: creating holder for CLID: 96477 label: DContainer1 and index: 0
+ToolSvc.Navigation   DEBUG registerHolder for OK type: TestDContainer(96477) container: TestDContainer(96477)label: "DContainer1" subTypeIndex: 0 container not allocated yet
+ToolSvc.Navigation   DEBUG NavigationCore::prepare Navigation structure prepared for next event
+Ownership_test        INFO LINE Test progress fine:  Objects prepared
+Ownership_test        INFO LINE Test progress fine:  Event wise container has ownership policy OWN
+ToolSvc.Navigation   DEBUG attachFeature: of clid: 96477(TestDContainer) to TE: 23 label: "DContainer1" memory management: 3
+ToolSvc.Navigation VERBOSE getting Holder for label: DContainer1
+ToolSvc.Navigation   DEBUG Getting holder for type: 96477 label: DContainer1
+Ownership_test        INFO LINE Test progress fine:  After attachFeture the container is VIEW
+Ownership_test        INFO LINE End of the test: testing if the insert operation on an empty container makes it a view container
+Ownership_test        INFO LINE Start of the test: noMixTest
+ToolSvc.Navigation   DEBUG Navigation reset done
+ToolSvc.Navigation VERBOSE NavigationCore::prepare Compile time known types : type: TestA(6421) container: DataVector<TestA>(64210)label: "" subTypeIndex: 0 container not allocated yet
+ToolSvc.Navigation VERBOSE NavigationCore::prepare Compile time known types : type: TestC(7800) container: DataVector<TestC>(78001)label: "" subTypeIndex: 0 container not allocated yet
+ToolSvc.Navigation VERBOSE NavigationCore::prepare Compile time known types : type: TrigNavTest::TestBContainer(96422) container: TrigNavTest::TestBContainer(96422)label: "" subTypeIndex: 0 container not allocated yet
+ToolSvc.Navigation VERBOSE NavigationCore::prepare Compile time known types : type: TrigNavTest::TestBContainerView(96423) container: TrigNavTest::TestBContainerView(96423)label: "" subTypeIndex: 0 container not allocated yet
+ToolSvc.Navigation VERBOSE NavigationCore::prepare Compile time known types : type: TestDContainer(96477) container: TestDContainer(96477)label: "" subTypeIndex: 0 container not allocated yet
+ToolSvc.Navigation VERBOSE NavigationCore::prepare Preregistering objects #:6
+ToolSvc.Navigation VERBOSE NavigationCore::prepare preregistering objects of clid: 6421 label: EverEmptyButPresent
+ToolSvc.Navigation VERBOSE NavigationCore::prepare creating handler for type (CLID): 6421 label: EverEmptyButPresent index: 0
+ToolSvc.Navigation   DEBUG createHolder: creating holder for CLID: 6421 label: EverEmptyButPresent and index: 0
+ToolSvc.Navigation   DEBUG registerHolder for OK type: TestA(6421) container: DataVector<TestA>(64210)label: "EverEmptyButPresent" subTypeIndex: 0 container not allocated yet
+ToolSvc.Navigation VERBOSE NavigationCore::prepare preregistering objects of clid: 6421 label: AgainPresentButEmpty
+ToolSvc.Navigation VERBOSE NavigationCore::prepare creating handler for type (CLID): 6421 label: AgainPresentButEmpty index: 1
+ToolSvc.Navigation   DEBUG createHolder: creating holder for CLID: 6421 label: AgainPresentButEmpty and index: 1
+ToolSvc.Navigation   DEBUG registerHolder for OK type: TestA(6421) container: DataVector<TestA>(64210)label: "AgainPresentButEmpty" subTypeIndex: 1 container not allocated yet
+ToolSvc.Navigation VERBOSE NavigationCore::prepare preregistering objects of clid: 6421 label: 
+ToolSvc.Navigation VERBOSE NavigationCore::prepare creating handler for type (CLID): 6421 label:  index: 2
+ToolSvc.Navigation   DEBUG createHolder: creating holder for CLID: 6421 label:  and index: 2
+ToolSvc.Navigation   DEBUG registerHolder for OK type: TestA(6421) container: DataVector<TestA>(64210)label: "" subTypeIndex: 2 container not allocated yet
+ToolSvc.Navigation VERBOSE NavigationCore::prepare preregistering objects of clid: 96422 label: BContainer1
+ToolSvc.Navigation VERBOSE NavigationCore::prepare creating handler for type (CLID): 96422 label: BContainer1 index: 0
+ToolSvc.Navigation   DEBUG createHolder: creating holder for CLID: 96422 label: BContainer1 and index: 0
+ToolSvc.Navigation   DEBUG registerHolder for OK type: TrigNavTest::TestBContainer(96422) container: TrigNavTest::TestBContainer(96422)label: "BContainer1" subTypeIndex: 0 container not allocated yet
+ToolSvc.Navigation VERBOSE NavigationCore::prepare preregistering objects of clid: 96422 label: BContainer2
+ToolSvc.Navigation VERBOSE NavigationCore::prepare creating handler for type (CLID): 96422 label: BContainer2 index: 1
+ToolSvc.Navigation   DEBUG createHolder: creating holder for CLID: 96422 label: BContainer2 and index: 1
+ToolSvc.Navigation   DEBUG registerHolder for OK type: TrigNavTest::TestBContainer(96422) container: TrigNavTest::TestBContainer(96422)label: "BContainer2" subTypeIndex: 1 container not allocated yet
+ToolSvc.Navigation VERBOSE NavigationCore::prepare preregistering objects of clid: 96477 label: DContainer1
+ToolSvc.Navigation VERBOSE NavigationCore::prepare creating handler for type (CLID): 96477 label: DContainer1 index: 0
+ToolSvc.Navigation   DEBUG createHolder: creating holder for CLID: 96477 label: DContainer1 and index: 0
+ToolSvc.Navigation   DEBUG registerHolder for OK type: TestDContainer(96477) container: TestDContainer(96477)label: "DContainer1" subTypeIndex: 0 container not allocated yet
+ToolSvc.Navigation   DEBUG NavigationCore::prepare Navigation structure prepared for next event
+Ownership_test        INFO LINE Test progress fine:  Objects prepared
+ToolSvc.Navigation   DEBUG attachFeature: of clid: 96422(TrigNavTest::TestBContainer) to TE: 23 label: "BContainer1" memory management: 3
+ToolSvc.Navigation VERBOSE getting Holder for label: BContainer1
+ToolSvc.Navigation   DEBUG Getting holder for type: 96422 label: BContainer1
+Ownership_test        INFO LINE Test progress fine:  After attachFeture the container is VIEW
+ToolSvc.Navigation   DEBUG attachFeature: of clid: 96422(TrigNavTest::TestBContainer) to TE: 23 label: "BContainer1" memory management: 3
+ToolSvc.Navigation VERBOSE getting Holder for label: BContainer1
+ToolSvc.Navigation   DEBUG Getting holder for type: 96422 label: BContainer1
+HolderFactory      WARNING insert::do_it objects can not be inserted because of ownership issues. Destination container has already 3 objects  and ownership policy OWN no action is performed, potential memory leak
+HolderFactory      WARNING HolderImp::add  insert failed 
+Ownership_test        INFO LINE Test progress fine:  The attachFeature was unsuccesfull (as expected)
+Ownership_test        INFO LINE End of the test: noMixTest
+Ownership_test        INFO LINE Start of the test: testing if the xAOD view container works
+Ownership_test        INFO LINE Test progress fine:  Objects prepared
+Ownership_test        INFO LINE Test progress fine:  View filled
+Ownership_test        INFO LINE Test progress fine:  TE in place - attaching
+ToolSvc.Navigation   DEBUG attachFeature: of clid: 96423(TrigNavTest::TestBContainerView) to TE: 23 label: "BView" memory management: 3
+ToolSvc.Navigation VERBOSE getting Holder for label: BView
+ToolSvc.Navigation   DEBUG Getting holder for type: 96423 label: BView
+ToolSvc.Navigation   DEBUG createHolder: creating holder for CLID: 96423 label: BView and index: 0
+ToolSvc.Navigation   DEBUG getHolder: predefined holder got
+ToolSvc.Navigation   DEBUG registerHolder for OK type: TrigNavTest::TestBContainerView(96423) container: TrigNavTest::TestBContainerView(96423)label: "BView" subTypeIndex: 0 container not allocated yet
+Ownership_test        INFO LINE Test progress fine:  First View attach worked
+ToolSvc.Navigation   DEBUG attachFeature: of clid: 96423(TrigNavTest::TestBContainerView) to TE: 23 label: "BView" memory management: 3
+ToolSvc.Navigation VERBOSE getting Holder for label: BView
+ToolSvc.Navigation   DEBUG Getting holder for type: 96423 label: BView
+Ownership_test        INFO LINE Test progress fine:  Second View attach worked
+Ownership_test        INFO LINE End of the test: testing if the xAOD view container works
+Ownership_test        INFO LINE Test progress fine:  END all went fine
