@@ -37,7 +37,16 @@ StatusCode GepCellsHandlerAlg::initialize() {
   if (!m_doTruncationOfOverflowingFEBs) ATH_MSG_WARNING("Truncation of GEP cells from overflowing FEBs has been disabled. More GEP cells will be send to algorithms than realistically possible");
 
   ATH_MSG_INFO("Flag to enabling the writting of all cells has been set to " << m_writeAllCells.value());
-  if (!m_writeAllCells) ATH_MSG_WARNING("Will write all cells even if they would get truncated for GEP and/or are below the 2sigma threshold. This might lead to large output Ntuples and is not a realistic representation of GEP cells");
+  if (m_writeAllCells) {
+    ATH_MSG_WARNING("Will write all cells even if they would get truncated for GEP and/or are below the 2sigma threshold. This might lead to large output Ntuples and is not a realistic representation of GEP cells");
+    if(m_cleanOutputCells) {
+      ATH_MSG_INFO("Setting energies of the truncated and noisy cells to 0");
+    }
+  } else if (m_cleanOutputCells) {
+    ATH_MSG_ERROR("Cannot use CleanOutputCells without WriteAllCells");
+    return StatusCode::FAILURE;
+  }
+
 
   // Setting up GEP energy encoding scheme
   if (m_doGepHardwareStyleEnergyEncoding) {
@@ -170,17 +179,20 @@ StatusCode GepCellsHandlerAlg::execute(const EventContext& ctx) const {
     float totalNoise = totalNoiseCDO->getNoise(cell->ID(), cell->gain());
    
     // Only send positive-energy 2sigma cells to the GEP
-    if (((cell->energy() / totalNoise) < 2.0) && !m_writeAllCells) continue;
+    const bool pass_2sigma = cell->energy() / totalNoise >= 2.0;
+    if (!pass_2sigma && !m_writeAllCells) continue;
+
+    const double energy = m_cleanOutputCells && !pass_2sigma ? 0 : cell->energy();
 
     // GEP will only have ET available for LAr cells, so convert to energy from ET
-    caloCell.offline_et = cell->energy() / TMath::CosH(cell->eta());
+    caloCell.offline_et = energy / TMath::CosH(cell->eta());
     if (m_doGepHardwareStyleEnergyEncoding && !m_CaloCell_ID->is_tile(cell->ID())) {
-	caloCell.et	= getGepEnergy(cell->energy() / TMath::CosH(cell->eta()));
-	caloCell.e	= caloCell.et * TMath::CosH(cell->eta());
+      caloCell.et	= getGepEnergy(energy / TMath::CosH(cell->eta()));
+      caloCell.e	= caloCell.et * TMath::CosH(cell->eta());
     }
     else {
-	caloCell.e	= cell->energy();
-	caloCell.et	= caloCell.offline_et;
+      caloCell.e	= energy;
+      caloCell.et	= caloCell.offline_et;
     }
     caloCell.time       = cell->time();
     caloCell.quality    = cell->quality();
@@ -271,7 +283,7 @@ StatusCode GepCellsHandlerAlg::execute(const EventContext& ctx) const {
   for ( ;itr != gepCellsPerFEB.end(); ++itr) {
 
 	// LAr FEBs might overflow, so they will get truncated
-	if (m_doTruncationOfOverflowingFEBs && itr->second.size() > m_maxCellsPerFEB && itr->first != "Tile" && !m_writeAllCells) {
+	if (m_doTruncationOfOverflowingFEBs && itr->second.size() > m_maxCellsPerFEB && itr->first != "Tile" && (!m_writeAllCells || m_cleanOutputCells)) {
 		ATH_MSG_DEBUG("FEB " << itr->first << " is sending " << itr->second.size() << " cells, which is more cells than GEP can receive. Removing all but the possible " << m_maxCellsPerFEB << " cells.");
 		CHECK(removeCellsFromOverloadedFEB(itr->second));
 		++nFeb2sInOverflow;
@@ -353,13 +365,14 @@ StatusCode GepCellsHandlerAlg::removeCellsFromOverloadedFEB(std::vector<Gep::Gep
 
   std::map<int,Gep::GepCaloCell>::iterator cell_itr = orderedCells.begin();
   for ( ;cell_itr != orderedCells.end(); ++cell_itr) {
-	cells.push_back(cell_itr->second);
-	if (cells.size() == m_maxCellsPerFEB) break;
+	  cells.push_back(cell_itr->second);
+	  if (!m_cleanOutputCells && cells.size() == m_maxCellsPerFEB) break;
+    else if (m_cleanOutputCells && cells.size() > m_maxCellsPerFEB) {
+      cells.back().offline_et = 0;
+      cells.back().e = 0;
+      cells.back().et = 0;
+    }
   }
 
   return StatusCode::SUCCESS;
 }
-
-
-
-
