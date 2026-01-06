@@ -29,6 +29,8 @@
 #include "FPGATrackSimNNTrackTool.h"
 #include "GaudiKernel/ITHistSvc.h"
 
+#include "GaudiKernel/IChronoStatSvc.h"
+
 #include <vector>
 
   // internal object for book-keeping during the tree branching, basically just a vector of hits with helper functions - NOTHING else
@@ -144,6 +146,7 @@ class FPGATrackSimNNPathfinderExtensionTool   : public extends <AthAlgTool, IFPG
     private:
         ServiceHandle<IFPGATrackSimMappingSvc> m_FPGATrackSimMapping {this, "FPGATrackSimMappingSvc", "FPGATrackSimMappingSvc"};
         ServiceHandle<ITHistSvc> m_tHistSvc {this, "THistSvc", "THistSvc"};
+        ServiceHandle<IChronoStatSvc> m_chronoSvc{this, "ChronoStatSvc", "ChronoStatSvc"};
 
         Gaudi::Property<unsigned> m_maxMiss { this, "threshold", 2, "Maximum number of missing hits to reject a road"};
         Gaudi::Property <std::string> m_region { this, "OutputRegion", "", "region ID"};
