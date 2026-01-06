@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -240,7 +240,13 @@ void test(const DbType storageType, const std::string& filename) {
 
 int main() {
    Athena::getMessageSvcQuiet = true;
-   test(ROOTTREEINDEX_StorageType, "TTreeContIdx_testfile.root");
-   test(ROOTRNTUPLE_StorageType, "RNTupleContIdx_testfile.root");
+   try {
+     test(ROOTTREEINDEX_StorageType, "TTreeContIdx_testfile.root");
+     test(ROOTRNTUPLE_StorageType, "RNTupleContIdx_testfile.root");
+   }
+   catch (const std::exception& e) {
+     std::cout << e.what() << "\n";
+     return 1;
+   }
    return 0;
 }
