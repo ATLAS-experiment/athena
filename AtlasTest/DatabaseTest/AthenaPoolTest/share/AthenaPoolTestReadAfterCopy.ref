@@ -23,7 +23,6 @@ Py:Athena            INFO including file "AthenaPoolTestAthenaPool/AthenaPoolTes
 ApplicationMgr       INFO Successfully loaded modules : AthenaPoolTestAthenaPoolPoolCnv
 Py:Athena            INFO including file "AthenaPoolTest/NoStats_jobOptions.py"
 Warning in <TClass::TClass>: no dictionary for class IProxyDict is available
-ActiveStoreSvc       INFO Initializing ActiveStoreSvc - package version StoreGate-02-20-04
 Py:Athena            INFO including file "AthenaCommon/runbatch.py"
 ApplicationMgr       INFO Successfully loaded modules : StoreGate
 ApplicationMgr       INFO Successfully loaded modules : GaudiSvc
@@ -35,11 +34,7 @@ ApplicationMgr       INFO Successfully loaded modules : PoolSvc
 ApplicationMgr       INFO Successfully loaded modules : AthenaSealSvc
 ApplicationMgr       INFO Successfully loaded modules : DetDescrCnvSvc
 StatusCodeSvc        INFO initialize
-DetectorStore        INFO Initializing DetectorStore - package version StoreGate-02-20-04
 EventPersistenc...   INFO  'CnvServices':[ 'DetDescrCnvSvc' , 'AthenaPoolCnvSvc' ]
-ProxyProviderSvc     INFO Initializing ProxyProviderSvc - package version SGComps-00-00-04
-MetaDataSvc          INFO Initializing MetaDataSvc - package version EventSelectorAthenaPool-00-05-36
-AthenaPoolCnvSvc     INFO Initializing AthenaPoolCnvSvc - package version AthenaPoolCnvSvc-00-11-40
 ChronoStatSvc        INFO  Number of skipped events for MemStat-1
 AthenaSealSvc        INFO begin initialize() - loading dictionary fillers: size 5
 AthenaSealSvc        INFO loadDictFiller - Ntypes before 4646 types added 1453 dictionary filler name:STLRflx
@@ -81,15 +76,12 @@ AthenaRootStrea...   INFO Adopted streamer for class Hep3Vector
 AthenaRootStrea...   INFO   - Streamer name:CLHEPBasicVectorStreamer
 AthenaRootStrea...   INFO ROOT Streamer for BasicVector3D added converter for checksum = 2681080162
 AthenaRootStrea...   INFO Adopted streamer for class BasicVector3D
-ClassIDSvc           INFO Initializing ClassIDSvc - package version CLIDComps-00-00-02
 ClassIDSvc           INFO  getRegistryEntries: read 1020 CLIDRegistry entries for module ALL
 ClassIDSvc           INFO ClassIDSvc Initialized successfully 
 AthenaPoolCnvSvc     INFO Loading POOL XMLAuthenticationService.
-InputMetaDataStore   INFO Initializing InputMetaDataStore - package version StoreGate-02-20-04
 EventSelector        INFO Create PoolCollectionConverter -  CollectionType: ImplicitCollection Connection:  InputCollection: SimplePoolFile2.root
 SimplePoolFile2.root   Always Root file version:51400
 EventSelector        INFO ----- EventSelectorAthenaPool Initialized Properly
-StoreGateSvc         INFO Initializing StoreGateSvc - package version StoreGate-02-20-04
 DetDescrCnvSvc       INFO  initializing 
 DetDescrCnvSvc       INFO Found DetectorStore service
 DetDescrCnvSvc       INFO  filling proxies for detector managers 
@@ -121,7 +113,6 @@ DetDescrCnvSvc       INFO  filling address for TGCIDHELPER with CLID 4173 and st
 DetDescrCnvSvc       INFO  filling address for CaloLVL1_ID with CLID 108133391 and storage type 68 to detector store 
 DetDescrCnvSvc       INFO  filling address for CaloCell_ID with CLID 123500438 and storage type 68 to detector store 
 DetDescrCnvSvc       INFO  filling address for CaloDM_ID with CLID 167756483 and storage type 68 to detector store 
-AthenaEventLoopMgr   INFO Initializing AthenaEventLoopMgr - package version AthenaServices-01-18-02
 HistogramPersis...   INFO  'CnvServices':[ 'HbookHistSvc' , 'RootHistSvc' ]
 HistogramPersis...WARNING Histograms saving not required.
 AthenaEventLoopMgrWARNING Histograms saving not required.
@@ -1359,11 +1350,8 @@ AthenaPoolTestD...  DEBUG Event ID: [0,4:0]
 AthenaPoolTestD...  DEBUG Event type: user type McEvent
 AthenaEventLoopMgr   INFO   ===>>>  end of event 4    <<<===
 HistorySvc           INFO Service finalised successfully
-InputMetaDataStore   INFO Finalizing InputMetaDataStore - package version StoreGate-02-20-04
 PoolSvc              INFO finalize() in PoolSvc
 AthenaSealSvc        INFO finalize() in AthenaSealSvc
-StoreGateSvc         INFO Finalizing StoreGateSvc - package version StoreGate-02-20-04
-DetectorStore        INFO Finalizing DetectorStore - package version StoreGate-02-20-04
 ToolSvc.finalize()   INFO Removing all tools created by ToolSvc
 ChronoStatSvc.f...   INFO  Service finalized succesfully 
 EventSelector     WARNING Service already offline

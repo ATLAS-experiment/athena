@@ -22,7 +22,6 @@ IOVDbSvc                                             INFO Global tag: OFLCOND-MC
 IOVDbSvc                                             INFO Initialised with 3 connections and 18 folders
 IOVDbSvc                                             INFO Service IOVDbSvc initialised successfully
 IOVDbSvc                                             INFO   AlgTool: ToolSvc.IOVDbMetaDataTool
-MetaDataSvc                                          INFO Initializing MetaDataSvc - package version AthenaServices-00-00-00
 PoolSvc                                              INFO io_register[PoolSvc](xmlcatalog_file:PoolFileCatalog.xml) [ok]
 PoolSvc                                              INFO Set connectionsvc retry/timeout/IDLE timeout to  'ConnectionRetrialPeriod':300/ 'ConnectionRetrialTimeOut':3600/ 'ConnectionTimeOut':5 seconds with connection cleanup disabled
 PoolSvc                                              INFO Frontier compression level set to 5
@@ -38,7 +37,6 @@ PoolSvc                                              INFO POOL WriteCatalog is x
 DbSession                                            INFO     Open     DbSession    
 Domain[ROOT_All]                                     INFO >   Access   DbDomain     READ      [ROOT_All] 
 MetaDataSvc                                          INFO Found MetaDataTools = PublicToolHandleArray(['IOVDbMetaDataTool/IOVDbMetaDataTool'])
-OutputStreamSequencerSvc                             INFO Initializing OutputStreamSequencerSvc - package version AthenaServices-00-00-00
 MetaDataSvc                                          INFO   AlgTool: ToolSvc.IOVDbMetaDataTool
 ClassIDSvc                                           INFO  getRegistryEntries: read 1178 CLIDRegistry entries for module ALL
 IOVDbSvc                                             INFO Opening COOL connection for COOLOFL_LAR/OFLP200
@@ -220,7 +218,6 @@ CaloLVL1_ID                                          INFO initialize_from_dictio
 TileCablingSvc                                       INFO RUN2 ATLAS geometry flag detected for geometry: ATLAS-R2-2016-01-00-01
 TileCablingSvc                                       INFO Cabling for RUN2 (2014-2017) ATLAS geometry is set via jobOptions 
 TileCablingSvc                                       INFO Setting Cabling type to 4
-AthenaEventLoopMgr                                   INFO Initializing AthenaEventLoopMgr - package version AthenaServices-00-00-00
 ClassIDSvc                                           INFO  getRegistryEntries: read 5023 CLIDRegistry entries for module ALL
 CondInputLoader                                      INFO Initializing CondInputLoader...
 CondInputLoader                                      INFO Adding base classes:
