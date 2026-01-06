@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // Trigger includes
@@ -18,6 +18,15 @@
 
 namespace {
   constexpr float wordsToKiloBytes = 0.001*sizeof(uint32_t);
+
+  template <typename EnumStatus, typename Getter> TrigByteStreamInputSvc::NextEventStatus fetch(Getter&& getStatus) {
+    switch (getStatus()) {
+      case EnumStatus::OK:      return TrigByteStreamInputSvc::NextEventStatus::OK;
+      case EnumStatus::NO_EVENT:return TrigByteStreamInputSvc::NextEventStatus::NO_EVENT;
+      case EnumStatus::STOP:    return TrigByteStreamInputSvc::NextEventStatus::STOP;
+    }
+    return TrigByteStreamInputSvc::NextEventStatus::ERROR;
+  }
 }
 
 // =============================================================================
@@ -38,6 +47,16 @@ StatusCode TrigByteStreamInputSvc::initialize() {
   ATH_MSG_VERBOSE("start of " << __FUNCTION__);
 
   ATH_CHECK(m_robDataProviderSvc.retrieve());
+  //Check if EFInterfaceSvc is available and set flag for selecting which interface to use
+  if (!m_efInterfaceSvc.empty()) {
+    ATH_MSG_INFO("Using EFInterfaceSvc");
+    ATH_CHECK(m_efInterfaceSvc.retrieve());
+    m_hasEFInterface = true;
+  }
+  else {
+    ATH_MSG_INFO("Using legacy dataflow interface");
+    m_hasEFInterface = false;
+  }
   ATH_CHECK(m_evtStore.retrieve());
   if (!m_monTool.empty()) ATH_CHECK(m_monTool.retrieve());
 
@@ -53,6 +72,11 @@ StatusCode TrigByteStreamInputSvc::finalize() {
   if (m_robDataProviderSvc.release().isFailure()) {
     ATH_MSG_WARNING("Cannot release rob data provider");
   }
+  if (m_hasEFInterface){
+    if (m_efInterfaceSvc.release().isFailure()) {
+      ATH_MSG_WARNING("Failed to release service " << m_efInterfaceSvc.typeAndName());
+    }
+  } 
   ATH_MSG_VERBOSE("end of " << __FUNCTION__);
   return StatusCode::SUCCESS;
 }
@@ -80,13 +104,17 @@ const RawEvent* TrigByteStreamInputSvc::nextEvent() {
   // Free the memory allocated to the previous event processed in the current slot
   cache->releaseEvent();
 
-  using DCStatus = hltinterface::DataCollector::Status;
-  DCStatus status = DCStatus::NO_EVENT;
   auto monLBN = Monitored::Scalar<uint16_t>("getNext_LBN", m_maxLB);
   auto monNoEvent = Monitored::Scalar<bool>("getNext_noEvent", false);
+  auto status = NextEventStatus::ERROR;
   try {
     auto t_getNext = Monitored::Timer<std::chrono::duration<float, std::milli>>("TIME_getNext");
-    status = hltinterface::DataCollector::instance()->getNext(cache->rawData);
+    if (m_hasEFInterface) {
+      status = fetch<EFInterfaceSvc::Status>([&]{ return m_efInterfaceSvc->getNext(cache->rawData); });
+    } 
+    else {
+      status = fetch<hltinterface::DataCollector::Status>([&]{ return hltinterface::DataCollector::instance()->getNext(cache->rawData); });
+    }
     auto mon = Monitored::Group(m_monTool, t_getNext);
   }
   catch (const std::exception& ex) {
@@ -99,18 +127,17 @@ const RawEvent* TrigByteStreamInputSvc::nextEvent() {
                   << "Throwing hltonl::Exception::EventSourceCorrupted" );
     throw hltonl::Exception::EventSourceCorrupted();
   }
-
-  if (status == DCStatus::STOP) {
+  if (status == NextEventStatus::STOP) {
     ATH_MSG_DEBUG("DataCollector::getNext returned STOP - no more events available");
     throw hltonl::Exception::NoMoreEvents();
   }
-  else if (status == DCStatus::NO_EVENT) {
+  else if (status == NextEventStatus::NO_EVENT) {
     ATH_MSG_DEBUG("DataCollector::getNext returned NO_EVENT - no events available temporarily");
     monNoEvent = true;
     auto mon = Monitored::Group(m_monTool, monLBN, monNoEvent);
     throw hltonl::Exception::NoEventsTemporarily();
   }
-  else if (status != DCStatus::OK) {
+  else if (status != NextEventStatus::OK) {
     ATH_MSG_ERROR("Unhandled return Status " << static_cast<int>(status) << " from DataCollector::getNext");
     return nullptr;
   }
@@ -198,3 +225,4 @@ void TrigByteStreamInputSvc::EventCache::releaseEvent() {
   this->rawData.reset();
   this->fullEventFragment.reset();
 }
+

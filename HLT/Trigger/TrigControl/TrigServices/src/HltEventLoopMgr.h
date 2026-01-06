@@ -6,7 +6,7 @@
 #define TRIGSERVICES_HLTEVENTLOOPMGR_H
 
 // Local includes
-#include "EventLoopUtils.h"
+#include "TrigKernel/EventLoopUtils.h"
 #include "TrigSORFromPtreeHelper.h"
 
 // Trigger includes

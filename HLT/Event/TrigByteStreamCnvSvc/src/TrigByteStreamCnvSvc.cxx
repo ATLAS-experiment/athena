@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // Trigger includes
@@ -99,6 +99,16 @@ StatusCode TrigByteStreamCnvSvc::initialize() {
   ATH_CHECK(ByteStreamCnvSvcBase::initialize());
   ATH_CHECK(m_evtStore.retrieve());
   ATH_CHECK(m_robDataProviderSvc.retrieve());
+    //Check if EFInterfaceSvc is available and set flag for selecting which interface to use
+  if (!m_efInterfaceSvc.empty()) {
+    ATH_MSG_INFO("Using EFInterfaceSvc");
+    ATH_CHECK(m_efInterfaceSvc.retrieve());
+    m_hasEFInterface = true;
+  }
+  else {
+    ATH_MSG_INFO("Using legacy dataflow interface");
+    m_hasEFInterface = false;
+  }
   if (!m_monTool.empty()) ATH_CHECK(m_monTool.retrieve());
   ATH_MSG_VERBOSE("end of " << __FUNCTION__);
   return StatusCode::SUCCESS;
@@ -111,6 +121,10 @@ StatusCode TrigByteStreamCnvSvc::finalize() {
   ATH_MSG_VERBOSE("start of " << __FUNCTION__);
   if (m_robDataProviderSvc.release().isFailure())
     ATH_MSG_WARNING("Failed to release service " << m_robDataProviderSvc.typeAndName());
+  if (m_hasEFInterface){
+    if (m_efInterfaceSvc.release().isFailure())
+      ATH_MSG_WARNING("Failed to release service " << m_efInterfaceSvc.typeAndName());
+  } 
   if (m_evtStore.release().isFailure())
     ATH_MSG_WARNING("Failed to release service " << m_evtStore.typeAndName());
   ATH_MSG_VERBOSE("end of " << __FUNCTION__);
@@ -220,7 +234,10 @@ StatusCode TrigByteStreamCnvSvc::commitOutput(const std::string& /*outputFile*/,
   StatusCode result = StatusCode::SUCCESS;
   try {
     auto t_eventDone = Monitored::Timer<std::chrono::duration<float, std::milli>>("TIME_eventDone");
-    hltinterface::DataCollector::instance()->eventDone(std::move(rawEventPtr));
+    if (m_hasEFInterface)
+      m_efInterfaceSvc->eventDone(std::move(rawEventPtr));
+    else
+      hltinterface::DataCollector::instance()->eventDone(std::move(rawEventPtr));
     Monitored::Group(m_monTool, t_eventDone);
     ATH_MSG_DEBUG("Serialised FullEventFragment with HLT result was returned to DataCollector successfully, "
                   << "the eventDone call took " << (double)t_eventDone << " milliseconds");
