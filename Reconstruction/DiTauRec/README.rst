@@ -11,7 +11,6 @@ Di-Tau Reconstruction
 
 |
 |
-|
 
 Introduction
 ============
@@ -23,18 +22,17 @@ for a boosted region.
 With the approach of single tau reconstruction it is not possible to reconstruct
 tau pair topologies with low spatial separation, corresponding to a di-tau with dR < 0.4.
 
-The current development of ``DiTauRec`` is focused on full-hadronic tau decays (hadhad). 
-Additionally, a multi-variate di-tau identification algorithm based on a BDT is available to suppress QCD jet background with high efficiency.
-
 ``DiTauRec`` uses anti-kt-10 fat jets as seeds for its search for di-tau candidates. 
 These are filtered for subjets. 
 A candidate for a full-hadronic tau pair decay should include at least two subjets, while 
 each subjet has to include at least one track. 
 
-A general introduction into di-tau tagging in ATLAS can be found in `master thesis <https://cds.cern.ch/record/2105592>`_ or in `ATL-COM-PHYS-2019-707 <https://cds.cern.ch/record/2679279/files/ATL-COM-PHYS-2019-707.pdf>`_. 
+The current development of ``DiTauRec`` is focused on full-hadronic tau decays (hadhad). 
+Additionally, a multi-variate di-tau identification algorithm (OmniDiscriminant)  is available to suppress QCD jet background with high efficiency. 
 
-|
-|
+A general introduction into di-tau tagging in ATLAS can be found in `master thesis <https://cds.cern.ch/record/2105592>`_ or in `ATL-COM-PHYS-2019-707 <https://cds.cern.ch/record/2679279/files/ATL-COM-PHYS-2019-707.pdf>`_.
+Additional documentation, especially for the OmniDiscriminant, is also available in `ATL-COM-PHYS-2025-772 <https://cds.cern.ch/record/2942068>`_. 
+
 |
 
 Implementation
@@ -70,11 +68,9 @@ These tools are applied in the following order:
 * `CellFinder <src/CellFinder.cxx>`_ (stores information of calorimeter cells which are located inside the 
   subjets)
 * `DiTauExtraVarDecorator <src/DiTauExtraVarDecorator.cxx>`_ (calculates variables which can used for ditau identification)
-* `DiTauOnnxDiscriminantTool <src/DiTauOnnxDiscriminantTool.xx>`_ (calculate the Omni score used for ditau identification)
+* `DiTauOnnxDiscriminantTool <src/DiTauOnnxDiscriminantTool.cxx>`_ (calculate the Omni score used for ditau identification)
 
-These tools are loaded and configured in `DiTauBuilderConfig.py <python/DiTauBuilderConfig.py>`_ and are executed in `DiTauBuilder.cxx <src/DiTauBuilder.cxx>`_.
-
-Note: the `DiTauExtraVarDecorator`_ and the `DiTauOnnxDiscriminantTool`_ are not run at reconstruction level, but they can be run at derivation level (xAOD -> DxAOD)
+Note: the `DiTauExtraVarDecorator`_ and the `DiTauOnnxDiscriminantTool`_ are not run at reconstruction level, but they can be run at derivation level (xAOD -> DxAOD). The OmniDiscriminant score is available in PHYS derivations starting from derivations produced with release 25.0.42 (`ATLASDPD-2315 <https://its.cern.ch/jira/browse/ATLASDPD-2315>>`_)
 
 |
 
@@ -85,8 +81,6 @@ The implementation of the Di-Tau EDM can be found in
 `Event/xAOD/xAODTau <https://gitlab.cern.ch/atlas/athena/-/tree/main/Event/xAOD/xAODTau/xAODTau/>`_.
 
 | 
-|
-|
 
 DiTauRec test in Full Reconstruction
 ----------------------------------
@@ -98,8 +92,6 @@ To execute the test:
 
    athena.py --CA /path/to/athena/Reconstruction/DiTauRec/python/StandAloneDiTauBuilder.py
 
-|
-|
 |
 
 Di-Tau Container Readout
@@ -141,10 +133,7 @@ To loop over the di-tau candidates of the event and access their variables, e.g.
       fCoreSubl = ditau->fCore(1)
 
 
-To see all variables available in the DiTau EDM consult `DiTauJet_v1.cxx <https://gitlab.cern.ch/atlas/athena/-/blob/main/Event/xAOD/xAODTau/Root/DiTauJet_v1.cxx>`_. 
+To see all variables available in the DiTau EDM consult `DiTauJet_v1 <https://gitlab.cern.ch/atlas/athena/-/blob/main/Event/xAOD/xAODTau/Root/DiTauJet_v1.cxx>`_. 
 
 
-|
-|
-|
 |
