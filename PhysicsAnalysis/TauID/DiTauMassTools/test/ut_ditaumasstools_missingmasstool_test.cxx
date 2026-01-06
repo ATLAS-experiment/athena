@@ -47,7 +47,6 @@ int main() {
 
    // Initialize the tool
    DiTauMassTools::MissingMassTool missingmassTool("missingmass_tool");
-   ANA_CHECK( missingmassTool.setProperty("Decorate", true)) ;
    ANA_CHECK( missingmassTool.setProperty("UseVerbose", 1)) ;
    ANA_CHECK( missingmassTool.setProperty("CalibSet", "2024")); 
    ANA_CHECK( missingmassTool.setProperty("UseTailCleanup", 0));
@@ -72,10 +71,6 @@ int main() {
    // Create the TEvent object
    xAOD::TEvent event(xAOD::TEvent::kClassAccess);
    ANA_CHECK( event.readFrom(ifile.get()) );
-
-   static const SG::ConstAccessor<double> acc_mmc_maxw_mass("mmc_maxw_mass");
-   static const SG::ConstAccessor<double> acc_mmc_mlm_mass("mmc_mlm_mass");
-   static const SG::ConstAccessor<double> acc_mmc_mlnu3p_mass("mmc_mlnu3p_mass");
 
    int nevents_with_two_taus = 0;
    Long64_t entries = event.getEntries();
@@ -115,9 +110,9 @@ int main() {
        ::Error(APP_NAME, "Something went wrong in the apply method");
 
      ::Info(APP_NAME, "%d events processed", (int)entry);
-     ::Info(APP_NAME, "mmc maxw = %f GeV", acc_mmc_maxw_mass(*ei));
-     ::Info(APP_NAME, "mmc mlm = %f GeV", acc_mmc_mlm_mass(*ei));
-     ::Info(APP_NAME, "mmc mlnu3p = %f GeV", acc_mmc_mlnu3p_mass(*ei));
+     ::Info(APP_NAME, "mmc maxw = %f GeV", missingmassTool.GetFittedMass(0));
+     ::Info(APP_NAME, "mmc mlm = %f GeV", missingmassTool.GetFittedMass(1));
+     ::Info(APP_NAME, "mmc mlnu3p = %f GeV", missingmassTool.GetFittedMass(2));
 
    }
 

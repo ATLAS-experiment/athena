@@ -97,7 +97,6 @@ class DiTauMassBlock(ConfigBlock):
     alg.met                              = config.readName(self.met)
 
     config.addPrivateTool( 'mmcTool', 'DiTauMassTools::MissingMassTool' )
-    alg.mmcTool.Decorate                   = False # this sets decorations on EventInfo that are not compatible with systematics
     alg.mmcTool.FloatStoppingCrit          = self.floatStopCriterion
     alg.mmcTool.FloatStoppingCritMinIter   = self.floatStopCriterionMinIter
     alg.mmcTool.FloatStoppingCritCheckFreq = self.floatStopCriterionCheckFreq
