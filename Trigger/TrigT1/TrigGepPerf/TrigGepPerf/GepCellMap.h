@@ -26,7 +26,7 @@ namespace Gep{
 	  return m_cellMap.size();
   }
 
-  pGepCellMap getCellMap() {
+  pGepCellMap getCellMap() const {
 	return std::make_unique<std::map<unsigned int,Gep::GepCaloCell>>(m_cellMap);
   }
 
