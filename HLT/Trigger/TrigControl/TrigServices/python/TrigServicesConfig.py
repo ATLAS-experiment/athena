@@ -174,7 +174,12 @@ def TrigServicesCfg(flags):
    acc = ComponentAccumulator()
 
    acc.addService( getMessageSvc(flags) )
-   acc.addService( getHltROBDataProviderSvc(flags) )
+   
+   if flags.Trigger.Online.useEFByteStreamSvc:
+      acc.addService(CompFactory.ROBDataProviderSvc('ROBDataProviderSvc'))
+   else:
+      acc.addService(getHltROBDataProviderSvc(flags))
+
    cool_helper = acc.popToolsAndMerge( getTrigCOOLUpdateHelper(flags) )
 
    loop_mgr = getHltEventLoopMgr(flags)
