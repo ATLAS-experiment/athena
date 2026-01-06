@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 #====================================================================
 # DAOD_LLP1.py
 # This defines DAOD_LLP1, an unskimmed DAOD format for Run 3.
@@ -859,7 +859,7 @@ def LLP1KernelCfg(flags, name='LLP1Kernel', **kwargs):
     # Compute RC substructure variables from tracks
     ghostConstitNames = ["GhostTrack"]
     if flags.Tracking.doLargeD0:
-        ghostConstitNames = ["GhostTrackLRT"]
+        ghostConstitNames += ["GhostTrackLRT"]
 
     from DerivationFrameworkLLP.LLPToolsConfig import RCJetSubstructureAugCfg
     LLP1RCJetSubstructureTrackTrimAugTool = acc.getPrimaryAndMerge(RCJetSubstructureAugCfg( flags,
