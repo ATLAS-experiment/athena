@@ -30,7 +30,7 @@
 #include "GaudiKernel/IEventProcessor.h"
 
 constexpr bool enableBenchmark = 
-#ifdef BENCHMARK_LOGICALHITSALG
+#ifdef BENCHMARK_FPGATRACKSIM
     true;
 #else
     false;
