@@ -50,7 +50,6 @@ TagInfoMgr                                           INFO   AlgTool: TagInfoMgr.
 IOVSvc                                               INFO No IOVSvcTool associated with store "StoreGateSvc"
 IOVSvc.IOVSvcTool                                    INFO IOVRanges will be checked at every Event
 ClassIDSvc                                           INFO  getRegistryEntries: read 829 CLIDRegistry entries for module ALL
-AthenaEventLoopMgr                                   INFO Initializing AthenaEventLoopMgr - package version AthenaServices-00-00-00
 PyComponentMgr                                       INFO Initializing PyComponentMgr...
 dumper                                               INFO Initializing dumper...
 PoolSvc                                              INFO io_register[PoolSvc](xmlcatalog_file:PoolFileCatalog.xml) [ok]

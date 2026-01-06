@@ -12,11 +12,7 @@ ApplicationMgr    SUCCESS
 ====================================================================================================================================
 ApplicationMgr       INFO Successfully loaded modules : StoreGate, CLIDComps
 ApplicationMgr       INFO Application Manager Configured successfully
-StoreGateSvc         INFO Initializing StoreGateSvc - package version StoreGate-03-06-17
-ClassIDSvc           INFO Initializing ClassIDSvc - package version CLIDComps-00-06-18
 ClassIDSvc           INFO  getRegistryEntries: read 1156 CLIDRegistry entries for module ALL
-ProxyProviderSvc     INFO Initializing ProxyProviderSvc - package version SGComps-00-02-04
-DetectorStore        INFO Initializing DetectorStore - package version StoreGate-03-06-17
 EventLoopMgr      WARNING Unable to locate service "EventSelector" 
 EventLoopMgr      WARNING No events will be processed from external input.
 HistogramPersis...WARNING Histograms saving not required.

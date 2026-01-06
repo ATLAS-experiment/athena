@@ -24,19 +24,14 @@ ApplicationMgr       INFO Updating Gaudi::PluginService::SetDebug(level) to leve
 StatusCodeSvc        INFO initialize
 AthDictLoaderSvc     INFO in initialize...
 AthDictLoaderSvc     INFO acquired Dso-registry
-ClassIDSvc           INFO Initializing ClassIDSvc - package version CLIDComps-00-06-21
 ClassIDSvc           INFO  getRegistryEntries: read 2244 CLIDRegistry entries for module ALL
 ChronoStatSvc        INFO  Number of skipped events for MemStat-1
 CoreDumpSvc          INFO install f-a-t-a-l handler... (flag = -1)
 CoreDumpSvc          INFO Handling signals: 11(Segmentation fault) 7(Bus error) 4(Illegal instruction) 8(Floating point exception) 
-AthenaEventLoopMgr   INFO Initializing AthenaEventLoopMgr - package version AthenaServices-01-60-25
 AthMasterSeq         INFO Member list: AthSequencer/AthAlgSeq, AthSequencer/AthOutSeq, AthSequencer/AthRegSeq
 AthAlgSeq            INFO Member list: PyAthena::Alg/dumper
 PyComponentMgr       INFO Initializing PyComponentMgr...
 dumper               INFO Initializing dumper...
-MetaDataSvc          INFO Initializing MetaDataSvc - package version AthenaServices-01-60-25
-AthenaPoolCnvSvc     INFO Initializing AthenaPoolCnvSvc - package version AthenaPoolCnvSvc-00-28-25
-PoolSvc              INFO Initializing PoolSvc - package version PoolSvc-00-25-03
 PoolSvc              INFO io_register[PoolSvc](xmlcatalog_file:PoolFileCatalog.xml) [ok]
 PoolSvc              INFO Set connectionsvc retry/timeout/IDLE timeout to  'ConnectionRetrialPeriod':300/ 'ConnectionRetrialTimeOut':3600/ 'ConnectionTimeOut':5 seconds with connection cleanup disabled
 PoolSvc              INFO Frontier compression level set to 5
@@ -49,7 +44,6 @@ PoolSvc              INFO POOL WriteCatalog is xmlcatalog_file:PoolFileCatalog.x
 XMLFileCatalog Info Connecting to the catalog
 PoolXMLFileCatalog Info Xerces-c initialization Number 0
 PoolXMLFileCatalog Info File PoolFileCatalog.xml does not exist, a new one is created
-EventSelector        INFO Initializing EventSelector - package version EventSelectorAthenaPool-00-19-16
 EventSelector        INFO reinitialization...
 PoolSvc              INFO File is not in Catalog! Attempt to open it anyway.
 RootCollection Info Opening Collection File /afs/cern.ch/atlas/maxidisk/d33/referencefiles/aod/AOD-17.5.0/AOD-17.5.0-full.pool.root in mode: READ
@@ -333,11 +327,8 @@ ImplicitCollection Info Opened the implicit collection with connection string "P
 ImplicitCollection Info and a name "POOLContainer(DataHeader)"
 PoolSvc              INFO Failed to find container MetaDataHdrDataHeader to get Token.
 EventPersistenc...   INFO Added successfully Conversion service:AthenaPoolCnvSvc
-AthenaPoolAddre...   INFO Initializing AthenaPoolAddressProviderSvc - package version EventSelectorAthenaPool-00-19-16
-ProxyProviderSvc     INFO Initializing ProxyProviderSvc - package version SGComps-00-02-10
 HistogramPersis...WARNING Histograms saving not required.
 AthenaEventLoopMgr   INFO Setup EventSelector service EventSelector
-ActiveStoreSvc       INFO Initializing ActiveStoreSvc - package version StoreGate-03-07-06
 ApplicationMgr       INFO Application Manager Initialized successfully
 /afs/cern.ch/atlas/maxidisk/d33/referencefiles/aod/AOD-17.5.0/AOD-17.5.0-full.pool.root Info Database being retired...
 Domain[ROOT_All] Info ->  Deaccess DbDatabase   READ      [ROOT_All] 48D7B5A4-1E0D-E011-B6D0-003048F0E778
