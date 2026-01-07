@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /** Return approximate correction on the number of reconstructed vertices
@@ -31,16 +31,13 @@
 #include "JetCalibTools/CalibrationMethods/NPVBeamspotCorrection.h"
 
 NPVBeamspotCorrection::NPVBeamspotCorrection()
-  : m_g_nvtx_nreco_bs66mm(nullptr), m_g_nvtx_nreco_bs47mm(nullptr), m_invGraph(nullptr), m_NPVmin(0), m_NPVmax(0)
+  : m_NPVmin(0), m_NPVmax(0)
 {
   initNPVBeamspotCorrection();
 }
 
 NPVBeamspotCorrection::~NPVBeamspotCorrection()
 {
-    if (m_g_nvtx_nreco_bs66mm) delete m_g_nvtx_nreco_bs66mm;
-    if (m_g_nvtx_nreco_bs47mm) delete m_g_nvtx_nreco_bs47mm; 
-    if (m_invGraph) delete m_invGraph; 
 }
 
 void NPVBeamspotCorrection::initNPVBeamspotCorrection() {
@@ -50,8 +47,8 @@ void NPVBeamspotCorrection::initNPVBeamspotCorrection() {
   m_g_nvtx_nreco_bs47mm = NVtx_NReconstructible_bs47mm();
   m_g_nvtx_nreco_bs66mm = NVtx_NReconstructible_bs66mm();
 
-  if (m_invGraph==nullptr) {
-    m_invGraph = new TGraph();
+  if (!m_invGraph) {
+    m_invGraph = std::make_unique<TGraph>();
     for (int i=0;i<m_g_nvtx_nreco_bs66mm->GetN();++i) 
       m_invGraph->SetPoint(i,m_g_nvtx_nreco_bs66mm->GetY()[i],m_g_nvtx_nreco_bs66mm->GetX()[i]);
   }
@@ -68,8 +65,8 @@ double NPVBeamspotCorrection::GetNVertexBsCorrection(double nRecoVtx)
   return m_g_nvtx_nreco_bs47mm->Eval(m_invGraph->Eval(nRecoVtx));
 }
 
-TGraph* NPVBeamspotCorrection::NVtx_NReconstructible_bs47mm() {
-   TGraph *graph = new TGraph(41);
+std::unique_ptr<TGraph> NPVBeamspotCorrection::NVtx_NReconstructible_bs47mm() {
+   auto graph = std::make_unique<TGraph>(41);
    graph->SetName("g_shadowedAverage_bs47mm");
    graph->SetPoint(0, 0, 0);
    graph->SetPoint(1, 1, 1);
@@ -115,8 +112,8 @@ TGraph* NPVBeamspotCorrection::NVtx_NReconstructible_bs47mm() {
    return graph;
 }
 
-TGraph* NPVBeamspotCorrection::NVtx_NReconstructible_bs66mm() {
-   TGraph *graph = new TGraph(41);
+std::unique_ptr<TGraph> NPVBeamspotCorrection::NVtx_NReconstructible_bs66mm() {
+   auto graph = std::make_unique<TGraph>(41);
    graph->SetName("g_shadowedAverage_bs66mm");
    graph->SetPoint(0, 0, 0);
    graph->SetPoint(1, 1, 1);
