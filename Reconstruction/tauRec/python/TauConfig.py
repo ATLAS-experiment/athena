@@ -273,47 +273,17 @@ def TauxAODthinngCfg(flags):
 def TauReconstructionCfg(flags):
 
     result = ComponentAccumulator()
-
-    # Schedule the custom jets needed for tau seeding
-    from JetRecConfig.JetRecConfig import JetRecCfg
-    from JetRecConfig.StandardJetConstits import stdConstitDic as cst
-    from JetRecConfig.JetDefinition import  JetDefinition
-    from JetRecConfig.StandardSmallRJets import flavourghosts, calibmods_noCut, standardmods, truthmods
-    minimalghosts = ["Track","MuonSegment","Truth"]
-
+    
     #Check if the specific jet collection is needed based on flags
-    if flags.Tau.TauRec.SeedJetCollection == "AntiKt4MLTopoJets":
-        from JetRecConfig.StandardSmallRJets import AntiKt4MLTopo
-        result.merge(JetRecCfg(flags, AntiKt4MLTopo))
-    if flags.Tau.TauRec.SeedJetCollection == "AntiKt4EMPFlowMLJets":
-        from JetRecConfig.StandardSmallRJets import AntiKt4EMPFlowML
-        result.merge(JetRecCfg(flags, AntiKt4EMPFlowML))
-    if flags.Tau.TauRec.SeedJetCollection == "AntiKt4EMPFlow10GeVCutTauSeedJets":
-        AntiKt4EMPFlow10GeVCutTauSeed = JetDefinition("AntiKt",0.4,cst.GPFlow,
-                                      infix = "10GeVCutTauSeed",
-                                      ghostdefs = minimalghosts+flavourghosts,
-                                      modifiers = calibmods_noCut+("Filter:1",)+truthmods+standardmods+("JetPtAssociation","CaloEnergiesClus"),
-                                      ptmin = 10000.,
-                                      lock = True)
-        result.merge(JetRecCfg(flags, AntiKt4EMPFlow10GeVCutTauSeed))
-    if flags.Tau.TauRec.SeedJetCollection == "AntiKt4EMPFlow5GeVCutTauSeedJets":
-        AntiKt4EMPFlow5GeVCutTauSeed = JetDefinition("AntiKt",0.4,cst.GPFlow,
-                                      infix = "5GeVCutTauSeed",
-                                      ghostdefs = minimalghosts+flavourghosts,
-                                      modifiers = calibmods_noCut+("Filter:1",)+truthmods+standardmods+("JetPtAssociation","CaloEnergiesClus"),
-                                      ptmin = 5000.,
-                                      lock = True)
-        result.merge(JetRecCfg(flags, AntiKt4EMPFlow5GeVCutTauSeed))
-    if flags.Tau.TauRec.SeedJetCollection == "AntiKt4EMPFlowNoPtCutTauSeedJets":
-        AntiKt4EMPFlowNoPtCutTauSeed = JetDefinition("AntiKt",0.4,cst.GPFlow,
-                                      infix = "NoPtCutTauSeed",
-                                      ghostdefs = minimalghosts+flavourghosts,
-                                      modifiers = calibmods_noCut+("Filter:1",)+truthmods+standardmods+("JetPtAssociation","CaloEnergiesClus"),
-                                      ptmin = 1,
-                                      lock = True)
-        result.merge(JetRecCfg(flags, AntiKt4EMPFlowNoPtCutTauSeed))
-    # --- > End of Schedule the custom jets needed for tau seeding < ---
-
+    if flags.Tau.TauRec.SeedJetCollection in ["AntiKt4MLTopoJets",
+                                              "AntiKt4EMPFlowMLJets",
+                                              "AntiKt4EMPFlow10GeVCutTauSeedJets",
+                                              "AntiKt4EMPFlow5GeVCutTauSeedJets",
+                                              "AntiKt4EMPFlowNoPtCutTauSeedJets"]:
+        from JetRecConfig.JetRecConfig import JetRecCfg
+        from tauRec.ConfigurationHelpers import GetSeedCollection
+        seedJet = GetSeedCollection(flags)
+        result.merge(JetRecCfg(flags, seedJet))
 
     # standard tau reconstruction
     flags_TauRec = flags.cloneAndReplace("Tau.ActiveConfig", "Tau.TauRec")
