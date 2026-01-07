@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CscCalibMonToolPed.h"
@@ -593,22 +593,22 @@ StatusCode CscCalibMonToolPed::postProc()
       return StatusCode::RECOVERABLE;
     }
 
-    const DataVector<TH1I> * pedAmpHists = pedReport->getPedAmpHists();
-    if(!pedAmpHists)
+    const std::vector<TH1I*>& pedAmpHists = pedReport->getPedAmpHists();
+    if(pedAmpHists.empty())
       ATH_MSG_WARNING( "No pedAmpHists vector found from calibration. "
                        << " Won't be in monitoring output file"  );
 
-    const DataVector<TH1I> * bitHists = pedReport->getBitHists();
-    if(!bitHists)
+    const std::vector<TH1I*>& bitHists = pedReport->getBitHists();
+    if(bitHists.empty())
       ATH_MSG_INFO( "No bit histogram vector found from calibration. "
                     << " Won't be in monitoring output file. "  );
 
-    const DataVector<TH2F> * bitCorrelations = nullptr;
+    const std::vector<TH2F*>* bitCorrelations = nullptr;
 
     if(m_doBitCorrelations)
-      bitCorrelations = pedReport->getBitCorrelation();
+      bitCorrelations = &pedReport->getBitCorrelation();
 
-    const DataVector< DataVector<TH1I> >* sampHists = pedReport->getSampHists();
+    const std::vector< std::vector<TH1I*> >& sampHists = pedReport->getSampHists();
 
     //These are the channels we will get detailed amplitude histograms for.
     for(unsigned int idItr = 0; idItr <= m_maxHashId; idItr++)
@@ -643,9 +643,9 @@ StatusCode CscCalibMonToolPed::postProc()
 
         //Pedestal amplitude histograms
         //copy source histogram into new histogram, and store
-        if(pedAmpHists)
+        if(!pedAmpHists.empty())
         {
-          sourceHist = const_cast<TH1I*>((*pedAmpHists)[idItr]);
+          sourceHist = const_cast<TH1I*>(pedAmpHists[idItr]);
           if(!sourceHist)
           {
             ATH_MSG_ERROR( "There is no pedestal amplitude histogram with hashId "
@@ -690,12 +690,12 @@ StatusCode CscCalibMonToolPed::postProc()
           }
         }
 
-        if(sampHists) {
-          const DataVector<TH1I> * histVect = (*sampHists)[idItr];
+        if(!sampHists.empty()) {
+          const std::vector<TH1I*>& histVect = sampHists[idItr];
 
-          size_t hNum = histVect->size();
+          size_t hNum = histVect.size();
           for(size_t hCnt = 0; hCnt < hNum; hCnt++) {
-            sourceHist = const_cast<TH1I*>((*histVect)[hCnt]);
+            sourceHist = const_cast<TH1I*>(histVect[hCnt]);
             std::stringstream name;
             name << "h_samp"
               << "_EC" << getEndCap(stationEta)
@@ -715,9 +715,9 @@ StatusCode CscCalibMonToolPed::postProc()
 
         //Bit map histograms
         //copy source histogram into new histogram, and store
-        if(bitHists)
+        if(!bitHists.empty())
         {
-          sourceHist = const_cast<TH1I*>((*bitHists)[idItr]);
+          sourceHist = const_cast<TH1I*>(bitHists[idItr]);
           if(!sourceHist)
           {
             ATH_MSG_ERROR( "There is no bit histogram with hashId "

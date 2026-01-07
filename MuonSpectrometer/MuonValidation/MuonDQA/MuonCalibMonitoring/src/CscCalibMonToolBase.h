@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef CSCCALIBMONITORING_CSCCALIBMONTOOLBASE_H
@@ -206,13 +206,13 @@ class CscCalibMonToolBase: public ManagedMonitorToolBase
           HistCollection(): 
             ignoreY(false), 
           hashHist(NULL), allChan1dHistX(NULL), allChan1dHistY(NULL), allChan2dHist(NULL), chamProf(NULL),  
-          layHistVect(NULL), laySummVect(NULL), chamSummVect(NULL), chamHistVect(NULL), abs2d(true)
+          abs2d(true)
           {}
 
           HistCollection(int arraySize, int errorSize = 0): 
             ignoreY(false),
             hashHist(NULL), allChan1dHistX(NULL), allChan1dHistY(NULL), allChan2dHist(NULL), chamProf(NULL),
-            layHistVect(NULL), laySummVect(NULL), chamSummVect(NULL), chamHistVect(NULL), abs2d(true)
+            abs2d(true)
           {
             data.resize(arraySize);
             if(errorSize)
@@ -220,12 +220,6 @@ class CscCalibMonToolBase: public ManagedMonitorToolBase
           }
 
           ~HistCollection() {
-            if (layHistVect != NULL)
-              delete layHistVect;
-            if (laySummVect != NULL)
-              delete laySummVect;
-            if (chamSummVect)
-              delete chamSummVect;                
           }
           bool ignoreY;
           std::vector<float>  data;
@@ -236,10 +230,10 @@ class CscCalibMonToolBase: public ManagedMonitorToolBase
           TH1F * allChan1dHistY{};
           TH2F * allChan2dHist{};
           TProfile * chamProf{};
-          std::vector<TH1F*> * layHistVect{};
-          std::vector<TH1F*> * laySummVect{}; 
-          std::vector<TH1F*> * chamSummVect{};
-          std::vector<TH1F*> * chamHistVect{};
+          std::vector<TH1F*> layHistVect{};
+          std::vector<TH1F*> laySummVect{};
+          std::vector<TH1F*> chamSummVect{};
+          std::vector<TH1F*> chamHistVect{};
           bool abs2d{};
         };
 
