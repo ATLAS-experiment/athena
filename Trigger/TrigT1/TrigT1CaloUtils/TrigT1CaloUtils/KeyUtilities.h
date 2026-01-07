@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /***************************************************************************
                           KeyUtilities.h  -  description
@@ -74,10 +74,10 @@ protected: // Protected methods
   /** converts the coordinates and corrects for overflows etc.
   For instance, if phi is negative this routine converts to the
   equivalent positive position. */
-  ICoordinate* convertCoordsToIntegers(double phi, double eta);
+  ICoordinate convertCoordsToIntegers(double phi, double eta);
   /** converts integer phi, eta 
   coordinates to phi, eta trigger bins. */
-  virtual BinAndCoord* calculateTriggerBin(ICoordinate* iCoord)=0;
+  virtual BinAndCoord calculateTriggerBin(const ICoordinate& iCoord)=0;
   /** returns -1 if temp is -ve and +1 if it is +ve. returns 0 if temp =0 */
   virtual int sign(int temp) const;
   /** returns -1 if temp is -ve and +1 if it is +ve. returns 0 if temp =0 */

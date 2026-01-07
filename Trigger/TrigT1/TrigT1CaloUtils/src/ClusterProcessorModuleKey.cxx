@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /***************************************************************************
                           ClusterProcessorModuleKey.cpp  -  description
@@ -57,11 +57,11 @@ double ClusterProcessorModuleKey::dEta(const Coordinate& /*coord*/) const{
 } //end of ns
 
 /** sets the eta and phi bins*/
-void LVL1::ClusterProcessorModuleKey::setBins(ICoordinate* iCoord, unsigned int& phiBin, int& etaBin){
+void LVL1::ClusterProcessorModuleKey::setBins(const ICoordinate& iCoord, unsigned int& phiBin, int& etaBin){
   unsigned int iPhiSize=16 ; // 64 bins in total, so 16/module
-  phiBin=( iCoord->phi() )/(iPhiSize);
+  phiBin=( iCoord.phi() )/(iPhiSize);
   int iEtaSize=4;// CPMs are 0.4 in eta, so ietaSize=4
-  etaBin=sharpRound2(iCoord->eta(),iEtaSize);
+  etaBin=sharpRound2(iCoord.eta(),iEtaSize);
 
   return;
 }
@@ -84,9 +84,9 @@ unsigned int LVL1::ClusterProcessorModuleKey::cpm(const Coordinate & coord) cons
 /** converts integer phi, eta
 coordinates to phi, eta trigger bins.
 Returns coordinates of centre of JEs*/
-LVL1::BinAndCoord* LVL1::ClusterProcessorModuleKey::calculateTriggerBin(ICoordinate* iCoord){
-  int abs_ieta=abs(iCoord->eta() );
-  int sign=( iCoord->eta() )/abs_ieta;
+LVL1::BinAndCoord LVL1::ClusterProcessorModuleKey::calculateTriggerBin(const ICoordinate& iCoord){
+  int abs_ieta=abs(iCoord.eta() );
+  int sign=( iCoord.eta() )/abs_ieta;
 
   int etaBin=0; unsigned int phiBin=0;
   setBins(iCoord,phiBin,etaBin);
@@ -98,15 +98,15 @@ LVL1::BinAndCoord* LVL1::ClusterProcessorModuleKey::calculateTriggerBin(ICoordin
   if (m_debugModuleKey){
     std::cout << "ClusterProcessorModuleKey: start calcTrigBin"<<std::endl;
     std::cout << "phi, eta   : ("<<m_phi<<", "<<m_eta<<")"<<std::endl;
-    std::cout << "iphi, ieta : ("<<( iCoord->phi() )<<", "<<( iCoord->eta() )<<")"<<std::endl;
+    std::cout << "iphi, ieta : ("<<( iCoord.phi() )<<", "<<( iCoord.eta() )<<")"<<std::endl;
     std::cout << "abs_ieta : ("<<abs_ieta<<" and sign :  "<<sign<<std::endl;
     std::cout << "central : ("<<centralPhi<<", "<<centralEta<<")"
         << "bin : ("<<phiBin<<","<<etaBin<<")"<<std::endl;
   }
 
-  Coordinate* centralCoords = new Coordinate(centralPhi, centralEta);
-  if (m_debugModuleKey) std::cout <<" ClusterProcessorModuleKey : created coord "<<(*centralCoords)<<std::endl;
-	return new BinAndCoord(phiBin,etaBin,centralCoords);
+  Coordinate centralCoords (centralPhi, centralEta);
+  if (m_debugModuleKey) std::cout <<" ClusterProcessorModuleKey : created coord "<<centralCoords<<std::endl;
+  return BinAndCoord(phiBin,etaBin,centralCoords);
 }
 
 

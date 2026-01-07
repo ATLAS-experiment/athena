@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /***************************************************************************
                           TriggerTowerKey.cpp  -  description
@@ -53,11 +53,11 @@ TriggerTowerKey::~TriggerTowerKey(){
 
 /** converts integer phi, eta
 coordinates to phi, eta trigger bins. */
-BinAndCoord* TriggerTowerKey::calculateTriggerBin(ICoordinate* iCoord){
+BinAndCoord TriggerTowerKey::calculateTriggerBin(const ICoordinate& iCoord){
 
   double phiBinWidth=((2*M_PI)/64.0);
-  int iphi=iCoord->phi();
-  int ieta=iCoord->eta();
+  int iphi=iCoord.phi();
+  int ieta=iCoord.eta();
   double centralPhi=0.0;
   double centralEta=0.0;
   int phiBin=0; int etaBin=0;
@@ -66,7 +66,7 @@ BinAndCoord* TriggerTowerKey::calculateTriggerBin(ICoordinate* iCoord){
 
   if (m_debug){
     std::cout << "TriggerTowerKey: start calcTrigBin"<<std::endl;
-    std::cout << "phi, eta   : ("<<iCoord->phi()<<", "<<iCoord->eta()<<")"<<std::endl;
+    std::cout << "phi, eta   : ("<<iCoord.phi()<<", "<<iCoord.eta()<<")"<<std::endl;
     std::cout << "iphi, ieta : ("<<iphi<<", "<<ieta<<")"<<std::endl;
     std::cout << "abs_ieta : ("<<abs_ieta<<" and sign :  "<<sign<<std::endl;
   }
@@ -112,7 +112,7 @@ BinAndCoord* TriggerTowerKey::calculateTriggerBin(ICoordinate* iCoord){
       
       double fcalEtaSize=0.425; //=(4.9-3.2)/4
 
-      double abs_eta = iCoord->dEta()*sign;
+      double abs_eta = iCoord.dEta()*sign;
       double temp=static_cast<double>(abs_eta-3.2);
       temp = (temp/ fcalEtaSize );
       int iTemp=static_cast<int>(temp);
@@ -126,9 +126,7 @@ BinAndCoord* TriggerTowerKey::calculateTriggerBin(ICoordinate* iCoord){
     }// end else: in .4x.4
   }// end of not in 0.1x0.1
   if (m_debug) std::cout << "central     : /t("<<centralPhi<<", "<<centralEta<<")"<<std::endl;
-  Coordinate* centralCoords = new Coordinate(centralPhi, centralEta);
-  BinAndCoord* bandc = new BinAndCoord(phiBin,etaBin,centralCoords);
-  return bandc;
+  return BinAndCoord(phiBin,etaBin,Coordinate(centralPhi, centralEta));
 }
 
 #ifndef  TRIGGERSPACE
