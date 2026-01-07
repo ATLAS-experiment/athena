@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //////////////////////////////////////////////////////////
@@ -207,6 +207,9 @@ public :
    virtual void     Loop();
    virtual Bool_t   Notify();
    virtual void     Show(Long64_t entry = -1);
+
+  TrkValidationNtupleOutputTrack(const TrkValidationNtupleOutputTrack&) = delete;
+  TrkValidationNtupleOutputTrack& operator=(const TrkValidationNtupleOutputTrack&) = delete;
 };
 
 #endif
