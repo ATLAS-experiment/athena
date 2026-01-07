@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -318,7 +318,7 @@ TimedHitCollection<ZDC_SimFiberHit> ZDC_PileUpTool::doZDClightGuideCuts(const ZD
   ZDC_SimFiberHit* newHits[2][4]{};
   auto newCollection = std::make_unique<ZDC_SimFiberHit_Collection>("ZDC_SimFiberHit_Collection_Temp");
 
-  for(ZDC_SimFiberHit hit : *hitCollection){
+  for(const ZDC_SimFiberHit& hit : *hitCollection){
     Identifier id = hit.getID();
     //Translate side from -1,1 to 0,1 to index ZDC hits
     int side = (m_ZdcID->side( id ) < 0 ) ? 0 : 1;
