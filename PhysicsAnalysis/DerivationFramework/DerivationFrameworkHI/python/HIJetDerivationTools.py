@@ -296,7 +296,7 @@ pp15TriggerDict_MB = {'HLT_mb_sptrk': 20}
 HI18TriggerDict_HP_HION8 = {'HLT_j50_ion_L1J12': 60, 'HLT_j60_ion_L1J15': 70.5, 'HLT_j75_ion_L1J20': 84.5, 'HLT_j75_ion_L1J30': 84.5, 'HLT_j85_ion_L1J30': 94.5}
 HI18TriggerDict_HP_HION7 = HI18TriggerDict_HP_HION8.copy()
 HI18TriggerDict_HP_HION7.update({'HLT_mu4_j30_a2_ion_dr05': 30 ,'HLT_mu4_j40_a2_ion_dr05': 40 ,'HLT_mu4_j30_a3_ion_dr05': 30 ,'HLT_mu4_j40_a3_ion_dr05': 40 ,'HLT_mu4_j40_ion_dr05': 40 ,'HLT_mu4_j50_ion_dr05': 50, 'HLT_mu4_j60_ion_dr05_L1MU4_J15': 60})
-HI18TriggerDict_HP_HION9 = {'HLT_j50_ion_L1J12': 60, 'HLT_j60_ion_L1J15': 70.5, 'HLT_j75_ion_L1J20': 84.5, 'HLT_j75_ion_L1J30': 84.5, 'HLT_j85_ion_L1J20': 94.5, 'HLT_j85_ion_L1J30': 94.5, 'HLT_j100_ion_L1J30': 110, 'HLT_j150_a10_ion_L1J50': 160, 'HLT_j180_a10_ion_L1J50': 190, 'HLT_j200_a10_ion_L1J50': 210, 'HLT_j50_ion_320eta490' : 60, 'HLT_j60_320eta490': 70, 'HLT_j70_320eta490':80}
+HI18TriggerDict_HP_HION9 = {'HLT_j50_ion_L1J12': 60, 'HLT_j60_ion_L1J15': 70.5, 'HLT_j75_ion_L1J20': 84.5, 'HLT_j75_ion_L1J30': 84.5, 'HLT_j85_ion_L1J20': 94.5, 'HLT_j85_ion_L1J30': 94.5, 'HLT_j100_ion_L1J30': 110, 'HLT_j150_a10_ion_L1J50': 160, 'HLT_j180_a10_ion_L1J50': 190, 'HLT_j200_a10_ion_L1J50': 210, 'HLT_j50_320eta490_ion' : 55,'HLT_j60_320eta490_ion': 65, 'HLT_j70_320eta490_ion':75}
 HI18TriggerDict_MB = {'HLT_mb_sptrk_L1ZDC_A_C_VTE50': 20, 'HLT_noalg_pc_L1TE50_VTE600.0ETA49': 20, 'HLT_noalg_cc_L1TE600.0ETA49': 20}
 
 #2017 pp  90% trigger efficiency points
@@ -304,7 +304,7 @@ HI18TriggerDict_MB = {'HLT_mb_sptrk_L1ZDC_A_C_VTE50': 20, 'HLT_noalg_pc_L1TE50_V
 pp17TriggerDict_HP_HION8 = {'HLT_j30_0eta490_L1TE20': 34,'HLT_j40_0eta490_L1TE20':  44, 'HLT_j50_L1J15': 59, 'HLT_j60': 70, 'HLT_j60_200eta320_L1J20': 70, 'HLT_j75_L1J20': 79, 'HLT_j75_200eta320_L1J20': 79, 'HLT_j85': 89, 'HLT_j100_L1J20': 100}
 pp17TriggerDict_HP_HION7 = pp17TriggerDict_HP_HION8.copy()
 pp17TriggerDict_HP_HION7.update({'HLT_mu4_j40_dr05': 40 ,'HLT_mu4_j50_dr05': 50 })
-pp17TriggerDict_HP_HION9 = {'HLT_j50_L1J15': 59, 'HLT_j60': 70, 'HLT_j85': 89, 'HLT_j100_L1J20': 100, 'HLT_j110_a10_lcw_subjes_L1J30': 150, "HLT_j25_320eta490": 32, "HLT_j25" :28, "HLT_j35_320eta490": 42, "HLT_j35": 41, "HLT_j45_320eta490": 60, "HLT_j45": 51, "HLT_j60_320eta490" : 66, "HLT_j60" : 66, "HLT_j85_320eta490" : 90, "HLT_j85" : 96 }
+pp17TriggerDict_HP_HION9 = {'HLT_j50_L1J15': 59, 'HLT_j60': 70, 'HLT_j85': 89, 'HLT_j100_L1J20': 100, 'HLT_j110_a10_lcw_subjes_L1J30': 150, "HLT_j25_320eta490": 30, "HLT_j25" :30, "HLT_j35_320eta490": 40, "HLT_j35": 40, "HLT_j45_320eta490": 55, "HLT_j45": 50, "HLT_j60_320eta490" : 65, "HLT_j60" : 65, "HLT_j85_320eta490" : 90, "HLT_j85" : 90 }
 pp17TriggerDict_MB = {'HLT_mb_sptrk': 20}
 
 #2017 XeXe
