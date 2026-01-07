@@ -114,11 +114,10 @@ datamodel_run_test (CondReadWriteCool
 #  EXTRA_IGNORE "|--host=http://.*"
 #)
 
-set(ENV{TMPDIR} /tmp)
 datamodel_run_test (CondReadWriteCrestFS
   COMMAND athena.py
   ARG "CondReadWrite.py --condDB=crestfs"
-  EXTRA_IGNORE "|--host=$ENV{TMPDIR}/.*"
+  EXTRA_IGNORE "|--host="
 )
 
 datamodel_run_test (xAODTestWriteThinned)

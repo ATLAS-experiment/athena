@@ -60,18 +60,18 @@ if flags.Concurrency.NumThreads >= 1:
     flags.Scheduler.ShowDataDeps = True
 flags.lock()
 
-## Check if CREST_URL is set, fail otherwise
-crest_url = os.getenv("CREST_URL")
-if not crest_url:
-    print("ERROR: Environment variable CREST_URL is not set.\n")
-    sys.exit(1)
-
 if args.condDB == 'cool':
     condtest_rw = 'condtest_rw.db'
     ## Cleanup previous file
     if os.path.isfile(condtest_rw):
         os.remove(condtest_rw)
 elif args.condDB == 'crest':
+    ## Check if CREST_URL is set, fail otherwise
+    crest_url = os.getenv("CREST_URL")
+    if not crest_url:
+        print("ERROR: Environment variable CREST_URL is not set.\n")
+        sys.exit(1)
+
     condtest_rw = 'CALO_OFL'
     cond_src = crest_url
 elif args.condDB == 'crestfs':
