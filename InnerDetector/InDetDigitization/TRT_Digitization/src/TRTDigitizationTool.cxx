@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -161,6 +161,7 @@ StatusCode TRTDigitizationTool::initialize()
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
   ATH_CHECK( m_fieldCacheCondObjInputKey.initialize() );
+  ATH_CHECK( m_trtDetElementsInputKey.initialize() );
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
   return StatusCode::SUCCESS;
@@ -319,6 +320,7 @@ StatusCode TRTDigitizationTool::processStraws(const EventContext& ctx,
   SG::WriteHandle<InDetSimDataCollection> simDataMap(m_outputSDOCollName, ctx);
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
+  // Access to Conditions objects
   MagField::AtlasFieldCache    fieldCache;
   if (m_settings->useMagneticFieldMap()) {
       
@@ -332,7 +334,13 @@ StatusCode TRTDigitizationTool::processStraws(const EventContext& ctx,
     }
     fieldCondObj->getInitializedCache (fieldCache);
   }
-  
+
+  SG::ReadCondHandle<InDetDD::TRT_DetElementContainer> trtDetElementsHandle{m_trtDetElementsInputKey, ctx};
+  const InDetDD::TRT_DetElementContainer* trtDetElements{*trtDetElementsHandle};
+  if(!trtDetElements) {
+    ATH_MSG_ERROR("Failed to retrieve TRT_DetElementContainer with key " << m_trtDetElementsInputKey.key());
+    return StatusCode::FAILURE;
+  }
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
   
@@ -428,7 +436,7 @@ StatusCode TRTDigitizationTool::processStraws(const EventContext& ctx,
     bool emulateArFlag = m_sumTool->getStatusHT(idStraw, ctx) == 6;
     bool emulateKrFlag = m_sumTool->getStatusHT(idStraw, ctx) == 7;
     const int statusHT = m_sumTool->getStatusHT(idStraw, ctx);
-    m_pProcessingOfStraw->ProcessStraw(fieldCache, i, e, digit_straw,
+    m_pProcessingOfStraw->ProcessStraw(fieldCache, trtDetElements, i, e, digit_straw,
                                        m_alreadyPrintedPDGcodeWarning,
                                        m_cosmicEventPhase, //m_ComTime,
                                        TRTDigiHelper::StrawGasType(statusHT,m_UseGasMix, &msg()),

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TRTProcessingOfStraw.h"
@@ -18,6 +18,7 @@
 //TRT detector information:
 #include "TRT_ReadoutGeometry/TRT_DetectorManager.h"
 #include "TRT_ReadoutGeometry/TRT_Numerology.h"
+#include "TRT_ReadoutGeometry/TRT_DetElementContainer.h"
 
 //helpers for identifiers and hitids (only for debug methods):
 #include "InDetIdentifier/TRT_ID.h"
@@ -248,6 +249,7 @@ void TRTProcessingOfStraw::addClustersFromStep ( const double& scaledKineticEner
 
 //________________________________________________________________________________
 void TRTProcessingOfStraw::ProcessStraw ( MagField::AtlasFieldCache& fieldCache,
+					  const InDetDD::TRT_DetElementContainer* detElements,
                                           hitCollConstIter i,
                                           hitCollConstIter e,
                                           TRTDigit& outdigit,
@@ -289,7 +291,7 @@ void TRTProcessingOfStraw::ProcessStraw ( MagField::AtlasFieldCache& fieldCache,
   //======================================================//
   //////////////////////////////////////////////////////////
   // TimeShift is the same for all the simhits in the straw.
-  const double timeShift(m_pTimeCorrection->TimeShift(hitID)); // rename hitID to strawID
+  const double timeShift(m_pTimeCorrection->TimeShift(hitID, detElements)); // rename hitID to strawID
 
   m_clusterlist.clear();
 
@@ -302,7 +304,7 @@ void TRTProcessingOfStraw::ProcessStraw ( MagField::AtlasFieldCache& fieldCache,
       //Get the hit:
       const TimedHitPtr<TRTUncompressedHit> *theHit = &(*hit_iter);
 
-      TRThitGlobalPos = getGlobalPosition(hitID, theHit);
+      TRThitGlobalPos = getGlobalPosition(hitID, theHit, detElements);
 
       //Figure out the global time of the hit (all clusters from the hit
       //will get same timing).
@@ -727,7 +729,10 @@ void TRTProcessingOfStraw::ClustersToDeposits (MagField::AtlasFieldCache& fieldC
   }
 
 //________________________________________________________________________________
-Amg::Vector3D TRTProcessingOfStraw::getGlobalPosition (  int hitID, const TimedHitPtr<TRTUncompressedHit> *theHit ) {
+Amg::Vector3D TRTProcessingOfStraw::getGlobalPosition(int hitID
+						      , const TimedHitPtr<TRTUncompressedHit>* theHit
+						      , const InDetDD::TRT_DetElementContainer* detElements)
+{
 
   const int mask(0x0000001F);
   int word_shift(5);
@@ -748,7 +753,7 @@ Amg::Vector3D TRTProcessingOfStraw::getGlobalPosition (  int hitID, const TimedH
     ringID    = hitID & mask;
     trtID     = hitID >> word_shift;
 
-    barrelElement = m_detmgr->getBarrelElement(trtID, ringID, moduleID, layerID);
+    barrelElement = detElements->getBarrelDetElement(trtID, ringID, moduleID, layerID);
 
     if (barrelElement) {
       const Amg::Vector3D v( (*theHit)->GetPreStepX(),(*theHit)->GetPreStepY(),(*theHit)->GetPreStepZ());
@@ -770,7 +775,7 @@ Amg::Vector3D TRTProcessingOfStraw::getGlobalPosition (  int hitID, const TimedH
     if (trtID == 3) trtID = 0;
     else            trtID = 1;
 
-    endcapElement = m_detmgr->getEndcapElement(trtID, wheelID, planeID, sectorID);
+    endcapElement = detElements->getEndcapDetElement(trtID, wheelID, planeID, sectorID);
 
     if ( endcapElement ) {
       const Amg::Vector3D v( (*theHit)->GetPreStepX(),(*theHit)->GetPreStepY(),(*theHit)->GetPreStepZ());
