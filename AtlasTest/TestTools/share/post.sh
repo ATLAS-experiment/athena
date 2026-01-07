@@ -142,6 +142,9 @@ PP="$PP"'|INFO Database being retired|^Domain.*INFO'
 PP="$PP"'|SZ='
 PP="$PP"'|using job opts'
 
+# TDAQ ERS debug messages in dbg builds
+PP="$PP"'| DEBUG_0 \['
+
 # Hive ordering.
 PP="$PP"'|Terminating thread-pool resources|Joining Scheduler thread|Disconnecting from sqlite|Opening COOL connection|Initializing CondInputLoader|preLoadAddresses: Removing|IOVRanges will be checked|User session with|ConnectionService I[nN][fF][oO]|Disconnect from the database|RalSessionMgr I[nN][fF][oO]|Connect to the database'
 
