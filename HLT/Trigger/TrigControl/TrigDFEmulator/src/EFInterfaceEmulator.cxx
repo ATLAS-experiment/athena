@@ -119,7 +119,7 @@ void DFEF::EFInterfaceEmulator::inputThreadCallback() {
         //auto sleepDuration = (std::rand() % 100) * 10;
         //ERS_DEBUG(2, "Sleeping for " << sleepDuration << " milliseconds");
         //std::this_thread::sleep_for(std::chrono::milliseconds(sleepDuration));
-        event = std::move(m_file_rw->getNextEvent());
+        event = m_file_rw->getNextEvent();
       } catch (const DFEF::NoMoreEventsInFile &ex) {
         ERS_DEBUG(2, "No more events in file");  
         p.set_exception(std::make_exception_ptr(daq::df_ef_interface::NoMoreEvents("No more events in file")));
