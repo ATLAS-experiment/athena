@@ -246,3 +246,54 @@ def MuonGeoModelToolCfg(flags):
     geoModelSvc = result.getPrimaryAndMerge(GeoModelCfg(flags))
     geoModelSvc.DetectorTools+= [result.popToolsAndMerge(MuonDetectorToolCfg(flags))]
     return result
+
+def RegionSelCondAlgCfg(flags, detector: str, **kwargs):
+    from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
+    from AthenaConfiguration.ComponentFactory import CompFactory
+    from MuonConfig.MuonCablingConfig import RPCCablingConfigCfg, MDTCablingConfigCfg, TGCCablingConfigCfg
+    from MuonConfig.MuonCondAlgConfig import MdtCondDbAlgCfg
+    result = ComponentAccumulator()
+    kwargs.setdefault("name", f"RegSelCondAlg_{detector}")
+    kwargs.setdefault("RegSelLUT", f"RegSelLUTCondData_{detector}")
+    kwargs.setdefault("PrintTable", flags.hasFlag("PrintLUT") and flags.PrintLUT)
+
+    result.merge(MuonGeoModelCfg(flags))
+    result.merge(RPCCablingConfigCfg(flags))
+    result.merge(MDTCablingConfigCfg(flags))
+    result.merge(TGCCablingConfigCfg(flags))
+
+    if flags.Muon.useMdtDcsData:
+            result.merge(MdtCondDbAlgCfg(flags))
+
+    the_alg = None
+    if flags.Muon.usePhaseIIGeoSetup:
+        if not flags.Detector.GeometryMDT: 
+            kwargs.setdefault("MdtCablingKey", "")
+        if not flags.Detector.GeometryRPC:
+            kwargs.setdefault("RpcCablingKey", "")
+        alignDet = ""
+        if detector == "MDT":    alignDet = "Mdt"
+        elif detector == "RPC":  alignDet = "Rpc"
+        elif detector == "TGC":  alignDet = "Tgc"        
+        elif detector == "sTGC": alignDet = "sTgc"
+        elif detector == "MM":   alignDet = "Mm"
+        
+        kwargs.setdefault("AlignKey", f"{alignDet}ActsAlignContainer")
+        the_alg = CompFactory.MuonR4.RegionSelectorCondAlg(**kwargs)
+       
+    elif detector == "MDT":
+        if not flags.Muon.useMdtDcsData:
+            kwargs.setdefault("Conditions", "")
+        the_alg = CompFactory.MDT_RegSelCondAlg(**kwargs)
+    elif detector == "RPC":
+        the_alg = CompFactory.RPC_RegSelCondAlg(**kwargs)
+    elif detector == "TGC":
+        the_alg = CompFactory.TGC_RegSelCondAlg(**kwargs)
+    elif detector == "sTGC":
+        the_alg = CompFactory.sTGC_RegSelCondAlg(**kwargs)
+    elif detector == "MM":
+        the_alg = CompFactory.MM_RegSelCondAlg(**kwargs)
+    else:
+        raise ValueError(f"The {detector} is an unknown detector flag")
+    result.addCondAlgo(the_alg, primary = True)
+    return result
