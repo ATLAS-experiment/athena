@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef CSCCALIBDATA_CSCCALIBREPORTSLOPE_H
@@ -54,69 +54,57 @@ class CscCalibReportSlope : public CscCalibReportBase
 
     ~CscCalibReportSlope();
 
-    void setBitHists(DataVector<TH1I> * somePedAmpHists);
+    void setBitHists(std::vector<TH1I*>&& somePedAmpHists);
     /** setCalGraphs - Set the pedAmpHist vector.  
-      @param someCalGraphs - Pointer to DataVector of calibration graphs. Takes ownership.
+      @param someCalGraphs - vector of calibration graphs.
      */
-    void setCalGraphs(DataVector<TGraphErrors> * someCalGraphs);
-
-    /*setDeadChanges - set the changed dead channels
-      @param someDeadChanges - Pointer to map of changed channels and their new value
-
-      void setDeadChanges(std::set<bitChange> * someDeadChannels);
-     */
+     void setCalGraphs(std::vector<TGraphErrors*>&& someCalGraphs);
 
     /**setAmpProfs - set the changed dead channels
       @param someAmpProfs - Pointer to map of changed channels and their new value
      */
-    void setAmpProfs(std::map<int,TProfile*> * someAmpProfs);
+    void setAmpProfs(std::map<int,TProfile*>&& someAmpProfs);
 
     /**setPulsedChambers - set the pulsed chambers
       @param somePulsedChambers - Pointer to set of pulsed chambers. Takes ownership.
      */
-    void setPulsedChambers(std::set<int> * somePulsedChambers);
+    void setPulsedChambers(std::set<int>&& somePulsedChambers);
 
-    void setFitResults(std::vector<float> * fitResults);
+    void setFitResults(std::vector<float>&& fitResults);
 
 
     /**Retrieve bit histogram vector*/
-    const DataVector<TH1I> * getBitHists() const;        
+    const std::vector<TH1I*>& getBitHists() const;
 
     /**Retrieve pedestal amplitude histogram vector*/
-    const DataVector<TGraphErrors> * getCalGraphs() const;
-
-    /*get the set of changes in dead channels*
-      const std::set<bitChange> * getDeadChanges() const;
-     */
+    const std::vector<TGraphErrors*>& getCalGraphs() const;
 
     /**getAmpProfs - get the map of ampProfs stored. These show the amplitudes each channel showed at a given
       pulserLevel*/
-    const std::map<int,TProfile*> * getAmpProfs() const;
+    const std::map<int,TProfile*>& getAmpProfs() const;
 
 
     /**getPulsedChambers - Contains the chambers that were pulsed. Stored as hash Ids*/
-    const std::set<int> * getPulsedChambers() const;
+    const std::set<int>& getPulsedChambers() const;
 
 
     /**getFitReturns - Contains slope fit results.*/
-    const std::vector<float> * getFitResults() const;
+    const std::vector<float>& getFitResults() const;
 
 
   private:
 
     //Pedestal amplitude histograms
-    DataVector<TGraphErrors> * m_calGraphs;
+    std::vector<TGraphErrors*> m_calGraphs;
 
-    DataVector<TH1I> * m_bitHists;
-    //status changes
-    //std::set<bitChange> * m_deadChanges;
+    std::vector<TH1I*> m_bitHists;
 
     //Interesting TProfiles grouped by attenuation level
-    std::map<int,TProfile*> * m_ampProfs;
+    std::map<int,TProfile*> m_ampProfs;
 
-    std::set<int> * m_pulsedChambers;
+    std::set<int> m_pulsedChambers;
 
-    std::vector<float> * m_fitResults;
+    std::vector<float> m_fitResults;
 
 
 };
