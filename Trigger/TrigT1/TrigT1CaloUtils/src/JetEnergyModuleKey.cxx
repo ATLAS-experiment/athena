@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /***************************************************************************
                           JetEnergyModuleKey.cpp  -  description
@@ -144,7 +144,7 @@ double LVL1::JetEnergyModuleKey::rowPhiCoord(unsigned int rowNum, const Coordina
   //not sure how to do this.
   //should really reuse code, but above is tied to KU stuff. Probably way to go though.
 
-  ICoordinate* iCoord = convertCoordsToIntegers(jemCoord.phi(), jemCoord.eta());
+  ICoordinate iCoord = convertCoordsToIntegers(jemCoord.phi(), jemCoord.eta());
   int etaBin=0; unsigned int phiBin=0;
   setBins(iCoord,phiBin,etaBin);
   // now work out row coord.
@@ -156,7 +156,6 @@ double LVL1::JetEnergyModuleKey::rowPhiCoord(unsigned int rowNum, const Coordina
   }
   double phi =( (static_cast<double>(phiBin))*TrigT1CaloDefs::jemPhiSize ); //bot of JEM
   phi+= static_cast<double>( rowNum )*0.2+0.1; //mid of row
-  delete iCoord;
   if (m_debugModuleKey){
     if ( (phi<(jemCoord.phi()-0.8))||(phi>(jemCoord.phi()+0.8) ) ){
     std::cerr << "ERROR!!! JetEnergyModuleKey::rowPhiCoord phi of row is "<<phi
@@ -198,11 +197,11 @@ LVL1::JetEnergyModuleKey::JEMRegion
 
 
 /** sets the eta and phi bins*/
-void LVL1::JetEnergyModuleKey::setBins(ICoordinate* iCoord, unsigned int& phiBin, int& etaBin){
+void LVL1::JetEnergyModuleKey::setBins(const ICoordinate& iCoord, unsigned int& phiBin, int& etaBin){
   unsigned int iPhiSize=16 ; // =PI/2 * 10
-  phiBin=( iCoord->phi() )/(iPhiSize);
+  phiBin=( iCoord.phi() )/(iPhiSize);
   int iEtaSize=8;// JEMs are 0.8 in eta, i.e ietaSize=8
-  etaBin=sharpRound2(iCoord->eta(),iEtaSize);
+  etaBin=sharpRound2(iCoord.eta(),iEtaSize);
   // the above calculation fails since end JEMs are larger, so ....
   etaBin=(etaBin < -4 ? -4 : etaBin); // etaBin=-5
   etaBin=(etaBin > 4 ? 4 : etaBin); //   belongs to the JEM in etaBin=-4
@@ -243,10 +242,10 @@ unsigned int LVL1::JetEnergyModuleKey::jem(const Coordinate & coord) const {
 /** converts integer phi, eta
 coordinates to phi, eta trigger bins.
 Returns coordinates of centre of JEs*/
-LVL1::BinAndCoord* LVL1::JetEnergyModuleKey::calculateTriggerBin(ICoordinate* iCoord){
+LVL1::BinAndCoord LVL1::JetEnergyModuleKey::calculateTriggerBin(const ICoordinate& iCoord){
 //  double phiBinWidth=((2*M_PI)/64.0);
-  int abs_ieta=abs(iCoord->eta() );
-  int sign=( iCoord->eta() )/abs_ieta;
+  int abs_ieta=abs(iCoord.eta() );
+  int sign=( iCoord.eta() )/abs_ieta;
 
   int etaBin=0; unsigned int phiBin=0;
   setBins(iCoord,phiBin,etaBin);
@@ -263,15 +262,15 @@ LVL1::BinAndCoord* LVL1::JetEnergyModuleKey::calculateTriggerBin(ICoordinate* iC
   if (m_debugModuleKey){
     std::cout << "JetEnergyModuleKey: start calcTrigBin"<<std::endl;
     std::cout << "phi, eta   : ("<<m_phi<<", "<<m_eta<<")"<<std::endl;
-    std::cout << "iphi, ieta : ("<<( iCoord->phi() )<<", "<<( iCoord->eta() )<<")"<<std::endl;
+    std::cout << "iphi, ieta : ("<<( iCoord.phi() )<<", "<<( iCoord.eta() )<<")"<<std::endl;
     std::cout << "abs_ieta : ("<<abs_ieta<<" and sign :  "<<sign<<std::endl;
     std::cout << "central : ("<<centralPhi<<", "<<centralEta<<")"
         << "bin : ("<<phiBin<<","<<etaBin<<")"<<std::endl;
   }
 
-  Coordinate* centralCoords = new Coordinate(centralPhi, centralEta);
-  if (m_debugModuleKey) std::cout <<" JetEnergyModuleKey : created coord "<<(*centralCoords)<<std::endl;
-	return new BinAndCoord(phiBin,etaBin,centralCoords);
+  Coordinate centralCoords(centralPhi, centralEta);
+  if (m_debugModuleKey) std::cout <<" JetEnergyModuleKey : created coord "<<centralCoords<<std::endl;
+  return BinAndCoord(phiBin,etaBin,centralCoords);
 }
 
 /** No descriptions */
