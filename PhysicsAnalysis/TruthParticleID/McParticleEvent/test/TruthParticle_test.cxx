@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @purpose: test the TruthParticle class
@@ -542,7 +542,13 @@ int main()
 
   TruthParticleTest * truthParticleTest = makeTestData();
   std::cout << "Launching tests..." << std::endl;
-  test(truthParticleTest);
+  try {
+    test(truthParticleTest);
+  }
+  catch (const std::exception& e) {
+    std::cerr << e.what() << "\n";
+    return EXIT_FAILURE;
+  }
 
   std::cout << "Done [OK]" << std::endl;
   return EXIT_SUCCESS;
