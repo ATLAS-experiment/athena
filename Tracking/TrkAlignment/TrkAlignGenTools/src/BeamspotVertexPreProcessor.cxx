@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrkAlignGenTools/BeamspotVertexPreProcessor.h"
@@ -712,8 +712,8 @@ AlignTrack* BeamspotVertexPreProcessor::doTrackRefit(const Track* track) {
     if(AlignTrack::VertexConstrained == type || AlignTrack::BeamspotConstrained == type) alignTrack->doFindPerigee();
 
     if (m_storeFitMatrices) {
-      alignTrack->setFullCovarianceMatrix(alignCache.m_fullCovarianceMatrix);
-      alignTrack->setDerivativeMatrix(alignCache.m_derivMatrix);
+      alignTrack->setFullCovarianceMatrix(alignCache.m_fullCovarianceMatrix.get());
+      alignTrack->setDerivativeMatrix(alignCache.m_derivMatrix.get());
     }
     delete newTrack;
 
