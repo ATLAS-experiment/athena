@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //*****************************************************************************
@@ -1684,12 +1684,12 @@ void TileTBDump::dump_digi(unsigned int subdet_id, const uint32_t* roddata, unsi
                 &nchan);
 
             std::cout << "\nReco calibrated energy fragment 0x" << std::hex  << id << std::dec << ", " << size << " words found:"
-                      << "\t" << ((nchan > 48 && nchan < 96) ? 1 : ngain) << " gain, " << unitName[unit].c_str() << " units, " << nchan << " channels in total" << std::endl;
+                      << "\t" << ((nchan > 48 && nchan < 96) ? 1 : ngain) << " gain, " << unitName[unit] << " units, " << nchan << " channels in total" << std::endl;
 
             if (pulse < 3) {
-              std::cout << "Reco flags: 0x" << std::hex << std::setfill('0') << rflag << setupDec << "  units: " << unitName[unit].c_str() << "  pulse_shape: " << shapeName[pulse].c_str() << "  nsamples: " << 7 + 2 * nsmpl << "  algorithm: " << algName[algor + 1].c_str() << "  niterations: " << niter << std::endl;
+              std::cout << "Reco flags: 0x" << std::hex << std::setfill('0') << rflag << setupDec << "  units: " << unitName[unit] << "  pulse_shape: " << shapeName[pulse] << "  nsamples: " << 7 + 2 * nsmpl << "  algorithm: " << algName[algor + 1] << "  niterations: " << niter << std::endl;
             } else {
-              std::cout << "Reco flags: 0x" << std::hex << std::setfill('0') << rflag << setupDec << "  units: " << unitName[unit].c_str() << "  pulse_shape: " << shapeName[pulse].c_str() << "  nsamples: " << 7 + 2 * nsmpl << "  algorithm: " << algName[algor * 4 + niter].c_str() << std::endl;
+              std::cout << "Reco flags: 0x" << std::hex << std::setfill('0') << rflag << setupDec << "  units: " << unitName[unit] << "  pulse_shape: " << shapeName[pulse] << "  nsamples: " << 7 + 2 * nsmpl << "  algorithm: " << algName[algor * 4 + niter] << std::endl;
             }
             
             std::cout << "\nPMT Ch |  full word | G  amp  time b  q    amp        time      qual";
@@ -1723,7 +1723,7 @@ void TileTBDump::dump_digi(unsigned int subdet_id, const uint32_t* roddata, unsi
             OFC.clear();
 
             std::cout << "\nFrag5 Compressed fragment 0x" << std::hex << id << std::dec << ", " << size << " words found:"
-                      << "\t" << 1 << " gain, " << unitName[unit].c_str() << " units, " << nchan << " channels in total" << std::endl;
+                      << "\t" << 1 << " gain, " << unitName[unit] << " units, " << nchan << " channels in total" << std::endl;
 
             dump_data((uint32_t*) data, size, version, verbosity);
 
