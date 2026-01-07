@@ -25,7 +25,7 @@ class LogicType( Enum ):
     def __repr__(self):
         return self.name
 
-class Logic(object):
+class Logic:
 
     __slots__ = ['content', 'logicType', 'subConditions']
 
@@ -54,8 +54,6 @@ class Logic(object):
             return (subConds[0], bunchGroups)
         
         raise RuntimeError("Item with logic '%s' has only internal triggers defined" % theLogic)
-
-
 
     def __init__(self, logicType = LogicType.NONE, content = None):
         self.content = content # only filled for THRESHOLD and INTERNAL

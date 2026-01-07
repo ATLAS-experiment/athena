@@ -12,6 +12,7 @@ class CType(Enum):
     CTPIN = (1, 'ctpin')
     ELEC = (2, 'electrical')
     OPT = (3, 'optical')
+    GLOBAL = (4, 'global')
     def __init__(self, _, ctype ):
         self.ctype = ctype
 
@@ -26,6 +27,8 @@ class CType(Enum):
             return CType.ELEC
         elif label == 'optical':
             return CType.OPT
+        elif label.lower() == 'global':
+            return CType.GLOBAL
         else:
             raise NotImplementedError("Connector of type %s does't exist" % label)
 
@@ -64,7 +67,8 @@ class MenuConnectorsCollection:
         return self.connectors[name]
 
     def addConnector(self, connDef):
-        name, cformat, ctype, legacy, boardName = map(connDef.__getitem__,["name", "format", "type", "legacy", "board"])
+        name, cformat, ctype = map(connDef.__getitem__,["name", "format", "type"])
+        legacy = connDef.get("legacy", False)
 
         if name in self.connectors:
             raise RuntimeError("Connector %s has already been defined" % name)
@@ -74,8 +78,10 @@ class MenuConnectorsCollection:
             newConnector = ElectricalConnector(name, cformat, legacy, connDef)
         elif CType.from_str(ctype) is CType.CTPIN:
             newConnector = CtpinConnector(name, legacy, connDef)
-        else:
+        elif CType.from_str(ctype) is CType.OPT:
             newConnector = OpticalConnector(name, cformat, ctype, legacy, connDef)
+        else:
+            newConnector = GlobalConnector(name, connDef)
         self.connectors[name] = newConnector
 
     def json(self):
@@ -95,7 +101,8 @@ class Connector:
         @param cformat can be 'topological' or 'multiplicity'
         @param ctype can be 'ctpin', 'electrical', or 'optical'
         """
-        name, cformat, ctype, legacy, boardName = map(connDef.__getitem__,["name", "format", "type", "legacy", "board"])
+        name, cformat, ctype, boardName = map(connDef.__getitem__,["name", "format", "type", "board"])
+        legacy = connDef.get("legacy", False)
         self.name    = name
         self.cformat = CFormat.from_str(cformat)
         self.ctype   = CType.from_str(ctype)
@@ -123,6 +130,34 @@ class Connector:
             confObj["legacy"] = self.legacy
         confObj["triggerlines"] = [tl.json() for tl in self.triggerLines]
         return confObj
+
+
+class GlobalConnector(Connector):
+    __slots__ = ['name', 'cformat', 'ctype', 'triggerLines', 'emptyTriggerLines']
+    def __init__(self, name, connDef):
+        """
+        @param name name of the connector
+        """
+        super(GlobalConnector,self).__init__(connDef = connDef)
+
+        # treat differently depending on the "format", which can be: 'topological' or 'multiplicity' 
+        if self.cformat == CFormat.MULT:
+            # multiplicity connectors contain all the triggerlines in a flat "thresholds" list
+            startbit = 0
+            nbits = connDef.get("nbitsDefault",1)
+            for thrName in connDef["thresholds"]:
+                if type(thrName)==tuple:
+                    (thrName, nbits) = thrName
+
+                if thrName is None:
+                    self.addEmptyTriggerLine(EmptyTriggerLine(startbit, nbits))
+                else:
+                    self.addTriggerLine(TriggerLine(name=thrName, startbit=startbit, flatindex=startbit, nbits=nbits))
+
+                startbit += nbits
+
+        else:
+            raise RuntimeError("Property 'format' of connector %s is '%s' but must be 'multiplicity'" % (name,connDef["format"]))
 
 
 class CtpinConnector(Connector):
@@ -240,7 +275,7 @@ class ElectricalConnector(Connector):
             _triggerLines = []
             for fpga in [0,1]:
                 for clock in [0,1]:
-                     _triggerLines += [tl.json() for tl in self.triggerLines[fpga][clock]]
+                    _triggerLines += [tl.json() for tl in self.triggerLines[fpga][clock]]
             confObj["triggerlines"] = _triggerLines
         elif self.cformat == CFormat.SIMPLE:
             _triggerLines = []
@@ -264,12 +299,12 @@ class TriggerLine:
         confObj["name"]     = self.name
         confObj["startbit"] = self.startbit
         if self.flatindex is not None: 
-           confObj["flatindex"] = self.flatindex
+            confObj["flatindex"] = self.flatindex
         confObj["nbits"]    = self.nbits
         if self.fpga is not None:
-           confObj["fpga"]  = self.fpga
+            confObj["fpga"]  = self.fpga
         if self.clock is not None:
-           confObj["clock"] = self.clock
+            confObj["clock"] = self.clock
         return confObj
 
     @property

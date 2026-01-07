@@ -21,6 +21,7 @@ class AlgCategory(Enum):
     MUCTPI = (2, 'MUTOPO', 'muctpi topo', 'TopoAlgoDefMuctpi')
     LEGACY = (3, 'R2TOPO', 'legacy topo', 'TopoAlgoDefLegacy')
     MULTI = (4, 'MULTTOPO', 'multiplicity topo', 'TopoAlgoDefMultiplicity')
+    GLOBHYPO = (5, 'GLOBHYPO', 'L0 global hypo', 'GlobalHypoAlgoDef')
 
     def __init__(self, _, key, desc, defFile ):
         self.key = key
@@ -32,9 +33,13 @@ class AlgCategory(Enum):
         return self.desc
 
     @staticmethod
-    def getAllCategories():
-        return [ AlgCategory.TOPO, AlgCategory.MUCTPI, AlgCategory.MULTI, AlgCategory.LEGACY ]
-            
+    def getAllCategories(run=3):
+        assert(run in [3,4])
+        if run == 3:
+            return [ AlgCategory.TOPO, AlgCategory.MUCTPI, AlgCategory.MULTI, AlgCategory.LEGACY ]
+        else:
+            return [ AlgCategory.GLOBHYPO ]
+
     @staticmethod
     def getCategoryFromBoardName(boardName):
         if 'muctpi' in boardName.lower():
@@ -49,18 +54,21 @@ class AlgCategory(Enum):
         return currentTopoCategory
 
 
-class MenuTopoAlgorithmsCollection(object):
+class MenuTopoAlgorithmsCollection:
 
-    def __init__(self):
+    def __init__(self, run):
         # all algos that are in menu (new and legacy)
         self.topoAlgos = {}
-        for cat in AlgCategory:
+        for cat in AlgCategory.getAllCategories(run):
             self.topoAlgos[cat] = {}
             if cat in [AlgCategory.TOPO, AlgCategory.MUCTPI, AlgCategory.LEGACY]:
                 self.topoAlgos[cat][AlgType.DEC] = {}
                 self.topoAlgos[cat][AlgType.SORT] = {}
             elif cat in [AlgCategory.MULTI]:
                 self.topoAlgos[cat][AlgType.MULT] = {}
+            elif cat in [AlgCategory.GLOBHYPO]:
+                self.topoAlgos[cat][AlgType.MULT] = {}
+                self.topoAlgos[cat][AlgType.DEC] = {}
 
     def addAlgo(self, algo, category):
         if type(category) is not AlgCategory:

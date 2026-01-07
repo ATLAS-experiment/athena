@@ -8,10 +8,14 @@ from ..Config.CTPInputConfig import CTPInputConfig
 from .BunchGroupSet import BunchGroupSet
 from .MonCounters import MenuMonCountersCollection
 
-class CTP(object):
+class CTP:
 
-    def __init__(self):
-        self.inputConnectors = CTPInputConfig.cablingLayout()
+    def __init__(self, run):
+        assert(run in [3,4]), "CTP configuration only defined for Run3 and Run4"
+        if run == 3:
+            self.inputConnectors = CTPInputConfig.cablingLayout()
+        else:
+            self.inputConnectors = CTPInputConfig.cablingLayoutRun4()
         self.random          = Random( names = ['Random0', 'Random1', 'Random2', 'Random3'], cuts = [1, 1, 1, 1] )
         self.bunchGroupSet   = BunchGroupSet()
         self.counters        = MenuMonCountersCollection()   # monitoring counters in the menu
@@ -21,9 +25,6 @@ class CTP(object):
     def setBunchGroupSetName(self, name):
         self.bunchGroupSet.name = name
         return self.bunchGroupSet
-
-    def addBunchGroup(self, name, internalNumber, bunches):
-        self.bunchGroupSet.addBunchGroup(name, internalNumber, bunches)
 
     def setupMonitoring(self, menuName, menuItems, menuThresholds, connectors, menuFullName):
         ##  # add the CTPIN counters
@@ -44,14 +45,14 @@ class CTP(object):
 
     def checkConnectorAvailability(self, availableConnectors, menuToLoad):
         inputConnectorList = []
-        inputConnectorList += self.inputConnectors["optical"].values()
-        inputConnectorList += self.inputConnectors["electrical"].values()
-        inputConnectorList += self.inputConnectors["ctpin"]["slot7"].values()
-        inputConnectorList += self.inputConnectors["ctpin"]["slot8"].values()
-        inputConnectorList += self.inputConnectors["ctpin"]["slot9"].values()
+        inputConnectorList += self.inputConnectors.get("optical", {}).values()
+        inputConnectorList += self.inputConnectors.get("electrical", {}).values()
+        inputConnectorList += self.inputConnectors.get("ctpin", {}).get("slot7", {}).values()
+        inputConnectorList += self.inputConnectors.get("ctpin", {}).get("slot8", {}).values()
+        inputConnectorList += self.inputConnectors.get("ctpin", {}).get("slot9", {}).values()
         for connName in inputConnectorList:
             if connName != '' and connName not in availableConnectors:
-                msg = "Connector '%s' requested in L1/Config/CTPConfig.py not defined as menu input. Please add it to L1/Menu/Menu_%s.py" % (connName, menuToLoad[1])
+                msg = "Connector '%s' requested in L1/Config/CTPInputConfig.py not defined as menu input. Please add it to L1/Menu/Menu_%s.py" % (connName, menuToLoad[1])
                 log.error(msg)
                 raise RuntimeError(msg)
 

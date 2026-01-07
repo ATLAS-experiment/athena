@@ -106,8 +106,12 @@ class MonitorDef:
         monItems   = { 1 :[], 2: [], 3: [], 4: [], 5: [], 6: [], 7: [] }
         monItemsHF = { 1 :[], 2: [], 3: [], 4: [], 5: [], 6: [], 7: [] }
 
-        # definitions hardcoded at the moment
+        # for Run4 
+        if "run4_v2" in menuName:
+            return
 
+
+        # definitions hardcoded at the moment
         if 'HI' not in menuName:
             monItems[TBP|TAP|TAV] = [
                 # L1Muon
@@ -167,13 +171,12 @@ class MonitorDef:
             ]
 
             # Changed-in-place primary thresholds for Run 4
-            if 'HI' not in menuName:
-                if 'run3' in menuName:
-                    monItems[TBP|TAP|TAV] += ["L1_eTAU140"]
-                    monItems[TBP|TAP|TAV] += ["L1_3jJ90", "L1_jJ90", "L1_jJ90p30ETA49"]
-                else:
-                    monItems[TBP|TAP|TAV] += ["L1_eTAU120"]
-                    monItems[TBP|TAP|TAV] += ["L1_3jJ70", "L1_jJ70"]
+            if 'run3' in menuName:
+                monItems[TBP|TAP|TAV] += ["L1_eTAU140"]
+                monItems[TBP|TAP|TAV] += ["L1_3jJ90", "L1_jJ90", "L1_jJ90p30ETA49"]
+            else:
+                monItems[TBP|TAP|TAV] += ["L1_eTAU120"]
+                monItems[TBP|TAP|TAV] += ["L1_3jJ70", "L1_jJ70"]
 
             topo3_monitems = [
                 "L1_HT190-jJ40s5pETA21", "L1_jMJJ-500-NFF",

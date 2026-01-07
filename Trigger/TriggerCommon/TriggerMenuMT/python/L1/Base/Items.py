@@ -10,15 +10,15 @@ from .MenuUtils import binstr
 log = logging.getLogger(__name__)
 
 
-class MenuItemsCollection(object):
+class MenuItemsCollection:
 
     splitBunchGroups = False
 
     def __init__(self):
-        self.menuName = ''
-        self.pssName = ''
-        self.pssType = 'Physics'
-        self.items = {}
+        self.menuName: str = ''
+        self.pssName: str = ''
+        self.pssType: str = 'Physics'
+        self.items: dict[str, MenuItem] = {}
 
     def __iter__(self):
         return iter(self.items.values())
@@ -32,7 +32,7 @@ class MenuItemsCollection(object):
         if name in self.items:
             log.warning("LVL1 item %s is already in the menu, will not add it again", name)
             return self
-        if item.ctpid in [x.ctpid for x in self.items]:
+        if item.ctpid in [x.ctpid for x in self]:
             log.warning("LVL1 item with ctpid %i is already in the menu, will not add %s", item.ctpid, name)
             return self
         self.items[ name ] = item
@@ -45,7 +45,7 @@ class MenuItemsCollection(object):
             msg = "LVL1 item %s is already in the menu, will not add it again" % item.name
             log.error(msg)
             raise RuntimeError(msg)
-        if item.ctpid in [x.ctpid for x in self.items.values()]:
+        if item.ctpid in [x.ctpid for x in self]:
             msg = "LVL1 item %s with ctpid %i is already in the menu, will not add %s with the same ctpid" % (self.itemById(item.ctpid).name, item.ctpid, item.name)
             log.error(msg)
             raise RuntimeError(msg)

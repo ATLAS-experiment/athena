@@ -36,6 +36,7 @@ class L1MenuFlagsCont(object):
     statusOn = set()
 
     __slots__ = {
+        "Run"                     :  FlagArgs( int, 3, val_check = lambda x: x in [2,3,4] ),
         "MenuSetup"               :  FlagArgs( str ),
         "CTPVersion"              :  FlagArgs( int, 4,   val_check = lambda x: x in range(5), action = lambda x: Limits.setLimits(x) ),
         "BunchGroupPartitioning"  :  FlagArgs( Iterable, val_check = lambda x: len(list(filter(lambda y: y not in range(16), x)))==0 ),
@@ -56,7 +57,7 @@ class L1MenuFlagsCont(object):
         d = L1MenuFlagsCont.__slots__[attr]
         # check the type
         if not isinstance(value, d.val_type):
-            raise TypeError("L1MenuFlags.%s type check failed for %r. Type needs to be '%s'" % ( attr, value, d.valtype.__name__))
+            raise TypeError("L1MenuFlags.%s type check failed for %r. Type needs to be '%s'" % ( attr, value, d.val_type.__name__))
         # check the values
         if d.val_check and not d.val_check(value):
             raise ValueError("L1MenuFlags.%s value check failed for %r" % ( attr, value))

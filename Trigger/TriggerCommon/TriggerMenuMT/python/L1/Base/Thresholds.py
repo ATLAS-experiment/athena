@@ -3,6 +3,7 @@
 import re
 from copy import deepcopy
 from functools import total_ordering
+from typing import Any
 
 from AthenaCommon.Logging import logging
 
@@ -109,7 +110,7 @@ class Threshold( object ):
     def setMenuConfig(mc):
         Threshold.l1configForRegistration = mc
 
-    def __init__(self, name, ttype, mapping = -1, run = 0):
+    def __init__(self, name, ttype, mapping:int = -1, run:int = 0):
         self.name            = name
         self.ttype           = ThrType[ttype]
         self.mapping         = int(mapping)
@@ -136,7 +137,7 @@ class Threshold( object ):
             return float(self.thresholdValues[0].value)
 
     def json(self):
-        confObj = {
+        confObj: dict[str,Any] = {
             "todo": "implement"
         }
         if self.ttype == ThrType.ZB:
@@ -222,7 +223,7 @@ class LegacyThreshold( Threshold ):
         return self
 
     def json(self):
-        confObj = {
+        confObj: dict[str,Any] = {
             "mapping": self.mapping
         }
         if self.ttype == ThrType.EM:
@@ -571,7 +572,7 @@ class MuonThreshold( Threshold ):
             raise RuntimeError("In muon threshold %s setThrValue() at least one region is unspecified" % self.name)
 
         # set the threshold index from the pT value
-        muonRoads = getTypeWideThresholdConfig(ThrType.MU)["roads"]
+        muonRoads: dict[str,Any] = getTypeWideThresholdConfig(ThrType.MU)["roads"]
         try:
             self.baIdx = muonRoads["rpc"][self.baThr]
         except KeyError as ex:
@@ -597,7 +598,7 @@ class MuonThreshold( Threshold ):
 
 
     def json(self):
-        confObj = {
+        confObj: dict[str,Any] = {
             "mapping": self.mapping
         }
         if self.isLegacy():
@@ -1116,8 +1117,8 @@ class ThresholdValue(object):
         ThresholdValue.defaultThresholdValues[ttype] = dic
         
     @staticmethod
-    def getDefaults(ttype):
-        defaults = {
+    def getDefaults(ttype) -> dict[str,Any]:
+        defaults: dict[str,Any] = {
             'etamin'  : -49,
             'etamax'  :  49,
             'phimin'  :   0,
@@ -1205,8 +1206,14 @@ class TopoThreshold( Threshold ):
         if ','  in name:
             raise RuntimeError("%s is not a valid topo output name, it should not contain a ','" % name)
         self.algCategory = algCategory
-        super(TopoThreshold,self).__init__(name = name, ttype = algCategory.key, run = 2 if algCategory==AlgCategory.LEGACY else 3)
-        if algCategory not in AlgCategory.getAllCategories():
+        if algCategory==AlgCategory.GLOBHYPO:
+            run = 4 
+        elif algCategory==AlgCategory.LEGACY:
+            run = 2
+        else:
+            run = 3
+        super(TopoThreshold,self).__init__(name = name, ttype = algCategory.key, run = run)
+        if algCategory not in AlgCategory.getAllCategories(run):
             raise RuntimeError("%r is not a valid topo category" % algCategory)
 
 
