@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // AtlCoolCopy.cxx
@@ -2742,7 +2742,7 @@ bool AtlCoolCopy::getOnlineRun() {
       // Perform the request
       res = curl_easy_perform(curl.get());
       if (res != CURLE_OK) {
-          std::cerr << "Failed to perform request: " << curl_easy_strerror(res) << ":" << url.c_str() << std::endl;
+          std::cerr << "Failed to perform request: " << curl_easy_strerror(res) << ":" << url << std::endl;
           return false;
       } else {
           // Print the received response
@@ -2834,7 +2834,7 @@ bool AtlCoolCopy::getBulkRun() {
       // Perform the request
       res = curl_easy_perform(curl.get());
       if (res != CURLE_OK) {
-          std::cerr << "Failed to perform request: " << curl_easy_strerror(res) << ":" << url.c_str() << std::endl;
+          std::cerr << "Failed to perform request: " << curl_easy_strerror(res) << ":" << url << std::endl;
           return false;
       } else {
           // Print the received response
