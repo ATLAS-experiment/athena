@@ -73,7 +73,7 @@ namespace VKalVrtAthena {
 
     // Truth match map
     std::map<const xAOD::TruthVertex*, bool> matchMap;
-
+    std::unique_ptr<Trk::IVKalState> state = m_fitSvc->makeState();
     // first make all 2-track vertices
     for( auto itrk = m_selectedTracks.begin(); itrk != m_selectedTracks.end(); ++itrk ) {
       for( auto jtrk = std::next(itrk); jtrk != m_selectedTracks.end(); ++jtrk ) {
@@ -126,7 +126,6 @@ namespace VKalVrtAthena {
         // new code to find initial approximate vertex
         Amg::Vector3D initVertex;
 
-        std::unique_ptr<Trk::IVKalState> state = m_fitSvc->makeState();
         StatusCode sc = m_fitSvc->VKalVrtFitFast( baseTracks, initVertex, *state );/* Fast crude estimation */
         if( sc.isFailure() ) {
           ATH_MSG_DEBUG(" > " << __FUNCTION__ << ": fast crude estimation fails ");
