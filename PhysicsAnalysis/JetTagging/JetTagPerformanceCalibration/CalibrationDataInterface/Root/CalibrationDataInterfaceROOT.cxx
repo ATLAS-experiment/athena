@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //////////////////////////////////////////////////////////////////////////////////////////////
@@ -527,7 +527,7 @@ Analysis::CalibrationDataInterfaceROOT::CalibrationDataInterfaceROOT(const std::
 
   if (m_verbose) {
     cout << "=== CalibrationDataInterfaceROOT::CalibrationDataInterfaceROOT ===" << endl;
-    cout << " taggerName           : " << taggerName.c_str() << endl;
+    cout << " taggerName           : " << taggerName << endl;
     cout << " Systematic strategy : ";
     if (m_EVStrategy == Analysis::Uncertainty::SFEigen){
       cout << "SFEigen" << endl;
@@ -2550,7 +2550,7 @@ Analysis::CalibrationDataInterfaceROOT::retrieveContainer(const string& label, c
   if (!isSF && !cnt && m_fileSF != m_fileEff) m_fileSF->GetObject(name.c_str(), cnt);
   m_objects.push_back(cnt);
   if (!cnt) {
-    cerr << "btag Calib: retrieveContainer: failed to retrieve container named " << name.c_str() << " from file" << endl;
+    cerr << "btag Calib: retrieveContainer: failed to retrieve container named " << name << " from file" << endl;
     return 0;
   }
 
