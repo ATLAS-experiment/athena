@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef COLLECTIONSVC_COLLECTIONITERATOR_H
@@ -9,6 +9,7 @@
 #include "CollectionSvc/CollectionRowBuffer.h"
 
 #include "CxxUtils/checker_macros.h"
+#include <memory>
 
 class Token;
 
@@ -74,7 +75,7 @@ namespace pool {
 
   protected:
      IContainer&        m_container;
-     ITokenIterator*    m_tokenIterator;
+     std::unique_ptr<ITokenIterator> m_tokenIterator;
      Token*             m_token;
 
      mutable CollectionRowBuffer        m_rowBuffer;
