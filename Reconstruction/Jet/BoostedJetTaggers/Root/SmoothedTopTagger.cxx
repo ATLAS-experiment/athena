@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "BoostedJetTaggers/SmoothedTopTagger.h"
@@ -28,18 +28,18 @@ StatusCode SmoothedTopTagger::initialize() {
     /// Get configReader
     ATH_CHECK( getConfigReader() );
 
-    TString prefix = "";
+    std::string prefix = "";
     if ( ! m_wkpt.empty() ) prefix = m_wkpt+".";
 
     // read the number of variables for tagger from file
-    m_numTaggerVars = std::stoi(m_configReader.GetValue( prefix+"NumVars", ""));
+    m_numTaggerVars = std::stoi(m_configReader.GetValue( (prefix+"NumVars").c_str(), ""));
 
     ATH_MSG_DEBUG("Number of variables used by tagger is " << std::to_string(m_numTaggerVars));
 
     std::string varName, varCutExpr;
     for (int i = 1; i <= m_numTaggerVars; i++) {
       // read the cut name corresponding to this variable
-      varName = m_configReader.GetValue( prefix+"Var"+std::to_string(i), "");
+      varName = m_configReader.GetValue( (prefix+"Var"+std::to_string(i)).c_str(), "");
 
       if (varName.empty()) {
         ATH_MSG_ERROR("Config file does not specify Var" << std::to_string(i) << "!") ; 
@@ -54,7 +54,7 @@ StatusCode SmoothedTopTagger::initialize() {
       m_varCutNames.push_back(varName);
 
       // read cut expression
-      varCutExpr = m_configReader.GetValue( prefix+m_varCutNames.back()+"Cut", "");
+      varCutExpr = m_configReader.GetValue( (prefix+m_varCutNames.back()+"Cut").c_str(), "");
 
       if (varCutExpr.empty()) {
         ATH_MSG_ERROR("Config file does not specify Var" << std::to_string(i) << " cut!") ; 
