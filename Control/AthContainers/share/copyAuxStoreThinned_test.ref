@@ -1,7 +1,7 @@
 test1
 should see unlocked decoration warning here
 Athena::getMessageSvc: WARNING MessageSvc not found, will use std::cout
-copyAuxStoreThi...WARNING AthContainers/src/copyAuxStoreThinned.cxx:138: unlocked decoration anIntDecor (6) in object of type AuxStoreTest
+copyAuxStoreThi... WARNING ../copyAuxStoreThinned.cxx: unlocked decoration anIntDecor (6) in object of type AuxStoreTest
 
 Testing lossy float compression...
 

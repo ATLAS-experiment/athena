@@ -1,11 +1,11 @@
 
 
-ApplicationMgr       INFO Application Manager Configured successfully
-ApplicationMgr       INFO Application Manager Initialized successfully
+ApplicationMgr        INFO Application Manager Configured successfully
+ApplicationMgr        INFO Application Manager Initialized successfully
 ApplicationMgr Ready
-LArMiniFCAL_ID       INFO initialize_from_dict - LArCalorimeter dictionary does NOT contain miniFCAL description. Unable to initialize LArMiniFCAL_ID.
-LArMiniFCAL_ID       INFO initialize_from_dict - LArCalorimeter dictionary does NOT contain miniFCAL description. Unable to initialize LArMiniFCAL_ID.
-ToolSvc.CaloSup...   INFO Done with initIDMap
+LArMiniFCAL_ID        INFO initialize_from_dict - LArCalorimeter dictionary does NOT contain miniFCAL description. Unable to initialize LArMiniFCAL_ID.
+LArMiniFCAL_ID        INFO initialize_from_dict - LArCalorimeter dictionary does NOT contain miniFCAL description. Unable to initialize LArMiniFCAL_ID.
+ToolSvc.CaloSup...    INFO Done with initIDMap
 *** test 400 400 0 1
      668      0.0     0.00 65095 6942 -1
      752      0.0     0.00 58512 2204 -1
@@ -5310,30 +5310,30 @@ ToolSvc.CaloSup...   INFO Done with initIDMap
 *** test SC 504
 *** test_errs
  --- err1
-CaloCellPacker_...WARNING FILE:LINE (void CaloCellPacker_400_500::unpack(const CaloCompactCellContainer&, const std::vector<int>&, CaloCellContainer&, DataPool<LArCell>&, DataPool<TileCell>&) const): Corrupted data: Too many cells 1010000.
-CaloCellPacker_...WARNING FILE:LINE (void CaloCellPacker_400_500::unpack(const CaloCompactCellContainer&, const std::vector<int>&, CaloCellContainer&, DataPool<LArCell>&, DataPool<TileCell>&) const): Corrupted data: Bad counts: ncells 1010000 nseqs 2 hashmax 187652
+CaloCellPacker_... WARNING FILE:LINE (void CaloCellPacker_400_500::unpack(const CaloCompactCellContainer&, const std::vector<int>&, CaloCellContainer&, DataPool<LArCell>&, DataPool<TileCell>&) const): Corrupted data: Too many cells 1010000.
+CaloCellPacker_... WARNING FILE:LINE (void CaloCellPacker_400_500::unpack(const CaloCompactCellContainer&, const std::vector<int>&, CaloCellContainer&, DataPool<LArCell>&, DataPool<TileCell>&) const): Corrupted data: Bad counts: ncells 1010000 nseqs 2 hashmax 187652
  --- err2
-CaloCellPacker_...WARNING FILE:LINE (void CaloCellPacker_400_500::unpack(const CaloCompactCellContainer&, const std::vector<int>&, CaloCellContainer&, DataPool<LArCell>&, DataPool<TileCell>&) const): Corrupted data: Bad counts: ncells 10000 nseqs 1000000 hashmax 187652
-CaloCellPacker_...WARNING FILE:LINE (void CaloCellPacker_400_500::unpack(const CaloCompactCellContainer&, const std::vector<int>&, CaloCellContainer&, DataPool<LArCell>&, DataPool<TileCell>&) const): Corrupted data: cell vector overrun.
+CaloCellPacker_... WARNING FILE:LINE (void CaloCellPacker_400_500::unpack(const CaloCompactCellContainer&, const std::vector<int>&, CaloCellContainer&, DataPool<LArCell>&, DataPool<TileCell>&) const): Corrupted data: Bad counts: ncells 10000 nseqs 1000000 hashmax 187652
+CaloCellPacker_... WARNING FILE:LINE (void CaloCellPacker_400_500::unpack(const CaloCompactCellContainer&, const std::vector<int>&, CaloCellContainer&, DataPool<LArCell>&, DataPool<TileCell>&) const): Corrupted data: cell vector overrun.
  --- err3
-CaloCellPacker_...WARNING FILE:LINE (void CaloCellPacker_400_500::unpack(const CaloCompactCellContainer&, const std::vector<int>&, CaloCellContainer&, DataPool<LArCell>&, DataPool<TileCell>&) const): Corrupted data: cell vector overrun.
+CaloCellPacker_... WARNING FILE:LINE (void CaloCellPacker_400_500::unpack(const CaloCompactCellContainer&, const std::vector<int>&, CaloCellContainer&, DataPool<LArCell>&, DataPool<TileCell>&) const): Corrupted data: cell vector overrun.
  --- err4
-CaloCellPacker_...WARNING FILE:LINE (void CaloCellPacker_400_500::unpack(const CaloCompactCellContainer&, const std::vector<int>&, CaloCellContainer&, DataPool<LArCell>&, DataPool<TileCell>&) const): Corrupted data: didn't consume all packed data.
+CaloCellPacker_... WARNING FILE:LINE (void CaloCellPacker_400_500::unpack(const CaloCompactCellContainer&, const std::vector<int>&, CaloCellContainer&, DataPool<LArCell>&, DataPool<TileCell>&) const): Corrupted data: didn't consume all packed data.
  --- err5
-CaloCellPacker_...WARNING FILE:LINE (void CaloCellPacker_400_500::unpack(const CaloCompactCellContainer&, const std::vector<int>&, CaloCellContainer&, DataPool<LArCell>&, DataPool<TileCell>&) const): Corrupted data: cell vector overrun.
+CaloCellPacker_... WARNING FILE:LINE (void CaloCellPacker_400_500::unpack(const CaloCompactCellContainer&, const std::vector<int>&, CaloCellContainer&, DataPool<LArCell>&, DataPool<TileCell>&) const): Corrupted data: cell vector overrun.
  --- err6
-CaloCellPacker_...WARNING FILE:LINE (void CaloCellPacker_400_500::unpack(const CaloCompactCellContainer&, const std::vector<int>&, CaloCellContainer&, DataPool<LArCell>&, DataPool<TileCell>&) const): Corrupted data: cell vector overrun.
+CaloCellPacker_... WARNING FILE:LINE (void CaloCellPacker_400_500::unpack(const CaloCompactCellContainer&, const std::vector<int>&, CaloCellContainer&, DataPool<LArCell>&, DataPool<TileCell>&) const): Corrupted data: cell vector overrun.
  --- err7
-CaloCellPacker_...WARNING FILE:LINE (void CaloCellPacker_400_500::unpack(const CaloCompactCellContainer&, const std::vector<int>&, CaloCellContainer&, DataPool<LArCell>&, DataPool<TileCell>&) const): Corrupted data: bad sequence.  nseq 9997 hash 200000 ncells 10000 hashmax 187652
-CaloCellPacker_...WARNING FILE:LINE (void CaloCellPacker_400_500::unpack(const CaloCompactCellContainer&, const std::vector<int>&, CaloCellContainer&, DataPool<LArCell>&, DataPool<TileCell>&) const): Corrupted data: didn't consume all packed data.
+CaloCellPacker_... WARNING FILE:LINE (void CaloCellPacker_400_500::unpack(const CaloCompactCellContainer&, const std::vector<int>&, CaloCellContainer&, DataPool<LArCell>&, DataPool<TileCell>&) const): Corrupted data: bad sequence.  nseq 9997 hash 200000 ncells 10000 hashmax 187652
+CaloCellPacker_... WARNING FILE:LINE (void CaloCellPacker_400_500::unpack(const CaloCompactCellContainer&, const std::vector<int>&, CaloCellContainer&, DataPool<LArCell>&, DataPool<TileCell>&) const): Corrupted data: didn't consume all packed data.
  --- err8
-CaloCellPacker_...WARNING FILE:LINE (void CaloCellPacker_400_500::unpack(const CaloCompactCellContainer&, const std::vector<int>&, CaloCellContainer&, DataPool<LArCell>&, DataPool<TileCell>&) const): Corrupted data: Compact cell header is 44 words long, longer than the largest expected value of 34.
+CaloCellPacker_... WARNING FILE:LINE (void CaloCellPacker_400_500::unpack(const CaloCompactCellContainer&, const std::vector<int>&, CaloCellContainer&, DataPool<LArCell>&, DataPool<TileCell>&) const): Corrupted data: Compact cell header is 44 words long, longer than the largest expected value of 34.
  --- err9
  --- err10
-CaloCellPacker_...WARNING FILE:LINE (void CaloCellPacker_400_500::unpack(const CaloCompactCellContainer&, const std::vector<int>&, CaloCellContainer&, DataPool<LArCell>&, DataPool<TileCell>&) const): Corrupted data: can't find DDE for cell with hash 46490
+CaloCellPacker_... WARNING FILE:LINE (void CaloCellPacker_400_500::unpack(const CaloCompactCellContainer&, const std::vector<int>&, CaloCellContainer&, DataPool<LArCell>&, DataPool<TileCell>&) const): Corrupted data: can't find DDE for cell with hash 46490
  --- err11
-CaloCellPacker_...WARNING FILE:LINE (void CaloCellPacker_400_500::unpack(const CaloCompactCellContainer&, const std::vector<int>&, CaloCellContainer&, DataPool<LArCell>&, DataPool<TileCell>&) const): Corrupted data: Provenance count too large 9999999.
-CaloCellPacker_...WARNING FILE:LINE (void CaloCellPacker_400_500::unpack(const CaloCompactCellContainer&, const std::vector<int>&, CaloCellContainer&, DataPool<LArCell>&, DataPool<TileCell>&) const): Corrupted data: didn't consume all packed data.
+CaloCellPacker_... WARNING FILE:LINE (void CaloCellPacker_400_500::unpack(const CaloCompactCellContainer&, const std::vector<int>&, CaloCellContainer&, DataPool<LArCell>&, DataPool<TileCell>&) const): Corrupted data: Provenance count too large 9999999.
+CaloCellPacker_... WARNING FILE:LINE (void CaloCellPacker_400_500::unpack(const CaloCompactCellContainer&, const std::vector<int>&, CaloCellContainer&, DataPool<LArCell>&, DataPool<TileCell>&) const): Corrupted data: didn't consume all packed data.
  --- err unordered
-CaloCellPacker_...WARNING FILE:LINE (void CaloCellPacker_400_500::unpack(const CaloCompactCellContainer&, const std::vector<int>&, CaloCellContainer&, DataPool<LArCell>&, DataPool<TileCell>&) const): Cells not in subcalo order; iterators will be wrong.
+CaloCellPacker_... WARNING FILE:LINE (void CaloCellPacker_400_500::unpack(const CaloCompactCellContainer&, const std::vector<int>&, CaloCellContainer&, DataPool<LArCell>&, DataPool<TileCell>&) const): Cells not in subcalo order; iterators will be wrong.
 *** test 501 187652 0 1
