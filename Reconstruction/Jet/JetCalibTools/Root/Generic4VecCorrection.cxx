@@ -52,7 +52,7 @@ StatusCode Generic4VecCorrection::initialize()
   } else if(m_correctionType == JET_CORRTYPE::MC2MC){
     algo_type = "JPS_MC2MC";
     default_OutJetScale = "JetMC2MCScaleMomentum";
-    bool isMC = m_simFlavour.Contains("FullG4",TString::kIgnoreCase) || m_simFlavour.Contains("ATLFAST3",TString::kIgnoreCase);
+    bool isMC = TString(m_simFlavour).Contains("FullG4",TString::kIgnoreCase) || TString(m_simFlavour).Contains("ATLFAST3",TString::kIgnoreCase);
     if (m_simFlavour == ""){
       ATH_MSG_WARNING("No simFlavour metadata available for this sample! Assuming it is MC, but this could cause an error if your sample is not listed in MC2MC_exceptions_DSID.json");
       isMC = true;
@@ -96,7 +96,7 @@ StatusCode Generic4VecCorrection::initialize()
     ATH_MSG_WARNING(algo_type << " is configured to use custom jet scale input " << m_inJetScale << "and/or custom jet scale output " << m_outJetScale << ", this is expert-level only!");
   }
 
-  ATH_MSG_INFO("Starting " << algo_type << " correction from jet scale " << m_inJetScale.Data() << " and writing out jet scale " << m_outJetScale.Data() << ", using input file " << m_correctionFilePath);
+  ATH_MSG_INFO("Starting " << algo_type << " correction from jet scale " << m_inJetScale << " and writing out jet scale " << m_outJetScale << ", using input file " << m_correctionFilePath);
   return StatusCode::SUCCESS;
 }
 
@@ -133,10 +133,10 @@ StatusCode Generic4VecCorrection::calibrate(xAOD::Jet& jet, JetEventInfo& jetEve
     return StatusCode::SUCCESS;
 
   xAOD::JetFourMom_t calibP4;
-  if (m_inJetScale.CompareTo("Default") == 0 )
+  if (m_inJetScale == "Default")
     calibP4 = jet.jetP4();
   else
-    calibP4 = jet.jetP4(m_inJetScale.Data());
+    calibP4 = jet.jetP4(m_inJetScale);
 
   float correctionFactor = 1.0;
 
@@ -177,7 +177,7 @@ StatusCode Generic4VecCorrection::calibrate(xAOD::Jet& jet, JetEventInfo& jetEve
   }
   // Apply the correction and set it in the jet EDM
   calibP4 *= correctionFactor;
-  jet.setAttribute<xAOD::JetFourMom_t>(m_outJetScale.Data(),calibP4);
+  jet.setAttribute<xAOD::JetFourMom_t>(m_outJetScale,calibP4);
   jet.setJetP4(calibP4);
 
   return StatusCode::SUCCESS;
@@ -205,7 +205,7 @@ StatusCode Generic4VecCorrection::initialize_correctionResponse()
 
   } else {
     // Recommended method to build the correct CalibFile
-    TString CalibFileTag = m_config->GetValue( (algo_type+".CalibFileTag").c_str(), ""); 
+    std::string CalibFileTag = m_config->GetValue( (algo_type+".CalibFileTag").c_str(), ""); 
     if( CalibFileTag == "" || m_jetAlgo == "" || m_mcCampaign == ""){
       ATH_MSG_FATAL("At least one of the required parameters is not set, please check m_mcCampaign (" << m_mcCampaign << "), m_jetAlgo (" << m_jetAlgo << "), and " << algo_type << ".CalibFileTag (" << CalibFileTag <<")");
       return StatusCode::FAILURE;
@@ -218,7 +218,7 @@ StatusCode Generic4VecCorrection::initialize_correctionResponse()
     ATH_MSG_FATAL("PathResolverFindCalibFile cannot find path to " << CalibFile);
     return StatusCode::FAILURE;
   }
-  std::unique_ptr<TFile> inputFile(TFile::Open(m_correctionFilePath));
+  std::unique_ptr<TFile> inputFile(TFile::Open(m_correctionFilePath.c_str()));
   if (!inputFile || inputFile->IsZombie()){
       ATH_MSG_FATAL("Cannot open " << algo_type << "'s CalibFile, even though the m_correctionFilePath exists: " << CalibFile);
       return StatusCode::FAILURE;
@@ -251,7 +251,7 @@ StatusCode Generic4VecCorrection::load_json(nlohmann::json& json_object, const s
 StatusCode Generic4VecCorrection::initialize_MC2MC()
 {
 
-  TString showerModel;
+  std::string showerModel;
   ATH_CHECK( parse_showerModel(showerModel, m_mcDSID, m_generatorsInfo) );
 
   // If CalibFile is set, we will force that generator correction. This is expert-level functionality
@@ -269,7 +269,7 @@ StatusCode Generic4VecCorrection::initialize_MC2MC()
 
   } else {
     // Recommended method to build the correct CalibFile
-    TString MC2MC_CalibFileTag = m_config->GetValue("JPS_MC2MC.CalibFileTag",""); 
+    std::string MC2MC_CalibFileTag = m_config->GetValue("JPS_MC2MC.CalibFileTag",""); 
     if( MC2MC_CalibFileTag == "" || m_jetAlgo == "" || m_mcCampaign == "" || showerModel == ""){
       ATH_MSG_FATAL("At least one of the required parameters is not set, please check m_mcCampaign (" << m_mcCampaign << "), m_jetAlgo (" << m_jetAlgo << "), JPS_MC2MC.CalibFileTag (" << MC2MC_CalibFileTag <<"), and showerModel (" << showerModel <<")");
       return StatusCode::FAILURE;
@@ -277,9 +277,9 @@ StatusCode Generic4VecCorrection::initialize_MC2MC()
     MC2MC_CalibFile.Append(m_calibAreaTag+"/CalibrationFactors/MC2MC_"+m_mcCampaign+"_"+m_jetAlgo+"_"+MC2MC_CalibFileTag+"_"+showerModel+".root");
   }
   // If the found / requested showerModel is the original Pythia used for calibrations, or was specifically set to None, skip the MC2MC correction
-  if (showerModel(0,6) == "Pythia" || showerModel(0,4) == "None"){
+  if (showerModel.starts_with("Pythia") || showerModel.starts_with("None")){
     m_skipCorrection = true;
-    ATH_MSG_INFO("Will not perform MC2MC correction for this sample (Pythia or forced to None), but will write out the redundant jet scale " << m_outJetScale.Data());
+    ATH_MSG_INFO("Will not perform MC2MC correction for this sample (Pythia or forced to None), but will write out the redundant jet scale " << m_outJetScale);
     return StatusCode::SUCCESS;
   }
   m_correctionFilePath = PathResolverFindCalibFile(MC2MC_CalibFile.Data());
@@ -287,7 +287,7 @@ StatusCode Generic4VecCorrection::initialize_MC2MC()
     ATH_MSG_FATAL("PathResolverFindCalibFile cannot find path to MC2MC CalibFile: " << MC2MC_CalibFile);
     return StatusCode::FAILURE;
   }
-  std::unique_ptr<TFile> inputFile(TFile::Open(m_correctionFilePath));
+  std::unique_ptr<TFile> inputFile(TFile::Open(m_correctionFilePath.c_str()));
   if (!inputFile || inputFile->IsZombie()){
       ATH_MSG_FATAL("Cannot open MC2MC CalibFile, even though the m_correctionFilePath exists: " << MC2MC_CalibFile);
       return StatusCode::FAILURE;
@@ -331,7 +331,7 @@ StatusCode Generic4VecCorrection::initialize_MC2MC()
 }
 
 // For MC2MC, parse showerModel from generatorsInfo, of form "Powheg(v.06-02)+Herwig7(v.7.2.3p2)+EvtGen(v.2.1.1)""
-StatusCode Generic4VecCorrection::parse_showerModel(TString& showerModel, int mcDSID, TString generatorsInfo) const
+StatusCode Generic4VecCorrection::parse_showerModel(std::string& showerModel, int mcDSID, TString generatorsInfo) const
 {
 
   // Check if an exception to the showerModel exists for this DSID
