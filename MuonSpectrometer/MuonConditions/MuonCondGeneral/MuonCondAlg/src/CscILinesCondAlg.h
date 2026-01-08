@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef MUONCONDALG_ILINESCONDALG_H
 #define MUONCONDALG_ILINESCONDALG_H
@@ -14,10 +14,11 @@
 #include "MuonIdHelpers/IMuonIdHelperSvc.h"
 #include "nlohmann/json.hpp"
 
+namespace Muon{
 class CscILinesCondAlg : public AthCondAlgorithm {
 
     public:
-        CscILinesCondAlg(const std::string& name, ISvcLocator* pSvcLocator);
+        using AthCondAlgorithm::AthCondAlgorithm;
         virtual ~CscILinesCondAlg() = default;
         virtual StatusCode initialize() override;
         virtual StatusCode execute(const EventContext& ctx) const override;
@@ -49,4 +50,5 @@ class CscILinesCondAlg : public AthCondAlgorithm {
         StatusCode parseDataFromJSON(const nlohmann::json& lines,
                                     ALineContainer& writeCdo) const;
 };
+}
 #endif

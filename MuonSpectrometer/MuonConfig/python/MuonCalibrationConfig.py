@@ -170,7 +170,7 @@ def MdtCalibDbAlgCfg(flags,name="MdtCalibDbAlg",**kwargs):
     kwargs.setdefault("AthRNGSvc", result.getPrimaryAndMerge(AthRNGSvcCfg(flags)))
 
     kwargs.setdefault("UseR4DetMgr", flags.Muon.usePhaseIIGeoSetup)
-    alg = CompFactory.MdtCalibDbAlg (name, **kwargs)
+    alg = CompFactory.Muon.MdtCalibDbAlg (name, **kwargs)
     result.addCondAlgo (alg, primary = True)
     return result
 
@@ -232,7 +232,7 @@ def NswErrorCalibDbAlgCfg(flags, name = "NswErrorCalibDbAlg", **kwargs):
         result.merge(addFolders(flags,folderNames[2:], className='CondAttrListCollection', detDb="TGC_OFL"))
          
     kwargs.setdefault("ReadKeys", folderNames) 
-    the_alg = CompFactory.NswUncertDbAlg(name = name, **kwargs)
+    the_alg = CompFactory.Muon.NswUncertDbAlg(name = name, **kwargs)
     result.addCondAlgo(the_alg, primary = True)
     return result
 
@@ -245,6 +245,6 @@ def MmCTPCondDbAlgCfg(flags, name = "MmCTPCondDbAlg", **kwargs):
       kwargs.setdefault("ReadKey", "/MDT/MM/CTPSLOPE")
       result.merge(addFolders(flags, kwargs["ReadKey"], className='CondAttrListCollection', detDb="MDT_OFL")) 
 
-    the_alg = CompFactory.MmCTPCondDbAlg(name = name, **kwargs)
+    the_alg = CompFactory.Muon.MmCTPCondDbAlg(name = name, **kwargs)
     result.addCondAlgo(the_alg, primary = True)
     return result

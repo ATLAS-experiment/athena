@@ -1,8 +1,9 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
+#include "MdtAsBuiltCondAlg.h"
+
 #include <fstream>
-#include <MuonCondAlg/MdtAsBuiltCondAlg.h>
 #include <StoreGate/ReadCondHandle.h>
 #include <StoreGate/WriteCondHandle.h>
 #include <AthenaKernel/IOVInfiniteRange.h>
@@ -10,9 +11,7 @@
 #include <CxxUtils/StringUtils.h>
 #include "GeoModelKernel/throwExcept.h"
 
-MdtAsBuiltCondAlg::MdtAsBuiltCondAlg(const std::string& name, ISvcLocator* pSvcLocator):
-        AthCondAlgorithm{name, pSvcLocator} {}
-
+namespace Muon{
 StatusCode MdtAsBuiltCondAlg::initialize(){
     ATH_CHECK(m_readKey.initialize(m_readFromJSON.value().empty()));
     ATH_CHECK(m_writeKey.initialize());
@@ -26,7 +25,7 @@ StatusCode MdtAsBuiltCondAlg::initialize(){
 }       
 
 StatusCode MdtAsBuiltCondAlg::execute(const EventContext& ctx) const {
-    SG::WriteCondHandle<MdtAsBuiltContainer> writeHandle{m_writeKey, ctx};
+    SG::WriteCondHandle writeHandle{m_writeKey, ctx};
     if (writeHandle.isValid()) {
          ATH_MSG_DEBUG("CondHandle " << writeHandle.fullKey() << " is already valid."
                                     << ". In theory this should not be called, but may happen"
@@ -34,7 +33,7 @@ StatusCode MdtAsBuiltCondAlg::execute(const EventContext& ctx) const {
         return StatusCode::SUCCESS; 
     }
     writeHandle.addDependency(EventIDRange(IOVInfiniteRange::infiniteTime()));
-    std::unique_ptr<MdtAsBuiltContainer> writeCdo{std::make_unique<MdtAsBuiltContainer>()};
+    auto writeCdo{std::make_unique<MdtAsBuiltContainer>()};
     
     /// Read the as-built parameters from JSON
     if (!m_readFromJSON.value().empty()) {
@@ -48,7 +47,7 @@ StatusCode MdtAsBuiltCondAlg::execute(const EventContext& ctx) const {
         ATH_CHECK(parseDataFromJSON(lines, *writeCdo));        
     }
     if (!m_readKey.empty()) {
-        SG::ReadCondHandle<CondAttrListCollection> readHandle{m_readKey, ctx};
+        SG::ReadCondHandle readHandle{m_readKey, ctx};
         if (!readHandle.isValid()){
             ATH_MSG_FATAL("Failed to retrieve "<<m_readKey.fullKey());
             return StatusCode::FAILURE;
@@ -207,4 +206,5 @@ StatusCode MdtAsBuiltCondAlg::setFromAscii(const std::string& asciiData,
         }
     }
     return StatusCode::SUCCESS;
+}
 }

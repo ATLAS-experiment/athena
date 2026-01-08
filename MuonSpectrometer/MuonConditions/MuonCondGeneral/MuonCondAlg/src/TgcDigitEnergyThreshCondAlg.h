@@ -15,10 +15,11 @@
 #include "StoreGate/ReadCondHandleKey.h"
 #include "StoreGate/WriteCondHandleKey.h"
 
+namespace Muon{
 class TgcDigitEnergyThreshCondAlg : public AthCondAlgorithm
 {
  public:
-    TgcDigitEnergyThreshCondAlg (const std::string& name, ISvcLocator* pSvcLocator);
+    using AthCondAlgorithm::AthCondAlgorithm;
     virtual ~TgcDigitEnergyThreshCondAlg() = default;
     virtual StatusCode initialize() override;
     virtual StatusCode execute(const EventContext& ctx) const override;
@@ -34,7 +35,7 @@ class TgcDigitEnergyThreshCondAlg : public AthCondAlgorithm
     SG::ReadCondHandleKey<CondAttrListCollection> m_readKeyDb{this, "ReadKey", "", "SG key for Tgc energy thresholds"};
     SG::WriteCondHandleKey<TgcDigitThresholdData> m_writeKey{this, "WriteKey", "TgcEnergyThresholds", "SG Key of TGCDigit AsdPos"};
 };
-
+}
 #endif
 
 

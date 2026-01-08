@@ -5,16 +5,6 @@
 #ifndef MUONCONDALG_RPCCONDDBALG_H
 #define MUONCONDALG_RPCCONDDBALG_H
 
-// STL includes
-#include <zlib.h>
-
-#include <sstream>
-#include <string>
-#include <vector>
-
-// Gaudi includes
-#include "GaudiKernel/ServiceHandle.h"
-
 // Athena includes
 #include "AthenaBaseComps/AthCondAlgorithm.h"
 #include "AthenaPoolUtilities/CondAttrListCollection.h"
@@ -24,9 +14,10 @@
 #include "StoreGate/ReadCondHandleKey.h"
 #include "StoreGate/WriteCondHandleKey.h"
 
+namespace Muon{
 class RpcCondDbAlg : public AthCondAlgorithm {
 public:
-    RpcCondDbAlg(const std::string &name, ISvcLocator *svc);
+    using AthCondAlgorithm::AthCondAlgorithm;
     virtual ~RpcCondDbAlg() = default;
     virtual StatusCode initialize() override;
     virtual StatusCode execute(const EventContext &) const override;
@@ -50,5 +41,5 @@ private:
                                                                                    "Key of input RPC condition data for MC dead elements"};
 
 };
-
+}
 #endif

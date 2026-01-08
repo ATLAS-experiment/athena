@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONCONDALG_MUONALIGNMENTCONDALG_H
@@ -17,11 +17,12 @@
 #include "MuonIdHelpers/IMuonIdHelperSvc.h"
 #include "nlohmann/json.hpp"
 
-
-class MuonAlignmentCondAlg : public AthCondAlgorithm {
+/** @brief Conditions algorithm to fetch the A & B-lines from the COol database */
+namespace Muon {
+class AlignmentCondAlg : public AthCondAlgorithm {
 public:
-    MuonAlignmentCondAlg(const std::string& name, ISvcLocator* pSvcLocator);
-    virtual ~MuonAlignmentCondAlg() = default;
+    using AthCondAlgorithm::AthCondAlgorithm;
+    virtual ~AlignmentCondAlg() = default;
     virtual StatusCode initialize() override;
     virtual StatusCode execute(const EventContext& ctx) const override;
 
@@ -80,5 +81,5 @@ private:
     Gaudi::Property<std::string> m_readFromJSON{this,"readFromJSON", "",
                                  "Reads the A & B lines parameters from a JSON file instead from COOL"};
 };
-
+}
 #endif

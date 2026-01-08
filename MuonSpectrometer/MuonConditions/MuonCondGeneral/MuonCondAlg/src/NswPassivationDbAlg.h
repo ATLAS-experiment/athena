@@ -20,12 +20,12 @@
 // Forward declarations
 class CondAttrListCollection;
 
-
+namespace Muon{
 class NswPassivationDbAlg: public AthCondAlgorithm{
 
 public:
 
-    NswPassivationDbAlg(const std::string& name, ISvcLocator* pSvcLocator);
+    using AthCondAlgorithm::AthCondAlgorithm;
     virtual ~NswPassivationDbAlg() = default;
     virtual StatusCode initialize() override;
     virtual StatusCode execute (const EventContext&) const override;
@@ -48,6 +48,6 @@ private:
                                  "Reads the passivation parameters from a JSON file instead of cool"};
  
 };
-
+}
 
 #endif

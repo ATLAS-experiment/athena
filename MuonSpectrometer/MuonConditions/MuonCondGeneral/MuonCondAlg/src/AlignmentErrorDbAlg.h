@@ -1,11 +1,6 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
-
-/**
-   MuonAlignmentErrorDbAlg reads raw condition data and writes derived condition data (MuonAlignmentErrorData) to the condition store
-*/
-
 #ifndef MUONCONDSVC_MUONALIGNMENTERRORDBALG_H
 #define MUONCONDSVC_MUONALIGNMENTERRORDBALG_H
 
@@ -20,12 +15,15 @@
 #include "MuonIdHelpers/IMuonIdHelperSvc.h"
 #include "MuonIdHelpers/MuonIdHelper.h"
 #include "MuonCalibITools/IIdToFixedIdTool.h"
-class MuonAlignmentErrorDbAlg : public AthCondAlgorithm {
+/** @brief MuonAlignmentErrorDbAlg reads raw condition data and writes derived    
+ *         condition data (MuonAlignmentErrorData) to the condition store
+*/
+namespace Muon{
+class AlignmentErrorDbAlg : public AthCondAlgorithm {
 public:
 
-    MuonAlignmentErrorDbAlg(const std::string& name, ISvcLocator* pSvcLocator);
-
-    ~MuonAlignmentErrorDbAlg() override = default;
+    using AthCondAlgorithm::AthCondAlgorithm;
+    ~AlignmentErrorDbAlg() override = default;
 
     StatusCode initialize() override;
     StatusCode execute(const EventContext& ctx) const override;
@@ -54,5 +52,5 @@ private:
     void generateMap(const auto & helper_obj, const auto & idTool, MuonAlignmentErrorData::MuonAlignmentErrorRuleCache& adev_new, 
         std::vector<MuonAlignmentErrorData::MuonAlignmentErrorRule>& devVec) const;
 };
-
+}
 #endif

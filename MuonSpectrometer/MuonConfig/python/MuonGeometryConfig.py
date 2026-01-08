@@ -128,7 +128,7 @@ def MuonAlignmentCondAlgCfg(flags, name="MuonAlignmentCondAlg", **kwargs):
     kwargs.setdefault("LoadBLines", flags.Muon.Align.UseBLines)
     
     kwargs.setdefault("ParlineFolders", ParlineFolders)
-    MuonAlign = CompFactory.MuonAlignmentCondAlg(name, **kwargs)
+    MuonAlign = CompFactory.Muon.AlignmentCondAlg(name, **kwargs)
     acc.addCondAlgo(MuonAlign, primary = True)
     return acc
 
@@ -137,7 +137,7 @@ def MuonAlignmentErrorDbAlgCfg(flags):
     acc = ComponentAccumulator()
     from IOVDbSvc.IOVDbSvcConfig import addFolders
     acc.merge(addFolders(flags, "/MUONALIGN/ERRS", "MUONALIGN_OFL", className="CondAttrListCollection"))
-    acc.addCondAlgo(CompFactory.MuonAlignmentErrorDbAlg("MuonAlignmentErrorDbAlg"))
+    acc.addCondAlgo(CompFactory.Muon.AlignmentErrorDbAlg("MuonAlignmentErrorDbAlg"))
     return acc
 
 def NswAsBuiltCondAlgCfg(flags, name = "NswAsBuiltCondAlg", **kwargs):
@@ -153,7 +153,7 @@ def NswAsBuiltCondAlgCfg(flags, name = "NswAsBuiltCondAlg", **kwargs):
     from IOVDbSvc.IOVDbSvcConfig import addFolders
     if(not (kwargs["MicroMegaJSON"] or not kwargs["ReadMmAsBuiltParamsKey"]) ) : # no need to add the folder if we are reading a json file anyhow
         result.merge(addFolders( flags, kwargs["ReadMmAsBuiltParamsKey"]  , 'MUONALIGN_OFL', className='CondAttrListCollection'))
-    the_alg = CompFactory.NswAsBuiltCondAlg(name, **kwargs)
+    the_alg = CompFactory.Muon.NswAsBuiltCondAlg(name, **kwargs)
     result.addCondAlgo(the_alg, primary = True)     
     return result
 
@@ -167,7 +167,7 @@ def sTGCAsBuiltCondAlgCfg(flags, name = "sTGCAsBuiltCondAlg", **kwargs):
         kwargs.setdefault("ReadKey","/MUONALIGN/ASBUILTPARAMS/STGC")
         from IOVDbSvc.IOVDbSvcConfig import addFolders
         result.merge(addFolders( flags, kwargs["ReadKey"], 'MUONALIGN_OFL', className='CondAttrListCollection', tag = 'MUONALIGN_STG_IntAl_alCons_noQL3_v01'))
-    the_alg = CompFactory.sTGCAsBuiltCondAlg(name,**kwargs)
+    the_alg = CompFactory.Muon.sTGCAsBuiltCondAlg(name,**kwargs)
     result.addCondAlgo(the_alg, primary=True)
     return result
 
@@ -179,7 +179,7 @@ def activateMmAsBuilt2PostExec(flags, cfg, **kwargs):
         return
     kwargs.setdefault("readFromJSON","")
     kwargs.setdefault("WriteKey","MmAsBuilt2")
-    the_alg = CompFactory.sTGCAsBuiltCondAlg(name,**kwargs)
+    the_alg = CompFactory.Muon.sTGCAsBuiltCondAlg(name,**kwargs)
     cfg.addCondAlgo(the_alg, primary=True)
 
     cfg.getCondAlgo("MuonDetectorCondAlg").applyMmAsBuilt2=True
@@ -195,7 +195,7 @@ def MdtAsBuiltCondAlgCfg(flags, name="MdtAsBuiltCondAlg", **kwargs):
     from IOVDbSvc.IOVDbSvcConfig import addFolders
     if "readFromJSON" not in kwargs or not kwargs["readFromJSON"]:
         result.merge(addFolders( flags, '/MUONALIGN/MDT/ASBUILTPARAMS' , 'MUONALIGN_OFL', className='CondAttrListCollection'))
-    the_alg = CompFactory.MdtAsBuiltCondAlg(name = name, **kwargs)
+    the_alg = CompFactory.Muon.MdtAsBuiltCondAlg(name = name, **kwargs)
     result.addCondAlgo(the_alg, primary = True)    
     return result
 
@@ -209,7 +209,7 @@ def CscILineCondAlgCfg(flags, name="CscILinesCondAlg", **kwargs):
     else:
         result.merge(addFolders( flags, ['/MUONALIGN/CSC/ILINES'], 'MUONALIGN_OFL', className='CondAttrListCollection'))
     
-    the_alg = CompFactory.CscILinesCondAlg(name, **kwargs)
+    the_alg = CompFactory.Muon.CscILinesCondAlg(name, **kwargs)
     result.addCondAlgo(the_alg, primary = True)
     return result
 

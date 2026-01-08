@@ -2,8 +2,8 @@
   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef MUONCONDALG_MmDigitEffiCondAlg_H
-#define MUONCONDALG_MmDigitEffiCondAlg_H
+#ifndef MUONCONDALG_sTgcDigitEffiCondAlg_H
+#define MUONCONDALG_sTgcDigitEffiCondAlg_H
 
 // Athena includes
 #include "AthenaBaseComps/AthCondAlgorithm.h"
@@ -18,10 +18,11 @@
 /**
  * Conditions algorithm to load the sTGC efficiency constants that are used in digitization.
 */
-class MmDigitEffiCondAlg : public AthCondAlgorithm {
+namespace Muon{
+class sTgcDigitEffiCondAlg : public AthCondAlgorithm {
 public:
-    MmDigitEffiCondAlg(const std::string& name, ISvcLocator* svc);
-    virtual ~MmDigitEffiCondAlg() = default;
+    using AthCondAlgorithm::AthCondAlgorithm;
+    virtual ~sTgcDigitEffiCondAlg() = default;
     virtual StatusCode initialize() override;
     virtual StatusCode execute(const EventContext& ctx) const override;
 
@@ -35,10 +36,10 @@ private:
      /// Load the gasGap efficiencies from a JSON file
     Gaudi::Property<std::string> m_readFromJSON{this, "readFromJSON", "" };
 
-    SG::WriteCondHandleKey<Muon::DigitEffiData> m_writeKey{this, "WriteKey", "MmDigitEff", "Key of the efficiency data in the CondStore"};
+    SG::WriteCondHandleKey<Muon::DigitEffiData> m_writeKey{this, "WriteKey", "sTgcDigitEff", "Key of the efficiency data in the CondStore"};
     SG::ReadCondHandleKey<CondAttrListCollection> m_readKeyDb{this, "ReadKey", "",
-                                                              "Folder of the MM efficiencies as they're stored in COOL"};
+                                                              "Folder of the STGC efficiencies as they're stored in COOL"};
     Gaudi::Property<double> m_defaultEffi{this, "defaultEffi", 1.};
 };
-
+}
 #endif

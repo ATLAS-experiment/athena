@@ -25,8 +25,8 @@ def ActsMuonAlignCondAlgCfg(flags, name="ActsMuonAlignCondAlg", **kwargs):
     kwargs.setdefault("applyNswAsBuilt", len([alg for alg in result.getCondAlgos() if alg.name == "NswAsBuiltCondAlg"])>0)
     kwargs.setdefault("applyMdtAsBuilt", len([alg for alg in result.getCondAlgos() if alg.name == "MdtAsBuiltCondAlg"])>0)
 
-    the_alg = CompFactory.ActsMuonAlignCondAlg(name, **kwargs)
-    result.addCondAlgo(the_alg)
+    the_alg = CompFactory.MuonR4.ActsAlignCondAlg(name, **kwargs)
+    result.addCondAlgo(the_alg, primary = True)
     return result
 
 def MdtAnalyticRtCalibAlgCfg(flags, name="MdtAnalyticCalibDbAlg",

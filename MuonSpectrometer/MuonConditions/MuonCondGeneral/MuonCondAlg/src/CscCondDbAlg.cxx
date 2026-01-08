@@ -1,19 +1,13 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <utility>
 
-
-
-#include "MuonCondAlg/CscCondDbAlg.h"
+#include "CscCondDbAlg.h"
 
 #include "AthenaKernel/IOVInfiniteRange.h"
-
-// constructor
-CscCondDbAlg::CscCondDbAlg(const std::string& name, ISvcLocator* pSvcLocator) :
-    AthCondAlgorithm(name, pSvcLocator) {}
-
+namespace Muon{
 // Initialize
 StatusCode CscCondDbAlg::initialize() {
     ATH_MSG_DEBUG("initializing " << name());
@@ -680,3 +674,4 @@ CscCondDbAlg::loadDataDeadChambers(writeHandle_t & writeHandle, CscCondDbData* w
     return StatusCode::SUCCESS;
 }
 */
+}

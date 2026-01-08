@@ -1,8 +1,8 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "ActsMuonAlignCondAlg.h"
+#include "ActsAlignCondAlg.h"
 
 #include <StoreGate/ReadCondHandle.h>
 #include <GeoModelKernel/GeoPerfUtils.h>
@@ -12,18 +12,8 @@
 
 using namespace MuonGMR4;
 
-#define CREATE_READHANDLE(CONT_TYPE, KEY)                  \
-     SG::ReadCondHandle<CONT_TYPE> readHandle{KEY, ctx};   \
-     if (!readHandle.isValid()) {                          \
-        ATH_MSG_FATAL(__FILE__<<":"<<__LINE__              \
-                    <<" Failed to load "<<KEY.fullKey());  \
-        return StatusCode::FAILURE;                        \
-     }
-
-ActsMuonAlignCondAlg::ActsMuonAlignCondAlg(const std::string& name, ISvcLocator* pSvcLocator):
-    AthCondAlgorithm{name, pSvcLocator}{}
-
-StatusCode ActsMuonAlignCondAlg::initialize() {
+namespace MuonR4{
+StatusCode ActsAlignCondAlg::initialize() {
     
     ATH_CHECK(m_readKeyALines.initialize(m_applyALines));
     ATH_CHECK(m_readKeyBLines.initialize(m_applyBLines));
@@ -62,7 +52,7 @@ StatusCode ActsMuonAlignCondAlg::initialize() {
     return StatusCode::SUCCESS;
 }
 
-Identifier ActsMuonAlignCondAlg::alignmentId(const MuonGMR4::MuonReadoutElement* re) const {
+Identifier ActsAlignCondAlg::alignmentId(const MuonGMR4::MuonReadoutElement* re) const {
     if (re->detectorType() == ActsTrk::DetectorType::Mdt || 
         re->detectorType() == ActsTrk::DetectorType::Tgc) {
             return m_idHelperSvc->chamberId(re->identify());
@@ -79,16 +69,15 @@ Identifier ActsMuonAlignCondAlg::alignmentId(const MuonGMR4::MuonReadoutElement*
     /// For the NSW, the alignment parameters are stored under the same key as the RE
     return re->identify();
 }
-StatusCode ActsMuonAlignCondAlg::loadDeltas(const EventContext& ctx,
+StatusCode ActsAlignCondAlg::loadDeltas(const EventContext& ctx,
                                             deltaMap& alignDeltas,
                                             alignTechMap& techTransforms) const {
     if (m_readKeyALines.empty()) {
         ATH_MSG_DEBUG("Loading of the A line parameters deactivated");
         return StatusCode::SUCCESS;
     }
-    
-    CREATE_READHANDLE(ALineContainer, m_readKeyALines);
-    const ALineContainer* aLineContainer{*readHandle};
+    const ALineContainer* aLineContainer{};
+    ATH_CHECK(SG::get(aLineContainer, m_readKeyALines, ctx));
     std::vector<const MuonReadoutElement*> readoutEles = m_detMgr->getAllReadoutElements();
     ATH_MSG_INFO("Load the alignment of "<<readoutEles.size()<<" detector elements");
     for (const MuonReadoutElement* re : readoutEles) {
@@ -119,23 +108,19 @@ StatusCode ActsMuonAlignCondAlg::loadDeltas(const EventContext& ctx,
     }
     return StatusCode::SUCCESS;
 }
-StatusCode ActsMuonAlignCondAlg::loadMdtDeformPars(const EventContext& ctx,
+StatusCode ActsAlignCondAlg::loadMdtDeformPars(const EventContext& ctx,
                                                    ActsTrk::DetectorAlignStore& store) const {
     
     if (!m_applyMdtAsBuilt  && !m_applyBLines) {
         return StatusCode::SUCCESS;
     }
-    std::unique_ptr<MdtAlignmentStore> internAlign = std::make_unique<MdtAlignmentStore>(m_idHelperSvc.get());
+    auto internAlign = std::make_unique<MdtAlignmentStore>(m_idHelperSvc.get());
     const MdtAsBuiltContainer* asBuiltCont{nullptr};
     const BLineContainer* bLines{nullptr};
-    if (m_applyMdtAsBuilt) {
-        CREATE_READHANDLE(MdtAsBuiltContainer, m_readMdtAsBuiltKey);
-        asBuiltCont = readHandle.cptr();
-    }
-    if (m_applyBLines) {
-        CREATE_READHANDLE(BLineContainer, m_readKeyBLines);
-        bLines = readHandle.cptr();        
-    }
+    
+    ATH_CHECK(SG::get(asBuiltCont, m_readMdtAsBuiltKey, ctx));
+    ATH_CHECK(SG::get(bLines, m_readKeyBLines, ctx));
+    
     const MdtIdHelper& idHelper{m_idHelperSvc->mdtIdHelper()};
     for (auto itr = idHelper.module_begin(); itr != idHelper.module_end(); ++itr) {
        const Identifier& stationId{*itr};
@@ -149,101 +134,104 @@ StatusCode ActsMuonAlignCondAlg::loadMdtDeformPars(const EventContext& ctx,
             MdtAsBuiltContainer::const_iterator itr = asBuiltCont->find(stationId);
             if (itr != asBuiltCont->end()) asBuilt = &(*itr);
         }
-        if (asBuilt || bline) internAlign->storeDistortion(stationId, bline, asBuilt);
+        if (asBuilt || bline) {
+            internAlign->storeDistortion(stationId, bline, asBuilt);
+        }       
     }
     // Down cast the alignment pointer
     store.internalAlignment = std::move(internAlign);
     return StatusCode::SUCCESS;
 }
-StatusCode ActsMuonAlignCondAlg::loadMmDeformPars(const EventContext& ctx,
-                                                  ActsTrk::DetectorAlignStore& store) const {
+StatusCode ActsAlignCondAlg::loadMmDeformPars(const EventContext& ctx,
+                                              ActsTrk::DetectorAlignStore& store) const {
     if (!m_applyMmPassivation && !m_applyNswAsBuilt && !m_applyBLines) {
         return StatusCode::SUCCESS;
     }
-    std::unique_ptr<MmAlignmentStore> internAlign = std::make_unique<MmAlignmentStore>();
-    if (m_applyMmPassivation) {
-        CREATE_READHANDLE(NswPassivationDbData, m_readNswPassivKey);
-        internAlign->passivation = readHandle.cptr();
+    auto internAlign = std::make_unique<MmAlignmentStore>();
+    const NswAsBuiltDbData* asBuiltPars{};
+    ATH_CHECK(SG::get(internAlign->passivation, m_readNswPassivKey, ctx));
+    ATH_CHECK(SG::get(asBuiltPars, m_readNswAsBuiltKey, ctx));
+    if (asBuiltPars) {
+        internAlign->asBuiltPars = asBuiltPars->microMegaData;
     }
-    if (m_applyNswAsBuilt) {
-        CREATE_READHANDLE(NswAsBuiltDbData, m_readNswAsBuiltKey);
-        internAlign->asBuiltPars = readHandle->microMegaData;
-    }
-    if (m_applyBLines) {
-        CREATE_READHANDLE(BLineContainer, m_readKeyBLines);
-        /// Replace it by the vector of MmReadout elements once these are implemented
-        std::vector<const MuonReadoutElement*> reEles = m_detMgr->getAllReadoutElements();
-        for (const MuonReadoutElement* re : reEles){
-            if (re->detectorType() != ActsTrk::DetectorType::Mm) continue;
+    const BLineContainer* bLines{};
+    ATH_CHECK(SG::get(bLines, m_readKeyBLines, ctx));
+    if (bLines) {
+        for (const MmReadoutElement* re : m_detMgr->getAllMmReadoutElements()){
             const Identifier stationId = alignmentId(re);
-            BLineContainer::const_iterator itr = readHandle->find(stationId);
-            if (itr != readHandle->end()) internAlign->cacheBLine(re->identify(), *itr);
+            BLineContainer::const_iterator itr = bLines->find(stationId);
+            if (itr != bLines->end()) {
+                internAlign->cacheBLine(re->identify(), *itr);
+            }
         }
     }
     store.internalAlignment = std::move(internAlign);
     return StatusCode::SUCCESS;
 }
-StatusCode ActsMuonAlignCondAlg::loadStgcDeformPars(const EventContext& ctx,
-                                                    ActsTrk::DetectorAlignStore& store) const{
+StatusCode ActsAlignCondAlg::loadStgcDeformPars(const EventContext& ctx,
+                                                ActsTrk::DetectorAlignStore& store) const{
     if (!(m_applyNswAsBuilt && !m_readsTgcAsBuiltKey.empty()) && !m_applyBLines) {
         return StatusCode::SUCCESS;
     }
-    std::unique_ptr<sTgcAlignmentStore> internalAlign = std::make_unique<sTgcAlignmentStore>();
-    if (m_applyNswAsBuilt && !m_readsTgcAsBuiltKey.empty()) {
-        CREATE_READHANDLE(sTGCAsBuiltData, m_readsTgcAsBuiltKey);
-        internalAlign->asBuiltPars = *readHandle;
-    }
-    if (m_applyBLines) {
-        CREATE_READHANDLE(BLineContainer, m_readKeyBLines);
-        /// Replace it by the vector of MmReadout elements once these are implemented
-        std::vector<const MuonReadoutElement*> reEles = m_detMgr->getAllReadoutElements();
-        for (const MuonReadoutElement* re : reEles){
-            if (re->detectorType() != ActsTrk::DetectorType::sTgc) continue;
+    auto internAlign = std::make_unique<sTgcAlignmentStore>();
+    ATH_CHECK(SG::get(internAlign->asBuiltPars, m_readsTgcAsBuiltKey, ctx));
+    const BLineContainer* bLines{};
+    ATH_CHECK(SG::get(bLines, m_readKeyBLines, ctx));
+    if (bLines) {
+        for (const sTgcReadoutElement* re : m_detMgr->getAllsTgcReadoutElements()) {
             const Identifier stationId = alignmentId(re);
-            BLineContainer::const_iterator itr = readHandle->find(stationId);
-            if (itr != readHandle->end()) internalAlign->cacheBLine(re->identify(), *itr);
+            BLineContainer::const_iterator itr = bLines->find(stationId);
+            if (itr != bLines->end()) {
+                internAlign->cacheBLine(re->identify(), *itr);
+            }
         }
     }
-    store.internalAlignment = std::move(internalAlign);
+    store.internalAlignment = std::move(internAlign);
     return StatusCode::SUCCESS;
 }
 
-StatusCode ActsMuonAlignCondAlg::declareDependencies(const EventContext& ctx,
-                                                     ActsTrk::DetectorType detType,
-                                                     SG::WriteCondHandle<ActsTrk::DetectorAlignStore>& writeHandle) const {
+StatusCode ActsAlignCondAlg::declareDependencies(const EventContext& ctx,
+                                                 ActsTrk::DetectorType detType,
+                                                 SG::WriteCondHandle<ActsTrk::DetectorAlignStore>& writeHandle) const {
     writeHandle.addDependency(IOVInfiniteRange::infiniteTime());
     if (m_applyALines) {
-        CREATE_READHANDLE(ALineContainer, m_readKeyALines);
-        writeHandle.addDependency(readHandle);
+        SG::ReadCondHandle depHandle{m_readKeyALines, ctx};
+        ATH_CHECK(depHandle.isValid());
+        writeHandle.addDependency(depHandle);
     }
     const bool issTGC = detType == ActsTrk::DetectorType::sTgc;
     const bool isMm   = detType == ActsTrk::DetectorType::Mm;
     const bool isMdt = detType == ActsTrk::DetectorType::Mdt;
     
     if (m_applyBLines&& (issTGC || isMm || isMdt)) {
-        CREATE_READHANDLE(BLineContainer, m_readKeyBLines);
-        writeHandle.addDependency(readHandle);
+        SG::ReadCondHandle depHandle{m_readKeyBLines, ctx};
+        ATH_CHECK(depHandle.isValid());
+        writeHandle.addDependency(depHandle);
     }
     if (m_applyMdtAsBuilt && isMdt) {
-        CREATE_READHANDLE(MdtAsBuiltContainer, m_readMdtAsBuiltKey);
-        writeHandle.addDependency(readHandle);
+        SG::ReadCondHandle depHandle{m_readMdtAsBuiltKey, ctx};
+        ATH_CHECK(depHandle.isValid());
+        writeHandle.addDependency(depHandle);
     }
     if (m_applyMmPassivation && detType == ActsTrk::DetectorType::Mm) {
-        CREATE_READHANDLE(NswPassivationDbData, m_readNswPassivKey);
-        writeHandle.addDependency(readHandle);
+        SG::ReadCondHandle depHandle{m_readNswPassivKey, ctx};
+        ATH_CHECK(depHandle.isValid());
+        writeHandle.addDependency(depHandle);
     }
     if (m_applyNswAsBuilt && isMm) {
-        CREATE_READHANDLE(NswAsBuiltDbData, m_readNswAsBuiltKey);
-        writeHandle.addDependency(readHandle);
+        SG::ReadCondHandle depHandle{m_readNswAsBuiltKey, ctx};
+        ATH_CHECK(depHandle.isValid());
+        writeHandle.addDependency(depHandle);
     }
     if(m_applyNswAsBuilt && issTGC && !m_readsTgcAsBuiltKey.empty()){
-        CREATE_READHANDLE(sTGCAsBuiltData, m_readsTgcAsBuiltKey);
-        writeHandle.addDependency(readHandle);
+        SG::ReadCondHandle depHandle{m_readsTgcAsBuiltKey, ctx};
+        ATH_CHECK(depHandle.isValid());
+        writeHandle.addDependency(depHandle);
     }
     return StatusCode::SUCCESS;
 }
 
-StatusCode ActsMuonAlignCondAlg::execute(const EventContext& ctx) const {
+StatusCode ActsAlignCondAlg::execute(const EventContext& ctx) const {
     deltaMap alignDeltas{};
     alignTechMap techTransforms{};
     unsigned int memBeforeAlign = GeoPerfUtils::getMem();
@@ -262,7 +250,7 @@ StatusCode ActsMuonAlignCondAlg::execute(const EventContext& ctx) const {
                           <<" are still valid.");
             continue;
         }
-        std::unique_ptr<ActsTrk::DetectorAlignStore> writeCdo = std::make_unique<ActsTrk::DetectorAlignStore>(subDet);
+        auto writeCdo = std::make_unique<ActsTrk::DetectorAlignStore>(subDet);
 
         const std::set<const GeoAlignableTransform*>& toStore =  techTransforms[subDet];
         /// Append the alignable transformations to the conditions object
@@ -316,5 +304,4 @@ StatusCode ActsMuonAlignCondAlg::execute(const EventContext& ctx) const {
     ATH_MSG_INFO("Caching of the alignment parameters required "<<(memAfterAlign - memBeforeAlign) / 1024<<" MB of memory");
     return StatusCode::SUCCESS;
 }
-
-#undef CREATE_READHANDLE
+}
