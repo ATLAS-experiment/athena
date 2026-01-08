@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -21,6 +21,7 @@
 #include "VP1Base/VP1Interval.h"
 
 #include <QWidget>
+#include <memory>
 
 class QPushButton;
 class QAbstractButton;
@@ -74,7 +75,7 @@ protected:
 
   template <class T>
   void initDialog(T& theUI, QPushButton* launchbutton, QAbstractButton* enabledButton = 0);
-  void initDialog(QWidget * dialog, QPushButton* launchbutton, QPushButton* closebutton, QAbstractButton* enabledButton = 0);
+  void initDialog(std::unique_ptr<QWidget> dialog, QPushButton* launchbutton, QPushButton* closebutton, QAbstractButton* enabledButton = 0);
 
   void setupCollWidgetInScrollArea(QScrollArea * scrollarea, VP1CollectionWidget* collWidget);
 
@@ -142,9 +143,9 @@ QString VP1Controller::toString( const T& par )
 
 template <class T>
 void VP1Controller::initDialog(T& theUI, QPushButton* launchbutton,QAbstractButton* enabledButton) {
-  QWidget * w = new QWidget(0,Qt::WindowStaysOnTopHint);
-  theUI.setupUi(w);
-  initDialog(w, launchbutton, theUI.pushButton_close,enabledButton);
+  auto w = std::make_unique<QWidget>(nullptr,Qt::WindowStaysOnTopHint);
+  theUI.setupUi(w.get());
+  initDialog(std::move(w), launchbutton, theUI.pushButton_close,enabledButton);
 }
 
 template <class T>
