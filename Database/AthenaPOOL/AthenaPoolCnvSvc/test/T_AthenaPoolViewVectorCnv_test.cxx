@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthenaPoolCnvSvc/test/T_AthenaPoolViewVectorCnv_test.cxx
@@ -267,7 +267,13 @@ int main()
   
   gSystem->Load("libAthenaPoolCnvSvcTestDict");
   DataVector<Y_v2>& vec = makeVecs (*testStore);
-  test1 (pSvcLoc, *testStore, *svc, vec);
-  test2 (pSvcLoc, *svc, vec);
+  try {
+    test1 (pSvcLoc, *testStore, *svc, vec);
+    test2 (pSvcLoc, *svc, vec);
+  }
+  catch (const std::exception& e) {
+    std::cerr << e.what() << "\n";
+    return 1;
+  }
 }
 
