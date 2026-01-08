@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -917,17 +917,23 @@ void test_upinsert()
 
 int main()
 {
-  test1();
-  test2();
-  test_baseinfo();
-  test_eltbaseinfo();
-  test_copyconvert();
-  test_iterate();
-  test_auxdata();
-  test_emptysort();
-  test_insertmove();
-  test_constctor();
-  test_upinsert();
+  try {
+    test1();
+    test2();
+    test_baseinfo();
+    test_eltbaseinfo();
+    test_copyconvert();
+    test_iterate();
+    test_auxdata();
+    test_emptysort();
+    test_insertmove();
+    test_constctor();
+    test_upinsert();
+  }
+  catch (const std::runtime_error& e) {
+    std::cerr << e.what() << "\n";
+    return 1;
+  }
   return 0;
 }
 
