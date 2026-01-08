@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -47,12 +47,11 @@ public:
   class MDTChamberInfo {
     public:
     MDTChamberInfo(const Amg::Transform3D& l2g, const GeoTrd* t)
-      : localToGlobal(l2g), globalToLocal(0), trd(t) {}
+      : localToGlobal(l2g), trd(t) {}
     Amg::Transform3D localToGlobal;
-    Amg::Transform3D * globalToLocal;//Only created on demand - saving ~100KB in a typical job.
+    std::unique_ptr<Amg::Transform3D> globalToLocal;//Only created on demand - saving ~100KB in a typical job.
     const GeoTrd * trd;
-    void ensureInitGlobalToLocal() { if (!globalToLocal) globalToLocal = new Amg::Transform3D(localToGlobal.inverse()); }
-    ~MDTChamberInfo() { delete globalToLocal; }
+    void ensureInitGlobalToLocal() { if (!globalToLocal) globalToLocal = std::make_unique<Amg::Transform3D>(localToGlobal.inverse()); }
   };
   std::map<GeoPVConstLink,MDTChamberInfo>::iterator itLastMDTChamberLookedUp{};
   std::map<GeoPVConstLink,MDTChamberInfo> mdtchambervolinfo;//Map typically has around 1124 entries.
