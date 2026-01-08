@@ -33,9 +33,6 @@ public:
   virtual StatusCode create() override final;
   virtual StatusCode clear() override final;
 
-  // Register callback function on CondDB object
-  virtual StatusCode registerCallback ATLAS_NOT_THREAD_SAFE () override final;
-
   // Callback function itself
   virtual StatusCode align ATLAS_NOT_THREAD_SAFE (IOVSVC_CALLBACK_ARGS) override final;
 
