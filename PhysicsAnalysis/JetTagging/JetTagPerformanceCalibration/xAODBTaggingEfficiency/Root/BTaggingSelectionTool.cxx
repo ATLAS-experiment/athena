@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #include "CxxUtils/checker_macros.h"
 #include "xAODBTaggingEfficiency/BTaggingSelectionTool.h"
@@ -283,6 +283,7 @@ StatusCode BTaggingSelectionTool::ExtractTaggerProperties(taggerproperties &tagg
       }
       if ( m_useCTag && !fraction_tau_cTag_data) {
         ATH_MSG_ERROR("Runnint c-tagging WP, but failed to retrive fraction_tau_cTag");
+        return StatusCode::FAILURE;
       }    
       fraction_tau_cTag = fraction_tau_cTag_data[0](0);
     }
