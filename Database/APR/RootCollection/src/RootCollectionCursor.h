@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ROOTCOLLECTION_ROOTCOLLECTIONCURSOR_H
@@ -62,8 +62,6 @@ namespace pool {
 
         /// Row buffer containing Tokens and Attributes
         pool::CollectionRowBuffer       m_collectionRowBuffer;
-
-        const TEventList                *m_eventList;
 
         char                             m_charBuffer[c_maxLengthOfStrings];
 
