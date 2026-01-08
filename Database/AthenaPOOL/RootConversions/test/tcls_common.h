@@ -1,10 +1,9 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-// $Id: tcls_common.h,v 1.4 2009-01-14 16:04:31 ssnyder Exp $
 /**
  * @file tcls_common.h
  * @author scott snyder <snyder@bnl.gov>
@@ -332,6 +331,8 @@ class RR
 public:
   RR();
   ~RR();
+  RR(const RR&) = delete;
+  RR& operator=(const RR&) = delete;
   int irr;
   T1* t1;
 };
