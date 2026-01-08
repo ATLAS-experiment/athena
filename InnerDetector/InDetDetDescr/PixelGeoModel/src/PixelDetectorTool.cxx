@@ -142,12 +142,7 @@ StatusCode PixelDetectorTool::create()
 
   // BCM Tool.
   if (!m_bcmTool.empty()) {
-    if (!m_bcmTool.retrieve().isFailure()) {
-      ATH_MSG_INFO("BCM_GeoModel tool retrieved: " << m_bcmTool );
-    } else {
-      ATH_MSG_INFO("Could not retrieve " << m_bcmTool << " -  BCM will not be built" );
-    }
-    m_athenaComps->setBCM(&*m_bcmTool);
+    m_athenaComps->setBCM(m_bcmTool.get());
   }
   else {
     ATH_MSG_INFO("BCM not requested." );
@@ -155,13 +150,7 @@ StatusCode PixelDetectorTool::create()
 
   // BLM Tool.
   if (!m_blmTool.empty()) {
-    if (!m_blmTool.retrieve().isFailure()) {
-      ATH_MSG_INFO("BLM_GeoModel tool retrieved: " << m_blmTool );
-    }
-    else {
-      ATH_MSG_INFO("Could not retrieve " << m_blmTool << " -  BLM will not be built" );
-    }
-    m_athenaComps->setBLM(&*m_blmTool);
+    m_athenaComps->setBLM(m_blmTool.get());
   }
   else {
     ATH_MSG_INFO("BLM not requested." );
