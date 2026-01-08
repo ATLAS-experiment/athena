@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONCONDALG_TGCDIGITCROSSTALKCONDALG_H_
@@ -15,7 +15,7 @@ namespace Muon{
 class TgcDigitCrosstalkCondAlg : public AthCondAlgorithm
 {
  public:
-  AthCondAlgorithm::AthCondAlgorithm;
+  using AthCondAlgorithm::AthCondAlgorithm;
   virtual ~TgcDigitCrosstalkCondAlg() = default;
   virtual StatusCode initialize() override;
   virtual StatusCode execute(const EventContext& ctx) const override;
