@@ -30,9 +30,8 @@ namespace MuonValR4{
 
             using PlotPtr_t = std::shared_ptr<detail::DrawCanvasObject>;
             using PlotVec_t = std::vector<PlotPtr_t>;
-        private:
 
-                    
+        private:
             void paintObjects(const ClientToken& token,
                               PlotVec_t&& toDraw);
 
@@ -40,12 +39,6 @@ namespace MuonValR4{
             Gaudi::Property<double> m_canvasExtraScale{this, "CanvasExtraScale" , 1.5};
             /** @brief Ensure that the canvas has the same interval sizes in x & y */
             Gaudi::Property<bool> m_quadCanvas{this, "QuadraticCanas", true};
-            /** @brief ATLAS label (Internal / Prelimnary / Simulation) */
-            Gaudi::Property<std::string> m_AtlasLabel{this, "AtlasLabel", "Internal"};
-            /** @brief Centre of mass energy label */
-            Gaudi::Property<std::string> m_sqrtSLabel{this, "SqrtSLabel", "14"};
-            /** @brief Luminosity label */
-            Gaudi::Property<std::string> m_lumiLabel{this, "LumiLabel", ""};
             /** @brief Width of all drawn Canvases */
             Gaudi::Property<unsigned> m_canvasWidth{this, "CanvasWidth", 800};
             /** @brief  Height of all drawn Canvases */
