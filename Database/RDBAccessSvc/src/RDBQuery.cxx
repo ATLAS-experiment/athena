@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "RDBQuery.h"
@@ -28,8 +28,6 @@ RDBQuery::RDBQuery(const Athena::DBLock& dblock
 		   , const std::string& connName)
   : IRDBQuery()
   , m_dblock (dblock)
-  , m_query(nullptr)
-  , m_queryCount(nullptr)
   , m_accessSvc(accessSvc)
   , m_nodeName(nodeName)
   , m_tagId(tagId)
@@ -42,8 +40,6 @@ RDBQuery::RDBQuery(const Athena::DBLock& dblock
 
 RDBQuery::~RDBQuery()
 {
-  delete m_query;
-  delete m_queryCount;
 }
 
 void RDBQuery::execute()
@@ -79,8 +75,8 @@ void RDBQuery::execute()
     }
 
     // ... Create query objects
-    m_query = m_accessSvc->getSession(m_connName)->nominalSchema().newQuery();
-    m_queryCount = m_accessSvc->getSession(m_connName)->nominalSchema().newQuery();
+    m_query.reset (m_accessSvc->getSession(m_connName)->nominalSchema().newQuery());
+    m_queryCount.reset (m_accessSvc->getSession(m_connName)->nominalSchema().newQuery());
 
     // Add fields
     if(m_fields.size()>0) {
