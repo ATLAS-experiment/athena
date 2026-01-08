@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // General package includes
@@ -390,14 +390,14 @@ StatusCode JetUncertaintiesTool::initialize()
     }
 
     // Get a file-wide validity histogram if specified
-    TString validHistForFile = settings.GetValue("FileValidHistogram","");
+    std::string validHistForFile = settings.GetValue("FileValidHistogram","");
     if (validHistForFile != "")
     {
         // Ensure that the parametrization is also specified
-        TString validHistForFileParam = settings.GetValue("FileValidHistParam","");
+        std::string validHistForFileParam = settings.GetValue("FileValidHistParam","");
         if (validHistForFileParam == "")
         {
-            ATH_MSG_ERROR("Specified a FileValidHistogram without an accompanying FileValidHistParam: " << validHistForFile.Data());
+            ATH_MSG_ERROR("Specified a FileValidHistogram without an accompanying FileValidHistParam: " << validHistForFile);
             return StatusCode::FAILURE;
         }
 
@@ -412,7 +412,7 @@ StatusCode JetUncertaintiesTool::initialize()
         if (m_fileValidHist->initialize(histFile).isFailure())
             return StatusCode::FAILURE;
 
-        ATH_MSG_INFO(Form("  FileValidHistogram: %s (%s)%s",validHistForFile.Data(),validHistForFileParam.Data(),validHistMassDef == CompMassDef::UNKNOWN ? "" : Form(" [%s]",CompMassDef::enumToString(validHistMassDef).Data())));
+        ATH_MSG_INFO(Form("  FileValidHistogram: %s (%s)%s",validHistForFile.c_str(),validHistForFileParam.c_str(),validHistMassDef == CompMassDef::UNKNOWN ? "" : Form(" [%s]",CompMassDef::enumToString(validHistMassDef).Data())));
     }
 
     // Check if combined mass weights have been specified
@@ -484,8 +484,8 @@ StatusCode JetUncertaintiesTool::initialize()
 
     // Get the NPV/mu reference values
     // These may not be set - only needed if a pileup component is requested
-    TString refNPV = settings.GetValue("Pileup.NPVRef","");
-    TString refMu  = settings.GetValue("Pileup.MuRef","");
+    std::string refNPV = settings.GetValue("Pileup.NPVRef","");
+    std::string refMu  = settings.GetValue("Pileup.MuRef","");
     if ( (refNPV != "" && refMu == "") || (refNPV == "" && refMu != "") )
     {
         ATH_MSG_ERROR(Form("Only one of the pileup references was specified: (NPV,mu) = (%.1f,%.1f)",m_refNPV,m_refMu));
@@ -1092,7 +1092,7 @@ UncertaintyComponent* JetUncertaintiesTool::buildUncertaintyComponent(const Comp
                     caloCompH.uncNames.clear();
                     caloCompH.isSpecial = false;
                     caloCompH.name = caloComps.at(iComp);
-                    caloCompH.uncNames.push_back(caloCompH.name+"_"+m_jetDef);
+                    caloCompH.uncNames.push_back(std::string(caloCompH.name)+"_"+m_jetDef);
                     caloCompH.massDef = CompMassDef::stringToEnum(caloMassDefs.at(iComp));
                     if (caloCompH.massDef == CompMassDef::UNKNOWN)
                     {
@@ -1147,7 +1147,7 @@ UncertaintyComponent* JetUncertaintiesTool::buildUncertaintyComponent(const Comp
                     TACompH.uncNames.clear();
                     TACompH.isSpecial = false;
                     TACompH.name = TAComps.at(iComp);
-                    TACompH.uncNames.push_back(TACompH.name+"_"+m_jetDef);
+                    TACompH.uncNames.push_back(std::string(TACompH.name)+"_"+m_jetDef);
                     TACompH.massDef = CompMassDef::stringToEnum(TAMassDefs.at(iComp));
                     if (TACompH.massDef == CompMassDef::UNKNOWN)
                     {
