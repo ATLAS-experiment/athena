@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef NSWCalibTool_h
 #define NSWCalibTool_h
@@ -16,7 +16,7 @@
 #include "MagFieldConditions/AtlasFieldCacheCondObj.h"
 #include "MuonCondData/NswCalibDbTimeChargeData.h"
 #include "MuonCondData/NswT0Data.h"
-#include "MuonCondData/mmCTPClusterCalibData.h"
+#include "MuonCondData/MmCTPClusterCalibData.h"
 
 #include "xAODMuonPrepData/MMCluster.h"
 
@@ -33,8 +33,8 @@ namespace Muon {
     using TimeCalibType = NswCalibDbTimeChargeData::CalibDataType;
     using TimeCalibConst = NswCalibDbTimeChargeData::CalibConstants;
     
-    StatusCode calibrateClus(const EventContext& ctx, const Muon::MMPrepData* prepData, const Amg::Vector3D& globalPos, std::vector<NSWCalib::CalibratedStrip>& calibClus) const override;
-    StatusCode distToTime(const EventContext& ctx, const Muon::MMPrepData* prepData, const Amg::Vector3D& globalPos, const std::vector<double>& driftDistances, std::vector<double>& driftTimes) const override;
+    StatusCode calibrateClus(const EventContext& ctx, const MMPrepData* prepData, const Amg::Vector3D& globalPos, std::vector<NSWCalib::CalibratedStrip>& calibClus) const override;
+    StatusCode distToTime(const EventContext& ctx, const MMPrepData* prepData, const Amg::Vector3D& globalPos, const std::vector<double>& driftDistances, std::vector<double>& driftTimes) const override;
 
 
     StatusCode calibrateClus(const EventContext& ctx, const ActsTrk::GeometryContext& gctx, const xAOD::MMCluster& prepData, const Amg::Vector3D& globalPos, std::vector<NSWCalib::CalibratedStrip>& calibClus) const override;
@@ -43,8 +43,8 @@ namespace Muon {
 
 
     StatusCode calibrateStrip(const EventContext& ctx, const Identifier& id, const double time, const double charge, const double theta, const double lorentzAngle, NSWCalib::CalibratedStrip& calibStrip) const override;
-    StatusCode calibrateStrip(const EventContext& ctx, const Muon::MM_RawData* mmRawData, NSWCalib::CalibratedStrip& calibStrip) const override;
-    StatusCode calibrateStrip(const EventContext& ctx, const Muon::STGC_RawData* sTGCRawData, NSWCalib::CalibratedStrip& calibStrip) const override;
+    StatusCode calibrateStrip(const EventContext& ctx, const MM_RawData* mmRawData, NSWCalib::CalibratedStrip& calibStrip) const override;
+    StatusCode calibrateStrip(const EventContext& ctx, const STGC_RawData* sTGCRawData, NSWCalib::CalibratedStrip& calibStrip) const override;
     
     
     bool tdoToTime  (const EventContext& ctx, const bool inCounts, const int tdo, const Identifier& chnlId, float& time, const int relBCID) const override;
@@ -60,16 +60,14 @@ namespace Muon {
     inline float stgcPeakTime() const override {return m_stgcPeakTime;}
 
   private:
-    const NswCalibDbTimeChargeData* getCalibData(const EventContext& ctx) const;
-    bool loadMagneticField(const EventContext& ctx, MagField::AtlasFieldCache& fieldCache ) const;
-    const Muon::mmCTPClusterCalibData* getCTPClusterCalibData(const EventContext& ctx) const;
-
+    StatusCode loadMagneticField(const EventContext& ctx, MagField::AtlasFieldCache& fieldCache) const;
+  
     bool timeToTdoMM(const NswCalibDbTimeChargeData* tdoPdoData, const float time, const Identifier& chnlId, int& tdo, int& relBCID) const;
     bool timeToTdoSTGC(const NswCalibDbTimeChargeData* tdoPdoData, const float time, const Identifier& chnlId, int& tdo, int& relBCID) const;
 
     float applyT0Calibration(const EventContext& ctx, const Identifier& id, float time) const;
 
-    ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc {this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
+    ServiceHandle<IMuonIdHelperSvc> m_idHelperSvc {this, "MuonIdHelperSvc", "MuonIdHelperSvc/MuonIdHelperSvc"};
     SG::ReadCondHandleKey<AtlasFieldCacheCondObj> m_fieldCondObjInputKey {this, "AtlasFieldCacheCondObj", "fieldCondObj"};
     SG::ReadCondHandleKey<MuonGM::MuonDetectorManager> m_muDetMgrKey {this, "DetectorManagerKey", "MuonDetectorManager", "Key of input MuonDetectorManager condition data"}; 
     SG::ReadCondHandleKey<NswCalibDbTimeChargeData> m_condTdoPdoKey {this, "condTdoPdoKey", "NswCalibDbTimeChargeData", "Key of NswCalibDbTimeChargeData object containing calibration data (TDO and PDO)"};
@@ -78,7 +76,7 @@ namespace Muon {
     Gaudi::Property<bool> m_isData{this, "isData", false, "Processing data"};
 
     Gaudi::Property<bool> m_CalibDriftVelocityFromData{this, "calibrateDriftVelocityFromData", false, "calibrateDriftVelocityFromData"};
-    SG::ReadCondHandleKey<Muon::mmCTPClusterCalibData> m_ctpClusterCalibKey{this, "CTPClusterCalibKey", "mmCTPClusterCalibData", "Key of the CTP cluster calibration corrections"};
+    SG::ReadCondHandleKey<MmCTPClusterCalibData> m_ctpClusterCalibKey{this, "CTPClusterCalibKey", "MmCTPClusterCalibData", "Key of the CTP cluster calibration corrections"};
 
     StatusCode initializeGasProperties();
     
@@ -116,7 +114,8 @@ namespace Muon {
     using angleFunction = NSWCalib::MicroMegaGas::angleFunction;
     angleFunction m_lorentzAngleFunction{NSWCalib::MicroMegaGas::dummy_func()};
    
-    bool localStripPosition(const Identifier& id, Amg::Vector2D &locPos) const;
+    std::optional<Amg::Vector2D> localStripPosition(const EventContext& ctx,
+                                                    const Identifier& id) const;
 
   };
 

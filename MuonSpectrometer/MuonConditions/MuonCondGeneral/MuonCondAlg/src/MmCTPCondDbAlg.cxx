@@ -49,7 +49,7 @@ StatusCode MmCTPCondDbAlg::execute(const EventContext& ctx) const {
         return StatusCode::SUCCESS;
     }
 
-    std::unique_ptr<Muon::mmCTPClusterCalibData> writeCdo{std::make_unique<Muon::mmCTPClusterCalibData>(m_idHelperSvc.get())};
+    std::unique_ptr<Muon::MmCTPClusterCalibData> writeCdo{std::make_unique<Muon::MmCTPClusterCalibData>(m_idHelperSvc.get())};
     writeHandle.addDependency(EventIDRange(IOVInfiniteRange::infiniteTime()));
 
     if (!m_readFromJSON.value().empty()) {
@@ -83,7 +83,7 @@ StatusCode MmCTPCondDbAlg::execute(const EventContext& ctx) const {
 }
 
 StatusCode MmCTPCondDbAlg::parseDataFromJSON(const nlohmann::json& lines,
-                                                 Muon::mmCTPClusterCalibData& ctpClusterCondData) const {
+                                                 Muon::MmCTPClusterCalibData& ctpClusterCondData) const {
     for (auto& corr : lines.items()) {
         nlohmann::json line = corr.value();    
 
@@ -115,7 +115,7 @@ StatusCode MmCTPCondDbAlg::parseDataFromJSON(const nlohmann::json& lines,
         //Using PCB 1 as default
         errorCalibId = m_idHelperSvc->mmIdHelper().channelID(stationType, stationEta, stationPhi, multiLayer, gasGap, 1 );
 
-        Muon::mmCTPClusterCalibData::CTPParameters constants{std::move(modelPars)};
+        Muon::MmCTPClusterCalibData::CTPParameters constants{std::move(modelPars)};
 
         ATH_CHECK(ctpClusterCondData.storeConstants(errorCalibId, std::move(constants)));
 
