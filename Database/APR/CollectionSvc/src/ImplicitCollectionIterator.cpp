@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ImplicitCollectionIterator.h"
@@ -16,20 +16,18 @@ ImplicitCollectionIterator( pool::IContainer& container,
                             const pool::ICollectionDescription& description )
       :
       m_container( container ),
-      m_tokenIterator( 0 ),
+      m_tokenIterator( m_container.tokens() ),
       m_token( 0 )
 {
    TokenList        tokenList;
    tokenList.extend( description.eventReferenceColumnName() );
    m_rowBuffer.setTokenList( tokenList );
-   m_tokenIterator = m_container.tokens();
 }
 
 
 pool::ImplicitCollectionIterator::~ImplicitCollectionIterator()
 {
   if ( m_token ) m_token->release();
-  delete m_tokenIterator;
 }
 
 
