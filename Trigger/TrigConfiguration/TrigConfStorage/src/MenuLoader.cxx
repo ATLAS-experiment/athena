@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "./MenuLoader.h"
@@ -217,7 +217,8 @@ TrigConf::MenuLoader::loadItems(TrigConf::Menu& menu) {
       // construct the tree of TriggerItemNodes according to
       // definition and set the thresholds and multiplicities in each
       // leaf node
-      titem->setTopNode( constructTree(titem->definition(), item_thrInfo[ctpid]) );
+      std::unique_ptr<TriggerItemNode> topNode (constructTree(titem->definition(), item_thrInfo[ctpid]));
+      titem->setTopNode( std::move(topNode)  );
    }
 }
 

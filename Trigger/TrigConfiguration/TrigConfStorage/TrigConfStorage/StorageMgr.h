@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TrigConf_StorageMgr
@@ -114,14 +114,14 @@ namespace TrigConf {
    private:
 
       template< class L >
-      L * NewLoader() {
-         return new L( *this, this->sessionMgr().createSession() );
+      std::unique_ptr<L> NewLoader() {
+         return std::make_unique<L>( *this, this->sessionMgr().createSession() );
       }
 
-      IHLTPrescaleSetLoader *            m_hltPrescaleSetLoader { nullptr };
-      IHLTPrescaleSetCollectionLoader *  m_hltPrescaleSetCollectionLoader { nullptr };
+      std::unique_ptr<IHLTPrescaleSetLoader>           m_hltPrescaleSetLoader;
+      std::unique_ptr<IHLTPrescaleSetCollectionLoader> m_hltPrescaleSetCollectionLoader;
 
-      SessionMgr*     m_sessionMgr { nullptr };
+      std::unique_ptr<SessionMgr>     m_sessionMgr;
       std::string     m_cs {""};      ///< connection string
       std::string     m_dbtype {""};  ///< db type
       std::string     m_dbserver {""};///< db server

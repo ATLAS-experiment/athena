@@ -1,13 +1,14 @@
 // Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TrigConf_CTPConfig
 #define TrigConf_CTPConfig
 
 #include <iosfwd>
+#include <memory>
 
 #include "TrigConfL1Data/Menu.h"
 #include "TrigConfL1Data/PrescaleSet.h"
@@ -41,7 +42,7 @@ namespace TrigConf {
       const PrescaledClock& prescaledClock() const { return m_PrescaledClock; }
       const DeadTime&       deadTime() const { return m_DeadTime; }
       const Random&         random() const { return m_Random; }
-      const CTPFiles*       ctpfiles() const { return m_CTPFiles; }
+      const CTPFiles*       ctpfiles() const { return m_CTPFiles.get(); }
       const PrioritySet&    prioritySet() const { return m_PrioritySet; }
       const Muctpi&         muCTPi() const { return m_MuCTPi; }
 
@@ -52,7 +53,7 @@ namespace TrigConf {
       PrescaledClock& prescaledClock() { return m_PrescaledClock; }
       DeadTime&       deadTime() { return m_DeadTime; }
       Random&         random() { return m_Random; }
-      CTPFiles*       ctpfiles() { return m_CTPFiles; }
+      CTPFiles*       ctpfiles() { return m_CTPFiles.get(); }
       PrioritySet&    prioritySet() { return m_PrioritySet; }
       Muctpi&         muCTPi() { return m_MuCTPi; }
 
@@ -74,7 +75,7 @@ namespace TrigConf {
       void setPrescaledClock( const PrescaledClock& m ) { m_PrescaledClock = m; }
       void setDeadTime( const DeadTime& m ) { m_DeadTime = m; }
       void setRandom( const Random& m ) { m_Random = m; }
-      void setCTPFiles( CTPFiles* ctp ) { m_CTPFiles = ctp; }
+      void setCTPFiles( std::unique_ptr<CTPFiles> ctp ) { m_CTPFiles = std::move(ctp); }
       void setPrioritySet( const PrioritySet& m ) { m_PrioritySet = m; }
       void setMuCTPi( const Muctpi& m ) { m_MuCTPi = m; }
       void setLoadCtpFiles (bool flag = true) {
@@ -118,7 +119,7 @@ namespace TrigConf {
       bool           m_LoadCtpcoreFiles;
       bool           m_LoadCtpinFiles;
       bool           m_LoadCtpmonFiles;
-      CTPFiles*      m_CTPFiles;
+     std::unique_ptr<CTPFiles> m_CTPFiles;
 
    };
 }
