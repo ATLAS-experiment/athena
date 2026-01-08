@@ -402,6 +402,11 @@ HGTD_IterativeExtensionTool::updateState(const Trk::Track* track, const Trk::Tra
 
   std::unique_ptr<Trk::TrackParameters> pars = m_updator->addToState(
       *param, cot->localParameters(), cot->localCovariance(), quality);
+  if (not pars) {
+    ATH_MSG_DEBUG("[updateState] pars is null");
+    return nullptr;
+  }
+  
   //Here one could  fix the addToState intefaces to
   //avoid them allocating memory for  Fit Quality On Surface
   auto uniqueQuality= std::unique_ptr<Trk::FitQualityOnSurface>(quality);
