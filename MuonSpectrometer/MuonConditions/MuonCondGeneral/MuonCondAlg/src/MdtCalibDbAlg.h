@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -30,13 +30,17 @@
 #include "nlohmann/json.hpp"
 #include "zlib.h"
 
+
+/** @brief Algorithm to load the Mdt calibration constants from the 
+ *         conditions database
+ */
+namespace Muon{
 class MdtCalibDbAlg : public AthCondAlgorithm {
 public:
-    MdtCalibDbAlg(const std::string& name, ISvcLocator* pSvcLocator);
+    using AthCondAlgorithm::AthCondAlgorithm;
     virtual ~MdtCalibDbAlg() = default;
     virtual StatusCode initialize() override;
     virtual StatusCode execute(const EventContext& ctx) const override;
-
 private:
     StatusCode declareDependency(const EventContext& ctx, 
                                  SG::WriteCondHandle<MuonCalib::MdtCalibDataContainer>& writeHandle) const;
@@ -122,5 +126,5 @@ private:
     
     SG::ReadCondHandleKey<MdtCondDbData> m_readKeyDCS{this, "ReadKeyDCS", "MdtCondDbData", "Key of the input DCS data"};
 };
-
+}
 #endif

@@ -1,8 +1,8 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "MuonCondAlg/NswCalibDbAlg.h"
+#include "NswCalibDbAlg.h"
 
 #include "TTree.h"
 #include "TFile.h"
@@ -19,13 +19,13 @@
 
 #include<ctime>
 
+namespace Muon{
 // Initialize
 StatusCode
 NswCalibDbAlg::initialize(){
 
   // retrievals
   ATH_MSG_DEBUG( "initializing " << name() );                
-  ATH_CHECK(m_condSvc     .retrieve());
   ATH_CHECK(m_idHelperSvc.retrieve());
 
   // initialize read keys
@@ -78,7 +78,7 @@ StatusCode
 NswCalibDbAlg::processTdoPdoData(const EventContext& ctx) const {
 
   // set up write handles for time/charge data
-  SG::WriteCondHandle<NswCalibDbTimeChargeData> wrHdl{m_writeKey_tdopdo, ctx};
+  SG::WriteCondHandle wrHdl{m_writeKey_tdopdo, ctx};
   if (wrHdl.isValid()) {
     ATH_MSG_DEBUG("CondHandle " << wrHdl.fullKey() << " is already valid."
         << " In theory this should not be called, but may happen"
@@ -86,7 +86,7 @@ NswCalibDbAlg::processTdoPdoData(const EventContext& ctx) const {
     return StatusCode::SUCCESS;
   }
   ATH_MSG_DEBUG("Range of time/charge output is " << wrHdl.getRange());
-  std::unique_ptr<NswCalibDbTimeChargeData> wrCdo{std::make_unique<NswCalibDbTimeChargeData>(m_idHelperSvc.get())};
+  auto wrCdo{std::make_unique<NswCalibDbTimeChargeData>(m_idHelperSvc.get())};
 
   // MM
   if(!m_readKey_mm_sidea_tdo.empty()) {
@@ -251,15 +251,14 @@ NswCalibDbAlg::processNSWT0Data(const EventContext& ctx) const {
 
 StatusCode NswCalibDbAlg::loadT0ToTree(const EventContext& ctx, const readKey_t& readKey, writeHandleT0_t& writeHandle, std::unique_ptr<TTree>& tree) const{
   // set up read handle
-  SG::ReadCondHandle<CondAttrListCollection> readHandle{readKey, ctx};
-  const CondAttrListCollection* readCdo{*readHandle}; 
-  if(!readCdo){
+  SG::ReadCondHandle readCdo{readKey, ctx};
+  if(!readCdo.isValid()){
     ATH_MSG_ERROR("Null pointer to the read conditions object");
     return StatusCode::FAILURE; 
   } 
-  writeHandle.addDependency(readHandle);
-  ATH_MSG_DEBUG("Size of CondAttrListCollection " << readHandle.fullKey() << " readCdo->size()= " << readCdo->size());
-  ATH_MSG_DEBUG("Range of input is " << readHandle.getRange() << ", range of output is " << writeHandle.getRange());
+  writeHandle.addDependency(readCdo);
+  ATH_MSG_DEBUG("Size of CondAttrListCollection " << readCdo.fullKey() << " readCdo->size()= " << readCdo->size());
+  ATH_MSG_DEBUG("Range of input is " << readCdo.getRange() << ", range of output is " << writeHandle.getRange());
 
   // iterate through data
   CondAttrListCollection::const_iterator itr;
@@ -283,12 +282,12 @@ StatusCode NswCalibDbAlg::loadT0ToTree(const EventContext& ctx, const readKey_t&
 StatusCode NswCalibDbAlg::loadT0Data(const std::unique_ptr<TTree>& tree, NswT0Data* writeCdo, const T0Tech tech) const{
     int sector{0}, layer{0}, channel{0}, channelType{0}, stationEta{0};
     double time{0};
-  tree->SetBranchAddress("sector" , &sector   );
-  tree->SetBranchAddress("layer"  , &layer    );
-  tree->SetBranchAddress("channel", &channel  );
-  tree->SetBranchAddress("mean"   , &time     );
-  tree->SetBranchAddress("stationEta"   , &stationEta);
-  tree->SetBranchAddress("channel_type", &channelType);
+    tree->SetBranchAddress("sector" , &sector   );
+    tree->SetBranchAddress("layer"  , &layer    );
+    tree->SetBranchAddress("channel", &channel  );
+    tree->SetBranchAddress("mean"   , &time     );
+    tree->SetBranchAddress("stationEta"   , &stationEta);
+    tree->SetBranchAddress("channel_type", &channelType);
      if (msgLvl(MSG::VERBOSE)) {
           tree->Print();
      }
@@ -347,7 +346,7 @@ StatusCode
 NswCalibDbAlg::loadThresholdData(const EventContext& ctx, const readKey_t& readKey, const ThresholdTech tech, writeHandleThr_t& writeHandle, NswCalibDbThresholdData* writeCdo) const {
 
   // set up read handle
-  SG::ReadCondHandle<CondAttrListCollection> readHandle{readKey, ctx};
+  SG::ReadCondHandle readHandle{readKey, ctx};
   const CondAttrListCollection* readCdo{*readHandle}; 
   if(!readCdo){
     ATH_MSG_ERROR("Null pointer to the read conditions object");
@@ -415,15 +414,14 @@ StatusCode
 NswCalibDbAlg::loadTimeChargeData(const EventContext& ctx, const readKey_t& readKey, const TimeChargeTech tech, const TimeChargeType type, writeHandleTdoPdo_t& writeHandle, NswCalibDbTimeChargeData* writeCdo) const {
 
   // set up read handle
-  SG::ReadCondHandle<CondAttrListCollection> readHandle{readKey, ctx};
-  const CondAttrListCollection* readCdo{*readHandle}; 
-  if(!readCdo){
+  SG::ReadCondHandle readCdo{readKey, ctx};
+  if(!readCdo.isValid()){
     ATH_MSG_ERROR("Null pointer to the read conditions object");
     return StatusCode::FAILURE; 
   } 
-  writeHandle.addDependency(readHandle);
-  ATH_MSG_DEBUG("Size of CondAttrListCollection " << readHandle.fullKey() << " readCdo->size()= " << readCdo->size());
-  ATH_MSG_DEBUG("Range of input is " << readHandle.getRange() << ", range of output is " << writeHandle.getRange());
+  writeHandle.addDependency(readCdo);
+  ATH_MSG_DEBUG("Size of CondAttrListCollection " << readKey.fullKey() << " readCdo->size()= " << readCdo->size());
+  ATH_MSG_DEBUG("Range of input is " << readCdo.getRange() << ", range of output is " << writeHandle.getRange());
 
   // iterate through data
   CondAttrListCollection::const_iterator itr;
@@ -554,4 +552,4 @@ NswCalibDbAlg::buildChannelId(Identifier& channelId, unsigned int elinkId, unsig
 
   return true;
 }
-
+}

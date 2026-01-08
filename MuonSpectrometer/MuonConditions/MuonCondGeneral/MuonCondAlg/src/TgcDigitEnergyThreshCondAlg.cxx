@@ -1,17 +1,15 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "MuonCondAlg/TgcDigitEnergyThreshCondAlg.h"
+#include "TgcDigitEnergyThreshCondAlg.h"
 #include <StoreGate/WriteCondHandle.h>
 #include <AthenaKernel/IOVInfiniteRange.h>
 #include <PathResolver/PathResolver.h>
 #include <fstream>
 
 
-TgcDigitEnergyThreshCondAlg::TgcDigitEnergyThreshCondAlg(const std::string& name, ISvcLocator* pSvcLocator) :
-    AthCondAlgorithm(name, pSvcLocator) {}
-
+namespace Muon{
 StatusCode TgcDigitEnergyThreshCondAlg::initialize() {
     ATH_MSG_DEBUG("initializing " << name());
     ATH_CHECK(m_idHelperSvc.retrieve());
@@ -32,7 +30,7 @@ StatusCode TgcDigitEnergyThreshCondAlg::initialize() {
 StatusCode TgcDigitEnergyThreshCondAlg::execute(const EventContext& ctx) const {
     ATH_MSG_DEBUG("execute " << name());
     // launching Write Cond Handle
-    SG::WriteCondHandle<TgcDigitThresholdData> writeHandle{m_writeKey, ctx};
+    SG::WriteCondHandle writeHandle{m_writeKey, ctx};
     if (writeHandle.isValid()) {
         ATH_MSG_DEBUG("CondHandle " << writeHandle.fullKey() << " is already valid."
                                     << " In theory this should not be called, but may happen"
@@ -40,9 +38,9 @@ StatusCode TgcDigitEnergyThreshCondAlg::execute(const EventContext& ctx) const {
         return StatusCode::SUCCESS;
     }
     writeHandle.addDependency(EventIDRange(IOVInfiniteRange::infiniteTime()));
-    std::unique_ptr<TgcDigitThresholdData> writeCdo{std::make_unique<TgcDigitThresholdData>(m_idHelperSvc.get())};
+    auto writeCdo{std::make_unique<TgcDigitThresholdData>(m_idHelperSvc.get())};
     if (!m_readKeyDb.empty()) {
-        SG::ReadCondHandle<CondAttrListCollection> readHandle{m_readKeyDb, ctx};
+        SG::ReadCondHandle readHandle{m_readKeyDb, ctx};
         if (!readHandle.isValid()) {
             ATH_MSG_FATAL("Failed to initialize the COOL folder "<<m_readKeyDb.fullKey());
             return StatusCode::FAILURE;
@@ -90,4 +88,5 @@ StatusCode TgcDigitEnergyThreshCondAlg::parseDataFromJSON(const nlohmann::json& 
         if(!channelThresholds.setThreshold(id, threshold)) return StatusCode::FAILURE;
     }
     return StatusCode::SUCCESS;
+}
 }

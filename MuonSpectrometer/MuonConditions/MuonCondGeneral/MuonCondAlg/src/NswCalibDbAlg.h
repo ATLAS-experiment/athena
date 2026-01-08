@@ -1,18 +1,9 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONCONDALG_NSWCALIBDBALG_H
 #define MUONCONDALG_NSWCALIBDBALG_H
-
-// STL includes
-#include <string>
-#include <vector>
-
-// Gaudi includes
-#include "GaudiKernel/ICondSvc.h"
-#include "GaudiKernel/ServiceHandle.h"
-#include "GaudiKernel/ToolHandle.h"
 
 // Athena includes
 #include "AthenaBaseComps/AthCondAlgorithm.h"
@@ -31,8 +22,8 @@
 class CondAttrListCollection;
 class TTree;
 
-
-class NswCalibDbAlg: public AthCondAlgorithm{
+namespace Muon {
+class NswCalibDbAlg: public AthCondAlgorithm {
 
 public:
 
@@ -73,7 +64,6 @@ private:
 	Gaudi::Property<bool> m_isData           {this, "isData"           , true, "Processing data"};
 	Gaudi::Property<bool> m_processThresholds{this, "processThresholds", false, "Process threshold data"};
 	
-	ServiceHandle<ICondSvc> m_condSvc{this, "CondSvc", "CondSvc"};
 	ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
 	
 	writeKeyTdoPdo_t m_writeKey_tdopdo{this, "WriteKey_TdoPdo", "NswCalibDbTimeChargeData", "Key of output calibration data (TDOs and PDOs)" };
@@ -101,6 +91,6 @@ private:
 	Gaudi::Property<std::string> m_stgcT0FilePath{this, "sTgcT0FileName", "", "Path to a file containing the sTGC T0 data, this will override the data from the conditions db"};
  
 };
-
+}
 
 #endif

@@ -70,7 +70,7 @@ def MdtCondDbAlgCfg(flags, **kwargs):
         kwargs['ReadKey_MC_DT'] = ''
         kwargs['ReadKey_MC_NC'] = ''
     
-    alg = CompFactory.MdtCondDbAlg(**kwargs)
+    alg = CompFactory.Muon.MdtCondDbAlg(**kwargs)
     result.merge( addFolders(flags, folders , detDb="DCS_OFL", className='CondAttrListCollection') )
     result.addCondAlgo(alg, primary = True)
     return result
@@ -81,7 +81,7 @@ def RpcCondDbAlgCfg(flags, **kwargs):
         return result ## avoid adding algo to the component accumulator
 
     kwargs['isData'] = not flags.Input.isMC
-    alg = CompFactory.RpcCondDbAlg(**kwargs)
+    alg = CompFactory.Muon.RpcCondDbAlg(**kwargs)
 
     result.merge( addFolders(flags, ["/RPC/DQMF/ELEMENT_STATUS"], detDb="RPC_OFL", className='CondAttrListCollection') )
     result.addCondAlgo(alg)
@@ -119,7 +119,7 @@ def CscCondDbAlgCfg(flags, **kwargs):
         else:
             kwargs['isData'] = True
             kwargs['isRun1'] = flags.IOVDb.DatabaseInstance == 'COMP200'
-    alg = CompFactory.CscCondDbAlg(**kwargs)
+    alg = CompFactory.Muon.CscCondDbAlg(**kwargs)
     result.merge( addFolders(flags, folders , detDb=scheme, className='CondAttrListCollection') )
     result.addCondAlgo(alg)
     return result
@@ -127,41 +127,41 @@ def CscCondDbAlgCfg(flags, **kwargs):
 def TgcCondDbAlgCfg(flags,name="TgcCondDbAlg", **kwargs):
     result  = ComponentAccumulator()
     ### TO DO define the COOL folder
-    the_alg = CompFactory.TgcCondDbAlg(name = name, **kwargs)
+    the_alg = CompFactory.Muon.TgcCondDbAlg(name = name, **kwargs)
     result.addCondAlgo(the_alg, primary = True)
     return result
 
 def TgcEnergyThresholdCondAlgCfg(flags, name = "TgcEnergyThresholdCondAlg", **kwargs):
     result = ComponentAccumulator()
     ### TO DO define the COOL folder
-    the_alg = CompFactory.TgcDigitEnergyThreshCondAlg(name= name, **kwargs)
+    the_alg = CompFactory.Muon.TgcDigitEnergyThreshCondAlg(name= name, **kwargs)
     result.addCondAlgo(the_alg, primary = True)
     return result
 
 def TgcDigitJitterCondAlgCfg(flags, name = "TgcDigitJitterCondAlg", **kwargs):
     result = ComponentAccumulator()
-    the_alg = CompFactory.TgcDigitJitterCondAlg(name = name, **kwargs)
+    the_alg = CompFactory.Muon.TgcDigitJitterCondAlg(name = name, **kwargs)
     result.addCondAlgo(the_alg, primary = True)
     return result
 
 def TgcDigitASDposCondAlgCfg(flags, name="TgcDigitASDposCondAlg", **kwargs):
     result = ComponentAccumulator()
     result.merge(addFolders(flags, ["/TGC/DIGIT/ASDPOS"], detDb="TGC_OFL", db="OFLP200", className="CondAttrListCollection"))
-    the_alg = CompFactory.TgcDigitASDposCondAlg(name = name, **kwargs)
+    the_alg = CompFactory.Muon.TgcDigitASDposCondAlg(name = name, **kwargs)
     result.addCondAlgo(the_alg, primary = True)
     return result
 
 def TgcDigitTimeOffsetCondAlgCfg(flags, name = "TgcDigitTimeOffsetCondAlg", **kwargs):
     result = ComponentAccumulator()
     result.merge(addFolders(flags, ["/TGC/DIGIT/TOFFSET"], detDb="TGC_OFL", db="OFLP200", className="CondAttrListCollection"))
-    the_alg = CompFactory.TgcDigitTimeOffsetCondAlg(name = name, **kwargs)
+    the_alg = CompFactory.Muon.TgcDigitTimeOffsetCondAlg(name = name, **kwargs)
     result.addCondAlgo(the_alg, primary = True)
     return result
 
 def TgcDigitCrosstalkCondAlgCfg(flags, name = "TgcDigitCrosstalkCondAlg", **kwargs):
     result = ComponentAccumulator()
     result.merge(addFolders(flags, ["/TGC/DIGIT/XTALK"], detDb="TGC_OFL", db="OFLP200", className="CondAttrListCollection"))
-    the_alg = CompFactory.TgcDigitCrosstalkCondAlg(name = name, **kwargs)
+    the_alg = CompFactory.Muon.TgcDigitCrosstalkCondAlg(name = name, **kwargs)
     result.addCondAlgo(the_alg, primary = True)
     return result
 
@@ -332,7 +332,7 @@ def NswCalibDbAlgCfg(flags, **kwargs):
             if kwargs["ReadKey_STGC_T0"]:
                 result.merge(addFolders(flags, [kwargs["ReadKey_STGC_T0"]], detDb=scheme, className='CondAttrListCollection'))
     
-    result.addCondAlgo(CompFactory.NswCalibDbAlg(**kwargs))
+    result.addCondAlgo(CompFactory.Muon.NswCalibDbAlg(**kwargs))
     return result
 
 def NswPassivationDbAlgCfg(flags, **kwargs):
@@ -342,7 +342,7 @@ def NswPassivationDbAlgCfg(flags, **kwargs):
         acc.merge(addFolders(flags, "/MDT/MM/PASSIVATION", "MDT_OFL", className="CondAttrListCollection", tag="MmPassiv2022May19"))
     else:
         acc.merge(addFolders(flags, "/MDT/MM/PASSIVATION", "MDT_OFL", className="CondAttrListCollection"))
-    alg = CompFactory.NswPassivationDbAlg("NswPassivationDbAlg", **kwargs)
+    alg = CompFactory.Muon.NswPassivationDbAlg("NswPassivationDbAlg", **kwargs)
     acc.addCondAlgo(alg)
     return acc
 
@@ -381,7 +381,7 @@ def NswDcsDbAlgCfg(flags, **kwargs):
     kwargs.setdefault("ReadKey_STG_ELTX","")
 
 
-    alg = CompFactory.NswDcsDbAlg("NswDcsDbAlg", **kwargs)
+    alg = CompFactory.Muon.NswDcsDbAlg("NswDcsDbAlg", **kwargs)
     acc.addCondAlgo(alg)
     return acc
 
@@ -396,7 +396,7 @@ def MmDigitEffiCondAlgCfg(flags, **kwargs):
         kwargs.setdefault("ReadKey","/MDT/MM/EFFMAP")
         acc.merge(addFolders(flags, kwargs["ReadKey"],"MDT_OFL", className="CondAttrListCollection", tag="MMEffMap_2024DataTillEndOfJuly"))
 
-    alg = CompFactory.MmDigitEffiCondAlg("MmDigitEffiCondAlg", **kwargs)
+    alg = CompFactory.Muon.MmDigitEffiCondAlg("MmDigitEffiCondAlg", **kwargs)
     acc.addCondAlgo(alg)
     return acc
 
@@ -410,6 +410,6 @@ def sTgcDigitEffiCondAlgCfg(flags, **kwargs):
         kwargs.setdefault("ReadKey","/TGC/NSW/EFFMAP")
         acc.merge(addFolders(flags, kwargs["ReadKey"],"TGC_OFL", className="CondAttrListCollection",tag="sTGCEffMap_2024DataTillEndOfJuly"))
 
-    alg = CompFactory.sTgcDigitEffiCondAlg("sTgcDigitEffiCondAlg", **kwargs)
+    alg = CompFactory.Muon.sTgcDigitEffiCondAlg("sTgcDigitEffiCondAlg", **kwargs)
     acc.addCondAlgo(alg)
     return acc

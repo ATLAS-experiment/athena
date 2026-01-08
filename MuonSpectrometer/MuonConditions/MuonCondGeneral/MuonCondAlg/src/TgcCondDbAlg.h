@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONCONDALG_TGCCONDDBALG_H
@@ -22,10 +22,10 @@
 #include "StoreGate/WriteCondHandleKey.h"
 
 
-
+namespace Muon{
 class TgcCondDbAlg : public AthCondAlgorithm {
 public:
-    TgcCondDbAlg(const std::string& name, ISvcLocator* svc);
+    using AthCondAlgorithm::AthCondAlgorithm;
     virtual ~TgcCondDbAlg() = default;
     virtual StatusCode initialize() override;
     virtual StatusCode execute(const EventContext& ctx) const override;
@@ -43,5 +43,5 @@ private:
     SG::WriteCondHandleKey<TgcCondDbData> m_writeKey{this, "WriteKey", "TgcCondDbData", "Key of output TGC condition data"};
     SG::ReadCondHandleKey<CondAttrListCollection> m_readKeyDb{this, "ReadKey", "", "Key of input TGC condition data"};
 };
-
+}
 #endif

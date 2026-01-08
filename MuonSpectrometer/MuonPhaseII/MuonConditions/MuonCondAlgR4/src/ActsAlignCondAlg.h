@@ -22,14 +22,15 @@
 #include <map>
 #include <set>
 #include <unordered_map>
-/* The ActsMuonAlignCondAlg takes the ALineContainer and translates this into the  
+/* The ActsAlignCondAlg takes the ALineContainer and translates this into the  
  *  a GeoAlignmentStore. The store is filled with the AlignableTransforms of the ReadoutGeometry
  *  which are connected with the A-line transformations of the ALineContainer.
  **/
-class ActsMuonAlignCondAlg: public AthCondAlgorithm {
+namespace MuonR4{
+class ActsAlignCondAlg: public AthCondAlgorithm {
 public:
-      ActsMuonAlignCondAlg(const std::string& name, ISvcLocator* pSvcLocator);
-      virtual ~ActsMuonAlignCondAlg() = default;
+      using AthCondAlgorithm::AthCondAlgorithm;
+      virtual ~ActsAlignCondAlg() = default;
       virtual StatusCode initialize() override;
       virtual StatusCode execute(const EventContext& ctx) const override;
 
@@ -106,6 +107,6 @@ private:
     Gaudi::Property<bool> m_fillGeoAlignStore{this, "FillGeoAlignStore", true};
 
 };
-
+}
 
 #endif

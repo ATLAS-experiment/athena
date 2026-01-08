@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONCONDALG_NSWUNCERTDBALG_H
@@ -18,12 +18,12 @@
 #include "MuonCondData/NswErrorCalibData.h"
 
 
-
+namespace Muon{
 
 class NswUncertDbAlg: public AthCondAlgorithm {
 
 public:
-    NswUncertDbAlg(const std::string& name, ISvcLocator* svc);
+    using AthCondAlgorithm::AthCondAlgorithm;
     virtual ~NswUncertDbAlg() = default;
     virtual StatusCode initialize() override;
     virtual StatusCode execute (const EventContext&) const override;
@@ -48,5 +48,5 @@ private:
                                                               "Key to the parametrized NSW uncertainty COOL folder"};
 };
 
-
+}
 #endif

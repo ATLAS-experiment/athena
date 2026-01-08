@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TGCDIGITASDPOSCONDALG_H
@@ -11,10 +11,11 @@
 #include "StoreGate/ReadCondHandleKey.h"
 #include "StoreGate/WriteCondHandleKey.h"
 
+namespace Muon{
 class TgcDigitASDposCondAlg : public AthCondAlgorithm
 {
  public:
-  TgcDigitASDposCondAlg (const std::string& name, ISvcLocator* pSvcLocator);
+  using AthCondAlgorithm::AthCondAlgorithm;
   virtual ~TgcDigitASDposCondAlg() = default;
   virtual StatusCode initialize() override;
   virtual StatusCode execute(const EventContext& ctx) const override;
@@ -22,7 +23,7 @@ class TgcDigitASDposCondAlg : public AthCondAlgorithm
   SG::ReadCondHandleKey<CondAttrListCollection> m_readKey_ASDpos{this, "ReadKeyAsdPos", "/TGC/DIGIT/ASDPOS", "SG key for TGCDIGITASDPOS"};
   SG::WriteCondHandleKey<TgcDigitASDposData> m_writeKey{this, "WriteKey", "TGCDigitASDposData", "SG Key of TGCDigit AsdPos"};
 };
-
+}
 #endif
 
 

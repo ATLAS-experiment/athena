@@ -1,8 +1,8 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "MuonCondAlg/MuonAlignmentCondAlg.h"
+#include "AlignmentCondAlg.h"
 
 #include <fstream>
 #include <map>
@@ -18,12 +18,8 @@
 #include "PathResolver/PathResolver.h"
 #include "SGTools/TransientAddress.h"
 
-MuonAlignmentCondAlg::MuonAlignmentCondAlg(const std::string& name, ISvcLocator* pSvcLocator) :
-    AthCondAlgorithm(name, pSvcLocator) {
-   
-}
-
-StatusCode MuonAlignmentCondAlg::initialize() {
+namespace Muon{
+StatusCode AlignmentCondAlg::initialize() {
     ATH_MSG_DEBUG("Initilalizing");
     if (!m_loadALines && !m_loadBLines) {
         ATH_MSG_ERROR("There's no point in setting up this algorithm if neither A or B Lines shall be processed");
@@ -39,11 +35,11 @@ StatusCode MuonAlignmentCondAlg::initialize() {
     return StatusCode::SUCCESS;
 }
 
-StatusCode MuonAlignmentCondAlg::execute(const EventContext& ctx) const {
+StatusCode AlignmentCondAlg::execute(const EventContext& ctx) const {
     ATH_MSG_DEBUG("execute " << name());
 
     if (m_loadALines) {
-        SG::WriteCondHandle<ALineContainer> writeALineHandle{m_writeALineKey, ctx};
+        SG::WriteCondHandle writeALineHandle{m_writeALineKey, ctx};
         if (writeALineHandle.isValid()) {
             ATH_MSG_DEBUG("CondHandle " << writeALineHandle.fullKey() << " is already valid."
                                         << ". In theory this should not be called, but may happen"
@@ -56,7 +52,7 @@ StatusCode MuonAlignmentCondAlg::execute(const EventContext& ctx) const {
     // Write BLine Cond Handle
     // =======================
     if (m_loadBLines) {
-        SG::WriteCondHandle<BLineContainer> writeBLineHandle{m_writeBLineKey, ctx};
+        SG::WriteCondHandle writeBLineHandle{m_writeBLineKey, ctx};
         if (writeBLineHandle.isValid()) {
             ATH_MSG_DEBUG("CondHandle " << writeBLineHandle.fullKey() << " is already valid."
                                         << ". In theory this should not be called, but may happen"
@@ -65,8 +61,8 @@ StatusCode MuonAlignmentCondAlg::execute(const EventContext& ctx) const {
         }
     }
     /// Create the containers
-    std::unique_ptr<ALineContainer> writeALineCdo{std::make_unique<ALineContainer>()};
-    std::unique_ptr<BLineContainer> writeBLineCdo{std::make_unique<BLineContainer>()};
+    auto writeALineCdo{std::make_unique<ALineContainer>()};
+    auto writeBLineCdo{std::make_unique<BLineContainer>()};
 
     for (const SG::ReadCondHandleKey<CondAttrListCollection>& key:  m_alignKeys){ 
         ATH_CHECK(loadCoolFolder(ctx, key, *writeALineCdo, *writeBLineCdo));
@@ -87,18 +83,18 @@ StatusCode MuonAlignmentCondAlg::execute(const EventContext& ctx) const {
     return StatusCode::SUCCESS;
 }
 template <class ContType>
-    StatusCode MuonAlignmentCondAlg::writeContainer(const EventContext& ctx,
+    StatusCode AlignmentCondAlg::writeContainer(const EventContext& ctx,
                                                     const SG::WriteCondHandleKey<ContType>& writeKey,
                                                     std::unique_ptr<ContType>&& container) const {
     if (writeKey.empty()) {
         ATH_MSG_DEBUG("The key of type "<<typeid(ContType).name()<<" is not set. Assume that nothing shall be written.");
         return StatusCode::SUCCESS;
     }
-    SG::WriteCondHandle<ContType> writeHandle{writeKey, ctx};
+    SG::WriteCondHandle writeHandle{writeKey, ctx};
     writeHandle.addDependency(EventIDRange(IOVInfiniteRange::infiniteTime()));
      /// Loop over all input folder and attach their IOVs to the output conditions
     for (const SG::ReadCondHandleKey<CondAttrListCollection>& key : m_alignKeys) {
-        SG::ReadCondHandle<CondAttrListCollection> readHandle{key, ctx};
+        SG::ReadCondHandle readHandle{key, ctx};
         if (!readHandle.isValid()){
             ATH_MSG_FATAL("Failed to load alignment folder "<<key.fullKey());
             return StatusCode::FAILURE;
@@ -109,12 +105,12 @@ template <class ContType>
     ATH_CHECK(writeHandle.record(std::move(container)));
     return StatusCode::SUCCESS;
 }
-StatusCode MuonAlignmentCondAlg::loadCoolFolder(const EventContext& ctx,
+StatusCode AlignmentCondAlg::loadCoolFolder(const EventContext& ctx,
                                                 const SG::ReadCondHandleKey<CondAttrListCollection>& key,
                                                 ALineContainer& writeALineCdo, 
                                                 BLineContainer& writeBLineCdo) const {
     
-    SG::ReadCondHandle<CondAttrListCollection> readHandle{key, ctx};
+    SG::ReadCondHandle readHandle{key, ctx};
     if (!readHandle.isValid()){
         ATH_MSG_FATAL("Failed to load alignment folder "<<key.fullKey());
         return StatusCode::FAILURE;
@@ -150,7 +146,7 @@ StatusCode MuonAlignmentCondAlg::loadCoolFolder(const EventContext& ctx,
     return StatusCode::SUCCESS;
 }
 
-StatusCode MuonAlignmentCondAlg::parseDataFromJSON(const nlohmann::json& lines,
+StatusCode AlignmentCondAlg::parseDataFromJSON(const nlohmann::json& lines,
                                                   ALineContainer& writeALineCdo, 
                                                   BLineContainer& writeBLineCdo) const{
     // loop over corrections ------------------------
@@ -247,7 +243,7 @@ StatusCode MuonAlignmentCondAlg::parseDataFromJSON(const nlohmann::json& lines,
     return StatusCode::SUCCESS;
 }
 
-StatusCode MuonAlignmentCondAlg::loadDataFromLegacy(const std::string& data, nlohmann::json& json,
+StatusCode AlignmentCondAlg::loadDataFromLegacy(const std::string& data, nlohmann::json& json,
                                                     bool loadBLines) const {
 
     // Parse corrections
@@ -326,4 +322,5 @@ StatusCode MuonAlignmentCondAlg::loadDataFromLegacy(const std::string& data, nlo
         }
     }
     return StatusCode::SUCCESS;
+}
 }

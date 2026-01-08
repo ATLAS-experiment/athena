@@ -1,18 +1,9 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONCONDALG_NSWDCSDBALG_H
 #define MUONCONDALG_NSWDCSDBALG_H
-
-// STL includes
-#include <string>
-#include <vector>
-
-// Gaudi includes
-#include "GaudiKernel/ICondSvc.h"
-#include "GaudiKernel/ServiceHandle.h"
-#include "GaudiKernel/ToolHandle.h"
 
 // Athena includes
 #include "AthenaBaseComps/AthCondAlgorithm.h"
@@ -27,6 +18,7 @@
 // Forward declarations
 class CondAttrListCollection;
 
+namespace Muon{
 
 class NswDcsDbAlg: public AthCondAlgorithm{
 
@@ -60,7 +52,6 @@ private:
 	bool buildChannelIdForTDaq(Identifier& channelId, uint& elink, const DcsTechType tech0, const std::string& chanName, bool& isOK) const;
         bool buildChannelIdForEltx(Identifier& channelId ,const DcsTechType tech0, const std::string& chanName, bool& isOK) const;
 
-	ServiceHandle<ICondSvc> m_condSvc{this, "CondSvc", "CondSvc"};
 	ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
 	
 	writeKey_t m_writeKey{this, "WriteKey", "NswDcsDbData", "Key of output data object" };
@@ -83,5 +74,5 @@ private:
     const MuonGM::MuonDetectorManager* m_detManager{nullptr}; 
 };
 
-
+}
 #endif

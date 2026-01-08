@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONCONDALG_MmCTPCondDbAlg_H
@@ -14,6 +14,7 @@
 #include <nlohmann/json.hpp>
 #include "MuonCondData/mmCTPClusterCalibData.h"
 
+namespace Muon{
 class MmCTPCondDbAlg : public AthCondAlgorithm {
 public:
     //No need for individual constructor
@@ -37,6 +38,6 @@ private:
 
 
 };
-
+}
 #endif
 

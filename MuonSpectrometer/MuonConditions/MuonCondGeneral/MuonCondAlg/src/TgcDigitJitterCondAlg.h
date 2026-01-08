@@ -16,10 +16,10 @@
 #include "StoreGate/WriteCondHandleKey.h"
 
 
-
+namespace Muon{
 class TgcDigitJitterCondAlg : public AthCondAlgorithm {
 public:
-    TgcDigitJitterCondAlg(const std::string& name, ISvcLocator* svc);
+    using AthCondAlgorithm::AthCondAlgorithm;
     virtual ~TgcDigitJitterCondAlg() = default;
     virtual StatusCode initialize() override;
     virtual StatusCode execute(const EventContext& ctx) const override;
@@ -35,5 +35,6 @@ private:
     SG::WriteCondHandleKey<TgcDigitJitterData> m_writeKey{this, "WriteKey", "TgcJitterData", "Key of output TGC condition data"};
     SG::ReadCondHandleKey<CondAttrListCollection> m_readKeyDb{this, "ReadKey", "", "Key of input TGC condition data"};
 };
+}
 
 #endif

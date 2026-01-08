@@ -1,18 +1,16 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "MuonCondAlg/MuonAlignmentErrorDbAlg.h"
+#include "AlignmentErrorDbAlg.h"
 #include "AthenaKernel/IOVInfiniteRange.h"
 #include <GaudiKernel/EventIDRange.h>
 #include <format>
 #include <fstream>
 #include <iterator>
 
-MuonAlignmentErrorDbAlg::MuonAlignmentErrorDbAlg(const std::string& name, ISvcLocator* pSvcLocator) :
-    AthCondAlgorithm(name, pSvcLocator) {}
-
-StatusCode MuonAlignmentErrorDbAlg::initialize() {
+namespace Muon{
+StatusCode AlignmentErrorDbAlg::initialize() {
     ATH_MSG_DEBUG("initialize " << name());
     ATH_CHECK(m_readKey.initialize());
     ATH_CHECK(m_writeKey.initialize());
@@ -21,19 +19,19 @@ StatusCode MuonAlignmentErrorDbAlg::initialize() {
     return StatusCode::SUCCESS;
 }
 
-StatusCode MuonAlignmentErrorDbAlg::execute(const EventContext& ctx) const {
+StatusCode AlignmentErrorDbAlg::execute(const EventContext& ctx) const {
     ATH_MSG_DEBUG("execute " << name());
 
     // Write Cond Handle
 
-    SG::WriteCondHandle<MuonAlignmentErrorData> writeHandle{m_writeKey, ctx};
+    SG::WriteCondHandle writeHandle{m_writeKey, ctx};
     if (writeHandle.isValid()) {
         ATH_MSG_DEBUG("CondHandle " << writeHandle.fullKey() << " is already valid."
                                     << ". In theory this should not be called, but may happen"
                                     << " if multiple concurrent events are being processed out of order.");
         return StatusCode::SUCCESS;
     }
-    std::unique_ptr<MuonAlignmentErrorData> writeCdo{std::make_unique<MuonAlignmentErrorData>()};
+    auto writeCdo{std::make_unique<MuonAlignmentErrorData>()};
 
     std::string clobContent;
     EventIDRange rangeW;
@@ -159,7 +157,7 @@ StatusCode MuonAlignmentErrorDbAlg::execute(const EventContext& ctx) const {
     return StatusCode::SUCCESS;
 }
 
-inline void MuonAlignmentErrorDbAlg::generateMap(const auto & helper_obj, const auto & idTool, 
+inline void AlignmentErrorDbAlg::generateMap(const auto & helper_obj, const auto & idTool, 
                                 MuonAlignmentErrorData::MuonAlignmentErrorRuleCache& adev_new, 
                                 std::vector<MuonAlignmentErrorData::MuonAlignmentErrorRule>& devVec) const {
 
@@ -194,24 +192,21 @@ inline void MuonAlignmentErrorDbAlg::generateMap(const auto & helper_obj, const 
     }
 }
 
-std::tuple<std::string, EventIDRange> MuonAlignmentErrorDbAlg::getDbClobContent(const EventContext& ctx) const {
+std::tuple<std::string, EventIDRange> AlignmentErrorDbAlg::getDbClobContent(const EventContext& ctx) const {
     // Read Cond Handle
-    SG::ReadCondHandle<CondAttrListCollection> readHandle{m_readKey, ctx};
-    const CondAttrListCollection* readCdo{*readHandle};
-    // const CondAttrListCollection* atrc(0);
-    // readCdo = *readHandle;
-    if (readCdo == nullptr) {
+    SG::ReadCondHandle readCdo{m_readKey, ctx};
+    if (!readCdo.isValid()) {
         ATH_MSG_ERROR("Null pointer to the read conditions object");
-        return std::make_tuple(std::string(), EventIDRange());
+        return {};
     }
 
     EventIDRange rangeW;
-    if (!readHandle.range(rangeW)) {
-        ATH_MSG_ERROR("Failed to retrieve validity range for " << readHandle.key());
-        return std::make_tuple(std::string(), EventIDRange());
+    if (!readCdo.range(rangeW)) {
+        ATH_MSG_ERROR("Failed to retrieve validity range for " << m_readKey.key());
+        return {};
     }
 
-    ATH_MSG_INFO("Size of CondAttrListCollection " << readHandle.fullKey() << " readCdo->size()= " << readCdo->size());
+    ATH_MSG_INFO("Size of CondAttrListCollection " << m_readKey.fullKey() << " readCdo->size()= " << readCdo->size());
     ATH_MSG_INFO("Range of input is " << rangeW);
 
     // like MuonAlignmentErrorDbTool::loadAlignmentError() after retrieving atrc (readCdo)
@@ -226,7 +221,7 @@ std::tuple<std::string, EventIDRange> MuonAlignmentErrorDbAlg::getDbClobContent(
     return std::make_tuple(std::move(clobContent), rangeW);
 }
 
-std::tuple<std::string, EventIDRange> MuonAlignmentErrorDbAlg::getFileClobContent() const {
+std::tuple<std::string, EventIDRange> AlignmentErrorDbAlg::getFileClobContent() const {
     ATH_MSG_INFO("Retrieving alignment error CLOB from file override " << m_clobFileOverride.value());
 
     std::ifstream in(m_clobFileOverride.value());
@@ -240,7 +235,7 @@ std::tuple<std::string, EventIDRange> MuonAlignmentErrorDbAlg::getFileClobConten
 // RECOGNIZE STATION NAME //
 ////////////////////////////
 
-inline std::string MuonAlignmentErrorDbAlg::hardwareName(MuonCalib::MuonFixedLongId calibId) const {
+inline std::string AlignmentErrorDbAlg::hardwareName(MuonCalib::MuonFixedLongId calibId) const {
     using StationName = MuonCalib::MuonFixedLongId::StationName;
 
     // The only exception that cannot be caught by hardwareEta() above
@@ -255,11 +250,11 @@ inline std::string MuonAlignmentErrorDbAlg::hardwareName(MuonCalib::MuonFixedLon
     return ret;
 }
 
-inline std::string_view MuonAlignmentErrorDbAlg::side(MuonCalib::MuonFixedLongId calibId) const {
+inline std::string_view AlignmentErrorDbAlg::side(MuonCalib::MuonFixedLongId calibId) const {
     return calibId.eta()>0 ? "A" : calibId.eta()<0 ? "C" : "B";
 }
 
-inline std::string MuonAlignmentErrorDbAlg::sectorString(MuonCalib::MuonFixedLongId calibId) const {
+inline std::string AlignmentErrorDbAlg::sectorString(MuonCalib::MuonFixedLongId calibId) const {
     int sec = sector(calibId);
     if (sec<0 || sec > 99) {
         throw std::runtime_error("Unhandled sector number");
@@ -267,7 +262,7 @@ inline std::string MuonAlignmentErrorDbAlg::sectorString(MuonCalib::MuonFixedLon
     return std::to_string(sec/10) + std::to_string(sec%10);
 }
 
-inline int MuonAlignmentErrorDbAlg::sector(MuonCalib::MuonFixedLongId calibId) const {
+inline int AlignmentErrorDbAlg::sector(MuonCalib::MuonFixedLongId calibId) const {
     if (calibId.is_tgc()) {
         // TGC sector convention is special
         return calibId.phi();
@@ -276,7 +271,7 @@ inline int MuonAlignmentErrorDbAlg::sector(MuonCalib::MuonFixedLongId calibId) c
     }
 }
 
-inline bool MuonAlignmentErrorDbAlg::isSmallSector(MuonCalib::MuonFixedLongId calibId) const {
+inline bool AlignmentErrorDbAlg::isSmallSector(MuonCalib::MuonFixedLongId calibId) const {
     using StationName = MuonCalib::MuonFixedLongId::StationName;
     switch (calibId.stationName()) {
         case StationName::BIS:
@@ -300,7 +295,7 @@ inline bool MuonAlignmentErrorDbAlg::isSmallSector(MuonCalib::MuonFixedLongId ca
     }
 }
 
-inline int MuonAlignmentErrorDbAlg::hardwareEta(MuonCalib::MuonFixedLongId calibId) const {
+inline int AlignmentErrorDbAlg::hardwareEta(MuonCalib::MuonFixedLongId calibId) const {
     using StationName = MuonCalib::MuonFixedLongId::StationName;
     switch (calibId.stationName()) {
         case StationName::BML:
@@ -354,4 +349,5 @@ inline int MuonAlignmentErrorDbAlg::hardwareEta(MuonCalib::MuonFixedLongId calib
             }
         default: return calibId.eta();
     }
+}
 }

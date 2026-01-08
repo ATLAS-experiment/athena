@@ -11,10 +11,12 @@
 #include "StoreGate/ReadCondHandleKey.h"
 #include "StoreGate/WriteCondHandleKey.h"
 
+
+namespace Muon{
 class TgcDigitTimeOffsetCondAlg : public AthCondAlgorithm
 {
  public:
-  TgcDigitTimeOffsetCondAlg (const std::string& name, ISvcLocator* pSvcLocator);
+  using AthCondAlgorithm::AthCondAlgorithm;
   virtual ~TgcDigitTimeOffsetCondAlg() = default;
   virtual StatusCode initialize() override;
   virtual StatusCode execute(const EventContext& ctx) const override;
@@ -23,6 +25,6 @@ class TgcDigitTimeOffsetCondAlg : public AthCondAlgorithm
   SG::ReadCondHandleKey<CondAttrListCollection> m_readKey{this, "ReadKey", "/TGC/DIGIT/TOFFSET", "SG key for TGCDIGITTOFFSET"};
   SG::WriteCondHandleKey<TgcDigitTimeOffsetData> m_writeKey{this, "WriteKey", "TGCDigitTimeOffsetData", "SG Key of TgcDigitTimeOffset"};
 };
-
+}
 #endif   // MUONCONDALG_TGCDIGITTIMEOFFSETCONDALG_H_
 

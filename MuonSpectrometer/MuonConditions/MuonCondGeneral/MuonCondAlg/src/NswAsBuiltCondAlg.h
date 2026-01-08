@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef MUONCONDALG_MUONNSWASBUILTCONDALG_H
 #define MUONCONDALG_MUONNSWASBUILTCONDALG_H
@@ -10,10 +10,12 @@
 #include "StoreGate/WriteCondHandleKey.h"
 #include "MuonAlignmentData/NswAsBuiltDbData.h"
 
-
+namespace Muon{
+/** @brief Conditions algorithm to load the NSW as-built model
+ *         from the conditions database */
 class NswAsBuiltCondAlg : public AthCondAlgorithm {
 public:
-    NswAsBuiltCondAlg(const std::string& name, ISvcLocator* pSvcLocator);
+    using AthCondAlgorithm::AthCondAlgorithm;
     virtual ~NswAsBuiltCondAlg() = default;
     virtual StatusCode initialize() override;
     virtual StatusCode execute(const EventContext& ctx) const override;
@@ -31,7 +33,5 @@ private:
 
 
 };
-
-
-
+}
 #endif

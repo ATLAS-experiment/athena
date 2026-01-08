@@ -1,8 +1,8 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "MuonCondAlg/MmCTPCondDbAlg.h"
+#include "MmCTPCondDbAlg.h"
 #include <StoreGate/WriteCondHandle.h>
 #include <StoreGate/ReadCondHandle.h>
 #include <AthenaKernel/IOVInfiniteRange.h>
@@ -12,7 +12,7 @@
 #include <fstream>
 
 
-
+namespace Muon{
 // Initialize
 StatusCode MmCTPCondDbAlg::initialize() {
 
@@ -122,4 +122,5 @@ StatusCode MmCTPCondDbAlg::parseDataFromJSON(const nlohmann::json& lines,
 
     }
     return StatusCode::SUCCESS;
+}
 }

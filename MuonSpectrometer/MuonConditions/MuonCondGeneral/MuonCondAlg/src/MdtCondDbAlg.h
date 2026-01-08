@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONCONDALG_MDTCONDDBALG_H
@@ -15,10 +15,12 @@
 #include "StoreGate/ReadCondHandleKey.h"
 #include "StoreGate/WriteCondHandleKey.h"
 
-
+/** @brief Conditions algorithm to load the switched-off Mdt channels
+ *         from the COOL database */
+namespace Muon {
 class MdtCondDbAlg : public AthCondAlgorithm {
 public:
-    MdtCondDbAlg(const std::string& name, ISvcLocator* svc);
+    using AthCondAlgorithm::AthCondAlgorithm;
     virtual ~MdtCondDbAlg() = default;
     virtual StatusCode initialize() override;
     virtual StatusCode execute(const EventContext&) const override;
@@ -75,5 +77,5 @@ private:
 
     std::map<std::string, Identifier> m_chamberNames{};
 };
-
+}
 #endif

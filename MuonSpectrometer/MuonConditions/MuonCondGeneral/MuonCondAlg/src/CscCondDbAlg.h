@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONCONDALG_CSCCONDDBALG_H
@@ -24,9 +24,10 @@
 #include "StoreGate/WriteCondHandleKey.h"
 #include "CxxUtils/StringUtils.h"
 
+namespace Muon{
 class CscCondDbAlg : public AthCondAlgorithm {
 public:
-    CscCondDbAlg(const std::string &name, ISvcLocator *svc);
+    using AthCondAlgorithm::AthCondAlgorithm;
     virtual ~CscCondDbAlg() = default;
     virtual StatusCode initialize() override;
     virtual StatusCode execute(const EventContext &) const override;
@@ -120,5 +121,5 @@ private:
         return StatusCode::SUCCESS;
     }
 };
-
+}
 #endif

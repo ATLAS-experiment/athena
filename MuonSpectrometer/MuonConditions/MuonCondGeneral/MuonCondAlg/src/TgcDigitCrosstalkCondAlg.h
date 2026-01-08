@@ -11,10 +11,11 @@
 #include "StoreGate/ReadCondHandleKey.h"
 #include "StoreGate/WriteCondHandleKey.h"
 
+namespace Muon{
 class TgcDigitCrosstalkCondAlg : public AthCondAlgorithm
 {
  public:
-  TgcDigitCrosstalkCondAlg(const std::string& name, ISvcLocator* pSvcLocator);
+  AthCondAlgorithm::AthCondAlgorithm;
   virtual ~TgcDigitCrosstalkCondAlg() = default;
   virtual StatusCode initialize() override;
   virtual StatusCode execute(const EventContext& ctx) const override;
@@ -23,6 +24,6 @@ class TgcDigitCrosstalkCondAlg : public AthCondAlgorithm
   SG::ReadCondHandleKey<CondAttrListCollection> m_readKey{this, "ReadKey", "/TGC/DIGIT/XTALK", "SG key for TGCDIGITXTALK"};
   SG::WriteCondHandleKey<TgcDigitCrosstalkData> m_writeKey{this, "WriteKey", "TGCDigitCrosstalkData", "SG Key of TgcDigitCrosstalk"};
 };
-
+}
 #endif   // MUONCONDALG_TGCDIGITTIMEOFFSETCONDALG_H_
 

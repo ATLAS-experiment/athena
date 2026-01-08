@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONCONDALG_MDTASBUILTCONDALG_H
@@ -15,9 +15,13 @@
 #include "MuonIdHelpers/IMuonIdHelperSvc.h"
 #include "nlohmann/json.hpp"
 
+/** @brief Algorithm to load the as-built parameters of the mdt chambers from the 
+ *         COOL database */
+
+ namespace Muon{
 class MdtAsBuiltCondAlg: public AthCondAlgorithm {
     public:
-        MdtAsBuiltCondAlg(const std::string& name, ISvcLocator* pSvcLocator);
+        using AthCondAlgorithm::AthCondAlgorithm;
         virtual ~MdtAsBuiltCondAlg() = default;
         virtual StatusCode initialize() override;
         virtual StatusCode execute(const EventContext& ctx) const override;
@@ -50,5 +54,5 @@ class MdtAsBuiltCondAlg: public AthCondAlgorithm {
 
 
 };
-
+}
 #endif
