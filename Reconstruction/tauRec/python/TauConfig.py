@@ -309,19 +309,9 @@ def TauReconstructionCfg(flags):
 
         # jet reclustering
         from JetRecConfig.JetRecConfig import JetRecCfg
-        if 'PFlow' in flags.Tau.TauRec.SeedJetCollection:
-           from JetRecConfig.JetRecConfig import JetRecCfg
-           from JetRecConfig.StandardSmallRJets import AntiKt4EMPFlow_tauSeedEleRM 
-           result.merge( JetRecCfg(flags_TauEleRM,AntiKt4EMPFlow_tauSeedEleRM ))  
-        else:
-           from JetRecConfig.StandardSmallRJets import AntiKt4LCTopo
-           AntiKt4LCTopo_EleRM = AntiKt4LCTopo.clone(suffix="_EleRM")
-           AntiKt4LCTopo_EleRM.inputdef.name = flags_TauEleRM.Tau.ActiveConfig.LCTopoOrigin_EleRM
-           AntiKt4LCTopo_EleRM.inputdef.inputname = flags_TauEleRM.Tau.ActiveConfig.CaloCalTopoClusters_EleRM
-           AntiKt4LCTopo_EleRM.inputdef.containername = flags_TauEleRM.Tau.ActiveConfig.LCOriginTopoClusters_EleRM
-           AntiKt4LCTopo_EleRM.standardRecoMode = True
-           AntiKt4LCTopo_EleRM.context = "EleRM"
-           result.merge(JetRecCfg(flags_TauEleRM, AntiKt4LCTopo_EleRM))
+        from tauRec.ConfigurationHelpers import GetEleRMSeedCollection
+        eleRMSeedJetCollection = GetEleRMSeedCollection(flags_TauEleRM)
+        result.merge( JetRecCfg(flags_TauEleRM, eleRMSeedJetCollection  ))  
 
         result.merge(TauBuildAlgCfg(flags_TauEleRM))
 

@@ -32,9 +32,6 @@ StatusCode TauIDVarCalculator::execute(xAOD::TauJet& tau) const {
   
   //everything below is just for EleBDT!
   static const SG::Accessor<float> acc_absEtaLead("ABS_ETA_LEAD_TRACK"); 
-  static const SG::ConstAccessor<float> acc_centFrac("centFrac");
-
-  // Will: Fixed variables for R21
   static const SG::Accessor<float> acc_EMFracFixed("EMFracFixed");
   static const SG::Accessor<float> acc_hadLeakFracFixed("hadLeakFracFixed");
   static const SG::Accessor<float> acc_etHotShotWin("etHotShotWin"); 

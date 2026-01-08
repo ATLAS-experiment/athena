@@ -56,3 +56,19 @@ def GetSeedCollection(flags):
         return AntiKt4EMPFlowNoPtCutTauSeed
 
 
+# seed jet for EleRM taus
+def GetEleRMSeedCollection(flags):
+
+    if 'PFlow' in flags.Tau.TauRec.SeedJetCollection:
+        from JetRecConfig.StandardSmallRJets import AntiKt4EMPFlow_tauSeedEleRM
+        return AntiKt4EMPFlow_tauSeedEleRM
+    else:
+        from JetRecConfig.StandardSmallRJets import AntiKt4LCTopo
+        AntiKt4LCTopo_EleRM = AntiKt4LCTopo.clone(suffix="_EleRM")
+        AntiKt4LCTopo_EleRM.inputdef.name = flags.Tau.ActiveConfig.LCTopoOrigin_EleRM
+        AntiKt4LCTopo_EleRM.inputdef.inputname = flags.Tau.ActiveConfig.CaloCalTopoClusters_EleRM
+        AntiKt4LCTopo_EleRM.inputdef.containername = flags.Tau.ActiveConfig.LCOriginTopoClusters_EleRM
+        AntiKt4LCTopo_EleRM.standardRecoMode = True
+        AntiKt4LCTopo_EleRM.context = "EleRM"
+        return AntiKt4LCTopo_EleRM
+
