@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -142,8 +142,8 @@ int main( int /*argc*/, char **/* argv */)
  {
    /// Load the StoreGateSvc
    if ( false == setupStoreGate() ) {
-     std::string error = "Could not setup StoreGateSvc !!";
-     throw std::runtime_error(error);
+     std::cerr << "Could not setup StoreGateSvc !!\n";
+     return 1;
    }
 
    /// Get the top level suite from the registry
