@@ -15,6 +15,7 @@
 #include "CollectionSvc/ICollection.h"
 #include "CollectionSvc/ICollectionCursor.h"
 #include "CollectionSvc/ICollectionDescription.h"
+#include "RootUtils/APRDefaults.h"
 
 // Gaudi
 #include "GaudiKernel/StatusCode.h"
@@ -25,16 +26,17 @@
 //______________________________________________________________________________
 PoolCollectionConverter::PoolCollectionConverter(const std::string& collectionType,
 	const std::string& inputCollection,
+	const std::string& inputContainer,
 	unsigned int contextId,
 	const IPoolSvc* svc) :
 	m_collectionType(collectionType),
 	m_connection(),
 	m_inputCollection(inputCollection),
+	m_inputContainer(inputContainer),
 	m_contextId(contextId),
 	m_poolSvc(svc),
 	m_poolCollection(nullptr),
-	m_collectionCursor(nullptr),
-	m_inputContainer() {
+	m_collectionCursor(nullptr) {
 }
 //______________________________________________________________________________
 PoolCollectionConverter::~PoolCollectionConverter() {
@@ -46,44 +48,45 @@ PoolCollectionConverter::~PoolCollectionConverter() {
 }
 //______________________________________________________________________________
 StatusCode PoolCollectionConverter::initialize() {
-   // Find out if the user specified a container
-   const std::string collectionType = m_collectionType;
-   std::string::size_type p_colon = collectionType.rfind(':');
-   if (p_colon != std::string::npos) {
-      m_inputContainer = collectionType.substr(p_colon + 1);
-      m_collectionType = collectionType.substr(0, p_colon);
-   }
-   if (m_collectionType == "ImplicitCollection") {
-      // Check if already prefixed
-      if (m_inputCollection.starts_with( "PFN:")
-	      || m_inputCollection.starts_with( "LFN:")
-	      || m_inputCollection.starts_with( "FID:")) {
-         // Already prefixed
-         m_connection = m_inputCollection;
-      } else {
-         // Prefix with PFN:
-         m_connection = std::format("PFN:{}", m_inputCollection);
-      }
-      try {
-         m_poolCollection = m_poolSvc->createCollection("RootCollection", m_connection, m_inputCollection, m_contextId);
-      } catch (std::exception &e) {
-         m_poolCollection = nullptr;
-      }
-      if (m_poolCollection == nullptr) {
-         // Now set where to look in the implicit file
-         m_inputCollection = std::format("{}(DataHeader)", m_inputContainer);
-      }
+   std::string inputContainer = std::format("{}(DataHeader)", m_inputContainer);
+   // Check if already prefixed
+   if (m_inputCollection.starts_with( "PFN:")
+           || m_inputCollection.starts_with( "LFN:")
+           || m_inputCollection.starts_with( "FID:")) {
+      // Already prefixed
+      m_connection = m_inputCollection;
+   } else {
+      // Prefix with PFN:
+      m_connection = std::format("PFN:{}", m_inputCollection);
    }
    try {
-      if (m_poolCollection == nullptr) {
-         m_poolCollection = m_poolSvc->createCollection(m_collectionType, m_connection, m_inputCollection, m_contextId);
+      if (m_collectionType == "RootCollection") {
+         m_poolCollection = m_poolSvc->createCollection(m_collectionType, m_connection, inputContainer, m_contextId);
+      } else if (m_collectionType == "RNTCollection") {
+         inputContainer = std::format("{}(DataHeader)", APRDefaults::RNTupleNames::DataHeader);
+         m_poolCollection = m_poolSvc->createCollection(m_collectionType, m_connection, inputContainer, m_contextId);
       }
-      if (m_poolCollection == nullptr && m_collectionType == "ImplicitCollection") {
-         m_inputCollection = std::format("{}_DataHeader", m_inputContainer);
-         m_poolCollection = m_poolSvc->createCollection(m_collectionType, m_connection, m_inputCollection, m_contextId);
+      if (m_poolCollection == nullptr) { // Open as ImplicitCollection if technologies fail, or none was specified
+         m_poolCollection = m_poolSvc->createCollection("ImplicitCollection", m_connection, inputContainer, m_contextId);
       }
    } catch (std::exception &e) {
-      return StatusCode::RECOVERABLE;
+      if (m_poolCollection == nullptr) return StatusCode::RECOVERABLE;
+   }
+   if (m_poolCollection == nullptr) {
+      try { // old style TTree per type
+         inputContainer = std::format("{}_DataHeader", m_inputContainer);
+         m_poolCollection = m_poolSvc->createCollection(m_collectionType, m_connection, inputContainer, m_contextId);
+      } catch (std::exception &e) {
+         return StatusCode::RECOVERABLE;
+      }
+   }
+   if (m_poolCollection == nullptr && m_collectionType == "ImplicitCollection" && m_inputContainer != APRDefaults::RNTupleNames::DataHeader) {
+      try { // ImpicitCollection with RNTuple container placement
+         inputContainer = std::format("{}(DataHeader)", APRDefaults::RNTupleNames::DataHeader);
+         m_poolCollection = m_poolSvc->createCollection(m_collectionType, m_connection, inputContainer, m_contextId);
+      } catch (std::exception &e) {
+         return StatusCode::RECOVERABLE;
+      }
    }
    return StatusCode::SUCCESS;
 }

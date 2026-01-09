@@ -150,6 +150,8 @@ def SortInput(flags, cfg):
     for inpfile in inputs:
         os.system('pool_insertFileToCatalog {}'.format(inpfile))
 
+    cfg.getService("PoolSvc").AttemptCatalogPatch = False
+
     # Tell Athena to use the sorted collection instead of the original inputs
     cfg.getService("EventSelector").InputCollections = [tmpCollFile + ".root"]
     cfg.getService("EventSelector").CollectionType = "RootCollection"
