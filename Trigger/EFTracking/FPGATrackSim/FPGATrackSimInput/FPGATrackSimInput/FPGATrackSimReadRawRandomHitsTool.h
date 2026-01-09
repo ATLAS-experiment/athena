@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef FPGATrackSimREADRAWRANDOMHITSTOOL_H
@@ -7,10 +7,6 @@
 
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "FPGATrackSimInput/IFPGATrackSimEventInputHeaderTool.h"
-
-#include "TFile.h"
-#include "TTree.h"
-
 
 
 class FPGATrackSimReadRawRandomHitsTool : public extends<AthAlgTool, IFPGATrackSimEventInputHeaderTool>
@@ -30,8 +26,7 @@ class FPGATrackSimReadRawRandomHitsTool : public extends<AthAlgTool, IFPGATrackS
   // JO configuration    
   StringProperty m_inpath {this, "InFileName", "httsim_smartwrapper.root", "input path"};
 
-  // Internal pointers       
-  unsigned int m_nEntries = 0U;
+  // Internal pointers
   mutable std::atomic<unsigned> m_entry = 0;
   mutable std::mutex m_readMutex; // Protect ROOT read operations in const methods
 };
