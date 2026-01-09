@@ -1,12 +1,11 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef MUONREADOUTGEOMETRYR4_CHAMBER_H
 #define MUONREADOUTGEOMETRYR4_CHAMBER_H
 
+/** This class is not to needed in AthSimulation */
 #ifndef SIMULATIONBASE
-
-
 #include <MuonReadoutGeometryR4/MuonReadoutElement.h>
 #include <AthenaBaseComps/AthMessaging.h>
 
@@ -19,7 +18,13 @@ namespace Acts {
 
 namespace MuonGMR4 {
     class SpectrometerSector;
-
+    /** @brief Chamber represent the volume enclosing a muon station. A muon station 
+     *         typically consists out of the two mdt multilayers which are accompanied
+     *         by the Rpc chambers, if the multilayer are mounted in the barrel.
+     *         The orientation of the chamber's coordinate system is the same as the
+     *         readout element's orientations. It provides methods for identification,
+     *         and the contained readout elements. It is the basic building block in the assembly
+     *         of the tracking volumes during the tracking geometry construction */
     class Chamber {
         public:
           /** @brief Define the list of read out elements of the chamber */

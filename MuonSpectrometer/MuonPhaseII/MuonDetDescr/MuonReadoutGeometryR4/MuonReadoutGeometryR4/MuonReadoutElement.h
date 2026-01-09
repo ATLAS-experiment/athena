@@ -26,133 +26,174 @@ namespace MuonGMR4 {
 
 class SpectrometerSector;
 class Chamber;
-///   The MuonReadoutElement is an abstract class representing the geometry
-///   representing the muon detector. The segmentation of the detectors varies
-///   along the MS subsystems and is documented further in the specific sub
-///   detector classes. As rule of thumb, detectors sitting on at a different MS
-///   layer or station Index, stationEta or station phi are represented by at
-///   least one MuonReadoutElement. The MuonReadout elements are constructed
-///   from the RAW geometry provided by GeoModelSvc. The class below is pure
-///   virtual and implements the minimal set of methods shared by all muon
-///   detector technolgies.
+/** @brief MuonReadoutElement is an abstract class representing the geometry of a muon detector. 
+  *   The segmentation of the detectors varies along the MS subsystems and is documented 
+  *   further in the specific sub-detector classes. As rule of thumb, detectors sitting 
+  *   at a different MS layer or station Index, stationEta or station phi are represented by at
+  *   least one MuonReadoutElement. The MuonReadoutElements are constructed from the RAW geometry 
+  *   provided by GeoModelSvc. The class below is pure virtual and implements the minimal set
+  *   of methods shared by all detector technolgies. */
 class MuonReadoutElement : public GeoVDetectorElement, public AthMessaging, public ActsTrk::IDetectorElement {
-
    public:
-    /// Helper struct to ship the defining arguments of the detector element
-    /// around
+    /** @brief Helper struct to ship the defining arguments of the detector element  */
     struct defineArgs {
-        /// Pointer to the underlying physical volume in GeoModel
-        GeoIntrusivePtr<GeoVFullPhysVol> physVol{nullptr};
-        /// Pointer to the alignable transformation 
-        const GeoAlignableTransform* alignTransform{nullptr};
-        /// chamber design name as it's occuring in the parameter book tables E.g. BMS5, RPC10, etc.
+        /** @brief Pointer to the underlying physical volume in GeoModel  */
+        GeoIntrusivePtr<const GeoVFullPhysVol> physVol{nullptr};
+        /** @brief Pointer to the alignable transform node upstream */
+        GeoIntrusivePtr<const GeoAlignableTransform> alignTransform{nullptr};
+        /** @brief chamber design name as it's occuring in the parameter book tables E.g. BMS5, RPC10, etc. */
         std::string chambDesign{""};
-        /// ATLAS identifier
-        Identifier detElId{0};        
+        /** @brief ATLAS detector element identifier (First channel of the first readout layer) */
+        Identifier detElId{};        
     };
     
-
+    /** @brief Constructor taking the basic define arguments */
     MuonReadoutElement(const defineArgs& args);
     virtual ~MuonReadoutElement();
     
-    MuonReadoutElement()=delete;
-    MuonReadoutElement(const MuonReadoutElement&)=delete;
-    MuonReadoutElement& operator=(const MuonReadoutElement&)=delete;
-    /// Element initialization
+    /** @brief Delete the copy constructor */
+    MuonReadoutElement(const MuonReadoutElement&) = delete;
+    /** @brief Delete the copy assignment */
+    MuonReadoutElement& operator=(const MuonReadoutElement&) = delete;
+    /** @brief Delete the move constructor */
+    MuonReadoutElement(MuonReadoutElement&&) = delete;
+    /** @brief Delete the move assignment */
+    MuonReadoutElement& operator=(MuonReadoutElement&&) = delete;
+    
+    /** @brief Initialization of the readout elements. Transforms & surfaces
+     *         for each readout layer are created */
     virtual StatusCode initElement() = 0;
-    /// Returnsthe alignable transform of the readout element
+    /** @brief Return the alignable transform node of the readout element */
     const GeoAlignableTransform* alignableTransform() const;
-    /// Return the athena identifier.
-    ///  The Identifier is identical with the first measurment channel in
-    ///  readout element (E.g. Strip 1 in Layer 1 in the NSW)
+    /** @brief Return the ATLAS identifier */
     Identifier identify() const override final;
-
-    /// Returns the Identifier has of the Element that is Identical to the
-    /// detElHash from the id_helper class
+    /** @brief Returns the hash of the readout element which is identical to the 
+     *         detector element hash provided by the associated idHelper */
     IdentifierHash identHash() const;
-    /// Returns the stationName (BIS, BOS, etc) encoded into the integer
+    /** @brief Returns the stationName (BIS, BOS, etc) encoded into the integer */
     int stationName() const;
-    /// Returns the stationEta (positive A site, negative O site)
+    /** @brief Returns the stationEta (positive A site, negative C site) */
     int stationEta() const;
-    /// Returns the stationPhi (1-8) -> sector (2*phi - (isSmall))
+    /** @brief Returns the stationPhi (1-8) -> sector (2*phi - (isSmall)) */
     int stationPhi() const;
-    /// Returns the chamber index of the Identifier (MMS & STS) have the same
-    /// chamber Index (EIS)
+    /** @brief Returns the chamber index of the Identifier (MMS & STS) have the same
+               chamber Index (EIS) */
     Muon::MuonStationIndex::ChIndex chamberIndex() const;
-
-    /// Constructs the identifier hash from the full measurement Identifier. The
-    /// hash is always defined w.r.t the specific detector element and used to
-    /// access the information in memory quickly
+    /** @brief The measurement hash is a continous numbering schema of 
+     *         all readout channels described by the specific MuonReadoutElement
+     *         instance. It's always defined w.r.t. the MuonReadoutElement and
+     *         has no meaning or wrong meaning without it.
+     *         This methods convert the identifier to a measurement hash
+     * @param measId: Identifier of the measurement to convert */ 
     virtual IdentifierHash measurementHash(const Identifier& measId) const = 0;
-
+    /** @brief The layer hash removes the bits from the IdentifierHash corresponding
+     *         to the measurement's channel number and sets them to zero. It's used 
+     *         to access the transform associated to the measurement's strip plane
+     *         or to the tube layer */
     virtual IdentifierHash layerHash(const Identifier& measId) const = 0;
-    /// Converts the measurement hash back to the full Identifier
+    /** @brief Back conversion of the measurement hash to a full Athena Identifier
+     *         The behaviour is undefined if a layer hash is parsed
+     *  @param measHash: Measurement hash to convert */
     virtual Identifier measurementId(const IdentifierHash& measHash) const = 0;
-
-
-    /// The chamber design refers to the construction parameters of a readout
-    /// element. Used for the retrieval of the chamber parameters
-    ///   E.g. the chambers BOL1A8 & BOL2A8 are identical in terms of number of
-    ///   tubes, dimensions etc.
+    /** @brief The chamber design refers to the construction parameters of
+     *          a readout element. It's used for the retrieval of the chamber meta data
+     *          containing the information about the number of sensors, their sepration etc. */
     const std::string& chamberDesign() const;
-
-    /// Returns the pointer to the muonIdHelperSvc
+    /** @brief Returns the pointer to the muonIdHelperSvc */
     const Muon::IMuonIdHelperSvc* idHelperSvc() const;
 
-    /// Returns the detector center (Which is the same as the detector center of
-    /// the first measurement layer)
+    /** @brief Returns the geometrical center point of the readout element
+     *  @param ctx: Geometry context to take the alignment corrections into account */
     Amg::Vector3D center(const ActsTrk::GeometryContext& ctx) const;
-    /// Returns the center of a given detector layer using the complete
-    /// Identifier of the measurement
+    /** @brief Returns the origin of the readout element's transform
+     *  @param ctx: Geometry context to take the alignment corrections into account
+     *  @param id: Identifier of the measurement channel to be retrieved */
     Amg::Vector3D center(const ActsTrk::GeometryContext& ctx,
                          const Identifier& id) const;
-    /// Returns the center of a given detector layer using the Identifier hash
-    /// of the measurement
+    /** @brief Returns the origin of the readout element's transform
+     *  @param ctx: Geometry context to take the alignment corrections into account
+     *  @param hash: Measurement hash of the transform to be retrieved */
     Amg::Vector3D center(const ActsTrk::GeometryContext& ctx,
                          const IdentifierHash& hash) const;
-
-    ///   Transformations to translate between local <-> global coordinates.
-    ///   They follow the common ATLAS conventations that the origin is located
-    ///   in the center of the detector layer
-    ///         x-axis: Points towards the sky
-    ///         y-axis: Points towards the edges of ATLAS
-    ///         z-axis: Points along the beamline
-    ///   The transformations always include the corrections from the A-Lines of
-    ///   the alignment system
-    /// Returns the global to local transformation into the rest frame of the
-    /// detector (Coincides with the first measurement layer)
+    /** @brief Returns the transformation from the global ATLAS coordinate system
+     *         into the local coordinate system of the readout element. The local axes
+     *         are oriented such that
+     *              x-axis: Is parallel to the sensors measuring the eta coordinate
+     *                      (e.g. parallel to the Mdt tube wire)
+     *              y-axis: Is parallel to the sensors measuring the phi coordinate
+     *                      (e.g. to the next tube wire)
+     *              z-axis: Points vertically outwards the chamber
+     *                      (e.g. radially outwards for barrel or to the endcap cavern wall)
+     *  @param ctx: Geometry context to take the alignment corrections into account */
     Amg::Transform3D globalToLocalTrans(const ActsTrk::GeometryContext& ctx) const;
-    /// Returns the global to local transformation into the rest frame of a
-    /// given measurement layer
+    /** @brief Returns the transformations from the ATLAS coordinate system into the
+     *         local coordinate system of the readout sensor. The orientiation of the
+     *         axes depends on whether the sensor is described by a plane or by a
+     *         tube wire.
+     *         In the former case, the axes are oriented such that
+     *             x-axis: Points to the next eta sensor such that local-x always
+     *                     constrains the precision coordinate
+     *             y-axis: Points to the next phi sensor such that local y always
+     *                     constains the coordinate along the precision sensor
+     *             z-axis: Is the cross-product of the other two
+     *        For Mdt tubes the axis orientiation is such that
+     *              x-axis: Points to the next tube in the same tube-layer
+     *              y-axis: Points to the next tube-layer plane
+     *              z-axis: Points along the tube wire
+     *  @param ctx: Geometry context to take the alignment corrections into account
+     *  @param id: Identifier of the measurement for which the transform shall be retrieved */
     Amg::Transform3D globalToLocalTrans(const ActsTrk::GeometryContext& ctx,
                                         const Identifier& id) const;
-    /// Returns the global to local transformation into the rest frame of a
-    /// given measurement layer
+    /** @brief Returns the transformations from the ATLAS coordinate system into the
+     *         local coordinate system using the measurement / layer hash mechanism.
+     *         For strip-like detectors a layer hash must always be parsed. For the 
+     *         Mdts a measurement or layer hash can be parsed depending on whether the
+     *         plane transform or the particular tube transform shall be retrieved.
+     *  @param ctx: Geometry context to take the alignment corrections into account.
+     *  @param hash: Hash of the transform to fetch (Measurement or layer hash). */
     Amg::Transform3D globalToLocalTrans(const ActsTrk::GeometryContext& ctx, 
                                         const IdentifierHash& hash) const;
-
-    /// Returns the local to global transformation into the ATLAS coordinate
-    /// system
+    /** @brief Returns the transformation from the local coordinate system  of the readout
+     *         element into the global ATLAS coordinate system (inverse of globalToLocal).
+     *  @param ctx: Geometry context to take the alignment corrections into account. */
     const Amg::Transform3D& localToGlobalTrans(const ActsTrk::GeometryContext& ctx) const;
+    /** @brief Returns the transformation from the local coordinate system  of the readout
+     *         element into the global ATLAS coordinate system (inverse of globalToLocal).
+     *  @param ctx: Geometry context to take the alignment corrections into account
+     *  @param id: Identifier of the measurement for which the transform shall be retrieved */
     const Amg::Transform3D& localToGlobalTrans(const ActsTrk::GeometryContext& ctx,
                                                const Identifier& id) const;
+    /** @brief Returns the transformation from the local coordinate system  of the readout
+     *         element into the global ATLAS coordinate system (inverse of globalToLocal).
+     *  @param ctx: Geometry context to take the alignment corrections into account
+     *  @param hash: Hash of the transform to fetch (Measurement or layer hash). */
     const Amg::Transform3D& localToGlobalTrans(const ActsTrk::GeometryContext& ctx,
                                                const IdentifierHash& id) const;
 
 #ifndef SIMULATIONBASE
-    /// Returns the transformation to the origin of the chamber coordinate system
+    /** @brief Wrapper function of the localToGlobalTransform method to satisfy the 
+     *         Acts::IDetectorElementBase interface
+     *  @param gctx: Acts representation of the GeometryContext */
     const Amg::Transform3D& transform(const Acts::GeometryContext& gctx) const override final;
-    /// Returns the surface associated to the readout element plane
+    /** @brief Returns the surface associated with the readout element. It is placed in the 
+     *         center of the readout element's volume and has the volumes surface bounds */
     const Acts::Surface& surface() const override final;
+    /** @brief Returns the mutable surface associated with the readout element. */
     Acts::Surface& surface() override final;
-
-    /// Returns the sufrface associated to a wire / measurement plane in the detector
+    /** @brief Returns the surface associated with the transform of a given
+      *         readout layer. (E.g. tube or  the strip plane)
+      * @param hash: Hash of the surface to fetch (Measurement or layer hash). */
     const Acts::Surface& surface(const IdentifierHash& hash) const;
+    /** @brief Returns the mutable surface associated with the transform of a given
+      *         readout layer. (E.g. tube or  the strip plane)
+      * @param hash: Hash of the surface to fetch (Measurement or layer hash). */
     Acts::Surface& surface(const IdentifierHash& hash);
-
-    /// Returns the pointer associated to a certain wire / plane
+    /** @brief Returns the mutable surface pointer associated with the transform of a given
+      *         readout layer. (E.g. tube or  the strip plane)
+      * @param hash: Hash of the surface to fetch (Measurement or layer hash). */
     std::shared_ptr<Acts::Surface> surfacePtr(const IdentifierHash& hash) const;
-
+    /** @brief Returns all surfaces that are associated with the active readout planes */
+    std::vector<std::shared_ptr<Acts::Surface>> getSurfaces() const;
     /** @brief Sets the link to the enclosing chamber */
     void setChamberLink(const Chamber* chamber);
     /** @brief Set the link to the enclosing sector envelope */
@@ -161,33 +202,52 @@ class MuonReadoutElement : public GeoVDetectorElement, public AthMessaging, publ
     const SpectrometerSector* msSector() const;
     /** @brief Returns the pointer to the chamber enclosing this readout element */
     const Chamber* chamber() const;
-    /// Returns all surfaces that are associated with the active readout planes
-    std::vector<std::shared_ptr<Acts::Surface>> getSurfaces() const;
 #else
-    /// In AthSimulation there's no Acts::DetectorElement which is declaring this method
-    /// in its interface.
+    /** @brief AthSimulation does not compile Acts and hence there's no interface declared
+     *         for the thickness method which is implemented by each detector technology
+     *         To keep the override in both cases declare the dummy for AthSimulation only */
     virtual double thickness() const = 0;
 #endif
-    /// Releases all cached transforms that are not connected with alignment
+    /** @brief Release all transforms from the memory that are not connected with a geometry context
+     *         but cached by the readout element itself */
     void releaseUnAlignedTrfs() const;
-
+    /** @brief Construct the final aligned transformations and store them in the alignment store.
+     *         Returns the number of how many transformations have been stored */
     unsigned int storeAlignedTransforms(const ActsTrk::DetectorAlignStore& store) const override final;
-
-     friend class ActsTrk::TransformCacheDetEle<MuonGMR4::MuonReadoutElement>;
-   protected:
-     /// Returns the local -> global transformation to go from the volume center origin
-     const Amg::Transform3D& toStation(const ActsTrk::DetectorAlignStore* alignStore) const;
+    /** @brief Allow the transform cache access to the private / protected data members */
+    friend class ActsTrk::TransformCacheDetEle<MuonGMR4::MuonReadoutElement>;
+  protected:
+    /** @brief Returns the transformation from the GeoModel tree and applies the A-lines if 
+     *         a valid alignment store pointer is provided. The local coordinate system in GeoModel
+     *         differs from the system used by the localToGlobaTransformations. It is referred to the
+     *         AMDB coordinate system used to describe the MS in Run 1-3
+     *                 x-axis: Points along the thickness of the readout element
+     *                          (e.g. radially outwards for barrel chambers or along global Z 
+     *                                for detector mounted in the endcaps)
+     *                 y-axis: Points along the edge which is parallel to the eta sensors
+     *                 z-axis: Points along towards the next eta sensor */
+    const Amg::Transform3D& toStation(const ActsTrk::DetectorAlignStore* alignStore) const;
       
-     /// Inserts a transfomration for caching
-     template <class MuonDetImpl> StatusCode insertTransform(const IdentifierHash& hash);
-
-     StatusCode createGeoTransform();
+    /** @brief Constructs the TransformDetEleCache associated with the hash of the 
+     *         given Mdt tube or strip layer. The method is templated over the specific
+    *         implementation of the readout element as the `TransformCacheDetEle` implements
+    *         the assembly of the final transforms. The method returns a failure of an instance
+    *         for the same hash has already been invoked earlier
+    *  @param hash: Measurement / layer hash to identifier the transform of the readout layer */
+    template <class MuonDetImpl> 
+            StatusCode insertTransform(const IdentifierHash& hash);
+    /** @brief Creates the `TransformCacheDetEle` corresponding the generic local -> global transformation
+     *         of the readout element. Needs to be called by each technology during initialization */
+    StatusCode createGeoTransform();
 #ifndef SIMULATIONBASE
-     //Creates a MuonSurfaceCache for straw surfaces using the given Bounds and Identifier Hash
-     StatusCode strawSurfaceFactory(const IdentifierHash& hash, std::shared_ptr<const Acts::LineBounds> lBounds);
-
-     //Creates a MuonSurfaceCache for plane surface using the given Bounds and Identifier Hash
-     StatusCode planeSurfaceFactory(const IdentifierHash& hash, std::shared_ptr<const Acts::PlanarBounds> pBounds);
+    /** @brief Invokes the factory to create straw surfaces && to associate them with the particular transform cache
+     *  @param hash: Measurement hash of the tube of interest
+     *  @param lBounds: Surface bound object describing the straw radius and the active tube length */
+    StatusCode strawSurfaceFactory(const IdentifierHash& hash, std::shared_ptr<const Acts::LineBounds> lBounds);
+    /** @brief Invokes the factory to create plane surfaces && to associate them with the particular transform cache
+     *  @param hash: Layer hash of the readout plane of interest
+     *  @param lBounds: Bounds describing the rectangle or trapezoidal surface's dimensions */
+    StatusCode planeSurfaceFactory(const IdentifierHash& hash, std::shared_ptr<const Acts::PlanarBounds> pBounds);
 #endif     
      /// Returns the hash that is associated with the surface cache holding the transformation that is
      /// placing the ReadoutElement inside the ATLAS coordinate system.

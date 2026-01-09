@@ -1,14 +1,34 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
+#include <MuonReadoutGeometryR4/MuonDetectorDefs.h>
+#include <GaudiKernel/SystemOfUnits.h>
+
 #ifndef SIMULATIONBASE
-#   include <MuonReadoutGeometryR4/MuonDetectorDefs.h>
 #   include <Acts/Geometry/VolumeBounds.hpp>
 #   include <Acts/Geometry/CuboidVolumeBounds.hpp>
 #   include <Acts/Geometry/TrapezoidVolumeBounds.hpp>
-
+#endif
 
 namespace MuonGMR4 {
+    std::unique_ptr<ActsTrk::DetectorAlignStore> copyDeltas(const ActsTrk::DetectorAlignStore& inStore) {
+        auto newStore = std::make_unique<ActsTrk::DetectorAlignStore>(inStore);
+        if(newStore->geoModelAlignment) {
+            if (!inStore.geoModelAlignment->posCacheLocked()) {
+                newStore->geoModelAlignment->clearPosCache();
+            }
+            newStore->trackingAlignment = std::make_unique<ActsTrk::DetectorAlignStore::TrackingAlignStore>(inStore.detType);
+        }
+        return newStore;
+    }
+    namespace detail{
+        Amg::Transform3D rotationToAMDB(const ActsTrk::DetectorType type) {
+            return type == ActsTrk::DetectorType::sTgc ? Amg::Transform3D::Identity()
+                  : Amg::getRotateY3D(90. * Gaudi::Units::deg) * Amg::getRotateZ3D(90. * Gaudi::Units::deg);
+        }
+    }
+
+#ifndef SIMULATIONBASE
     double halfXlowY(const Acts::VolumeBounds& visitBounds) {
         switch (visitBounds.type()) {
             case Acts::VolumeBounds::BoundsType::eCuboid: {
@@ -74,5 +94,5 @@ namespace MuonGMR4 {
         }
         return 0.;
    }
-}
 #endif
+}
