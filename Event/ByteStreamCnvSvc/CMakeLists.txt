@@ -17,7 +17,7 @@ atlas_add_component( ByteStreamCnvSvc
    LINK_LIBRARIES ${TDAQ-COMMON_LIBRARIES} ${Boost_LIBRARIES}
    AthenaBaseComps ByteStreamCnvSvcBaseLib ByteStreamData GaudiKernel EventInfoMgtLib
    AthenaKernel StoreGateLib AthenaPoolUtilities PersistentDataModel xAODEventInfo xAODTrigger
-   ByteStreamCnvSvcLegacy CxxUtils )
+   CxxUtils )
 
 # Executables in the package:
 atlas_add_executable( AtlFindBSEvent test/AtlFindBSEvent.cxx

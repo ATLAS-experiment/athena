@@ -45,8 +45,7 @@ public:
      *  Factory method returning data writer instance for specified version.
      *  Throws exception in case of problems, never returns zero pointer.
      *
-     *  @param version: writer version to instantiate, 0 for most current version,
-     *                  other supported values: 5 for run1-compatible output.
+     *  @param version: writer version to instantiate, 0 for most current version
      *                  Exception is thrown if version is not supported.
      *  @param writingPath: directory where to write data
      *  @param fileNameCore: file name not including the ending "._NNNN.data"
@@ -76,8 +75,7 @@ public:
      *  Factory method returning data writer instance for specified version.
      *  Throws exception in case of problems, never returns zero pointer.
      *
-     *  @param version: writer version to instantiate, 0 for most current version,
-     *                  other supported values: 5 for run1-compatible output.
+     *  @param version: writer version to instantiate, 0 for most current version.
      *                  Exception is thrown is version is not supported.
      *  @param writingPath: directory where to write data
      *  @param theFNCB: callback method for generating file names
@@ -153,8 +151,7 @@ public:
 struct DataWriterParameters {
   /** Writer version to instantiate, 0 for most current version
    *
-   *  Other supported values: 5 for run1-compatible output. Exception is thrown
-   *  is version is not supported.
+   *  Exception is thrown if version is not supported.
    **/
   int version{0};
 
