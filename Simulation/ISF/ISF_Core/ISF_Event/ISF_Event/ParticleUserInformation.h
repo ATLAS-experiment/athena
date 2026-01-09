@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -10,6 +10,7 @@
 #define ISF_EVENT_PARTICLEUSERINFORMATION_H
 
 #include <cmath>
+#include <memory>
 
 namespace ISF {
 
@@ -56,7 +57,7 @@ namespace ISF {
     ParticleUserInformation();
 
     /** virtual destructor */
-    virtual ~ParticleUserInformation() { delete m_matInfo; };
+    virtual ~ParticleUserInformation() = default;
 
     int getExtraBC() const;
     int process() const;
@@ -76,7 +77,7 @@ namespace ISF {
     int  m_process;            // generating process
     int  m_generation;         // generation number (i.e. number of vertices separating vertex of origin
     //                    from the primary vertex (GenEvent input)
-    MaterialPathInfo*   m_matInfo;     // presampled process and material collection
+    std::unique_ptr<MaterialPathInfo>   m_matInfo;     // presampled process and material collection
   };
 } // end of namespace
 
@@ -85,13 +86,13 @@ inline int ISF::ParticleUserInformation::process()                const { return
 
 inline int ISF::ParticleUserInformation::generation()             const { return m_generation; }
 
-inline const ISF::MaterialPathInfo* ISF::ParticleUserInformation::materialLimit()   const { return m_matInfo; }
+inline const ISF::MaterialPathInfo* ISF::ParticleUserInformation::materialLimit()   const { return m_matInfo.get(); }
 
 inline void ISF::ParticleUserInformation::setProcess(int proc)    { m_process = proc; }
 
 inline void ISF::ParticleUserInformation::setGeneration(int gen)  { m_generation = gen; }
 
 inline void ISF::ParticleUserInformation::setMaterialLimit(int proc, float dMax, float d)
-{  delete m_matInfo; m_matInfo = new ISF::MaterialPathInfo(proc,dMax,d); }
+{  m_matInfo = std::make_unique<ISF::MaterialPathInfo>(proc,dMax,d); }
 
 #endif // ISF_EVENT_PARTICLEUSERINFORMATION_H
