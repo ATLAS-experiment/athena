@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef MUONR4_MUONVISUALIZATIONHELPERS_H
 #define MUONR4_MUONVISUALIZATIONHELPERS_H
@@ -104,19 +104,10 @@ namespace MuonValR4 {
                                       const int view = objViewEta);
     /** @brief Create a TLatex label,
      *  @param text: Label text
-     *  @param xPos: x-position of the label on the Canvas
-     *  @param yPos: y-position of the label on the Canvas
+     *  @param xPos: x-position of the label on the Canvas in relative coordinates
+     *  @param yPos: y-position of the label on the Canvas in relative coordinates
      *  @param fontSize: Size of the label font */
     std::unique_ptr<TLatex> drawLabel(const std::string& text, 
-                                      const double xPos, 
-                                      const double yPos,
-                                      const unsigned int fontSize = 18);
-    /** @brief Create a TLatex label,
-     *  @param text: Label text
-     *  @param xPos: x-position of the label on the Canvas in NDC  coordinates
-     *  @param yPos: y-position of the label on the Canvas in NDC  coordinates
-     *  @param fontSize: Size of the label font */
-    std::unique_ptr<TLatex> drawLabelNDC(const std::string& text, 
                                       const double xPos, 
                                       const double yPos,
                                       const unsigned int fontSize = 18);

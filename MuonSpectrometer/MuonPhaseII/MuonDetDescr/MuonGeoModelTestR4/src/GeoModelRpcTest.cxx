@@ -1,6 +1,6 @@
 
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #include "GeoModelRpcTest.h"
 #include <ActsGeometryInterfaces/GeometryContext.h>
@@ -33,6 +33,7 @@ StatusCode GeoModelRpcTest::initialize() {
         m_clientToken.preFixName="GeoModelRpcTest";
         m_clientToken.subDirectory = "RpcPlots";
         m_clientToken.canvasLimit = -1;
+        m_clientToken.drawSqrtS = false;
         ATH_CHECK(m_visualSvc.retrieve());
         ATH_CHECK(m_visualSvc->registerClient(m_clientToken));
     }
@@ -143,8 +144,12 @@ void GeoModelRpcTest::visualizeStripPanel(const EventContext& ctx,
                               2.*design->shortHalfHeight(), strip % 2 ? kBlue: kRed, 
                               strip % 2 ? oddFill : evenFill));
     }
-    canvas->add(drawLabel(std::format("{:}, #{:}-panel", m_idHelperSvc->toStringDetEl(detId),
-                                      measPhi ? "phi" : "eta"), 0.2, 0.05));
+    canvas->add(drawLabel(std::format("{:}, #{:}-panel", 
+                                      m_idHelperSvc->toStringDetEl(detId),
+                                      measPhi ? "phi" : "eta"), 0.1, 0.05));
+    canvas->add(drawLabel(std::format("Dimensions: {:.1f}X{:.1f} [mm]", 
+                                      2.*design->halfWidth(),
+                                      2.*design->shortHalfHeight()), 0.1, 0.015));
 }
 StatusCode GeoModelRpcTest::execute() {
     const EventContext& ctx{Gaudi::Hive::currentContext()};

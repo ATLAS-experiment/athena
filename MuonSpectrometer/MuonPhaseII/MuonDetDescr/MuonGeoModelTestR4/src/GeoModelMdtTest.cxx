@@ -1,6 +1,6 @@
 
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #include "GeoModelMdtTest.h"
 #include <ActsGeometryInterfaces/GeometryContext.h>
@@ -28,12 +28,15 @@ StatusCode GeoModelMdtTest::initialize() {
         m_clientTokenLayerVis.preFixName="GeoModelMdtTest_Layer";
         m_clientTokenLayerVis.subDirectory = "MdtLayerPlots";
         m_clientTokenLayerVis.canvasLimit = -1;
+        m_clientTokenLayerVis.drawSqrtS = false;
         ATH_CHECK(m_visualSvc->registerClient(m_clientTokenLayerVis));
     }
     if(m_visualStaggering) {
         m_clientTokenStaggeringVis.preFixName="GeoModelMdtTest_Staggering";
         m_clientTokenStaggeringVis.subDirectory = "MdtStaggeringPlots";
         m_clientTokenStaggeringVis.canvasLimit = -1;
+        m_clientTokenLayerVis.drawSqrtS = false;
+        m_clientTokenLayerVis.drawAtlas = false;
         ATH_CHECK(m_visualSvc->registerClient(m_clientTokenStaggeringVis));
     }
     const MdtIdHelper& idHelper{m_idHelperSvc->mdtIdHelper()};
@@ -165,7 +168,7 @@ StatusCode GeoModelMdtTest::visualizeTubeStaggering(const EventContext& ctx, con
         canvases.insert(std::make_pair(chamberId,
                                         m_visualSvc->prepareCanvas(ctx, m_clientTokenStaggeringVis, canName)));
         
-        canvases[chamberId] -> add(MuonValR4::drawLabelNDC(m_idHelperSvc->toStringChamber(test_me),0.4,0.85,30));
+        canvases[chamberId] -> add(MuonValR4::drawLabel(m_idHelperSvc->toStringChamber(test_me),0.4,0.85,30));
 
     }
 
@@ -225,7 +228,7 @@ StatusCode GeoModelMdtTest::visualizeTubeStaggering(const EventContext& ctx, con
                 } else {
                     canvas->add(MuonValR4::drawDriftCircle(Amg::Vector3D{0., x, y}, r, kBlack, MuonValR4::hollowFilling));
                 }
-                canvas->add(MuonValR4::drawLabel(std::to_string(cabling_data.channelId),x ,y, 3));
+                canvas->add(MuonValR4::drawLabel(std::to_string(cabling_data.channelId), x ,y, 3));
             }
         }
 
