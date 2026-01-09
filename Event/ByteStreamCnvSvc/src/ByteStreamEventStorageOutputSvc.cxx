@@ -1,4 +1,4 @@
-/* Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration */
+/* Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration */
 #include "ByteStreamEventStorageOutputSvc.h"
 
 #include <stdexcept>
@@ -111,8 +111,8 @@ StatusCode
 ByteStreamEventStorageOutputSvc::finalize() {
   // clean up
   ATH_MSG_DEBUG("deleting DataWriter");
-  m_dataWriter.reset();
   std::lock_guard< std::mutex > lock(m_dataWriterMutex);
+  m_dataWriter.reset();
   ATH_MSG_INFO("number of events written: " << m_totalEventCounter);
   return StatusCode::SUCCESS;
 }
