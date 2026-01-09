@@ -40,7 +40,6 @@ if __name__=="__main__":
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
     flags = initConfigFlags()
     flags.PerfMon.doFullMonMT = not args.noPerfMon
-    flags.Muon.doFastMMDigitization = False
     flags.Acts.TrackingGeometry.UseBlueprint = False
 
     ####
