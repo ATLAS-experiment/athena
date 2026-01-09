@@ -13,7 +13,6 @@
   <class name="TauAnalysisTools::DiTauSelectionTool" />
   <class name="TauAnalysisTools::DiTauSmearingTool" />
   <class name="TauAnalysisTools::CommonDiTauSmearingTool" />
-  <class name="TauAnalysisTools::TauHFVetoTool" />
   <function pattern="TauAnalysisTools::split*"/>
   <function pattern="TauAnalysisTools::testFileForEOFContainsCharacters*"/>
 
