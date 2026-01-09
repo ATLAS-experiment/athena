@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef CALOTRKMUIDTOOLS_CALOMUONLIKELIHOODTOOL_H
@@ -25,7 +25,7 @@ class TH1F;
 class CaloMuonLikelihoodTool : public AthAlgTool, virtual public ICaloMuonLikelihoodTool {
 public:
     CaloMuonLikelihoodTool(const std::string& type, const std::string& name, const IInterface* parent);
-    virtual ~CaloMuonLikelihoodTool() = default;
+    virtual ~CaloMuonLikelihoodTool();
 
     virtual StatusCode initialize();
 
@@ -37,9 +37,9 @@ public:
 private:
     StatusCode retrieveHistograms();
 
-    std::unique_ptr<const TH1F> m_TH1F_sig[9][11]{};
-    std::unique_ptr<const TH1F> m_TH1F_bkg[9][11]{};
-    std::string m_TH1F_key[9][11]{};
+    std::unique_ptr<const TH1F> m_TH1F_sig[9][11];
+    std::unique_ptr<const TH1F> m_TH1F_bkg[9][11];
+    std::string m_TH1F_key[9][11];
     int m_numKeys[9]{};
     mutable std::atomic_int m_cnt_warn{0};
 
