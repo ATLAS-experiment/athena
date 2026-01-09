@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONTGC_CABLING_TGCCABLEASDTOPP_H
@@ -58,7 +58,7 @@ class TGCCableASDToPP : public TGCCable {
   static const int s_stripForward[];
 
   ToolHandle<ITGCCablingDbTool> m_tgcCablingDbTool; // cannot declare inline, since TGCCableASDToPP is no athena component
-  std::vector<std::string>* m_ASD2PP_DIFF_12{nullptr};
+  std::vector<std::string> m_ASD2PP_DIFF_12;
 
  private:
   using ForwardSectorDB = std::array<std::array<std::shared_ptr<TGCDatabaseASDToPP>, TGCId::NUM_FORWARD_SECTOR>, TGCId::MaxSideType>;
