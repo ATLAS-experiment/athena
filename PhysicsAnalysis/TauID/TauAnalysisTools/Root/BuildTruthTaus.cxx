@@ -83,17 +83,17 @@ StatusCode BuildTruthTaus::initialize()
 StatusCode BuildTruthTaus::retrieveTruthTaus()
 {
   const EventContext& ctx = Gaudi::Hive::currentContext();
-  return retrieveTruthTaus (m_truthTausEvent, ctx);
+  return retrieveTruthTausImpl (m_truthTausEvent, ctx);
 }
 
 
 StatusCode BuildTruthTaus::retrieveTruthTaus(ITruthTausEvent& truthTausEvent, const EventContext& ctx) const
 {
-  return retrieveTruthTaus (dynamic_cast<TruthTausEvent&> (truthTausEvent), ctx);
+  return retrieveTruthTausImpl (dynamic_cast<TruthTausEvent&> (truthTausEvent), ctx);
 }
 
 
-StatusCode BuildTruthTaus::retrieveTruthTaus(TruthTausEvent& truthTausEvent, const EventContext& ctx) const
+StatusCode BuildTruthTaus::retrieveTruthTausImpl(TruthTausEvent& truthTausEvent, const EventContext& ctx) const
 {
   // truth matching mode
   if (m_truthMatchingMode) {
