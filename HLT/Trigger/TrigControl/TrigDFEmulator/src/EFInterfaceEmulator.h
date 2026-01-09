@@ -10,6 +10,7 @@
 #include <queue>
 #include <future>
 #include <unordered_map>
+#include <vector>
 
 #include "ers/ers.h"
 #include "eformat/eformat.h"
@@ -91,8 +92,8 @@ namespace DFEF{
     /// queue mutex
     std::mutex m_oQMutex;
 
-    /// Map of events read from the input
-    std::unordered_map<uint64_t, std::unique_ptr<uint32_t[]>> m_events;
+    /// Map of events read from the input (stores duplicates per L1ID)
+    std::unordered_map<uint64_t, std::vector<std::unique_ptr<uint32_t[]>>> m_events;
     /// Map mutex
     std::mutex m_mMutex;
 
