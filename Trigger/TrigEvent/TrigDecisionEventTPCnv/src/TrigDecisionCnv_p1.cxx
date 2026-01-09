@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigDecisionEvent/TrigDecision.h"
@@ -33,10 +33,10 @@ void TrigDecisionCnv_p1::persToTrans(const TrigDec::TrigDecision_p1* pers,
   LVL1CTP::Lvl1Result l1result;
   m_lvl1ResultCnv.persToTrans(&pers->m_l1_result, &l1result, log);
 
-  trans->m_l2_result_ptr = new HLT::HLTResult();
-  trans->m_ef_result_ptr = new HLT::HLTResult();
-  m_hltResultCnv.persToTrans (&pers->m_l2_result, trans->m_l2_result_ptr, log);
-  m_hltResultCnv.persToTrans (&pers->m_ef_result, trans->m_ef_result_ptr, log);
+  trans->m_l2_result_ptr = std::make_unique<HLT::HLTResult>();
+  trans->m_ef_result_ptr = std::make_unique<HLT::HLTResult>();
+  m_hltResultCnv.persToTrans (&pers->m_l2_result, trans->m_l2_result_ptr.get(), log);
+  m_hltResultCnv.persToTrans (&pers->m_ef_result, trans->m_ef_result_ptr.get(), log);
 
   //trans->resetCache();
 }
