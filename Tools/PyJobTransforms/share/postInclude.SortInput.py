@@ -30,6 +30,8 @@ sorter.execute(inputs, outputCollection=tmpCollFile, sortAttribute=sortTag, sort
 for inpfile in inputs:
     os.system('pool_insertFileToCatalog {}'.format(inpfile))
 
+ServiceMgr.PoolSvc.AttemptCatalogPatch = False
+
 # Tell Athena to use the sorted collection instead of the original inputs
 ServiceMgr.EventSelector.InputCollections = [tmpCollFile + ".root"]
 ServiceMgr.EventSelector.CollectionType = "RootCollection"

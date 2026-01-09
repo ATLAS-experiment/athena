@@ -143,8 +143,9 @@ StatusCode CondProxyProvider::updateAddress(StoreID::type /*storeID*/,
 //__________________________________________________________________________
 std::unique_ptr<PoolCollectionConverter> CondProxyProvider::getCollectionCnv() {
    ATH_MSG_DEBUG("Try item: \"" << *m_inputCollectionsIterator << "\" from the collection list.");
-   auto pCollCnv = std::make_unique<PoolCollectionConverter>(std::string("ImplicitCollection:") + APRDefaults::TTreeNames::DataHeader,
+   auto pCollCnv = std::make_unique<PoolCollectionConverter>("ImplicitCollection",
 	   *m_inputCollectionsIterator,
+	   APRDefaults::TTreeNames::DataHeader,
 	   m_contextId,
 	   m_athenaPoolCnvSvc->getPoolSvc());
    if (!pCollCnv->initialize().isSuccess()) {

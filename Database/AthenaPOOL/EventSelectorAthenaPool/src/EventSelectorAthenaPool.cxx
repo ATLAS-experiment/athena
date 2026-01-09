@@ -763,8 +763,9 @@ StatusCode EventSelectorAthenaPool::seek(Context& /*ctxt*/, int evtNum) const {
          // Reset input collection iterator to the right place
          m_inputCollectionsIterator = m_inputCollectionsProp.value().begin();
          m_inputCollectionsIterator += m_curCollection;
-         m_poolCollectionConverter = std::make_unique<PoolCollectionConverter>(m_collectionType.value() + ":" + m_collectionTree.value(),
+         m_poolCollectionConverter = std::make_unique<PoolCollectionConverter>(m_collectionType.value(),
 	         m_inputCollectionsProp.value()[m_curCollection],
+	         m_collectionTree.value(),
 	         IPoolSvc::kInputStream,
 	         m_athenaPoolCnvSvc->getPoolSvc());
          if (!m_poolCollectionConverter->initialize().isSuccess()) {
@@ -806,8 +807,9 @@ int EventSelectorAthenaPool::curEvent (const Context& /*ctxt*/) const {
 int EventSelectorAthenaPool::findEvent(int evtNum) const {
    for (std::size_t i = 0, imax = m_numEvt.size(); i < imax; i++) {
       if (m_numEvt[i] == -1) {
-         PoolCollectionConverter pcc(m_collectionType.value() + ":" + m_collectionTree.value(),
+         PoolCollectionConverter pcc(m_collectionType.value(),
 	         m_inputCollectionsProp.value()[i],
+	         m_collectionTree.value(),
 	         IPoolSvc::kInputStream,
 	         m_athenaPoolCnvSvc->getPoolSvc());
          if (!pcc.initialize().isSuccess()) {
@@ -973,8 +975,9 @@ EventSelectorAthenaPool::getCollectionCnv(bool throwIncidents) const {
          m_firstEvt[m_curCollection] = m_evtCount;
       }
       ATH_MSG_DEBUG("Try item: \"" << *m_inputCollectionsIterator << "\" from the collection list.");
-      auto pCollCnv = std::make_unique<PoolCollectionConverter>(m_collectionType.value() + ":" + m_collectionTree.value(),
+      auto pCollCnv = std::make_unique<PoolCollectionConverter>(m_collectionType.value(),
 	      *m_inputCollectionsIterator,
+	      m_collectionTree.value(),
 	      IPoolSvc::kInputStream,
 	      m_athenaPoolCnvSvc->getPoolSvc());
       StatusCode status = pCollCnv->initialize();

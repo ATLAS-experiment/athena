@@ -103,6 +103,7 @@ def PoolReadCfg(flags):
         # Create DoubleEventSelector (universal for any seconday input type)
         evSel = CompFactory.DoubleEventSelectorAthenaPool("EventSelector",
                                                           InputCollections=flags.Input.Files)
+        evSel.CollectionType = "RootCollection"
 
         if flags.Overlay.ByteStream:
             # In case of data overlay HITS are primary input
@@ -135,6 +136,7 @@ def PoolReadCfg(flags):
                                                                IsSecondary=True,
                                                                InputCollections=flags.Input.SecondaryFiles,
                                                                SkipEvents=skipEventsPrimary)
+            secondarySel.CollectionType = "RootCollection"
             result.addService(secondarySel)
         result.addService(evSel)
     else:

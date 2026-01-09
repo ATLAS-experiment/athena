@@ -18,7 +18,6 @@ EventSelector                                       DEBUG Events to skip: 9, 10
 IoComponentMgr                                       INFO IoComponent EventSelector has already had file EmptyPoolFile.root registered with i/o mode READ
 EventSelector                                       DEBUG reinitialization...
 EventSelector                                       DEBUG Try item: "EmptyPoolFile.root" from the collection list.
-PoolSvc                                             DEBUG createCollection() type=RootCollection, connection=PFN:EmptyPoolFile.root, name=EmptyPoolFile.root, contextID=0
 PoolSvc                                             DEBUG createCollection() type=ImplicitCollection, connection=PFN:EmptyPoolFile.root, name=POOLContainer(DataHeader), contextID=0
 EmptyPoolFile.root                                  DEBUG --> Access   DbContainer  READ      [ROOT_All] ##Shapes
 EmptyPoolFile.root                                  DEBUG --> Access   DbContainer  READ      [ROOT_All] ##Shapes
@@ -45,12 +44,12 @@ EmptyPoolFile.root                                  DEBUG --->Reading Param:FID=
 EmptyPoolFile.root                                  DEBUG --->Reading Param:PFN=[EmptyPoolFile.root]
 ##Params                                            DEBUG No objects passing selection criteria... Container has 4 Entries in total.
 PoolSvc                                             DEBUG createCollection() type=ImplicitCollection, connection=PFN:EmptyPoolFile.root, name=POOLContainer_DataHeader, contextID=0
+PoolSvc                                             DEBUG createCollection() type=ImplicitCollection, connection=PFN:EmptyPoolFile.root, name=DataHeader(DataHeader), contextID=0
 EventSelector                                       DEBUG No events found in: EmptyPoolFile.root skipped!!!
 StorageSvc                                          DEBUG Disconnect request for database: FID=C7040C30-3363-7D42-B1B7-E3F3B1881030 PFN=EmptyPoolFile.root
 StorageSvc                                          DEBUG Closing database: FID=C7040C30-3363-7D42-B1B7-E3F3B1881030
 RootDatabase                                        DEBUG Closing DB EmptyPoolFile.root
 EventSelector                                       DEBUG Try item: "SimplePoolReplica1.root" from the collection list.
-PoolSvc                                             DEBUG createCollection() type=RootCollection, connection=PFN:SimplePoolReplica1.root, name=SimplePoolReplica1.root, contextID=0
 PoolSvc                                             DEBUG createCollection() type=ImplicitCollection, connection=PFN:SimplePoolReplica1.root, name=POOLContainer(DataHeader), contextID=0
 SimplePoolReplica1.root                             DEBUG --> Access   DbContainer  READ      [ROOT_All] ##Shapes
 SimplePoolReplica1.root                             DEBUG --> Access   DbContainer  READ      [ROOT_All] ##Shapes
@@ -110,7 +109,6 @@ StorageSvc                                          DEBUG Disconnect request for
 StorageSvc                                          DEBUG Closing database: FID=095498FF-E805-B142-9948-BD2D4AC79975
 RootDatabase                                        DEBUG Closing DB SimplePoolReplica1.root
 EventSelector                                       DEBUG Try item: "EmptyPoolFile.root" from the collection list.
-PoolSvc                                             DEBUG createCollection() type=RootCollection, connection=PFN:EmptyPoolFile.root, name=EmptyPoolFile.root, contextID=0
 PoolSvc                                             DEBUG createCollection() type=ImplicitCollection, connection=PFN:EmptyPoolFile.root, name=POOLContainer(DataHeader), contextID=0
 EmptyPoolFile.root                                  DEBUG --> Access   DbContainer  READ      [ROOT_All] ##Shapes
 EmptyPoolFile.root                                  DEBUG --> Access   DbContainer  READ      [ROOT_All] ##Shapes
@@ -137,6 +135,7 @@ EmptyPoolFile.root                                  DEBUG --->Reading Param:FID=
 EmptyPoolFile.root                                  DEBUG --->Reading Param:PFN=[EmptyPoolFile.root]
 ##Params                                            DEBUG No objects passing selection criteria... Container has 4 Entries in total.
 PoolSvc                                             DEBUG createCollection() type=ImplicitCollection, connection=PFN:EmptyPoolFile.root, name=POOLContainer_DataHeader, contextID=0
+PoolSvc                                             DEBUG createCollection() type=ImplicitCollection, connection=PFN:EmptyPoolFile.root, name=DataHeader(DataHeader), contextID=0
 EventSelector                                       DEBUG No events found in: EmptyPoolFile.root skipped!!!
 MetaDataSvc                                         DEBUG handle() BeginInputFile for EmptyPoolFile.root
 MetaDataSvc                                         DEBUG initInputMetaDataStore: file name EmptyPoolFile.root
@@ -172,7 +171,6 @@ StorageSvc                                          DEBUG Disconnect request for
 StorageSvc                                          DEBUG Closing database: FID=C7040C30-3363-7D42-B1B7-E3F3B1881030
 RootDatabase                                        DEBUG Closing DB EmptyPoolFile.root
 EventSelector                                       DEBUG Try item: "SimplePoolReplica1.root" from the collection list.
-PoolSvc                                             DEBUG createCollection() type=RootCollection, connection=PFN:SimplePoolReplica1.root, name=SimplePoolReplica1.root, contextID=0
 PoolSvc                                             DEBUG createCollection() type=ImplicitCollection, connection=PFN:SimplePoolReplica1.root, name=POOLContainer(DataHeader), contextID=0
 SimplePoolReplica1.root                             DEBUG --> Access   DbContainer  READ      [ROOT_All] ##Shapes
 SimplePoolReplica1.root                             DEBUG --> Access   DbContainer  READ      [ROOT_All] ##Shapes
@@ -597,7 +595,6 @@ StorageSvc                                          DEBUG Disconnect request for
 StorageSvc                                          DEBUG Closing database: FID=095498FF-E805-B142-9948-BD2D4AC79975
 RootDatabase                                        DEBUG Closing DB SimplePoolReplica1.root
 EventSelector                                       DEBUG Try item: "EmptyPoolFile.root" from the collection list.
-PoolSvc                                             DEBUG createCollection() type=RootCollection, connection=PFN:EmptyPoolFile.root, name=EmptyPoolFile.root, contextID=0
 PoolSvc                                             DEBUG createCollection() type=ImplicitCollection, connection=PFN:EmptyPoolFile.root, name=POOLContainer(DataHeader), contextID=0
 EmptyPoolFile.root                                  DEBUG --> Access   DbContainer  READ      [ROOT_All] ##Shapes
 EmptyPoolFile.root                                  DEBUG --> Access   DbContainer  READ      [ROOT_All] ##Shapes
@@ -624,6 +621,7 @@ EmptyPoolFile.root                                  DEBUG --->Reading Param:FID=
 EmptyPoolFile.root                                  DEBUG --->Reading Param:PFN=[EmptyPoolFile.root]
 ##Params                                            DEBUG No objects passing selection criteria... Container has 4 Entries in total.
 PoolSvc                                             DEBUG createCollection() type=ImplicitCollection, connection=PFN:EmptyPoolFile.root, name=POOLContainer_DataHeader, contextID=0
+PoolSvc                                             DEBUG createCollection() type=ImplicitCollection, connection=PFN:EmptyPoolFile.root, name=DataHeader(DataHeader), contextID=0
 EventSelector                                       DEBUG No events found in: EmptyPoolFile.root skipped!!!
 MetaDataSvc                                         DEBUG handle() BeginInputFile for EmptyPoolFile.root
 MetaDataSvc                                         DEBUG initInputMetaDataStore: file name EmptyPoolFile.root
@@ -651,7 +649,6 @@ StorageSvc                                          DEBUG Disconnect request for
 StorageSvc                                          DEBUG Closing database: FID=C7040C30-3363-7D42-B1B7-E3F3B1881030
 RootDatabase                                        DEBUG Closing DB EmptyPoolFile.root
 EventSelector                                       DEBUG Try item: "SimplePoolFile2.root" from the collection list.
-PoolSvc                                             DEBUG createCollection() type=RootCollection, connection=PFN:SimplePoolFile2.root, name=SimplePoolFile2.root, contextID=0
 PoolSvc                                             DEBUG createCollection() type=ImplicitCollection, connection=PFN:SimplePoolFile2.root, name=POOLContainer(DataHeader), contextID=0
 SimplePoolFile2.root                                DEBUG --> Access   DbContainer  READ      [ROOT_All] ##Shapes
 SimplePoolFile2.root                                DEBUG --> Access   DbContainer  READ      [ROOT_All] ##Shapes
@@ -1387,7 +1384,6 @@ StorageSvc                                          DEBUG Disconnect request for
 StorageSvc                                          DEBUG Closing database: FID=73F77177-D136-9344-B64D-29693F68D6C2
 RootDatabase                                        DEBUG Closing DB SimplePoolFile2.root
 EventSelector                                       DEBUG Try item: "SimplePoolFile4.root" from the collection list.
-PoolSvc                                             DEBUG createCollection() type=RootCollection, connection=PFN:SimplePoolFile4.root, name=SimplePoolFile4.root, contextID=0
 PoolSvc                                             DEBUG createCollection() type=ImplicitCollection, connection=PFN:SimplePoolFile4.root, name=POOLContainer(DataHeader), contextID=0
 SimplePoolFile4.root                                DEBUG --> Access   DbContainer  READ      [ROOT_All] ##Shapes
 SimplePoolFile4.root                                DEBUG --> Access   DbContainer  READ      [ROOT_All] ##Shapes

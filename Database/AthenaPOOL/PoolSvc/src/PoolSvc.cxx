@@ -444,16 +444,8 @@ pool::ICollection* PoolSvc::createCollection(const std::string& collectionType,
 		const std::string& connection,
 		const std::string& collectionName,
 		unsigned int contextId) const {
-   ATH_MSG_DEBUG("createCollection() type="<< collectionType << ", connection=" << connection
+   ATH_MSG_DEBUG("createCollection() type=" << collectionType << ", connection=" << connection
                  << ", name=" << collectionName << ", contextID=" << contextId);
-   std::string collection(collectionName);
-   if (collectionType == "RootCollection") {
-      if (collectionName.find("PFN:") == std::string::npos
-	      && collectionName.find("LFN:") == std::string::npos
-	      && collectionName.find("FID:") == std::string::npos) {
-	 collection = "PFN:" + collectionName;
-      }
-   }
    if (contextId >= m_persistencySvcVec.size()) {
       ATH_MSG_WARNING("createCollection: Using default input Stream instead of id = " << contextId);
       contextId = IPoolSvc::kInputStream;
@@ -469,8 +461,8 @@ pool::ICollection* PoolSvc::createCollection(const std::string& collectionType,
          ATH_MSG_INFO("File is not in Catalog! Attempt to open it anyway.");
       }
    }
-   // Check whether Collection Container exists.
    if (collectionType == "ImplicitCollection") {
+      // Check whether Collection Container exists.
       std::unique_ptr<pool::IDatabase> dbH = getDbHandle(contextId, connection);
       if (dbH == nullptr) {
          ATH_MSG_INFO("Failed to get Session/DatabaseHandle to create POOL collection.");
@@ -489,15 +481,15 @@ pool::ICollection* PoolSvc::createCollection(const std::string& collectionType,
                this->disconnectDb("FID:" + m_guidLists[contextId].begin()->toString(), contextId).ignore();
             }
          }
-         std::unique_ptr<pool::IContainer> contH = getContainerHandle(dbH.get(), collection);
+         std::unique_ptr<pool::IContainer> contH = getContainerHandle(dbH.get(), collectionName);
          if (contH == nullptr) {
-            ATH_MSG_INFO("Failed to find container " << collection << " to create POOL collection.");
+            ATH_MSG_INFO("Failed to find container " << collectionName << " to create POOL collection.");
             if (insertFile && m_attemptCatalogPatch.value()) {
                patchCatalog(connection.substr(4), *dbH);
-             }
+            }
             return(nullptr); // no events
          }
-      } catch(std::exception& e) {
+      } catch (std::exception& e) {
          ATH_MSG_INFO("Failed to open container to check POOL collection - trying.");
       }
    }
@@ -506,35 +498,25 @@ pool::ICollection* PoolSvc::createCollection(const std::string& collectionType,
    pool::CollectionService collSvc ATLAS_THREAD_SAFE = pool::CollectionService();
    pool::ICollection* collPtr ATLAS_THREAD_SAFE = nullptr;
 
-   if (collectionType == "RootCollection" &&
-	   m_persistencySvcVec[contextId]->session().defaultConnectionPolicy().writeModeForNonExisting() != pool::DatabaseConnectionPolicy::RAISE_ERROR) {
-      ATH_MSG_INFO("Writing RootCollection - do not pass session pointer");
-      std::scoped_lock lock(m_pool_mut);
-      collPtr = collSvc.handle(collection, collectionType, "", true);
-   } else {
-      // Try to open APR EventTags Collection in the input file - first as RootCollection, then as RNTCollection
-      std::scoped_lock lock(m_pool_mut);
-      std::string       tree_error, rntuple_error;
-      try {
-         collPtr = collSvc.handle(collection, collectionType, collectionType == "ImplicitCollection" ? connection : "", true, &m_persistencySvcVec[contextId]->session());
-      } catch (std::exception &e) {
-         tree_error = e.what();
+   // Try to open APR EventTags Collection in the input file
+   std::scoped_lock sc_lock(m_pool_mut);
+   std::string error_text;
+   try {
+      if (collectionType == "ImplicitCollection") {
+         collPtr = collSvc.handle(collectionName, collectionType, connection, true, &m_persistencySvcVec[contextId]->session());
+      } else {
+         collPtr = collSvc.handle(connection, collectionType, "", true, &m_persistencySvcVec[contextId]->session());
       }
-      if( !collPtr ) try {
-         collPtr = collSvc.handle(collection, "RNTCollection", collectionType == "ImplicitCollection" ? connection : "", true, &m_persistencySvcVec[contextId]->session());
-      } catch (std::exception &e) {
-         if (insertFile) {
-            std::unique_ptr<pool::IDatabase> dbH = getDbHandle(contextId, connection);
-            if (dbH != nullptr) {
-               if (!dbH->fid().empty()) {
-                  return(nullptr); // no events
-               }
-            }
-         }
-         rntuple_error = e.what();
+   } catch (std::exception &e) {
+      collPtr = nullptr;
+      error_text = e.what();
+   }
+   if( !collPtr ) {
+      std::unique_ptr<pool::IDatabase> dbH = getDbHandle(contextId, connection);
+      if (dbH != nullptr && !dbH->fid().empty()) {
+         return(nullptr); // no events
       }
-      if( !collPtr ) throw std::runtime_error( "Failed to open APR Collection as RootCollection or RNTCollection: "
-                                            + tree_error + " | " + rntuple_error + "PoolSvc::createCollection" );
+      throw std::runtime_error( "Failed to open APR Collection: " + error_text  + ", PoolSvc::createCollection");
    }
    if (insertFile && m_attemptCatalogPatch.value()) {
       std::unique_ptr<pool::IDatabase> dbH = getDbHandle(contextId, connection);
