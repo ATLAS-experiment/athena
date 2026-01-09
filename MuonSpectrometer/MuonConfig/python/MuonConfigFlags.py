@@ -41,8 +41,8 @@ def createMuonConfigFlags():
                                                                           prevFlags.GeoModel.SQLiteDB ,
                                                                           prevFlags.GeoModel.SQLiteDBFullPath)["Muon"]["useR4Plugin"] )
     # 1. Digitization
-    mcf.addFlag("Muon.doFastMMDigitization",True)  ### The digitization flag is only relevant if usePhaseIIGeoSetup is activated
-    mcf.addFlag("Muon.doFastsTGCDigitization",True) ### The digitization flag is only relevant if usePhaseIIGeoSetup is activated
+    mcf.addFlag("Muon.doFastMMDigitization", False)  ### The digitization flag is only relevant if usePhaseIIGeoSetup is activated
+    mcf.addFlag("Muon.doFastsTGCDigitization",False) ### The digitization flag is only relevant if usePhaseIIGeoSetup is activated
 
     
     # 2. Reco MuonRecFlags 

@@ -24,9 +24,6 @@ if __name__=="__main__":
     flags.PerfMon.doFullMonMT = not args.noPerfMon
     flags.PerfMon.OutputJSON="perfmonmt_MuonR4Reco.json"
 
-    flags.Muon.doFastMMDigitization = False
-    flags.Muon.doFastsTGCDigitization = False
-
     flags, cfg = setupGeoR4TestCfg(args,flags)
   
     

@@ -44,7 +44,6 @@ if __name__=="__main__":
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
     flags = initConfigFlags()
     flags.PerfMon.doFullMonMT = not args.noPerfMon
-    flags.Muon.doFastMMDigitization = True
     flags, cfg = setupGeoR4TestCfg(args,flags)
 
     cfg.merge(setupHistSvcCfg(flags,outFile=args.outRootFile,
