@@ -36,6 +36,16 @@ namespace MuonGMR4 {
     double halfY(const Acts::VolumeBounds& bounds);
     /** @brief Returns the half-Z length for the parsed volume bounds (Trapezoid/ Cuboid) */
     double halfZ(const Acts::VolumeBounds& bounds);
+    /** @brief Copy the alignment deltas from the inStore to a new alignment store
+     *  @param inStore: Alignment store from which the delta transforms are copied */
+    std::unique_ptr<ActsTrk::DetectorAlignStore> copyDeltas(const ActsTrk::DetectorAlignStore& inStore);
+    namespace detail {
+        /** @brief Returns the rotation matrix from the readout element coordinate system
+          *         into the AMDB coordinate system */
+        Amg::Transform3D rotationToAMDB(const ActsTrk::DetectorType type);
+    }
 }  // namespace MuonGMR4
+
+
 
 #endif

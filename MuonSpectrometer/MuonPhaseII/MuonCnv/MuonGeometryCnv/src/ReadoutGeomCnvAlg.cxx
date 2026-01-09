@@ -1,6 +1,6 @@
 
 /*
-   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #include "ReadoutGeomCnvAlg.h"
 
@@ -65,6 +65,11 @@ namespace {
         }
         return false;
     };
+    Amg::Transform3D amdbTransform(const ActsTrk::GeometryContext& gctx,
+                                   const MuonGMR4::MuonReadoutElement& reEle) {
+        return reEle.localToGlobalTrans(gctx) * 
+               MuonGMR4::detail::rotationToAMDB(reEle.detectorType()).inverse();                       
+    }
 }
 
 namespace MuonGMR4{
@@ -89,19 +94,13 @@ StatusCode ReadoutGeomCnvAlg::execute(const EventContext& ctx) const {
     ActsTrk::GeometryContext geoContext{};
     using TrackingAlignment = ActsTrk::DetectorAlignStore::TrackingAlignStore;
     for (const SG::ReadCondHandleKey<ActsTrk::DetectorAlignStore>& key : m_alignStoreKeys) {
-        SG::ReadCondHandle<ActsTrk::DetectorAlignStore> readHandle{key, ctx};
+        SG::ReadCondHandle readHandle{key, ctx};
         if (!readHandle.isValid()) {
             ATH_MSG_FATAL("Failed to retrieve alignment store "<<key.fullKey());
             return StatusCode::FAILURE;
         }
         writeHandle.addDependency(readHandle);
-        auto alignStore = std::make_unique<ActsTrk::DetectorAlignStore>(**readHandle);
-        /// Ensure that the position & tracking alignment caches are split from the conditions object
-        if (alignStore->geoModelAlignment) {
-            alignStore->geoModelAlignment->clearPosCache();
-        }
-        alignStore->trackingAlignment = std::make_unique<TrackingAlignment>(alignStore->detType);
-        geoContext.setStore(std::move(alignStore));
+        geoContext.setStore(copyDeltas(**readHandle));
     }
     /// Check that for every detector technology there's an DetectorAlignStore in the geometry context
     /// Otherwise create an empty one.
@@ -129,7 +128,9 @@ StatusCode ReadoutGeomCnvAlg::execute(const EventContext& ctx) const {
   
     /// Move the passives also onto the new world tree...
     for (const GeoChildNodeWithTrf& treeTop : treeTops) {
-        if (hasStationVolume(treeTop.volume, cacheObj.translatedStations)) continue;
+        if (hasStationVolume(treeTop.volume, cacheObj.translatedStations)) {
+            continue;
+        }
         ATH_MSG_VERBOSE("Detected passive volume "<<treeTop.nodeName);
 
         cacheObj.world->add(const_pointer_cast(treeTop.volume));
@@ -233,7 +234,7 @@ StatusCode ReadoutGeomCnvAlg::buildStation(const ActsTrk::GeometryContext& gctx,
     const double lengthZ = (maxZ - minZ);
 
     /// Fetch the transform of the detector element which is AlignableNode x Station x [relative pos in station]
-    const Amg::Transform3D alignedTransform = copyMe->localToGlobalTrans(gctx) *
+    const Amg::Transform3D alignedTransform = amdbTransform(gctx, *copyMe) *
                                              ( ( stationShiftNode ? stationShiftNode->getDefTransform() : Amg::Transform3D::Identity()) 
                                                * readOutVol->getDefX()).inverse();
 
@@ -292,7 +293,7 @@ StatusCode ReadoutGeomCnvAlg::cloneReadoutVolume(const ActsTrk::GeometryContext&
     ///              
     const Amg::Transform3D alignNodeToRE{copyMe->alignableTransform()->getDefTransform().inverse() *
                                          readOutVol->getParent()->getX() * readOutVol->getX()};
-    const Amg::Transform3D alignedNode{copyMe->localToGlobalTrans(gctx) * alignNodeToRE.inverse()};
+    const Amg::Transform3D alignedNode{amdbTransform(gctx, *copyMe) * alignNodeToRE.inverse()};
     
     const Amg::Transform3D stationTrf{copiedStationVol->getX().inverse() * alignedNode};
 
@@ -360,7 +361,7 @@ StatusCode ReadoutGeomCnvAlg::buildRpc(const ActsTrk::GeometryContext& gctx, Con
                                                                 channel);
 
                     gapIds.push_back(gapId);
-                    const Amg::Vector3D locStripPos = copyMe->globalToLocalTrans(gctx) * copyMe->stripPosition(gctx, gapId);
+                    const Amg::Vector3D locStripPos = amdbTransform(gctx, *copyMe).inverse() * copyMe->stripPosition(gctx, gapId);
                     ATH_MSG_VERBOSE("GasGap "<<m_idHelperSvc->toString(gapId)<<", local strip position: "<<Amg::toString(locStripPos));
                     newElement->m_gasGap_xPos[gasGap -1] = locStripPos.x();
                     /// Hack to assign the proper strip positions  for REs having doubletPhi =2
@@ -479,7 +480,7 @@ StatusCode ReadoutGeomCnvAlg::buildTgc(const ActsTrk::GeometryContext& gctx, Con
         for (unsigned int gasGap = 1; gasGap <= copyMe->nGasGaps(); ++gasGap) {
             const IdentifierHash layHash{copyMe->constructHash(0, gasGap, false)};
             /// In the sector frame, the gasGap is oriented along the x-axis
-            const Amg::Vector3D translation{copyMe->globalToLocalTrans(gctx) * copyMe->center(gctx, layHash)};            
+            const Amg::Vector3D translation{amdbTransform(gctx, *copyMe).inverse() * copyMe->center(gctx, layHash)};            
             newRE->setPlaneZ(translation.x(), gasGap);
         }
         newRE->setRsize(copyMe->moduleHeight());
@@ -509,7 +510,7 @@ GeoIntrusivePtr<GeoVFullPhysVol>
     PVLink clonedVol{cloneVolume(const_pointer_cast<GeoVFullPhysVol>(readOutVol))};
     GeoIntrusivePtr<GeoFullPhysVol> physVol{dynamic_pointer_cast<GeoFullPhysVol>(clonedVol)};
     cacheObj.world->add(cacheObj.newIdTag());
-    cacheObj.world->add(cacheObj.makeTransform(copyMe->localToGlobalTrans(gctx)));
+    cacheObj.world->add(cacheObj.makeTransform(amdbTransform(gctx, *copyMe)));
     cacheObj.world->add(physVol);
     return physVol;
 }
@@ -826,7 +827,7 @@ StatusCode ReadoutGeomCnvAlg::dumpAndCompare(const ActsTrk::GeometryContext& gct
 
     ATH_MSG_VERBOSE("Compare basic readout transforms"<<std::endl
                 <<GeoTrf::toString(testEle.absTransform(),true)<<std::endl
-                <<GeoTrf::toString(refEle.localToGlobalTrans(gctx), true));
+                <<GeoTrf::toString(amdbTransform(gctx, refEle), true));
     const MmIdHelper& idHelper{m_idHelperSvc->mmIdHelper()};
     for (unsigned int gasGap = 1; gasGap <= refEle.nGasGaps(); ++ gasGap) {
         const Identifier gapId = idHelper.channelID(refEle.identify(), refEle.multilayer(),  gasGap, 1);
@@ -873,7 +874,7 @@ StatusCode ReadoutGeomCnvAlg::dumpAndCompare(const ActsTrk::GeometryContext& gct
     ATH_CHECK(checkIdCompability(refEle, testEle));
     
     ATH_MSG_VERBOSE("Detector element "<<m_idHelperSvc->toString(refEle.identify())
-                <<std::endl<<GeoTrf::toString(refEle.localToGlobalTrans(gctx))                        
+                <<std::endl<<GeoTrf::toString(amdbTransform(gctx, refEle))                        
                 <<std::endl<<GeoTrf::toString(testEle.getMaterialGeom()->getAbsoluteTransform())
                 <<std::endl<<"r-size: "<<testEle.getRsize()<<"/"<<testEle.getLongRsize()
                             <<" s-size: "<<testEle.getSsize()<<"/"<<testEle.getLongSsize()
@@ -930,9 +931,9 @@ StatusCode ReadoutGeomCnvAlg::dumpAndCompare(const ActsTrk::GeometryContext& gct
     ATH_CHECK(checkIdCompability(refEle, testEle));
 
     ATH_MSG_VERBOSE("Compare basic readout transforms"<<std::endl
-                 <<"  ref: "<<GeoTrf::toString(refEle.localToGlobalTrans(gctx), true)<<std::endl
+                 <<"  ref: "<<GeoTrf::toString(amdbTransform(gctx, refEle), true)<<std::endl
                  <<" test: "<<GeoTrf::toString(testEle.absTransform(),true)<<std::endl
-                 <<"delta: "<<GeoTrf::toString(testEle.absTransform().inverse()*refEle.localToGlobalTrans(gctx), true ));
+                 <<"delta: "<<GeoTrf::toString(testEle.absTransform().inverse()*amdbTransform(gctx, refEle), true ));
     const RpcIdHelper& idHelper{m_idHelperSvc->rpcIdHelper()};
     for (unsigned int gasGap = 1; gasGap <= refEle.nGasGaps(); ++gasGap) {
         for (int doubPhi = refEle.doubletPhi(); doubPhi <= refEle.doubletPhiMax(); ++doubPhi) {
@@ -993,7 +994,7 @@ StatusCode ReadoutGeomCnvAlg::dumpAndCompare(const ActsTrk::GeometryContext& gct
     const TgcIdHelper& idHelper{m_idHelperSvc->tgcIdHelper()};
     
     ATH_MSG_VERBOSE("Detector element "<<m_idHelperSvc->toString(refEle.identify())
-                <<std::endl<<GeoTrf::toString(refEle.localToGlobalTrans(gctx), true)                        
+                <<std::endl<<GeoTrf::toString(amdbTransform(gctx, refEle), true)                        
                 <<std::endl<<GeoTrf::toString(testEle.getMaterialGeom()->getAbsoluteTransform(), true)
                 <<std::endl<<"r-size: "<<testEle.getRsize()<<"/"<<testEle.getLongRsize()
                            <<" s-size: "<<testEle.getSsize()<<"/"<<testEle.getLongSsize()
@@ -1068,7 +1069,7 @@ StatusCode ReadoutGeomCnvAlg::dumpAndCompare(const ActsTrk::GeometryContext& gct
 
     ATH_MSG_VERBOSE("Compare basic readout transforms"<<std::endl
                 <<GeoTrf::toString(testEle.absTransform(),true)<<std::endl
-                <<GeoTrf::toString(refEle.localToGlobalTrans(gctx), true));
+                <<GeoTrf::toString(amdbTransform(gctx, refEle), true));
     const sTgcIdHelper& idHelper{m_idHelperSvc->stgcIdHelper()};
     for (unsigned int gasGap = 1; gasGap <= refEle.numLayers(); ++gasGap) {
         for (int chType : {sTgcIdHelper::sTgcChannelTypes::Pad , 

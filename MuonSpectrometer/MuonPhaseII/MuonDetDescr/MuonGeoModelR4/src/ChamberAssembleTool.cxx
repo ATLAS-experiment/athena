@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef SIMULATIONBASE
 
@@ -40,32 +40,12 @@ using chamberArgs = Chamber::defineArgs;
 using VolBoundPtr_t = ChamberAssembleTool::VolBoundPtr_t;
 using ChamberPtr = SpectrometerSector::ChamberPtr;
 
-/// Orientation of the readout element coordinate system
-///   x-axis: Points towards the sky
-///   y-axis: Points along the chamber plane
-///   z-axis: Points along the beam axis
-/// --> Transform into the coordinate system of the chamber
-///   x-axis: Parallel to the eta channels
-///   y-axis: Along the beam axis
-///   z-axis: Towards the sky
-Amg::Transform3D axisRotation(const MuonReadoutElement* re) {
-   ActsTrk::DetectorType t = re->detectorType();
-   if (t == ActsTrk::DetectorType::sTgc) {
-      return Amg::Transform3D::Identity();
-   }
-   return Amg::getRotateZ3D(-90. * Gaudi::Units::deg) *
-          Amg::getRotateY3D(-90. * Gaudi::Units::deg);
-}
-Amg::Transform3D axisRotation(const ChamberPtr& /*ch*/) {
-   return Amg::Transform3D::Identity();
-}
 std::string toString(const MuonGMR4::MuonReadoutElement* re) {
    return re->idHelperSvc()->toStringDetEl(re->identify());
 }
 std::string toString(const ChamberPtr& ch) {
    return ch->identString();
 } 
-
 
 double ChamberAssembleTool::trapezoidEdgeDist(const Amg::Vector3D& linePos,
                                               const Amg::Vector3D& lineDir,
@@ -192,8 +172,7 @@ template <typename ReObjType>
       Amg::Transform3D newCentreTrf{Amg::Transform3D::Identity()};
       for (const auto& chambEle :  constituents) {
             Amg::Transform3D trf = newCentreTrf * toCenter * 
-                                   chambEle->localToGlobalTrans(gctx) * 
-                                   axisRotation(chambEle).inverse();
+                                   chambEle->localToGlobalTrans(gctx);
             VolBoundPtr_t bounds = boundingBox(chambEle, volBoundSet);
             /// Hack to cope with the RPCs which may be rotated by 180 degrees around the x or z-axis in cases,
             /// they're upside down.
@@ -443,7 +422,7 @@ StatusCode ChamberAssembleTool::buildReadOutElements(MuonDetectorManager &mgr) {
 
          for (auto& detEles: chamberElements) {
             const MuonReadoutElement* refEle = detEles.front();
-            const Amg::Transform3D toChambCentre = axisRotation(refEle) * refEle->globalToLocalTrans(gctx);
+            const Amg::Transform3D toChambCentre = refEle->globalToLocalTrans(gctx);
             ATH_MSG_VERBOSE("New chamber candidate "<<m_idHelperSvc->toStringChamber(refEle->identify()));
             const auto[chamberCentre, chamberBox, planeBounds] = boundingBox(gctx, detEles, toChambCentre, volBoundSet, 
                                                                               surfBoundSet, 0.*Gaudi::Units::cm);
