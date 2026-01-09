@@ -36,9 +36,6 @@ namespace pool {
       /// Commits and holds the transaction.
       bool commitAndHold();
 
-      /// Rolls back the transaction
-      void rollback();
-
       /// Checks if the transaction is active
       bool isActive() const;
 

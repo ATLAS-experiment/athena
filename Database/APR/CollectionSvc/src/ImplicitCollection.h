@@ -63,9 +63,6 @@ namespace pool {
     /// Commits the last changes made to the collection. Will always return true.
     void commit(bool reopen=false) override;
 
-    /// Aborts the last changes made to the collection.  Will always return true.
-    void rollback();
-
     ///  no-op at the moment
     void close() override;
 
