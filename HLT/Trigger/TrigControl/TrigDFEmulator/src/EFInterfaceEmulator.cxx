@@ -138,7 +138,8 @@ void DFEF::EFInterfaceEmulator::inputThreadCallback() {
     std::memcpy(eventCopy.get(), event.get(), nwords * sizeof(uint32_t));
     {
       std::lock_guard<std::mutex> lock(m_mMutex);
-      m_events.emplace(fullEvent.lvl1_id(), std::move(eventCopy)); 
+      auto& bucket = m_events[fullEvent.lvl1_id()];
+      bucket.push_back(std::move(eventCopy));
     }
     p.set_value(std::move(event));
   }
@@ -163,9 +164,12 @@ void DFEF::EFInterfaceEmulator::outputThreadCallback() {
     {
       std::lock_guard<std::mutex> lock(m_mMutex);
       auto it = m_events.find(eventPair.first);
-      if (it != m_events.end()) {
-        fullEvent = std::move(it->second); 
-        m_events.erase(it);
+      if (it != m_events.end() && !it->second.empty()) {
+        fullEvent = std::move(it->second.back());
+        it->second.pop_back();
+        if (it->second.empty()) {
+          m_events.erase(it);
+        }
       } else {
        throw std::runtime_error("Missing the FullEvent copy for event accepted with L0ID: " + std::to_string(eventPair.first)); 
       }

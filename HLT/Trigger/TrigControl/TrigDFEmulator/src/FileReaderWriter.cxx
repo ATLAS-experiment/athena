@@ -112,7 +112,7 @@ void DFEF::FileReaderWriter::print() {
 }
 
 void DFEF::FileReaderWriter::skipEvents(uint num) {
-  ERS_LOG("Going to skip " << num << " events in file: " << m_currFile);
+  ERS_DEBUG(2,"Going to skip " << num << " events in file: " << m_currFile);
   for (uint i = 0; i < num; i++) {
     auto blob = getEventFromFile();
   }
