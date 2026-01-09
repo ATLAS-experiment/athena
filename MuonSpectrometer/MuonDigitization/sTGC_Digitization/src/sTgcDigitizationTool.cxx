@@ -27,7 +27,7 @@
 
 //Truth
 #include "GeneratorObjects/HepMcParticleLink.h"
-
+#include "TruthUtils/HepMCHelpers.h"
 #include "AthenaKernel/RNGWrapper.h"
 #include "CLHEP/Random/RandGaussZiggurat.h"
 
@@ -307,6 +307,10 @@ StatusCode sTgcDigitizationTool::doDigitization(const EventContext& ctx) {
       ++nhits;
       TimedHitPtr<sTGCSimHit> phit = *i++;
       const sTGCSimHit& hit = *phit;
+      if (m_digitizeMuonOnly && !MC::isMuon(hit.particleEncoding())) {
+        ATH_MSG_VERBOSE("Hit is not from a muon - skipping ");
+        continue;
+      }
       ATH_MSG_VERBOSE("Hit Particle ID : " << hit.particleEncoding() );
       double eventTime = phit.eventTime();
       if(eventTime < earliestEventTime) earliestEventTime = eventTime;

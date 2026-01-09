@@ -140,7 +140,8 @@ private:
 
   SG::WriteHandleKey<sTgcDigitContainer> m_outputDigitCollectionKey{this,"OutputObjectName","sTGC_DIGITS","WriteHandleKey for Output sTgcDigitContainer"}; // name of the output digits
   SG::WriteHandleKey<MuonSimDataCollection> m_outputSDO_CollectionKey{this,"OutputSDOName","sTGC_SDO","WriteHandleKey for Output MuonSimDataCollection"}; // name of the output SDOs
-
+  
+  Gaudi::Property<bool> m_digitizeMuonOnly{this, "ProcessTrueMuonsOnly", false};
   Gaudi::Property<bool> m_doSmearing{this,"doSmearing",false};
   Gaudi::Property<bool> m_doToFCorrection{this,"doToFCorrection",false};
   Gaudi::Property<bool> m_doEfficiencyCorrection{this,"doEfficiencyCorrection",false};
