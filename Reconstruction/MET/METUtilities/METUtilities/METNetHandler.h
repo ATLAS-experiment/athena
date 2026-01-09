@@ -10,6 +10,7 @@
 
 // STL includes
 #include <string>
+#include <mutex>
 
 // ONNX Library
 #include <onnxruntime_cxx_api.h>
