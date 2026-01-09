@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #include "sTgcFastDigiTool.h"
 #include "TruthUtils/HepMCHelpers.h"
@@ -11,10 +11,12 @@ namespace {
         return 100. * numerator / std::max(denom, 1u);
     }
     using channelType = sTgcIdHelper::sTgcChannelTypes;
-    
-    static const SG::Decorator<uint16_t> dec_sdoPadChannel{"sTgc_padChannel"};
-    static const SG::Decorator<uint16_t> dec_sdoWireChannel{"sTgc_wireChannel"};
-    
+    using ChVec_t = std::vector<std::uint16_t>;
+      
+    static const SG::Decorator<ChVec_t> dec_stripCh{"sTgc_stripChannels"};
+    static const SG::Decorator<ChVec_t> dec_wireCh{"sTgc_wireChannels"};
+    static const SG::Decorator<ChVec_t> dec_padCh{"sTgc_padChannels"};
+   
 }
 namespace MuonR4 {
     
@@ -70,15 +72,18 @@ namespace MuonR4 {
                 }
                 sTgcDigitCollection* digiColl = fetchCollection(simHit->identify(), digitCache);
                 const bool digitizedPad = digitizePad(ctx, simHit, efficiencyMap, rndEngine, *digiColl);
-                const int16_t padChannel = digitizedPad ? idHelper.channel(digiColl->back()->identify()) : -1;
+                const std::int16_t padChannel = digitizedPad ? idHelper.channel(digiColl->back()->identify()) : -1;
                 const bool digitizedWire = digitizeWire(ctx, simHit, efficiencyMap, rndEngine, *digiColl);
-                const int16_t  wireChannel = digitizedWire ? idHelper.channel(digiColl->back()->identify()) : -1;
+                const std::int16_t  wireChannel = digitizedWire ? idHelper.channel(digiColl->back()->identify()) : -1;
                 const bool digitizedStrip = digitizeStrip(ctx, simHit, nswUncertDB, efficiencyMap, rndEngine, *digiColl);
-
+                const std::int16_t stripCh = digitizedStrip ? idHelper.channel(digiColl->back()->identify()) : -1;
+            
                 if (digitizedStrip || digitizedPad || digitizedWire) {
                     xAOD::MuonSimHit* sdo = addSDO(simHit, sdoContainer);
-                    dec_sdoPadChannel(*sdo) = padChannel;
-                    dec_sdoWireChannel(*sdo) = wireChannel;
+                    ChVec_t& stripChV{dec_stripCh(*sdo)}, wireCh{dec_wireCh(*sdo)}, padCh{dec_padCh(*sdo)};
+                    if (stripCh > 0) { stripChV.push_back(stripCh); }
+                    if (wireChannel > 0) { stripChV.push_back(wireChannel); }
+                    if (padChannel > 0) { stripChV.push_back(padChannel); }
                     sdo->setIdentifier(digiColl->back()->identify());
                 }
             }

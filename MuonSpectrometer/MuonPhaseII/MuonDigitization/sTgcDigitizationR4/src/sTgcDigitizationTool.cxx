@@ -6,6 +6,7 @@
 #include "xAODMuonViews/ChamberViewer.h"
 #include "TruthUtils/HepMCHelpers.h"
 #include "CLHEP/Random/RandGaussZiggurat.h"
+#include "GaudiKernel/PhysicalConstants.h"
 namespace MuonR4 {
   StatusCode sTgcDigitizationTool::initialize() {
     ATH_MSG_DEBUG("sTgcDigitizationTool::initialize()");
@@ -153,7 +154,7 @@ namespace MuonR4 {
         const MuonGMR4::sTgcReadoutElement* readoutElement = m_detMgr->getsTgcReadoutElement(hitId);
         const Amg::Vector3D globalHitPos = readoutElement->localToGlobalTrans(gctx, hitId) * locHitPos;
         double globalHitTime = hit->globalTime() + eventTime;
-        double tofCorrection = globalHitPos.mag() / CLHEP::c_light;
+        double tofCorrection = globalHitPos.mag() / Gaudi::Units::c_light;
         double bunchTime = globalHitTime - tofCorrection;
 
         const HepMcParticleLink particleLink = hit->genParticleLink();
@@ -204,17 +205,67 @@ namespace MuonR4 {
                         <<" digitTime = " << newDigitPtr->time()
                         <<" charge = "    << newDigitPtr->charge());
           }
-          simDigitsByChType[digitChType].emplace_back(std::move(hit), std::move(newDigitPtr));
+          simDigitsByChType[digitChType].emplace_back(hit, std::move(newDigitPtr));
         }
       }
-      if (!simDigitsByChType[ReadoutChannelType::Strip].empty()) {
-        ATH_CHECK(processDigitsWithVMM(ctx, digiCond, simDigitsByChType[ReadoutChannelType::Strip], m_deadtimeStrip, m_doNeighborOn, digitCache, *sdoContainer));
-      }
-      if (!simDigitsByChType[ReadoutChannelType::Pad].empty()) {
-        ATH_CHECK(processDigitsWithVMM(ctx, digiCond, simDigitsByChType[ReadoutChannelType::Pad], m_deadtimePad, false, digitCache, *sdoContainer));
-      }
-      if (!simDigitsByChType[ReadoutChannelType::Wire].empty()) {
-        ATH_CHECK(processDigitsWithVMM(ctx, digiCond, simDigitsByChType[ReadoutChannelType::Wire], m_deadtimeWire, false, digitCache, *sdoContainer));
+      SdoIdMap_t sdoIdMap{};
+      sTgcDigitCollection* outColl = fetchCollection(viewer.at(0)->identify(), digitCache);
+   
+      ATH_CHECK(processDigitsWithVMM(ctx, digiCond, std::move(simDigitsByChType[ReadoutChannelType::Strip]), 
+                                      m_deadtimeStrip, m_doNeighborOn, *outColl, sdoIdMap));
+      ATH_CHECK(processDigitsWithVMM(ctx, digiCond, std::move(simDigitsByChType[ReadoutChannelType::Pad]), 
+                                      m_deadtimePad, false, *outColl, sdoIdMap));
+      ATH_CHECK(processDigitsWithVMM(ctx, digiCond, std::move(simDigitsByChType[ReadoutChannelType::Wire]), 
+                                      m_deadtimeWire, false, *outColl, sdoIdMap));
+      for (auto& [simHit, assocIds]: sdoIdMap) {
+          /// Add the only the hits and digits that pass VMM simulation to sdo container
+          xAOD::MuonSimHit* sdoHit = addSDO(simHit, sdoContainer);
+          if (!sdoHit) {
+             continue;
+          }
+          std::ranges::sort(assocIds, [&](const Identifier& a, const Identifier& b){
+               const int typeA = idHelper.channelType(a);
+               const int typeB = idHelper.channelType(b);
+               if (typeA != typeB) {
+                  if (typeA == sTgcIdHelper::sTgcChannelTypes::Strip) {
+                      return true;
+                  } else if (typeB == sTgcIdHelper::sTgcChannelTypes::Strip) {
+                      return false;
+                  }
+                  return typeA > typeB;
+               }
+               return idHelper.channel(a) < idHelper.channel(b);
+          });
+          const double globalHitTime = sdoHit->globalTime() + simHit.eventTime();
+          sdoHit->setGlobalTime(globalHitTime);
+
+          sdoHit->setIdentifier(assocIds.front());
+          assocIds.erase(assocIds.begin());
+
+          using ChVec_t = std::vector<std::uint16_t>;
+          static const SG::Decorator<ChVec_t> dec_stripCh{"sTgc_stripChannels"};
+          static const SG::Decorator<ChVec_t> dec_wireCh{"sTgc_wireChannels"};
+          static const SG::Decorator<ChVec_t> dec_padCh{"sTgc_padChannels"};
+          ChVec_t& stripCh{dec_stripCh(*sdoHit)}, wireCh{dec_wireCh(*sdoHit)}, padCh{dec_padCh(*sdoHit)};
+
+          std::ranges::for_each(assocIds,[&](const Identifier& secId){
+              const int ch = idHelper.channel(secId);
+              switch(idHelper.channelType(secId)){
+                 using enum sTgcIdHelper::sTgcChannelTypes;
+                 case Strip: {
+                    stripCh.push_back(ch);
+                    break;
+                 }case Wire: {
+                    wireCh.push_back(ch);
+                    break;
+                 }case Pad: {
+                    padCh.push_back(ch);
+                    break;
+                 }
+              }
+          });
+
+
       }
     } while (viewer.next());
     /// Digits are sorted by 
@@ -225,20 +276,21 @@ namespace MuonR4 {
 
   StatusCode sTgcDigitizationTool::processDigitsWithVMM(const EventContext& ctx,
                                                         const DigiConditions& digiCond,
-                                                        sTgcSimDigitVec& digitsInChamber,
+                                                        sTgcSimDigitVec&& digitsInChamber,
                                                         const double vmmDeadTime,
                                                         const bool isNeighbourOn,
-                                                        DigiCache& cache,
-                                                        xAOD::MuonSimHitContainer& outSdoContainer) const {
+                                                        sTgcDigitCollection& outColl,
+                                                        SdoIdMap_t& sdoIdMap) const {
     
-    const sTgcIdHelper& idHelper{m_idHelperSvc->stgcIdHelper()};
     if (digitsInChamber.empty()) {
-      ATH_MSG_WARNING("Failed to obtain the digitized hits for VMM Simulation" );
+      ATH_MSG_DEBUG("Empty hits from VMM Simulation" );
       return StatusCode::SUCCESS;
     }
+    const sTgcIdHelper& idHelper{m_idHelperSvc->stgcIdHelper()};
+    
     /// Sort all digits from the same chamber according to layer->channelType->time 
-    sTgcSimDigitVec mergedDigits = processDigitsWithVMM(ctx, digiCond, vmmDeadTime, 
-                                                      digitsInChamber, isNeighbourOn);
+    sTgcSimDigitVec mergedDigits = mergeDigitsVMM(ctx, digiCond, vmmDeadTime, 
+                                                  isNeighbourOn, std::move(digitsInChamber));
     /// Update the container iterator to go to the next chamber
     if (mergedDigits.empty()) {
       return StatusCode::SUCCESS;
@@ -262,7 +314,7 @@ namespace MuonR4 {
           chargeAfterSmearing < 0.001) {
           continue;
       }
-      std::unique_ptr<sTgcDigit> finalDigit = std::make_unique<sTgcDigit>(std::move(merged.getDigit()));
+      auto finalDigit = merged.releaseDigit();
       if (m_doSmearing) {
           finalDigit->set_charge(chargeAfterSmearing);
       }
@@ -272,24 +324,19 @@ namespace MuonR4 {
                       " charge = "    << finalDigit->charge());
 
       /// Add the only the hits and digits that pass VMM simulation to sdo container
-      xAOD::MuonSimHit* sdoHit = addSDO(merged.getSimHit(), &outSdoContainer);
-      if(sdoHit) {
-        /// Change the sdo hit time to include the pileup eventTime
-        double globalHitTime = sdoHit->globalTime() + merged.getSimHit().eventTime();
-        sdoHit->setGlobalTime(globalHitTime);
-      }
+      sdoIdMap[merged.getSimHit()].push_back(finalDigit->identify());
       /// Add the VMM processed digit to cache
-      sTgcDigitCollection* outColl = fetchCollection(finalDigit->identify(), cache);
-      outColl->push_back(std::move(finalDigit)); 
+      outColl.push_back(std::move(finalDigit)); 
     }    
-  return StatusCode::SUCCESS; 
+    return StatusCode::SUCCESS; 
   }
 
-  sTgcDigitizationTool::sTgcSimDigitVec sTgcDigitizationTool::processDigitsWithVMM(const EventContext& ctx,
-                                      const DigiConditions& digiCond, 
-                                      const double vmmDeadTime, 
-                                      sTgcSimDigitVec& unmergedDigits, 
-                                      const bool isNeighbourOn) const {
+  sTgcDigitizationTool::sTgcSimDigitVec 
+      sTgcDigitizationTool::mergeDigitsVMM(const EventContext& ctx,
+                                           const DigiConditions& digiCond, 
+                                           const double vmmDeadTime, 
+                                           const bool isNeighbourOn,    
+                                           sTgcSimDigitVec&& unmergedDigits) const {
 
     const sTgcIdHelper& idHelper{m_idHelperSvc->stgcIdHelper()};
     /// Sort Digits in the unmergedDigits vector by gasgap -> channelType -> time
@@ -391,10 +438,8 @@ namespace MuonR4 {
       }    
     } // end of time-ordering and hit merging loop
     std::copy_if(std::make_move_iterator(premerged.begin()),
-                std::make_move_iterator(premerged.end()),
-                std::back_inserter(savedDigits), passNeigbourLogic);
-    if(savedDigits.empty() && !unmergedDigits.empty()) {
-    }
+                 std::make_move_iterator(premerged.end()),
+                 std::back_inserter(savedDigits), passNeigbourLogic);
     return savedDigits;
   }
 }
