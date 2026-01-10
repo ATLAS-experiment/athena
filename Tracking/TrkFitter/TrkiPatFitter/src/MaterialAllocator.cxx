@@ -889,9 +889,8 @@ void MaterialAllocator::addSpectrometerDelimiters(
   Amg::Vector3D referenceDirection;
   Amg::Vector3D referencePosition;
   double referencePhi = 0.;
-  int index = 1;
   for (std::vector<FitMeasurement*>::iterator m = measurements.begin();
-       m != measurements.end(); ++m, ++index) {
+       m != measurements.end(); ++m) {
     // skip 'non'-measurements
     if (!(**m).isPositionMeasurement() || (**m).isPseudo())
       continue;
@@ -936,22 +935,6 @@ void MaterialAllocator::addSpectrometerDelimiters(
       previousDistance = distance;
       continue;
     }
-
-    //  ///////
-    //  msg(MSG::INFO) << std::setiosflags(std::ios::fixed)
-    //             << " index" << std::setw(3) << index+1
-    //             << "  at " << std::setw(10) << std::setprecision(1)
-    //             << startDirection.dot(
-    //             (**m).intersection(FittedTrajectory).position() -
-    //             startPosition)
-    //             << std::setw(10) << std::setprecision(1) << distance
-    //             << std::setw(9)  << std::setprecision(4)
-    //             << std::abs(position.phi() - referencePhi);
-    //  if (preBreak) msg() << " preBreak ";
-    //  if (postBreak) msg() << " postBreak ";
-    //  if ((**m).isDrift()) msg() << " isDrift ";
-    //  msg() << endmsg;
-    //  ///////
 
     if (postBreak && previous) {
       // if (distance < offset) offset = 0.5*distance;
