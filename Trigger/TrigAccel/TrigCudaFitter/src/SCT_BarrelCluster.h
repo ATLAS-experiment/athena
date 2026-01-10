@@ -4,12 +4,13 @@
 
 #include "SCT_Cluster.h"
 
+#include <memory>
+
 class SCT_BarrelCluster : public SCT_Cluster
 {
   public:
-    SCT_BarrelCluster(const Surface*);
-    virtual ~SCT_BarrelCluster(void);
-
+    SCT_BarrelCluster(std::unique_ptr<const Surface>);
+  
     virtual void setParameters(float* par);
     virtual TrkBaseNode* createDkfNode(void) const;
 };

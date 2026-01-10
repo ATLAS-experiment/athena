@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 #include "McTrack.h"
 #include "SiCluster.h"
 #include "PixelCluster.h"
@@ -11,6 +11,7 @@
 #include "EventData.h"
 #include "FileReader.h"
 #include <map>
+#include <memory>
 #include <iostream>
 #include <fstream>
 
@@ -29,7 +30,7 @@ int FileReader::readEvents(std::ifstream& input, std::vector<EventData*>& events
             // MC info
             input >> eventNumber;
             input >> par[0] >> par[1] >> par[2] >> par[3] >> par[4] >> par[5] >> Np >> Np2;
-            McTrack* pMcTrack = new McTrack(par);
+            auto pMcTrack = std::make_unique<McTrack>(par);
             for(int i=0;i<Np;i++)
             {
                 input >> par[0] >> par[1] >> par[2] >> par[3];
@@ -37,7 +38,7 @@ int FileReader::readEvents(std::ifstream& input, std::vector<EventData*>& events
             }
             if(!pEvent) pEvent = new EventData();
             pEvent->setEventNumber(eventNumber);
-            pEvent->setMcTrack(pMcTrack);
+            pEvent->setMcTrack(std::move(pMcTrack));
             events.push_back(pEvent);
             //if(events.size()==5) break;
             pEvent=NULL;
@@ -71,7 +72,7 @@ int FileReader::readEvents(std::ifstream& input, std::vector<EventData*>& events
                     for(int iCL=0;iCL<nCL;iCL++)
                     {
                         input >> par[0] >> par[1] >> par[2] >> par[3] >> par[4] >> par[5];
-                        Surface* pS = new Surface(par);
+                        auto pS = std::make_unique<Surface>(par);
                         for(int nRow=0;nRow<3;nRow++)
                         {
                             input >> par[0] >> par[1] >> par[2];
@@ -80,7 +81,7 @@ int FileReader::readEvents(std::ifstream& input, std::vector<EventData*>& events
 						
                         if(nCL==1)
                         {
-                            SiCluster* pCL = new PixelCluster(pS);
+                            SiCluster* pCL = new PixelCluster(std::move(pS));
                             input >> par[0] >> par[1] >> par[2] >> par[3];
                             pCL->setParameters(par);
                             pSP->addCluster(pCL);
@@ -91,14 +92,14 @@ int FileReader::readEvents(std::ifstream& input, std::vector<EventData*>& events
                             input >> sctType;
                             if(sctType==0)
                             {
-                                SiCluster* pCL = new SCT_BarrelCluster(pS);
+                                SiCluster* pCL = new SCT_BarrelCluster(std::move(pS));
                                 input >> par[0] >> par[1];
                                 pCL->setParameters(par);
                                 pSP->addCluster(pCL);
                             }
                             else if(sctType==1)
                             {
-                                SiCluster* pCL = new SCT_EndCapCluster(pS);
+                                SiCluster* pCL = new SCT_EndCapCluster(std::move(pS));
                                 input >> par[0] >> par[1] >> par[2];
                                 pCL->setParameters(par);
                                 pSP->addCluster(pCL);
