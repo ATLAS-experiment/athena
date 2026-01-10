@@ -63,9 +63,9 @@ class L1MenuConfig(object):
 
         # menu
         L1MenuFlags.CTPVersion = 4 # this needs to be done here already, since L1Menu depends on it during init
-        self.l1menu = L1Menu(self.menuName, flags)
+        self.l1menu = L1Menu(self.menuName, flags, run=3)
 
-        self.l1menu.setBunchGroupSplitting() # store bunchgroups separate from other item inputs
+        # self.l1menu.setBunchGroupSplitting() # store bunchgroups separate from other item inputs
 
         if not self._checkMenuExistence():
             log.error("Generating L1 menu %s is not possible", self.menuName)
@@ -234,7 +234,8 @@ class L1MenuConfig(object):
         menuToLoadReq = self.menuFullName
         # Extract the menu name, independent of menu prescale sets
         if menuToLoadReq.endswith('prescale'):
-            menuToLoadReq = re.match(r'\w*_v\d*',self.menuFullName).group(0)
+            if (m:=re.match(r'\w*_v\d*',self.menuFullName)) is not None:
+                menuToLoadReq = m.group(0)
             log.info(f'Base menu name {menuToLoadReq} extracted from {self.menuFullName}')
         from .Menu.MenuMapping import menuMap
         if menuToLoadReq in menuMap:
@@ -587,6 +588,7 @@ class L1MenuConfig(object):
                 if connDef["type"] != "ctpin":
                     continue
                 for entry in connDef["thresholds"]:
+                    thrNames = []
                     if type(entry) is dict:
                         # section that defines topo legacy thresholds 
                         thrNames = sum([x.outputlines for x in entry["algorithms"]],[])
@@ -781,10 +783,6 @@ class L1MenuConfig(object):
                 item.prescale = ps
             else:
                 log.warning('Cannot find item %s to set the prescale', it_name )
-
-
-    def configureCTP(self):
-        self.l1menu.ctp.addMonCounters()
 
     # remove prescale suffixes
     def _getMenuBaseName(self, menuName):

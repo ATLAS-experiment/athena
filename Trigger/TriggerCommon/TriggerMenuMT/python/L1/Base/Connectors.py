@@ -111,7 +111,7 @@ class Connector:
         self.triggerLines = []
         self.emptyTriggerLines = [] # Empty placeholders in the output fibers/cables, to ensure correst alignment of the triggerLines bits
 
-    def addTriggerLine(self, tl):
+    def addTriggerLine(self, tl: 'TriggerLine'):
         self.triggerLines.append(tl)
 
     def addEmptyTriggerLine(self, tl):
@@ -237,7 +237,7 @@ class ElectricalConnector(Connector):
                         tlname = currentTopoCategory.prefix + tl
                         startbit = bit+i
                         flatindex = 32*fpga + 2*startbit + clock
-                        self.addTriggerLine( TriggerLine( name = tlname, startbit = startbit, flatindex = flatindex, nbits = 1, fpga = fpga, clock = clock ), fpga, clock )
+                        self._addTriggerLineByFpgaClock( TriggerLine( name = tlname, startbit = startbit, flatindex = flatindex, nbits = 1, fpga = fpga, clock = clock ), fpga, clock )
         elif self.cformat == CFormat.SIMPLE:
             for sigG in connDef["signalGroups"]:
                 clock = sigG["clock"]
@@ -253,12 +253,12 @@ class ElectricalConnector(Connector):
                     flatindex = 2*startbit + clock
                     tl = TriggerLine( name = signal, startbit = startbit, flatindex = flatindex, nbits = nbits, fpga = None, clock = clock)
                     startbit += nbits
-                    self.addTriggerLine(tl, 0, clock)
+                    self._addTriggerLineByFpgaClock(tl, 0, clock)
         else:
             raise RuntimeError("Property 'format' of connector %s is '%s' but must be either 'simple' or 'topological'" % (name,connDef["format"]))
 
 
-    def addTriggerLine(self, tl, fpga, clock):
+    def _addTriggerLineByFpgaClock(self, tl, fpga, clock):
         self.triggerLines[fpga][clock].append( tl )
 
     def triggerThresholds(self):

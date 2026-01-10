@@ -104,7 +104,7 @@ def defineInputsMenu():
             "format": "multiplicity",
             "thresholds" : [
                 # 11x eEM thresholds
-                "eEM5", "eEM7", "eEM9", "eEM10L", "eEM12L", "eEM15", "eEM18", "eEM18L", "eEM18M", "eEM22M", "eEM24L",
+                ("eEM5",4), "eEM7", "eEM9", "eEM10L", "eEM12L", "eEM15", "eEM18", "eEM18L", "eEM18M", "eEM22M", "eEM24L",
 
                 # 9x eTAU thresholds
                 # "eTau1", "eTau2", "eTau12", "eTau24M", "eTau26", "eTau26L", "eTau26M", "eTau26T", "eTau140",

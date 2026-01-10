@@ -16,6 +16,9 @@ from .Base.TopoAlgorithms import AlgCategory
 from .Base.L1Menu2JSON import L1MenuJSONConverter
 from .Config.TriggerTypeDef import TT
 from .Config.TopoAlgoDefMultiplicity import TopoAlgoDefMultiplicity 
+from .Config.ItemDef import ItemDef
+from .Config.ItemDefRun4 import ItemDef as ItemDefRun4
+
 
 """
 L1MenuConfig is responsible for building the L1 Menu
@@ -75,7 +78,7 @@ class L1MenuConfig(object):
         L1MenuFlags.CTPVersion = 4 # this needs to be done here already, since L1Menu depends on it during init
         self.l1menu = L1Menu(self.menuName, flags, run=self.run)
 
-        self.l1menu.setBunchGroupSplitting() # store bunchgroups separate from other item inputs
+        # self.l1menu.setBunchGroupSplitting() # store bunchgroups separate from other item inputs
 
         if not self._checkMenuExistence():
             log.fatal("Generating L1 menu %s is not possible", self.menuName)
@@ -390,13 +393,11 @@ class L1MenuConfig(object):
             log.info("... registered %i global hypo thresholds", self._registeredThresholdsStats[AlgCategory.GLOBHYPO])
         
         if self.run == 3:
-            log.info("Importing TriggerMenuMT.Config.ItemDef")
-            from .Config.ItemDef import ItemDef
+            log.info("Registering items from TriggerMenuMT.Config.ItemDef")
+            ItemDef.registerItems(self, self.menuFullName)
         else:
-            log.info("Importing TriggerMenuMT.Config.ItemDefRun4")
-            from .Config.ItemDefRun4 import ItemDef
-
-        ItemDef.registerItems(self, self.menuFullName)
+            log.info("Registering items from TriggerMenuMT.Config.ItemDefRun4")
+            ItemDefRun4.registerItems(self, self.menuFullName)
         log.info("... registered %i defined items", len(self.registeredItems))
 
 

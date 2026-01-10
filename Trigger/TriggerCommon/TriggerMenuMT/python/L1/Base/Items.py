@@ -5,6 +5,7 @@ from AthenaCommon.Logging import logging
 from ..Config.MonitorDef import MonitorDef
 from .PrescaleHelper import getCutFromPrescale, getPrescaleFromCut
 from .MenuUtils import binstr
+from .Logic import Logic
 
 
 log = logging.getLogger(__name__)
@@ -12,19 +13,17 @@ log = logging.getLogger(__name__)
 
 class MenuItemsCollection:
 
-    splitBunchGroups = False
-
     def __init__(self):
         self.menuName: str = ''
         self.pssName: str = ''
         self.pssType: str = 'Physics'
-        self.items: dict[str, MenuItem] = {}
+        self.items: dict[str, MenuItem] = {}  # name -> MenuItem
 
     def __iter__(self):
         return iter(self.items.values())
 
-    def __getitem__(self, key):
-        return self.items[key]
+    def __getitem__(self, name):
+        return self.items[name]
 
     def __setitem__(self, name, item):
         if item is None:
@@ -45,8 +44,8 @@ class MenuItemsCollection:
             msg = "LVL1 item %s is already in the menu, will not add it again" % item.name
             log.error(msg)
             raise RuntimeError(msg)
-        if item.ctpid in [x.ctpid for x in self]:
-            msg = "LVL1 item %s with ctpid %i is already in the menu, will not add %s with the same ctpid" % (self.itemById(item.ctpid).name, item.ctpid, item.name)
+        if (itemInMenu := self.itemById(item.ctpid)) is not None:
+            msg = "LVL1 item %s with ctpid %i is already in the menu, will not add %s with the same ctpid" % (itemInMenu.name, item.ctpid, item.name)
             log.error(msg)
             raise RuntimeError(msg)
         self.items[ item.name ] = item
@@ -63,7 +62,7 @@ class MenuItemsCollection:
         return itemById[ctpid] if ctpid in itemById else None
 
     def itemNames(self):
-        return self.items.keys()
+        return list(self.items)
 
     def json(self):
         confObj = {item.name: item.json() for item in self}
@@ -90,11 +89,11 @@ class MenuItem(object):
         self.psCut            = psCut if psCut is not None else getCutFromPrescale(prescale)
         self.trigger_type     = 0
         self.partition        = MenuItem.currentPartition
-        self.logic            = None
+        self.logic: Logic = Logic()
         self.monitorsLF       = 0
         self.monitorsHF       = 0
         self.verbose          = verbose
-        self.bunchGroups      = None
+        self.bunchGroups: list[str] = []
         self.legacy           = False
 
         if MenuItem.l1configForRegistration:
@@ -120,10 +119,7 @@ class MenuItem(object):
             self.monitorsHF |= flag
     
     def setLogic(self, logic):
-        if MenuItemsCollection.splitBunchGroups:
-            (self.logic, self.bunchGroups) = logic.stripBunchGroups(logic)
-        else:
-            self.logic = logic
+        (self.logic, self.bunchGroups) = Logic.stripBunchGroups(logic)
         return self
 
     def setCtpid(self, x):
@@ -131,22 +127,18 @@ class MenuItem(object):
         return self
 
     def thresholdNames(self, include_bgrp=False):
-        if self.logic is not None:
-            return self.logic.thresholdNames(include_bgrp)
-        else:
-            return []
+        return self.logic.thresholdNames(include_bgrp)
 
     def conditions(self, include_internal=False):
-        if self.logic is not None:
-            return self.logic.conditions(include_internal)
-        else:
-            return []
+        return self.logic.conditions(include_internal)
 
     def setTriggerType(self, ttype):
         self.trigger_type = int(ttype) & 0xff
         return self
 
-    def markLegacy(self,legacyThresholdsSet):
+    def markLegacy(self, legacyThresholdsSet):
+        if self.logic is None:
+            raise RuntimeError("Cannot mark item %s as legacy, logic is not set" % self.name)
         self.legacy = bool ( legacyThresholdsSet.intersection(self.logic.thresholdNames()) )
 
     def binary_trigger_type(self, width=8):

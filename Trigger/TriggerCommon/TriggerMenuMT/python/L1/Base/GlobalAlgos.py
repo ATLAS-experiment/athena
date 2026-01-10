@@ -14,6 +14,15 @@ log = logging.getLogger(__name__)
 ## During the build, from each class a python class is generated and put in the release
 ## Those generated python classes derive fro SortingAlgo and DecisionAlgo below.
 
+class GlobalAlgo:
+    pass
+
+class GlobalDecisionAlgo(GlobalAlgo):
+    pass
+
+class GlobalHypoAlgo(GlobalAlgo):
+    pass
+
 class TopoAlgo:
 
     _availableVars = []

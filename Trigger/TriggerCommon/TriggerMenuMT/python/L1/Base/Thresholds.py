@@ -1,9 +1,11 @@
 # Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
+from abc import abstractmethod
 import re
 from copy import deepcopy
 from functools import total_ordering
 from typing import Any
+
 
 from AthenaCommon.Logging import logging
 
@@ -15,7 +17,7 @@ from .TopoAlgorithms import AlgCategory
 log = logging.getLogger(__name__)
 
 
-class MenuThresholdsCollection( object ):
+class MenuThresholdsCollection:
 
     def __init__(self, flags):
         self.thresholds     = {}     # holds all thresholds
@@ -53,10 +55,10 @@ class MenuThresholdsCollection( object ):
         self += thr
 
 
-    def names(self, ttype = None):
-        if not ttype:
-            return self.thresholdsNames
-        return set([thr.name for thr in self if thr.ttype == ttype])
+    # def names(self, ttype = None):
+    #     if not ttype:
+    #         return self.thresholdsNames
+    #     return set([thr.name for thr in self if thr.ttype == ttype])
 
 
     def typeWideThresholdConfig(self, ttype):
@@ -99,8 +101,7 @@ class MenuThresholdsCollection( object ):
         return confObj
 
 
-
-class Threshold( object ):
+class Threshold:
     __slots__ = ['name', 'ttype', 'mapping', 'thresholdValues', 'run']
 
     # global variable for threshold registration, if set, new thresholds will be registered with l1configForRegistration
@@ -123,6 +124,12 @@ class Threshold( object ):
     def __str__(self):
         return self.name
 
+    def _getSuffix(self, name: str, flags: str):
+        if (m := re.match(f"(?P<type>[A-z]*)[0-9]*(?P<suffix>[{flags}]*)",name)) is not None:
+            return m.groupdict()["suffix"]
+        else:
+            raise RuntimeError(f"Cannot extract suffix from threshold name {name} with flags {flags}")
+
     def getVarName(self):
         """returns a string that can be used as a varname"""
         return self.name.replace('p','')
@@ -136,18 +143,9 @@ class Threshold( object ):
         else:
             return float(self.thresholdValues[0].value)
 
-    def json(self):
-        confObj: dict[str,Any] = {
-            "todo": "implement"
-        }
-        if self.ttype == ThrType.ZB:
-            confObj.update( {
-                "seed": self.seed,
-                "seed_multi": self.seed_multi,
-                "bc_delay": self.mapping
-            } )
-        return confObj
-
+    @abstractmethod
+    def json(self) -> dict[str,Any]:
+        ...
 
 
 class LegacyThreshold( Threshold ):
@@ -298,8 +296,7 @@ class eEMThreshold (Threshold):
     
     def __init__(self, name, ttype = 'eEM', mapping = -1):
         super(eEMThreshold,self).__init__(name = name, ttype = ttype, mapping = mapping, run = 3 if ttype=='eEM' else 2)
-        mres = re.match("(?P<type>[A-z]*)[0-9]*(?P<suffix>[VHILMT]*)",name).groupdict()
-        self.suffix = mres["suffix"]
+        self.suffix = self._getSuffix(name, "VHILMT")
         self.rhad = "None"
         self.reta = "None"
         self.wstot = "None"
@@ -369,8 +366,7 @@ class eEMVarThreshold (Threshold):
 
     def __init__(self, name, ttype = 'eEM', mapping = -1):
         super(eEMVarThreshold,self).__init__(name = name, ttype = ttype, mapping = mapping, run = 3 if ttype=='eEM' else 2)
-        mres = re.match("(?P<type>[A-z]*)[0-9]*(?P<suffix>[VHILMT]*)",name).groupdict()
-        self.suffix = mres["suffix"]
+        self.suffix = self._getSuffix(name, "VHILMT")
         self.rhad = "None"
         self.reta = "None"
         self.wstot = "None"
@@ -440,8 +436,7 @@ class jEMThreshold (Threshold):
 
     def __init__(self, name, ttype = 'jEM', mapping = -1):
         super(jEMThreshold,self).__init__(name = name, ttype = ttype, mapping = mapping, run = 3 if ttype=='jEM' else 2)
-        mres = re.match("(?P<type>[A-z]*)[0-9]*(?P<suffix>[VHILMT]*)",name).groupdict()
-        self.suffix = mres["suffix"]
+        self.suffix = self._getSuffix(name, "VHILMT")
         self.iso = "None"
         self.frac = "None"
         self.frac2 = "None"
@@ -635,8 +630,7 @@ class eTauThreshold( Threshold ):
     def __init__(self, name, ttype = 'eTAU', mapping = -1):
         super(eTauThreshold,self).__init__(name = name, ttype = ttype, mapping = mapping, run = 3 if ttype=='eTAU' else 2)
         self.et = None
-        mres = re.match("(?P<type>[A-z]*)[0-9]*(?P<suffix>[LMTH]*)",name).groupdict()
-        self.suffix = mres["suffix"]
+        self.suffix = self._getSuffix(name, "LMTH")
         self.rCore = "None"
         self.rHad = "None"
 
@@ -709,8 +703,7 @@ class jTauThreshold( Threshold ):
     def __init__(self, name, ttype = 'jTAU', mapping = -1):
         super(jTauThreshold,self).__init__(name = name, ttype = ttype, mapping = mapping, run = 3 if ttype=='jTAU' else 2)
         self.et = None
-        mres = re.match("(?P<type>[A-z]*)[0-9]*(?P<suffix>[LMT]*)",name).groupdict()
-        self.suffix = mres["suffix"]
+        self.suffix = self._getSuffix(name, "LMT")
         self.isolation = "None"
 
     def isL(self):
@@ -774,8 +767,7 @@ class cTauThreshold( Threshold ):
     def __init__(self, name, ttype = 'cTAU', mapping = -1):
         super(cTauThreshold,self).__init__(name = name, ttype = ttype, mapping = mapping, run = 3 if ttype=='cTAU' else 2)
         self.et = None
-        mres = re.match("(?P<type>[A-z]*)[0-9]*(?P<suffix>[LMT]*)",name).groupdict()
-        self.suffix = mres["suffix"]
+        self.suffix = self._getSuffix(name, "LMT")
         self.isolation = "None"
 
     def isL(self):
@@ -1215,7 +1207,6 @@ class TopoThreshold( Threshold ):
         super(TopoThreshold,self).__init__(name = name, ttype = algCategory.key, run = run)
         if algCategory not in AlgCategory.getAllCategories(run):
             raise RuntimeError("%r is not a valid topo category" % algCategory)
-
 
 
     def getVarName(self):

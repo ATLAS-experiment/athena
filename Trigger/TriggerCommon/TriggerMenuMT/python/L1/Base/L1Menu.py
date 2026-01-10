@@ -1,5 +1,7 @@
 # Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
+from typing import cast
+
 from .CTP import CTP
 from .Items import MenuItemsCollection
 from .Thresholds import MenuThresholdsCollection
@@ -11,11 +13,12 @@ from .Limits import Limits
 from .L1MenuFlags import L1MenuFlags
 from .ThresholdType import ThrType
 from ..Config.TypeWideThresholdConfig import getTypeWideThresholdConfig
+from .CTPCondition import ThrCondition
 
 from AthenaCommon.Logging import logging
 log = logging.getLogger(__name__)
 
-class L1Menu(object):
+class L1Menu:
     """
     This class holds everything that is needed to define the menu
     """
@@ -26,7 +29,7 @@ class L1Menu(object):
         self.menuFullName = L1MenuFlags.MenuSetup()
 
         # items in menu
-        self.items = MenuItemsCollection()
+        self.items: MenuItemsCollection = MenuItemsCollection()
 
         # store cached flags
         self.flags = flags
@@ -56,18 +59,12 @@ class L1Menu(object):
     def isRun4Menu(self):
         return "run4" in self.menuName.lower()
 
-
-
-    def setBunchGroupSplitting(self, v = True):
-        MenuItemsCollection.splitBunchGroups = v
-
-
     def addItem(self, item):
         self.items += item
 
 
     def getItem(self,name):
-        return self.items.findItemByName(name)
+        return self.items[name]
 
 
     def addThreshold(self, threshold):
@@ -381,7 +378,7 @@ class L1Menu(object):
             if len(item.bunchGroups)==1 and item.bunchGroups[0]=='BGRP0':
                 raise RuntimeError("L1 item %s is defined with only BGRP0, ie it can trigger also in the CALREQ BGRP2 bunches. Please add another bunch group (ATR-24781)" % item.name) 
             if 'BGRP2' in item.bunchGroups:
-                thrtype = item.logic.content['threshold'].ttype
+                thrtype = cast(ThrCondition, item.logic).threshold().ttype
                 if thrtype in ThrType.CaloTypes():
                     # The LAr Digital Trigger sends an "align frame" to the FEXes in BCID 3500 (in BGRP2)
                     # No trigger can be sent during this align frame, so we block all calo triggers from this BGRP

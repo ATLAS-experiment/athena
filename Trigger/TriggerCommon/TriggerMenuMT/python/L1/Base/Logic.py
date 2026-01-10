@@ -27,7 +27,7 @@ class LogicType( Enum ):
 
 class Logic:
 
-    __slots__ = ['content', 'logicType', 'subConditions']
+    __slots__ = ['logicType', 'subConditions']
 
     @staticmethod
     def Not(x):
@@ -37,9 +37,9 @@ class Logic:
         return a
 
     @staticmethod
-    def stripBunchGroups(theLogic):
-        subConds = []
-        bunchGroups = []
+    def stripBunchGroups(theLogic) -> tuple['Logic', list[str]]:
+        subConds: list['Logic'] = []
+        bunchGroups: list[str] = []
         for sc in theLogic.subConditions:
             if sc.logicType is LogicType.INTERNAL and sc.name().startswith('BGRP'):
                 bunchGroups.append(sc.name())
@@ -55,8 +55,7 @@ class Logic:
         
         raise RuntimeError("Item with logic '%s' has only internal triggers defined" % theLogic)
 
-    def __init__(self, logicType = LogicType.NONE, content = None):
-        self.content = content # only filled for THRESHOLD and INTERNAL
+    def __init__(self, logicType = LogicType.NONE):
         self.logicType = logicType
         self.subConditions = [] # holds Logic instances
 
@@ -133,31 +132,32 @@ class Logic:
             return s
         return ''
 
-    def thresholdNames(self, include_bgrp=False):
-        names = set()
-        if self.logicType is LogicType.THRESHOLD:
-            names.add( self.threshold.name )
-        elif self.logicType is LogicType.INTERNAL:
-            if include_bgrp:
-                names.add(self.name())
-        else:
-            for sc in self.subConditions:
-                names.update( sc.thresholdNames(include_bgrp) )
-        return sorted(list(names))
+    def thresholdNames(self, include_bgrp=False) -> list[str]:
+        """List of names of thresholds in this logic
 
+        Args:
+            include_bgrp (bool, optional): if True,include bunch group names in the list. Defaults to False.
+
+        Returns:
+            list[str]: list of threshold names
+        """
+        names: set[str] = set()
+        for sc in self.subConditions:
+            names.update( sc.thresholdNames(include_bgrp) )
+        return sorted(list(names))
 
     def conditions(self, include_internal=False):
         cond = set([])
-        if hasattr(self,'condition') and self.condition is not None:
-            from .CTPCondition import InternalTrigger
-            if isinstance(self.condition, InternalTrigger):
-                if include_internal:
-                    cond.add(self.condition)
-            else:
-                cond.add( self.condition )
-        else:
-            for sc in self.subConditions:
-                cond.update( sc.conditions(include_internal) )
+        # if hasattr(self,'condition') and self.condition is not None:
+        #     from .CTPCondition import InternalTrigger
+        #     if isinstance(self.condition, InternalTrigger):
+        #         if include_internal:
+        #             cond.add(self.condition)
+        #     else:
+        #         cond.add( self.condition )
+        # else:
+        for sc in self.subConditions:
+            cond.update( sc.conditions(include_internal) )
         return sorted(list(cond))
 
 
