@@ -55,12 +55,12 @@ class CtpinCounter(MonCounter):
     These monitor the CTP Item counts
     """
     def __init__(self, threshold, multiplicity):
-        super(CtpinCounter, self).__init__(threshold, multiplicity, 'ctpin')
+        super().__init__(threshold, multiplicity, 'ctpin')
 
 class CtpmonCounter(MonCounter):
     """
     These monitor the CTPInput signal counts
     """
     def __init__(self, threshold, multiplicity):
-        super(CtpmonCounter, self).__init__(threshold, multiplicity, 'ctpmon')
+        super().__init__(threshold, multiplicity, 'ctpmon')
 

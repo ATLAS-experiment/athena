@@ -1,5 +1,7 @@
 # Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
+from __future__ import annotations
+
 from abc import abstractmethod
 import re
 from copy import deepcopy
@@ -21,8 +23,8 @@ log = logging.getLogger(__name__)
 class MenuThresholdsCollection:
 
     def __init__(self, flags):
-        self.thresholds     = {}     # holds all thresholds
-        self.thresholdNames = set()  # holds all threshold names
+        self.thresholds: dict[str, Threshold] = {}     # holds all thresholds
+        self.thresholdNames: set[str] = set()  # holds all threshold names
         self.flags = flags
 
     def __iter__(self):
@@ -31,7 +33,7 @@ class MenuThresholdsCollection:
     def __call__(self):
         return self.thresholds.values()
 
-    def __iadd__(self, thr):
+    def __iadd__(self, thr: Threshold):
         if thr is None or thr.name in self.thresholdNames:
             return self
         self.thresholds[thr.name] = thr 
@@ -152,7 +154,7 @@ class Threshold:
 class LegacyThreshold( Threshold ):
     
     def __init__(self, name, ttype, mapping = -1):
-        super(LegacyThreshold,self).__init__(name = name, ttype = ttype, mapping = mapping, run = 2)
+        super().__init__(name = name, ttype = ttype, mapping = mapping, run = 2)
 
     def addThrValue(self, value, *args, **kwargs):
         if self.ttype == ThrType.EM or self.ttype == ThrType.TAU:
@@ -296,7 +298,7 @@ class LegacyThreshold( Threshold ):
 class eEMThreshold (Threshold):
     
     def __init__(self, name, ttype = 'eEM', mapping = -1):
-        super(eEMThreshold,self).__init__(name = name, ttype = ttype, mapping = mapping, run = 3 if ttype=='eEM' else 2)
+        super().__init__(name = name, ttype = ttype, mapping = mapping, run = 3 if ttype=='eEM' else 2)
         self.suffix = self._getSuffix(name, "VHILMT")
         self.rhad = "None"
         self.reta = "None"
@@ -366,7 +368,7 @@ class eEMThreshold (Threshold):
 class eEMVarThreshold (Threshold):
 
     def __init__(self, name, ttype = 'eEM', mapping = -1):
-        super(eEMVarThreshold,self).__init__(name = name, ttype = ttype, mapping = mapping, run = 3 if ttype=='eEM' else 2)
+        super().__init__(name = name, ttype = ttype, mapping = mapping, run = 3 if ttype=='eEM' else 2)
         self.suffix = self._getSuffix(name, "VHILMT")
         self.rhad = "None"
         self.reta = "None"
@@ -436,7 +438,7 @@ class eEMVarThreshold (Threshold):
 class jEMThreshold (Threshold):
 
     def __init__(self, name, ttype = 'jEM', mapping = -1):
-        super(jEMThreshold,self).__init__(name = name, ttype = ttype, mapping = mapping, run = 3 if ttype=='jEM' else 2)
+        super().__init__(name = name, ttype = ttype, mapping = mapping, run = 3 if ttype=='jEM' else 2)
         self.suffix = self._getSuffix(name, "VHILMT")
         self.iso = "None"
         self.frac = "None"
@@ -507,7 +509,7 @@ class jEMThreshold (Threshold):
 class MuonThreshold( Threshold ):
 
     def __init__(self, name, run = 3, tgcFlags = "", mapping = -1):
-        super(MuonThreshold,self).__init__(name = name, ttype = 'MU', mapping = mapping, run = run)
+        super().__init__(name = name, ttype = 'MU', mapping = mapping, run = run)
         self.thr = None
         self.baThr = None
         self.ecThr = None
@@ -616,7 +618,7 @@ class MuonThreshold( Threshold ):
 class NSWMonThreshold( Threshold ):
 
     def __init__(self, name, mapping = -1):
-        super(NSWMonThreshold,self).__init__(name = name, ttype = ThrType.NSWMon, mapping=mapping, run = 3)
+        super().__init__(name = name, ttype = ThrType.NSWMon, mapping=mapping, run = 3)
         self.thresholdValues = [ThresholdValue(thrtype=self.ttype,value=0,**ThresholdValue.getDefaults(self.ttype))]
 
     def json(self) -> JSONType:
@@ -629,7 +631,7 @@ class NSWMonThreshold( Threshold ):
 class eTauThreshold( Threshold ):
 
     def __init__(self, name, ttype = 'eTAU', mapping = -1):
-        super(eTauThreshold,self).__init__(name = name, ttype = ttype, mapping = mapping, run = 3 if ttype=='eTAU' else 2)
+        super().__init__(name = name, ttype = ttype, mapping = mapping, run = 3 if ttype=='eTAU' else 2)
         self.et = None
         self.suffix = self._getSuffix(name, "LMTH")
         self.rCore = "None"
@@ -702,7 +704,7 @@ class eTauThreshold( Threshold ):
 class jTauThreshold( Threshold ):
 
     def __init__(self, name, ttype = 'jTAU', mapping = -1):
-        super(jTauThreshold,self).__init__(name = name, ttype = ttype, mapping = mapping, run = 3 if ttype=='jTAU' else 2)
+        super().__init__(name = name, ttype = ttype, mapping = mapping, run = 3 if ttype=='jTAU' else 2)
         self.et = None
         self.suffix = self._getSuffix(name, "LMT")
         self.isolation = "None"
@@ -766,7 +768,7 @@ class jTauThreshold( Threshold ):
 class cTauThreshold( Threshold ):
 
     def __init__(self, name, ttype = 'cTAU', mapping = -1):
-        super(cTauThreshold,self).__init__(name = name, ttype = ttype, mapping = mapping, run = 3 if ttype=='cTAU' else 2)
+        super().__init__(name = name, ttype = ttype, mapping = mapping, run = 3 if ttype=='cTAU' else 2)
         self.et = None
         self.suffix = self._getSuffix(name, "LMT")
         self.isolation = "None"
@@ -830,7 +832,7 @@ class cTauThreshold( Threshold ):
 class jJetThreshold( Threshold ):
 
     def __init__(self, name, ttype = 'jJ', mapping = -1):
-        super(jJetThreshold,self).__init__(name = name, ttype = ttype, mapping = mapping, run = 3 if ttype=='jJ' else 2)
+        super().__init__(name = name, ttype = ttype, mapping = mapping, run = 3 if ttype=='jJ' else 2)
 
     def addThrValue(self, value, *args, **kwargs):
         defargs = ThresholdValue.getDefaults(self.ttype.name)
@@ -868,7 +870,7 @@ class jJetThreshold( Threshold ):
 class gJetThreshold( Threshold ):
 
     def __init__(self, name, ttype = 'gJ', mapping = -1):
-        super(gJetThreshold,self).__init__(name = name, ttype = ttype, mapping = mapping, run = 3 if ttype=='gJ' else 2)
+        super().__init__(name = name, ttype = ttype, mapping = mapping, run = 3 if ttype=='gJ' else 2)
 
     def addThrValue(self, value, *args, **kwargs):
         defargs = ThresholdValue.getDefaults(self.ttype.name)
@@ -904,7 +906,7 @@ class gJetThreshold( Threshold ):
 class gLJetThreshold( Threshold ):
 
     def __init__(self, name, ttype = 'gLJ', mapping = -1):
-        super(gLJetThreshold,self).__init__(name = name, ttype = ttype, mapping = mapping, run = 3 if ttype=='gLJ' else 2)
+        super().__init__(name = name, ttype = ttype, mapping = mapping, run = 3 if ttype=='gLJ' else 2)
 
     def addThrValue(self, value, *args, **kwargs):
         defargs = ThresholdValue.getDefaults(self.ttype.name)
@@ -940,7 +942,7 @@ class gLJetThreshold( Threshold ):
 class XEThreshold( Threshold ):
 
     def __init__(self, name, ttype, mapping = -1):
-        super(XEThreshold,self).__init__(name = name, ttype = ttype, mapping = mapping, run = 3 if ttype.startswith('gXE') or ttype.startswith('gMHT') or ttype.startswith('jXE') or ttype.startswith('cXE') else 2)
+        super().__init__(name = name, ttype = ttype, mapping = mapping, run = 3 if ttype.startswith('gXE') or ttype.startswith('gMHT') or ttype.startswith('jXE') or ttype.startswith('cXE') else 2)
         self.xe = None
 
     def setXE(self, xe):
@@ -959,7 +961,7 @@ class XEThreshold( Threshold ):
 class LArSaturationThreshold( Threshold ):
 
     def __init__(self, name, mapping = -1):
-        super(LArSaturationThreshold,self).__init__(name = name, ttype = ThrType.LArSat, mapping=mapping, run = 3)
+        super().__init__(name = name, ttype = ThrType.LArSat, mapping=mapping, run = 3)
         self.thresholdValues = [ThresholdValue(thrtype=self.ttype,value=0,**ThresholdValue.getDefaults(self.ttype))]
 
     def json(self) -> JSONType:
@@ -971,7 +973,7 @@ class LArSaturationThreshold( Threshold ):
 class ZeroBiasThresholdTopo( Threshold ):
 
     def __init__(self, name, mapping = -1):
-        super(ZeroBiasThresholdTopo,self).__init__(name = name, ttype = ThrType.ZBTopo, mapping = mapping, run = 3)
+        super().__init__(name = name, ttype = ThrType.ZBTopo, mapping = mapping, run = 3)
         self.mask0       = 0
         self.mask1       = 0
         self.mask2       = 0
@@ -1010,7 +1012,7 @@ class ZeroBiasThresholdTopo( Threshold ):
 class TEThreshold( Threshold ):
 
     def __init__(self, name, ttype, mapping = -1):
-        super(TEThreshold,self).__init__(name = name, ttype = ttype, mapping = mapping, run = 3 if ttype.startswith('gTE') or ttype.startswith('gESPRESSO') or ttype.startswith('jTE') else 2)
+        super().__init__(name = name, ttype = ttype, mapping = mapping, run = 3 if ttype.startswith('gTE') or ttype.startswith('gESPRESSO') or ttype.startswith('jTE') else 2)
         self.xe = None
 
     def setTE(self, xe):
@@ -1028,7 +1030,7 @@ class TEThreshold( Threshold ):
 class NimThreshold( Threshold ):
 
     def __init__(self, name, ttype, mapping = -1):
-        super(NimThreshold,self).__init__(name = name, ttype = ttype, mapping = mapping, run = 3)
+        super().__init__(name = name, ttype = ttype, mapping = mapping, run = 3)
 
     def json(self) -> JSONType:
         confObj: JSONType = {
@@ -1040,7 +1042,7 @@ class NimThreshold( Threshold ):
 class MBTSSIThreshold( Threshold ):
 
     def __init__(self, name, mapping = -1):
-        super(MBTSSIThreshold,self).__init__(name = name, ttype = 'MBTSSI', mapping = mapping, run = 3)
+        super().__init__(name = name, ttype = 'MBTSSI', mapping = mapping, run = 3)
         self.voltage = None
 
     def setVoltage(self, voltage):
@@ -1057,7 +1059,7 @@ class MBTSSIThreshold( Threshold ):
 class MBTSThreshold( Threshold ):
 
     def __init__(self, name, mapping = -1):
-        super(MBTSThreshold,self).__init__(name = name, ttype = 'MBTS', mapping = mapping, run = 3)
+        super().__init__(name = name, ttype = 'MBTS', mapping = mapping, run = 3)
         self.sectors = []
 
     def addSector(self, mbtsSector):
@@ -1077,7 +1079,7 @@ class ZeroBiasThreshold( Threshold ):
     __slots__ = [ 'seed','seed_ttype', 'seed_multi', 'bcdelay' ]
 
     def __init__(self, name, mapping = -1):
-        super(ZeroBiasThreshold,self).__init__(name = name, ttype = 'ZB', mapping = mapping, run = 2)
+        super().__init__(name = name, ttype = 'ZB', mapping = mapping, run = 2)
         self.seed       = ''
         self.seed_ttype = ''
         self.seed_multi = 0
@@ -1205,7 +1207,7 @@ class TopoThreshold( Threshold ):
             run = 2
         else:
             run = 3
-        super(TopoThreshold,self).__init__(name = name, ttype = algCategory.key, run = run)
+        super().__init__(name = name, ttype = algCategory.key, run = run)
         if algCategory not in AlgCategory.getAllCategories(run):
             raise RuntimeError("%r is not a valid topo category" % algCategory)
 

@@ -2,9 +2,11 @@
 
 from typing import cast
 
+from TriggerMenuMT.L1.Menu.MenuMapping import MenuMetaInfo
+
 from .CTP import CTP
 from .Items import MenuItemsCollection
-from .Thresholds import MenuThresholdsCollection
+from .Thresholds import MenuThresholdsCollection, Threshold
 from .TopoAlgorithms import MenuTopoAlgorithmsCollection, AlgType, AlgCategory
 from .TopoAlgos import MultiplicityAlgo, SortingAlgo
 from .Boards import MenuBoardsCollection
@@ -24,10 +26,15 @@ class L1Menu:
     This class holds everything that is needed to define the menu
     """
 
-    def __init__(self, menuName, flags, run: int):
-        self.menuName = menuName
-
-        self.menuFullName = L1MenuFlags.MenuSetup()
+    def __init__(self, menuName, flags, run: int, *, menuInfo: MenuMetaInfo | None = None):
+        self.menuInfo = menuInfo
+        if self.menuInfo:
+            self.menuName = self.menuInfo.menuBaseName
+            self.menuFullName = L1MenuFlags.MenuSetup()
+            run = self.menuInfo.run
+        else:
+            self.menuName = menuName
+            self.menuFullName = L1MenuFlags.MenuSetup()
 
         # items in menu
         self.items: MenuItemsCollection = MenuItemsCollection()
@@ -58,6 +65,8 @@ class L1Menu:
 
     @property
     def isRun4Menu(self):
+        if self.menuInfo is not None and self.menuInfo.run == 4:
+            return True 
         return "run4" in self.menuName.lower()
 
     def addItem(self, item):
@@ -68,7 +77,7 @@ class L1Menu:
         return self.items[name]
 
 
-    def addThreshold(self, threshold):
+    def addThreshold(self, threshold: Threshold):
         self.thresholds += threshold
 
 
@@ -86,7 +95,7 @@ class L1Menu:
 
 
     def setupCTPMonitoring(self):
-        self.ctp.setupMonitoring(self.menuName, self.items, self.thresholds, self.connectors, self.menuFullName)
+        self.ctp.setupMonitoring(self.menuName, self.items, self.thresholds, self.connectors, self.menuFullName, menuInfo=self.menuInfo)
         
     def check(self):
         log.info("Doing L1 Menu checks")

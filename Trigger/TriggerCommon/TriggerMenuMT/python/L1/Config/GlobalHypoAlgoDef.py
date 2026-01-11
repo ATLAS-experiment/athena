@@ -18,13 +18,9 @@ class GlobalHypoAlgoDef:
     def registerGlobalHypoAlgos(tm):
 
         # Multiplicity algorithms
-
-        alg = GlobalMultiplicityAlgo( name = 'eEMall', input = 'eEM', output = 'eEMall' )
-        # alg.addgeneric('InputWidth', HW.eEmInputWidth)
-        # alg.addgeneric('OutputWidth', HW.eEmInputWidth)
-        # alg.addvariable('REtaMin',   0)
-        # alg.addvariable('RHadMin',   0)
-        # alg.addvariable('WsTotMin',  0)
-        tm.registerTopoAlgo(alg)  
+        for emThr in ['eEM5', 'eEM7', 'eEM9', 'eEM10L', 'eEM12L', 'eEM15', 'eEM18', 'eEM18L', 
+            'eEM18M', 'eEM22M', 'eEM24L']:
+            alg = GlobalMultiplicityAlgo( name = f'Mult_{emThr}', input = 'eEM', output = emThr )
+            tm.registerTopoAlgo(alg)
 
 

@@ -6,6 +6,7 @@
 #
 
 from AthenaCommon.Logging import logging
+from TriggerMenuMT.L1.Menu.MenuMapping import MenuMetaInfo
 log = logging.getLogger(__name__)
 
 # The trigger types
@@ -38,9 +39,11 @@ class ItemDef:
         return d
 
     @staticmethod
-    def registerItems(tc, menuName):
-        if "run4" not in menuName:
+    def registerItems(tc, menuInfo: MenuMetaInfo):
+        if menuInfo.run != 4:
             return
+        
+        menuName = menuInfo.menuBaseName
 
         # Phase-II
         d = ItemDef.threshold_conditions(tc)

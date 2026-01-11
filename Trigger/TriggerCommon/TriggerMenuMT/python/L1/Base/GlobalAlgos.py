@@ -1,9 +1,14 @@
 # Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
+from __future__ import annotations
+
 from abc import abstractmethod
-from typing import Any
+from typing import Any, TYPE_CHECKING
 from AthenaCommon.Logging import logging
 import re
+
+if TYPE_CHECKING:
+    from TriggerMenuMT.L1.Base.Thresholds import MenuThresholdsCollection
 
 from .ThresholdType import ThrType
 
@@ -50,6 +55,11 @@ class GlobalAlgo:
     def name(self) -> str:
         return self._name
 
+    @property
+    def classtype(self) -> str:
+        return self._klass
+
+
     def addvariable(self, name, value, selection = -1):
         if name in self._availableVars:
             self.variables += [ Variable(name, selection, value) ]
@@ -86,6 +96,11 @@ class GlobalMultiplicityAlgo(GlobalHypoAlgo):
                 return gen.value
         raise RuntimeError("No output defined for GlobalMultiplicityAlgo %s" % self.name)
 
+    def setThresholds(self, thresholds):
+        # link to all thresholds in the menu need for configuration
+        self.menuThr = thresholds
+
+
 class GlobalDecisionAlgo(GlobalHypoAlgo):
     def __init__(self, name: str):
         super().__init__( klass="GlobalDecisionAlgo", name=name)
@@ -114,7 +129,7 @@ class TopoAlgo:
     def isMultiplicityAlg(self) -> bool:
         return False
 
-    def setThresholds(self, thresholds):
+    def setThresholds(self, thresholds: MenuThresholdsCollection):
         # link to all thresholds in the menu need for configuration
         self.menuThr = thresholds
 
@@ -145,7 +160,7 @@ class TopoAlgo:
 class SortingAlgo(TopoAlgo):
     
     def __init__(self, classtype, name, inputs, outputs):
-        super(SortingAlgo, self).__init__(classtype=classtype, name=name)
+        super().__init__(classtype=classtype, name=name)
         self.inputs = inputs
         self.outputs = outputs
         self.inputvalue=  self.inputs
@@ -159,7 +174,7 @@ class SortingAlgo(TopoAlgo):
         return True
         
     def json(self):
-        confObj = super(SortingAlgo, self).json()
+        confObj = super().json()
         confObj["input"] = self.inputvalue
         confObj["output"] = self.outputs
         confObj["fixedParameters"] = {}
@@ -190,7 +205,7 @@ class SortingAlgo(TopoAlgo):
 class DecisionAlgo(TopoAlgo):
 
     def __init__(self, classtype, name, inputs, outputs):
-        super(DecisionAlgo, self).__init__(classtype=classtype, name=name)
+        super().__init__(classtype=classtype, name=name)
         self.inputs = inputs if type(inputs)==list else [inputs]
         self.outputs = outputs if type(outputs)==list else [outputs]
 
@@ -198,7 +213,7 @@ class DecisionAlgo(TopoAlgo):
         return True
 
     def json(self):
-        confObj = super(DecisionAlgo, self).json()
+        confObj = super().json()
         confObj["input"] = self.inputs # list of input names
         confObj["output"] = self.outputs # list of output names
         # fixed parameters
@@ -255,7 +270,7 @@ class MultiplicityAlgo(TopoAlgo):
         pass
 
     def json(self):
-        confObj = super(MultiplicityAlgo, self).json()
+        confObj = super().json()
         confObj["threshold"] = self.threshold
         confObj["input"] = self.input
         confObj["output"] = self.outputs

@@ -1,6 +1,7 @@
 # Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 from AthenaCommon.Logging import logging
+from TriggerMenuMT.L1.Menu.MenuMapping import MenuMetaInfo
 log = logging.getLogger(__name__)
 
 from ..Config.MonitorDef import MonitorDef
@@ -26,7 +27,7 @@ class CTP:
         self.bunchGroupSet.name = name
         return self.bunchGroupSet
 
-    def setupMonitoring(self, menuName, menuItems, menuThresholds, connectors, menuFullName):
+    def setupMonitoring(self, menuName, menuItems, menuThresholds, connectors, menuFullName, *, menuInfo: MenuMetaInfo | None = None):
         ##  # add the CTPIN counters
         ##  for counter in MonitorDef.ctpinCounters( menuThresholds ):
         ##      self.counters.addCounter( counter )
@@ -40,10 +41,9 @@ class CTP:
             self.counters.addCounter( counter )
 
         # mark the L1 Items that they should be monitored
-        MonitorDef.applyItemCounter( menuName, menuItems, menuFullName )
-        pass
+        MonitorDef.applyItemCounter( menuName, menuItems, menuFullName, menuInfo=menuInfo )
 
-    def checkConnectorAvailability(self, availableConnectors, menuToLoad):
+    def checkConnectorAvailability(self, availableConnectors, menuInputFile: str):
         inputConnectorList = []
         inputConnectorList += self.inputConnectors.get("optical", {}).values()
         inputConnectorList += self.inputConnectors.get("electrical", {}).values()
@@ -52,7 +52,10 @@ class CTP:
         inputConnectorList += self.inputConnectors.get("ctpin", {}).get("slot9", {}).values()
         for connName in inputConnectorList:
             if connName != '' and connName not in availableConnectors:
-                msg = "Connector '%s' requested in L1/Config/CTPInputConfig.py not defined as menu input. Please add it to L1/Menu/Menu_%s.py" % (connName, menuToLoad[1])
+                msg = (
+                    f"Connector '{connName}' requested in L1/Config/CTPInputConfig.py not defined as menu input. "
+                    f"Please add it to L1/Menu/Menu_{menuInputFile}.py"
+                )
                 log.error(msg)
                 raise RuntimeError(msg)
 

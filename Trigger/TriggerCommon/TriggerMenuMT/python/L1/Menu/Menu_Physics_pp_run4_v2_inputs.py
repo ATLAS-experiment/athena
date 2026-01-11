@@ -1,5 +1,7 @@
 # Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
+from typing import Any
+from TriggerMenuMT.L1.Base.Boards import BoardType
 from ..Base.L1MenuFlags import L1MenuFlags
 
 def defineInputsMenu():
@@ -9,9 +11,9 @@ def defineInputsMenu():
     # https://twiki.cern.ch/twiki/bin/view/Atlas/LevelOneCentralTriggerSetup#CTPIN_Slot_9
     #-----------------------------------
 
-    ctpinBoard = {"Ctpin9" : {}}
-    muctpiBoard = {"MuCTPi": {}}
-    globalBoard = {"L0Global": {}}
+    ctpinBoard: dict[str,Any] = {"Ctpin9" : { "type": BoardType.CTPIN }}
+    muctpiBoard: dict[str,Any] = {"MuCTPi": { "type": BoardType.MUCTPI }}
+    globalBoard: dict[str,Any] = {"L0Global": { "type": BoardType.L0GLOBAL }}
     L1MenuFlags.boards().clear()
     L1MenuFlags.boards().update(ctpinBoard)
     L1MenuFlags.boards().update(muctpiBoard)

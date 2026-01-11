@@ -7,6 +7,7 @@ from AthenaCommon.Logging import logging
 log = logging.getLogger(__name__)
 
 from .TopoAlgos import DecisionAlgo, MultiplicityAlgo, SortingAlgo, TopoAlgo
+from .GlobalAlgos import GlobalAlgo, GlobalMultiplicityAlgo
 
 class AlgType(Enum):
     SORT = ('sortingAlgorithms')
@@ -57,7 +58,7 @@ class MenuTopoAlgorithmsCollection:
 
     def __init__(self, run):
         # all algos that are in menu (new and legacy)
-        self.topoAlgos: dict[AlgCategory, dict[AlgType, dict[str, TopoAlgo]]] = {}
+        self.topoAlgos: dict[AlgCategory, dict[AlgType, dict[str, TopoAlgo | GlobalAlgo]]] = {}
         for cat in AlgCategory.getAllCategories(run):
             self.topoAlgos[cat] = {}
             if cat in [AlgCategory.TOPO, AlgCategory.MUCTPI, AlgCategory.LEGACY]:
@@ -78,6 +79,8 @@ class MenuTopoAlgorithmsCollection:
         elif isinstance(algo, SortingAlgo):
             algType = AlgType.SORT
         elif isinstance(algo, MultiplicityAlgo):
+            algType = AlgType.MULT
+        elif isinstance(algo, GlobalMultiplicityAlgo):
             algType = AlgType.MULT
         else:
             raise RuntimeError("Trying to add topo algorithm %s of unknown type %s to the menu" % (algo.name, type(algo)))
