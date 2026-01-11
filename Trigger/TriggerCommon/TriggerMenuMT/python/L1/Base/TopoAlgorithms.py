@@ -6,13 +6,12 @@ from enum import Enum
 from AthenaCommon.Logging import logging
 log = logging.getLogger(__name__)
 
-from .TopoAlgos import DecisionAlgo, MultiplicityAlgo, SortingAlgo
+from .TopoAlgos import DecisionAlgo, MultiplicityAlgo, SortingAlgo, TopoAlgo
 
 class AlgType(Enum):
     SORT = ('sortingAlgorithms')
     DEC = ('decisionAlgorithms') 
     MULT = ('multiplicityAlgorithms')
-
     def __init__(self, key):
         self.key = key
     
@@ -21,10 +20,10 @@ class AlgCategory(Enum):
     MUCTPI = (2, 'MUTOPO', 'muctpi topo', 'TopoAlgoDefMuctpi')
     LEGACY = (3, 'R2TOPO', 'legacy topo', 'TopoAlgoDefLegacy')
     MULTI = (4, 'MULTTOPO', 'multiplicity topo', 'TopoAlgoDefMultiplicity')
-    GLOBHYPO = (5, 'GLOBHYPO', 'L0 global hypo', 'GlobalHypoAlgoDef')
+    GLOBHYPO = (5, 'hypoAlgorithm', 'L0 global hypo', 'GlobalHypoAlgoDef')
 
     def __init__(self, _, key, desc, defFile ):
-        self.key = key
+        self.key: str = key  # key for json output
         self.prefix = key + '_' if key else ''
         self.desc = desc
         self.defFile = defFile
@@ -58,7 +57,7 @@ class MenuTopoAlgorithmsCollection:
 
     def __init__(self, run):
         # all algos that are in menu (new and legacy)
-        self.topoAlgos = {}
+        self.topoAlgos: dict[AlgCategory, dict[AlgType, dict[str, TopoAlgo]]] = {}
         for cat in AlgCategory.getAllCategories(run):
             self.topoAlgos[cat] = {}
             if cat in [AlgCategory.TOPO, AlgCategory.MUCTPI, AlgCategory.LEGACY]:

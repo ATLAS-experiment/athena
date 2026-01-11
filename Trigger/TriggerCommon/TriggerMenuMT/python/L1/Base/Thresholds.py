@@ -13,6 +13,7 @@ from ..Config.TypeWideThresholdConfig import getTypeWideThresholdConfig
 from .ThresholdType import ThrType
 from .Limits import CaloLimits as CL
 from .TopoAlgorithms import AlgCategory
+from .Typing import JSONType
 
 log = logging.getLogger(__name__)
 
@@ -144,7 +145,7 @@ class Threshold:
             return float(self.thresholdValues[0].value)
 
     @abstractmethod
-    def json(self) -> dict[str,Any]:
+    def json(self) -> JSONType:
         ...
 
 
@@ -618,8 +619,8 @@ class NSWMonThreshold( Threshold ):
         super(NSWMonThreshold,self).__init__(name = name, ttype = ThrType.NSWMon, mapping=mapping, run = 3)
         self.thresholdValues = [ThresholdValue(thrtype=self.ttype,value=0,**ThresholdValue.getDefaults(self.ttype))]
 
-    def json(self):
-        confObj = {
+    def json(self) -> JSONType:
+        confObj: JSONType = {
             "mapping": self.mapping
         }
         return confObj
@@ -961,8 +962,8 @@ class LArSaturationThreshold( Threshold ):
         super(LArSaturationThreshold,self).__init__(name = name, ttype = ThrType.LArSat, mapping=mapping, run = 3)
         self.thresholdValues = [ThresholdValue(thrtype=self.ttype,value=0,**ThresholdValue.getDefaults(self.ttype))]
 
-    def json(self):
-        confObj = {
+    def json(self) -> JSONType:
+        confObj: JSONType = {
             "mapping": self.mapping
         }
         return confObj
@@ -1029,8 +1030,8 @@ class NimThreshold( Threshold ):
     def __init__(self, name, ttype, mapping = -1):
         super(NimThreshold,self).__init__(name = name, ttype = ttype, mapping = mapping, run = 3)
 
-    def json(self):
-        confObj = {
+    def json(self) -> JSONType:
+        confObj: JSONType = {
             "mapping": self.mapping
         }
         return confObj
@@ -1213,8 +1214,8 @@ class TopoThreshold( Threshold ):
         """returns a string that can be used as a varname"""
         return self.name.replace('.','').replace('-','_') # we can not have '.' or '-' in the variable name
 
-    def json(self):
-        confObj = {
+    def json(self) -> JSONType:
+        confObj: JSONType = {
             "mapping": self.mapping
         }
         return confObj

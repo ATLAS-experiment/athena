@@ -200,7 +200,7 @@ class L1MenuConfig(object):
         for cat in AlgCategory.getAllCategories(run=4):
             outputLines = []
             for algo in self._registeredTopoAlgos[cat].values():
-                outputLines += algo.outputs if (type(algo.outputs) is list) else [ algo.outputs ]
+                outputLines += algo.output() if (isinstance(algo.output(), list)) else [ algo.output() ]
             _topoTriggers[cat] = sorted(outputLines)
             log.info("... found %i topo triggerlines (source: %s)", len(_topoTriggers[cat]), cat )
             log.debug("%r", _topoTriggers[cat])
@@ -211,6 +211,7 @@ class L1MenuConfig(object):
         for cat in topoAlgCategoryList:
             multibitTopoTriggers = set()
             for topoLineName in _topoTriggers[cat]:
+                print(f"{topoLineName=}")
                 m = multibitPattern.match(topoLineName) # tries to match "trigger[bit]"
                 if m:
                     topoThrName = cat.prefix + m.groupdict()['line']
@@ -354,7 +355,10 @@ class L1MenuConfig(object):
             defFile = "TriggerMenuMT.L1.Config.%s" % self.currentAlgoDef.defFile
             log.info("Importing %s", defFile)
             try:
-                import_module(defFile).__getattribute__(self.currentAlgoDef.defFile).registerTopoAlgos(self)
+                if self.run == 3:
+                    import_module(defFile).__getattribute__(self.currentAlgoDef.defFile).registerTopoAlgos(self)
+                else:
+                    import_module(defFile).__getattribute__(self.currentAlgoDef.defFile).registerGlobalHypoAlgos(self)
             except ImportError as ie:
                 log.fatal("No topo algorithm defintion found. %s", ie.msg)
                 raise

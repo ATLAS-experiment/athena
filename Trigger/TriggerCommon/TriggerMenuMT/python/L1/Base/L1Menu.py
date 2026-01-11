@@ -6,6 +6,7 @@ from .CTP import CTP
 from .Items import MenuItemsCollection
 from .Thresholds import MenuThresholdsCollection
 from .TopoAlgorithms import MenuTopoAlgorithmsCollection, AlgType, AlgCategory
+from .TopoAlgos import MultiplicityAlgo, SortingAlgo
 from .Boards import MenuBoardsCollection
 from .Connectors import MenuConnectorsCollection, CType
 from .MenuUtils import get_smk_psk_Name
@@ -410,7 +411,7 @@ class L1Menu:
         # loop over multiplicity algorithms and get the min et values
         thresholdMin = {}
         for algo in self.topoAlgos.topoAlgos[AlgCategory.MULTI][AlgType.MULT]:
-            alg = self.topoAlgos.topoAlgos[AlgCategory.MULTI][AlgType.MULT][algo]
+            alg = cast(MultiplicityAlgo, self.topoAlgos.topoAlgos[AlgCategory.MULTI][AlgType.MULT][algo])
             threshold = alg.threshold
             inputtype = alg.input
             if 'cTAU' in inputtype:
@@ -436,7 +437,7 @@ class L1Menu:
 
         # loop over sorting algorithms and get the min et values
         for algo in self.topoAlgos.topoAlgos[AlgCategory.TOPO][AlgType.SORT]:
-            alg = self.topoAlgos.topoAlgos[AlgCategory.TOPO][AlgType.SORT][algo]
+            alg = cast(SortingAlgo, self.topoAlgos.topoAlgos[AlgCategory.TOPO][AlgType.SORT][algo])
             if alg.inputvalue == 'MuonTobs':
                 continue
             for (pos, variable) in enumerate(alg.variables): 

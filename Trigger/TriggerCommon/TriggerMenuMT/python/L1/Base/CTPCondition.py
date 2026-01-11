@@ -7,7 +7,7 @@ from .Logic import Logic, LogicType
 
 class ThrCondition(Logic):
     def __init__(self, threshold, multiplicity=1):
-        super(ThrCondition, self).__init__( logicType = LogicType.THRESHOLD)
+        super().__init__( logicType = LogicType.THRESHOLD)
         self._threshold = threshold
         self._multiplicity = multiplicity
 

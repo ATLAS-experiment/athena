@@ -31,7 +31,7 @@ class ItemDef:
     otherTopoNames = ddict(list)
 
     @staticmethod
-    def threshold_conditions(tc):
+    def threshold_conditions(tc) -> type:
         class d(metaclass=meta_d): pass
 
         # ... and make them accessible by their name
@@ -54,11 +54,11 @@ class ItemDef:
     def registerRequiredItems(d, menuName):
         """Register required L1 items for further use"""
         physcond = d.BGRP0 & d.BGRP1
-        calibcond  = d.BGRP0 & d.BGRP2
+        calibcond = d.BGRP0 & d.BGRP2
         cosmiccond = d.BGRP0 & d.BGRP3
         unpaired_isocond = d.BGRP0 & d.BGRP4 # unpaired isolated (satellite bunches)
         firstempty = d.BGRP0 & d.BGRP6
-        bgrp7cond           = d.BGRP0 & d.BGRP7 # No unpaired anymore
+        bgrp7cond  = d.BGRP0 & d.BGRP7 # No unpaired anymore
         bgrp10cond = d.BGRP0 & d.BGRP10
         bgrp11cond = d.BGRP0 & d.BGRP11
         bgrp12cond = d.BGRP0 & d.BGRP12

@@ -30,7 +30,7 @@ class ThrType( Enum ):
     TOPO = 60; MUTOPO = 61; MULTTOPO = 62; R2TOPO = 63 # noqa: E702
 
     # global hypo based thresholds
-    GLOBHYPO = 70
+    hypoAlgorithm = 70
 
     @staticmethod
     def LegacyTypes():

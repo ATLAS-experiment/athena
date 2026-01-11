@@ -1,5 +1,7 @@
 # Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
+from abc import abstractmethod
+from typing import Any
 from AthenaCommon.Logging import logging
 import re
 
@@ -14,14 +16,80 @@ log = logging.getLogger(__name__)
 ## During the build, from each class a python class is generated and put in the release
 ## Those generated python classes derive fro SortingAlgo and DecisionAlgo below.
 
-class GlobalAlgo:
-    pass
+class Variable:
+    def __init__(self, name, selection, value):
+        self.name = name
+        self.selection = int(selection)
+        self.value = int(value)
+            
+class Generic:
+    def __init__(self, name, value):
+        self.name = name
+        from L1TopoHardware.L1TopoHardware import HardwareConstrainedParameter
+        if isinstance(value,HardwareConstrainedParameter):
+            self.value = ":%s:" % value.name
+        else:
+            self.value = value
 
-class GlobalDecisionAlgo(GlobalAlgo):
-    pass
+
+class GlobalAlgo:
+
+    # list of available variable names (will be overridden or extended in derived classes)
+    _availableVars: list[str] = []
+
+    def __init__(self, klass: str, name: str):
+        self._klass: str = klass
+        self._name: str = name
+        self.generics = []
+        self.variables = []
+
+    def __str__(self):
+        return f"{self._name}@{self._klass}"
+
+    @property
+    def name(self) -> str:
+        return self._name
+
+    def addvariable(self, name, value, selection = -1):
+        if name in self._availableVars:
+            self.variables += [ Variable(name, selection, value) ]
+            return self
+        log.fatal("Variable parameter '%s' does not exist for algorithm %s of type %s,\navailable parameters are %r", name,self._name, self._klass, self._availableVars)
+        raise RuntimeError("Illegal variable parameter '%s'" % name)
+
+    def addgeneric(self, name, value):
+        if name in self._availableVars:
+            self.generics += [ Generic(name, value) ]
+        else:
+            log.fatal("Generic parameter '%s' does not exist for algorithm %s of type %s,\navailable parameters are %r" % (name,self._name, self._klass, self._availableVars))
+            raise RuntimeError("Illegal generic parameter '%s'" % name)
+        return self
+
+    @abstractmethod
+    def json(self) -> dict[str, Any]: ...
 
 class GlobalHypoAlgo(GlobalAlgo):
-    pass
+    def __init__(self, klass: str, name: str):
+        super().__init__( klass=klass, name=name)
+
+class GlobalMultiplicityAlgo(GlobalHypoAlgo):
+    _availableVars: list[str] = ["input", "output"]
+
+    def __init__(self, name: str, input: str, output: str):
+        super().__init__( klass="GlobalMultiplicityAlgo", name=name)
+        self.addgeneric('input', input)
+        self.addgeneric('output', output)
+
+    def output(self) -> str | list[str]:
+        for gen in self.generics:
+            if gen.name == "output":
+                return gen.value
+        raise RuntimeError("No output defined for GlobalMultiplicityAlgo %s" % self.name)
+
+class GlobalDecisionAlgo(GlobalHypoAlgo):
+    def __init__(self, name: str):
+        super().__init__( klass="GlobalDecisionAlgo", name=name)
+
 
 class TopoAlgo:
 
@@ -73,22 +141,6 @@ class TopoAlgo:
     def getScaleToCountsEM(self):  # legacy Et conversion!!
         tw = self.menuThr.typeWideThresholdConfig(ThrType["EM"])
         return 1000 // tw["resolutionMeV"]
-
-class Variable(object):
-    def __init__(self, name, selection, value):
-        self.name = name
-        self.selection = int(selection)
-        self.value = int(value)
-            
-class Generic(object):
-    def __init__(self, name, value):
-        self.name = name
-        from L1TopoHardware.L1TopoHardware import HardwareConstrainedParameter
-        if isinstance(value,HardwareConstrainedParameter):
-            self.value = ":%s:" % value.name
-        else:
-            self.value = value
-
         
 class SortingAlgo(TopoAlgo):
     

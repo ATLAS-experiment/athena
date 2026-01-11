@@ -271,8 +271,8 @@ class TopoAlgoDef:
             {"otype" : "FjJ",  "ocut" : 40, "olist" : "ab", "etamin" : 30, "etamax" : 49}, # FjJab
         ]
         for x in algoList:
-            class d:
-                pass
+            class d:  # type: ignore
+                __slots__ = ('otype', 'ocut', 'olist', 'etamin', 'etamax')
             for k in x:
                 setattr (d, k, x[k])
             listname = "%s%s" % (d.otype,d.olist)
@@ -293,8 +293,8 @@ class TopoAlgoDef:
             {"otype" : "AjJ", "ocut" : 0,  "olist" : "s",  "etamin" : 0,  "etamax" : 49}, # AjJs
         ]
         for x in algoList:
-            class d:
-                pass
+            class d: # type: ignore
+                __slots__ = ('otype', 'ocut', 'olist', 'etamin', 'etamax')
             for k in x:
                 setattr (d, k, x[k])
             listname = "%s%s" % (d.otype,d.olist)
@@ -386,8 +386,8 @@ class TopoAlgoDef:
             {"otype" : "eEM", "ocut1" : 24,  "ocut2" : 24, "olist" : "sm", "nleading1" : 2, "minInvm" : 60, "maxInvm" : 100, "inputwidth": HW.eEmOutputWidthSort},
         ]
         for x in algoList:
-            class d:
-                pass
+            class d:  # type: ignore
+                __slots__ = ('otype', 'ocut1', 'ocut2', 'olist', 'nleading1', 'minInvm', 'maxInvm', 'inputwidth')
             for k in x:
                 setattr (d, k, x[k])
             toponame = 'ZEE-eEM24sm2'
@@ -415,8 +415,8 @@ class TopoAlgoDef:
         ]
 
         for x in algolist:
-            class d:
-                pass
+            class d:  # type: ignore
+                __slots__ = ('minDr', 'maxDr', 'mult', 'otype1', 'otype2', 'ocut2', 'olist2')
             for k in x:
                 setattr (d, k, x[k])
             obj1 = "%s%s" % ((str(d.mult) if d.mult>1 else ""), d.otype1)
@@ -456,8 +456,8 @@ class TopoAlgoDef:
             {"minDr": 2, "maxDr": 99, "mult": 2, "otype1" : "MU3Vab" ,  "otype2" : "",       }, #2DR99-2MU3Vab
         ]
         for x in listofalgos:
-            class d:
-                pass
+            class d:  # type: ignore
+                __slots__ = ('minDr', 'maxDr', 'mult', 'otype1', 'otype2')
             for k in x:
                 setattr (d, k, x[k])
             obj1 = "%s%s" % ((str(d.mult) if d.mult>1 else ""), d.otype1)
@@ -492,8 +492,8 @@ class TopoAlgoDef:
             {"minDr": 0, "maxDr": 12, "mult": 2, "otype1" : "MU3Vab", "otype2" : "", }, #0DR12C-2MU3Vab 
         ]
         for x in listofalgos:
-            class d:
-                pass
+            class d:  # type: ignore
+                __slots__ = ('minDr', 'maxDr', 'mult', 'otype1', 'otype2')
             for k in x:
                 setattr (d, k, x[k])
             obj1 = "%s%s" % ((str(d.mult) if d.mult>1 else ""), d.otype1)
@@ -530,8 +530,8 @@ class TopoAlgoDef:
             {"minInvm":7, "maxInvm":22, "minDr": 0, "maxDr": 20, "mult": 2, "otype1" : "MU3Vab", "otype2" : "", }, #7INVM22-0DR20C-2MU3Vab
         ]
         for x in listofalgos:
-            class d:
-                pass
+            class d:  # type: ignore
+                __slots__ = ('minInvm', 'maxInvm', 'minDr', 'maxDr', 'mult', 'otype1', 'otype2')
             for k in x:
                 setattr (d, k, x[k])
             obj1 = "%s%s" % ((str(d.mult) if d.mult>1 else ""), d.otype1)
@@ -590,8 +590,10 @@ class TopoAlgoDef:
               "otype2" : "eTAU", "ocut2": 12, "olist2": "ab", "nleading2": HW.eTauOutputWidthSelect},#0DETA24_10DPHI99_eTAU30ab_eTAU12ab
         ]
         for x in algolist:            
-            class d:
-                pass
+            class d:  # type: ignore
+                __slots__ = ('minDeta', 'maxDeta', 'minDphi', 'maxDphi', 'mult',
+                             'otype1', 'ocut1', 'olist1', 'nleading1',
+                             'otype2', 'ocut2', 'olist2', 'nleading2')
             for k in x:
                 setattr (d, k, x[k])
             obj1 = "%s%s" % ((str(d.mult) if d.mult>1 else ""), d.otype1+str(d.ocut1)+str(d.olist1))
@@ -631,8 +633,8 @@ class TopoAlgoDef:
             {"itemNameMinHT": 190, "minHT": 300, "otype" : "jJ", "ocut" : 40, "olist" : "s",   "nleading" : 5, "inputwidth": HW.jJetOutputWidthSort, "oeta" : 21}, #HT190-jJ40s5pETA21
         ]
         for x in algoList:
-            class d:
-                pass
+            class d:  # type: ignore
+                __slots__ = ('itemNameMinHT', 'minHT', 'otype', 'ocut', 'olist', 'nleading', 'inputwidth', 'oeta')
             for k in x:
                 setattr (d, k, x[k])
             toponame = "HT%d-%s%s%s%spETA%s" % (d.itemNameMinHT, d.otype, str(d.ocut), d.olist, str(d.nleading) if d.olist=="s" else "", str(d.oeta))
@@ -664,8 +666,8 @@ class TopoAlgoDef:
 
 
         for x in DR_2MU5FMap:
-            class d:
-                pass
+            class d:  # type: ignore
+                __slots__ = ('algoname', 'minDR', 'maxDR', 'otype1', 'mult1')
             for k in x:
                 setattr (d, k, x[k])
             inputList = [ d.otype1 ]
@@ -717,8 +719,10 @@ class TopoAlgoDef:
         ]
 
         for x in eINVM_DPHIMap:
-            class d:
-                pass
+            class d:  # type: ignore
+                __slots__ = ('algoname', 'minInvm', 'maxInvm', 'minDphi', 'maxDphi',
+                             'otype1', 'olist1', 'ocut1List', 'nleading1',
+                             'otype2', 'ocut2List', 'olist2', 'nleading2')
             for k in x:
                 setattr (d, k, x[k])
             inputList = [d.otype1 + d.olist1, d.otype2 + d.olist1]
@@ -765,8 +769,10 @@ class TopoAlgoDef:
         }
         ]
         for x in INVM_DISAMB_Map:
-            class d:
-                pass
+            class d:  # type: ignore
+                __slots__ = ('algoname', 'disamb', 'minInvm', 'maxInvm',
+                             'otype1', 'ocut1a', 'ocut1b', 'olist1', 'nleading1', 'inputwidth1',
+                             'otype2', 'ocut2', 'olist2', 'nleading2', 'inputwidth2', 'numResultBits')
             for k in x:
                 setattr(d,k,x[k])
             inputList = [d.otype1 + d.olist1, d.otype2 + d.olist2]
@@ -825,8 +831,10 @@ class TopoAlgoDef:
         ]
 
         for x in eINVM_DPHIMap:
-            class d:
-                pass
+            class d:  # type: ignore
+                __slots__ = ('algoname', 'minInvm', 'maxInvm', 'minDphi', 'maxDphi',
+                             'otype1', 'olist1', 'ocut1List', 'nleading1',
+                             'otype2', 'ocut2List', 'olist2', 'nleading2')
             for k in x:
                 setattr (d, k, x[k])
             inputList = [d.otype1 + d.olist1, d.otype2 + d.olist1]
@@ -883,8 +891,10 @@ class TopoAlgoDef:
         ]
 
         for x in eINVM_DRMap:
-            class d:
-                pass
+            class d:  # type: ignore
+                __slots__ = ('algoname', 'minInvm', 'maxInvm', 'minDR', 'maxDR',
+                             'otype1', 'olist1', 'ocut1List', 'nleading1',
+                             'otype2', 'ocut2List', 'olist2', 'nleading2')
             for k in x:
                 setattr (d, k, x[k])
             inputList = [d.otype1 + d.olist1, d.otype2 + d.olist1]
@@ -940,8 +950,10 @@ class TopoAlgoDef:
         ]
 
         for x in eINVM_Ranges_DRMap:
-            class d:
-                pass
+            class d:  # type: ignore
+                __slots__ = ('algoname', 'minInvm', 'maxInvm', 'minDR', 'maxDR',
+                             'otype1', 'olist1', 'ocut1List', 'nleading1',
+                             'otype2', 'ocut2List', 'olist2', 'nleading2')
             for k in x:
                 setattr (d, k, x[k])
             inputList = [d.otype1 + d.olist1, d.otype2 + d.olist1]
@@ -998,8 +1010,10 @@ class TopoAlgoDef:
         ]
 
         for x in eINVM_Ranges_Asymm_DRMap:
-            class d:
-                pass
+            class d:  # type: ignore
+                __slots__ = ('algoname', 'minInvm', 'maxInvm', 'minDR', 'maxDR',
+                             'otype1', 'olist1', 'ocut1List', 'nleading1',
+                             'otype2', 'ocut2List', 'olist2', 'nleading2')
             for k in x:
                 setattr (d, k, x[k])
             inputList = [d.otype1 + d.olist1, d.otype2 + d.olist1]
@@ -1040,8 +1054,9 @@ class TopoAlgoDef:
         }
         ]
         for x in INVM_DR_2MU5VFabMap:
-            class d:
-                pass
+            class d:  # type: ignore
+                __slots__ = ('algoname', 'minInvm', 'maxInvm', 'minDR', 'maxDR',
+                             'otype1', 'mult1')
             for k in x:
                 setattr(d,k,x[k])
             inputList = d.otype1 
@@ -1078,8 +1093,8 @@ class TopoAlgoDef:
         }
         ]
         for x in INVM_2MU3VFab_Map:
-            class d:
-                pass
+            class d:  # type: ignore
+                __slots__ = ('algoname', 'minInvm', 'maxInvm', 'mult1', 'otype1')
             for k in x:
                 setattr(d,k,x[k])
             inputList = d.otype1 
@@ -1106,8 +1121,9 @@ class TopoAlgoDef:
         invm_map = { "algoname": 'INVM_eEMs6' , "ocutlist": [ 9, 15 ], "minInvm": 1, "maxInvm": 5, "otype" : "eEM", "olist" : "s",
                      "nleading" : 1, "inputwidth": HW.eEmOutputWidthSort}
         for x in [ invm_map ]:
-            class d:
-                pass
+            class d:  # type: ignore
+                __slots__ = ('algoname', 'ocutlist', 'minInvm', 'maxInvm',
+                             'otype', 'olist', 'nleading', 'inputwidth')
             for k in x:
                 setattr (d, k, x[k])
             inputList = d.otype + d.olist
@@ -1139,8 +1155,8 @@ class TopoAlgoDef:
             {"minDr": 0, "maxDr": 4, "otype1" : "MU5VFab", "otype2" : "CjJ", "ocut2": 20, "olist2" : "ab"}, #0DR04_MU5VFab_CjJ20ab
         ]
         for x in algoList:
-            class d:
-                pass
+            class d:  # type: ignore
+                __slots__ = ('minDr', 'maxDr', 'otype1', 'otype2', 'ocut2', 'olist2')
             for k in x:
                 setattr (d, k, x[k])
             toponame = "%iDR%02d-%s-%s%s%s"  % (d.minDr, d.maxDr, d.otype1, d.otype2, str(d.ocut2), d.olist2)
@@ -1178,8 +1194,8 @@ class TopoAlgoDef:
             {"minInvm": 7, "maxInvm": 14, "mult": 2, "otype1" : "MU3Vab",  "otype2" : "",      }, #7INVM14-2MU3Vab, ATR-22782
         ]
         for x in listofalgos:
-            class d:
-                pass
+            class d:  # type: ignore
+                __slots__ = ('minInvm', 'maxInvm', 'mult', 'otype1', 'otype2')
             for k in x:
                 setattr (d, k, x[k])
             obj1 = "%s%s" % ((str(d.mult) if d.mult>1 else ""), d.otype1)
@@ -1221,8 +1237,8 @@ class TopoAlgoDef:
             {"minInvm": 2, "maxInvm": 8, "mult": 1, "otype1" : "CMU3Vab", "otype2" :"MU3Vab"}, # 2INVM8-CMU3Vab-MU3Vab
         ]
         for x in algolist:
-            class d:
-                pass
+            class d:  # type: ignore
+                __slots__ = ('minInvm', 'maxInvm', 'mult', 'otype1', 'otype2', 'onebarrel')
             for k in x:
                 setattr (d, k, x[k])
             obj1 = "%s%s" % ((str(d.mult) if d.mult>1 else ""), d.otype1)
@@ -1254,8 +1270,8 @@ class TopoAlgoDef:
             {"minDr": 1,  "maxDr": 24, "mult": 1, "otype1" : "CMU3Vab", "otype2" : "MU3Vab", }, #1DR24-CMU3Vab-MU3Vab 
         ]
         for x in algolist:
-            class d:
-                pass
+            class d:  # type: ignore
+                __slots__ = ('minDr', 'maxDr', 'mult', 'otype1', 'otype2')
             for k in x:
                 setattr (d, k, x[k])
             obj1 = "%s%s" % ((str(d.mult) if d.mult>1 else ""), d.otype1)
@@ -1314,8 +1330,8 @@ class TopoAlgoDef:
         # TODO: to be updated with phase1 met, jets
         xemap = [{"etcut": 0, "Threlist": [55, 60, 65, 75 ]}]
         for x in xemap:                
-            class d:
-                pass
+            class d:  # type: ignore
+                __slots__ = ('etcut', 'Threlist')
             for k in x:
                 setattr (d, k, x[k])            
             log.debug("Define %s", toponame)            
@@ -1343,8 +1359,8 @@ class TopoAlgoDef:
             {"otype" : "LATE-MU", "ocut" : 10, "inputwidth": HW.NumberOfDelayedMuons},
             ]:
 
-            class d:
-                pass
+            class d:  # type: ignore
+                __slots__ = ('otype', 'ocut', 'inputwidth')
             for k in x:
                 setattr (d, k, x[k])
 
@@ -1367,8 +1383,8 @@ class TopoAlgoDef:
             {"itemNameMinHT": 175, "minHT": 176, "otype" : "SCjJ", "ocut" : 10, "olist" : "ab", "nleading" : HW.jJetOutputWidthSelect, "inputwidth": HW.jJetOutputWidthSelect, "oeta" : 26}, #SC175-SCjJ10abpETA26
         ]
         for x in algoList:
-            class d:
-                pass
+            class d:  # type: ignore
+                __slots__ = ('itemNameMinHT', 'minHT', 'otype', 'ocut', 'olist', 'nleading', 'inputwidth', 'oeta')
             for k in x:
                 setattr (d, k, x[k])
             toponame = "SC%d-%s%s%s%spETA%s" % (d.itemNameMinHT, d.otype, str(d.ocut), d.olist, str(d.nleading) if d.olist=="s" else "", str(d.oeta))
@@ -1387,8 +1403,8 @@ class TopoAlgoDef:
             {"minInvm" : 0, "maxInvm": 9, "otype" : "eEM", "ocut1" : 9, "olist" : "ab", "inputwidth": HW.eEmOutputWidthSelect, "ocut2" : 0},
         ]
         for x in algoList:
-            class d:
-                pass
+            class d:  # type: ignore
+                __slots__ = ('minInvm', 'maxInvm', 'otype', 'ocut1', 'olist', 'inputwidth', 'ocut2')
             for k in x:
                 setattr (d, k, x[k])
             inputList = d.otype + d.olist
@@ -1411,8 +1427,8 @@ class TopoAlgoDef:
             {"minDr": 0, "maxDr": 3, "otype1" : "eEM" ,"ocut1": 9,  "olist1" : "ab", "otype2" : "CjJ", "ocut2": 40, "olist2" : "ab"} 
         ]
         for x in algoList:
-            class d:
-                pass
+            class d:  # type: ignore
+                __slots__ = ('minDr', 'maxDr', 'otype1', 'ocut1', 'olist1', 'otype2', 'ocut2', 'olist2')
             for k in x:
                 setattr (d, k, x[k])
             toponame = "%iDR%02d-%s%s%s-%s%s%s"  % (d.minDr, d.maxDr, d.otype1, str(d.ocut1), d.olist1, d.otype2, str(d.ocut2), d.olist2)
@@ -1437,8 +1453,9 @@ class TopoAlgoDef:
             {"minDphi": 27,  "maxDphi": 32, "otype" : "eEM",  "ocut1" : 0,  "olist" : "s", "nleading1" : 1, "inputwidth1": HW.eEmOutputWidthSort, "ocut2" : 0, "nleading2": 6},
         ]
         for x in algoList:                 
-            class d:
-                pass
+            class d:  # type: ignore
+                __slots__ = ('minDphi', 'maxDphi', 'otype', 'ocut1', 'olist', 'nleading1', 'inputwidth1',
+                             'ocut2', 'nleading2')
             for k in x:
                 setattr (d, k, x[k])
             toponame = "%iDPHI%i-%s%s%s%s-%s%s%s%s"  % (d.minDphi, d.maxDphi,
@@ -1466,8 +1483,9 @@ class TopoAlgoDef:
               "nleading2": HW.eTauOutputWidthSelect, "inputwidth2": HW.eTauOutputWidthSelect}, # 0DR28-eTAU30abm-eTAU20abm
         ]
         for x in algolist:
-            class d:
-                pass
+            class d:  # type: ignore
+                __slots__ = ('minDr', 'maxDr', 'otype1', 'ocut1', 'olist1', 'nleading1', 'inputwidth1',
+                             'otype2', 'ocut2', 'olist2', 'nleading2', 'inputwidth2')
             for k in x:
                 setattr (d, k, x[k])
             obj1 = "%s%s%s" % (d.otype1, str(d.ocut1), d.olist1)
@@ -1586,8 +1604,11 @@ class TopoAlgoDef:
         }
         ]
         for x in DISAMB_DR_jJ_eTau_eTau_Map:
-            class d:
-                pass
+            class d:  # type: ignore
+                __slots__ = ('algoname', 'disamb', 'minDR', 'maxDR',
+                             'otype1', 'ocut1', 'olist1', 'nleading1', 'inputwidth1',
+                             'otype2', 'ocut2', 'olist2', 'nleading2', 'inputwidth2',
+                             'otype3', 'ocut3', 'olist3', 'nleading3', 'inputwidth3')
             for k in x:
                 setattr(d,k,x[k])
             inputList = [d.otype1 + d.olist1, d.otype2 + d.olist2, d.otype3 + d.olist3]
@@ -1637,8 +1658,10 @@ class TopoAlgoDef:
         }
         ]
         for x in DR_eTau30_eTau20_Map:
-            class d:
-                pass
+            class d:  # type: ignore
+                __slots__ = ('algoname', 'minDR', 'maxDR',
+                             'otype1', 'ocut1', 'olist1',
+                             'otype2', 'ocut2', 'olist2', 'inputwidth')
             for k in x:
                 setattr(d,k,x[k])
             inputList = [d.otype1 + d.olist1]
@@ -1692,8 +1715,11 @@ class TopoAlgoDef:
               "drcutmin": 10   , "drcutmax": 32}, # 2DISAMB-jJ55ab-10DR32-eTAU30ab-eTAU20ab
         ]
         for x in algolist:
-            class d:
-                pass
+            class d:  # type: ignore
+                __slots__ = ('disamb', 'otype1', 'ocut1', 'olist1', 'nleading1', 'inputwidth1',
+                             'otype2', 'ocut2', 'olist2', 'nleading2', 'inputwidth2',
+                             'otype3', 'ocut3', 'olist3', 'nleading3', 'inputwidth3',
+                             'drcutmin', 'drcutmax')
             for k in x:
                 setattr (d, k, x[k])
             obj1 = "-%s%s%s" % (d.otype1, str(d.ocut1), d.olist1)
@@ -1728,8 +1754,8 @@ class TopoAlgoDef:
               "ocut2"  : 12, "nleading2":  2}, #0DETA24_eTAU30s2_eTAU12s2
         ]        
         for x in algoList:
-            class d:
-                pass
+            class d:  # type: ignore
+                __slots__ = ('minDeta', 'maxDeta', 'otype', 'ocut1', 'olist', 'nleading1', 'inputwidth1', 'ocut2', 'nleading2')
             for k in x:
                 setattr (d, k, x[k])
             toponame = "%iDETA%i-%s%s%s%s-%s%s%s%s"  % (d.minDeta, d.maxDeta,
@@ -1768,8 +1794,9 @@ class TopoAlgoDef:
         ]
 
         for x in DPHI_jXE40delay_jJ40s_map:
-            class d:
-                pass
+            class d:  # type: ignore
+                __slots__ = ('algoname', 'Delay1', 'Delay2', 'InputWidth1', 'InputWidth2',
+                             'MaxTob1', 'MaxTob2', 'MinET1', 'MinET2', 'MinDeltaPhi', 'phi_thresholds')
             for k in x:
                 setattr(d,k,x[k])
             inputList = ['jXEs', 'jJs']
@@ -1811,8 +1838,8 @@ class TopoAlgoDef:
         ]
 
         for x in TeAsymmetry_map:
-            class d:
-                pass
+            class d:  # type: ignore
+                __slots__ = ('algoname', 'deltaAbsMin', 'asymFactor', 'asymOffset', 'maxTeProduct')
             for k in x:
                 setattr(d,k,x[k])
             inputList = ['jTENoSort_1BC']
@@ -1848,8 +1875,8 @@ class TopoAlgoDef:
         ]
 
         for x in TeATIME_map:
-            class d:
-                pass
+            class d: # type: ignore
+                __slots__ = ('algoname', 'teFlavor', 'combination', 'nextBcOffset', 'nextBcFactor')
             for k in x:
                 setattr(d,k,x[k])
             inputList = ['jTENoSort_1BC']
@@ -1879,8 +1906,11 @@ class TopoAlgoDef:
               "drcutmin": 0, "drcutmax": 10}, # 2DISAMB-jJ40ab-0DR10-eTAU20ab-eTAU12ab
         ]
         for x in algolist:
-            class d:
-                pass
+            class d:  # type: ignore
+                __slots__ = ('disamb', 'otype1', 'ocut1', 'olist1', 'nleading1', 'inputwidth1',
+                             'otype2', 'ocut2', 'olist2', 'nleading2', 'inputwidth2',
+                             'otype3', 'ocut3', 'olist3', 'nleading3', 'inputwidth3',
+                             'drcutmin', 'drcutmax')
             for k in x:
                 setattr (d, k, x[k])
             obj1 = "-%s%s%s" % (d.otype1, str(d.ocut1), d.olist1)
@@ -1914,9 +1944,11 @@ class TopoAlgoDef:
             "MinET2": 0,#min muon2 threshold in Gev 
             "ScoreThreshold": [40, 25]
         }
-        
-        class d:
-            pass
+        class d:  # type: ignore
+            __slots__ = ('algoname', 'otype1', 'olist1', 'inputwidth1', 'nleading1',
+                         'WPList',
+                         'MinET1', 'MinET2',
+                         'ScoreThreshold')
         
         for k in algo:
             setattr(d, k, algo[k])
@@ -1930,14 +1962,11 @@ class TopoAlgoDef:
         )
         alg.addgeneric('NumResultBits', 2)
         alg.addgeneric('MaxTob',d.nleading1) #Set the number of Tobs to 3 (leading pT 3 muons)
-
         alg.addvariable('MinET1',d.MinET1*_et_conversion)
         alg.addvariable('MinET2',d.MinET2*_et_conversion)
         for bitId in range(len(toponames)):
             alg.addvariable('ScoreThreshold', d.ScoreThreshold[bitId], bitId)
-
         tm.registerTopoAlgo(alg)
-
             
         #VAE-based anomaly trigger
         # output lines: 'ADVAE2A-6jJ0s-4eTAU0s-4MU0s-jXE0s-Tight', 
@@ -1963,8 +1992,15 @@ class TopoAlgoDef:
               "ScaleSqr3" : [128, 128], #corresponds to Tight and Loose WPs
               "AnomalyScoreThresh" : [1521991, 1333204], #corresponds to Tight and Loose WPs (500Hz,1kHz est.)
         }
-        class d:
-            pass
+        class d:  # type: ignore
+            __slots__ = ('algoname', 'otype1', 'olist1', 'inputwidth1', 'nleading1',
+                         'otype2', 'olist2', 'inputwidth2', 'nleading2',
+                         'otype3', 'olist3', 'inputwidth3', 'nleading3',
+                         'otype4', 'olist4', 'inputwidth4', 'nleading4',
+                         'WPList',
+                         'MinET1', 'MinET2', 'MinET3', 'MinET4',
+                         'ScaleSqr1', 'ScaleSqr2', 'ScaleSqr3',
+                         'AnomalyScoreThresh')
         for k in algo:
             setattr (d, k, algo[k])
         toponames = []
@@ -2023,8 +2059,15 @@ class TopoAlgoDef:
               "MaxET4" : 0, # jXE
               "AnomalyScoreThresh" : [1521991, 1333204], #corresponds to Tight and Loose WPs (500Hz,1kHz est.)
         }
-        class d:
-            pass
+        class d:  # type: ignore
+            __slots__ = ('algoname', 'otype1', 'olist1', 'inputwidth1', 'nleading1',
+                         'otype2', 'olist2', 'inputwidth2', 'nleading2',
+                         'otype3', 'olist3', 'inputwidth3', 'nleading3',
+                         'otype4', 'olist4', 'inputwidth4', 'nleading4',
+                         'WPList',
+                         'MinET1', 'MinET2', 'MinET3', 'MinET4',
+                         'MaxET1', 'MaxET2', 'MaxET3', 'MaxET4',
+                         'AnomalyScoreThresh')
         for k in algo:
             setattr (d, k, algo[k])
         toponames = []
@@ -2067,8 +2110,11 @@ class TopoAlgoDef:
               "drcutmin": 0, "drcutmax": 10}, # 2DISAMB-jJ30ab-0DR10-eTAU20ab-eTAU12ab
         ]
         for x in algolist:
-            class d:
-                pass
+            class d:  # type: ignore
+                __slots__ = ('disamb', 'otype1', 'ocut1', 'olist1', 'nleading1', 'inputwidth1',
+                             'otype2', 'ocut2', 'olist2', 'nleading2', 'inputwidth2',
+                             'otype3', 'ocut3', 'olist3', 'nleading3', 'inputwidth3',
+                             'drcutmin', 'drcutmax')
             for k in x:
                 setattr (d, k, x[k])
             obj1 = "-%s%s%s" % (d.otype1, str(d.ocut1), d.olist1)
@@ -2100,8 +2146,10 @@ class TopoAlgoDef:
                          "otype2" : "AjJ", "ocut2" : 50, "olist2" : "s", "nleading2" : 6 }
         ]
         for x in NFFDphimap:
-            class d:
-                pass
+            class d:  # type: ignore
+                __slots__ = ('itemNameMinInvm', 'minInvm', 'minDphi', 'maxDphiList',
+                             'otype1', 'ocut1', 'olist1', 'nleading1', 'inputwidth',
+                             'otype2', 'ocut2', 'olist2', 'nleading2')
             for k in x:
                 setattr (d, k, x[k])
             inputList = [d.otype1 + d.olist1, d.otype2 + d.olist1]
@@ -2133,8 +2181,10 @@ class TopoAlgoDef:
                "minEta1": 0 ,"maxEta1": 32 , "minEta2": 30 ,"maxEta2": 49 , }, #400INVM-AjJ60s6pETA32-AjJ50s6p30ETA49
         ]
         for x in algoList:
-            class d: 
-                pass     
+            class d:  # type: ignore
+                __slots__ = ('itemNameMinInvm', 'minInvm', 'otype1', 'ocut1', 'olist1', 'nleading1', 'inputwidth1',
+                             'otype2', 'ocut2', 'olist2', 'nleading2', 'inputwidth2',
+                             'applyEtaCut', 'minEta1', 'maxEta1', 'minEta2', 'maxEta2')     
             for k in x:  
                 setattr (d, k, x[k])
             obj1 = "%s%s%sp%sETA%i"  % (d.otype1, str(d.ocut1), d.olist1 + (str(d.nleading1) if d.olist1.find('s')>=0 else ""),str(d.minEta1) if d.minEta1>0 else "", d.maxEta1)
@@ -2167,8 +2217,10 @@ class TopoAlgoDef:
                          "otype2" : "AjJ", "ocut2" : 50, "olist2" : "s", "nleading2" : 6 }
         ]
         for x in NFFmap:
-            class d:
-                pass
+            class d:  # type: ignore
+                __slots__ = ('itemNameMinInvmList', 'minInvmList',
+                             'otype1', 'ocut1', 'olist1', 'nleading1', 'inputwidth',
+                             'otype2', 'ocut2', 'olist2', 'nleading2')
             for k in x:
                 setattr (d, k, x[k])
             inputList = [d.otype1 + d.olist1, d.otype2 + d.olist1]
@@ -2197,8 +2249,10 @@ class TopoAlgoDef:
                          "otype2" : "AjJ", "ocut2" : 50, "olist2" : "s", "nleading2" : 6 }
         ]
         for x in NFFmap:
-            class d:
-                pass
+            class d:  # type: ignore
+                __slots__ = ('itemNameMinInvmList', 'minInvmList',
+                             'otype1', 'ocut1', 'olist1', 'nleading1', 'inputwidth',
+                             'otype2', 'ocut2', 'olist2', 'nleading2')
             for k in x:
                 setattr (d, k, x[k])
             inputList = [d.otype1 + d.olist1, d.otype2 + d.olist1]
@@ -2293,8 +2347,10 @@ class TopoAlgoDef:
         }]
 
         for x in INVM_DR_eEM_MU_Map:
-            class d:
-                pass
+            class d:  # type: ignore
+                __slots__ = ('algoname', 'minInvm', 'maxInvm', 'minDR', 'maxDR',
+                             'otype1', 'ocut1', 'olist1',
+                             'otype2', 'ocut2', 'olist2', 'ocut2Offset')
             for k in x:
                 setattr(d,k,x[k])
             inputList = [d.otype1 + d.olist1, d.otype2 + str(d.ocut2) + d.olist2[1] ]
@@ -2348,8 +2404,10 @@ class TopoAlgoDef:
               "nleading1" : HW.eEmOutputWidthSelect, "inputwidth2": HW.jEmOutputWidthSort,  "ocut2" : 20, "ocut3" : 25, "nleading2" : 6 }
         ]
         for x in ZAFBDphimap:
-            class d:
-                pass
+            class d:  # type: ignore
+                __slots__ = ('minInvm', 'minDphiList', 'maxDphi', 'minEta2', 'maxEta2',
+                             'inputwidth1', 'otype1', 'ocut1', 'olist1', 'nleading1',
+                             'inputwidth2', 'ocut2', 'ocut3', 'nleading2')
             for k in x:
                 setattr (d, k, x[k])
             inputList = [d.otype1 + d.olist1, 'jEMs25ETA49']
@@ -2410,8 +2468,10 @@ class TopoAlgoDef:
             {"minInvm": 0,"maxInvm": 70,"minDphi": 27,"maxDphi": 32,"otype":"eEM","olist":"sl","ocut1":9,"nleading1":1,"ocut2":9,"nleading2":6,}, #0INVM70-27DPHI32-eEM9sl1-eEM9sl6
         ]
         for x in listofalgos:
-            class d:
-                pass
+            class d:  # type: ignore
+                __slots__ = ('minInvm', 'maxInvm', 'minDphi', 'maxDphi',
+                             'otype', 'olist', 'ocut1', 'nleading1',
+                             'ocut2', 'nleading2')
             for k in x:
                 setattr (d, k, x[k])
             toponame = "%iINVM%i-%iDPHI%i-%s%s%s%s-%s%s%s%s"  % (d.minInvm, d.maxInvm, d.minDphi, d.maxDphi, d.otype, str(d.ocut1), d.olist, str(d.nleading1), d.otype, str(d.ocut2), d.olist,str(d.nleading2))
@@ -2452,8 +2512,9 @@ class TopoAlgoDef:
         }
         ]
         for x in INVM_DR_2MU3Vab_Map:
-            class d:
-                pass
+            class d:  # type: ignore
+                __slots__ = ('algoname', 'minInvm', 'maxInvm', 'minDR', 'maxDR',
+                             'otype1', 'mult1')
             for k in x:
                 setattr(d,k,x[k])
             inputList = d.otype1 
@@ -2495,8 +2556,9 @@ class TopoAlgoDef:
         }
         ]
         for x in INVM_DR_2MU3VFab_Map:
-            class d:
-                pass
+            class d:  # type: ignore
+                __slots__ = ('algoname', 'minInvm', 'maxInvm', 'minDR', 'maxDR',
+                             'otype1', 'mult1')
             for k in x:
                 setattr(d,k,x[k])
             inputList = d.otype1 
@@ -2545,8 +2607,8 @@ class TopoAlgoDef:
 
         ]
         for x in listofalgos:
-            class d:
-                pass
+            class d:  # type: ignore
+                __slots__ = ('minInvm', 'maxInvm', 'minDr', 'maxDr', 'mult', 'otype1', 'otype2')
             for k in x:
                 setattr (d, k, x[k])
             obj1 = "%s%s" % ((str(d.mult) if d.mult>1 else ""), d.otype1)
@@ -2579,8 +2641,8 @@ class TopoAlgoDef:
             {"minInvm": 8, "maxInvm": 15, "minDr": 20, "maxDr": 99, "mult": 2, "otype1" : "MU3Vab",  "otype2": "",},       #8INVM15-20DR99-C-2MU3Vab
         ]
         for x in listofalgos:
-            class d:
-                pass
+            class d:  # type: ignore
+                __slots__ = ('minInvm', 'maxInvm', 'minDr', 'maxDr', 'mult', 'otype1', 'otype2')
             for k in x:
                 setattr (d, k, x[k])
             obj1 = "%s%s" % ((str(d.mult) if d.mult>1 else ""), d.otype1)
@@ -2623,8 +2685,8 @@ class TopoAlgoDef:
                 "ocut1": 1, "olist1": "s", "nleading1": HW.jTauOutputWidthSort,"minET1":1.4,"otype2" : "","minET2":1.4},#23DPHI32_2jTAU1s
         ]
         for x in algolist:
-            class d:
-                pass
+            class d:  # type: ignore
+                __slots__ = ('minDphi', 'maxDphi', 'mult', 'otype1', 'ocut1', 'olist1', 'nleading1', 'minET1', 'otype2', 'minET2')  
             for k in x:
                 setattr (d, k, x[k])
             obj = "%s" % (str(d.mult)+d.otype1+str(d.ocut1)+str(d.olist1))

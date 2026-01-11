@@ -37,7 +37,7 @@ class TopoAlgoDefMuctpi:
 
         for x in listofalgos:
             class d:
-                pass
+                __slots__ = ('minDr', 'maxDr', 'mult', 'otype1', 'ocut1', 'olist', 'otype2')
             for k in x:
                 setattr (d, k, x[k])
 
