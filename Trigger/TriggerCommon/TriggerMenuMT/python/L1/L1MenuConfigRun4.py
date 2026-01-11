@@ -211,7 +211,6 @@ class L1MenuConfig(object):
         for cat in topoAlgCategoryList:
             multibitTopoTriggers = set()
             for topoLineName in _topoTriggers[cat]:
-                print(f"{topoLineName=}")
                 m = multibitPattern.match(topoLineName) # tries to match "trigger[bit]"
                 if m:
                     topoThrName = cat.prefix + m.groupdict()['line']

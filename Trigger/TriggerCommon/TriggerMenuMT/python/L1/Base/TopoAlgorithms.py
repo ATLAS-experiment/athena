@@ -35,7 +35,7 @@ class AlgCategory(Enum):
     def getAllCategories(run=3):
         assert(run in [2,3,4]), "Only run 3 and run 4 are supported, but got run %s" % run
         if run in (2,3):
-            return [ AlgCategory.TOPO, AlgCategory.MUCTPI, AlgCategory.MULTI, AlgCategory.LEGACY ]
+            return [ AlgCategory.TOPO, AlgCategory.MUCTPI, AlgCategory.LEGACY, AlgCategory.MULTI ]
         else:
             return [ AlgCategory.GLOBHYPO ]
 

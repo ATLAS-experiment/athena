@@ -144,8 +144,6 @@ class ItemDef:
 
         d = ItemDef.threshold_conditions(tc)
 
-        ItemDef.registerRequiredItems(d, menuName)
-
         # Setting up bunch group and BPTX conditions
         physcond            = d.BGRP0 & d.BGRP1
         calibcond           = d.BGRP0 & d.BGRP2
@@ -172,6 +170,8 @@ class ItemDef:
 
 
         MenuItem.currentPartition = 1
+
+        ItemDef.registerRequiredItems(d, menuName)
 
         # ZDC
 
