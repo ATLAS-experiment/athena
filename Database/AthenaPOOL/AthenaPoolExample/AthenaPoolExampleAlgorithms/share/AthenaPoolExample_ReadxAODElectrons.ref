@@ -155,7 +155,7 @@ CollectionTree(EventInfoAux.)                       DEBUG Opening
 CollectionTree(EventInfoAux.)                       DEBUG    attributes# = 1
 CollectionTree(EventInfoAux.)                       DEBUG Branch container 'EventInfoAux.'
 CollectionTree(EventInfoAux.)                       DEBUG Opened container CollectionTree(EventInfoAux.) of type ROOT_Tree
-TBranchAuxDynReader                                  INFO ../TBranchAuxDynReader.cxx (TBranchAuxDynReader::BranchInfo& TBranchAuxDynReader::getBranchInfo(const unsigned long&, const SG::AuxStoreInternal&)): attribute 'mcEventNumber' (id=1 typename=unsigned long) has different type than the branch: ULong64_t  Marking for schema evolution.
+TBranchAuxDynReader                                  INFO ../TBranchAuxDynReader.cxx (FUNC): attribute 'mcEventNumber' (id=1 typename=unsigned long) has different type than the branch: ULong64_t  Marking for schema evolution.
 AthenaEventLoopMgr                                   INFO   ===>>>  start of run 1    <<<===
 AthenaEventLoopMgr                                   INFO   ===>>>  start processing event #4294967297, run #1 0 events processed so far  <<<===
 ReadExampleElectron                                  INFO ReadExampleElectron: is executing ...
