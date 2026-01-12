@@ -1,5 +1,5 @@
 /*
-*   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+*   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #include "./GepCellTowerAlg.h"
 #include "CaloDetDescr/CaloDetDescrManager.h"
@@ -39,7 +39,7 @@ StatusCode GepCellTowerAlg::execute(const EventContext& context) const {
 
   auto h_gepCellsMap = SG::makeHandle(m_gepCellsKey, context);
   CHECK(h_gepCellsMap.isValid());
-  auto gepCellsMap = *h_gepCellsMap;
+  const auto & gepCellsMap = *h_gepCellsMap;
 
   auto cell_map = gepCellsMap.getCellMap();
 

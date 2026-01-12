@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <boost/property_tree/ptree.hpp>
@@ -119,6 +119,7 @@ void DFEF::EFInterfaceEmulator::inputThreadCallback() {
         //auto sleepDuration = (std::rand() % 100) * 10;
         //ERS_DEBUG(2, "Sleeping for " << sleepDuration << " milliseconds");
         //std::this_thread::sleep_for(std::chrono::milliseconds(sleepDuration));
+        //coverity[SLEEP]
         event = m_file_rw->getNextEvent();
       } catch (const DFEF::NoMoreEventsInFile &ex) {
         ERS_DEBUG(2, "No more events in file");  
