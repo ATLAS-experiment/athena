@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "VP1UtilitySystems/VP1PartSpectSystem.h"
@@ -24,32 +24,24 @@
 #include "TROOT.h"
 #include "TH1F.h"
 #include "TKey.h"
+#include <memory>
 #include <sstream>
 
 
 class VP1PartSpectSystem::Imp {
 public:
   Imp();
-  ~Imp();
 
   VP1PartSpectController* controller;
-  QMainWindow* PlotMainWindow;
-  TFile* stream;
+  std::unique_ptr<QMainWindow> PlotMainWindow;
+  std::unique_ptr<TFile> stream;
 
   QString histogramPrefix(VP1PartSpect::ParticleType);
 };
 
 VP1PartSpectSystem::Imp::Imp()
   :controller(0)
-  ,PlotMainWindow(0)
-  ,stream(0)
 {
-}
-
-VP1PartSpectSystem::Imp::~Imp()
-{
-  delete PlotMainWindow;
-  delete stream;
 }
 
 QString VP1PartSpectSystem::Imp::histogramPrefix(VP1PartSpect::ParticleType parttype)
@@ -146,8 +138,7 @@ void VP1PartSpectSystem::restoreFromState(QByteArray ba)
 void VP1PartSpectSystem::plotSpectrum(QStack<QString>& path, int copyNumber)
 {
   // close plot main window if already open
-  delete  m_d->PlotMainWindow;
-  m_d->PlotMainWindow = 0;
+  m_d->PlotMainWindow.reset();
 
   // Do something only if the system is active
   if(activeState()==IVP1System::OFF) return;
@@ -330,12 +321,8 @@ void VP1PartSpectSystem::plotSpectrum(QStack<QString>& path, int copyNumber)
 
 void VP1PartSpectSystem::fileUpdated(const QString& fileName)
 {
-  // Close previously open file
-  delete m_d->stream;
-  m_d->stream=0;
-
   // Open the new file
-  m_d->stream = new TFile(fileName.toStdString().c_str(),"READ");
+  m_d->stream = std::make_unique<TFile>(fileName.toStdString().c_str(),"READ");
   messageVerbose(fileName + " opened");
 }
 
