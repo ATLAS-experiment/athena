@@ -14,17 +14,9 @@ using json = nlohmann::json;
 namespace CP{
   SSVWeightsAlg::SSVWeightsAlg(const std::string &name, ISvcLocator *pSvcLocator)
     : EL::AnaAlgorithm(name, pSvcLocator){
-    declareProperty("JsonConfigFile_SSVWeightsAlg",m_jsonConfigPath_SSVWeightsAlg, "Path to the JSON config file that contains the SSV calibration results which are needed to calculate the SSV weights");
-    declareProperty("BTagging_WP", m_BTagging_WP, "b-tagging working point that is used to count the number of b-jets in the event for b-jet based SSV weight calculation");
-    declareProperty("OverlapRemoval", m_OverlapRemoval, "string that will be used in the overlap removal accessor for jets, electrons and muons; empty string means no overlap removal will be applied");
-    declareProperty("Jvt", m_Jvt, "string that will be used in the jvt accessor for jets; empty string means no jvt selection will be applied");
-    declareProperty("efficiency_Method", m_efficiency_Method, "efficiency definition that will be used to calculate the SSV weights, string can be 'Bhadron_pT_eta_based' or 'bjet_based'");
-    declareProperty("nF_Method", m_nF_Method, "average number of fake SSV definition that will be used to calculate the SSV weights, string can be 'pileup_bjet_based','pileup_based_linearfit' or 'pileup_based_binned'");  
-    declareProperty("OutputVariable_Size", m_OutputVariable_Size, "number of variables that will be saved to the output, string can be 'standard','extended','additional' or 'all'"); 
   }
 
   StatusCode SSVWeightsAlg::initialize() {
-
     ANA_MSG_INFO("Initialising SSVWeightsAlg");
     ANA_MSG_INFO("WARNING: The Run3 SSV calibration has not been performed yet -> the scale factors are not usable yet");
 
@@ -35,24 +27,49 @@ namespace CP{
     ANA_CHECK(m_truthParticlesHandle.initialize(m_systematicsList));
     ANA_CHECK(m_SSV_weight_decor.initialize(m_systematicsList, m_eventInfoHandle));
     ANA_CHECK(m_ssvHandle.initialize(m_systematicsList));
+    ANA_CHECK(m_jetSelection.initialize (m_systematicsList, m_jetsHandle, SG::AllowEmpty));
+    ANA_CHECK(m_electronSelection.initialize (m_systematicsList, m_electronsHandle, SG::AllowEmpty));
+    ANA_CHECK(m_muonSelection.initialize (m_systematicsList, m_muonsHandle, SG::AllowEmpty));
 
-    ANA_CHECK(m_N_matched_decor.initialize(m_systematicsList, m_eventInfoHandle));
-    ANA_CHECK(m_N_missed_decor.initialize(m_systematicsList, m_eventInfoHandle));
-    ANA_CHECK(m_N_fake_decor.initialize(m_systematicsList, m_eventInfoHandle));
+    if (m_OutputVariableSize == "standard") {
+      m_OutputVariableSizeType = OutputVariableSizeType::standard;
+    }
+    else if (m_OutputVariableSize == "extended") {
+      m_OutputVariableSizeType = OutputVariableSizeType::extended;
+    }
+    else if (m_OutputVariableSize == "additional") {
+      m_OutputVariableSizeType = OutputVariableSizeType::additional;
+    }
+    else if (m_OutputVariableSize == "all") {
+      m_OutputVariableSizeType = OutputVariableSizeType::all;
+    }
+    else {
+      ATH_MSG_ERROR("Unknown OutputVariableSizeType: " << m_OutputVariableSize <<" , accepted options are: 'standard', 'extended', 'additional', 'all'" );
+      return StatusCode::FAILURE;
+    }
 
-    ANA_CHECK(m_P_eff_decor.initialize(m_systematicsList, m_eventInfoHandle));
-    ANA_CHECK(m_P_ineff_decor.initialize(m_systematicsList, m_eventInfoHandle));
-    ANA_CHECK(m_P_fake_decor.initialize(m_systematicsList, m_eventInfoHandle));
+    if (m_OutputVariableSizeType == OutputVariableSizeType::extended || m_OutputVariableSizeType == OutputVariableSizeType::additional || m_OutputVariableSizeType == OutputVariableSizeType::all){
+      ANA_CHECK(m_P_eff_decor.initialize(m_systematicsList, m_eventInfoHandle));
+      ANA_CHECK(m_P_ineff_decor.initialize(m_systematicsList, m_eventInfoHandle));
+      ANA_CHECK(m_P_fake_decor.initialize(m_systematicsList, m_eventInfoHandle));
+    }
 
-    ANA_CHECK(m_number_of_bjets_decor.initialize(m_systematicsList, m_eventInfoHandle));
-    ANA_CHECK(m_number_of_accepted_Bhadrons_decor.initialize(m_systematicsList, m_eventInfoHandle));
-    ANA_CHECK(m_number_of_good_SSVs_decor.initialize(m_systematicsList, m_eventInfoHandle));
+    if ( m_OutputVariableSizeType == OutputVariableSizeType::additional || m_OutputVariableSizeType == OutputVariableSizeType::all){
+      ANA_CHECK(m_N_matched_decor.initialize(m_systematicsList, m_eventInfoHandle));
+      ANA_CHECK(m_N_missed_decor.initialize(m_systematicsList, m_eventInfoHandle));
+      ANA_CHECK(m_N_fake_decor.initialize(m_systematicsList, m_eventInfoHandle));
+      ANA_CHECK(m_number_of_bjets_decor.initialize(m_systematicsList, m_eventInfoHandle));
+      ANA_CHECK(m_number_of_accepted_Bhadrons_decor.initialize(m_systematicsList, m_eventInfoHandle));
+      ANA_CHECK(m_number_of_good_SSVs_decor.initialize(m_systematicsList, m_eventInfoHandle));
+    }
 
-    ANA_CHECK(m_P_ineff_bjet_based_decor.initialize(m_systematicsList, m_eventInfoHandle));
-    ANA_CHECK(m_P_ineff_pt_eta_based_decor.initialize(m_systematicsList, m_eventInfoHandle));
-    ANA_CHECK(m_P_fake_pileup_bjet_based_decor.initialize(m_systematicsList, m_eventInfoHandle));
-    ANA_CHECK(m_P_fake_pileup_based_linearfit_decor.initialize(m_systematicsList, m_eventInfoHandle));
-    ANA_CHECK(m_P_fake_pileup_based_binned_decor.initialize(m_systematicsList, m_eventInfoHandle));
+    if (m_OutputVariableSizeType == OutputVariableSizeType::all){
+      ANA_CHECK(m_P_ineff_bjet_based_decor.initialize(m_systematicsList, m_eventInfoHandle));
+      ANA_CHECK(m_P_ineff_pt_eta_based_decor.initialize(m_systematicsList, m_eventInfoHandle));
+      ANA_CHECK(m_P_fake_pileup_bjet_based_decor.initialize(m_systematicsList, m_eventInfoHandle));
+      ANA_CHECK(m_P_fake_pileup_based_linearfit_decor.initialize(m_systematicsList, m_eventInfoHandle));
+      ANA_CHECK(m_P_fake_pileup_based_binned_decor.initialize(m_systematicsList, m_eventInfoHandle));
+    }
 
     ANA_CHECK(m_systematicsList.initialize());
 
@@ -60,12 +77,39 @@ namespace CP{
     std::string json_file_SSVWeightsAlg=PathResolver::find_file(m_jsonConfigPath_SSVWeightsAlg, "DATAPATH");
     std::ifstream jsonFile_SSVWeightsAlg(json_file_SSVWeightsAlg);
     if (!jsonFile_SSVWeightsAlg.is_open()) {
-      ANA_MSG_ERROR("Could not open JSON file: " << m_jsonConfigPath_SSVWeightsAlg);
+      ATH_MSG_ERROR("Could not open JSON file: " << m_jsonConfigPath_SSVWeightsAlg);
       return StatusCode::FAILURE;
     }
 
     m_jsonConfig_SSVWeightsAlg = json::parse(jsonFile_SSVWeightsAlg);
     jsonFile_SSVWeightsAlg.close();
+
+    
+    if (m_EfficiencyMethod == "bjet_based") {
+      m_EfficiencyMethodType = EfficiencyMethodType::bjet_based;
+    }
+    else if (m_EfficiencyMethod == "Bhadron_pT_eta_based") {
+      m_EfficiencyMethodType = EfficiencyMethodType::Bhadron_pT_eta_based;
+    }
+    else {
+      ATH_MSG_ERROR("Unknown efficiency method: " << m_EfficiencyMethod << " , accepted efficiency methods are: 'bjet_based','Bhadron_pT_eta_based'");
+      return StatusCode::FAILURE;
+    }
+
+
+    if (m_nFMethod == "pileup_bjet_based") {
+      m_nFMethodType = nFMethodType::pileup_bjet_based;
+    }
+    else if (m_nFMethod == "pileup_based_linearfit") {
+      m_nFMethodType = nFMethodType::pileup_based_linearfit;
+    }
+    else if (m_nFMethod == "pileup_based_binned") {
+      m_nFMethodType = nFMethodType::pileup_based_binned;
+    }
+    else {
+      ATH_MSG_ERROR("Unknown nF method: " << m_nFMethod << " , accepted nF methods are: 'pileup_bjet_based', 'pileup_based_linearfit', 'pileup_based_binned'");
+      return StatusCode::FAILURE;
+    }
 
     return StatusCode::SUCCESS;
   }
@@ -89,25 +133,14 @@ namespace CP{
       const xAOD::JetContainer *jets = nullptr;
       ANA_CHECK(m_jetsHandle.retrieve(jets, sys));
 
-      std::vector<const xAOD::Jet*> jets_PassedORJvt;
-
+      std::vector<const xAOD::Jet*> jets_Selected;
       int b_jet_count=0;
+      static const SG::AuxElement::ConstAccessor<char> jet_btag_accessor(m_BTaggingWP);
 
-      static const SG::AuxElement::ConstAccessor<char> jet_btag_accessor(m_BTagging_WP);
-
-      bool useOR = !m_OverlapRemoval.empty(); 
-      static const SG::AuxElement::ConstAccessor<char> particle_passesOR_accessor(useOR ? m_OverlapRemoval : "passesOR");  // placeholder string (will never be used if !useOR)
-
-      bool useJvt = !m_Jvt.empty(); 
-      static const SG::AuxElement::ConstAccessor<char> jet_jvt_selection_accessor(useJvt ? m_Jvt : "jvt_selection");  // placeholder string (will never be used if !useJvt)
-
-      //create jets that pass overlap removal and jvt
+      //create jets that pass your jet selection
       for(const xAOD::Jet* jet : *jets){
-        char jet_passesOR_char = useOR ? particle_passesOR_accessor(*jet) : 1; // fallback: always true
-        char jet_jvt_selection_char = useJvt ? jet_jvt_selection_accessor(*jet) : 1; // fallback: always true
-
-        if (jet_passesOR_char && jet_jvt_selection_char){
-          jets_PassedORJvt.push_back(jet);
+        if (m_jetSelection.getBool (*jet, sys)){
+          jets_Selected.push_back(jet);
           
           // Count number of bjets
           if (jet_btag_accessor(*jet)){
@@ -120,31 +153,29 @@ namespace CP{
       const xAOD::ElectronContainer *electrons = nullptr;
       ANA_CHECK(m_electronsHandle.retrieve(electrons, sys));
       
-      std::vector<const xAOD::Electron*> electrons_PassedOR;
+      std::vector<const xAOD::Electron*> electrons_Selected;
 
-      //create electrons that pass overlap removal
+      //create electrons that pass your electron selection
       for(const xAOD::Electron* electron : *electrons){
-        char electron_passesOR_char = useOR ? particle_passesOR_accessor(*electron) : 1; // fallback: always true
-        if (electron_passesOR_char){
-          electrons_PassedOR.push_back (electron);
+        if (m_electronSelection.getBool (*electron, sys)){
+          electrons_Selected.push_back (electron);
         }
       }
 
       //create muons
       const xAOD::MuonContainer *muons = nullptr;
       ANA_CHECK(m_muonsHandle.retrieve(muons, sys));
-      std::vector<const xAOD::Muon*> muons_PassedOR;
+      std::vector<const xAOD::Muon*> muons_Selected;
 
-      //create muons that pass overlap removal
+      //create muons that pass your muon selection
       for(const xAOD::Muon* muon : *muons){
-        char muon_passesOR_char = useOR ? particle_passesOR_accessor(*muon) : 1; // fallback: always true
-        if (muon_passesOR_char){
-          muons_PassedOR.push_back( muon );
+        if (m_muonSelection.getBool (*muon, sys)){
+          muons_Selected.push_back( muon );
         }
       }
 
       // create good SSVs
-      std::vector<const xAOD::Vertex*> good_SSVs = create_good_SSVs(jets_PassedORJvt, electrons_PassedOR, muons_PassedOR, SSVs);
+      std::vector<const xAOD::Vertex*> good_SSVs = create_good_SSVs(jets_Selected, electrons_Selected, muons_Selected, SSVs);
 
       //create truth b-hadrons (truthBhs)
       std::vector<const xAOD::TruthParticle*> truthBhs;
@@ -160,7 +191,7 @@ namespace CP{
 
 
       //create truthBhs in acceptance
-      std::vector<const xAOD::TruthParticle*> accepted_truthBhs = create_accepted_truthBhs(truthBhs, jets_PassedORJvt);
+      std::vector<const xAOD::TruthParticle*> accepted_truthBhs = create_accepted_truthBhs(truthBhs, jets_Selected);
 
       //do the DeltaR matching between truthBh and SSV
       std::vector<bool> truthBh_to_SSV_matched = truthBh_to_SSV_matching(accepted_truthBhs, good_SSVs);
@@ -182,34 +213,32 @@ namespace CP{
 
       //calculate P_ineff
       double P_ineff = 1;
-      if (m_efficiency_Method == "bjet_based"){
+      if (m_EfficiencyMethodType == EfficiencyMethodType::bjet_based){
         P_ineff = calculate_P_ineff_bjet_based(b_jet_count, N_missed,SF_eff);
       }
-      else if (m_efficiency_Method == "Bhadron_pT_eta_based"){
+      else if (m_EfficiencyMethodType == EfficiencyMethodType::Bhadron_pT_eta_based){
         P_ineff = calculate_P_ineff_Bhadron_pt_eta_based(accepted_truthBhs, truthBh_to_SSV_matched, SF_eff);
       }
       else {
-        ATH_MSG_ERROR("No efficiency computation defined for method=" << m_efficiency_Method); 
+        ATH_MSG_ERROR("Unknown efficiency method: " << m_EfficiencyMethod << " , accepted efficiency methods are: 'bjet_based','Bhadron_pT_eta_based'");
         return StatusCode::FAILURE;
       } 
 
-
       // calculate P_fake
       double P_fake = 1;
-      if (m_nF_Method == "pileup_bjet_based"){
+      if (m_nFMethodType == nFMethodType::pileup_bjet_based){
         P_fake = calculate_P_fake_pileup_bjet_based(muactual, b_jet_count, N_fake,SF_fake_low, SF_fake_high);
       }
-      else if (m_nF_Method == "pileup_based_linearfit"){
+      else if (m_nFMethodType == nFMethodType::pileup_based_linearfit){
         P_fake = calculate_P_fake_pileup_based_linearfit(muactual, N_fake);
       }
-      else if (m_nF_Method == "pileup_based_binned"){
+      else if (m_nFMethodType == nFMethodType::pileup_based_binned){
         P_fake = calculate_P_fake_pileup_based_binned(muactual, N_fake, SF_fake_low, SF_fake_high);
       }
       else { 
-        ATH_MSG_ERROR("No fake computation defined for method=" << m_nF_Method); 
+        ATH_MSG_ERROR("Unknown nF method: " << m_nFMethod << " , accepted nF methods are: 'pileup_bjet_based', 'pileup_based_linearfit', 'pileup_based_binned'");
         return StatusCode::FAILURE;
       }
-
 
       //calculate SSV_weight
       double SSV_weight = P_eff * P_ineff * P_fake;
@@ -217,22 +246,23 @@ namespace CP{
       // decorate SSV weight
       m_SSV_weight_decor.set(*evtInfo, SSV_weight, sys);
 
-      // decorate P factors 
-      m_P_eff_decor.set(*evtInfo, P_eff, sys);
-      m_P_ineff_decor.set(*evtInfo, P_ineff, sys);
-      m_P_fake_decor.set(*evtInfo, P_fake, sys);
-
-      //decorate additional information
-      m_N_matched_decor.set(*evtInfo, N_matched, sys);
-      m_N_missed_decor.set(*evtInfo, N_missed, sys);
-      m_N_fake_decor.set(*evtInfo, N_fake, sys);
-
-      m_number_of_bjets_decor.set(*evtInfo, b_jet_count, sys);
-      m_number_of_accepted_Bhadrons_decor.set(*evtInfo, accepted_truthBhs.size(), sys);
-      m_number_of_good_SSVs_decor.set(*evtInfo, good_SSVs.size(), sys);
-
+      if (m_OutputVariableSizeType == OutputVariableSizeType::extended || m_OutputVariableSizeType == OutputVariableSizeType::additional || m_OutputVariableSizeType == OutputVariableSizeType::all){
+        // decorate P factors 
+        m_P_eff_decor.set(*evtInfo, P_eff, sys);
+        m_P_ineff_decor.set(*evtInfo, P_ineff, sys);
+        m_P_fake_decor.set(*evtInfo, P_fake, sys);
+      }
+      if (m_OutputVariableSizeType == OutputVariableSizeType::additional || m_OutputVariableSizeType == OutputVariableSizeType::all){
+        //decorate additional information
+        m_N_matched_decor.set(*evtInfo, N_matched, sys);
+        m_N_missed_decor.set(*evtInfo, N_missed, sys);
+        m_N_fake_decor.set(*evtInfo, N_fake, sys);
+        m_number_of_bjets_decor.set(*evtInfo, b_jet_count, sys);
+        m_number_of_accepted_Bhadrons_decor.set(*evtInfo, accepted_truthBhs.size(), sys);
+        m_number_of_good_SSVs_decor.set(*evtInfo, good_SSVs.size(), sys);
+      }
       //decorate all possible P factors
-      if (m_OutputVariable_Size == "all"){
+      if (m_OutputVariableSizeType == OutputVariableSizeType::all){
         double P_ineff_bjet_based = calculate_P_ineff_bjet_based(b_jet_count, N_missed,SF_eff);
         double P_ineff_pt_eta_based = calculate_P_ineff_Bhadron_pt_eta_based(accepted_truthBhs, truthBh_to_SSV_matched, SF_eff);
         double P_fake_pileup_bjet_based = calculate_P_fake_pileup_bjet_based(muactual, b_jet_count, N_fake, SF_fake_low, SF_fake_high);
