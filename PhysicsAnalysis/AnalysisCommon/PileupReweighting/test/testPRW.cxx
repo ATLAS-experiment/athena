@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -12,7 +12,7 @@ void testValue(double v1, double v2) {
 }
 
 
-int main() {
+int main1() {
    //create a 'dummy' lumicalc file, with only a few runs, with a few lumiblocks 
    TFile l("dummy.None.lumicalc.root","RECREATE");
    TTree *t = new TTree("LumiMetaData","LumiMetaData");
@@ -191,4 +191,17 @@ int main() {
 
 
    return 0;
+}
+
+
+int main()
+{
+  int ret = 1;
+  try {
+    ret = main1();
+  }
+  catch (const std::exception& e) {
+    std::cerr << e.what() << "\n";
+  }
+  return ret;
 }
