@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -17,6 +17,7 @@
 #include "TrkVertexFitterInterfaces/IVertexLinearizedTrackFactory.h"
 #include "VxVertex/LinearizedTrack.h"
 #include "VxVertex/VxTrackAtVertex.h"
+#include <memory>
 #include <cmath>
 //xAOD includes 
 #include "xAODTracking/Vertex.h" 
@@ -31,15 +32,10 @@ namespace
 	struct BilloirTrack
 	{
 		BilloirTrack() : perigee ( nullptr ), originalPerigee( nullptr ), linTrack( nullptr ) {}
-		virtual ~BilloirTrack() 
-		{
-		  // linTrack needs to be deleted
-		  delete linTrack; linTrack=nullptr;
-		}
-                
+
                 BilloirTrack(const BilloirTrack& arg) 
                 {
-                  linTrack = arg.linTrack->clone();
+                  linTrack.reset(arg.linTrack->clone());
                   perigee = arg.perigee; // does not own it
                   originalPerigee = arg.originalPerigee; // does not own it
                   chi2    = arg.chi2   ;
@@ -55,7 +51,7 @@ namespace
 		
 		Trk::TrackParameters * perigee;
 		const Trk::TrackParameters * originalPerigee;
-		Trk::LinearizedTrack * linTrack;
+		std::unique_ptr<Trk::LinearizedTrack> linTrack;
 		double chi2{};
 		AmgMatrix(5,3) Di_mat;
 		AmgMatrix(5,3) Ei_mat;
@@ -228,7 +224,7 @@ namespace Trk
 					BilloirTrack locBilloirTrack;
 					
 					locBilloirTrack.originalPerigee = originalPerigee;
-                                        locBilloirTrack.linTrack = linTrack;
+					locBilloirTrack.linTrack.reset(linTrack);
 					double d0 = linTrack->expectedParametersAtPCA()[Trk::d0];
 					double z0 = linTrack->expectedParametersAtPCA()[Trk::z0];
 					double phi = linTrack->expectedParametersAtPCA()[Trk::phi];
