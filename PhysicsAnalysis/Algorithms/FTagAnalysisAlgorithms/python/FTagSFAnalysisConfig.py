@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # AnaAlgorithm import(s):
 from AnalysisAlgorithmsConfig.ConfigBlock import ConfigBlock
@@ -151,10 +151,13 @@ class FTagJetSFBlock(ConfigBlock):
             tool.SelectionTaggerName = selectionTagger
 
     def makeAlgs(self, config):
+        log = logging.getLogger('FTagJetSFConfig')
 
         if config.dataType() is DataType.Data: return
 
-        log = logging.getLogger('FTagJetSFConfig')
+        if config.isPhyslite() and self.triggerChainsPerYear:
+            log.warning ('The b-jet trigger SF computation is currently not supported in PHYSLITE')
+            return
 
         if 'FixedCutBEff' in self.btagWP:
             raise ValueError('FTAG calibration is only available for Continuous WP. '
@@ -300,8 +303,13 @@ class FTagEventSFBlock(ConfigBlock):
         return self.containerName.replace('.', '_') + '_' + selectionName
 
     def makeAlgs(self, config):
+        log = logging.getLogger('FTagEventSFConfig')
 
         if config.dataType() is DataType.Data: return
+
+        if config.isPhyslite() and self.triggerChainsPerYear:
+            log.warning ('The b-jet trigger SF computation is currently not supported in PHYSLITE')
+            return
 
         if 'FixedCut' in self.btagWP:
             raise ValueError('FTAG calibration is only available for Continuous WP. '
@@ -327,9 +335,13 @@ class FTagEventSFBlock(ConfigBlock):
 
         # Set up the per-event FTAG efficiency scale factor calculation algorithm
         for chain in triggers:
+            chain_noHLT = chain.replace("HLT_", "")
+            chain_out = chain_noHLT if self.removeHLTPrefix else chain
+            chain_out = chain_out.replace('-', '_').replace('.', 'p')
+
             postfix2 = postfix
             if chain:
-                postfix2 = postfix2 + '_' + chain
+                postfix2 = postfix2 + '_' + chain_out
             alg = config.createAlgorithm('CP::AsgEventScaleFactorAlg',
                                          'FTagEventScaleFactorAlg' + postfix2)
 
