@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "JetCalibTools/CalibrationMethods/Generic4VecCorrection.h"
@@ -265,7 +265,7 @@ StatusCode Generic4VecCorrection::initialize_MC2MC()
     float n_fields = CalibFile_fields->GetEntries();
     std::string new_showerModel = ((TObjString *)(CalibFile_fields->At(n_fields-1)))->String().Data();
     new_showerModel.resize(new_showerModel.find(".root")); //Remove .root
-    showerModel = new_showerModel;
+    showerModel = std::move(new_showerModel);
 
   } else {
     // Recommended method to build the correct CalibFile
@@ -433,12 +433,12 @@ StatusCode Generic4VecCorrection::parse_showerModel(std::string& showerModel, in
   if( MC2MC_showerRemap.contains( genType+"-"+version+"-"+psType+"-"+hadType ) ){
     std::string replaced_showerModel = MC2MC_showerRemap[ genType+"-"+version+"-"+psType+"-"+hadType ];
     ATH_MSG_INFO("Sample with identified showerModel " << genType+"-"+version+"-"+psType+"-"+hadType << " is in the MC2MC_showerRemap list, will be forcing the showerModel " << replaced_showerModel);
-    showerModel = replaced_showerModel;
+    showerModel = std::move(replaced_showerModel);
   } else if (MC2MC_showerRemap.contains( genType+"-"+version ) ){ 
     std::string replaced_showerModel = MC2MC_showerRemap[ genType+"-"+version ];
     replaced_showerModel += "-"+psType+"-"+hadType;
     ATH_MSG_INFO("Sample with identified showerModel " << genType+"-"+version+"-"+psType+"-"+hadType << " is in the MC2MC_showerRemap list, will be forcing the showerModel " << replaced_showerModel);
-    showerModel = replaced_showerModel;
+    showerModel = std::move(replaced_showerModel);
   }
   
   return StatusCode::SUCCESS;
