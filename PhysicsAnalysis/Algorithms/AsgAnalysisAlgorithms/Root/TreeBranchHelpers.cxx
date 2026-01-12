@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //
@@ -373,10 +373,20 @@ namespace CP
           SG::ConstAccessor<int> {nominalAuxName};
         else if (typeName == "unsigned")
           SG::ConstAccessor<unsigned> {nominalAuxName};
+	else if (typeName == "unsigned_char")
+          SG::ConstAccessor<unsigned char> {nominalAuxName};
+	else if (typeName == "unsigned_long_long")
+          SG::ConstAccessor<unsigned long long> {nominalAuxName};
         else if (typeName == "uint16")
           SG::ConstAccessor<std::uint16_t> {nominalAuxName};
         else if (typeName == "uint32")
           SG::ConstAccessor<std::uint32_t> {nominalAuxName};
+        else if (typeName == "uint64")
+          SG::ConstAccessor<std::uint64_t> {nominalAuxName};
+	else if (typeName == "vector_float")
+	  SG::ConstAccessor<std::vector<float>> {nominalAuxName};
+	else if (typeName == "vector_int")
+	  SG::ConstAccessor<std::vector<int>> {nominalAuxName};
         else
         {
           unsigned line = __LINE__ - 2;
