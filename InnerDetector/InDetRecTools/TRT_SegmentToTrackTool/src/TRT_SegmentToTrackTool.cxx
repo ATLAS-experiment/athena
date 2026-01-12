@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TRT_SegmentToTrackTool/TRT_SegmentToTrackTool.h"
@@ -568,8 +568,10 @@ namespace InDet {
           surfforpar = dynamic_cast<const Trk::StraightLineSurface*>(firstsurf);
         else
           surfforpar = dynamic_cast<const Trk::StraightLineSurface*>(lastsurf);
-        if (!surfforpar)
+        if (!surfforpar) {
           ATH_MSG_ERROR("Cast of surface failed, should never happen");
+          return nullptr;
+        }
 
         Trk::AtaStraightLine ataline(((nbarrel == 0) ? pos1 : pos2),
                                      precisephi,
