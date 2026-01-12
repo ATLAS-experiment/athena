@@ -36,8 +36,7 @@ namespace pool  {
       TRANSACT_ACTIVE   = 1<<9,
       TRANSACT_COMMIT   = 1<<10,
       TRANSACT_FLUSH    = 1<<11,
-      TRANSACT_ROLLBACK = 1<<12,
-      TRANSACT_ENDED    = 1<<13
+      TRANSACT_ENDED    = 1<<12
     };
     enum Mode  {
       AUTOCOMMIT_OFF    = 1<<16,

@@ -250,10 +250,7 @@ namespace pool  {
       *
       * @param    conn  [IN]    Database connection
       * @param    typ   [IN]    Enum indicating an action to be performed.
-      *                         Valid arguments are COMMIT and ROLLBACK.
-      *                         ROLLBACK can only be suported if the 
-      *                         underlying technology supports the necessary
-      *                         features.
+      *                         Valid arguments are COMMIT
       *
       * @return                 StatusCode code indicating success or failure.
       */

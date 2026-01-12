@@ -49,9 +49,6 @@ namespace pool {
       /// Commits and holds the transaction
       bool commitAndHoldTransaction();
 
-      /// Rolls back the transaction
-      void rollBackTransaction();
-
       /// Disconnects the transaction
       bool disconnectTransaction();
 

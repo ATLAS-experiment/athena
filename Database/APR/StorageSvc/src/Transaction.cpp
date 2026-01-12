@@ -37,7 +37,6 @@ const char* Transaction::actionAsString(Action action) {
     case TRANSACT_ACTIVE   : return "ACTIVE";
     case TRANSACT_COMMIT   : return "COMMIT";
     case TRANSACT_FLUSH    : return "FLUSH";
-    case TRANSACT_ROLLBACK : return "ROLLBACK";
     case TRANSACT_ENDED    : return "ENDED";
    }
    return "UNDEFINED";

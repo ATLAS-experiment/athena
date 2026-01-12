@@ -156,7 +156,7 @@ namespace pool  {
     StatusCode retire();
     /// Check if the database was opened
     bool isOpen() const;
-    /// Commit/Rollback Database Transaction
+    /// Commit Database Transaction
     /** @param   action     [IN]  action to perform
       * @return Status code indicating success or failure.
       */

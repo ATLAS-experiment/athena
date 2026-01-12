@@ -136,7 +136,7 @@ StatusCode DbContainer::getOption(DbOption& refOpt) {
   return isValid() ? m_ptr->getOption(refOpt) : StatusCode::FAILURE;
 }
 
-/// Start/Commit/Rollback Database Transaction
+/// Start/Commit Database Transaction
 const Token* DbContainer::token() const {
   return isValid() ? m_ptr->token() : 0;
 }

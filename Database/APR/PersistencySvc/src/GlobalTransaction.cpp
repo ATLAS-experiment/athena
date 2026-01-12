@@ -14,9 +14,6 @@ pool::PersistencySvc::GlobalTransaction::GlobalTransaction( pool::PersistencySvc
 
 pool::PersistencySvc::GlobalTransaction::~GlobalTransaction()
 {
-  if ( this->isActive() ) {
-    this->rollback();
-  }
 }
 
 
@@ -69,19 +66,6 @@ pool::PersistencySvc::GlobalTransaction::commitAndHold()
     return OK;
   }
   return false;
-}
-
-
-void
-pool::PersistencySvc::GlobalTransaction::rollback()
-{
-  if ( this->isActive() ) {
-    for ( pool::PersistencySvc::DatabaseRegistry::iterator iDb = m_databases.begin();
-          iDb != m_databases.end(); ++iDb ) {
-      (*iDb)->rollBackTransaction();
-    }
-    m_type = pool::ITransaction::UNDEFINED;
-  }
 }
 
 

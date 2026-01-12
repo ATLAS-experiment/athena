@@ -41,7 +41,6 @@ pool::PersistencySvc::DatabaseHandler::~DatabaseHandler()
 {
    int mode = 0;
    if( m_storageSvc.openMode(m_fileDescriptor, mode).isSuccess() ) {
-     rollBackTransaction();
      m_storageSvc.disconnect( m_fileDescriptor ).ignore();
    }
 }
@@ -65,18 +64,9 @@ pool::PersistencySvc::DatabaseHandler::commitAndHoldTransaction()
 }
 
 
-void
-pool::PersistencySvc::DatabaseHandler::rollBackTransaction()
-{
-   m_storageSvc.endTransaction( m_fileDescriptor.dbc(), Transaction::TRANSACT_ROLLBACK ).ignore();
-}
-
-
-
 bool
 pool::PersistencySvc::DatabaseHandler::disconnectTransaction()
 {
-   rollBackTransaction();
    return ( m_storageSvc.disconnect( m_fileDescriptor ).isSuccess() );
 }
 
