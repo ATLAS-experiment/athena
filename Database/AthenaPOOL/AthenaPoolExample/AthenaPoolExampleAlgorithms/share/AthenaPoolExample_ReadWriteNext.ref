@@ -173,7 +173,7 @@ CollectionTree(xAOD::EventAuxInfo_v3/EventInfo...)  DEBUG Opening
 CollectionTree(xAOD::EventAuxInfo_v3/EventInfo...)  DEBUG    attributes# = 1
 CollectionTree(xAOD::EventAuxInfo_v3/EventInfo...)  DEBUG Branch container 'xAOD::EventAuxInfo_v3_EventInfoAux.'
 CollectionTree(xAOD::EventAuxInfo_v3/EventInfo...)  DEBUG Opened container CollectionTree(xAOD::EventAuxInfo_v3/EventInfoAux.) of type ROOT_Tree
-TBranchAuxDynReader                                  INFO ../TBranchAuxDynReader.cxx (TBranchAuxDynReader::BranchInfo& TBranchAuxDynReader::getBranchInfo(const unsigned long&, const SG::AuxStoreInternal&)): attribute 'mcEventNumber' (id=1 typename=unsigned long) has different type than the branch: ULong64_t  Marking for schema evolution.
+TBranchAuxDynReader                                  INFO ../TBranchAuxDynReader.cxx (FUNC): attribute 'mcEventNumber' (id=1 typename=unsigned long) has different type than the branch: ULong64_t  Marking for schema evolution.
 AthenaEventLoopMgr                                   INFO   ===>>>  start of run 1    <<<===
 IOVDbSvc                                             INFO Only 5 POOL conditions files will be open at once
 IOVDbSvc                                             INFO Initialised with 1 connections and 0 folders

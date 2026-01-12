@@ -253,7 +253,7 @@ CollectionTree(ExampleHitContainer_p1/MyHits)       DEBUG Branch container 'Exam
 CollectionTree(ExampleHitContainer_p1/MyHits)       DEBUG Opened container CollectionTree(ExampleHitContainer_p1/MyHits) of type ROOT_Tree
 SimplePoolReplica1.root                             DEBUG ---->Class:ExampleHitContainer_p1
 SimplePoolReplica1.root                             DEBUG ---->[0]:ExampleHitContainer_p1 Typ:ExampleHitContainer_p1 [21] Size:0 Offset:0 #Elements:1
-TBranchAuxDynReader                                  INFO ../TBranchAuxDynReader.cxx (TBranchAuxDynReader::BranchInfo& TBranchAuxDynReader::getBranchInfo(const unsigned long&, const SG::AuxStoreInternal&)): attribute 'mcEventNumber' (id=1 typename=unsigned long) has different type than the branch: ULong64_t  Marking for schema evolution.
+TBranchAuxDynReader                                  INFO ../TBranchAuxDynReader.cxx (FUNC): attribute 'mcEventNumber' (id=1 typename=unsigned long) has different type than the branch: ULong64_t  Marking for schema evolution.
 SimplePoolReplica1.root                             DEBUG --> Access   DbContainer  CREA/UPDA [ROOT_TreeIndex] CollectionTree(xAOD::EventAuxInfo_v3/EventInfoAux.)
 CollectionTree(xAOD::EventAuxInfo_v3/EventInfo...)  DEBUG Opening
 CollectionTree(xAOD::EventAuxInfo_v3/EventInfo...)  DEBUG    attributes# = 1

@@ -1473,7 +1473,7 @@ CollectionTree(xAOD::EventAuxInfo_v3/EventInfo...)  DEBUG Opening
 CollectionTree(xAOD::EventAuxInfo_v3/EventInfo...)  DEBUG    attributes# = 1
 CollectionTree(xAOD::EventAuxInfo_v3/EventInfo...)  DEBUG Branch container 'xAOD::EventAuxInfo_v3_EventInfoAux.'
 CollectionTree(xAOD::EventAuxInfo_v3/EventInfo...)  DEBUG Opened container CollectionTree(xAOD::EventAuxInfo_v3/EventInfoAux.) of type ROOT_Tree
-TBranchAuxDynReader                                  INFO ../TBranchAuxDynReader.cxx (TBranchAuxDynReader::BranchInfo& TBranchAuxDynReader::getBranchInfo(const unsigned long&, const SG::AuxStoreInternal&)): attribute 'mcEventNumber' (id=1 typename=unsigned long) has different type than the branch: ULong64_t  Marking for schema evolution.
+TBranchAuxDynReader                                  INFO ../TBranchAuxDynReader.cxx (FUNC): attribute 'mcEventNumber' (id=1 typename=unsigned long) has different type than the branch: ULong64_t  Marking for schema evolution.
 StoreGateSvc_Impl                                 WARNING record_impl: you are recording an object with key , type EventInfo (CLID 2101)
  There is already a persistent version of this object. Recording a duplicate may lead to unreproducible results and it is deprecated.
 AthenaEventLoopMgr                                   INFO   ===>>>  start processing event #4294967297, run #1 30 events processed so far  <<<===
