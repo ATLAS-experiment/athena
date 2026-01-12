@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -53,6 +53,10 @@ public:
     DialogInfo(QPushButton * lb,QWidget * dw,QAbstractButton * ec)
       : enabledButton(ec), dialogWidget(dw), launchButton(lb), neverShown(true) {}
     ~DialogInfo() { delete dialogWidget; }
+
+    DialogInfo(const DialogInfo&) = delete;
+    DialogInfo& operator=(const DialogInfo&) = delete;
+
     QAbstractButton * enabledButton;
     QWidget * dialogWidget;
     QPushButton * launchButton;
