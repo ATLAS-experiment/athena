@@ -157,14 +157,14 @@ StatusCode ZdcNtuple :: initialize ()
 	    if (nsamplesZdc == 32)
 	      {
 		ANA_MSG_INFO("Setting up for 32 samples");
-		m_outputTree->Branch("zdc_raw", &t_raw32, "zdc_raw[2][4][2][2][32]/s"); // 24 samples
-		m_outputTree->Branch("rpd_raw", &t_rpdRaw32, "rpd_raw[2][16][32]/s"); // 24 samples
+		m_outputTree->Branch("zdc_raw", &t_raw32, "zdc_raw[2][4][2][2][32]/s"); // 32 samples
+		m_outputTree->Branch("rpd_raw", &t_rpdRaw32, "rpd_raw[2][16][32]/s"); // 32 samples
 	      }
 	    if (nsamplesZdc == 40)
 	      {
 		ANA_MSG_INFO("Setting up for 40 samples");
-		m_outputTree->Branch("zdc_raw", &t_raw40, "zdc_raw[2][4][2][2][40]/s"); // 24 samples
-		m_outputTree->Branch("rpd_raw", &t_rpdRaw40, "rpd_raw[2][16][40]/s"); // 24 samples
+		m_outputTree->Branch("zdc_raw", &t_raw40, "zdc_raw[2][4][2][2][40]/s"); // 40 samples
+		m_outputTree->Branch("rpd_raw", &t_rpdRaw40, "rpd_raw[2][16][40]/s"); // 40 samples
 	      }
 	  }
 	
@@ -704,10 +704,12 @@ void ZdcNtuple::processZdcNtupleFromModules()
 			  if (nsamplesZdc==7) t_raw7[iside][imod][ig][id][isamp]=0;
 			  if (nsamplesZdc==15) t_raw15[iside][imod][ig][id][isamp]=0;
 			  if (nsamplesZdc==24) t_raw24[iside][imod][ig][id][isamp]=0;
+			  if (nsamplesZdc==32) t_raw32[iside][imod][ig][id][isamp]=0;
+			  if (nsamplesZdc==40) t_raw40[iside][imod][ig][id][isamp]=0;
 			}
 		    }
 		}
-	      if (nsamplesZdc==24)
+	      if (nsamplesZdc==24||nsamplesZdc==32||nsamplesZdc==40)
 		{
 		  for (int ch=0;ch<16;ch++)
 		    {
@@ -1045,6 +1047,16 @@ void ZdcNtuple::processZdcNtupleFromModules()
 			{
 			  t_raw24[iside][imod][0][0][isamp] = g0dataAcc(*zdcMod).at(isamp);
 			  t_raw24[iside][imod][1][0][isamp] = g1dataAcc(*zdcMod).at(isamp);
+			}
+		      if (nsamplesZdc == 32)
+			{
+			  t_raw32[iside][imod][0][0][isamp] = g0dataAcc(*zdcMod).at(isamp);
+			  t_raw32[iside][imod][1][0][isamp] = g1dataAcc(*zdcMod).at(isamp);
+			}
+		      if (nsamplesZdc == 40)
+			{
+			  t_raw40[iside][imod][0][0][isamp] = g0dataAcc(*zdcMod).at(isamp);
+			  t_raw40[iside][imod][1][0][isamp] = g1dataAcc(*zdcMod).at(isamp);
 			}
 		    }
 		}
