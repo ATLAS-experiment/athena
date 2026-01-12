@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////////////////////
@@ -27,6 +27,7 @@
 #include "StoreGate/ReadHandleKey.h"
 #include <iosfwd>
 #include <vector>
+#include <memory>
 
 class MsgStream;
 class TRT_ID;
@@ -132,16 +133,13 @@ namespace InDet {
          EventData(const TRT_DriftCircleContainer *trtcontainer) : m_trtcontainer(trtcontainer) {}
 
          ~EventData() {
-            delete m_trtcylinder;
-            delete m_trtdiscA;
-            delete m_trtdiscC;
          }
 
       protected:
          const TRT_DriftCircleContainer  *m_trtcontainer = nullptr;
-         Trk::Surface                    *m_trtcylinder  = nullptr;
-         Trk::Surface                    *m_trtdiscA     = nullptr;
-         Trk::Surface                    *m_trtdiscC     = nullptr;
+         std::unique_ptr<Trk::Surface>    m_trtcylinder;
+         std::unique_ptr<Trk::Surface>    m_trtdiscA;
+         std::unique_ptr<Trk::Surface>    m_trtdiscC;
 
          std::vector<const Trk::MeasurementBase*>  m_measurement  ;
       };
