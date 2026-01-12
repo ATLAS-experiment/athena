@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "FileReaderWriter.h"
@@ -32,7 +32,7 @@ DFEF::FileReaderWriter::FileReaderWriter(const boost::property_tree::ptree &args
   }
 
   // Get correct run number and detector_mask from prepareForRun ptree
-  auto run_params = args.get_child("RunParams");
+  const auto & run_params = args.get_child("RunParams");
   std::string detmask = run_params.get("det_mask", "");
   uint64_t detmask_LS(0), detmask_MS(0);
   if (detmask.size() == 32) {  // Detmask is supposed to be a 32 digit hex number. Otherwise ignore
