@@ -173,8 +173,8 @@ StatusCode SmoothedTopTagger::tag( const xAOD::Jet& jet ) const {
   calculateJSSRatios(jet);
 
   // configure decorators from JSSTaggerBase class
-  SG::WriteDecorHandle<xAOD::JetContainer, bool> decValidJetContent(m_decValidJetContentKey);
-  SG::WriteDecorHandle<xAOD::JetContainer, bool> decTagged(m_decTaggedKey);
+  SG::WriteDecorHandle<xAOD::JetContainer, char> decValidJetContent(m_decValidJetContentKey);
+  SG::WriteDecorHandle<xAOD::JetContainer, char> decTagged(m_decTaggedKey);
 
   // initialize for use in other statements
   bool passCuts = true;
@@ -190,7 +190,7 @@ StatusCode SmoothedTopTagger::tag( const xAOD::Jet& jet ) const {
     if (m_varCutNames[i] == "Mass" || m_varCutNames[i] == "mass") {
       // decorators for jet after applying cuts
       SG::WriteDecorHandle<xAOD::JetContainer, float> decMCut(m_dec_mcut);
-      SG::WriteDecorHandle<xAOD::JetContainer, bool> decPassMass(m_decPassMassKey);
+      SG::WriteDecorHandle<xAOD::JetContainer, char> decPassMass(m_decPassMassKey);
 
       // decorate cut
       decMCut(jet) = cut_var;
@@ -208,7 +208,7 @@ StatusCode SmoothedTopTagger::tag( const xAOD::Jet& jet ) const {
       // setup read/write handles for sphericity cut decorations & reading variables
       SG::ReadDecorHandle<xAOD::JetContainer, float> readSphericity(m_readSphericityKey);
       SG::WriteDecorHandle<xAOD::JetContainer, float> decSphericityCut(m_dec_sphericitycut);
-      SG::WriteDecorHandle<xAOD::JetContainer, bool> decPassSphericity(m_decPassSphericityKey);
+      SG::WriteDecorHandle<xAOD::JetContainer, char> decPassSphericity(m_decPassSphericityKey);
 
       // decorate cut
       decSphericityCut(jet) = cut_var;

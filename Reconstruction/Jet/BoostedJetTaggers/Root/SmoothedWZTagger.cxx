@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "BoostedJetTaggers/SmoothedWZTagger.h"
@@ -240,10 +240,10 @@ StatusCode SmoothedWZTagger::tag( const xAOD::Jet& jet ) const {
   /// Decorate the cut values
 
   /// Create WriteDecorHandles
-  SG::WriteDecorHandle<xAOD::JetContainer, bool> decPassMass(m_decPassMassKey);
-  SG::WriteDecorHandle<xAOD::JetContainer, bool> decPassD2(m_decPassD2Key);
-  SG::WriteDecorHandle<xAOD::JetContainer, bool> decPassScore(m_decPassScoreKey);
-  SG::WriteDecorHandle<xAOD::JetContainer, bool> decTagged(m_decTaggedKey);
+  SG::WriteDecorHandle<xAOD::JetContainer, char> decPassMass(m_decPassMassKey);
+  SG::WriteDecorHandle<xAOD::JetContainer, char> decPassD2(m_decPassD2Key);
+  SG::WriteDecorHandle<xAOD::JetContainer, char> decPassScore(m_decPassScoreKey);
+  SG::WriteDecorHandle<xAOD::JetContainer, char> decTagged(m_decTaggedKey);
   SG::WriteDecorHandle<xAOD::JetContainer, float> decCutMLow(m_decCutMLowKey);
   SG::WriteDecorHandle<xAOD::JetContainer, float> decCutMHigh(m_decCutMHighKey);
   SG::WriteDecorHandle<xAOD::JetContainer, float> decCutD2(m_decCutD2Key);
@@ -283,9 +283,9 @@ StatusCode SmoothedWZTagger::tag( const xAOD::Jet& jet ) const {
     /// Decorate Ntrk cut value
 
     /// Create WriteDecorHandles
-    SG::WriteDecorHandle<xAOD::JetContainer, bool> decValidJetContent(m_decValidJetContentKey);
-    SG::WriteDecorHandle<xAOD::JetContainer, bool> decValidEventContent(m_decValidEventContentKey);
-    SG::WriteDecorHandle<xAOD::JetContainer, bool> decPassNtrk(m_decPassNtrkKey);
+    SG::WriteDecorHandle<xAOD::JetContainer, char> decValidJetContent(m_decValidJetContentKey);
+    SG::WriteDecorHandle<xAOD::JetContainer, char> decValidEventContent(m_decValidEventContentKey);
+    SG::WriteDecorHandle<xAOD::JetContainer, char> decPassNtrk(m_decPassNtrkKey);
     SG::WriteDecorHandle<xAOD::JetContainer, float> decCutNtrk(m_decCutNtrkKey);
 
     /// Decorate values

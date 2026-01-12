@@ -392,10 +392,10 @@ StatusCode JSSTaggerBase::checkKinRange( const xAOD::Jet &jet, asg::AcceptData &
   }
 
   /// Create write decor handles
-  SG::WriteDecorHandle<xAOD::JetContainer, bool> decValidPtRangeHigh(m_decValidPtRangeHighKey);
-  SG::WriteDecorHandle<xAOD::JetContainer, bool> decValidPtRangeLow(m_decValidPtRangeLowKey);
-  SG::WriteDecorHandle<xAOD::JetContainer, bool> decValidEtaRange(m_decValidEtaRangeKey);
-  SG::WriteDecorHandle<xAOD::JetContainer, bool> decValidKinRange(m_decValidKinRangeKey);
+  SG::WriteDecorHandle<xAOD::JetContainer, char> decValidPtRangeHigh(m_decValidPtRangeHighKey);
+  SG::WriteDecorHandle<xAOD::JetContainer, char> decValidPtRangeLow(m_decValidPtRangeLowKey);
+  SG::WriteDecorHandle<xAOD::JetContainer, char> decValidEtaRange(m_decValidEtaRangeKey);
+  SG::WriteDecorHandle<xAOD::JetContainer, char> decValidKinRange(m_decValidKinRangeKey);
 
   /// Decorate kinematic pass information
   decValidPtRangeHigh(jet) = acceptData.getCutResult( "ValidPtRangeHigh" );
