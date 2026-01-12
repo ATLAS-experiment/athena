@@ -115,7 +115,7 @@ class GeoModelRpcTest : public AthHistogramAlgorithm{
       /** @brief Token to be presented to the visualization service  */
       MuonValR4::IRootVisualizationService::ClientToken m_clientToken{};
       /** @brief Flag toggling whether the strip planes shall be printed */
-      Gaudi::Property<bool> m_visualStrips{this, "visualizePlanes", false};
+      Gaudi::Property<bool> m_visualStrips{this, "visualizePlanes", true};
   
 };
 }

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #include "MuonVisualizationHelpersR4/VisualizationHelpers.h"
 
@@ -41,16 +41,8 @@ namespace MuonValR4{
                                       const double xPos, const double yPos,
                                       const unsigned int fontSize) {
         auto tl = std::make_unique<TLatex>(xPos, yPos, text.c_str());
-        tl->SetTextFont(43); 
-        tl->SetTextSize(fontSize); 
-        return tl;
-    }
-    std::unique_ptr<TLatex> drawLabelNDC(const std::string& text, 
-                                      const double xPos, const double yPos,
-                                      const unsigned int fontSize) {
-        auto tl = std::make_unique<TLatex>(xPos, yPos, text.c_str());
-        tl->SetNDC();
-        tl->SetTextFont(43); 
+        tl->SetTextFont(43);
+        tl->SetNDC(); 
         tl->SetTextSize(fontSize); 
         return tl;
     }
@@ -99,12 +91,12 @@ namespace MuonValR4{
     }
     std::unique_ptr<TLatex> drawAtlasLabel(const double xPos, const double yPos,
                                            const std::string& status) {
-        return drawLabelNDC( "#font[72]{ATLAS} "+status, xPos, yPos);
+        return drawLabel( "#font[72]{ATLAS} "+status, xPos, yPos);
     }
     std::unique_ptr<TLatex> drawLumiSqrtS(const double xPos,
                                           const double yPos,
                                           const std::string_view sqrtS,
                                           const std::string_view lumi) {
-        return drawLabelNDC(std::format("#sqrt{{s}}={0} TeV {1}{2}", sqrtS, lumi, lumi.empty() ? "" : "fb^{-1}"), xPos, yPos);
+        return drawLabel(std::format("#sqrt{{s}}={0} TeV {1}{2}", sqrtS, lumi, lumi.empty() ? "" : "fb^{-1}"), xPos, yPos);
     }
 }
