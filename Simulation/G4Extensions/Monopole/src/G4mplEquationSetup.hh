@@ -56,6 +56,7 @@
 #define MONOPOLE_G4mplEquationSetup_H
 
 #include <thread>
+#include <memory>
 #include "G4Types.hh"
 #ifdef G4MULTITHREADED
 #  include "tbb/concurrent_unordered_map.h"
@@ -137,9 +138,9 @@ private:
 
   // Objects owned -- created during tracking 
   //                  and transiently associated with the current FieldManager object.
-  G4mplEqMagElectricField*  fMonopoleEquation= nullptr;
-  G4MagIntegratorStepper*   fMonopoleStepper = nullptr;
-  G4ChordFinder*            fMonopoleChordFinder= nullptr;
+  std::unique_ptr<G4mplEqMagElectricField>  fMonopoleEquation;
+  std::unique_ptr<G4MagIntegratorStepper>   fMonopoleStepper;
+  std::unique_ptr<G4ChordFinder>            fMonopoleChordFinder;
 
   // Cache of objects related to the current state - for consistency
   G4FieldManager*   fCurrentFieldManager = nullptr; // Memory of this needed to ensure integrity
