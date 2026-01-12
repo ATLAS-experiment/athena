@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // LArIdTranslatorHelper
@@ -29,6 +29,7 @@
 #include "TPad.h"
 #include "TAxis.h"
 #include "TKey.h"
+#include <cmath>
 
 LArIdTranslatorHelper::LArIdTranslatorHelper(const TString& file)
   : bec(0),side(0),ft(0),sl(0),ch(0),sa(0),part(0),
@@ -463,7 +464,7 @@ void LArIdTranslatorHelper::MakeTranslatorMapping(const char* inputtreefile,cons
 
   // counters
   Int_t nchannels = 0;
-  Double_t emb1PhiGran = M_PI/(Double_t)32;
+  Double_t emb1PhiGran = M_PI/32.0;
   Int_t dupl = 0,dupl2 = 0;
   Int_t empt = 0;
   Int_t ntotal = 0;
@@ -515,7 +516,7 @@ void LArIdTranslatorHelper::MakeTranslatorMapping(const char* inputtreefile,cons
       if( ((Eta_Raw > 1.4) && (Eta_Raw < 1.475)) || ((Eta_Raw < -1.4) && (Eta_Raw > -1.475))) {    
           //this is the eta region where we mess around:                                            
           //take phi modulus the phi granularity we have in our histogram, then shift eta accordingly:
-          phiMod = fmod( fabs(Phi_Raw),emb1PhiGran);
+          phiMod = std::fmod( std::fabs(Phi_Raw),emb1PhiGran);
           celleta = Eta_Raw + (phiMod * 0.2551) - 0.0125;
       }
     }
@@ -543,8 +544,8 @@ void LArIdTranslatorHelper::MakeTranslatorMapping(const char* inputtreefile,cons
     if(emhad>=1){
       lodiff = cellphi-h2map[j][0]->GetYaxis()->GetBinLowEdge(binphidqm1);
       updiff = cellphi-h2map[j][0]->GetYaxis()->GetBinUpEdge(binphidqm1);
-      Bool_t loedge = (fabs(lodiff) < 1e-5) ? 1 : 0;
-      Bool_t upedge = (fabs(updiff) < 1e-5) ? 1 : 0;
+      Bool_t loedge = (std::fabs(lodiff) < 1e-5) ? 1 : 0;
+      Bool_t upedge = (std::fabs(updiff) < 1e-5) ? 1 : 0;
 
       if(loedge || upedge){ // bin edges are close enough
         if(h2count[j][0]->GetBinContent(binetadqm,binphidqm1)==1){ // nominal bin
