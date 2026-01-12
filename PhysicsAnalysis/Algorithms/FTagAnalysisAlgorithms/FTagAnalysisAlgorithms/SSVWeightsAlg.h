@@ -38,15 +38,39 @@ namespace CP{
     virtual StatusCode execute() override;
 
   private:
-    std::string m_jsonConfigPath_SSVWeightsAlg;
-    std::string m_BTagging_WP;
+    Gaudi::Property<std::string> m_jsonConfigPath_SSVWeightsAlg {this, "JsonConfigFile_SSVWeightsAlg","", "Path to the JSON config file that contains the SSV calibration results which are needed to calculate the SSV weights"};
+    Gaudi::Property<std::string> m_BTaggingWP {this, "BTaggingWP", "", "b-tagging working point that is used to count the number of b-jets in the event for b-jet based SSV weight calculation"};
+    Gaudi::Property<std::string> m_EfficiencyMethod {this, "EfficiencyMethod", "", "efficiency definition that will be used to calculate the SSV weights, string can be 'Bhadron_pT_eta_based' or 'bjet_based'"};
+    Gaudi::Property<std::string> m_nFMethod {this, "nFMethod", "", "average number of fake SSV definition that will be used to calculate the SSV weights, string can be 'pileup_bjet_based','pileup_based_linearfit' or 'pileup_based_binned'"};
+    Gaudi::Property<std::string> m_OutputVariableSize {this, "OutputVariableSize", "", "number of variables that will be saved to the output, string can be 'standard','extended','additional' or 'all'"};
+
     nlohmann::json m_jsonConfig_SSVWeightsAlg;
-    std::string m_OverlapRemoval;
-    std::string m_Jvt;
-    std::string m_efficiency_Method;
-    std::string m_nF_Method;
-    std::string m_OutputVariable_Size;
     const double m_lowMuHighMuThreshold = 42.93;
+
+    enum class EfficiencyMethodType {
+      unknown,
+      bjet_based,
+      Bhadron_pT_eta_based,
+    };
+
+    enum class nFMethodType {
+      unknown,
+      pileup_bjet_based,
+      pileup_based_linearfit,
+      pileup_based_binned
+    };
+
+    enum class OutputVariableSizeType {
+      unknown,
+      standard,
+      extended,
+      additional,
+      all
+    };
+
+    EfficiencyMethodType m_EfficiencyMethodType{EfficiencyMethodType::unknown};
+    nFMethodType m_nFMethodType{nFMethodType::unknown};
+    OutputVariableSizeType m_OutputVariableSizeType{OutputVariableSizeType::unknown};
 
     std::vector<const xAOD::Vertex*> create_good_SSVs(
       const std::vector<const xAOD::Jet*> &jets,
@@ -125,16 +149,23 @@ namespace CP{
     CP::SysReadHandle<xAOD::JetContainer> m_jetsHandle{
       this, "jets", "", "the jet container to use"};
 
-
     CP::SysReadHandle<xAOD::ElectronContainer> m_electronsHandle {
       this, "electrons", "", "the electron container to use"};
 
     CP::SysReadHandle<xAOD::MuonContainer> m_muonsHandle {
       this, "muons", "", "the muon container to use"};
 
-
     CP::SysReadHandle<xAOD::VertexContainer> m_ssvHandle{
       this, "NVSI_WP", "", "The NewVrtSecInclusiveTool output container to use (NewVrtSecInclusiveTool = algorithm that constructs the soft secondary vertices (SSVs))"};
+
+    CP::SysReadSelectionHandle m_jetSelection {
+      this, "jetSelection", "", "the jet selection to apply on the jets that are used to check if they overlap with a SSV or a b-hadron"};
+
+    CP::SysReadSelectionHandle m_electronSelection {
+      this, "electronSelection", "", "the electron selection to apply on the electrons that are used to check if they overlap with a SSV or a b-hadron"};
+
+    CP::SysReadSelectionHandle m_muonSelection {
+      this, "muonSelection", "", "the muon selection to apply on the muons that are used to check if they overlap with a SSV or a b-hadron"};
 
     static const SG::AuxElement::ConstAccessor<float> m_ssv_pt_accessor;
     static const SG::AuxElement::ConstAccessor<float> m_ssv_m_accessor;
@@ -155,11 +186,11 @@ namespace CP{
     CP::SysWriteDecorHandle<float> m_number_of_accepted_Bhadrons_decor{this, "number_of_accepted_Bhadrons", "number_of_accepted_Bhadrons_%SYS%", "number of b-hadrons in acceptance in an event"};
     CP::SysWriteDecorHandle<float> m_number_of_good_SSVs_decor{this, "number_of_good_SSVs", "number_of_good_SSVs_%SYS%", "number of good SSVs in an event"};
 
-    CP::SysWriteDecorHandle<float> m_P_ineff_bjet_based_decor{this, "P_ineff_bjet_based", "P_ineff_bjet_based_%SYS%", "inefficiency correction factor calculated according to the 'bjet_based' efficiency_Method"};
-    CP::SysWriteDecorHandle<float> m_P_ineff_pt_eta_based_decor{this, "P_ineff_pt_eta_based", "P_ineff_pt_eta_based_%SYS%", "inefficiency correction factor calculated according to the 'Bhadron_pT_eta_based' efficiency_Method"};
-    CP::SysWriteDecorHandle<float> m_P_fake_pileup_bjet_based_decor{this, "P_fake_pileup_bjet_based", "P_fake_pileup_bjet_based_%SYS%", "fake correction factor calculated according to the 'pileup_bjet_based' nF_Method"};
-    CP::SysWriteDecorHandle<float> m_P_fake_pileup_based_linearfit_decor{this, "P_fake_pileup_based_linearfit", "P_fake_pileup_based_linearfit_%SYS%", "fake correction factor calculated according to the 'pileup_based_linearfit' nF_Method"};
-    CP::SysWriteDecorHandle<float> m_P_fake_pileup_based_binned_decor{this, "P_fake_pileup_based_binned", "P_fake_pileup_based_binned_%SYS%", "fake correction factor calculated accoring to the 'pileup_based_binned' nF_Method"};
+    CP::SysWriteDecorHandle<float> m_P_ineff_bjet_based_decor{this, "P_ineff_bjet_based", "P_ineff_bjet_based_%SYS%", "inefficiency correction factor calculated according to the 'bjet_based' EfficiencyMethod"};
+    CP::SysWriteDecorHandle<float> m_P_ineff_pt_eta_based_decor{this, "P_ineff_pt_eta_based", "P_ineff_pt_eta_based_%SYS%", "inefficiency correction factor calculated according to the 'Bhadron_pT_eta_based' EfficiencyMethod"};
+    CP::SysWriteDecorHandle<float> m_P_fake_pileup_bjet_based_decor{this, "P_fake_pileup_bjet_based", "P_fake_pileup_bjet_based_%SYS%", "fake correction factor calculated according to the 'pileup_bjet_based' nFMethod"};
+    CP::SysWriteDecorHandle<float> m_P_fake_pileup_based_linearfit_decor{this, "P_fake_pileup_based_linearfit", "P_fake_pileup_based_linearfit_%SYS%", "fake correction factor calculated according to the 'pileup_based_linearfit' nFMethod"};
+    CP::SysWriteDecorHandle<float> m_P_fake_pileup_based_binned_decor{this, "P_fake_pileup_based_binned", "P_fake_pileup_based_binned_%SYS%", "fake correction factor calculated accoring to the 'pileup_based_binned' nFMethod"};
   };
 }
 #endif
