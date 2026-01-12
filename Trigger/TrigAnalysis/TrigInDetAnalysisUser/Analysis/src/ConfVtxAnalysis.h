@@ -5,7 +5,7 @@
  **     @author  mark sutton
  **     @date    Sun  9 Aug 2015 00:02:23 CEST 
  **
- **     Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+ **     Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  **/
 
 
@@ -13,6 +13,7 @@
 #define  CONFVTXANALYSIS_H
 
 #include <iostream>
+#include <memory>
 
 #include "TrigInDetAnalysis/VertexAnalysis.h"
 #include "TrigInDetAnalysis/TIDAVertex.h"
@@ -26,8 +27,6 @@ class ConfVtxAnalysis : public VertexAnalysis {
 public:
 
   ConfVtxAnalysis( const std::string& n, bool use_secVtx_limits=false );
-
-  virtual ~ConfVtxAnalysis() { if ( m_dir ) delete m_dir; }
 
   void initialise();
 
@@ -50,7 +49,7 @@ private:
 
   bool m_use_secVtx_limits;
 
-  TIDDirectory* m_dir;
+  std::unique_ptr<TIDDirectory> m_dir;
 
   TH1F*    m_hnvtx = 0;
   TH1F*    m_hzed = 0;
