@@ -1,21 +1,18 @@
-// Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 #include "TrkTrackState.h"
 #include "TrkBaseNode.h"
 #include "TrkPlanarSurface.h"
 #include "RecTrack.h"
 #include "DkfTrack.h"
 
-DkfTrack::DkfTrack(TrkTrackState* pTS, const RecTrack* pR) : m_pTrackState(pTS), m_pRecTrack(pR)
+DkfTrack::DkfTrack(std::unique_ptr<TrkTrackState> pTS, const RecTrack* pR) : m_pTrackState(std::move(pTS)), m_pRecTrack(pR)
   , m_dChi2(0)
   , m_nNDOF(-5)
 {
-	m_vpNodes.clear();m_vpSurfaces.clear();
-	m_vpTrackStates.clear();
 }
 
 DkfTrack::~DkfTrack(void)
 {
-	delete m_pTrackState;
 	for(std::vector<TrkBaseNode*>::iterator it=m_vpNodes.begin();it!=m_vpNodes.end();++it)
 		delete (*it);
 	m_vpNodes.clear();

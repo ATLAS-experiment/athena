@@ -4,11 +4,12 @@
 
 #include "SiCluster.h"
 
+#include <memory>
+
 class PixelCluster : public SiCluster
 {
   public:
-    PixelCluster(const Surface*);
-    virtual ~PixelCluster(void);
+    PixelCluster(std::unique_ptr<const Surface>);
 
     double m_m[2]{};
     double m_cov[2][2]{};
