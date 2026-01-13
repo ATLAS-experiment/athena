@@ -197,8 +197,7 @@ StatusCode GeoModelMdtTest::visualizeTubeStaggering(const EventContext& ctx, con
                 cabling->convert(tube_id,cabling_data);
                 /// Test if the online channel can be found
                 if (!cabling->getOnlineId(cabling_data, msgStream())) {
-                    // to be uncommented once BIS1 has the correct number of tubes
-                    //ATH_MSG_WARNING("Could no retrieve a valid online channel for "<<m_idHelperSvc->toString(tube_id));
+                    ATH_MSG_WARNING("Could no retrieve a valid online channel for "<<m_idHelperSvc->toString(tube_id));
                     continue;
                     return StatusCode::FAILURE;
                 }
@@ -228,7 +227,13 @@ StatusCode GeoModelMdtTest::visualizeTubeStaggering(const EventContext& ctx, con
                 } else {
                     canvas->add(MuonValR4::drawDriftCircle(Amg::Vector3D{0., x, y}, r, kBlack, MuonValR4::hollowFilling));
                 }
-                canvas->add(MuonValR4::drawLabel(std::to_string(cabling_data.channelId), x ,y, 3));
+                canvas->add(MuonValR4::drawLabel(std::to_string(cabling_data.channelId), x-1.5 ,y, 3, false));
+                auto label = MuonValR4::drawLabel(std::to_string(static_cast<int>(cabling_data.mezzanine_type)), x-1.5 ,y + 2, 3, false);
+                label->SetTextColor(kBlue);
+                canvas->add(std::move(label));
+                auto label2=MuonValR4::drawLabel(std::to_string(cabling_data.tdcId), x-1.5 ,y-2, 3, false);
+                label2->SetTextColor(kRed);
+                canvas->add(std::move(label2));
             }
         }
 
