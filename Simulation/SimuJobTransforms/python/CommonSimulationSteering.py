@@ -90,6 +90,8 @@ def CommonSimulationCfg(flags, log):
         cfg.merge(SimEventFilterCfg(flags, sequenceName='SimSequence'))
         cfg.merge(InvertedSimEventFilterCfg(flags, sequenceName='CopyHitSequence'))
         cfg.merge(RenameHitCollectionsCfg(flags, sequenceName='CopyHitSequence'))
+        evSel = cfg.getService("EventSelector")
+        evSel.CollectionType = "RootCollection"
     else:
         #Cases 1, 2, 3
         # add BeamEffectsAlg
