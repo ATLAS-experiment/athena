@@ -15,13 +15,13 @@ def VarToolCfg(flags, var, Tname="VarTool", **kwargs):
     else:
         raise TypeError('Unregonised type for VarTool block')
     # Guess if this is a jet variable if not explicitly set
-    if var in ["e", "et", "pt", "eta", "abseta", "|eta|", "rapidity", "y", "|y|", "absy", "absrapidity", "|rapidity|", "DetectorEta", "absDetEta", "LOGmOe"]:
+    if var in ["e", "et", "pt", "eta", "abseta", "|eta|", "rapidity", "y", "|y|", "absy", "absrapidity", "|rapidity|", "DetectorEta", "absDetEta", "LOGmOe", "mass", "M", "m"]:
         kwargs.setdefault("isJetVar", True)
     else:
         kwargs.setdefault("isJetVar", False)
     kwargs.setdefault("Type","float")
     # Guess the scale if not explicitly set
-    if kwargs.get("isJetVar") and var in ["pt", "e", "et"]:
+    if kwargs.get("isJetVar") and var in ["pt", "e", "et", "mass", "M", "m"]:
         kwargs.setdefault("Scale", 1e-3)
     else:
         kwargs.setdefault("Scale",1.0)

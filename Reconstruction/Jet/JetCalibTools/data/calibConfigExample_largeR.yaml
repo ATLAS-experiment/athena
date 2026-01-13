@@ -51,3 +51,31 @@ JMS:
 
   InScale: "JetEtaJESScaleMomentum"
   OutScale: "JetJMSScaleMomentum"
+
+# --------------------------------------------------------------------------------------------------------------------------------------------------------------
+# 3. Insitu + InsituJMS calibration
+Insitu:
+  fileInsitu:
+    - JetCalibTools/CalibArea-00-04-83/InsituCalibration/InsituCalibration_AntiKt10UFOCSSKSoftDropBeta100Zcut10_Precision_Sep2022_1516.root
+    - JetCalibTools/CalibArea-00-04-83/InsituCalibration/InsituCalibration_AntiKt10UFOCSSKSoftDropBeta100Zcut10_Precision_Sep2022_17.root
+    - JetCalibTools/CalibArea-00-04-83/InsituCalibration/InsituCalibration_AntiKt10UFOCSSKSoftDropBeta100Zcut10_Precision_Sep2022_18.root
+  histEtaInterCalib:
+    histName: 'AntiKt10UFOCSSKSoftDropBeta100Zcut10_EtaInterCalibration'
+    varX: 'pt'
+    varY: 'DetectorEta'
+  histAbsCalib:
+    histName: 'AntiKt10UFOCSSKSoftDropBeta100Zcut10_InsituCalib'
+    varX: 'pt'
+  useOriginalHistCombination: false
+  RunNumbers: [251102, 314199, 341649, 999999]
+  CalibrateMC: True
+  InScale: "JetConstitScaleMomentum" 
+  OutScale: "JetInsituScaleMomentum" 
+  prereqs:
+    default: []
+  JMS:
+    inputFile: "JetCalibTools/CalibArea-00-04-83/InsituCalibration/InsituJMSCalibration_140ifb_15161718_Sep_2024_10UFO_Precision.root"
+    histName: "AntiKt10UFOCSSKSoftDropBeta100Zcut10_InsituCalibJMS_CaloMass"
+    InterpType: "Full"
+    varX: "pt"
+    varY: "M"

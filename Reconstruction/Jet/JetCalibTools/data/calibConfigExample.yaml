@@ -115,15 +115,15 @@ Insitu:
   histEtaInterCalib:
     histName: 'AntiKt4EMPFlow_EtaInterCalibration'
     varX: 'pt'
-    varY: 'eta'
+    varY: 'DetectorEta'
   histAbsCalib:
     histName: 'AntiKt4EMPFlow_InsituCalib'
     varX: 'pt'
   RunNumbers: [251102, 314199, 999999]
-  CalibrateMC: True
+  CalibrateMC: False
+  useOriginalHistCombination: False
   InScale: "JetGSCScaleMomentum" # do not include in analysis-facing YAML
   OutScale: "JetInsituScaleMomentum" # do not include in analysis-facing YAML
   prereqs:
     default: []
-  # noRun: True
 # ----------------
