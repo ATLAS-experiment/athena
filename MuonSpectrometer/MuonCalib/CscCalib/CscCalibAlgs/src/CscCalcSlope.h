@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef CSCCALCSLOPE_H
@@ -99,14 +99,14 @@ namespace MuonCalib{
 
       DataVector<DataVector<TProfile> >* m_fracProfs;
       DataVector<DataVector<TGraph> >* m_fracGraphs;
-      DataVector<TH1I> * m_bitHists;
-      std::vector<float> * m_fitReturns;
+      std::vector<TH1I*> m_bitHists;
+      std::vector<float> m_fitReturns;
 
       TGraph * m_resGraph;        
-      DataVector<TGraphErrors> * m_calGraphs;
+      std::vector<TGraphErrors*> m_calGraphs;
       TProfile * m_currentAmpProf; 
-      std::map<int, TProfile*> * m_ampProfs;
-      std::set<int> * m_pulsedChambers;
+      std::map<int, TProfile*> m_ampProfs;
+      std::set<int> m_pulsedChambers;
 
       /**coherent correction array has the corrections to the coherently pulsed channels to get the basic channels**/
       int m_eventCnt;	
