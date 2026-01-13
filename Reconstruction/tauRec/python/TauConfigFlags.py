@@ -17,6 +17,7 @@ def createTauConfigFlags():
     tau_cfg.addFlag("Tau.doPanTau", True)
     tau_cfg.addFlag("Tau.doRNNTrackClass", True)
     tau_cfg.addFlag("Tau.doTauDiscriminant", True)
+    tau_cfg.addFlag("Tau.doTauNeutralFourVecNNRegression", True)
     tau_cfg.addFlag("Tau.associateLRT", False)
     tau_cfg.addFlag("Tau.isStandalone", False)
     # Classify Large Radius Tracks in tau track classifier
@@ -53,6 +54,9 @@ def createTauConfigFlags():
     tau_cfg.addFlag("Tau.TauEleRNNConfig", ["taueveto_rnn_config_1P_r22.json", "taueveto_rnn_config_3P_r22.json"])
     tau_cfg.addFlag("Tau.TauEleRNNWPConfig", ["taueveto_rnn_flat_1P_r22.root", "taueveto_rnn_flat_3P_r22.root"])
     tau_cfg.addFlag("Tau.DecayModeNNClassifierConfig", "NNDecayMode_R22_v1.json")
+    tau_cfg.addFlag("Tau.NeutralFourVecNNRegressionConfig1p1n", "TauNeutralFourVecNNRegresssion_model_1p1n.onnx") 
+    tau_cfg.addFlag("Tau.NeutralFourVecNNRegressionConfig1pXn", "TauNeutralFourVecNNRegresssion_model_1p1n.onnx") # using the 1p1n network as a placeholder for testing
+    tau_cfg.addFlag("Tau.NeutralFourVecNNRegressionConfig3pXn", "TauNeutralFourVecNNRegresssion_model_1p1n.onnx") # using the 1p1n network as a placeholder for testing
     tau_cfg.addFlag("Tau.TauEleRNNWPfix", ["rnneveto_mc16d_flat_1p_fix.root", "rnneveto_mc16d_flat_3p_fix.root"])
     # R22 DeepSet tau ID tune with track RNN scores
     tau_cfg.addFlag("Tau.TauJetDeepSetConfig", ["tauid_R22_1p_trk_dpst_notrkfakeRNN.json", "tauid_R22_2p_trk_dpst.json", "tauid_R22_3p_trk_dpst.json"])

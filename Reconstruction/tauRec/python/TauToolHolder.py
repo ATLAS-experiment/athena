@@ -13,7 +13,7 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.AccumulatorCache import AccumulatorCache
 from AthenaConfiguration.Enums import ProductionStep
 from AthenaCommon.SystemOfUnits import GeV, MeV, deg
-
+from AthOnnxComps.OnnxRuntimeFlags import OnnxRuntimeType
 
 ########################################################################
 # JetSeedBuilder
@@ -980,6 +980,36 @@ def TauDecayModeNNClassifierCfg(flags):
                                                           WeightFile=flags.Tau.DecayModeNNClassifierConfig)
 
     result.setPrivateTools(myTauDecayModeNNClassifier)
+    return result
+
+def TauNeutralFourVecNNRegressionCfg(flags, **kwargs):
+    result = ComponentAccumulator()
+    _name = flags.Tau.ActiveConfig.prefix + 'TauNeutralFourVecNNRegression'
+    
+    model_fname_1p1n = flags.Tau.NeutralFourVecNNRegressionConfig1p1n
+    model_fname_1pXn = flags.Tau.NeutralFourVecNNRegressionConfig1pXn
+    model_fname_3pXn = flags.Tau.NeutralFourVecNNRegressionConfig3pXn
+    execution_provider = OnnxRuntimeType.CPU
+    
+    from AthOnnxComps.OnnxRuntimeInferenceConfig import OnnxRuntimeInferenceToolCfg
+    kwargs.setdefault("ORTInferenceTool_1p1n", result.popToolsAndMerge(
+        OnnxRuntimeInferenceToolCfg(flags, model_fname_1p1n, execution_provider, name="TauNeutralFourVecNNRegression_onnx_1p1n")
+    ))
+    kwargs.setdefault("ORTInferenceTool_1pXn", result.popToolsAndMerge(
+        OnnxRuntimeInferenceToolCfg(flags, model_fname_1pXn, execution_provider, name="TauNeutralFourVecNNRegression_onnx_1pXn")
+    ))
+    kwargs.setdefault("ORTInferenceTool_3pXn", result.popToolsAndMerge(
+        OnnxRuntimeInferenceToolCfg(flags, model_fname_3pXn, execution_provider, name="TauNeutralFourVecNNRegression_onnx_3pXn")
+    ))
+    
+    TauNeutralFourVecNNRegression = CompFactory.getComp("TauNeutralFourVecNNRegression")
+    myTauNeutralFourVecNNRegression = TauNeutralFourVecNNRegression(name=_name, **kwargs)#,
+    #                               WeightFile_1p1n=flags.Tau.NeutralFourVecNNRegressionConfig1p1n,
+    #                               WeightFile_1pXn=flags.Tau.NeutralFourVecNNRegressionConfig1pXn,
+    #                               WeightFile_3pXn=flags.Tau.NeutralFourVecNNRegressionConfig3pXn)
+    
+    result.setPrivateTools(myTauNeutralFourVecNNRegression)
+    
     return result
 
 def TauAODSelectorCfg(flags):
