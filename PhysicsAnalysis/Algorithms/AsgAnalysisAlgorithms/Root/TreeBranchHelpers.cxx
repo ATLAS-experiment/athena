@@ -387,6 +387,10 @@ namespace CP
 	  SG::ConstAccessor<std::vector<float>> {nominalAuxName};
 	else if (typeName == "vector_int")
 	  SG::ConstAccessor<std::vector<int>> {nominalAuxName};
+	else if (typeName == "vector_vector_float")
+	  SG::ConstAccessor<std::vector<std::vector<float>>> {nominalAuxName};
+	else if (typeName == "vector_vector_int")
+	  SG::ConstAccessor<std::vector<std::vector<int>>> {nominalAuxName};
         else
         {
           unsigned line = __LINE__ - 2;
