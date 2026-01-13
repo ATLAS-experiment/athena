@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef GEO2G4_GDMLDetectorTool_H
@@ -39,14 +39,18 @@ class GDMLDetectorTool final : public DetectorGeometryBase
   virtual void BuildGeometry() override final;
 
  private:
-
-  std::string m_GDMLFileName;
-  std::string m_builderName;
-  bool m_blGetTopTransform;
-  G4Transform3D m_topTransform;
-  std::string m_geoDetectorName;
+  // Internal methods
   bool IsTopTransform();
   void SetInitialTransformation();
+
+  //Configurable Properties
+  Gaudi::Property<std::string> m_GDMLFileName{this, "GDMLFileName", "", "Name of the GDML file to be used as input."};
+  Gaudi::Property<std::string> m_geoDetectorName{this, "GeoDetectorName", "", "Name of the detector in GeoModel, if different from G4."};
+
+  // Other member variables
+  std::string m_builderName{""};
+  bool m_blGetTopTransform{true};
+  G4Transform3D m_topTransform; // initialized in the constructor
 };
 
 #endif // GEO2G4_GDMLDetectorTool_H

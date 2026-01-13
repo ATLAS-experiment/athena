@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "Geo2G4Svc.h"
@@ -8,12 +8,7 @@
 
 Geo2G4Svc::Geo2G4Svc(const std::string& name, ISvcLocator* svcLocator)
   : base_class(name,svcLocator)
-  , m_defaultBuilder()
-  , m_getTopTransform(true)
-  , m_G4AssemblyFactory(nullptr)
 {
-  ATH_MSG_VERBOSE ("Creating the Geo2G4Svc.");
-  declareProperty("GetTopTransform", m_getTopTransform);
 }
 
 Geo2G4Svc::~Geo2G4Svc()
