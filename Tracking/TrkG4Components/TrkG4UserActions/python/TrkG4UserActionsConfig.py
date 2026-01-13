@@ -5,7 +5,7 @@
 def MaterialStepRecorderCfg(configFlags, name="G4UA::UserActionSvc.MaterialStepRecorderTool", **kwargs):
   from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
   from AthenaConfiguration.ComponentFactory import CompFactory
-  result = ComponentAccumulator()  
+  result = ComponentAccumulator()
   result.setPrivateTools(CompFactory.G4UA.MaterialStepRecorderTool(name, **kwargs))
   return result
   
@@ -22,21 +22,17 @@ def MaterialStepRecorderUserActionSvcCfg(configFlags, name="G4UA::MaterialStepRe
   actions += [actionAcc.popToolsAndMerge(MaterialStepRecorderCfg(configFlags))]
   actionAcc.setPrivateTools(actions)
   MaterialStepRecorderAction = result.popToolsAndMerge(actionAcc)
-  
+
   #Retrieving the default action list
   from G4AtlasServices.G4AtlasUserActionConfig import getDefaultActions
   defaultActions = result.popToolsAndMerge(getDefaultActions(configFlags))
-    
-  #Adding LengthIntegrator to defaults
+
+  #Adding material recorder action to defaults
   actionList = (defaultActions + MaterialStepRecorderAction)
 
-  #Setting up UserActionsService
-  ##We clear it here because UserActionsTools also wants kwargs, different
-  ##from the tool above - probably this can be improved...
-  kwargs_UATools = {}
-  kwargs_UATools.setdefault("UserActionTools",actionList)
-  result.addService(CompFactory.G4UA.UserActionSvc(name,**kwargs_UATools))    
-    
+  kwargs.setdefault("UserActionTools",actionList)
+  result.addService(CompFactory.G4UA.UserActionSvc(name,**kwargs), primary = True)
+
   return result
 
 def MaterialStepRecorder(configFlags, name="G4UA::ISFFullUserActionSvc", **kwargs):
