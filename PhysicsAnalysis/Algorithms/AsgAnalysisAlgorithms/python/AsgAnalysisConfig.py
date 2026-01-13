@@ -66,6 +66,8 @@ class CommonServicesConfig (ConfigBlock) :
         self.addOption ('streamName', 'ANALYSIS', type=str,
             info="name of the output stream to save the cut bookkeeper in. "
             "The default is ANALYSIS.")
+        self.addOption ('setupONNX', False, type=bool,
+            info="creates an instance of `AthOnnx::OnnxRuntimeSvc`.")
 
     def instanceName (self) :
         """Return the instance name for this block"""
@@ -157,7 +159,8 @@ class CommonServicesConfig (ConfigBlock) :
                         +reset)
             log.warning(f"{bold}{yellow}These settings are not recommended for analysis. Make sure you know what you're doing, or disable them with `enableExpertMode: False` in `CommonServices`.{reset}")
 
-
+        if self.setupONNX:
+            config.createService('AthOnnx::OnnxRuntimeSvc', 'OnnxRuntimeSvc')
 
 @groupBlocks
 def CommonServices(seq):
