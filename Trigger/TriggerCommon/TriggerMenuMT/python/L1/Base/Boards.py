@@ -28,8 +28,6 @@ class BoardType(Enum):
             btype = BoardType.TOPO
         elif 'ctpin' in name.lower():
             btype = BoardType.CTPIN
-        elif 'ctpin' in name.lower():
-            btype = BoardType.CTPIN
         elif 'l0global' in name.lower():
             btype = BoardType.L0GLOBAL
         else:
