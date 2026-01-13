@@ -4,7 +4,7 @@
 atlas_subdir( MuonCondDump )
 
 # External dependencies:
-find_package( ROOT COMPONENTS Core Tree MathCore Hist RIO pthread )
+find_package( ROOT COMPONENTS Core Tree MathCore Hist RIO pthread Graf Gpad)
 find_package( CORAL )
 
 # Component(s) in the package:
@@ -15,7 +15,7 @@ atlas_add_component( MuonCondDump
                      LINK_LIBRARIES ${CORAL_LIBRARIES} ${ROOT_LIBRARIES} AthenaBaseComps AthenaKernel CoralUtilitiesLib GaudiKernel 
                                     GeoPrimitives Identifier MuonAlignmentData MuonCondData MuonCondInterface MuonCondSvcLib MuonIdHelpersLib 
                                     MuonReadoutGeometry ActsGeoUtils StoreGateLib MuonCablingData MuonReadoutGeometryR4 MdtCalibData
-                                    MuonTesterTreeLib)
+                                    MuonTesterTreeLib MuonRecToolInterfacesR4 MuonVisualizationHelpersR4)
 
 # Install files from the package:
 atlas_install_python_modules( python/*.py )
