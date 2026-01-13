@@ -53,6 +53,12 @@ std::unique_ptr<InputVariable> InputVariable::createVariable(const std::string& 
                 [](const xAOD::Jet& jet, const JetContext&) {
                     return std::abs(jet.rapidity());
                 });
+        
+        if (name == "mass" || name == "M" || name == "m")
+           return std::make_unique<InputVariable>(name,
+               [](const xAOD::Jet& jet, const JetContext&) {
+                   return jet.m();
+               });
 
 	if (name == "absDetEta")
             return std::make_unique<InputVariable>(name,
