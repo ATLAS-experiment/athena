@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef GEO2G4_Geo2G4Svc_H
@@ -36,10 +36,10 @@ public:
 private:
   typedef std::unordered_map<std::string, std::unique_ptr<VolumeBuilder>> BuilderMap;
 
-  std::string m_defaultBuilder;
+  Gaudi::Property<bool> m_getTopTransform{this, "GetTopTransform", true};
   BuilderMap m_builders;
-  bool m_getTopTransform;
-  std::unique_ptr<Geo2G4AssemblyFactory> m_G4AssemblyFactory;
+  std::string m_defaultBuilder{""};
+  std::unique_ptr<Geo2G4AssemblyFactory> m_G4AssemblyFactory{};
 };
 
 #endif
