@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ISF_FASTCALOSIMPARAMETRIZATION_CALOGEOMETRYLOOKUP_H
@@ -11,7 +11,6 @@
 #include <map>
 #include <iostream>
 
-//#include "ISF_FastCaloSimEvent/ICaloGeometry.h"
 #include "ISF_FastCaloSimParametrization/MeanAndRMS.h"
 #include "ISF_FastCaloSimParametrization/FSmap.h"
 
@@ -94,8 +93,20 @@ class CaloGeometryLookup {
 #endif
 
   protected:
-    float neta_double() {return (maxeta_raw()-mineta_raw())/deta().mean();};
-    float nphi_double() {return (maxphi_raw()-minphi_raw())/dphi().mean();};
+    float neta_double() {
+      if (auto m = deta().mean();m!=0.)[[likely]]{
+        return (maxeta_raw()-mineta_raw())/m;
+      }
+      return 0.f;
+    }
+    
+    float nphi_double() {
+      if(auto m = dphi().mean(); m!=0.)[[likely]]{
+        return (maxphi_raw()-minphi_raw())/m;
+      }
+      return 0.f;
+    }
+    
     Int_t neta() {return TMath::Nint( neta_double() );};
     Int_t nphi() {return TMath::Nint( nphi_double() );};
 
