@@ -96,10 +96,12 @@ def getLowMuPhysicsSignatures():
         #BLS triggers
         ChainProp(name='HLT_2mu4_bDimu_L12MU3V', stream=[PhysicsStream], groups=PrimaryL1MuGroup+BphysicsGroup+["RATE:CPS_2MU3V"], monGroups=['bphysMon:online','bphysMon:shifter']),
         ChainProp(name='HLT_2mu4_bJpsimumu_L12MU3V', l1SeedThresholds=['MU3V'], stream=[PhysicsStream], groups=BphysicsGroup+['RATE:CPS_2MU3V'], monGroups=['bphysMon:online','bphysMon:t0']),
+        ChainProp(name='HLT_2mu4_bUpsimumu_L12MU3V', l1SeedThresholds=['MU3V'], stream=[PhysicsStream], groups=BphysicsGroup+['RATE:CPS_2MU3V'], monGroups=['bphysMon:online','bphysMon:t0']),
         ChainProp(name='HLT_2mu4_bJpsimumu_Lxy0_L12MU3V', l1SeedThresholds=['MU3V'], stream=[PhysicsStream], groups=BphysicsGroup+['RATE:CPS_2MU3V']),
         ChainProp(name='HLT_2mu4_bBmumu_Lxy0_L12MU3V', l1SeedThresholds=['MU3V'], stream=[PhysicsStream], groups=BphysicsGroup+['RATE:CPS_2MU3V']),
         ChainProp(name='HLT_2mu4_bBmumu_L12MU3V', l1SeedThresholds=['MU3V'], stream=[PhysicsStream], groups=BphysicsGroup+['RATE:CPS_2MU3V']),
         ChainProp(name='HLT_2mu4_bJpsimumu_L12MU3VF', l1SeedThresholds=['MU3VF'], stream=[PhysicsStream], groups=BphysicsGroup+['RATE:CPS_2MU3VF']),
+        ChainProp(name='HLT_2mu4_bUpsimumu_L12MU3VF', l1SeedThresholds=['MU3VF'], stream=[PhysicsStream], groups=BphysicsGroup+['RATE:CPS_2MU3VF']),
         ChainProp(name='HLT_2mu4_bJpsimumu_Lxy0_L12MU3VF', l1SeedThresholds=['MU3VF'], stream=[PhysicsStream], groups=BphysicsGroup+['RATE:CPS_2MU3VF']),
         ChainProp(name='HLT_2mu4_bBmumu_Lxy0_L12MU3VF', l1SeedThresholds=['MU3VF'], stream=[PhysicsStream], groups=BphysicsGroup+['RATE:CPS_2MU3VF']),
         ChainProp(name='HLT_2mu4_bBmumu_L12MU3VF', l1SeedThresholds=['MU3VF'], stream=[PhysicsStream], groups=BphysicsGroup+['RATE:CPS_2MU3VF']),
