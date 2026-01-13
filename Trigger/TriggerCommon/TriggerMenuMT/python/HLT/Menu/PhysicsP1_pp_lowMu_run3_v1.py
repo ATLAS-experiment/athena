@@ -21,6 +21,7 @@ from .Physics_pp_run3_v1 import (
     SupportPhIGroup,
     JetStreamersGroup,
     METStreamersGroup,
+    METGroup,
     TauStreamersGroup,
     EgammaStreamersGroup,
     PrimaryL1MuGroup,
@@ -33,7 +34,8 @@ from .Physics_pp_run3_v1 import (
     BphysicsGroup,
     BphysElectronGroup,
     EOFBeePhIGroup,
-    TagAndProbePhIGroup
+    TagAndProbePhIGroup,
+    EOFL1MuGroup
 )
 from . import P1_run3_v1
 
@@ -89,6 +91,22 @@ def getLowMuPhysicsSignatures():
         #----------- LRT mu (ATR-32273)
         ChainProp(name='HLT_mu4_LRT_d0loose_L1MU3V', groups=PrimaryL1MuGroup+SingleMuonGroup, monGroups=['muonMon:online']),
         ChainProp(name='HLT_mu20_LRT_d0loose_L1MU14FCH',  groups=PrimaryL1MuGroup+SingleMuonGroup, monGroups=['muonMon:online']),
+
+        #ATR-32300
+        ChainProp(name='HLT_2mu4_7invmAA9_L1DY-BOX-2MU3VF', l1SeedThresholds=['MU3VF'], groups=MultiMuonGroup+SupportGroup+Topo2Group+['RATE:CPS_DY-BOX-2MU3VF']),
+        ChainProp(name='HLT_2mu4_11invmAA60_L1DY-BOX-2MU3VF', l1SeedThresholds=['MU3VF'], groups=MultiMuonGroup+SupportGroup+Topo2Group+['RATE:CPS_DY-BOX-2MU3VF']),
+        ChainProp(name='HLT_2mu6_11invmAA24_L1DY-BOX-2MU5VF', l1SeedThresholds=['MU5VF'], groups=MultiMuonGroup+SupportGroup+Topo2Group+['RATE:CPS_DY-BOX-2MU5VF']),
+        ChainProp(name='HLT_2mu6_24invmAA60_L1DY-BOX-2MU5VF', l1SeedThresholds=['MU5VF'], groups=MultiMuonGroup+SupportGroup+Topo2Group+['RATE:CPS_DY-BOX-2MU5VF']),
+
+        ChainProp(name='HLT_mu4_ivarloose_mu4_7invmAB9_L1DY-BOX-2MU3VF',          l1SeedThresholds=['MU3VF','MU3VF'], groups=MultiMuonGroup+EOFL1MuGroup+Topo2Group+['RATE:CPS_DY-BOX-2MU3VF']),
+        ChainProp(name='HLT_mu4_ivarloose_mu4_11invmAB60_L1DY-BOX-2MU3VF',        l1SeedThresholds=['MU3VF','MU3VF'], groups=MultiMuonGroup+EOFL1MuGroup+Topo2Group+['RATE:CPS_DY-BOX-2MU3VF']),
+        ChainProp(name='HLT_mu6_ivarloose_mu6_11invmAB24_L1DY-BOX-2MU5VF',       l1SeedThresholds=['MU5VF','MU5VF'], groups=MultiMuonGroup+EOFL1MuGroup+Topo2Group+['RATE:CPS_DY-BOX-2MU5VF']),
+        ChainProp(name='HLT_mu6_ivarloose_mu6_24invmAB60_L1DY-BOX-2MU5VF',       l1SeedThresholds=['MU5VF','MU5VF'], groups=MultiMuonGroup+EOFL1MuGroup+Topo2Group+['RATE:CPS_DY-BOX-2MU5VF']),
+
+        ChainProp(name='HLT_mu4_ivarloose_mu4_b7invmAB9vtx20_L1DY-BOX-2MU3VF',    l1SeedThresholds=['MU3VF','MU3VF'], groups=MultiMuonGroup+EOFL1MuGroup+Topo2Group+['RATE:CPS_DY-BOX-2MU3VF']),
+        ChainProp(name='HLT_mu4_ivarloose_mu4_b11invmAB60vtx20_L1DY-BOX-2MU3VF',  l1SeedThresholds=['MU3VF','MU3VF'], groups=MultiMuonGroup+EOFL1MuGroup+Topo2Group+['RATE:CPS_DY-BOX-2MU3VF']),
+        ChainProp(name='HLT_mu6_ivarloose_mu6_b11invmAB24vtx20_L1DY-BOX-2MU5VF', l1SeedThresholds=['MU5VF','MU5VF'], groups=MultiMuonGroup+EOFL1MuGroup+Topo2Group+['RATE:CPS_DY-BOX-2MU5VF']),
+        ChainProp(name='HLT_mu6_ivarloose_mu6_b24invmAB60vtx20_L1DY-BOX-2MU5VF', l1SeedThresholds=['MU5VF','MU5VF'], groups=MultiMuonGroup+EOFL1MuGroup+Topo2Group+['RATE:CPS_DY-BOX-2MU5VF']),
     ]
 
     chains['Bphysics'] += [
@@ -612,6 +630,12 @@ def getLowMuPhysicsSignatures():
 
         ChainProp(name='HLT_noalg_eb_L1RD1_FILLED',         l1SeedThresholds=['FSNOSEED'], stream=['EnhancedBias'], groups=['PS:NoBulkMCProd', "RATE:EnhancedBias", "BW:Detector"]+SupportGroup ),
     ]
+
+    chains['MET'] += [
+        ChainProp(name='HLT_xe30_cell_L1eEM12L',  l1SeedThresholds=['FSNOSEED'], stream=['Main'], groups=PrimaryPhIGroup+METGroup),
+        ChainProp(name='HLT_xe30_pfopufit_L1eEM12L',  l1SeedThresholds=['FSNOSEED'], stream=['Main'], groups=PrimaryPhIGroup+METGroup),
+    ]
+
 
     return chains
 

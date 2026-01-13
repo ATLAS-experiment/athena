@@ -472,6 +472,9 @@ def defineMenu():
 
         'L1_jMJJ-500-NFF', 'L1_jMJJ-700',
 
+        #ATR-32300
+        'L1_DY-BOX-2MU3VF', 'L1_DY-BOX-2MU5VF',
+
     ]
 
 
