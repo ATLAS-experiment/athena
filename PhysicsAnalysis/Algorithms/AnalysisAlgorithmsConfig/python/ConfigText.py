@@ -133,7 +133,7 @@ class TextConfig(ConfigFactory):
                     merge(subBlock, algs[subName].subAlgs, newPath)
             return
 
-        logCPAlgTextCfg.info(f'loading {yamlPath}')
+        logCPAlgTextCfg.debug(f'loading {yamlPath}')
         if configDict is not None:
             # if configDict is provided, use it directly
             config = configDict
@@ -269,7 +269,7 @@ class TextConfig(ConfigFactory):
             elif containerName is not None and 'containerName' not in options:
                 options['containerName'] = containerName
             # will check which options are associated alg and not options
-            logCPAlgTextCfg.info(f"Configuring {block.algName}")
+            logCPAlgTextCfg.debug(f"Configuring {block.algName}")
             seq, funcOpts = block.makeConfig(options)
             if not seq._blocks:
                 continue
