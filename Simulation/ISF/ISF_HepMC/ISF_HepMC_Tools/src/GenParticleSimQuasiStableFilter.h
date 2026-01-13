@@ -1,10 +1,6 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
-
-///////////////////////////////////////////////////////////////////
-// GenParticleFinalStateFilter.h, (c) ATLAS Detector software
-///////////////////////////////////////////////////////////////////
 
 #ifndef ISF_HEPMC_GenParticleSimQuasiStableFilter_H
 #define ISF_HEPMC_GenParticleSimQuasiStableFilter_H 1
@@ -24,38 +20,37 @@
 
 namespace ISF {
 
-    class ISFParticle;
+  class ISFParticle;
 
-      /** @class GenParticleSimQuasiStableFilter
- 
-       Quasi stable particle and their daughter filter for HepMC particles to be used in the
-       stack filling process.  Checks this particle and all daughters.
-      */
+  /** @class GenParticleSimQuasiStableFilter
+
+      Quasi stable particle and their daughter filter for HepMC particles to be used in the
+      stack filling process.  Checks this particle and all daughters.
+  */
   class GenParticleSimQuasiStableFilter : public extends<AthAlgTool, IGenParticleFilter> {
 
-    public:
-      //** Constructor with parameters */
-      GenParticleSimQuasiStableFilter( const std::string& t, const std::string& n, const IInterface* p );
+  public:
+    //** Constructor with parameters */
+    GenParticleSimQuasiStableFilter( const std::string& t, const std::string& n, const IInterface* p );
 
-      /** Destructor */
-      ~GenParticleSimQuasiStableFilter(){}
+    /** Destructor */
+    ~GenParticleSimQuasiStableFilter() = default;
 
-      /** Athena algtool's Hooks */
-      StatusCode  initialize();
-      StatusCode  finalize();
+    /** Athena algtool's Hooks */
+    virtual StatusCode  initialize() override final;
 
-      /** passes through to the private version */
+    /** passes through to the private version */
 #ifdef HEPMC3
-      bool pass(const HepMC::ConstGenParticlePtr& particle ) const;
+    virtual bool pass(const HepMC::ConstGenParticlePtr& particle ) const override final;
 #else
-      bool pass(const HepMC::GenParticle& particle ) const;
+    virtual bool pass(const HepMC::GenParticle& particle ) const override final;
 #endif
 
-     private:
-      /** returns true if the the particle and all daughters are on the accept list */
-      std::vector< int >    m_statuscode = {1,2};                 //!< status codes to accept
-      std::vector< double > m_minProdRadius = {30.19*Gaudi::Units::mm,0.0*Gaudi::Units::mm};           //!< minimum production radius below which particles should be ignored
-      std::vector< double > m_minDecayRadius = {30.19*Gaudi::Units::mm,30.19*Gaudi::Units::mm};         //!< minimum decay radius below which particles should be ignored
+  private:
+    /** returns true if the the particle and all daughters are on the accept list */
+    Gaudi::Property<std::vector< int > > m_statuscode{this, "StatusCode", {1,2}};                 //!< status codes to accept
+    Gaudi::Property<std::vector< double > > m_minProdRadius{this, "MinProdRadius", {30.19*Gaudi::Units::mm,0.0*Gaudi::Units::mm}};           //!< minimum production radius below which particles should be ignored
+    Gaudi::Property<std::vector< double > > m_minDecayRadius{this, "MinDecayRadius", {30.19*Gaudi::Units::mm,30.19*Gaudi::Units::mm}};         //!< minimum decay radius below which particles should be ignored
   };
 
 }

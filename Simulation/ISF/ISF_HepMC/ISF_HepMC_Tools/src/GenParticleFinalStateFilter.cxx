@@ -1,10 +1,6 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
-
-///////////////////////////////////////////////////////////////////
-// GenParticleFinalStateFilter.cxx, (c) ATLAS Detector software
-///////////////////////////////////////////////////////////////////
 
 // class header include
 #include "GenParticleFinalStateFilter.h"
@@ -20,13 +16,8 @@
 ISF::GenParticleFinalStateFilter::GenParticleFinalStateFilter( const std::string& t,
                                                                const std::string& n,
                                                                const IInterface* p )
-  : base_class(t,n,p),
-    m_checkGenSimStable(true),
-    m_checkGenInteracting(true)
+  : base_class(t,n,p)
 {
-    // different options
-    declareProperty("CheckGenSimStable",        m_checkGenSimStable);
-    declareProperty("CheckGenInteracting",      m_checkGenInteracting);
 }
 
 
@@ -60,11 +51,3 @@ bool ISF::GenParticleFinalStateFilter::pass(const HepMC::GenParticle& particle) 
   return passFilter;
 }
 #endif
-
-
-StatusCode  ISF::GenParticleFinalStateFilter::finalize()
-{
-    ATH_MSG_VERBOSE("Finalizing ...");
-    return StatusCode::SUCCESS;
-}
-
