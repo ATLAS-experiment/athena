@@ -105,11 +105,10 @@ beamcond.tiltX=0.0
 beamcond.tiltY=0.0
 
 kwargs = {}
-
 svcName = "G4UA::MaterialStepRecorderUserActionSvc"
 from TrkG4UserActions.TrkG4UserActionsConfig import MaterialStepRecorderUserActionSvcCfg
-acc.merge(MaterialStepRecorderUserActionSvcCfg(flags,svcName,**kwargs))
-kwargs.update(UserActionSvc=svcName)
+userAction = acc.getPrimaryAndMerge(MaterialStepRecorderUserActionSvcCfg(flags,svcName,**kwargs))
+kwargs.update(UserActionSvc=userAction)
 
 if args.simulate:
   from G4AtlasAlg.G4AtlasAlgConfig import G4AtlasAlgCfg
@@ -118,6 +117,8 @@ if args.simulate:
   from SimuJobTransforms.SimOutputConfig import getStreamHITS_ItemList
   acc.merge( OutputStreamCfg(flags,"HITS", ItemList=getStreamHITS_ItemList(flags), disableEventTag=True, AcceptAlgs=['ITkG4AtlasAlg']) )
 
+from xAODEventInfoCnv.xAODEventInfoCnvConfig import EventInfoCnvAlgCfg
+acc.merge(EventInfoCnvAlgCfg(flags))
 
 AthenaOutputStream=CompFactory.AthenaOutputStream
 AthenaOutputStreamTool=CompFactory.AthenaOutputStreamTool
@@ -138,7 +139,7 @@ streamInfoTool = MakeEventStreamInfo( "MaterialStepCollectionStream_MakeEventStr
 streamInfoTool.Key = "MaterialStepCollectionStream"
 streamInfoTool.EventInfoKey = "EventInfo"
 outputStream.HelperTools.append(streamInfoTool)
-    
+
 acc.addEventAlgo(outputStream)
 
 acc.printConfig(withDetails = True, summariseProps = True)
