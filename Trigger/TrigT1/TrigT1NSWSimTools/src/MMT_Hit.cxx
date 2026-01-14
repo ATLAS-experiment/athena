@@ -82,10 +82,10 @@ MMT_Hit::MMT_Hit(const Identifier &id, const std::string& stationName,
     m_Z = globalPos.z();
     m_PitchOverZ = (readout->getDesign(id))->inputPitch/m_Z;
     m_RZslope = m_R / m_Z;
-    const double distanceFromZAxis = readout->absTransform().translation().perp() - 0.5*readout->getRsize();
 
     Identifier tmpId = detManager->mmIdHelper()->channelID(stationName, 1, 1, 1, 1, 1);
     const MuonGM::MMReadoutElement* roEl = detManager->getMMReadoutElement(tmpId);
+    const double distanceFromZAxis = roEl->absTransform().translation().perp() - 0.5*roEl->getRsize();
     int tmpStrip = (roEl->getDesign(tmpId))->nMissedBottomEta + 1;
     tmpId = detManager->mmIdHelper()->channelID(stationName, 1, 1, 1, 1, tmpStrip);
     globalPos = Amg::Vector3D::Zero();
