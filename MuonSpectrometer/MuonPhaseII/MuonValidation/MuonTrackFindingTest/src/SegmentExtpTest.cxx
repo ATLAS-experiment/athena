@@ -48,7 +48,7 @@ namespace MuonValR4{
 
         auto extrapolate = [&](const Acts::BoundTrackParameters& start,
                                const MuonR4::SpacePoint& sp) {
-            const Amg::Transform3D& trf = sp.msSector()->localToGlobalTrans(*gctx);
+            const Amg::Transform3D& trf = sp.msSector()->localToGlobalTransform(*gctx);
             const Acts::Surface& target = xAOD::muonSurface(sp.primaryMeasurement());
             const Amg::Vector3D n = target.normal(tgContext, 
                                                   Amg::Vector3D::Zero(), 

@@ -81,7 +81,7 @@ namespace MuonValR4{
         } else {
             locCov = xAOD::toEigen(strip.localCovariance<2>());
         }
-        const Amg::Vector3D globPos{re->localToGlobalTrans(gctx, strip.layerHash()) *locPos};
+        const Amg::Vector3D globPos{re->localToGlobalTransform(gctx, strip.layerHash()) *locPos};
         m_globPos.push_back(globPos);
         m_locPos.push_back(locPos.block<2,1>(0,0));
         m_locCov.push_back(locCov(0,0), locCov(1,1));

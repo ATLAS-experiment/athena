@@ -224,7 +224,7 @@ namespace MuonR4{
                                          Amg::error(inSegment->covariance(), Acts::toUnderlying(t0)));
 
                 SegPars_t& localPars{dec_locPars(*convertedSeg)};
-                const Amg::Transform3D globToLoc{sector->globalToLocalTrans(*gctx)};            
+                const Amg::Transform3D globToLoc{sector->globalToLocalTransform(*gctx)};            
                 const Amg::Vector3D locPos{globToLoc * pos};
                 const Amg::Vector3D locDir{globToLoc.linear() * dir};
 

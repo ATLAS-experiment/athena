@@ -86,7 +86,7 @@ Amg::Transform3D MmReadoutElement::fromGapToChamOrigin(const IdentifierHash& lay
 Amg::Vector3D MmReadoutElement::stripPosition(const ActsTrk::GeometryContext& ctx, const IdentifierHash& measHash) const {
    const IdentifierHash lHash = layerHash(measHash);
    if (static_cast<unsigned int>(lHash) < m_pars.layers.size()) {
-      return localToGlobalTrans(ctx, lHash) * stripLayer(lHash).localStripPosition(stripNumber(measHash));
+      return localToGlobalTransform(ctx, lHash) * stripLayer(lHash).localStripPosition(stripNumber(measHash));
    }
    ATH_MSG_WARNING(__FILE__<<":"<<__LINE__<<" The layer hash "<<static_cast<unsigned int>(lHash)
                  <<" is out of range. Maximum range "<<m_pars.layers.size());
@@ -105,7 +105,7 @@ Amg::Vector3D MmReadoutElement::stripPosition(const ActsTrk::GeometryContext& ct
 Amg::Vector3D MmReadoutElement::leftStripEdge(const ActsTrk::GeometryContext& ctx, const IdentifierHash& measHash) const {
     const IdentifierHash lHash = layerHash(measHash);
     if (static_cast<unsigned int>(lHash) < m_pars.layers.size()) {
-       return localToGlobalTrans(ctx, lHash) * stripLayer(lHash).localStripLeftEdge(stripNumber(measHash));
+       return localToGlobalTransform(ctx, lHash) * stripLayer(lHash).localStripLeftEdge(stripNumber(measHash));
     }
     ATH_MSG_WARNING(__FILE__<<":"<<__LINE__<<" The layer hash "<<static_cast<unsigned int>(lHash)
                  <<" is out of range. Maximum range "<<m_pars.layers.size());
@@ -123,7 +123,7 @@ Amg::Vector3D MmReadoutElement::leftStripEdge(const ActsTrk::GeometryContext& ct
 Amg::Vector3D MmReadoutElement::rightStripEdge(const ActsTrk::GeometryContext& ctx, const IdentifierHash& measHash) const{
     const IdentifierHash lHash = layerHash(measHash);
     if (static_cast<unsigned int>(lHash) < m_pars.layers.size()) {
-       return localToGlobalTrans(ctx, lHash) * stripLayer(lHash).localStripRightEdge(stripNumber(measHash));
+       return localToGlobalTransform(ctx, lHash) * stripLayer(lHash).localStripRightEdge(stripNumber(measHash));
     }
     ATH_MSG_WARNING(__FILE__<<":"<<__LINE__<<" The layer hash "<<static_cast<unsigned int>(lHash)
                  <<" is out of range. Maximum range "<<m_pars.layers.size());

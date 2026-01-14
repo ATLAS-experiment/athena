@@ -77,7 +77,7 @@ namespace MuonGMR4{
     double Chamber::halfZ() const { return MuonGMR4::halfZ(*m_args.bounds);}
 
     std::shared_ptr<Acts::Volume> Chamber::boundingVolume(const ActsTrk::GeometryContext& gctx) const {
-        return std::make_shared<Acts::Volume>(localToGlobalTrans(gctx), bounds());
+        return std::make_shared<Acts::Volume>(localToGlobalTransform(gctx), bounds());
     }
     std::shared_ptr<Acts::VolumeBounds> Chamber::bounds() const { return m_args.bounds; }
     int Chamber::stationPhi() const{ return readoutEles().front()->stationPhi(); }
@@ -92,11 +92,11 @@ namespace MuonGMR4{
     const Acts::PlaneSurface& Chamber::surface() const {
         return *m_args.surface;
     }
-    const Amg::Transform3D& Chamber::localToGlobalTrans(const ActsTrk::GeometryContext& gctx) const {
+    const Amg::Transform3D& Chamber::localToGlobalTransform(const ActsTrk::GeometryContext& gctx) const {
         return surface().transform(gctx.context());
     }
-    Amg::Transform3D Chamber::globalToLocalTrans(const ActsTrk::GeometryContext& gctx) const {
-        return localToGlobalTrans(gctx).inverse();
+    Amg::Transform3D Chamber::globalToLocalTransform(const ActsTrk::GeometryContext& gctx) const {
+        return localToGlobalTransform(gctx).inverse();
     }
     const SpectrometerSector* Chamber::parent() const { return m_parent; }
     void Chamber::setParent(const SpectrometerSector* parent) { m_parent = parent; }

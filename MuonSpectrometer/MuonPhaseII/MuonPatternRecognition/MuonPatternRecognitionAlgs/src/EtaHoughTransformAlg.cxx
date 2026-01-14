@@ -118,7 +118,7 @@ void EtaHoughTransformAlg::preProcess(const EventContext& ctx,
         }
         std::vector<HoughSetupForBucket>& buckets = data.houghSetups[bucket->front()->msSector()];        
         HoughSetupForBucket& hs{buckets.emplace_back(bucket)};
-        const Amg::Transform3D globToLoc{hs.bucket->msSector()->globalToLocalTrans(gctx)};
+        const Amg::Transform3D globToLoc{hs.bucket->msSector()->globalToLocalTransform(gctx)};
         Amg::Vector3D leftSide  = globToLoc.translation() - (hs.bucket->coveredMin() * Amg::Vector3D::UnitY());
         Amg::Vector3D rightSide = globToLoc.translation() - (hs.bucket->coveredMax() * Amg::Vector3D::UnitY());
 

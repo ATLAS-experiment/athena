@@ -105,8 +105,8 @@ StatusCode GeoModelsTgcTest::execute() {
             return StatusCode::FAILURE;
         }
         ATH_CHECK(dumpToTree(ctx, gctx, reElement));
-        const Amg::Transform3D globToLocal{reElement->globalToLocalTrans(gctx)};
-        const Amg::Transform3D& localToGlob{reElement->localToGlobalTrans(gctx)};
+        const Amg::Transform3D globToLocal{reElement->globalToLocalTransform(gctx)};
+        const Amg::Transform3D& localToGlob{reElement->localToGlobalTransform(gctx)};
         /// Closure test that the transformations actually close
         const Amg::Transform3D transClosure = globToLocal * localToGlob;
         for (Amg::Vector3D axis :{Amg::Vector3D::UnitX(),Amg::Vector3D::UnitY(),Amg::Vector3D::UnitZ()}) {
@@ -183,7 +183,7 @@ StatusCode GeoModelsTgcTest::dumpToTree(const EventContext& ctx,
     m_chamberHeight = reElement->chamberHeight();
      
    /// Dump the local to global transformation of the readout element
-   const Amg::Transform3D& transform{reElement->localToGlobalTrans(gctx)};
+   const Amg::Transform3D& transform{reElement->localToGlobalTransform(gctx)};
    m_readoutTransform = transform;
    m_alignableNode  = reElement->alignableTransform()->getDefTransform();
 
@@ -275,7 +275,7 @@ StatusCode GeoModelsTgcTest::dumpToTree(const EventContext& ctx,
                             m_padGasGap.push_back(layer);
 
                             if (!(etaIndex == 1 && phiIndex == 1)) continue;
-                            const Amg::Transform3D locToGlob = reElement->localToGlobalTrans(gctx, 
+                            const Amg::Transform3D locToGlob = reElement->localToGlobalTransform(gctx, 
                                                                                     reElement->layerHash(padIDHash));
                             ATH_MSG_DEBUG("The local to global transformation on layers is: " << Amg::toString(locToGlob));
                             m_padRot.push_back(locToGlob);
@@ -307,7 +307,7 @@ StatusCode GeoModelsTgcTest::dumpToTree(const EventContext& ctx,
                         m_stripLengths.push_back(reElement->stripLength(stripHash));
 
                         if (strip != 1) continue;
-                        const Amg::Transform3D locToGlob = reElement->localToGlobalTrans(gctx, 
+                        const Amg::Transform3D locToGlob = reElement->localToGlobalTransform(gctx, 
                                                                         reElement->layerHash(stripHash));
                         ATH_MSG_DEBUG("The local to global transformation on layers is: " << Amg::toString(locToGlob));
                         m_stripRot.push_back(locToGlob);
@@ -343,7 +343,7 @@ StatusCode GeoModelsTgcTest::dumpToTree(const EventContext& ctx,
                         m_wireGroupNum.push_back(wireGroup);
                     
                         if (wireGroup != 1) continue;
-                        const Amg::Transform3D locToGlob = reElement->localToGlobalTrans(gctx, 
+                        const Amg::Transform3D locToGlob = reElement->localToGlobalTransform(gctx, 
                                                                 reElement->layerHash(wireGroupHash));
                         ATH_MSG_DEBUG("The local to global transformation on layers is: " << Amg::toString(locToGlob));
                         m_wireGroupRot.push_back(locToGlob);

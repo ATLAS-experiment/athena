@@ -56,7 +56,7 @@ G4bool RpcSensitiveDetector::ProcessHits(G4Step* aStep,G4TouchableHistory*) {
       return true;
   }
   /// Fetch the local -> global transformation  
-  const Amg::Transform3D toGasGap{readOutEle->globalToLocalTrans(gctx, etaHitID)};
+  const Amg::Transform3D toGasGap{readOutEle->globalToLocalTransform(gctx, etaHitID)};
   propagateAndSaveStrip(etaHitID, toGasGap, aStep);
   return true;
 }
@@ -70,7 +70,7 @@ Identifier RpcSensitiveDetector::getIdentifier(const ActsTrk::GeometryContext& g
                                                   readOutEle->doubletZ(),
                                                   readOutEle->doubletPhi(), 1, phiGap, 1);
   
-  const Amg::Vector3D locHitPos{readOutEle->globalToLocalTrans(gctx, firstChan) * 
+  const Amg::Vector3D locHitPos{readOutEle->globalToLocalTransform(gctx, firstChan) * 
                                 hitAtGapPlane};
   const double gapHalfWidth = readOutEle->stripEtaLength() / 2;
   const double gapHalfLength = readOutEle->stripPhiLength()/ 2;

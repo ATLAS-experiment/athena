@@ -125,7 +125,7 @@ class MuonReadoutElement : public GeoVDetectorElement, public AthMessaging, publ
      *              z-axis: Points vertically outwards the chamber
      *                      (e.g. radially outwards for barrel or to the endcap cavern wall)
      *  @param ctx: Geometry context to take the alignment corrections into account */
-    Amg::Transform3D globalToLocalTrans(const ActsTrk::GeometryContext& ctx) const;
+    Amg::Transform3D globalToLocalTransform(const ActsTrk::GeometryContext& ctx) const;
     /** @brief Returns the transformations from the ATLAS coordinate system into the
      *         local coordinate system of the readout sensor. The orientiation of the
      *         axes depends on whether the sensor is described by a plane or by a
@@ -142,8 +142,8 @@ class MuonReadoutElement : public GeoVDetectorElement, public AthMessaging, publ
      *              z-axis: Points along the tube wire
      *  @param ctx: Geometry context to take the alignment corrections into account
      *  @param id: Identifier of the measurement for which the transform shall be retrieved */
-    Amg::Transform3D globalToLocalTrans(const ActsTrk::GeometryContext& ctx,
-                                        const Identifier& id) const;
+    Amg::Transform3D globalToLocalTransform(const ActsTrk::GeometryContext& ctx,
+                                            const Identifier& id) const;
     /** @brief Returns the transformations from the ATLAS coordinate system into the
      *         local coordinate system using the measurement / layer hash mechanism.
      *         For strip-like detectors a layer hash must always be parsed. For the 
@@ -151,24 +151,24 @@ class MuonReadoutElement : public GeoVDetectorElement, public AthMessaging, publ
      *         plane transform or the particular tube transform shall be retrieved.
      *  @param ctx: Geometry context to take the alignment corrections into account.
      *  @param hash: Hash of the transform to fetch (Measurement or layer hash). */
-    Amg::Transform3D globalToLocalTrans(const ActsTrk::GeometryContext& ctx, 
-                                        const IdentifierHash& hash) const;
+    Amg::Transform3D globalToLocalTransform(const ActsTrk::GeometryContext& ctx, 
+                                            const IdentifierHash& hash) const;
     /** @brief Returns the transformation from the local coordinate system  of the readout
      *         element into the global ATLAS coordinate system (inverse of globalToLocal).
      *  @param ctx: Geometry context to take the alignment corrections into account. */
-    const Amg::Transform3D& localToGlobalTrans(const ActsTrk::GeometryContext& ctx) const;
+    const Amg::Transform3D& localToGlobalTransform(const ActsTrk::GeometryContext& ctx) const;
     /** @brief Returns the transformation from the local coordinate system  of the readout
      *         element into the global ATLAS coordinate system (inverse of globalToLocal).
      *  @param ctx: Geometry context to take the alignment corrections into account
      *  @param id: Identifier of the measurement for which the transform shall be retrieved */
-    const Amg::Transform3D& localToGlobalTrans(const ActsTrk::GeometryContext& ctx,
-                                               const Identifier& id) const;
+    const Amg::Transform3D& localToGlobalTransform(const ActsTrk::GeometryContext& ctx,
+                                                   const Identifier& id) const;
     /** @brief Returns the transformation from the local coordinate system  of the readout
      *         element into the global ATLAS coordinate system (inverse of globalToLocal).
      *  @param ctx: Geometry context to take the alignment corrections into account
      *  @param hash: Hash of the transform to fetch (Measurement or layer hash). */
-    const Amg::Transform3D& localToGlobalTrans(const ActsTrk::GeometryContext& ctx,
-                                               const IdentifierHash& id) const;
+    const Amg::Transform3D& localToGlobalTransform(const ActsTrk::GeometryContext& ctx,
+                                                   const IdentifierHash& id) const;
 
 #ifndef SIMULATIONBASE
     /** @brief Wrapper function of the localToGlobalTransform method to satisfy the 

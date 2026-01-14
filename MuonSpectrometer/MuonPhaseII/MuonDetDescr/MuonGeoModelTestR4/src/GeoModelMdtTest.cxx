@@ -203,17 +203,17 @@ StatusCode GeoModelMdtTest::visualizeTubeStaggering(const EventContext& ctx, con
                 }
 
 
-                const Amg::Vector3D tubePos = chamber->globalToLocalTrans(gctx) * readEle->readOutPos(gctx, tube_id);
+                const Amg::Vector3D tubePos = chamber->globalToLocalTransform(gctx) * readEle->readOutPos(gctx, tube_id);
                 const Amg::Vector3D locDir{Amg::Vector3D::UnitY()};
 
                 if(tube == 1){
                     Identifier tube2 = idHelper.channelID(test_me, readEle->multilayer(), layer, 2);
                     ATH_MSG_VERBOSE("processing tube" << m_idHelperSvc->toString(tube_id)
-                                    << " " << Amg::toString(tubePos) << " " << Amg::toString(chamber->globalToLocalTrans(gctx) * readEle->readOutPos(gctx, tube2)) << " " << 
-                                    Amg::toString(chamber->localToGlobalTrans(gctx).linear() * locDir));
+                                    << " " << Amg::toString(tubePos) << " " << Amg::toString(chamber->globalToLocalTransform(gctx) * readEle->readOutPos(gctx, tube2)) << " " << 
+                                    Amg::toString(chamber->localToGlobalTransform(gctx).linear() * locDir));
                 }
                 if(tube==1 && layer ==1 && idHelper.stationPhi(tube_id)==1){
-                    ATH_MSG_VERBOSE(Amg::toString(chamber->localToGlobalTrans(gctx)));
+                    ATH_MSG_VERBOSE(Amg::toString(chamber->localToGlobalTransform(gctx)));
                 }
 
                 // In the chamber coordinate system z points to the next tube layer, x points along the tube and y points to the next tube in the same layer 
@@ -270,8 +270,8 @@ StatusCode GeoModelMdtTest::execute() {
          return StatusCode::FAILURE;
       }
       ATH_CHECK(dumpToTree(ctx,gctx,reElement));
-      const Amg::Transform3D globToLocal{reElement->globalToLocalTrans(gctx)};
-      const Amg::Transform3D& localToGlob{reElement->localToGlobalTrans(gctx)};
+      const Amg::Transform3D globToLocal{reElement->globalToLocalTransform(gctx)};
+      const Amg::Transform3D& localToGlob{reElement->localToGlobalTransform(gctx)};
       /// Closure test that the transformations actually close
       const Amg::Transform3D transClosure = globToLocal * localToGlob;
       if (!Amg::doesNotDeform(transClosure)) {
@@ -344,7 +344,7 @@ StatusCode GeoModelMdtTest::dumpToTree(const EventContext& ctx,
    m_tubePitch = readoutEle->tubePitch();
 
    /// Dump the local to global transformation of the readout element
-   const Amg::Transform3D& transform {readoutEle->localToGlobalTrans(gctx)};
+   const Amg::Transform3D& transform {readoutEle->localToGlobalTransform(gctx)};
    m_readoutTransform = transform;
    m_alignableNode  = readoutEle->alignableTransform()->getDefTransform();
 
@@ -355,11 +355,11 @@ StatusCode GeoModelMdtTest::dumpToTree(const EventContext& ctx,
         for (unsigned int tube = 1; tube <= readoutEle->numTubesInLay(); ++tube) {
             const IdentifierHash measHash{readoutEle->measurementHash(lay,tube)};
             if (!readoutEle->isValid(measHash)) continue;
-            const Amg::Transform3D& tubeTransform{readoutEle->localToGlobalTrans(gctx,measHash)};
+            const Amg::Transform3D& tubeTransform{readoutEle->localToGlobalTransform(gctx,measHash)};
             m_tubeLay.push_back(lay);
             m_tubeNum.push_back(tube);         
             m_tubeTransform.push_back(tubeTransform);
-            m_tubePosInCh.push_back(readoutEle->msSector()->globalToLocalTrans(gctx) * 
+            m_tubePosInCh.push_back(readoutEle->msSector()->globalToLocalTransform(gctx) * 
                                     readoutEle->center(gctx, measHash));
             m_roPos.push_back(readoutEle->readOutPos(gctx, measHash));
             m_tubeLength.push_back(readoutEle->tubeLength(measHash));

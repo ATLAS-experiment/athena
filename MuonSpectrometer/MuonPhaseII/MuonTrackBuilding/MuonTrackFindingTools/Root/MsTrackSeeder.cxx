@@ -133,7 +133,7 @@ namespace MuonR4{
         const Amg::Vector3D segPos3D{segment.position()};
         /// Recall that the sector coordinate system is defined such that the x-axis 
         /// is aligned with the nominal wire direction
-        const Amg::Vector3D dirAlongTube{envelope(segment)->localToGlobalTrans(gctx).linear().col(0)};
+        const Amg::Vector3D dirAlongTube{envelope(segment)->localToGlobalTransform(gctx).linear().col(0)};
         ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - Project onto phi: "<<inDeg(projectPhi));
         const Amg::Vector3D radialDir = Amg::getRotateZ3D(projectPhi) * Amg::Vector3D::UnitX();
         using namespace Acts::detail::LineHelper;

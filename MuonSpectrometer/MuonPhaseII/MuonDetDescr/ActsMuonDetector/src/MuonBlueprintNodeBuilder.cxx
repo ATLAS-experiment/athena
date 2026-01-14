@@ -143,7 +143,7 @@ MuonBlueprintNodeBuilder::buildMuonNode(
     std::visit([&](const auto& elems){
   
     for(const auto& element : elems){
-      const Amg::Transform3D& transform = element->localToGlobalTrans(*context);
+      const Amg::Transform3D& transform = element->localToGlobalTransform(*context);
       std::string volName = element->identString();
 
       auto vol = std::make_unique<Acts::TrackingVolume>(
@@ -258,8 +258,8 @@ MuonBlueprintNodeBuilder::getSensitiveElements(
         const MuonGMR4::MdtReadoutElement::parameterBook& parameters{mdtReadoutEle->getParameters()};
 
           // get the transform to the sector's frame
-          const Amg::Vector3D toChamber = element.globalToLocalTrans(gctx)*mdtReadoutEle->center(gctx);
-          const Acts::Transform3 mdtTransform = element.localToGlobalTrans(gctx) * Amg::getTranslate3D(toChamber);
+          const Amg::Vector3D toChamber = element.globalToLocalTransform(gctx)*mdtReadoutEle->center(gctx);
+          const Acts::Transform3 mdtTransform = element.localToGlobalTransform(gctx) * Amg::getTranslate3D(toChamber);
 
           // create the MDT multilayer volume with the dedicated builder
           Acts::Experimental::MultiWireVolumeBuilder::Config mwCfg;

@@ -445,7 +445,7 @@ namespace MuonGMR4 {
                 if (!mdtMl.isValid(idHash)){
                     continue;
                 }
-                const Amg::Transform3D& locToGlob{mdtMl.localToGlobalTrans(gctx, idHash)}; 
+                const Amg::Transform3D& locToGlob{mdtMl.localToGlobalTransform(gctx, idHash)}; 
                 const Identifier measId{mdtMl.measurementId(idHash)};
 
                 ATH_CHECK(pointInside(chamber, detVol, mdtMl.globalTubePos(gctx, idHash), "tube center", measId));

@@ -90,7 +90,7 @@ namespace MuonR4{
                       case xAOD::UncalibMeasType::sTgcStripType: {
                     const Identifier prdId{xAOD::identify(measurement)};
                     const MuonGMR4::MuonReadoutElement* readOutEle = xAOD::muonReadoutElement(measurement);
-                    const Amg::Transform3D& locToGlob{readOutEle->localToGlobalTrans(*gctx, readOutEle->layerHash(prdId))};
+                    const Amg::Transform3D& locToGlob{readOutEle->localToGlobalTransform(*gctx, readOutEle->layerHash(prdId))};
                     
                     const Identifier gasGapId = m_idHelperSvc->gasGapId(prdId);
                     /** Calculate the local position */                    
@@ -106,7 +106,7 @@ namespace MuonR4{
                             continue; 
                         }
                         const IdentifierHash simLayHash{readOutEle->layerHash(simHit->identify())};
-                        const Amg::Transform3D globToLoc{readOutEle->globalToLocalTrans(*gctx, simLayHash) *locToGlob};
+                        const Amg::Transform3D globToLoc{readOutEle->globalToLocalTransform(*gctx, simLayHash) *locToGlob};
                         /** If the prepdata is expressed in the phi view, it's automatically rotated into the eta view */
                         const Amg::Vector3D prdPos = globToLoc * locPos;
                         /** 2D space points closest eucledian disance -> otherwise closest local x */

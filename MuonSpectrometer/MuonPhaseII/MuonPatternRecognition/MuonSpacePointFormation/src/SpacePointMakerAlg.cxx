@@ -42,9 +42,9 @@ namespace {
                                             const MeasType& meas) {
         const MuonGMR4::MuonReadoutElement* reEle{meas.readoutElement()};
         if constexpr(std::is_same_v<MeasType, xAOD::MdtDriftCircle>) {
-            return sectorTrans * reEle->localToGlobalTrans(gctx, meas.measurementHash());
+            return sectorTrans * reEle->localToGlobalTransform(gctx, meas.measurementHash());
         } else {
-            return sectorTrans * reEle->localToGlobalTrans(gctx, meas.layerHash());
+            return sectorTrans * reEle->localToGlobalTransform(gctx, meas.layerHash());
         }
     }
     /** @brief Estimates the half-length of a tube or a readout-strip 
@@ -303,7 +303,7 @@ template <typename ContType>
 
     do {
         SpacePointsPerChamber& pointsInChamb = fillContainer[viewer.at(0)->readoutElement()->msSector()];
-        const Amg::Transform3D sectorTrans = viewer.at(0)->readoutElement()->msSector()->globalToLocalTrans(*gctx);
+        const Amg::Transform3D sectorTrans = viewer.at(0)->readoutElement()->msSector()->globalToLocalTransform(*gctx);
         ATH_MSG_DEBUG("Fill space points for chamber "<<m_idHelperSvc->toStringDetEl(viewer.at(0)->identify()));
         if constexpr( std::is_same_v<ContType, xAOD::MdtDriftCircleContainer>) {
             pointsInChamb.etaHits.reserve(pointsInChamb.etaHits.capacity() + viewer.size());       
@@ -408,7 +408,7 @@ StatusCode SpacePointMakerAlg::loadContainerAndSort(const EventContext& ctx,
     using namespace Acts::detail::LineHelper;
     do {
         SpacePointsPerChamber& pointsInChamb = fillContainer[viewer.at(0)->readoutElement()->msSector()];
-        const Amg::Transform3D sectorTrans = viewer.at(0)->readoutElement()->msSector()->globalToLocalTrans(*gctx);
+        const Amg::Transform3D sectorTrans = viewer.at(0)->readoutElement()->msSector()->globalToLocalTransform(*gctx);
         ATH_MSG_DEBUG(__func__<<"() "<<__LINE__<<" - Fill space points for multiplet "<<m_idHelperSvc->toStringDetEl(viewer.at(0)->identify()));
         for(auto& HitColls: splitHitsPerGasGap(viewer)){ 
             auto& [etaHits, phiHits, two2DHits] =  HitColls;

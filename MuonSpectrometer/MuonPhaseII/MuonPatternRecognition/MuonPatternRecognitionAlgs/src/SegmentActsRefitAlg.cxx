@@ -86,7 +86,7 @@ namespace MuonR4{
             return smearSegment(gctx, segment, engine);
         }
 
-        const Amg::Transform3D& locToGlob{segment.msSector()->localToGlobalTrans(gctx)};
+        const Amg::Transform3D& locToGlob{segment.msSector()->localToGlobalTransform(gctx)};
         if (smearLocDir.z() < 0) {
             smearLocDir = -smearLocDir;
         }
@@ -133,7 +133,7 @@ namespace MuonR4{
             const auto msSector = m_detMgr->getSectorEnvelope(reFitMe->chamberIndex(), 
                                                               reFitMe->sector(), 
                                                               reFitMe->etaIndex());
-            const Amg::Transform3D& sectorTrf{msSector->localToGlobalTrans(gctx)};
+            const Amg::Transform3D& sectorTrf{msSector->localToGlobalTransform(gctx)};
 
             m_calibTool->stampSignsOnMeasurements(*reFitMe);
 
@@ -286,7 +286,7 @@ namespace MuonR4{
             const Amg::Vector3D refitDir = globToLoc.linear() * globDir;
             /// Straight line extension to plane
             const Amg::Vector3D refitSeg = refitPos + Amg::intersect<3>(refitPos, refitDir, Amg::Vector3D::UnitZ(), 0).value_or(0.) * refitDir;
-            const Amg::Vector3D globPos{msSector->localToGlobalTrans(gctx) * refitSeg};
+            const Amg::Vector3D globPos{msSector->localToGlobalTransform(gctx) * refitSeg};
 
             auto newSegment = outHandle->push_back(std::make_unique<xAOD::MuonSegment>());
             dec_segLink(*newSegment) = Link_t{*segments, reFitMe->index(), ctx};

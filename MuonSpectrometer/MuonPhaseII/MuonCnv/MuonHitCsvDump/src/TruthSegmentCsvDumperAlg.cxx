@@ -93,7 +93,7 @@ StatusCode TruthSegmentCsvDumperAlg::execute(){
     if (!sector) {
       continue;
     }
-    const Amg::Transform3D globToLoc{sector->globalToLocalTrans(*gctxHandle)};
+    const Amg::Transform3D globToLoc{sector->globalToLocalTransform(*gctxHandle)};
     /// Segment information
     const Amg::Vector3D globPos = segment->position();
     const Amg::Vector3D globDir = segment->direction();
