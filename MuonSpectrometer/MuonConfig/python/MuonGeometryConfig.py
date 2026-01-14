@@ -262,8 +262,8 @@ def RegionSelCondAlgCfg(flags, detector: str, **kwargs):
     result.merge(MDTCablingConfigCfg(flags))
     result.merge(TGCCablingConfigCfg(flags))
 
-    if flags.Muon.useMdtDcsData:
-            result.merge(MdtCondDbAlgCfg(flags))
+    
+    result.merge(MdtCondDbAlgCfg(flags))
 
     the_alg = None
     if flags.Muon.usePhaseIIGeoSetup:
