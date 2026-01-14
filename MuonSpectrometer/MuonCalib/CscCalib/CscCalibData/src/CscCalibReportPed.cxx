@@ -2,12 +2,10 @@
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
+#include "CscCalibData/CscCalibReportPed.h"
 #include "TH1I.h"
 #include "TH2F.h"
 
-#include "AthContainers/DataVector.h"
-#include "CscCalibData/CscCalibReportPed.h"
-#include <string>
 #include <utility>
 
 /* default constructor */

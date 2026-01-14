@@ -15,10 +15,11 @@ Holds info corresponding to the calibration process, such as applicable plots
 and graphs. The monitoring system can pick out what graphs it wants.
  ****************************************************************************/
 #include "CscCalibData/CscCalibReportBase.h"
-#include "AthContainers/DataVector.h"
 
+#include <string>
 #include <map>
 #include <set>
+#include <vector>
 
 class TProfile;
 class TGraphErrors;
@@ -29,28 +30,18 @@ class CscCalibReportSlope : public CscCalibReportBase
 
   public:
 
-    /*class to record changed bit. As of 2008-09-08 is only used for changed 
-      /dead chan status
-      struct bitChange 
-      {
-      int hash;
-      bool newVal;
-      int pulserLevel;
-
-      bitChange() {
-      hash = -9999;
-      newVal = true;
-      pulserLevel = -9999;
-      }
-
-      };
-     */
 
     /* default constructor */
     CscCalibReportSlope();
 
     /* full constructor */
     CscCalibReportSlope(std::string label); 
+    
+    /* delete copy constructor */
+    CscCalibReportSlope(const CscCalibReportSlope &) = delete;
+    
+    /* delete copy assignment */
+    CscCalibReportSlope& operator = (const CscCalibReportSlope &) = delete;
 
     ~CscCalibReportSlope();
 
