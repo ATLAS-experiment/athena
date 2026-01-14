@@ -12,9 +12,9 @@ from AthenaConfiguration.Enums import LHCPeriod
 @AccumulatorCache
 def MdtCondDbAlgCfg(flags, **kwargs):
     result  = ComponentAccumulator()
-    folders = []
     if not flags.Muon.useMdtDcsData:
         return result ## avoid adding algo to the component accumulator
+    folders = []
 
     kwargs["isOnline"] = False
     if flags.Input.isMC:
