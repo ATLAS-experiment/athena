@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ALFA_DETECTORTOOL_H
@@ -42,7 +42,6 @@ class ATLAS_NOT_THREAD_SAFE ALFA_DetectorTool final : public GeoModelTool
   // Build geometry and store Manager to the TDS
   virtual StatusCode create() override final;
 
-  virtual StatusCode registerCallback() override final;
   virtual StatusCode align(IOVSVC_CALLBACK_ARGS) override final;
 };
 

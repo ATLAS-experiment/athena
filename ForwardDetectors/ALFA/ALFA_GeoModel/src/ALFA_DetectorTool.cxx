@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #include "ALFA_DetectorTool.h"
 #include "ALFA_DetectorFactory.h" 
@@ -161,27 +161,6 @@ StatusCode ALFA_DetectorTool::create()
 			       , m_pALFADetectorFactory->getDetectorManager()->getName()));
     
   return StatusCode::SUCCESS;
-}
-
-StatusCode ALFA_DetectorTool::registerCallback()
-{
-  StatusCode sc=StatusCode::FAILURE;
-
-  if(((eMetrologyType)m_Config.GeometryConfig.eRPMetrologyGeoType)==EMT_SWCORRECTIONS) {
-    const DataHandle<CondAttrListCollection> DataPtr;
-    sc=detStore()->regFcn(&IGeoModelTool::align,dynamic_cast<IGeoModelTool*>(this), DataPtr, COOLFOLDER_DETSWCORR, true);
-    if(sc!=StatusCode::SUCCESS) {
-      ATH_MSG_ERROR("Cannot register COOL callback for folder '"<<COOLFOLDER_DETSWCORR <<"'");
-    }
-    else {
-      ATH_MSG_INFO("Call-back to ALFA_DetectorTool::align() against folder "<< COOLFOLDER_DETSWCORR <<" registered ");
-    }
-  }
-  else {
-    ATH_MSG_INFO("No callback registed");
-  }
-
-  return sc;
 }
 
 StatusCode ALFA_DetectorTool::align(IOVSVC_CALLBACK_ARGS)
