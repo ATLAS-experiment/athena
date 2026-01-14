@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -40,7 +40,9 @@ namespace LArSamples {
       /** @brief Constructor  */
       Interface(const Accessor& accessor)
         : m_accessor(&accessor), m_shapeErrorGetter(0), m_ownShapeErrorGetter(0), m_neighborCache(nChannels()) { }
-      
+      Interface(const Interface& ) = delete;
+      Interface& operator = (const Interface& ) = delete;
+
       static Interface* open(const TString& fileName);
       static Interface* open(const std::vector<TString>& fileNames);
       static Interface* openList(const TString& fileList);
