@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "DistanceCalculatorSaggingOff.h"
@@ -25,11 +25,7 @@ namespace LArWheelCalculator_Impl
     m_EndQuarterWave = lwc()->m_ActiveLength - lwc()->m_QuarterWaveLength;
   }
 
-#ifndef LARWC_DTNF_NEW
-  double DistanceCalculatorSaggingOff::DistanceToTheNeutralFibre(const CLHEP::Hep3Vector& P, int /*fan_number*/) const
-#else
   double DistanceCalculatorSaggingOff::DistanceToTheNeutralFibre_ref(const CLHEP::Hep3Vector& P, int /*fan_number*/) const
-#endif
   {
     assert(P.y() > 0.);
     double distance = 0.;
@@ -141,11 +137,7 @@ namespace LArWheelCalculator_Impl
   }
 
   // IMPROVED PERFORMANCE
-#ifdef LARWC_DTNF_NEW
   double DistanceCalculatorSaggingOff::DistanceToTheNeutralFibre(const CLHEP::Hep3Vector& P, int /*fan_number*/) const
-#else
-  double DistanceCalculatorSaggingOff::DistanceToTheNeutralFibre_ref(const CLHEP::Hep3Vector& P, int /*fan_number*/) const
-#endif
   {
     double z = P.z() - lwc()->m_StraightStartSection;
     double x = P.x();
