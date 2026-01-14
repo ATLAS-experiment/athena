@@ -62,7 +62,7 @@ bool MdtTdcMap::onlineId(MdtCablingData& cabling_data, MsgStream& log) const {
         cabling_data.layer, cabling_data.tube - tubeOffSet, log);
     static_cast<MdtCablingOnData&>(cabling_data) = m_statId;
     cabling_data.tdcId = moduleId();
-    // cabling_data.mezzanine_type = m_mezzCard->id();
+    cabling_data.mezzanine_type = m_mezzCard->id();
     if (debug) {
         log << MSG::VERBOSE << "Mapped to " << m_statId << ", channel "
             << static_cast<int>(cabling_data.channelId) << endmsg;
