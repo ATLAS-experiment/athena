@@ -171,7 +171,7 @@ double TauAnalysisTools::truthTauPt(const xAOD::TauJet& xTau)
 double TauAnalysisTools::truthVisTauPt(const xAOD::TauJet& xTau)
 {
   // return truth visible tau Pt in GeV
-  const xAOD::TruthParticle* xTruthTau = getTruth(xTau);
+  const xAOD::TruthParticle* xTruthTau = xAOD::TauHelpers::getTruthParticle(&xTau);
 
   // if there is a truth tau return visible pT, otherwise return 0 (getTruth will print an error)
   static const SG::ConstAccessor<char> accIsHadronicTau ("IsHadronicTau");
