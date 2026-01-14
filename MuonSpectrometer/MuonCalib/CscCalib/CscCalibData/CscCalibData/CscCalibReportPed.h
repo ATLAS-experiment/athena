@@ -17,9 +17,12 @@ include details about the calibration process, as opposed to the
 CscCalibResults which contain just the simple results of the calibration.
  ****************************************************************************/
 #include "CscCalibData/CscCalibReportBase.h"
-#include "TH1.h"
-#include "TH2.h"
+
 #include <vector>
+#include <string>
+
+class TH1I;
+class TH2F;
 
 class CscCalibReportPed : public CscCalibReportBase
 {
@@ -35,6 +38,12 @@ class CscCalibReportPed : public CscCalibReportBase
 
     /* default constructor */
     CscCalibReportPed();
+    
+    /* delete copy constructor */
+    CscCalibReportPed(const CscCalibReportPed &) = delete;
+    
+    /* delete assignment  */
+    CscCalibReportPed& operator =(const CscCalibReportPed &) = delete;
 
     /* full constructor */
     CscCalibReportPed(std::string label);

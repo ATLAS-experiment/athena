@@ -3,16 +3,12 @@
 */
 
 #include "CscCalibData/CscCalibReportSlope.h"
-#include "AthContainers/DataVector.h"
 #include "GaudiKernel/MsgStream.h"
 #include "AthenaKernel/getMessageSvc.h"
 
 #include "TGraphErrors.h"
 #include "TH1I.h"
 #include "TProfile.h"
-#include <map>
-#include <set>
-#include <string>
 #include <utility>
 
 /* default constructor */
