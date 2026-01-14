@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -11,8 +11,6 @@
 #include "TrkParameters/TrackParameters.h"
 #include "TrkMeasurementBase/MeasurementBase.h"
 
-#include "muonEvent/Muon.h"
-#include "muonEvent/MuonContainer.h"
 #include "muonEvent/MuonParamDefs.h"
 #include "MuonSegment/MuonSegment.h"
 #include "Particle/TrackParticle.h"
@@ -30,75 +28,8 @@ namespace Trk {
                const IInterface* parent)
 
     : AthAlgTool(type,name,parent)
-    , m_trackFitter("Trk::GlobalChi2Fitter/InDetTrackFitter")
-    , m_inputMuonCollection("MuidMuonCollection")
-    , m_inputTracksCollection("Tracks")
-    , m_nCBMuonsFromSG(0)
-    , m_nCBMuonsHasEXandID(0)
-    , m_nCBMuonsPassSelection(0)
-    , m_nCBMuonsFailedRefit(0)
-    , m_nCBMuonsSucRefit(0)
-    , m_ntuple(nullptr)
-    , m_tree(nullptr)
-    , m_run{}
-    , m_event{}
-    , m_pID{}
-    , m_pMS{}
-    , m_ptID{}
-    , m_ptMS{}
-    , m_charge{}
-    , m_combinedEta{}
-    , m_IDEta{}
-    , m_combinedPhi{}
-    , m_IDPhi{}
-    , m_pID_constrained{}
-    , m_ptID_constrained{}
-    , m_IDEta_constrained{}
-    , m_IDPhi_constrained{}
-    , m_charge_constrained{}
-    , m_eBLhits{}
-    , m_nBLhits{}
-    , m_nPIXDS{}
-    , m_nSCTDS{}
-    , m_nPIXH{}
-    , m_nSCTH{}
-    , m_nPIXHits{}
-    , m_nSCTHits{}
-    , m_nTRTHits{}
-    , m_sectors{}
-    , m_phiLayers{}
-    , m_stationLayers{}
-    , m_sectorNum{}
-    , m_phiLayerNum{}
-    , m_stationLayerNum{}
   {
-
     declareInterface<ITrackCollectionProvider>(this);
-
-    declareProperty("TrackFitter",              m_trackFitter                       );
-    declareProperty("InputMuonCollection",      m_inputMuonCollection               );
-    declareProperty("InputTracksCollection",    m_inputTracksCollection             );
-    declareProperty("RunOutlierRemoval",        m_runOutlierRemoval      = true     );
-    declareProperty("MaxRetrievalErrors",       m_maxRetrievalErrors     = 10       );
-    declareProperty("UseMSConstraintTrkOnly",   m_useMSConstraintTrkOnly = true     );
-    declareProperty("DoTree",                   m_doTree                 = true     );
-    declareProperty("MinPt",                    m_minPt                  = 15.0     );
-    declareProperty("MinPIXHits",               m_minPIXHits             = 1        );
-    declareProperty("MinSCTHits",               m_minSCTHits             = 6        );
-    declareProperty("MinTRTHits",               m_minTRTHits             = 0        );
-    declareProperty("MaxIDd0",                  m_maxIDd0                = 500.     );
-    declareProperty("MaxIDz0",                  m_maxIDz0                = 500.     );
-    declareProperty("MinIDPt",                  m_minIDPt                = 10       );
-    declareProperty("MDTHits",                  m_minMDTHits             = 15       );
-    declareProperty("MinRPCPhiHits",            m_minRPCPhiHits          = 0        );
-    declareProperty("MinTGCPhiHits",            m_minTGCPhiHits          = 0        );
-    declareProperty("MaxMSd0",                  m_maxMSd0                = 500.     );
-    declareProperty("MaxMSz0",                  m_maxMSz0                = 500.     );
-    declareProperty("MinMSPt",                  m_minMSPt                = 0        );
-    declareProperty("MaxNumberOfSectors",       m_maxNumberOfSectors     = 1        );
-    declareProperty("MinNumberOfPhiLayers",     m_minNumberOfPhiLayers   = 2        );
-    declareProperty("MinStationLayers",         m_minStationLayers       = 3        );
-
   }
 
   //________________________________________________________________________
@@ -112,6 +43,9 @@ namespace Trk {
     ATH_CHECK(m_trackFitter.retrieve());
     ATH_MSG_DEBUG("Retrieved " << m_trackFitter);
     ATH_CHECK(m_muonHitSummaryTool.retrieve());
+
+    ATH_CHECK(m_muonContainerKey.initialize());
+    ATH_CHECK(m_trackContainerKey.initialize());
     //
     bookNtuple();
     return StatusCode::SUCCESS;
@@ -413,19 +347,19 @@ StatusCode MSConstraintTracksProvider::trackCollection(const TrackCollection*& o
 
   originalTracks = nullptr;
 
-  const Analysis::MuonContainer* muonContainer = nullptr;
-  if ( StatusCode::SUCCESS != evtStore()->retrieve( muonContainer , m_inputMuonCollection) ){
-    ATH_MSG_WARNING(" Can't retrieve " << m_inputMuonCollection << " from the StoreGate ");
+  SG::ReadHandle<Analysis::MuonContainer> muonContainer(m_muonContainerKey);
+  if (!muonContainer.isValid()){
+    ATH_MSG_WARNING(" Can't retrieve " << m_muonContainerKey);
     ATH_MSG_WARNING("One probability is that you are not running on ESD/DESD ");
 
     // Can't do MS constraint refit, resort to retrieve tracks directly
-    if ( StatusCode::SUCCESS != evtStore()->retrieve(originalTracks, m_inputTracksCollection) ){
+    SG::ReadHandle<TrackCollection> trackContainer(m_trackContainerKey);
+    if (!trackContainer.isValid()){
       originalTracks = nullptr;
-      ATH_MSG_WARNING(" Can't retrieve " << m_inputTracksCollection << " from the StoreGate ");
+      ATH_MSG_WARNING(" Can't retrieve " << m_trackContainerKey);
     } else {
-      if (originalTracks){
-        ATH_MSG_DEBUG(" have tracks of this event: " << originalTracks->size());
-      }
+      originalTracks = trackContainer.cptr();
+      ATH_MSG_DEBUG(" have tracks of this event: " << originalTracks->size());
     }
 
     return StatusCode::SUCCESS;
