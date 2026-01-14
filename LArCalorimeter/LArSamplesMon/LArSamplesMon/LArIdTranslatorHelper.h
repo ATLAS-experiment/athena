@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -31,6 +31,8 @@ class ATLAS_NOT_THREAD_SAFE LArIdTranslatorHelper
   public:
 
     LArIdTranslatorHelper(const TString& inputfile);
+    LArIdTranslatorHelper(const LArIdTranslatorHelper&) = delete;
+    LArIdTranslatorHelper& operator = (const LArIdTranslatorHelper&) = delete;
     ~LArIdTranslatorHelper();
     
     // variables
