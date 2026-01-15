@@ -31,7 +31,7 @@ def ITkByteStreamErrorDetectorElementStatusToolCfg(flags, name = "ITkByteStreamE
     # @TODO bytestream errors for ITk have not been defined yet.
     acc = ComponentAccumulator()
     kwargs.setdefault("PixelDetEleCollKey","ITkPixelDetectorElementCollection") # @TODO do we need the DetEleColl for the Acts chain ?
-    if not flags.Input.isMC and not flags.Overlay.DataOverlay and flags.Input.Format is Format.BS :
+    if (not flags.Input.isMC and flags.Input.Format is Format.BS) or flags.Overlay.DataOverlay:
         kwargs.setdefault("PixelByteStreamErrs", "PixelByteStreamErrs")
         kwargs.setdefault("UseByteStreamFEI4",   True)
         kwargs.setdefault("UseByteStreamFEI3",   True)
