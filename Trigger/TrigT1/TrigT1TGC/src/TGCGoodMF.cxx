@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration 
+   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration 
 */
 
 #include "TrigT1TGC/TGCGoodMF.h"
@@ -67,6 +67,7 @@ bool TGCGoodMF::readBadMFList()
       std::istringstream cont(buf);
       std::map<int,int>& mapssc = m_mapisgoodMF[mod]; // mapssc = <SSCId,badMFId>, m_mapisgoodMF = <ModuleId,<~>>
       int badMFId;
+      //coverity[TAINTED_SCALAR]
       for(int i=0; i<=maxssc; i++) {
         cont>>badMFId;
         if(badMFId < 0) continue;
