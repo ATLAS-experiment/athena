@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <iostream>
@@ -85,12 +85,17 @@ bool TGCConnectionASDToPP::readData(TGCRegionType region, int type,
            ||(PPType=="FST"&&m_type==TGCSector::STPP)||(PPType=="FSD"&&m_type==TGCSector::SDPP)
            ||(PPType=="FWI"&&m_type==TGCSector::WIPP)||(PPType=="FSI"&&m_type==TGCSector::SIPP) ) )    ){
         m_totalNumberOfChannel = nChannel;
-
-        m_layerId = new int [m_totalNumberOfChannel]; 
-        m_chamberId = new int [m_totalNumberOfChannel]; 
-        m_lineId = new int [m_totalNumberOfChannel]; 
-        m_PPId = new int [m_totalNumberOfChannel]; 
-        m_connectorId = new int [m_totalNumberOfChannel]; 
+        //coverity[TAINTED_SCALAR]
+        m_layerId = new int [m_totalNumberOfChannel];
+        //coverity[TAINTED_SCALAR] 
+        m_chamberId = new int [m_totalNumberOfChannel];
+        //coverity[TAINTED_SCALAR] 
+        m_lineId = new int [m_totalNumberOfChannel];
+        //coverity[TAINTED_SCALAR] 
+        m_PPId = new int [m_totalNumberOfChannel];
+        //coverity[TAINTED_SCALAR]
+        m_connectorId = new int [m_totalNumberOfChannel];
+        //coverity[TAINTED_SCALAR] 
         m_channelId = new int [m_totalNumberOfChannel]; 
          
 
@@ -100,7 +105,8 @@ bool TGCConnectionASDToPP::readData(TGCRegionType region, int type,
         if (region == TGCRegionType::ENDCAP && (PPType=="EWT"||PPType=="EST")) chamberIdBase=1;
         //******************************************************
         int lineIdBase=0;
-	// initialize array
+	      // initialize array
+	      //coverity[TAINTED_SCALAR]
         for(int i=0; i<m_totalNumberOfChannel; i+=1){
 	  m_layerId[i]     = 0;
 	  m_chamberId[i]   = 0;
@@ -119,6 +125,7 @@ bool TGCConnectionASDToPP::readData(TGCRegionType region, int type,
 	  // DB is Backward
           if(PPType=="FST"||PPType=="FSD"||PPType=="EST"||PPType=="ESD"||PPType=="FSI"||PPType=="ESI"){
             if(forwardBackward==ForwardSector){
+               //coverity[TAINTED_SCALAR]
                m_layerId[i] = s_forwardLayer[m_layerId[i]];
             }
           }

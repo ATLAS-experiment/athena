@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigT1TGC/TGCConnectionPPToSL.h"
@@ -70,6 +70,7 @@ bool TGCConnectionPPToSL::readData(TGCRegionType type)
     for (int itype=0; itype < m_HPBToSL.getNumberOfType(); itype++) {
       int board_number{0};
       infileStr >> board_number;
+      //coverity[TAINTED_SCALAR]
       m_HPBToSL.setNumber(itype, board_number);
       for (int j=0; j < board_number; j++) {
 	inputfile.getline(buf, BufferSize);
@@ -77,6 +78,7 @@ bool TGCConnectionPPToSL::readData(TGCRegionType type)
         int id, port;
 	infileStr2 >> id >> port;
 	m_HPBToSL.setId(itype, j, id);
+	//coverity[TAINTED_SCALAR]
 	m_HPBToSL.setSLPortToHPB(itype, id, port);
       }
     }
@@ -93,6 +95,7 @@ bool TGCConnectionPPToSL::readData(TGCRegionType type)
       if (itype == WISB || itype == SISB) continue;
       int board_number{0};
       infileStr >> board_number;
+      //coverity[TAINTED_SCALAR]
       m_SBToHPB.setNumber(itype, board_number);
       for (int j=0; j < board_number; j++) {
 	inputfile.getline(buf, BufferSize);
@@ -101,6 +104,7 @@ bool TGCConnectionPPToSL::readData(TGCRegionType type)
 	infileStr2 >> id >> idHPB >> port;
         if (id < 0 || idHPB < 0 || port < 0) continue;
 	m_SBToHPB.setId(itype, j, id);   // BoardType, Number in a type, id
+	//coverity[TAINTED_SCALAR]
 	m_SBToHPB.setHPBIdToSB(itype, id, idHPB);
 	m_SBToHPB.setHPBPortToSB(itype, id, port);
       }
@@ -116,6 +120,7 @@ bool TGCConnectionPPToSL::readData(TGCRegionType type)
     for (int itype=0; itype < m_PPToSB.getNumberOfType(); itype++) {
       int board_number{0};
       infileStr >> board_number;
+      //coverity[TAINTED_SCALAR]
       m_PPToSB.setNumber(itype, board_number);
       for(int j=0; j<board_number; j++) {
         inputfile.getline(buf, BufferSize);

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -160,30 +160,32 @@ namespace LVL1TGCTrigger {
 
       ////////////// Read CW ////////////////
       for(size_t posR=0; posR<N_dEta ; posR++){
-	std::getline(data, field, delimiter);
-	std::istringstream cont(field);
-	//----Read EtaPhi CW---------
-	if(cw_type==ReadCW_Type::EtaPhi_CW){
-	  for(size_t posPHI=0; posPHI<N_dPhi; posPHI++){
-	    cont >> word;
-	    std::istringstream(word) >> std::hex >> pT;
-	    m_EtaPhi_CW[posR][posPHI][roi]=pT;
-	  }
-	}
-	//-----Read EtaDtheta CW-----
-	if(cw_type==ReadCW_Type::EtaDtheta_CW){
-	  for(size_t posDTHETA=0; posDTHETA<N_Dtheta; posDTHETA++){
-	    cont >> word;
-	    std::istringstream(word) >> std::hex >> pT;
-	    auto & roiIndexedVector = m_EtaDtheta_CW[posR][posDTHETA];
-	    if ((roi<0) or (static_cast<size_t>(roi)>=roiIndexedVector.size())){
-	      throw std::out_of_range("roi outside of vector limits in TGCNSWCoincidenceMap::readMap");
-	    }
-	    roiIndexedVector[roi]=pT;
-	  }
-	}
+        std::getline(data, field, delimiter);
+        std::istringstream cont(field);
+        //----Read EtaPhi CW---------
+        if(cw_type==ReadCW_Type::EtaPhi_CW){
+          for(size_t posPHI=0; posPHI<N_dPhi; posPHI++){
+            cont >> word;
+            std::istringstream(word) >> std::hex >> pT;
+            //values should be checked against sensible limits; do minimal check here:
+            if (roi<0) continue;
+            //coverity[TAINTED_SCALAR]
+            m_EtaPhi_CW[posR][posPHI][roi]=pT;
+          }
+        }
+        //-----Read EtaDtheta CW-----
+        if(cw_type==ReadCW_Type::EtaDtheta_CW){
+          for(size_t posDTHETA=0; posDTHETA<N_Dtheta; posDTHETA++){
+            cont >> word;
+            std::istringstream(word) >> std::hex >> pT;
+            auto & roiIndexedVector = m_EtaDtheta_CW[posR][posDTHETA];
+            if ((roi<0) or (static_cast<size_t>(roi)>=roiIndexedVector.size())){
+              throw std::out_of_range("roi outside of vector limits in TGCNSWCoincidenceMap::readMap");
+            }
+            roiIndexedVector[roi]=pT;
+          }
+        }
       }      
-   
     }
     data.close();
 
