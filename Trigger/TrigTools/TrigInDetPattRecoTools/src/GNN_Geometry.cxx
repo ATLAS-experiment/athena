@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -106,6 +106,9 @@ TrigFTF_GNN_Layer::TrigFTF_GNN_Layer(const TrigInDetSiLayer& ls, float ew, int b
 	  m_maxBinCoord.push_back(z2);
 	}
 	else {//endcap
+	  if (m_layer.m_refCoord > 0) {//for the positive endcap larger eta corresponds to smaller radius
+	    std::swap(e1, e2);
+	  }
 	  float r = m_layer.m_refCoord/std::sinh(e1);
 	  m_minBinCoord.push_back(r);
 	  m_minRadius.push_back(r - 2.0);
@@ -127,7 +130,7 @@ bool TrigFTF_GNN_Layer::verifyBin(const TrigFTF_GNN_Layer* pL, int b1, int b2, f
   float z1max = m_maxBinCoord.at(b1);
   float r1 = m_layer.m_refCoord;
 
-  if(m_layer.m_type == 0 && pL->m_layer.m_type == 0) {//barrel -> barrel
+  if(m_layer.m_type == 0 && pL->m_layer.m_type == 0) {//barrel <- barrel
 
     const float tol = 5.0;
 
@@ -147,9 +150,7 @@ bool TrigFTF_GNN_Layer::verifyBin(const TrigFTF_GNN_Layer* pL, int b1, int b2, f
     return true;
   }
 
-  if(m_layer.m_type == 0 && pL->m_layer.m_type != 0) {//barrel -> endcap
-
-    const float tol = 10.0;
+  if(m_layer.m_type == 0 && pL->m_layer.m_type != 0) {//barrel <- endcap
 
     float z2 = pL->m_layer.m_refCoord;
     float r2max = pL->m_maxBinCoord.at(b2);
@@ -173,7 +174,7 @@ bool TrigFTF_GNN_Layer::verifyBin(const TrigFTF_GNN_Layer* pL, int b1, int b2, f
       z0_min = (z1min*r2max - z2*r1)/(r2max-r1);
     }
 
-    if(z0_max < min_z0-tol || z0_min > max_z0+tol) return false;
+    if(z0_max < min_z0 || z0_min > max_z0) return false;
     return true;
   }
 
@@ -281,6 +282,7 @@ TrigFTF_GNN_Geometry::TrigFTF_GNN_Geometry(const std::vector<TrigInDetSiLayer>& 
       }
     }
   }
+
 }
 	  
 
