@@ -1,9 +1,10 @@
 #
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 #
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
+from AthenaConfiguration.Enums import ProductionStep
 from ITkStripCabling.ITkStripCablingConfig import ITkStripCablingToolCfg
 from StripGeoModelXml.ITkStripGeoModelConfig import ITkStripReadoutGeometryCfg
 
@@ -47,7 +48,7 @@ def ITkStripRawDataProviderCfg(flags, **kwargs):
     acc = ComponentAccumulator()    
     kwargs.setdefault("ProviderTool", acc.popToolsAndMerge(ITkStripRawDataProviderToolCfg(flags)))
 
-    if flags.Overlay.ByteStream:
+    if flags.Common.ProductionStep is ProductionStep.MinbiasPreprocessing:
         kwargs.setdefault("RDOKey", f"{flags.Overlay.BkgPrefix}ITkStripRDOs")
         kwargs.setdefault("LVL1IDKey", f"{flags.Overlay.BkgPrefix}ITkStripLVL1ID")
         kwargs.setdefault("BCIDKey", f"{flags.Overlay.BkgPrefix}ITkStripBCID")
@@ -57,7 +58,7 @@ def ITkStripRawDataProviderCfg(flags, **kwargs):
 
 def ITkStripsEventFlagWriterCfg(flags, **kwargs):
     acc = ComponentAccumulator()
-    if flags.Overlay.ByteStream:
+    if flags.Common.ProductionStep is ProductionStep.MinbiasPreprocessing:
         kwargs.setdefault("xAODEventInfoKey", f"{flags.Overlay.BkgPrefix}EventInfo")
     acc.addEventAlgo(CompFactory.SCTEventFlagWriter(name="ITkStripsEventFlagWriter", **kwargs))
 
