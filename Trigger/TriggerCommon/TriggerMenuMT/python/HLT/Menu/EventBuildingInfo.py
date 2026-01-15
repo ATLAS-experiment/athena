@@ -33,6 +33,7 @@ _PartialEventBuildingIdentifiers = {
     'AFPPEB' : False,
     'LumiPEB' : False,
     'Lvl1CaloPEB' : False,
+    'Lvl1CaloLatomePEB' : False,
     # DataScouting identifiers from TrigEDMConfig.DataScoutingInfo:
     'CostMonDS': False,
     'MuonDS': False,

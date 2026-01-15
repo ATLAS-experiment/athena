@@ -1,9 +1,10 @@
 #
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 #
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
+from AthenaConfiguration.Enums import ProductionStep
 from SCT_Cabling.SCT_CablingConfig import SCT_CablingToolCfg
 from SCT_ConditionsTools.SCT_ConditionsToolsConfig import SCT_ConfigurationConditionsToolCfg
 from SCT_GeoModel.SCT_GeoModelConfig import SCT_ReadoutGeometryCfg
@@ -32,7 +33,7 @@ def SCTRawDataProviderCfg(flags, prefix="InDet", suffix="", **kwargs):
     acc = ComponentAccumulator()    
     kwargs.setdefault("ProviderTool", acc.popToolsAndMerge(SCTRawDataProviderToolCfg(flags, prefix, suffix)))
 
-    if flags.Overlay.ByteStream:
+    if flags.Common.ProductionStep is ProductionStep.MinbiasPreprocessing:
         kwargs.setdefault("RDOKey", f"{flags.Overlay.BkgPrefix}SCT_RDOs")
         kwargs.setdefault("LVL1IDKey", f"{flags.Overlay.BkgPrefix}SCT_LVL1ID")
         kwargs.setdefault("BCIDKey", f"{flags.Overlay.BkgPrefix}SCT_BCID")
@@ -68,7 +69,7 @@ def TrigSCTRawDataProviderCfg(flags, suffix, RoIs):
 
 def SCTEventFlagWriterCfg(flags, prefix="InDet", suffix="", **kwargs):
     acc = ComponentAccumulator()
-    if flags.Overlay.ByteStream:
+    if flags.Common.ProductionStep is ProductionStep.MinbiasPreprocessing:
         kwargs.setdefault("xAODEventInfoKey", f"{flags.Overlay.BkgPrefix}EventInfo")
     acc.addEventAlgo(CompFactory.SCTEventFlagWriter(name=prefix+"SCTEventFlagWriter"+suffix,
                                                     **kwargs))

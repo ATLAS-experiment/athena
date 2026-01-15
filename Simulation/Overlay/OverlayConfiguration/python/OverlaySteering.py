@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """Main steering for MC+MC and MC+data overlay
 
-Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 """
 
 from AthenaConfiguration.MainServicesConfig import MainServicesCfg
@@ -68,8 +68,7 @@ def OverlayMainContentCfg(configFlags):
     if not configFlags.IOVDb.WriteParametersAsMetaData and hasattr(configFlags, '_Overlay_pileupDigitizationMetadata'):
         acc.merge(writeDigitizationParameters(configFlags))
 
-    if not configFlags.Overlay.ByteStream:
-        acc.merge(IOVDbMetaDataToolWithRunNumberOverrideCfg(configFlags))
+    acc.merge(IOVDbMetaDataToolWithRunNumberOverrideCfg(configFlags))
 
     # Add event info overlay
     if not configFlags.Sim.DoFullChain:

@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 import re
 
@@ -175,15 +175,8 @@ def tagInfoMetadataCheck(sigdict, pudict):
 
 def overlayMetadataCheck(flags):
     """Check overlay metadata"""
-    if flags.Overlay.ByteStream:
-        files = flags.Input.Files
-        filesPileup = flags.Input.SecondaryFiles
-    else:
-        files = flags.Input.SecondaryFiles
-        filesPileup = flags.Input.Files
-
-    if files:
-        signalMetadata = GetFileMD(files, maxLevel="full")
+    if flags.Input.SecondaryFiles:
+        signalMetadata = GetFileMD(flags.Input.SecondaryFiles, maxLevel="full")
         signalSimulationMetadata = signalMetadata.get("/Simulation/Parameters", {})
         signalTagInfoMetadata = signalMetadata.get("/TagInfo", {})
         # signal check
@@ -194,8 +187,8 @@ def overlayMetadataCheck(flags):
         logger.info("Simulation metadata check not done due to no inputs")
 
     # pile-up check
-    if not flags.Overlay.DataOverlay and filesPileup:
-        pileupMetaDataCheck = GetFileMD(filesPileup, maxLevel="full")
+    if not flags.Overlay.DataOverlay and flags.Input.Files:
+        pileupMetaDataCheck = GetFileMD(flags.Input.Files, maxLevel="full")
         pileupDigitizationMetadata = pileupMetaDataCheck.get("/Digitization/Parameters", {})
         pileupSimulationMetadata = pileupMetaDataCheck.get("/Simulation/Parameters", {})
         pileupTagInfoMetadata = pileupMetaDataCheck.get("/TagInfo", {})
@@ -212,14 +205,9 @@ def overlayMetadataCheck(flags):
 
 def fastChainOverlayMetadataCheck(flags):
     """Check fastchain overlay metadata"""
-    if flags.Overlay.ByteStream:
-        filesPileup = flags.Input.SecondaryFiles
-    else:
-        filesPileup = flags.Input.Files
-
     # pile-up check
-    if not flags.Overlay.DataOverlay and filesPileup:
-        pileupMetaDataCheck = GetFileMD(filesPileup, maxLevel="full")
+    if not flags.Overlay.DataOverlay and flags.Input.Files:
+        pileupMetaDataCheck = GetFileMD(flags.Input.Files, maxLevel="full")
         pileupDigitizationMetadata = pileupMetaDataCheck.get("/Digitization/Parameters", {})
         pileupSimulationMetadata = pileupMetaDataCheck.get("/Simulation/Parameters", {})
         pileupTagInfoMetadata = pileupMetaDataCheck.get("/TagInfo", {})

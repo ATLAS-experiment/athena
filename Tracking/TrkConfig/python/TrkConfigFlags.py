@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.AthConfigFlags import AthConfigFlags
 from AthenaConfiguration.Enums import BeamType, LHCPeriod, FlagEnum, HIMode, ProductionStep
@@ -73,7 +73,7 @@ def createTrackingConfigFlags():
 
     # Turn running of truth matching on and off (by default on for MC off for data)
     icf.addFlag("Tracking.doTruth", lambda prevFlags: prevFlags.Input.isMC or 
-        (prevFlags.Overlay.DataOverlay and prevFlags.Common.ProductionStep is not ProductionStep.MinbiasPreprocessing))
+        (prevFlags.Common.ProductionStep is not ProductionStep.MinbiasPreprocessing and prevFlags.Overlay.DataOverlay))
 
     # control which fitter to be used
     icf.addFlag("Tracking.trackFitterType",

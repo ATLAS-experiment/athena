@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGVALTOOLS_TROOTCOMPARE_H
@@ -13,9 +13,15 @@
  */
 
 #include "TFileLooper.h"
-#include "TFile.h"
-#include "TCanvas.h"
-#include "TKey.h"
+#include "Rtypes.h"
+#include "TString.h"
+#include <vector>
+#include <string>
+
+class TFile;
+class TCanvas;
+class TKey;
+class TDirectory;
 
 /**
  * @class  TRootCompare
@@ -30,7 +36,7 @@ class TRootCompare : public TFileLooper {
   enum ALG {BIN, CHI2, AXIS};
 
  public:
-  TRootCompare();
+  TRootCompare() = default;
   virtual ~TRootCompare();
   
   virtual void processKey(TDirectory& dir, TKey& key);
@@ -58,20 +64,20 @@ class TRootCompare : public TFileLooper {
   void printCanvas(const char* filename);
   
  private:
-  TFile* m_refFile;
-  TFile* m_outFile;
-  TString m_refRootDir;
-  TString m_psFile;
-  TCanvas* m_can;
+  TFile* m_refFile{};
+  TFile* m_outFile{};
+  TString m_refRootDir{};
+  TString m_psFile{};
+  TCanvas* m_can{};
   
-  ALG m_alg;
-  Double_t m_threshold;
-  Int_t m_histMatch;
-  Int_t m_histTotal;
-  Int_t m_histMissing;
-  Bool_t m_drawNormalized;
-  Bool_t m_drawDiff;
-  Bool_t m_sortLabels;
+  ALG m_alg{BIN};
+  Double_t m_threshold{1e-6};
+  Int_t m_histMatch{};
+  Int_t m_histTotal{};
+  Int_t m_histMissing{};
+  Bool_t m_drawNormalized{kFALSE};
+  Bool_t m_drawDiff{kTRUE};
+  Bool_t m_sortLabels{kTRUE};
   
   std::vector<std::string> m_noMatch;
  

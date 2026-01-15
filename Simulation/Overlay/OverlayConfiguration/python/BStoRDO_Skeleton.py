@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 import sys
 
@@ -34,7 +34,6 @@ def fromRunArgs(runArgs):
 
     # This is for data overlay
     flags.Overlay.DataOverlay = True
-    flags.Overlay.ByteStream = True
 
     # Setting input/output files
     if hasattr(runArgs, 'inputBSFile'):

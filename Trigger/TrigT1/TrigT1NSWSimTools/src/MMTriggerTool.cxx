@@ -229,10 +229,11 @@ namespace NSWL1 {
           ATH_MSG_ERROR("Available digits belongs to different sectors IDs, unable to assign an unique ID in output RDO");
           return StatusCode::FAILURE;
         }
+        const bool isEta1 = (std::all_of(ev_hits.begin(), ev_hits.end(), [] (const auto &hit) { return std::abs(hit->getStationEta()) == 1; }));
 
         // Setup roads
         std::vector<MMT_Road> ev_roads;
-        m_diamond->createRoads(ev_roads, isLarge);
+        m_diamond->createRoads(ev_roads, isLarge, isEta1);
 
         // Evaluate coincidences
         std::vector<slope_t> diamondSlopes;
