@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 """Define method to construct configured Tile DQ status tool and algorithm"""
 
@@ -67,10 +67,9 @@ def TileDQstatusAlgCfg(flags, **kwargs):
         digitsContainer = flags.Overlay.BkgPrefix + 'TileDigitsCnt'
         rawChannelContainer = flags.Overlay.BkgPrefix + 'TileRawChannelCnt'
 
-        if not flags.Overlay.ByteStream:
-            from SGComps.SGInputLoaderConfig import SGInputLoaderCfg
-            acc.merge(SGInputLoaderCfg(flags, [f'TileDigitsContainer#{digitsContainer}']))
-            acc.merge(SGInputLoaderCfg(flags, [f'TileRawChannelContainer#{rawChannelContainer}']))
+        from SGComps.SGInputLoaderConfig import SGInputLoaderCfg
+        acc.merge(SGInputLoaderCfg(flags, [f'TileDigitsContainer#{digitsContainer}']))
+        acc.merge(SGInputLoaderCfg(flags, [f'TileRawChannelContainer#{rawChannelContainer}']))
     else:
         beamElemContainer = ""
         digitsContainer = ""
