@@ -57,12 +57,12 @@ namespace MuonR4 {
                                                    const Identifier& channelID,
                                                    const NswCalibDbThresholdData& thresholdData) const {
     float threshold = m_chargeThreshold;
-    float elecThreshold = 0.0;
-    if (!thresholdData.getThreshold(channelID, elecThreshold)) {
+    std::optional<float> elecThreshold = thresholdData.getThreshold(channelID);
+    if (!elecThreshold) {
       THROW_EXCEPTION("Cannot retrieve VMM threshold from conditions database!");
     }
     
-    if (!m_calibrationTool->pdoToCharge(ctx, true, elecThreshold, channelID, threshold)) {
+    if (!m_calibrationTool->pdoToCharge(ctx, true, *elecThreshold, channelID, threshold)) {
       THROW_EXCEPTION("Cannot convert VMM charge threshold via conditions data!");
     }
     

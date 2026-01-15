@@ -207,12 +207,12 @@ StatusCode NswCondTestAlg::retrieveVmm(const EventContext& ctx, const std::strin
     std::stringstream sstr {};
     if (!channelIds.empty()) {
         const Identifier& channel = channelIds[0];
-        float threshold{0.};
-        readCdo->getThreshold(channel, threshold);
-        ATH_MSG_INFO("Checking channel 0 (Id = " << m_idHelperSvc->toString(channel)<< ")  threshold "<< threshold);
+        auto threshold = readCdo->getThreshold(channel);
+        ATH_MSG_INFO("Checking channel 0 (Id = " << m_idHelperSvc->toString(channel)<< ")  threshold "
+                    << threshold.value_or(std::numeric_limits<float>::max()));
         if (!m_logName.empty()){
            for (const Identifier& id : channelIds){
-            sstr<<m_idHelperSvc->toString(id)<<" threshold "<<threshold<<std::endl;
+            sstr<<m_idHelperSvc->toString(id)<<" threshold "<<threshold.value_or(std::numeric_limits<float>::max())<<std::endl;
            }  
         }
     }
@@ -261,13 +261,13 @@ StatusCode NswCondTestAlg::retrieveT0(const EventContext& ctx,
             Identifier layerId  = id_helper.channelID(*it,id_helper.multilayer(*it), i_layer,1);
             for(int i_channel=id_helper.channelMin(layerId); i_channel <  id_helper.channelMax(layerId); i_channel++){
                 Identifier  channelId = id_helper.channelID(layerId,id_helper.multilayer(*it), i_layer, i_channel);
-                float t0{0};
-                if(!readCdo->getT0(channelId, t0)){
+                std::optional<float> t0 = readCdo->getT0(channelId);
+                if(!t0) {
                     ATH_MSG_ERROR("Failed to retrieve t0 calibration for channel"<< m_idHelperSvc->toString(channelId));
                     return StatusCode::FAILURE;
                 }
                 if (!m_logName.empty()){
-                    sstr<<m_idHelperSvc->toString(channelId)<<" T0 "<< t0 <<std::endl;
+                    sstr<<m_idHelperSvc->toString(channelId)<<" T0 "<< (*t0) <<std::endl;
                 }  
             }
         }
