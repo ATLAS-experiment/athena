@@ -275,7 +275,7 @@ bool Calib::totFitting    (const pix::PixelMapping &pm, const std::string &inTot
                 
                 
                 // Find the module it belong to
-                int modID = pm.getID(std::string(modName));
+                int modID = pm.getID(modName);
                 auto itr = map_info.find( modID );
                 
                 if (itr != map_info.end()) {
@@ -410,7 +410,7 @@ bool Calib::fillTiming(const pix::PixelMapping &pm, const std::string &inTimFile
             if ( not moduleInPart(modName)){
                 continue;
             } 
-            if ( not pm.contains(std::string(modName))){
+            if ( not pm.contains(modName)){
                 printf("Error - Module %s not found in the PixelMapping tool\n",modName.c_str());
                 continue;
             } 
@@ -445,17 +445,17 @@ bool Calib::fillTiming(const pix::PixelMapping &pm, const std::string &inTimFile
             // Freeing memory of TH2F         
             h2dTim.reset();
             
-            int modID = pm.getID(std::string(modName));
+            int modID = pm.getID(modName);
             auto itr = map_info.find( modID );
             if (itr == map_info.end()) {
-                printf("Calib::fillTiming: ERROR - Mod ID= %16s not found. Creating it -----> Inform Pixel Offline Software Experts... \n",std::string(modName).c_str());
+                printf("Calib::fillTiming: ERROR - Mod ID= %16s not found. Creating it -----> Inform Pixel Offline Software Experts... \n",modName.c_str());
                 
                 map_info[modID] = std::vector<std::unique_ptr<CalibFrontEndInfo>> ();
                 
                 for(unsigned int FE = 0; FE < m_nFE; FE++){
                     
                     map_info[modID].push_back( std::unique_ptr<CalibFrontEndInfo>() );
-                    std::unique_ptr<CalibFrontEndInfo> p = std::make_unique<CalibFrontEndInfo>(modID,FE,std::string(modName),std::string(rodKey->GetName()));
+                    std::unique_ptr<CalibFrontEndInfo> p = std::make_unique<CalibFrontEndInfo>(modID,FE,modName,std::string(rodKey->GetName()));
                     map_info[modID].at(FE) = std::move(p);
                     
                     for(unsigned int pixel=0; pixel<3; pixel++){
@@ -596,7 +596,7 @@ bool Calib::fillThresholds(const pix::PixelMapping &pm, const std::string &inThr
             if ( not moduleInPart(modName)){
                 continue;
             } 
-            if ( not pm.contains(std::string(modName))){
+            if ( not pm.contains(modName)){
                 printf("Error - Module %s not found in the PixelMapping tool\n",modName.c_str());
                 continue;
             } 
@@ -640,7 +640,7 @@ bool Calib::fillThresholds(const pix::PixelMapping &pm, const std::string &inThr
             h2dThr.reset();
             h2dSig.reset();
             
-            int modID = pm.getID(std::string(modName));
+            int modID = pm.getID(modName);
             auto itr = map_info.find( modID );
 
             // Map should be empty and therefore we need to create the key - if the key is repeated then it will throw an error
@@ -651,7 +651,7 @@ bool Calib::fillThresholds(const pix::PixelMapping &pm, const std::string &inThr
                 for(unsigned int FE = 0; FE < m_nFE; FE++){
                     std::string subdir(((FE < 10) ? "FE0" : "FE") +std::to_string(FE));
                     map_info[modID].push_back( std::unique_ptr<CalibFrontEndInfo>() );
-                    std::unique_ptr<CalibFrontEndInfo> p = std::make_unique<CalibFrontEndInfo>(modID,FE,std::string(modName),std::string(rodKey->GetName()));
+                    std::unique_ptr<CalibFrontEndInfo> p = std::make_unique<CalibFrontEndInfo>(modID,FE,modName,std::string(rodKey->GetName()));
                     map_info[modID].at(FE) = std::move(p);
                     
                     for(unsigned int pixel=0; pixel<3; pixel++){
@@ -710,7 +710,7 @@ bool Calib::fillThresholds(const pix::PixelMapping &pm, const std::string &inThr
                 
             }
             else{
-                printf("Calib::fillThresholds: ERROR - REPEATED MOD ID: %s! Contact Offline team\n",std::string(modName).c_str());
+                printf("Calib::fillThresholds: ERROR - REPEATED MOD ID: %s! Contact Offline team\n",modName.c_str());
                 return false;
             }
         } // End of MOD loop 
