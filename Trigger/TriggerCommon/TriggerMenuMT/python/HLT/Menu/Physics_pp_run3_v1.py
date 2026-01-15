@@ -385,8 +385,9 @@ def setupMenu():
         ChainProp(name='HLT_mu10_msonly_L1jMJJ-500-NFF', l1SeedThresholds=['MU5VF'], groups=PrimaryPhIGroup+SingleMuonGroup+Topo3Group),
         ChainProp(name='HLT_mu6_msonly_iloosems_mu6noL1_msonly_nscan40_L1jMJJ-500-NFF', l1SeedThresholds=['MU3V','FSNOSEED'], groups=PrimaryPhIGroup+MultiMuonGroup+Topo3Group),
 
-
-
+        # ATR-31457
+        ChainProp(name='HLT_2mu4_L1ADBDTL',               l1SeedThresholds=['MU3V'], stream=['Main'], groups=Topo3Group+ MultiMuonGroup+EOFL1MuGroup),
+        ChainProp(name='HLT_2mu4_l2io_invmDimu_L1ADBDTL', l1SeedThresholds=['MU3V'], stream=['Main'], groups=Topo3Group+ MultiMuonGroup+EOFL1MuGroup),
     ]
 
     chains['Egamma'] += [
@@ -2012,6 +2013,13 @@ def setupMenu():
         ChainProp(name='HLT_3mu4_b3mu_noos_L13MU3VF', l1SeedThresholds=['MU3VF'], stream=["BphysDelayed"], groups=BphysicsGroup+PrimaryL1MuGroup),
         ChainProp(name='HLT_3mu4_b3mu_L13MU3V', l1SeedThresholds=['MU3V'], stream=["BphysDelayed"], groups=BphysicsGroup+PrimaryL1MuGroup),
 
+        # ATR-31457
+        ChainProp(name='HLT_2mu4_bDimu2700_L1ADBDTL',     l1SeedThresholds=['MU3V'], stream=['Main'], groups=Topo3Group+BphysicsGroup+EOFBPhysL1MuGroup),
+        ChainProp(name='HLT_2mu4_bDimu_L1ADBDTL',         l1SeedThresholds=['MU3V'], stream=['Main'], groups=Topo3Group+BphysicsGroup+EOFBPhysL1MuGroup),
+        ChainProp(name='HLT_2mu4_bDimu2700_L1ADBDTT',     l1SeedThresholds=['MU3V'], stream=['Main'], groups=Topo3Group+BphysicsGroup+EOFBPhysL1MuGroup),
+        ChainProp(name='HLT_2mu4_bDimu_L1ADBDTT',         l1SeedThresholds=['MU3V'], stream=['Main'], groups=Topo3Group+BphysicsGroup+EOFBPhysL1MuGroup),
+        ChainProp(name='HLT_2mu4_bDimu2700_L12MU3VF_ADBDTT', l1SeedThresholds=['MU3V'], stream=['Main'], groups=Topo3Group+BphysicsGroup+EOFBPhysL1MuGroup),
+        ChainProp(name='HLT_2mu4_bDimu_L12MU3VF_ADBDTT',  l1SeedThresholds=['MU3V'], stream=['Main'], groups=Topo3Group+BphysicsGroup+EOFBPhysL1MuGroup),
     ]
 
     chains['Combined'] += [
@@ -3159,7 +3167,9 @@ def setupMenu():
 
     chains['Streaming'] = [
         #AD testing trigger
-        ChainProp(name='HLT_noalg_L1ADVAEL', l1SeedThresholds=['FSNOSEED'], stream=['Main'], groups=['PS:NoBulkMCProd']+Topo2Group+SupportGroup), 
+        ChainProp(name='HLT_noalg_L1ADVAEL', l1SeedThresholds=['FSNOSEED'], stream=['Main'], groups=['PS:NoBulkMCProd']+Topo2Group+SupportGroup),
+        ChainProp(name='HLT_noalg_L1ARTEMIST', l1SeedThresholds=['FSNOSEED'], stream=['Main'], groups=['PS:NoBulkMCProd']+Topo2Group+SupportGroup), #ATR-31871
+        ChainProp(name='HLT_noalg_L1ARTEMISL', l1SeedThresholds=['FSNOSEED'], stream=['Main'], groups=['PS:NoBulkMCProd']+Topo2Group+SupportGroup), #ATR-31871
         # Streamers already active in MC for jet/MET monitoring
 
 

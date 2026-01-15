@@ -37,7 +37,6 @@ from .Physics_pp_run3_v1 import (PhysicsStream,
                                  LegacyTopoGroup,
                                  Topo2Group,
                                  Topo3Group,
-                                 EOFL1MuGroup,
                                  EOFBPhysL1MuGroup,
                                  SingleElectronGroup,
                                  MultiElectronGroup
@@ -108,10 +107,6 @@ def getDevSignatures():
 
         # ATR-22782, ATR-28868, 4mu analysis
         ChainProp(name='HLT_mu4_ivarloose_mu4_L1BPH-7M14-0DR25-MU5VFMU3VF', l1SeedThresholds=['MU3VF','MU3VF'], stream=['BphysDelayed'], groups=MultiMuonGroup+EOFBPhysL1MuGroup+Topo3Group),
-  
-        #ATR-31457 - HLT chains for muon AD BDT (NOMAD)
-        ChainProp(name='HLT_2mu4_L1ADBDTL',               l1SeedThresholds=['MU3V'], stream=['Main'], groups=Topo3Group+ MultiMuonGroup+EOFL1MuGroup),
-        ChainProp(name='HLT_2mu4_l2io_invmDimu_L1ADBDTL', l1SeedThresholds=['MU3V'], stream=['Main'], groups=Topo3Group+ MultiMuonGroup+EOFL1MuGroup),
     ]
 
     chains['Egamma'] = [
@@ -670,10 +665,6 @@ def getDevSignatures():
         ChainProp(name='HLT_2mu4_noL2Comb_bBmumux_BpmumuKp_L12MU3V', stream=["BphysDelayed"], groups=BphysicsGroup+DevGroup),
         ChainProp(name='HLT_2mu4_noL2Comb_bBmumux_BsmumuPhi_L12MU3V', stream=["BphysDelayed"], groups=BphysicsGroup+DevGroup),
         ChainProp(name='HLT_2mu4_noL2Comb_bBmumux_LbPqKm_L12MU3V', stream=["BphysDelayed"], groups=BphysicsGroup+DevGroup),
-
-        #ATR-31457 - HLT chains for muon AD BDT (NOMAD)
-        ChainProp(name='HLT_2mu4_bDimu2700_L1ADBDTL',     l1SeedThresholds=['MU3V'], stream=['Main'], groups=Topo3Group+BphysicsGroup+EOFBPhysL1MuGroup),
-        ChainProp(name='HLT_2mu4_bDimu_L1ADBDTL',         l1SeedThresholds=['MU3V'], stream=['Main'], groups=Topo3Group+BphysicsGroup+EOFBPhysL1MuGroup),
     ]
 
     chains['Combined'] = [
