@@ -1,6 +1,6 @@
 """Define ComponentAccumulator functions for configuration of muon data conversions
 
-Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 """
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -25,12 +25,8 @@ def MdtRdoToMdtDigitCfg(flags, name="MdtRdoToMdtDigitAlg", **kwargs):
         kwargs.setdefault("MdtRdoContainer", f"{flags.Overlay.BkgPrefix}MDTCSM")
         kwargs.setdefault("MdtDigitContainer", f"{flags.Overlay.BkgPrefix}MDT_DIGITS")
 
-        if flags.Overlay.ByteStream:
-            from MuonConfig.MuonBytestreamDecodeConfig import MdtBytestreamDecodeCfg
-            acc.merge(MdtBytestreamDecodeCfg(flags))
-        else:
-            from SGComps.SGInputLoaderConfig import SGInputLoaderCfg
-            acc.merge(SGInputLoaderCfg(flags, [f'MdtCsmContainer#{kwargs["MdtRdoContainer"]}']))
+        from SGComps.SGInputLoaderConfig import SGInputLoaderCfg
+        acc.merge(SGInputLoaderCfg(flags, [f'MdtCsmContainer#{kwargs["MdtRdoContainer"]}']))
     else:
         kwargs.setdefault("MdtRdoContainer", "MDTCSM")
         kwargs.setdefault("MdtDigitContainer", "MDT_DIGITS")
@@ -59,13 +55,8 @@ def RpcRdoToRpcDigitCfg(flags, name="RpcRdoToRpcDigitAlg", **kwargs):
         kwargs.setdefault("NRpcRdoContainer", "NRPCRDO")
 
     if flags.Common.isOverlay:
-        if flags.Overlay.ByteStream:
-            from MuonConfig.MuonBytestreamDecodeConfig import RpcBytestreamDecodeCfg
-            acc.merge(RpcBytestreamDecodeCfg(flags))
-        else:
-            from SGComps.SGInputLoaderConfig import SGInputLoaderCfg
-            acc.merge(SGInputLoaderCfg(flags, [f'RpcPadContainer#{kwargs["RpcRdoContainer"]}']))
-
+        from SGComps.SGInputLoaderConfig import SGInputLoaderCfg
+        acc.merge(SGInputLoaderCfg(flags, [f'RpcPadContainer#{kwargs["RpcRdoContainer"]}']))
 
     # Set N BCs and central BC consistently with RPC readout settings
     kwargs.setdefault("rpcRdoDecoderTool", CompFactory.Muon.RpcRDO_Decoder("RpcRDO_Decoder",
@@ -86,12 +77,8 @@ def TgcRdoToTgcDigitCfg(flags, name="TgcRdoToTgcDigitAlg", **kwargs):
         kwargs.setdefault("TgcRdoContainer", f"{flags.Overlay.BkgPrefix}TGCRDO")
         kwargs.setdefault("TgcDigitContainer",f"{flags.Overlay.BkgPrefix}TGC_DIGITS")
 
-        if flags.Overlay.ByteStream:
-            from MuonConfig.MuonBytestreamDecodeConfig import TgcBytestreamDecodeCfg
-            acc.merge(TgcBytestreamDecodeCfg(flags))
-        else:
-            from SGComps.SGInputLoaderConfig import SGInputLoaderCfg
-            acc.merge(SGInputLoaderCfg(flags, [f'TgcRdoContainer#{kwargs["TgcRdoContainer"]}']))
+        from SGComps.SGInputLoaderConfig import SGInputLoaderCfg
+        acc.merge(SGInputLoaderCfg(flags, [f'TgcRdoContainer#{kwargs["TgcRdoContainer"]}']))
     else:
         kwargs.setdefault("TgcRdoContainer", "TGCRDO")
         kwargs.setdefault("TgcDigitContainer", "TGC_DIGITS")
@@ -108,12 +95,8 @@ def STGC_RdoToDigitCfg(flags, name="STGC_RdoToDigitAlg", **kwargs):
         kwargs.setdefault("sTgcRdoContainer", f"{flags.Overlay.BkgPrefix}sTGCRDO")
         kwargs.setdefault("sTgcDigitContainer", f"{flags.Overlay.BkgPrefix}sTGC_DIGITS")
 
-        if flags.Overlay.ByteStream:
-            from MuonConfig.MuonBytestreamDecodeConfig import sTgcBytestreamDecodeCfg
-            acc.merge(sTgcBytestreamDecodeCfg(flags))
-        else:
-            from SGComps.SGInputLoaderConfig import SGInputLoaderCfg
-            acc.merge(SGInputLoaderCfg(flags, [f'Muon::STGC_RawDataContainer#{kwargs["sTgcRdoContainer"]}']))
+        from SGComps.SGInputLoaderConfig import SGInputLoaderCfg
+        acc.merge(SGInputLoaderCfg(flags, [f'Muon::STGC_RawDataContainer#{kwargs["sTgcRdoContainer"]}']))
     else:
         kwargs.setdefault("sTgcRdoContainer", "sTGCRDO")
         kwargs.setdefault("sTgcDigitContainer", "sTGC_DIGITS")
@@ -132,12 +115,8 @@ def MM_RdoToDigitCfg(flags, name="MM_RdoToDigitAlg", **kwargs):
         kwargs.setdefault("MmRdoContainer", f"{flags.Overlay.BkgPrefix}MMRDO")
         kwargs.setdefault("MmDigitContainer", f"{flags.Overlay.BkgPrefix}MM_DIGITS")
 
-        if flags.Overlay.ByteStream:
-            from MuonConfig.MuonBytestreamDecodeConfig import MmBytestreamDecodeCfg
-            acc.merge(MmBytestreamDecodeCfg(flags))
-        else:
-            from SGComps.SGInputLoaderConfig import SGInputLoaderCfg
-            acc.merge(SGInputLoaderCfg(flags, [f'Muon::MM_RawDataContainer#{kwargs["MmRdoContainer"]}']))
+        from SGComps.SGInputLoaderConfig import SGInputLoaderCfg
+        acc.merge(SGInputLoaderCfg(flags, [f'Muon::MM_RawDataContainer#{kwargs["MmRdoContainer"]}']))
     else:
         kwargs.setdefault("MmRdoContainer", "MMRDO")
         kwargs.setdefault("MmDigitContainer", "MM_DIGITS")

@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 import sys
 from PyJobTransforms.CommonRunArgsToFlags import commonRunArgsToFlags
@@ -46,7 +46,7 @@ def fromRunArgs(runArgs):
         flags.Common.isOverlay = True
         flags.Digitization.PileUp = False
 
-        if flags.Overlay.DataOverlay and not flags.Overlay.ByteStream:
+        if flags.Overlay.DataOverlay:
             from SimulationConfig.SimEnums import VertexSource
             flags.Sim.VertexSource = VertexSource.MatchingBkg
     else:
