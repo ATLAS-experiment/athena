@@ -15,19 +15,13 @@ JobProperties.jobPropertiesDisallowed = True
 
 def setOverlayInputFiles(runArgs, flags, log):
     hasRDO_BKGInput = hasattr(runArgs, 'inputRDO_BKGFile')
-    hasBS_SKIMInput = hasattr(runArgs, 'inputBS_SKIMFile')
     hasEVNT_Input   = hasattr(runArgs, 'inputEVNTFile')
 
     if flags.Common.ProductionStep == ProductionStep.Overlay and not hasattr(runArgs, 'inputHITSFile'):
         raise RuntimeError('No input HITS file defined')
 
-    if hasRDO_BKGInput and hasBS_SKIMInput:
-        raise RuntimeError('Both RDO_BKG and BS_SKIM are defined')
-    if not hasRDO_BKGInput and not hasBS_SKIMInput:
-        raise RuntimeError('Define one of RDO_BKG and BS_SKIM file types')
-    
-    if hasBS_SKIMInput:
-        raise ValueError('BS_SKIM input is not supported any more, please use RDO_BKG input instead')
+    if not hasRDO_BKGInput:
+        raise RuntimeError('No input RDO_BKG file defined')
 
     if hasattr(runArgs, 'skipSecondaryEvents'):
         flags.Overlay.SkipSecondaryEvents = runArgs.skipSecondaryEvents
