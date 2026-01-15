@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.AthConfigFlags import AthConfigFlags
 from AthenaConfiguration.Enums import BeamType, ProductionStep
@@ -16,7 +16,7 @@ def createInDetConfigFlags():
     # Turn on running of PRD MultiTruthMaker
     icf.addFlag("InDet.doTruth", lambda prevFlags: 
         prevFlags.Input.isMC or
-        (prevFlags.Overlay.DataOverlay and prevFlags.Common.ProductionStep is not ProductionStep.MinbiasPreprocessing))
+        (prevFlags.Common.ProductionStep is not ProductionStep.MinbiasPreprocessing and prevFlags.Overlay.DataOverlay))
 
     # defines if the X1X mode is used for the offline or not
     icf.addFlag("InDet.selectSCTIntimeHits", lambda prevFlags: (

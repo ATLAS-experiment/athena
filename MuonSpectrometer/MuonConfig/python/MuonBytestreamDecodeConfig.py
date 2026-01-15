@@ -1,7 +1,8 @@
-#  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
+from AthenaConfiguration.Enums import ProductionStep
 
 ## Small class to hold the names for cache containers, should help to avoid copy / paste errors
 class MuonCacheNames(object):
@@ -47,7 +48,7 @@ def RpcBytestreamDecodeCfg(flags, name="RpcRawDataProvider", **kwargs):
 
 
     # Setup the RAW data provider tool
-    keyName = f"{flags.Overlay.BkgPrefix}RPCPAD" if flags.Overlay.ByteStream else "RPCPAD"
+    keyName = f"{flags.Overlay.BkgPrefix}RPCPAD" if flags.Common.ProductionStep is ProductionStep.MinbiasPreprocessing else "RPCPAD"
     MuonRpcRawDataProviderTool = CompFactory.Muon.RPC_RawDataProviderToolMT(name    = "RPC_RawDataProviderToolMT",
                                                                  Decoder = RPCRodDecoder,
                                                                  RdoLocation = keyName )
@@ -111,7 +112,7 @@ def TgcBytestreamDecodeCfg(flags, name="TgcRawDataProvider", **kwargs):
 
 
     # Setup the RAW data provider tool
-    keyName = f"{flags.Overlay.BkgPrefix}TGCRDO" if flags.Overlay.ByteStream else "TGCRDO"
+    keyName = f"{flags.Overlay.BkgPrefix}TGCRDO" if flags.Common.ProductionStep is ProductionStep.MinbiasPreprocessing else "TGCRDO"
     Muon__TGC_RawDataProviderToolMT=CompFactory.Muon.TGC_RawDataProviderToolMT
     MuonTgcRawDataProviderTool = Muon__TGC_RawDataProviderToolMT(name    = "TGC_RawDataProviderToolMT",
                                                                  Decoder = TGCRodDecoder,
@@ -156,7 +157,7 @@ def MdtBytestreamDecodeCfg(flags, name="MdtRawDataProvider", **kwargs):
 
 
     # Setup the RAW data provider tool
-    keyName = f"{flags.Overlay.BkgPrefix}MDTCSM" if flags.Overlay.ByteStream else "MDTCSM"
+    keyName = f"{flags.Overlay.BkgPrefix}MDTCSM" if flags.Common.ProductionStep is ProductionStep.MinbiasPreprocessing else "MDTCSM"
     Muon__MDT_RawDataProviderToolMT=CompFactory.Muon.MDT_RawDataProviderToolMT
     MuonMdtRawDataProviderTool = Muon__MDT_RawDataProviderToolMT(name    = "MDT_RawDataProviderToolMT",
                                                                  Decoder = MDTRodDecoder,
@@ -196,7 +197,7 @@ def CscBytestreamDecodeCfg(flags, name="CscRawDataProvider", **kwargs):
 
 
     # Setup the RAW data provider tool
-    keyName = f"{flags.Overlay.BkgPrefix}CSCRDO" if flags.Overlay.ByteStream else "CSCRDO"
+    keyName = f"{flags.Overlay.BkgPrefix}CSCRDO" if flags.Common.ProductionStep is ProductionStep.MinbiasPreprocessing else "CSCRDO"
     Muon__CSC_RawDataProviderToolMT=CompFactory.Muon.CSC_RawDataProviderToolMT
     MuonCscRawDataProviderTool = Muon__CSC_RawDataProviderToolMT(name    = "CSC_RawDataProviderToolMT",
                                                                  Decoder = CSCRodDecoder,
@@ -254,7 +255,7 @@ def sTgcBytestreamDecodeCfg(flags, name="sTgcRawDataProvider", **kwargs):
 
 
     # Setup the RAW data provider tool
-    keyName = f"{flags.Overlay.BkgPrefix}sTGCRDO" if flags.Overlay.ByteStream else "sTGCRDO"
+    keyName = f"{flags.Overlay.BkgPrefix}sTGCRDO" if flags.Common.ProductionStep is ProductionStep.MinbiasPreprocessing else "sTGCRDO"
     Muon__STGC_RawDataProviderToolMT=CompFactory.Muon.STGC_RawDataProviderToolMT
     MuonsTgcRawDataProviderTool = Muon__STGC_RawDataProviderToolMT(name    = "sTgcRawDataProviderTool",
                                                                    Decoder = acc.popToolsAndMerge(sTgcRODDecoderCfg(flags)),
@@ -357,7 +358,7 @@ def MmBytestreamDecodeCfg(flags, name="MmRawDataProvider", **kwargs):
     acc.merge(MuonGeoModelCfg(flags)) 
    
     # Setup the RAW data provider tool
-    keyName = f"{flags.Overlay.BkgPrefix}MMRDO" if flags.Overlay.ByteStream else "MMRDO"
+    keyName = f"{flags.Overlay.BkgPrefix}MMRDO" if flags.Common.ProductionStep is ProductionStep.MinbiasPreprocessing else "MMRDO"
     MuonMmRawDataProviderTool = CompFactory.Muon.MM_RawDataProviderToolMT(name  = "MM_RawDataProviderToolMT",
                                                               Decoder = acc.popToolsAndMerge(MmRDODDecoderCfg(flags)),
                                                               RdoLocation = keyName,
