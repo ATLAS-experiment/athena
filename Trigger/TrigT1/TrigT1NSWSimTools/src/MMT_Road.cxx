@@ -28,8 +28,6 @@ MMT_Road::MMT_Road(const char sector, const int roadSize,
 
 void MMT_Road::addHits(std::vector<std::shared_ptr<MMT_Hit> > &hits) {
   for (const auto &hit_i : hits) {
-    if (m_sector != hit_i->getSector()) continue;
-
     double slow, shigh;
     if (hit_i->isX()) {
       slow = hit_i->getShift() + m_slopeXlow * hit_i->getPitchOverZ();
