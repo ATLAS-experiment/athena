@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -87,38 +87,25 @@ def PoolReadCfg(flags):
         evSel = CompFactory.DoubleEventSelectorAthenaPool("EventSelector",
                                                           InputCollections=flags.Input.Files)
 
-        if flags.Overlay.ByteStream:
-            # In case of data overlay HITS are primary input
-            evSel.SkipEvents = skipEventsPrimary
+        # In case of MC overlay RDOs are primary input
+        evSel.SkipEvents = skipEventsSecondary
+        # Do not process secondary input metadata
+        evSel.ProcessMetadata = False
 
-            # We have to check if we're running overlay with ByteStream input
-            from ByteStreamCnvSvc.ByteStreamConfig import ByteStreamReadCfg
-            result.merge(ByteStreamReadCfg(flags))
+        # We have primary and secondary pool inputs, create two address providers
+        result.merge(AthenaPoolAddressProviderSvcCfg(flags,
+                                                     name="AthenaPoolAddressProviderSvcPrimary",
+                                                     DataHeaderKey="EventSelector",
+                                                     AttributeListKey="Input"))
+        result.merge(AthenaPoolAddressProviderSvcCfg(flags,
+                                                     name="AthenaPoolAddressProviderSvcSecondary",
+                                                     DataHeaderKey="SecondaryEventSelector"))
 
-            # We still have to add primary address provider
-            result.merge(AthenaPoolAddressProviderSvcCfg(flags,
-                                                         name="AthenaPoolAddressProviderSvcPrimary",
-                                                         DataHeaderKey="EventSelector"))
-        else:
-            # In case of MC overlay RDOs are primary input
-            evSel.SkipEvents = skipEventsSecondary
-            # Do not process secondary input metadata
-            evSel.ProcessMetadata = False
-
-            # We have primary and secondary pool inputs, create two address providers
-            result.merge(AthenaPoolAddressProviderSvcCfg(flags,
-                                                         name="AthenaPoolAddressProviderSvcPrimary",
-                                                         DataHeaderKey="EventSelector",
-                                                         AttributeListKey="Input"))
-            result.merge(AthenaPoolAddressProviderSvcCfg(flags,
-                                                         name="AthenaPoolAddressProviderSvcSecondary",
-                                                         DataHeaderKey="SecondaryEventSelector"))
-
-            secondarySel = CompFactory.EventSelectorAthenaPool("SecondaryEventSelector",
-                                                               IsSecondary=True,
-                                                               InputCollections=flags.Input.SecondaryFiles,
-                                                               SkipEvents=skipEventsPrimary)
-            result.addService(secondarySel)
+        secondarySel = CompFactory.EventSelectorAthenaPool("SecondaryEventSelector",
+                                                            IsSecondary=True,
+                                                            InputCollections=flags.Input.SecondaryFiles,
+                                                            SkipEvents=skipEventsPrimary)
+        result.addService(secondarySel)
         result.addService(evSel)
     else:
         # We have only primary inputs
