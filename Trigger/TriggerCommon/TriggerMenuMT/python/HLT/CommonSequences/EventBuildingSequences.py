@@ -192,6 +192,18 @@ def pebInfoWriterToolCfg(flags, name, eventBuildType):
                        SubDetector.TDAQ_CALO_JET_PROC_ROI,
                        SubDetector.TDAQ_CTP] )
 
+    elif 'Lvl1CaloLatomePEB' == eventBuildType:
+        acc = StaticPEBInfoWriterToolCfg(
+            flags, name,
+            ROBs = LATOMESourceIDs,
+            MaxRoIs = 1,
+            subDets = [SubDetector.TDAQ_CALO_PREPROC,
+                       SubDetector.TDAQ_CTP,
+                       SubDetector.TDAQ_HLT,
+                       SubDetector.TDAQ_CALO_TOPO_PROC,
+                       SubDetector.TDAQ_CALO_FEAT_EXTRACT_DAQ,
+                       SubDetector.TDAQ_CALO_FEAT_EXTRACT_ROI] )
+
     elif 'DarkJetPEBTLA' == eventBuildType:
         acc = RoIPEBInfoWriterToolCfg(
             flags, name,
