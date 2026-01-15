@@ -535,7 +535,7 @@ NswSegmentFinderAlg::findSegmentsFromMaximum(const HoughMaximum &max,
         }
     }
 
-    if(m_dumpSeedStatistics){
+    if(m_seedCounter) {
         m_seedCounter->addToStat(max.msSector(), nSeeds, nExtSeeds, nSegments);
     }
     
@@ -681,9 +681,8 @@ StatusCode NswSegmentFinderAlg::execute(const EventContext &ctx) const {
     return StatusCode::SUCCESS;
 }
 
-StatusCode NswSegmentFinderAlg::finalize(){
-    
-    if(m_dumpSeedStatistics){
+StatusCode NswSegmentFinderAlg::finalize() {    
+    if(m_seedCounter) {
         m_seedCounter->printTableSeedStats(msgStream());
     }
     return StatusCode::SUCCESS;
@@ -705,30 +704,26 @@ void NswSegmentFinderAlg::SeedStatistics::addToStat(const MuonGMR4::Spectrometer
 void NswSegmentFinderAlg::SeedStatistics::printTableSeedStats(MsgStream& msg) const{
 
 
-   msg<<MSG::ALWAYS<<"Seed statistics per sector:"<<endmsg;
-   msg<<MSG::ALWAYS<<"-----------------------------------------------------"<<endmsg;
-   msg<<MSG::ALWAYS<<"| Chamber | Phi | Eta | Seeds | ExtSeeds | Segments |"<<endmsg;
-   msg<<MSG::ALWAYS<<"-----------------------------------------------------"<<endmsg;
+    std::stringstream sstr{};
+    sstr<<"Seed statistics per sector:"<<std::endl;
+    sstr<<"-----------------------------------------------------"<<std::endl;
+    sstr<<"| Chamber | Phi | Eta | Seeds | ExtSeeds | Segments |"<<std::endl;
+    sstr<<"-----------------------------------------------------"<<std::endl;
 
-   using Muon::MuonStationIndex::ChIndex;
+    using namespace  Muon::MuonStationIndex;
 
-    for (const auto& entry : m_seedStat) {
-        const auto& sector = entry.first;
-        const auto& stats  = entry.second;
-
-        
-        msg<<MSG::ALWAYS << "| " << std::setw(3) << (sector.chIdx == ChIndex::EIL ? "EIL" :"EIS")
-                        <<"  | " << std::setw(2) << sector.phi
-                        << " | " << std::setw(3) << sector.eta
-                        << " | " << std::setw(7) << stats.nSeeds
-                        << " | " << std::setw(8) << stats.nExtSeeds
-                        << " | " << std::setw(8) << stats.nSegments
-                        << " |"<<endmsg;
-
-        
+    for (const auto& [sector, stats] : m_seedStat) {
+        sstr <<  "| " << std::setw(3) << chName(sector.chIdx)
+             << " | " << std::setw(2) << static_cast<unsigned>(sector.phi)
+             << " | " << std::setw(3) << static_cast<int>(sector.eta)
+             << " | " << std::setw(7) << stats.nSeeds
+             << " | " << std::setw(8) << stats.nExtSeeds
+             << " | " << std::setw(8) << stats.nSegments
+             << " |"<<std::endl;
     }
 
-    msg<<MSG::ALWAYS<<"------------------------------------------------------------"<<endmsg;
+    sstr<<"------------------------------------------------------------"<<std::endl;
+    msg<<MSG::ALWAYS<<"\n"<<sstr.str()<<endmsg;
  }
   
 
