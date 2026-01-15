@@ -172,7 +172,7 @@ template <typename ReObjType>
       Amg::Transform3D newCentreTrf{Amg::Transform3D::Identity()};
       for (const auto& chambEle :  constituents) {
             Amg::Transform3D trf = newCentreTrf * toCenter * 
-                                   chambEle->localToGlobalTrans(gctx);
+                                   chambEle->localToGlobalTransform(gctx);
             VolBoundPtr_t bounds = boundingBox(chambEle, volBoundSet);
             /// Hack to cope with the RPCs which may be rotated by 180 degrees around the x or z-axis in cases,
             /// they're upside down.
@@ -422,7 +422,7 @@ StatusCode ChamberAssembleTool::buildReadOutElements(MuonDetectorManager &mgr) {
 
          for (auto& detEles: chamberElements) {
             const MuonReadoutElement* refEle = detEles.front();
-            const Amg::Transform3D toChambCentre = refEle->globalToLocalTrans(gctx);
+            const Amg::Transform3D toChambCentre = refEle->globalToLocalTransform(gctx);
             ATH_MSG_VERBOSE("New chamber candidate "<<m_idHelperSvc->toStringChamber(refEle->identify()));
             const auto[chamberCentre, chamberBox, planeBounds] = boundingBox(gctx, detEles, toChambCentre, volBoundSet, 
                                                                               surfBoundSet, 0.*Gaudi::Units::cm);
@@ -444,7 +444,7 @@ StatusCode ChamberAssembleTool::buildReadOutElements(MuonDetectorManager &mgr) {
                                                       return (*a) < (*b);
                                                    });
 
-         const Amg::Transform3D toCenter = sectorArgs.chambers.front()->globalToLocalTrans(gctx);
+         const Amg::Transform3D toCenter = sectorArgs.chambers.front()->globalToLocalTransform(gctx);
          const auto [envelopeCentre, envelopeBox, envelopePlane] = boundingBox(gctx, sectorArgs.chambers, toCenter, 
                                                                                volBoundSet, surfBoundSet, 2.* Gaudi::Units::cm);
 
@@ -458,7 +458,7 @@ StatusCode ChamberAssembleTool::buildReadOutElements(MuonDetectorManager &mgr) {
             // split by readout elements - MDT multilayers and trigger chambers for the sector
             for (auto & RE : chamber->readoutEles()){
                // get the center of the element in the sector frame 
-               const Amg::Transform3D& chamberToGlobal{RE->localToGlobalTrans(gctx)}; 
+               const Amg::Transform3D& chamberToGlobal{RE->localToGlobalTransform(gctx)}; 
                const Amg::Vector3D origin = (globalToSector * chamberToGlobal).translation();
                // and then add the bounds of the element - this is technology dependent 
                sectorArgs.detectorLocs.emplace_back(origin, RE, boundingBox(RE, volBoundSet));

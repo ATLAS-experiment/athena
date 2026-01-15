@@ -368,7 +368,7 @@ std::unique_ptr<Segment> NswSegmentFinderAlg::fitSegmentSeed(const EventContext&
                                                                patternSeed->localPosition(), 
                                                                patternSeed->localDirection(), 0.);
 
-    const Amg::Transform3D& locToGlob{patternSeed->msSector()->localToGlobalTrans(gctx)};
+    const Amg::Transform3D& locToGlob{patternSeed->msSector()->localToGlobalTransform(gctx)};
  
     return m_lineFitter->fitSegment(ctx, patternSeed, patternSeed->parameters(),
                                                 locToGlob, std::move(calibratedHits));
@@ -409,8 +409,8 @@ NswSegmentFinderAlg::findSegmentsFromMaximum(const HoughMaximum &max,
             }
 
             const MuonGMR4::MuonReadoutElement* reEle = m_detMgr->getReadoutElement(simHit->identify());
-            const Amg::Transform3D toChamb = reEle->msSector()->globalToLocalTrans(gctx) * 
-                                             reEle->localToGlobalTrans(gctx, sp->identify());
+            const Amg::Transform3D toChamb = reEle->msSector()->globalToLocalTransform(gctx) * 
+                                             reEle->localToGlobalTransform(gctx, sp->identify());
 
             const Amg::Vector3D hitPos = toChamb * xAOD::toEigen(simHit->localPosition());
             const Amg::Vector3D hitDir = toChamb.linear() * xAOD::toEigen(simHit->localDirection());
@@ -442,7 +442,7 @@ NswSegmentFinderAlg::findSegmentsFromMaximum(const HoughMaximum &max,
 
     UsedHitMarker_t allUsedHits = emptyBookKeeper(stripHitsLayers); 
  
-    const Amg::Transform3D globToLocal = max.msSector()->globalToLocalTrans(gctx);
+    const Amg::Transform3D globToLocal = max.msSector()->globalToLocalTransform(gctx);
     std::array<const SpacePoint*, 4> seedHits{};
 
     InitialSeedVec_t preLimSeeds{};

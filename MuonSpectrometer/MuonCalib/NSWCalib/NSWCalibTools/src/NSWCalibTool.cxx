@@ -146,7 +146,7 @@ StatusCode Muon::NSWCalibTool::calibrateClus(const EventContext& ctx,
     double time = prepData.stripTimes().at(i);
     double charge = prepData.stripCharges().at(i);
     //Retrieve pointing constraint
-    const Amg::Vector3D& globPos{prepData.readoutElement()->localToGlobalTrans(gctx, prepData.layerHash()) * (prepData.localPosition<1>()[0]*Amg::Vector3D::UnitX())};
+    const Amg::Vector3D& globPos{prepData.readoutElement()->localToGlobalTransform(gctx, prepData.layerHash()) * (prepData.localPosition<1>()[0]*Amg::Vector3D::UnitX())};
     NSWCalib::CalibratedStrip calibStrip;
     ATH_CHECK(calibrateStrip(ctx, id, time, charge, (globPos.theta() / toRad) , lorentzAngle, calibStrip));
 

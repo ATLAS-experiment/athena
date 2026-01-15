@@ -111,7 +111,7 @@ namespace MuonR4 {
                 }
             }
             const MuonGMR4::SpectrometerSector* chamber = m_detMgr->getSectorEnvelope(xAOD::identify(*prdLinks.front()));
-            const Amg::Transform3D globToLoc{chamber->globalToLocalTrans(*gctx)};
+            const Amg::Transform3D globToLoc{chamber->globalToLocalTransform(*gctx)};
 
             SegPars& locPars{parDecor(*seg)};
 

@@ -69,10 +69,10 @@ namespace MuonGMR4 {
           const ReadoutSet& readoutEles() const;
           /** @brief Returns the transformation chamber frame -> global transformation
            *  @param gctx: Geometry context carrrying the alignment transformations */
-          const Amg::Transform3D& localToGlobalTrans(const ActsTrk::GeometryContext& gctx) const;
+          const Amg::Transform3D& localToGlobalTransform(const ActsTrk::GeometryContext& gctx) const;
           /** @brief Returns the global -> local transformation 
            *  @param gctx: Geometry context carrrying the alignment transformations */
-          Amg::Transform3D globalToLocalTrans(const ActsTrk::GeometryContext& gctx) const;
+          Amg::Transform3D globalToLocalTransform(const ActsTrk::GeometryContext& gctx) const;
           /** @brief Returns the surface associated with the chamber */
           const Acts::PlaneSurface& surface() const;
           /** @brief Long-extend of the chamber in the x-direction at positive Y */

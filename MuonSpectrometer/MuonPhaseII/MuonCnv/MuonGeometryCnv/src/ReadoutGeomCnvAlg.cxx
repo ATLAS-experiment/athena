@@ -67,7 +67,7 @@ namespace {
     };
     Amg::Transform3D amdbTransform(const ActsTrk::GeometryContext& gctx,
                                    const MuonGMR4::MuonReadoutElement& reEle) {
-        return reEle.localToGlobalTrans(gctx) * 
+        return reEle.localToGlobalTransform(gctx) * 
                MuonGMR4::detail::rotationToAMDB(reEle.detectorType()).inverse();                       
     }
 }
@@ -382,7 +382,7 @@ StatusCode ReadoutGeomCnvAlg::buildRpc(const ActsTrk::GeometryContext& gctx, Con
         for (const Identifier& gapId : gapIds) {
             const int surfaceHash = newElement->surfaceHash(gapId);
             const int layerHash = newElement->layerHash(gapId);
-            const Amg::Transform3D refTrf{copyMe->localToGlobalTrans(gctx, gapId)* 
+            const Amg::Transform3D refTrf{copyMe->localToGlobalTransform(gctx, gapId)* 
                                           (m_idHelperSvc->measuresPhi(gapId) ? 
                                                 Amg::getRotateZ3D(90_degree) :
                                                 Amg::Transform3D::Identity())};
@@ -832,7 +832,7 @@ StatusCode ReadoutGeomCnvAlg::dumpAndCompare(const ActsTrk::GeometryContext& gct
     for (unsigned int gasGap = 1; gasGap <= refEle.nGasGaps(); ++ gasGap) {
         const Identifier gapId = idHelper.channelID(refEle.identify(), refEle.multilayer(),  gasGap, 1);
         
-        const Amg::Transform3D& refTrf{refEle.localToGlobalTrans(gctx, gapId)};
+        const Amg::Transform3D& refTrf{refEle.localToGlobalTransform(gctx, gapId)};
         const Amg::Transform3D& testTrf{testEle.transform(gapId)};
         if (!Amg::isIdentity(refTrf.inverse()*testTrf)) {
             ATH_MSG_FATAL("The layer "<<m_idHelperSvc->toStringGasGap(gapId)<<" does not transform equally"
@@ -844,7 +844,7 @@ StatusCode ReadoutGeomCnvAlg::dumpAndCompare(const ActsTrk::GeometryContext& gct
         for (int strip = stripDesign.firstStripNumber(); strip <= stripDesign.numStrips(); ++strip) {
             const Identifier stripId = idHelper.channelID(refEle.identify(), refEle.multilayer(), gasGap, strip);
             const Amg::Vector3D refStripPos{refEle.stripPosition(gctx, stripId)};
-            const Amg::Vector3D refStripDir{refEle.localToGlobalTrans(gctx, refEle.layerHash(stripId)).linear() * Amg::Vector3D::UnitX()};
+            const Amg::Vector3D refStripDir{refEle.localToGlobalTransform(gctx, refEle.layerHash(stripId)).linear() * Amg::Vector3D::UnitX()};
 
             Amg::Vector3D testStripPos{Amg::Vector3D::Zero()};
             if (!testEle.stripGlobalPosition(stripId, testStripPos)) {
@@ -886,7 +886,7 @@ StatusCode ReadoutGeomCnvAlg::dumpAndCompare(const ActsTrk::GeometryContext& gct
                 ATH_MSG_VERBOSE("SKip layer / tube "<<lay <<","<<tube);
                 continue;
             }
-            const Amg::Transform3D globToLocal = refEle.globalToLocalTrans(gctx, tubeHash);
+            const Amg::Transform3D globToLocal = refEle.globalToLocalTransform(gctx, tubeHash);
 
             const Amg::Vector3D refPos = refEle.globalTubePos(gctx, tubeHash);
             const Amg::Vector3D tubePos = testEle.tubePos(lay, tube);
@@ -944,7 +944,7 @@ StatusCode ReadoutGeomCnvAlg::dumpAndCompare(const ActsTrk::GeometryContext& gct
                                                                   refEle.doubletZ(), 
                                                                   doubPhi, gasGap, measPhi, strip);
                     
-                    const Amg::Transform3D refTrans{refEle.localToGlobalTrans(gctx, stripId) * 
+                    const Amg::Transform3D refTrans{refEle.localToGlobalTransform(gctx, stripId) * 
                                                     (measPhi ? Amg::getRotateZ3D(90_degree) : 
                                                                Amg::Transform3D::Identity())};
                     const Amg::Transform3D& testTrans{testEle.transform(stripId)};
@@ -1007,7 +1007,7 @@ StatusCode ReadoutGeomCnvAlg::dumpAndCompare(const ActsTrk::GeometryContext& gct
             const Identifier layId = idHelper.channelID(refEle.identify(), gasGap, isStrip, 1);
             ATH_MSG_VERBOSE("Test layer "<<m_idHelperSvc->toString(layId)<<", nCh: "<<refEle.numChannels(layHash)<<", layHash: "<<layHash);
             if (!refEle.numChannels(layHash)) continue;
-            const Amg::Transform3D refLayerTrf = refEle.localToGlobalTrans(gctx, refEle.constructHash(0, gasGap, false)) *
+            const Amg::Transform3D refLayerTrf = refEle.localToGlobalTransform(gctx, refEle.constructHash(0, gasGap, false)) *
                                                                             (!isStrip ? Amg::Transform3D::Identity()
                                                                                       : Amg::getRotateZ3D(-90._degree));
             const Amg::Transform3D& testLayerTrf = testEle.transform(layId);
@@ -1098,7 +1098,7 @@ StatusCode ReadoutGeomCnvAlg::dumpAndCompare(const ActsTrk::GeometryContext& gct
                     return StatusCode::FAILURE;
                 } 
                 const IdentifierHash measHash = refEle.measurementHash(chID);
-                Amg::Transform3D refTrans{refEle.localToGlobalTrans(gctx, refEle.layerHash(measHash))*
+                Amg::Transform3D refTrans{refEle.localToGlobalTransform(gctx, refEle.layerHash(measHash))*
                                         Amg::getRotateZ3D( -1.*(chType != sTgcIdHelper::sTgcChannelTypes::Strip)* 90._degree)};
                 const Amg::Transform3D& testTrans{testEle.transform(chID)};
                 if (channel == firstCh && (!Amg::doesNotDeform(testTrans.inverse()*refTrans)

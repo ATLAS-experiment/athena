@@ -50,7 +50,7 @@ namespace MuonR4{
         Parameters localSegmentPars(const ActsTrk::GeometryContext& gctx,
                                     const Segment& segment) {
             Parameters pars{};
-            const Amg::Transform3D globToLoc = segment.msSector()->globalToLocalTrans(gctx);
+            const Amg::Transform3D globToLoc = segment.msSector()->globalToLocalTransform(gctx);
             const Amg::Vector3D locPos = globToLoc * segment.position();
             const Amg::Vector3D locDir = globToLoc.linear() * segment.direction();
             pars[toUnderlying(ParamDefs::x0)] = locPos.x();

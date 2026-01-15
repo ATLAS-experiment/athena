@@ -140,9 +140,9 @@ namespace MuonGMR4 {
             bool barrel() const;
             /** @brief  Returns the local -> global tarnsformation from the sector
               * @param gctx: Geometry context carrrying the alignment transformations */
-            const Amg::Transform3D& localToGlobalTrans(const ActsTrk::GeometryContext& gctx) const;
+            const Amg::Transform3D& localToGlobalTransform(const ActsTrk::GeometryContext& gctx) const;
             /** @brief Returns the global -> local transformation from the ATLAS global */
-            Amg::Transform3D globalToLocalTrans(const ActsTrk::GeometryContext& gctx) const;
+            Amg::Transform3D globalToLocalTransform(const ActsTrk::GeometryContext& gctx) const;
             /** @brief Returns the associated surface */
             const Acts::PlaneSurface& surface() const;
             /** @brief Returns the associated chambers with this sector */

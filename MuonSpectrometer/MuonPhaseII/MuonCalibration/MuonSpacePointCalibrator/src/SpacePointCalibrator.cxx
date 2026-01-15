@@ -103,7 +103,7 @@ namespace MuonR4{
             return nullptr;
         }
         const Amg::Vector3D& spPos{spacePoint->localPosition()};
-        const Amg::Transform3D& locToGlob{spacePoint->msSector()->localToGlobalTrans(*gctx)};
+        const Amg::Transform3D& locToGlob{spacePoint->msSector()->localToGlobalTransform(*gctx)};
         const Amg::Vector3D& chDir{spacePoint->sensorDirection()};
 
         // Adjust the space point position according to the external seed. But only if the space point
@@ -181,7 +181,7 @@ namespace MuonR4{
                 auto* strip = static_cast<const xAOD::RpcMeasurement*>(spacePoint->primaryMeasurement());
 
                 /// Transform the space point into the local frame to calculate the propagation time towards the readout
-                const Amg::Transform3D toGasGap{strip->readoutElement()->globalToLocalTrans(*gctx, strip->layerHash()) * locToGlob};
+                const Amg::Transform3D toGasGap{strip->readoutElement()->globalToLocalTransform(*gctx, strip->layerHash()) * locToGlob};
                 const Amg::Vector3D lPos = toGasGap * calibSpPos;
                 using EdgeSide = MuonGMR4::RpcReadoutElement::EdgeSide;
                 calibSP = std::make_unique<CalibratedSpacePoint>(spacePoint, std::move(calibSpPos));
@@ -222,7 +222,7 @@ namespace MuonR4{
                 
                 ATH_MSG_DEBUG("Calibrated pos and cov" << calibPosCov.first << " " << calibPosCov.second);
                 cov[Acts::toUnderlying(AxisDefs::etaCov)] = calibPosCov.second;
-                Amg::Transform3D toChamberTrans{ locToGlob.inverse() * cluster->readoutElement()->localToGlobalTrans(*gctx, cluster->layerHash())};
+                Amg::Transform3D toChamberTrans{ locToGlob.inverse() * cluster->readoutElement()->localToGlobalTransform(*gctx, cluster->layerHash())};
 
                 // since we want to take the second coordiante from the external estimate we need to transform the sp posiiton to the layer frame, replace the precission coordinate and transform back
                 Amg::Vector3D calibSpPosInLayer = toChamberTrans.inverse() * calibSpPos;
@@ -267,7 +267,7 @@ namespace MuonR4{
                 
                 ATH_MSG_DEBUG("Calibrated pos and cov" << calibPos << " " << calibCov);
                 cov[Acts::toUnderlying(AxisDefs::etaCov)] = calibCov;
-                Amg::Transform3D toChamberTrans{ locToGlob.inverse() * cluster->readoutElement()->localToGlobalTrans(*gctx, cluster->layerHash())};
+                Amg::Transform3D toChamberTrans{ locToGlob.inverse() * cluster->readoutElement()->localToGlobalTransform(*gctx, cluster->layerHash())};
 
                 // since we want to take the second coordiante from the external estimate we need to transform the sp posiiton to the layer frame, replace the precission coordinate and transform back
                 Amg::Vector3D calibSpPosInLayer = toChamberTrans.inverse() * calibSpPos;
@@ -336,7 +336,7 @@ namespace MuonR4{
         }
 
         Amg::Vector2D locPos{cluster.localPosition<1>()[0] * Amg::Vector2D::UnitX()};
-        Amg::Vector3D locDir = Muon::NswClustering::toLocal(cluster.readoutElement()->globalToLocalTrans(gctx, cluster.layerHash()), globalDir);
+        Amg::Vector3D locDir = Muon::NswClustering::toLocal(cluster.readoutElement()->globalToLocalTransform(gctx, cluster.layerHash()), globalDir);
 
         Amg::MatrixX calibCov{};
         calibCov.resize(1,1);
@@ -360,7 +360,7 @@ namespace MuonR4{
 
         // if the second coordiante was not provided by the wire, take it from the seed track position 
         if(!posAlongTheStrip) {
-            Amg::Vector3D extPosLocal =  cluster.readoutElement()->globalToLocalTrans(gctx, cluster.layerHash()) * globalPos;
+            Amg::Vector3D extPosLocal =  cluster.readoutElement()->globalToLocalTransform(gctx, cluster.layerHash()) * globalPos;
             posAlongTheStrip = extPosLocal[1];
         }
 

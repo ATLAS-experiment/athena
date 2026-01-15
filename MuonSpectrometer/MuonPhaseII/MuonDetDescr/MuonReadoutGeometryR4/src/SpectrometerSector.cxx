@@ -63,11 +63,11 @@ const ChamberSet& SpectrometerSector::chambers() const{ return m_args.chambers; 
 const Acts::PlaneSurface& SpectrometerSector::surface() const {
     return *m_args.surface;
 }
-const Amg::Transform3D& SpectrometerSector::localToGlobalTrans(const ActsTrk::GeometryContext& gctx) const {
+const Amg::Transform3D& SpectrometerSector::localToGlobalTransform(const ActsTrk::GeometryContext& gctx) const {
     return surface().transform(gctx.context());
 }            
-Amg::Transform3D SpectrometerSector::globalToLocalTrans(const ActsTrk::GeometryContext& gctx) const {
-    return localToGlobalTrans(gctx).inverse(); 
+Amg::Transform3D SpectrometerSector::globalToLocalTransform(const ActsTrk::GeometryContext& gctx) const {
+    return localToGlobalTransform(gctx).inverse(); 
 }
 double SpectrometerSector::halfXLong() const { return MuonGMR4::halfXhighY(*m_args.bounds); }
 double SpectrometerSector::halfXShort() const { return MuonGMR4::halfXlowY(*m_args.bounds);  }
@@ -76,7 +76,7 @@ double SpectrometerSector::halfZ() const { return MuonGMR4::halfZ(*m_args.bounds
 
 
 std::shared_ptr<Acts::Volume> SpectrometerSector::boundingVolume(const ActsTrk::GeometryContext& gctx) const {
-    return std::make_shared<Acts::Volume>(localToGlobalTrans(gctx), bounds());
+    return std::make_shared<Acts::Volume>(localToGlobalTransform(gctx), bounds());
 }
 std::shared_ptr<Acts::VolumeBounds> SpectrometerSector::bounds() const { return m_args.bounds; }
 Chamber::ReadoutSet SpectrometerSector::readoutEles() const {
@@ -116,7 +116,7 @@ SpectrometerSector::fillDetLayIdCache() const{
 
     std::unordered_map<const MuonReadoutElement*, std::vector<unsigned int>> cache{};
     const ActsTrk::GeometryContext gctx{};
-    const Amg::Transform3D sectorTrans = globalToLocalTrans(gctx);
+    const Amg::Transform3D sectorTrans = globalToLocalTransform(gctx);
 
     // sort the Readout elements by z in the sector fram
     Chamber::ReadoutSet reEleSorted {readoutEles()};

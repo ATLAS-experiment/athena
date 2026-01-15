@@ -152,7 +152,7 @@ namespace MuonR4 {
           }
         }
         const MuonGMR4::sTgcReadoutElement* readoutElement = m_detMgr->getsTgcReadoutElement(hitId);
-        const Amg::Vector3D globalHitPos = readoutElement->localToGlobalTrans(gctx, hitId) * locHitPos;
+        const Amg::Vector3D globalHitPos = readoutElement->localToGlobalTransform(gctx, hitId) * locHitPos;
         double globalHitTime = hit->globalTime() + eventTime;
         double tofCorrection = globalHitPos.mag() / Gaudi::Units::c_light;
         double bunchTime = globalHitTime - tofCorrection;

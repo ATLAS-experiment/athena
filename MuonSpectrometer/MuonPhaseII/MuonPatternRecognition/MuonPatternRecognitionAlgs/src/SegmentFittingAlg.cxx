@@ -121,7 +121,7 @@ namespace MuonR4 {
                                            const ActsTrk::GeometryContext& gctx,
                                            const SegmentSeed* patternSeed) const {
 
-        const Amg::Transform3D& locToGlob{patternSeed->msSector()->localToGlobalTrans(gctx)};
+        const Amg::Transform3D& locToGlob{patternSeed->msSector()->localToGlobalTransform(gctx)};
         std::vector<std::unique_ptr<Segment>> segments{};
 
         MdtSegmentSeedGenerator::Config genCfg{};

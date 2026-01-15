@@ -275,7 +275,7 @@ namespace MuonR4{
                     continue;
                 }
                 ///
-                const Amg::Vector2D dPosExtp = propPars->localPosition() - (sector->globalToLocalTrans(gctx) * segPos).segment<2>(0);
+                const Amg::Vector2D dPosExtp = propPars->localPosition() - (sector->globalToLocalTransform(gctx) * segPos).segment<2>(0);
                 const double dThetaExtp = std::abs(segDir.theta() - propPars->theta());
                 const double dPhiExtp  = std::abs(segDir.phi() - propPars->phi());
                 ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - Parameter difference: "<<Amg::toString(dPosExtp)

@@ -47,7 +47,7 @@ IdentifierHash MuonReadoutElement::geoTransformHash() {
 }
 
 
-const Amg::Transform3D& MuonReadoutElement::localToGlobalTrans(const ActsTrk::GeometryContext& ctx, 
+const Amg::Transform3D& MuonReadoutElement::localToGlobalTransform(const ActsTrk::GeometryContext& ctx, 
                                                                const IdentifierHash& hash) const {
     TransformCacheMap::const_iterator cache = m_localToGlobalCaches.find(hash);
     if (cache != m_localToGlobalCaches.end()) return cache->second->getTransform(ctx.getStore(detectorType()).get());
@@ -75,16 +75,16 @@ unsigned int MuonReadoutElement::storeAlignedTransforms(const ActsTrk::DetectorA
     return aligned;
 }
 
-Amg::Transform3D MuonReadoutElement::globalToLocalTrans(const ActsTrk::GeometryContext& ctx) const {
-    return globalToLocalTrans(ctx, geoTransformHash());
+Amg::Transform3D MuonReadoutElement::globalToLocalTransform(const ActsTrk::GeometryContext& ctx) const {
+    return globalToLocalTransform(ctx, geoTransformHash());
 }
-const Amg::Transform3D& MuonReadoutElement::localToGlobalTrans(const ActsTrk::GeometryContext& ctx) const {
-    return localToGlobalTrans(ctx, geoTransformHash());
+const Amg::Transform3D& MuonReadoutElement::localToGlobalTransform(const ActsTrk::GeometryContext& ctx) const {
+    return localToGlobalTransform(ctx, geoTransformHash());
 }
 #ifndef SIMULATIONBASE
 const Acts::Transform3& MuonReadoutElement::transform(const Acts::GeometryContext& anygctx) const {
     const ActsTrk::GeometryContext *gctx = anygctx.get<const ActsTrk::GeometryContext *>();
-    return localToGlobalTrans(*gctx, geoTransformHash());
+    return localToGlobalTransform(*gctx, geoTransformHash());
 }
 std::shared_ptr<Acts::Surface> MuonReadoutElement::surfacePtr(const IdentifierHash& hash) const {
     ActsTrk::SurfaceCacheSet::const_iterator cache = m_surfaces.find(hash);

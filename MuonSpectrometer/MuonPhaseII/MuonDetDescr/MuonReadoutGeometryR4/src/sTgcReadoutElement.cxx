@@ -146,7 +146,7 @@ Amg::Vector3D sTgcReadoutElement::localPosition(const IdentifierHash& measHash) 
 
 Amg::Vector3D sTgcReadoutElement::globalChannelPosition(const ActsTrk::GeometryContext& ctx, 
                                                         const IdentifierHash& measHash) const {
-   return localToGlobalTrans(ctx, layerHash(measHash)) * localPosition(measHash);
+   return localToGlobalTransform(ctx, layerHash(measHash)) * localPosition(measHash);
 }
 
 using localCornerArray = std::array<Amg::Vector2D, 4>;
@@ -159,7 +159,7 @@ globalCornerArray sTgcReadoutElement::globalPadCorners(const ActsTrk::GeometryCo
       const auto& layer = stripLayer(lHash);
       localCornerArray lPadCorners = localPadCorners(measHash);
       for (unsigned corner = 0; corner < lPadCorners.size(); ++corner) {
-         gPadCorners[corner] = localToGlobalTrans(ctx, lHash)* layer.to3D(std::move(lPadCorners[corner]), true);
+         gPadCorners[corner] = localToGlobalTransform(ctx, lHash)* layer.to3D(std::move(lPadCorners[corner]), true);
       }
       return gPadCorners;
    }
@@ -182,7 +182,7 @@ Amg::Vector3D sTgcReadoutElement::leftStripEdge(const ActsTrk::GeometryContext& 
    switch (chType(measHash)) {
       case ReadoutChannelType::Strip:
       case ReadoutChannelType::Wire:      
-         return localToGlobalTrans(ctx, lHash) *
+         return localToGlobalTransform(ctx, lHash) *
                 stripLayer(measHash).localStripLeftEdge(channelNumber(measHash), 
                                                         chType(measHash) == ReadoutChannelType::Wire);
       default:
@@ -200,7 +200,7 @@ Amg::Vector3D sTgcReadoutElement::rightStripEdge(const ActsTrk::GeometryContext&
    switch (chType(measHash)) {
       case ReadoutChannelType::Strip:
       case ReadoutChannelType::Wire:      
-         return localToGlobalTrans(ctx, lHash) *
+         return localToGlobalTransform(ctx, lHash) *
                 stripLayer(measHash).localStripRightEdge(channelNumber(measHash), 
                                                          chType(measHash) == ReadoutChannelType::Wire);
       default:

@@ -228,7 +228,7 @@ namespace MuonR4{
         ATH_MSG_DEBUG("Fetched in total "<<measurements.size()<<" measurements. "<<std::endl<<
                         m_printer->print(measurements.stdcont()));
         /// Next build a surface
-        const Amg::Transform3D& locToGlob{segment.msSector()->localToGlobalTrans(*gctx)};
+        const Amg::Transform3D& locToGlob{segment.msSector()->localToGlobalTransform(*gctx)};
         auto segSurf = std::make_unique<Trk::PlaneSurface>(Amg::getTransformFromRotTransl(locToGlob.linear(), segment.position()));
         Trk::LocalDirection segDir{};
         segSurf->globalToLocalDirection(segment.direction(), segDir);

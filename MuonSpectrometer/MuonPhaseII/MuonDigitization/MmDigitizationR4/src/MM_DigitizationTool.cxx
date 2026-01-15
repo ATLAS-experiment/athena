@@ -245,7 +245,7 @@ namespace MuonR4 {
                 const Amg::Vector3D locPos{xAOD::toEigen(simHit->localPosition())};
                 const Amg::Vector3D locDir{xAOD::toEigen(simHit->localDirection())};
 
-                const Amg::Transform3D &locToGlobal{readOutEle->localToGlobalTrans(gctx, readOutEle->layerHash(hitId))};
+                const Amg::Transform3D &locToGlobal{readOutEle->localToGlobalTransform(gctx, readOutEle->layerHash(hitId))};
                 const Amg::Vector3D globalHitPosition{locToGlobal * locPos};
 
                 // We could use the MuonDigitizationTool::hitTime which returns the global time

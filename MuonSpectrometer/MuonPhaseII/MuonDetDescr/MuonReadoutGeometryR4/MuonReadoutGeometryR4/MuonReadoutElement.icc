@@ -28,27 +28,27 @@ inline int MuonReadoutElement::stationPhi() const { return m_stPhi; }
 /// Returns the detector center (Which is the same as the detector center of the
 /// first measurement layer)
 inline Amg::Vector3D MuonReadoutElement::center(const ActsTrk::GeometryContext& ctx) const {
-    return localToGlobalTrans(ctx).translation();
+    return localToGlobalTransform(ctx).translation();
 }
 inline Amg::Vector3D MuonReadoutElement::center(const ActsTrk::GeometryContext& ctx,
                                                 const Identifier& id) const {
-    return localToGlobalTrans(ctx, id).translation();
+    return localToGlobalTransform(ctx, id).translation();
 }
 inline Amg::Vector3D MuonReadoutElement::center(const ActsTrk::GeometryContext& ctx, 
                                                 const IdentifierHash& hash) const {
-    return localToGlobalTrans(ctx, hash).translation();
+    return localToGlobalTransform(ctx, hash).translation();
 }
-inline Amg::Transform3D MuonReadoutElement::globalToLocalTrans(const ActsTrk::GeometryContext& ctx, 
+inline Amg::Transform3D MuonReadoutElement::globalToLocalTransform(const ActsTrk::GeometryContext& ctx, 
                                                                const IdentifierHash& hash) const {   
-    return localToGlobalTrans(ctx, hash).inverse();
+    return localToGlobalTransform(ctx, hash).inverse();
 }
-inline Amg::Transform3D MuonReadoutElement::globalToLocalTrans(const ActsTrk::GeometryContext& ctx, 
+inline Amg::Transform3D MuonReadoutElement::globalToLocalTransform(const ActsTrk::GeometryContext& ctx, 
                                                                const Identifier& id) const {
-    return globalToLocalTrans(ctx, layerHash(id));
+    return globalToLocalTransform(ctx, layerHash(id));
 }
-inline const Amg::Transform3D& MuonReadoutElement::localToGlobalTrans(const ActsTrk::GeometryContext& ctx, 
+inline const Amg::Transform3D& MuonReadoutElement::localToGlobalTransform(const ActsTrk::GeometryContext& ctx, 
                                                                       const Identifier& id) const {
-    return localToGlobalTrans(ctx, layerHash(id));
+    return localToGlobalTransform(ctx, layerHash(id));
 }
 #ifndef SIMULATIONBASE
 inline const SpectrometerSector* MuonReadoutElement::msSector() const { return m_msSectorLink; }
