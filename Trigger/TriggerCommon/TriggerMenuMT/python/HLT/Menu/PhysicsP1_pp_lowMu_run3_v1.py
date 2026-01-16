@@ -156,7 +156,7 @@ def getLowMuPhysicsSignatures():
 
         #--------- phase-1 physics electron chains
         ChainProp(name='HLT_e14_lhvloose_L1eEM12L', stream=[PhysicsStream], groups=SingleElectronGroup+SupportPhIGroup, monGroups=['egammaMon:shifter']), #ATR-30147
-        ChainProp(name='HLT_e15_lhloose_L1eEM15',  stream=[PhysicsStream, 'express'], groups=SingleElectronGroup+PrimaryPhIGroup, monGroups=['egammaMon:shifter']),
+        ChainProp(name='HLT_e15_lhloose_L1eEM15',  stream=[PhysicsStream, 'express'], groups=SingleElectronGroup+PrimaryPhIGroup, monGroups=['egammaMon:online','egammaMon:shifter']),
         ChainProp(name='HLT_e15_loose_L1eEM15',    stream=[PhysicsStream, 'express'], groups=SingleElectronGroup+PrimaryPhIGroup, monGroups=['egammaMon:shifter']),
         ChainProp(name='HLT_e15_lhmedium_L1eEM15', stream=[PhysicsStream], groups=SingleElectronGroup+PrimaryPhIGroup),
         ChainProp(name='HLT_e15_medium_L1eEM15',   stream=[PhysicsStream], groups=SingleElectronGroup+PrimaryPhIGroup),
@@ -168,7 +168,7 @@ def getLowMuPhysicsSignatures():
         ChainProp(name='HLT_e20_medium_L1eEM18',  stream=[PhysicsStream], groups=SingleElectronGroup+PrimaryPhIGroup),
 
         ChainProp(name='HLT_e30_lhloose_L1eEM18', stream=[PhysicsStream], groups=SingleElectronGroup+PrimaryPhIGroup),
-        ChainProp(name='HLT_e30_lhmedium_L1eEM18',stream=[PhysicsStream], groups=SingleElectronGroup+PrimaryPhIGroup),
+        ChainProp(name='HLT_e30_lhmedium_L1eEM18',stream=[PhysicsStream,'express'], groups=SingleElectronGroup+PrimaryPhIGroup, monGroups=['egammaMon:online','egammaMon:shifter']),
         ChainProp(name='HLT_e30_loose_L1eEM18',   stream=[PhysicsStream], groups=SingleElectronGroup+PrimaryPhIGroup),
         ChainProp(name='HLT_e30_medium_L1eEM18',  stream=[PhysicsStream], groups=SingleElectronGroup+PrimaryPhIGroup),
 
@@ -214,6 +214,7 @@ def getLowMuPhysicsSignatures():
         ChainProp(name='HLT_e10_lhloose_nopix_lrtmedium_L1eEM9', groups=PrimaryPhIGroup+SingleElectronGroup),
         ChainProp(name='HLT_e30_lhloose_nopix_lrtmedium_L1eEM26M', groups=PrimaryPhIGroup+SingleElectronGroup),
 
+        #----------- RadiativeZ chains (ATR-32302)
         ChainProp(name='HLT_2e17_lhvloose_g22_tight_probe_L12eEM18M', l1SeedThresholds=['eEM18M','PROBEeEM18M'], groups=TagAndProbePhIGroup+MultiElectronGroup),
         ChainProp(name='HLT_2e17_lhvloose_g25_medium_probe_L12eEM18M', l1SeedThresholds=['eEM18M','PROBEeEM18M'],groups=TagAndProbePhIGroup+MultiElectronGroup),
         ChainProp(name='HLT_2e17_lhvloose_g50_loose_probe_L12eEM18M', l1SeedThresholds=['eEM18M','PROBEeEM18M'],groups=TagAndProbePhIGroup+MultiElectronGroup),
@@ -224,6 +225,9 @@ def getLowMuPhysicsSignatures():
         ChainProp(name='HLT_2e24_lhvloose_g50_loose_probe_L12eEM24L', l1SeedThresholds=['eEM24L','PROBEeEM24L'],groups=TagAndProbePhIGroup+MultiElectronGroup),
         ChainProp(name='HLT_2e17_lhvloose_g20_tight_probe_L12eEM18M', l1SeedThresholds=['eEM18M','PROBEeEM18M'], groups=TagAndProbePhIGroup+MultiElectronGroup),
         ChainProp(name='HLT_2e24_lhvloose_g20_tight_probe_L12eEM24L', l1SeedThresholds=['eEM24L','PROBEeEM24L'], groups=TagAndProbePhIGroup+MultiElectronGroup),
+        ChainProp(name='HLT_2e17_lhvloose_g20_nopid_probe_L12eEM18M', l1SeedThresholds=['eEM18M','PROBEeEM18M'], groups=TagAndProbePhIGroup+MultiElectronGroup),
+        ChainProp(name='HLT_2e17_lhvloose_g35_nopid_probe_L12eEM18M', l1SeedThresholds=['eEM18M','PROBEeEM18M'],groups=TagAndProbePhIGroup+MultiElectronGroup),
+        ChainProp(name='HLT_2e17_lhvloose_g50_nopid_probe_L12eEM18M', l1SeedThresholds=['eEM18M','PROBEeEM18M'],groups=TagAndProbePhIGroup+MultiElectronGroup),
         
 
     ]
