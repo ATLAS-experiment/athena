@@ -50,15 +50,11 @@ public:
   VP1CollectionWidget* collWidget;
   class DialogInfo {
   public:
-    DialogInfo(QPushButton * lb,QWidget * dw,QAbstractButton * ec)
-      : enabledButton(ec), dialogWidget(dw), launchButton(lb), neverShown(true) {}
-    ~DialogInfo() { delete dialogWidget; }
-
-    DialogInfo(const DialogInfo&) = delete;
-    DialogInfo& operator=(const DialogInfo&) = delete;
-
+    DialogInfo(QPushButton * lb,std::unique_ptr<QWidget> dw,QAbstractButton * ec)
+      : enabledButton(ec), dialogWidget(std::move(dw)), launchButton(lb), neverShown(true) {}
+    ~DialogInfo() { }
     QAbstractButton * enabledButton;
-    QWidget * dialogWidget;
+    std::unique_ptr<QWidget> dialogWidget;
     QPushButton * launchButton;
     bool neverShown;
   };
@@ -124,12 +120,12 @@ QString VP1Controller::toString( SbColor4f p )
 }
 
 //____________________________________________________________________
-void VP1Controller::initDialog(QWidget * dialog, QPushButton* launchButton, QPushButton* closeButton,QAbstractButton* enabledButton)
+void VP1Controller::initDialog(std::unique_ptr<QWidget> dialogPtr, QPushButton* launchButton, QPushButton* closeButton,QAbstractButton* enabledButton)
 {
   QString txt(enabledButton?enabledButton->text():launchButton->text());
   txt.replace("&&","&");
-  dialog->setWindowTitle(txt+" ["+systemBase()->name()+"]");
-  dialog->setWindowIcon(QIcon(QString(":/vp1/icons/icons/3d_32x32.png")));
+  dialogPtr->setWindowTitle(txt+" ["+systemBase()->name()+"]");
+  dialogPtr->setWindowIcon(QIcon(QString(":/vp1/icons/icons/3d_32x32.png")));
   launchButton->setMaximumHeight(static_cast<int>(0.5+QFontMetricsF(launchButton->font()).height()*1.05+2));
   launchButton->setMinimumHeight(launchButton->maximumHeight());
   launchButton->setCheckable(true);
@@ -144,7 +140,9 @@ void VP1Controller::initDialog(QWidget * dialog, QPushButton* launchButton, QPus
   if (enabledButton)
     launchButton->setEnabled(enabledButton->isChecked());
 
-  m_d->dialogs << new Imp::DialogInfo(launchButton,dialog,enabledButton);
+  auto di = std::make_unique<Imp::DialogInfo>(launchButton,std::move(dialogPtr),enabledButton);
+  QWidget* dialog = di->dialogWidget.get();
+  m_d->dialogs << di.release();
 
   connect(launchButton,SIGNAL(clicked()),this,SLOT(toggleDialogState()));
   if (enabledButton)
@@ -199,7 +197,7 @@ void VP1Controller::toggleDialogState(QObject* widget)
 {
   Imp::DialogInfo * di(0);
   for (Imp::DialogInfo* di2 : m_d->dialogs) {
-    if (di2->launchButton==sender() || (widget && di2->dialogWidget==widget)) {
+    if (di2->launchButton==sender() || (widget && di2->dialogWidget.get()==widget)) {
       di = di2;
       break;
     }
@@ -400,7 +398,7 @@ void VP1Controller::restoreSettings(const QByteArray& ba)
     s.ignoreWidget(m_d->collWidget);
   s.warnUnrestored(static_cast<QWidget*>(this));
   for (Imp::DialogInfo* di : m_d->dialogs)
-    s.warnUnrestored(di->dialogWidget);
+    s.warnUnrestored(di->dialogWidget.get());
 
   QTimer::singleShot(0, this, SLOT(testForChanges()));
 }
@@ -421,7 +419,7 @@ QByteArray VP1Controller::saveSettings() const
 
   s.warnUnsaved(static_cast<const QWidget*>(this));
   for (Imp::DialogInfo* di : m_d->dialogs)
-    s.warnUnsaved(di->dialogWidget);
+    s.warnUnsaved(di->dialogWidget.get());
 
   return s.result();
 
