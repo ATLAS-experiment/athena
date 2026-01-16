@@ -1,6 +1,6 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthContainers/AuxElement.h
@@ -474,6 +474,7 @@ private:
  * This class should not have any virtual methods (to avoid forcing
  * derived classes to have a vtable).
  */
+//coverity[MISSING_MOVE_ASSIGNMENT]
 class AuxElement
 #ifdef ATHCONTAINERS_R21_COMPAT
   : public SG::IAuxElement
