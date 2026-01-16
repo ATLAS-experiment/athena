@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 #
 # Script that is used by the build_env.sh scripts of the individual projects.
 # It takes care of setting up a functional build environment for an ATLAS
@@ -54,7 +54,7 @@ atlas_env_setup() {
    export ATLAS_BUILD_DIR
 
    # Get the version of the project to be built.
-   ATLAS_PROJECT_VERSION=$(cat ${ATLAS_PROJECT_DIR}/version.txt)
+   ATLAS_PROJECT_VERSION=$(cat ${ATLAS_PROJECT_DIR}/version.txt | tr -d '\n\r')
 
    # Set up the environment variables for finding LCG and the TDAQ externals.
    source "${ATLAS_BUILD_SCRIPTS_DIR}/LCG_RELEASE_BASE.sh"
