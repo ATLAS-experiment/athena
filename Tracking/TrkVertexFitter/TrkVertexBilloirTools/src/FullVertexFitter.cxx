@@ -19,6 +19,7 @@
 #include "VxVertex/VxTrackAtVertex.h"
 #include <memory>
 #include <cmath>
+#include <memory>
 //xAOD includes 
 #include "xAODTracking/Vertex.h" 
 #include "xAODTracking/TrackParticle.h" 
@@ -33,21 +34,25 @@ namespace
 	{
 		BilloirTrack() : perigee ( nullptr ), originalPerigee( nullptr ), linTrack( nullptr ) {}
 
-                BilloirTrack(const BilloirTrack& arg) 
+                ~BilloirTrack() = default;
+
+                BilloirTrack(const BilloirTrack& arg)
+                  : perigee (arg.perigee), // does not own it
+                    originalPerigee (arg.originalPerigee), // does not own it
+                    linTrack (arg.linTrack->clone()),
+                    chi2 (arg.chi2),
+                    Di_mat (arg.Di_mat),
+                    Ei_mat (arg.Ei_mat),
+                    Gi_mat (arg.Gi_mat),
+                    Bi_mat (arg.Bi_mat),
+                    Ci_inv (arg.Ci_inv),
+                    Ui_vec (arg.Ui_vec),
+                    BCi_mat(arg.BCi_mat),
+                    Dper   (arg.Dper)
                 {
-                  linTrack.reset(arg.linTrack->clone());
-                  perigee = arg.perigee; // does not own it
-                  originalPerigee = arg.originalPerigee; // does not own it
-                  chi2    = arg.chi2   ;
-                  Di_mat  = arg.Di_mat ;
-                  Ei_mat  = arg.Ei_mat ;
-                  Gi_mat  = arg.Gi_mat ;
-                  Bi_mat  = arg.Bi_mat ;
-                  Ci_inv  = arg.Ci_inv ;
-                  Ui_vec  = arg.Ui_vec ;
-                  BCi_mat = arg.BCi_mat;
-                  Dper    = arg.Dper   ;
                 }
+
+                BilloirTrack(BilloirTrack&& arg) = default;
 		
 		Trk::TrackParameters * perigee;
 		const Trk::TrackParameters * originalPerigee;
@@ -214,7 +219,7 @@ namespace Trk
 				// in all other cases it did not extrapolate because the reference surface of the original perigee
 				// is already given to the extrapolation point (or very close nearby)
 
-				LinearizedTrack* linTrack = m_linFactory->linearizedTrack ( originalPerigee, linPoint );
+				std::unique_ptr<LinearizedTrack> linTrack ( m_linFactory->linearizedTrack ( originalPerigee, linPoint ) );
 				if ( linTrack==nullptr )
 				{
 					ATH_MSG_DEBUG("Could not linearize track! Skipping this track!");
@@ -224,7 +229,6 @@ namespace Trk
 					BilloirTrack locBilloirTrack;
 					
 					locBilloirTrack.originalPerigee = originalPerigee;
-					locBilloirTrack.linTrack.reset(linTrack);
 					double d0 = linTrack->expectedParametersAtPCA()[Trk::d0];
 					double z0 = linTrack->expectedParametersAtPCA()[Trk::z0];
 					double phi = linTrack->expectedParametersAtPCA()[Trk::phi];
@@ -280,7 +284,8 @@ namespace Trk
 						// and some summed results
 						billoirVertex.BCU_vec += locBilloirTrack.BCi_mat * locBilloirTrack.Ui_vec; // sum{Bi * Ci^-1 * Ui}
 						billoirVertex.BCB_mat =  billoirVertex.BCB_mat + locBilloirTrack.BCi_mat * locBilloirTrack.Bi_mat.transpose() ;// sum{Bi * Ci^-1 * Bi.T}
-						billoirTracks.push_back ( locBilloirTrack );
+						locBilloirTrack.linTrack = std::move(linTrack);
+						billoirTracks.push_back ( std::move(locBilloirTrack) );
                 			        count++;
 
 				}
