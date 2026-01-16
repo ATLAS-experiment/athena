@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentFactory import CompFactory
 from TrigBphysHypo.TrigBmumuxComboHypoMonitoringConfig import TrigBmumuxComboHypoMonitoring, TrigBmumuxComboHypoToolMonitoring
@@ -132,11 +132,15 @@ def TrigBmumuxComboHypoToolFromDict(flags, chainDict):
         'BdmuDpX' :          24,  # BD2DMMUX
         'BdmuDstarX' :       25,  # BD2DSTMUX
         'BsmuDsX' :          26,  # BS2DSMUX
-        'LbmuLcX' :          27   # LB2LCMUX
+        'LbmuLcX' :          27,  # LB2LCMUX
+        'bBhh' :             28   # BHH
     }
     tool.Decay = trigDecayDict[decay]
     tool.isBmux = True if 'bBmux' in chainDict['topo'] else False
+    tool.isBhh = True if 'bBhh' in chainDict['topo'] else False
+
     monGroups = ['bphysMon:online']
     if any(group in monGroups for group in chainDict['monGroups']):
         tool.MonTool = TrigBmumuxComboHypoToolMonitoring(flags, 'MonTool')
+
     return tool

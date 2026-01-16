@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigSteeringEvent/TrigRoiDescriptorCollection.h"
@@ -78,6 +78,10 @@ StatusCode ViewCreatorMuonSuperROITool::attachROILinks( TrigCompositeUtils::Deci
 
 
    double muonEta{muon->eta()}, muonPhi{muon->phi()};
+   if (m_isBhh) {
+      muonEta = 0.;
+      muonPhi = CxxUtils::wrapToPi( muon->phi() + M_PI );
+   }
 
    double etaMinus = muonEta - m_roiEtaWidth;
    double etaPlus  = muonEta + m_roiEtaWidth;
