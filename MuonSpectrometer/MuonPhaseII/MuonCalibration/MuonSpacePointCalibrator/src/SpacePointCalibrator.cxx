@@ -254,7 +254,12 @@ namespace MuonR4{
                 if(spacePoint->secondaryMeasurement()) {
                     const auto* secMeas = static_cast<const xAOD::sTgcMeasurement*>(spacePoint->secondaryMeasurement());
                     ATH_MSG_VERBOSE("Using secondary measurement "<< m_idHelperSvc->toString(secMeas->identify())<<" for sTGC strip cluster " << m_idHelperSvc->toString(cluster->identify()));
-                    posAlongTheStrip =static_cast<double>(spacePoint->secondaryMeasurement()->localPosition<1>()[0]);
+                    // Extract scalar value - use 2D for pads (2 dimensions), 1D for wires (1 dimension)
+                    if (secMeas->numDimensions() == 2) {
+                        posAlongTheStrip = static_cast<double>(secMeas->localPosition<2>()[0]);
+                    } else {
+                        posAlongTheStrip = static_cast<double>(secMeas->localPosition<1>()[0]);
+                    }
                 } else {
                     ATH_MSG_VERBOSE("No secondary measurement for sTGC strip cluster " << m_idHelperSvc->toString(cluster->identify()));
                 }

@@ -411,13 +411,11 @@ StatusCode SpacePointMakerAlg::loadContainerAndSort(const EventContext& ctx,
         const Amg::Transform3D sectorTrans = viewer.at(0)->readoutElement()->msSector()->globalToLocalTransform(*gctx);
         ATH_MSG_DEBUG(__func__<<"() "<<__LINE__<<" - Fill space points for multiplet "<<m_idHelperSvc->toStringDetEl(viewer.at(0)->identify()));
         for(auto& HitColls: splitHitsPerGasGap(viewer)){ 
-            auto& [etaHits, phiHits, two2DHits] =  HitColls;
-            ATH_MSG_DEBUG(__func__<<"() "<<__LINE__<<" - Found "<<etaHits.size()<<"eta, "<<phiHits.size()
-                        <<" phi hits and "<<two2DHits.size()<<" 2D hits.");
-            
+            auto& [etaHits, phiHits, two2DHits] =  HitColls;          
             std::array<std::vector<std::shared_ptr<unsigned>>, 3> instanceCounts{matchCountVec(etaHits.size()), 
                                                                                  matchCountVec(phiHits.size()),
-                                                                                 matchCountVec(two2DHits.size())};
+                                                                                 matchCountVec(two2DHits.size())};                                                      
+            
             //loop through the Prds and try to combine according` to the hierarchy
             // Strip+Wire
             // Strip+Pad
@@ -446,6 +444,16 @@ StatusCode SpacePointMakerAlg::loadContainerAndSort(const EventContext& ctx,
                                        
                 const auto& collA = HitColls[collIdxA];
                 const auto& collB = HitColls[collIdxB];
+
+                /// Skip if one of collections are empty
+                if(collA.empty() || collB.empty()) {
+                    ATH_MSG_DEBUG(__func__<<"() "<<__LINE__<<" - Skipping combination: both collections empty");
+                    return;
+                }
+                
+                /// Get first hit from the first collection 
+                const xAOD::sTgcMeasurement* firstHit = collB.front();
+                const Amg::Transform3D toSectorTrans = toChamberTransform(*gctx, sectorTrans, *firstHit);
                
                 for(std::size_t idxA = 0; idxA < collA.size(); ++idxA) {
                     /// The hit in the collection has already been used
@@ -464,13 +472,18 @@ StatusCode SpacePointMakerAlg::loadContainerAndSort(const EventContext& ctx,
                         //create space point
                         ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - Combine sTgc measurements "
                             <<m_idHelperSvc->toString(collA[idxA]->identify())<<" and "
-                            <<m_idHelperSvc->toString(collB[idxB]->identify())<<" to new space point");
+                            <<m_idHelperSvc->toString(collB[idxB]->identify())<< "with local positions"
+                            << Amg::toString(collA[idxA]->localMeasurementPos()) << " and "
+                            << Amg::toString(collB[idxB]->localMeasurementPos())
+                            <<" to new space point");
+                        
                         SpacePoint& newSp = pointsInChamb.etaHits.emplace_back(collB[idxB], collA[idxA]);
                         auto crossPoint = lineIntersect<3>(collA[idxA]->localMeasurementPos(), 
                                                            Amg::Vector3D::UnitX(),
                                                            collB[idxB]->localMeasurementPos(),
                                                            Amg::Vector3D::UnitY());
-                        newSp.setPosition(crossPoint.position());
+
+                        newSp.setPosition(toSectorTrans*crossPoint.position());
                         newSp.setDirection(Amg::Vector3D::UnitX(), Amg::Vector3D::UnitY());
                         auto cov = Acts::filledArray<double, 3>(0.);
                         cov[Acts::toUnderlying(CovIdx::phiCov)] = covElement(*collA[idxA], CovIdx::phiCov);

@@ -152,7 +152,7 @@ namespace  MuonValR4 {
                         dY = 0.5* sTgcClus->readoutElement()->stripDesign(sTgcClus->measurementHash()).stripLength(sTgcClus->channelNumber());
                     } else if (sTgcClus->channelType() == sTgcIdHelper::sTgcChannelTypes::Wire) {
                         dY = std::sqrt(sTgcClus->localCovariance<1>()(0,0));
-                        dY = 0.5*sTgcClus->readoutElement()->wireDesign(sTgcClus->measurementHash()).stripLength(sTgcClus->channelNumber());
+                        dX = 0.5*sTgcClus->readoutElement()->wireDesign(sTgcClus->measurementHash()).stripLength(sTgcClus->channelNumber());
                     }
                 }
                 break;
