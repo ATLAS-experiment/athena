@@ -23,10 +23,8 @@ namespace CP
 {
   BTaggingTriggerMatchingAlg::BTaggingTriggerMatchingAlg
   (const std::string &name, ISvcLocator *svcLoc) :
-    EL::AnaAlgorithm(name, svcLoc),
-    m_trigDecTool("Trig::TrigDecisionTool/TrigDecisionTool")
+    EL::AnaAlgorithm(name, svcLoc)
   {
-    declareProperty("TrigDecisionTool", m_trigDecTool, "trigger decision tool");
   }
 
   StatusCode BTaggingTriggerMatchingAlg ::

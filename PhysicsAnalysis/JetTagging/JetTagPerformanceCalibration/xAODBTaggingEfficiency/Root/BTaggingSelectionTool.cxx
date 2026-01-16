@@ -8,7 +8,6 @@
 #include "CalibrationDataInterface/CalibrationDataInterfaceROOT.h"
 #include "CalibrationDataInterface/CalibrationDataVariables.h"
 #include "CalibrationDataInterface/CalibrationDataContainer.h"
-#include "xAODBTaggingEfficiency/ToolDefaults.h"
 
 #include "PATInterfaces/SystematicRegistry.h"
 #include "PathResolver/PathResolver.h"
@@ -43,26 +42,13 @@ using xAOD::IParticle;
 BTaggingSelectionTool::BTaggingSelectionTool( const std::string & name)
   : asg::AsgTool( name ), m_acceptinfo( "JetSelection" ), m_accessor_pb( "pb" ), m_accessor_pc( "pc" ), m_accessor_pu( "pu" ), m_accessor_ptau( "ptau" )
 {
-  namespace def = ftag::defaults;
   m_initialised = false;
-  declareProperty( "MaxEta", m_maxEta = 2.5 );
-  declareProperty( "MinPt", m_minPt = 0 /*MeV*/);
-  declareProperty( "MaxRangePt", m_maxRangePt = 3000000 /*MeV*/);
-  declareProperty( "FlvTagCutDefinitionsFileName", m_CutFileName=def::cdi_path, "name of the files containing official cut definitions (uses PathResolver)");
-  declareProperty( "TaggerName",                    m_taggerName=def::tagger,    "tagging algorithm name");
-  declareProperty( "OperatingPoint",                m_OP="",            "operating point");
-  declareProperty( "JetAuthor",                     m_jetAuthor=def::jet_collection,     "jet collection");
-  declareProperty( "WorkingPointDefinitions",       m_wps_raw="FixedCutBEff_85,FixedCutBEff_77,FixedCutBEff_70,FixedCutBEff_60",       "Comma-separated list of tagger working points (in decreasing order of efficiency!) - required for 1D tagging purposes");
-  declareProperty( "ErrorOnTagWeightFailure",       m_ErrorOnTagWeightFailure=true, "optionally ignore cases where the tagweight cannot be retrieved. default behaviour is to give an error, switching to false will turn it into a warning");
-  declareProperty( "CutBenchmarksContinuousWP",     m_ContinuousBenchmarks="", "comma separated list of tag bins that will be accepted as tagged: 1,2,3 etc.. ");
-  declareProperty( "useCTagging",                   m_useCTag=false, "Enabled only for FixedCut or Continuous WPs: define wether the cuts refer to b-tagging or c-tagging");
-  declareProperty( "readFromBTaggingObject",        m_readFromBTaggingObject=false,       "Enabled to access btagging scores from xAOD::BTagging object; Can be disabled for GN2v01 to access the scores from the jet itself.");
 }
 
 StatusCode BTaggingSelectionTool::initialize() {
   m_initialised = true;
 
-  if (""==m_OP){
+  if (m_OP == ""){
     ATH_MSG_ERROR( "BTaggingSelectionTool wasn't given a working point name" );
     return StatusCode::FAILURE;
   }
@@ -75,7 +61,7 @@ StatusCode BTaggingSelectionTool::initialize() {
   }
 
   // check the CDI file for the selected tagger and jet collection
-  TString check_CDI = m_taggerName;
+  TString check_CDI = m_taggerName.value();
   if(!m_inf->Get(check_CDI)){
     ATH_MSG_ERROR( "Tagger: "+m_taggerName+" not found in this CDI file: "+m_CutFileName);
     return StatusCode::FAILURE;
@@ -96,7 +82,7 @@ StatusCode BTaggingSelectionTool::initialize() {
  }
 
  // Operating point reading
- TString cutname = m_OP;
+ TString cutname = m_OP.value();
  m_continuous   = false;
  m_continuous2D = false;
 
