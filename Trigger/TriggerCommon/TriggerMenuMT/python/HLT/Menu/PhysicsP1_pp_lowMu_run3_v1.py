@@ -636,6 +636,8 @@ def getLowMuPhysicsSignatures():
     chains['MET'] += [
         ChainProp(name='HLT_xe30_cell_L1eEM12L',  l1SeedThresholds=['FSNOSEED'], stream=['Main'], groups=PrimaryPhIGroup+METGroup),
         ChainProp(name='HLT_xe30_pfopufit_L1eEM12L',  l1SeedThresholds=['FSNOSEED'], stream=['Main'], groups=PrimaryPhIGroup+METGroup),
+        ChainProp(name='HLT_xe30_cell_L1eEM15',  l1SeedThresholds=['FSNOSEED'], stream=['Main'], groups=PrimaryPhIGroup+METGroup),
+        ChainProp(name='HLT_xe30_pfopufit_L1eEM15',  l1SeedThresholds=['FSNOSEED'], stream=['Main'], groups=PrimaryPhIGroup+METGroup),
     ]
 
 
