@@ -175,6 +175,8 @@ def getLowMuPhysicsSignatures():
         ChainProp(name='HLT_2e20_lhloose_L12eEM18', stream=[PhysicsStream, 'express'], groups=SingleElectronGroup+PrimaryPhIGroup, monGroups=['egammaMon:shifter']),
         ChainProp(name='HLT_2e20_lhmedium_L12eEM18',stream=[PhysicsStream, 'express'], groups=SingleElectronGroup+PrimaryPhIGroup, monGroups=['egammaMon:shifter']),
 
+        ChainProp(name='HLT_2e9_lhloose_L12eEM9', stream=[PhysicsStream], groups=SingleElectronGroup+PrimaryPhIGroup),
+
         # PhotonChains----------
         #----------- phase-1 support photon chains
         ChainProp(name='HLT_g13_etcut_L1eEM12', stream=[PhysicsStream], groups=SinglePhotonGroup+SupportPhIGroup),

@@ -832,12 +832,16 @@ HLT_2mu4_bBmux_BdmuDstarX_L12MU3VF:
     0: 1
   stepFeatures:
     0: 2
+HLT_2mu4_bDimu2700_L12MU3VF_ADBDTT:
+  eventCount: 0
 HLT_2mu4_bDimu2700_L1ADBDTL:
   eventCount: 0
   stepCounts:
     0: 1
   stepFeatures:
     0: 3
+HLT_2mu4_bDimu2700_L1ADBDTT:
+  eventCount: 0
 HLT_2mu4_bDimu2700_sigmaLxy3_L12MU3V:
   eventCount: 0
   stepCounts:
@@ -862,12 +866,16 @@ HLT_2mu4_bDimu_L12MU3VF:
     0: 1
   stepFeatures:
     0: 2
+HLT_2mu4_bDimu_L12MU3VF_ADBDTT:
+  eventCount: 0
 HLT_2mu4_bDimu_L1ADBDTL:
   eventCount: 0
   stepCounts:
     0: 1
   stepFeatures:
     0: 3
+HLT_2mu4_bDimu_L1ADBDTT:
+  eventCount: 0
 HLT_2mu4_bJpsimumu_L12MU3V:
   eventCount: 0
   stepCounts:
@@ -10178,6 +10186,10 @@ HLT_noalg_L1AFP_A_AND_C_TOF_T0T1_jJ90:
 HLT_noalg_L1AFP_A_AND_C_TOF_jJ125:
   eventCount: 0
 HLT_noalg_L1AFP_A_AND_C_TOF_jJ90:
+  eventCount: 0
+HLT_noalg_L1ARTEMISL:
+  eventCount: 0
+HLT_noalg_L1ARTEMIST:
   eventCount: 0
 HLT_noalg_L1All:
   eventCount: 50
