@@ -7,9 +7,9 @@ from .Logic import Logic, LogicType
 
 class ThrCondition(Logic):
     def __init__(self, threshold, multiplicity=1):
-        super(ThrCondition, self).__init__( logicType = LogicType.THRESHOLD, 
-                                            content = { "threshold" : threshold,
-                                                        "multiplicity" : multiplicity } )
+        super().__init__( logicType = LogicType.THRESHOLD)
+        self._threshold = threshold
+        self._multiplicity = multiplicity
 
     def x(self, multiplicity):
         return ThrCondition(self.threshold(), multiplicity) # provide a copy
@@ -18,10 +18,10 @@ class ThrCondition(Logic):
         return str(self.threshold()) + '[x' + str(self.multiplicity())+']'
 
     def threshold(self):
-        return self.content["threshold"]
+        return self._threshold
 
     def multiplicity(self):
-        return self.content["multiplicity"]        
+        return self._multiplicity
 
     def name(self):
         return "%s_x%i" % (self.threshold().name, self.multiplicity())
@@ -31,14 +31,15 @@ class ThrCondition(Logic):
 
 
 class InternalTrigger(Logic):
-    def __init__(self, name):
-        super(InternalTrigger, self).__init__( logicType = LogicType.INTERNAL, content = name )
-        
+    def __init__(self, name: str):
+        super().__init__( logicType = LogicType.INTERNAL )
+        self._name: str = name
+
     def __str__(self):
         return self.name()
 
     def name(self):
-        return str(self.content)
+        return self._name
 
     def thresholdNames(self, include_bgrp=False):
         if include_bgrp:

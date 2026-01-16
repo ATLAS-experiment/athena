@@ -2,6 +2,7 @@
 
 from dataclasses import dataclass
 from enum import Enum
+from typing import Any
 
 from AthenaCommon.Logging import logging
 log = logging.getLogger(__name__)
@@ -23,7 +24,7 @@ class ValueWithEtaDependence(object):
         variable: str,
         working_point: str,
         values_with_prio: list,
-        eta_range: list = (-49,49,1),
+        eta_range: tuple = (-49,49,1),
     ):
         self.variable = variable
         self.working_point = working_point
@@ -98,7 +99,7 @@ def cTAUfwToFlowConversion(fw):
     decimal = fw/1024
     return float("{:.2f}".format(decimal))
 
-def getTypeWideThresholdConfig(ttype, do_HI_tob_thresholds=False, do_eFex_BDT_Tau=True):
+def getTypeWideThresholdConfig(ttype, do_HI_tob_thresholds=False, do_eFex_BDT_Tau=True) -> dict[str,Any]:
     if isinstance(ttype, str):
         ttype = ThrType[ttype]
 
@@ -140,7 +141,7 @@ def getTypeWideThresholdConfig(ttype, do_HI_tob_thresholds=False, do_eFex_BDT_Ta
 
 
 def getConfig_MU():
-    confObj = {
+    confObj: dict[str,Any] = {
         "exclusionLists": {
             "rpcFeet": [
                 {"sectorName": "B21", "rois": [8, 9, 10, 11, 16, 17, 18, 19, 20, 21, 22, 23, 28, 29, 30, 31]},
@@ -183,7 +184,7 @@ def getConfig_MU():
 
 
 def getConfig_eEM(do_HI_tob_thresholds):
-    confObj = {"workingPoints": {}}
+    confObj: dict[str,Any] = {"workingPoints": {}}
     bitshift_reta = 3
     bitshift_rhad = 3
     bitshift_wstot = 5   
@@ -287,8 +288,8 @@ def getConfig_eEM(do_HI_tob_thresholds):
         for ssthr in confObj["workingPoints"][wp]:
             for ssthr_i in ssthr:
                 if "_fw" in ssthr_i:
-                     if not isinstance(ssthr[ssthr_i], int):
-                          raise RuntimeError("Threshold %s in eEM configuration is not an integer!", ssthr_i )
+                    if not isinstance(ssthr[ssthr_i], int):
+                        raise RuntimeError("Threshold %s in eEM configuration is not an integer!", ssthr_i )
 
     # Check that T >= M >= L [ATR-27796]
     for var in ["reta_fw","rhad_fw","wstot_fw"]:
@@ -309,7 +310,7 @@ def getConfig_jEM():
     frac2_medium_float = 0.08
     frac2_tight_float = 0.04
 
-    confObj = {
+    confObj: dict[str,Any] = {
         "workingPoints": {
             "Loose": [
                 {
@@ -356,8 +357,8 @@ def getConfig_jEM():
         for ssthr in confObj["workingPoints"][wp]:
             for ssthr_i in ssthr:
                 if "_fw" in ssthr_i:
-                     if not isinstance(ssthr[ssthr_i], int):
-                          raise RuntimeError("Threshold %s in jEM configuration is not an integer!", ssthr_i )
+                    if not isinstance(ssthr[ssthr_i], int):
+                        raise RuntimeError("Threshold %s in jEM configuration is not an integer!", ssthr_i )
 
     # Check that T >= M >= L [ATR-27796]
     for var in ["iso_fw","frac_fw","frac2_fw"]:
@@ -450,8 +451,8 @@ class L1Config_eTAU:
             for ssthr in confObj["workingPoints"][wp]:
                 for ssthr_i in ssthr:
                     if "_fw" in ssthr_i:
-                         if not isinstance(ssthr[ssthr_i], int) or ssthr[ssthr_i] < 0 or ssthr[ssthr_i] > 255:
-                              raise RuntimeError(f'Threshold {ssthr_i} in eTAU configuration must be an 8-bit integer (between 0 and 255)!')
+                        if not isinstance(ssthr[ssthr_i], int) or ssthr[ssthr_i] < 0 or ssthr[ssthr_i] > 255:
+                            raise RuntimeError(f'Threshold {ssthr_i} in eTAU configuration must be an 8-bit integer (between 0 and 255)!')
                          
         # Check that T >= M >= L [ATR-27796]
         for var in ["rCore_fw", "rHad_fw"]:
@@ -616,9 +617,9 @@ class L1Config_jTAU:
             for ssthr in confObj["workingPoints"][wp]:
                 for ssthr_i in ssthr:
                     if "_fw" in ssthr_i:
-                         if not isinstance(ssthr[ssthr_i], int):
-                              raise RuntimeError("Threshold %s in jTAU configuration is not an integer!", ssthr_i )
-                         elif ssthr[ssthr_i] < 0:
+                        if not isinstance(ssthr[ssthr_i], int):
+                            raise RuntimeError("Threshold %s in jTAU configuration is not an integer!", ssthr_i )
+                        elif ssthr[ssthr_i] < 0:
                             raise RuntimeError("Threshold %s in jTAU configuration is negative!", ssthr_i )
 
         # Check that T >= M >= L [ATR-27796]
@@ -744,7 +745,7 @@ def getConfig_gTE():
 # LEGACY
 
 def getConfig_EM(do_HI_tob_thresholds):
-    confObj = {
+    confObj: dict[str,Any] = {
         "isolation": {
             "HAIsoForEMthr": {
                 "thrtype": "HAIsoForEMthr",

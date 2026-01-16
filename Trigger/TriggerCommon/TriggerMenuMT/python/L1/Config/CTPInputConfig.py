@@ -46,3 +46,21 @@ class CTPInputConfig:
             }
         }
         return inputLayout
+
+    @staticmethod
+    def cablingLayoutRun4():
+        inputLayout = {
+            "optical": {
+                "connector0": "MuCTPiOpt0",
+                "connector1": "L0Global",
+            },
+            "ctpin": {
+                "slot9": {
+                    "connector0": "",
+                    "connector1": "CTPCAL",
+                    "connector2": "NIM1",
+                    "connector3": "NIM2"
+                }
+            }
+        }
+        return inputLayout

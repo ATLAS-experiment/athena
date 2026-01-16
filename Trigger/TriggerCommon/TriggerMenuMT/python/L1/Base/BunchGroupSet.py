@@ -116,7 +116,7 @@ class BunchGroupSet(object):
         self.bunchGroups = self.bunchGroups[:newsize]
 
 
-    def addBunchGroup(self, bunchGroup):
+    def addBunchGroup(self, bunchGroup: BunchGroup):
         # check if one already exists with this number
         doesExist = self.bunchGroups[bunchGroup.internalNumber].name != BunchGroupSet.BunchGroup.nameUndefBG
         if doesExist:
@@ -127,7 +127,7 @@ class BunchGroupSet(object):
             for lowestBG in L1MenuFlags.BunchGroupPartitioning():
                 if bunchGroup.internalNumber >= lowestBG:
                     partition += 1
-        bunchGroup.partition = partition
+        bunchGroup.menuPartition = partition
         self.bunchGroups[bunchGroup.internalNumber] = bunchGroup
         return self
 

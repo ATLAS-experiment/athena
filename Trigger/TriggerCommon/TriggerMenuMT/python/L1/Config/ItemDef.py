@@ -31,7 +31,7 @@ class ItemDef:
     otherTopoNames = ddict(list)
 
     @staticmethod
-    def threshold_conditions(tc):
+    def threshold_conditions(tc) -> type:
         class d(metaclass=meta_d): pass
 
         # ... and make them accessible by their name
@@ -48,6 +48,91 @@ class ItemDef:
             setattr (d, "RNDM%i"%i, InternalTrigger('RNDM%i'%i))
 
         return d
+
+
+    @staticmethod
+    def registerRequiredItems(d, menuName):
+        """Register required L1 items for further use"""
+        physcond = d.BGRP0 & d.BGRP1
+        calibcond = d.BGRP0 & d.BGRP2
+        cosmiccond = d.BGRP0 & d.BGRP3
+        unpaired_isocond = d.BGRP0 & d.BGRP4 # unpaired isolated (satellite bunches)
+        firstempty = d.BGRP0 & d.BGRP6
+        bgrp7cond  = d.BGRP0 & d.BGRP7 # No unpaired anymore
+        bgrp10cond = d.BGRP0 & d.BGRP10
+        bgrp11cond = d.BGRP0 & d.BGRP11
+        bgrp12cond = d.BGRP0 & d.BGRP12
+        bgrp13cond = d.BGRP0 & d.BGRP13 #UNPAIREDB1
+        bgrp14cond = d.BGRP0 & d.BGRP14 #UNPAIREDB2
+        firstintrain = d.BGRP0 & d.BGRP8
+
+        # CALREQ
+        MenuItem('L1_CALREQ0', ctpid=0x1fd).setLogic( d.CAL0 & calibcond).setTriggerType(TT.calreq0)
+        MenuItem('L1_CALREQ1', ctpid=0x1fe).setLogic( d.CAL1 & calibcond).setTriggerType(TT.calreq1)
+        MenuItem('L1_CALREQ2', ctpid=0x1ff).setLogic( d.CAL2 & calibcond).setTriggerType(TT.calreq2)
+
+        # BPTX -- important for CTP timing checks
+        MenuItem('L1_BPTX0_BGRP12', ctpid=0xf1).setLogic(d.BPTX0 & bgrp12cond ).setTriggerType(TT.rand)
+        MenuItem('L1_BPTX1_BGRP12', ctpid=0xf2).setLogic(d.BPTX1 & bgrp12cond ).setTriggerType(TT.rand)
+
+        # NSW Monitoring
+        MenuItem('L1_NSW_MONITOR').setLogic(d.NSWMon & physcond).setTriggerType(TT.nsw)
+
+        # TRT
+        MenuItem('L1_TRT_FILLED').setLogic(d.NIMTRT & physcond).setTriggerType(TT.nim)
+        MenuItem('L1_TRT_EMPTY').setLogic(d.NIMTRT & cosmiccond).setTriggerType(TT.nim)
+
+        # TGC
+        MenuItem('L1_TGC_BURST').setLogic(d.NIMTGC & bgrp12cond ).setTriggerType(TT.nim)
+
+        # BCM
+        MenuItem('L1_BCM_Wide').setLogic( d.BCM_Wide & physcond )
+        MenuItem('L1_BCM_Wide_EMPTY').setLogic( d.BCM_Wide & cosmiccond )
+        MenuItem('L1_BCM_Wide_BGRP12').setLogic( d.BCM_Wide & bgrp12cond )
+        MenuItem('L1_BCM_Wide_UNPAIREDB1').setLogic( d.BCM_Wide & bgrp13cond )
+        MenuItem('L1_BCM_Wide_UNPAIREDB2').setLogic( d.BCM_Wide & bgrp14cond )
+        MenuItem('L1_BCM_Wide_CALIB').setLogic( d.BCM_Wide & calibcond) # no needed anymore
+        MenuItem('L1_BCM_2A_2C_UNPAIRED_ISO').setLogic((d.BCM6 | d.BCM7) & unpaired_isocond)
+        MenuItem('L1_BCM_2A_2C_BGRP12').setLogic((d.BCM6 | d.BCM7) & bgrp12cond )
+        MenuItem('L1_BCM_2A_CALIB').setLogic( d.BCM6 & calibcond)
+        MenuItem('L1_BCM_2C_CALIB').setLogic( d.BCM7 & calibcond)
+        MenuItem('L1_BCM_2A_EMPTY').setLogic( d.BCM6 & cosmiccond)
+        MenuItem('L1_BCM_2C_EMPTY').setLogic( d.BCM7 & cosmiccond)
+        MenuItem('L1_BCM_2A_UNPAIREDB1').setLogic( d.BCM6 & bgrp13cond)
+        MenuItem('L1_BCM_2C_UNPAIREDB1').setLogic( d.BCM7 & bgrp13cond)
+        MenuItem('L1_BCM_2A_UNPAIREDB2').setLogic( d.BCM6 & bgrp14cond)
+        MenuItem('L1_BCM_2C_UNPAIREDB2').setLogic( d.BCM7 & bgrp14cond)
+        MenuItem('L1_BCM_2A_FIRSTINTRAIN').setLogic( d.BCM6 & firstintrain)
+        MenuItem('L1_BCM_2C_FIRSTINTRAIN').setLogic( d.BCM7 & firstintrain)
+            
+        # RNDM
+        MenuItem('L1_RD0_FILLED').setLogic( d.RNDM0 & physcond).setTriggerType(TT.rand)
+        MenuItem('L1_RD0_EMPTY').setLogic( d.RNDM0 & cosmiccond).setTriggerType(TT.rand)
+        MenuItem('L1_RD0_UNPAIRED_ISO').setLogic( d.RNDM0 & unpaired_isocond).setTriggerType(TT.rand)
+        MenuItem('L1_RD0_FIRSTEMPTY').setLogic( d.RNDM0 & firstempty).setTriggerType(TT.rand)
+        MenuItem('L1_RD0_BGRP7').setLogic( d.RNDM0 & bgrp7cond).setTriggerType(TT.rand)
+        MenuItem('L1_RD0_BGRP10').setLogic( d.RNDM0 & bgrp10cond).setTriggerType(TT.rand)
+        MenuItem('L1_RD0_BGRP11').setLogic( d.RNDM0 & bgrp11cond).setTriggerType(TT.rand)
+        MenuItem('L1_RD0_BGRP15').setLogic( d.RNDM0 & d.BGRP0 & d.BGRP15).setTriggerType(TT.rand)
+        MenuItem('L1_RD0_FIRSTINTRAIN').setLogic( d.RNDM0 & firstintrain).setTriggerType(TT.rand)
+        MenuItem('L1_RD1_FILLED').setLogic( d.RNDM1 & physcond).setTriggerType(TT.zerobs) # used to be TT.rand
+        MenuItem('L1_RD1_EMPTY').setLogic( d.RNDM1 & cosmiccond).setTriggerType(TT.zerobs)
+        MenuItem('L1_RD2_FILLED').setLogic( d.RNDM2 & physcond).setTriggerType(TT.rand)
+        MenuItem('L1_RD2_EMPTY').setLogic( d.RNDM2 & cosmiccond).setTriggerType(TT.rand)
+        MenuItem('L1_RD3_FILLED').setLogic( d.RNDM3 & physcond).setTriggerType(TT.rand)
+        MenuItem('L1_RD3_EMPTY').setLogic( d.RNDM3 & cosmiccond).setTriggerType(TT.rand)
+        MenuItem('L1_RD0_LAR_FILLED').setLogic( d.RNDM0 & physcond).setTriggerType(TT.lardigital)
+        MenuItem('L1_RD0_LAR_EMPTY').setLogic( d.RNDM0 & cosmiccond).setTriggerType(TT.lardigital)
+        MenuItem('L1_RD0_LAR_FIRSTEMPTY').setLogic( d.RNDM0 & firstempty).setTriggerType(TT.lardigital)
+        MenuItem('L1_RD0_LAR_BGRP7').setLogic( d.RNDM0 & bgrp7cond).setTriggerType(TT.lardigital)
+
+        # ZB 
+        if ('HI_run3_v' in menuName):
+            MenuItem('L1_ZeroBias').setLogic( d.ZeroBiasB & physcond).setTriggerType(TT.zerobs)
+        elif ('run4_v2' not in menuName):
+            MenuItem('L1_ZeroBias').setLogic( d.ZeroBiasA & physcond).setTriggerType(TT.zerobs)
+
+
 
     @staticmethod
     def registerItems(tc, menuName):
@@ -85,6 +170,8 @@ class ItemDef:
 
 
         MenuItem.currentPartition = 1
+
+        ItemDef.registerRequiredItems(d, menuName)
 
         # ZDC
 
@@ -387,8 +474,6 @@ class ItemDef:
         MenuItem('L1_jTE5_VjTE200_GAP_C'         ).setLogic( d.jTE5  & Not(d.jTE200) & GAPC  & physcond).setTriggerType( TT.calo )
         MenuItem('L1_gTE5_VjTE200'         ).setLogic( d.gTE5  & Not(d.jTE200) & physcond).setTriggerType( TT.calo )
 
-        # NSW Monitoring
-        MenuItem('L1_NSW_MONITOR').setLogic(d.NSWMon & physcond ).setTriggerType(TT.nsw)
 
         # MUON ctpid=[0x20;0x2f]
         # RUn3 thresholds
@@ -930,11 +1015,6 @@ class ItemDef:
 
         # LAr Saturation
         MenuItem('L1_LArSaturation').setLogic( d.LArSaturation & physcond ).setTriggerType(TT.calo)
-
-        if ('HI_run3_v' in menuName):
-            MenuItem('L1_ZeroBias').setLogic( d.ZeroBiasB & physcond ).setTriggerType(TT.zerobs)
-        else:
-            MenuItem('L1_ZeroBias').setLogic( d.ZeroBiasA & physcond ).setTriggerType(TT.zerobs)
 
         # combined jet - xe
         MenuItem('L1_J40_XE50').setLogic( d.J40 & d.XE50 & physcond).setTriggerType(TT.calo)
@@ -1957,13 +2037,8 @@ class ItemDef:
         MenuItem('L1_LUCID_C_BGRP11').setLogic( d.LUCID_C & bgrp11cond)
 
         # BCM
-        MenuItem('L1_BCM_Wide'                   ).setLogic( d.BCM_Wide & physcond )
-        MenuItem('L1_BCM_Wide_BGRP12'            ).setLogic( d.BCM_Wide & bgrp12cond )
-        MenuItem('L1_BCM_Wide_EMPTY'             ).setLogic( d.BCM_Wide & cosmiccond )
         MenuItem('L1_BCM_Wide_UNPAIRED_ISO'      ).setLogic( d.BCM_Wide & unpaired_isocond ) # no needed anymore
         MenuItem('L1_BCM_Wide_UNPAIRED_NONISO'   ).setLogic( d.BCM_Wide & unpaired_nonisocond ) # no needed anymore
-        MenuItem('L1_BCM_Wide_UNPAIREDB1'        ).setLogic( d.BCM_Wide & bgrp13cond )
-        MenuItem('L1_BCM_Wide_UNPAIREDB2'        ).setLogic( d.BCM_Wide & bgrp14cond )
 
         MenuItem('L1_BCM_HT_BGRP12'               ).setLogic( d.BCM_Comb.x(7) & bgrp12cond)
         MenuItem('L1_BCM_AC_CA_BGRP12'            ).setLogic((d.BCM_AtoC | d.BCM_CtoA) & bgrp12cond )
@@ -1977,80 +2052,30 @@ class ItemDef:
 
         MenuItem('L1_BCM_AC_CALIB'     ).setLogic( d.BCM_AtoC & calibcond)
         MenuItem('L1_BCM_CA_CALIB'     ).setLogic( d.BCM_CtoA & calibcond)
-        MenuItem('L1_BCM_Wide_CALIB'   ).setLogic( d.BCM_Wide & calibcond) # no needed anymore
 
         MenuItem('L1_BCM_AC_UNPAIREDB1'  ).setLogic( d.BCM_AtoC & bgrp13cond) # no needed anymore
         MenuItem('L1_BCM_CA_UNPAIREDB2'  ).setLogic( d.BCM_CtoA & bgrp14cond) # no needed anymore
-
-        MenuItem('L1_BCM_2A_EMPTY' ).setLogic( d.BCM6 & cosmiccond)
-        MenuItem('L1_BCM_2C_EMPTY' ).setLogic( d.BCM7 & cosmiccond)
-
-        MenuItem('L1_BCM_2A_UNPAIREDB1' ).setLogic( d.BCM6 & bgrp13cond)
-        MenuItem('L1_BCM_2C_UNPAIREDB1' ).setLogic( d.BCM7 & bgrp13cond)
-        MenuItem('L1_BCM_2A_UNPAIREDB2' ).setLogic( d.BCM6 & bgrp14cond)
-        MenuItem('L1_BCM_2C_UNPAIREDB2' ).setLogic( d.BCM7 & bgrp14cond)
 
         MenuItem('L1_BCM_2A_UNPAIRED_ISO' ).setLogic( d.BCM6 & unpaired_isocond)
         MenuItem('L1_BCM_2C_UNPAIRED_ISO' ).setLogic( d.BCM7 & unpaired_isocond)
         MenuItem('L1_BCM_2A_UNPAIRED_NONISO' ).setLogic( d.BCM6 & unpaired_nonisocond)
         MenuItem('L1_BCM_2C_UNPAIRED_NONISO' ).setLogic( d.BCM7 & unpaired_nonisocond)
 
-        MenuItem('L1_BCM_2A_CALIB' ).setLogic( d.BCM6 & calibcond)
-        MenuItem('L1_BCM_2C_CALIB' ).setLogic( d.BCM7 & calibcond)
-
-        MenuItem('L1_BCM_2A_FIRSTINTRAIN' ).setLogic( d.BCM6 & firstintrain)
-        MenuItem('L1_BCM_2C_FIRSTINTRAIN' ).setLogic( d.BCM7 & firstintrain)
-
-        MenuItem('L1_BCM_2A_2C_BGRP12'       ).setLogic((d.BCM6 | d.BCM7) & bgrp12cond )
-        MenuItem('L1_BCM_2A_2C_UNPAIRED_ISO' ).setLogic((d.BCM6 | d.BCM7) & unpaired_isocond)
-
         # RANDOM
-        MenuItem('L1_RD0_FILLED'         ).setLogic( d.RNDM0 & physcond           ).setTriggerType(TT.rand)
-        MenuItem('L1_RD0_EMPTY'          ).setLogic( d.RNDM0 & cosmiccond         ).setTriggerType(TT.rand)
-        MenuItem('L1_RD0_UNPAIRED_ISO'   ).setLogic( d.RNDM0 & unpaired_isocond   ).setTriggerType(TT.rand)
         MenuItem('L1_RD0_UNPAIRED_NONISO').setLogic( d.RNDM0 & unpaired_nonisocond).setTriggerType(TT.rand)
-        MenuItem('L1_RD0_FIRSTEMPTY'     ).setLogic( d.RNDM0 & firstempty         ).setTriggerType(TT.rand)
         MenuItem('L1_RD0_BGRP0'          ).setLogic( d.RNDM0 & d.BGRP0            ).setTriggerType(TT.rand)
-        MenuItem('L1_RD0_BGRP7'          ).setLogic( d.RNDM0 & bgrp7cond          ).setTriggerType(TT.rand)
         MenuItem('L1_RD0_BGRP9'          ).setLogic( d.RNDM0 & bgrp9cond          ).setTriggerType(TT.rand)
-        MenuItem('L1_RD0_BGRP10'         ).setLogic( d.RNDM0 & bgrp10cond         ).setTriggerType(TT.rand)
-        MenuItem('L1_RD0_BGRP11'         ).setLogic( d.RNDM0 & bgrp11cond         ).setTriggerType(TT.rand)
-        MenuItem('L1_RD0_BGRP15'         ).setLogic( d.RNDM0 & d.BGRP0 & d.BGRP15 ).setTriggerType(TT.rand)
-        MenuItem('L1_RD0_FIRSTINTRAIN'   ).setLogic( d.RNDM0 & firstintrain       ).setTriggerType(TT.rand)
-
-        MenuItem('L1_RD1_FILLED'         ).setLogic( d.RNDM1 & physcond           ).setTriggerType(TT.zerobs) # used to be TT.rand
-        MenuItem('L1_RD1_EMPTY'          ).setLogic( d.RNDM1 & cosmiccond         ).setTriggerType(TT.zerobs)
         MenuItem('L1_RD1_BGRP10'         ).setLogic( d.RNDM1 & bgrp10cond         ).setTriggerType(TT.zerobs)
-
-        MenuItem('L1_RD2_FILLED'         ).setLogic( d.RNDM2 & physcond           ).setTriggerType(TT.rand)
-        MenuItem('L1_RD2_EMPTY'          ).setLogic( d.RNDM2 & cosmiccond         ).setTriggerType(TT.rand)
         MenuItem('L1_RD2_BGRP11'         ).setLogic( d.RNDM2 & bgrp11cond         ).setTriggerType(TT.rand)
         MenuItem('L1_RD2_BGRP12'         ).setLogic( d.RNDM2 & bgrp12cond         ).setTriggerType(TT.rand)
-
-        MenuItem('L1_RD3_FILLED'         ).setLogic( d.RNDM3 & physcond           ).setTriggerType(TT.rand)
-        MenuItem('L1_RD3_EMPTY'          ).setLogic( d.RNDM3 & cosmiccond         ).setTriggerType(TT.rand)
-
-        MenuItem('L1_BPTX0_BGRP12', ctpid=0xf1).setLogic(d.BPTX0 & bgrp12cond ).setTriggerType(TT.rand)
-        MenuItem('L1_BPTX1_BGRP12', ctpid=0xf2).setLogic(d.BPTX1 & bgrp12cond ).setTriggerType(TT.rand)
-
-        MenuItem('L1_RD0_LAR_FILLED'         ).setLogic( d.RNDM0 & physcond ).setTriggerType(TT.lardigital)
-        MenuItem('L1_RD0_LAR_EMPTY'          ).setLogic( d.RNDM0 & cosmiccond ).setTriggerType(TT.lardigital)
-        MenuItem('L1_RD0_LAR_FIRSTEMPTY'     ).setLogic( d.RNDM0 & firstempty ).setTriggerType(TT.lardigital)
-        MenuItem('L1_RD0_LAR_BGRP7'          ).setLogic( d.RNDM0 & bgrp7cond ).setTriggerType(TT.lardigital)
 
         # lumi measurements
         MenuItem('L1_MLZ_A').setLogic( (d.MBTS_A|ZDC_A|d.LUCID_A) & physcond)
         MenuItem('L1_MLZ_C').setLogic( (d.MBTS_C|ZDC_C|d.LUCID_C) & physcond)
         MenuItem('L1_MBLZ' ).setLogic( ( (d.MBTS_A|ZDC_A|d.LUCID_A) & (d.MBTS_C|ZDC_C|d.LUCID_C) | d.BCM_Wide) & physcond )
 
-        MenuItem('L1_CALREQ0', ctpid=0x1fd).setLogic( d.CAL0 & calibcond).setTriggerType(TT.calreq0)
-        MenuItem('L1_CALREQ1', ctpid=0x1fe).setLogic( d.CAL1 & calibcond).setTriggerType(TT.calreq1)
-        MenuItem('L1_CALREQ2', ctpid=0x1ff).setLogic( d.CAL2 & calibcond).setTriggerType(TT.calreq2)
-
         # TRT
         MenuItem('L1_TRT'       , ctpid=0x4e).setLogic(d.NIMTRT & d.BGRP0).setTriggerType(TT.nim)
-        MenuItem('L1_TRT_FILLED').setLogic(d.NIMTRT & physcond).setTriggerType(TT.nim)
-        MenuItem('L1_TRT_EMPTY' ).setLogic(d.NIMTRT & cosmiccond).setTriggerType(TT.nim)
         MenuItem('L1_TRT_VTE200').setLogic(d.NIMTRT & Not(d.TE200) & physcond)
         MenuItem('L1_TRT_VTE50' ).setLogic(d.NIMTRT & Not(d.TE50)  & physcond)
         MenuItem('L1_TRT_VTE20' ).setLogic(d.NIMTRT & Not(d.TE20)  & physcond)
@@ -2061,9 +2086,6 @@ class ItemDef:
         MenuItem('L1_TRT_VjTE200' ).setLogic(d.NIMTRT & Not(d.jTE200)  & physcond)
         MenuItem('L1_TRT_VjTE50_GAP_AANDC' ).setLogic(d.NIMTRT & Not(d.jTE50) & GAPAC  & physcond)
         MenuItem('L1_TRT_VjTE200_GAP_AANDC' ).setLogic(d.NIMTRT & Not(d.jTE200) & GAPAC  & physcond)
-
-        # TGC
-        MenuItem('L1_TGC_BURST').setLogic(d.NIMTGC & bgrp12cond ).setTriggerType(TT.nim)
 
         # LHCF
         MenuItem('L1_LHCF').setLogic( d.NIMLHCF & physcond).setTriggerType(TT.nim)

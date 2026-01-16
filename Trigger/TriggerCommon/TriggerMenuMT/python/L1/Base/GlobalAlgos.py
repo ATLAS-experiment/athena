@@ -1,7 +1,14 @@
 # Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
+from __future__ import annotations
+
+from abc import abstractmethod
+from typing import Any, TYPE_CHECKING
 from AthenaCommon.Logging import logging
 import re
+
+if TYPE_CHECKING:
+    from TriggerMenuMT.L1.Base.Thresholds import MenuThresholdsCollection
 
 from .ThresholdType import ThrType
 
@@ -13,6 +20,91 @@ log = logging.getLogger(__name__)
 ## C++ L1Topo algorithms are defined in Trigger/TrigT1/L1Topo/L1TopoAlgorithms
 ## During the build, from each class a python class is generated and put in the release
 ## Those generated python classes derive fro SortingAlgo and DecisionAlgo below.
+
+class Variable:
+    def __init__(self, name, selection, value):
+        self.name = name
+        self.selection = int(selection)
+        self.value = int(value)
+            
+class Generic:
+    def __init__(self, name, value):
+        self.name = name
+        from L1TopoHardware.L1TopoHardware import HardwareConstrainedParameter
+        if isinstance(value,HardwareConstrainedParameter):
+            self.value = ":%s:" % value.name
+        else:
+            self.value = value
+
+
+class GlobalAlgo:
+
+    # list of available variable names (will be overridden or extended in derived classes)
+    _availableVars: list[str] = []
+
+    def __init__(self, klass: str, name: str):
+        self._klass: str = klass
+        self._name: str = name
+        self.generics = []
+        self.variables = []
+
+    def __str__(self):
+        return f"{self._name}@{self._klass}"
+
+    @property
+    def name(self) -> str:
+        return self._name
+
+    @property
+    def classtype(self) -> str:
+        return self._klass
+
+
+    def addvariable(self, name, value, selection = -1):
+        if name in self._availableVars:
+            self.variables += [ Variable(name, selection, value) ]
+            return self
+        log.fatal("Variable parameter '%s' does not exist for algorithm %s of type %s,\navailable parameters are %r", name,self._name, self._klass, self._availableVars)
+        raise RuntimeError("Illegal variable parameter '%s'" % name)
+
+    def addgeneric(self, name, value):
+        if name in self._availableVars:
+            self.generics += [ Generic(name, value) ]
+        else:
+            log.fatal("Generic parameter '%s' does not exist for algorithm %s of type %s,\navailable parameters are %r" % (name,self._name, self._klass, self._availableVars))
+            raise RuntimeError("Illegal generic parameter '%s'" % name)
+        return self
+
+    @abstractmethod
+    def json(self) -> dict[str, Any]: ...
+
+class GlobalHypoAlgo(GlobalAlgo):
+    def __init__(self, klass: str, name: str):
+        super().__init__( klass=klass, name=name)
+
+class GlobalMultiplicityAlgo(GlobalHypoAlgo):
+    _availableVars: list[str] = ["input", "output"]
+
+    def __init__(self, name: str, input: str, output: str):
+        super().__init__( klass="GlobalMultiplicityAlgo", name=name)
+        self.addgeneric('input', input)
+        self.addgeneric('output', output)
+
+    def output(self) -> str | list[str]:
+        for gen in self.generics:
+            if gen.name == "output":
+                return gen.value
+        raise RuntimeError("No output defined for GlobalMultiplicityAlgo %s" % self.name)
+
+    def setThresholds(self, thresholds):
+        # link to all thresholds in the menu need for configuration
+        self.menuThr = thresholds
+
+
+class GlobalDecisionAlgo(GlobalHypoAlgo):
+    def __init__(self, name: str):
+        super().__init__( klass="GlobalDecisionAlgo", name=name)
+
 
 class TopoAlgo:
 
@@ -37,7 +129,7 @@ class TopoAlgo:
     def isMultiplicityAlg(self) -> bool:
         return False
 
-    def setThresholds(self, thresholds):
+    def setThresholds(self, thresholds: MenuThresholdsCollection):
         # link to all thresholds in the menu need for configuration
         self.menuThr = thresholds
 
@@ -64,27 +156,11 @@ class TopoAlgo:
     def getScaleToCountsEM(self):  # legacy Et conversion!!
         tw = self.menuThr.typeWideThresholdConfig(ThrType["EM"])
         return 1000 // tw["resolutionMeV"]
-
-class Variable(object):
-    def __init__(self, name, selection, value):
-        self.name = name
-        self.selection = int(selection)
-        self.value = int(value)
-            
-class Generic(object):
-    def __init__(self, name, value):
-        self.name = name
-        from L1TopoHardware.L1TopoHardware import HardwareConstrainedParameter
-        if isinstance(value,HardwareConstrainedParameter):
-            self.value = ":%s:" % value.name
-        else:
-            self.value = value
-
         
 class SortingAlgo(TopoAlgo):
     
     def __init__(self, classtype, name, inputs, outputs):
-        super(SortingAlgo, self).__init__(classtype=classtype, name=name)
+        super().__init__(classtype=classtype, name=name)
         self.inputs = inputs
         self.outputs = outputs
         self.inputvalue=  self.inputs
@@ -98,7 +174,7 @@ class SortingAlgo(TopoAlgo):
         return True
         
     def json(self):
-        confObj = super(SortingAlgo, self).json()
+        confObj = super().json()
         confObj["input"] = self.inputvalue
         confObj["output"] = self.outputs
         confObj["fixedParameters"] = {}
@@ -129,7 +205,7 @@ class SortingAlgo(TopoAlgo):
 class DecisionAlgo(TopoAlgo):
 
     def __init__(self, classtype, name, inputs, outputs):
-        super(DecisionAlgo, self).__init__(classtype=classtype, name=name)
+        super().__init__(classtype=classtype, name=name)
         self.inputs = inputs if type(inputs)==list else [inputs]
         self.outputs = outputs if type(outputs)==list else [outputs]
 
@@ -137,7 +213,7 @@ class DecisionAlgo(TopoAlgo):
         return True
 
     def json(self):
-        confObj = super(DecisionAlgo, self).json()
+        confObj = super().json()
         confObj["input"] = self.inputs # list of input names
         confObj["output"] = self.outputs # list of output names
         # fixed parameters
@@ -194,7 +270,7 @@ class MultiplicityAlgo(TopoAlgo):
         pass
 
     def json(self):
-        confObj = super(MultiplicityAlgo, self).json()
+        confObj = super().json()
         confObj["threshold"] = self.threshold
         confObj["input"] = self.input
         confObj["output"] = self.outputs

@@ -31,6 +31,7 @@ Please take note that the bunch mask is not applied for the per-bunch monitoring
 """
 
 from AthenaCommon.Logging import logging
+from TriggerMenuMT.L1.Menu.MenuMapping import MenuMetaInfo
 log = logging.getLogger(__name__)
 
 from ..Base.MonCounters import CtpinCounter, CtpmonCounter
@@ -93,11 +94,19 @@ class MonitorDef:
 
 
     @staticmethod
-    def applyItemCounter( menuName, items, menuFullName ):
+    def applyItemCounter( menuName, items, menuFullName, *, menuInfo: MenuMetaInfo | None = None ):
         """
         this functions marks the items that should be monitored by setting the corresponding monitoring flags
         e.g. to "LF:000|HF:111" for high frequency monitoring of TBP, TAP, and TAV.
         """
+        if menuInfo is not None:
+            menuName = menuInfo.menuBaseName
+            menuFullName = menuInfo.menuFullName
+
+        # for Run4 
+        if "run4" in menuName or (menuInfo is not None and menuInfo.run == 4):
+            return
+
 
         TBP=1
         TAP=2
@@ -107,7 +116,6 @@ class MonitorDef:
         monItemsHF = { 1 :[], 2: [], 3: [], 4: [], 5: [], 6: [], 7: [] }
 
         # definitions hardcoded at the moment
-
         if 'HI' not in menuName:
             monItems[TBP|TAP|TAV] = [
                 # L1Muon
@@ -167,13 +175,12 @@ class MonitorDef:
             ]
 
             # Changed-in-place primary thresholds for Run 4
-            if 'HI' not in menuName:
-                if 'run3' in menuName:
-                    monItems[TBP|TAP|TAV] += ["L1_eTAU140"]
-                    monItems[TBP|TAP|TAV] += ["L1_3jJ90", "L1_jJ90", "L1_jJ90p30ETA49"]
-                else:
-                    monItems[TBP|TAP|TAV] += ["L1_eTAU120"]
-                    monItems[TBP|TAP|TAV] += ["L1_3jJ70", "L1_jJ70"]
+            if 'run3' in menuName:
+                monItems[TBP|TAP|TAV] += ["L1_eTAU140"]
+                monItems[TBP|TAP|TAV] += ["L1_3jJ90", "L1_jJ90", "L1_jJ90p30ETA49"]
+            else:
+                monItems[TBP|TAP|TAV] += ["L1_eTAU120"]
+                monItems[TBP|TAP|TAV] += ["L1_3jJ70", "L1_jJ70"]
 
             topo3_monitems = [
                 "L1_HT190-jJ40s5pETA21", "L1_jMJJ-500-NFF",

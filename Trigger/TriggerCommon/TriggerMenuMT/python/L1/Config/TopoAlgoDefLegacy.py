@@ -290,8 +290,8 @@ class TopoAlgoDefLegacy:
               "nleading1" : 6, "inputwidth1": HW.OutputWidthSortJET, "ocut2" : 20, "nleading2" : 6}
         ]
         for x in algoList:
-            class d:
-                pass
+            class d:  # type: ignore
+                __slots__ = ('algoname', 'Threlist', 'maxInvm', 'otype', 'ocut1', 'olist', 'nleading1', 'inputwidth1', 'ocut2', 'nleading2')
             for k in x:
                 setattr (d, k, x[k])
             inputList = d.otype + d.olist
@@ -325,8 +325,8 @@ class TopoAlgoDefLegacy:
             {"minInvm": 7, "maxInvm": 15, "mult": 2, "otype1" : "MU", "ocut1": 4, "olist" : "ab", "otype2" : "",  "ocut2" : 0, "onebarrel": 0}, #7INVM15-2MU4ab 
         ]
         for x in listofalgos:
-            class d:
-                pass
+            class d:  # type: ignore
+                __slots__ = ('minInvm', 'maxInvm', 'mult', 'otype1', 'ocut1', 'olist', 'otype2', 'ocut2', 'onebarrel')
             for k in x:
                 setattr (d, k, x[k])
             obj1 = "%s%s%s%s" % ((str(d.mult) if d.mult>1 else ""), d.otype1, str(d.ocut1), d.olist)
@@ -367,8 +367,8 @@ class TopoAlgoDefLegacy:
             {"minDr": 0, "maxDr": 15, "mult": 2, "otype1" : "MU", "ocut1": 6,  "olist" : "ab", "otype2" : "",   "ocut2": 6, "onebarrel": 0}, #0DR15-2MU6ab  
         ]
         for x in listofalgos:
-            class d:
-                pass
+            class d:  # type: ignore
+                __slots__ = ('minDr', 'maxDr', 'mult', 'otype1', 'ocut1', 'olist', 'otype2', 'ocut2', 'onebarrel')
             for k in x:
                 setattr (d, k, x[k])
             obj1 = "%s%s%s%s" % ((str(d.mult) if d.mult>1 else ""), d.otype1, str(d.ocut1), d.olist)
@@ -403,8 +403,9 @@ class TopoAlgoDefLegacy:
               "otype2" : "", "ocut2": 6, "olist2": "", "nleading2": HW.OutputWidthSelectMU}, #5DETA99-5DPHI99-2MU6ab           
         ]     
         for x in algolist:
-            class d:
-                pass
+            class d:  # type: ignore
+                __slots__ = ('minDeta', 'maxDeta', 'minDphi', 'maxDphi', 'mult', 'otype1', 'ocut1', 'olist1', 'nleading1',
+                             'otype2', 'ocut2', 'olist2', 'nleading2')
             for k in x:
                 setattr (d, k, x[k])
             obj1 = "%s%s%s%s" % ((str(d.mult) if d.mult>1 else ""), d.otype1, str(d.ocut1), d.olist1)
@@ -447,8 +448,9 @@ class TopoAlgoDefLegacy:
               "otype2" : "TAU", "ocut2": 12, "olist2" : "abi", "nleading2": HW.OutputWidthSelectTAU, "inputwidth2": HW.OutputWidthSelectTAU}, # 0DR25-TAU20abi-TAU12abi
         ] 
         for x in algolist:
-            class d:
-                pass
+            class d:  # type: ignore
+                __slots__ = ('minDr', 'maxDr', 'otype1', 'ocut1', 'olist1', 'nleading1', 'inputwidth1',
+                             'otype2', 'ocut2', 'olist2', 'nleading2', 'inputwidth2')
             for k in x:
                 setattr (d, k, x[k])
             obj1 = "%s%s%s" % (d.otype1, str(d.ocut1), d.olist1)
@@ -490,8 +492,8 @@ class TopoAlgoDefLegacy:
             {"minHT": 20,  "otype" : "AJj","ocut" : 15,  "olist" : "all", "nleading" : HW.InputWidthJET, "inputwidth": HW.InputWidthJET, "oeta" : 49}, #HT20-AJj15allpETA49
         ]
         for x in algoList:
-            class d:
-                pass
+            class d:  # type: ignore
+                __slots__ = ('minHT', 'otype', 'ocut', 'olist', 'nleading', 'inputwidth', 'oeta')
             for k in x:
                 setattr (d, k, x[k])
             toponame = "HT%d-%s%s%s%spETA%s" % (d.minHT, d.otype, str(d.ocut), d.olist, str(d.nleading) if d.olist=="s" else "", str(d.oeta))            
@@ -514,8 +516,8 @@ class TopoAlgoDefLegacy:
             {"algoname": 'INVM_EMs6' , "ocutlist": [ 0, 7, 12 ], "minInvm": 1, "maxInvm": 5, "otype" : "EM", "olist" : "s", "nleading" : 1, "inputwidth": HW.OutputWidthSortEM}
         ]
         for x in algoList:
-            class d:
-                pass
+            class d:  # type: ignore
+                __slots__ = ('minInvm', 'maxInvm', 'otype', 'ocutlist', 'olist', 'nleading', 'inputwidth', 'algoname')
             for k in x:
                 setattr (d, k, x[k])
             inputList = d.otype + d.olist
@@ -548,8 +550,8 @@ class TopoAlgoDefLegacy:
             {"minDPhi":  5, "otype" : "EM",  "ocut" : 15, "olist" : "s", "nleading" : 6, "inputwidth": HW.OutputWidthSortEM},#same
         ]
         for x in alglist:
-            class d:
-                pass
+            class d:  # type: ignore
+                __slots__ = ('minDPhi', 'otype', 'ocut', 'olist', 'nleading', 'inputwidth')
             for k in x:
                 setattr (d, k, x[k])
             toponame = "%02dMINDPHI-%s%s%s%s-XE0"  % (d.minDPhi, d.otype, str(d.ocut) if d.ocut > 0 else "", d.olist, str(d.nleading) if d.olist=="s" else "")
@@ -573,8 +575,8 @@ class TopoAlgoDefLegacy:
             {"minMT": 35, "otype" : "EM", "ocut" : 15, "olist" : "s", "nleading" : 6, "inputwidth": HW.OutputWidthSortEM},
         ]
         for x in alglistmt:
-            class d:
-                pass
+            class d:  # type: ignore
+                __slots__ = ('minMT', 'otype', 'ocut', 'olist', 'nleading', 'inputwidth')
             for k in x:
                 setattr (d, k, x[k])
             toponame = "%iMT-%s%s%s%s-XE0"  % (d.minMT, d.otype, str(d.ocut) if d.ocut > 0 else "", d.olist, str(d.nleading) if d.olist=="s" else "")
@@ -598,8 +600,8 @@ class TopoAlgoDefLegacy:
               "ocut2" : 0, "nleading2": 2}, #0DETA20-J50s1-Js2
         ]
         for x in algoList:                 
-            class d:
-                pass
+            class d:  # type: ignore
+                __slots__ = ('minDeta', 'maxDeta', 'otype', 'ocut1', 'olist', 'nleading1', 'inputwidth1', 'ocut2', 'nleading2')
             for k in x:
                 setattr (d, k, x[k])
             toponame = "%iDETA%i-%s%s%s%s-%s%s%s%s"  % (d.minDeta, d.maxDeta,
@@ -626,8 +628,8 @@ class TopoAlgoDefLegacy:
             {"minDPhi": 10, "otype" : "J", "ocut" : 20, "olist" : "s", "nleading" : 2, "inputwidth": HW.OutputWidthSortJET, "ocut2": 30 }, #10MINDPHI-J20s2-XE30
         ]
         for x in supportedalgolist:
-            class d:
-                pass
+            class d:  # type: ignore
+                __slots__ = ('minDPhi', 'otype', 'ocut', 'olist', 'nleading', 'inputwidth', 'ocut2')
             for k in x:
                 setattr (d, k, x[k])
             toponame = "%iMINDPHI-%s%s%s%s-XE%i"  % (d.minDPhi, d.otype, str(d.ocut) if d.ocut > 0 else "", d.olist, str(d.nleading) if d.olist=="s" else "",d.ocut2)
@@ -654,8 +656,9 @@ class TopoAlgoDefLegacy:
             {"minDr": 0, "maxDr": 4, "otype1" : "MU" ,"ocut1": 4,  "olist1" : "ab", "otype2" : "CJ", "ocut2": 20, "olist2" : "ab"}, #0DR04-MU6ab-CJ20ab
         ]
         for x in algoList:
-            class d:
-                pass
+            class d:  # type: ignore
+                __slots__ = ('minDr', 'maxDr', 'otype1', 'ocut1', 'olist1', 'nleading1', 'inputwidth1',
+                             'otype2', 'ocut2', 'olist2', 'nleading2', 'inputwidth2')
             for k in x:
                 setattr (d, k, x[k])
             toponame = "%iDR%02d-%s%s%s-%s%s%s"  % (d.minDr, d.maxDr, d.otype1, str(d.ocut1), d.olist1, d.otype2, str(d.ocut2), d.olist2)
@@ -680,8 +683,8 @@ class TopoAlgoDefLegacy:
             {"minInvm": 2, "maxInvm": 8, "mult": 1, "otype1" : "MU", "ocut1": 6, "olist" : "ab", "otype2" : "MU","ocut2" : 4, "onebarrel": 1}, # 2INVM8-ONEBARREL-MU6ab-MU4ab
         ]
         for x in algolist:
-            class d:
-                pass
+            class d:  # type: ignore
+                __slots__ = ('minInvm', 'maxInvm', 'mult', 'otype1', 'ocut1', 'olist', 'otype2', 'ocut2', 'onebarrel')
             for k in x:
                 setattr (d, k, x[k])
             obj1 = "%s%s%s%s" % ((str(d.mult) if d.mult>1 else ""), d.otype1, str(d.ocut1), d.olist)
@@ -714,8 +717,8 @@ class TopoAlgoDefLegacy:
             {"minDr": 0, "maxDr": 24, "mult": 1, "otype1" : "CMU","ocut1": 4,  "olist" : "ab", "otype2" : "MU","ocut2": 4, "onebarrel": 0}, #0DR24-CMU4ab-MU4ab  
         ]
         for x in algolist: 
-            class d:
-                pass
+            class d:  # type: ignore
+                __slots__ = ('minDr', 'maxDr', 'mult', 'otype1', 'ocut1', 'olist', 'otype2', 'ocut2', 'onebarrel')
             for k in x:
                 setattr (d, k, x[k])
             obj1 = "%s%s%s%s" % ((str(d.mult) if d.mult>1 else ""), d.otype1, str(d.ocut1), d.olist)
@@ -748,8 +751,9 @@ class TopoAlgoDefLegacy:
               "otype2" : "TAU", "ocut2": 12, "olist2": "abi", "nleading2": HW.OutputWidthSelectTAU },
         ]
         for x in algoList:                 
-            class d:
-                pass
+            class d:  # type: ignore
+                __slots__ = ('minDeta', 'maxDeta', 'minDphi', 'maxDphi', 'mult', 'otype1', 'ocut1', 'olist1', 'nleading1',
+                             'otype2', 'ocut2', 'olist2', 'nleading2')
             for k in x:
                 setattr (d, k, x[k])
             obj1 = "%s%s%s%s" % ((str(d.mult) if d.mult>1 else ""), d.otype1, str(d.ocut1), d.olist1)
@@ -791,8 +795,9 @@ class TopoAlgoDefLegacy:
               "otype2" : "MU", "ocut2": 0, "olist2": "ab", "nleading2": HW.OutputWidthSelectMU}, #0DETA04-EM15abi-MUab
         ]
         for x in algoList:
-            class d:
-                pass
+            class d:  # type: ignore
+                __slots__ = ('minDeta', 'maxDeta', 'mult', 'otype1', 'ocut1', 'olist1', 'nleading1',
+                             'otype2', 'ocut2', 'olist2', 'nleading2')
             for k in x:
                 setattr (d, k, x[k])
             toponame = "%sDETA%s-%s%s%s-%s%s%s"  % (d.minDeta, d.maxDeta, d.otype1, str(d.ocut1), d.olist1, d.otype2, str(d.ocut2) if d.ocut2>0 else "", d.olist2)
@@ -818,8 +823,9 @@ class TopoAlgoDefLegacy:
               "otype2" : "MU", "ocut2": 0, "olist2": "ab", "nleading2": HW.OutputWidthSelectMU}, #0DPHI03-EM15abi-MUab
         ]
         for x in algoList:
-            class d:
-                pass
+            class d:  # type: ignore
+                __slots__ = ('minDphi', 'maxDphi', 'mult', 'otype1', 'ocut1', 'olist1', 'nleading1',
+                             'otype2', 'ocut2', 'olist2', 'nleading2')
             for k in x:
                 setattr (d, k, x[k])
             toponame = "%sDPHI%s-%s%s%s-%s%s%s"  % (d.minDphi, d.maxDphi, d.otype1, str(d.ocut1), d.olist1, d.otype2, str(d.ocut2) if d.ocut2>0 else "", d.olist2)
@@ -874,8 +880,8 @@ class TopoAlgoDefLegacy:
             { "minRatio": 250, "ocut" : 15, "Ratio": "RATIO2"},
         ]
         for x in algolist:
-            class d:
-                pass
+            class d:  # type: ignore
+                __slots__ = ('minRatio', 'ocut', 'Ratio')
             for k in x:
                 setattr (d, k, x[k])
             toponame = "%02d%s-XE0-HT0-AJj%sallpETA49"  % (d.minRatio, d.Ratio, str(d.ocut))
@@ -934,8 +940,8 @@ class TopoAlgoDefLegacy:
             {"otype1" : "CMU" ,"ocut1": 6, "olist1" : "ab", "nleading1": HW.OutputWidthSelectMU, "inputwidth1": HW.OutputWidthSelectMU}, #MULT-CMU6ab
         ]
         for x in algolist:
-            class d:
-                pass
+            class d:  # type: ignore
+                __slots__ = ('otype1', 'ocut1', 'olist1', 'nleading1', 'inputwidth1')
             for k in x:
                 setattr (d, k, x[k])
             toponame = "MULT-%s%s%s" % (d.otype1, str(d.ocut1), d.olist1)
@@ -955,8 +961,8 @@ class TopoAlgoDefLegacy:
               "otype2" : "J", "ocut2": 25, "olist2": "ab", "nleading2": HW.OutputWidthSelectJET}, #1DISAMB-TAU12abi-J25ab
         ]
         for x in algolist:
-            class d:
-                pass
+            class d:  # type: ignore
+                __slots__ = ('disamb', 'otype1', 'ocut1', 'olist1', 'nleading1', 'otype2', 'ocut2', 'olist2', 'nleading2')
             for k in x:
                 setattr (d, k, x[k])
             obj1 = "%s%s%s"  % (d.otype1, str(d.ocut1), d.olist1)
@@ -988,8 +994,10 @@ class TopoAlgoDefLegacy:
               "otype3" : "J", "ocut3": 25, "olist3": "ab", "nleading3": HW.OutputWidthSelectTAU, "inputwidth3": HW.OutputWidthSelectJET}, #1DISAMB-TAU20abi-TAU12abi-J25ab
         ]
         for x in algoList:     
-            class d:
-                pass
+            class d:  # type: ignore
+                __slots__ = ('disamb', 'otype1', 'ocut1', 'olist1', 'nleading1', 'inputwidth1',
+                             'otype2', 'ocut2', 'olist2', 'nleading2', 'inputwidth2',
+                             'otype3', 'ocut3', 'olist3', 'nleading3', 'inputwidth3')
             for k in x:
                 setattr (d, k, x[k])
             obj1 = "%s%s%s"  % (d.otype1, str(d.ocut1), d.olist1.replace('shi','his') + (str(d.nleading1) if d.olist1.find('s')>=0 else ""))
@@ -1030,8 +1038,11 @@ class TopoAlgoDefLegacy:
               "drcutmin": 0, "drcutmax": 25}, # 1DISAMB-J25ab-0DR25-TAU20abi-TAU12abi
         ]
         for x in algolist:
-            class d:
-                pass
+            class d:  # type: ignore
+                __slots__ = ('disamb', 'otype1', 'ocut1', 'olist1', 'nleading1', 'inputwidth1',
+                             'otype2', 'ocut2', 'olist2', 'nleading2', 'inputwidth2',
+                             'otype3', 'ocut3', 'olist3', 'nleading3', 'inputwidth3',
+                             'drcutmin', 'drcutmax')
             for k in x:
                 setattr (d, k, x[k])
             obj1 = "-%s%s%s"  % (d.otype1, str(d.ocut1), d.olist1.replace('shi','his') + (str(d.nleading1) if d.olist1.find('s')>=0 else ""))
@@ -1063,8 +1074,8 @@ class TopoAlgoDefLegacy:
             {"minEta": 1, "maxEta": 14, "minPhi": 17, "maxPhi": 23, "otype" : "J", "ocut" : 100,  "olist" : "s", "inputwidth": HW.OutputWidthSortJET},  #LAR-J100s1
         ]
         for x in algoList:
-            class d:
-                pass
+            class d:  # type: ignore
+                __slots__ = ('minEta', 'maxEta', 'minPhi', 'maxPhi', 'otype', 'ocut', 'olist', 'inputwidth')
             for k in x:
                 setattr (d, k, x[k])
             toponame = "LAR-%s%s%s1"  % ( d.otype, str(d.ocut), d.olist )
@@ -1086,8 +1097,8 @@ class TopoAlgoDefLegacy:
             {"etcut": 0, "Threlist": [ 40, 50, 55, 60, 65, 75 ]}
         ]
         for x in xemap:
-            class d:
-                pass
+            class d:  # type: ignore
+                __slots__ = ('etcut', 'Threlist')
             for k in x:
                 setattr (d, k, x[k])
             log.debug("Define %s", toponame)
@@ -1110,8 +1121,8 @@ class TopoAlgoDefLegacy:
             {"minDPhi": 15, "otype" : "EM",  "ocut" : 15, "olist" : "s", "nleading" : 6, "inputwidth": HW.OutputWidthSortEM},
         ]
         for x in algoList:
-            class d:
-                pass
+            class d:  # type: ignore
+                __slots__ = ('minDPhi', 'otype', 'ocut', 'olist', 'nleading', 'inputwidth')
             for k in x:
                 setattr (d, k, x[k])
             toponame = "%02dMINDPHI-%s%s%s%s-XE0"  % (d.minDPhi, d.otype, str(d.ocut) if d.ocut > 0 else "", d.olist, str(d.nleading) if d.olist=="s" else "")
@@ -1134,8 +1145,8 @@ class TopoAlgoDefLegacy:
             {"minMT": 35, "otype" : "EM", "ocut" : 12, "olist" : "s", "nleading" : 6, "inputwidth": HW.OutputWidthSortEM},
         ]
         for x in algoList:
-            class d:
-                pass
+            class d:  # type: ignore
+                __slots__ = ('minMT', 'otype', 'ocut', 'olist', 'nleading', 'inputwidth')
             for k in x:
                 setattr (d, k, x[k])
             toponame = "%iMT-%s%s%s%s-XE0"  % (d.minMT, d.otype, str(d.ocut) if d.ocut > 0 else "", d.olist, str(d.nleading) if d.olist=="s" else "")
@@ -1157,8 +1168,11 @@ class TopoAlgoDefLegacy:
               "otype2" : "TAU", "ocut2": 12, "olist2": "abi", "nleading2": HW.OutputWidthSelectTAU, "inputwidth2": HW.OutputWidthSelectTAU, "drcutmin": 0, "drcutmax": 28},          
         ]
         for x in algoList:
-            class d:
-                pass
+            class d:  # type: ignore
+                __slots__ = ('disamb', 'otype1', 'ocut1', 'olist1', 'nleading1', 'inputwidth1',
+                             'otype2', 'ocut2', 'olist2', 'nleading2', 'inputwidth2',
+                             'otype3', 'ocut3', 'olist3', 'nleading3', 'inputwidth3',
+                             'drcutmin', 'drcutmax')
             for k in x:
                 setattr (d, k, x[k])
             obj1 = "-%s%s%s"  % (d.otype1, str(d.ocut1), d.olist1.replace('shi','his') + (str(d.nleading1) if d.olist1.find('s')>=0 else ""))
@@ -1184,8 +1198,8 @@ class TopoAlgoDefLegacy:
             {"minDPhi": 10, "otype" : "AJ", "ocut" : 20,  "olist" : "s", "nleading" : 2, "inputwidth": HW.OutputWidthSortJET},
         ]
         for x in algoList:            
-            class d:
-                pass
+            class d:  # type: ignore
+                __slots__ = ('minDPhi', 'otype', 'ocut', 'olist', 'nleading', 'inputwidth')
             for k in x:
                 setattr (d, k, x[k])
             toponame = "%iMINDPHI-%s%s%s%s-XE50"  % (d.minDPhi, d.otype, str(d.ocut) if d.ocut > 0 else "", d.olist, str(d.nleading) if d.olist=="s" else "")
@@ -1208,8 +1222,8 @@ class TopoAlgoDefLegacy:
             {"otype" : "LATE-MU", "ocut" : 10, "inputwidth": HW.NumberOfDelayedMuons},
             ]:
 
-            class d:
-                pass
+            class d:  # type: ignore
+                __slots__ = ('otype', 'ocut', 'inputwidth')
             for k in x:
                 setattr (d, k, x[k])
             toponame = "%s%ss1"  % ( d.otype, str(d.ocut) )
@@ -1229,8 +1243,8 @@ class TopoAlgoDefLegacy:
             {"minHT": 85, "otype" : "CJ", "ocut" : 15, "olist" : "ab", "nleading" : HW.OutputWidthSelectJET, "inputwidth": HW.OutputWidthSelectJET, "oeta" : 26},  #SC85-CJ15ab.ETA26
         ]
         for x in algoList:            
-            class d:
-                pass
+            class d:  # type: ignore
+                __slots__ = ('minHT', 'otype', 'ocut', 'olist', 'nleading', 'inputwidth', 'oeta')
             for k in x:
                 setattr (d, k, x[k])
             toponame = "SC%d-%s%s%s%spETA%s" % (d.minHT, d.otype, str(d.ocut), d.olist, str(d.nleading) if d.olist=="s" else "", str(d.oeta))
@@ -1252,8 +1266,9 @@ class TopoAlgoDefLegacy:
               "inputwidth2": HW.OutputWidthSelectTAU},
         ]
         for x in algoList:
-            class d:
-                pass
+            class d:  # type: ignore
+                __slots__ = ('disamb', 'minInvm', 'maxInvm', 'otype1', 'ocut1', 'olist1', 'nleading1', 'inputwidth1',
+                             'otype2', 'ocut2', 'olist2', 'nleading2', 'inputwidth2')
             for k in x:
                 setattr (d, k, x[k])
             obj1 = "%s%s%s"  % (d.otype1, str(d.ocut1), d.olist1.replace('shi','his') + (str(d.nleading1) if d.olist1.find('s')>=0 else ""))
@@ -1282,8 +1297,10 @@ class TopoAlgoDefLegacy:
                "minEta1": 0 ,"maxEta1": 31 , "minEta2": 31 ,"maxEta2": 49 , },
         ]
         for x in algoList:
-            class d:
-                pass
+            class d:  # type: ignore
+                __slots__ = ('minInvm', 'maxInvm', 'otype1', 'ocut1', 'olist1', 'nleading1', 'inputwidth1',
+                             'otype2', 'ocut2', 'olist2', 'nleading2', 'inputwidth2', 'applyEtaCut',
+                             'minEta1', 'maxEta1', 'minEta2', 'maxEta2')
             for k in x:
                 setattr (d, k, x[k])
             obj1 = "%s%s%sp%sETA%i"  % (d.otype1, str(d.ocut1), d.olist1 + (str(d.nleading1) if d.olist1.find('s')>=0 else ""),str(d.minEta1) if d.minEta1>0 else "", d.maxEta1)
@@ -1318,8 +1335,8 @@ class TopoAlgoDefLegacy:
             {"minEta": -16, "maxEta": 16, "minPhi": 15, "maxPhi": 29, "otype" : "MU", "ocut" : 10, "inputwidth": HW.OutputWidthSortMU},
         ]
         for x in algoList:
-            class d:
-                pass
+            class d:  # type: ignore
+                __slots__ = ('minEta', 'maxEta', 'minPhi', 'maxPhi', 'otype', 'ocut', 'inputwidth')
             for k in x:
                 setattr (d, k, x[k])
             toponame = "FTK-%s%ss1"  % ( d.otype, str(d.ocut) if not d.otype=="EM" else "20" )  # noqa: F821
@@ -1342,8 +1359,8 @@ class TopoAlgoDefLegacy:
             {"otype" : "EM", "ocut1" : 20,  "ocut2" : 20, "olist" : "shi", "nleading1" : 2, "minInvm" : 60, "maxInvm" : 100, "inputwidth": HW.OutputWidthSortEM},
         ]
         for x in algoList:
-            class d:
-                pass
+            class d:  # type: ignore
+                __slots__ = ('otype', 'ocut1', 'ocut2', 'olist', 'nleading1', 'minInvm', 'maxInvm', 'inputwidth')
             for k in x:
                 setattr (d, k, x[k])
             toponame = 'ZEE-EM20shi2'
@@ -1365,8 +1382,8 @@ class TopoAlgoDefLegacy:
             {"minInvm" : 0, "maxInvm": 9, "otype" : "EM", "ocut1" : 7, "olist" : "ab", "inputwidth": HW.OutputWidthSelectEM, "ocut2" : 0},
         ]
         for x in algoList:
-            class d:
-                pass
+            class d:  # type: ignore
+                __slots__ = ('minInvm', 'maxInvm', 'otype', 'ocut1', 'olist', 'inputwidth', 'ocut2')
             for k in x:
                 setattr (d, k, x[k])
             inputList = d.otype + d.olist
@@ -1389,8 +1406,8 @@ class TopoAlgoDefLegacy:
             {"minDr": 0, "maxDr": 3, "otype1" : "EM" ,"ocut1": 7,  "olist1" : "ab", "otype2" : "CJ", "ocut2": 15, "olist2" : "ab"} 
         ]
         for x in algoList:
-            class d:
-                pass
+            class d:  # type: ignore
+                __slots__ = ('minDr', 'maxDr', 'otype1', 'ocut1', 'olist1', 'otype2', 'ocut2', 'olist2')
             for k in x:
                 setattr (d, k, x[k])
             toponame = "%iDR%02d-%s%s%s-%s%s%s"  % (d.minDr, d.maxDr, d.otype1, str(d.ocut1), d.olist1, d.otype2, str(d.ocut2), d.olist2)
@@ -1414,9 +1431,9 @@ class TopoAlgoDefLegacy:
             { "algoname": 'INVM_NFF', "Threlist": [ 600, 500, 400, 200 ], "maxInvm": 9999, "otype1" : "J", "ocut1" : 30, "olist1" : "s", "nleading1" : 6, 
               "inputwidth": HW.OutputWidthSortJET,  "otype2" : "AJ", "ocut2" : 20, "olist2" : "s", "nleading2" : 6 }
         ]
-        for x in algoList:            
-            class d:
-                pass
+        for x in algoList:
+            class d:  # type: ignore
+                __slots__ = ['algoname', 'Threlist', 'maxInvm', 'otype1', 'ocut1', 'olist1', 'nleading1', 'inputwidth', 'otype2', 'ocut2', 'olist2', 'nleading2']
             for k in x:
                 setattr (d, k, x[k])
             inputList = [d.otype1 + d.olist1, d.otype2 + d.olist1]
@@ -1446,8 +1463,8 @@ class TopoAlgoDefLegacy:
             {"minDphi": 27,  "maxDphi": 32, "otype" : "EM",  "ocut1" : 0,  "olist" : "s", "nleading1" : 1, "inputwidth1": HW.OutputWidthSortEM, "ocut2" : 0, "nleading2": 6},
         ]
         for x in algoList:                 
-            class d:
-                pass
+            class d:  # type: ignore
+                __slots__ = ['minDphi', 'maxDphi', 'otype', 'ocut1', 'olist', 'nleading1', 'inputwidth1', 'ocut2', 'nleading2']
             for k in x:
                 setattr (d, k, x[k])
             toponame = "%iDPHI%i-%s%s%s%s-%s%s%s%s"  % (d.minDphi, d.maxDphi,

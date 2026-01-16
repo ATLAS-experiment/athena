@@ -47,6 +47,7 @@ class ThresholdDef:
             thr.addThrValue( pt + sh, eta_min, eta_max, priority=2)
         return thr
 
+    @staticmethod
     def addJetVaryingThrValues(thr, pt, shift_set, rangemin, rangemax):
         eta_bin_boundaries = ThresholdDef.jJVar[shift_set]["eta_bin_boundaries"]
         shift = ThresholdDef.jJVar[shift_set]["shift"]

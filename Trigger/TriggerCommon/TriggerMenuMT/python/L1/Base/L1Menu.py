@@ -1,9 +1,14 @@
 # Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
+from typing import cast
+
+from TriggerMenuMT.L1.Menu.MenuMapping import MenuMetaInfo
+
 from .CTP import CTP
 from .Items import MenuItemsCollection
-from .Thresholds import MenuThresholdsCollection
+from .Thresholds import MenuThresholdsCollection, Threshold
 from .TopoAlgorithms import MenuTopoAlgorithmsCollection, AlgType, AlgCategory
+from .TopoAlgos import MultiplicityAlgo, SortingAlgo
 from .Boards import MenuBoardsCollection
 from .Connectors import MenuConnectorsCollection, CType
 from .MenuUtils import get_smk_psk_Name
@@ -11,22 +16,28 @@ from .Limits import Limits
 from .L1MenuFlags import L1MenuFlags
 from .ThresholdType import ThrType
 from ..Config.TypeWideThresholdConfig import getTypeWideThresholdConfig
+from .CTPCondition import ThrCondition
 
 from AthenaCommon.Logging import logging
 log = logging.getLogger(__name__)
 
-class L1Menu(object):
+class L1Menu:
     """
     This class holds everything that is needed to define the menu
     """
 
-    def __init__(self, menuName, flags):
-        self.menuName = menuName
-
-        self.menuFullName = L1MenuFlags.MenuSetup()
+    def __init__(self, menuName, flags, run: int, *, menuInfo: MenuMetaInfo | None = None):
+        self.menuInfo = menuInfo
+        if self.menuInfo:
+            self.menuName = self.menuInfo.menuBaseName
+            self.menuFullName = L1MenuFlags.MenuSetup()
+            run = self.menuInfo.run
+        else:
+            self.menuName = menuName
+            self.menuFullName = L1MenuFlags.MenuSetup()
 
         # items in menu
-        self.items = MenuItemsCollection()
+        self.items: MenuItemsCollection = MenuItemsCollection()
 
         # store cached flags
         self.flags = flags
@@ -35,7 +46,7 @@ class L1Menu(object):
         self.thresholds = MenuThresholdsCollection(flags)
 
         # all thresholds that are in menu (new and legacy)
-        self.topoAlgos = MenuTopoAlgorithmsCollection()
+        self.topoAlgos = MenuTopoAlgorithmsCollection(run=run)
 
         # all connectors between legacyCalo, muctpi, topo and the CTPIN/CTPCORE
         self.connectors = MenuConnectorsCollection()
@@ -44,7 +55,7 @@ class L1Menu(object):
         self.boards = MenuBoardsCollection()
 
         # CTP Info in the menu
-        self.ctp = CTP()
+        self.ctp = CTP(run)
 
         if self.menuName:
             smk_psk_Name = get_smk_psk_Name(self.menuName)
@@ -52,19 +63,21 @@ class L1Menu(object):
             self.items.pssName  = smk_psk_Name["pskName"]
 
 
-    def setBunchGroupSplitting(self, v = True):
-        MenuItemsCollection.splitBunchGroups = v
-
+    @property
+    def isRun4Menu(self):
+        if self.menuInfo is not None and self.menuInfo.run == 4:
+            return True 
+        return "run4" in self.menuName.lower()
 
     def addItem(self, item):
         self.items += item
 
 
     def getItem(self,name):
-        return self.items.findItemByName(name)
+        return self.items[name]
 
 
-    def addThreshold(self, threshold):
+    def addThreshold(self, threshold: Threshold):
         self.thresholds += threshold
 
 
@@ -82,7 +95,7 @@ class L1Menu(object):
 
 
     def setupCTPMonitoring(self):
-        self.ctp.setupMonitoring(self.menuName, self.items, self.thresholds, self.connectors, self.menuFullName)
+        self.ctp.setupMonitoring(self.menuName, self.items, self.thresholds, self.connectors, self.menuFullName, menuInfo=self.menuInfo)
         
     def check(self):
         log.info("Doing L1 Menu checks")
@@ -198,8 +211,8 @@ class L1Menu(object):
     def checkCTPINconnectors(self):
         for conn in self.connectors:
             if conn.ctype == CType.CTPIN:
-               if len(conn.triggerLines)>31:
-                   raise RuntimeError("Too many CTP inputs in %s: %i but a max of 31 are allowed" %(conn.name,len(conn.triggerLines)))
+                if len(conn.triggerLines)>31:
+                    raise RuntimeError("Too many CTP inputs in %s: %i but a max of 31 are allowed" %(conn.name,len(conn.triggerLines)))
                
     def checkTOPObits(self):
         import re
@@ -245,7 +258,7 @@ class L1Menu(object):
                             ctpInputs.append(ctpInput(name=thrName,conn=conn.name,nbit=tl.nbits))
                             thrName_found = True
                 else:
-                     for fpga in conn.triggerLines:
+                    for fpga in conn.triggerLines:
                         for clock in conn.triggerLines[fpga]:
                             for tl in conn.triggerLines[fpga][clock]:
                                 if thrName == tl.name:
@@ -262,23 +275,23 @@ class L1Menu(object):
                         thrName = thrName[3:]
                     usedInput = False
                     for ctpIn in ctpInputs:
-                       if thrName == ctpIn.name:
-                           usedInput = True
+                        if thrName == ctpIn.name:
+                            usedInput = True
                     if not usedInput:
-                       ctpUnusedInputs.append(ctpInput(name=thrName,conn=conn.name,nbit=tl.nbits))
+                        ctpUnusedInputs.append(ctpInput(name=thrName,conn=conn.name,nbit=tl.nbits))
             else:
                 for fpga in conn.triggerLines:
                     for clock in conn.triggerLines[fpga]:
                         for tl in conn.triggerLines[fpga][clock]:
-                           thrName = tl.name
-                           if thrName[:3]=='ZB_':
-                               thrName = thrName[3:]
-                           usedInput = False
-                           for ctpIn in ctpInputs:
-                              if thrName == ctpIn.name:
-                                  usedInput = True
-                           if not usedInput:
-                              ctpUnusedInputs.append(ctpInput(name=thrName,conn=conn.name,nbit=tl.nbits))
+                            thrName = tl.name
+                            if thrName[:3]=='ZB_':
+                                thrName = thrName[3:]
+                            usedInput = False
+                            for ctpIn in ctpInputs:
+                                if thrName == ctpIn.name:
+                                    usedInput = True
+                            if not usedInput:
+                                ctpUnusedInputs.append(ctpInput(name=thrName,conn=conn.name,nbit=tl.nbits))
 
         if len(thrNames_notFound)>0:
             log.error("Thresholds [%s] are not found", ",".join(thrNames_notFound)) 
@@ -373,9 +386,9 @@ class L1Menu(object):
     def checkBGRP(self):
         for item in self.items:
             if len(item.bunchGroups)==1 and item.bunchGroups[0]=='BGRP0':
-               raise RuntimeError("L1 item %s is defined with only BGRP0, ie it can trigger also in the CALREQ BGRP2 bunches. Please add another bunch group (ATR-24781)" % item.name) 
+                raise RuntimeError("L1 item %s is defined with only BGRP0, ie it can trigger also in the CALREQ BGRP2 bunches. Please add another bunch group (ATR-24781)" % item.name) 
             if 'BGRP2' in item.bunchGroups:
-                thrtype = item.logic.content['threshold'].ttype
+                thrtype = cast(ThrCondition, item.logic).threshold().ttype
                 if thrtype in ThrType.CaloTypes():
                     # The LAr Digital Trigger sends an "align frame" to the FEXes in BCID 3500 (in BGRP2)
                     # No trigger can be sent during this align frame, so we block all calo triggers from this BGRP
@@ -384,6 +397,10 @@ class L1Menu(object):
 
     def checkPtMinToTopo(self):
         # check that the ptMinToTopo for all types of thresholds is lower than the minimum Et cuts applied in multiplicity and decision algorithms
+
+        if self.isRun4Menu:
+            log.info("checkPtMinToTopo: skipping check for Run-4 menus")
+            return
 
         # collect the ptMinToTopo values
         ptMin = {}
@@ -396,67 +413,70 @@ class L1Menu(object):
                 if "ptMinToTopo" in key:
                     if inputtype in ptMin:
                         if ptMin[inputtype] > value:
-                             ptMin[inputtype] = value
+                            ptMin[inputtype] = value
                     else: 
                         ptMin[inputtype] = value
 
         # loop over multiplicity algorithms and get the min et values
         thresholdMin = {}
         for algo in self.topoAlgos.topoAlgos[AlgCategory.MULTI][AlgType.MULT]:
-             alg = self.topoAlgos.topoAlgos[AlgCategory.MULTI][AlgType.MULT][algo]
-             threshold = alg.threshold
-             inputtype = alg.input
-             if 'cTAU' in inputtype:
-                 inputtype = 'eTAU'
-             elif any(substring in inputtype for substring in ['XE','TE','MHT', 'ESPRESSO','LArSaturation','ZeroBias']):
-                 continue
-             thr = self.thresholds.thresholds[threshold]
-             minEt = 99999 
-             if hasattr(thr, 'thresholdValues'):
-                 etvalues = thr.thresholdValues
-                 for etvalue in etvalues:
-                     et = etvalue.value
-                     if et < minEt:
-                         minEt = et
-             if hasattr(thr, 'et'):
-                 if thr.et < minEt:
-                     minEt = thr.et
-             if inputtype in thresholdMin:
-                 if minEt < thresholdMin[inputtype]:
-                     thresholdMin[inputtype] = minEt
-             else:
-                 thresholdMin[inputtype] = minEt
+            alg = cast(MultiplicityAlgo, self.topoAlgos.topoAlgos[AlgCategory.MULTI][AlgType.MULT][algo])
+            threshold = alg.threshold
+            inputtype = alg.input
+            if 'cTAU' in inputtype:
+                inputtype = 'eTAU'
+            elif any(substring in inputtype for substring in ['XE','TE','MHT', 'ESPRESSO','LArSaturation','ZeroBias']):
+                continue
+            thr = self.thresholds.thresholds[threshold]
+            minEt = 99999 
+            if hasattr(thr, 'thresholdValues'):
+                etvalues = thr.thresholdValues
+                for etvalue in etvalues:
+                    et = etvalue.value
+                    if et < minEt:
+                        minEt = et
+            if hasattr(thr, 'et'):
+                if thr.et < minEt:
+                    minEt = thr.et
+            if inputtype in thresholdMin:
+                if minEt < thresholdMin[inputtype]:
+                    thresholdMin[inputtype] = minEt
+            else:
+                thresholdMin[inputtype] = minEt
 
         # loop over sorting algorithms and get the min et values
         for algo in self.topoAlgos.topoAlgos[AlgCategory.TOPO][AlgType.SORT]:
-             alg = self.topoAlgos.topoAlgos[AlgCategory.TOPO][AlgType.SORT][algo]
-             if alg.inputvalue == 'MuonTobs':
-                 continue
-             for (pos, variable) in enumerate(alg.variables): 
-                 if variable.name == "MinET":
-                     value = variable.value/10 # convert energies from 100MeV to GeV units
-                     inputtype = ''
-                     if alg.inputvalue == 'eEmTobs':
-                         inputtype = 'eEM'
-                     elif alg.inputvalue == 'eTauTobs':
-                         inputtype = 'eTAU'
-                     elif alg.inputvalue == 'jJetTobs':
-                         inputtype = 'jJ'
-                     else:
-                         raise RuntimeError("checkPtMinToTopo: input type %s in sorting algo not recognised" % alg.inputvalue)
-                     if inputtype in thresholdMin:
-                         if value < thresholdMin[inputtype]:
-                              thresholdMin[inputtype] = value
-                     else:
-                         thresholdMin[inputtype] = value      
+            alg = cast(SortingAlgo, self.topoAlgos.topoAlgos[AlgCategory.TOPO][AlgType.SORT][algo])
+            if alg.inputvalue == 'MuonTobs':
+                continue
+            for (pos, variable) in enumerate(alg.variables): 
+                if variable.name == "MinET":
+                    value = variable.value/10 # convert energies from 100MeV to GeV units
+                    inputtype = ''
+                    if alg.inputvalue == 'eEmTobs':
+                        inputtype = 'eEM'
+                    elif alg.inputvalue == 'eTauTobs':
+                        inputtype = 'eTAU'
+                    elif alg.inputvalue == 'jJetTobs':
+                        inputtype = 'jJ'
+                    else:
+                        raise RuntimeError("checkPtMinToTopo: input type %s in sorting algo not recognised" % alg.inputvalue)
+                    if inputtype in thresholdMin:
+                        if value < thresholdMin[inputtype]:
+                            thresholdMin[inputtype] = value
+                    else:
+                        thresholdMin[inputtype] = value      
         for thr in thresholdMin:
             if thr in ptMin:
-                 if thresholdMin[thr] < ptMin[thr]:
-                     raise RuntimeError("checkPtMinToTopo: for threshold type %s the minimum threshold %i is less than ptMinToTopo %i" % (thr, thresholdMin[thr], ptMin[thr]))
+                if thresholdMin[thr] < ptMin[thr]:
+                    raise RuntimeError("checkPtMinToTopo: for threshold type %s the minimum threshold %i is less than ptMinToTopo %i" % (thr, thresholdMin[thr], ptMin[thr]))
             else:
-                 raise RuntimeError("checkPtMinToTopo: for threshold type %s the minimum threshold is %i and no ptMinToTopo value is found" % (thr, thresholdMin[thr]))  
+                raise RuntimeError("checkPtMinToTopo: for threshold type %s the minimum threshold is %i and no ptMinToTopo value is found" % (thr, thresholdMin[thr]))  
 
     def checkL1TopoParams(self):
+        if self.isRun4Menu:
+            log.info("checkL1TopoParams: skipping check L1Topo params for Run-4 menus")
+            return
         from ..Menu.L1TopoParams import L1TopoParams as params
 
         algo_param_mismatch = []

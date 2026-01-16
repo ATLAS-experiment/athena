@@ -29,6 +29,9 @@ class ThrType( Enum ):
     # topo thresholds
     TOPO = 60; MUTOPO = 61; MULTTOPO = 62; R2TOPO = 63 # noqa: E702
 
+    # global hypo based thresholds
+    hypoAlgorithm = 70
+
     @staticmethod
     def LegacyTypes():
         return [ ThrType.EM, ThrType.TAU, ThrType.JET, ThrType.XE, ThrType.TE, ThrType.XS, ThrType.ZB ]

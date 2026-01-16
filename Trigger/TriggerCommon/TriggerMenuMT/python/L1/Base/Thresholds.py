@@ -1,8 +1,13 @@
 # Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
+from __future__ import annotations
+
+from abc import abstractmethod
 import re
 from copy import deepcopy
 from functools import total_ordering
+from typing import Any
+
 
 from AthenaCommon.Logging import logging
 
@@ -10,15 +15,16 @@ from ..Config.TypeWideThresholdConfig import getTypeWideThresholdConfig
 from .ThresholdType import ThrType
 from .Limits import CaloLimits as CL
 from .TopoAlgorithms import AlgCategory
+from .Typing import JSONType
 
 log = logging.getLogger(__name__)
 
 
-class MenuThresholdsCollection( object ):
+class MenuThresholdsCollection:
 
     def __init__(self, flags):
-        self.thresholds     = {}     # holds all thresholds
-        self.thresholdNames = set()  # holds all threshold names
+        self.thresholds: dict[str, Threshold] = {}     # holds all thresholds
+        self.thresholdNames: set[str] = set()  # holds all threshold names
         self.flags = flags
 
     def __iter__(self):
@@ -27,7 +33,7 @@ class MenuThresholdsCollection( object ):
     def __call__(self):
         return self.thresholds.values()
 
-    def __iadd__(self, thr):
+    def __iadd__(self, thr: Threshold):
         if thr is None or thr.name in self.thresholdNames:
             return self
         self.thresholds[thr.name] = thr 
@@ -52,10 +58,10 @@ class MenuThresholdsCollection( object ):
         self += thr
 
 
-    def names(self, ttype = None):
-        if not ttype:
-            return self.thresholdsNames
-        return set([thr.name for thr in self if thr.ttype == ttype])
+    # def names(self, ttype = None):
+    #     if not ttype:
+    #         return self.thresholdsNames
+    #     return set([thr.name for thr in self if thr.ttype == ttype])
 
 
     def typeWideThresholdConfig(self, ttype):
@@ -98,8 +104,7 @@ class MenuThresholdsCollection( object ):
         return confObj
 
 
-
-class Threshold( object ):
+class Threshold:
     __slots__ = ['name', 'ttype', 'mapping', 'thresholdValues', 'run']
 
     # global variable for threshold registration, if set, new thresholds will be registered with l1configForRegistration
@@ -109,7 +114,7 @@ class Threshold( object ):
     def setMenuConfig(mc):
         Threshold.l1configForRegistration = mc
 
-    def __init__(self, name, ttype, mapping = -1, run = 0):
+    def __init__(self, name, ttype, mapping:int = -1, run:int = 0):
         self.name            = name
         self.ttype           = ThrType[ttype]
         self.mapping         = int(mapping)
@@ -121,6 +126,12 @@ class Threshold( object ):
 
     def __str__(self):
         return self.name
+
+    def _getSuffix(self, name: str, flags: str):
+        if (m := re.match(f"(?P<type>[A-z]*)[0-9]*(?P<suffix>[{flags}]*)",name)) is not None:
+            return m.groupdict()["suffix"]
+        else:
+            raise RuntimeError(f"Cannot extract suffix from threshold name {name} with flags {flags}")
 
     def getVarName(self):
         """returns a string that can be used as a varname"""
@@ -135,24 +146,15 @@ class Threshold( object ):
         else:
             return float(self.thresholdValues[0].value)
 
-    def json(self):
-        confObj = {
-            "todo": "implement"
-        }
-        if self.ttype == ThrType.ZB:
-            confObj.update( {
-                "seed": self.seed,
-                "seed_multi": self.seed_multi,
-                "bc_delay": self.mapping
-            } )
-        return confObj
-
+    @abstractmethod
+    def json(self) -> JSONType:
+        ...
 
 
 class LegacyThreshold( Threshold ):
     
     def __init__(self, name, ttype, mapping = -1):
-        super(LegacyThreshold,self).__init__(name = name, ttype = ttype, mapping = mapping, run = 2)
+        super().__init__(name = name, ttype = ttype, mapping = mapping, run = 2)
 
     def addThrValue(self, value, *args, **kwargs):
         if self.ttype == ThrType.EM or self.ttype == ThrType.TAU:
@@ -222,7 +224,7 @@ class LegacyThreshold( Threshold ):
         return self
 
     def json(self):
-        confObj = {
+        confObj: dict[str,Any] = {
             "mapping": self.mapping
         }
         if self.ttype == ThrType.EM:
@@ -296,9 +298,8 @@ class LegacyThreshold( Threshold ):
 class eEMThreshold (Threshold):
     
     def __init__(self, name, ttype = 'eEM', mapping = -1):
-        super(eEMThreshold,self).__init__(name = name, ttype = ttype, mapping = mapping, run = 3 if ttype=='eEM' else 2)
-        mres = re.match("(?P<type>[A-z]*)[0-9]*(?P<suffix>[VHILMT]*)",name).groupdict()
-        self.suffix = mres["suffix"]
+        super().__init__(name = name, ttype = ttype, mapping = mapping, run = 3 if ttype=='eEM' else 2)
+        self.suffix = self._getSuffix(name, "VHILMT")
         self.rhad = "None"
         self.reta = "None"
         self.wstot = "None"
@@ -367,9 +368,8 @@ class eEMThreshold (Threshold):
 class eEMVarThreshold (Threshold):
 
     def __init__(self, name, ttype = 'eEM', mapping = -1):
-        super(eEMVarThreshold,self).__init__(name = name, ttype = ttype, mapping = mapping, run = 3 if ttype=='eEM' else 2)
-        mres = re.match("(?P<type>[A-z]*)[0-9]*(?P<suffix>[VHILMT]*)",name).groupdict()
-        self.suffix = mres["suffix"]
+        super().__init__(name = name, ttype = ttype, mapping = mapping, run = 3 if ttype=='eEM' else 2)
+        self.suffix = self._getSuffix(name, "VHILMT")
         self.rhad = "None"
         self.reta = "None"
         self.wstot = "None"
@@ -438,9 +438,8 @@ class eEMVarThreshold (Threshold):
 class jEMThreshold (Threshold):
 
     def __init__(self, name, ttype = 'jEM', mapping = -1):
-        super(jEMThreshold,self).__init__(name = name, ttype = ttype, mapping = mapping, run = 3 if ttype=='jEM' else 2)
-        mres = re.match("(?P<type>[A-z]*)[0-9]*(?P<suffix>[VHILMT]*)",name).groupdict()
-        self.suffix = mres["suffix"]
+        super().__init__(name = name, ttype = ttype, mapping = mapping, run = 3 if ttype=='jEM' else 2)
+        self.suffix = self._getSuffix(name, "VHILMT")
         self.iso = "None"
         self.frac = "None"
         self.frac2 = "None"
@@ -510,7 +509,7 @@ class jEMThreshold (Threshold):
 class MuonThreshold( Threshold ):
 
     def __init__(self, name, run = 3, tgcFlags = "", mapping = -1):
-        super(MuonThreshold,self).__init__(name = name, ttype = 'MU', mapping = mapping, run = run)
+        super().__init__(name = name, ttype = 'MU', mapping = mapping, run = run)
         self.thr = None
         self.baThr = None
         self.ecThr = None
@@ -571,7 +570,7 @@ class MuonThreshold( Threshold ):
             raise RuntimeError("In muon threshold %s setThrValue() at least one region is unspecified" % self.name)
 
         # set the threshold index from the pT value
-        muonRoads = getTypeWideThresholdConfig(ThrType.MU)["roads"]
+        muonRoads: dict[str,Any] = getTypeWideThresholdConfig(ThrType.MU)["roads"]
         try:
             self.baIdx = muonRoads["rpc"][self.baThr]
         except KeyError as ex:
@@ -597,7 +596,7 @@ class MuonThreshold( Threshold ):
 
 
     def json(self):
-        confObj = {
+        confObj: dict[str,Any] = {
             "mapping": self.mapping
         }
         if self.isLegacy():
@@ -619,11 +618,11 @@ class MuonThreshold( Threshold ):
 class NSWMonThreshold( Threshold ):
 
     def __init__(self, name, mapping = -1):
-        super(NSWMonThreshold,self).__init__(name = name, ttype = ThrType.NSWMon, mapping=mapping, run = 3)
+        super().__init__(name = name, ttype = ThrType.NSWMon, mapping=mapping, run = 3)
         self.thresholdValues = [ThresholdValue(thrtype=self.ttype,value=0,**ThresholdValue.getDefaults(self.ttype))]
 
-    def json(self):
-        confObj = {
+    def json(self) -> JSONType:
+        confObj: JSONType = {
             "mapping": self.mapping
         }
         return confObj
@@ -632,10 +631,9 @@ class NSWMonThreshold( Threshold ):
 class eTauThreshold( Threshold ):
 
     def __init__(self, name, ttype = 'eTAU', mapping = -1):
-        super(eTauThreshold,self).__init__(name = name, ttype = ttype, mapping = mapping, run = 3 if ttype=='eTAU' else 2)
+        super().__init__(name = name, ttype = ttype, mapping = mapping, run = 3 if ttype=='eTAU' else 2)
         self.et = None
-        mres = re.match("(?P<type>[A-z]*)[0-9]*(?P<suffix>[LMTH]*)",name).groupdict()
-        self.suffix = mres["suffix"]
+        self.suffix = self._getSuffix(name, "LMTH")
         self.rCore = "None"
         self.rHad = "None"
 
@@ -706,10 +704,9 @@ class eTauThreshold( Threshold ):
 class jTauThreshold( Threshold ):
 
     def __init__(self, name, ttype = 'jTAU', mapping = -1):
-        super(jTauThreshold,self).__init__(name = name, ttype = ttype, mapping = mapping, run = 3 if ttype=='jTAU' else 2)
+        super().__init__(name = name, ttype = ttype, mapping = mapping, run = 3 if ttype=='jTAU' else 2)
         self.et = None
-        mres = re.match("(?P<type>[A-z]*)[0-9]*(?P<suffix>[LMT]*)",name).groupdict()
-        self.suffix = mres["suffix"]
+        self.suffix = self._getSuffix(name, "LMT")
         self.isolation = "None"
 
     def isL(self):
@@ -771,10 +768,9 @@ class jTauThreshold( Threshold ):
 class cTauThreshold( Threshold ):
 
     def __init__(self, name, ttype = 'cTAU', mapping = -1):
-        super(cTauThreshold,self).__init__(name = name, ttype = ttype, mapping = mapping, run = 3 if ttype=='cTAU' else 2)
+        super().__init__(name = name, ttype = ttype, mapping = mapping, run = 3 if ttype=='cTAU' else 2)
         self.et = None
-        mres = re.match("(?P<type>[A-z]*)[0-9]*(?P<suffix>[LMT]*)",name).groupdict()
-        self.suffix = mres["suffix"]
+        self.suffix = self._getSuffix(name, "LMT")
         self.isolation = "None"
 
     def isL(self):
@@ -836,7 +832,7 @@ class cTauThreshold( Threshold ):
 class jJetThreshold( Threshold ):
 
     def __init__(self, name, ttype = 'jJ', mapping = -1):
-        super(jJetThreshold,self).__init__(name = name, ttype = ttype, mapping = mapping, run = 3 if ttype=='jJ' else 2)
+        super().__init__(name = name, ttype = ttype, mapping = mapping, run = 3 if ttype=='jJ' else 2)
 
     def addThrValue(self, value, *args, **kwargs):
         defargs = ThresholdValue.getDefaults(self.ttype.name)
@@ -874,7 +870,7 @@ class jJetThreshold( Threshold ):
 class gJetThreshold( Threshold ):
 
     def __init__(self, name, ttype = 'gJ', mapping = -1):
-        super(gJetThreshold,self).__init__(name = name, ttype = ttype, mapping = mapping, run = 3 if ttype=='gJ' else 2)
+        super().__init__(name = name, ttype = ttype, mapping = mapping, run = 3 if ttype=='gJ' else 2)
 
     def addThrValue(self, value, *args, **kwargs):
         defargs = ThresholdValue.getDefaults(self.ttype.name)
@@ -910,7 +906,7 @@ class gJetThreshold( Threshold ):
 class gLJetThreshold( Threshold ):
 
     def __init__(self, name, ttype = 'gLJ', mapping = -1):
-        super(gLJetThreshold,self).__init__(name = name, ttype = ttype, mapping = mapping, run = 3 if ttype=='gLJ' else 2)
+        super().__init__(name = name, ttype = ttype, mapping = mapping, run = 3 if ttype=='gLJ' else 2)
 
     def addThrValue(self, value, *args, **kwargs):
         defargs = ThresholdValue.getDefaults(self.ttype.name)
@@ -946,7 +942,7 @@ class gLJetThreshold( Threshold ):
 class XEThreshold( Threshold ):
 
     def __init__(self, name, ttype, mapping = -1):
-        super(XEThreshold,self).__init__(name = name, ttype = ttype, mapping = mapping, run = 3 if ttype.startswith('gXE') or ttype.startswith('gMHT') or ttype.startswith('jXE') or ttype.startswith('cXE') else 2)
+        super().__init__(name = name, ttype = ttype, mapping = mapping, run = 3 if ttype.startswith('gXE') or ttype.startswith('gMHT') or ttype.startswith('jXE') or ttype.startswith('cXE') else 2)
         self.xe = None
 
     def setXE(self, xe):
@@ -965,11 +961,11 @@ class XEThreshold( Threshold ):
 class LArSaturationThreshold( Threshold ):
 
     def __init__(self, name, mapping = -1):
-        super(LArSaturationThreshold,self).__init__(name = name, ttype = ThrType.LArSat, mapping=mapping, run = 3)
+        super().__init__(name = name, ttype = ThrType.LArSat, mapping=mapping, run = 3)
         self.thresholdValues = [ThresholdValue(thrtype=self.ttype,value=0,**ThresholdValue.getDefaults(self.ttype))]
 
-    def json(self):
-        confObj = {
+    def json(self) -> JSONType:
+        confObj: JSONType = {
             "mapping": self.mapping
         }
         return confObj
@@ -977,7 +973,7 @@ class LArSaturationThreshold( Threshold ):
 class ZeroBiasThresholdTopo( Threshold ):
 
     def __init__(self, name, mapping = -1):
-        super(ZeroBiasThresholdTopo,self).__init__(name = name, ttype = ThrType.ZBTopo, mapping = mapping, run = 3)
+        super().__init__(name = name, ttype = ThrType.ZBTopo, mapping = mapping, run = 3)
         self.mask0       = 0
         self.mask1       = 0
         self.mask2       = 0
@@ -1016,7 +1012,7 @@ class ZeroBiasThresholdTopo( Threshold ):
 class TEThreshold( Threshold ):
 
     def __init__(self, name, ttype, mapping = -1):
-        super(TEThreshold,self).__init__(name = name, ttype = ttype, mapping = mapping, run = 3 if ttype.startswith('gTE') or ttype.startswith('gESPRESSO') or ttype.startswith('jTE') else 2)
+        super().__init__(name = name, ttype = ttype, mapping = mapping, run = 3 if ttype.startswith('gTE') or ttype.startswith('gESPRESSO') or ttype.startswith('jTE') else 2)
         self.xe = None
 
     def setTE(self, xe):
@@ -1034,10 +1030,10 @@ class TEThreshold( Threshold ):
 class NimThreshold( Threshold ):
 
     def __init__(self, name, ttype, mapping = -1):
-        super(NimThreshold,self).__init__(name = name, ttype = ttype, mapping = mapping, run = 3)
+        super().__init__(name = name, ttype = ttype, mapping = mapping, run = 3)
 
-    def json(self):
-        confObj = {
+    def json(self) -> JSONType:
+        confObj: JSONType = {
             "mapping": self.mapping
         }
         return confObj
@@ -1046,7 +1042,7 @@ class NimThreshold( Threshold ):
 class MBTSSIThreshold( Threshold ):
 
     def __init__(self, name, mapping = -1):
-        super(MBTSSIThreshold,self).__init__(name = name, ttype = 'MBTSSI', mapping = mapping, run = 3)
+        super().__init__(name = name, ttype = 'MBTSSI', mapping = mapping, run = 3)
         self.voltage = None
 
     def setVoltage(self, voltage):
@@ -1063,7 +1059,7 @@ class MBTSSIThreshold( Threshold ):
 class MBTSThreshold( Threshold ):
 
     def __init__(self, name, mapping = -1):
-        super(MBTSThreshold,self).__init__(name = name, ttype = 'MBTS', mapping = mapping, run = 3)
+        super().__init__(name = name, ttype = 'MBTS', mapping = mapping, run = 3)
         self.sectors = []
 
     def addSector(self, mbtsSector):
@@ -1083,7 +1079,7 @@ class ZeroBiasThreshold( Threshold ):
     __slots__ = [ 'seed','seed_ttype', 'seed_multi', 'bcdelay' ]
 
     def __init__(self, name, mapping = -1):
-        super(ZeroBiasThreshold,self).__init__(name = name, ttype = 'ZB', mapping = mapping, run = 2)
+        super().__init__(name = name, ttype = 'ZB', mapping = mapping, run = 2)
         self.seed       = ''
         self.seed_ttype = ''
         self.seed_multi = 0
@@ -1116,8 +1112,8 @@ class ThresholdValue(object):
         ThresholdValue.defaultThresholdValues[ttype] = dic
         
     @staticmethod
-    def getDefaults(ttype):
-        defaults = {
+    def getDefaults(ttype) -> dict[str,Any]:
+        defaults: dict[str,Any] = {
             'etamin'  : -49,
             'etamax'  :  49,
             'phimin'  :   0,
@@ -1205,18 +1201,23 @@ class TopoThreshold( Threshold ):
         if ','  in name:
             raise RuntimeError("%s is not a valid topo output name, it should not contain a ','" % name)
         self.algCategory = algCategory
-        super(TopoThreshold,self).__init__(name = name, ttype = algCategory.key, run = 2 if algCategory==AlgCategory.LEGACY else 3)
-        if algCategory not in AlgCategory.getAllCategories():
+        if algCategory==AlgCategory.GLOBHYPO:
+            run = 4 
+        elif algCategory==AlgCategory.LEGACY:
+            run = 2
+        else:
+            run = 3
+        super().__init__(name = name, ttype = algCategory.key, run = run)
+        if algCategory not in AlgCategory.getAllCategories(run):
             raise RuntimeError("%r is not a valid topo category" % algCategory)
-
 
 
     def getVarName(self):
         """returns a string that can be used as a varname"""
         return self.name.replace('.','').replace('-','_') # we can not have '.' or '-' in the variable name
 
-    def json(self):
-        confObj = {
+    def json(self) -> JSONType:
+        confObj: JSONType = {
             "mapping": self.mapping
         }
         return confObj
