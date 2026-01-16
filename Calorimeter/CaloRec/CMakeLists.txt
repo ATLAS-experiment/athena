@@ -60,7 +60,7 @@ atlas_add_test( CaloBCIDLumiCondAlgConfig_test
                 LOG_SELECT_PATTERN "ComponentAccumulator|^---|^IOVDbSvc" )
 
 
-atlas_add_test( CaloTopoClusterConfig_test
+atlas_add_test( CaloTopoCluster_test
                 SCRIPT python -m CaloRec.CaloTopoClusterConfig
                 PROPERTIES TIMEOUT 300
                 POST_EXEC_SCRIPT nopost.sh)
