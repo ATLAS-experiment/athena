@@ -384,7 +384,7 @@ NswCalibDbAlg::loadThresholdData(const EventContext& ctx,
   StatusCode NswCalibDbAlg::declareDependency(const EventContext& ctx,
                                               SG::WriteCondHandle<Key_t>& writeHandle,
                                               const readKey_t& readKey,
-                                              KeyArgs_t... otherKeys) const {
+                                              KeyArgs_t&... otherKeys) const {
       if (!readKey.empty()) {
           SG::ReadCondHandle readHandle{readKey, ctx};
           if (!readHandle.isValid()) {
