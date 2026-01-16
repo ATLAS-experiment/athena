@@ -180,6 +180,21 @@ def pebInfoWriterToolCfg(flags, name, eventBuildType):
                        SubDetector.PIXEL_DBM,
                        SubDetector.TDAQ_CTP] )
 
+    elif 'IDScanPEB' == eventBuildType:
+        acc = StaticPEBInfoWriterToolCfg(
+            flags, name,
+            ROBs = [HLT_ROB],
+            subDets = [SubDetector.PIXEL_IBL,
+                       SubDetector.PIXEL_BARREL,
+                       SubDetector.PIXEL_DISK_SIDE,
+                       SubDetector.PIXEL_B_LAYER,
+                       SubDetector.SCT_BARREL_A_SIDE,
+                       SubDetector.SCT_BARREL_C_SIDE,
+                       SubDetector.SCT_ENDCAP_A_SIDE,
+                       SubDetector.SCT_ENDCAP_C_SIDE,
+                       SubDetector.PIXEL_DBM,
+                       SubDetector.TDAQ_CTP] )
+
     elif 'Lvl1CaloPEB' == eventBuildType:
         acc = StaticPEBInfoWriterToolCfg(
             flags, name,

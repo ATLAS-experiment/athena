@@ -37,11 +37,10 @@ void MMT_Road::addHits(std::vector<std::shared_ptr<MMT_Hit> > &hits) {
       slow = hit_i->getShift() + m_slopeUlow * hit_i->getPitchOverZ();
       shigh = hit_i->getShift() + m_slopeUhigh * hit_i->getPitchOverZ();
     }
-    else if (hit_i->isV()) {
+    else {
       slow = hit_i->getShift() + m_slopeVlow * hit_i->getPitchOverZ();
       shigh = hit_i->getShift() + m_slopeVhigh * hit_i->getPitchOverZ();
     }
-    else continue;
 
     const double val = hit_i->getRZSlope();
     bool has_hit = (val > 0.) ? (val > slow && val < shigh) : (val > shigh && val < slow);

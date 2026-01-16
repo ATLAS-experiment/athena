@@ -1009,6 +1009,9 @@ class ItemDef:
         MenuItem('L1_ADBDTT').setLogic(d.TOPO_ADBDT_3MU0s_Tight & physcond).setTriggerType(TT.muon)
         MenuItem('L1_ADBDTL').setLogic(d.TOPO_ADBDT_3MU0s_Loose & physcond).setTriggerType(TT.muon)
 
+        #ATR-31457
+        MenuItem('L1_2MU3VF_ADBDTT').setLogic( d.MU3VF.x(2) & d.TOPO_ADBDT_3MU0s_Tight & physcond).setTriggerType(TT.muon)
+
         # HI
         MenuItem('L1_J15_NZ' ).setLogic( d.J15      & Not(ZDC_AND) & physcond).setTriggerType(TT.calo)
         MenuItem('L1_2J15_NZ').setLogic( d.J15.x(2) & Not(ZDC_AND) & physcond).setTriggerType(TT.calo)

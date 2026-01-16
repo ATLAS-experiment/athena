@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 ########################################################################
 #
@@ -13,10 +13,11 @@ from ..Muon.MuonChainConfiguration import MuonChainConfiguration
 
 from ..Muon.MuonMenuSequences import mul2IOOvlpRmSequenceGenCfg, mul2mtCBOvlpRmSequenceGenCfg, muEFCBSequenceGenCfg
 
-from .BphysicsMenuSequences import dimuL2SequenceGenCfg, dimuEFSequenceGenCfg, bmumuxSequenceGenCfg
+from .BphysicsMenuSequences import dimuL2SequenceGenCfg, dimuEFSequenceGenCfg, bmumuxSequenceGenCfg, bhhSequenceGenCfg
 from TrigBphysHypo.TrigMultiTrkComboHypoConfig import StreamerDimuL2ComboHypoCfg, StreamerDimuL2IOComboHypoCfg, StreamerDimuL2MTComboHypoCfg, DimuEFComboHypoCfg, BmutrkComboHypoCfg, StreamerDimuEFComboHypoCfg, TrigMultiTrkComboHypoToolFromDict
 from TrigBphysHypo.TrigBmumuxComboHypoConfig import BmumuxComboHypoCfg, TrigBmumuxComboHypoToolFromDict
 from TrigBphysHypo.TrigBmuxComboHypoConfig import BmuxComboHypoCfg
+from TrigBphysHypo.TrigBhhComboHypoConfig import BhhComboHypoCfg
 
 
 #############################################
@@ -55,6 +56,7 @@ class BphysicsChainConfiguration(MuonChainConfiguration):
             'bmumux' : [['getmuFast', 'getDimuL2'], ['getmuEFSA', 'getDimuEFCB', 'getBmumux']],
             'bmutrk' : [['getmuFast', 'getmuCombIO'], ['getmuEFSA', 'getmuEFCB', 'getBmutrk']],
             'bmux'   : [['getmuFast', 'getmuCombIO'], ['getmuEFSA', 'getmuEFCB', 'getBmux']],
+            'bhh'    : [['getmuFast', 'getmuCombIO'], ['getmuEFSA', 'getmuEFCB', 'getBhh']],
         }
         return stepDictionary
 
@@ -77,6 +79,7 @@ class BphysicsChainConfiguration(MuonChainConfiguration):
             'b3mu'       : 'dimu',
             'bBmux'      : 'bmux',
             'bBmumux'    : 'bmumux',
+            'bBhh'       : 'bhh',
             'b0dRAB12vtx20' : 'dimu',
             'b0dRAB207invmAB22vtx20' : 'dimu',
             'b0dRAB127invmAB22vtx20' : 'dimu',
@@ -107,3 +110,6 @@ class BphysicsChainConfiguration(MuonChainConfiguration):
 
     def getBmutrk(self, flags):
         return self.getStep(flags, 'bmutrk', [bmumuxSequenceGenCfg], comboHypoCfg=BmutrkComboHypoCfg, comboTools=[TrigMultiTrkComboHypoToolFromDict])
+
+    def getBhh(self, flags):
+        return self.getStep(flags, 'bhh', [bhhSequenceGenCfg], comboHypoCfg=BhhComboHypoCfg, comboTools=[TrigBmumuxComboHypoToolFromDict])

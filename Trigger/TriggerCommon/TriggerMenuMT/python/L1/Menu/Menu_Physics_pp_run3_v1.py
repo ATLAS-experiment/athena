@@ -260,6 +260,9 @@ def defineMenu():
         'L1_ADBDTT',
         'L1_ADBDTL',
 
+        #ATR-31457
+        'L1_2MU3VF_ADBDTT',
+
         # tau 
         'L1_cTAU30M_2cTAU20M',
         'L1_cTAU30M_2cTAU20M_DR-eTAU30LeTAU20L', 'L1_cTAU30M_2cTAU20M_DR-eTAU30LeTAU20L-jJ55',
