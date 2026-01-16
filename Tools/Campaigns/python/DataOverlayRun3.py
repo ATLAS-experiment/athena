@@ -30,4 +30,7 @@ def DataOverlay2025OO(flags):
     """Configuration for OO data overlay for year 2025"""
     _DataOverlayRun3Cfg(flags)
 
+    from AthenaConfiguration.Enums import HIMode
+    flags.Reco.HIMode = HIMode.HIP
+
     flags.Overlay.DataOverlayConditions = "OverlayConfiguration.DataOverlayConditions.DataOverlay2025OOCfg"

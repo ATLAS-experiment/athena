@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """Overlay test helpers
 
-Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 """
 
 from argparse import ArgumentParser
@@ -58,7 +58,6 @@ def overlayTestFlags(flags, args):
         flags.Output.RDOFileName = "dataOverlayRDO.pool.root"
         flags.IOVDb.GlobalTag = defaultConditionsTags.RUN3_DATA23
         flags.IOVDb.DatabaseInstance = "CONDBR2"
-        flags.Overlay.ByteStream = False
         from Campaigns import DataOverlay2023
         DataOverlay2023(flags)
     else:

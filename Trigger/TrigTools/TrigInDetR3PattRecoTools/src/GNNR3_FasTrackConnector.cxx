@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "GNNR3_FasTrackConnector.h"
@@ -19,23 +19,25 @@ GNNR3_FasTrackConnector::GNNR3_FasTrackConnector(std::ifstream& inFile, bool LRT
   m_connMap.clear();
   m_layerGroups.clear();
 
-  int nLinks;
+  int nLinks{};
 
   inFile >> nLinks >> m_etaBin;
+  
+  //nLinks _should_ be checked against sensible bounds
+  
+  unsigned int stage{}, lIdx{}, src{}, dst{}, nEntries{};
+  int height{}, width{};
+  int dummy{};
 
-
+  //coverity[TAINTED_SCALAR]
   for(int l=0;l<nLinks;l++) {
-
-    unsigned int stage, lIdx, src, dst, nEntries;
-    int height, width;
-
     inFile >> lIdx >> stage >> src >> dst >> height >> width >> nEntries;
-    
     GNNR3_FASTRACK_CONNECTION* pC = new GNNR3_FASTRACK_CONNECTION(src, dst);
     
-    int dummy;
 
+    //coverity[TAINTED_SCALAR]
     for(int i=0;i<height;i++) {
+      //coverity[TAINTED_SCALAR]
       for(int j=0;j<width;j++) inFile >> dummy;//pC->m_binTable[j+i*width];
     }
 

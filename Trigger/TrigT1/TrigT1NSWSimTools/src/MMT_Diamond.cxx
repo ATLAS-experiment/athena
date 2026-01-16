@@ -27,17 +27,19 @@ MMT_Diamond::MMT_Diamond(const int diamXthreshold, const bool uv, const int diam
     m_roadSizeDownUV = olapStereoDown;
 }
 
-void MMT_Diamond::createRoads(std::vector<MMT_Road>& roads, const bool isLarge) const {
+void MMT_Diamond::createRoads(std::vector<MMT_Road>& roads, const bool isLarge, const bool isEta1) const {
   const char sec = (isLarge) ? 'L' : 'S';
   /*
-   * This computation is done as follows: 1024 X roads
+   * This computation is done as follows: 1024 X roads, from 8192 strips in total (5120 for |eta|==1 and 3072 for |eta|==2)
    * MML: for i in [0,8] -> i*6 UV roads. Then: (1024-9)*6*9 UV roads
    * MMS: for i in [0,6] -> i*6 UV roads. Then: (1024-7)*6*7 UV roads
    */
-  const unsigned int vecRoads = (isLarge) ? 56050 : 43864;
+  const unsigned int vecRoads = 35000;
   roads.reserve(vecRoads);
-  int nroad = 8192/this->getRoadSize();
+  const int nroad = 8192/m_roadSize;
   for (int i = 0; i < nroad; ++i) {
+    const int div = 5120/m_roadSize;
+    if((isEta1 && i>div) || (!isEta1 && i<=div)) continue;
     roads.emplace_back(sec, m_roadSize, m_roadSizeUpX, m_roadSizeDownX, m_roadSizeUpUV, m_roadSizeDownUV, m_xthr, m_uvthr, i);
 
     /*

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigT1TGC/TGCPatchPanel.h"
@@ -190,6 +190,8 @@ void TGCPatchPanel::clockIn(int bunch, TGCDatabaseManager* db)
       m_connectionInPP = new TGCConnectionInPP();
       m_connectionInPP->readConnectionTable(this);
       // Register PatchPanel and ConnectionInPP in TGCDatabaseManager
+      //note: Input _should_ be checked against sensible limits.
+      //coverity[TAINTED_SCALAR]
       if(db) db->addConnectionInPP(this, m_connectionInPP);
     }
   }

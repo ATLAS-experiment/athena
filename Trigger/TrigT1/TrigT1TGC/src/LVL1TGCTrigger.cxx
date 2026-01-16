@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // STL
@@ -803,9 +803,11 @@ void LVL1TGCTrigger::recordRdoHPT(TGCSector* sector,
 void LVL1TGCTrigger::recordRdoInner(TGCSector * sector,
 				std::map<std::pair<int, int>, std::unique_ptr<TgcRdo>>& tgcrdo)
 {
-    bool isAside  = sector->getSideId()==0;
-    bool isEndcap = (sector->getRegionType() == TGCRegionType::ENDCAP);
+    const bool isAside  = sector->getSideId()==0;
+    const bool isEndcap = (sector->getRegionType() == TGCRegionType::ENDCAP);
     if (!isEndcap) return;
+    
+    //*** isEndcap must be true for the rest of this function. ***
     
     //  sector Id = 0..47, phi = 1..48
     int module = sector->getModuleId();
@@ -840,12 +842,8 @@ void LVL1TGCTrigger::recordRdoInner(TGCSector * sector,
     }
 
     int secId = 0;
-    if (isEndcap){
-      secId = sectorId % coverageOfEndcapSector;
-    } else {
-      secId = sectorId % coverageOfForwardSector;
-    }
-    
+    secId = sectorId % coverageOfEndcapSector;
+  
     uint16_t bcTag = m_CurrentBunchTag, l1Id = 0, bcId = 0;
     
     // EIFI
