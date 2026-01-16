@@ -1,6 +1,7 @@
 /*
   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
+
 #include "xAODBTaggingEfficiency/BTaggingToolUtil.h"
 #include "xAODBTaggingEfficiency/BTaggingEfficiencyJsonTool.h"
 #include <fstream>
@@ -9,12 +10,6 @@ BTaggingEfficiencyJsonTool::BTaggingEfficiencyJsonTool ( const std::string &name
   asg::AsgTool ( name )
 {
   m_initialised = false;
-  declareProperty( "MaxEta", m_maxEta = 2.5 );
-  declareProperty( "MinPt", m_minPt = -1 /*MeV*/);
-  declareProperty( "TaggerName",                    m_taggerName="",       "tagging algorithm name");
-  declareProperty( "JetAuthor",                     m_jetAuthor="",        "jet collection");
-  declareProperty( "OperatingPoint",                m_OP="",               "operating point");
-  declareProperty( "JsonConfigFile",                m_json_config_path="", "Path to JSON config file");
 }
 
 BTaggingEfficiencyJsonTool::~BTaggingEfficiencyJsonTool() {

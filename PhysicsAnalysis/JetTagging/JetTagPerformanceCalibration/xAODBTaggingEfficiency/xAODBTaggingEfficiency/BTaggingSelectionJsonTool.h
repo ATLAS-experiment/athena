@@ -7,6 +7,7 @@
 
 #include "FTagAnalysisInterfaces/IBTaggingSelectionJsonTool.h"
 #include "AsgTools/AsgTool.h"
+#include <AsgTools/PropertyWrapper.h>
 #include <nlohmann/json.hpp>
 using json = nlohmann::ordered_json;
 
@@ -27,16 +28,16 @@ class BTaggingSelectionJsonTool: public asg::AsgTool,
 
 private:
   bool m_initialised = false;
-
-  double m_maxEta;
-  double m_minPt;
-
+  Gaudi::Property<float> m_minPt {this, "MinPt", -1 /*MeV*/, "Minimum jet pT cut (in MeV)"};
+  Gaudi::Property<float> m_maxEta {this, "MaxEta", 2.5, "Maximum jet eta cut"};
+  
   std::string m_taggerName;
-  std::string m_outputName;
-  std::string m_OP;
-  std::string m_jetAuthor;
-  std::string m_json_config_path;
   std::string m_target;
+  
+  Gaudi::Property<std::string> m_outputName {this, "OutputName", "", "output name of the tagger"};
+  Gaudi::Property<std::string> m_jetAuthor {this, "JetAuthor", "", "jet collection"};
+  Gaudi::Property<std::string> m_OP {this, "OperatingPoint", "", "operating point"};
+  Gaudi::Property<std::string> m_json_config_path {this, "JsonConfigFile", "", "Path to JSON config file"};
 
   json m_json_config;
 

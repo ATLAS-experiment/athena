@@ -35,7 +35,14 @@ namespace CP
         StatusCode execute () override;
 
     private:
-        ToolHandle<Trig::TrigDecisionTool> m_trigDecTool;
+        #ifndef XAOD_STANDALONE
+        // For AthAnalysis and Athena, PublicToolHandle exist
+        PublicToolHandle<Trig::TrigDecisionTool> m_trigDecTool{this, "TrigDecisionTool", "Trig::TrigDecisionTool/TrigDecisionTool", "trigger decision tool"};
+        #else
+        // For AnalysisBase use ToolHandle as PublicToolHandle is not available
+        ToolHandle<Trig::TrigDecisionTool> m_trigDecTool{this, "TrigDecisionTool", "Trig::TrigDecisionTool/TrigDecisionTool", "trigger decision tool"};
+        #endif
+        
         Gaudi::Property<std::string> m_trigger {this, "trigger", "",
         "the trigger path to consider"};
         Gaudi::Property<bool> m_useRun3TriggerEDM {this, "useRun3TriggerEDM", true,

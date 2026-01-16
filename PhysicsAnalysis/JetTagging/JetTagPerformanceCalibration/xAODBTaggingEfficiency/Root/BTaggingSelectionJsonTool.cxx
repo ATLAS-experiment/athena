@@ -9,12 +9,6 @@ BTaggingSelectionJsonTool::BTaggingSelectionJsonTool( const std::string & name)
   : asg::AsgTool( name )
 {
   m_initialised = false;
-  declareProperty( "MaxEta", m_maxEta = 2.5 );
-  declareProperty( "MinPt", m_minPt = -1 /*MeV*/);
-  declareProperty( "OutputName",                    m_outputName="",       "output name of the tagger");
-  declareProperty( "JetAuthor",                     m_jetAuthor="",        "jet collection");
-  declareProperty( "OperatingPoint",                m_OP="",               "operating point");
-  declareProperty( "JsonConfigFile",                m_json_config_path="", "Path to JSON config file");
 }
 
 StatusCode BTaggingSelectionJsonTool::initialize() {

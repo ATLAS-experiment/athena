@@ -43,47 +43,6 @@ BTaggingTruthTaggingTool::BTaggingTruthTaggingTool( const std::string & name)
   {
 
   m_initialised = false;
-
-  // properties of BTaggingTruthTaggingTool
-  declareProperty( "IgnoreScaleFactors", m_ignoreSF=true, "ignore scale factors in computation of TRF weight");
-  declareProperty( "UsePermutations", m_usePerm=true, "if the chosen permutation is used, a reweighting is applied to the TRF weight for systematics");
-  declareProperty( "UseQuantile", m_useQuantile=true, "if the chosen quantile is used, a reweighting is applied to the TRF weight for systematics");
-  declareProperty( "UseSystematics", m_useSys=false, "will the results contain all systematic variations, or just the nominal");
-  declareProperty( "MaxNtagged", m_nbtag=2, "what is the maximal possible number of tagged jets");
-
-  // properties of BtaggingSelectionTool
-  declareProperty( "MaxEta", m_maxEta = 2.5 );
-  declareProperty( "MinPt", m_minPt = 20000 /*MeV*/);
-  declareProperty( "MaxRangePt", m_maxRangePt = 1000000 /*MeV*/);
-
-  // properties of BTaggingEfficiencyTool
-  declareProperty("TaggerName",                      m_taggerName="MV2c10",            "tagging algorithm name as specified in CDI file");
-  declareProperty("OperatingPoint",                  m_OP="FixedCutBEff_77",                    "operating point as specified in CDI file");
-  declareProperty("JetAuthor",                       m_jetAuthor="AntiKt4EMTopoJets",             "jet collection & JVF/JVT specification in CDI file");
-  declareProperty("ScaleFactorFileName",             m_SFFile = "xAODBTaggingEfficiency/13TeV/2016-20_7-13TeV-MC15-CDI-July12_v1.root",              "name of the official scale factor calibration CDI file (uses PathResolver)");
-  declareProperty("UseDevelopmentFile",              m_useDevFile = false,       "specify whether or not to use the (PathResolver) area for temporary scale factor calibration CDI files");
-  declareProperty("EfficiencyFileName",              m_EffFile = "",             "name of optional user-provided MC efficiency CDI file");
-  declareProperty("ScaleFactorBCalibration",         m_SFBName = "default",      "name of b-jet scale factor calibration object");
-  declareProperty("ScaleFactorCCalibration",         m_SFCName = "default",      "name of c-jet scale factor calibration object");
-  declareProperty("ScaleFactorTCalibration",         m_SFTName = "default",      "name of tau-jet scale factor calibration object");
-  declareProperty("ScaleFactorLightCalibration",     m_SFLightName = "default",  "name of light-flavour jet scale factor calibration object");
-  declareProperty("EigenvectorReductionB",           m_EVReductionB = "Loose",   "b-jet scale factor Eigenvector reduction strategy; choose between 'Loose', 'Medium', 'Tight'");
-  declareProperty("EigenvectorReductionC",           m_EVReductionC = "Loose",   "c-jet scale factor Eigenvector reduction strategy; choose between 'Loose', 'Medium', 'Tight'");
-  declareProperty("EigenvectorReductionLight",       m_EVReductionLight = "Loose","light-flavour jet scale factor Eigenvector reduction strategy; choose between 'Loose', 'Medium', 'Tight'");
-  declareProperty("EfficiencyBCalibrations",         m_EffBName = "default",     "(semicolon-separated) name(s) of b-jet efficiency object(s)");
-  declareProperty("EfficiencyCCalibrations",         m_EffCName = "default",     "(semicolon-separated) name(s) of c-jet efficiency object(s)");
-  declareProperty("EfficiencyTCalibrations",         m_EffTName = "default",     "(semicolon-separated) name(s) of tau-jet efficiency object(s)");
-  declareProperty("EfficiencyLightCalibrations",     m_EffLightName = "default", "(semicolon-separated) name(s) of light-flavour-jet efficiency object(s)");
-  declareProperty("ExcludeFromEigenVectorTreatment", m_excludeFromEV = "",       "(semicolon-separated) names of uncertainties to be excluded from eigenvector decomposition (if used)");
-  declareProperty("SystematicsStrategy",             m_systStrategy = "SFEigen", "name of systematics model; presently choose between 'SFEigen' and 'Envelope'");
-  declareProperty("ConeFlavourLabel",                m_coneFlavourLabel = true, "specify whether or not to use the cone-based flavour labelling instead of the default ghost association based labelling");
-  declareProperty("CutBenchmark",                    m_cutBenchmark = "1,2", "if you want to run in continuous you need to fix a benchmark - it does something only if running in Continuous OP");
-  declareProperty("ExcludeSpecificEigens",           m_excludeEV = "" ,    "(semicolon-separated) names of Eigens you want to exclude. in case of continuous some eigenvectors can be ignored to make the computation faster");
-  declareProperty("StoreOnlyUpVariations",           m_doOnlyUpVariations = false ,    "If set to true it processes only the __1up b-tagging variations. It speeds up the computation in case of symmetric variations.");
-  declareProperty("doDirectTagging",                 m_doDirectTag = false ,    "If set to true it also computes and stores the direct tagging choice and the related SFs for each jet");
-  // if it is empty, the onnx tool won't be initialised
-  declareProperty( "pathToONNX",                     m_pathToONNX = "",          "path to the onnx file that will be used for inference");
-  declareProperty( "TaggingStrategy",                m_taggingStrategy = "AllJets",     "tagging strategy in the Analysis (eg. 'leading2SignalJets' in boosted VHbb). Required to do TT with GNN");
 }
 
 StatusCode BTaggingTruthTaggingTool::setEffMapIndex(const std::string& flavour, unsigned int index){
@@ -162,10 +121,10 @@ StatusCode BTaggingTruthTaggingTool::initialize() {
 
   m_continuous = false;
   m_continuous2D = false;
-  if(m_OP.find("Continuous") != std::string::npos){
+  if(m_OP.value().find("Continuous") != std::string::npos){
     ATH_MSG_INFO("You are running in Continuous and you chose " << m_cutBenchmark <<" as benchmarks" );
     m_continuous = true;
-    if(m_OP.find("Continuous2D") != std::string::npos)
+    if(m_OP.value().find("Continuous2D") != std::string::npos)
       m_continuous2D = true;
     
     //tokenize the quantiles that will be used as tagged bin indices.
@@ -244,7 +203,7 @@ StatusCode BTaggingTruthTaggingTool::initialize() {
       m_cuts.push_back(one_cut);
     }
   } //== continuous
-  else if (m_OP.find("Continuous2D")  != std::string::npos){
+  else if (m_OP.value().find("Continuous2D")  != std::string::npos){
     ATH_MSG_INFO("TruthTagging initialization: Working with Continuous2D WP.");
     TString cutname = m_taggerName+"/"+m_jetAuthor+"/Continuous2D/cutvalue";
     TMatrixD* cuts2D = (TMatrixD*) m_inf->Get(cutname);
