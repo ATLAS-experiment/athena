@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 #
 # Script building all the externals necessary for Athena.
 #
@@ -17,7 +17,7 @@ ATLAS_EXTRA_CMAKE_ARGS=(-DLCG_VERSION_NUMBER=108
                         -DATLAS_GEANT4_USE_LTO=TRUE
                         -DATLAS_VECGEOM_USE_LTO=TRUE
                         -DATLAS_ONNXRUNTIME_USE_CUDA=TRUE
-                        -DATLAS_GAUDI_USE_CUDA=TRUE)
+                        -DATLAS_GAUDI_USE_CUDA=FALSE)
 ATLAS_EXTRA_MAKE_ARGS=()
 
 # Let "the common script" do all the heavy lifting.
