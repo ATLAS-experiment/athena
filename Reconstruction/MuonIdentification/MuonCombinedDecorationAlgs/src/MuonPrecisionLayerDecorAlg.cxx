@@ -1,38 +1,68 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonPrecisionLayerDecorAlg.h"
 #include "StoreGate/WriteDecorHandle.h"
 #include "StoreGate/ReadHandle.h" 
 
+#include <unordered_map>
 namespace{
     static const SG::AuxElement::ConstAccessor<std::vector<std::vector<unsigned int>>> acc_alignEffectChId("alignEffectChId");
     static const SG::AuxElement::ConstAccessor<std::vector<float>> acc_alligSigmaDeltaTrans("alignEffectSigmaDeltaTrans");
+    constexpr unsigned badQualityFlag = 2;
+    constexpr unsigned goodQualityFlag = 1;
+
+    using ChIndex = Muon::MuonStationIndex::ChIndex;
+    inline bool isBarrel(const ChIndex index) {
+      switch (index) {
+         case ChIndex::BIS:
+         case ChIndex::BIL:
+         case ChIndex::BMS:
+         case ChIndex::BML:
+         case ChIndex::BOL:
+         case ChIndex::BOS:
+         case ChIndex::BEE:
+            return true;
+         default:
+            return false;
+      }
+   }
+   inline bool isSmall(const ChIndex index) {
+      switch (index) {
+         case ChIndex::BIS:
+         case ChIndex::BMS:
+         case ChIndex::BOS:
+         case ChIndex::EIS:
+         case ChIndex::EMS:
+         case ChIndex::EOS:
+         case ChIndex::EES:
+         case ChIndex::CSS:
+         case ChIndex::BEE:
+            return true;
+         default:
+            return false;
+      }
+   }
 }
- MuonPrecisionLayerDecorAlg::MuonPrecisionLayerDecorAlg(const std::string& name, ISvcLocator* pSvcLocator):
-    AthReentrantAlgorithm(name,pSvcLocator){}
  
  StatusCode MuonPrecisionLayerDecorAlg::initialize() {
     ATH_CHECK(m_MuonContainer.initialize());
     ATH_CHECK(m_TrackContainer.initialize());
     m_trkAlignReadKey.clear();
     for (const SG::ReadHandleKey<xAOD::TrackParticleContainer>& trk : m_TrackContainer){
-        m_trkAlignReadKey.emplace_back(trk.key()+".alignEffectChId");
+        m_trkAlignReadKey.emplace_back(trk, "alignEffectChId");
+        m_trkAlignReadKey.emplace_back(trk, "alignEffectSigmaDeltaTrans");
     }
-    ATH_CHECK(m_trkAlignReadKey.initialize());
-    
-    m_goodPrecLayerKey = m_MuonContainer.key() + ".numberOfGoodPrecisionLayers";
+    ATH_CHECK(m_trkAlignReadKey.initialize());    
     ATH_CHECK(m_goodPrecLayerKey.initialize());
-    m_isGoodSmallKey = m_MuonContainer.key() + ".isSmallGoodSectors";
     ATH_CHECK(m_isGoodSmallKey.initialize());
-    m_isEndcapGoodLayersKey = m_MuonContainer.key() + ".isEndcapGoodLayers";   
     ATH_CHECK(m_isEndcapGoodLayersKey.initialize());
     return StatusCode::SUCCESS;
  }
 
  StatusCode MuonPrecisionLayerDecorAlg::execute(const EventContext& ctx) const {
-    SG::ReadHandle<xAOD::MuonContainer> muons{m_MuonContainer, ctx};
+    SG::ReadHandle muons{m_MuonContainer, ctx};
     if (!muons.isValid()) {
         ATH_MSG_FATAL("Failed to load track collection "<<m_MuonContainer.fullKey());
         return StatusCode::FAILURE;
@@ -50,35 +80,29 @@ namespace{
         const std::vector<std::vector<unsigned int>>& chIds = acc_alignEffectChId(*ptp);
         const std::vector<float>& alignEffSDT = acc_alligSigmaDeltaTrans(*ptp);
 
-        uint8_t prec = 0;  // all precision layers
+        uint8_t prec{0};  // all precision layers
         mu->summaryValue(prec, xAOD::numberOfPrecisionLayers);
         const uint8_t nTotPrec = prec;        
         uint8_t nBadPrec{0}, nBadBar{0}, nBadSmall{0}, nBadLarge{0}, nGoodBar{0}, nGoodLarge{0}, nGoodSmall{0};
 
-        std::map<Muon::MuonStationIndex::ChIndex, int> chamberQual;  // 1=good, 2=bad; for choosing large/small
+        std::unordered_map<ChIndex, int> chamberQual{};  // 1=good, 2=bad; for choosing large/small
+        /// the outer vector describes the AEOT of interest
         for (unsigned int i = 0; i < chIds.size(); ++i) {
+            /// Particular chambers affected by the AEOT
             for (unsigned int j = 0; j < chIds[i].size(); ++j) {
-                Muon::MuonStationIndex::ChIndex currInd = (Muon::MuonStationIndex::ChIndex)chIds[i][j];
-                if (alignEffSDT[i] >= 0.5) {
-                    if ((chamberQual.count(currInd) && chIds[i].size() > 1) || !chamberQual.count(currInd)) {
-                        // either we haven't seen this chamber before, or we have but now
-                        // we're in a sub-vector that's not just this chamber
-                        chamberQual[currInd] = 2;
-                    }
-                } else {
-                    if ((chamberQual.count(currInd) && chIds[i].size() > 1) || !chamberQual.count(currInd)) {
+                const auto currInd = static_cast<ChIndex>(chIds[i][j]);
+                const int quality = alignEffSDT[i] >= 0.5 ? badQualityFlag : goodQualityFlag;
+                if ((chamberQual.count(currInd) && chIds[i].size() > 1) || !chamberQual.count(currInd)) {
                     // either we haven't seen this chamber before, or we have but now
                     // we're in a sub-vector that's not just this chamber
-                    chamberQual[currInd] = 1;
-                    }
+                    chamberQual[currInd] = quality;
                 }
             }
         }
-        for (const auto& it : chamberQual) {
-            const int chnum = it.first;
-            const bool is_barrel = chnum < 7;
-            const bool is_small  = !(chnum %2);
-            if (it.second == 2) {
+        for (const auto& [chamber, quality] : chamberQual) {
+            const bool is_barrel = isBarrel(chamber);
+            const bool is_small  = isSmall(chamber);
+            if (quality == badQualityFlag) {
                 ++nBadPrec;            
                 nBadBar+= is_barrel;
                 nBadSmall+= is_small;
