@@ -5,7 +5,7 @@ NTHREADS=${1}
 NEVENTS=${2}
 OPT=${3}
 
-inputFile=$(python -c "from MuonGeoModelTestR4.testGeoModel import MuonPhaseIITestDefaults; print(MuonPhaseIITestDefaults.DATA_BS[0])")
+inputFile=$(python -c "from MuonGeoModelTestR4.testGeoModel import MuonPhaseIITestDefaults; print(' '.join(MuonPhaseIITestDefaults.DATA_BS))")
 
 # Run the job
 export TRF_ECHO=1;
