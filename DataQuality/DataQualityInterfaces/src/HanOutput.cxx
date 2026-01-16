@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "DataQualityInterfaces/HanOutput.h"
@@ -286,7 +286,12 @@ namespace dqi
           {
             resultList->SetName((storename + extra + "_").c_str());
           }
-          dynamic_cast<TSeqCollection*>((*m_outputMap)[parentName])->Add(resultList);
+          if (auto seqcoll = dynamic_cast<TSeqCollection*>((*m_outputMap)[parentName])) {
+            seqcoll->Add(resultList);
+          }
+          else {
+            std::cerr << "dynamic_cast to TSeqCollection* fails\n";
+          }
           TKey* key = getObjKey(m_input, storename);
           if (key != 0)
           {
