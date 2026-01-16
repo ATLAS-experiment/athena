@@ -32,6 +32,7 @@ _PartialEventBuildingIdentifiers = {
     'ZDCPEB' : False,
     'AFPPEB' : False,
     'LumiPEB' : False,
+    'IDScanPEB' : False,
     'Lvl1CaloPEB' : False,
     'Lvl1CaloLatomePEB' : False,
     # DataScouting identifiers from TrigEDMConfig.DataScoutingInfo:
