@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONCOMBINEDDECORATIONALGS_MONPRECISIONLAYERDECORALG_H
@@ -20,7 +20,7 @@
 
 class MuonPrecisionLayerDecorAlg: public AthReentrantAlgorithm {
    public:
-        MuonPrecisionLayerDecorAlg(const std::string& name, ISvcLocator* pSvcLocator);
+        using AthReentrantAlgorithm::AthReentrantAlgorithm;
         ~MuonPrecisionLayerDecorAlg() = default;
 
         virtual StatusCode initialize() override;
@@ -38,10 +38,12 @@ class MuonPrecisionLayerDecorAlg: public AthReentrantAlgorithm {
         SG::ReadDecorHandleKeyArray<xAOD::TrackParticleContainer> m_trkAlignReadKey{this, "ReadChambedIds", {},
                                         "Use the alignEffectChId decoration as hook to schedule this alg correctly." };
 
-        SG::WriteDecorHandleKey<xAOD::MuonContainer> m_goodPrecLayerKey{this, "GoodPrecisionLayers", 
-                                                                        "" , "numberOfGoodPrecisionLayers decoration"};
-        SG::WriteDecorHandleKey<xAOD::MuonContainer> m_isGoodSmallKey{this, "SmallGoodSectors", "" , "isSmallGoodSectors decoration"};
-        SG::WriteDecorHandleKey<xAOD::MuonContainer> m_isEndcapGoodLayersKey{this, "EndCapGoodLayers", "" , "isEndcapGoodLayers decoration"};
+        SG::WriteDecorHandleKey<xAOD::MuonContainer> m_goodPrecLayerKey{this, "GoodPrecisionLayers", m_MuonContainer,
+                                                                        "numberOfGoodPrecisionLayers" , "numberOfGoodPrecisionLayers decoration"};
+        SG::WriteDecorHandleKey<xAOD::MuonContainer> m_isGoodSmallKey{this, "SmallGoodSectors", m_MuonContainer, 
+                                                                      "isSmallGoodSectors" , "isSmallGoodSectors decoration"};
+        SG::WriteDecorHandleKey<xAOD::MuonContainer> m_isEndcapGoodLayersKey{this, "EndCapGoodLayers", m_MuonContainer,
+                                                                            "isEndcapGoodLayers" , "isEndcapGoodLayers decoration"};
    
 };
 #endif
