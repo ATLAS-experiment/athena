@@ -142,4 +142,5 @@ if __name__=="__main__":
     flags.Input.Files = (defaultTestFiles.RAW_RUN3)
     flags.IOVDb.GlobalTag = defaultConditionsTags.RUN3_DATA
     flags.GeoModel.AtlasVersion=defaultGeometryTags.RUN3
+    flags.lock()
     CaloRecoConfigTest(flags)

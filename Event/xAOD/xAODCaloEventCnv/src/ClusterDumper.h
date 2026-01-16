@@ -1,7 +1,7 @@
 // Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // $Id: ClusterDumper.h 581807 2014-02-06 08:40:10Z krasznaa $
@@ -15,16 +15,16 @@
 
 // Athena/Gaudi include(s):
 #include "AthenaBaseComps/AthAlgorithm.h"
-
+#include "xAODEventInfo/EventInfo.h"
 #include "StoreGate/ReadHandleKey.h"
 #include "xAODCaloEvent/CaloClusterContainer.h"
 
 class ClusterDumper : public AthAlgorithm {
 
 public:
-  /// Regular algorithm constructor
-  ClusterDumper( const std::string& name, ISvcLocator* svcLoc );
-  
+  /// Delegate algorithm constructor
+  using AthAlgorithm::AthAlgorithm;
+
   /// Function initialising the algorithm
   virtual StatusCode initialize();
   /// Function executing the algorithm
@@ -37,9 +37,12 @@ public:
 private:
   /// The key for the output xAOD::CaloClusterContainer
   SG::ReadHandleKey<xAOD::CaloClusterContainer> m_containerName{this,"ContainerName","CaloCalTopoClusters"};
-  std::string m_fileName;
+  SG::ReadHandleKey<xAOD::EventInfo> m_eventInfoKey{this, "EvtInfo", "EventInfo", "EventInfo name"};
 
-  std::ostream* m_out;
+  Gaudi::Property<std::string> m_fileName{this,"FileName",{}};
+  Gaudi::Property<bool> m_printCellLinks{this,"PrintCellLinks",true};
+
+  std::ostream* m_out=&std::cout;
   std::ofstream m_fileOut;
   
   std::mutex m_fileMutex;
