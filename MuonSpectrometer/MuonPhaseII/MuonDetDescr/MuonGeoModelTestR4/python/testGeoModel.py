@@ -16,7 +16,16 @@ class MuonPhaseIITestDefaults:
     ### Hits parsed through the R4 MS-only ATLAS layout
     HITS_PG_R4_MSOnly = []
     ### BS file taken in MD3 2025 with a pile-up of >120
-    DATA_BS = ["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonRecRTT/data25_13p6TeV.00508073.physics_Main.daq.RAW._lb0277._SFO-14._0001.data" ]
+    DATA_BS = [
+        "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonRecRTT/data25_13p6TeV/data25_13p6TeV.00508073.physics_Main.daq.RAW._lb0277._SFO-11._0001.data",
+        "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonRecRTT/data25_13p6TeV/data25_13p6TeV.00508073.physics_Main.daq.RAW._lb0277._SFO-12._0001.data",
+        "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonRecRTT/data25_13p6TeV/data25_13p6TeV.00508073.physics_Main.daq.RAW._lb0277._SFO-13._0001.data",
+        "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonRecRTT/data25_13p6TeV/data25_13p6TeV.00508073.physics_Main.daq.RAW._lb0277._SFO-14._0001.data",
+        "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonRecRTT/data25_13p6TeV/data25_13p6TeV.00508073.physics_Main.daq.RAW._lb0277._SFO-15._0001.data",
+        "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonRecRTT/data25_13p6TeV/data25_13p6TeV.00508073.physics_Main.daq.RAW._lb0277._SFO-16._0001.data",
+        "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonRecRTT/data25_13p6TeV/data25_13p6TeV.00508073.physics_Main.daq.RAW._lb0277._SFO-17._0001.data",
+        "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonRecRTT/data25_13p6TeV/data25_13p6TeV.00508073.physics_Main.daq.RAW._lb0277._SFO-18._0001.data",
+        "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonRecRTT/data25_13p6TeV/data25_13p6TeV.00508073.physics_Main.daq.RAW._lb0277._SFO-19._0001.data"]
     ###
     RDO_ZMUMU_R3 = ["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonGeomRTT/myRDO.R3.pool.root"]
     ###
