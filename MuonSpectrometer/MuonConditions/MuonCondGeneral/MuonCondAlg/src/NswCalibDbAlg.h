@@ -57,7 +57,7 @@ private:
         StatusCode declareDependency(const EventContext& ctx,
                                      SG::WriteCondHandle<Key_t>& writeHandle,
                                      const readKey_t& readKey,
-                                     KeyArgs_t... otherKeys) const;
+                                     KeyArgs_t&... otherKeys) const;
 
     StatusCode loadTimeChargeData(const EventContext& ctx, 
                                   const readKey_t& readKey, 
