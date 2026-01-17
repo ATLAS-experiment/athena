@@ -16,7 +16,7 @@ from argparse import ArgumentParser
 def main():
     parser = ArgumentParser(description='create gridpackage from job option')
     parser.add_argument("jobOptionDir",type=str, nargs='+',help="Path to job option directory. If multiple are given only the calculation of MinEvents is performed for the additional setups (meant e.g. for different filters).")
-    parser.add_argument('-b', '--batchSystem', type=str, dest='batchSystem', default='htcondor_lxplus', help='Batch system to use (default = %(default)s, alternatives: htcondor_naf, slurm_taurus, slurm_barnard, sge_grace)')
+    parser.add_argument('-b', '--batchSystem', type=str, dest='batchSystem', default='htcondor_lxplus', help='Batch system to use (default = %(default)s, alternatives: htcondor_naf, slurm_taurus, slurm_barnard, sge_grace, htcondor_baf)')
     parser.add_argument('-a', '--account', type=str, dest='account', default='ATLAS-HEP-GROUP', help='Account to charge. This only is needed for PBS.')
     parser.add_argument('-q', '--queue', type=str, dest='queue', default='compute', help='What queue to use. This only is needed for PBS.')
     parser.add_argument('-c', '--ecm', type=float, dest='ecm', nargs="+", default=[13.6], help='center of mass energy in TeV')
