@@ -159,6 +159,11 @@ def addCommonP1Signatures(chains):
         ChainProp(name='HLT_noalg_LumiPEB_L1MBTS_1_UNPAIRED_ISO', l1SeedThresholds=['FSNOSEED'], stream=['PixelBeam'], groups=SupportGroup),
         ChainProp(name='HLT_noalg_LumiPEB_L1MBTS_2', l1SeedThresholds=['FSNOSEED'], stream=['PixelBeam'], groups=SupportGroup),
         ChainProp(name='HLT_noalg_LumiPEB_L1MBTS_2_UNPAIRED_ISO', l1SeedThresholds=['FSNOSEED'], stream=['PixelBeam'], groups=SupportGroup),
+        #IDScanPEB streamers - ATR-31257
+        ChainProp(name='HLT_noalg_IDScanPEB_L1MBTS_1', l1SeedThresholds=['FSNOSEED'], stream=['IDScanPEB'], groups=SupportGroup),
+        ChainProp(name='HLT_noalg_IDScanPEB_L1MBTS_2', l1SeedThresholds=['FSNOSEED'], stream=['IDScanPEB'], groups=SupportGroup),
+        ChainProp(name='HLT_noalg_IDScanPEB_L1MBTS_1_1', l1SeedThresholds=['FSNOSEED'], stream=['IDScanPEB'], groups=SupportGroup),
+
         #ATR-25327 VdM streamers
         ChainProp(name='HLT_noalg_vdm_LumiPEB_L1MBTS_2_BGRP11', l1SeedThresholds=['FSNOSEED'], stream=['VdM'], groups=SupportGroup),
         ChainProp(name='HLT_noalg_vdm_LumiPEB_L1LUCID_A_BGRP11', l1SeedThresholds=['FSNOSEED'], stream=['VdM'], groups=SupportGroup),

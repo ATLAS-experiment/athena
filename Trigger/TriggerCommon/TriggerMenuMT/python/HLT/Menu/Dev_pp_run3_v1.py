@@ -37,7 +37,6 @@ from .Physics_pp_run3_v1 import (PhysicsStream,
                                  LegacyTopoGroup,
                                  Topo2Group,
                                  Topo3Group,
-                                 EOFL1MuGroup,
                                  EOFBPhysL1MuGroup,
                                  SingleElectronGroup,
                                  MultiElectronGroup
@@ -108,10 +107,6 @@ def getDevSignatures():
 
         # ATR-22782, ATR-28868, 4mu analysis
         ChainProp(name='HLT_mu4_ivarloose_mu4_L1BPH-7M14-0DR25-MU5VFMU3VF', l1SeedThresholds=['MU3VF','MU3VF'], stream=['BphysDelayed'], groups=MultiMuonGroup+EOFBPhysL1MuGroup+Topo3Group),
-  
-        #ATR-31457 - HLT chains for muon AD BDT (NOMAD)
-        ChainProp(name='HLT_2mu4_L1ADBDTL',               l1SeedThresholds=['MU3V'], stream=['Main'], groups=Topo3Group+ MultiMuonGroup+EOFL1MuGroup),
-        ChainProp(name='HLT_2mu4_l2io_invmDimu_L1ADBDTL', l1SeedThresholds=['MU3V'], stream=['Main'], groups=Topo3Group+ MultiMuonGroup+EOFL1MuGroup),
     ]
 
     chains['Egamma'] = [
@@ -670,10 +665,6 @@ def getDevSignatures():
         ChainProp(name='HLT_2mu4_noL2Comb_bBmumux_BpmumuKp_L12MU3V', stream=["BphysDelayed"], groups=BphysicsGroup+DevGroup),
         ChainProp(name='HLT_2mu4_noL2Comb_bBmumux_BsmumuPhi_L12MU3V', stream=["BphysDelayed"], groups=BphysicsGroup+DevGroup),
         ChainProp(name='HLT_2mu4_noL2Comb_bBmumux_LbPqKm_L12MU3V', stream=["BphysDelayed"], groups=BphysicsGroup+DevGroup),
-
-        #ATR-31457 - HLT chains for muon AD BDT (NOMAD)
-        ChainProp(name='HLT_2mu4_bDimu2700_L1ADBDTL',     l1SeedThresholds=['MU3V'], stream=['Main'], groups=Topo3Group+BphysicsGroup+EOFBPhysL1MuGroup),
-        ChainProp(name='HLT_2mu4_bDimu_L1ADBDTL',         l1SeedThresholds=['MU3V'], stream=['Main'], groups=Topo3Group+BphysicsGroup+EOFBPhysL1MuGroup),
     ]
 
     chains['Combined'] = [
@@ -788,15 +779,6 @@ def getDevSignatures():
         ChainProp(name='HLT_mu6_j55c_020jvt_j40c_020jvt_j25c_020jvt_j20c_020jvt_SHARED_j20c_020jvt_bgn277_pf_ftf_presel3c20XX1c20bgtwo85_L1BTAG-MU5VFjJ40_2jJ30p0ETA25'                          , l1SeedThresholds=['MU5VF']+['FSNOSEED']*5,  stream=[PhysicsStream], groups=SupportPhIGroup+MultiBjetGroup),
         ChainProp(name='HLT_mu6_j55c_020jvt_j40c_020jvt_j25c_020jvt_j20c_020jvt_SHARED_j20c_020jvt_bgn277_pf_ftf_presel3c20XX1c20bgtwo85_dRAF04_L1BTAG-MU5VFjJ40_2jJ30p0ETA25'                   , l1SeedThresholds=['MU5VF']+['FSNOSEED']*5,  stream=[PhysicsStream], groups=SupportPhIGroup+MultiBjetGroup),
 
-        # ATR-21596 MET with DarkJet
-        # PFO MET
-        ChainProp(name='HLT_j0_HT650XX0eta240_pf_ftf_preselcHT450_xe0_pfopufit_L1HT190-jJ40s5pETA21', l1SeedThresholds=['FSNOSEED', 'FSNOSEED'], stream=[PhysicsStream], groups=PrimaryPhIGroup+SingleJetGroup+METGroup+Topo3Group),
-        ChainProp(name='HLT_j0_HT500XX0eta240_pf_ftf_preselcHT450_xe0_pfopufit_L1HT190-jJ40s5pETA21', l1SeedThresholds=['FSNOSEED', 'FSNOSEED'],groups=SupportPhIGroup+MultiJetGroup+METGroup+Topo3Group+['RATE:CPS_HT190-jJ40s5pETA21']),
-        ChainProp(name='HLT_j0_HT500XX0eta240_pf_ftf_preselcHT450_xe0_pfopufit_DarkJetPEBTLA_L1HT190-jJ40s5pETA21', l1SeedThresholds=['FSNOSEED','FSNOSEED'], stream=['DarkJetPEBTLA'],groups=PrimaryPhIGroup+MultiJetGroup+Topo3Group+['RATE:CPS_HT190-jJ40s5pETA21']),
-        # NN MET
-        ChainProp(name='HLT_j0_HT650XX0eta240_pf_ftf_preselcHT450_xe0_nn_L1HT190-jJ40s5pETA21', l1SeedThresholds=['FSNOSEED', 'FSNOSEED'], stream=[PhysicsStream], groups=PrimaryPhIGroup+SingleJetGroup+METGroup+Topo3Group),
-        ChainProp(name='HLT_j0_HT500XX0eta240_pf_ftf_preselcHT450_xe0_nn_L1HT190-jJ40s5pETA21', l1SeedThresholds=['FSNOSEED', 'FSNOSEED'],groups=SupportPhIGroup+MultiJetGroup+METGroup+Topo3Group+['RATE:CPS_HT190-jJ40s5pETA21']),
-        ChainProp(name='HLT_j0_HT500XX0eta240_pf_ftf_preselcHT450_xe0_nn_DarkJetPEBTLA_L1HT190-jJ40s5pETA21', l1SeedThresholds=['FSNOSEED','FSNOSEED'], stream=['DarkJetPEBTLA'],groups=PrimaryPhIGroup+MultiJetGroup+Topo3Group+['RATE:CPS_HT190-jJ40s5pETA21']),
 
         # Anomaly detection (ATR-30618, ATR-30826)
         ChainProp(name='HLT_0e25_nopid_0g25_loose_0mu24noL1_j20_xe0_nn_anomdetL_L1ADVAET', l1SeedThresholds=['eEM18L','eEM18L','FSNOSEED','FSNOSEED','FSNOSEED'], groups=PrimaryPhIGroup+Topo2Group),

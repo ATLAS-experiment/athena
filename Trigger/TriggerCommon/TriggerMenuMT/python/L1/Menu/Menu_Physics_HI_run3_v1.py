@@ -49,8 +49,8 @@ def defineMenu():
         ##
         # combined lepton (e and mu)
         # new calo
-        #'L1_2eEM7', 'L1_2eEM9', 'L1_2eEM15',
-        'L1_2eEM12', 'L1_2eEM18',
+        #'L1_2eEM7', 'L1_2eEM15',
+        'L1_2eEM12', 'L1_2eEM18', 'L1_2eEM9',
 
         # ATR-32259: L1 items for L1BKeePrimary, L1BKeePrescaled
         'L1_2eEM10L_MU8F', 'L1_2eEM18M', 'L1_2eEM24L', 'L1_eEM18L_MU8F', 'L1_eEM24L_3eEM12L',

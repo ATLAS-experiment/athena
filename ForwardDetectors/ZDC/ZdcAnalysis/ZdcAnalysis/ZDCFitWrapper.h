@@ -277,7 +277,7 @@ public:
     double constant = theTF1->GetParameter(4);
 
     if (amp > 0) return constant / amp;
-    else return -1;
+    else return 1;
   }
 
   virtual double operator()(const double *x, const double *p)  override{
@@ -338,8 +338,9 @@ public:
   {
     const TF1* theTF1 = ZDCFitWrapper::GetWrapperTF1();
     double amp = theTF1->GetParameter(0);
+    if (amp <= 0) return -1;
+    
     double C = theTF1->GetParameter(2);
-
     return C / amp;
   }
 
@@ -454,8 +455,8 @@ public:
     // double bckgd = linSlope*t;
 
     double pulse1 =  amp*m_norm*m_expFermiFunc->operator()(deltaT);
-    double pulse2 =  preAmp * m_norm * (m_expFermiPreFunc->operator()(deltaTPre) -
-					m_expFermiPreFunc->operator()(deltaPresamp));
+    double pulse2 =  preAmp * m_norm * (m_expFermiFunc->operator()(deltaTPre) -
+					m_expFermiFunc->operator()(deltaPresamp));
 
     return C + pulse1 + pulse2;// + bckgd;
   }
@@ -533,7 +534,7 @@ public:
     double maxTime = GetTime();
 
     double amp = theTF1->GetParameter(0);
-    if (amp <= 0) return 1;
+    if (amp <= 0) return -1;
     
     double preAmp = theTF1->GetParameter(2);
     double preT0 = theTF1->GetParameter(3);
@@ -729,7 +730,7 @@ public:
   {
     const TF1* theTF1 = ZDCFitWrapper::GetWrapperTF1();
     double amp = theTF1->GetParameter(0);
-    if (amp <= 0) return 1;
+    if (amp <= 0) return -1;
 
     double maxTime = GetTime();
     
@@ -825,6 +826,8 @@ public:
   {
     const TF1* theTF1 = ZDCFitWrapper::GetWrapperTF1();
     double amp = theTF1->GetParameter(0);
+    if (amp <= 0) return -1;
+    
     double slope = theTF1->GetParameter(2);
 
     double background = slope * GetTime();
@@ -916,6 +919,8 @@ public:
     double maxTime = GetTime();
 
     double amp = theTF1->GetParameter(0);
+    if (amp <= 0) return -1;
+    
     double preAmp = theTF1->GetParameter(2);
     double preT0 = theTF1->GetParameter(3);
     double slope = theTF1->GetParameter(4);
@@ -1030,6 +1035,8 @@ public:
     double maxTime = GetTime();
 
     double amp    = theTF1->GetParameter(0);
+    if (amp <= 0) return -1;
+    
     double preAmp = theTF1->GetParameter(2);
     double preT0  = theTF1->GetParameter(3);
     double slope  = theTF1->GetParameter(4);
@@ -1160,6 +1167,7 @@ public:
     double maxTime = GetTime();
 
     double amp    = theTF1->GetParameter(0);
+    if (amp <= 0) return -1;
     double preAmp = theTF1->GetParameter(2);
     double preT0  = theTF1->GetParameter(3);
     double slope  = theTF1->GetParameter(4);

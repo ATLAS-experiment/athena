@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 #####
 # CI Reference Files Map
@@ -28,9 +28,9 @@ references_map = {
     "d2030": "v17",
     # Reco
     "q442": "v107",
-    "q449": "v165",
+    "q449": "v166",
     "q452": "v72",
-    "q454": "v91",
+    "q454": "v92",
     # Derivations
     "data_PHYS_Run2": "v73",
     "data_PHYSLITE_Run2": "v39",
