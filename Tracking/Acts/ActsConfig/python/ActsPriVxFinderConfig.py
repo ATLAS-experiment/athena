@@ -7,7 +7,8 @@ from AthenaConfiguration.Enums import LHCPeriod
 def ActsGaussAdaptiveMultiFindingCfg(flags,
                                      name="ActsAdaptiveMultiPriVtxFinderTool",
                                      **kwargs):
-    acc = ComponentAccumulator()
+    from BeamSpotConditions.BeamSpotConditionsConfig import BeamSpotCondAlgCfg
+    acc = BeamSpotCondAlgCfg(flags)
 
     if "TrackSelector" not in kwargs:
         from InDetConfig.InDetTrackSelectionToolConfig import (
@@ -65,7 +66,8 @@ def TrigActsGaussAdaptiveMultiFindingCfg(
 def ActsIterativeFindingCfg(flags,
                             name="ActsIterativePriVtxFinderTool",
                             **kwargs):
-    acc = ComponentAccumulator()
+    from BeamSpotConditions.BeamSpotConditionsConfig import BeamSpotCondAlgCfg
+    acc = BeamSpotCondAlgCfg(flags)
 
     if "TrackSelector" not in kwargs:
         from InDetConfig.InDetTrackSelectionToolConfig import (
