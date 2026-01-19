@@ -1,5 +1,5 @@
 /*
- *   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+ *   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  */
 
 #ifndef MMT_HIT_H
@@ -38,7 +38,6 @@ class MMT_Hit {
     double getZ() const { return m_Z; }
     double getPitchOverZ() const { return m_PitchOverZ; }
     float getTime() const { return m_time; }
-    bool isNoise() const { return m_isNoise; }
     bool isX() const { return m_isX; }
     bool isU() const { return m_isU; }
     bool isV() const { return m_isV; }
@@ -46,7 +45,6 @@ class MMT_Hit {
 
     // Setters
     void setAge(int age) { m_age = age; }
-    void setAsNoise() { m_isNoise = true; }
 
   private:
     double m_RZslope{-1}, m_Rp{-1};
@@ -63,7 +61,6 @@ class MMT_Hit {
     int m_BC_time;
     int m_age;
     char m_sector;
-    bool m_isNoise{false};
     bool m_isX{false};
     bool m_isU{false};
     bool m_isV{false};

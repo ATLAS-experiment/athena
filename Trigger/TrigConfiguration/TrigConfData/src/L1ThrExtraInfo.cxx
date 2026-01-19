@@ -67,7 +67,10 @@ TrigConf::L1ThrExtraInfo::createExtraInfo(const std::string & thrTypeName, const
 
    if( thrTypeName == "gTE" )
       return std::make_unique<L1ThrExtraInfo_gTE>(thrTypeName, data);
-
+   
+   if( thrTypeName == "cXE" )
+      return std::make_unique<L1ThrExtraInfo_cXE>(thrTypeName, data);
+   
    // if no special extra information is supplied for the threshold type return base class
    return std::make_unique<L1ThrExtraInfoBase>(thrTypeName, data);
 }
@@ -183,6 +186,11 @@ TrigConf::L1ThrExtraInfo::gXE() const {
 const TrigConf::L1ThrExtraInfo_gTE &
 TrigConf::L1ThrExtraInfo::gTE() const {
    return dynamic_cast<const TrigConf::L1ThrExtraInfo_gTE&>( * m_thrExtraInfo.at("gTE") );
+}
+
+const TrigConf::L1ThrExtraInfo_cXE &
+TrigConf::L1ThrExtraInfo::cXE() const {
+   return dynamic_cast<const TrigConf::L1ThrExtraInfo_cXE&>( * m_thrExtraInfo.at("cXE") );
 }
 
 const TrigConf::L1ThrExtraInfo_MU &
@@ -710,6 +718,21 @@ TrigConf::L1ThrExtraInfo_gXE::load()
 void
 TrigConf::L1ThrExtraInfo_gTE::load()
 {
+}
+
+/*******
+ * cXE
+ *******/
+void
+TrigConf::L1ThrExtraInfo_cXE::load()
+{
+   for( auto & x : m_extraInfo ) {
+      if( x.first == "jXeWeight" ){
+         m_jXeWeight = x.second.getValue<float>();
+      } else if( x.first == "gXeWeight" ){
+         m_gXeWeight = x.second.getValue<float>();
+      }
+   }
 }
 
 /*******

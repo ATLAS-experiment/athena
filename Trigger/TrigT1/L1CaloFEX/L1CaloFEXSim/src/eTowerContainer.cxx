@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // Code stolen shamelessly from Calorimeter/CaloEvent/src/CaloCellContainer.cxx and modified
@@ -28,7 +28,7 @@ void eTowerContainer::print() const {
 
 const LVL1::eTower * eTowerContainer::findTower(int towerID) const{
     const auto it = m_map_towerID_containerIndex.find(towerID);
-
+    if (it == m_map_towerID_containerIndex.end()) return nullptr;
     const int container_index = it->second;
     if (container_index < 0) {
         return nullptr;
@@ -38,7 +38,7 @@ const LVL1::eTower * eTowerContainer::findTower(int towerID) const{
 
 LVL1::eTower * eTowerContainer::findTower(int towerID) {
     const auto it = m_map_towerID_containerIndex.find(towerID);
-
+    if (it == m_map_towerID_containerIndex.end()) return nullptr;
     const int container_index = it->second;
     if (container_index < 0) {
         return nullptr;

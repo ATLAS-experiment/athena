@@ -177,6 +177,14 @@ def fromRunArgs(runArgs):
     # Post-exec
     processPostExec(runArgs, flags, cfg)
 
+    # Make sure data year is propagated in the metadata
+    if flags.Input.DataYear > 0:
+        from EventInfoMgt.TagInfoMgrConfig import TagInfoMgrCfg
+        cfg.merge(TagInfoMgrCfg(flags, tagValuePairs={
+            "project_name": flags.Input.ProjectName,
+            "data_year": str(flags.Input.DataYear)
+        }))
+
     # Write AMI tag into in-file metadata
     from PyUtils.AMITagHelperConfig import AMITagCfg
     cfg.merge(AMITagCfg(flags, runArgs))

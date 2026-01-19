@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MMTRIGGERTOOL_H
@@ -78,14 +78,11 @@ namespace NSWL1 {
     std::shared_ptr<MuonVal::VectorBranch<char> > m_trigger_diamond_sector ATLAS_THREAD_SAFE {};
     std::shared_ptr<MuonVal::VectorBranch<int> > m_trigger_diamond_sectorPhi ATLAS_THREAD_SAFE {};
     std::shared_ptr<MuonVal::VectorBranch<unsigned int> > m_trigger_diamond_totalCount ATLAS_THREAD_SAFE {};
-    std::shared_ptr<MuonVal::VectorBranch<unsigned int> > m_trigger_diamond_realCount ATLAS_THREAD_SAFE {};
     std::shared_ptr<MuonVal::VectorBranch<int> > m_trigger_diamond_iX ATLAS_THREAD_SAFE {};
     std::shared_ptr<MuonVal::VectorBranch<int> > m_trigger_diamond_iU ATLAS_THREAD_SAFE {};
     std::shared_ptr<MuonVal::VectorBranch<int> > m_trigger_diamond_iV ATLAS_THREAD_SAFE {};
-    std::shared_ptr<MuonVal::VectorBranch<unsigned int> > m_trigger_diamond_XbkgCount ATLAS_THREAD_SAFE {};
-    std::shared_ptr<MuonVal::VectorBranch<unsigned int> > m_trigger_diamond_UVbkgCount ATLAS_THREAD_SAFE {};
-    std::shared_ptr<MuonVal::VectorBranch<unsigned int> > m_trigger_diamond_XmuonCount ATLAS_THREAD_SAFE {};
-    std::shared_ptr<MuonVal::VectorBranch<unsigned int> > m_trigger_diamond_UVmuonCount ATLAS_THREAD_SAFE {};
+    std::shared_ptr<MuonVal::VectorBranch<unsigned int> > m_trigger_diamond_xCount ATLAS_THREAD_SAFE {};
+    std::shared_ptr<MuonVal::VectorBranch<unsigned int> > m_trigger_diamond_uCount ATLAS_THREAD_SAFE {};
     std::shared_ptr<MuonVal::VectorBranch<int> > m_trigger_diamond_age ATLAS_THREAD_SAFE {};
     std::shared_ptr<MuonVal::VectorBranch<double> > m_trigger_diamond_mx ATLAS_THREAD_SAFE {};
     std::shared_ptr<MuonVal::VectorBranch<double> > m_trigger_diamond_my ATLAS_THREAD_SAFE {};
