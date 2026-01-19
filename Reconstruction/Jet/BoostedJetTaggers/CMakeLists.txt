@@ -31,6 +31,7 @@ atlas_add_library( BoostedJetTaggersLib
   Root/JSSWTopTaggerANN.cxx
   Root/SmoothedWZTagger.cxx
   Root/SmoothedTopTagger.cxx
+  Root/LundJetOnnxAlg.cxx
    PUBLIC_HEADERS BoostedJetTaggers
    INCLUDE_DIRS ${ROOT_INCLUDE_DIRS} ${LWTNN_INCLUDE_DIRS}
    LINK_LIBRARIES ${ROOT_LIBRARIES} ${FASTJET_LIBRARIES}
