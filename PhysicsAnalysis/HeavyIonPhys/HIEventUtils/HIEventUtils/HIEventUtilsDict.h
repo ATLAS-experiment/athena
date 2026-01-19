@@ -7,6 +7,7 @@
 #define HIEVENTUTILS_HIEVENTUTILSDICT_H
 
 #include "HIEventUtils/HIPileupTool.h"
+#include "HIEventUtils/HIEventSelectionToolRun3.h"
 
 
 #endif
