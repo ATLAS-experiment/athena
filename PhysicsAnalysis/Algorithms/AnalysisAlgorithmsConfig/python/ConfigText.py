@@ -259,7 +259,13 @@ class TextConfig(ConfigFactory):
 
     def _configureAlg(self, block, blockConfig, configSeq=None, containerName=None,
                       extraOptions=None):
-        if not isinstance(blockConfig, list):
+        # 'AddConfigBlocks' blocks can be passed as either a list or a dictionary.
+        # Dictionaries are allowed so that when merging YAML files duplicate entries get automatically removed.
+        # This turns the dictionary into a list for downstream use.
+        if block.algName == "AddConfigBlocks" and isinstance(blockConfig, dict):
+            blockConfig = [options | {'algName': algName} for algName, options in blockConfig.items()]
+
+        elif not isinstance(blockConfig, list):
             blockConfig = [blockConfig]
 
         for options in blockConfig:
