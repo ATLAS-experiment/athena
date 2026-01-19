@@ -1,5 +1,5 @@
 /*
- Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+ Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 //***************************************************************************
 //             Interface for jFEXBDTool - Tool to read the COOL DB for jFEX
@@ -76,16 +76,21 @@ std::array<uint16_t,4> jFEXDBCondData::get_NoiseCuts(uint16_t onlineID) const {
         gEta = gEta < 0 ? std::abs(gEta+1) : gEta;
         if(gEta < 15){ // This is LATOME and Tile towers ( |eta| < 1.5 )
             //{CutJetEM, CutJetHad, CutMetEM, CutMetHad}
-            return m_NoiseCuts.find(0x00f0)->second;
+            auto p = m_NoiseCuts.find(0x00f0);
+            if (p != m_NoiseCuts.end()) return p->second;
+            return m_NoiseCuts_default;
         }
         else if (gEta < 32){  // This is LATOME  EMB/EMEC and HEC towers (1.5 < |eta| < 3.1)
-            return m_NoiseCuts.find(0x0f00)->second;
+            auto p = m_NoiseCuts.find(0x0f00);
+            if (p != m_NoiseCuts.end()) return p->second;
+            return m_NoiseCuts_default;
         }
         else{ // This is FCAL towers (|eta| > 3.1)
-            return m_NoiseCuts.find(0xf000)->second;
+            auto p = m_NoiseCuts.find(0xf000);
+            if (p != m_NoiseCuts.end()) return p->second;
+            return m_NoiseCuts_default;
         }             
-    }
-    else{
+    } else {
         auto itr = m_NoiseCuts.find(onlineID);
         if(itr == m_NoiseCuts.end()) {
             return m_NoiseCuts_default;
@@ -98,7 +103,9 @@ std::array<uint16_t,4> jFEXDBCondData::get_NoiseCuts(uint16_t onlineID) const {
 std::array<uint16_t,4> jFEXDBCondData::get_PileUpValues(uint16_t onlineID) const {
     
     if(m_sendDefaults){
-        return m_PileUpWeight.find(0x0000)->second;
+        auto p = m_PileUpWeight.find(0x0000);
+        if (p!= m_PileUpWeight.end()) return p->second;
+        return m_PileUpWeight_default;
     }
     else{
         auto itr = m_PileUpWeight.find(onlineID);
