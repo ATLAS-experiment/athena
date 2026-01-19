@@ -35,6 +35,8 @@ jFexInputProvider::jFexInputProvider(const std::string& type, const std::string&
    base_class(type, name, parent)
 {
    declareInterface<LVL1::IInputTOBConverter>( this );
+   declareProperty( "cXEweight_jFEX", m_cXEweight_jFEX, "cXE coefficient for jXE component" );
+   declareProperty( "cXEweight_gFEX", m_cXEweight_gFEX, "cXE coefficient for gXE component" );
 }
 
 jFexInputProvider::~jFexInputProvider()
@@ -392,9 +394,13 @@ jFexInputProvider::fillXE(TCS::TopoInputEvent& inputEvent) const {
   }
   
   //construct cXE
-  //note: FW specification interprets weights at 10 bit unsigned fixed point, 2 integer, 8 fractional bits
-  unsigned jWeight = 0.55 * pow(2,8); //TODO: read those from menu
-  unsigned gWeight = 0.45 * pow(2,8);
+  // note: FW interprets these weights as 10 bit unsigned fixed point, 2 integer, 8 fractional bits
+  // for better legibility the menu contains these weights as floats, the rounding/truncation here
+  // must therefore be consistently done in the (L1Calo) online SW loading these weights into the 
+  // relevant L1Topo IPBus registers.
+  unsigned jWeight = m_cXEweight_jFEX * pow(2,8);
+  unsigned gWeight = m_cXEweight_gFEX * pow(2,8);
+  
   long long cXE_x = (jWeight * global_ExTopoLong + gWeight * gXE_ExTopoLong) >> 8;
   long long cXE_y = (jWeight * global_EyTopoLong + gWeight * gXE_EyTopoLong) >> 8;
   
