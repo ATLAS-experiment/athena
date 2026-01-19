@@ -1,5 +1,5 @@
 /*
- *   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+ *   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  */
 
 #ifndef MMT_ROAD_H
@@ -22,9 +22,8 @@ class MMT_Road {
       return horizontalCheck() && stereoCheck() && matureCheck(bcwind);
     }
     unsigned int countHits() const { return m_road_hits.size(); }
-    unsigned int countRealHits() const;
-    unsigned int countUVHits(bool flag) const;
-    unsigned int countXHits(bool flag) const;
+    unsigned int countUHits() const;
+    unsigned int countXHits() const;
     bool evaluateLowRes() const;
     bool horizontalCheck() const;
     void incrementAge(const int bcwind);
@@ -37,7 +36,6 @@ class MMT_Road {
     int iRoadv() const { return m_iroadv; }
     bool matureCheck(const int bcwind) const;
     double mxl() const;
-    void reset();
     bool stereoCheck() const;
 
   private:

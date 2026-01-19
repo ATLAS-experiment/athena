@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MMT_Diamond.h"
@@ -177,14 +177,11 @@ void MMT_Diamond::findDiamonds(std::vector<std::shared_ptr<MMT_Hit> >& hits, std
         slope_t slope;
         slope.BC = bcidMode;
         slope.totalCount = road.countHits();
-        slope.realCount = road.countRealHits();
         slope.iRoad = road.iRoadx();
         slope.iRoadu = road.iRoadu();
         slope.iRoadv = road.iRoadv();
-        slope.uvbkg = road.countUVHits(true); // the bool in the following 4 functions refers to background/noise hits
-        slope.xbkg = road.countXHits(true);
-        slope.uvmuon = road.countUVHits(false);
-        slope.xmuon = road.countXHits(false);
+        slope.xCount = road.countXHits();
+        slope.uCount = road.countUHits();
         slope.age = slope.BC - bc_start;
         slope.mxl = road.mxl();
         slope.my = road.avgSofX(); // defined as my in ATL-COM-UPGRADE-2015-033
