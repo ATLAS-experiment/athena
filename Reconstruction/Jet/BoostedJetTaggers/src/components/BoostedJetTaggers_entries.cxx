@@ -6,6 +6,7 @@
 #include "BoostedJetTaggers/JSSWTopTaggerANN.h"
 #include "BoostedJetTaggers/JSSMLTool.h"
 #include "BoostedJetTaggers/JSSTaggerUtils.h"
+#include "BoostedJetTaggers/LundJetOnnxAlg.h"
 
 DECLARE_COMPONENT(SmoothedWZTagger)
 DECLARE_COMPONENT(SmoothedTopTagger)
@@ -15,3 +16,6 @@ DECLARE_COMPONENT(CP::JetQGTagger)
 DECLARE_COMPONENT(CP::JetQGTaggerBDT)
 DECLARE_COMPONENT(AthONNX::JSSMLTool)
 DECLARE_COMPONENT(JSSTaggerUtils)
+#ifndef XAOD_ANALYSIS
+DECLARE_COMPONENT( LundJetOnnxAlg )
+#endif
