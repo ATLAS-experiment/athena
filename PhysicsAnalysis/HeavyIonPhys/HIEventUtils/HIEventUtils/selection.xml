@@ -1,3 +1,4 @@
 <lcgdict>
+  <enum pattern="HI::*"/>
   <class name="HI::HIPileupTool" />
 </lcgdict>
