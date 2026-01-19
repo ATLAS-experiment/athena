@@ -21,13 +21,25 @@ MdtDigiToolOutput MDT_Response_DigiTool::digitize(const EventContext& ctx,
                                                   CLHEP::HepRandomEngine* rndmEngine) const {
     
     SG::ReadCondHandle<MuonGM::MuonDetectorManager> detMgr{m_detMgrKey, ctx};
-    MDT_Response responseTube{};
+    MDT_Response responseTube{m_DoUpdatedMdtDigi};
+
     // initialize MDT_Response
     responseTube.SetTubeRadius(detMgr->getMdtReadoutElement(input.getHitID())->innerTubeRadius());
-    responseTube.SetClusterDensity(m_clusterDensity);
-    responseTube.SetAttLength(m_attenuationLength);
     responseTube.SetTriggerElectron(m_threshold);
-
+    
+    if (m_DoUpdatedMdtDigi) {
+        responseTube.SetClusterDensity(10.);
+        responseTube.SetAttLength(30000.);
+        responseTube.SetIntegrationWindow(18.5);
+        responseTube.SetAdcOffset(35.); // constants determined Z -> mumu data in 2025
+        responseTube.SetAdcFactor(150.); // constants determined Z -> mumu data in 2025
+        responseTube.SetDoUpdatedMdtDigi(true);
+    }
+    else {
+        responseTube.SetClusterDensity(m_clusterDensity);
+        responseTube.SetAttLength(m_attenuationLength);
+    }
+    
     responseTube.SetSegment(input.radius(), input.positionAlongWire());
     ATH_MSG_DEBUG("Digitizing input ");
     if (m_DoQballGamma) {

@@ -43,6 +43,7 @@ private:
     Gaudi::Property<double> m_threshold{this, "Threshold" , 20.};
     Gaudi::Property<double> m_attenuationLength{this, "AttenuationLength", 16000};
     Gaudi::Property<bool> m_DoQballGamma{this, "DoQballGamma", false};
+    Gaudi::Property<bool> m_DoUpdatedMdtDigi{this, "DoUpdatedMdtDigi", false, "MDT digitization with updated constants and corrections"};
 };
 
 #endif
