@@ -53,6 +53,9 @@ namespace LVL1 {
       SG::ReadHandleKey<xAOD::jFexSumETRoIContainer> m_jTE_EDMKey {this, "jFexSumETRoIKey", "L1_jFexSumETRoI", "jFEX TE EDM"};
       // gFEX XE to build "combined MET" (cXE)
       SG::ReadHandleKey<xAOD::gFexGlobalRoIContainer> m_gXEJWOJ_EDMKey {this, "gMETComponentsJwojKey", "L1_gMETComponentsJwoj", "gFEX XEJWOJ EDM"};
+      //cXE coefficients
+      float m_cXEweight_jFEX = 0.0; 
+      float m_cXEweight_gFEX = 0.0;
       
       // jFex to L1Topo conversion factors
       static const int m_Et_conversion;

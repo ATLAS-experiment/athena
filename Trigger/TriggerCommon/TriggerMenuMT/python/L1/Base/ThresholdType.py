@@ -22,20 +22,23 @@ class ThrType( Enum ):
     # legacy calo thresholds
     EM = 41; TAU = 42; JET = 43; JE = 44; XE = 45; TE = 46; XS = 47 # noqa: E702
 
+    # additional Phase-1 thresholds
+    cXE = 48 # noqa: E702
+
     # zero bias threshold on CTPIN
     ZB = 50 
     ZBTopo = 51
 
     # topo thresholds
     TOPO = 60; MUTOPO = 61; MULTTOPO = 62; R2TOPO = 63 # noqa: E702
-
+    
     @staticmethod
     def LegacyTypes():
         return [ ThrType.EM, ThrType.TAU, ThrType.JET, ThrType.XE, ThrType.TE, ThrType.XS, ThrType.ZB ]
     
     @staticmethod
     def Run3Types():
-        return [ ThrType.MU, ThrType.eEM, ThrType.jEM, ThrType.eTAU, ThrType.jTAU, ThrType.cTAU, ThrType.jJ, ThrType.jLJ, ThrType.gJ, ThrType.gLJ, ThrType.gXE, ThrType.gTE, ThrType.jXE, ThrType.jTE, ThrType.LArSat, ThrType.ZBTopo ]
+        return [ ThrType.MU, ThrType.eEM, ThrType.jEM, ThrType.eTAU, ThrType.jTAU, ThrType.cTAU, ThrType.jJ, ThrType.jLJ, ThrType.gJ, ThrType.gLJ, ThrType.gXE, ThrType.gTE, ThrType.jXE, ThrType.jTE, ThrType.cXE, ThrType.LArSat, ThrType.ZBTopo ]
     
     @staticmethod
     def NIMTypes():
