@@ -112,7 +112,7 @@ StatusCode FPGATrackSim::FPGATrackSimRegionMergingAlg::mergeTracks(const std::ve
     }
 
     ATH_MSG_INFO("Filtering and concatenating " << numberOfAllTracks << " tracks from " << inputTracksPtrs.size() << " regions");
-    if constexpr (enableBenchmark) m_chrono->chronoStart("Merging Tracks");
+    if constexpr (enableBenchmark) m_chrono->chronoStart("RegionMerging: Merging Tracks");
     FPGATrackSimTrackCollection regionFilteredTracks;
     regionFilteredTracks.reserve(numberOfAllTracks);
     for (const FPGATrackSimTrackCollection* tracksInRegion : inputTracksPtrs)
@@ -125,20 +125,20 @@ StatusCode FPGATrackSim::FPGATrackSimRegionMergingAlg::mergeTracks(const std::ve
             }
         }
     }
-    if constexpr (enableBenchmark) m_chrono->chronoStop("Merging Tracks");
+    if constexpr (enableBenchmark) m_chrono->chronoStop("RegionMerging: Merging Tracks");
 
     // Overlap removal: It runs only on the tracks that passed the in-region OR
-    if constexpr (enableBenchmark) m_chrono->chronoStart("Overlap removal (tracks)");
+    if constexpr (enableBenchmark) m_chrono->chronoStart("RegionMerging: Overlap removal (tracks)");
     if (m_doOverlapRemoval) ATH_CHECK(m_overlapRemovalTool->runOverlapRemoval(regionFilteredTracks));
-    if constexpr (enableBenchmark) m_chrono->chronoStop("Overlap removal (tracks)");
+    if constexpr (enableBenchmark) m_chrono->chronoStop("RegionMerging: Overlap removal (tracks)");
 
-    if constexpr (enableBenchmark) m_chrono->chronoStart("Copying final tracks");
+    if constexpr (enableBenchmark) m_chrono->chronoStart("RegionMerging: Copying final tracks");
     outputTracks->reserve(numberOfAllTracks);
     for (const FPGATrackSimTrack & track: regionFilteredTracks)
     {
         if(track.passedOR()) outputTracks->push_back(track);
     }
-    if constexpr (enableBenchmark) m_chrono->chronoStop("Copying final tracks");
+    if constexpr (enableBenchmark) m_chrono->chronoStop("RegionMerging: Copying final tracks");
 
     m_nPreORTracks.fetch_add(regionFilteredTracks.size(), std::memory_order_relaxed); // number of tracks that passed the region OR only (if configured upstream)
     m_allIncomingTracks.fetch_add(numberOfAllTracks, std::memory_order_relaxed); // number of all tracks from all regions

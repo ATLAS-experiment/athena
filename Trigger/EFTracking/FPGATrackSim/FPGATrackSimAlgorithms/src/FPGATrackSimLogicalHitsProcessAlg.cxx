@@ -25,9 +25,11 @@
 #include "FPGATrackSimMaps/FPGATrackSimRegionMap.h"
 
 #include "GaudiKernel/IEventProcessor.h"
+#include "AthenaKernel/Chrono.h"
 
 #include <algorithm>
 #include <vector>
+#include <optional>
 
 constexpr bool enableBenchmark =
 #ifdef BENCHMARK_FPGATRACKSIM
@@ -214,7 +216,8 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::execute()
     m_slicedStripHeader->newEvent(eventInfo);
     m_slicedStripHeaderPreSP->newEvent(eventInfo);
     
-    if constexpr (enableBenchmark) m_chrono->chronoStart("1st Stage: Split hits to 1st and 2nd stage");
+    std::optional<Athena::Chrono> chronoSplitHits;
+    if constexpr (enableBenchmark) chronoSplitHits.emplace("1st Stage: Split hits to 1st and 2nd stage", m_chrono.get());
 
     std::vector<std::shared_ptr<const FPGATrackSimHit>> phits_output, phits_all, phits_1st, phits_2nd;
     phits_1st.reserve(FPGAHits->size());
@@ -236,10 +239,10 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::execute()
     // The slicing engine puts strip hits into a logical event input header. That header now needs to go
     // to the spacepoint tool if it's turned on. Those hits then get added to phits_1st or phits_2nd as appropriate.
     if (m_doSpacepoints) {
+        std::optional<Athena::Chrono> chronoSPFormation;
+        if constexpr (enableBenchmark) chronoSPFormation.emplace("1st Stage: SP fornmation", m_chrono.get());
         m_spacepoints.clear();
-        if constexpr (enableBenchmark) m_chrono->chronoStart("1st Stage: SP fornmation");
         ATH_CHECK(m_spacepointsTool->DoSpacePoints(*m_slicedStripHeader, m_spacepoints));
-        if constexpr (enableBenchmark) m_chrono->chronoStop("1st Stage: SP fornmation");
         for (const FPGATrackSimCluster& cluster : m_spacepoints) FPGASpacePoints->push_back(cluster);
     }
 
@@ -255,8 +258,6 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::execute()
     for (const FPGATrackSimHit* hit : *(FPGAHits_2nd.cptr())) {
         phits_output.emplace_back(hit, [](const FPGATrackSimHit*){});
     }
-
-    if constexpr (enableBenchmark) m_chrono->chronoStop("1st Stage: Split hits to 1st and 2nd stage");
     ATH_MSG_DEBUG("1st stage hits: " << phits_1st.size() << "          2nd stage hits: " << phits_2nd.size() );
     if (phits_1st.empty()) return StatusCode::SUCCESS;
     // Get truth tracks from DataPrep as well.
@@ -290,18 +291,20 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::execute()
         }
     };
 
-
-    if constexpr (enableBenchmark) m_chrono->chronoStart("1st Stage: GetRoads");
-    // get roads
     std::vector<std::shared_ptr<const FPGATrackSimRoad>> roads_1st;
+    {
+    std::optional<Athena::Chrono> chronoGetRoads;
+    if constexpr (enableBenchmark) chronoGetRoads.emplace("1st Stage: GetRoads", m_chrono.get());
+    // get roads
     ATH_CHECK(m_roadFinderTool->getRoads(phits_1st, roads_1st, *(FPGATruthTracks.cptr())));
-    monitorRoads(m_1st_stage_road_monitor, roads_1st); 
-    if constexpr (enableBenchmark) m_chrono->chronoStop("1st Stage: GetRoads");
+    monitorRoads(m_1st_stage_road_monitor, roads_1st);
+    }
     
 
-
+    {
     // Standard road Filter
-    if constexpr (enableBenchmark) m_chrono->chronoStart("1st Stage: RoadFiltering");
+    std::optional<Athena::Chrono> chronoRoadFiltering;
+    if constexpr (enableBenchmark) chronoRoadFiltering.emplace("1st Stage: RoadFiltering", m_chrono.get());
     std::vector<std::shared_ptr<const FPGATrackSimRoad>> postfilter_roads;
     if (m_filterRoads) {
         ATH_CHECK(m_roadFilterTool->filterRoads(roads_1st, postfilter_roads));
@@ -309,19 +312,23 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::execute()
     }
     //// (second road monitor, after road filter 1)
     monitorRoads(m_1st_stage_road_post_filter_1_monitor, roads_1st);
-    if constexpr (enableBenchmark) m_chrono->chronoStop("1st Stage: RoadFiltering");
+    }
         
 
+    {
     // overlap removal
-    if constexpr (enableBenchmark) m_chrono->chronoStart("1st Stage: OverlapRemoval");
+    std::optional<Athena::Chrono> chronoOverlapRemoval;
+    if constexpr (enableBenchmark) chronoOverlapRemoval.emplace("1st Stage: OverlapRemoval", m_chrono.get());
     if (m_doOverlapRemoval) ATH_CHECK(m_overlapRemovalTool_1st->runOverlapRemoval(roads_1st));
     //// (third road monitor, after overlap removal)
     monitorRoads(m_1st_stage_road_post_OLR_monitor, roads_1st);
-    if constexpr (enableBenchmark) m_chrono->chronoStop("1st Stage: OverlapRemoval");
+    }
 
 
+    {
     // Road Filter2
-    if constexpr (enableBenchmark) m_chrono->chronoStart("1st Stage: RoadFiltering2");
+    std::optional<Athena::Chrono> chronoRoadFiltering2;
+    if constexpr (enableBenchmark) chronoRoadFiltering2.emplace("1st Stage: RoadFiltering2", m_chrono.get());
     std::vector<std::shared_ptr<const FPGATrackSimRoad>> postfilter2_roads;
     if (m_filterRoads2) {
         ATH_CHECK(m_roadFilterTool2->filterRoads(roads_1st, postfilter2_roads));
@@ -329,7 +336,7 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::execute()
     }
     //// (fourth road monitor, after road filter 2)
     monitorRoads(m_1st_stage_road_post_filter_2_monitor, roads_1st);
-    if constexpr (enableBenchmark) m_chrono->chronoStop("1st Stage: RoadFiltering2");
+    }
 
 
     ////////////////////////////////////////////////////
@@ -354,9 +361,11 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::execute()
         monitor->fillTrack(track_ptrs, truthtracks, 1.e15);
     };
 
-    // Get tracks
-    if constexpr (enableBenchmark) m_chrono->chronoStart("1st Stage: Getting Tracks");
     std::vector<FPGATrackSimTrack> tracks_1st;
+    {
+    // Get tracks
+    std::optional<Athena::Chrono> chronoGettingTracks;
+    if constexpr (enableBenchmark) chronoGettingTracks.emplace("1st Stage: Getting Tracks", m_chrono.get());
     if (m_doTracking) {
         if (m_doNNTrack) {
             ATH_MSG_DEBUG("Performing NN tracking");
@@ -423,11 +432,13 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::execute()
     //// (first track monitor, after getting tracks)
     /// create a vector of references from a vector of instances
     monitorTracks(m_1st_stage_track_monitor, tracks_1st);
-    if constexpr (enableBenchmark) m_chrono->chronoStop("1st Stage: Getting Tracks");
+    }
     
 
+    {
     // set track parameters to truth
-    if constexpr (enableBenchmark) m_chrono->chronoStart("1st Stage: Set Track Parameters to Truth");
+    std::optional<Athena::Chrono> chronoSetTruthParams;
+    if constexpr (enableBenchmark) chronoSetTruthParams.emplace("1st Stage: Set Track Parameters to Truth", m_chrono.get());
     //Loop over tracks and set the region for all of them, also optionally set track parameters to truth
     for (FPGATrackSimTrack& track : tracks_1st) {
         track.setRegion(m_region);
@@ -447,7 +458,7 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::execute()
     //// (second track monitor, after set track parameters to truth)
     /// create a vector of references from a vector of instances
     monitorTracks(m_1st_stage_track_post_setTruth_monitor, tracks_1st);
-    if constexpr (enableBenchmark) m_chrono->chronoStop("1st Stage: Set Track Parameters to Truth");
+    }
 
     // Loop over roads and store them in SG (after track finding to also copy the sector information)
     for (auto const& road : roads_1st) {
@@ -462,8 +473,10 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::execute()
         FPGARoads_1st->push_back(*road);
     }
 
+    {
     // overlap removal
-    if constexpr (enableBenchmark) m_chrono->chronoStart("1st Stage: OverlapRemoval");
+    std::optional<Athena::Chrono> chronoOverlapRemoval2;
+    if constexpr (enableBenchmark) chronoOverlapRemoval2.emplace("1st Stage: OverlapRemoval", m_chrono.get());
     if (m_doOverlapRemoval)  ATH_CHECK(m_overlapRemovalTool_1st->runOverlapRemoval(tracks_1st));
     // monitor variables (vectors of pointers)
     std::vector<const FPGATrackSimTrack*> tracks_1st_after_chi2;
@@ -482,7 +495,7 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::execute()
     monitorTracks(m_1st_stage_track_post_chi2_monitor, tracks_1st_after_chi2);
     //// (fourth track monitor, after overlap removal)
     monitorTracks(m_1st_stage_track_post_OLR_monitor, tracks_1st_after_overlap);
-    if constexpr (enableBenchmark) m_chrono->chronoStop("1st Stage: OverlapRemoval");
+    }
 
     m_nRoadsTot += roads_1st.size();
     m_nTracksTot += tracks_1st.size();

@@ -23,81 +23,100 @@ StatusCode runOverlapRemoval(std::vector<FPGATrackSimTrack>& tracks, const float
   // Debug variables 
   int ntrack_passOR = 0;
   int ntrack = 0;
-  std::vector<int> track_passOR_counter;
-  std::vector<int> track_passOR_barcodefrac;
-  track_passOR_counter.clear();
-  track_passOR_barcodefrac.clear();
+  std::vector<int> track_passOR_counter(tracks.size(), -1);
+  std::vector<int> track_passOR_barcodefrac(tracks.size(), -1);
   int ntrack_passOR_total = 0;
   int trackMuon_gt0pt5_passOR = 0;
   float tmp_TrueTrack_BCF = -999;
 
+  // Pre-filter tracks with bad chi2
+  std::vector<unsigned int> goodTrackIndices;
+  goodTrackIndices.reserve(tracks.size());
+  for(unsigned int i = 0; i < tracks.size(); i++)
+  {
+    if(tracks[i].getChi2ndof() > minChi2)
+    {
+      tracks[i].setPassedOR(0);
+    }
+    else
+    {
+      goodTrackIndices.push_back(i);
+    }
+  }
 
-  // Create tracks to hold and compare
+  // Pre-compute track_counter based on chi2 cuts (static per event, doesn't depend on track pairs)
+  std::vector<int> track_counter;
+  int ntr_belowMinChi2 = 0;
   for(unsigned int i=0; i<tracks.size();i++)
   {
+    if(tracks.at(i).getChi2ndof() >  minChi2) {
+      track_counter.push_back(0);
+      flags_OR.push_back(-1);
+    } else {
+      ntr_belowMinChi2++;
+      track_counter.push_back(ntr_belowMinChi2);
+      flags_OR.push_back(1);
+    }
+  }
+
+  // Create tracks to hold and compare - only process good tracks
+  for(size_t idx = 0; idx < goodTrackIndices.size(); idx++)
+  {
+    unsigned int i = goodTrackIndices[idx];
     FPGATrackSimTrack &fit1 = tracks.at(i);
 
-    // Apply Chi2 cut
-    if(fit1.getChi2ndof() > minChi2)
-    {
-      // Only consider track with chi2 smaller than minChi2
-      fit1.setPassedOR(0);
-      continue;
-    }
+    // Skip if already marked as failed
+    if(!fit1.passedOR()) continue;
 
     // Create vector for holding duplicate track list
     std::vector<int> duplicates(1,i);
 
-    // Loop through the rest of the tracks
-    for(unsigned int j=0; j<tracks.size(); j++)
+    // Loop through ALL other good tracks (not just those after)
+    for(size_t jdx = 0; jdx < goodTrackIndices.size(); jdx++)
     {
-      if(i!=j)
-      {
-	FPGATrackSimTrack &fit2=tracks.at(j);
-        // Apply Chi2 cut and potentially OR cut if so desired
-        if(fit2.getChi2ndof()>minChi2)
-        {
-          fit2.setPassedOR(0);
-          continue;
-        }
-        //  Based on the algorithm choose common hit of non-common hit
-        if(orAlgo == ORAlgo::Normal)
-        {
-          // Find the number of common hits between two tracks. We have two ways to do this:
-          // * only compare hits in the same 'layer', requires tracks to be the same size.
-          // * compare every hit to every other hit; allows for tracks to be different sizes.
-          int nOverlappingHits = 0;
-          nOverlappingHits= (compareAllHits) ? findNCommonHitsGlobal(fit1,fit2) : findNCommonHits(fit1,fit2);
-          // Group overlapping tracks into a vector for removal if at least [NumOfHitPerGrouping] hits are the same
-          if(nOverlappingHits >= NumOfHitPerGrouping)
-          {
-            duplicates.push_back(j);
-          }
-        }
-        else if(orAlgo == ORAlgo::InvertGrouping)
-        {
-          //  Find the number of non-common hits between two tracks
-          int nNotOverlappingHits=0;
-          nNotOverlappingHits=findNonOverlapHits(fit1, fit2);
+      if(jdx == idx) continue; // Skip comparing with itself
+      
+      unsigned int j = goodTrackIndices[jdx];
+      FPGATrackSimTrack &fit2 = tracks.at(j);
 
-          // If the number of non-overlapping hit is [NumOfHitPerGrouping] or less
-          if(nNotOverlappingHits <= NumOfHitPerGrouping)
-          {
-            duplicates.push_back(j);
-          }
+      //  Based on the algorithm choose common hit of non-common hit
+      if(orAlgo == ORAlgo::Normal)
+      {
+        // Find the number of common hits between two tracks. We have two ways to do this:
+        // * only compare hits in the same 'layer', requires tracks to be the same size.
+        // * compare every hit to every other hit; allows for tracks to be different sizes.
+        int nOverlappingHits = 0;
+        nOverlappingHits = (compareAllHits) ? findNCommonHitsGlobal(fit1, fit2) : findNCommonHits(fit1, fit2);
+        
+        // Group overlapping tracks into a vector for removal if at least [NumOfHitPerGrouping] hits are the same
+        if(nOverlappingHits >= NumOfHitPerGrouping)
+        {
+          duplicates.push_back(j);
+        }
+      }
+      else if(orAlgo == ORAlgo::InvertGrouping)
+      {
+        // Find the number of non-common hits between two tracks using coordinate comparison
+        int nNotOverlappingHits = 0;
+        nNotOverlappingHits = findNonOverlapHits(fit1, fit2);
+
+        // If the number of non-overlapping hit is [NumOfHitPerGrouping] or less
+        if(nNotOverlappingHits <= NumOfHitPerGrouping)
+        {
+          duplicates.push_back(j);
         }
       }
     }
-    findMinChi2MaxHit(duplicates, tracks, flags_OR, minChi2);
+    findMinChi2MaxHit(duplicates, tracks, flags_OR, track_counter);
   
     
     // Monitoring 
     ntrack++;
-    track_passOR_counter.push_back(ntrack);
+    track_passOR_counter[i] = ntrack;
     // barcodeFrac should be set in the track upstream e.g in FPGATrackSimLogicalHitsProcessAlg.cxx using calculateTruth()
     if (fit1.getBarcodeFrac() < 0)
       ANA_MSG_WARNING("barcodeFrac not set!");
-    track_passOR_barcodefrac.push_back(fit1.getBarcodeFrac());
+    track_passOR_barcodefrac[i] = fit1.getBarcodeFrac();
     // check if the track passes OR and has barcodeFrac > 0.5
     if(fit1.getBarcodeFrac() > 0.5 && fit1.passedOR()) {
       // count how many muon tracks satisfy the condition
@@ -161,7 +180,7 @@ int findNonOverlapHits(const FPGATrackSimTrack& Track1, const FPGATrackSimTrack&
     // Check if two hits have same coordinate. this is difficult due to spacepoints,
     // since the same hit can be used to make multiple spacepoints.
     else if (hit1.getHitType() == HitType::spacepoint && hit2.getHitType() == HitType::spacepoint) {
-      if ((abs(hit1.getX() - hit2.getX()) > EPSILON) || (abs(hit1.getY() - hit2.getY()) < EPSILON) || (abs(hit1.getZ() - hit2.getZ()) < EPSILON)) {
+      if ((abs(hit1.getX() - hit2.getX()) > EPSILON) || (abs(hit1.getY() - hit2.getY()) > EPSILON) || (abs(hit1.getZ() - hit2.getZ()) > EPSILON)) {
         nonOverlapHits++;
       } else {
         continue;
@@ -180,23 +199,8 @@ int findNonOverlapHits(const FPGATrackSimTrack& Track1, const FPGATrackSimTrack&
 }
 
 
-void findMinChi2MaxHit(const std::vector<int>& duplicates, std::vector<FPGATrackSimTrack>& RMtracks, std::vector<int> flags_OR, const float minChi2)
+void findMinChi2MaxHit(const std::vector<int>& duplicates, std::vector<FPGATrackSimTrack>& RMtracks, std::vector<int>& flags_OR, const std::vector<int>& track_counter)
 {
-  int ntr_belowMinChi2 = 0;
-  std::vector<int> track_counter;
-
-  for(unsigned int i=0; i<RMtracks.size();i++)
-  {
-    if(RMtracks.at(i).getChi2ndof() >  minChi2) {
-      track_counter.push_back(0);
-      flags_OR.push_back(-1);
-      continue;
-    }
-    ntr_belowMinChi2++;    
-    track_counter.push_back(ntr_belowMinChi2);
-    flags_OR.push_back(1);
-  }
-
   int dup_counter = 0;
   int head_track = 1;
   float head_chi2 = 0.;
@@ -254,16 +258,18 @@ void findMinChi2MaxHit(const std::vector<int>& duplicates, std::vector<FPGATrack
 int findNCommonHits_v2(const FPGATrackSimTrack& Track1, const FPGATrackSimTrack& Track2)
 {
   int nCommHits = 0;
-  std::vector<bool> hit2_matched(Track2.getFPGATrackSimHits().size(), false);
+  std::vector<uint8_t> hit2_matched(Track2.getFPGATrackSimHits().size(), 0);
 
   for (const auto& hit1 : Track1.getFPGATrackSimHits())
-    {
-      for (size_t j = 0; j < Track2.getFPGATrackSimHits().size(); ++j)
-	{
-	  const auto& hit2 = Track2.getFPGATrackSimHits()[j];
+  {
+    if (!hit1.isReal()) continue; // Skip if hit1 is not real
 
-	  if (hit2_matched[j]) continue; // already used this hit
-	  else if (!hit1.isReal() || !hit2.isReal()) continue; // Check if hit is missing
+    for (size_t j = 0; j < Track2.getFPGATrackSimHits().size(); ++j)
+    {
+      const auto& hit2 = Track2.getFPGATrackSimHits()[j];
+
+      if (hit2_matched[j]) continue; // already used this hit
+      else if (!hit2.isReal()) continue; // Check if hit is missing
 	  else if (hit1.getLayer() != hit2.getLayer()) continue; // Check if hit on the same plane
 	  else if (hit1.getIdentifierHash() != hit2.getIdentifierHash()) continue; // Check if two hits have the same hashID
 
@@ -300,16 +306,18 @@ int findNCommonHits_v2(const FPGATrackSimTrack& Track1, const FPGATrackSimTrack&
 int findNCommonHitsGlobal(const FPGATrackSimTrack& Track1, const FPGATrackSimTrack& Track2)
 {
   int nCommHits = 0;
-  std::vector<bool> hit2_matched(Track2.getFPGATrackSimHits().size(), false);
+  std::vector<uint8_t> hit2_matched(Track2.getFPGATrackSimHits().size(), 0);
 
   for (const auto& hit1 : Track1.getFPGATrackSimHits())
   {
+    if (!hit1.isReal()) continue; // Skip if hit1 is not real
+
     for (size_t j = 0; j < Track2.getFPGATrackSimHits().size(); ++j)
     {
       const auto& hit2 = Track2.getFPGATrackSimHits()[j];
 
       if (hit2_matched[j]) continue; // already used this hit
-      else if (!hit1.isReal() || !hit2.isReal()) continue; // Check if hit is missing
+      else if (!hit2.isReal()) continue; // Check if hit is missing
       else if (hit1.getLayer() != hit2.getLayer()) continue; // Check if hit on the same plane
       else if (hit1.getIdentifierHash() != hit2.getIdentifierHash()) continue; // Check if two hits have the same hashID
 
