@@ -737,6 +737,13 @@ static void cluster_transfer_helper_moments(ReadStateFrom & state_holder,
           }
       };
 
+      if (!moments_to_add[xAOD::CaloCluster::NCELL_SAMPLING])
+        //We need to tranfer the number of cells per sampling in any case
+        //to be able to properly populate the sampling bit pattern...
+        {
+          moments_copy_helper(output_clusters->moments.nCellSampling, input_clusters->moments.nCellSampling);
+        }
+
 #define CALORECGPU_MOMENTS_TO_GPU_HELPER(VAR_NAME, PROPER_MOMENT, NORMAL_ASSIGN, IS_CALCULATED, MOMENT_NAME, ...) \
   CRGPU_CONCAT(CRGPU_CONCAT(CALORECGPU_MOMENTS_TO_GPU_HELPER_, PROPER_MOMENT), IS_CALCULATED)  (VAR_NAME, MOMENT_NAME)
 
@@ -753,10 +760,10 @@ static void cluster_transfer_helper_moments(ReadStateFrom & state_holder,
       moments_copy_helper(output_clusters->moments. VAR_NAME, input_clusters->moments. VAR_NAME);                 \
     }
 
-#define CALORECGPU_MOMENTS_TO_GPU_HELPER_01( VAR_NAME, MOMENT_NAME)                                               \
+#define CALORECGPU_MOMENTS_TO_GPU_HELPER_01(VAR_NAME, MOMENT_NAME)                                                \
   moments_copy_helper(output_clusters->moments. VAR_NAME, input_clusters->moments. VAR_NAME);
 
-#define CALORECGPU_MOMENTS_TO_GPU_HELPER_00(PROPER_MOMENT, VAR_NAME, MOMENT_NAME)                                 \
+#define CALORECGPU_MOMENTS_TO_GPU_HELPER_00(VAR_NAME, MOMENT_NAME)                                                \
   if (state_holder->state == CaloRecGPU::ClusterInformationState::WithExtraMoments)                               \
     {                                                                                                             \
       moments_copy_helper(output_clusters->moments. VAR_NAME, input_clusters->moments. VAR_NAME);                 \

@@ -857,6 +857,8 @@ namespace
     //To avoid the warnings about the function not having been referenced.
     //Useful for debugging the algorithm.
 
+    //Safe to be called simultaneously from multiple threads
+    //if indeed the thread index is provided.
     constexpr void add_value(const unsigned int thread, const unsigned int bin, const uint16_t value)
     {
       const unsigned int index = bin / s_divider;
@@ -993,13 +995,9 @@ namespace
           {
             shared_hist.carriers[i][LocalSortingNumThreads] = shared_array[LocalSortingNumWarps - 1];
           }
-        //No worries about synchronization since the thread that reads
-        //from the shared array is also at lane (intra_warp_index) 31,
-        //which means it is also the one writing to the shared array
-        //at the next step (after this).
+        
+        __syncthreads();
       }
-
-    __syncthreads();
 
     local_sort_final_prefix_sum(this_thread_index, shared_hist);
 
@@ -1101,17 +1099,24 @@ __global__ static void buildHistogramKernel(Helpers::CUDA_kernel_object<ClusterI
 
   if (number_of_clusters <= LocalSortingMaxNumber)
     {
-      if (blockIdx.x == 0 && threadIdx.x < LocalSortingNumThreads)
+      if (threadIdx.x >= LocalSortingNumThreads)
+        {
+          return;
+        }
+      
+      if (blockIdx.x == 0)
         {
           local_sort(clusters_arr, number_of_clusters);
         }
     }
   else if (blockIdx.x * HistogramItemsPerBlock < number_of_clusters)
     {
-      if (threadIdx.x < HistogramNumThreadsPerBlock)
+      if (threadIdx.x >= HistogramNumThreadsPerBlock)
         {
-          onesweep_histogram(clusters_arr, number_of_clusters);
+          return;
         }
+      
+      onesweep_histogram(clusters_arr, number_of_clusters);
     }
 }
 

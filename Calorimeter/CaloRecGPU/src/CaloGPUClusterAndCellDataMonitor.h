@@ -147,7 +147,10 @@ class CaloGPUClusterAndCellDataMonitor :
 
   StatusCode match_clusters(sample_comparisons_holder & sch,
                             const CaloRecGPU::ConstantDataHolder & constant_data,
-                            const CaloRecGPU::CellInfoArr & cell_info,
+                            const CaloRecGPU::CellInfoArr & cell_info_1,
+                            const CaloRecGPU::CellInfoArr & cell_info_2,
+                            const std::vector<int> & cells_prefix_sum_1,
+                            const std::vector<int> & cells_prefix_sum_2,
                             const CaloRecGPU::ClusterInfoArr & cluster_info_1,
                             const CaloRecGPU::ClusterInfoArr & cluster_info_2,
                             const bool match_in_energy,
@@ -155,7 +158,10 @@ class CaloGPUClusterAndCellDataMonitor :
 
   StatusCode match_clusters_perfectly(sample_comparisons_holder & sch,
                                       const CaloRecGPU::ConstantDataHolder & constant_data,
-                                      const CaloRecGPU::CellInfoArr & cell_info,
+                                      const CaloRecGPU::CellInfoArr & cell_info_1,
+                                      const CaloRecGPU::CellInfoArr & cell_info_2,
+                                      const std::vector<int> & cells_prefix_sum_1,
+                                      const std::vector<int> & cells_prefix_sum_2,
                                       const CaloRecGPU::ClusterInfoArr & cluster_info_1,
                                       const CaloRecGPU::ClusterInfoArr & cluster_info_2,
                                       const bool match_without_shared) const;

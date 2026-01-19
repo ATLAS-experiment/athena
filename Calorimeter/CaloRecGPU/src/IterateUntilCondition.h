@@ -91,27 +91,28 @@ namespace IterateUntilCondition
 
     bool was_once_valid = false;
 
-    int count = 0;
+    volatile unsigned int * to_check = static_cast<volatile unsigned int *>(&store->mutex_check);
     
     do
       {
-        last_check = atomicOr(&store->mutex_check, 0U);
+        last_check = *to_check;
         was_once_valid = !(last_check & 0x80000000U);
-        ++count;
       }
     while (last_check < ticket && !(last_check & 0x80000000U));
 
-    return was_once_valid && count < 10000;
+    return was_once_valid;
   }
 
   inline __device__ void unlock_mutex(Storage * store)
   {
-    atomicAdd(&store->mutex_check, 1U);
+    volatile unsigned int * ptr = static_cast<volatile unsigned int *>(&store->mutex_check);
+    *ptr = *ptr + 1;
   }
 
   inline __device__ void disable_mutex(Storage * store)
   {
-    atomicOr(&store->mutex_check, 0x80000000U);
+    volatile unsigned int * ptr = static_cast<volatile unsigned int *>(&store->mutex_check);
+    *ptr = *ptr | 0x80000000U;
   }
 
   inline __device__ bool check_if_participating(Storage * store)
@@ -120,7 +121,9 @@ namespace IterateUntilCondition
 
     unsigned int old_count = Storage::NumMaxBlocks;
 
-    if (atomicOr(&store->poll_closed, 0U) == 0)
+    volatile unsigned int * poll_closed_ptr = static_cast<volatile unsigned int *>(&store->poll_closed);
+
+    if (*poll_closed_ptr == 0)
       {
         old_count = atomicAdd(&store->count, 1);
         store->block_indices[blockIdx.x] = old_count;
@@ -135,21 +138,16 @@ namespace IterateUntilCondition
         return false;
       }
 
-    if (atomicOr(&store->poll_closed, 0U))
+    if (*poll_closed_ptr == 0)
       {
         try_lock_mutex(store);
-        atomicOr(&store->poll_closed, 1U);
-        //disable_mutex(store);
+        *poll_closed_ptr = 1;
+        disable_mutex(store);
         unlock_mutex(store);
       }
 
     return (old_count < Storage::NumMaxBlocks);
   }
-
-  //Possible TO-DO:
-  //Some/all of these atomic operations
-  //probably just require volatile semantics.
-  //To investigate at some other point...
 
   template <class Condition, class Before, class After, class ... Funcs, class ... Args>
   __device__ void normal_kernel_impl(const Holder<Condition, Before, After, Funcs...> &, Storage * store, Args && ... args)
@@ -166,7 +164,7 @@ namespace IterateUntilCondition
     __syncthreads();
 
     const unsigned int this_block_index = store->block_indices[blockIdx.x];
-    const unsigned int total_blocks = min(store->count, Storage::NumMaxBlocks);
+    const unsigned int total_blocks = min(*static_cast<volatile unsigned int *>(&store->count), Storage::NumMaxBlocks);
         
     if (is_participating)
       {
@@ -190,18 +188,23 @@ namespace IterateUntilCondition
 
               func(total_blocks, this_block_index, checker, std::forward<Args>(args)...);
 
-              return;
-
               //Technically, for the foreseeable future,
               //this could be simply the if,
               //as the maximum number of concurrent blocks
               //in all devices is smaller than 1024...
               if (is_reference_block)
                 {
-
                   for (unsigned int block_to_check = this_thread_index + 1; block_to_check < total_blocks; block_to_check += num_threads_per_block)
                     {
-                      while (store->wait_flags[block_to_check] == 0);
+                      unsigned int last_check = 0;
+                      
+                      volatile unsigned int * to_check = static_cast<volatile unsigned int*>(&store->wait_flags[block_to_check]);
+
+                      do
+                        {
+                          last_check = *to_check;
+                        }
+                      while (last_check == 0);
                       //When porting to non-CUDA, this may need to be some form of atomic load.
                     }
 
@@ -209,18 +212,32 @@ namespace IterateUntilCondition
 
                   for (unsigned int block_to_check = this_thread_index + 1; block_to_check < total_blocks; block_to_check += num_threads_per_block)
                     {
+                      __threadfence();
+                      //*static_cast<volatile unsigned int*>(&store->wait_flags[block_to_check]) = 0;
                       atomicAnd(&(store->wait_flags[block_to_check]), 0U);
                     }
+
+                  __syncthreads();
                 }
               else
                 {
                   __syncthreads();
 
                   if (is_reference_thread)
-                    {
+                    {                      
                       atomicOr(&(store->wait_flags[this_block_index]), 1U);
 
-                      while (store->wait_flags[this_block_index] != 0);
+                      unsigned int last_check = 1;
+                      
+                      volatile unsigned int * to_check = static_cast<volatile unsigned int*>(&store->wait_flags[this_block_index]);
+
+                      __threadfence();
+                      
+                      do
+                        {
+                          last_check = *to_check;
+                        }
+                      while (last_check != 0);
                       //When porting to non-CUDA, this may need to be some form of atomic load.
                     }
 

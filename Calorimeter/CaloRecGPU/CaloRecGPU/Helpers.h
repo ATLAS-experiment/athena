@@ -202,7 +202,7 @@ namespace CaloRecGPU
     /*!
       \brief Optimizes block and grid size for a cooperative launch.
     */
-    void optimize_block_and_grid_size_for_cooperative_launch(void * func, int & block_size, int & grid_size, const int dynamic_memory = 0, const int block_size_limit = 0);
+    void optimize_block_and_grid_size_for_cooperative_launch(void * func, int & block_size, int & grid_size, const int dynamic_memory = 0, const int block_size_limit = 0, const bool multiple_blocks_per_SM = true);
 
     bool supports_cooperative_launches();
 
@@ -1698,12 +1698,58 @@ namespace CaloRecGPU
 
       mutable std::shared_mutex m_mutex;
 
+      //Assumes a (read) lock is taken!
+      //Returns nullptr if the current thread
+      //has no objects associated with it.
+      T * get_pointer_if_available() const
+      {
+        const std::thread::id this_id = std::this_thread::get_id();
+        
+        for (size_t i = 0; i < m_thread_equivs.size(); ++i)
+          {
+            if (m_thread_equivs[i] == this_id)
+              {
+                return m_held[i].get();
+              }
+          }
+        return nullptr;
+      }
+
       T & add_one_and_return()
       {
         std::unique_lock<std::shared_mutex> lock(m_mutex);
-        m_held.emplace_back(std::make_unique<T>());
-        m_thread_equivs.emplace_back(std::this_thread::get_id());
-        return *(m_held.back());
+        
+        const std::thread::id this_id = std::this_thread::get_id();
+        const std::thread::id invalid_id{};
+
+        bool empty_found = false;
+        
+        size_t first_empty;
+        
+        for (size_t i = 0; i < m_thread_equivs.size(); ++i)
+          {
+            if (m_thread_equivs[i] == this_id)
+              {
+                return *(m_held[i]);
+              }
+            else if (!empty_found && m_thread_equivs[i] == invalid_id)
+              {
+                empty_found = true;
+                first_empty = i;
+              }
+          }
+
+        if (empty_found)
+          {
+            m_thread_equivs[first_empty] = this_id;
+            return *(m_held[first_empty]);
+          }
+        else
+          {
+            m_held.emplace_back(std::make_unique<T>());
+            m_thread_equivs.emplace_back(std::this_thread::get_id());
+            return *(m_held.back());
+          }
       }
 
      public:
@@ -1711,15 +1757,12 @@ namespace CaloRecGPU
       {
         {
           std::shared_lock<std::shared_mutex> lock(m_mutex);
-          std::thread::id this_id = std::this_thread::get_id();
-          const std::thread::id invalid_id{};
-          for (size_t i = 0; i < m_thread_equivs.size(); ++i)
+
+          T * to_return = get_pointer_if_available();
+
+          if (to_return != nullptr)
             {
-              if (m_thread_equivs[i] == invalid_id)
-                {
-                  m_thread_equivs[i] = this_id;
-                  return *(m_held[i]);
-                }
+              return *to_return;
             }
         }
         return add_one_and_return();
@@ -1729,17 +1772,19 @@ namespace CaloRecGPU
       T & get_for_thread() const
       {
         std::shared_lock<std::shared_mutex> lock(m_mutex);
-        std::thread::id this_id = std::this_thread::get_id();
-        for (size_t i = 0; i < m_thread_equivs.size(); ++i)
+
+        T * to_return = get_pointer_if_available();
+
+        if (to_return != nullptr)
           {
-            if (m_thread_equivs[i] == this_id)
-              {
-                return *(m_held[i]);
-              }
+            return *to_return;
           }
-        //Here would be a good place for an unreachable.
-        //C++23?
-        return *(m_held.back());
+        else
+          {
+            //Here would be a good place for an unreachable.
+            //C++23?
+            return *(m_held.back());
+          }
       }
 
       void release_one()

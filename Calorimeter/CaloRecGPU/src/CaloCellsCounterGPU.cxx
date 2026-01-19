@@ -71,7 +71,7 @@ StatusCode CaloCellsCounterGPU::execute(const EventContext & ctx, const Constant
     {
       for (int i = 0; i < cell_info->number; ++i)
         {
-          if (!cell_info->is_valid(i))
+          if (!cell_info->is_valid(cell_info->hashID[i]))
             {
               continue;
             }
@@ -167,7 +167,7 @@ StatusCode CaloCellsCounterGPU::execute(const EventContext & ctx, const Constant
     {
       for (int i = 0; i < cell_info->number; ++i)
         {
-          if (!cell_info->is_valid(i))
+          if (!cell_info->is_valid(cell_info->hashID[i]))
             {
               continue;
             }
