@@ -124,7 +124,7 @@ void signalToNoiseKernel(Helpers::CUDA_kernel_object<ClusterInfoArr> clusters_ar
 
       const int cell_sampling = (hash_ID >= 0 ? geometry->sampling(hash_ID) : 0);
 
-      if (hash_ID < 0 || !cell_info_arr->is_valid(cell, assume_complete_cells) || !opts->uses_calorimeter_by_sampling(cell_sampling))
+      if (hash_ID < 0 || !cell_info_arr->is_valid(hash_ID, assume_complete_cells) || !opts->uses_calorimeter_by_sampling(cell_sampling))
         {
           clusters_arr->cells.tags[cell] = TACTag::make_invalid_tag();
           TACTemporaries::secondary_array(clusters_arr, cell) = TACTag::make_invalid_tag();
@@ -282,7 +282,6 @@ void cellPairsKernel(Helpers::CUDA_kernel_object<ClusterInfoArr> clusters_arr,
       int neighbours[NMaxNeighbours];
 
       int num_seedgrow_neighs = 0, num_term_neighs = 0, num_total_neighs = 0;
-
 
       constexpr unsigned int grow_seed_neighbour_mark = 0x100000;
       constexpr unsigned int term_neighbour_mark      = 0x200000;

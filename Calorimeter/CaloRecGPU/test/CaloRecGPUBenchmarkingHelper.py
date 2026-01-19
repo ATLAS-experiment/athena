@@ -3,10 +3,168 @@
 import os
 import numpy as np
 import pandas as pd
+import subprocess
 
 import ROOT as rr
 
 rr.gROOT.SetStyle('ATLAS')
+rr.gROOT.SetBatch(1)
+
+rr.TCandle.SetScaledViolin(False)
+
+#From the atlas-plots repo:
+#https://github.com/joeycarter/atlas-plots/tree/master
+def atlas_label(
+    x=None,
+    y=None,
+    text="",
+    loc="",
+    size=None,
+    font=None,
+    align=None,
+    color=None,
+    alpha=None,
+    angle=None   ):
+  """Draws the "official" ATLAS label.
+
+  Guidelines from PubCom:
+
+  An ATLAS label must be present on plots which have been approved by ATLAS:
+
+  - ATLAS: means the plot has been submitted for publication or is in the
+    associated approved auxiliary material (i.e. an ATLAS paper, or a
+    pre-datataking publication like the CSC notes).
+  - ATLAS Preliminary: means the plot has been approved by ATLAS but has not
+    appeared in a refereed publication. This is used in particular for CONF
+    and PUB notes.
+  - ATLAS Work In Progress: used only in student talks at national meetings
+    where the student is presenting what is largely her own work. This should
+    not be used for internal plots inside ATLAS.
+  - ATLAS Internal: for plots shown in internal ATLAS talks (including
+    approval talks) or included in draft documents circulated to ATLAS.
+
+  Parameters
+  ----------
+  x, y : float, optional
+      The x- and y-coordinates of the ATLAS label in NDC units [0, 1].
+
+      This x-coordinate is left-aligned and the y-coordinate is top-aligned
+      unless the `align` argument is given.
+
+  text : str, optional
+      Additional text, e.g. "Internal", "Preliminary", etc. ROOT TLatex syntax
+      is supported.
+
+  loc : str, optional
+      The location of the ATLAS label.
+
+      The strings 'upper left', 'upper right', 'lower left', 'lower right'
+      place the label at the corresponding corner of the axes/figure. This
+      option is overridden if the `x` and `y` arguments are provided.
+
+      The default location is 'upper left'.
+
+  size : float, optional
+      Text size.
+
+  font : int, optional
+      ROOT font code.
+
+  align : int, optional
+      ROOT text-alignment code.
+
+  color : int, optional
+      ROOT text-color code.
+
+  alpha : float, optional
+      Text alpha.
+
+      Not recommended for official ATLAS labels!
+
+  angle : float, optional
+      Text angle in degrees.
+
+      Not recommended for official ATLAS labels!
+
+  Returns
+  -------
+  ROOT.TLatex
+      The TLatex object for this label.
+  """
+  if rr.gROOT.GetStyle("ATLAS") is None:
+    print("warning: The 'ATLAS' style has not been set")
+
+  label = rr.TLatex()
+  label.SetNDC()
+
+  if size is not None:
+    label.SetTextSize(size)
+
+  if font is not None:
+    label.SetTextFont(font)
+
+  if align is not None:
+    label.SetTextAlign(align)
+
+  if color is not None and alpha is not None:
+    label.SetTextColorAlpha(color, alpha)
+  elif color is not None:
+    label.SetTextColor(color)
+
+  if angle is not None:
+    label.SetTextAngle(angle)
+
+  if font is not None:
+    label.SetTextFont(font)
+
+  # Decide on label position
+  if x is not None and y is not None:
+    # Set location manually
+    xpos = x
+    ypos = y
+
+  elif loc:
+    # Set location automatically from 'loc' argument
+    if loc == "upper left":
+        label.SetTextAlign(13)
+        xpos = rr.gPad.GetLeftMargin() + 0.04
+        ypos = 1 - rr.gPad.GetTopMargin() - 0.04
+    elif loc == "upper right":
+        label.SetTextAlign(33)
+        xpos = 1 - rr.gPad.GetRightMargin() - 0.04
+        ypos = 1 - rr.gPad.GetTopMargin() - 0.04
+    elif loc == "lower left":
+        label.SetTextAlign(11)
+        xpos = rr.gPad.GetLeftMargin() + 0.04
+        ypos = rr.gPad.GetBottomMargin() + 0.04
+    elif loc == "lower right":
+        label.SetTextAlign(31)
+        xpos = 1 - rr.gPad.GetRightMargin() - 0.04
+        ypos = rr.gPad.GetBottomMargin() + 0.04
+    else:
+      print(
+          "warning: unrecognized location '{}'. "
+          "Falling back on 'upper left'".format(loc)
+      )
+      label.SetTextAlign(13)
+      xpos = rr.gPad.GetLeftMargin() + 0.04
+      ypos = 1 - rr.gPad.GetTopMargin() - 0.04
+
+  else:
+    # User 'upper left' if no position arguments are given
+    label.SetTextAlign(13)
+    xpos = rr.gPad.GetLeftMargin() + 0.04
+    ypos = 1 - rr.gPad.GetTopMargin() - 0.04
+
+  if not text:
+    label.DrawLatex(xpos, ypos, "#bf{#it{ATLAS}}")
+  else:
+    label.DrawLatex(xpos, ypos, "#bf{#it{ATLAS}} " + text)
+  return label
+
+
+extra_label_to_use = "Internal"
+
 
 def combine_num_events(n1, n2):
   if n1 >= 0 and n2 >= 0:
@@ -36,6 +194,7 @@ class Sample:
     self.threads_step = 1
     self.data_list = []
     self.perf_list = []
+    self.marker_style = None #Set later based on position inside sample.
 
 class Combination:
   def __init__(self, d = {}, global_folder = "", global_num_events = -1):
@@ -118,8 +277,10 @@ def get_from_file(sample_info):
           continue
         this_center = np.median(d[c])
         one_edge    = np.min(d[c])
-        limit       = this_center + (this_center - one_edge) * 10
-        inclusions *= d[c] < limit
+        limit       = this_center + (this_center - one_edge) * 20
+        if limit <= this_center:
+          limit = np.max(d[c])
+        inclusions *= d[c] <= limit
     
     print("{}: Events selected: {}%".format(sample_info.latex_name, inclusions.mean() * 100))
     
@@ -400,19 +561,43 @@ def make_tables(output_long, output_short, include_total, samples):
   with open(output_short, "w") as out_short:
     out_short.write(short_table)
 
-def plot_one_combined(plotname, x_getter, y_getter, x_label, y_label, samples):
-  cvs = rr.TCanvas(plotname, "", 2400, 1600)
+marker_styles = [20, 21, 22, 29, 33, 34, 41, 43, 45, 47]
+
+def plot_one_combined(plotname, x_getter, y_getter, x_label, y_label, samples, log_X = False, log_Y = False):
+  cvs = rr.TCanvas(plotname, "", 3400, 2000)
   
-  xs   = np.concatenate([x_getter(s.perf_list) for s in samples]).astype(np.double)
-  ys   = np.concatenate([y_getter(s.data_list) for s in samples]).astype(np.double)
-  cols = np.concatenate([np.full(len(s.perf_list[0]), s.colour) for s in samples]).astype(np.double)
+  mg = rr.TMultiGraph(plotname + "_mg", ";" + x_label + ";" + y_label)
   
-  sct = rr.TScatter(len(xs), xs, ys, cols)
+  for idx, s in enumerate(reversed(samples)):
+    graph = rr.TGraph()
+    graph.SetTitle(s.root_name + ";" + x_label + ";" + y_label)
+    
+    xs = x_getter(s.perf_list)
+    ys = y_getter(s.data_list)
+    
+    for x, y in zip(xs, ys):
+      graph.AddPoint(x, y)
+    
+    graph.SetMarkerColor(s.colour)
+    graph.SetMarkerSize(2.0)
+    
+    graph.SetMarkerStyle(marker_styles[idx % len(marker_styles)] if s.marker_style is None else s.marker_style)
+    
+    mg.Add(graph)
   
-  sct.SetMarkerStyle(8)
-  sct.SetTitle(";" + x_label + ";" + y_label)
+  mg.Draw("AP")
   
-  sct.Draw("AP")
+  if log_X:
+    cvs.SetLogx()
+  
+  if log_Y:
+    cvs.SetLogy()
+  
+  cvs.Update()
+  
+  rr.gPad.BuildLegend(0.75, 0.75, 0.95, 0.95, "")
+  
+  atlas_label(text = extra_label_to_use, loc = "upper left")
   
   cvs.SaveAs(plotname + ".png")
 
@@ -432,8 +617,10 @@ def handle_combination(samples, do_tables, do_plots, comb_name):
                       samples)
                       #Easy to extend this...
 
-def plot_one_global(plotname, getter, y_label, fill_colour, samples):
-  cvs = rr.TCanvas(plotname, "", 2400, 1600)
+def plot_one_global_per_sample(plotname, getter, y_label, fill_colour, samples):
+  cvs = rr.TCanvas(plotname, "", 3400, 2000)
+  
+  cvs.cd()
   
   times = [getter(s.data_list) for s in samples]
   
@@ -443,7 +630,7 @@ def plot_one_global(plotname, getter, y_label, fill_colour, samples):
     limits[0] = min(limits[0], np.min(t_sample))
     limits[1] = max(limits[1], np.max(t_sample))
   
-  violin = rr.TH2F(plotname + "_v", ";Sample;" + y_label, len(samples), 0, len(samples), 100, limits[0] * 0.75, limits[1])
+  violin = rr.TH2F(plotname + "_v", ";Sample;" + y_label, len(samples), 0, len(samples), 100, limits[0] * 0.5, limits[1] * 1.25)
   
   for idx, t_sample in enumerate(times):
     for t in t_sample:
@@ -452,33 +639,44 @@ def plot_one_global(plotname, getter, y_label, fill_colour, samples):
   for idx, s in enumerate(samples):
     violin.GetXaxis().SetBinLabel(idx + 1, s.root_name)
     
+  violin.SetFillColor(fill_colour)
+  
   config_string = "VIOLIN(03002100)"
   
-  violin.SetFillColor(fill_colour)
   violin.Draw(config_string)
   cvs.Update()
+  
+  atlas_label(text = extra_label_to_use, loc = "upper left")
+  
   cvs.SaveAs(plotname + ".png")
   cvs.Clear()
 
 def do_global_plots(samples):
   colour = 27
   
-  plot_one_global("global_CPU_time",
-                  lambda d: get_CPU_time(d) * 0.001, 
-                  "CPU Total Execution Times [ms]",
-                  colour, samples)
-  plot_one_global("global_GPU_time",
-                  lambda d: get_GPU_time(d) * 0.001, 
-                  "GPU Total Execution Times [ms]",
-                  colour, samples)
-  plot_one_global("global_speedup",
-                  lambda d: get_CPU_time(d)/get_GPU_time(d), 
-                  "Speed-Up",
-                  colour, samples)
-  plot_one_global("global_algorithm_time",
-                  lambda d: get_GPU_algorithm_time(d) * 0.001, 
-                  "GPU Algorithm Times [ms]",
-                  colour, samples)
+  plot_one_global_per_sample("global_CPU_time",
+                             lambda d: get_CPU_time(d) * 0.001, 
+                             "CPU Total Execution Times [ms]",
+                             colour, samples)
+  plot_one_global_per_sample("global_GPU_time",
+                             lambda d: get_GPU_time(d) * 0.001, 
+                             "GPU Total Execution Times [ms]",
+                             colour, samples)
+  plot_one_global_per_sample("global_speedup",
+                             lambda d: get_CPU_time(d)/get_GPU_time(d), 
+                             "Speed-Up",
+                             colour, samples)
+  plot_one_global_per_sample("global_algorithm_time",
+                             lambda d: get_GPU_algorithm_time(d) * 0.001, 
+                             "GPU Algorithm Times [ms]",
+                             colour, samples)
+                             
+  plot_one_combined("global_perf_split_cluster_number",
+                    lambda p: p[1]["Number Clusters"],
+                    lambda d: get_GPU_time(d) * 0.001,
+                    "# of Clusters",
+                    "GPU Execution Time [ms]",
+                    samples)
 
 def plot_all_combinations(combinations_to_do):
   flattened_samples = []
@@ -486,14 +684,19 @@ def plot_all_combinations(combinations_to_do):
   for comb in combinations_to_do:
     handle_combination(comb.samples, comb.do_tables, comb.do_plots, comb.name)
     if comb.add_to_global:
+      for idx in range(len(comb.samples)):
+        comb.samples[idx].colour = comb.samples[-1].colour
+        comb.samples[idx].marker_style = marker_styles[idx % len(marker_styles)]
       flattened_samples += comb.samples
   
   do_global_plots(flattened_samples)
 
 def plot_one_per_threads(plotname, getter, y_label, samples):
-  cvs = rr.TCanvas(plotname, "", 2400, 1600)
+  cvs = rr.TCanvas(plotname, "", 3400, 2000)
   
-  times = [[getter(d_l, num_threads)] for s in samples for d_l, num_threads in zip(s.data_list, range(s.threads_start, s.threads_end, s.threads_step))]
+  times = [[getter(d_l, num_threads) for d_l, num_threads in zip(s.data_list, range(s.threads_start, s.threads_end, s.threads_step))] for s in samples]
+  
+  print(len(times), len(times[0]))
   
   limits = [999999999, 0]
   
@@ -503,31 +706,32 @@ def plot_one_per_threads(plotname, getter, y_label, samples):
     for t_thread in ts_sample:
       limits[0] = min(limits[0], np.min(t_thread))
       limits[1] = max(limits[1], np.max(t_thread))
-
-  print(plotname, ts_sample, limits, len(ts_sample[0]))
-      
-  for idx, (ts_sample, s) in enumerate(zip(times, samples)):
-    violin = rr.TH2F(plotname + "_" + s.name + "_v", s.root_name + ";# of CPU Threads;" + y_label, len(ts_sample[0]), 0, len(ts_sample[0]), 100, limits[0] * 0.75, limits[1])
+  
+  print(limits[0], limits[1], len(times))
+  
+  stack = rr.THStack(plotname + "_stack", ";# of CPU Threads;" + y_label)
+  
+  for (ts_sample, s) in zip(times, samples):
+    violin = rr.TH2F(plotname + "_" + s.name + "_v", s.root_name + ";# of CPU Threads;" + y_label, len(ts_sample), 0, len(ts_sample), 250, limits[0] * 0.1, limits[1] * 1.25)
     for bin_idx, ts in enumerate(ts_sample):
       for t in ts:
         violin.Fill(bin_idx, t)
     
     violin.SetFillColor(s.colour)
     
-    if idx == 0:
-      for bin_idx, num_threads in enumerate(range(s.threads_start, s.threads_end, s.threads_step)):
-        violin.GetXaxis().SetBinLabel(bin_idx + 1, str(num_threads))
-      
-      config_string = "VIOLIN(03002100)"
-      
-      violin.Draw(config_string)
-      
-    else:
-      violin.Draw("SAME")
+    for bin_idx, num_threads in enumerate(range(s.threads_start, s.threads_end, s.threads_step)):
+      violin.GetXaxis().SetBinLabel(bin_idx + 1, str(num_threads))
+    
+    stack.Add(violin)
   
+  stack.Draw(config_string)
   cvs.Update()
-  cvs.BuildLegend()
-  cvs.Update()
+  
+  rr.gPad.BuildLegend(0.75, 0.75, 0.95, 0.95, "")
+  
+  atlas_label(text = extra_label_to_use, loc = "upper left")
+  
+  
   cvs.SaveAs(plotname + ".png")
   cvs.Clear()
 
@@ -547,7 +751,7 @@ def plot_for_threads(thread_spec):
                        lambda d, n: get_CPU_time(d)/get_GPU_time(d), 
                        "Speed-Up",
                        thread_spec.samples)
-  plot_one_per_threads("global_algorithm_time",
+  plot_one_per_threads("threads_algorithm_time",
                        lambda d, n: get_GPU_algorithm_time(d) * 0.001 / n, 
                        "GPU Algorithm Times [ms]",
                        thread_spec.samples)
@@ -556,7 +760,7 @@ def plot_all_threads(threads_to_do):
   for thread_spec in threads_to_do:
     plot_for_threads(thread_spec)
 
-def load_configurations(files, global_folder_override = None, max_events = -1):
+def load_configurations(files, skip_threads = False, global_folder_override = None, max_events = -1):
   import json
   
   combinations_to_do = []
@@ -572,55 +776,70 @@ def load_configurations(files, global_folder_override = None, max_events = -1):
   
     for c in desc.get("combinations", []):
       combinations_to_do += [Combination(c, global_folder, global_num_events)]
-  
-    threads_to_do += [Threads(desc.get("threads", {}), global_folder, global_num_events)]
+      
+    if not skip_threads:
+      threads_to_do += [Threads(desc.get("threads", {}), global_folder, global_num_events)]
   
   return combinations_to_do, threads_to_do
   
-def plot_from_files(files):
-  combinations, threads = load_configurations(files)
+def plot_from_files(files, skip_threads = False):
+  combinations, threads = load_configurations(files, skip_threads)
+  
   plot_all_combinations(combinations)
-  plot_all_threads(threads)
-
-#Relying on the solution suggested in https://stackoverflow.com/a/76621548
-#for tee-like behaviour in terms of stdout/stderr
-
-import asyncio
-
-async def stream_reader(stream, callback):
-  while True:
-    line = await stream.readline()
-    if len(line) == 0:
-      break
-    callback(line)
-
-def tee(line, file, buf):
-  buf.write(line)
-  file.write(line)
   
-async def process_runner(command, folder, out, err):
-  proc = await asyncio.create_subprocess_exec(*command,
-                                              cwd = folder,
-                                              stdout=asyncio.subprocess.PIPE,
-                                              stderr=asyncio.subprocess.PIPE  )
+  if not skip_threads:
+    plot_all_threads(threads)
 
-  import sys
+USE_SUBPROCESS = True
   
-  await asyncio.gather(stream_reader(proc.stdout, lambda l: tee(l, out, sys.stdout.buffer)),
-                       stream_reader(proc.stderr, lambda l: tee(l, err, sys.stderr.buffer))  )
-  
-  exit_code = await proc.wait()
-
-  return exit_code
-  
-def run_in_folder(args, folder):
+def run_in_folder(these_args, folder, do_logs = False, timeout_seconds = -1, repeat_tries = -1):
   os.makedirs(folder, exist_ok = True)
-  
-  with open(os.path.join(folder, "log.txt"), "ab") as out_file, open(os.path.join(folder, "err.txt"), "ab") as err_file:
-    loop = asyncio.get_event_loop()
-    loop.run_until_complete(asyncio.wait_for(process_runner(args, folder, out_file, err_file), timeout = None))
 
-def run_sample(sample, scripts_folder = ""):
+  if USE_SUBPROCESS:
+    
+    retry_count = 0
+    
+    if do_logs:  
+      with open(os.path.join(folder, "log.txt"), "ab") as out_file, open(os.path.join(folder, "err.txt"), "ab") as err_file:
+        while retry_count <= repeat_tries or repeat_tries < 0:
+          try:
+            ret = subprocess.call(these_args,
+                                  cwd = folder,
+                                  stdout = out_file,
+                                  stderr = err_file,
+                                  timeout = timeout_seconds if timeout_seconds > 0 else None)
+            if ret < 0:
+              print("Exited with signal {}. Retrying.".format(-ret))
+              retry_count += 1
+              continue
+          except Exception:
+            print("Timed out and/or unspecified error. Retrying.")
+            retry_count += 1
+            continue
+          break
+    else:
+        while retry_count <= repeat_tries or repeat_tries < 0:
+          try:
+            ret = subprocess.call(these_args,
+                                  cwd = folder,
+                                  stdout = subprocess.DEVNULL,
+                                  stderr = subprocess.DEVNULL,
+                                  timeout = timeout_seconds if timeout_seconds > 0 else None)
+            if ret < 0:
+              print("Exited with signal {}. Retrying.".format(-ret))
+              retry_count += 1
+              continue
+          except Exception:
+            print("Timed out and/or unspecified error. Retrying.")
+            retry_count += 1
+            continue
+          break
+  else:
+    to_run = "cd " + str(folder) + "; " + these_args + (" | tee log.txt" if do_logs else "")
+    os.system(to_run + " | grep AthenaHiveEventLoopMgr")
+    
+
+def run_sample(sample, scripts_folder = "", do_logs = False, timeout_seconds = -1, repeat_tries = -1):
   import shlex, glob
 
   thread_range = range(sample.threads_start, sample.threads_end, sample.threads_step)
@@ -647,30 +866,44 @@ def run_sample(sample, scripts_folder = ""):
     command += " -events " + str(sample.num_events)
   
   command += " -f"
-  real_args = shlex.split(command)
+
+  if USE_SUBPROCESS:
+    real_args = shlex.split(command)
   
-  real_args += glob.glob(os.path.join(sample.input_folder, "*"))
+    real_args += glob.glob(os.path.join(sample.input_folder, "*"))
+  else:
+    real_args = command + " " + str(os.path.join(sample.input_folder, "*"))
   
   if len(thread_range) == 0:
     print("Doing {} from {}".format(sample.name, sample.input_folder))
-    run_in_folder(real_args, sample.output_folder)
+    run_in_folder(real_args, sample.output_folder, do_logs, timeout_seconds, repeat_tries)
   else:
     for i in thread_range:
       print("Doing {}: {}".format(sample.name, i))
-      run_in_folder(real_args, os.path.join(sample.output_folder, str(i)))
+      if USE_SUBPROCESS:
+        real_real_args = real_args + ["-threads", str(i)]
+      else:
+        real_real_args = real_args + " -threads " + str(i)
+      run_in_folder(real_real_args, os.path.join(sample.output_folder, str(i)), do_logs, timeout_seconds, repeat_tries)
 
 
-def execute_from_files(files, scripts_folder = "", max_events = -1):
+def execute_from_files(files,
+                       scripts_folder = "",
+                       max_events = -1,
+                       skip_threads = False,
+                       do_logs = False,
+                       timeout_seconds = -1,
+                       repeat_tries = -1):
   combinations, threads = load_configurations(files, max_events = max_events)
   
   for c in combinations:
     for s in c.samples:
-      run_sample(s, scripts_folder)
-  
-  for t in threads:
-    for s in t.samples:
-      run_sample(s, scripts_folder)
+      run_sample(s, scripts_folder, do_logs, timeout_seconds, repeat_tries)
 
+  if not skip_threads:
+    for t in threads:
+      for s in t.samples:
+        run_sample(s, scripts_folder, do_logs, timeout_seconds, repeat_tries)
 
 if __name__=="__main__":
   import argparse
@@ -679,13 +912,24 @@ if __name__=="__main__":
   parser.add_argument('-run', '--run_files', action = 'extend', nargs = '*')
   parser.add_argument('-plot', '--plot_files', action = 'extend', nargs = '*')
   parser.add_argument('-events', '--max_events', type = int, default = -1)
+  parser.add_argument('-log', '--do_logs', action = 'store_true')
+  parser.add_argument('-timeout', '--timeout_seconds', type = int, default = 3600)
+  parser.add_argument('-retry', '--repeat_tries', type = int, default = 3)
+  parser.add_argument('-no_threads', '--skip_threads', action = 'store_true')
   
   args = parser.parse_args()
   
   if args.run_files is not None and len(args.run_files) > 0:
-    execute_from_files(args.run_files, args.scripts_folder, args.max_events)
+    execute_from_files(args.run_files,
+                       args.scripts_folder,
+                       args.max_events,
+                       args.skip_threads,
+                       args.do_logs,
+                       args.timeout_seconds,
+                       args.repeat_tries)
   
   if args.plot_files is not None and len(args.plot_files) > 0:
-    plot_from_files(args.plot_files)
+    plot_from_files(args.plot_files,
+                    args.skip_threads)
   
   

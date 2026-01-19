@@ -287,7 +287,7 @@ bool CaloGPUClusterAndCellDataMonitor::filter_tool_by_name(const std::string & t
 
 StatusCode CaloGPUClusterAndCellDataMonitor::update_cell_representation(const EventContext &,
                                                                         const CaloRecGPU::ConstantDataHolder &,
-                                                                        const CaloRecGPU::CellInfoArr * /*cell_info*/,
+                                                                        const CaloRecGPU::CellInfoArr * cell_info,
                                                                         CaloRecGPU::ClusterInfoArr * clusters,
                                                                         std::vector<int> & cells_prefix_sum) const
 {
@@ -368,7 +368,17 @@ StatusCode CaloGPUClusterAndCellDataMonitor::update_cell_representation(const Ev
       }
     else
       {
-        return clusters->cells.indices[a] < clusters->cells.indices[b];
+        const int hash_ID_a = cell_info->get_hash_ID(clusters->cells.indices[a]);
+        const int hash_ID_b = cell_info->get_hash_ID(clusters->cells.indices[b]);
+        if (hash_ID_a < 0)
+          {
+            ATH_MSG_WARNING("Attempting to sort impossible cell: " << a << " " << hash_ID_a);
+          }
+        if (hash_ID_b < 0)
+          {
+            ATH_MSG_WARNING("Attempting to sort impossible cell: " << b << " " << hash_ID_b);
+          }
+        return hash_ID_a < hash_ID_b;
       }
   } );
   
@@ -394,16 +404,19 @@ StatusCode CaloGPUClusterAndCellDataMonitor::update_cell_representation(const Ev
   cells_prefix_sum.clear();
   cells_prefix_sum.resize(NCaloCells + 1, 0);
 
-  int prev_cell = -1;
+  int prev_cell_index = -1;
   int cell_count = 0;
 
   for (int i = 0; i < clusters->number_cells; ++i)
     {
-      const int this_cell = clusters->cells.indices[i];
+      const int this_cell_index = clusters->cells.indices[i];
 
-      if (this_cell != prev_cell)
+      if (this_cell_index != prev_cell_index)
         {
-          for (int j = prev_cell + 1; j <= this_cell; ++j)
+          const int prev_cell_ID = cell_info->get_hash_ID(prev_cell_index);
+          const int this_cell_ID = cell_info->get_hash_ID(this_cell_index);
+
+          for (int j = prev_cell_ID + 1; j <= this_cell_ID; ++j)
             {
               cells_prefix_sum[j] = cell_count;
             }
@@ -411,12 +424,12 @@ StatusCode CaloGPUClusterAndCellDataMonitor::update_cell_representation(const Ev
 
       ++cell_count;
 
-      prev_cell = this_cell;
+      prev_cell_index = this_cell_index;
     }
 
   if (clusters->number_cells > 0)
     {
-      for (int i = clusters->cells.indices[clusters->number_cells - 1]; i <= NCaloCells; ++i)
+      for (int i = cell_info->get_hash_ID(clusters->cells.indices[clusters->number_cells - 1]); i <= NCaloCells; ++i)
         {
           cells_prefix_sum[i + 1] = cell_count;
         }
@@ -433,82 +446,52 @@ StatusCode CaloGPUClusterAndCellDataMonitor::update_cell_representation(const Ev
 //whether this assignment is for test (false for reference),
 //and a vector of pairs of cluster index and cell weight.
 template <class WeighMatch, class WeighNotMatch>
-static void build_similarity_map_helper(const CaloRecGPU::ClusterInfoArr & cluster_info_1,
+static void build_similarity_map_helper(const CaloRecGPU::CellInfoArr & /*cell_info_1*/,
+                                        const CaloRecGPU::CellInfoArr & /*cell_info_2*/,
+                                        const std::vector<int> & cells_prefix_sum_1,
+                                        const std::vector<int> & cells_prefix_sum_2,
+                                        const CaloRecGPU::ClusterInfoArr & cluster_info_1,
                                         const CaloRecGPU::ClusterInfoArr & cluster_info_2,
                                         WeighMatch match,
                                         WeighNotMatch not_match)
 {
-  int it_1 = 0, it_2 = 0;
-
   std::vector<std::pair<int, float>> cluster_weights_1, cluster_weights_2;
-  int this_index_1 = -1;
-  int this_index_2 = -1;
-
-  while (it_1 < cluster_info_1.number_cells || it_2 < cluster_info_2.number_cells)
-    {      
-      if (it_1 < cluster_info_1.number_cells)
+  
+  for (unsigned int this_hash_ID = 0; this_hash_ID < NCaloCells; ++this_hash_ID)
+    {
+      cluster_weights_1.clear();
+      cluster_weights_2.clear();
+      
+      for (int i = cells_prefix_sum_1[this_hash_ID]; i < cells_prefix_sum_1[this_hash_ID + 1]; ++i)
         {
-          this_index_1 = cluster_info_1.cells.indices[it_1];
+          cluster_weights_1.push_back({cluster_info_1.clusterIndices[i], cluster_info_1.cellWeights[i] + 1e-8});
         }
-      else
+      for (int i = cells_prefix_sum_2[this_hash_ID]; i < cells_prefix_sum_2[this_hash_ID + 1]; ++i)
         {
-          this_index_1 = -1;
+          cluster_weights_2.push_back({cluster_info_2.clusterIndices[i], cluster_info_2.cellWeights[i] + 1e-8});
         }
       
-      if (it_2 < cluster_info_2.number_cells)
+      if (cluster_weights_1.size() != 0 && cluster_weights_2.size() != 0)
         {
-          this_index_2 = cluster_info_2.cells.indices[it_2];
+          match(this_hash_ID, cluster_weights_1, cluster_weights_2);
         }
-      else
+      else if (cluster_weights_1.size() != 0)
         {
-          this_index_2 = -1;
+          not_match(false, this_hash_ID, cluster_weights_1);
         }
-
-      if (cluster_weights_1.size() == 0)
+      else if (cluster_weights_2.size() != 0)
         {
-          while (it_1 < cluster_info_1.number_cells && cluster_info_1.cells.indices[it_1] == this_index_1)
-            {
-              cluster_weights_1.push_back({cluster_info_1.clusterIndices[it_1], cluster_info_1.cellWeights[it_1] + 1e-8});
-              ++it_1;
-            }
-        }
-
-      if (cluster_weights_2.size() == 0)
-        {
-          while (it_2 < cluster_info_2.number_cells && cluster_info_2.cells.indices[it_2] == this_index_2)
-            {
-              cluster_weights_2.push_back({cluster_info_2.clusterIndices[it_2], cluster_info_2.cellWeights[it_2] + 1e-8});
-              ++it_2;
-            }
-        }
-      
-      if (this_index_1 == this_index_2 and this_index_1 >= 0)
-        {
-          match(this_index_1, cluster_weights_1, cluster_weights_2);
-          cluster_weights_1.clear();
-          cluster_weights_2.clear();
-        }
-      else if ((this_index_1 > this_index_2) and this_index_2 >= 0)
-        {
-          not_match(true, this_index_2, cluster_weights_2);
-          cluster_weights_2.clear();
-        }
-      else if ((this_index_2 > this_index_1) and this_index_1 >= 0 )
-        {
-          not_match(false, this_index_1, cluster_weights_1);
-          cluster_weights_1.clear();
-        }
-      else
-        {
-          cluster_weights_1.clear();
-          cluster_weights_2.clear();
+          not_match(true, this_hash_ID, cluster_weights_2);
         }
     }
 }
 
 StatusCode CaloGPUClusterAndCellDataMonitor::match_clusters(sample_comparisons_holder & sch,
                                                             const CaloRecGPU::ConstantDataHolder & constant_data,
-                                                            const CaloRecGPU::CellInfoArr & cell_info,
+                                                            const CaloRecGPU::CellInfoArr & cell_info_1,
+                                                            const CaloRecGPU::CellInfoArr & cell_info_2,
+                                                            const std::vector<int> & cells_prefix_sum_1,
+                                                            const std::vector<int> & cells_prefix_sum_2,
                                                             const CaloRecGPU::ClusterInfoArr & cluster_info_1,
                                                             const CaloRecGPU::ClusterInfoArr & cluster_info_2,
                                                             const bool match_in_energy,
@@ -529,18 +512,18 @@ StatusCode CaloGPUClusterAndCellDataMonitor::match_clusters(sample_comparisons_h
   {
     double SNR = 0.00001;
 
-    if (!cell_info.is_bad(cell))
+    if (!cell_info_1.is_bad(cell))
       {
-        const int gain = cell_info.gain[cell];
+        const int gain = cell_info_1.gain[cell];
 
-        const double cellNoise = constant_data.m_cell_noise->get_noise(cell_info.get_hash_ID(cell), gain);
+        const double cellNoise = constant_data.m_cell_noise->get_noise(cell_info_1.get_hash_ID(cell), gain);
         if (std::isfinite(cellNoise) && cellNoise > 0.0f)
           {
-            SNR = std::abs(cell_info.energy[cell] / cellNoise);
+            SNR = std::abs(cell_info_1.energy[cell] / cellNoise);
           }
       }
 
-    const double quantity = ( match_in_energy ? std::abs(cell_info.energy[cell]) : SNR );
+    const double quantity = ( match_in_energy ? std::abs(cell_info_1.energy[cell]) : SNR );
     const double weight = (quantity + 1e-7) *
                           ( SNR > m_seedThreshold ? (match_in_energy ? 1000 : m_seed_weight) :
                             (
@@ -554,10 +537,10 @@ StatusCode CaloGPUClusterAndCellDataMonitor::match_clusters(sample_comparisons_h
     return weight + 1e-8;
   };
 
-  auto matched_clusters = [&](const int cell, const std::vector<std::pair<int, float>> & v1, const std::vector<std::pair<int, float>> & v2)
+  auto matched_clusters = [&](const int hash_ID, const std::vector<std::pair<int, float>> & v1, const std::vector<std::pair<int, float>> & v2)
   {
-#if CALORECGPU_DATA_MONITOR_EXTRA_PRINTOUTS
-    msg(MSG::INFO) <<  "MATCH: " << cell << " " << calculate_weight(cell) << " |";
+#if CALORECGPU_DATA_MONITOR_EXTRA_PRINTOUTS && CALORECGPU_DATA_MONITOR_EXTRA_PRINTOUTS > 1
+    msg(MSG::INFO) <<  "MATCH: " << hash_ID << " " << calculate_weight(cell_info_1.get_cell_with_hash_ID(hash_ID)) << " |";
     for (const auto & p : v1)
       {
         msg() << " (" << p.first << ", " << p.second << ")";
@@ -575,7 +558,7 @@ StatusCode CaloGPUClusterAndCellDataMonitor::match_clusters(sample_comparisons_h
         return;
       }
 
-    const float weight = calculate_weight(cell);
+    const float weight = calculate_weight(cell_info_1.get_cell_with_hash_ID(hash_ID));
 
     for (const auto & p1 : v1)
       {
@@ -596,10 +579,10 @@ StatusCode CaloGPUClusterAndCellDataMonitor::match_clusters(sample_comparisons_h
       }
   };
 
-  auto unmatched_clusters = [&](const bool is_test, const int cell, const std::vector<std::pair<int, float>> & v)
+  auto unmatched_clusters = [&](const bool is_test, const int hash_ID, const std::vector<std::pair<int, float>> & v)
   {
 #if CALORECGPU_DATA_MONITOR_EXTRA_PRINTOUTS
-    msg(MSG::INFO) << "UNMATCH: " << cell << " " << calculate_weight(cell) << " | " << is_test << " |";
+    msg(MSG::INFO) << "UNMATCH: " << hash_ID << " " << calculate_weight(cell_info_1.get_cell_with_hash_ID(hash_ID)) << " | " << is_test << " |";
     for (const auto & p : v)
       {
         msg() << " (" << p.first << ", " << p.second << ")";
@@ -612,7 +595,7 @@ StatusCode CaloGPUClusterAndCellDataMonitor::match_clusters(sample_comparisons_h
         return;
       }
 
-    const float weight = calculate_weight(cell);
+    const float weight = calculate_weight(cell_info_1.get_cell_with_hash_ID(hash_ID));
 
     std::vector<double> & normalization = (is_test ? test_normalization : ref_normalization);
 
@@ -622,7 +605,10 @@ StatusCode CaloGPUClusterAndCellDataMonitor::match_clusters(sample_comparisons_h
       }
   };
 
-  build_similarity_map_helper(cluster_info_1, cluster_info_2, matched_clusters, unmatched_clusters);
+  build_similarity_map_helper(cell_info_1,        cell_info_2,
+                              cells_prefix_sum_1, cells_prefix_sum_2,
+                              cluster_info_1,     cluster_info_2,
+                              matched_clusters,   unmatched_clusters);
 
   for (int testc = 0; testc < cluster_info_2.number; ++testc)
     {
@@ -762,7 +748,10 @@ StatusCode CaloGPUClusterAndCellDataMonitor::match_clusters(sample_comparisons_h
 
 StatusCode CaloGPUClusterAndCellDataMonitor::match_clusters_perfectly(sample_comparisons_holder & sch,
                                                                       const CaloRecGPU::ConstantDataHolder & /*constant_data*/,
-                                                                      const CaloRecGPU::CellInfoArr & /*cell_info*/,
+                                                                      const CaloRecGPU::CellInfoArr & cell_info_1,
+                                                                      const CaloRecGPU::CellInfoArr & cell_info_2,
+                                                                      const std::vector<int> & cells_prefix_sum_1,
+                                                                      const std::vector<int> & cells_prefix_sum_2,
                                                                       const CaloRecGPU::ClusterInfoArr & cluster_info_1,
                                                                       const CaloRecGPU::ClusterInfoArr & cluster_info_2,
                                                                       const bool match_without_shared) const
@@ -775,10 +764,10 @@ StatusCode CaloGPUClusterAndCellDataMonitor::match_clusters_perfectly(sample_com
 
   std::vector<char> match_possibilities(cluster_info_1.number * cluster_info_2.number, 1);
 
-  auto matched_clusters = [&]([[maybe_unused]] const int cell, const std::vector<std::pair<int, float>> & v1, const std::vector<std::pair<int, float>> & v2)
+  auto matched_clusters = [&]([[maybe_unused]] const int hash_ID, const std::vector<std::pair<int, float>> & v1, const std::vector<std::pair<int, float>> & v2)
   {
-#if CALORECGPU_DATA_MONITOR_EXTRA_PRINTOUTS
-    msg(MSG::INFO) << "MATCH: " << cell << " <> |";
+#if CALORECGPU_DATA_MONITOR_EXTRA_PRINTOUTS && CALORECGPU_DATA_MONITOR_EXTRA_PRINTOUTS > 1
+    msg(MSG::INFO) << "MATCH: " << hash_ID << " <> |";
     for (const auto & p : v1)
       {
         msg() << " (" << p.first << ", " << p.second << ")";
@@ -845,10 +834,10 @@ StatusCode CaloGPUClusterAndCellDataMonitor::match_clusters_perfectly(sample_com
       }
   };
 
-  auto unmatched_clusters = [&](const bool is_test, [[maybe_unused]] const int cell, const std::vector<std::pair<int, float>> & v)
+  auto unmatched_clusters = [&](const bool is_test, [[maybe_unused]] const int hash_ID, const std::vector<std::pair<int, float>> & v)
   {
 #if CALORECGPU_DATA_MONITOR_EXTRA_PRINTOUTS
-    msg(MSG::INFO) << "UNMATCH: " << cell << " <> | " << is_test << " |";
+    msg(MSG::INFO) << "UNMATCH: " << hash_ID << " <> | " << is_test << " |";
     for (const auto & p : v)
       {
         msg() << " (" << p.first << ", " << p.second << ")";
@@ -873,7 +862,10 @@ StatusCode CaloGPUClusterAndCellDataMonitor::match_clusters_perfectly(sample_com
       }
   };
 
-  build_similarity_map_helper(cluster_info_1, cluster_info_2, matched_clusters, unmatched_clusters);
+  build_similarity_map_helper(cell_info_1,        cell_info_2,
+                              cells_prefix_sum_1, cells_prefix_sum_2,
+                              cluster_info_1,     cluster_info_2,
+                              matched_clusters,   unmatched_clusters);
   
   for (int testc = 0; testc < cluster_info_2.number; ++testc)
     {
@@ -1576,7 +1568,7 @@ StatusCode CaloGPUClusterAndCellDataMonitor::add_data(const EventContext & /*ctx
 
           for (int cell = 0; cell < cell_info->number; ++cell)
             {
-              if (!cell_info->is_valid(cell))
+              if (!cell_info->is_valid(cell_info->hashID[cell]))
                 {
                   continue;
                 }
@@ -1747,11 +1739,19 @@ StatusCode CaloGPUClusterAndCellDataMonitor::add_combination(const EventContext 
 
   if (match_perfectly)
     {
-      ATH_CHECK( match_clusters_perfectly(sch, constant_data, cell_info_1, clusters_1, clusters_2, match_without_shared) );
+      ATH_CHECK( match_clusters_perfectly(sch, constant_data,
+                                          cell_info_1,        cell_info_2,
+                                          cells_prefix_sum_1, cells_prefix_sum_2,
+                                          clusters_1,         clusters_2,
+                                          match_without_shared) );
     }
   else
     {
-      ATH_CHECK( match_clusters(sch, constant_data, cell_info_1, clusters_1, clusters_2, match_in_energy, match_without_shared) );
+      ATH_CHECK( match_clusters(sch, constant_data,
+                                cell_info_1,        cell_info_2,
+                                cells_prefix_sum_1, cells_prefix_sum_2,
+                                clusters_1,         clusters_2,
+                                match_in_energy, match_without_shared) );
     }
 
   std::unordered_map<std::string, std::vector<double>> cluster_properties, cell_properties;
@@ -1778,7 +1778,10 @@ StatusCode CaloGPUClusterAndCellDataMonitor::add_combination(const EventContext 
         //The way the validity is checked means we will
         //simply continue for all cells beyond cell_info_N->number.
         {
-          if (!cell_info_1.is_valid(cell) || !cell_info_2.is_valid(cell) || cell >= cell_info_1.number || cell >= cell_info_2.number)
+          if ( cell >= cell_info_1.number                       ||
+               cell >= cell_info_2.number                       ||
+               !cell_info_1.is_valid(cell_info_1.hashID[cell])  ||
+               !cell_info_2.is_valid(cell_info_2.hashID[cell])      )
             {
               continue;
             }

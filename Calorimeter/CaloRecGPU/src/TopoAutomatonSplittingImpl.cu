@@ -113,7 +113,7 @@ namespace TASTemporaries
 
   CALORECGPU_TEMPVAR(continue_flag,             secondR, 0, int);
   CALORECGPU_TEMPVAR(stop_flag,            secondLambda, 0, int);
-
+  
   CALORECGPU_TEMPVAR(num_new_clusters, deltaPhi, 0, int);
   CALORECGPU_TEMPVAR(num_final_clusters, deltaTheta, 0, int);
   
@@ -589,7 +589,7 @@ void countInferiorNeighsKernel(Helpers::CUDA_kernel_object<ClusterInfoArr> clust
 
       if (!is_max_neig)
         {
-         TASTemporaries::local_maxima_detection(clusters_arr, neigh_cell) = -NCaloCells;
+          TASTemporaries::local_maxima_detection(clusters_arr, neigh_cell) = -NCaloCells;
         }
     }
 
@@ -690,6 +690,8 @@ void findLocalMaximaKernel(Helpers::CUDA_kernel_object<ClusterInfoArr> clusters_
                   
                       TASTemporaries::secondary_array(clusters_arr, cell) = TASTag::secondary_maxima_eliminator();
                       TASTemporaries::tertiary_array(clusters_arr, cell)  = TASTag::secondary_maxima_eliminator();
+
+                      clusters_arr->seedCellIndex[original_cluster] = -1;
                     }
                   else
                     {
@@ -711,6 +713,8 @@ void findLocalMaximaKernel(Helpers::CUDA_kernel_object<ClusterInfoArr> clusters_
 
                   TASTemporaries::secondary_array(clusters_arr, cell) = new_tag;
                   TASTemporaries::tertiary_array(clusters_arr, cell)  = 0;
+                  
+                  clusters_arr->seedCellIndex[original_cluster] = -1;
                 }
 #if CALORECGPU_INCLUDE_ITERATION_COUNTERS
               if (is_primary)
@@ -805,6 +809,15 @@ void TASplitting::findLocalMaxima(EventDataHolder & holder,
  * Delete secondary maxima according to the criteria on the CPU version.
  ******************************************************************************/
 
+//We will use the reset counters for continue and stop flags here
+//to skip the initialisation later.
+//Since the reset counters rely on the reverse propagation counter
+//(which is much bigger than 1 for all practical cases),
+//them being in some 0 or 1 state does not change anything.
+
+constexpr int index_for_continue = 0;
+constexpr int index_for_stop     = 1;
+
 static __device__
 void propagate_secondary_maxima_pair(const int pair,
                                      const bool is_prev,
@@ -815,12 +828,13 @@ void propagate_secondary_maxima_pair(const int pair,
   
   const TASTag this_tag = (is_prev ? TASTemporaries::tertiary_array(clusters_arr, this_index) : TASTemporaries::secondary_array(clusters_arr, this_index));
   tag_type * neigh_tag_ptr = (is_prev ? &TASTemporaries::tertiary_array(clusters_arr, neigh_index) : &TASTemporaries::secondary_array(clusters_arr, neigh_index));
-
+  
   if (this_tag.is_secondary_maxima_eliminator() || this_tag.is_part_of_splitter_cluster())
     {
-      if (atomicMax(neigh_tag_ptr, this_tag) < this_tag)
+      const TASTag old_tag = atomicMax(neigh_tag_ptr, this_tag);
+      if (old_tag < this_tag)
         {
-          TASTemporaries::continue_flag(clusters_arr) = 1;
+          TASTemporaries::reset_counters(clusters_arr, index_for_continue) = 1;
         }
     }
 }
@@ -866,10 +880,14 @@ void clean_up_secondary_tags(const int cell,
 #if CALORECGPU_INCLUDE_ITERATION_COUNTERS
               atomicAdd(TASTemporaries::eliminated_secondary_ptr(clusters_arr), 1);
 #endif
+
+              clusters_arr->seedCellIndex[TASTemporaries::cell_to_old_cluster_map(clusters_arr, cell)] = -1;
             }
           else
             {
               const TASTag new_tag = TASTag::make_non_split_cluster_tag();
+              
+              TASTemporaries::cell_to_new_cluster_map(clusters_arr, original_tag.index()) = 0xFFFFFFFFU;
 
               clusters_arr->cells.tags[cell]                      = new_tag;
               TASTemporaries::secondary_array(clusters_arr, cell) = new_tag;
@@ -899,7 +917,7 @@ namespace
                                 ClusterInfoArr * clusters_arr,
                                 const CellInfoArr * /*cell_info_arr*/) const
     {
-      return TASTemporaries::stop_flag(clusters_arr);
+      return TASTemporaries::reset_counters(clusters_arr, index_for_stop);
     }
   };
 
@@ -933,7 +951,7 @@ namespace
 
       constexpr int start_next_pairs = NExactPairs;
       const int start_prev_pairs = 2 * NExactPairs - condition.num_pairs_prev;
-
+      
       for (int pair = index; pair < condition.num_pairs_total; pair += grid_size)
         {
           const bool is_prev = (pair >= condition.num_pairs_next);
@@ -945,6 +963,7 @@ namespace
     }
   };
 
+  
   struct SecondaryPropagationChecker
   {
     __device__ void operator() (const unsigned int /*grid_dim*/,
@@ -955,15 +974,14 @@ namespace
     {
       if (grid_index == 0 && threadIdx.x == 0)
         {
-          if (!TASTemporaries::continue_flag(clusters_arr))
+          if (!TASTemporaries::reset_counters(clusters_arr, index_for_continue))
             {
-              TASTemporaries::stop_flag(clusters_arr) = 1;
+              TASTemporaries::reset_counters(clusters_arr, index_for_stop) = 1;
             }
           else
             {
-              TASTemporaries::continue_flag(clusters_arr) = 0;
+              TASTemporaries::reset_counters(clusters_arr, index_for_continue) = 0;
             }
-
 #if CALORECGPU_INCLUDE_ITERATION_COUNTERS
           ++condition.counter;
 #endif
@@ -982,19 +1000,16 @@ namespace
       const int index = grid_index * blockDim.x + threadIdx.x;
       const int grid_size = grid_dim * blockDim.x;
 
-      if (index == 0)
-        {
-          TASTemporaries::stop_flag(clusters_arr) = 0;
-          TASTemporaries::continue_flag(clusters_arr) = 0;
-
-#if CALORECGPU_INCLUDE_ITERATION_COUNTERS
-          printf("SECONDARY SPLITTING: %16d\n", condition.counter);
-#endif
-        }
-
       for (int cell = index; cell < clusters_arr->number_cells; cell += grid_size)
         {
           clean_up_secondary_tags(cell, clusters_arr, cell_info_array);
+        }
+      
+      if (index == 0)
+        {
+#if CALORECGPU_INCLUDE_ITERATION_COUNTERS
+          printf("SECONDARY SPLITTING: %16d\n", condition.counter);
+#endif
         }
     }
   };
@@ -1156,7 +1171,7 @@ void update_cell_tag(const int cell,
       
       const unsigned int final_assignment = (max(new_cluster & 0xFFFFU, old_cluster & 0xFFFFU) << 16) | (min(new_cluster & 0xFFFFU, old_cluster & 0xFFFFU));
       
-      new_tag = new_tag.update_counter(old_tag.counter() - 1);
+      new_tag = new_tag.update_counter(old_tag.counter());
       
       TASTemporaries::cell_to_new_cluster_map(clusters_arr, cell_hash_ID) = final_assignment;
     }
@@ -1241,19 +1256,33 @@ namespace
       const int index = grid_index * blockDim.x + threadIdx.x;
       const int grid_size = grid_dim * blockDim.x;
 
+      const int old_clusters_num = clusters_arr->number;
+      const int new_clusters_num = TASTemporaries::num_new_clusters(clusters_arr);
+
+      const int full_iteration_size = min(new_clusters_num + old_clusters_num, NMaxClusters);
       
-      for (int cluster = index; cluster < TASTemporaries::num_new_clusters(clusters_arr); cluster += grid_size)
+      for (int cluster = index; cluster < full_iteration_size; cluster += grid_size)
         {
-          TASTemporaries::cluster_E(clusters_arr, cluster) = 0.f;
-          TASTemporaries::cluster_E_corr(clusters_arr, cluster) = 0.f;
-          TASTemporaries::cluster_abs_E(clusters_arr, cluster) = 0.f;
-          TASTemporaries::cluster_abs_E_corr(clusters_arr, cluster) = 0.f;
-          TASTemporaries::cluster_X(clusters_arr, cluster) = 0.f;
-          TASTemporaries::cluster_X_corr(clusters_arr, cluster) = 0.f;
-          TASTemporaries::cluster_Y(clusters_arr, cluster) = 0.f;
-          TASTemporaries::cluster_Y_corr(clusters_arr, cluster) = 0.f;
-          TASTemporaries::cluster_Z(clusters_arr, cluster) = 0.f;
-          TASTemporaries::cluster_Z_corr(clusters_arr, cluster) = 0.f;
+          if (cluster < new_clusters_num)
+            {
+              TASTemporaries::cluster_E(clusters_arr, cluster) = 0.f;
+              TASTemporaries::cluster_E_corr(clusters_arr, cluster) = 0.f;
+              TASTemporaries::cluster_abs_E(clusters_arr, cluster) = 0.f;
+              TASTemporaries::cluster_abs_E_corr(clusters_arr, cluster) = 0.f;
+              TASTemporaries::cluster_X(clusters_arr, cluster) = 0.f;
+              TASTemporaries::cluster_X_corr(clusters_arr, cluster) = 0.f;
+              TASTemporaries::cluster_Y(clusters_arr, cluster) = 0.f;
+              TASTemporaries::cluster_Y_corr(clusters_arr, cluster) = 0.f;
+              TASTemporaries::cluster_Z(clusters_arr, cluster) = 0.f;
+              TASTemporaries::cluster_Z_corr(clusters_arr, cluster) = 0.f;
+            }
+          if (cluster >= old_clusters_num)
+            //We also need to initialize the seed cell indices here
+            //so that the overwriting with the cells for restored clusters
+            //works correctly later.
+            {
+              clusters_arr->seedCellIndex[cluster] = -1;
+            }
         }
       
 #if CALORECGPU_INCLUDE_ITERATION_COUNTERS
@@ -1295,7 +1324,7 @@ namespace
     {
       const int index = grid_index * blockDim.x + threadIdx.x;
       const int grid_size = grid_dim * blockDim.x;
-
+      
       for (int cell = index; cell < condition.cells_number; cell += grid_size)
         {
           update_cell_tag(cell, clusters_arr, cell_info_arr, condition.counter_select, use_shared_cells, condition.assume_complete_cells);
@@ -1338,7 +1367,7 @@ void TASplitting::splitClusterGrowing(EventDataHolder & holder,
                                       CaloRecGPU::CUDA_Helpers::CUDAStreamPtrHolder stream)
 {
   const cudaStream_t & stream_to_use = (stream ? * ((cudaStream_t *) stream) : cudaStreamPerThread);
-
+  
   const CUDAKernelLaunchConfiguration cfg_iter = (optimizer.can_use_cooperative_groups() ?
                                                   optimizer.get_launch_configuration("TopoAutomatonSplitting", 6) :
                                                   optimizer.get_launch_configuration("TopoAutomatonSplitting", 7));
@@ -1415,7 +1444,10 @@ void sumCellsForCentroidKernel(Helpers::CUDA_kernel_object<ClusterInfoArr> clust
         {
           const int old_cluster = TASTemporaries::cell_to_old_cluster_map(clusters_arr, cell);
 
-          TASTemporaries::old_cluster_validity(clusters_arr, old_cluster) = 1;
+          if (old_cluster >= 0)
+            {
+              atomicMax(TASTemporaries::old_cluster_validity_ptr(clusters_arr, old_cluster), 1);
+            }
         }
     }
 
@@ -1451,6 +1483,7 @@ void calculateCentroidsKernel(Helpers::CUDA_kernel_object<ClusterInfoArr> cluste
               const int new_index = atomicAdd(TASTemporaries::num_final_clusters_ptr(clusters_arr), 1);
 
               const int old_seed_cell = clusters_arr->seedCellIndex[cluster];
+              clusters_arr->seedCellIndex[cluster] = -1;
 
               TASTemporaries::old_to_new_cluster_map(clusters_arr, cluster) = new_index | (mark_revalidated_clusters * (old_seed_cell < 0));
 
@@ -1501,12 +1534,7 @@ void assignFinalCellsKernel(Helpers::CUDA_kernel_object<ClusterInfoArr> clusters
 
           const int new_seed_cell = TASTemporaries::new_seed_cells(clusters_arr, cluster_index_for_update);
 
-          if (new_seed_cell < 0)
-            {
-              atomicMax(&(clusters_arr->seedCellIndex[cluster_index_for_update]), new_seed_cell);
-              //To make sure the cases where the seeds are updated from other cells work properly.
-            }
-          else
+          if (new_seed_cell >= 0)
             {
               clusters_arr->seedCellIndex[cluster_index_for_update] = new_seed_cell;
             }
@@ -1685,7 +1713,7 @@ void TASplitting::cellWeightingAndFinalization(EventDataHolder & holder,
       
   calculateCentroidsKernel <<< cfg_centroid.grid_x, cfg_centroid.block_x, 0, stream_to_use>>>(holder.m_clusters_dev,
                                                                                               options.m_options->share_border_cells);
-
+      
   assignFinalCellsKernel <<< cfg_finalize.grid_x, cfg_finalize.block_x, 0, stream_to_use>>>(holder.m_clusters_dev,
                                                                                             holder.m_cell_info_dev,
                                                                                             instance_data.m_geometry_dev,
