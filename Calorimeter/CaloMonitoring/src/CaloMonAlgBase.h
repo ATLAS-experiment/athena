@@ -24,7 +24,7 @@ class CaloMonAlgBase : public AthMonitorAlgorithm {
  private:
   // LArCollisionTime name
   SG::ReadHandleKey<LArCollisionTime> m_LArCollisionTimeKey{this,"LArCollisionTimeKey","LArCollisionTime"};
-  SG::ReadHandleKey<BeamBackgroundData>  m_beamBackgroundKey{this,"BeamBackgroundKey","BeamBackgroundData"};
+  SG::ReadHandleKey<BeamBackgroundData>  m_beamBackgroundKey{this,"BeamBackgroundKey","CSCBackgroundForCaloMon"};
 
   // Handles on filtering tools
   bool m_useBadLBTool;

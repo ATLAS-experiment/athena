@@ -2,7 +2,6 @@
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
-from AthenaConfiguration.Enums import BeamType
 from LArCellRec.LArCollisionTimeConfig import LArCollisionTimeCfg
 
 def BackgroundAlgsCfg(flags):
@@ -11,33 +10,9 @@ def BackgroundAlgsCfg(flags):
 
   result.merge(LArCollisionTimeCfg(flags))
 
-  haveMM   = flags.Detector.GeometryMM
-  havesTGC = flags.Detector.GeometrysTGC
-  haveNSW  = haveMM or havesTGC      
+  haveCSC=flags.Detector.GeometryCSC 
 
-  isRun3  = haveNSW                 
-
-  filler = CompFactory.BeamBackgroundFiller()
-
-  if flags.Beam.Type is BeamType.Collisions:
-    if isRun3:
-      # Run 3: NSW segments
-      filler.nswSegmentContainerKey = "NCB_TrackMuonSegments"
-      filler.cscSegmentContainerKey = ""   # disable CSC
-      filler.isRun3 = True
-
-    else:
-      # Run 2: CSC segments
-      filler.cscSegmentContainerKey = "NCB_TrackMuonSegments"
-      filler.nswSegmentContainerKey = ""   # disable NSW
-      filler.isRun3 = False
-  
-  else:
-    filler.nswSegmentContainerKey = ""
-    filler.cscSegmentContainerKey = ""
-    filler.isRun3 = isRun3 
-
-  result.addEventAlgo(filler)
+  result.addEventAlgo(CompFactory.BeamBackgroundFiller(cscSegmentContainerKey=("NCB_TrackMuonSegments" if haveCSC else "")))
 
   result.addEventAlgo(CompFactory.BcmCollisionTimeAlg())
 
