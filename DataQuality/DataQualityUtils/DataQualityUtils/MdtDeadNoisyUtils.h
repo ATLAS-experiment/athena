@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  */
 
 #ifndef dqutilsMdtDeadNoisy_h
@@ -12,7 +12,6 @@
 #include <fstream>
 #include <stdio.h>
 
-#include <TString.h>
 #include <TH1F.h>
 #include <TCanvas.h>
 
@@ -37,10 +36,10 @@ namespace dqutils_mdtdeadnoisy {
   void getSurelyDeadList(TH1F* h, std::vector<int>& v, std::vector<int>& betweenlist);
   void getNotBetweenList(std::vector<int>& v, std::vector<int>& surely_v, std::vector<int>& betweenlist);
   void getNotMasked(std::vector<int>& v, TH1F* h);
-  void getNotInDeadML(std::vector<int>& v, std::vector<int>& deadML_v, const TString& hardware_name, int totalTubes);
-  void getNotInDeadLayer(std::vector<int>& v, std::vector<int>& deadLayer_v, const TString& hardware_name,
+  void getNotInDeadML(std::vector<int>& v, std::vector<int>& deadML_v, const std::string& hardware_name, int totalTubes);
+  void getNotInDeadLayer(std::vector<int>& v, std::vector<int>& deadLayer_v, const std::string& hardware_name,
                          int totalTubes);
-  void getNotInDeadMezz(std::vector<int>& v, std::vector<int>& deadMezz_v, const TString& hardware_name,
+  void getNotInDeadMezz(std::vector<int>& v, std::vector<int>& deadMezz_v, const std::string& hardware_name,
                         int totalTubes);
   void getAllBins(TH1F* h, std::vector<int>& v);
   void getAllBinsInRange(TH1F* h, std::vector<int>& v, int x1, int x2);
@@ -93,37 +92,37 @@ namespace dqutils_mdtdeadnoisy {
                        TH1F* EffVSNoise_ADCCut_den, TH1F* EffVSBkd_num, TH1F* EffVSBkd_den);
   std::vector<int> GetNoisyTubes(TH1F* h_tube_fornoise, int nTriggers, float frequency);//Simply determine noisy tubes
                                                                                         // from freq.
-  std::vector<int> GetNoisyTubes(TH1F* h_tube_fornoise, TH1F* h_tube, TString chamber, int& validity);
-  std::vector<int> GetNoisyTubes_WithoutForNoise(TH1F* h_tube, int& validity, TString chamber);
-  //std::vector<int> GetDeadTubes( TH1F* h_tube_fornoise, TH1F* h_tube, TString chamber);
+  std::vector<int> GetNoisyTubes(TH1F* h_tube_fornoise, TH1F* h_tube, const std::string& chamber, int& validity);
+  std::vector<int> GetNoisyTubes_WithoutForNoise(TH1F* h_tube, int& validity, const std::string& chamber);
+  //std::vector<int> GetDeadTubes( TH1F* h_tube_fornoise, TH1F* h_tube, std::string chamber);
   std::vector<int> GetDeadTubes(TH1F* h_tube, int& validity, std::vector<int>& deadML_v, std::vector<int>& deadLayer_v,
                                 std::vector<int>& deadMezz_v);
-  //std::vector<int> GetMaskedTubesForDead( TH1F* h_tube_fornoise, TH1F* h_tube, TString chamber);
+  //std::vector<int> GetMaskedTubesForDead( TH1F* h_tube_fornoise, TH1F* h_tube, std::string chamber);
   std::vector<int> GetMaskedTubesForDead(TH1F* h_tube);
-  //std::vector<int> GetMaskedTubesForNoisy( TH1F* h_tube_fornoise, TH1F* h_tube, TString chamber);
+  //std::vector<int> GetMaskedTubesForNoisy( TH1F* h_tube_fornoise, TH1F* h_tube, std::string chamber);
   std::vector<int> GetMaskedTubesForNoisy(TH1F* h_tube_fornoise);
   double GetMeanFromHist(TH1F* h_tube);
   double GetStandardDevFromHist(TH1F* h_tube, double mean);
-  int getLastTubeInLayer(int& firstTubeInLayer, const TString& hardware_name, int totalTubes);
-  std::vector<TubeRange> getLayerRanges(const TString& hardware_name, int totalTubes);
-  int getLastTubeInML(int& firstTubeInML, const TString& hardware_name, int totalTubes);
-  std::vector<TubeRange> getMLRanges(const TString& hardware_name, int totalTubes);
-  std::vector<TubeRange> getMezzRanges(const TString& hardware_name, int totalTubes, int& groupsPerLayer);
-  int Get_ML_of_Mezz(int& mezz, const TString& hardware_name, int totalTubes);
-  int Get_ML_of_Mezz_degenerate(int& mezz, const TString& hardware_name, int totalTubes);
-  std::vector<int> /*void*/ FindDeadMezz(TH1F* h_tube, const TString& hardware_name, std::vector<int>& deadML_v);
-  std::vector<int> /*void*/ FindDeadLayer(TH1F* h_tube, const TString& hardware_name, std::vector<int>& deadML_v);
-  std::vector<int> /*void*/ FindDeadML(TH1F* h_tube, const TString& hardware_name);
-  int GetNumML(const TString& hardware_name);
-  int GetNumLayersPerML(const TString& hardware_name);
-  int GetNumTubesPerMezz(const TString& hardware_name, int mezz);//For Getting total tube count
+  int getLastTubeInLayer(int& firstTubeInLayer, const std::string& hardware_name, int totalTubes);
+  std::vector<TubeRange> getLayerRanges(const std::string& hardware_name, int totalTubes);
+  int getLastTubeInML(int& firstTubeInML, const std::string& hardware_name, int totalTubes);
+  std::vector<TubeRange> getMLRanges(const std::string& hardware_name, int totalTubes);
+  std::vector<TubeRange> getMezzRanges(const std::string& hardware_name, int totalTubes, int& groupsPerLayer);
+  int Get_ML_of_Mezz(int& mezz, const std::string& hardware_name, int totalTubes);
+  int Get_ML_of_Mezz_degenerate(int& mezz, const std::string& hardware_name, int totalTubes);
+  std::vector<int> /*void*/ FindDeadMezz(TH1F* h_tube, const std::string& hardware_name, std::vector<int>& deadML_v);
+  std::vector<int> /*void*/ FindDeadLayer(TH1F* h_tube, const std::string& hardware_name, std::vector<int>& deadML_v);
+  std::vector<int> /*void*/ FindDeadML(TH1F* h_tube, const std::string& hardware_name);
+  int GetNumML(const std::string& hardware_name);
+  int GetNumLayersPerML(const std::string& hardware_name);
+  int GetNumTubesPerMezz(const std::string& hardware_name, int mezz);//For Getting total tube count
   //global layer i.e. 5 instead of ML2 layer 2
-  int GetNumTubesPerML(const TString& hardware_name, int layer, int TotalTubes);//For Getting total tube count
-  int GetNumTubesPerLayer(const TString& hardware_name, int ML, int TotalTubes);//For Getting total tube count
-  int Get_ML_of_Layer(int& layer, const TString& hardware_name);
-  int Get_ML_of_Tube(int& tubeID, const TString& hardware_name, int totalTubes);
-  int Get_Layer_of_Tube(int& tubeID, const TString& hardware_name, int totalTubes);
-  int Get_Mezz_of_Tube(int& tubeID, const TString& hardware_name /*, int totalTubes*/,
+  int GetNumTubesPerML(const std::string& hardware_name, int layer, int TotalTubes);//For Getting total tube count
+  int GetNumTubesPerLayer(const std::string& hardware_name, int ML, int TotalTubes);//For Getting total tube count
+  int Get_ML_of_Layer(int& layer, const std::string& hardware_name);
+  int Get_ML_of_Tube(int& tubeID, const std::string& hardware_name, int totalTubes);
+  int Get_Layer_of_Tube(int& tubeID, const std::string& hardware_name, int totalTubes);
+  int Get_Mezz_of_Tube(int& tubeID, const std::string& hardware_name /*, int totalTubes*/,
                        std::vector<TubeRange>& tubeRanges, int groupsPerLayer);
   int GetNumNonMaskedTubes(TH1F* h_tube);
   int GetNumMezz(TH1F* h_tube);
