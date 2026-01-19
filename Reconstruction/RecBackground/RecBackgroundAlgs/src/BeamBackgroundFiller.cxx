@@ -10,6 +10,8 @@
 #include "CaloGeoHelpers/CaloSampling.h"
 #include "GeoPrimitives/GeoPrimitives.h"
 #include "MuonPrepRawData/CscPrepData.h"
+#include "MuonPrepRawData/MMPrepData.h"
+#include "MuonPrepRawData/sTgcPrepData.h"
 #include "xAODCaloEvent/CaloCluster.h"
 #include "xAODJet/JetConstituentVector.h"
 
@@ -18,39 +20,12 @@ constexpr float const& myConst = 1e-3 / 3e8 / 1e-9;
 }
 
 //------------------------------------------------------------------------------
-BeamBackgroundFiller::BeamBackgroundFiller(const std::string& name,
-                                           ISvcLocator* pSvcLocator)
-    : AthReentrantAlgorithm(name, pSvcLocator) {
-
-  declareProperty("doMuonBoyCSCTiming", m_doMuonBoyCSCTiming = true);
-  declareProperty("cutThetaCsc", m_cutThetaCsc = 5.);
-  declareProperty("cutThetaMdtI", m_cutThetaMdtI = 10.);
-  declareProperty("cutPhi", m_cutPhiSeg = 4.);
-  declareProperty("cutPhiCsc", m_cutPhiCsc = 4.);
-  declareProperty("cutPhiMdtI", m_cutPhiMdtI = 4.);
-  declareProperty("cutRadiusCsc", m_cutRadiusCsc = 300.);
-  declareProperty("cutRadiusMdtI", m_cutRadiusMdtI = 800.);
-  declareProperty("cutEnergy", m_cutEnergy = 10000.);
-  // CSC :  881 < R < 2081
-  // LAr barrel :  1500 < R < 1970
-  // TileCal :  2280 < R < 4250
-  declareProperty("cutRadiusLow", m_cutRadiusLow = 881.);
-  declareProperty("cutRadiusHigh", m_cutRadiusHigh = 4250.);
-
-  declareProperty("cutMuonTime", m_cutMuonTime = 25.);
-  declareProperty("cutClusTime", m_cutClusTime = 2.5);
-
-  declareProperty("cutTimeDiffAC", m_cutTimeDiffAC = 25.);
-
-  declareProperty("cutDrdz", m_cutDrdz = .15);
-}
-
-//------------------------------------------------------------------------------
 StatusCode BeamBackgroundFiller::initialize() {
   CHECK(m_edmHelperSvc.retrieve());
   CHECK(m_idHelperSvc.retrieve());
 
-ATH_CHECK(m_cscSegmentContainerReadHandleKey.initialize(m_idHelperSvc->hasCSC()));
+  ATH_CHECK(m_nswSegmentContainerReadHandleKey.initialize(!m_nswSegmentContainerReadHandleKey.empty())); 
+  ATH_CHECK(m_cscSegmentContainerReadHandleKey.initialize(!m_cscSegmentContainerReadHandleKey.empty())); 
   ATH_CHECK(m_mdtSegmentContainerReadHandleKey.initialize());
   ATH_CHECK(m_caloClusterContainerReadHandleKey.initialize());
   ATH_CHECK(m_jetContainerReadHandleKey.initialize());
@@ -65,9 +40,10 @@ StatusCode BeamBackgroundFiller::execute(const EventContext& ctx) const {
   Cache cache{};
   // find muon segments from beam background muon candidates and match them with
   // calorimeter clusters
-  FillMatchMatrix(ctx, cache);
+  ATH_CHECK(FillMatchMatrix(ctx, cache));
   // apply Beam Background Identifiaction Methods
   SegmentMethod(cache);
+  NSWMDTMatching(ctx, cache);
   OneSidedMethod(cache);
   TwoSidedMethod(cache);
   ClusterShapeMethod(cache);
@@ -91,7 +67,7 @@ StatusCode BeamBackgroundFiller::execute(const EventContext& ctx) const {
  * matrix is created to store the results of beam background identification for
  * each cluster and segment
  */
-void BeamBackgroundFiller::FillMatchMatrix(const EventContext& ctx,
+StatusCode BeamBackgroundFiller::FillMatchMatrix(const EventContext& ctx,
                                            Cache& cache) const {
   //
   cache.m_numMatched = 0;
@@ -100,6 +76,49 @@ void BeamBackgroundFiller::FillMatchMatrix(const EventContext& ctx,
   cache.m_indexClus.clear();
   cache.m_matchMatrix.clear();
   cache.m_resultClus.clear();
+
+ 
+  if (!m_nswSegmentContainerReadHandleKey.empty()) {
+    // select only NSW segments with the global direction parallel to the beam pipe
+    SG::ReadHandle<Trk::SegmentCollection> nswSegmentReadHandle(m_nswSegmentContainerReadHandleKey, ctx);
+
+    if (!nswSegmentReadHandle.isValid()) {
+      ATH_MSG_ERROR("Could not load the " << m_nswSegmentContainerReadHandleKey.key() << " segment container");
+      return StatusCode::FAILURE;
+    }
+
+    unsigned int nswSegmentCounter = 0;
+    for (const auto *thisNSWSegment : *nswSegmentReadHandle) {
+
+      nswSegmentCounter++;
+      const Muon::MuonSegment* seg = dynamic_cast<const Muon::MuonSegment*>(thisNSWSegment);
+
+      Identifier id = m_edmHelperSvc->chamberId(*seg);
+      if (!id.is_valid() || !m_idHelperSvc->isMuon(id)) {
+        continue;
+      }
+      if (!m_idHelperSvc->isMM(id) && !m_idHelperSvc->issTgc(id)) {
+        continue;
+      }
+
+      const Amg::Vector3D& globalDir = seg->globalDirection();
+      double thetaDir = globalDir.theta();
+
+      if ((std::abs(thetaDir)) > m_cutThetaNsw) {
+        continue;
+      }
+
+      ElementLink<Trk::SegmentCollection> segLink;
+      segLink.toIndexedElement(*nswSegmentReadHandle, nswSegmentCounter - 1);
+
+      if (!segLink.isValid()) {
+        ATH_MSG_INFO("Failed to create valid ElementLink for NSW segment index " << (nswSegmentCounter - 1));
+        continue;
+      }
+
+      cache.m_indexSeg.push_back(segLink);
+    }
+  } 
 
   if (m_idHelperSvc->hasCSC()) {
     // select only the CSC segments with the global direction parallel to the
@@ -137,9 +156,9 @@ void BeamBackgroundFiller::FillMatchMatrix(const EventContext& ctx,
         double thetaPos = globalPos.theta();
         double thetaDir = globalDir.theta();
 
-        double d2r = M_PI / 180.;
+        
         if (std::cos(2. * (thetaPos - thetaDir)) >
-            std::cos(2. * m_cutThetaCsc * d2r))
+            std::cos(2. * m_cutThetaCsc))
           continue;
 
         ElementLink<Trk::SegmentCollection> segLink;
@@ -187,9 +206,8 @@ void BeamBackgroundFiller::FillMatchMatrix(const EventContext& ctx,
       double thetaPos = globalPos.theta();
       double thetaDir = globalDir.theta();
 
-      double d2r = M_PI / 180.;
       if (std::cos(2. * (thetaPos - thetaDir)) >
-          std::cos(2. * m_cutThetaMdtI * d2r))
+          std::cos(2. * m_cutThetaMdtI))
         continue;
 
       ElementLink<Trk::SegmentCollection> segLink;
@@ -272,25 +290,25 @@ void BeamBackgroundFiller::FillMatchMatrix(const EventContext& ctx,
         if (!seg)
           std::abort();
 
-        Identifier id = m_edmHelperSvc->chamberId(*seg);
-        bool isCsc = m_idHelperSvc->isCsc(id);
-
         const Amg::Vector3D& globalPos = seg->globalPosition();
         double phiSeg = globalPos.phi();
         double rSeg = globalPos.perp();
 
-        // match in phi
-        double d2r = M_PI / 180.;
-        if (std::cos(phiClus - phiSeg) < std::cos(m_cutPhiCsc * d2r) && isCsc)
-          continue;
-        if (std::cos(phiClus - phiSeg) < std::cos(m_cutPhiMdtI * d2r) && !isCsc)
-          continue;
-
-        // match in radius
-        if (std::abs(rClus - rSeg) > m_cutRadiusCsc && isCsc)
-          continue;
-        if (std::abs(rClus - rSeg) > m_cutRadiusMdtI && !isCsc)
-          continue;
+        if ( m_isRun3 ) { 
+          // match in phi  
+          if (std::abs(phiClus - phiSeg) > m_cutPhiNsw) continue; 
+          // match in radius 
+          if (std::abs(rClus - rSeg) > m_cutRadiusNsw) continue; 
+        } else { 
+          Identifier id = m_edmHelperSvc->chamberId(*seg); 
+          bool isCsc = m_idHelperSvc->isCsc(id); 
+          // match in phi 
+          if (std::cos(phiClus - phiSeg) < std::cos(m_cutPhiCsc) && isCsc) continue; 
+          if (std::cos(phiClus - phiSeg) < std::cos(m_cutPhiMdtI) && !isCsc) continue; 
+          // match in radius 
+          if (std::abs(rClus - rSeg) > m_cutRadiusCsc && isCsc) continue; 
+          if (std::abs(rClus - rSeg) > m_cutRadiusMdtI && !isCsc) continue; 
+        }
 
         matchedSegmentsPerCluster[j] = 1;
         matched = true;
@@ -310,6 +328,8 @@ void BeamBackgroundFiller::FillMatchMatrix(const EventContext& ctx,
     }
   }
   cache.m_resultClus.assign(cache.m_indexClus.size(), int(1));
+
+  return StatusCode::SUCCESS;
 }
 
 //------------------------------------------------------------------------------
@@ -401,9 +421,11 @@ void BeamBackgroundFiller::SegmentMethod(Cache& cache) const {
       double phiSegC = globalPos.phi();
 
       // match in phi
-      double d2r = M_PI / 180.;
-      if (std::cos(phiSegA - phiSegC) < std::cos(m_cutPhiSeg * d2r))
+      double phiCut = m_isRun3 ? m_cutPhiSegNsw : m_cutPhiSeg;
+
+      if (std::cos(phiSegA - phiSegC) < std::cos(phiCut)) {
         continue;
+      }
 
       cache.m_numSegmentACNoTime++;
       cache.m_resultSeg[segIndexA] =
@@ -422,6 +444,67 @@ void BeamBackgroundFiller::SegmentMethod(Cache& cache) const {
         cache.m_resultSeg[segIndexC] =
             cache.m_resultSeg[segIndexC] | BeamBackgroundData::SegmentAC;
       }
+    }
+  }
+}
+// Match EI NSW segments to MDT segments in the EM 
+
+void BeamBackgroundFiller::NSWMDTMatching(const EventContext& ctx, Cache& cache) const {
+
+  // Run this entire method only for Run-3 data
+  if (!m_isRun3) return;
+
+  cache.m_numSegmentMDT = 0;
+  
+  SG::ReadHandle<Trk::SegmentCollection> mdtSegmentReadHandle(m_mdtSegmentContainerReadHandleKey, ctx);
+  if (!mdtSegmentReadHandle.isValid()) {
+      throw std::runtime_error("Could not load the " + m_mdtSegmentContainerReadHandleKey.key() + "segment container");
+  }
+  
+  ATH_MSG_DEBUG("NSWMDTMatching: NSW indexSeg size = " << cache.m_indexSeg.size());
+  
+  for (unsigned int segIndexNSW = 0; segIndexNSW < cache.m_indexSeg.size(); ++segIndexNSW) {
+    
+    const Muon::MuonSegment* segNSW = dynamic_cast<const Muon::MuonSegment*>(*(cache.m_indexSeg[segIndexNSW]));
+
+    const Identifier idNSW = m_edmHelperSvc->chamberId(*segNSW);
+
+    const Amg::Vector3D& globalPos = segNSW->globalPosition();
+    double zSegNSW   = globalPos.z();
+    double phiSegNSW = globalPos.phi();
+    double rSegNSW   = globalPos.perp();
+
+    for (const Trk::Segment* thisMDTSegment : *mdtSegmentReadHandle) {
+      
+      const Muon::MuonSegment* segMDT = dynamic_cast<const Muon::MuonSegment*>(thisMDTSegment);
+
+      const Identifier idMDT = m_edmHelperSvc->chamberId(*segMDT);
+      if (!m_idHelperSvc->isMuon(idMDT)) continue;
+
+      Muon::MuonStationIndex::StIndex stIndex = m_idHelperSvc->stationIndex(idMDT);
+      if (stIndex != Muon::MuonStationIndex::StIndex::EM) continue;
+
+      const Amg::Vector3D& globalPosMDT = segMDT->globalPosition();
+      double zSegMDT   = globalPosMDT.z();
+      double phiSegMDT = globalPosMDT.phi();
+      double rSegMDT   = globalPosMDT.perp();
+
+      // same side
+      if (zSegNSW * zSegMDT < 0.) continue;
+
+      // same sector
+      if (m_idHelperSvc->sector(idNSW) != m_idHelperSvc->sector(idMDT)) continue;
+
+      // phi matching
+      if (std::abs(phiSegNSW - phiSegMDT) > m_cutPhiSegMdt) continue;
+
+      // radius matching
+      if ((rSegNSW - rSegMDT) < m_cutRadSegMdt) continue;
+
+      ATH_MSG_DEBUG("NSW-MDT match FOUND for NSW index " << segIndexNSW);
+
+      cache.m_numSegmentMDT++;
+      cache.m_resultSeg[segIndexNSW] |= BeamBackgroundData::SegmentMDT;
     }
   }
 }
@@ -861,6 +944,7 @@ void BeamBackgroundFiller::FillBeamBackgroundData(
   beamBackgroundDataWriteHandle->SetNumSegmentEarly(cache.m_numSegmentEarly);
   beamBackgroundDataWriteHandle->SetNumSegmentACNoTime(cache.m_numSegmentACNoTime);
   beamBackgroundDataWriteHandle->SetNumSegmentAC(cache.m_numSegmentAC);
+  beamBackgroundDataWriteHandle->SetNumSegmentMDT(cache.m_numSegmentMDT);
   beamBackgroundDataWriteHandle->SetNumMatched(cache.m_numMatched);
   beamBackgroundDataWriteHandle->SetNumNoTimeLoose(cache.m_numNoTimeLoose);
   beamBackgroundDataWriteHandle->SetNumNoTimeMedium(cache.m_numNoTimeMedium);
@@ -884,16 +968,15 @@ void BeamBackgroundFiller::FillBeamBackgroundData(
 
   beamBackgroundDataWriteHandle->SetDirection(cache.m_direction);
 
-  beamBackgroundDataWriteHandle->FillIndexSeg(cache.m_indexSeg);
+  beamBackgroundDataWriteHandle->FillIndexSeg(std::move(cache.m_indexSeg));
   beamBackgroundDataWriteHandle->FillResultSeg(&cache.m_resultSeg);
-  beamBackgroundDataWriteHandle->FillIndexClus(cache.m_indexClus);
+  beamBackgroundDataWriteHandle->FillIndexClus(std::move(cache.m_indexClus));
   beamBackgroundDataWriteHandle->FillMatchMatrix(&cache.m_matchMatrix);
 
   beamBackgroundDataWriteHandle->FillResultClus(&cache.m_resultClus);
-  beamBackgroundDataWriteHandle->FillIndexJet(cache.m_indexJet);
   beamBackgroundDataWriteHandle->FillDrdzClus(&cache.m_drdzClus);
 
-  beamBackgroundDataWriteHandle->FillIndexJet(cache.m_indexJet);
+  beamBackgroundDataWriteHandle->FillIndexJet(std::move(cache.m_indexJet));
   beamBackgroundDataWriteHandle->FillResultJet(&cache.m_resultJet);
 
   ATH_MSG_DEBUG("parallel segments "
