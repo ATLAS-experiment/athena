@@ -13649,6 +13649,13 @@ HLT_g50_loose_L1eEM24L:
     1: 3
     2: 3
     3: 3
+HLT_g50_loose_g10_loose_j50c_115masswisoABC135_L1110INVM150-eEM50s-eEM10s-2DISAMB-jJ60s:
+  eventCount: 0
+  stepCounts:
+    0: 3
+  stepFeatures:
+    0: 17
+    1: 5
 HLT_g50_loose_g10_loose_j50c_115masswisoABC135_L12eEM24L:
   eventCount: 0
   stepFeatures:
@@ -13660,6 +13667,13 @@ HLT_g50_loose_g10_loose_j50c_115masswisoABC135_L1eEM40L_2eEM18L:
   stepFeatures:
     0: 5
     1: 1
+HLT_g50_loose_g10_loose_j50c_115masswisoABC_L1110INVM150-eEM50s-eEM10s-2DISAMB-jJ60s:
+  eventCount: 0
+  stepCounts:
+    0: 3
+  stepFeatures:
+    0: 17
+    1: 5
 HLT_g50_loose_g10_loose_j50c_115masswisoABC_L12eEM24L:
   eventCount: 0
   stepFeatures:
@@ -13753,6 +13767,24 @@ HLT_g50_nopid_L1eEM26M:
     1: 8
     2: 8
     3: 8
+HLT_g50_nopid_g10_nopid_j50c_020jvt_bgn285_pf_ftf_115masswisoABC135_L1110INVM150-eEM50s-eEM10s-2DISAMB-jJ60s:
+  eventCount: 2
+  stepCounts:
+    0: 5
+    1: 5
+    2: 5
+    3: 5
+    4: 5
+    5: 5
+    6: 2
+  stepFeatures:
+    0: 28
+    1: 28
+    2: 27
+    3: 26
+    4: 5
+    5: 16
+    6: 7
 HLT_g50_nopid_g10_nopid_j50c_020jvt_bgn285_pf_ftf_115masswisoABC135_L12eEM24L:
   eventCount: 0
   stepCounts:
@@ -13817,6 +13849,20 @@ HLT_g50_nopid_g10_nopid_j50c_020jvt_pf_ftf_115masswisoABC135_L1eEM40L_2eEM18L:
     3: 9
     4: 2
     5: 7
+HLT_g50_nopid_g10_nopid_j50c_115masswisoABC135_L1110INVM150-eEM50s-eEM10s-2DISAMB-jJ60s:
+  eventCount: 3
+  stepCounts:
+    0: 5
+    1: 5
+    2: 5
+    3: 5
+    4: 3
+  stepFeatures:
+    0: 28
+    1: 28
+    2: 27
+    3: 26
+    4: 16
 HLT_g50_nopid_g10_nopid_j50c_115masswisoABC135_L12eEM24L:
   eventCount: 0
   stepCounts:
@@ -13843,6 +13889,20 @@ HLT_g50_nopid_g10_nopid_j50c_115masswisoABC135_L1eEM40L_2eEM18L:
     2: 9
     3: 9
     4: 7
+HLT_g50_nopid_g10_nopid_j50c_115masswisoABC_L1110INVM150-eEM50s-eEM10s-2DISAMB-jJ60s:
+  eventCount: 4
+  stepCounts:
+    0: 5
+    1: 5
+    2: 5
+    3: 5
+    4: 4
+  stepFeatures:
+    0: 28
+    1: 28
+    2: 27
+    3: 26
+    4: 16
 HLT_g50_nopid_g10_nopid_j50c_115masswisoABC_L12eEM24L:
   eventCount: 2
   stepCounts:
@@ -13871,6 +13931,24 @@ HLT_g50_nopid_g10_nopid_j50c_115masswisoABC_L1eEM40L_2eEM18L:
     2: 9
     3: 9
     4: 7
+HLT_g50_nopid_g10_nopid_j50c_nnJvtv1_bgn285_pf_ftf_115masswisoABC135_L1110INVM150-eEM50s-eEM10s-2DISAMB-jJ60s:
+  eventCount: 2
+  stepCounts:
+    0: 5
+    1: 5
+    2: 5
+    3: 5
+    4: 5
+    5: 5
+    6: 2
+  stepFeatures:
+    0: 28
+    1: 28
+    2: 27
+    3: 26
+    4: 5
+    5: 16
+    6: 7
 HLT_g50_nopid_g10_nopid_j50c_nnJvtv1_bgn285_pf_ftf_115masswisoABC135_L12eEM24L:
   eventCount: 0
   stepCounts:
