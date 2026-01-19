@@ -15,6 +15,9 @@
     <class name="FPGATrackSimTowerInputHeader" />
     <class name="FPGATrackSimRoad" />
     <class name="FPGATrackSimTrack" />
+    <class name="FPGATrackSimTrackPars" />
+    <class name="FPGATrackSimHitCollection" />
+    <class name="FPGATrackSimHitContainer" />
     <class name="FPGATrackSimTrackStream" />
     <class name="FPGATrackSimTruthTrack" />
 
