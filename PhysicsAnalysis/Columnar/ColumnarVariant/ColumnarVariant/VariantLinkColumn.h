@@ -166,15 +166,14 @@ namespace columnar
 
 
 
-  template<ContainerIdConcept CIBase,ContainerIdConcept... CIList>
-  class ObjectLink<VariantContainerId<CIBase,CIList...>,ColumnarModeArray> final
+  template<ContainerIdConcept CIBase,ContainerIdConcept... CIList, ColumnarArrayMode CM>
+  class ObjectLink<VariantContainerId<CIBase,CIList...>,CM> final
   {
     /// Public Members
     /// ==============
   public:
 
     using CI = VariantContainerId<CIBase,CIList...>;
-    using CM = ColumnarModeArray;
 
     ObjectLink (typename CM::LinkIndexType val_link, const typename CM::LinkKeyType* val_keys, void** val_data)
       : m_link (val_link), m_keys (val_keys), m_data (val_data)
@@ -293,8 +292,8 @@ namespace columnar
     const CM::LinkKeyType* m_keys = nullptr;
     void** m_data = nullptr;
   };
-  template<typename... CIList>
-  std::ostream& operator<< (std::ostream& str, const ObjectLink<VariantContainerId<CIList...>,ColumnarModeArray>& obj)
+  template<typename... CIList, ColumnarArrayMode CM>
+  std::ostream& operator<< (std::ostream& str, const ObjectLink<VariantContainerId<CIList...>,CM>& obj)
   {
     return str << obj.getLinkKey() << "/" << obj.getLinkIndex();
   }
@@ -303,15 +302,14 @@ namespace columnar
 
   // in external mode we need to use a vector column, as well as an
   // extra column to contain our keys in order.
-  template<ContainerIdConcept CI,ColumnAccessMode CAM,ContainerIdConcept CIBase,ContainerIdConcept... CIList>
-  class AccessorTemplate<CI,ObjectLink<VariantContainerId<CIBase,CIList...>,ColumnarModeArray>,CAM,ColumnarModeArray> final
+  template<ContainerIdConcept CI,ColumnAccessMode CAM,ContainerIdConcept CIBase,ContainerIdConcept... CIList, ColumnarArrayMode CM>
+  class AccessorTemplate<CI,ObjectLink<VariantContainerId<CIBase,CIList...>,CM>,CAM,CM> final
   {
     /// Public Members
     /// ==============
   public:
 
     using VariantCI = VariantContainerId<CIBase,CIList...>;
-    using CM = ColumnarModeArray;
     static constexpr std::array containerIdNames = {CIList::idName...};
 
     AccessorTemplate () = default;
@@ -358,12 +356,12 @@ namespace columnar
     {
       auto *data = static_cast<const typename CM::LinkIndexType*>(id.getData()[m_dataIndex]);
       auto *keys = static_cast<const typename CM::LinkKeyType*>(id.getData()[m_keysIndex]);
-      return ObjectLink<VariantContainerId<CIBase,CIList...>,ColumnarModeArray> (data[id.getIndex()], keys, id.getData());
+      return ObjectLink<VariantContainerId<CIBase,CIList...>,CM> (data[id.getIndex()], keys, id.getData());
     }
 
     template<ContainerIdConcept CI2>
       requires (CAM == ColumnAccessMode::output && VariantCI::template isValidContainer<CI2>())
-    void set (ObjectId<CI,CM> id, ObjectId<CI2,ColumnarModeArray> obj) const noexcept
+    void set (ObjectId<CI,CM> id, ObjectId<CI2,CM> obj) const noexcept
     {
       auto *data = static_cast<typename CM::LinkIndexType*>(id.getData()[m_dataIndex]);
       auto *keys = static_cast<const typename CM::LinkKeyType*>(id.getData()[m_keysIndex]);

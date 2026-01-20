@@ -10,9 +10,9 @@
 namespace columnar
 {
   // the external mode specialization for native types
-  template<ContainerIdConcept CI,typename CT,ColumnAccessMode CAM>
-    requires (CI::regularColumnAccessorArray && ColumnTypeTraits<CT,ColumnarModeArray>::isNativeType)
-  class AccessorTemplate<CI,CT,CAM,ColumnarModeArray> final
+  template<ContainerIdConcept CI,typename CT,ColumnAccessMode CAM,ColumnarArrayMode CM>
+    requires (CI::regularColumnAccessorArray && ColumnTypeTraits<CT,CM>::isNativeType)
+  class AccessorTemplate<CI,CT,CAM,CM> final
   {
     /// Common Public Members
     /// =====================
@@ -20,15 +20,14 @@ namespace columnar
 
     static_assert (!std::is_const_v<CT>, "CT must not be const");
 
-    using CM = ColumnarModeArray;
-    using ColumnType = typename ColumnAccessModeTraits<CAM>::template ColumnType<typename ColumnTypeTraits<CT,ColumnarModeArray>::ColumnType>;
+    using ColumnType = typename ColumnAccessModeTraits<CAM>::template ColumnType<typename ColumnTypeTraits<CT,CM>::ColumnType>;
 
     AccessorTemplate () noexcept = default;
 
     AccessorTemplate (ColumnarTool<CM>& columnBase,
                   const std::string& name, ColumnInfo&& info = {})
     {
-      ColumnTypeTraits<CT,ColumnarModeArray>::updateColumnInfo (columnBase, info);
+      ColumnTypeTraits<CT,CM>::updateColumnInfo (columnBase, info);
       info.offsetName = CI::idName;
       m_accessorData = std::make_unique<ColumnAccessorDataArray> (&m_dataIndex, &m_accessorData, &typeid (typename ColumnTypeTraits<CT,CM>::ColumnType), CAM);
       columnBase.addColumn (std::string(CI::idName) + "." + name, m_accessorData.get(), std::move (info));

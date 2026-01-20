@@ -93,13 +93,13 @@ namespace columnar
 
 
 
-  template<ContainerIdConcept CI> class ObjectId<CI,ColumnarModeArray> final
+  template<ContainerIdConcept CI, ColumnarArrayMode CM>
+  class ObjectId<CI,CM> final
   {
     /// Common Public Members
     /// =====================
   public:
 
-    using CM = ColumnarModeArray;
     using xAODObject = typename CI::xAODObjectIdType;
 
     // Whatever you do: Do not remove this function. Yes, it will always
@@ -111,14 +111,14 @@ namespace columnar
       throw std::logic_error ("can't call xAOD function in columnar mode");
     }
 
-    ObjectId (const ObjectId<CI,ColumnarModeArray>& that) noexcept = default;
+    ObjectId (const ObjectId<CI,CM>& that) noexcept = default;
 
     template<ContainerIdConcept CI2> requires (CI2::isMutable && std::is_same_v<typename CI2::constId,CI>)
-    ObjectId (const ObjectId<CI2,ColumnarModeArray>& that) noexcept
+    ObjectId (const ObjectId<CI2,CM>& that) noexcept
       : m_data (that.getData()), m_index (that.getIndex())
     {}
 
-    ObjectId& operator = (const ObjectId<CI,ColumnarModeArray>& that) noexcept = default;
+    ObjectId& operator = (const ObjectId<CI,CM>& that) noexcept = default;
 
     // Whatever you do: Do not remove this function. Yes, it will always
     // throw. It is meant to throw in this template specialization, and
@@ -128,7 +128,7 @@ namespace columnar
       throw std::logic_error ("can't call xAOD function in columnar mode");}
 
     template<typename Acc,typename... Args>
-      requires std::invocable<Acc,ObjectId<CI,ColumnarModeArray>,Args...>
+      requires std::invocable<Acc,ObjectId<CI,CM>,Args...>
     [[nodiscard]] decltype(auto) operator() (Acc& acc, Args&&... args) const {
       return acc (*this, std::forward<Args> (args)...);}
 
@@ -158,20 +158,20 @@ namespace columnar
     std::size_t m_index = 0u;
   };
 
-  template<ContainerIdConcept CI>
-  std::ostream& operator<< (std::ostream& str, const ObjectId<CI,ColumnarModeArray>& obj)
+  template<ContainerIdConcept CI, ColumnarArrayMode CM>
+  std::ostream& operator<< (std::ostream& str, const ObjectId<CI,CM>& obj)
   {
     return str << CI::idName << "/" << obj.getIndex();
   }
 
-  template<ContainerIdConcept CI>
-  bool operator== (const ObjectId<CI,ColumnarModeArray>& lhs, const ObjectId<CI,ColumnarModeArray>& rhs)
+  template<ContainerIdConcept CI, ColumnarArrayMode CM>
+  bool operator== (const ObjectId<CI,CM>& lhs, const ObjectId<CI,CM>& rhs)
   {
     return lhs.getIndex() == rhs.getIndex();
   }
 
-  template<ContainerIdConcept CI>
-  bool operator!= (const ObjectId<CI,ColumnarModeArray>& lhs, const ObjectId<CI,ColumnarModeArray>& rhs)
+  template<ContainerIdConcept CI, ColumnarArrayMode CM>
+  bool operator!= (const ObjectId<CI,CM>& lhs, const ObjectId<CI,CM>& rhs)
   {
     return lhs.getIndex() != rhs.getIndex();
   }

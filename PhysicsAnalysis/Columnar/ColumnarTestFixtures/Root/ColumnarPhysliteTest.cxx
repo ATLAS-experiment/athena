@@ -12,21 +12,30 @@
 #include <ColumnarTestFixtures/ColumnarPhysliteTest.h>
 
 #include <AsgTesting/UnitTest.h>
+#include <ColumnarTestFixtures/PerformanceData.h>
 #include <ColumnarCore/ColumnarTool.h>
 #include <ColumnarInterfaces/ColumnInfo.h>
 #include <ColumnarInterfaces/IColumnarTool.h>
 #include <ColumnarToolWrapper/ColumnarToolHelpers.h>
+#include <ColumnarTestFixtures/Benchmark.h>
+#include <ColumnarTestFixtures/Configuration.h>
+#include <ColumnarTestFixtures/PhysliteTest.h>
 #include <ColumnarTestFixtures/ToolWrapper.h>
 #include <PATInterfaces/ISystematicsTool.h>
 #include <TruthUtils/ParticleConstants.h>
+#include <xAODEventInfo/EventInfo.h>
 #include <xAODJet/JetContainer.h>
+#include <xAODMuon/MuonContainer.h>
 #include <xAODMissingET/versions/MissingETAuxAssociationMap_v2.h>
 #include <xAODMissingET/versions/MissingETBase.h>
 #include <xAODCaloEvent/CaloClusterContainer.h>
+#include <xAODEgamma/ElectronContainer.h>
+#include <xAODEgamma/PhotonContainer.h>
 
 #include <xAODCaloEvent/CaloClusterContainer.h>
 #include <xAODTracking/TrackParticleContainer.h>
 #include <xAODTracking/VertexContainer.h>
+#include <xAODCore/ShallowCopy.h>
 
 #ifndef XAOD_STANDALONE
 #include <POOLRootAccess/TEvent.h>
@@ -35,6 +44,8 @@
 #include <TFile.h>
 #include <TLeaf.h>
 #include <TTree.h>
+
+#include <boost/core/demangle.hpp>
 
 #include <chrono>
 #include <cstdint>
@@ -50,6 +61,11 @@
 
 namespace columnar
 {
+  // I'm moving code to this namespace but some of the code in this file
+  // is still just in the columnar namespace. As I evolve the code I'll
+  // move more of it to TestUtils.
+  using namespace TestUtils;
+
   namespace
   {
     // the target time to run a given tool
@@ -58,64 +74,14 @@ namespace columnar
     // the number of events per batch in columnar mode
     const unsigned int batchSize = 1000;
 
+    // whether to run the tool a second time to get a "warm" cache measurement
+    const bool runToolTwice = true;
 
-    class Benchmark final
-    {
-      std::string m_name;
+    // whether to skip all shallow copies in xAOD array mode
+    const bool skipShallowCopies = false;
 
-      std::chrono::time_point<std::chrono::high_resolution_clock> m_start;
-
-      /// accumulated time m_ticks
-      std::chrono::high_resolution_clock::duration m_ticks {};
-
-      /// the number of times the timer has been started
-      std::uint64_t m_count = 0;
-
-      /// the number of calls per batch
-      unsigned m_batchSize = 1;
-
-      /// whether to suppress output
-      bool m_silence = false;
-
-    public:
-      Benchmark (const std::string& val_name, unsigned val_batchSize = 1)
-        : m_name (val_name), m_batchSize (val_batchSize)
-      {}
-
-      ~Benchmark ()
-      {
-        if (m_count > 0 && !m_silence)
-          std::cout << m_name << ": " << std::chrono::duration<std::uint64_t,std::nano> (m_ticks) / (m_count * m_batchSize) << std::endl;
-      }
-
-      void setSilence ()
-      {
-        m_silence = true;
-      }
-
-      std::optional<float> getEntryTime (float emptyTime) const
-      {
-        if (m_count == 0)
-          return std::nullopt;
-        return static_cast<float>((std::chrono::duration<float,std::nano> (m_ticks) / (m_count * m_batchSize)) / std::chrono::duration<float,std::nano> (1))-emptyTime/m_batchSize;
-      }
-
-      auto getTotalTime () const
-      {
-        return m_ticks;
-      }
-
-      void startTimer ()
-      {
-        m_start = std::chrono::high_resolution_clock::now();
-      }
-
-      void stopTimer ()
-      {
-        m_ticks += std::chrono::high_resolution_clock::now() - m_start;
-        m_count += 1;
-      }
-    };
+    /// whether to measure non-retrieval for empty containers
+    const bool measureNonAccessForEmpty = false;
   }
 
   namespace TestUtils
@@ -136,27 +102,6 @@ namespace columnar
       {"GSFTrackParticles", 0x2e42db0b},
       {"InDetForwardTrackParticles", 0x143c6846},
       {"MuonSpectrometerTrackParticles", 0x3993c8f3},
-    };
-
-    /// the performance data for reading a single branch
-    struct BranchPerfData final
-    {
-      std::string name;
-      std::optional<float> timeRead;
-      std::optional<float> timeUnpack;
-      std::optional<float> entrySize;
-      std::optional<float> uncompressedSize;
-      std::optional<unsigned> numBaskets;
-      std::optional<unsigned> entries;
-      std::optional<unsigned> nullEntries;
-    };
-
-    /// the performance data for running a single tool
-    struct ToolPerfData final
-    {
-      std::string name;
-      std::optional<float> timeCheck;
-      std::optional<float> timeCall;
     };
 
     template<typename T>
@@ -2101,7 +2046,8 @@ namespace columnar
       setupKnownColumns ();
       setupColumns (toolWrapper);
 
-      Benchmark benchmark (name, batchSize);
+      Benchmark benchmarkCall (name, batchSize);
+      Benchmark benchmarkCall2 (name + "(call2)", batchSize);
       Benchmark benchmarkCheck (name + "(column check)", batchSize);
       Benchmark benchmarkEmpty ("empty");
 
@@ -2132,9 +2078,15 @@ namespace columnar
           benchmarkCheck.startTimer ();
           columnData.checkData ();
           benchmarkCheck.stopTimer ();
-          benchmark.startTimer ();
+          benchmarkCall.startTimer ();
           columnData.callNoCheck (*myTool);
-          benchmark.stopTimer ();
+          benchmarkCall.stopTimer ();
+          if (runToolTwice)
+          {
+            benchmarkCall2.startTimer ();
+            columnData.callNoCheck (*myTool);
+            benchmarkCall2.stopTimer ();
+          }
           for (auto& column : usedColumns)
             column->clearColumns ();
           if ((std::chrono::high_resolution_clock::now() - startTime) > targetTime)
@@ -2152,15 +2104,19 @@ namespace columnar
       benchmarkEmpty.setSilence();
       {
         std::vector<TestUtils::BranchPerfData> branchPerfData;
-        TestUtils::BranchPerfData summary {.name = "total", .timeRead = 0, .timeUnpack = 0, .entrySize = 0, .uncompressedSize = 0, .numBaskets = 0, .entries = std::nullopt, .nullEntries = std::nullopt};
+        TestUtils::BranchPerfData summary;
+        summary.name = "total";
+        summary.timeRead = 0;
+        summary.timeUnpack = 0;
+        summary.timeShallowCopy = 0;
+        summary.entries = std::nullopt; 
+        summary.nullEntries = std::nullopt;
         for (auto& column : usedColumns)
         {
           branchPerfData.push_back (column->getPerfData (emptyTime));
           summary.timeRead.value() += branchPerfData.back().timeRead.value_or(0);
           summary.timeUnpack.value() += branchPerfData.back().timeUnpack.value_or(0);
-          summary.entrySize.value() += branchPerfData.back().entrySize.value_or(0);
-          summary.uncompressedSize.value() += branchPerfData.back().uncompressedSize.value_or(0);
-          summary.numBaskets.value() += branchPerfData.back().numBaskets.value_or(0);
+          summary.timeShallowCopy.value() += branchPerfData.back().timeShallowCopy.value_or(0);
         }
         std::sort (branchPerfData.begin(), branchPerfData.end(), [] (const auto& a, const auto& b) {return a.name < b.name;});
         branchPerfData.insert (branchPerfData.end(), summary);
@@ -2210,12 +2166,15 @@ namespace columnar
         std::vector<TestUtils::ToolPerfData> toolPerfData;
         toolPerfData.emplace_back ();
         toolPerfData.back().name = name;
-        toolPerfData.back().timeCall = benchmark.getEntryTime(emptyTime);
+        toolPerfData.back().timeCall = benchmarkCall.getEntryTime(emptyTime);
+        if (runToolTwice)
+          toolPerfData.back().timeCall2 = benchmarkCall2.getEntryTime(emptyTime);
         toolPerfData.back().timeCheck = benchmarkCheck.getEntryTime(emptyTime);
-        benchmark.setSilence();
+        benchmarkCall.setSilence();
+        benchmarkCall2.setSilence();
         benchmarkCheck.setSilence();
         const std::size_t nameWidth = std::max_element (toolPerfData.begin(), toolPerfData.end(), [] (const auto& a, const auto& b) {return a.name.size() < b.name.size();})->name.size();
-        std::string header = std::format ("{:{}} | call(ns) | check(ns)", "tool name", nameWidth);
+        std::string header = std::format ("{:{}} | call(ns) | call2(ns) | check(ns)", "tool name", nameWidth);
         std::cout << "\n" << header << std::endl;
         std::cout << std::string (header.size(), '-') << std::endl;
         for (auto& data : toolPerfData)
@@ -2225,6 +2184,10 @@ namespace columnar
             std::cout << std::format ("{:>9.0f} |", data.timeCall.value());
           else
             std::cout << "          |";
+          if (data.timeCall2)
+            std::cout << std::format ("{:>10.0f} |", data.timeCall2.value());
+          else
+            std::cout << "           |";
           if (data.timeCheck)
             std::cout << std::format ("{:>10.1f}", data.timeCheck.value());
           std::cout << std::endl;
@@ -2246,6 +2209,7 @@ namespace columnar
       Benchmark benchmarkCallClear (name + " call clear");
       Benchmark benchmarkPrepClear (name + " prep clear");
 #endif
+      Benchmark benchmarkRepeatCall (name + " repeat-call");
       Benchmark benchmarkCall (name + " call");
       Benchmark benchmarkCallCopyRecord (name + " call copy-record");
       Benchmark benchmarkCallRetrieve (name + " call retrieve");
@@ -2303,6 +2267,12 @@ namespace columnar
         benchmarkCall.startTimer ();
         ASSERT_SUCCESS (xAODToolCaller.call ());
         benchmarkCall.stopTimer ();
+        if (runToolTwice)
+        {
+          benchmarkRepeatCall.startTimer ();
+          ASSERT_SUCCESS (xAODToolCaller.call ());
+          benchmarkRepeatCall.stopTimer ();
+        }
 #ifdef XAOD_STANDALONE
         benchmarkCallClear.startTimer ();
         store.clear ();
@@ -2313,6 +2283,15 @@ namespace columnar
 #endif
       }
       std::cout << "Total entries read: " << entry << std::endl;
+    } else if constexpr (columnarAccessMode == 100)
+    {
+      UserConfiguration userConfiguration;
+      TestDefinition testDefinition;
+      testDefinition.name = name;
+      testDefinition.file = file.get();
+      testDefinition.tool = &tool;
+      testDefinition.containerRenames = containerRenames;
+      TestUtils::runXaodArrayTest (userConfiguration, testDefinition);
     }
   }
 }
