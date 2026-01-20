@@ -65,10 +65,8 @@ def addRDOValidArguments(parser):
     addRDOValidArgs(parser)
     addCommonSimDigTrfArgs(parser)
 
-### Add Sub-step Methods
-## @brief Add ISF transform substep
-#  @param overlayTransform If @c True use the tweaked version of in/outData for an overlay job
-def addSimulationSubstep(executorSet, overlayTransform = False):
+
+def addSimulationSubstep(executorSet):
     TRExe = athenaExecutor(name = 'TRtoHITS',
                            skeletonCA = 'SimuJobTransforms.ISF_Skeleton',
                            substep = 'simTRIn', tryDropAndReload = False, perfMonFile = 'ntuple.pmon.gz',
@@ -76,18 +74,10 @@ def addSimulationSubstep(executorSet, overlayTransform = False):
                            outData=['HITS','NULL'] )
     executorSet.add(TRExe)
     SimExe = athenaExecutor(name = 'EVNTtoHITS',
-                                   skeletonCA = 'SimuJobTransforms.ISF_Skeleton',
-                                   substep = 'sim', tryDropAndReload = False, perfMonFile = 'ntuple.pmon.gz',
-                                   inData=['NULL','EVNT'],
-                                   outData=['EVNT_TR','HITS','NULL'] )
-    if overlayTransform:
-        from PyJobTransforms.trfUtils import releaseIsOlderThan
-        if releaseIsOlderThan(20,3):
-            SimExe.inData = [('EVNT', 'BS_SKIM')]
-        else:
-            SimExe.inData = [('EVNT','TXT_EVENTID')]
-        SimExe.outData = ['HITS']
-        SimExe.inputDataTypeCountCheck = ['EVNT']
+                            skeletonCA = 'SimuJobTransforms.ISF_Skeleton',
+                            substep = 'sim', tryDropAndReload = False, perfMonFile = 'ntuple.pmon.gz',
+                            inData=['NULL','EVNT'],
+                            outData=['EVNT_TR','HITS','NULL'] )
     executorSet.add(SimExe)
 
 

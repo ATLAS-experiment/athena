@@ -447,7 +447,13 @@ class ItemDef:
 
         MenuItem('L1_LLPDPHI-jXE40-jJ40').setLogic( d.TOPO_0DPHI10_jXE40delay_jJ40s & physcond)
         MenuItem('L1_LLPNODPHI-jXE40-jJ40').setLogic( d.TOPO_0DPHI99_jXE40delay_jJ40s & physcond)
-        
+ 
+        # ATR-32084 
+        MenuItem('L1_LLP2DPHI-jXE40-jJ40').setLogic( d.TOPO_0DPHI10_jXE40delay2_jJ40s & physcond)
+        MenuItem('L1_LLP2NODPHI-jXE40-jJ40').setLogic( d.TOPO_0DPHI99_jXE40delay2_jJ40s & physcond)
+        MenuItem('L1_LLP3DPHI-jXE40-jJ40').setLogic( d.TOPO_0DPHI10_jXE40delay3_jJ40s & physcond)
+        MenuItem('L1_LLP3NODPHI-jXE40-jJ40').setLogic( d.TOPO_0DPHI99_jXE40delay3_jJ40s & physcond)
+      
         # HI
         MenuItem('L1_MU3V_VTE10' ).setLogic( d.MU3V      & Not(d.TE10) & physcond).setTriggerType(TT.muon)
         MenuItem('L1_2MU3V_VTE10').setLogic( d.MU3V.x(2) & Not(d.TE10) & physcond).setTriggerType(TT.muon)

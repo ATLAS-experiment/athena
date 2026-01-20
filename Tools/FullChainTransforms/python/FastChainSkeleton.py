@@ -39,7 +39,7 @@ def fromRunArgs(runArgs):
     flags.Sim.ISFRun = True
 
     # Set input files
-    if hasattr(runArgs, 'inputRDO_BKGFile') or hasattr(runArgs, 'inputBS_SKIMFile'):
+    if hasattr(runArgs, 'inputRDO_BKGFile'):
         # Set inputs for Overlay
         from OverlayConfiguration.OverlaySkeleton import setOverlayInputFiles
         setOverlayInputFiles(runArgs, flags, logFastChain)
