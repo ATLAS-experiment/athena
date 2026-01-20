@@ -40,3 +40,26 @@ def AugOriginalCountsCfg(flags, name="AugOriginalCounts", **kwargs):
 
 def getDefaultAllVariables():
     return ["EventInfo"]
+
+def BPhysBGammaFinderCfg(flags, name="BPhysBGammaFinder", **kwargs):
+    #Perhaps flesh out in future see ATLASG-2977
+    acc = ComponentAccumulator()
+    acc.setPrivateTools(
+    CompFactory.DerivationFramework.BPhysBGammaFinder(name, **kwargs))
+    return acc
+
+def BPhysMetadataBaseCfg(flags, name="BPhysMetadataBase", **kwargs):
+    #Perhaps flesh out in future see ATLASG-2977
+    acc = ComponentAccumulator()
+    acc.setPrivateTools(
+    CompFactory.DerivationFramework.BPhysMetadataBase(name, **kwargs))
+    return acc
+
+def Bmumu_metadataCfg(flags, BPHYDerivationName, **kwargs):
+    #Perhaps flesh out in future see ATLASG-2977
+    acc = ComponentAccumulator()
+    name = BPHYDerivationName + "_Bmumu_metadata"
+    kwargs.setdefault("DerivationName",BPHYDerivationName)
+    acc.setPrivateTools(
+    CompFactory.DerivationFramework.Bmumu_metadata(name, **kwargs))
+    return acc
