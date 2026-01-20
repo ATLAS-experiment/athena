@@ -5364,6 +5364,12 @@ HLT_j20_0eta290_nnJvtv1_boffperf_pf_ftf_L1jJ30:
     0: 17
     1: 50
     2: 50
+HLT_j20_CLEANllp_momemfrac006_calratio_L1eTAU40HT:
+  eventCount: 0
+HLT_j20_CLEANllp_momemfrac006_calratio_L1eTAU60HM:
+  eventCount: 0
+HLT_j20_CLEANllp_momemfrac006_calratio_L1jJ160:
+  eventCount: 0
 HLT_j20_CLEANllp_momemfrac006_calratiovar_roiftf_preselj20emf6_L1eTAU140:
   eventCount: 0
 HLT_j20_CLEANllp_momemfrac006_calratiovar_roiftf_preselj20emf6_L1eTAU40HT:
@@ -6029,6 +6035,12 @@ HLT_j30_CLEANllp_momemfrac006_calratiormbib_L1eTAU60_UNPAIRED_ISO:
 HLT_j30_CLEANllp_momemfrac006_calratiormbib_L1eTAU80:
   eventCount: 0
 HLT_j30_CLEANllp_momemfrac006_calratiormbib_L1jJ160:
+  eventCount: 0
+HLT_j30_CLEANllp_momemfrac011_calratio_L1eTAU40HT:
+  eventCount: 0
+HLT_j30_CLEANllp_momemfrac011_calratio_L1eTAU60HM:
+  eventCount: 0
+HLT_j30_CLEANllp_momemfrac011_calratio_L1jJ160:
   eventCount: 0
 HLT_j30_CLEANllp_momemfrac012_calratiormbib_L1jMJJ-500-NFF:
   eventCount: 0
