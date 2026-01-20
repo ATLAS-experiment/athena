@@ -184,20 +184,24 @@ namespace Muon {
     }
 
     int MuonIdHelperSvc::gasGap(const Identifier& id) const {
-        if (isRpc(id)) {
-            return m_rpcIdHelper->gasGap(id);
-        } else if (isTgc(id)) {
-            return m_tgcIdHelper->gasGap(id);
-        } else if (isCsc(id)) {
-            return m_cscIdHelper->wireLayer(id);
-        } else if (issTgc(id)) {
-            return m_stgcIdHelper->gasGap(id);
-        } else if (isMM(id)) {
-            return m_mmIdHelper->gasGap(id);
-        } else {
-            return m_mdtIdHelper->channel(id);
+        switch (technologyIndex(id)) {
+            using enum TechnologyIndex;
+            case RPC: {
+                return m_rpcIdHelper->gasGap(id);
+            } case TGC: {
+               return m_tgcIdHelper->gasGap(id);
+            } case CSC: {
+                return m_cscIdHelper->wireLayer(id);
+            } case STGC: {
+                return m_stgcIdHelper->gasGap(id);
+            } case MM: {
+                return m_mmIdHelper->gasGap(id);
+            } case MDT: {
+                return m_mdtIdHelper->channel(id);
+            } default:
+                break;
         }
-        return 1;
+        return 0;
     }
 
     bool MuonIdHelperSvc::isMuon(const Identifier& id) const { 
@@ -230,8 +234,9 @@ namespace Muon {
         return m_techPerStation[toInt(stIndex)];
     }
     bool MuonIdHelperSvc::issMdt(const Identifier& id) const {
-        if (!isMdt(id))
+        if (!isMdt(id)) {
             return false;
+        }
         if (stationName(id) == m_BIS_stat) {
             return m_smdt_stat.find(m_mdtIdHelper->elementID(id)) != m_smdt_stat.end();
         }
@@ -246,26 +251,11 @@ namespace Muon {
         return issMdt(id) && !m_mdtIdHelper->isBME(id);
     }
 
-    bool MuonIdHelperSvc::measuresPhi(const Identifier& id) const {
-        if (isRpc(id)) {
-            return m_rpcIdHelper->measuresPhi(id);
-        } else if (isTgc(id)) {
-            return m_tgcIdHelper->measuresPhi(id);
-        } else if (isCsc(id)) {
-            return m_cscIdHelper->measuresPhi(id);
-        } else if (issTgc(id)) {
-            return m_stgcIdHelper->measuresPhi(id);
-        }
-        // MM and MDTs only measure eta
-        return false;
-    }
-
     bool MuonIdHelperSvc::isTrigger(const Identifier& id) const {
         return isRpc(id) || isTgc(id);
     }
 
     bool MuonIdHelperSvc::isEndcap(const Identifier& id) const { return m_primaryHelper->isEndcap(id); }
-
     bool MuonIdHelperSvc::isSmallChamber(const Identifier& id) const { return m_primaryHelper->isSmall(id); }
 
     ChIndex MuonIdHelperSvc::chamberIndex(const Identifier& id) const {
@@ -285,6 +275,7 @@ namespace Muon {
     }
 
     PhiIndex MuonIdHelperSvc::phiIndex(const Identifier& id) const {
+#ifndef NDEBUG
         if (!id.is_valid() || !isMuon(id)) {
             if (id.is_valid()) ATH_MSG_WARNING("phiIndex: invalid ID " << m_primaryHelper->print_to_string(id));
             return PhiIdx::PhiUnknown;
@@ -293,34 +284,39 @@ namespace Muon {
             ATH_MSG_WARNING("phiIndex: not supported for " << toString(id));
             return PhiIdx::PhiUnknown;
         }
-        PhiIdx index{PhiIdx::PhiUnknown};
-        const StIdx stIndex = stationIndex(id);
-        if (stIndex == StIdx::BI) {
-            index = m_rpcIdHelper->doubletR(id) == 1 ?  PhiIdx::BI1 : PhiIdx::BI2;
-        } else if (stIndex == StIdx::BM) {
-            index =  m_rpcIdHelper->doubletR(id) == 1 ? PhiIdx::BM1 : PhiIdx::BM2;
-        } else if (stIndex == StIdx::BO) {
-            index = m_rpcIdHelper->doubletR(id) == 1 ?  PhiIdx::BO1 : PhiIdx::BO2;
-        } else if (stIndex == StIdx::EI) {
-            if (isCsc(id)) {
-                index = PhiIdx::CSC;
-            } else if (isTgc(id)) {
-                index = PhiIdx::T4;
-            } else if (m_stgcIdHelper->multilayer(id) == 1) {
-                index = PhiIdx::STGC1;
-            } else {
-                index = PhiIdx::STGC2;
-            }
-        } else if (stIndex == StIdx::EM) {
-            std::string chamberName = chamberNameString(id);
-            if (chamberName[1] == '1')
-                index = PhiIdx::T1;
-            else if (chamberName[1] == '2')
-                index = PhiIdx::T2;
-            else
-                index = PhiIdx::T3;
+#endif
+        switch (stationIndex(id)) {
+            case StIndex::BI:{
+                return m_rpcIdHelper->doubletR(id) == 1 ?  PhiIdx::BI1 : PhiIdx::BI2;
+            } case StIndex::BM: {
+                return m_rpcIdHelper->doubletR(id) == 1 ? PhiIdx::BM1 : PhiIdx::BM2;
+            } case StIndex::BO: {
+                return m_rpcIdHelper->doubletR(id) == 1 ? PhiIdx::BO1 : PhiIdx::BO2;
+            } case StIndex::EI: {
+                switch (technologyIndex(id)) {
+                    case TechIdx::CSC:
+                        return PhiIdx::CSC;
+                    case TechIdx::TGC:
+                        return PhiIdx::T4;
+                    case TechIdx::STGC:
+                        return m_stgcIdHelper->multilayer(id) == 1 ? PhiIdx::STGC1 : PhiIdx::STGC2;
+                    default:
+                        break;
+                }
+                break;
+            } case StIndex::EM: {
+                const std::string chamberName = stationNameString(id);
+                if (chamberName[1] == '1') {
+                    return PhiIdx::T1;
+                } else if (chamberName[1] == '2') {
+                    return PhiIdx::T2;
+                } else {
+                    return PhiIdx::T3;
+                }
+            } default:
+                break;
         }
-        return index;
+        return PhiIdx::PhiUnknown;
     }
 
     DetectorRegionIndex MuonIdHelperSvc::regionIndex(const Identifier& id) const {
@@ -333,34 +329,41 @@ namespace Muon {
     }
 
     TechnologyIndex MuonIdHelperSvc::technologyIndex(const Identifier& id) const {
-        if (isMdt(id)) return TechIdx::MDT;
-        else if (isCsc(id)) return TechIdx::CSC;
+        if (isMdt(id)) return TechIdx::MDT;   
+        else if (issTgc(id)) return TechIdx::STGC;
+        else if (isMM(id)) return TechIdx::MM;     
         else if (isTgc(id)) return TechIdx::TGC;
         else if (isRpc(id)) return TechIdx::RPC;
-        else if (issTgc(id)) return TechIdx::STGC;
-        else if (isMM(id)) return TechIdx::MM;
+        else if (isCsc(id)) return TechIdx::CSC;
         return TechIdx::TechnologyUnknown;
     }
     std::string MuonIdHelperSvc::toString(const Identifier& id) const {
         if (!id.is_valid()) return " Invalid Identifier";
-        if (isMdt(id)) {
-            return toStringGasGap(id);
+        switch (technologyIndex(id)) {
+            using enum TechnologyIndex;
+            case MDT:{
+                return toStringGasGap(id);
+            } case RPC: {
+                return std::format("{:} {:} channel {:2d}", toStringGasGap(id), 
+                                   measuresPhi(id) ? "phi" : "eta", m_rpcIdHelper->channel(id));
+            } case TGC: {
+                return std::format("{:} {:} channel {:2d}", toStringGasGap(id), 
+                                   measuresPhi(id) ? "phi" : "eta",  m_tgcIdHelper->channel(id));
+            } case CSC: {
+                return std::format("{:} {:} channel {:2d}", toStringGasGap(id), 
+                                   measuresPhi(id) ? "phi" : "eta",  m_cscIdHelper->channel(id));
+            } case STGC: {
+                using sTgcType = sTgcIdHelper::sTgcChannelTypes;
+                const int channelType = m_stgcIdHelper->channelType(id);
+                return std::format("{:} {:} channel {:3d}", toStringGasGap(id), 
+                                    channelType == sTgcType::Strip ? "eta" : channelType == sTgcType::Wire ? "phi" : "pad" ,
+                                    m_stgcIdHelper->channel(id));
+            } case MM: {
+                return std::format("{:} channel {:4d}",toStringGasGap(id),  m_mmIdHelper->channel(id));
+            } default:
+                break;
         }
-        const std::string_view phiStr{measuresPhi(id) ? "phi" : "eta"};
-        if (isRpc(id)) {
-            return std::format("{:} {:} channel {:2d}",toStringGasGap(id), measuresPhi(id) ? "phi" : "eta", m_rpcIdHelper->channel(id));
-        } else if (isTgc(id)) {
-            return std::format("{:} {:} channel {:2d}",toStringGasGap(id), measuresPhi(id) ? "phi" : "eta",  m_tgcIdHelper->channel(id));
-        } else if (isCsc(id)) {
-            return std::format("{:} {:} channel {:2d}",toStringGasGap(id), measuresPhi(id) ? "phi" : "eta",  m_cscIdHelper->channel(id));
-        } else if (isMM(id)) {
-            return std::format("{:} channel {:4d}",toStringGasGap(id),  m_mmIdHelper->channel(id));
-        } 
-        using  sTgcType = sTgcIdHelper::sTgcChannelTypes;
-        const int channelType = m_stgcIdHelper->channelType(id);
-        return std::format("{:} {:} channel {:3d}",toStringGasGap(id), 
-                            channelType == sTgcType::Strip ? "eta" : channelType == sTgcType::Wire ? "phi" : "pad" ,
-                            m_stgcIdHelper->channel(id));
+        return {};
     }
 
     std::string MuonIdHelperSvc::toStringTech(const Identifier& id) const {
@@ -386,197 +389,132 @@ namespace Muon {
     }
 
     std::string MuonIdHelperSvc::toStringDetEl(const Identifier& id) const {
-
-        if (!id.is_valid()) return " Invalid Identifier";
-        if (isMdt(id)) {
-            return std::format("{:} ml {:1d}", toStringChamber(id), m_mdtIdHelper->multilayer(id));
-        } else if (isRpc(id)) {
-            return std::format("{:} dbZ {:1d} dbPhi {:1d}", toStringChamber(id), m_rpcIdHelper->doubletZ(id), m_rpcIdHelper->doubletPhi(id));
-        } else if (isTgc(id)) {
-            return toStringChamber(id);
-        } 
-        int ml{0};
-        if (isCsc(id)) {
-           ml =  m_cscIdHelper->chamberLayer(id);
-        } else if (isMM(id)) {
-            ml = m_mmIdHelper->multilayer(id);
-        } else {
-            ml = m_stgcIdHelper->multilayer(id);
+        switch (technologyIndex(id)) {
+            using enum TechnologyIndex;
+            case MDT: {
+                return std::format("{:} ml {:1d}", toStringChamber(id), m_mdtIdHelper->multilayer(id));
+            } case RPC: {
+                return std::format("{:} dbZ {:1d} dbPhi {:1d}", toStringChamber(id), m_rpcIdHelper->doubletZ(id), m_rpcIdHelper->doubletPhi(id));
+            } case TGC: {
+                return toStringChamber(id);
+            } case CSC: {
+                return std::format("{:} chlay {:1d}",toStringChamber(id), m_cscIdHelper->chamberLayer(id));
+            } case STGC: {
+                return std::format("{:} chlay {:1d}",toStringChamber(id), m_stgcIdHelper->multilayer(id));
+            } case MM: {
+                return std::format("{:} chlay {:1d}",toStringChamber(id), m_mmIdHelper->multilayer(id));
+            } default:
+                break;
         }
-        return std::format("{:} chlay {:1d}",toStringChamber(id), ml);
+        return "Invalid detector element";
     }
 
     std::string MuonIdHelperSvc::toStringGasGap(const Identifier& id) const {
-        if (!id.is_valid()) return " Invalid Identifier";
-        if (isMdt(id)) {
-            return std::format("{:} lay {:1d} tube {:1d}", toStringDetEl(id),m_mdtIdHelper->tubeLayer(id), m_mdtIdHelper->tube(id));
-        } else if (isRpc(id) || isTgc(id)) {
-            return std::format("{:} gap {:1d}", toStringDetEl(id), gasGap(id));
-        } 
-        return std::format("{:} lay {:1d}", toStringDetEl(id), gasGap(id));
+        switch (technologyIndex(id)) {
+            using enum TechnologyIndex;
+            case MDT: {
+                return std::format("{:} lay {:1d} tube {:1d}", toStringDetEl(id),
+                                   m_mdtIdHelper->tubeLayer(id), m_mdtIdHelper->tube(id));
+            } case RPC:
+              case TGC: {
+                return std::format("{:} gap {:1d}", toStringDetEl(id), gasGap(id)); 
+            } case STGC:
+              case MM:
+              case CSC: {
+                return std::format("{:} lay {:1d}", toStringDetEl(id), gasGap(id));
+            } default:
+                break;
+        }
+        return "invalid gas gap Id";
     }
 
     Identifier MuonIdHelperSvc::chamberId(const Identifier& id) const {
-        Identifier chId;
         // use phi hits on segment
-        if (isTgc(id)) {
-            chId = m_tgcIdHelper->elementID(id);
-        } else if (isRpc(id)) {
-            chId = m_rpcIdHelper->elementID(id);
-        } else if (isMM(id)) {
-            chId = m_mmIdHelper->elementID(id);
-        } else if (issTgc(id)) {
-            chId = m_stgcIdHelper->elementID(id);
-        } else if (isCsc(id)) {
-            chId = m_cscIdHelper->channelID(id, 2, 1, 1, 1);
-        } else if (isMdt(id)) {
-            chId = m_mdtIdHelper->elementID(id);
+        switch (technologyIndex(id)) {
+            using enum TechnologyIndex;
+            case MDT: {
+                return m_mdtIdHelper->elementID(id);
+            } case RPC: {
+                return m_rpcIdHelper->elementID(id);
+            } case TGC: {
+                return m_tgcIdHelper->elementID(id);
+            } case CSC: {
+                return m_cscIdHelper->elementID(id);
+            } case STGC: {
+                return m_stgcIdHelper->elementID(id);
+            } case MM: {
+                return m_mmIdHelper->elementID(id);
+            } default:
+                break;
         }
-        return chId;
+        return Identifier{};
     }
 
     Identifier MuonIdHelperSvc::detElId(const Identifier& id) const {
         // use phi hits on segment
-        if (isTgc(id)) {
-            return m_tgcIdHelper->elementID(id);
-        } else if (isRpc(id)) {
-            return m_rpcIdHelper->channelID(id, m_rpcIdHelper->doubletZ(id), m_rpcIdHelper->doubletPhi(id), 1, false, 1);
-        } else if (isCsc(id)) {
-            return  m_cscIdHelper->channelID(id, 2, 1, 1, 1);
-        } else if (issTgc(id)) {
-            return m_stgcIdHelper->channelID(id, m_stgcIdHelper->multilayer(id), 1, sTgcIdHelper::sTgcChannelTypes::Strip, 1);
-        } else if (isMM(id)) {
-            return m_mmIdHelper->channelID(id, m_mmIdHelper->multilayer(id), 1, 1);
-        } 
-        return m_mdtIdHelper->channelID(id, m_mdtIdHelper->multilayer(id), 1, 1);
+        switch (technologyIndex(id)) {
+            using enum MuonStationIndex::TechnologyIndex;
+            case MDT: {
+                return m_mdtIdHelper->channelID(id, m_mdtIdHelper->multilayer(id), 1, 1);;
+            } case RPC: {
+                return m_rpcIdHelper->channelID(id, m_rpcIdHelper->doubletZ(id), m_rpcIdHelper->doubletPhi(id), 1, false, 1);
+            } case TGC: {
+                return m_tgcIdHelper->elementID(id);   
+            } case CSC: {
+                return m_cscIdHelper->channelID(id, 2, 1, 1, 1);
+            } case MM: {
+                return m_mmIdHelper->channelID(id, m_mmIdHelper->multilayer(id), 1, 1);   
+            } case STGC: {
+                return m_stgcIdHelper->channelID(id, m_stgcIdHelper->multilayer(id), 1, sTgcIdHelper::sTgcChannelTypes::Strip, 1);
+            } default:
+                 break;
+        }
+        return id;
     }
 
     Identifier MuonIdHelperSvc::layerId(const Identifier& id) const {
-        // use phi hits on segment
-        if (isTgc(id)) {
-            return m_tgcIdHelper->channelID(id, m_tgcIdHelper->gasGap(id), m_tgcIdHelper->measuresPhi(id), 1);
-        } else if (isRpc(id)) {
-            return m_rpcIdHelper->channelID(id, m_rpcIdHelper->doubletZ(id), m_rpcIdHelper->doubletPhi(id), 
-                                            m_rpcIdHelper->gasGap(id), m_rpcIdHelper->measuresPhi(id), 1);
-        } else if (isCsc(id)) {
-            return m_cscIdHelper->channelID(id, m_cscIdHelper->chamberLayer(id), m_cscIdHelper->wireLayer(id), 
-                                            m_cscIdHelper->measuresPhi(id), 1);
-        } else if (isMM(id)) {
-            return m_mmIdHelper->channelID(id, m_mmIdHelper->multilayer(id), m_mmIdHelper->gasGap(id), 1);
-        } else if (issTgc(id)) {
-            return m_stgcIdHelper->channelID(id, m_stgcIdHelper->multilayer(id), 
-                                             m_stgcIdHelper->gasGap(id), m_stgcIdHelper->channelType(id), 1);
+        switch (technologyIndex(id)) {
+            using enum TechnologyIndex;
+            case TGC: {
+                return m_tgcIdHelper->channelID(id, m_tgcIdHelper->gasGap(id), m_tgcIdHelper->measuresPhi(id), 1);
+            } case RPC: {
+                return m_rpcIdHelper->channelID(id, m_rpcIdHelper->doubletZ(id), m_rpcIdHelper->doubletPhi(id), 
+                                                m_rpcIdHelper->gasGap(id), m_rpcIdHelper->measuresPhi(id), 1); 
+            } case CSC: {
+                return m_cscIdHelper->channelID(id, m_cscIdHelper->chamberLayer(id), m_cscIdHelper->wireLayer(id), 
+                                                m_cscIdHelper->measuresPhi(id), 1);
+            } case MM: {
+                return m_mmIdHelper->channelID(id, m_mmIdHelper->multilayer(id), m_mmIdHelper->gasGap(id), 1);
+            } case STGC: {
+                return m_stgcIdHelper->channelID(id, m_stgcIdHelper->multilayer(id), 
+                                                 m_stgcIdHelper->gasGap(id), m_stgcIdHelper->channelType(id), 1);
+            } default:
+                break;
         }
         /// Return Identifier for the Mdts 
         return id;
     }
 
     Identifier MuonIdHelperSvc::gasGapId(const Identifier& id) const {
-        // use phi hits on segment
-        if (isTgc(id)) {
-            return m_tgcIdHelper->channelID(id, m_tgcIdHelper->gasGap(id), false, 1);
-
-        } else if (isRpc(id)) {
-            return m_rpcIdHelper->channelID(id, m_rpcIdHelper->doubletZ(id), m_rpcIdHelper->doubletPhi(id), 
-                                            m_rpcIdHelper->gasGap(id), false, 1);
-
-        } else if (isCsc(id)) {
-            return m_cscIdHelper->channelID(id, m_cscIdHelper->chamberLayer(id), m_cscIdHelper->wireLayer(id), 1, 1);
-        } else if (isMM(id)) {
-            return m_mmIdHelper->channelID(id, m_mmIdHelper->multilayer(id), m_mmIdHelper->gasGap(id), 1);
-
-        } else if (issTgc(id)) {
-            return m_stgcIdHelper->channelID(id, m_stgcIdHelper->multilayer(id), m_stgcIdHelper->gasGap(id), 
+        switch (technologyIndex(id)) {
+            using enum TechnologyIndex;
+            case RPC: {
+                return m_rpcIdHelper->channelID(id, m_rpcIdHelper->doubletZ(id), m_rpcIdHelper->doubletPhi(id), 
+                                                m_rpcIdHelper->gasGap(id), false, 1);
+            } case TGC: {
+               return m_tgcIdHelper->channelID(id, m_tgcIdHelper->gasGap(id), false, 1); 
+            } case CSC: {
+                return m_cscIdHelper->channelID(id, m_cscIdHelper->chamberLayer(id), m_cscIdHelper->wireLayer(id), 1, 1);
+            } case STGC: {
+                return m_stgcIdHelper->channelID(id, m_stgcIdHelper->multilayer(id), m_stgcIdHelper->gasGap(id), 
                                                  sTgcIdHelper::sTgcChannelTypes::Strip, 1);
-
-        } 
-        return m_mdtIdHelper->channelID(id, m_mdtIdHelper->multilayer(id), m_mdtIdHelper->tubeLayer(id), 1);
+            } case MM: {
+                return m_mmIdHelper->channelID(id, m_mmIdHelper->multilayer(id), m_mmIdHelper->gasGap(id), 1);
+            } default: 
+                break;
+        }
+        return id;
     }
-
-    int MuonIdHelperSvc::stationPhi(const Identifier& id) const {
-        if (!id.is_valid()) {
-            ATH_MSG_WARNING("stationPhi: invalid ID");
-            return 0;
-        }
-        if (isRpc(id)) {
-            return m_rpcIdHelper->stationPhi(id);
-        } else if (isTgc(id)) {
-            return m_tgcIdHelper->stationPhi(id);
-        } else if (isMdt(id)) {
-            return m_mdtIdHelper->stationPhi(id);
-        } else if (isCsc(id)) {
-            return m_cscIdHelper->stationPhi(id);
-        } else if (issTgc(id)) {
-            return m_stgcIdHelper->stationPhi(id);
-        } else if (isMM(id)) {
-            return m_mmIdHelper->stationPhi(id);
-        }
-        return 0;
-    }
-
-    int MuonIdHelperSvc::stationEta(const Identifier& id) const {
-        if (!id.is_valid()) {
-            ATH_MSG_WARNING("stationEta: invalid ID");
-            return 0;
-        }
-        if (isRpc(id)) {
-            return m_rpcIdHelper->stationEta(id);
-        } else if (isTgc(id)) {
-            return m_tgcIdHelper->stationEta(id);
-        } else if (isMdt(id)) {
-            return m_mdtIdHelper->stationEta(id);
-        } else if (isCsc(id)) {
-            return m_cscIdHelper->stationEta(id);
-        } else if (issTgc(id)) {
-            return m_stgcIdHelper->stationEta(id);
-        } else if (isMM(id)) {
-            return m_mmIdHelper->stationEta(id);
-        }
-        return 0;
-    }
-
-    int MuonIdHelperSvc::stationName(const Identifier& id) const {
-        if (!id.is_valid()) {
-            ATH_MSG_WARNING("stationName: invalid ID");
-            return 0;
-        }
-        if (isRpc(id)) {
-            return m_rpcIdHelper->stationName(id);
-        } else if (isTgc(id)) {
-            return m_tgcIdHelper->stationName(id);
-        } else if (isMdt(id)) {
-            return m_mdtIdHelper->stationName(id);
-        } else if (isCsc(id)) {
-            return m_cscIdHelper->stationName(id);
-        } else if (issTgc(id)) {
-            return m_stgcIdHelper->stationName(id);
-        } else if (isMM(id)) {
-            return m_mmIdHelper->stationName(id);
-        }
-        return 0;
-    }
-
-    int MuonIdHelperSvc::stationRegion(const Identifier& id) const {
-        if (!id.is_valid()) {
-            ATH_MSG_WARNING("stationRegion: invalid ID");
-            return 0;
-        }
-        if (isRpc(id)) {
-            return m_rpcIdHelper->stationRegion(id);
-        } else if (isTgc(id)) {
-            return m_tgcIdHelper->stationRegion(id);
-        } else if (isMdt(id)) {
-            return m_mdtIdHelper->stationRegion(id);
-        } else if (isCsc(id)) {
-            return m_cscIdHelper->stationRegion(id);
-        } else if (issTgc(id)) {
-            return m_stgcIdHelper->stationRegion(id);
-        } else if (isMM(id)) {
-            return m_mmIdHelper->stationRegion(id);
-        }
-        return 0;
-    }
-
     int MuonIdHelperSvc::sector(const Identifier& id) const {
         // TGC has different segmentation, return 0 for the moment
         if (isTgc(id)) {
@@ -612,16 +550,7 @@ namespace Muon {
     bool MuonIdHelperSvc::hasSTGC() const { return m_hasSTGC; }
     bool MuonIdHelperSvc::hasMM() const { return m_hasMM; }
     
-    std::string MuonIdHelperSvc::stationNameString(const Identifier& id) const {
-        const int station = stationName(id);
-        if (isMdt(id)) return m_mdtIdHelper->stationNameString(station);
-        else if (isRpc(id)) return m_rpcIdHelper->stationNameString(station);
-        else if (isTgc(id)) return m_tgcIdHelper->stationNameString(station);
-        else if (isMM(id)) return m_mmIdHelper->stationNameString(station);
-        else if (issTgc(id)) return m_stgcIdHelper->stationNameString(station);   
-        else if (isCsc(id)) return m_cscIdHelper->stationNameString(station);
-        return "UNKNOWN";
-    }
+
     inline IdentifierHash MuonIdHelperSvc::moduleHash(const MuonIdHelper& idHelper, const Identifier& id) const{
         IdentifierHash hash{};
         if (idHelper.get_module_hash(id, hash) ||
@@ -639,24 +568,86 @@ namespace Muon {
         return hash;
     }
     IdentifierHash MuonIdHelperSvc::moduleHash(const Identifier& id) const {
-        if (isMdt(id)) return moduleHash(*m_mdtIdHelper, id);
-        else if (isRpc(id)) return moduleHash(*m_rpcIdHelper, id);
-        else if (isTgc(id)) return moduleHash(*m_tgcIdHelper, id);
-        else if (isMM(id)) return moduleHash(*m_mmIdHelper, id);
-        else if (issTgc(id)) return moduleHash(*m_stgcIdHelper, id);
-        else if (isCsc(id)) return moduleHash(*m_cscIdHelper, id);
+        switch (technologyIndex(id)){
+            using enum MuonStationIndex::TechnologyIndex;
+            case MDT: {
+                return moduleHash(*m_mdtIdHelper, id);
+            }
+            case RPC: {
+                return moduleHash(*m_rpcIdHelper, id);
+            }
+            case TGC: {
+                return moduleHash(*m_tgcIdHelper, id);
+            }
+            case CSC: {
+                return moduleHash(*m_cscIdHelper, id);
+            }
+            case STGC: {
+                return moduleHash(*m_stgcIdHelper, id);
+            }
+            case MM: {
+                return moduleHash(*m_mmIdHelper, id);
+            }
+            default:
+                break;
+        }
+
         ATH_MSG_WARNING("moduleHash(): No muon Identifier "<<id);
         return IdentifierHash{};
     }
     IdentifierHash MuonIdHelperSvc::detElementHash(const Identifier& id) const {
-        if (isMdt(id)) return detElementHash(*m_mdtIdHelper, id);
-        else if (isRpc(id)) return detElementHash(*m_rpcIdHelper, id);
-        else if (isTgc(id)) return detElementHash(*m_tgcIdHelper, id);
-        else if (isMM(id)) return detElementHash(*m_mmIdHelper, id);
-        else if (issTgc(id)) return detElementHash(*m_stgcIdHelper, id);
-        else if (isCsc(id)) return detElementHash(*m_cscIdHelper, id);
+       switch (technologyIndex(id)){
+            using enum MuonStationIndex::TechnologyIndex;
+            case MDT: {
+                return detElementHash(*m_mdtIdHelper, id);
+            }
+            case RPC: {
+                return detElementHash(*m_rpcIdHelper, id);
+            }
+            case TGC: {
+                return detElementHash(*m_tgcIdHelper, id);
+            }
+            case CSC: {
+                return detElementHash(*m_cscIdHelper, id);
+            }
+            case STGC: {
+                return detElementHash(*m_stgcIdHelper, id);
+            }
+            case MM: {
+                return detElementHash(*m_mmIdHelper, id);
+            }
+            default:
+                break;
+        }
         ATH_MSG_WARNING("detElementHash(): No muon Identifier "<<id);
         return IdentifierHash{};
     }
-
+    #define IMPL_FIELDGETTER(fieldName, retType) \
+    retType MuonIdHelperSvc::fieldName(const  Identifier& id) const { \
+        switch (technologyIndex(id)) {                                \
+            using enum TechnologyIndex;                               \
+            case MDT: {                                               \
+                return m_mdtIdHelper->fieldName(id);                  \
+            } case RPC: {                                             \
+                return m_rpcIdHelper->fieldName(id);                  \
+            } case TGC: {                                             \
+                return m_tgcIdHelper->fieldName(id);                  \
+            } case CSC: {                                             \
+                return m_cscIdHelper->fieldName(id);                  \
+            } case STGC: {                                            \
+                return m_stgcIdHelper->fieldName(id);                 \
+            } case MM: {                                              \
+                return m_mmIdHelper->fieldName(id);                   \
+            } default:                                                \
+                break;                                                \
+        }                                                             \
+        return {};                                                    \
+    } 
+    IMPL_FIELDGETTER(stationPhi, int);
+    IMPL_FIELDGETTER(stationEta, int);
+    IMPL_FIELDGETTER(stationName, int);
+    IMPL_FIELDGETTER(stationRegion, int);
+    IMPL_FIELDGETTER(measuresPhi, bool);
+    IMPL_FIELDGETTER(stationNameString, std::string);
+    #undef IMPL_FIELDGETTER
 }  // namespace Muon
