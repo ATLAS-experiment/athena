@@ -176,14 +176,16 @@ def defineMenu():
         #ATR-29523
         'L1_3jJ40p0ETA25',
         # new calo
-        'L1_gXENC70', 'L1_gXENC100',
         'L1_gXEJWOJ60', 'L1_gXEJWOJ70', 'L1_gXEJWOJ80', 'L1_gXEJWOJ100', 'L1_gXEJWOJ110', 'L1_gXEJWOJ120', 'L1_gXEJWOJ500',
         'L1_gTE200',
         'L1_gMHT500',
 
         'L1_jXE60', 'L1_jXE70', 'L1_jXE80', 'L1_jXE90', 'L1_jXE100', 'L1_jXE110', 'L1_jXE120', 'L1_jXE500', 
         'L1_jXEC100', 'L1_jTE200', 'L1_jTEC200', 'L1_jTEFWD100', 'L1_jTEFWDA100', 'L1_jTEFWDC100',
-    
+
+        # Combination of jXE, gXE
+        'L1_cXE100', 'L1_cXE110',
+
         #LUCID
         'L1_LUCID_A', 'L1_LUCID_C',
         'L1_LUCID_A_BGRP11', 'L1_LUCID_C_BGRP11',

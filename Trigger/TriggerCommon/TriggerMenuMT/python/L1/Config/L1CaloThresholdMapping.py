@@ -172,6 +172,11 @@ threshold_mapping = {
         120:60,
         500:300, 
     },
+    'cXE':
+    {
+        100:50,
+        110:55,
+    },
 }
 
 def get_threshold_cut(threshold_type,threshold_val):

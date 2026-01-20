@@ -184,10 +184,10 @@ class TopoAlgoDefMultiplicity:
 
         XEThresholds = [ 
             'gXEJWOJ60', 'gXEJWOJ70', 'gXEJWOJ80', 'gXEJWOJ100', 'gXEJWOJ110', 'gXEJWOJ120', 'gXEJWOJ500',
-            #'gXERHO70', 'gXERHO100', 
-            'gXENC70', 'gXENC100',
 
             'jXE60', 'jXE70', 'jXE80', 'jXE90', 'jXE100', 'jXE110', 'jXE120', 'jXE500',
+
+            'cXE100', 'cXE110',
 
             'jXEC100', 'jTE200', 'jTEC200', 'jTEFWD100', 'jTEFWDA100', 'jTEFWDC100', 
             'gTE5', 'gTE10', 'gTE200',
