@@ -263,13 +263,6 @@ class ThresholdDef:
             gLJetThreshold('gLJSPARE%i' % thrV, 'gLJ').addThrValue(thrVal_SPARE)
 
         # gXE
-        gXE_cuts = [70, 100]
-        for thrV in gXE_cuts:
-            XEThreshold('gXENC%i' % thrV, 'gXE').setXE(get_threshold_cut('gXENC', thrV))
-
-        #gXE_cuts = [70, 100]
-        #for thrV in gXE_cuts:
-        #    XEThreshold('gXERHO%i' % thrV, 'gXE').setXE(get_threshold_cut('gXERHO', thrV))
 
         gXE_cuts = [60, 70, 80, 100, 110, 120, 500]
         for thrV in gXE_cuts:
@@ -293,7 +286,7 @@ class ThresholdDef:
             XEThreshold('jXE%i' % thrV, 'jXE').setXE(get_threshold_cut('jXE', thrV))
         
         # cXE (linear combination of jFEX+gFEX MET)
-        cXE_cuts = []
+        cXE_cuts = [100,110]
         for thrV in cXE_cuts:
             XEThreshold('cXE%i' % thrV, 'jXE').setXE(get_threshold_cut('jXE', thrV))
 
