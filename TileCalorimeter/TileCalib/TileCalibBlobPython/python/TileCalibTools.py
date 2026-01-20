@@ -22,7 +22,6 @@ except ImportError:
     # Fall back to Python 2's urllib2
     from urllib2 import urlopen
 import cppyy
-import six
 
 from TileCalibBlobObjs.Classes import TileCalibUtils, TileCalibDrawerCmt, \
      TileCalibDrawerInt, TileCalibDrawerOfc, TileCalibDrawerBch, \
@@ -247,6 +246,32 @@ def openDb(db, instance, mode="READONLY", schema="COOLOFL_TILE", sqlfn="tileSqli
 
 #
 #______________________________________________________________________
+def openDbOracle(db, schema, folder):
+    """
+    Opens a COOL db connection.
+    - db:       The DB type. The following names are recognized:
+                    * ORACLE or FRONTIER: Opens ORACLE DB, forces READONLY
+    - schema:   Full schema string for sqlite file, dbname will be extracted from this string
+    - folder:   Fill folder path, schema string will be construced using folder name
+    """
+
+    connStr = 'COOL'
+    if '/OFL' in folder.upper():
+        connStr += 'OFL_'
+    else:
+        connStr += 'ONL_'
+    connStr += folder.strip('/').split('/')[0].upper()
+    dbn=schema.split('dbname=')
+    if len(dbn)==2:
+        dbname=dbn[1].split(';')[0]
+    else:
+        dbname='CONDBR2'
+    connStr += '/' + dbname
+
+    return openDbConn(connStr,db)
+
+#
+#______________________________________________________________________
 def openDbConn(connStr, mode="READONLY"):
     """
     Opens a COOL db connection.
@@ -369,7 +394,9 @@ def getCoolValidityKey(pointInTime, isSince=True):
 def getFolderTag(db, folderPath, globalTag):
 
     tag=""
-    if globalTag.startswith("/") or globalTag.startswith("TileO") or globalTag.startswith("CALO"):
+    gTAG = globalTag.upper()
+    findTAG = (gTAG == "ANY" or gTAG == "FIRST" or gTAG == "LAST")
+    if globalTag.startswith("/") or globalTag.startswith("TileO") or globalTag.upper().startswith("CALO"):
         tag = globalTag
         log.warning("Using tag as-is for folder %s", folderPath)
     elif '/TILE/ONL01' in folderPath:
@@ -385,7 +412,7 @@ def getFolderTag(db, folderPath, globalTag):
         else:
             dbname ='COOLOFL_TILE'
         schema=dbname+'/CONDBR2'
-        if isinstance(db, six.string_types):
+        if isinstance(db, str):
             if 'OFLP200' in db or 'MC' in db:
                 schema=dbname+'/OFLP200'
                 if not globalTag.startswith("OFLCOND"):
@@ -395,8 +422,10 @@ def getFolderTag(db, folderPath, globalTag):
             elif 'COMP200' in db or 'RUN1' in db:
                 schema=dbname+'/COMP200'
                 if globalTag!='UPD1' and globalTag!='UPD4' and ('UPD1' in globalTag or 'UPD4' in globalTag or 'COND' not in globalTag):
-                    log.info("Using suffix \'%s\' as it is", globalTag)
+                    if not findTAG:
+                        log.info("Using suffix \'%s\' as it is", globalTag)
                 else:
+                    findTAG = False
                     globalTag='COMCOND-BLKPA-RUN1-06'
                     log.info("Using RUN1 global tag \'%s\'", globalTag)
         if schema == dbname+'/CONDBR2':
@@ -413,16 +442,19 @@ def getFolderTag(db, folderPath, globalTag):
                 globalTag=getAliasFromFile('NextES')
                 log.info("Resolved NEXT ES globalTag to \'%s\'", globalTag)
         globalTag=globalTag.replace('*','')
-        if 'UPD1' in globalTag or 'UPD4' in globalTag or 'COND' not in globalTag:
+        if not findTAG and ('UPD1' in globalTag or 'UPD4' in globalTag or 'COND' not in globalTag):
             tag = TileCalibUtils.getFullTag(folderPath, globalTag)
-            if tag.startswith('Calo'):
+            if tag.startswith('Calo') and 'NoiseCell' not in tag:
                 tag='CALO'+tag[4:]
             log.info("Resolved localTag \'%s\' to folderTag \'%s\'", globalTag,tag)
         else:
-            if not isinstance(db, six.string_types):
+            if not isinstance(db, str):
                 try:
                     folder = db.getFolder(folderPath)
-                    tag = folder.resolveTag(globalTag)
+                    if findTAG:
+                        tag = findTag(folder,gTAG)
+                    else:
+                        tag = folder.resolveTag(globalTag)
                     log.info("Resolved globalTag \'%s\' to folderTag \'%s\'", globalTag,tag)
                     schema=""
                 except Exception as e:
@@ -431,11 +463,26 @@ def getFolderTag(db, folderPath, globalTag):
             if len(schema):
                 dbr = openDbConn(schema,'READONLY')
                 folder = dbr.getFolder(folderPath)
-                tag = folder.resolveTag(globalTag)
+                if findTAG:
+                    tag = findTag(folder,gTAG)
+                else:
+                    tag = folder.resolveTag(globalTag)
                 dbr.closeDatabase()
                 log.info("Resolved globalTag \'%s\' to folderTag \'%s\'", globalTag,tag)
 
     return tag
+
+#
+#____________________________________________________________________
+def findTag(folder,tag):
+    taglist=folder.listTags()
+    if len(taglist):
+        if tag=='FIRST':
+            return taglist[0]
+        else:
+            return taglist[-1]
+    else:
+        return 'tag-not-found'
 
 #
 #____________________________________________________________________

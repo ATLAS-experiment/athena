@@ -1,6 +1,6 @@
 #!/bin/env python
 
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #
 # PlotCalibFromCool.py
 # Using Part of ReadCalibfromCool.py to plot constants
@@ -176,7 +176,7 @@ for o, a in options:
         usage()
         sys.exit(2)
     else:
-        assert False, "unhandeled option"
+        raise RuntimeError("unhandled option")
 
 
 #=== check parameters

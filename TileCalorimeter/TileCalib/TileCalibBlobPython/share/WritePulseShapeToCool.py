@@ -1,6 +1,6 @@
 #!/bin/env python
 #
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #
 # WritePulseShapeToCool.py
 # Sanya Solodkov 2023-02-23
@@ -112,7 +112,7 @@ for o, a in options:
     elif o in ("-u","--update"):
         update = True
     else:
-        assert False, "unhandeled option"
+        raise RuntimeError("unhandled option")
 
 
 part=['AUX','LBA','LBC','EBA','EBC']
@@ -186,7 +186,7 @@ newPulse.push_back(vecHi)
 #=== write pulse shapes to COOL DB
 from TileCalibBlobPython import TileCalibTools
 from TileCalibBlobObjs.Classes import TileCalibUtils
-from TileCalibBlobPython.TileCalibTools import MINRUN, MINLBK, MAXRUN, MAXLBK
+from TileCalibBlobPython.TileCalibTools import MAXRUN, MAXLBK
 
 #=== open the database
 db = TileCalibTools.openDbConn(schema,('UPDATE' if update else 'RECREATE'))
