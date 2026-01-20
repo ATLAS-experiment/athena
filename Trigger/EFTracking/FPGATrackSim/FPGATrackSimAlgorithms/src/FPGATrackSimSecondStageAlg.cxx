@@ -190,7 +190,7 @@ StatusCode FPGATrackSimSecondStageAlg::execute()
     m_slicedHitHeader->newEvent(eventInfo);
 
     // Get second stage roads from tracks.
-    std::vector<std::shared_ptr<const FPGATrackSimRoad>> roads;
+    std::vector<FPGATrackSimRoad> roads;
 
     {
         std::optional<Athena::Chrono> chrono;
@@ -198,25 +198,26 @@ StatusCode FPGATrackSimSecondStageAlg::execute()
         // Use the track extension tool to actually produce a new set of roads.
         ATH_CHECK(m_trackExtensionTool->extendTracks(phits_2nd, tracks_1st, roads));
 
-        for (auto const &road : roads) {
+        for (auto const& road : roads) {
             auto road_hits = std::make_unique<FPGATrackSimHitCollection>();
-            ATH_MSG_DEBUG("Hough Road X Y: " << road->getX() << " " << road->getY());
-            for (size_t l = 0; l < road->getNLayers(); ++l) {
-                for (const auto &layerH : road->getHits(l)) {
+            ATH_MSG_DEBUG("Hough Road X Y: " << road.getX() << " " << road.getY());
+            for (size_t l = 0; l < road.getNLayers(); ++l) {
+                for (const auto& layerH : road.getHits(l)) {
                     road_hits->push_back(new FPGATrackSimHit(*layerH));
                 }
             }
             FPGAHitsInRoads_2nd->push_back(std::move(*road_hits));
-            FPGARoads_2nd->push_back(*road);
+            FPGARoads_2nd->push_back(road);
         }
     }
+    
     auto mon_nroads = Monitored::Scalar<unsigned>("nroads_2nd", roads.size());
     unsigned bitmask_best(0);
     unsigned nhit_best(0);
     for (auto const &road : roads) {
-        unsigned bitmask = road->getHitLayers();
-        if (road->getNHitLayers() > nhit_best) {
-            nhit_best = road->getNHitLayers();
+        unsigned bitmask = road.getHitLayers();
+        if (road.getNHitLayers() > nhit_best) {
+            nhit_best = road.getNHitLayers();
             bitmask_best = bitmask;
         }
         for (size_t l = 0; l < m_FPGATrackSimMapping->PlaneMap_2nd(0)->getNLogiLayers(); l++) {
@@ -259,7 +260,7 @@ StatusCode FPGATrackSimSecondStageAlg::execute()
                 for (const auto& road : roads) {
                     // Collect tracks for the current road
                     std::vector<FPGATrackSimTrack> tracksForCurrentRoad;
-                    std::vector<std::shared_ptr<const FPGATrackSimRoad>> roadVec = {road};
+                    std::vector<FPGATrackSimRoad> roadVec = {road};
                     ATH_CHECK(m_trackFitterTool->getTracks(roadVec, tracksForCurrentRoad, m_evtSel->getMin(), m_evtSel->getMax()));
 
                     // Find and keep the best track (lowest chi2) for this road
@@ -448,7 +449,7 @@ StatusCode FPGATrackSimSecondStageAlg::execute()
 }
 
 
-StatusCode FPGATrackSimSecondStageAlg::writeOutputData( const std::vector<std::shared_ptr<const FPGATrackSimRoad>>& roads_2nd,
+StatusCode FPGATrackSimSecondStageAlg::writeOutputData( const std::vector<FPGATrackSimRoad>& roads_2nd,
                                                         std::vector<FPGATrackSimTrack> const& tracks_2nd,
                                                         FPGATrackSimDataFlowInfo const* dataFlowInfo)
 {

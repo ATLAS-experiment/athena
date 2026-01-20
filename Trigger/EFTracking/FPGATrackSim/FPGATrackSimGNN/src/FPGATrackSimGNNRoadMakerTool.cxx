@@ -24,7 +24,7 @@ StatusCode FPGATrackSimGNNRoadMakerTool::initialize()
 ///////////////////////////////////////////////////////////////////////
 // Functions
 
-StatusCode FPGATrackSimGNNRoadMakerTool::makeRoads(const std::vector<std::shared_ptr<const FPGATrackSimHit>> & hits, const std::vector<std::shared_ptr<FPGATrackSimGNNHit>> & gnn_hits, const std::vector<std::shared_ptr<FPGATrackSimGNNEdge>> & edges, std::vector<std::shared_ptr<const FPGATrackSimRoad>> & roads)
+StatusCode FPGATrackSimGNNRoadMakerTool::makeRoads(const std::vector<std::shared_ptr<const FPGATrackSimHit>> & hits, const std::vector<std::shared_ptr<FPGATrackSimGNNHit>> & gnn_hits, const std::vector<std::shared_ptr<FPGATrackSimGNNEdge>> & edges, std::vector<FPGATrackSimRoad> & roads)
 {
     m_num_nodes = gnn_hits.size();
     doScoreCut(edges);
@@ -130,7 +130,7 @@ void FPGATrackSimGNNRoadMakerTool::doJunctionAwareCC()
 
 void FPGATrackSimGNNRoadMakerTool::addRoads(const std::vector<std::shared_ptr<const FPGATrackSimHit>> & hits, 
                                             const std::vector<std::shared_ptr<FPGATrackSimGNNHit>> & gnn_hits, 
-                                            std::vector<std::shared_ptr<const FPGATrackSimRoad>> & roads)
+                                            std::vector<FPGATrackSimRoad> & roads)
 {
     roads.clear();
     m_roads.clear();
@@ -149,7 +149,7 @@ void FPGATrackSimGNNRoadMakerTool::addRoads(const std::vector<std::shared_ptr<co
     }
 
     roads.reserve(m_roads.size());
-    for (const FPGATrackSimRoad & r : m_roads) roads.emplace_back(std::make_shared<const FPGATrackSimRoad>(r));
+    roads = std::move(m_roads);
 }
 
 void FPGATrackSimGNNRoadMakerTool::addRoad(const std::vector<std::shared_ptr<const FPGATrackSimHit>> & hits, const std::vector<int>& road_hitIDs)

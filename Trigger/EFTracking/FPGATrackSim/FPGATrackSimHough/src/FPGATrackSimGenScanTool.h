@@ -85,8 +85,8 @@ public:
 
     ///////////////////////////////////////////////////////////////////////
     // IFPGATrackSimRoadFinderTool virtual method for interface
-    virtual StatusCode getRoads(const std::vector<std::shared_ptr<const FPGATrackSimHit>> &hits,
-                                std::vector<std::shared_ptr<const FPGATrackSimRoad>> &road) override;
+    virtual StatusCode getRoads(const std::vector<std::shared_ptr<const FPGATrackSimHit>>& hits,
+                                std::vector<FPGATrackSimRoad>& road) override;
     virtual int getSubRegion() const override {return 0;}
 
     friend class FPGATrackSimGenScanMonitoring;
@@ -271,7 +271,7 @@ protected:
     std::vector<unsigned int> m_pairingLayers;
     
     // output roads
-    std::vector<std::unique_ptr<FPGATrackSimRoad>> m_roads{};
+    std::vector<FPGATrackSimRoad> m_roads{};
 };
 
 #endif // FPGATrackSimGenScanTool_H

@@ -164,7 +164,7 @@ StatusCode FPGATrackSimNNPathfinderExtensionTool::initialize() {
 
 StatusCode FPGATrackSimNNPathfinderExtensionTool::extendTracks(const std::vector<std::shared_ptr<const FPGATrackSimHit>> & hits,
         const std::vector<std::shared_ptr<const FPGATrackSimTrack>> & tracks,
-        std::vector<std::shared_ptr<const FPGATrackSimRoad>> & roads) {
+        std::vector<FPGATrackSimRoad> & roads) {
 
     // Reset the internal second stage roads storage.
     roads.clear();
@@ -578,7 +578,7 @@ StatusCode FPGATrackSimNNPathfinderExtensionTool::extendTracks(const std::vector
     for (FPGATrackSimRoad & r : m_roads)
     {
         if (r.getNWCLayers() >= m_maxMiss) continue; // extra check on this
-        roads.emplace_back(std::make_shared<const FPGATrackSimRoad>(r));
+        roads.emplace_back(r);
     }
     ATH_MSG_DEBUG("Found " << roads.size() << " new roads in second stage.");
 

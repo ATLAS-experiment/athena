@@ -39,14 +39,14 @@ class FPGATrackSimRoadUnionTool : public AthAlgTool
         // IFPGATrackSimRoadFinderTool
 
         StatusCode getRoads(const std::vector<std::shared_ptr<const FPGATrackSimHit>> &hits,
-                        std::vector<std::shared_ptr<const FPGATrackSimRoad>> &roads,
+                        std::vector<FPGATrackSimRoad> &roads,
                         std::vector<FPGATrackSimTruthTrack> const &truthtracks)
         {
             m_truthtracks = truthtracks;
             return getRoads(hits, roads);
         }
 
-        StatusCode getRoads(const std::vector<std::shared_ptr<const FPGATrackSimHit>> & hits, std::vector<std::shared_ptr<const FPGATrackSimRoad>> & roads);
+        StatusCode getRoads(const std::vector<std::shared_ptr<const FPGATrackSimHit>> & hits, std::vector<FPGATrackSimRoad> & roads);
 
         std::vector<FPGATrackSimTruthTrack> const *getTruthTracks() { return &m_truthtracks; }
 

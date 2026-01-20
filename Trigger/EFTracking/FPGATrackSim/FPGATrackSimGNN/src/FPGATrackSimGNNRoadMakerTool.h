@@ -51,7 +51,7 @@ class FPGATrackSimGNNRoadMakerTool : public AthAlgTool
         virtual StatusCode makeRoads(const std::vector<std::shared_ptr<const FPGATrackSimHit>> & hits, 
                                      const std::vector<std::shared_ptr<FPGATrackSimGNNHit>> & gnn_hits, 
                                      const std::vector<std::shared_ptr<FPGATrackSimGNNEdge>> & edges, 
-                                     std::vector<std::shared_ptr<const FPGATrackSimRoad>> & roads);
+                                     std::vector<FPGATrackSimRoad> & roads);
 
     private:
         
@@ -94,7 +94,7 @@ class FPGATrackSimGNNRoadMakerTool : public AthAlgTool
         void doJunctionAwareCC();
         void addRoads(const std::vector<std::shared_ptr<const FPGATrackSimHit>> & hits, 
                       const std::vector<std::shared_ptr<FPGATrackSimGNNHit>> & gnn_hits, 
-                      std::vector<std::shared_ptr<const FPGATrackSimRoad>> & roads);
+                      std::vector<FPGATrackSimRoad> & roads);
         void addRoad(const std::vector<std::shared_ptr<const FPGATrackSimHit>> & hits, const std::vector<int>& road_hitIDs);
         void addRoadForPixelSeed(const std::vector<std::shared_ptr<const FPGATrackSimHit>> & hits, const std::vector<int>& road_hitIDs);
         void resetVectors();

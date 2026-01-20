@@ -230,7 +230,7 @@ StatusCode FPGATrackSimNNTrackTool::setTrackParameters(std::vector<FPGATrackSimT
 }
 
 
-StatusCode FPGATrackSimNNTrackTool::getTracks_1st(std::vector<std::shared_ptr<const FPGATrackSimRoad>> &roads, std::vector<FPGATrackSimTrack> &tracks) {
+StatusCode FPGATrackSimNNTrackTool::getTracks_1st(std::vector<FPGATrackSimRoad> &roads, std::vector<FPGATrackSimTrack> &tracks) {
 
     if(m_doGNNTracking) {
         ATH_CHECK(getTracks_GNN(roads, tracks));
@@ -245,14 +245,14 @@ StatusCode FPGATrackSimNNTrackTool::getTracks_1st(std::vector<std::shared_ptr<co
     // Loop over roads
     for (auto const &iroad : roads) {
 
-        double y = iroad->getY();
+      double y = iroad.getY();
 
         // Just used to get number of layers considered
-        const FPGATrackSimPlaneMap *planeMap = m_FPGATrackSimMapping->PlaneMap_1st(iroad->getSubRegion());
+        const FPGATrackSimPlaneMap *planeMap = m_FPGATrackSimMapping->PlaneMap_1st(iroad.getSubRegion());
 
         // Get info on layers with missing hits
         int nMissing = 0;
-        layer_bitmask_t missing_mask = iroad->getNWCLayers();
+        layer_bitmask_t missing_mask = iroad.getNWCLayers();
 	for (unsigned ilayer = 0; ilayer < planeMap->getNLogiLayers(); ilayer++) {
 	  if ((missing_mask >> ilayer) & 0x1) {
 	    nMissing++;
@@ -267,26 +267,26 @@ StatusCode FPGATrackSimNNTrackTool::getTracks_1st(std::vector<std::shared_ptr<co
         temp.setTrackStage(TrackStage::FIRST);
         temp.setNLayers(planeMap->getNLogiLayers());
         temp.setBankID(-1);
-        temp.setPatternID(iroad->getPID());
-        temp.setFirstSectorID(iroad->getSector());
+        temp.setPatternID(iroad.getPID());
+        temp.setFirstSectorID(iroad.getSector());
         temp.setHitMap(missing_mask);
         temp.setNMissing(nMissing);
         temp.setQOverPt(y);
 
-        temp.setSubRegion(iroad->getSubRegion());
-        temp.setHoughX(iroad->getX());
-        temp.setHoughY(iroad->getY());
-        temp.setHoughXBin(iroad->getXBin());
-        temp.setHoughYBin(iroad->getYBin());
+        temp.setSubRegion(iroad.getSubRegion());
+        temp.setHoughX(iroad.getX());
+        temp.setHoughY(iroad.getY());
+        temp.setHoughXBin(iroad.getXBin());
+        temp.setHoughYBin(iroad.getYBin());
 
-        temp.setBinIdx(iroad->getBinIdx());
+        temp.setBinIdx(iroad.getBinIdx());
 
         ////////////////////////////////////////////////////////////////////////
         // Get a list of indices for all possible combinations given a certain
         // number of layers
         std::vector<std::vector<int>> combs;
         
-        combs = getComboIndices(iroad->getNHits_layer());
+        combs = getComboIndices(iroad.getNHits_layer());
 
         // Loop over possible combinations for this road
         for (size_t icomb = 0; icomb < combs.size(); icomb++) {
@@ -302,7 +302,7 @@ StatusCode FPGATrackSimNNTrackTool::getTracks_1st(std::vector<std::shared_ptr<co
                 // Check to see if this is a valid hit
                 if (hit_indices[layer] >= 0) {
 
-                    std::shared_ptr<const FPGATrackSimHit> hit = iroad->getHits(layer)[hit_indices[layer]];
+                    std::shared_ptr<const FPGATrackSimHit> hit = iroad.getHits(layer)[hit_indices[layer]];
                     // Add this hit to the road
                     if (hit->isReal()){
                         hit_list.push_back(std::move(hit));
@@ -476,7 +476,7 @@ StatusCode FPGATrackSimNNTrackTool::getTracks_1st(std::vector<std::shared_ptr<co
 }
 
 
-StatusCode FPGATrackSimNNTrackTool::getTracks_2nd(std::vector<std::shared_ptr<const FPGATrackSimRoad>> &roads, std::vector<FPGATrackSimTrack> &tracks) {
+StatusCode FPGATrackSimNNTrackTool::getTracks_2nd(std::vector<FPGATrackSimRoad> &roads, std::vector<FPGATrackSimTrack> &tracks) {
 
     ATH_CHECK(setRoadSectors(roads));
     int n_track = 0;
@@ -485,12 +485,12 @@ StatusCode FPGATrackSimNNTrackTool::getTracks_2nd(std::vector<std::shared_ptr<co
     // Loop over roads
     for (auto const &iroad : roads) {
 
-        double y = iroad->getY();
+      double y = iroad.getY();
 
-	const FPGATrackSimPlaneMap *planeMap = m_FPGATrackSimMapping->PlaneMap_2nd(iroad->getSubRegion());
+  	  const FPGATrackSimPlaneMap *planeMap = m_FPGATrackSimMapping->PlaneMap_2nd(iroad.getSubRegion());
         // Get info on layers with missing hits
         int nMissing = 0;
-        layer_bitmask_t missing_mask = iroad->getNWCLayers();
+        layer_bitmask_t missing_mask = iroad.getNWCLayers();
 	layer_bitmask_t hit_mask = 0x0;
 	for (unsigned ilayer = 0; ilayer < 13; ilayer++) {
 	  if ((missing_mask >> ilayer) & 0x1) {
@@ -508,22 +508,22 @@ StatusCode FPGATrackSimNNTrackTool::getTracks_2nd(std::vector<std::shared_ptr<co
         temp.setTrackStage(TrackStage::SECOND);
         temp.setNLayers(13);
         temp.setBankID(-1);
-        temp.setPatternID(iroad->getPID());
-        temp.setFirstSectorID(iroad->getSector());
+        temp.setPatternID(iroad.getPID());
+        temp.setFirstSectorID(iroad.getSector());
         temp.setHitMap(hit_mask);
         temp.setNMissing(nMissing);
         temp.setQOverPt(y);
 
-        temp.setSubRegion(iroad->getSubRegion());
-        temp.setHoughX(iroad->getX());
-        temp.setHoughY(iroad->getY());
-        temp.setHoughXBin(iroad->getXBin());
-        temp.setHoughYBin(iroad->getYBin());
+        temp.setSubRegion(iroad.getSubRegion());
+        temp.setHoughX(iroad.getX());
+        temp.setHoughY(iroad.getY());
+        temp.setHoughXBin(iroad.getXBin());
+        temp.setHoughYBin(iroad.getYBin());
         ////////////////////////////////////////////////////////////////////////
         // Get a list of indices for all possible combinations given a certain
         // number of layers
         std::vector<std::vector<int>> combs =
-            getComboIndices(iroad->getNHits_layer());
+            getComboIndices(iroad.getNHits_layer());
 
         // Loop over possible combinations for this road
         for (size_t icomb = 0; icomb < combs.size(); icomb++) {
@@ -539,7 +539,7 @@ StatusCode FPGATrackSimNNTrackTool::getTracks_2nd(std::vector<std::shared_ptr<co
                 // Check to see if this is a valid hit
                 if (hit_indices[layer] >= 0) {
 
-                    std::shared_ptr<const FPGATrackSimHit> hit = iroad->getHits(layer)[hit_indices[layer]];
+                    std::shared_ptr<const FPGATrackSimHit> hit = iroad.getHits(layer)[hit_indices[layer]];
                     // Add this hit to the road
                     if (hit->isReal()){
                         hit_list.push_back(std::move(hit));
@@ -719,7 +719,7 @@ StatusCode FPGATrackSimNNTrackTool::getTracks_2nd(std::vector<std::shared_ptr<co
     return StatusCode::SUCCESS;
 }
 
-StatusCode FPGATrackSimNNTrackTool::getTracks_GNN(std::vector<std::shared_ptr<const FPGATrackSimRoad>> &roads, std::vector<FPGATrackSimTrack> &tracks) {
+StatusCode FPGATrackSimNNTrackTool::getTracks_GNN(std::vector<FPGATrackSimRoad> &roads, std::vector<FPGATrackSimTrack> &tracks) {
 
     ATH_CHECK(setRoadSectors(roads));
     int n_track = 0;
@@ -729,9 +729,9 @@ StatusCode FPGATrackSimNNTrackTool::getTracks_GNN(std::vector<std::shared_ptr<co
     // Loop over roads
     for (auto const &iroad : roads) {
         // Just used to get number of layers considered
-        const FPGATrackSimPlaneMap *planeMap = m_FPGATrackSimMapping->PlaneMap_1st(iroad->getSubRegion());
+        const FPGATrackSimPlaneMap *planeMap = m_FPGATrackSimMapping->PlaneMap_1st(iroad.getSubRegion());
 
-        double y = iroad->getY();
+        double y = iroad.getY();
 
         // Get info on layers with missing hits
         int nMissing = 0;
@@ -754,17 +754,17 @@ StatusCode FPGATrackSimNNTrackTool::getTracks_GNN(std::vector<std::shared_ptr<co
         temp.setTrackStage(TrackStage::FIRST);
         temp.setNLayers(planeMap->getNLogiLayers());
         temp.setBankID(-1);
-        temp.setPatternID(iroad->getPID());
-        temp.setFirstSectorID(iroad->getSector());
+        temp.setPatternID(iroad.getPID());
+        temp.setFirstSectorID(iroad.getSector());
         temp.setHitMap(hit_mask);
         temp.setNMissing(nMissing);
         temp.setQOverPt(y);
 
-        temp.setSubRegion(iroad->getSubRegion());
-        temp.setHoughX(iroad->getX());
-        temp.setHoughY(iroad->getY());
-        temp.setHoughXBin(iroad->getXBin());
-        temp.setHoughYBin(iroad->getYBin());
+        temp.setSubRegion(iroad.getSubRegion());
+        temp.setHoughX(iroad.getX());
+        temp.setHoughY(iroad.getY());
+        temp.setHoughXBin(iroad.getXBin());
+        temp.setHoughYBin(iroad.getYBin());
 
         ////////////////////////////////////////////////////////////////////////
         // Get a list of indices for all possible combinations given a certain
@@ -776,8 +776,8 @@ StatusCode FPGATrackSimNNTrackTool::getTracks_GNN(std::vector<std::shared_ptr<co
         std::vector<std::shared_ptr<const FPGATrackSimHit>> all_strip_hits;
         size_t pixelCount = 0;
 
-        for (unsigned layer = 0; layer < iroad->getNLayers(); ++layer) {
-            all_hits.insert(all_hits.end(), iroad->getHits(layer).begin(), iroad->getHits(layer).end());
+        for (unsigned layer = 0; layer < iroad.getNLayers(); ++layer) {
+            all_hits.insert(all_hits.end(), iroad.getHits(layer).begin(), iroad.getHits(layer).end());
         }
 
         for (const auto& hit : all_hits) {

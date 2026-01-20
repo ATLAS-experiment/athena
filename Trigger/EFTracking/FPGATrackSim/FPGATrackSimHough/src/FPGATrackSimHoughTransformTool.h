@@ -98,7 +98,7 @@ class FPGATrackSimHoughTransformTool : public extends <AthAlgTool, IFPGATrackSim
         ///////////////////////////////////////////////////////////////////////
         // IFPGATrackSimRoadFinderTool
 
-        virtual StatusCode getRoads(const std::vector<std::shared_ptr<const FPGATrackSimHit>> & hits, std::vector<std::shared_ptr<const FPGATrackSimRoad>> & roads) override; 
+        virtual StatusCode getRoads(const std::vector<std::shared_ptr<const FPGATrackSimHit>> & hits, std::vector<FPGATrackSimRoad> & roads) override; 
 
         ///////////////////////////////////////////////////////////////////////
         // FPGATrackSimHoughTransformTool

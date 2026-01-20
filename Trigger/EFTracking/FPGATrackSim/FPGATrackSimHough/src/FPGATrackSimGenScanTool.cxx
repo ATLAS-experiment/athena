@@ -132,7 +132,7 @@ StatusCode FPGATrackSimGenScanTool::initialize()
 // Main Algorithm
 
 StatusCode FPGATrackSimGenScanTool::getRoads(const std::vector<std::shared_ptr<const FPGATrackSimHit>> &hits,
-                                             std::vector<std::shared_ptr<const FPGATrackSimRoad>> &roads)
+                                             std::vector<FPGATrackSimRoad> &roads)
 {
   ATH_MSG_DEBUG("In getRoads, Processing Event# " << ++m_evtsProcessed << " hit size = " << hits.size());
 
@@ -194,9 +194,9 @@ StatusCode FPGATrackSimGenScanTool::getRoads(const std::vector<std::shared_ptr<c
   roads.reserve(m_roads.size());
 
   if (m_keepHitsStrategy > 0) {
-    for (std::unique_ptr<FPGATrackSimRoad>& r : m_roads) {
-      const std::vector<std::vector<std::shared_ptr<const FPGATrackSimHit>>>& theseHits = r->getAllHits();
-      layer_bitmask_t hitmask = r->getHitLayers();
+    for (auto & r : m_roads) {
+      const std::vector<std::vector<std::shared_ptr<const FPGATrackSimHit>>>& theseHits = r.getAllHits();
+      layer_bitmask_t hitmask = r.getHitLayers();
       std::vector<unsigned> toUse = PickHitsToUse(hitmask);
 
       std::vector<std::vector<std::shared_ptr<const FPGATrackSimHit>>> vec(5); // even if not all layers have hits, they need to be in the vector as empty vectors
@@ -208,12 +208,11 @@ StatusCode FPGATrackSimGenScanTool::getRoads(const std::vector<std::shared_ptr<c
         }
         vec[ihit].push_back(theseHits[layer][0]);
       }
-      r->setHits(std::move(vec));
+      r.setHits(std::move(vec));
     }
   }
 
-  
-  for (auto & r : m_roads) roads.push_back(std::move(r));
+  roads = std::move(m_roads);
   ATH_MSG_DEBUG("Roads = " << roads.size());
 
   // clear previous event
@@ -627,28 +626,28 @@ void FPGATrackSimGenScanTool::addRoad(std::vector<const StoredHit *> const &hits
   bool inBin = fitRoad(hits, idx, fittedpars, chi2, chi2_phi,chi2_eta);
   if (!inBin && m_inBinFiltering) return;
 
-  m_roads.emplace_back(std::make_unique<FPGATrackSimRoad>());
-  FPGATrackSimRoad *r = m_roads.back().get();
+  m_roads.emplace_back();
+  FPGATrackSimRoad &r = m_roads.back();
 
-  r->setRoadID(m_roads.size() - 1);
+  r.setRoadID(static_cast<int>(m_roads.size()) - 1);
   //    r.setPID(y * m_imageSize_y + x);
-  r->setHits(std::move(sorted_hits));
+  r.setHits(std::move(sorted_hits));
 
-  r->setBinIdx(idx);
+  r.setBinIdx(idx);
 
   FPGATrackSimBinUtil::ParSet binCenterPars = m_binnedhits->getBinTool().lastStep()->binCenter(idx);
   FPGATrackSimTrackPars trackpars = m_binnedhits->getBinTool().binDesc()->parSetToTrackPars(binCenterPars);
-  r->setX(trackpars[FPGATrackSimTrackPars::IPHI]);
-  r->setY(trackpars[FPGATrackSimTrackPars::IHIP]);
-  r->setXBin(idx[3]);
-  r->setYBin(idx[4]);
-  r->setHitLayers(hitLayers);
-  r->setSubRegion(0);
+  r.setX(trackpars[FPGATrackSimTrackPars::IPHI]);
+  r.setY(trackpars[FPGATrackSimTrackPars::IHIP]);
+  r.setXBin(idx[3]);
+  r.setYBin(idx[4]);
+  r.setHitLayers(hitLayers);
+  r.setSubRegion(0);
 
   // Store the fitted information on the track.
-  r->setFitParams(fittedpars);
-  r->setFitChi2(chi2);
-  r->setFitChi2_2d(chi2_phi,chi2_eta);
+  r.setFitParams(fittedpars);
+  r.setFitChi2(chi2);
+  r.setFitChi2_2d(chi2_phi,chi2_eta);
 }
 
 

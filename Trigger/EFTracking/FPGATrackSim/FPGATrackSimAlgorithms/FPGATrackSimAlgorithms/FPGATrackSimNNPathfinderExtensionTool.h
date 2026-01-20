@@ -134,7 +134,7 @@ class FPGATrackSimNNPathfinderExtensionTool   : public extends <AthAlgTool, IFPG
 
         virtual StatusCode extendTracks(const std::vector<std::shared_ptr<const FPGATrackSimHit>> & hits,
                                         const std::vector<std::shared_ptr<const FPGATrackSimTrack>> & tracks,
-                                        std::vector<std::shared_ptr<const FPGATrackSimRoad>> & roads) override;
+                                        std::vector<FPGATrackSimRoad> & roads) override;
 
         // We don't have a "union" tool that sits in front of the extension tool, so this is needed here.
         virtual StatusCode setupSlices(FPGATrackSimLogicalEventInputHeader *slicedHitHeader) override {
