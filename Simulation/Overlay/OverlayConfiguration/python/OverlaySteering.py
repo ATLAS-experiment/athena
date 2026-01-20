@@ -10,6 +10,7 @@ from AthenaConfiguration.Enums import LHCPeriod
 from AthenaKernel.EventIdOverrideConfig import IOVDbMetaDataToolWithRunNumberOverrideCfg
 from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
 from DigitizationConfig.DigitizationParametersConfig import writeDigitizationParameters
+from EventInfoMgt.TagInfoMgrConfig import TagInfoMgrCfg
 from OverlayCopyAlgs.OverlayCopyAlgsConfig import \
     CopyCaloCalibrationHitContainersCfg, CopyJetTruthInfoCfg, CopyPileupParticleTruthInfoCfg, CopyMcEventCollectionCfg, \
     CopyTrackRecordCollectionsCfg, CopyBackgroundVertexCfg
@@ -178,5 +179,10 @@ def OverlayMainContentCfg(configFlags):
         acc.merge(SetupMetaDataForStreamCfg(configFlags, "RDO"))
     if configFlags.Output.doWriteRDO_SGNL:
         acc.merge(SetupMetaDataForStreamCfg(configFlags, "RDO_SGNL"))
+
+    if not configFlags.Input.isMC and configFlags.Input.DataYear > 0:
+        acc.merge(TagInfoMgrCfg(configFlags, tagValuePairs={
+            "data_year": str(configFlags.Input.DataYear)
+        }))
 
     return acc

@@ -4650,9 +4650,13 @@ HLT_g45_tight_noiso_3j25_pf_ftf_PhysicsTLA_L1eEM28M:
   eventCount: 0
 HLT_g50_loose_L1eEM24L:
   eventCount: 0
+HLT_g50_loose_g10_loose_j50c_115masswisoABC135_L1110INVM150-eEM50s-eEM10s-2DISAMB-jJ60s:
+  eventCount: 0
 HLT_g50_loose_g10_loose_j50c_115masswisoABC135_L12eEM24L:
   eventCount: 0
 HLT_g50_loose_g10_loose_j50c_115masswisoABC135_L1eEM40L_2eEM18L:
+  eventCount: 0
+HLT_g50_loose_g10_loose_j50c_115masswisoABC_L1110INVM150-eEM50s-eEM10s-2DISAMB-jJ60s:
   eventCount: 0
 HLT_g50_loose_g10_loose_j50c_115masswisoABC_L12eEM24L:
   eventCount: 0
@@ -4674,6 +4678,8 @@ HLT_g50_medium_g20_medium_L12eEM18M:
   eventCount: 0
 HLT_g50_nopid_L1eEM26M:
   eventCount: 0
+HLT_g50_nopid_g10_nopid_j50c_020jvt_bgn285_pf_ftf_115masswisoABC135_L1110INVM150-eEM50s-eEM10s-2DISAMB-jJ60s:
+  eventCount: 0
 HLT_g50_nopid_g10_nopid_j50c_020jvt_bgn285_pf_ftf_115masswisoABC135_L12eEM24L:
   eventCount: 0
 HLT_g50_nopid_g10_nopid_j50c_020jvt_bgn285_pf_ftf_115masswisoABC135_L1eEM40L_2eEM18L:
@@ -4682,13 +4688,19 @@ HLT_g50_nopid_g10_nopid_j50c_020jvt_pf_ftf_115masswisoABC135_L12eEM24L:
   eventCount: 0
 HLT_g50_nopid_g10_nopid_j50c_020jvt_pf_ftf_115masswisoABC135_L1eEM40L_2eEM18L:
   eventCount: 0
+HLT_g50_nopid_g10_nopid_j50c_115masswisoABC135_L1110INVM150-eEM50s-eEM10s-2DISAMB-jJ60s:
+  eventCount: 0
 HLT_g50_nopid_g10_nopid_j50c_115masswisoABC135_L12eEM24L:
   eventCount: 0
 HLT_g50_nopid_g10_nopid_j50c_115masswisoABC135_L1eEM40L_2eEM18L:
   eventCount: 0
+HLT_g50_nopid_g10_nopid_j50c_115masswisoABC_L1110INVM150-eEM50s-eEM10s-2DISAMB-jJ60s:
+  eventCount: 0
 HLT_g50_nopid_g10_nopid_j50c_115masswisoABC_L12eEM24L:
   eventCount: 0
 HLT_g50_nopid_g10_nopid_j50c_115masswisoABC_L1eEM40L_2eEM18L:
+  eventCount: 0
+HLT_g50_nopid_g10_nopid_j50c_nnJvtv1_bgn285_pf_ftf_115masswisoABC135_L1110INVM150-eEM50s-eEM10s-2DISAMB-jJ60s:
   eventCount: 0
 HLT_g50_nopid_g10_nopid_j50c_nnJvtv1_bgn285_pf_ftf_115masswisoABC135_L12eEM24L:
   eventCount: 0
