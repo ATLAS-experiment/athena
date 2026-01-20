@@ -458,7 +458,7 @@ JetChainParts = {
     'nnJvt'         : # NN Jet Vertex Tagger pileup discriminant
       ['nnJvtv1'], # No range cuts, boolean pass/fail
     'momCuts'       : # Generic moment cut on single jets
-       ['050momemfrac100','momemfrac006','momemfrac024','momemfrac012', 'momhecfrac010', '050momemfrac100XXmomhecfrac010', 'momemfrac072', 'momemfrac048' ],
+       ['050momemfrac100','momemfrac006','momemfrac024','momemfrac012', 'momhecfrac010','momemfrac011', '050momemfrac100XXmomhecfrac010', 'momemfrac072', 'momemfrac048' ],
     'timing'        : # delayed jets, with absolute delay requirement [ns]
     ['2timing','2timing15'],
     'timeSig'       : # delayed jets, based on pT-dependent significance of delay [sigma]
