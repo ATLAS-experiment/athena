@@ -1,6 +1,7 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
+#include "PathResolver/PathResolver.h"
 #include "xAODBTaggingEfficiency/BTaggingToolUtil.h"
 #include "xAODBTaggingEfficiency/BTaggingSelectionJsonTool.h"
 #include <fstream>
@@ -13,10 +14,11 @@ BTaggingSelectionJsonTool::BTaggingSelectionJsonTool( const std::string & name)
 
 StatusCode BTaggingSelectionJsonTool::initialize() {
   m_initialised = true;
-  
-  std::ifstream jsonFile(m_json_config_path);
+
+  std::string pathToJsonConfigFile = PathResolverFindCalibFile(m_json_config_path);
+  std::ifstream jsonFile(pathToJsonConfigFile);
   if (!jsonFile.is_open()) {
-    ATH_MSG_ERROR( "JSON file " + m_json_config_path + " do not exist. Please put the correct path of the file." );
+    ATH_MSG_ERROR( "JSON file " + m_json_config_path + " does not exist. Please put the correct path of the file." );
     return StatusCode::FAILURE;
   }
   m_json_config = json::parse(jsonFile);
