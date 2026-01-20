@@ -17828,6 +17828,18 @@ HLT_j30_0eta290_nnJvtv1_boffperf_pf_ftf_L1jJ50:
     0: 20
     1: 78
     2: 78
+HLT_j30_CLEANllp_momemfrac006_calratio_L1LLP2DPHI-jXE40-jJ40:
+  eventCount: 0
+HLT_j30_CLEANllp_momemfrac006_calratio_L1LLP2NODPHI-jXE40-jJ40:
+  eventCount: 0
+HLT_j30_CLEANllp_momemfrac006_calratio_L1LLP3DPHI-jXE40-jJ40:
+  eventCount: 0
+HLT_j30_CLEANllp_momemfrac006_calratio_L1LLP3NODPHI-jXE40-jJ40:
+  eventCount: 0
+HLT_j30_CLEANllp_momemfrac006_calratio_L1LLPDPHI-jXE40-jJ40:
+  eventCount: 0
+HLT_j30_CLEANllp_momemfrac006_calratio_L1LLPNODPHI-jXE40-jJ40:
+  eventCount: 0
 HLT_j30_CLEANllp_momemfrac006_calratio_L1eTAU140:
   eventCount: 0
 HLT_j30_CLEANllp_momemfrac006_calratio_L1eTAU40HT:
@@ -17843,6 +17855,18 @@ HLT_j30_CLEANllp_momemfrac006_calratio_L1eTAU80:
 HLT_j30_CLEANllp_momemfrac006_calratio_L1jJ160:
   eventCount: 0
 HLT_j30_CLEANllp_momemfrac006_calratio_L1jMJJ-500-NFF:
+  eventCount: 0
+HLT_j30_CLEANllp_momemfrac006_calratiormbib_L1LLP2DPHI-jXE40-jJ40:
+  eventCount: 0
+HLT_j30_CLEANllp_momemfrac006_calratiormbib_L1LLP2NODPHI-jXE40-jJ40:
+  eventCount: 0
+HLT_j30_CLEANllp_momemfrac006_calratiormbib_L1LLP3DPHI-jXE40-jJ40:
+  eventCount: 0
+HLT_j30_CLEANllp_momemfrac006_calratiormbib_L1LLP3NODPHI-jXE40-jJ40:
+  eventCount: 0
+HLT_j30_CLEANllp_momemfrac006_calratiormbib_L1LLPDPHI-jXE40-jJ40:
+  eventCount: 0
+HLT_j30_CLEANllp_momemfrac006_calratiormbib_L1LLPNODPHI-jXE40-jJ40:
   eventCount: 0
 HLT_j30_CLEANllp_momemfrac006_calratiormbib_L1eTAU140:
   eventCount: 0
@@ -29711,6 +29735,14 @@ HLT_noalg_L1BPH-2M9-0DR15-2MU3VF:
   eventCount: 0
 HLT_noalg_L1BPH-8M15-0DR22-2MU5VF:
   eventCount: 0
+HLT_noalg_L1LLP2DPHI-jXE40-jJ40:
+  eventCount: 3
+HLT_noalg_L1LLP2NODPHI-jXE40-jJ40:
+  eventCount: 7
+HLT_noalg_L1LLP3DPHI-jXE40-jJ40:
+  eventCount: 3
+HLT_noalg_L1LLP3NODPHI-jXE40-jJ40:
+  eventCount: 7
 HLT_noalg_L1LLPDPHI-jXE40-jJ40:
   eventCount: 3
 HLT_noalg_L1LLPNODPHI-jXE40-jJ40:
