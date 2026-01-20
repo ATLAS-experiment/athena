@@ -549,7 +549,8 @@ class LargeRJetAnalysisConfig (ConfigBlock) :
         if self.calibToolConfigFile is not None:
             configFile = self.calibToolConfigFile
 
-        if self.jetInput == "TrackCaloCluster" or self.jetInput == "UFO" or config.dataType() is DataType.FullSim:
+        # No in situ calibration provided for TCC jets, thus always applying MC calibration sequence only
+        if self.jetInput == "TrackCaloCluster" or config.dataType() is DataType.FullSim or config.dataType() is DataType.FastSim:
             calibSeq = "EtaJES_JMS"
         elif config.dataType() is DataType.Data:
             calibSeq = "EtaJES_JMS_Insitu"
