@@ -99,7 +99,7 @@ StatusCode FPGATrackSimGNNRootOutputTool::bookTree()
 StatusCode FPGATrackSimGNNRootOutputTool::fillTree(const std::vector<std::shared_ptr<const FPGATrackSimHit>> & hits,
                                                    const std::vector<std::shared_ptr<FPGATrackSimGNNHit>> & gnn_hits,
                                                    const std::vector<std::shared_ptr<FPGATrackSimGNNEdge>> & edges,
-                                                   const std::vector<std::shared_ptr<const FPGATrackSimRoad>> & roads)
+                                                   const std::vector<FPGATrackSimRoad> & roads)
 { 
   // fill the FPGATrackSimHits
   int hit_count = 0;
@@ -164,18 +164,18 @@ StatusCode FPGATrackSimGNNRootOutputTool::fillTree(const std::vector<std::shared
   m_GNNEdge_tree->Fill();
 
   for (const auto& road : roads) {
-    m_road_id.push_back(road->getRoadID());
-    m_road_nHits.push_back(road->getNHits());
-    m_road_nHits_layer.push_back(road->getNHits_layer());
-    m_road_nLayers.push_back(road->getNLayers());
+    m_road_id.push_back(road.getRoadID());
+    m_road_nHits.push_back(road.getNHits());
+    m_road_nHits_layer.push_back(road.getNHits_layer());
+    m_road_nLayers.push_back(road.getNLayers());
 
-    std::vector<std::vector<HepMcParticleLink::barcode_type>> road_hit_uniqueID(road->getNLayers());
-    std::vector<std::vector<HepMcParticleLink::barcode_type>> road_hit_barcode(road->getNLayers());
-    std::vector<std::vector<long>> road_hit_eventIndex(road->getNLayers());
-    std::vector<std::vector<float>> road_hit_z(road->getNLayers());
-    std::vector<std::vector<float>> road_hit_r(road->getNLayers());
-    for (size_t l = 0; l < road->getNLayers(); ++l) {
-      for (const auto &layerH : road->getHits(l)) {
+    std::vector<std::vector<HepMcParticleLink::barcode_type>> road_hit_uniqueID(road.getNLayers());
+    std::vector<std::vector<HepMcParticleLink::barcode_type>> road_hit_barcode(road.getNLayers());
+    std::vector<std::vector<long>> road_hit_eventIndex(road.getNLayers());
+    std::vector<std::vector<float>> road_hit_z(road.getNLayers());
+    std::vector<std::vector<float>> road_hit_r(road.getNLayers());
+    for (size_t l = 0; l < road.getNLayers(); ++l) {
+      for (const auto &layerH : road.getHits(l)) {
         road_hit_uniqueID[l].push_back((*layerH).getUniqueID());
         road_hit_barcode[l].push_back((*layerH).getBarcode());
         road_hit_eventIndex[l].push_back((*layerH).getEventIndex());

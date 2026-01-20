@@ -32,7 +32,7 @@ void findMinChi2MaxHit(const std::vector<int>& duplicates, std::vector<FPGATrack
 int findNonOverlapHits(const FPGATrackSimTrack& Track1, const FPGATrackSimTrack& Track2);
 int findNCommonHits(const FPGATrackSimTrack& Track1, const FPGATrackSimTrack& Track2);
 int findNCommonHitsGlobal(const FPGATrackSimTrack& Track1, const FPGATrackSimTrack& Track2);
-void roadsToTrack(std::vector<std::shared_ptr<const FPGATrackSimRoad>>& roads, std::vector<FPGATrackSimTrack>& track_cands, const FPGATrackSimPlaneMap *pmap);
+void roadsToTrack(std::vector<FPGATrackSimRoad>& roads, std::vector<FPGATrackSimTrack>& track_cands, const FPGATrackSimPlaneMap *pmap);
 
 
 #endif // FPGATrackSimHoughFUNCTIONS_H

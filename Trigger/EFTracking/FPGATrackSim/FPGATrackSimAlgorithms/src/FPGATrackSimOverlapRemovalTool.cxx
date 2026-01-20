@@ -63,7 +63,7 @@ bool isLocalMax(vector2D<FPGATrackSimRoad*> const & acc, unsigned x, unsigned y,
     return true;
 }
 
-StatusCode FPGATrackSimOverlapRemovalTool::runOverlapRemoval(std::vector<std::shared_ptr<const FPGATrackSimRoad>>& roads)
+StatusCode FPGATrackSimOverlapRemovalTool::runOverlapRemoval(std::vector<FPGATrackSimRoad>& roads)
 {
     if (roads.empty()) return StatusCode::SUCCESS;
 
@@ -76,10 +76,10 @@ StatusCode FPGATrackSimOverlapRemovalTool::runOverlapRemoval(std::vector<std::sh
     // Slice-wise duplicate removal: accept only one road (with most hits) per bin
     for (auto &r: roads)
     {
-        FPGATrackSimRoad* & old = acc(r->getYBin(), r->getXBin());
-        if (!old) old = new FPGATrackSimRoad (*r.get());
-        else if (r->getNHitLayers() > old->getNHitLayers()) *old = *r.get();
-        else if (r->getNHitLayers() == old->getNHitLayers() && r->getNHits() > old->getNHits()) *old = *r.get();
+        FPGATrackSimRoad* & old = acc(r.getYBin(), r.getXBin());
+        if (!old) old = new FPGATrackSimRoad (r);
+        else if (r.getNHitLayers() > old->getNHitLayers()) *old = r;
+        else if (r.getNHitLayers() == old->getNHitLayers() && r.getNHits() > old->getNHits()) *old = r;
     }
 
     // Reformat to vector
@@ -87,7 +87,7 @@ StatusCode FPGATrackSimOverlapRemovalTool::runOverlapRemoval(std::vector<std::sh
     for (unsigned y = 0; y < m_imageSize_y; y++)
       for (unsigned x = 0; x < m_imageSize_x; x++)
         if (FPGATrackSimRoad *tempPtr = acc(y, x); tempPtr && isLocalMax(acc, x, y, m_localMaxWindowSize)/*All-slices local max*/) {
-          roads.emplace_back(std::shared_ptr<const FPGATrackSimRoad>(tempPtr));
+          roads.emplace_back(*tempPtr);
           acc(y, x) = nullptr;
         }
         else {

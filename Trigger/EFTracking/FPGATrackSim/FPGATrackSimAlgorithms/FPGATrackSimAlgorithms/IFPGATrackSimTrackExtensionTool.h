@@ -40,7 +40,7 @@ class IFPGATrackSimTrackExtensionTool : virtual public IAlgTool
         
         virtual StatusCode extendTracks(const std::vector<std::shared_ptr<const FPGATrackSimHit>> & hits,
                                         const std::vector<std::shared_ptr<const FPGATrackSimTrack>> & tracks,
-                                        std::vector<std::shared_ptr<const FPGATrackSimRoad>> & roads) = 0;
+                                        std::vector<FPGATrackSimRoad> & roads) = 0;
 
         virtual StatusCode setupSlices(FPGATrackSimLogicalEventInputHeader *slicedHitHeader) = 0;
 };

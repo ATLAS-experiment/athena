@@ -83,7 +83,7 @@ StatusCode FPGATrackSimTrackFitterTool::initialize()
 }
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-StatusCode FPGATrackSimTrackFitterTool::getTracks(std::vector<std::shared_ptr<const FPGATrackSimRoad>>& roads, std::vector<FPGATrackSimTrack>& tracks, const FPGATrackSimTrackPars& min, const FPGATrackSimTrackPars& max) {
+StatusCode FPGATrackSimTrackFitterTool::getTracks(std::vector<FPGATrackSimRoad>& roads, std::vector<FPGATrackSimTrack>& tracks, const FPGATrackSimTrackPars& min, const FPGATrackSimTrackPars& max) {
     // elaborate the next event
   if (!m_fitFromRoad) ATH_CHECK(setRoadSectors(roads)); // we do not need to set sectors in this case
     int status = m_tfpobj->fitTracks(roads,tracks);

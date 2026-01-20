@@ -49,7 +49,7 @@ StatusCode FPGATrackSimPhiRoadFilterTool::initialize()
 ///////////////////////////////////////////////////////////////////////////////
 // Main Algorithm
 
-StatusCode FPGATrackSimPhiRoadFilterTool::filterRoads(std::vector<std::shared_ptr<const FPGATrackSimRoad>> & prefilter_roads, std::vector<std::shared_ptr<const FPGATrackSimRoad>> & postfilter_roads) 
+StatusCode FPGATrackSimPhiRoadFilterTool::filterRoads(std::vector<FPGATrackSimRoad> & prefilter_roads, std::vector<FPGATrackSimRoad> & postfilter_roads) 
 {
     ATH_MSG_DEBUG("Start Phi Road Filter"); 
     
@@ -72,9 +72,7 @@ StatusCode FPGATrackSimPhiRoadFilterTool::filterRoads(std::vector<std::shared_pt
 	
     }
 
-    // copy roads to outputs
-    postfilter_roads.reserve(m_postfilter_roads.size());
-    for (FPGATrackSimRoad & r : m_postfilter_roads) postfilter_roads.emplace_back(std::make_shared<const FPGATrackSimRoad>(r));
+    postfilter_roads = std::move(m_postfilter_roads);
     
     ATH_MSG_DEBUG("Event Done");
     
@@ -82,21 +80,21 @@ StatusCode FPGATrackSimPhiRoadFilterTool::filterRoads(std::vector<std::shared_pt
     return StatusCode::SUCCESS;
 }
 
-FPGATrackSimRoad FPGATrackSimPhiRoadFilterTool::buildRoad(std::shared_ptr<const FPGATrackSimRoad> origr) const
+FPGATrackSimRoad FPGATrackSimPhiRoadFilterTool::buildRoad(const FPGATrackSimRoad & origr) const
 {
   ATH_MSG_DEBUG("PhiRoad Build Road");
-  float phi = origr->getX();
-  float qPt  = origr->getY();
+  float phi = origr.getX();
+  float qPt  = origr.getY();
 
   // make new road -- main alg doesn't keep it if not needed
-  FPGATrackSimRoad r(*origr); // only works with Hough roads!
+  FPGATrackSimRoad r(origr); // only works with Hough roads!
   r.setNLayers(m_nLayers);
   layer_bitmask_t hitLayers = 0;
   
   // add hits
   for (unsigned lyr = 0; lyr < m_nLayers; lyr++) {
     std::vector<std::shared_ptr<const FPGATrackSimHit>> road_hits;
-    for (auto &hit : origr->getHits(lyr)) {
+    for (auto &hit : origr.getHits(lyr)) {
       float phi_expected = -1.0*asin(fpgatracksim::A * hit->getR() * qPt) + phi;
       if (m_fieldCorrection) phi_expected  -= fieldCorrection(m_EvtSel->getRegionID(), qPt, hit->getR());
       if (abs(hit->getGPhi()-phi_expected)< (m_window.value()[lyr]+qPt*m_ptscaling)) {
@@ -111,7 +109,7 @@ FPGATrackSimRoad FPGATrackSimPhiRoadFilterTool::buildRoad(std::shared_ptr<const 
       wcHit->setLayer(lyr);
       road_hits.push_back(std::move(wcHit));
     }
-    ATH_MSG_DEBUG("PhiRoad Hits " << lyr << " " << road_hits.size() << " " << origr->getHits(lyr).size());
+    ATH_MSG_DEBUG("PhiRoad Hits " << lyr << " " << road_hits.size() << " " << origr.getHits(lyr).size());
     r.setHits(lyr,std::move(road_hits));
   }
 

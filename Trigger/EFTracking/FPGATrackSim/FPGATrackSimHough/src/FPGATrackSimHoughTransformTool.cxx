@@ -152,7 +152,7 @@ StatusCode FPGATrackSimHoughTransformTool::initialize()
 ///////////////////////////////////////////////////////////////////////////////
 // Main Algorithm
 
-StatusCode FPGATrackSimHoughTransformTool::getRoads(const std::vector<std::shared_ptr<const FPGATrackSimHit>> & hits, std::vector<std::shared_ptr<const FPGATrackSimRoad>> & roads) 
+StatusCode FPGATrackSimHoughTransformTool::getRoads(const std::vector<std::shared_ptr<const FPGATrackSimHit>> & hits, std::vector<FPGATrackSimRoad> & roads) 
 {
   roads.clear();
   m_roads.clear();
@@ -240,8 +240,7 @@ StatusCode FPGATrackSimHoughTransformTool::getRoads(const std::vector<std::share
     }
   }
 
-  roads.reserve(m_roads.size());
-  for (FPGATrackSimRoad & r : m_roads) roads.emplace_back(std::make_shared<const FPGATrackSimRoad>(r));
+  roads = std::move(m_roads);
     
   return StatusCode::SUCCESS;
 }

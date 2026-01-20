@@ -54,7 +54,7 @@ StatusCode FPGATrackSimSpacepointRoadFilterTool::finalize()
 ///////////////////////////////////////////////////////////////////////////////
 // Main Algorithm
 
-StatusCode FPGATrackSimSpacepointRoadFilterTool::filterRoads(std::vector<std::shared_ptr<const FPGATrackSimRoad>> & prefilter_roads, std::vector<std::shared_ptr<const FPGATrackSimRoad>> & postfilter_roads) {
+StatusCode FPGATrackSimSpacepointRoadFilterTool::filterRoads(std::vector<FPGATrackSimRoad> & prefilter_roads, std::vector<FPGATrackSimRoad> & postfilter_roads) {
     // Record the number of input roads and roads with problems.
     int badRoads = 0;
     if (prefilter_roads.size() > 0) {
@@ -76,9 +76,7 @@ StatusCode FPGATrackSimSpacepointRoadFilterTool::filterRoads(std::vector<std::sh
     // not both. Then we can match each new road unambiguously to a single set of
     // spacepoint-dependent fit constants.
     for (auto & road : prefilter_roads) {
-        std::shared_ptr<FPGATrackSimRoad> nonConstRoad = std::const_pointer_cast<FPGATrackSimRoad>(road);
-        bool success = splitRoad(nonConstRoad.get());
-        road = nonConstRoad;
+        bool success = splitRoad(road);
         if (!success) {
             badRoads += 1;
         }
@@ -86,15 +84,12 @@ StatusCode FPGATrackSimSpacepointRoadFilterTool::filterRoads(std::vector<std::sh
 
         m_badRoads->Fill(badRoads);
 
-    // copy roads to outputs - borrowed from the eta pattern filter.
-    postfilter_roads.reserve(m_postfilter_roads.size());
-    for (FPGATrackSimRoad & r : m_postfilter_roads)
-        postfilter_roads.emplace_back(std::make_shared<const FPGATrackSimRoad>(r));
+    postfilter_roads = std::move(m_postfilter_roads);
 
     return StatusCode::SUCCESS;
 }
 
-bool FPGATrackSimSpacepointRoadFilterTool::splitRoad(FPGATrackSimRoad* initial_road) {
+bool FPGATrackSimSpacepointRoadFilterTool::splitRoad(FPGATrackSimRoad& initial_road) {
 
     // Loop through the initial road, keeping track of the spacepoints and single hits as we go.
     std::map<size_t, std::vector<std::shared_ptr<const FPGATrackSimHit>>> strip_hits;
@@ -103,21 +98,21 @@ bool FPGATrackSimSpacepointRoadFilterTool::splitRoad(FPGATrackSimRoad* initial_r
 
     bool retval = true;
     // Loop over each pair of strip layers.
-    for (size_t layer = 0; layer < initial_road->getNLayers(); layer++) {
+    for (size_t layer = 0; layer < initial_road.getNLayers(); layer++) {
         // Do nothing for pixel layers.
         if (m_isSecondStage){
-            if(m_FPGATrackSimMapping->PlaneMap_2nd(initial_road->getSubRegion())->isPixel(layer)){
+            if(m_FPGATrackSimMapping->PlaneMap_2nd(initial_road.getSubRegion())->isPixel(layer)){
                 continue;
             }
         }
-        else if (m_FPGATrackSimMapping->PlaneMap_1st(initial_road->getSubRegion())->isPixel(layer)) {
+        else if (m_FPGATrackSimMapping->PlaneMap_1st(initial_road.getSubRegion())->isPixel(layer)) {
             continue;
         }
 
         // Get the hits in these two layers, split by whether or not they are SPs.
         std::vector<std::shared_ptr<const FPGATrackSimHit>> strip_hits_in;
         std::vector<std::shared_ptr<const FPGATrackSimHit>> spacepoints_in;
-        const std::vector<std::shared_ptr<const FPGATrackSimHit>> hits_in = initial_road->getHits(layer);
+        const std::vector<std::shared_ptr<const FPGATrackSimHit>> hits_in = initial_road.getHits(layer);
         for (auto& hit : hits_in) {
             if (hit->getHitType() == HitType::spacepoint) {
                 spacepoints_in.push_back(hit);
@@ -129,7 +124,7 @@ bool FPGATrackSimSpacepointRoadFilterTool::splitRoad(FPGATrackSimRoad* initial_r
         // Do the same for the next layer.
         std::vector<std::shared_ptr<const FPGATrackSimHit>> strip_hits_out;
         std::vector<std::shared_ptr<const FPGATrackSimHit>> spacepoints_out;
-        const std::vector<std::shared_ptr<const FPGATrackSimHit>> hits_out = initial_road->getHits(layer + 1);
+        const std::vector<std::shared_ptr<const FPGATrackSimHit>> hits_out = initial_road.getHits(layer + 1);
         for (auto& hit : hits_out) {
             if (hit->getHitType() == HitType::spacepoint) {
                 spacepoints_out.push_back(hit);
@@ -153,7 +148,7 @@ bool FPGATrackSimSpacepointRoadFilterTool::splitRoad(FPGATrackSimRoad* initial_r
             retval = false;
 
             // Debug message. Let's see if this still happens, now.
-            ATH_MSG_DEBUG("Found inconsistent number of spacepoints in road with x = " << initial_road->getXBin() << ", y = " << initial_road->getYBin() << ": spacepoints_in = " << spacepoints_in << ", spacepoints_out = " << spacepoints_out);
+            ATH_MSG_DEBUG("Found inconsistent number of spacepoints in road with x = " << initial_road.getXBin() << ", y = " << initial_road.getYBin() << ": spacepoints_in = " << spacepoints_in << ", spacepoints_out = " << spacepoints_out);
 
             // Update the spacepoint vectors.
             spacepoints_in = std::move(new_sp_in);
@@ -162,11 +157,11 @@ bool FPGATrackSimSpacepointRoadFilterTool::splitRoad(FPGATrackSimRoad* initial_r
             // Now update the two layers accordingly, having converted invalid SPs back to paired hits.
             std::vector<std::shared_ptr<const FPGATrackSimHit>> new_all_in = spacepoints_in;
             new_all_in.insert(std::end(new_all_in), std::begin(strip_hits_in), std::end(strip_hits_in));
-            initial_road->setHits(layer, std::move(new_all_in));
+            initial_road.setHits(layer, std::move(new_all_in));
 
             std::vector<std::shared_ptr<const FPGATrackSimHit>> new_all_out = spacepoints_out;
             new_all_out.insert(std::end(new_all_out), std::begin(strip_hits_out), std::end(strip_hits_out));
-            initial_road->setHits(layer + 1, std::move(new_all_out));
+            initial_road.setHits(layer + 1, std::move(new_all_out));
         }
 
         // Update our spacepoint maps now that any uniques have been eliminated.
@@ -190,7 +185,7 @@ bool FPGATrackSimSpacepointRoadFilterTool::splitRoad(FPGATrackSimRoad* initial_r
 
     // Create a copy of the initial road. this is our first working road.
     std::vector<FPGATrackSimRoad> working_roads;
-    FPGATrackSimRoad new_road(*initial_road);
+    FPGATrackSimRoad new_road(initial_road);
     working_roads.push_back(new_road);
 
     // Now loop through the processed spacepoints.

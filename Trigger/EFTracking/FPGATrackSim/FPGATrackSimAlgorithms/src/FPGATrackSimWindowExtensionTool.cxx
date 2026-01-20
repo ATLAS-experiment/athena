@@ -59,9 +59,9 @@ StatusCode FPGATrackSimWindowExtensionTool::initialize() {
     return StatusCode::SUCCESS;
 }
 
-StatusCode FPGATrackSimWindowExtensionTool::extendTracks(const std::vector<std::shared_ptr<const FPGATrackSimHit>> & hits,
-        const std::vector<std::shared_ptr<const FPGATrackSimTrack>> & tracks,
-        std::vector<std::shared_ptr<const FPGATrackSimRoad>> & roads) {
+StatusCode FPGATrackSimWindowExtensionTool::extendTracks(const std::vector<std::shared_ptr<const FPGATrackSimHit>>& hits,
+    const std::vector<std::shared_ptr<const FPGATrackSimTrack>>& tracks,
+    std::vector<FPGATrackSimRoad>& roads) {
 
     // Reset the internal second stage roads storage.
     roads.clear();
@@ -179,12 +179,9 @@ StatusCode FPGATrackSimWindowExtensionTool::extendTracks(const std::vector<std::
         }
     }
 
-    // Copy the roads we found into the output argument and return success.
-    roads.reserve(m_roads.size());
-    for (FPGATrackSimRoad & r : m_roads) {
-        roads.emplace_back(std::make_shared<const FPGATrackSimRoad>(r));
-    }
-    ATH_MSG_DEBUG("Found " << m_roads.size() << " new roads in second stage.");
+    // Move the roads we found into the output argument and return success.
+    roads = std::move(m_roads);
+    ATH_MSG_DEBUG("Found " << roads.size() << " new roads in second stage.");
 
     // Reset the hit binning tool.
     m_hitBinningTool->resetBins();

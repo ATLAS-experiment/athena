@@ -124,7 +124,7 @@ class FPGATrackSimSecondStageAlg : public AthAlgorithm
         unsigned long m_maxNTracksChi2OLRTot = 0; // max number of tracks passing chi2 and OLR in an events
   
         // TODO: what functions should we have here?
-        StatusCode writeOutputData(const std::vector<std::shared_ptr<const FPGATrackSimRoad>> & roads_2nd,
+        StatusCode writeOutputData(const std::vector<FPGATrackSimRoad> & roads_2nd,
                                    std::vector<FPGATrackSimTrack> const & tracks_2nd,
                                    FPGATrackSimDataFlowInfo const * dataFlowInfo);
 

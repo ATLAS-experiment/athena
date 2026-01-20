@@ -672,34 +672,34 @@ long getFineID(const FPGATrackSimHit & hit)
 }
 
 // Adapted from TrackFitter, but TrackFitter *depends* on fit constants and this algorithm
-void roadsToTrack(std::vector<std::shared_ptr<const FPGATrackSimRoad>>& roads, std::vector<FPGATrackSimTrack>& track_cands, const FPGATrackSimPlaneMap *pmap)
+void roadsToTrack(std::vector<FPGATrackSimRoad>& roads, std::vector<FPGATrackSimTrack>& track_cands, const FPGATrackSimPlaneMap *pmap)
 {
 
 
-    for (const std::shared_ptr<const FPGATrackSimRoad>& road : roads) {
+    for (const FPGATrackSimRoad& road : roads) {
 
       FPGATrackSimTrack temp;
       temp.setNLayers(pmap->getNLogiLayers());
       temp.setBankID(-1);
-      temp.setPatternID(road->getPID());
-      temp.setHoughX(road->getX());
-      temp.setHoughY(road->getY());
-      temp.setQOverPt(road->getY());
+      temp.setPatternID(road.getPID());
+      temp.setHoughX(road.getX());
+      temp.setHoughY(road.getY());
+      temp.setQOverPt(road.getY());
 
-      temp.setSubRegion(road->getSubRegion());
-      temp.setHoughXBin(road->getXBin());
-      temp.setHoughYBin(road->getYBin());
+      temp.setSubRegion(road.getSubRegion());
+      temp.setHoughXBin(road.getXBin());
+      temp.setHoughYBin(road.getYBin());
       temp.setChi2(0);
 
-      temp.setBinIdx(road->getBinIdx());
+      temp.setBinIdx(road.getBinIdx());
 
       // This comes from FPGATrackSimFunctions
-      std::vector<std::vector<int>> combs = getComboIndices(road->getNHits_layer());
+      std::vector<std::vector<int>> combs = getComboIndices(road.getNHits_layer());
       unsigned existing_size = track_cands.size();
       track_cands.resize(existing_size + combs.size(), temp);
 
       //get the WC hits:
-      layer_bitmask_t wcbits= road->getWCLayers();
+      layer_bitmask_t wcbits= road.getWCLayers();
       // Add the hits from each combination to the track, and set ID
       for (size_t icomb = 0; icomb < combs.size(); icomb++)
       {
@@ -725,7 +725,7 @@ void roadsToTrack(std::vector<std::shared_ptr<const FPGATrackSimRoad>>& roads, s
             }
             else
             {
-                const std::shared_ptr<const FPGATrackSimHit> hit = road->getHits(layer)[hit_indices[layer]];
+                const std::shared_ptr<const FPGATrackSimHit> hit = road.getHits(layer)[hit_indices[layer]];
                 // If this is an outer spacepoint, and it is not the same as the inner spacepoint, reject it.
                 // Here we "reject" it by marking the candidate as "invalid", to be rejected later.
                 // That require another field on the track object, but it avoids having to change the sizes
