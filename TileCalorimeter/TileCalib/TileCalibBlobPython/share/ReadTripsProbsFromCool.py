@@ -1,6 +1,6 @@
 #!/bin/env python
 
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #
 # ./ReadTripsProbsFromCool.py  --schema='COOLOFL_TILE/OFLP200'  --folder='OFL02' --tag='UPD4'
 
@@ -55,7 +55,7 @@ for o, a in opts:
         usage()
         sys.exit(2)
     else:
-        assert False, "unhandled option"
+        raise RuntimeError("unhandled option")
 
 
 

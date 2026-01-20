@@ -8,7 +8,7 @@
 # Purpose: Manual update of lumi values in CALO COOL DB
 #
 
-import getopt,sys,os,re
+import getopt,sys,os
 os.environ['TERM'] = 'linux'
 
 def usage():

@@ -1,6 +1,6 @@
 #!/bin/env python
 
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #
 # WriteBchToCool.py
 # Alexander Solodkov <Sanya.Solodkov@cern.ch>, 2014-09-09
@@ -132,7 +132,7 @@ for o, a in opts:
         usage()
         sys.exit(2)
     else:
-        assert False, "unhandeled option"
+        raise RuntimeError("unhandeled option")
 
 onl=("/TILE/ONL01" in folderPath)
 if onl:
