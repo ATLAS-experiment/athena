@@ -14,16 +14,14 @@
 
 namespace columnar
 {
-  template<ContainerIdConcept CI>
-  class AccessorTemplate<CI,ObjectColumn,ColumnAccessMode::input,ColumnarModeArray> final
+  template<ContainerIdConcept CI,ColumnarArrayMode CM>
+  class AccessorTemplate<CI,ObjectColumn,ColumnAccessMode::input,CM> final
   {
     /// Common Public Members
     /// =====================
   public:
 
     static_assert (CI::perEventRange || CI::perEventId, "ObjectColumn can only be used with per-event ranges or IDs");
-
-    using CM = ColumnarModeArray;
 
     AccessorTemplate () = default;
 
