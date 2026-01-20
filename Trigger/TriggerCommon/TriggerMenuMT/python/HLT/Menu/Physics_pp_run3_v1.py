@@ -1013,6 +1013,7 @@ def setupMenu():
         ChainProp(name='HLT_j30_CLEANllp_momemfrac006_calratiormbib_L1eTAU40HT', l1SeedThresholds=['FSNOSEED'], groups=SingleJetGroup+SupportPhIGroup),
         ChainProp(name='HLT_j30_CLEANllp_momemfrac006_calratio_L1eTAU60HM', l1SeedThresholds=['FSNOSEED'], groups=SingleJetGroup+SupportPhIGroup),
         ChainProp(name='HLT_j30_CLEANllp_momemfrac006_calratiormbib_L1eTAU60HM', l1SeedThresholds=['FSNOSEED'], groups=SingleJetGroup+SupportPhIGroup),
+ 
 
         # Support performance chains (for emulation+calibration studies) ATR-20624
         ChainProp(name='HLT_j0_perf_L1RD0_FILLED', l1SeedThresholds=['FSNOSEED'], stream=['Main'], groups=SingleJetGroup+SupportGroup+['RATE:CPS_RD0_FILLED']),
@@ -1346,8 +1347,22 @@ def setupMenu():
         ChainProp(name='HLT_j20_calratiovar_roiftf_preselj20emf24_L1LLPDPHI-jXE40-jJ40', l1SeedThresholds=['FSNOSEED'], groups=SingleJetGroup+PrimaryPhIGroup+Topo2Group+['PS:NoHLTRepro']),
         ChainProp(name='HLT_j20_calratiovar_roiftf_preselj20emf24_L1LLPNODPHI-jXE40-jJ40', l1SeedThresholds=['FSNOSEED'], groups=SingleJetGroup+SupportPhIGroup+Topo2Group+['PS:NoHLTRepro']),
 
+        # ATR-32084 
+        ChainProp(name='HLT_j30_CLEANllp_momemfrac006_calratio_L1LLPDPHI-jXE40-jJ40', l1SeedThresholds=['FSNOSEED'], groups=SingleJetGroup+PrimaryPhIGroup+Topo2Group),
+        ChainProp(name='HLT_j30_CLEANllp_momemfrac006_calratiormbib_L1LLPDPHI-jXE40-jJ40', l1SeedThresholds=['FSNOSEED'], groups=SingleJetGroup+PrimaryPhIGroup+Topo2Group),
+        ChainProp(name='HLT_j30_CLEANllp_momemfrac006_calratio_L1LLPNODPHI-jXE40-jJ40', l1SeedThresholds=['FSNOSEED'], groups=SingleJetGroup+PrimaryPhIGroup+Topo2Group),
+        ChainProp(name='HLT_j30_CLEANllp_momemfrac006_calratiormbib_L1LLPNODPHI-jXE40-jJ40', l1SeedThresholds=['FSNOSEED'], groups=SingleJetGroup+PrimaryPhIGroup+Topo2Group),
 
+        # ATR-32084
+        ChainProp(name='HLT_j30_CLEANllp_momemfrac006_calratio_L1LLP2DPHI-jXE40-jJ40', l1SeedThresholds=['FSNOSEED'], groups=SingleJetGroup+PrimaryPhIGroup+Topo2Group),
+        ChainProp(name='HLT_j30_CLEANllp_momemfrac006_calratiormbib_L1LLP2DPHI-jXE40-jJ40', l1SeedThresholds=['FSNOSEED'], groups=SingleJetGroup+PrimaryPhIGroup+Topo2Group),
+        ChainProp(name='HLT_j30_CLEANllp_momemfrac006_calratio_L1LLP2NODPHI-jXE40-jJ40', l1SeedThresholds=['FSNOSEED'], groups=SingleJetGroup+PrimaryPhIGroup+Topo2Group),
+        ChainProp(name='HLT_j30_CLEANllp_momemfrac006_calratiormbib_L1LLP2NODPHI-jXE40-jJ40', l1SeedThresholds=['FSNOSEED'], groups=SingleJetGroup+PrimaryPhIGroup+Topo2Group),
 
+        ChainProp(name='HLT_j30_CLEANllp_momemfrac006_calratio_L1LLP3DPHI-jXE40-jJ40', l1SeedThresholds=['FSNOSEED'], groups=SingleJetGroup+PrimaryPhIGroup+Topo2Group),
+        ChainProp(name='HLT_j30_CLEANllp_momemfrac006_calratiormbib_L1LLP3DPHI-jXE40-jJ40', l1SeedThresholds=['FSNOSEED'], groups=SingleJetGroup+PrimaryPhIGroup+Topo2Group),
+        ChainProp(name='HLT_j30_CLEANllp_momemfrac006_calratio_L1LLP3NODPHI-jXE40-jJ40', l1SeedThresholds=['FSNOSEED'], groups=SingleJetGroup+PrimaryPhIGroup+Topo2Group),
+        ChainProp(name='HLT_j30_CLEANllp_momemfrac006_calratiormbib_L1LLP3NODPHI-jXE40-jJ40', l1SeedThresholds=['FSNOSEED'], groups=SingleJetGroup+PrimaryPhIGroup+Topo2Group),
 
     ]
 
@@ -3299,6 +3314,12 @@ def setupMenu():
         # ATR-28563 
         ChainProp(name='HLT_noalg_L1LLPDPHI-jXE40-jJ40', l1SeedThresholds=['FSNOSEED'], stream=['Main'], groups=JetPhaseIStreamersGroup+SupportPhIGroup+Topo2Group),
         ChainProp(name='HLT_noalg_L1LLPNODPHI-jXE40-jJ40', l1SeedThresholds=['FSNOSEED'], stream=['Main'], groups=JetPhaseIStreamersGroup+SupportPhIGroup+Topo2Group),
+
+        # ATR-32084
+        ChainProp(name='HLT_noalg_L1LLP2DPHI-jXE40-jJ40', l1SeedThresholds=['FSNOSEED'], stream=['Main'], groups=JetPhaseIStreamersGroup+SupportPhIGroup+Topo2Group),
+        ChainProp(name='HLT_noalg_L1LLP2NODPHI-jXE40-jJ40', l1SeedThresholds=['FSNOSEED'], stream=['Main'], groups=JetPhaseIStreamersGroup+SupportPhIGroup+Topo2Group),
+        ChainProp(name='HLT_noalg_L1LLP3DPHI-jXE40-jJ40', l1SeedThresholds=['FSNOSEED'], stream=['Main'], groups=JetPhaseIStreamersGroup+SupportPhIGroup+Topo2Group),
+        ChainProp(name='HLT_noalg_L1LLP3NODPHI-jXE40-jJ40', l1SeedThresholds=['FSNOSEED'], stream=['Main'], groups=JetPhaseIStreamersGroup+SupportPhIGroup+Topo2Group),
 
     ]
 

@@ -350,6 +350,12 @@ def defineMenu():
         'L1_LLPDPHI-jXE40-jJ40',
         'L1_LLPNODPHI-jXE40-jJ40',
 
+        #ATR-32084
+        'L1_LLP2DPHI-jXE40-jJ40',
+        'L1_LLP2NODPHI-jXE40-jJ40',
+        'L1_LLP3DPHI-jXE40-jJ40',
+        'L1_LLP3NODPHI-jXE40-jJ40',
+
         #ATR-30656
         'L1_cTAU30M_3DR35-MU8F-eTAU30',
 
