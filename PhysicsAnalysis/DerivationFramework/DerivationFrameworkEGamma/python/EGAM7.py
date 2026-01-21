@@ -460,11 +460,11 @@ def EGAM7Cfg(flags):
     # truth
     if flags.Input.isMC:
         EGAM7SlimmingHelper.ExtraVariables += [
-            "MuonTruthParticles.e.px.py.pz.status.pdgId.truthOrigin.truthType"
+            "MuonTruthParticles.e.px.py.pz.status.pdgId.truthClassification.truthOrigin.truthType"
         ]
 
         EGAM7SlimmingHelper.ExtraVariables += [
-            "Photons.truthOrigin.truthType.truthParticleLink"
+            "Photons.truthClassification.truthOrigin.truthType.truthParticleLink"
         ]
 
     # Add event info

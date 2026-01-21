@@ -579,7 +579,7 @@ def EGAM3Cfg(flags):
     # truth
     if flags.Input.isMC:
         EGAM3SlimmingHelper.ExtraVariables += [
-            "Electrons.truthOrigin.truthType.truthParticleLink"
+            "Electrons.truthClassification.truthOrigin.truthType.truthParticleLink"
         ]
 
     # Add event info

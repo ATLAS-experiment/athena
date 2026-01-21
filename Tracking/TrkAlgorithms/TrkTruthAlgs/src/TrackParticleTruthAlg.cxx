@@ -18,6 +18,7 @@ StatusCode TrackParticleTruthAlg::initialize() {
   ATH_CHECK(m_particlesLinkKey.initialize());
   ATH_CHECK(m_particlesTypeKey.initialize());
   ATH_CHECK(m_particlesOriginKey.initialize());
+  ATH_CHECK(m_particlesClassificationKey.initialize());
   ATH_CHECK(m_truthParticleLinkVecKey.initialize());
   ATH_CHECK(m_truthTracksKey.initialize());
   ATH_CHECK(m_truthClassifier.retrieve());
@@ -33,6 +34,7 @@ StatusCode TrackParticleTruthAlg::execute(const EventContext& ctx) const {
   SG::WriteDecorHandle<xAOD::TrackParticleContainer,ElementLink<xAOD::TruthParticleContainer> > particlesLink{m_particlesLinkKey, ctx};
   SG::WriteDecorHandle<xAOD::TrackParticleContainer,int> particlesType{m_particlesTypeKey, ctx};
   SG::WriteDecorHandle<xAOD::TrackParticleContainer,int> particlesOrigin{m_particlesOriginKey, ctx};
+  SG::WriteDecorHandle<xAOD::TrackParticleContainer, unsigned int> particlesClassification{m_particlesClassificationKey, ctx};
 
   ATH_CHECK(particlesLink.isValid());
   ATH_CHECK(truthParticleLinkVec.isValid());
@@ -53,38 +55,41 @@ StatusCode TrackParticleTruthAlg::execute(const EventContext& ctx) const {
           ATH_MSG_WARNING("Found TrackParticle with Invalid element link, skipping");
       }
       //add dummy truth link
-      particlesLink(*particle)=ElementLink<xAOD::TruthParticleContainer>();
+      particlesLink(*particle) = ElementLink<xAOD::TruthParticleContainer>();
       particlesType(*particle) = 0;
-      particlesOrigin(*particle)= 0;
+      particlesOrigin(*particle) = 0;
+      particlesClassification(*particle) = 0;
       continue;
     }
 
     MCTruthPartClassifier::ParticleType type = MCTruthPartClassifier::Unknown;
     MCTruthPartClassifier::ParticleOrigin origin = MCTruthPartClassifier::NonDefined;
+    unsigned int classification = 0;
     ElementLink<xAOD::TruthParticleContainer> link;
     // look-up associated truth particle
 
     Trk::TrackTruthKey key(particle->trackLink());
     auto result = truthTrackColl.find(key);
-    
+
     // if we found a match use it
     if( result != truthTrackColl.end() ){
       ATH_MSG_VERBOSE("Found track Truth: uniqueID  " << HepMC::uniqueID(&(result->second.particleLink())) << " evt " << result->second.particleLink().eventIndex());
       link = truthParticleLinks.find(result->second.particleLink());
-      
+
       // if configured also get truth classification
 
-      if( link.isValid()&& !m_truthClassifier.empty() ){
-	auto truthClass = m_truthClassifier->particleTruthClassifier(*link);
-	type = truthClass.first;
-	origin = truthClass.second;
-	ATH_MSG_VERBOSE("Got truth type  " << static_cast<int>(type) << "  origin " << static_cast<int>(origin));
+      if( link.isValid() && !m_truthClassifier.empty() ){
+        auto truthClass = m_truthClassifier->particleTruthClassifier(*link);
+        type = truthClass.first;
+        origin = truthClass.second;
+        classification = std::get<0>(MCTruthPartClassifier::defOrigOfParticle(*link)); // See AGENE-2351
+        ATH_MSG_VERBOSE("Got truth type  " << static_cast<int>(type) << "  origin " << static_cast<int>(origin) << " classification " << classification);
       }
     }
 
     if( link.isValid() ){
       ATH_MSG_DEBUG("Found matching xAOD Truth: uniqueID " << HepMC::uniqueID(*link) << " pt " << (*link)->pt() << " eta " << (*link)->eta() << " phi " << (*link)->phi());
-      // set element link 
+      // set element link
       link.toPersistent();
       particlesLink(*particle)=link;
 
@@ -97,6 +102,7 @@ StatusCode TrackParticleTruthAlg::execute(const EventContext& ctx) const {
       //use index for these since it's the same particle
       particlesType(partInd)=static_cast<int>(type);
       particlesOrigin(partInd)=static_cast<int>(origin);
+      particlesClassification(partInd)=classification;
     }
     partInd++;
   }

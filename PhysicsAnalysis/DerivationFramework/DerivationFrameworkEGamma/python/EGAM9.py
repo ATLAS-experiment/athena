@@ -396,7 +396,7 @@ def EGAM9Cfg(flags):
     # truth
     if flags.Input.isMC:
         EGAM9SlimmingHelper.ExtraVariables += [
-            "Photons.truthOrigin.truthType.truthParticleLink"
+            "Photons.truthClassification.truthOrigin.truthType.truthParticleLink"
         ]
 
     # Add event info

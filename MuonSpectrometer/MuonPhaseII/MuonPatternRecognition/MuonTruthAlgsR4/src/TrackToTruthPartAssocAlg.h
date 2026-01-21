@@ -32,7 +32,7 @@ namespace MuonR4{
             ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "IdHelperSvc",  "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
             /** @brief Helper service to handle the Identifiers of measurements */
             ServiceHandle<Muon::IMuonEDMHelperSvc> m_edmHelperSvc{this, "EdmHelperSvc", "Muon::MuonEDMHelperSvc/MuonEDMHelperSvc"};
-        
+
 
             using TrkReadKey_t = SG::ReadHandleKey<xAOD::TrackParticleContainer>;
             using TrkWriteDecorKey_t = SG::WriteDecorHandleKey<xAOD::TrackParticleContainer>;
@@ -41,21 +41,26 @@ namespace MuonR4{
             /** @brief Decorations to be written to the TrackParticle truthOrigin/truthType/truthParticleLink */
             TrkWriteDecorKey_t m_originWriteKey{this, "TruthOriginWriteKey", m_trkKey, "truthOrigin"};
             TrkWriteDecorKey_t m_typeWriteKey{this, "TruthTypeWriteKey", m_trkKey, "truthType"};
+            TrkWriteDecorKey_t m_classificationWriteKey{this, "TruthClassificationWriteKey", m_trkKey, "truthClassification"};
             TrkWriteDecorKey_t m_linkWriteKey{this, "TruthLinkWriteKey", m_trkKey, "truthParticleLink"};
             /** @brief Input truth particle keys */
             using TruthReadKey_t = SG::ReadHandleKey<xAOD::TruthParticleContainer>;
-            using TruthDecor_t = SG::ReadDecorHandleKey<xAOD::TruthParticleContainer>;
-            using TruthDecorArr_t =  SG::ReadDecorHandleKeyArray<xAOD::TruthParticleContainer>;
+            using TruthReadDecorKey_t = SG::ReadDecorHandleKey<xAOD::TruthParticleContainer>;
+            using TruthReadDecorKeyArr_t =  SG::ReadDecorHandleKeyArray<xAOD::TruthParticleContainer>;
 
             TruthReadKey_t m_truthMuonKey{this, "TruthMuonKey", "MuonTruthParticles"};
 
             /** @brief List of simHit id decorations to read from the truth particle */
             Gaudi::Property<std::vector<std::string>> m_simHitIds{this, "SimHitIds", {}};
             /** @brief Declaration of the dependency on the simHit decorations */
-            TruthDecorArr_t m_simHitKeys{this, "TruthSimHitIdKeys", {}};
-
-            TruthDecor_t m_truMuOriginKey{this, "TruthMuonOriginKey", m_truthMuonKey, "truthOrigin"};
-            TruthDecor_t m_truMuTypeKey{this, "TruthMuonTypeKey", m_truthMuonKey, "truthType"};
+            TruthReadDecorKeyArr_t m_simHitKeys{this, "TruthSimHitIdKeys", {}};
+            /// FIXME ReadDecorHandle should not be used to access
+            /// dynamic variables applied by the algorithm which
+            /// created the container, instead a
+            /// SG::AuxElement::ConstAccessor should be used.
+            TruthReadDecorKey_t m_truMuOriginKey{this, "TruthMuonOriginKey", m_truthMuonKey, "truthOrigin"};
+            TruthReadDecorKey_t m_truMuTypeKey{this, "TruthMuonTypeKey", m_truthMuonKey, "truthType"};
+            TruthReadDecorKey_t m_truMuClassificationKey{this, "TruthMuonClassificationKey", m_truthMuonKey, "truthClassification"};
 
     };
 }

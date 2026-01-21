@@ -619,11 +619,11 @@ def EGAM1Cfg(flags):
     # truth
     if flags.Input.isMC:
         EGAM1SlimmingHelper.ExtraVariables += [
-            "MuonTruthParticles.e.px.py.pz.status.pdgId.truthOrigin.truthType"
+            "MuonTruthParticles.e.px.py.pz.status.pdgId.truthClassification.truthOrigin.truthType"
         ]
 
         EGAM1SlimmingHelper.ExtraVariables += [
-            "Photons.truthOrigin.truthType.truthParticleLink"
+            "Photons.truthClassification.truthOrigin.truthType.truthParticleLink"
         ]
 
     # Add event info
