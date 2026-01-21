@@ -197,6 +197,7 @@ private:
 
     // MULTI-CHARGE PARTICLES DIGITIZATION
     Gaudi::Property<bool> m_DoQballCharge{this, "DoQballCharge", false, "dEdx for Qballs with account of electric charge"};
+    Gaudi::Property<bool> m_DoUpdatedMdtDigi{this, "DoUpdatedMdtDigi", false, "MDT digitization with updated constants and corrections"};
 
     // STATIONS TO MASK
     Gaudi::Property<std::vector<std::string>> m_maskedStations{this, "MaskedStations", {}, "Stations to be masked at digi level"};
