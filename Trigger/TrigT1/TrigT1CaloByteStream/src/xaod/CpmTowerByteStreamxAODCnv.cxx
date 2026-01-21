@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <vector>
@@ -57,7 +57,6 @@ StatusCode CpmTowerByteStreamxAODCnv::initialize() {
   ATH_MSG_DEBUG("Initializing " << m_name);
 
   CHECK(Converter::initialize());
-  //CHECK(m_readTool.retrieve());
   return StatusCode::SUCCESS;
 }
 
@@ -68,7 +67,7 @@ StatusCode CpmTowerByteStreamxAODCnv::createObj(IOpaqueAddress* pAddr,
   ATH_MSG_DEBUG("createObj() called");
   // -------------------------------------------------------------------------
   ByteStreamAddress *pBS_Addr = dynamic_cast<ByteStreamAddress *>(pAddr);
-  CHECK(pBS_Addr != nullptr);
+  if (not pBS_Addr) return StatusCode::FAILURE;
   // -------------------------------------------------------------------------
   const std::string nm = *(pBS_Addr->par());
   const std::string nmAux = nm + "Aux.";
