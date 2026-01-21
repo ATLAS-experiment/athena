@@ -76,12 +76,6 @@ namespace columnar
 
     // whether to run the tool a second time to get a "warm" cache measurement
     const bool runToolTwice = true;
-
-    // whether to skip all shallow copies in xAOD array mode
-    const bool skipShallowCopies = false;
-
-    /// whether to measure non-retrieval for empty containers
-    const bool measureNonAccessForEmpty = false;
   }
 
   namespace TestUtils
