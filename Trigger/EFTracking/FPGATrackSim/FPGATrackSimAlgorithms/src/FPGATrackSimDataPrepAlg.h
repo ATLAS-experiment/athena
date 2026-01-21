@@ -7,7 +7,7 @@
  * Please put a description on what this class does
  */
 
-#include "AthenaBaseComps/AthAlgorithm.h"
+#include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "GaudiKernel/ToolHandle.h"
 #include "FPGATrackSimInput/FPGATrackSimOutputHeaderTool.h"
 #include "FPGATrackSimObjects/FPGATrackSimEventInfo.h"
@@ -54,20 +54,20 @@ class FPGATrackSimHit;
 class FPGATrackSimLogicalEventInputHeader;
 class FPGATrackSimLogicalEventOutputHeader;
 
-class FPGATrackSimDataPrepAlg : public AthAlgorithm
+class FPGATrackSimDataPrepAlg : public ::AthReentrantAlgorithm
 {
     public:
         FPGATrackSimDataPrepAlg(const std::string& name, ISvcLocator* pSvcLocator);
         virtual ~FPGATrackSimDataPrepAlg() = default;
 
         virtual StatusCode initialize() override;
-        virtual StatusCode execute() override;
+        virtual StatusCode execute(const EventContext& ctx) const override final;
         virtual StatusCode finalize() override;
 
     private:
 
         std::string m_description;
-        int m_ev = 0;
+        mutable std::atomic<unsigned> m_ev{0};
 
         // Handles
         ToolHandle<IFPGATrackSimInputTool>               m_hitSGInputTool {this, "SGInputTool", "", "Input tool from SG"};
@@ -82,6 +82,7 @@ class FPGATrackSimDataPrepAlg : public AthAlgorithm
         ServiceHandle<IChronoStatSvc> m_chrono{this,"ChronoStatSvc","ChronoStatSvc"};
 
         // Flags
+        Gaudi::Property<bool> m_isDataPrepPipeline {this, "isDataPrepPipeline", false, "If True, this is for data prep pipeline only, thus skipping unecessary steps"};
         Gaudi::Property<int> m_firstInputToolN {this, "FirstInputToolN", 1, "number of times to use event from first input tool"};
         Gaudi::Property<int> m_secondInputToolN {this, "SecondInputToolN", 0, "number of times to use event from second input tool"};
         Gaudi::Property<bool> m_doHitFiltering {this, "HitFiltering", false, "flag to enable hit/cluster filtering"};
@@ -99,29 +100,32 @@ class FPGATrackSimDataPrepAlg : public AthAlgorithm
         Gaudi::Property<std::string> m_preClusterBranch      {this, "preClusterBranch", "LogicalEventInputHeader_PreCluster", "Name of the branch for pre-cluster input data in output ROOT file." };
         Gaudi::Property<std::string> m_postClusterBranch     {this, "postClusterBranch", "LogicalEventInputHeader_PostCluster", "Name of the branch for post-cluster input data in output ROOT file." };
 
-        // ROOT pointers 
-        FPGATrackSimEventInputHeader          m_eventHeader;
-        FPGATrackSimEventInputHeader          m_firstInputHeader;
+        // ROOT pointers
         FPGATrackSimLogicalEventInputHeader*  m_logicEventHeader_precluster = nullptr;
         FPGATrackSimLogicalEventInputHeader*  m_logicEventHeader = nullptr;
 
-        // Event storage
-        std::unique_ptr<FPGATrackSimClusterCollection> m_clusters = std::make_unique<FPGATrackSimClusterCollection>();
-        std::vector<FPGATrackSimHit>     m_hits_miss{};
-
         // internal counters
-        double m_evt = 0; // number of events passing event selection, independent of truth
+        mutable std::atomic<size_t> m_evt = 0; // number of events passing event selection, independent of truth
 
-        unsigned long m_nPixClusters = 0; // number of clusters for pix, total
-        unsigned m_nMaxPixClusters = 0; // max number of pixel clusters in an event
-        unsigned long m_nStripClusters = 0; // number of clusters for strip, total
-        unsigned m_nMaxStripClusters = 0; // max number of strip clusters in an event
-        unsigned m_nMaxClusters = 0; // max number of total clusters in an event
+        mutable std::atomic<unsigned long> m_nPixClusters = 0; // number of clusters for pix, total
+        mutable std::atomic<unsigned> m_nMaxPixClusters = 0; // max number of pixel clusters in an event
+        mutable std::atomic<unsigned long> m_nStripClusters = 0; // number of clusters for strip, total
+        mutable std::atomic<unsigned> m_nMaxStripClusters = 0; // max number of strip clusters in an event
+        mutable std::atomic<unsigned> m_nMaxClusters = 0; // max number of total clusters in an event
 
 
-        StatusCode readInputs(bool & done);
-        StatusCode processInputs(SG::WriteHandle<FPGATrackSimHitCollection> &FPGAHitUnmapped,
-                                 SG::WriteHandle<FPGATrackSimClusterCollection> &FPGAClusters);
+        StatusCode readInputs(const EventContext& ctx,
+                     FPGATrackSimEventInputHeader& eventHeader,
+                     FPGATrackSimEventInputHeader& firstInputHeader,
+                     bool& done) const;
+                     
+        StatusCode processInputs(const FPGATrackSimEventInputHeader& eventHeader,
+                        FPGATrackSimLogicalEventInputHeader& logicEventHeader,
+                        FPGATrackSimLogicalEventInputHeader& logicEventHeader_precluster,
+                        std::vector<std::unique_ptr<FPGATrackSimHit>>& hits_miss,
+                        FPGATrackSimClusterCollection& clusters,
+                        SG::WriteHandle<FPGATrackSimHitCollection> &FPGAHitUnmapped,
+                        SG::WriteHandle<FPGATrackSimClusterCollection> &FPGAClusters) const;
 
         ToolHandle<GenericMonitoringTool> m_monTool{this,"MonTool", "", "Monitoring tool"};
 
@@ -136,6 +140,8 @@ class FPGATrackSimDataPrepAlg : public AthAlgorithm
         SG::WriteHandleKey<FPGATrackSimTruthTrackCollection> m_FPGATruthTrackKey {this, "FPGATrackSimTruthTrackKey", "FPGATruthTracks", "FPGATrackSim truth tracks"};
         SG::WriteHandleKey<FPGATrackSimOfflineTrackCollection> m_FPGAOfflineTrackKey {this, "FPGATrackSimOfflineTrackKey", "FPGAOfflineTracks", "FPGATrackSim offline tracks"};
         SG::WriteHandleKey<FPGATrackSimEventInfo> m_FPGAEventInfoKey{this, "FPGATrackSimEventInfoKey", "FPGAEventInfo", "FPGATrackSim event info"};
+
+        mutable std::mutex m_rootWriteMutex; // Protect ROOT writes in const execute()
 
 };
 

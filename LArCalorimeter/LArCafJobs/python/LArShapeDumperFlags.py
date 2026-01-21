@@ -24,6 +24,7 @@ def addShapeDumpFlags(flags):
     flags.addFlag("LArShapeDump.nrawSC",1)
     flags.addFlag("LArShapeDump.energySCCut",1000.)
     flags.addFlag("LArShapeDump.adcSCCut",100)
+    flags.addFlag("LArShapeDump.doSCReco",False)
     
 
 

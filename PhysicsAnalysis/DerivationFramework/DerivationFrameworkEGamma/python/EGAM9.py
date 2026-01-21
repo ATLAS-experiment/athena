@@ -31,7 +31,6 @@ from DerivationFrameworkEGamma.TriggerContent import (
 # additional settings for this derivation
 thinCells = False
 keepCells = False
-applyTriggerSelection = True
 saveJets = False
 
 
@@ -48,48 +47,41 @@ def EGAM9SkimmingToolCfg(flags):
         + "Electrons.DFCommonElectronsLHMedium) > 0)"
     )
     expression = photon_selection + " || " + electron_selection
+    skimmingTools = []
 
-    if applyTriggerSelection:
-        # trigger-based selection
-        MenuType = None
-        if flags.Trigger.EDMVersion == 2:
-            MenuType = "Run2"
-        elif flags.Trigger.EDMVersion == 3:
-            MenuType = "Run3"
-        else:
-            MenuType = ""
+    # trigger-based selection
+    MenuType = ""
+    if flags.Trigger.EDMVersion == 2:
+        MenuType = "Run2"
+    elif flags.Trigger.EDMVersion == 3:
+        MenuType = "Run3"
+
+    if MenuType:
         triggers = BootstrapPhotonTriggers[MenuType]
         triggers += noalgTriggers[MenuType]
         print("EGAM9 trigger skimming list (OR): ", triggers)
         EGAM9_TriggerSkimmingTool = CompFactory.DerivationFramework.TriggerSkimmingTool(
             name="EGAM9_TriggerSkimmingTool", TriggerListOR=triggers
         )
-
-        # off-line based selection
-        print("EGAM9 offline skimming expression: ", expression)
-        EGAM9_OfflineSkimmingTool = (
-            CompFactory.DerivationFramework.xAODStringSkimmingTool(
-                name="EGAM9_OfflineSkimmingTool", expression=expression
-            )
-        )
-
-        # do the AND of trigger-based and offline-based selection
-        print("EGAM9 skimming is logical AND of previous selections")
-        EGAM9_SkimmingTool = CompFactory.DerivationFramework.FilterCombinationAND(
-            name="EGAM9_SkimmingTool",
-            FilterList=[EGAM9_OfflineSkimmingTool, EGAM9_TriggerSkimmingTool],
-        )
-        acc.addPublicTool(EGAM9_OfflineSkimmingTool)
         acc.addPublicTool(EGAM9_TriggerSkimmingTool)
-        acc.addPublicTool(EGAM9_SkimmingTool, primary=True)
-    else:
-        # off-line based selection
-        print("EGAM9 skimming expression: ", expression)
-        EGAM9_SkimmingTool = CompFactory.DerivationFramework.xAODStringSkimmingTool(
-            name="EGAM9_SkimmingTool", expression=expression
-        )
-        acc.addPublicTool(EGAM9_SkimmingTool, primary=True)
+        skimmingTools += [EGAM9_TriggerSkimmingTool]
 
+    # off-line based selection
+    print("EGAM9 offline skimming expression: ", expression)
+    from DerivationFrameworkTools.DerivationFrameworkToolsConfig import (
+        xAODStringSkimmingToolCfg)
+    EGAM9_OfflineSkimmingTool = acc.getPrimaryAndMerge(xAODStringSkimmingToolCfg(
+        flags, name = "EGAM9_OfflineSkimmingTool", expression = expression))    
+    skimmingTools += [EGAM9_OfflineSkimmingTool]
+
+    # do the AND of trigger-based and offline-based selection
+    print("EGAM9 skimming is logical AND of previous selections")
+    EGAM9_SkimmingTool = CompFactory.DerivationFramework.FilterCombinationAND(
+        name="EGAM9_SkimmingTool",
+        FilterList=skimmingTools
+    )
+
+    acc.addPublicTool(EGAM9_SkimmingTool, primary=True)
     return acc
 
 
@@ -312,17 +304,17 @@ def EGAM9Cfg(flags):
     ]
 
     # for trigger studies we also add:
-    MenuType = None
+    MenuType = ""
     if flags.Trigger.EDMVersion == 2:
         MenuType = "Run2"
     elif flags.Trigger.EDMVersion == 3:
         MenuType = "Run3"
-    else:
-        MenuType = ""
-    EGAM9SlimmingHelper.AllVariables += ExtraContainersTrigger[MenuType]
-    EGAM9SlimmingHelper.AllVariables += ExtraContainersPhotonTrigger[MenuType]
-    if not flags.Input.isMC:
-        EGAM9SlimmingHelper.AllVariables += ExtraContainersTriggerDataOnly[MenuType]
+
+    if MenuType:
+        EGAM9SlimmingHelper.AllVariables += ExtraContainersTrigger[MenuType]
+        EGAM9SlimmingHelper.AllVariables += ExtraContainersPhotonTrigger[MenuType]
+        if not flags.Input.isMC:
+            EGAM9SlimmingHelper.AllVariables += ExtraContainersTriggerDataOnly[MenuType]
 
     # and on MC we also add:
     if flags.Input.isMC:
@@ -404,7 +396,7 @@ def EGAM9Cfg(flags):
     # truth
     if flags.Input.isMC:
         EGAM9SlimmingHelper.ExtraVariables += [
-            "Photons.truthOrigin.truthType.truthParticleLink"
+            "Photons.truthClassification.truthOrigin.truthType.truthParticleLink"
         ]
 
     # Add event info

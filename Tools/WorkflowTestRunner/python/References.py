@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 #####
 # CI Reference Files Map
@@ -11,13 +11,13 @@
 # Format is "test" : "version"
 references_map = {
     # Simulation
-    "s3761": "v24",
-    "s4005": "v16",
-    "s4006": "v25",
-    "s4007": "v24",
+    "s3761": "v25",
+    "s4005": "v17",
+    "s4006": "v26",
+    "s4007": "v25",
     "s4008": "v2",
-    "s4454": "v8",
-    "a913": "v19",
+    "s4454": "v9",
+    "a913": "v20",
     # Digi
     "d1920": "v18",
     # Overlay
@@ -25,23 +25,23 @@ references_map = {
     "d1759": "v25",
     "d1912": "v9",
     "d2029": "v11",
-    "d2030": "v16",
+    "d2030": "v18",
     # Reco
-    "q442": "v102",
-    "q449": "v160",
-    "q452": "v68",
-    "q454": "v87",
+    "q442": "v107",
+    "q449": "v166",
+    "q452": "v73",
+    "q454": "v93",
     # Derivations
-    "data_PHYS_Run2": "v70",
-    "data_PHYSLITE_Run2": "v37",
-    "data_PHYS_Run3": "v77",
-    "data_PHYSLITE_Run3": "v46",
-    "mc_PHYS_Run2": "v94",
-    "mc_PHYSLITE_Run2": "v46",
-    "mc_PHYS_Run3": "v98",
-    "mc_PHYSLITE_Run3": "v56",
-    "af3_PHYS_Run2": "v43",
-    "af3_PHYSLITE_Run2": "v26",
-    "af3_PHYS_Run3": "v79",
-    "af3_PHYSLITE_Run3": "v58",
+    "data_PHYS_Run2": "v73",
+    "data_PHYSLITE_Run2": "v40",
+    "data_PHYS_Run3": "v83",
+    "data_PHYSLITE_Run3": "v50",
+    "mc_PHYS_Run2": "v101",
+    "mc_PHYSLITE_Run2": "v49",
+    "mc_PHYS_Run3": "v106",
+    "mc_PHYSLITE_Run3": "v61",
+    "af3_PHYS_Run2": "v51",
+    "af3_PHYSLITE_Run2": "v29",
+    "af3_PHYS_Run3": "v86",
+    "af3_PHYSLITE_Run3": "v63",
 }

@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 // ROOT include(s):
 #include <TClass.h>
@@ -132,6 +132,7 @@ namespace xAOD {
       parent.m_owner = kFALSE;
    }
 
+   //coverity[UNCAUGHT_EXCEPT]
    THolder::~THolder() {
 
       // Delete the object using its dictionary:

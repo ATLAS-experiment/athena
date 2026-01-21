@@ -66,6 +66,8 @@ class CommonServicesConfig (ConfigBlock) :
         self.addOption ('streamName', 'ANALYSIS', type=str,
             info="name of the output stream to save the cut bookkeeper in. "
             "The default is ANALYSIS.")
+        self.addOption ('setupONNX', False, type=bool,
+            info="creates an instance of `AthOnnx::OnnxRuntimeSvc`.")
 
     def instanceName (self) :
         """Return the instance name for this block"""
@@ -157,7 +159,8 @@ class CommonServicesConfig (ConfigBlock) :
                         +reset)
             log.warning(f"{bold}{yellow}These settings are not recommended for analysis. Make sure you know what you're doing, or disable them with `enableExpertMode: False` in `CommonServices`.{reset}")
 
-
+        if self.setupONNX:
+            config.createService('AthOnnx::OnnxRuntimeSvc', 'OnnxRuntimeSvc')
 
 @groupBlocks
 def CommonServices(seq):
@@ -242,7 +245,7 @@ class PileupReweightingBlock (ConfigBlock):
                 config.addOutputVar ('EventInfo', var, var, noSys=True)
 
             if config.dataType() is not DataType.Data:
-                config.addOutputVar ('EventInfo', 'PileupWeight_%SYS%', 'weight_pileup')
+                config.addOutputVar ('EventInfo', 'PileupWeight_%SYS%', 'weight_pileup', auxType='float')
                 if config.geometry() is LHCPeriod.Run2:
                     config.addOutputVar ('EventInfo', 'beamSpotWeight', 'weight_beamspot', noSys=True)
             return
@@ -392,6 +395,14 @@ class GeneratorAnalysisBlock (ConfigBlock):
         self.addOption ('detailedPDFinfo', False, type=bool,
             info="save the necessary information to run the LHAPDF tool offline. "
                  "The default is False.")
+        self.addOption ('doPDFReweighting', False, type=bool,
+            info="perform the PDF reweighting to do the PDF sensitivity studies with the existing sample, intrinsic charm PDFs as the default here. WARNING: the reweighting closure should be validated within analysis (It has been proved to be good for Madgraph , aMC@NLO, Pythia8, Herwig, and Alpgen, but not good for Sherpa and Powheg).")
+        self.addOption ('outPDFName', [
+            "CT14nnloIC/0", "CT14nnloIC/1", "CT14nnloIC/2", 
+            "CT18FC/0", "CT18FC/3", "CT18FC/6", "CT18FC/9", 
+            "CT18NNLO/0", "CT18XNNLO/0", 
+            "NNPDF40_nnlo_pch_as_01180/0", "NNPDF40_nnlo_as_01180/0"
+        ], type=list, info="List of PDF sets to use for PDF reweighting")
         self.addOption ('doHFProdFracReweighting', False, type=bool,
             info="whether to apply HF production fraction reweighting. "
                  "The default is False.")
@@ -439,6 +450,14 @@ class GeneratorAnalysisBlock (ConfigBlock):
             for var in ["PDFID1","PDFID2","PDGID1","PDGID2","Q","X1","X2","XF1","XF2"]:
                 config.addOutputVar ('EventInfo', var, 'PDFinfo_' + var, noSys=True)
 
+        if self.doPDFReweighting:
+            alg = config.createAlgorithm( 'CP::PDFReweightAlg', 'PDFReweightAlg', reentrant=True )
+        
+            for pdf_set in self.outPDFName:
+                config.addOutputVar('EventInfo', f'PDFReweightSF_{pdf_set.replace("/", "_")}', 
+                                    f'PDFReweightSF_{pdf_set.replace("/", "_")}', noSys=True) 
+
+        
         if self.doHFProdFracReweighting:
             generatorInfo = config.flags.Input.GeneratorsInfo
             log.info(f"Loaded generator info: {generatorInfo}")

@@ -80,7 +80,6 @@ class MissingMassTool : virtual public IMissingMassTool, virtual public asg::Asg
 
   MissingMassCalculator* m_MMC{};
 
-  Gaudi::Property<bool> m_decorate{this, "Decorate", false};
   Gaudi::Property<bool> m_float_stop{this, "FloatStoppingCrit", true, "Applying Floating Stopping Criterion to speed up MMC"};
   Gaudi::Property<int>  m_float_stop_miniter{this, "FloatStoppingCritMinIter", 10000, "Minimum number of iteration to apply Floating Stopping Criterion"};
   Gaudi::Property<int>  m_float_stop_checkfreq{this, "FloatStoppingCritCheckFreq", 1000, "Number of events frequency for Floating Stopping Criterion to be applied after minimum number of iteration"}; 

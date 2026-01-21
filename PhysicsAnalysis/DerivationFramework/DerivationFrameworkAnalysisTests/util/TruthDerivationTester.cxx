@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /* Simple class for working with truth DAODs */
@@ -57,7 +57,7 @@ namespace po = boost::program_options;
 #define CHECK_RETRIEVE( container , name ) { \
     if (!event.retrieve( container , name ).isSuccess()){ \
       Error( APP_NAME , "%s", std::format ("Could not load event {} from the file!" , name ).c_str()); \
-      throw std::runtime_error("Container retrieval failed"); \
+      return 1; \
     } \
   }
 
@@ -94,7 +94,8 @@ int main(int argc, char **argv) {
   // Setup for reading -- if this fails, we have major problems
 #ifdef XAOD_STANDALONE
   if ( ! xAOD::Init().isSuccess() ) {
-    throw std::runtime_error("Cannot initialise xAOD access !");
+    std::cerr << "Cannot initialise xAOD access !" << std::endl;
+    return 1;
   }
   ANA_MSG_INFO("Using xAOD access");
 #else
@@ -233,13 +234,13 @@ int main(int argc, char **argv) {
 
     if (!event.retrieveMetaInput( truthMeta , "TruthMetaData" ).isSuccess()){
       Error( APP_NAME , "Could not load event TruthMetaData from the file!" );
-      throw std::runtime_error("Could not load event TruthMetaData from the file!");
+      return 1;
     }
 
     // Metadata check
     if (truthMeta->size()>1){
       Error( APP_NAME , "Truth metadata size: %lu . No one will look past item 0!" , truthMeta->size() );
-      throw std::runtime_error("Truth metadata size >1");
+      return 1;
     }
     if (channelNumber==0){
       channelNumber = (*truthMeta)[0]->mcChannelNumber();
@@ -248,7 +249,7 @@ int main(int argc, char **argv) {
     }
     if (channelNumber != (*truthMeta)[0]->mcChannelNumber()){
       Error( APP_NAME , "Channel number changed mid-file! Was: %u now: %u " , channelNumber , (*truthMeta)[0]->mcChannelNumber() );
-      throw std::runtime_error("Channel number changed mid-file!");
+      return 1;
     }
     if (weightNames != (*truthMeta)[0]->weightNames() ){
       Error( APP_NAME , "Weights have changed!" );
@@ -260,7 +261,7 @@ int main(int argc, char **argv) {
         else                                         std::cerr << "- ";
         std::cerr << std::endl;
       }
-      throw std::runtime_error("Weights have changed!");
+      return 1;
     }
     // Event weight handling
     if (h_weights.size()==0){

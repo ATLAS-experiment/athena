@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonTGC_Cabling/TGCCableASDToPP.h"
@@ -21,8 +21,6 @@ TGCCableASDToPP::TGCCableASDToPP(const std::string& filename) :
 }
 
 TGCCableASDToPP::~TGCCableASDToPP() {
-  delete m_ASD2PP_DIFF_12;
-  m_ASD2PP_DIFF_12 = nullptr;
 }
 
 
@@ -76,13 +74,12 @@ StatusCode TGCCableASDToPP::updateDatabase() {
   std::vector<std::string> *tmp_ASD2PP_DIFF_12 = m_tgcCablingDbTool->giveASD2PP_DIFF_12();
   if(!tmp_ASD2PP_DIFF_12) return StatusCode::FAILURE;
 
-  delete m_ASD2PP_DIFF_12;
-  m_ASD2PP_DIFF_12 = new std::vector<std::string>;
+  m_ASD2PP_DIFF_12.clear();
   // Truncation saves initialization CPU time of about 30 ms.
   for (const std::string& s : *tmp_ASD2PP_DIFF_12) {
     char letter = s.at(0);
     if(letter=='/'||letter=='*') continue; 
-    m_ASD2PP_DIFF_12->push_back(s);
+    m_ASD2PP_DIFF_12.push_back(s);
   }
   delete tmp_ASD2PP_DIFF_12;
   tmp_ASD2PP_DIFF_12 = nullptr;
@@ -132,8 +129,8 @@ StatusCode TGCCableASDToPP::getUpdateInfo(const int side,
   // clear info
   info.clear();
   
-  std::vector<std::string>::const_iterator it   = m_ASD2PP_DIFF_12->begin();
-  std::vector<std::string>::const_iterator it_e = m_ASD2PP_DIFF_12->end();
+  std::vector<std::string>::const_iterator it   = m_ASD2PP_DIFF_12.begin();
+  std::vector<std::string>::const_iterator it_e = m_ASD2PP_DIFF_12.end();
   int size = 0;
 
   // search block name

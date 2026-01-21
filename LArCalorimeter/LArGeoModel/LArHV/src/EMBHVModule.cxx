@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArHV/EMBHVModule.h"
@@ -42,7 +42,7 @@ EMBHVModule::EMBHVModule(const EMBHVManager* manager
 			 , unsigned int iEta
 			 , unsigned int iPhi
 			 , unsigned int iSector)
-  : m_c(new Clockwork(manager,this,iSide,iEta,iPhi,iSector))
+  : m_c (std::make_unique<Clockwork> (manager,this,iSide,iEta,iPhi,iSector))
 {
 }
 
@@ -61,10 +61,7 @@ unsigned int EMBHVModule::getSectorIndex() const
   return m_c->iSector;
 }
 
-EMBHVModule::~EMBHVModule() 
-{
-  delete m_c;
-}
+EMBHVModule::~EMBHVModule() = default;
 
 const EMBHVElectrode& EMBHVModule::getElectrode(unsigned int iElectrode) const
 {

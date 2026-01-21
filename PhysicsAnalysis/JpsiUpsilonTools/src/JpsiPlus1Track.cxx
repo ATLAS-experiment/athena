@@ -363,8 +363,8 @@ namespace Analysis {
 
                 if (m_trkTrippletMassUpper>0.0 || m_trkTrippletMassLower>0.0) {
                      massCuts.clear();
-                     if(m_kMassHyp)  massCuts.push_back(getInvariantMass(tracks, m_muonMasses[0], m_muonMasses[1], kMass));
-                     if(m_piMassHyp) massCuts.push_back(getInvariantMass(tracks, m_muonMasses[0], m_muonMasses[1], piMass));
+                     if(m_kMassHyp)  massCuts.push_back(JpsiUpsilonCommon::getInvariantMass(tracks, {{m_muonMasses[0], m_muonMasses[1], kMass}}));
+                     if(m_piMassHyp) massCuts.push_back(JpsiUpsilonCommon::getInvariantMass(tracks, {{m_muonMasses[0], m_muonMasses[1], piMass}}));
                      passRoughMassCuts = JpsiUpsilonCommon::cutRangeOR(massCuts, m_trkTrippletMassLower, m_trkTrippletMassUpper);
                  }
                  if (!passRoughMassCuts) continue;
@@ -470,39 +470,6 @@ namespace Analysis {
     }
     
     
-
-    double JpsiPlus1Track::getInvariantMass(const std::vector<const xAOD::TrackParticle*> &trk, double mass1,
-                                            double mass2, double mass3)
-    {
-        const auto trk1V = trk[0]->p4();
-        double px1 = trk1V.Px();
-        double py1 = trk1V.Py();
-        double pz1 = trk1V.Pz();
-        double e1 = sqrt(px1*px1+py1*py1+pz1*pz1+mass1*mass1);
-
-        const auto trk2V = trk[1]->p4();
-        double px2 = trk2V.Px();
-        double py2 = trk2V.Py();
-        double pz2 = trk2V.Pz();
-        double e2 = sqrt(px2*px2+py2*py2+pz2*pz2+mass2*mass2);
-        
-        const auto trk3V = trk[2]->p4();
-        double px3 = trk3V.Px();
-        double py3 = trk3V.Py();
-        double pz3 = trk3V.Pz();
-        double e3 = sqrt(px3*px3+py3*py3+pz3*pz3+mass3*mass3);
-        
-        
-        double pxSum=px1+px2+px3;
-        double pySum=py1+py2+py3;
-        double pzSum=pz1+pz2+pz3;
-        double eSum=e1+e2+e3;
-        
-        double M=sqrt((eSum*eSum)-(pxSum*pxSum)-(pySum*pySum)-(pzSum*pzSum));
-        
-        return M;
-        
-    }
 
     
 } // End of namespace

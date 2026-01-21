@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef MUONNSWCOMMONDECODE_NSWELINK_H
 #define MUONNSWCOMMONDECODE_NSWELINK_H
@@ -61,28 +61,28 @@ namespace Muon
       unsigned int test_checksum (const uint8_t *buffer, unsigned int buflen);
 
      private:
-      unsigned int m_wordCount;
-      unsigned int m_nhits;
-      unsigned int m_running_checksum;
-      unsigned int m_packet_status;
+      unsigned int m_wordCount{};
+      unsigned int m_nhits{};
+      unsigned int m_running_checksum{};
+      unsigned int m_packet_status{};
 
-      bool m_isNull;
-      bool m_noTdc;
-      bool m_tout;
-      bool m_extended;
+      bool m_isNull{};
+      bool m_noTdc{};
+      bool m_tout{};
+      bool m_extended{};
 
-      uint8_t m_checksum;
+      uint8_t m_checksum{};
 
-      uint16_t m_l1Id;
-      uint16_t m_rocId;
-      uint16_t m_bcId;
-      uint16_t m_orbit;
-      uint16_t m_nhitsTrail;
-      uint16_t m_l0Id;
-      uint16_t m_flagMiss;
+      uint16_t m_l1Id{};
+      uint16_t m_rocId{};
+      uint16_t m_bcId{};
+      uint16_t m_orbit{};
+      uint16_t m_nhitsTrail{};
+      uint16_t m_l0Id{};
+      uint16_t m_flagMiss{};
 
-      uint32_t m_elinkWord;
-      Muon::nsw::NSWResourceId *m_elinkId;
+      uint32_t m_elinkWord{};
+      Muon::nsw::NSWResourceId *m_elinkId{};
       std::vector <Muon::nsw::VMMChannel *> m_channels;
 
       static const unsigned int s_null_packet_length = 10;

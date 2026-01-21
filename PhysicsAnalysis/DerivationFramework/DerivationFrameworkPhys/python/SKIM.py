@@ -11,16 +11,10 @@ from AthenaCommon.CFElements import seqAND
 
 def SKIMSkimmingToolCfg(flags):
     """Configure the skimming tool"""
-    from TrigDecisionTool.TrigDecisionToolConfig import TrigDecisionToolCfg
-    acc = ComponentAccumulator()
-    tdt = acc.getPrimaryAndMerge(TrigDecisionToolCfg(flags))
-    
-    acc.addPublicTool(CompFactory.DerivationFramework.xAODStringSkimmingTool(name       = "SKIMStringSkimmingTool",
-                                                                             expression = flags.Derivation.skimmingExpression,
-                                                                             TrigDecisionTool=tdt), 
-                      primary = True)
-    return(acc)                       
-
+    from DerivationFrameworkTools.DerivationFrameworkToolsConfig import (
+        xAODStringSkimmingToolCfg)
+    return xAODStringSkimmingToolCfg(flags, name = "SKIMStringSkimmingTool",
+                                     expression = flags.Derivation.skimmingExpression)
 
 def SKIMKernelCfg(flags, name='SKIMKernel', **kwargs):
     """Configure the derivation framework driving algorithm (kernel)"""

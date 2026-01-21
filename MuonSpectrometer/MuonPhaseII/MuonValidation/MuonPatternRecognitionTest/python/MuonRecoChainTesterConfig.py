@@ -23,6 +23,7 @@ if __name__=="__main__":
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
     flags = initConfigFlags()
     flags.PerfMon.doFullMonMT = not args.noPerfMon
+    flags.Muon.useMdtDcsData = lambda prevFlags: prevFlags.Input.isMC
     flags.PerfMon.OutputJSON="perfmonmt_MuonR4Reco.json"
 
     flags, cfg = setupGeoR4TestCfg(args,flags)

@@ -1,10 +1,10 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonTrkIDMSScatterDecorAlg.h"
 #include "StoreGate/WriteDecorHandle.h"
-#include "StoreGate/ReadHandle.h" 
+#include "StoreGate/ReadHandle.h"
 #include "TrkMaterialOnTrack/EnergyLoss.h"
 #include "TrkMaterialOnTrack/MaterialEffectsOnTrack.h"
 #include "TrkMaterialOnTrack/ScatteringAngles.h"
@@ -14,28 +14,16 @@ namespace{
 }
 MuonTrkIDMSScatterDecorAlg::MuonTrkIDMSScatterDecorAlg(const std::string& name, ISvcLocator* pSvcLocator):
     AthReentrantAlgorithm(name,pSvcLocator){}
- 
+
  StatusCode MuonTrkIDMSScatterDecorAlg::initialize() {
 
     ATH_CHECK(m_TrkContainer.initialize());
-    
-    m_deltaPhi1Key = m_TrkContainer.key() +".deltaphi_1";
-    m_deltaTheta1Key = m_TrkContainer.key() +".deltatheta_1";
-    
-    m_sigmaDeltaPhi1Key = m_TrkContainer.key() +".sigmadeltaphi_1";
-    m_sigmaDeltaTheta1Key = m_TrkContainer.key() +".sigmadeltatheta_1";
-  
-    m_deltaPhi0Key = m_TrkContainer.key() +".deltaphi_0";
-    m_deltaTheta0Key = m_TrkContainer.key() +".deltatheta_0";
-    
-    m_sigmaDeltaPhi0Key = m_TrkContainer.key() +".sigmadeltaphi_0";
-    m_sigmaDeltaTheta0Key = m_TrkContainer.key() +".sigmadeltatheta_0";
-   
+
     ATH_CHECK(m_deltaPhi1Key.initialize());
     ATH_CHECK(m_deltaTheta1Key.initialize());
     ATH_CHECK(m_sigmaDeltaPhi1Key.initialize());
     ATH_CHECK(m_sigmaDeltaTheta1Key.initialize());
-    
+
     ATH_CHECK(m_deltaPhi0Key.initialize());
     ATH_CHECK(m_deltaTheta0Key.initialize());
     ATH_CHECK(m_sigmaDeltaPhi0Key.initialize());

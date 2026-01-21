@@ -255,7 +255,7 @@ StatusCode FPGATrackSimMatrixGenAlgo::execute()
       m_h_trackQoP_okRegion->Fill(track.getQOverPt());
 
       //For the Hough constants, find the Hough roads
-      std::vector<std::shared_ptr<const FPGATrackSimRoad>> houghRoads;
+      std::vector<FPGATrackSimRoad> houghRoads;
       if (m_doHoughConstants){
 
         std::vector<std::shared_ptr<const FPGATrackSimHit>> phits;
@@ -294,7 +294,7 @@ StatusCode FPGATrackSimMatrixGenAlgo::execute()
             }
 
             // Use the track extension tool to actually produce a new set of roads.
-            std::vector<std::shared_ptr<const FPGATrackSimRoad>> roads_2nd;
+            std::vector<FPGATrackSimRoad> roads_2nd;
             std::vector<std::shared_ptr<const FPGATrackSimTrack>> ptracks_1st;
             ptracks_1st.reserve(tracks_1st.size());
             for (const auto& track : tracks_1st) {

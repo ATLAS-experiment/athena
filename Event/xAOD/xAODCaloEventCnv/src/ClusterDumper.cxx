@@ -1,8 +1,6 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
-
-// $Id: ClusterDumper.cxx 767574 2016-08-11 13:52:47Z ssnyder $
 
 // Gaudi/Athena include(s):
 #include "AthenaKernel/errorcheck.h"
@@ -12,15 +10,6 @@
 
 // Local include(s):
 #include "ClusterDumper.h"
-
-ClusterDumper::ClusterDumper( const std::string& name,
-				ISvcLocator* svcLoc )
-  : AthAlgorithm( name, svcLoc ),
-    m_out(&std::cout)
-{
-  declareProperty( "FileName",m_fileName);
-  
-}
 
 StatusCode ClusterDumper::initialize() {
   ATH_MSG_INFO( "Initializing" );
@@ -41,6 +30,7 @@ StatusCode ClusterDumper::initialize() {
     ATH_MSG_INFO("Writing to stdout");
   }
 
+  ATH_CHECK(m_eventInfoKey.initialize());
   ATH_CHECK(m_containerName.initialize());
   return StatusCode::SUCCESS;
 }
@@ -55,7 +45,9 @@ StatusCode ClusterDumper::finalize() {
  
 StatusCode ClusterDumper::execute() {
 
-  //const xAOD::CaloClusterContainer* clustercontainer = nullptr;
+
+  SG::ReadHandle<xAOD::EventInfo> eventInfo (m_eventInfoKey);
+  
   SG::ReadHandle<xAOD::CaloClusterContainer> clustercontainer{m_containerName};
   ATH_MSG_DEBUG( "Retrieved clusters with key: " << m_containerName.key() );
 
@@ -68,6 +60,8 @@ StatusCode ClusterDumper::execute() {
     ATH_MSG_INFO("Did not find corresponding cell-link container");
 
   std::lock_guard<std::mutex> fileLock{m_fileMutex};
+  (*m_out) << "Run " << eventInfo->runNumber() << ", evt " << eventInfo->eventNumber() << " contains " << clustercontainer->size() << " CaloClusters" << std::endl;
+
   for (const auto itr: *clustercontainer) {
     const xAOD::CaloCluster& cluster=*itr;
     (*m_out) << "Kinematics :" << std::endl;
@@ -120,20 +114,22 @@ StatusCode ClusterDumper::execute() {
       }
     }
 
-    (*m_out) << "Cell-links:" << std::endl;
-    const CaloClusterCellLink* cellLinks=cluster.getCellLinks();
+    const CaloClusterCellLink* cellLinks = cluster.getCellLinks();
     if (cellLinks) {
-//      (*m_out) << "  Total: " << cellLinks->size() << std::endl;
-      CaloClusterCellLink::const_iterator lnk_it=cellLinks->begin();
-      CaloClusterCellLink::const_iterator lnk_it_e=cellLinks->end();
-      for (;lnk_it!=lnk_it_e;++lnk_it) {
-	const CaloCell* cell=*lnk_it;
-	(*m_out) << "   ID=" << std::hex << cell->ID() << std::dec << ", E=" << cell->e() << ", weight=" << lnk_it.weight() << std::endl;
-      }
+      if (m_printCellLinks) {
+        (*m_out) << "Cell-links:" << std::endl;
+        CaloClusterCellLink::const_iterator lnk_it = cellLinks->begin();
+        CaloClusterCellLink::const_iterator lnk_it_e = cellLinks->end();
+        for (; lnk_it != lnk_it_e; ++lnk_it) {
+          const CaloCell* cell = *lnk_it;
+          (*m_out) << "   ID=" << std::hex << cell->ID() << std::dec << ", E=" << cell->e() << ", weight=" << lnk_it.weight() << std::endl;
+        }
+      } else 
+       (*m_out) << "  Nbr of cells: " << cellLinks->size() << std::endl;
+    } else {
+       (*m_out) << "  No Cell Links found" << std::endl; 
     }
-    else
-      (*m_out) << "   No Cell Links found" << std::endl;
-    
+
   }//end loop over clusters
   
   return StatusCode::SUCCESS;

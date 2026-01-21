@@ -24,8 +24,6 @@ from DerivationFrameworkEGamma.TriggerContent import (
 
 def EGAM1SkimmingToolCfg(flags):
     """Configure the EGAM1 skimming tool"""
-    acc = ComponentAccumulator()
-
     expression = " || ".join(
         [
             "(count( EGAM1_DiElectronMass1 > 50.0*GeV ) >= 1)",
@@ -36,13 +34,10 @@ def EGAM1SkimmingToolCfg(flags):
     )
     print("EGAM1 skimming expression: ", expression)
 
-    acc.setPrivateTools(
-        CompFactory.DerivationFramework.xAODStringSkimmingTool(
-            name="EGAM1SkimmingTool", expression=expression
-        )
-    )
-
-    return acc
+    from DerivationFrameworkTools.DerivationFrameworkToolsConfig import (
+        xAODStringSkimmingToolCfg)
+    return xAODStringSkimmingToolCfg(
+        flags, name = "EGAM1SkimmingTool", expression = expression)
 
 
 def EGAM1ZeeMassTool1Cfg(flags):
@@ -459,8 +454,7 @@ def EGAM1KernelCfg(flags, name="EGAM1Kernel", **kwargs):
         thinningTools.append(EGAM1TruthThinningTool)
 
     # skimming
-    skimmingTool = acc.popToolsAndMerge(EGAM1SkimmingToolCfg(flags))
-    acc.addPublicTool(skimmingTool)
+    skimmingTool = acc.getPrimaryAndMerge(EGAM1SkimmingToolCfg(flags))
 
     # setup the kernel
     acc.addEventAlgo(
@@ -486,7 +480,6 @@ def EGAM1Cfg(flags):
     # multiple times in a train
 
     from DerivationFrameworkPhys.TriggerListsHelper import TriggerListsHelper
-
     EGAM1TriggerListsHelper = TriggerListsHelper(flags)
 
     # configure skimming/thinning/augmentation tools
@@ -523,15 +516,14 @@ def EGAM1Cfg(flags):
     ]
 
     # for trigger studies we also add trigger containers
-    MenuType = None
+    MenuType = ""
     if flags.Trigger.EDMVersion == 2:
         MenuType = "Run2"
     elif flags.Trigger.EDMVersion == 3:
         MenuType = "Run3"
-    else:
-        MenuType = ""
-    EGAM1SlimmingHelper.AllVariables += ExtraContainersTrigger[MenuType]
-    EGAM1SlimmingHelper.AllVariables += ExtraContainersElectronTrigger[MenuType]
+    if MenuType:
+        EGAM1SlimmingHelper.AllVariables += ExtraContainersTrigger[MenuType]
+        EGAM1SlimmingHelper.AllVariables += ExtraContainersElectronTrigger[MenuType]
 
     # and on MC we also add:
     if flags.Input.isMC:
@@ -627,11 +619,11 @@ def EGAM1Cfg(flags):
     # truth
     if flags.Input.isMC:
         EGAM1SlimmingHelper.ExtraVariables += [
-            "MuonTruthParticles.e.px.py.pz.status.pdgId.truthOrigin.truthType"
+            "MuonTruthParticles.e.px.py.pz.status.pdgId.truthClassification.truthOrigin.truthType"
         ]
 
         EGAM1SlimmingHelper.ExtraVariables += [
-            "Photons.truthOrigin.truthType.truthParticleLink"
+            "Photons.truthClassification.truthOrigin.truthType.truthParticleLink"
         ]
 
     # Add event info

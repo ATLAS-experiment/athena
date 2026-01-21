@@ -20,7 +20,6 @@ from DerivationFrameworkEGamma.PhotonsCPDetailedContent import (
 
 def EGAM8SkimmingToolCfg(flags):
     """Configure the EGAM8 skimming tool"""
-    acc = ComponentAccumulator()
 
     expression = " || ".join(
         [
@@ -30,13 +29,10 @@ def EGAM8SkimmingToolCfg(flags):
     )
     print("EGAM8 skimming expression: ", expression)
 
-    acc.setPrivateTools(
-        CompFactory.DerivationFramework.xAODStringSkimmingTool(
-            name="EGAM8SkimmingTool", expression=expression
-        )
-    )
-
-    return acc
+    from DerivationFrameworkTools.DerivationFrameworkToolsConfig import (
+        xAODStringSkimmingToolCfg)
+    return xAODStringSkimmingToolCfg(flags, name = "EGAM8SkimmingTool",
+                                     expression = expression)
 
 
 def EGAM8ZeeMassToolCfg(flags):
@@ -162,8 +158,7 @@ def EGAM8KernelCfg(flags, name="EGAM8Kernel", **kwargs):
         EGammaCookieCutClusterToolCfg(flags,
                                       name,
                                       StoreInputMoments=True,
-                                      StoreCookedMoments=True,
-                                      OutputLevel = 3))
+                                      StoreCookedMoments=True))
     acc.addPublicTool(cookieCutTool)
     augmentationTools.append(cookieCutTool)
 
@@ -353,8 +348,7 @@ def EGAM8KernelCfg(flags, name="EGAM8Kernel", **kwargs):
         thinningTools.append(EGAM8TruthThinningTool)
 
     # skimming
-    skimmingTool = acc.popToolsAndMerge(EGAM8SkimmingToolCfg(flags))
-    acc.addPublicTool(skimmingTool)
+    skimmingTool = acc.getPrimaryAndMerge(EGAM8SkimmingToolCfg(flags))
 
     # setup the kernel
     acc.addEventAlgo(
@@ -502,11 +496,11 @@ def EGAM8Cfg(flags):
     # truth
     if flags.Input.isMC:
         EGAM8SlimmingHelper.ExtraVariables += [
-            "MuonTruthParticles.e.px.py.pz.status.pdgId.truthOrigin.truthType"
+            "MuonTruthParticles.e.px.py.pz.status.pdgId.truthClassification.truthOrigin.truthType"
         ]
 
         EGAM8SlimmingHelper.ExtraVariables += [
-            "Photons.truthOrigin.truthType.truthParticleLink"
+            "Photons.truthClassification.truthOrigin.truthType.truthParticleLink"
         ]
 
     # Add event info

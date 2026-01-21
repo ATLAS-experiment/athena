@@ -1,8 +1,8 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "MuonCondAlg/MdtCondDbAlg.h"
+#include "MdtCondDbAlg.h"
 
 #include "AthenaKernel/IOVInfiniteRange.h"
 #include "CxxUtils/StringUtils.h"
@@ -14,10 +14,8 @@
 using readOutPair = CondAttrListCollection::ChanAttrListPair;
 using namespace MuonCond;
 using namespace CxxUtils;
-// constructor
-MdtCondDbAlg::MdtCondDbAlg(const std::string& name, ISvcLocator* pSvcLocator) :
-    AthReentrantAlgorithm(name, pSvcLocator) {}
 
+namespace Muon{
 // Initialize
 StatusCode MdtCondDbAlg::initialize() {
     ATH_MSG_DEBUG("initializing " << name());
@@ -76,7 +74,7 @@ StatusCode MdtCondDbAlg::addDHDependency(const EventContext& ctx, const dataBase
         ATH_MSG_VERBOSE("Key is empty");
         return StatusCode::SUCCESS;
     }
-    SG::ReadCondHandle<CondAttrListCollection> readHandle{key, ctx};
+    SG::ReadCondHandle readHandle{key, ctx};
     if (!readHandle.isValid()) {
         ATH_MSG_FATAL("Failed to load conditions from "<<key.fullKey());
         return StatusCode::FAILURE;
@@ -109,14 +107,14 @@ StatusCode MdtCondDbAlg::execute(const EventContext& ctx) const {
     }
 
     // launching Write Cond Handle
-    SG::WriteCondHandle<MdtCondDbData> writeHandle{m_writeKey, ctx};
+    SG::WriteCondHandle writeHandle{m_writeKey, ctx};
     if (writeHandle.isValid()) {
         ATH_MSG_DEBUG("CondHandle " << writeHandle.fullKey() << " is already valid."
                                     << " In theory this should not be called, but may happen"
                                     << " if multiple concurrent events are being processed out of order.");
         return StatusCode::SUCCESS;
     }
-    std::unique_ptr<MdtCondDbData> writeCdo{std::make_unique<MdtCondDbData>(m_idHelperSvc->mdtIdHelper())};
+    auto writeCdo{std::make_unique<MdtCondDbData>(m_idHelperSvc->mdtIdHelper())};
     ATH_CHECK(loadDependencies(ctx, writeHandle));
     // retrieving data
     if (m_isData && m_isRun1) {
@@ -141,7 +139,7 @@ StatusCode MdtCondDbAlg::execute(const EventContext& ctx) const {
 
 // loadDataPsHv
 StatusCode MdtCondDbAlg::loadDataPsHv(const EventContext& ctx, MdtCondDbData& writeCdo ) const {
-    SG::ReadCondHandle<CondAttrListCollection> readHandle{m_readKey_folder_da_pshv, ctx};
+    SG::ReadCondHandle readHandle{m_readKey_folder_da_pshv, ctx};
     const CondAttrListCollection* readCdo{*readHandle};
     if (!readCdo) {
         ATH_MSG_ERROR("Null pointer to the read conditions object");
@@ -195,7 +193,7 @@ StatusCode MdtCondDbAlg::loadDataPsHv(const EventContext& ctx, MdtCondDbData& wr
     std::map<Identifier, float> chamberML_V0;
 
     // V0 handle
-    SG::ReadCondHandle<CondAttrListCollection> readHandle_v0{m_readKey_folder_da_psv0, ctx};
+    SG::ReadCondHandle readHandle_v0{m_readKey_folder_da_psv0, ctx};
     const CondAttrListCollection* readCdo_v0{*readHandle_v0};
     if (!readCdo_v0) {
         ATH_MSG_ERROR("Null pointer to the read conditions object");
@@ -205,7 +203,7 @@ StatusCode MdtCondDbAlg::loadDataPsHv(const EventContext& ctx, MdtCondDbData& wr
     ATH_MSG_DEBUG("Size of CondAttrListCollection " << readHandle_v0.fullKey() << " readCdo->size()= " << readCdo_v0->size());
  
     // V1
-    SG::ReadCondHandle<CondAttrListCollection> readHandle_v1{m_readKey_folder_da_psv1, ctx};
+    SG::ReadCondHandle readHandle_v1{m_readKey_folder_da_psv1, ctx};
     const CondAttrListCollection* readCdo_v1{*readHandle_v1};
     if (!readCdo_v1) {
         ATH_MSG_ERROR("Null pointer to the read conditions object");
@@ -275,7 +273,7 @@ StatusCode MdtCondDbAlg::loadDataPsHv(const EventContext& ctx, MdtCondDbData& wr
 
 // loadDataPsLv
 StatusCode MdtCondDbAlg::loadDataPsLv(const EventContext& ctx, MdtCondDbData& writeCdo ) const {
-    SG::ReadCondHandle<CondAttrListCollection> readHandle{m_readKey_folder_da_pslv, ctx};
+    SG::ReadCondHandle readHandle{m_readKey_folder_da_pslv, ctx};
     const CondAttrListCollection* readCdo{*readHandle};
     if (!readCdo) {
         ATH_MSG_ERROR("Null pointer to the read conditions object");
@@ -302,7 +300,7 @@ StatusCode MdtCondDbAlg::loadDataPsLv(const EventContext& ctx, MdtCondDbData& wr
 }
 
 StatusCode MdtCondDbAlg::loadDataHv(const EventContext& ctx, MdtCondDbData& writeCdo ) const {
-    SG::ReadCondHandle<CondAttrListCollection> readCdo{m_readKey_folder_da_hv, ctx};
+    SG::ReadCondHandle readCdo{m_readKey_folder_da_hv, ctx};
     
     ATH_MSG_DEBUG("Size of CondAttrListCollection " << readCdo.fullKey() << " readCdo->size()= " << readCdo->size());
     for (const auto& [chanNum, atr] : **readCdo) {
@@ -340,7 +338,7 @@ StatusCode MdtCondDbAlg::loadDataHv(const EventContext& ctx, MdtCondDbData& writ
 
 // loadDataLv
 StatusCode MdtCondDbAlg::loadDataLv(const EventContext& ctx, MdtCondDbData& writeCdo ) const {
-    SG::ReadCondHandle<CondAttrListCollection> readHandle{m_readKey_folder_da_lv, ctx};
+    SG::ReadCondHandle readHandle{m_readKey_folder_da_lv, ctx};
     const CondAttrListCollection* readCdo{*readHandle};
     if (!readCdo) {
         ATH_MSG_ERROR("Null pointer to the read conditions object");
@@ -372,7 +370,7 @@ StatusCode MdtCondDbAlg::loadDataLv(const EventContext& ctx, MdtCondDbData& writ
 
 // loadDataDroppedChambers
 StatusCode MdtCondDbAlg::loadDroppedChambers(const EventContext& ctx, MdtCondDbData& writeCdo , bool isMC) const {
-    SG::ReadCondHandle<CondAttrListCollection> readHandle{(isMC ? m_readKey_folder_mc_droppedChambers 
+    SG::ReadCondHandle readHandle{(isMC ? m_readKey_folder_mc_droppedChambers 
                                                                 : m_readKey_folder_da_droppedChambers), ctx};
     const CondAttrListCollection* readCdo{*readHandle};
     if (!readCdo) {
@@ -399,7 +397,7 @@ StatusCode MdtCondDbAlg::loadDroppedChambers(const EventContext& ctx, MdtCondDbD
 
 // loadMcDeadElements
 StatusCode MdtCondDbAlg::loadMcDeadElements(const EventContext& ctx, MdtCondDbData& writeCdo ) const {
-    SG::ReadCondHandle<CondAttrListCollection> readHandle{m_readKey_folder_mc_deadElements, ctx};
+    SG::ReadCondHandle readHandle{m_readKey_folder_mc_deadElements, ctx};
     const CondAttrListCollection* readCdo{*readHandle};
     if (!readCdo) {
         ATH_MSG_ERROR("Null pointer to the read conditions object");
@@ -457,7 +455,7 @@ StatusCode MdtCondDbAlg::loadMcDeadElements(const EventContext& ctx, MdtCondDbDa
 
 // loadMcDeadTubes
 StatusCode MdtCondDbAlg::loadMcDeadTubes(const EventContext& ctx, MdtCondDbData& writeCdo ) const {
-    SG::ReadCondHandle<CondAttrListCollection> readHandle{m_readKey_folder_mc_deadTubes, ctx};
+    SG::ReadCondHandle readHandle{m_readKey_folder_mc_deadTubes, ctx};
     const CondAttrListCollection* readCdo{*readHandle};
     if (!readCdo) {
         ATH_MSG_ERROR("Null pointer to the read conditions object");
@@ -490,7 +488,7 @@ StatusCode MdtCondDbAlg::loadMcDeadTubes(const EventContext& ctx, MdtCondDbData&
 
 // loadMcNoisyChannels
 StatusCode MdtCondDbAlg::loadMcNoisyChannels(const EventContext& ctx, MdtCondDbData& writeCdo ) const {
-    SG::ReadCondHandle<CondAttrListCollection> readHandle{m_readKey_folder_mc_noisyChannels, ctx};
+    SG::ReadCondHandle readHandle{m_readKey_folder_mc_noisyChannels, ctx};
     const CondAttrListCollection* readCdo{*readHandle};
     if (!readCdo) {
         ATH_MSG_ERROR("Null pointer to the read conditions object");
@@ -523,4 +521,5 @@ Identifier MdtCondDbAlg::identifyChamber(std::string chamber) const {
     if (itr != m_chamberNames.end()) return itr->second;
     ATH_MSG_DEBUG("The chamber "<<chamber<<" is unknown.");
     return Identifier{};
+}
 }

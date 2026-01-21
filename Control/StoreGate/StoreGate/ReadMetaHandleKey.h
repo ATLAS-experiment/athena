@@ -6,6 +6,7 @@
 #define STOREGATE_READMETAHANDLEKEY_H
 
 #include "StoreGate/MetaHandleKey.h"
+#include <concepts>
 #include <string>
 
 namespace SG {
@@ -23,9 +24,7 @@ namespace SG {
 	: MetaHandleKey<T>(key, dbKey, Gaudi::DataHandle::Reader)
 	{}   
 
-      template <
-	class OWNER
-	, typename = typename std::enable_if<std::is_base_of<IProperty, OWNER>::value>::type>
+    template <std::derived_from<IProperty> OWNER>
 	inline ReadMetaHandleKey( OWNER* owner
 				  , std::string name
                   , const std::string& key={}

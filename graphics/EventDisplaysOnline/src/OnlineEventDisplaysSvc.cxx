@@ -188,9 +188,12 @@ std::string OnlineEventDisplaysSvc::getStreamName(){
 void OnlineEventDisplaysSvc::createWriteableDir(const std::string& directory, gid_t zpgid){
 
   const char* char_dir = directory.c_str();
-
+  //Time of Check, Time of Use
+  //coverity[TOCTOU]
   if (access(char_dir, F_OK) == 0) {
     struct stat directoryStat;
+    //Time of Check, Time of Use
+    //coverity[TOCTOU]
     if (stat(char_dir, &directoryStat) == 0 && S_ISDIR(directoryStat.st_mode) &&
 	access(char_dir, W_OK) == 0) {
       ATH_MSG_DEBUG("Going to write file to existing directory: " << directory);

@@ -61,15 +61,8 @@ namespace ActsTrk
   // compact surface/boundary name
   std::string TrackStatePrinterTool::actsSurfaceName(const Acts::Surface &surface)
   {
-    std::string name = surface.name();
-    if (name.compare(0, 6, "Acts::") == 0)
-    {
-      name.erase(0, 6);
-    }
-    if (name.size() > 7 && name.compare(name.size() - 7, 7, "Surface") == 0)
-    {
-      name.erase(name.size() - 7, 7);
-    }
+    const auto type = std::min(surface.type(), Acts::Surface::SurfaceType::Other);
+    std::string name{Acts::Surface::s_surfaceTypeNames[type]};
     static const std::map<Acts::SurfaceBounds::BoundsType, const char *> boundsNames{{
         {Acts::SurfaceBounds::BoundsType::eCone, "Cone"},
         {Acts::SurfaceBounds::BoundsType::eCylinder, "Cylinder"},

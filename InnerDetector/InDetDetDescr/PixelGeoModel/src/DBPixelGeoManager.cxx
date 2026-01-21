@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "DBPixelGeoManager.h"
@@ -58,11 +58,6 @@ DBPixelGeoManager::DBPixelGeoManager(PixelGeoModelAthenaComps * athenaComps)
     m_PlanarModuleNumber(0),
     m_3DModuleNumber(0),
     m_dbm(false),
-    m_legacyManager(nullptr),
-    m_gangedIndexMap(nullptr),
-    m_frameElementMap(nullptr),
-    m_diskRingIndexMap(nullptr),
-    m_zPositionMap(nullptr),
     m_dbVersion(0),
     m_defaultLengthUnit(Gaudi::Units::mm)
 {
@@ -165,18 +160,18 @@ DBPixelGeoManager::init()
   if(msgLvl(MSG::DEBUG)) msg(MSG::DEBUG) << "Database version number: " << m_dbVersion << endmsg;
 
   if (m_dbVersion < 4) {
-    m_legacyManager = new PixelLegacyManager(rdbSvc,  detectorKey, detectorNode);
+    m_legacyManager = std::make_unique<PixelLegacyManager>(rdbSvc,  detectorKey, detectorNode);
   }
 
   if(msgLvl(MSG::INFO)) msg(MSG::INFO) << "... Record Sets retrieved." << endmsg;
 
-  m_distortedMatManager = new InDetDD::DistortedMaterialManager;
+  m_distortedMatManager = std::make_unique<InDetDD::DistortedMaterialManager>();
  
   // Set default lenth unit to Gaudi::Units::mm for newer version and Gaudi::Units::cm for older versions
   m_defaultLengthUnit =  (m_dbVersion < 3) ? Gaudi::Units::cm : Gaudi::Units::mm;
 
   // Get the top level placements
-  m_placements = new TopLevelPlacements(m_PixelTopLevel);
+  m_placements = std::make_unique<TopLevelPlacements>(m_PixelTopLevel);
 
   // If all individual pieces are not present, then actually all are present.
   m_allPartsPresent = (!m_placements->present("Barrel") && !m_placements->present("EndcapA") &&  !m_placements->present("EndcapC"));
@@ -194,7 +189,7 @@ DBPixelGeoManager::init()
   // Get the InDet material manager. This is a wrapper around the geomodel one with some extra functionality to deal
   // with weights table if it exists
  
-  m_pMatMgr = new InDetMaterialManager("PixelMaterialManager", athenaComps());
+  m_pMatMgr = std::make_unique<InDetMaterialManager>("PixelMaterialManager", athenaComps());
   m_pMatMgr->addWeightTable(m_weightTable, "pix");
   m_pMatMgr->addScalingTable(m_scalingTable);
 
@@ -202,11 +197,11 @@ DBPixelGeoManager::init()
   m_pMatMgr->addWeightTable(m_dbmWeightTable, "pix");
 
   // Create material map
-  m_materialMap = new PixelMaterialMap(db(), m_materialTable);
+  m_materialMap = std::make_unique<PixelMaterialMap>(db(), m_materialTable);
   if (m_materialTable->size() == 0) addDefaultMaterials();
 
   // Create stave type map
-  m_pixelStaveTypes = new PixelStaveTypes(db(), m_staveTypeTable);
+  m_pixelStaveTypes = std::make_unique<PixelStaveTypes>(db(), m_staveTypeTable);
  
   
   //
@@ -219,27 +214,17 @@ DBPixelGeoManager::init()
 
 InDetMaterialManager* DBPixelGeoManager::getMaterialManager()
 {
-  return m_pMatMgr;
+  return m_pMatMgr.get();
 }
 
 PixelLegacyManager * DBPixelGeoManager::legacyManager()
 {
-  return m_legacyManager;
+  return m_legacyManager.get();
 }
 
 
 DBPixelGeoManager::~DBPixelGeoManager()
 {
-  delete m_placements;
-  delete m_distortedMatManager;
-  delete m_materialMap;
-  delete m_pixelStaveTypes;
-  delete m_legacyManager;
-  delete m_pMatMgr;
-  delete m_gangedIndexMap;
-  delete m_diskRingIndexMap;
-  delete m_zPositionMap;
-  delete m_frameElementMap;
 }
 
 
@@ -424,7 +409,7 @@ PixelDetectorManager* DBPixelGeoManager::GetPixelDDManager() {
 
 InDetDD::DistortedMaterialManager *
 DBPixelGeoManager::distortedMatManager() {
-  return m_distortedMatManager;
+  return m_distortedMatManager.get();
 }  
 
 
@@ -1403,7 +1388,7 @@ void
 DBPixelGeoManager::makeFrameIndexMap()
 {
   if (!m_frameElementMap) {
-    m_frameElementMap = new std::map<int,std::vector<int> >;
+    m_frameElementMap = std::make_unique<std::map<int,std::vector<int> > >();
     for (unsigned int i = 0; i < db()->getTableSize(m_PixelFrameSect); ++i) {
       int section = db()->getInt(m_PixelFrameSect,"SECTION",i);
       (*m_frameElementMap)[section].push_back(i);
@@ -2456,7 +2441,7 @@ double DBPixelGeoManager::PixelModuleZPosition(int etaModule)
 double DBPixelGeoManager::PixelModuleZPositionTabulated(int etaModule, int type) 
 { 
   if (!m_zPositionMap) {
-    m_zPositionMap = new InDetDD::PairIndexMap;
+    m_zPositionMap = std::make_unique<InDetDD::PairIndexMap>();
     for (unsigned int indexTmp = 0; indexTmp < db()->getTableSize(m_PixelStaveZ); ++indexTmp) {
       int eta_module = db()->getInt(m_PixelStaveZ,"ETAMODULE",indexTmp);
       int type_tmp       = db()->getInt(m_PixelStaveZ,"TYPE",indexTmp);
@@ -3240,7 +3225,7 @@ int DBPixelGeoManager::GangedTableIndex(int index, int type)
 
   if (!m_gangedIndexMap) {
     // First time we create the map
-    m_gangedIndexMap = new std::map<int,std::vector<int> >;
+    m_gangedIndexMap = std::make_unique<std::map<int,std::vector<int> > >();
     for (unsigned int i = 0; i < db()->getTableSize(m_PixelGangedPixels); i++){
       int testType = 1;
       if (db()->testField(m_PixelGangedPixels,"TYPE",i)) {

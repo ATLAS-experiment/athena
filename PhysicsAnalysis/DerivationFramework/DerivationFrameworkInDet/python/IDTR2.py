@@ -16,8 +16,11 @@ def IDTR2Cfg(flags):
     acc = ComponentAccumulator()
 
     # LRT merge
-    from DerivationFrameworkInDet.InDetToolsConfig import InDetLRTMergeCfg
-    acc.merge(InDetLRTMergeCfg(flags))
+    TrackParticleContainer = "InDetTrackParticles"
+    if flags.Tracking.doLargeD0:
+        from DerivationFrameworkInDet.InDetToolsConfig import InDetLRTMergeCfg
+        acc.merge(InDetLRTMergeCfg(flags))
+        TrackParticleContainer = "InDetWithLRTTrackParticles"
 
     # VrtSecInclusive
     from VrtSecInclusive.VrtSecInclusiveConfig import VrtSecInclusiveCfg
@@ -26,7 +29,7 @@ def IDTR2Cfg(flags):
         name="VrtSecInclusive",
         AugmentingVersionString="",
         FillIntermediateVertices=False,
-        TrackLocation="InDetWithLRTTrackParticles"))
+        TrackLocation=TrackParticleContainer))
 
     # NewVrtSecInclusive
     from NewVrtSecInclusiveTool.NewVrtSecInclusiveConfig import (
@@ -35,7 +38,7 @@ def IDTR2Cfg(flags):
         MaterialSVFinderToolCfg(flags, AugmentingVersionString="_Material"))
     acc.addEventAlgo(CompFactory.Rec.NewVrtSecInclusiveAlg(
         name="NewVrtSecInclusive_Material",
-        TrackParticleContainer="InDetWithLRTTrackParticles",
+        TrackParticleContainer=TrackParticleContainer,
         PrimaryVertexContainer="PrimaryVertices",
         BVertexContainerName="NewVrtSecInclusive_SecondaryVertices_Material",
         BVertexTool=MaterialSVFinderTool))
@@ -44,7 +47,7 @@ def IDTR2Cfg(flags):
         DVFinderToolCfg(flags, AugmentingVersionString="_DV"))
     acc.addEventAlgo(CompFactory.Rec.NewVrtSecInclusiveAlg(
         name="NewVrtSecInclusive_DV",
-        TrackParticleContainer="InDetWithLRTTrackParticles",
+        TrackParticleContainer=TrackParticleContainer,
         PrimaryVertexContainer="PrimaryVertices",
         BVertexContainerName="NewVrtSecInclusive_SecondaryVertices_DV",
         BVertexTool=DVFinderTool))
@@ -53,7 +56,7 @@ def IDTR2Cfg(flags):
         KsFinderToolCfg(flags, AugmentingVersionString="_Ks"))
     acc.addEventAlgo(CompFactory.Rec.NewVrtSecInclusiveAlg(
         name="NewVrtSecInclusive_Ks",
-        TrackParticleContainer="InDetWithLRTTrackParticles",
+        TrackParticleContainer=TrackParticleContainer,
         PrimaryVertexContainer="PrimaryVertices",
         BVertexContainerName="NewVrtSecInclusive_SecondaryVertices_Ks",
         BVertexTool=KsFinderTool))
@@ -68,7 +71,7 @@ def IDTR2Cfg(flags):
     V0FinderTool = acc.popToolsAndMerge(IDTR2_V0FinderToolCfg(
         flags,
         name="IDTR2_V0FinderTool",
-        TrackParticleCollection="InDetWithLRTTrackParticles",
+        TrackParticleCollection=TrackParticleContainer,
         V0ContainerName=IDTR2V0ContainerName,
         KshortContainerName=IDTR2KshortContainerName,
         LambdaContainerName=IDTR2LambdaContainerName,
@@ -91,15 +94,15 @@ def IDTR2Cfg(flags):
         from InDetTrackSystematicsTools.InDetTrackSystematicsToolsConfig import TrackSystematicsAlgCfg
         acc.merge(TrackSystematicsAlgCfg(
             flags,
-            InputTrackContainer="InDetWithLRTTrackParticles",
+            InputTrackContainer=TrackParticleContainer,
             OutputTrackContainer=(
-                "InDetWithLRTTrackParticles_TRK_EFF_LARGED0_GLOBAL__1down")))
+                TrackParticleContainer+"_TRK_EFF_LARGED0_GLOBAL__1down")))
 
         V0FinderToolSyst = acc.popToolsAndMerge(IDTR2_V0FinderToolCfg(
             flags,
             name="IDTR2_V0FinderTool_Syst",
             TrackParticleCollection=(
-                "InDetWithLRTTrackParticles_TRK_EFF_LARGED0_GLOBAL__1down"),
+                TrackParticleContainer+"_TRK_EFF_LARGED0_GLOBAL__1down"),
             V0ContainerName=IDTR2V0ContainerName + "Syst",
             KshortContainerName=IDTR2KshortContainerName + "Syst",
             LambdaContainerName=IDTR2LambdaContainerName + "Syst",
@@ -141,10 +144,11 @@ def IDTR2Cfg(flags):
         "EventInfo",
         "PrimaryVertices",
         "InDetTrackParticles",
-        "InDetLargeD0TrackParticles",
         "TruthParticles",
         "TruthVertices"
     ]
+    if flags.Tracking.doLargeD0:
+        IDTR2SlimmingHelper.AllVariables += ["InDetLargeD0TrackParticles"]
 
     StaticContent = []
     StaticContent += ["xAOD::VertexContainer#VrtSecInclusive_SecondaryVertices"]

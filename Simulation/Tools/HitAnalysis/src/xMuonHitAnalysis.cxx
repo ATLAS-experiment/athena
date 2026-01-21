@@ -213,7 +213,7 @@ namespace MuonValR4{
                                                    xAOD::toEigen(hit->localDirection()));
                     layHash = re->measurementHash(hitId);
                 }
-                const Amg::Vector3D globPos{re->localToGlobalTrans(*gctx,layHash)*
+                const Amg::Vector3D globPos{re->localToGlobalTransform(*gctx,layHash)*
                                             xAOD::toEigen(hit->localPosition())};
 
                 for (unsigned h : fillMe) {

@@ -82,6 +82,7 @@ if( NOT SIMULATIONBASE AND NOT GENERATIONBASE )
    _add_test( ut_xaodrootaccess_stats_test )
    _add_test( ut_xaodrootaccess_tchain_test )
    _add_test( ut_xaodrootaccess_transtree_test )
+   _add_test( ut_xaodrootaccess_revent_test )
    atlas_add_test( ut_xaodrootaccess_transtree2_test
       SCRIPT python
       ${CMAKE_CURRENT_SOURCE_DIR}/test/ut_xaodrootaccess_transtree2_test.py

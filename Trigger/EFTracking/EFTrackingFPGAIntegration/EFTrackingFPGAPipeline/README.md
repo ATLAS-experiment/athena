@@ -8,7 +8,7 @@ There are two ways to get the codes
 1. Sparse checkout
 2. Full checkout
 
-Considering that the integration might modify more than one package, a full checkout is recommended to ease the setup. If you prefer to perform a sparse checkout, you can follow the ATLAS git tutorial [here](https://atlassoftwaredocs.web.cern.ch/gittutorial/git-clone/). Only the full checkout instructions are provided here.
+Considering that the integration might modify more than one package, a full checkout is recommended to ease the setup. If you prefer to perform a sparse checkout, you can follow the ATLAS git tutorial [here](https://atlas-software.docs.cern.ch/athena/git/). Only the full checkout instructions are provided here.
 
 ### Full checkout
 If you are familiar with `Athena` and `git`, you don't have to follow this checkout instructions. Otherwise, you can follow the instructions below

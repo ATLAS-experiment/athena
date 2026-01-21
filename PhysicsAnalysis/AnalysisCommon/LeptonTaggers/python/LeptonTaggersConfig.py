@@ -598,7 +598,6 @@ def GetExtraPLITVariablesForDxAOD(name=''):
 
 
 # Script to run for testing the config
-# from https://atlassoftwaredocs.web.cern.ch/athena/configuration/ca/
 if __name__ == "__main__":
     # argument parsing - not using flags.fillFromArgs() since this is just a test app
     from argparse import ArgumentParser

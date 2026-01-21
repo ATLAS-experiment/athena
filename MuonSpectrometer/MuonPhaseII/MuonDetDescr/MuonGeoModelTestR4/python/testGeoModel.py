@@ -16,8 +16,18 @@ class MuonPhaseIITestDefaults:
     ### Hits parsed through the R4 MS-only ATLAS layout
     HITS_PG_R4_MSOnly = []
     ### BS file taken in MD3 2025 with a pile-up of >120
-    DATA_BS = ["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonRecRTT/data25_13p6TeV.00508073.physics_Main.daq.RAW._lb0277._SFO-14._0001.data" ]
-    
+    DATA_BS = [
+        "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonRecRTT/data25_13p6TeV/data25_13p6TeV.00508073.physics_Main.daq.RAW._lb0277._SFO-11._0001.data",
+        "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonRecRTT/data25_13p6TeV/data25_13p6TeV.00508073.physics_Main.daq.RAW._lb0277._SFO-12._0001.data",
+        "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonRecRTT/data25_13p6TeV/data25_13p6TeV.00508073.physics_Main.daq.RAW._lb0277._SFO-13._0001.data",
+        "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonRecRTT/data25_13p6TeV/data25_13p6TeV.00508073.physics_Main.daq.RAW._lb0277._SFO-14._0001.data",
+        "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonRecRTT/data25_13p6TeV/data25_13p6TeV.00508073.physics_Main.daq.RAW._lb0277._SFO-15._0001.data",
+        "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonRecRTT/data25_13p6TeV/data25_13p6TeV.00508073.physics_Main.daq.RAW._lb0277._SFO-16._0001.data",
+        "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonRecRTT/data25_13p6TeV/data25_13p6TeV.00508073.physics_Main.daq.RAW._lb0277._SFO-17._0001.data",
+        "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonRecRTT/data25_13p6TeV/data25_13p6TeV.00508073.physics_Main.daq.RAW._lb0277._SFO-18._0001.data",
+        "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonRecRTT/data25_13p6TeV/data25_13p6TeV.00508073.physics_Main.daq.RAW._lb0277._SFO-19._0001.data"]
+    ###
+    RDO_ZMUMU_R3 = ["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonGeomRTT/myRDO.R3.pool.root"]
     ###
     ###     Layout files
     ###
@@ -56,6 +66,8 @@ def SetupArgParser():
     parser.add_argument("--noMM", help="Disable the MMs from the geometry", action='store_true', default = False)
     parser.add_argument("--noSTGC", help="Disable the sTgcs from the geometry", action='store_true', default = False)
     parser.add_argument("--eventPrintoutLevel", type=int, help="Interval of event heartbeat printouts from the loop manager", default = 1)
+    parser.add_argument("--localMdtMezzJSON", default="", help="")
+    parser.add_argument("--localMdtCablingJSON", default="", help="")
     return parser
 
 def setupServicesCfg(flags):
@@ -76,10 +88,10 @@ def setupServicesCfg(flags):
     result.merge(MuonIdHelperSvcCfg(flags))
     return result
 
-def GeoModelMdtTestCfg(flags, name = "GeoModelMdtTest", **kwargs):
+def GeoModelMdtTestCfg(flags, name = "GeoModelMdtTest", localMezzanineJSON="", localCablingJSON="",**kwargs):
     result = ComponentAccumulator()
     from MuonConfig.MuonCablingConfig import MDTCablingConfigCfg
-    result.merge(MDTCablingConfigCfg(flags))
+    result.merge(MDTCablingConfigCfg(flags,MezzanineJSON=localMezzanineJSON, CablingJSON=localCablingJSON))
     the_alg = CompFactory.MuonGMR4.GeoModelMdtTest(name, **kwargs)
     result.addEventAlgo(the_alg, primary = True)
     return result
@@ -283,6 +295,8 @@ if __name__=="__main__":
             cfg.merge(GeoModelMdtTestCfg(flags, 
                                          TestStations = [ch for ch in chambToTest if ch[0] == "B" or ch[0] == "E"],
                                          ExcludeStations = [ch for ch in chambToExclude if ch[0] == "B" or ch[0] == "E"],
+                                         localMezzanineJSON=args.localMdtMezzJSON,
+                                         localCablingJSON=args.localMdtCablingJSON,
                                          ReadoutSideXML="ReadoutSides.xml",
                                          ExtraInputs=[( 'MuonGM::MuonDetectorManager' , 'ConditionStore+MuonDetectorManager' )]))
 

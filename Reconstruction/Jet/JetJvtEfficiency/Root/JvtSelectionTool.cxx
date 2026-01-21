@@ -15,17 +15,8 @@ namespace CP {
 
     StatusCode JvtSelectionTool::initialize() {
         ATH_MSG_WARNING("Jvt is deprecated, please move to using NNJvt");
-        ATH_CHECK(JvtSelectionToolBase::initialize());
 
-        m_jvtAcc = SG::ConstAccessor<float>(m_jvtMoment.key());
-        if (m_jetContainer.empty()) {
-            ATH_MSG_WARNING("No JetContainer set. This behaviour is deprecated");
-            ATH_CHECK(m_jvtMoment.initialize(false));
-        }
-        else {
-            m_jvtMoment = m_jetContainer + "." + m_jvtMoment.key();
-            ATH_CHECK(m_jvtMoment.initialize());
-        }
+        ATH_CHECK(JvtSelectionToolBase::initialize());
 
         if (m_wp != "Custom") {
             if (m_wp == "Default")
@@ -44,11 +35,12 @@ namespace CP {
     }
 
     bool JvtSelectionTool::select(const xAOD::IParticle *jet) const {
+        if(!isInRange(jet)) return true;
+        SG::ReadDecorHandle<xAOD::JetContainer, float> jvtHandle(m_jvtMomentKey);
         float eta = m_etaAcc(*jet);
         if (std::abs(eta) > 2.4 && std::abs(eta) < 2.5)
-            return m_jvtAcc(*jet) > m_jvtCutBorder;
-        else
-            return m_jvtAcc(*jet) > m_jvtCut;
+            return jvtHandle(*jet) > m_jvtCutBorder;
+        return jvtHandle(*jet) > m_jvtCut;
     }
 
 } // namespace CP

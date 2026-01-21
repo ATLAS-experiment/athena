@@ -12,7 +12,6 @@
 #ifndef GLOBALSIM_EEMTOB_H
 #define GLOBALSIM_EEMTOB_H
 
-#include "IeEmTOB.h"
 #include "CommonTOB.h"
 #include "AthenaKernel/CLASS_DEF.h"
 
@@ -20,11 +19,27 @@
 
 namespace GlobalSim::IOBitwise {
   /*! @copydoc IeEmTOB */
-  class eEmTOB : virtual public IeEmTOB, private CommonTOB {
+  class eEmTOB : public  CommonTOB {
     
   public:
+
+    
+    /// Count: Size of hadronic thresholds satisfied bitset
+    static constexpr std::size_t s_RHad_width{2};
+    /// Count: Size of WsTot algorithm thresholds satisfied bitset
+    static constexpr std::size_t s_WsTot_width{2};
+    /// Count: Size of R0 thresholds satisfied bitset 
+    static constexpr std::size_t s_REta_width{2};
+    /// Count: Size of Seed eta position in the TOB bitset
+    static constexpr std::size_t s_Seed_width{2};
+    /// Count: Size of UpnotDown bit
+    static constexpr std::size_t s_UpNotDown_width{1};
+    /// Count: Size of Seed supercell is a local maxima bit
+    static constexpr std::size_t s_SeedIsMax_width{1};
+
+    
     /**
-     * @brief Constructor taking an eFexROITOB to inisialise bits.
+     * @brief Constructor taking an eFexROITOB to initialise bits.
      * @param[in] eFexTOB The input eFexRoI TOB defining the common/eFex bits.
      * 
      * To be used to create, and initilise a global eEmTOB from an existing eFexTOB
@@ -41,9 +56,10 @@ namespace GlobalSim::IOBitwise {
      * to initialise the common bits.
      */
 
-    eEmTOB(const GlobalSim::IOBitwise::IeEmTOB& eEmTOB);
+    eEmTOB(const eEmTOB&);
 
-    eEmTOB(const GlobalSim::IOBitwise::ICommonTOB&,
+
+    eEmTOB(const GlobalSim::IOBitwise::CommonTOB&,
 	   const std::bitset<s_RHad_width>&,
 	   const std::bitset<s_REta_width>&,
 	   const std::bitset<s_WsTot_width>&,
@@ -56,19 +72,19 @@ namespace GlobalSim::IOBitwise {
     virtual ~eEmTOB(){};
 
     //! @copydoc IeEmTOB::RHad_bits()
-    virtual const std::bitset<s_RHad_width>& RHad_bits() const override;
+    virtual const std::bitset<s_RHad_width>& RHad_bits() const;
     //! @copydoc IeEmTOB::WsTot_bits()
-    virtual const std::bitset<s_WsTot_width>& WsTot_bits() const override;
+    virtual const std::bitset<s_WsTot_width>& WsTot_bits() const;
     //! @copydoc IeEmTOB::REta_bits()
-    virtual const std::bitset<s_REta_width>& REta_bits() const override;
+    virtual const std::bitset<s_REta_width>& REta_bits() const;
     //! @copydoc IeEmTOB::Seed_bits()
-    virtual const std::bitset<s_Seed_width>& Seed_bits() const override;
+    virtual const std::bitset<s_Seed_width>& Seed_bits() const;
     //! @copydoc IeEmTOB::UpNotDown_bit()
-    virtual const std::bitset<s_UpNotDown_width>& UpNotDown_bit() const override;
+    virtual const std::bitset<s_UpNotDown_width>& UpNotDown_bit() const;
     //! @copydoc IeEmTOB::SeedIsMax_bit()
-    virtual const std::bitset<s_SeedIsMax_width>& SeedIsMax_bit() const override;
+    virtual const std::bitset<s_SeedIsMax_width>& SeedIsMax_bit() const;
 
-    virtual std::string to_string() const override;
+    virtual std::string to_string() const;
 
   private:
 

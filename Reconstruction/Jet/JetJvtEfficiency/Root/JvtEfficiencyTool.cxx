@@ -3,8 +3,6 @@
 */
 
 #include "JetJvtEfficiency/JvtEfficiencyTool.h"
-// Get the systematic definitions from here
-#include "JetAnalysisInterfaces/IJetJvtEfficiency.h"
 
 namespace CP {
 

@@ -14,7 +14,7 @@
 
 namespace LVL1 {
 
-gFEXCondAlgo::gFEXCondAlgo(const std::string& name, ISvcLocator* svc) : AthReentrantAlgorithm(name, svc){}
+gFEXCondAlgo::gFEXCondAlgo(const std::string& name, ISvcLocator* svc) : AthCondAlgorithm(name, svc){}
 
 StatusCode gFEXCondAlgo::initialize() {
 

@@ -38,15 +38,16 @@ class L1CaloTriggerTowerDecoratorAlg : public AthAlgorithm {
 
   ToolHandle<LVL1::IL1CaloxAODOfflineTriggerTowerTools> m_ttTools;
 
-  SG::WriteDecorHandleKey<xAOD::TriggerTowerContainer> m_caloCellEnergyKey{ this, "caloCellEnergyKey", "", "" };
-  SG::WriteDecorHandleKey<xAOD::TriggerTowerContainer> m_caloCellETKey{ this, "caloCellETKey", "", "" };
+  SG::WriteDecorHandleKey<xAOD::TriggerTowerContainer> m_caloCellEnergyKey {this, "caloCellEnergyKey", m_triggerTowerContainerKey, "", "Offline Calo Cell Energy of the Tower in GeV"};
+  SG::WriteDecorHandleKey<xAOD::TriggerTowerContainer> m_caloCellETKey {this, "caloCellETKey", m_triggerTowerContainerKey, "", "Offline Calo Cell Et of the Tower in GeV"};
 
-  SG::WriteDecorHandleKey<xAOD::TriggerTowerContainer> m_caloCellsQualityKey{ this, "caloCellsQualityKey", m_triggerTowerContainerKey.key()+".CaloCellQuality", "" };
-  SG::WriteDecorHandleKey<xAOD::TriggerTowerContainer> m_caloCellEnergyByLayerKey{this, "caloCellEnergyByLayerKey", m_triggerTowerContainerKey.key()+".CaloCellEnergyByLayer",""};
-  SG::WriteDecorHandleKey<xAOD::TriggerTowerContainer> m_caloCellETByLayerKey{ this, "caloCellETByLayerKey", m_triggerTowerContainerKey.key()+".CaloCellETByLayer", "" };
+  SG::WriteDecorHandleKey<xAOD::TriggerTowerContainer> m_caloCellsQualityKey {this, "caloCellsQualityKey", m_triggerTowerContainerKey, "CaloCellQuality", "Offline Calo Cell Quality of the Tower"};
+  SG::WriteDecorHandleKey<xAOD::TriggerTowerContainer>  m_caloCellEnergyByLayerKey{this, "caloCellEnergyByLayerKey", m_triggerTowerContainerKey, "CaloCellEnergyByLayer", "Offline Calo Cell Energy by layer in GeV"};
+  SG::WriteDecorHandleKey<xAOD::TriggerTowerContainer>  m_caloCellETByLayerKey{this, "caloCellETByLayerKey", m_triggerTowerContainerKey, "CaloCellETByLayer", "Offline Calo Cell Et by layer in GeV"};
 
-  SG::WriteDecorHandleKey<xAOD::TriggerTowerContainer> m_caloCellEnergyByLayerByReceiverKey{ this, "caloCellEnergyByLayerByReceiverKey", "", ""};
-  SG::WriteDecorHandleKey<xAOD::TriggerTowerContainer> m_caloCellETByLayerByReceiverKey{ this, "caloCellETByLayerByReceiverKey", "", "" };
+  SG::WriteDecorHandleKey<xAOD::TriggerTowerContainer> m_caloCellEnergyByLayerByReceiverKey {this, "caloCellEnergyByLayerByReceiverKey", m_triggerTowerContainerKey, "", "Offline Calo Cell Energy by layer by receiver key"};
+  SG::WriteDecorHandleKey<xAOD::TriggerTowerContainer> m_caloCellETByLayerByReceiverKey {this, "caloCellETByLayerByReceiverKey", m_triggerTowerContainerKey, "", "Offline Calo Cell Et by layer by receiver key"};
+
 };
 }
 #endif

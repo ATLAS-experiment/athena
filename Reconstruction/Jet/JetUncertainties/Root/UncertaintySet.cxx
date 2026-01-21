@@ -4,8 +4,11 @@
 
 
 #include "JetUncertainties/UncertaintySet.h"
+#include "JetUncertainties/UncertaintyGroup.h"
 #include "JetUncertainties/Helpers.h"
 
+#include "PATInterfaces/SystematicSet.h"
+#include "AsgMessaging/StatusCode.h"
 #include <set>
 
 namespace jet
@@ -251,7 +254,7 @@ std::vector< std::pair<CompScaleVar::TypeEnum,bool> > UncertaintySet::getValidUn
     // Simple case
     if (m_groups.empty())
     {
-        unc = localUnc;
+        unc = std::move(localUnc);
         return validity;
     }
 

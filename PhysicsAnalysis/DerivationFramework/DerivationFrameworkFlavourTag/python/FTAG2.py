@@ -35,12 +35,10 @@ def FTAG2KernelCfg(flags, name='FTAG2Kernel', **kwargs):
 
     skim_expr = lepton_skimming_expression
 
-    FTAG2SkimmingTool = CompFactory.DerivationFramework.xAODStringSkimmingTool(
-        name = "FTAG2SkimmingTool",
-        expression = skim_expr
-    )
-    acc.addPublicTool(FTAG2SkimmingTool)
-
+    from DerivationFrameworkTools.DerivationFrameworkToolsConfig import (
+        xAODStringSkimmingToolCfg)
+    FTAG2SkimmingTool = acc.getPrimaryAndMerge(xAODStringSkimmingToolCfg(
+        flags, name = "FTAG2SkimmingTool", expression = skim_expr))
 
     from DerivationFrameworkInDet.InDetToolsConfig import JetTrackParticleThinningCfg, MuonTrackParticleThinningCfg, EgammaTrackParticleThinningCfg, JetConstituentThinningCfg, JetGhostThinningCfg
     from DerivationFrameworkTools.DerivationFrameworkToolsConfig import GenericObjectThinningCfg

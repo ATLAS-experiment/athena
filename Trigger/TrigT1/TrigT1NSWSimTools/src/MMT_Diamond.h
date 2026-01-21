@@ -1,5 +1,5 @@
 /*
- *   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+ *   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  */
 
 #ifndef MMT_DIAMOND_H
@@ -14,14 +14,11 @@ struct slope_t {
   uint64_t event{0};
   int BC{-1};
   unsigned int totalCount{999};
-  unsigned int realCount{999};
   int iRoad{-1};
   int iRoadu{-1};
   int iRoadv{-1};
-  unsigned int uvbkg{999};
-  unsigned int xbkg{999};
-  unsigned int uvmuon{999};
-  unsigned int xmuon{999};
+  unsigned int xCount{999};
+  unsigned int uCount{999};
   int age{-1};
   double mxl{999};
   double my{999};
@@ -43,7 +40,7 @@ class MMT_Diamond : public AthMessaging {
                 const int olapEtaUp, const int olapEtaDown, const int olapStereoUp, const int olapStereoDown);
     ~MMT_Diamond() = default;
 
-    void createRoads(std::vector<MMT_Road>& roads, const bool isLarge) const;
+    void createRoads(std::vector<MMT_Road>& roads, const bool isLarge, const bool isEta1) const;
     void findDiamonds(std::vector<std::shared_ptr<MMT_Hit> >& hits, std::vector<MMT_Road>& roads, std::vector<slope_t>& diamondSlopes, const int sectorPhi) const;
     double phiShift(const int n, const double phi, const char side) const;
 

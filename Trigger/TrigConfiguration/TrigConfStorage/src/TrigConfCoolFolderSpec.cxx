@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigConfStorage/TrigConfCoolFolderSpec.h"
@@ -382,7 +382,7 @@ TrigConfCoolFolderSpec::CreateFolderIfNotExist(IDatabasePtr db, const string& fo
    cool::RecordSpecification rspec;
    rspec.extend(spec);
    FolderDefinition fd(folder, mode,rspec);
-   return CreateFolderIfNotExist(db, fd, isMultiChannel);
+   return CreateFolderIfNotExist(std::move(db), std::move(fd), isMultiChannel);
 }
 
 
@@ -467,7 +467,7 @@ TrigConfCoolFolderSpec::createFolderStructure(IDatabasePtr db, int schemaVersion
       
    newFolder |= CreateFolderIfNotExist(db, HltPrescaleKeyFolderDefinition(), singleChannel);
       
-   if(newFolder) printFolderStructure(db, cout);
+   if(newFolder) printFolderStructure(std::move(db), cout);
 
    return topFolder;
 }

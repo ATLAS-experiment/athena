@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CpmSimMonitorAlgorithm.h"
@@ -805,15 +805,11 @@ bool CpmSimMonitorAlgorithm::compareHad(const TriggerTowerMapHad &ttMap,
 	fill(m_packageName,loc_PpmNoCpmFpga,loc_fpga_PpmNoCpmFpga);	
 
       } else { // no tt
-	if (overlap) {
-	  eta_had_OverlapNoPpm=eta;
-	  phi_had_OverlapNoPpm=phiMod;
-	  fill(m_packageName,eta_had_OverlapNoPpm,phi_had_OverlapNoPpm);
-	} else {
-	  eta_had_OverlapNoPpm=eta;
-	  phi_had_OverlapNoPpm=phiMod;
-	  fill(m_packageName,eta_had_OverlapNoPpm,phi_had_OverlapNoPpm);
-	}
+	
+  eta_had_OverlapNoPpm=eta;
+  phi_had_OverlapNoPpm=phiMod;
+  fill(m_packageName,eta_had_OverlapNoPpm,phi_had_OverlapNoPpm);
+	
 	loc_CpmNoPpmFpga=loc;
 	loc_fpga_CpmNoPpmFpga=loc2Mod;
 	fill(m_packageName,loc_CpmNoPpmFpga,loc_fpga_CpmNoPpmFpga);

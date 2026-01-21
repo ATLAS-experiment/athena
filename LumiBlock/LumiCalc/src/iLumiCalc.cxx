@@ -7,8 +7,8 @@
 #include "CxxUtils/checker_macros.h"
 ATLAS_NO_CHECK_FILE_THREAD_SAFETY;
 
-#include "CollectionBase/CollectionService.h"
-#include "CollectionBase/ICollection.h"
+#include "CollectionSvc/CollectionService.h"
+#include "CollectionSvc/ICollection.h"
 #include "DataModelRoot/RootType.h"
 
 #include "TTree.h"

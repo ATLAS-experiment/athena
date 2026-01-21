@@ -8,14 +8,15 @@
 #include "AthenaBaseComps/AthAlgTool.h"
 
 #include "../GlobalSimComponents/IGlobalSimAlgTool.h"
-#include "../IO/ICommonTOB.h"
+#include "../IO/CommonTOB.h"
+#include "../IO/CommonTOBContainer.h"
 
 #include "ICommonSelector.h"
 
 #include <string>
 
 namespace  GlobalSim::IOBitwise {
-  class ICommonTOB;
+  class CommonTOB;
 }
 
 namespace GlobalSim {
@@ -44,7 +45,7 @@ namespace GlobalSim {
   
     std::unique_ptr<ICommonSelector> m_c_selector{nullptr};
   
-    SG::ReadHandleKey<GlobalSim::IOBitwise::ICommonTOBContainer>
+    SG::ReadHandleKey<GlobalSim::IOBitwise::CommonTOBContainer>
     m_inTOBContainerKey {
       this,
       "inTOBs",
@@ -52,7 +53,7 @@ namespace GlobalSim {
       "Key for GlobalSim CommonTOB container"};
 
      
-    SG::WriteHandleKey<GlobalSim::IOBitwise::ICommonTOBContainer>
+    SG::WriteHandleKey<GlobalSim::IOBitwise::CommonTOBContainer>
     m_outTOBContainerKey {
       this,
       "outTOBs",

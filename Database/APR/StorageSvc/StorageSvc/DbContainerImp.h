@@ -16,6 +16,7 @@
 #include "StorageSvc/pool.h"
 #include "StorageSvc/IDbContainer.h"
 #include "POOLCore/DbPrint.h"
+#include "GaudiKernel/StatusCode.h"
 
 // STL include files
 #include <map>
@@ -50,11 +51,10 @@ namespace pool    {
       const void*         object;
       const Shape*        shape;
       Token::OID_t        link;
-      AccessMode          action;
 
-      DbAction() : object(nullptr), shape(nullptr), action(NONE)   { }
-      DbAction(const void* obj, const Shape* s, const Token::OID_t&  l, AccessMode a)
-            : object(obj), shape(s), link(l), action(a)   { }
+      DbAction() : object(nullptr), shape(nullptr) { }
+      DbAction(const void* obj, const Shape* s, const Token::OID_t&  l)
+            : object(obj), shape(s), link(l) { }
 
       const void*       dataAtOffset(size_t offset) {
          return static_cast<const char*>(object) + offset;
@@ -65,37 +65,20 @@ namespace pool    {
     
   private:
     /// Transaction fifo storage for writing
-    ActionList            m_stack;
+    ActionList            m_writeStack;
     /// Current size of the transaction stack
     size_t                m_size;
-    /// Number of objects to be written out during open transaction
-    size_t                m_writeSize;
-    /// Accumulated stack entry types
-    int                   m_stackType;
   protected:
     /// Container name
     std::string           m_name;
-    /// Flag to indicate if object updates are supported
-    bool                  m_canUpdate;
-    /// Flag to indicate if object removals are supported
-    bool                  m_canDestroy;
 
     /// Standard destructor
     virtual ~DbContainerImp();
-    /// Access accumulated stack entry types
-    int stackType()   const
-    { return m_stackType;                                                     }
-    /// Access stack size
-    size_t stackSize()  const   
-    { return m_size;                                                          }
-    /// Internal: get access to stack entry
-    ActionList::value_type* stackEntry(size_t which) 
-    { return (which <= m_size) ? &(*(m_stack.begin()+which)) : 0;             }
     /// Commit single entry to container
-    virtual DbStatus writeObject(ActionList::value_type& /* entry */)  
-    { return Error;                                                   }
+    virtual StatusCode writeObject(ActionList::value_type& /* entry */)  
+    { return StatusCode::FAILURE;                                                   }
     /// Execute object modification requests during a transaction
-    virtual DbStatus commitTransaction();
+    virtual StatusCode commitTransaction();
 
   public:
     explicit DbContainerImp(const std::string& name);
@@ -111,35 +94,35 @@ namespace pool    {
     /// Suggest next Record ID for tbe next object written - used only with synced indexes
     virtual void useNextRecordId(uint64_t) override {};
     /// Close the container and deallocate resources
-    virtual DbStatus close() override;
+    virtual StatusCode close() override;
 
     /// Access options
     /** @param opt      [IN]  Reference to option object.
       *
-      * @return DbStatus code indicating success or failure.  
+      * @return StatusCode code indicating success or failure.  
       */
-    virtual DbStatus getOption(DbOption& opt) override;
+    virtual StatusCode getOption(DbOption& opt) override;
 
     /// Set options
     /** @param opt      [IN]  Reference to option object.
       *
-      * @return DbStatus code indicating success or failure.  
+      * @return StatusCode code indicating success or failure.  
       */
-    virtual DbStatus setOption(const DbOption& opt) override;
+    virtual StatusCode setOption(const DbOption& opt) override;
 
     /// Execute Transaction Action
-    virtual DbStatus transAct(Transaction::Action) override;
+    virtual StatusCode transAct(Transaction::Action) override;
     /// Store object in location
-    virtual DbStatus store(      const void* object,
+    virtual StatusCode store(      const void* object,
                                  DbContainer&  cntH,
                                  ShapeH shape) override;
     /// In place allocation of object location
-    virtual DbStatus allocate(DbContainer& cntH,
+    virtual StatusCode allocate(DbContainer& cntH,
                               const void* object,
                               ShapeH shape,
                               Token::OID_t& oid) override;
-    /// Fetch next object address of the selection to set token
-    virtual DbStatus fetch(DbSelect&      sel) override;
+    /// Fetch next object address to set token
+    virtual StatusCode next(Token::OID_t& linkH) override;
 
     /// Find object within the container and load it into memory
     /** @param  ptr    [IN/OUT]  ROOT-style address of the pointer to object
@@ -151,14 +134,10 @@ namespace pool    {
       *                          will differ from the preferred oid.
       * @return Status code indicating success or failure.
       */
-    virtual DbStatus load( void** ptr, ShapeH shape,
+    virtual StatusCode load( void** ptr, ShapeH shape,
                            const Token::OID_t& lnkH,
                            Token::OID_t&       oid,
                            bool                any_next) override;
-    /// Clear Transaction stack containing transaction requests
-    virtual DbStatus clearStack();
-    /// Fetch refined object address. Default implementation returns identity
-    virtual DbStatus fetch(const Token::OID_t& linkH, Token::OID_t& stmt);
 
     /// Find object by object identifier and load it into memory
     /** @param  ptr    [IN/OUT]  ROOT-style address of the pointer to object
@@ -167,7 +146,7 @@ namespace pool    {
       *
       * @return Status code indicating success or failure.
       */
-    virtual DbStatus loadObject(void** ptr, ShapeH shape, Token::OID_t& oid) = 0;
+    virtual StatusCode loadObject(void** ptr, ShapeH shape, Token::OID_t& oid) = 0;
 
   };
 }       // End namespace pool

@@ -10,7 +10,6 @@
 #define POOL_DBPRINT_H 1
 
 #include <atomic>
-#include "AthenaKernel/getMessageSvc.h"
 #include "AthenaBaseComps/AthMessaging.h"
 #include "SystemTools.h"
 

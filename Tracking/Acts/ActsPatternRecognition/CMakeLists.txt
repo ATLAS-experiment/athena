@@ -32,7 +32,8 @@ atlas_add_component( ActsPatternRecognition
                TrkEventUtils
                TrkParameters
                TrkSpacePoint
-               xAODInDetMeasurement )
+               xAODInDetMeasurement
+               TrigInDetToolInterfacesLib )
 
 
 

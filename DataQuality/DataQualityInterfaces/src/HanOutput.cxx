@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "DataQualityInterfaces/HanOutput.h"
@@ -251,9 +251,13 @@ namespace dqi
             std::cerr << "WARNING: setInput() has not been set; cannot publish regex results" << std::endl;
             continue;
           }
-          resultList = dynamic_cast<TSeqCollection*>(tmpRegex[parname]->Clone());
+          resultList = static_cast<TSeqCollection*>(tmpRegex[parname]->Clone());
           (*m_outputMap)[storename + extra] = resultList;
           DQParMap_t::const_iterator i = m_dqPars.find(parname);
+          if (i == m_dqPars.end()) {
+            std::cerr << "WARNING: Can't find parname in m_dqPars" << std::endl;
+            continue;
+          }
           parentName = i->second->getName();
           bool use_full_name = false;
           if (m_config)
@@ -282,7 +286,12 @@ namespace dqi
           {
             resultList->SetName((storename + extra + "_").c_str());
           }
-          dynamic_cast<TSeqCollection*>((*m_outputMap)[parentName])->Add(resultList);
+          if (auto seqcoll = dynamic_cast<TSeqCollection*>((*m_outputMap)[parentName])) {
+            seqcoll->Add(resultList);
+          }
+          else {
+            std::cerr << "dynamic_cast to TSeqCollection* fails\n";
+          }
           TKey* key = getObjKey(m_input, storename);
           if (key != 0)
           {

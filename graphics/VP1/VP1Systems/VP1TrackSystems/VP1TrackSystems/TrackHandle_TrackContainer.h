@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -19,6 +19,8 @@
 #include "GeoPrimitives/GeoPrimitives.h"
 #include "ActsEvent/TrackContainer.h"
 #include "VP1TrackSystems/TrkObjToString.h"
+
+#include <memory>
 
 namespace Trk {
   class Track;
@@ -53,7 +55,7 @@ public:
 private:
   void visibleStateChanged();
   void currentMaterialChanged();
-  virtual void ensureInitTSOSs(std::vector<AssociatedObjectHandleBase*>*& ascobjs); //!< Ensure that the TSOSs are initialized. This is called by update3DObjects() and should be called by any method that needs to access the TSOSs.
+  virtual void ensureInitTSOSs(std::unique_ptr<std::vector<AssociatedObjectHandleBase*>>& ascobjs); //!< Ensure that the TSOSs are initialized. This is called by update3DObjects() and should be called by any method that needs to access the TSOSs.
   void ensureInitTrackStateCache(); //!< Ensure that the track state cache is initialized. 
   void addTrackState(const typename ActsTrk::TrackContainer::ConstTrackStateProxy &state, std::vector<AssociatedObjectHandleBase*>* ascobjs, unsigned int index);
   TrkObjToString::MeasurementType measurementType(const ActsTrk::TrackStateBackend::ConstTrackStateProxy &state) const;

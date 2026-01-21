@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 from AthenaCommon.Logging import logging
 log = logging.getLogger(__name__)
@@ -25,5 +25,18 @@ def bmumuxRecoSequenceCfg(flags, rois, muons):
     precisionTrackingSequence = parOR('precisionTrackingInBmumux')
     acc.addSequence(precisionTrackingSequence, parentName=recoSequence.name)
     acc.merge(trigInDetPrecisionTrackingCfg(flags, rois, signatureName='bmumux'), sequenceName=precisionTrackingSequence.name)
+
+    return acc
+
+
+def bhhRecoSequenceCfg(flags, rois):
+
+    acc = ComponentAccumulator()
+
+    recoSequence = seqAND('bhhViewNode')
+    acc.addSequence(recoSequence)
+
+    from TrigInDetConfig.TrigInDetConfig import trigInDetFastTrackingCfg
+    acc.merge(trigInDetFastTrackingCfg(flags, rois, signatureName='bhh'), sequenceName=recoSequence.name)
 
     return acc

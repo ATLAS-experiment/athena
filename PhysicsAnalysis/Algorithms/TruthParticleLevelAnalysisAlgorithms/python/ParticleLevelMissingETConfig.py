@@ -32,5 +32,5 @@ class ParticleLevelMissingETBlock(ConfigBlock):
             alg.input = config.readName (self.outputContainerName)
             alg.output = config.copyName (self.outputContainerName)
 
-        config.addOutputVar (self.outputContainerName, 'met', 'met', noSys=True)
-        config.addOutputVar (self.outputContainerName, 'phi', 'phi', noSys=True)
+        config.addOutputVar (self.outputContainerName, 'met', 'met', noSys=True, auxType='float')
+        config.addOutputVar (self.outputContainerName, 'phi', 'phi', noSys=True, auxType='float')

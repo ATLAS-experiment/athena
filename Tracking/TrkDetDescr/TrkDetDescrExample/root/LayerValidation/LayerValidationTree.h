@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //////////////////////////////////////////////////////////
@@ -48,6 +48,8 @@ public :
    TBranch        *b_HitPositionR;   //!
 
    LayerValidationTree(TTree *tree=0);
+   LayerValidationTree(const LayerValidationTree &) = delete;
+   LayerValidationTree& operator =(const LayerValidationTree &) = delete;
    virtual ~LayerValidationTree();
    virtual Int_t    Cut(Long64_t entry);
    virtual Int_t    GetEntry(Long64_t entry);

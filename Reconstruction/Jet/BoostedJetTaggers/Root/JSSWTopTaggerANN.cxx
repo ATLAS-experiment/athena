@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "BoostedJetTaggers/JSSWTopTaggerANN.h"
@@ -218,14 +218,14 @@ StatusCode JSSWTopTaggerANN::decorate( const xAOD::JetContainer& jets ) const {
   decorateJSSRatios(jets);
 
   ATH_MSG_DEBUG("Using AthAnalysis code. ANN code.");
-  SG::WriteDecorHandle<xAOD::JetContainer, bool> decValidPtRangeHigh(m_decValidPtRangeHighKey);
-  SG::WriteDecorHandle<xAOD::JetContainer, bool> decValidPtRangeLow(m_decValidPtRangeLowKey);
-  SG::WriteDecorHandle<xAOD::JetContainer, bool> decValidEtaRange(m_decValidEtaRangeKey);
-  SG::WriteDecorHandle<xAOD::JetContainer, bool> decValidKinRange(m_decValidKinRangeKey);
+  SG::WriteDecorHandle<xAOD::JetContainer, char> decValidPtRangeHigh(m_decValidPtRangeHighKey);
+  SG::WriteDecorHandle<xAOD::JetContainer, char> decValidPtRangeLow(m_decValidPtRangeLowKey);
+  SG::WriteDecorHandle<xAOD::JetContainer, char> decValidEtaRange(m_decValidEtaRangeKey);
+  SG::WriteDecorHandle<xAOD::JetContainer, char> decValidKinRange(m_decValidKinRangeKey);
 
-  SG::WriteDecorHandle<xAOD::JetContainer, bool> decPassMass(m_decPassMassKey);
-  SG::WriteDecorHandle<xAOD::JetContainer, bool> decPassScore(m_decPassScoreKey);
-  SG::WriteDecorHandle<xAOD::JetContainer, bool> decTagged(m_decTaggedKey);
+  SG::WriteDecorHandle<xAOD::JetContainer, char> decPassMass(m_decPassMassKey);
+  SG::WriteDecorHandle<xAOD::JetContainer, char> decPassScore(m_decPassScoreKey);
+  SG::WriteDecorHandle<xAOD::JetContainer, char> decTagged(m_decTaggedKey);
   SG::WriteDecorHandle<xAOD::JetContainer, float> decCutMLow(m_decCutMLowKey);
   SG::WriteDecorHandle<xAOD::JetContainer, float> decCutMHigh(m_decCutMHighKey);
   SG::WriteDecorHandle<xAOD::JetContainer, float> decScoreCut(m_decScoreCutKey);
@@ -426,9 +426,9 @@ StatusCode JSSWTopTaggerANN::tag( const xAOD::Jet& jet ) const {
   ATH_MSG_DEBUG( "Decorating with score" );
 
   /// Create WriteDecorHandles
-  SG::WriteDecorHandle<xAOD::JetContainer, bool> decPassMass(m_decPassMassKey);
-  SG::WriteDecorHandle<xAOD::JetContainer, bool> decPassScore(m_decPassScoreKey);
-  SG::WriteDecorHandle<xAOD::JetContainer, bool> decTagged(m_decTaggedKey);
+  SG::WriteDecorHandle<xAOD::JetContainer, char> decPassMass(m_decPassMassKey);
+  SG::WriteDecorHandle<xAOD::JetContainer, char> decPassScore(m_decPassScoreKey);
+  SG::WriteDecorHandle<xAOD::JetContainer, char> decTagged(m_decTaggedKey);
   SG::WriteDecorHandle<xAOD::JetContainer, float> decCutMLow(m_decCutMLowKey);
   SG::WriteDecorHandle<xAOD::JetContainer, float> decCutMHigh(m_decCutMHighKey);
   SG::WriteDecorHandle<xAOD::JetContainer, float> decScoreCut(m_decScoreCutKey);

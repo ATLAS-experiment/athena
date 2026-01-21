@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //////////////////////////////////////////////////////////
@@ -57,6 +57,8 @@ class CylinderLayerMaterial {
    TBranch        *b_LayerReferenceZARho;   //!
 
    CylinderLayerMaterial(TTree *tree=0);
+   CylinderLayerMaterial(const CylinderLayerMaterial &) = delete;
+   CylinderLayerMaterial & operator =(const CylinderLayerMaterial &) = delete;
    virtual ~CylinderLayerMaterial();
    virtual Int_t    Cut(Long64_t entry);
    virtual Int_t    GetEntry(Long64_t entry);

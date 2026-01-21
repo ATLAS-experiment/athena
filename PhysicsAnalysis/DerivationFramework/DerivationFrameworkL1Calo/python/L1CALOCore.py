@@ -520,11 +520,9 @@ def L1CALOCoreCfg(flags, deriv='L1CALO1', **kwargs):
          "L1_jFexDataTowers":"xAOD::jFexTowerContainer",
          "L1_jFexDataTowersAux":"xAOD::jFexTowerAuxContainer",
          "L1_gFexDataTowers":"xAOD::gFexTowerContainer",
-         "L1_gFexDataTowersAux":"xAOD::gFexTowerAuxContainer",
-         "L1_gFexDataTowers50":"xAOD::gFexTowerContainer",
-         "L1_gFexDataTowers50Aux":"xAOD::gFexTowerAuxContainer"}
+         "L1_gFexDataTowersAux":"xAOD::gFexTowerAuxContainer"}
     )
-    AllVariables += ["L1_eFexDataTowers","L1_jFexDataTowers","L1_gFexDataTowers","L1_gFexDataTowers50"]
+    AllVariables += ["L1_eFexDataTowers","L1_jFexDataTowers","L1_gFexDataTowers"]
 
     # Emulated eFEX input tower data from LATOME
     L1CaloSlimmingHelper.AppendToDictionary.update (

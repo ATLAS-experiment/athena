@@ -273,7 +273,7 @@ StatusCode iGeant4::G4LegacyTransportTool::simulateVector(
   /** Process ParticleState from particle stack */
   // Lambda prevents using the unique_ptr 
   bool abort = [&] ATLAS_NOT_THREAD_SAFE {
-    auto eventInfo = std::make_unique<AtlasG4EventUserInfo>();
+    auto eventInfo = std::make_unique<AtlasG4EventUserInfo>(ctx);
     eventInfo->SetHitCollectionMap(hitCollections);
 
     auto inputEvent = std::make_unique<G4Event>(ctx.eventID().event_number());

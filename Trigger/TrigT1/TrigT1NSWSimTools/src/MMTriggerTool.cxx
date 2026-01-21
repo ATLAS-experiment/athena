@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MMTriggerTool.h"
@@ -38,14 +38,11 @@ namespace NSWL1 {
     m_trigger_diamond_sector = std::make_shared<MuonVal::VectorBranch<char> >(tree, "MM_diamond_sector");
     m_trigger_diamond_sectorPhi = std::make_shared<MuonVal::VectorBranch<int> >(tree, "MM_diamond_sectorPhi");
     m_trigger_diamond_totalCount = std::make_shared<MuonVal::VectorBranch<unsigned int> >(tree, "MM_diamond_totalCount");
-    m_trigger_diamond_realCount = std::make_shared<MuonVal::VectorBranch<unsigned int> >(tree, "MM_diamond_realCount");
     m_trigger_diamond_iX = std::make_shared<MuonVal::VectorBranch<int> >(tree, "MM_diamond_iX");
     m_trigger_diamond_iU = std::make_shared<MuonVal::VectorBranch<int> >(tree, "MM_diamond_iU");
     m_trigger_diamond_iV = std::make_shared<MuonVal::VectorBranch<int> >(tree, "MM_diamond_iV");
-    m_trigger_diamond_XbkgCount = std::make_shared<MuonVal::VectorBranch<unsigned int> >(tree, "MM_diamond_XbkgCount");
-    m_trigger_diamond_UVbkgCount = std::make_shared<MuonVal::VectorBranch<unsigned int> >(tree, "MM_diamond_UVbkgCount");
-    m_trigger_diamond_XmuonCount = std::make_shared<MuonVal::VectorBranch<unsigned int> >(tree, "MM_diamond_XmuonCount");
-    m_trigger_diamond_UVmuonCount = std::make_shared<MuonVal::VectorBranch<unsigned int> >(tree, "MM_diamond_UVmuonCount");
+    m_trigger_diamond_xCount = std::make_shared<MuonVal::VectorBranch<unsigned int> >(tree, "MM_diamond_xCount");
+    m_trigger_diamond_uCount = std::make_shared<MuonVal::VectorBranch<unsigned int> >(tree, "MM_diamond_uCount");
     m_trigger_diamond_age = std::make_shared<MuonVal::VectorBranch<int> >(tree, "MM_diamond_age");
     m_trigger_diamond_mx = std::make_shared<MuonVal::VectorBranch<double> >(tree, "MM_diamond_mx");
     m_trigger_diamond_my = std::make_shared<MuonVal::VectorBranch<double> >(tree, "MM_diamond_my");
@@ -83,14 +80,11 @@ namespace NSWL1 {
     tree.addBranch(m_trigger_diamond_sector);
     tree.addBranch(m_trigger_diamond_sectorPhi);
     tree.addBranch(m_trigger_diamond_totalCount);
-    tree.addBranch(m_trigger_diamond_realCount);
     tree.addBranch(m_trigger_diamond_iX);
     tree.addBranch(m_trigger_diamond_iU);
     tree.addBranch(m_trigger_diamond_iV);
-    tree.addBranch(m_trigger_diamond_XbkgCount);
-    tree.addBranch(m_trigger_diamond_UVbkgCount);
-    tree.addBranch(m_trigger_diamond_XmuonCount);
-    tree.addBranch(m_trigger_diamond_UVmuonCount);
+    tree.addBranch(m_trigger_diamond_xCount);
+    tree.addBranch(m_trigger_diamond_uCount);
     tree.addBranch(m_trigger_diamond_age);
     tree.addBranch(m_trigger_diamond_mx);
     tree.addBranch(m_trigger_diamond_my);
@@ -229,10 +223,11 @@ namespace NSWL1 {
           ATH_MSG_ERROR("Available digits belongs to different sectors IDs, unable to assign an unique ID in output RDO");
           return StatusCode::FAILURE;
         }
+        const bool isEta1 = (std::all_of(ev_hits.begin(), ev_hits.end(), [] (const auto &hit) { return std::abs(hit->getStationEta()) == 1; }));
 
         // Setup roads
         std::vector<MMT_Road> ev_roads;
-        m_diamond->createRoads(ev_roads, isLarge);
+        m_diamond->createRoads(ev_roads, isLarge, isEta1);
 
         // Evaluate coincidences
         std::vector<slope_t> diamondSlopes;
@@ -247,11 +242,8 @@ namespace NSWL1 {
               m_trigger_diamond_sectorPhi->push_back(sectorPhi);
               m_trigger_diamond_bc->push_back(slope.BC);
               m_trigger_diamond_totalCount->push_back(slope.totalCount);
-              m_trigger_diamond_realCount->push_back(slope.realCount);
-              m_trigger_diamond_XbkgCount->push_back(slope.xbkg);
-              m_trigger_diamond_UVbkgCount->push_back(slope.uvbkg);
-              m_trigger_diamond_XmuonCount->push_back(slope.xmuon);
-              m_trigger_diamond_UVmuonCount->push_back(slope.uvmuon);
+              m_trigger_diamond_xCount->push_back(slope.xCount);
+              m_trigger_diamond_uCount->push_back(slope.uCount);
               m_trigger_diamond_iX->push_back(slope.iRoad);
               m_trigger_diamond_iU->push_back(slope.iRoadu);
               m_trigger_diamond_iV->push_back(slope.iRoadv);
@@ -274,7 +266,7 @@ namespace NSWL1 {
           for (const auto &slope : diamondSlopes) slopeBC.push_back(slope.BC);
           std::sort(slopeBC.begin(), slopeBC.end());
           slopeBC.erase( std::unique(slopeBC.begin(), slopeBC.end()), slopeBC.end() );
-          for (const auto &bc : slopeBC) {
+          for (const auto bc : slopeBC) {
             Muon::NSW_TrigRawData* trigRawData = new Muon::NSW_TrigRawData(sectorPhi-1, side, bc);
 
             for (const auto &slope : diamondSlopes) {

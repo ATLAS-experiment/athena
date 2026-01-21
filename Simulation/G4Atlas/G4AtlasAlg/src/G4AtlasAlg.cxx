@@ -346,7 +346,7 @@ StatusCode G4AtlasAlg::execute()
 
   ATH_MSG_DEBUG("Calling SimulateG4Event");
 
-  auto eventInfo = std::make_unique<AtlasG4EventUserInfo>();
+  auto eventInfo = std::make_unique<AtlasG4EventUserInfo>(ctx);
   // get a shared pointer to the hit collection map because we will need it after the G4Event is destroyed
   std::shared_ptr<HitCollectionMap> hitCollections = eventInfo->GetHitCollectionMap();
 

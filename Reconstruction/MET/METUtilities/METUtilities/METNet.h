@@ -137,6 +137,7 @@ namespace met {
 
     SG::ReadHandleKey<xAOD::EventInfo> m_eventInfoKey{this, "EventInfoKey", "EventInfo", "Event info key"};
     SG::ReadHandleKey<xAOD::VertexContainer> m_pvContainerKey{this, "PVContainerKey", "PrimaryVertices", "Primary vertex container"};
+    SG::ReadHandleKey<xAOD::JetContainer> m_jetContainerKey{this, "JetContainer", "", "Name of input jet container"};
 
     std::unique_ptr<const METNetHandler> m_metNetHandler;
     // Users do not need to interact with these ToolHandles; they're managed by METNet

@@ -47,6 +47,25 @@ namespace columnar
 
 
 
+  // in xAOD array mode we can do a straightforward conversion from
+  // std::vector to std::span, as xAODs natively use std::vector
+  template<typename CT>
+    requires (ColumnTypeTraits<CT,ColumnarModeXAODArray>::isNativeType)
+  struct ColumnTypeTraits<std::vector<CT>,ColumnarModeXAODArray> final
+  {
+    using CM = ColumnarModeXAODArray;
+    using ElementType = typename ColumnTypeTraits<CT,CM>::ColumnType;
+    using ColumnType = NativeColumn<std::vector<ElementType>>;
+    using UserType = std::span<const ElementType>;
+    static constexpr bool isNativeType = false;
+    static constexpr bool useConvertInput = true;
+    static constexpr bool useConvertWithDataInput = false;
+    static ColumnInfo& updateColumnInfo (ColumnarTool<CM>& /*columnarTool*/, ColumnInfo& info) {return info;}
+    static std::span<const ElementType> convertInput (const std::vector<ElementType>& value) {return std::span<const ElementType> (value);}
+  };
+
+
+
 
   // the column accessor for std::vector in ColumnarModeArray
   //

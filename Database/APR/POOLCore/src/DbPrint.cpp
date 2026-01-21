@@ -3,7 +3,7 @@ Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "POOLCore/DbPrint.h"
-
+#include "AthenaKernel/getMessageSvc.h"
 
 using namespace pool;
 
@@ -16,8 +16,7 @@ std::atomic<MSG::Level> DbPrintLvl::outputLvl = MSG::NIL;
  {
    // temporary solution to keep Collections logging at WARNING by default
    // while the rest of APR at the level set by Athena or by the environment if not in Athena
-   static const std::set<std::string> collNames = {"RNTCollection","RootCollection","POOLCollFactory",
-                                                   "CollectionBase","ImplicitCollection"};
+   static const std::set<std::string> collNames = {"ImplicitCollection","RNTCollection","RootCollection","CollectionSvc"};
    if( collNames.contains(name) or outputLvl == MSG::NIL ) {
       return SystemTools::GetOutputLvl(); 
    } else {
@@ -35,9 +34,5 @@ DbPrint::DbPrint( const std::string& name )
 
 APRMessaging::APRMessaging(const std::string& name) : AthMessaging(name)
 {
-  auto msgSvc = Athena::getMessageSvc(Athena::Options::Eager,true);
-  msgSvc->setOutputLevel(name, DbPrintLvl::getLevel(name) );
+  setLevel( DbPrintLvl::getLevel(name) );
 }
-
-
-  

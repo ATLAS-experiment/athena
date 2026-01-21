@@ -18,6 +18,7 @@
 
 #include "FPGATrackSimObjects/FPGATrackSimRoad.h"
 #include "FPGATrackSimObjects/FPGATrackSimTrack.h"
+#include "FPGATrackSimObjects/FPGATrackSimHitContainer.h"
 
 
   class IFPGAActsTrkConverter
@@ -28,7 +29,7 @@
                   const xAOD::PixelClusterContainer & pixelContainer,
                   const xAOD::StripClusterContainer & stripContainer,
                   std::vector<ActsTrk::ProtoTrack> & foundProtoTracks ,
-                  const std::vector<std::vector<FPGATrackSimHit>>& hitsInRoads,
+                  const FPGATrackSimHitContainer & hitsInRoads,
                   const std::vector<FPGATrackSimRoad>& roads) const = 0;
     virtual StatusCode findProtoTracks(const EventContext& ctx,
                   const xAOD::PixelClusterContainer & pixelContainer,

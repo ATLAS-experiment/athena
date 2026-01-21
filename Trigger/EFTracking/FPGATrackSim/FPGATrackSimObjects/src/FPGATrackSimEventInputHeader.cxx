@@ -13,7 +13,6 @@ FPGATrackSimEventInputHeader::~FPGATrackSimEventInputHeader()
 
 void FPGATrackSimEventInputHeader::reset()
 {
-  m_event.reset();
   m_optional.reset();
   m_Hits.clear();
 }

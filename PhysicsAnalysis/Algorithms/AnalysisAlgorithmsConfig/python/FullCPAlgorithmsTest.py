@@ -34,7 +34,6 @@ tauTriggerChainsSF = {
 bjetTriggerChainsPerYear = {
     2022: ['HLT_2j45_0eta290_020jvt_bdl1d60_2j45_pf_ftf_presel2j25XX2j25b85_L14J15p0ETA25'],
     2023: ['HLT_2j45_0eta290_020jvt_bgn160_2j45_pf_ftf_presel2j25XX2j25b85_L14J15p0ETA25'],
-    2024: ['HLT_2j45_0eta290_020jvt_bgn260_2j45_pf_ftf_presel2j25XX2j25bgtwo85_L14jJ40p0ETA25'],
 }
 
 # Example cuts used for event selection algorithm test
@@ -137,7 +136,7 @@ def makeTestSequenceBlocks (dataType, algSeq, isPhyslite,
     configSeq += config.makeConfig( 'Jets.FTagTriggerMatching' )
     configSeq.setOptionValue('.containerName', 'AnaJets')
     configSeq.setOptionValue('.triggerChainsPerYear', bjetTriggerChainsPerYear)
-    
+
     # disabling flavor tagging for Run 4, as the configuration just
     # refuses to work on that
     if geometry is not LHCPeriod.Run4:
@@ -154,6 +153,8 @@ def makeTestSequenceBlocks (dataType, algSeq, isPhyslite,
         configSeq += config.makeConfig( 'Jets.FlavourTaggingEventSF' )
         configSeq.setOptionValue ('.containerName', 'AnaJets.baselineJvt')
         configSeq.setOptionValue ('.btagger', btagger)
+        configSeq.setOptionValue('.triggerChainsPerYear',
+                                 bjetTriggerChainsPerYear)
 
     if largeRJets :
         configSeq += config.makeConfig( 'Jets',
@@ -184,6 +185,11 @@ def makeTestSequenceBlocks (dataType, algSeq, isPhyslite,
     configSeq.setOptionValue ('.isolationWP', 'Tight_VarRad')
     configSeq.setOptionValue ('.chargeIDSelectionRun2', True)
     configSeq.setOptionValue ('.addChargeMisIDSF', geometry is LHCPeriod.Run2)
+    configSeq += config.makeConfig('Electrons.TriggerSF')
+    configSeq.setOptionValue('.containerName', 'AnaElectrons')
+    configSeq.setOptionValue('.electronID', 'LooseBLayerLH')
+    configSeq.setOptionValue('.electronIsol', 'Tight_VarRad')
+    configSeq.setOptionValue('.triggerChainsPerYear', triggerChainsPerYear)
 
     configSeq += config.makeConfig ('Electrons.IFFClassification')
     configSeq.setOptionValue ('.containerName', 'AnaElectrons')
@@ -469,6 +475,7 @@ def makeTestSequenceBlocks (dataType, algSeq, isPhyslite,
     configSeq.setOptionValue ('.treeName', 'analysis')
     configSeq.setOptionValue ('.vars', [
         'EventInfo.actualInteractionsPerCrossing -> actualMuScaled',
+        'OutMuons_NOSYS.muonType -> mu_muonType type=uint16' #types are typically not needed, but if needed this is how you add them
     ])
     configSeq.setOptionValue ('.metVars', [
         'AnaMET_%SYS%.met -> met_%SYS%',

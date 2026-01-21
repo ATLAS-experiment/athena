@@ -41,8 +41,8 @@ def createMuonConfigFlags():
                                                                           prevFlags.GeoModel.SQLiteDB ,
                                                                           prevFlags.GeoModel.SQLiteDBFullPath)["Muon"]["useR4Plugin"] )
     # 1. Digitization
-    mcf.addFlag("Muon.doFastMMDigitization",True)  ### The digitization flag is only relevant if usePhaseIIGeoSetup is activated
-    mcf.addFlag("Muon.doFastsTGCDigitization",True) ### The digitization flag is only relevant if usePhaseIIGeoSetup is activated
+    mcf.addFlag("Muon.doFastMMDigitization", False)  ### The digitization flag is only relevant if usePhaseIIGeoSetup is activated
+    mcf.addFlag("Muon.doFastsTGCDigitization",False) ### The digitization flag is only relevant if usePhaseIIGeoSetup is activated
 
     
     # 2. Reco MuonRecFlags 
@@ -163,7 +163,7 @@ def createMuonConfigFlags():
 
     mcf.addFlag("Muon.writexAODPRD", lambda prevFlags: prevFlags.Muon.usePhaseIIGeoSetup) # Output new xAOD format from convertors (to be removed once the old format is deprecated)
     # use the MDT DCS data to determine if a chamber is alive or not. This is used in the hole search and the region selector. Needs to be false if the job is running online or is the reconstruction of the MDT calib stream
-    mcf.addFlag("Muon.useMdtDcsData", lambda prevFlags : not prevFlags.Common.isOnline)
+    mcf.addFlag("Muon.useMdtDcsData", lambda prevFlags : not prevFlags.Common.isOnline and prevFlags.Detector.GeometryMDT)
 
 
 

@@ -143,8 +143,7 @@ StatusCode sTgcReadoutGeomTool::loadDimensions(sTgcReadoutElement::defineArgs& d
             padDesign->defineDiamond(0.5*paramBook.sPadLength, 0.5*paramBook.lPadLength, gapPars.halfHeight, paramBook.yCutoutCathode);
             padDesign->flipTrapezoid();
             ATH_MSG_VERBOSE("Created new diamond pad design "<<(*padDesign));
-        }
-        else if (!gapPars.yCutOut) {
+        } else {
             /// Trapezoid Strip Design
             stripDesign->defineTrapezoid(gapPars.shortWidth, gapPars.longWidth, gapPars.halfHeight + 0.01);
             stripDesign->defineStripLayout(Amg::Vector2D{firstStripPos, 0.},
@@ -197,29 +196,24 @@ StatusCode sTgcReadoutGeomTool::loadDimensions(sTgcReadoutElement::defineArgs& d
         /// sTgc geometry code.
         ++gasGap;
         /// StripLayer
-        stripDesign = (*factoryCache.stripDesigns.emplace(stripDesign).first); 
-        StripLayer stripLayer(factoryCache.trfNodeMaker.makeTransform(gapVol.transform
-                                                *  Amg::getRotateZ3D(-90. * Gaudi::Units::deg) 
-                                                * Amg::getRotateY3D(180* Gaudi::Units::deg)), stripDesign, 
-                                                sTgcReadoutElement::createHash(gasGap, sTgcIdHelper::Strip, 0));
+        stripDesign = (*factoryCache.stripDesigns.emplace(stripDesign).first);
+        wireGroupDesign = (*factoryCache.wireGroupDesigns.emplace(wireGroupDesign).first);
+        StripLayer stripLayer{factoryCache.trfNodeMaker.makeTransform(gapVol.transform
+                                                * Amg::getRotateZ3D(-90. * Gaudi::Units::deg) 
+                                                * Amg::getRotateY3D(180* Gaudi::Units::deg)), 
+                                                stripDesign, wireGroupDesign,
+                                                sTgcReadoutElement::createHash(gasGap, sTgcIdHelper::Strip, 0)};
+        stripLayer.flipPhiRotation();
         ATH_MSG_VERBOSE("Added new diamond strip layer at "<< stripLayer);
         define.stripLayers.push_back(std::move(stripLayer));
-
-        /// WireGroup Layer      
-        wireGroupDesign = (*factoryCache.wireGroupDesigns.emplace(wireGroupDesign).first);
-        StripLayer wireGroupLayer(factoryCache.trfNodeMaker.makeTransform(gapVol.transform 
-                                              * Amg::getRotateY3D(180* Gaudi::Units::deg)), 
-                                                wireGroupDesign, sTgcReadoutElement::createHash(gasGap, 
-                                                sTgcIdHelper::Wire, 0));
-        ATH_MSG_VERBOSE("Added new diamond wireGroup layer at "<<wireGroupLayer);
-        define.wireGroupLayers.push_back(std::move(wireGroupLayer));
 
         /// Pad Layer
         padDesign = (*factoryCache.padDesigns.emplace(padDesign).first);
         StripLayer padLayer(factoryCache.trfNodeMaker.makeTransform(gapVol.transform 
+                                              * Amg::getRotateZ3D(-90. * Gaudi::Units::deg) 
                                               * Amg::getRotateY3D(180* Gaudi::Units::deg)), 
-                                                padDesign, sTgcReadoutElement::createHash(gasGap, 
-                                                sTgcIdHelper::Pad, 0));
+                                                stripDesign, padDesign, sTgcReadoutElement::createHash(gasGap, sTgcIdHelper::Pad, 0));
+        padLayer.flipPhiRotation();
         ATH_MSG_VERBOSE("Added new diamond pad layer at "<<padLayer);
         define.padLayers.push_back(std::move(padLayer));
     }

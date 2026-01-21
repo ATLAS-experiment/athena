@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "RPC_CondCabling/RPCchamber.h"
@@ -360,17 +360,11 @@ bool RPCchamber::inversion(int sector) const {
             break;
 
         case 'R':
-            if (sector % 2)
-                return (sector <= 31) ? false : false;  // HV
-            else
-                return (sector <= 31) ? false : false;  // RO
+            return false;
             break;
 
         case 'M':
-            if (sector % 2)
-                return (sector <= 31) ? false : false;  // HV
-            else
-                return (sector <= 31) ? false : false;  // RO
+            return false;
             break;
 
         case 'S':

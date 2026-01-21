@@ -451,6 +451,7 @@ void TileFilterManager::makeFitterOffsetTables() {
         if (index <= ipile) {
           Offset[index] = 0;
         } else {
+          //coverity[UNINIT]  -- false positive
           Offset[index] = Offset[index - 1] + vlast[index - 1];
         }
       }

@@ -129,7 +129,7 @@ int iblCalib(const std::string& InDir, const std::string& THRscan, const std::st
     //  For debugging a small area of pixels will print their readout and injection
     int XcheckCharge[2] = {13, 14}, XcheckToT = 10;
     int XcheckPhi[2] = {57, 63}, XcheckEta[2] = {23, 29};
-    TString XcheckModule = "LI_S11_A_M3_A6";
+    std::string XcheckModule = "LI_S11_A_M3_A6";
 
     //  fill some histograms for monitoring
     int ToTfill = 3 * finerToT, CHRGfill = 3;
@@ -155,17 +155,17 @@ int iblCalib(const std::string& InDir, const std::string& THRscan, const std::st
     std::vector<int> reversedModules = {182, 211, 213, 229, 223, 231, 246, 280, 295, 350, 357, 360, 371, 403, 416, 423};
 
     // outputs : something@somewhere as one like ...
-    TString Outdir = "./";
+    std::string Outdir = "./";
     string spec = "ToTbin" + to_string(finerToT) + "_FrtEnd" + to_string(npsFEs) + "_";
 
 #if defined(DEMOXCHECK)
     spec += "DEMOXCHECK_";
 #endif
 
-    TString StrFileName = spec + scan;
-    TString rootFileName = Outdir + "/TotChargeCalib_" + StrFileName + ".root";
-    TString logFileName = Outdir + "/ChargeCalib_" + StrFileName + ".log";
-    TString dbFileName = Outdir + "/ChargeCalib_" + StrFileName + ".TXT";
+    std::string StrFileName = spec + scan;
+    std::string rootFileName = Outdir + "/TotChargeCalib_" + StrFileName + ".root";
+    std::string logFileName = Outdir + "/ChargeCalib_" + StrFileName + ".log";
+    std::string dbFileName = Outdir + "/ChargeCalib_" + StrFileName + ".TXT";
     if (!run3)
     {
         rootFileName = Outdir + "/TotChargeCalib_run2_" + StrFileName + ".root";
@@ -177,11 +177,11 @@ int iblCalib(const std::string& InDir, const std::string& THRscan, const std::st
     ofstream logout(logFileName);
     ofstream txtDB(dbFileName);
 
-    TString inThrFile = "";
-    TString inTotFile = "";
-    TString rodPath = "";
-    TString inTotFileAux = "";
-    TString rodPathAux = "";
+    std::string inThrFile = "";
+    std::string inTotFile = "";
+    std::string rodPath = "";
+    std::string inTotFileAux = "";
+    std::string rodPathAux = "";
 
     std::cout << " Running IBL calibration analysis ... " << endl;
 
@@ -259,7 +259,7 @@ int iblCalib(const std::string& InDir, const std::string& THRscan, const std::st
 
     map<string, map<string, map<string, float>>> pcdMap;
 
-    TFile roFile(rootFileName, "RECREATE");
+    TFile roFile(rootFileName.c_str(), "RECREATE");
     TDirectory *roThrDir = roFile.mkdir("Threshold");
     TDirectory *roTotDir = roFile.mkdir("ToT");
 
@@ -269,7 +269,7 @@ int iblCalib(const std::string& InDir, const std::string& THRscan, const std::st
     array<std::unique_ptr<TH2D> , npsFEs> h2_Thr{};
     array<std::unique_ptr<TH2D> , npsFEs> h2_ThrSig{};
 
-    std::multimap<float, TString, std::greater<float>> badThr_Order;
+    std::multimap<float, std::string, std::greater<float>> badThr_Order;
 
     for (int sfe = 0; sfe < npsFEs; sfe++)
     {
@@ -295,15 +295,15 @@ int iblCalib(const std::string& InDir, const std::string& THRscan, const std::st
         h2_ThrSig[sfe] =  std::make_unique<TH2D>(idx.c_str(), " ", 2, 0, 2, 200, 0, 500);
     }
 
-    if (inThrFile.Length() > 0)
+    if (inThrFile.size() > 0)
     {
         std::cout << endl
                   << "INFO =>> [IBL] threshold scan analysis..." << endl;
 
-        TFile riThrFile(inThrFile, "READ");
-        TString chi2HistName = "SCURVE_CHI2";
-        TString thrHistName = "SCURVE_MEAN";
-        TString sigHistName = "SCURVE_SIGMA";
+        TFile riThrFile(inThrFile.c_str(), "READ");
+        std::string chi2HistName = "SCURVE_CHI2";
+        std::string thrHistName = "SCURVE_MEAN";
+        std::string sigHistName = "SCURVE_SIGMA";
 
         std::unique_ptr<TH1F> h1dChi2 = std::make_unique<TH1F>("h1dChi2", "", 200, 0, 1);
         std::unique_ptr<TH1F> h1dThr  = std::make_unique<TH1F>("h1dThr" , "", 200, 0, 5000);
@@ -316,23 +316,23 @@ int iblCalib(const std::string& InDir, const std::string& THRscan, const std::st
 
         while ((rodKey = (TKey *)rodItr()))
         {   
-            TString rodName(rodKey->GetName());
+            std::string rodName(rodKey->GetName());
             TDirectoryFile *rodDir = (TDirectoryFile *)rodKey->ReadObj();
             TList *modKeyList = (TList *)rodDir->GetListOfKeys();
             TIter modItr(modKeyList);
             TKey *modKey;
 
-            TDirectory *dirRod = roThrDir->mkdir(rodName);
+            TDirectory *dirRod = roThrDir->mkdir(rodName.c_str());
 
             while ((modKey = (TKey *)modItr()))
             {
-                TString modName(modKey->GetName());
+                std::string modName(modKey->GetName());
                 string modStr(modKey->GetName());
-                TDirectory *dirMod = dirRod->mkdir(modName);
+                TDirectory *dirMod = dirRod->mkdir(modName.c_str());
 
-                TString chi2HistDirPath = modName + "/" + chi2HistName + "/A0/B0";
+                std::string chi2HistDirPath = modName + "/" + chi2HistName + "/A0/B0";
 
-                TDirectory *chi2HistDir = (TDirectory *)rodDir->Get(chi2HistDirPath);
+                TDirectory *chi2HistDir = (TDirectory *)rodDir->Get(chi2HistDirPath.c_str());
                 if (chi2HistDir == NULL)
                 {
                     cout << " Warning : NULL dir " << endl;
@@ -345,12 +345,12 @@ int iblCalib(const std::string& InDir, const std::string& THRscan, const std::st
                     cout << " Warning : NULL dir " << endl;
                     continue;
                 }
-                TString thrHistDirPath = modName + "/" + thrHistName + "/A0/B0";
-                TDirectoryFile *thrHistDir = (TDirectoryFile *)rodDir->Get(thrHistDirPath);
+                std::string thrHistDirPath = modName + "/" + thrHistName + "/A0/B0";
+                TDirectoryFile *thrHistDir = (TDirectoryFile *)rodDir->Get(thrHistDirPath.c_str());
                 std::unique_ptr<TH2D> h2dThr(static_cast<TH2D*>(static_cast<TKey*>(thrHistDir->GetListOfKeys()->First())->ReadObj()));
-                TString sigHistDirPath = modName + "/" + sigHistName + "/A0/B0";
+                std::string sigHistDirPath = modName + "/" + sigHistName + "/A0/B0";
 
-                TDirectoryFile *sigHistDir = (TDirectoryFile *)rodDir->Get(sigHistDirPath);
+                TDirectoryFile *sigHistDir = (TDirectoryFile *)rodDir->Get(sigHistDirPath.c_str());
                 std::unique_ptr<TH2D> h2dSig (static_cast<TH2D*>(static_cast<TKey*>(sigHistDir->GetListOfKeys()->First())->ReadObj()));
 
                 array<std::unique_ptr<TH1F>, npsFEs> h1_ThrNorm{};
@@ -469,7 +469,7 @@ int iblCalib(const std::string& InDir, const std::string& THRscan, const std::st
                     float blank = 100. * IlledThr[sfe] * npsFEs / (1. * ncol * nrow);
 
                     if (blank > 0.01)
-                        badThr_Order.insert(std::pair<float, TString>(blank, (TString)(modName + " : " + blank)));
+                        badThr_Order.insert(std::pair<float, std::string>(blank, (std::string)(modName + " : " + blank)));
 
                     if (valid)
                     {
@@ -517,7 +517,7 @@ int iblCalib(const std::string& InDir, const std::string& THRscan, const std::st
     /*************************     IBL  ToT ***************************/
     /////////////////////////////////////////////////////////////////////////////////
 
-    if (inTotFile.Length() == 0 || inTotFileAux.Length() == 0)
+    if (inTotFile.size() == 0 || inTotFileAux.size() == 0)
     {
         logout << " Missing ToT file from calib scan as input " << endl;
         return 0;
@@ -526,18 +526,18 @@ int iblCalib(const std::string& InDir, const std::string& THRscan, const std::st
     std::cout << endl
               << "INFO =>> [IBL] tot calib analysis..." << endl;
 
-    TFile riTotFile(inTotFile, "READ");
-    TFile riTotFileAux(inTotFileAux, "READ");
+    TFile riTotFile(inTotFile.c_str(), "READ");
+    TFile riTotFileAux(inTotFileAux.c_str(), "READ");
 
-    TString totHistName = "TOT_MEAN";
-    TString totSigHistName = "TOT_SIGMA";
+    std::string totHistName = "TOT_MEAN";
+    std::string totSigHistName = "TOT_SIGMA";
 
     TDirectoryFile *scanDir = (TDirectoryFile *)((TKey *)riTotFile.GetListOfKeys()->First())->ReadObj();
     TList *rodKeyList = (TList *)scanDir->GetListOfKeys();
     TIter rodItr(rodKeyList);
     TKey *rodKey;
 
-    std::map<float, std::pair<vector<TString>, vector<Double_t>>> ModuDataToPrint;
+    std::map<float, std::pair<vector<std::string>, vector<Double_t>>> ModuDataToPrint;
 
 #if defined(DEMOXCHECK)
     vector<TH1F *> h1_ChrgEntry(nToTibl, nullptr);
@@ -574,22 +574,22 @@ int iblCalib(const std::string& InDir, const std::string& THRscan, const std::st
     std::unique_ptr<Column[]> occuPhiEta{new Column[nchargeIBL]{}};
 
     Int_t cntRod = 0;
-    std::map<float, TString> devChrg_Order;
-    std::map<float, TString> devToT_Order;
+    std::map<float, std::string> devChrg_Order;
+    std::map<float, std::string> devToT_Order;
 
-    std::multimap<float, TString, std::greater<float>> badModules_Order;
-    std::multimap<float, TString, std::greater<float>> badModules_Order_detailed;
+    std::multimap<float, std::string, std::greater<float>> badModules_Order;
+    std::multimap<float, std::string, std::greater<float>> badModules_Order_detailed;
     
     while ((rodKey = (TKey *)rodItr()))
     {
-        TString rodName(rodKey->GetName());
+        std::string rodName(rodKey->GetName());
         string rodStr(rodKey->GetName());
         TDirectoryFile *rodDir = (TDirectoryFile *)rodKey->ReadObj();
 
         TString path = rodDir->GetPath();
-        TString pathAux = path.ReplaceAll(rodPath, rodPathAux);
+        std::string pathAux = path.ReplaceAll(rodPath, rodPathAux).Data();
 
-        TDirectoryFile *rodDirAux = (TDirectoryFile *)riTotFileAux.Get(pathAux);
+        TDirectoryFile *rodDirAux = (TDirectoryFile *)riTotFileAux.Get(pathAux.c_str());
         if (rodDirAux == NULL)
         {
             std::cout<< " Fail to get the rodPath in Aux: "<< pathAux << endl;
@@ -597,7 +597,7 @@ int iblCalib(const std::string& InDir, const std::string& THRscan, const std::st
             continue;
         }
 
-        TDirectory *dirRod = roTotDir->mkdir(rodName);
+        TDirectory *dirRod = roTotDir->mkdir(rodName.c_str());
 
         TList *modKeyList = (TList *)rodDir->GetListOfKeys();
         TIter modItr(modKeyList);
@@ -610,7 +610,7 @@ int iblCalib(const std::string& InDir, const std::string& THRscan, const std::st
         float occuChrgs[nToTibl][16 * npsFEs];
 
 #if defined(DEMOXCHECK)
-        TString feName_maxDevChrg = "", feName_maxDevToT = "";
+        std::string feName_maxDevChrg = "", feName_maxDevToT = "";
         float maxDevChrg = -9., maxDevToT = -9., avgDevChrg = 0., avgDevToT = 0.;
 
         vector<TH1F *> h1d_totSprd(nToTibl - 1, nullptr);
@@ -629,10 +629,10 @@ int iblCalib(const std::string& InDir, const std::string& THRscan, const std::st
         
         while ((modKey = (TKey *)modItr()))
         {
-            TString modName(modKey->GetName());
+            std::string modName(modKey->GetName());
             string modStr(modKey->GetName());
 
-            TDirectory *dirMod = dirRod->mkdir(modName);
+            TDirectory *dirMod = dirRod->mkdir(modName.c_str());
             bool ibl3Dfe0 = false, ibl3Dfe1 = false;
 
             int hashID = -1, hashIDL = -1, hashIDR = -1;
@@ -693,11 +693,11 @@ int iblCalib(const std::string& InDir, const std::string& THRscan, const std::st
             // Fill ToT-Chrg for pixels per module
             for (int c = 0; c < nchargeIBL; c++)
             {
-                TString totHistDirPath = modName + "/" + totHistName + "/A0/B0/C";
+                std::string totHistDirPath = modName + "/" + totHistName + "/A0/B0/C";
                 totHistDirPath += std::to_string(c);
 
                 std::unique_ptr<TH2F> h2dTot;
-                TDirectoryFile* totHistDir(static_cast<TDirectoryFile*> (rodDir->Get(totHistDirPath)));
+                TDirectoryFile* totHistDir(static_cast<TDirectoryFile*> (rodDir->Get(totHistDirPath.c_str())));
                 if(!totHistDir){
                     std::cout<<" Missing totHistDir in : " << totHistDirPath << endl;
                     abort();
@@ -712,7 +712,7 @@ int iblCalib(const std::string& InDir, const std::string& THRscan, const std::st
                 }
 
                 unique_ptr<TH2F> h2dTotAux;
-                TDirectoryFile* totHistDirAux(static_cast<TDirectoryFile*>(rodDirAux->Get(totHistDirPath)));
+                TDirectoryFile* totHistDirAux(static_cast<TDirectoryFile*>(rodDirAux->Get(totHistDirPath.c_str())));
                 if (!totHistDirAux)
                 {
                     std::cout<<" Missing totHistDir in : " << totHistDirPath << endl;
@@ -728,9 +728,9 @@ int iblCalib(const std::string& InDir, const std::string& THRscan, const std::st
                     std::cout<<" Unrecoverable error in  : " <<__LINE__ <<" of CalibrateIBL.cxx\n";
                     abort();
                 }
-                TString totSigHistDirPath = modName + "/" + totSigHistName + "/A0/B0/C";
+                std::string totSigHistDirPath = modName + "/" + totSigHistName + "/A0/B0/C";
                 totSigHistDirPath += std::to_string(c);
-                TDirectoryFile* totSigHistDir (static_cast<TDirectoryFile*>(rodDir->Get(totSigHistDirPath)));
+                TDirectoryFile* totSigHistDir (static_cast<TDirectoryFile*>(rodDir->Get(totSigHistDirPath.c_str())));
                 unique_ptr<TH2F> h2dTotSig (static_cast<TH2F*> ((static_cast<TKey*>(totSigHistDir->GetListOfKeys()->First()))->ReadObj()));
                 h2dTotSig->SetDirectory(0);
                 
@@ -1079,9 +1079,9 @@ int iblCalib(const std::string& InDir, const std::string& THRscan, const std::st
 
                 //   prepare a map sor sorting
                 string Idx = "I" + ss.str();
-                vector<TString> modName2prt;
+                vector<std::string> modName2prt;
                 modName2prt.push_back(modName);
-                modName2prt.push_back((TString)(Idx));
+                modName2prt.push_back((std::string)(Idx));
                 //  unfortunately some tuning is necessary to satisfy dataBase reauirements
                 //  5 for module ID, 4 for threshold, nToTibl - 1 for charges at ToT, 3 for ResToT
                 std::vector<Double_t> prtAux;
@@ -1135,8 +1135,8 @@ int iblCalib(const std::string& InDir, const std::string& THRscan, const std::st
                 prtAux.push_back(parP0);
                 prtAux.push_back(parP1);
 
-                std::pair<vector<TString>, vector<Double_t>> payloadDB = std::pair<vector<TString>, vector<Double_t>>(modName2prt, prtAux);
-                ModuDataToPrint.insert(std::pair<float, std::pair<vector<TString>, vector<Double_t>>>(modHash, payloadDB));
+                std::pair<vector<std::string>, vector<Double_t>> payloadDB = std::pair<vector<std::string>, vector<Double_t>>(modName2prt, prtAux);
+                ModuDataToPrint.insert(std::pair<float, std::pair<vector<std::string>, vector<Double_t>>>(modHash, payloadDB));
             } // end 1'st loop over FrontEnds
 
             cntMod++;
@@ -1157,7 +1157,7 @@ int iblCalib(const std::string& InDir, const std::string& THRscan, const std::st
         }
         h1d_totSprd.clear();
 
-        TString hn = "";
+        std::string hn = "";
 
         TH2F *h2_badChrgs = new TH2F(rodName + "ChargeOccupancy", "Occupancy ", nchargeIBL, 0, nchargeIBL, 16 * npsFEs, 0, 16 * npsFEs);
         hn = "Occupancy along charges @ " + rodName;
@@ -1177,9 +1177,9 @@ int iblCalib(const std::string& InDir, const std::string& THRscan, const std::st
                 float occu = occuPhiEta[c][cntRod * 16 * npsFEs + sfe];
                 float nt = 10. - floor(10. * occu + 0.5);
                 PhiEta += 0.1 * nt;
-                TString modchrg = (TString)(modNames[sfe] + "_Chrg_" + c);
+                std::string modchrg = (std::string)(modNames[sfe] + "_Chrg_" + c);
                 if (nt > 0.01)
-                    badModules_Order_detailed.insert(std::pair<float, TString>(1. - occu, modchrg));
+                    badModules_Order_detailed.insert(std::pair<float, std::string>(1. - occu, modchrg));
                 if (nt > 5.)
                     continue;
                 if (nt < 0.1)
@@ -1190,8 +1190,8 @@ int iblCalib(const std::string& InDir, const std::string& THRscan, const std::st
             }
             PhiEta /= nchargeIBL;
             if (PhiEta > 0.01)
-                badModules_Order.insert(std::pair<float, TString>(PhiEta,
-                                                                  (TString)(modNames[sfe])));
+                badModules_Order.insert(std::pair<float, std::string>(PhiEta,
+                                                                  (std::string)(modNames[sfe])));
 
             for (int t = 1; t < nToTibl; t++)
             {
@@ -1202,7 +1202,7 @@ int iblCalib(const std::string& InDir, const std::string& THRscan, const std::st
                 fillToT = true;
             }
 
-            TString shortName = modNames[sfe].substr(9, 13).c_str();
+            std::string shortName = modNames[sfe].substr(9, 13).c_str();
             h2_badChrgs->GetYaxis()->SetBinLabel(sfe + 1, shortName);
             h2_badToT->GetYaxis()->SetBinLabel(sfe + 1, shortName);
             h2_badChrgs->SetStats(kFALSE);
@@ -1263,11 +1263,11 @@ int iblCalib(const std::string& InDir, const std::string& THRscan, const std::st
     }
     h1_ChrgEntry.clear();
 
-    for (std::map<float, TString>::const_iterator itr = devChrg_Order.begin();
+    for (std::map<float, std::string>::const_iterator itr = devChrg_Order.begin();
          itr != devChrg_Order.end(); ++itr)
         logout << " Charge dev order : " << itr->second << " : " << itr->first << endl;
 
-    for (std::map<float, TString>::const_iterator itr = devToT_Order.begin();
+    for (std::map<float, std::string>::const_iterator itr = devToT_Order.begin();
          itr != devToT_Order.end(); ++itr)
         logout << " ToT dev order : " << itr->second << " : " << itr->first << endl;
 
@@ -1299,11 +1299,11 @@ int iblCalib(const std::string& InDir, const std::string& THRscan, const std::st
     // txtDB << "########################  TXT for IBL calibration  ____Start : _>        ###########################" << endl;
 
     //  now print the dataBase payloads in a TXT format
-    for (std::map<float, std::pair<vector<TString>, vector<Double_t>>>::const_iterator itr = ModuDataToPrint.begin();
+    for (std::map<float, std::pair<vector<std::string>, vector<Double_t>>>::const_iterator itr = ModuDataToPrint.begin();
          itr != ModuDataToPrint.end(); ++itr)
     {
         int hash = floor(itr->first);
-        std::pair<vector<TString>, vector<Double_t>> payload = itr->second;
+        std::pair<vector<std::string>, vector<Double_t>> payload = itr->second;
         vector<Double_t> fe = payload.second;
 
         txtDB << hash << "  ";
@@ -1337,15 +1337,15 @@ int iblCalib(const std::string& InDir, const std::string& THRscan, const std::st
 
     // statistics for BAD frontends, only for ELOG reports
     logout << " modules lacking in RD during Threshold scan : " << std::endl;
-    for (std::multimap<float, TString, std::greater<float>>::const_iterator itr = badThr_Order.begin(); itr != badThr_Order.end(); ++itr)
+    for (std::multimap<float, std::string, std::greater<float>>::const_iterator itr = badThr_Order.begin(); itr != badThr_Order.end(); ++itr)
         logout << " " << itr->second << "   " << (itr->first) * 100. << "%" << endl;
 
     logout << " modules lacking in RD during ToT scan : " << std::endl;
-    for (std::multimap<float, TString, std::greater<float>>::const_iterator itr = badModules_Order.begin(); itr != badModules_Order.end(); ++itr)
+    for (std::multimap<float, std::string, std::greater<float>>::const_iterator itr = badModules_Order.begin(); itr != badModules_Order.end(); ++itr)
         logout << " " << itr->second << "   " << (itr->first) * 100. << "%" << endl;
 
     logout << " modules lacking in RD at certain charges during ToT scan : " << std::endl;
-    for (std::multimap<float, TString, std::greater<float>>::const_iterator itr = badModules_Order_detailed.begin();
+    for (std::multimap<float, std::string, std::greater<float>>::const_iterator itr = badModules_Order_detailed.begin();
          itr != badModules_Order_detailed.end(); ++itr)
         logout << " " << itr->second << "   " << (itr->first) * 100. << "%" << endl;
 

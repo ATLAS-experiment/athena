@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "AFP_GlobReco/Parameterization.h"
@@ -44,8 +44,9 @@ namespace AFP {
       for (int iPoly = 0; iPoly < m_numberOfPolynomials; iPoly++) {
         int N = 0;
         file >> N;
-        double value;
-
+        double value{};
+        //assume we trust the file source
+        //coverity[TAINTED_SCALAR]
         for (int i = 0; i <= N; i++) {
           if (file.eof()) {
             std::stringstream errorMsg;

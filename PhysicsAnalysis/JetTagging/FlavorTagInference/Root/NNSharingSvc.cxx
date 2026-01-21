@@ -3,10 +3,10 @@
 */
 
 #include "FlavorTagInference/NNSharingSvc.h"
-#include "PathResolver/PathResolver.h"
 #ifndef XAOD_ANALYSIS
-#include "FlavorTagInference/SaltModelTriton.h"
+#include "SaltModelTriton.h"
 #endif
+#include "PathResolver/PathResolver.h"
 #include "src/hash.h"
 
 namespace FlavorTagInference {

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ////////////////////////////////////////////////////////////////
@@ -373,16 +373,16 @@ void TrackHandle_TrackContainer::ensureInitTrackStateCache()
 
 
 void TrackHandle_TrackContainer::ensureInitTSOSs(
-    std::vector<AssociatedObjectHandleBase*>*& ascobjs) {
+    std::unique_ptr<std::vector<AssociatedObjectHandleBase*>>& ascobjs) {
   if (ascobjs)
     return;
   ensureInitTrackStateCache();
 
-  ascobjs = new std::vector<AssociatedObjectHandleBase*>;
+  ascobjs = std::make_unique<std::vector<AssociatedObjectHandleBase*>>();
   unsigned int index =0;
 
   for (const auto trackState : m_trackStates) {
-    addTrackState(trackState, ascobjs, index++);
+    addTrackState(trackState, ascobjs.get(), index++);
   }
 }
 

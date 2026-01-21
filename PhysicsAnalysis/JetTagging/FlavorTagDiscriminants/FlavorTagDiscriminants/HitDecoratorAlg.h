@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef HIT_DECORATOR_ALG_HH
@@ -14,16 +14,16 @@
 
 // Read and write handle keys
 #include "StoreGate/WriteDecorHandleKey.h"
-#include "StoreGate/ReadDecorHandleKey.h"
+#include "StoreGate/ReadHandleKey.h"
 
 
 
 namespace FlavorTagDiscriminants {
 
   class HitDecoratorAlg: public AthReentrantAlgorithm {
-    
+
     public:
-    
+
       HitDecoratorAlg(const std::string& name,
                             ISvcLocator* pSvcLocator );
 
@@ -42,13 +42,13 @@ namespace FlavorTagDiscriminants {
         this,"eventInfo","EventInfo","Key for EventInfo"};
 
       SG::WriteDecorHandleKey< xAOD::TrackMeasurementValidationContainer > m_OutputHitXKey {
-        this, "hitsXRelToBeamspotDecorator", "HitsXRelToBeamspot", "Key for output hits x coordinate relative to beamspot"};
+        this, "hitsXRelToBeamspotDecorator", m_HitContainerKey, "HitsXRelToBeamspot", "Key for output hits x coordinate relative to beamspot"};
 
       SG::WriteDecorHandleKey< xAOD::TrackMeasurementValidationContainer > m_OutputHitYKey {
-        this, "hitsYRelToBeamspotDecorator", "HitsYRelToBeamspot", "Key for output hits y coordinate relative to beamspot"};
+        this, "hitsYRelToBeamspotDecorator", m_HitContainerKey, "HitsYRelToBeamspot", "Key for output hits y coordinate relative to beamspot"};
 
       SG::WriteDecorHandleKey< xAOD::TrackMeasurementValidationContainer > m_OutputHitZKey {
-        this, "hitsZRelToBeamspotDecorator", "HitsZRelToBeamspot", "Key for output hits z coordinate relative to beamspot"};
+        this, "hitsZRelToBeamspotDecorator", m_HitContainerKey, "HitsZRelToBeamspot", "Key for output hits z coordinate relative to beamspot"};
 
   };
 }

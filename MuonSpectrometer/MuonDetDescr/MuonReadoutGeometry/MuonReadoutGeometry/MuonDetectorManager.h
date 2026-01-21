@@ -148,6 +148,8 @@ namespace MuonGM {
 
         void setNswAsBuilt(const NswAsBuiltDbData* nswAsBuiltData);
         void setsTGCAsBuilt(const sTGCAsBuiltData* stgcAsBuilt);
+        void setMmAsBuilt2(const sTGCAsBuiltData* mmAsBuilt2);
+
 #ifndef SIMULATIONBASE
         const NswAsBuilt::StripCalculator* getMMAsBuiltCalculator() const { 
             return  m_nswAsBuilt ? m_nswAsBuilt->microMegaData.get() : nullptr; 
@@ -162,6 +164,9 @@ namespace MuonGM {
 
         const sTGCAsBuiltData* getsTGCAsBuilt() const {
             return m_stgcAsBuildData;
+        }
+        const sTGCAsBuiltData* getMmAsBuilt2() const {
+            return m_mmAsBuilt2;
         }
 
         const NswPassivationDbData* getMMPassivation() const {
@@ -221,6 +226,7 @@ namespace MuonGM {
         const NswAsBuiltDbData* m_nswAsBuilt{nullptr};
         const sTGCAsBuiltData* m_stgcAsBuildData {nullptr};
         const NswPassivationDbData* m_mmPassivation{nullptr};
+        const sTGCAsBuiltData* m_mmAsBuilt2{nullptr};
     
         /// RPC name caches
         std::map<int, int> m_rpcStatToIdx;

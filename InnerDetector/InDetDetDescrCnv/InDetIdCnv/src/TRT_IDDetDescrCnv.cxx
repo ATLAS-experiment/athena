@@ -95,8 +95,6 @@ TRT_IDDetDescrCnv::createObj(IOpaqueAddress* /*pAddr*/, DataObject*& pObj)
 	// create the helper
 	m_trtId = new TRT_ID;
 	initHelper = true;
-        // add in message service for printout
-        m_trtId->setMessageSvc(msgSvc());
     }
     
     if (initHelper) {

@@ -1,12 +1,12 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #include "MuonCalibMath/LegendrePolynomial.h"
-#include "MuonCalibMath/LegendrePoly.h"
+#include "Acts/Utilities/detail/Polynomials.hpp"
 #include "cmath"
 
 using namespace MuonCalib;
 
 double LegendrePolynomial::value(const int  k, const double  x) const {
-    return std::legendre(k, x);
+    return Acts::detail::legendrePoly(x,k);
 }

@@ -135,7 +135,7 @@ namespace CP
 	  } else
 	  {
 	    // otherwise just add all of them flat
-	    for (auto mysys : sys.second)
+	    for (const auto & mysys : sys.second)
 	    {
 	      subresult.push_back(CP::SystematicSet());
 	      subresult.back().insert(mysys);
@@ -233,7 +233,7 @@ namespace CP
   calcBaseSys (const SystematicSet& sysList)
   {
     std::map<std::string,std::vector<SystematicVariation> > basesys;
-    for (auto sys : sysList)
+    for (const auto & sys : sysList)
     {
       basesys[sys.basename()].push_back (sys);
     }

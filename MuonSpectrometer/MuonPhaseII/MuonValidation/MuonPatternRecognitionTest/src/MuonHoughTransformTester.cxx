@@ -311,7 +311,7 @@ namespace MuonValR4 {
             const MuonGMR4::MuonReadoutElement* RE = m_detMgr->getReadoutElement(hitId); 
             const IdentifierHash hash{m_idHelperSvc->isMdt(hitId) ? RE->measurementHash(hitId)
                                                                   : RE->layerHash(hitId) };
-            const Amg::Transform3D localToChamber = RE->msSector()->globalToLocalTrans(gctx) * RE->localToGlobalTrans(gctx, hash);
+            const Amg::Transform3D localToChamber = RE->msSector()->globalToLocalTransform(gctx) * RE->localToGlobalTransform(gctx, hash);
             const Amg::Vector3D chamberPos = localToChamber * xAOD::toEigen(hit->localPosition()); 
             minYhit = std::min(chamberPos.y(), minYhit); 
             maxYhit = std::max(chamberPos.y(), maxYhit); 

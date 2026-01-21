@@ -79,3 +79,6 @@ def commonRunArgsToFlags(runArgs,configFlags):
 
     if hasattr(runArgs,"mpi"):
         configFlags.Exec.MPI = runArgs.mpi
+
+    if hasattr(runArgs,"stopOnSignal"):
+        configFlags.Exec.StopOnSignal = runArgs.stopOnSignal

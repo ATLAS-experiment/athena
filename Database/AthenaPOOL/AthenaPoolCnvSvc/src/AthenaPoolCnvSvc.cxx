@@ -62,6 +62,7 @@ StatusCode AthenaPoolCnvSvc::initialize() {
             ATH_MSG_WARNING(std::format("Invalid MaxFileSize value: {}", std::string(start, end)));
          }
          std::string databaseName = maxFileSizeSpec.substr(0, maxFileSizeSpec.find_first_of(" 	="));
+         std::unique_lock<std::mutex> lock(m_mutex);
          m_databaseMaxFileSize.emplace(std::move(databaseName), maxFileSize);
       } else {
          if (auto [ptr, ec] = std::from_chars(maxFileSizeSpec.data(), maxFileSizeSpec.data() + maxFileSizeSpec.size(), m_domainMaxFileSize); ec != std::errc{}) {
@@ -181,14 +182,14 @@ StatusCode AthenaPoolCnvSvc::createObj(IOpaqueAddress* pAddress, DataObject*& re
    if (!m_persSvcPerInputType.empty()) { // Use separate PersistencySvc for each input data type
       TokenAddress* tokAddr = dynamic_cast<TokenAddress*>(pAddress);
       if (tokAddr != nullptr && tokAddr->getToken() != nullptr && (tokAddr->getToken()->contID().starts_with(m_persSvcPerInputType.value() + "(") || tokAddr->getToken()->contID().starts_with(m_persSvcPerInputType.value() + "_"))) {
-         const unsigned int maxContext = m_poolSvc->getInputContextMap().size();
+         const unsigned int maxContext = m_poolSvc->getInputContextMapSize();
          const unsigned int auxContext = m_poolSvc->getInputContext(tokAddr->getToken()->classID().toString() + tokAddr->getToken()->dbID().toString(), 1);
          char text[32];
          const std::string contextStr = std::format("[CTXT={:08X}]", auxContext);
          std::strncpy(text, contextStr.c_str(), sizeof(text) - 1);
          text[sizeof(text) - 1] = '\0';
-         if (m_poolSvc->getInputContextMap().size() > maxContext) {
-            if (m_poolSvc->setAttribute("TREE_CACHE", "0", pool::DbType(pool::ROOTTREE_StorageType).type(), "FID:" + tokAddr->getToken()->dbID().toString(), m_persSvcPerInputType.value(), auxContext).isSuccess()) {
+         if (m_poolSvc->getInputContextMapSize() > maxContext) {
+            if (!m_poolSvc->setAttribute("TREE_CACHE", "0", pool::DbType(pool::ROOTTREE_StorageType).type(), "FID:" + tokAddr->getToken()->dbID().toString(), m_persSvcPerInputType.value(), auxContext).isSuccess()) {
                ATH_MSG_DEBUG("setInputAttribute failed to switch off TTreeCache for id = " << auxContext << ".");
             }
          }
@@ -576,7 +577,7 @@ StatusCode AthenaPoolCnvSvc::setInputAttributes(const std::string& fileName) {
       // Loop over all extra event input contexts and switch off TTreeCache
       const auto& extraInputContextMap = m_poolSvc->getInputContextMap();
       for (const auto& [label, id]: extraInputContextMap) {
-         if (m_poolSvc->setAttribute("TREE_CACHE", "0", pool::DbType(pool::ROOTTREE_StorageType).type(), m_lastInputFileName, m_persSvcPerInputType.value(), id).isSuccess()) {
+         if (!m_poolSvc->setAttribute("TREE_CACHE", "0", pool::DbType(pool::ROOTTREE_StorageType).type(), m_lastInputFileName, m_persSvcPerInputType.value(), id).isSuccess()) {
             ATH_MSG_DEBUG("setInputAttribute failed to switch off TTreeCache for = " << label << ".");
          }
       }
@@ -611,18 +612,16 @@ void AthenaPoolCnvSvc::extractPoolAttributes(const StringArrayProperty& property
       valueString.clear();
       using Gaudi::Utils::AttribStringParser;
       for (const AttribStringParser::Attrib& attrib : AttribStringParser (propertyValue)) {
-         const std::string tag = attrib.tag;
-         const std::string val = attrib.value;
-         if (tag == "DatabaseName") {
-            databaseName = std::move(val);
-         } else if (tag == "ContainerName") {
+         if (attrib.tag == "DatabaseName") {
+            databaseName = attrib.value;
+         } else if (attrib.tag == "ContainerName") {
             if (databaseName.empty()) {
                databaseName = "*";
             }
-            containerName = std::move(val);
+            containerName = attrib.value;
          } else {
-            attributeName = std::move(tag);
-            valueString = std::move(val);
+            attributeName = attrib.tag;
+            valueString = attrib.value;
          }
       }
       if (!attributeName.empty() && !valueString.empty()) {

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //////////////////////////////////////////////////////////
@@ -306,6 +306,9 @@ public:
   unsigned int GetRunNumber() const {return _runNumber;}
 
   void DoAnalysis();
+
+  ZDCTreeAnalysis(const ZDCTreeAnalysis&) = delete;
+  ZDCTreeAnalysis& operator=(const ZDCTreeAnalysis&) = delete;
 };
 
 

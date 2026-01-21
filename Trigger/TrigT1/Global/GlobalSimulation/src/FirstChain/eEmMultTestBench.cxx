@@ -1,7 +1,6 @@
 //  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 #include "eEmMultTestBench.h"
-#include "../IO/IeEmTOB.h"
 #include "../IO/eEmTOB.h"
 #include "../IO/CommonTOB.h"
 #include "../IO/TipWord_clid.h"
@@ -72,7 +71,7 @@ namespace GlobalSim {
 
         
     auto padded_line = std::string();
-    auto tobs = std::make_unique<GlobalSim::IOBitwise::IeEmTOBContainer>();
+    auto tobs = std::make_unique<GlobalSim::IOBitwise::eEmTOBContainer>();
 
     while (true) {
       std::getline(m_tob_stream, padded_line);
@@ -90,7 +89,7 @@ namespace GlobalSim {
 
     }
 
-    using WH_TOB = SG::WriteHandle<GlobalSim::IOBitwise::IeEmTOBContainer>;
+    using WH_TOB = SG::WriteHandle<GlobalSim::IOBitwise::eEmTOBContainer>;
     auto h_write_tobs = WH_TOB(m_eEmTOBContainer_WriteKey);    
     CHECK(h_write_tobs.record(std::move(tobs)));
 
@@ -112,7 +111,7 @@ namespace GlobalSim {
 
 
 
-  IeEmTOB*
+  eEmTOB*
   eEmMultTestBench::make_tob(const std::string& trimmed_line) const {
     ATH_MSG_INFO("in make_tob> line: " <<trimmed_line);
 
@@ -120,21 +119,21 @@ namespace GlobalSim {
     std::string et, eta, phi, RHad, WsTot, REta, seed, UpNotDown, SeedIsMax;
     ss >> et;
 
-    const auto& s_et_width = ICommonTOB::s_et_width;
-    const auto& s_eta_width = ICommonTOB::s_eta_width;
-    const auto& s_phi_width = ICommonTOB::s_phi_width;
+    const auto& s_et_width = CommonTOB::s_et_width;
+    const auto& s_eta_width = CommonTOB::s_eta_width;
+    const auto& s_phi_width = CommonTOB::s_phi_width;
 
     auto common = CommonTOB(std::bitset<s_et_width>(et),
 			    std::bitset<s_eta_width>(eta),
 			    std::bitset<s_phi_width>(phi));
 
 
-    const auto&  s_RHad_width = IeEmTOB::s_RHad_width;
-    const auto&  s_REta_width = IeEmTOB::s_REta_width;
-    const auto&  s_WsTot_width = IeEmTOB::s_WsTot_width;
-    const auto&  s_Seed_width = IeEmTOB::s_Seed_width;
-    const auto&  s_UpNotDown_width = IeEmTOB::s_UpNotDown_width;
-    const auto&  s_SeedIsMax_width = IeEmTOB::s_SeedIsMax_width;
+    const auto&  s_RHad_width = eEmTOB::s_RHad_width;
+    const auto&  s_REta_width = eEmTOB::s_REta_width;
+    const auto&  s_WsTot_width = eEmTOB::s_WsTot_width;
+    const auto&  s_Seed_width = eEmTOB::s_Seed_width;
+    const auto&  s_UpNotDown_width = eEmTOB::s_UpNotDown_width;
+    const auto&  s_SeedIsMax_width = eEmTOB::s_SeedIsMax_width;
 
 
     return 

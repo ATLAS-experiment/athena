@@ -206,6 +206,9 @@ for opt in str(evgenConfig).split(os.linesep):
     evgenLog.info(opt)
 evgenLog.info(".transform =                   Gen_tf")      
 
+## Print platform
+evgenLog.info(".platform = "+str(os.environ['BINARY_TAG']))
+
 ## Sort and check generator name / JO name consistency
 ##
 ## Check that the common fragments are not obsolete:

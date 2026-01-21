@@ -34,22 +34,33 @@ namespace CP
     for (const auto& decorationName : m_doubleDecorations) {
       auto [it, added] = m_doubleWriteHandleKeys.emplace(std::make_unique<SG::ConstAccessor<double>>(decorationName), SG::WriteDecorHandleKey<xAOD::TauJetContainer>(m_tausKey.key() + "." + m_prefix + decorationName));
       ANA_CHECK(it->second.initialize());
+      // register output decoration type for output algorithms
+      // note that even though we read a double we write it as a float
+      SG::ConstAccessor<float> (it->second.key().substr (it->second.key().find_last_of(".") + 1));
     }
     for (const auto& decorationName : m_floatDecorations) {
       auto [it, added] = m_floatWriteHandleKeys.emplace(std::make_unique<SG::ConstAccessor<float>>(decorationName), SG::WriteDecorHandleKey<xAOD::TauJetContainer>(m_tausKey.key() + "." + m_prefix + decorationName));
       ANA_CHECK(it->second.initialize());
+      // register output decoration type for output algorithms
+      SG::ConstAccessor<float> (it->second.key().substr (it->second.key().find_last_of(".") + 1));
     }
     for (const auto& decorationName : m_intDecorations) {
       auto [it, added] = m_intWriteHandleKeys.emplace(std::make_unique<SG::ConstAccessor<int>>(decorationName), SG::WriteDecorHandleKey<xAOD::TauJetContainer>(m_tausKey.key() + "." + m_prefix + decorationName));
       ANA_CHECK(it->second.initialize());
+      // register output decoration type for output algorithms
+      SG::ConstAccessor<int> (it->second.key().substr (it->second.key().find_last_of(".") + 1));
     }
     for (const auto& decorationName : m_unsignedIntDecorations) {
       auto [it, added] = m_unsignedIntWriteHandleKeys.emplace(std::make_unique<SG::ConstAccessor<unsigned int>>(decorationName), SG::WriteDecorHandleKey<xAOD::TauJetContainer>(m_tausKey.key() + "." + m_prefix + decorationName));
       ANA_CHECK(it->second.initialize());
+      // register output decoration type for output algorithms
+      SG::ConstAccessor<unsigned int> (it->second.key().substr (it->second.key().find_last_of(".") + 1));
     }
     for (const auto& decorationName : m_charDecorations) {
       auto [it, added] = m_charWriteHandleKeys.emplace(std::make_unique<SG::ConstAccessor<char>>(decorationName), SG::WriteDecorHandleKey<xAOD::TauJetContainer>(m_tausKey.key() + "." + m_prefix + decorationName));
       ANA_CHECK(it->second.initialize());
+      // register output decoration type for output algorithms
+      SG::ConstAccessor<char> (it->second.key().substr (it->second.key().find_last_of(".") + 1));
     }
 
     if (m_truthDecayModeKey.contHandleKey().key() == m_truthDecayModeKey.key()) {
@@ -64,6 +75,12 @@ namespace CP
     ANA_CHECK(m_truthDecayModeKey.initialize());
     ANA_CHECK(m_truthParticleTypeKey.initialize());
     ANA_CHECK(m_partonTruthLabelIDKey.initialize());
+
+    // register output decoration type for output algorithms
+    // TO CHECK: should these be of type `float`???
+    SG::ConstAccessor<float> (m_truthDecayModeKey.key().substr (m_truthDecayModeKey.key().find_last_of(".") + 1));
+    SG::ConstAccessor<float> (m_truthParticleTypeKey.key().substr (m_truthParticleTypeKey.key().find_last_of(".") + 1));
+    SG::ConstAccessor<float> (m_partonTruthLabelIDKey.key().substr (m_partonTruthLabelIDKey.key().find_last_of(".") + 1));
 
     ANA_CHECK(m_truthDecayModeKey.initialize());
     ANA_CHECK(m_truthParticleTypeKey.initialize());

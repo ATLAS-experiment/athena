@@ -69,10 +69,6 @@ namespace xAOD {
 
 /// Size of a possible TTreeCache
 static const ::Int_t CACHE_SIZE = -1;
-/// Name of the event tree
-const char* const TEvent::EVENT_TREE_NAME = "CollectionTree";
-/// Name of the metadata tree
-static const char* const METADATA_TREE_NAME = "MetaData";
 
 TEvent::TEvent(EAuxMode mode) : Event("xAOD::TEvent"), m_auxMode(mode) {}
 
@@ -105,10 +101,22 @@ TEvent::~TEvent() {
 
 /// @returns The auxiliary data access mode currently in use
 ///
-TEvent::EAuxMode TEvent::auxMode() const {
+TEvent::EAuxMode TEvent::auxMode() const { return m_auxMode; }
 
-  return m_auxMode;
+void TEvent::setOtherMetaDataTreeNamePattern(const std::string &pattern) {
+  // Only change if pattern provided is not empty
+  if (pattern.size()) {
+    // User provided a regular expression for other MetaData trees
+    m_otherMetaDataTreeNamePattern = std::regex(pattern);
+  }
 }
+
+/// Interface implementation for reading - forward to readFrom below
+StatusCode TEvent::readFrom(TFile& inFile) {
+  ATH_CHECK(readFrom(&inFile));
+  return StatusCode::SUCCESS;
+}
+
 
 /// This function takes care of connecting the event object to a new input
 /// file. It reads in the metadata of the input file needed for reading
@@ -150,7 +158,7 @@ StatusCode TEvent::readFrom(::TFile* file, bool useTreeCache,
   tracer.add(*file);
 
   // Look for the metadata tree:
-  m_inMetaTree = file->Get<TTree>(METADATA_TREE_NAME);
+  m_inMetaTree = file->Get<TTree>(METADATA_OBJECT_NAME);
   if (m_inMetaTree == nullptr) {
     ATH_MSG_ERROR("Couldn't find metadata tree on input. Object is unusable!");
     return StatusCode::FAILURE;
@@ -182,7 +190,8 @@ StatusCode TEvent::readFrom(::TFile* file, bool useTreeCache,
 
   // Helper lambda for collecting the event format metadata from an RNTuple
   // with a given name.
-  auto readEventFormatMetadata = [&](std::string_view thisTreeName) -> StatusCode {
+  auto readEventFormatMetadata =
+      [&](std::string_view thisTreeName) -> StatusCode {
     // Look for the metadata tree:
     TTree* metaTree = file->Get<TTree>(thisTreeName.data());
     if (metaTree == nullptr) {
@@ -192,8 +201,8 @@ StatusCode TEvent::readFrom(::TFile* file, bool useTreeCache,
     }
     // Set metadata entry to be read.
     if (metaTree->LoadTree(0) < 0) {
-      ATH_MSG_ERROR("Failed to load entry 0 for metadata tree \"" << thisTreeName
-                                                                  << "\"");
+      ATH_MSG_ERROR("Failed to load entry 0 for metadata tree \""
+                    << thisTreeName << "\"");
       return StatusCode::FAILURE;
     }
 
@@ -220,7 +229,7 @@ StatusCode TEvent::readFrom(::TFile* file, bool useTreeCache,
 
     // Merge the object into our private member.
     br->GetEntry(0);
-    for (const auto& [key, element] : *format) {
+    for (const auto &[key, element] : *format) {
       m_inputEventFormat.add(element);
     }
 
@@ -236,7 +245,7 @@ StatusCode TEvent::readFrom(::TFile* file, bool useTreeCache,
 
   // Read in the metadata from the "main" metadata ntuple.
   m_inputEventFormat = {};
-  const StatusCode sc = readEventFormatMetadata(METADATA_TREE_NAME);
+  const StatusCode sc = readEventFormatMetadata(METADATA_OBJECT_NAME);
   if (sc.isRecoverable()) {
     m_inTree = nullptr;
     m_inTreeMissing = true;
@@ -257,11 +266,10 @@ StatusCode TEvent::readFrom(::TFile* file, bool useTreeCache,
       // Make sure the key corresponds to a metadata tree but
       // do not add the current metadata tree in the list of other trees
       // and do not add the metadata tree handlers to the list
-      if ((keyName != METADATA_TREE_NAME) &&
-          (keyName.find("MetaData") != std::string::npos) &&
-          !(keyName.find("MetaDataHdr") != std::string::npos)) {
+      if ((keyName != METADATA_OBJECT_NAME) &&
+          std::regex_match(keyName, m_otherMetaDataTreeNamePattern)) {
         // Make sure key corresponds to a tree
-        const char* className = ((::TKey*)lKeys->At(iKey))->GetClassName();
+        const char* className = ((::TKey* )lKeys->At(iKey))->GetClassName();
         static constexpr Bool_t LOAD = kFALSE;
         static constexpr Bool_t SILENT = kTRUE;
         ::TClass* cl = ::TClass::GetClass(className, LOAD, SILENT);
@@ -274,7 +282,7 @@ StatusCode TEvent::readFrom(::TFile* file, bool useTreeCache,
   }
 
   // Loop over the other metadata trees found (if any).
-  for (const std::string& metaTreeName : lOtherMetaTreeNames) {
+  for (const std::string &metaTreeName : lOtherMetaTreeNames) {
     ATH_CHECK(readEventFormatMetadata(metaTreeName));
   }
 
@@ -296,7 +304,7 @@ StatusCode TEvent::readFrom(::TFile* file, bool useTreeCache,
   // Init the statistics collection.
   ATH_CHECK(initStats());
   // Update the event counter in the statistics object.
-  xAOD::ReadStats& stats = IOStats::instance().stats();
+  xAOD::ReadStats &stats = IOStats::instance().stats();
   if (m_inTree) {
     stats.setNEvents(stats.nEvents() + m_inTree->GetEntries());
   }
@@ -333,7 +341,7 @@ StatusCode TEvent::readFrom(::TTree* tree, bool useTreeCache) {
   // Remember the info:
   m_inTree = nullptr;
   m_inTreeMissing = false;
-  m_inChain = dynamic_cast<TChain*>(tree);
+  m_inChain = dynamic_cast<TChain* >(tree);
   m_inMetaTree = nullptr;
 
   if (m_inChain) {
@@ -358,7 +366,7 @@ StatusCode TEvent::readFrom(::TTree* tree, bool useTreeCache) {
       return StatusCode::FAILURE;
     }
     const ::TChainElement* chEl =
-        dynamic_cast<const ::TChainElement*>(files->At(0));
+        dynamic_cast<const ::TChainElement* >(files->At(0));
     if (!chEl) {
       ATH_MSG_ERROR("Couldn't cast object to TChainElement");
       return StatusCode::FAILURE;
@@ -458,7 +466,7 @@ StatusCode TEvent::finishWritingTo(::TFile* file) {
   // Notify the listeners that they should write out their metadata, if they
   // have any.
   const TIncident incident(IncidentType::MetaDataStop);
-  for (auto& listener : m_listeners) {
+  for (auto &listener : m_listeners) {
     listener->handle(incident);
   }
 
@@ -471,14 +479,14 @@ StatusCode TEvent::finishWritingTo(::TFile* file) {
   file->cd();
 
   // Check if there's already a metadata tree in the output:
-  if (file->Get(METADATA_TREE_NAME)) {
+  if (file->Get(METADATA_OBJECT_NAME)) {
     // Let's assume that the metadata is complete in the file already.
     return StatusCode::SUCCESS;
   }
 
   // Create the metadata tree.
   auto metatree =
-      std::make_unique<TTree>(METADATA_TREE_NAME, "xAOD metadata tree");
+      std::make_unique<TTree>(METADATA_OBJECT_NAME, "xAOD metadata tree");
   metatree->SetAutoSave(10000);
   metatree->SetAutoFlush(-30000000);
   metatree->SetDirectory(file);
@@ -489,7 +497,7 @@ StatusCode TEvent::finishWritingTo(::TFile* file) {
         "EventFormat",
         SG::normalizedTypeinfoName(typeid(xAOD::EventFormat)).c_str(),
         &m_outputEventFormat);
-  } catch (const CxxUtils::ClassName::ExcBadClassName& e) {
+  } catch (const CxxUtils::ClassName::ExcBadClassName &e) {
     ::Error("xAOD::TEvent::finishWritingTo",
             XAOD_MESSAGE("Class name parsing fails for %s ! "), e.what());
     return StatusCode::FAILURE;
@@ -498,10 +506,10 @@ StatusCode TEvent::finishWritingTo(::TFile* file) {
   // Create a copy of the m_outputMetaObjects variable. This is necessary
   // because the putAux(...) function will modify this variable while we
   // loop over it.
-  std::vector<std::pair<std::string, TObjectManager*>> outputMetaObjects;
+  std::vector<std::pair<std::string, TObjectManager* >> outputMetaObjects;
   outputMetaObjects.reserve(m_outputMetaObjects.size());
-  for (const auto& [key, mgr] : m_outputMetaObjects) {
-    TObjectManager* objMgr = dynamic_cast<TObjectManager*>(mgr.get());
+  for (const auto &[key, mgr] : m_outputMetaObjects) {
+    TObjectManager* objMgr = dynamic_cast<TObjectManager* >(mgr.get());
     if (objMgr == nullptr) {
       ATH_MSG_FATAL("Internal logic error detected");
       return StatusCode::FAILURE;
@@ -511,7 +519,7 @@ StatusCode TEvent::finishWritingTo(::TFile* file) {
 
   // Now loop over all the metadata objects that need to be put into the
   // output file:
-  for (auto& [key, mgr] : outputMetaObjects) {
+  for (auto &[key, mgr] : outputMetaObjects) {
 
     // Select a split level depending on whether this is an interface or an
     // auxiliary object:
@@ -559,7 +567,7 @@ StatusCode TEvent::finishWritingTo(::TFile* file) {
 /// @param type The type of the auxiliary store (object/container)
 /// @returns An auxiliary store object that will write to the output
 ///
-SG::IAuxStore* TEvent::recordAux(const std::string& key,
+SG::IAuxStore* TEvent::recordAux(const std::string &key,
                                  SG::IAuxStoreHolder::AuxStoreType type) {
 
   // A sanity check:
@@ -603,7 +611,7 @@ SG::IAuxStore* TEvent::recordAux(const std::string& key,
   }
 
   // Check that it is of the right type:
-  TAuxManager* mgr = dynamic_cast<TAuxManager*>(itr->second.get());
+  TAuxManager* mgr = dynamic_cast<TAuxManager* >(itr->second.get());
   if (!mgr) {
     ATH_MSG_ERROR("Internal logic error detected");
     return nullptr;
@@ -715,7 +723,7 @@ SG::IAuxStore* TEvent::recordAux(const std::string& key,
     if (m_auxMode == kAthenaAccess) {
       // In kAthenaAccess mode we need to use getInputObject(...) to load
       // all the input objects correctly.
-      for (auto& [key, mgr] : m_inputObjects) {
+      for (auto &[key, mgr] : m_inputObjects) {
         static const std::string dynStorePostfix = "Aux.Dynamic";
         if (key.ends_with(dynStorePostfix)) {
           // Ignore the dynamic store objects. They get loaded through
@@ -732,7 +740,7 @@ SG::IAuxStore* TEvent::recordAux(const std::string& key,
       }
     } else {
       // In a "reasonable" access mode, we do something very simple:
-      for (auto& [key, mgr] : m_inputObjects) {
+      for (auto &[key, mgr] : m_inputObjects) {
         result += mgr->getEntry(getall);
       }
     }
@@ -740,7 +748,7 @@ SG::IAuxStore* TEvent::recordAux(const std::string& key,
 
   // Notify the listeners that a new event was loaded:
   const TIncident incident(IncidentType::BeginEvent);
-  for (auto& listener : m_listeners) {
+  for (auto &listener : m_listeners) {
     listener->handle(incident);
   }
 
@@ -839,12 +847,12 @@ SG::IAuxStore* TEvent::recordAux(const std::string& key,
   // called inside the loop may itself add elements to the m_outputObject
   // container.
   std::string unsetObjects;
-  std::vector<std::pair<std::string, TVirtualManager*>> outputObjectsCopy;
+  std::vector<std::pair<std::string, TVirtualManager* >> outputObjectsCopy;
   outputObjectsCopy.reserve(m_outputObjects.size());
-  for (const auto& [key, mgr] : m_outputObjects) {
+  for (const auto &[key, mgr] : m_outputObjects) {
     outputObjectsCopy.emplace_back(key, mgr.get());
   }
-  for (auto& [key, mgr] : outputObjectsCopy) {
+  for (auto &[key, mgr] : outputObjectsCopy) {
     // Check that a new object was provided in the event:
     if (!mgr->create()) {
       // We are now going to fail. But let's collect the names of
@@ -860,10 +868,9 @@ SG::IAuxStore* TEvent::recordAux(const std::string& key,
     // get added to the output:
     static constexpr bool METADATA = false;
     if (putAux(*m_outTree, *mgr, METADATA).isFailure()) {
-      ATH_MSG_ERROR(
-          "Failed to put dynamic auxiliary variables "
-          "in the output for object \""
-          << key << "\"");
+      ATH_MSG_ERROR("Failed to put dynamic auxiliary variables "
+                    "in the output for object \""
+                    << key << "\"");
       return 0;
     }
   }
@@ -882,7 +889,7 @@ SG::IAuxStore* TEvent::recordAux(const std::string& key,
   }
 
   // Reset the object managers.
-  for (auto& [key, mgr] : m_outputObjects) {
+  for (auto &[key, mgr] : m_outputObjects) {
     mgr->reset();
   }
 
@@ -895,20 +902,17 @@ bool TEvent::hasInput() const {
   return ((m_inTree != nullptr) || (m_inChain != nullptr));
 }
 
-bool TEvent::hasOutput() const {
+bool TEvent::hasOutput() const { return (m_outTree.get() != nullptr); }
 
-  return (m_outTree.get() != nullptr);
-}
-
-StatusCode TEvent::getNames(const std::string& targetClassName,
-                            std::vector<std::string>& vkeys,
+StatusCode TEvent::getNames(const std::string &targetClassName,
+                            std::vector<std::string> &vkeys,
                             bool metadata) const {
   // The results go in here
   std::set<std::string> keys;
 
   // Get list of branches from
   // the input metadata tree or input tree
-  std::vector<TObjArray*> fullListOfBranches = {};
+  std::vector<TObjArray* > fullListOfBranches = {};
   if (metadata) {
     if (m_inMetaTree) {
       // No friend tree expected for metadata tree
@@ -930,7 +934,7 @@ StatusCode TEvent::getNames(const std::string& targetClassName,
         for (TObject* feObj : *fList) {
           if (feObj) {
             // Get corresponding friend tree
-            auto* pElement = dynamic_cast<TFriendElement*>(feObj);
+            auto* pElement = dynamic_cast<TFriendElement* >(feObj);
             if (pElement == nullptr) {
               continue;
             }
@@ -951,7 +955,7 @@ StatusCode TEvent::getNames(const std::string& targetClassName,
       if (obj == nullptr) {
         continue;
       }
-      const TBranch* element = dynamic_cast<const TBranch*>(obj);
+      const TBranch* element = dynamic_cast<const TBranch* >(obj);
       if (!element) {
         ATH_MSG_ERROR("Failure inspecting input data objects");
         return StatusCode::FAILURE;
@@ -968,16 +972,17 @@ StatusCode TEvent::getNames(const std::string& targetClassName,
     }
   }
 
-  const Object_t& inAux = (metadata ? m_inputMetaObjects : m_inputObjects);
+  const Object_t &inAux = (metadata ? m_inputMetaObjects : m_inputObjects);
 
   ATH_MSG_DEBUG("Scanning input objects for \"" << targetClassName << "\"");
-  for (const auto& [key, vmgr] : inAux) {
+  for (const auto &[key, vmgr] : inAux) {
     // All (metadata) objects should be held by TObjectManager objects.
-    const TObjectManager* mgr = dynamic_cast<const TObjectManager*>(vmgr.get());
+    const TObjectManager* mgr =
+        dynamic_cast<const TObjectManager* >(vmgr.get());
     if (mgr == nullptr) {
       continue;
     }
-    const std::string& objClassName = mgr->holder()->getClass()->GetName();
+    const std::string &objClassName = mgr->holder()->getClass()->GetName();
     ATH_MSG_VERBOSE("Inspecting \"" << objClassName << "\" / \"" << key
                                     << "\"");
     if (objClassName == targetClassName) {
@@ -996,7 +1001,7 @@ StatusCode TEvent::getNames(const std::string& targetClassName,
       if (obj == nullptr) {
         continue;
       }
-      const TBranch* element = dynamic_cast<const TBranch*>(obj);
+      const TBranch* element = dynamic_cast<const TBranch* >(obj);
       if (element == nullptr) {
         ATH_MSG_ERROR("Failure inspecting output objects");
         return StatusCode::FAILURE;
@@ -1013,17 +1018,17 @@ StatusCode TEvent::getNames(const std::string& targetClassName,
     }
   }
 
-  const Object_t& outAux = (metadata ? m_outputMetaObjects : m_outputObjects);
+  const Object_t &outAux = (metadata ? m_outputMetaObjects : m_outputObjects);
 
   // Search though the in-memory output objects.
   ATH_MSG_DEBUG("Scanning output objects for \"" << targetClassName << "\"");
-  for (const auto& [key, vmgr] : outAux) {
+  for (const auto &[key, vmgr] : outAux) {
     // All (metadata) objects should be held by TObjectManager objects.
-    TObjectManager* mgr = dynamic_cast<TObjectManager*>(vmgr.get());
+    TObjectManager* mgr = dynamic_cast<TObjectManager* >(vmgr.get());
     if (mgr == nullptr) {
       continue;
     }
-    const std::string& objClassName = mgr->holder()->getClass()->GetName();
+    const std::string &objClassName = mgr->holder()->getClass()->GetName();
     ATH_MSG_VERBOSE("Inspecting \"" << objClassName << "\" / \"" << key
                                     << "\"");
     if (objClassName == targetClassName) {
@@ -1056,7 +1061,7 @@ StatusCode TEvent::getNames(const std::string& targetClassName,
 ///               in case the branch can't be connected to
 /// @return The usual @c StatusCode types
 ///
-StatusCode TEvent::connectObject(const std::string& key, bool silent) {
+StatusCode TEvent::connectObject(const std::string &key, bool silent) {
 
   // A little sanity check:
   if (hasInput() == false) {
@@ -1147,7 +1152,7 @@ StatusCode TEvent::connectObject(const std::string& key, bool silent) {
   Object_t::const_iterator out_itr = m_outputObjects.find(key);
   if (out_itr != m_outputObjects.end()) {
     // It needs to be an object manager...
-    TObjectManager* mgr = dynamic_cast<TObjectManager*>(out_itr->second.get());
+    TObjectManager* mgr = dynamic_cast<TObjectManager* >(out_itr->second.get());
     if (mgr == nullptr) {
       ATH_MSG_ERROR("Couldn't access output manager for: " << key);
       return StatusCode::FAILURE;
@@ -1225,7 +1230,7 @@ StatusCode TEvent::connectObject(const std::string& key, bool silent) {
 ///               in case the branch can't be connected to
 /// @returns The usual @c StatusCode types
 ///
-StatusCode TEvent::connectMetaObject(const std::string& key, bool silent) {
+StatusCode TEvent::connectMetaObject(const std::string &key, bool silent) {
 
   // A little sanity check:
   if (!m_inMetaTree) {
@@ -1289,7 +1294,7 @@ StatusCode TEvent::connectMetaObject(const std::string& key, bool silent) {
   }
 
   // Store the manager.
-  TObjectManager* mgrPtr = mgr.get();
+  TObjectManager *mgrPtr = mgr.get();
   m_inputMetaObjects[key] = std::move(mgr);
 
   // Read in the object:
@@ -1326,7 +1331,7 @@ StatusCode TEvent::connectMetaObject(const std::string& key, bool silent) {
 /// @param standalone Type of the auxiliary store that should be created
 /// @return The usual @c StatusCode types
 ///
-StatusCode TEvent::connectAux(const std::string& prefix, bool standalone) {
+StatusCode TEvent::connectAux(const std::string &prefix, bool standalone) {
 
   // A simple test...
   if (hasInput() == false) {
@@ -1398,7 +1403,7 @@ StatusCode TEvent::connectAux(const std::string& prefix, bool standalone) {
 /// @param standalone Type of the auxiliary store that should be created
 /// @return The usual @c StatusCode types
 ///
-StatusCode TEvent::connectMetaAux(const std::string& prefix, bool standalone) {
+StatusCode TEvent::connectMetaAux(const std::string &prefix, bool standalone) {
 
   // Check if the branch is already connected:
   if (m_inputMetaObjects.contains(prefix)) {
@@ -1462,8 +1467,8 @@ StatusCode TEvent::connectMetaAux(const std::string& prefix, bool standalone) {
 ///                 or event data object
 /// @return The usual @c StatusCode types
 ///
-StatusCode TEvent::setAuxStore(const std::string& key,
-                               Details::IObjectManager& mgr, bool metadata) {
+StatusCode TEvent::setAuxStore(const std::string &key,
+                               Details::IObjectManager &mgr, bool metadata) {
 
   // Pre-compute some values.
   const bool isAuxStore = Details::isAuxStore(*(mgr.holder()->getClass()));
@@ -1475,7 +1480,7 @@ StatusCode TEvent::setAuxStore(const std::string& key,
   }
 
   // Select which object container to use:
-  Object_t& objects = (metadata ? m_inputMetaObjects : m_inputObjects);
+  Object_t &objects = (metadata ? m_inputMetaObjects : m_inputObjects);
 
   // Look up the auxiliary object's manager:
   TVirtualManager* auxMgr = nullptr;
@@ -1520,8 +1525,8 @@ StatusCode TEvent::setAuxStore(const std::string& key,
         // In "Athena mode" this object has already been deleted when
         // the main auxiliary store object was switched to the new
         // event. So let's re-create it:
-        xAOD::TObjectManager& auxMgrRef =
-            dynamic_cast<xAOD::TObjectManager&>(*auxMgr);
+        xAOD::TObjectManager &auxMgrRef =
+            dynamic_cast<xAOD::TObjectManager &>(*auxMgr);
         ATH_CHECK(
             setUpDynamicStore(auxMgrRef, (metadata ? m_inMetaTree : m_inTree)));
         // Now tell the newly created dynamic store object which event
@@ -1575,7 +1580,7 @@ StatusCode TEvent::setAuxStore(const std::string& key,
   const SG::IConstAuxStore* store = 0;
   if (m_auxMode == kBranchAccess) {
     // Get the concrete auxiliary manager:
-    TAuxManager* amgr = dynamic_cast<TAuxManager*>(auxMgr);
+    TAuxManager* amgr = dynamic_cast<TAuxManager* >(auxMgr);
     if (!amgr) {
       ATH_MSG_FATAL("Auxiliary manager for \""
                     << auxKey << "\" is not of the right type");
@@ -1592,14 +1597,14 @@ StatusCode TEvent::setAuxStore(const std::string& key,
     }
   } else if (m_auxMode == kClassAccess || m_auxMode == kAthenaAccess) {
     // Get the concrete auxiliary manager:
-    TObjectManager* omgr = dynamic_cast<TObjectManager*>(auxMgr);
+    TObjectManager* omgr = dynamic_cast<TObjectManager* >(auxMgr);
     if (!omgr) {
       ATH_MSG_FATAL("Auxiliary manager for \""
                     << auxKey << "\" is not of the right type");
       return StatusCode::FAILURE;
     }
     void* p = omgr->holder()->getAs(typeid(SG::IConstAuxStore));
-    store = reinterpret_cast<const SG::IConstAuxStore*>(p);
+    store = reinterpret_cast<const SG::IConstAuxStore* >(p);
   }
   if (!store) {
     ATH_MSG_FATAL("Logic error detected in the code");
@@ -1635,8 +1640,8 @@ StatusCode TEvent::setAuxStore(const std::string& key,
 ///                or not
 /// @returns The usual @c StatusCode tyoes
 ///
-StatusCode TEvent::record(void* obj, const std::string& typeName,
-                          const std::string& key, bool overwrite, bool metadata,
+StatusCode TEvent::record(void* obj, const std::string &typeName,
+                          const std::string &key, bool overwrite, bool metadata,
                           bool isOwner) {
 
   // Check if we have an output tree when writing an event:
@@ -1731,7 +1736,7 @@ StatusCode TEvent::record(void* obj, const std::string& typeName,
   }
 
   // Access the object manager:
-  TObjectManager* omgr = dynamic_cast<TObjectManager*>(vitr->second.get());
+  TObjectManager* omgr = dynamic_cast<TObjectManager* >(vitr->second.get());
   if (!omgr) {
     ATH_MSG_ERROR("Manager object of the wrong type encountered");
     return StatusCode::FAILURE;
@@ -1766,7 +1771,7 @@ StatusCode TEvent::record(void* obj, const std::string& typeName,
   return StatusCode::SUCCESS;
 }
 
-StatusCode TEvent::recordAux(TVirtualManager& mgr, const std::string& key,
+StatusCode TEvent::recordAux(TVirtualManager &mgr, const std::string &key,
                              bool metadata) {
 
   // Check if the auxiliary store is a generic object.
@@ -1781,7 +1786,7 @@ StatusCode TEvent::recordAux(TVirtualManager& mgr, const std::string& key,
   }
 
   // Check if it's a TAuxStore object.
-  TAuxManager* auxmgr = dynamic_cast<TAuxManager*>(&mgr);
+  TAuxManager* auxmgr = dynamic_cast<TAuxManager* >(&mgr);
   if (auxmgr != nullptr) {
     // This type has to be an event object.
     if (metadata) {
@@ -1827,7 +1832,7 @@ StatusCode TEvent::initStats() {
   for (; itr != end; ++itr) {
 
     // Get the name of the branch in question:
-    const std::string& branchName = itr->second.branchName();
+    const std::string &branchName = itr->second.branchName();
 
     // If it's an auxiliary container, scan it using TAuxStore:
     if (branchName.find("Aux.") != std::string::npos) {
@@ -1850,7 +1855,7 @@ StatusCode TEvent::initStats() {
         ::Bool_t auxFound = kFALSE;
         const std::string dynName = Utils::dynBranchPrefix(branchName);
 
-        std::vector<TObjArray*> fullListOfBranches = {};
+        std::vector<TObjArray* > fullListOfBranches = {};
         // Add the list of branches of the main tree
         fullListOfBranches.push_back(m_inTree->GetListOfBranches());
         // If input tree has friend trees
@@ -1862,7 +1867,7 @@ StatusCode TEvent::initStats() {
           for (TObject* feObj : *fList) {
             if (feObj) {
               // Get corresponding friend tree
-              auto* pElement = dynamic_cast<TFriendElement*>(feObj);
+              auto* pElement = dynamic_cast<TFriendElement* >(feObj);
               if (not pElement)
                 continue;
               TTree* friendTree = pElement->GetTree();
@@ -1902,7 +1907,7 @@ StatusCode TEvent::initStats() {
       }
 
       // Get the dictionary for the DataVector base class:
-      static const std::type_info& baseTi = typeid(SG::AuxVectorBase);
+      static const std::type_info &baseTi = typeid(SG::AuxVectorBase);
       static const std::string baseName = SG::normalizedTypeinfoName(baseTi);
       static ::TClass* const baseCl = ::TClass::GetClass(baseName.c_str());
       if (!baseCl) {
@@ -1924,7 +1929,7 @@ StatusCode TEvent::initStats() {
       ATH_CHECK(temp.readFrom(*m_inTree, PRINT_WARNINGS));
 
       // Conveninence variable:
-      ReadStats& stats = IOStats::instance().stats();
+      ReadStats &stats = IOStats::instance().stats();
 
       // Teach the cache about all the branches:
       for (SG::auxid_t id : temp.getAuxIDs()) {
@@ -1962,7 +1967,7 @@ StatusCode TEvent::initStats() {
 /// @returns The usual @c StatusCode tyoes
 ///
 StatusCode TEvent::record(std::unique_ptr<TAuxStore> store,
-                          const std::string& key) {
+                          const std::string &key) {
 
   // Check if we have an output tree:
   if (!m_outTree) {
@@ -2008,7 +2013,7 @@ StatusCode TEvent::record(std::unique_ptr<TAuxStore> store,
   // multiple input files.
 
   // Check if the output manager is of the right type:
-  TAuxManager* mgr = dynamic_cast<TAuxManager*>(vitr->second.get());
+  TAuxManager* mgr = dynamic_cast<TAuxManager* >(vitr->second.get());
   if (mgr == nullptr) {
     ATH_MSG_ERROR("Output object with key \""
                   << key << "\" already exists, and is not of type TAuxStore");
@@ -2038,7 +2043,7 @@ StatusCode TEvent::record(std::unique_ptr<TAuxStore> store,
 /// @param tree The tree to read dynamic variables from
 /// @returns The usual @c StatusCode types
 ///
-StatusCode TEvent::setUpDynamicStore(TObjectManager& mgr, ::TTree* tree) {
+StatusCode TEvent::setUpDynamicStore(TObjectManager &mgr, ::TTree* tree) {
 
   // Check if we can call setName(...) on the object:
   ::TMethodCall setNameCall;
@@ -2071,7 +2076,7 @@ StatusCode TEvent::setUpDynamicStore(TObjectManager& mgr, ::TTree* tree) {
   }
 
   // Try to get the object as an IAuxStoreHolder:
-  SG::IAuxStoreHolder* storeHolder = reinterpret_cast<SG::IAuxStoreHolder*>(
+  SG::IAuxStoreHolder* storeHolder = reinterpret_cast<SG::IAuxStoreHolder* >(
       mgr.holder()->getAs(typeid(SG::IAuxStoreHolder)));
   if (!storeHolder) {
     ATH_MSG_FATAL("There's a logic error in the code");
@@ -2124,14 +2129,14 @@ StatusCode TEvent::setUpDynamicStore(TObjectManager& mgr, ::TTree* tree) {
 ///                 not
 /// @returns The usual @c StatusCode types
 ///
-StatusCode TEvent::putAux(::TTree& outTree, TVirtualManager& vmgr,
+StatusCode TEvent::putAux(::TTree &outTree, TVirtualManager &vmgr,
                           bool metadata) {
 
   // A little sanity check:
   assert(m_outputEventFormat != 0);
 
   // Do the conversion:
-  TObjectManager* mgr = dynamic_cast<TObjectManager*>(&vmgr);
+  TObjectManager* mgr = dynamic_cast<TObjectManager* >(&vmgr);
   if (!mgr) {
     // It's not an error any more when we don't get a TObjectManager.
     return StatusCode::SUCCESS;
@@ -2143,7 +2148,7 @@ StatusCode TEvent::putAux(::TTree& outTree, TVirtualManager& vmgr,
   }
 
   // Get a pointer to the auxiliary store I/O interface:
-  SG::IAuxStoreIO* aux = reinterpret_cast<SG::IAuxStoreIO*>(
+  SG::IAuxStoreIO* aux = reinterpret_cast<SG::IAuxStoreIO* >(
       mgr->holder()->getAs(typeid(SG::IAuxStoreIO)));
   if (!aux) {
     ATH_MSG_FATAL("There is a logic error in the code!");
@@ -2176,11 +2181,11 @@ StatusCode TEvent::putAux(::TTree& outTree, TVirtualManager& vmgr,
       Utils::dynBranchPrefix(mgr->branch()->GetName());
 
   // Select which container to add the variables to:
-  Object_t& objects = (metadata ? m_outputMetaObjects : m_outputObjects);
+  Object_t &objects = (metadata ? m_outputMetaObjects : m_outputObjects);
 
   // This iteration will determine the ordering of branches within
   // the tree, so sort auxids by name.
-  const SG::AuxTypeRegistry& r = SG::AuxTypeRegistry::instance();
+  const SG::AuxTypeRegistry &r = SG::AuxTypeRegistry::instance();
   typedef std::pair<std::string, SG::auxid_t> AuxVarSort_t;
   std::vector<AuxVarSort_t> varsort;
   varsort.reserve(auxids.size());
@@ -2190,7 +2195,7 @@ StatusCode TEvent::putAux(::TTree& outTree, TVirtualManager& vmgr,
   std::sort(varsort.begin(), varsort.end());
 
   // Extract all the dynamic variables from the object:
-  for (const auto& p : varsort) {
+  for (const auto &p : varsort) {
 
     // The auxiliary ID:
     const SG::auxid_t id = p.second;
@@ -2334,9 +2339,9 @@ StatusCode TEvent::putAux(::TTree& outTree, TVirtualManager& vmgr,
     }
 
     // Replace the managed object:
-    void* nc_data ATLAS_THREAD_SAFE =  // we hold non-const pointers but check
-                                       // on retrieve
-        const_cast<void*>(static_cast<const void*>(aux->getIOData(id)));
+    void* nc_data ATLAS_THREAD_SAFE = // we hold non-const pointers but check
+                                      // on retrieve
+        const_cast<void* >(static_cast<const void* >(aux->getIOData(id)));
     bmgr->second->setObject(nc_data);
   }
 
@@ -2344,7 +2349,7 @@ StatusCode TEvent::putAux(::TTree& outTree, TVirtualManager& vmgr,
   return StatusCode::SUCCESS;
 }
 
-StatusCode TEvent::recordAux(TAuxStore* store, const std::string& key) {
+StatusCode TEvent::recordAux(TAuxStore* store, const std::string &key) {
 
   // Check if we have an output tree:
   if (hasOutput() == false) {
@@ -2388,7 +2393,7 @@ StatusCode TEvent::recordAux(TAuxStore* store, const std::string& key) {
   // multiple input files.
 
   // Check if the output manager is of the right type:
-  TAuxManager* mgr = dynamic_cast<TAuxManager*>(vitr->second.get());
+  TAuxManager* mgr = dynamic_cast<TAuxManager* >(vitr->second.get());
   if (mgr == nullptr) {
     ATH_MSG_ERROR("Output object with key \""
                   << key << "\" already exists, and is not of type TAuxStore");
@@ -2410,4 +2415,4 @@ StatusCode TEvent::recordAux(TAuxStore* store, const std::string& key) {
   return StatusCode::SUCCESS;
 }
 
-}  // namespace xAOD
+} // namespace xAOD

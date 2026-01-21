@@ -10,40 +10,36 @@
 #include <iostream>
 #include <sstream>
 #include <algorithm>
+#include <stdexcept>
 
 namespace MuonCalib{
 
 
-  RpcCalibDBEntry::RpcCalibDBEntry(Identifier gapID, std::string_view payLoad):
-      m_theGap(gapID) {
+  RpcCalibDBEntry::RpcCalibDBEntry(Identifier gapID, std::string_view payLoad)
+  : m_theGap(gapID)
+{
+  auto take_until = [&](std::string_view& sv) -> std::string_view {
+    const std::string_view delim = "END ";
+    const auto pos = sv.find(delim);
+    if (pos == std::string_view::npos) {
+      throw std::runtime_error("RpcCalibDBEntry: malformed payload (missing 'END ')");
+    }
+    auto out = sv.substr(0, pos);
+    sv.remove_prefix(pos + delim.size()); // avoids overflow math
+    return out;
+  };
 
-    
-    std::string::size_type end=payLoad.find("END ");
-    std::string_view etaRec=payLoad.substr(0,end);
-    payLoad=payLoad.substr(end+4,payLoad.size()-end-4);
+  const auto etaRec  = take_until(payLoad);
+  const auto etaDet  = take_until(payLoad);
+  const auto phiRec1 = take_until(payLoad);
+  const auto phiRec2 = take_until(payLoad);
+  const auto phiDet1 = take_until(payLoad);
+  const auto phiDet2 = take_until(payLoad);
 
-    end=payLoad.find("END ");
-    std::string_view etaDet=payLoad.substr(0,end);
-    payLoad=payLoad.substr(end+4,payLoad.size()-end-4);
-
-    end=payLoad.find("END ");
-    std::string_view phiRec1=payLoad.substr(0,end);
-    payLoad=payLoad.substr(end+4,payLoad.size()-end-4);
-
-    end=payLoad.find("END ");
-    std::string_view phiRec2=payLoad.substr(0,end);
-    payLoad=payLoad.substr(end+4,payLoad.size()-end-4);
-
-    end=payLoad.find("END ");
-    std::string_view phiDet1=payLoad.substr(0,end);
-    payLoad=payLoad.substr(end+4,payLoad.size()-end-4);
-
-    end=payLoad.find("END ");
-    std::string_view phiDet2=payLoad.substr(0,end);
-
-    this->initData(std::string(etaRec), std::string(etaDet),std::string(phiRec1),std::string(phiRec2),std::string(phiDet1),std::string(phiDet2));
-    
-  }
+  initData(std::string(etaRec), std::string(etaDet),
+           std::string(phiRec1), std::string(phiRec2),
+           std::string(phiDet1), std::string(phiDet2));
+}
 
   void  RpcCalibDBEntry::initData(std::string etaRec, std::string etaDet, std::string phiRec1, std::string phiRec2, std::string phiDet1, std::string phiDet2){
 

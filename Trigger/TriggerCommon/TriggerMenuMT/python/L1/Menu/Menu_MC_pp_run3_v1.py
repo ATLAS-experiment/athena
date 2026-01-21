@@ -188,7 +188,6 @@ def defineMenu():
 
         #ATR-29330
         'L1_4J15',
-
     ]
 
     # To replace thresholds in the physics menu

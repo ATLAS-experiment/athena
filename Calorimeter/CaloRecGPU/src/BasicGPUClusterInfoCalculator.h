@@ -55,27 +55,8 @@ class BasicGPUClusterInfoCalculator:
   virtual StatusCode finalize() override;
 
   virtual ~BasicGPUClusterInfoCalculator() = default;
-
-  virtual size_t size_of_temporaries() const override
-  {
-    if (m_preserveClusterMoments)
-      {
-        return sizeof(BasicClusterInfoCalculator::ClusterInfoCalculatorTemporaries);
-      }
-    else
-      {
-        return 0;
-      }
-  };
   
  private:
-
-  /**
-  * @brief If set to @p true, allocates a temporary array
-  *        to store some temporary intermediate results
-  *        instead of using cluster moments. Default is @p false.
-  */
-  Gaudi::Property<bool> m_preserveClusterMoments {this, "PreserveClusterMoments", false, "Do not use cluster moments array as temporary storage"};
 
   /**
   * @brief if set to @p true cluster cuts are on \f$|E|_\perp\f$, if @p false on \f$E_\perp\f$. Default is @p true.

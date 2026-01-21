@@ -9,7 +9,7 @@
 #ifndef LARRECUTILS_LARADC2MEVCONDALG_H
 #define LARRECUTILS_LARADC2MEVCONDALG_H
 
-#include "AthenaBaseComps/AthReentrantAlgorithm.h"
+#include "AthenaBaseComps/AthCondAlgorithm.h"
 #include "StoreGate/ReadCondHandleKey.h"
 #include "StoreGate/WriteCondHandleKey.h"
 #include "LArRecConditions/LArFebConfig.h"
@@ -24,16 +24,15 @@
 class LArOnlineID_Base;
 
 
-class LArADC2MeVCondAlg: public AthReentrantAlgorithm {
+class LArADC2MeVCondAlg: public AthCondAlgorithm {
  public:
 
-  using AthReentrantAlgorithm::AthReentrantAlgorithm;
+  using AthCondAlgorithm::AthCondAlgorithm;
   ~LArADC2MeVCondAlg();
 
   StatusCode initialize() override;
   StatusCode execute(const EventContext& ctx) const override;
   StatusCode finalize() override {return StatusCode::SUCCESS;}
-  virtual bool isReEntrant() const override final { return false; }
 
  private:
   SG::ReadCondHandleKey<LArOnOffIdMapping>  m_cablingKey{this,"LArOnOffIdMappingKey","LArOnOffIdMap","SG key of LArOnOffIdMapping object"};

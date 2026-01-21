@@ -349,6 +349,46 @@ namespace CP {
                                                                     std::make_unique<TF2>("muonPLIT", "TMath::Log(x / y)"),
                                                                     cutFunction,
                                                                     m_isoDecSuffix, true));
+        } else if (muWPname == "R3PLITVeryLoose") {
+            const std::vector<std::string>& isoTypes = {"PLIT_TPLTmu_pmuxpromp", "PLIT_TPLTmu_pnpxall"};
+            const std::vector<double> boundaries = {15000.0, 20000.0, 25000.0, 30000.0, 40000.0, 50000.0, 75000.0, 100000.0, 110000.0, 120000.0, 160000.0};
+            const std::vector<std::vector<double>> parameters = {{-0.3040909, 0.0002809},
+								 {1.56375, 9.75e-05},
+								 {1.22625, 9.75e-05},
+								 {1.4625, 7.5e-05},
+								 {1.4622506, 6.45e-05},
+								 {1.6695205, 4.62e-05},
+								 {1.9120284, 3.31e-05},
+								 {2.9462838, 1.26e-05},
+								 {3.375},
+								 {3.45},
+								 {3.225},
+								 {3.3}};
+            const std::string cutFunction = createPieceWisePolinomialFunction(boundaries, parameters, true);
+            wp->addCut(std::make_unique<IsolationConditionCombined>("R3PLITVeryLoose", isoTypes,
+                                                                    std::make_unique<TF2>("muonPLIT", "TMath::Log(x / y)"),
+                                                                    cutFunction,
+                                                                    m_isoDecSuffix, true));
+        } else if (muWPname == "R2PLITVeryLoose") {
+            const std::vector<std::string>& isoTypes = {"PLIT_TPLTmu_pmuxpromp", "PLIT_TPLTmu_pnpxall"};
+            const std::vector<double> boundaries = {15000.0, 20000.0, 25000.0, 30000.0, 40000.0, 50000.0, 75000.0, 100000.0, 110000.0, 120000.0, 160000.0};
+            const std::vector<std::vector<double>> parameters = {{0.0886364, 0.0002536},
+								 {1.8651869, 8.55e-05},
+								 {1.7625, 7.5e-05},
+								 {1.4625, 7.5e-05},
+								 {1.5238217, 6.21e-05},
+								 {1.743375, 4.43e-05},
+								 {2.1522807, 2.78e-05},
+								 {2.3787162, 1.74e-05},
+								 {3.3},
+								 {3.45},
+								 {3.15},
+								 {3.075}};
+            const std::string cutFunction = createPieceWisePolinomialFunction(boundaries, parameters, true);
+            wp->addCut(std::make_unique<IsolationConditionCombined>("R2PLITVeryLoose", isoTypes,
+                                                                    std::make_unique<TF2>("muonPLIT", "TMath::Log(x / y)"),
+                                                                    cutFunction,
+                                                                    m_isoDecSuffix, true));
         } else {
             ATH_MSG_ERROR("Unknown muon isolation WP: " << muWPname);
             return StatusCode::FAILURE;

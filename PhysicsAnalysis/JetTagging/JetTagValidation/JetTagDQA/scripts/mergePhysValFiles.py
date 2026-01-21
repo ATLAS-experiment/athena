@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 #----------------------------------------------------------------------
 #stand-alone script to merge specific directories of NTUP_PHYSVAL files 
@@ -8,7 +9,7 @@
 #Nov 2020
 #----------------------------------------------------------------------
 
-import getopt,os,sys,glob,argparse,ROOT,time
+import os,glob,argparse,ROOT,time
 from ROOT import gDirectory
 
 start = time.process_time()
@@ -17,16 +18,9 @@ start = time.process_time()
 categories = ['jet',
               'tracks',
               'SV',
-              'tagger_IP3D',
-              'tagger_RNNIP',
-              'tagger_DIPS',
-              'tagger_SV1',
-              'tagger_DL1dv01',
-              'tagger_DL1r',
               'tagger_GN2v01',
-              'tagger_GN2Xv01',
+              'tagger_GN3XPV01',
               'old_taggers',
-              #'tagger_IP2D',
              ]
 
 # name of the folder into which plots in no other category are sorted
@@ -42,7 +36,7 @@ sub_categories_type_1 = [ '_incl',
                    '_muon',
                  ]
 
-categories_with_subcategories_type_2 = ['tagger_IP3D', 'tagger_RNNIP', 'tagger_DIPS', 'tagger_SV1', 'tagger_DL1dv01', 'tagger_DL1r', 'tagger_GN2v01','tagger_GN2Xv01']
+categories_with_subcategories_type_2 = ['tagger_GN2v01','tagger_GN3XPV01']
 
 sub_categories_type_2 = [ '_pt_ttbar',
                    '_pt_Zprime',
@@ -51,8 +45,7 @@ sub_categories_type_2 = [ '_pt_ttbar',
 
 categories_with_subcategories_type_3 = ['old_taggers']
 
-sub_categories_type_3 = [ '_IP2D',
-                 ]
+sub_categories_type_3 = [ ]
 
 categories_with_subcategories_type_4 = ['jet']
 

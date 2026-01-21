@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //====================================================================
@@ -65,27 +65,27 @@ namespace pool    {
     /// Check for Database existence within domain
     bool existsDbase(const std::string& nam);
     /// Open domain with possible change of access mode
-    DbStatus open(DbAccessMode mode);
+    StatusCode open(DbAccessMode mode);
     /// Open domain in default access mode
-    DbStatus open();
+    StatusCode open();
     /// Close domain
-    DbStatus close();
+    StatusCode close();
     /// Increase the age of all open databases
-    DbStatus ageOpenDbs();
+    StatusCode ageOpenDbs();
     /// Check if databases are present, which aged a lot and need to be closed
-    DbStatus closeAgedDbs();
+    StatusCode closeAgedDbs();
     /// Set domain specific options
     /** @param refOpt   [IN]  Reference to option object
       *
-      * @return DbStatus code indicating success or failure.  
+      * @return StatusCode indicating success or failure.
       */
-    DbStatus setOption(const DbOption& refOpt);
+    StatusCode setOption(const DbOption& refOpt);
     /// Access domain specific options
     /** @param refOpt   [IN]  Reference to option object
       *
-      * @return DbStatus code indicating success or failure.  
+      * @return StatusCode indicating success or failure.
       */
-    DbStatus getOption(DbOption& refOpt) const;
+    StatusCode getOption(DbOption& refOpt) const;
   };
 }      // End namespace pool
 #endif // POOL_DBDOMAINOBJ_H

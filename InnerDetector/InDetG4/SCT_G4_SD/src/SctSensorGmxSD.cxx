@@ -15,6 +15,7 @@
 #include "SctSensorGmxSD.h"
 
 // athena includes
+#include "MCTruth/AtlasG4EventUserInfo.h"
 #include "MCTruth/TrackHelper.h"
 
 // Geant4 includes
@@ -72,6 +73,7 @@ G4bool SctSensorGmxSD::ProcessHits(G4Step *aStep, G4TouchableHistory * /* not us
   
   // get the HepMcParticleLink from the TrackHelper
   TrackHelper trHelp(aStep->GetTrack());
+  auto particleLink = trHelp.GenerateParticleLink(m_g4UserEventInfo ? m_g4UserEventInfo->GetEventStore() : nullptr);
 
   if(m_sqlreader){
     //if sqlite inputs, Identifier indices come from PhysVol Name  
@@ -83,7 +85,7 @@ G4bool SctSensorGmxSD::ProcessHits(G4Step *aStep, G4TouchableHistory * /* not us
                     lP2,
                     edep,
                     aStep->GetPreStepPoint()->GetGlobalTime(),//use the global time. i.e. the time from the beginning of the event
-                    trHelp.GenerateParticleLink(),
+                    std::move(particleLink),
                     hitIdOfWafer);
     return true;
   }
@@ -95,7 +97,7 @@ G4bool SctSensorGmxSD::ProcessHits(G4Step *aStep, G4TouchableHistory * /* not us
   //
   const int id = myTouch->GetVolume(0)->GetCopyNo();
 
-  m_HitColl->Emplace(lP1, lP2, edep, aStep->GetPreStepPoint()->GetGlobalTime(), trHelp.GenerateParticleLink(), id);
+  m_HitColl->Emplace(lP1, lP2, edep, aStep->GetPreStepPoint()->GetGlobalTime(), std::move(particleLink), id);
 
   return true;
 }

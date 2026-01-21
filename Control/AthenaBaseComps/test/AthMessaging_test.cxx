@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration.
  */
 
 /**
@@ -17,6 +17,7 @@
 
 #include <chrono>
 #include <iostream>
+#include <cstring> //for strcmp
 
 
 struct MyObj : public AthMessaging {
@@ -24,22 +25,36 @@ struct MyObj : public AthMessaging {
   MyObj()                    : AthMessaging("MyObj1")         {}
   /// Constructor with explicit MessageSvc
   MyObj(IMessageSvc* msgSvc) : AthMessaging(msgSvc, "MyObj2") {}
+  /// Constructor with explicit output level
+  MyObj(MSG::Level lvl)      : AthMessaging("MyObj3")         {
+    setLevel(lvl);
+  }
 
   void print()
   {
+    ATH_MSG_DEBUG("Good morning");
     ATH_MSG_WARNING("Hello");
     ATH_MSG_INFO("World");
   }
 };
 
 
-void test(IMessageSvc* msgSvc)
+bool test(IMessageSvc* msgSvc)
 {
   MyObj obj1;
   obj1.print();
 
   MyObj obj2(msgSvc);
   obj2.print();
+
+  MyObj obj3(MSG::DEBUG);
+  obj3.print();
+
+  // Checking a level < OutputLevel should not result in getMessageSvc warning
+  MyObj obj4(MSG::WARNING);
+  //typically used in "if (obj4.msgLvl(MSG::DEBUG)) {  ..debug messages ..}"
+  bool outputExpected = obj4.msgLvl(MSG::DEBUG);
+  return (not outputExpected);
 }
 
 
@@ -64,7 +79,7 @@ int main (int argc, char** argv)
 {
   const unsigned int ntry = 100000;
   bool doPerf = false;
-  if (argc >= 2 && strcmp (argv[1], "--perf") == 0) {
+  if (argc >= 2 && std::strcmp (argv[1], "--perf") == 0) {
     doPerf = true;
   }
 
@@ -86,7 +101,7 @@ int main (int argc, char** argv)
   if (!msgSvc) return 1;
 
   std::cout << "--- Test with MessageSvc" << std::endl;
-  test(msgSvc);
+  if (not test(msgSvc)) return 1;
 
   if (doPerf) {
     perftest(msgSvc, ntry);

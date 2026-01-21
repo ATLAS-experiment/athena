@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -28,6 +28,7 @@
 
 #include <QStringList>
 #include <QTreeWidgetItem>
+#include <memory>
 #include <vector>
 #include <set>
 #include <optional>
@@ -196,7 +197,7 @@ private:
   AssocObjAttachmentHandle * getAttachmentHandle(int regionIndex, const double& crossoverval);
 protected:
   void registerAssocObject(AssociatedObjectHandleBase*);//!<Trackhandle assumes ownership
-  virtual void ensureInitTSOSs(std::vector<AssociatedObjectHandleBase*>*&); //!< Ensure that the TSOSs are initialized. This is called by update3DObjects() and should be called by any method that needs to access the TSOSs.
+  virtual void ensureInitTSOSs(std::unique_ptr<std::vector<AssociatedObjectHandleBase*>>&); //!< Ensure that the TSOSs are initialized. This is called by update3DObjects() and should be called by any method that needs to access the TSOSs.
 };
 
 class AssocObjAttachmentHandle {

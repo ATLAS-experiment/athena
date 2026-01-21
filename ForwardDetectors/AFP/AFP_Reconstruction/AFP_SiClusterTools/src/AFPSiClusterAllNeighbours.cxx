@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -104,7 +104,9 @@ StatusCode AFPSiClusterAllNeighbours::doClustering (const std::list<const xAOD::
       
       newCluster.hits().push_back(currHit);
     }
-    
+    if (charge == 0.){
+      continue;
+    }
     newCluster.setHorizID(horizID/charge);
     newCluster.setVertID(vertID/charge);
     newCluster.setCharge(charge);

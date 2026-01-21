@@ -31,13 +31,10 @@ def HION5SkimmingToolCfg(flags):
 
     expression = ' ( ' +' || '.join(triggers) + ' )  && ' + req_total
     
-    
-    from TrigDecisionTool.TrigDecisionToolConfig import TrigDecisionToolCfg    
-    tdt = acc.getPrimaryAndMerge(TrigDecisionToolCfg(flags))
-    acc.addPublicTool(CompFactory.DerivationFramework.xAODStringSkimmingTool(name       = "HION5StringSkimmingTool",
-                                                                             expression = expression,
-                                                                             TrigDecisionTool=tdt),
-                      primary = True)
+    from DerivationFrameworkTools.DerivationFrameworkToolsConfig import (
+        xAODStringSkimmingToolCfg)
+    acc.addPublicTool(acc.getPrimaryAndMerge(xAODStringSkimmingToolCfg(
+        flags, name = "HION5StringSkimmingTool", expression = expression)), primary = True)
     
     return acc
 

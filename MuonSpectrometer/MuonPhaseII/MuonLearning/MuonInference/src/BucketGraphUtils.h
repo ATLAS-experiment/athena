@@ -61,7 +61,7 @@ inline void buildNodesAndFeatures(const MuonR4::SpacePointContainer& buckets,
     NodeAux n;
 
     const double midY = 0.5 * (bucket->coveredMin() + bucket->coveredMax());
-    const Amg::Vector3D glob = bucket->msSector()->localToGlobalTrans(gctx) * (midY * Amg::Vector3D::UnitY());
+    const Amg::Vector3D glob = bucket->msSector()->localToGlobalTransform(gctx) * (midY * Amg::Vector3D::UnitY());
     n.x = glob.x();
     n.y = glob.y();
     n.z = glob.z();

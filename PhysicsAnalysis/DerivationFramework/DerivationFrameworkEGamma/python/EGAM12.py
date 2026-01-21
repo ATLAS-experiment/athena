@@ -24,18 +24,13 @@ addCaloDecorations = False
 
 def EGAM12SkimmingToolCfg(flags):
     """Configure the EGAM12 skimming tool"""
-    acc = ComponentAccumulator()
-
     # off-line based selection
     expression = "count(Electrons.pt > 4.5*GeV) >= 1"
     print("EGAM12 offline skimming expression: ", expression)
-    EGAM12_OfflineSkimmingTool = CompFactory.DerivationFramework.xAODStringSkimmingTool(
-        name="EGAM12_OfflineSkimmingTool", expression=expression, TrigDecisionTool=""
-    )
-
-    acc.addPublicTool(EGAM12_OfflineSkimmingTool, primary=True)
-
-    return acc
+    from DerivationFrameworkTools.DerivationFrameworkToolsConfig import (
+        xAODStringSkimmingToolCfg)
+    return xAODStringSkimmingToolCfg(flags, name="EGAM12_OfflineSkimmingTool",
+                                     expression=expression, TrigDecisionTool=None)
 
 
 def EGAM12KernelCfg(flags, name="EGAM12Kernel", **kwargs):
@@ -88,11 +83,11 @@ def EGAM12KernelCfg(flags, name="EGAM12Kernel", **kwargs):
     # but taus are missing in HI derivations so need to do differently
 
     # Decorate if jet passed JVT criteria
-    from JetJvtEfficiency.JetJvtEfficiencyToolConfig import getJvtEffToolCfg
+    from JetJvtEfficiency.JetJvtEfficiencyToolConfig import getJvtSelToolCfg
 
     algName = "DFJet_EventCleaning_passJvtAlg"
-    passJvtTool = acc.popToolsAndMerge(getJvtEffToolCfg(flags, "AntiKt4EMTopo"))
-    passJvtTool.PassJVTKey = "AntiKt4EMTopoJets.DFCommonJets_passJvt"
+    passJvtTool = acc.popToolsAndMerge(getJvtSelToolCfg(flags, "AntiKt4EMTopoJets"))
+    passJvtTool.PassFlagName = "DFCommonJets_passJvt"
     acc.addEventAlgo(
         CompFactory.JetDecorationAlg(
             algName, JetContainer="AntiKt4EMTopoJets", Decorators=[passJvtTool]
@@ -501,11 +496,11 @@ def EGAM12Cfg(flags):
     # truth
     if flags.Input.isMC:
         EGAM12SlimmingHelper.ExtraVariables += [
-            "MuonTruthParticles.e.px.py.pz.status.pdgId.truthOrigin.truthType"
+            "MuonTruthParticles.e.px.py.pz.status.pdgId.truthClassification.truthOrigin.truthType"
         ]
 
         EGAM12SlimmingHelper.ExtraVariables += [
-            "Photons.truthOrigin.truthType.truthParticleLink"
+            "Photons.truthClassification.truthOrigin.truthType.truthParticleLink"
         ]
 
     # Add event info

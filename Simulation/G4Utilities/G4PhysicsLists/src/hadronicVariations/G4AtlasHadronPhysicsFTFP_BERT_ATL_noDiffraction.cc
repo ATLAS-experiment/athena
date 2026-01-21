@@ -81,11 +81,6 @@ G4_DECLARE_PHYSCONSTR_FACTORY(G4AtlasHadronPhysicsFTFP_BERT_ATL_noDiffraction);
 G4AtlasHadronPhysicsFTFP_BERT_ATL_noDiffraction::G4AtlasHadronPhysicsFTFP_BERT_ATL_noDiffraction(G4int)
     :  G4VPhysicsConstructor("hInelastic FTFP_BERT_ATL_noDiffraction")
     , theNeutronCaptureModel(0)
-    , thePreEquilib(0)
-    , theCascade(0)
-    , theStringModel(0)
-    , theStringDecay(0)
-    , theLund(0)
     , theHandler(0)
     , theModel1(0)
     , theModel2(0)
@@ -133,11 +128,6 @@ G4AtlasHadronPhysicsFTFP_BERT_ATL_noDiffraction::G4AtlasHadronPhysicsFTFP_BERT_A
 G4AtlasHadronPhysicsFTFP_BERT_ATL_noDiffraction::G4AtlasHadronPhysicsFTFP_BERT_ATL_noDiffraction(const G4String& name, G4bool /*quasiElastic*/)
     :  G4VPhysicsConstructor(name) 
     , theNeutronCaptureModel(0)
-    , thePreEquilib(0)
-    , theCascade(0)
-    , theStringModel(0)
-    , theStringDecay(0)
-    , theLund(0)
     , theHandler(0)
     , theModel1(0)
     , theModel2(0)
@@ -190,23 +180,24 @@ void G4AtlasHadronPhysicsFTFP_BERT_ATL_noDiffraction::CreateModels()
   G4cout << " FTFP_BERT_ATL_noDiffraction : similar to FTFP_BERT_ATL but with" << G4endl
          << " target diffraction for hadron-nucleus interaction switched off." << G4endl;
 
-  theStringModel = new G4FTFModel2;
+  theStringModel = std::make_unique<G4FTFModel2>();
 
   //***********************************
   theStringModel->TurnOffDiffraction();  // Switch off projectile and target diffraction
   //***********************************
 
-  theStringDecay = new G4ExcitedStringDecay( theLund = new G4LundStringFragmentation );
-  theStringModel->SetFragmentationModel( theStringDecay );
-  thePreEquilib = new G4PreCompoundModel( theHandler = new G4ExcitationHandler );
-  theCascade = new G4GeneratorPrecompoundInterface( thePreEquilib );
+  theLund = std::make_unique<G4LundStringFragmentation>();
+  theStringDecay = std::make_unique<G4ExcitedStringDecay>( theLund.get() );
+  theStringModel->SetFragmentationModel( theStringDecay.get() );
+  thePreEquilib = std::make_unique<G4PreCompoundModel>( theHandler = new G4ExcitationHandler );
+  theCascade = std::make_unique<G4GeneratorPrecompoundInterface>( thePreEquilib.get() );
 
   // FTF for neutrons, protons, pions, and kaons
   theModel1 = new G4TheoFSGenerator( "FTFP" );
   theModel1->SetMinEnergy( minFTFP );
   theModel1->SetMaxEnergy( 100.0*TeV );
-  theModel1->SetTransport( theCascade );
-  theModel1->SetHighEnergyGenerator( theStringModel );
+  theModel1->SetTransport( theCascade.get() );
+  theModel1->SetHighEnergyGenerator( theStringModel.get() );
  
   // BERT for neutrons, protons, pions, and kaons
   theBertini1 = new G4CascadeInterface;
@@ -217,8 +208,8 @@ void G4AtlasHadronPhysicsFTFP_BERT_ATL_noDiffraction::CreateModels()
   theModel2 = new G4TheoFSGenerator( "FTFP" );
   theModel2->SetMinEnergy( 2.0*GeV );
   theModel2->SetMaxEnergy( 100.0*TeV );
-  theModel2->SetTransport( theCascade );
-  theModel2->SetHighEnergyGenerator( theStringModel );
+  theModel2->SetTransport( theCascade.get() );
+  theModel2->SetHighEnergyGenerator( theStringModel.get() );
   
   // BERT for hyperons
   theBertini2 = new G4CascadeInterface;
@@ -229,8 +220,8 @@ void G4AtlasHadronPhysicsFTFP_BERT_ATL_noDiffraction::CreateModels()
   theModel3 = new G4TheoFSGenerator( "FTFP" );
   theModel3->SetMinEnergy( 0.0*GeV );
   theModel3->SetMaxEnergy( 100.0*TeV );
-  theModel3->SetTransport( theCascade );
-  theModel3->SetHighEnergyGenerator( theStringModel );
+  theModel3->SetTransport( theCascade.get() );
+  theModel3->SetHighEnergyGenerator( theStringModel.get() );
 
   // Neutron Capture
   theNeutronCaptureModel = new G4NeutronRadCapture;
@@ -256,11 +247,6 @@ void G4AtlasHadronPhysicsFTFP_BERT_ATL_noDiffraction::CreateModels()
 
 G4AtlasHadronPhysicsFTFP_BERT_ATL_noDiffraction::~G4AtlasHadronPhysicsFTFP_BERT_ATL_noDiffraction()
 {
-  delete theStringDecay;
-  delete theStringModel;
-  delete thePreEquilib;
-  delete theCascade;
-  delete theLund;
 }
 
 void G4AtlasHadronPhysicsFTFP_BERT_ATL_noDiffraction::ConstructParticle()

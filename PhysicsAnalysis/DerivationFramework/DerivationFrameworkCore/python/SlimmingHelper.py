@@ -603,7 +603,7 @@ class SlimmingHelper:
                         else:
                                 items.extend(JetTriggerContentRun3TLA)
                 elif collectionName=="HLT_BJetTriggerByYearContent":
-                        from DerivationFrameworkTrigger.BJetTriggerByYearContent import getBJetTriggerContent
+                        from FTagAnalysisAlgorithms.BJetTriggerByYearContent import getBJetTriggerContent
                         items.extend(getBJetTriggerContent(self.flags))
                 elif collectionName=="HLT_FULL_EDM":
                         from DerivationFrameworkTrigger.TrigSlimmingHelper import addTrigEDMSetToOutput

@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 #====================================================================
 # DAOD_JETM1.py
 #====================================================================
@@ -24,15 +24,15 @@ def JETM1SkimmingToolCfg(flags):
         acc.addPublicTool(JETM1TrigSkimmingTool)
 
         expression = 'HLT_xe120_pufit_L1XE50'
-        JETM1OfflineSkimmingTool = CompFactory.DerivationFramework.xAODStringSkimmingTool(name       = "JETM1OfflineSkimmingTool1",
-                                                                                          expression = expression)
-
-        acc.addPublicTool(JETM1OfflineSkimmingTool)
+        from DerivationFrameworkTools.DerivationFrameworkToolsConfig import (
+            xAODStringSkimmingToolCfg)
+        JETM1OfflineSkimmingTool = acc.getPrimaryAndMerge(xAODStringSkimmingToolCfg(
+            flags, name = "JETM1OfflineSkimmingTool1", expression = expression))
         
         # OR of the above two selections
-        acc.addPublicTool(CompFactory.DerivationFramework.FilterCombinationOR(name="JETM1ORTool", 
-                                                                              FilterList=[JETM1TrigSkimmingTool,JETM1OfflineSkimmingTool] ), 
-                          primary = True)
+        acc.addPublicTool(CompFactory.DerivationFramework.FilterCombinationOR(
+            name="JETM1ORTool",
+            FilterList=[JETM1TrigSkimmingTool,JETM1OfflineSkimmingTool] ), primary = True)
 
     return(acc)
 
@@ -275,8 +275,8 @@ def JETM1Cfg(flags):
         triggerNames = ["a4tcemsubjesFS", "a4tcemsubjesISFS", "a10tclcwsubjesFS", "a10tclcwsubFS", "a10ttclcwjesFS", "GSCJet"]
         for trigger in triggerNames:
             JETM1SlimmingHelper.FinalItemList.append('xAOD::AuxContainerBase!#HLT_xAOD__JetContainer_'+trigger+'Aux.pt.eta.phi.m')
-    
-    from DerivationFrameworkPhys.TriggerMatchingCommonConfig import getDataYear
+
+    from Campaigns.Utils import getDataYear
     if getDataYear(flags) >= 2024:
         from DerivationFrameworkPhys.TriggerMatchingCommonConfig import AddjFexRoIsToSlimmingHelper
         AddjFexRoIsToSlimmingHelper(SlimmingHelper = JETM1SlimmingHelper)

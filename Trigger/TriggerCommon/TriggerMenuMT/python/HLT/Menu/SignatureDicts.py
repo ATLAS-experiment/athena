@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 from AthenaCommon.Logging import logging
 log = logging.getLogger( __name__ )
 log.debug("Importing %s",__name__)
@@ -196,6 +196,7 @@ JetChainParts = {
        'preselj20',
        'preselj50',
        'preselj80',
+       'preselj100',
        'preselj120',
        'preselj140',
        'preselj180',
@@ -223,6 +224,7 @@ JetChainParts = {
        'presel4c40',
        'presel4j45',
        'presel4j50',
+       'presel4j65',
        'presel4j85',
        'presel5c20',
        'presel5j25',
@@ -250,6 +252,7 @@ JetChainParts = {
        'preselc60XXj45XXf40',
        'preselj60XXj45XXf40',
        'presela60XXa40XX2a25',
+       'preselcHT200',
        'preseljHT400',
        'preselcHT400',
        'preseljHT450',
@@ -384,6 +387,7 @@ JetChainParts = {
                       'DJMASS900j50', # alias
                       'DJMASS1000j50', # alias
                       'DJMASS1000j50dphi240', # alias
+                      'DJMASS1000j50dphi250x250deta',
                       'DJMASS1000j50dphi200x400deta', # alias
                       'DJMASS900j50dphi200x400deta', # alias
                       'DJMASS1000j50dphi260x200deta', # alias
@@ -405,6 +409,7 @@ JetChainParts = {
                       'HT500',
                       'HT940',
                       'HT50',
+                      'HT300XX0eta240',
                       'HT300XX10ptXX0eta490',
                       'HT300XX10ptXX0eta490XXveto',
                       'HT300XX15ptXX0eta490',
@@ -458,7 +463,7 @@ JetChainParts = {
     'nnJvt'         : # NN Jet Vertex Tagger pileup discriminant
       ['nnJvtv1'], # No range cuts, boolean pass/fail
     'momCuts'       : # Generic moment cut on single jets
-       ['050momemfrac100','momemfrac006','momemfrac024','momemfrac012', 'momhecfrac010', '050momemfrac100XXmomhecfrac010', 'momemfrac072', 'momemfrac048' ],
+       ['050momemfrac100','momemfrac006','momemfrac024','momemfrac012', 'momhecfrac010','momemfrac011', '050momemfrac100XXmomhecfrac010', 'momemfrac072', 'momemfrac048' ],
     'timing'        : # delayed jets, with absolute delay requirement [ns]
     ['2timing','2timing15'],
     'timeSig'       : # delayed jets, based on pT-dependent significance of delay [sigma]
@@ -661,7 +666,7 @@ MuonChainParts_Default = {
 #==========================================================
 AllowedTopos_Bphysics = [
     'bJpsimumu','bJpsi','bJpsimutrk','bUpsimumu','bUpsi','bBmumu','bDimu','bDimu2700','bDimu6000','bPhi','bTau','b3mu',
-    'bBmumux', 'bBmux', 'b0dRAB12vtx20', 'b0dRAB127invmAB22vtx20', 'b0dRAB207invmAB22vtx20', 'b7invmAB22vtx20',
+    'bBmumux', 'bBmux', 'bBhh', 'b0dRAB12vtx20', 'b0dRAB127invmAB22vtx20', 'b0dRAB207invmAB22vtx20', 'b7invmAB22vtx20',
 
     ##### TO BE REMOVED ONCE IMPLEMENTED IN SIGNATURE CODE
     # topoVariants
@@ -982,7 +987,7 @@ MinBiasChainParts = {
                         'sp1000', 'sp1100', 'sp1200', 'sp1300', 'sp1400', 'sp1500', 'sp1600', 'sp1700', 'sp1800',
                         'sp2000', 'sp2100', 'sp2200', 'sp2300', 'sp2400', 'sp2500', 'sp2700', 'sp2800', 'sp2900', 'sp3000',
                         'sp3100', 'sp3500', 'sp4100', 'sp4500', 'sp4800', 'sp5000', 'sp5200',
-                        'vpix15', 'vpix30', 'vpix35', 'vpix40', 'vpix45', 'vpix50', 'vpix55', 'vpix60',
+                        'vpix15', 'vpix30', 'vpix35', 'vpix40', 'vpix45', 'vpix50', 'vpix55', 'vpix60', 'vpix800',
                         'pix20','pix50','pix100', 'pix200', 'pix500', 'pix1000',
                         'nototpix20', 'nototpix30','nototpix50', 'nototpix70', 'nototpix100', 'nototpix200', 'nototpix500'],
     'pileupInfo'     : ['pusup0', 'pusup7', 'pusup10', 'pusup15', 'pusup20', 'pusup30', 'pusup40','pusup50','pusup60', 'pusup70', 'pusup80', 'pusup90', 'pusup100', 'pusup110', 'pusup120', 'pusup130', 'pusup150', 'pusup180', 'pusup190',

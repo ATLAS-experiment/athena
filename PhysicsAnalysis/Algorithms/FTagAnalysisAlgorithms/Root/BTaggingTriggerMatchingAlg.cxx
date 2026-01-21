@@ -23,10 +23,8 @@ namespace CP
 {
   BTaggingTriggerMatchingAlg::BTaggingTriggerMatchingAlg
   (const std::string &name, ISvcLocator *svcLoc) :
-    EL::AnaAlgorithm(name, svcLoc),
-    m_trigDecTool("Trig::TrigDecisionTool/TrigDecisionTool")
+    EL::AnaAlgorithm(name, svcLoc)
   {
-    declareProperty("TrigDecisionTool", m_trigDecTool, "trigger decision tool");
   }
 
   StatusCode BTaggingTriggerMatchingAlg ::
@@ -40,6 +38,16 @@ namespace CP
     ANA_CHECK (m_matchingDecoration.initialize (m_systematicsList, m_jetHandle));
     ANA_CHECK (m_bTagMatchingDecoration.initialize (m_systematicsList, m_jetHandle));
     ANA_CHECK (m_systematicsList.initialize());
+    if (!m_useRun3TriggerEDM.value()) {
+        ANA_MSG_INFO("Using Run-2 trigger EDM for b-tagging trigger matching");
+    } else {
+        ANA_MSG_INFO("Using Run-3 trigger EDM for b-tagging trigger matching");
+        m_ftagRun3TriggerDecorAccessors.clear();
+        m_ftagRun3TriggerDecorAccessors.reserve(m_ftagRun3TriggerDecoNames.value().size());
+        for (const auto& decoName : m_ftagRun3TriggerDecoNames.value()) {
+            m_ftagRun3TriggerDecorAccessors.emplace_back(decoName);
+        }
+    }
 
     return StatusCode::SUCCESS;
   }
@@ -128,8 +136,17 @@ namespace CP
 	  float dR = jet->p4().DeltaR(hlt_jet->p4());
 	  bool hasBtag = false;
 	  if(m_useRun3TriggerEDM){
-            // we need to access via the trigger decision tool
-	    hasBtag = hlt_jet_link.source->hasObjectLink("btag");
+      // we need to access via the trigger decision tool
+      
+	    bool hasBtagLink = hlt_jet_link.source->hasObjectLink("btag");
+        // in later Run-3 releases, the btag link may not be present if the online btagging decorations
+        // were added to the jets directly
+        bool hasBtagDeco = false;
+        if(!hasBtagLink){
+            ATH_MSG_VERBOSE("No btag' link found on HLT jet, checking for Run-3 trigger decorations on jet");
+            ATH_CHECK(hasBTagDeco(hlt_jet, hasBtagDeco));
+        }
+        hasBtag = hasBtagLink || hasBtagDeco;
 	  }
 	  else{
 	    double hlt_bscore = -1.;
@@ -143,7 +160,7 @@ namespace CP
 			  << " btag: " << hasBtag);
 
 	  if (bestHLT && isSameJet(bestHLT, hlt_jet))
-	    btag |= hasBtag; // if any leg claims b-tag, then the jet is b-tagged
+	    btag = btag || hasBtag; // if any leg claims b-tag, then the jet is b-tagged
 	  else if (dR < minDRHLT) {
 	    minDRHLT = dR;
 	    bestHLT = hlt_jet;
@@ -195,5 +212,16 @@ namespace CP
     }
     return StatusCode::SUCCESS;
   }
-}
 
+  StatusCode BTaggingTriggerMatchingAlg::hasBTagDeco(const xAOD::IParticle* jet, bool& hasBtagDeco) const {
+    hasBtagDeco = false;
+    for (const auto& accessor : m_ftagRun3TriggerDecorAccessors) {
+        if (accessor.isAvailable(*jet)) {
+            hasBtagDeco = true;
+            break;
+        }
+    }
+    return StatusCode::SUCCESS;
+  }
+
+}

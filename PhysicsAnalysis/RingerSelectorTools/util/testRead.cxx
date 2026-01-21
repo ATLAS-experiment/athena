@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // $Id: testRead.cxx 770805 2016-08-30 14:03:33Z ssnyder $
@@ -65,7 +65,7 @@ void readCollectionFromFile(const char* fileName);
 template<>
 void readCollectionFromFile<IThresWrapper>(const char* fileName);
 
-int main(){
+int main1(){
 
   // Change message level and greet user
   msg.setLevel(MSG::DEBUG);
@@ -548,6 +548,19 @@ int main(){
   msg << MSG::INFO << BREAKER << endmsg;
 
   return 0;
+}
+
+
+int main()
+{
+  int ret = 1;
+  try {
+    ret = main1();
+  }
+  catch (const std::exception& e) {
+    std::cerr << e.what() << "\n";
+  }
+  return ret;
 }
 
 // =============================================================================

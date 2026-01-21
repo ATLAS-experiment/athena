@@ -523,10 +523,11 @@ def CombinedMuonTrackTruthAlgsCfg(flags):
     result.merge(MuonDetailedTrackTruthMakerCfg(flags, name="MuonCombinedDetailedTrackTruthMaker",
                                                 TrackCollectionNames=trk_cols))
 
-    for i in range(len(trk_cols)):
-        from TrkConfig.TrkTruthAlgsConfig import TrackTruthSelectorCfg, TrackParticleTruthAlgCfg
-        result.merge(TrackTruthSelectorCfg(flags, tracks=trk_cols[i]))
-        result.merge(TrackParticleTruthAlgCfg(flags, tracks=trk_cols[i],
+    if(not flags.Muon.scheduleActsReco):
+        for i in range(len(trk_cols)):
+            from TrkConfig.TrkTruthAlgsConfig import TrackTruthSelectorCfg, TrackParticleTruthAlgCfg
+            result.merge(TrackTruthSelectorCfg(flags, tracks=trk_cols[i])) 
+            result.merge(TrackParticleTruthAlgCfg(flags, tracks=trk_cols[i],
                                               TrackParticleName=particle_cols[i]))
 
     return result

@@ -273,15 +273,6 @@ public:
     virtual void        set_do_neighbours   (bool do_neighbours) override;
     //@}
 
-    /// @name setting pointer to the MessageService
-    //@{
-    virtual void setMessageSvc  (IMessageSvc* msgSvc) override;
-    //@}
-
-    /// Set flag for suppressing informational output.
-    void set_quiet (bool quiet);
-
-
 protected:
 
     friend class AtlasDetectorIDHelper;
@@ -364,13 +355,6 @@ protected:
     /// Flag for subclasses to know whether or not to perform
     /// neighbour initialization
     bool        m_do_neighbours{true};
-
-    /// pointer to the message service
-    IMessageSvc*        m_msgSvc{};
-
-    /// If true, suppress DEBUG/INFO messages.
-    bool m_quiet{};
-
 
     /// List of dictionary names used by this helper
     std::vector<std::string>  m_dict_names;

@@ -8,16 +8,12 @@
 #include "AthenaBaseComps/AthAlgTool.h"
 
 #include "../GlobalSimComponents/ITIPwriterAlgTool.h"
-#include "../IO/IeEmTOBContainer.h"
+#include "../IO/eEmTOBContainer.h"
 
 #include "ICommonSelector.h"
 #include "IeEmSelector.h"
 
 #include <string>
-
-namespace  GlobalSim::IOBitwise {
-  class ICommonTOB;
-}
 
 namespace GlobalSim {
 
@@ -49,7 +45,7 @@ namespace GlobalSim {
     std::unique_ptr<ICommonSelector> m_c_selector{nullptr};
     std::unique_ptr<IeEmSelector> m_e_selector{nullptr};
   
-    SG::ReadHandleKey<GlobalSim::IOBitwise::IeEmTOBContainer>
+    SG::ReadHandleKey<GlobalSim::IOBitwise::eEmTOBContainer>
     m_eEmTOBContainerKey {
       this,
       "eEmTOBs",

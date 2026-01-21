@@ -84,6 +84,8 @@ namespace MuonR4 {
             Gaudi::Property<unsigned> m_precHitCut{this, "PrecHitCut" , 3};
             /** @brief Use the fast Mdt fitter where possible */
             Gaudi::Property<bool> m_useFastFitter{this, "useFastFitter", true};
+            /** @brief The fast fitter is treated as a pre fitter */
+            Gaudi::Property<bool> m_fastPreFitter{this, "useFastPreFitter", false};
             /** @brief Tune the number of iterations */
             Gaudi::Property<unsigned> m_maxIter{this, "maxIterations", 50};
             /** @brief Pointer to the ambiguity reosolution */

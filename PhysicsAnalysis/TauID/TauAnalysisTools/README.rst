@@ -40,13 +40,13 @@ Setup
 AnalysisBase (AthAnalysisBase)
 ---------------
 
-First start with a clean shell and setup athena using sparse checkout, following the instructions from `Setup Sparse Checkout <https://atlassoftwaredocs.web.cern.ch/gittutorial/git-clone/#sparse-checkout>`_.
+First start with a clean shell and setup athena using sparse checkout, following the instructions from `Setup Sparse Checkout <://atlas-software.docs.cern.ch/athena/git/clone/#sparse-checkout>`_.
 
 Then checkout the TauAnalysisTools package::
 
   git atlas addpkg TauAnalysisTools
 
-Compile the package following the instructions from `Setting up to compile and test code <https://atlassoftwaredocs.web.cern.ch/gittutorial/git-develop/>`_.
+Compile the package following the instructions from `Setting up to compile and test code <https://atlas-software.docs.cern.ch/athena/git/develop/>`_.
 Please make sure to setup AnalysisBase (or AthAnalysisBase), for example typing::
 
   asetup AnalysisBase,25.2.12,here

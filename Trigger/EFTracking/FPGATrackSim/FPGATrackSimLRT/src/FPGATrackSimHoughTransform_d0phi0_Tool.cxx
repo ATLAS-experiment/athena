@@ -146,7 +146,7 @@ StatusCode FPGATrackSimHoughTransform_d0phi0_Tool::finalize()
 ///////////////////////////////////////////////////////////////////////////////
 // Main Algorithm
 
-StatusCode FPGATrackSimHoughTransform_d0phi0_Tool::getRoads(const std::vector<std::shared_ptr<const FPGATrackSimHit>> & hits, std::vector<std::shared_ptr<const FPGATrackSimRoad>> & roads) 
+StatusCode FPGATrackSimHoughTransform_d0phi0_Tool::getRoads(const std::vector<std::shared_ptr<const FPGATrackSimHit>> & hits, std::vector<FPGATrackSimRoad> & roads) 
 {
   ATH_MSG_DEBUG("Event: " << m_event << ", # hits: " << hits.size());
   roads.clear();
@@ -164,8 +164,7 @@ StatusCode FPGATrackSimHoughTransform_d0phi0_Tool::getRoads(const std::vector<st
     }
   }
 
-  roads.reserve(m_roads.size());
-  for (FPGATrackSimRoad & r : m_roads) roads.emplace_back(std::make_shared<const FPGATrackSimRoad>(r));
+  roads = std::move(m_roads);
 
   if (roads.empty() && m_event >= 5 && m_event < 200)
     drawImage(image, m_name + "_" + std::to_string(m_event));

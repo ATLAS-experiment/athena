@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TileIdCnv/TileHWIDDetDescrCnv.h"
@@ -33,9 +33,6 @@ TileHWIDDetDescrCnv::createObj(IOpaqueAddress* /*pAddr*/, DataObject*& pObj)
 
     // create the helper
     TileHWID* tilehw_id = new TileHWID;
-
-    // pass a pointer to IMessageSvc to the helper
-    tilehw_id->setMessageSvc(msgSvc());
 
     ATH_CHECK( idDictMgr->initializeHelper(*tilehw_id) == 0 );
 

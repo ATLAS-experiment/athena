@@ -7,14 +7,11 @@ from AthenaCommon.CFElements import seqAND
 
 def TEST7SkimmingToolCfg(flags):
     """Configure the example skimming tool"""
-    from TrigDecisionTool.TrigDecisionToolConfig import TrigDecisionToolCfg
-    acc = ComponentAccumulator()
-    tdt = acc.getPrimaryAndMerge(TrigDecisionToolCfg(flags))
-    acc.addPublicTool(CompFactory.DerivationFramework.xAODStringSkimmingTool(name       = "TEST7StringSkimmingTool",
-                                                                             expression = "( count(Muons.pt > (6 * GeV)) + count(Electrons.pt > (6 * GeV)) ) >= 3",
-                                                                             TrigDecisionTool=tdt),
-                      primary = True)
-    return(acc)                          
+    from DerivationFrameworkTools.DerivationFrameworkToolsConfig import (
+        xAODStringSkimmingToolCfg)
+    return xAODStringSkimmingToolCfg(
+        flags, name = "TEST7StringSkimmingTool",
+        expression = "( count(Muons.pt > (6 * GeV)) + count(Electrons.pt > (6 * GeV)) ) >= 3")
 
 def TEST7KernelCfg(flags, name='TEST7Kernel', **kwargs):
     """Configure the derivation framework driving algorithm (kernel)"""

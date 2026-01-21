@@ -11,6 +11,7 @@
 #include "CaloRecGPU/CUDAFriendlyClasses.h"
 #include "GPUClusterInfoAndMomentsCalculatorImpl.h"
 #include "FPHelpers.h"
+#include "TemporaryHelpers.h"
 
 #include "CaloGeoHelpers/CaloSampling.h"
 //Just enums and stuff, CUDA compatible.
@@ -22,157 +23,6 @@ namespace
 {
   namespace CMCTemporaries
   {
-    constexpr int split_size = CaloRecGPU::NMaxClusters / 2;
-
-    constexpr int nested_size = CaloRecGPU::NMaxClusters;
-
-    template <class T>
-    using nested_type = T[nested_size];
-
-    //Suppress warnings about unused functions.
-    _Pragma("nv_diag_suppress 177")
-
-#define CALORECGPU_EXPAND(...) __VA_ARGS__
-
-#define CALORECGPU_CONCAT_HELPER_INNER(A, ...) A ## __VA_ARGS__
-#define CALORECGPU_CONCAT_HELPER(A, B) CALORECGPU_CONCAT_HELPER_INNER(A, B)
-
-
-#define CMC_TEMPARR_1_DECLARE(TEMPNAME, TYPE)                                                                                          \
-  template <class PtrLike> __host__ __device__ const TYPE * TEMPNAME (const PtrLike & arr);                                            \
-  template <class PtrLike> __host__ __device__ TYPE * TEMPNAME (PtrLike & arr);                                                        \
-  template <class PtrLike> __host__ __device__ const TYPE & TEMPNAME (const PtrLike & arr, const int idx);                             \
-  template <class PtrLike> __host__ __device__ TYPE & TEMPNAME (PtrLike & arr, const int idx);                                         \
-  struct to_end_with_semicolon
-
-#define CMC_TEMPARR_1_SPLIT_DECLARE(TEMPNAME, TYPE)                                                                                    \
-  CMC_TEMPARR_1_DECLARE(CALORECGPU_CONCAT_HELPER(TEMPNAME, _1), TYPE);                                                                 \
-  CMC_TEMPARR_1_DECLARE(CALORECGPU_CONCAT_HELPER(TEMPNAME, _2), TYPE);                                                                 \
-  template <class PtrLike> __host__ __device__ const TYPE & TEMPNAME (const PtrLike & arr, const int idx);                             \
-  template <class PtrLike> __host__ __device__ TYPE & TEMPNAME (PtrLike & arr, const int idx);                                         \
-  struct to_end_with_semicolon
-
-#define CMC_TEMPARR_2_DECLARE(TEMPNAME, TYPE)                                                                                          \
-  template <class PtrLike> __host__ __device__ const nested_type<TYPE> * TEMPNAME (const PtrLike & arr);                               \
-  template <class PtrLike> __host__ __device__ nested_type<TYPE> * TEMPNAME (PtrLike & arr);                                           \
-  template <class PtrLike> __host__ __device__ const nested_type<TYPE> & TEMPNAME (const PtrLike & arr, const int idx);                \
-  template <class PtrLike> __host__ __device__ nested_type<TYPE> & TEMPNAME (PtrLike & arr, const int idx);                            \
-  template <class PtrLike> __host__ __device__ const TYPE & TEMPNAME (const PtrLike & arr, const int idx, const int jdx);              \
-  template <class PtrLike> __host__ __device__ TYPE & TEMPNAME (PtrLike & arr, const int idx, const int jdx);                          \
-  struct to_end_with_semicolon
-
-#define CMC_TEMPARR_2_SPLIT_DECLARE(TEMPNAME, TYPE)                                                                                    \
-  CMC_TEMPARR_2_DECLARE(CALORECGPU_CONCAT_HELPER(TEMPNAME, _1), TYPE);                                                                 \
-  CMC_TEMPARR_2_DECLARE(CALORECGPU_CONCAT_HELPER(TEMPNAME, _2), TYPE);                                                                 \
-  template <class PtrLike> __host__ __device__ const TYPE & TEMPNAME (const PtrLike & arr, const int idx, const int jdx);              \
-  template <class PtrLike> __host__ __device__ TYPE & TEMPNAME (PtrLike & arr, const int idx, const int jdx);                          \
-  struct to_end_with_semicolon
-
-
-#define CMC_TEMPARR_1(TEMPNAME, BASEVAR, TYPE)                                                                                         \
-  template <class PtrLike> __host__ __device__ const TYPE * TEMPNAME (const PtrLike & arr)                                             \
-  {                                                                                                                                    \
-    constexpr auto misalignment = offsetof(CaloRecGPU::ClusterMomentsArr, BASEVAR) % alignof(TYPE);                                    \
-    const char * aligned = ((const char *) arr->BASEVAR) + (alignof(TYPE) - misalignment) * (misalignment > 0);                        \
-    return (const TYPE *) (aligned);                                                                                                   \
-  }                                                                                                                                    \
-  template <class PtrLike> __host__ __device__ TYPE * TEMPNAME (PtrLike & arr)                                                         \
-  {                                                                                                                                    \
-    constexpr auto misalignment = offsetof(CaloRecGPU::ClusterMomentsArr, BASEVAR) % alignof(TYPE);                                    \
-    char * aligned = ((char *) arr->BASEVAR) + (alignof(TYPE) - misalignment) * (misalignment > 0);                                    \
-    return (TYPE *) (aligned);                                                                                                         \
-  }                                                                                                                                    \
-  template <class PtrLike> __host__ __device__ const TYPE & TEMPNAME (const PtrLike & arr, const int idx)                              \
-  {                                                                                                                                    \
-    return TEMPNAME (arr) [idx];                                                                                                       \
-  }                                                                                                                                    \
-  template <class PtrLike> __host__ __device__ TYPE & TEMPNAME (PtrLike & arr, const int idx)                                          \
-  {                                                                                                                                    \
-    return TEMPNAME (arr) [idx];                                                                                                       \
-  } struct to_end_with_semicolon
-
-#define CMC_TEMPARR_1_SPLIT(TEMPNAME, BASEVAR1, BASEVAR2, TYPE)                                                                        \
-  CMC_TEMPARR_1(CALORECGPU_CONCAT_HELPER(TEMPNAME, _1), BASEVAR1, TYPE);                                                               \
-  CMC_TEMPARR_1(CALORECGPU_CONCAT_HELPER(TEMPNAME, _2), BASEVAR2, TYPE);                                                               \
-  template <class PtrLike> __host__ __device__ const TYPE & TEMPNAME (const PtrLike & arr, const int idx)                              \
-  {                                                                                                                                    \
-    if (idx >= split_size)                                                                                                             \
-      {                                                                                                                                \
-        return CALORECGPU_CONCAT_HELPER(TEMPNAME, _2)(arr, idx - split_size);                                                          \
-      }                                                                                                                                \
-    else                                                                                                                               \
-      {                                                                                                                                \
-        return CALORECGPU_CONCAT_HELPER(TEMPNAME, _1)(arr, idx);                                                                       \
-      }                                                                                                                                \
-  }                                                                                                                                    \
-  template <class PtrLike> __host__ __device__ TYPE & TEMPNAME (PtrLike & arr, const int idx)                                          \
-  {                                                                                                                                    \
-    if (idx >= split_size)                                                                                                             \
-      {                                                                                                                                \
-        return CALORECGPU_CONCAT_HELPER(TEMPNAME, _2)(arr, idx - split_size);                                                          \
-      }                                                                                                                                \
-    else                                                                                                                               \
-      {                                                                                                                                \
-        return CALORECGPU_CONCAT_HELPER(TEMPNAME, _1)(arr, idx);                                                                       \
-      }                                                                                                                                \
-  } struct to_end_with_semicolon
-
-#define CMC_TEMPARR_2(TEMPNAME, BASEVAR, TYPE)                                                                                         \
-  template <class PtrLike> __host__ __device__ const nested_type<TYPE> * TEMPNAME (const PtrLike & arr)                                \
-  {                                                                                                                                    \
-    constexpr auto misalignment = offsetof(CaloRecGPU::ClusterMomentsArr, BASEVAR) % alignof(nested_type<TYPE>);                       \
-    const char * aligned = ((const char *) arr->BASEVAR) + (alignof(nested_type<TYPE>) - misalignment) * (misalignment > 0);           \
-    return (const nested_type<TYPE> *) (aligned);                                                                                      \
-  }                                                                                                                                    \
-  template <class PtrLike> __host__ __device__ nested_type<TYPE> * TEMPNAME (PtrLike & arr)                                            \
-  {                                                                                                                                    \
-    constexpr auto misalignment = offsetof(CaloRecGPU::ClusterMomentsArr, BASEVAR) % alignof(nested_type<TYPE>);                       \
-    char * aligned = ((char *) arr->BASEVAR) + (alignof(nested_type<TYPE>) - misalignment) * (misalignment > 0);                       \
-    return (nested_type<TYPE> *) (aligned);                                                                                            \
-  }                                                                                                                                    \
-  template <class PtrLike> __host__ __device__ const nested_type<TYPE> & TEMPNAME (const PtrLike & arr, const int idx)                 \
-  {                                                                                                                                    \
-    return TEMPNAME (arr) [idx];                                                                                                       \
-  }                                                                                                                                    \
-  template <class PtrLike> __host__ __device__ nested_type<TYPE> & TEMPNAME (PtrLike & arr, const int idx)                             \
-  {                                                                                                                                    \
-    return TEMPNAME (arr) [idx];                                                                                                       \
-  }                                                                                                                                    \
-  template <class PtrLike> __host__ __device__ const TYPE & TEMPNAME (const PtrLike & arr, const int idx, const int jdx)               \
-  {                                                                                                                                    \
-    return TEMPNAME (arr) [idx] [jdx];                                                                                                 \
-  }                                                                                                                                    \
-  template <class PtrLike> __host__ __device__ TYPE & TEMPNAME (PtrLike & arr, const int idx, const int jdx)                           \
-  {                                                                                                                                    \
-    return TEMPNAME (arr) [idx] [jdx];                                                                                                 \
-  } struct to_end_with_semicolon
-
-#define CMC_TEMPARR_2_SPLIT(TEMPNAME, BASEVAR1, BASEVAR2, TYPE)                                                                        \
-  CMC_TEMPARR_2(CALORECGPU_CONCAT_HELPER(TEMPNAME, _1), BASEVAR1, TYPE);                                                               \
-  CMC_TEMPARR_2(CALORECGPU_CONCAT_HELPER(TEMPNAME, _2), BASEVAR2, TYPE);                                                               \
-  template <class PtrLike> __host__ __device__ const TYPE & TEMPNAME (const PtrLike & arr, const int idx, const int jdx)               \
-  {                                                                                                                                    \
-    if (jdx >= split_size)                                                                                                             \
-      {                                                                                                                                \
-        return CALORECGPU_CONCAT_HELPER(TEMPNAME, _2)(arr, idx, jdx - split_size);                                                     \
-      }                                                                                                                                \
-    else                                                                                                                               \
-      {                                                                                                                                \
-        return CALORECGPU_CONCAT_HELPER(TEMPNAME, _1)(arr, idx, jdx);                                                                  \
-      }                                                                                                                                \
-  }                                                                                                                                    \
-  template <class PtrLike> __host__ __device__ TYPE & TEMPNAME (PtrLike & arr, const int idx, const int jdx)                           \
-  {                                                                                                                                    \
-    if (jdx >= split_size)                                                                                                             \
-      {                                                                                                                                \
-        return CALORECGPU_CONCAT_HELPER(TEMPNAME, _2)(arr, idx, jdx - split_size);                                                     \
-      }                                                                                                                                \
-    else                                                                                                                               \
-      {                                                                                                                                \
-        return CALORECGPU_CONCAT_HELPER(TEMPNAME, _1)(arr, idx, jdx);                                                                  \
-      }                                                                                                                                \
-  } struct to_end_with_semicolon
-
     // BIG TABLE OF VARIABLE COEXISTENCE!
     // I know this is a big comment to have here, but it is the most immediate way to have a reference for what lives where.
     //
@@ -361,8 +211,8 @@ namespace
     // | time                     ||                            |                            |                            |                            | time                       | time                       | time                       | time                       | time                       | time                       | time                       ||                            |
     // | firstPhi                 ||                            |                            | firstPhi                   | firstPhi                   | firstPhi                   | firstPhi                   | firstPhi                   | firstPhi                   | firstPhi                   | firstPhi                   | firstPhi                   ||                            |
     // | firstEta                 ||                            |                            | firstEta                   | firstEta                   | firstEta                   | firstEta                   | firstEta                   | firstEta                   | firstEta                   | firstEta                   | firstEta                   ||                            |
-    // | secondR                  ||                            |                            | firstPhiAux                | firstPhiAux                | firstPhiAux                |                            |                            | secondR                    | secondR                    | secondR                    | secondR                    ||                            |
-    // | secondLambda             ||                            |                            | firstEtaAux                | firstEtaAux                | firstEtaAux                |                            |                            | secondLambda               | secondLambda               | secondLambda               | secondLambda               ||                            |
+    // | secondR                  ||                            |                            | firstPhiAux                | firstPhiAux                | firstPhiAux -> matrix11    | matrix11                   | matrix11                   | secondR                    | secondR                    | secondR                    | secondR                    ||                            |
+    // | secondLambda             ||                            |                            |energyDensityNormlizationAux|energyDensityNormlizationAux|EDnstNormAux>avgLArQNormAux | averageLArQNormAux         | averageLArQNormAux         |avgLArQNormAux>secondLambda | secondLambda               | secondLambda               | secondLambda               ||                            |
     // | deltaPhi                 ||                            |                            |                            |                            | matrix10Aux                | matrix10Aux                | matrix10Aux -> deltaPhi    | deltaPhi                   | deltaPhi                   | deltaPhi                   | deltaPhi                   ||                            |
     // | deltaTheta               ||                            |                            |                            |                            | matrix20Aux                | matrix20Aux                | matrix20Aux -> deltaTheta  | deltaTheta                 | deltaTheta                 | deltaTheta                 | deltaTheta                 ||                            |
     // | deltaAlpha               ||                            |                            |                            |                            | matrix21Aux                | matrix21Aux                | matrix21Aux -> deltaAlpha  | deltaAlpha                 | deltaAlpha                 | deltaAlpha                 | deltaAlpha                 ||                            |
@@ -372,7 +222,7 @@ namespace
     // | centerMag                ||                            |                            | engFracEMAux               | engFracEMAux               | engFracEMAux               |                            | centerMag                  | centerMag                  | centerMag                  | centerMag                  | centerMag                  ||                            |
     // | centerLambda             ||                            |                            |                            |                            | badCellsCorrEAux           | badCellsCorrEAux           | badCellsCorrEAux           | badCellsCorrEAux           |                            |                            | centerLambda               ||                            |
     // | lateral                  ||                            |                            | secondEngDensAux           | secondEngDensAux           | secondEngDensAux           |                            |                            | lateral                    | lateral                    | lateral                    | lateral                    ||                            |
-    // | longitudinal             ||                            |                            |energyDensityNormlizationAux|energyDensityNormlizationAux|energyDensityNormlizationAux|                            |                            | longitudinal               | longitudinal               | longitudinal               | longitudinal               ||                            |
+    // | longitudinal             ||                            |                            | firstEtaAux                | firstEtaAux                | firstEtaAux -> matrix00    | matrix00                   | matrix00                   | longitudinal               | longitudinal               | longitudinal               | longitudinal               ||                            |
     // | engFracEM                ||                            |                            | engFracEM                  | engFracEM                  | engFracEM                  | engFracEM                  | engFracEM                  | engFracEM                  | engFracEM                  | engFracEM                  | engFracEM                  ||                            |
     // | engFracMax               ||                            |                            |                            |                            | engFracMax                 | engFracMax                 | engFracMax                 | engFracMax                 | engFracMax                 | engFracMax                 | engFracMax                 ||                            |
     // | engFracCore              || engFracCore                | engFracCore                | engFracCore                | engFracCore                | engFracCore                | engFracCore                | engFracCore                | engFracCore                | engFracCore                | engFracCore                | engFracCore                ||                            |
@@ -391,7 +241,7 @@ namespace
     // | avgLArQ                  ||                            |                            |                            |                            | avgLArQ                    | avgLArQ                    | avgLArQ                    | avgLArQ                    | avgLArQ                    | avgLArQ                    | avgLArQ                    ||                            |
     // | avgTileQ                 ||                            |                            |                            |                            | avgTileQ                   | avgTileQ                   | avgTileQ                   | avgTileQ                   | avgTileQ                   | avgTileQ                   | avgTileQ                   ||                            |
     // +--------------------------++----------------------------+----------------------------+----------------------------+----------------------------+----------------------------+----------------------------+----------------------------+----------------------------+----------------------------+----------------------------+----------------------------++----------------------------+
-    // | engBadHVCells            ||                            | engPosAux                  | engPosAux                  |                            |                            |                            |                            |                            |                            |                            |                            || calculated on the CPU...   |
+    // | engBadHVCells            ||                            | engPosAux                  | engPosAux                  |                            | timeNormalizationAux       | timeNormalizationAux       | timeNormalizationAux       | timeNormalizationAux       |                            |                            |                            || calculated on the CPU...   |
     // | nBadHVCells              ||                            |                            |                            |                            | significanceAux            | significanceAux            | significanceAux            | significanceAux            |                            |                            |                            || calculated on the CPU...   |
     // +--------------------------++----------------------------+----------------------------+----------------------------+----------------------------+----------------------------+----------------------------+----------------------------+----------------------------+----------------------------+----------------------------+----------------------------++----------------------------+
     // | PTD                      ||                            |                            | mX                         | mX                         | mX -> PTD                  | PTD                        | PTD                        | PTD                        | PTD                        | PTD                        | PTD                        ||                            |
@@ -400,8 +250,8 @@ namespace
     // | EMProbability            ||                            |                            | centerXAux                 | centerXAux                 | centerXAux -> matrix00Aux  | matrix00Aux                | matrix00Aux -> showerAxisX | showerAxisX                | showerAxisX                | showerAxisX                | showerAxisX                ||                            |
     // | hadWeight                ||                            |                            | centerYAux                 | centerYAux                 | centerYAux -> matrix11Aux  | matrix11Aux                | matrix11Aux -> showerAxisY | showerAxisY                | showerAxisY                | showerAxisY                | showerAxisY                ||                            |
     // | OOCweight                ||                            |                            | centerZAux                 | centerZAux                 | centerZAux -> matrix22Aux  | matrix22Aux                | matrix22Aux -> showerAxisZ | showerAxisZ                | showerAxisZ                | showerAxisZ                | showerAxisZ                ||                            |
-    // | DMweight                 ||                            |                            | clusterEnergyAux           | clusterEnergyAux           | clusterEnergyAux           |                            |                            |                            |                            |                            |                            ||                            |
-    // | tileConfidenceLevel      ||                            |                            | clusterPhiAux              | clusterPhiAux              | clusterPhiAux              |                            |                            |                            |                            |                            |                            ||                            |
+    // | DMweight                 ||                            |                            | clusterEnergyAux           | clusterEnergyAux           | clusterEnergyAux           |                            |                            | lateralNormalization       | lateralNormalization       | lateralNormalization       |                            ||                            |
+    // | tileConfidenceLevel      ||                            |                            | clusterPhiAux              | clusterPhiAux              | clusterPhiAux -> matrix22  | matrix22                   | matrix22                   | lateralNormalizationAux    | lateralNormalizationAux    | lateralNormalizationAux    |                            ||                            |
     // +--------------------------++----------------------------+----------------------------+----------------------------+----------------------------+----------------------------+----------------------------+----------------------------+----------------------------+----------------------------+----------------------------+----------------------------++----------------------------+
     // | secondTime               ||                            |                            |                            |                            | secondTime                 | secondTime                 | secondTime                 | secondTime                 | secondTime                 | secondTime                 | secondTime                 ||                            |
     // +--------------------------++----------------------------+----------------------------+----------------------------+----------------------------+----------------------------+----------------------------+----------------------------+----------------------------+----------------------------+----------------------------+----------------------------++----------------------------+
@@ -435,26 +285,27 @@ namespace
     // | nCellSampling       [27] ||                            |                            | nCellSampling         [27] | nCellSampling         [27] | nCellSampling         [27] | nCellSampling         [27] | nCellSampling         [27] | nCellSampling         [27] | nCellSampling         [27] | nCellSampling         [27] | nCellSampling         [27] ||                            |
     // +--------------------------++----------------------------+----------------------------+----------------------------+----------------------------+----------------------------+----------------------------+----------------------------+----------------------------+----------------------------+----------------------------+----------------------------++----------------------------+
     // | nExtraCellSampling       ||                            |                            | sumAbsEnergyNonMomentsAux  | sumAbsEnergyNonMomentsAux  | sumAbsEnergyNonMomentsAux  |                            |                            | nExtraCellSampling         | nExtraCellSampling         | nExtraCellSampling         | nExtraCellSampling         ||                            |
-    // | numCells                 ||                            |                            | energyDensityNormalization | energyDensityNormalization | energyDensityNormalization |                            |                            | numCells                   | numCells                   | numCells                   | numCells                   ||                            |
     // +--------------------------++----------------------------+----------------------------+----------------------------+----------------------------+----------------------------+----------------------------+----------------------------+----------------------------+----------------------------+----------------------------+----------------------------++----------------------------+
     // | vertexFraction           ||                            |                            |                            |                            | engBadCellsAux             | engBadCellsAux             | engBadCellsAux             | engBadCellsAux             |                            |                            |                            ||                            |
     // | nVertexFraction          ||                            |                            |                            |                            | badLArQFracAux             | badLArQFracAux             | badLArQFracAux             | badLArQFracAux             |                            |                            |                            ||                            |
-    // | etaCaloFrame             ||                            |                            |                            |                            | avgLArQAux                 | avgLArQAux                 | avgLArQAux                 | avgLArQAux                 |                            |                            |                            ||                            |
+    // | etaCaloFrame             ||                            |                            | energyDensityNormalization | energyDensityNormalization |enrgyDnstyNorm > avgLArQAux | avgLArQAux                 | avgLArQAux                 | avgLArQAux                 |                            |                            |                            ||                            |
     // | phiCaloFrame             ||                            |                            |                            |                            | timeAux                    | timeAux                    | timeAux                    | timeAux                    |                            |                            |                            ||                            |
     // | eta1CaloFrame            ||                            |                            |                            |                            | secondTimeAux              | secondTimeAux              | secondTimeAux              | secondTimeAux              |                            |                            |                            ||                            |
     // | phi1CaloFrame            ||                            |                            |                            |                            | averageTileQNorm           | averageTileQNorm           | averageTileQNorm           | averageTileQNorm           |                            |                            |                            ||                            |
     // | eta2CaloFrame            ||                            |                            |                            |                            | averageTileQNormAux        | averageTileQNormAux        | averageTileQNormAux        | averageTileQNormAux        |                            |                            |                            ||                            |
-    // | phi2CaloFrame            ||                            |                            |                            |                            | averageLArQNorm            | averageLArQNorm            | averageLArQNorm            | averageLArQNorm            |                            |                            |                            ||                            |
-    // | engCalibTot              ||                            |                            |                            |                            | averageLArQNormAux         | averageLArQNormAux         | averageLArQNormAux         | averageLArQNormAux         |                            |                            |                            ||                            |
-    // | engCalibOutL             ||                            |                            |                            |                            | timeNormalization          | timeNormalization          | timeNormalization          | timeNormalization          |                            |                            |                            ||                            |
-    // | engCalibOutM             ||                            |                            |                            |                            | timeNormalizationAux       | timeNormalizationAux       | timeNormalizationAux       | timeNormalizationAux       |                            |                            |                            ||                            |
-    // | engCalibOutT             ||                            |                            |                            |                            | matrix00                   | matrix00                   | matrix00                   | lateralNormalization       | lateralNormalization       | lateralNormalization       |                            ||                            |
-    // | engCalibDeadL            ||                            |                            |                            |                            | matrix10                   | matrix10                   | matrix10                   | lateralNormalizationAux    | lateralNormalizationAux    | lateralNormalizationAux    |                            ||                            |
-    // | engCalibDeadM            ||                            |                            |                            |                            | matrix20                   | matrix20                   | matrix20                   | longitudinalNormalization  | longitudinalNormalization  | longitudinalNormalization  |                            ||                            |
-    // | engCalibDeadT            ||                            |                            |                            |                            | matrix11                   | matrix11                   | matrix11                   |longitudinalNormalizationAux|longitudinalNormalizationAux|longitudinalNormalizationAux|                            ||                            |
-    // | engCalibEMB0             ||                            |                            |                            |                            | matrix21                   | matrix21                   | matrix21                   | lateralAux                 | lateralAux                 | lateralAux                 |                            ||                            |
-    // | engCalibEME0             ||                            |                            |                            |                            | matrix22                   | matrix22                   | matrix22                   | longitudinalAux            | longitudinalAux            | longitudinalAux            |                            ||                            |
-    // | engCalibTileG3           ||                            |                            | firstEngDensAux            | firstEngDensAux            | firstEngDensAux            |                            |                            | secondLambdaAux            | secondLambdaAux            | secondLambdaAux            |                            ||                            |
+    // | phi2CaloFrame            ||                            |                            |                            |                            | timeNormalization          | timeNormalization          | timeNormalization          | timeNormalization          |                            |                            |                            ||                            |
+    // +--------------------------++----------------------------+----------------------------+----------------------------+----------------------------+----------------------------+----------------------------+----------------------------+----------------------------+----------------------------+----------------------------+----------------------------++----------------------------+
+    // | engCalibTot              || <struct's extra cell info> | <struct's extra cell info> | <struct's extra cell info> | <struct's extra cell info> | <struct's extra cell info> | <struct's extra cell info> | <struct's extra cell info> | <struct's extra cell info> | <struct's extra cell info> | <struct's extra cell info> | <struct's extra cell info> || <struct's extra cell info> |
+    // | engCalibOutL             || <struct's extra cell info> | <struct's extra cell info> | <struct's extra cell info> | <struct's extra cell info> | <struct's extra cell info> | <struct's extra cell info> | <struct's extra cell info> | <struct's extra cell info> | <struct's extra cell info> | <struct's extra cell info> | <struct's extra cell info> || <struct's extra cell info> |
+    // | engCalibOutM             || <struct's extra cell info> | <struct's extra cell info> | <struct's extra cell info> | <struct's extra cell info> | <struct's extra cell info> | <struct's extra cell info> | <struct's extra cell info> | <struct's extra cell info> | <struct's extra cell info> | <struct's extra cell info> | <struct's extra cell info> || <struct's extra cell info> |
+    // | engCalibOutT             || <struct's extra cell info> | <struct's extra cell info> | <struct's extra cell info> | <struct's extra cell info> | <struct's extra cell info> | <struct's extra cell info> | <struct's extra cell info> | <struct's extra cell info> | <struct's extra cell info> | <struct's extra cell info> | <struct's extra cell info> || <struct's extra cell info> |
+    // | engCalibDeadL            || <struct's extra cell info> | <struct's extra cell info> | <struct's extra cell info> | <struct's extra cell info> | <struct's extra cell info> | <struct's extra cell info> | <struct's extra cell info> | <struct's extra cell info> | <struct's extra cell info> | <struct's extra cell info> | <struct's extra cell info> || <struct's extra cell info> |
+    // | engCalibDeadM            || <struct's extra cell info> | <struct's extra cell info> | <struct's extra cell info> | <struct's extra cell info> | <struct's extra cell info> | <struct's extra cell info> | <struct's extra cell info> | <struct's extra cell info> | <struct's extra cell info> | <struct's extra cell info> | <struct's extra cell info> || <struct's extra cell info> |
+    // +--------------------------++----------------------------+----------------------------+----------------------------+----------------------------+----------------------------+----------------------------+----------------------------+----------------------------+----------------------------+----------------------------+----------------------------++----------------------------+
+    // | engCalibDeadT            ||                            |                            |                            |                            | matrix10                   | matrix10                   | matrix10                   |                            |                            |                            |                            ||                            |
+    // | engCalibEMB0             ||                            |                            |                            |                            | matrix20                   | matrix20                   | matrix20                   | lateralAux                 | lateralAux                 | lateralAux                 |                            ||                            |
+    // | engCalibEME0             ||                            |                            |                            |                            | matrix21                   | matrix21                   | matrix21                   | longitudinalAux            | longitudinalAux            | longitudinalAux            |                            ||                            |
+    // | engCalibTileG3           ||                            |                            | firstEngDensAux            | firstEngDensAux            |firstEngDensAux>avgLArQNorm | averageLArQNorm            | averageLArQNorm            |avgLArQNorm>secondLambdaAux | secondLambdaAux            | secondLambdaAux            |                            ||                            |
     // | engCalibDeadTot          ||                            |                            |                            |                            | sumSquareEnergies          | sumSquareEnergies          | sumSquareEnergies          | secondRAux                 | secondRAux                 | secondRAux                 |                            ||                            |
     // | engCalibDeadEMB0         ||                            |                            |                            |                            | sumSquareEnergiesAux       | sumSquareEnergiesAux       | sumSquareEnergiesAux       |                            |                            |                            |                            ||                            |
     // | engCalibDeadTile0        ||                            |                            | maxCellEnergyAndCell_2     | maxCellEnergyAndCell_2     |mCEAC2>mxSgnificanceAndSmpl2|maxSignificanceAndSampling_2|maxSignificanceAndSampling_2|maxSignificanceAndSampling_2|                            |                            |                            ||                            |
@@ -463,119 +314,101 @@ namespace
     // | engCalibDeadHEC0         ||                            |                            |secondMaxCellEnergyAndCell_1|secondMaxCellEnergyAndCell_1|sMCEAC2>maxAndScondMaxCells1| maxAndSecondMaxCells_1     | maxAndSecondMaxCells_1     | maxAndSecondMaxCells_1     | maxAndSecondMaxCells_1     |                            |                            ||                            |
     // | engCalibDeadFCAL         ||                            |                            | clusterEtaAux              | clusterEtaAux              | clusterEtaAux              |                            |                            |                            |                            |                            |                            ||                            |
     // | engCalibDeadLeakage      ||                            |                            | mY                         | mY                         | mY -> PTDAux               | PTDAux                     | PTDAux                     | PTDAux                     |                            |                            |                            ||                            |
-    // | engCalibDeadUnclass      ||                            |                            | mZ                         | mZ                         | mZ                         |                            |                            |                            |                            |                            |                            ||                            |
+    // | engCalibDeadUnclass      ||                            |                            | mZ                         | mZ                         | mZ > numPositiveEnergyCells| numPositiveEnergyCells     | numPositiveEnergyCells     |                            |                            |                            |                            ||                            |
     // | engCalibFracEM           ||                            |                            |                            |                            | avgTileQAux                | avgTileQAux                | avgTileQAux                | avgTileQAux                |                            |                            |                            ||                            |
-    // | engCalibFracHad          ||                            |                            | sumAbsEnergyNonMoments     | sumAbsEnergyNonMoments     | sumAbsEnergyNonMoments     |                            |                            |                            |                            |                            |                            ||                            |
-    // | engCalibFracRest         ||                            |                            | seedCellPhi                | seedCellPhi                | numPositiveEnergyCells     | numPositiveEnergyCells     | numPositiveEnergyCells     |                            |                            |                            |                            ||                            |
+    // | engCalibFracHad          ||                            |                            | sumAbsEnergyNonMoments     | sumAbsEnergyNonMoments     | sumAbsEnergyNonMoments     |                            |                            | longitudinalNormalization  | longitudinalNormalization  | longitudinalNormalization  |                            ||                            |
+    // | engCalibFracRest         ||                            |                            | seedCellPhi                | seedCellPhi                |                            |                            |                            |longitudinalNormalizationAux|longitudinalNormalizationAux|longitudinalNormalizationAux|                            ||                            |
     // +--------------------------++----------------------------+----------------------------+----------------------------+----------------------------+----------------------------+----------------------------+----------------------------+----------------------------+----------------------------+----------------------------+----------------------------++----------------------------+
     // | CLUSTER STORAGE VARIABLE ||   Isolation Cluster Pass   |    Isolation Cell Pass     |    Zeroth Cluster Pass     |      First Cell Pass       |     First Cluster Pass     |      Second Cell Pass      |      Shower Axis Pass      |    Second Cluster Pass     |      Third Cell Pass       |     Third Cluster Pass     |     Final Cluster Pass     ||          Comments          |
     // +--------------------------++----------------------------+----------------------------+----------------------------+----------------------------+----------------------------+----------------------------+----------------------------+----------------------------+----------------------------+----------------------------+----------------------------++----------------------------+
     //
 
 
-    CMC_TEMPARR_2      (          numberEmptySamplings,         etaPerSample,                                       int);
-    CMC_TEMPARR_2      (       numberNonEmptySamplings,      maxPhiPerSample,                                       int);
-    CMC_TEMPARR_2      (     maxMomentsEnergyPerSample,      maxEtaPerSample,                              unsigned int);
+    CALORECGPU_TEMP2DARR_1 (          numberEmptySamplings,         etaPerSample,                                       int);
+    CALORECGPU_TEMP2DARR_1 (       numberNonEmptySamplings,      maxPhiPerSample,                                       int);
+    CALORECGPU_TEMP2DARR_1 (     maxMomentsEnergyPerSample,      maxEtaPerSample,                              unsigned int);
 
 
-    CMC_TEMPARR_2      (       absoluteEnergyPerSample,        maxEPerSample,                                     float);
-    CMC_TEMPARR_2      (    absoluteEnergyPerSampleAux,      energyPerSample,                                     float);
-    CMC_TEMPARR_2      (               phiPerSampleAux,      maxPhiPerSample,                                     float);
-    CMC_TEMPARR_2      (               etaPerSampleAux,      maxEtaPerSample,                                     float);
-    CMC_TEMPARR_1      (                   seedCellPhi,     engCalibFracRest,                                     float);
-    CMC_TEMPARR_1      (              clusterEnergyAux,             DMweight,                                     float);
-    CMC_TEMPARR_1      (                 clusterPhiAux,  tileConfidenceLevel,                                     float);
-    CMC_TEMPARR_1      (                 clusterEtaAux,     engCalibDeadFCAL,                                     float);
-    CMC_TEMPARR_1      (                    centerXAux,        EMProbability,                                     float);
-    CMC_TEMPARR_1      (                    centerYAux,            hadWeight,                                     float);
-    CMC_TEMPARR_1      (                    centerZAux,            OOCweight,                                     float);
-    CMC_TEMPARR_1      (                   firstPhiAux,              secondR,                                     float);
-    CMC_TEMPARR_1      (                   firstEtaAux,         secondLambda,                                     float);
-    CMC_TEMPARR_1      (                     engPosAux,        engBadHVCells,                                     float);
-    CMC_TEMPARR_1      (                  engFracEMAux,            centerMag,                                     float);
-    CMC_TEMPARR_1      (               firstEngDensAux,       engCalibTileG3,                                     float);
-    CMC_TEMPARR_1      (              secondEngDensAux,              lateral,                                     float);
-    CMC_TEMPARR_1      (    energyDensityNormalization,             numCells,                                     float);
-    CMC_TEMPARR_1      ( energyDensityNormalizationAux,         longitudinal,                                     float);
-    CMC_TEMPARR_1      (        sumAbsEnergyNonMoments,      engCalibFracHad,                                     float);
-    CMC_TEMPARR_1      (     sumAbsEnergyNonMomentsAux,   nExtraCellSampling,                                     float);
-    CMC_TEMPARR_1      (                            mX,                  PTD,                                     float);
-    CMC_TEMPARR_1      (                         mXAux,                 mass,                                     float);
-    CMC_TEMPARR_1      (                            mY,  engCalibDeadLeakage,                                     float);
-    CMC_TEMPARR_1      (                         mYAux,     cellSignificance,                                     float);
-    CMC_TEMPARR_1      (                            mZ,  engCalibDeadUnclass,                                     float);
-    CMC_TEMPARR_1      (                         mZAux,      cellSigSampling,                                     float);
-    CMC_TEMPARR_1_SPLIT(          maxCellEnergyAndCell,   engCalibDeadTileG3,    engCalibDeadTile0,  unsigned long long);
-    CMC_TEMPARR_1_SPLIT(    secondMaxCellEnergyAndCell,     engCalibDeadHEC0,     engCalibDeadEME0,  unsigned long long);
-    CMC_TEMPARR_1_SPLIT(          maxAndSecondMaxCells,     engCalibDeadHEC0,     engCalibDeadEME0,  unsigned long long);
+    CALORECGPU_TEMP2DARR_1 (       absoluteEnergyPerSample,        maxEPerSample,                                     float);
+    CALORECGPU_TEMP2DARR_1 (    absoluteEnergyPerSampleAux,      energyPerSample,                                     float);
+    CALORECGPU_TEMP2DARR_1 (               phiPerSampleAux,      maxPhiPerSample,                                     float);
+    CALORECGPU_TEMP2DARR_1 (               etaPerSampleAux,      maxEtaPerSample,                                     float);
+    CALORECGPU_TEMPARR_1   (                   seedCellPhi,     engCalibFracRest,                                     float);
+    CALORECGPU_TEMPARR_1   (              clusterEnergyAux,             DMweight,                                     float);
+    CALORECGPU_TEMPARR_1   (                 clusterPhiAux,  tileConfidenceLevel,                                     float);
+    CALORECGPU_TEMPARR_1   (                 clusterEtaAux,     engCalibDeadFCAL,                                     float);
+    CALORECGPU_TEMPARR_1   (                    centerXAux,        EMProbability,                                     float);
+    CALORECGPU_TEMPARR_1   (                    centerYAux,            hadWeight,                                     float);
+    CALORECGPU_TEMPARR_1   (                    centerZAux,            OOCweight,                                     float);
+    CALORECGPU_TEMPARR_1   (                   firstPhiAux,              secondR,                                     float);
+    CALORECGPU_TEMPARR_1   (                   firstEtaAux,         longitudinal,                                     float);
+    CALORECGPU_TEMPARR_1   (                     engPosAux,        engBadHVCells,                                     float);
+    CALORECGPU_TEMPARR_1   (                  engFracEMAux,            centerMag,                                     float);
+    CALORECGPU_TEMPARR_1   (               firstEngDensAux,       engCalibTileG3,                                     float);
+    CALORECGPU_TEMPARR_1   (              secondEngDensAux,              lateral,                                     float);
+    CALORECGPU_TEMPARR_1   (    energyDensityNormalization,         etaCaloFrame,                                     float);
+    CALORECGPU_TEMPARR_1   ( energyDensityNormalizationAux,         secondLambda,                                     float);
+    CALORECGPU_TEMPARR_1   (        sumAbsEnergyNonMoments,      engCalibFracHad,                                     float);
+    CALORECGPU_TEMPARR_1   (     sumAbsEnergyNonMomentsAux,   nExtraCellSampling,                                     float);
+    CALORECGPU_TEMPARR_1   (                            mX,                  PTD,                                     float);
+    CALORECGPU_TEMPARR_1   (                         mXAux,                 mass,                                     float);
+    CALORECGPU_TEMPARR_1   (                            mY,  engCalibDeadLeakage,                                     float);
+    CALORECGPU_TEMPARR_1   (                         mYAux,     cellSignificance,                                     float);
+    CALORECGPU_TEMPARR_1   (                            mZ,  engCalibDeadUnclass,                                     float);
+    CALORECGPU_TEMPARR_1   (                         mZAux,      cellSigSampling,                                     float);
+    CALORECGPU_TEMPARR_2   (          maxCellEnergyAndCell,   engCalibDeadTileG3,    engCalibDeadTile0,  unsigned long long);
+    CALORECGPU_TEMPARR_2   (    secondMaxCellEnergyAndCell,     engCalibDeadHEC0,     engCalibDeadEME0,  unsigned long long);
+    CALORECGPU_TEMPARR_2   (          maxAndSecondMaxCells,     engCalibDeadHEC0,     engCalibDeadEME0,  unsigned long long);
 
-    CMC_TEMPARR_1      (                       timeAux,         phiCaloFrame,                                     float);
-    CMC_TEMPARR_1      (                 secondTimeAux,        eta1CaloFrame,                                     float);
-    CMC_TEMPARR_1      (               significanceAux,          nBadHVCells,                                     float);
-    CMC_TEMPARR_1      (                        PTDAux,  engCalibDeadLeakage,                                     float);
-    CMC_TEMPARR_1      (                engBadCellsAux,       vertexFraction,                                     float);
-    CMC_TEMPARR_1      (              badCellsCorrEAux,         centerLambda,                                     float);
-    CMC_TEMPARR_1      (                badLArQFracAux,      nVertexFraction,                                     float);
-    CMC_TEMPARR_1      (                    avgLArQAux,         etaCaloFrame,                                     float);
-    CMC_TEMPARR_1      (                   avgTileQAux,       engCalibFracEM,                                     float);
-    CMC_TEMPARR_1      (        numPositiveEnergyCells,     engCalibFracRest,                                       int);
-    CMC_TEMPARR_1      (             sumSquareEnergies,      engCalibDeadTot,                                     float);
-    CMC_TEMPARR_1      (          sumSquareEnergiesAux,     engCalibDeadEMB0,                                     float);
-    CMC_TEMPARR_1      (                      matrix00,         engCalibOutT,                                     float);
-    CMC_TEMPARR_1      (                      matrix10,        engCalibDeadL,                                     float);
-    CMC_TEMPARR_1      (                      matrix20,        engCalibDeadM,                                     float);
-    CMC_TEMPARR_1      (                      matrix11,        engCalibDeadT,                                     float);
-    CMC_TEMPARR_1      (                      matrix21,         engCalibEMB0,                                     float);
-    CMC_TEMPARR_1      (                      matrix22,         engCalibEME0,                                     float);
-    CMC_TEMPARR_1      (                   matrix00Aux,        EMProbability,                                     float);
-    CMC_TEMPARR_1      (                   matrix10Aux,             deltaPhi,                                     float);
-    CMC_TEMPARR_1      (                   matrix20Aux,           deltaTheta,                                     float);
-    CMC_TEMPARR_1      (                   matrix11Aux,            hadWeight,                                     float);
-    CMC_TEMPARR_1      (                   matrix21Aux,           deltaAlpha,                                     float);
-    CMC_TEMPARR_1      (                   matrix22Aux,            OOCweight,                                     float);
-    CMC_TEMPARR_1      (             timeNormalization,         engCalibOutL,                                     float);
-    CMC_TEMPARR_1      (          timeNormalizationAux,         engCalibOutM,                                     float);
-    CMC_TEMPARR_1      (               averageLArQNorm,        phi2CaloFrame,                                     float);
-    CMC_TEMPARR_1      (            averageLArQNormAux,          engCalibTot,                                     float);
-    CMC_TEMPARR_1      (              averageTileQNorm,        phi1CaloFrame,                                     float);
-    CMC_TEMPARR_1      (           averageTileQNormAux,        eta2CaloFrame,                                     float);
-    CMC_TEMPARR_1_SPLIT(    maxSignificanceAndSampling,   engCalibDeadTileG3,    engCalibDeadTile0,  unsigned long long);
-    CMC_TEMPARR_1      (                   showerAxisX,        EMProbability,                                     float);
-    CMC_TEMPARR_1      (                   showerAxisY,            hadWeight,                                     float);
-    CMC_TEMPARR_1      (                   showerAxisZ,            OOCweight,                                     float);
+    CALORECGPU_TEMPARR_1   (                       timeAux,         phiCaloFrame,                                     float);
+    CALORECGPU_TEMPARR_1   (                 secondTimeAux,        eta1CaloFrame,                                     float);
+    CALORECGPU_TEMPARR_1   (               significanceAux,          nBadHVCells,                                     float);
+    CALORECGPU_TEMPARR_1   (                        PTDAux,  engCalibDeadLeakage,                                     float);
+    CALORECGPU_TEMPARR_1   (                engBadCellsAux,       vertexFraction,                                     float);
+    CALORECGPU_TEMPARR_1   (              badCellsCorrEAux,         centerLambda,                                     float);
+    CALORECGPU_TEMPARR_1   (                badLArQFracAux,      nVertexFraction,                                     float);
+    CALORECGPU_TEMPARR_1   (                    avgLArQAux,         etaCaloFrame,                                     float);
+    CALORECGPU_TEMPARR_1   (                   avgTileQAux,       engCalibFracEM,                                     float);
+    CALORECGPU_TEMPARR_1   (        numPositiveEnergyCells,  engCalibDeadUnclass,                                       int);
+    CALORECGPU_TEMPARR_1   (             sumSquareEnergies,      engCalibDeadTot,                                     float);
+    CALORECGPU_TEMPARR_1   (          sumSquareEnergiesAux,     engCalibDeadEMB0,                                     float);
+    CALORECGPU_TEMPARR_1   (                      matrix00,         longitudinal,                                     float);
+    CALORECGPU_TEMPARR_1   (                      matrix10,        engCalibDeadT,                                     float);
+    CALORECGPU_TEMPARR_1   (                      matrix20,         engCalibEMB0,                                     float);
+    CALORECGPU_TEMPARR_1   (                      matrix11,              secondR,                                     float);
+    CALORECGPU_TEMPARR_1   (                      matrix21,         engCalibEME0,                                     float);
+    CALORECGPU_TEMPARR_1   (                      matrix22,  tileConfidenceLevel,                                     float);
+    CALORECGPU_TEMPARR_1   (                   matrix00Aux,        EMProbability,                                     float);
+    CALORECGPU_TEMPARR_1   (                   matrix10Aux,             deltaPhi,                                     float);
+    CALORECGPU_TEMPARR_1   (                   matrix20Aux,           deltaTheta,                                     float);
+    CALORECGPU_TEMPARR_1   (                   matrix11Aux,            hadWeight,                                     float);
+    CALORECGPU_TEMPARR_1   (                   matrix21Aux,           deltaAlpha,                                     float);
+    CALORECGPU_TEMPARR_1   (                   matrix22Aux,            OOCweight,                                     float);
+    CALORECGPU_TEMPARR_1   (             timeNormalization,        phi2CaloFrame,                                     float);
+    CALORECGPU_TEMPARR_1   (          timeNormalizationAux,        engBadHVCells,                                     float);
+    CALORECGPU_TEMPARR_1   (               averageLArQNorm,       engCalibTileG3,                                     float);
+    CALORECGPU_TEMPARR_1   (            averageLArQNormAux,         secondLambda,                                     float);
+    CALORECGPU_TEMPARR_1   (              averageTileQNorm,        phi1CaloFrame,                                     float);
+    CALORECGPU_TEMPARR_1   (           averageTileQNormAux,        eta2CaloFrame,                                     float);
+    CALORECGPU_TEMPARR_2   (    maxSignificanceAndSampling,   engCalibDeadTileG3,    engCalibDeadTile0,  unsigned long long);
+    CALORECGPU_TEMPARR_1   (                   showerAxisX,        EMProbability,                                     float);
+    CALORECGPU_TEMPARR_1   (                   showerAxisY,            hadWeight,                                     float);
+    CALORECGPU_TEMPARR_1   (                   showerAxisZ,            OOCweight,                                     float);
 
-    CMC_TEMPARR_2_SPLIT(     maxEnergyAndCellPerSample,      maxEtaPerSample,      maxPhiPerSample,  unsigned long long);
-    CMC_TEMPARR_2      (            energyPerSampleAux,        maxEPerSample,                                     float);
-    CMC_TEMPARR_1      (                    lateralAux,         engCalibEMB0,                                     float);
-    CMC_TEMPARR_1      (               longitudinalAux,         engCalibEME0,                                     float);
-    CMC_TEMPARR_1      (               secondLambdaAux,       engCalibTileG3,                                     float);
-    CMC_TEMPARR_1      (                    secondRAux,      engCalibDeadTot,                                     float);
-    CMC_TEMPARR_1      (          lateralNormalization,         engCalibOutT,                                     float);
-    CMC_TEMPARR_1      (       lateralNormalizationAux,        engCalibDeadL,                                     float);
-    CMC_TEMPARR_1      (     longitudinalNormalization,        engCalibDeadM,                                     float);
-    CMC_TEMPARR_1      (  longitudinalNormalizationAux,        engCalibDeadT,                                     float);
+    CALORECGPU_TEMP2DARR_2 (     maxEnergyAndCellPerSample,      maxEtaPerSample,      maxPhiPerSample,  unsigned long long);
+    CALORECGPU_TEMP2DARR_1 (            energyPerSampleAux,        maxEPerSample,                                     float);
+    CALORECGPU_TEMPARR_1   (                    lateralAux,         engCalibEMB0,                                     float);
+    CALORECGPU_TEMPARR_1   (               longitudinalAux,         engCalibEME0,                                     float);
+    CALORECGPU_TEMPARR_1   (               secondLambdaAux,       engCalibTileG3,                                     float);
+    CALORECGPU_TEMPARR_1   (                    secondRAux,      engCalibDeadTot,                                     float);
+    CALORECGPU_TEMPARR_1   (          lateralNormalization,             DMweight,                                     float);
+    CALORECGPU_TEMPARR_1   (       lateralNormalizationAux,  tileConfidenceLevel,                                     float);
+    CALORECGPU_TEMPARR_1   (     longitudinalNormalization,      engCalibFracHad,                                     float);
+    CALORECGPU_TEMPARR_1   (  longitudinalNormalizationAux,     engCalibFracRest,                                     float);
 
-    CMC_TEMPARR_2      (             maxECellPerSample,        maxEPerSample,                                       int);
+    CALORECGPU_TEMP2DARR_1 (             maxECellPerSample,        maxEPerSample,                                       int);
 
-    //Restore warnings.
-    _Pragma("nv_diag_default 177")
   }
-
-  //Again the Kahan-Babushka-Neumaier algorithm.
-  __device__ void add_with_corr(float * sum_arr, float * corr_arr, const int idx, const float v)
-  {
-    const float old_sum = atomicAdd(sum_arr + idx, v);
-    const float new_sum = old_sum + v;
-    if (fabsf(old_sum) >= fabsf(v))
-      {
-        atomicAdd(corr_arr + idx, (old_sum - new_sum) + v);
-      }
-    else
-      {
-        atomicAdd(corr_arr + idx, (v - new_sum) + old_sum);
-      }
-  }
-
 
   template <class ... Ts>
   struct TypeList
@@ -625,8 +458,8 @@ namespace
 
   struct Parameters
   {
+    bool                                                                                                     assume_complete_cells;
     int                                                                                                      moments_index;
-    CaloRecGPU::Helpers::CUDA_kernel_object<CaloRecGPU::ClusterMomentsArr>                                   moments_arr;
     CaloRecGPU::Helpers::CUDA_kernel_object<CaloRecGPU::ClusterInfoArr>                                      clusters_arr;
     const CaloRecGPU::Helpers::CUDA_kernel_object<CaloRecGPU::CellInfoArr>                                   cell_info_arr;
     const CaloRecGPU::Helpers::CUDA_kernel_object<CaloRecGPU::GeometryArr>                                   geometry;
@@ -830,13 +663,16 @@ namespace
   namespace ToLoad
   {
 
+#define CALORECGPU_CMC_EXPAND(...) __VA_ARGS__
+
+    
 #define CALORECGPU_CMC_LOAD(NAME, NEEDED, PREVNEEDED, VARS, INIT)                                                                      \
   struct NAME                                                                                                                          \
   {                                                                                                                                    \
-    using AssumedList = TypeList<CALORECGPU_EXPAND NEEDED  >;                                                                          \
-    using AssumedPreviousList = TypeList<CALORECGPU_EXPAND PREVNEEDED  >;                                                              \
-    CALORECGPU_EXPAND VARS                                                                                                             \
-    template <class Final> __device__ NAME(const Final & f, Parameters p, const int idx) { CALORECGPU_EXPAND INIT }                    \
+    using AssumedList = TypeList<CALORECGPU_CMC_EXPAND NEEDED  >;                                                                          \
+    using AssumedPreviousList = TypeList<CALORECGPU_CMC_EXPAND PREVNEEDED  >;                                                              \
+    CALORECGPU_CMC_EXPAND VARS                                                                                                             \
+    template <class Final> __device__ NAME(const Final & f, Parameters p, const int idx) { CALORECGPU_CMC_EXPAND INIT }                    \
   }
     //Of course, any circular dependencies will lead to infinite loops during compilation!
 
@@ -851,10 +687,10 @@ namespace
 
 #define CALORECGPU_CMC_LOAD_SIMPLE_GEOMETRY_INFO(NAME, VARNAME, PROPNAME)                                                              \
   CALORECGPU_CMC_LOAD(NAME,                                                                                                            \
-                      (),                                                                                                              \
+                      (CellHashID),                                                                                                    \
                       (),                                                                                                              \
                       (std::decay_t<decltype(std::declval<CaloRecGPU::GeometryArr>().PROPNAME[0])> VARNAME;),                          \
-                      (VARNAME = p.geometry->PROPNAME[idx];)                                                                           \
+                      (VARNAME = p.geometry->PROPNAME[f.hash_ID];)                                                                     \
                      );
 
 #define CALORECGPU_CMC_LOAD_SIMPLE_CLUSTER_INFO(NAME, VARNAME, PROPNAME)                                                               \
@@ -869,8 +705,8 @@ namespace
   CALORECGPU_CMC_LOAD(NAME,                                                                                                            \
                       (),                                                                                                              \
                       (),                                                                                                              \
-                      (std::decay_t<decltype(std::declval<CaloRecGPU::ClusterMomentsArr>().PROPNAME[0])> VARNAME;),                    \
-                      (VARNAME = p.moments_arr->PROPNAME[idx];)                                                                        \
+                      (std::decay_t<decltype(std::declval<CaloRecGPU::ClusterInfoArr>().moments.PROPNAME[0])> VARNAME;),               \
+                      (VARNAME = p.clusters_arr->moments.PROPNAME[idx];)                                                               \
                      );
 
     //Warning! These require either a CellSampling or a SamplingFromMomentIndex
@@ -879,16 +715,16 @@ namespace
   CALORECGPU_CMC_LOAD(NAME,                                                                                                            \
                       (),                                                                                                              \
                       (),                                                                                                              \
-                      (std::decay_t<decltype(std::declval<CaloRecGPU::ClusterMomentsArr>().PROPNAME[0][0])> VARNAME;),                 \
-                      (VARNAME = p.moments_arr->PROPNAME[f.sampling][idx];)                                                            \
+                      (std::decay_t<decltype(std::declval<CaloRecGPU::ClusterInfoArr>().moments.PROPNAME[0][0])> VARNAME;),            \
+                      (VARNAME = p.clusters_arr->moments.PROPNAME[f.sampling][idx];)                                                   \
                      );
 
 #define CALORECGPU_CMC_LOAD_SIMPLE_TEMPORARY_INFO(NAME, VARNAME, PROPNAME)                                                             \
   CALORECGPU_CMC_LOAD(NAME,                                                                                                            \
                       (),                                                                                                              \
                       (),                                                                                                              \
-                      (std::decay_t<decltype(CMCTemporaries::PROPNAME(std::declval<CaloRecGPU::ClusterMomentsArr *>(),0))> VARNAME;),  \
-                      (VARNAME = CMCTemporaries::PROPNAME(p.moments_arr, idx);)                                                        \
+                      (std::decay_t<decltype(CMCTemporaries::PROPNAME(std::declval<CaloRecGPU::ClusterInfoArr *>(),0))> VARNAME;),     \
+                      (VARNAME = CMCTemporaries::PROPNAME(p.clusters_arr, idx);)                                                       \
                      );
 
     //Warning! These require either a CellSampling or a SamplingFromMomentIndex
@@ -897,8 +733,8 @@ namespace
   CALORECGPU_CMC_LOAD(NAME,                                                                                                            \
                       (),                                                                                                              \
                       (),                                                                                                              \
-                      (std::decay_t<decltype(CMCTemporaries::PROPNAME(std::declval<CaloRecGPU::ClusterMomentsArr*>(),0,0))> VARNAME;), \
-                      (VARNAME = CMCTemporaries::PROPNAME(p.moments_arr, f.sampling, idx);)                                            \
+                      (std::decay_t<decltype(CMCTemporaries::PROPNAME(std::declval<CaloRecGPU::ClusterInfoArr *>(),0,0))> VARNAME;),   \
+                      (VARNAME = CMCTemporaries::PROPNAME(p.clusters_arr, f.sampling, idx);)                                           \
                      );
 
     //+---------------------------------------------------+
@@ -914,11 +750,19 @@ namespace
     );
 
     CALORECGPU_CMC_LOAD
-    (CellSampling,
+    (CellHashID,
      (),
+     (),
+     (int hash_ID;),
+     (hash_ID = p.cell_info_arr->get_hash_ID(idx, p.assume_complete_cells);)
+    );
+    
+    CALORECGPU_CMC_LOAD
+    (CellSampling,
+     (CellHashID),
      (),
      (int sampling;),
-     (sampling = p.geometry->sampling(idx);)
+     (sampling = p.geometry->sampling(f.hash_ID);)
     );
 
     //+---------------------------------------------------+
@@ -963,10 +807,10 @@ namespace
 
     CALORECGPU_CMC_LOAD
     (CellIsTile,
-     (),
+     (CellHashID),
      (),
      (bool is_tile;),
-     (is_tile = p.geometry->is_tile(idx);)
+     (is_tile = p.geometry->is_tile(f.hash_ID);)
     );
 
     CALORECGPU_CMC_LOAD
@@ -974,17 +818,17 @@ namespace
      (CellIsTile, CellQualityProvenance),
      (),
      (bool is_bad;),
-     (is_bad = p.cell_info_arr->is_bad(f.is_tile, f.qp, false);)
+     (is_bad = p.cell_info_arr->is_bad_general(f.is_tile, f.qp, false);)
     );
 
     CALORECGPU_CMC_LOAD
     (CellNoise,
-     (CellIsTile, CellGain, CellEnergy),
+     (CellHashID, CellIsTile, CellGain, CellEnergy),
      (),
      (float noise;),
      (noise = ( f.is_tile && p.opts->use_two_gaussian_noise                   ?
-                p.noise_arr->get_double_gaussian_noise(idx, f.gain, f.energy) :
-                p.noise_arr->get_noise(idx, f.gain)                             );)
+                p.noise_arr->get_double_gaussian_noise(f.hash_ID, f.gain, f.energy) :
+                p.noise_arr->get_noise(f.hash_ID, f.gain)                             );)
     );
 
     CALORECGPU_CMC_LOAD
@@ -1060,7 +904,7 @@ namespace
     CALORECGPU_CMC_LOAD
     (WeightedEnergyOrNegative,
      (),
-     (CellEnergy, CellAbsEnergy),
+     (CellEnergy),
      (float weighted_energy_or_negative;),
      (weighted_energy_or_negative = (p.opts->use_abs_energy ? fabsf(f.energy) : f.energy) * f.weight;)
     );
@@ -1125,7 +969,7 @@ namespace
      (Deltas, ShowerAxisX, ShowerAxisY, ShowerAxisZ),
      (),
      (float lambda;),
-     (lambda = ClusterMomentsCalculator::corrected_dot_product(f.dx, f.dy, f.dz, f.axis_x, f.axis_y, f.axis_z);)
+     (lambda = CaloRecGPU::Helpers::corrected_dot_product(f.dx, f.dy, f.dz, f.axis_x, f.axis_y, f.axis_z);)
     );
 
     CALORECGPU_CMC_LOAD
@@ -1133,14 +977,14 @@ namespace
      (Deltas, ShowerAxisX, ShowerAxisY, ShowerAxisZ),
      (),
      (float r;),
-     (r = ClusterMomentsCalculator::corrected_magn_cross_product(f.dx, f.dy, f.dz, f.axis_x, f.axis_y, f.axis_z);)
+     (r = CaloRecGPU::Helpers::corrected_magn_cross_product(f.dx, f.dy, f.dz, f.axis_x, f.axis_y, f.axis_z);)
     );
 
     //+---------------------------------------------------+
     //|                   Cluster Info:                   |
     //+---------------------------------------------------+
 
-    CALORECGPU_CMC_LOAD_SIMPLE_CLUSTER_INFO(SeedCellID, seed_cell, seedCellID);
+    CALORECGPU_CMC_LOAD_SIMPLE_CLUSTER_INFO(SeedCellIndex, seed_cell, seedCellIndex);
 
     CALORECGPU_CMC_LOAD_SIMPLE_MOMENT_INFO(SumEnergies, sum_energies, engPos);
 
@@ -1295,11 +1139,12 @@ namespace
     //from using the seedCellPhi temporary instead!
     CALORECGPU_CMC_LOAD
     (SeedCellGeometryPhi,
-     (SeedCellID),
+     (SeedCellIndex),
      (),
      (float seed_cell_phi_coordinate;),
-     ( seed_cell_phi_coordinate = ((f.seed_cell >= 0 && f.seed_cell < CaloRecGPU::NCaloCells) ?
-                                   p.geometry->phi[f.seed_cell]                               : -999);
+     ( const int seed_cell_hash_ID = ( f.seed_cell >= 0 && f.seed_cell < CaloRecGPU::NCaloCells ?
+                                       p.cell_info_arr->get_hash_ID(f.seed_cell, p.assume_complete_cells) : -1);
+        seed_cell_phi_coordinate = (seed_cell_hash_ID >= 0 ? p.geometry->phi[seed_cell_hash_ID] : -999);
      )
     );
   }
@@ -1356,23 +1201,23 @@ namespace
 #define CALORECGPU_CMC_MOMENT_CALC(NAME, BEFORELOAD, BEFOREEXEC, CELLLOAD, CLUSTERLOAD, CELLEXEC, AFTERLOAD, AFTEREXEC)                \
   struct NAME                                                                                                                          \
   {                                                                                                                                    \
-    using BeforeLoading = TypeList<CALORECGPU_EXPAND BEFORELOAD>;                                                                      \
+    using BeforeLoading = TypeList<CALORECGPU_CMC_EXPAND BEFORELOAD>;                                                                      \
     template <class T>  __device__ static void before(Parameters p,                                                                    \
                                                       const T & data,                                                                  \
                                                       const int cluster)                                                               \
-    { CALORECGPU_EXPAND BEFOREEXEC }                                                                                                   \
-    using CellLoading    = TypeList<CALORECGPU_EXPAND CELLLOAD>;                                                                       \
-    using ClusterLoading = TypeList<CALORECGPU_EXPAND CLUSTERLOAD>;                                                                    \
+    { CALORECGPU_CMC_EXPAND BEFOREEXEC }                                                                                                   \
+    using CellLoading    = TypeList<CALORECGPU_CMC_EXPAND CELLLOAD>;                                                                       \
+    using ClusterLoading = TypeList<CALORECGPU_CMC_EXPAND CLUSTERLOAD>;                                                                    \
     template <class T> __device__ static  void per_cell(Parameters p,                                                                  \
                                                         const T & data,                                                                \
                                                         const int cell,                                                                \
                                                         const int cluster)                                                             \
-    { CALORECGPU_EXPAND CELLEXEC }                                                                                                     \
-    using AfterLoading = TypeList<CALORECGPU_EXPAND AFTERLOAD>;                                                                        \
+    { CALORECGPU_CMC_EXPAND CELLEXEC }                                                                                                     \
+    using AfterLoading = TypeList<CALORECGPU_CMC_EXPAND AFTERLOAD>;                                                                        \
     template <class T> __device__ static void after(Parameters p,                                                                      \
                                                     const T & data,                                                                    \
                                                     const int cluster)                                                                 \
-    { CALORECGPU_EXPAND AFTEREXEC }                                                                                                    \
+    { CALORECGPU_CMC_EXPAND AFTEREXEC }                                                                                                    \
   }
 
     //-------------------------------
@@ -1388,33 +1233,46 @@ namespace
     (ClusterEnergyEtaAndEt,
      (),
      (p.clusters_arr->clusterEnergy[cluster] = 0.f;
-      CMCTemporaries::clusterEnergyAux(p.moments_arr, cluster) = 0.f;
+      CMCTemporaries::clusterEnergyAux(p.clusters_arr, cluster) = 0.f;
       p.clusters_arr->clusterEta[cluster] = 0.f;
-      CMCTemporaries::clusterEtaAux(p.moments_arr, cluster) = 0.f;),
+      CMCTemporaries::clusterEtaAux(p.clusters_arr, cluster) = 0.f;),
      (ToLoad::CellEnergy, ToLoad::CellAbsEnergy, ToLoad::CellEta),
      (),
-     (add_with_corr(p.clusters_arr->clusterEnergy,
-                    CMCTemporaries::clusterEnergyAux(p.moments_arr),
-                    cluster,
-                    data.energy * data.weight);
-      add_with_corr(p.clusters_arr->clusterEta,
-                    CMCTemporaries::clusterEtaAux(p.moments_arr),
-                    cluster,
-                    data.abs_energy * data.weight * data.eta);
+     (CaloRecGPU::Helpers::device_kahan_babushka_neumaier(&(p.clusters_arr->clusterEnergy[cluster]),
+                                                          CMCTemporaries::clusterEnergyAux_ptr(p.clusters_arr, cluster),
+                                                          data.energy * data.weight);
+      CaloRecGPU::Helpers::device_kahan_babushka_neumaier(&(p.clusters_arr->clusterEta[cluster]),
+                                                          CMCTemporaries::clusterEtaAux_ptr(p.clusters_arr, cluster),
+                                                          data.abs_energy * data.weight * data.eta);
      ),
      (ToLoad::SumAbsEnergyNonMoments, ToLoad::ReverseSumAbsEnergyNonMoments),
-     (const float temp_energy = p.clusters_arr->clusterEnergy[cluster] + CMCTemporaries::clusterEnergyAux(p.moments_arr, cluster);
+     (const float temp_E_main = p.clusters_arr->clusterEnergy[cluster];
+      const float temp_E_corr = CMCTemporaries::clusterEnergyAux(p.clusters_arr, cluster);
+      
+      const float temp_eta_main = p.clusters_arr->clusterEta[cluster];
+      const float temp_eta_corr = CMCTemporaries::clusterEtaAux(p.clusters_arr, cluster);
+      
+      const float temp_exp_1 = expf(temp_eta_main * data.rev_abs_energy_non_moments);
+      const float temp_exp_2 = expf(temp_eta_corr * data.rev_abs_energy_non_moments);
+      
+      const float temp_exp_mult = temp_exp_1 * temp_exp_2;
+      
+      const float temp_numerator   = 2.f * CaloRecGPU::Helpers::product_sum_cornea_harrison_tang(temp_E_main, temp_exp_mult,
+                                                                                                 temp_E_corr, temp_exp_mult);
+      const float temp_inv_denominator = 1.f/fmaf(temp_exp_mult, temp_exp_mult, 1.f);
+      
+      const float temp_ET = temp_numerator * temp_inv_denominator;
+
+      const float temp_energy = temp_E_main + temp_E_corr;
 
       p.clusters_arr->clusterEnergy[cluster] = temp_energy;
 
-      const float temp_eta = (p.clusters_arr->clusterEta[cluster] +
-                              CMCTemporaries::clusterEtaAux(p.moments_arr, cluster)) * data.rev_abs_energy_non_moments;
+      const float temp_eta = (temp_eta_main + temp_eta_corr) * data.rev_abs_energy_non_moments;
 
       p.clusters_arr->clusterEta[cluster] = temp_eta * (data.abs_energy_non_moments != 0.f);
 
-
-      const float temp_ET = temp_energy / coshf(fabsf(temp_eta));
-
+      //const float temp_ET = temp_energy / coshf(abs(temp_eta));
+      
       p.clusters_arr->clusterEt[cluster] = temp_ET * (data.abs_energy_non_moments != 0.f);
      )
     );
@@ -1423,18 +1281,17 @@ namespace
     (ClusterPhi,
      (),
      (p.clusters_arr->clusterPhi[cluster] = 0.f;
-      CMCTemporaries::clusterPhiAux(p.moments_arr, cluster) = 0.f;
+      CMCTemporaries::clusterPhiAux(p.clusters_arr, cluster) = 0.f;
      ),
      (ToLoad::CellAbsEnergy, ToLoad::CellPhi),
      (ToLoad::SeedCellPhi),
      (const float phi_real = CaloRecGPU::Helpers::regularize_angle(data.phi, data.phi_0);
-      add_with_corr(p.clusters_arr->clusterPhi,
-                    CMCTemporaries::clusterPhiAux(p.moments_arr),
-                    cluster,
-                    phi_real * data.abs_energy * data.weight);
+      CaloRecGPU::Helpers::device_kahan_babushka_neumaier(&(p.clusters_arr->clusterPhi[cluster]),
+                                                          CMCTemporaries::clusterPhiAux_ptr(p.clusters_arr, cluster),
+                                                          phi_real * data.abs_energy * data.weight);
      ),
      (ToLoad::SumAbsEnergyNonMoments, ToLoad::ReverseSumAbsEnergyNonMoments),
-     (const float old_phi = p.clusters_arr->clusterPhi[cluster] + CMCTemporaries::clusterPhiAux(p.moments_arr, cluster);
+     (const float old_phi = p.clusters_arr->clusterPhi[cluster] + CMCTemporaries::clusterPhiAux(p.clusters_arr, cluster);
       p.clusters_arr->clusterPhi[cluster] = CaloRecGPU::Helpers::regularize_angle(old_phi *
                                                                                   data.rev_abs_energy_non_moments, 0.f) *
                                             (data.abs_energy_non_moments != 0.f);
@@ -1448,32 +1305,31 @@ namespace
     CALORECGPU_CMC_MOMENT_CALC
     (AvgLArQ,
      (),
-     (p.moments_arr->avgLArQ[cluster] = 0.f;
-      CMCTemporaries::avgLArQAux(p.moments_arr, cluster) = 0.f;
+     (p.clusters_arr->moments.avgLArQ[cluster] = 0.f;
+      CMCTemporaries::avgLArQAux(p.clusters_arr, cluster) = 0.f;
      ),
      (ToLoad::CellQualityProvenance, ToLoad::CellLArQCheck),
      (ToLoad::SquareWeightedEnergyOrNegative),
      (if (data.LArQ_cell_check)
     {
-      add_with_corr(p.moments_arr->avgLArQ,
-                    CMCTemporaries::avgLArQAux(p.moments_arr),
-                    cluster,
-                    data.square_w_E_or_neg * data.qp.quality());
+      CaloRecGPU::Helpers::device_kahan_babushka_neumaier(&(p.clusters_arr->moments.avgLArQ[cluster]),
+                                                          CMCTemporaries::avgLArQAux_ptr(p.clusters_arr, cluster),
+                                                          data.square_w_E_or_neg * data.qp.quality());
       }
      ),
     (),
-    (const float norm_LAr = CMCTemporaries::averageLArQNorm(p.moments_arr, cluster) + CMCTemporaries::averageLArQNormAux(p.moments_arr, cluster);
+    (const float norm_LAr = CMCTemporaries::averageLArQNorm(p.clusters_arr, cluster) + CMCTemporaries::averageLArQNormAux(p.clusters_arr, cluster);
      const float rev_norm_LAr = 1.0f / (norm_LAr > 0.f ? norm_LAr : 1.0f);
-     const float new_LArQ = p.moments_arr->avgLArQ[cluster] + CMCTemporaries::avgLArQAux(p.moments_arr, cluster);
-     p.moments_arr->avgLArQ[cluster] = new_LArQ * rev_norm_LAr;
+     const float new_LArQ = p.clusters_arr->moments.avgLArQ[cluster] + CMCTemporaries::avgLArQAux(p.clusters_arr, cluster);
+     p.clusters_arr->moments.avgLArQ[cluster] = new_LArQ * rev_norm_LAr;
     )
     );
 
     CALORECGPU_CMC_MOMENT_CALC
     (AvgTileQ,
      (),
-     (p.moments_arr->avgTileQ[cluster] = 0.f;
-      CMCTemporaries::avgTileQAux(p.moments_arr, cluster) = 0.f;
+     (p.clusters_arr->moments.avgTileQ[cluster] = 0.f;
+      CMCTemporaries::avgTileQAux(p.clusters_arr, cluster) = 0.f;
      ),
      (ToLoad::CellQualityProvenance, ToLoad::CellTileQCheck),
      (ToLoad::SquareWeightedEnergyOrNegative),
@@ -1481,60 +1337,57 @@ namespace
     {
       const float max_quality = max((unsigned int) data.qp.tile_qual1(), (unsigned int) data.qp.tile_qual2());
 
-        add_with_corr(p.moments_arr->avgTileQ,
-                      CMCTemporaries::avgTileQAux(p.moments_arr),
-                      cluster,
-                      data.square_w_E_or_neg * max_quality);
+        CaloRecGPU::Helpers::device_kahan_babushka_neumaier(&(p.clusters_arr->moments.avgTileQ[cluster]),
+                                                            CMCTemporaries::avgTileQAux_ptr(p.clusters_arr, cluster),
+                                                            data.square_w_E_or_neg * max_quality);
       }
      ),
     (),
-    (const float norm_Tile = CMCTemporaries::averageTileQNorm(p.moments_arr, cluster) + CMCTemporaries::averageTileQNormAux(p.moments_arr, cluster);
+    (const float norm_Tile = CMCTemporaries::averageTileQNorm(p.clusters_arr, cluster) + CMCTemporaries::averageTileQNormAux(p.clusters_arr, cluster);
      const float rev_norm_Tile = 1.0f / (norm_Tile > 0.f ? norm_Tile : 1.0f);
-     const float new_TileQ = p.moments_arr->avgTileQ[cluster] + CMCTemporaries::avgTileQAux(p.moments_arr, cluster);
-     p.moments_arr->avgTileQ[cluster] = new_TileQ * rev_norm_Tile;
+     const float new_TileQ = p.clusters_arr->moments.avgTileQ[cluster] + CMCTemporaries::avgTileQAux(p.clusters_arr, cluster);
+     p.clusters_arr->moments.avgTileQ[cluster] = new_TileQ * rev_norm_Tile;
     )
     );
 
     CALORECGPU_CMC_MOMENT_CALC
     (BadCellsCorrE,
      (),
-     (p.moments_arr->badCellsCorrE[cluster] = 0.f;
-      CMCTemporaries::badCellsCorrEAux(p.moments_arr, cluster) = 0.f;
+     (p.clusters_arr->moments.badCellsCorrE[cluster] = 0.f;
+      CMCTemporaries::badCellsCorrEAux(p.clusters_arr, cluster) = 0.f;
      ),
      (ToLoad::CellIsBad, ToLoad::CellEnergy),
      (ToLoad::WeightedEnergyOrNegative),
      (if (data.is_bad && data.energy != 0.f)
     {
-      add_with_corr(p.moments_arr->badCellsCorrE,
-                    CMCTemporaries::badCellsCorrEAux(p.moments_arr),
-                    cluster,
-                    data.weighted_energy_or_negative);
+      CaloRecGPU::Helpers::device_kahan_babushka_neumaier(&(p.clusters_arr->moments.badCellsCorrE[cluster]),
+                                                          CMCTemporaries::badCellsCorrEAux_ptr(p.clusters_arr, cluster),
+                                                          data.weighted_energy_or_negative);
       }
      ),
     (),
-    (p.moments_arr->badCellsCorrE[cluster] += CMCTemporaries::badCellsCorrEAux(p.moments_arr, cluster);
+    (p.clusters_arr->moments.badCellsCorrE[cluster] += CMCTemporaries::badCellsCorrEAux(p.clusters_arr, cluster);
     )
     );
 
     CALORECGPU_CMC_MOMENT_CALC
     (BadLArQFrac,
      (),
-     (p.moments_arr->badLArQFrac[cluster] = 0.f;
-      CMCTemporaries::badLArQFracAux(p.moments_arr, cluster) = 0.f;
+     (p.clusters_arr->moments.badLArQFrac[cluster] = 0.f;
+      CMCTemporaries::badLArQFracAux(p.clusters_arr, cluster) = 0.f;
      ),
      (ToLoad::CellQualityProvenance, ToLoad::CellLArQCheck),
      (ToLoad::WeightedEnergyOrNegative),
      (if (data.LArQ_cell_check && data.qp.quality() > p.opts->min_LAr_quality)
     {
-      add_with_corr(p.moments_arr->badLArQFrac,
-                    CMCTemporaries::badLArQFracAux(p.moments_arr),
-                    cluster,
-                    data.weighted_energy_or_negative);
+      CaloRecGPU::Helpers::device_kahan_babushka_neumaier(&(p.clusters_arr->moments.badLArQFrac[cluster]),
+                                                          CMCTemporaries::badLArQFracAux_ptr(p.clusters_arr, cluster),
+                                                          data.weighted_energy_or_negative);
       }
      ),
     (ToLoad::ReverseClusterEnergy),
-    (const float new_badLArQFrac = p.moments_arr->badLArQFrac[cluster] + CMCTemporaries::badLArQFracAux(p.moments_arr, cluster);
-     p.moments_arr->badLArQFrac[cluster] = new_badLArQFrac * data.rev_cluster_energy;
+    (const float new_badLArQFrac = p.clusters_arr->moments.badLArQFrac[cluster] + CMCTemporaries::badLArQFracAux(p.clusters_arr, cluster);
+     p.clusters_arr->moments.badLArQFrac[cluster] = new_badLArQFrac * data.rev_cluster_energy;
     )
     );
 
@@ -1547,7 +1400,7 @@ namespace
      (),
      (ToLoad::MaxSignificanceAndSampling),
      (const float max_sig = __uint_as_float(data.max_sig_and_samp >> 32);
-      p.moments_arr->cellSignificance[cluster] = max_sig * (data.max_sig_and_samp & 1 ? 1.f : -1.f);
+      p.clusters_arr->moments.cellSignificance[cluster] = max_sig * (data.max_sig_and_samp & 1 ? 1.f : -1.f);
      )
     );
 
@@ -1560,7 +1413,7 @@ namespace
      (),
      (ToLoad::MaxSignificanceAndSampling),
      (const int max_samp = (data.max_sig_and_samp & 0xFFFFFFFEU) >> 1;
-      p.moments_arr->cellSigSampling[cluster] = max_samp;
+      p.clusters_arr->moments.cellSigSampling[cluster] = max_samp;
      )
     );
 
@@ -1568,63 +1421,60 @@ namespace
     CALORECGPU_CMC_MOMENT_CALC
     (CenterX,
      (),
-     (p.moments_arr->centerX[cluster] = 0.f;
-      CMCTemporaries::centerXAux(p.moments_arr, cluster) = 0.f;
+     (p.clusters_arr->moments.centerX[cluster] = 0.f;
+      CMCTemporaries::centerXAux(p.clusters_arr, cluster) = 0.f;
      ),
      (ToLoad::CellX),
      (ToLoad::WeightedEnergy),
-     (add_with_corr(p.moments_arr->centerX,
-                    CMCTemporaries::centerXAux(p.moments_arr),
-                    cluster,
-                    data.x * data.weighted_energy);
+     (CaloRecGPU::Helpers::device_kahan_babushka_neumaier(&(p.clusters_arr->moments.centerX[cluster]),
+                                                          CMCTemporaries::centerXAux_ptr(p.clusters_arr, cluster),
+                                                          data.x * data.weighted_energy);
      ),
      (ToLoad::ReverseSumEnergies),
-     (const float new_value = p.moments_arr->centerX[cluster] + CMCTemporaries::centerXAux(p.moments_arr, cluster);
-      p.moments_arr->centerX[cluster] = new_value * data.rev_sum_energies;
+     (const float new_value = p.clusters_arr->moments.centerX[cluster] + CMCTemporaries::centerXAux(p.clusters_arr, cluster);
+      p.clusters_arr->moments.centerX[cluster] = new_value * data.rev_sum_energies;
      )
     );
     CALORECGPU_CMC_MOMENT_CALC
     (CenterY,
      (),
-     (p.moments_arr->centerY[cluster] = 0.f;
-      CMCTemporaries::centerYAux(p.moments_arr, cluster) = 0.f;
+     (p.clusters_arr->moments.centerY[cluster] = 0.f;
+      CMCTemporaries::centerYAux(p.clusters_arr, cluster) = 0.f;
      ),
      (ToLoad::CellY),
      (ToLoad::WeightedEnergy),
-     (add_with_corr(p.moments_arr->centerY,
-                    CMCTemporaries::centerYAux(p.moments_arr),
-                    cluster,
-                    data.y * data.weighted_energy);
+     (CaloRecGPU::Helpers::device_kahan_babushka_neumaier(&(p.clusters_arr->moments.centerY[cluster]),
+                                                          CMCTemporaries::centerYAux_ptr(p.clusters_arr, cluster),
+                                                          data.y * data.weighted_energy);
      ),
      (ToLoad::ReverseSumEnergies),
-     (const float new_value = p.moments_arr->centerY[cluster] + CMCTemporaries::centerYAux(p.moments_arr, cluster);
-      p.moments_arr->centerY[cluster] = new_value * data.rev_sum_energies;
+     (const float new_value = p.clusters_arr->moments.centerY[cluster] + CMCTemporaries::centerYAux(p.clusters_arr, cluster);
+      p.clusters_arr->moments.centerY[cluster] = new_value * data.rev_sum_energies;
      )
     );
     CALORECGPU_CMC_MOMENT_CALC
     (CenterZ,
      (),
-     (p.moments_arr->centerZ[cluster] = 0.f;
-      CMCTemporaries::centerZAux(p.moments_arr, cluster) = 0.f;
+     (p.clusters_arr->moments.centerZ[cluster] = 0.f;
+      CMCTemporaries::centerZAux(p.clusters_arr, cluster) = 0.f;
      ),
      (ToLoad::CellZ),
      (ToLoad::WeightedEnergy),
-     (add_with_corr(p.moments_arr->centerZ,
-                    CMCTemporaries::centerZAux(p.moments_arr),
-                    cluster,
-                    data.z * data.weighted_energy);
+     (CaloRecGPU::Helpers::device_kahan_babushka_neumaier(&(p.clusters_arr->moments.centerZ[cluster]),
+                                                          CMCTemporaries::centerZAux_ptr(p.clusters_arr, cluster),
+                                                          data.z * data.weighted_energy);
      ),
      (ToLoad::ReverseSumEnergies),
-     (const float new_value = p.moments_arr->centerZ[cluster] + CMCTemporaries::centerZAux(p.moments_arr, cluster);
-      p.moments_arr->centerZ[cluster] = new_value * data.rev_sum_energies;
+     (const float new_value = p.clusters_arr->moments.centerZ[cluster] + CMCTemporaries::centerZAux(p.clusters_arr, cluster);
+      p.clusters_arr->moments.centerZ[cluster] = new_value * data.rev_sum_energies;
      )
     );
 
     CALORECGPU_CMC_MOMENT_CALC
     (EngFracEM,
      (),
-     (p.moments_arr->engFracEM[cluster] = 0.f;
-      CMCTemporaries::engFracEMAux(p.moments_arr, cluster) = 0.f;),
+     (p.clusters_arr->moments.engFracEM[cluster] = 0.f;
+      CMCTemporaries::engFracEMAux(p.clusters_arr, cluster) = 0.f;),
      (ToLoad::CellSampling),
      (ToLoad::WeightedEnergy),
      ( if ( data.sampling == CaloSampling::EMB1   ||
@@ -1635,35 +1485,33 @@ namespace
             data.sampling == CaloSampling::EME3   ||
             data.sampling == CaloSampling::FCAL0     )
     {
-      add_with_corr(p.moments_arr->engFracEM,
-                    CMCTemporaries::engFracEMAux(p.moments_arr),
-                    cluster,
-                    data.weighted_energy);
+      CaloRecGPU::Helpers::device_kahan_babushka_neumaier(&(p.clusters_arr->moments.engFracEM[cluster]),
+                                                          CMCTemporaries::engFracEMAux_ptr(p.clusters_arr, cluster),
+                                                          data.weighted_energy);
       }
      ),
     (ToLoad::ReverseSumEnergies),
-    (const float new_engFracEM = p.moments_arr->engFracEM[cluster] + CMCTemporaries::engFracEMAux(p.moments_arr, cluster);
-     p.moments_arr->engFracEM[cluster] = new_engFracEM * data.rev_sum_energies;
+    (const float new_engFracEM = p.clusters_arr->moments.engFracEM[cluster] + CMCTemporaries::engFracEMAux(p.clusters_arr, cluster);
+     p.clusters_arr->moments.engFracEM[cluster] = new_engFracEM * data.rev_sum_energies;
     )
     );
 
     CALORECGPU_CMC_MOMENT_CALC
     (EngBadCells,
      (),
-     (p.moments_arr->engBadCells[cluster] = 0.f;
-      CMCTemporaries::engBadCellsAux(p.moments_arr, cluster) = 0.f;),
+     (p.clusters_arr->moments.engBadCells[cluster] = 0.f;
+      CMCTemporaries::engBadCellsAux(p.clusters_arr, cluster) = 0.f;),
      (ToLoad::CellIsBad),
      (ToLoad::WeightedEnergyOrNegative),
      (if (data.is_bad)
     {
-      add_with_corr(p.moments_arr->engBadCells,
-                    CMCTemporaries::engBadCellsAux(p.moments_arr),
-                    cluster,
-                    data.weighted_energy_or_negative);
+      CaloRecGPU::Helpers::device_kahan_babushka_neumaier(&(p.clusters_arr->moments.engBadCells[cluster]),
+                                                          CMCTemporaries::engBadCellsAux_ptr(p.clusters_arr, cluster),
+                                                          data.weighted_energy_or_negative);
       }
      ),
     (),
-    (p.moments_arr->engBadCells[cluster] += CMCTemporaries::engBadCellsAux(p.moments_arr, cluster);)
+    (p.clusters_arr->moments.engBadCells[cluster] += CMCTemporaries::engBadCellsAux(p.clusters_arr, cluster);)
     );
 
     CALORECGPU_CMC_MOMENT_CALC
@@ -1674,15 +1522,15 @@ namespace
      (),
      (),
      (ToLoad::ReverseSumEnergies, ToLoad::ClusterMaxCellEnergy),
-     (p.moments_arr->engFracMax[cluster] = data.max_E * data.rev_sum_energies;)
+     (p.clusters_arr->moments.engFracMax[cluster] = data.max_E * data.rev_sum_energies;)
     );
 
     CALORECGPU_CMC_MOMENT_CALC
     (EngPosAndEngFracCore,
      (),
-     (const float sum_energies = p.moments_arr->engPos[cluster] + CMCTemporaries::engPosAux(p.moments_arr, cluster);
-      p.moments_arr->engPos[cluster] = sum_energies;
-      p.moments_arr->engFracCore[cluster] *= (sum_energies != 0.f ? 1.0f / sum_energies : 0.f);
+     (const float sum_energies = p.clusters_arr->moments.engPos[cluster] + CMCTemporaries::engPosAux(p.clusters_arr, cluster);
+      p.clusters_arr->moments.engPos[cluster] = sum_energies;
+      p.clusters_arr->moments.engFracCore[cluster] *= (sum_energies != 0.f ? 1.0f / sum_energies : 0.f);
      ),
      (),
      (),
@@ -1694,108 +1542,103 @@ namespace
     CALORECGPU_CMC_MOMENT_CALC
     (FirstEngDens,
      (),
-     (p.moments_arr->firstEngDens[cluster] = 0.f;
-      CMCTemporaries::firstEngDensAux(p.moments_arr, cluster) = 0.f;),
+     (p.clusters_arr->moments.firstEngDens[cluster] = 0.f;
+      CMCTemporaries::firstEngDensAux(p.clusters_arr, cluster) = 0.f;),
      (ToLoad::CellVolume),
      (ToLoad::WeightedEnergy, ToLoad::WeightedEnergyOverVolume),
      (if (data.volume > 0.f)
     {
-      add_with_corr(p.moments_arr->firstEngDens,
-                    CMCTemporaries::firstEngDensAux(p.moments_arr),
-                    cluster,
-                    data.weighted_energy * data.w_E_over_V);
+      CaloRecGPU::Helpers::device_kahan_babushka_neumaier(&(p.clusters_arr->moments.firstEngDens[cluster]),
+                                                          CMCTemporaries::firstEngDensAux_ptr(p.clusters_arr, cluster),
+                                                          data.weighted_energy * data.w_E_over_V);
       }
      ),
     (ToLoad::ReverseEnergyDensityNormalization),
-    (const float new_firstEngDens = p.moments_arr->firstEngDens[cluster] + CMCTemporaries::firstEngDensAux(p.moments_arr, cluster);
-     p.moments_arr->firstEngDens[cluster] = new_firstEngDens * data.rev_energy_density_norm;
+    (const float new_firstEngDens = p.clusters_arr->moments.firstEngDens[cluster] + CMCTemporaries::firstEngDensAux(p.clusters_arr, cluster);
+     p.clusters_arr->moments.firstEngDens[cluster] = new_firstEngDens * data.rev_energy_density_norm;
     )
     );
 
     CALORECGPU_CMC_MOMENT_CALC
     (FirstEta,
      (),
-     (p.moments_arr->firstEta[cluster] = 0.f;
-      CMCTemporaries::firstEtaAux(p.moments_arr, cluster) = 0.f;
+     (p.clusters_arr->moments.firstEta[cluster] = 0.f;
+      CMCTemporaries::firstEtaAux(p.clusters_arr, cluster) = 0.f;
      ),
      (ToLoad::CellEta),
      (ToLoad::WeightedEnergy),
-     (add_with_corr(p.moments_arr->firstEta,
-                    CMCTemporaries::firstEtaAux(p.moments_arr),
-                    cluster,
-                    data.weighted_energy * data.eta);
+     (CaloRecGPU::Helpers::device_kahan_babushka_neumaier(&(p.clusters_arr->moments.firstEta[cluster]),
+                                                          CMCTemporaries::firstEtaAux_ptr(p.clusters_arr, cluster),
+                                                          data.weighted_energy * data.eta);
      ),
      (ToLoad::ReverseSumEnergies),
-     (const float new_firstEta = p.moments_arr->firstEta[cluster] + CMCTemporaries::firstEtaAux(p.moments_arr, cluster);
-      p.moments_arr->firstEta[cluster] = new_firstEta * data.rev_sum_energies;
+     (const float new_firstEta = p.clusters_arr->moments.firstEta[cluster] + CMCTemporaries::firstEtaAux(p.clusters_arr, cluster);
+      p.clusters_arr->moments.firstEta[cluster] = new_firstEta * data.rev_sum_energies;
      )
     );
 
     CALORECGPU_CMC_MOMENT_CALC
     (FirstPhi,
      (),
-     (p.moments_arr->firstPhi[cluster] = 0.f;
-      CMCTemporaries::firstPhiAux(p.moments_arr, cluster) = 0.f;
+     (p.clusters_arr->moments.firstPhi[cluster] = 0.f;
+      CMCTemporaries::firstPhiAux(p.clusters_arr, cluster) = 0.f;
      ),
      (ToLoad::CellPhi),
      (ToLoad::SeedCellPhi, ToLoad::WeightedEnergy),
      (const float phi_real = CaloRecGPU::Helpers::regularize_angle(data.phi, data.phi_0);
-      add_with_corr(p.moments_arr->firstPhi,
-                    CMCTemporaries::firstPhiAux(p.moments_arr),
-                    cluster,
-                    data.weighted_energy * phi_real);
+      CaloRecGPU::Helpers::device_kahan_babushka_neumaier(&(p.clusters_arr->moments.firstPhi[cluster]),
+                                                          CMCTemporaries::firstPhiAux_ptr(p.clusters_arr, cluster),
+                                                          data.weighted_energy * phi_real);
      ),
      (ToLoad::ReverseSumEnergies),
-     (const float new_firstPhi = p.moments_arr->firstPhi[cluster] + CMCTemporaries::firstPhiAux(p.moments_arr, cluster);
-      p.moments_arr->firstPhi[cluster] = CaloRecGPU::Helpers::regularize_angle(new_firstPhi * data.rev_sum_energies);
+     (const float new_firstPhi = p.clusters_arr->moments.firstPhi[cluster] + CMCTemporaries::firstPhiAux(p.clusters_arr, cluster);
+      p.clusters_arr->moments.firstPhi[cluster] = CaloRecGPU::Helpers::regularize_angle(new_firstPhi * data.rev_sum_energies);
      )
     );
 
     CALORECGPU_CMC_MOMENT_CALC
     (Lateral,
      (),
-     (p.moments_arr->lateral[cluster] = 0.f;
-      CMCTemporaries::lateralAux(p.moments_arr, cluster) = 0.f;
+     (p.clusters_arr->moments.lateral[cluster] = 0.f;
+      CMCTemporaries::lateralAux(p.clusters_arr, cluster) = 0.f;
      ),
      (),
      (ToLoad::WeightedEnergy, ToLoad::ClusterMaxAndSecondMaxCell, ToLoad::R),
      (if (cell != data.max_cell && cell != data.second_max_cell)
     {
-      add_with_corr(p.moments_arr->lateral,
-                    CMCTemporaries::lateralAux(p.moments_arr),
-                    cluster,
-                    data.weighted_energy * data.r * data.r);
+      CaloRecGPU::Helpers::device_kahan_babushka_neumaier(&(p.clusters_arr->moments.lateral[cluster]),
+                                                          CMCTemporaries::lateralAux_ptr(p.clusters_arr, cluster),
+                                                          data.weighted_energy * data.r * data.r);
       }
      ),
     (),
-    (const float new_lateral = p.moments_arr->lateral[cluster] + CMCTemporaries::lateralAux(p.moments_arr, cluster);
-     const float new_norm    = CMCTemporaries::lateralNormalization(p.moments_arr, cluster) +
-                               CMCTemporaries::lateralNormalizationAux(p.moments_arr, cluster);
-     p.moments_arr->lateral[cluster] = new_lateral / (new_norm != 0.f ? new_norm : 1.f);
+    (const float new_lateral = p.clusters_arr->moments.lateral[cluster] + CMCTemporaries::lateralAux(p.clusters_arr, cluster);
+     const float new_norm    = CMCTemporaries::lateralNormalization(p.clusters_arr, cluster) +
+                               CMCTemporaries::lateralNormalizationAux(p.clusters_arr, cluster);
+     p.clusters_arr->moments.lateral[cluster] = new_lateral / (new_norm != 0.f ? new_norm : 1.f);
     )
     );
 
     CALORECGPU_CMC_MOMENT_CALC
     (Longitudinal,
      (),
-     (p.moments_arr->longitudinal[cluster] = 0.f;
-      CMCTemporaries::longitudinalAux(p.moments_arr, cluster) = 0.f;
+     (p.clusters_arr->moments.longitudinal[cluster] = 0.f;
+      CMCTemporaries::longitudinalAux(p.clusters_arr, cluster) = 0.f;
      ),
      (),
      (ToLoad::WeightedEnergy, ToLoad::ClusterMaxAndSecondMaxCell, ToLoad::Lambda),
      (if (cell != data.max_cell && cell != data.second_max_cell)
     {
-      add_with_corr(p.moments_arr->longitudinal,
-                    CMCTemporaries::longitudinalAux(p.moments_arr),
-                    cluster,
-                    data.weighted_energy * data.lambda * data.lambda);
+      CaloRecGPU::Helpers::device_kahan_babushka_neumaier(&(p.clusters_arr->moments.longitudinal[cluster]),
+                                                          CMCTemporaries::longitudinalAux_ptr(p.clusters_arr, cluster),
+                                                          data.weighted_energy * data.lambda * data.lambda);
       }
      ),
     (),
-    (const float new_longitudinal = p.moments_arr->longitudinal[cluster] + CMCTemporaries::longitudinalAux(p.moments_arr, cluster);
-     const float new_norm          = CMCTemporaries::longitudinalNormalization(p.moments_arr, cluster) +
-                                     CMCTemporaries::longitudinalNormalizationAux(p.moments_arr, cluster);
-     p.moments_arr->longitudinal[cluster] = new_longitudinal / (new_norm != 0.f ? new_norm : 1.f);
+    (const float new_longitudinal = p.clusters_arr->moments.longitudinal[cluster] + CMCTemporaries::longitudinalAux(p.clusters_arr, cluster);
+     const float new_norm          = CMCTemporaries::longitudinalNormalization(p.clusters_arr, cluster) +
+                                     CMCTemporaries::longitudinalNormalizationAux(p.clusters_arr, cluster);
+     p.clusters_arr->moments.longitudinal[cluster] = new_longitudinal / (new_norm != 0.f ? new_norm : 1.f);
     )
     );
 
@@ -1807,9 +1650,9 @@ namespace
      (),
      (),
      (ToLoad::SumEnergies),
-     (const float mx = CMCTemporaries::mX(p.moments_arr, cluster) + CMCTemporaries::mXAux(p.moments_arr, cluster);
-      const float my = CMCTemporaries::mY(p.moments_arr, cluster) + CMCTemporaries::mYAux(p.moments_arr, cluster);
-      const float mz = CMCTemporaries::mZ(p.moments_arr, cluster) + CMCTemporaries::mZAux(p.moments_arr, cluster);
+     (const float mx = CMCTemporaries::mX(p.clusters_arr, cluster) + CMCTemporaries::mXAux(p.clusters_arr, cluster);
+      const float my = CMCTemporaries::mY(p.clusters_arr, cluster) + CMCTemporaries::mYAux(p.clusters_arr, cluster);
+      const float mz = CMCTemporaries::mZ(p.clusters_arr, cluster) + CMCTemporaries::mZAux(p.clusters_arr, cluster);
 
       const float v_1 = mx * mx;
       const float v_2 = my * my;
@@ -1821,21 +1664,21 @@ namespace
       const float c_3 = fmaf(mz, mz, -v_3);
       const float c_4 = fmaf(data.sum_energies, data.sum_energies, -v_4);
 
-      const float sq_mass = ClusterMomentsCalculator::sum_kahan_babushka_neumaier(v_4, -v_1, -v_2, -v_3, c_4, -c_1, -c_2, -c_3);
+      const float sq_mass = CaloRecGPU::Helpers::sum_kahan_babushka_neumaier(v_4, -v_1, -v_2, -v_3, c_4, -c_1, -c_2, -c_3);
 
-      p.moments_arr->mass[cluster] = sqrtf(fabsf(sq_mass)) * ((sq_mass > 0.f) - (sq_mass < 0.f));
+      p.clusters_arr->moments.mass[cluster] = sqrtf(fabsf(sq_mass)) * ((sq_mass > 0.f) - (sq_mass < 0.f));
      )
     );
 
     CALORECGPU_CMC_MOMENT_CALC
     (NBadCells,
      (),
-     (p.moments_arr->nBadCells[cluster] = 0;),
+     (p.clusters_arr->moments.nBadCells[cluster] = 0;),
      (ToLoad::CellIsBad),
      (),
      (if (data.is_bad)
     {
-      atomicAdd(&(p.moments_arr->nBadCells[cluster]), 1);
+      atomicAdd(&(p.clusters_arr->moments.nBadCells[cluster]), 1);
       }),
     (),
     ()
@@ -1844,12 +1687,12 @@ namespace
     CALORECGPU_CMC_MOMENT_CALC
     (NBadCellsCorr,
      (),
-     (p.moments_arr->nBadCellsCorr[cluster] = 0;),
+     (p.clusters_arr->moments.nBadCellsCorr[cluster] = 0;),
      (ToLoad::CellIsBad, ToLoad::CellEnergy),
      (),
      (if (data.is_bad && data.energy != 0.f)
     {
-      atomicAdd(&(p.moments_arr->nBadCellsCorr[cluster]), 1);
+      atomicAdd(&(p.clusters_arr->moments.nBadCellsCorr[cluster]), 1);
       }
      ),
     (),
@@ -1859,12 +1702,12 @@ namespace
     CALORECGPU_CMC_MOMENT_CALC
     (NExtraCellSampling,
      (),
-     (p.moments_arr->nExtraCellSampling[cluster] = 0;),
+     (p.clusters_arr->moments.nExtraCellSampling[cluster] = 0;),
      (ToLoad::CellSampling, ToLoad::CellEta),
      (),
      (if (data.sampling == CaloSampling::EME2 && fabsf(data.eta) > p.opts->eta_inner_wheel)
     {
-      atomicAdd(&(p.moments_arr->nExtraCellSampling[cluster]), 1);
+      atomicAdd(&(p.clusters_arr->moments.nExtraCellSampling[cluster]), 1);
       }
      ),
     (),
@@ -1872,28 +1715,16 @@ namespace
     );
 
     CALORECGPU_CMC_MOMENT_CALC
-    (NumCells,
-     (),
-     (p.moments_arr->numCells[cluster] = 0;),
-     (),
-     (),
-     (atomicAdd(&(p.moments_arr->numCells[cluster]), 1);),
-     (),
-     ()
-    );
-
-    CALORECGPU_CMC_MOMENT_CALC
     (PTD,
      (),
-     (p.moments_arr->PTD[cluster] = 0.f;
-      CMCTemporaries::PTDAux(p.moments_arr, cluster) = 0.f;
+     (p.clusters_arr->moments.PTD[cluster] = 0.f;
+      CMCTemporaries::PTDAux(p.clusters_arr, cluster) = 0.f;
      ),
      (),
      (ToLoad::SquareWeightedEnergy),
-     (add_with_corr(p.moments_arr->PTD,
-                    CMCTemporaries::PTDAux(p.moments_arr),
-                    cluster,
-                    data.square_w_E);
+     (CaloRecGPU::Helpers::device_kahan_babushka_neumaier(&(p.clusters_arr->moments.PTD[cluster]),
+                                                          CMCTemporaries::PTDAux_ptr(p.clusters_arr, cluster),
+                                                          data.square_w_E);
 
       //Comment on there:
       //
@@ -1908,8 +1739,8 @@ namespace
       //So maybe we could change this here?
      ),
      (ToLoad::SumEnergies),
-     (const float new_PTD = p.moments_arr->PTD[cluster] + CMCTemporaries::PTDAux(p.moments_arr, cluster);
-      p.moments_arr->PTD[cluster] = 1.0f / ((data.sum_energies > 0.f ? data.sum_energies : 1.f) * rsqrtf(new_PTD));
+     (const float new_PTD = p.clusters_arr->moments.PTD[cluster] + CMCTemporaries::PTDAux(p.clusters_arr, cluster);
+      p.clusters_arr->moments.PTD[cluster] = 1.0f / ((data.sum_energies > 0.f ? data.sum_energies : 1.f) * rsqrtf(new_PTD));
       //See before: maybe to be revised?
      )
     );
@@ -1917,59 +1748,56 @@ namespace
     CALORECGPU_CMC_MOMENT_CALC
     (SecondEngDens,
      (),
-     (p.moments_arr->secondEngDens[cluster] = 0.f;
-      CMCTemporaries::secondEngDensAux(p.moments_arr, cluster) = 0.f;
+     (p.clusters_arr->moments.secondEngDens[cluster] = 0.f;
+      CMCTemporaries::secondEngDensAux(p.clusters_arr, cluster) = 0.f;
      ),
      (ToLoad::CellVolume),
      (ToLoad::WeightedEnergy, ToLoad::WeightedEnergyOverVolume),
      (if (data.volume > 0.f)
     {
-      add_with_corr(p.moments_arr->secondEngDens,
-                    CMCTemporaries::secondEngDensAux(p.moments_arr),
-                    cluster,
-                    data.weighted_energy * data.w_E_over_V * data.w_E_over_V);
+      CaloRecGPU::Helpers::device_kahan_babushka_neumaier(&(p.clusters_arr->moments.secondEngDens[cluster]),
+                                                          CMCTemporaries::secondEngDensAux_ptr(p.clusters_arr, cluster),
+                                                          data.weighted_energy * data.w_E_over_V * data.w_E_over_V);
       }
      ),
     (ToLoad::ReverseEnergyDensityNormalization),
-    (const float new_secondEngDens = p.moments_arr->secondEngDens[cluster] + CMCTemporaries::secondEngDensAux(p.moments_arr, cluster);
-     p.moments_arr->secondEngDens[cluster] = new_secondEngDens * data.rev_energy_density_norm;)
+    (const float new_secondEngDens = p.clusters_arr->moments.secondEngDens[cluster] + CMCTemporaries::secondEngDensAux(p.clusters_arr, cluster);
+     p.clusters_arr->moments.secondEngDens[cluster] = new_secondEngDens * data.rev_energy_density_norm;)
     );
 
     CALORECGPU_CMC_MOMENT_CALC
     (SecondLambda,
      (),
-     (p.moments_arr->secondLambda[cluster] = 0.f;
-      CMCTemporaries::secondLambdaAux(p.moments_arr, cluster) = 0.f;
+     (p.clusters_arr->moments.secondLambda[cluster] = 0.f;
+      CMCTemporaries::secondLambdaAux(p.clusters_arr, cluster) = 0.f;
      ),
      (),
      (ToLoad::WeightedEnergy, ToLoad::Lambda),
-     (add_with_corr(p.moments_arr->secondLambda,
-                    CMCTemporaries::secondLambdaAux(p.moments_arr),
-                    cluster,
-                    data.weighted_energy * data.lambda * data.lambda);
+     (CaloRecGPU::Helpers::device_kahan_babushka_neumaier(&(p.clusters_arr->moments.secondLambda[cluster]),
+                                                          CMCTemporaries::secondLambdaAux_ptr(p.clusters_arr, cluster),
+                                                          data.weighted_energy * data.lambda * data.lambda);
      ),
      (ToLoad::ReverseSumEnergies),
-     (const float new_secondLambda = p.moments_arr->secondLambda[cluster] + CMCTemporaries::secondLambdaAux(p.moments_arr, cluster);
-      p.moments_arr->secondLambda[cluster] = new_secondLambda * data.rev_sum_energies;
+     (const float new_secondLambda = p.clusters_arr->moments.secondLambda[cluster] + CMCTemporaries::secondLambdaAux(p.clusters_arr, cluster);
+      p.clusters_arr->moments.secondLambda[cluster] = new_secondLambda * data.rev_sum_energies;
      )
     );
 
     CALORECGPU_CMC_MOMENT_CALC
     (SecondR,
      (),
-     (p.moments_arr->secondR[cluster] = 0.f;
-      CMCTemporaries::secondRAux(p.moments_arr, cluster) = 0.f;
+     (p.clusters_arr->moments.secondR[cluster] = 0.f;
+      CMCTemporaries::secondRAux(p.clusters_arr, cluster) = 0.f;
      ),
      (),
      (ToLoad::WeightedEnergy, ToLoad::R),
-     (add_with_corr(p.moments_arr->secondR,
-                    CMCTemporaries::secondRAux(p.moments_arr),
-                    cluster,
-                    data.weighted_energy * data.r * data.r);
+     (CaloRecGPU::Helpers::device_kahan_babushka_neumaier(&(p.clusters_arr->moments.secondR[cluster]),
+                                                          CMCTemporaries::secondRAux_ptr(p.clusters_arr, cluster),
+                                                          data.weighted_energy * data.r * data.r);
      ),
      (ToLoad::ReverseSumEnergies),
-     (const float new_secondR = p.moments_arr->secondR[cluster] + CMCTemporaries::secondRAux(p.moments_arr, cluster);
-      p.moments_arr->secondR[cluster] = new_secondR * data.rev_sum_energies;
+     (const float new_secondR = p.clusters_arr->moments.secondR[cluster] + CMCTemporaries::secondRAux(p.clusters_arr, cluster);
+      p.clusters_arr->moments.secondR[cluster] = new_secondR * data.rev_sum_energies;
      )
     );
 
@@ -1977,56 +1805,53 @@ namespace
     CALORECGPU_CMC_MOMENT_CALC
     (Significance,
      (),
-     (p.moments_arr->significance[cluster] = 0.f;
-      CMCTemporaries::significanceAux(p.moments_arr, cluster) = 0.f;
+     (p.clusters_arr->moments.significance[cluster] = 0.f;
+      CMCTemporaries::significanceAux(p.clusters_arr, cluster) = 0.f;
      ),
      (ToLoad::CellNoise),
      (),
-     (add_with_corr(p.moments_arr->significance,
-                    CMCTemporaries::significanceAux(p.moments_arr),
-                    cluster,
-                    data.noise * data.noise);
+     (CaloRecGPU::Helpers::device_kahan_babushka_neumaier(&(p.clusters_arr->moments.significance[cluster]),
+                                                          CMCTemporaries::significanceAux_ptr(p.clusters_arr, cluster),
+                                                          data.noise * data.noise);
      ),
      (ToLoad::ClusterEnergy),
-     (const float prev_v = p.moments_arr->significance[cluster] + CMCTemporaries::significanceAux(p.moments_arr, cluster);
-      p.moments_arr->significance[cluster] = (prev_v > 0.f ? data.cluster_energy * rsqrtf(prev_v) : 0.f);)
+     (const float prev_v = p.clusters_arr->moments.significance[cluster] + CMCTemporaries::significanceAux(p.clusters_arr, cluster);
+      p.clusters_arr->moments.significance[cluster] = (prev_v > 0.f ? data.cluster_energy * rsqrtf(prev_v) : 0.f);)
     );
 
     CALORECGPU_CMC_MOMENT_CALC
     (TimeAndSecondTime,
      (),
-     (p.moments_arr->time[cluster] = 0.f;
-      CMCTemporaries::timeAux(p.moments_arr, cluster) = 0.f;
-      p.moments_arr->secondTime[cluster] = 0.f;
-      CMCTemporaries::secondTimeAux(p.moments_arr, cluster) = 0.f;
+     (p.clusters_arr->moments.time[cluster] = 0.f;
+      CMCTemporaries::timeAux(p.clusters_arr, cluster) = 0.f;
+      p.clusters_arr->moments.secondTime[cluster] = 0.f;
+      CMCTemporaries::secondTimeAux(p.clusters_arr, cluster) = 0.f;
      ),
      (ToLoad::CellTime, ToLoad::CellTimeMomentsCheck),
      (ToLoad::SquaredWeightedNonMomentsEnergy),
      (if (data.time_moments_check)
     {
-      add_with_corr(p.moments_arr->time,
-                    CMCTemporaries::timeAux(p.moments_arr),
-                    cluster,
-                    data.time * data.squared_normE);
-        add_with_corr(p.moments_arr->secondTime,
-                      CMCTemporaries::secondTimeAux(p.moments_arr),
-                      cluster,
-                      data.time * data.time * data.squared_normE);
+      CaloRecGPU::Helpers::device_kahan_babushka_neumaier(&(p.clusters_arr->moments.time[cluster]),
+                                                          CMCTemporaries::timeAux_ptr(p.clusters_arr, cluster),
+                                                          data.time * data.squared_normE);
+      CaloRecGPU::Helpers::device_kahan_babushka_neumaier(&(p.clusters_arr->moments.secondTime[cluster]),
+                                                          CMCTemporaries::secondTimeAux_ptr(p.clusters_arr, cluster),
+                                                          data.time * data.time * data.squared_normE);
       }),
     (ToLoad::TimeNormalization),
     (if (data.time_norm != 0.f)
     {
       const float real_norm = 1.0f / data.time_norm;
-      const float time = (p.moments_arr->time[cluster] + CMCTemporaries::timeAux(p.moments_arr, cluster))
+      const float time = (p.clusters_arr->moments.time[cluster] + CMCTemporaries::timeAux(p.clusters_arr, cluster))
                            * real_norm;
-        const float second_sum = p.moments_arr->secondTime[cluster] + CMCTemporaries::secondTimeAux(p.moments_arr, cluster);
-        p.moments_arr->time[cluster] = time;
-        p.moments_arr->secondTime[cluster] = ClusterMomentsCalculator::product_sum_cornea_harrison_tang(second_sum, real_norm, -time, time);
+        const float second_sum = p.clusters_arr->moments.secondTime[cluster] + CMCTemporaries::secondTimeAux(p.clusters_arr, cluster);
+        p.clusters_arr->moments.time[cluster] = time;
+        p.clusters_arr->moments.secondTime[cluster] = CaloRecGPU::Helpers::product_sum_cornea_harrison_tang(second_sum, real_norm, -time, time);
       }
     else
       {
-        p.moments_arr->time[cluster] = 0.f;
-        p.moments_arr->secondTime[cluster] = 0.f;
+        p.clusters_arr->moments.time[cluster] = 0.f;
+        p.clusters_arr->moments.secondTime[cluster] = 0.f;
       }
     )
     );
@@ -2042,24 +1867,23 @@ namespace
      (const int offset = data.sampling * num + delta;
       for (int i = 0; i < num; ++i)
     {
-      p.moments_arr->energyPerSample[offset + i]
+      p.clusters_arr->moments.energyPerSample[offset + i]
         [cluster] = 0.f;
-        CMCTemporaries::energyPerSampleAux(p.moments_arr, offset + i, cluster) = 0.f;
+        CMCTemporaries::energyPerSampleAux(p.clusters_arr, offset + i, cluster) = 0.f;
       }
      ),
     (ToLoad::CellEnergy, ToLoad::CellSampling),
     (),
-    (add_with_corr(p.moments_arr->energyPerSample[data.sampling],
-                   CMCTemporaries::energyPerSampleAux(p.moments_arr, data.sampling),
-                   cluster,
-                   data.energy * data.weight);
+    (CaloRecGPU::Helpers::device_kahan_babushka_neumaier(&(p.clusters_arr->moments.energyPerSample[data.sampling][cluster]),
+                                                         CMCTemporaries::energyPerSampleAux_ptr(p.clusters_arr, data.sampling, cluster),
+                                                         data.energy * data.weight);
     ),
     (ToLoad::SamplingFromMomentIndex),
     (const int offset = data.sampling * num + delta;
      for (int i = 0; i < num; ++i)
     {
-      p.moments_arr->energyPerSample[offset + i]
-        [cluster] += CMCTemporaries::energyPerSampleAux(p.moments_arr, offset + i, cluster);
+      p.clusters_arr->moments.energyPerSample[offset + i]
+        [cluster] += CMCTemporaries::energyPerSampleAux(p.clusters_arr, offset + i, cluster);
       }
     )
     );
@@ -2074,28 +1898,27 @@ namespace
      (const int offset = data.sampling * num + delta;
       for (int i = 0; i < num; ++i)
     {
-      p.moments_arr->etaPerSample[offset + i]
+      p.clusters_arr->moments.etaPerSample[offset + i]
         [cluster] = 0.f;
-        CMCTemporaries::etaPerSampleAux(p.moments_arr, offset + i, cluster) = 0.f;
+        CMCTemporaries::etaPerSampleAux(p.clusters_arr, offset + i, cluster) = 0.f;
       }
      ),
     (ToLoad::CellSampling, ToLoad::CellAbsEnergy, ToLoad::CellEta),
     (),
-    (add_with_corr(p.moments_arr->etaPerSample[data.sampling],
-                   CMCTemporaries::etaPerSampleAux(p.moments_arr, data.sampling),
-                   cluster,
-                   data.abs_energy * data.weight * data.eta);
+     (CaloRecGPU::Helpers::device_kahan_babushka_neumaier(&(p.clusters_arr->moments.etaPerSample[data.sampling][cluster]),
+                                                          CMCTemporaries::etaPerSampleAux_ptr(p.clusters_arr, data.sampling, cluster),
+                                                          data.abs_energy * data.weight * data.eta);
     ),
     (ToLoad::SamplingFromMomentIndex/*, ToLoad::ReverseAbsoluteEnergyPerSample*/),
     (const int offset = data.sampling * num + delta;
      for (int i = 0; i < num; ++i)
     {
       const int idx = offset + i;
-      const float normalization = CMCTemporaries::absoluteEnergyPerSample(p.moments_arr, idx, cluster) +
-                                    CMCTemporaries::absoluteEnergyPerSampleAux(p.moments_arr, idx, cluster);
+      const float normalization = CMCTemporaries::absoluteEnergyPerSample(p.clusters_arr, idx, cluster) +
+                                    CMCTemporaries::absoluteEnergyPerSampleAux(p.clusters_arr, idx, cluster);
         const float rev_normalization = 1.0f / (normalization != 0.f ? normalization : 1.0f);
-        const float new_eta = p.moments_arr->etaPerSample[idx][cluster] + CMCTemporaries::etaPerSampleAux(p.moments_arr, idx, cluster);
-        p.moments_arr->etaPerSample[idx][cluster] = new_eta * rev_normalization;
+        const float new_eta = p.clusters_arr->moments.etaPerSample[idx][cluster] + CMCTemporaries::etaPerSampleAux(p.clusters_arr, idx, cluster);
+        p.clusters_arr->moments.etaPerSample[idx][cluster] = new_eta * rev_normalization;
       }
     )
     );
@@ -2109,13 +1932,13 @@ namespace
      (const int offset = data.sampling * num + delta;
       for (int i = 0; i < num; ++i)
     {
-      p.moments_arr->nCellSampling[offset + i]
+      p.clusters_arr->moments.nCellSampling[offset + i]
         [cluster] = 0;
       }
      ),
     (ToLoad::CellSampling),
     (),
-    (atomicAdd(&(p.moments_arr->nCellSampling[data.sampling][cluster]), 1);),
+    (atomicAdd(&(p.clusters_arr->moments.nCellSampling[data.sampling][cluster]), 1);),
     (),
     ()
     );
@@ -2129,29 +1952,28 @@ namespace
      (const int offset = data.sampling * num + delta;
       for (int i = 0; i < num; ++i)
     {
-      p.moments_arr->phiPerSample[offset + i]
+      p.clusters_arr->moments.phiPerSample[offset + i]
         [cluster] = 0.f;
-        CMCTemporaries::phiPerSampleAux(p.moments_arr, offset + i, cluster) = 0.f;
+        CMCTemporaries::phiPerSampleAux(p.clusters_arr, offset + i, cluster) = 0.f;
       }
      ),
     (ToLoad::CellSampling, ToLoad::CellAbsEnergy, ToLoad::CellPhi),
     (ToLoad::SeedCellPhi),
     (const float phi_real = CaloRecGPU::Helpers::regularize_angle(data.phi, data.phi_0);
-     add_with_corr(p.moments_arr->phiPerSample[data.sampling],
-                   CMCTemporaries::phiPerSampleAux(p.moments_arr, data.sampling),
-                   cluster,
-                   data.abs_energy * data.weight * phi_real);
+     CaloRecGPU::Helpers::device_kahan_babushka_neumaier(&(p.clusters_arr->moments.phiPerSample[data.sampling][cluster]),
+                                                         CMCTemporaries::phiPerSampleAux_ptr(p.clusters_arr, data.sampling, cluster),
+                                                         data.abs_energy * data.weight * phi_real);
     ),
     (ToLoad::SamplingFromMomentIndex/*, ToLoad::ReverseAbsoluteEnergyPerSample*/),
     (const int offset = data.sampling * num + delta;
      for (int i = 0; i < num; ++i)
     {
       const int idx = offset + i;
-      const float normalization = CMCTemporaries::absoluteEnergyPerSample(p.moments_arr, idx, cluster) +
-                                    CMCTemporaries::absoluteEnergyPerSampleAux(p.moments_arr, idx, cluster);
+      const float normalization = CMCTemporaries::absoluteEnergyPerSample(p.clusters_arr, idx, cluster) +
+                                    CMCTemporaries::absoluteEnergyPerSampleAux(p.clusters_arr, idx, cluster);
         const float rev_normalization = 1.0f / (normalization != 0.f ? normalization : 1.0f);
-        const float new_phi = p.moments_arr->phiPerSample[idx][cluster] + CMCTemporaries::phiPerSampleAux(p.moments_arr, idx, cluster);
-        p.moments_arr->phiPerSample[idx][cluster] = CaloRecGPU::Helpers::regularize_angle(new_phi * rev_normalization, 0.f);
+        const float new_phi = p.clusters_arr->moments.phiPerSample[idx][cluster] + CMCTemporaries::phiPerSampleAux(p.clusters_arr, idx, cluster);
+        p.clusters_arr->moments.phiPerSample[idx][cluster] = CaloRecGPU::Helpers::regularize_angle(new_phi * rev_normalization, 0.f);
       }
     )
     );
@@ -2166,16 +1988,15 @@ namespace
     CALORECGPU_CMC_MOMENT_CALC
     (AverageLArQNormalization,
      (),
-     (CMCTemporaries::averageLArQNorm(p.moments_arr, cluster) = 0.f;
-      CMCTemporaries::averageLArQNormAux(p.moments_arr, cluster) = 0.f;),
+     (CMCTemporaries::averageLArQNorm(p.clusters_arr, cluster) = 0.f;
+      CMCTemporaries::averageLArQNormAux(p.clusters_arr, cluster) = 0.f;),
      (ToLoad::CellLArQCheck),
      (ToLoad::SquareWeightedEnergyOrNegative),
      (if (data.LArQ_cell_check)
     {
-      add_with_corr(CMCTemporaries::averageLArQNorm(p.moments_arr),
-                    CMCTemporaries::averageLArQNormAux(p.moments_arr),
-                    cluster,
-                    data.square_w_E_or_neg);
+      CaloRecGPU::Helpers::device_kahan_babushka_neumaier(CMCTemporaries::averageLArQNorm_ptr(p.clusters_arr, cluster),
+                                                          CMCTemporaries::averageLArQNormAux_ptr(p.clusters_arr, cluster),
+                                                          data.square_w_E_or_neg);
       }
      ),
     (),
@@ -2185,16 +2006,15 @@ namespace
     CALORECGPU_CMC_MOMENT_CALC
     (AverageTileQNormalization,
      (),
-     (CMCTemporaries::averageTileQNorm(p.moments_arr, cluster) = 0.f;
-      CMCTemporaries::averageTileQNormAux(p.moments_arr, cluster) = 0.f;),
+     (CMCTemporaries::averageTileQNorm(p.clusters_arr, cluster) = 0.f;
+      CMCTemporaries::averageTileQNormAux(p.clusters_arr, cluster) = 0.f;),
      (ToLoad::CellQualityProvenance, ToLoad::CellTileQCheck),
      (ToLoad::SquareWeightedEnergyOrNegative),
      (if (data.TileQ_cell_check)
     {
-      add_with_corr(CMCTemporaries::averageTileQNorm(p.moments_arr),
-                    CMCTemporaries::averageTileQNormAux(p.moments_arr),
-                    cluster,
-                    data.square_w_E_or_neg);
+      CaloRecGPU::Helpers::device_kahan_babushka_neumaier(CMCTemporaries::averageTileQNorm_ptr(p.clusters_arr, cluster),
+                                                          CMCTemporaries::averageTileQNormAux_ptr(p.clusters_arr, cluster),
+                                                          data.square_w_E_or_neg);
       }
      ),
     (),
@@ -2204,17 +2024,16 @@ namespace
     CALORECGPU_CMC_MOMENT_CALC
     (EnergyDensityNormalization,
      (),
-     (CMCTemporaries::energyDensityNormalization(p.moments_arr, cluster) = 0.f;
-      CMCTemporaries::energyDensityNormalizationAux(p.moments_arr, cluster) = 0.f;
+     (CMCTemporaries::energyDensityNormalization(p.clusters_arr, cluster) = 0.f;
+      CMCTemporaries::energyDensityNormalizationAux(p.clusters_arr, cluster) = 0.f;
      ),
      (ToLoad::CellVolume),
      (ToLoad::WeightedEnergy),
      (if (data.volume > 0.f)
     {
-      add_with_corr(CMCTemporaries::energyDensityNormalization(p.moments_arr),
-                    CMCTemporaries::energyDensityNormalizationAux(p.moments_arr),
-                    cluster,
-                    data.weighted_energy);
+      CaloRecGPU::Helpers::device_kahan_babushka_neumaier(CMCTemporaries::energyDensityNormalization_ptr(p.clusters_arr, cluster),
+                                                          CMCTemporaries::energyDensityNormalizationAux_ptr(p.clusters_arr, cluster),
+                                                          data.weighted_energy);
       }
      ),
     (),
@@ -2224,8 +2043,8 @@ namespace
     CALORECGPU_CMC_MOMENT_CALC
     (FirstAndSecondMaxEnergyAndCell,
      (),
-     (CMCTemporaries::maxCellEnergyAndCell(p.moments_arr, cluster) = 0ULL;
-      CMCTemporaries::secondMaxCellEnergyAndCell(p.moments_arr, cluster) = 0ULL;
+     (CMCTemporaries::maxCellEnergyAndCell(p.clusters_arr, cluster) = 0ULL;
+      CMCTemporaries::secondMaxCellEnergyAndCell(p.clusters_arr, cluster) = 0ULL;
      ),
      (),
      (ToLoad::WeightedEnergy),
@@ -2234,8 +2053,8 @@ namespace
       unsigned long long int energy_and_cell = __float_as_uint(data.weighted_energy);
         //Energy is positive, so no need to switch to total ordering...
         energy_and_cell = (energy_and_cell << 32) | (cell + 1);
-        const unsigned long long int old_enc = atomicMax(&(CMCTemporaries::maxCellEnergyAndCell(p.moments_arr, cluster)), energy_and_cell);
-        atomicMax(&(CMCTemporaries::secondMaxCellEnergyAndCell(p.moments_arr, cluster)), min(old_enc, energy_and_cell));
+        const unsigned long long int old_enc = atomicMax(&(CMCTemporaries::maxCellEnergyAndCell(p.clusters_arr, cluster)), energy_and_cell);
+        atomicMax(&(CMCTemporaries::secondMaxCellEnergyAndCell(p.clusters_arr, cluster)), min(old_enc, energy_and_cell));
       }
      ),
     (),
@@ -2246,18 +2065,17 @@ namespace
     CALORECGPU_CMC_MOMENT_CALC
     (LateralNormalization,
      (),
-     (CMCTemporaries::lateralNormalization(p.moments_arr, cluster) = 0.f;
-      CMCTemporaries::lateralNormalizationAux(p.moments_arr, cluster) = 0.f;
+     (CMCTemporaries::lateralNormalization(p.clusters_arr, cluster) = 0.f;
+      CMCTemporaries::lateralNormalizationAux(p.clusters_arr, cluster) = 0.f;
      ),
      (),
      (ToLoad::WeightedEnergy, ToLoad::ClusterMaxAndSecondMaxCell, ToLoad::R),
      (const float real_r = (cell != data.max_cell && cell != data.second_max_cell) ?
                            data.r : max(data.r, p.opts->min_r_lateral);
 
-      add_with_corr(CMCTemporaries::lateralNormalization(p.moments_arr),
-                    CMCTemporaries::lateralNormalizationAux(p.moments_arr),
-                    cluster,
-                    data.weighted_energy * real_r * real_r);
+      CaloRecGPU::Helpers::device_kahan_babushka_neumaier(CMCTemporaries::lateralNormalization_ptr(p.clusters_arr, cluster),
+                                                          CMCTemporaries::lateralNormalizationAux_ptr(p.clusters_arr, cluster),
+                                                          data.weighted_energy * real_r * real_r);
      ),
      (),
      ()
@@ -2266,18 +2084,17 @@ namespace
     CALORECGPU_CMC_MOMENT_CALC
     (LongitudinalNormalization,
      (),
-     (CMCTemporaries::longitudinalNormalization(p.moments_arr, cluster) = 0.f;
-      CMCTemporaries::longitudinalNormalizationAux(p.moments_arr, cluster) = 0.f;
+     (CMCTemporaries::longitudinalNormalization(p.clusters_arr, cluster) = 0.f;
+      CMCTemporaries::longitudinalNormalizationAux(p.clusters_arr, cluster) = 0.f;
      ),
      (),
      (ToLoad::WeightedEnergy, ToLoad::ClusterMaxAndSecondMaxCell, ToLoad::Lambda),
      (const float real_lambda = (cell != data.max_cell && cell != data.second_max_cell) ?
                                 data.lambda : max(data.lambda, p.opts->min_l_longitudinal);
 
-      add_with_corr(CMCTemporaries::longitudinalNormalization(p.moments_arr),
-                    CMCTemporaries::longitudinalNormalizationAux(p.moments_arr),
-                    cluster,
-                    data.weighted_energy * real_lambda * real_lambda);
+      CaloRecGPU::Helpers::device_kahan_babushka_neumaier(CMCTemporaries::longitudinalNormalization_ptr(p.clusters_arr, cluster),
+                                                          CMCTemporaries::longitudinalNormalizationAux_ptr(p.clusters_arr, cluster),
+                                                          data.weighted_energy * real_lambda * real_lambda);
      ),
      (),
      ()
@@ -2286,15 +2103,14 @@ namespace
     CALORECGPU_CMC_MOMENT_CALC
     (Matrix00,
      (),
-     (CMCTemporaries::matrix00(p.moments_arr, cluster) = 0.f;
-      CMCTemporaries::matrix00Aux(p.moments_arr, cluster) = 0.f;
+     (CMCTemporaries::matrix00(p.clusters_arr, cluster) = 0.f;
+      CMCTemporaries::matrix00Aux(p.clusters_arr, cluster) = 0.f;
      ),
      (ToLoad::CellX),
      (ToLoad::CenterX, ToLoad::SquareWeightedEnergy),
-     (add_with_corr(CMCTemporaries::matrix00(p.moments_arr),
-                    CMCTemporaries::matrix00Aux(p.moments_arr),
-                    cluster,
-                    data.square_w_E * (data.x - data.center_x) * (data.x - data.center_x));
+     (CaloRecGPU::Helpers::device_kahan_babushka_neumaier(CMCTemporaries::matrix00_ptr(p.clusters_arr, cluster),
+                                                          CMCTemporaries::matrix00Aux_ptr(p.clusters_arr, cluster),
+                                                          data.square_w_E * (data.x - data.center_x) * (data.x - data.center_x));
      ),
      (),
      ()
@@ -2302,15 +2118,14 @@ namespace
     CALORECGPU_CMC_MOMENT_CALC
     (Matrix10,
      (),
-     (CMCTemporaries::matrix10(p.moments_arr, cluster) = 0.f;
-      CMCTemporaries::matrix10Aux(p.moments_arr, cluster) = 0.f;
+     (CMCTemporaries::matrix10(p.clusters_arr, cluster) = 0.f;
+      CMCTemporaries::matrix10Aux(p.clusters_arr, cluster) = 0.f;
      ),
      (ToLoad::CellX, ToLoad::CellY),
      (ToLoad::CenterX, ToLoad::CenterY, ToLoad::SquareWeightedEnergy),
-     (add_with_corr(CMCTemporaries::matrix10(p.moments_arr),
-                    CMCTemporaries::matrix10Aux(p.moments_arr),
-                    cluster,
-                    data.square_w_E * (data.x - data.center_x) * (data.y - data.center_y));
+     (CaloRecGPU::Helpers::device_kahan_babushka_neumaier(CMCTemporaries::matrix10_ptr(p.clusters_arr, cluster),
+                                                          CMCTemporaries::matrix10Aux_ptr(p.clusters_arr, cluster),
+                                                          data.square_w_E * (data.x - data.center_x) * (data.y - data.center_y));
      ),
      (),
      ()
@@ -2318,15 +2133,14 @@ namespace
     CALORECGPU_CMC_MOMENT_CALC
     (Matrix20,
      (),
-     (CMCTemporaries::matrix20(p.moments_arr, cluster) = 0.f;
-      CMCTemporaries::matrix20Aux(p.moments_arr, cluster) = 0.f;
+     (CMCTemporaries::matrix20(p.clusters_arr, cluster) = 0.f;
+      CMCTemporaries::matrix20Aux(p.clusters_arr, cluster) = 0.f;
      ),
      (ToLoad::CellX, ToLoad::CellZ),
      (ToLoad::CenterX, ToLoad::CenterZ, ToLoad::SquareWeightedEnergy),
-     (add_with_corr(CMCTemporaries::matrix20(p.moments_arr),
-                    CMCTemporaries::matrix20Aux(p.moments_arr),
-                    cluster,
-                    data.square_w_E * (data.x - data.center_x) * (data.z - data.center_z));
+     (CaloRecGPU::Helpers::device_kahan_babushka_neumaier(CMCTemporaries::matrix20_ptr(p.clusters_arr, cluster),
+                                                          CMCTemporaries::matrix20Aux_ptr(p.clusters_arr, cluster),
+                                                          data.square_w_E * (data.x - data.center_x) * (data.z - data.center_z));
      ),
      (),
      ()
@@ -2334,15 +2148,14 @@ namespace
     CALORECGPU_CMC_MOMENT_CALC
     (Matrix11,
      (),
-     (CMCTemporaries::matrix11(p.moments_arr, cluster) = 0.f;
-      CMCTemporaries::matrix11Aux(p.moments_arr, cluster) = 0.f;
+     (CMCTemporaries::matrix11(p.clusters_arr, cluster) = 0.f;
+      CMCTemporaries::matrix11Aux(p.clusters_arr, cluster) = 0.f;
      ),
      (ToLoad::CellY),
      (ToLoad::CenterY, ToLoad::SquareWeightedEnergy),
-     (add_with_corr(CMCTemporaries::matrix11(p.moments_arr),
-                    CMCTemporaries::matrix11Aux(p.moments_arr),
-                    cluster,
-                    data.square_w_E * (data.y - data.center_y) * (data.y - data.center_y));
+     (CaloRecGPU::Helpers::device_kahan_babushka_neumaier(CMCTemporaries::matrix11_ptr(p.clusters_arr, cluster),
+                                                          CMCTemporaries::matrix11Aux_ptr(p.clusters_arr, cluster),
+                                                          data.square_w_E * (data.y - data.center_y) * (data.y - data.center_y));
      ),
      (),
      ()
@@ -2350,15 +2163,14 @@ namespace
     CALORECGPU_CMC_MOMENT_CALC
     (Matrix21,
      (),
-     (CMCTemporaries::matrix21(p.moments_arr, cluster) = 0.f;
-      CMCTemporaries::matrix21Aux(p.moments_arr, cluster) = 0.f;
+     (CMCTemporaries::matrix21(p.clusters_arr, cluster) = 0.f;
+      CMCTemporaries::matrix21Aux(p.clusters_arr, cluster) = 0.f;
      ),
      (ToLoad::CellY, ToLoad::CellZ),
      (ToLoad::CenterY, ToLoad::CenterZ, ToLoad::SquareWeightedEnergy),
-     (add_with_corr(CMCTemporaries::matrix21(p.moments_arr),
-                    CMCTemporaries::matrix21Aux(p.moments_arr),
-                    cluster,
-                    data.square_w_E * (data.y - data.center_y) * (data.z - data.center_z));
+     (CaloRecGPU::Helpers::device_kahan_babushka_neumaier(CMCTemporaries::matrix21_ptr(p.clusters_arr, cluster),
+                                                          CMCTemporaries::matrix21Aux_ptr(p.clusters_arr, cluster),
+                                                          data.square_w_E * (data.y - data.center_y) * (data.z - data.center_z));
      ),
      (),
      ()
@@ -2366,15 +2178,14 @@ namespace
     CALORECGPU_CMC_MOMENT_CALC
     (Matrix22,
      (),
-     (CMCTemporaries::matrix22(p.moments_arr, cluster) = 0.f;
-      CMCTemporaries::matrix22Aux(p.moments_arr, cluster) = 0.f;
+     (CMCTemporaries::matrix22(p.clusters_arr, cluster) = 0.f;
+      CMCTemporaries::matrix22Aux(p.clusters_arr, cluster) = 0.f;
      ),
      (ToLoad::CellZ),
      (ToLoad::CenterZ, ToLoad::SquareWeightedEnergy),
-     (add_with_corr(CMCTemporaries::matrix22(p.moments_arr),
-                    CMCTemporaries::matrix22Aux(p.moments_arr),
-                    cluster,
-                    data.square_w_E * (data.z - data.center_z) * (data.z - data.center_z));
+     (CaloRecGPU::Helpers::device_kahan_babushka_neumaier(CMCTemporaries::matrix22_ptr(p.clusters_arr, cluster),
+                                                          CMCTemporaries::matrix22Aux_ptr(p.clusters_arr, cluster),
+                                                          data.square_w_E * (data.z - data.center_z) * (data.z - data.center_z));
      ),
      (),
      ()
@@ -2390,20 +2201,20 @@ namespace
      (ToLoad::ClusterCellWithMaxEnergy, ToLoad::ClusterCellWithSecondMaxEnergy),
      (unsigned long long to_store = data.max_E_cell;
       to_store = (to_store << 32u) | static_cast<unsigned int>(data.second_max_E_cell);
-      CMCTemporaries::maxAndSecondMaxCells(p.moments_arr, cluster) = to_store;
+      CMCTemporaries::maxAndSecondMaxCells(p.clusters_arr, cluster) = to_store;
      )
     );
 
     CALORECGPU_CMC_MOMENT_CALC
     (MaxSignificanceAndSampling,
      (),
-     (CMCTemporaries::maxSignificanceAndSampling(p.moments_arr, cluster) = 0ULL;),
+     (CMCTemporaries::maxSignificanceAndSampling(p.clusters_arr, cluster) = 0ULL;),
      (ToLoad::CellSampling, ToLoad::CellNoise),
      (ToLoad::WeightedEnergyOrNegative),
      (const float max_sig = data.noise > 0.f ? data.weighted_energy_or_negative / data.noise : 0.f;
       unsigned long long int max_S_and_S = __float_as_uint(fabsf(max_sig));
-      max_S_and_S = (max_S_and_S << 32) | (((unsigned long long int) data.sampling << 1)) | (max_sig > 0.f);
-      atomicMax(&(CMCTemporaries::maxSignificanceAndSampling(p.moments_arr, cluster)), max_S_and_S);),
+      max_S_and_S = (max_S_and_S << 32) | (static_cast<unsigned long long int>(data.sampling) << 1) | (max_sig > 0.f);
+      atomicMax(&(CMCTemporaries::maxSignificanceAndSampling(p.clusters_arr, cluster)), max_S_and_S);),
      (),
      ()
     );
@@ -2411,15 +2222,14 @@ namespace
     CALORECGPU_CMC_MOMENT_CALC
     (MX,
      (),
-     (CMCTemporaries::mX(p.moments_arr, cluster) = 0.f;
-      CMCTemporaries::mXAux(p.moments_arr, cluster) = 0.f;),
+     (CMCTemporaries::mX(p.clusters_arr, cluster) = 0.f;
+      CMCTemporaries::mXAux(p.clusters_arr, cluster) = 0.f;),
      (ToLoad::CellX),
      (ToLoad::WeightedCellPositionNormalization),
      (const float mx = data.w_E_r_dir * data.x;
-      add_with_corr(CMCTemporaries::mX(p.moments_arr),
-                    CMCTemporaries::mXAux(p.moments_arr),
-                    cluster,
-                    mx);
+      CaloRecGPU::Helpers::device_kahan_babushka_neumaier(CMCTemporaries::mX_ptr(p.clusters_arr, cluster),
+                                                          CMCTemporaries::mXAux_ptr(p.clusters_arr, cluster),
+                                                          mx);
      ),
      (),
      ()
@@ -2427,15 +2237,14 @@ namespace
     CALORECGPU_CMC_MOMENT_CALC
     (MY,
      (),
-     (CMCTemporaries::mY(p.moments_arr, cluster) = 0.f;
-      CMCTemporaries::mYAux(p.moments_arr, cluster) = 0.f;),
+     (CMCTemporaries::mY(p.clusters_arr, cluster) = 0.f;
+      CMCTemporaries::mYAux(p.clusters_arr, cluster) = 0.f;),
      (ToLoad::CellY),
      (ToLoad::WeightedCellPositionNormalization),
      (const float my = data.w_E_r_dir * data.y;
-      add_with_corr(CMCTemporaries::mY(p.moments_arr),
-                    CMCTemporaries::mYAux(p.moments_arr),
-                    cluster,
-                    my);
+      CaloRecGPU::Helpers::device_kahan_babushka_neumaier(CMCTemporaries::mY_ptr(p.clusters_arr, cluster),
+                                                          CMCTemporaries::mYAux_ptr(p.clusters_arr, cluster),
+                                                          my);
      ),
      (),
      ()
@@ -2443,15 +2252,14 @@ namespace
     CALORECGPU_CMC_MOMENT_CALC
     (MZ,
      (),
-     (CMCTemporaries::mZ(p.moments_arr, cluster) = 0.f;
-      CMCTemporaries::mZAux(p.moments_arr, cluster) = 0.f;),
+     (CMCTemporaries::mZ(p.clusters_arr, cluster) = 0.f;
+      CMCTemporaries::mZAux(p.clusters_arr, cluster) = 0.f;),
      (ToLoad::CellZ),
      (ToLoad::WeightedCellPositionNormalization),
      (const float mz = data.w_E_r_dir * data.z;
-      add_with_corr(CMCTemporaries::mZ(p.moments_arr),
-                    CMCTemporaries::mZAux(p.moments_arr),
-                    cluster,
-                    mz);
+      CaloRecGPU::Helpers::device_kahan_babushka_neumaier(CMCTemporaries::mZ_ptr(p.clusters_arr, cluster),
+                                                          CMCTemporaries::mZAux_ptr(p.clusters_arr, cluster),
+                                                          mz);
      ),
      (),
      ()
@@ -2461,12 +2269,12 @@ namespace
     CALORECGPU_CMC_MOMENT_CALC
     (NumPositiveEnergyCells,
      (),
-     (CMCTemporaries::numPositiveEnergyCells(p.moments_arr, cluster) = 0;),
+     (CMCTemporaries::numPositiveEnergyCells(p.clusters_arr, cluster) = 0;),
      (),
      (ToLoad::WeightedEnergyOrNegative),
      (if (data.weighted_energy_or_negative > 0)
     {
-      atomicAdd(&(CMCTemporaries::numPositiveEnergyCells(p.moments_arr, cluster)), 1);
+      atomicAdd(&(CMCTemporaries::numPositiveEnergyCells(p.clusters_arr, cluster)), 1);
       }
      ),
     (),
@@ -2476,7 +2284,7 @@ namespace
     CALORECGPU_CMC_MOMENT_CALC
     (SeedCellPhi,
      (ToLoad::SeedCellGeometryPhi),
-     (CMCTemporaries::seedCellPhi(p.moments_arr, cluster) = data.seed_cell_phi_coordinate;),
+     (CMCTemporaries::seedCellPhi(p.clusters_arr, cluster) = data.seed_cell_phi_coordinate;),
      (),
      (),
      (),
@@ -2487,15 +2295,14 @@ namespace
     CALORECGPU_CMC_MOMENT_CALC
     (SumAbsEnergyNonMoments,
      (),
-     (CMCTemporaries::sumAbsEnergyNonMoments(p.moments_arr, cluster) = 0.f;
-      CMCTemporaries::sumAbsEnergyNonMomentsAux(p.moments_arr, cluster) = 0.f;
+     (CMCTemporaries::sumAbsEnergyNonMoments(p.clusters_arr, cluster) = 0.f;
+      CMCTemporaries::sumAbsEnergyNonMomentsAux(p.clusters_arr, cluster) = 0.f;
      ),
      (ToLoad::CellAbsEnergy),
      (),
-     (add_with_corr(CMCTemporaries::sumAbsEnergyNonMoments(p.moments_arr),
-                    CMCTemporaries::sumAbsEnergyNonMomentsAux(p.moments_arr),
-                    cluster,
-                    data.abs_energy * data.weight);
+     (CaloRecGPU::Helpers::device_kahan_babushka_neumaier(CMCTemporaries::sumAbsEnergyNonMoments_ptr(p.clusters_arr, cluster),
+                                                          CMCTemporaries::sumAbsEnergyNonMomentsAux_ptr(p.clusters_arr, cluster),
+                                                          data.abs_energy * data.weight);
      ),
      (),
      ()
@@ -2504,15 +2311,14 @@ namespace
     CALORECGPU_CMC_MOMENT_CALC
     (SumSquareEnergies,
      (),
-     (CMCTemporaries::sumSquareEnergies(p.moments_arr, cluster) = 0.f;
-      CMCTemporaries::sumSquareEnergiesAux(p.moments_arr, cluster) = 0.f;
+     (CMCTemporaries::sumSquareEnergies(p.clusters_arr, cluster) = 0.f;
+      CMCTemporaries::sumSquareEnergiesAux(p.clusters_arr, cluster) = 0.f;
      ),
      (),
      (ToLoad::SquareWeightedEnergy),
-     (add_with_corr(CMCTemporaries::sumSquareEnergies(p.moments_arr),
-                    CMCTemporaries::sumSquareEnergiesAux(p.moments_arr),
-                    cluster,
-                    data.square_w_E);
+     (CaloRecGPU::Helpers::device_kahan_babushka_neumaier(CMCTemporaries::sumSquareEnergies_ptr(p.clusters_arr, cluster),
+                                                          CMCTemporaries::sumSquareEnergiesAux_ptr(p.clusters_arr, cluster),
+                                                          data.square_w_E);
      ),
      (),
      ()
@@ -2521,17 +2327,16 @@ namespace
     CALORECGPU_CMC_MOMENT_CALC
     (TimeNormalization,
      (),
-     (CMCTemporaries::timeNormalization(p.moments_arr, cluster) = 0.f;
-      CMCTemporaries::timeNormalizationAux(p.moments_arr, cluster) = 0.f;
+     (CMCTemporaries::timeNormalization(p.clusters_arr, cluster) = 0.f;
+      CMCTemporaries::timeNormalizationAux(p.clusters_arr, cluster) = 0.f;
      ),
      (ToLoad::CellTimeMomentsCheck),
      (ToLoad::SquaredWeightedNonMomentsEnergy),
      (if (data.time_moments_check)
     {
-      add_with_corr(CMCTemporaries::timeNormalization(p.moments_arr),
-                    CMCTemporaries::timeNormalizationAux(p.moments_arr),
-                    cluster,
-                    data.squared_normE);
+      CaloRecGPU::Helpers::device_kahan_babushka_neumaier(CMCTemporaries::timeNormalization_ptr(p.clusters_arr, cluster),
+                                                          CMCTemporaries::timeNormalizationAux_ptr(p.clusters_arr, cluster),
+                                                          data.squared_normE);
       }
      ),
     (),
@@ -2550,17 +2355,16 @@ namespace
      (const int offset = data.sampling * num + delta;
       for (int i = 0; i < num; ++i)
     {
-      CMCTemporaries::absoluteEnergyPerSample(p.moments_arr, offset + i, cluster)
+      CMCTemporaries::absoluteEnergyPerSample(p.clusters_arr, offset + i, cluster)
           = 0.f;
-        CMCTemporaries::absoluteEnergyPerSampleAux(p.moments_arr, offset + i, cluster) = 0.f;
+        CMCTemporaries::absoluteEnergyPerSampleAux(p.clusters_arr, offset + i, cluster) = 0.f;
       }
      ),
     (ToLoad::CellSampling, ToLoad::CellAbsEnergy),
     (),
-    (add_with_corr(CMCTemporaries::absoluteEnergyPerSample(p.moments_arr, data.sampling),
-                   CMCTemporaries::absoluteEnergyPerSampleAux(p.moments_arr, data.sampling),
-                   cluster,
-                   data.abs_energy * data.weight);
+     (CaloRecGPU::Helpers::device_kahan_babushka_neumaier(CMCTemporaries::absoluteEnergyPerSample_ptr(p.clusters_arr, data.sampling, cluster),
+                                                          CMCTemporaries::absoluteEnergyPerSampleAux_ptr(p.clusters_arr, data.sampling, cluster),
+                                                          data.abs_energy * data.weight);
     ),
     (),
     ()
@@ -2575,7 +2379,7 @@ namespace
      (const int offset = data.sampling * num + delta;
       for (int i = 0; i < num; ++i)
     {
-      CMCTemporaries::maxEnergyAndCellPerSample(p.moments_arr, offset + i, cluster)
+      CMCTemporaries::maxEnergyAndCellPerSample(p.clusters_arr, offset + i, cluster)
           = 0ULL;
       }
      ),
@@ -2584,7 +2388,7 @@ namespace
     (const unsigned int energy_pattern = __float_as_uint(data.energy * data.weight);
      unsigned long long int E_and_cell = FloatingPointHelpers::StandardFloat::to_total_ordering(energy_pattern);
      E_and_cell = (E_and_cell << 32) | cell;
-     atomicMax(&(CMCTemporaries::maxEnergyAndCellPerSample(p.moments_arr, data.sampling, cluster)), E_and_cell);
+     atomicMax(&(CMCTemporaries::maxEnergyAndCellPerSample(p.clusters_arr, data.sampling, cluster)), E_and_cell);
     ),
     (),
     ()
@@ -2602,9 +2406,9 @@ namespace
       const int offset = data.sampling * num + delta;
       for (int i = 0; i < num; ++i)
     {
-      const unsigned long long max_energy_and_cell = CMCTemporaries::maxEnergyAndCellPerSample(p.moments_arr, offset + i, cluster);
+      const unsigned long long max_energy_and_cell = CMCTemporaries::maxEnergyAndCellPerSample(p.clusters_arr, offset + i, cluster);
         const int cell = (max_energy_and_cell > comparison ? ((int) (max_energy_and_cell & 0x7FFFFFFFU)) : -1);
-        CMCTemporaries::maxECellPerSample(p.moments_arr, offset + i, cluster) = cell;
+        CMCTemporaries::maxECellPerSample(p.clusters_arr, offset + i, cluster) = cell;
       }
      ),
     (),

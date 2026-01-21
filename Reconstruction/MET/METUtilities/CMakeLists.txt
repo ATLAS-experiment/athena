@@ -57,7 +57,7 @@ atlas_add_dictionary( METUtilitiesDict
 
 #set readLib, used below to compile apps/tests
 set( readLib )
-if( XAOD_STANDALONE ) 
+if( XAOD_STANDALONE )
   set( readLib xAODRootAccess )
 else()
   set( readLib POOLRootAccessLib )
@@ -103,4 +103,3 @@ atlas_add_test( gt_ColumnarToolTests
 atlas_install_python_modules( python/*.py )
 
 atlas_install_data( data/* )
-

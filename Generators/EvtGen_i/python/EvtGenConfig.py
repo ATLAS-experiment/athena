@@ -15,9 +15,6 @@ def EvtGenCfg(flags,
               whiteList = None,
               allowAllKnownDecays = False,
               auxfiles = None):
-    
-    # Propagate EvtGen information
-    # evgenConfig.generators += ["EvtGen"]
 
     # Set defaults
     if flags.Beam.Energy*2/GeV > 13001.:
@@ -77,6 +74,10 @@ def EvtGenCfg(flags,
           whiteList = whiteList
         )
     )
+
+    # Announce generator to service
+    from GeneratorConfig.GeneratorInfoSvcConfig import GeneratorInfoSvcCfg
+    ca.merge(GeneratorInfoSvcCfg(flags, Generators=["EvtGen"]), sequenceName=EvgenSequence.Generator.value)
 
     # Copy necessary files
     from PyJobTransformsCore.trfutil import get_files

@@ -4,7 +4,7 @@
  **     @author  mark sutton
  **     @date    Fri 12 Oct 2012 13:39:05 BST 
  **
- **     Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+ **     Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  **/
 
 // cppcheck-suppress-file stlIfStrFind; cannot use C++20 starts_with in this standalone code
@@ -210,7 +210,7 @@ T* Get( TFile& f, const std::string& n, const std::string& dir="",
     }
   }
 
-  if ( saved ) saved->push_back( name );
+  if ( saved ) saved->push_back( std::move(name) );
 
   if ( h ) h->SetDirectory(0);
 
@@ -542,7 +542,7 @@ double chi2( TH1* h0, TH1* h1 ) {
   return c2;
 }
 
-
+//coverity[root_function]
 int main(int argc, char** argv) { 
 
   std::cout << "\n---------------------------------\n";
@@ -1339,7 +1339,10 @@ int main(int argc, char** argv) {
   
 	  Panel p( panel_config[ipanel], tncols );
 	  
-	  if ( raw_input.empty() ) throw std::exception();
+	  if ( raw_input.empty() ) {
+	    std::cerr << argv[0] << ":\t panel " << panel_config[ipanel] << " is empty";
+	    return -1;
+	  }
 	  for ( size_t iraw=0 ; iraw<raw_input.size() ; iraw += 6 ) p.push_back( HistDetails( &(raw_input[iraw]) ) );
 	  	  
 	  panels.push_back( p ); 

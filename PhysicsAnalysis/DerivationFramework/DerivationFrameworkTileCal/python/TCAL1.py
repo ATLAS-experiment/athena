@@ -73,7 +73,7 @@ def TCAL1TileCellsDecoratorCfg(flags, Prefix="TCAL1_", **kwargs):
     kwargs.setdefault("CellsPmt2Bad", Prefix + "cells_pmt2_bad")
     kwargs.setdefault("CellsPmt1Gain", Prefix + "cells_pmt1_gain")
     kwargs.setdefault("CellsPmt2Gain", Prefix + "cells_pmt2_gain")
-    acc.addPrivateTools(CompFactory.DerivationFramework.TileCellsDecorator(name="TileCellsDecorator", **kwargs))
+    acc.setPrivateTools(CompFactory.DerivationFramework.TileCellsDecorator(name="TileCellsDecorator", **kwargs))
     return acc
 
 
@@ -92,6 +92,7 @@ def TCAL1TileCellsMuonDecoratorCfg(flags, **kwargs):
     prefix = kwargs.pop('Prefix', 'TCAL1_')
     kwargs.setdefault('IsoCone', 0.4)
     kwargs.setdefault('DeltaRCones', [0.2, 0.4])
+    kwargs.setdefault('MuonContainer', 'Muons')
     kwargs.setdefault('ClusterContainer', "CaloCalTopoClusters")
     # Moved logic of setting WriteDecorHandleKeys to python to make configuration clearer
     kwargs.setdefault("SelectedMuon", prefix + "SelectedMuon")
@@ -109,7 +110,7 @@ def TCAL1TileCellsMuonDecoratorCfg(flags, **kwargs):
     kwargs.setdefault("CellsMuonDx", prefix + "cells_muon_dx")
     kwargs.setdefault("CellsMuonDeDx", prefix + "cells_muon_dedx")
     if len(kwargs['ClusterContainer']) > 0:
-        kwargs.setdefault("LArEnergyInCone", [prefix + "elarcone" + str(int(x*100)) for x in kwargs['DeltaRCones']])
+        kwargs.setdefault("LArEnergyInCone", [f"{prefix}elarcone{str(int(x*100))}" for x in kwargs['DeltaRCones']])
 
     kwargs.setdefault('SelectMuons', flags.Beam.Type is BeamType.Collisions)
     kwargs.setdefault('MinMuonPt', 10 * GeV)
@@ -133,10 +134,6 @@ def TCAL1StringSkimmingToolCfg(flags, **kwargs):
 
     prefix = kwargs.pop('Prefix', 'TCAL1_')
 
-    from TrigDecisionTool.TrigDecisionToolConfig import TrigDecisionToolCfg
-    acc = ComponentAccumulator()
-    tdt = acc.getPrimaryAndMerge(TrigDecisionToolCfg(flags))
-
     selectionExpression = ""
     if flags.Beam.Type is BeamType.Collisions:
         selectionExpression = f'(Muons.ptvarcone30_Nonprompt_All_MaxWeightTTVA_pt500 + 0.4 * Muons.neflowisol20) / Muons.pt < 0.18 && Muons.{prefix}SelectedMuon'
@@ -147,12 +144,10 @@ def TCAL1StringSkimmingToolCfg(flags, **kwargs):
 
     kwargs.setdefault('name', 'TCAL1StringSkimmingTool')
     kwargs.setdefault('expression', skimmingExpression)
-    kwargs.setdefault('TrigDecisionTool', tdt)
 
-    xAODStringSkimmingTool = CompFactory.DerivationFramework.xAODStringSkimmingTool
-    acc.addPublicTool(xAODStringSkimmingTool(**kwargs), primary = True)
-
-    return acc
+    from DerivationFrameworkTools.DerivationFrameworkToolsConfig import (
+        xAODStringSkimmingToolCfg)
+    return xAODStringSkimmingToolCfg(flags, **kwargs)
 
 
 def TCAL1MuonTPThinningToolCfg(flags, streamName, **kwargs):
@@ -217,7 +212,7 @@ def TCAL1Cfg(flags):
     from xAODMetaDataCnv.InfileMetaDataConfig import SetupMetaDataForStreamCfg
     from DerivationFrameworkCore.SlimmingHelper import SlimmingHelper
     TCAL1SlimmingHelper = SlimmingHelper("TCAL1SlimmingHelper", NamesAndTypes = flags.Input.TypedCollections, flags = flags)
-    TCAL1SlimmingHelper.SmartCollections = ['EventInfo', 'Muons', 'AntiKt4EMTopoJets', 'AntiKt4EMPFlowJets', 'MET_Baseline_AntiKt4EMTopo', 'MET_Baseline_AntiKt4EMPFlow', 'PrimaryVertices', 'BTagging_AntiKt4EMPFlow']
+    TCAL1SlimmingHelper.SmartCollections = ['EventInfo', 'Muons', 'AntiKt4EMTopoJets', 'AntiKt4EMPFlowJets', 'MET_Baseline_AntiKt4EMTopo', 'MET_Baseline_AntiKt4EMPFlow', 'PrimaryVertices']
 
     TCAL1ExtraVariables = f'Muons.{TCAL1Prefix}etrkcone40'
 

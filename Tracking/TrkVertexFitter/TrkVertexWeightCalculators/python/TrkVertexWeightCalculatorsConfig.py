@@ -87,18 +87,18 @@ def TrkVertexWeightCalculatorDebugCfg(flags, **kwargs):
         CompFactory.CP.TreeMakerAlg("TreeMaker", TreeName=flags.Output.TreeName)
     )
     branches = [
-        "EventInfo.runNumber -> runNumber",
+        "EventInfo.runNumber -> runNumber type=uint32",
         "EventInfo.eventNumber -> eventNumber",
         "EventInfo.actualInteractionsPerCrossing -> actualInteractionsPerCrossing",
         "EventInfo.averageInteractionsPerCrossing -> averageInteractionsPerCrossing",
-        "PrimaryVertices.x -> vtx_x",
-        "PrimaryVertices.y -> vtx_y",
-        "PrimaryVertices.z -> vtx_z",
-        "PrimaryVertices.score -> vtx_score",
-        "PhotonPointingVertices.z -> z_common",
-        "PhotonPointingVertices.nphotons_good -> nphotons_good",
-        "PrimaryVertices.score_sumpt2 -> vtx_score_sumpt2",
-        "PrimaryVertices.score_true_vertex_distance -> vtx_score_true_vertex_distance",
+        "PrimaryVertices.x -> vtx_x type=float",
+        "PrimaryVertices.y -> vtx_y type=float",
+        "PrimaryVertices.z -> vtx_z type=float",
+        "PrimaryVertices.score -> vtx_score type=float",
+        "PhotonPointingVertices.z -> z_common type=float",
+        "PhotonPointingVertices.nphotons_good -> nphotons_good type=unsigned",
+        "PrimaryVertices.score_sumpt2 -> vtx_score_sumpt2 type=float",
+        "PrimaryVertices.score_true_vertex_distance -> vtx_score_true_vertex_distance type=float",
     ]
     acc.addEventAlgo(
         CompFactory.CP.AsgxAODNTupleMakerAlg(

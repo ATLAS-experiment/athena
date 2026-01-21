@@ -36,8 +36,8 @@ class HITowerWeightTool : public extends<AthAlgTool, IHITowerWeightTool>
     
   private:
     Gaudi::Property<bool> m_applycorrection{this, "ApplyCorrection", true , "If false, unit weigts are applied"};
-    // 226000-MC; 287931-PbPb 2015, 338037-XeXe 2017, 367384-PbPb 2018, 440101-PbPb 2022
-    Gaudi::Property<std::vector<int>> m_defaultRunNumbers{this, "DefaultRunNumbers", {226000,287931,338037,367384,440101} , "List of run numbers that will be used if the event run number is not found in the InputFile"};
+    // 226000-MC; 287931-PbPb 2015, 338037-XeXe 2017, 367384-PbPb 2018, 440101-PbPb 2022, 463427-PbPb 2023, 490223-PbPb 2024
+    Gaudi::Property<std::vector<int>> m_defaultRunNumbers{this, "DefaultRunNumbers", {226000,287931,338037,367384,440101,463427,490223} , "List of run numbers that will be used if the event run number is not found in the InputFile"};
     Gaudi::Property<std::string> m_inputFile{this, "InputFile", "cluster.geo.HIJING_2018.root","File containing cluster geometric moments."};
     Gaudi::Property<std::string> m_configDir{this, "ConfigDir", "HIJetCorrection/","Directory containing configuration file."};
 

@@ -10,5 +10,5 @@ xAOD::TEvent::getEvent... WARNING Can't find EventFormatElement for hashed SG ke
 xAOD::TEvent::proxy_exact WARNING Can't find BranchInfo for 946497385.
 xAOD::TEvent::getEvent... WARNING Can't find EventFormatElement for hashed SG key 886873592
 xAOD::TEvent::proxy_exact WARNING Can't find BranchInfo for 886873592.
-el_pt_from_iparticle.Mean() = 7769.1
-el_pt_from_electron.Mean() = 7769.1
+el_pt_from_iparticle.Mean() = 8858.16
+el_pt_from_electron.Mean() = 8858.16

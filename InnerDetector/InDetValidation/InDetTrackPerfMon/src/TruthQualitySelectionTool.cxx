@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TruthQualitySelectionTool.h"
@@ -74,25 +74,25 @@ bool IDTPM::TruthQualitySelectionTool::accept( const xAOD::TruthParticle* truth 
   if( not m_truthTool->accept( truth ) )                            return false;
 
   /// Customised selections
-  if (m_maxEta!=-9999.  and (eta(*truth)) > m_maxEta )              return false;
-  if (m_minEta!=-9999.  and (eta(*truth)) < m_minEta )              return false;
-  if (m_minPhi!=-9999.  and (phi(*truth)) < m_minPhi )              return false;
-  if (m_maxPhi!=-9999.  and (phi(*truth)) > m_maxPhi )              return false;
-  if (m_minD0!=-9999.   and (d0(*truth)) < m_minD0 )                return false;
-  if (m_maxD0!=-9999.   and (d0(*truth)) > m_maxD0 )                return false;
-  if (m_minZ0!=-9999.   and (z0(*truth)) < m_minZ0 )                return false;
-  if (m_maxZ0!=-9999.   and (z0(*truth)) > m_maxZ0 )                return false;
-  if (m_minQoPT!=-9999. and (qOverPT(*truth)) < m_minQoPT )         return false;
-  if (m_maxQoPT!=-9999. and (qOverPT(*truth)) > m_maxQoPT )         return false;
-  if (m_minAbsEta!=-9999.  and std::fabs(eta(*truth)) < m_minAbsEta )       return false;
-  if (m_minAbsPhi!=-9999.  and std::fabs(phi(*truth)) < m_minAbsPhi )       return false;
-  if (m_maxAbsPhi!=-9999.  and std::fabs(phi(*truth)) > m_maxAbsPhi )       return false;
-  if (m_minAbsD0!=-9999.   and std::fabs(d0(*truth)) < m_minAbsD0 )         return false;
-  if (m_maxAbsD0!=-9999.   and std::fabs(d0(*truth)) > m_maxAbsD0 )         return false;
-  if (m_minAbsZ0!=-9999.   and std::fabs(z0(*truth)) < m_minAbsZ0 )         return false;
-  if (m_maxAbsZ0!=-9999.   and std::fabs(z0(*truth)) > m_maxAbsZ0 )         return false;
-  if (m_minAbsQoPT!=-9999. and std::fabs(qOverPT(*truth)) < m_minAbsQoPT )  return false;
-  if (m_maxAbsQoPT!=-9999. and std::fabs(qOverPT(*truth)) > m_maxAbsQoPT )  return false;
+  if (m_maxEta!=-9999  and (eta(*truth)) > m_maxEta )              return false;
+  if (m_minEta!=-9999  and (eta(*truth)) < m_minEta )              return false;
+  if (m_minPhi!=-9999  and (phi(*truth)) < m_minPhi )              return false;
+  if (m_maxPhi!=-9999  and (phi(*truth)) > m_maxPhi )              return false;
+  if (m_minD0!=-9999   and (d0(*truth)) < m_minD0 )                return false;
+  if (m_maxD0!=-9999   and (d0(*truth)) > m_maxD0 )                return false;
+  if (m_minZ0!=-9999   and (z0(*truth)) < m_minZ0 )                return false;
+  if (m_maxZ0!=-9999   and (z0(*truth)) > m_maxZ0 )                return false;
+  if (m_minQoPT!=-9999 and (qOverPT(*truth)) < m_minQoPT )         return false;
+  if (m_maxQoPT!=-9999 and (qOverPT(*truth)) > m_maxQoPT )         return false;
+  if (m_minAbsEta!=-9999  and std::fabs(eta(*truth)) < m_minAbsEta )       return false;
+  if (m_minAbsPhi!=-9999  and std::fabs(phi(*truth)) < m_minAbsPhi )       return false;
+  if (m_maxAbsPhi!=-9999  and std::fabs(phi(*truth)) > m_maxAbsPhi )       return false;
+  if (m_minAbsD0!=-9999   and std::fabs(d0(*truth)) < m_minAbsD0 )         return false;
+  if (m_maxAbsD0!=-9999   and std::fabs(d0(*truth)) > m_maxAbsD0 )         return false;
+  if (m_minAbsZ0!=-9999   and std::fabs(z0(*truth)) < m_minAbsZ0 )         return false;
+  if (m_maxAbsZ0!=-9999   and std::fabs(z0(*truth)) > m_maxAbsZ0 )         return false;
+  if (m_minAbsQoPT!=-9999 and std::fabs(qOverPT(*truth)) < m_minAbsQoPT )  return false;
+  if (m_maxAbsQoPT!=-9999 and std::fabs(qOverPT(*truth)) > m_maxAbsQoPT )  return false;
   if (m_isHadron           and not isHadron(*truth) )                       return false;
   if (m_isPion             and not isPion(*truth) )                         return false;
 
@@ -108,8 +108,8 @@ bool IDTPM::TruthQualitySelectionTool::accept( const xAOD::TruthParticle* truth 
     }
     if (m_isFromLightFlav and truthParent ) return false;
     if (not m_isFromLightFlav and not truthParent) return false;  
-    if (m_minParentPt!=-9999. and truthParent->pt() < m_minParentPt )           return false;
-    if (m_maxParentPt!=-9999. and truthParent->pt() > m_maxParentPt )           return false;
+    if (m_minParentPt!=-9999 and truthParent->pt() < m_minParentPt )           return false;
+    if (m_maxParentPt!=-9999 and truthParent->pt() > m_maxParentPt )           return false;
   }
 
   return true;

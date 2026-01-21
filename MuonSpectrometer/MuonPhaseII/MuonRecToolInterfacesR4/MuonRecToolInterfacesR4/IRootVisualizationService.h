@@ -5,7 +5,7 @@
 #define MUONRECTOOLINTERFACESR4_IROOTVISUALIZATIONSERVICE_H
 
 #include <GaudiKernel/IService.h>
-
+#include <cstdint>
 
 class TObject;
 class EventContext;
@@ -51,6 +51,18 @@ namespace MuonValR4{
                 bool operator<(const ClientToken& other) const {
                     return preFixName < other.preFixName;
                 }
+                /** @brief Flag toggling whether the ATLAS label shall be drawn */
+                bool drawAtlas{true};
+                /** @brief ATLAS label */
+                std::string atlasLabel{"Internal"};
+                /** @brief flag toggling whether the sqrts Label */
+                bool drawSqrtS{true};
+                /** @brief Sqrt s Label to be drawn on the plot*/
+                std::string sqrtSLabel{"14"};
+                /** @brief Lumi label to be drawn on the plot */
+                std::string lumiLabel{""};
+                /** @brief Position of the ATLAS / sqrtS label in relative coordinates */
+                std::array<double, 2> atlasLabelPos{0.65, 0.26};
             };
             /** @brief Registers a new client to the Service. It needs to be 
              *         called during the initialization stage

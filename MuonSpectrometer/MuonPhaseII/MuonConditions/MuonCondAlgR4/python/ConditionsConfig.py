@@ -25,8 +25,8 @@ def ActsMuonAlignCondAlgCfg(flags, name="ActsMuonAlignCondAlg", **kwargs):
     kwargs.setdefault("applyNswAsBuilt", len([alg for alg in result.getCondAlgos() if alg.name == "NswAsBuiltCondAlg"])>0)
     kwargs.setdefault("applyMdtAsBuilt", len([alg for alg in result.getCondAlgos() if alg.name == "MdtAsBuiltCondAlg"])>0)
 
-    the_alg = CompFactory.ActsMuonAlignCondAlg(name, **kwargs)
-    result.addCondAlgo(the_alg)
+    the_alg = CompFactory.MuonR4.ActsAlignCondAlg(name, **kwargs)
+    result.addCondAlgo(the_alg, primary = True)
     return result
 
 def MdtAnalyticRtCalibAlgCfg(flags, name="MdtAnalyticCalibDbAlg",
@@ -35,7 +35,7 @@ def MdtAnalyticRtCalibAlgCfg(flags, name="MdtAnalyticCalibDbAlg",
     kwargs.setdefault("OutStream", "MDTANALYTICRTS")
     kwargs.setdefault("saveDiagnosticHist", True)
     if kwargs["saveDiagnosticHist"]:
-        from MuonGeoModelTestR4.testGeoModel import setupHistSvcCfg
+        from MuonConfig.MuonConfigUtils import setupHistSvcCfg
         result.merge(setupHistSvcCfg(flags, outFile=diagnosticsFile, outStream=kwargs["OutStream"]))
     the_alg = CompFactory.MuonCalibR4.MdtAnalyticRtCalibAlg(name, **kwargs)
     result.addCondAlgo(the_alg, primary = True)

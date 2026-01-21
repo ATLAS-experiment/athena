@@ -76,7 +76,7 @@ namespace MuonValR4{
         Amg::Vector3D locPos{Amg::Vector3D::Zero()};
         locPos = strip.localPosition<1>()[0] * Amg::Vector3D::UnitX();
 
-        const Amg::Vector3D globPos{re->localToGlobalTrans(gctx, strip.layerHash()) *locPos};
+        const Amg::Vector3D globPos{re->localToGlobalTransform(gctx, strip.layerHash()) *locPos};
         m_globPos.push_back(globPos);
         m_locPos.push_back(strip.localPosition<1>()[0]);
         m_locCov.push_back(strip.localCovariance<1>()(0,0));

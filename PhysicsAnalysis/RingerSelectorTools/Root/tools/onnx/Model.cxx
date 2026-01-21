@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -44,7 +44,7 @@ namespace Ringer{
           if(input_node_dims[j]<0)
             input_node_dims[j] =1;
         }  
-        m_input_node_dims.push_back(input_node_dims);
+        m_input_node_dims.push_back(std::move(input_node_dims));
       }
       
      

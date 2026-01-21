@@ -25,7 +25,7 @@ class TruthCollectionsFixerBlock(ConfigBlock):
             type=list,
             info="list of input DAOD truthVertex containers to fix",
         )
-        self.addOption("fixDAODTruthRecord", True, type=bool,
+        self.addOption("fixDAODTruthRecord", False, type=bool,
                        info="older derivations have the old HepMC barcodes and need to be fixed, otherwise we get "
                        "a crash on 'missing ::uid'. Schedules an instance of TruthCollectionsFixerBlock. "
                        "Not needed for recent derivations.")
@@ -108,7 +108,12 @@ class TruthCollectionsFixerBlock(ConfigBlock):
             alg.OutputContainer = container
 
             # in Athena, we further need to remap relevant ElementLinks for containers that have them
-            containers_without_parent_child_links = ["TruthBosonsWithDecayParticles", "TruthTausWithDecayParticles", "BornLeptons", "TruthPileupParticles", "TruthForwardProtons"]
+            containers_without_parent_child_links = [
+                "TruthBosonsWithDecayParticles",
+                "TruthTausWithDecayParticles",
+                "BornLeptons", "TruthPileupParticles",
+                "TruthForwardProtons",
+                "TruthBSMWithDecayParticles"]
             if DualUseConfig.isAthena and container not in containers_without_parent_child_links:
                 alg.LinkPrefixToRemove = "InFile"
                 alg.ParticleLinks = ["parentLinks", "childLinks"]

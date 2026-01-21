@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /*
@@ -93,9 +93,6 @@ StatusCode ZdcRecChannelToolV2::initialize()
 	msg(MSG::DEBUG) << "--> ZDC : END OF MODIFICATION 0" << endmsg ;
 	return StatusCode::SUCCESS;
 
-	ServiceHandle<IIncidentSvc> incidentSvc("IncidentSvc", name());
-	CHECK(incidentSvc.retrieve());
-	incidentSvc->addListener(this, IncidentType::EndEvent);
 }
 //==================================================================================================
 

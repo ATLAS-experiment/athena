@@ -11,10 +11,11 @@
 
 #include "../GlobalSimComponents/IGlobalSimAlgTool.h"
 #include "../IO/LArStripNeighborhoodContainer.h"
-#include "../IO/IeEmNbhoodTOBContainer.h"
-#include "../IO/IeEmNbhoodTOB.h"
-#include "../IO/IeEmEg1BDTTOBContainer.h"
-#include "../IO/IeEmEg1BDTTOB.h"
+#include "../IO/eEmNbhoodTOBContainer.h"
+#include "../IO/eEmNbhoodTOB.h"
+#include "../IO/eEmEg1BDTTOBContainer.h"
+#include "../IO/eEmEg1BDTTOB.h"
+
 
 #include "ap_int.h"
 #include "ap_fixed.h"
@@ -52,21 +53,21 @@ namespace GlobalSim {
 	     {false},
 	     "flag to enable dumps"};
 
-    SG::WriteHandleKey<IOBitwise::IeEmEg1BDTTOBContainer>
+    SG::WriteHandleKey<IOBitwise::eEmEg1BDTTOBContainer>
     m_BDTResultKey {
       this,
       "BDTResultKey",
       "BDTResult"};
     
     // input to the  BDT Algorithm
-    SG::ReadHandleKey<IOBitwise::IeEmNbhoodTOBContainer>
+    SG::ReadHandleKey<IOBitwise::eEmNbhoodTOBContainer>
     m_nbhdTOBContainerReadKey {
       this,
       "LArNeighborhoodTOBContainerReadKey",
       "stripNeighborhoodTOBContainer",
       "key to read inLArNeighborhoodTOBsReadKeys"};
     
-    std::vector<double> combine_phi(const IOBitwise::IeEmNbhoodTOB*) const;
+    std::vector<double> combine_phi(const IOBitwise::eEmNbhoodTOB*) const;
 
     // a neighborhood has 3 vectors of strip energies (phi_low, phi_center.
     // phi_high). Provide the length thes vectors must have for the BDT to be

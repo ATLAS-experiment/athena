@@ -9,7 +9,7 @@
 #include "TileCalibBlobObjs/TileCalibDrawerInt.h"
 #include "TileConditions/ITileCondProxy.h"
 
-#include "AthenaBaseComps/AthReentrantAlgorithm.h"
+#include "AthenaBaseComps/AthCondAlgorithm.h"
 #include "xAODEventInfo/EventInfo.h"
 #include "StoreGate/ReadHandleKey.h"
 #include "StoreGate/WriteCondHandleKey.h"
@@ -24,10 +24,10 @@ class TileHWID;
  * @class TileHid2RESrcIDCondAlg
  * @brief Condition algorithm to prepare TileHid2RESrcID conditions object and put it into conditions store
  */
-class TileHid2RESrcIDCondAlg: public AthReentrantAlgorithm {
+class TileHid2RESrcIDCondAlg: public AthCondAlgorithm {
   public:
 
-    using AthReentrantAlgorithm::AthReentrantAlgorithm;
+    using AthCondAlgorithm::AthCondAlgorithm;
 
     virtual StatusCode initialize() override;
     virtual StatusCode execute(const EventContext& ctx) const override;

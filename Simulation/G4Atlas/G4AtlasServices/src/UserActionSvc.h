@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -22,6 +22,8 @@
 #include "G4AtlasTools/ThreadActionHolder.h"
 #include "HitManagement/HitCollectionMap.h"
 
+// Forward declarations
+class IG4RunTool;
 
 namespace G4UA
 {
@@ -50,6 +52,8 @@ namespace G4UA
       StatusCode getSecondaryActions( std::vector< G4UserSteppingAction* >& actions ) override final;
 
       StatusCode addActionTool(const ToolHandle<IUserActionTool>& service_tool) override final;
+
+      void G4RunTool(IG4RunTool*) override final;
 
       /// Calls BeginOfAthenaEvent on each UserAction tool
       StatusCode BeginOfAthenaEvent(HitCollectionMap&) override final;

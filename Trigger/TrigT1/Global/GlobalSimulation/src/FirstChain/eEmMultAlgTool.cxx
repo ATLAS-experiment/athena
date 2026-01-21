@@ -74,7 +74,7 @@ namespace GlobalSim {
   StatusCode eEmMultAlgTool::updateTIP(std::bitset<s_nbits_TIP>& word,
 				       const EventContext& ctx) const {
     auto tobs =
-      SG::ReadHandle<GlobalSim::IOBitwise::IeEmTOBContainer>(m_eEmTOBContainerKey,
+      SG::ReadHandle<GlobalSim::IOBitwise::eEmTOBContainer>(m_eEmTOBContainerKey,
 							     ctx);
 
     CHECK(tobs.isValid());
@@ -85,7 +85,7 @@ namespace GlobalSim {
 
     ulong tob_count{0};
     std::vector<bool> tob_pass(tobs->size(), false);
-    for (const GlobalSim::IOBitwise::IeEmTOB* t : *tobs){
+    for (const GlobalSim::IOBitwise::eEmTOB* t : *tobs){
       if (m_c_selector->select(*t) and m_e_selector->select(*t)) {
 	tob_pass[tob_count] = true;
 	if (++tob_count == m_maxtob){
@@ -117,8 +117,8 @@ namespace GlobalSim {
       std::stringstream ss;
       ss << "\nRun " << ctx <<' ' << "TIP:\n" << word << '\n';
       std::size_t ind{0};
-      for (const GlobalSim::IOBitwise::IeEmTOB* tob : *tobs) {
-	ss << *tob  << ' ' << std::boolalpha << " pass " << tob_pass[ind++] << '\n';
+      for (const GlobalSim::IOBitwise::eEmTOB* tob : *tobs) {
+	ss << tob->to_string()  << ' ' << std::boolalpha << " pass " << tob_pass[ind++] << '\n';
       }
       ss << "tob count " << tob_count << '\n';
  

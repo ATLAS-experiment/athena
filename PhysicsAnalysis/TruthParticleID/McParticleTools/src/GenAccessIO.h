@@ -63,7 +63,7 @@ public:
                     }
                 } else {
                     for (auto it: *genEvt) {
-                        mcParticles.push_back(it);
+                        mcParticles.push_back(std::move(it));
                     }
                 }
             }

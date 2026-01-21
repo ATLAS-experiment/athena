@@ -250,9 +250,10 @@ StatusCode MetaDataAlg::beginInputFile() {
                 }
             }
 
-            itr->has_book_keeper = mc_keeper != nullptr;
+            itr->has_book_keeper = (mc_keeper != nullptr);
 
             if (itr->has_book_keeper) {
+                //coverity[FORWARD_NULL:FALSE]
                 itr->tot_events += mc_keeper->nAcceptedEvents();
                 itr->sum_w += mc_keeper->sumOfEventWeights();
                 itr->sum_w_squared += mc_keeper->sumOfEventWeightsSquared();

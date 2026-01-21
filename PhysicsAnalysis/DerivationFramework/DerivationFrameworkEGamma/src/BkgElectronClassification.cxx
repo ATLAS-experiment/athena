@@ -3,6 +3,7 @@
 */
 
 #include "DerivationFrameworkEGamma/BkgElectronClassification.h"
+#include "StoreGate/ReadDecorHandle.h"
 #include "GaudiKernel/EventContext.h"
 #include "MCTruthClassifier/IMCTruthClassifier.h"
 #include "xAODEgamma/EgammaTruthxAODHelpers.h"
@@ -22,16 +23,18 @@ BkgElectronClassification::initialize()
 
   ATH_CHECK(m_electronContainer.initialize());
   ATH_CHECK(m_truthContainer.initialize());
-
+  ATH_CHECK(m_electronTruthParticleLink.initialize());
   ATH_CHECK(m_truthPdgId.initialize());
   //
   ATH_CHECK(m_firstEgMotherTruthType.initialize());
   ATH_CHECK(m_firstEgMotherTruthOrigin.initialize());
+  ATH_CHECK(m_firstEgMotherTruthClassification.initialize());
   ATH_CHECK(m_firstEgMotherTruthParticleLink.initialize());
   ATH_CHECK(m_firstEgMotherPdgId.initialize());
   //
   ATH_CHECK(m_lastEgMotherTruthType.initialize());
   ATH_CHECK(m_lastEgMotherTruthOrigin.initialize());
+  ATH_CHECK(m_lastEgMotherTruthClassification.initialize());
   ATH_CHECK(m_lastEgMotherTruthParticleLink.initialize());
   ATH_CHECK(m_lastEgMotherPdgId.initialize());
 
@@ -48,12 +51,10 @@ BkgElectronClassification::addBranches(const EventContext& ctx) const
   SG::ReadHandle<xAOD::TruthParticleContainer> truthContainer{ m_truthContainer,
                                                                ctx };
 
-  // Access for the already existing info
-  static const SG::AuxElement::Accessor<int> tT("truthType");
-  static const SG::AuxElement::Accessor<int> tO("truthOrigin");
-  static const SG::AuxElement::Accessor<
-    ElementLink<xAOD::TruthParticleContainer>>
-    tPL("truthParticleLink");
+  // Access for the pre-existing decoration
+  SG::ReadDecorHandle<xAOD::ElectronContainer,
+                      ElementLink<xAOD::TruthParticleContainer>>
+    tPL{ m_electronTruthParticleLink, ctx };
 
   // pdg iD
   SG::WriteDecorHandle<xAOD::ElectronContainer, int> tPdgID(m_truthPdgId, ctx);
@@ -62,6 +63,8 @@ BkgElectronClassification::addBranches(const EventContext& ctx) const
     m_firstEgMotherTruthType, ctx);
   SG::WriteDecorHandle<xAOD::ElectronContainer, int> firstEgMotherTO(
     m_firstEgMotherTruthOrigin, ctx);
+  SG::WriteDecorHandle<xAOD::ElectronContainer, unsigned int> firstEgMotherTC(
+    m_firstEgMotherTruthClassification, ctx);
   SG::WriteDecorHandle<xAOD::ElectronContainer, int> firstEgMotherPdgID(
     m_firstEgMotherPdgId, ctx);
   SG::WriteDecorHandle<xAOD::ElectronContainer,
@@ -73,6 +76,8 @@ BkgElectronClassification::addBranches(const EventContext& ctx) const
     m_lastEgMotherTruthType, ctx);
   SG::WriteDecorHandle<xAOD::ElectronContainer, int> lastEgMotherTO(
     m_lastEgMotherTruthOrigin, ctx);
+  SG::WriteDecorHandle<xAOD::ElectronContainer, unsigned int> lastEgMotherTC(
+    m_lastEgMotherTruthClassification, ctx);
   SG::WriteDecorHandle<xAOD::ElectronContainer, int> lastEgMotherPdgID(
     m_lastEgMotherPdgId, ctx);
   SG::WriteDecorHandle<xAOD::ElectronContainer,
@@ -82,16 +87,17 @@ BkgElectronClassification::addBranches(const EventContext& ctx) const
 
   for (const xAOD::Electron* el : *electrons) {
     tPdgID(*el) = 0;
-    if (tPL.isAvailable(*el) && tPL(*el).isValid()) {
+    if (tPL.isPresent() && tPL(*el).isValid()) {
       tPdgID(*el) = (*tPL(*el))->pdgId();
     }
     // Use the Helpers for electron from electron or photon
     // Add Extra Decoration from Egamma helpers in case of BkgElectron (Electron
     // coming for a photon) Go back to the first/last electron/photon Generator
     // mother and classify this one
-    // First the one entering the Geant, the first we meet on the way back
+    // First the one entering the Geant4, the first we meet on the way back
     firstEgMotherTT(*el) = 0;
     firstEgMotherTO(*el) = 0;
+    firstEgMotherTC(*el) = 0;
     firstEgMotherTPL(*el) = ElementLink<xAOD::TruthParticleContainer>();
     firstEgMotherPdgID(*el) = 0;
     const xAOD::TruthParticle* firstElTruth =
@@ -102,16 +108,18 @@ BkgElectronClassification::addBranches(const EventContext& ctx) const
       auto res = m_mcTruthClassifier->particleTruthClassifier(firstElTruth, &mcinfo);
       firstEgMotherTT(*el) = res.first;
       firstEgMotherTO(*el) = res.second;
+      firstEgMotherTC(*el) = std::get<0>(MCTruthPartClassifier::defOrigOfParticle(firstElTruth)); // See AGENE-2351
       firstEgMotherPdgID(*el) = firstElTruth->pdgId();
       ElementLink<xAOD::TruthParticleContainer> link(
         firstElTruth, *truthContainer, ctx);
       firstEgMotherTPL(*el) = link;
     }
 
-    // The last electron / photon  we meet on the way back towards the Generator
+    // The last electron / photon we meet on the way back towards the Generator
     // vertex
     lastEgMotherTT(*el) = 0;
     lastEgMotherTO(*el) = 0;
+    lastEgMotherTC(*el) = 0;
     lastEgMotherTPL(*el) = ElementLink<xAOD::TruthParticleContainer>();
     lastEgMotherPdgID(*el) = 0;
     const xAOD::TruthParticle* lastElTruth =
@@ -121,6 +129,7 @@ BkgElectronClassification::addBranches(const EventContext& ctx) const
       auto res = m_mcTruthClassifier->particleTruthClassifier(lastElTruth, &mcinfo);
       lastEgMotherTT(*el) = res.first;
       lastEgMotherTO(*el) = res.second;
+      lastEgMotherTC(*el) = std::get<0>(MCTruthPartClassifier::defOrigOfParticle(lastElTruth)); // See AGENE-2351
       lastEgMotherPdgID(*el) = lastElTruth->pdgId();
       ElementLink<xAOD::TruthParticleContainer> link(
         lastElTruth, *truthContainer, ctx);

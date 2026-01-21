@@ -7,6 +7,7 @@
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
+from AthenaConfiguration.Enums import LHCPeriod
 from AthenaCommon.Logging import logging
 msg = logging.getLogger('PHYSCommonConfig')
 
@@ -67,6 +68,7 @@ def PhysCommonAugmentationsCfg(flags,**kwargs):
     from DerivationFrameworkTau.TauCommonConfig import (AddMuonRemovalTauAODReRecoAlgCfg, AddTauIDDecorationCfg)
     from DerivationFrameworkTau.DiTauCommonConfig import (AddDiTauLowPtCfg, AddDiTauChargeDecoratorCfg, AddDiTauIDDecorationCfg)
     from DerivationFrameworkJetEtMiss.METCommonConfig import METCommonCfg 
+    from DerivationFrameworkJetEtMiss.METCommonConfig import HadRecoilMETCfg
     acc.merge(JetCommonCfg(flags))
     #We also need to build links between the newly created jet constituents (GlobalFE)
     #and electrons,photons,muons and taus
@@ -89,11 +91,17 @@ def PhysCommonAugmentationsCfg(flags,**kwargs):
         from BTagging.FlavorTaggingConfig import FlavorTaggingCfg
         acc.merge(FlavorTaggingCfg(flags, "AntiKt4EMPFlowJets"))
         acc.merge(FlavorTaggingCfg(flags, "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets"))
+        if flags.GeoModel.Run >= LHCPeriod.Run4:
+            acc.merge(FlavorTaggingCfg(flags, "AntiKt4EMTopoJets"))
 
     acc.merge(METCommonCfg(flags))
+    acc.merge(HadRecoilMETCfg(flags))
 
-    # Trigger matching
+    # Trigger matching and postprocessing
     if flags.Reco.EnableTrigger or flags.Trigger.triggerConfig == 'INFILE':
+        from JetTagDerivationUtils.TrigBTagCopierConfig import TrigBTagCopierAlgCfg
+        acc.merge(TrigBTagCopierAlgCfg(flags))
+
         from DerivationFrameworkPhys.TriggerMatchingCommonConfig import TriggerMatchingCommonRun2Cfg
         from DerivationFrameworkPhys.TriggerMatchingCommonConfig import TriggerMatchingCommonRun2ToRun3Cfg
         from DerivationFrameworkPhys.TriggerMatchingCommonConfig import TriggerMatchingCommonRun3Cfg

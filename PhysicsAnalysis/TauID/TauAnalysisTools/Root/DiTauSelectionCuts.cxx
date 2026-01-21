@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -12,17 +12,12 @@ using namespace TauAnalysisTools;
 //______________________________________________________________________________
 DiTauSelectionCut::DiTauSelectionCut(const std::string& sName, TauAnalysisTools::DiTauSelectionTool* tDTST)
   : m_sName(sName)
-  , m_hHistCutPre(nullptr)
-  , m_hHistCut(nullptr)
   , m_tDTST(tDTST)
 {}
 
 //______________________________________________________________________________
 DiTauSelectionCut::~DiTauSelectionCut()
 {
-  // FIXME: could use unique_ptr
-  delete m_hHistCutPre;
-  delete m_hHistCut;
 }
 
 //______________________________________________________________________________
@@ -33,11 +28,11 @@ void DiTauSelectionCut::writeControlHistograms()
 }
 
 //______________________________________________________________________________
-TH1F* DiTauSelectionCut::CreateControlPlot(const char* sName, const char* sTitle, int iBins, double dXLow, double dXUp)
+std::unique_ptr<TH1F> DiTauSelectionCut::CreateControlPlot(const char* sName, const char* sTitle, int iBins, double dXLow, double dXUp)
 {
   if (m_tDTST->m_bCreateControlPlots)
   {
-    TH1F* hHist = new TH1F(sName, sTitle, iBins, dXLow, dXUp);
+    auto hHist = std::make_unique<TH1F>(sName, sTitle, iBins, dXLow, dXUp);
     hHist->SetDirectory(0);
     return hHist;
   }

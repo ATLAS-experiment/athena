@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #include "RootVisualizationService.h"
 
@@ -61,7 +61,7 @@ namespace MuonValR4{
 
     std::shared_ptr<ICanvasObject> 
     RootVisualizationService::prepareCanvas(const EventContext& ctx, const ClientToken& token,
-                                            const std::string& canvasName){
+                                            const std::string& canvasName) {
         if (canvasName.empty()) {
             THROW_EXCEPTION("The canvas name must not be empty");
         }
@@ -72,7 +72,7 @@ namespace MuonValR4{
         }
         PlotsPerClient& dataHolder = store_itr->second;
         if (!dataHolder.elementsDrawn &&
-            cleanTrashed(dataHolder.toDraw) < store_itr->first.canvasLimit){
+            cleanTrashed(dataHolder.toDraw) < store_itr->first.canvasLimit) {
             const std::size_t evt = ctx.eventID().event_number();
             ATH_MSG_VERBOSE("Provide new canvas "<<canvasName<<" for stream "<<token.preFixName
                             <<" in "<<ctx.eventID());
@@ -80,8 +80,9 @@ namespace MuonValR4{
             newCanvas->setRangeScale(m_canvasExtraScale, m_quadCanvas);
             return newCanvas;
         } else if (!dataHolder.elementsDrawn) {
-            paintObjects(store_itr->first, std::move(dataHolder.toDraw));
             dataHolder.elementsDrawn = true;
+            lock_guard.unlock();
+            paintObjects(store_itr->first, std::move(dataHolder.toDraw));
         }
         ATH_MSG_VERBOSE("Maximum elements for "<<token.preFixName
                         <<" reached. Don't provide any new canvas");
@@ -145,14 +146,20 @@ namespace MuonValR4{
                     1, drawMe->corner(xLow), drawMe->corner(xHigh), 
                     1, drawMe->corner(yLow), drawMe->corner(yHigh));
             frameH->Draw("AXIS");
-            drawMe->add(drawAtlasLabel(0.65, 0.26, m_AtlasLabel));
-            drawMe->add(drawLumiSqrtS(0.65,0.21, m_sqrtSLabel, m_lumiLabel));
+
+            if (token.drawAtlas) {
+                drawMe->add(drawAtlasLabel(token.atlasLabelPos[0], token.atlasLabelPos[1], token.atlasLabel));
+            }
+            if (token.drawSqrtS) {
+                drawMe->add(drawLumiSqrtS(token.atlasLabelPos[0], token.atlasLabelPos[1] - 0.05, 
+                                          token.sqrtSLabel, token.lumiLabel));
+            }
             /// Draw the primitives
             for (auto& [primitive, opt] : drawMe->primitives()) {
                 primitive->Draw(opt.c_str());
             }
             /// Save the single plots
-            if (token.saveSinglePlots){
+            if (token.saveSinglePlots) {
                 for (const std::string& fileExt : token.fileFormats) {
                     if (fileExt != "root") {
                         ensureDirectory(plotName);

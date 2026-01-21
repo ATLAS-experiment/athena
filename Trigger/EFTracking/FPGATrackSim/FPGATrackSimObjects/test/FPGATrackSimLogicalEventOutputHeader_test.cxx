@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /*
@@ -10,7 +10,7 @@
 #include <iostream>
 #include <cassert>
 #include "FPGATrackSimObjects/FPGATrackSimLogicalEventOutputHeader.h"
-
+//coverity[UNCAUGHT_EXCEPT]
 int main(int, char**)
 {
   // some random values for checking things, just put them all up here
@@ -28,17 +28,16 @@ int main(int, char**)
 
   FPGATrackSimRoad road;
   road.setRoadID(roadid);
-  std::vector<std::shared_ptr<const FPGATrackSimRoad>> roadvec;
-  roadvec.emplace_back(std::make_shared<FPGATrackSimRoad>(road));
+  std::vector<FPGATrackSimRoad> roadvec;
+  roadvec.push_back(road);
 
   header.addFPGATrackSimTracks_1st(trackvec);
   header.addFPGATrackSimRoads_1st(roadvec);
   std::cout << "q/pt = " << header.getFPGATrackSimTracks_1st()[0].getQOverPt()  << " and chi2 = " << 
     header.getFPGATrackSimTracks_1st()[0].getChi2() << std::endl;
 
-  std::vector<std::shared_ptr<const FPGATrackSimRoad>> roads_1st;
-  header.getFPGATrackSimRoads_1st(roads_1st);
-  std::cout << "Road ID = " << roads_1st[0]->getRoadID() << std::endl;
+  const auto& roads_1st = header.getFPGATrackSimRoads_1st();
+  std::cout << "Road ID = " << roads_1st[0].getRoadID() << std::endl;
 
   return 0;
 

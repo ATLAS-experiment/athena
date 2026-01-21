@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
  */
 
 /* HLTMET Post Processing Method: In the HLT/MET[Mon/Mon_allCells/Mon_FEB]/DQPlots directory, there are
@@ -40,9 +40,9 @@ namespace dqutils {
   // Method to obtain summary DQFlags
   //---------------------------------------------------------------------------------------------------
   void MonitoringFile::HLTMETDQFlagSummary(TFile* f, TString& run_dir) {
-    bool dbgLevel = false;
+    //bool dbgLevel = false;
 
-    if (dbgLevel) std::cout << "--> HLTMETDQFlagSummary: Updating histograms in HLT/METMon*/DQPlots  " << std::endl;
+    //if (dbgLevel) std::cout << "--> HLTMETDQFlagSummary: Updating histograms in HLT/METMon*/DQPlots  " << std::endl;
 
     f->cd("/");
     TIter next_run(f->GetListOfKeys());
@@ -129,11 +129,11 @@ namespace dqutils {
           TString histL2C = (theDQPath + *itHist);
           TH1* hl2(0), *hl2c(0);
           if (!f->Get(histL2)) {
-            if (dbgLevel) std::cerr << "--> HLTMETDQFlagSummary: no histogram " << histL2 << std::endl;
+            //if (dbgLevel) std::cerr << "--> HLTMETDQFlagSummary: no histogram " << histL2 << std::endl;
             continue;
           }
           if (!f->Get(histL2C)) {
-            if (dbgLevel) std::cerr << "--> HLTMETDQFlagSummary: no histogram " << histL2C << std::endl;
+            //if (dbgLevel) std::cerr << "--> HLTMETDQFlagSummary: no histogram " << histL2C << std::endl;
             continue;
           }
           hl2 = (TH1*) (f->Get(histL2));
@@ -165,11 +165,11 @@ namespace dqutils {
           TString histEFC = (theDQPath + *itHist);
           TH1* hef(0), *hefc(0);
           if (!f->Get(histEF)) {
-            if (dbgLevel) std::cerr << "--> HLTMETDQFlagSummary: no histogram " << histEF << std::endl;
+            //if (dbgLevel) std::cerr << "--> HLTMETDQFlagSummary: no histogram " << histEF << std::endl;
             continue;
           }
           if (!f->Get(histEFC)) {
-            if (dbgLevel) std::cerr << "--> HLTMETDQFlagSummary: no histogram " << histEFC << std::endl;
+            //if (dbgLevel) std::cerr << "--> HLTMETDQFlagSummary: no histogram " << histEFC << std::endl;
             continue;
           }
           hef = (TH1*) (f->Get(histEF));
@@ -198,7 +198,7 @@ namespace dqutils {
           TString histLBN = theDQPath + lbn_dqhist;
           TH1* hlb(0);
           if (!f->Get(histLBN)) {
-            if (dbgLevel) std::cerr << "--> HLTMETDQFlagSummary: no histogram " << histLBN << std::endl;
+            //if (dbgLevel) std::cerr << "--> HLTMETDQFlagSummary: no histogram " << histLBN << std::endl;
             continue;
           }
           hlb = (TH1*) (f->Get(histLBN));
@@ -214,7 +214,7 @@ namespace dqutils {
             if (k > nbinx) continue;
             TString histLBstat = run_dir + TString("/") + *it + TString("/HLT") + (*itFex) + "/lbnstatus/EF_MET_status";
             if (!f->Get(histLBstat)) {
-              if (dbgLevel) std::cerr << "--> HLTMETDQFlagSummary: no histogram " << histLBstat << std::endl;
+              //if (dbgLevel) std::cerr << "--> HLTMETDQFlagSummary: no histogram " << histLBstat << std::endl;
               continue;
             }
             hlbstat = (TH1I*) (f->Get(histLBstat));
@@ -242,8 +242,8 @@ namespace dqutils {
 
     lbnDirs.clear();
 
-    bool dbgLevel = false;
-    if (dbgLevel) std::cout << "--> HLTMETGetDQLBNRange: lowStat_* directories: ";
+    //bool dbgLevel = false;
+    //if (dbgLevel) std::cout << "--> HLTMETGetDQLBNRange: lowStat_* directories: ";
     run_dir->cd();
 
     TIter next_lbn(run_dir->GetListOfKeys());
@@ -261,7 +261,7 @@ namespace dqutils {
       // std::endl;
     }
     unsigned int nLBNDirs = lbnDirs.size();
-    if (dbgLevel) std::cout << "found " << nLBNDirs << std::endl;
+    //if (dbgLevel) std::cout << "found " << nLBNDirs << std::endl;
     return nLBNDirs;
   } // end method MonitoringFile::HLTMETGetDQLBNRange
 

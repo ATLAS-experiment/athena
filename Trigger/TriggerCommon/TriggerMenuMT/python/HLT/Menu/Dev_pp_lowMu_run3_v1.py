@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 #------------------------------------------------------------------------#
 # Dev_pp_lowMu_run3_v1.py menu for Run 3 development
@@ -18,6 +18,7 @@ from .Physics_pp_run3_v1 import (
     PrimaryPhIGroup,
     SinglePhotonGroup,
     SingleJetGroup,
+    BphysicsGroup,
 )
 from .PhysicsP1_pp_lowMu_run3_v1 import (LowMuGroup, LowMuGroupPhI)
 
@@ -28,6 +29,18 @@ def getDevLowMuSignatures():
     chains['Muon'] += [
         # ATR-30691/ATR-30692: Oxygen runs
         ChainProp(name='HLT_mu3_L1MU3V', stream=['MinBias', 'express'], groups=SingleMuonGroup+SupportGroup, monGroups=['muonMon:shifter','muonMon:online']),
+    ]
+
+    chains['Bphysics'] += [
+        # ATR-32209: B -> h+h-
+        ChainProp(name='HLT_mu4_bBhh_L1MU3V', stream=['MinBias'], groups=BphysicsGroup+SingleMuonGroup),
+        ChainProp(name='HLT_mu6_bBhh_L1MU3V', stream=['MinBias'], groups=BphysicsGroup+SingleMuonGroup),
+        ChainProp(name='HLT_mu6_bBhh_L1MU5VF', stream=['MinBias'], groups=BphysicsGroup+SingleMuonGroup),
+        ChainProp(name='HLT_mu8_bBhh_L1MU5VF', stream=['MinBias'], groups=BphysicsGroup+SingleMuonGroup),
+        ChainProp(name='HLT_mu10_bBhh_L1MU8F', stream=['MinBias'], groups=BphysicsGroup+SingleMuonGroup),
+        ChainProp(name='HLT_mu12_bBhh_L1MU8F', stream=['MinBias'], groups=BphysicsGroup+SingleMuonGroup),
+        ChainProp(name='HLT_mu15_bBhh_L1MU8F', stream=['MinBias'], groups=BphysicsGroup+SingleMuonGroup),
+        ChainProp(name='HLT_mu15_bBhh_L1MU14FCH', stream=['MinBias'], groups=BphysicsGroup+SingleMuonGroup),
     ]
 
     chains['Egamma'] += [
@@ -109,9 +122,9 @@ def getDevLowMuSignatures():
     chains['MinBias'] += [
         # ATR-30691/ATR-30692: Oxygen runs
         ChainProp(name='HLT_mb_sptrk_L1MBTS_1_1_VjTE50', l1SeedThresholds=['FSNOSEED'], stream=['MinBias'], groups=MinBiasGroup+SupportGroup),
-        ChainProp(name='HLT_mb_sptrk_L1ZDC_OR_VjTE50',   l1SeedThresholds=['FSNOSEED'], stream=['MinBias'], groups=MinBiasGroup+SupportPhIGroup, monGroups=['mbMon:t0']),
+        # ChainProp(name='HLT_mb_sptrk_L1ZDC_OR_VjTE50',   l1SeedThresholds=['FSNOSEED'], stream=['MinBias'], groups=MinBiasGroup+SupportPhIGroup, monGroups=['mbMon:t0']),
         ChainProp(name='HLT_mb_sptrk_L1ZDC_A_C_VjTE50',  l1SeedThresholds=['FSNOSEED'], stream=['MinBias'], groups=MinBiasGroup+SupportPhIGroup),
-        ChainProp(name='HLT_mb_sptrk_L1ZDC_XOR_VjTE50',  l1SeedThresholds=['FSNOSEED'], stream=['MinBias'], groups=MinBiasGroup+SupportPhIGroup),
+        # ChainProp(name='HLT_mb_sptrk_L1ZDC_XOR_VjTE50',  l1SeedThresholds=['FSNOSEED'], stream=['MinBias'], groups=MinBiasGroup+SupportPhIGroup),
 
         ChainProp(name='HLT_mb_sptrk_L1TRT_VjTE50',         l1SeedThresholds=['FSNOSEED'], stream=['MinBias'], groups=MinBiasGroup+SupportPhIGroup),
         # ChainProp(name='HLT_mb_sptrk_L1TRT_ZDC_OR_VjTE50',  l1SeedThresholds=['FSNOSEED'], stream=['MinBias'], groups=MinBiasGroup+SupportPhIGroup, monGroups=['mbMon:t0']),

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigConfJobOptData/JobOption.h"
@@ -18,7 +18,6 @@
 #include "RelationalAccess/ICursor.h"
 #include "RelationalAccess/IQuery.h"
 
-#include "boost/lexical_cast.hpp"
 #include "boost/regex.hpp"
 
 #include <set>
@@ -323,7 +322,7 @@ namespace {
       // the last entries in the loop
       if(s!="") {
          s.erase(s.end()-1); // erase last comma
-         split.push_back( s );
+         split.push_back( std::move(s) );
       }
       
       return split;
@@ -518,7 +517,7 @@ TrigConf::JobOptionTableLoader::assembleSplitParameters2( JobOptionTable& jot, c
 
          const std::string& comp_alias = splitpar.alias;
          std::string par_name(matches[1].first, matches[1].second);
-         unsigned int pos = boost::lexical_cast<unsigned int,std::string>(string(matches[2].first, matches[2].second)) - 1;  // start with __IPC__01 
+         unsigned int pos = static_cast<unsigned int>(std::stoul(std::string(matches[2].first, matches[2].second))) - 1;  // start with __IPC__01 
 
          std::vector<std::string>& values = assembled_params[ AssembledPar(comp_alias, par_name) ];
 

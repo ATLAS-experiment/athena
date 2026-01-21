@@ -12,7 +12,6 @@
 #ifndef GLOBALSIM_EEMEGAMMA1ERATIOTOB_H
 #define GLOBALSIM_EEMEGAMMA1ERATIOTOB_H
 
-#include "IeEmEg1eRatioTOB.h"
 #include "eEmTOB.h"
 #include "AthenaKernel/CLASS_DEF.h"
 
@@ -20,7 +19,7 @@
 
 namespace GlobalSim::IOBitwise {
   /*! @copydoc IeEmEg1eRatioTOB */
-  class eEmEg1eRatioTOB : virtual public IeEmEg1eRatioTOB, private eEmTOB {
+  class eEmEg1eRatioTOB : public eEmTOB {
     
   public:
     /**
@@ -33,8 +32,13 @@ namespace GlobalSim::IOBitwise {
      * eGamma1 BDT result bits are set here, eFexRoI threshold bits are set in the eEmTOB
      * constructor, the CommonTOB constructor is used to initialise the common bits.
      */
+
+    
+    /// Count: Size of output bits of the eGamma1 eRatio algorithm
+    static const std::size_t s_eGamma1eRatio_width{11};
+    
     eEmEg1eRatioTOB(const xAOD::eFexEMRoI& eFexTOB,
-		 std::bitset<s_eGamma1eRatio_width> eGamma1eRatio_bits);
+		    std::bitset<s_eGamma1eRatio_width> eGamma1eRatio_bits);
 
     /**
      * @brief Constructor taking an eEmTOB and eGamma1 eRatio output bits to initialise bits..
@@ -46,17 +50,17 @@ namespace GlobalSim::IOBitwise {
      * eGamma1 eRatio result bits are set here, eFexRoI threshold bits are set in the eEmTOB 
      * constructor, the CommonTOB constructor is used to initialise the common bits.
      */
-    eEmEg1eRatioTOB(const IeEmTOB& eEmTOB,
+    eEmEg1eRatioTOB(const eEmTOB& eEmTOB,
 		    std::bitset<s_eGamma1eRatio_width> eGamma1eRatio_bits);
 
     //! @copydoc IeEmEg1eRatioTOB::~IeEmEg1eRatioTOB()
     virtual ~eEmEg1eRatioTOB(){};
 
     //! @copydoc IeEmEg1eRatioTOB::eGamma1eRatio_bits()
-    virtual std::bitset<s_eGamma1eRatio_width> eGamma1eRatio_bits() const override;
+    virtual std::bitset<s_eGamma1eRatio_width> eGamma1eRatio_bits() const;
 
     //! @copydoc IeEmEg1eRatioTOB::to_string()
-    virtual std::string to_string() const override;
+    virtual std::string to_string() const;
   private:
     // Property: Bitset to hold the eGamma1eRatio bits
     std::bitset<s_eGamma1eRatio_width> m_eGamma1eRatio_bits;

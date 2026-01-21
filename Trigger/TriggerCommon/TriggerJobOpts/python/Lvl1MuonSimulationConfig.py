@@ -216,10 +216,10 @@ def MuonRdo2DigitConfig(flags):
     sTGCRdoName = "sTGCRDO"+suffix
 
     if flags.Input.Format is Format.POOL:
-        rdoInputs = [
-            ('RpcPadContainer','RPCPAD'),
-            ('TgcRdoContainer','TGCRDO')
-        ]
+        rdoInputs = [('TgcRdoContainer','TGCRDO')]
+        
+        if 'RPCPAD' in flags.Input.Collections:
+            rdoInputs += [('RpcPadContainer','RPCPAD')]
         # Read MMRDO and sTGCRDO
         if flags.Detector.GeometrysTGC or flags.Detector.GeometryMM:
             rdoInputs += [
@@ -256,8 +256,8 @@ def NSWTriggerConfig(flags):
     if flags.Input.Format is Format.POOL and flags.Input.isMC:
         rdoInputs = [
             ('McEventCollection','TruthEvent'), # for MM trigger
+            *( [('MuonSimDataCollection','sTGC_SDO')] if not flags.Muon.usePhaseIIGeoSetup else [] ),     # for sTGC Pad trigger
             ('TrackRecordCollection','MuonEntryLayer'), # for MM trigger
-            ('MuonSimDataCollection','sTGC_SDO') # for sTGC Pad trigger
         ]
         from SGComps.SGInputLoaderConfig import SGInputLoaderCfg
         acc.merge(SGInputLoaderCfg(flags, Load=rdoInputs))

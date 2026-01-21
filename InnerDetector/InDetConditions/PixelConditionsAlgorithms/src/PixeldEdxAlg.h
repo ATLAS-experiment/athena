@@ -12,7 +12,7 @@
 #ifndef PIXELDEDXALG_H
 #define PIXELDEDXALG_H
 
-#include "AthenaBaseComps/AthAlgorithm.h"
+#include "AthenaBaseComps/AthCondAlgorithm.h"
 
 #include "StoreGate/ReadCondHandleKey.h"
 #include "AthenaPoolUtilities/AthenaAttributeList.h"
@@ -24,13 +24,13 @@
 
 #include "Gaudi/Property.h"
 
-class PixeldEdxAlg : public AthAlgorithm {  
+class PixeldEdxAlg : public AthCondAlgorithm {  
   public:
     PixeldEdxAlg(const std::string& name, ISvcLocator* pSvcLocator);
     virtual ~PixeldEdxAlg() = default;
 
     virtual StatusCode initialize() override;
-    virtual StatusCode execute() override;
+    virtual StatusCode execute(const EventContext& ctx) const override;
 
   private:
 

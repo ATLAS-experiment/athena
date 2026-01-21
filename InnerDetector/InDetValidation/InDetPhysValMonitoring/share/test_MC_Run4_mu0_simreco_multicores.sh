@@ -37,15 +37,19 @@ dcubemon_rdo=RDOAnalysis.root
 artdata=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art
 dcubecfg_sim=$artdata/InDetPhysValMonitoring/dcube/config/run4_SiHitValid.xml
 dcubecfg_rdo=$artdata/InDetPhysValMonitoring/dcube/config/run4_RDOAnalysis.xml
-dcubeshiftercfg_rec=$artdata/InDetPhysValMonitoring/dcube/config/IDPVMPlots_mc_baseline.xml
-dcubeexpertcfg_rec=$artdata/InDetPhysValMonitoring/dcube/config/IDPVMPlots_mc_expert.xml
+
 art_dcube=$ATLAS_LOCAL_ROOT/dcube/current/DCubeClient/python/dcube.py
 
 lastref_dir=last_results
+dcubeXml=dcube_ART_IDPVMPlots_ITk.xml
 
 sim_tf_exit_code=0
 rdoana_tf_exit_code=0
 idpvm_tf_exit_code=0
+
+
+# search in $DATAPATH for matching file
+dcubeshiftercfg_rec=$(find -H ${DATAPATH//:/ } -mindepth 1 -maxdepth 1 -name $dcubeXml -print -quit 2>/dev/null)
 
 # Don't run if dcube config not found
 if [ -z "$dcubeshiftercfg_rec" ]; then
@@ -127,19 +131,6 @@ case $ArtProcess in
           ${dcubemon_rec}
         echo "art-result: $? dcube_rec_last"
 
-        $ATLAS_LOCAL_ROOT/dcube/current/DCubeClient/python/dcube.py \
-          -p -x ${dcube_rec_expert_fixref} \
-          -c ${dcubeexpertcfg_rec} \
-          -r ${dcuberef_rec} \
-          ${dcubemon_rec}
-
-        $ATLAS_LOCAL_ROOT/dcube/current/DCubeClient/python/dcube.py \
-          -p -x ${dcube_rec_expert_lastref} \
-          -c ${dcubeexpertcfg_rec} \
-          -r ${lastref_dir}/${dcubemon_rec} \
-          ${dcubemon_rec}
-
-        echo "art-result: $? dcube_rec_last"
     fi
     ;;
   *)
@@ -164,8 +155,8 @@ case $ArtProcess in
 	--preExec "default:flags.Output.HISTFileName='${dcubemon_sim}';" \
 	--postInclude 'default:PyJobTransforms.UseFrontier' 'HitAnalysis.PostIncludes.ITkHitAnalysis'\
 	--preInclude 'EVNTtoHITS:Campaigns.PhaseIISimulation' \
-	--geometryVersion "default:${geometry}" \
-	--inputEVNTFile ${ArtInFile} \
+	--geometryVersion "default:${geotag}" \
+	--inputEVNTFile $x \
 	--outputHITSFile $hits \
 	--maxEvents ${maxEvents} \
 	--imf False
@@ -179,7 +170,6 @@ case $ArtProcess in
         run Digi_tf.py \
 	    --conditionsTag "default:${conditionsTag}" \
 	    --digiSeedOffset1 170 --digiSeedOffset2 170 \
-	    --geometryVersion "default:${geometry}" \
 	    --inputHITSFile $hits \
 	    --jobNumber 568 \
 	    --maxEvents -1 \

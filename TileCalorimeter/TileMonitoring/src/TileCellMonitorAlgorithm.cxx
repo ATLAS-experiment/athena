@@ -14,6 +14,7 @@
 #include "StoreGate/ReadCondHandle.h"
 #include "AthenaKernel/Units.h"
 #include "CxxUtils/trapping_fp.h"
+#include <stdexcept>
 
 using Athena::Units::GeV;
 using Athena::Units::ns;
@@ -163,21 +164,21 @@ StatusCode TileCellMonitorAlgorithm::fillHistograms( const EventContext& ctx ) c
   std::vector<int> timeBalModPartModule;
   std::vector<int> timeBalModPartPartition;
 
-  double energySample[MAX_PART][MAX_SAMP] = {{0.}};
-  int nCells[MAX_PART] = {0};
-  int nBadCells[MAX_PART] = {0};
+  double energySample[MAX_PART][MAX_SAMP]{};
+  int nCells[MAX_PART]{};
+  int nBadCells[MAX_PART]{};
 
   // Arrays for BCID plots
-  int nCellsOverThreshold[MAX_PART] = {0};
+  int nCellsOverThreshold[MAX_PART]{};
 
   // Number of channels masked on the fly
-  int nBadChannelsOnFly[MAX_PART] = {0};
+  int nBadChannelsOnFly[MAX_PART]{};
 
   // Number of channels masked on the fly due to bad DQ status
-  unsigned int nMaskedChannelsDueDQ[MAX_PART] = { 0 };
+  unsigned int nMaskedChannelsDueDQ[MAX_PART]{};
 
   // Number of cells masked on the fly due to bad DQ status
-  unsigned int nMaskedCellsDueDQ[MAX_PART] = { 0 };
+  unsigned int nMaskedCellsDueDQ[MAX_PART]{};
 
   std::vector<int> negOccupModule[Tile::MAX_ROS - 1];
   std::vector<int> negOccupChannel[Tile::MAX_ROS - 1];
@@ -307,8 +308,9 @@ StatusCode TileCellMonitorAlgorithm::fillHistograms( const EventContext& ctx ) c
       // Note that drawer from HWID and module from ID are different for E3 cells near MBTS
       int module = m_tileID->module(id); // Range from 0-63
 
-      // int samp = std::min(m_tileID->sample(id),(int)AllSamp);
       int sample = m_tileID->sample(id);
+      // Skip special-purpose samplings used for Cs calibration.
+      if (sample >= SAMP_ALL) continue;
 
       bool single_PMT_scin = (sample == TileID::SAMP_E);
       bool single_PMT_C10 = (m_tileID->section(id) == TileID::GAPDET
@@ -318,7 +320,7 @@ StatusCode TileCellMonitorAlgorithm::fillHistograms( const EventContext& ctx ) c
       // Distinguish cells with one or two PMTs
       bool single_PMT = single_PMT_C10 || single_PMT_scin;
 
-      // Distinguish normal cells and fantoms (e.g. non-existing D4 in EBA15, EBC18
+      // Distinguish normal cells and phantoms (e.g. non-existing D4 in EBA15, EBC18
       // or non-existing E3/E4 - they might appear in CaloCellContainer)
       bool realCell  = single_PMT_C10 || m_cabling->TileGap_connected(id);
 
@@ -352,10 +354,13 @@ StatusCode TileCellMonitorAlgorithm::fillHistograms( const EventContext& ctx ) c
         }
         if (m_fillGapScintHistograms) {
           if (energy > m_energyThresholdForGapScint) {
-            int gapScintIdx = gapScintIndex[tower - 10];
-            unsigned int partition = (ros1 > 0) ? ros1 - 3 : ros2 - 3;
-            auto monEnergy = Monitored::Scalar<float>("energy", energy);
-            fill(m_tools[m_energyGapScintGroups[partition][drawer][gapScintIdx]], monEnergy);
+            int idx = tower - 10;
+            if (idx >= 0 && idx < static_cast<int>(std::size(gapScintIndex))) {
+              int gapScintIdx = gapScintIndex[idx];
+              unsigned int partition = (ros1 > 0) ? ros1 - 3 : ros2 - 3;
+              auto monEnergy = Monitored::Scalar<float>("energy", energy);
+              fill(m_tools[m_energyGapScintGroups[partition][drawer][gapScintIdx]], monEnergy);
+            }
           }
         }
       }
@@ -467,7 +472,6 @@ StatusCode TileCellMonitorAlgorithm::fillHistograms( const EventContext& ctx ) c
               && (time != 0)) { // Cell has reconstructed time
             muonCells.push_back(cell);
           }
-
           occupEta[sample].push_back(eta);
           occupPhi[sample].push_back(phi);
           occupEnergy[sample].push_back(energy);
@@ -646,17 +650,21 @@ StatusCode TileCellMonitorAlgorithm::fillHistograms( const EventContext& ctx ) c
             moduleCorr[PART_ALL].inputxy(module);
           }
 
-          // Store info for BCID plots.
-          // Count the number of cells over threshold per partition
-          ++nCellsOverThreshold[partition1];
+          if (partition1 >= 0) {
+            // Store info for BCID plots.
+            // Count the number of cells over threshold per partition
+            ++nCellsOverThreshold[partition1];
+          }
         }
       }
 
-      // Count total number of cells in a partition
-      ++nCells[partition1];
+      if (partition1 >= 0) {
+        // Count total number of cells in a partition
+        ++nCells[partition1];
 
-      // Accumulate total energy per sample per partition
-      energySample[partition1][sample] += energy;
+        // Accumulate total energy per sample per partition
+        energySample[partition1][sample] += energy;
+      }
     }
   }
 
@@ -990,13 +998,16 @@ void TileCellMonitorAlgorithm::fillMaskedInDB(const TileBadChannels* badChannels
 
     if (badChannels->getAdcStatus(adc_id).isBad()) {
 
-      unsigned int partition = m_tileHWID->ros(adc_id) - 1; // ROS - 1
-      unsigned int drawer = m_tileHWID->drawer(adc_id);
-      unsigned int channel = m_tileHWID->channel(adc_id);
-      unsigned int adc = m_tileHWID->adc(adc_id);
+      unsigned int partition = m_tileHWID->ros(adc_id);
+      if (partition > 0) {
+        partition -= 1; // ROS - 1
+        unsigned int drawer = m_tileHWID->drawer(adc_id);
+        unsigned int channel = m_tileHWID->channel(adc_id);
+        unsigned int adc = m_tileHWID->adc(adc_id);
 
-      drawers[partition][adc].push_back(drawer);
-      channels[partition][adc].push_back(channel);
+        drawers[partition][adc].push_back(drawer);
+        channels[partition][adc].push_back(channel);
+      }
 
     }
   }

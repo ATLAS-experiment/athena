@@ -1,13 +1,13 @@
 # Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 from AthenaCommon import Logging
-from ..powheg_V2 import PowhegV2
+from ..powheg_RES import PowhegRES
 
 ## Get handle to Athena logging
 logger = Logging.logging.getLogger("PowhegControl")
 
 
-class Wc(PowhegV2):
+class Wc(PowhegRES):
     """! Default Powheg configuration for single W-boson production plus one jet.
 
     Create a configurable object with all applicable Powheg options.
@@ -33,6 +33,9 @@ class Wc(PowhegV2):
         # Add all keywords for this process, overriding defaults if required
         self.add_keyword("alphaem")
         self.add_keyword("alphas_from_lhapdf")
+        self.add_keyword("alphas_from_pdf")
+        self.add_keyword("cmass")
+        self.add_keyword("bmass")
         self.add_keyword("bornktmin", 5.0)
         self.add_keyword("bornonly")
         self.add_keyword("bornsuppfact")
@@ -76,6 +79,7 @@ class Wc(PowhegV2):
         self.add_keyword("frensc2min")
         self.add_keyword("fullrwgt")
         self.add_keyword("fullrwgtmode")
+        self.add_keyword("gfermi")
         self.add_keyword("hdamp")
         self.add_keyword("hfact")
         self.add_keyword("icsimax")
@@ -103,7 +107,6 @@ class Wc(PowhegV2):
         self.add_keyword("maxseeds")
         self.add_keyword("min_W_mass", 2.5)
         self.add_keyword("minlo_nnll")
-        self.add_keyword("minlo", 1)
         self.add_keyword("mintupbratlim")
         self.add_keyword("mintupbxless")
         self.add_keyword("ncall1", 20000)
@@ -159,6 +162,11 @@ class Wc(PowhegV2):
         self.add_keyword("xupbound", 6)
         self.add_keyword("Zmass")
         self.add_keyword("Zwidth")
+        self.add_keyword("wmasslow")
+        self.add_keyword("wmasshigh")
+        self.add_keyword("wmass")
+        self.add_keyword("wwidth")
+        self.add_keyword("zmass")
 
     def validate_decays(self):
         """! Validate idvecbos and vdecaymode keywords."""

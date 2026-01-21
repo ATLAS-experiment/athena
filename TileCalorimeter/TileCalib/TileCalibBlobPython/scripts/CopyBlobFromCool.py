@@ -2,7 +2,7 @@
 
 # Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 #
-# CopyBlobFromCool.py
+# File:    CopyBlobFromCool.py
 # Sanya Solodkov <Sanya.Solodkov@cern.ch>, 2025-02-04
 #
 # Purpose: Read blobs from COOL and write them to JSON file

@@ -110,9 +110,8 @@ StatusCode MuFastSteering::initialize()
   ATH_MSG_DEBUG("Multi-TrackMode: " << m_multiTrack << "/ run for endcap RoI -> " << m_doEndcapForl2mt);
 
   //
-  // Initialize the calibration streamer  
-  // 
-  
+  // Initialize the calibration streamer
+  ATH_CHECK(m_calStreamer.retrieve(EnableTool(m_doCalStream)));
   if (m_doCalStream) {
     ATH_CHECK(m_jobOptionsSvc.retrieve());
 
@@ -132,8 +131,6 @@ StatusCode MuFastSteering::initialize()
       ATH_MSG_DEBUG("Could not parse MuonHltCalibrationConfig.MuonCalBufferSize from JobOptionsSvc");
     }
     
-    // retrieve the calibration streamer
-    ATH_CHECK(m_calStreamer.retrieve());
     // set properties
     m_calStreamer->setBufferName(m_calBufferName);
     ATH_MSG_DEBUG("Initialized the Muon Calibration Streamer. Buffer name: " << m_calBufferName 
@@ -1575,7 +1572,7 @@ bool MuFastSteering::storeMuonSA(const xAOD::MuonRoI*                roi,
       mdtId.push_back(mdtHit.Id.getString());
     }
   }
-  SG::AuxElement::Accessor< std::vector<std::string> > accessor_mdthitid( "mdtHitId" );
+  static const SG::Accessor< std::vector<std::string> > accessor_mdthitid( "mdtHitId" );
   accessor_mdthitid( *muonSA ) = mdtId;
 
   //CSC hits
@@ -1609,7 +1606,7 @@ bool MuFastSteering::storeMuonSA(const xAOD::MuonRoI*                roi,
       }
     }
   }
-  SG::AuxElement::Accessor< std::vector<float> > accessor_cschitresol( "cscHitResolution" );
+  static const SG::Accessor< std::vector<float> > accessor_cschitresol( "cscHitResolution" );
   accessor_cschitresol( *muonSA ) = cscResol;
 
   // RPC hits
@@ -2133,15 +2130,6 @@ StatusCode MuFastSteering::updateMonitor(const xAOD::MuonRoI*                   
   std::vector<float> r_inner, r_middle, r_outer;
   std::vector<float> f_residuals;
 
-  t_eta.clear();
-  t_phi.clear();
-  f_eta.clear();
-  f_phi.clear();
-  r_inner.clear();
-  r_middle.clear();
-  r_outer.clear();
-  f_residuals.clear();
-
   auto track_eta	= Monitored::Collection("TrackEta", t_eta);
   auto track_phi	= Monitored::Collection("TrackPhi", t_phi);
   auto failed_eta	= Monitored::Collection("FailedRoIEta", f_eta);
@@ -2159,7 +2147,7 @@ StatusCode MuFastSteering::updateMonitor(const xAOD::MuonRoI*                   
 
   const float ZERO_LIMIT = 1e-5;
 
-  if( trackPatterns.size() > 0 ) {
+  if( !trackPatterns.empty() ) {
 
     efficiency  = 1;
 
@@ -2218,6 +2206,3 @@ StatusCode MuFastSteering::updateMonitor(const xAOD::MuonRoI*                   
 
   return StatusCode::SUCCESS;
 }
-
-
-

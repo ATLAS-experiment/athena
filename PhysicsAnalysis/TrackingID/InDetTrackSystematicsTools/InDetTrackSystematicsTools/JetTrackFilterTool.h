@@ -1,6 +1,6 @@
 // -*- c++ -*-
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef INDETTRACKSYSTEMATICSTOOLS_JETTRACKFILTERTOOL_H
@@ -45,6 +45,8 @@ namespace InDet {
     // create constructor for standalone Root
     JetTrackFilterTool( const std::string& name );
 
+    virtual ~JetTrackFilterTool();
+
     //  static const InterfaceID& interfaceID();
     virtual StatusCode initialize() override;
     virtual void prepare() override {};
@@ -68,7 +70,7 @@ namespace InDet {
 
     Gaudi::Property<int> m_seed{this, "Seed", 0,
       "Seed used to initialize the RNG"};
-    std::unique_ptr<TRandom3> m_rnd = nullptr; //!
+    std::unique_ptr<TRandom3> m_rnd; //!
     Gaudi::Property<double> m_deltaR{this, "DeltaR", 0.1,
       "Delta-R cut in which to apply jet-track efficiency rejection"};
     Gaudi::Property<double> m_minJetPt{this, "minJetPt", 200000.,

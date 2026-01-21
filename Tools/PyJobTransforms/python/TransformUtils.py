@@ -134,7 +134,7 @@ def SortInput(flags, cfg):
     sortTag     = locals().get("AthenaInputSortTag",      "LumiBlockN")
     sortOrd     = locals().get("AthenaInputSortOrder",    "Ascending")
 
-    from CollectionUtilities.SortedCollectionCreator import SortedCollectionCreator
+    from CollectionSvc.SortedCollectionCreator import SortedCollectionCreator
     sorter = SortedCollectionCreator(name="SortEvents")
     # Sort Inputs based on one of the EventInfoTag attributes
     # Store sorted event collection in a temporary file
@@ -149,6 +149,8 @@ def SortInput(flags, cfg):
     # Reading Events through References require a populated FileCatalog
     for inpfile in inputs:
         os.system('pool_insertFileToCatalog {}'.format(inpfile))
+
+    cfg.getService("PoolSvc").AttemptCatalogPatch = False
 
     # Tell Athena to use the sorted collection instead of the original inputs
     cfg.getService("EventSelector").InputCollections = [tmpCollFile + ".root"]

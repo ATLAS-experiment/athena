@@ -16,10 +16,12 @@ TagInfoMgr                                          DEBUG removeTagFromInput - a
 TagInfoMgr                                          DEBUG removeTagFromInput - adding tag name to be removed: /TILE/OFL02/CALIB/LAS/LIN
 TagInfoMgr                                          DEBUG removeTagFromInput - adding tag name to be removed: /TILE/OFL02/CALIB/LAS/NLN
 TagInfoMgr                                          DEBUG removeTagFromInput - adding tag name to be removed: /TagInfo
+TagInfoMgr                                          DEBUG addTag - adding name/value pairs: GeoAtlas ATLAS-R2-2016-01-00-01
 EventInfoWriter                                     DEBUG EventInfoWriter::initialize()
 EventInfoWriter                                     DEBUG CreateDummyTags          'CreateDummyTags':False
 EventInfoWriter                                     DEBUG RemoveDummyTags          'RemoveDummyTags':False
 EventInfoWriter                                     DEBUG CreateDummyOverrideTags  'CreateDummyOverrideTags':False
+TagInfoMgr                                          DEBUG addTag - adding name/value pairs: EventInfoWriterTag EIW-00-00-01
 EventInfoWriter                                     DEBUG Added tag to TagInfoMgr
 EventInfoWriter                                     DEBUG EventInfoWriter::fillTagInfo()
 EventInfoWriter                                     DEBUG Called fillTagInfo
@@ -40,6 +42,10 @@ TagInfoMgr                                          DEBUG fillTagInfo: Did NOT a
 TagInfoMgr                                          DEBUG fillTagInfo: Added value/tag to TagInfo as input tag /LAR/Identifier/FebRodMap LARIdentifierFebRodMap-005
 TagInfoMgr                                          DEBUG fillTagInfo: Did NOT add tag - on remove list: name/tag: /LAR/Identifier/OnOffIdMap LARIdentifierOnOffIdMap-012
 TagInfoMgr                                          DEBUG fillTagInfo: Added value/tag to TagInfo as input tag /LAR/Identifier/OnOffIdMap LARIdentifierOnOffIdMap-012
+TagInfoMgr                                          DEBUG fillTagInfo: Added name/tag to TagInfo EventInfoWriterTag EIW-00-00-01
+TagInfoMgr                                          DEBUG fillTagInfo: Added value/tag to TagInfo as input tag EventInfoWriterTag EIW-00-00-01
+TagInfoMgr                                          DEBUG fillTagInfo: Added name/tag to TagInfo GeoAtlas ATLAS-R2-2016-01-00-01
+TagInfoMgr                                          DEBUG fillTagInfo: Added value/tag to TagInfo as input tag GeoAtlas ATLAS-R2-2016-01-00-01
 TagInfoMgr                                          DEBUG fillTagInfo: Added name/tag to TagInfo IOVDbGlobalTag OFLCOND-SDR-BS14T-IBL-06
 TagInfoMgr                                          DEBUG fillTagInfo: Added value/tag to TagInfo as input tag IOVDbGlobalTag OFLCOND-SDR-BS14T-IBL-06
 TagInfoMgr                                          DEBUG fillTagInfo: print out tags before adding extra tags
@@ -47,6 +53,8 @@ TagInfoMgr                                          DEBUG TagInfo tag:
 TagInfoMgr                                          DEBUG fillTagInfo: Adding extra value/tag pair: /LAR/Identifier/CalibIdMap LARIdentifierCalibIdMap-012
 TagInfoMgr                                          DEBUG fillTagInfo: Adding extra value/tag pair: /LAR/Identifier/FebRodMap LARIdentifierFebRodMap-005
 TagInfoMgr                                          DEBUG fillTagInfo: Adding extra value/tag pair: /LAR/Identifier/OnOffIdMap LARIdentifierOnOffIdMap-012
+TagInfoMgr                                          DEBUG fillTagInfo: Adding extra value/tag pair: EventInfoWriterTag EIW-00-00-01
+TagInfoMgr                                          DEBUG fillTagInfo: Adding extra value/tag pair: GeoAtlas ATLAS-R2-2016-01-00-01
 TagInfoMgr                                          DEBUG fillTagInfo: Adding extra value/tag pair: IOVDbGlobalTag OFLCOND-SDR-BS14T-IBL-06
 TagInfoMgr                                          DEBUG fillTagInfo: print out tags
 TagInfoMgr                                          DEBUG TagInfo tag: 
@@ -56,6 +64,8 @@ TagInfoMgr                                          DEBUG fillMetaData: Adding v
 TagInfoMgr                                          DEBUG /LAR/Identifier/CalibIdMap LARIdentifierCalibIdMap-012
 TagInfoMgr                                          DEBUG /LAR/Identifier/FebRodMap LARIdentifierFebRodMap-005
 TagInfoMgr                                          DEBUG /LAR/Identifier/OnOffIdMap LARIdentifierOnOffIdMap-012
+TagInfoMgr                                          DEBUG EventInfoWriterTag EIW-00-00-01
+TagInfoMgr                                          DEBUG GeoAtlas ATLAS-R2-2016-01-00-01
 TagInfoMgr                                          DEBUG IOVDbGlobalTag OFLCOND-SDR-BS14T-IBL-06
 TagInfoMgr                                          DEBUG IOV minRange from IOVMetaData: {[1,0] - [3,0]}
 TagInfoMgr                                          DEBUG fillMetaData: run number is in previous IOVRange: 1 {[1,0] - [3,0]}
@@ -71,11 +81,15 @@ EventInfoWriter                                     DEBUG Current tags:
 EventInfoWriter                                     DEBUG     /LAR/Identifier/CalibIdMap LARIdentifierCalibIdMap-012
 EventInfoWriter                                     DEBUG     /LAR/Identifier/FebRodMap LARIdentifierFebRodMap-005
 EventInfoWriter                                     DEBUG     /LAR/Identifier/OnOffIdMap LARIdentifierOnOffIdMap-012
+EventInfoWriter                                     DEBUG     EventInfoWriterTag EIW-00-00-01
+EventInfoWriter                                     DEBUG     GeoAtlas ATLAS-R2-2016-01-00-01
 EventInfoWriter                                     DEBUG     IOVDbGlobalTag OFLCOND-SDR-BS14T-IBL-06
 EventInfoWriter                                     DEBUG Input tags: 
 EventInfoWriter                                     DEBUG     /LAR/Identifier/CalibIdMap LARIdentifierCalibIdMap-012
 EventInfoWriter                                     DEBUG     /LAR/Identifier/FebRodMap LARIdentifierFebRodMap-005
 EventInfoWriter                                     DEBUG     /LAR/Identifier/OnOffIdMap LARIdentifierOnOffIdMap-012
+EventInfoWriter                                     DEBUG     EventInfoWriterTag EIW-00-00-01
+EventInfoWriter                                     DEBUG     GeoAtlas ATLAS-R2-2016-01-00-01
 EventInfoWriter                                     DEBUG     IOVDbGlobalTag OFLCOND-SDR-BS14T-IBL-06
 EventInfoWriter                                     DEBUG EventInfoWriter::execute()
 EventInfoWriter                                     DEBUG Event ID: [1,4294967297:5] 
@@ -85,11 +99,15 @@ EventInfoWriter                                     DEBUG Current tags:
 EventInfoWriter                                     DEBUG     /LAR/Identifier/CalibIdMap LARIdentifierCalibIdMap-012
 EventInfoWriter                                     DEBUG     /LAR/Identifier/FebRodMap LARIdentifierFebRodMap-005
 EventInfoWriter                                     DEBUG     /LAR/Identifier/OnOffIdMap LARIdentifierOnOffIdMap-012
+EventInfoWriter                                     DEBUG     EventInfoWriterTag EIW-00-00-01
+EventInfoWriter                                     DEBUG     GeoAtlas ATLAS-R2-2016-01-00-01
 EventInfoWriter                                     DEBUG     IOVDbGlobalTag OFLCOND-SDR-BS14T-IBL-06
 EventInfoWriter                                     DEBUG Input tags: 
 EventInfoWriter                                     DEBUG     /LAR/Identifier/CalibIdMap LARIdentifierCalibIdMap-012
 EventInfoWriter                                     DEBUG     /LAR/Identifier/FebRodMap LARIdentifierFebRodMap-005
 EventInfoWriter                                     DEBUG     /LAR/Identifier/OnOffIdMap LARIdentifierOnOffIdMap-012
+EventInfoWriter                                     DEBUG     EventInfoWriterTag EIW-00-00-01
+EventInfoWriter                                     DEBUG     GeoAtlas ATLAS-R2-2016-01-00-01
 EventInfoWriter                                     DEBUG     IOVDbGlobalTag OFLCOND-SDR-BS14T-IBL-06
 EventInfoWriter                                     DEBUG EventInfoWriter::execute()
 EventInfoWriter                                     DEBUG Event ID: [1,4294967298:10] 
@@ -99,11 +117,15 @@ EventInfoWriter                                     DEBUG Current tags:
 EventInfoWriter                                     DEBUG     /LAR/Identifier/CalibIdMap LARIdentifierCalibIdMap-012
 EventInfoWriter                                     DEBUG     /LAR/Identifier/FebRodMap LARIdentifierFebRodMap-005
 EventInfoWriter                                     DEBUG     /LAR/Identifier/OnOffIdMap LARIdentifierOnOffIdMap-012
+EventInfoWriter                                     DEBUG     EventInfoWriterTag EIW-00-00-01
+EventInfoWriter                                     DEBUG     GeoAtlas ATLAS-R2-2016-01-00-01
 EventInfoWriter                                     DEBUG     IOVDbGlobalTag OFLCOND-SDR-BS14T-IBL-06
 EventInfoWriter                                     DEBUG Input tags: 
 EventInfoWriter                                     DEBUG     /LAR/Identifier/CalibIdMap LARIdentifierCalibIdMap-012
 EventInfoWriter                                     DEBUG     /LAR/Identifier/FebRodMap LARIdentifierFebRodMap-005
 EventInfoWriter                                     DEBUG     /LAR/Identifier/OnOffIdMap LARIdentifierOnOffIdMap-012
+EventInfoWriter                                     DEBUG     EventInfoWriterTag EIW-00-00-01
+EventInfoWriter                                     DEBUG     GeoAtlas ATLAS-R2-2016-01-00-01
 EventInfoWriter                                     DEBUG     IOVDbGlobalTag OFLCOND-SDR-BS14T-IBL-06
 EventInfoWriter                                     DEBUG EventInfoWriter::execute()
 EventInfoWriter                                     DEBUG Event ID: [1,4294967299:15] 
@@ -113,11 +135,15 @@ EventInfoWriter                                     DEBUG Current tags:
 EventInfoWriter                                     DEBUG     /LAR/Identifier/CalibIdMap LARIdentifierCalibIdMap-012
 EventInfoWriter                                     DEBUG     /LAR/Identifier/FebRodMap LARIdentifierFebRodMap-005
 EventInfoWriter                                     DEBUG     /LAR/Identifier/OnOffIdMap LARIdentifierOnOffIdMap-012
+EventInfoWriter                                     DEBUG     EventInfoWriterTag EIW-00-00-01
+EventInfoWriter                                     DEBUG     GeoAtlas ATLAS-R2-2016-01-00-01
 EventInfoWriter                                     DEBUG     IOVDbGlobalTag OFLCOND-SDR-BS14T-IBL-06
 EventInfoWriter                                     DEBUG Input tags: 
 EventInfoWriter                                     DEBUG     /LAR/Identifier/CalibIdMap LARIdentifierCalibIdMap-012
 EventInfoWriter                                     DEBUG     /LAR/Identifier/FebRodMap LARIdentifierFebRodMap-005
 EventInfoWriter                                     DEBUG     /LAR/Identifier/OnOffIdMap LARIdentifierOnOffIdMap-012
+EventInfoWriter                                     DEBUG     EventInfoWriterTag EIW-00-00-01
+EventInfoWriter                                     DEBUG     GeoAtlas ATLAS-R2-2016-01-00-01
 EventInfoWriter                                     DEBUG     IOVDbGlobalTag OFLCOND-SDR-BS14T-IBL-06
 EventInfoWriter                                     DEBUG EventInfoWriter::execute()
 EventInfoWriter                                     DEBUG Event ID: [1,4294967300:20] 
@@ -127,11 +153,15 @@ EventInfoWriter                                     DEBUG Current tags:
 EventInfoWriter                                     DEBUG     /LAR/Identifier/CalibIdMap LARIdentifierCalibIdMap-012
 EventInfoWriter                                     DEBUG     /LAR/Identifier/FebRodMap LARIdentifierFebRodMap-005
 EventInfoWriter                                     DEBUG     /LAR/Identifier/OnOffIdMap LARIdentifierOnOffIdMap-012
+EventInfoWriter                                     DEBUG     EventInfoWriterTag EIW-00-00-01
+EventInfoWriter                                     DEBUG     GeoAtlas ATLAS-R2-2016-01-00-01
 EventInfoWriter                                     DEBUG     IOVDbGlobalTag OFLCOND-SDR-BS14T-IBL-06
 EventInfoWriter                                     DEBUG Input tags: 
 EventInfoWriter                                     DEBUG     /LAR/Identifier/CalibIdMap LARIdentifierCalibIdMap-012
 EventInfoWriter                                     DEBUG     /LAR/Identifier/FebRodMap LARIdentifierFebRodMap-005
 EventInfoWriter                                     DEBUG     /LAR/Identifier/OnOffIdMap LARIdentifierOnOffIdMap-012
+EventInfoWriter                                     DEBUG     EventInfoWriterTag EIW-00-00-01
+EventInfoWriter                                     DEBUG     GeoAtlas ATLAS-R2-2016-01-00-01
 EventInfoWriter                                     DEBUG     IOVDbGlobalTag OFLCOND-SDR-BS14T-IBL-06
 EventInfoWriter                                     DEBUG EventInfoWriter::execute()
 EventInfoWriter                                     DEBUG Event ID: [1,4294967301:25] 
@@ -141,11 +171,15 @@ EventInfoWriter                                     DEBUG Current tags:
 EventInfoWriter                                     DEBUG     /LAR/Identifier/CalibIdMap LARIdentifierCalibIdMap-012
 EventInfoWriter                                     DEBUG     /LAR/Identifier/FebRodMap LARIdentifierFebRodMap-005
 EventInfoWriter                                     DEBUG     /LAR/Identifier/OnOffIdMap LARIdentifierOnOffIdMap-012
+EventInfoWriter                                     DEBUG     EventInfoWriterTag EIW-00-00-01
+EventInfoWriter                                     DEBUG     GeoAtlas ATLAS-R2-2016-01-00-01
 EventInfoWriter                                     DEBUG     IOVDbGlobalTag OFLCOND-SDR-BS14T-IBL-06
 EventInfoWriter                                     DEBUG Input tags: 
 EventInfoWriter                                     DEBUG     /LAR/Identifier/CalibIdMap LARIdentifierCalibIdMap-012
 EventInfoWriter                                     DEBUG     /LAR/Identifier/FebRodMap LARIdentifierFebRodMap-005
 EventInfoWriter                                     DEBUG     /LAR/Identifier/OnOffIdMap LARIdentifierOnOffIdMap-012
+EventInfoWriter                                     DEBUG     EventInfoWriterTag EIW-00-00-01
+EventInfoWriter                                     DEBUG     GeoAtlas ATLAS-R2-2016-01-00-01
 EventInfoWriter                                     DEBUG     IOVDbGlobalTag OFLCOND-SDR-BS14T-IBL-06
 EventInfoWriter                                     DEBUG EventInfoWriter::execute()
 EventInfoWriter                                     DEBUG Event ID: [1,4294967302:30] 
@@ -155,11 +189,15 @@ EventInfoWriter                                     DEBUG Current tags:
 EventInfoWriter                                     DEBUG     /LAR/Identifier/CalibIdMap LARIdentifierCalibIdMap-012
 EventInfoWriter                                     DEBUG     /LAR/Identifier/FebRodMap LARIdentifierFebRodMap-005
 EventInfoWriter                                     DEBUG     /LAR/Identifier/OnOffIdMap LARIdentifierOnOffIdMap-012
+EventInfoWriter                                     DEBUG     EventInfoWriterTag EIW-00-00-01
+EventInfoWriter                                     DEBUG     GeoAtlas ATLAS-R2-2016-01-00-01
 EventInfoWriter                                     DEBUG     IOVDbGlobalTag OFLCOND-SDR-BS14T-IBL-06
 EventInfoWriter                                     DEBUG Input tags: 
 EventInfoWriter                                     DEBUG     /LAR/Identifier/CalibIdMap LARIdentifierCalibIdMap-012
 EventInfoWriter                                     DEBUG     /LAR/Identifier/FebRodMap LARIdentifierFebRodMap-005
 EventInfoWriter                                     DEBUG     /LAR/Identifier/OnOffIdMap LARIdentifierOnOffIdMap-012
+EventInfoWriter                                     DEBUG     EventInfoWriterTag EIW-00-00-01
+EventInfoWriter                                     DEBUG     GeoAtlas ATLAS-R2-2016-01-00-01
 EventInfoWriter                                     DEBUG     IOVDbGlobalTag OFLCOND-SDR-BS14T-IBL-06
 EventInfoWriter                                     DEBUG EventInfoWriter::execute()
 EventInfoWriter                                     DEBUG Event ID: [1,4294967303:35] 
@@ -169,11 +207,15 @@ EventInfoWriter                                     DEBUG Current tags:
 EventInfoWriter                                     DEBUG     /LAR/Identifier/CalibIdMap LARIdentifierCalibIdMap-012
 EventInfoWriter                                     DEBUG     /LAR/Identifier/FebRodMap LARIdentifierFebRodMap-005
 EventInfoWriter                                     DEBUG     /LAR/Identifier/OnOffIdMap LARIdentifierOnOffIdMap-012
+EventInfoWriter                                     DEBUG     EventInfoWriterTag EIW-00-00-01
+EventInfoWriter                                     DEBUG     GeoAtlas ATLAS-R2-2016-01-00-01
 EventInfoWriter                                     DEBUG     IOVDbGlobalTag OFLCOND-SDR-BS14T-IBL-06
 EventInfoWriter                                     DEBUG Input tags: 
 EventInfoWriter                                     DEBUG     /LAR/Identifier/CalibIdMap LARIdentifierCalibIdMap-012
 EventInfoWriter                                     DEBUG     /LAR/Identifier/FebRodMap LARIdentifierFebRodMap-005
 EventInfoWriter                                     DEBUG     /LAR/Identifier/OnOffIdMap LARIdentifierOnOffIdMap-012
+EventInfoWriter                                     DEBUG     EventInfoWriterTag EIW-00-00-01
+EventInfoWriter                                     DEBUG     GeoAtlas ATLAS-R2-2016-01-00-01
 EventInfoWriter                                     DEBUG     IOVDbGlobalTag OFLCOND-SDR-BS14T-IBL-06
 EventInfoWriter                                     DEBUG EventInfoWriter::execute()
 EventInfoWriter                                     DEBUG Event ID: [1,4294967304:40] 
@@ -183,11 +225,15 @@ EventInfoWriter                                     DEBUG Current tags:
 EventInfoWriter                                     DEBUG     /LAR/Identifier/CalibIdMap LARIdentifierCalibIdMap-012
 EventInfoWriter                                     DEBUG     /LAR/Identifier/FebRodMap LARIdentifierFebRodMap-005
 EventInfoWriter                                     DEBUG     /LAR/Identifier/OnOffIdMap LARIdentifierOnOffIdMap-012
+EventInfoWriter                                     DEBUG     EventInfoWriterTag EIW-00-00-01
+EventInfoWriter                                     DEBUG     GeoAtlas ATLAS-R2-2016-01-00-01
 EventInfoWriter                                     DEBUG     IOVDbGlobalTag OFLCOND-SDR-BS14T-IBL-06
 EventInfoWriter                                     DEBUG Input tags: 
 EventInfoWriter                                     DEBUG     /LAR/Identifier/CalibIdMap LARIdentifierCalibIdMap-012
 EventInfoWriter                                     DEBUG     /LAR/Identifier/FebRodMap LARIdentifierFebRodMap-005
 EventInfoWriter                                     DEBUG     /LAR/Identifier/OnOffIdMap LARIdentifierOnOffIdMap-012
+EventInfoWriter                                     DEBUG     EventInfoWriterTag EIW-00-00-01
+EventInfoWriter                                     DEBUG     GeoAtlas ATLAS-R2-2016-01-00-01
 EventInfoWriter                                     DEBUG     IOVDbGlobalTag OFLCOND-SDR-BS14T-IBL-06
 EventInfoWriter                                     DEBUG EventInfoWriter::execute()
 EventInfoWriter                                     DEBUG Event ID: [1,4294967305:45] 
@@ -197,11 +243,15 @@ EventInfoWriter                                     DEBUG Current tags:
 EventInfoWriter                                     DEBUG     /LAR/Identifier/CalibIdMap LARIdentifierCalibIdMap-012
 EventInfoWriter                                     DEBUG     /LAR/Identifier/FebRodMap LARIdentifierFebRodMap-005
 EventInfoWriter                                     DEBUG     /LAR/Identifier/OnOffIdMap LARIdentifierOnOffIdMap-012
+EventInfoWriter                                     DEBUG     EventInfoWriterTag EIW-00-00-01
+EventInfoWriter                                     DEBUG     GeoAtlas ATLAS-R2-2016-01-00-01
 EventInfoWriter                                     DEBUG     IOVDbGlobalTag OFLCOND-SDR-BS14T-IBL-06
 EventInfoWriter                                     DEBUG Input tags: 
 EventInfoWriter                                     DEBUG     /LAR/Identifier/CalibIdMap LARIdentifierCalibIdMap-012
 EventInfoWriter                                     DEBUG     /LAR/Identifier/FebRodMap LARIdentifierFebRodMap-005
 EventInfoWriter                                     DEBUG     /LAR/Identifier/OnOffIdMap LARIdentifierOnOffIdMap-012
+EventInfoWriter                                     DEBUG     EventInfoWriterTag EIW-00-00-01
+EventInfoWriter                                     DEBUG     GeoAtlas ATLAS-R2-2016-01-00-01
 EventInfoWriter                                     DEBUG     IOVDbGlobalTag OFLCOND-SDR-BS14T-IBL-06
 EventInfoWriter                                     DEBUG EventInfoWriter::execute()
 EventInfoWriter                                     DEBUG Event ID: [1,4294967306:50] 
@@ -211,11 +261,15 @@ EventInfoWriter                                     DEBUG Current tags:
 EventInfoWriter                                     DEBUG     /LAR/Identifier/CalibIdMap LARIdentifierCalibIdMap-012
 EventInfoWriter                                     DEBUG     /LAR/Identifier/FebRodMap LARIdentifierFebRodMap-005
 EventInfoWriter                                     DEBUG     /LAR/Identifier/OnOffIdMap LARIdentifierOnOffIdMap-012
+EventInfoWriter                                     DEBUG     EventInfoWriterTag EIW-00-00-01
+EventInfoWriter                                     DEBUG     GeoAtlas ATLAS-R2-2016-01-00-01
 EventInfoWriter                                     DEBUG     IOVDbGlobalTag OFLCOND-SDR-BS14T-IBL-06
 EventInfoWriter                                     DEBUG Input tags: 
 EventInfoWriter                                     DEBUG     /LAR/Identifier/CalibIdMap LARIdentifierCalibIdMap-012
 EventInfoWriter                                     DEBUG     /LAR/Identifier/FebRodMap LARIdentifierFebRodMap-005
 EventInfoWriter                                     DEBUG     /LAR/Identifier/OnOffIdMap LARIdentifierOnOffIdMap-012
+EventInfoWriter                                     DEBUG     EventInfoWriterTag EIW-00-00-01
+EventInfoWriter                                     DEBUG     GeoAtlas ATLAS-R2-2016-01-00-01
 EventInfoWriter                                     DEBUG     IOVDbGlobalTag OFLCOND-SDR-BS14T-IBL-06
 EventInfoWriter                                     DEBUG EventInfoWriter::execute()
 EventInfoWriter                                     DEBUG Event ID: [1,4294967307:55] 
@@ -225,11 +279,15 @@ EventInfoWriter                                     DEBUG Current tags:
 EventInfoWriter                                     DEBUG     /LAR/Identifier/CalibIdMap LARIdentifierCalibIdMap-012
 EventInfoWriter                                     DEBUG     /LAR/Identifier/FebRodMap LARIdentifierFebRodMap-005
 EventInfoWriter                                     DEBUG     /LAR/Identifier/OnOffIdMap LARIdentifierOnOffIdMap-012
+EventInfoWriter                                     DEBUG     EventInfoWriterTag EIW-00-00-01
+EventInfoWriter                                     DEBUG     GeoAtlas ATLAS-R2-2016-01-00-01
 EventInfoWriter                                     DEBUG     IOVDbGlobalTag OFLCOND-SDR-BS14T-IBL-06
 EventInfoWriter                                     DEBUG Input tags: 
 EventInfoWriter                                     DEBUG     /LAR/Identifier/CalibIdMap LARIdentifierCalibIdMap-012
 EventInfoWriter                                     DEBUG     /LAR/Identifier/FebRodMap LARIdentifierFebRodMap-005
 EventInfoWriter                                     DEBUG     /LAR/Identifier/OnOffIdMap LARIdentifierOnOffIdMap-012
+EventInfoWriter                                     DEBUG     EventInfoWriterTag EIW-00-00-01
+EventInfoWriter                                     DEBUG     GeoAtlas ATLAS-R2-2016-01-00-01
 EventInfoWriter                                     DEBUG     IOVDbGlobalTag OFLCOND-SDR-BS14T-IBL-06
 EventInfoWriter                                     DEBUG EventInfoWriter::execute()
 EventInfoWriter                                     DEBUG Event ID: [1,4294967308:60] 
@@ -239,11 +297,15 @@ EventInfoWriter                                     DEBUG Current tags:
 EventInfoWriter                                     DEBUG     /LAR/Identifier/CalibIdMap LARIdentifierCalibIdMap-012
 EventInfoWriter                                     DEBUG     /LAR/Identifier/FebRodMap LARIdentifierFebRodMap-005
 EventInfoWriter                                     DEBUG     /LAR/Identifier/OnOffIdMap LARIdentifierOnOffIdMap-012
+EventInfoWriter                                     DEBUG     EventInfoWriterTag EIW-00-00-01
+EventInfoWriter                                     DEBUG     GeoAtlas ATLAS-R2-2016-01-00-01
 EventInfoWriter                                     DEBUG     IOVDbGlobalTag OFLCOND-SDR-BS14T-IBL-06
 EventInfoWriter                                     DEBUG Input tags: 
 EventInfoWriter                                     DEBUG     /LAR/Identifier/CalibIdMap LARIdentifierCalibIdMap-012
 EventInfoWriter                                     DEBUG     /LAR/Identifier/FebRodMap LARIdentifierFebRodMap-005
 EventInfoWriter                                     DEBUG     /LAR/Identifier/OnOffIdMap LARIdentifierOnOffIdMap-012
+EventInfoWriter                                     DEBUG     EventInfoWriterTag EIW-00-00-01
+EventInfoWriter                                     DEBUG     GeoAtlas ATLAS-R2-2016-01-00-01
 EventInfoWriter                                     DEBUG     IOVDbGlobalTag OFLCOND-SDR-BS14T-IBL-06
 EventInfoWriter                                     DEBUG EventInfoWriter::execute()
 EventInfoWriter                                     DEBUG Event ID: [1,4294967309:65] 
@@ -253,11 +315,15 @@ EventInfoWriter                                     DEBUG Current tags:
 EventInfoWriter                                     DEBUG     /LAR/Identifier/CalibIdMap LARIdentifierCalibIdMap-012
 EventInfoWriter                                     DEBUG     /LAR/Identifier/FebRodMap LARIdentifierFebRodMap-005
 EventInfoWriter                                     DEBUG     /LAR/Identifier/OnOffIdMap LARIdentifierOnOffIdMap-012
+EventInfoWriter                                     DEBUG     EventInfoWriterTag EIW-00-00-01
+EventInfoWriter                                     DEBUG     GeoAtlas ATLAS-R2-2016-01-00-01
 EventInfoWriter                                     DEBUG     IOVDbGlobalTag OFLCOND-SDR-BS14T-IBL-06
 EventInfoWriter                                     DEBUG Input tags: 
 EventInfoWriter                                     DEBUG     /LAR/Identifier/CalibIdMap LARIdentifierCalibIdMap-012
 EventInfoWriter                                     DEBUG     /LAR/Identifier/FebRodMap LARIdentifierFebRodMap-005
 EventInfoWriter                                     DEBUG     /LAR/Identifier/OnOffIdMap LARIdentifierOnOffIdMap-012
+EventInfoWriter                                     DEBUG     EventInfoWriterTag EIW-00-00-01
+EventInfoWriter                                     DEBUG     GeoAtlas ATLAS-R2-2016-01-00-01
 EventInfoWriter                                     DEBUG     IOVDbGlobalTag OFLCOND-SDR-BS14T-IBL-06
 EventInfoWriter                                     DEBUG EventInfoWriter::execute()
 EventInfoWriter                                     DEBUG Event ID: [1,4294967310:70] 
@@ -267,11 +333,15 @@ EventInfoWriter                                     DEBUG Current tags:
 EventInfoWriter                                     DEBUG     /LAR/Identifier/CalibIdMap LARIdentifierCalibIdMap-012
 EventInfoWriter                                     DEBUG     /LAR/Identifier/FebRodMap LARIdentifierFebRodMap-005
 EventInfoWriter                                     DEBUG     /LAR/Identifier/OnOffIdMap LARIdentifierOnOffIdMap-012
+EventInfoWriter                                     DEBUG     EventInfoWriterTag EIW-00-00-01
+EventInfoWriter                                     DEBUG     GeoAtlas ATLAS-R2-2016-01-00-01
 EventInfoWriter                                     DEBUG     IOVDbGlobalTag OFLCOND-SDR-BS14T-IBL-06
 EventInfoWriter                                     DEBUG Input tags: 
 EventInfoWriter                                     DEBUG     /LAR/Identifier/CalibIdMap LARIdentifierCalibIdMap-012
 EventInfoWriter                                     DEBUG     /LAR/Identifier/FebRodMap LARIdentifierFebRodMap-005
 EventInfoWriter                                     DEBUG     /LAR/Identifier/OnOffIdMap LARIdentifierOnOffIdMap-012
+EventInfoWriter                                     DEBUG     EventInfoWriterTag EIW-00-00-01
+EventInfoWriter                                     DEBUG     GeoAtlas ATLAS-R2-2016-01-00-01
 EventInfoWriter                                     DEBUG     IOVDbGlobalTag OFLCOND-SDR-BS14T-IBL-06
 EventInfoWriter                                     DEBUG EventInfoWriter::execute()
 EventInfoWriter                                     DEBUG Event ID: [1,4294967311:75] 
@@ -281,11 +351,15 @@ EventInfoWriter                                     DEBUG Current tags:
 EventInfoWriter                                     DEBUG     /LAR/Identifier/CalibIdMap LARIdentifierCalibIdMap-012
 EventInfoWriter                                     DEBUG     /LAR/Identifier/FebRodMap LARIdentifierFebRodMap-005
 EventInfoWriter                                     DEBUG     /LAR/Identifier/OnOffIdMap LARIdentifierOnOffIdMap-012
+EventInfoWriter                                     DEBUG     EventInfoWriterTag EIW-00-00-01
+EventInfoWriter                                     DEBUG     GeoAtlas ATLAS-R2-2016-01-00-01
 EventInfoWriter                                     DEBUG     IOVDbGlobalTag OFLCOND-SDR-BS14T-IBL-06
 EventInfoWriter                                     DEBUG Input tags: 
 EventInfoWriter                                     DEBUG     /LAR/Identifier/CalibIdMap LARIdentifierCalibIdMap-012
 EventInfoWriter                                     DEBUG     /LAR/Identifier/FebRodMap LARIdentifierFebRodMap-005
 EventInfoWriter                                     DEBUG     /LAR/Identifier/OnOffIdMap LARIdentifierOnOffIdMap-012
+EventInfoWriter                                     DEBUG     EventInfoWriterTag EIW-00-00-01
+EventInfoWriter                                     DEBUG     GeoAtlas ATLAS-R2-2016-01-00-01
 EventInfoWriter                                     DEBUG     IOVDbGlobalTag OFLCOND-SDR-BS14T-IBL-06
 EventInfoWriter                                     DEBUG EventInfoWriter::execute()
 EventInfoWriter                                     DEBUG Event ID: [1,4294967312:80] 
@@ -295,11 +369,15 @@ EventInfoWriter                                     DEBUG Current tags:
 EventInfoWriter                                     DEBUG     /LAR/Identifier/CalibIdMap LARIdentifierCalibIdMap-012
 EventInfoWriter                                     DEBUG     /LAR/Identifier/FebRodMap LARIdentifierFebRodMap-005
 EventInfoWriter                                     DEBUG     /LAR/Identifier/OnOffIdMap LARIdentifierOnOffIdMap-012
+EventInfoWriter                                     DEBUG     EventInfoWriterTag EIW-00-00-01
+EventInfoWriter                                     DEBUG     GeoAtlas ATLAS-R2-2016-01-00-01
 EventInfoWriter                                     DEBUG     IOVDbGlobalTag OFLCOND-SDR-BS14T-IBL-06
 EventInfoWriter                                     DEBUG Input tags: 
 EventInfoWriter                                     DEBUG     /LAR/Identifier/CalibIdMap LARIdentifierCalibIdMap-012
 EventInfoWriter                                     DEBUG     /LAR/Identifier/FebRodMap LARIdentifierFebRodMap-005
 EventInfoWriter                                     DEBUG     /LAR/Identifier/OnOffIdMap LARIdentifierOnOffIdMap-012
+EventInfoWriter                                     DEBUG     EventInfoWriterTag EIW-00-00-01
+EventInfoWriter                                     DEBUG     GeoAtlas ATLAS-R2-2016-01-00-01
 EventInfoWriter                                     DEBUG     IOVDbGlobalTag OFLCOND-SDR-BS14T-IBL-06
 TagInfoMgr                                          DEBUG handle: received incident of type BeginRun from AthenaEventLoopMgr
 TagInfoMgr                                          DEBUG handle: BeginRun incident - Event ID: [2,1:85] 
@@ -315,6 +393,10 @@ TagInfoMgr                                          DEBUG fillTagInfo: Did NOT a
 TagInfoMgr                                          DEBUG fillTagInfo: Added value/tag to TagInfo as input tag /LAR/Identifier/FebRodMap LARIdentifierFebRodMap-005
 TagInfoMgr                                          DEBUG fillTagInfo: Did NOT add tag - on remove list: name/tag: /LAR/Identifier/OnOffIdMap LARIdentifierOnOffIdMap-012
 TagInfoMgr                                          DEBUG fillTagInfo: Added value/tag to TagInfo as input tag /LAR/Identifier/OnOffIdMap LARIdentifierOnOffIdMap-012
+TagInfoMgr                                          DEBUG fillTagInfo: Added name/tag to TagInfo EventInfoWriterTag EIW-00-00-01
+TagInfoMgr                                          DEBUG fillTagInfo: Added value/tag to TagInfo as input tag EventInfoWriterTag EIW-00-00-01
+TagInfoMgr                                          DEBUG fillTagInfo: Added name/tag to TagInfo GeoAtlas ATLAS-R2-2016-01-00-01
+TagInfoMgr                                          DEBUG fillTagInfo: Added value/tag to TagInfo as input tag GeoAtlas ATLAS-R2-2016-01-00-01
 TagInfoMgr                                          DEBUG fillTagInfo: Added name/tag to TagInfo IOVDbGlobalTag OFLCOND-SDR-BS14T-IBL-06
 TagInfoMgr                                          DEBUG fillTagInfo: Added value/tag to TagInfo as input tag IOVDbGlobalTag OFLCOND-SDR-BS14T-IBL-06
 TagInfoMgr                                          DEBUG fillTagInfo: print out tags before adding extra tags
@@ -322,6 +404,8 @@ TagInfoMgr                                          DEBUG TagInfo tag:
 TagInfoMgr                                          DEBUG fillTagInfo: Adding extra value/tag pair: /LAR/Identifier/CalibIdMap LARIdentifierCalibIdMap-012
 TagInfoMgr                                          DEBUG fillTagInfo: Adding extra value/tag pair: /LAR/Identifier/FebRodMap LARIdentifierFebRodMap-005
 TagInfoMgr                                          DEBUG fillTagInfo: Adding extra value/tag pair: /LAR/Identifier/OnOffIdMap LARIdentifierOnOffIdMap-012
+TagInfoMgr                                          DEBUG fillTagInfo: Adding extra value/tag pair: EventInfoWriterTag EIW-00-00-01
+TagInfoMgr                                          DEBUG fillTagInfo: Adding extra value/tag pair: GeoAtlas ATLAS-R2-2016-01-00-01
 TagInfoMgr                                          DEBUG fillTagInfo: Adding extra value/tag pair: IOVDbGlobalTag OFLCOND-SDR-BS14T-IBL-06
 TagInfoMgr                                          DEBUG fillTagInfo: print out tags
 TagInfoMgr                                          DEBUG TagInfo tag: 
@@ -331,6 +415,8 @@ TagInfoMgr                                          DEBUG fillMetaData: Adding v
 TagInfoMgr                                          DEBUG /LAR/Identifier/CalibIdMap LARIdentifierCalibIdMap-012
 TagInfoMgr                                          DEBUG /LAR/Identifier/FebRodMap LARIdentifierFebRodMap-005
 TagInfoMgr                                          DEBUG /LAR/Identifier/OnOffIdMap LARIdentifierOnOffIdMap-012
+TagInfoMgr                                          DEBUG EventInfoWriterTag EIW-00-00-01
+TagInfoMgr                                          DEBUG GeoAtlas ATLAS-R2-2016-01-00-01
 TagInfoMgr                                          DEBUG IOVDbGlobalTag OFLCOND-SDR-BS14T-IBL-06
 TagInfoMgr                                          DEBUG fillMetaData: run number is in previous IOVRange: 2 {[1,0] - [3,0]}
 TagInfoMgr                                          DEBUG fillMetaData: start, stop: [2,0] [3,0]
@@ -344,11 +430,15 @@ EventInfoWriter                                     DEBUG Current tags:
 EventInfoWriter                                     DEBUG     /LAR/Identifier/CalibIdMap LARIdentifierCalibIdMap-012
 EventInfoWriter                                     DEBUG     /LAR/Identifier/FebRodMap LARIdentifierFebRodMap-005
 EventInfoWriter                                     DEBUG     /LAR/Identifier/OnOffIdMap LARIdentifierOnOffIdMap-012
+EventInfoWriter                                     DEBUG     EventInfoWriterTag EIW-00-00-01
+EventInfoWriter                                     DEBUG     GeoAtlas ATLAS-R2-2016-01-00-01
 EventInfoWriter                                     DEBUG     IOVDbGlobalTag OFLCOND-SDR-BS14T-IBL-06
 EventInfoWriter                                     DEBUG Input tags: 
 EventInfoWriter                                     DEBUG     /LAR/Identifier/CalibIdMap LARIdentifierCalibIdMap-012
 EventInfoWriter                                     DEBUG     /LAR/Identifier/FebRodMap LARIdentifierFebRodMap-005
 EventInfoWriter                                     DEBUG     /LAR/Identifier/OnOffIdMap LARIdentifierOnOffIdMap-012
+EventInfoWriter                                     DEBUG     EventInfoWriterTag EIW-00-00-01
+EventInfoWriter                                     DEBUG     GeoAtlas ATLAS-R2-2016-01-00-01
 EventInfoWriter                                     DEBUG     IOVDbGlobalTag OFLCOND-SDR-BS14T-IBL-06
 EventInfoWriter                                     DEBUG EventInfoWriter::execute()
 EventInfoWriter                                     DEBUG Event ID: [2,2:90] 
@@ -358,11 +448,15 @@ EventInfoWriter                                     DEBUG Current tags:
 EventInfoWriter                                     DEBUG     /LAR/Identifier/CalibIdMap LARIdentifierCalibIdMap-012
 EventInfoWriter                                     DEBUG     /LAR/Identifier/FebRodMap LARIdentifierFebRodMap-005
 EventInfoWriter                                     DEBUG     /LAR/Identifier/OnOffIdMap LARIdentifierOnOffIdMap-012
+EventInfoWriter                                     DEBUG     EventInfoWriterTag EIW-00-00-01
+EventInfoWriter                                     DEBUG     GeoAtlas ATLAS-R2-2016-01-00-01
 EventInfoWriter                                     DEBUG     IOVDbGlobalTag OFLCOND-SDR-BS14T-IBL-06
 EventInfoWriter                                     DEBUG Input tags: 
 EventInfoWriter                                     DEBUG     /LAR/Identifier/CalibIdMap LARIdentifierCalibIdMap-012
 EventInfoWriter                                     DEBUG     /LAR/Identifier/FebRodMap LARIdentifierFebRodMap-005
 EventInfoWriter                                     DEBUG     /LAR/Identifier/OnOffIdMap LARIdentifierOnOffIdMap-012
+EventInfoWriter                                     DEBUG     EventInfoWriterTag EIW-00-00-01
+EventInfoWriter                                     DEBUG     GeoAtlas ATLAS-R2-2016-01-00-01
 EventInfoWriter                                     DEBUG     IOVDbGlobalTag OFLCOND-SDR-BS14T-IBL-06
 EventInfoWriter                                     DEBUG EventInfoWriter::execute()
 EventInfoWriter                                     DEBUG Event ID: [2,3:95] 
@@ -372,11 +466,15 @@ EventInfoWriter                                     DEBUG Current tags:
 EventInfoWriter                                     DEBUG     /LAR/Identifier/CalibIdMap LARIdentifierCalibIdMap-012
 EventInfoWriter                                     DEBUG     /LAR/Identifier/FebRodMap LARIdentifierFebRodMap-005
 EventInfoWriter                                     DEBUG     /LAR/Identifier/OnOffIdMap LARIdentifierOnOffIdMap-012
+EventInfoWriter                                     DEBUG     EventInfoWriterTag EIW-00-00-01
+EventInfoWriter                                     DEBUG     GeoAtlas ATLAS-R2-2016-01-00-01
 EventInfoWriter                                     DEBUG     IOVDbGlobalTag OFLCOND-SDR-BS14T-IBL-06
 EventInfoWriter                                     DEBUG Input tags: 
 EventInfoWriter                                     DEBUG     /LAR/Identifier/CalibIdMap LARIdentifierCalibIdMap-012
 EventInfoWriter                                     DEBUG     /LAR/Identifier/FebRodMap LARIdentifierFebRodMap-005
 EventInfoWriter                                     DEBUG     /LAR/Identifier/OnOffIdMap LARIdentifierOnOffIdMap-012
+EventInfoWriter                                     DEBUG     EventInfoWriterTag EIW-00-00-01
+EventInfoWriter                                     DEBUG     GeoAtlas ATLAS-R2-2016-01-00-01
 EventInfoWriter                                     DEBUG     IOVDbGlobalTag OFLCOND-SDR-BS14T-IBL-06
 EventInfoWriter                                     DEBUG EventInfoWriter::execute()
 EventInfoWriter                                     DEBUG Event ID: [2,4:100] 
@@ -386,11 +484,15 @@ EventInfoWriter                                     DEBUG Current tags:
 EventInfoWriter                                     DEBUG     /LAR/Identifier/CalibIdMap LARIdentifierCalibIdMap-012
 EventInfoWriter                                     DEBUG     /LAR/Identifier/FebRodMap LARIdentifierFebRodMap-005
 EventInfoWriter                                     DEBUG     /LAR/Identifier/OnOffIdMap LARIdentifierOnOffIdMap-012
+EventInfoWriter                                     DEBUG     EventInfoWriterTag EIW-00-00-01
+EventInfoWriter                                     DEBUG     GeoAtlas ATLAS-R2-2016-01-00-01
 EventInfoWriter                                     DEBUG     IOVDbGlobalTag OFLCOND-SDR-BS14T-IBL-06
 EventInfoWriter                                     DEBUG Input tags: 
 EventInfoWriter                                     DEBUG     /LAR/Identifier/CalibIdMap LARIdentifierCalibIdMap-012
 EventInfoWriter                                     DEBUG     /LAR/Identifier/FebRodMap LARIdentifierFebRodMap-005
 EventInfoWriter                                     DEBUG     /LAR/Identifier/OnOffIdMap LARIdentifierOnOffIdMap-012
+EventInfoWriter                                     DEBUG     EventInfoWriterTag EIW-00-00-01
+EventInfoWriter                                     DEBUG     GeoAtlas ATLAS-R2-2016-01-00-01
 EventInfoWriter                                     DEBUG     IOVDbGlobalTag OFLCOND-SDR-BS14T-IBL-06
 EventInfoWriter                                     DEBUG EventInfoWriter::execute()
 EventInfoWriter                                     DEBUG Event ID: [2,5:105] 
@@ -400,11 +502,15 @@ EventInfoWriter                                     DEBUG Current tags:
 EventInfoWriter                                     DEBUG     /LAR/Identifier/CalibIdMap LARIdentifierCalibIdMap-012
 EventInfoWriter                                     DEBUG     /LAR/Identifier/FebRodMap LARIdentifierFebRodMap-005
 EventInfoWriter                                     DEBUG     /LAR/Identifier/OnOffIdMap LARIdentifierOnOffIdMap-012
+EventInfoWriter                                     DEBUG     EventInfoWriterTag EIW-00-00-01
+EventInfoWriter                                     DEBUG     GeoAtlas ATLAS-R2-2016-01-00-01
 EventInfoWriter                                     DEBUG     IOVDbGlobalTag OFLCOND-SDR-BS14T-IBL-06
 EventInfoWriter                                     DEBUG Input tags: 
 EventInfoWriter                                     DEBUG     /LAR/Identifier/CalibIdMap LARIdentifierCalibIdMap-012
 EventInfoWriter                                     DEBUG     /LAR/Identifier/FebRodMap LARIdentifierFebRodMap-005
 EventInfoWriter                                     DEBUG     /LAR/Identifier/OnOffIdMap LARIdentifierOnOffIdMap-012
+EventInfoWriter                                     DEBUG     EventInfoWriterTag EIW-00-00-01
+EventInfoWriter                                     DEBUG     GeoAtlas ATLAS-R2-2016-01-00-01
 EventInfoWriter                                     DEBUG     IOVDbGlobalTag OFLCOND-SDR-BS14T-IBL-06
 EventInfoWriter                                     DEBUG EventInfoWriter::execute()
 EventInfoWriter                                     DEBUG Event ID: [2,6:110] 
@@ -414,11 +520,15 @@ EventInfoWriter                                     DEBUG Current tags:
 EventInfoWriter                                     DEBUG     /LAR/Identifier/CalibIdMap LARIdentifierCalibIdMap-012
 EventInfoWriter                                     DEBUG     /LAR/Identifier/FebRodMap LARIdentifierFebRodMap-005
 EventInfoWriter                                     DEBUG     /LAR/Identifier/OnOffIdMap LARIdentifierOnOffIdMap-012
+EventInfoWriter                                     DEBUG     EventInfoWriterTag EIW-00-00-01
+EventInfoWriter                                     DEBUG     GeoAtlas ATLAS-R2-2016-01-00-01
 EventInfoWriter                                     DEBUG     IOVDbGlobalTag OFLCOND-SDR-BS14T-IBL-06
 EventInfoWriter                                     DEBUG Input tags: 
 EventInfoWriter                                     DEBUG     /LAR/Identifier/CalibIdMap LARIdentifierCalibIdMap-012
 EventInfoWriter                                     DEBUG     /LAR/Identifier/FebRodMap LARIdentifierFebRodMap-005
 EventInfoWriter                                     DEBUG     /LAR/Identifier/OnOffIdMap LARIdentifierOnOffIdMap-012
+EventInfoWriter                                     DEBUG     EventInfoWriterTag EIW-00-00-01
+EventInfoWriter                                     DEBUG     GeoAtlas ATLAS-R2-2016-01-00-01
 EventInfoWriter                                     DEBUG     IOVDbGlobalTag OFLCOND-SDR-BS14T-IBL-06
 EventInfoWriter                                     DEBUG EventInfoWriter::execute()
 EventInfoWriter                                     DEBUG Event ID: [2,7:115] 
@@ -428,11 +538,15 @@ EventInfoWriter                                     DEBUG Current tags:
 EventInfoWriter                                     DEBUG     /LAR/Identifier/CalibIdMap LARIdentifierCalibIdMap-012
 EventInfoWriter                                     DEBUG     /LAR/Identifier/FebRodMap LARIdentifierFebRodMap-005
 EventInfoWriter                                     DEBUG     /LAR/Identifier/OnOffIdMap LARIdentifierOnOffIdMap-012
+EventInfoWriter                                     DEBUG     EventInfoWriterTag EIW-00-00-01
+EventInfoWriter                                     DEBUG     GeoAtlas ATLAS-R2-2016-01-00-01
 EventInfoWriter                                     DEBUG     IOVDbGlobalTag OFLCOND-SDR-BS14T-IBL-06
 EventInfoWriter                                     DEBUG Input tags: 
 EventInfoWriter                                     DEBUG     /LAR/Identifier/CalibIdMap LARIdentifierCalibIdMap-012
 EventInfoWriter                                     DEBUG     /LAR/Identifier/FebRodMap LARIdentifierFebRodMap-005
 EventInfoWriter                                     DEBUG     /LAR/Identifier/OnOffIdMap LARIdentifierOnOffIdMap-012
+EventInfoWriter                                     DEBUG     EventInfoWriterTag EIW-00-00-01
+EventInfoWriter                                     DEBUG     GeoAtlas ATLAS-R2-2016-01-00-01
 EventInfoWriter                                     DEBUG     IOVDbGlobalTag OFLCOND-SDR-BS14T-IBL-06
 EventInfoWriter                                     DEBUG EventInfoWriter::execute()
 EventInfoWriter                                     DEBUG Event ID: [2,8:120] 
@@ -442,11 +556,15 @@ EventInfoWriter                                     DEBUG Current tags:
 EventInfoWriter                                     DEBUG     /LAR/Identifier/CalibIdMap LARIdentifierCalibIdMap-012
 EventInfoWriter                                     DEBUG     /LAR/Identifier/FebRodMap LARIdentifierFebRodMap-005
 EventInfoWriter                                     DEBUG     /LAR/Identifier/OnOffIdMap LARIdentifierOnOffIdMap-012
+EventInfoWriter                                     DEBUG     EventInfoWriterTag EIW-00-00-01
+EventInfoWriter                                     DEBUG     GeoAtlas ATLAS-R2-2016-01-00-01
 EventInfoWriter                                     DEBUG     IOVDbGlobalTag OFLCOND-SDR-BS14T-IBL-06
 EventInfoWriter                                     DEBUG Input tags: 
 EventInfoWriter                                     DEBUG     /LAR/Identifier/CalibIdMap LARIdentifierCalibIdMap-012
 EventInfoWriter                                     DEBUG     /LAR/Identifier/FebRodMap LARIdentifierFebRodMap-005
 EventInfoWriter                                     DEBUG     /LAR/Identifier/OnOffIdMap LARIdentifierOnOffIdMap-012
+EventInfoWriter                                     DEBUG     EventInfoWriterTag EIW-00-00-01
+EventInfoWriter                                     DEBUG     GeoAtlas ATLAS-R2-2016-01-00-01
 EventInfoWriter                                     DEBUG     IOVDbGlobalTag OFLCOND-SDR-BS14T-IBL-06
 EventInfoWriter                                     DEBUG EventInfoWriter::finalize()
 TagInfoMgr                                          DEBUG finalize()

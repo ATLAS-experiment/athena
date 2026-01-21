@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  */
 
 #ifndef dqutilsMonitoringFile_h
@@ -184,7 +184,7 @@ namespace dqutils {
 
     // For MuonTrackMonitoring
     static void MuonTrackPostProcess(const std::string& inFileName, bool isIncremental = false);
-    static void MuonTrack_Main(const std::string& inFileName, TString dirname);
+    static void MuonTrack_Main(const std::string& inFileName, const std::string& dirname_in);
 
     //For RPC
     static void RPCPostProcess(const std::string& inFilename, bool isIncremental = false);

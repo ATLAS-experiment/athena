@@ -20,7 +20,7 @@
 
 LArHVCorrToSCHVCorr::LArHVCorrToSCHVCorr( const std::string& name, 
 				      ISvcLocator* pSvcLocator ) : 
-  ::AthAlgorithm( name, pSvcLocator )
+  ::AthCondAlgorithm( name, pSvcLocator )
 {
 }
 

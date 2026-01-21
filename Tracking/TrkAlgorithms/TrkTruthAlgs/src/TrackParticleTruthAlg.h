@@ -2,8 +2,8 @@
   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef TRACKPARTICLETRUTHALG_H
-#define TRACKPARTICLETRUTHALG_H
+#ifndef TRKTRUTHALGS_TRACKPARTICLETRUTHALG_H
+#define TRKTRUTHALGS_TRACKPARTICLETRUTHALG_H
 
 
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
@@ -17,20 +17,23 @@
 class TrackParticleTruthAlg: public AthReentrantAlgorithm {
 public:
   using AthReentrantAlgorithm::AthReentrantAlgorithm;
-  
+
   virtual StatusCode initialize() override;
   virtual StatusCode execute(const EventContext& ctx) const override;
 
 private:
 
-SG::ReadHandleKey<xAOD::TrackParticleContainer> m_trkKey{this, "TrackParticleName", "InDetTrackParticles",
-                                                          "TrackParticle input name"};
-SG::WriteDecorHandleKey<xAOD::TrackParticleContainer> m_particlesLinkKey 
+  SG::ReadHandleKey<xAOD::TrackParticleContainer> m_trkKey{this, "TrackParticleName", "InDetTrackParticles",
+      "TrackParticle input name"};
+  /// Decorations for input TrackParticleContainer
+  SG::WriteDecorHandleKey<xAOD::TrackParticleContainer> m_particlesLinkKey
     {this, "ParticleLinkKey", m_trkKey,"truthParticleLink"};
   SG::WriteDecorHandleKey<xAOD::TrackParticleContainer> m_particlesTypeKey
     {this, "ParticleTypeKey" ,m_trkKey, "truthType"};
   SG::WriteDecorHandleKey<xAOD::TrackParticleContainer> m_particlesOriginKey
     {this, "ParticleOriginKey", m_trkKey, "truthOrigin"};
+  SG::WriteDecorHandleKey<xAOD::TrackParticleContainer> m_particlesClassificationKey
+    {this, "ParticleClassificationKey", m_trkKey, "truthClassification"};
 
   SG::ReadHandleKey<xAODTruthParticleLinkVector>  m_truthParticleLinkVecKey
     {this, "xAODTruthLinkVector", "xAODTruthLinks",
@@ -43,4 +46,4 @@ SG::WriteDecorHandleKey<xAOD::TrackParticleContainer> m_particlesLinkKey
     "MCTruthClassifier/MCTruthClassifier"};
 };
 
-#endif/*TRACKTRUTHSELECTOR_H*/
+#endif/*TRKTRUTHALGS_TRACKPARTICLETRUTHALG_H*/

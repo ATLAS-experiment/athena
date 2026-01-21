@@ -10,7 +10,7 @@
 #include "../GlobalSimComponents/IGlobalSimAlgTool.h"
 #include "xAODTrigger/eFexEMRoIContainer.h"
 
-#include "../IO/IeEmTOBContainer.h"
+#include "../IO/eEmTOBContainer.h"
 
 namespace GlobalSim {
 
@@ -44,7 +44,7 @@ namespace GlobalSim {
     m_eEmRoIKey {this, "eFexEMRoIKey", "L1_eEMRoI", "eFEXEM EDM"};
 
   
-    SG::WriteHandleKey<GlobalSim::IOBitwise::IeEmTOBContainer>
+    SG::WriteHandleKey<GlobalSim::IOBitwise::eEmTOBContainer>
     m_eEmTOBContainerKey {
       this,
       "eEmTOBs",

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MMT_Diamond.h"
@@ -27,17 +27,19 @@ MMT_Diamond::MMT_Diamond(const int diamXthreshold, const bool uv, const int diam
     m_roadSizeDownUV = olapStereoDown;
 }
 
-void MMT_Diamond::createRoads(std::vector<MMT_Road>& roads, const bool isLarge) const {
+void MMT_Diamond::createRoads(std::vector<MMT_Road>& roads, const bool isLarge, const bool isEta1) const {
   const char sec = (isLarge) ? 'L' : 'S';
   /*
-   * This computation is done as follows: 1024 X roads
+   * This computation is done as follows: 1024 X roads, from 8192 strips in total (5120 for |eta|==1 and 3072 for |eta|==2)
    * MML: for i in [0,8] -> i*6 UV roads. Then: (1024-9)*6*9 UV roads
    * MMS: for i in [0,6] -> i*6 UV roads. Then: (1024-7)*6*7 UV roads
    */
-  const unsigned int vecRoads = (isLarge) ? 56050 : 43864;
+  const unsigned int vecRoads = 35000;
   roads.reserve(vecRoads);
-  int nroad = 8192/this->getRoadSize();
+  const int nroad = 8192/m_roadSize;
   for (int i = 0; i < nroad; ++i) {
+    const int div = 5120/m_roadSize;
+    if((isEta1 && i>div) || (!isEta1 && i<=div)) continue;
     roads.emplace_back(sec, m_roadSize, m_roadSizeUpX, m_roadSizeDownX, m_roadSizeUpUV, m_roadSizeDownUV, m_xthr, m_uvthr, i);
 
     /*
@@ -175,14 +177,11 @@ void MMT_Diamond::findDiamonds(std::vector<std::shared_ptr<MMT_Hit> >& hits, std
         slope_t slope;
         slope.BC = bcidMode;
         slope.totalCount = road.countHits();
-        slope.realCount = road.countRealHits();
         slope.iRoad = road.iRoadx();
         slope.iRoadu = road.iRoadu();
         slope.iRoadv = road.iRoadv();
-        slope.uvbkg = road.countUVHits(true); // the bool in the following 4 functions refers to background/noise hits
-        slope.xbkg = road.countXHits(true);
-        slope.uvmuon = road.countUVHits(false);
-        slope.xmuon = road.countXHits(false);
+        slope.xCount = road.countXHits();
+        slope.uCount = road.countUHits();
         slope.age = slope.BC - bc_start;
         slope.mxl = road.mxl();
         slope.my = road.avgSofX(); // defined as my in ATL-COM-UPGRADE-2015-033

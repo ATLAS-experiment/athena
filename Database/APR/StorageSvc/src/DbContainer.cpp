@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //====================================================================
@@ -16,10 +16,12 @@
 // Framework include files
 #include "StorageSvc/DbTypeInfo.h"
 #include "StorageSvc/DbContainer.h"
-#include "StorageSvc/DbToken.h"
 #include "StorageSvc/DbReflex.h"
 #include "DbContainerObj.h"
+
 #include "CxxUtils/checker_macros.h"
+#include "PersistentDataModel/Token.h"
+#include "GaudiKernel/StatusCode.h"
 
 #include <memory>
 #include <stdexcept>
@@ -34,7 +36,7 @@ int DbContainer::refCount() const  {
 }
 
 // Open container from handle
-DbStatus DbContainer::open( DbDatabase&  dbH, 
+StatusCode DbContainer::open( DbDatabase&  dbH, 
                             const string& nam, 
                             const DbTypeInfo*  typ, 
                             const DbType&      dbtyp,
@@ -50,26 +52,26 @@ DbStatus DbContainer::open( DbDatabase&  dbH,
         }
       }
       if ( ptr()->open(typ).isSuccess() )  {
-        return Success;
+        return StatusCode::SUCCESS;
       }
-      close();
+      close().ignore();
     }
   }
-  return Error;
+  return StatusCode::FAILURE;
 }
 
 // Check if we can access the container for reading with the given type
-DbStatus DbContainer::checkAccess(DbDatabase&  dbH,
+StatusCode DbContainer::checkAccess(DbDatabase&  dbH,
                                   const string& nam,
                                   const DbType& dbtyp)
 {
-  DbStatus result = Error;
+  StatusCode result = StatusCode::FAILURE;
   if ( dbH.isValid() && dbH.openMode() == pool::READ ) {
     // ASM: Double check this implementation...
     DbContainerObj* q = dbH.find(nam);
     switchPtr(q ? q : new DbContainerObj(dbH, nam, dbtyp, pool::READ));
     result = ptr()->checkAccess();
-    close();
+    close().ignore();
   }
   return result;
 }
@@ -105,13 +107,13 @@ const string& DbContainer::name() const {
 }
 
 /// Close container object if handle is valid
-DbStatus DbContainer::close() {
+StatusCode DbContainer::close() {
   if ( isValid() )  {
-    DbStatus res = m_ptr->close();
+    StatusCode res = m_ptr->close();
     switchPtr(0);
     return res;
   }
-  return Error;
+  return StatusCode::FAILURE;
 }
 
 /// Check if the container was opened
@@ -120,21 +122,21 @@ bool DbContainer::isOpen() const  {
 }
 
 /// Execute Database Transaction Action
-DbStatus DbContainer::transAct(Transaction::Action action) {
-  return isValid() ? m_ptr->transAct(action) : Error;
+StatusCode DbContainer::transAct(Transaction::Action action) {
+  return isValid() ? m_ptr->transAct(action) : StatusCode::FAILURE;
 }
 
 /// Pass options to the implementation
-DbStatus DbContainer::setOption(const DbOption& refOpt) {
-  return isValid() ? m_ptr->setOption(refOpt) : Error;
+StatusCode DbContainer::setOption(const DbOption& refOpt) {
+  return isValid() ? m_ptr->setOption(refOpt) : StatusCode::FAILURE;
 }
 
 /// Access options
-DbStatus DbContainer::getOption(DbOption& refOpt) {
-  return isValid() ? m_ptr->getOption(refOpt) : Error;
+StatusCode DbContainer::getOption(DbOption& refOpt) {
+  return isValid() ? m_ptr->getOption(refOpt) : StatusCode::FAILURE;
 }
 
-/// Start/Commit/Rollback Database Transaction
+/// Start/Commit Database Transaction
 const Token* DbContainer::token() const {
   return isValid() ? m_ptr->token() : 0;
 }
@@ -154,18 +156,13 @@ DbContainer::objectShape(const Guid& guid) {
   return isValid() ? m_ptr->objectShape(guid) : 0;
 }
 
-/// Perform selection
-DbStatus DbContainer::select(DbSelect& sel) {
-  return isValid() ? m_ptr->select(sel) : Error;
-}
-
-/// Fetch next object address of the selection to set token
-DbStatus DbContainer::fetch(DbSelect& sel) {
-  return isValid() ? m_ptr->fetch(sel) : Error;
+/// Fetch next object address to set token
+StatusCode DbContainer::next(Token::OID_t& linkH) {
+  return isValid() ? m_ptr->next(linkH) : StatusCode::FAILURE;
 }
 
 /// Store object in location
-DbStatus DbContainer::store(const void* object, const DbTypeInfo* typ) {
+StatusCode DbContainer::store(const void* object, const DbTypeInfo* typ) {
   if ( isValid() )  {
     return m_ptr->store(object, *this, typ);
   }
@@ -173,7 +170,7 @@ DbStatus DbContainer::store(const void* object, const DbTypeInfo* typ) {
 }
 
 /// In place allocation of object location
-DbStatus DbContainer::allocate(const void* object, ShapeH shape, Token::OID_t& oid) {
+StatusCode DbContainer::allocate(const void* object, ShapeH shape, Token::OID_t& oid) {
   if ( !isValid() ) {
     throw std::runtime_error("DbContainer::allocate failed: invalid container");
   }
@@ -184,14 +181,14 @@ DbStatus DbContainer::allocate(const void* object, ShapeH shape, Token::OID_t& o
 }
 
 /// Load object in the container identified by its handle
-DbStatus DbContainer::load( void** ptr,
+StatusCode DbContainer::load( void** ptr,
                             ShapeH shape,
                             const Token::OID_t& linkH )
 {
   if ( isValid() )  {
     Token::OID_t oid;
-    DbStatus sc = m_ptr->load(ptr, shape, linkH, oid, false);
+    StatusCode sc = m_ptr->load(ptr, shape, linkH, oid, false);
     return sc;
   }
-  return Error;
+  return StatusCode::FAILURE;
 }

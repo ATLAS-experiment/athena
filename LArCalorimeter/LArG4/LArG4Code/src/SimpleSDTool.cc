@@ -75,7 +75,7 @@ namespace LArG4
   //---------------------------------------------------------------------------
   // Create one SD
   //---------------------------------------------------------------------------
-  std::unique_ptr<LArG4SimpleSD>
+  LArG4SimpleSD*
   SimpleSDTool::makeOneSD(const std::string& sdName, ILArCalculatorSvc* calc,
                           const std::vector<std::string>& volumes) const
   {
@@ -87,15 +87,16 @@ namespace LArG4
     // Create the simple SD
     auto sd = std::make_unique<LArG4SimpleSD>
       (sdName, calc, m_timeBinType, m_timeBinWidth);
+    auto* sdPtr = sd.get();
     sd->setupHelpers(m_larEmID, m_larFcalID, m_larHecID);
 
     // Assign the volumes to the SD
-    if( assignSD( sd.get(), parsedVolumes ).isFailure() ) {
+    if( assignSD( std::move(sd), parsedVolumes ).isFailure() ) {
       // TODO: can I just return NULL here?
       throw GaudiException("Failed to assign sd: " + sdName,
                            name(), StatusCode::FAILURE);
     }
-    return sd;
+    return sdPtr;
   }
 
 } // namespace LArG4

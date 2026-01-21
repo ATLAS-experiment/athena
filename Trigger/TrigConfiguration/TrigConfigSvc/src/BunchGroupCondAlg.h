@@ -5,7 +5,7 @@
 #ifndef TRIGCONFIGSVC__BUNCHGROUPCONDALG
 #define TRIGCONFIGSVC__BUNCHGROUPCONDALG
 
-#include "AthenaBaseComps/AthReentrantAlgorithm.h"
+#include "AthenaBaseComps/AthCondAlgorithm.h"
 #include "CxxUtils/checker_macros.h"
 
 #include "StoreGate/ReadCondHandleKey.h"
@@ -17,14 +17,12 @@
 
 namespace TrigConf {
 
-   class BunchGroupCondAlg : public AthReentrantAlgorithm {
+   class BunchGroupCondAlg : public AthCondAlgorithm {
    public:
       BunchGroupCondAlg (const std::string& name, ISvcLocator* pSvcLocator);
       virtual StatusCode initialize() override;
       virtual StatusCode execute(const EventContext& ctx) const override;
 
-      // avoids running CondAlg multiple times for the same input (ATEAM-617)
-      virtual bool isReEntrant() const override final { return false; }
     private:
       // helper function to load a L1BunchGroupSet set from a file
       std::shared_ptr<L1BunchGroupSet> createFromFile( const std::string & filename ) const;

@@ -59,8 +59,7 @@ namespace PanTau {
         StatusCode addConstituentMomenta(PanTau::PanTauSeed* inSeed) const;
         
         //Function to calculate features based on two sets of constituents
-        StatusCode addCombinedFeatures(PanTau::PanTauSeed* inSeed,
-				       const std::map<std::string, double>& variants_SeedEt) const;
+        StatusCode addCombinedFeatures(PanTau::PanTauSeed* inSeed) const; 
         
         //Function to fill the variants_SeedEt member
         static void fillVariantsSeedEt(const std::vector<PanTau::TauConstituent*>& tauConstituents,
@@ -76,7 +75,7 @@ namespace PanTau {
         
         
         //! Helper members
-        std::vector<double> m_Config_CellBased_BinEdges_Eta;
+        std::vector<double> m_Config_BinEdges_Eta;
         std::vector<double> m_Config_CellBased_EtaBinned_Pi0MVACut_1prong;
         std::vector<double> m_Config_CellBased_EtaBinned_Pi0MVACut_3prong;
         
@@ -85,7 +84,6 @@ namespace PanTau {
         static const std::string varTypeName_Mean()         {return "Mean";}
         static const std::string varTypeName_StdDev()       {return "StdDev";}
         static const std::string varTypeName_HLV()          {return "HLV";}
-        static const std::string varTypeName_Angle()        {return "Angle";}
         static const std::string varTypeName_DeltaR()       {return "DeltaR";}
         static const std::string varTypeName_JetMoment()    {return "JetMoment";}
         static const std::string varTypeName_Combined()     {return "Combined";}
@@ -94,11 +92,8 @@ namespace PanTau {
         static const std::string varTypeName_Shots()        {return "Shots";}
         
         std::string m_varTypeName_Ratio;
-        std::string m_varTypeName_Mean;
         std::string m_varTypeName_StdDev;
         std::string m_varTypeName_HLV;
-        std::string m_varTypeName_Angle;
-        std::string m_varTypeName_DeltaR;
         std::string m_varTypeName_JetMoment;
         std::string m_varTypeName_Combined;
         std::string m_varTypeName_Basic;

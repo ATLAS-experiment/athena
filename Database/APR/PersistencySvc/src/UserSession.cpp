@@ -93,12 +93,12 @@ pool::PersistencySvc::UserSession::databaseHandle( const std::string& dbName,
 {
   if ( m_transaction->isActive() ) {
      return std::make_unique<UserDatabase>( *m_technologyDispatcher,
-                                                   *m_policy,
-                                                   *m_catalog,
-                                                   *m_transaction,
-                                                   *m_registry,
-                                                   dbName,
-                                                   dbNameType );
+                                            *m_policy,
+                                            *m_catalog,
+                                            *m_transaction,
+                                            *m_registry,
+                                             dbName,
+                                             dbNameType );
   }
   return nullptr;
 }

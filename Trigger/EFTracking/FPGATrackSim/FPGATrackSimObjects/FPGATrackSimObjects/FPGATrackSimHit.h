@@ -33,11 +33,12 @@
 #include "TMath.h"
 
 #include "GeneratorObjects/HepMcParticleLink.h"
-
+#include "Identifier/Identifier.h"
+#include "AthContainers/AuxElement.h"
  // Some types are inclusive of others. For example, clustered implies mapped.
 enum class HitType { unmapped, mapped, clustered, wildcard, guessed, undefined, extrapolated, spacepoint };
 
-class FPGATrackSimHit
+class FPGATrackSimHit : public SG::AuxElement
 {
 public:
 
@@ -70,6 +71,7 @@ public:
     // --- Unmapped Location ---
     void setIdentifier(unsigned int v) { m_identifier = v; } // 32 bit (short) module identifier
     void setIdentifierHash(unsigned v) { m_identifierHash = v; }
+    void setRdoIdentifier(Identifier::value_type v) { m_rdoIdentifier = v; } // this stores the entire 64 bit hit identifier
     void setLayerDisk(unsigned v) { m_layer_disk = v; } // ITk layer number
     void setSide(unsigned v) { m_side = v; }
     void setPhysLayer(unsigned v); // Sets using the FPGATrackSim-defined physical layer index (see FPGATrackSimPlaneMap.h)
@@ -79,6 +81,7 @@ public:
     void setPhiWidth(unsigned v) { m_phiWidth = v; }
     unsigned int getIdentifier() const { return m_identifier; } // 32 bit (short) module identifier
     unsigned getIdentifierHash() const { return m_identifierHash; } // TODO note this might break things in the same way as getSide() a few lines below. If so, recomment.
+    Identifier::value_type getRdoIdentifier() const { return m_rdoIdentifier; } // this returns the entire 64 bit hit identifier. TODO instead of storing it, calculate it based on the module ID and eta/phi index
     unsigned getLayerDisk(bool old=false) const { if (old && isRemapped()) return m_layer_disk_old; else return m_layer_disk;} // ITk layer number
     unsigned getSide() const { return m_side; } // strip side TODO note this has been uncommented on 4/20/21. If wrappers suddenly break, recomment this. Same for getIdentifierHash above.
     unsigned getPhysLayer(bool old=false) const; // Returns the FPGATrackSim-defined physical layer index (see FPGATrackSimPlaneMap.h)
@@ -220,6 +223,7 @@ protected:
     // --- Unmapped Location ---
     unsigned int m_identifier = 0; // Global module ID, from offline (32 bit variant)
     unsigned m_identifierHash = 0; // Global module ID hash, from ITk
+    Identifier::value_type m_rdoIdentifier = 0; // Full 64 bit hit identifier
     unsigned m_layer_disk = 0;     // ITk layer number
     unsigned m_layer_disk_old = 0;     // ITk layer number
     unsigned m_side = 0;           // Side of the strip module
@@ -307,7 +311,7 @@ protected:
     std::vector<unsigned> m_IDhashVec; // for a cluster, when we get the equivalent hit info we want to store all the ID hash containing it
     std::vector<int> m_PhiIndexVec; // for a cluster, all the phi indices in it
     std::vector<int> m_EtaIndexVec; // for a cluster, all the eta indices in it
-    ClassDefNV(FPGATrackSimHit, 14);
+    ClassDefNV(FPGATrackSimHit, 15);
 };
 
 // Container of <FPGATrackSimHit const *>

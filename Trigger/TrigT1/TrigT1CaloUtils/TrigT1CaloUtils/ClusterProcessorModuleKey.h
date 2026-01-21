@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /***************************************************************************
                           ClusterProcessorModuleKey.h  -  description
@@ -51,18 +51,18 @@ public:
   /** calculates key from crate and module index */
   unsigned int cpmKey(unsigned int crate, unsigned int module);
   /** height */
-  double dPhi(const Coordinate& coord) const;
+  virtual double dPhi(const Coordinate& coord) const override;
   /** width */
-  double dEta(const Coordinate& coord) const;
+  virtual double dEta(const Coordinate& coord) const override;
   /** returns CPM number within a crate for a TriggerTower or RoI coordinate*/
   unsigned int cpm(const Coordinate & coord) const;
   
 private: // Private methods
   /** converts integer phi, eta coordinates to phi, eta trigger bins,
   and central coords*/
-  BinAndCoord* calculateTriggerBin(ICoordinate* iCoord);
+  virtual BinAndCoord calculateTriggerBin(const ICoordinate& iCoord) override;
   /** sets the eta and phi bins*/
-  void setBins(ICoordinate* iCoord,unsigned int& phiBin, int& etaBin);
+  void setBins(const ICoordinate& iCoord,unsigned int& phiBin, int& etaBin);
   /** returns the quadrant number associated with the phi coordinate,
   0   - 90   = 0
   90 - 180 = 1

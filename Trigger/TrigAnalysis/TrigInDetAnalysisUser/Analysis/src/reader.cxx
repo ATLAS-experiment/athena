@@ -4,7 +4,7 @@
  **     @author  mark sutton
  **     @date    Mon 30 Jan 2012 18:43:21 CET 
  **
- **     Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+ **     Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
  **/
 
 
@@ -58,7 +58,7 @@ int main(int argc, char** argv) {
       if      ( argi == "-r"  || argi == "--release" ) show_release = true;
       if      ( argi == "-ro" || argi == "--releaseonly" ) show_release = quit_after_release = true;
       else if ( argi == "-h"  || argi == "--help" )    return usage( std::cout, argc, argv );
-      else    files.push_back( argi );
+      else    files.push_back( std::move(argi) );
     }
   }
 

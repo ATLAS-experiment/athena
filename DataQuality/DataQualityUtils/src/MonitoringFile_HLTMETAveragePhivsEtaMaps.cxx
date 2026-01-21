@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
  */
 
 /* HLTMET Post Processing Method: Peform bin-wise division for each Phi.vs.Eta maps of MET, SumEt, SumE
@@ -36,9 +36,9 @@
 namespace dqutils {
   void
   MonitoringFile::HLTMETAveragePhivsEtaMaps(TFile* f, TString& run_dir) {
-    bool dbgLevel = false;
+    //bool dbgLevel = false;
 
-    if (dbgLevel) std::cout << "--> HLTMETAveragePhivsEtaMaps: <Quantity(eta,phi)>  = Quantity(eta,phi)/N(eta,phi) " << std::endl;
+    //if (dbgLevel) std::cout << "--> HLTMETAveragePhivsEtaMaps: <Quantity(eta,phi)>  = Quantity(eta,phi)/N(eta,phi) " << std::endl;
 
     f->cd("/");
     TIter next_run(f->GetListOfKeys());
@@ -119,11 +119,11 @@ namespace dqutils {
 
             // test if histograms are present
             if (!f->Get(numPath)) {
-              if (dbgLevel) std::cerr << "--> HLTMETAveragePhivsEtaMaps: no histogram " << numPath << std::endl;
+              //if (dbgLevel) std::cerr << "--> HLTMETAveragePhivsEtaMaps: no histogram " << numPath << std::endl;
               continue;
             }
             if (!f->Get(denPath)) {
-              if (dbgLevel) std::cerr << "--> HLTMETAveragePhivsEtaMaps: no histogram " << denPath << std::endl;
+              //if (dbgLevel) std::cerr << "--> HLTMETAveragePhivsEtaMaps: no histogram " << denPath << std::endl;
               continue;
             }
 

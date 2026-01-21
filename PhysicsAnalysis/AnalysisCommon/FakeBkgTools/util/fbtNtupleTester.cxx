@@ -286,7 +286,7 @@ int main(int argc, char* argv[])
       if (lepType == xAOD::Type::Electron){
         xAOD::Electron* particle = new xAOD::Electron();
         particle->makePrivateStore();
-        particle->setP4(lepPt.at(i)*convertToMeV,lepEta.at(i),lepPhi.at(i),ParticleConstants::electronMassInMeV);
+        particle->setPtEtaPhi(lepPt.at(i)*convertToMeV,lepEta.at(i),lepPhi.at(i));
         particle->setCharge(lepCharge.at(i));
         tightDecor(*particle) = passesSignal;
         particles.push_back(static_cast<xAOD::IParticle*>(particle));

@@ -128,14 +128,24 @@ namespace ActsTrk {
           freeParams.segment<3>(Acts::eFreePos0),
           freeParams.segment<3>(Acts::eFreeDir0)
         ).closest().pathLength());
-    auto boundParamsResult = m_extrapolator->propagateToSurface(curvilinearParams, surface, propOptions);
+
+    std::optional<Acts::BoundTrackParameters> boundParams;
+    auto boundParamsResult =
+        m_extrapolator->propagateToSurface(curvilinearParams, surface, propOptions);
+
     if (!boundParamsResult.ok()) {
       ATH_MSG_DEBUG("Extrapolation failed");
-      return std::nullopt;
+      if (m_allowPropagatorFailure) {
+        // Fallback: use curvilinear parameters instead of failing
+        ATH_MSG_DEBUG("Using curvilinear parameters due to propagation failure");
+        boundParams = curvilinearParams;
+      } else {
+        return std::nullopt;
+      }
+    } else {
+      boundParams = *boundParamsResult;
     }
 
-    // Get extrapolated parameters
-    Acts::BoundTrackParameters boundParams = *boundParamsResult;
 
     // Estimate covariance
     Acts::EstimateTrackParamCovarianceConfig covarianceEstimationConfig = {
@@ -144,9 +154,9 @@ namespace ActsTrk {
       .initialVarInflation = Eigen::Map<const Acts::BoundVector>(m_initialVarInflation.value().data()),
       .noTimeVarInflation = 1.0,
     };
-    boundParams.covariance() = Acts::estimateTrackParamCovariance(
+    boundParams->covariance() = Acts::estimateTrackParamCovariance(
       covarianceEstimationConfig,
-      boundParams.parameters(),
+      boundParams->parameters(),
       false);
 
     return boundParams;

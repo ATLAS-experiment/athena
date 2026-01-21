@@ -74,10 +74,8 @@ class PreJetAnalysisConfig (ConfigBlock) :
 
         # NB: I'm assuming that the truth tagging is done in PHYSLITE, if not this will
         # need to change
-        if self.runTruthJetTagging or (
-            self.runTruthJetTagging is None
-            and config.dataType() is not DataType.Data
-        ):
+        if (self.runTruthJetTagging or (self.runTruthJetTagging is None)
+        ) and config.dataType() is not DataType.Data:
             # Decorate jets with isHS labels (required to retrieve Jvt SFs)
             alg = config.createAlgorithm( 'CP::JetDecoratorAlg', 'JetPileupLabelAlg' )
             config.addPrivateTool( 'decorator', 'JetPileupLabelingTool' )
@@ -182,6 +180,7 @@ class SmallRJetAnalysisConfig (ConfigBlock) :
         if not config.isPhyslite() or self.recalibratePhyslite:
             # Prepare the jet calibration algorithm
             alg = config.createAlgorithm( 'CP::JetCalibrationAlg', 'JetCalibrationAlg' )
+            alg.HIsetup = self.jetInput == "HI"
             config.addPrivateTool( 'calibrationTool', 'JetCalibrationTool' )
             alg.calibrationTool.JetCollection = jetCollectionName[:-4]
             # Get the correct string to use in the config file name
@@ -196,7 +195,7 @@ class SmallRJetAnalysisConfig (ConfigBlock) :
                 if config.geometry() is LHCPeriod.Run2:
                     configFile = "JES_MC16_HI_Jan2021_5TeV.config"
                 if config.geometry() is LHCPeriod.Run3:
-                    configFile = "AntiKt4HI_JES_constants_11-05-2024_13p6TeVFinalConfiguration.config"
+                    configFile = "AntiKt4HI_MC23_EtaJES_Run3PreRec_Run2VJet_Run3EtaInt_5p36TeV.config"
                     alg.calibrationTool.CalibArea = "00-04-83"
             else:
                 if config.dataType() is DataType.FastSim:
@@ -211,10 +210,7 @@ class SmallRJetAnalysisConfig (ConfigBlock) :
             alg.calibrationTool.ConfigFile = configFile
             if config.dataType() is DataType.Data:
                 if self.jetInput == "HI":
-                    if config.geometry() is LHCPeriod.Run2:
-                        alg.calibrationTool.CalibSequence = 'EtaJES_Insitu'
-                    if config.geometry() is LHCPeriod.Run3:
-                        alg.calibrationTool.CalibSequence = 'EtaJES'
+                    alg.calibrationTool.CalibSequence = 'EtaJES_Insitu'
                 else:
                     alg.calibrationTool.CalibSequence = 'JetArea_Residual_EtaJES_GSC_Insitu'
             else:
@@ -258,6 +254,7 @@ class SmallRJetAnalysisConfig (ConfigBlock) :
             alg = config.createAlgorithm('CP::AsgSelectionAlg', 'JvtSelectionAlg')
             config.addPrivateTool('selectionTool', 'CP::NNJvtSelectionTool')
             alg.selectionTool.JetContainer = config.readName(self.containerName)
+            alg.selectionTool.JvtMomentName = "NNJvt"
             alg.selectionTool.WorkingPoint = self.jvtWP
             alg.selectionTool.MaxPtForJvt = 60*GeV
             alg.selectionDecoration = "jvt_selection,as_char"
@@ -288,6 +285,7 @@ class SmallRJetAnalysisConfig (ConfigBlock) :
             alg = config.createAlgorithm('CP::AsgSelectionAlg', 'FJvtSelectionAlg')
             config.addPrivateTool('selectionTool', 'CP::FJvtSelectionTool')
             alg.selectionTool.JetContainer = config.readName(self.containerName)
+            alg.selectionTool.JvtMomentName = "DFCommonJets_fJvt"
             alg.selectionTool.WorkingPoint = self.fJvtWP
             alg.selectionDecoration = "fjvt_selection,as_char"
             alg.particles = config.readName(self.containerName)
@@ -357,19 +355,28 @@ class RScanJetAnalysisConfig (ConfigBlock) :
             jetCollectionName="AntiKt10LCTopoTrimmedPtFrac5SmallR20Jets"
 
         if not config.isPhyslite() or self.recalibratePhyslite:
-            if self.jetInput != "LCTopo":
+            if self.jetInput not in ["LCTopo", "HI"]:
                 raise ValueError(
                     "Unsupported input type '{0}' for R-scan jets!".format(self.jetInput) )
             # Prepare the jet calibration algorithm
             alg = config.createAlgorithm( 'CP::JetCalibrationAlg', 'JetCalibrationAlg' )
+            alg.HIsetup = self.jetInput == "HI"
             config.addPrivateTool( 'calibrationTool', 'JetCalibrationTool' )
             alg.calibrationTool.JetCollection = jetCollectionName[:-4]
-            alg.calibrationTool.ConfigFile = \
-                "JES_MC16Recommendation_Rscan{0}LC_Feb2022_R21.config".format(self.radius)
-            if config.dataType() is DataType.Data:
-                alg.calibrationTool.CalibSequence = "JetArea_Residual_EtaJES_GSC_Insitu"
-            else:
-                alg.calibrationTool.CalibSequence = "JetArea_Residual_EtaJES_GSC_Smear"
+            if self.jetInput=="LCTopo":
+                alg.calibrationTool.ConfigFile = \
+                    "JES_MC16Recommendation_Rscan{0}LC_Feb2022_R21.config".format(self.radius)
+                if config.dataType() is DataType.Data:
+                    alg.calibrationTool.CalibSequence = "JetArea_Residual_EtaJES_GSC_Insitu"
+                else:
+                    alg.calibrationTool.CalibSequence = "JetArea_Residual_EtaJES_GSC_Smear"
+            elif self.jetInput=="HI":
+                alg.calibrationTool.ConfigFile = \
+                    "JES_MC16_HI_Jan2021_5TeV.config"
+                if config.dataType() is DataType.Data:
+                    alg.calibrationTool.CalibSequence = "EtaJES_Insitu"
+                else:
+                    alg.calibrationTool.CalibSequence = "EtaJES"
             alg.calibrationTool.IsData = (config.dataType() is DataType.Data)
             alg.jets = config.readName (self.containerName)
             # Logging would be good
@@ -489,9 +496,8 @@ class LargeRJetAnalysisConfig (ConfigBlock) :
         if self.uncertToolConfigPathJMR is not None:
             config_file = self.uncertToolConfigPathJMR
         else:
-            if config.geometry() in [LHCPeriod.Run2, LHCPeriod.Run3]:
-                config_file = "rel22/Summer2025_PreRec/" + config_file
-            else:
+            config_file = "rel22/Summer2025_PreRec/" + config_file
+            if config.geometry() is LHCPeriod.Run4:
                 log.warning("Uncertainties for UFO jets are not for Run 4!")
 
         # MC type:
@@ -500,7 +506,7 @@ class LargeRJetAnalysisConfig (ConfigBlock) :
                 mc_type = "MC20AF3"
             else:
                 mc_type = "MC20"
-        elif config.geometry() is LHCPeriod.Run3:
+        elif config.geometry() >= LHCPeriod.Run3:
             if config.dataType() is DataType.FastSim:
                 mc_type = "MC23AF3"
             else:
@@ -543,7 +549,8 @@ class LargeRJetAnalysisConfig (ConfigBlock) :
         if self.calibToolConfigFile is not None:
             configFile = self.calibToolConfigFile
 
-        if self.jetInput == "TrackCaloCluster" or self.jetInput == "UFO" or config.dataType() is DataType.FullSim:
+        # No in situ calibration provided for TCC jets, thus always applying MC calibration sequence only
+        if self.jetInput == "TrackCaloCluster" or config.dataType() is DataType.FullSim or config.dataType() is DataType.FastSim:
             calibSeq = "EtaJES_JMS"
         elif config.dataType() is DataType.Data:
             calibSeq = "EtaJES_JMS_Insitu"

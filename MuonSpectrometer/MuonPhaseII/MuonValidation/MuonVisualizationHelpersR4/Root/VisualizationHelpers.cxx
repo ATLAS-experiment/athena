@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #include "MuonVisualizationHelpersR4/VisualizationHelpers.h"
 
@@ -39,10 +39,13 @@ namespace MuonValR4{
     }
     std::unique_ptr<TLatex> drawLabel(const std::string& text, 
                                       const double xPos, const double yPos,
-                                      const unsigned int fontSize) {
+                                      const unsigned int fontSize,
+                                      const bool useNDC /*= true*/) {
         auto tl = std::make_unique<TLatex>(xPos, yPos, text.c_str());
-        tl->SetNDC();
-        tl->SetTextFont(43); 
+        tl->SetTextFont(43);
+        if(useNDC){
+            tl->SetNDC();
+        } 
         tl->SetTextSize(fontSize); 
         return tl;
     }
@@ -56,7 +59,7 @@ namespace MuonValR4{
     }
     std::unique_ptr<TBox> drawBox(const double x1, const double y1, 
                                   const double x2, const double y2, 
-                                   const int color, const int fillStyle) {
+                                  const int color, const int fillStyle) {
         auto box = std::make_unique<TBox>(x1,y1,x2,y2);
         box->SetFillColor(color);
         box->SetLineColor(color);
@@ -69,13 +72,25 @@ namespace MuonValR4{
                                     const int color, const int lineStyle,
                                     const int view) {
         const auto [pos, dir] = makeLine(pars);
-        const double x1 = (pos + Amg::intersect<3>(pos,dir,Amg::Vector3D::UnitZ(), lowEnd).value_or(0.)* dir)[view];
-        const double x2 = (pos + Amg::intersect<3>(pos,dir,Amg::Vector3D::UnitZ(), highEnd).value_or(0.)* dir)[view];
-        auto seedLine = std::make_unique<TLine>(x1, lowEnd, x2, highEnd);
+        return drawLine(pos + Amg::intersect<3>(pos,dir,Amg::Vector3D::UnitZ(), lowEnd).value_or(0.)* dir,
+                        pos + Amg::intersect<3>(pos,dir,Amg::Vector3D::UnitZ(), highEnd).value_or(0.)* dir,
+                        color, lineStyle, view);
+    }
+    std::unique_ptr<TLine> drawLine(const Amg::Vector3D& lowEnd,
+                                    const Amg::Vector3D& highEnd,
+                                    const int color, const int lineStyle,
+                                    const int view) {
+        const double x1 = lowEnd[view];
+        const double y1 = lowEnd[Amg::z];
+        const double x2 = highEnd[view];
+        const double y2 = highEnd[Amg::z];
+        
+        auto seedLine = std::make_unique<TLine>(x1, y1, x2, y2);
         seedLine->SetLineColor(color);
         seedLine->SetLineWidth(2);
         seedLine->SetLineStyle(lineStyle);
         return seedLine;
+    
     }
     std::unique_ptr<TLatex> drawAtlasLabel(const double xPos, const double yPos,
                                            const std::string& status) {

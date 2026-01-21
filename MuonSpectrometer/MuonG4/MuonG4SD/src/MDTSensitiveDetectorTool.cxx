@@ -4,11 +4,26 @@
 
 #include "MDTSensitiveDetectorTool.h"
 #include "MDTSensitiveDetector.h"
+
+#include "HitManagement/HitCollectionMap.h"
+#include "MuonSimEvent/MDTSimHitCollection.h"
 #include <TString.h> // for Form
 
 MDTSensitiveDetectorTool::MDTSensitiveDetectorTool(const std::string& type, const std::string& name, const IInterface* parent)
   : SensitiveDetectorBase( type , name , parent )
 {
+}
+
+StatusCode MDTSensitiveDetectorTool::SetupEvent(HitCollectionMap& hitCollections)
+{
+  hitCollections.Emplace<MDTSimHitCollection>(m_outputCollectionNames[0]);
+  return StatusCode::SUCCESS;
+}
+
+StatusCode MDTSensitiveDetectorTool::Gather(HitCollectionMap& hitCollections)
+{
+  hitCollections.Record<MDTSimHitCollection>(m_outputCollectionNames[0]);
+  return StatusCode::SUCCESS;
 }
 
 G4VSensitiveDetector* MDTSensitiveDetectorTool::makeSD() const

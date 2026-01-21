@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ROOTCOLLECTION_ROOTCOLLECTIONCURSOR_H
@@ -8,9 +8,9 @@
 
 #include "PersistentDataModel/Token.h"
 
-#include "CollectionBase/CollectionRowBuffer.h"
-#include "CollectionBase/ICollectionDescription.h"
-#include "CollectionBase/ICollectionCursor.h"
+#include "CollectionSvc/CollectionRowBuffer.h"
+#include "CollectionSvc/ICollectionDescription.h"
+#include "CollectionSvc/ICollectionCursor.h"
 
 class TTree;
 class TBranch;
@@ -21,7 +21,7 @@ namespace pool {
       /** 
        * @class RootcollectionCursor RootcollectionCursor.h Rootcollection/RootcollectionCursor.h
        *
-       * An interface used to navigate the result of a query on a collection.
+       * An interface used to navigate a collection.
        */
       class RootCollectionCursor : public ICollectionCursor
       {
@@ -34,10 +34,10 @@ namespace pool {
            const TEventList *evl );
 
         
-        /// Advances the cursor to the next row of the query result set.
+        /// Advances the cursor to the next row
         virtual bool next() override;
 
-        /// Returns the selected Tokens and Attributes for the current row of the query result set.
+        /// Returns the selected Tokens and Attributes for the current row
         virtual const pool::CollectionRowBuffer& currentRow() const override;
 
         /// Return the size of the collection.
@@ -60,10 +60,8 @@ namespace pool {
         
         const ICollectionDescription    &m_description;
 
-        /// Row buffer containing Tokens and Attributes selected by query.
+        /// Row buffer containing Tokens and Attributes
         pool::CollectionRowBuffer       m_collectionRowBuffer;
-
-        const TEventList                *m_eventList;
 
         char                             m_charBuffer[c_maxLengthOfStrings];
 

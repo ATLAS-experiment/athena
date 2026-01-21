@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGCONFDATA_CONSTITER_H
@@ -10,8 +10,7 @@
  */
 
 #include "CxxUtils/CachedValue.h"
-
-#include <iostream>
+#include <iterator> //std::forward_iterator_tag
 #include <functional>
 
 namespace TrigConf {
@@ -55,7 +54,7 @@ namespace TrigConf {
          m_buf(buf),
          m_offset(offset),
          m_data(),
-         m_f(f),
+         m_f(std::move(f)),
          m_bufIt(buf.begin())
       {}
 
@@ -64,10 +63,6 @@ namespace TrigConf {
          return &i.m_buf == &m_buf && i.m_offset == m_offset;
       }
 
-      /** Not-equal operator */
-      bool operator!=(const ConstIter &i) const {
-         return !(*this == i);
-      }
 
       /** Pre-increment operator */
       ConstIter & operator++() {

@@ -23,7 +23,7 @@ namespace {
 
 namespace InDet {
    SiDetectorElementStatusCondAlg::SiDetectorElementStatusCondAlg(const std::string& name, ISvcLocator* pSvcLocator)
-      : ::AthReentrantAlgorithm(name, pSvcLocator)
+      : ::AthCondAlgorithm(name, pSvcLocator)
    {
    }
 

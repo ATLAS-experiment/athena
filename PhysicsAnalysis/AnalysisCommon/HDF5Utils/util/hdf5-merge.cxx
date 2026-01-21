@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "H5Cpp.h"
@@ -106,9 +106,10 @@ int main(int argc, char* argv[]) {
   else {
     // Default used if neither was set or if bufferSizeMB is set
     std::size_t MB = 1024*1024;
-    if (std::size_t(-1) / bufferSizeMB < MB)
-      throw std::overflow_error(
-          "Requested buffer size would overflow the register!");
+    if (std::size_t(-1) / bufferSizeMB < MB) {
+      std::cerr << "Requested buffer size would overflow the register!\n";
+      return 1;
+    }
     buffer = bufferSizeMB * MB;
     bufferInRows = false;
   }

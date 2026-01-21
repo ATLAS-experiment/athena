@@ -22,14 +22,6 @@ def HIGG9D1KernelCfg(flags, name='HIGG9D1Kernel', **kwargs):
     else:
         log_HIGG9D1.info("flags.Tracking.doLargeD0 is False")
 
-    # Adds primary vertex counts and track counts to EventInfo before they are thinned
-    HIGG9D1_AugOriginalCounts = CompFactory.DerivationFramework.AugOriginalCounts(
-       name              = "HIGG9D1_AugOriginalCounts",
-       VertexContainer   = "PrimaryVertices",
-       TrackContainer    = "InDetTrackParticles",
-       TrackLRTContainer = "InDetLargeD0TrackParticles" if doLRT else "" )
-    acc.addPublicTool(HIGG9D1_AugOriginalCounts)
-
     mainMuonInput = "StdWithLRTMuons" if doLRT else "Muons"
     mainIDInput   = "InDetWithLRTTrackParticles" if doLRT else "InDetTrackParticles"
     if doLRT:
@@ -47,7 +39,16 @@ def HIGG9D1KernelCfg(flags, name='HIGG9D1Kernel', **kwargs):
     MuonToRelink = [ "Muons", "MuonsLRT" ] if doLRT else []
     TrkToRelink = ["InDetTrackParticles", "InDetLargeD0TrackParticles"] if doLRT else []
 
-    from DerivationFrameworkBPhys.commonBPHYMethodsCfg import (BPHY_V0ToolCfg,  BPHY_InDetDetailedTrackSelectorToolCfg, BPHY_VertexPointEstimatorCfg, BPHY_TrkVKalVrtFitterCfg)
+    from DerivationFrameworkBPhys.commonBPHYMethodsCfg import (
+        BPHY_V0ToolCfg,  BPHY_InDetDetailedTrackSelectorToolCfg,
+        BPHY_VertexPointEstimatorCfg, BPHY_TrkVKalVrtFitterCfg,
+        AugOriginalCountsCfg)
+
+    # Adds primary vertex counts and track counts to EventInfo before they are thinned
+    HIGG9D1_AugOriginalCounts = acc.popToolsAndMerge(
+        AugOriginalCountsCfg(flags, name = "HIGG9D1_AugOriginalCounts"))
+    acc.addPublicTool(HIGG9D1_AugOriginalCounts)
+
     V0Tools = acc.popToolsAndMerge(BPHY_V0ToolCfg(flags, "HIGG9D1"))
     vkalvrt = acc.popToolsAndMerge(BPHY_TrkVKalVrtFitterCfg(flags, "HIGG9D1"))
     acc.addPublicTool(vkalvrt)
@@ -191,12 +192,15 @@ def HIGG9D1KernelCfg(flags, name='HIGG9D1Kernel', **kwargs):
     acc.addEventAlgo(HIGG9D1_onia_skimKernel, sequenceName="HIGG9D1Sequence")
 
     ## FTAG augmentations - run b-tagging on PFlow jets
-    from DerivationFrameworkFlavourTag.FtagDerivationConfig import JetCollectionsBTaggingCfg
-    acc.merge(JetCollectionsBTaggingCfg(flags, ["AntiKt4EMPFlowJets"]), sequenceName="HIGG9D1Sequence")
+    from BTagging.FlavorTaggingConfig import FlavorTaggingCfg
+    acc.merge(FlavorTaggingCfg(flags, "AntiKt4EMPFlowJets"), sequenceName="HIGG9D1Sequence")
 
     ##===========================
     ## bb / tautau / yy skimming
     ##===========================
+
+    from DerivationFrameworkTools.DerivationFrameworkToolsConfig import (
+        xAODStringSkimmingToolCfg)
 
     ## b-jets
     # https://indico.cern.ch/event/273466/contributions/616597/attachments/492353/680556/summary.pdf
@@ -206,11 +210,11 @@ def HIGG9D1KernelCfg(flags, name='HIGG9D1Kernel', **kwargs):
     # fraction_c (0.2), fraction_tau (0.01) and cutvalue (0.844) from TDirectory "GN2v01/AntiKt4EMPFlowJets/FixedCutBEff_77" of
     # /cvmfs/atlas.cern.ch/repo/sw/database/GroupData/xAODBTaggingEfficiency/13TeV/MC20_2024-10-17_GN2v01_v1.root (run-2) and
     # /cvmfs/atlas.cern.ch/repo/sw/database/GroupData/xAODBTaggingEfficiency/13p6TeV/MC23_2024-10-17_GN2v01_v1.root (run-3)
-    HIGG9D1_smallR_EMPFlow_1b_sel = "count(AntiKt4EMPFlowJets.pt > 18*GeV && abs(AntiKt4EMPFlowJets.eta) < 2.8 && log(BTagging_AntiKt4EMPFlow.GN2v01_pb/(0.2*BTagging_AntiKt4EMPFlow.GN2v01_pc + (1.-0.2-0.01)*BTagging_AntiKt4EMPFlow.GN2v01_pu + 0.01*BTagging_AntiKt4EMPFlow.GN2v01_ptau))>=0.844) >= 1"
+    HIGG9D1_smallR_EMPFlow_1b_sel = "count(AntiKt4EMPFlowJets.pt > 18*GeV && abs(AntiKt4EMPFlowJets.eta) < 2.8 && log(AntiKt4EMPFlowJets.GN2v01_pb/(0.2*AntiKt4EMPFlowJets.GN2v01_pc + (1.-0.2-0.01)*AntiKt4EMPFlowJets.GN2v01_pu + 0.01*AntiKt4EMPFlowJets.GN2v01_ptau))>=0.844) >= 1"
 
     HIGG9D1_bjet_sel = "%s && %s && %s" % (HIGG9D1_smallR_EMPFlow_2j_sel, HIGG9D1_smallR_EMPFlow_1j_sel, HIGG9D1_smallR_EMPFlow_1b_sel)
-    HIGG9D1_bb_skim = CompFactory.DerivationFramework.xAODStringSkimmingTool(name = "HIGG9D1_bb_skim", expression = HIGG9D1_bjet_sel)
-    acc.addPublicTool(HIGG9D1_bb_skim)
+    HIGG9D1_bb_skim = acc.getPrimaryAndMerge(xAODStringSkimmingToolCfg(
+        flags, name = "HIGG9D1_bb_skim", expression = HIGG9D1_bjet_sel))
 
     ## taus
     HIGG9D1_tauTrks = '(TauJets.nTracks + TauJets.nTracksIsolation >= 1 && TauJets.nTracks + TauJets.nTracksIsolation <= 8)'
@@ -222,8 +226,8 @@ def HIGG9D1KernelCfg(flags, name='HIGG9D1Kernel', **kwargs):
     HIGG9D1_tauReq2 = 'count( '+HIGG9D1_tauLead+' && '+HIGG9D1_tauTrks+' ) >= 1'
     HIGG9D1_tau_sel = "%s && %s && %s" % (HIGG9D1_tauReq0, HIGG9D1_tauReq1, HIGG9D1_tauReq2)
 
-    HIGG9D1_tautau_skim = CompFactory.DerivationFramework.xAODStringSkimmingTool(name = "HIGG9D1_tautau_skim", expression = HIGG9D1_tau_sel)
-    acc.addPublicTool(HIGG9D1_tautau_skim)
+    HIGG9D1_tautau_skim = acc.getPrimaryAndMerge(xAODStringSkimmingToolCfg(
+        flags, name = "HIGG9D1_tautau_skim", expression = HIGG9D1_tau_sel))
 
     ## diphoton
     from  DerivationFrameworkHiggs.SkimmingToolHIGG1Config import SkimmingToolHIGG1Cfg
@@ -619,7 +623,7 @@ def HIGG9D1Cfg(flags):
         AddRun3TrigNavSlimmingCollectionsToSlimmingHelper(HIGG9D1SlimmingHelper)
 
     # L1 trigger objects
-    from DerivationFrameworkPhys.TriggerMatchingCommonConfig import getDataYear
+    from Campaigns.Utils import getDataYear
     if getDataYear(flags) >= 2024:
         # Run 3 with Phase I jet RoIs.
         from DerivationFrameworkPhys.TriggerMatchingCommonConfig import AddjFexRoIsToSlimmingHelper

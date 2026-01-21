@@ -15,21 +15,21 @@ echo "art-result: $? ENVTMerge_tf"
 
 
 
-Sim_tf.py --AMIConfig=s3879 --maxEvents=100 --inputEVNTFile=EVNT.MERGE_pool.root --outputHITSFile=HITS_421113.pool.root #--jobNumber=113
+Sim_tf.py --AMIConfig=s4369 --maxEvents=100 --inputEVNTFile=EVNT.MERGE_pool.root --outputHITSFile=HITS_421113.pool.root #--jobNumber=113
 
 echo "art-result: $? Sim_tf"
 
-HITSMerge_tf.py  --AMIConfig=s3875 --inputHITSFile=HITS_421113.pool.root --outputHITS_MRGFile=HITS_Mrg_421113_13p6.pool.root --maxEvents=100 --skipEvents=0
+HITSMerge_tf.py  --AMIConfig=s4370 --inputHITSFile=HITS_421113.pool.root --outputHITS_MRGFile=HITS_Mrg_421113_13p6.pool.root --maxEvents=100 --skipEvents=0
 
 echo "art-results: $? HITSMerge_tf"
 
 
 
-Reco_tf.py --AMIConfig=r13829 --inputHITSFile=HITS_Mrg_421113_13p6.pool.root --maxEvents=100 --jobNumber=113 --outputAODFile=AOD_421111_13p6.pool.root --inputRDO_BKGFile=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/CampaignInputs/mc21/RDO_BKG/mc21_13p6TeV.900149.PG_single_nu_Pt50.digit.RDO.e8453_e8455_s3864_d1761/100events.RDO.pool.root
+Reco_tf.py --AMIConfig=r16083 --inputHITSFile=HITS_Mrg_421113_13p6.pool.root --maxEvents=100 --jobNumber=113 --outputAODFile=AOD_421111_13p6.pool.root --inputRDO_BKGFile=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/CampaignInputs/mc23/RDO_BKG/mc23_13p6TeV.900149.PG_single_nu_Pt50.merge.RDO.e8514_e8528_s4332_s4324_d1994_d1943/100events.RDO.pool.root
 
 echo "art-result: $? Reco_tf"
 
-AODMerge_tf.py  --AMIConfig=r13831 --inputAODFile=AOD_421113.pool.root --outputAOD_MRGFile=AOD_merge_421113.pool.root --skipEvents=0
+AODMerge_tf.py  --AMIConfig=r15970 --inputAODFile=AOD_421113.pool.root --outputAOD_MRGFile=AOD_merge_421113.pool.root --skipEvents=0
 
 echo "art-result: $? AODMerge_tf"
 ~                                   

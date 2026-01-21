@@ -797,6 +797,8 @@ HLT_AntiKt4HIJets
 HLT_AntiKt4HIJetsAux.
 HLT_AntiKtVR30Rmax4Rmin02PV0TrackJets
 HLT_AntiKtVR30Rmax4Rmin02PV0TrackJetsAux.
+HLT_Bhh
+HLT_BhhAux.
 HLT_Bmumux
 HLT_BmumuxAux.
 HLT_Bmutrk
@@ -979,6 +981,8 @@ HLT_HitDVAuxDyn.hitDV_n_track_qual
 HLT_HitDVAuxDyn.hitDV_seed_eta
 HLT_HitDVAuxDyn.hitDV_seed_phi
 HLT_HitDVAuxDyn.hitDV_seed_type
+HLT_IDTrack_Bhh_FTF
+HLT_IDTrack_Bhh_FTFAux.
 HLT_IDTrack_Bjet_FTF
 HLT_IDTrack_Bjet_FTFAux.
 HLT_IDTrack_Bjet_FTFAuxDyn.viewIndex
@@ -1188,6 +1192,7 @@ HLT_NoMuonDiElecPrecisionGSF
 HLT_NoMuonDiElecPrecisionGSFAux.
 HLT_PixelTrackCount
 HLT_PixelTrackCountAux.
+HLT_Roi_Bhh
 HLT_Roi_Bjet
 HLT_Roi_Bmumux
 HLT_Roi_DJ
@@ -1839,6 +1844,7 @@ SlowMuonsAux.
 SlowMuonsAuxDyn.hitEnergy
 SlowMuonsAuxDyn.hitError
 SlowMuonsAuxDyn.hitIdentifier
+SlowMuonsAuxDyn.hitPassesMDTBetaCut
 SlowMuonsAuxDyn.hitPositionX
 SlowMuonsAuxDyn.hitPositionY
 SlowMuonsAuxDyn.hitPositionZ

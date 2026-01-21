@@ -60,31 +60,31 @@ bool DbDatabase::exist(DbDomain& dH, const string& n) const
 {  return dH.isValid() ? dH.existsDbase(n) : false;                     }
 
 /// Open Database
-DbStatus DbDatabase::open(DbDomain&       domH, 
-                          const string&   pfn, 
-                          const string&   fid, 
-                          DbAccessMode    mode)
+StatusCode DbDatabase::open(DbDomain&       domH,
+                            const string&   pfn, 
+                            const string&   fid, 
+                            DbAccessMode    mode)
 {
   if ( domH.isValid() )   {
     DbDatabaseObj* db = domH.find(fid);
     if ( !db )   {
       db = new DbDatabaseObj(domH, pfn, fid, mode);
-      if ( !db->open().isSuccess() )    {
+      if ( !db->open().isSuccess() ) {
         switchPtr(0);
-        domH.remove(db);
-        return Error;
+        domH.remove(db).ignore();
+        return StatusCode::FAILURE;
       }
     }
     switchPtr(db);
     m_type = domH.type();
-    return Success;
+    return StatusCode::SUCCESS;
   }
-  return Error;
+  return StatusCode::FAILURE;
 }
 
 /// Close Database
-DbStatus DbDatabase::close() {
-  DbStatus ret = Success;
+StatusCode DbDatabase::close() {
+  StatusCode ret = StatusCode::SUCCESS;
   if ( isValid() ) ret = ptr()->close();
   switchPtr(0);  
   return ret;
@@ -95,20 +95,20 @@ long long int DbDatabase::size()
 {  return isValid() ? ptr()->size() : -1;                               }
 
 /// Re-open database with changing access permissions
-DbStatus DbDatabase::reopen(DbAccessMode mod)
-{  return isValid() ? ptr()->reopen(mod) : Error;                       }
+StatusCode DbDatabase::reopen(DbAccessMode mod)
+{  return isValid() ? ptr()->reopen(mod) : StatusCode::FAILURE;                       }
 
 /// End database access, but still leave database accessible
-DbStatus DbDatabase::retire()
-{  return isValid() ? ptr()->retire() : Error;                          }
+StatusCode DbDatabase::retire()
+{  return isValid() ? ptr()->retire() : StatusCode::FAILURE;                          }
 
 /// Add domain to session
-DbStatus DbDatabase::add(const string& nam, DbContainerObj* cnt)
-{  return (isValid() && cnt) ? ptr()->add(nam, cnt) : Error;            }
+StatusCode DbDatabase::add(const string& nam, DbContainerObj* cnt)
+{  return (isValid() && cnt) ? ptr()->add(nam, cnt) : StatusCode::FAILURE;            }
 
 /// Remove domain from session
-DbStatus DbDatabase::remove(const DbContainerObj* cnt)   
-{  return (isValid() && cnt) ? ptr()->remove(cnt) : Error;              }
+StatusCode DbDatabase::remove(const DbContainerObj* cnt)
+{  return (isValid() && cnt) ? ptr()->remove(cnt) : StatusCode::FAILURE;              }
 
 /// Access to access mode member
 DbAccessMode DbDatabase::openMode() const 
@@ -139,37 +139,37 @@ bool DbDatabase::isOpen() const
 {  return isValid();                                                    }
 
 /// Add association link to link container
-DbStatus DbDatabase::makeLink(Token* pToken, Token::OID_t& refLink)
-{  return isValid() ? ptr()->makeLink(pToken, refLink) : Error;         }
+StatusCode DbDatabase::makeLink(Token* pToken, Token::OID_t& refLink)
+{  return isValid() ? ptr()->makeLink(pToken, refLink) : StatusCode::FAILURE;         }
 
 /// read an object referenced by the token
-DbStatus DbDatabase::read(const Token& token, ShapeH shape, void** object)
-{  return isValid() ? ptr()->read(token, shape, object) : Error;  }
+StatusCode DbDatabase::read(const Token& token, ShapeH shape, void** object)
+{  return isValid() ? ptr()->read(token, shape, object) : StatusCode::FAILURE;  }
 
 /// Expand OID into a full Token, based on the Links table.
-DbStatus DbDatabase::getLink(const Token::OID_t& oid, Token* pTok)
-{  return isValid() ? ptr()->getLink(oid, pTok) : Error;  }
+StatusCode DbDatabase::getLink(const Token::OID_t& oid, Token* pTok)
+{  return isValid() ? ptr()->getLink(oid, pTok) : StatusCode::FAILURE;  }
 
 /// Access local container token (if container exists)
 std::string DbDatabase::cntName(Token& token)
 {  return isValid() ? ptr()->cntName(token) : "";                       }
 
 /// Execute Database Transaction action
-DbStatus DbDatabase::transAct(Transaction::Action action) {
-  return isValid()? ptr()->transAct(action) : Error;
+StatusCode DbDatabase::transAct(Transaction::Action action) {
+  return isValid()? ptr()->transAct(action) : StatusCode::FAILURE;
 }
 
 /// Pass options to the implementation
-DbStatus DbDatabase::setOption(const DbOption& refOpt) 
-{  return isValid() ? ptr()->setOption(refOpt) : Error;                 }
+StatusCode DbDatabase::setOption(const DbOption& refOpt) 
+{  return isValid() ? ptr()->setOption(refOpt) : StatusCode::FAILURE;                 }
 
 /// Pass options from the implementation to the user
-DbStatus DbDatabase::getOption(DbOption& refOpt)
-{  return isValid() ? ptr()->getOption(refOpt) : Error;                 }
+StatusCode DbDatabase::getOption(DbOption& refOpt)
+{  return isValid() ? ptr()->getOption(refOpt) : StatusCode::FAILURE;                 }
 
 /// Add persistent type to the Database
-DbStatus DbDatabase::addShape(const DbTypeInfo* refType)   
-{  return isValid() ? ptr()->addShape(refType) : Error;                 }
+StatusCode DbDatabase::addShape(const DbTypeInfo* refType)
+{  return isValid() ? ptr()->addShape(refType) : StatusCode::FAILURE;                 }
 
 /// Retrieve persistent type information
 const DbTypeInfo* DbDatabase::objectShape(const Guid& guid)
@@ -188,36 +188,36 @@ const Token* DbDatabase::cntToken(const string& cntName)
 {  return isValid() ? ptr()->cntToken(cntName) : 0;                     }
 
 /// Allow access to all known containers
-DbStatus DbDatabase::containers(vector<const Token*>& conts,bool with_internal)
-{  return isValid() ? ptr()->containers(conts,with_internal) : Error;   }
+StatusCode DbDatabase::containers(vector<const Token*>& conts,bool with_internal)
+{  return isValid() ? ptr()->containers(conts,with_internal) : StatusCode::FAILURE;   }
 
 /// Allow access to all known containers
-DbStatus DbDatabase::containers(vector<IDbContainer*>& conts,bool with_internal)
-{  return isValid() ? ptr()->containers(conts,with_internal) : Error;   }
+StatusCode DbDatabase::containers(vector<IDbContainer*>& conts,bool with_internal)
+{  return isValid() ? ptr()->containers(conts,with_internal) : StatusCode::FAILURE;   }
 
 /// Allow access to all known associations between containers
-DbStatus DbDatabase::associations(vector<const Token*>& assocs)
-{  return isValid() ? ptr()->associations(assocs) : Error;              }
+StatusCode DbDatabase::associations(vector<const Token*>& assocs)
+{  return isValid() ? ptr()->associations(assocs) : StatusCode::FAILURE;              }
 
 /// Allow access to all known shapes used by the database
-DbStatus DbDatabase::shapes(vector<const DbTypeInfo*>& shaps)
-{  return isValid() ? ptr()->shapes(shaps) : Error;                     }
+StatusCode DbDatabase::shapes(vector<const DbTypeInfo*>& shaps)
+{  return isValid() ? ptr()->shapes(shaps) : StatusCode::FAILURE;                     }
 
 /// Retrieve the number of user parameters
 int DbDatabase::nParam()
 {  return isValid() ? ptr()->nParam() : -1;                             }
 
 /// Add a persistent parameter to the file
-DbStatus DbDatabase::addParam(const string& nam, const string& val)
-{  return isValid() ? ptr()->addParam(nam, val) : Error;                }
+StatusCode DbDatabase::addParam(const string& nam, const string& val)
+{  return isValid() ? ptr()->addParam(nam, val) : StatusCode::FAILURE;                }
 
 /// Retrieve existing parameter by name
-DbStatus DbDatabase::param(const string& nam, string& val)
-{  return isValid() ? ptr()->param(nam, val) : Error;                   }
+StatusCode DbDatabase::param(const string& nam, string& val)
+{  return isValid() ? ptr()->param(nam, val) : StatusCode::FAILURE;                   }
 
 /// Retrieve all parameters
-DbStatus DbDatabase::params(Parameters& vals)
-{  return isValid() ? ptr()->params(vals) : Error;                      }
+StatusCode DbDatabase::params(Parameters& vals)
+{  return isValid() ? ptr()->params(vals) : StatusCode::FAILURE;                      }
 
 /// Access the token of the database object
 const Token* DbDatabase::token() const

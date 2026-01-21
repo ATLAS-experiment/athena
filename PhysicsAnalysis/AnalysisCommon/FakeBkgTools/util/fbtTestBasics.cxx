@@ -220,7 +220,7 @@ bool eventLoop(asg::AnaToolHandle<Interface>& tool, Store_t& store, Result& resu
   static const SG::Accessor<char> TightAcc("Tight");
   for(int i=eventOffset;i<nEvents+eventOffset;++i)
     {
-      e->setP4((1 + (i%3))*1e4, 0., 0. ,ParticleConstants::electronMassInMeV);
+      e->setPtEtaPhi((1 + (i%3))*1e4, 0., 0.);
       TightAcc(*e) = (i%4)? 0 : 1;
       FBT_CHECK( tool->addEvent(particles) );
       FBT_CHECK( addEventWeight(tool, result) );

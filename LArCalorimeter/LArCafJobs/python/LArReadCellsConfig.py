@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory 
@@ -40,6 +40,73 @@ def LArReadCellsCfg(flags):
     dumperAlg.output = flags.LArShapeDump.outputNtup
     dumperAlg.etCut = -1500.
     dumperAlg.etCut2 = -1500.
+
+    result.addEventAlgo(dumperAlg)
+
+    return result
+
+def LArReadSCCfg(flags):
+
+    result=ComponentAccumulator()
+    from AthenaCommon.Logging import logging
+    mlog = logging.getLogger( 'LArReadSCCfg' )
+
+    #setup SC reading
+    from LArCabling.LArCablingConfig import LArOnOffIdMappingSCCfg
+    result.merge(LArOnOffIdMappingSCCfg(flags))
+    from LArByteStream.LArRawSCDataReadingConfig import LArRawSCDataReadingCfg
+    result.merge(LArRawSCDataReadingCfg(flags))
+    result.addCondAlgo(CompFactory.CaloSuperCellAlignCondAlg('CaloSuperCellAlignCondAlg'))
+    from LArCellRec.LArRAWtoSuperCellConfig import LArRAWtoSuperCellCfg
+    result.merge(LArRAWtoSuperCellCfg(flags,mask=True, SCellContainerOut="SCell") )
+
+    from LArCafJobs.LArSCDumperSkeleton import L1CaloMenuCfg
+    result.merge(L1CaloMenuCfg(flags))
+
+    from LumiBlockComps.BunchCrossingCondAlgConfig import BunchCrossingCondAlgCfg
+    result.merge(BunchCrossingCondAlgCfg(flags))
+    
+    from LArConfiguration.LArElecCalibDBConfig import LArElecCalibDBSCCfg
+    result.merge(LArElecCalibDBSCCfg(flags, condObjs=["Pedestal"]))
+
+    #setup SC reco
+    if flags.LArShapeDump.doSCReco:
+       # and elec. calib. coeffs
+       result.merge(LArElecCalibDBSCCfg(flags, condObjs=["Ramp","DAC2uA", "uA2MeV", "MphysOverMcal", "OFC", "Shape", "HVScaleCorr"]))
+       larLATOMEBuilderAlg=CompFactory.LArLATOMEBuilderAlg("LArLATOMEBuilderAlg")
+
+    dumperAlg=CompFactory.LArReadSC("LArReadSC")
+
+    from LArConditionsCommon.LArRunFormat import getLArDTInfoForRun
+    try:
+        runinfo=getLArDTInfoForRun(flags.Input.RunNumbers[0], connstring="COOLONL_LAR/CONDBR2")
+        streamTypes=runinfo.streamTypes()
+    except Exception as e:
+        mlog.warning("Could not get DT run info, using defaults !")
+        mlog.warning(e)
+        streamTypes=["RawADC"]
+    
+    for i in range(0,len(streamTypes)):
+        if streamTypes[i] ==  "RawADC":
+            dumperAlg.DigitsKey = "SC"
+            if flags.LArShapeDump.doSCReco:
+               larLATOMEBuilderAlg.LArDigitKey = "SC"
+               larLATOMEBuilderAlg.isADCBas = False
+        if streamTypes[i] ==  "ADC":
+            if flags.LArShapeDump.doSCReco:
+               larLATOMEBuilderAlg.isADCBas = True
+               larLATOMEBuilderAlg.LArDigitKey = "SC_ADC_BAS"
+            dumperAlg.DigitsKey = "SC_ADC_BAS"
+
+    if flags.LArShapeDump.doSCReco:    
+       result.addEventAlgo(larLATOMEBuilderAlg)
+       result.merge(LArRAWtoSuperCellCfg(flags,name="LArRAWRecotoSuperCell",mask=True,doReco=True,SCIn="SC_ET_RECO",SCellContainerOut="SCell_RECO") )    
+
+    dumperAlg.output = flags.LArShapeDump.outputNtup
+    dumperAlg.SCContainerKey = "SCell"
+    if flags.LArShapeDump.doSCReco:
+       dumperAlg.SCRecoContainerKey = "SCell_RECO"
+    dumperAlg.etCut = -1500.
 
     result.addEventAlgo(dumperAlg)
 

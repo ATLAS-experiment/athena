@@ -11,7 +11,8 @@
 namespace MuonTGC_Cabling {
 
 TGCCableSLBToSSW::TGCCableSLBToSSW(const std::string& filename)
-  : TGCCable(TGCCable::SLBToSSW)
+  : TGCCable(TGCCable::SLBToSSW),
+    m_database{{{nullptr}}}
 {
   m_database[TGCId::Endcap][TGCId::WT] = std::make_unique<TGCDatabaseSLBToROD>(filename, "SLB EWT");
   m_database[TGCId::Endcap][TGCId::WD] = std::make_unique<TGCDatabaseSLBToROD>(filename, "SLB EWD");

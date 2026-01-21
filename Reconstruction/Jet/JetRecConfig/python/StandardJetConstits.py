@@ -418,6 +418,9 @@ _stdSeqList = [
     JetInputConstitSeq("EMTopoOrigin", xAODType.CaloCluster, ["EM","Origin"],
                        "CaloCalTopoClusters", "EMOriginTopoClusters", jetinputtype="EMTopo",
                        ),
+    JetInputConstitSeq("MLTopoOrigin", xAODType.CaloCluster, ["ML","Origin"],
+                       "CaloCalTopoClusters", "MLOriginTopoClusters", jetinputtype="EMTopo",
+                       ),
     JetInputConstitSeq("LCTopoOrigin",xAODType.CaloCluster, ["LC","Origin"],
                        "CaloCalTopoClusters", "LCOriginTopoClusters", jetinputtype="LCTopo",
                        ),
@@ -437,7 +440,7 @@ _stdSeqList = [
     JetInputConstitSeq("EMPFlow", xAODType.FlowElement,["CorrectPFO", "CHS"] , 'JetETMissParticleFlowObjects', 'CHSParticleFlowObjects'),
 
     # EM-scale particle flow objects with correction to ML cluster scale, with charged hadron subtraction
-    JetInputConstitSeq("GPFlowML", xAODType.FlowElement,["CorrectPFO", "CHS"] , 'GlobalClusterMLCorrectedParticleFlowObjects', 'CHSGlobalClusterMLCorrectedParticleFlowObjects', label = 'EMPFlow',),
+    JetInputConstitSeq("GPFlowML", xAODType.FlowElement,["CHS"] , 'GlobalClusterMLCorrectedParticleFlowObjects', 'CHSGlobalClusterMLCorrectedParticleFlowObjects', label = 'EMPFlow',),
 
     # GPFlow are the same than EMPFlow except they have pflow linked to elec or muons filtered out.
     JetInputConstitSeq("GPFlow", xAODType.FlowElement,["CorrectPFO", "CHS"] , 'GlobalParticleFlowObjects', 'CHSGParticleFlowObjects',
@@ -567,6 +570,7 @@ _stdModList = [
     
     JetConstitModifier("Origin", "CaloClusterConstituentsOrigin", prereqs=[inputsFromContext("Vertices")]),
     JetConstitModifier("EM",     "ClusterAtEMScaleTool", ),
+    JetConstitModifier("ML",     "ClusterAtMLScaleTool", prereqs=["input:CaloCalTopoClustersML"]),
     JetConstitModifier("LC",     "", ),
     # Particle flow
     JetConstitModifier("CorrectPFO", "CorrectPFOTool",

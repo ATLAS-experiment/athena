@@ -10,7 +10,7 @@
 
 namespace GlobalSim {
   namespace IOBitwise{
-    class IeEmTOB;
+    class eEmTOB;
   }
 }
 
@@ -21,12 +21,12 @@ namespace  GlobalSim {
    *
    */
 
-  using GlobalSim::IOBitwise::IeEmTOB;
+  using GlobalSim::IOBitwise::eEmTOB;
   
   class IeEmSelector {
   public:
     virtual ~IeEmSelector() = default;
-    virtual bool select(const IeEmTOB&) const = 0;
+    virtual bool select(const eEmTOB&) const = 0;
     virtual std::string to_string() const = 0;
 
   };

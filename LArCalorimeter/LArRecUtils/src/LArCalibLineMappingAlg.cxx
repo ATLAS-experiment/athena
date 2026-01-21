@@ -23,17 +23,17 @@ StatusCode LArCalibLineMappingAlg::initialize() {
 }
 
 
-StatusCode LArCalibLineMappingAlg::execute() {
+StatusCode LArCalibLineMappingAlg::execute(const EventContext& ctx) const {
   ATH_MSG_DEBUG("executing");
 
-  SG::WriteCondHandle<LArCalibLineMapping> writeHandle{m_writeKey};
+  SG::WriteCondHandle<LArCalibLineMapping> writeHandle{m_writeKey, ctx};
   
   if (writeHandle.isValid()) {
     ATH_MSG_DEBUG("Found valid write handle");
     return StatusCode::SUCCESS;
   }  
 
-  SG::ReadCondHandle<AthenaAttributeList> readHandle{m_readKey};
+  SG::ReadCondHandle<AthenaAttributeList> readHandle{m_readKey, ctx};
   const AthenaAttributeList* attr{*readHandle};
 
   if (attr==nullptr) {

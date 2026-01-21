@@ -17,7 +17,7 @@ usage () {
     -s  |  --skipCheck                      skip checks on output AOD file
     -k  |  --doSeeds                        persistify track seeds (default off)
     -w  |  --writeAdditionalOutputData      write extra FPGATrackSim outputs (default off)
-    -r  |  --region             STRING      region list; e.g. \"[34,98,162]\" or \"34,98,162\"
+    -r  |  --region             STRING      region list; e.g. \"[34,98,162]\" or \"34,98,162\" or \"10-60,!20\" or \"*\".
     -g  |  --keepHitsStrategy   INT         GenScan.keepHitsStrategy value (default = 2)
     -h  |  --help                           this help
 
@@ -68,24 +68,6 @@ done
 ## checking valid inputs
 if [ -z "$inputRDO" ]; then usage 1 "Input RDO not provided"; fi
 if [ -z "$outputAOD" ]; then usage 1 "Output AOD not provided"; fi
-
-
-# Normalize and validate region list (accepts "[a,b,c]" or "a,b,c")
-normalize_region_list () {
-    local raw="$1"
-    raw="$(echo "$raw" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')"
-    if [[ "$raw" != \[*\] ]]; then
-        raw="[$raw]"
-    fi
-    local cleaned
-    cleaned="$(echo "$raw" | sed -E 's/[[:space:]]*,[[:space:]]*/,/g')"
-    if [[ ! "$cleaned" =~ ^\[[[:space:]]*[0-9]+([,][0-9]+)*[[:space:]]*\]$ ]]; then
-        echo "Error: --region expects a list of integers like \"[34,98,162]\" or \"34,98,162\"."
-        exit 1
-    fi
-    echo "$cleaned"
-}
-regionList="$(normalize_region_list "$regionList")"
 
 # Handle inputRDO patterns or check files
 if [[ "$inputRDO" == *"*"* ]]; then

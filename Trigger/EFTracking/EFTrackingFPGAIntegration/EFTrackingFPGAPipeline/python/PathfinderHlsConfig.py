@@ -30,6 +30,12 @@ if __name__ == "__main__":
     )
 
     argumentParser.add_argument(
+        "--events", 
+        type = int, 
+        default = 2,
+    )
+
+    argumentParser.add_argument(
         "--verbose", 
         action = "store_true",
     )
@@ -60,33 +66,31 @@ if __name__ == "__main__":
     from EFTrackingFPGAUtility.EFTrackingDataStreamLoaderAlgorithmConfig import EFTrackingDataStreamLoaderAlgorithmCfg
     acc.merge(EFTrackingDataStreamLoaderAlgorithmCfg(
         flags,
-        name = "trackDataStreamLoader",
+        name = "dataStreamLoader",
         bufferSize = arguments.bufferSize,
-        inputCsvPath = arguments.trackTestVectorPath,
-        inputDataStream = "inputTrackDataStream",
-    ))
-
-    acc.merge(EFTrackingDataStreamLoaderAlgorithmCfg(
-        flags,
-        name = "hitDataStreamLoader",
-        bufferSize = arguments.bufferSize,
-        inputCsvPath = arguments.hitTestVectorPath,
-        inputDataStream = "inputHitDataStream",
+        GHITZTxtInputPaths = [
+            arguments.trackTestVectorPath,
+            arguments.hitTestVectorPath,
+        ],
+        GHITZTxtInputKeys = [
+            "pattern_reco_output",
+            "stripL2G_output",
+        ],
     ))
 
     from EFTrackingFPGAPipeline.EFTrackingXrtAlgorithmConfig import EFTrackingXrtAlgorithmCfg
     acc.merge(EFTrackingXrtAlgorithmCfg(
         flags, 
         inputInterfaces = [
-            ["configurableLengthWideLoader:{configurableLengthWideLoader_1}", "inputTrackDataStream", 0],
-            ["configurableLengthWideLoader:{configurableLengthWideLoader_2}", "inputHitDataStream", 0],
+            ["configurableLengthWideLoader:{configurableLengthWideLoader_1}", "pattern_reco_output", 0],
+            ["configurableLengthWideLoader:{configurableLengthWideLoader_2}", "stripL2G_output", 0],
         ],
         outputInterfaces = [
-            ["dynamicLengthWideUnloader:{dynamicLengthWideUnloader_1}", "outputDataStream", 1],
+            ["dynamicLengthWideUnloader:{dynamicLengthWideUnloader_1}", "pathfinder_output", 1],
         ],
         vSizeInterfaces = [
-            ["configurableLengthWideLoader:{configurableLengthWideLoader_1}", "inputTrackDataStream", 2],
-            ["configurableLengthWideLoader:{configurableLengthWideLoader_2}", "inputHitDataStream", 2],
+            ["configurableLengthWideLoader:{configurableLengthWideLoader_1}", "pattern_reco_output", 2],
+            ["configurableLengthWideLoader:{configurableLengthWideLoader_2}", "stripL2G_output", 2],
         ],
         kernelOrder = [
             [
@@ -100,9 +104,14 @@ if __name__ == "__main__":
     from EFTrackingFPGAUtility.EFTrackingDataStreamUnloaderAlgorithmConfig import EFTrackingDataStreamUnloaderAlgorithmCfg
     acc.merge(EFTrackingDataStreamUnloaderAlgorithmCfg(
         flags,
-        outputCsvPath = arguments.outputPath,
-        outputDataStream = "outputDataStream",
+        name = "dataStreamUnloader",
+        GHITZTxtInputPaths = [
+            arguments.outputPath,
+        ],
+        GHITZTxtInputKeys = [
+            "pathfinder_output",
+        ],
     ))
 
-    acc.run(2)
+    acc.run(arguments.events)
 

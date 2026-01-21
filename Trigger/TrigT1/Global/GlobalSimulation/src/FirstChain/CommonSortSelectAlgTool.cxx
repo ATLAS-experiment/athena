@@ -5,6 +5,7 @@
 #include "./CommonSortSelectAlgTool.h"
 #include "./CommonSelector.h"
 #include "./eEmSelector.h"
+#include "../IO//CommonTOB.h"
 
 #include <fstream>
 
@@ -38,7 +39,7 @@ namespace GlobalSim {
   
   StatusCode CommonSortSelectAlgTool::run(const EventContext& ctx) const {
     auto tobs =
-      SG::ReadHandle<GlobalSim::IOBitwise::ICommonTOBContainer>(m_inTOBContainerKey,
+      SG::ReadHandle<GlobalSim::IOBitwise::CommonTOBContainer>(m_inTOBContainerKey,
 								ctx);
 
     CHECK(tobs.isValid());
@@ -46,13 +47,25 @@ namespace GlobalSim {
     // copy selected tobs to the output container
 
     auto out_tobs =
-      std::make_unique<IOBitwise::ICommonTOBContainer>(tobs->size());
+      std::make_unique<IOBitwise::CommonTOBContainer>(tobs->size());
 
-    std::copy_if(std::cbegin(*tobs),
-		 std::cend(*tobs),
+    
+    auto tmp_tobs =
+      std::vector<IOBitwise::CommonTOB*>(tobs->size());
+
+    std::transform(std::begin(*tobs),
+		   std::end(*tobs),
+		   std::back_inserter(tmp_tobs),
+		   [](const auto& tobptr) {
+		     return new IOBitwise::CommonTOB(*tobptr);
+		   });
+
+    std::copy_if(std::begin(tmp_tobs),
+		 std::end(tmp_tobs),
 		 std::back_inserter(*out_tobs),
 		 [&selector=m_c_selector](const auto& tob) {
 		   return selector->select(*tob);});
+
     
     ATH_MSG_DEBUG("no of TOBS in, selected: " << tobs->size()
 		  << " " << out_tobs->size());
@@ -66,7 +79,7 @@ namespace GlobalSim {
 		return l->et_bits().to_ulong() <  r->et_bits().to_ulong();
 	      });
 
-    SG::WriteHandle<IOBitwise::ICommonTOBContainer>
+    SG::WriteHandle<IOBitwise::CommonTOBContainer>
       h_out(m_outTOBContainerKey, ctx);
     
     CHECK(h_out.record(std::move(out_tobs)));

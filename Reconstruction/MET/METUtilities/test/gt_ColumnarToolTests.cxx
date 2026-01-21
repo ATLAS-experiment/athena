@@ -38,6 +38,7 @@ TEST_F (ColumnarMemoryTest, METMaker_muon)
     return;
 
   auto tool = std::make_unique<met::ColumnarMETMaker> (makeUniqueName());
+  ASSERT_SUCCESS (tool->setProperty ("JetContainer", "dummyjets"));
   ASSERT_SUCCESS (tool->setProperty ("skipSystematicJetSelection", false));
   ASSERT_SUCCESS (tool->setProperty ("JetSelection", "Tight"));
   ASSERT_SUCCESS (tool->setProperty ("DoPFlow", true));
@@ -204,6 +205,7 @@ TEST_F (ColumnarMemoryTest, METMaker_jet)
     return;
 
   auto tool = std::make_unique<met::ColumnarMETMaker> (makeUniqueName());
+  ASSERT_SUCCESS (tool->setProperty ("JetContainer", "dummyjets"));
   ASSERT_SUCCESS (tool->setProperty ("skipSystematicJetSelection", false));
   ASSERT_SUCCESS (tool->setProperty ("JetSelection", "Tight"));
   ASSERT_SUCCESS (tool->setProperty ("DoPFlow", true));
@@ -428,6 +430,7 @@ TEST_F (ColumnarPhysLiteTest, METMaker_muon)
     return;
 
   auto tool = std::make_unique<met::ColumnarMETMaker> (makeUniqueName());
+  ASSERT_SUCCESS (tool->setProperty ("JetContainer", "dummyjets"));
   ASSERT_SUCCESS (tool->setProperty ("skipSystematicJetSelection", false));
   ASSERT_SUCCESS (tool->setProperty ("JetSelection", "Tight"));
   ASSERT_SUCCESS (tool->setProperty ("DoPFlow", true));
@@ -491,6 +494,7 @@ TEST_F (ColumnarPhysLiteTest, METMaker_jet)
     return;
 
   auto tool = std::make_unique<met::ColumnarMETMaker> (makeUniqueName());
+  ASSERT_SUCCESS (tool->setProperty ("JetContainer", "dummyjets"));
   ASSERT_SUCCESS (tool->setProperty ("skipSystematicJetSelection", false));
   ASSERT_SUCCESS (tool->setProperty ("JetSelection", "Tight"));
   ASSERT_SUCCESS (tool->setProperty ("DoPFlow", true));

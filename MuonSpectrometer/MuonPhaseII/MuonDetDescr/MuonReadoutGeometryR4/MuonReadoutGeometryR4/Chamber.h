@@ -1,17 +1,16 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef MUONREADOUTGEOMETRYR4_CHAMBER_H
 #define MUONREADOUTGEOMETRYR4_CHAMBER_H
 
+/** This class is not to needed in AthSimulation */
 #ifndef SIMULATIONBASE
-
-
 #include <MuonReadoutGeometryR4/MuonReadoutElement.h>
 #include <AthenaBaseComps/AthMessaging.h>
 
 namespace Acts {
-    class TrapezoidVolumeBounds;
+    class VolumeBounds;
     class Volume;
     class PlaneSurface;
 }
@@ -19,7 +18,13 @@ namespace Acts {
 
 namespace MuonGMR4 {
     class SpectrometerSector;
-
+    /** @brief Chamber represent the volume enclosing a muon station. A muon station 
+     *         typically consists out of the two mdt multilayers which are accompanied
+     *         by the Rpc chambers, if the multilayer are mounted in the barrel.
+     *         The orientation of the chamber's coordinate system is the same as the
+     *         readout element's orientations. It provides methods for identification,
+     *         and the contained readout elements. It is the basic building block in the assembly
+     *         of the tracking volumes during the tracking geometry construction */
     class Chamber {
         public:
           /** @brief Define the list of read out elements of the chamber */
@@ -30,7 +35,7 @@ namespace MuonGMR4 {
               /** @brief List of associated readout elements */
               ReadoutSet  detEles{};
               /** @brief Chamber volume bounds */
-              std::shared_ptr<Acts::TrapezoidVolumeBounds> bounds{};
+              std::shared_ptr<Acts::VolumeBounds> bounds{};
           };
           
           /** @brief Standard constructor taking the defineArgs */
@@ -64,10 +69,10 @@ namespace MuonGMR4 {
           const ReadoutSet& readoutEles() const;
           /** @brief Returns the transformation chamber frame -> global transformation
            *  @param gctx: Geometry context carrrying the alignment transformations */
-          const Amg::Transform3D& localToGlobalTrans(const ActsTrk::GeometryContext& gctx) const;
+          const Amg::Transform3D& localToGlobalTransform(const ActsTrk::GeometryContext& gctx) const;
           /** @brief Returns the global -> local transformation 
            *  @param gctx: Geometry context carrrying the alignment transformations */
-          Amg::Transform3D globalToLocalTrans(const ActsTrk::GeometryContext& gctx) const;
+          Amg::Transform3D globalToLocalTransform(const ActsTrk::GeometryContext& gctx) const;
           /** @brief Returns the surface associated with the chamber */
           const Acts::PlaneSurface& surface() const;
           /** @brief Long-extend of the chamber in the x-direction at positive Y */
@@ -84,7 +89,7 @@ namespace MuonGMR4 {
             * @param gctx: Geometry context carrrying the alignment transformations */
           std::shared_ptr<Acts::Volume> boundingVolume(const ActsTrk::GeometryContext& gctx) const;
           /** @brief Returns the volume bounds */
-          std::shared_ptr<Acts::TrapezoidVolumeBounds> bounds() const;
+          std::shared_ptr<Acts::VolumeBounds> bounds() const;
           /** @brief Returns the pointer to the MS sector enclosing the chamber */
           const SpectrometerSector* parent() const;
           /** @brief Sets the connection to the MS sector enclosing the chamber */

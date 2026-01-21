@@ -11,7 +11,7 @@
 #ifndef PIXELCHARGELUTCALIBCONDALG
 #define PIXELCHARGELUTCALIBCONDALG
 
-#include "AthenaBaseComps/AthReentrantAlgorithm.h"
+#include "AthenaBaseComps/AthCondAlgorithm.h"
 
 #include "StoreGate/ReadCondHandleKey.h"
 #include "AthenaPoolUtilities/CondAttrListCollection.h"
@@ -27,13 +27,12 @@
 class PixelID;
 
 
-class PixelChargeLUTCalibCondAlg : public AthReentrantAlgorithm {
+class PixelChargeLUTCalibCondAlg : public AthCondAlgorithm {
   public:
     PixelChargeLUTCalibCondAlg(const std::string& name, ISvcLocator* pSvcLocator);
 
     virtual StatusCode initialize() override final;
     virtual StatusCode execute(const EventContext& ctx) const override final;
-    virtual bool isReEntrant() const override final { return false; }
   private:
     const PixelID* m_pixelID{nullptr};
     Gaudi::Property<std::string> m_pixelIDName

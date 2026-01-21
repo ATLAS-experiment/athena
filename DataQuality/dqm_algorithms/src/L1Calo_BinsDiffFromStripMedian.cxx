@@ -126,6 +126,7 @@ dqm_algorithms::L1Calo_BinsDiffFromStripMedian::execute(const std::string &  nam
         int ymin = range[2], ymax = range[3];
         if(t!=-1) {
             // need to adjust ranges using y-axis bins and nBinsZ parameter
+            //coverity[DIVIDE_BY_ZERO]
             xmin = 1; xmax = histogram->GetNbinsY()/nBinsZ;
             ymin = 1; ymax = nBinsZ;
         }

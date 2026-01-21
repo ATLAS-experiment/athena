@@ -5,7 +5,7 @@
 #ifndef PIXELCONDITIONSALGORITHMS_PIXELMODULECONFIGCONDALG
 #define PIXELCONDITIONSALGORITHMS_PIXELMODULECONFIGCONDALG
 
-#include "AthenaBaseComps/AthReentrantAlgorithm.h"
+#include "AthenaBaseComps/AthCondAlgorithm.h"
 #include "GaudiKernel/ToolHandle.h"
 
 #include "StoreGate/ReadCondHandleKey.h"
@@ -17,13 +17,12 @@
 #include "Gaudi/Property.h"
 #include "CLHEP/Units/SystemOfUnits.h"
 
-class PixelModuleConfigCondAlg : public AthReentrantAlgorithm {
+class PixelModuleConfigCondAlg : public AthCondAlgorithm {
   public:
     PixelModuleConfigCondAlg(const std::string& name, ISvcLocator* pSvcLocator);
 
     virtual StatusCode initialize() override final;
     virtual StatusCode execute(const EventContext& ctx) const override final;
-    virtual bool isReEntrant() const override final { return false; }
 
   private:
     // Key for basic pixel parameters

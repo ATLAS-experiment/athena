@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGHLTJETHYPO_SIMPLEJETSTREAM_H
@@ -18,8 +18,8 @@
  */
 
 #include "IJetStream.h"
-#include <vector>
 #include <sstream>
+#include <vector>
 #include <memory>
 #include <string>
 
@@ -30,8 +30,7 @@ class SimpleJetStream: public IJetStream {
 
   friend std::ostream& operator << (std::ostream&,
 				    const SimpleJetStream&);
-  friend std::stringstream& operator << (std::stringstream&,
-					 const SimpleJetStream&);
+
 
   SimpleJetStream(const std::vector<std::size_t>& jets,
 		  std::unique_ptr<IJetStream> neigh,
@@ -49,10 +48,8 @@ class SimpleJetStream: public IJetStream {
   
   
   virtual std::vector<std::size_t> get() override {
-
     auto result = m_neigh ? m_neigh->get() : std::vector<std::size_t>();
     result.push_back(m_data);
-
     return result;
   }
   
@@ -98,13 +95,10 @@ class SimpleJetStream: public IJetStream {
   }
 
   virtual std::string dump() const override {
-    std::stringstream ss;
-
+    std::ostringstream ss;
     auto result = m_neigh ? m_neigh->dump() : "";
-
     ss<< *this << '\n';
     result += ss.str();
-    
     return result;
   }
 
@@ -112,15 +106,14 @@ private:
   std::vector<std::size_t> m_jets;
   std::size_t m_ind{0};
   std::unique_ptr<IJetStream> m_neigh{nullptr};
-  std::size_t m_id;
-  std::size_t m_data;
+  std::size_t m_id{};
+  std::size_t m_data{};
   bool m_valid{false};
 
 };
 
 std::ostream& operator << (std::ostream& os ,
 			   const SimpleJetStream& js);
-std::stringstream& operator << (std::stringstream& os ,
-				const SimpleJetStream& js);
+			   
 
 #endif

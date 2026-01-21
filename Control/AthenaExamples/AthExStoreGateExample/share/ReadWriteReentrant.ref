@@ -8,25 +8,25 @@ AthenaEventLoopMgr   INFO   ===>>>  start of run 1    <<<===
 AthenaEventLoopMgr   INFO   ===>>>  start processing event #1, run #1 0 events processed so far  <<<===
 WriteDataReentrant   INFO in execute()
 WriteDataReentrant WARNING we expect  an error message here
-StoreGateSvc WARNING  setupProxy:: error setting up proxy for key dobj and clid 8000
+StoreGateSvc_Impl  WARNING  setupProxy:: error setting up proxy for key dobj and clid 8000
 VarHandle(StoreGateSvc+dobj[8000]) ERROR FILE:LINE (StatusCode SG::VarHandleBase::record_impl(std::unique_ptr<DataObject>, void*, bool, bool)): code FAILURE: recordObject failed
 WriteDataReentrant WARNING end of error message
 WriteDataReentrant   INFO  registered all data objects
 WriteDataReentrant   INFO  StoreGate structure before returning from execute 
-StoreGateSvc: <<<<<<<<<<<<<<<<< Data Store Dump >>>>>>>>>>>>>>> 
-StoreGateSvc: StoreGateSvc()::dump() which is NOT LOADED 
-StoreGateSvc: Found 2 proxies for ClassID 1434 (BaseClass): 
-StoreGateSvc: Found 1 proxy for ClassID 2101 (EventInfo): 
-StoreGateSvc: Found 6 proxies for ClassID 8000 (MyDataObj): 
-StoreGateSvc: Found 1 proxy for ClassID 9967 (DataVector<MyContObj>): 
-StoreGateSvc: Found 1 proxy for ClassID 9983 (std::vector< ElementLink<MapStringFloat> >): 
-StoreGateSvc: Found 1 proxy for ClassID 9984 (std::list< ElementLink< std::vector<float> > >): 
-StoreGateSvc: Found 1 proxy for ClassID 33347479 (SG::AuxVectorBase): 
-StoreGateSvc: Found 1 proxy for ClassID 55596997 (EventContext): 
-StoreGateSvc: Found 1 proxy for ClassID 193758082 (std::map<std::string,float>): 
-StoreGateSvc: Found 1 proxy for ClassID 202242136 (std::vector<float>): 
-StoreGateSvc: Found 1 proxy for ClassID 289238765 (TestDataObject): 
-StoreGateSvc: <<<<<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>>>> 
+StoreGateSvc_Impl: <<<<<<<<<<<<<<<<< Data Store Dump >>>>>>>>>>>>>>> 
+StoreGateSvc_Impl: SGImplSvc()::dump() which is NOT LOADED 
+StoreGateSvc_Impl: Found 2 proxies for ClassID 1434 (BaseClass): 
+StoreGateSvc_Impl: Found 1 proxy for ClassID 2101 (EventInfo): 
+StoreGateSvc_Impl: Found 6 proxies for ClassID 8000 (MyDataObj): 
+StoreGateSvc_Impl: Found 1 proxy for ClassID 9967 (DataVector<MyContObj>): 
+StoreGateSvc_Impl: Found 1 proxy for ClassID 9983 (std::vector< ElementLink<MapStringFloat> >): 
+StoreGateSvc_Impl: Found 1 proxy for ClassID 9984 (std::list< ElementLink< std::vector<float> > >): 
+StoreGateSvc_Impl: Found 1 proxy for ClassID 33347479 (SG::AuxVectorBase): 
+StoreGateSvc_Impl: Found 1 proxy for ClassID 55596997 (EventContext): 
+StoreGateSvc_Impl: Found 1 proxy for ClassID 193758082 (std::map<std::string,float>): 
+StoreGateSvc_Impl: Found 1 proxy for ClassID 202242136 (std::vector<float>): 
+StoreGateSvc_Impl: Found 1 proxy for ClassID 289238765 (TestDataObject): 
+StoreGateSvc_Impl: <<<<<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>>>> 
 
 ReadDataReentrant    INFO in execute()
 ReadDataReentrant    INFO Time: 11.3  ID: 132
@@ -41,25 +41,25 @@ AthenaEventLoopMgr   INFO   ===>>>  done processing event #1, run #1 1 events pr
 AthenaEventLoopMgr   INFO   ===>>>  start processing event #2, run #1 1 events processed so far  <<<===
 WriteDataReentrant   INFO in execute()
 WriteDataReentrant WARNING we expect  an error message here
-StoreGateSvc WARNING  setupProxy:: error setting up proxy for key dobj and clid 8000
+StoreGateSvc_Impl  WARNING  setupProxy:: error setting up proxy for key dobj and clid 8000
 VarHandle(StoreGateSvc+dobj[8000]) ERROR FILE:LINE (StatusCode SG::VarHandleBase::record_impl(std::unique_ptr<DataObject>, void*, bool, bool)): code FAILURE: recordObject failed
 WriteDataReentrant WARNING end of error message
 WriteDataReentrant   INFO  registered all data objects
 WriteDataReentrant   INFO  StoreGate structure before returning from execute 
-StoreGateSvc: <<<<<<<<<<<<<<<<< Data Store Dump >>>>>>>>>>>>>>> 
-StoreGateSvc: StoreGateSvc()::dump() which is NOT LOADED 
-StoreGateSvc: Found 2 proxies for ClassID 1434 (BaseClass): 
-StoreGateSvc: Found 1 proxy for ClassID 2101 (EventInfo): 
-StoreGateSvc: Found 6 proxies for ClassID 8000 (MyDataObj): 
-StoreGateSvc: Found 1 proxy for ClassID 9967 (DataVector<MyContObj>): 
-StoreGateSvc: Found 1 proxy for ClassID 9983 (std::vector< ElementLink<MapStringFloat> >): 
-StoreGateSvc: Found 1 proxy for ClassID 9984 (std::list< ElementLink< std::vector<float> > >): 
-StoreGateSvc: Found 1 proxy for ClassID 33347479 (SG::AuxVectorBase): 
-StoreGateSvc: Found 1 proxy for ClassID 55596997 (EventContext): 
-StoreGateSvc: Found 1 proxy for ClassID 193758082 (std::map<std::string,float>): 
-StoreGateSvc: Found 1 proxy for ClassID 202242136 (std::vector<float>): 
-StoreGateSvc: Found 1 proxy for ClassID 289238765 (TestDataObject): 
-StoreGateSvc: <<<<<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>>>> 
+StoreGateSvc_Impl: <<<<<<<<<<<<<<<<< Data Store Dump >>>>>>>>>>>>>>> 
+StoreGateSvc_Impl: SGImplSvc()::dump() which is NOT LOADED 
+StoreGateSvc_Impl: Found 2 proxies for ClassID 1434 (BaseClass): 
+StoreGateSvc_Impl: Found 1 proxy for ClassID 2101 (EventInfo): 
+StoreGateSvc_Impl: Found 6 proxies for ClassID 8000 (MyDataObj): 
+StoreGateSvc_Impl: Found 1 proxy for ClassID 9967 (DataVector<MyContObj>): 
+StoreGateSvc_Impl: Found 1 proxy for ClassID 9983 (std::vector< ElementLink<MapStringFloat> >): 
+StoreGateSvc_Impl: Found 1 proxy for ClassID 9984 (std::list< ElementLink< std::vector<float> > >): 
+StoreGateSvc_Impl: Found 1 proxy for ClassID 33347479 (SG::AuxVectorBase): 
+StoreGateSvc_Impl: Found 1 proxy for ClassID 55596997 (EventContext): 
+StoreGateSvc_Impl: Found 1 proxy for ClassID 193758082 (std::map<std::string,float>): 
+StoreGateSvc_Impl: Found 1 proxy for ClassID 202242136 (std::vector<float>): 
+StoreGateSvc_Impl: Found 1 proxy for ClassID 289238765 (TestDataObject): 
+StoreGateSvc_Impl: <<<<<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>>>> 
 
 ReadDataReentrant    INFO in execute()
 ReadDataReentrant    INFO Time: 11.3  ID: 132
@@ -74,25 +74,25 @@ AthenaEventLoopMgr   INFO   ===>>>  done processing event #2, run #1 2 events pr
 AthenaEventLoopMgr   INFO   ===>>>  start processing event #3, run #1 2 events processed so far  <<<===
 WriteDataReentrant   INFO in execute()
 WriteDataReentrant WARNING we expect  an error message here
-StoreGateSvc WARNING  setupProxy:: error setting up proxy for key dobj and clid 8000
+StoreGateSvc_Impl  WARNING  setupProxy:: error setting up proxy for key dobj and clid 8000
 VarHandle(StoreGateSvc+dobj[8000]) ERROR FILE:LINE (StatusCode SG::VarHandleBase::record_impl(std::unique_ptr<DataObject>, void*, bool, bool)): code FAILURE: recordObject failed
 WriteDataReentrant WARNING end of error message
 WriteDataReentrant   INFO  registered all data objects
 WriteDataReentrant   INFO  StoreGate structure before returning from execute 
-StoreGateSvc: <<<<<<<<<<<<<<<<< Data Store Dump >>>>>>>>>>>>>>> 
-StoreGateSvc: StoreGateSvc()::dump() which is NOT LOADED 
-StoreGateSvc: Found 2 proxies for ClassID 1434 (BaseClass): 
-StoreGateSvc: Found 1 proxy for ClassID 2101 (EventInfo): 
-StoreGateSvc: Found 6 proxies for ClassID 8000 (MyDataObj): 
-StoreGateSvc: Found 1 proxy for ClassID 9967 (DataVector<MyContObj>): 
-StoreGateSvc: Found 1 proxy for ClassID 9983 (std::vector< ElementLink<MapStringFloat> >): 
-StoreGateSvc: Found 1 proxy for ClassID 9984 (std::list< ElementLink< std::vector<float> > >): 
-StoreGateSvc: Found 1 proxy for ClassID 33347479 (SG::AuxVectorBase): 
-StoreGateSvc: Found 1 proxy for ClassID 55596997 (EventContext): 
-StoreGateSvc: Found 1 proxy for ClassID 193758082 (std::map<std::string,float>): 
-StoreGateSvc: Found 1 proxy for ClassID 202242136 (std::vector<float>): 
-StoreGateSvc: Found 1 proxy for ClassID 289238765 (TestDataObject): 
-StoreGateSvc: <<<<<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>>>> 
+StoreGateSvc_Impl: <<<<<<<<<<<<<<<<< Data Store Dump >>>>>>>>>>>>>>> 
+StoreGateSvc_Impl: SGImplSvc()::dump() which is NOT LOADED 
+StoreGateSvc_Impl: Found 2 proxies for ClassID 1434 (BaseClass): 
+StoreGateSvc_Impl: Found 1 proxy for ClassID 2101 (EventInfo): 
+StoreGateSvc_Impl: Found 6 proxies for ClassID 8000 (MyDataObj): 
+StoreGateSvc_Impl: Found 1 proxy for ClassID 9967 (DataVector<MyContObj>): 
+StoreGateSvc_Impl: Found 1 proxy for ClassID 9983 (std::vector< ElementLink<MapStringFloat> >): 
+StoreGateSvc_Impl: Found 1 proxy for ClassID 9984 (std::list< ElementLink< std::vector<float> > >): 
+StoreGateSvc_Impl: Found 1 proxy for ClassID 33347479 (SG::AuxVectorBase): 
+StoreGateSvc_Impl: Found 1 proxy for ClassID 55596997 (EventContext): 
+StoreGateSvc_Impl: Found 1 proxy for ClassID 193758082 (std::map<std::string,float>): 
+StoreGateSvc_Impl: Found 1 proxy for ClassID 202242136 (std::vector<float>): 
+StoreGateSvc_Impl: Found 1 proxy for ClassID 289238765 (TestDataObject): 
+StoreGateSvc_Impl: <<<<<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>>>> 
 
 ReadDataReentrant    INFO in execute()
 ReadDataReentrant    INFO Time: 11.3  ID: 132

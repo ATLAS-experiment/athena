@@ -131,12 +131,12 @@ int main ATLAS_NOT_THREAD_SAFE () {
   // First EM ROI
   xAOD::Electron* rec_1__em0 = new xAOD::Electron(); // Step1 electron
   electronContainerPtr->push_back(rec_1__em0);
-  rec_1__em0->setP4(30., 0., 0., 0.);
+  rec_1__em0->setPtEtaPhi(30., 0., 0.);
   ElementLink<xAOD::ElectronContainer> rec_1__em0_link(*electronContainerPtr, electronContainerPtr->size() - 1, ctx1);
 
   xAOD::Electron* rec_2__em0 = new xAOD::Electron(); // Step2 electron
   electronContainerPtr->push_back(rec_2__em0);
-  rec_2__em0->setP4(31., 0., 0., 0.);
+  rec_2__em0->setPtEtaPhi(31., 0., 0.);
   ElementLink<xAOD::ElectronContainer> rec_2__em0_link(*electronContainerPtr, electronContainerPtr->size() - 1, ctx1);
 
   ///

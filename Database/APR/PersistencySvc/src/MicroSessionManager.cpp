@@ -6,12 +6,13 @@
 #include "DatabaseRegistry.h"
 #include "DatabaseHandler.h"
 #include "StorageSvc/IStorageSvc.h"
-#include "StorageSvc/IStorageExplorer.h"
-#include "StorageSvc/pool.h"
 #include "PersistencySvc/ITransaction.h"
-#include "StorageSvc/DbStatus.h"
+#include "StorageSvc/DatabaseConnection.h"
+#include "StorageSvc/DbDatabase.h"
 #include "StorageSvc/DbOption.h"
+#include "StorageSvc/pool.h"
 
+#include "GaudiKernel/StatusCode.h"
 #include <exception>
 
 pool::PersistencySvc::MicroSessionManager::MicroSessionManager( pool::PersistencySvc::DatabaseRegistry& registry,
@@ -20,22 +21,13 @@ pool::PersistencySvc::MicroSessionManager::MicroSessionManager( pool::Persistenc
   m_registry( registry ),
   m_transaction( transaction ),
   m_storageSvc( 0 ),
-  m_storageExplorer( 0 ),
   m_session( 0 ),
   m_technology( technology ),
   m_databaseHandlers()
 {
-  void* ppvoid = 0;
   m_storageSvc = createStorageSvc("StorageSvc");
   if ( ! m_storageSvc ) {
     throw std::runtime_error( "Could not create a StorageSvc object (APR: \" MicroSessionManager::MicroSessionManager \" from \" PersistencySvc \"" );
-  }
-  m_storageSvc->addRef();
-  pool::DbStatus sc = m_storageSvc->queryInterface( pool::IStorageExplorer::interfaceID(),&ppvoid );
-  m_storageExplorer = (IStorageExplorer*)ppvoid;
-  if ( !( sc.isSuccess() && m_storageExplorer ) ) {
-    m_storageSvc->release();
-    throw std::runtime_error( "Could not retrieve a IStorageExplorer interface (APR: \" MicroSessionManager::MicroSessionManager \" from \" PersistencySvc \"" );
   }
 }
 
@@ -43,7 +35,6 @@ pool::PersistencySvc::MicroSessionManager::MicroSessionManager( pool::Persistenc
 pool::PersistencySvc::MicroSessionManager::~MicroSessionManager()
 {
   this->disconnectAll();
-  m_storageExplorer->release();
   m_storageSvc->release();
 }
 
@@ -72,7 +63,6 @@ pool::PersistencySvc::MicroSessionManager::connect( const std::string& fid,
   pool::PersistencySvc::DatabaseHandler* db = 0;
   try {
     db = new pool::PersistencySvc::DatabaseHandler( *m_storageSvc,
-                                                    *m_storageExplorer,
                                                     m_session,
                                                     m_technology,
                                                     fid,
@@ -85,7 +75,7 @@ pool::PersistencySvc::MicroSessionManager::connect( const std::string& fid,
   }
 
   if ( m_databaseHandlers.empty() && m_session ) {
-    m_storageSvc->endSession( m_session );
+    m_storageSvc->endSession( m_session ).ignore();
     m_session = 0;
   }
   return db;
@@ -102,7 +92,7 @@ pool::PersistencySvc::MicroSessionManager::disconnect( pool::PersistencySvc::Dat
     m_databaseHandlers.erase( idb );
   }
   if ( m_databaseHandlers.empty() && m_session ) {
-    m_storageSvc->endSession( m_session );
+    m_storageSvc->endSession( m_session ).ignore();
     m_session = 0;
   }
 }
@@ -121,7 +111,7 @@ pool::PersistencySvc::MicroSessionManager::disconnectAll()
   m_databaseHandlers.clear();
 
   if ( m_session ) {
-    m_storageSvc->endSession( m_session );
+    ret = ret and m_storageSvc->endSession( m_session ).isSuccess();
     m_session = 0;
   }
   return ret;
@@ -148,22 +138,20 @@ pool::PersistencySvc::MicroSessionManager::fidForPfn( const std::string& pfn )
   }
 
   std::string fid = "";
-
-  pool::DbStatus sc;
   pool::FileDescriptor fd( pfn, pfn );
   // this is only a temporary FID so use a special pattern to make that clear
   fd.setFID( fd.FID().substr(0,24) + "0FF0FF0FF0FF" );
-  sc = m_storageSvc->existsConnection( m_session, pool::READ, fd );
-  if ( !( sc.value() == static_cast<unsigned int>( IStorageSvc::CONNECTION_NOT_EXISTING ) ||
-          sc.value() == static_cast<unsigned int>( IStorageSvc::INVALID_SESSION_TOKEN ) ) ) {
-    if ( m_storageExplorer->connect( m_session, pool::READ, fd ).isSuccess() ) {
-      if ( ! m_storageExplorer->dbParam( fd, "FID", fid ).isSuccess() ) fid = "";
-      m_storageExplorer->disconnect( fd );
+  if( m_storageSvc->existsConnection( m_session, pool::READ, fd ).isSuccess() ) {
+    if ( m_storageSvc->connect( m_session, pool::READ, fd ).isSuccess() ) {
+      pool::DatabaseConnection* connection = fd.dbc();
+      DbDatabase dbH(static_cast<DbDatabaseObj*>(connection->handle()));
+      if ( ! dbH.param( "FID", fid ).isSuccess() ) fid = "";
+      m_storageSvc->disconnect( fd ).ignore();
     }
   }
 
   if ( m_databaseHandlers.empty() ) {
-    m_storageSvc->endSession( m_session );
+    m_storageSvc->endSession( m_session ).ignore();
     m_session = 0;
   }
 
@@ -188,17 +176,9 @@ pool::PersistencySvc::MicroSessionManager::attributeOfType( const std::string& a
       return false;
     }
   }
-
   pool::DbOption domainOption( attributeName, option );
-  pool::DbStatus sc = m_storageExplorer->getDomainOption( m_session,
-                                                          domainOption );
-  if ( !sc.isSuccess() ) return false;
-  if ( domainOption.i_getValue( typeInfo, data ).isSuccess() ) {
-    return true;
-  }
-  else {
-    return false;
-  }
+  if( !m_storageSvc->getDomainOption( m_session, domainOption ).isSuccess() ) return false;
+  return domainOption.i_getValue( typeInfo, data ).isSuccess();
 }
 
 bool
@@ -212,22 +192,11 @@ pool::PersistencySvc::MicroSessionManager::setAttributeOfType( const std::string
     if ( m_transaction.type() == ITransaction::UPDATE ) {
       mode = pool::UPDATE;
     }
-    if ( ! ( m_storageSvc->startSession( mode,
-                                         m_technology,
-                                         m_session ).isSuccess() ) ) {
+    if( !m_storageSvc->startSession( mode, m_technology, m_session ).isSuccess() ) {
       return false;
     }
   }
-
   pool::DbOption domainOption( attributeName, option );
-  pool::DbStatus sc = domainOption.i_setValue( typeInfo, const_cast<void*>( data ) );
-  if ( !sc.isSuccess() ) return false;
-  sc = m_storageExplorer->setDomainOption( m_session,
-                                           domainOption );
-  if ( !sc.isSuccess() ) {
-    return false;
-  }
-  else {
-    return true;
-  }
+  if( !domainOption.i_setValue( typeInfo, const_cast<void*>( data ) ).isSuccess() ) return false;
+  return m_storageSvc->setDomainOption( m_session, domainOption ).isSuccess();
 }

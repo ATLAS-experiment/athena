@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /***************************************************************************
                           TriggerTowerKey.h  -  description
@@ -86,7 +86,7 @@ enum TriggerTowerRegion {
 private: // Private methods
   /** converts integer phi, eta 
 coordinates to phi, eta trigger bins. */
-  BinAndCoord* calculateTriggerBin(ICoordinate* iCoord);
+  virtual BinAndCoord calculateTriggerBin(const ICoordinate& iCoord);
 private:
 //  bool m_debug;
 };

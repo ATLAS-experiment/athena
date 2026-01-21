@@ -13,7 +13,7 @@
 #include <map>
 
 PixelDetectorElementCondAlg::PixelDetectorElementCondAlg(const std::string& name, ISvcLocator* pSvcLocator)
-  : ::AthReentrantAlgorithm(name, pSvcLocator)
+  : ::AthCondAlgorithm(name, pSvcLocator)
 {
   declareProperty("ReadKey", m_readKey);
 }

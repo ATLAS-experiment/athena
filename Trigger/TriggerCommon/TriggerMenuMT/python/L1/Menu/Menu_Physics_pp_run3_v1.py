@@ -253,9 +253,15 @@ def defineMenu():
         #ATR-30618
         'L1_ADVAET',
         'L1_ADVAEL',
+        #ATR-31871 - second VAE AD 
+        'L1_ARTEMISL',
+        'L1_ARTEMIST',
         #ATR-31154 - BDT AD with muons
         'L1_ADBDTT',
         'L1_ADBDTL',
+
+        #ATR-31457
+        'L1_2MU3VF_ADBDTT',
 
         # tau 
         'L1_cTAU30M_2cTAU20M',
@@ -337,14 +343,24 @@ def defineMenu():
 
         'L1_DPHI-M70-2eEM12M', 'L1_DPHI-M70-2eEM15M', #ATR-19302
         'L1_DPHI-M70-2eEM9', 'L1_DPHI-M70-2eEM9L', # ATR-21637 (no or loose shower shape cuts)
-                
+        'L1_0DPHI32-2M5-eEM9M-eEM6M', # #ATR-32259
+
 
         #ATR-28563
         'L1_LLPDPHI-jXE40-jJ40',
         'L1_LLPNODPHI-jXE40-jJ40',
 
+        #ATR-32084
+        'L1_LLP2DPHI-jXE40-jJ40',
+        'L1_LLP2NODPHI-jXE40-jJ40',
+        'L1_LLP3DPHI-jXE40-jJ40',
+        'L1_LLP3NODPHI-jXE40-jJ40',
+
         #ATR-30656
         'L1_cTAU30M_3DR35-MU8F-eTAU30',
+
+        # ATR-31830
+        'L1_110INVM150-eEM50s-eEM10s-2DISAMB-jJ60s',
         
         ]
 

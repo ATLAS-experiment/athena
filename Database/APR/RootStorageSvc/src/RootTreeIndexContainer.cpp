@@ -13,6 +13,8 @@
 #include "TBranch.h"
 #include "TTreeIndex.h"
 
+#include "GaudiKernel/StatusCode.h"
+
 using namespace pool;
 
 RootTreeIndexContainer::RootTreeIndexContainer(const std::string& name) :
@@ -23,7 +25,7 @@ RootTreeIndexContainer::RootTreeIndexContainer(const std::string& name) :
 { }
 
 
-DbStatus RootTreeIndexContainer::open( DbDatabase& dbH, 
+StatusCode RootTreeIndexContainer::open( DbDatabase& dbH, 
                                        const std::string& nam,
                                        const DbTypeInfo* info,
                                        DbAccessMode mod)
@@ -57,7 +59,7 @@ void RootTreeIndexContainer::useNextRecordId(uint64_t nextID)
 }
 
 
-DbStatus RootTreeIndexContainer::writeObject(ActionList::value_type& action)
+StatusCode RootTreeIndexContainer::writeObject(ActionList::value_type& action)
 {
    // Prepare for writing - grab/create the index branch
    if( !m_indexBranch ) {
@@ -79,7 +81,7 @@ DbStatus RootTreeIndexContainer::writeObject(ActionList::value_type& action)
 }
 
 
-DbStatus RootTreeIndexContainer::loadObject(void** ptr, ShapeH shape, Token::OID_t& oid)
+StatusCode RootTreeIndexContainer::loadObject(void** ptr, ShapeH shape, Token::OID_t& oid)
 {
    if( (oid.second >> 32) > 0 ) {
       if( m_firstRead ) {
@@ -87,7 +89,7 @@ DbStatus RootTreeIndexContainer::loadObject(void** ptr, ShapeH shape, Token::OID
          if( m_tree->GetEntries()>0 and m_tree->GetBranch(APRDefaults::IndexColName)
              and !m_rootDb->wasIndexRebuilt(m_tree->GetName()) ) {
             delete m_tree->GetTreeIndex();
-            m_tree->BuildIndex(APRDefaults::IndexColName);
+            m_tree->BuildIndex(APRDefaults::IndexColName, true);
             m_rootDb->markIndexRebuilt(m_tree->GetName());
          }
          m_firstRead = false;
@@ -95,7 +97,7 @@ DbStatus RootTreeIndexContainer::loadObject(void** ptr, ShapeH shape, Token::OID
       auto evt_id = m_tree->GetEntryNumberWithIndex(oid.second);
       if (evt_id == -1) {
          delete m_tree->GetTreeIndex();
-         m_tree->BuildIndex(APRDefaults::IndexColName);
+         m_tree->BuildIndex(APRDefaults::IndexColName, true);
          evt_id = m_tree->GetEntryNumberWithIndex(oid.second);
       }
       if (evt_id >= 0) {

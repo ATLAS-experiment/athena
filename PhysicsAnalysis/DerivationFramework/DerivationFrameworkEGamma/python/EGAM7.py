@@ -30,38 +30,42 @@ thinCells = True
 def EGAM7SkimmingToolCfg(flags):
     """Configure the EGAM7 skimming tool"""
     acc = ComponentAccumulator()
+    skimmingTools = []
 
     # off-line based selection
     expression = "count(Electrons.pt > 4.5*GeV) >= 1"
     print("EGAM7 offline skimming expression: ", expression)
-    EGAM7_OfflineSkimmingTool = CompFactory.DerivationFramework.xAODStringSkimmingTool(
-        name="EGAM7_OfflineSkimmingTool", expression=expression
-    )
+    from DerivationFrameworkTools.DerivationFrameworkToolsConfig import (
+        xAODStringSkimmingToolCfg)
+    EGAM7_OfflineSkimmingTool = acc.getPrimaryAndMerge(xAODStringSkimmingToolCfg(
+        flags, name = "EGAM7_OfflineSkimmingTool", expression = expression))
+    skimmingTools += [EGAM7_OfflineSkimmingTool]
 
     # trigger-based selection
-    MenuType = None
+    MenuType = ""
     if flags.Trigger.EDMVersion == 2:
         MenuType = "Run2"
     elif flags.Trigger.EDMVersion == 3:
         MenuType = "Run3"
-    else:
-        MenuType = ""
-    triggers = BkgElectronTriggers[MenuType]
-    print("EGAM7 trigger skimming list (OR): ", triggers)
 
-    EGAM7_TriggerSkimmingTool = CompFactory.DerivationFramework.TriggerSkimmingTool(
-        name="EGAM7_TriggerSkimmingTool", TriggerListOR=triggers
-    )
+    if MenuType:
+        triggers = BkgElectronTriggers[MenuType]
+        print("EGAM7 trigger skimming list (OR): ", triggers)
+
+        EGAM7_TriggerSkimmingTool = CompFactory.DerivationFramework.TriggerSkimmingTool(
+            name="EGAM7_TriggerSkimmingTool", TriggerListOR=triggers
+        )
+
+        acc.addPublicTool(EGAM7_TriggerSkimmingTool)
+        skimmingTools += [EGAM7_TriggerSkimmingTool]
 
     # do the AND of trigger-based and offline-based selection
     print("EGAM7 skimming is logical AND of previous selections")
     EGAM7_SkimmingTool = CompFactory.DerivationFramework.FilterCombinationAND(
         name="EGAM7_SkimmingTool",
-        FilterList=[EGAM7_OfflineSkimmingTool, EGAM7_TriggerSkimmingTool],
+        FilterList=skimmingTools
     )
 
-    acc.addPublicTool(EGAM7_OfflineSkimmingTool)
-    acc.addPublicTool(EGAM7_TriggerSkimmingTool)
     acc.addPublicTool(EGAM7_SkimmingTool, primary=True)
 
     return acc
@@ -360,17 +364,17 @@ def EGAM7Cfg(flags):
     ]
 
     # for trigger studies we also add:
-    MenuType = None
+    MenuType = ""
     if flags.Trigger.EDMVersion == 2:
         MenuType = "Run2"
     elif flags.Trigger.EDMVersion == 3:
         MenuType = "Run3"
-    else:
-        MenuType = ""
-    EGAM7SlimmingHelper.AllVariables += ExtraContainersTrigger[MenuType]
-    EGAM7SlimmingHelper.AllVariables += ExtraContainersElectronTrigger[MenuType]
-    if not flags.Input.isMC:
-        EGAM7SlimmingHelper.AllVariables += ExtraContainersTriggerDataOnly[MenuType]
+
+    if MenuType:
+        EGAM7SlimmingHelper.AllVariables += ExtraContainersTrigger[MenuType]
+        EGAM7SlimmingHelper.AllVariables += ExtraContainersElectronTrigger[MenuType]
+        if not flags.Input.isMC:
+            EGAM7SlimmingHelper.AllVariables += ExtraContainersTriggerDataOnly[MenuType]
 
     # and on MC we also add:
     if flags.Input.isMC:
@@ -456,11 +460,11 @@ def EGAM7Cfg(flags):
     # truth
     if flags.Input.isMC:
         EGAM7SlimmingHelper.ExtraVariables += [
-            "MuonTruthParticles.e.px.py.pz.status.pdgId.truthOrigin.truthType"
+            "MuonTruthParticles.e.px.py.pz.status.pdgId.truthClassification.truthOrigin.truthType"
         ]
 
         EGAM7SlimmingHelper.ExtraVariables += [
-            "Photons.truthOrigin.truthType.truthParticleLink"
+            "Photons.truthClassification.truthOrigin.truthType.truthParticleLink"
         ]
 
     # Add event info

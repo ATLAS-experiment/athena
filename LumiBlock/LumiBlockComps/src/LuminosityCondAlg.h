@@ -19,24 +19,25 @@
 #include "CoolLumiUtilities/FillParamsCondData.h"
 #include "CoolLumiUtilities/BunchLumisCondData.h"
 #include "CoolLumiUtilities/BunchGroupCondData.h"
-#include "AthenaBaseComps/AthReentrantAlgorithm.h"
+#include "AthenaBaseComps/AthCondAlgorithm.h"
 #include "AthenaPoolUtilities/CondAttrListCollection.h"
 #include "PersistentDataModel/AthenaAttributeList.h"
 #include "StoreGate/ReadCondHandleKey.h"
 #include "StoreGate/WriteCondHandleKey.h"
 #include "CoralBase/Blob.h"
 #include "xAODEventInfo/EventInfo.h"
+#include "ByteStreamData/ByteStreamMetadataContainer.h"
 
 
 /**
  * @brief Conditions algorithm for luminosity data.
  */
 class LuminosityCondAlg
-  : public AthReentrantAlgorithm
+  : public AthCondAlgorithm
 {
 public:
   /// Forward base class ctor.
-  using AthReentrantAlgorithm::AthReentrantAlgorithm;
+  using AthCondAlgorithm::AthCondAlgorithm;
 
 
   /// Gaudi initialize method.
@@ -45,7 +46,6 @@ public:
 
   /// Algorithm execute method.
   virtual StatusCode execute (const EventContext& ctx) const override;
-  virtual bool isReEntrant() const override final { return false; }
 
 
 private:
@@ -178,6 +178,10 @@ private:
   SG::ReadCondHandleKey<AthenaAttributeList> m_mcDigitizationInputKey
   { this, "DigitizationFolderInputKey", "/Digitization/Parameters",
     "Digitization parameters metadata folder." };
+
+  SG::ReadHandleKey<ByteStreamMetadataContainer> m_byteStreamMetadataKey
+  { this, "ByteStreamMetadataKey", "",
+    "ByteStream metadata (for reading IOV metadata from BS files in MC mode)" };
 
   SG::ReadHandleKey<xAOD::EventInfo> m_eventInfoKey 
   { this, "EventInfoKey", "EventInfo", "EventInfo key, used to read in simulated mu in MC" };

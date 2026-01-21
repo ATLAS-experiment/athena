@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef CSCCALCPED_H
@@ -61,7 +61,7 @@ namespace MuonCalib{
       StatusCode calculateParameters();
       StatusCode writeCalibrationFile();
       StatusCode storeGateRecord();
-      DataVector<TH2F> * makeBitCorrelation();
+      std::vector<TH2F*> makeBitCorrelation();
 
       StatusCode calOutput0();
       StatusCode calOutput1();
@@ -113,9 +113,9 @@ namespace MuonCalib{
 
       bool m_doF001;
 
-      DataVector<TH1I> * m_ampHists;
-      DataVector< DataVector<TH1I> > * m_sampHists;
-      DataVector<TH1I> * m_bitHists;
+      std::vector<TH1I*> m_ampHists;
+      std::vector< std::vector<TH1I*> > m_sampHists;
+      std::vector<TH1I*> m_bitHists;
       DataVector<TH2F> * m_bitProds;
       DataVector<TH1F> * m_bitCorrelation;
       std::vector<int> m_onlineThresholds;

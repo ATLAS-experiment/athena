@@ -309,12 +309,7 @@ private:
   typedef hash_vec::const_iterator hash_vec_it;
   enum ExpandedIdIndices {INDET, SCT, BARREL_EC, LAYER_DISK, PHI, ETA, SIDE, ROW,STRIP, NUM_INDICES};
   std::array<std::function< IdentifierHash(const IdentifierHash & )>, 5> m_neighboursByEta;
-  
-  //this is a bit clumsy, but it reproduces the original messaging behaviour with/without Gaudi
-  //it *SHOULD NOT* be used for messaging in event loop code, as it is expensive!
-  void 
-  localMessage(const std::string & msgTxt, const std::string &func, const MSG::Level & lvl) const;
-  
+    
   void wafer_id_checks(int barrel_ec,
                        int layer_disk,
                        int phi_module,

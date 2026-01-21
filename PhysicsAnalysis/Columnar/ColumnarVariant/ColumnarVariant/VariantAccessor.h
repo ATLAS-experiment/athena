@@ -78,14 +78,14 @@ namespace columnar
 
 
 
-  // the column accessor for variant objects in ColumnarModeArray
+  // the column accessor for variant objects in array columnar modes
   //
   // This internally contains a tuple of accessors, one for each
   // variant. This is probably not the best way to implement it, but it
   // fits best with the current accessor infrastructure.
-  template<ContainerIdConcept CIBase,ContainerIdConcept... CIList,typename CT,ColumnAccessMode CAM>
-    requires requires { AccessorTemplate<CIBase,CT,CAM,ColumnarModeArray>{}; }
-  class AccessorTemplate<VariantContainerId<CIBase,CIList...>,CT,CAM,ColumnarModeArray> final
+  template<ContainerIdConcept CIBase,ContainerIdConcept... CIList,typename CT,ColumnAccessMode CAM,ColumnarArrayMode CM>
+    requires requires { AccessorTemplate<CIBase,CT,CAM,CM>{}; }
+  class AccessorTemplate<VariantContainerId<CIBase,CIList...>,CT,CAM,CM> final
   {
     /// Common Public Members
     /// =====================
@@ -94,7 +94,6 @@ namespace columnar
     static_assert (!std::is_const_v<CT>, "CT must not be const");
 
     using CI = VariantContainerId<CIBase,CIList...>;
-    using CM = ColumnarModeArray;
     using AccessorTuple = std::tuple<AccessorTemplate<CIList,CT,CAM,CM>...>;
 
     AccessorTemplate () noexcept = default;

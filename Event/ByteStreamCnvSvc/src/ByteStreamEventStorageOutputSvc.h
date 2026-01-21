@@ -26,12 +26,14 @@
 #include "ByteStreamData/RawEvent.h"
 #include "EventStorage/EventStorageRecords.h"
 #include "StoreGate/ReadHandleKey.h"
+#include "StoreGate/StoreGateSvc.h"
 #include "xAODEventInfo/EventInfo.h"
 
 #include "GaudiKernel/extends.h"
 #include "GaudiKernel/IIoComponent.h"
-#include "GaudiKernel/IIoComponentMgr.h" 
+#include "GaudiKernel/IIoComponentMgr.h"
 #include "GaudiKernel/ServiceHandle.h"
+#include "EventInfoMgt/ITagInfoMgr.h"
 
 
 class EventInfo;
@@ -93,11 +95,6 @@ class ByteStreamEventStorageOutputSvc :
   Gaudi::Property<std::string> m_streamName{this, "StreamName", "",
     "part of filename"};
 
-  //!< eformat event version to produce, "v40" for run1, or "current"
-  Gaudi::Property<std::string> m_eformatVersion{this, "EformatVersion",
-    "current", "Version of the event format data, use \"v40\" or \"run1\" "
-    "for run1, \"current\" for most current version (default)."};
-
   //!< EventStorage BS version to produce, "v5" for run1, or "current"
   Gaudi::Property<std::string> m_eventStorageVersion{this,
     "EventStorageVersion", "current", "Version of the ByteStream file data, "
@@ -145,12 +142,12 @@ class ByteStreamEventStorageOutputSvc :
     "Key for bytestream metadata object in metadata store"};
 
   ServiceHandle< IIoComponentMgr > m_ioMgr{"IoComponentMgr", name()};
+  ServiceHandle< ITagInfoMgr > m_tagInfoMgr{"TagInfoMgr", name()};
+  ServiceHandle< StoreGateSvc > m_metaDataStore{"StoreGateSvc/MetaDataStore", name()};
 
  private:  // data
   //! number of event counter
   int m_totalEventCounter{0};
-
-  bool m_isRun1{false};
 
   //! pointer to DataWriter
   std::unique_ptr<ByteStreamDataWriter> m_dataWriter;

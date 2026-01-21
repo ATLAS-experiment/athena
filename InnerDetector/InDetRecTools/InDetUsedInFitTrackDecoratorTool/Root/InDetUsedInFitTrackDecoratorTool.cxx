@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // Local include(s):
@@ -31,27 +31,17 @@ StatusCode InDet::InDetUsedInFitTrackDecoratorTool::initialize()
 {
   // Print configuration
   ATH_MSG_DEBUG("Initializing " << name() << "...");
-  ATH_MSG_DEBUG("Using AMVFVerticesDecoName: " << m_vtxDecoName);
-  ATH_MSG_DEBUG("Using AMVFWeightsDecoName: "  << m_wgtDecoName);
+  ATH_MSG_DEBUG("Using AMVFVerticesDecoName: " << m_vtxDecoKey);
+  ATH_MSG_DEBUG("Using AMVFWeightsDecoName: "  << m_wgtDecoKey);
   ATH_MSG_DEBUG("Using TrackContainer: "       << m_trkContKey);
   ATH_MSG_DEBUG("Using VertexContainer: "      << m_vtxContKey);
 
   // Instantiate and initialize our container reads
-  // For tracks:
   ATH_CHECK(m_trkContKey.initialize());
-  // For vertices:
   ATH_CHECK(m_vtxContKey.initialize());
 
   // Instantiate and initialize our decorator writes
-  // For vertices:
-  m_vtxDecoKey = SG::WriteDecorHandleKey<xAOD::TrackParticleContainer>(m_trkContKey.key() + "." + m_vtxDecoName); // FIXME Do not assign properties during initialize()
-  this->declare(m_vtxDecoKey);
-  m_vtxDecoKey.setOwner(&(*this));
   ATH_CHECK(m_vtxDecoKey.initialize());
-  // For weights:
-  m_wgtDecoKey = SG::WriteDecorHandleKey<xAOD::TrackParticleContainer>(m_trkContKey.key() + "." + m_wgtDecoName); // FIXME Do not assign properties during initialize()
-  this->declare(m_wgtDecoKey);
-  m_wgtDecoKey.setOwner(&(*this));
   ATH_CHECK(m_wgtDecoKey.initialize());
 
   return StatusCode::SUCCESS;

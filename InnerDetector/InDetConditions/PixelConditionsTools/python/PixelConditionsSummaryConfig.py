@@ -1,6 +1,6 @@
 """Define a function to configure PixelConditionsSummaryCfg
 
-Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 """
 from AthenaConfiguration.AccumulatorCache import AccumulatorCache
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
@@ -20,14 +20,14 @@ def PixelConditionsSummaryCfg(flags, name="PixelConditionsSummary", **kwargs):
 
     kwargs.setdefault("UseByteStreamFEI4", (not flags.Input.isMC and flags.Input.Format is Format.BS) or flags.Overlay.DataOverlay)
     kwargs.setdefault("UseByteStreamFEI3", (not flags.Input.isMC and flags.Input.Format is Format.BS) or flags.Overlay.DataOverlay)
-    if (flags.Overlay.DataOverlay and
-        flags.Common.ProductionStep is not ProductionStep.MinbiasPreprocessing and
-        not flags.Overlay.ByteStream):
+    if flags.Common.ProductionStep is not ProductionStep.MinbiasPreprocessing and flags.Overlay.DataOverlay:
         from SGComps.SGInputLoaderConfig import SGInputLoaderCfg
         acc.merge(SGInputLoaderCfg(flags, ["IDCInDetBSErrContainer#PixelByteStreamErrs"]))
 
     if flags.InDet.usePixelDCS:
         pixel_states_active =  [ 'READY', 'ON' ]     # 'UNKNOWN', 'TRANSITION', 'UNDEFINED', 'DISABLED', 'LOCKED_OUT', 'OFF' states should be masked.
+        if flags.InDet.useHVActiveStates:
+            pixel_states_active =  [ 'READY', 'ON', 'UNDEFINED' ]     # 'UNKNOWN', 'TRANSITION', 'DISABLED', 'LOCKED_OUT', 'OFF' states should be masked.
 
         kwargs.setdefault("IsActiveStates", pixel_states_active)
         kwargs.setdefault("IsActiveStatus", [ 'OK', 'WARNING', 'ERROR', 'FATAL' ])

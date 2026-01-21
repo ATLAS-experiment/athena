@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -866,10 +866,10 @@ MM_ElectronicsToolInput MM_DigitizationTool::combinedStripResponseAllHits(const 
                 if (m_useCondThresholds) {
                     const Identifier id = m_idHelperSvc->mmIdHelper().channelID(digitID, m_idHelperSvc->mmIdHelper().multilayer(digitID),
                                                                                 m_idHelperSvc->mmIdHelper().gasGap(digitID), strip_id);
-                    float threshold = 0;
-                    if (!thresholdData->getThreshold(id, threshold))
+                    std::optional<float> threshold = thresholdData->getThreshold(id);
+                    if (!threshold)
                         ATH_MSG_ERROR("Cannot find retrieve VMM threshold from conditions data base!");
-                    v_stripThresholdResponseAllHits.push_back(threshold);
+                    v_stripThresholdResponseAllHits.push_back(*threshold);
                 } else if (m_useThresholdScaling) {
                     Identifier id = m_idHelperSvc->mmIdHelper().channelID(digitID, m_idHelperSvc->mmIdHelper().multilayer(digitID),
                                                                           m_idHelperSvc->mmIdHelper().gasGap(digitID), strip_id);

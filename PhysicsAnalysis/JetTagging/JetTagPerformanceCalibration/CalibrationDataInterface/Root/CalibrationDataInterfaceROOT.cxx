@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //////////////////////////////////////////////////////////////////////////////////////////////
@@ -527,7 +527,7 @@ Analysis::CalibrationDataInterfaceROOT::CalibrationDataInterfaceROOT(const std::
 
   if (m_verbose) {
     cout << "=== CalibrationDataInterfaceROOT::CalibrationDataInterfaceROOT ===" << endl;
-    cout << " taggerName           : " << taggerName.c_str() << endl;
+    cout << " taggerName           : " << taggerName << endl;
     cout << " Systematic strategy : ";
     if (m_EVStrategy == Analysis::Uncertainty::SFEigen){
       cout << "SFEigen" << endl;
@@ -2550,7 +2550,7 @@ Analysis::CalibrationDataInterfaceROOT::retrieveContainer(const string& label, c
   if (!isSF && !cnt && m_fileSF != m_fileEff) m_fileSF->GetObject(name.c_str(), cnt);
   m_objects.push_back(cnt);
   if (!cnt) {
-    cerr << "btag Calib: retrieveContainer: failed to retrieve container named " << name.c_str() << " from file" << endl;
+    cerr << "btag Calib: retrieveContainer: failed to retrieve container named " << name << " from file" << endl;
     return 0;
   }
 
@@ -2638,7 +2638,7 @@ Analysis::CalibrationDataInterfaceROOT::retrieveContainer(const string& label, c
       // The choices are stored with the container object; but first we need to know what flavour we are dealing with.
       string flavour = dir.substr(dir.find_last_of("/")+1);
 
-      for (auto entry : m_excludeFromCovMatrix[flavour]) {
+      for (const auto & entry : m_excludeFromCovMatrix[flavour]) {
         newEigenVariation->excludeNamedUncertainty(entry, cnt);
       }
       newEigenVariation->initialize();
@@ -2665,7 +2665,7 @@ Analysis::CalibrationDataInterfaceROOT::retrieveContainer(const string& label, c
         // now to see if it's completely empty or not
         if (m_eigenVariationsMap.empty()){
           std::shared_ptr<CalibrationDataGlobalEigenVariations> newEigenVariation(new CalibrationDataGlobalEigenVariations(m_filenameSF, m_taggerName, OP, author, m_flavours, histoContainer, m_useRecommendedEVExclusions));
-          for (auto entry : m_excludeFromCovMatrix[label]) {
+          for (const auto & entry : m_excludeFromCovMatrix[label]) {
             newEigenVariation->excludeNamedUncertainty(entry, label); // <---- custom exclude named uncertainties method for global variations
           }
 

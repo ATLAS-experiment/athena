@@ -1426,7 +1426,7 @@ ChangeOutputDir( TFile* file, const std::string& path, DirMap_t& directories )
 	dir = parDir->mkdir( dirName.c_str() );
       }
       else{
-	std::cout << "Failed to make directory " << dirName.c_str() << std::endl;
+	std::cout << "Failed to make directory " << dirName << std::endl;
       }
       DirMap_t::value_type dirVal( subPath, dir );
       directories.insert( std::move(dirVal) );

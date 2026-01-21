@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ISF_TOOLS_LLPTRUTHSTRATEGY_H
@@ -35,21 +35,21 @@ namespace ISF {
     ~LLPTruthStrategy() = default;
 
     // Athena algtool's Hooks
-    virtual StatusCode  initialize() override;
+    virtual StatusCode  initialize() override final;
 
     /** True if the ITruthStrategy implementationapplies to the given ITruthIncident */
-    virtual bool pass( ITruthIncident& incident) const override;
+    virtual bool pass( ITruthIncident& incident) const override final;
 
-    virtual bool appliesToRegion(unsigned short geoID) const override;
+    virtual bool appliesToRegion(unsigned short geoID) const override final;
 
   private:
     /** The process code range (low-high) and the category of processes that
      *  should pass this strategy */
-    int  m_passProcessCodeRangeLow;
-    int  m_passProcessCodeRangeHigh;
-    int  m_passProcessCategory;
+    Gaudi::Property<int> m_passProcessCodeRangeLow{this, "PassProcessCodeRangeLow", 200};
+    Gaudi::Property<int> m_passProcessCodeRangeHigh{this, "PassProcessCodeRangeHigh", 299};
+    Gaudi::Property<int> m_passProcessCategory{this, "PassProcessCategory", 9};
 
-    IntegerArrayProperty            m_regionListProperty;
+    IntegerArrayProperty m_regionListProperty{this, "Regions", {}};
   };
 
 }

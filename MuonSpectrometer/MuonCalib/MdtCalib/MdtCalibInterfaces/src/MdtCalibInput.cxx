@@ -194,7 +194,7 @@ const Amg::Transform3D& MdtCalibInput::localToGlobal() const {
          using REType = std::decay_t<decltype(re)>;
          if constexpr(std::is_same_v<REType, const MuonGMR4::MdtReadoutElement*>){
             assert(m_gctx != nullptr);
-            return re->localToGlobalTrans(*m_gctx, m_hash);
+            return re->localToGlobalTransform(*m_gctx, m_hash);
          } else if (std::is_same_v<REType, const MuonGM::MdtReadoutElement*>) {
             return re->localToGlobalTransf(identify());
          }

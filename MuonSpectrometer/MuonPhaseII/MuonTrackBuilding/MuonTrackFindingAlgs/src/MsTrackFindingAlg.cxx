@@ -10,7 +10,6 @@
 
 
 #include "MuonTrackFindingTools/MsTrackSeeder.h"
-#include "MuonPatternHelpers/MatrixUtils.h"
 #include "ActsCalibBase/CalibrationContext.h"
 #include "ActsCalibrators/xAODUncalibMeasCalibrator.h"
 

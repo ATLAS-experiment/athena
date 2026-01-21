@@ -26,6 +26,9 @@ def JETM12SkimmingToolCfg(flags):
 
 
     #xAODStringSkimmingTool cannot handle electron trigger names, therefore need to use TriggerSkimmingTool
+    from DerivationFrameworkTools.DerivationFrameworkToolsConfig import (
+        xAODStringSkimmingToolCfg)
+
     tracks = 'InDetTrackParticles.TrkIsoPt1000_ptcone20 < 0.12*InDetTrackParticles.pt && InDetTrackParticles.DFCommonTightPrimary && abs(DFCommonInDetTrackZ0AtPV*sin(InDetTrackParticles.theta)) < 5.0*mm'
 
     trackRequirements = '(InDetTrackParticles.pt > 6.*GeV && '+tracks+' )'
@@ -45,48 +48,109 @@ def JETM12SkimmingToolCfg(flags):
     expression_ttbarMu = '( count('+muonsRequirements+') >=1 ) && ( count('+jetRequirementsTtbar+') >=1 ) && ( count('+trackRequirementsNoIso+') >=2 ) && ( count('+trackRequirements+') >=1 )'
     expression_ttbarMuNoTag = '( count('+muonsRequirements+') >=1 ) && ( count('+trackRequirements+') >=1 )'
 
-    skimmingTool_W = CompFactory.DerivationFramework.xAODStringSkimmingTool(name = "skimmingTool_W", expression = expression_W)
-    acc.addPublicTool(skimmingTool_W)
-    skimmingTool_Mu = CompFactory.DerivationFramework.xAODStringSkimmingTool(name = "skimmingTool_mu", expression = expression_Mu)
-    acc.addPublicTool(skimmingTool_Mu)
+    skimmingTool_W = acc.getPrimaryAndMerge(xAODStringSkimmingToolCfg(
+        flags, name = "skimmingTool_W", expression = expression_W))
+    filterList_W = [skimmingTool_W]
+    skimmingTool_Mu = acc.getPrimaryAndMerge(xAODStringSkimmingToolCfg(
+        flags, name = "skimmingTool_mu", expression = expression_Mu))
+    filterList_Mu = [skimmingTool_Mu]
 
     # Trigger skimming tools
-    JETM12TriggerSkimmingTool_W = CompFactory.DerivationFramework.TriggerSkimmingTool(name = "JETM12TriggerSkimmingTool_W", TriggerListOR = metTriggers)
-    acc.addPublicTool(JETM12TriggerSkimmingTool_W)
-    JETM12TriggerSkimmingTool_ele = CompFactory.DerivationFramework.TriggerSkimmingTool(name = "JETM12TriggerSkimmingTool_ele", TriggerListOR = elTriggers)
-    acc.addPublicTool(JETM12TriggerSkimmingTool_ele)
-    JETM12TriggerSkimmingTool_mu = CompFactory.DerivationFramework.TriggerSkimmingTool(name = "JETM12TriggerSkimmingTool_mu", TriggerListOR = muTriggers)
-    acc.addPublicTool(JETM12TriggerSkimmingTool_mu)
+    if flags.Trigger.EDMVersion >= 0:
+        JETM12TriggerSkimmingTool_W = (
+            CompFactory.DerivationFramework.TriggerSkimmingTool(
+                name = "JETM12TriggerSkimmingTool_W",
+                TriggerListOR = metTriggers))
+        acc.addPublicTool(JETM12TriggerSkimmingTool_W)
+        filterList_W += [JETM12TriggerSkimmingTool_W]
 
-    JETM12SkimmingTool_W  = CompFactory.DerivationFramework.FilterCombinationAND(name="JETM12SkimmingTool_W",  FilterList=[skimmingTool_W,  JETM12TriggerSkimmingTool_W])
+        JETM12TriggerSkimmingTool_ele = (
+            CompFactory.DerivationFramework.TriggerSkimmingTool(
+                name = "JETM12TriggerSkimmingTool_ele",
+                TriggerListOR = elTriggers))
+        acc.addPublicTool(JETM12TriggerSkimmingTool_ele)
+
+        JETM12TriggerSkimmingTool_mu = (
+            CompFactory.DerivationFramework.TriggerSkimmingTool(
+                name = "JETM12TriggerSkimmingTool_mu",
+                TriggerListOR = muTriggers))
+        acc.addPublicTool(JETM12TriggerSkimmingTool_mu)
+        filterList_Mu += [JETM12TriggerSkimmingTool_mu]
+
+    JETM12SkimmingTool_W  = (
+        CompFactory.DerivationFramework.FilterCombinationAND(
+            name="JETM12SkimmingTool_W",  FilterList=filterList_W))
     acc.addPublicTool(JETM12SkimmingTool_W)
-    JETM12SkimmingTool_Mu = CompFactory.DerivationFramework.FilterCombinationAND(name="JETM12SkimmingTool_Mu", FilterList=[skimmingTool_Mu, JETM12TriggerSkimmingTool_mu])
+    JETM12SkimmingTool_Mu = (
+        CompFactory.DerivationFramework.FilterCombinationAND(
+            name="JETM12SkimmingTool_Mu", FilterList=filterList_Mu))
     acc.addPublicTool(JETM12SkimmingTool_Mu)
 
     finalSkimmingTools = [JETM12SkimmingTool_W,JETM12SkimmingTool_Mu]
 
     if addTtbarEvents:
-        skimmingTool_ttbarEl = CompFactory.DerivationFramework.xAODStringSkimmingTool(name = "skimmingTool_ttbarEl", expression = expression_ttbarEl)
+        skimmingTool_ttbarEl = acc.getPrimaryAndMerge(
+            xAODStringSkimmingToolCfg(
+                flags, name = "skimmingTool_ttbarEl",
+                expression = expression_ttbarEl))
         acc.addPublicTool(skimmingTool_ttbarEl)
-        skimmingTool_ttbarElNoTag = CompFactory.DerivationFramework.xAODStringSkimmingTool(name = "skimmingTool_ttbarElNoTag", expression = expression_ttbarElNoTag)
-        acc.addPublicTool(skimmingTool_ttbarElNoTag)
-        skimmingTool_ttbarMu = CompFactory.DerivationFramework.xAODStringSkimmingTool(name = "skimmingTool_ttbarMu", expression = expression_ttbarMu)
-        acc.addPublicTool(skimmingTool_ttbarMu)
-        skimmingTool_ttbarMuNoTag = CompFactory.DerivationFramework.xAODStringSkimmingTool(name = "skimmingTool_ttbarMuNoTag", expression = expression_ttbarMuNoTag)
-        acc.addPublicTool(skimmingTool_ttbarMuNoTag)
+        filterList_ttbarEl = [skimmingTool_ttbarEl]
 
-        JETM12SkimmingTool_ttbarEl      = CompFactory.DerivationFramework.FilterCombinationAND(name="JETM12SkimmingTool_ttbarEl",FilterList=[skimmingTool_ttbarEl,JETM12TriggerSkimmingTool_ele])
+        skimmingTool_ttbarElNoTag = acc.getPrimaryAndMerge(
+            xAODStringSkimmingToolCfg(
+                flags, name = "skimmingTool_ttbarElNoTag",
+                expression = expression_ttbarElNoTag))
+        acc.addPublicTool(skimmingTool_ttbarElNoTag)
+        filterList_ttbarElNoTag = [skimmingTool_ttbarElNoTag]
+
+        skimmingTool_ttbarMu = acc.getPrimaryAndMerge(
+            xAODStringSkimmingToolCfg(
+                flags, name = "skimmingTool_ttbarMu",
+                expression = expression_ttbarMu))
+        acc.addPublicTool(skimmingTool_ttbarMu)
+        filterList_ttbarMu = [skimmingTool_ttbarMu]
+
+        skimmingTool_ttbarMuNoTag = acc.getPrimaryAndMerge(
+            xAODStringSkimmingToolCfg(
+                flags, name = "skimmingTool_ttbarMuNoTag",
+                expression = expression_ttbarMuNoTag))
+        acc.addPublicTool(skimmingTool_ttbarMuNoTag)
+        filterList_ttbarMuNoTag = [skimmingTool_ttbarMuNoTag]
+
+        if flags.Trigger.EDMVersion >= 0:
+            filterList_ttbarEl += [JETM12TriggerSkimmingTool_ele]
+            filterList_ttbarElNoTag += [JETM12TriggerSkimmingTool_ele]
+            filterList_ttbarMu += [JETM12TriggerSkimmingTool_mu]
+            filterList_ttbarMuNoTag += [JETM12TriggerSkimmingTool_mu]
+
+        JETM12SkimmingTool_ttbarEl      = (
+            CompFactory.DerivationFramework.FilterCombinationAND(
+                name="JETM12SkimmingTool_ttbarEl",
+                FilterList=filterList_ttbarEl))
         acc.addPublicTool(JETM12SkimmingTool_ttbarEl)
-        JETM12SkimmingTool_ttbarElNoTag = CompFactory.DerivationFramework.FilterCombinationAND(name="JETM12SkimmingTool_ttbarElNoTag",FilterList=[skimmingTool_ttbarElNoTag,JETM12TriggerSkimmingTool_ele])
+        JETM12SkimmingTool_ttbarElNoTag = (
+            CompFactory.DerivationFramework.FilterCombinationAND(
+                name="JETM12SkimmingTool_ttbarElNoTag",
+                FilterList=filterList_ttbarElNoTag))
         acc.addPublicTool(JETM12SkimmingTool_ttbarElNoTag)
-        JETM12SkimmingTool_ttbarMu      = CompFactory.DerivationFramework.FilterCombinationAND(name="JETM12SkimmingTool_ttbarMu",FilterList=[skimmingTool_ttbarMu,JETM12TriggerSkimmingTool_mu])
+        JETM12SkimmingTool_ttbarMu      = (
+            CompFactory.DerivationFramework.FilterCombinationAND(
+                name="JETM12SkimmingTool_ttbarMu",
+                FilterList=filterList_ttbarMu))
         acc.addPublicTool(JETM12SkimmingTool_ttbarMu)
-        JETM12SkimmingTool_ttbarMuNoTag = CompFactory.DerivationFramework.FilterCombinationAND(name="JETM12SkimmingTool_ttbarMuNoTag",FilterList=[skimmingTool_ttbarMuNoTag,JETM12TriggerSkimmingTool_mu])
+        JETM12SkimmingTool_ttbarMuNoTag = (
+            CompFactory.DerivationFramework.FilterCombinationAND(
+                name="JETM12SkimmingTool_ttbarMuNoTag",
+                FilterList=filterList_ttbarMuNoTag))
         acc.addPublicTool(JETM12SkimmingTool_ttbarMuNoTag)
 
-        finalSkimmingTools = [JETM12SkimmingTool_W, JETM12SkimmingTool_Mu, JETM12SkimmingTool_ttbarEl, JETM12SkimmingTool_ttbarMu, JETM12SkimmingTool_ttbarElNoTag, JETM12SkimmingTool_ttbarMuNoTag]
+        finalSkimmingTools = [
+            JETM12SkimmingTool_W, JETM12SkimmingTool_Mu,
+            JETM12SkimmingTool_ttbarEl, JETM12SkimmingTool_ttbarMu,
+            JETM12SkimmingTool_ttbarElNoTag, JETM12SkimmingTool_ttbarMuNoTag]
 
-    JETM12SkimmingTool = CompFactory.DerivationFramework.FilterCombinationOR(name="JETM12SkimmingTool", FilterList=finalSkimmingTools)
+    JETM12SkimmingTool = CompFactory.DerivationFramework.FilterCombinationOR(
+        name="JETM12SkimmingTool", FilterList=finalSkimmingTools)
     acc.addPublicTool(JETM12SkimmingTool, primary = True)
 
     return(acc)

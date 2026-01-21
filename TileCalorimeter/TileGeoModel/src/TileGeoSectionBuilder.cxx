@@ -38,6 +38,7 @@
 #include "GaudiKernel/MsgStream.h"
 #include "GaudiKernel/SystemOfUnits.h"
 
+#include "boost/io/ios_state.hpp"
 #include <iostream>
 
 #include <assert.h>
@@ -464,6 +465,9 @@ void TileGeoSectionBuilder::fillSection(PVLink&                  mother,
           lvEndPlateSh = new GeoLogVol("EndPlateSh", &(endPlateShCutted3562) , matIron);
 
         } else {
+          //coverity[DEADCODE]
+          // logically cannot reach here --- but leave in place to guard
+          // against future changes.
           (*m_log) << MSG::ERROR <<" TileGeoSectionBuilder::fillSection . Wrong Module in cut-out region. ModuleNcp= "<<ModuleNcp<< endmsg;
           lvEndPlateSh = new GeoLogVol("EndPlateSh", endPlateSh , matIron);
         }
@@ -1782,8 +1786,6 @@ void TileGeoSectionBuilder::fillPeriod(PVLink &              mother,
   PVLink  pvWrapper{nullptr};
   GeoTransform* tfWrapper{nullptr};
 
-  GeoIdentifierTag* idTag{nullptr};
-
   (*m_log) << MSG::VERBOSE <<" TileGeoSectionBuilder::fillPeriod"<< endmsg;
 
   // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
@@ -1873,7 +1875,6 @@ void TileGeoSectionBuilder::fillPeriod(PVLink &              mother,
     //Cs tubes in mother volume and holes in glue
     if (m_switches.csTube) {
       for (j = CurrentScin; j < (CurrentScin + m_dbManager->TILBnscin()); j++) {
-        idTag = new GeoIdentifierTag(j-CurrentScin);
         m_dbManager->SetCurrentScin(j);
 
         double off0 = m_dbManager->SCNTrc()*Gaudi::Units::cm - heightMother2;
@@ -1948,7 +1949,7 @@ void TileGeoSectionBuilder::fillPeriod(PVLink &              mother,
       }
 
       for (j = CurrentScin; j < (CurrentScin + m_dbManager->TILBnscin()); j++) {
-        idTag = new GeoIdentifierTag(j-CurrentScin);
+        GeoIdentifierTag* idTag = new GeoIdentifierTag(j-CurrentScin);
         m_dbManager->SetCurrentScin(j);
 
         scintiHeight = m_dbManager->SCNTdr();
@@ -2048,7 +2049,7 @@ void TileGeoSectionBuilder::fillPeriod(PVLink &              mother,
       }
 
       for (j = CurrentScin; j < (CurrentScin + m_dbManager->TILBnscin()); j++) {
-        idTag = new GeoIdentifierTag(j-CurrentScin);
+        GeoIdentifierTag* idTag = new GeoIdentifierTag(j-CurrentScin);
         m_dbManager->SetCurrentScin(j);
 
         scintiHeight = m_dbManager->SCNTdr();
@@ -2160,7 +2161,7 @@ void TileGeoSectionBuilder::fillPeriod(PVLink &              mother,
       }
 
       for (j = CurrentScin; j < (CurrentScin + m_dbManager->TILBnscin()); j++) {
-        idTag = new GeoIdentifierTag(j-CurrentScin);
+        GeoIdentifierTag* idTag = new GeoIdentifierTag(j-CurrentScin);
         m_dbManager->SetCurrentScin(j);
 
         scintiHeight = m_dbManager->SCNTdr();
@@ -2261,7 +2262,7 @@ void TileGeoSectionBuilder::fillPeriod(PVLink &              mother,
         if (m_switches.glue == 2)   thicknessWrapper = std::max(thicknessWrapper - m_additionalIronLayer, scintiThickness);
 
         if (scintiZPos<0) {
-          idTag = new GeoIdentifierTag(j-CurrentScin);
+          GeoIdentifierTag* idTag = new GeoIdentifierTag(j-CurrentScin);
           // create wrapper
           heightWrapper = (scintiHeight + 2*scintiWrapInR)*Gaudi::Units::cm;
           dy1Wrapper = ((scintiRC - scintiHeight/2 - scintiWrapInR + m_dbManager->TILBrmin()) *
@@ -2339,7 +2340,7 @@ void TileGeoSectionBuilder::fillPeriod(PVLink &              mother,
           (*m_log) << MSG::DEBUG <<"Different tan_delta_phi_2 " << tanphi << " " << tan_delta_phi_2  <<endmsg;
 
       for (j = CurrentScin; j < (CurrentScin + m_dbManager->TILBnscin()); j++) {
-        idTag = new GeoIdentifierTag(j-CurrentScin);
+        GeoIdentifierTag* idTag = new GeoIdentifierTag(j-CurrentScin);
         m_dbManager->SetCurrentScin(j);
 
         scintiHeight = m_dbManager->SCNTdr();
@@ -2758,7 +2759,12 @@ void TileGeoSectionBuilder::computeCellDim(TileDetDescrManager*& manager,
 
     rMin = m_dbManager->TILBrmin() *Gaudi::Units::cm;
     if (addPlates) rMin -= m_dbManager->TILBdrfront() *Gaudi::Units::cm;
-    CurrentScin = 100*m_dbManager->TILBsection() + 1;
+    int section = m_dbManager->TILBsection();
+    if (section < 0) {
+      (*m_log) << MSG::ERROR << "TileGeoSectionBuilder::computeCellDim: Error return from TileDddbManager::TILBsection() " << endmsg;
+      return;
+    }
+    CurrentScin = 100*section + 1;
     //dzMaster = m_dbManager->TILBdzmast()*Gaudi::Units::cm;
 
     /** Initialize rMin, rMax vectors  - once per region
@@ -2915,7 +2921,7 @@ void TileGeoSectionBuilder::computeCellDim(TileDetDescrManager*& manager,
               cellDimNeg->addRMax(rmaxs[jj-1]);
               cellDimNeg->addZMin(-Zmax-zShiftNeg);
               cellDimNeg->addZMax(-Zmin-zShiftNeg);
-              if (jj==nFirstRow || (BCcell && jj==nLastRow))
+              if (jj==nFirstRow)
                 MLOG(DEBUG) << "Zmin: " << Zmin << "  Zmax: " << Zmax << "  zShiftPos: " << zShiftPos << "  zShiftNeg: " << zShiftNeg << endmsg;
 
             } else {
@@ -3182,6 +3188,7 @@ void TileGeoSectionBuilder::computeCellDim(TileDetDescrManager*& manager,
 
 /* -------- DEBUG printouts -------------- */
         if (m_verbose) {
+          boost::io::ios_base_all_saver coutsave (std::cout);
           std::cout << std::setiosflags(std::ios::fixed)
                     << std::setw(9) << std::setprecision(2);
           std::cout << "\n **** Cell dimension computed for : ";
@@ -3204,7 +3211,6 @@ void TileGeoSectionBuilder::computeCellDim(TileDetDescrManager*& manager,
                       << cellDimNeg->getZMin(jj) << " "
                       << cellDimNeg->getZMax(jj) << "\n";
           std::cout << " >> CellNeg Volume is " << cellDimNeg->getVolume()*(1./Gaudi::Units::cm3) << " cm^3\n";
-          std::cout << "\n" << std::resetiosflags(std::ios::fixed);
         }
 /* -------------------------------------------- */
       }
@@ -3262,7 +3268,12 @@ void TileGeoSectionBuilder::calculateZ(int detector,
 
   } else if (detector == TILE_REGION_GAP && (sample > 9) ) {
     zcenter=m_dbManager->TILBzoffset() * Gaudi::Units::cm ;
-    m_dbManager->SetCurrentScin(100*m_dbManager->TILBsection() + 1 );
+    int section = m_dbManager->TILBsection();
+    if (section < 0) {
+      (*m_log) << MSG::ERROR << "TileGeoSectionBuilder::calculateZ: Error return from TileDddbManager::TILBsection() " << endmsg;
+      return;
+    }
+    m_dbManager->SetCurrentScin(100*section + 1 );
     dz =  m_dbManager->SCNTdt()*Gaudi::Units::cm;
 
   } else {
@@ -3323,7 +3334,12 @@ void TileGeoSectionBuilder::calculateR(int detector,
   float rMax = m_dbManager->TILBrmax();
 
   if (cell>0) { // single gap/crack scintillator
-    m_dbManager->SetCurrentScin(100*m_dbManager->TILBsection()+cell);
+    int section = m_dbManager->TILBsection();
+    if (section < 0) {
+      (*m_log) << MSG::ERROR << "TileGeoSectionBuilder::calculateR: Error return from TileDddbManager::TILBsection() " << endmsg;
+      return;
+    }
+    m_dbManager->SetCurrentScin(100*section+cell);
     rcenter = (rMin + m_dbManager->SCNTrc());
     dr = m_dbManager->SCNTdr() + 2. * m_dbManager->SCNTdrw();
     if (addPlates) {
@@ -3379,10 +3395,10 @@ void TileGeoSectionBuilder::calculateR(int detector,
 
 /* -------- DEBUG printouts -------------- */
   if (m_verbose) {
+    boost::io::ios_base_all_saver coutsave (std::cout);
     std::cout << std::setiosflags(std::ios::fixed) << std::setw(9) << std::setprecision(2);
     std::cout << "Detector " << detector << " sample " << sample << " old r/dr " << oldrc   << " " << olddr << std::endl;
     std::cout << "Detector " << detector << " sample " << sample << " new r/dr " << rcenter << " " << dr << " delta r/dr " << rcenter-oldrc << " " << dr-olddr << std::endl;
-    std::cout << std::resetiosflags(std::ios::fixed);
   }
 
   return;

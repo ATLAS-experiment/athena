@@ -1,75 +1,76 @@
 Athena::getMessageSvc: WARNING MessageSvc not found, will use std::cout
-ISF_FastCaloSim...SUCCESS Testing fastCaloGAN format.
+ISF_FastCaloSim... SUCCESS Testing fastCaloGAN format.
 
-ISF_FastCaloSim...SUCCESS NetworkInputs, outer size 1
+ISF_FastCaloSim... SUCCESS NetworkInputs, outer size 1
  key->inputs; node_1=1.000000, node_2=2.000000, 
 
 
-ISF_FastCaloSim...SUCCESS NetworkOutputs, size 2; 
+ISF_FastCaloSim... SUCCESS NetworkOutputs, size 2; 
 0=3.000000, 1=0.500000, 
 
 
-ISF_FastCaloSim...SUCCESS Writing to a root file; with_lwtnn_network.root
+ISF_FastCaloSim... SUCCESS Writing to a root file; with_lwtnn_network.root
 
-ISF_FastCaloSim...SUCCESS Reading copy written to root
+ISF_FastCaloSim... SUCCESS Reading copy written to root
 
-ISF_FastCaloSim...SUCCESS Running copy from root file
+ISF_FastCaloSim... SUCCESS Running copy from root file
 
-ISF_FastCaloSim...SUCCESS NetworkOutputs, size 2; 
+ISF_FastCaloSim... SUCCESS NetworkOutputs, size 2; 
 0=3.000000, 1=0.500000, 
 
 
-ISF_FastCaloSim...SUCCESS Outputs should before and after writing shoud be identical
+ISF_FastCaloSim... SUCCESS Outputs should before and after writing shoud be identical
 
-ISF_FastCaloSim...SUCCESS Writing with a streamer to; with_lwtnn_network.root
+ISF_FastCaloSim... SUCCESS Writing with a streamer to; with_lwtnn_network.root
 
-ISF_FastCaloSim...SUCCESS Reading streamer copy written to root
+ISF_FastCaloSim... SUCCESS Reading streamer copy written to root
 
-ISF_FastCaloSim...SUCCESS Running copy streamed from root file
+ISF_FastCaloSim... SUCCESS Running copy streamed from root file
 
-ISF_FastCaloSim...SUCCESS NetworkOutputs, size 2; 
+ISF_FastCaloSim... SUCCESS NetworkOutputs, size 2; 
 0=3.000000, 1=0.500000, 
 
 
-ISF_FastCaloSim...SUCCESS Outputs should before and after writing shoud be identical
+ISF_FastCaloSim... SUCCESS Outputs should before and after writing shoud be identical
 
-ISF_FastCaloSim...SUCCESS Testing fastCaloSim format.
+ISF_FastCaloSim... SUCCESS Testing fastCaloSim format.
 
-ISF_FastCaloSim...SUCCESS Made the net.
+ISF_FastCaloSim... SUCCESS Made the net.
 
-ISF_FastCaloSim...SUCCESS Made the inputs.
+ISF_FastCaloSim... SUCCESS Made the inputs.
 
-ISF_FastCaloSim...SUCCESS NetworkInputs, outer size 2
+ISF_FastCaloSim... SUCCESS NetworkInputs, outer size 2
  key->node_0; 0=0.000000, 
  key->node_1; 0=0.000000, 1=1.000000, 
 
 
-ISF_FastCaloSim...SUCCESS NetworkOutputs, size 3; 
+ISF_FastCaloSim... SUCCESS NetworkOutputs, size 3; 
 0=0.400000, 1=0.800000, 2=1.200000, 
 
 
-ISF_FastCaloSim...SUCCESS Writing to a root file; with_lwtnn_graph.root
+ISF_FastCaloSim... SUCCESS Writing to a root file; with_lwtnn_graph.root
 
-ISF_FastCaloSim...SUCCESS Reading copy written to root
+ISF_FastCaloSim... SUCCESS Reading copy written to root
 
-ISF_FastCaloSim...SUCCESS Running copy from root file
+ISF_FastCaloSim... SUCCESS Running copy from root file
 
-ISF_FastCaloSim...SUCCESS NetworkOutputs, size 3; 
+ISF_FastCaloSim... SUCCESS NetworkOutputs, size 3; 
 0=0.400000, 1=0.800000, 2=1.200000, 
 
 
-ISF_FastCaloSim...SUCCESS Outputs should before and after writing shoud be identical
+ISF_FastCaloSim... SUCCESS Outputs should before and after writing shoud be identical
 
-ISF_FastCaloSim...SUCCESS Writing with a streamer to; with_lwtnn_graph.root
+ISF_FastCaloSim... SUCCESS Writing with a streamer to; with_lwtnn_graph.root
 
-ISF_FastCaloSim...SUCCESS Reading streamer copy written to root
+ISF_FastCaloSim... SUCCESS Reading streamer copy written to root
 
-ISF_FastCaloSim...SUCCESS Running copy streamed from root file
+ISF_FastCaloSim... SUCCESS Running copy streamed from root file
 
-ISF_FastCaloSim...SUCCESS NetworkOutputs, size 3; 
+ISF_FastCaloSim... SUCCESS NetworkOutputs, size 3; 
 0=0.400000, 1=0.800000, 2=1.200000, 
 
 
-ISF_FastCaloSim...SUCCESS Outputs should before and after writing shoud be identical
+ISF_FastCaloSim... SUCCESS Outputs should before and after writing shoud be identical
 
-ISF_FastCaloSim...SUCCESS Program ends
+ISF_FastCaloSim... SUCCESS Program ends
+

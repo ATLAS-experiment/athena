@@ -18,7 +18,7 @@ _log = logging.getLogger(__name__)
 def _condAlgName(detector):
     return "RegSelCondAlg_"+detector
 
-def _createRegSelCondAlg( detector,  CondAlgConstructor, useMdtDcsData, printTable=False ):
+def _createRegSelCondAlg( detector,  CondAlgConstructor, printTable=False ):
     """
     Creates conditions alg that provides data to a RegSel Tool
     """
@@ -32,9 +32,7 @@ def _createRegSelCondAlg( detector,  CondAlgConstructor, useMdtDcsData, printTab
                                       PrintTable  = printTable,
                                       RegSelLUT = ("RegSelLUTCondData_"+detector) )
 
-    if detector == "MDT" and not useMdtDcsData:
-         condAlg.Conditions = "" 
-    elif detector == "Pixel":
+    if detector == "Pixel":
         condAlg.DetEleCollKey = "PixelDetectorElementCollection"
         condAlg.PixelCablingCondData = "PixelCablingCondData"
     elif detector == "SCT":
@@ -88,8 +86,8 @@ def regSelToolCfg(flags, detector, algorithm, readout_geometry=None, conditions=
     printLUT = False
     if flags.hasFlag("PrintLUT"):
         printLUT = flags.PrintLUT
-        
-    the_alg = _createRegSelCondAlg(detector, algorithm, flags.Muon.useMdtDcsData, printTable=printLUT )
+   
+    the_alg = _createRegSelCondAlg(detector, algorithm, printTable=printLUT)
     ca.addCondAlgo(the_alg)
     return ca
 
@@ -132,42 +130,27 @@ def regSelTool_ITkStrip_Cfg(flags):
 # muon spectrometer
 @AccumulatorCache
 def regSelTool_MDT_Cfg(flags):
-    from MuonConfig.MuonCablingConfig import MDTCablingConfigCfg
-    from MuonConfig.MuonCondAlgConfig import MdtCondDbAlgCfg
-    from MuonConfig.MuonGeometryConfig import MuonGeoModelCfg
-
-    conditions = ComponentAccumulator()
-    conditions.merge(MuonGeoModelCfg(flags))
-    conditions.merge(MDTCablingConfigCfg(flags))
-    if flags.Muon.useMdtDcsData: #false for online and MDT calibration stream processing 
-        conditions.merge(MdtCondDbAlgCfg(flags))
-
-    return regSelToolCfg(flags, "MDT", CompFactory.MDT_RegSelCondAlg,
-                         conditions=conditions)
+    from MuonConfig.MuonGeometryConfig import RegionSelCondAlgCfg
+    result = ComponentAccumulator()
+    result.merge(RegionSelCondAlgCfg(flags, detector = "MDT"))
+    result.setPrivateTools(_createRegSelTool("MDT", True))
+    return result
 
 @AccumulatorCache
 def regSelTool_RPC_Cfg(flags):
-    from MuonConfig.MuonCablingConfig import RPCCablingConfigCfg
-    from MuonConfig.MuonGeometryConfig import MuonGeoModelCfg
-
-    conditions = ComponentAccumulator()
-    conditions.merge(MuonGeoModelCfg(flags))
-    conditions.merge(RPCCablingConfigCfg(flags))
-
-    return regSelToolCfg(flags, "RPC", CompFactory.RPC_RegSelCondAlg,
-                         conditions=conditions)
+    from MuonConfig.MuonGeometryConfig import RegionSelCondAlgCfg
+    result = ComponentAccumulator()
+    result.merge(RegionSelCondAlgCfg(flags, detector = "RPC"))
+    result.setPrivateTools(_createRegSelTool("RPC", True))
+    return result
 
 @AccumulatorCache
 def regSelTool_TGC_Cfg(flags):
-    from MuonConfig.MuonCablingConfig import TGCCablingConfigCfg
-    from MuonConfig.MuonGeometryConfig import MuonGeoModelCfg
-
-    conditions = ComponentAccumulator()
-    conditions.merge(MuonGeoModelCfg(flags))
-    conditions.merge(TGCCablingConfigCfg(flags))
-
-    return regSelToolCfg(flags, "TGC", CompFactory.TGC_RegSelCondAlg,
-                         conditions=conditions)
+    from MuonConfig.MuonGeometryConfig import RegionSelCondAlgCfg
+    result = ComponentAccumulator()
+    result.merge(RegionSelCondAlgCfg(flags, detector = "TGC"))
+    result.setPrivateTools(_createRegSelTool("TGC", True))
+    return result
 
 @AccumulatorCache
 def regSelTool_CSC_Cfg(flags):
@@ -183,15 +166,20 @@ def regSelTool_CSC_Cfg(flags):
 
 @AccumulatorCache
 def regSelTool_STGC_Cfg(flags):
-    from MuonConfig.MuonGeometryConfig import MuonGeoModelCfg
-    return regSelToolCfg(flags, "sTGC", CompFactory.sTGC_RegSelCondAlg,
-                         conditions=MuonGeoModelCfg(flags))
+    from MuonConfig.MuonGeometryConfig import RegionSelCondAlgCfg
+    result = ComponentAccumulator()
+    result.merge(RegionSelCondAlgCfg(flags, detector = "sTGC"))
+    result.setPrivateTools(_createRegSelTool("sTGC", True))
+    return result
 
 @AccumulatorCache
 def regSelTool_MM_Cfg(flags):
-    from MuonConfig.MuonGeometryConfig import MuonGeoModelCfg
-    return regSelToolCfg(flags, "MM", CompFactory.MM_RegSelCondAlg,
-                         conditions=MuonGeoModelCfg(flags))
+    from MuonConfig.MuonGeometryConfig import RegionSelCondAlgCfg
+    result = ComponentAccumulator()
+    result.merge(RegionSelCondAlgCfg(flags, detector = "MM"))
+    result.setPrivateTools(_createRegSelTool("MM", True))
+    return result
+
 
 
 # calo

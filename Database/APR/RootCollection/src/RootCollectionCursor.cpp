@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "RootCollectionCursor.h"
@@ -21,7 +21,6 @@ RootCollectionCursor(
       :
       m_description( description ),
       m_collectionRowBuffer( collectionRowBuffer ),
-      m_eventList(evl),
       m_idx(-1),
       m_entries( evl? evl->GetN() : tree->GetEntries() ),
       m_dummyRef( false )
@@ -67,7 +66,6 @@ RootCollectionCursor(
 pool::RootCollection::RootCollectionCursor::~RootCollectionCursor()
 {
    RootCollectionCursor::close();
-   if(m_eventList) delete m_eventList;
 }
 
 
@@ -84,7 +82,7 @@ pool::RootCollection::RootCollectionCursor::next()
       return false;
    }
 
-   Long64_t entry( m_eventList? m_eventList->GetEntry(m_idx) : m_idx );
+   Long64_t entry = m_idx;
 
    // read attributes
    for( AttrBranchVector_t::const_iterator branchI = m_attrBranches.begin(); branchI != m_attrBranches.end(); ++branchI) {

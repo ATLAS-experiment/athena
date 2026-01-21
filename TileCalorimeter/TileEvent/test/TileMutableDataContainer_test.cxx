@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file TileEvent/testTileMutableDataContainer_test.cxx
@@ -10,6 +10,7 @@
 
 
 #undef NDEBUG
+#include "AthenaKernel/getMessageSvc.h"
 #include "TileEvent/TileMutableDataContainer.h"
 #include "TileEvent/TileRawDataContainer.h"
 #include "TileEvent/TileRawDataCollection.h"
@@ -43,9 +44,6 @@ public:
     tileid.set_do_neighbours (false);
     parser.register_external_entity("TileCalorimeter", "IdDictTileCalorimeter.xml");
     IdDictMgr& idd = parser.parse ("IdDictParser/ATLAS_IDS.xml");
-    hwid.set_quiet (true);
-    tbid.set_quiet (true);
-    tileid.set_quiet (true);
     assert (hwid.initialize_from_dictionary (idd) == 0);
     assert (tbid.initialize_from_dictionary (idd) == 0);
     assert (tileid.initialize_from_dictionary (idd) == 0);
@@ -247,8 +245,9 @@ void test1()
 
 int main ATLAS_NOT_THREAD_SAFE ()
 {
+  Athena::getMessageSvcQuiet = true;
   std::cout << "TileMutableDataContainer_test\n";
-  TileCablingSvc cabling;
+  auto cabling = std::make_unique<TileCablingSvc>();
   test1();
   return 0;
 }

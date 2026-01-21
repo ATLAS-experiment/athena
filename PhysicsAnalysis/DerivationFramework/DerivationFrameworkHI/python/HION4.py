@@ -40,24 +40,19 @@ def HION4SkimmingToolCfg(flags):
     tightTrackOnlySelection = '( count('+tightTrackRequirements+') == 2 )'
 
     objectSelection = '('+muonOnlySelection+' || '+electronOnlySelection+' || '+photonOnlySelection+' || '+electronPhotonSelection+' || '+trackOnlySelection+')'
-    
-    from DerivationFrameworkHI import ListTriggers
-    VMtrigger=ListTriggers.HION4SkimmingTriggersVM()
-    triggers=ListTriggers.HION4SkimmingTriggersALL()
         
-    tdt = None
     if flags.Trigger.EDMVersion != -1: # Only for files with trigger payload
-        from TrigDecisionTool.TrigDecisionToolConfig import TrigDecisionToolCfg
-        tdt = acc.getPrimaryAndMerge(TrigDecisionToolCfg(flags))
+        from DerivationFrameworkHI import ListTriggers
+        VMtrigger=ListTriggers.HION4SkimmingTriggersVM()
+        triggers=ListTriggers.HION4SkimmingTriggersALL()
         expression = '( (' + ' || '.join(triggers) + ') && '+objectSelection+') || ( '+ ' || '.join(VMtrigger)+ ' && '+tightTrackOnlySelection+')'
     else:
         expression = '( '+objectSelection+' ) || ( '+tightTrackOnlySelection+' )'
 
-
-    acc.addPublicTool(CompFactory.DerivationFramework.xAODStringSkimmingTool(name       = "HION4StringSkimmingTool",
-                                                                             expression = expression,
-                                                                             TrigDecisionTool=tdt), 
-                      primary = True)
+    from DerivationFrameworkTools.DerivationFrameworkToolsConfig import (
+        xAODStringSkimmingToolCfg)
+    acc.addPublicTool(acc.getPrimaryAndMerge(xAODStringSkimmingToolCfg(
+        flags, name = "HION4StringSkimmingTool", expression = expression)), primary = True)
     
     return(acc)
 

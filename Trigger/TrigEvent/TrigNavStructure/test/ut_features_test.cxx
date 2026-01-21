@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <stdexcept>
@@ -318,38 +318,44 @@ int main() {
 
   TestTNS tns;
 
-  if ( build(tns) == false ) 
-    ABORT("not strictly a test but pre-conditions, nonetheless fails");
+  try {
+    if ( build(tns) == false )
+      ABORT("not strictly a test but pre-conditions, nonetheless fails");
 
-  if ( attach(tns) == false ) 
-    ABORT("not strictly a test but pre-conditions, nonetheless fails");
+    if ( attach(tns) == false )
+      ABORT("not strictly a test but pre-conditions, nonetheless fails");
   
-  MSG("INFO", "build navigation. test.");
+    MSG("INFO", "build navigation. test.");
 
-  if ( getFromExplicitTE(tns) == false ) 
-    ABORT("basic get failed");
+    if ( getFromExplicitTE(tns) == false )
+      ABORT("basic get failed");
 
-  if ( getRecursivelyTEbyCLID(tns) == false ) 
-    ABORT("Get by CLID failed"); 
+    if ( getRecursivelyTEbyCLID(tns) == false )
+      ABORT("Get by CLID failed");
 
-  if ( getRecursivelyTEbyLabel(tns) == false ) 
-    ABORT("Get by label failed"); 
+    if ( getRecursivelyTEbyLabel(tns) == false )
+      ABORT("Get by label failed");
 
-  // Now is the trick, we serialize the navigation and scratch the old content. 
-  // Then we deserialize into it the old content and see if the tests still work.
-  if ( ser(tns) == false ) 
-    ABORT("Issue with serialziation->reset->deserialization cycle");
+    // Now is the trick, we serialize the navigation and scratch the old content.
+    // Then we deserialize into it the old content and see if the tests still work.
+    if ( ser(tns) == false )
+      ABORT("Issue with serialziation->reset->deserialization cycle");
 
-  MSG("INFO", "tests after serialization, deserialization");
-  tns.dumpHolders();
-  if ( getFromExplicitTE(tns) == false ) 
-    ABORT("basic get failed");
+    MSG("INFO", "tests after serialization, deserialization");
+    tns.dumpHolders();
+    if ( getFromExplicitTE(tns) == false )
+      ABORT("basic get failed");
 
-  if ( getRecursivelyTEbyCLID(tns) == false ) 
-    ABORT("Get by CLID failed"); 
+    if ( getRecursivelyTEbyCLID(tns) == false )
+      ABORT("Get by CLID failed");
 
-  if ( getRecursivelyTEbyLabel(tns) == false ) 
-    ABORT("Get by label failed"); 
+    if ( getRecursivelyTEbyLabel(tns) == false )
+      ABORT("Get by label failed");
+  }
+  catch (const std::exception& e) {
+    std::cerr << e.what() << "\n";
+    return 1;
+  }
 
   MSG("OK", "test passed");
   return 0;

@@ -61,11 +61,6 @@ bool LArHitEMap::AddDigit(const LArDigit* digit) {
     return false;
 }
 
-int LArHitEMap::GetNbCells(void) const
-{
-  return m_emap.size()  ;
-}
-
 bool LArHitEMap::BuildWindows(const McEventCollection* mcCollptr,
                               float deta,float dphi, float ptmin)
 {

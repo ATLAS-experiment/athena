@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.AthConfigFlags import AthConfigFlags
 from TrkConfig.TrackingPassFlags import createTrackingPassFlags,createITkTrackingPassFlags
@@ -201,6 +201,7 @@ def signatureTrigTrackingFlags(mode : str) -> AthConfigFlags:
                 
     "cosmics"      : cosmics,
     "bmumux"       : bmumux,
+    "bhh"          : bhh,
 
     "minBias"      : minBias,
     "minBiasPixel" : minBiasPixel,
@@ -615,6 +616,24 @@ def bmumux(flags: AthConfigFlags, instanceName: str, recoMode: str) -> AthConfig
   return flags
 
 @signatureActions
+def bhh(flags: AthConfigFlags, instanceName: str, recoMode: str) -> AthConfigFlags:
+
+  flags.input_name = instanceName
+  flags.name      = "bhh"
+  flags.suffix    = "Bhh"
+  flags.roi       = "HLT_Roi_Bhh"
+  flags.Triplet_D0Max       = 10.
+  flags.DoPhiFiltering      = False
+  flags.etaHalfWidth        = 2.5
+  flags.phiHalfWidth        = math.pi-1.e-5
+  flags.zedHalfWidth        = 30.
+  flags.pTmin               = 2*Units.GeV
+  flags.minPT = tsetter(flags.minPT, flags.pTmin)
+  flags.doSeedRedundancyCheck = True
+  flags.SuperRoI = True
+  return flags
+
+@signatureActions
 def electronLRT(flags: AthConfigFlags, instanceName: str, recoMode: str) -> AthConfigFlags:
 
   flags.input_name = instanceName
@@ -855,7 +874,7 @@ def collToRecordable(flags,name):
       record = False
   else:
     if signature in ["tauCore","tauIso","tauIsoBDT",
-                     "jet","fullScan","FS","jetSuper",
+                     "jet","fullScan","FS","jetSuper","bhh",
                      "beamSpot", "BeamSpot","beamSpotFS",
                      "bjetLRT","DJetLRT","DVtxLRT"]:
       record = False

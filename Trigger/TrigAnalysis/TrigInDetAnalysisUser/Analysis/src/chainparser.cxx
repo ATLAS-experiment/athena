@@ -5,7 +5,7 @@
  **     @author  mark sutton
  **     @date    Mon 23 Jan 2017 12:30:25 CET 
  **
- **     Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+ **     Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
  **/
 
 #include <iostream> 
@@ -59,7 +59,7 @@ std::vector<std::string> split( std::string& line ) {
       continue;
     }
     while ( contains( s, ' ' ) ) line.replace( s.find(' '), 1, "" );
-    if ( !s.empty() ) strings.push_back( s );
+    if ( !s.empty() ) strings.push_back( std::move(s) );
   }
 
   strings.push_back( line );
@@ -204,8 +204,8 @@ int main( int argc, char** argv ) {
       else            return usage( argc, argv, 1 );
     }
     else { 
-      if      (  afile=="" )  afile=arg;
-      else if ( aslice=="" ) aslice=arg;
+      if      (  afile=="" )  afile=std::move(arg);
+      else if ( aslice=="" ) aslice=std::move(arg);
       else  return usage( argc, argv, 7 );
     }
   }
@@ -224,7 +224,7 @@ int main( int argc, char** argv ) {
 
   std::string slice = "/" + aslice + '/';
 
-  std::string rawslice = aslice;
+  std::string rawslice = std::move(aslice);
 
   std::map<std::string, std::string> chains;
 
@@ -353,7 +353,7 @@ int main( int argc, char** argv ) {
 	    //	  std::cout << "\t" << t << "\t" << contains( expl[4], "_track_" ) << std::endl;
 	    //    std::cout << "\tadding: " << t << std::endl;
 	    
-	    thresholds.push_back( t );
+	    thresholds.push_back( std::move(t) );
 	  }
 	}
       }

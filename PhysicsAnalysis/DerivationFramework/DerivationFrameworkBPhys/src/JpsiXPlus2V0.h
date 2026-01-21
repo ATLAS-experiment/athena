@@ -56,6 +56,7 @@ namespace DerivationFramework {
     SG::WriteHandleKey<xAOD::VertexContainer> m_v0VtxOutputKey;
     SG::ReadHandleKey<xAOD::TrackParticleContainer> m_TrkParticleCollection;
     SG::ReadHandleKey<xAOD::VertexContainer> m_VxPrimaryCandidateName;
+    SG::ReadHandleKey<xAOD::VertexContainer> m_pvContainerName;
     SG::WriteHandleKey<xAOD::VertexContainer> m_refPVContainerName;
     SG::ReadHandleKey<xAOD::EventInfo> m_eventInfo_key;
     SG::ReadHandleKeyArray<xAOD::TrackParticleContainer> m_RelinkContainers;
@@ -101,6 +102,8 @@ namespace DerivationFramework {
     bool   m_constrV02{};
     bool   m_constrJXV02{};
     bool   m_constrMainV{};
+    int    m_cascadeFitWithPV{};
+    bool   m_firstDecayAtPV{};
     bool   m_JXSubVtx{};
     bool   m_JXV02SubVtx{};
     double m_chi2cut_JX{};
@@ -137,6 +140,7 @@ namespace DerivationFramework {
     double m_mass_proton{};
     double m_mass_Lambda{};
     double m_mass_Lambdab{};
+    double m_mass_BCPLUS{};
     double m_mass_Ks{};
     double m_mass_Bpm{};
     double m_mass_phi{};
@@ -146,7 +150,7 @@ namespace DerivationFramework {
     std::vector<double> m_massesV0_pipi;
 
     bool d0Pass(const xAOD::TrackParticle* track, const xAOD::Vertex* PV) const;
-    Trk::VxCascadeInfo* fitMainVtx(const xAOD::Vertex* JXvtx, std::vector<double>& massesJX, const xAOD::Vertex* V01vtx, const V0Enum V01, const xAOD::Vertex* V02vtx, const V0Enum V02, const std::vector<const xAOD::TrackParticleContainer*>& trackCols) const;
+    Trk::VxCascadeInfo* fitMainVtx(const xAOD::Vertex* JXvtx, std::vector<double>& massesJX, const xAOD::Vertex* V01vtx, const V0Enum V01, const xAOD::Vertex* V02vtx, const V0Enum V02, const std::vector<const xAOD::TrackParticleContainer*>& trackCols, const xAOD::VertexContainer* defaultPVContainer, const xAOD::VertexContainer* pvContainer) const;
     void fitV0Container(xAOD::VertexContainer* V0ContainerNew, const std::vector<const xAOD::TrackParticle*>& selectedTracks, const std::vector<const xAOD::TrackParticleContainer*>& trackCols) const;
     template<size_t NTracks> const xAOD::Vertex* FindVertex(const xAOD::VertexContainer* cont, const xAOD::Vertex* v) const;
   };

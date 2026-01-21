@@ -12,13 +12,15 @@ namespace MuonR4::SegmentFit {
         m_cfg{std::move(cfg)} {}
 
     double SegmentAmbiSolver::redChi2(const Segment& segment) const {
-        return segment.chi2() / segment.nDoF();
+        return segment.chi2() / std::max(segment.nDoF(), 1u);
     }
     SegmentVec SegmentAmbiSolver::resolveAmbiguity(const ActsTrk::GeometryContext& gctx,
                                                    SegmentVec&& toResolve) const {
         
+        /// Sort segments with a reduced chi2 better than 5 (normmaly) by the degrees of freedom,
+        /// otherwise by the reduced chi2 itself
         std::ranges::stable_sort(toResolve,[this](const SegmentVec::value_type& a,
-                                              const SegmentVec::value_type& b){
+                                                  const SegmentVec::value_type& b){
             const double redChi2A = redChi2(*a);
             const double redChi2B = redChi2(*b);
             if (redChi2A < m_cfg.selectByNDoFChi2 && redChi2B < m_cfg.selectByNDoFChi2){
@@ -34,14 +36,14 @@ namespace MuonR4::SegmentFit {
         std::vector<std::vector<int>> segmentSigns{driftSigns(gctx, *resolved.front(), resolved.front()->measurements())};
         std::vector<MeasurementSet> segMeasurements{extractPrds(*resolved.front())};
 
-        for (std::unique_ptr<Segment>& resolveMe : toResolve) {
+        for (SegmentVec::value_type& resolveMe : toResolve) {
             ATH_MSG_VERBOSE("Try to resolve new segment "<<toString(localSegmentPars(gctx, *resolveMe))
                           <<" redChi2: "<<redChi2(*resolveMe)<<" nDoF: "<<resolveMe->nDoF());
             /// Fetch first the Prds 
             MeasurementSet testMeas{extractPrds(*resolveMe)};
             Resolution reso{Resolution::noOverlap};
             unsigned resolvedIdx{0};
-            for (std::unique_ptr<Segment>& goodSeg : resolved) {
+            for (SegmentVec::value_type& goodSeg : resolved) {
                 ATH_MSG_VERBOSE("Test against segment "<<toString(localSegmentPars(gctx, *goodSeg))
                         <<" redChi2: "<<redChi2(*goodSeg)<<" nDoF: "<<goodSeg->nDoF());
                 MeasurementSet& resolvedM = segMeasurements[resolvedIdx];
@@ -117,7 +119,7 @@ namespace MuonR4::SegmentFit {
         return meas;
     }
     unsigned SegmentAmbiSolver::countShared(const MeasurementSet& measSet1, 
-                                                const MeasurementSet& measSet2) const {
+                                            const MeasurementSet& measSet2) const {
         if (measSet1.size() > measSet2.size()) {
             return std::count_if(measSet2.begin(),measSet2.end(),[&measSet1](const xAOD::UncalibratedMeasurement* meas){
                 return measSet1.count(meas);

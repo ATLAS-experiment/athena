@@ -12,11 +12,6 @@
 
 namespace DerivationFramework {
 
-  TauTruthMatchingWrapper::TauTruthMatchingWrapper(const std::string& t, const std::string& n, const IInterface* p) : 
-    base_class(t,n,p)
-  {
-  }
-
   StatusCode TauTruthMatchingWrapper::initialize()
   {
     ATH_CHECK(m_tauKey.initialize());
@@ -24,10 +19,6 @@ namespace DerivationFramework {
     return StatusCode::SUCCESS;
   }
 
-  StatusCode TauTruthMatchingWrapper::finalize()
-  {
-    return StatusCode::SUCCESS;
-  }
 
   StatusCode TauTruthMatchingWrapper::addBranches(const EventContext& ctx) const
   {
@@ -46,7 +37,7 @@ namespace DerivationFramework {
     for(auto xTau : *xTauContainer)
       m_tTauTruthMatchingTool->getTruth(*xTau, *truthTausEvent);
     ATH_CHECK( m_tTauTruthMatchingTool->lockDecorations(*xTauContainer) );
-    
+
     return StatusCode::SUCCESS;
-  }  
+  }
 }

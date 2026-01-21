@@ -12,7 +12,7 @@
 #define LARHVCONDALG_H
 
 
-#include "AthenaBaseComps/AthAlgorithm.h"
+#include "AthenaBaseComps/AthCondAlgorithm.h"
 #include "StoreGate/DataHandle.h" 
 #include "Identifier/Identifier.h"
 #include "AthenaBaseComps/AthAlgTool.h"
@@ -51,17 +51,17 @@ class LArHVLineID;
 class HWIdentifier;
 class LArOnlineID;
 
-class LArHVCondAlg: public AthAlgorithm
+class LArHVCondAlg: public AthCondAlgorithm
 {
  
   public: 
   
-  using AthAlgorithm::AthAlgorithm;
+  using AthCondAlgorithm::AthCondAlgorithm;
 
   virtual ~LArHVCondAlg() = default;
 
   virtual StatusCode initialize() override;
-  StatusCode execute() override;
+  StatusCode execute(const EventContext& ctx) const override;
 
 
 private:

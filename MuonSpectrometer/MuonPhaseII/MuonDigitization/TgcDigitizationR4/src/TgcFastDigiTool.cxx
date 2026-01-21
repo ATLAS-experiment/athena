@@ -10,6 +10,7 @@ namespace {
     constexpr double percentage(unsigned int numerator, unsigned int denom) {
         return 100. * numerator / std::max(denom, 1u);
     }
+    static const SG::Decorator<std::int16_t> dec_phiChannel{"SDO_phiChannel"};
 }
 namespace MuonR4 {
 
@@ -213,22 +214,14 @@ namespace MuonR4 {
                 }
                 TgcDigitCollection* outColl = fetchCollection(simHit->identify(), digitCache);
  
-                const bool digitizedEta = digitizeWireHit(ctx,simHit, efficiencyMap,*outColl, rndEngine, deadTimes);
                 const bool digitizedPhi = digitizeStripHit(ctx, simHit, efficiencyMap,*outColl, rndEngine, deadTimes);
-                
-                if (digitizedEta) {
+                std::int16_t phiChannel = digitizedPhi ? idHelper.channel(outColl->back()->identify()) : -1;
+                const bool digitizedEta = digitizeWireHit(ctx,simHit, efficiencyMap,*outColl, rndEngine, deadTimes);
+ 
+                if (digitizedEta || digitizedPhi) {
                     xAOD::MuonSimHit* sdo = addSDO(simHit, sdoContainer);
-                    sdo->setIdentifier(outColl->at(outColl->size() - 1 - digitizedPhi)->identify());
-                } else if (digitizedPhi) {
-                    xAOD::MuonSimHit* sdo = addSDO(simHit, sdoContainer);
-                    sdo->setIdentifier(outColl->at(outColl->size() - 1)->identify());
-                    const MuonGMR4::TgcReadoutElement* re{m_detMgr->getTgcReadoutElement(simHit->identify())};
-
-                    const Amg::Transform3D etaToPhi{re->globalToLocalTrans(getGeoCtx(ctx), re->layerHash(sdo->identify())) *
-                                                    re->localToGlobalTrans(getGeoCtx(ctx), re->layerHash(simHit->identify()))};
-                
-                    sdo->setLocalDirection(xAOD::toStorage(etaToPhi * xAOD::toEigen(sdo->localDirection())));
-                    sdo->setLocalPosition(xAOD::toStorage(etaToPhi * xAOD::toEigen(sdo->localPosition())));
+                    sdo->setIdentifier(outColl->back()->identify());
+                    dec_phiChannel(*sdo) = phiChannel;
                 }
             }
         } while(viewer.next());

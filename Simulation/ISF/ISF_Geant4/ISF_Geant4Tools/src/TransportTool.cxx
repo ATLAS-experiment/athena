@@ -293,7 +293,7 @@ StatusCode iGeant4::G4TransportTool::simulateVector(
   /** Process ParticleState from particle stack */
 
   bool abort = [&] ATLAS_NOT_THREAD_SAFE {
-    auto eventInfo = std::make_unique<AtlasG4EventUserInfo>();
+    auto eventInfo = std::make_unique<AtlasG4EventUserInfo>(ctx);
     eventInfo->SetHitCollectionMap(hitCollections);
 
     auto inputEvent = std::make_unique<G4Event>(ctx.eventID().event_number());

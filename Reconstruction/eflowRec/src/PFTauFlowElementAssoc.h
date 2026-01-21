@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /*
@@ -54,13 +54,13 @@ private:
   SG::ReadHandleKey<xAOD::FlowElementContainer> m_chargedFEReadHandleKey{this,"JetETMissChargedFlowElementContainer","JetETMissChargedParticleFlowObjects","ReadHandleKey for charged FlowElements"};
 
   /** The write key for adding Neutral Flow Element links to the taus */
-  SG::WriteDecorHandleKey<xAOD::TauJetContainer> m_tauNeutralFEWriteDecorKey{this,"TauNeutralFEDecorKey","TauJets.neutralFELinks","WriteDecorHandleKey for adding neutral FE links to taus"};
+  SG::WriteDecorHandleKey<xAOD::TauJetContainer> m_tauNeutralFEWriteDecorKey{this,"TauNeutralFEDecorKey",m_tauJetReadHandleKey,"neutralFELinks","WriteDecorHandleKey for adding neutral FE links to taus"};
   /** The write key for adding Charged Flow Element links to the taus */
-  SG::WriteDecorHandleKey<xAOD::TauJetContainer> m_tauChargedFEWriteDecorKey{this,"TauChargedFEDecorKey","TauJets.chargedFELinks","WriteDecorHandleKey for adding charged FE links to taus"};
+  SG::WriteDecorHandleKey<xAOD::TauJetContainer> m_tauChargedFEWriteDecorKey{this,"TauChargedFEDecorKey",m_tauJetReadHandleKey,"chargedFELinks","WriteDecorHandleKey for adding charged FE links to taus"};
   /** The write key for adding tau element links to the Neutral Flow Elements */
-  SG::WriteDecorHandleKey<xAOD::FlowElementContainer> m_neutralFETauWriteDecorKey{this,"NeutralFETauDecorKey","JetETMissNeutralParticleFlowObjects.FE_TauLinks","WriteDecorHandleKey for adding tau links to neutral FEs"};
+  SG::WriteDecorHandleKey<xAOD::FlowElementContainer> m_neutralFETauWriteDecorKey{this,"NeutralFETauDecorKey",m_neutralFEReadHandleKey,"FE_TauLinks","WriteDecorHandleKey for adding tau links to neutral FEs"};
   /** The write key for adding tau element links to the Charged Flow Elements */
-  SG::WriteDecorHandleKey<xAOD::FlowElementContainer> m_chargedFETauWriteDecorKey{this,"ChargedFETauDecorKey","JetETMissChargedParticleFlowObjects.FE_TauLinks","WriteDecorHandleKey for adding tau links to charged FEs"};
+  SG::WriteDecorHandleKey<xAOD::FlowElementContainer> m_chargedFETauWriteDecorKey{this,"ChargedFETauDecorKey",m_chargedFEReadHandleKey,"FE_TauLinks","WriteDecorHandleKey for adding tau links to charged FEs"};
 
   SG::ReadHandleKey<xAOD::JetContainer> m_jetReadHandleKey{this,"JetContainer","AntiKt4EMPFlowJets","ReadHandleKey for Jet Container"};
 

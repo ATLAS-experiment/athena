@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #include "sTgcFastDigiTool.h"
 #include "TruthUtils/HepMCHelpers.h"
@@ -11,12 +11,15 @@ namespace {
         return 100. * numerator / std::max(denom, 1u);
     }
     using channelType = sTgcIdHelper::sTgcChannelTypes;
+    using ChVec_t = std::vector<std::uint16_t>;
+      
+    static const SG::Decorator<ChVec_t> dec_stripCh{"sTgc_stripChannels"};
+    static const SG::Decorator<ChVec_t> dec_wireCh{"sTgc_wireChannels"};
+    static const SG::Decorator<ChVec_t> dec_padCh{"sTgc_padChannels"};
+   
 }
 namespace MuonR4 {
     
-    sTgcFastDigiTool::sTgcFastDigiTool(const std::string& type, const std::string& name, const IInterface* pIID):
-        MuonDigitizationTool{type,name, pIID} {}
-
     StatusCode sTgcFastDigiTool::initialize() {
         ATH_CHECK(MuonDigitizationTool::initialize());
         ATH_CHECK(m_writeKey.initialize());
@@ -56,36 +59,32 @@ namespace MuonR4 {
                 }
 
                 if (simHit->energyDeposit() < m_energyDepositThreshold){
-                ATH_MSG_VERBOSE("Hit with Energy Deposit of " << simHit->energyDeposit()
-                << " less than " << m_energyDepositThreshold << ". Skip this hit." );
-                continue;
+                    ATH_MSG_VERBOSE("Hit with Energy Deposit of " << simHit->energyDeposit()
+                    << " less than " << m_energyDepositThreshold << ". Skip this hit." );
+                    continue;
                 }
 
                 const double hitKineticEnergy = simHit->kineticEnergy();
                 if (hitKineticEnergy < m_limitElectronKineticEnergy && MC::isElectron(simHit)) {
-                  ATH_MSG_DEBUG("Skip electron hit with kinetic energy " << hitKineticEnergy
+                    ATH_MSG_DEBUG("Skip electron hit with kinetic energy " << hitKineticEnergy
                               << ", which is less than the lower limit of " << m_limitElectronKineticEnergy);
-                  continue;
+                    continue;
                 }
                 sTgcDigitCollection* digiColl = fetchCollection(simHit->identify(), digitCache);
-                const bool digitizedStrip = digitizeStrip(ctx, simHit, nswUncertDB, efficiencyMap, rndEngine, *digiColl);
-                const bool digitizedWire = digitizeWire(ctx, simHit, efficiencyMap, rndEngine, *digiColl);
                 const bool digitizedPad = digitizePad(ctx, simHit, efficiencyMap, rndEngine, *digiColl);
-
-                if (digitizedStrip) {
+                const std::int16_t padChannel = digitizedPad ? idHelper.channel(digiColl->back()->identify()) : -1;
+                const bool digitizedWire = digitizeWire(ctx, simHit, efficiencyMap, rndEngine, *digiColl);
+                const std::int16_t  wireChannel = digitizedWire ? idHelper.channel(digiColl->back()->identify()) : -1;
+                const bool digitizedStrip = digitizeStrip(ctx, simHit, nswUncertDB, efficiencyMap, rndEngine, *digiColl);
+                const std::int16_t stripCh = digitizedStrip ? idHelper.channel(digiColl->back()->identify()) : -1;
+            
+                if (digitizedStrip || digitizedPad || digitizedWire) {
                     xAOD::MuonSimHit* sdo = addSDO(simHit, sdoContainer);
-                    size_t stripIdx = digiColl->size() - 1 - digitizedWire - digitizedPad;
-                    sdo->setIdentifier(digiColl->at(stripIdx)->identify());
-                } else if (digitizedWire || digitizedPad) {
-                    xAOD::MuonSimHit* sdo = addSDO(simHit, sdoContainer);
-                    sdo->setIdentifier(digiColl->at(digiColl->size() - 1)->identify());
-                    const MuonGMR4::sTgcReadoutElement* re{m_detMgr->getsTgcReadoutElement(simHit->identify())};
-
-                    const Amg::Transform3D etaToPhi{re->globalToLocalTrans(getGeoCtx(ctx), re->layerHash(sdo->identify())) *
-                                                    re->localToGlobalTrans(getGeoCtx(ctx), re->layerHash(simHit->identify()))};
-                
-                    sdo->setLocalDirection(xAOD::toStorage(etaToPhi * xAOD::toEigen(sdo->localDirection())));
-                    sdo->setLocalPosition(xAOD::toStorage(etaToPhi * xAOD::toEigen(sdo->localPosition())));
+                    ChVec_t& stripChV{dec_stripCh(*sdo)}, wireCh{dec_wireCh(*sdo)}, padCh{dec_padCh(*sdo)};
+                    if (stripCh > 0) { stripChV.push_back(stripCh); }
+                    if (wireChannel > 0) { stripChV.push_back(wireChannel); }
+                    if (padChannel > 0) { stripChV.push_back(padChannel); }
+                    sdo->setIdentifier(digiColl->back()->identify());
                 }
             }
         } while (viewer.next());
@@ -110,11 +109,12 @@ namespace MuonR4 {
         
         const sTgcIdHelper& idHelper{m_idHelperSvc->stgcIdHelper()};
 
-        const int gasGap = idHelper.gasGap(hitId);
-        const MuonGMR4::StripDesign& design{readOutEle->stripDesign(hitId)};
+        const IdentifierHash meashHash = readOutEle->measurementHash(hitId);
+        const MuonGMR4::StripDesign& design{readOutEle->stripDesign(meashHash)};
 
-        const Amg::Vector2D stripPos{xAOD::toEigen(timedHit->localPosition()).block<2,1>(0,0)};
-
+        const Amg::Vector2D stripPos = readOutEle->stripLayer(meashHash)
+                                    .to2D(xAOD::toEigen(timedHit->localPosition()), false);
+                    
         const int stripNum = design.stripNumber(stripPos);
         if (stripNum < 0) {
             ATH_MSG_VERBOSE("Strip hit "<<Amg::toString(stripPos)<<" "<<m_idHelperSvc->toStringGasGap(hitId)
@@ -124,6 +124,7 @@ namespace MuonR4 {
 
 
         bool isValid{false};
+        const int gasGap = idHelper.gasGap(hitId);
         const Identifier stripId = idHelper.channelID(hitId, readOutEle->multilayer(),
                                                       gasGap, channelType::Strip, stripNum, isValid);
         
@@ -235,23 +236,15 @@ namespace MuonR4 {
         }
         const sTgcIdHelper& idHelper{m_idHelperSvc->stgcIdHelper()};
         const MuonGMR4::sTgcReadoutElement* readOutEle = m_detMgr->getsTgcReadoutElement(hitId);
+        const IdentifierHash hitHash = readOutEle->measurementHash(hitId);
         const int gasGap = idHelper.gasGap(hitId);
-
         
-        /// Sim hits are always expressed in the eta view of the gasGap...
-        //  Rotate the sim hit into the wire view 
-        const IdentifierHash stripLayHash{readOutEle->createHash(gasGap, channelType::Strip, 0)};
-        const IdentifierHash wireLayHash{readOutEle->createHash(gasGap, channelType::Wire, 0)};
-        
-        const ActsTrk::GeometryContext& gctx{getGeoCtx(ctx)};
-        const Amg::Transform3D toWire{readOutEle->globalToLocalTrans(gctx, wireLayHash) *
-                                      readOutEle->localToGlobalTrans(gctx, stripLayHash)};
-        
-        const Amg::Vector2D wirePos{(toWire*xAOD::toEigen(timedHit->localPosition())).block<2,1>(0,0)};
+        const Amg::Vector2D wirePos = readOutEle->stripLayer(hitHash).to2D(xAOD::toEigen(timedHit->localPosition()), true);
         // do not digitise wires that are never read out in reality
-        bool isInnerQ1 = readOutEle->isEtaZero(readOutEle->measurementHash(hitId), wirePos);
-        if(isInnerQ1) return false;
-        
+        bool isInnerQ1 = readOutEle->isEtaZero(hitHash, wirePos);
+        if(isInnerQ1) {
+            return false;
+        }
         /// Check efficiencies
         if (efficiencyMap && efficiencyMap->getEfficiency(hitId, isInnerQ1) < CLHEP::RandFlat::shoot(rndEngine,0.,1.)){
             ATH_MSG_VERBOSE("Simulated wire hit "<<xAOD::toEigen(timedHit->localPosition())
@@ -259,7 +252,7 @@ namespace MuonR4 {
             return false;
         }
 
-        const MuonGMR4::WireGroupDesign& design{readOutEle->wireDesign(wireLayHash)};
+        const MuonGMR4::WireGroupDesign& design{readOutEle->wireDesign(hitHash)};
         
         const int wireGrpNum = design.stripNumber(wirePos);
         if (wireGrpNum < 0) {
@@ -319,19 +312,12 @@ namespace MuonR4 {
         const MuonGMR4::sTgcReadoutElement* readOutEle = m_detMgr->getsTgcReadoutElement(hitId);
         const int gasGap = idHelper.gasGap(hitId);
 
+        const IdentifierHash hitHash = readOutEle->createHash(gasGap, sTgcIdHelper::sTgcChannelTypes::Pad, 1);
         
-        /// Sim hits are always expressed in the eta view of the gasGap...
-        //  Rotate the sim hit into the wire view 
-        const IdentifierHash stripLayHash{readOutEle->createHash(gasGap, channelType::Strip, 0)};
-        const IdentifierHash padLayerHash{readOutEle->createHash(gasGap, channelType::Pad, 0)};
         
-        const ActsTrk::GeometryContext& gctx{getGeoCtx(ctx)};
-        const Amg::Transform3D toPad{readOutEle->globalToLocalTrans(gctx, padLayerHash) *
-                                      readOutEle->localToGlobalTrans(gctx, stripLayHash)};
-        
-        const Amg::Vector2D padPos{(toPad*xAOD::toEigen(timedHit->localPosition())).block<2,1>(0,0)};
+        const Amg::Vector2D padPos{readOutEle->stripLayer(hitHash).to2D(xAOD::toEigen(timedHit->localPosition()), true)};
         /// 
-        const MuonGMR4::PadDesign& design{readOutEle->padDesign(padLayerHash)};
+        const MuonGMR4::PadDesign& design{readOutEle->padDesign(hitHash)};
         
         const auto [padEta, padPhi] = design.channelNumber(padPos);
         if (padEta < 0 || padPhi < 0) {
@@ -357,8 +343,6 @@ namespace MuonR4 {
                             << m_idHelperSvc->toString(hitId) <<" is rejected because of efficency modelling");
             return false;
         }
-
-
 
         outCollection.push_back(std::make_unique<sTgcDigit>(padId,
                                                             associateBCIdTag(ctx, timedHit), 

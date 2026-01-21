@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /**************************************************************************
@@ -50,8 +50,6 @@ TileInfo::TileInfo()
   , m_tileHWID(nullptr)
   , m_tileTBID(nullptr)
   , m_cabling(nullptr)
-  , m_channel_context(nullptr)
-  , m_drawer_context(nullptr)
   , m_ADCmax(0)
   , m_ADCmaskValue(0)
   , m_nSamples(0)
@@ -123,9 +121,6 @@ TileInfo::TileInfo()
 //_____________________________________________________________________________
 TileInfo::~TileInfo() 
 {
-  if (m_channel_context) delete m_channel_context;
-  if (m_drawer_context) delete m_drawer_context;
-
   int sizepart=m_decoCovaria.size();
   for (int i=0; i<sizepart; ++i){
     int sizemodu=(m_decoCovaria[i]).size();
@@ -173,11 +168,6 @@ TileInfo::initialize()
   m_tileTBID = m_cabling->getTileTBID();
   m_tileHWID = m_cabling->getTileHWID();
 
-
-  //=== initialize channel context
-  m_channel_context = new IdContext(m_tileHWID->channel_context());
-  //=== initialize drawer context
-  m_drawer_context = new IdContext(m_tileHWID->drawer_context());
 
   //=== Initialize TilePulseShapes
   if (m_pulseShapes)

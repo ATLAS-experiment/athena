@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONR4_MUONPATTERNRECOGNITIONALGS_NSWSEGMENTFINDERALG_H
@@ -81,25 +81,24 @@ class NswSegmentFinderAlg : public AthReentrantAlgorithm {
         };
 
         /** @brief sector's field to dump the seed statistics */
-        struct SectorField{  
-          chIdx_t chIdx{0};      
-          int phi{0};
-          int eta{0};
-          int8_t side{1};
-
-          bool operator<(SectorField const& o) const noexcept {
-             if(chIdx != o.chIdx) return chIdx < o.chIdx;
-             if(eta != o.eta) return eta < o.eta;              
-             if(side != o.side) return side < o.side;
+          struct SectorField{  
+            chIdx_t chIdx{};      
+            int8_t phi{0};
+            int8_t eta{0};
+            bool operator<(SectorField const& o) const noexcept {
+              if(chIdx != o.chIdx) {
+                return chIdx < o.chIdx;
+              }
+              if(eta != o.eta) {
+                return eta < o.eta;              
+              }
               return phi < o.phi;
-          }
+            }
+          };
+          using SeedStatistic_T = std::map<SectorField, SeedField>;
+          SeedStatistic_T m_seedStat{};
 
-        };
-
-        using SeedStatistic_T = std::map<SectorField, SeedField>;
-        SeedStatistic_T m_seedStat{};
-
-        std::mutex m_mutex{};
+          std::mutex m_mutex{};
 
         };
 
@@ -241,10 +240,10 @@ class NswSegmentFinderAlg : public AthReentrantAlgorithm {
         DoubleProperty m_minPullThreshold{this, "maxPull", 5.};
         
         //minimum number of hits required to form a seed after extension
-        DoubleProperty m_minSeedHits{this, "minSeedHits", 6.};
+        UnsignedIntegerProperty m_minSeedHits{this, "minSeedHits", 4};
 
         //maximum number of MM Clusters that are invalid in the seed
-        DoubleProperty m_maxInvalidClusters{this, "maxInvalidClusters", 4.};
+        UnsignedIntegerProperty m_maxInvalidClusters{this, "maxInvalidClusters", 4};
 
         //reject also hits from the seed even if it does not lead to succesful segment
         BooleanProperty m_markHitsFromSeed{this, "markHitsFromSeed", true};
@@ -253,13 +252,13 @@ class NswSegmentFinderAlg : public AthReentrantAlgorithm {
         UnsignedIntegerProperty m_maxUsed{this, "maxHitIsUsed", 6};
 
         //minimum number of strips required for MMClusers not to be invalid
-        DoubleProperty m_minClusSize{this, "minClusterSize", 1.};
+        UnsignedIntegerProperty m_minClusSize{this, "minClusterSize", 1};
 
         //maximum number of chi2 cut for the segment
         DoubleProperty m_maxChi2{this, "maxChi2", 6.};
 
         // maximum number of clusters in the layer for the seed finding
-        DoubleProperty m_maxClustersInLayer{this, "maxClustersInLayer", 8};
+        UnsignedIntegerProperty m_maxClustersInLayer{this, "maxClustersInLayer", 8};
 
         //maximum number of dY window size for killing hits on the layer from the segments 
         DoubleProperty m_maxdYWindow{this, "maxdYWindow", 4.*Gaudi::Units::cm};  
@@ -268,6 +267,8 @@ class NswSegmentFinderAlg : public AthReentrantAlgorithm {
         BooleanProperty m_dumpSeedStatistics{this, "dumpStatistics", true};
 
         std::unique_ptr<SeedStatistics> m_seedCounter ATLAS_THREAD_SAFE{};
+
+        const MuonGMR4::MuonDetectorManager* m_detMgr{};
         
        
 };

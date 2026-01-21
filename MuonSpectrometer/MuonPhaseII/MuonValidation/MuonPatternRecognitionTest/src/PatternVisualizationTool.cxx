@@ -214,8 +214,8 @@ namespace MuonValR4 {
             const IdentifierHash hash = re->detectorType() == ActsTrk::DetectorType::Mdt ?
                                         re->measurementHash(simHit->identify()) :
                                         re->layerHash(simHit->identify());
-            const Amg::Transform3D trf = re->msSector()->globalToLocalTrans(*geoCtx) *
-                                         re->localToGlobalTrans(*geoCtx, hash);
+            const Amg::Transform3D trf = re->msSector()->globalToLocalTransform(*geoCtx) *
+                                         re->localToGlobalTransform(*geoCtx, hash);
             const Amg::Vector3D locPos = trf * xAOD::toEigen(simHit->localPosition());
             const Amg::Vector3D locDir = trf.linear() * xAOD::toEigen(simHit->localDirection());
             canvas.add(drawArrow(locPos, locDir, truthColor, kDashed, view));

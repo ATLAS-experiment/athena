@@ -232,7 +232,7 @@ TrigConf::L1Menu::thresholdTypes() const
 {
    std::vector<std::string> thrTypeNames;
    thrTypeNames.reserve(m_thresholdsByType.size());
-   for( auto x : m_thresholdsByType ) {
+   for( const auto & x : m_thresholdsByType ) {
       thrTypeNames.emplace_back(x.first);
    }
    return thrTypeNames;
@@ -243,7 +243,7 @@ TrigConf::L1Menu::thresholdNames() const
 {
    std::vector<std::string> thrNames;
    thrNames.reserve(m_thresholdsByName.size());
-   for( auto x : m_thresholdsByName ) {
+   for( const auto & x : m_thresholdsByName ) {
       thrNames.emplace_back(x.first);
    }
    return thrNames;

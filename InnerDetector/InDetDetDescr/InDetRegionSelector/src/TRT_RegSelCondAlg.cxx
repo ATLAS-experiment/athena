@@ -46,7 +46,7 @@
 
 
 TRT_RegSelCondAlg::TRT_RegSelCondAlg(const std::string& name, ISvcLocator* pSvcLocator):
-  AthReentrantAlgorithm( name, pSvcLocator ),
+  AthCondAlgorithm( name, pSvcLocator ),
   m_printTable(false)
 { 
   ATH_MSG_DEBUG( "TRT_RegSelCondAlg::TRT_RegSelCondAlg() " << this->name() );

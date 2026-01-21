@@ -46,19 +46,21 @@ private:
   std::string m_crest_folder_desc;
   std::vector<uint64_t> m_vList;
   bool m_head;
+  std::string m_tag;
 public:
-  CoolCrestCompare(std::string& cool_str,std::string& crest_str,std::string& gTagCrest,std::string& gTagCool, std::string& folder, std::vector<uint64_t>& vList,bool isHead):m_msgSvc("msgSvc","test"),
+  CoolCrestCompare(std::string& cool_str,std::string& crest_str,std::string& gTagCrest,std::string& gTagCool, std::string& folder, std::vector<uint64_t>& vList,bool isHead,std::string& tag):m_msgSvc("msgSvc","test"),
   m_cool_con_str(cool_str),
   m_crest_str(crest_str),
   m_gTagCrest(gTagCrest),
   m_gTagCool(gTagCool),
   m_folder(folder),
-  m_log(m_msgSvc.get(), "IOVDbFolder_test"),
+  m_log(0, "IOVDbFolder_test"),
   m_clidSvc("ClassIDSvc","test"),
   m_crest_tag(""),
   m_crest_folder_desc(""),
   m_vList(vList),
-  m_head(isHead)	
+  m_head(isHead),
+  m_tag(tag)	
   {
   }
   void compareFiles() {
@@ -103,16 +105,18 @@ public:
     }
   }
   void startCool(){
+    std::cout<<"Start COOL dump:"<<std::endl;
     ServiceHandle<ITagInfoMgr> tagInfoMgr{"TagInfoMgr","TagInfoMgr"};
     IOVDbParser parser(m_folder+m_crest_folder_desc,m_log);
     IOVDbConn connection(m_cool_con_str, true, m_log);
-    IOVDbFolder f(&(connection), parser, m_log, m_clidSvc.get(), nullptr, false, false, "COOL_DATABASE","http://unknown","unknown",true);
+    IOVDbFolder f(&(connection), parser, m_log, &(*m_clidSvc), nullptr, false, false, "COOL_DATABASE","http://unknown","unknown",true);
     f.preLoadFolder(tagInfoMgr.get() , 0, 0);
     for (uint64_t vkey : m_vList) {
     	f.loadCache(vkey, 0,m_gTagCool, true);
     }
   }
   void startCrest(){
+    std::cout<<"Start CREST dump:"<<std::endl;
     ServiceHandle<ITagInfoMgr> tagInfoMgr{"TagInfoMgr","TagInfoMgr"};
     std::map<std::string, std::string> cresttagmap;
     cresttagmap.clear();
@@ -127,10 +131,13 @@ public:
     if(m_head)
       m_crest_folder_desc+="<tag>HEAD</tag>";
     else if(m_crest_tag.ends_with("-HEAD"))
-      m_crest_folder_desc+="<tag>HEAD</tag>";    
+      m_crest_folder_desc+="<tag>HEAD</tag>";
+    else if(m_tag.size()>0){
+      m_crest_folder_desc+="<tag>"+m_tag+"</tag>";	    
+    }    
     IOVDbParser parser(m_folder+m_crest_folder_desc,m_log);
     IOVDbConn connection("", true, m_log);
-    IOVDbFolder f(&(connection), parser, m_log, m_clidSvc.get(), nullptr, false, false, "CREST",m_crest_str,m_crest_tag,true);
+    IOVDbFolder f(&(connection), parser, m_log, &(*m_clidSvc), nullptr, false, false, "CREST",m_crest_str,m_crest_tag,true);
     f.preLoadFolder(tagInfoMgr.get() , 0, 0);
     for (uint64_t vkey : m_vList) {
       f.loadCache(vkey, 0,m_gTagCrest, true);
@@ -150,6 +157,7 @@ int main(int argc, char ** argv)
 	( "globalTagCool,G", boost::program_options::value<std::string>(), "Global tag for COOL" )
 	( "folder,f", boost::program_options::value<std::string>(), "name of Folder" )
         ( "timestamp,t", boost::program_options::value<std::vector<uint64_t>>()->multitoken(), "Time of data. Support multiple space separated values. Example: -t 1715204691957781740 1725204691957781740" )
+	( "tag,T",  boost::program_options::value<std::string>(), "name of Tag")
 	( "head,H", boost::program_options::bool_switch()->default_value(false), "Use HEAD tag" );
 
     boost::program_options::variables_map arguments;
@@ -174,6 +182,7 @@ int main(int argc, char ** argv)
     std::string globalTagCool;
     std::string conStr="";
     std::string crestStr="";
+    std::string tag="";
     bool isHead = false; 
     std::vector<uint64_t> vList;
     if (arguments.count("folder")) {
@@ -218,9 +227,13 @@ int main(int argc, char ** argv)
       std::cerr <<"Error do not define timestamp"<<std::endl;
       return -1;
     }
+    if (arguments.count("tag")) {
+      tag = arguments["tag"].as<std::string>();
+    }
+
     if (arguments.count("head"))
       isHead=arguments["head"].as<bool>();
-    CoolCrestCompare pr(conStr,crestStr,globalTagCrest,globalTagCool,folder,vList,isHead);
+    CoolCrestCompare pr(conStr,crestStr,globalTagCrest,globalTagCool,folder,vList,isHead,tag);
     pr.startCrest();
     pr.startCool();
     pr.compareFiles();

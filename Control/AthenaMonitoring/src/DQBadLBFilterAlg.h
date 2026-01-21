@@ -5,7 +5,7 @@
 #ifndef DQBadLBFILTERALG_H
 #define DQBadLBFILTERALG_H
 
-#include "AthenaBaseComps/AthAlgorithm.h"
+#include "AthenaBaseComps/AthCondAlgorithm.h"
 #include "StoreGate/ReadCondHandleKey.h"
 #include "StoreGate/WriteCondHandleKey.h"
 #include "AthenaPoolUtilities/AthenaAttributeList.h"
@@ -18,7 +18,7 @@
 // This filter tool rejects events where the a bad LB block is flagged from a given defect
 // @author Michele Petteni <mpetteni@sfu.ca>
 
-class DQBadLBFilterAlg :  public AthAlgorithm  {
+class DQBadLBFilterAlg :  public AthCondAlgorithm  {
  public:
   DQBadLBFilterAlg(const std::string&, ISvcLocator*);
         
@@ -26,7 +26,7 @@ class DQBadLBFilterAlg :  public AthAlgorithm  {
   
   virtual StatusCode initialize() override;
 
-  virtual StatusCode execute() override;
+  virtual StatusCode execute(const EventContext& ctx) const override;
 
  private:
   bool m_ignoreRecoverable;

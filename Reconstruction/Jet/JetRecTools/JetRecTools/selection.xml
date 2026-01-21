@@ -3,6 +3,7 @@
   <class name="CaloClusterConstituentsOrigin" />
   <class name="ChargedHadronSubtractionTool" />
   <class name="ClusterAtEMScaleTool" />
+  <class name="ClusterAtMLScaleTool" />
   <class name="ConstitTimeCutTool" />
   <class name="ConstituentSubtractorTool" />
   <class name="CorrectPFOTool" />

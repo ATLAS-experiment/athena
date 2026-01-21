@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////////
@@ -45,7 +45,6 @@
 #include "CoolKernel/IFolder.h"
 #include "CoolKernel/IObject.h"
 
-#include "boost/lexical_cast.hpp"
 #include "boost/algorithm/string.hpp"
 
 
@@ -194,19 +193,19 @@ JobConfig::parseProgramOptions(int argc, char* argv[]) {
          if(stripped == "jo")                              { jo = true; continue; }
          if(stripped == "fw")                              { fw = true; continue; }
          if(stripped == "nomerge") { merge = false; continue; }
-         currentPar = stripped;
+         currentPar = std::move(stripped);
       } else {
-         if(currentPar == "i" || currentPar == "input")     { inpar.push_back(stripped); continue; }
-         if(currentPar == "2" || currentPar == "comp")      { inpar2.push_back(stripped); continue; }
+         if(currentPar == "i" || currentPar == "input")     { inpar.push_back(std::move(stripped)); continue; }
+         if(currentPar == "2" || currentPar == "comp")      { inpar2.push_back(std::move(stripped)); continue; }
          if(currentPar == "o" || currentPar == "output")    {
             if(outpar.size()==0 && stripped != "r3json" && stripped != "cool") {
                error.push_back("Unknown output type: " + stripped + ". Must be either json or cool, optionally followed by a base string for the output file name");
             } else {
-               outpar.push_back(stripped);
+               outpar.push_back(std::move(stripped));
             }
             continue; }
-         if(currentPar == "l" || currentPar == "log")       { logFileName = stripped; continue; }
-         if(currentPar == "p" || currentPar == "print")     { printlevel = boost::lexical_cast<int,string>(stripped); currentPar=""; continue; }
+         if(currentPar == "l" || currentPar == "log")       { logFileName = std::move(stripped); continue; }
+         if(currentPar == "p" || currentPar == "print")     { printlevel = std::stoi(stripped); currentPar=""; continue; }
          if(currentPar == "v" || currentPar == "loglevel") {
             if("NIL" == stripped ) { outputlevel = MSGTC::NIL; }
             else if("VERBOSE" == stripped ) { outputlevel = MSGTC::VERBOSE; }
@@ -257,7 +256,7 @@ JobConfig::parseProgramOptions(int argc, char* argv[]) {
       vector<string> ksv;
       boost::split(ksv,inpar[1],boost::is_any_of(","));
       for(const string& ks: ksv) {
-         keys.push_back( boost::lexical_cast<unsigned int,string>(ks) );
+         keys.push_back( static_cast<unsigned int>(std::stoul(ks)) );
       };
    }
 
@@ -268,7 +267,7 @@ JobConfig::parseProgramOptions(int argc, char* argv[]) {
       } else if ( o=="cool" ) {
          output |= COOL;
       } else if ( isUnsignedInteger(o) ) {
-         coolOutputRunNr = boost::lexical_cast<unsigned int,string>(o);
+         coolOutputRunNr = static_cast<unsigned int>(std::stoul(o));
       } else {
          outBase = o;
       }
@@ -460,8 +459,8 @@ int main( int argc, char* argv[] ) {
     *-----------------*/
    else if (gConfig.input == JobConfig::COOL) {
       string coolInputConnection = gConfig.coolInputConnection;
-      unsigned int runnumber =  gConfig.inpar.size()>1 ? boost::lexical_cast<unsigned int,string>(gConfig.inpar[1]) : 1;
-      unsigned int lb =  gConfig.inpar.size()>2 ? boost::lexical_cast<unsigned int,string>(gConfig.inpar[2]) : 0;
+      unsigned int runnumber =  gConfig.inpar.size()>1 ? static_cast<unsigned int>(std::stoul(gConfig.inpar[1])) : 1;
+      unsigned int lb =  gConfig.inpar.size()>2 ? static_cast<unsigned int>(std::stoul(gConfig.inpar[2])) : 0;
       log << "TrigConfReadWrite Reading cool : " << coolInputConnection << lineend;
       log << "                  run number   : " << runnumber << lineend;
       log << "                  lb           : " << lb << lineend;

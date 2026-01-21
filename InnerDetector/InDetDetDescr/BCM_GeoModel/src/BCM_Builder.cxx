@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "BCM_GeoModel/BCM_Builder.h"
@@ -236,19 +236,4 @@ StatusCode InDetDD::BCM_Builder::build(GeoVPhysVol* pv)
   return StatusCode::SUCCESS;
 }
 
-
-// Register callback function on ConDB object
-// Empty for now
-StatusCode InDetDD::BCM_Builder::registerCallback( StoreGateSvc*)
-{
-  return StatusCode::SUCCESS;
-}
-
-// Callback function itself
-// Empty for now
-StatusCode InDetDD::BCM_Builder::align(IOVSVC_CALLBACK_ARGS)
-{
-  // Return Failure since no function has been registered
-  return StatusCode::FAILURE;
-}
 //============================================================================================

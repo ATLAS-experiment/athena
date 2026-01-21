@@ -1,5 +1,5 @@
 /*
- *   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+ *   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  */
 
 #include "MMT_Road.h"
@@ -28,8 +28,6 @@ MMT_Road::MMT_Road(const char sector, const int roadSize,
 
 void MMT_Road::addHits(std::vector<std::shared_ptr<MMT_Hit> > &hits) {
   for (const auto &hit_i : hits) {
-    if (m_sector != hit_i->getSector()) continue;
-
     double slow, shigh;
     if (hit_i->isX()) {
       slow = hit_i->getShift() + m_slopeXlow * hit_i->getPitchOverZ();
@@ -39,29 +37,20 @@ void MMT_Road::addHits(std::vector<std::shared_ptr<MMT_Hit> > &hits) {
       slow = hit_i->getShift() + m_slopeUlow * hit_i->getPitchOverZ();
       shigh = hit_i->getShift() + m_slopeUhigh * hit_i->getPitchOverZ();
     }
-    else if (hit_i->isV()) {
+    else {
       slow = hit_i->getShift() + m_slopeVlow * hit_i->getPitchOverZ();
       shigh = hit_i->getShift() + m_slopeVhigh * hit_i->getPitchOverZ();
     }
-    else continue;
 
     const double val = hit_i->getRZSlope();
     bool has_hit = (val > 0.) ? (val > slow && val < shigh) : (val > shigh && val < slow);
 
     if (!has_hit) continue;
 
-    has_hit = false;
     const int bo = hit_i->getPlane();
     auto it = std::find_if(m_road_hits.begin(), m_road_hits.end(), [&bo](const auto &hit) { return (hit.getPlane() == bo); });
-    if (it != m_road_hits.end()) {
-      has_hit = true;
-      if (!hit_i->isNoise() && it->isNoise()) {
-        m_road_hits.erase(it);
-        has_hit = false;
-      }
-    }
+    if (it != m_road_hits.end()) continue;
 
-    if (has_hit) continue;
     m_road_hits.emplace_back(*hit_i.get());
     m_road_hits.back().setAge(0);
   }
@@ -92,26 +81,21 @@ double MMT_Road::avgSofUV(const int uv1, const int uv2) const {
   return sum/N;
 }
 
-unsigned int MMT_Road::countRealHits() const {
+unsigned int MMT_Road::countUHits() const {
   return std::count_if(m_road_hits.begin(), m_road_hits.end(),
-                       [&](auto& hit) { return hit.isNoise()==false; });
+                       [](const auto& hit) { return hit.isU(); });
 }
 
-unsigned int MMT_Road::countUVHits(bool flag) const {
+unsigned int MMT_Road::countXHits() const {
   return std::count_if(m_road_hits.begin(), m_road_hits.end(),
-                       [&](auto& hit) { return (hit.isU() || hit.isV()) && hit.isNoise()==flag; });
-}
-
-unsigned int MMT_Road::countXHits(bool flag) const {
-  return std::count_if(m_road_hits.begin(), m_road_hits.end(),
-                       [&](auto& hit) { return hit.isX() && hit.isNoise()==flag; });
+                       [](const auto& hit) { return hit.isX(); });
 }
 
 bool MMT_Road::evaluateLowRes() const {
   unsigned int nhits1 = 0, nhits2 = 0;
   for (const auto &hit : m_road_hits) {
-    nhits1 += hit.getPlane() < 4 && !hit.isNoise();
-    nhits2 += hit.getPlane() > 3 && !hit.isNoise();
+    nhits1 += hit.getPlane() < 4;
+    nhits2 += hit.getPlane() > 3;
   }
   return (nhits1 < 4 || nhits2 < 4);
 }
@@ -157,10 +141,6 @@ double MMT_Road::mxl() const {
   for (unsigned int i = 0; i < ys.size(); i++) mxl += ys[i]*( (zs[i]-avg_z) / (sum_sq_z - zs.size()*std::pow(avg_z,2)) );
 
   return mxl;
-}
-
-void MMT_Road::reset() {
-  m_road_hits.clear();
 }
 
 bool MMT_Road::stereoCheck() const {

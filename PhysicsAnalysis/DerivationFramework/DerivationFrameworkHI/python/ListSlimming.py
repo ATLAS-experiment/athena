@@ -129,6 +129,7 @@ def HION4ExtraContentMuons():
 
 def HION4ExtraMuonsTruth():
     variables  = []
+    variables += ["MuonTruthParticles.truthClassification"]
     variables += ["MuonTruthParticles.truthOrigin"]
     variables += ["MuonTruthParticles.truthType"]
 
@@ -141,6 +142,7 @@ def HION4ExtraContentPrimaryVertices():
 
 def HION4ExtraPhotonsTruth():
     variables  = []
+    variables += ["Photons.truthClassification"]
     variables += ["Photons.truthOrigin"]
     variables += ["Photons.truthType"]
     variables += ["Photons.truthParticleLink"]
@@ -372,6 +374,7 @@ def HION5AllTruthVariables():
     variables += ["AntiKt4TruthJets"]
     variables += ["TruthElectrons"]
     variables += ["TruthMuons"]
+    variables += ["TruthNeutrinos"]
     return variables
 
 def HION5SmartCollections():
@@ -694,6 +697,7 @@ def HION14ContentMuons():
     variables += ["Muons.phi"]
     variables += ["Muons.truthType"]
     variables += ["Muons.truthOrigin"]
+    variables += ["Muons.truthClassification"]
     variables += ["Muons.author"]
     variables += ["Muons.muonType"]
     variables += ["Muons.quality"]
@@ -768,6 +772,7 @@ def HION14ContentCombinedMuonTrackParticles():
 
 def HION14ExtraCombinedMuonTrackParticlesTruth():
     variables = []
+    variables += ["CombinedMuonTrackParticles.truthClassification"]
     variables += ["CombinedMuonTrackParticles.truthOrigin"]
     variables += ["CombinedMuonTrackParticles.truthType"]
 
@@ -779,6 +784,7 @@ def HION14ContentExtrapolatedMuonTrackParticles():
     variables += ["ExtrapolatedMuonTrackParticles.z0"]
     variables += ["ExtrapolatedMuonTrackParticles.vz"]
     variables += ["ExtrapolatedMuonTrackParticles.definingParametersCovMatrix"]
+    variables += ["ExtrapolatedMuonTrackParticles.truthClassification"]
     variables += ["ExtrapolatedMuonTrackParticles.truthOrigin"]
     variables += ["ExtrapolatedMuonTrackParticles.truthType"]
     variables += ["ExtrapolatedMuonTrackParticles.qOverP"]
@@ -789,6 +795,7 @@ def HION14ContentExtrapolatedMuonTrackParticles():
 
 def HION14ExtraExtrapolatedMuonTrackParticlesTruth():
     variables = []
+    variables += ["ExtrapolatedMuonTrackParticles.truthClassification"]
     variables += ["ExtrapolatedMuonTrackParticles.truthOrigin"]
     variables += ["ExtrapolatedMuonTrackParticles.truthType"]
 

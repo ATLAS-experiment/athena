@@ -15,17 +15,11 @@
 #include "AthenaBaseComps/AthAlgorithm.h"
 
 #include "../GlobalSimComponents/ITIPwriterAlgTool.h"
-#include "../IO/IeEmTOBContainer.h" 
+#include "../IO/eEmTOBContainer.h" 
 
 #include <string>
 #include <memory>
 #include <fstream>
-
-namespace GlobalSim {
-  namespace IOBitwise {
-    class IeEmTOB;
-  }
-}
 
 namespace GlobalSim {
 
@@ -49,7 +43,7 @@ namespace GlobalSim {
 
   private:
 
-    SG::WriteHandleKey<GlobalSim::IOBitwise::IeEmTOBContainer>
+    SG::WriteHandleKey<GlobalSim::IOBitwise::eEmTOBContainer>
     m_eEmTOBContainer_WriteKey {
       this,
       "eEmTOBs",
@@ -84,7 +78,7 @@ namespace GlobalSim {
     std::unique_ptr<std::ifstream> m_TIPword_stream{nullptr};
     
 
-    GlobalSim::IOBitwise::IeEmTOB* make_tob(const std::string& s) const;
+    GlobalSim::IOBitwise::eEmTOB* make_tob(const std::string& s) const;
 
   };
 

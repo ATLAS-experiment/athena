@@ -2,7 +2,7 @@
 
 # Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 #
-# ReadCalibFromCrest.py
+# File:    ReadCalibFromCrest.py
 # Sanya Solodkov <Sanya.Solodkov@cern.ch>, 2025-02-04
 #
 # Purpose: Read calibration constants from CREST DB or from JSON file
@@ -38,11 +38,9 @@ def usage():
     print ("-p, --prefix=   print some prefix on every line ")
     print ("-k, --keep=     field numbers or channel numbers to ignore, e.g. '0,2,3,EBch0,EBch1,EBch12,EBch13,EBspD4ch18,EBspD4ch19,EBspC10ch4,EBspC10ch5' ")
     print ("-s, --schema=   specify name of input JSON file or CREST_SERVER_PATH")
-    #print ("-D, --dbname=   specify dbname part of schema if schema only contains file name, default is CONDBR2")
-    #print ("-S, --server=   specify server - ORACLE or FRONTIER, default is FRONTIER")
 
-letters = "hr:l:s:t:f:D:S:n:b:e:m:N:X:c:a:g:p:dBCiIHPk:"
-keywords = ["help","run=","lumi=","schema=","tag=","folder=","dbname=","server=","module=","begin=","end=","chmin=","chmax=","gain=","adc=","chan=","nval=","prefix=","default","blob","hex","pmt","keep=","comment","iov","IOV"]
+letters = "hr:l:s:t:f:n:b:e:m:N:X:c:a:g:p:dBCiIHPk:"
+keywords = ["help","run=","lumi=","schema=","tag=","folder=","module=","begin=","end=","chmin=","chmax=","gain=","adc=","chan=","nval=","prefix=","default","blob","hex","pmt","keep=","comment","iov","IOV"]
 
 try:
     opts, extraparams = getopt.getopt(sys.argv[1:],letters,keywords)
@@ -54,10 +52,7 @@ except getopt.GetoptError as err:
 # defaults
 run = 2147483647
 lumi = 0
-#schema = "output.%s.json" % (run)
 schema = 'CREST'
-dbname = ''
-server = ''
 folderPath =  "/TILE/OFL02/CALIB/CIS/LIN"
 tag = "UPD4"
 nval = 0
@@ -96,10 +91,6 @@ for o, a in opts:
         tag = a
     elif o in ("-s","--schema"):
         schema = a
-    elif o in ("-D","--dbname"):
-        dbname = a
-    elif o in ("-S","--server"):
-        server = a
     elif o in ("-n","--nval"):
         nval = int(a)
     elif o in ("-b","--begin"):
@@ -277,17 +268,6 @@ if iov:
     en=iovList[-1][0]
 
     if begin != be or end != en:
-        ib=0
-        ie=len(iovList)
-        for i,iovs in enumerate(iovList):
-            run = iovs[0]
-            lumi = iovs[1]
-            if (run<begin and run>be) or (run==begin and lumi==0) :
-                be=run
-                ib=i
-            if run>=end and run<en:
-                en=run
-                ie=i+1
         log.info( "" )
         if be != begin:
             log.info( "Changing begin run from %d to %d (start of IOV)", begin,be)
@@ -298,69 +278,13 @@ if iov:
             else:
                 log.info( "Changing end run from %d to %d (start of last IOV)", end,en)
             end=en
-        iovList=iovList[ib:ie]
         log.info( "%d IOVs in total", len(iovList))
 
         #=== IOV only option
         if iovonly or IOVONLY:
-            alliovs={}
-            allmods={}
-            zeroiovs={}
-            nmod=0
-            for ros in range(rosmin,rosmax):
-                for mod in range(modmin, min(modmax,TileCalibUtils.getMaxDrawer(ros))):
-                    allmods[TileCalibUtils.getDrawerString(ros,mod)] = ""
-                    nmod+=1
-            for since in iovList:
-                iov="(%s,%s)" % since
-                allmod=""
-                missmod=""
-                zeromod=""
-                zero=0
-                miss=0
-                for ros in range(rosmin,rosmax):
-                    for mod in range(modmin, min(modmax,TileCalibUtils.getMaxDrawer(ros))):
-                        flt = blobReader.getDrawer(ros, mod, since, False, False)
-                        mod = TileCalibUtils.getDrawerString(ros,mod)
-                        if flt is not None:
-                            if flt==0:
-                                zero += 1
-                                zeromod += " " + mod
-                                allmod += " " + mod + "_zero"
-                                allmods[mod] += " " + iov + "_zero"
-                            else:
-                                allmod += " " + mod
-                                allmods[mod] += " " + iov
-                        else:
-                            miss+=1
-                            missmod += " " + mod
-                if miss==0 and nmod>1:
-                    alliovs[iov] = " All %d modules" % nmod
-                elif miss>0 and miss<10:
-                    alliovs[iov] = " %d modules present, %d modules missing:%s" % (nmod-miss,miss,missmod)
-                else:
-                    alliovs[iov] = "%s ; %d modules present, %d modules missing" % (allmod,nmod-miss,miss)
-                zeroiovs[iov] = (zero,zeromod)
-            print("")
-            if len(iovList)>0:
-                if iovonly:
-                    for key,value in allmods.items():
-                        if value=="":
-                            value=" None"
-                        print("%s\t%s" % (key,value))
-                if IOVONLY:
-                    for key,value in alliovs.items():
-                        if value=="":
-                            value=" None"
-                        if zeroiovs[key] and zeroiovs[key][0]>0:
-                            if "_zero" not in value:
-                                print("%s\t%s ; zero-sized blobs for %d modules:%s" % (key,value,zeroiovs[key][0],zeroiovs[key][1]))
-                            else:
-                                print("%s\t%s ; zero-sized blobs for %d modules" % (key,value,zeroiovs[key][0]))
-                        else:
-                            print("%s\t%s" % (key,value))
-            else:
-                print("No IOVs found")
+            option = 1 if iovonly else 0
+            option += (2 if IOVONLY else 0)
+            blobReader.dumpIovs(iovList,rosmin,rosmax,modmin,modmax,option,(rosmin<=0),True)
             sys.exit(0)
 else:
     iovList.append((run,lumi))
@@ -390,6 +314,8 @@ else:
     gname = [ "LG", "HG" ]
 
 #=== loop over all partitions,modules,channels
+oneModule = ((rosmax-rosmin==1) and (modmax-modmin==1) and iov)
+oldBlob = None
 pref = ""
 for iovs in iovList:
     if iov:
@@ -428,6 +354,17 @@ for iovs in iovList:
             else:
                 modSpec = modName
             try:
+                if oneModule:
+                    newBlob = blobReader.getBlob(ros, mod, iovs, False)
+                    if oldBlob == newBlob:
+                        log.info( f'{modName} in IOV {iovs} is identical to previous IOV')
+                        continue
+                    else:
+                        if oldBlob is None:
+                            log.info( f'Reading IOV {iovs} for module {modName}')
+                        else:
+                            log.info( f'{modName} was updated in IOV {iovs}')
+                    oldBlob = newBlob
                 flt = blobReader.getDrawer(ros, mod,iovs, False, False)
                 if flt is None or isinstance(flt, (int)):
                     miss+=1

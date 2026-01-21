@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <EventLoop/OutputStream.h>
@@ -11,11 +11,14 @@
 #include <TFile.h>
 #include <regex>
 
-void try_exec(const std::string& cmd)
+bool try_exec(const std::string& cmd)
 {
+  using namespace asg::msgUserCode;
   if (gSystem->Exec(cmd.c_str()) != 0) {
-    RCU_THROW_MSG("command failed: " + cmd);
+    ANA_MSG_ERROR ("command failed: " + cmd);
+    return false;
   }
+  return true;
 }
 
 int main (int argc, char **argv)
@@ -42,7 +45,8 @@ int main (int argc, char **argv)
 
   std::unique_ptr<TList> outs{dynamic_cast<TList*>(jd.Get("outputs"))};
   if (outs.get() == nullptr) {
-    RCU_THROW_MSG("Unable to get list of output streams");
+    ANA_MSG_ERROR("Unable to get list of output streams");
+    return -1;
   }
   TIter itr(outs.get());
   TObject* obj;
@@ -67,5 +71,5 @@ int main (int argc, char **argv)
     }  
   }
   mergeCmd += " " + output + " " + input;
-  try_exec(mergeCmd);
+  if (not try_exec(mergeCmd)) return -1;
 }

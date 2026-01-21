@@ -1,32 +1,28 @@
-AtlasDetectorIDHelper::initialize_from_dictionary - Warning: unable to find mm region index: group, region size 0 0
-AtlasDetectorIDHelper::initialize_from_dictionary - Warning: unable to find stgc region index: group, region size 0 0
-decode index and bit fields for each level: 
-lar  decode 1 vals 2,4,5,7,10,11,12,13 mask/zero mask/shift/bits/offset 7   1fffffffffffffff 61 3  0  indexes 0 0 1 2 0 3 0 0 4 5 6 7 mode  enumerated  
-hec  decode 1 vals -3,-2,-1,1,2,3,4,5 mask/zero mask/shift/bits/offset 7   e3ffffffffffffff 58 3  3  indexes 0 1 2 0 3 4 5 6 7   mode  enumerated  
-pn   decode 1 vals -2,2            mask/zero mask/shift/bits/offset 1   fdffffffffffffff 57 1  6  indexes 0 0 0 0 1           mode  enumerated  
-samp decode 0 vals 0:3             mask/zero mask/shift/bits/offset 3   fe7fffffffffffff 55 2  7  indexes                     mode  both_bounded  
-reg  decode 0 vals 0:1             mask/zero mask/shift/bits/offset 1   ffbfffffffffffff 54 1  9  indexes                     mode  both_bounded  
-eta  decode 0 vals 0:9             mask/zero mask/shift/bits/offset f   ffc3ffffffffffff 50 4  10 indexes                     mode  both_bounded  
-phi  decode 0 vals 0:63            mask/zero mask/shift/bits/offset 3f  fffc0fffffffffff 44 6  14 indexes                     mode  both_bounded  
-is-slar  decode 0 vals 0:1             mask/zero mask/shift/bits/offset 1   fffff7ffffffffff 43 1  20 indexes                     mode  both_bounded  
-initialize_from_dict : 
- channel range -> 4/2/-2,2/0/0/0:9/0:63/0 | 4/2/-2,2/1/0/0:9/0:63/0 | 4/2/-2,2/2/0/1:9/0:63/0 | 4/2/-2,2/3/0/2:9/0:63/0 | 4/2/-2,2/0/1/0:3/0:31/0 | 4/2/-2,2/1/1/0:2/0:31/0 | 4/2/-2,2/2/1/0:2/0:31/0 | 4/2/-2,2/3/1/0:3/0:31/0
- region range -> 4/2/-2,2/0/0 | 4/2/-2,2/1/0 | 4/2/-2,2/2/0 | 4/2/-2,2/3/0 | 4/2/-2,2/0/1 | 4/2/-2,2/1/1 | 4/2/-2,2/2/1 | 4/2/-2,2/3/1
-AtlasDetectorIDHelper::initialize_from_dictionary - Warning: unable to find mm region index: group, region size 0 0
-AtlasDetectorIDHelper::initialize_from_dictionary - Warning: unable to find stgc region index: group, region size 0 0
-decode index and bit fields for each level: 
-lar  decode 1 vals 2,4,5,7,10,11,12,13 mask/zero mask/shift/bits/offset 7   1fffffffffffffff 61 3  0  indexes 0 0 1 2 0 3 0 0 4 5 6 7 mode  enumerated  
-hec  decode 1 vals -3,-2,-1,1,2,3,4,5 mask/zero mask/shift/bits/offset 7   e3ffffffffffffff 58 3  3  indexes 0 1 2 0 3 4 5 6 7   mode  enumerated  
-pn   decode 1 vals -2,2            mask/zero mask/shift/bits/offset 1   fdffffffffffffff 57 1  6  indexes 0 0 0 0 1           mode  enumerated  
-samp decode 0 vals 0:3             mask/zero mask/shift/bits/offset 3   fe7fffffffffffff 55 2  7  indexes                     mode  both_bounded  
-reg  decode 0 vals 0:1             mask/zero mask/shift/bits/offset 1   ffbfffffffffffff 54 1  9  indexes                     mode  both_bounded  
-eta  decode 0 vals 0:9             mask/zero mask/shift/bits/offset f   ffc3ffffffffffff 50 4  10 indexes                     mode  both_bounded  
-phi  decode 0 vals 0:63            mask/zero mask/shift/bits/offset 3f  fffc0fffffffffff 44 6  14 indexes                     mode  both_bounded  
-is-slar  decode 0 vals 0:1             mask/zero mask/shift/bits/offset 1   fffff7ffffffffff 43 1  20 indexes                     mode  both_bounded  
-initialize_from_dict : 
- channel range -> 4/2/-2,2/0/0/0:9/0:63/0 | 4/2/-2,2/1/0/0:9/0:63/0 | 4/2/-2,2/2/0/1:9/0:63/0 | 4/2/-2,2/3/0/2:9/0:63/0 | 4/2/-2,2/0/1/0:3/0:31/0 | 4/2/-2,2/1/1/0:2/0:31/0 | 4/2/-2,2/2/1/0:2/0:31/0 | 4/2/-2,2/3/1/0:3/0:31/0
- region range -> 4/2/-2,2/0/0 | 4/2/-2,2/1/0 | 4/2/-2,2/2/0 | 4/2/-2,2/3/0 | 4/2/-2,2/0/1 | 4/2/-2,2/1/1 | 4/2/-2,2/2/1 | 4/2/-2,2/3/1
- LArHEC_Base_ID::init_neighbors 
+LArHEC_ID           DEBUG initialize_from_dictionary
+LArHEC_ID           DEBUG (Re)initialize
+LArHEC_ID           DEBUG initialize_base_from_dictionary
+LArHEC_ID           DEBUG (Re)initialize
+LArHEC_ID           DEBUG initLevelsFromDict - unable to find 'STGC' label
+LArHEC_ID           DEBUG initLevelsFromDict - unable to find 'MM' label
+LArHEC_ID           DEBUG initLevelsFromDict -  Could not get value for label 'no_side' of field 'DetZside' in dictionary Calorimeter
+LArHEC_ID           DEBUG initialize_from_dictionary - OK
+LArHEC_ID           DEBUG decode index and bit fields for each level: 
+LArHEC_ID           DEBUG initialize_from_dict : 
+LArHEC_ID           DEBUG  channel range -> 4/2/-2,2/0/0/0:9/0:63/0 | 4/2/-2,2/1/0/0:9/0:63/0 | 4/2/-2,2/2/0/1:9/0:63/0 | 4/2/-2,2/3/0/2:9/0:63/0 | 4/2/-2,2/0/1/0:3/0:31/0 | 4/2/-2,2/1/1/0:2/0:31/0 | 4/2/-2,2/2/1/0:2/0:31/0 | 4/2/-2,2/3/1/0:3/0:31/0
+LArHEC_ID           DEBUG  region range -> 4/2/-2,2/0/0 | 4/2/-2,2/1/0 | 4/2/-2,2/2/0 | 4/2/-2,2/3/0 | 4/2/-2,2/0/1 | 4/2/-2,2/1/1 | 4/2/-2,2/2/1 | 4/2/-2,2/3/1
+LArHEC_ID           DEBUG initialize_from_dictionary
+LArHEC_ID           DEBUG (Re)initialize
+LArHEC_ID           DEBUG initialize_base_from_dictionary
+LArHEC_ID           DEBUG (Re)initialize
+LArHEC_ID           DEBUG initLevelsFromDict - unable to find 'STGC' label
+LArHEC_ID           DEBUG initLevelsFromDict - unable to find 'MM' label
+LArHEC_ID           DEBUG initLevelsFromDict -  Could not get value for label 'no_side' of field 'DetZside' in dictionary Calorimeter
+LArHEC_ID           DEBUG initialize_from_dictionary - OK
+LArHEC_ID           DEBUG decode index and bit fields for each level: 
+LArHEC_ID           DEBUG initialize_from_dict : 
+LArHEC_ID           DEBUG  channel range -> 4/2/-2,2/0/0/0:9/0:63/0 | 4/2/-2,2/1/0/0:9/0:63/0 | 4/2/-2,2/2/0/1:9/0:63/0 | 4/2/-2,2/3/0/2:9/0:63/0 | 4/2/-2,2/0/1/0:3/0:31/0 | 4/2/-2,2/1/1/0:2/0:31/0 | 4/2/-2,2/2/1/0:2/0:31/0 | 4/2/-2,2/3/1/0:3/0:31/0
+LArHEC_ID           DEBUG  region range -> 4/2/-2,2/0/0 | 4/2/-2,2/1/0 | 4/2/-2,2/2/0 | 4/2/-2,2/3/0 | 4/2/-2,2/0/1 | 4/2/-2,2/1/1 | 4/2/-2,2/2/1 | 4/2/-2,2/3/1
+LArHEC_ID           DEBUG init_neighbors
 test_basic
 [4.2.2.1.0.0.1.0] hex(3280100000000000)
 [4.2.2.2.0.2.10.0] hex(3308a00000000000)

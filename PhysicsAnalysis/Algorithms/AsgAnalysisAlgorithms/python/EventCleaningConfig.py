@@ -77,7 +77,7 @@ class EventCleaningBlock (ConfigBlock):
                     alg.noFilter = True
                     alg.grlKey = f"EventInfo.{GRLDecoratorName}"
 
-                    config.addOutputVar("EventInfo", GRLDecoratorName, GRLDecoratorName, noSys=True)
+                    config.addOutputVar("EventInfo", GRLDecoratorName, GRLDecoratorName, noSys=True, auxType="char")
             else:
                 # Set up the GRL selection:
                 alg = config.createAlgorithm( 'GRLSelectorAlg', 'GRLSelectorAlg' )

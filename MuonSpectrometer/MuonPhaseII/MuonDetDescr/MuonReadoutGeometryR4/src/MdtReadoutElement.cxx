@@ -143,7 +143,7 @@ StatusCode MdtReadoutElement::initElement() {
 
 Amg::Vector3D MdtReadoutElement::globalTubePos(const ActsTrk::GeometryContext& ctx,
                                                const IdentifierHash& hash) const {
-   return localToGlobalTrans(ctx, hash).translation();
+   return localToGlobalTransform(ctx, hash).translation();
 }
 
 Amg::Vector3D MdtReadoutElement::localTubePos(const IdentifierHash& hash) const {
@@ -151,12 +151,12 @@ Amg::Vector3D MdtReadoutElement::localTubePos(const IdentifierHash& hash) const 
 }
 Amg::Vector3D MdtReadoutElement::readOutPos(const ActsTrk::GeometryContext& ctx,
                                             const IdentifierHash& hash) const {
-   return localToGlobalTrans(ctx, hash) * 
+   return localToGlobalTransform(ctx, hash) * 
           (0.5*activeTubeLength(hash) * m_pars.readoutSide * Amg::Vector3D::UnitZ());
 }
 Amg::Vector3D MdtReadoutElement::highVoltPos(const ActsTrk::GeometryContext& ctx,
                                              const IdentifierHash& hash) const {
-   return localToGlobalTrans(ctx, hash) * 
+   return localToGlobalTransform(ctx, hash) * 
           (-0.5*activeTubeLength(hash) * m_pars.readoutSide * Amg::Vector3D::UnitZ());
 }
 Amg::Transform3D MdtReadoutElement::toChamberLayer(const IdentifierHash& hash) const {   
@@ -191,7 +191,7 @@ double MdtReadoutElement::wireLength(const IdentifierHash& hash) const {
 double MdtReadoutElement::distanceToReadout(const ActsTrk::GeometryContext& ctx,
                                             const IdentifierHash& measHash,
                                             const Amg::Vector3D& globPoint) const {
-    return distanceToReadout(measHash, globalToLocalTrans(ctx, measHash) * globPoint);
+    return distanceToReadout(measHash, globalToLocalTransform(ctx, measHash) * globPoint);
 
 }
 double MdtReadoutElement::distanceToReadout(const IdentifierHash& measHash,

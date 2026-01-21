@@ -57,6 +57,8 @@ clustermods      = ("ECPSFrac","ClusterMoments",)
 truthmods        = ("PartonTruthLabel","JetDeltaRLabel:5000", "JetGhostLabel")
 pflowmods        = ()
 
+substrmods = ("nsubjettiness","ecorr")
+
 # ********************************************************
 # Standard track jet definition
 # ********************************************************
@@ -182,7 +184,7 @@ AntiKt4EMPFlowNoPtCut = JetDefinition("AntiKt",0.4,cst.GPFlow,
 
 AntiKt4EMPFlowByVertex = JetDefinition("AntiKt", 0.4, cst.GPFlowByVtx,
                                         ghostdefs = standardghosts+flavourghosts,
-                                        modifiers = calibmods_lowCut+("Filter:1",)+truthmods+standardmods+("JetPtAssociation","CaloEnergiesClus"),
+                                        modifiers = calibmods_lowCut+("Filter:1",)+truthmods+standardmods+substrmods+("JetPtAssociation","CaloEnergiesClus"),
                                         ptmin = 7000,
                                         lock = True,
                                         byVertex = True
@@ -192,6 +194,14 @@ AntiKt4EMTopoNoPtCut = JetDefinition("AntiKt",0.4,cst.EMTopoOrigin,
                                      infix = "NoPtCut",
                                      ghostdefs = standardghosts+flavourghosts,
                                      modifiers = calibmods_lowCut+("Filter:1",)+truthmods+standardmods+clustermods+("JetPtAssociation","jetiso",),
+                                     ptmin = 1,
+                                     lock = True
+)
+
+AntiKt4MLTopo = JetDefinition("AntiKt",0.4,cst.MLTopoOrigin,
+                                     infix = "",
+                                     ghostdefs = standardghosts+flavourghosts,
+                                     modifiers = ("CaloEnergies", "Sort")+("Filter:1",)+truthmods+standardmods+clustermods+("JetPtAssociation","jetiso",),
                                      ptmin = 1,
                                      lock = True
 )

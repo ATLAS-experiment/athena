@@ -128,6 +128,7 @@ class FPGATrackSimLogicalHitsProcessAlg : public AthAlgorithm
         Gaudi::Property<int> m_SetTruthParametersForTracks {this, "SetTruthParametersForTracks", -1, "flag to override track parameters and set them to the truth values"};
         Gaudi::Property<bool> m_doSpacepoints {this, "Spacepoints", false, "flag to enable the spacepoint formation"};
         Gaudi::Property<bool> m_doTracking {this, "tracking", false, "flag to enable the tracking"};
+        Gaudi::Property<bool> m_doMultiTruth{this, "doMultiTruth", true, "flag to enable the use of multi-truth information for hits"};
         Gaudi::Property<bool> m_doOverlapRemoval {this, "doOverlapRemoval", true , "flag to enable the overlap removal"}; // defaul true to not change functionality
         Gaudi::Property<bool> m_doMissingHitsChecks {this, "DoMissingHitsChecks", false};
         Gaudi::Property<bool> m_filterRoads  {this, "FilterRoads", false, "enable first road filter"};
@@ -188,7 +189,7 @@ class FPGATrackSimLogicalHitsProcessAlg : public AthAlgorithm
         unsigned long m_maxNTracksChi2Tot = 0; // max number of tracks passing chi2 in an event
         unsigned long m_maxNTracksChi2OLRTot = 0; // max number of tracks passing chi2 and OLR in an events
 
-        StatusCode writeOutputData(const std::vector<std::shared_ptr<const FPGATrackSimRoad>> & roads_1st, std::vector<FPGATrackSimTrack> const & tracks_1st,
+        StatusCode writeOutputData(const std::vector<FPGATrackSimRoad> & roads_1st, std::vector<FPGATrackSimTrack> const & tracks_1st,
                                    FPGATrackSimDataFlowInfo const * dataFlowInfo);
 
         void printHitSubregions(std::vector<FPGATrackSimHit> const & hits);

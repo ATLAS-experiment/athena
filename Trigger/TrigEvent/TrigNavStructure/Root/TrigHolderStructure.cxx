@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigNavStructure/TrigHolderStructure.h"
@@ -34,15 +34,13 @@ HLT::BaseHolder* HLT::TrigHolderStructure::getBaseHolder(class_id_type clid, sub
 bool HLT::TrigHolderStructure::registerHolder(const std::shared_ptr<BaseHolder>& holder){ 
   auto clid = holder->typeClid();
   auto subtypeindex = holder->subTypeIndex();
-  auto label = holder->label();
+  const auto & label = holder->label();
 
   if(getHolder(clid,subtypeindex)){
     ATH_MSG_WARNING("we already have a holder like this! clid:" << clid << " subtypeIndex: " << subtypeindex << " label: " << label);
     return false;
   }
   
-
-
   m_holderByClidAndIndex[clid][subtypeindex] = holder;
   m_lookupLabels[clid][subtypeindex] = label;
   m_lookupSubIndex[clid][label] = subtypeindex;

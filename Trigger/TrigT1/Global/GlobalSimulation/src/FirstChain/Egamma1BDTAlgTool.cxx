@@ -13,6 +13,8 @@
 
 namespace GlobalSim {
 
+  using eEmEg1BDTTOB = IOBitwise::eEmEg1BDTTOB;
+
   Egamma1BDTAlgTool::Egamma1BDTAlgTool(const std::string& type,
 				       const std::string& name,
 				       const IInterface* parent) :
@@ -34,14 +36,14 @@ namespace GlobalSim {
   
     // read in LArStrip neighborhood TOBs from the event store
     auto in =
-      SG::ReadHandle<IOBitwise::IeEmNbhoodTOBContainer>(m_nbhdTOBContainerReadKey,
-						    ctx);
+      SG::ReadHandle<IOBitwise::eEmNbhoodTOBContainer>(m_nbhdTOBContainerReadKey,
+						       ctx);
     CHECK(in.isValid());
 
     ATH_MSG_DEBUG("read in " << (*in).size() << " neighborhoods");
 
-    SG::WriteHandle<IOBitwise::IeEmEg1BDTTOBContainer> h_BDTResult(m_BDTResultKey, ctx);
-    CHECK(h_BDTResult.record(std::make_unique<IOBitwise::IeEmEg1BDTTOBContainer>()));
+    SG::WriteHandle<IOBitwise::eEmEg1BDTTOBContainer> h_BDTResult(m_BDTResultKey, ctx);
+    CHECK(h_BDTResult.record(std::make_unique<IOBitwise::eEmEg1BDTTOBContainer>()));
     
     for (const auto nbhdTOB : *in) {
       auto c_phi = combine_phi(nbhdTOB);
@@ -70,7 +72,7 @@ namespace GlobalSim {
       }
 
       //Extract the bits (one by one) from the ap_fixed<10,5> object -> Bitset<10>
-      std::bitset<IOBitwise::IeEmEg1BDTTOB::s_eGamma1BDT_width> result;
+      std::bitset<eEmEg1BDTTOB::s_eGamma1BDT_width> result;
       for (int i=0;i<scores[0].length();i++){
 	result[i] = scores[0][0];
       }
@@ -83,7 +85,7 @@ namespace GlobalSim {
 
   
   std::vector<double>
-  Egamma1BDTAlgTool::combine_phi(const IOBitwise::IeEmNbhoodTOB* nbhdTOB) const  {
+  Egamma1BDTAlgTool::combine_phi(const IOBitwise::eEmNbhoodTOB* nbhdTOB) const  {
     auto result = std::vector<double>();
 
     const auto& phi_low = nbhdTOB->Neighbourhood().phi_low();

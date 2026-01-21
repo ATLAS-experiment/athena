@@ -10,7 +10,6 @@ class EvgenConfig():
     __slots__ = ()
  
     def __init__(self, flags):
-        self.generators = []
         self.keywords = []
         self.contact = []
         self.nEventsPerJob = None

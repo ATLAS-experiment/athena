@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #include <AthenaKernel/getMessageSvc.h>
 #include <GaudiKernel/MsgStream.h>
@@ -60,9 +60,9 @@ std::string MuonTesterBranch::eraseWhiteSpaces(const std::string& In) {
 }
 std::vector<MuonTesterBranch::DataDependency> MuonTesterBranch::data_dependencies() { return m_dependencies;}
 
-template <> bool& VectorBranch<bool>::get(size_t) {
+template <> 
+bool& VectorBranch<bool>::get(size_t) {
     THROW_EXCEPTION("For boolean branches the get() operator is cumbersome");
-    return m_default;
 }
 }
 #undef SET_BRANCHSTRING

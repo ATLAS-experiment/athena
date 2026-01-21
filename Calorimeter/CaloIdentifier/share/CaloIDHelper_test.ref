@@ -1,7 +1,7 @@
 test_hashgroup
 10
-CaloIDHelper::H...  ERROR helperinit_hashes  duplicated id for channel id. nids= 9 compact Id  Unable to decode id
-CaloIDHelper        ERROR helper. set size 9 not equal to hash max 10
+helper              ERROR init_hashes  duplicated id for channel id. nids= 9 compact Id  Unable to decode id
+helper.             ERROR set size 9 not equal to hash max 10
 test_helper
 Athena::getMessageSvc: WARNING MessageSvc not found, will use std::cout
 Athena::getMessageSvc: WARNING MessageSvc not found, will use std::cout

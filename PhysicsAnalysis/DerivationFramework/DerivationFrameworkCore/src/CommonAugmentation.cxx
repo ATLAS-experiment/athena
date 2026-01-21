@@ -1,14 +1,14 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
-// CommonAugmentation.cxx, (c) ATLAS Detector software
+// CommonAugmentation.cxx
 ///////////////////////////////////////////////////////////////////
 // Author: James Catmore (James.Catmore@cern.ch)
 // This code loops over common tools from the CP groups, which write
 // into SG so that other derivations can make use of them without
-// re-running the tools. 
+// re-running the tools.
 
 #include "DerivationFrameworkCore/CommonAugmentation.h"
 
@@ -25,111 +25,65 @@
 #include "StoreGate/DataHandle.h"
 #include "AthenaKernel/DefaultKey.h"
 #include "SGTools/StlVectorClids.h"
-//#include "AthenaRootComps/TransferTree.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 
 DerivationFramework::CommonAugmentation::CommonAugmentation(const std::string& name, ISvcLocator* pSvcLocator) :
-AthAlgorithm(name, pSvcLocator),
-m_chronoSvc("ChronoStatSvc", name) 
+AthReentrantAlgorithm(name, pSvcLocator)
 {
-    // ------- Python changeable properties -------
-    declareProperty("AugmentationTools",     m_augmentationTools);
-    //declareProperty("OutputMetaStore",       m_ometaStore);
-    //---------------------------------------------
 }
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
 StatusCode DerivationFramework::CommonAugmentation::initialize() {
-    
+
     ATH_MSG_INFO("Initializing the common selections in " << name());
-    
+
     // get the augmentation tools
-    if( m_augmentationTools.retrieve().isFailure() ) {
-        ATH_MSG_FATAL("Failed to retrieve augmentation tools");
-        return StatusCode::FAILURE;
-    } else {
-        ATH_MSG_INFO("The following augmentation tools will be applied....");
-        ATH_MSG_INFO(m_augmentationTools);
-    }
- 
+    ATH_CHECK ( m_augmentationTools.retrieve() );
+    ATH_MSG_INFO("The following augmentation tools will be applied....");
+    ATH_MSG_INFO(m_augmentationTools);
+
     // get the chrono auditor
-    if ( m_chronoSvc.retrieve().isFailure() ) {
-	    ATH_MSG_FATAL("Failed to retrieve service " << m_chronoSvc);
-	    return StatusCode::FAILURE;
-    } 
-
-    // Set accumulation variables to zero
-    //m_eventCount = 0;
-    //m_eventWeights = 0.0;
-
-    return StatusCode::SUCCESS;
+    ATH_CHECK ( m_chronoSvc.retrieve() );
     
+    return StatusCode::SUCCESS;
+
 }
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
-StatusCode DerivationFramework::CommonAugmentation::execute() {
-    
+StatusCode DerivationFramework::CommonAugmentation::execute(const EventContext& ctx) const {
+
     // On your marks.... get set....
-    Chrono chrono( &(*m_chronoSvc), name() ); 
+    Chrono chrono( &(*m_chronoSvc), name() );
     // GO!!
 
     //=============================================================================
     // AUGMENTATION ===============================================================
     //=============================================================================
-    const EventContext &ctx = Gaudi::Hive::currentContext();
-    ToolHandleArray<IAugmentationTool>::iterator augmentationTool(m_augmentationTools.begin());
-    ToolHandleArray<IAugmentationTool>::iterator endOfAugmentationTools(m_augmentationTools.end());
-    while (augmentationTool != endOfAugmentationTools) {
-    	if ( (**augmentationTool).addBranches(ctx).isFailure() ) {
-		ATH_MSG_ERROR("Augmentation failed!");
-		return StatusCode::FAILURE;
-	}
-        ++augmentationTool;
+    for (const auto &  augmentationTool : m_augmentationTools) {
+      if ( augmentationTool->addBranches(ctx).isFailure() ) {
+        ATH_MSG_ERROR("Augmentation failed!");
+        return StatusCode::FAILURE;
+      }
     }
-    
-    //++m_eventCount;
-    //float* weight;
-    //if (evtStore()->contains<float>("mc_event_weight")) { 
-    //	CHECK(evtStore()->retrieve((const float*&)weight,"mc_event_weight"));
-   //	m_eventWeights += *weight;
-    //}
-    return StatusCode::SUCCESS;
-        
-}
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-//
-//StatusCode DerivationFramework::CommonAugmentation::stop() {
-//
-//    TTree* tree = new TTree("DerivationTree","Extra metadata from derivation framework");
-//    tree->Branch("totalEventsProcessed",&m_eventCount,"totalEventsProcessed/I");
-//    tree->Branch("summedEventWeights",&m_eventWeights,"summedEventWeights/F");
-//    tree->Fill();
-//    TransferTree* temp = new TransferTree(tree);
-//    if (m_ometaStore->record(temp,"ExtraMetadata").isFailure()) ATH_MSG_ERROR("Unable to record metadata tree " << tree->GetName());
-//    std::cout << "Just filled " <<  tree->GetName() << " with " << m_eventCount << " and " << m_eventWeights << std::endl;
-//    tree->Print();
-//    return StatusCode::SUCCESS; 
-//
-//}
+    return StatusCode::SUCCESS;
+
+}
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
 StatusCode DerivationFramework::CommonAugmentation::finalize() {
-    
+
     ATH_MSG_INFO( "============================================================================");
     ATH_MSG_INFO( " The following CP tools were called by " << name() << " for the whole train:");
-    ToolHandleArray<IAugmentationTool>::iterator augmentationTool(m_augmentationTools.begin());
-    ToolHandleArray<IAugmentationTool>::iterator endOfAugmentationTools(m_augmentationTools.end());
-    while (augmentationTool != endOfAugmentationTools) { 
-        ATH_MSG_INFO ( (**augmentationTool).name() );
-        ++augmentationTool;
+    for (const auto &  augmentationTool : m_augmentationTools) {
+        ATH_MSG_INFO ( augmentationTool->name() );
     }
     ATH_MSG_INFO( "============================================================================");
-    
+
     return StatusCode::SUCCESS;
-    
+
 }

@@ -237,14 +237,13 @@ test_pixel (const IdDictMgr& idd, Identifier::size_type pixel_region){
     full_wafer_range = dict->build_multirange(region_id, prefix, "eta_module");
     std::cout << "range -> " << (std::string) full_wafer_range << std::endl; 
     // Try loop over fullRange and check each id that comes out
-    int nids = 0;
     for (unsigned int i = 0; i < full_wafer_range.size(); ++i) {
       Range range = full_wafer_range[i];
       RangeIterator rit(range);
       auto first = rit.begin();
       auto last  = rit.end();
       int test_print = 0;
-      for (; first != last; ++first, ++nids) {
+      for (; first != last; ++first) {
 	    ExpandedIdentifier id = *first;
 	    int barrel_ec  = id[2];
 	    int layer_disk = id[3];

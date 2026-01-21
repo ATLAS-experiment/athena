@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -29,14 +29,6 @@ namespace FlavorTagDiscriminants {
 
     ATH_CHECK( m_ElectronContainerKey.initialize() );
     ATH_CHECK( m_VertexContainerKey.initialize() );
-
-    // Prepare decorators
-    m_dec_electron_et = m_ElectronContainerKey.key() + "." + m_dec_electron_et.key();
-    m_dec_electron_deltaPOverP = m_ElectronContainerKey.key() + "." + m_dec_electron_deltaPOverP.key();
-    m_dec_electron_isoPtOverPt = m_ElectronContainerKey.key() + "." + m_dec_electron_isoPtOverPt.key();
-    m_dec_electron_energyOverP = m_ElectronContainerKey.key() + "." + m_dec_electron_energyOverP.key();
-    m_dec_electron_z0 = m_ElectronContainerKey.key() + "." + m_dec_electron_z0.key();
-    m_dec_electron_z0_significance = m_ElectronContainerKey.key() + "." + m_dec_electron_z0_significance.key();
 
     // Initialize decorators
     ATH_MSG_DEBUG( "Initializing decorators:"  );

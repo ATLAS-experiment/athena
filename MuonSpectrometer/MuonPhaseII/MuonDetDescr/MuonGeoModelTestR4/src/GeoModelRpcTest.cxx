@@ -1,11 +1,12 @@
 
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #include "GeoModelRpcTest.h"
 #include <ActsGeometryInterfaces/GeometryContext.h>
 #include <MuonReadoutGeometryR4/RpcReadoutElement.h>
 #include <EventPrimitives/EventPrimitivesToStringConverter.h>
+#include <MuonVisualizationHelpersR4/VisualizationHelpers.h>
 #include <fstream>
 
 namespace {
@@ -27,7 +28,15 @@ namespace MuonGMR4{
 
 StatusCode GeoModelRpcTest::initialize() {
     ATH_CHECK(m_idHelperSvc.retrieve());
-    ATH_CHECK(m_geoCtxKey.initialize());    
+    ATH_CHECK(m_geoCtxKey.initialize());
+    if (m_visualStrips) {
+        m_clientToken.preFixName="GeoModelRpcTest";
+        m_clientToken.subDirectory = "RpcPlots";
+        m_clientToken.canvasLimit = -1;
+        m_clientToken.drawSqrtS = false;
+        ATH_CHECK(m_visualSvc.retrieve());
+        ATH_CHECK(m_visualSvc->registerClient(m_clientToken));
+    }
     /// Prepare the TTree dump
     ATH_CHECK(m_tree.init(this));
 
@@ -101,6 +110,47 @@ StatusCode GeoModelRpcTest::finalize() {
     ATH_CHECK(m_tree.write());
     return StatusCode::SUCCESS;
 }
+void GeoModelRpcTest::visualizeStripPanel(const EventContext& ctx,
+                                          const StripDesignPtr& design,
+                                          const Identifier& detId,
+                                          const bool measPhi) const {
+    if (!design  || !m_visualStrips) {
+        return;
+    }
+    const RpcIdHelper& idHelper{m_idHelperSvc->rpcIdHelper()};          
+    const std::string chName = std::format("{:}{:}{:}{:}R{:}Z{:}P{:}{:}",
+                                           m_idHelperSvc->stationNameString(detId),
+                                           std::abs(m_idHelperSvc->stationEta(detId)),
+                                           m_idHelperSvc->stationEta(detId) > 0 ? 'A' : 'C',
+                                           m_idHelperSvc->stationPhi(detId),
+                                           idHelper.doubletR(detId), idHelper.doubletZ(detId),
+                                           idHelper.doubletPhi(detId), measPhi ? "Phi" : "Eta");
+    auto canvas = m_visualSvc->prepareCanvas(ctx, m_clientToken, chName);
+    canvas->expandPad(-design->halfWidth(), -design->shortHalfHeight());
+    canvas->expandPad(design->halfWidth(), design->shortHalfHeight());
+    canvas->setAxisTitles("x [mm]", "y [mm]");
+    canvas->setRangeScale(1.1);
+    using namespace MuonValR4;
+    canvas->add(drawBox(Amg::Vector3D::Zero(),
+                        2.*design->halfWidth(),
+                        2.*design->shortHalfHeight(),
+                        kBlack, hollowFilling));
+    constexpr int oddFill = 3315;
+    constexpr int evenFill = 3351;
+    for (int strip = design->firstStripNumber(); strip <= design->numStrips(); ++strip) {
+        const Amg::Vector2D stripPos = design->center(strip).value_or(Amg::Vector2D::Zero());
+        canvas->add(drawBox(Amg::Vector3D{0., stripPos.x(), stripPos.y()},
+                            design->stripWidth(),
+                              2.*design->shortHalfHeight(), strip % 2 ? kBlue: kRed, 
+                              strip % 2 ? oddFill : evenFill));
+    }
+    canvas->add(drawLabel(std::format("{:}, #{:}-panel", 
+                                      m_idHelperSvc->toStringDetEl(detId),
+                                      measPhi ? "phi" : "eta"), 0.1, 0.05));
+    canvas->add(drawLabel(std::format("Dimensions: {:.1f}X{:.1f} [mm]", 
+                                      2.*design->halfWidth(),
+                                      2.*design->shortHalfHeight()), 0.1, 0.015));
+}
 StatusCode GeoModelRpcTest::execute() {
     const EventContext& ctx{Gaudi::Hive::currentContext()};
 
@@ -120,9 +170,12 @@ StatusCode GeoModelRpcTest::execute() {
                       <<". But got instead "<<m_idHelperSvc->toStringDetEl(reElement->identify()));
          return StatusCode::FAILURE;
       }
-      ATH_CHECK(dumpToTree(ctx,gctx,reElement));
-      const Amg::Transform3D globToLocal{reElement->globalToLocalTrans(gctx)};
-      const Amg::Transform3D& localToGlob{reElement->localToGlobalTrans(gctx)};
+      ATH_CHECK(dumpToTree(ctx, gctx, reElement));
+      visualizeStripPanel(ctx, reElement->getParameters().etaDesign, reElement->identify(), false);
+      visualizeStripPanel(ctx, reElement->getParameters().phiDesign, reElement->identify(), true);
+      
+      const Amg::Transform3D globToLocal{reElement->globalToLocalTransform(gctx)};
+      const Amg::Transform3D& localToGlob{reElement->localToGlobalTransform(gctx)};
       /// Closure test that the transformations actually close
       const Amg::Transform3D transClosure = globToLocal * localToGlob;
       if (!Amg::doesNotDeform(transClosure)) {
@@ -131,12 +184,12 @@ StatusCode GeoModelRpcTest::execute() {
         return StatusCode::FAILURE;                  
       }
       const RpcIdHelper& id_helper{m_idHelperSvc->rpcIdHelper()};
-      for (unsigned int gasGap = 1; gasGap <= reElement->nGasGaps(); ++gasGap) {
+      for (unsigned gasGap = 1; gasGap <= reElement->nGasGaps(); ++gasGap) {
         for (int doubPhi = reElement->doubletPhi(); doubPhi <= reElement->doubletPhiMax(); ++doubPhi) {
             for (bool measPhi: {false, true}) {
-                unsigned int numStrip =  (measPhi ? reElement->nPhiStrips() :
-                                                    reElement->nEtaStrips());
-                for (unsigned int strip = 1; strip < numStrip ; ++strip) {
+                unsigned numStrip =  (measPhi ? reElement->nPhiStrips() :
+                                                reElement->nEtaStrips());
+                for (unsigned strip = 1; strip < numStrip ; ++strip) {
                     bool isValid{false};
                     const Identifier chId = id_helper.channelID(reElement->identify(),
                                                                 reElement->doubletZ(),
@@ -202,18 +255,18 @@ StatusCode GeoModelRpcTest::dumpToTree(const EventContext& ctx,
    m_envelopeWidth  = 2.*reElement->getParameters().halfWidth;
    m_envelopeLength = 2.*reElement->getParameters().halfLength;
    /// Dump the local to global transformation of the readout element
-   const Amg::Transform3D& transform{reElement->localToGlobalTrans(gctx)};
+   const Amg::Transform3D& transform{reElement->localToGlobalTransform(gctx)};
    m_readoutTransform = transform;
    m_alignableNode  = reElement->alignableTransform()->getDefTransform();
 
    const RpcIdHelper& id_helper{m_idHelperSvc->rpcIdHelper()};
       
-   for (unsigned int gasGap = 1; gasGap <= reElement->nGasGaps(); ++gasGap) {
+   for (unsigned gasGap = 1; gasGap <= reElement->nGasGaps(); ++gasGap) {
         for (int doubPhi = reElement->doubletPhi(); doubPhi <= reElement->doubletPhiMax(); ++doubPhi) {
             for (bool measPhi: {false, true}) {
-                unsigned int numStrip =  (measPhi ? reElement->nPhiStrips() :
+                unsigned numStrip =  (measPhi ? reElement->nPhiStrips() :
                                                     reElement->nEtaStrips());
-                for (unsigned int strip = 1; strip <= numStrip ; ++strip) {
+                for (unsigned strip = 1; strip <= numStrip ; ++strip) {
 
                     bool isValid{false};
                     const Identifier stripID = id_helper.channelID(reElement->identify(), 
@@ -229,14 +282,14 @@ StatusCode GeoModelRpcTest::dumpToTree(const EventContext& ctx,
                     const IdentifierHash layHash = reElement->layerHash(measHash);
                     const Amg::Vector3D stripPos = reElement->stripPosition(gctx, measHash);
                     m_stripPos.push_back(stripPos);
-                    m_locStripPos.push_back((reElement->globalToLocalTrans(gctx, layHash) * stripPos).block<2,1>(0,0));
+                    m_locStripPos.push_back((reElement->globalToLocalTransform(gctx, layHash) * stripPos).block<2,1>(0,0));
                     m_stripPosGasGap.push_back(gasGap);
                     m_stripPosMeasPhi.push_back(measPhi);
                     m_stripPosNum.push_back(strip);
                     m_stripDblPhi.push_back(doubPhi);
 
                     if (strip != 1) continue;
-                    const Amg::Transform3D locToGlob = reElement->localToGlobalTrans(gctx, layHash)
+                    const Amg::Transform3D locToGlob = reElement->localToGlobalTransform(gctx, layHash)
                                                       * Amg::getRotateZ3D(90.*Gaudi::Units::deg * measPhi);
                     m_stripRot.push_back(locToGlob);
                     m_stripRotGasGap.push_back(gasGap);

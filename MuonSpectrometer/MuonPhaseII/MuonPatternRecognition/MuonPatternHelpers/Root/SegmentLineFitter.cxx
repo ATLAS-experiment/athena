@@ -208,8 +208,8 @@ namespace MuonR4::SegmentFit{
                 sstr<<"   **** "<<(*h)<<", pull: "
                     <<std::sqrt(SeedingAux::chi2Term(locPos, locDir, *h))<<std::endl;
             }
-            ATH_MSG_VERBOSE(__func__<<"() - "<<__LINE__ 
-                            <<": Create new segment "<<toString(data.parameters)<<" in "<<patternSeed->msSector()->identString()<<"built from:\n"<<sstr.str());
+            ATH_MSG_VERBOSE(__func__<<"() - "<<__LINE__ <<": Create new segment "
+                        <<toString(data.parameters)<<" in "<<patternSeed->msSector()->identString()<<"built from:\n"<<sstr.str());
         }
 
         auto finalSeg = std::make_unique<Segment>(std::move(globPos), std::move(globDir),
@@ -217,8 +217,7 @@ namespace MuonR4::SegmentFit{
                                                   data.chi2, data.nDoF);
         finalSeg->setCallsToConverge(data.nIter);
         finalSeg->setParUncertainties(std::move(data.covariance));
-        /// TODO: Add the config retrieval to the composite space point line fitter
-        if (false) {
+        if (m_fitter.config().fitT0) {
             finalSeg->setSegmentT0(data.parameters[toUnderlying(ParamDefs::t0)]);
         }
         return finalSeg;
@@ -229,19 +228,21 @@ namespace MuonR4::SegmentFit{
                                            const Amg::Transform3D& localToGlobal,
                                            Result_t& fitResult) const {
 
-        /// @todo Use the fitter config object once it's added to the interface
-        if (fitResult.nDoF == 0 || countPrecHits(fitResult.measurements) < m_cfg.nPrecHitCut
-            || fitResult.nIter > 10000) {
+        if (countPrecHits(fitResult.measurements) < m_cfg.nPrecHitCut || fitResult.nDoF == 0
+            || fitResult.nIter > m_fitter.config().maxIter) {
             ATH_MSG_VERBOSE(__func__<<"() - "<<__LINE__ 
                             <<": No degree of freedom available. What shall be removed?!. nDoF: "
                             <<fitResult.nDoF<<", n-meas: "<<countPrecHits(fitResult.measurements));
             return false;
         }
-        if (fitResult.converged && fitResult.chi2 / fitResult.nDoF < m_cfg.outlierRemovalCut) {
+        if (fitResult.converged && fitResult.chi2 / std::max(fitResult.nDoF, 1ul) < m_cfg.outlierRemovalCut) {
             ATH_MSG_VERBOSE(__func__<<"() - "<<__LINE__ <<": The segment "<<toString(fitResult.parameters)
-                          <<" is already of good quality "<<fitResult.chi2 /fitResult.nDoF
+                          <<" is already of good quality "<<fitResult.chi2 / std::max(fitResult.nDoF, 1ul)
                           <<". Don't remove outliers");
             return true;
+        }
+        if (fitResult.nDoF == 0u){
+            return false;
         }
         ATH_MSG_VERBOSE(__func__<<"() - "<<__LINE__ <<": Segment "
                        <<toString(fitResult.parameters)<<" is of badish quality. Remove worst hit");

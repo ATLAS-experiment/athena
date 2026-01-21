@@ -2,11 +2,11 @@
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
-def SegmentRefitTestCfg(flags,name="SegmentRefitter", **kwargs):
+def SegmentRefitTestCfg(flags,name="SegmentRefitter", drawEvent=False, **kwargs):
     result = ComponentAccumulator()
     from MuonPatternRecognitionAlgs.MuonPatternRecognitionConfig import ActsMuonSegmentRefitAlgCfg
 
-    result.merge(ActsMuonSegmentRefitAlgCfg(flags))
+    result.merge(ActsMuonSegmentRefitAlgCfg(flags, drawEvent=drawEvent))
     the_alg = CompFactory.MuonValR4.SegmentRefitTest(name, **kwargs)
     result.addEventAlgo(the_alg, primary = True)
     return result
@@ -29,6 +29,8 @@ if __name__=="__main__":
                                             action='store_true')
     parser.add_argument("--dumpObjFiles", help="If set to true, the spacepoints in the bucket are saved to disk",
                         default=False, action='store_true')
+    parser.add_argument("--noPerfMon", help="If set to true, disable performance monitoring.",
+                                              default=False, action='store_true')
     parser.set_defaults(nEvents = -1)
   
     parser.set_defaults(outRootFile="MsTrkTester.root")
@@ -37,8 +39,7 @@ if __name__=="__main__":
     args = parser.parse_args()
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
     flags = initConfigFlags()
-    flags.PerfMon.doFullMonMT = True
-    flags.Muon.doFastMMDigitization = False
+    flags.PerfMon.doFullMonMT = not args.noPerfMon
     flags.Acts.TrackingGeometry.UseBlueprint = False
 
     ####
@@ -58,7 +59,7 @@ if __name__=="__main__":
 
     from MuonPatternRecognitionAlgs.MuonPatternRecognitionConfig import MuonPatternRecognitionCfg
     cfg.merge(MuonPatternRecognitionCfg(flags))
-    #cfg.merge(SegmentRefitTestCfg(flags))
+    cfg.merge(SegmentRefitTestCfg(flags, drawEvent = args.dumpObjFiles))
     cfg.merge(SegmentExtpTestCfg(flags, drawEvent = args.dumpObjFiles ))
    
     from MuonPatternRecognitionTest.PatternTestConfig import PatternVisualizationToolCfg

@@ -26,17 +26,6 @@ namespace CTPResultUtils {
     CTPdataformatVersion ctpDataFormat(ctpVersionNumber);
     ctpRes.setCtpVersionNumber(ctpVersionNumber);
 
-    // Header words
-    ctpRes.setHeaderSize(8);
-    ctpRes.setL1ID(0);
-    ctpRes.setEventType(0);
-
-    // Trailer words
-    ctpRes.setErrorStatus(0);
-    ctpRes.setInfoStatus(0);
-    ctpRes.setNumStatusWords(2);
-    ctpRes.setStatusPosition(1);
-
     // Number of bunches
     if (!data.size()) {
       ctpRes.setNumberOfBunches(0u);
@@ -44,6 +33,9 @@ namespace CTPResultUtils {
       uint32_t numberOfWords = static_cast<uint32_t>(data.size()) - ctpDataFormat.getNumberTimeWords() - nExtraWords;
       ctpRes.setNumberOfBunches(numberOfWords / ctpDataFormat.getDAQwordsPerBunch());
     }
+
+    ctpRes.setTimeSec(data[ctpDataFormat.getTimeSecondsPos()]);
+    ctpRes.setTimeNanoSec(data[ctpDataFormat.getTimeNanosecondsPos()]);
 
     // Create vectors of vectors for the trigger words for all bunches
     std::vector<std::vector<uint32_t>> tip(ctpRes.numberOfBunches());
@@ -129,18 +121,20 @@ namespace CTPResultUtils {
     log << MSG::DEBUG << "L1A position: " << ctpRes.l1AcceptBunchPosition() << endmsg;
 
     // Print header info
-    log << MSG::DEBUG << "Header marker           :  " << MSG::hex << ctpRes.headerMarker() << MSG::dec << endmsg;
-    log << MSG::DEBUG << "Header size             :  " << ctpRes.headerSize() << endmsg;
-    log << MSG::DEBUG << "Header format version   :  " << ctpRes.headerFormatVersion() << endmsg;
-    log << MSG::DEBUG << "Source ID               :  0x" << MSG::hex << ctpRes.sourceID() << MSG::dec << endmsg;
-    log << MSG::DEBUG << "Run number              :  " << ctpRes.runNumber() << endmsg;
-    log << MSG::DEBUG << "Ext. LVL1 ID            :  " << ctpRes.L1ID() << endmsg;
-    log << MSG::DEBUG << "BCID                    :  " << ctpRes.BCID() << endmsg;
-    log << MSG::DEBUG << "Trigger type            :  " << ctpRes.triggerType() << endmsg;
-    log << MSG::DEBUG << "Det. event type         :  " << ctpRes.eventType() << endmsg;
+    log << MSG::DEBUG << "Header information:  " << endmsg;
+    log << MSG::DEBUG << "    Header marker           :  " << MSG::hex << ctpRes.headerMarker() << MSG::dec << endmsg;
+    log << MSG::DEBUG << "    Header size             :  " << ctpRes.headerSize() << endmsg;
+    log << MSG::DEBUG << "    Header format version   :  " << ctpRes.headerFormatVersion() << endmsg;
+    log << MSG::DEBUG << "    Source ID               :  0x" << MSG::hex << ctpRes.sourceID() << MSG::dec << endmsg;
+    log << MSG::DEBUG << "    Run number              :  " << ctpRes.runNumber() << endmsg;
+    log << MSG::DEBUG << "    Ext. LVL1 ID            :  " << ctpRes.L1ID() << endmsg;
+    log << MSG::DEBUG << "    BCID                    :  " << ctpRes.BCID() << endmsg;
+    log << MSG::DEBUG << "    Trigger type            :  " << ctpRes.triggerType() << endmsg;
+    log << MSG::DEBUG << "    Det. event type         :  " << ctpRes.eventType() << endmsg;
 
     // Print payload info
-    log << MSG::DEBUG << "Time " << ctpRes.timeSec() << "s "
+    log << MSG::DEBUG << "Payload information:  " << endmsg;
+    log << MSG::DEBUG << "    Time " << ctpRes.timeSec() << "s "
         << std::setw(10) << std::setiosflags(std::ios_base::right) << std::setfill(' ')
         << ctpRes.timeNanoSec() << std::resetiosflags(std::ios_base::right)
         << "ns" << endmsg;
@@ -149,55 +143,56 @@ namespace CTPResultUtils {
     for(unsigned int i = 0; i<ctpRes.numberOfBunches(); ++i) {
 
       auto bunch = ctpRes.getBC(i);
-      log << MSG::DEBUG << "BC dump for bunch " << i << endmsg;
+      log << MSG::DEBUG << "    BC dump for bunch " << i << endmsg;
 
       // TIP words
       for(unsigned int j = 0; j<ctpRes.tipWords()[i].size(); ++j) {
-        log << MSG::DEBUG << "TIP word number " << j << ": " << ctpRes.tipWords()[i][j] << endmsg;
+        log << MSG::DEBUG << "        TIP word number " << j << ": " << ctpRes.tipWords()[i][j] << endmsg;
       }
       if (ctpRes.tipWords()[i].size() == 0) {
-        log << MSG::DEBUG << "No TIP words!" << endmsg;
+        log << MSG::DEBUG << "        No TIP words!" << endmsg;
       }
 
       // TBP words
       for(unsigned int j = 0; j<ctpRes.tbpWords()[i].size(); ++j) {
-        log << MSG::DEBUG << "TBP word number " << j << ": " << ctpRes.tbpWords()[i][j] << endmsg;
+        log << MSG::DEBUG << "        TBP word number " << j << ": " << ctpRes.tbpWords()[i][j] << endmsg;
       }
       if (ctpRes.tbpWords()[i].size() == 0) {
-        log << MSG::DEBUG << "No TBP words!" << endmsg;
+        log << MSG::DEBUG << "        No TBP words!" << endmsg;
       }
 
       // TAP words
       for(unsigned int j = 0; j<ctpRes.tapWords()[i].size(); ++j) {
-        log << MSG::DEBUG << "TAP word number " << j << ": " << ctpRes.tapWords()[i][j] << endmsg;
+        log << MSG::DEBUG << "        TAP word number " << j << ": " << ctpRes.tapWords()[i][j] << endmsg;
       }
       if (ctpRes.tapWords()[i].size() == 0) {
-        log << MSG::DEBUG << "No TAP words!" << endmsg;
+        log << MSG::DEBUG << "        No TAP words!" << endmsg;
       }
 
       // TAV words
       for(unsigned int j = 0; j<ctpRes.tavWords()[i].size(); ++j) {
-        log << MSG::DEBUG << "TAV word number " << j << ": " << ctpRes.tavWords()[i][j] << endmsg;
+        log << MSG::DEBUG << "        TAV word number " << j << ": " << ctpRes.tavWords()[i][j] << endmsg;
       }
       if (ctpRes.tavWords()[i].size() == 0) {
-        log << MSG::DEBUG << "No TAV words!" << endmsg;
+        log << MSG::DEBUG << "        No TAV words!" << endmsg;
       }
     }
 
     // Additional words
     for(unsigned int i = 0; i<ctpRes.additionalWords().size(); ++i) {
-      log << MSG::DEBUG << "Additional word number " << i << ": " << ctpRes.additionalWords()[i] << endmsg;
+      log << MSG::DEBUG << "    Additional word number " << i << ": " << ctpRes.additionalWords()[i] << endmsg;
     }
     if (ctpRes.additionalWords().size() == 0) {
-      log << MSG::DEBUG << "No additional words!" << endmsg;
+      log << MSG::DEBUG << "    No additional words!" << endmsg;
     }
 
     // Print trailer info
-    log << MSG::DEBUG << "Error status                :  " << ctpRes.errorStatus() << endmsg;
-    log << MSG::DEBUG << "Status info                 :  " << ctpRes.infoStatus() << endmsg;
-    log << MSG::DEBUG << "Number of status words      :  " << ctpRes.numStatusWords() << endmsg;
-    log << MSG::DEBUG << "Number of data words        :  " << ctpRes.numDataWords() << endmsg;
-    log << MSG::DEBUG << "Status information position :  " << ctpRes.statusPosition() << endmsg;
+    log << MSG::DEBUG << "Trailer information:  " << endmsg;
+    log << MSG::DEBUG << "    Error status                :  " << ctpRes.errorStatus() << endmsg;
+    log << MSG::DEBUG << "    Status info                 :  " << ctpRes.infoStatus() << endmsg;
+    log << MSG::DEBUG << "    Number of status words      :  " << ctpRes.numStatusWords() << endmsg;
+    log << MSG::DEBUG << "    Number of data words        :  " << ctpRes.numDataWords() << endmsg;
+    log << MSG::DEBUG << "    Status information position :  " << ctpRes.statusPosition() << endmsg;
     log << MSG::DEBUG << "*END* xAOD::CTPResult" << endmsg;
   }
 

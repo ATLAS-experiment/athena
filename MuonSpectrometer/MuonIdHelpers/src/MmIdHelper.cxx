@@ -32,7 +32,6 @@ int MmIdHelper::initialize_from_dictionary(const IdDictMgr& dict_mgr) {
     }
 
     // init base object
-    AtlasDetectorID::setMessageSvc(Athena::getMessageSvc());
     if (AtlasDetectorID::initialize_from_dictionary(dict_mgr)) return 1;
 
     // Register version of the MuonSpectrometer dictionary
@@ -58,7 +57,7 @@ int MmIdHelper::initialize_from_dictionary(const IdDictMgr& dict_mgr) {
         m_DETECTORELEMENT_INDEX = field->index();
     } else {
         ATH_MSG_ERROR("initLevelsFromDict - unable to find 'mmMultilayer' field ");
-        status = 1;
+        return 1;
     }
 
     field = m_dict->find_field("mmGasGap");
@@ -66,7 +65,7 @@ int MmIdHelper::initialize_from_dictionary(const IdDictMgr& dict_mgr) {
         m_GASGAP_INDEX = field->index();
     } else {
         ATH_MSG_ERROR("initLevelsFromDict - unable to find 'mmGasGap' field ");
-        status = 1;
+        return 1;
     }
 
     field = m_dict->find_field("mmChannel");
@@ -84,6 +83,7 @@ int MmIdHelper::initialize_from_dictionary(const IdDictMgr& dict_mgr) {
     const IdDictGroup* mmGroup = m_dict->find_group("mm");
     if (!mmGroup) {
         ATH_MSG_ERROR("Cannot find mm group");
+        return 1;
     } else {
         m_GROUP_INDEX = mmGroup->region(0).index();
     }
@@ -129,6 +129,7 @@ int MmIdHelper::initialize_from_dictionary(const IdDictMgr& dict_mgr) {
                      << "MultiRange size is " << muon_range.size());
     } else {
         ATH_MSG_ERROR("Muon MultiRange is empty");
+        return 1;
     }
 
     // Build MultiRange down to "detector element" for all mdt regions
@@ -141,6 +142,7 @@ int MmIdHelper::initialize_from_dictionary(const IdDictMgr& dict_mgr) {
                      << "Multilayer MultiRange size is " << muon_detectorElement_range.size());
     } else {
         ATH_MSG_ERROR("Muon MicroMegas detector element MultiRange is empty");
+        return 1;
     }
 
     // Build MultiRange down to "channel" for all MM regions
@@ -196,30 +198,30 @@ int MmIdHelper::initialize_from_dictionary(const IdDictMgr& dict_mgr) {
     // test to see that the multi range is not empty
     if (m_full_module_range.size() == 0) {
         ATH_MSG_ERROR("MicroMegas MultiRange ID is empty for modules");
-        status = 1;
+        return 1;
     }
 
     // test to see that the detector element multi range is not empty
     if (m_full_detectorElement_range.size() == 0) {
         ATH_MSG_ERROR("MicroMegas MultiRange ID is empty for detector elements");
-        status = 1;
+        return 1;
     }
 
     // test to see that the multi range is not empty
     if (m_full_channel_range.size() == 0) {
         ATH_MSG_ERROR("MicroMegas MultiRange ID is empty for channels");
-        status = 1;
+        return 1;
     }
 
     // Setup the hash tables for MicroMegas
     ATH_MSG_INFO("Initializing MicroMegas hash indices ... ");
-    status = init_hashes();
-    status = init_detectorElement_hashes();  // same as module hash
-    status = init_id_to_hashes();
+    status += init_hashes();
+    status += init_detectorElement_hashes();  // same as module hash
+    status += init_id_to_hashes();
 
     // Setup hash tables for finding neighbors
     ATH_MSG_INFO("Initializing MicroMegas hash indices for finding neighbors ... ");
-    status = init_neighbors();
+    status += init_neighbors();
 
     m_init = true;
     return (status);

@@ -46,8 +46,6 @@ def ITkPixelEncodingAlgCfg(flags, name = "ITkPixelEncodingAlg",
                            **kwargs) -> ComponentAccumulator:
     acc = ComponentAccumulator()
 
-    acc.merge(ITkPixelTranslatorAlgCfg(flags, **kwargs))
-
     from PixelGeoModelXml.ITkPixelGeoModelConfig import ITkPixelReadoutGeometryCfg
     acc.merge(ITkPixelReadoutGeometryCfg(flags))
 
@@ -90,7 +88,6 @@ def ITkPixelCnvToolCfg(flags, name = "ITkPixelCnvTool",
 
     kwargs.setdefault("HitSortingTool", acc.popToolsAndMerge(ITkPixelHitSortingToolCfg(name)))
     kwargs.setdefault("EncodingTool", acc.popToolsAndMerge(ITkPixelEncodingToolCfg(name)))
-    kwargs.setdefault("ByteStreamConvertionService", acc.addService(CompFactory.ByteStreamCnvSvc(name)))
     kwargs.setdefault("PixelCablingKey", "ITkPixelCablingData")
 
     acc.addPublicTool(CompFactory.ITkPixelCnvTool(name, **kwargs), primary=True)

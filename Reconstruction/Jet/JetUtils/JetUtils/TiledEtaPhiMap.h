@@ -120,9 +120,9 @@ namespace JetTiledMap {
 
       int indx = int( (p.x()+m_halfetarange)/m_sizeX) ;
       if(indx<0) indx=0;
-      if(indx>=static_cast<int>(m_ndivX)) indx=m_ndivX-1;
+      if(indx>=static_cast<int>(m_ndivX)) indx=static_cast<int>(m_ndivX)-1;
       int indy = int((M_PI-p.y())/m_sizeY);      
-      if(indy>=static_cast<int>(m_ndivY)) indy=m_ndivY-1;
+      if(indy>=static_cast<int>(m_ndivY)) indy=static_cast<int>(m_ndivY)-1;
       
       return tileIndex_i(indx,indy);
     }

@@ -40,13 +40,9 @@ Athena               INFO including file "AthenaPoolTestAthenaPool/AthenaPoolTes
 Athena               INFO including file "AthenaPoolTest/NoStats_jobOptions.py"
 Athena               INFO including file "AthenaCommon/runbatch.py"
 DetDescrCnvSvc       INFO  initializing 
-DetectorStore        INFO Initializing DetectorStore - package version StoreGate-02-14-31
 EventPersistenc...   INFO "CnvServices": ["DetDescrCnvSvc", "McCnvSvc", "AthenaPoolCnvSvc"]
-ProxyProviderSvc     INFO Initializing ProxyProviderSvc - package version StoreGate-02-14-31
-ClassIDSvc           INFO Initializing ClassIDSvc - package version CLIDSvc-00-02-05
 ClassIDSvc           INFO  getRegistryEntries: read 1215 CLIDRegistry entries for module ALL
 ClassIDSvc           INFO ClassIDSvc Initialized successfully 
-StoreGateSvc         INFO Initializing StoreGateSvc - package version StoreGate-02-14-31
 IOVSvc               INFO IOVRanges will be checked at every Event
 DetDescrCnvSvc       INFO Found DetectorStore service
 DetDescrCnvSvc       INFO  filling proxies for detector managers 
@@ -75,8 +71,6 @@ DetDescrCnvSvc       INFO  filling address for TGCIDHELPER with CLID 4173 and st
 DetDescrCnvSvc       INFO  filling address for CaloLVL1_ID with CLID 108133391 and storage type 68 to detector store 
 DetDescrCnvSvc       INFO  filling address for CaloCell_ID with CLID 123500438 and storage type 68 to detector store 
 DetDescrCnvSvc       INFO  filling address for CaloDM_ID with CLID 167756483 and storage type 68 to detector store 
-AthenaEventLoopMgr   INFO Initializing AthenaEventLoopMgr - package version AthenaServices-01-07-24
-AthenaPoolCnvSvc     INFO Initializing AthenaPoolCnvSvc - package version AthenaPoolCnvSvc-00-03-08
 PoolSvc              INFO No POOL WriteCatalog was specified--using POOL default.
 WARNING: $POOL_CATALOG is not defined
 using default `xmlcatalog_file:PoolFileCatalog.xml'
@@ -94,7 +88,6 @@ HistorySvc           INFO Registered 2 Algorithms
 HistorySvc           INFO Registered 1 AlgTools
 HistorySvc           INFO Registered 22 Services
 ApplicationMgr       INFO Application Manager Initialized successfully
-ActiveStoreSvc       INFO Initializing ActiveStoreSvc - package version StoreGate-02-14-31
 EventPersistenc...   INFO Added successfully Conversion service:DetDescrCnvSvc
 EventPersistenc...   INFO Added successfully Conversion service:McCnvSvc
 AthenaEventLoopMgr   INFO   ===>>>  start of run 0    <<<===

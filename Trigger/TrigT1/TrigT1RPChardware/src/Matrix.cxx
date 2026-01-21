@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigT1RPChardware/Matrix.h"
@@ -792,18 +792,14 @@ void Matrix::setRoad(ubit16 addThres, ubit16 addChn, ubit16 add64, CMAword conte
 void Matrix::setRoad(ubit16 addThres, ubit16 addChn, char road[17]) {
     if (addThres >= s_nthres || addChn > s_nchan[0]) {
         throw std::out_of_range("Matrix::setRoad :  addThres= " + std::to_string(addThres) + " addChn= " + std::to_string(addChn));
-    } else {
-        CMAword the32[2] = {0, 0};
-        ubit16 outflag = char2int(road, the32);
-        if (outflag) {
-            throw std::runtime_error("Matrix::setRoad; outflag from char2int is positive: " + std::to_string(outflag));
-            m_trigRoad[addThres][addChn][0] = 0;
-            m_trigRoad[addThres][addChn][1] = 0;
-        } else {
-            m_trigRoad[addThres][addChn][0] = the32[0];
-            m_trigRoad[addThres][addChn][1] = the32[1];
-        }
-    }  // end-of-if
+    } 
+    CMAword the32[2] = {0, 0};
+    ubit16 outflag = char2int(road, the32);
+    if (outflag) {
+        throw std::runtime_error("Matrix::setRoad; outflag from char2int is positive: " + std::to_string(outflag));
+    }
+    m_trigRoad[addThres][addChn][0] = the32[0];
+    m_trigRoad[addThres][addChn][1] = the32[1];
 }  // end-of-Matrix::setRoad
 //----------------------------------------------------------------------//
 void Matrix::setMatOverlap(ubit16 add, CMAword content) {

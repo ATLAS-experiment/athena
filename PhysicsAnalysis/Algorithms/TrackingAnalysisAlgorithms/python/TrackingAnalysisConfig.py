@@ -68,6 +68,66 @@ class InDetTrackCalibrationConfig (ConfigBlock):
         """Return the instance name for this block"""
         return self.containerName + self.postfix
 
+    @staticmethod
+    def makeTrackBiasingTool(config,
+                             alg,
+                             biasD0             :   float=None,
+                             biasZ0             :   float=None,
+                             biasQoverPsagitta  :   float=None,
+                             customRunNumber    :   int=None) :
+        toolName = "biasingTool"
+        config.addPrivateTool(toolName, "InDet::InDetTrackBiasingTool")
+        if config.geometry() is LHCPeriod.Run3:
+            raise ValueError ('Recommendations are not yet available in Run 3.')
+        elif config.geometry() is not LHCPeriod.Run2:
+            raise ValueError ('No recommendations found for geometry \"'
+                              + config.geometry().value + '\". Please check '
+                              'the configuration.')
+        if biasD0:
+            alg.biasingTool.biasD0 = biasD0
+        if biasZ0:
+            alg.biasingTool.biasZ0 = biasZ0
+        if biasQoverPsagitta:
+            alg.biasingTool.biasQoverPsagitta = biasQoverPsagitta
+        if customRunNumber:
+            alg.biasingTool.runNumber = customRunNumber
+        pass
+
+    @staticmethod
+    def makeTrackSmearingTool(config,
+                              alg,
+                              seed      :   int=None,
+                              calibFile :   str=None) :
+        toolName = "smearingTool"
+        config.addPrivateTool(toolName, "InDet::InDetTrackSmearingTool")
+        if seed:
+            alg.smearingTool.Seed = seed
+        if calibFile:
+            alg.tackSmearingTool.calibFileIP_CTIDE = calibFile
+        else:
+            if config.geometry() is LHCPeriod.Run2:
+                # Run 2 recommendations (MC20)
+                alg.smearingTool.calibFileIP_CTIDE = "InDetTrackSystematicsTools/CalibData_22.0_2022-v00/d0z0_smearing_factors_Run2_v2.root"
+            elif config.geometry() is LHCPeriod.Run3:
+                if config.campaign() is Campaign.MC23a:
+                    # 2022 recommendations (MC23a)
+                    alg.smearingTool.calibFileIP_CTIDE = "InDetTrackSystematicsTools/CalibData_25.2_2025-v00/2022_d0z0_smearing_factors_v2.root"
+                elif config.campaign() is Campaign.MC23d:
+                    # 2023 recommendations (MC23d)
+                    alg.smearingTool.calibFileIP_CTIDE = "InDetTrackSystematicsTools/CalibData_25.2_2025-v00/2023_d0z0_smearing_factors_v2.root"
+                elif config.campaign() is Campaign.MC23e:
+                    # 2024 recommendations (MC23e)
+                    alg.smearingTool.calibFileIP_CTIDE = "InDetTrackSystematicsTools/CalibData_25.2_2025-v00/2024_d0z0_smearing_factors.root"
+                else:
+                    raise ValueError ('No recommendations found for campaign \"'
+                                      + config.campaign().value + '\" in Run 3. '
+                                      'Please check that the recommendations exist.')
+            else:
+                raise ValueError ('No recommendations found for geometry \"'
+                                  + config.geometry().value + '\". Please check '
+                                  'the configuration.')
+        pass
+
     def makeAlgs (self, config) :
         log = logging.getLogger('InDetTrackCalibrationConfig')
 
@@ -97,22 +157,13 @@ class InDetTrackCalibrationConfig (ConfigBlock):
                 log.warning('Disabling the biasing tool for now. This should not '
                             'be used in an analysis.')
             else:
-                if config.geometry() is LHCPeriod.Run3:
-                    raise ValueError ('Recommendations are not yet available in Run 3.')
-                elif config.geometry() is not LHCPeriod.Run2:
-                    raise ValueError ('No recommendations found for geometry \"'
-                                      + config.geometry().value + '\". Please check '
-                                      'the configuration.')
                 alg = config.createAlgorithm( 'CP::InDetTrackBiasingAlg', 'InDetTrackBiasingAlg' )
-                config.addPrivateTool( 'biasingTool', 'InDet::InDetTrackBiasingTool' )
-                if self.biasD0:
-                    alg.biasingTool.biasD0 = self.biasD0
-                if self.biasZ0:
-                    alg.biasingTool.biasZ0 = self.biasZ0
-                if self.biasQoverPsagitta:
-                    alg.biasingTool.biasQoverPsagitta = self.biasQoverPsagitta
-                if self.customRunNumber:
-                    alg.biasingTool.runNumber = self.customRunNumber
+                self.makeTrackBiasingTool(config,
+                                          alg,
+                                          self.biasD0,
+                                          self.biasZ0,
+                                          self.biasQoverPsagitta,
+                                          self.customRunNumber)
                 alg.inDetTracks = config.readName (self.containerName)
                 alg.inDetTracksOut = config.copyName (self.containerName)
                 alg.preselection = config.getPreselection (self.containerName, '')
@@ -120,33 +171,10 @@ class InDetTrackCalibrationConfig (ConfigBlock):
         # Set up the smearing algorithm:
         if config.dataType() is not DataType.Data:
             alg = config.createAlgorithm( 'CP::InDetTrackSmearingAlg', 'InDetTrackSmearingAlg' )
-            config.addPrivateTool( 'smearingTool', 'InDet::InDetTrackSmearingTool' )
-            if self.smearingToolSeed:
-                alg.smearingTool.Seed = self.smearingToolSeed
-            if self.calibFile:
-                alg.smearingTool.calibFileIP_CTIDE = self.calibFile
-            else:
-                if config.geometry() is LHCPeriod.Run2:
-                    # Run 2 recommendations (MC20)
-                    alg.smearingTool.calibFileIP_CTIDE = "InDetTrackSystematicsTools/CalibData_22.0_2022-v00/d0z0_smearing_factors_Run2_v2.root"
-                elif config.geometry() is LHCPeriod.Run3:
-                    if config.campaign() is Campaign.MC23a:
-                        # 2022 recommendations (MC23a)
-                        alg.smearingTool.calibFileIP_CTIDE = "InDetTrackSystematicsTools/CalibData_25.2_2025-v00/2022_d0z0_smearing_factors_v2.root"
-                    elif config.campaign() is Campaign.MC23d:
-                        # 2023 recommendations (MC23d)
-                        alg.smearingTool.calibFileIP_CTIDE = "InDetTrackSystematicsTools/CalibData_25.2_2025-v00/2023_d0z0_smearing_factors_v2.root"
-                    elif config.campaign() is Campaign.MC23e:
-                        # 2024 recommendations (MC23e)
-                        alg.smearingTool.calibFileIP_CTIDE = "InDetTrackSystematicsTools/CalibData_25.2_2025-v00/2024_d0z0_smearing_factors.root"
-                    else:
-                        raise ValueError ('No recommendations found for capaign \"'
-                                          + config.campaign().value + '\" in Run 3. '
-                                          'Please check that the recommendations exist.')
-                else:
-                    raise ValueError ('No recommendations found for geometry \"'
-                                      + config.geometry().value + '\". Please check '
-                                      'the configuration.')
+            self.makeTrackSmearingTool(config,
+                                       alg,
+                                       self.smearingToolSeed,
+                                       self.calibFile)
             alg.inDetTracks = config.readName (self.containerName)
             alg.inDetTracksOut = config.copyName (self.containerName)
             alg.preselection = config.getPreselection (self.containerName, '')
@@ -175,7 +203,7 @@ class InDetTrackCalibrationConfig (ConfigBlock):
         config.addOutputVar (self.containerName, 'vz', 'vz', noSys=True)
 
         # decorate track summary information on the reconstructed object:
-        if self.outputTrackSummaryInfo and config.dataType() is not DataType.Data:
+        if self.outputTrackSummaryInfo:
             config.addOutputVar (self.containerName, 'numberOfInnermostPixelLayerHits', 'numberOfInnermostPixelLayerHits', noSys=True)
             config.addOutputVar (self.containerName, 'numberOfPixelDeadSensors', 'numberOfPixelDeadSensors', noSys=True)
             config.addOutputVar (self.containerName, 'numberOfPixelHits', 'numberOfPixelHits', noSys=True)
@@ -319,7 +347,7 @@ class InDetTrackWorkingPointConfig (ConfigBlock):
                         alg.filterTool.fFakeLoose = 0.40
                         alg.filterTool.fFakeTight = 1.00
                     elif not (self.calibFile and self.fFakeLoose and self.fFakeTight):
-                        raise ValueError ('No efficiency recommendations found for capaign \"'
+                        raise ValueError ('No efficiency recommendations found for campaign \"'
                                           + config.campaign().value + '\" in Run 3. '
                                           'Please check that the recommendations exist.')
                 elif not (self.calibFile and self.fFakeLoose and self.fFakeTight):

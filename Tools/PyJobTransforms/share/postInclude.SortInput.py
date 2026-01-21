@@ -19,7 +19,7 @@ tmpCollFile = locals().get("AthenaInputSortCollName", "sortedEventRefs" + str(os
 sortTag     = locals().get("AthenaInputSortTag",      "LumiBlockN")
 sortOrd     = locals().get("AthenaInputSortOrder",    "Ascending")
 
-from CollectionUtilities.SortedCollectionCreator import SortedCollectionCreator
+from CollectionSvc.SortedCollectionCreator import SortedCollectionCreator
 sorter = SortedCollectionCreator(name="SortEvents")
 # Sort Inputs based on one of the EventInfoTag attributes
 # Store sorted event collection in a temporary file
@@ -29,6 +29,8 @@ sorter.execute(inputs, outputCollection=tmpCollFile, sortAttribute=sortTag, sort
 # Reading Events through References require a populated FileCatalog
 for inpfile in inputs:
     os.system('pool_insertFileToCatalog {}'.format(inpfile))
+
+ServiceMgr.PoolSvc.AttemptCatalogPatch = False
 
 # Tell Athena to use the sorted collection instead of the original inputs
 ServiceMgr.EventSelector.InputCollections = [tmpCollFile + ".root"]

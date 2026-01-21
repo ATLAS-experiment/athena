@@ -1,9 +1,9 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef BCMBCMBUILDER_H
-#define BCMBCMBUILDER_H
+#ifndef BCMGEOMODEL_BCMBCMBUILDER_H
+#define BCMGEOMODEL_BCMBCMBUILDER_H
 
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "GeoModelInterfaces/IGeoSubDetTool.h"
@@ -35,14 +35,6 @@ namespace InDetDD
       virtual StatusCode finalize() override;
        /** build the BCM geometry */
       virtual StatusCode build(GeoVPhysVol* parent) override;
-
-      /** For alignment */
-      // Register callback function on ConDB object
-      virtual StatusCode registerCallback( StoreGateSvc* detStore ) override;
-
-      // Callback function itself
-      virtual StatusCode align(IOVSVC_CALLBACK_ARGS) override;
-
 
     private:
 

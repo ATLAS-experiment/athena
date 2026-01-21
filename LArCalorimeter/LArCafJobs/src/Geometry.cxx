@@ -34,7 +34,7 @@ TProfile2D* Geo::partitionProfileHist(PartitionId part, const TString& name, con
 bool Geo::setBinLabels(TH2* hist, PartitionId part)
 {
   if (hist->GetXaxis()->GetNbins() != nFEBs(part)) return false;
-  for (int i = 0; i < nFeedThroughs(part); i++)
+  for (short i = 0; i < nFeedThroughs(part); i++)
     hist->GetXaxis()->SetBinLabel(1 + i*static_cast<int>(nSlots(part)), feedThroughName(part, i));
 
   short nTicks = 16;
@@ -619,81 +619,70 @@ int Geo::nChannels(CaloId calo)
 }
 
 
-TString Geo::feedThroughName(PartitionId part, short feedThrough)
+const char* Geo::feedThroughName(PartitionId part, short feedThrough)
 {
 // feedthrough experts names (based on baseplane numbers) vector
 // From ATL-AP-IN-0003, Numberings for the Barrel Feedthroughs
   
-// Barrel A and C feedthrough experts names
-// indexed by feedthrough number (which starts at 0)
-  std::vector<std::string> ftBarrelA, ftBarrelC;
-  ftBarrelA.resize(32);     ftBarrelC.resize(32); 
-  ftBarrelA[0]  = " 0-01L";    ftBarrelC[0]  = " 0-09L";
-  ftBarrelA[1]  = " 1-02R";    ftBarrelC[1]  = " 1-08R";
-  ftBarrelA[2]  = " 2-02L";    ftBarrelC[2]  = " 2-08L";
-  ftBarrelA[3]  = " 3-03R";    ftBarrelC[3]  = " 3-07R";
-  ftBarrelA[4]  = " 4-03L";    ftBarrelC[4]  = " 4-07L";
-  ftBarrelA[5]  = " 5-04R";    ftBarrelC[5]  = " 5-06R";
-  ftBarrelA[6]  = " 6-04L";    ftBarrelC[6]  = " 6-06L";
-  ftBarrelA[7]  = " 7-05R";    ftBarrelC[7]  = " 7-05R";
-  ftBarrelA[8]  = " 8-05L";    ftBarrelC[8]  = " 8-05L";
-  ftBarrelA[9]  = " 9-06R";    ftBarrelC[9]  = " 9-04R";
-  ftBarrelA[10] = "10-06L";    ftBarrelC[10] = "10-04L";
-  ftBarrelA[11] = "11-07R";    ftBarrelC[11] = "11-03R";
-  ftBarrelA[12] = "12-07L";    ftBarrelC[12] = "12-03L";
-  ftBarrelA[13] = "13-08R";    ftBarrelC[13] = "13-02R";
-  ftBarrelA[14] = "14-08L";    ftBarrelC[14] = "14-02L";
-  ftBarrelA[15] = "15-09R";    ftBarrelC[15] = "15-01R";
-  ftBarrelA[16] = "16-09L";    ftBarrelC[16] = "16-01L";
-  ftBarrelA[17] = "17-10R";    ftBarrelC[17] = "17-16R";
-  ftBarrelA[18] = "18-10L";    ftBarrelC[18] = "18-16L";
-  ftBarrelA[19] = "19-11R";    ftBarrelC[19] = "19-15R";
-  ftBarrelA[20] = "20-11L";    ftBarrelC[20] = "20-15L";
-  ftBarrelA[21] = "21-12R";    ftBarrelC[21] = "21-14R";
-  ftBarrelA[22] = "22-12L";    ftBarrelC[22] = "22-14L";
-  ftBarrelA[23] = "23-13R";    ftBarrelC[23] = "23-13R";
-  ftBarrelA[24] = "24-13L";    ftBarrelC[24] = "24-13L";
-  ftBarrelA[25] = "25-14R";    ftBarrelC[25] = "25-12R";
-  ftBarrelA[26] = "26-14L";    ftBarrelC[26] = "26-12L";
-  ftBarrelA[27] = "27-15R";    ftBarrelC[27] = "27-11R";
-  ftBarrelA[28] = "28-15L";    ftBarrelC[28] = "28-11L";
-  ftBarrelA[29] = "29-16R";    ftBarrelC[29] = "29-10R";
-  ftBarrelA[30] = "30-16L";    ftBarrelC[30] = "30-10L";
-  ftBarrelA[31] = "31-01R";    ftBarrelC[31] = "31-09R";
+// Feedthrough experts names indexed by feedthrough number (which starts at 0)
   
-// Endcap A and C feedthrough experts names, indexed by feedthrough number
-  std::vector<std::string> ftEndcapA, ftEndcapC;
-  ftEndcapA.resize(25);     ftEndcapC.resize(25); 
-  ftEndcapA[0]  = " 0-01R";    ftEndcapC[0]  = " 0-07R";
-  ftEndcapA[1]  = " 1-01L";    ftEndcapC[1]  = " 1-07L";
-  ftEndcapA[2]  = " 2-02R";    ftEndcapC[2]  = " 2-06R";
-  ftEndcapA[3]  = " 3-02L";    ftEndcapC[3]  = " 3-06L";
-  ftEndcapA[4]  = " 4-03R";    ftEndcapC[4]  = " 4-05R";
-  ftEndcapA[5]  = " 5-03L";    ftEndcapC[5]  = " 5-05L";
-  ftEndcapA[6]  = " 6-04R";    ftEndcapC[6]  = " 6-04L";  // the FCAL baseplane
-  ftEndcapA[7]  = " 7-05R";    ftEndcapC[7]  = " 7-03R";
-  ftEndcapA[8]  = " 8-05L";    ftEndcapC[8]  = " 8-03L";
-  ftEndcapA[9]  = " 9-06R";    ftEndcapC[9]  = " 9-02R";
-  ftEndcapA[10] = "10-06L";    ftEndcapC[10] = "10-02L";
-  ftEndcapA[11] = "11-07R";    ftEndcapC[11] = "11-01R";
-  ftEndcapA[12] = "12-07L";    ftEndcapC[12] = "12-01L";
-  ftEndcapA[13] = "13-08R";    ftEndcapC[13] = "13-13R";
-  ftEndcapA[14] = "14-08L";    ftEndcapC[14] = "14-13L";
-  ftEndcapA[15] = "15-09R";    ftEndcapC[15] = "15-12R";
-  ftEndcapA[16] = "16-09L";    ftEndcapC[16] = "16-12L";
-  ftEndcapA[17] = "17-10R";    ftEndcapC[17] = "17-11R";
-  ftEndcapA[18] = "18-10L";    ftEndcapC[18] = "18-11L";
-  ftEndcapA[19] = "19-11R";    ftEndcapC[19] = "19-10R";
-  ftEndcapA[20] = "20-11L";    ftEndcapC[20] = "20-10L";
-  ftEndcapA[21] = "21-12R";    ftEndcapC[21] = "21-09R";
-  ftEndcapA[22] = "22-12L";    ftEndcapC[22] = "22-09L";
-  ftEndcapA[23] = "23-13R";    ftEndcapC[23] = "23-08R";
-  ftEndcapA[24] = "24-13L";    ftEndcapC[24] = "24-08L";
-  
-  if (part == EMB_A_PARTITION) return ftBarrelA[feedThrough];
-  if (part == EMB_C_PARTITION) return ftBarrelC[feedThrough];
-  if (part == EMEC_A_PARTITION) return ftEndcapA[feedThrough];
-  if (part == EMEC_C_PARTITION) return ftEndcapC[feedThrough];
+  if (part == EMB_A_PARTITION) {
+    static const char* const ftBarrelA[] = {
+      " 0-01L",  " 1-02R",  " 2-02L",  " 3-03R",
+      " 4-03L",  " 5-04R",  " 6-04L",  " 7-05R",
+      " 8-05L",  " 9-06R",  "10-06L",  "11-07R",
+      "12-07L",  "13-08R",  "14-08L",  "15-09R",
+      "16-09L",  "17-10R",  "18-10L",  "19-11R",
+      "20-11L",  "21-12R",  "22-12L",  "23-13R",
+      "24-13L",  "25-14R",  "26-14L",  "27-15R",
+      "28-15L",  "29-16R",  "30-16L",  "31-01R",
+    };
+    if (feedThrough >= 0 && feedThrough < static_cast<int>(std::size(ftBarrelA))) {
+      return ftBarrelA[feedThrough];
+    }
+  }
+
+  if (part == EMB_C_PARTITION) {
+    static const char* const ftBarrelC[] = {
+      " 0-09L",  " 1-08R",  " 2-08L",  " 3-07R",
+      " 4-07L",  " 5-06R",  " 6-06L",  " 7-05R",
+      " 8-05L",  " 9-04R",  "10-04L",  "11-03R",
+      "12-03L",  "13-02R",  "14-02L",  "15-01R",
+      "16-01L",  "17-16R",  "18-16L",  "19-15R",
+      "20-15L",  "21-14R",  "22-14L",  "23-13R",
+      "24-13L",  "25-12R",  "26-12L",  "27-11R",
+      "28-11L",  "29-10R",  "30-10L",  "31-09R",
+    };
+    if (feedThrough >= 0 && feedThrough < static_cast<int>(std::size(ftBarrelC))) {
+      return ftBarrelC[feedThrough];
+    }
+  }
+
+  if (part == EMEC_A_PARTITION) {
+    static const char* const ftEndcapA[] = {
+      " 0-01R",  " 1-01L",  " 2-02R",  " 3-02L",  " 4-03R",
+      " 5-03L",  " 6-04R",  " 7-05R",  " 8-05L",  " 9-06R",
+      "10-06L",  "11-07R",  "12-07L",  "13-08R",  "14-08L",
+      "15-09R",  "16-09L",  "17-10R",  "18-10L",  "19-11R",
+      "20-11L",  "21-12R",  "22-12L",  "23-13R",  "24-13L",
+    };
+    if (feedThrough >= 0 && feedThrough < static_cast<int>(std::size(ftEndcapA))) {
+      return ftEndcapA[feedThrough];
+    }
+  }
+
+  if (part == EMEC_C_PARTITION) {
+    static const char* const ftEndcapC[] = {
+      " 0-07R",  " 1-07L",  " 2-06R",  " 3-06L",  " 4-05R",
+      " 5-05L",  " 6-04L",  " 7-03R",  " 8-03L",  " 9-02R",
+      "10-02L",  "11-01R",  "12-01L",  "13-13R",  "14-13L",
+      "15-12R",  "16-12L",  "17-11R",  "18-11L",  "19-10R",
+      "20-10L",  "21-09R",  "22-09L",  "23-08R",  "24-08L",
+    };
+    if (feedThrough >= 0 && feedThrough < static_cast<int>(std::size(ftEndcapC))) {
+      return ftEndcapC[feedThrough];
+    }
+  }
   return "UNKNOWN";
 }
 

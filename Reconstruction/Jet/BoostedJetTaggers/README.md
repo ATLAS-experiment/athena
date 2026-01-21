@@ -57,7 +57,7 @@ git atlas addpkg BoostedJetTaggers
 When this finishes you'll see `Reconstruction` in your local
 directory. The boosted taggers package is inside.
 
-[1]: https://atlassoftwaredocs.web.cern.ch/gittutorial/
+[1]: https://atlas-software.docs.cern.ch/athena/git/
 
 Step 3: Build
 -------------
@@ -134,4 +134,4 @@ changes.
 
 
 [2]: http://atlas.web.cern.ch/Atlas/GROUPS/DATABASE/GroupData/BoostedJetTaggers/
-[3]: https://atlassoftwaredocs.web.cern.ch/gittutorial/merge-request/
+[3]: https://atlas-software.docs.cern.ch/athena/git/merge-request/

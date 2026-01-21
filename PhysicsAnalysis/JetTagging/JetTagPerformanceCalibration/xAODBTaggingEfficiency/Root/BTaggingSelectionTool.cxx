@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #include "CxxUtils/checker_macros.h"
 #include "xAODBTaggingEfficiency/BTaggingSelectionTool.h"
@@ -8,7 +8,6 @@
 #include "CalibrationDataInterface/CalibrationDataInterfaceROOT.h"
 #include "CalibrationDataInterface/CalibrationDataVariables.h"
 #include "CalibrationDataInterface/CalibrationDataContainer.h"
-#include "xAODBTaggingEfficiency/ToolDefaults.h"
 
 #include "PATInterfaces/SystematicRegistry.h"
 #include "PathResolver/PathResolver.h"
@@ -43,26 +42,13 @@ using xAOD::IParticle;
 BTaggingSelectionTool::BTaggingSelectionTool( const std::string & name)
   : asg::AsgTool( name ), m_acceptinfo( "JetSelection" ), m_accessor_pb( "pb" ), m_accessor_pc( "pc" ), m_accessor_pu( "pu" ), m_accessor_ptau( "ptau" )
 {
-  namespace def = ftag::defaults;
   m_initialised = false;
-  declareProperty( "MaxEta", m_maxEta = 2.5 );
-  declareProperty( "MinPt", m_minPt = 0 /*MeV*/);
-  declareProperty( "MaxRangePt", m_maxRangePt = 3000000 /*MeV*/);
-  declareProperty( "FlvTagCutDefinitionsFileName", m_CutFileName=def::cdi_path, "name of the files containing official cut definitions (uses PathResolver)");
-  declareProperty( "TaggerName",                    m_taggerName=def::tagger,    "tagging algorithm name");
-  declareProperty( "OperatingPoint",                m_OP="",            "operating point");
-  declareProperty( "JetAuthor",                     m_jetAuthor=def::jet_collection,     "jet collection");
-  declareProperty( "WorkingPointDefinitions",       m_wps_raw="FixedCutBEff_85,FixedCutBEff_77,FixedCutBEff_70,FixedCutBEff_60",       "Comma-separated list of tagger working points (in decreasing order of efficiency!) - required for 1D tagging purposes");
-  declareProperty( "ErrorOnTagWeightFailure",       m_ErrorOnTagWeightFailure=true, "optionally ignore cases where the tagweight cannot be retrieved. default behaviour is to give an error, switching to false will turn it into a warning");
-  declareProperty( "CutBenchmarksContinuousWP",     m_ContinuousBenchmarks="", "comma separated list of tag bins that will be accepted as tagged: 1,2,3 etc.. ");
-  declareProperty( "useCTagging",                   m_useCTag=false, "Enabled only for FixedCut or Continuous WPs: define wether the cuts refer to b-tagging or c-tagging");
-  declareProperty( "readFromBTaggingObject",        m_readFromBTaggingObject=false,       "Enabled to access btagging scores from xAOD::BTagging object; Can be disabled for GN2v01 to access the scores from the jet itself.");
 }
 
 StatusCode BTaggingSelectionTool::initialize() {
   m_initialised = true;
 
-  if (""==m_OP){
+  if (m_OP == ""){
     ATH_MSG_ERROR( "BTaggingSelectionTool wasn't given a working point name" );
     return StatusCode::FAILURE;
   }
@@ -70,13 +56,12 @@ StatusCode BTaggingSelectionTool::initialize() {
   TString pathtofile =  PathResolverFindCalibFile(m_CutFileName);
   m_inf = TFile::Open(pathtofile, "read");
   if (0==m_inf) {
-
-    ATH_MSG_ERROR( "BTaggingSelectionTool couldn't access tagging cut definitions" );
+    ATH_MSG_ERROR( "BTaggingSelectionTool couldn't access the CDI file" );
     return StatusCode::FAILURE;
   }
 
   // check the CDI file for the selected tagger and jet collection
-  TString check_CDI = m_taggerName;
+  TString check_CDI = m_taggerName.value();
   if(!m_inf->Get(check_CDI)){
     ATH_MSG_ERROR( "Tagger: "+m_taggerName+" not found in this CDI file: "+m_CutFileName);
     return StatusCode::FAILURE;
@@ -96,9 +81,8 @@ StatusCode BTaggingSelectionTool::initialize() {
     return StatusCode::FAILURE;
  }
 
- 
  // Operating point reading
- TString cutname = m_OP;
+ TString cutname = m_OP.value();
  m_continuous   = false;
  m_continuous2D = false;
 
@@ -190,9 +174,9 @@ StatusCode BTaggingSelectionTool::initialize() {
       //The WP is not important. This is just to retrieve the c-fraction. 
       ANA_CHECK(ExtractTaggerProperties(m_tagger, m_taggerName, workingpoints.at(0)));
 
- } else {  // FixedCut Working Point: load only one WP
+ } else {
     if(m_useCTag){
-      ATH_MSG_WARNING( "Running in FixedCut WP and using c-tagging");
+      ATH_MSG_WARNING( "Running in FixedCut WP for c-tagging, make sure to use  b-veto to select c-tagged jet properly.");
     }
     ANA_CHECK(ExtractTaggerProperties(m_tagger,m_taggerName, m_OP));
  }
@@ -251,47 +235,54 @@ StatusCode BTaggingSelectionTool::ExtractTaggerProperties(taggerproperties &tagg
   //retrieve the "fraction" used in the DL1 log likelihood from the CDI, if its not there, use the hard coded values
   // (backwards compatibility)
   if( (m_taggerEnum == Tagger::DL1) || (m_taggerEnum == Tagger::GN1) || (m_taggerEnum == Tagger::GN2)){
-
-    TString fraction_data_name = taggerName+"/"+m_jetAuthor+"/"+OP+"/fraction";
-    TVector *fraction_data = dynamic_cast<TVector*> (m_inf->Get(fraction_data_name));
     
-    double fraction = -1;
-    if(fraction_data!=nullptr){
-      fraction = fraction_data[0](0);
-    }else{
-      if("DL1"    ==taggerName){ fraction = 0.08; }
-      if("DL1mu"  ==taggerName){ fraction = 0.08; }
-      if("DL1rnn" ==taggerName){ fraction = 0.03; }
+    double fraction_b = -1;
+    const TString basePath = taggerName + "/" + m_jetAuthor + "/" + OP;
+    TVector* fraction_b_data = dynamic_cast<TVector*>( m_inf->Get(basePath + "/fraction_b") );
+    if (fraction_b_data) {
+        fraction_b = (*fraction_b_data)(0);
     }
-    tagger.fraction_c = fraction;
-    tagger.fraction_b = fraction;
+    
+    TVector* fraction_c_data = dynamic_cast<TVector*>( m_inf->Get(basePath + "/fraction") );
+    if (!fraction_c_data) {
+        fraction_c_data = dynamic_cast<TVector*>( m_inf->Get(basePath + "/fraction_c") );
+    }
+    double fraction_c = -1;
+    if (fraction_c_data) {
+      fraction_c = (*fraction_c_data)(0);
+    } else{
+      if("DL1"    ==taggerName){ fraction_c = 0.08; }
+      if("DL1mu"  ==taggerName){ fraction_c = 0.08; }
+      if("DL1rnn" ==taggerName){ fraction_c = 0.03; }
+      else {
+        ATH_MSG_ERROR("Failed to retrieve fraction_c");
+      }
+    }
 
     double fraction_tau = 0.;
     double fraction_tau_cTag = 0.;
-    TString fraction_tau_name = taggerName+"/"+m_jetAuthor+"/"+OP+"/fraction_tau";
-    TVector *fraction_tau_data = dynamic_cast<TVector*> (m_inf->Get(fraction_tau_name));
+    TVector* fraction_tau_data = dynamic_cast<TVector*>( m_inf->Get(basePath + "/fraction_tau") );
+    TVector* fraction_tau_cTag_data = dynamic_cast<TVector*>( m_inf->Get(basePath + "/fraction_tau_cTag") );
     if (m_taggerEnum == Tagger::GN2 && !(taggerName.find("GN2v00") != std::string::npos)){
-      if( fraction_tau_data != nullptr ) {
-        if (m_useCTag){
-          // tau fraction for c-tagging 
-          fraction_tau_cTag = fraction_tau_data[0](0);
-        }
-        else{
-          // tau fraction for b-tagging 
-          fraction_tau = fraction_tau_data[0](0);
-        }
+      if( fraction_tau_data ) {
+        fraction_tau = fraction_tau_data[0](0);
       }
-      else {
-        // For GN2v01 taggers and onwards the fraction_tau should be in the CDI file 
-        ATH_MSG_ERROR("Tagger fraction_tau is not available");
+      if ( m_useCTag && !fraction_tau_cTag_data) {
+        ATH_MSG_ERROR("Runnint c-tagging WP, but failed to retrive fraction_tau_cTag");
         return StatusCode::FAILURE;
-      }
+      }    
+      fraction_tau_cTag = fraction_tau_cTag_data[0](0);
     }
+
+    tagger.fraction_b = fraction_b;
+    tagger.fraction_c = fraction_c;
     tagger.fraction_tau = fraction_tau;
     tagger.fraction_tau_cTag = fraction_tau_cTag;
 
-    delete fraction_data;
+    delete fraction_b_data;
+    delete fraction_c_data;
     delete fraction_tau_data;
+    delete fraction_tau_cTag_data;
   }
   return StatusCode::SUCCESS;
 }

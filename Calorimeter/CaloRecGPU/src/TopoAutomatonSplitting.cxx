@@ -208,15 +208,12 @@ StatusCode TopoAutomatonSplitting::initialize_CUDA()
 StatusCode TopoAutomatonSplitting::execute(const EventContext & ctx, const ConstantDataHolder & constant_data,
                                            EventDataHolder & event_data, void * /*temporary_buffer*/                ) const
 {
-
   using clock_type = boost::chrono::thread_clock;
   auto time_cast = [](const auto & before, const auto & after)
   {
     return boost::chrono::duration_cast<boost::chrono::microseconds>(after - before).count();
   };
 
-  static_assert(sizeof(TopoAutomatonSplittingTemporaries) <= sizeof(ClusterMomentsArr), "We store the temporaries in the cluster moments, so the sizes must be compatible!");
-  
   const auto start = clock_type::now();
   const auto preprocessing_end = clock_type::now();
   

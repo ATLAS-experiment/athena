@@ -24,7 +24,7 @@ StatusCode PanTau::Tool_TauConstituentSelector::initialize() {
   ATH_CHECK( m_Tool_InformationStore->getInfo_Double("TauConstituents_MaxEta", m_MaxEta) );
     
   //eta bin edges
-  ATH_CHECK( m_Tool_InformationStore->getInfo_VecDouble("TauConstituents_BinEdges_Eta", m_BinEdges_Eta) );
+  ATH_CHECK( m_Tool_InformationStore->getInfo_VecDouble("Common_BinEdges_Eta", m_BinEdges_Eta) );
     
   //et cuts for types used in mode reco
   ATH_CHECK( m_Tool_InformationStore->getInfo_VecDouble("TauConstituents_Selection_Neutral_EtaBinned_EtCut", m_Selection_Neutral_EtaBinned_EtCut) );

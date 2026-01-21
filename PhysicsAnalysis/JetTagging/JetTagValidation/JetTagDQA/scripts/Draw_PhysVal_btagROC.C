@@ -9,7 +9,7 @@
 // Variables to edit:
 //
 // -List of taggers:
-//  const vector<TString> taggers = {"IP3D","SV1","DL1dv01","DL1r","GN2v01","GN2Xv01"};
+//  const vector<TString> taggers = {"SV1","GN2v01","GN3XPV01"};
 //
 // -Output directories for plots
 //  const TString HistoDir = "ROC/";
@@ -78,7 +78,7 @@ const float EffMax=1.;
 
 
 //Some global variables for plotting:
-vector<TString> taggers = {"IP3D","DIPS","SV1","DL1dv01","GN2v01","GN2Xv01"};
+vector<TString> taggers = {"SV1","GN2v01","GN3XPV01"};
 
 const float CWidth=800;
 const float CHeight=600;
@@ -123,24 +123,12 @@ map<TString, vector<TString>> WP_values;
 
 void fill_WP_values(){
   if(high_detail_level){
-    WP_values.insert(make_pair<TString, vector<TString>>("IP3D", {"50", "70", "80"}));
-    WP_values.insert(make_pair<TString, vector<TString>>("RNNIP", {"50", "70", "80"}));
-    WP_values.insert(make_pair<TString, vector<TString>>("DIPS", {"50", "70", "80"}));
-    WP_values.insert(make_pair<TString, vector<TString>>("SV1", {"40", "50", "60"}));
-    WP_values.insert(make_pair<TString, vector<TString>>("DL1dv01", {"60", "70", "77", "85"}));
-    WP_values.insert(make_pair<TString, vector<TString>>("DL1r", {"60", "70", "77", "85"}));
-    WP_values.insert(make_pair<TString, vector<TString>>("GN2v01", {"60", "70", "77", "85"}));
-    WP_values.insert(make_pair<TString, vector<TString>>("GN2Xv01", {"50","55","60","65","75","80","85"}));
+    WP_values.insert(make_pair<TString, vector<TString>>("GN2v01", {"67", "70", "77", "85","90"}));
+    WP_values.insert(make_pair<TString, vector<TString>>("GN3XPV01", {"50","55","60","65","75","80","85"})); // TODO: Change WPs since they will be a function of mass and pT.
   }
   else{
-    WP_values.insert(make_pair<TString, vector<TString>>("IP3D", {"70"}));
-    WP_values.insert(make_pair<TString, vector<TString>>("RNNIP", {"70"}));
-    WP_values.insert(make_pair<TString, vector<TString>>("DIPS", {"70"}));
-    WP_values.insert(make_pair<TString, vector<TString>>("SV1", {"60"}));
-    WP_values.insert(make_pair<TString, vector<TString>>("DL1dv01", {"70"}));
-    WP_values.insert(make_pair<TString, vector<TString>>("DL1r", {"70"}));
     WP_values.insert(make_pair<TString, vector<TString>>("GN2v01", {"70"}));
-    WP_values.insert(make_pair<TString, vector<TString>>("GN2Xv01", {"60"}));
+    WP_values.insert(make_pair<TString, vector<TString>>("GN3XPV01", {"60"}));  // TODO: Change WPs since they will be a function of mass and pT.
   }
 }
 
@@ -221,6 +209,14 @@ void myText(TString txt, float x, float y, Color_t color, bool drawRatio=true, f
 }
 
 TGraphErrors * h_RejvEff(TH1 *hsig, TH1 *hbkg, bool isSV1, bool drawCtag=false) {
+  if (!hsig) {
+    std::cerr << "ERROR in h_RejvEff: hsig is NULL" << std::endl;
+    return nullptr;
+  }
+  if (!hbkg) {
+    std::cerr << "ERROR in h_RejvEff: hbkg is NULL" << std::endl;
+    return nullptr;
+  }
   int nbins = hsig->GetNbinsX();
   int inf = 0;
   int sup = nbins+1;
@@ -606,6 +602,16 @@ void plotGraphs(const vector<TString>& InputFileNames,
       TH1F *MVX_b = (TH1F*)f->Get(hname_b);
       TH1F *MVX_u = (TH1F*)f->Get(hname_u);
       
+      if (!MVX_b) {
+        std::cerr << "ERROR: Histogram not found: " << hname_b << std::endl;
+        continue;
+      }
+
+      if (!MVX_u) {
+        std::cerr << "ERROR: Histogram not found: " << hname_u << std::endl;
+        continue;
+      }
+      
       hb.push_back(MVX_b);
       hu.push_back(MVX_u);
       bool isSV1 = false;
@@ -869,10 +875,11 @@ void plotGraphs(const vector<TString>& InputFileNames,
       gSystem->Exec("mkdir "+HistoDir);
     } 
 
-    if(drawCtag) {Histo = HistoDir+taggers[i]+"-cVSb.pdf";}
-    else {Histo = HistoDir+taggers[i]+".pdf";}
-    //cout << "Saving Histo = " << Histo.Data() << endl;
-    c1->SaveAs(Histo.Data(),"RECREATE");
+    TString histo_name = HistoDir+taggers[i];
+    if(drawCtag) histo_name += "-cVSb";
+    //cout << "Saving Histo = " << histo.Data() << endl;
+    c1->SaveAs(histo_name + ".pdf");
+    c1->SaveAs(histo_name + ".png");
    
   } // tagger i
 
@@ -1256,8 +1263,10 @@ void plotGraphsEffVsVar(TString var_name, const vector<TString>& InputFileNames,
           gSystem->Exec("mkdir "+HistoDir+"eff_vs_"+var_name);
         } 
     
-        plot_name = HistoDir+"eff_vs_"+var_name+"/eff_vs_"+var_name+"_"+taggers[i]+"_"+truth_labels[i_truthlabel]+"-jets"+"_"+tagger_WPs[i_WP]+"_WP.pdf";
-        c2->SaveAs(plot_name.Data(),"RECREATE");
+        TString plot_name;
+        plot_name = HistoDir+"eff_vs_"+var_name+"/eff_vs_"+var_name+"_"+taggers[i]+"_"+truth_labels[i_truthlabel]+"-jets"+"_"+tagger_WPs[i_WP]+"_WP";
+        c2->SaveAs(plot_name + ".pdf");
+        c2->SaveAs(plot_name + ".png");
 
       }
     } 
@@ -1273,7 +1282,7 @@ void Draw_PhysVal_btagROC(TString inputMC="ttbar",
 			  TString reffile="files_merged/merged_NTUP_PHYSVAL_ref.root",
 			  TString testfile="files_merged/merged_NTUP_PHYSVAL_test.root",
 			  TString outputName="MyHistos.root",
-			  const vector<TString>& def_taggers=vector<TString>{"IP3D","DIPS","SV1","DL1dv01","GN2v01","GN2Xv01"},
+			  const vector<TString>& def_taggers=vector<TString>{"GN2v01","GN3XPV01"},
 			  bool writeHistos=true){
 
     jetType=jet_type;

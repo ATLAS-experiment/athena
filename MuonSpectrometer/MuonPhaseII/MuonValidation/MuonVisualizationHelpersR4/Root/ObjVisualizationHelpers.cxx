@@ -66,7 +66,7 @@ namespace  MuonValR4 {
 
         const Segment* detSeg = detailedSegment(segment);
         /// Take the local z component of the local to global transform as plane normal
-        const Amg::Vector3D planeNorm = detSeg->msSector()->localToGlobalTrans(gctx).linear().col(2);
+        const Amg::Vector3D planeNorm = detSeg->msSector()->localToGlobalTransform(gctx).linear().col(2);
         /// Create the intersections
         const auto firstPlaneIsect = intersectPlane(segment.position(), segment.direction(),
                                                     planeNorm, firstSurfPos);
@@ -152,7 +152,7 @@ namespace  MuonValR4 {
                         dY = 0.5* sTgcClus->readoutElement()->stripDesign(sTgcClus->measurementHash()).stripLength(sTgcClus->channelNumber());
                     } else if (sTgcClus->channelType() == sTgcIdHelper::sTgcChannelTypes::Wire) {
                         dY = std::sqrt(sTgcClus->localCovariance<1>()(0,0));
-                        dY = 0.5*sTgcClus->readoutElement()->wireDesign(sTgcClus->measurementHash()).stripLength(sTgcClus->channelNumber());
+                        dX = 0.5*sTgcClus->readoutElement()->wireDesign(sTgcClus->measurementHash()).stripLength(sTgcClus->channelNumber());
                     }
                 }
                 break;

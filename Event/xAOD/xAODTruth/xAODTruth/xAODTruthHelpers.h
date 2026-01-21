@@ -1,7 +1,7 @@
 // Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef XAODTRUTH_XAODTRUTHHELPERS_H
@@ -31,6 +31,10 @@ namespace xAOD {
       /// Return the particle's truth origin (as defined by the MC Truth
       /// Classifier)
       int getParticleTruthOrigin( const xAOD::IParticle& p );
+
+      /// Return the particle's truth classification (as defined by the MC Truth
+      /// Classifier)
+      int getParticleTruthClassification( const xAOD::IParticle& p );
 
    } // namespace TruthHelpers
 

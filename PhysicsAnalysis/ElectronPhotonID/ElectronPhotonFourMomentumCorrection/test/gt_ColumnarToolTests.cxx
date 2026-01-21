@@ -59,12 +59,12 @@ TEST_F (ColumnarMemoryTest, EgammaCalibrationAndSmearingTool)
   columnMap.addColumn ("EventInfo.RandomRunNumber", {284500});
   columnMap.addColumn ("EventInfo.eventNumber", {1234});
   columnMap.addColumn ("EventInfo.eventTypeBitmask", {unsigned (xAOD::EventInfo::IS_SIMULATION)});
+  columnMap.addColumn ("EventInfo.actualInteractionsPerCrossing", {20});
 
   columnMap.addColumn ("Electrons", {0, 1});
   columnMap.addColumn ("Electrons.pt", {10e5});
   columnMap.addColumn ("Electrons.eta", {1});
   columnMap.addColumn ("Electrons.phi", {1});
-  columnMap.addColumn ("Electrons.m", {ParticleConstants::electronMassInMeV});
   columnMap.addColumn ("Electrons.author", {unsigned (xAOD::EgammaParameters::AuthorElectron)});
   columnMap.addColumn ("Electrons.caloClusterLinks.data", {0});
   columnMap.addColumn ("Electrons.caloClusterLinks.offset", {0, columnMap.columnSize("Electrons.caloClusterLinks.data")});

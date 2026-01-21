@@ -82,7 +82,7 @@ public:
   PlaneSurface& operator=(PlaneSurface&& psf) noexcept = default;
 
   /**Destructor*/
-  virtual ~PlaneSurface() = default;
+  virtual ~PlaneSurface();
 
   /** Copy Constructor with shift*/
   PlaneSurface(const PlaneSurface& psf, const Amg::Transform3D& transf);

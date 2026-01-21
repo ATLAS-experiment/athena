@@ -188,6 +188,14 @@ private:
   CLID m_CaloClusterContainerCLID{0};
   CLID m_TrackParticleContainerCLID{0};
   CLID m_TauTrackContainerCLID{0};
+  CLID m_ElectronContainerCLID{0};
+  CLID m_PhotonContainerCLID{0};
+  CLID m_MuonContainerCLID{0};
+  CLID m_TauJetContainerCLID{0};
+
+  /// Helper function to determine expected particle CLID based on TE name
+  /// Returns 0 if no specific type is expected (e.g., for non-physics TEs)
+  CLID getExpectedParticleCLID(const std::string& teName) const;
 
   // special cases that need separate method
   // this is to cover chains like this one: HLT_mu4_j15_boffperf_split_dr05_dz02

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "InDetTrackingGeometry/SiLayerBuilderImpl.h"
@@ -1202,31 +1202,27 @@ InDet::SiLayerBuilderImpl::dressCylinderLayers(const std::vector<Trk::CylinderLa
     auto addLayerTypeIter     = m_barrelAdditionalLayerType.begin();
     auto addLayerTypeIterEnd  = m_barrelAdditionalLayerType.end();
     double cylLayerExtend     = 0;
-    for ( ; addLayerIter != addLayerIterEnd &&
-            addLayerTypeIter != addLayerTypeIterEnd; ) {
+    for ( ; addLayerIter != addLayerIterEnd && addLayerTypeIter != addLayerTypeIterEnd; ) {
       // build the passive layer if it is smaller the current
       // cylLayerIter - or if it is the last one
-      if  ( cylLayerIter == cylLayerIterEnd ||
-            (*addLayerIter) < (*cylLayerIter)->bounds().r() ) {
-        cylLayerExtend = (cylLayerIter == cylLayerIterEnd)
-          ? cylLayerExtend
-          : (*cylLayerIter)->bounds().halflengthZ() ;
+      const bool lastLayer = (cylLayerIter == cylLayerIterEnd);
+      if  ( lastLayer || (*addLayerIter) < (*cylLayerIter)->bounds().r() ) {
+        //cppcheck-suppress derefInvalidIteratorRedundantCheck
+        cylLayerExtend = lastLayer ? cylLayerExtend : (*cylLayerIter)->bounds().halflengthZ() ;
         if ((*addLayerTypeIter)) {
           ATH_MSG_DEBUG("[- M -] Building an additional CylinderLayer w/o "
                         "sensitive modules");
           // the material for the passive layer
-          const Trk::LayerMaterialProperties& passiveLayerMaterial =
-            barrelLayerMaterial(*addLayerIter, cylLayerExtend);
+          const Trk::LayerMaterialProperties& passiveLayerMaterial = barrelLayerMaterial(*addLayerIter, cylLayerExtend);
           // create the passive layer
-          cylinderLayers->push_back(new Trk::CylinderLayer(
-              std::make_shared<Trk::CylinderBounds>(*addLayerIter, cylLayerExtend),
+          cylinderLayers->push_back(new Trk::CylinderLayer(std::make_shared<Trk::CylinderBounds>(*addLayerIter, cylLayerExtend),
               passiveLayerMaterial, 1. * Gaudi::Units::mm, nullptr, 0));
         } else {
           ATH_MSG_DEBUG("[- N -] Building an additional NavigationLayer for "
                         "volume dimension control");
           // create the passive layer
           cylinderLayers->push_back(new Trk::CylinderLayer(
-              std::make_shared<Trk::CylinderBounds>(*addLayerIter, cylLayerExtend), nullptr));
+            std::make_shared<Trk::CylinderBounds>(*addLayerIter, cylLayerExtend), nullptr));
         }
         ATH_MSG_DEBUG("  -> With Radius     :  " << *addLayerIter);
         // increase the additional layer radii

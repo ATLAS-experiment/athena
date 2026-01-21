@@ -80,9 +80,8 @@ class InformationHandler:
 
 
     def setupInfo_VecDouble(self, flags):
-        self.m_Infos_VecDouble["TauConstituents_BinEdges_Eta"]                       = flags.Tau.PanTau.TauConstituents_BinEdges_Eta
+        self.m_Infos_VecDouble["Common_BinEdges_Eta"]                       = flags.Tau.PanTau.Common_BinEdges_Eta
         self.m_Infos_VecDouble["TauConstituents_Selection_Neutral_EtaBinned_EtCut"]  = flags.Tau.PanTau.TauConstituents_Selection_Neutral_EtaBinned_EtCut
-        self.m_Infos_VecDouble["CellBased_BinEdges_Eta"]                             = flags.Tau.PanTau.CellBased_BinEdges_Eta
         self.m_Infos_VecDouble["CellBased_EtaBinned_Pi0MVACut_1prong"]               = flags.Tau.PanTau.CellBased_EtaBinned_Pi0MVACut_1prong
         self.m_Infos_VecDouble["CellBased_EtaBinned_Pi0MVACut_3prong"]               = flags.Tau.PanTau.CellBased_EtaBinned_Pi0MVACut_3prong
         self.m_Infos_VecDouble["ModeDiscriminator_BinEdges_Pt"]                      = flags.Tau.PanTau.ModeDiscriminator_BinEdges_Pt
@@ -133,7 +132,6 @@ class InformationHandler:
         self.m_Infos_String["FeatureExtractor_VarTypeName_varTypeName_Mean"]        = theFeatureHandler.m_VarTypeName_Mean
         self.m_Infos_String["FeatureExtractor_VarTypeName_varTypeName_StdDev"]      = theFeatureHandler.m_VarTypeName_StdDev
         self.m_Infos_String["FeatureExtractor_VarTypeName_varTypeName_HLV"]         = theFeatureHandler.m_VarTypeName_HLV
-        self.m_Infos_String["FeatureExtractor_VarTypeName_varTypeName_Angle"]       = theFeatureHandler.m_VarTypeName_Angle
         self.m_Infos_String["FeatureExtractor_VarTypeName_varTypeName_DeltaR"]      = theFeatureHandler.m_VarTypeName_DeltaR
         self.m_Infos_String["FeatureExtractor_VarTypeName_varTypeName_JetMoment"]   = theFeatureHandler.m_VarTypeName_JetMoment
         self.m_Infos_String["FeatureExtractor_VarTypeName_varTypeName_Combined"]    = theFeatureHandler.m_VarTypeName_Combined

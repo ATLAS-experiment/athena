@@ -14,6 +14,7 @@
 #include "StorageSvc/DbType.h"
 #include "RootDomain.h"
 #include "RootDatabase.h"
+#include "GaudiKernel/StatusCode.h"
 
 #include "TSystem.h"
 #include "TFile.h"
@@ -45,7 +46,7 @@ bool RootDomain::existsDbase(const std::string& nam)  {
 }
 
 /// Set domain specific options
-DbStatus RootDomain::setOption(const DbOption& opt)  {
+StatusCode RootDomain::setOption(const DbOption& opt)  {
   const char* n = opt.name().c_str();
   switch( ::toupper(n[0]) )  {
     case 'D':
@@ -71,7 +72,7 @@ DbStatus RootDomain::setOption(const DbOption& opt)  {
     case 'E':
       if ( !strcasecmp(n, "ENABLE_THREADSAFETY") )  {
         bool multithreaded = false;
-        DbStatus sc = opt._getValue(multithreaded);
+        StatusCode sc = opt._getValue(multithreaded);
         if ( sc.isSuccess() && multithreaded )  {
            ROOT::EnableThreadSafety();
         }
@@ -79,7 +80,7 @@ DbStatus RootDomain::setOption(const DbOption& opt)  {
       }
       else if ( !strcasecmp(n, "ENABLE_IMPLICITMT") )  {
         int implicitMT = -1;
-        DbStatus sc = opt._getValue(implicitMT);
+        StatusCode sc = opt._getValue(implicitMT);
         if ( sc.isSuccess() )  {
            if ( implicitMT == 0 )  {
               ROOT::EnableImplicitMT();
@@ -93,7 +94,7 @@ DbStatus RootDomain::setOption(const DbOption& opt)  {
     case 'F':
       if ( !strncasecmp(n+5, "READSTREAMERINFO",15) )  {
         int val = 1;
-        DbStatus sc = opt._getValue(val);
+        StatusCode sc = opt._getValue(val);
         if ( sc.isSuccess() )  {
           TFile::SetReadStreamerInfo(val != 0 ? kTRUE : kFALSE);
         }
@@ -103,7 +104,7 @@ DbStatus RootDomain::setOption(const DbOption& opt)  {
     case 'S':
       if ( !strcasecmp(n,"STREAM_MEMBER_WISE") ) {       // int
         int val = 1;
-        DbStatus sc = opt._getValue(val);
+        StatusCode sc = opt._getValue(val);
         if ( sc.isSuccess() )  {
             TVirtualStreamerInfo::SetStreamMemberWise(val);
         }
@@ -116,7 +117,7 @@ DbStatus RootDomain::setOption(const DbOption& opt)  {
        }
        else if ( !strcasecmp(n+5,"MAX_SIZE") )  {
 	  long long int max_size = TTree::GetMaxTreeSize();
-	  DbStatus sc = opt._getValue(max_size);
+	  StatusCode sc = opt._getValue(max_size);
 	  if ( sc.isSuccess() )  {
 	     TTree::SetMaxTreeSize(max_size);
         }
@@ -125,11 +126,11 @@ DbStatus RootDomain::setOption(const DbOption& opt)  {
     default:
       break;
   }
-  return Error;  
+  return StatusCode::FAILURE;  
 }
 
 /// Access domain specific options
-DbStatus RootDomain::getOption(DbOption& opt) const   {
+StatusCode RootDomain::getOption(DbOption& opt) const   {
   const char* n = opt.name().c_str();
   switch( ::toupper(n[0]) )  {
     case 'C':
@@ -185,6 +186,6 @@ DbStatus RootDomain::getOption(DbOption& opt) const   {
     default:
       break;
   }
-  return Error;  
+  return StatusCode::FAILURE;  
 }
 

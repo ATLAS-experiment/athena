@@ -154,22 +154,6 @@ StatusCode TauJetRNNEvaluator::execute(xAOD::TauJet &tau) const {
   return StatusCode::SUCCESS;
 }
 
-const TauJetRNN* TauJetRNNEvaluator::get_rnn_0p() const {
-  return m_net_0p.get();
-}
-
-const TauJetRNN* TauJetRNNEvaluator::get_rnn_1p() const {
-  return m_net_1p.get();
-}
-
-const TauJetRNN* TauJetRNNEvaluator::get_rnn_2p() const {
-  return m_net_2p.get();
-}
-
-const TauJetRNN* TauJetRNNEvaluator::get_rnn_3p() const {
-  return m_net_3p.get();
-}
-
 StatusCode TauJetRNNEvaluator::get_tracks(const xAOD::TauJet &tau, std::vector<const xAOD::TauTrack *> &out) const {
   std::vector<const xAOD::TauTrack*> tracks = tau.allTracks();
 

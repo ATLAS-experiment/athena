@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # @file AthenaCommon.AthOptionsParser
 # @purpose the central module to parse command line options of athena.py
@@ -27,23 +27,6 @@ class JobOptAction(argparse.Action):
 
         setattr(args, self.dest, scripts)
         args.fromdb = pkls[0] if pkls else None
-
-
-class MemCheckAction(argparse.Action):
-    """Enable Hepheastus"""
-    def __call__(self, parser, args, values, option_string=None):
-
-        setattr(args, self.dest,
-                [] if values=='all' else [values])
-
-        # early import is needed for proper offloading later
-        import Hephaestus.MemoryTracker as memtrack  # noqa: F401
-
-        if option_string=='--delete-check':
-            args.memchk_mode = 'delete-check'
-            import Hephaestus.DeleteChecker          # noqa: F401
-        else:
-            args.memchk_mode = 'leak-check'
 
 
 class AthHelpFlags(argparse.Action):
@@ -85,8 +68,7 @@ def check_tcmalloc(opts):
     libname = 'libtcmalloc'  # also covers libtcmalloc_minimal.so
     # Warn if...
     if ( libname not in os.getenv('LD_PRELOAD','') and  # tcmalloc not loaded
-         os.getenv('USETCMALLOC') in ('1', None) and    # but requested (or default)
-         opts.do_leak_chk is None ):                    # and not disabled by leak checker
+         os.getenv('USETCMALLOC') in ('1', None) ):     # but requested (or default)
 
         print ('*******************************************************************************')
         print ('WARNING: option --tcmalloc used or implied, but libtcmalloc.so not loaded.')
@@ -216,16 +198,6 @@ def getArgumentParser(legacy_args=False, **kwargs):
 
     g.add_argument('--debugWorker', action='store_true', dest='debug_worker',
                    help='pause AthenaMP workers at bootstrap until SIGUSR1 signal received')
-
-    g.add_argument('--leak-check', metavar='STAGE', dest='do_leak_chk', action=MemCheckAction,
-                   choices=['initialize', 'start', 'beginrun', 'execute', 'finalize',
-                            'endrun', 'stop', 'full', 'full-athena', 'all'],
-                   help='perform basic memory leak checking, disables the use of tcmalloc.')
-
-    g.add_argument('--delete-check', metavar='STAGE', dest='do_leak_chk', action=MemCheckAction,
-                   choices=['initialize', 'start', 'beginrun', 'execute', 'finalize',
-                            'endrun', 'stop', 'full', 'full-athena', 'all'],
-                   help='perform double delete checking, disables the use of tcmalloc.')
 
     g.add_argument('--tracelevel', metavar='LEVEL', nargs='?', type=int, choices=range(1,4), const=3,
                    help='trace level for python configuration (%(choices)s)')

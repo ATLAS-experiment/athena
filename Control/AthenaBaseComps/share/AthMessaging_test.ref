@@ -5,6 +5,10 @@ MyObj1               INFO World
 Athena::getMessageSvc: WARNING MessageSvc not found, will use std::cout
 MyObj2            WARNING Hello
 MyObj2               INFO World
+Athena::getMessageSvc: WARNING MessageSvc not found, will use std::cout
+MyObj3              DEBUG Good morning
+MyObj3            WARNING Hello
+MyObj3               INFO World
 
 
 JobOptionsSvc        INFO # =======> /scratch/fwinkl/athena/Control/AthenaBaseComps/share/athMessaging_test.txt
@@ -23,3 +27,6 @@ ApplicationMgr Ready
 --- Test with MessageSvc
 MyObj1            WARNING Hello
 MyObj2            WARNING Hello
+MyObj3              DEBUG Good morning
+MyObj3            WARNING Hello
+MyObj3               INFO World

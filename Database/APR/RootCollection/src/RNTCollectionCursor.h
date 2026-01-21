@@ -7,9 +7,9 @@
 
 #include "PersistentDataModel/Token.h"
 
-#include "CollectionBase/CollectionRowBuffer.h"
-#include "CollectionBase/ICollectionDescription.h"
-#include "CollectionBase/ICollectionCursor.h"
+#include "CollectionSvc/CollectionRowBuffer.h"
+#include "CollectionSvc/ICollectionDescription.h"
+#include "CollectionSvc/ICollectionCursor.h"
 
 #include <memory>
 
@@ -26,7 +26,7 @@ namespace pool {
       /** 
        * @class RNTCollectionCursor RNTCollectionCursor.h Rootcollection/RNTCollectionCursor.h
        *
-       * An interface used to navigate the result of a query on a collection
+       * An interface used to navigate
        * stored in RNTuple
        */
       class RNTCollectionCursor : public ICollectionCursor
@@ -39,10 +39,10 @@ namespace pool {
             ROOT::RNTupleReader* reader );
 
         
-         /// Advances the cursor to the next row of the query result set.
+         /// Advances the cursor to the next row of the result set.
          virtual bool next() override;
 
-         /// Returns the selected Tokens and Attributes for the current row of the query result set.
+         /// Returns the selected Tokens and Attributes for the current row of the result set.
          virtual const pool::CollectionRowBuffer& currentRow() const override;
 
          /// Return the size of the collection.
@@ -68,7 +68,7 @@ namespace pool {
          /// RNtuple row with Field addresses set to collectionRowBuffer attributes
          std::unique_ptr< ROOT::REntry >      m_RNTEntry;
 
-         /// Row buffer containing Tokens and Attributes selected by query.
+         /// Row buffer containing Tokens and Attributes
          pool::CollectionRowBuffer      m_collectionRowBuffer;
 
          /// "Token rowBuffer" for reading Tokens as strings and converting them later
