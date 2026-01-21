@@ -45,6 +45,10 @@ namespace DerivationFramework {
       "Electrons",
       "Input Electrons"
     };
+  SG::ReadDecorHandleKey<xAOD::ElectronContainer>
+    m_electronTruthParticleLink{ this, "electronTruthParticleLink",
+    m_electronContainer, "truthParticleLink", "" }; // Decoration applied in egammaTruthAssociationAlg
+
     /** @brief Input truth particle container **/
     SG::ReadHandleKey<xAOD::TruthParticleContainer> m_truthContainer{
       this,
@@ -61,6 +65,9 @@ namespace DerivationFramework {
     SG::WriteDecorHandleKey<xAOD::ElectronContainer>
     m_firstEgMotherTruthOrigin{ this, "firstEgMotherTruthOrigin", m_electronContainer, "firstEgMotherTruthOrigin", "" };
     SG::WriteDecorHandleKey<xAOD::ElectronContainer>
+    m_firstEgMotherTruthClassification{ this, "firstEgMotherTruthClassification",
+      m_electronContainer, "firstEgMotherTruthClassification", "" };
+    SG::WriteDecorHandleKey<xAOD::ElectronContainer>
     m_firstEgMotherTruthParticleLink{ this,
       "firstEgMotherTruthParticleLink",
       m_electronContainer, "firstEgMotherTruthParticleLink",
@@ -71,6 +78,9 @@ namespace DerivationFramework {
     m_lastEgMotherTruthType{ this, "lastEgMotherTruthType", m_electronContainer, "lastEgMotherTruthType", "" };
     SG::WriteDecorHandleKey<xAOD::ElectronContainer>
     m_lastEgMotherTruthOrigin{ this, "lastEgMotherTruthOrigin", m_electronContainer, "lastEgMotherTruthOrigin", "" };
+    SG::WriteDecorHandleKey<xAOD::ElectronContainer>
+    m_lastEgMotherTruthClassification{ this, "lastEgMotherTruthClassification",
+      m_electronContainer, "lastEgMotherTruthClassification", "" };
     SG::WriteDecorHandleKey<xAOD::ElectronContainer>
     m_lastEgMotherTruthParticleLink{ this,
       "lastEgMotherTruthParticleLink",

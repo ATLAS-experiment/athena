@@ -379,15 +379,15 @@ def EGAM10Cfg(flags):
     # truth
     if flags.Input.isMC:
         EGAM10SlimmingHelper.ExtraVariables += [
-            "Electrons.truthOrigin.truthType.truthParticleLink.truthPdgId",
-            "Electrons.lastEgMotherTruthType.lastEgMotherTruthOrigin",
+            "Electrons.truthClassification.truthOrigin.truthType.truthParticleLink.truthPdgId",
+            "Electrons.lastEgMotherTruthClassification.lastEgMotherTruthType.lastEgMotherTruthOrigin",
             "Electrons.lastEgMotherTruthParticleLink.lastEgMotherPdgId",
-            "Electrons.firstEgMotherTruthType.firstEgMotherTruthOrigin",
+            "Electrons.firstEgMotherTruthClassification.firstEgMotherTruthType.firstEgMotherTruthOrigin",
             "Electrons.firstEgMotherTruthParticleLink.firstEgMotherPdgId",
         ]
 
         EGAM10SlimmingHelper.ExtraVariables += [
-            "Photons.truthOrigin.truthType.truthParticleLink"
+            "Photons.truthClassification.truthOrigin.truthType.truthParticleLink"
         ]
 
         EGAM10SlimmingHelper.ExtraVariables += [

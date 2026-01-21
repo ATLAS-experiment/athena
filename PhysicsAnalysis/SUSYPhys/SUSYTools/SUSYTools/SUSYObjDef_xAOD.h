@@ -1045,6 +1045,7 @@ namespace ST {
   const static SG::ConstAccessor<unsigned int> acc_OQ("OQ");
   const static SG::ConstAccessor<int> acc_truthType("truthType");
   const static SG::ConstAccessor<int> acc_truthOrigin("truthOrigin");
+  const static SG::ConstAccessor<unsigned int> acc_truthClassification("truthClassification");
   const static SG::ConstAccessor<int> acc_bkgTruthOrigin("bkgTruthOrigin");
   const static SG::ConstAccessor<char> acc_passPhCleaning("DFCommonPhotonsCleaning");
   const static SG::ConstAccessor<char> acc_passPhCleaningNoTime("DFCommonPhotonsCleaningNoTime");

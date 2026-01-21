@@ -1089,7 +1089,7 @@ def LLP1Cfg(flags):
                                           "InDetTrackParticles.expectInnermostPixelLayerHit.expectNextToInnermostPixelLayerHit.numberOfNextToInnermostPixelLayerHits.numberOfContribPixelLayers.numberOfGangedFlaggedFakes.numberOfPixelOutliers.numberOfPixelSplitHits.numberOfPixelSpoiltHits",
                                           "InDetTrackParticles.numberOfSCTOutliers.numberOfSCTSpoiltHits",
                                           "InDetTrackParticles.numberOfTRTHoles.numberOfTRTDeadStraws.numberOfTRTSharedHits.numberOfTRTHighThresholdHits.numberOfTRTHighThresholdHitsTotal.numberOfTRTHighThresholdOutliers.TRTdEdx.TRTdEdxUsedHits.hitPattern",
-                                          "InDetTrackParticles.truthMatchProbability.truthOrigin.truthType",
+                                          "InDetTrackParticles.truthMatchProbability.truthClassification.truthOrigin.truthType",
                                           "InDetTrackParticles.TrkIsoPtPdEdx_ptcone20.TrkIsoPtPdEdx_ptcone30.TrkIsoPtPdEdx_ptcone40.TrkIsoPtTightPdEdx_ptcone20.TrkIsoPtTightPdEdx_ptcone30.TrkIsoPtTightPdEdx_ptcone40",
                                           "InDetTrackParticles.LLP1_ptcone20.LLP1_ptcone30.LLP1_ptcone40.LLP1_ptvarcone20.LLP1_ptvarcone30.LLP1_ptvarcone40.definingParametersCovMatrixDiag.definingParametersCovMatrixOffDiag",
                                           "InDetTrackParticles.LLP1_topoetcone20.LLP1_topoetcone30.LLP1_topoetcone40.LLP1_topoetcone20NonCoreCone.LLP1_topoetcone30NonCoreCone.LLP1_topoetcone40NonCoreCone",
@@ -1097,7 +1097,7 @@ def LLP1Cfg(flags):
                                           "InDetTrackParticles.Reco_msosLink",
 
                                           "InDetLargeD0TrackParticles.d0.z0.vz.TTVA_AMVFVertices.TTVA_AMVFWeights.eProbabilityHT.truthParticleLink.truthMatchProbability.radiusOfFirstHit.hitPattern.patternRecoInfo",
-                                          "GSFTrackParticles.d0.z0.vz.TTVA_AMVFVertices.TTVA_AMVFWeights.eProbabilityHT.truthParticleLink.truthMatchProbability.radiusOfFirstHit.numberOfPixelHoles.numberOfSCTHoles.numberDoF.chiSquared.hitPattern.truthOrigin.truthType",
+                                          "GSFTrackParticles.d0.z0.vz.TTVA_AMVFVertices.TTVA_AMVFWeights.eProbabilityHT.truthParticleLink.truthMatchProbability.radiusOfFirstHit.numberOfPixelHoles.numberOfSCTHoles.numberDoF.chiSquared.hitPattern.truthClassification.truthOrigin.truthType",
                                           "EventInfo.hardScatterVertexLink.timeStampNSOffset",
                                           "EventInfo.GenFiltHT.GenFiltMET.GenFiltHTinclNu.GenFiltPTZ.GenFiltFatJ",
                                           "EventInfo.hardScatterVertexLink.timeStampNSOffset",

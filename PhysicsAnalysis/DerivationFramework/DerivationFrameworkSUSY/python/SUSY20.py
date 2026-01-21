@@ -396,7 +396,7 @@ def SUSY20Cfg(flags):
 			"Muons.TruthLink",
 			"Photons.TruthLink",
 			"TruthEvents.Q.XF1.XF2.PDGID1.PDGID2.PDFID1.PDFID2.X1.X2.crossSection",
-			"InDetTrackParticles.TruthLink.truthMatchProbability.truthOrigin.truthType.truthParticleLink"
+			"InDetTrackParticles.TruthLink.truthMatchProbability.truthClassification.truthOrigin.truthType.truthParticleLink"
 		]
 
 	StaticContent = []
