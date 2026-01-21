@@ -156,6 +156,8 @@ def initConfigFlags():
     acf.addFlag('MP.UseSharedReader', False, help='use shared reader')
     acf.addFlag('MP.UseSharedWriter', False, help='use shared writer')
     acf.addFlag('MP.UseParallelCompression', True, help='enable event compression in workers')
+    acf.addFlag('MP.SharedWriter.FileFlushSetting', {},
+                help="how frequently (in number of events) SW will flush the output, e.g., {'DAOD_PHYS.pool.root':500}. If empty, AutoFlush is used. Only applies when parallel compression is enabled.")
 
     acf.addFlag('Common.MsgSuppression', True, help='enable log message suppression')
     acf.addFlag('Common.MsgSourceLength', 50, help='length of the source-field in the log message format')

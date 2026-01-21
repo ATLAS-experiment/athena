@@ -84,6 +84,7 @@ def PoolWriteCfg(flags):
     OutputMetadataContainers = []
 
     # Loop over all streams and set the appropriate attributes
+    fileFlushSetting = {}
     maxAutoFlush = -1
     storageTechnologyMap = flags.Output.StorageTechnology.EventData or {'*': flags.PoolSvc.DefaultContainerType}
     for stream in _getStreamsFromFlags(flags):
@@ -151,10 +152,14 @@ def PoolWriteCfg(flags):
             poolContainerPrefix += f"_{stream}"
             OutputMetadataContainers += [f"MetaData_{stream}"]
 
-        # Set the AutoFlush attributes
+        # Set the AutoFlush & Maximum Size attributes
         PoolAttributes += [ pah.setTreeAutoFlush( fileName, poolContainerPrefix, autoFlush ) ]
         PoolAttributes += [ pah.setTreeAutoFlush( fileName, outputCollection, autoFlush ) ]
         PoolAttributes += [ pah.setTreeAutoFlush( fileName, "POOLContainerForm", autoFlush ) ]
+        PoolAttributes += [ pah.setTreeMaxSize( fileName, "*", "1099511627776L" ) ] # 1 TB
+        if flags.MP.UseSharedWriter and flags.MP.UseParallelCompression:
+            fileFlushSetting[fileName] = ( flags.MP.SharedWriter.FileFlushSetting.get(fileName, autoFlush) )
+            logger.info(f"Setting auto write for {fileName} to {fileFlushSetting[fileName]} events")
 
         # Set the Spit Level attributes
         PoolAttributes += [ pah.setContainerSplitLevel( fileName, poolContainerPrefix, splitLvl ) ]
@@ -198,10 +203,11 @@ def PoolWriteCfg(flags):
                                            ParallelCompression=useParallelCompression,
                                            StorageTechnology=storageTechnologyMap,
                                            OutputMetadataContainers=OutputMetadataContainers,
-                                           OneDataHeaderForm = oneDHForm)
+                                           OneDataHeaderForm=oneDHForm,
+                                           FileFlushSetting=fileFlushSetting)
     else:
         from AthenaPoolCnvSvc.PoolCommonConfig import AthenaPoolCnvSvcCfg
         return AthenaPoolCnvSvcCfg(flags,
                                    PoolAttributes=PoolAttributes,
                                    StorageTechnology=storageTechnologyMap,
-                                   OneDataHeaderForm = oneDHForm)
+                                   OneDataHeaderForm=oneDHForm)
