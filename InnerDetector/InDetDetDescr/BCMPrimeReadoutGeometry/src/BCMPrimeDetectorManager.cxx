@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "BCMPrimeReadoutGeometry/BCMPrimeDetectorManager.h"
@@ -22,18 +22,6 @@ namespace InDetDD {
 
     void BCMPrimeDetectorManager::addTreeTop(const PVConstLink& vol) {
         m_volume.push_back(vol);
-    }
-
-    void BCMPrimeDetectorManager::addAlignableTransform(int /*id*/, 
-                                                        GeoAlignableTransform * /*transform*/,
-                                                        const GeoVPhysVol * /*child*/)
-    {
-        // Here alignment transforms will be added
-    }
-
-    StatusCode BCMPrimeDetectorManager::align( IOVSVC_CALLBACK_ARGS_P( /*I*/, /*keys*/) ) const {
-        // Here alignment transform deltas will be set
-        return StatusCode::SUCCESS;
     }
 
 } // namespace InDetDD
