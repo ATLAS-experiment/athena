@@ -266,8 +266,8 @@ Root::TGoodRunsListWriter::WriteLumiRangeCollection(xmlTextWriterPtr writer)
   }
 
   /* Write DTD section */
-  rc = xmlTextWriterWriteDTD(writer, (xmlChar *)"LumiRangeCollection", NULL,
-                             (xmlChar *)"http://atlas-runquery.cern.ch/LumiRangeCollection.dtd", NULL);
+  rc = xmlTextWriterWriteDTD(writer, ConvertInput("LumiRangeCollection",MY_ENCODING), NULL,
+                             ConvertInput("http://atlas-runquery.cern.ch/LumiRangeCollection.dtd", MY_ENCODING), NULL);
   if (rc < 0) {
     m_logger << kWARNING << "testXmlwriterDoc: Error at xmlTestWriterWriteDTD" << GEndl;
     return kFALSE;
