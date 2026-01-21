@@ -1,6 +1,6 @@
 """Define methods to construct configured EventInfo conversion algorithms
 
-Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 """
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
@@ -107,19 +107,23 @@ def EventInfoOverlayCfg(flags, **kwargs):
     return acc
 
 
-def EventInfoUpdateFromContextAlgCfg(flags, name="EventInfoUpdateFromContextAlg", **kwargs):
+def EventInfoUpdateFromContextAlgCfg(flags, name="EventInfoUpdateFromContextAlg", disableBeamSpot=False, **kwargs):
     """Return a ComponentAccumulator for EventInfoUpdateFromContext algorithm"""
     acc = ComponentAccumulator()
 
     # Add beam spot conditions
-    from BeamSpotConditions.BeamSpotConditionsConfig import BeamSpotCondAlgCfg
-    acc.merge(BeamSpotCondAlgCfg(flags))
+    if not disableBeamSpot:
+        from BeamSpotConditions.BeamSpotConditionsConfig import BeamSpotCondAlgCfg
+        acc.merge(BeamSpotCondAlgCfg(flags))
 
     kwargs.setdefault("SignalInputKey", "Input_EventInfo")
     kwargs.setdefault("OutputKey", f"{flags.Overlay.SigPrefix}EventInfo" if flags.Common.ProductionStep == ProductionStep.FastChain and flags.Common.isOverlay else "EventInfo")
 
     if flags.Input.MCChannelNumber > 0:
         kwargs.setdefault("MCChannelNumber", flags.Input.MCChannelNumber)
+
+    if disableBeamSpot:
+        kwargs.setdefault("BeamSpotKey", "")
 
     # Do the xAOD::EventInfo overlay
     acc.addEventAlgo(CompFactory.xAODMaker.EventInfoUpdateFromContextAlg(name, **kwargs))
