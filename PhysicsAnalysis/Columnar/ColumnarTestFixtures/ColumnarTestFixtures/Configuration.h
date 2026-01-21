@@ -40,7 +40,7 @@ namespace columnar
       unsigned int batchSize = 1000;
 
       // whether to run the tool a second time to get a "warm" cache measurement
-      bool runToolTwice = true;
+      bool runToolTwice = false;
 
       // whether to skip all shallow copies in xAOD array mode
       bool skipShallowCopies = false;
