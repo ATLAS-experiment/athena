@@ -132,7 +132,7 @@ namespace columnar
           : AsgMessaging ("ColumnDataXARetrieve_" + info.name), containerName (info.name), index (info.index), skipShallowCopies (userConfiguration.skipShallowCopies)
         {}
 
-        virtual void requestShallowCopy () {
+        virtual void requestShallowCopy() override {
           if (!skipShallowCopies)
             shallowCopy = true;
         }
