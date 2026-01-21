@@ -250,7 +250,7 @@ def MMRdoToPrepDataToolCfg(flags, name="MmRdoToPrepDataTool", **kwargs):
     from MuonConfig.MuonCalibrationConfig import NSWCalibToolCfg
     kwargs.setdefault("NSWCalibTool", result.popToolsAndMerge(NSWCalibToolCfg(flags)))   
     kwargs["xAODKey"] =  "xAODMMClusters" if flags.Muon.writexAODPRD or flags.Muon.usePhaseIIGeoSetup else ""
- 
+    kwargs["UseR4DetMgr"] = flags.Muon.usePhaseIIGeoSetup
     the_tool = CompFactory.Muon.MmRdoToPrepDataToolMT(name, **kwargs)
     result.setPrivateTools(the_tool)
     return result
@@ -290,7 +290,6 @@ def MdtRDODecodeCfg(flags, name="MdtRdoToMdtPrepData", RDOContainer = None, **kw
     tool_kwargs["xAODKey"] =  "xMdtDriftCircles" if writexAOD else ""
     tool_kwargs["xAODTwinKey"] =  "xMdtTwinDriftCircles" if writexAOD else ""
     
-    ### Disable the twin tubes in the Phase II geometry setup
     tool_kwargs["UseR4DetMgr"]  = flags.Muon.usePhaseIIGeoSetup
     tool_kwargs["CalibrationTool"] = acc.popToolsAndMerge(MdtCalibrationToolCfg(flags, TimeWindowSetting = 2, 
                                                                                 DoPropagationCorrection = False))
