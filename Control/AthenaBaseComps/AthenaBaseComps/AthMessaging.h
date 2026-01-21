@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // AthMessaging.h 
@@ -150,6 +150,10 @@ inline
 bool
 AthMessaging::msgLvl (const MSG::Level lvl) const
 {
+  // If user did not set explicit message level we have to initialize
+  // the messaging and retrieve the default via the MessageSvc.
+  if (m_lvl==MSG::NIL && !m_initialized.test_and_set()) initMessaging();
+
   if (m_lvl <= lvl) {
     msg() << lvl;
     return true;

@@ -9,6 +9,7 @@ Athena::getMessageSvc: WARNING MessageSvc not found, will use std::cout
 MyObj3              DEBUG Good morning
 MyObj3            WARNING Hello
 MyObj3               INFO World
+Athena::getMessageSvc: WARNING MessageSvc not found, will use std::cout
 
 
 JobOptionsSvc        INFO # =======> /scratch/fwinkl/athena/Control/AthenaBaseComps/share/athMessaging_test.txt
