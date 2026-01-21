@@ -41,7 +41,7 @@ if 'shutil' in sys.modules:
 sys.path.insert(0,patched_shutil_loc)
 import shutil
 
-from MadGraphControl.MadGraphUtilsHelpers import checkSettingExists,checkSetting,checkSettingIsTrue,getDictFromCard,get_runArgs_info,error_check,setup_path_protection,is_NLO_run,get_default_config_card
+from MadGraphControl.MadGraphUtilsHelpers import checkSettingExists,checkSetting,checkSettingIsTrue,getDictFromCard,get_runArgs_info,error_check,setup_path_protection,is_NLO_run,get_default_config_card,get_mg5_version
 from MadGraphControl.MadGraphParamHelpers import check_PMG_updates
 
 def stack_subprocess(command,**kwargs):
@@ -263,9 +263,10 @@ def generate(process_dir='PROC_mssm_0', grid_pack=False, gridpack_compile=False,
 
     if grid_pack:
         # Name dictacted by https://twiki.cern.ch/twiki/bin/viewauth/AtlasProtected/PmgMcSoftware
+        # MG version included for traceability (e.g. MG351 for version 3.5.1)
         energy = '%1.1f'%(beamEnergy*2./1000.)
         energy = energy.replace('.0','').replace('.','p')
-        gridpack_name='mc_'+energy+'TeV.'+get_physics_short()+'.GRID.tar.gz'
+        gridpack_name='mc_'+energy+'TeV.'+get_physics_short()+'.MG'+get_mg5_version().replace('.','')+'.GRID.tar.gz'
         mglog.info('Tidying up gridpack '+gridpack_name)
 
         # Return the setting for the systematics_program

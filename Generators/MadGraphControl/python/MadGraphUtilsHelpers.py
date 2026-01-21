@@ -63,6 +63,18 @@ def checkSettingExists(key_,mydict_):
         keys+=[totallyStripped(k)]
     return key in keys
 
+def get_mg5_version():
+    """Return MadGraph version string (e.g. '3.5.1')
+
+    Used to include MG version in gridpack names for better traceability.
+    Reads version from $MADPATH/VERSION file.
+    """
+    with open(os.environ['MADPATH']+'/VERSION','r') as version_file:
+        for line in version_file:
+            if 'version' in line:
+                return line.split('=')[1].strip()
+    raise RuntimeError('Failed to find MadGraph/MadGraph5_aMC@NLO version')
+
 def is_version_or_newer(args):
     # also need to find out the version (copied from generate)
     import os
