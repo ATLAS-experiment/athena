@@ -35,7 +35,6 @@ JetParticleShrinkingConeAssociation::match(const xAOD::JetContainer& jets, const
 
         double drmin = -1;
         int matchjetidx = -1;
-   
         for (unsigned int iJet = 0; iJet < jets.size(); iJet++) {
             const xAOD::Jet& jet = *jets[iJet];
 
