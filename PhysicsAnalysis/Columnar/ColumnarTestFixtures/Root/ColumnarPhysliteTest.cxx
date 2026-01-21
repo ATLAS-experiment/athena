@@ -75,7 +75,7 @@ namespace columnar
     const unsigned int batchSize = 1000;
 
     // whether to run the tool a second time to get a "warm" cache measurement
-    const bool runToolTwice = true;
+    const bool runToolTwice = false;
   }
 
   namespace TestUtils
