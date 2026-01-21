@@ -630,7 +630,7 @@ void getNotInDeadLayer(std::vector<int>& v, std::vector<int>& deadLayer_v, const
       validity = 2;
       //     std::cout << " ... validity check failed for noisy, trying with h_tube" << std::endl;
       //    return GetNoisyTubes_WithoutForNoise( h_tube_fornoise, h_tube, chamber);
-      return GetNoisyTubes_WithoutForNoise(h_tube, validity, std::move(chamber));
+      return GetNoisyTubes_WithoutForNoise(h_tube, validity, chamber);
     }
   }
 
