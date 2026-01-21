@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # MCTruthCommonConfig
 # Contains the configuration for the common truth containers/decorations used in analysis DAODs
@@ -31,7 +31,10 @@ def HepMCtoXAODTruthCfg(flags):
     # Ensure EventInfoCnvAlg is scheduled
     if "EventInfo#McEventInfo" in flags.Input.TypedCollections and "xAOD::EventInfo#EventInfo" not in flags.Input.TypedCollections:
         from xAODEventInfoCnv.xAODEventInfoCnvConfig import EventInfoCnvAlgCfg
-        acc.merge(EventInfoCnvAlgCfg(flags, inputKey="McEventInfo", outputKey="EventInfo", disableBeamSpot=True))
+        acc.merge(EventInfoCnvAlgCfg(flags, inputKey="McEventInfo", outputKey="Input_EventInfo", disableBeamSpot=True))
+
+        from xAODEventInfoCnv.xAODEventInfoCnvConfig import EventInfoUpdateFromContextAlgCfg
+        acc.merge(EventInfoUpdateFromContextAlgCfg(flags, disableBeamSpot=True))
 
     # Build truth collection if input is HepMC. Must be scheduled first to allow slimming.
     # Input file is event generator output (EVNT)
