@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef GLOBALSIM_COMMONSORTSELECTALGTOOL_H
@@ -114,8 +114,8 @@ namespace GlobalSim {
     Gaudi::Property<bool> m_enableDump {
       this,
       "enable_dump",
-      "False",
-      "floag to eanble debug dumps"
+      false,
+      "flag to enable debug dumps"
     };
 
 
