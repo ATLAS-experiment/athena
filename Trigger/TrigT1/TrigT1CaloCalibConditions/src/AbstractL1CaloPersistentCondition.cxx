@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigT1CaloCalibConditions/AbstractL1CaloPersistentCondition.h"
@@ -42,11 +42,15 @@ coral::AttributeListSpecification* AbstractL1CaloPersistentCondition::createAttr
 }
 
 std::string AbstractL1CaloPersistentCondition::specificationName(int specId) const {
-	return m_attrSpecificationNameMap.find(specId)->second;
+  auto p = m_attrSpecificationNameMap.find(specId);
+  if (p == m_attrSpecificationNameMap.end()) return "";
+	return p->second;
 }
 
 std::string AbstractL1CaloPersistentCondition::specificationType(int specId) const {
-	return m_attrSpecificationTypeMap.find(specId)->second;
+  auto p = m_attrSpecificationTypeMap.find(specId);
+  if (p == m_attrSpecificationTypeMap.end()) return "";
+	return p->second;
 }
 
 void AbstractL1CaloPersistentCondition::clear() {
