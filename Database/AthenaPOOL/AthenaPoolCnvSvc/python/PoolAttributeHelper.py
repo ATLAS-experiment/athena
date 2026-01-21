@@ -65,6 +65,14 @@ def setTreeAutoFlush( fileName = None, treeName = None, autoFlush = None ):
                              attrName  = "TREE_AUTO_FLUSH",
                              attrValue = autoFlush )
 
+def setTreeMaxSize( fileName = None, treeName = None, maxSize = None ):
+    """ Convenience method for setting the maximum size for a tree in a given file. """
+
+    return setPoolAttribute( fileName  = fileName,
+                             contName  = f"TTree={treeName}",
+                             attrName  = "TREE_MAX_SIZE",
+                             attrValue = maxSize )
+
 def setContainerSplitLevel( fileName = None, treeName = None, splitLvl = None ):
     """ Convenience method for setting the split level for a tree in a given file. """
 

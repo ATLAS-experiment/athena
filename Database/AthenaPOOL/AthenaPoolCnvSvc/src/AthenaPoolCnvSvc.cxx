@@ -115,7 +115,7 @@ StatusCode AthenaPoolCnvSvc::initialize() {
 //______________________________________________________________________________
 StatusCode AthenaPoolCnvSvc::io_reinit() {
    ATH_MSG_DEBUG("I/O reinitialization...");
-   m_contextAttr.clear();
+   m_processedContextIds.clear();
    return(StatusCode::SUCCESS);
 }
 //______________________________________________________________________________
@@ -287,48 +287,10 @@ StatusCode AthenaPoolCnvSvc::connectOutput(const std::string& outputConnectionSp
       ATH_MSG_ERROR("connectOutput - caught exception: " << e.what());
       return(StatusCode::FAILURE);
    }
-
    std::unique_lock<std::mutex> lock(m_mutex);
-   if (std::find(m_contextAttr.begin(), m_contextAttr.end(), contextId) == m_contextAttr.end()) {
-      std::size_t merge = outputConnection.find("?pmerge="); // Used to remove trailing TMemFile
-      int flush = m_numberEventsPerWrite.value();
-      m_contextAttr.push_back(contextId);
-      // Setting default 'TREE_MAX_SIZE' for ROOT to 1024 GB to avoid file chains.
-      std::vector<std::string> maxFileSize;
-      maxFileSize.push_back("TREE_MAX_SIZE");
-      maxFileSize.push_back("1099511627776L");
-      m_domainAttr.emplace_back(std::move(maxFileSize));
+   if (m_processedContextIds.insert(contextId).second) {
       // Extracting OUTPUT POOL ItechnologySpecificAttributes for Domain, Database and Container.
       extractPoolAttributes(m_poolAttr, &m_containerAttr, &m_databaseAttr, &m_domainAttr);
-      //FIXME
-      for (auto& dbAttrEntry : m_databaseAttr) {
-         const std::string& opt = dbAttrEntry[0];
-         std::string& data = dbAttrEntry[1];
-         const std::string& file = dbAttrEntry[2];
-         const std::string& cont = dbAttrEntry[3];
-         std::size_t equal = cont.find('='); // Used to remove leading "TTree="
-         if (equal == std::string::npos) equal = 0;
-         else equal++;
-         const auto& prefix = m_containerPrefixProp.value();
-         std::size_t colon = prefix.find(':');
-         if (colon == std::string::npos) colon = 0; // Used to remove leading technology
-         else colon++;
-         const auto defaultContName = (tech == pool::ROOTRNTUPLE_StorageType.type()) ? APRDefaults::RNTupleNames::EventData : APRDefaults::TTreeNames::EventData;
-         const auto& strProp = (prefix == "Default") ? defaultContName : prefix;
-         if (merge != std::string::npos && opt == "TREE_AUTO_FLUSH" && 0 == outputConnection.compare(0, merge, file) &&cont.compare(equal, std::string::npos, strProp, colon) == 0 && data != "int" && data != "DbLonglong" && data != "double" && data != "string") {
-            flush = atoi(data.c_str());
-            if (flush < 0 && m_numberEventsPerWrite.value() > 0) {
-               flush = m_numberEventsPerWrite.value();
-               data = std::to_string(flush);
-            } else if (flush > 0 && flush < m_numberEventsPerWrite.value()) {
-               flush = flush * (int(static_cast<float>(m_numberEventsPerWrite.value()) / flush - 0.5) + 1);
-            }
-         }
-      }
-      if (merge != std::string::npos) {
-         ATH_MSG_INFO("connectOutput setting auto write for: " << outputConnection << " to " << flush << " events");
-         m_fileFlushSetting[outputConnection.substr(0, merge)] = flush;
-      }
    }
    if (!processPoolAttributes(m_domainAttr, outputConnection, contextId).isSuccess()) {
       ATH_MSG_DEBUG("connectOutput failed process POOL domain attributes.");
@@ -362,13 +324,6 @@ StatusCode AthenaPoolCnvSvc::commitOutput(const std::string& outputConnectionSpe
    if (!processPoolAttributes(m_containerAttr, outputConnection, contextId).isSuccess()) {
       ATH_MSG_DEBUG("commitOutput failed process POOL container attributes.");
    }
-   std::size_t merge = outputConnection.find("?pmerge="); // Used to remove trailing TMemFile
-   const std::string baseOutputConnection = outputConnection.substr(0, merge);
-   m_fileCommitCounter[baseOutputConnection]++;
-   if (merge != std::string::npos && m_fileFlushSetting[baseOutputConnection] > 0 && m_fileCommitCounter[baseOutputConnection] % m_fileFlushSetting[baseOutputConnection] == 0) {
-      doCommit = true;
-      ATH_MSG_DEBUG("commitOutput sending data.");
-   }
 
    // lock.unlock();  //MN: first need to make commitCache slot-specific
    try {
@@ -387,7 +342,7 @@ StatusCode AthenaPoolCnvSvc::commitOutput(const std::string& outputConnectionSpe
       ATH_MSG_ERROR("commitOutput - caught exception: " << e.what());
       return(StatusCode::FAILURE);
    }
-   if (!this->cleanUp(baseOutputConnection).isSuccess()) {
+   if (!this->cleanUp(outputConnection).isSuccess()) {
       ATH_MSG_ERROR("commitOutput FAILED to cleanup converters.");
       return(StatusCode::FAILURE);
    }
@@ -517,17 +472,12 @@ StatusCode AthenaPoolCnvSvc::decodeOutputSpec(std::string& fileSpec, int& output
       outputTech = pool::ROOTRNTUPLE_StorageType.type();
       fileSpec.erase(0, 12);
    } else if (outputTech == 0) {
-      // Extract the file name
-      std::string fileName{fileSpec};
-      if (auto pos = fileSpec.find("?pmerge="); pos != std::string::npos) {
-         fileName = fileSpec.substr(0, pos);
-      }
       // Find the appropriate event data technology for this file
       // This will be used for event data and its data header
       // First we look for an exact file name match
       // If that fails, we look for a wildcard ("*") match
       // If that also fails, we use the default value from PoolSvc
-      if (auto it = m_storageTechMap.find(fileName); it != m_storageTechMap.end()) {
+      if (auto it = m_storageTechMap.find(fileSpec); it != m_storageTechMap.end()) {
          outputTech = it->second;
       } else if (it = m_storageTechMap.find("*"); it != m_storageTechMap.end()) {
          outputTech = it->second;

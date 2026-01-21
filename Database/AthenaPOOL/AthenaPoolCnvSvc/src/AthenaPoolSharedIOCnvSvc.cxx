@@ -391,6 +391,16 @@ StatusCode AthenaPoolSharedIOCnvSvc::commitOutput(const std::string& outputConne
          outputConnection += m_streamPortString.value();
       }
    }
+   std::size_t merge = outputConnection.find("?pmerge="); // Used to remove trailing TMemFile
+   const std::string baseOutputConnection = outputConnection.substr(0, merge);
+   m_fileCommitCounter[baseOutputConnection]++;
+   if (m_parallelCompression &&
+      m_fileFlushSetting.value().contains(baseOutputConnection) &&
+      m_fileFlushSetting[baseOutputConnection] > 0 &&
+      m_fileCommitCounter[baseOutputConnection] % m_fileFlushSetting[baseOutputConnection] == 0) {
+      doCommit = true;
+      ATH_MSG_DEBUG("commitOutput sending data.");
+   }
    StatusCode status = AthenaPoolCnvSvc::commitOutput(outputConnection, doCommit);
    for (auto& [ptr, rootType] : commitCache) {
       rootType.Destruct(ptr);
@@ -652,6 +662,28 @@ StatusCode AthenaPoolSharedIOCnvSvc::createAddress(long svcType,
 		const std::string& refAddress,
 		IOpaqueAddress*& refpAddress) {
    return AthenaPoolCnvSvc::createAddress(svcType, clid, refAddress, refpAddress);
+}
+//__________________________________________________________________________
+StatusCode AthenaPoolSharedIOCnvSvc::decodeOutputSpec(std::string& fileSpec, int& outputTech) const {
+    auto pos = fileSpec.find("?pmerge=");
+    std::string suffix;
+    // Remove trailing TMemFile for decoding
+    if (pos != std::string::npos) {
+      suffix = fileSpec.substr(pos);
+      fileSpec.erase(pos);
+    }
+    StatusCode sc = AthenaPoolCnvSvc::decodeOutputSpec(fileSpec, outputTech);
+    // Append back the suffix
+    if (!suffix.empty()) {
+        fileSpec += suffix;
+    }
+    return sc;
+}
+//______________________________________________________________________________
+StatusCode AthenaPoolSharedIOCnvSvc::cleanUp(const std::string& connection) {
+   auto pos = connection.find("?pmerge=");
+   std::string conn = (pos == std::string::npos) ? connection : connection.substr(0, pos);
+   return AthenaPoolCnvSvc::cleanUp(conn);
 }
 //______________________________________________________________________________
 StatusCode AthenaPoolSharedIOCnvSvc::makeServer(int num) {
