@@ -148,7 +148,22 @@ namespace Analysis {
             vertex_index.push_back(vtx_i);
             vertexLink.push_back(ElementLink<xAOD::VertexContainer>(*verteces, vtx_i));
             
+          }else{
+            d0.push_back(-99);
+            z0SinTheta.push_back(-99);
+            sigmad0.push_back(-99);
+            sigmaz0SinTheta.push_back(-99);
+            vertex_index.push_back(vtx_i);
+            vertexLink.push_back(ElementLink<xAOD::VertexContainer>(*verteces, vtx_i));
           }
+        }else {
+          ATH_MSG_WARNING( "failed to estimate track impact parameter, using dummy values" );
+          d0.push_back(-99);
+          z0SinTheta.push_back(-99);
+          sigmad0.push_back(-99);
+          sigmaz0SinTheta.push_back(-99);
+          vertex_index.push_back(vtx_i);
+          vertexLink.push_back(ElementLink<xAOD::VertexContainer>(*verteces, vtx_i));
         }
         // some other parameters we have go get directly from the
         // extrapolator. This is more or less copied from:

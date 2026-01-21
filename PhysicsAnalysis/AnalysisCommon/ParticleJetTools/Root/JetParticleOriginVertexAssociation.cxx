@@ -28,8 +28,6 @@ StatusCode JetParticleOriginVertexAssociation::initialize() {
 
   m_dzCut_bool = (m_dzCut == m_dzCutMax);
 
-  
-  //if (m_dzCut_bool){
   CHECK( m_dec_d0.initialize(m_dzCut_bool) );
   CHECK( m_dec_z0.initialize(m_dzCut_bool) );
   CHECK( m_dec_d0_sigma.initialize(m_dzCut_bool) );
@@ -41,7 +39,6 @@ StatusCode JetParticleOriginVertexAssociation::initialize() {
   CHECK( m_dec_trk_origin_vtx_idx.initialize(m_dzCut_bool) );  
   CHECK( m_outDuplicatedTrackContainerKey.initialize(m_dzCut_bool) );
   CHECK( m_readDuplicatedTrackContainerKey.initialize(!m_dzCut_bool) );
-  //}
 
   return StatusCode::SUCCESS;
 }
@@ -75,38 +72,12 @@ struct MatchInfo {
   // Vector<float> variables
   std::vector<float> trackDisplacement;
   std::vector<float> trackMomentum;
-  /*
-  // std::variant allows multiple types
-  using VarType = std::variant<float, int, char, std::vector<float>>;
-  std::map<std::string, VarType> values;
-  */
+
 };
-// function to pair the z0 vector and vertex links together to sort them in ascending order of abs(z0)
-std::vector<std::pair<float, ElementLink<xAOD::VertexContainer>>>
-combined_sorted(const std::vector<float>& z0, const std::vector<ElementLink<xAOD::VertexContainer>>& vertexLink){
-  std::vector<std::pair<float,ElementLink<xAOD::VertexContainer>>> combined;
-  for (size_t i = 0; i < z0.size(); i++) {
-    combined.emplace_back(z0[i], vertexLink[i]);
-  }
 
-  std::sort(combined.begin(), combined.end(),
-            [](auto &a, auto &b) { return std::abs(a.first) < std::abs(b.first); });
-
-  return combined;
-}
 
 const std::vector<std::vector<ElementLink<xAOD::IParticleContainer> > >*
 JetParticleOriginVertexAssociation::match(const xAOD::JetContainer& jets, const xAOD::IParticleContainer& parts) const {
-    std::vector<std::string> perVertexVarNames = {
-      "d0",
-      "z0SinTheta",
-      "d0Uncertainty",
-      "z0SinThetaUncertainty"
-      "trackDisplacement",
-      "trackMomentum",
-      "invalidIp"
-      "TrkOriginVtx_idx"
-    };
     //Get the vertex associated to each track by reading the decoration
     const SG::AuxElement::ConstAccessor<std::vector<ElementLink<xAOD::VertexContainer>>> trkOrigin("btagIp_ByVertex_TrkOriginVtx");
     const SG::AuxElement::ConstAccessor<std::vector<float>> z0SinTheta("btagIp_ByVertex_z0SinTheta");
@@ -140,8 +111,6 @@ JetParticleOriginVertexAssociation::match(const xAOD::JetContainer& jets, const 
           const std::vector<float>& z0SinTheta_vec = z0SinTheta(*part); // sort this 
           // check if the vectors are not empty
           if(z0SinTheta_vec.empty()) continue;
-          // Combine the 2 vectors and sort them according to abs(z0)
-          //const std::vector<std::pair<float,ElementLink<xAOD::VertexContainer>>>& z0SinTheta_vertexLink_vec = combined_sorted(z0SinTheta_vec, vertexLink_vec);
           // clear the vector
           matchjet_vtx.clear();
           // loop through vertices
@@ -200,16 +169,6 @@ JetParticleOriginVertexAssociation::match(const xAOD::JetContainer& jets, const 
             info.trackMomentum = acc_track_mom(*part).at(iVtx);
             info.invalidIp = acc_invalid(*part).at(iVtx);
             info.TrkOriginVtx_idx = acc_TrkOriginVtx_idx(*part).at(iVtx);
-            // loop over all per-vertex variables
-            /*
-            for (const auto& varName : perVertexVarNames) {
-              SG::AuxElement::ConstAccessor<std::vector<float>> acc("btagIp_ByVertex_" + varName);
-              const std::vector<float>& vec = acc(*part);
-              if (iVtx < vec.size()) {
-                info.values[varName] = vec.at(iVtx);
-              }
-            }
-            */
             matchjet_vtx.push_back(std::move(info));          
             
           }
@@ -225,7 +184,6 @@ JetParticleOriginVertexAssociation::match(const xAOD::JetContainer& jets, const 
             for (const auto& match: matchjet_vtx){
               // for the first jet associated with the track save it to the original track collection
               if (count_trks == 1){ // add track IP value to original trk collection for the first jet that is associated with
-
                 decor_d0(*trk) = match.d0;
                 decor_z0(*trk) = match.z0SinTheta;
                 decor_d0_sigma(*trk) = match.d0Uncertainty;
@@ -277,11 +235,6 @@ JetParticleOriginVertexAssociation::match(const xAOD::JetContainer& jets, const 
                         << m_outDuplicatedTrackContainerKey.key());
           return nullptr;
         }
-        
-        //ATH_CHECK( evtStore()->record(std::move(DuplicatedTrks), "DuplicatedTrks") );
-        //ATH_CHECK( evtStore()->record(std::move(DuplicatedTrksAux), "DuplicatedTrksAux") );
-        //StatusCode sc = evtStore()->record(DuplicatedTrks.release(), "DuplicatedTrks");
-        //sc = evtStore()->record(DuplicatedTrksAux.release(), "DuplicatedTrksAux");
     } else{
       SG::ReadHandle< xAOD::TrackParticleContainer > ExistingDuplicatedTrksHandle = SG::makeHandle< xAOD::TrackParticleContainer >(m_readDuplicatedTrackContainerKey);
     
@@ -295,8 +248,6 @@ JetParticleOriginVertexAssociation::match(const xAOD::JetContainer& jets, const 
         const std::vector<float>& z0SinTheta_vec = z0SinTheta(*part); // sort this 
         // check if the vectors are not empty
         if(z0SinTheta_vec.empty()) continue;
-        // Combine the 2 vectors and sort them according to abs(z0)
-        //const std::vector<std::pair<float,ElementLink<xAOD::VertexContainer>>>& z0SinTheta_vertexLink_vec = combined_sorted(z0SinTheta_vec, vertexLink_vec);
         // clear the vector
         matchjet_vtx.clear();
         // loop through vertices

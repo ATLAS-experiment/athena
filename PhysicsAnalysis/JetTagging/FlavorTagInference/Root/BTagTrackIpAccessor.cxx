@@ -77,27 +77,9 @@ BTagSignedIP BTagTrackIpAccessor::getSignedIp(const xAOD::TrackParticle &track, 
 double BTagTrackIpAccessor::d0(const xAOD::TrackParticle &track) const {
   const Amg::Vector3D track_displacement = get_vector3d(m_track_displacement(track));
   const Amg::Vector3D track_momentum = get_vector3d(m_track_momentum(track));
-  static const SG::AuxElement::ConstAccessor<float> acc_d0("btagIp_ByVertex1_d0");
-  // static const SG::AuxElement::ConstAccessor<float> acc_d0sigma("btagIp_ByVertex1_d0Uncertainty");
-  // static const SG::AuxElement::ConstAccessor<std::vector<float>> acc_track_pos("btagIp_ByVertex1_trackDisplacement");
-  // std::cout << "Mario repeating" <<"\n" << std::endl;
-  // std::cout << "Mario displacement: " << track_displacement[Amg::x] << "\n" << std::endl;
-  // std::cout << "Mario d0 sigma: " << m_ip_d0_sigma(track) << "\n" << std::endl;
-  // std::cout << "Mario see d0: " << std::copysign(std::hypot(track_displacement[Amg::x], track_displacement[Amg::y]),
-  //   track_momentum.cross(track_displacement)[Amg::z]) << "\n" << std::endl;
-  if (acc_d0.isAvailable(track)) {
-    // std::cout << "Mario ByVertex"<<"\n" << std::endl;
-    // std::cout << "Mario displacement: " << acc_track_pos(track)[Amg::x]  << " " << track_displacement[Amg::x] << "\n" << std::endl;
-    // std::cout << "Mario d0 sigma: " << acc_d0sigma(track)  << " " << m_ip_d0_sigma(track) << "\n" << std::endl;
-    // std::cout << "Mario see d0: " << acc_d0(track) << " " << std::copysign(std::hypot(track_displacement[Amg::x], track_displacement[Amg::y]),
-    //   track_momentum.cross(track_displacement)[Amg::z]) << std::endl;
-    return acc_d0(track);
-  }else{
-    return std::copysign(
-        std::hypot(track_displacement[Amg::x], track_displacement[Amg::y]),
-        track_momentum.cross(track_displacement)[Amg::z]);
-  }
-  
+  return std::copysign(
+    std::hypot(track_displacement[Amg::x], track_displacement[Amg::y]),
+    track_momentum.cross(track_displacement)[Amg::z]);
 }
 double BTagTrackIpAccessor::d0Uncertainty(const xAOD::TrackParticle &track)
   const {
@@ -106,16 +88,8 @@ double BTagTrackIpAccessor::d0Uncertainty(const xAOD::TrackParticle &track)
 double BTagTrackIpAccessor::z0SinTheta(const xAOD::TrackParticle &track) const {
   const Amg::Vector3D track_displacement = get_vector3d(m_track_displacement(track));
   const Amg::Vector3D track_momentum = get_vector3d(m_track_momentum(track));
-  static const SG::AuxElement::ConstAccessor<float> acc_z0("btagIp_ByVertex1_z0SinTheta");
-  if (acc_z0.isAvailable(track)) {
-    // std::cout << "Mario see z0: " << acc_z0(track) << " " << track_displacement[Amg::z] * std::sqrt(
-    //   1 - std::pow(track_momentum[Amg::z],2) / track_momentum.squaredNorm()) << std::endl;
-    return acc_z0(track);
-  }else{
-    return track_displacement[Amg::z] * std::sqrt(
-      1 - std::pow(track_momentum[Amg::z],2) / track_momentum.squaredNorm());
-  }
-  
+  return track_displacement[Amg::z] * std::sqrt(
+    1 - std::pow(track_momentum[Amg::z],2) / track_momentum.squaredNorm());
 }
 double BTagTrackIpAccessor::z0SinThetaUncertainty(const xAOD::TrackParticle &track) const {
   return m_ip_z0_sigma(track);

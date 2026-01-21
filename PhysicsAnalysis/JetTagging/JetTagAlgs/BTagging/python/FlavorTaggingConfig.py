@@ -224,17 +224,17 @@ def JetBTagginglessByVertexAlgCfg(
             ))
             
             dz_suffix = '_' + str(dzCut) + '_' + 'inclusive_'
-            
-            # Remap variables
-            args["remapping"] = {'BTagTrackToJetAssociator':'TracksForBTagging' + dz_suffix + "assoc",
-                                    'GN2v01_pb': 'GN2v01' + dz_suffix + "pb",
-                                    'GN2v01_pc': 'GN2v01' + dz_suffix + "pc",
-                                    'GN2v01_pu': 'GN2v01' + dz_suffix + "pu",
-                                    'GN2v01_ptau': 'GN2v01' + dz_suffix + "ptau",
-                                    'GN2v01_TrackOrigin': 'GN2v01' + dz_suffix + 'TrackOrigin',
-                                    'GN2v01_VertexIndex': 'GN2v01' + dz_suffix + 'VertexIndex',
-                                    'GN2v01_TrackLinks': 'GN2v01' + dz_suffix + 'TrackLinks',
-                                    'btagIp_': 'btagIp_ByVertex1_'}
+            base = dict(networks.get('remapping', {}))
+            base.update({'BTagTrackToJetAssociator':'TracksForBTagging' + dz_suffix + "assoc",
+                        'GN2v01_pb': 'GN2v01' + dz_suffix + "pb",
+                        'GN2v01_pc': 'GN2v01' + dz_suffix + "pc",
+                        'GN2v01_pu': 'GN2v01' + dz_suffix + "pu",
+                        'GN2v01_ptau': 'GN2v01' + dz_suffix + "ptau",
+                        'GN2v01_TrackOrigin': 'GN2v01' + dz_suffix + 'TrackOrigin',
+                        'GN2v01_VertexIndex': 'GN2v01' + dz_suffix + 'VertexIndex',
+                        'GN2v01_TrackLinks': 'GN2v01' + dz_suffix + 'TrackLinks',
+                        'btagIp_': 'btagIp_ByVertex1_',})
+            args["remapping"] = base
 
             if '/GN2v01/' in dirname:
                 args['tag_requirements'] = {'nonzeroTracks'}
