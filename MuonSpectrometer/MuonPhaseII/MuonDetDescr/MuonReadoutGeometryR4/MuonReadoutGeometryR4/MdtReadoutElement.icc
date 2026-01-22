@@ -1,17 +1,18 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef MUONREADOUTGEOMETRYR4_MDTREADOUTELEMENT_ICC
 #define MUONREADOUTGEOMETRYR4_MDTREADOUTELEMENT_ICC
 
 #include <GaudiKernel/SystemOfUnits.h>
+#include <cassert>
 namespace ActsTrk{
     template <> inline Amg::Transform3D 
         TransformCacheDetEle<MuonGMR4::MdtReadoutElement>::fetchTransform(const DetectorAlignStore* store) const {
             using RE = MuonGMR4::MdtReadoutElement;
-            static const unsigned int layerTube = RE::tubeNumber(RE::measurementHash(1, 0));
+            const unsigned layerTube = m_parent->tubeNumber(RE::measurementHash(1, 0));
             /// Check whether the hash represents a tube or the central layer
-            const unsigned int tubeNum = m_parent->tubeNumber(hash());
+            const unsigned tubeNum = m_parent->tubeNumber(hash());
             if (tubeNum == layerTube) {
                 const Amg::Translation3D toCenter{0.5*m_parent->moduleHeight() * Amg::Vector3D::UnitY()};
                 return m_parent->toStation(store) * m_parent->toChamberLayer(hash()) *
@@ -23,9 +24,9 @@ namespace ActsTrk{
      template <> inline Identifier
         TransformCacheDetEle<MuonGMR4::MdtReadoutElement>::identify() const {
             using RE = MuonGMR4::MdtReadoutElement;
-            static const unsigned int layerTube = RE::tubeNumber(RE::measurementHash(0,0));
+            const unsigned layerTube = m_parent->tubeNumber(RE::measurementHash(1, 0));
             /// Check whether the hash represents a tube or the central layer
-            const unsigned int tubeNum = m_parent->tubeNumber(hash());
+            const unsigned tubeNum = m_parent->tubeNumber(hash());
             if (tubeNum == layerTube) {
                 return m_parent->measurementId(RE::measurementHash(RE::layerNumber(hash()) +1,
                                                                     m_parent->numTubesInLay() +1));
@@ -35,9 +36,9 @@ namespace ActsTrk{
 }
 
 namespace MuonGMR4 {
-inline unsigned int MdtReadoutElement::multilayer() const { return m_stML; }
-inline unsigned int MdtReadoutElement::numLayers() const { return m_pars.tubeLayers.size(); }
-inline unsigned int MdtReadoutElement::numTubesInLay() const { return m_pars.tubeLayers.empty() ? 0 : m_pars.tubeLayers[0]->nTubes(); }
+inline unsigned MdtReadoutElement::multilayer() const { return m_stML; }
+inline unsigned MdtReadoutElement::numLayers() const { return m_pars.tubeLayers.size(); }
+inline unsigned MdtReadoutElement::numTubesInLay() const { return m_pars.tubeLayers.empty() ? 0 : m_pars.tubeLayers[0]->nTubes(); }
 inline double MdtReadoutElement::innerTubeRadius() const {return m_pars.tubeInnerRad;}
 inline double MdtReadoutElement::tubeRadius() const {return innerTubeRadius() + m_pars.tubeWall;}
 inline double MdtReadoutElement::tubePitch() const { return m_pars.tubePitch;}
@@ -67,29 +68,20 @@ inline IdentifierHash MdtReadoutElement::measurementHash(const Identifier& measI
     return hash;
 }
 inline IdentifierHash MdtReadoutElement::layerHash(const Identifier& measId) const {
-    if (idHelperSvc()->detElId(measId) != identify()) {
-        ATH_MSG_WARNING("The measurement "
-                        << idHelperSvc()->toString(measId)
-                        << " picks the wrong readout element "
-                        << idHelperSvc()->toStringDetEl(identify()));
-    }
-    IdentifierHash hash = measurementHash(m_idHelper.tubeLayer(measId), 0);
-    ATH_MSG_VERBOSE("Translate measurement identifier "
-                    << idHelperSvc()->toString(measId)
-                    << " to layer hash hash " << static_cast<int>(hash));
-    return hash;
+    return layerHash(measurementHash(measId));
 }
-inline unsigned int MdtReadoutElement::tubeNumber(const IdentifierHash& hash) {
-    return (static_cast<unsigned int>(hash) >> 16);
+inline unsigned MdtReadoutElement::tubeNumber(const IdentifierHash& hash) {
+    return (static_cast<unsigned>(hash) >> 3) - 1u;
 }
 /// Transforms the identifier hash into a layer number ranging from
 /// (0-numLayers()-1)
-inline unsigned int MdtReadoutElement::layerNumber(const IdentifierHash& hash) {
-    constexpr uint16_t layMask = (~0);
-    return static_cast<unsigned int>(hash) & layMask;
+inline unsigned MdtReadoutElement::layerNumber(const IdentifierHash& hash) {
+    constexpr unsigned layMask = 0b111;
+    return static_cast<unsigned>(hash) & layMask;
 }
-inline IdentifierHash MdtReadoutElement::measurementHash(unsigned int layer, unsigned int tube) {
-    return IdentifierHash{( (tube-1) << 16) | (layer-1)};
+inline IdentifierHash MdtReadoutElement::measurementHash(unsigned layer, unsigned tube) {
+    assert(layer<=4);
+    return IdentifierHash{( tube << 3) | (layer-1)};
 }
 inline IdentifierHash MdtReadoutElement::layerHash(const IdentifierHash& measHash) {
     return measurementHash(layerNumber(measHash) + 1 , 0);

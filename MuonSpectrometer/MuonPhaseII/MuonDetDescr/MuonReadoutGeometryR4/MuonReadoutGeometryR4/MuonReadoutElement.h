@@ -227,7 +227,6 @@ class MuonReadoutElement : public GeoVDetectorElement, public AthMessaging, publ
      *                 y-axis: Points along the edge which is parallel to the eta sensors
      *                 z-axis: Points along towards the next eta sensor */
     const Amg::Transform3D& toStation(const ActsTrk::DetectorAlignStore* alignStore) const;
-      
     /** @brief Constructs the TransformDetEleCache associated with the hash of the 
      *         given Mdt tube or strip layer. The method is templated over the specific
     *         implementation of the readout element as the `TransformCacheDetEle` implements
@@ -249,26 +248,34 @@ class MuonReadoutElement : public GeoVDetectorElement, public AthMessaging, publ
      *  @param lBounds: Bounds describing the rectangle or trapezoidal surface's dimensions */
     StatusCode planeSurfaceFactory(const IdentifierHash& hash, std::shared_ptr<const Acts::PlanarBounds> pBounds);
 #endif     
-     /// Returns the hash that is associated with the surface cache holding the transformation that is
-     /// placing the ReadoutElement inside the ATLAS coordinate system.
+     /** @brief Returns the hash that is associated with the surface cache holding the transformation that is
+                placing the ReadoutElement inside the ATLAS coordinate system. */
      static IdentifierHash geoTransformHash();
    private:
+    /** @brief Returns the pointer to the TransformCache associated with this measurement hash
+     *  @param measHash: Measurement hash for which the cache shall be returned */
+    const ActsTrk::TransformCache* transformCache(const IdentifierHash& measHash) const;
+    /** @brief IdHelperSvc for Identifier manipulation */
     ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{"Muon::MuonIdHelperSvc/MuonIdHelperSvc", "MuonReadoutElement"};
 
     const defineArgs m_args{};
-    /// Cache of the detector element hash
+    /** @brief Cache of the detector element hash */
     IdentifierHash m_detElHash{};
-    /// Cache the chamber index of the Identifier
-    Muon::MuonStationIndex::ChIndex m_chIdx{Muon::MuonStationIndex::ChIndex::ChUnknown};
-    /// Cache the station name of the identifier
+    /** @brief  Cache the station name of the identifier */
     int m_stName{-1};
-    /// Cache the station eta of the identifier
+    /** @brief Cache the station eta of the identifier */
     int m_stEta{-1};
-    /// Cache the station phi of the identifier
+    /** @brief Cache the station phi of the identifier */
     int m_stPhi{-1};
-    /// Cache all local to global transformations
-    using TransformCacheMap = std::unordered_map<IdentifierHash, std::unique_ptr<ActsTrk::TransformCache>>;
-    TransformCacheMap m_localToGlobalCaches;
+    /** @brief The transform caches corresponding to the surfaces of the tubes and gas gap planes */
+    using TransformCacheMap = std::vector<std::unique_ptr<ActsTrk::TransformCache>>;
+    TransformCacheMap m_localToGlobalCaches{};
+    /** @brief Cache of the transform of the readout element itself */
+    std::unique_ptr<ActsTrk::TransformCache> m_centralTrfCache{};
+    // ActsTrk::TransformCacheDetEle<MuonReadoutElement> m_centralTrfCache{geoTransformHash(), this};
+    /** @brief Cache the chamber index of the Identifier */
+    Muon::MuonStationIndex::ChIndex m_chIdx{Muon::MuonStationIndex::ChIndex::ChUnknown};   
+
 #ifndef SIMULATIONBASE
     ///Cache of all associated surfaces
     ActsTrk::SurfaceCacheSet m_surfaces;

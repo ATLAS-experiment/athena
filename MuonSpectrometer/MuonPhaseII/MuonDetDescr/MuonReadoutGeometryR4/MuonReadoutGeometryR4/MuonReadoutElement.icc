@@ -55,16 +55,40 @@ inline const SpectrometerSector* MuonReadoutElement::msSector() const { return m
 inline const Chamber* MuonReadoutElement::chamber() const { return m_chambLink; }
 #endif
 
+inline const Amg::Transform3D& MuonReadoutElement::localToGlobalTransform(const ActsTrk::GeometryContext& ctx, 
+                                                                   const IdentifierHash& hash) const {
+    const ActsTrk::TransformCache* cache = transformCache(hash);
+    if (cache) {
+        return cache->getTransform(ctx.getStore(detectorType()).get());
+    }
+    ATH_MSG_FATAL(__FILE__<<":"<<__LINE__<<" "<<__func__<<"() -- "
+                <<idHelperSvc()->toStringDetEl(identify())<<" hash: "<<hash<<" is unknown.");
+    static const Amg::Transform3D dummyTrf{Amg::Transform3D::Identity()};
+    return dummyTrf;
+}
+
+inline const ActsTrk::TransformCache* MuonReadoutElement::transformCache(const IdentifierHash& measHash) const {
+    if (measHash == geoTransformHash()) {
+        return m_centralTrfCache.get();
+    }
+    return m_localToGlobalCaches.size() > static_cast<unsigned>(measHash) ? 
+           m_localToGlobalCaches[measHash].get() : nullptr;
+}
 template<class MuonImpl>
-StatusCode MuonReadoutElement::insertTransform(const IdentifierHash& hash) {    
-    TransformCacheMap::const_iterator cache = m_localToGlobalCaches.find(hash);
-    if (cache != m_localToGlobalCaches.end()) {
+StatusCode MuonReadoutElement::insertTransform(const IdentifierHash& hash) {
+    const unsigned idx = static_cast<unsigned>(hash);
+    ATH_MSG_VERBOSE(__FILE__<<":"<<__LINE__<<" - "<<idHelperSvc()->toStringDetEl(identify())
+                 <<" Insert new transform cache: "<<idx);
+
+    if (m_localToGlobalCaches.size() <= idx) {
+        m_localToGlobalCaches.resize(idx+1);
+    }
+    if (m_localToGlobalCaches[idx]) {
         ATH_MSG_FATAL(__FILE__<<":"<<__LINE__<<" - "<<idHelperSvc()->toStringDetEl(identify())
                    <<" has already a transformation cached for hash "<<hash);
         return StatusCode::FAILURE;
     }
-    auto newCache = std::make_unique<ActsTrk::TransformCacheDetEle<MuonImpl>>(hash, static_cast<MuonImpl*>(this));
-    m_localToGlobalCaches.insert(std::make_pair(hash, std::move(newCache)));
+    m_localToGlobalCaches[idx] = std::make_unique<ActsTrk::TransformCacheDetEle<MuonImpl>>(hash, static_cast<MuonImpl*>(this));
     return StatusCode::SUCCESS;
 }
 
