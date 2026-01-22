@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 #
 # @author Joseph Lambert
 
@@ -14,6 +14,7 @@ from AnalysisAlgorithmsConfig.ConfigSequence import ConfigSequence
 from AnalysisAlgorithmsConfig.ConfigFactory import ConfigFactory
 from AnalysisAlgorithmsConfig.ConfigAccumulator import deprecationWarningCategory
 
+from AnaAlgorithm.DualUseConfig import isAthena
 from AnaAlgorithm.Logging import logging
 logCPAlgTextCfg = logging.getLogger('CPAlgTextCfg')
 
@@ -365,11 +366,7 @@ def makeSequence(configPath, *, flags=None, algSeq=None, noSystematics=None, dat
     logCPAlgTextCfg.info("ConfigBlocks and their configuration:")
     configSeq.printOptions()
 
-    from AnaAlgorithm.DualUseConfig import isAthena, useComponentAccumulator
-    if isAthena and useComponentAccumulator:
-        return configAccumulator.CA
-    else:
-        return None
+    return configAccumulator.CA if isAthena else None
 
 
 # Combine configuration files

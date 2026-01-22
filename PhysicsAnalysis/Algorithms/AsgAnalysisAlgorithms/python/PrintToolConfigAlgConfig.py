@@ -1,8 +1,8 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # AnaAlgorithm import(s):
 from AnalysisAlgorithmsConfig.ConfigBlock import ConfigBlock
-from AnaAlgorithm.DualUseConfig import isAthena, useComponentAccumulator
+from AnaAlgorithm.DualUseConfig import isAthena
 
 from pathlib import Path
 
@@ -41,7 +41,7 @@ class PrintToolConfigAlgBlock(ConfigBlock):
         Args:
             config: Configuration object used to create the algorithm.
         """
-        if isAthena and useComponentAccumulator:
+        if isAthena:
             # we leave the implementation for Athena/AthAnalysis to a future MR
             # this will be based on https://gitlab.cern.ch/atlas/athena/-/merge_requests/77616
             return

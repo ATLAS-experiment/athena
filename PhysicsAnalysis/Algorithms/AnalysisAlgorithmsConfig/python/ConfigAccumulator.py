@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 import AnaAlgorithm.DualUseConfig as DualUseConfig
 from AthenaConfiguration.Enums import LHCPeriod, FlagEnum
@@ -249,22 +249,16 @@ class ConfigAccumulator :
         self._selectionNameExpr = re.compile ('[A-Za-z_][A-Za-z_0-9]+')
         self.setSourceName ('EventInfo', 'EventInfo')
         self._eventcutflow = {}
-
-        # If we are in an Athena environment with ComponentAccumulator configuration
-        # then the AlgSequence, which is Gaudi.AthSequencer, does not support '+=',
-        # and we in any case want to produce an output ComponentAccumulator
         self.CA = None
-        if DualUseConfig.useComponentAccumulator:
+
+        if DualUseConfig.isAthena:
             from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
             self.CA = ComponentAccumulator()
-            # if we have a component accumulator the user is not required to pass
-            # in a sequence, but if they do let's add it
-            if algSeq :
+            if algSeq is not None:
                 self.CA.addSequence(algSeq)
-        else :
+        else:
             if algSeq is None :
                 raise ValueError ("need to pass algSeq if not using ComponentAccumulator")
-
 
     def noSystematics (self) :
         """noSystematics flag used by CommonServices block"""
@@ -365,13 +359,14 @@ class ConfigAccumulator :
             else:
                 alg = DualUseConfig.createAlgorithm (type, name)
 
-            if DualUseConfig.useComponentAccumulator:
-                if self._algSeq :
+            if DualUseConfig.isAthena:
+                if self._algSeq is not None:
                     self.CA.addEventAlgo(alg,self._algSeq.name)
                 else :
                     self.CA.addEventAlgo(alg)
             else:
                 self._algSeq += alg
+
             self._algorithms[name] = alg
             self._currentAlg = alg
             return alg
@@ -393,8 +388,7 @@ class ConfigAccumulator :
             # Avoid importing AthenaCommon.AppMgr in a CA Athena job
             # as it modifies Gaudi behaviour
             if DualUseConfig.isAthena:
-                if DualUseConfig.useComponentAccumulator:
-                    self.CA.addService(service)
+                self.CA.addService(service)
             else:
                 # We're not, so let's remember this as a "normal" algorithm:
                 self._algSeq += service
@@ -417,8 +411,7 @@ class ConfigAccumulator :
             # Avoid importing AthenaCommon.AppMgr in a CA Athena job
             # as it modifies Gaudi behaviour
             if DualUseConfig.isAthena:
-                if DualUseConfig.useComponentAccumulator:
-                    self.CA.addPublicTool(tool)
+                self.CA.addPublicTool(tool)
             else:
                 # We're not, so let's remember this as a "normal" algorithm:
                 self._algSeq += tool
