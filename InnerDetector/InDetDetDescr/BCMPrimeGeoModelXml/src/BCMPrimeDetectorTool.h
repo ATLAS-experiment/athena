@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef BCMPRIMEGEOMODELXML_BCMPRIMEDETECTORTOOL_H
@@ -28,13 +28,9 @@ public:
   virtual ~BCMPrimeDetectorTool() = default;
   virtual StatusCode create() override final;
   virtual StatusCode clear() override final;
-  virtual StatusCode registerCallback ATLAS_NOT_THREAD_SAFE () override final;
-  virtual StatusCode align ATLAS_NOT_THREAD_SAFE (IOVSVC_CALLBACK_ARGS_P(I,keys)) override final;
 
 private:
   const InDetDD::BCMPrimeDetectorManager *m_detManager{};
-
-  Gaudi::Property<bool> m_alignable{this, "Alignable", false, ""};
 };
 
 #endif // BCMPRIMEGEOMODELXML_BCMPRIMEDETECTORTOOL_H

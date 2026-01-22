@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef BCMPRIMEREADOUTGEOMETRY_BCMPRIMEDETECTORMANAGER_H
@@ -9,12 +9,6 @@
 
 #include "GeoModelKernel/GeoVPhysVol.h"
 #include "GeoModelKernel/GeoVDetectorManager.h"
-
-#include "GeoModelKernel/GeoAlignableTransform.h"
-
-#include "AthenaKernel/IIOVSvc.h"
-
-class StoreGateSvc;
 
 /** @class BCMPrimeDetectorManager
 
@@ -40,9 +34,6 @@ namespace InDetDD {
 
         /** Add a Tree top: */
         void addTreeTop (const PVConstLink& treeTop);
-
-        void addAlignableTransform (int /*id*/, GeoAlignableTransform * /*transform*/, const GeoVPhysVol * /*child*/);
-        StatusCode align( IOVSVC_CALLBACK_ARGS ) const;
 
     private:
 
