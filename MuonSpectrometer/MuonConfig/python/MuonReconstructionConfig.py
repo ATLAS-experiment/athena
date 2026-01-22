@@ -100,6 +100,9 @@ def StandaloneMuonOutputCfg(flags):
 
     # Segments
     esd_items += ["Trk::SegmentCollection#NCB_TrackMuonSegments"]
+    ### Needs to be part of the output to fix the CombinedTest
+    ### Keep it here for now but fix it later in a follow up MR
+    ##esd_items += ["Trk::SegmentCollection#TrackMuonSegments"] 
 
     # Tracks
     esd_items += ["TrackCollection#MuonSpectrometerTracks"]
