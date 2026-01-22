@@ -7,7 +7,7 @@
 
 #include "GaudiKernel/ServiceHandle.h"
 #include "GeoModelUtilities/GeoModelTool.h"
-#include "HGTD_GeoModel/HGTD_GeoModelAthenaComps.h"
+#include "HGTD_GeoModelAthenaComps.h"
 #include "GeoModelInterfaces/IGeoDbTagSvc.h"
 #include "RDBAccessSvc/IRDBAccessSvc.h"
 

@@ -3,8 +3,8 @@
 */
 
 // includes
-#include "HGTD_GeoModel/HGTD_DetectorTool.h"
-#include "HGTD_GeoModel/HGTD_DetectorFactory.h"
+#include "HGTD_DetectorTool.h"
+#include "HGTD_DetectorFactory.h"
 #include "HGTD_ReadoutGeometry/HGTD_DetectorManager.h"
 #include "GeoModelUtilities/GeoModelExperiment.h"
 #include "StoreGate/StoreGateSvc.h"
