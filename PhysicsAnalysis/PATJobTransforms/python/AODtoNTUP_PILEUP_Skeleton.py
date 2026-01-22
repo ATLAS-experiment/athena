@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 import sys
 from PyJobTransforms.CommonRunArgsToFlags import commonRunArgsToFlags
@@ -13,8 +13,8 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 
 
 def PRWOutputCfg(flags, output_name="NTUP_PILEUP"):
-    from MuonConfig.MuonConfigUtils import setupHistSvcCfg
-    return setupHistSvcCfg(flags, outFile =flags.Output.HISTFileName, outStream =  output_name)
+    from MuonGeoModelTestR4.testGeoModel import setupHistSvcCfg # NB In main this function has moved to MuonConfig.MuonConfigUtils
+    return setupHistSvcCfg(flags, out_file = flags.Output.HISTFileName, out_stream = output_name)
 
 
 def PileupReweightingProviderCfg(flags, **kwargs):
