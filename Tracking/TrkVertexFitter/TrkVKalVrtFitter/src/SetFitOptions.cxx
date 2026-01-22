@@ -5,6 +5,7 @@
 // Header include
 #include "TrkVKalVrtFitter/TrkVKalVrtFitter.h"
 #include "TrkVKalVrtCore/TrkVKalVrtCore.h"
+
 //-------------------------------------------------
 #include<iostream>
 
@@ -17,6 +18,7 @@ namespace Trk{
   void TrkVKalVrtFitter::VKalVrtConfigureFitterCore(int NTRK, State& state) const
   {
     state.m_FitStatus = 0;     // Drop all previous fit results
+    state.m_globalFirstHit = nullptr;
     state.m_vkalFitControl.vk_forcft = ForCFT();
   
     //Set input particle masses
@@ -48,7 +50,10 @@ namespace Trk{
     // Set general configuration parameters
     state.m_vkalFitControl.setRobustness(state.m_Robustness);
     state.m_vkalFitControl.setRobustScale(state.m_RobustScale);
-    state.m_vkalFitControl.setUsePlaneCnst(0.,0.,0.,0.);
+    if(!m_firstMeasuredPointLimit)state.m_vkalFitControl.setUsePlaneCnst(0.,0.,0.,0.);
+    else  state.m_vkalFitControl.setUsePlaneCnst(state.m_parPlaneCnst[0],state.m_parPlaneCnst[1],
+                                                 state.m_parPlaneCnst[2],state.m_parPlaneCnst[3]);
+    if(m_firstMeasuredRadiusLimit)state.m_vkalFitControl.setUseRadiusCnst(state.m_cnstRadius,state.m_cnstRadiusRef);
     if(state.m_useAprioriVertex) state.m_vkalFitControl.setUseAprioriVrt();
     if(state.m_useThetaCnst)     state.m_vkalFitControl.setUseThetaCnst();
     if(state.m_usePhiCnst)       state.m_vkalFitControl.setUsePhiCnst();
@@ -61,6 +66,7 @@ namespace Trk{
 
     if(m_IterationPrecision>0.) state.m_vkalFitControl.setIterationPrec(m_IterationPrecision);
     if(m_IterationNumber)  state.m_vkalFitControl.setIterationNum(m_IterationNumber);
+
  }
 
 /* 
