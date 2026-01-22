@@ -1,8 +1,11 @@
 /*
- *   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+ *   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  */
 #include "WTAConeJetMaker.h"
 #include "WTAConeParallelHelper.h"
+
+#include "Jet.h"
+#include "Cluster.h"
 
  
  std::vector<Gep::Jet> Gep::WTAConeJetMaker::makeJets(const std::vector<Gep::Cluster>& inTopoTowers) const
