@@ -1035,8 +1035,6 @@ class ItemDef:
         MenuItem('L1_XE70').setLogic( d.XE70 & physcond).setTriggerType(TT.calo)
         MenuItem('L1_XE80').setLogic( d.XE80 & physcond).setTriggerType(TT.calo)
         # phase1
-        MenuItem('L1_gXENC70'   ).setLogic( d.gXENC70    & physcond).setTriggerType(TT.calo)
-        MenuItem('L1_gXENC100'  ).setLogic( d.gXENC100   & physcond).setTriggerType(TT.calo)
         MenuItem('L1_gXEJWOJ60' ).setLogic( d.gXEJWOJ60  & physcond).setTriggerType(TT.calo)
         MenuItem('L1_gXEJWOJ70' ).setLogic( d.gXEJWOJ70  & physcond).setTriggerType(TT.calo)
         MenuItem('L1_gXEJWOJ80' ).setLogic( d.gXEJWOJ80  & physcond).setTriggerType(TT.calo)
@@ -1053,6 +1051,8 @@ class ItemDef:
         MenuItem('L1_jXE110').setLogic( d.jXE110 & physcond).setTriggerType(TT.calo)
         MenuItem('L1_jXE120').setLogic( d.jXE120 & physcond).setTriggerType(TT.calo)
         MenuItem('L1_jXE500').setLogic( d.jXE500 & physcond).setTriggerType(TT.calo)
+        MenuItem('L1_cXE100').setLogic( d.cXE100 & physcond).setTriggerType(TT.calo)
+        MenuItem('L1_cXE110').setLogic( d.cXE110 & physcond).setTriggerType(TT.calo)
 
         MenuItem('L1_jXEC100'    ).setLogic( d.jXEC100 & physcond).setTriggerType(TT.calo)
         MenuItem('L1_jXEPerf100' ).setLogic( d.jXEPerf100 & physcond).setTriggerType(TT.calo)

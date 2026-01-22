@@ -145,9 +145,8 @@ class MonitorDef:
                 "L1_gJ20p0ETA25", "L1_gJ20p25ETA49", "L1_gJ50p0ETA25",
                 "L1_gJ100p0ETA25", "L1_gJ400p0ETA25",
                 "L1_gLJ80p0ETA25", "L1_gLJ100p0ETA25", "L1_gLJ140p0ETA25", "L1_gLJ160p0ETA25",
-                #"L1_gXERHO70", "L1_gXERHO100",
-                "L1_gXENC70", "L1_gXENC100",
                 "L1_gXEJWOJ60", "L1_gXEJWOJ70", "L1_gXEJWOJ80", "L1_gXEJWOJ100", "L1_gXEJWOJ110", "L1_gXEJWOJ120", "L1_gXEJWOJ500",
+                "L1_cXE100", "L1_cXE110",
                 "L1_gTE200",
                 "L1_gMHT500",
                 # Combined
