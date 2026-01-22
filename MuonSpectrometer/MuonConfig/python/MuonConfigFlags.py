@@ -10,7 +10,24 @@ import re
 # - MuonCnvFlags - not sure we need this - it really only configures single properties of the various cablings - we can just do this directly.
 # - MuonCalibFlags - looks like we need this
 
-
+class GeoTrfCacheMode(FlagEnum):
+    ### All transform  caches are slowly populated during the
+    ### IOV range of the current alignment constants
+    SlopyCache = 1
+    ### The Acts transform cache is slowly populated during the
+    ### IOV range of the current alignment constants. The GeoModel
+    ### alignment cache is filled with the parsing of the new alignment
+    ### deltas
+    ActsSlopyALineCond = 2
+    ### At the beginning of each event an empty cache is created
+    ### which is filled with the needed transforms during the processing
+    SplitCache = 3
+    ### A new Acts transform cache is created at the beginning each event
+    ### The GeoModel alignment cache is filled with the parsing of the new
+    ### alignment
+    ActsSplitALineCond = 4
+    ### All geometry transforms are cached when new alignment constants are loaded
+    FullCacheCond = 5
 
 class MMClusterBuilderEnum(FlagEnum):
     """Flag values for Muon.MMClusterCalibRecoTool"""
@@ -40,6 +57,8 @@ def createMuonConfigFlags():
     mcf.addFlag("Muon.usePhaseIIGeoSetup",lambda prevFlags : DetDescrInfo(prevFlags.GeoModel.AtlasVersion, 
                                                                           prevFlags.GeoModel.SQLiteDB ,
                                                                           prevFlags.GeoModel.SQLiteDBFullPath)["Muon"]["useR4Plugin"] )
+    
+    mcf.addFlag("Muon.AlignedGeoTrfCacheMode",  GeoTrfCacheMode.FullCacheCond)
     # 1. Digitization
     mcf.addFlag("Muon.doFastMMDigitization", False)  ### The digitization flag is only relevant if usePhaseIIGeoSetup is activated
     mcf.addFlag("Muon.doFastsTGCDigitization",False) ### The digitization flag is only relevant if usePhaseIIGeoSetup is activated

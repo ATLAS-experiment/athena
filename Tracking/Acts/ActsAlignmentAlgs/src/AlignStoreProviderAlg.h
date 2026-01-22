@@ -35,7 +35,7 @@ namespace ActsTrk{
       /// Key to the alignment transformations written by the alg
       SG::WriteHandleKey<DetectorAlignStore> m_outputKey{this, "EventAlignStore", ""};
       /// ServiceHandle to the ActsTrackingGeometry
-      ServiceHandle<ActsTrk::ITrackingGeometrySvc> m_trackingGeoSvc{this, "TrackingGeometrySvc", "ActsTrackingGeometrySvc"};
+      ServiceHandle<ITrackingGeometrySvc> m_trackingGeoSvc{this, "TrackingGeometrySvc", "ActsTrackingGeometrySvc"};
       /// Flag determining the subdetector. Needs to be static castable to DetectorType
       Gaudi::Property<int> m_detType{this, "DetectorType", static_cast<int>(DetectorType::UnDefined)};
       /// Flag toggling whether the full GeoAlignmentStore shall be written to store gate or whether the

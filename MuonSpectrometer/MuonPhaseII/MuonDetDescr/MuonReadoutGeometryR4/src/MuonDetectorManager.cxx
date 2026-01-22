@@ -23,16 +23,18 @@ namespace {
     /// Helper function to copy the radout elements from a technology into the 
     /// vector of all readout elements.
     template <class ReadOutEleStoreType,
-              class ReadoutEleReturnType> void insert(const ElementStorage_t<ReadOutEleStoreType>& eleStore,
-                                                      std::vector<ReadoutEleReturnType>& returnVec) {
+              class ReadoutEleReturnType> 
+        void insert(const ElementStorage_t<ReadOutEleStoreType>& eleStore,
+                    std::vector<ReadoutEleReturnType>& returnVec) {
         returnVec.reserve(returnVec.capacity() + eleStore.size());
         for (const auto& ele : eleStore) {
             if (ele) returnVec.push_back(ele.get());
         }
     }
     template <class ReadOutEleType,
-              class ReadOutEleReturnType> void insert(std::vector<ReadOutEleType*>&& eleStore,
-                                                      std::vector<ReadOutEleReturnType*>& returnVec) {
+              class ReadOutEleReturnType> 
+            void insert(std::vector<ReadOutEleType*>&& eleStore,
+                        std::vector<ReadOutEleReturnType*>& returnVec) {
         returnVec.insert(returnVec.end(), 
                         std::make_move_iterator(eleStore.begin()),
                         std::make_move_iterator(eleStore.end()));
@@ -86,34 +88,48 @@ namespace {
          insert(STORAGE_VEC, allElements);                                          \
          return allElements;                                                        \
     }
-#define WRITE_ALLGETTER(TYPE) \
-    std::vector<TYPE MuonReadoutElement*> MuonDetectorManager::getAllReadoutElements() TYPE { \
-        std::vector<TYPE MuonReadoutElement*> allEles{};                                      \
-        insert(getAllMdtReadoutElements(), allEles);                                          \
-        insert(getAllRpcReadoutElements(), allEles);                                          \
-        insert(getAllTgcReadoutElements(), allEles);                                          \
-        insert(getAllMmReadoutElements(), allEles);                                           \
-        insert(getAllsTgcReadoutElements(), allEles);                                         \
-        return allEles;                                                                       \
-    }                                                                                         \
-    TYPE MuonReadoutElement* MuonDetectorManager::getReadoutElement(const Identifier& id) TYPE {  \
-        switch(m_idHelperSvc->technologyIndex(id)) {                                              \
-            using enum Muon::MuonStationIndex::TechnologyIndex;                                   \
-            case MDT:                                                                             \
-                return getMdtReadoutElement(id);                                                  \
-            case RPC:                                                                             \
-                return getRpcReadoutElement(id);                                                  \
-            case TGC:                                                                             \
-                return getTgcReadoutElement(id);                                                  \
-            case STGC:                                                                            \
-                return getsTgcReadoutElement(id);                                                 \
-            case MM:                                                                              \
-                return getMmReadoutElement(id);                                                   \
-            default:                                                                              \
-                ATH_MSG_WARNING(__FILE__<<":"<<__LINE__<<" Not a muon detector element "          \
-                    <<m_idHelperSvc->toString(id));                                               \
-        }                                                                                         \
-        return nullptr;                                                                           \
+#define WRITE_ALLGETTER(CONSTNESS) \
+    std::vector<CONSTNESS MuonReadoutElement*> \
+        MuonDetectorManager::getAllReadoutElements(const ActsTrk::DetectorType type) CONSTNESS { \
+        std::vector<CONSTNESS MuonReadoutElement*> allEles{};  \
+        using enum ActsTrk::DetectorType;                      \
+        if (type == UnDefined || type == Mdt) {                \
+            insert(getAllMdtReadoutElements(), allEles);       \
+        }                                                      \
+        if (type == UnDefined || type == Rpc) {                \
+            insert(getAllRpcReadoutElements(), allEles);       \
+        }                                                      \
+        if (type == UnDefined || type == Tgc) {                \
+            insert(getAllTgcReadoutElements(), allEles);       \
+        }                                                      \
+        if (type == UnDefined || type == Mm) {                 \
+            insert(getAllMmReadoutElements(), allEles);        \
+        }                                                      \
+        if (type == UnDefined || type == sTgc) {               \
+            insert(getAllsTgcReadoutElements(), allEles);      \
+        }                                                      \
+        return allEles;                                        \
+    }                                                          \
+                                                               \
+    CONSTNESS MuonReadoutElement*                              \
+        MuonDetectorManager::getReadoutElement(const Identifier& id) CONSTNESS {          \
+        switch(m_idHelperSvc->technologyIndex(id)) {                                      \
+            using enum Muon::MuonStationIndex::TechnologyIndex;                           \
+            case MDT:                                                                     \
+                return getMdtReadoutElement(id);                                          \
+            case RPC:                                                                     \
+                return getRpcReadoutElement(id);                                          \
+            case TGC:                                                                     \
+                return getTgcReadoutElement(id);                                          \
+            case STGC:                                                                    \
+                return getsTgcReadoutElement(id);                                         \
+            case MM:                                                                      \
+                return getMmReadoutElement(id);                                           \
+            default:                                                                      \
+                ATH_MSG_WARNING(__FILE__<<":"<<__LINE__<<" Not a muon detector element "  \
+                    <<m_idHelperSvc->toString(id));                                       \
+        }                                                                                 \
+        return nullptr;                                                                   \
     }
 
 

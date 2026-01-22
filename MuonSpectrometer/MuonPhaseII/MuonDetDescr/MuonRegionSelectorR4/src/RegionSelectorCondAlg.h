@@ -70,6 +70,9 @@ namespace MuonR4 {
             SG::ReadCondHandleKey<MuonMDT_CablingMap> m_cablingMdtKey{this, "MdtCablingKey", "MuonMDT_CablingMap"};
             /** @brief Dependency on the phase II Rpc cabling map */
             SG::ReadCondHandleKey<Muon::RpcCablingMap> m_cablingRpcKey{this, "RpcCablingKey", "MuonNRPC_CablingMap"};
+            /** @brief Instantiate a new transform cache to ensure lazy transform population in the event processing */
+            Gaudi::Property<bool> m_splitTrfCache{this, "splitTrfCache", false, ""};
+
     };
 }
 #endif // MuonRegSelCondAlg_h

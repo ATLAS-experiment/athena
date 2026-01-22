@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef MUONREADOUTGEOMETRY_MUONDETECTORMANAGER_H
 #define MUONREADOUTGEOMETRY_MUONDETECTORMANAGER_H
@@ -91,9 +91,14 @@ class MuonDetectorManager : public GeoVDetectorManager, public AthMessaging {
     /** @brief Returns a pointer to the central MuonIdHelperSvc */
     const Muon::IMuonIdHelperSvc* idHelperSvc() const;
     
-    /// Returns the list of all detector elements
-    std::vector<const MuonReadoutElement*> getAllReadoutElements() const;
-    std::vector<MuonReadoutElement*> getAllReadoutElements();
+    /** @brief Returns all readout elements
+     *  @param type: The detector type of readout elements to be fetched. If it is UnDefined all
+     *               registered elements are fetched. Otherwise all of the specified muon technology */
+    std::vector<const MuonReadoutElement*> getAllReadoutElements(const ActsTrk::DetectorType type = ActsTrk::DetectorType::UnDefined) const;
+    /** @brief Returns all readout elements
+     *  @param type: The detector type of readout elements to be fetched. If it is UnDefined all
+     *               registered elements are fetched. Otherwise all of the specified muon technology */
+    std::vector<MuonReadoutElement*> getAllReadoutElements(const ActsTrk::DetectorType type = ActsTrk::DetectorType::UnDefined);
     /// Returns a generic Muon readout element
     const MuonReadoutElement* getReadoutElement(const Identifier& id) const;
     MuonReadoutElement* getReadoutElement(const Identifier& id);

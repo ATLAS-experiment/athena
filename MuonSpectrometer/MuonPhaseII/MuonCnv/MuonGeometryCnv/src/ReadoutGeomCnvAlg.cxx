@@ -100,7 +100,11 @@ StatusCode ReadoutGeomCnvAlg::execute(const EventContext& ctx) const {
             return StatusCode::FAILURE;
         }
         writeHandle.addDependency(readHandle);
-        geoContext.setStore(copyDeltas(**readHandle));
+        if (m_splitTrfCache) {
+            geoContext.setStore(copyDeltas(**readHandle));
+        } else {
+            geoContext.setStore(std::make_unique<ActsTrk::DetectorAlignStore>(**readHandle));
+        }
     }
     /// Check that for every detector technology there's an DetectorAlignStore in the geometry context
     /// Otherwise create an empty one.
@@ -502,15 +506,15 @@ StatusCode ReadoutGeomCnvAlg::buildTgc(const ActsTrk::GeometryContext& gctx, Con
 
 GeoIntrusivePtr<GeoVFullPhysVol> 
             ReadoutGeomCnvAlg::cloneNswWedge(const ActsTrk::GeometryContext& gctx,
-                                             const MuonGMR4::MuonReadoutElement* copyMe,
+                                             const MuonGMR4::MuonReadoutElement& copyMe,
                                              ConstructionCache& cacheObj) const {
-    GeoIntrusivePtr<const GeoVFullPhysVol> readOutVol{copyMe->getMaterialGeom()};
+    GeoIntrusivePtr<const GeoVFullPhysVol> readOutVol{copyMe.getMaterialGeom()};
     cacheObj.translatedStations.insert(readOutVol->getParent());
         
     PVLink clonedVol{cloneVolume(const_pointer_cast<GeoVFullPhysVol>(readOutVol))};
     GeoIntrusivePtr<GeoFullPhysVol> physVol{dynamic_pointer_cast<GeoFullPhysVol>(clonedVol)};
     cacheObj.world->add(cacheObj.newIdTag());
-    cacheObj.world->add(cacheObj.makeTransform(amdbTransform(gctx, *copyMe)));
+    cacheObj.world->add(cacheObj.makeTransform(amdbTransform(gctx, copyMe)));
     cacheObj.world->add(physVol);
     return physVol;
 }
@@ -528,7 +532,7 @@ StatusCode ReadoutGeomCnvAlg::buildMM(const ActsTrk::GeometryContext& gctx, Cons
     
     for (const MuonGMR4::MmReadoutElement* copyMe : mmReadouts) {
         const Identifier reId = copyMe->identify();
-        GeoIntrusivePtr<GeoVFullPhysVol> physVol{cloneNswWedge(gctx, copyMe, cacheObj)};
+        GeoIntrusivePtr<GeoVFullPhysVol> physVol{cloneNswWedge(gctx, *copyMe, cacheObj)};
         auto newRE = std::make_unique<MuonGM::MMReadoutElement>(physVol, 
                                                                 m_idHelperSvc->stationNameString(reId),
                                                                 copyMe->stationEta(),
@@ -580,7 +584,7 @@ StatusCode  ReadoutGeomCnvAlg::buildSTGC(const ActsTrk::GeometryContext& gctx, C
     for (const MuonGMR4::sTgcReadoutElement* copyMe : sTgcReadOuts) {
         const Identifier reId = copyMe->identify();
         ATH_MSG_DEBUG("Translate readout element "<<m_idHelperSvc->toStringDetEl(reId)<<".");
-        GeoIntrusivePtr<GeoVFullPhysVol> physVol{cloneNswWedge(gctx, copyMe, cacheObj)};
+        GeoIntrusivePtr<GeoVFullPhysVol> physVol{cloneNswWedge(gctx, *copyMe, cacheObj)};
 
         auto newRE = std::make_unique<MuonGM::sTgcReadoutElement>(physVol, 
                                                                   m_idHelperSvc->stationNameString(reId).substr(1),

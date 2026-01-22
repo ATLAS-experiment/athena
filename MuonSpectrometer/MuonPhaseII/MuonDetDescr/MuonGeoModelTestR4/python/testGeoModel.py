@@ -250,8 +250,7 @@ def setupGeoR4TestCfg(args,  flags = None):
 
     from MuonConfig.MuonGeometryConfig import MuonGeoModelCfg
     cfg.merge(MuonGeoModelCfg(flags))
-
-
+    
     if not flags.Muon.usePhaseIIGeoSetup:
         print ("WARNING: New Muon plugin is not part of the Geometry file {geoDBFile}".format(geoDBFile=args.geoModelFile))
     else:
