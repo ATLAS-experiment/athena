@@ -158,7 +158,7 @@ double TauAnalysisTools::tauLeadTrackEta(const xAOD::TauJet& xTau)
 double TauAnalysisTools::truthTauPt(const xAOD::TauJet& xTau)
 {
   // return truth tau Pt in GeV
-  const xAOD::TruthParticle* xTruthTau = getTruth(xTau);
+  const xAOD::TruthParticle* xTruthTau = xAOD::TauHelpers::getTruthParticle(&xTau);
 
   // if there is a truth tau return pT, otherwise return 0 (getTruth will print an error)
   static const SG::ConstAccessor<char> accIsHadronicTau ("IsHadronicTau");
@@ -185,7 +185,7 @@ double TauAnalysisTools::truthVisTauPt(const xAOD::TauJet& xTau)
 double TauAnalysisTools::truthTauAbsEta(const xAOD::TauJet& xTau)
 {
   // return truth tau absolute eta
-  const xAOD::TruthParticle* xTruthTau = getTruth(xTau);
+  const xAOD::TruthParticle* xTruthTau = xAOD::TauHelpers::getTruthParticle(&xTau);
 
   // if there is a truth tau return absolute eta, otherwise return -5 (getTruth will print an error)
   static const SG::ConstAccessor<char> accIsHadronicTau ("IsHadronicTau");
@@ -204,26 +204,9 @@ double TauAnalysisTools::truthDecayMode(const xAOD::TauJet& xTau)
 }
 
 //______________________________________________________________________________
-const xAOD::TruthParticle* TauAnalysisTools::getTruth(const xAOD::TauJet& xTau)
-{
-  typedef ElementLink< xAOD::TruthParticleContainer > Link_t;
-  static const SG::ConstAccessor<Link_t> accTruthParticleLink("truthParticleLink");
-  if (!accTruthParticleLink(xTau))
-  {
-    Error("TauAnalysisTools::getTruth", "No truth match information available. Please run TauTruthMatchingTool first");
-  }
-
-  const Link_t xTruthTauLink = accTruthParticleLink(xTau);
-  const xAOD::TruthParticle* xTruthTau = xTruthTauLink.cachedElement();
-
-  return xTruthTau;
-}
-
-
-//______________________________________________________________________________
 xAOD::TauJetParameters::DecayMode TauAnalysisTools::getTruthDecayMode(const xAOD::TauJet& xTau)
 {
-  const xAOD::TruthParticle* xTruthTau = getTruth(xTau);
+  const xAOD::TruthParticle* xTruthTau = xAOD::TauHelpers::getTruthParticle(&xTau);
 
   static const SG::ConstAccessor<char> accIsHadronicTau ("IsHadronicTau");
   if (xTruthTau!=nullptr && accIsHadronicTau(*xTruthTau))
