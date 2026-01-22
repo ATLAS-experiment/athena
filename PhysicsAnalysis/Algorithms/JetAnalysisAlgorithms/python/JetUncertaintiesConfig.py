@@ -21,37 +21,36 @@ class JetUncertaintiesConfig (ConfigBlock) :
             info="the name of the output container after calibration.")
         self.addOption ('jetInput', '', type=str,
             noneAction='error',
-            info="")
+            info="the type of jet input. Refer to the corresponding small- or large-R jet options.")
         self.addOption('analysisJetSelection', '', type=str,
             info="the jet selection to use to calculate N jets for an analysis specific "
-            "jet flavor composition uncertainty. Of the form jvt_selection,as_char&&passesOR,as_char...")
+            "jet flavor composition uncertainty. Of the form `jvt_selection,as_char&&passesOR,as_char...`.")
         self.addOption('analysisFile', '', type=str,
             info="the file containing gluon fraction histograms needed to calculate an analysis specific "
             "jet flavor composition uncertainty.")
         self.addOption ('largeRMass', "Comb", type=str,
-            info="")
+            info="the large-R mass definition to use. Supported options are: `Comb`, `Calo`, `TA`.")
         self.addOption ('systematicsModelJES', "Category", type=str,
-            info="the NP reduction scheme to use for JES: All, Global, Category, "
-            "Scenario. The default is Category.")
+            info="the NP reduction scheme to use for JES: `All`, `Global`, `Category`, "
+            "`Scenario`.")
         self.addOption ('systematicsModelJER', "Full", type=str,
-            info="the NP reduction scheme to use for JER: All, Full, Simple. The "
-            "default is Full.")
-        self.addOption ('systematicsModelJMS', "Full", type=str)
+            info="the NP reduction scheme to use for JER: `All`, `Full`, `Simple`.")
+        self.addOption ('systematicsModelJMS', "Full", type=str,
+            info="the NP reduction scheme to use for JMS: `Full`, `Simple`.")
         self.addOption ('runJERsystematicsOnData', False, type=bool,
-            info="whether to run the All/Full JER model variations also on data samples. Expert option!")
+            info="whether to run the `All`/`Full` JER model variations also on data samples",
+            expertMode=True)
         # Uncertainties tool options
         self.addOption ('uncertToolConfigPath', None, type=str,
-            info="name (str) of the config file to use for the jet uncertainty "
-            "tool. Expert option to override JetETmiss recommendations. The "
-            "default is None.")
+            info="name of the config file to use for the jet uncertainty "
+            "tool. Expert option to override JetETmiss recommendations.")
         self.addOption ('uncertToolCalibArea', None, type=str,
-            info="name (str) of the CVMFS area to use for the jet uncertainty "
-            "tool. Expert option to override JetETmiss recommendations. The "
-            "default is None.")
+            info="name of the CVMFS area to use for the jet uncertainty "
+            "tool. Expert option to override JetETmiss recommendations.")
         self.addOption ('uncertToolMCType', None, type=str,
-            info="data type (str) to use for the jet uncertainty tool (e.g. "
-            "'AF3' or 'MC16'). Expert option to override JetETmiss "
-            "recommendations. The default is None.")
+            info="data type to use for the jet uncertainty tool (e.g. "
+            "`AF3` or `MC16`). Expert option to override JetETmiss "
+            "recommendations.")
 
     def instanceName (self) :
         """Return the instance name for this block"""

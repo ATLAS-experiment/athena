@@ -17,21 +17,22 @@ class TauCalibrationConfig (ConfigBlock):
         super (TauCalibrationConfig, self).__init__ ()
         self.setBlockName('Taus')
         self.addOption ('inputContainer', '', type=str,
-            info="select tau input container, by default set to TauJets")
+            info="the name of the input tau-jet container. If left empty, automatically defaults "
+            "to `'AnalysisTauJets'` for PHYSLITE and `'TauJets'` otherwise.")
         self.addOption ('containerName', '', type=str,
             noneAction='error',
             info="the name of the output container after calibration.")
         self.addOption ('postfix', '', type=str,
             info="a postfix to apply to decorations and algorithm names. "
             "Typically not needed here since the calibration is common to "
-            "all taus.")
+            "all tau-jets.")
         self.addOption ('rerunTruthMatching', True, type=bool,
             info="whether to rerun truth matching (sets up an instance of "
-            "CP::TauTruthMatchingAlg). The default is True.")
+            "`CP::TauTruthMatchingAlg`).")
         self.addOption ('decorateTruth', False, type=bool,
-            info="decorate truth particle information on the reconstructed one")
+            info="decorate the truth particle information on the reconstructed one.")
         self.addOption ('decorateExtraVariables', True, type=bool,
-            info="decorate extra variables for the reconstructed tau")    
+            info="decorate extra variables for the reconstructed tau-jet.")
 
     def instanceName (self) :
         """Return the instance name for this block"""
@@ -131,69 +132,67 @@ class TauWorkingPointConfig (ConfigBlock) :
             info="the name of the input container.")
         self.addOption ('selectionName', '', type=str,
             noneAction='error',
-            info="the name of the tau-jet selection to define (e.g. tight or "
-            "loose).")
+            info="the name of the tau-jet selection to define (e.g. `tight` or "
+            "`loose`).")
         self.addOption ('postfix', None, type=str,
             info="a postfix to apply to decorations and algorithm names. "
             "Typically not needed here as selectionName is used internally.")
         self.addOption ('quality', None, type=str,
-            info="the ID WP (string) to use. Supported ID WPs: Tight, Medium, "
-            "Loose, VeryLoose, Baseline, BaselineForFakes.")
+            info="the ID WP to use. Supported ID WPs: `Tight`, `Medium`, "
+            "`Loose`, `VeryLoose`, `Baseline`, `BaselineForFakes`.")
         self.addOption ('use_eVeto', False, type=bool,
-            info="use selection with or without eVeto combined with tauID "
-            "recommendations: set it to True if electron mis-reconstructed as tau is a large background for your analysis")
+            info="use selection with or without eVeto combined with TauID. "
+            "Recommendations: set it to `True` if electrons mis-reconstructed as tau-jets are a large background for your analysis.")
         self.addOption ('use_muonOLR', False, type=bool,
-            info="use selection with or without muonOLR with TauID "
-            "recommendations: set it to True if muon mis-reconstructed as tau is a large background for your analysis")
+            info="use selection with or without muonOLR with TauID. "
+            "Recommendations: set it to `True` if muons mis-reconstructed as tau-jets are a large background for your analysis")
         self.addOption ('useGNTau', False, type=bool,
-            info="use GNTau based ID instead of RNNTau ID "
-            "recommendations: that's new experimental feature and might come default soon",
+            info="use GNTau-based ID instead of RNNTau ID. "
+            "Recommendations: experimental feature and might become default soon.",
             expertMode=True)
         self.addOption ('dropPtCut', False, type=bool,
-            info="select taus without explicit min Pt cut. For PHYS/PHYSLITE, this would mean selecting taus starting from 13 GeV "
-            "recommendations: that's experimental feature and not supported for all combinations of ID/eVeto WPs",
+            info=r"select tau-jets without an explicit minimum $p_\mathrm{T}$ cut. For PHYS/PHYSLITE, this would mean selecting tau-jets starting from 13 GeV. "
+            "Recommendations: experimental feature and not supported for all combinations of ID/eVeto WPs.",
             expertMode=True)
         self.addOption ('useLowPt', False, type=bool, 
             info="select taus starting from 15 GeV instead of the default 20 GeV cut "
-            "recommendations: that's experimental feature and not supported for all combinations of ID/eVeto WPs",
+            "recommendations: experimental feature and not supported for all combinations of ID/eVeto WPs.",
             expertMode=True)
         self.addOption ('useSelectionConfigFile', True, type=bool,
-            info="use pre-defined configuration files for selecting taus "
-            "recommendations: set this to False only if you want to test/optimise the tau selection for selections not already provided through config files")
+            info="use pre-defined configuration files for selecting tau-jets. "
+            "Recommendations: set this to `False` only if you want to test/optimise the tau-jet selection for selections not already provided through config files.")
         self.addOption ('manual_sel_minpt', 20.0, type=float,
-            info="minimum pt cut used for tau selection when useSelectionConfigFile is set to false")
+            info=r"minimum $p_\mathrm{T}$ cut used for tau-jet selection when `useSelectionConfigFile` is set to `False`.")
         self.addOption ('manual_sel_absetaregion', [0, 1.37, 1.52, 2.5], type=list,
-            info="eta regions cut used for tau selection when useSelectionConfigFile is set to false") 
+            info=r"$\vert\eta\vert$ regions cut used for tau-jet selection when `useSelectionConfigFile` is set to `False`") 
         self.addOption ('manual_sel_abscharges', [1,], type=list,
-            info="charge of the tau cut used for tau selection when useSelectionConfigFile is set to false")
+            info="charge of the tau-jet cut used for tau-jet selection when `useSelectionConfigFile` is set to `False`")
         self.addOption ('manual_sel_ntracks', [1,3], type=list,
-            info="number of tau tracks used for tau selection when useSelectionConfigFile is set to false")
+            info="number of tau-jet tracks used for tau-jet selection when `useSelectionConfigFile` is set to `False`")
         self.addOption ('manual_sel_minrnnscore', -1, type=float,
-            info="minimum rnn score cut used for tau selection when useSelectionConfigFile is set to false")
+            info="minimum RNN score cut used for tau-jet selection when `useSelectionConfigFile` is set to `False`")
         self.addOption ('manual_sel_mingntauscore', -1, type=float,
-            info="minimum gntau score selection when useSelectionConfigFile is set to false")
+            info="minimum GNTau score selection when `useSelectionConfigFile` is set to `False`")
         self.addOption ('manual_sel_rnnwp', None, type=str,
-            info="rnn working point used for tau selection when useSelectionConfigFile is set to false")
+            info="RNN working point used for tau-jet selection when `useSelectionConfigFile` is set to `False`")
         self.addOption ('manual_sel_gntauwp', None, type=str,
-            info="gntau working point used for tau selection when useSelectionConfigFile is set to false")
+            info="GNTau working point used for tau-jet selection when `useSelectionConfigFile` is set to `False`")
         self.addOption ('manual_sel_evetowp', None, type=str, 
-            info="eveto working point used for tau selection when useSelectionConfigFile is set to false")
+            info="eveto working point used for tau-jet selection when `useSelectionConfigFile` is set to `False`")
         self.addOption ('manual_sel_muonolr', False, type=bool,
-            info="use muonolr used for tau selection when useSelectionConfigFile is set to false")    
+            info="use `muonolr` used for tau-jet selection when `useSelectionConfigFile` is set to `False`")    
         self.addOption ('noEffSF', False, type=bool,
             info="disables the calculation of efficiencies and scale factors. "
             "Experimental! only useful to test a new WP for which scale "
-            "factors are not available. The default is False.",
+            "factors are not available.",
             expertMode=True)
         self.addOption ('saveDetailedSF', True, type=bool,
-            info="save all the independent detailed object scale factors. "
-            "The default is True.")
+            info="save all the independent detailed object scale factors.")
         self.addOption ('saveCombinedSF', False, type=bool,
-            info="save the combined object scale factor. "
-            "The default is False.")
+            info="save the combined object scale factor.")
         self.addOption ('addSelectionToPreselection', True, type=bool,
             info="whether to retain only tau-jets satisfying the working point "
-            "requirements. The default is True.")
+            "requirements.")
 
     def instanceName (self) :
         """Return the instance name for this block"""
@@ -488,21 +487,19 @@ class TauTriggerAnalysisSFBlock (ConfigBlock):
 
         self.addOption ('triggerChainsPerYear', {}, type=None,
                         info="a dictionary with key (string) the year and value (list of "
-                        "strings) the trigger chains. The default is {} (empty dictionary).")
+                        "strings) the trigger chains.")
         self.addOption ('tauID', '', type=str,
-                        info="the tau quality WP (string) to use.")
+                        info="the tau-jet quality WP to use.")
         self.addOption ('prefixSF', 'trigEffSF', type=str,
-                        info="the decoration prefix for trigger scale factors, "
-                        "the default is 'trigEffSF'")
+                        info="the decoration prefix for trigger scale factors.")
         self.addOption ('includeAllYearsPerRun', False, type=bool,
-                        info="if True, all configured years in the LHC run will "
-                        "be included in all jobs. The default is False.")
+                        info="all configured years in the LHC run will "
+                        "be included in all jobs.")
         self.addOption ('removeHLTPrefix', True, type=bool,
-                        info="remove the HLT prefix from trigger chain names, "
-                        "The default is True.")
+                        info="remove the HLT prefix from trigger chain names.")
         self.addOption ('containerName', '', type=str,
-                        info="the input tau container, with a possible selection, in "
-                        "the format container or container.selection.")
+                        info="the input tau-jet container, with a possible selection, in "
+                        "the format `container` or `container.selection`.")
 
     def instanceName (self) :
         """Return the instance name for this block"""

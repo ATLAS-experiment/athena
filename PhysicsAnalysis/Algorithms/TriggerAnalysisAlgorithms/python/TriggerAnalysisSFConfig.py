@@ -86,63 +86,61 @@ class TriggerAnalysisSFBlock(ConfigBlock):
 
         self.addOption ('triggerChainsPerYear', {}, type=None,
             info="a dictionary with key (string) the year and value (list of "
-            "strings) the trigger chains. You can also use || within a string "
+            "strings) the trigger chains. You can also use `||` within a string "
             "to enforce an OR of triggers without looking up the individual "
-            "triggers. Used for both trigger selection and SFs. "
-            "The default is {} (empty dictionary).")
+            "triggers. Used for both trigger selection and SFs.")
         self.addOption ('multiTriggerChainsPerYear', {}, type=None,
             info="a dictionary with key (string) a trigger set name and value a "
-            "triggerChainsPerYear dictionary, following the previous convention. "
+            "`triggerChainsPerYear` dictionary, following the previous convention. "
             "Relevant for analyses using different triggers in different categories, "
-            "where the trigger global scale factors shouldn't be combined. "
-            "The default is {} (empty dictionary).")
+            "where the trigger global scale factors shouldn't be combined.")
         self.addOption ('noFilter', False, type=bool,
-            info="do not apply an event filter. The default is False, i.e. "
-            "remove events not passing trigger selection and matching.")
+            info="do not apply an event filter (i.e. keep events "
+            "not passing trigger selection and matching).")
         self.addOption ('electronID', '', type=str,
-            info="the electron ID WP (string) to use.")
+            info="the electron ID WP to use.")
         self.addOption ('electronIsol', '', type=str,
-            info="the electron isolation WP (string) to use.")
+            info="the electron isolation WP to use.")
         self.addOption ('photonIsol', '', type=str,
-            info="the photon isolation WP (string) to use.")
+            info="the photon isolation WP to use.")
         self.addOption ('muonID', '', type=str,
-            info="the muon quality WP (string) to use.")
+            info="the muon quality WP to use.")
         self.addOption ('electrons', '', type=str,
             info="the input electron container, with a possible selection, in "
-            "the format container or container.selection.")
+            "the format `container` or `container.selection`.")
         self.addOption ('muons', '', type=str,
             info="the input muon container, with a possible selection, in the "
-            "format container or container.selection.")
+            "format `container` or `container.selection`.")
         self.addOption ('photons', '', type=str,
             info="the input photon container, with a possible selection, in "
-            "the format container or container.selection.")
+            "the format `container` or `container.selection`.")
         self.addOption ('taus', '', type=str,
-            info="the input tau container, with a possible selection, in "
-            "the format container or container.selection.")
+            info="the input tau-jet container, with a possible selection, in "
+            "the format `container` or `container.selection`.")
         self.addOption ('numberOfToys', 0, type=int,
-            info="Number of toy experiments to run to estimate the trigger efficiencies, "
-            "instead of using explicit formulas. The default is 0 (not using toys).")
+            info="the number of toy experiments to run to estimate the trigger efficiencies, "
+            "instead of using explicit formulas. Set it to 0 to not use toys.")
         self.addOption ('noEffSF', False, type=bool,
             info="disables the calculation of efficiencies and scale factors. "
             "Experimental! only useful to test a new WP for which scale "
             "factors are not available. Still performs the global trigger "
-            "matching (same behaviour as on data). The default is False.",
+            "matching (same behaviour as on data).",
             expertMode=True)
         self.addOption ('noGlobalTriggerEff', False, type=bool,
             info="disables the global trigger efficiency tool (including "
             "matching), which is only suited for electron/muon/photon "
-            "trigger legs. The default is False.")
+            "trigger legs.")
         self.addOption ('separateChainMatching', False, type=bool,
-            info="Store the matching status for each trigger separately")
+            info="store the matching status for each trigger separately.")
         self.addOption ('triggerMatchingChainsPerYear', {}, type=None,
             info="a dictionary with key (string) the year and value (list of "
-            "strings) the trigger chains. The default is {} (empty dictionary).")
+            "strings) the trigger chains.")
         self.addOption("includeAllYearsPerRun", False, type=bool,
-            info="if True, trigger matching will include all configured years "
-            "in the LHC run in all jobs. The default is False.")
+            info="trigger matching will include all configured years "
+            "in the LHC run in all jobs.")
         self.addOption ('postfix', '', type=str,
             info="a unique identifier for the trigger matching decorations. Only "
-            "useful when defining multiple setups. The default is '' (empty string).")
+            "useful when defining multiple setups.")
 
     def makeTriggerGlobalEffCorrAlg(
         self,
