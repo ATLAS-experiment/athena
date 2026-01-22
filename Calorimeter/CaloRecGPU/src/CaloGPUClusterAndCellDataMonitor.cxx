@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 //
 // Dear emacs, this is -*- c++ -*-
 //
@@ -413,7 +413,9 @@ StatusCode CaloGPUClusterAndCellDataMonitor::update_cell_representation(const Ev
 
       if (this_cell_index != prev_cell_index)
         {
-          const int prev_cell_ID = cell_info->get_hash_ID(prev_cell_index);
+          //prev_cell_index is used directly as an index into a c-style array, so must
+          //not be negative (should also check upper bound?)
+          const int prev_cell_ID = (prev_cell_index < 0 ? -1 : cell_info->get_hash_ID(prev_cell_index));
           const int this_cell_ID = cell_info->get_hash_ID(this_cell_index);
 
           for (int j = prev_cell_ID + 1; j <= this_cell_ID; ++j)
