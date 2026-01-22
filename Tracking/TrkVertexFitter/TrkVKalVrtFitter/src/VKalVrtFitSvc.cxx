@@ -106,19 +106,18 @@ StatusCode TrkVKalVrtFitter::VKalVrtFit(const std::vector<const xAOD::TrackParti
               TParamOwner.emplace_back(m_fitPropagator->myxAODFstPntOnTrk((*i_ntrk)));
               //For the last one we created, push also a not owning / view ptr to tmpInputC
               tmpInputC.push_back((TParamOwner.back()).get());
-
-              if( (*i_ntrk)->radiusOfFirstHit() < closestHitR ) {
-                closestHitR=(*i_ntrk)->radiusOfFirstHit();
-              }
               if(tmpInputC[tmpInputC.size()-1]==nullptr){
                 //Extrapolation failure
-              if(msgLvl(MSG::WARNING)){
-                msg()<< "InDetExtrapolator can't etrapolate xAOD::TrackParticle Perigee "<<
-                  "to FirstMeasuredPoint radius! Stop vertex fit!" << endmsg;
-              }
-              return StatusCode::FAILURE;
+                if(msgLvl(MSG::WARNING)){
+                  msg()<< "InDetExtrapolator can't etrapolate xAOD::TrackParticle Perigee "<<
+                    "to FirstMeasuredPoint radius! Stop vertex fit!" << endmsg;
+                }
+                return StatusCode::FAILURE;
               }
             }
+            if( (*i_ntrk)->radiusOfFirstHit() < closestHitR ) {
+               closestHitR=(*i_ntrk)->radiusOfFirstHit();
+            } 
           }
           sc=CvtTrackParameters(tmpInputC,ntrk,state);
           if(sc.isFailure()){
@@ -138,24 +137,39 @@ StatusCode TrkVKalVrtFitter::VKalVrtFit(const std::vector<const xAOD::TrackParti
     //
     //-- Check vertex position with respect to first measured hit and refit with plane constraint if needed
     state.m_planeCnstNDOF = 0;
-    if(m_firstMeasuredPointLimit && !ierr){
-       Amg::Vector3D  cnstRefPoint(0.,0.,0.);
+    if( (m_firstMeasuredPointLimit || m_firstMeasuredRadiusLimit) && !ierr){
+       Amg::Vector3D cnstRefPoint(0.,0.,0.);
+       if(closestHitR==1.e6){  // Not found previously
+          const xAOD::TrackParticle * trkFMP=nullptr;
+          for(auto &trka : InpTrkC){
+            double hitR=trka->radiusOfFirstHit();
+            if(closestHitR>hitR){
+              closestHitR=hitR;
+              trkFMP=trka;
+            }
+          }
+          if(closestHitR<1.e6){
+            auto perFMP=m_fitPropagator->myxAODFstPntOnTrk(trkFMP);  //FMP is calculated by extrapolation to radiusOfFirstHit
+            if(perFMP) cnstRefPoint=perFMP->position();
+          }
+       }
+       Amg::Vector3D unitMom=Amg::Vector3D(Momentum.Px()/Momentum.P(),Momentum.Py()/Momentum.P(),Momentum.Pz()/Momentum.P());
        //----------- Use as reference either hit(state.m_globalFirstHit) or its radius(closestHitR) if hit is absent
        if(state.m_globalFirstHit)cnstRefPoint=state.m_globalFirstHit->position();
-       else if(closestHitR < 1.e6){
-         Amg::Vector3D unitMom=Amg::Vector3D(Momentum.Vect().Unit().x(),Momentum.Vect().Unit().y(),Momentum.Vect().Unit().z());
-         if((Vertex+unitMom).perp() < Vertex.perp()) unitMom=-unitMom;
-         cnstRefPoint=Vertex+(closestHitR-Vertex.perp())*unitMom;
-       }
        //------------
-       if(Vertex.perp()>cnstRefPoint.perp() && cnstRefPoint.perp()>0.){
+       if(Vertex.perp()>closestHitR && cnstRefPoint.perp()>0.){
           if(msgLvl(MSG::DEBUG))msg(MSG::DEBUG)<<"Vertex behind first measured point is detected. Constraint is applied!"<<endmsg;
           state.m_planeCnstNDOF = 1;   // Additional NDOF due to plane constraint
-          double pp[3]={Momentum.Px()/Momentum.Rho(),Momentum.Py()/Momentum.Rho(),Momentum.Pz()/Momentum.Rho()};
-          double D= pp[0]*(cnstRefPoint.x()-state.m_refFrameX)
-                   +pp[1]*(cnstRefPoint.y()-state.m_refFrameY)
-                   +pp[2]*(cnstRefPoint.z()-state.m_refFrameZ);
-          state.m_vkalFitControl.setUsePlaneCnst( pp[0], pp[1], pp[2], D);
+          double D= unitMom.x()*(cnstRefPoint.x()-state.m_refFrameX)
+                   +unitMom.y()*(cnstRefPoint.y()-state.m_refFrameY)
+                   +unitMom.z()*(cnstRefPoint.z()-state.m_refFrameZ);
+          state.m_parPlaneCnst[0]=unitMom.x();
+          state.m_parPlaneCnst[1]=unitMom.y();
+          state.m_parPlaneCnst[2]=unitMom.z();
+          state.m_parPlaneCnst[3]=D;
+          state.m_cnstRadius=std::sqrt(std::pow(cnstRefPoint.x()-state.m_refFrameX,2.)+std::pow(cnstRefPoint.y()-state.m_refFrameY,2.));
+          state.m_cnstRadiusRef[0]=-state.m_refFrameX;
+          state.m_cnstRadiusRef[1]=-state.m_refFrameY;
           std::vector<double> saveApproxV(3,0.); state.m_ApproximateVertex.swap(saveApproxV);
           state.m_ApproximateVertex[0]=cnstRefPoint.x();
           state.m_ApproximateVertex[1]=cnstRefPoint.y();

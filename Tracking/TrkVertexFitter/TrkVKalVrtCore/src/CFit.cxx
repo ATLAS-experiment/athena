@@ -190,11 +190,13 @@ int fitVertex(VKVertex * vk)
   }
   if ( vrtForCFT.usePhiCnst )  vk->ConstraintList.emplace_back(std::make_unique<VKPhiConstraint>( NTRK, vk));
   if ( vrtForCFT.useThetaCnst )vk->ConstraintList.emplace_back(std::make_unique<VKThetaConstraint>( NTRK, vk));
-  if ( vrtForCFT.usePlaneCnst ){
-    if( vrtForCFT.Ap+vrtForCFT.Bp+vrtForCFT.Cp != 0.){
-      vk->ConstraintList.emplace_back(std::make_unique<VKPlaneConstraint>( NTRK, vrtForCFT.Ap, vrtForCFT.Bp, vrtForCFT.Cp, vrtForCFT.Dp, vk));
-    }
+  if ( vrtForCFT.usePlaneCnst && vrtForCFT.Ap+vrtForCFT.Bp+vrtForCFT.Cp != 0.){
+    vk->ConstraintList.emplace_back(std::make_unique<VKPlaneConstraint>( NTRK, vrtForCFT.Ap, vrtForCFT.Bp, vrtForCFT.Cp, vrtForCFT.Dp, vk));
   }
+  if ( vrtForCFT.useRadiusCnst && vrtForCFT.RC != 0.){
+    vk->ConstraintList.emplace_back(std::make_unique<VKRadiusConstraint>( NTRK, vrtForCFT.RC, vrtForCFT.radiusRefP, vk));
+  }
+
   //-----Debug printout
   //    for(auto & cnst : vk->ConstraintList) {
   //       VKMassConstraint *ctmp=dynamic_cast<VKMassConstraint*>( cnst.get() );   if(ctmp) std::cout<<(*ctmp)<<'\n';

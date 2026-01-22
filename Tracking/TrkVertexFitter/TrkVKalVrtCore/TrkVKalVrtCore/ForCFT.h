@@ -12,13 +12,14 @@ namespace Trk {
   struct ForCFT
   {
 //
-    int useMassCnst;
-    int usePhiCnst;
-    int useThetaCnst;
-    int usePointingCnst;
-    int useAprioriVrt;
-    int usePassNear;
-    int usePlaneCnst;
+    int useMassCnst{};
+    int usePhiCnst{};
+    int useThetaCnst{};
+    int usePointingCnst{};
+    int useAprioriVrt{};
+    int usePassNear{};
+    int usePlaneCnst{};
+    int useRadiusCnst{};
 
 //
 // For several(up to 8) mass constraints
@@ -27,7 +28,12 @@ namespace Trk {
     double wmfit[vkalMaxNMassCnst];
     double localbmag;
 // Since 20/09/2009 - Vertex in plane constraint
-    double Ap,Bp,Cp,Dp;
+    double Ap{};
+    double Bp{};
+    double Cp{};
+    double Dp{};
+    double RC{};
+    double radiusRefP[2]{};
 
 //
 // Vertex, covariance and it's weight (inverse covariance)
