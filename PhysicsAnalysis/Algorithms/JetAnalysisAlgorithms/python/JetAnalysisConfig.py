@@ -25,16 +25,15 @@ class PreJetAnalysisConfig (ConfigBlock) :
             info="the jet container to run on. It is interpreted to determine "
             "the correct config blocks to call for small- or large-R jets.")
         self.addOption('outputTruthLabelIDs', False, type=bool,
-            info='Enable or disable HadronConeExclTruthLabelID and PartonTruthLabelID decorations')
-        # TODO: add info string
+            info='enable or disable `HadronConeExclTruthLabelID` and `PartonTruthLabelID` decorations.')
         self.addOption ('runOriginalObjectLink', False, type=bool,
-            info="")
+                info='sets up an instance of `CP::AsgOriginalObjectLinkAlg` to link systematically-varied containers to the base one.')
         self.addOption ('runGhostMuonAssociation', None, type=bool,
             info="whether to set up the jet-ghost-muon association algorithm "
-            "CP::JetGhostMuonAssociationAlg. The default is True for non-PHYSLITE and False for PHYSLITE.")
+            "`CP::JetGhostMuonAssociationAlg`. If left empty, automatically defaults to `False` for PHYSLITE and `True` otherwise.")
         self.addOption ('runTruthJetTagging', None, type=bool,
             info="whether to set up the jet truth tagging algorithm "
-            "CP::JetTruthTagAlg. The default is True.")
+            "`CP::JetTruthTagAlg`.")
 
     def instanceName (self) :
         """Return the instance name for this block"""
@@ -113,44 +112,40 @@ class SmallRJetAnalysisConfig (ConfigBlock) :
             noneAction='error',
             info="the jet container to run on. It is interpreted to determine "
             "the correct config blocks to call for small- or large-R jets.")
-        # TODO: add info string
         self.addOption ('jetInput', '', type=str,
             noneAction='error',
-            info="")
+            info="the type of jet input. Supported options are: `EMPFlow`, `EMTopo`, `HI`.")
         self.addOption ('runJvtUpdate', False, type=bool,
-            info="whether to update the JVT. The default is False.")
+            info="whether to update the JVT.")
         self.addOption ('runNNJvtUpdate', False, type=bool,
-            info="whether to update the NN-JVT. The default is False.")
+            info="whether to update the NN-JVT.")
         self.addOption ('runJvtSelection', True, type=bool,
-            info="whether to run JVT selection. The default is True.")
+            info="whether to run JVT selection.")
         self.addOption ('runFJvtSelection', False, type=bool,
-            info="whether to run forward JVT selection. The default is False.")
+            info="whether to run forward JVT selection.")
         self.addOption ('jvtWP', "FixedEffPt", type=str,
-            info="which Jvt WP to apply. The default is FixedEffPt.")
+            info="which Jvt WP to apply.")
         self.addOption ('fJvtWP', "Loose", type=str,
-            info="which fJvt WP to apply. The default is Loose.")
+            info="which fJvt WP to apply.")
         self.addOption ('runJvtEfficiency', True, type=bool,
-            info="whether to calculate the JVT efficiency. The default is True.")
+            info="whether to calculate the JVT efficiency.")
         self.addOption ('runFJvtEfficiency', False, type=bool,
-            info="whether to calculate the forward JVT efficiency. The default is False.")
+            info="whether to calculate the forward JVT efficiency.")
         self.addOption ('recalibratePhyslite', True, type=bool,
-            info="whether to run the CP::JetCalibrationAlg on PHYSLITE derivations. "
-            "The default is True.")
+            info="whether to run the `CP::JetCalibrationAlg` on PHYSLITE derivations.")
         # Calibration tool options
         self.addOption ('calibToolConfigFile', None, type=str,
-            info="name (str) of the config file to use for the jet calibration "
-            "tool. Expert option to override JetETmiss recommendations. The "
-            "default is None.",
+            info="the name of the config file to use for the jet calibration "
+            "tool. Expert option to override JetETmiss recommendations.",
             expertMode=True)
         self.addOption ('calibToolCalibArea', None, type=str,
-            info="name (str) of the CVMFS area to use for the jet calibration "
-            "tool. Expert option to override JetETmiss recommendations. The "
-            "default is None.",
+            info="name of the CVMFS area to use for the jet calibration "
+            "tool. Expert option to override JetETmiss recommendations",
             expertMode=True)
         self.addOption ('calibToolCalibSeq', None, type=str,
-            info="name (str) of the sequence to use for the jet calibration "
-            "tool (e.g. 'JetArea_Residual_EtaJES_GSC'). Expert option to override "
-            "JetETmiss recommendations. The default is None.",
+            info="name of the sequence to use for the jet calibration "
+            "tool (e.g. `JetArea_Residual_EtaJES_GSC`). Expert option to override "
+            "JetETmiss recommendations.",
             expertMode=True)
 
     def instanceName (self) :
@@ -415,64 +410,52 @@ class LargeRJetAnalysisConfig (ConfigBlock) :
             noneAction='error',
             info="the jet container to run on. It is interpreted to determine "
             "the correct config blocks to call for small- or large-R jets.")
-        # TODO: add info string
         self.addOption ('jetInput', '', type=str,
             noneAction='error',
-            info="")
-        # TODO: add info string
+            info="the type of jet input. Supported options are: `LCTopo`, `TrackCaloCluster`, `UFO`.")
         self.addOption ('largeRMass', "Comb", type=str,
-            info="")
+            info="the large-R mass definition to use. Supported options are: `Comb`, `Calo`, `TA`.")
         self.addOption ('recalibratePhyslite', True, type=bool,
-            info="whether to run the CP::JetCalibrationAlg on PHYSLITE "
-            "derivations. The default is True.")
+            info="whether to run the `CP::JetCalibrationAlg` on PHYSLITE "
+            "derivations.")
         self.addOption ('systematicsModelJMR', "Full", type=str,
-            info="the NP reduction scheme to use for JMR: Full, Simple. The default is Full.")
+            info="the NP reduction scheme to use for JMR. Supported options are: `Full`, `Simple`.")
         # Adding these options to override the jet uncertainty config file when we have new recommendations
         # Calibration tool options
         self.addOption ('calibToolConfigFile', None, type=str,
-            info="name (str) of the config file to use for the jet calibration "
-            "tool. Expert option to override JetETmiss recommendations. The "
-            "default is None.",
+            info="name of the config file to use for the jet calibration "
+            "tool. Expert option to override JetETmiss recommendations.",
             expertMode=True)
         self.addOption ('calibToolCalibArea', None, type=str,
-            info="name (str) of the CVMFS area to use for the jet calibration "
-            "tool. Expert option to override JetETmiss recommendations. The "
-            "default is None.",
+            info="name of the CVMFS area to use for the jet calibration "
+            "tool. Expert option to override JetETmiss recommendations.",
             expertMode=True)
         self.addOption ('calibToolCalibSeq', None, type=str,
-            info="name (str) of the sequence to use for the jet calibration "
-            "tool (e.g. 'JetArea_Residual_EtaJES_GSC'). Expert option to override "
-            "JetETmiss recommendations. The default is None.",
+            info="name of the sequence to use for the jet calibration "
+            "tool (e.g. `JetArea_Residual_EtaJES_GSC`). Expert option to override "
+            "JetETmiss recommendations.",
             expertMode=True)
         # Uncertainties tool options
         self.addOption ('uncertToolConfigPath', None, type=str,
-            info="name (str) of the config file to use for the JES, JER, and JMS uncertainty "
-            "tool. Expert option to override JetETmiss recommendations. The "
-            "default is None.",
+            info="name of the config file to use for the JES, JER, and JMS uncertainty "
+            "tool. Expert option to override JetETmiss recommendations.",
             expertMode=True)
         self.addOption ('uncertToolConfigPathJMR', None, type=str,
-            info="name (str) of the config file to use for the JMR uncertainty "
-            "tool. Expert option to override JetETmiss recommendations. The "
-            "default is None.",
+            info="name of the config file to use for the JMR uncertainty "
+            "tool. Expert option to override JetETmiss recommendations.",
             expertMode=True)
         self.addOption ('minPt', 200.*GeV, type=float,
-            info="the minimum pt cut to apply to calibrated large-R jets. "
-            "The default is 200 GeV.")
+            info=r"the minimum $p_\mathrm{T}$ cut to apply to calibrated large-R jets.")
         self.addOption ('maxPt', 3000.*GeV, type=float,
-            info="the maximum pt cut to apply to calibrated large-R jets. "
-            "The default is 3000 GeV.")
+            info=r"the maximum $p_\mathrm{T}$ cut to apply to calibrated large-R jets.")
         self.addOption ('maxEta', 0., type=float,
-            info="the maximum |eta| cut to apply to calibrated large-R jets. "
-            "The default is 0.")
+            info=r"the maximum $\vert\eta\vert$ cut to apply to calibrated large-R jets.")
         self.addOption ('maxRapidity', 2., type=float,
-            info="the maximum rapidity cut to apply to calibrated large-R jets. "
-            "The default is 2.")        
+            info="the maximum rapidity cut to apply to calibrated large-R jets.")
         self.addOption ('minMass', 40.*GeV, type=float,
-            info="the minimum mass cut to apply to calibrated large-R jets. "
-            "The default is 40 GeV.")
+            info="the minimum mass cut to apply to calibrated large-R jets.")
         self.addOption ('maxMass', 600.*GeV, type=float,
-            info="the maximum mass cut to apply to calibrated large-R jets. "
-            "The default is 600 GeV.")
+            info="the maximum mass cut to apply to calibrated large-R jets.")
 
     def instanceName (self) :
         """Return the instance name for this block"""

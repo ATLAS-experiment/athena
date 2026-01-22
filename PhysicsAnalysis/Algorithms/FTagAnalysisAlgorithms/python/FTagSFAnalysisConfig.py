@@ -43,71 +43,69 @@ class FTagJetSFBlock(ConfigBlock):
             noneAction='error',
             info="a postfix to apply to decorations and algorithm names. "
             "Typically not needed here as internally the string "
-            "f'{btagger}_{btagWP}' is used.")
+            "`f'{btagger}_{btagWP}'` is used.")
         self.addOption ('btagWP', "Continuous", type=str,
-            info="the flavour tagging WP. The default is Continuous.")
+            info="the flavour tagging WP.")
         self.addOption('btagger', "GN2v01", type=str,
-            info="the flavour tagging algorithm: DL1dv01, GN2v01. The default is GN2v01.")
+            info="the flavour tagging algorithm: `DL1dv01`, `GN2v01`.")
         self.addOption('useCTagging', False, type=bool,
-            info="whether the fixed WP refer to b-tagging or c-tagging. Set to 'True' "
-            "for referring to c-tagging")
+            info="whether the fixed WP refer to b-tagging or c-tagging. Set to `True` "
+            "to make it refer to c-tagging.")
         self.addOption ('bTagCalibFile', None, type=str,
-            info="calibration file for CDI")
+            info="path to a custom b-tagging CDI file. If left empty, uses the latest available recommendations.")
         self.addOption ('bTagCalibTriggerFile', None, type=str,
-            info="trigger calibration file for CDI")
+            info="path to a custom b-tagging CDI file. If left empty, uses the latest available recommendations.")
         self.addOption ('generator', "autoconfig", type=str,
-            info="MC generator setup, for MC/MC SFs. The default is 'autoconfig'"
+            info="MC generator setup, for MC/MC SFs. The default is `autoconfig`"
             " (relies on the sample metadata).")
         self.addOption ('systematicsStrategy', 'SFEigen', type=str,
-            info="name of systematics model; presently choose between 'SFEigen' "
-            "and 'Envelope'")
+            info="name of systematics model; presently choose between `SFEigen` "
+            "and `Envelope`.")
         self.addOption ('eigenvectorReductionB', 'Loose', type=str,
-            info="b-jet scale factor Eigenvector reduction strategy; choose between "
-            "'Loose', 'Medium', 'Tight'")
+            info="b-jet scale factor eigenvector reduction strategy; choose between "
+            "`Loose`, `Medium`, `Tight`.")
         self.addOption ('eigenvectorReductionC', 'Loose', type=str,
-            info="b-jet scale factor Eigenvector reduction strategy; choose between "
-            "'Loose', 'Medium', 'Tight'")
+            info="b-jet scale factor eigenvector reduction strategy; choose between "
+            "`Loose`, `Medium`, `Tight`.")
         self.addOption ('eigenvectorReductionLight', 'Loose', type=str,
-            info="b-jet scale factor Eigenvector reduction strategy; choose between "
-            "'Loose', 'Medium', 'Tight'")
+            info="b-jet scale factor eigenvector reduction strategy; choose between "
+            "`Loose`, `Medium`, `Tight`.")
         self.addOption ('excludeFromEigenVectorTreatment', '', type=str,
             info="(semicolon-separated) names of uncertainties to be excluded from "
-            "all eigenvector decompositions (if used)")
+            "all eigenvector decompositions (if used).")
         self.addOption ('excludeFromEigenVectorBTreatment', '', type=str,
             info="(semicolon-separated) names of uncertainties to be excluded from "
-            "b-jet eigenvector decompositions (if used)")
+            "b-jet eigenvector decompositions (if used).")
         self.addOption ('excludeFromEigenVectorCTreatment', '', type=str,
             info="(semicolon-separated) names of uncertainties to be excluded from "
-            "c-jet eigenvector decompositions (if used)")
+            "c-jet eigenvector decompositions (if used).")
         self.addOption ('excludeFromEigenVectorLightTreatment', '', type=str,
             info="(semicolon-separated) names of uncertainties to be excluded from "
-            "light-flavour-jet eigenvector decompositions (if used)")
+            "light-flavour-jet eigenvector decompositions (if used).")
         self.addOption ('excludeRecommendedFromEigenVectorTreatment', False, type=str,
             info="whether or not to add recommended lists to the user specified "
-            "eigenvector decomposition exclusion lists")
+            "eigenvector decomposition exclusion lists.")
         self.addOption ('savePerJetSF', False, type=bool,
-            info="whether or not to save the per jet FTAG SF as output variable")
+            info="whether or not to save the per-jet FTAG SF as output variable.")
         self.addOption ('triggerChainsPerYear', {}, type=None,
             info="a dictionary with key (string) the year and value (list of "
-            "strings) the trigger chains. The default is {} (empty dictionary).")
+            "strings) the trigger chains.")
         self.addOption ('includeAllYearsPerRun', False, type=bool,
-            info="if True, all configured years in the LHC run will be included in all jobs. "
-            "The default is False.")
+            info="if `True`, all configured years in the LHC run will be included in all jobs.")
         self.addOption ('removeHLTPrefix', True, type=bool,
-            info="remove the HLT prefix from trigger chain names, "
-            "The default is True.")
+            info="remove the HLT prefix from trigger chain names.")
         self.addOption ('bTagOnlineTagger', None, type=str,
-            info="Online tagger to use to configure the CDI access",
+            info="online tagger to use to configure the CDI access.",
             expertMode=True)
         self.addOption ('bTagOnlineWP', None, type=str,
-            info="Online working point to use to configure the CDI access",
+            info="online working point to use to configure the CDI access.",
             expertMode=True)
         # Peculiar case default value set to None while type is bool 
         # A default value will be assigned by the getReadFromBTaggingObject function 
         # if this flag is not set 
         self.addOption('readFromBTaggingObject', None, type=bool,
-            info="whether to read the b-tagging information from the BTagging object "
-            "instead of the jet container. FTAG group has dropped BTagging object, all"
+            info="whether to read the b-tagging information from the `BTagging` object "
+            "instead of the jet container. FTAG group has dropped `BTagging` object, all"
             "b-tagging related variables are attached to jet container. This only serves"
             "as a compatibility option for analysis that use old derivations.")
 
@@ -275,25 +273,27 @@ class FTagEventSFBlock(ConfigBlock):
         self.addDependency('OverlapRemoval', required=False)
         self.addOption('containerName', '', type=str,
             noneAction='error',
-            info="the name of the input container.")
+            info="the input jet container with a possible selection, in the format "
+            "`container` or `container.selection`. The default recommendation is to "
+            "pass `container.baselineJvt` selection, e.g. if the calibrated jets "
+            "container is `AnaJets`, the recommendation is to pass `AnaJet.baselineJvt`.")
         self.addOption('selectionName', '', type=str,
             noneAction='error',
             info="a postfix to apply to decorations and algorithm names. "
             "Typically not needed here as internally the string "
-            "f'{btagger}_{btagWP}' is used.")
+            "`f'{btagger}_{btagWP}'` is used.")
         self.addOption ('btagWP', "Continuous", type=str,
-            info="the flavour tagging WP. The default is Continuous.")
+            info="the flavour tagging WP.")
         self.addOption('btagger', "GN2v01", type=str,
-            info="the flavour tagging algorithm: DL1dv01, GN2v01. The default is GN2v01.")
+            info="the flavour tagging algorithm: `DL1dv01`, `GN2v01`.")
         self.addOption ('triggerChainsPerYear', {}, type=None,
             info="a dictionary with key (string) the year and value (list of "
-            "strings) the trigger chains. The default is {} (empty dictionary).")
+            "strings) the trigger chains.")
         self.addOption ('includeAllYearsPerRun', False, type=bool,
-            info="if True, all configured years in the LHC run will be included "
-            "in all jobs. The default is False.")
+            info="if `True`, all configured years in the LHC run will be included "
+            "in all jobs.")
         self.addOption ('removeHLTPrefix', True, type=bool,
-            info="remove the HLT prefix from trigger chain names, "
-            "The default is True.")
+            info="remove the HLT prefix from trigger chain names.")
 
     def instanceName (self) :
         """Return the instance name for this block"""

@@ -17,17 +17,17 @@ class TruthCollectionsFixerBlock(ConfigBlock):
             "truthParticleContainersToFix",
             None,
             type=list,
-            info="list of input DAOD truthParticle containers to fix",
+            info="list of input DAOD truthParticle containers to fix.",
         )
         self.addOption(
             "truthVertexContainersToFix",
             None,
             type=list,
-            info="list of input DAOD truthVertex containers to fix",
+            info="list of input DAOD truthVertex containers to fix.",
         )
         self.addOption("fixDAODTruthRecord", False, type=bool,
                        info="older derivations have the old HepMC barcodes and need to be fixed, otherwise we get "
-                       "a crash on 'missing ::uid'. Schedules an instance of TruthCollectionsFixerBlock. "
+                       "a crash on 'missing `::uid`'. Schedules an instance of `TruthCollectionsFixerBlock`. "
                        "Not needed for recent derivations.")
 
     def makeAlgs(self, config):

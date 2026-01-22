@@ -14,11 +14,11 @@ class XbbConfig (ConfigBlock):
         self.addOption('XbbWP', 'FlatMassQCDEff_0p25', type=str,
                        info="the Xbb tagging WP." )
         self.addOption('Xbbtagger', 'GN2Xv01', type=str,
-                       info="The output name of the Xbb tagger - should match the first level key of the calibration json file." )
+                       info="the output name of the Xbb tagger - should match the first level key of the calibration json file." )
         self.addOption('calibFile', None, type=str,
-                       info="the calibration json file")
+                       info="path to a Xbb JSON calibration file.")
         self.addOption('noEffSF', False, type=bool,
-                       info="do not apply the eff SF")
+                       info="do not compute the efficiency SF.")
 
     def instanceName (self) :
         """Return the instance name for this block"""

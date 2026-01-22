@@ -17,9 +17,9 @@ class PrintToolConfigAlgBlock(ConfigBlock):
         super (PrintToolConfigAlgBlock, self).__init__ ()
 
         self.addOption('OutputFile', 'tool_config.txt', type=str,
-                       info="Name of the file where the tool configuration will be written.")
+                       info="name of the file where the tool configuration will be written.")
         self.addOption('OutputDir', None, type=str,
-                       info="Directory where the output file will be written. If 'None',"
+                       info="directory where the output file will be written. If left empty,"
                        " the current directory of the job.")
 
     def instanceName (self) :

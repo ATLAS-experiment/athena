@@ -9,18 +9,18 @@ class ParticleLevelPhotonsBlock(ConfigBlock):
     def __init__(self):
         super(ParticleLevelPhotonsBlock, self).__init__()
         self.addOption('containerName', 'TruthPhotons', type=str,
-                       info='the name of the input truth photons container')
+                       info='the name of the input truth photons container.')
         self.addOption('selectionName', '', type=str,
-                       info='the name of the selection to create. The default is "",'
-                       ' which applies the selection to all truth photons.')
+                       info='the name of the selection to create. If left empty, '
+                       'applies the selection to all truth photons.')
         self.addOption('isolated', True, type=bool,
                        info='select only truth photons that are isolated.')
         self.addOption('isolationVariable', '', type=str,
-                       info='variable to use in isolation cuts of the form "var/pT < cut".')
+                       info='variable to use in isolation cuts of the form `var/pT < cut`.')
         self.addOption('isolationCut', -1, type=float,
-                       info='threshold to use in isolation cuts of the form "var/pT < cut".')
+                       info='threshold to use in isolation cuts of the form `var/pT < cut`.')
         self.addOption('saveUID', False, type=bool,
-                       info='save unique ID in output')
+                       info='save unique ID in output.')
         # Always skip on data
         self.setOptionValue('skipOnData', True)
 

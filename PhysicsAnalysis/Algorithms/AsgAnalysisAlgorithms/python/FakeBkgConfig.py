@@ -12,7 +12,7 @@ class FakeBkgBlock(ConfigBlock):
     def __init__(self):
         super(FakeBkgBlock, self).__init__()
         self.addOption('setupName', '', type=str,
-                       info='custom name for this instance of the algorithm and tool')
+                       info='unique name for this instance of the algorithm and tool.')
         self.addOption('electrons', None, type=str,
                        info='the input electron container, with a possible selection, in the format `container` or `container.selection`.')
         self.addOption('electronsTarget', None, type=str,

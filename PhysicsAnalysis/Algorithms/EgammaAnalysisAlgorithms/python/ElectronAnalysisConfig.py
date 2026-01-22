@@ -22,67 +22,61 @@ class ElectronCalibrationConfig (ConfigBlock) :
         super (ElectronCalibrationConfig, self).__init__ ()
         self.setBlockName('Electrons')
         self.addOption ('inputContainer', '', type=str,
-            info="select electron input container, by default set to Electrons")
+            info="the name of the input electron container. If left empty, automatically defaults "
+            "to `AnalysisElectrons` for PHYSLITE or `Electrons` otherwise.")
         self.addOption ('containerName', '', type=str,
             noneAction='error',
             info="the name of the output container after calibration.")
         self.addOption ('ESModel', '', type=str,
-            info="flag of egamma calibration recommendation.")
+            info="flag for Egamma calibration. If left empty, use the current recommendations.")
         self.addOption ('decorrelationModel', '1NP_v1', type=str,
-            info="egamma energy scale decorrelationModel. The default is 1NP_v1. "
-            "Supported Model: 1NP_v1, FULL_v1.")
+            info="decorrelation model for the EGamma energy scale. Supported choices are: `1NP_v1`, `FULL_v1`.")
         self.addOption ('postfix', '', type=str,
             info="a postfix to apply to decorations and algorithm names. Typically "
             "not needed here since the calibration is common to all electrons.")
         self.addOption ('crackVeto', False, type=bool,
-            info="whether to perform LAr crack veto based on the cluster eta, "
-            "i.e. remove electrons within 1.37<|eta|<1.52. The default "
-            "is False.")
+            info=r"whether to perform LAr crack veto based on the cluster $\eta$, "
+            r"i.e. remove electrons within $1.37<\vert\eta\vert<1.52$.")
         self.addOption ('isolationCorrection', True, type=bool,
             info="whether or not to perform isolation corrections (leakage "
             "corrections), i.e. set up an instance of "
-            "CP::EgammaIsolationCorrectionAlg.")
+            "`CP::EgammaIsolationCorrectionAlg`.")
         self.addOption ('recalibratePhyslite', True, type=bool,
-            info="whether to run the CP::EgammaCalibrationAndSmearingAlg on "
-            "PHYSLITE derivations. The default is True.")
+            info="whether to run the `CP::EgammaCalibrationAndSmearingAlg` on "
+            "PHYSLITE derivations")
         self.addOption ('minPt', 4.5*GeV, type=float,
-            info="the minimum pT cut to apply to calibrated electrons. "
-            "The default is 4.5 GeV.")
+            info="the minimum pT cut to apply to calibrated electrons.")
         self.addOption ('maxEta', 2.47, type=float,
-            info="maximum electron |eta| (float). The default is 2.47.")
+            info=r"maximum electron $\vert\eta\vert$.")
         self.addOption ('forceFullSimConfigForP4', False, type=bool,
             info="whether to force the tool to use the configuration meant for "
-            "full simulation samples for P4 corrections. Only for testing purposes. "
-            "The default is False.")
+            "full simulation samples for 4-vector corrections. Only for testing purposes.")
         self.addOption ('forceFullSimConfigForIso', False, type=bool,
             info="whether to force the tool to use the configuration meant for "
-            "full simulation samples for isolation corrections. Only for testing purposes. "
-            "The default is False.")
+            "full simulation samples for isolation corrections. Only for testing purposes.")
         self.addOption ('splitCalibrationAndSmearing', False, type=bool,
-            info="EXPERIMENTAL: This splits the EgammaCalibrationAndSmearingTool "
+            info="EXPERIMENTAL: This splits the `EgammaCalibrationAndSmearingTool` "
             " into two steps. The first step applies a baseline calibration that "
             "is not affected by systematics. The second step then applies the "
-            "systematics dependent corrections.  The net effect is that the "
+            "systematics-dependent corrections. The net effect is that the "
             "slower first step only has to be run once, while the second is run "
-            "once per systematic. ATLASG-2358",
+            "once per systematic. ATLASG-2358.",
             expertMode=True)
         self.addOption ('runTrackBiasing', False, type=bool,
-            info="EXPERIMENTAL: This enables the InDetTrackBiasingTool, for "
-            "tracks associated to Electrons. The the tool does not have run 3 "
+            info="EXPERIMENTAL: This enables the `InDetTrackBiasingTool`, for "
+            "tracks associated to electrons. The tool does not have Run 3 "
             "recommendations yet.",
             expertMode=True)
-
         self.addOption ('decorateTruth', False, type=bool,
-            info="decorate truth particle information on the reconstructed one")
+            info="decorate truth particle information on the reconstructed one.")
         self.addOption ('decorateCaloClusterEta', False, type=bool,
-            info="decorate the calo cluster eta on the reconstructed one")
+            info=r"decorate the calo cluster $\eta$.")
         self.addOption ('writeTrackD0Z0', False, type = bool,
-            info="save the d0 significance and z0sinTheta variables so they can be written out")
+            info=r"save the $d_0$ significance and $z_0\sin\theta$ variables.")
         self.addOption ('decorateEmva', False, type=bool,
-            info="decorate E_mva_only on the objects (needed for columnar tools/PHYSLITE)")
-
+            info="decorate `E_mva_only` on the electrons (needed for columnar tools/PHYSLITE).")
         self.addOption ('decorateSamplingPattern', False, type=bool,
-            info="add samplingPattern decorations to clusters as part of PHYSLITE")
+            info="decorate `samplingPattern` on the clusters (meant for PHYSLITE).")
 
     def instanceName (self) :
         """Return the instance name for this block"""
@@ -293,80 +287,71 @@ class ElectronWorkingPointConfig (ConfigBlock) :
             info="the name of the input container.")
         self.addOption ('selectionName', '', type=str,
             noneAction='error',
-            info="the name of the electron selection to define (e.g. tight or "
-            "loose).")
+            info="the name of the electron selection to define (e.g. `tight` or "
+            "`loose`).")
         self.addOption ('postfix', None, type=str,
             info="a postfix to apply to decorations and algorithm names. "
-            "Typically not needed here as selectionName is used internally.")
+            "Typically not needed here as `selectionName` is used internally.")
         self.addOption ('trackSelection', True, type=bool,
             info="whether or not to set up an instance of "
-            "CP::AsgLeptonTrackSelectionAlg, with the recommended d_0 and "
-            "z_0 sin(theta) cuts. The default is True.")
+            "`CP::AsgLeptonTrackSelectionAlg`, with the recommended $d_0$ and "
+            r"$z_0\sin\theta$ cuts")
         self.addOption ('maxD0Significance', 5, type=float,
-            info="maximum d0 significance used for the trackSelection"
-            "The default is 5")
+            info="maximum $d_0$ significance used for the track selection.")
         self.addOption ('maxDeltaZ0SinTheta', 0.5, type=float,
-            info="maximum z0sinTheta in mm used for the trackSelection"
-            "The default is 0.5 mm")
+            info=r"maximum $z_0\sin\theta$ in mm used for the track selection.")
         self.addOption ('identificationWP', None, type=str,
-            info="the ID WP (string) to use. Supported ID WPs: TightLH, "
-            "MediumLH, LooseBLayerLH, TightDNN, MediumDNN, LooseDNN, "
-            "TightNoCFDNN, MediumNoCFDNN, VeryLooseNoCF97DNN, NoID.",
+            info="the ID WP to use. Supported ID WPs: `TightLH`, "
+            "`MediumLH`, `LooseBLayerLH`, `TightDNN`, `MediumDNN`, `LooseDNN`, "
+            "`TightNoCFDNN`, `MediumNoCFDNN`, `VeryLooseNoCF97DNN`, `NoID`.",
             expertMode=["NoID"])
         self.addOption ('isolationWP', None, type=str,
-            info="the isolation WP (string) to use. Supported isolation WPs: "
-            "HighPtCaloOnly, Loose_VarRad, Tight_VarRad, TightTrackOnly_"
-            "VarRad, TightTrackOnly_FixedRad, NonIso.")
+            info="the isolation WP to use. Supported isolation WPs: "
+            "`HighPtCaloOnly`, `Loose_VarRad`, `Tight_VarRad`, `TightTrackOnly_"
+            "VarRad`, `TightTrackOnly_FixedRad`, `NonIso`.")
         self.addOption ('convSelection', None, type=str,
-            info="enter additional selection (string) to use. To be used with "
-            "TightLH or will crash. Supported keywords:"
-            "Veto, MatConv, GammaStar.")
+            info="enter additional selection to use for conversions. To be used with "
+            "`TightLH` or will crash. Supported keywords:"
+            "`Veto`, `MatConv`, `GammaStar`.")
         self.addOption ('addSelectionToPreselection', True, type=bool,
             info="whether to retain only electrons satisfying the working point "
-            "requirements. The default is True.")
+            "requirements")
         self.addOption ('closeByCorrection', False, type=bool,
-            info="whether to use close-by-corrected isolation working points")
+            info="whether to use close-by-corrected isolation working points.")
         self.addOption ('recomputeID', False, type=bool,
-            info="whether to rerun the ID LH/DNN. The default is False, i.e. to use "
-            "derivation flags.")
+            info="whether to rerun the ID LH/DNN, or rely on derivation flags.")
         self.addOption ('chargeIDSelectionRun2', False, type=bool,
-            info="whether to run the ECIDS tool. Only available for run 2. "
-            "The default is False.")
+            info="whether to run the ECIDS tool. Only available for Run 2.")
         self.addOption ('recomputeChargeID', False, type=bool,
-            info="whether to rerun the ECIDS. The default is False, i.e. to use "
-            "derivation flags.")
+            info="whether to rerun the ECIDS, or rely on derivation flags.")
         self.addOption ('doFSRSelection', False, type=bool,
             info="whether to accept additional electrons close to muons for "
             "the purpose of FSR corrections to these muons. Expert feature "
-            "requested by the H4l analysis running on PHYSLITE. "
-            "The default is False.",
+            "requested by the H4l analysis running on PHYSLITE.",
             expertMode=True)
         self.addOption ('noEffSF', False, type=bool,
             info="disables the calculation of efficiencies and scale factors. "
             "Experimental! only useful to test a new WP for which scale "
-            "factors are not available. The default is False.",
+            "factors are not available.",
             expertMode=True)
         self.addOption ('saveDetailedSF', True, type=bool,
-            info="save all the independent detailed object scale factors. "
-            "The default is True.")
+            info="save all the independent detailed object scale factors.")
         self.addOption ('saveCombinedSF', False, type=bool,
-            info="save the combined object scale factor. "
-            "The default is False.")
+            info="save the combined object scale factor.")
         self.addOption ('forceFullSimConfig', False, type=bool,
             info="whether to force the tool to use the configuration meant for "
-            "full simulation samples. Only for testing purposes. "
-            "The default is False.")
+            "full simulation samples. Only for testing purposes.")
         self.addOption ('correlationModelId', 'SIMPLIFIED', type=str,
-            info="the correlation model (string) to use for ID scale factors "
-            "Supported models: SIMPLIFIED (default), FULL, TOTAL, TOYS")
+            info="the correlation model to use for ID scale factors. "
+            "Supported models: `SIMPLIFIED`, `FULL`, `TOTAL`, `TOYS`.")
         self.addOption ('correlationModelIso', 'SIMPLIFIED', type=str,
-            info="the correlation model (string) to use for isolation scale factors "
-            "Supported models: SIMPLIFIED (default), FULL, TOTAL, TOYS")
+            info="the correlation model to use for isolation scale factors, "
+            "Supported models: `SIMPLIFIED`, `FULL`, `TOTAL`, `TOYS`.")
         self.addOption ('correlationModelReco', 'SIMPLIFIED', type=str,
-            info="the correlation model (string) to use for reconstruction scale factors "
-            "Supported models: SIMPLIFIED (default), FULL, TOTAL, TOYS")
+            info="the correlation model to use for reconstruction scale factors. "
+            "Supported models: `SIMPLIFIED`, `FULL`, `TOTAL`, `TOYS`.")
         self.addOption('addChargeMisIDSF', False, type=bool,
-            info="Adds scale factors for charge-misID.")
+            info="adds scale factors for charge-misID.")
 
     def instanceName (self) :
         """Return the instance name for this block"""
@@ -796,32 +781,27 @@ class ElectronTriggerAnalysisSFBlock (ConfigBlock):
 
         self.addOption ('triggerChainsPerYear', {}, type=None,
                         info="a dictionary with key (string) the year and value (list of "
-                        "strings) the trigger chains. The default is {} (empty dictionary).")
+                        "strings) the trigger chains.")
         self.addOption ('electronID', '', type=str,
-                        info="the electron ID WP (string) to use.")
+                        info="the electron ID WP to use.")
         self.addOption ('electronIsol', '', type=str,
-                        info="the electron isolation WP (string) to use.")
+                        info="the electron isolation WP to use.")
         self.addOption ('saveEff', False, type=bool,
-                        info="define whether we decorate also the trigger scale efficiency "
-                        "The default is false.")
+                        info="define whether we decorate also the trigger scale efficiency.")
         self.addOption ('prefixSF', 'trigEffSF', type=str,
-                        info="the decoration prefix for trigger scale factors, "
-                        "the default is 'trigEffSF'")
+                        info="the decoration prefix for trigger scale factors.")
         self.addOption ('prefixEff', 'trigEff', type=str,
-                        info="the decoration prefix for MC trigger efficiencies, "
-                        "the default is 'trigEff'")
+                        info="the decoration prefix for MC trigger efficiencies.")
         self.addOption ('includeAllYearsPerRun', False, type=bool,
-                        info="if True, all configured years in the LHC run will "
-                        "be included in all jobs. The default is False.")
+                        info="all configured years in the LHC run will "
+                        "be included in all jobs.")
         self.addOption ('removeHLTPrefix', True, type=bool,
-                        info="remove the HLT prefix from trigger chain names, "
-                        "The default is True.")
+                        info="remove the HLT prefix from trigger chain names.")
         self.addOption ('useToolKeyAsOutput', False, type=bool,
-                        info="use tool trigger key as output, "
-                        "The default is False.")
+                        info="use the tool trigger key as output.")
         self.addOption ('containerName', '', type=str,
                         info="the input electron container, with a possible selection, in "
-                        "the format container or container.selection.")
+                        "the format `container` or `container.selection`.")
 
     def instanceName (self) :
         """Return the instance name for this block"""

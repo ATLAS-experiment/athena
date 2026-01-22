@@ -20,7 +20,7 @@ class JetJvtAnalysisConfig (ConfigBlock) :
             info="a postfix to apply to decorations and algorithm names. Typically "
             "not needed here.")
         self.addOption ('enableFJvt', False, type=bool,
-            info="whether to enable forward JVT calculations. The default is False.")
+            info="whether to enable forward JVT calculations.")
 
     def instanceName (self) :
         """Return the instance name for this block"""

@@ -13,68 +13,68 @@ class MetAnalysisConfig (ConfigBlock):
         super (MetAnalysisConfig, self).__init__ ()
         self.addOption('containerName', '', type=str,
             noneAction='error',
-            info="the name of the input container")
+            info="the name of the output container.")
         self.addOption ('useJVT', True, type=bool,
-            info="whether to use the JVT decision in the MET calculation")
+            info="whether to use the JVT decision in the MET calculation.")
         self.addOption ('useFJVT', False, type=bool,
-            info="whether to use the forward JVT decision in the MET calculation")
+            info="whether to use the forward JVT decision in the MET calculation.")
         self.addOption ('treatPUJets', False, type=bool,
-            info="whether to treat pile-up jets in the MET significance calculation")
+            info="whether to treat pile-up jets in the MET significance calculation.")
         self.addOption ('setMuonJetEMScale', True, type=bool,
             info="enables the handling of muons in jets for the MET calculation. "
             "Should be turned off for analyses where muons are not reconstructed "
             "at all.")
         self.addOption ('jets', "", type=str,
-            info="the input jet container")
+            info="the input jet container.")
         self.addOption ('electrons', "", type=str,
             info="the input electron container, with a possible selection, in "
-            "the format `container` or `container.selection`")
+            "the format `container` or `container.selection`.")
         self.addOption ('muons', "", type=str,
             info="the input muon container, with a possible selection, in the "
-            "format `container` or `container.selection`")
+            "format `container` or `container.selection`.")
         self.addOption ('photons', "", type=str,
             info="the input photon container, with a possible selection, in "
-            "the format `container` or `container.selection`")
+            "the format `container` or `container.selection`.")
         self.addOption ('taus', "", type=str,
             info="the input tau-jet container, with a possible selection, in "
-            "the format `container` or `container.selection`")
+            "the format `container` or `container.selection`.")
         self.addOption ('invisible', [], type=None,
             info="any input containers to be treated as invisible particles, "
-            "as a single string or a list of strings in the format `container` or `container.selection`")
+            "as a single string or a list of strings in the format `container` or `container.selection`.")
         self.addOption ('metWP', "Tight", type=str,
-            info="the MET working point to use: Loose, Tight, Tighter, "
-            "Tenacious")
+            info="the MET working point to use: `Loose`, `Tight`, `Tighter`, "
+            "`Tenacious`.")
         self.addOption ('skipSystematicJetSelection', False, type=bool,
             info="EXPERIMENTAL: whether to use simplified OR based on nominal jets "
             "and for jet-related systematics only. "
             "WARNING: this option is strictly for doing physics studies of the feasibility "
-            "of this OR scheme, it should not be used in a regular analysis",
+            "of this OR scheme, it should not be used in a regular analysis.",
             expertMode=True)
         self.addOption ('saveSignificance', True, type=bool,
-            info="whether to save the MET significance (default=True)")
+            info="whether to save the MET significance.")
         self.addOption ('jetCalibConfig', "", type=str,
-            info="config file used in jet calibration (for MET significance)")
+            info="config file used in jet calibration (for MET significance).")
         self.addOption ('jetCalibSequence', "", type=str,
-            info="jet calibration sequence (for MET significance)")
+            info="jet calibration sequence (for MET significance).")
         self.addOption ('jetCalibArea', "", type=str,
-            info="CalibArea used in jet calibration (for MET significance)")
+            info="name of the CalibArea used in jet calibration (for MET significance).")
         self.addOption ('egammaESModel', "", type=str,
-            info="ESModel for egamma calibration (for MET significance)")
+            info="ESModel for EGamma calibration (for MET significance).")
         self.addOption ('egammaDecorrelationModel', "1NP_v1", type=str,
-            info="Decorrelation model for egamma calibration (for MET significance)")
+            info="decorrelation model for EGamma calibration (for MET significance).")
         self.addOption ('tauTESConfig', "CombinedTES_R22_Round2.5_v2.root", type=str,
-            info="Config file for tau energy scale calibration (for MET significance)")
+            info="config file for tau energy scale calibration (for MET significance).")
         self.addOption ('tauUseMVAResolution', True, type=bool,
-            info="Use MVA resolution for taus? (for MET significance)")
+            info="whether to use MVA resolution for taus-jets (for MET significance).")
         self.addOption ('addExtraSignificanceVars', False, type=bool,
-            info="whether to save some additional (event-based) MET significance variables (default=False)")
+            info="whether to save some additional (event-based) MET significance variables")
         self.addOption ('useLRT', False, type=bool,
-            info="whether to use LRT MET Core and association map")
+            info="whether to use LRT MET Core and association map.")
         self.addOption ('useCaloSoftTerm', False, type=bool,
-            info="(expert) use calo- instead of track-based soft term",
+            info="whether to use calo- instead of track-based soft term.",
             expertMode=True)
         self.addOption ('softTermResolution', -1.0, type=float,
-            info="(expert) override the default soft term resolution in METSignificance",
+            info="override the default soft term resolution in METSignificance.",
             expertMode=True)
 
     def instanceName (self) :

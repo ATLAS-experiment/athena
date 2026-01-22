@@ -9,17 +9,17 @@ class ParticleLevelElectronsBlock(ConfigBlock):
     def __init__(self):
         super(ParticleLevelElectronsBlock, self).__init__()
         self.addOption('containerName', 'TruthElectrons', type=str,
-                       info='the name of the input truth electrons container')
+                       info='the name of the input truth electrons container.')
         self.addOption('selectionName', '', type=str,
-                       info='the name of the selection to create. The default is "",'
-                       ' which applies the selection to all truth electrons.')
+                       info='the name of the selection to create. If left empty, '
+                       'applies the selection to all truth electrons.')
         self.addOption('isolated', True, type=bool,
                        info='select only truth electrons that are isolated.')
         self.addOption('notFromTau', True, type=bool,
                        info='select only truth electrons that did not orginate '
-                       'from a tau decay.')
+                       'from a tau-lepton decay.')
         self.addOption('saveUID', False, type=bool,
-                       info='save unique ID in output')
+                       info='save unique ID in output.')
         # Always skip on data
         self.setOptionValue('skipOnData', True)
 

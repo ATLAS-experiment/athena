@@ -25,53 +25,48 @@ class TriggerAnalysisBlock (ConfigBlock):
         super (TriggerAnalysisBlock, self).__init__ ()
         self.addOption ('triggerChainsPerYear', {}, type=None,
             info="a dictionary with key (string) the year and value (list of "
-            "strings) the trigger chains. You can also use || within a string "
+            "strings) the trigger chains. You can also use `||` within a string "
             "to enforce an OR of triggers without looking up the individual "
-            "triggers. Used for both trigger selection and SFs. "
-            "The default is {} (empty dictionary).")
+            "triggers. Used for both trigger selection and SFs.")
         self.addOption ('multiTriggerChainsPerYear', {}, type=None,
             info="a dictionary with key (string) a trigger set name and value a "
-            "triggerChainsPerYear dictionary, following the previous convention. "
+            "`triggerChainsPerYear` dictionary, following the previous convention. "
             "Relevant for analyses using different triggers in different categories, "
-            "where the trigger global scale factors shouldn't be combined. "
-            "The default is {} (empty dictionary).")
+            "where the trigger global scale factors shouldn't be combined.")
         self.addOption ('triggerChainsForSelection', [], type=None,
             info="a list of trigger chains (list of strings) to be used for "
             "trigger selection. Only set it if you need a different setup "
-            "than for trigger SFs. The default is [] (empty list).")
+            "than for trigger SFs.")
         self.addOption ('triggerChainsForDecoration', [], type=None,
             info="a list of trigger chains (list of strings) to be used for "
-            "trigger decoration, if it needs to be different from the selection one. "
-            "The default is [] (empty list).")
+            "trigger decoration, if it needs to be different from the selection one.")
         self.addOption ('prescaleDecoration', 'prescale', type=str,
-            info="name (prefix) of decoration for trigger prescales.")
+            info="name of the decoration for trigger prescales.")
         self.addOption ('prescaleLumiCalcFiles', [], type=None,
-            info="a list of lumical files (list of strings) to calculate "
-            "trigger prescales. The default is [] (empty list). Mutually "
-            "exclusive with prescaleLumiCalcFilesPerYear")
+            info="a list of lumicalc files (list of strings) to calculate "
+            "trigger prescales. Mutually "
+            "exclusive with `prescaleLumiCalcFilesPerYear`.")
         self.addOption ('prescaleLumiCalcFilesPerYear', {}, type=None,
             info="a dicrionary with key (string) the year and value (list of "
             "strings) the list of lumicalc files to calculate trigger prescales "
-            "for an individual data year. The default is {} (empty dictionary). "
-            "Mutually exclusive with prescaleLumiCalcFiles")
+            "for an individual data year. "
+            "Mutually exclusive with `prescaleLumiCalcFiles`.")
         self.addOption ('prescaleTriggersFormula', '', type=str,
             info="a formula used in (un)prescaling, producing overall prescale "
             "factor instead of prescale per trigger.")
         self.addOption ('prescaleMC', False, type=bool,
-            info="ouput trigger prescales when running on MC. The default is False.")
+            info="output trigger prescales when running on MC.")
         self.addOption ('unprescaleData', False, type=bool,
-            info="ouput trigger prescales when running on Data. The default is False.")
+            info="output trigger prescales when running on Data.")
         self.addOption ('prescaleIncludeAllYearsPerRun', False, type=bool,
-            info="if True, trigger prescales will include all configured years "
-            "from prescaleLumiCalcFilesPerYear in all jobs. The default is False.")
+            info="trigger prescales will include all configured years "
+            "from `prescaleLumiCalcFilesPerYear` in all jobs.")
         self.addOption ('splitPerLHCRun', False, type=bool,
-            info="if True, trigger branches will only be processed for the current LHC run.")
+            info="trigger branches will only be processed for the current LHC run.")
         self.addOption ('noFilter', False, type=bool,
-            info="do not apply an event filter. The default is False, i.e. "
-            "remove events not passing trigger selection and matching.")
-        # TODO: add info string
+            info="do not apply an event filter (i.e. keep events not passing trigger selection or matching).")
         self.addOption ('noL1', False, type=bool,
-            info="")
+            info="toggle off the L1 trigger decision. This flag is required e.g. for running the algorithm on TLA stream data.")
 
     def instanceName (self) :
         """Return the instance name for this block"""

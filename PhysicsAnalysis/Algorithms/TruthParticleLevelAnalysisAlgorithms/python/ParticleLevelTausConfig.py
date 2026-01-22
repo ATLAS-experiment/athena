@@ -9,14 +9,14 @@ class ParticleLevelTausBlock(ConfigBlock):
     def __init__(self):
         super(ParticleLevelTausBlock, self).__init__()
         self.addOption('containerName', 'TruthTaus', type=str,
-                       info='the name of the input truth taus container')
+                       info='the name of the input truth taus container.')
         self.addOption('selectionName', '', type=str,
-                       info='the name of the selection to create. The default is "",'
-                       ' which applies the selection to all truth taus.')
+                       info='the name of the selection to create. If left empty, '
+                       'applies the selection to all truth taus.')
         self.addOption('isolated', True, type=bool,
                        info='select only truth taus that are isolated.')
         self.addOption('saveUID', False, type=bool,
-                       info='save unique ID in output')
+                       info='save unique ID in output.')
         # Always skip on data
         self.setOptionValue('skipOnData', True)
 
