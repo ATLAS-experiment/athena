@@ -66,7 +66,6 @@ double truthVisTauPt(const xAOD::TauJet& xTau);
 double truthTauAbsEta(const xAOD::TauJet& xTau);
 /** return truth decay mode (if hadronic truth tau match)*/
 double truthDecayMode(const xAOD::TauJet& xTau);
-const xAOD::TruthParticle* getTruth(const xAOD::TauJet& xTau);
 /**
  * @brief Get the Truth Decay Mode from TruthTau particle
  * 
