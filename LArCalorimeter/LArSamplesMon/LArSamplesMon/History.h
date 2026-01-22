@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -16,6 +16,7 @@
 #include "LArCafJobs/EventData.h"//implemented method
 #include "TVectorD.h" //typedef
 #include <vector>
+#include <memory>
 
 class TString;
 
@@ -69,7 +70,7 @@ namespace LArSamples {
       OFC* ofc(unsigned int i, int lwb = -1, int upb = -1, double time = Definitions::none, bool useCorrs = true) const;
       History* refit(Chi2Params pars = DefaultChi2) const;
       History* adjust() const;
-      History* filter(const TString& cuts) const;
+      std::unique_ptr<History> filter(const TString& cuts) const;
       
       bool refVal(unsigned int i, unsigned int sample, double& val, double& err) const;
       bool delta(unsigned int i, unsigned int sample, double& del) const;
