@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArSamplesMon/D3PDConverter.h"
@@ -20,6 +20,14 @@ using std::cout;
 using std::endl;
 
 using namespace LArSamples;
+
+D3PDConverter::D3PDConverter(TTree& tree, const TString& templateFile, const TString& translatorFile)
+  : CaloD3PDClass(&tree)
+{
+  initMapping(templateFile, translatorFile);
+}
+
+D3PDConverter::~D3PDConverter() = default;
 
 bool D3PDConverter::makeSamplesTuple(const TString& outputFileName)
 {

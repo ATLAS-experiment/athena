@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -16,6 +16,7 @@
 class TString;
 
 #include <map>
+#include <memory>
 
 
 namespace LArSamples {
@@ -28,17 +29,15 @@ namespace LArSamples {
     public:
 
       /** @brief Constructor  */
-      D3PDConverter(TTree& tree, const TString& templateFile, const TString& translatorFile)
-       : CaloD3PDClass(&tree) { initMapping(templateFile, translatorFile); }
-       
-      virtual ~D3PDConverter() { }
+      D3PDConverter(TTree& tree, const TString& templateFile, const TString& translatorFile);
+      virtual ~D3PDConverter();
 
       bool makeSamplesTuple(const TString& outputFileName);
 
       bool initMapping(const TString& templateFile, const TString& translatorFile);
       
       std::map<unsigned int, unsigned int> m_id2hash;
-      Interface* m_template;
+      std::unique_ptr<Interface> m_template;
   };
 }
 

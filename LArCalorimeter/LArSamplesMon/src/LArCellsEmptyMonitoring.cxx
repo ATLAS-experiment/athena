@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // LArCellsEmptyMonitoring
@@ -245,7 +245,7 @@ void LArCellsEmptyMonitoring::TestRun(const TString& inputfile)
 
  
   // Opening file:
-  std::unique_ptr<LArSamples::Interface> tuple ((LArSamples::Interface*)Interface::open(inputfile));
+  std::unique_ptr<LArSamples::Interface> tuple (Interface::open(inputfile));
   printf("Number of events: %u %u\n",tuple->nEvents(),tuple->nChannels()); 
   unsigned int nchannels = tuple->nChannels();
 
@@ -713,7 +713,7 @@ printf("Set threshold at %4.3f counts per cell for LB range. \n",(MeanHits+(nsig
   printf("Done.\n");
  
   // Opening file:
-  LArSamples::Interface* tuple = (LArSamples::Interface*)Interface::open(inputfile);
+  std::unique_ptr<LArSamples::Interface> tuple = Interface::open(inputfile);
   printf("Number of events: %u %u\n",tuple->nEvents(),tuple->nChannels()); //tuple->ShowEvents("energy>0.");
   unsigned int nchannels = tuple->nChannels();
 
@@ -1018,7 +1018,7 @@ void LArCellsEmptyMonitoring::GetLimits_EqLB(const char* inputfile, int& lbmin, 
   int lb=0.;
 
   // Opening file:
-  LArSamples::Interface* tuple = (LArSamples::Interface*)Interface::open(inputfile);
+  std::unique_ptr<LArSamples::Interface> tuple = Interface::open(inputfile);
   
   unsigned int nchannels = tuple->nChannels();
   
@@ -1076,7 +1076,7 @@ std::vector<int, std::allocator<int> >  LArCellsEmptyMonitoring::GetBadLBList(co
   double NSIG = nsigma;
 
   // Opening file:
-  LArSamples::Interface* tuple = (LArSamples::Interface*)Interface::open(inputfile);
+  std::unique_ptr<LArSamples::Interface> tuple = Interface::open(inputfile);
   unsigned int nchannels = tuple->nChannels();
 
   // -------------------------------------------------------------------------
@@ -1237,7 +1237,7 @@ void LArCellsEmptyMonitoring::GetMeanCellHits(const char* inputfile, int nlb, in
 
   int  nHits = 0., lumiBlock = 0.,nCells = 0.;
   double energy = 0, noise = 0;
-  std::unique_ptr<LArSamples::Interface> tuple((LArSamples::Interface*)Interface::open(inputfile));
+  std::unique_ptr<LArSamples::Interface> tuple(Interface::open(inputfile));
   unsigned int nchannels = tuple->nChannels();
   
   double TotalRecordedHits=0;
@@ -1514,7 +1514,7 @@ void LArCellsEmptyMonitoring::ScanOnlids(const TString& inputfile)
   int nskipped=0,nrepeated=0;
 
   // Opening file:
-  std::unique_ptr<LArSamples::Interface> tuple((LArSamples::Interface*)Interface::open(inputfile));
+  std::unique_ptr<LArSamples::Interface> tuple(Interface::open(inputfile));
   printf("Number of events: %u %u\n",tuple->nEvents(),tuple->nChannels()); //tuple->ShowEvents("energy>0.");
   unsigned int nchannels = tuple->nChannels();
 
@@ -1592,7 +1592,7 @@ void LArCellsEmptyMonitoring::DoEtaPhiMonitoring(const char* inputfile,const cha
   ULong64_t onlid = 0;
 
   // Opening file:
-  std::unique_ptr<LArSamples::Interface> tuple((LArSamples::Interface*)Interface::open(inputfile));
+  std::unique_ptr<LArSamples::Interface> tuple(Interface::open(inputfile));
   printf("Number of events: %u %u\n",tuple->nEvents(),tuple->nChannels());
   unsigned int nchannels = tuple->nChannels();
 
@@ -1727,7 +1727,7 @@ void LArCellsEmptyMonitoring::TriggerEfficiency(const char* inputfile,float frac
   std::map< std::pair<unsigned int, unsigned int>, unsigned int > eventLayer;
   int run=0;
   // Opening file:
-  std::unique_ptr<LArSamples::Interface> tuple((LArSamples::Interface*)Interface::open(inputfile));
+  std::unique_ptr<LArSamples::Interface> tuple(Interface::open(inputfile));
   unsigned int nchannels = tuple->nChannels();
 
   // -------------------------------------------------------------------------
