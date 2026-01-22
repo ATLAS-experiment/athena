@@ -257,9 +257,9 @@ namespace dqutils {
             htemp->Fit("fn", "RQMN");
           } else {
             ctemp = new TCanvas("ctemp", "ctemp", 500, 500);
-            TString psName = num2str + triggerName + ".ps";
+            std::string psName = num2str + triggerName + ".ps";
             htemp->Fit("fn", "RQM");
-            ctemp->Print(psName);
+            ctemp->Print(psName.c_str());
             delete ctemp;
           }
           double frange = 2.4 * sigma;
