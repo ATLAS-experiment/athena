@@ -14,10 +14,6 @@
 #endif
 
 using namespace ActsTrk;
-namespace {  
-    /// Dummy transformation
-    static const Amg::Transform3D dummyTrans{Amg::Transform3D::Identity()};
-}
 namespace MuonGMR4 {
 MuonReadoutElement::~MuonReadoutElement() = default;
 MuonReadoutElement::MuonReadoutElement(const defineArgs& args)
@@ -39,21 +35,12 @@ StatusCode MuonReadoutElement::createGeoTransform() {
        ATH_MSG_FATAL("The readout element "<<idHelperSvc()->toStringDetEl(identify())<<" has no assigned alignable node");
        return StatusCode::FAILURE;
     }
-    return insertTransform<MuonReadoutElement>(geoTransformHash());
+    m_centralTrfCache = std::make_unique<TransformCacheDetEle<MuonReadoutElement>>(geoTransformHash(), this);
+    return StatusCode::SUCCESS;
 }
 IdentifierHash MuonReadoutElement::geoTransformHash() {     
     static const IdentifierHash hash{static_cast<unsigned>(~0)-1};
     return hash;
-}
-
-
-const Amg::Transform3D& MuonReadoutElement::localToGlobalTransform(const ActsTrk::GeometryContext& ctx, 
-                                                               const IdentifierHash& hash) const {
-    TransformCacheMap::const_iterator cache = m_localToGlobalCaches.find(hash);
-    if (cache != m_localToGlobalCaches.end()) return cache->second->getTransform(ctx.getStore(detectorType()).get());
-    ATH_MSG_FATAL(__FILE__<<":"<<__LINE__<<" "<<__func__<<"() -- "
-                <<idHelperSvc()->toStringDetEl(identify())<<" hash: "<<hash<<" is unknown.");
-    return dummyTrans;
 }
 
 const Amg::Transform3D& MuonReadoutElement::toStation(const DetectorAlignStore* alignStore) const {
@@ -61,33 +48,39 @@ const Amg::Transform3D& MuonReadoutElement::toStation(const DetectorAlignStore* 
 }
 void MuonReadoutElement::releaseUnAlignedTrfs() const {
     for (const auto& cache : m_localToGlobalCaches) {
-        cache.second->releaseNominalCache();
+        if (cache){
+            cache->releaseNominalCache();
+        }
     }
+    m_centralTrfCache->releaseNominalCache();
 }
 
-unsigned int MuonReadoutElement::storeAlignedTransforms(const ActsTrk::DetectorAlignStore& store) const {
+unsigned MuonReadoutElement::storeAlignedTransforms(const DetectorAlignStore& store) const {
     if (store.detType != detectorType()) return 0;
-    unsigned int aligned{0};
+    unsigned int aligned{1};
+    m_centralTrfCache->getTransform(&store);
     for (const auto& cache : m_localToGlobalCaches) {
-        cache.second->getTransform(&store);
+        if (cache) {
+            cache->getTransform(&store);
+        }
         ++aligned;
     }
     return aligned;
 }
 
-Amg::Transform3D MuonReadoutElement::globalToLocalTransform(const ActsTrk::GeometryContext& ctx) const {
+Amg::Transform3D MuonReadoutElement::globalToLocalTransform(const GeometryContext& ctx) const {
     return globalToLocalTransform(ctx, geoTransformHash());
 }
-const Amg::Transform3D& MuonReadoutElement::localToGlobalTransform(const ActsTrk::GeometryContext& ctx) const {
+const Amg::Transform3D& MuonReadoutElement::localToGlobalTransform(const GeometryContext& ctx) const {
     return localToGlobalTransform(ctx, geoTransformHash());
 }
 #ifndef SIMULATIONBASE
 const Acts::Transform3& MuonReadoutElement::transform(const Acts::GeometryContext& anygctx) const {
-    const ActsTrk::GeometryContext *gctx = anygctx.get<const ActsTrk::GeometryContext *>();
+    const GeometryContext *gctx = anygctx.get<const GeometryContext *>();
     return localToGlobalTransform(*gctx, geoTransformHash());
 }
 std::shared_ptr<Acts::Surface> MuonReadoutElement::surfacePtr(const IdentifierHash& hash) const {
-    ActsTrk::SurfaceCacheSet::const_iterator cache = m_surfaces.find(hash);
+    SurfaceCacheSet::const_iterator cache = m_surfaces.find(hash);
     if(cache != m_surfaces.end()) return (*cache)->getSurface();
     ATH_MSG_FATAL(__FILE__<<":"<<__LINE__<<" "<<__func__<<"() -- Hash "<<hash
                <<" is unknown to "<<idHelperSvc()->toStringDetEl(identify()));
@@ -103,14 +96,14 @@ StatusCode MuonReadoutElement::strawSurfaceFactory(const IdentifierHash& hash,
                                                    std::shared_ptr<const Acts::LineBounds> lBounds) {
 
     //get the local to global transform cache
-    TransformCacheMap::const_iterator transformCache = m_localToGlobalCaches.find(hash);
-    if (transformCache == m_localToGlobalCaches.end()) {
+    const TransformCache* cache = transformCache(hash);
+    if (!cache) {
         ATH_MSG_FATAL(__FILE__<<":"<<__LINE__<<" - "<<idHelperSvc()->toString(identify())
                    <<" no transform cache available for hash "<<hash);
         return StatusCode::FAILURE;
     }
 
-    auto insert_itr = m_surfaces.insert(std::make_unique<ActsTrk::SurfaceCache>(transformCache->second.get()));
+    auto insert_itr = m_surfaces.insert(std::make_unique<SurfaceCache>(cache));
     if(!insert_itr.second){
         ATH_MSG_FATAL(__FILE__<<":"<<__LINE__<<" - "<<idHelperSvc()->toString(identify())
                    <<" Insertion to muon surface cache failed for hash "<<hash);
@@ -126,13 +119,13 @@ StatusCode MuonReadoutElement::planeSurfaceFactory(const IdentifierHash& hash,
                                                    std::shared_ptr<const Acts::PlanarBounds> pBounds){
 
     //get the local to global transform cache
-    TransformCacheMap::const_iterator transformCache = m_localToGlobalCaches.find(hash);
-    if (transformCache == m_localToGlobalCaches.end()) {
+    const TransformCache* cache = transformCache(hash);
+    if (!cache) {
         ATH_MSG_FATAL(__FILE__<<":"<<__LINE__<<" - "<<idHelperSvc()->toString(identify())
                    <<" no transform cache available for hash "<<hash);
         return StatusCode::FAILURE;
-    }    
-    auto insert_itr = m_surfaces.insert(std::make_unique<ActsTrk::SurfaceCache>(transformCache->second.get()));
+    }
+    auto insert_itr = m_surfaces.insert(std::make_unique<SurfaceCache>(cache));
     if(!insert_itr.second){
         ATH_MSG_FATAL(__FILE__<<":"<<__LINE__<<" - "<<idHelperSvc()->toString(identify())
                    <<" Insertion to muon surface cache failed for hash "<<hash);
