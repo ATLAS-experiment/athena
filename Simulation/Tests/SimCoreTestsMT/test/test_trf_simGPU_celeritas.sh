@@ -71,6 +71,9 @@ SimValid_tf.py --inputHITSFile $OUTPUT.HITS.pool.root --outputHIST_SIMFile $OUTP
 rc4=$?
 echo "art-result: ${rc4} SimValid_tf" 
 
+# change back to AthSimulation,main--simGPU so that the dcube labels are correct
+asetup AthSimulation,main--simGPU,latest
+
 echo "============ dcube reference file creation == local version == will be changed in next iteration"
 $ATLAS_LOCAL_ROOT/dcube/current/DCubeClient/python/dcube.py -vv -g -r $OUTPUT.HIST.root -c dcube_config_hist_${OUTPUT}_25050.xml
 rcref=$?
