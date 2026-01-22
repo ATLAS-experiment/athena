@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # Set the name of the package.
 atlas_subdir( AthExCUDA )
@@ -17,7 +17,7 @@ find_package( CUDAToolkit )
 atlas_add_component( AthExCUDA
    src/*.h src/*.cxx src/*.cu src/components/*.cxx
    DEFINITIONS EIGEN_NO_CUDA EIGEN_DONT_VECTORIZE
-   LINK_LIBRARIES vecmem::core vecmem::cuda AthenaBaseComps GaudiKernel
+   LINK_LIBRARIES vecmem::core vecmem::cuda AthenaBaseComps GaudiKernel Gaudi::GaudiCUDALib
    StoreGateLib xAODTracking AthCUDAInterfacesLib AthCUDAKernelLib )
 
 # Install extra files from the package.
