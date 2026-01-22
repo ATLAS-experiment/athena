@@ -1,8 +1,9 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 #
 # @author Nils Krumnack
 
 from AnaAlgorithm.AlgSequence import AlgSequence
+from AnaAlgorithm.DualUseConfig import isAthena
 from AnalysisAlgorithmsConfig.ConfigSequence import ConfigSequence
 from AnalysisAlgorithmsConfig.ConfigAccumulator import ConfigAccumulator, DataType
 from AthenaConfiguration.Enums import LHCPeriod
@@ -502,12 +503,7 @@ def makeTestSequenceBlocks (dataType, algSeq, isPhyslite,
     # order can change during fullConfigure
     configSeq.printOptions()
 
-    from AnaAlgorithm.DualUseConfig import isAthena, useComponentAccumulator
-    if isAthena and useComponentAccumulator:
-        return configAccumulator.CA
-    else:
-        return None
-
+    return configAccumulator.CA if isAthena else None
 
 
 def printSequenceAlgs (sequence) :
