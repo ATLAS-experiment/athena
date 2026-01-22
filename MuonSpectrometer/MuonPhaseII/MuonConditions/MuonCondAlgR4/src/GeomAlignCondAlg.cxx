@@ -2,7 +2,7 @@
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "ActsAlignCondAlg.h"
+#include "GeomAlignCondAlg.h"
 
 #include <StoreGate/ReadCondHandle.h>
 #include <GeoModelKernel/GeoPerfUtils.h>
@@ -10,10 +10,11 @@
 #include <AthenaKernel/IOVInfiniteRange.h>
 
 
+#include "Acts/Utilities/Helpers.hpp"
 using namespace MuonGMR4;
 
 namespace MuonR4{
-StatusCode ActsAlignCondAlg::initialize() {
+StatusCode GeomAlignCondAlg::initialize() {
     
     ATH_CHECK(m_readKeyALines.initialize(m_applyALines));
     ATH_CHECK(m_readKeyBLines.initialize(m_applyBLines));
@@ -28,9 +29,8 @@ StatusCode ActsAlignCondAlg::initialize() {
         return StatusCode::FAILURE;
     }
     auto hasDetector = [this](const ActsTrk::DetectorType d) -> bool {
-        return std::find(m_techs.begin(),m_techs.end(), d) != m_techs.end();
+        return Acts::rangeContainsValue(m_techs, d);
     };
-
     m_applyBLines = m_applyBLines && (hasDetector(ActsTrk::DetectorType::Mdt) ||
                                       hasDetector(ActsTrk::DetectorType::Mm) ||
                                       hasDetector(ActsTrk::DetectorType::sTgc));
@@ -52,7 +52,7 @@ StatusCode ActsAlignCondAlg::initialize() {
     return StatusCode::SUCCESS;
 }
 
-Identifier ActsAlignCondAlg::alignmentId(const MuonGMR4::MuonReadoutElement* re) const {
+Identifier GeomAlignCondAlg::alignmentId(const MuonGMR4::MuonReadoutElement* re) const {
     if (re->detectorType() == ActsTrk::DetectorType::Mdt || 
         re->detectorType() == ActsTrk::DetectorType::Tgc) {
             return m_idHelperSvc->chamberId(re->identify());
@@ -69,9 +69,9 @@ Identifier ActsAlignCondAlg::alignmentId(const MuonGMR4::MuonReadoutElement* re)
     /// For the NSW, the alignment parameters are stored under the same key as the RE
     return re->identify();
 }
-StatusCode ActsAlignCondAlg::loadDeltas(const EventContext& ctx,
-                                            deltaMap& alignDeltas,
-                                            alignTechMap& techTransforms) const {
+StatusCode GeomAlignCondAlg::loadDeltas(const EventContext& ctx,
+                                        deltaMap& alignDeltas,
+                                        alignTechMap& techTransforms) const {
     if (m_readKeyALines.empty()) {
         ATH_MSG_DEBUG("Loading of the A line parameters deactivated");
         return StatusCode::SUCCESS;
@@ -108,8 +108,8 @@ StatusCode ActsAlignCondAlg::loadDeltas(const EventContext& ctx,
     }
     return StatusCode::SUCCESS;
 }
-StatusCode ActsAlignCondAlg::loadMdtDeformPars(const EventContext& ctx,
-                                                   ActsTrk::DetectorAlignStore& store) const {
+StatusCode GeomAlignCondAlg::loadMdtDeformPars(const EventContext& ctx,
+                                               ActsTrk::DetectorAlignStore& store) const {
     
     if (!m_applyMdtAsBuilt  && !m_applyBLines) {
         return StatusCode::SUCCESS;
@@ -142,7 +142,7 @@ StatusCode ActsAlignCondAlg::loadMdtDeformPars(const EventContext& ctx,
     store.internalAlignment = std::move(internAlign);
     return StatusCode::SUCCESS;
 }
-StatusCode ActsAlignCondAlg::loadMmDeformPars(const EventContext& ctx,
+StatusCode GeomAlignCondAlg::loadMmDeformPars(const EventContext& ctx,
                                               ActsTrk::DetectorAlignStore& store) const {
     if (!m_applyMmPassivation && !m_applyNswAsBuilt && !m_applyBLines) {
         return StatusCode::SUCCESS;
@@ -168,7 +168,7 @@ StatusCode ActsAlignCondAlg::loadMmDeformPars(const EventContext& ctx,
     store.internalAlignment = std::move(internAlign);
     return StatusCode::SUCCESS;
 }
-StatusCode ActsAlignCondAlg::loadStgcDeformPars(const EventContext& ctx,
+StatusCode GeomAlignCondAlg::loadStgcDeformPars(const EventContext& ctx,
                                                 ActsTrk::DetectorAlignStore& store) const{
     if (!(m_applyNswAsBuilt && !m_readsTgcAsBuiltKey.empty()) && !m_applyBLines) {
         return StatusCode::SUCCESS;
@@ -190,7 +190,7 @@ StatusCode ActsAlignCondAlg::loadStgcDeformPars(const EventContext& ctx,
     return StatusCode::SUCCESS;
 }
 
-StatusCode ActsAlignCondAlg::declareDependencies(const EventContext& ctx,
+StatusCode GeomAlignCondAlg::declareDependencies(const EventContext& ctx,
                                                  ActsTrk::DetectorType detType,
                                                  SG::WriteCondHandle<ActsTrk::DetectorAlignStore>& writeHandle) const {
     writeHandle.addDependency(IOVInfiniteRange::infiniteTime());
@@ -231,16 +231,14 @@ StatusCode ActsAlignCondAlg::declareDependencies(const EventContext& ctx,
     return StatusCode::SUCCESS;
 }
 
-StatusCode ActsAlignCondAlg::execute(const EventContext& ctx) const {
+StatusCode GeomAlignCondAlg::execute(const EventContext& ctx) const {
     deltaMap alignDeltas{};
     alignTechMap techTransforms{};
-    unsigned int memBeforeAlign = GeoPerfUtils::getMem();
+    const unsigned memBeforeAlign = GeoPerfUtils::getMem();
     ATH_CHECK(loadDeltas(ctx, alignDeltas, techTransforms));
     
-    std::vector<const MuonReadoutElement*> readoutEles = m_detMgr->getAllReadoutElements();
     /// Create the condition handles
-    unsigned int numAligned{0};
-    for (size_t det =0 ; det < m_techs.size(); ++det) {
+    for (std::size_t det =0 ; det < m_techs.size(); ++det) {
         const SG::WriteCondHandleKey<ActsTrk::DetectorAlignStore>& key = m_writeKeys[det];
         const ActsTrk::DetectorType subDet = m_techs[det];
 
@@ -269,38 +267,40 @@ StatusCode ActsAlignCondAlg::execute(const EventContext& ctx) const {
         }
         /// Propagate the cache throughout the geometry
         ATH_CHECK(declareDependencies(ctx, subDet, writeHandle));
-        if (m_fillGeoAlignStore) {
+        /// Cache all transforms at the creation of this conditions object
+        if (m_fillAlignStoreCache) {
+            unsigned numAligned{0};
+            std::ranges::for_each(m_detMgr->getAllReadoutElements(subDet),
+                [&](const MuonGMR4::MuonReadoutElement* re) {
+                    numAligned += re->storeAlignedTransforms(*writeCdo);
+                });
+            /// The geoModel constants are no longer needed.
+            writeCdo->geoModelAlignment.reset();
+            ATH_MSG_DEBUG("Populated the alignment store "<<to_string(subDet)<<" with "<<numAligned<<" transforms");
+        } else if (m_fillGeoAlignStore) {
             /// Ensure that the rigid transformations of the detector elements are applied 
-            for (const MuonReadoutElement* re : readoutEles) {
-                if (re->detectorType() == subDet) {
-                    const Amg::Transform3D& detTrf{re->getMaterialGeom()->getAbsoluteTransform(writeCdo->geoModelAlignment.get())};
-                    ATH_MSG_VERBOSE("Detector element "<<m_idHelperSvc->toStringDetEl(re->identify())<<" is located at "
-                                    <<Amg::toString(detTrf));
-                }
-            }
+            std::ranges::for_each(m_detMgr->getAllReadoutElements(subDet),
+                    [&](const MuonReadoutElement* re){
+                        const Amg::Transform3D& detTrf{re->getMaterialGeom()->getAbsoluteTransform(writeCdo->geoModelAlignment.get())};
+                        ATH_MSG_VERBOSE("Detector element "<<m_idHelperSvc->toStringDetEl(re->identify())<<" is located at "
+                                    <<Amg::toString(detTrf));     
+                    });
             /// There's no need to cache the delta parameters longer
             writeCdo->geoModelAlignment->getDeltas()->clear();
             writeCdo->geoModelAlignment->lockPosCache();
-        } else if (m_fillAlignStoreCache) {
-            for (const MuonReadoutElement* re : readoutEles){
-                numAligned+= re->storeAlignedTransforms(*writeCdo);
-            }
-            /// The geoModel constants are no longer needed.
-            writeCdo->geoModelAlignment.reset();
-        }
+        } 
         ATH_CHECK(writeHandle.record(std::move(writeCdo)));
     }
 
-    ATH_MSG_VERBOSE("Only "<<numAligned<<" out of "<<readoutEles.size()<<" were picked up by the alignment cutalg");
     alignDeltas.clear();
     techTransforms.clear();
     /// Whipe the GeoModelCache
     GeoClearAbsPosAction whipeTreeTop{};
-    for (unsigned int treeTop = 0 ; treeTop < m_detMgr->getNumTreeTops(); ++treeTop) {
+    for (unsigned treeTop = 0 ; treeTop < m_detMgr->getNumTreeTops(); ++treeTop) {
         m_detMgr->getTreeTop(treeTop)->exec(&whipeTreeTop);
     }
 
-    unsigned int memAfterAlign  = GeoPerfUtils::getMem();
+    const unsigned memAfterAlign  = GeoPerfUtils::getMem();
     ATH_MSG_INFO("Caching of the alignment parameters required "<<(memAfterAlign - memBeforeAlign) / 1024<<" MB of memory");
     return StatusCode::SUCCESS;
 }

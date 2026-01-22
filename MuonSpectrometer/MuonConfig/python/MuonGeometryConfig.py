@@ -279,6 +279,9 @@ def RegionSelCondAlgCfg(flags, detector: str, **kwargs):
         elif detector == "MM":   alignDet = "Mm"
         
         kwargs.setdefault("AlignKey", f"{alignDet}ActsAlignContainer")
+        from MuonConfig.MuonConfigFlags import GeoTrfCacheMode
+        kwargs.setdefault("splitTrfCache", flags.Muon.AlignedGeoTrfCacheMode ==  GeoTrfCacheMode.SplitCache or
+                                           flags.Muon.AlignedGeoTrfCacheMode ==  GeoTrfCacheMode.SlopyCache)
         the_alg = CompFactory.MuonR4.RegionSelectorCondAlg(**kwargs)
        
     elif detector == "MDT":

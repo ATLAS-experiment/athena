@@ -114,8 +114,11 @@ namespace MuonR4{
         ATH_CHECK(SG::get(alignDeltas, m_alignKey, ctx));
 
         ActsTrk::GeometryContext gctx{};
-        gctx.setStore(MuonGMR4::copyDeltas(*alignDeltas));
-
+        if (m_splitTrfCache) {
+            gctx.setStore(MuonGMR4::copyDeltas(*alignDeltas));
+        } else {
+            gctx.setStore(std::make_unique<ActsTrk::DetectorAlignStore>(*alignDeltas));
+        }
         const MuonIdHelper& idHelper{getIdHelper(alignDeltas->detType)};
 
         /** @brief Temporary auxiliary struct to cache the readout element's 
@@ -140,19 +143,14 @@ namespace MuonR4{
         std::vector<TempSelTable> luts(idHelper.module_hash_max());
         IdentifierHash modHash{};
         /** Fill the geometric part of the reg sel table */
-        for (auto det_itr = idHelper.detectorElement_begin(); 
-                  det_itr != idHelper.detectorElement_end(); ++det_itr) {
+        for (const MuonGMR4::MuonReadoutElement* reEle: m_detMgr->getAllReadoutElements(alignDeltas->detType)) {
             
-            const MuonGMR4::MuonReadoutElement* reEle = m_detMgr->getReadoutElement(*det_itr);
-            if (!reEle) {
-                ATH_MSG_WARNING(__LINE__<<" - Failed to fetch "<<m_idHelperSvc->toStringDetEl(*det_itr)<<".");
-                continue;
-            }
             const Acts::Surface& surface{reEle->surface()};
 
             const double halfTck = 0.5*reEle->thickness();
 
             std::vector<Amg::Vector3D> localVertices{};
+            localVertices.reserve(8);
             ATH_MSG_VERBOSE(__LINE__<<" - Fetch edge points from surface: "<<m_idHelperSvc->toStringDetEl(reEle->identify()));
             std::ranges::for_each(static_cast<const Acts::PlanarBounds&>(surface.bounds()).vertices(), 
                     [&](const Amg::Vector2D& v){
@@ -162,7 +160,7 @@ namespace MuonR4{
                     });
             ATH_MSG_VERBOSE(__LINE__<<" - Fetched "<<localVertices.size()<<" vertices.");
             const Amg::Transform3D& loc2Glob{surface.transform(gctx.context())};
-            idHelper.get_module_hash(*det_itr, modHash);
+            idHelper.get_module_hash(reEle->identify(), modHash);
             auto& lut = luts.at(modHash);
             if (!lut.centralPhi) {
                 lut.centralPhi = loc2Glob.translation().phi();

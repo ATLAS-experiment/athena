@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef MUONCONDALGR4_ACTSMUONALIGNCONDALG_H
 #define MUONCONDALGR4_ACTSMUONALIGNCONDALG_H
@@ -8,8 +8,8 @@
 #include <StoreGate/CondHandleKeyArray.h>
 #include <StoreGate/WriteCondHandle.h>
 
-#include <MuonReadoutGeometryR4/MuonDetectorManager.h>
 #include <ActsGeometryInterfaces/DetectorAlignStore.h>
+#include <MuonReadoutGeometryR4/MuonDetectorManager.h>
 #include <MuonIdHelpers/IMuonIdHelperSvc.h>
 #include <MuonAlignmentData/CorrContainer.h>
 
@@ -22,15 +22,15 @@
 #include <map>
 #include <set>
 #include <unordered_map>
-/* The ActsAlignCondAlg takes the ALineContainer and translates this into the  
+/* The GeomAlignCondAlg takes the ALineContainer and translates this into the  
  *  a GeoAlignmentStore. The store is filled with the AlignableTransforms of the ReadoutGeometry
  *  which are connected with the A-line transformations of the ALineContainer.
  **/
 namespace MuonR4{
-class ActsAlignCondAlg: public AthCondAlgorithm {
+class GeomAlignCondAlg: public AthCondAlgorithm {
 public:
       using AthCondAlgorithm::AthCondAlgorithm;
-      virtual ~ActsAlignCondAlg() = default;
+      virtual ~GeomAlignCondAlg() = default;
       virtual StatusCode initialize() override;
       virtual StatusCode execute(const EventContext& ctx) const override;
 
@@ -86,6 +86,7 @@ private:
                                                                         "Keys of the alignment technologies"};
     Gaudi::Property<std::string> m_keyToken{this, "CondKeyToken","ActsAlignContainer",
                                             "Common name token of all written alignment objects (e.g.) MdtActsAlignContainer"};
+
     ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
 
     const MuonGMR4::MuonDetectorManager* m_detMgr{nullptr};
