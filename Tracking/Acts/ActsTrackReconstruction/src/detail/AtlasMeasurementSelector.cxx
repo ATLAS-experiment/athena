@@ -1,7 +1,6 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
-
 #include "ActsGeometryInterfaces/IExtrapolationTool.h"
 #include "ActsGeometryInterfaces/ITrackingGeometryTool.h"
 
@@ -21,6 +20,7 @@
 #include "Acts/Utilities/Logger.hpp"
 #include "Acts/TrackFinding/CombinatorialKalmanFilter.hpp"
 #include "Acts/TrackFinding/TrackStateCreator.hpp"
+#include "Acts/Surfaces/BoundaryTolerance.hpp"
 
 #include "src/detail/MeasurementSelector.h"
 #include "ActsEvent/TrackContainer.h"
@@ -407,7 +407,8 @@ std::unique_ptr<ActsTrk::IMeasurementSelector>  getMeasurementSelector(const Act
                                                                        const ActsTrk::detail::MeasurementRangeList &measurementRanges,
                                                                        const std::vector<float> &etaBinsf,
                                                                        const std::vector<std::pair<float, float> > &chi2CutOffOutlier,
-                                                                       const std::vector<size_t> &numMeasurementsCutOff) {
+                                                                       const std::vector<size_t> &numMeasurementsCutOff,
+                                                                       double edge_hole_border_width) {
 
     // set calibrators per measurement container type (order does not matter);
     ActsTrk::MeasurementCalibrator atl_measurement_calibrator(pixelOnTrackCalibratorTool,
@@ -422,11 +423,16 @@ std::unique_ptr<ActsTrk::IMeasurementSelector>  getMeasurementSelector(const Act
        selector(new AtlMeasurementSelector(
                            std::move(atl_measurement_calibrator),
                            measurementRanges,
-                           AtlMeasurementSelectorConfig{ {Acts::GeometryIdentifier(),
-                                                          AtlMeasurementSelectorCuts{ etaBinsf,
-                                                                                      chi2CutOffOutlier,
-                                                                                      numMeasurementsCutOff} }}));
+                           AtlMeasurementSelectorConfig{
+                              {Acts::GeometryIdentifier(),
+                                    AtlMeasurementSelectorCuts{ etaBinsf,
+                                       chi2CutOffOutlier,
+                                       numMeasurementsCutOff,
+                                       edge_hole_border_width==0.
+                                         ? std::optional<Acts::BoundaryTolerance>{}
+                                         : std::optional{Acts::BoundaryTolerance::AbsoluteEuclidean(-std::abs(edge_hole_border_width))}
+                                    }
+                              }}));
     return selector;
-
 }
 }

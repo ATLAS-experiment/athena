@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "src/TrackFindingBaseAlg.h"
@@ -191,7 +191,8 @@ namespace ActsTrk {
         measurements.measurementRanges(),
         m_measurementSelectorConfig.m_etaBins,
         m_measurementSelectorConfig.m_chi2CutOffOutlier,
-        m_numMeasurementsCutOff.value());
+        m_numMeasurementsCutOff.value(),
+        m_edgeHoleBorderWidth.value());
 
     measurementSelector->connect(&options.extensions.createTrackStates);
 
