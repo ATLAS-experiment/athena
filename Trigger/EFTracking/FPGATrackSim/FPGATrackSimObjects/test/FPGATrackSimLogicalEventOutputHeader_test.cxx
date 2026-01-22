@@ -29,7 +29,7 @@ int main(int, char**)
   FPGATrackSimRoad road;
   road.setRoadID(roadid);
   std::vector<FPGATrackSimRoad> roadvec;
-  roadvec.push_back(road);
+  roadvec.push_back(std::move(road));
 
   header.addFPGATrackSimTracks_1st(trackvec);
   header.addFPGATrackSimRoads_1st(roadvec);
