@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // ----------------------------------------------------------------------
@@ -9,7 +9,7 @@
 // AuthorList:
 //   Andrii Verbytskyi
 // ----------------------------------------------------------------------
-
+#include "Epos4.h"
 #include "GaudiKernel/MsgStream.h"
 #include "CLHEP/Random/RandFlat.h"
 #include "AthenaKernel/RNGWrapper.h"
@@ -18,11 +18,15 @@
 #include "AtlasHepMC/HeavyIon.h"
 #include "AtlasHepMC/SimpleVector.h"
 
-#include "Epos4.h"
-#include <iostream>
-#include <filesystem>
 #include "HepMC3/Writer.h"
 #include "HepMC3/GenEvent.h"
+
+#include <iostream>
+#include <filesystem>
+#include <memory> //for shared_ptr, dynamic_pointer_cast
+#include <cstdlib> //for std::getenv
+#include <cstring> //for strlen, memcpy
+#include <fstream> //for ofstream, ifstream
 
 
 // Match the Fortran COMMON block layout
@@ -36,10 +40,10 @@ struct jobfnametype {
 extern struct jobfnametype jobfname_;
 // C function to set values in the COMMON block
 void set_job_common(const char *filename) {
-    size_t len = strlen(filename);
+    size_t len = std::strlen(filename);
     if (len > 1000) len = 1000;
     // Copy filename and pad with spaces
-    memcpy(jobfname_.fnjob, filename, len);
+    std::memcpy(jobfname_.fnjob, filename, len);
     for (size_t i = len; i < 1000; ++i) {
         jobfname_.fnjob[i] = ' ';
     }
@@ -56,13 +60,13 @@ namespace HepMC3 {
 class WriterEPOS: public Writer  {
 public:
     WriterEPOS([[maybe_unused]] const std::string& filename, std::shared_ptr<GenRunInfo> run = std::shared_ptr<GenRunInfo>()) {
-        set_run_info(run);
+        set_run_info(std::move(run));
     }
     WriterEPOS([[maybe_unused]] std::ostream& stream, std::shared_ptr<GenRunInfo> run = std::shared_ptr<GenRunInfo>()) {
-        set_run_info(run);
+        set_run_info(std::move(run));
     }
     WriterEPOS([[maybe_unused]] std::shared_ptr<std::ostream> s_stream, std::shared_ptr<GenRunInfo> run = std::shared_ptr<GenRunInfo>()) {
-        set_run_info(run);
+        set_run_info(std::move(run));
     }
     ~WriterEPOS() {};
     void write_event(const GenEvent& evt) override {
@@ -166,7 +170,7 @@ std::string  Epos4::create_file(const std::string&  filein) {
     if (std::string(OPT) == "./") {
         OPX = std::filesystem::current_path().string() + "/";
     } else {
-        OPX = OPT;
+        OPX = std::move(OPT);
     }
 
     ofile << "!fname mtr " << CHK << "z-" << one << ".mtr\n";
