@@ -204,6 +204,7 @@ JetChainParts = {
        'preselj160',
        'preselj200',
        'preselj225',
+       'preselj245',
        # Multijets
        'presel2j180',
        'presel2j225',

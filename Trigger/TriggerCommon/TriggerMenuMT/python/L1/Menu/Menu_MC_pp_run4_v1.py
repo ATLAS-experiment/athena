@@ -41,7 +41,7 @@ def defineMenu():
     try_add("L1_3jJ70")             # Remapped from 3jJ90
     try_add("L1_2jJ70_jXE80")
     try_add("L1_HT150-jJ50s5pETA32")    
-
+    try_add("L1_MU8VF_2MU8F")
     
     # recover the ones removed by run3 MC
     try_recover("L1_eEM22M")

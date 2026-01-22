@@ -107,7 +107,7 @@ def addMCSignatures(chains):
         ChainProp(name='HLT_mu26_ivarmedium_L1MU14FCH', l1SeedThresholds=['MU14FCH'], groups=PrimaryPhIGroup+SingleMuonGroup),
 
         # Phase-II Multi muon
-        ChainProp(name='HLT_2mu10_L12MU5VF', groups=PrimaryL1MuGroup+MultiMuonGroup, monGroups=['muonMon:online','muonMon:shifter']),
+        ChainProp(name='HLT_2mu12_L12MU5VF', groups=PrimaryL1MuGroup+MultiMuonGroup, monGroups=['muonMon:online','muonMon:shifter']),
         ChainProp(name='HLT_2mu10_L12MU8F', groups=PrimaryL1MuGroup+MultiMuonGroup),
         ChainProp(name='HLT_2mu12_L12MU8F', groups=PrimaryL1MuGroup+MultiMuonGroup),
 
@@ -116,7 +116,7 @@ def addMCSignatures(chains):
         ChainProp(name='HLT_mu20_ivarperf_L1MU12FCH', groups=SupportGroup+SingleMuonGroup, monGroups=['idMon:shifter']),
 
         # HL-LHC TDR inspired chains
-        ChainProp(name="HLT_mu3vtx_L12MU5VF", groups=PrimaryPhIGroup+SingleTauGroup),
+        ChainProp(name="HLT_mu3vtx_L12MU8F", groups=PrimaryPhIGroup+SingleTauGroup),
     ]
 
     chainsMC['Egamma'] = [
@@ -205,7 +205,7 @@ def addMCSignatures(chains):
         ChainProp(name='HLT_e24_lhtight_ivarloose_L1eEM24M', groups=PrimaryPhIGroup+SingleElectronGroup, monGroups=['egammaMon:online','egammaMon:shifter_tp','caloMon:t0']),
         ChainProp(name='HLT_g110_loose_L1eEM22M', groups=PrimaryPhIGroup+SinglePhotonGroup),
         # Phase-II Multi egamma
-        ChainProp(name='HLT_2e10_lhvloose_L12eEM10L', groups=PrimaryPhIGroup+MultiElectronGroup),
+        ChainProp(name='HLT_2e12_lhvloose_L12eEM10L', groups=PrimaryPhIGroup+MultiElectronGroup),
         ChainProp(name='HLT_2g23_tight_icaloloose_L12eEM10L', groups=PrimaryPhIGroup+MultiPhotonGroup),
         # Phase-II Support
         ChainProp(name='HLT_e22_lhtight_ivarloose_L1eEM18M', groups=SupportPhIGroup+SingleElectronGroup),
@@ -244,7 +244,6 @@ def addMCSignatures(chains):
         # HL-LHC TDR inspired chains
         ChainProp(name='HLT_tau140_mediumGNTau_L1eTAU120', groups=PrimaryPhIGroup+SingleTauGroup),
         ChainProp(name='HLT_tau35_mediumGNTau_tau25_mediumGNTau_03dRAB_L1eTAU28M_2eTAU20M', l1SeedThresholds=['eTAU28M', 'eTAU20M'], groups=PrimaryPhIGroup+MultiTauGroup),
-        ChainProp(name="HLT_tau160_mediumRNN_tracktwoLLP_L1eTAU120", l1SeedThresholds=['eTAU120'], groups=PrimaryPhIGroup+MultiTauGroup),
     ]
 
     chainsMC['Jet'] = [
@@ -363,10 +362,10 @@ def addMCSignatures(chains):
         ChainProp(name='HLT_j380_a10sd_cssk_pf_jes_ftf_preselj180_L1gLJ100p0ETA25', l1SeedThresholds=['FSNOSEED'], groups=PrimaryPhIGroup+SingleJetGroup, monGroups=['jetMon:shifter', 'jetMon:online']),
 
         # HL-LHC TDR inspired chains
-        ChainProp(name='HLT_j280_35smcINF_a10sd_cssk_pf_jes_ftf_preselj225_L1SC175-SCjJ10', l1SeedThresholds=['FSNOSEED'], groups=PrimaryPhIGroup+SingleJetGroup),
+        ChainProp(name='HLT_j300_35smcINF_a10sd_cssk_pf_jes_ftf_preselj245_L1SC175-SCjJ10', l1SeedThresholds=['FSNOSEED'], groups=PrimaryPhIGroup+SingleJetGroup),
         ChainProp(name='HLT_4j90_pf_ftf_presel4j65_L13jJ70', l1SeedThresholds=['FSNOSEED'], groups=PrimaryPhIGroup+MultiJetGroup, monGroups=['jetMon:t0']),
-        ChainProp(name='HLT_j0_HT300XX0eta240_pf_ftf_preselcHT200_L1HT150-jJ50s5pETA32', l1SeedThresholds=['FSNOSEED'], groups=PrimaryPhIGroup+SingleJetGroup),
-        ChainProp(name='HLT_j75_j75a_j0_DJMASS1000j50dphi200x400deta_L1jMJJ-500-NFF', l1SeedThresholds=['FSNOSEED']*3,stream=['VBFDelayed'],groups=PrimaryPhIGroup+MultiJetGroup+Topo3Group),
+        ChainProp(name='HLT_j0_HT650XX0eta240_pf_ftf_preselcHT450_L1HT150-jJ50s5pETA32', l1SeedThresholds=['FSNOSEED'], groups=PrimaryPhIGroup+SingleJetGroup),
+        ChainProp(name='HLT_j90_j90a_j0_DJMASS1000j50dphi200x400deta_L1jMJJ-500-NFF', l1SeedThresholds=['FSNOSEED']*3,stream=['VBFDelayed'],groups=PrimaryPhIGroup+MultiJetGroup+Topo3Group),
     ]
 
     chainsMC['Bjet'] = [
@@ -444,7 +443,7 @@ def addMCSignatures(chains):
         ChainProp(name='HLT_j80_0eta290_020jvt_boffperf_pf_ftf_L1jJ70', l1SeedThresholds=['FSNOSEED'], groups=SupportPhIGroup+SingleBjetGroup, monGroups=['bJetMon:t0','idMon:t0']),
         
         # HL-LHC TDR inspired chains
-        ChainProp(name="HLT_j160_0eta290_020jvt_bgn277_pf_ftf_preselj100_L1jJ140", l1SeedThresholds=['FSNOSEED'], groups=PrimaryPhIGroup+SingleBjetGroup),
+        ChainProp(name="HLT_j180_0eta290_020jvt_bgn277_pf_ftf_preselj120_L1jJ140", l1SeedThresholds=['FSNOSEED'], groups=PrimaryPhIGroup+SingleBjetGroup),
         
     ]
 
@@ -479,7 +478,7 @@ def addMCSignatures(chains):
         ChainProp(name='HLT_mu10_l2mt_mu4_l2mt_bJpsimumu_L1MU12BOM', l1SeedThresholds=['MU12BOM']*2, groups=BphysicsGroup+PrimaryL1MuGroup),
 
         #-- mu11_mu6 chains
-        ChainProp(name='HLT_mu11_mu6_bJpsimumu_L1MU8VF_2MU5VF', l1SeedThresholds=['MU8VF','MU5VF'], groups=BphysicsGroup+PrimaryL1MuGroup),
+        ChainProp(name='HLT_mu11_mu6_bJpsimumu_L1MU8VF_2MU8F', l1SeedThresholds=['MU8VF','MU8F'], groups=BphysicsGroup+PrimaryL1MuGroup),
         ChainProp(name='HLT_mu11_mu6_bJpsimumu_Lxy0_L1MU8VF_2MU5VF', l1SeedThresholds=['MU8VF','MU5VF'], groups=BphysicsGroup+PrimaryL1MuGroup),
         ChainProp(name='HLT_mu11_mu6_bUpsimumu_L1MU8VF_2MU5VF', l1SeedThresholds=['MU8VF','MU5VF'], groups=BphysicsGroup+PrimaryL1MuGroup),
 
@@ -488,7 +487,7 @@ def addMCSignatures(chains):
         ChainProp(name='HLT_mu11_mu6_bBmumux_Bidperf_L1MU8VF_2MU5VF', l1SeedThresholds=['MU8VF','MU5VF'], groups=BphysicsGroup+SupportGroup, monGroups=['idMon:shifter']), # Note, delayed in R3
 
         # HL-LHC TDR inspired chains
-        ChainProp(name='HLT_mu11_mu6_bBmumux_BpmumuKp_L12MU5VF', l1SeedThresholds=['MU8VF', 'MU5VF'], groups=BphysicsGroup+PrimaryL1MuGroup),
+        ChainProp(name='HLT_mu11_mu6_bBmumux_BpmumuKp_L12MU8F', l1SeedThresholds=['MU8VF', 'MU8F'], groups=BphysicsGroup+PrimaryL1MuGroup),
         ChainProp(name='HLT_mu11_mu6_bUpsimumu_L12MU5VF', l1SeedThresholds=['MU8VF', 'MU5VF'], groups=BphysicsGroup+PrimaryL1MuGroup),
     ]
 
@@ -643,7 +642,7 @@ def addMCSignatures(chains):
         ChainProp(name='HLT_e20_lhmedium_ivarloose_tau20_mediumRNN_tracktwoMVA_03dRAB_L1eEM18M', l1SeedThresholds=['eEM18M', 'eTAU12'], groups=SupportPhIGroup+EgammaTauGroup),
 
         # HL-LHC TDR inspired chains
-        ChainProp(name='HLT_e10_lhloose_mu10_L1eEM10L_MU5VF', l1SeedThresholds=['eEM10L','MU5VF'], groups=PrimaryPhIGroup+EgammaMuonGroup),
+        ChainProp(name='HLT_e10_lhloose_mu12_L1eEM10L_MU5VF', l1SeedThresholds=['eEM10L','MU5VF'], groups=PrimaryPhIGroup+EgammaMuonGroup),
         ChainProp(name='HLT_e7_lhloose_mu20_L1MU12FCH', l1SeedThresholds=['eEM7','MU12FCH'], groups=PrimaryPhIGroup+EgammaMuonGroup),
         ChainProp(name='HLT_tau25_mediumGNTau_probe_L1eTAU12_j65c_020jvt_j40c_020jvt_j25c_020jvt_j20c_020jvt_SHARED_j20c_020jvt_bgn285_pf_ftf_presel2c20XX1c20bgtwo85XX1c20gntau90_L1jJ85p0ETA21_3jJ40p0ETA25', l1SeedThresholds=['PROBEeTAU12']+5*['FSNOSEED'], groups=PrimaryPhIGroup+MuonTauGroup),
         # without presel

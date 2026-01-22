@@ -14,7 +14,7 @@ __log = logging.getLogger('TriggerEDMRun4Config')
 # ------------------------------------------------------------
 # Additional properties for EDM collections
 # ------------------------------------------------------------
-#from TrigEDMConfig.TriggerEDMDefs import Alias, InViews, allowTruncation # Import when needed
+from TrigEDMConfig.TriggerEDMDefs import InViews # Import when needed, Alias, allowTruncation
 
 # ----------------------------
 
@@ -61,8 +61,14 @@ TriggerHLTListRun4 = [
     ('xAOD::TrigEMClusterAuxContainer#CaloClustersGlobalAux.',  'BS ESD AODFULL', 'Calo'),
 
     ('CaloCellContainer#SeedLessFS',  'ESD AODFULL', 'Calo'), 
-
-    # L1 Calo inputs, note we are giving extended EDM targets
+    
+    # Egamma - R4 Rate Estimations
+    ('xAOD::TrigEMClusterContainer#HLT_FastCaloEMClusters',           'BS ESD AODFULL', 'Egamma', [InViews('EMCaloViews')]),
+    ('xAOD::TrigEMClusterAuxContainer#HLT_FastCaloEMClustersAux.',    'BS ESD AODFULL', 'Egamma'),
+    ('xAOD::TrigRingerRingsContainer#HLT_FastCaloRinger',             'BS ESD AODFULL', 'Egamma', [InViews('EMCaloViews')]), #Ringer
+    ('xAOD::TrigRingerRingsAuxContainer#HLT_FastCaloRingerAux.',      'BS ESD AODFULL', 'Egamma'), #Ringer
+    
+# L1 Calo inputs, note we are giving extended EDM targets
     ("CaloCellContainer#SCell",                                'ESD AODFULL', 'L1'),
 
     # Particle Flow Objects, for assessing performance with ITk (and perhaps HGTD)
