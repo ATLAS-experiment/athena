@@ -689,6 +689,7 @@ StatusCode PpmByteStreamReadV1V2Tool::processPpmCompressedR4V1_(State& state) co
 
       }
        // Next get the ADC related quantities (all encodings).
+      if (minIndex <0) return StatusCode::FAILURE;
       adcVal = getPpmAdcSamplesR4_(state, br, encoding, minIndex);
       // Finally get the pedestal correction.
       if ((encoding < 3) || (encoding == 6)) {

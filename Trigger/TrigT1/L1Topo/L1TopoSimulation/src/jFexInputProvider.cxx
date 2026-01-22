@@ -35,8 +35,6 @@ jFexInputProvider::jFexInputProvider(const std::string& type, const std::string&
    base_class(type, name, parent)
 {
    declareInterface<LVL1::IInputTOBConverter>( this );
-   declareProperty( "cXEweight_jFEX", m_cXEweight_jFEX, "cXE coefficient for jXE component" );
-   declareProperty( "cXEweight_gFEX", m_cXEweight_gFEX, "cXE coefficient for gXE component" );
 }
 
 jFexInputProvider::~jFexInputProvider()
@@ -401,15 +399,22 @@ jFexInputProvider::fillXE(TCS::TopoInputEvent& inputEvent) const {
   unsigned jWeight = m_cXEweight_jFEX * pow(2,8);
   unsigned gWeight = m_cXEweight_gFEX * pow(2,8);
   
-  long long cXE_x = (jWeight * global_ExTopoLong + gWeight * gXE_ExTopoLong) >> 8;
-  long long cXE_y = (jWeight * global_EyTopoLong + gWeight * gXE_EyTopoLong) >> 8;
+  // The gXE MET has the wrong sign convention i.e. is the vector sum rather than the
+  // negative vector sum over the measured transverse energies in the detector
+  long long cXE_x = (jWeight * global_ExTopoLong - gWeight * gXE_ExTopoLong) >> 8;
+  long long cXE_y = (jWeight * global_EyTopoLong - gWeight * gXE_EyTopoLong) >> 8;
   
   unsigned long long cXE_mag2 = cXE_x*cXE_x + cXE_y*cXE_y;
   unsigned long long cXE_mag = std::sqrt( cXE_mag2 );
   
+  // Have to set the double and Et2 values explicitly as well as for jXE
   TCS::jXETOB cxe_tob( cXE_x, cXE_y, cXE_mag, TCS::CXE );
+  cxe_tob.setExDouble( static_cast<double>(cXE_x*m_EtDouble_conversion) );
+  cxe_tob.setEyDouble( static_cast<double>(cXE_y*m_EtDouble_conversion) );
+  cxe_tob.setEtDouble( static_cast<double>(cXE_mag*m_EtDouble_conversion) );
+  cxe_tob.setEt2( cXE_mag2 );
   inputEvent.setcXE( cxe_tob );
-  
+
   //optional: add monitoring of cXE values as done above
   
   return StatusCode::SUCCESS;
