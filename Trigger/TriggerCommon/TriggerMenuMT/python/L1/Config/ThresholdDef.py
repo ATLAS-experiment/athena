@@ -288,7 +288,7 @@ class ThresholdDef:
         # cXE (linear combination of jFEX+gFEX MET)
         cXE_cuts = [100,110]
         for thrV in cXE_cuts:
-            XEThreshold('cXE%i' % thrV, 'jXE').setXE(get_threshold_cut('jXE', thrV))
+            XEThreshold('cXE%i' % thrV, 'jXE').setXE(get_threshold_cut('cXE', thrV))
 
         # ENERGY SPARES
         # decrement jXE spares for addtional heavy ion jTE/gTE thresholds

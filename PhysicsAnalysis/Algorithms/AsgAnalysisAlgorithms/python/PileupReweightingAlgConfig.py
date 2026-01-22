@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 
@@ -61,4 +61,5 @@ def PileupReweightingProviderToolCfg(flags, name="auto", **kwargs):
     kwargs.setdefault("DataScaleFactorUP", 0.)
     kwargs.setdefault("DataScaleFactorDOWN", 0.)
     kwargs.setdefault("PeriodAssignments", [])
-    return acc.setPrivateTools(acc.popToolsAndMerge(PileupReweightingToolCfg(flags, name, **kwargs)))
+    acc.setPrivateTools(acc.popToolsAndMerge(PileupReweightingToolCfg(flags, name, **kwargs)))
+    return acc
