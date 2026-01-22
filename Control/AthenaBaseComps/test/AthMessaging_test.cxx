@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration.
  */
 
 /**
@@ -8,6 +8,8 @@
  * @date Aug, 2022
  * @brief Test AthMessaging (run with --perf to measure performance)
  */
+
+#undef NDEBUG
 
 #include "AthenaBaseComps/AthMessaging.h"
 #include "AthenaKernel/getMessageSvc.h"
@@ -39,7 +41,7 @@ struct MyObj : public AthMessaging {
 };
 
 
-bool test(IMessageSvc* msgSvc)
+void test(IMessageSvc* msgSvc)
 {
   MyObj obj1;
   obj1.print();
@@ -52,9 +54,13 @@ bool test(IMessageSvc* msgSvc)
 
   // Checking a level < OutputLevel should not result in getMessageSvc warning
   MyObj obj4(MSG::WARNING);
-  //typically used in "if (obj4.msgLvl(MSG::DEBUG)) {  ..debug messages ..}"
-  bool outputExpected = obj4.msgLvl(MSG::DEBUG);
-  return (not outputExpected);
+
+  // Typically used in "if (obj4.msgLvl(MSG::DEBUG)) { ... debug messages ... }"
+  assert( obj4.msgLvl(MSG::DEBUG) == false );
+
+  // Check that default message level is correctly set even before printing anything
+  MyObj obj5;
+  assert( obj5.msgLvl(MSG::DEBUG) == false );
 }
 
 
@@ -101,7 +107,7 @@ int main (int argc, char** argv)
   if (!msgSvc) return 1;
 
   std::cout << "--- Test with MessageSvc" << std::endl;
-  if (not test(msgSvc)) return 1;
+  test(msgSvc);
 
   if (doPerf) {
     perftest(msgSvc, ntry);
