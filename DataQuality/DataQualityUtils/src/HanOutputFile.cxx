@@ -28,7 +28,6 @@
 #include <TMath.h>
 #include <TProfile.h>
 #include <TROOT.h>
-#include <TString.h>
 #include <TStyle.h>
 #include <TText.h>
 #include <TImageDump.h>
@@ -166,7 +165,7 @@ namespace dqutils
     if (obj == nullptr) return;
 
     TDirectory* dir {};
-    TString obj_type = obj->ClassName();
+    std::string obj_type = obj->ClassName();
 
     if (objName != "") { // Not a file
       if (obj_type == "TDirectoryFile" || obj_type == "TDirectory" || obj_type == "TFile") {
@@ -202,7 +201,7 @@ namespace dqutils
         // don't delete TDirectories
         std::string fName("");
         TObject* obj_in_dir = key->ReadObj();
-        TString obj_in_dir_type = obj_in_dir->ClassName();
+        std::string obj_in_dir_type = obj_in_dir->ClassName();
         // Check if this is node (not a histogram)
         if (obj_in_dir_type == "TDirectoryFile" || obj_in_dir_type == "TDirectory" || obj_in_dir_type == "TFile" ||
             obj_in_dir_type == "TObjString") {
@@ -653,7 +652,7 @@ namespace dqutils
       TIter next(gDirectory->GetListOfKeys());
       TKey* key;
       while ((key = (TKey*) next())) {
-        TString key_name = key->GetName();
+        std::string key_name = key->GetName();
         if (key_name == "V.2.3") {
           return 2;
         } else {
