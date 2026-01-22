@@ -112,12 +112,12 @@ bool MMT_Road::horizontalCheck() const {
 }
 
 void MMT_Road::incrementAge(const int bcwind) {
-  std::vector<unsigned int> old_ihits;
-  for (unsigned int j = 0; j < m_road_hits.size(); j++) {
-    m_road_hits[j].setAge(m_road_hits[j].getAge() +1);
-    if (m_road_hits[j].getAge() > (bcwind-1)) old_ihits.push_back(j);
+  short int old_ihits = 0;
+  for (auto &hit : m_road_hits) {
+    hit.setAge(hit.getAge()+1);
+    if (hit.getAge() > (bcwind-1)) ++old_ihits;
   }
-  for (int j = old_ihits.size()-1; j > -1; j--) m_road_hits.erase(m_road_hits.begin()+j);
+  m_road_hits.erase(m_road_hits.begin(), m_road_hits.begin()+old_ihits);
 }
 
 bool MMT_Road::matureCheck(const int bcwind) const {
