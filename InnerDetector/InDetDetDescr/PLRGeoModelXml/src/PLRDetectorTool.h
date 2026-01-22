@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef PLRGeoModelXml_PLRDETECTORTOOL_H
@@ -29,15 +29,12 @@ public:
   virtual ~PLRDetectorTool() = default;
   virtual StatusCode create() override final;
   virtual StatusCode clear() override final;
-  virtual StatusCode registerCallback ATLAS_NOT_THREAD_SAFE () override final;
-  virtual StatusCode align ATLAS_NOT_THREAD_SAFE (IOVSVC_CALLBACK_ARGS_P(I,keys)) override final;
 
 private:
   const InDetDD::PixelDetectorManager *m_detManager{};
   std::unique_ptr<InDetDD::SiCommonItems> m_commonItems{};
   WaferTree m_moduleTree;
 
-  Gaudi::Property<bool> m_alignable{this, "Alignable", false, ""};
   // This should be changed to an ITk-specific one in future, once available
   Gaudi::Property<std::string> m_alignmentFolderName{this, "AlignmentFolderName", "/Indet/Align", ""};
 
