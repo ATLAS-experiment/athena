@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( AthenaPython )
@@ -37,11 +37,11 @@ atlas_add_test( pyathena
    POST_EXEC_SCRIPT noerror.sh )
 
 atlas_add_test( pyhistsvc_write
-   SCRIPT athena AthenaPython/test_pyhistsvc_write.py
+   SCRIPT test/test_pyhistsvc_write.py
    POST_EXEC_SCRIPT noerror.sh )
 
 atlas_add_test( pyhistsvc_read
-   SCRIPT athena AthenaPython/test_pyhistsvc_read.py
+   SCRIPT test/test_pyhistsvc_read.py
    DEPENDS pyhistsvc_write
    POST_EXEC_SCRIPT noerror.sh )
 
