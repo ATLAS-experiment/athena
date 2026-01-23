@@ -4,7 +4,6 @@
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-// $Id: ClusterDumper.h 581807 2014-02-06 08:40:10Z krasznaa $
 #ifndef XAODCREATORALGS_CLUSTERDUMPER_H
 #define XAODCREATORALGS_CLUSTERDUMPER_H
 
@@ -41,6 +40,8 @@ private:
 
   Gaudi::Property<std::string> m_fileName{this,"FileName",{}};
   Gaudi::Property<bool> m_printCellLinks{this,"PrintCellLinks",true};
+  Gaudi::Property<bool> m_reducedPrecision{this,"ReducedPrecision",false,
+  "If true, use less precision in the output, to reduce exposure to FP rounding issues when comparing with a reference."};
 
   std::ostream* m_out=&std::cout;
   std::ofstream m_fileOut;
