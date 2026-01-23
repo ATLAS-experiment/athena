@@ -16,8 +16,8 @@
 #include <memory>
 
 namespace Gep{
-  class Jet;
-  class Cluster;
+  struct Jet;
+  struct Cluster;
 }
 
  enum WTAConeMakerEnum{ // use WTAConeMakerEnum for algorithm variants
