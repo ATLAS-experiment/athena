@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 #include "L1TopoCoreSim/Connector.h"
 
@@ -49,12 +49,14 @@ TCS::Connector::reset() {
    StatusCode sc(StatusCode::SUCCESS);
 
    // clear the output data
+   //coverity[USELESS_CALL:FALSE]
    sc &= clearOutput();
    m_hasInputOverflow = false;
    m_hasAmbiguity = false;
 
    // reset the algorithm
    if(m_algorithm)
+      //coverity[USELESS_CALL:FALSE]
       sc &= m_algorithm->reset();
 
    // reset the execution flags

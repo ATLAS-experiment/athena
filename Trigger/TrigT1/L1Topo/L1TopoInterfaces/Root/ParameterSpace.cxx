@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 //  ParameterSpace.cxx
 //  TopoCore
@@ -104,9 +104,7 @@ ParameterSpace::parameter(const std::string & parameterName) const {
       if( pa.name() == parameterName ) 
          return pa;
    }
-
    TCS_EXCEPTION("Single parameter " << parameterName << " not found for algorithm " << algName());
-   return m_parameters[0]; // doesn't make sense, but should never get here
 }
 
 
@@ -117,9 +115,7 @@ ParameterSpace::parameter(const std::string & parameterName, unsigned int select
       if( (pa.name() == parameterName) && (pa.selection() == selection) ) 
          return pa;
    }
-
    TCS_EXCEPTION("Array parameter " << parameterName << "[" << selection << "] not found for algorithm " << algName());
-   return m_parameters[0]; // doesn't make sense, but should never get here
 }
 
 

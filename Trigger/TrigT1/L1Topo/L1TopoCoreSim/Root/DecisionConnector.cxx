@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "L1TopoCoreSim/DecisionConnector.h"
@@ -81,7 +81,7 @@ DecisionConnector::attachOutputData(const std::vector<TOBArray *>& data) {
 
    //std::vector<TOBArray const *>  m_outputData;
    for(TOBArray * x : data)
-      m_outputData.push_back( (TOBArray const *) x );
+      m_outputData.push_back(x);
 }
 
 

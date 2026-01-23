@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 //  ConfigException.h
 //  TopoCore
@@ -10,13 +10,14 @@
 
 #include <iostream>
 #include <sstream>
+#include <string>
 
 #define TCS_EXCEPTION(MSG) \
-{ std::stringstream o;   \
-o << MSG;\
-throw TCS::Exception(o.str()); }
-
+  do { std::ostringstream o; o << MSG; TCS::raise(o.str()); } while(0)
+  
 namespace TCS {
+  
+  
    
    class Exception : virtual public std::exception {
    public:
@@ -29,14 +30,17 @@ namespace TCS {
          m_msg(msg)
       {}
       
-			virtual ~Exception() throw() {};
+			virtual ~Exception() = default;
 
-      virtual char const* what() const throw() { return m_msg.data(); }
+      virtual char const* what() const noexcept { return m_msg.data(); }
       
    private:
       std::string m_msg;
-      /*type_t m_type; // not used yet, commenting out to suppress compilation warning */
    };
+   
+   [[noreturn]] inline void raise(const std::string & msg) {
+    throw Exception(msg);
+  }
    
 }
 

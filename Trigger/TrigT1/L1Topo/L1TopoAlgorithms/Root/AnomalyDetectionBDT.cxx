@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************
@@ -24,6 +24,7 @@
 #include <PathResolver/PathResolver.h>
 #endif
 #include <fstream>
+#include <iostream>
 
 REGISTER_ALG_TCS(AnomalyDetectionBDT)
 
@@ -72,7 +73,7 @@ namespace {
 }
 
 namespace {
-   int mapval(int value, std::string vartype){
+   int mapval(int value, const std::string & vartype){
 
       static const std::map<int,int> eta_LUT = {
       ///////////////////////
