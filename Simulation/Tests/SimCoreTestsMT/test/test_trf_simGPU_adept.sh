@@ -31,7 +31,7 @@ OUTPUT="PhaseIISim.AdePT"
 
 export ATHENA_CORE_NUMBER=8
 
-timeout 64800 AtlasG4_tf.py  \
+timeout 10800 AtlasG4_tf.py  \
   --maxEvents 100 \
   --multithreaded \
   --simulator 'AtlasG4_QS' \
