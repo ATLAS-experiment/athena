@@ -44,12 +44,10 @@ void MMT_Road::addHits(std::vector<std::shared_ptr<MMT_Hit> > &hits) {
 
     const double val = hit_i->getRZSlope();
     bool has_hit = (val > 0.) ? (val > slow && val < shigh) : (val > shigh && val < slow);
-
     if (!has_hit) continue;
 
-    const int bo = hit_i->getPlane();
-    auto it = std::find_if(m_road_hits.begin(), m_road_hits.end(), [&bo](const auto &hit) { return (hit.getPlane() == bo); });
-    if (it != m_road_hits.end()) continue;
+    const int pl = hit_i->getPlane();
+    if (std::ranges::any_of(m_road_hits, [&pl](const auto &hit) { return (hit.getPlane() == pl); })) continue;
 
     m_road_hits.emplace_back(*hit_i.get());
     m_road_hits.back().setAge(0);
