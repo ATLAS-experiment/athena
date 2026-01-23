@@ -74,7 +74,7 @@ namespace CP{
     ANA_CHECK(m_systematicsList.initialize());
 
     //retrieve the JSON file
-    std::string json_file_SSVWeightsAlg=PathResolver::find_file(m_jsonConfigPath_SSVWeightsAlg, "DATAPATH");
+    std::string json_file_SSVWeightsAlg = PathResolverFindCalibFile(m_jsonConfigPath_SSVWeightsAlg);
     std::ifstream jsonFile_SSVWeightsAlg(json_file_SSVWeightsAlg);
     if (!jsonFile_SSVWeightsAlg.is_open()) {
       ATH_MSG_ERROR("Could not open JSON file: " << m_jsonConfigPath_SSVWeightsAlg);
@@ -84,32 +84,69 @@ namespace CP{
     m_jsonConfig_SSVWeightsAlg = json::parse(jsonFile_SSVWeightsAlg);
     jsonFile_SSVWeightsAlg.close();
 
-    
+    // Check that b-tagging working point is the same as in the calibration
+    if (m_BTaggingWP.value() != m_jsonConfig_SSVWeightsAlg["CalibrationInformation"]["btaggingWP"].get<std::string>()){
+      ANA_MSG_ERROR("WARNING: You are using b-tagging working point: "<< m_BTaggingWP.value() <<" , which is different to the one used in the SSV Calibration: " << m_jsonConfig_SSVWeightsAlg["CalibrationInformation"]["btaggingWP"].get<std::string>());
+      return StatusCode::FAILURE;
+    }
+
+    // retrieve scale factors
+    m_SF_eff = m_jsonConfig_SSVWeightsAlg["CalibrationScaleFactors"]["SF_eff"];
+    m_SF_fake_low = m_jsonConfig_SSVWeightsAlg["CalibrationScaleFactors"]["SF_fake"]["mu_low"];
+    m_SF_fake_high = m_jsonConfig_SSVWeightsAlg["CalibrationScaleFactors"]["SF_fake"]["mu_high"];
+
+    // Initialize EfficiencyMethodClass
     if (m_EfficiencyMethod == "bjet_based") {
       m_EfficiencyMethodType = EfficiencyMethodType::bjet_based;
+      m_EfficiencyMethodBJetBasedPtr = std::make_unique<EfficiencyMethodBJetBasedClass>( m_jsonConfig_SSVWeightsAlg );
     }
     else if (m_EfficiencyMethod == "Bhadron_pT_eta_based") {
       m_EfficiencyMethodType = EfficiencyMethodType::Bhadron_pT_eta_based;
+      m_EfficiencyMethodBhadronPtEtaBasedPtr = std::make_unique<EfficiencyMethodBhadronPtEtaBasedClass>( m_jsonConfig_SSVWeightsAlg );
     }
     else {
       ATH_MSG_ERROR("Unknown efficiency method: " << m_EfficiencyMethod << " , accepted efficiency methods are: 'bjet_based','Bhadron_pT_eta_based'");
       return StatusCode::FAILURE;
     }
 
-
+    //Initialize nFMethodClass
     if (m_nFMethod == "pileup_bjet_based") {
       m_nFMethodType = nFMethodType::pileup_bjet_based;
+      m_nFPileupBJetBasedPtr = std::make_unique<nFMethodPileupBJetBasedClass>( m_jsonConfig_SSVWeightsAlg );
     }
     else if (m_nFMethod == "pileup_based_linearfit") {
       m_nFMethodType = nFMethodType::pileup_based_linearfit;
+      m_nFPileupBasedLinearFitPtr = std::make_unique<nFMethodPileupBasedLinearFitClass>( m_jsonConfig_SSVWeightsAlg );
     }
     else if (m_nFMethod == "pileup_based_binned") {
       m_nFMethodType = nFMethodType::pileup_based_binned;
+      m_nFPileupBasedBinnedPtr = std::make_unique<nFMethodPileupBasedBinnedClass>( m_jsonConfig_SSVWeightsAlg );
     }
     else {
       ATH_MSG_ERROR("Unknown nF method: " << m_nFMethod << " , accepted nF methods are: 'pileup_bjet_based', 'pileup_based_linearfit', 'pileup_based_binned'");
       return StatusCode::FAILURE;
     }
+    // If OutputVariableSize = all -> Initialize all EfficiencyMethods and nFMethods
+    // Also check if pointers have already been created (see code just above) 
+    // as depending on the user method settings some of them might have been set already 
+    if ( m_OutputVariableSizeType == OutputVariableSizeType::all ){
+      if (!m_EfficiencyMethodBJetBasedPtr){
+        m_EfficiencyMethodBJetBasedPtr = std::make_unique<EfficiencyMethodBJetBasedClass>( m_jsonConfig_SSVWeightsAlg );
+      }
+      if (!m_EfficiencyMethodBhadronPtEtaBasedPtr){
+        m_EfficiencyMethodBhadronPtEtaBasedPtr = std::make_unique<EfficiencyMethodBhadronPtEtaBasedClass>( m_jsonConfig_SSVWeightsAlg );
+      }
+      if (!m_nFPileupBJetBasedPtr){
+        m_nFPileupBJetBasedPtr = std::make_unique<nFMethodPileupBJetBasedClass>( m_jsonConfig_SSVWeightsAlg );
+      }
+      if (!m_nFPileupBasedLinearFitPtr){
+        m_nFPileupBasedLinearFitPtr = std::make_unique<nFMethodPileupBasedLinearFitClass>( m_jsonConfig_SSVWeightsAlg );
+      }
+      if (!m_nFPileupBasedBinnedPtr){
+        m_nFPileupBasedBinnedPtr = std::make_unique<nFMethodPileupBasedBinnedClass>( m_jsonConfig_SSVWeightsAlg );
+      }
+    }
+
 
     return StatusCode::SUCCESS;
   }
@@ -201,39 +238,35 @@ namespace CP{
       int N_missed = count_not_matched_objects(truthBh_to_SSV_matched);
       int N_fake = count_number_of_fake_SSVs(accepted_truthBhs, good_SSVs);
 
-      // retrieve scale factors and pileup
-      double SF_eff = m_jsonConfig_SSVWeightsAlg["CalibrationScaleFactors"]["SF_eff"];
-      double SF_fake_low = m_jsonConfig_SSVWeightsAlg["CalibrationScaleFactors"]["SF_fake"]["mu_low"];
-      double SF_fake_high = m_jsonConfig_SSVWeightsAlg["CalibrationScaleFactors"]["SF_fake"]["mu_high"];
-
+      // retrieve pileup
       double muactual = evtInfo->actualInteractionsPerCrossing();
 
       // calculate P_eff
-      double P_eff = std::pow(SF_eff, N_matched);
+      double P_eff = std::pow(m_SF_eff, N_matched);
 
-      //calculate P_ineff
+      //calculate P_ineff according to the chosen method
       double P_ineff = 1;
       if (m_EfficiencyMethodType == EfficiencyMethodType::bjet_based){
-        P_ineff = calculate_P_ineff_bjet_based(b_jet_count, N_missed,SF_eff);
+        P_ineff = m_EfficiencyMethodBJetBasedPtr->getPIneff(b_jet_count, N_missed,m_SF_eff);
       }
       else if (m_EfficiencyMethodType == EfficiencyMethodType::Bhadron_pT_eta_based){
-        P_ineff = calculate_P_ineff_Bhadron_pt_eta_based(accepted_truthBhs, truthBh_to_SSV_matched, SF_eff);
+        P_ineff = m_EfficiencyMethodBhadronPtEtaBasedPtr->getPIneff(accepted_truthBhs, truthBh_to_SSV_matched, m_SF_eff);
       }
       else {
         ATH_MSG_ERROR("Unknown efficiency method: " << m_EfficiencyMethod << " , accepted efficiency methods are: 'bjet_based','Bhadron_pT_eta_based'");
         return StatusCode::FAILURE;
       } 
 
-      // calculate P_fake
+      // calculate P_fake according to the chosen method
       double P_fake = 1;
       if (m_nFMethodType == nFMethodType::pileup_bjet_based){
-        P_fake = calculate_P_fake_pileup_bjet_based(muactual, b_jet_count, N_fake,SF_fake_low, SF_fake_high);
+        P_fake = m_nFPileupBJetBasedPtr->getPFake(muactual, b_jet_count, N_fake,m_SF_fake_low, m_SF_fake_high);
       }
       else if (m_nFMethodType == nFMethodType::pileup_based_linearfit){
-        P_fake = calculate_P_fake_pileup_based_linearfit(muactual, N_fake);
+        P_fake = m_nFPileupBasedLinearFitPtr->getPFake(muactual,N_fake);
       }
       else if (m_nFMethodType == nFMethodType::pileup_based_binned){
-        P_fake = calculate_P_fake_pileup_based_binned(muactual, N_fake, SF_fake_low, SF_fake_high);
+        P_fake = m_nFPileupBasedBinnedPtr->getPFake(muactual, N_fake, m_SF_fake_low, m_SF_fake_high);
       }
       else { 
         ATH_MSG_ERROR("Unknown nF method: " << m_nFMethod << " , accepted nF methods are: 'pileup_bjet_based', 'pileup_based_linearfit', 'pileup_based_binned'");
@@ -263,11 +296,11 @@ namespace CP{
       }
       //decorate all possible P factors
       if (m_OutputVariableSizeType == OutputVariableSizeType::all){
-        double P_ineff_bjet_based = calculate_P_ineff_bjet_based(b_jet_count, N_missed,SF_eff);
-        double P_ineff_pt_eta_based = calculate_P_ineff_Bhadron_pt_eta_based(accepted_truthBhs, truthBh_to_SSV_matched, SF_eff);
-        double P_fake_pileup_bjet_based = calculate_P_fake_pileup_bjet_based(muactual, b_jet_count, N_fake, SF_fake_low, SF_fake_high);
-        double P_fake_pileup_based_linearfit = calculate_P_fake_pileup_based_linearfit(muactual, N_fake);
-        double P_fake_pileup_based_binned = calculate_P_fake_pileup_based_binned(muactual, N_fake, SF_fake_low, SF_fake_high);
+        double P_ineff_bjet_based = m_EfficiencyMethodBJetBasedPtr->getPIneff(b_jet_count, N_missed,m_SF_eff);
+        double P_ineff_pt_eta_based = m_EfficiencyMethodBhadronPtEtaBasedPtr->getPIneff(accepted_truthBhs, truthBh_to_SSV_matched, m_SF_eff);
+        double P_fake_pileup_bjet_based = m_nFPileupBJetBasedPtr->getPFake(muactual, b_jet_count, N_fake, m_SF_fake_low, m_SF_fake_high);
+        double P_fake_pileup_based_linearfit = m_nFPileupBasedLinearFitPtr->getPFake(muactual,N_fake);
+        double P_fake_pileup_based_binned = m_nFPileupBasedBinnedPtr->getPFake(muactual, N_fake, m_SF_fake_low, m_SF_fake_high);
 
         m_P_ineff_bjet_based_decor.set(*evtInfo, P_ineff_bjet_based, sys);
         m_P_ineff_pt_eta_based_decor.set(*evtInfo, P_ineff_pt_eta_based, sys);
@@ -458,7 +491,7 @@ namespace CP{
 
   const std::vector<const xAOD::TruthParticle*> SSVWeightsAlg::construct_not_matched_vectors(
     const std::vector<const xAOD::TruthParticle*> &truthBhs,
-    const std::vector<bool> &matched_vector) const {
+    const std::vector<bool> &matched_vector) {
 
     std::vector<const xAOD::TruthParticle*> missed_vector;
     for (size_t i = 0; i < truthBhs.size(); ++i){
@@ -506,14 +539,25 @@ namespace CP{
 
   double SSVWeightsAlg::poisson_pmf(
     const int k,
-    const double lambda) const {
+    const double lambda){
     // Returns $P(k;\lambda) = \frac{e^{-\lambda}\lambda^k}{k!}$ 
     boost::math::poisson distrib(lambda);
     return boost::math::pdf(distrib, k);
   }
 
+  SSVWeightsAlg::EfficiencyMethodBhadronPtEtaBasedClass::EfficiencyMethodBhadronPtEtaBasedClass( const nlohmann::json & jsonConfig )
+    : m_ptbins(jsonConfig["efficiency_Bhadron_pT_eta_based"]["pt_bins"].get<std::vector<double>>())
+  {
+    // Extract information from JSON file for EfficiencyMethod EfficiencyMethodBhadronPtEtaBased
+    for (size_t i = 0; i < m_ptbins.size() - 1; ++i) {
+      std::string pT_bin_key = "pt_bin_" + std::to_string((int)m_ptbins[i]) + "_" + std::to_string((int)m_ptbins[i+1]);
+      m_BhadronPtEtaEfficiencyMap[pT_bin_key] = jsonConfig["efficiency_Bhadron_pT_eta_based"][pT_bin_key];
+    }
+    m_upperboundpT = m_ptbins[m_ptbins.size()-1];
+  }
+
   //calculate P_ineff based on the Bhadron pT and eta
-  double SSVWeightsAlg::calculate_P_ineff_Bhadron_pt_eta_based(
+  double SSVWeightsAlg::EfficiencyMethodBhadronPtEtaBasedClass::getPIneff(
     const std::vector<const xAOD::TruthParticle*> &accepted_truthBhs,
     const std::vector<bool> &truthBh_to_SSV_matched,
     double SF_eff) const{
@@ -521,9 +565,9 @@ namespace CP{
     const std::vector<const xAOD::TruthParticle*> missed_truthBhs = construct_not_matched_vectors(accepted_truthBhs, truthBh_to_SSV_matched);
 
     //read off pt bins from JSON file
-    const std::vector<double> &ptbins = m_jsonConfig_SSVWeightsAlg["Efficiency_pt_eta_based"]["pt_bins"];
+    const std::vector<double> &ptbins = m_ptbins;
 
-    double P_ineff2 = 1;
+    double P_ineff = 1;
     for (size_t i = 0; i < missed_truthBhs.size(); ++i) { 
       //retrieve pt,eta of missed truthBh
       double pt = missed_truthBhs[i]->pt();
@@ -535,8 +579,8 @@ namespace CP{
           //construct pt bin name
           pt_bin_of_truthBh = "pt_bin_" + std::to_string((int)ptbins[j]) + "_" + std::to_string((int)ptbins[j+1]);
         }
-        if (pt > 100000){
-          pt_bin_of_truthBh = "pt_bin_43500_100000";
+        else if (pt > m_upperboundpT){
+          pt_bin_of_truthBh = "pt_bin_" + std::to_string(m_upperboundpT) + "plus";
         }
       }
       if (pt_bin_of_truthBh == ""){
@@ -544,9 +588,9 @@ namespace CP{
         continue;
       }
       //retrieve eta and efficiency bins for the pT bin
-      const std::vector<double>& eta_bins = m_jsonConfig_SSVWeightsAlg["Efficiency_pt_eta_based"][pt_bin_of_truthBh]["eta"];
-      const std::vector<double>& efficiencies = m_jsonConfig_SSVWeightsAlg["Efficiency_pt_eta_based"][pt_bin_of_truthBh]["efficiency"];
-    
+      const std::vector<double>& eta_bins = m_BhadronPtEtaEfficiencyMap.at(pt_bin_of_truthBh).at("eta");
+      const std::vector<double>& efficiencies = m_BhadronPtEtaEfficiencyMap.at(pt_bin_of_truthBh).at("efficiency");
+
       double efficiency = 1;
 
       //iterate eta bins to find appropriate eta bin for truthBh eta
@@ -559,33 +603,41 @@ namespace CP{
         }
       }
       //calculate P_ineff using the found efficiency
-      P_ineff2 = P_ineff2*(1-SF_eff*efficiency)/(1-efficiency);
+      P_ineff = P_ineff*(1-SF_eff*efficiency)/(1-efficiency);
     }
-    return P_ineff2;
+    return P_ineff;
   }
 
+  SSVWeightsAlg::EfficiencyMethodBJetBasedClass::EfficiencyMethodBJetBasedClass( const nlohmann::json & jsonConfig )
+    : m_bjetEfficiencyMap(jsonConfig["efficiency_bjet_based"])
+  {
+    // Extract information from JSON file for EfficiencyMethodBJetBased
+    std::map<std::string, double>::iterator lastItem = std::prev(m_bjetEfficiencyMap.end());
+    std::string lastItemKey = lastItem->first;
+    m_upperboundNbjets = std::stoi(lastItemKey);
+  }
+
+
   //calculate P_ineff based on the bjet multiplicity
-  double SSVWeightsAlg::calculate_P_ineff_bjet_based(
+  double SSVWeightsAlg::EfficiencyMethodBJetBasedClass::getPIneff(
     const int b_jet_count,
     const int N_missed,
     const double SF_eff) const{
 
     double P_ineff = 1;  
-    // Build the bjets key string
-    std::string bjets_key = std::to_string(b_jet_count) + "_bjets";
-    // Get the value
 
+    // Get the value
     double epsilon = 1;
 
     //retrieve efficiency and average number of fake SSV depending on number of jets in event
-    if (b_jet_count<5 && b_jet_count>0){
-      epsilon = m_jsonConfig_SSVWeightsAlg["Efficiency_bjet_based"][bjets_key];
+    if (b_jet_count < m_upperboundNbjets){
+      // Build the bjets key string
+      std::string bjets_key = std::to_string(b_jet_count) + "_bjets";
+      epsilon = m_bjetEfficiencyMap.at(bjets_key);
     }
-    if (b_jet_count > 4){
-      epsilon = m_jsonConfig_SSVWeightsAlg["Efficiency_bjet_based"]["4_bjets"];      
-    }
-    if (b_jet_count < 1){
-      epsilon = m_jsonConfig_SSVWeightsAlg["Efficiency_bjet_based"]["1_bjets"];      
+    else{
+      std::string bjets_key = std::to_string(m_upperboundNbjets) + "p_bjets";
+      epsilon = m_bjetEfficiencyMap.at(bjets_key);      
     }
 
     P_ineff = std::pow((1-SF_eff*epsilon)/(1-epsilon), N_missed);
@@ -593,8 +645,18 @@ namespace CP{
     return P_ineff;
   }
 
+  SSVWeightsAlg::nFMethodPileupBJetBasedClass::nFMethodPileupBJetBasedClass( const nlohmann::json & jsonConfig )
+    : m_nFPileupBJetMap(jsonConfig["nF_pileup_bjet_based"])
+  {
+    // Extract information from JSON file for nFMethodPileupBJetBased
+    std::map<std::string, double>::iterator lastItem = std::prev(m_nFPileupBJetMap.at("high_muactual").end());
+    std::string lastItemKey = lastItem->first;
+    m_upperboundNbjets = std::stoi(lastItemKey);
+    m_lowMuHighMuThreshold = jsonConfig["CalibrationInformation"]["lowMuHighMuThreshold"];
+  }
+
   //calculate P_fake based on the bjet multiplicity in the high pileup and low pileup region
-  double SSVWeightsAlg::calculate_P_fake_pileup_bjet_based(
+  double SSVWeightsAlg::nFMethodPileupBJetBasedClass::getPFake(
     const double muactual,
     const int b_jet_count,
     const int N_fake,
@@ -605,20 +667,18 @@ namespace CP{
     // 2D map muactual and Nbjets
     std::string mu_key = (muactual >= m_lowMuHighMuThreshold) ? "high_muactual" : "low_muactual";
 
-    // Build the bjets key string
-    std::string bjets_key = std::to_string(b_jet_count) + "_bjets";
     // Get the value
-
     double n_F_value = 0;
 
-    if (b_jet_count<5 && b_jet_count>0){
-      n_F_value = m_jsonConfig_SSVWeightsAlg["nF_pileup_bjet_based"][mu_key][bjets_key];
+    if (b_jet_count < m_upperboundNbjets){
+      // Build the bjets key string
+      std::string bjets_key = std::to_string(b_jet_count) + "_bjets";
+      n_F_value = m_nFPileupBJetMap.at(mu_key).at(bjets_key);
     }
-    if (b_jet_count>4){
-      n_F_value = m_jsonConfig_SSVWeightsAlg["nF_pileup_bjet_based"][mu_key]["4_bjets"];
-    }
-    if (b_jet_count<1){
-      n_F_value = m_jsonConfig_SSVWeightsAlg["nF_pileup_bjet_based"][mu_key]["1_bjets"];
+    else{
+      // Build the bjets key string
+      std::string bjets_key = std::to_string(m_upperboundNbjets) + "p_bjets";
+      n_F_value = m_nFPileupBJetMap.at(mu_key).at(bjets_key);
     }
 
     if (muactual >= m_lowMuHighMuThreshold){
@@ -631,52 +691,59 @@ namespace CP{
     return P_fake;
   }
 
-  //calculate P_fake based on a linear fit of the average number of fake SSVs (nF) to the pileup (muactual)
-  double SSVWeightsAlg::calculate_P_fake_pileup_based_linearfit(
-    const double muactual,
-    const int N_fake) const{
-    // Extract slopes and intercepts from JSON
-    double slope_unscaled = m_jsonConfig_SSVWeightsAlg["nF_pileup_based_linearfit"]["unscaled"]["slope"];
-    double intercept_unscaled = m_jsonConfig_SSVWeightsAlg["nF_pileup_based_linearfit"]["unscaled"]["intercept"];
-
-    double slope_scaled = m_jsonConfig_SSVWeightsAlg["nF_pileup_based_linearfit"]["scaled"]["slope"];
-    double intercept_scaled = m_jsonConfig_SSVWeightsAlg["nF_pileup_based_linearfit"]["scaled"]["intercept"];
-
-    // Calculate expected counts
-    double n_F = slope_unscaled * muactual + intercept_unscaled;
-    double n_F_scaled = slope_scaled * muactual + intercept_scaled;
-
-    // Calculate P_fake
-    double P_fake2 = poisson_pmf(N_fake, n_F_scaled) / poisson_pmf(N_fake, n_F);
-
-    return P_fake2;
+  SSVWeightsAlg::nFMethodPileupBasedLinearFitClass::nFMethodPileupBasedLinearFitClass( const nlohmann::json & jsonConfig ){
+    // Extract information from JSON file for nFMethodPileupBasedLinearFit
+    m_slopeUnscaled = jsonConfig["nF_pileup_based_linearfit"]["unscaled"]["slope"];
+    m_interceptUnscaled = jsonConfig["nF_pileup_based_linearfit"]["unscaled"]["intercept"];
+    m_slopeScaled = jsonConfig["nF_pileup_based_linearfit"]["scaled"]["slope"];
+    m_interceptScaled = jsonConfig["nF_pileup_based_linearfit"]["scaled"]["intercept"];
   }
 
+  //calculate P_fake based on a linear fit of the average number of fake SSVs (nF) to the pileup (muactual)
+  double SSVWeightsAlg::nFMethodPileupBasedLinearFitClass::getPFake(
+    const double muactual,
+    const int N_fake) const{
+    // Calculate expected counts
+    double n_F = m_slopeUnscaled * muactual + m_interceptUnscaled;
+    double n_F_scaled = m_slopeScaled * muactual + m_interceptScaled;
+
+    // Calculate P_fake
+    double P_fake = poisson_pmf(N_fake, n_F_scaled) / poisson_pmf(N_fake, n_F);
+
+    return P_fake;
+  }
+
+  SSVWeightsAlg::nFMethodPileupBasedBinnedClass::nFMethodPileupBasedBinnedClass( const nlohmann::json & jsonConfig )
+    : m_muactualBins(jsonConfig["nF_pileup_based_binned"]["muactual_bins"].get<std::vector<double>>()),
+      m_nFBins(jsonConfig["nF_pileup_based_binned"]["values"].get<std::vector<double>>())
+  {
+    // Extract information from JSON file for nFMethodPileupBasedBinned
+    m_lowMuHighMuThreshold = jsonConfig["CalibrationInformation"]["lowMuHighMuThreshold"];
+  }
+
+
   //calculate P_fake with the pileup binned
-  double SSVWeightsAlg::calculate_P_fake_pileup_based_binned(
+  double SSVWeightsAlg::nFMethodPileupBasedBinnedClass::getPFake(
     const double muactual,
     const int N_fake,
     const double SF_fake_low,
     const double SF_fake_high) const{
-    // Extract bin edges and values from the JSON configuration
-    std::vector<double> muactualbins = m_jsonConfig_SSVWeightsAlg["nF_pileup_based_binned"]["muactual_bins"].get<std::vector<double>>();
-    std::vector<double> nFbins = m_jsonConfig_SSVWeightsAlg["nF_pileup_based_binned"]["values"].get<std::vector<double>>();
 
     double nF = 0;
-    double P_fake3 = 1;
+    double P_fake = 1;
 
     // Find the correct bin for muactual
-    for (size_t j = 0; j < muactualbins.size() - 1; ++j) {
-      if (muactual >= muactualbins[j] && muactual < muactualbins[j + 1]) {
-        nF = nFbins[j];
-        if (muactual < m_lowMuHighMuThreshold) {
-          P_fake3 = poisson_pmf(N_fake, SF_fake_low * nF) / poisson_pmf(N_fake, nF);
+    for (size_t j = 0; j < m_muactualBins.size() - 1; ++j) {
+      if (muactual >= m_muactualBins[j] && muactual < m_muactualBins[j + 1]) {
+        nF = m_nFBins[j];
+        if (muactual < m_lowMuHighMuThreshold){
+          P_fake = poisson_pmf(N_fake, SF_fake_low * nF) / poisson_pmf(N_fake, nF);
         } else {
-          P_fake3 = poisson_pmf(N_fake, SF_fake_high * nF) / poisson_pmf(N_fake, nF);
+          P_fake = poisson_pmf(N_fake, SF_fake_high * nF) / poisson_pmf(N_fake, nF);
         }
         break; // Bin found, no need to continue loop
       }
     }
-    return P_fake3;
+    return P_fake;
   }
 }

@@ -45,7 +45,6 @@ namespace CP{
     Gaudi::Property<std::string> m_OutputVariableSize {this, "OutputVariableSize", "", "number of variables that will be saved to the output, string can be 'standard','extended','additional' or 'all'"};
 
     nlohmann::json m_jsonConfig_SSVWeightsAlg;
-    const double m_lowMuHighMuThreshold = 42.93;
 
     enum class EfficiencyMethodType {
       unknown,
@@ -67,6 +66,84 @@ namespace CP{
       additional,
       all
     };
+
+    class nFMethodPileupBasedLinearFitClass {
+      public:
+        nFMethodPileupBasedLinearFitClass( const nlohmann::json & jsonConfig );
+        double getPFake(
+          const double muactual,
+          const int N_fake) const;
+      private:
+        double m_slopeUnscaled = -999.;
+        double m_interceptUnscaled = -999.;
+        double m_slopeScaled = -999.;
+        double m_interceptScaled = -999.;
+    };
+
+    class nFMethodPileupBasedBinnedClass {
+      public: 
+        nFMethodPileupBasedBinnedClass( const nlohmann::json & jsonConfig );
+        double getPFake(
+          const double muactual,
+          const int N_fake,
+          const double SF_fake_low,
+          const double SF_fake_high) const;
+      private:
+        std::vector<double> m_muactualBins{};
+        std::vector<double> m_nFBins{};
+        double m_lowMuHighMuThreshold = -999;
+    };
+
+    class nFMethodPileupBJetBasedClass {
+      public: 
+        nFMethodPileupBJetBasedClass( const nlohmann::json & jsonConfig );
+        double getPFake(
+          const double muactual,
+          const int b_jet_count,
+          const int N_fake,
+          const double SF_fake_low,
+          const double SF_fake_high) const;
+      private:
+        std::map<std::string, std::map<std::string, double>> m_nFPileupBJetMap{};
+        int m_upperboundNbjets = -999;
+        double m_lowMuHighMuThreshold = -999;
+    };
+
+    class EfficiencyMethodBhadronPtEtaBasedClass {
+      public:
+        EfficiencyMethodBhadronPtEtaBasedClass( const nlohmann::json & jsonConfig );
+        double getPIneff(
+          const std::vector<const xAOD::TruthParticle*> &accepted_truthBh,
+          const std::vector<bool> &truthBh_to_SSV_matched,
+          double SF_eff) const;
+      private:
+        std::vector<double> m_ptbins{};
+        std::map<std::string, std::map<std::string, std::vector<double>>> m_BhadronPtEtaEfficiencyMap{};
+        double m_upperboundpT = -999;
+    };
+
+    class EfficiencyMethodBJetBasedClass {
+      public: 
+        EfficiencyMethodBJetBasedClass( const nlohmann::json & jsonConfig );
+          double getPIneff(
+            const int b_jet_count,
+            const int N_missed,
+            const double SF_eff) const;
+      private:
+        std::map<std::string, double> m_bjetEfficiencyMap{};
+        int m_upperboundNbjets = -999; 
+    };
+
+
+    double m_SF_eff = -999.;
+    double m_SF_fake_low = -999.;
+    double m_SF_fake_high = -999.;
+
+    std::unique_ptr<nFMethodPileupBasedLinearFitClass> m_nFPileupBasedLinearFitPtr; 
+    std::unique_ptr<nFMethodPileupBasedBinnedClass> m_nFPileupBasedBinnedPtr; 
+    std::unique_ptr<nFMethodPileupBJetBasedClass> m_nFPileupBJetBasedPtr; 
+    std::unique_ptr<EfficiencyMethodBhadronPtEtaBasedClass> m_EfficiencyMethodBhadronPtEtaBasedPtr; 
+    std::unique_ptr<EfficiencyMethodBJetBasedClass> m_EfficiencyMethodBJetBasedPtr; 
 
     EfficiencyMethodType m_EfficiencyMethodType{EfficiencyMethodType::unknown};
     nFMethodType m_nFMethodType{nFMethodType::unknown};
@@ -90,17 +167,17 @@ namespace CP{
       const std::vector<const xAOD::TruthParticle*> &truthBhs,
       const std::vector<const xAOD::Vertex*> &SSVs)const;
 
-    const std::vector<const xAOD::TruthParticle*> construct_not_matched_vectors(
+    static const std::vector<const xAOD::TruthParticle*> construct_not_matched_vectors(
       const std::vector<const xAOD::TruthParticle*> &truthBhs,
-      const std::vector<bool> &matched_vector)const;
+      const std::vector<bool> &matched_vector);
 
     double compute_DeltaR_between_SSV_and_particle(
       const xAOD::Vertex* vtx, 
       const xAOD::IParticle * part) const;
 
-    double poisson_pmf(
+    static double poisson_pmf(
       const int k,
-      const double lambda)const; 
+      const double lambda); 
 
     int count_matched_objects(
       const std::vector<bool> &matching_vector)const;
