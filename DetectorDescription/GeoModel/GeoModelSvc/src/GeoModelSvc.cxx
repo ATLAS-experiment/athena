@@ -31,8 +31,7 @@
 GeoModelSvc::GeoModelSvc(const std::string &name, ISvcLocator *svc)
     : base_class(name, svc), m_pSvcLocator(svc) {}
 
-StatusCode GeoModelSvc::initialize ATLAS_NOT_THREAD_SAFE()
-//                                 ^ due to IGeoModelTool::align()
+StatusCode GeoModelSvc::initialize()
 {
   if (!m_sqliteDb && m_supportedGeometry == 0) {
     ATH_MSG_FATAL(
@@ -69,15 +68,8 @@ StatusCode GeoModelSvc::initialize ATLAS_NOT_THREAD_SAFE()
 
   if (!m_checkTagInfo) {
     // We are in a Simulation job: apply possible alignments to detectors.
-
-    // Pass dummy parameters to the align() function
-    int par1 = 0;
-    std::list<std::string> par2;
-
     for(ToolHandle<IGeoModelTool>& theTool : m_detectorTools) {
-      if (theTool->align(par1, par2) != StatusCode::SUCCESS) {
-        ATH_MSG_DEBUG("align() failed for the tool " << theTool->name());
-      }
+      ATH_CHECK(theTool->align());
     }
   }
 

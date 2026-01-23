@@ -8,7 +8,6 @@
 #include "GeoModelUtilities/GeoModelTool.h"
 #include "ALFA_DetectorFactory.h" //typedef CONFIGURATION
 #include "AthenaKernel/IIOVDbSvc.h"
-#include "CxxUtils/checker_macros.h"
 #include "CLHEP/Vector/ThreeVector.h" //CLHEP::Hep3Vector
 
 
@@ -42,7 +41,7 @@ class ATLAS_NOT_THREAD_SAFE ALFA_DetectorTool final : public GeoModelTool
   // Build geometry and store Manager to the TDS
   virtual StatusCode create() override final;
 
-  virtual StatusCode align(IOVSVC_CALLBACK_ARGS) override final;
+  virtual StatusCode align() override final;
 };
 
 #endif

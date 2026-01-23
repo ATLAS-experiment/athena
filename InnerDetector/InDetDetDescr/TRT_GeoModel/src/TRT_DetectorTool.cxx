@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TRT_DetectorTool.h"
@@ -169,7 +169,7 @@ StatusCode TRT_DetectorTool::clear()
 }
 
 StatusCode
-TRT_DetectorTool::align ATLAS_NOT_THREAD_SAFE (IOVSVC_CALLBACK_ARGS_P(I,keys))
+TRT_DetectorTool::align()
 //The manager align call invalidates all elements
 {
   MsgStream log(msgSvc(), name());
@@ -178,7 +178,7 @@ TRT_DetectorTool::align ATLAS_NOT_THREAD_SAFE (IOVSVC_CALLBACK_ARGS_P(I,keys))
     return StatusCode::FAILURE;
   }
   if (m_alignable) {
-    return const_cast<InDetDD::TRT_DetectorManager*>(m_manager)->align(I,keys);
+    return const_cast<InDetDD::TRT_DetectorManager*>(m_manager)->align();
   } else {
     msg(MSG::DEBUG) << "Alignment disabled. No alignments applied" << endmsg;
     return StatusCode::SUCCESS;

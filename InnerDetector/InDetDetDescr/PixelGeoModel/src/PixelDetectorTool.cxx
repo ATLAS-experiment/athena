@@ -306,7 +306,7 @@ StatusCode PixelDetectorTool::clear()
 }
 
 StatusCode
-PixelDetectorTool::align ATLAS_NOT_THREAD_SAFE(IOVSVC_CALLBACK_ARGS_P(I,keys))
+PixelDetectorTool::align()
 //Not thread safe as the call m_manager->align will invalidateAllElements it holds
 {
   if (!m_manager) {
@@ -314,7 +314,7 @@ PixelDetectorTool::align ATLAS_NOT_THREAD_SAFE(IOVSVC_CALLBACK_ARGS_P(I,keys))
     return StatusCode::FAILURE;
   }
   if (m_alignable) {
-    return const_cast<InDetDD::PixelDetectorManager*>(m_manager)->align(I,keys);
+    return const_cast<InDetDD::PixelDetectorManager*>(m_manager)->align();
   } else{
     ATH_MSG_DEBUG("Alignment disabled. No alignments applied" );
     return StatusCode::SUCCESS;

@@ -17,7 +17,6 @@
 #include "GaudiKernel/ToolHandle.h" //member
 #include "Gaudi/Property.h" //member
 
-#include "CxxUtils/checker_macros.h" //ATLAS_NOT_THREAD_SAFE()
 #include "StoreGate/StoreGateSvc.h" //SvcHandle template
 #include <memory> //unique_ptr
 
@@ -31,7 +30,7 @@ public:
     // Standard Constructor
     GeoModelSvc(const std::string& name, ISvcLocator* svc);
 
-    virtual StatusCode initialize ATLAS_NOT_THREAD_SAFE() override;
+    virtual StatusCode initialize() override;
     virtual StatusCode finalize() override;
 
     /// Callback from TagInfoMgr on TagInfo change

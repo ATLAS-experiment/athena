@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArReadoutGeometry/FCAL_ChannelMap.h"
@@ -241,7 +241,7 @@ StatusCode LArDetectorToolNV::clear()
   return StatusCode::SUCCESS;
 }
 
-StatusCode LArDetectorToolNV::align(IOVSVC_CALLBACK_ARGS)
+StatusCode LArDetectorToolNV::align()
 {
   if(!m_applyAlignments) {
     ATH_MSG_DEBUG("LAr alignments switched OFF");

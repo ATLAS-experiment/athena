@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /** @file TRT_StrawAlignDbSvc.cxx
@@ -152,9 +152,7 @@ StatusCode TRT_StrawAlignDbSvc::readTextFile(StrawDxContainer* dxcontainer,
   ATH_MSG_INFO (" (no compression) ");
 
   // force a call back in the geometry
-  int i(0);
-  std::list<std::string> keys ;
-  (const_cast<InDetDD::TRT_DetectorManager*>(m_trtman))->align(i,keys).ignore() ;
+  (const_cast<InDetDD::TRT_DetectorManager*>(m_trtman))->align().ignore() ;
 
   return StatusCode::SUCCESS ;
 }
