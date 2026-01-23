@@ -9,7 +9,6 @@
 #include "CollectionSvc/TokenList.h"
 #include "CollectionSvc/ICollectionColumn.h"
 #include "CollectionSvc/ICollectionCursor.h"
-#include "RootCollection/AttributeListLayout.h"
 
 #include "PersistentDataModel/Token.h"
 #include "CxxUtils/checker_macros.h"
@@ -49,7 +48,7 @@ TestDriver::write ATLAS_NOT_THREAD_SAFE ()
    description.insertColumn( "attr64bit", "unsigned long long" );
 
    cout << "Creating Collection" << endl;
-   pool::ICollection* collection = serviceHandle->create( description, true );
+   pool::ICollection* collection = serviceHandle->create( description );
    if ( ! collection )   {
       throw std::runtime_error( "Could not create a relational collection object" );
    }
@@ -134,15 +133,4 @@ TestDriver::read ATLAS_NOT_THREAD_SAFE ()
 
   collection->close();
   delete collection;
-}
-
-
-// Force a link dependency on libRootCollection; otherwise, the linker
-// will remove the dependency.  And if we don't link against libRootCollection,
-// then we can get ubsan errors related to ICollectionQuery because in that
-// case, the typeinfo for ICollectionQuery won't get exported from
-// the test binary.
-void dum()
-{
-  AttributeListLayout all;
 }

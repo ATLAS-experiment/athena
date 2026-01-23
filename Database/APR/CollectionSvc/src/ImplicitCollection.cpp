@@ -16,8 +16,7 @@
 
 namespace pool {
 
-   ImplicitCollection::
-   ImplicitCollection( ISession* session,
+   ImplicitCollection::ImplicitCollection( ISession* session,
                        const std::string& connection,
                        const std::string& name,
                        ICollection::OpenMode mode )
@@ -29,8 +28,7 @@ namespace pool {
    }
 
 
-   ImplicitCollection::
-   ImplicitCollection( const ICollectionDescription* description,
+   ImplicitCollection::ImplicitCollection( const ICollectionDescription* description,
                        ICollection::OpenMode mode,
                        ISession* session )
          : APRMessaging("ImplicitCollection"),
@@ -42,8 +40,7 @@ namespace pool {
 
 
    void
-   ImplicitCollection::
-   open( ICollection::OpenMode mode,
+   ImplicitCollection::open( ICollection::OpenMode mode,
          ISession* session )
    {
       if ( mode != ICollection::READ ) {
@@ -130,12 +127,6 @@ namespace pool {
    }
 
 
-   ICollection::OpenMode 
-   ImplicitCollection::openMode() const{
-      return ICollection::READ;
-   }
-
-
    void
    ImplicitCollection::insertRow(const pool::CollectionRowBuffer& /*inputRowBuffer*/)
    {
@@ -162,11 +153,6 @@ namespace pool {
       // hmm, no-op at the moment  //MN
    }
 
-   bool
-   ImplicitCollection::isOpen() const
-   {
-      return true;
-   }
 
    const ICollectionDescription& ImplicitCollection::description() const
    {
@@ -176,6 +162,6 @@ namespace pool {
    ICollectionCursor& ImplicitCollection::cursor()
    {
       ImplicitCollectionIterator* cursor = new ImplicitCollectionIterator( *m_container, m_description );
-      return *cursor;//cursor->execute();
+      return *cursor;
    }
 }

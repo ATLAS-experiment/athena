@@ -16,7 +16,7 @@ using namespace pool;
 namespace pool { class ISession; }
 
 pool::ICollection*
-pool::CollectionService::create( const pool::ICollectionDescription& description, bool overwrite )
+pool::CollectionService::create( const pool::ICollectionDescription& description )
 {
    if( description.name().empty() ) {
       std::string errorMsg = "Must specify name of collection in description input argument.";
@@ -34,7 +34,7 @@ pool::CollectionService::create( const pool::ICollectionDescription& description
       throw std::runtime_error( errorMsg + " (APR: \" CollectionService::create \" from \" CollectionSvc \")" );
    }
 
-   pool::ICollection::OpenMode openMode = overwrite? pool::ICollection::CREATE_AND_OVERWRITE : pool::ICollection::CREATE;
+   pool::ICollection::OpenMode openMode = pool::ICollection::CREATE_AND_OVERWRITE;
    return plugin( description, openMode );
 }
 
@@ -51,8 +51,7 @@ pool::CollectionService::handle( const std::string& name,
       throw std::runtime_error( errorMsg + " (APR: \" CollectionService::handle \" from \" CollectionSvc \")" );
    }
    pool::CollectionDescription description( name, type, connection );
-   pool::ICollection::OpenMode openMode = readOnly? ICollection::READ : ICollection::UPDATE;
-   return plugin( description, openMode, session );
+   return plugin( description, ICollection::READ, session );
 }
 
 

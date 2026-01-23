@@ -70,15 +70,9 @@ namespace pool {
         /// Destructor
         ~RNTCollection();
     
-        /// Return openMode
-        virtual ICollection::OpenMode openMode() const final override; 
-
         /// Explicitly re-opens the collection after it has been closed.
         virtual void open() final override;
     
-        /// Checks if the collection is open.
-        virtual bool isOpen() const final override;
-
         /// Adds a new row of data to the collection.
         virtual void insertRow( const pool::CollectionRowBuffer& inputRowBuffer ) final override;
 
@@ -92,15 +86,13 @@ namespace pool {
         virtual const ICollectionDescription& description() const final override;
 
         /// Returns a cursor for the collection.
-        virtual ICollectionCursor&         cursor() final override;
+        virtual ICollectionCursor& cursor() final override;
 
      private:    
         /// copying unimplemented in this class.
         RNTCollection(const RNTCollection &) = delete;
         RNTCollection & operator = (const RNTCollection &) = delete;
     
-        void delayedFileOpen(const std::string& method);
-        std::unique_ptr<ROOT::RNTupleReader> getCollectionRNTuple();
         void addField(ROOT::RNTupleModel* model, const std::string& field_name, const std::string& field_type);
 
         void cleanup();

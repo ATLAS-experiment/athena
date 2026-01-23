@@ -42,10 +42,8 @@ namespace pool {
      * its properties.
      *
      * @param description Specification of collection or collection fragment properties.
-     * @param overwrite Flag to distinguish creation and overwrite open modes.
      */
-    virtual ICollection* create( const ICollectionDescription& description,
-                                 bool overwrite = false );
+    virtual ICollection* create( const ICollectionDescription& description );
 
     virtual ICollection* open( const std::string & name,
                                const std::string & type,

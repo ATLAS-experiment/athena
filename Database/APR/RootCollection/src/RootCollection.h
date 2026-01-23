@@ -31,7 +31,6 @@ namespace pool {
    namespace RootCollection {
 
       class Attribute;
-      class AttributeSpecification;
   
       /**
          @brief Collection (and CollectionProxy) implementation based on ROOT trees
@@ -59,9 +58,6 @@ namespace pool {
         ///   - connection:
         ///     - It can be a relative or absolute path
         ///     - In case of an empty connection string it is assumed that the file is located in the current directory
-        ///     - Remote access via rootd: e.g. "root://pcepsft02.cern.ch:9090//localdisk/ \n 
-        ///       Further documentation can be found in the class description of TNetFile
-        ///       (http://root.cern.ch/root/html/TNetFile.html)
 
     
         RootCollection(  const pool::ICollectionDescription* description,
@@ -73,15 +69,9 @@ namespace pool {
     
         virtual void addTreeBranch( const std::string& name, const std::string& type_name );
 
-        /// Return openMode
-        virtual ICollection::OpenMode openMode() const final override; 
-
         /// Explicitly re-opens the collection after it has been closed.
         virtual void open() final override;
     
-        /// Checks if the collection is open.
-        virtual bool isOpen() const final override;
-
         /// Adds a new row of data to the collection.
         virtual void insertRow( const pool::CollectionRowBuffer& inputRowBuffer ) final override;
 
@@ -95,7 +85,7 @@ namespace pool {
         virtual const ICollectionDescription& description() const final override;
 
         /// Returns a cursor for the collection.
-        virtual ICollectionCursor&         cursor() final override;
+        virtual ICollectionCursor& cursor() final override;
 
      private:
     
@@ -104,21 +94,14 @@ namespace pool {
         /// copying unimplemented in this class.
         RootCollection & operator = (const RootCollection &);
     
-        void delayedFileOpen( const std::string& method );
-        TTree* getCollectionTree();
         void setupTree() const;
-        void readAttributeListSpecification() const;
-        void writeAttributeListSpecification();
 
         void cleanup();
         
      public:
         
-        static const unsigned int c_maxLengthOfStrings = 5000;
         static const char* const poolOptToRootOpt[];
         static const Io::IoFlags poolOptToFileMgrOpt[];
-        static const char* const c_tokenBranchName;// = "Token";
-        static const char* const c_attributeListLayoutName;// = "Schema"; 
 
      private:
 
@@ -131,11 +114,8 @@ namespace pool {
         TFile*                               m_file;
         ISession*                            m_session;
         bool                                 m_open;
-        bool                                 m_readOnly;
-        bool                                 m_schemaWritten;
-        
-        SmartIF<IFileMgr>                    m_fileMgr;
 
+        SmartIF<IFileMgr>                    m_fileMgr;
       };
    }
 }
