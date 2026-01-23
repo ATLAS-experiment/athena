@@ -1,5 +1,5 @@
 /*
- *   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+ *   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  */
 #include "LArHitEMapToDigitAlg.h"
 #include "AthenaKernel/ITriggerTime.h"
@@ -179,10 +179,15 @@ StatusCode LArHitEMapToDigitAlg::execute(const EventContext& context) const {
              if ((!m_RndmEvtOverlay) || (m_RndmEvtOverlay && digit)) {
                LArDigit* Digit = nullptr;
                LArDigit* Digit_DigiHSTruth = nullptr;
-               ATH_CHECK(MakeDigit(context, cellID, ch_id, Digit,
+               auto sc = MakeDigit(context, cellID, ch_id, Digit,
                                    dataItemsPool,
                                    Digit_DigiHSTruth, TimeE, digit, engine,
-                                   TimeE_DigiHSTruth));
+                                   TimeE_DigiHSTruth);
+               if (sc.isFailure()){
+                 ATH_MSG_ERROR("LArHitEMapToDigitAlg::execute failed in MakeDigit");
+                 delete Digit_DigiHSTruth;
+                 return sc;
+               }
                DigitContainer->push_back(Digit);
                if (DigitContainer_DigiHSTruth){
                  DigitContainer_DigiHSTruth->push_back(Digit_DigiHSTruth);
