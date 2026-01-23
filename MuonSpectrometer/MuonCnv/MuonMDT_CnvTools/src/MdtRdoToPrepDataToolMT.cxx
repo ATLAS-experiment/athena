@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MdtRdoToPrepDataToolMT.h"
@@ -36,6 +36,16 @@ namespace {
         CxxUtils::sincos  tubeSC{nominalTubePos.phi()};
         Amg::Vector3D measurePos{tubeSC.cs * measuredPerp, tubeSC.sn *measuredPerp, nominalTubePos.z()};
         in.setClosestApproach(measurePos);
+    }
+    
+    inline std::string print(const Muon::MdtPrepData& prd) {
+        const auto* idHelperSvc = prd.detectorElement()->idHelperSvc();
+        std::stringstream sstr{};
+        sstr<<" PrepData "<<idHelperSvc->toString(prd.identify())
+            <<" radius: "<<prd.localPosition()[Trk::locR]<<" pm "
+            <<std::sqrt(prd.localCovariance()(Trk::locR, Trk::locR))<<
+            ", tdc: "<<prd.tdc()<<", adc: "<<prd.adc()<<", status: "<<prd.status();
+        return sstr.str();
     }
 }  // namespace
 
@@ -403,8 +413,24 @@ namespace Muon {
             const MdtCalibOutput calibResult{m_calibrationTool->calibrate(ctx, calibIn, false)};
 
             std::unique_ptr<MdtPrepData> newPrepData = createPrepData(calibIn, calibResult);
-            if (!newPrepData) continue;
-
+            if (!newPrepData) {
+                continue;
+            }
+            if (driftCircleColl->size()) {
+                MdtPrepData* prevPrd = driftCircleColl->at(driftCircleColl->size()-1);
+                if (prevPrd->identify() == channelId) {
+                    ATH_MSG_VERBOSE("Duplicated prep data object detected: "<<std::endl
+                        <<"  **** "<<print(*prevPrd)<<std::endl
+                        <<"  **** "<<print(*newPrepData));
+                    if (prevPrd->status() == MdtDriftCircleStatus::MdtStatusDriftTime) {
+                        ATH_MSG_VERBOSE("Prd is already good");
+                    } else if (newPrepData->status() == MdtDriftCircleStatus::MdtStatusDriftTime) {
+                        (*prevPrd) = std::move(*newPrepData);
+                        prevPrd->setHashAndIndex(driftCircleColl->identifyHash(), driftCircleColl->size()-1);
+                    }
+                    continue;
+                }
+            }
             newPrepData->setHashAndIndex(driftCircleColl->identifyHash(), driftCircleColl->size());
             driftCircleColl->push_back(std::move(newPrepData));
         }
