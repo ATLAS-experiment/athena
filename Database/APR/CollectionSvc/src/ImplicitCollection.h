@@ -34,7 +34,7 @@ namespace pool {
        @param session the session object
        @param connection database connection string. It has the format databaseNameType:databaseName, where databaseNameType can be FID, PFN or LFN.
        @param name the container name in the database
-       @param mode collection's open mode. For the moment only READONLY mode is allowed.
+       @param mode collection's open mode. Only READONLY mode is allowed.
     */
     ImplicitCollection( ISession* session,
                         const std::string& connection,
@@ -53,10 +53,6 @@ namespace pool {
     ImplicitCollection (const ImplicitCollection&) = delete;
     ImplicitCollection& operator= (const ImplicitCollection&) = delete;
 
-    /// Return openMode
-    virtual ICollection::OpenMode openMode() const override;
-    
-
     /// Adds a new row of data to the collection. Will always throw exception.
     virtual void insertRow( const pool::CollectionRowBuffer& inputRowBuffer ) override;
 
@@ -69,14 +65,11 @@ namespace pool {
     ///  no-op at the moment
     void open() override;
 
-    /// Checks if the collection is open.
-    bool isOpen() const override;
-
     /// Returns an object used to describe the collection properties.
     virtual const ICollectionDescription& description() const override;
 
     /// Returns a cursor for the collection.
-    virtual ICollectionCursor&         cursor() final override;
+    virtual ICollectionCursor& cursor() final override;
 
   protected:
     void open( ICollection::OpenMode mode, ISession* session );

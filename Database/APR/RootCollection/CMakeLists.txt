@@ -9,11 +9,6 @@ find_package( ROOT COMPONENTS Core pthread RIO Tree ROOTNTuple )
 find_package( VDT )
 
 # Component(s) in the package:
-atlas_add_root_dictionary( RootCollection
-                           RootCollectionDictSource
-                           ROOT_HEADERS RootCollection/AttributeListLayout.h RootCollection/LinkDef.h
-                           EXTERNAL_PACKAGES ROOT CORAL )
-
 atlas_add_library( RootCollection
                    src/*.cpp
                    ${RootCollectionDictSource}

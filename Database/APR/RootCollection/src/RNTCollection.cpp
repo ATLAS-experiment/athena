@@ -47,45 +47,13 @@ RNTCollection::RNTCollection(
      m_mode( mode ),
      m_file( 0 ),
      m_session( 0 ),
-     m_open( false )
-{
+     m_open( false ) {
    RNTCollection::open();
 }
 
      
-RNTCollection::~RNTCollection()
-{
-   if( m_open ) try {
-      RNTCollection::close();
-   } catch( std::exception& exception ) {
-      ATH_MSG_ERROR( exception.what() );
-      cleanup();
-   }
-   else cleanup();
-}
-
-
-void  RNTCollection::delayedFileOpen( const std::string& method )
-{
-   if( m_open && !m_file && m_session && m_mode != ICollection::READ ) {
-      m_file = TFile::Open(m_fileName.c_str(), poolOptToRootOpt[m_mode] );
-      if(!m_file || m_file->IsZombie()) {
-         throw std::runtime_error( string("ROOT cannot \"") + poolOptToRootOpt[m_mode] + "\" file " + m_fileName + " (APR: \" RNTCollection::" + method +" \" from \" RNTCollection \")");
-      }
-   ATH_MSG_INFO( "File " << m_fileName << " opened in " << method );
-// (Write Schema)
-   }
-}
-
-std::unique_ptr< ROOT::RNTupleReader > RNTCollection::getCollectionRNTuple()
-{
-   if( m_file ) {
-      auto reader = ROOT::RNTupleReader::Open( APRDefaults::RNTupleNames::EventTag, m_fileName );
-      if( reader )
-         ATH_MSG_DEBUG( "Retrieved Collection RNTuple  '" << reader->GetDescriptor().GetName() << "' from file " << m_fileName );
-      return reader;
-   }
-   return nullptr;
+RNTCollection::~RNTCollection() {
+   RNTCollection::close();
 }
 
 
@@ -114,10 +82,8 @@ void RNTCollection::insertRow( const pool::CollectionRowBuffer& inputRowBuffer )
 
 void RNTCollection::commit( bool )
 {
-   delayedFileOpen("commit");
-
    if( m_open ) {
-   ATH_MSG_DEBUG( "Commit: saving collection to file: " << "" );
+      ATH_MSG_DEBUG( "Commit: saving collection to file: " << "" );
    }
 }
 
@@ -126,14 +92,6 @@ void RNTCollection::close()
 {
    ATH_MSG_INFO( "Closing " << (m_open? "open":"not open") << " collection '" << m_fileName << "'" );
    if(m_open) {
-      delayedFileOpen("close");
-              
-      if( m_mode == ICollection::CREATE || m_mode == ICollection::CREATE_AND_OVERWRITE ) {
-         m_mode = ICollection::UPDATE;
-      }
-      if( m_mode != ICollection::READ ) {
-         // Write Schema?  MN: not sure
-      }
       cleanup();
    }
 }
@@ -161,9 +119,7 @@ void RNTCollection::open()  try
 {
    const string myFileType = "RNTCollectionFile";
 
-   if( m_open ) close();
-
-   if(  m_fileName.starts_with( "PFN:") && m_description.connection().empty() )
+   if( m_fileName.starts_with( "PFN:") && m_description.connection().empty() )
    {
       // special case with no catalog and PFN specified
       // create the collection with exactly PFN file name
@@ -171,24 +127,17 @@ void RNTCollection::open()  try
    }
 
    TDirectory::TContext dirctxt;
-   if( m_session == 0 || m_mode == ICollection::READ || m_mode == ICollection::UPDATE ) {
+   if( m_session == 0 || m_mode == ICollection::READ ) {
       // first step: Try to open the file
       ATH_MSG_INFO( "Opening Collection File '" << m_fileName << "' in mode: " << poolOptToRootOpt[m_mode] );
       bool fileExists = !gSystem->AccessPathName( m_fileName.c_str() );
        ATH_MSG_DEBUG( "File '" << m_fileName << "'" << (fileExists? " exists." : " does not exist." ) );
       // open the file if it exists, or create if requested
-      if( !fileExists && m_mode != ICollection::CREATE && m_mode != ICollection::CREATE_AND_OVERWRITE )
+      if( !fileExists && m_mode != ICollection::CREATE_AND_OVERWRITE )
          m_file = 0;
       else {
          const char* root_mode = poolOptToRootOpt[m_mode];
          Io::IoFlags io_mode = poolOptToFileMgrOpt[m_mode];
-
-         if( fileExists && (m_mode == ICollection::CREATE
-                            || m_mode == ICollection::CREATE_AND_OVERWRITE ) ) {
-            // creating collection in an existing file
-            root_mode = "UPDATE";
-            io_mode = (Io::WRITE | Io::APPEND);
-         }
          if( !m_fileMgr ) {
             m_fileMgr = Gaudi::svcLocator()->service("FileMgr");
             if ( !m_fileMgr ) {
@@ -224,10 +173,9 @@ void RNTCollection::open()  try
    ATH_MSG_INFO( "File " << m_fileName << " opened" );
    }
 
-   if (m_mode == ICollection::READ || m_mode == ICollection::UPDATE) {
+   if (m_mode == ICollection::READ) {
       // retrieve RNTuple from file
-      m_reader = getCollectionRNTuple();
-
+      m_reader = ROOT::RNTupleReader::Open( APRDefaults::RNTupleNames::EventTag, m_fileName );
       if (!m_reader) {
          int n(0);
          if (!m_fileMgr) {
@@ -262,10 +210,10 @@ void RNTCollection::open()  try
          // MN: TODO : may need to fix coral::Attribute to recognize the "new" typenames
          static const std::map< std::string, std::string > typenameConv = {
             { "std::string", "string" },
-            { "std::uint64_t", "unsigned long" },
+            { "std::uint64_t", "unsigned long long" },
             { "std::uint32_t", "unsigned int" },
             { "std::uint16_t", "unsigned short" },
-            { "std::int64_t", "long" },
+            { "std::int64_t", "long long" },
             { "std::int32_t", "int" },
             { "std::int16_t", "short" } };
          auto it = typenameConv.find( field_type );
@@ -293,13 +241,11 @@ void RNTCollection::open()  try
       }
    }
 
-   if( m_mode == ICollection::UPDATE || m_mode == ICollection::CREATE || m_mode == ICollection::CREATE_AND_OVERWRITE ) {
+   if( m_mode == ICollection::CREATE_AND_OVERWRITE ) {
       // create a new Collection
       std::string rntupleName = std::string(APRDefaults::RNTupleNames::EventTag);
-      if( m_mode == ICollection::CREATE_AND_OVERWRITE ) {
-         ATH_MSG_DEBUG( "Creating collection in overwrite mode..." );
-         m_file->Delete( (rntupleName+";*").c_str() );
-      }
+      ATH_MSG_DEBUG( "Creating collection in overwrite mode..." );
+      m_file->Delete( (rntupleName+";*").c_str() );
       // (Create Schema)
       auto model { ROOT::RNTupleModel::Create() };
       model->SetDescription( rntupleName );
@@ -326,18 +272,6 @@ void RNTCollection::open()  try
    ATH_MSG_INFO( "RNTuple Collection opened, size = " << m_reader->GetNEntries() );
    }
       
-   if (m_session && m_mode == ICollection::UPDATE) {
-      int n(0);
-      if (!m_fileMgr) {
-         m_file->Close();
-      } else {
-         n = m_fileMgr->close(m_file, "RNTCollection");
-      }
-
-      if(n == 0) delete m_file;
-      m_file = 0;
-   }
-
    m_open = true;
 
 } catch (std::exception& e) {
@@ -356,26 +290,12 @@ void RNTCollection::addField(ROOT::RNTupleModel* model, const std::string& field
 }
 
 
-bool RNTCollection::isOpen() const
-{
-   return m_open;
-}
-
-     
-pool::ICollection::OpenMode RNTCollection::openMode() const
-{
-   return m_mode;
-}
-
-     
-const pool::ICollectionDescription& RNTCollection::description() const
-{
+const pool::ICollectionDescription& RNTCollection::description() const {
    return m_description;
 }
 
-pool::ICollectionCursor& RNTCollection::cursor()
-{
-   if( !isOpen() ) {
+pool::ICollectionCursor& RNTCollection::cursor() {
+   if( !m_open ) {
       throw std::runtime_error(  "Attempt to get cursor for a closed collection. (APR: \" RNTCollection::cursor \" from \" RNTCollection \")");
    }
    pool::TokenList m_outputTokenList;
@@ -388,7 +308,6 @@ pool::ICollectionCursor& RNTCollection::cursor()
    }
 
    pool::CollectionRowBuffer collectionRowBuffer( m_outputTokenList, m_outputAttributeList );
-
    ICollectionCursor* m_cursor = new RNTCollectionCursor( m_description, collectionRowBuffer, m_reader.get() );
    return *m_cursor;
 }
