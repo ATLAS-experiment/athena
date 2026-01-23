@@ -228,11 +228,7 @@ std::shared_ptr<CylinderSurface> ActsTrk::CaloBlueprintNodeBuilder::generateCyli
 
   ATH_MSG_DEBUG("Cylinder radius and length are " << LArBRadius << " and " << LArBLength);
 
-  //Now we need to transform the local cylinder centred on 0,0,0 into the global
-  //atlas coordinate system. To do this we shift the cylinder in Z away from zero
-  //to the midpoint in the Z coordinates used to build the cylinder.
-  auto transform = Transform3(Translation3(0.0,0.0,lowZLarB + (lowZLarB + highZLarB) / 2.0));
-  auto surface = Surface::makeShared<CylinderSurface>(transform,LArBRadius, LArBLength);
+  auto surface = Surface::makeShared<CylinderSurface>(Transform3::Identity(), LArBRadius, LArBLength);
     
   return surface;
 
