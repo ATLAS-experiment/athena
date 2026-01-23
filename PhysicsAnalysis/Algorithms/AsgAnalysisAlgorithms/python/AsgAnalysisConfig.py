@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # AnaAlgorithm import(s):
 from AnalysisAlgorithmsConfig.ConfigBlock import ConfigBlock
@@ -14,16 +14,18 @@ except ImportError:
     import logging
 
 class SystematicsCategories(Enum):
-    JETS = ['JET_']
-    JER = ['JET_JER']
-    ELECTRONS = ['EG_', 'EL_']
-    MUONS = ['MUON_']
-    PHOTONS = ['EG_', 'PH_']
-    TAUS = ['TAUS_']
-    MET = ['MET_']
-    TRACKS = ['TRK_']
-    EVENT = ['GEN_', 'PRW_']
-    FTAG = ['FT_']
+    JETS = {'JET_'}
+    JER = {'JET_JER'}
+    FTAG = {'FT_'}
+    ELECTRONS = {'EG_', 'EL_'}
+    MUONS = {'MUON_'}
+    PHOTONS = {'EG_', 'PH_'}
+    TAUS = {'TAUS_'}
+    MET = {'MET_'}
+    TRACKS = {'TRK_'}
+    GENERATOR = {'GEN_'}
+    PRW = {'PRW_'}
+    EVENT = {'GEN_', 'PRW_'}
 
 class CommonServicesConfig (ConfigBlock) :
     """the ConfigBlock for common services
@@ -45,8 +47,8 @@ class CommonServicesConfig (ConfigBlock) :
         self.addOption ('onlySystematicsCategories', None, type=list,
             info="a list of strings defining categories of systematics to enable "
             "(only recommended for studies / partial ntuple productions). Choose amongst: "
-            "`jets`, `electrons`, `muons`, `photons`, `taus`, `met`, `tracks`, `ftag`, `event`. This option is overridden "
-            "by `filterSystematics`.")
+            "`jets`, `JER`, `FTag`, `electrons`, `muons`, `photons`, `taus`, `met`, `tracks`, `generator`, `PRW`, `event`. "
+            "This option is overridden by `filterSystematics`.")
         self.addOption ('systematicsHistogram', None , type=str,
             info="the name of the histogram to which a list of executed "
             "systematics will be printed. If left empty, the histogram is not written at all.")
@@ -91,11 +93,11 @@ class CommonServicesConfig (ConfigBlock) :
                 self.onlySystematicsCategories = ['JER']
             if self.onlySystematicsCategories is not None:
                 # Convert strings to enums and validate
-                requested_categories = []
+                requested_categories = set()
                 for category_str in self.onlySystematicsCategories:
                     try:
                         category_enum = SystematicsCategories[category_str.upper()]
-                        requested_categories += category_enum.value
+                        requested_categories |= category_enum.value
                     except KeyError:
                         raise ValueError(f"Invalid systematics category passed to option 'onlySystematicsCategories': {category_str}. Must be one of {', '.join(category.name for category in SystematicsCategories)}")
                 # Construct regex pattern as logical-OR of category names
