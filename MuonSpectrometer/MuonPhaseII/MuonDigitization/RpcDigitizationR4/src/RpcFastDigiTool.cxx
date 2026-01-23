@@ -20,8 +20,6 @@ namespace MuonR4 {
         ATH_CHECK(MuonDigitizationTool::initialize());
         ATH_CHECK(m_writeKey.initialize());
         ATH_CHECK(m_effiDataKey.initialize(!m_effiDataKey.empty()));
-        m_stIdxBIL = m_idHelperSvc->rpcIdHelper().stationNameIndex("BIL");
-        m_stIdxBIS = m_idHelperSvc->rpcIdHelper().stationNameIndex("BIS");
         return StatusCode::SUCCESS;
     }
     StatusCode RpcFastDigiTool::finalize() {
@@ -49,10 +47,9 @@ namespace MuonR4 {
                     continue;
                 }
                 const Identifier hitId{simHit->identify()};
-                const int stName = m_idHelperSvc->stationName(hitId);
                 RpcDigitCollection* digiColl = fetchCollection(hitId, digitCache);
-                bool run4_BI = (stName== m_stIdxBIS &&  std::abs(m_idHelperSvc->stationEta(hitId)) < 7) ||
-                                stName == m_stIdxBIL;
+                //The new BI chambers only have eta strips
+                bool run4_BI =  m_detMgr->getRpcReadoutElement(hitId)->nPhiStrips() == 0;
                 if (!run4_BI) {
                     /// Standard digitization path
                     const bool digitizedPhi = digitizeHit(simHit, true,  efficiencyMap, *digiColl, rndEngine, deadTimes);
