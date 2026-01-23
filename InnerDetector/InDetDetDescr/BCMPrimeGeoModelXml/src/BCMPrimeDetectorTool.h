@@ -5,7 +5,6 @@
 #ifndef BCMPRIMEGEOMODELXML_BCMPRIMEDETECTORTOOL_H
 #define BCMPRIMEGEOMODELXML_BCMPRIMEDETECTORTOOL_H
 
-#include <CxxUtils/checker_macros.h>
 #include <InDetGeoModelUtils/GeoModelXmlTool.h>
 
 namespace InDetDD

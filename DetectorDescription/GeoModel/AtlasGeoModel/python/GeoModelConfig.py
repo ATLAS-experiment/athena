@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -53,7 +53,7 @@ def GeoModelCfg(flags):
                                 nThreads = nThreads)
     if flags.Common.ProductionStep == ProductionStep.Simulation:
         ## Protects GeoModelSvc in the simulation from the AlignCallbacks
-        gms.AlignCallbacks = False
+        gms.CheckTagInfo = False
     result.addService(gms, primary=True, create=True)
 
     return result

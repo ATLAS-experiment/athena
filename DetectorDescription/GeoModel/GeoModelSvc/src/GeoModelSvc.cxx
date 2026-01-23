@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "GeoModelSvc.h"
@@ -32,7 +32,7 @@ GeoModelSvc::GeoModelSvc(const std::string &name, ISvcLocator *svc)
     : base_class(name, svc), m_pSvcLocator(svc) {}
 
 StatusCode GeoModelSvc::initialize ATLAS_NOT_THREAD_SAFE()
-//                                 ^ due to IGeoModelTool::registerCallback
+//                                 ^ due to IGeoModelTool::align()
 {
   if (!m_sqliteDb && m_supportedGeometry == 0) {
     ATH_MSG_FATAL(
@@ -64,54 +64,29 @@ StatusCode GeoModelSvc::initialize ATLAS_NOT_THREAD_SAFE()
 
   ATH_CHECK(m_detectorTools.retrieve());
 
-  ToolHandleArray<IGeoModelTool>::iterator itPriv = m_detectorTools.begin(),
-                                           itPrivEnd = m_detectorTools.end();
-
-  if (m_useTagInfo) {
-    ATH_CHECK(m_tagInfoMgr.retrieve());
-  }
-
   // build regular geometry
   ATH_CHECK(geoInit());
 
-  if (!m_callBackON) {
-    // _________________ Align functions NOT registered as callbacks
-    // _____________
+  if (!m_checkTagInfo) {
+    // We are in a Simulation job: apply possible alignments to detectors.
 
-    // Apply possible alignments to detectors.
-    // Dummy parameters for the callback
+    // Pass dummy parameters to the align() function
     int par1 = 0;
     std::list<std::string> par2;
-    for (; itPriv != itPrivEnd; ++itPriv) {
-      if ((*itPriv)->align(par1, par2) != StatusCode::SUCCESS) {
-        ATH_MSG_DEBUG("align() failed for the tool " << (*itPriv)->name());
+
+    for(ToolHandle<IGeoModelTool>& theTool : m_detectorTools) {
+      if (theTool->align(par1, par2) != StatusCode::SUCCESS) {
+        ATH_MSG_DEBUG("align() failed for the tool " << theTool->name());
       }
     }
+  }
 
-    // Fill in the contents of TagInfo
-    if (m_useTagInfo) {
-      ATH_CHECK(fillTagInfo());
-    }
-  } else {
-    // Register align() functions for all Tools
-    for (; itPriv != itPrivEnd; ++itPriv) {
-      IGeoModelTool *theTool = (*itPriv).get();
-
-      if (StatusCode::SUCCESS != theTool->registerCallback()) {
-        ATH_MSG_DEBUG(
-            "IGeoModelTool::align() was not registerred on CondDB object for "
-            "the tool "
-            << theTool->name());
-      }
-    }
-
-    // Register a callback on TagInfo in order to compare geometry
-    // configurations defined in job options to the one read from the input file
-    if (m_useTagInfo) {
+  if (m_useTagInfo) {
+    ATH_CHECK(m_tagInfoMgr.retrieve());
+    if (m_checkTagInfo) {
       m_tagInfoMgr->addListener(this);
-      // Fill in the contents of TagInfo
-      ATH_CHECK(fillTagInfo());
     }
+    ATH_CHECK(fillTagInfo());
   }
 
   return StatusCode::SUCCESS;
@@ -302,12 +277,7 @@ StatusCode GeoModelSvc::geoInit() {
   }
 
   // Loop over all tools
-  ToolHandleArray<IGeoModelTool>::iterator itPriv = m_detectorTools.begin(),
-                                           itPrivEnd = m_detectorTools.end();
-
-  for (; itPriv != itPrivEnd; ++itPriv) {
-    IGeoModelTool *theTool = &(**itPriv);
-
+  for(ToolHandle<IGeoModelTool>& theTool : m_detectorTools) {
     mem = GeoPerfUtils::getMem();
     cpu = GeoPerfUtils::getCpu();
 
