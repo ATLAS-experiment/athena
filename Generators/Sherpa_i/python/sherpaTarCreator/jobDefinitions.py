@@ -292,11 +292,10 @@ def mkEvntGenTestJob(options, ecm, jodir, prevJob):
       job.cmds += ["Gen_tf.py --ecmEnergy="+str(ecm*1000.)+" --maxEvents=1 --firstEvent=1 --randomSeed=10 --jobConfig="+jodir+" --outputEVNTFile=${outputEVNTFile} --maxEvents="+str(options.nEvts)]
     job.cmds += ["cat log.generate"]
 
-    ## set min events
-    job.cmds += ["post_ini_time=$(grep snapshot_post_ini log.generate | awk '{ print $5}')"]
-    job.cmds += ["post_lastevt_time=$(grep snapshot_post_lastevt log.generate | awk '{ print $5}')"]
-    job.cmds += ["nPer12h=$(awk -v a=\"$post_lastevt_time\" -v b=\"$post_ini_time\" 'BEGIN { printf \"%.0f\", "
-                  +str(options.nEvts)+"*12*60*60*1000/(a-b) }' </dev/null)"]
+    ## set min events based on the Wall Time [s] of the first event as reported by PerfMonMTSvc in log.generate
+    job.cmds += ["first_event_time=$(grep FirstEvent log.generate | awk '{ print $6}')"]
+    job.cmds += ["nPer12h=$(awk -v a=\"$first_event_time\" 'BEGIN { printf \"%.0f\", "
+                  +str(options.nEvts)+"*12*60*60/a }' </dev/null)"]
     job.cmds += ["finalEventsPerJob=0"]
     job.cmds += ["for i in 1 2 5 10 20 50 100 200 500 1000 2000 5000 10000; do if test $nPer12h -gt $i; then finalEventsPerJob=$i; fi; done"]
     job.cmds += ["echo \"Possible number of events per 12h: ${nPer12h} -> ${finalEventsPerJob} \""]
