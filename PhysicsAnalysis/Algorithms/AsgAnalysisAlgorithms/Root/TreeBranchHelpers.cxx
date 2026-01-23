@@ -373,24 +373,34 @@ namespace CP
           SG::ConstAccessor<int> {nominalAuxName};
         else if (typeName == "unsigned")
           SG::ConstAccessor<unsigned> {nominalAuxName};
-	else if (typeName == "unsigned_char")
+        else if (typeName == "unsigned_char")
           SG::ConstAccessor<unsigned char> {nominalAuxName};
-	else if (typeName == "unsigned_long_long")
+        else if (typeName == "unsigned_long_long")
           SG::ConstAccessor<unsigned long long> {nominalAuxName};
+        else if (typeName == "int8")
+          SG::ConstAccessor<std::int8_t> {nominalAuxName};
+        else if (typeName == "int16")
+          SG::ConstAccessor<std::int16_t> {nominalAuxName};
+        else if (typeName == "int32")
+          SG::ConstAccessor<std::int32_t> {nominalAuxName};
+        else if (typeName == "int64")
+          SG::ConstAccessor<std::int64_t> {nominalAuxName};
+        else if (typeName == "uint8")
+          SG::ConstAccessor<std::uint8_t> {nominalAuxName};
         else if (typeName == "uint16")
           SG::ConstAccessor<std::uint16_t> {nominalAuxName};
         else if (typeName == "uint32")
           SG::ConstAccessor<std::uint32_t> {nominalAuxName};
         else if (typeName == "uint64")
           SG::ConstAccessor<std::uint64_t> {nominalAuxName};
-	else if (typeName == "vector_float")
-	  SG::ConstAccessor<std::vector<float>> {nominalAuxName};
-	else if (typeName == "vector_int")
-	  SG::ConstAccessor<std::vector<int>> {nominalAuxName};
-	else if (typeName == "vector_vector_float")
-	  SG::ConstAccessor<std::vector<std::vector<float>>> {nominalAuxName};
-	else if (typeName == "vector_vector_int")
-	  SG::ConstAccessor<std::vector<std::vector<int>>> {nominalAuxName};
+        else if (typeName == "vector_float")
+          SG::ConstAccessor<std::vector<float>> {nominalAuxName};
+        else if (typeName == "vector_int")
+          SG::ConstAccessor<std::vector<int>> {nominalAuxName};
+        else if (typeName == "vector_vector_float")
+          SG::ConstAccessor<std::vector<std::vector<float>>> {nominalAuxName};
+        else if (typeName == "vector_vector_int")
+          SG::ConstAccessor<std::vector<std::vector<int>>> {nominalAuxName};
         else
         {
           unsigned line = __LINE__ - 2;

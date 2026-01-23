@@ -273,12 +273,12 @@ class ElectronCalibrationConfig (ConfigBlock) :
 
         # decorate truth information on the reconstructed object:
         if self.decorateTruth and config.dataType() is not DataType.Data:
-            config.addOutputVar (self.containerName, "truthType", "truth_type", noSys=True)
-            config.addOutputVar (self.containerName, "truthOrigin", "truth_origin", noSys=True)
+            config.addOutputVar (self.containerName, "truthType", "truth_type", noSys=True, auxType='int')
+            config.addOutputVar (self.containerName, "truthOrigin", "truth_origin", noSys=True, auxType='int')
 
-            config.addOutputVar (self.containerName, "firstEgMotherPdgId", "truth_firstEgMotherPdgId", noSys=True)
-            config.addOutputVar (self.containerName, "firstEgMotherTruthOrigin", "truth_firstEgMotherTruthOrigin", noSys=True)
-            config.addOutputVar (self.containerName, "firstEgMotherTruthType", "truth_firstEgMotherTruthType", noSys=True)
+            config.addOutputVar (self.containerName, "firstEgMotherPdgId", "truth_firstEgMotherPdgId", noSys=True, auxType='int')
+            config.addOutputVar (self.containerName, "firstEgMotherTruthOrigin", "truth_firstEgMotherTruthOrigin", noSys=True, auxType='int')
+            config.addOutputVar (self.containerName, "firstEgMotherTruthType", "truth_firstEgMotherTruthType", noSys=True, auxType='int')
 
 
 class ElectronWorkingPointConfig (ConfigBlock) :
