@@ -47,7 +47,6 @@ atlas_add_test(ap_fixed
 
 atlas_add_test(testEgamma1BDT_tv
                SOURCES src/FirstChain/Egamma1BDT/TestEgamma1/all_tests.cxx
-	       src/FirstChain/TestEgamma1/egamma1BDT_Test.cxx
 	       src/FirstChain/Egamma1BDT/*.cpp
                INCLUDE_DIRS ${APTYPES_INCLUDE_DIRS} ${GTEST_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS}
                LINK_LIBRARIES ${APTYPES_LIBRARIES} ${GTEST_LIBRARIES} ${ROOT_LIBRARIES} CxxUtils
