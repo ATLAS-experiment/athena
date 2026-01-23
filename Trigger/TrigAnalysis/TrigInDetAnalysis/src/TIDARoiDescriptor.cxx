@@ -6,7 +6,7 @@
  **     @author  mark sutton
  **     @date    Tue 10 Nov 2009 10:15:40 GMT 
  **
- **     Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+ **     Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  **/
 
 
@@ -72,9 +72,11 @@ TIDARoiDescriptor::TIDARoiDescriptor( bool fullscan )
 {
   if ( m_fullscan ) { 
     m_params = TIDARoiParameters( 0, -5, 5, 0, -M_PI, M_PI, 0, -225, 225 );
-
     m_tanthetaPlus  = exitpoint(  225,  5,  m_zedPlusR,  m_rPlusZed );
     m_tanthetaMinus = exitpoint( -225, -5, m_zedMinusR, m_rMinusZed );
+  } else {
+    m_tanthetaPlus = 0.0;
+    m_tanthetaMinus = 0.0;
   }
 }
 
@@ -103,7 +105,8 @@ TIDARoiDescriptor::TIDARoiDescriptor( unsigned int l1id, int id,
 	       phi, phiMinus, phiPlus,
 	       zed, zedMinus, zedPlus ), 
      m_fullscan(false),
-     m_l1Id(l1id), m_roiId(id), m_roiWord(0)
+     m_l1Id(l1id), m_roiId(id), m_roiWord(0),
+     m_cached(false), m_dphi(0)
 {
   // calculate z limits at radius maxRadius
 
@@ -120,10 +123,10 @@ TIDARoiDescriptor::TIDARoiDescriptor(unsigned int roiword, unsigned int l1id, in
 	       phi, phiMinus, phiPlus,
 	       zed, zedMinus, zedPlus ), 
      m_fullscan(false),
-     m_l1Id(l1id), m_roiId(id), m_roiWord(roiword)
+     m_l1Id(l1id), m_roiId(id), m_roiWord(roiword),
+     m_cached(false), m_dphi(0)
 {
   // calculate z limits at radius maxRadius
-  
   m_tanthetaPlus  = exitpoint( this->zedPlus(),  this->etaPlus(),  m_zedPlusR,  m_rPlusZed );
   m_tanthetaMinus = exitpoint( this->zedMinus(), this->etaMinus(), m_zedMinusR, m_rMinusZed );
 }
@@ -134,7 +137,8 @@ TIDARoiDescriptor::TIDARoiDescriptor(const TIDARoiDescriptor& a) :
   m_params(a.m_params),
   m_fullscan(a.m_fullscan),
   m_l1Id(a.m_l1Id), m_roiId(a.m_roiId), m_roiWord(a.m_roiWord),  
-  m_rois(a.m_rois)
+  m_rois(a.m_rois), 
+  m_cached(false), m_dphi(0)
 { 
   m_tanthetaPlus  = exitpoint( this->zedPlus(),  this->etaPlus(),  m_zedPlusR,  m_rPlusZed );
   m_tanthetaMinus = exitpoint( this->zedMinus(), this->etaMinus(), m_zedMinusR, m_rMinusZed );
@@ -151,6 +155,8 @@ TIDARoiDescriptor& TIDARoiDescriptor::operator= (const TIDARoiDescriptor& a)
     m_roiId = a.m_roiId;
     m_roiWord = a.m_roiWord;
     m_rois = a.m_rois;
+    m_cached = a.m_cached;
+    m_dphi = a.m_dphi;
     m_tanthetaPlus  = exitpoint( this->zedPlus(),  this->etaPlus(),  m_zedPlusR,  m_rPlusZed );
     m_tanthetaMinus = exitpoint( this->zedMinus(), this->etaMinus(), m_zedMinusR, m_rMinusZed );
   }
