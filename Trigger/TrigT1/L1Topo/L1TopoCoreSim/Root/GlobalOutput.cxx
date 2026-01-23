@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <iomanip>
@@ -206,24 +206,44 @@ namespace TCS {
 
 
 std::ostream&
-operator<<(std::ostream& o, const TCS::GlobalOutput & dec) {
+operator<<(std::ostream& o, const TCS::GlobalOutput& dec){
+  // Save stream state
+  const auto flags = o.flags();
+  const auto fill  = o.fill();
+  const auto width = o.width();
 
-   if(!dec.isValid()) 
-      o << "Note that the overall decision has not been calculated" << endl;
+  if (!dec.isValid())
+    o << "Note that the overall decision has not been calculated\n";
 
-   for(auto const& itdec : dec.m_decision)
-      o << "Overall decision for connector " << itdec.first << ": 0x" << right << hex << setfill('0') << setw(16) << dec.decision_field(itdec.first) << std::dec << setfill(' ') << endl;
-   
-   if(dec.isValid()) {
-     for(const TrigConf::TriggerLine & trigger : dec.m_triggersDec){
-         unsigned int position = trigger.flatindex();
-	 o << "  " << setw(30) << left << trigger.name() << "  " << (dec.passed(trigger.connName(), position) ? "pass" : "fail") << endl;}
-   } else {
-      for(const TrigConf::TriggerLine & trigger : dec.m_triggersDec)
-	o << "  " << setw(30) << left << trigger.name() << "  unset" << endl;
-   }
-   return o;
+  for (auto const& itdec : dec.m_decision) {
+    o << "Overall decision for connector " << itdec.first << ": 0x"
+      << std::right << std::hex << std::setfill('0') << std::setw(16)
+      << dec.decision_field(itdec.first)
+      << std::dec << std::setfill(' ') << '\n';
+  }
+
+  if (dec.isValid()) {
+    for (const TrigConf::TriggerLine& trigger : dec.m_triggersDec) {
+      unsigned int position = trigger.flatindex();
+      o << "  " << std::setw(30) << std::left << trigger.name()
+        << "  " << (dec.passed(trigger.connName(), position) ? "pass" : "fail")
+        << '\n';
+    }
+  } else {
+    for (const TrigConf::TriggerLine& trigger : dec.m_triggersDec) {
+      o << "  " << std::setw(30) << std::left << trigger.name()
+        << "  unset\n";
+    }
+  }
+
+  // Restore stream state
+  o.flags(flags);
+  o.fill(fill);
+  o.width(width);
+
+  return o;
 }
+
 //----------------------------------------------------------
 void
 GlobalOutput::print() const {
