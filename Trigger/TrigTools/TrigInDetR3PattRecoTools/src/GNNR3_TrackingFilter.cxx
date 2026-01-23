@@ -164,8 +164,7 @@ void TrigFTF_GNNR3_TrackingFilter::propagate(TrigFTF_GNNR3_Edge* pS, TrigFTF_GNN
     }
   } 
   else {//branching
-    int nBranches = 0;
-    for(auto sIt = lCont.begin();sIt!=lCont.end();++sIt, nBranches++) {
+    for(auto sIt = lCont.begin();sIt!=lCont.end();++sIt) {
       propagate((*sIt), new_ts);//recursive call
     }
   }
