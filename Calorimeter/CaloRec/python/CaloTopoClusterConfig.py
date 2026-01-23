@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -525,7 +525,8 @@ def CaloTopoClusterConfigTest(flags=None):
     )
     cfg.addEventAlgo(theNegativeEnergyCaloClustersThinner,"AthAlgSeq")
 
-    cfg.addEventAlgo(CompFactory.ClusterDumper("TopoDumper",ContainerName=topoAlg.ClustersOutputName,FileName="TopoClusters.txt"),sequenceName="AthAlgSeq")
+    cfg.addEventAlgo(CompFactory.ClusterDumper("TopoDumper",ContainerName=topoAlg.ClustersOutputName,FileName="TopoClusters.txt",
+                                               ReducedPrecision=True),sequenceName="AthAlgSeq")
 
     return cfg.run().isSuccess()
 
@@ -538,7 +539,7 @@ if __name__=="__main__":
     else:
         from AthenaCommon.Utils.unixtools import find_datafile
         import os
-        refFile=find_datafile("CaloRec/CaloRec-00-00-00/TopoClusters.txt.ref",pathlist=os.getenv("DATAPATH").split(":"))
+        refFile=find_datafile("CaloRec/CaloRec-00-00-01/TopoClusters.txt.ref",pathlist=os.getenv("DATAPATH").split(":"))
         if not refFile or refFile=="":
             print ("Did not find reference file!")
             sys.exit(-1) 
