@@ -1,8 +1,6 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
-
-// $Id$
 /**
  * @file AthenaKernel/Chrono_test.cxx
  * @author scott snyder <snyder@bnl.gov>
@@ -76,7 +74,13 @@ void test1()
 
 int main()
 {
-  test1();
+  try {
+    test1();
+  }
+  catch (const std::runtime_error& e) {
+    std::cerr << e.what() << "\n";
+    return 1;
+  }
   return 0;
 }
 
