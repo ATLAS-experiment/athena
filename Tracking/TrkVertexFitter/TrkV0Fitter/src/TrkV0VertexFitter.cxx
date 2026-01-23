@@ -26,7 +26,6 @@ namespace
   struct V0FitterTrack final
   {
     V0FitterTrack() : originalPerigee(nullptr), chi2(-1.) {}
-    ~V0FitterTrack() = default;
     const Trk::TrackParameters * originalPerigee;
     double chi2;
     AmgVector(5) TrkPar;
@@ -124,6 +123,7 @@ namespace Trk
         unsigned int indexFMP;
         if (p->indexOfParameterAtPosition(indexFMP, xAOD::FirstMeasurement)) {
           measuredPerigees.push_back(new CurvilinearParameters(p->curvilinearParameters(indexFMP)));
+          measuredPerigees_delete.push_back(measuredPerigees.back());
           ATH_MSG_DEBUG("first measurement on track exists");
           ATH_MSG_DEBUG("first measurement " << p->curvilinearParameters(indexFMP));
           ATH_MSG_DEBUG("first measurement covariance " << *(p->curvilinearParameters(indexFMP)).covariance());
@@ -423,8 +423,8 @@ namespace Trk
         for (PTIter = v0FitterTracks.begin(); PTIter != v0FitterTracks.end() ; ++PTIter)
         {
           V0FitterTrack locP((*PTIter));
-          Wmeas0_mat.block(5*i,5*i,5,5) = locP.Wi_mat;
-          Wmeas_mat.block(5*i,5*i,5,5) = locP.Wi_mat;
+          Wmeas0_mat.block<5,5>(5*i,5*i) = locP.Wi_mat;
+          Wmeas_mat.block<5,5>(5*i,5*i) = locP.Wi_mat;
           for (int j=0; j<5; ++j) {
             Y0_vec(j+5*i)  = locP.TrkPar[j];
           }
@@ -434,8 +434,8 @@ namespace Trk
           Y0_vec(5*nTrk + 0) = x_point;
           Y0_vec(5*nTrk + 1) = y_point;
           Y0_vec(5*nTrk + 2) = z_point;
-          Wmeas0_mat.block(5*nTrk,5*nTrk,3,3) = pointingVertexCov;
-          Wmeas_mat.block(5*nTrk,5*nTrk,3,3) = pointingVertexCov;
+          Wmeas0_mat.block<3,3>(5*nTrk,5*nTrk) = pointingVertexCov;
+          Wmeas_mat.block<3,3>(5*nTrk,5*nTrk) = pointingVertexCov;
         }
         Wmeas_mat = Wmeas_mat.inverse();
       }
@@ -776,7 +776,7 @@ namespace Trk
       double BFieldItr[3];
       fieldCache.getField(globalPositionItr->data(),BFieldItr);
       double B_z_new = BFieldItr[2]*299.792;            // should be in GeV/mm
-      if (B_z_new == 0. || std::isnan(B_z)) {
+      if (B_z_new == 0. || std::isnan(B_z_new)) {
         ATH_MSG_DEBUG("Using old B_z");
         B_z_new = B_z;
       }
@@ -900,7 +900,7 @@ namespace Trk
 
     V_mat.setZero();
     V_mat.block(0,0,n_dim,n_dim) = C11_mat;
-    V_mat.block(n_dim,n_dim,3,3) = C22_mat;
+    V_mat.block<3,3>(n_dim,n_dim) = C22_mat;
     V_mat.block(n_dim,0,3,n_dim) = C21_mat;
     V_mat.block(0,n_dim,n_dim,3) = C21_mat.transpose();
 
@@ -910,8 +910,7 @@ namespace Trk
     for (BTIter = v0FitterTracks.begin(); BTIter != v0FitterTracks.end() ; ++BTIter)
     {
       // chi2 per track
-      AmgSymMatrix(5) covTrk; covTrk.setZero();
-      covTrk = Wmeas0_mat.block(5*iRP,5*iRP,4+5*iRP,4+5*iRP);
+      AmgSymMatrix(5) covTrk = Wmeas0_mat.block<5,5>(5*iRP,5*iRP);
       AmgVector(5) chi_vec; chi_vec.setZero();
       for (unsigned int i=0; i<5; ++i) chi_vec(i) = DeltaY_vec(i+5*iRP);
       double chi2Trk = chi_vec.dot(covTrk*chi_vec);
@@ -936,14 +935,7 @@ namespace Trk
     std::vector<V0FitterTrack>::iterator BTIterf;
     for (BTIterf = v0FitterTracks.begin(); BTIterf != v0FitterTracks.end() ; ++BTIterf)
     {
-      AmgSymMatrix(5) CovMtxP;
-      CovMtxP.setIdentity();
-      for (unsigned int i=0; i<5; ++i) {
-        for (unsigned int j=0; j<i+1; ++j) {
-          double val = V_mat(5*iterf+i,5*iterf+j);
-          CovMtxP.fillSymmetric(i,j,val);
-        }
-      }
+      AmgSymMatrix(5) CovMtxP = V_mat.block<5,5>(5*iterf, 5*iterf);
       refittedPerigee = new Trk::Perigee (Y_vec(0+5*iterf),Y_vec(1+5*iterf),Y_vec(2+5*iterf),Y_vec(3+5*iterf),Y_vec(4+5*iterf),
                                           Surface, std::move(CovMtxP));
       tracksAtVertex.emplace_back((*BTIterf).chi2, refittedPerigee, (*BTIterf).originalPerigee);
