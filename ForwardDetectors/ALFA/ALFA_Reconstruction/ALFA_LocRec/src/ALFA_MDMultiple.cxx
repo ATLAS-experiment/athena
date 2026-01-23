@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ALFA_LocRec/ALFA_MDMultiple.h"
@@ -347,7 +347,7 @@ StatusCode ALFA_MDMultiple::Finalize(Float_t (&fRecXPos)[MAXTRACKNUM], Float_t (
 /************************************************/
 /*  Making projection and storing in an array   */
 /************************************************/
-void ALFA_MDMultiple::Proj_Store(Int_t iFiberSide, Int_t (&iOver)[72000], Float_t fbRef, Int_t iSideFlag)
+void ALFA_MDMultiple::Proj_Store(Int_t iFiberSide, std::span<Int_t> iOver, Float_t fbRef, Int_t iSideFlag)
 {
 	ATH_MSG_DEBUG("ALFA_MDMultiple::Pro_Store()");
 
@@ -412,7 +412,7 @@ void ALFA_MDMultiple::Proj_Store(Int_t iFiberSide, Int_t (&iOver)[72000], Float_
 /************************************************/
 /*  Making projection and storing in an array   */
 /************************************************/
-void ALFA_MDMultiple::Proj_Store(const std::vector<Int_t> (&FiberHit)[ALFAPLATESCNT], Int_t (&iOver)[72000], Float_t fbRef, Int_t iSideFlag)
+void ALFA_MDMultiple::Proj_Store(const std::vector<Int_t> (&FiberHit)[ALFAPLATESCNT], std::span<Int_t> iOver, Float_t fbRef, Int_t iSideFlag)
 {
 	ATH_MSG_DEBUG("ALFA_MDMultiple::Pro_Store()");
 
@@ -454,7 +454,7 @@ void ALFA_MDMultiple::Proj_Store(const std::vector<Int_t> (&FiberHit)[ALFAPLATES
 /************************************************/
 /*   Identifying plateau in projection array	*/
 /************************************************/
-void ALFA_MDMultiple::Find_Proj(const Int_t iOver[72000], Float_t fbRef, Float_t &fb, Float_t &fOv, Int_t &iNum)
+void ALFA_MDMultiple::Find_Proj(const std::span<const Int_t>& iOver, Float_t fbRef, Float_t &fb, Float_t &fOv, Int_t &iNum)
 {
 	ATH_MSG_DEBUG("ALFA_MDMultiple::Find_Proj()");
 
@@ -649,8 +649,8 @@ void ALFA_MDMultiple::Reco_Track(std::vector<double> &b_p, std::vector<double> &
 //	Int_t FSel_pos[ALFAPLATESCNT];
 	Int_t FSel_neg[ALFAPLATESCNT];
 	Int_t FSel_pos_tmp[ALFAPLATESCNT];
-	Int_t Over_p[72000];
-	Int_t Over_n[72000];
+	std::vector<Int_t> Over_p(72000);
+	std::vector<Int_t> Over_n(72000);
 	Int_t cnt_step_U=0;
 	Int_t cnt_step_V=0;
 	Int_t NumU=0;
