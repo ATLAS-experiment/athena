@@ -18,7 +18,7 @@ def NRPCCablingConfigCfg(flags, name = "MuonNRPC_CablingAlg", **kwargs):
             if flags.GeoModel.Run <= LHCPeriod.Run3:   
                 cablingTag = "RpcNcablingJson-RUN3-FantasyCabling-5"
             else:
-                cablingTag = "RpcNcablingJson-RUN4-FantasyCabling-6"
+                cablingTag = "RpcNcablingJson-RUN4-FantasyCabling-8"
 
         result.merge(addFolders(flags, [cablingFolder], detDb=dbName, className='CondAttrListCollection', tag=cablingTag))
         kwargs.setdefault("MapFolders",  cablingFolder)
@@ -116,8 +116,8 @@ def MDTCablingConfigCfg(flags, name = "MuonMDT_CablingAlg", **kwargs):
             dbTagSchema = None
             if flags.Muon.usePhaseIIGeoSetup and \
                flags.GeoModel.Run >= LHCPeriod.Run4: 
-                dbTagMezz = "MDTMezMapSchemaJSON_RUN4_FantasyCabling_1"
-                dbTagSchema = "MDTCablingMapSchemaJSON_RUN4_FantasyCabling_1"
+                dbTagMezz = "MDTMezMapSchemaJSON_RUN4BestKnowledge_v1"
+                dbTagSchema = "MDTCablingMapSchemaJSON_RUN4BestKnowledge_v1"
             elif flags.GeoModel.Run >= LHCPeriod.Run4:
                 dbTagSchema = "MDTOflCablingMapSchema_RUN124_MC15_02"
                 dbTagMezz = "MDTOflCablingMezzanineSchema_RUN124_MC15_02"
