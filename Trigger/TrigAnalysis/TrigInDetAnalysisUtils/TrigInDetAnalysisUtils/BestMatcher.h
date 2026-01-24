@@ -9,7 +9,7 @@
  **     @author  mark sutton
  **     @date    Mon 10 Aug 2015 03:07:24 CEST 
  **
- **     Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+ **     Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  **/
 
 
@@ -123,8 +123,6 @@ protected:
 
     typename std::multiset<matched_>::iterator mitr = m.begin();
     
-    double  chi2 = 0;
-    
     for ( ; mitr!=m.end() ; ++mitr ) {
 
       int rind = mitr->first();
@@ -137,9 +135,6 @@ protected:
       testused[tind] = true;
 
       unique.insert( *mitr );
-
-      chi2 += (mitr->d()*mitr->d());
-
     }
     
     

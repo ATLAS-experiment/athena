@@ -120,11 +120,15 @@ void ZDCTriggerSimFADC::doSimStage() {
       //   4095 if there is an overflow 
       //
       for (size_t i = 0; i < 24; i++) {
-	unsigned int ADC = ptr->getValueTrunc(sampleIdx++);
-	if (ADC == 4095) {
-	  adcOverflow = true;
-	  break;
-	}
+	    unsigned int ADC = ptr->getValueTrunc(sampleIdx);
+      if (ADC == 4095) {
+        adcOverflow = true;
+        sampleIdx += (24 - i);
+        break;
+      } else {
+        sampleIdx++;
+      }
+
 	
 	FADCsamples.push_back(ADC);
       }
