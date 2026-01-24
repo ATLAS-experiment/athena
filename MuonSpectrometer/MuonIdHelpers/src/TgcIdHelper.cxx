@@ -693,7 +693,7 @@ bool TgcIdHelper::endcapChamber(int stationName) const {
 
 bool TgcIdHelper::tripletChamber(int stationName) const {
     const std::string& name = stationNameString(stationName);
-    return ('1' == name[1]);
+    return ('1' == name[1]) || ('4' == name[1]);
 }
 
 int TgcIdHelper::chamberType(const std::string& stationName, int stationEta) {
