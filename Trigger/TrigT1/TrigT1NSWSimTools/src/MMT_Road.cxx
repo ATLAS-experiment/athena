@@ -26,7 +26,7 @@ MMT_Road::MMT_Road(const char sector, const int roadSize,
   m_slopeVhigh = roadSize*(m_iroadv+1) + 0.5 + UpUV;
 }
 
-void MMT_Road::addHits(std::vector<std::shared_ptr<MMT_Hit> > &hits) {
+void MMT_Road::addHits(const std::vector<std::shared_ptr<MMT_Hit> > &hits) {
   for (const auto &hit_i : hits) {
     double slow, shigh;
     if (hit_i->isX()) {
