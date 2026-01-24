@@ -116,8 +116,8 @@ def MdtCalibDbAlgR4Cfg(flags, name="MdtCalibDbAlg",**kwargs):
         kwargs.setdefault("ReadKeyTube","/MDT/T0JSONS")
         kwargs.setdefault("dbPayloadType","TTree")
         from IOVDbSvc.IOVDbSvcConfig import addFolders
-        result.merge(addFolders(flags,[kwargs["ReadKeyRt"]], className='CondAttrListCollection', detDb="MDT_OFL", tag="MDTRTTREE-RUN4-01"))
-        result.merge(addFolders(flags,[kwargs["ReadKeyTube"]], className='CondAttrListCollection', detDb="MDT_OFL", tag="MDTT0TREE-RUN4-01"))
+        result.merge(addFolders(flags,[kwargs["ReadKeyRt"]], className='CondAttrListCollection', detDb="MDT_OFL", tag="MDTRTTREE-RUN4-02"))
+        result.merge(addFolders(flags,[kwargs["ReadKeyTube"]], className='CondAttrListCollection', detDb="MDT_OFL", tag="MDTT0TREE-RUN4-02"))
 
     alg = CompFactory.MuonCalibR4.MdtCalibDbAlg(name, **kwargs)
     result.addCondAlgo (alg, primary = True)
