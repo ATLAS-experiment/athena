@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************
@@ -24,6 +24,7 @@
 #include <PathResolver/PathResolver.h>
 #endif
 #include <fstream>
+#include <iostream>
 
 REGISTER_ALG_TCS(AnomalyDetectionBDT)
 

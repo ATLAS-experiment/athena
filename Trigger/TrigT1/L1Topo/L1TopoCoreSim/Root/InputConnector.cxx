@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 #include "L1TopoCoreSim/InputConnector.h"
 #include "L1TopoCommon/Exception.h"
@@ -27,7 +27,7 @@ TCS::InputConnector::clearOutput() {
 void
 TCS::InputConnector::attachOutputData(const TCS::InputTOBArray* data) {
    if(m_outputData != 0) {
-      TCS_EXCEPTION("Trying to attach data to input connector " << name() << " which has already data attached")
+      TCS_EXCEPTION("Trying to attach data to input connector " << name() << " which has already data attached");
    }
    m_outputData = data;
 }
