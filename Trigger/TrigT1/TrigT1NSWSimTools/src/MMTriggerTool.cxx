@@ -265,7 +265,7 @@ namespace NSWL1 {
           std::vector<int> slopeBC;
           for (const auto &slope : diamondSlopes) slopeBC.push_back(slope.BC);
           std::ranges::sort(slopeBC);
-          slopeBC.erase( std::ranges::unique(slopeBC), slopeBC.end() );
+          slopeBC.erase( std::unique(slopeBC.begin(), slopeBC.end()), slopeBC.end() );
           for (const auto bc : slopeBC) {
             Muon::NSW_TrigRawData* trigRawData = new Muon::NSW_TrigRawData(sectorPhi-1, side, bc);
 
