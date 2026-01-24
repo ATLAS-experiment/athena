@@ -54,27 +54,23 @@ void MMT_Road::addHits(std::vector<std::shared_ptr<MMT_Hit> > &hits) {
   }
 }
 
-double MMT_Road::avgSofX() const {
+double MMT_Road::avgSofXUV(const char type) const {
   double sum = 0;
-  int N = 0;
+  unsigned short int N = 0;
   for (const auto &hit : m_road_hits) {
-    if (hit.isX()) {
+    if (hit.isX() && type == 'X') {
       sum += hit.getRZSlope();
       ++N;
     }
-  }
-  return sum/N;
-}
-
-double MMT_Road::avgSofUV(const int uv1, const int uv2) const {
-  double sum = 0;
-  int N = 0;
-  for (const auto &hit : m_road_hits) {
-    const int bo = hit.getPlane();
-    if (bo == uv1 || bo == uv2) {
+    else if (hit.isU() && type == 'U') {
       sum += hit.getRZSlope();
       ++N;
     }
+    else if (hit.isV() && type == 'V') {
+      sum += hit.getRZSlope();
+      ++N;
+    }
+    else continue;
   }
   return sum/N;
 }
@@ -90,7 +86,7 @@ unsigned int MMT_Road::countXHits() const {
 }
 
 bool MMT_Road::evaluateLowRes() const {
-  unsigned int nhits1 = 0, nhits2 = 0;
+  unsigned short int nhits1 = 0, nhits2 = 0;
   for (const auto &hit : m_road_hits) {
     nhits1 += hit.getPlane() < 4;
     nhits2 += hit.getPlane() > 3;
@@ -99,10 +95,10 @@ bool MMT_Road::evaluateLowRes() const {
 }
 
 bool MMT_Road::horizontalCheck() const {
-  int nx1 = 0, nx2 = 0;
+  unsigned short int nx1 = 0, nx2 = 0;
   for (const auto &hit : m_road_hits) {
-    nx1 += hit.getPlane() >-1 && hit.getPlane() < 2;
-    nx2 += hit.getPlane() > 5 && hit.getPlane() < 8;
+    nx1 += hit.getPlane() < 2;
+    nx2 += hit.getPlane() > 5;
 
     if (nx1 > 0 && nx2 > 0 && (nx1+nx2) >= m_xthr) return true;
   }
@@ -110,7 +106,7 @@ bool MMT_Road::horizontalCheck() const {
 }
 
 void MMT_Road::incrementAge(const int bcwind) {
-  short int old_ihits = 0;
+  unsigned short int old_ihits = 0;
   for (auto &hit : m_road_hits) {
     hit.setAge(hit.getAge()+1);
     if (hit.getAge() > (bcwind-1)) ++old_ihits;
@@ -142,10 +138,7 @@ double MMT_Road::mxl() const {
 }
 
 bool MMT_Road::stereoCheck() const {
-
-  if (m_uvthr == 0) return true;
-
-  int nu = 0, nv = 0;
+  unsigned short int nu = 0, nv = 0;
   for (const auto &hit : m_road_hits) {
     nu += hit.isU();
     nv += hit.isV();

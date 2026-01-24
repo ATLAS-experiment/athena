@@ -16,8 +16,7 @@ class MMT_Road {
     ~MMT_Road()=default;
 
     void addHits(std::vector<std::shared_ptr<MMT_Hit> > &hits);
-    double avgSofX() const;
-    double avgSofUV(const int uv1, const int uv2) const;
+    double avgSofXUV(const char type) const;
     bool checkCoincidences(const int bcwind) const {
       return horizontalCheck() && stereoCheck() && matureCheck(bcwind);
     }
