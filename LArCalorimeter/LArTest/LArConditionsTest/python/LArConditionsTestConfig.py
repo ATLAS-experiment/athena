@@ -37,7 +37,7 @@ def LArConditionsTestCfg(flags):
         #Write to pool.root file
         from RegistrationServices.OutputConditionsAlgConfig import OutputConditionsAlgCfg
         result.merge(OutputConditionsAlgCfg(flags,
-                                            outputFile="LarCondTestNoReg.root",
+                                            outputFile=flags.LArCondTest.FileName,
                                             ObjectList=["LArRampMC#/LArCalorimeter/LArTests/LArRampsSingleGroup",
                                                         "LArRampMC#/LArCalorimeter/LArTests/LArRampsSubDetectorGrouping",
                                                         "LArRampMC#/LArCalorimeter/LArTests/LArRampsFeedThroughGrouping" ],
@@ -49,7 +49,7 @@ def LArConditionsTestCfg(flags):
     elif (flags.LArCondTest.Step==2):
         #Read the pool-root file
         from EventSelectorAthenaPool.CondProxyProviderConfig import CondProxyProviderCfg 
-        result.merge(CondProxyProviderCfg(flags,"LarCondTestNoReg.root"))
+        result.merge(CondProxyProviderCfg(flags,flags.LArCondTest.FileName))
 
 
     
@@ -60,6 +60,7 @@ if __name__ == "__main__":
     from AthenaConfiguration.TestDefaults import defaultGeometryTags
     flags=initConfigFlags()
     flags.addFlag("LArCondTest.Step",1)
+    flags.addFlag("LArCondTest.FileName","LarCondTestNoReg.root")
     #Set a few flags to avoid input-file peeking (there is no input)
     flags.GeoModel.AtlasVersion=defaultGeometryTags.RUN3
     flags.Input.isMC=True
