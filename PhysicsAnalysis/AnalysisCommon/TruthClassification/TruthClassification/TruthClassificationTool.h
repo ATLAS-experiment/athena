@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRUTH_CLASSIFICATION__TRUTH_CLASSIFICATION_TOOL_H_
@@ -55,11 +55,11 @@ private:
   const SG::AuxElement::ConstAccessor<unsigned int> m_classifierParticleOrigin{"classifierParticleOrigin"};
   const SG::AuxElement::ConstAccessor<int> m_firstMotherTruthType{"firstEgMotherTruthType"};
   const SG::AuxElement::ConstAccessor<int> m_firstMotherTruthOrigin{"firstEgMotherTruthOrigin"};
-  const SG::AuxElement::ConstAccessor<int> m_firstMotherTruthClassification{"firstEgMotherTruthClassification"};
+  const SG::AuxElement::ConstAccessor<unsigned int> m_firstMotherTruthClassification{"firstEgMotherTruthClassification"};
   const SG::AuxElement::ConstAccessor<int> m_firstMotherPdgId{"firstEgMotherPdgId"};
   const SG::AuxElement::ConstAccessor<int> m_lastMotherTruthType{"lastEgMotherTruthType"};
   const SG::AuxElement::ConstAccessor<int> m_lastMotherTruthOrigin{"lastEgMotherTruthOrigin"};
-  const SG::AuxElement::ConstAccessor<int> m_lastMotherTruthClassification{"lastEgMotherTruthClassification"};
+  const SG::AuxElement::ConstAccessor<unsigned int> m_lastMotherTruthClassification{"lastEgMotherTruthClassification"};
   const SG::AuxElement::ConstAccessor<int> m_lastMotherPdgId{"lastEgMotherPdgId"};
   const SG::AuxElement::ConstAccessor<int> m_fallbackTruthType{"TruthClassifierFallback_truthType"};
   const SG::AuxElement::ConstAccessor<int> m_fallbackTruthOrigin{"TruthClassifierFallback_truthOrigin"};
