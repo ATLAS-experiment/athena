@@ -137,7 +137,7 @@ def RpcRdoToPrepDataToolCfg(flags, suffix ="", RDOContainer = None, **kwargs):
 
     return result
 
-def RpcRDODecodeCfg(flags, name="RpcRdoToRpcPrepData", RDOContainer = None, **kwargs):
+def RpcRDODecodeCfg(flags, name="MuonRpcRdoToPrdConv", RDOContainer = None, **kwargs):
     acc = ComponentAccumulator()
     
     suffix = name[name.find("_") :] if name.find("_") != -1 else ""
@@ -163,7 +163,7 @@ def RpcRDODecodeCfg(flags, name="RpcRdoToRpcPrepData", RDOContainer = None, **kw
     return acc
 
 
-def TgcRDODecodeCfg(flags, name="TgcRdoToTgcPrepData", RDOContainer = None,  **kwargs):
+def TgcRDODecodeCfg(flags, name="MuonTgcRdoToPrdConv", RDOContainer = None,  **kwargs):
     acc = ComponentAccumulator()
 
     # We need the TGC cabling to be setup
@@ -221,7 +221,7 @@ def StgcRdoToPrepDataToolCfg(flags, name="STGC_PrepDataProviderTool", **kwargs):
     return result
 
 
-def StgcRDODecodeCfg(flags, name="StgcRdoToStgcPrepData", **kwargs):
+def StgcRDODecodeCfg(flags, name="MuonStgcRdoToPrdConv", **kwargs):
     acc = ComponentAccumulator()
     # Get the RDO -> PRD tool
     kwargs.setdefault("DecodingTool", acc.popToolsAndMerge(StgcRdoToPrepDataToolCfg(flags)))
@@ -256,7 +256,7 @@ def MMRdoToPrepDataToolCfg(flags, name="MmRdoToPrepDataTool", **kwargs):
     return result
 
 
-def MMRDODecodeCfg(flags, name="MM_RdoToMM_PrepData", **kwargs):
+def MMRDODecodeCfg(flags, name="MuonMmRdoToPrdConv", **kwargs):
     acc = ComponentAccumulator()
     ## Get the RDO -> PRD tool
     kwargs.setdefault("DecodingTool", acc.popToolsAndMerge(MMRdoToPrepDataToolCfg(flags)))
@@ -269,7 +269,7 @@ def MMRDODecodeCfg(flags, name="MM_RdoToMM_PrepData", **kwargs):
     return acc
 
 
-def MdtRDODecodeCfg(flags, name="MdtRdoToMdtPrepData", RDOContainer = None, **kwargs):
+def MdtRDODecodeCfg(flags, name="MuonMdtRpcToPrdConv", RDOContainer = None, **kwargs):
     acc = ComponentAccumulator()
     from MuonConfig.MuonCalibrationConfig import MdtCalibrationToolCfg
 
