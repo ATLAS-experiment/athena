@@ -135,11 +135,7 @@ def ITkStoreTrackSeparateContainerCfg(flags,
                                       ClusterSplitProbContainer: str = "") -> ComponentAccumulator:
     result = ComponentAccumulator()
     extension = flags.Tracking.ActiveConfig.extension
-    if flags.hasCategory("TrackOverlay.ActiveConfig"):
-       doTrackOverlay = getattr(flags.TrackOverlay.ActiveConfig, "doTrackOverlay", None)
-    else:
-       doTrackOverlay = flags.Overlay.doTrackOverlay
-
+    doTrackOverlay = flags.TrackOverlay.isTrackOverlaySeq
     if doTrackOverlay:
         # schedule merger to combine signal and background tracks
         InputTracks = [flags.Overlay.SigPrefix+TrackContainer,
@@ -220,13 +216,7 @@ def ITkTrackRecoPassCfg(flags,
     extension = flags.Tracking.ActiveConfig.extension
     
     result = ComponentAccumulator()
-    if flags.hasCategory("TrackOverlay.ActiveConfig"):
-       doTrackOverlay = getattr(flags.TrackOverlay.ActiveConfig, "doTrackOverlay", None)
-    else:
-       doTrackOverlay = flags.Overlay.doTrackOverlay
-
-    # Define collection name(s)
-    # This is the track collection AFTER the ambiguity resolution
+    doTrackOverlay = flags.TrackOverlay.isTrackOverlaySeq
     TrackContainer = "Resolved" + extension + "Tracks"
     # For Acts we have another convention, with the extention as the first element in the name
     if extension in _actsExtensions:
@@ -341,11 +331,7 @@ def ITkTrackFinalCfg(flags,
     if len(InputCombinedITkTracks) == 0:
         return result
     
-    if flags.hasCategory("TrackOverlay.ActiveConfig"):
-       doTrackOverlay = getattr(flags.TrackOverlay.ActiveConfig, "doTrackOverlay", None)
-    else:
-       doTrackOverlay = flags.Overlay.doTrackOverlay
-
+    doTrackOverlay = flags.TrackOverlay.isTrackOverlaySeq
     TrackContainer = "CombinedITkTracks"
     if doTrackOverlay:
         #schedule merge to combine signal and background tracks

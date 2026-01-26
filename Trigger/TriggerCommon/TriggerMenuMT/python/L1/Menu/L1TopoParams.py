@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 # L1TopoParams.py
 #
 # *** IMPORTANT ***
@@ -91,7 +91,10 @@ L1TopoParams = {
                                   'MaxET1',
                                   'MaxET2',
                                   'MaxET3',
-                                  'MaxET4'],
+                                  'MaxET4',
+                                  'MaxET5',
+                                  'MaxET6',
+                                  'MaxET7'],
            'parameters': ['AnomalyScoreThresh']},
   'AnomalyDetectionBDT': {
      'comment': 'BDT-based muon anomaly trigger',

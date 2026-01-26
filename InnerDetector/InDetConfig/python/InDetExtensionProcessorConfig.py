@@ -7,7 +7,8 @@ from AthenaConfiguration.Enums import BeamType
 
 def InDetExtensionProcessorCfg(flags, name="InDetExtensionProcessor", **kwargs):
     acc = ComponentAccumulator()
-
+    doTrackOverlay = flags.TrackOverlay.isTrackOverlaySeq
+    prefix = 'TrackOverlay_' if doTrackOverlay else ''
     if "TrackFitter" not in kwargs:
         if flags.Tracking.ActiveConfig.extension != "LowPt":
             from TrkConfig.CommonTrackFitterConfig import (
@@ -60,7 +61,7 @@ def InDetExtensionProcessorCfg(flags, name="InDetExtensionProcessor", **kwargs):
     kwargs.setdefault("Cosmics", flags.Beam.Type is BeamType.Cosmics)
 
     acc.addEventAlgo(CompFactory.InDet.InDetExtensionProcessor(
-        name + flags.Tracking.ActiveConfig.extension, **kwargs))
+        prefix + name + flags.Tracking.ActiveConfig.extension, **kwargs))
     return acc
 
 

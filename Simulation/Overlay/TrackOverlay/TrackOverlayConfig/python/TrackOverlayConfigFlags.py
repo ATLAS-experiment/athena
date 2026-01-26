@@ -3,8 +3,7 @@ from AthenaConfiguration.AthConfigFlags import AthConfigFlags
 
 def createTrackOverlayConfigFlags():
     mlcf = AthConfigFlags()
-    mlcf.addFlag("TrackOverlay.TrackOverlayConfig.doTrackOverlay", True)
-    mlcf.addFlag("TrackOverlay.MCOverlayConfig.doTrackOverlay", False)
+    mlcf.addFlag("TrackOverlay.isTrackOverlaySeq", False)
     mlcf.addFlag("TrackOverlay.MLThreshold", 0.74201)
 
     return mlcf
