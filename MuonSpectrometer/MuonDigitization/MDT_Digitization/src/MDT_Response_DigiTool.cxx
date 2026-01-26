@@ -52,8 +52,6 @@ MdtDigiToolOutput MDT_Response_DigiTool::digitize(const MdtDigiToolInput& input,
 }
 
 StatusCode MDT_Response_DigiTool::initialize() {
-    // overwrite default-constructed member to propagate flag once its value is known
-    m_tube = MDT_Response{m_DoUpdatedMdtDigi}; 
 
     const MuonGM::MuonDetectorManager* muDetMgr = nullptr;
     if (detStore()->contains<MuonDetectorManager>("Muon")) {
@@ -86,6 +84,7 @@ bool MDT_Response_DigiTool::initializeTube(const MuonGM::MuonDetectorManager* de
         m_tube.SetAdcOffset(35.); // constants determined Z -> mumu data in 2025
         m_tube.SetAdcFactor(150.); // constants determined Z -> mumu data in 2025
         m_tube.SetDoUpdatedMdtDigi(true);
+        m_tube.ReInitTubeParameters();
     }
     else {
         m_tube.SetClusterDensity(m_clusterDensity);

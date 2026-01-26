@@ -65,6 +65,7 @@ class MDT_Response {
   int    GenerateQ(CLHEP::HepRandomEngine *rndmEngine) const;
 
   const double* RtParameters() const;
+  void   ReInitTubeParameters();
  private:
   void   InitTubeParameters();
   void   InitClusters(double timewindow, double binsize);
