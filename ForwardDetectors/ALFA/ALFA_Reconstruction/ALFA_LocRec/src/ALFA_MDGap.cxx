@@ -245,7 +245,7 @@ void ALFA_MDGap::Find_Proj(const std::span<const Int_t>& iOver, Float_t fbRef, F
 		if ((p_max-p_min)<m_fOverlapCut)
 		{
 //			Storing the coordinate of the maximum
-			fb = fbRef+(p_min+p_max)/sqrt(2.0);
+			fb = fbRef+(p_min+p_max)/M_SQRT2;
 			fOv = p_max-p_min;
 //			iNum = iNumFib;
 		}
@@ -475,12 +475,12 @@ void ALFA_MDGap::Reco_Track(std::vector<Float_t> &b_p, std::vector<Float_t> &b_n
 			//Then looking for both gaps in the plateau
 			if ((Gaps[0][0]>0 || Gaps[1][0]>0) && (Gaps[0][1]>0 || Gaps[1][1]>0))
 			{
-                                Over_copy = Over_p;
+        Over_copy = std::move(Over_p);
 				Silent_Gap(Over_copy, b_neg, b_pos, FSel_p, FG_p, G_F_p, OvU, 0);
 				Active_Gap(0,Over_copy, b_neg, b_pos, FSel_p, OvU, 0);
 				Find_Proj(Over_copy, b_neg, b_pos_active, OvU, NumU);
 
-                                Over_copy = Over_n;
+        Over_copy = std::move(Over_n);
 				Silent_Gap(Over_copy, b_pos, b_neg, FSel_n, FG_n, G_F_n, OvV, 1);
 				Active_Gap(1,Over_copy, b_pos, b_neg, FSel_n, OvV, 1);
 				Find_Proj(Over_copy, b_pos, b_neg_active, OvV, NumV);
