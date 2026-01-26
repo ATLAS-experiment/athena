@@ -105,7 +105,7 @@ void MMT_Diamond::findDiamonds(std::vector<std::shared_ptr<MMT_Hit> >& hits, std
         }
         if (vmm_same.size() > 1) {
           to_erase.clear();
-          std::ranges::sort(vmm_same, [](const std::pair<int, float>& p1, const std::pair<int, float>& p2) { return p1.second < p2.second; });
+          std::ranges::sort(vmm_same, {}, &std::pair<int, float>::second);
           for (auto pair: vmm_same) to_erase.push_back(pair.first);
           // reverse and erase
           std::sort(to_erase.rbegin(), to_erase.rend());
@@ -128,7 +128,7 @@ void MMT_Diamond::findDiamonds(std::vector<std::shared_ptr<MMT_Hit> >& hits, std
           // priority encode the hits by channel number; remember hits 8+
           to_erase.clear();
 
-          std::sort(addc_same.begin(), addc_same.end(), [](const std::pair<int, int>& p1, const std::pair<int, int>& p2) { return p1.second < p2.second; });
+          std::ranges::sort(addc_same, {}, &std::pair<int, int>::second);
           for (unsigned int it = 8; it < addc_same.size(); it++) to_erase.push_back(addc_same[it].first);
 
           // reverse and erase
