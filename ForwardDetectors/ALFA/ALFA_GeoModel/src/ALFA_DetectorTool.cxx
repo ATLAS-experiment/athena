@@ -163,7 +163,7 @@ StatusCode ALFA_DetectorTool::create()
   return StatusCode::SUCCESS;
 }
 
-StatusCode ALFA_DetectorTool::align(IOVSVC_CALLBACK_ARGS)
+StatusCode ALFA_DetectorTool::align()
 {
 	int nChannel;
 	StatusCode sc=StatusCode::SUCCESS;

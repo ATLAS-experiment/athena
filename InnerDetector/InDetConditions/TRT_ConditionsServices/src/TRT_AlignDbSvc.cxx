@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /** @file TRT_AlignDbSvc.cxx
@@ -476,9 +476,7 @@ StatusCode TRT_AlignDbSvc::readAlignTextFile(const std::string & file) {
                 << " Now forcing callback in detector manager."  );
 
   /** force a call back */
-  int i(0);
-  std::list<std::string> keys;
-  if((const_cast<InDetDD::TRT_DetectorManager*>(m_trtman))->align(i,keys).isFailure()){
+  if((const_cast<InDetDD::TRT_DetectorManager*>(m_trtman))->align().isFailure()){
     ATH_MSG_ERROR("Failed to force the alignment callback!" );
   }
   

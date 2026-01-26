@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -13,9 +13,6 @@
 #define LARGEOALGSNV_LARDETECTORTOOLNV_H
 
 #include "GeoModelUtilities/GeoModelTool.h"
-#include "AthenaKernel/IOVSvcDefs.h"
-#include "CxxUtils/checker_macros.h"
-
 #include "LArGeoCode/LArAlignHelper.h"
 
 class LArDetectorManager;
@@ -44,7 +41,7 @@ class LArDetectorToolNV final : public GeoModelTool {
   virtual StatusCode clear() override;
 
   // Apply alignments (for simulation only)
-  virtual StatusCode align ATLAS_NOT_THREAD_SAFE (IOVSVC_CALLBACK_ARGS) override;
+  virtual StatusCode align() override;
 
  private:
   bool m_barrelSaggingOn;

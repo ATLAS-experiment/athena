@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef SCT_GEOMODEL_SCT_DETECTORTOOL_H
@@ -10,8 +10,6 @@
 
 #include "GeometryDBSvc/IGeometryDBSvc.h"
 #include "GeoModelInterfaces/IGeoDbTagSvc.h"
-
-#include "CxxUtils/checker_macros.h"
 
 #include "GaudiKernel/ServiceHandle.h"
 
@@ -31,7 +29,7 @@ public:
   virtual StatusCode clear() override final;
 
   // Callback function itself
-  virtual StatusCode align ATLAS_NOT_THREAD_SAFE(IOVSVC_CALLBACK_ARGS) override;
+  virtual StatusCode align() override;
 
 private:
   BooleanProperty m_alignable{this, "Alignable", true};

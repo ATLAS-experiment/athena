@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -18,9 +18,6 @@
 #include "ReadoutGeometryBase/InDetDD_Defs.h"
 #include "InDetReadoutGeometry/Version.h"
 #include "CLHEP/Geometry/Transform3D.h"
-
-// IOV SVC for alignment:
-#include "AthenaKernel/IIOVSvc.h"
 
 #include "DetDescrConditions/AlignableTransformContainer.h"//typedef
 #include "AthenaBaseComps/AthMessaging.h"
@@ -80,7 +77,7 @@ namespace InDetDD {
       void addGlobalFolder(const std::string & key);
       void addAlignFolderType(const AlignFolderType alignfolder);
 
-      StatusCode align( IOVSVC_CALLBACK_ARGS );
+      StatusCode align();
 
       StatusCode align(const RawAlignmentObjects& alignObjects, GeoVAlignmentStore* alignStore) const;
 

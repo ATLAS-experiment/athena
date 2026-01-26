@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRT_GEOMODEL_TRTDETECTORTOOL_H
@@ -14,7 +14,6 @@
 
 #include "GaudiKernel/ToolHandle.h"
 #include "GaudiKernel/ServiceHandle.h"
-#include "CxxUtils/checker_macros.h"
 #include <string>
 
 namespace InDetDD {
@@ -34,7 +33,7 @@ public:
   virtual StatusCode clear() override final;
 
   // Callback function itself
-  virtual StatusCode align ATLAS_NOT_THREAD_SAFE (IOVSVC_CALLBACK_ARGS) override final;
+  virtual StatusCode align() override final;
 
 private:
   Gaudi::Property<bool> m_useOldActiveGasMixture{this,"UseOldActiveGasMixture",false};
