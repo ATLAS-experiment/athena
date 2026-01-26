@@ -214,16 +214,16 @@ namespace NSWL1 {
 
       // Go ahead when hits are more than X+UV thresholds
       if (do_MMDiamonds and ev_hits.size() >= (m_diamond->getXthreshold()+m_diamond->getUVthreshold())) {
-        const bool isLarge = (std::all_of(ev_hits.begin(), ev_hits.end(), [] (const auto &hit) { return hit->getSector() == 'L'; }));
+        const bool isLarge = (std::ranges::all_of(ev_hits, [](const auto &hit) { return hit->getSector() == 'L'; }));
         const char sector = (isLarge) ? 'L' : 'S';
-        const char side = (std::all_of(ev_hits.begin(), ev_hits.end(), [] (const auto &hit) { return hit->getStationEta() < 0; })) ? 'C' : 'A';
+        const char side = (std::ranges::all_of(ev_hits, [](const auto &hit) { return hit->getStationEta() < 0; })) ? 'C' : 'A';
         const int sectorPhi = ev_hits[0]->getSectorPhi();
-        const bool allSectorPhi = (std::all_of(ev_hits.begin(), ev_hits.end(), [&] (const auto &hit) { return hit->getSectorPhi() == sectorPhi; }));
+        const bool allSectorPhi = (std::ranges::all_of(ev_hits, [&](const auto &hit) { return hit->getSectorPhi() == sectorPhi; }));
         if (not allSectorPhi) {
           ATH_MSG_ERROR("Available digits belongs to different sectors IDs, unable to assign an unique ID in output RDO");
           return StatusCode::FAILURE;
         }
-        const bool isEta1 = (std::all_of(ev_hits.begin(), ev_hits.end(), [] (const auto &hit) { return std::abs(hit->getStationEta()) == 1; }));
+        const bool isEta1 = (std::ranges::all_of(ev_hits, [](const auto &hit) { return std::abs(hit->getStationEta()) == 1; }));
 
         // Setup roads
         std::vector<MMT_Road> ev_roads;
@@ -264,7 +264,7 @@ namespace NSWL1 {
           // MM RDO filling below
           std::vector<int> slopeBC;
           for (const auto &slope : diamondSlopes) slopeBC.push_back(slope.BC);
-          std::sort(slopeBC.begin(), slopeBC.end());
+          std::ranges::sort(slopeBC);
           slopeBC.erase( std::unique(slopeBC.begin(), slopeBC.end()), slopeBC.end() );
           for (const auto bc : slopeBC) {
             Muon::NSW_TrigRawData* trigRawData = new Muon::NSW_TrigRawData(sectorPhi-1, side, bc);
