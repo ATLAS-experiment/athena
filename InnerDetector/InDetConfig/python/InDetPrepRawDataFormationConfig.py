@@ -8,11 +8,7 @@ from AthenaConfiguration.Enums import ProductionStep
 
 def clusterizationInputPrefix(flags):
     """Return clusterization input prefix based on the production step and tracking config"""
-    if hasattr(flags.TrackOverlay, "ActiveConfig"):
-       doTrackOverlay = getattr(flags.TrackOverlay.ActiveConfig, "doTrackOverlay", None)
-    else:
-       doTrackOverlay = flags.Overlay.doTrackOverlay
-
+    doTrackOverlay = flags.TrackOverlay.isTrackOverlaySeq
     if doTrackOverlay:
         prefix = flags.Overlay.SigPrefix
     elif flags.Common.ProductionStep in [ProductionStep.PileUpPretracking, ProductionStep.MinbiasPreprocessing]:

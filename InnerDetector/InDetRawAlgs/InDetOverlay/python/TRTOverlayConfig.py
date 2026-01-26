@@ -61,12 +61,6 @@ def TRTOverlayAlgCfg(flags, name="TRTOverlay", **kwargs):
             f"TRT_RDO_Container#{flags.Overlay.SigPrefix}TRT_RDOs"
         ]))
 
-    # for track overlay, write out the signal RDOs because reco tracking will only run on them
-    if flags.Overlay.doTrackOverlay:
-        acc.merge(OutputStreamCfg(flags, "RDO", ItemList=[
-            f"TRT_RDO_Container#{flags.Overlay.SigPrefix}TRT_RDOs"
-        ]))
-
     return acc
 
 
