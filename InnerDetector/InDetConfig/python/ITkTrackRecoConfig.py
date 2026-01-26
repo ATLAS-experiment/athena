@@ -216,6 +216,8 @@ def ITkTrackRecoPassCfg(flags,
     extension = flags.Tracking.ActiveConfig.extension
     
     result = ComponentAccumulator()
+    # Define collection name(s)
+    # This is the track collection AFTER the ambiguity resolution
     doTrackOverlay = flags.TrackOverlay.isTrackOverlaySeq
     TrackContainer = "Resolved" + extension + "Tracks"
     # For Acts we have another convention, with the extention as the first element in the name
