@@ -1,8 +1,7 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
   */
 #pragma once
-
 // Alternative measurement selector
 //
 // This measurement selector is assuming the following
@@ -33,6 +32,7 @@
 
 #include <utility>
 #include <type_traits>
+#include <optional>
 
 // Types to be used during measurement selection for the prediction and the
 // measurement for calibrated measurements after selection if the actual calibration is
@@ -302,6 +302,8 @@ struct AtlasMeasurementSelectorCuts {
   std::vector<std::pair<float, float> > chi2CutOff{ {15,25} };
   /// Maximum number of associated measurements on a single surface.
   std::vector<std::size_t> numMeasurementsCutOff{1};
+  /// Optional (expected negative) boundary tolerance to label edge holes as no measurement expected
+  std::optional<Acts::BoundaryTolerance> edgeTolerance{};
 };
 
 // Measurement type specific measirement selector
@@ -606,6 +608,20 @@ protected:
          }
       };
 
+      if (selected_measurements.empty()) {
+         auto config_for_surface = m_config.find(surface.geometryId());
+         if (config_for_surface != m_config.end()) {
+            if (config_for_surface->edgeTolerance.has_value()) {
+               // if the  prediction failes the bound test, where the edgeTolerance is expected to be negative
+               // then the "hole" is considered to be an edge hole which is not treated as a hole.
+               auto local_coords  = derived().boundParams(boundState).parameters().template block<2,1>(0,0);
+               if (!surface.insideBounds(local_coords,config_for_surface->edgeTolerance.value())) {
+                  result = result.failure(Acts::CombinatorialKalmanFilterError::NoMeasurementExpected);
+               }
+            }
+         }
+      }
+      else {
       // copy selected measurements to pre-created states
       unsigned int state_i=0;
       for (typename TopCollection<NMeasMax, MeasCovPair >::IndexType
@@ -641,6 +657,7 @@ protected:
          }
          ++state_i;
       }
+      }
       return result;
    }
 
@@ -675,7 +692,7 @@ public:
       // Find the appropriate cuts
       auto cuts = m_config.find(geoID);
       if (cuts == m_config.end()) {
-         // indicats failure
+         // indicates failure
          numMeasurementsCut = 0;
       }
       else {
