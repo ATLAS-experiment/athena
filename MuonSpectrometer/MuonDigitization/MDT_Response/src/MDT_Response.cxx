@@ -92,6 +92,24 @@ void MDT_Response::InitTubeParameters()
     
 }
 
+void MDT_Response::ReInitTubeParameters() {
+  
+  if (m_DoUpdatedMdtDigi) {
+    m_attLength = 30000.;   // mm
+    m_clusterDensity    = 10.;
+    m_integrationWindow = 18.5; // ns
+    m_amp_adcOffset     = 35.; 
+    m_amp_adcFactor     = 150.;
+  }
+  
+  m_amplifier.SetTriggerElectron(m_triggerElectron);
+  m_amplifier.SetIntegrationWindow(m_integrationWindow);
+  m_amplifier.SetIntegrationWindowNs(m_integrationWindow);
+  m_amplifier.SetAdcOffset(m_amp_adcOffset);
+  m_amplifier.SetAdcFactor(m_amp_adcFactor);
+  m_amplifier.SetAdcFraction(m_amp_adcFraction);
+}
+
 void MDT_Response::InitdEdxTable()
 {
 
