@@ -32,7 +32,7 @@ def MuonCacheCfg(flags):
 ## This configuration function sets up everything for decoding RPC bytestream data into RDOs
 #
 # The function returns a ComponentAccumulator and the data-decoding algorithm, which should be added to the right sequence by the user
-def RpcBytestreamDecodeCfg(flags, name="RpcRawDataProvider", **kwargs):
+def RpcBytestreamDecodeCfg(flags, name="MuonRpcRdoProvider", **kwargs):
     acc = ComponentAccumulator()
     
     # We need the RPC cabling to be setup
@@ -71,7 +71,7 @@ def RpcBytestreamDecodeCfg(flags, name="RpcRawDataProvider", **kwargs):
     acc.addEventAlgo(RpcRawDataProvider, primary=True)
     return acc
 
-def NrpcBytestreamDecodeCfg(flags, name="NrpcRawDataProvider", **kwargs):
+def NrpcBytestreamDecodeCfg(flags, name="MuonNRpcRdoProvider", **kwargs):
     acc = ComponentAccumulator()
     
     # We need the NRPC cabling to be setup
@@ -95,7 +95,7 @@ def NrpcBytestreamDecodeCfg(flags, name="NrpcRawDataProvider", **kwargs):
     acc.addEventAlgo(NrpcRawDataProvider, primary=True)
     return acc
 
-def TgcBytestreamDecodeCfg(flags, name="TgcRawDataProvider", **kwargs):
+def TgcBytestreamDecodeCfg(flags, name="MuonTgcRdoProvider", **kwargs):
     acc = ComponentAccumulator()
 
     # We need the TGC cabling to be setup
@@ -136,7 +136,7 @@ def TgcBytestreamDecodeCfg(flags, name="TgcRawDataProvider", **kwargs):
 
     return acc
 
-def MdtBytestreamDecodeCfg(flags, name="MdtRawDataProvider", **kwargs):
+def MdtBytestreamDecodeCfg(flags, name="MuonMdtRdoProvider", **kwargs):
     acc = ComponentAccumulator()
 
     # We need the MDT cabling to be setup
@@ -243,7 +243,7 @@ def sTgcRODDecoderCfg(flags, name = "sTgcROD_Decoder", **kwargs):
     result.setPrivateTools(STGCRodDecoder)
     return result
 
-def sTgcBytestreamDecodeCfg(flags, name="sTgcRawDataProvider", **kwargs):
+def sTgcBytestreamDecodeCfg(flags, name="MuonStgcRdoProvider", **kwargs):
 
     acc = ComponentAccumulator()
 
@@ -346,7 +346,7 @@ def MmRDODDecoderCfg(flags, name="MmROD_Decoder", **kwargs):
     the_tool = CompFactory.Muon.MM_ROD_Decoder(name = name, **kwargs)
     result.setPrivateTools(the_tool)
     return result
-def MmBytestreamDecodeCfg(flags, name="MmRawDataProvider", **kwargs):
+def MmBytestreamDecodeCfg(flags, name="MuonMmRdoProvider", **kwargs):
     acc = ComponentAccumulator()
 
     # We need the MM cabling to be setup
