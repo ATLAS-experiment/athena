@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // test interface for a wrapper module that can open various kinds of neural
@@ -349,7 +349,7 @@ void test_ONNX(const ISF_FCS::MLogging& logger) {
                                 << inputFile << "\n Will skip ONNX tests.");
   }
 }
-
+//coverity[UNCAUGHT_EXCEPT]
 int main() {
   ISF_FCS::MLogging logger;
   std::string gan_data_example("example_data_gan.json");

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /********************************************************************
@@ -1039,8 +1039,10 @@ namespace LArG4 {
       double delta_r_SR = (radius_max - radius_min) / nBinsRadiusSR;
     
       auto computeBin = [](double val, double min_lr, double delta_sr, int maxBins) {
+        const int overflow = maxBins - 1;
+        if (delta_sr == 0.0) return overflow;
         int bin = int((val - min_lr) / delta_sr);
-        return std::min(std::max(bin, 0), maxBins - 1);
+        return std::clamp(bin, 0, overflow);;
       };
     
       // --- Compute SR bin numbers (local within the cell) ---

@@ -5,9 +5,9 @@
 
 #include "TrigInDetPattRecoTools/GNN_Geometry.h"
 
-#include<cmath>
-#include<cstring>
-#include<algorithm>
+#include <cmath>
+#include <cstring>
+#include <algorithm>
 #include <iostream>
 
 #include <list>
@@ -349,11 +349,14 @@ TrigFTF_GNN_Geometry::TrigFTF_GNN_Geometry(const std::vector<TrigInDetSiLayer>& 
     //2c. remove links : graph ablation
 
     for (auto bin1_key : exit_bins) {
-
-      auto& bin1_links = (*current_map.find(bin1_key)).second;
+      auto p1 = current_map.find(bin1_key);
+      if (p1 == current_map.end()) continue;
+      auto& bin1_links = (*p1).second;
 
       for(auto bin2_key : bin1_links.second) {
-        std::list<int>& links = (*current_map.find(bin2_key)).second.first;
+        auto p2 = current_map.find(bin2_key);
+        if (p2 == current_map.end()) continue;
+        std::list<int>& links = (*p2).second.first;
         links.remove(bin1_key);
       }
     }
@@ -373,8 +376,9 @@ TrigFTF_GNN_Geometry::TrigFTF_GNN_Geometry(const std::vector<TrigInDetSiLayer>& 
   for (auto iter = stages.rbegin(); iter != stages.rend(); ++iter) {//refill order is reverse to creation
 
     for (auto bin1_idx : (*iter)) {
-
-      const std::list<int>& bin2_list = (*bin_map.find(bin1_idx)).second.second;//bins which are incoming to bin1
+      const auto p = bin_map.find(bin1_idx);
+      if (p == bin_map.end()) continue;
+      const std::list<int>& bin2_list = (*p).second.second;//bins which are incoming to bin1
 
       std::vector<int> v2(bin2_list.begin(), bin2_list.end());
       
