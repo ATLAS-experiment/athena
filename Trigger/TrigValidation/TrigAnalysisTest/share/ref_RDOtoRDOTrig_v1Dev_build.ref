@@ -29738,9 +29738,9 @@ HLT_noalg_L1AFP_A_AND_C_TOF_jJ125:
 HLT_noalg_L1AFP_A_AND_C_TOF_jJ90:
   eventCount: 0
 HLT_noalg_L1ARTEMISL:
-  eventCount: 0
+  eventCount: 6
 HLT_noalg_L1ARTEMIST:
-  eventCount: 0
+  eventCount: 6
 HLT_noalg_L1All:
   eventCount: 20
 HLT_noalg_L1BPH-2M9-0DR15-2MU3VF:

@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 #
 # *** IMPORTANT ***
 # Menu parameter ordering must match that in the L1Topo
@@ -2013,15 +2013,18 @@ class TopoAlgoDef:
               "otype3" : "MU", "olist3": "s", "inputwidth3": 6, "nleading3": 4,
               "otype4" : "jXE", "olist4": "s", "inputwidth4": 1, "nleading4": 1,
               "WPList" : ["Tight", "Loose"],
-              "MinET1" : 15, # jJets in GeV (= 100MeV steps after conversion)
-              "MinET2" : 0, # eTaus
-              "MinET3" : 0, # muons
-              "MinET4" : 0, # jXE
-              "MaxET1" : 90, # jJets in GeV (= 100MeV steps after conversion)
-              "MaxET2" : 0, # eTaus
-              "MaxET3" : 0, # muons
-              "MaxET4" : 0, # jXE
-              "AnomalyScoreThresh" : [1521991, 1333204], #corresponds to Tight and Loose WPs (500Hz,1kHz est.)
+              "MinET1" :  15, # jJets in GeV (= 100 MeV steps after conversion)
+              "MinET2" :   0, # eTaus
+              "MinET3" :   0, # muons
+              "MinET4" :   0, # jXE
+              "MaxET1" :   0, # jJet 1
+              "MaxET2" :   0, # jJet 2
+              "MaxET3" :   0, # jJet 3
+              "MaxET4" :   0, # jJet 4
+              "MaxET5" :   0, # eTau 1
+              "MaxET6" :   0, # mu 1
+              "MaxET7" :   0, # jXE 
+              "AnomalyScoreThresh" : [1521991, 1333204], # Tight and Loose WPs
         }
         class d:
             pass
@@ -2050,10 +2053,13 @@ class TopoAlgoDef:
         alg.addvariable('MinET2', d.MinET2 * _et_conversion)
         alg.addvariable('MinET3', d.MinET3 * _et_conversion)
         alg.addvariable('MinET4', d.MinET4 * _et_conversion)
-        alg.addvariable('MaxET1', d.MinET1 * _et_conversion)
-        alg.addvariable('MaxET2', d.MinET2 * _et_conversion)
-        alg.addvariable('MaxET3', d.MinET3 * _et_conversion)
-        alg.addvariable('MaxET4', d.MinET4 * _et_conversion)
+        alg.addvariable('MaxET1', d.MaxET1 * _et_conversion)
+        alg.addvariable('MaxET2', d.MaxET2 * _et_conversion)
+        alg.addvariable('MaxET3', d.MaxET3 * _et_conversion)
+        alg.addvariable('MaxET4', d.MaxET4 * _et_conversion)
+        alg.addvariable('MaxET5', d.MaxET5 * _et_conversion)
+        alg.addvariable('MaxET6', d.MaxET6 * _et_conversion)
+        alg.addvariable('MaxET7', d.MaxET7 * _et_conversion)
         for bitId in range(len(toponames)):
             alg.addvariable('AnomalyScoreThresh', d.AnomalyScoreThresh[bitId], bitId)
         tm.registerTopoAlgo(alg)

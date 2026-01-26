@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /*********************************
  * Artemis_2A.cxx
@@ -14,10 +14,13 @@
  * @param MinEt2 : zero any eTau TOB if its ET is below this value
  * @param MinEt3 : zero any Muon TOB if its ET is below this value
  * @param MinEt4 : zero jXE TOB if its ET is below this value
- * @param MaxEt1 : veto event if any jJet ET exceeds this value
- * @param MaxEt2 : veto event if any eTau ET exceeds this value
- * @param MaxEt3 : veto event if any muon ET exceeds this value
- * @param MaxEt4 : veto event if jXE exceeds this value
+ * @param MaxEt1 : veto event if any jJet 1 ET exceeds this value
+ * @param MaxEt2 : veto event if any jJet 2 ET exceeds this value
+ * @param MaxEt3 : veto event if any jJet 3 ET exceeds this value
+ * @param MaxEt4 : veto event if any jJet 4 ET exceeds this value
+ * @param MaxEt5 : veto event if any eTau 1 ET exceeds this value
+ * @param MaxEt6 : veto event if any muon 1 ET exceeds this value
+ * @param MaxEt7 : veto event if jXE 1 exceeds this value
  * @param AnomalyScoreThresh
 **********************************/
 
@@ -57,6 +60,9 @@ TCS::ARTEMIS_2A::ARTEMIS_2A(const std::string & name) : DecisionAlg(name)
    defineParameter("MaxET2",0);
    defineParameter("MaxET3",0);
    defineParameter("MaxET4",0);
+   defineParameter("MaxET5",0);
+   defineParameter("MaxET6",0);
+   defineParameter("MaxET7",0);
    // The value used is sum of squares of the NN result vector elements, bit-shifted by 8 to get all decimal bits
    defineParameter("AnomalyScoreThresh", 1000000, 0);
    defineParameter("AnomalyScoreThresh", 1000000, 1);
@@ -88,6 +94,9 @@ TCS::ARTEMIS_2A::initialize() {
    p_maxEt2 = parameter("MaxET2").value();
    p_maxEt3 = parameter("MaxET3").value();
    p_maxEt4 = parameter("MaxET4").value();
+   p_maxEt5 = parameter("MaxET5").value();
+   p_maxEt6 = parameter("MaxET6").value();
+   p_maxEt7 = parameter("MaxET7").value();
 
    for(unsigned int i=0; i<numberOutputBits(); ++i) {
       p_AnomalyScoreThresh[i] = parameter("AnomalyScoreThresh", i).value();
