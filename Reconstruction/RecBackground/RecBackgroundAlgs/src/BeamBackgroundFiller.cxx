@@ -120,7 +120,7 @@ StatusCode BeamBackgroundFiller::FillMatchMatrix(const EventContext& ctx,
     }
   } 
 
-  if (m_idHelperSvc->hasCSC()) {
+  if (!m_cscSegmentContainerReadHandleKey.empty() && m_idHelperSvc->hasCSC()) {
     // select only the CSC segments with the global direction parallel to the
     // beam pipe
     SG::ReadHandle<Trk::SegmentCollection> cscSegmentReadHandle(
