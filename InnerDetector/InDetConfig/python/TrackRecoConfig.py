@@ -7,10 +7,10 @@ from TrkConfig.TrackingPassFlags import printActiveConfig, printPrimaryConfig
 _flags_set = []  # For caching
 _extensions_list = [] # For caching
 
-def CombinedTrackingPassFlagSets(flags):
+def CombinedTrackingPassFlagSets(flags, resetCache=False):
 
     global _flags_set
-    if _flags_set:
+    if _flags_set and not resetCache:
         return _flags_set
 
     flags_set = []
@@ -36,7 +36,7 @@ def CombinedTrackingPassFlagSets(flags):
 
         flags_set += [flagsLRT]
 
-    # LowPtRoI pass (low-pt tracks in high pile-up enviroment)
+    # LowPtRoI pass (low-pt tracks in high pile-up environment)
     if flags.Tracking.doLowPtRoI:
         flagsLowPtRoI = flags.cloneAndReplace("Tracking.ActiveConfig",
                                               "Tracking.LowPtRoIPass")
@@ -81,7 +81,6 @@ def CombinedTrackingPassFlagSets(flags):
     _flags_set = flags_set  # Put into cache
 
     return flags_set
-
 
 def ClusterSplitProbabilityContainerName(flags):
     if flags.Detector.GeometryITk:
@@ -296,44 +295,29 @@ def TRTStandalonePassRecoCfg(flags,
 def StoreTrackSeparateContainerCfg(flags, TrackContainer="",
                                    ClusterSplitProbContainer=""):
     result = ComponentAccumulator()
-    if hasattr(flags.TrackOverlay, "ActiveConfig"):
-       doTrackOverlay = getattr(flags.TrackOverlay.ActiveConfig, "doTrackOverlay", None)
-    else:
-       doTrackOverlay = flags.Overlay.doTrackOverlay
-
     # Dummy Merger to fill additional info
     # for PRD-associated pixel tracklets
     # Can also run on all separate collections like R3LargeD0
     # but kept consistent with legacy config
-
     AssociationMapName = ""
     extension = flags.Tracking.ActiveConfig.extension
-
-    if extension == "Disappearing" or doTrackOverlay:
-        if extension == "Disappearing":
-            InputTracks = [TrackContainer]
-            if doTrackOverlay:
-                InputTracks += [flags.Overlay.BkgPrefix +
-                                extension + "Tracks"]
-            TrackContainer = extension+"Tracks"
-            AssociationMapName = "PRDtoTrackMap" + TrackContainer
-            MergerOutputTracks = TrackContainer
-        elif doTrackOverlay:
-            # schedule merger to combine signal and background tracks
-            InputTracks = [flags.Overlay.SigPrefix+TrackContainer,
-                           flags.Overlay.BkgPrefix+TrackContainer]
-            AssociationMapName = ("PRDtoTrackMapResolved" +
-                                  extension + "Tracks")
-            MergerOutputTracks = TrackContainer
+    
+    # For track overlay: each pass owns its output container; merging of Sig/Bkg is handled earlier if needed
+    # Always run the block for Disappearing extension to ensure containers are produced
+    if extension == "Disappearing":
+        InputTracks = [TrackContainer]
+        # For TO, always use DisappearingTracks as the output container for downstream
+        TrackContainer = extension + "Tracks"
+        MergerOutputTracks = TrackContainer
 
         from TrkConfig.TrkTrackCollectionMergerConfig import (
             TrackCollectionMergerAlgCfg)
         result.merge(TrackCollectionMergerAlgCfg(
             flags,
-            name = "TrackCollectionMergerAlgCfg"+extension,
+            name = "TrackCollectionMergerAlgCfg" + extension,
             InputCombinedTracks=InputTracks,
             OutputCombinedTracks=MergerOutputTracks,
-            AssociationMapName=AssociationMapName))
+            AssociationMapName="PRDtoTrackMap" + TrackContainer))
 
     if flags.Tracking.doTruth:
         from InDetConfig.TrackTruthConfig import InDetTrackTruthCfg
@@ -410,10 +394,7 @@ def TrackRecoPassCfg(flags, extension="",
                      StatTrackTruthCollections=None,
                      ClusterSplitProbContainer=""):
     result = ComponentAccumulator()
-    if hasattr(flags.TrackOverlay, "ActiveConfig"):
-       doTrackOverlay = getattr(flags.TrackOverlay.ActiveConfig, "doTrackOverlay", None)
-    else:
-       doTrackOverlay = flags.Overlay.doTrackOverlay
+    doTrackOverlay = flags.TrackOverlay.isTrackOverlaySeq
     if InputCombinedInDetTracks is None:
         InputCombinedInDetTracks = []
     if InputExtendedInDetTracks is None:
@@ -424,12 +405,11 @@ def TrackRecoPassCfg(flags, extension="",
         StatTrackTruthCollections = []
 
     ResolvedTracks = "Resolved" + extension + "Tracks"
-
-    # for track overlay, save resolved track name
-    # for final merged track collection
-    if (doTrackOverlay and
-        flags.Tracking.ActiveConfig.storeSeparateContainer and
-        not flags.Tracking.ActiveConfig.useTRTExtension):
+    # for track overlay, save resolved track name for final merged track collection
+    # Only add Sig_ prefix for primary pass (where we merge signal+pileup)
+    # Non-primary passes process signal only, so no prefix needed
+    if (doTrackOverlay and extension == '' and
+        flags.Tracking.ActiveConfig.storeSeparateContainer):
         ResolvedTracks = flags.Overlay.SigPrefix + ResolvedTracks
 
     # Tweak to match old config key
@@ -442,6 +422,7 @@ def TrackRecoPassCfg(flags, extension="",
 
     if doTrackingSiPattern:
         SiSPSeededTracks = "SiSPSeeded" + extension + "Tracks"
+        
         from InDetConfig.TrackingSiPatternConfig import TrackingSiPatternCfg
         result.merge(TrackingSiPatternCfg(
             flags,
@@ -453,14 +434,55 @@ def TrackRecoPassCfg(flags, extension="",
         StatTrackTruthCollections += [SiSPSeededTracks+"TruthCollection",
                                       ResolvedTracks+"TruthCollection"]
 
+    # ---------------------------------------
+    # --- For track overlay main pass: merge signal Si tracks with pileup tracks BEFORE TRT extension
+    # --- TRT extension needs to see ALL Si tracks (signal + pileup) to properly
+    # --- associate TRT hits from the overlaid TRT_RDOs with both signal and pileup tracks
+    # ---------------------------------------
+    
     TrackContainer = ResolvedTracks
-    if (doTrackOverlay and
-        flags.Tracking.ActiveConfig.storeSeparateContainer):
-        TrackContainer = "Resolved" + extension + "Tracks"
+    
+    # Track which Si tracks to use for TRT extension
+    SiTracksForTRTExtension = ResolvedTracks
+    
+    # For track overlay: Merge signal + pileup Si tracks BEFORE TRT extension
+    # First add TrackSummary to pileup tracks
+    # Then merge and run TRT extension on combined collection
+    if doTrackOverlay and extension == '':
+        # Add TrackSummary to pileup tracks
+        from InDetConfig.AddTrackSummaryAlgConfig import AddTrackSummaryAlgCfg
+        result.merge(AddTrackSummaryAlgCfg(
+           flags,
+           name="AddSummaryToPileupTracks",
+           InputTrackCollection="Bkg_CombinedInDetTracks",
+           OutputTrackCollection="Bkg_CombinedInDetTracksWithSummary",
+           MinPt=flags.Tracking.ActiveConfig.minPT,
+           MaxAbsEta=2.2,
+        ))
+        # Merge signal + pileup Si tracks
+        from TrkConfig.TrkTrackCollectionMergerConfig import TrackCollectionMergerAlgCfg
+        result.merge(TrackCollectionMergerAlgCfg(
+            flags,
+            name="MergeSignalPileupBeforeTRTExtension",
+            InputCombinedTracks=[ResolvedTracks, "Bkg_CombinedInDetTracksWithSummary"],
+            OutputCombinedTracks="MergedSiTracks",
+            AssociationMapName="PRDtoTrackMapMergedSiTracks"))
+        
+        # Use merged Si tracks as input for TRT extension
+        SiTracksForTRTExtension = "MergedSiTracks"
+        TrackContainer = "MergedSiTracks"
+        
+    elif (doTrackOverlay and
+          flags.Tracking.ActiveConfig.storeSeparateContainer):
+        #not doing the merge in non-primary passes, so the pass’s own output container
+        TrackContainer = ResolvedTracks
 
     # ---------------------------------------
     # --- TRT extension
     # ---------------------------------------
+
+    # For track overlay non-primary passes: process signal tracks normally
+    # Primary pass (extension="") merges signal+pileup Si tracks before TRT extension (done above)
 
     if flags.Tracking.ActiveConfig.useTRTExtension:
         ExtendedTracks = "Extended" + extension + "Tracks"
@@ -469,14 +491,12 @@ def TrackRecoPassCfg(flags, extension="",
             ExtendedTracks = "ExtendedTracksDisappearing"
         elif "LargeD0" in extension:
             ExtendedTracks = "ExtendedLargeD0Tracks"
-            if doTrackOverlay:
-                ExtendedTracks = flags.Overlay.SigPrefix+"ExtendedLargeD0Tracks"
+            # In track overlay, LargeD0 pass only processes signal - no Sig_ prefix needed
         ExtendedTracksMap = "ExtendedTracksMap" + extension
-
         from InDetConfig.TRTExtensionConfig import NewTrackingTRTExtensionCfg
         result.merge(NewTrackingTRTExtensionCfg(
             flags,
-            SiTrackCollection=ResolvedTracks,
+            SiTrackCollection=SiTracksForTRTExtension,
             ExtendedTrackCollection=ExtendedTracks,
             ExtendedTracksMap=ExtendedTracksMap))
 
@@ -504,7 +524,6 @@ def TrackRecoPassCfg(flags, extension="",
         InputCombinedInDetTracks += [TrackContainer]
 
     InputExtendedInDetTracks += [TrackContainer]
-
     return result, ClusterSplitProbContainer
 
 
@@ -513,21 +532,13 @@ def TrackFinalCfg(flags,
                   StatTrackCollections=None,
                   StatTrackTruthCollections=None):
     result = ComponentAccumulator()
-    if hasattr(flags.TrackOverlay, "ActiveConfig"):
-       doTrackOverlay = getattr(flags.TrackOverlay.ActiveConfig, "doTrackOverlay", None)
-    else:
-       doTrackOverlay = flags.Overlay.doTrackOverlay
-
+    
     if InputCombinedInDetTracks is None:
         InputCombinedInDetTracks = []
     if StatTrackCollections is None:
         StatTrackCollections = []
     if StatTrackTruthCollections is None:
         StatTrackTruthCollections = []
-
-    if doTrackOverlay:
-        InputCombinedInDetTracks += [flags.Overlay.BkgPrefix +
-                                     "CombinedInDetTracks"]
 
     TrackContainer = "CombinedInDetTracks"
 
@@ -827,7 +838,7 @@ def InDetTrackRecoCfg(flags):
     if flags.Tracking.doTrackSegmentsTRT:
         result.merge(TRTTrackRecoCfg(flags, extensions_list=_extensions_list))
 
-    flags_set = CombinedTrackingPassFlagSets(flags)
+    flags_set = CombinedTrackingPassFlagSets(flags, resetCache=True)
 
     # Pre-processing for TRT phase in cosmics
     if flags.Beam.Type is BeamType.Cosmics:
@@ -858,7 +869,7 @@ def InDetTrackRecoCfg(flags):
             "" if isPrimaryPass else
             current_flags.Tracking.ActiveConfig.extension)
         _extensions_list.append(extension)
-
+        
         # ---------------------------------------
         # ----   TRTStandalone pass
         # ---------------------------------------
@@ -908,7 +919,7 @@ def InDetTrackRecoCfg(flags):
             # ---------------------------------------
             # --- BackTracking
             # ---------------------------------------
-
+            
             if flags.Tracking.doBackTracking:
                 acc, ClusterSplitProbContainer = BackTrackingRecoCfg(
                     current_flags,
@@ -1054,3 +1065,4 @@ def TrackRecoConfigTest(flags=None):
 
 if __name__ == "__main__":
     TrackRecoConfigTest()
+

@@ -5,14 +5,15 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 
 def TRT_TrackExtensionAlgCfg(flags, name = 'InDetTRT_Extension', **kwargs):
     acc = ComponentAccumulator()
-
+    doTrackOverlay = flags.TrackOverlay.isTrackOverlaySeq
+    prefix = "TrackOverlay_" if doTrackOverlay else ''
     if "TrackExtensionTool" not in kwargs:
         from InDetConfig.TRT_TrackExtensionToolConfig import TRT_TrackExtensionToolCfg
         kwargs.setdefault("TrackExtensionTool", acc.popToolsAndMerge(
             TRT_TrackExtensionToolCfg(flags)))
 
     acc.addEventAlgo(CompFactory.InDet.TRT_TrackExtensionAlg(
-        name + flags.Tracking.ActiveConfig.extension, **kwargs))
+        prefix + name + flags.Tracking.ActiveConfig.extension, **kwargs))
     return acc
 
 def TRT_Phase_TrackExtensionAlgCfg(flags, name = 'InDetTRT_Phase_Extension', **kwargs):

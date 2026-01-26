@@ -31,7 +31,7 @@ Reco_tf.py \
   --postInclude 'PyJobTransforms.UseFrontier' \
   --conditionsTag "default:${conditions}" \
   --geometryVersion "default:${geometry}" \
-  --preExec="flags.Tracking.doBackTracking=False;" \
+  --preExec="flags.Tracking.doBackTracking=False; flags.Detector.EnableTRT=False; flags.Tracking.doTruth=False; flags.Tracking.doLargeD0=False; flags.Tracking.doForwardTracks=False; flags.Tracking.doTrackSegmentsDisappearing=False" \
   --postExec 'with open("ConfigCA.pkl", "wb") as f: cfg.store(f)' \
   --imf False
 

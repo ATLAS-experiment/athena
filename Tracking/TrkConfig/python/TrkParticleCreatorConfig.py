@@ -18,7 +18,6 @@ def TrackParticleCreatorToolCfg(flags,
     if flags.Detector.GeometryITk:
         name = name.replace("InDet", "ITk")
         return ITkTrackParticleCreatorToolCfg(flags, name, **kwargs)
-
     # To produce InDet::BeamSpotData CondHandle
     from BeamSpotConditions.BeamSpotConditionsConfig import BeamSpotCondAlgCfg
     result = BeamSpotCondAlgCfg(flags)

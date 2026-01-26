@@ -128,12 +128,10 @@ def OverlayMainContentCfg(configFlags):
            acc.merge(CopyITkPixelClusterContainerCfg(configFlags))
            acc.merge(CopyITkStripClusterContainerCfg(configFlags))
         else:
-           from OverlayCopyAlgs.OverlayCopyAlgsConfig import CopyTrackCollectionsCfg,CopyPixelClusterContainerCfg, CopySCT_ClusterContainerCfg,\
-            CopyTRT_DriftCircleContainerCfg
+           from OverlayCopyAlgs.OverlayCopyAlgsConfig import CopyTrackCollectionsCfg,CopyPixelClusterContainerCfg, CopySCT_ClusterContainerCfg
            acc.merge(CopyTrackCollectionsCfg(configFlags))
            acc.merge(CopyPixelClusterContainerCfg(configFlags))
            acc.merge(CopySCT_ClusterContainerCfg(configFlags))
-           acc.merge(CopyTRT_DriftCircleContainerCfg(configFlags))
 
     if configFlags.Overlay.DataOverlay:
         # Copy background vertex collection
