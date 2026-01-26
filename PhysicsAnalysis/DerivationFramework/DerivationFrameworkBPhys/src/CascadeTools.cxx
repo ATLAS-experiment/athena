@@ -551,57 +551,5 @@ double CascadeTools::vertexProbability(int ndf, double chi2) const
   }
 }
 
-
-Amg::MatrixX * CascadeTools::convertCovMatrix(const xAOD::Vertex * vxCandidate) const
-{
-  unsigned int NTrk = vxCandidate->nTrackParticles();
-  std::vector<float> matrix = vxCandidate->covariance();
-
-  int ndim = 0;
-
-  if ( matrix.size() == (3*NTrk+3)*(3*NTrk+3+1)/2) {
-    ndim = 3*NTrk+3;
-  } else if (matrix.size() == (5*NTrk+3)*(5*NTrk+3+1)/2) {
-    ndim = 5*NTrk+3;
-  } else {
-    return nullptr;
-  }
-
-  Amg::MatrixX* mtx = new Amg::MatrixX(ndim,ndim);
-
-  long int ij=0;
-  for (int i=1; i<= ndim; i++) {
-    for (int j=1; j<=i; j++){
-      if (i==j) {
-        (*mtx)(i-1,j-1)=matrix[ij];
-      } else {
-        (*mtx).fillSymmetric(i-1,j-1,matrix[ij]);
-      }
-      ij++;
-     }
-  }
- // NOTE: mtx is a pointer! Take care of deleting it after you do not need it anymore!!!
-
-  return mtx;
-} 
-  
-Amg::MatrixX CascadeTools::SetFullMatrix(int NTrk, const std::vector<float> & Matrix) const
-{
-
-  Amg::MatrixX mtx(3+3*NTrk,3+3*NTrk);   // Create identity matrix of needed size
-
-  int ij=0;
-
-  for(int i=0; i<(3+3*NTrk); i++){
-    for(int j=0; j<=i; j++){
-                mtx(i,j)=Matrix[ij];
-       if(i!=j) mtx(j,i)=Matrix[ij];
-       ij++;
-    }
-  }
-
-  return mtx;
-}
-
 } //end of namespace definitions
 
