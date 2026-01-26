@@ -99,7 +99,7 @@ def MuonAlignStoreCfg(flags):
     from ROOT.ActsTrk import DetectorType
     if flags.Detector.GeometryMDT:  
         result.merge(ActsAlignStoreProviderAlgCfg(flags, 
-                                                  name="ActsDetAlignmentAlgMdt",
+                                                  name="MuonAlignStoreProviderMdt",
                                                   CondAlignStore="MdtActsAlignContainer" if setCondDep else "",
                                                   EventAlignStore="MdtActsAlignContainer",
                                                   SplitPhysVolCache =  flags.Muon.AlignedGeoTrfCacheMode == GeoTrfCacheMode.SplitCache or
@@ -110,7 +110,7 @@ def MuonAlignStoreCfg(flags):
                                                   DetectorType=DetectorType.Mdt))
     if flags.Detector.GeometryRPC:  
         result.merge(ActsAlignStoreProviderAlgCfg(flags, 
-                                                  name="ActsDetAlignmentAlgRpc",
+                                                  name="MuonAlignStoreProviderRpc",
                                                   CondAlignStore="RpcActsAlignContainer" if setCondDep else "",
                                                   EventAlignStore="RpcActsAlignContainer",
                                                   SplitPhysVolCache =  flags.Muon.AlignedGeoTrfCacheMode == GeoTrfCacheMode.SplitCache or
@@ -121,7 +121,7 @@ def MuonAlignStoreCfg(flags):
                                                   DetectorType=DetectorType.Rpc))
     if flags.Detector.GeometryTGC:  
         result.merge(ActsAlignStoreProviderAlgCfg(flags, 
-                                                  name="ActsDetAlignmentAlgTgc",
+                                                  name="MuonAlignStoreProviderTgc",
                                                   CondAlignStore="TgcActsAlignContainer" if setCondDep else "",
                                                   EventAlignStore="TgcActsAlignContainer",
                                                   SplitPhysVolCache =  flags.Muon.AlignedGeoTrfCacheMode == GeoTrfCacheMode.SplitCache or
@@ -132,7 +132,7 @@ def MuonAlignStoreCfg(flags):
                                                   DetectorType=DetectorType.Tgc))
     if flags.Detector.GeometrysTGC: 
         result.merge(ActsAlignStoreProviderAlgCfg(flags, 
-                                                  name="ActsDetAlignmentAlgSTGC",
+                                                  name="MuonAlignStoreProviderSTGC",
                                                   CondAlignStore="sTgcActsAlignContainer" if setCondDep else "",
                                                   EventAlignStore="sTgcActsAlignContainer",
                                                   SplitPhysVolCache =  flags.Muon.AlignedGeoTrfCacheMode == GeoTrfCacheMode.SplitCache or
@@ -144,7 +144,7 @@ def MuonAlignStoreCfg(flags):
 
     if flags.Detector.GeometryMM:
         result.merge(ActsAlignStoreProviderAlgCfg(flags, 
-                                                  name="ActsDetAlignmentAlgMM",
+                                                  name="MuonAlignStoreProviderMM",
                                                   CondAlignStore="MmActsAlignContainer" if setCondDep or \
                                                                                            flags.Muon.applyMMPassivation else "",
                                                   EventAlignStore="MmActsAlignContainer",
