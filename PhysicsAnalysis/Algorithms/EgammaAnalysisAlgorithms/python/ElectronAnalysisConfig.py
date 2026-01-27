@@ -40,7 +40,8 @@ class ElectronCalibrationConfig (ConfigBlock) :
         self.addOption ('isolationCorrection', True, type=bool,
             info="whether or not to perform isolation corrections (leakage "
             "corrections), i.e. set up an instance of "
-            "`CP::EgammaIsolationCorrectionAlg`.")
+            "`CP::EgammaIsolationCorrectionAlg`.",
+            expertMode=True)
         self.addOption ('recalibratePhyslite', True, type=bool,
             info="whether to run the `CP::EgammaCalibrationAndSmearingAlg` on "
             "PHYSLITE derivations")
