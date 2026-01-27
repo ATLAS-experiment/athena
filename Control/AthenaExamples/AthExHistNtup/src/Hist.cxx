@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // Hist.cxx 
@@ -12,16 +12,8 @@
 // AthExHistNtup includes
 #include "Hist.h"
 
-// STL includes
-
-// FrameWork includes
-#include "Gaudi/Property.h"
-
 // ROOT includes
 #include "TH1F.h"
-
-// event includes
-#include "xAODEventInfo/EventInfo.h"
 
 using namespace AthEx;
 
@@ -34,18 +26,8 @@ using namespace AthEx;
 Hist::Hist( const std::string& name, 
             ISvcLocator* pSvcLocator ) : 
   ::AthAlgorithm( name, pSvcLocator ),
-  m_ntsvc("THistSvc/THistSvc", name),
   m_hist (0)
-{
-  //
-  // Property declaration
-  // 
-
-  declareProperty( "EvtInfo", 
-                   m_evtInfoName = "",
-                   "key to the event-info instance to histogram-ize.");
-
-}
+{ }
 
 // Destructor
 ///////////////
@@ -57,15 +39,12 @@ Hist::~Hist()
 StatusCode Hist::initialize()
 {
   ATH_MSG_INFO ("Initializing " << name() << "...");
-
-  if (!m_ntsvc.retrieve().isSuccess()) {
-    ATH_MSG_ERROR("could not retrieve handle to ntuple svc");
-    return StatusCode::FAILURE;
-  }
+  ATH_CHECK( m_histSvc.retrieve() );
+  ATH_CHECK( m_evt.initialize() );
 
   // register our histogram with the svc
   m_hist = new TH1F("h1", "histogram title", 100,0.,100.);
-  if (!m_ntsvc->regHist("/stat/simple1D/h1", m_hist).isSuccess()) {
+  if (!m_histSvc->regHist("/stat/simple1D/h1", m_hist).isSuccess()) {
     ATH_MSG_ERROR("could not register histogram [h1]");
     delete m_hist; m_hist = 0;
     return StatusCode::FAILURE;
@@ -86,14 +65,14 @@ StatusCode Hist::execute()
   ATH_MSG_DEBUG ("Executing " << name() << "...");
 
   // get event data...
-  const xAOD::EventInfo* evt = 0;
-  if (!evtStore()->retrieve(evt, m_evtInfoName).isSuccess() ||
-      0==evt) {
-    ATH_MSG_ERROR("could not get event-info at [" << m_evtInfoName << "]");
+  SG::ReadHandle<xAOD::EventInfo> evt( m_evt );
+  if (!evt.isValid()) {
+    ATH_MSG_ERROR ("Could not retrieve EventInfo obj");
     return StatusCode::FAILURE;
-  }
-
+  } 
+  
   int event = evt->eventNumber();
+  ATH_MSG_INFO("   EventInfo:  r: " << event << " e: " << evt->eventNumber() );
 
   // fill the histogram
   m_hist->Fill( float(event), 1.);

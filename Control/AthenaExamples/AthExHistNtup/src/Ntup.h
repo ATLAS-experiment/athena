@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // Ntup.h 
@@ -19,8 +19,9 @@
 #include "AthenaBaseComps/AthAlgorithm.h"
 #include "GaudiKernel/ITHistSvc.h"
 #include "GaudiKernel/ServiceHandle.h"
+#include "StoreGate/ReadHandleKey.h"
+#include "xAODEventInfo/EventInfo.h"
 
-//#include "TTree.h"
 // fwd declares
 class TTree;
 
@@ -59,8 +60,8 @@ class Ntup
   /// Default constructor: 
   Ntup();
 
-  /// handle to the n-tuple svc
-  ServiceHandle<ITHistSvc> m_ntsvc;
+  /// handle to the histogram service
+  ServiceHandle<ITHistSvc> m_ntSvc {this, "THistSvc", "THistSvc", "Handle to the histogram service"};
 
   // n-tuple data members
   unsigned int m_size;
@@ -72,8 +73,8 @@ class Ntup
   TTree* m_ntuple;
   
   /// key to the event-info
-  std::string m_evtInfoName;
-
+  SG::ReadHandleKey<xAOD::EventInfo> m_evt {this, "EventInfo", "EventInfo", 
+                                            "key to the event-info instance to ntuple-ize."};
 }; 
 
 } //> namespace AthEx

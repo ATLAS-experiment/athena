@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // Hist.h 
@@ -18,6 +18,8 @@
 #include "AthenaBaseComps/AthAlgorithm.h"
 #include "GaudiKernel/ITHistSvc.h"
 #include "GaudiKernel/ServiceHandle.h"
+#include "StoreGate/ReadHandleKey.h"
+#include "xAODEventInfo/EventInfo.h"
 
 // fwd declares
 class TH1F;
@@ -57,15 +59,14 @@ class Hist
   /// Default constructor: 
   Hist();
 
-  /// handle to the n-tuple svc
-  ServiceHandle<ITHistSvc> m_ntsvc;
+  /// handle to the histogram service
+  ServiceHandle<ITHistSvc> m_histSvc {this,"THistSvc", "THistSvc", "Handle to the histogram service"};
 
   /// pointer to our histogram
   TH1F *m_hist;
 
   /// key to the event-info
-  std::string m_evtInfoName;
-
+  SG::ReadHandleKey<xAOD::EventInfo> m_evt {this,"EventInfo", "EventInfo", "xAOD EventInfo name"};
 }; 
 
 } //> namespace AthEx
