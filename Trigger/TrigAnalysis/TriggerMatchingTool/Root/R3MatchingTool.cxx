@@ -168,6 +168,7 @@ namespace Trig
           ATH_MSG_WARNING("Cannot retrieve egamma object's primary calorimeter cluster, will match to the egamma object");
         match = true;
       }
+      if (reco->type() == xAOD::Type::TruthParticle) match=true;
       if (match)
         match = m_scoreTool->score(*online, *reco) < scoreThreshold;
       cacheItr = cache.insert(std::make_pair(linkIndices, match)).first;
