@@ -74,6 +74,10 @@ class OutputAnalysisConfig (ConfigBlock):
         self.addOption ('skipRedundantSelectionFlags', True, type=bool,
             info="remove the redundant `outputSelect` branches created by the `Thinning` step. "
             "These could however be used to simplify downstream workflows, as in Easyjet.")
+        self.addOption ('defaultBasketSize', None, type=int,
+            info="default basket size for all branches in the output tree. "
+            "If not set (the default), no basket size is configured and ROOT's "
+            "default will be used.")
         # helper to protect for second pass
         self.validated = False
 
@@ -98,6 +102,8 @@ class OutputAnalysisConfig (ConfigBlock):
         branchList_nosys = [branch for branch in branchList if "%SYS%" not in branch]
         branchList_sys = [branch for branch in branchList if "%SYS%" in branch]
         alg.Branches = branchList_nosys + branchList_sys
+        if self.defaultBasketSize is not None:
+            alg.DefaultBasketSize = self.defaultBasketSize
         return alg
 
     def makeAlgs (self, config) :
