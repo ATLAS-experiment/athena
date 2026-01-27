@@ -13,7 +13,7 @@ atlas_add_component( MuonCondDump
                      src/components/*.cxx
                      INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
                      LINK_LIBRARIES ${CORAL_LIBRARIES} ${ROOT_LIBRARIES} AthenaBaseComps AthenaKernel CoralUtilitiesLib GaudiKernel 
-                                    GeoPrimitives Identifier MuonAlignmentData MuonCondData MuonCondInterface MuonCondSvcLib MuonIdHelpersLib 
+                                    GeoPrimitives Identifier MuonAlignmentData MuonCondData  MuonCondSvcLib MuonIdHelpersLib 
                                     MuonReadoutGeometry ActsGeoUtils StoreGateLib MuonCablingData MuonReadoutGeometryR4 MdtCalibData
                                     MuonTesterTreeLib MuonRecToolInterfacesR4 MuonVisualizationHelpersR4)
 
