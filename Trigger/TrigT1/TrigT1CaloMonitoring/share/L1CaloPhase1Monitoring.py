@@ -72,7 +72,7 @@ else:
 # now parse
 
 parser = flags.getArgumentParser(epilog="""
-Extra flags are specified after a " -- " and the following are most relevant bool flags for this script:
+Extra flags are specified after a " -- " and the following are most relevant flags for this script:
   
   Trigger.enableL1CaloPhase1 : turn on/off the offline simulation [default: True]
   DQ.doMonitoring            : turn on/off the monitoring [default: True]
@@ -84,7 +84,8 @@ Extra flags are specified after a " -- " and the following are most relevant boo
   Trigger.L1.doTopo          : controls topo simulation and monitoring [default: False*] (from 2023 Onwards)
   DQ.useTrigger              : controls if JetEfficiency monitoring alg is run or not  [default: False]
   PerfMon.doFullMonMT        : print info about execution time of algorithms and memory use etc [default: False]
-  
+  Trigger.triggerConfig      : if you specifying this as "FILE:<filename>" the script will use that L1 json menu. [default: "DB" (takes menu from DB for data)]
+                                 
 Note: If you do not specify any flags, then all the flags that are marked with a * will automatically become True
 
 E.g. to run just the jFex monitoring, without offline simulation, you can do:
@@ -136,20 +137,34 @@ if args.runNumber is not None:
     flags.Input.Files += glob(tryStr)
   log.info(" ".join(("Found",str(len(flags.Input.Files)),"files")))
 
+customMenuFile = ""
+if flags.Trigger.triggerConfig.startswith("FILE:"):
+  customMenuFile = flags.Trigger.triggerConfig.split(":",1)[-1]
+  flags.Trigger.triggerConfig="FILE"
+
 standalone = False
 # require at least 1 input file if running offline, unless running config-generating mode ....
-if not partition.isValid() and len(flags.Input.Files)==0:
+if not flags.Common.isOnline and len(flags.Input.Files)==0:
   if flags.Exec.MaxEvents==0:
     # this test file is used for generating the han config file
     flags.Input.Files = ["/eos/atlas/atlascerngroupdisk/det-l1calo/OfflineSoftware/TestFiles/data24_13p6TeV/data24_13p6TeV.00477048.physics_Main.daq.RAW._lb0821._SFO-20._0001.data"]
   else:
     log.fatal("Running in offline mode but no input files provided")
     exit(1)
-elif partition.isValid():
+elif flags.Common.isOnline:
   log.info("Running Online with Partition: "+partition.name())
+  # if the partition name is not set in the flags, run the autoconfig again
+  # this occurs when running the online monitoring config in offline environment for testing
+  if flags.Trigger.Online.partitionName == '':
+    # must ensure doLVL1 and doHLT are False, otherwise will get ByteStreamCnvSvc conflicts (TrigByteStreamCnvSvc is setup, but EMon setup provides ByteStreamCnvSvc)
+    # see TriggerByteStreamConfig.py
+    flags.Trigger.doLVL1 = False
+    flags.Trigger.doHLT = False
+    from AthenaConfiguration.AutoConfigOnlineRecoFlags import autoConfigOnlineRecoFlags
+    autoConfigOnlineRecoFlags(flags, partition.name())
   standalone = (partition.name()!="ATLAS")
   if standalone : log.info("Using local menu because partition is not ATLAS")
-  elif len(flags.Input.Files)==0:
+  elif len(flags.Input.Files)==0 and partition.isValid():
     # wait here for 2 minutes, to give LAr time to put fw info in the database
     import time
     log.info("Waiting 2 minutes for LATOME to get their databases in order")
@@ -192,6 +207,12 @@ if flags.GeoModel.AtlasVersion is None:
   from AthenaConfiguration.TestDefaults import defaultGeometryTags
   flags.GeoModel.AtlasVersion = defaultGeometryTags.autoconfigure(flags)
 
+if flags.Trigger.triggerConfig=="FILE" and flags.Trigger.L1.doCalo:
+  # HLTConfgSvc fails to load if using a json file for the menu
+  # so disable the legacy monitoring which triggers that svc
+  log.warning("Cannot run Legacy sim/mon when using json l1 menu. Disabling")
+  flags.Trigger.L1.doCalo=False
+
 if (flags.Input.Format == Format.POOL): flags.Trigger.L1.doTopo = False #Deactivating L1Topo if Format is POOL
 if not flags.Trigger.L1.doTopo: flags.Trigger.L1.doMuon = False # don't do muons if not doing topo
 
@@ -217,7 +238,7 @@ if not any([flags.Trigger.L1.doCaloInputs,flags.Trigger.L1.doCalo,flags.Trigger.
   log.fatal("See --help for more info about the flags")
   exit(1)
 
-if partition.isValid() and len(flags.Input.Files)==0:
+if flags.Common.isOnline and len(flags.Input.Files)==0:
   flags.dump(evaluate=True)
   from ByteStreamEmonSvc.EmonByteStreamConfig import EmonByteStreamCfg
   cfg.merge(EmonByteStreamCfg(flags)) # setup EmonSvc
@@ -259,14 +280,28 @@ cfg.merge(getDQTHistSvc(flags))
 from TrigConfigSvc.TrigConfigSvcCfg import L1ConfigSvcCfg,generateL1Menu, createL1PrescalesFileFromMenu,getL1MenuFileName
 if flags.Trigger.triggerConfig=="FILE":
   # for MC we set the TriggerConfig to "FILE" above, so must generate a menu for it to load (will be the release's menu)
-  generateL1Menu(flags)
-  createL1PrescalesFileFromMenu(flags)
   menuFilename = getL1MenuFileName(flags)
+  if customMenuFile == "":
+    if os.path.exists(menuFilename): os.remove(menuFilename)
+    generateL1Menu(flags)
+  else:
+    # create a symlink to the custom file
+    import os,errno
+    try:
+        os.symlink(customMenuFile, menuFilename)
+    except OSError as e:
+        if e.errno == errno.EEXIST:
+            os.remove(menuFilename)
+            os.symlink(customMenuFile, menuFilename)
+        else:
+            raise e
+    menuFilename = customMenuFile 
   if os.path.exists(menuFilename):
     log.info(f"Using L1Menu: {menuFilename}")
   else:
     log.fatal(f"L1Menu file does not exist: {menuFilename}")
     exit(1)
+  createL1PrescalesFileFromMenu(flags)
 cfg.merge(L1ConfigSvcCfg(flags))
 
 # -------- CHANGES GO BELOW ------------
@@ -274,7 +309,7 @@ cfg.merge(L1ConfigSvcCfg(flags))
 
 decoderTools = []
 
-if partition.isValid() or (flags.Input.Format != Format.POOL and not flags.Input.isMC):
+if flags.Common.isOnline or (flags.Input.Format != Format.POOL and not flags.Input.isMC):
   from L1CaloFEXByteStream.L1CaloFEXByteStreamConfig import eFexByteStreamToolCfg, jFexRoiByteStreamToolCfg, jFexInputByteStreamToolCfg, gFexByteStreamToolCfg, gFexInputByteStreamToolCfg
   if flags.Trigger.L1.doeFex: decoderTools += [cfg.popToolsAndMerge(eFexByteStreamToolCfg(flags=flags,name='eFexBSDecoderTool',TOBs=flags.Trigger.L1.doeFex,xTOBs=flags.Trigger.L1.doeFex,decodeInputs=flags.Trigger.L1.doCaloInputs,multiSlice=True))]
   if flags.Trigger.L1.dojFex: decoderTools += [cfg.popToolsAndMerge(jFexRoiByteStreamToolCfg(flags=flags,name="jFexBSDecoderTool",writeBS=False))]
@@ -299,7 +334,7 @@ if partition.isValid() or (flags.Input.Format != Format.POOL and not flags.Input
         OutputLevel=Constants.ERROR, # hides warnings about non-zero status codes in fragments ... will show up in hists
         DecoderTools=decoderTools,
         ByteStreamMetadataRHKey = '', # seems necessary @ P1 if trying to run on a raw file
-        MaybeMissingROBs= [id for tool in decoderTools for id in tool.ROBIDs ] if partition.name()!="ATLAS" or not partition.isValid() else [], # allow missing ROBs away from online ATLAS partition
+        MaybeMissingROBs= [id for tool in decoderTools for id in tool.ROBIDs ] if partition.name()!="ATLAS" or not flags.Common.isOnline else [], # allow missing ROBs away from online ATLAS partition
         MonTool= cfg.popToolsAndMerge(L1TriggerByteStreamDecoderMonitoringCfg(flags,"L1TriggerByteStreamDecoder", decoderTools))
       ),sequenceName='AthAlgSeq'
       )
