@@ -57,7 +57,7 @@ class CommonServicesConfig (ConfigBlock) :
             "histogram holding only the names of weight-based systematics. This is useful "
             "to help make histogramming frameworks more efficient by knowing in advance which "
             "systematics need to recompute the observable and which don't.")
-        self.addOption ('metadataHistogram', None , type=str,
+        self.addOption ('metadataHistogram', 'metadata' , type=str,
             info="the name of the metadata histogram which contains information about "
             "data type, campaign, etc. If left empty, the histogram is not written at all.")
         self.addOption ('enableExpertMode', False, type=bool,
