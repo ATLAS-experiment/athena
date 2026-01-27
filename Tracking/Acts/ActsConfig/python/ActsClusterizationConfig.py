@@ -4,11 +4,17 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.Enums import BeamType
 from ActsConfig.ActsUtilities import extractChildKwargs
+from HGTD_Calibration.HGTD_CalibrationConfig import HGTD_TdcCalibrationToolCfg
 
 def ActsHgtdClusteringToolCfg(flags,
                               name: str = "ActsHgtdClusteringTool",
                               **kwargs) -> ComponentAccumulator:
     acc = ComponentAccumulator()
+    if flags.HGTD.useALTIROC_RDO:
+        kwargs.setdefault("useALTIROC_RDO", True)
+        kwargs.setdefault("HGTD_TdcCalibrationTool", acc.popToolsAndMerge(HGTD_TdcCalibrationToolCfg(flags)))
+    else:
+        kwargs.setdefault("useALTIROC_RDO", False)
     acc.setPrivateTools(CompFactory.ActsTrk.HgtdClusteringTool(name, **kwargs))    
     return acc
 
@@ -16,6 +22,12 @@ def ActsHgtdTimedClusteringToolCfg(flags,
                                    name: str = "ActsHgtdTimedClusteringTool",
                                    **kwargs) -> ComponentAccumulator:
     acc = ComponentAccumulator()
+    if flags.HGTD.useALTIROC_RDO:
+        kwargs.setdefault("useALTIROC_RDO", True)
+        kwargs.setdefault("HGTD_TdcCalibrationTool", acc.popToolsAndMerge(HGTD_TdcCalibrationToolCfg(flags)))
+    else:
+        kwargs.setdefault("useALTIROC_RDO", False)
+    
     acc.setPrivateTools(CompFactory.ActsTrk.HgtdTimedClusteringTool(name, **kwargs))    
     return acc
 
@@ -31,6 +43,7 @@ def ActsHgtdClusterizationAlgCfg(flags,
     acc.merge(HGTD_ReadoutGeometryCfg(flags))
 
     kwargs.setdefault('RDOContainerName', 'HGTD_RDOs')
+    kwargs.setdefault('AltirocRDOContainerName', 'HGTD_ALTIROC_RDOs')
     kwargs.setdefault('ClusterContainerName', 'HGTD_Clusters')
 
     if 'ClusteringTool' not in kwargs:
@@ -42,8 +55,13 @@ def ActsHgtdClusterizationAlgCfg(flags,
 
     if flags.Acts.doMonitoring and 'MonTool' not in kwargs:
         from ActsConfig.ActsMonitoringConfig import ActsHgtdClusterizationMonitoringToolCfg
-        kwargs.setdefault('MonTool', acc.popToolsAndMerge(ActsHgtdClusterizationMonitoringToolCfg(flags)))        
-        
+        kwargs.setdefault('MonTool', acc.popToolsAndMerge(ActsHgtdClusterizationMonitoringToolCfg(flags)))
+
+    if flags.HGTD.useALTIROC_RDO:
+        kwargs.setdefault("useALTIROC_RDO", True)
+    else:
+        kwargs.setdefault("useALTIROC_RDO", False)
+       
     acc.addEventAlgo(CompFactory.ActsTrk.HgtdClusterizationAlg(name, **kwargs))
     return acc
 
