@@ -481,14 +481,6 @@ pool::ICollection* PoolSvc::createCollection(const std::string& collectionType,
                this->disconnectDb("FID:" + m_guidLists[contextId].begin()->toString(), contextId).ignore();
             }
          }
-         std::unique_ptr<pool::IContainer> contH = getContainerHandle(dbH.get(), collectionName);
-         if (contH == nullptr) {
-            ATH_MSG_INFO("Failed to find container " << collectionName << " to create POOL collection.");
-            if (insertFile && m_attemptCatalogPatch.value()) {
-               patchCatalog(connection.substr(4), *dbH);
-            }
-            return(nullptr); // no events
-         }
       } catch (std::exception& e) {
          ATH_MSG_INFO("Failed to open container to check POOL collection - trying.");
       }
@@ -502,11 +494,7 @@ pool::ICollection* PoolSvc::createCollection(const std::string& collectionType,
    std::scoped_lock sc_lock(m_pool_mut);
    std::string error_text;
    try {
-      if (collectionType == "ImplicitCollection") {
-         collPtr = collSvc.handle(collectionName, collectionType, connection, true, &m_persistencySvcVec[contextId]->session());
-      } else {
-         collPtr = collSvc.handle(connection, collectionType, "", true, &m_persistencySvcVec[contextId]->session());
-      }
+      collPtr = collSvc.open(collectionName, collectionType, connection, &m_persistencySvcVec[contextId]->session());
    } catch (std::exception &e) {
       collPtr = nullptr;
       error_text = e.what();

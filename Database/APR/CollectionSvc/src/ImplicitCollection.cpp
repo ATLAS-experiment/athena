@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ImplicitCollection.h"
@@ -9,24 +9,14 @@
 #include "PersistencySvc/IDatabase.h"
 #include "PersistencySvc/IContainer.h"
 #include "StorageSvc/DbType.h"
+#include "RootUtils/APRDefaults.h"
 
 #include <sstream>
 #include <memory>
+#include <format>
 
 
 namespace pool {
-
-   ImplicitCollection::ImplicitCollection( ISession* session,
-                       const std::string& connection,
-                       const std::string& name,
-                       ICollection::OpenMode mode )
-         : APRMessaging("ImplicitCollection"),
-         m_container( 0 ),
-         m_description( name,"ImplicitCollection", connection )
-   {
-      open( mode, session );
-   }
-
 
    ImplicitCollection::ImplicitCollection( const ICollectionDescription* description,
                        ICollection::OpenMode mode,
@@ -103,20 +93,28 @@ namespace pool {
          }
       }
 
-      const std::string& name = m_description.name();
+      const std::string& ttreeName = std::format("{}(DataHeader)", APRDefaults::TTreeNames::DataHeader);
+      const std::string& rntupleName = std::format("{}(DataHeader)", APRDefaults::RNTupleNames::DataHeader);
+      const std::string& oldTtreeName = std::format("{}_DataHeader", APRDefaults::TTreeNames::DataHeader);
       std::vector< std::string > containers = database->containers();
       for( std::vector< std::string >::const_iterator iContainer = containers.begin();
            iContainer != containers.end(); ++iContainer ) {
-         if( name == *iContainer ) {
-            m_container = database->containerHandle( name );
+         if( ttreeName == *iContainer ) {
+            m_container = database->containerHandle( ttreeName );
+            break;
+         } else if( rntupleName == *iContainer ) {
+            m_container = database->containerHandle( rntupleName );
+            break;
+         } else if( oldTtreeName == *iContainer ) {
+            m_container = database->containerHandle( oldTtreeName );
             break;
          }
       }
 
       if( !m_container ) {
-         throw std::runtime_error( "Could not open the container " + name + " (APR: \" ImplicitCollection::ImplicitCollection \" from \" ImplicitCollection \")" );
+         throw std::runtime_error( "Could not open the container (APR: \" ImplicitCollection::ImplicitCollection \" from \" ImplicitCollection \")" );
       }
-      ATH_MSG_INFO( "Opened the implicit collection with connection string '" << connection << "' and a name '" << name << "'" );
+      ATH_MSG_INFO( "Opened the implicit collection with connection string '" << connection );
    }
 
 

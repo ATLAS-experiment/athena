@@ -55,7 +55,7 @@ class SortedCollectionCreator:
       self.tokenName = None
       for inFileName in inputCollections:
          self.debug("Opening {}".format(inFileName))
-         iColl = self.collSvc.open( "PFN:"+inFileName, getCollectionType(inFileName))
+         iColl = self.collSvc.open( "Input", getCollectionType(inFileName), inFileName)
          self.debug("{} opened".format(inFileName))
          if self.collDescription is None:
             self.readCollectionDescription(iColl)
@@ -92,8 +92,9 @@ class SortedCollectionCreator:
    def writeCollection(self, outputCollection, outputCollectionType):
       """write sorted collection into a Collection file"""
       self.info("Writing Event collection {}".format(outputCollection))
-      self.collDescription.setName(outputCollection)
+      self.collDescription.setName("Sorting")
       self.collDescription.setType(outputCollectionType)
+      self.collDescription.setConnection(outputCollection)
       # create the output collection (file)
       dstColl = self.collSvc.create(self.collDescription)
       row = self.pool.CollectionRowBuffer()

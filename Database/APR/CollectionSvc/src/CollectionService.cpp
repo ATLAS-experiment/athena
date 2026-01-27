@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CollectionSvc/CollectionService.h"
@@ -40,16 +40,11 @@ pool::CollectionService::create( const pool::ICollectionDescription& description
 
 
 pool::ICollection* 
-pool::CollectionService::handle( const std::string& name,
-                                 const std::string& type,
-                                 const std::string & connection,
-                                 bool readOnly,
-                                 pool::ISession* session ) const
+pool::CollectionService::open( const std::string& name,
+                               const std::string& type,
+                               const std::string & connection,
+                               pool::ISession* session ) const
 {
-   if( ( type == "ImplicitCollection ") && (! readOnly ) )  {
-      std::string errorMsg = "Cannot open a collection of type 'ImplicitCollection' for updates.";
-      throw std::runtime_error( errorMsg + " (APR: \" CollectionService::handle \" from \" CollectionSvc \")" );
-   }
    pool::CollectionDescription description( name, type, connection );
    return plugin( description, ICollection::READ, session );
 }

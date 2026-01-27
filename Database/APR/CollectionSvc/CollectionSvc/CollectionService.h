@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef COLLECTIONSVC_COLLECTIONSERVICE_H
@@ -45,14 +45,6 @@ namespace pool {
      */
     virtual ICollection* create( const ICollectionDescription& description );
 
-    virtual ICollection* open( const std::string & name,
-                               const std::string & type,
-                               const std::string & connection = "",
-                               bool readOnly = true) const
-    {
-       return handle(name, type, connection, readOnly, 0);
-    }
-
 
     /**
      * Retrieves a handle to an existing collection or collection fragment for read or update
@@ -64,14 +56,12 @@ namespace pool {
      * @param name Name of collection or collection fragment.
      * @param type Storage technology type of collection or collection fragment.
      * @param connection Connection to database containing collection or collection fragment.
-     * @param readOnly Flag to distinguish read and update open modes.
      * @param session Reference to database session (need only be set for implicit collections).
      */
-    virtual ICollection* handle( const std::string & name,
-                                 const std::string & type,
-                                 const std::string & connection = "",
-                                 bool readOnly = true,
-                                 ISession* session = 0 ) const;
+    virtual ICollection* open( const std::string & name,
+                               const std::string & type,
+                               const std::string & connection = "",
+                               ISession* session = 0 ) const;
 
     /**
      * suppress (or enable) warning about a missing MessageSvc (logging)

@@ -16,8 +16,8 @@ collSvc = pool.CollectionService()
 collSvc.setMessageSvcQuiet()
 
 primaryColl = { 'name' : 'EventNumber',  'type' : 'unsigned long' }
-sampleCollName = 'sample_apr_collection'
-desc = pool.CollectionDescription(sampleCollName, 'RootCollection')
+sampleCollName = 'sample_apr_collection.root'
+desc = pool.CollectionDescription(sampleCollName, 'RootCollection', sampleCollName)
 desc.insertColumn( primaryColl['name'], primaryColl['type'] )
 
 # Create a small collection to serve as input to the Sorter
@@ -31,9 +31,8 @@ coll.commit()
 coll.close()
 
 # Sort the example collection and write both TTree and RNTuple based sorted collections
-outputCollNameTree =  "collection.tree"
-outputCollNameRNTup = "collection.rntuple"
-sampleCollName += '.root'
+outputCollNameTree =  "collection.tree.root"
+outputCollNameRNTup = "collection.rntuple.root"
 from CollectionSvc.SortedCollectionCreator import SortedCollectionCreator
 sorter = SortedCollectionCreator(name="SortEvents")
 sorter.execute( sampleCollName, sortAttribute = primaryColl['name'],
@@ -44,5 +43,5 @@ sorter.executeInSubprocess( sampleCollName, sortAttribute = primaryColl['name'],
 # Read the collections in VERBOSE mode to see the content
 Logging.log.setLevel(Constants.VERBOSE)
 sorter.readInputCollections( [sampleCollName] )
-sorter.readInputCollections( [outputCollNameTree+'.root'] )
-sorter.readInputCollections( [outputCollNameRNTup+'.root'] )
+sorter.readInputCollections( [outputCollNameTree] )
+sorter.readInputCollections( [outputCollNameRNTup] )

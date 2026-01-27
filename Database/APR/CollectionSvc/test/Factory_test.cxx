@@ -31,8 +31,7 @@ int main(int , char** )
 {
   SystemTools::initGaudi();
   
-//  const string collConnection = "./";
-  const string collConnection = "";
+  const string collConnection = "Collection";
   const string collType = "RootCollection";
   
   Token* token = new Token();
@@ -60,7 +59,7 @@ int main(int , char** )
     ICollection* in_collection = 0;
     
     cout << "Open collection with physical name .... ";
-    CollectionDescription	in_desc("Collection", collType );
+    CollectionDescription	in_desc("Collection", collType, collConnection);
     in_collection = service.plugin(in_desc, ICollection::READ);
     cout << (in_collection ? "OK":"KO") << endl;
     delete in_collection;

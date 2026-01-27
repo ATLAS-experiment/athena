@@ -8,7 +8,7 @@ ReadData                                             INFO in initialize()
 MetaDataSvc                                          INFO Initializing MetaDataSvc
 PoolSvc                                             DEBUG OutputLevel is 2
 PoolSvc                                             DEBUG POOL ReadCatalog is file:Catalog1.xml
-PoolSvc                                             DEBUG createCollection() type=ImplicitCollection, connection=PFN:SimplePoolFile1.root, name=POOLContainer(DataHeader), contextID=0
+PoolSvc                                             DEBUG createCollection() type=ImplicitCollection, connection=PFN:SimplePoolFile1.root, name=Input, contextID=0
 SimplePoolFile1.root                                DEBUG --> Access   DbContainer  READ      [ROOT_All] ##Shapes
 SimplePoolFile1.root                                DEBUG --> Access   DbContainer  READ      [ROOT_All] ##Shapes
 ##Shapes                                            DEBUG Opening
@@ -78,7 +78,7 @@ ApplicationMgr                                       INFO Application Manager In
 StorageSvc                                          DEBUG Disconnect request for database: FID=F2313678-C96A-964F-89E8-08BAB39F2DA7 PFN=SimplePoolFile1.root
 StorageSvc                                          DEBUG Closing database: FID=F2313678-C96A-964F-89E8-08BAB39F2DA7
 RootDatabase                                        DEBUG Closing DB SimplePoolFile1.root
-PoolSvc                                             DEBUG createCollection() type=ImplicitCollection, connection=PFN:SimplePoolFile1.root, name=POOLContainer(DataHeader), contextID=0
+PoolSvc                                             DEBUG createCollection() type=ImplicitCollection, connection=PFN:SimplePoolFile1.root, name=Input, contextID=0
 SimplePoolFile1.root                                DEBUG --> Access   DbContainer  READ      [ROOT_All] ##Shapes
 SimplePoolFile1.root                                DEBUG --> Access   DbContainer  READ      [ROOT_All] ##Shapes
 ##Shapes                                            DEBUG Opening

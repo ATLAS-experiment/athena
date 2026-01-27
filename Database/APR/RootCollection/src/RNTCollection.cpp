@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "RNTCollection.h"
@@ -43,7 +43,7 @@ RNTCollection::RNTCollection(
    : APRMessaging("RNTCollection"),
      m_description( *description ),
      m_name( description->name() ),
-     m_fileName( description->name() + ".root" ),
+     m_fileName( description->connection() ),
      m_mode( mode ),
      m_file( 0 ),
      m_session( 0 ),
@@ -119,11 +119,8 @@ void RNTCollection::open()  try
 {
    const string myFileType = "RNTCollectionFile";
 
-   if( m_fileName.starts_with( "PFN:") && m_description.connection().empty() )
-   {
-      // special case with no catalog and PFN specified
-      // create the collection with exactly PFN file name
-      m_fileName = m_description.name().substr(4);   // remove the PFN: prefix
+   if( m_fileName.starts_with( "PFN:") ) {
+      m_fileName = m_fileName.substr(4);   // remove the PFN: prefix
    }
 
    TDirectory::TContext dirctxt;

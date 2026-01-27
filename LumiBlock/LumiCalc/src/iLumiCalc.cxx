@@ -455,9 +455,7 @@ int main(int argc, char * argv[]){
     logger << Root::kINFO << "Being in TAG file mode..." << Root::GEndl;
 
     Root::TGoodRunsListReader reader;
-    std::string connection ="";
     std::string type = "RootCollection";
-    bool readOnly(true);
     for(std::vector<std::string>::iterator it = tagfile.begin(); it != tagfile.end(); ++it){
       logger << Root::kINFO << "Processing file: <" << (*it) << ">" <<  Root::GEndl;
       int n = (*it).find(".root");
@@ -465,7 +463,7 @@ int main(int argc, char * argv[]){
 
       // get Value for a Key
       pool::CollectionService collectionService;
-      pool::ICollection* collection = collectionService.handle(tagfilename, type, connection, readOnly);
+      pool::ICollection* collection = collectionService.open(tagfilename, type, tagfilename);
       if(collection == NULL) {
          logger << Root::kERROR << "ICollection is NULL, exiting... " << Root::GEndl;
          exit(-1);

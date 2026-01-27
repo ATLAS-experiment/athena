@@ -130,7 +130,7 @@ def SortInput(flags, cfg):
     inputs = cfg.getService("EventSelector").InputCollections
 
     # set default sort parameters, read overrides from locals()
-    tmpCollFile = locals().get("AthenaInputSortCollName", "sortedEventRefs" + str(os.getpid()) )
+    tmpCollFile = locals().get("AthenaInputSortCollName", "sortedEventRefs" + str(os.getpid()) + ".root")
     sortTag     = locals().get("AthenaInputSortTag",      "LumiBlockN")
     sortOrd     = locals().get("AthenaInputSortOrder",    "Ascending")
 
@@ -153,6 +153,6 @@ def SortInput(flags, cfg):
     cfg.getService("PoolSvc").AttemptCatalogPatch = False
 
     # Tell Athena to use the sorted collection instead of the original inputs
-    cfg.getService("EventSelector").InputCollections = [tmpCollFile + ".root"]
+    cfg.getService("EventSelector").InputCollections = [tmpCollFile]
     cfg.getService("EventSelector").CollectionType = "RootCollection"
     return cfg

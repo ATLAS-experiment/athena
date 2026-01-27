@@ -129,11 +129,6 @@ StatusCode EventSelectorAthenaPool::initialize() {
       if( !skip_ranges_str.empty() )
          ATH_MSG_DEBUG("Events to skip: " << skip_ranges_str);
    }
-   // CollectionType must be one of:
-   if (m_collectionType.value() != "RootCollection" && m_collectionType.value() != "ImplicitCollection") {
-      ATH_MSG_FATAL("EventSelector.CollectionType must be one of: RootCollection, ImplicitCollection (default)");
-      return StatusCode::FAILURE;
-   }
    // Get IncidentSvc
    ATH_CHECK(m_incidentSvc.retrieve());
    // Listen to the Event Processing incidents
@@ -438,7 +433,7 @@ StatusCode EventSelectorAthenaPool::next(IEvtSelector::Context& ctxt) const {
       std::unique_ptr<AthenaAttributeList> athAttrList(new AthenaAttributeList());
       athAttrList->extend("eventRef", "string");
       (*athAttrList)["eventRef"].data<std::string>() = std::string((char*)tokenStr);
-      SG::WriteHandle<AthenaAttributeList> wh(m_attrListKey.value(), eventStore()->name());
+      SG::WriteHandle<AthenaAttributeList> wh(m_attrListKey, eventStore()->name());
       if (!wh.record(std::move(athAttrList)).isSuccess()) {
          delete [] (char*)tokenStr; tokenStr = nullptr;
          ATH_MSG_ERROR("Cannot record AttributeList to StoreGate " << StoreID::storeName(eventStore()->storeID()));
@@ -705,7 +700,7 @@ StatusCode EventSelectorAthenaPool::rewind(IEvtSelector::Context& ctxt) const {
 StatusCode EventSelectorAthenaPool::createAddress(const IEvtSelector::Context& /*ctxt*/,
 		IOpaqueAddress*& iop) const {
    std::string tokenStr;
-   SG::ReadHandle<AthenaAttributeList> attrList(m_attrListKey.value(), eventStore()->name());
+   SG::ReadHandle<AthenaAttributeList> attrList(m_attrListKey, eventStore()->name());
    if (attrList.isValid()) {
       try {
          tokenStr = (*attrList)["eventRef"].data<std::string>();
@@ -715,7 +710,7 @@ StatusCode EventSelectorAthenaPool::createAddress(const IEvtSelector::Context& /
          return StatusCode::FAILURE;
       }
    } else {
-      ATH_MSG_WARNING("Cannot find AthenaAttribute, key = " << m_attrListKey.value());
+      ATH_MSG_WARNING("Cannot find AthenaAttribute, key = " << m_attrListKey);
       tokenStr = m_headerIterator->eventRef().toString();
    }
    auto token = std::make_unique<Token>();
@@ -765,7 +760,6 @@ StatusCode EventSelectorAthenaPool::seek(Context& /*ctxt*/, int evtNum) const {
          m_inputCollectionsIterator += m_curCollection;
          m_poolCollectionConverter = std::make_unique<PoolCollectionConverter>(m_collectionType.value(),
 	         m_inputCollectionsProp.value()[m_curCollection],
-	         m_collectionTree.value(),
 	         IPoolSvc::kInputStream,
 	         m_athenaPoolCnvSvc->getPoolSvc());
          if (!m_poolCollectionConverter->initialize().isSuccess()) {
@@ -809,7 +803,6 @@ int EventSelectorAthenaPool::findEvent(int evtNum) const {
       if (m_numEvt[i] == -1) {
          PoolCollectionConverter pcc(m_collectionType.value(),
 	         m_inputCollectionsProp.value()[i],
-	         m_collectionTree.value(),
 	         IPoolSvc::kInputStream,
 	         m_athenaPoolCnvSvc->getPoolSvc());
          if (!pcc.initialize().isSuccess()) {
@@ -977,7 +970,6 @@ EventSelectorAthenaPool::getCollectionCnv(bool throwIncidents) const {
       ATH_MSG_DEBUG("Try item: \"" << *m_inputCollectionsIterator << "\" from the collection list.");
       auto pCollCnv = std::make_unique<PoolCollectionConverter>(m_collectionType.value(),
 	      *m_inputCollectionsIterator,
-	      m_collectionTree.value(),
 	      IPoolSvc::kInputStream,
 	      m_athenaPoolCnvSvc->getPoolSvc());
       StatusCode status = pCollCnv->initialize();
@@ -1021,7 +1013,7 @@ StatusCode EventSelectorAthenaPool::recordAttributeList() const {
    // Fill the new attribute list
    ATH_CHECK(fillAttributeList(athAttrList.get(), "", false));
    // Write the AttributeList
-   SG::WriteHandle<AthenaAttributeList> wh(m_attrListKey.value(), eventStore()->name());
+   SG::WriteHandle<AthenaAttributeList> wh(m_attrListKey, eventStore()->name());
    ATH_CHECK(wh.record(std::move(athAttrList)));
    return StatusCode::SUCCESS;
 }
