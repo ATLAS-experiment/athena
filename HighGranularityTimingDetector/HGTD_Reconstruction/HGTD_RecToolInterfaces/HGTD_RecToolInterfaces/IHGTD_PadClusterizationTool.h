@@ -19,6 +19,7 @@
 #include "HGTD_Identifier/HGTD_ID.h"
 #include "HGTD_PrepRawData/HGTD_ClusterCollection.h"
 #include "HGTD_RawData/HGTD_RDO_Collection.h"
+#include "HGTD_RawData/HGTD_ALTIROC_RDO_Collection.h"
 #include "HGTD_ReadoutGeometry/HGTD_DetectorManager.h"
 
 #include "AthAllocators/DataPool.h"
@@ -41,6 +42,10 @@ public:
   virtual std::unique_ptr<HGTD_ClusterCollection>
   clusterize(const HGTD_RDO_Collection& rdo_collection,
              DataPool<HGTD_Cluster>* dataItemsPool) const = 0;
+
+  virtual std::unique_ptr<HGTD_ClusterCollection>
+  clusterize(const HGTD_ALTIROC_RDO_Collection& rdo_collection,
+            DataPool<HGTD_Cluster>* dataItemsPool) const = 0;
 };
 
 #endif // IHGTD_CLUSTERMAKERTOOL_H

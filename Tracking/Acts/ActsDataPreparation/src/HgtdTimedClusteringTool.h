@@ -10,6 +10,7 @@
 
 #include "HGTD_Identifier/HGTD_ID.h"
 #include "HGTD_ReadoutGeometry/HGTD_DetectorManager.h"
+#include "HGTD_Calibration/HGTD_TdcCalibrationTool.h"
 
 #include "Acts/Definitions/Units.hpp"
 
@@ -52,7 +53,11 @@ public:
     virtual StatusCode clusterize(const EventContext& ctx,
 				  const RawDataCollection& RDOs,
 				  ClusterContainer& container) const override;
-
+          
+    virtual StatusCode clusterize(const EventContext& ctx,
+          const HGTD_ALTIROC_RDO_Collection& RDOs,
+          ClusterContainer& container) const override;
+    
 private:
   // N.B. the cluster is added to the container
   StatusCode makeCluster(const EventContext& ctx,
@@ -63,6 +68,11 @@ private:
 private:
     const HGTD_DetectorManager* m_hgtd_det_mgr{nullptr};
     const HGTD_ID* m_hgtd_id{nullptr};
+    ToolHandle<HGTD_TdcCalibrationTool> m_hgtd_tdc_calib_tool{this, 
+      "HGTD_TdcCalibrationTool","HGTD_TdcCalibrationTool", 
+      "Tool that that access TOA TDC calibration and retrieves time of arrival"};
+
+  BooleanProperty m_use_altiroc_rdo{this, "useALTIROC_RDO", false, "Use Altiroc RDO instead of standard"};
 
   Gaudi::Property<double> m_timeTollerance {this, "TimeTollerance", 0.035 * Acts::UnitConstants::ns};
   Gaudi::Property<bool> m_addCorners {this, "AddCorners", true};

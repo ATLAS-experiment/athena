@@ -7,6 +7,7 @@
 
 #include <GaudiKernel/IAlgTool.h>
 #include <HGTD_RawData/HGTD_RDO_Container.h>
+#include <HGTD_RawData/HGTD_ALTIROC_RDO_Container.h>
 #include <xAODInDetMeasurement/HGTDClusterContainer.h>
 #include "xAODInDetMeasurement/HGTDClusterAuxContainer.h"
 
@@ -25,6 +26,11 @@ public:
     clusterize(const EventContext& ctx,
 	       const RawDataCollection& RDOs,
 	       ClusterContainer& container) const = 0;
+    
+    virtual StatusCode
+    clusterize(const EventContext& ctx,
+        const HGTD_ALTIROC_RDO_Collection& RDOs,
+        ClusterContainer& container) const = 0;
 };
 
 }

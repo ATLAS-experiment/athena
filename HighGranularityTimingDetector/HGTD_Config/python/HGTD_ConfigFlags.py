@@ -14,6 +14,7 @@ def createHGTD_ConfigFlags():
   hgtdcf.addFlag('HGTD.doActs', False)
   hgtdcf.addFlag('HGTD.outputAltirocRDO', False)
   hgtdcf.addFlag('HGTD.Acts.ClusteringStrategy', ClusteringStrategy.SinglePad, type=ClusteringStrategy)
+  hgtdcf.addFlag('HGTD.useALTIROC_RDO',False)
   
   hgtdcf.addFlag("HGTD.Geometry.useGeoModelXml", True)
   hgtdcf.addFlag("HGTD.Geometry.isLocal", False)
