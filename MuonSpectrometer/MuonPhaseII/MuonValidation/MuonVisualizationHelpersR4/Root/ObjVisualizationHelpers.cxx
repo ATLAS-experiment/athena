@@ -116,6 +116,26 @@ namespace  MuonValR4 {
             /// Combined pseudo measurement 
             case 0:{
                 const auto* cmbMeas = static_cast<const xAOD::CombinedMuonStrip*>(meas);
+                if(cmbMeas->primaryStrip()->type() == xAOD::UncalibMeasType::sTgcStripType){
+                    // combined stgc space points can be strip/wire, strip/pad or pad/wire combinations.
+                    const auto* primMeas = static_cast<const xAOD::sTgcMeasurement*>(cmbMeas->primaryStrip());
+                    const auto* secMeas = static_cast<const xAOD::sTgcMeasurement*>(cmbMeas->secondaryStrip());
+                    if(primMeas->channelType() == sTgcIdHelper::sTgcChannelTypes::Strip){
+                        locPos[Amg::x] = primMeas->localPosition<1>()[0];
+                        dX = std::sqrt(primMeas->localCovariance<1>()(0,0));
+                    } else if (primMeas->channelType() == sTgcIdHelper::sTgcChannelTypes::Pad) {
+                        locPos[Amg::x] = primMeas->localPosition<2>()[0];
+                        dX = std::sqrt(primMeas->localCovariance<2>()(0,0));
+                    }
+                    if(secMeas->channelType() == sTgcIdHelper::sTgcChannelTypes::Wire){
+                        locPos[Amg::y] = secMeas->localPosition<1>()[0];
+                        dY = std::sqrt(secMeas->localCovariance<1>()(0,0));
+                    } else if (secMeas->channelType() == sTgcIdHelper::sTgcChannelTypes::Pad) {
+                        locPos[Amg::y] = secMeas->localPosition<2>()[1];
+                        dY = std::sqrt(secMeas->localCovariance<2>()(1,1));
+                    }
+                    break;
+                }
                 locPos[Amg::x] = cmbMeas->primaryStrip()->localPosition<1>()[0];
                 locPos[Amg::y] = cmbMeas->secondaryStrip()->localPosition<1>()[0];
                 dX = std::sqrt(cmbMeas->primaryStrip()->localCovariance<1>()(0,0));
