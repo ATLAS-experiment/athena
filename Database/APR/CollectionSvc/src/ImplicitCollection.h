@@ -29,18 +29,6 @@ namespace pool {
   public:
     typedef Gaudi::PluginService::Factory<ICollection*( const ICollectionDescription*, ICollection::OpenMode, ISession*)> Factory;  
 
-    /** Constructor - old style
-       Throws POOL exception.
-       @param session the session object
-       @param connection database connection string. It has the format databaseNameType:databaseName, where databaseNameType can be FID, PFN or LFN.
-       @param name the container name in the database
-       @param mode collection's open mode. Only READONLY mode is allowed.
-    */
-    ImplicitCollection( ISession* session,
-                        const std::string& connection,
-                        const std::string& name,
-                        ICollection::OpenMode mode );
-
     /// Constructor compying to the new Collections API
     /// parameters as above, but name and connection passed in description
     ImplicitCollection( const ICollectionDescription* description,

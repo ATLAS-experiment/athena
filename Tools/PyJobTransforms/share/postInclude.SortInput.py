@@ -15,7 +15,7 @@ from AthenaCommon.AppMgr import ServiceMgr
 inputs = ServiceMgr.EventSelector.InputCollections
 
 # set default sort parameters, read overrides from locals()
-tmpCollFile = locals().get("AthenaInputSortCollName", "sortedEventRefs" + str(os.getpid()) )
+tmpCollFile = locals().get("AthenaInputSortCollName", "sortedEventRefs" + str(os.getpid()) + ".root")
 sortTag     = locals().get("AthenaInputSortTag",      "LumiBlockN")
 sortOrd     = locals().get("AthenaInputSortOrder",    "Ascending")
 
@@ -33,5 +33,5 @@ for inpfile in inputs:
 ServiceMgr.PoolSvc.AttemptCatalogPatch = False
 
 # Tell Athena to use the sorted collection instead of the original inputs
-ServiceMgr.EventSelector.InputCollections = [tmpCollFile + ".root"]
+ServiceMgr.EventSelector.InputCollections = [tmpCollFile]
 ServiceMgr.EventSelector.CollectionType = "RootCollection"

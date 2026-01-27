@@ -29,12 +29,10 @@ public:
    /// Constructor
    /// @param collectionType [IN] type of the collection
    /// ("RootCollection", or "ImplicitCollection").
-   /// @param inputCollection [IN] name of the collection.
    /// @param svc [IN] pointer to the PoolSvc.
    /// @param contextId [IN] id for PoolSvc persistency service to use for input.
    PoolCollectionConverter(const std::string& collectionType,
 		   const std::string& inputCollection,
-		   const std::string& inputContainer,
 		   unsigned int contextId,
 		   const IPoolSvc* svc);
 
@@ -57,7 +55,6 @@ private: // data
    std::string m_collectionType;
    std::string m_connection;
    std::string m_inputCollection;
-   std::string m_inputContainer;
    unsigned int m_contextId;
    const IPoolSvc* m_poolSvc;
    pool::ICollection* m_poolCollection;
