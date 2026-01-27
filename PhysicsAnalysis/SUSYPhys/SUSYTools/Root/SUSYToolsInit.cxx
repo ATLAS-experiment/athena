@@ -1236,14 +1236,14 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
 
       if(m_isRun3 && m_eleAllowRun3TrigSFFallback){
         bool pass_isRun3TrigSFFallback = true;
-        if (triggerEleID.find("Medium") != std::string::npos && triggerEleIso.find("Loose") != std::string::npos)                {triggerEleID = "Loose";}
+        if (triggerEleID.find("Medium") != std::string::npos && triggerEleIso.find("Loose") != std::string::npos)                {triggerEleID = "LooseBLayer";}
         else if (triggerEleID.find("Medium") != std::string::npos && triggerEleIso.find("Tight") != std::string::npos)           {triggerEleID = "Tight"; triggerEleIso = "Tight_VarRad";}
         else if (triggerEleID.find("Medium") != std::string::npos && triggerEleIso.find("HighPtCaloOnly") != std::string::npos)  {triggerEleID = "Tight"; triggerEleIso = "Tight_VarRad";}
-        else if (triggerEleID.find("Tight")  != std::string::npos && triggerEleIso.find("Loose") != std::string::npos)           {triggerEleID = "Loose";}
+        else if (triggerEleID.find("Tight")  != std::string::npos && triggerEleIso.find("Loose") != std::string::npos)           {triggerEleID = "LooseBLayer";}
         else if (triggerEleID.find("Tight")  != std::string::npos && triggerEleIso.find("Tight") != std::string::npos)           {triggerEleIso= "Tight_VarRad";}
         else if (triggerEleID.find("Tight")  != std::string::npos && triggerEleIso.find("HighPtCaloOnly") != std::string::npos)  {triggerEleID = "Tight"; triggerEleIso = "Tight_VarRad";}
-        else if (triggerEleID.find("Loose")  != std::string::npos && triggerEleIso.find("Tight") != std::string::npos)           {triggerEleID = "Loose"; triggerEleIso = "Loose_VarRad";}
-        else if (triggerEleID.find("Loose")  != std::string::npos && triggerEleIso.find("HighPtCaloOnly") != std::string::npos)  {triggerEleID = "Loose"; triggerEleIso = "Loose_VarRad";}
+        else if (triggerEleID.find("Loose")  != std::string::npos && triggerEleIso.find("Tight") != std::string::npos)           {triggerEleID = "LooseBLayer"; triggerEleIso = "Loose_VarRad";}
+        else if (triggerEleID.find("Loose")  != std::string::npos && triggerEleIso.find("HighPtCaloOnly") != std::string::npos)  {triggerEleID = "LooseBLayer"; triggerEleIso = "Loose_VarRad";}
         else {pass_isRun3TrigSFFallback=false;}
         if(pass_isRun3TrigSFFallback){
           ATH_MSG_INFO(" ************** This is only for testing/studying purpose! ************** ");
