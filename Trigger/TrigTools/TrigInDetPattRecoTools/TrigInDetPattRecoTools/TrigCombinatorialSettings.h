@@ -26,8 +26,11 @@ public:
     m_doubletD0Max         = 5.0;
 
     m_tripletD0Max      = 4.0; 
-    m_tripletD0_PPS_Max = 1.7; 
+    m_tripletD0_PPS_Max = 1.7;
+    m_doublet_dR_Max    = 270.0;
+    m_doublet_dR_Max_Confirm = 150.0;
     m_tripletPtMin      = 2500.0;//was 1000.0
+    m_seedRadBinWidth   = 2.0;
     m_tripletDoPSS      = false; // Allow Pixel SCT SCT seeds?
     m_tripletDoPPS      = true; // Allow Pixel Pixel SCT seeds?
     m_tripletDoConfirm  = false; // Use another Pixel spacepoint to confirm a triplet
