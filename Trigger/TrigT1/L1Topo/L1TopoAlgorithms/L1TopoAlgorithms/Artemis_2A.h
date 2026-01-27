@@ -43,6 +43,9 @@ namespace TCS {
       parType_t      p_maxEt2 = { 0 };
       parType_t      p_maxEt3 = { 0 };
       parType_t      p_maxEt4 = { 0 };
+      parType_t      p_maxEt5 = { 0 };
+      parType_t      p_maxEt6 = { 0 };
+      parType_t      p_maxEt7 = { 0 };
       parType_t      p_AnomalyScoreThresh[2] = { 0, 0 };
 
    };

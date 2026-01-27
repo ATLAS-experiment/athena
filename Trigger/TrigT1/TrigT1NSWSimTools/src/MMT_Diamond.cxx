@@ -66,7 +66,7 @@ void MMT_Diamond::createRoads(std::vector<MMT_Road>& roads, const bool isLarge, 
 void MMT_Diamond::findDiamonds(std::vector<std::shared_ptr<MMT_Hit> >& hits, std::vector<MMT_Road>& roads, std::vector<slope_t>& diamondSlopes, const int sectorPhi) const {
 
   // Comparison with lambda function (easier to implement)
-  std::sort(hits.begin(), hits.end(), [](const auto &h1, const auto &h2){ return h1->getBC() < h2->getBC(); });
+  std::ranges::sort(hits, [](const auto &h1, const auto &h2){ return h1->getBC() < h2->getBC(); });
   const int bc_start = hits.front()->getBC();
   const int bc_end = hits.front()->getBC() + 16;
   ATH_MSG_DEBUG("Window Start: " << bc_start << " - Window End: " << bc_end);
@@ -105,7 +105,7 @@ void MMT_Diamond::findDiamonds(std::vector<std::shared_ptr<MMT_Hit> >& hits, std
         }
         if (vmm_same.size() > 1) {
           to_erase.clear();
-          std::sort(vmm_same.begin(), vmm_same.end(), [](const std::pair<int, float>& p1, const std::pair<int, float>& p2) { return p1.second < p2.second; });
+          std::ranges::sort(vmm_same, {}, &std::pair<int, float>::second);
           for (auto pair: vmm_same) to_erase.push_back(pair.first);
           // reverse and erase
           std::sort(to_erase.rbegin(), to_erase.rend());
@@ -128,7 +128,7 @@ void MMT_Diamond::findDiamonds(std::vector<std::shared_ptr<MMT_Hit> >& hits, std
           // priority encode the hits by channel number; remember hits 8+
           to_erase.clear();
 
-          std::sort(addc_same.begin(), addc_same.end(), [](const std::pair<int, int>& p1, const std::pair<int, int>& p2) { return p1.second < p2.second; });
+          std::ranges::sort(addc_same, {}, &std::pair<int, int>::second);
           for (unsigned int it = 8; it < addc_same.size(); it++) to_erase.push_back(addc_same[it].first);
 
           // reverse and erase
@@ -156,7 +156,7 @@ void MMT_Diamond::findDiamonds(std::vector<std::shared_ptr<MMT_Hit> >& hits, std
         for (const auto &hit: road.getHitVector()) {
           bcidVec.push_back(hit.getBC());
         }
-        std::sort(bcidVec.begin(), bcidVec.end());
+        std::ranges::sort(bcidVec);
 
         // evaluating mode of the BCID of the hits in the diamond
         // default setting in the firmware is the mode of the hits's bcid in the diamond
@@ -184,9 +184,9 @@ void MMT_Diamond::findDiamonds(std::vector<std::shared_ptr<MMT_Hit> >& hits, std
         slope.uCount = road.countUHits();
         slope.age = slope.BC - bc_start;
         slope.mxl = road.mxl();
-        slope.my = road.avgSofX(); // defined as my in ATL-COM-UPGRADE-2015-033
-        slope.uavg = road.avgSofUV(2,4);
-        slope.vavg = road.avgSofUV(3,5);
+        slope.my = road.avgSofXUV('X'); // defined as my in ATL-COM-UPGRADE-2015-033
+        slope.uavg = road.avgSofXUV('U');
+        slope.vavg = road.avgSofXUV('V');
         slope.mx = (slope.uavg-slope.vavg)/(2.*tan_stereo_angle);
         const double theta = std::atan(std::sqrt(std::pow(slope.mx,2) + std::pow(slope.my,2)));
         slope.theta = (slope.my > 0.) ? theta : M_PI - theta;

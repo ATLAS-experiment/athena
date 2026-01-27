@@ -17,7 +17,7 @@ atlas_add_library( TrkTrackCollectionMergerLib
 
 atlas_add_component( TrkTrackCollectionMerger
                      src/components/*.cxx
-                     LINK_LIBRARIES TrkTrackCollectionMergerLib )
+                     LINK_LIBRARIES TrkTrackCollectionMergerLib)
 
 # Tests in the package:
 atlas_add_test( TrackCollectionMerger_test

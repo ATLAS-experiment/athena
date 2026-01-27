@@ -4,6 +4,8 @@
 
 #include "TrkTrackCollectionMerger/TrackCollectionMerger.h"
 #include "test/PutTrackCollectionsInSG.h"
+#include "TrkTrackCollectionMerger/AddTrackSummaryAlg.h"
 
 DECLARE_COMPONENT( Trk::TrackCollectionMerger )
 DECLARE_COMPONENT( PutTrackCollectionsInSG )
+DECLARE_COMPONENT( Trk::AddTrackSummaryAlg )
