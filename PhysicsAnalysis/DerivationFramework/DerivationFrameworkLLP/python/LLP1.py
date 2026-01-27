@@ -994,7 +994,7 @@ def LLP1Cfg(flags):
                                            "AntiKt10LCTopoTrimmedPtFrac5SmallR20Jets",
                                            "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets"]
     if flags.Tracking.doLargeD0:
-        LLP1SlimmingHelper.SmartCollections = ["LRTElectrons", "MuonsLRT",
+        LLP1SlimmingHelper.SmartCollections += ["LRTElectrons", "MuonsLRT",
                                                "InDetLargeD0TrackParticles"]
 
     LLP1SlimmingHelper.AllVariables =  ["InDetDisappearingTrackParticles",
