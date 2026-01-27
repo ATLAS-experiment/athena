@@ -194,6 +194,11 @@ def HIGG1D2KernelCfg(flags, name='HIGG1D2Kernel', **kwargs):
     contNames = ["Muons", "Electrons", "Photons"]
     acc.merge(IsoCloseByAlgsCfg(flags, suff = "_HIGG1D2", isPhysLite = False, containerNames = contNames, stream_name = kwargs['StreamName']))
 
+    # Truth categories decoration tool for HTXS
+    if flags.Input.isMC:
+        from DerivationFrameworkHiggs.TruthCategoriesConfig import TruthCategoriesDecoratorCfg
+        acc.merge(TruthCategoriesDecoratorCfg(flags, name="TruthCategoriesDecorator"))
+
     # Kernel now
     DerivationKernel = CompFactory.DerivationFramework.DerivationKernel
     acc.addEventAlgo(DerivationKernel(name,
@@ -288,6 +293,35 @@ def HIGG1D2Cfg(flags):
         HIGG1D2SlimmingHelper.ExtraVariables += ["Electrons.TruthLink",
                                                  "Muons.TruthLink",
                                                  "Photons.TruthLink"]
+
+        # Add HTXS variables
+        HIGG1D2SlimmingHelper.ExtraVariables.extend(["EventInfo.HTXS_prodMode",
+                                                     "EventInfo.HTXS_errorCode",
+                                                     "EventInfo.HTXS_Stage0_Category",
+                                                     "EventInfo.HTXS_Stage1_Category_pTjet25",
+                                                     "EventInfo.HTXS_Stage1_Category_pTjet30",
+                                                     "EventInfo.HTXS_Stage1_FineIndex_pTjet30",
+                                                     "EventInfo.HTXS_Stage1_FineIndex_pTjet25",
+                                                     "EventInfo.HTXS_Stage1_2_Category_pTjet25",
+                                                     "EventInfo.HTXS_Stage1_2_Category_pTjet30",
+                                                     "EventInfo.HTXS_Stage1_2_FineIndex_pTjet30",
+                                                     "EventInfo.HTXS_Stage1_2_FineIndex_pTjet25",
+                                                     "EventInfo.HTXS_Stage1_2_Fine_Category_pTjet25",
+                                                     "EventInfo.HTXS_Stage1_2_Fine_Category_pTjet30",
+                                                     "EventInfo.HTXS_Stage1_2_Fine_FineIndex_pTjet30",
+                                                     "EventInfo.HTXS_Stage1_2_Fine_FineIndex_pTjet25",
+                                                     "EventInfo.HTXS_Njets_pTjet25",
+                                                     "EventInfo.HTXS_Njets_pTjet30",
+                                                     "EventInfo.HTXS_isZ2vvDecay",
+                                                     "EventInfo.HTXS_Higgs_eta",
+                                                     "EventInfo.HTXS_Higgs_m",
+                                                     "EventInfo.HTXS_Higgs_phi",
+                                                     "EventInfo.HTXS_Higgs_pt",
+                                                     "EventInfo.HTXS_V_jets30_eta",
+                                                     "EventInfo.HTXS_V_jets30_m",
+                                                     "EventInfo.HTXS_V_jets30_phi",
+                                                     "EventInfo.HTXS_V_jets30_pt",
+                                                     "EventInfo.HTXS_V_pt"])
 
 
     HIGG1D2SlimmingHelper.AppendToDictionary.update({'MET_Track':'xAOD::MissingETContainer','MET_TrackAux':'xAOD::MissingETAuxContainer'})
