@@ -163,7 +163,7 @@ StatusCode FPGATrackSimNNPathfinderExtensionTool::initialize() {
 
 
 StatusCode FPGATrackSimNNPathfinderExtensionTool::extendTracks(const std::vector<std::shared_ptr<const FPGATrackSimHit>> & hits,
-        const std::vector<std::shared_ptr<const FPGATrackSimTrack>> & tracks,
+        const FPGATrackSimTrackCollection & tracks,
         std::vector<FPGATrackSimRoad> & roads) {
 
     // Reset the internal second stage roads storage.
@@ -189,15 +189,15 @@ StatusCode FPGATrackSimNNPathfinderExtensionTool::extendTracks(const std::vector
     
     if(m_debugEvent) ATH_MSG_DEBUG("Got: "<<tracks.size()<<" tracks to extrapolate");
     // Now, loop over the tracks.
-    for (const auto& track : tracks) {
+    for (const FPGATrackSimTrack& track : tracks) {
         Athena::Chrono chronoTrackLoop("NNPathfinder:TrackLoop", m_chronoSvc.get());
         if(m_debugEvent) ATH_MSG_DEBUG("\033[1;31m-------------------------- extraploating Track ------------------ \033[0m");
-        if (track->passedOR() == 0) {
+        if (track.passedOR() == 0) {
             continue;
         }
-        const std::vector<FPGATrackSimHit> hitsOnTrack = track->getFPGATrackSimHits();
+        const std::vector<FPGATrackSimHit> hitsOnTrack = track.getFPGATrackSimHits();
         miniRoad road;
-        float pt = track->getPt();
+        float pt = track.getPt();
 
         for (const auto &thit : hitsOnTrack) {
             road.addHit(std::make_shared<const FPGATrackSimHit>(thit)); // add all hits, we check if WC later
@@ -540,11 +540,11 @@ StatusCode FPGATrackSimNNPathfinderExtensionTool::extendTracks(const std::vector
             road.setHitLayers(miniroad.getHitLayers());
             road.setRoadID(m_roads.size() - 1);
             // Set the "Hough x" and "Hough y" using the track parameters.
-            road.setX(track->getPhi());
-            road.setY(track->getQOverPt());
-            road.setXBin(track->getHoughXBin());
-            road.setYBin(track->getHoughYBin());
-            road.setSubRegion(track->getSubRegion());
+            road.setX(track.getPhi());
+            road.setY(track.getQOverPt());
+            road.setXBin(track.getHoughXBin());
+            road.setYBin(track.getHoughYBin());
+            road.setSubRegion(track.getSubRegion());
 
             // just force the right number of layers now, in case we find fewer than expected (needed downstream)
             std::vector<std::vector<std::shared_ptr<const FPGATrackSimHit>>> roadhits = miniroad.getVecHits();

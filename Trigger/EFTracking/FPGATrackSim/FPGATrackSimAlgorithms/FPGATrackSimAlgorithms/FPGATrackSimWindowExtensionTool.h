@@ -20,7 +20,7 @@
 #include "FPGATrackSimObjects/FPGATrackSimFunctions.h"
 #include "FPGATrackSimObjects/FPGATrackSimHit.h"
 #include "FPGATrackSimObjects/FPGATrackSimRoad.h"
-#include "FPGATrackSimObjects/FPGATrackSimTrack.h"
+#include "FPGATrackSimObjects/FPGATrackSimTrackCollection.h"
 #include "FPGATrackSimMaps/IFPGATrackSimMappingSvc.h"
 #include "FPGATrackSimBanks/IFPGATrackSimBankSvc.h"
 #include "FPGATrackSimMaps/FPGATrackSimPlaneMap.h"
@@ -40,7 +40,7 @@ class FPGATrackSimWindowExtensionTool : public extends <AthAlgTool, IFPGATrackSi
         virtual StatusCode initialize() override;
 
         virtual StatusCode extendTracks(const std::vector<std::shared_ptr<const FPGATrackSimHit>> & hits,
-                                        const std::vector<std::shared_ptr<const FPGATrackSimTrack>> & tracks,
+                                        const FPGATrackSimTrackCollection & tracks,
                                         std::vector<FPGATrackSimRoad> & roads) override;
 
         // We don't have a "union" tool that sits in front of the extension tool, so this is needed here.
@@ -50,9 +50,9 @@ class FPGATrackSimWindowExtensionTool : public extends <AthAlgTool, IFPGATrackSi
         };
 
         // Helper functions to extend a single track using different methods.
-        bool extendTrackSliced(std::shared_ptr<const FPGATrackSimTrack> track, std::vector<int>& numHits, layer_bitmask_t& hitLayers,
+        bool extendTrackSliced(const FPGATrackSimTrack& track, std::vector<int>& numHits, layer_bitmask_t& hitLayers,
                           std::vector<std::vector<std::shared_ptr<const FPGATrackSimHit>>>& road_hits);
-        bool extendTrackBinned(std::shared_ptr<const FPGATrackSimTrack> track, std::vector<int>& numHits, layer_bitmask_t& hitLayers,
+        bool extendTrackBinned(const FPGATrackSimTrack& track, std::vector<int>& numHits, layer_bitmask_t& hitLayers,
                           std::vector<std::vector<std::shared_ptr<const FPGATrackSimHit>>>& road_hits);
 
     private:
