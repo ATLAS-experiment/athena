@@ -46,9 +46,9 @@
 #include "TrigInDetPattRecoTools/GNN_Geometry.h"
 #include "TrigInDetPattRecoTools/TrigTrackSeedGenerator_ITk.h"
 
-#include "TrigInDetR3PattRecoTools/TrigCombinatorialSettings.h"
-#include "TrigInDetR3PattRecoTools/TrigInDetR3Utils.h"
-#include "TrigInDetR3PattRecoTools/TrigSeedML_LUT.h"
+#include "TrigInDetPattRecoTools/TrigCombinatorialSettings.h"
+#include "TrigInDetPattRecoTools/TrigSeedML_LUT.h"
+#include "TrigInDetPattRecoTools/TrigInDetUtils.h"
 
 //for UTT
 #include "InDetRIO_OnTrack/PixelClusterOnTrack.h"

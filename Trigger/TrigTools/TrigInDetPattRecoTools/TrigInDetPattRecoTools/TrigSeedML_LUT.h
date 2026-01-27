@@ -9,7 +9,7 @@
 
 typedef struct TrigSeedML_LUT {
 public:
-TrigSeedML_LUT() : m_id(-1), m_w(0), m_h(0), m_data(0), m_invBinWidthX(0), m_invBinWidthY(0) {};
+TrigSeedML_LUT() : m_id(-1), m_w(0), m_h(0), m_c(), m_data(0), m_invBinWidthX(0), m_invBinWidthY(0) {};
 
 TrigSeedML_LUT(int id, int w, int h, float c[4]) : m_id(id), m_w(w), m_h(h) {
   for(int i=0;i<4;i++) m_c[i] = c[i];

@@ -9,7 +9,7 @@ atlas_add_component( TrigFastTrackFinder
                      src/components/*.cxx
                      LINK_LIBRARIES AthenaBaseComps AthenaMonitoringKernelLib BeamSpotConditionsData CxxUtils PathResolver 
                      InDetIdentifier InDetPrepRawData InDetRIO_OnTrack InDetRecToolInterfaces SiSPSeededTrackFinderData TrigInDetEvent 
-                     TrigInDetPattRecoEvent TrigInDetPattRecoTools TrigInDetR3PattRecoToolsLib
+                     TrigInDetPattRecoEvent TrigInDetPattRecoTools 
                      TrigInDetToolInterfacesLib TrigSteeringEvent TrkEventPrimitives 
                      TrkEventUtils TrkParameters TrkRIO_OnTrack TrkToolInterfaces TrkTrack TrkExInterfaces TrkFitterInterfaces TrigAccelEvent 
                      TrigInDetAccelerationToolLib TrigInDetAccelerationServiceLib TrigT1Interfaces xAODTrigger )
