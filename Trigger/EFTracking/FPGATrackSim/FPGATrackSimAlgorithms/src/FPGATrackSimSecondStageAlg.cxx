@@ -159,12 +159,7 @@ StatusCode FPGATrackSimSecondStageAlg::execute()
         phits_2nd.push_back(std::make_shared<const FPGATrackSimHit>(*hit));
     }
 
-    std::vector<std::shared_ptr<const FPGATrackSimTrack>> tracks_1st;
-    tracks_1st.reserve(FPGAInputTracks->size());
-    for (const auto& track : *FPGAInputTracks) {
-        tracks_1st.push_back(std::make_shared<const FPGATrackSimTrack>(track));
-    }
-    ATH_MSG_DEBUG("Retrieved " << phits_2nd.size() << " hits and " << tracks_1st.size() << " tracks from storegate");
+    ATH_MSG_DEBUG("Retrieved " << phits_2nd.size() << " hits and " << FPGAInputTracks->size() << " tracks from storegate");
 
     // Get truth tracks from DataPrep as well.
     SG::ReadHandle<FPGATrackSimTruthTrackCollection> FPGATruthTracks(m_FPGATruthTrackKey, ctx);
@@ -196,7 +191,7 @@ StatusCode FPGATrackSimSecondStageAlg::execute()
         std::optional<Athena::Chrono> chrono;
         if constexpr (enableBenchmark) chrono.emplace("2nd Stage: Track Extension", m_chrono.get());
         // Use the track extension tool to actually produce a new set of roads.
-        ATH_CHECK(m_trackExtensionTool->extendTracks(phits_2nd, tracks_1st, roads));
+        ATH_CHECK(m_trackExtensionTool->extendTracks(phits_2nd, *FPGAInputTracks, roads));
 
         for (auto const& road : roads) {
             auto road_hits = std::make_unique<FPGATrackSimHitCollection>();

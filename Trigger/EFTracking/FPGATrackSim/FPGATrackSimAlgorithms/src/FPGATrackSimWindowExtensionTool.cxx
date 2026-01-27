@@ -60,7 +60,7 @@ StatusCode FPGATrackSimWindowExtensionTool::initialize() {
 }
 
 StatusCode FPGATrackSimWindowExtensionTool::extendTracks(const std::vector<std::shared_ptr<const FPGATrackSimHit>>& hits,
-    const std::vector<std::shared_ptr<const FPGATrackSimTrack>>& tracks,
+    const FPGATrackSimTrackCollection& tracks,
     std::vector<FPGATrackSimRoad>& roads) {
 
     // Reset the internal second stage roads storage.
@@ -113,14 +113,14 @@ StatusCode FPGATrackSimWindowExtensionTool::extendTracks(const std::vector<std::
     }
 
     // Now, loop over the tracks.
-    for (std::shared_ptr<const FPGATrackSimTrack> track : tracks) {
-        if (track->passedOR() == 0) {
+    for (const FPGATrackSimTrack& track : tracks) {
+        if (track.passedOR() == 0) {
             continue;
         }
 
         // Retrieve track parameters.
-        double trackphi = track->getPhi();
-        double trackqoverpt = track->getQOverPt();
+        double trackphi = track.getPhi();
+        double trackqoverpt = track.getQOverPt();
 
         std::vector<int> numHits(m_nLayers_2ndStage + m_nLayers_1stStage, 0);
 
@@ -131,8 +131,8 @@ StatusCode FPGATrackSimWindowExtensionTool::extendTracks(const std::vector<std::
         layer_bitmask_t hitLayers = 0;
         unsigned nhit = 0;
         // We can't just use the the iterator since hit.getLayer() isn't guaranteed to be right.
-        for (unsigned layer = 0; layer < track->getFPGATrackSimHits().size(); layer++) {
-            const FPGATrackSimHit& hit = track->getFPGATrackSimHits().at(layer);
+        for (unsigned layer = 0; layer < track.getFPGATrackSimHits().size(); layer++) {
+            const FPGATrackSimHit& hit = track.getFPGATrackSimHits().at(layer);
             road_hits[layer].push_back(std::make_shared<FPGATrackSimHit>(hit));
             if (hit.isReal()) {
                 hitLayers |= 1 << layer;
@@ -140,7 +140,7 @@ StatusCode FPGATrackSimWindowExtensionTool::extendTracks(const std::vector<std::
             }
         }
 
-        size_t slice = track->getSubRegion();
+        size_t slice = track.getSubRegion();
         pmap_2nd = m_FPGATrackSimMapping->PlaneMap_2nd(slice);
 
         // Extend the track using either slicing (F-200/300 legacy support) or binning (F-600)
@@ -162,9 +162,9 @@ StatusCode FPGATrackSimWindowExtensionTool::extendTracks(const std::vector<std::
             // Set the "Hough x" and "Hough y" using the track parameters.
             road.setX(trackphi);
             road.setY(trackqoverpt);
-            road.setXBin(track->getHoughXBin());
-            road.setYBin(track->getHoughYBin());
-            road.setSubRegion(track->getSubRegion());
+            road.setXBin(track.getHoughXBin());
+            road.setYBin(track.getHoughYBin());
+            road.setSubRegion(track.getSubRegion());
 
             // figure out bit mask for wild card layers
             unsigned int wclayers = 0;
@@ -189,25 +189,25 @@ StatusCode FPGATrackSimWindowExtensionTool::extendTracks(const std::vector<std::
     return StatusCode::SUCCESS;
 }
 
-bool FPGATrackSimWindowExtensionTool::extendTrackSliced(std::shared_ptr<const FPGATrackSimTrack> track, std::vector<int>& numHits, layer_bitmask_t& hitLayers,
+bool FPGATrackSimWindowExtensionTool::extendTrackSliced(const FPGATrackSimTrack& track, std::vector<int>& numHits, layer_bitmask_t& hitLayers,
                                                         std::vector<std::vector<std::shared_ptr<const FPGATrackSimHit>>>& road_hits) {
 
     const FPGATrackSimRegionMap* rmap_2nd = m_FPGATrackSimMapping->SubRegionMap_2nd();
 
     // Retrieve track parameters.
-    double trackd0 = track->getD0();
-    double trackphi = track->getPhi();
-    double trackz0 = track->getZ0();
-    double tracketa = track->getEta();
-    double trackqoverpt = track->getQOverPt();
+    double trackd0 = track.getD0();
+    double trackphi = track.getPhi();
+    double trackz0 = track.getZ0();
+    double tracketa = track.getEta();
+    double trackqoverpt = track.getQOverPt();
     double cottracktheta = 0.5*(exp(tracketa)-exp(-tracketa));
-    size_t slice = track->getSubRegion();
+    size_t slice = track.getSubRegion();
 
     for (unsigned layer = m_nLayers_1stStage; layer < m_nLayers_2ndStage + m_nLayers_1stStage; layer++) {
         ATH_MSG_DEBUG("Testing layer " << layer << " with " << m_phits_atLayer[slice][layer].size() << " hit");
         for (const std::shared_ptr<const FPGATrackSimHit>& hit: m_phits_atLayer[slice][layer]) {
             // Make sure this hit is in the same subregion as the track. TODO: mapping/slice changes.
-            if (!rmap_2nd->isInRegion(track->getSubRegion(), *hit)) {
+            if (!rmap_2nd->isInRegion(track.getSubRegion(), *hit)) {
                 continue;
             }
 
@@ -219,7 +219,7 @@ bool FPGATrackSimWindowExtensionTool::extendTrackSliced(std::shared_ptr<const FP
 
             // Field correction, now pulled from FPGATrackSimFunctions.
             if (m_fieldCorrection){
-                double fieldCor = fieldCorrection(track->getRegion(), trackqoverpt, hitr);
+                double fieldCor = fieldCorrection(track.getRegion(), trackqoverpt, hitr);
                 pred_hitphi += fieldCor;
             }
 
@@ -240,22 +240,22 @@ bool FPGATrackSimWindowExtensionTool::extendTrackSliced(std::shared_ptr<const FP
 }
 
 
-bool FPGATrackSimWindowExtensionTool::extendTrackBinned(std::shared_ptr<const FPGATrackSimTrack> track, std::vector<int>& numHits, layer_bitmask_t& hitLayers,
+bool FPGATrackSimWindowExtensionTool::extendTrackBinned(const FPGATrackSimTrack& track, std::vector<int>& numHits, layer_bitmask_t& hitLayers,
                                                         std::vector<std::vector<std::shared_ptr<const FPGATrackSimHit>>>& road_hits) {
 
     // Retrieve track parameters.
-    double trackd0 = track->getD0();
-    double trackphi = track->getPhi();
-    double trackz0 = track->getZ0();
-    double tracketa = track->getEta();
-    double trackqoverpt = track->getQOverPt();
+    double trackd0 = track.getD0();
+    double trackphi = track.getPhi();
+    double trackz0 = track.getZ0();
+    double tracketa = track.getEta();
+    double trackqoverpt = track.getQOverPt();
     double cottracktheta = 0.5*(exp(tracketa)-exp(-tracketa));
 
     // If we're doing binning, match the track to a bin...
     const FPGATrackSimBinStep* binStep = m_hitBinningTool->getBinTool().lastStep();
     const IFPGATrackSimBinDesc* binDesc = m_hitBinningTool->getBinTool().binDesc();
-    ATH_MSG_DEBUG("Attempting to look up binIdx for track with phi = " << track->getPhi() << ", chi2/DOF = " << track->getChi2ndof() << ", q/pt = " << track->getQOverPt() << ", eta = " << track->getEta() << ", d0 = " << track->getD0() << ", z0 = " << track->getZ0());
-    FPGATrackSimTrackPars trackPars = track->getPars();
+    ATH_MSG_DEBUG("Attempting to look up binIdx for track with phi = " << track.getPhi() << ", chi2/DOF = " << track.getChi2ndof() << ", q/pt = " << track.getQOverPt() << ", eta = " << track.getEta() << ", d0 = " << track.getD0() << ", z0 = " << track.getZ0());
+    FPGATrackSimTrackPars trackPars = track.getPars();
 
     // MeV/GeV conversion factor, needed when switching between track parametrizations.
     trackPars[FPGATrackSimTrackPars::IHIP] = trackPars[FPGATrackSimTrackPars::IHIP] * 1000;
@@ -289,7 +289,7 @@ bool FPGATrackSimWindowExtensionTool::extendTrackBinned(std::shared_ptr<const FP
 
         // Field correction, now pulled from FPGATrackSimFunctions.
         if (m_fieldCorrection){
-            double fieldCor = fieldCorrection(track->getRegion(), trackqoverpt, hitr);
+            double fieldCor = fieldCorrection(track.getRegion(), trackqoverpt, hitr);
             pred_hitphi += fieldCor;
         }
 

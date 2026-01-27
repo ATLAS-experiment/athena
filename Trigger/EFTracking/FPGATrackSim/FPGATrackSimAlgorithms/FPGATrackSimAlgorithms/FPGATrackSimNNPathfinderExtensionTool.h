@@ -20,7 +20,7 @@
 #include "FPGATrackSimObjects/FPGATrackSimFunctions.h"
 #include "FPGATrackSimObjects/FPGATrackSimHit.h"
 #include "FPGATrackSimObjects/FPGATrackSimRoad.h"
-#include "FPGATrackSimObjects/FPGATrackSimTrack.h"
+#include "FPGATrackSimObjects/FPGATrackSimTrackCollection.h"
 #include "FPGATrackSimMaps/IFPGATrackSimMappingSvc.h"
 #include "FPGATrackSimBanks/IFPGATrackSimBankSvc.h"
 #include "FPGATrackSimMaps/FPGATrackSimPlaneMap.h"
@@ -133,7 +133,7 @@ class FPGATrackSimNNPathfinderExtensionTool   : public extends <AthAlgTool, IFPG
         virtual StatusCode initialize() override;
 
         virtual StatusCode extendTracks(const std::vector<std::shared_ptr<const FPGATrackSimHit>> & hits,
-                                        const std::vector<std::shared_ptr<const FPGATrackSimTrack>> & tracks,
+                                        const FPGATrackSimTrackCollection & tracks,
                                         std::vector<FPGATrackSimRoad> & roads) override;
 
         // We don't have a "union" tool that sits in front of the extension tool, so this is needed here.

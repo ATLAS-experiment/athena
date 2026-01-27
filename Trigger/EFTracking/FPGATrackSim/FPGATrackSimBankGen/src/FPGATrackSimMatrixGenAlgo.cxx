@@ -295,12 +295,7 @@ StatusCode FPGATrackSimMatrixGenAlgo::execute()
 
             // Use the track extension tool to actually produce a new set of roads.
             std::vector<FPGATrackSimRoad> roads_2nd;
-            std::vector<std::shared_ptr<const FPGATrackSimTrack>> ptracks_1st;
-            ptracks_1st.reserve(tracks_1st.size());
-            for (const auto& track : tracks_1st) {
-              ptracks_1st.push_back(std::make_shared<const FPGATrackSimTrack>(track));
-            }
-            ATH_CHECK(m_trackExtensionTool->extendTracks(phits_2nd, ptracks_1st, roads_2nd));
+            ATH_CHECK(m_trackExtensionTool->extendTracks(phits_2nd, tracks_1st, roads_2nd));
 
             // Now produce "track" candidates and loop over them.
             std::vector<FPGATrackSimTrack> tracks_2nd;
