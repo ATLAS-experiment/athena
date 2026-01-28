@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
    */
 
 #include "GeneratorFilters/xAODChargedTracksWeightFilter.h"
@@ -166,12 +166,14 @@ double xAODChargedTracksWeightFilter::get_nch_weight(int nch) const {
       ATH_MSG_WARNING("xAODChargedTracksWeightFilter::get_nch_weight: w_fc is zero.");
       return 0.;
     }
+    //coverity[DIVIDE_BY_ZERO]
     return m_min_weight/w_fc;
 }
 
 
 void xAODChargedTracksWeightFilter::weight_event(double weight) {
 
+    if (weight == 0) return;
     for (auto event : *(events())){
         if(!event) continue;
 
