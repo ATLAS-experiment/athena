@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // PowhegHooksBB4L.h 
@@ -496,13 +496,10 @@ namespace Pythia8 {
 	    return doVetoFSR((distance == 1) && scale > m_atopresscale,scale,iTopCharge);
 	  }
 	  else {
-	    if ( m_debug(settingsPtr) && scale > m_topresscale && ! m_wouldVetoFsr)
+	    if ( m_debug(settingsPtr) && scale > m_atopresscale && ! m_wouldVetoFsr)
 	      std::cout << e[iTop].id() << ": " << e[iRadBef].id() << " > " << e[iRadAft].id() << " + " << e[iEmt].id() << "; " << scale << std::endl;
 	    return doVetoFSR(scale > m_atopresscale,scale,iTopCharge);
 	  }
-	}
-	else {
-	  std::cout << "Bug in PohwgeHooksBB4l" << std::endl;
 	}
       }
 
