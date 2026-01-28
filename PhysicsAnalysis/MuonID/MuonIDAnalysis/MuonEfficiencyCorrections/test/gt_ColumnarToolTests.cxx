@@ -227,7 +227,7 @@ TEST_F (ColumnarPhysLiteTest, MuonEfficiencyScaleFactors)
 
   XAODToolCaller callXAOD (*myToolHandle, "AnalysisMuons");
 
-  doCall (*myToolHandle, "MuonEfficiencyScaleFactors", "AnalysisMuons", callXAOD, {{"Muons", "AnalysisMuons"}});
+  doCall ({.tool = &*myToolHandle, .name = "MuonEfficiencyScaleFactors", .xAODToolCaller = &callXAOD, .containerRenames = {{"Muons", "AnalysisMuons"}}});
 }
 
 
@@ -242,7 +242,7 @@ TEST_F (ColumnarPhysLiteTest, MuonEfficiencyScaleFactors_systematics)
 
   XAODToolCaller callXAOD (*myToolHandle, "AnalysisMuons");
 
-  doCall (*myToolHandle, "MuonEfficiencyScaleFactors", "AnalysisMuons", callXAOD, {{"Muons", "AnalysisMuons"}}, "MUON_EFF_RECO_STAT__1down");
+  doCall ({.tool = &*myToolHandle, .name = "MuonEfficiencyScaleFactors", .xAODToolCaller = &callXAOD, .containerRenames = {{"Muons", "AnalysisMuons"}}, .sysName = "MUON_EFF_RECO_STAT__1down"});
 }
 
 ATLAS_GOOGLE_TEST_MAIN

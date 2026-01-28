@@ -66,18 +66,6 @@ namespace columnar
   // move more of it to TestUtils.
   using namespace TestUtils;
 
-  namespace
-  {
-    // the target time to run a given tool
-    const auto targetTime = std::chrono::seconds(5);
-
-    // the number of events per batch in columnar mode
-    const unsigned int batchSize = 1000;
-
-    // whether to run the tool a second time to get a "warm" cache measurement
-    const bool runToolTwice = false;
-  }
-
   namespace TestUtils
   {
     // I never figured out how the keys get calculated, so I looked
@@ -1786,7 +1774,7 @@ namespace columnar
     return true;
   }
 
-  void ColumnarPhysLiteTest :: setupKnownColumns ()
+  void ColumnarPhysLiteTest :: setupKnownColumns (const TestDefinition& testDefinition)
   {
     using namespace TestUtils;
 
@@ -1925,8 +1913,9 @@ namespace columnar
     knownColumns.push_back (std::make_shared<ColumnDataVectorVectorVariantLink<xAOD::IParticleContainer>>("METAssoc_AnalysisMETAux.objectLinks"));
 
     // For METMaker we need to preplace all of the MET terms that we
-    // expect to be used, that's what this lined does.
-    knownColumns.push_back (std::make_shared<ColumnDataOutputMet> ("OutputMET", std::vector<std::string>{"Muons", "RefJet", "MuonEloss", "PVSoftTrk"}));
+    // expect to be used, that's what this line does.
+    if (!testDefinition.metTermNames.empty())
+      knownColumns.push_back (std::make_shared<ColumnDataOutputMet> ("OutputMET", testDefinition.metTermNames));
 
     // For METMaker we need various extra columns to run. This may need
     // some work to avoid, but would likey be worth it.
@@ -2016,33 +2005,34 @@ namespace columnar
     }
   }
 
-  void ColumnarPhysLiteTest :: doCall (asg::AsgTool& tool, const std::string& name, const std::string& /*container*/, TestUtils::IXAODToolCaller& xAODToolCaller, const std::vector<std::pair<std::string,std::string>>& containerRenames, const std::string& sysName)
+  void ColumnarPhysLiteTest :: doCall (const TestDefinition& testDefinition)
   {
     using namespace asg::msgUserCode;
+    auto userConfiguration = TestUtils::UserConfiguration::fromEnvironment();
 
-    if (!sysName.empty())
+    if (!testDefinition.sysName.empty())
     {
-      auto *sysTool = dynamic_cast<CP::ISystematicsTool*>(&tool);
+      auto *sysTool = dynamic_cast<CP::ISystematicsTool*>(testDefinition.tool);
       if (!sysTool)
         throw std::runtime_error ("tool does not support systematics");
-      std::cout << "applying systematic variation: " << sysName << std::endl;
-      if (sysTool->applySystematicVariation (CP::SystematicSet (sysName)).isFailure())
-        throw std::runtime_error ("failed to apply systematic variation: " + sysName);
+      std::cout << "applying systematic variation: " << testDefinition.sysName << std::endl;
+      if (sysTool->applySystematicVariation (CP::SystematicSet (testDefinition.sysName)).isFailure())
+        throw std::runtime_error ("failed to apply systematic variation: " + testDefinition.sysName);
     }
     if constexpr (columnarAccessMode == 2)
     {
-      auto *myTool = dynamic_cast<ColumnarTool<ColumnarModeArray>*>(&tool);
-      if (!containerRenames.empty())
-        renameContainers (*myTool, containerRenames);
+      auto *myTool = dynamic_cast<ColumnarTool<ColumnarModeArray>*>(testDefinition.tool);
+      if (!testDefinition.containerRenames.empty())
+        renameContainers (*myTool, testDefinition.containerRenames);
       ColumnVectorHeader columnHeader;
       ToolColumnVectorMap toolWrapper (columnHeader, *myTool);
 
-      setupKnownColumns ();
+      setupKnownColumns (testDefinition);
       setupColumns (toolWrapper);
 
-      Benchmark benchmarkCall (name, batchSize);
-      Benchmark benchmarkCall2 (name + "(call2)", batchSize);
-      Benchmark benchmarkCheck (name + "(column check)", batchSize);
+      Benchmark benchmarkCall (testDefinition.name, userConfiguration.batchSize);
+      Benchmark benchmarkCall2 (testDefinition.name + "(call2)", userConfiguration.batchSize);
+      Benchmark benchmarkCheck (testDefinition.name + "(column check)", userConfiguration.batchSize);
       Benchmark benchmarkEmpty ("empty");
 
       const auto numberOfEvents = tree->GetEntries();
@@ -2060,7 +2050,7 @@ namespace columnar
         TestUtils::ToolWrapperData toolColumnData (&columnData, &toolWrapper);
         for (auto& column : usedColumns)
           column->getEntry (entry % numberOfEvents);
-        if ((entry + 1) % batchSize == 0)
+        if ((entry + 1) % userConfiguration.batchSize == 0)
         {
           if (entry < numberOfEvents)
           {
@@ -2075,7 +2065,7 @@ namespace columnar
           benchmarkCall.startTimer ();
           columnData.callNoCheck (*myTool);
           benchmarkCall.stopTimer ();
-          if (runToolTwice)
+          if (userConfiguration.runToolTwice)
           {
             benchmarkCall2.startTimer ();
             columnData.callNoCheck (*myTool);
@@ -2083,7 +2073,7 @@ namespace columnar
           }
           for (auto& column : usedColumns)
             column->clearColumns ();
-          if ((std::chrono::high_resolution_clock::now() - startTime) > targetTime)
+          if ((std::chrono::high_resolution_clock::now() - startTime) > userConfiguration.targetTime)
             endLoop = true;
         } else if (entry + 1 == numberOfEvents)
         {
@@ -2159,9 +2149,9 @@ namespace columnar
       {
         std::vector<TestUtils::ToolPerfData> toolPerfData;
         toolPerfData.emplace_back ();
-        toolPerfData.back().name = name;
+        toolPerfData.back().name = testDefinition.name;
         toolPerfData.back().timeCall = benchmarkCall.getEntryTime(emptyTime);
-        if (runToolTwice)
+        if (userConfiguration.runToolTwice)
           toolPerfData.back().timeCall2 = benchmarkCall2.getEntryTime(emptyTime);
         toolPerfData.back().timeCheck = benchmarkCheck.getEntryTime(emptyTime);
         benchmarkCall.setSilence();
@@ -2199,18 +2189,18 @@ namespace columnar
       ANA_CHECK_THROW (event.readFrom (file.get()));
 
 #ifdef XAOD_STANDALONE
-      Benchmark benchmarkEmptyClear (name + " empty clear");
-      Benchmark benchmarkCallClear (name + " call clear");
-      Benchmark benchmarkPrepClear (name + " prep clear");
+      Benchmark benchmarkEmptyClear (testDefinition.name + " empty clear");
+      Benchmark benchmarkCallClear (testDefinition.name + " call clear");
+      Benchmark benchmarkPrepClear (testDefinition.name + " prep clear");
 #endif
-      Benchmark benchmarkRepeatCall (name + " repeat-call");
-      Benchmark benchmarkCall (name + " call");
-      Benchmark benchmarkCallCopyRecord (name + " call copy-record");
-      Benchmark benchmarkCallRetrieve (name + " call retrieve");
-      Benchmark benchmarkPrep (name + " prep");
-      Benchmark benchmarkPrepCopyRecord (name + " prep copy-record");
-      Benchmark benchmarkPrepRetrieve (name + " prep retrieve");
-      Benchmark benchmarkGetEntry (name + " getEntry");
+      Benchmark benchmarkRepeatCall (testDefinition.name + " repeat-call");
+      Benchmark benchmarkCall (testDefinition.name + " call");
+      Benchmark benchmarkCallCopyRecord (testDefinition.name + " call copy-record");
+      Benchmark benchmarkCallRetrieve (testDefinition.name + " call retrieve");
+      Benchmark benchmarkPrep (testDefinition.name + " prep");
+      Benchmark benchmarkPrepCopyRecord (testDefinition.name + " prep copy-record");
+      Benchmark benchmarkPrepRetrieve (testDefinition.name + " prep retrieve");
+      Benchmark benchmarkGetEntry (testDefinition.name + " getEntry");
 
       const auto numberOfEvents = event.getEntries();
 #ifdef XAOD_STANDALONE
@@ -2231,20 +2221,20 @@ namespace columnar
       // make sure that we ran the tool enough to get a precise
       // performance estimate.
       const auto startTime = std::chrono::high_resolution_clock::now();
-      for (; (std::chrono::high_resolution_clock::now() - startTime) < targetTime; ++entry)
+      for (; (std::chrono::high_resolution_clock::now() - startTime) < userConfiguration.targetTime; ++entry)
       {
         benchmarkGetEntry.startTimer ();
         event.getEntry (entry % numberOfEvents);
         benchmarkGetEntry.stopTimer ();
         benchmarkPrepRetrieve.startTimer ();
-        ASSERT_SUCCESS (xAODToolCaller.retrieve (*tool.evtStore()));
+        ASSERT_SUCCESS (testDefinition.xAODToolCaller->retrieve (*testDefinition.tool->evtStore()));
         benchmarkPrepRetrieve.stopTimer ();
         benchmarkPrepCopyRecord.startTimer ();
         static const std::string prepPostfix = "Prep";
-        ASSERT_SUCCESS (xAODToolCaller.copyRecord (*tool.evtStore(), prepPostfix));
+        ASSERT_SUCCESS (testDefinition.xAODToolCaller->copyRecord (*testDefinition.tool->evtStore(), prepPostfix));
         benchmarkPrepCopyRecord.stopTimer ();
         benchmarkPrep.startTimer ();
-        ASSERT_SUCCESS (xAODToolCaller.call ());
+        ASSERT_SUCCESS (testDefinition.xAODToolCaller->call ());
         benchmarkPrep.stopTimer ();
 #ifdef XAOD_STANDALONE
         benchmarkPrepClear.startTimer ();
@@ -2252,19 +2242,19 @@ namespace columnar
         benchmarkPrepClear.stopTimer ();
 #endif
         benchmarkCallRetrieve.startTimer ();
-        ASSERT_SUCCESS (xAODToolCaller.retrieve (*tool.evtStore()));
+        ASSERT_SUCCESS (testDefinition.xAODToolCaller->retrieve (*testDefinition.tool->evtStore()));
         benchmarkCallRetrieve.stopTimer ();
         benchmarkCallCopyRecord.startTimer ();
         static const std::string callPostfix = "Call";
-        ASSERT_SUCCESS (xAODToolCaller.copyRecord (*tool.evtStore(), callPostfix));
+        ASSERT_SUCCESS (testDefinition.xAODToolCaller->copyRecord (*testDefinition.tool->evtStore(), callPostfix));
         benchmarkCallCopyRecord.stopTimer ();
         benchmarkCall.startTimer ();
-        ASSERT_SUCCESS (xAODToolCaller.call ());
+        ASSERT_SUCCESS (testDefinition.xAODToolCaller->call ());
         benchmarkCall.stopTimer ();
-        if (runToolTwice)
+        if (userConfiguration.runToolTwice)
         {
           benchmarkRepeatCall.startTimer ();
-          ASSERT_SUCCESS (xAODToolCaller.call ());
+          ASSERT_SUCCESS (testDefinition.xAODToolCaller->call ());
           benchmarkRepeatCall.stopTimer ();
         }
 #ifdef XAOD_STANDALONE
@@ -2279,13 +2269,7 @@ namespace columnar
       std::cout << "Total entries read: " << entry << std::endl;
     } else if constexpr (columnarAccessMode == 100)
     {
-      UserConfiguration userConfiguration;
-      TestDefinition testDefinition;
-      testDefinition.name = name;
-      testDefinition.file = file.get();
-      testDefinition.tool = &tool;
-      testDefinition.containerRenames = containerRenames;
-      TestUtils::runXaodArrayTest (userConfiguration, testDefinition);
+      TestUtils::runXaodArrayTest (userConfiguration, testDefinition, file.get());
     }
   }
 }

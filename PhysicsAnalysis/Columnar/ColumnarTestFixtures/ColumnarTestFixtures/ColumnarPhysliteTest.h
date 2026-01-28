@@ -11,6 +11,7 @@
 #include <AsgTools/AsgTool.h>
 #include <ColumnarInterfaces/ColumnInfo.h>
 #include <ColumnarInterfaces/IColumnarTool.h>
+#include <ColumnarTestFixtures/Configuration.h>
 #include <ColumnarTestFixtures/IXAODToolCaller.h>
 
 #include <gtest/gtest.h>
@@ -50,11 +51,11 @@ namespace columnar
     /// @brief check whether we have the right mode
     static bool checkMode ();
 
-    void setupKnownColumns ();
+    void setupKnownColumns (const TestUtils::TestDefinition& testDefinition);
 
     void setupColumns (ToolColumnVectorMap& toolWrapper);
 
-    void doCall (asg::AsgTool& tool, const std::string& name, const std::string& container, TestUtils::IXAODToolCaller& xAODToolCaller, const std::vector<std::pair<std::string,std::string>>& containerRenames, const std::string& sysName = "");
+    void doCall (const TestUtils::TestDefinition& testDefinition);
   };
 }
 

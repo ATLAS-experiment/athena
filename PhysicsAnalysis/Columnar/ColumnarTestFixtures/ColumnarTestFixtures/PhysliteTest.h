@@ -8,6 +8,8 @@
 #ifndef COLUMNAR_TEST_FIXTURES_PHYSLITE_TEST_H
 #define COLUMNAR_TEST_FIXTURES_PHYSLITE_TEST_H
 
+class TFile;
+
 namespace columnar
 {
   namespace TestUtils
@@ -15,7 +17,7 @@ namespace columnar
     struct TestDefinition;
     struct UserConfiguration;
 
-    void runXaodArrayTest (const UserConfiguration& userConfiguration, const TestDefinition& testDefinition);
+    void runXaodArrayTest (const UserConfiguration& userConfiguration, const TestDefinition& testDefinition, TFile *file);
   }
 }
 

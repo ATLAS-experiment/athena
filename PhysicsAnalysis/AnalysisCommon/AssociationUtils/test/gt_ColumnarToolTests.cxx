@@ -186,7 +186,7 @@ namespace ORUtils
 
     // this will call the tool in either mode, and also performs some
     // performance measurements of the tool in either mode
-    doCall (*tool, "DeltaROverlapTool", particles1, callXAOD, {{"particle1", particles1},{"particle2", particles2}});
+    doCall ({.tool = tool.get(), .name = "DeltaROverlapTool", .xAODToolCaller = &callXAOD, .containerRenames = {{"particle1", particles1},{"particle2", particles2}}});
   }
 
   // this runs the test above, but with IParticle momentum accessors in
@@ -212,7 +212,7 @@ namespace ORUtils
 
     // this will call the tool in either mode, and also performs some
     // performance measurements of the tool in either mode
-    doCall (*tool, "DeltaROverlapTool", particles1, callXAOD, {{"particle1", particles1},{"particle2", particles2}});
+    doCall ({.tool = tool.get(), .name = "DeltaROverlapTool", .xAODToolCaller = &callXAOD, .containerRenames = {{"particle1", particles1},{"particle2", particles2}}});
   }
 
   // this runs the test above, but with IParticle momentum accessors in
@@ -241,7 +241,7 @@ namespace ORUtils
 
     // this will call the tool in either mode, and also performs some
     // performance measurements of the tool in either mode
-    doCall (*tool, "DeltaROverlapTool", particles1, callXAOD, {{"particle1", particles1},{"particle2", particles2}});
+    doCall ({.tool = tool.get(), .name = "DeltaROverlapTool", .xAODToolCaller = &callXAOD, .containerRenames = {{"particle1", particles1},{"particle2", particles2}}});
   }
 
 
@@ -268,7 +268,7 @@ namespace ORUtils
 
     // this will call the tool in either mode, and also performs some
     // performance measurements of the tool in either mode
-    doCall (*tool, "DeltaROverlapTool", particles1, callXAOD, {{"particle1", particles1},{"particle2", particles2}});
+    doCall ({.tool = tool.get(), .name = "DeltaROverlapTool", .xAODToolCaller = &callXAOD, .containerRenames = {{"particle1", particles1},{"particle2", particles2}}});
   }
 
   // this runs the test above, but with IParticle momentum accessors in
@@ -294,7 +294,7 @@ namespace ORUtils
 
     // this will call the tool in either mode, and also performs some
     // performance measurements of the tool in either mode
-    doCall (*tool, "DeltaROverlapTool", particles1, callXAOD, {{"particle1", particles1},{"particle2", particles2}});
+    doCall ({.tool = tool.get(), .name = "DeltaROverlapTool", .xAODToolCaller = &callXAOD, .containerRenames = {{"particle1", particles1},{"particle2", particles2}}});
   }
 
   // this runs the test above, but with IParticle momentum accessors in
@@ -323,7 +323,7 @@ namespace ORUtils
 
     // this will call the tool in either mode, and also performs some
     // performance measurements of the tool in either mode
-    doCall (*tool, "DeltaROverlapTool", particles1, callXAOD, {{"particle1", particles1},{"particle2", particles2}});
+    doCall ({.tool = tool.get(), .name = "DeltaROverlapTool", .xAODToolCaller = &callXAOD, .containerRenames = {{"particle1", particles1},{"particle2", particles2}}});
   }
 
   TEST_F (ColumnarPhysLiteTest, MuJetOverlapTool)
@@ -348,7 +348,7 @@ namespace ORUtils
 
     // this will call the tool in either mode, and also performs some
     // performance measurements of the tool in either mode
-    doCall (*tool, "MuJetOverlapTool", particles1, callXAOD, {{"particle1", particles1},{"particle2", particles2}});
+    doCall ({.tool = tool.get(), .name = "MuJetOverlapTool", .xAODToolCaller = &callXAOD, .containerRenames = {{"particle1", particles1},{"particle2", particles2}}});
   }
 
   TEST_F (ColumnarPhysLiteTest, AltMuJetOverlapTool)
@@ -373,7 +373,7 @@ namespace ORUtils
 
     // this will call the tool in either mode, and also performs some
     // performance measurements of the tool in either mode
-    doCall (*tool, "AltMuJetOverlapTool", particles1, callXAOD, {{"particle1", particles1},{"particle2", particles2}});
+    doCall ({.tool = tool.get(), .name = "AltMuJetOverlapTool", .xAODToolCaller = &callXAOD, .containerRenames = {{"particle1", particles1},{"particle2", particles2}}});
   }
 
   TEST_F (ColumnarPhysLiteTest, EleEleOverlapTool)
@@ -397,7 +397,7 @@ namespace ORUtils
 
     // this will call the tool in either mode, and also performs some
     // performance measurements of the tool in either mode
-    doCall (*tool, "EleEleOverlapTool", particles1, callXAOD, {{"particle1", particles1},{"particle2", particles2}});
+    doCall ({.tool = tool.get(), .name = "EleEleOverlapTool", .xAODToolCaller = &callXAOD, .containerRenames = {{"particle1", particles1},{"particle2", particles2}}});
   }
 
   TEST_F (ColumnarPhysLiteTest, EleJetOverlapTool)
@@ -417,7 +417,7 @@ namespace ORUtils
 
     // this will call the tool in either mode, and also performs some
     // performance measurements of the tool in either mode
-    doCall (*tool, "EleJetOverlapTool", particles1, callXAOD, {{"particle1", particles1},{"particle2", particles2}});
+    doCall ({.tool = tool.get(), .name = "EleJetOverlapTool", .xAODToolCaller = &callXAOD, .containerRenames = {{"particle1", particles1},{"particle2", particles2}}});
   }
 
   TEST_F (ColumnarPhysLiteTest, EleMuSharedTrkOverlapTool)
@@ -444,7 +444,7 @@ namespace ORUtils
 
     // this will call the tool in either mode, and also performs some
     // performance measurements of the tool in either mode
-    doCall (*tool, "EleMuSharedTrkOverlapTool", particles1, callXAOD, {{"particle1", particles1},{"particle2", particles2}});
+    doCall ({.tool = tool.get(), .name = "EleMuSharedTrkOverlapTool", .xAODToolCaller = &callXAOD, .containerRenames = {{"particle1", particles1},{"particle2", particles2}}});
   }
 
   TEST_F (ColumnarMemoryTest, TauAntiTauJetOverlapTool)
@@ -520,7 +520,7 @@ namespace ORUtils
 
     // this will call the tool in either mode, and also performs some
     // performance measurements of the tool in either mode
-    doCall (*tool, "TauAntiTauJetOverlapTool", particles1, callXAOD, {{"particle1", particles1},{"particle2", particles2}});
+    doCall ({.tool = tool.get(), .name = "TauAntiTauJetOverlapTool", .xAODToolCaller = &callXAOD, .containerRenames = {{"particle1", particles1},{"particle2", particles2}}});
   }
 
   TEST_F (ColumnarPhysLiteTest, TauJetOverlapTool)
@@ -540,7 +540,7 @@ namespace ORUtils
 
     // this will call the tool in either mode, and also performs some
     // performance measurements of the tool in either mode
-    doCall (*tool, "TauAntiTauJetOverlapTool", particles1, callXAOD, {{"particle1", particles1},{"particle2", particles2}});
+    doCall ({.tool = tool.get(), .name = "TauAntiTauJetOverlapTool", .xAODToolCaller = &callXAOD, .containerRenames = {{"particle1", particles1},{"particle2", particles2}}});
   }
 
   TEST_F (ColumnarPhysLiteTest, TauLooseEleOverlapTool)
@@ -560,7 +560,7 @@ namespace ORUtils
 
     // this will call the tool in either mode, and also performs some
     // performance measurements of the tool in either mode
-    doCall (*tool, "TauLooseEleOverlapTool", particles1, callXAOD, {{"particle1", particles1},{"particle2", particles2}});
+    doCall ({.tool = tool.get(), .name = "TauLooseEleOverlapTool", .xAODToolCaller = &callXAOD, .containerRenames = {{"particle1", particles1},{"particle2", particles2}}});
   }
 
   TEST_F (ColumnarPhysLiteTest, TauLooseMuOverlapTool)
@@ -580,7 +580,7 @@ namespace ORUtils
 
     // this will call the tool in either mode, and also performs some
     // performance measurements of the tool in either mode
-    doCall (*tool, "TauLooseMuOverlapTool", particles1, callXAOD, {{"particle1", particles1},{"particle2", particles2}});
+    doCall ({.tool = tool.get(), .name = "TauLooseMuOverlapTool", .xAODToolCaller = &callXAOD, .containerRenames = {{"particle1", particles1},{"particle2", particles2}}});
   }
 }
 
