@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -39,22 +39,24 @@ namespace LArSamples {
 
       TreeAccessor(const TString& fileName) : PersistentAccessor(fileName) { }
       
-      static TreeAccessor* open(const TString& fileName);
+      static std::unique_ptr<TreeAccessor> open(const TString& fileName);
       
       virtual ~TreeAccessor() { resetCache(); }
                 
-      static TreeAccessor* merge(const std::vector<const Accessor*>& accessors,const TString& fileName = "");
-      static TreeAccessor* merge(const std::vector<const Accessor*>& accessors,const TString& fileName,const TString& LBFile);
-      static TreeAccessor* filter(const Accessor& accessor, 
-                                  const FilterParams& filterParams,
-                                  const TString& fileName, const DataTweaker& tweaker);
+      static std::unique_ptr<TreeAccessor> merge(const std::vector<const Accessor*>& accessors,const TString& fileName = "");
+      static std::unique_ptr<TreeAccessor> merge(const std::vector<const Accessor*>& accessors,const TString& fileName,const TString& LBFile);
+      static std::unique_ptr<TreeAccessor>
+        filter(const Accessor& accessor,
+               const FilterParams& filterParams,
+               const TString& fileName, const DataTweaker& tweaker);
       
-      static std::vector<TreeAccessor*> filter(const Accessor& accessor, 
-                                               const FilterList& filterList, const DataTweaker& tweaker);
+      static std::vector<std::unique_ptr<TreeAccessor> >
+        filter(const Accessor& accessor,
+               const FilterList& filterList, const DataTweaker& tweaker);
                                                
       friend class Interface;
 
-      static TreeAccessor* makeTemplate(const Accessor& accessor, const TString& fileName);
+      static std::unique_ptr<TreeAccessor> makeTemplate(const Accessor& accessor, const TString& fileName);
       
       bool writeToFile(const TString& fileName) const;
 

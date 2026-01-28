@@ -34,7 +34,7 @@ using namespace LArSamples;
 
 std::unique_ptr<Interface> Interface::open(const TString& fileName)
 {
-  std::unique_ptr<TreeAccessor> accessor (TreeAccessor::open(fileName));
+  std::unique_ptr<TreeAccessor> accessor = TreeAccessor::open(fileName);
   if (accessor) {
     return std::make_unique<Interface> (std::move(accessor));
   }
@@ -43,7 +43,7 @@ std::unique_ptr<Interface> Interface::open(const TString& fileName)
 
 std::unique_ptr<Interface> Interface::open(const std::vector<TString>& fileNames)
 {
-  std::unique_ptr<MultiTreeAccessor> accessor (MultiTreeAccessor::open(fileNames));
+  std::unique_ptr<MultiTreeAccessor> accessor = MultiTreeAccessor::open(fileNames);
   if (accessor) {
     return std::make_unique<Interface> (std::move(accessor));
   }
@@ -53,7 +53,7 @@ std::unique_ptr<Interface> Interface::open(const std::vector<TString>& fileNames
 
 std::unique_ptr<Interface> Interface::openList(const TString& fileList)
 {
-  std::unique_ptr<MultiTreeAccessor> accessor (MultiTreeAccessor::openList(fileList));
+  std::unique_ptr<MultiTreeAccessor> accessor = MultiTreeAccessor::openList(fileList);
   if (accessor) {
     return std::make_unique<Interface> (std::move(accessor));
   }
@@ -63,7 +63,7 @@ std::unique_ptr<Interface> Interface::openList(const TString& fileList)
 
 std::unique_ptr<Interface> Interface::openWild(const TString& wcName)
 {
-  std::unique_ptr<MultiTreeAccessor> accessor (MultiTreeAccessor::openWild(wcName));
+  std::unique_ptr<MultiTreeAccessor> accessor = MultiTreeAccessor::openWild(wcName);
   if (accessor) {
     return std::make_unique<Interface> (std::move(accessor));
   }
@@ -255,7 +255,7 @@ std::unique_ptr<Interface> Interface::merge(const std::vector<const Interface*>&
   std::vector<const Accessor*> accessors;
   for (unsigned int i = 0; i < interfaces.size(); i++)
     accessors.push_back(&interfaces[i]->accessor());
-  std::unique_ptr<TreeAccessor> newAccessor (TreeAccessor::merge(accessors, fileName));
+  std::unique_ptr<TreeAccessor> newAccessor = TreeAccessor::merge(accessors, fileName);
   return std::make_unique<Interface>(std::move(newAccessor));
 }
 
@@ -271,7 +271,7 @@ std::unique_ptr<Interface> Interface::merge(const std::vector<const Interface*>&
   std::vector<const Accessor*> accessors;
   for (unsigned int i = 0; i < interfaces.size(); i++)
     accessors.push_back(&interfaces[i]->accessor());
-  std::unique_ptr<TreeAccessor> newAccessor (TreeAccessor::merge(accessors, fileName, LBFile));
+  std::unique_ptr<TreeAccessor> newAccessor = TreeAccessor::merge(accessors, fileName, LBFile);
   return std::make_unique<Interface>(std::move(newAccessor));
 }
 
@@ -383,14 +383,14 @@ TString Interface::addSuffix(const TString& fileName, const TString& suffix)
 
 std::unique_ptr<Interface> Interface::filter(const FilterParams& filterParams, const DataTweaker& tweaker, const TString& fileName) const
 {
-  std::unique_ptr<TreeAccessor> newAcc (TreeAccessor::filter(accessor(), filterParams, fileName, tweaker));
+  std::unique_ptr<TreeAccessor> newAcc = TreeAccessor::filter(accessor(), filterParams, fileName, tweaker);
   return std::make_unique<Interface>(std::move(newAcc));
 }
 
 
 std::unique_ptr<Interface> Interface::makeTemplate(const TString& fileName) const
 {
-  std::unique_ptr<TreeAccessor> newAcc (TreeAccessor::makeTemplate(accessor(), fileName));
+  std::unique_ptr<TreeAccessor> newAcc = TreeAccessor::makeTemplate(accessor(), fileName);
   return std::make_unique<Interface>(std::move(newAcc));
 }
 
