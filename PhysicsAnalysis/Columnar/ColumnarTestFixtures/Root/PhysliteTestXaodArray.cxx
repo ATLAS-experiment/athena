@@ -313,13 +313,13 @@ namespace columnar
 
 
 
-    void runXaodArrayTest (const UserConfiguration& userConfiguration, const TestDefinition& testDefinition)
+    void runXaodArrayTest (const UserConfiguration& userConfiguration, const TestDefinition& testDefinition, TFile *file)
     {
       using namespace asg::msgUserCode;
 
       xAOD::TEvent event;
       xAOD::TStore store;
-      ANA_CHECK_THROW (event.readFrom (testDefinition.file));
+      ANA_CHECK_THROW (event.readFrom (file));
 
       auto *myTool = dynamic_cast<ColumnarTool<ColumnarModeXAODArray>*>(testDefinition.tool);
       if (!myTool)

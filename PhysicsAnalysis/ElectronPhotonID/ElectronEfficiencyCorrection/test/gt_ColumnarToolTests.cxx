@@ -142,7 +142,7 @@ TEST_F (ColumnarPhysLiteTest, AsgElectronEfficiencyCorrectionTool)
 
   XAODTestToolCaller callXAOD (*myToolHandle, "AnalysisElectrons");
 
-  doCall (*myToolHandle, "AsgElectronEfficiencyCorrectionTool", "AnalysisElectrons", callXAOD, {{"Electrons", "AnalysisElectrons"}});
+  doCall ({.tool = &*myToolHandle, .name = "AsgElectronEfficiencyCorrectionTool", .xAODToolCaller = &callXAOD, .containerRenames = {{"Electrons", "AnalysisElectrons"}}});
 }
 
 ATLAS_GOOGLE_TEST_MAIN

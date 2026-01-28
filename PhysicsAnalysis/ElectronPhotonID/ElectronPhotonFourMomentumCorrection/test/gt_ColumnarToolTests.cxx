@@ -36,7 +36,7 @@ TEST_F (ColumnarMemoryTest, EgammaCalibrationAndSmearingTool)
   if (!checkMode())
     return;
 
-  auto tool = new CP::EgammaCalibrationAndSmearingTool (makeUniqueName());
+  auto tool = std::make_unique<CP::EgammaCalibrationAndSmearingTool> (makeUniqueName());
   ASSERT_SUCCESS (tool->setProperty ("ESModel", "es2022_R22_PRE"));
   ASSERT_SUCCESS (tool->setProperty ("decorrelationModel", "1NP_v1"));
   ASSERT_SUCCESS (tool->setProperty ("useFastSim", 0));
@@ -134,7 +134,7 @@ private:
 
 TEST_F (ColumnarPhysLiteTest, EgammaCalibrationAndSmearingTool)
 {
-  auto tool = new CP::EgammaCalibrationAndSmearingTool (makeUniqueName());
+  auto tool = std::make_unique<CP::EgammaCalibrationAndSmearingTool> (makeUniqueName());
   ASSERT_SUCCESS (tool->setProperty ("ESModel", "es2022_R22_PRE"));
   ASSERT_SUCCESS (tool->setProperty ("decorrelationModel", "1NP_v1"));
   ASSERT_SUCCESS (tool->setProperty ("useFastSim", 0));
@@ -145,7 +145,7 @@ TEST_F (ColumnarPhysLiteTest, EgammaCalibrationAndSmearingTool)
 
   XAODEgammaCalibrationAndSmearingToolCaller callXAOD (*tool, "AnalysisElectrons");
 
-  doCall (*tool, "EgammaCalibrationAndSmearingTool", "AnalysisElectrons", callXAOD, {{"EGamma", "AnalysisElectrons"}});
+  doCall ({.tool = tool.get(), .name = "EgammaCalibrationAndSmearingTool", .xAODToolCaller = &callXAOD, .containerRenames = {{"EGamma", "AnalysisElectrons"}}});
 }
 
 ATLAS_GOOGLE_TEST_MAIN
