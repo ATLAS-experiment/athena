@@ -43,31 +43,7 @@ LArDetectorToolNV::LArDetectorToolNV(const std::string& type
 				     , const std::string& name
 				     , const IInterface* parent)
   : GeoModelTool(type,name,parent)
-  , m_barrelSaggingOn(false)
-  , m_barrelVisLimit(-1)
-  , m_fcalVisLimit(-1)
-  , m_buildBarrel(true)
-  , m_buildEndcap(true)
-  , m_applyAlignments(false)
-  , m_manager{nullptr}
-  , m_geometryConfig("FULL")
-  , m_EMECVariantInner("Wheel")
-  , m_EMECVariantOuter("Wheel")
-  , m_activateFT(true)
-  , m_enableMBTS(true)
 {
-  declareProperty("SaggingBarrelAccordeon",m_barrelSaggingOn);
-  declareProperty("BarrelCellVisLimit",    m_barrelVisLimit);
-  declareProperty("FCALVisLimit",          m_fcalVisLimit);
-
-  declareProperty("BuildBarrel",           m_buildBarrel);
-  declareProperty("BuildEndcap",           m_buildEndcap);
-  declareProperty("ApplyAlignments",       m_applyAlignments);
-  declareProperty("GeometryConfig",        m_geometryConfig);
-  declareProperty("EMECVariantInner",      m_EMECVariantInner);
-  declareProperty("EMECVariantOuter",      m_EMECVariantOuter);
-  declareProperty("ActivateFeedThrougs",   m_activateFT);
-  declareProperty("EnableMBTS",            m_enableMBTS);
 }
 
 LArDetectorToolNV::~LArDetectorToolNV()
@@ -248,25 +224,14 @@ StatusCode LArDetectorToolNV::align()
     return StatusCode::SUCCESS;
   }
 
-  if(m_manager==nullptr) {
+  if(!m_manager) {
     ATH_MSG_ERROR(" LArDetDescrManager not created yet, cannot align !");
     return StatusCode::FAILURE;
   }
 
   if(detStore()->contains<DetCondKeyTrans>(LAR_ALIGN)) {
     const DetCondKeyTrans* align{nullptr};
-    StatusCode sc = detStore()->retrieve(align, LAR_ALIGN);
-
-    if(sc.isFailure()) {
-      ATH_MSG_ERROR(" Could not retrieve LAr DetCondKeyTrans ");
-      return sc;
-    }
-
-    if(align==nullptr) {
-      ATH_MSG_ERROR("LAr DetCondKeyTrans ptr is null");
-      return StatusCode::FAILURE;
-    }
-
+    ATH_CHECK(detStore()->retrieve(align, LAR_ALIGN));
     ATH_MSG_DEBUG(" LAr DetCondKeyTrans retrieved ");
     if(m_alignHelper.applyAlignments(detStore(),align,nullptr).isFailure()) {
       ATH_MSG_ERROR("Failed to apply LAr alignments to GeoModel");
