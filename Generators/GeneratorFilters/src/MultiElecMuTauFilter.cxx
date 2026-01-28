@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "GeneratorFilters/MultiElecMuTauFilter.h"
@@ -78,7 +78,7 @@ StatusCode MultiElecMuTauFilter::filterEvent() {
           }
         }
 
-        if (tau and taunu) {
+        if (taunu) {
           // Good hadronic decay
           CLHEP::HepLorentzVector tauVisMom = CLHEP::HepLorentzVector(tau->momentum().px() - taunu->momentum().px(),
                                                         tau->momentum().py() - taunu->momentum().py(),

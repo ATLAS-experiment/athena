@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "GeneratorFilters/ChargedTracksWeightFilter.h"
@@ -177,6 +177,7 @@ double ChargedTracksWeightFilter::get_nch_weight(int nch) const {
     ATH_MSG_WARNING("ChargedTracksWeightFilter::get_nch_weight: w_fc divisor is zero.");
     return 0.;
   }
+  //coverity[DIVIDE_BY_ZERO]
   return m_min_weight/w_fc;
 }
 
