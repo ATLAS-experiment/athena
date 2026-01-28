@@ -64,6 +64,7 @@ RootDatabase::RootDatabase() :
         m_rntBufferedWriteEnabled(true),
         m_rntReaderMetricsEnabled(false),
         m_rntWriterMetricsEnabled(false),
+        m_rntUnsplitFieldList(""),
         m_indexMasterID(0)
 {
   m_counters[READ_COUNTER] = m_counters[WRITE_COUNTER] = m_counters[OTHER_COUNTER] = 0;
@@ -500,6 +501,8 @@ StatusCode RootDatabase::getOption(DbOption& opt)  {
         return opt._setValue(int(m_rntReaderMetricsEnabled));
       else if ( !strcasecmp(n, "RNTUPLE_WRITER_METRICS_ENABLED") ) // int
         return opt._setValue(int(m_rntWriterMetricsEnabled));
+      else if ( !strcasecmp(n, "RNTUPLE_UNSPLIT_FIELD_LIST") ) // string
+        return opt._setValue(m_rntUnsplitFieldList.c_str());
       break;
     case 'T':
       if( !strcasecmp(n+5,"BRANCH_OFFSETTAB_LEN") )  {
@@ -651,6 +654,15 @@ StatusCode RootDatabase::setOption(const DbOption& opt)  {
           return opt._getValue(m_rntReaderMetricsEnabled);
       else if ( !strcasecmp(n, "RNTUPLE_WRITER_METRICS_ENABLED") ) // bool
           return opt._getValue(m_rntWriterMetricsEnabled);
+      else if ( !strcasecmp(n, "RNTUPLE_UNSPLIT_FIELD_LIST") ) // string
+      {
+          char* tempStr = nullptr;
+          if (opt._getValue(tempStr).isSuccess() && tempStr) {
+              m_rntUnsplitFieldList = tempStr;
+              return SUCCESS;
+          }
+          return FAILURE;
+      }
       break;
     case 'T':
        if( !strcasecmp(n+5,"BRANCH_OFFSETTAB_LEN") )  {
@@ -1069,7 +1081,11 @@ RootDatabase::getNTupleWriter(const std::string& ntuple_name, bool create)
    auto& writer = m_ntupleWriterMap[ntuple_name];
    if( !writer and create ) {
       writer = std::make_unique<RootStorageSvc::RNTupleWriterHelper>(m_file, ntuple_name, m_rntBufferedWriteEnabled, m_rntWriterMetricsEnabled);
-      ATH_MSG_DEBUG("Created new RNTuple: " << ntuple_name  << " in file: " << m_file->GetName());
+      writer->setUnsplitFieldsList(m_rntUnsplitFieldList);
+      ATH_MSG_DEBUG("Created RNTuple Writer for ntuple: " << ntuple_name << " in file: " << m_file->GetName());
+      ATH_MSG_DEBUG(" - Buffered Write Enabled: " << m_rntBufferedWriteEnabled);
+      ATH_MSG_DEBUG(" - Writer Metrics Enabled: " << m_rntWriterMetricsEnabled);
+      ATH_MSG_DEBUG(" - Unsplit Field List: " << m_rntUnsplitFieldList);
    }
    if( writer and create ) {
       // treat the create flag as an indication of a new container client and count them
