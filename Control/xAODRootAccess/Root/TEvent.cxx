@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 // Local include(s).
 #include "xAODRootAccess/TEvent.h"
@@ -405,6 +405,22 @@ StatusCode TEvent::readFrom(::TTree* tree, bool useTreeCache) {
   }
 }
 
+
+/// This interface function should be called on a file opened be the user, before
+/// any event processing would occur. It sets up the output event tree.
+///
+/// @param file The file that the event data should be written to
+/// @returns The usual @c StatusCode tyoes
+///
+StatusCode TEvent::writeTo(TFile& file) {
+  
+  // Forward call
+  ATH_CHECK(writeTo(&file));
+
+  // Return gracefully:
+  return StatusCode::SUCCESS;
+}
+
 /// This function should be called on a file opened be the user, before
 /// any event processing would occur. It sets up the output event tree.
 ///
@@ -444,6 +460,16 @@ StatusCode TEvent::writeTo(::TFile* file, int autoFlush,
 
   // Return gracefully:
   return StatusCode::SUCCESS;
+}
+
+/// This function needs to be called when the user is done writing events
+/// to a file, before (s)he would close the file itself.
+///
+/// @param file The file that the event data is written to
+/// @returns The usual @c StatusCode tyoes
+///
+StatusCode TEvent::finishWritingTo(TFile& file) {
+  return finishWritingTo(&file);
 }
 
 /// This function needs to be called when the user is done writing events

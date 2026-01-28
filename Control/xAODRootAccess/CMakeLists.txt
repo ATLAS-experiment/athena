@@ -82,7 +82,6 @@ if( NOT SIMULATIONBASE AND NOT GENERATIONBASE )
    _add_test( ut_xaodrootaccess_stats_test )
    _add_test( ut_xaodrootaccess_tchain_test )
    _add_test( ut_xaodrootaccess_transtree_test )
-   _add_test( ut_xaodrootaccess_revent_test )
    atlas_add_test( ut_xaodrootaccess_transtree2_test
       SCRIPT python
       ${CMAKE_CURRENT_SOURCE_DIR}/test/ut_xaodrootaccess_transtree2_test.py
@@ -116,5 +115,6 @@ atlas_add_test( ut_xaodrootaccess_tpystore_test
 # These have expected errors.
 _add_test( ut_xaodrootaccess_tstore_test EXTRA_IGNORE "|of type ClassA as non-const|of type ConstDataVector<DataVector<ClassA> > as non-const|of type DataVector<ClassA> as non-const" )
 if( NOT GENERATIONBASE AND NOT SIMULATIONBASE )
-   _add_test( ut_xaodrootaccess_tevent_test EXTRA_IGNORE "|The following objects were not set in the current event: .FloatVec., .Container2Aux..|Didn.t find dictionary for type: ClassA|ERROR.* xAOD::Event::record.*T = ClassA|Destructor not known for type DataVector<ClassA>|Couldn.t delete managed object" )
+_add_test( ut_xaodrootaccess_revent_test EXTRA_IGNORE "|The following objects were not set in the current event: .FloatVec., .Container3Aux.., .Container2Aux..|Didn.t find dictionary for type: ClassA|ERROR.* xAOD::Event::record.*T = ClassA|Destructor not known for type DataVector<ClassA>|Couldn.t delete managed object" )
+_add_test( ut_xaodrootaccess_tevent_test EXTRA_IGNORE "|The following objects were not set in the current event: .FloatVec., .Container2Aux..|Didn.t find dictionary for type: ClassA|ERROR.* xAOD::Event::record.*T = ClassA|Destructor not known for type DataVector<ClassA>|Couldn.t delete managed object" )
 endif()
