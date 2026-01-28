@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 # Files for use in configuration unit tests
 
 # These samples can be access via shell script through commands such as:
@@ -117,7 +117,7 @@ class defaultConditionsTags:
     RUN3_DATA22 = "CONDBR2-BLKPA-2022-17"
     RUN3_DATA23 = "CONDBR2-BLKPA-2023-07"
     RUN3_DATA24 = "CONDBR2-BLKPA-2024-05"
-    RUN3_MC = "OFLCOND-MC23-SDR-RUN3-08"
+    RUN3_MC = "OFLCOND-MC23-SDR-RUN3-11-02"
     RUN4_MC = "OFLCOND-MC21-SDR-RUN4-03"
 
     @staticmethod
