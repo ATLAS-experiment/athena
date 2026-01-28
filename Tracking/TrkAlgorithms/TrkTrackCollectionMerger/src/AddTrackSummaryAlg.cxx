@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 #include "TrkTrackCollectionMerger/AddTrackSummaryAlg.h"
 
@@ -59,22 +59,20 @@ StatusCode AddTrackSummaryAlg::execute(const EventContext& ctx) const {
 
         if (m_minPt > 0.0 && pt < m_minPt) doSummary = false;
         if (m_maxAbsEta < 90.0 && std::abs(eta) > m_maxAbsEta) doSummary = false;
-      } else {
-        // No perigee: be conservative to avoid crashes later
-        doSummary = true;
       }
+
       // Create and attach the summary (updateTrackSummary modifies track in-place)
       // This is thread-safe because each event gets its own copy of tracks
       if (doSummary){
-      m_trackSummaryTool->updateTrackSummary(ctx, *const_cast<Trk::Track*>(track));
-      ++tracksProcessed;
+	m_trackSummaryTool->updateTrackSummary(ctx, *const_cast<Trk::Track*>(track));
+	++tracksProcessed;
 
-      // Verify the summary was actually created
-      if (!track->trackSummary()) {
-        ATH_MSG_ERROR("Failed to create TrackSummary for track!");
-        return StatusCode::FAILURE;
+	// Verify the summary was actually created
+	if (!track->trackSummary()) {
+	  ATH_MSG_ERROR("Failed to create TrackSummary for track!");
+	  return StatusCode::FAILURE;
+	}
       }
-     }
     } else {
       ++tracksAlreadyHaveSummary;
     }
@@ -82,6 +80,8 @@ StatusCode AddTrackSummaryAlg::execute(const EventContext& ctx) const {
     // Add track pointer to output collection
     outputTracks->push_back(track);
   }
+
+  ATH_MSG_DEBUG("Processed " << tracksProcessed << " tracks. " << tracksAlreadyHaveSummary << " tracks already had summary");
 
   // Record output collection
   SG::WriteHandle<ConstDataVector<TrackCollection>> outputHandle(m_outputTrackCollection, ctx);
