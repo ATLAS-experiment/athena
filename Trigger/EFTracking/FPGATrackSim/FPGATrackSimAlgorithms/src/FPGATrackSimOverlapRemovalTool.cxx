@@ -110,6 +110,9 @@ StatusCode FPGATrackSimOverlapRemovalTool::runOverlapRemoval(std::vector<FPGATra
 
   ATH_MSG_DEBUG("Tracks in event: " << tracks.size());
 
+
+  if (m_useV2OR)
+    return runOverlapRemoval_v2(tracks);
   return ::runOverlapRemoval(tracks, m_minChi2.value(), m_NumOfHitPerGrouping, getAlgorithm(), m_monTool, m_compareAllHits);
 }
 
@@ -263,6 +266,120 @@ StatusCode FPGATrackSimOverlapRemovalTool::runOverlapRemoval_fast(std::vector<FP
 
     }
   }
+
+  return StatusCode::SUCCESS;
+}
+
+// V2 comparison: sorts worst-to-best (fewer hits = worse, higher chi2 = worse)
+bool FPGATrackSimOverlapRemovalTool::compareTrackQuality_v2(const FPGATrackSimTrack & track1, const FPGATrackSimTrack & track2)
+{
+    // Count real hits in each track
+    int nHits1 = countRealHits_v2(track1);
+    int nHits2 = countRealHits_v2(track2);
+
+    // Sort worst to best: fewer hits is worse, higher chi2 is worse
+    // Return true if track1 should come before track2 (i.e., track1 is worse)
+
+    // First compare number of hits
+    if (nHits1 != nHits2) {
+      return nHits1 < nHits2;  // Fewer hits = worse
+    }
+    
+    // Same number of hits: compare chi2 (higher is worse)
+    float chi2_1 = track1.getChi2ndof();
+    float chi2_2 = track2.getChi2ndof();
+    
+    // Then compare chi2
+    if (std::abs(chi2_1 - chi2_2) > std::numeric_limits<float>::epsilon()) {
+      return chi2_1 > chi2_2;  // Higher chi2 = worse
+    }
+    
+    // Tie-breaker:
+    // in case of same number of hits and same chi2, use track ID (higher ID = worse)
+    return track1.getTrackID() > track2.getTrackID();
+}
+
+int FPGATrackSimOverlapRemovalTool::countRealHits_v2(const FPGATrackSimTrack& track)
+{
+    int nHits = 0;
+    for (const auto& hit : track.getFPGATrackSimHits()) {
+        if (hit.isReal()) nHits++;
+    }
+    return nHits;
+}
+
+int FPGATrackSimOverlapRemovalTool::countOverlappingHits_v2(const FPGATrackSimTrack& track1, const FPGATrackSimTrack& track2) const
+{
+    // Use the existing functions from FPGATrackSimHoughFunctions
+    if (m_compareAllHits) {
+        return findNCommonHitsGlobal(track1, track2);
+    } else {
+        return findNCommonHits(track1, track2);
+    }
+}
+
+StatusCode FPGATrackSimOverlapRemovalTool::runOverlapRemoval_v2(std::vector<FPGATrackSimTrack>& tracks)
+{
+  ATH_MSG_DEBUG("Beginning v2 overlap removal on " << tracks.size() << " tracks");
+
+  // First pass: mark tracks with bad chi2
+  for (auto& track : tracks) {
+    if (track.getChi2ndof() > m_minChi2.value()) {
+      track.setPassedOR(0);
+    }
+  }
+
+  // Sort tracks from worst to best quality using v2 comparison
+  // After sorting: index 0 = worst track (fewest hits, highest chi2)
+  //                last index = best track (most hits, lowest chi2)
+  std::sort(tracks.begin(), tracks.end(), compareTrackQuality_v2);
+
+  // Process from worst to best
+  // For each track at index i, compare with better tracks (j > i)
+  // If overlap found, mark track i as rejected and move to next
+  for (size_t i = 0; i < tracks.size(); i++) {
+    
+    // Skip if already rejected (bad chi2 or previous overlap)
+    if (!tracks[i].passedOR()) continue;
+
+    // Compare with all better tracks (j > i)
+    for (size_t j = i + 1; j < tracks.size(); j++) {
+      
+      // Skip if track j already rejected
+      if (!tracks[j].passedOR()) continue;
+
+      // Count overlapping hits
+      int nOverlapping = countOverlappingHits_v2(tracks[i], tracks[j]);
+
+      // Check if tracks overlap based on algorithm
+      bool isOverlap = false;
+      if (m_algo == ORAlgo::Normal) {
+        isOverlap = (nOverlapping >= m_NumOfHitPerGrouping);
+      } else if (m_algo == ORAlgo::InvertGrouping) {
+        // For InvertGrouping: overlap if non-overlapping hits <= threshold
+        int nHits_i = countRealHits_v2(tracks[i]);
+        int nHits_j = countRealHits_v2(tracks[j]);
+        int nonOverlapping = std::min(nHits_i - nOverlapping, nHits_j - nOverlapping);
+        isOverlap = (nonOverlapping <= m_NumOfHitPerGrouping);
+      }
+
+      if (isOverlap) {
+        // Track i overlaps with better track j -> reject track i
+        tracks[i].setPassedOR(0);
+        ATH_MSG_DEBUG("Track " << i << " rejected due to overlap with better track " << j);
+        
+        // No need to compare track i with any more tracks
+        break;
+      }
+    }
+  }
+
+  // Count survivors for monitoring
+  int nSurvivors = 0;
+  for (const auto& track : tracks) {
+    if (track.passedOR()) nSurvivors++;
+  }
+  ATH_MSG_DEBUG("V2 OR complete: " << nSurvivors << " tracks surviving out of " << tracks.size());
 
   return StatusCode::SUCCESS;
 }
