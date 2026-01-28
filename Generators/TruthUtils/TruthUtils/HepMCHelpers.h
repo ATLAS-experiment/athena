@@ -209,7 +209,8 @@ namespace MC
   /// AV: This is MCtruthClassifier legacy.
   /// The function should be improved in the future.
   /** This can be used for HepMC3::GenVertexPtr, HepMC3::ConstGenVertexPtr or xAOD::TruthVertex* */  
-  template <class T> bool isFromHadron(T p, T hadron, bool &fromTau, bool &fromBSM) {
+    template <class T, class U>
+    bool isFromHadron(T p, U hadron, bool &fromTau, bool &fromBSM) {
     if (isHadron(p)&&!isBeam(p))  return true; // trivial case
     auto vtx = p->production_vertex();
     if (!vtx)  return false;
