@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TestDriver.h"
@@ -15,7 +15,6 @@
 #include "PersistentDataModel/Token.h"
 
 #include "StorageSvc/DbType.h"
-#include "FileCatalog/URIParser.h"
 #include "FileCatalog/IFileCatalog.h"
 
 #include "PersistencySvc/ISession.h"
@@ -40,9 +39,7 @@ pool::TestDriver::TestDriver( const std::string& catname ):
   std::cout << "[OVAL] Creating a file catalog" << std::endl;
   m_fileCatalog = new pool::IFileCatalog;
   std::filesystem::remove( {catname} );
-  pool::URIParser p( std::string("file:") + catname );
-  p.parse();
-  m_fileCatalog->setWriteCatalog( p.contactstring() );
+  m_fileCatalog->setWriteCatalog( catname );
   m_fileCatalog->connect();
 }
 
