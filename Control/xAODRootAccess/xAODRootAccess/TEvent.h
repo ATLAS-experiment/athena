@@ -1,6 +1,6 @@
 // Dear emacs, this is -*- c++ -*-
 //
-// Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 //
 #ifndef XAODROOTACCESS_TEVENT_H
 #define XAODROOTACCESS_TEVENT_H
@@ -108,8 +108,12 @@ public:
   /// Connect the object to a new input tree/chain
   StatusCode readFrom(::TTree* tree, bool useTreeCache = true);
   /// Connect the object to an output file
+  StatusCode writeTo(TFile& file) override;
+  /// Connect the object to an output file
   StatusCode writeTo(::TFile* file, int autoFlush = 200,
                      std::string_view treeName = EVENT_TREE_NAME);
+  /// Finish writing to an output file
+  StatusCode finishWritingTo(TFile& file) override;
   /// Finish writing to an output file
   StatusCode finishWritingTo(::TFile* file);
 
@@ -118,7 +122,7 @@ public:
   /// @name Event data accessor/modifier functions
   /// @{
 
-  // Bring the definition of Event::record into scope
+  // Bring the definition of Event::record into scope to allow a TEvent object to record object
   using Event::record;
 
   /// Add an auxiliary store object to the output
@@ -142,7 +146,7 @@ public:
   ::Int_t getFile(::Long64_t file, ::Int_t getall = 0);
 
   /// Function filling one event into the output tree
-  ::Int_t fill();
+  ::Int_t fill() override;
 
   /// @}
 

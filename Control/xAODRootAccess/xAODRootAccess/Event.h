@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 #ifndef XAODROOTACCESS_EVENT_H
 #define XAODROOTACCESS_EVENT_H
 
@@ -85,6 +85,12 @@ class Event : public TVirtualEvent,
   /// Read from a new file - only needed for the second+ files
   virtual StatusCode  readFrom(TFile& inFile) = 0;
 
+  /// Connect the object to an output file
+  virtual StatusCode writeTo(TFile& file) = 0;
+
+  /// Finish writing to an output file
+  virtual StatusCode finishWritingTo(TFile& file) = 0;
+
   /// Set this event object as the currently active one
   void setActive() const;
 
@@ -120,6 +126,8 @@ class Event : public TVirtualEvent,
   /// Function loading a given entry of the input TTree
   virtual ::Int_t getEntry(::Long64_t entry, ::Int_t getall = 0) = 0;
 
+  /// Method filling one event into the output tree
+  virtual ::Int_t fill() = 0;
 
   /// Get information about the input objects
   const EventFormat* inputEventFormat() const;

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // System include(s):
@@ -22,8 +22,8 @@
 // Local include(s):
 #include "xAODRootAccess/Init.h"
 
-// #include "xAODRootAccess/REvent.h"
 #include "xAODRootAccess/Event.h"
+#include "xAODRootAccess/REvent.h"
 #include "xAODRootAccess/TStore.h"
 #include "xAODRootAccess/RAuxStore.h"
 #include "xAODRootAccess/TAuxStore.h"
@@ -109,8 +109,8 @@ int main() {
    // Try resetting the ifile pointer to make sure things still work
    ifile.reset();
 
-   // Set debug level 
-   event->msg().setLevel(MSG::DEBUG);
+   // // Set debug level 
+   // event->msg().setLevel(MSG::DEBUG);
 
    // Read in the first event:
    if( event->getEntry( 0 ) < 0 ) {
@@ -133,7 +133,7 @@ int main() {
    // Print what's in the event now:
    Info( APP_NAME, "Event contents:\n\n%s\n\n", event->dump().c_str() );
 
-   // They should now be accessible through EventIO:
+   // They should now be accessible through Event:
    const ClassA* dummy1 = 0;
    RETURN_CHECK( APP_NAME, event->retrieve( dummy1, "MyObjA" ) );
    const ClassB* dummy2 = 0;
@@ -220,15 +220,16 @@ int main() {
    }
 
 
-   // *********************************************************************************************
-   // RDS: the following can be uncommented when REvent has the getName implemented - needs writing
-   // *********************************************************************************************
+   //////////////////////////////////////////////////////////////
+   // RDS: 2026/01/21 getName will be implemented in a future MR
+   //////////////////////////////////////////////////////////////
+
 
 
    // // test listing object keys
    // {
    //    std::vector<std::string> keys;
-   //    RETURN_CHECK( APP_NAME, event.keys<xAOD::FileMetaData>(keys, true) );
+   //    RETURN_CHECK( APP_NAME, event->keys<xAOD::FileMetaData>(keys, true) );
    //    if (keys.size() != 1) {
    //       ::Error( APP_NAME,
    //             XAOD_MESSAGE( "keys<xAOD::FileMetaData>(true).size = %u (!=1)" ),
@@ -236,9 +237,9 @@ int main() {
    //       return 1;
    //    }
    //    keys.clear();
-   //    keys.reserve(6);
-   //    RETURN_CHECK( APP_NAME, event.keys<DataVector< xAOD::TrackParticle > >(keys, false) );
-   //    if (keys.size() != 6) {
+   //    keys.reserve(5); // Only 5 containers for TrackParticles in OpenData, whereas there are 6 for std DAODs
+   //    RETURN_CHECK( APP_NAME, event->keys<DataVector< xAOD::TrackParticle > >(keys, false) );
+   //    if (keys.size() != 5) {
    //       ::Error( APP_NAME,
    //             XAOD_MESSAGE( "keys<xAOD::TrackParticle >().size = %u (!=6)" ),
    //             static_cast<unsigned>(keys.size()) );
@@ -257,80 +258,160 @@ int main() {
 
    // }
 
-   // **************************************************************************************
-   // RDS: the following is for writing. To uncomment when REvent has the writing integrated
-   // **************************************************************************************
 
-   // // Create another REvent instance to test the file writing capabilities of
-   // // the code:
-   // xAOD::Experimental::REvent wevent;
-   // // And connect it to an output file:
-   // static const char* const OFNAME = "test.xAOD.root";
-   // RETURN_CHECK( APP_NAME, wevent.writeTo( OFNAME ) );
-   // // Construct some xAOD store objects:
-   // SG::AuxTypeRegistry& reg = SG::AuxTypeRegistry::instance();
-   // std::unique_ptr< xAOD::AuxContainerBase > c1( new xAOD::AuxContainerBase() );
-   // c1->resize( 5 );
-   // c1->getData( reg.getAuxID< int >( "IntVar" ), 5, 5 );
-   // c1->getData( reg.getAuxID< float >( "FloatVar" ), 5, 5 );
-   // std::unique_ptr< xAOD::AuxContainerBase > c2( new xAOD::AuxContainerBase() );
+   // Create another REvent instance to test the file writing capabilities of
+   // the code:
+   xAOD::Experimental::REvent wevent;
+
+   // // Set debug level 
+   // wevent.msg().setLevel(MSG::DEBUG);
+
+   // And connect it to an output file:
+   static const char* const OFNAME = "test.xAOD.root";
+   std::unique_ptr< ::TFile > ofile( ::TFile::Open( OFNAME, "RECREATE" ) );
+   if( ! ofile.get() ) {
+      ::Error( APP_NAME, XAOD_MESSAGE( "Couldn't create test output file: %s" ),
+               OFNAME );
+      return 1;
+   }
+   RETURN_CHECK( APP_NAME, wevent.writeTo( *ofile ) );
+
+
+   // Construct some xAOD store objects 
+   //   - for the first fill, keep the last container, c3, empty for the first fill
+   //   - the the add objects for the next fill
+   SG::AuxTypeRegistry& reg = SG::AuxTypeRegistry::instance();
+   std::unique_ptr< xAOD::AuxContainerBase > c1( new xAOD::AuxContainerBase() );
+   c1->resize( 5 );
+   c1->getData( reg.getAuxID< int >( "IntVar" ), 5, 5 );
+   c1->getData( reg.getAuxID< float >( "FloatVar" ), 5, 5 );
+   std::unique_ptr< xAOD::AuxContainerBase > c2( new xAOD::AuxContainerBase() );
+   c2->resize( 10 );
+   c2->getData( reg.getAuxID< int >( "IntVar" ), 10, 10 );
+   c2->getData( reg.getAuxID< float >( "FloatVar" ), 10, 10 );
+   std::unique_ptr< xAOD::AuxContainerBase > c3( new xAOD::AuxContainerBase() );
    // c2->resize( 10 );
    // c2->getData( reg.getAuxID< int >( "IntVar" ), 10, 10 );
    // c2->getData( reg.getAuxID< float >( "FloatVar" ), 10, 10 );
-   // // And some STL ones as well:
-   // std::unique_ptr< std::vector< float > >
-   //    fvector( new std::vector< float >() );
-   // fvector->insert( fvector->begin(), 5, 1.23 );
-   // std::unique_ptr< std::vector< std::string > >
-   //    svector( new std::vector< std::string >() );
-   // svector->insert( svector->begin(), 3, "foo" );
-   // // It should be possible to record these into the output:
-   // RETURN_CHECK( APP_NAME, wevent.record( std::move( c1 ), "Container1Aux." ) );
-   // RETURN_CHECK( APP_NAME, wevent.record( std::move( c2 ), "Container2Aux." ) );
-   // RETURN_CHECK( APP_NAME, wevent.record( std::move( fvector ), "FloatVec" ) );
-   // RETURN_CHECK( APP_NAME, wevent.record( std::move( svector ), "StringVec" ) );
-   // ::Int_t nbytes = wevent.fill();
-   // if( nbytes <= 0 ) {
-   //    ::Error( APP_NAME, XAOD_MESSAGE( "Couldn't write event to output" ) );
-   //    return 1;
-   // }
+   // And some STL ones as well:
+   std::unique_ptr< std::vector< float > >
+      fvector( new std::vector< float >() );
+   fvector->insert( fvector->begin(), 5, 1.23 );
+   std::unique_ptr< std::vector< std::string > >
+      svector( new std::vector< std::string >() );
+   svector->insert( svector->begin(), 3, "foo" );
+   // It should be possible to record these into the output:
+   RETURN_CHECK( APP_NAME, wevent.record( std::move( c1 ), "Container1Aux." ) );
+   RETURN_CHECK( APP_NAME, wevent.record( std::move( c2 ), "Container2Aux." ) );
+   RETURN_CHECK( APP_NAME, wevent.record( std::move( c3 ), "Container3Aux." ) );
+   RETURN_CHECK( APP_NAME, wevent.record( std::move( fvector ), "FloatVec" ) );
+   RETURN_CHECK( APP_NAME, wevent.record( std::move( svector ), "StringVec" ) );
 
-   // // Now update just some of them, and see what happens. Remember that the old
-   // // objects are now owned by REvent, so we can re-use these pointers.
-   // c1.reset( new xAOD::AuxContainerBase() );
-   // c1->resize( 5 );
-   // c1->getData( reg.getAuxID< int >( "IntVar" ), 5, 5 );
-   // c1->getData( reg.getAuxID< float >( "FloatVar" ), 5, 5 );
-   // svector.reset( new std::vector< std::string >() );
-   // svector->insert( svector->begin(), 4, "bar" );
-   // RETURN_CHECK( APP_NAME, wevent.record( std::move( c1 ), "Container1Aux." ) );
-   // RETURN_CHECK( APP_NAME, wevent.record( std::move( svector ), "StringVec" ) );
-   // if( wevent.fill() > 0 ) {
-   //    ::Error( APP_NAME, XAOD_MESSAGE( "This writing should've failed. o.O" ) );
-   //    return 1;
-   // }
+   ::Int_t nbytes = wevent.fill();
+   if( nbytes <= 0 ) {
+      ::Error( APP_NAME, XAOD_MESSAGE( "Couldn't write event to output - first fill" ) );
+      return 1;
+   }
 
-   // // And now try to record an object without a dictionary. Which should
-   // // of course fail.
-   // std::unique_ptr< ClassA > c3( new ClassA() );
-   // if( wevent.record( std::move( c3 ), "ClassA" ).isSuccess() ) {
-   //    ::Error( APP_NAME, XAOD_MESSAGE( "This record should've failed. o.O" ) );
-   //    return 1;
-   // }
+   // Now refill with c3 not empty
+   c1.reset( new xAOD::AuxContainerBase() );
+   c1->resize( 6 );
+   c1->getData( reg.getAuxID< int >( "IntVar" ), 6, 6 );
+   c1->getData( reg.getAuxID< float >( "FloatVar" ), 6, 6 );
+   c2.reset( new xAOD::AuxContainerBase() );
+   c2->resize( 11 );
+   c2->getData( reg.getAuxID< int >( "IntVar" ), 11, 11 );
+   c2->getData( reg.getAuxID< float >( "FloatVar" ), 11, 11 );
+   c3.reset( new xAOD::AuxContainerBase() );
+   c3->resize( 16 );
+   c3->getData( reg.getAuxID< int >( "IntVar" ), 16, 16 );
+   c3->getData( reg.getAuxID< float >( "FloatVar" ), 16, 16 );
+   fvector.reset( new std::vector< float >() );
+   fvector->insert( fvector->begin(), 5, 1.33 );
+   svector.reset( new std::vector< std::string >() );
+   svector->insert( svector->begin(), 4, "bar1" );
+   // It should be possible to record these into the output:
+   RETURN_CHECK( APP_NAME, wevent.record( std::move( c1 ), "Container1Aux." ) );
+   RETURN_CHECK( APP_NAME, wevent.record( std::move( c2 ), "Container2Aux." ) );
+   RETURN_CHECK( APP_NAME, wevent.record( std::move( c3 ), "Container3Aux." ) );
+   RETURN_CHECK( APP_NAME, wevent.record( std::move( fvector ), "FloatVec" ) );
+   RETURN_CHECK( APP_NAME, wevent.record( std::move( svector ), "StringVec" ) );
 
-   // // Finish writing to the file:
-   // RETURN_CHECK( APP_NAME, wevent.finishWriting() );
+   nbytes = wevent.fill();
+   if( nbytes <= 0 ) {
+      ::Error( APP_NAME, XAOD_MESSAGE( "Couldn't write event to output - second fill" ) );
+      return 1;
+   }
 
-   // xAOD::Experimental::REvent rwevent;
-   // RETURN_CHECK( APP_NAME, rwevent.readFrom( "test.xAOD.root" ) );
+   // Now repeat another time with container 2 empty
+   c1.reset( new xAOD::AuxContainerBase() );
+   c1->resize( 7 );
+   c1->getData( reg.getAuxID< int >( "IntVar" ), 7, 7 );
+   c1->getData( reg.getAuxID< float >( "FloatVar" ), 7, 7 );
+   c2.reset( new xAOD::AuxContainerBase() );
+   // c2->resize( 11 );
+   c2->getData( reg.getAuxID< int >( "IntVar" ), 0, 0 );
+   c2->getData( reg.getAuxID< float >( "FloatVar" ), 0, 0 );
+   c3.reset( new xAOD::AuxContainerBase() );
+   c3->resize( 17 );
+   c3->getData( reg.getAuxID< int >( "IntVar" ), 17, 17 );
+   c3->getData( reg.getAuxID< float >( "FloatVar" ), 17, 17 );
+   fvector.reset( new std::vector< float >() );
+   fvector->insert( fvector->begin(), 5, 1.33 );
+   svector.reset( new std::vector< std::string >() );
+   svector->insert( svector->begin(), 4, "bar1" );
+   // It should be possible to record these into the output:
+   RETURN_CHECK( APP_NAME, wevent.record( std::move( c1 ), "Container1Aux." ) );
+   RETURN_CHECK( APP_NAME, wevent.record( std::move( c2 ), "Container2Aux." ) );
+   RETURN_CHECK( APP_NAME, wevent.record( std::move( c3 ), "Container3Aux." ) );
+   RETURN_CHECK( APP_NAME, wevent.record( std::move( fvector ), "FloatVec" ) );
+   RETURN_CHECK( APP_NAME, wevent.record( std::move( svector ), "StringVec" ) );
 
-   // // Read in the first event:
-   // if( rwevent.getEntry( 0 ) < 0 ) {
-   //    ::Error( APP_NAME, XAOD_MESSAGE( "Couldn't load entry 0 from test.xAOD.root" ) );
-   //    return 1;
-   // }
+   nbytes = wevent.fill();
+   if( nbytes <= 0 ) {
+      ::Error( APP_NAME, XAOD_MESSAGE( "Couldn't write event to output - third fill" ) );
+      return 1;
+   }
 
-   // // And delete the file from disk:
+
+   // Now update just some of them, and see what happens. The fill should fail.
+   // Remember that the old
+   // objects are now owned by REvent, so we can re-use these pointers.
+   c1.reset( new xAOD::AuxContainerBase() );
+   c1->resize( 5 );
+   c1->getData( reg.getAuxID< int >( "IntVar" ), 5, 5 );
+   c1->getData( reg.getAuxID< float >( "FloatVar" ), 5, 5 );
+   svector.reset( new std::vector< std::string >() );
+   svector->insert( svector->begin(), 4, "bar" );
+   RETURN_CHECK( APP_NAME, wevent.record( std::move( c1 ), "Container1Aux." ) );
+   RETURN_CHECK( APP_NAME, wevent.record( std::move( svector ), "StringVec" ) );
+
+   if( wevent.fill() > 0 ) {
+      ::Error( APP_NAME, XAOD_MESSAGE( "This writing should've failed. nbytes %i" ), nbytes );
+      return 1;
+   }
+
+   // And now try to record an object without a dictionary. Which should
+   // of course fail.
+   std::unique_ptr< ClassA > c4( new ClassA() );
+   if( wevent.record( std::move( c4 ), "ClassA" ).isSuccess() ) {
+      ::Error( APP_NAME, XAOD_MESSAGE( "This record should've failed. o.O" ) );
+      return 1;
+   }
+
+   // Finish writing to the file:
+   RETURN_CHECK( APP_NAME, wevent.finishWritingTo(*ofile) );
+
+   xAOD::Experimental::REvent rwevent;
+   RETURN_CHECK( APP_NAME, rwevent.readFrom( "test.xAOD.root" ) );
+
+   // Read in the first event:
+   if( rwevent.getEntry( 0 ) < 0 ) {
+      ::Error( APP_NAME, XAOD_MESSAGE( "Couldn't load entry 0 from test.xAOD.root" ) );
+      return 1;
+   }
+
+   // And delete the file from disk:
    // if( gSystem->Unlink( OFNAME ) ) {
    //    ::Error( APP_NAME, XAOD_MESSAGE( "Couldn't remove temporary file: %s" ),
    //             OFNAME );
