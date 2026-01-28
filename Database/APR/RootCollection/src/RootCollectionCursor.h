@@ -14,7 +14,6 @@
 
 class TTree;
 class TBranch;
-class TEventList;
 
 namespace pool {
    namespace RootCollection {
@@ -30,8 +29,7 @@ namespace pool {
         RootCollectionCursor(
            const pool::ICollectionDescription& description,
            const pool::CollectionRowBuffer& collectionRowBuffer,
-           TTree *tree,
-           const TEventList *evl );
+           TTree *tree );
 
         
         /// Advances the cursor to the next row

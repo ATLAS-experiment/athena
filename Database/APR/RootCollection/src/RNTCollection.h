@@ -36,9 +36,6 @@ namespace pool {
 
    namespace RootCollection {
       class Attribute;
-      class AttributeSpecification;
-
-      static constexpr auto MODULE_NAME = "RootCollection";
   
       /**
          @brief Collection (and CollectionProxy) implementation based on RNTuple
