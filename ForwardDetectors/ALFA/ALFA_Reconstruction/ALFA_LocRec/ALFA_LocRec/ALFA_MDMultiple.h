@@ -28,9 +28,9 @@ class ALFA_MDMultiple : public AthMessaging
 {
 	public:
 		ALFA_MDMultiple();
-		ALFA_MDMultiple(const ALFA_MDMultiple &obj);
-		ALFA_MDMultiple& operator=(const ALFA_MDMultiple &obj);
-		~ALFA_MDMultiple();
+		ALFA_MDMultiple(const ALFA_MDMultiple &obj) = default;
+		ALFA_MDMultiple& operator=(const ALFA_MDMultiple &obj) = default;
+		~ALFA_MDMultiple() = default;
 
 	private:
 		Int_t m_iRPot;
@@ -46,21 +46,11 @@ class ALFA_MDMultiple : public AthMessaging
 		//number of hits in the layer [2*10]
 		Int_t m_iNumHitsLayer[ALFALAYERSCNT*ALFAPLATESCNT];
 
-//		Int_t m_iTrackMatch[MAXTRACKNUM][2];
-//		Int_t m_iNU[MAXTRACKNUM];
-//		Int_t m_iNV[MAXTRACKNUM];
-//		Int_t m_iFibSel[MAXTRACKNUM][ALFALAYERSCNT*ALFAPLATESCNT];
-
-//		Float_t m_fRecXPos[MAXTRACKNUM];
-//		Float_t m_fRecYPos[MAXTRACKNUM];
-//		Float_t m_fOvU[MAXTRACKNUM];
-//		Float_t m_fOvV[MAXTRACKNUM];
-
-		std::vector<Float_t> *m_fRecXPos, *m_fRecYPos;
-		std::vector<Float_t> *m_fOvU, *m_fOvV;
-		std::vector<Int_t>   *m_iNU, *m_iNV;
-		std::vector<Int_t>   *m_iFibSel[ALFALAYERSCNT*ALFAPLATESCNT];
-		std::vector<Int_t>   *m_iTrackMatch[2];
+		std::vector<Float_t> m_fRecXPos, m_fRecYPos;
+		std::vector<Float_t> m_fOvU, m_fOvV;
+		std::vector<Int_t>   m_iNU, m_iNV;
+		std::vector<Int_t>   m_iFibSel[ALFALAYERSCNT*ALFAPLATESCNT];
+		std::vector<Int_t>   m_iTrackMatch[2];
 
 	private:
 		std::map<int, FIBERS> m_MapLayers;
