@@ -95,12 +95,15 @@ Vec4 Suep_shower::generateFourVector(){
     phi = 2.0*M_PI*(m_rndmEngine->flat());
     theta = acos(2.0*m_rndmEngine->flat()-1.0);
   } else {
+    //coverity[DC.WEAK_CRYPTO]
     phi = 2.0*M_PI*((double) rand() / RAND_MAX);
+    //coverity[DC.WEAK_CRYPTO]
     theta = acos(2.0*((double) rand() / RAND_MAX)-1.0);
   }
   
   // compose the 4 vector
   en = std::sqrt(p*p+(this->m_m)*(this->m_m));
+  //coverity[COPY_PASTE_ERROR]
   fourvec.p(p*cos(phi)*sin(theta), p*sin(phi)*sin(theta), p*cos(theta), en);
   
   return fourvec; 
