@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  */
 
 
@@ -64,7 +64,7 @@ namespace dqutils {
     }
 
     //start postprocessing
-    TString run_dir;
+    std::string run_dir;
     HLTJetCalcEfficiencyAndRate(f, run_dir);
     //close root file
     f->Close();
