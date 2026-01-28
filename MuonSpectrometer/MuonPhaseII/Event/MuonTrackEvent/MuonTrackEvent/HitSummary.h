@@ -30,7 +30,9 @@ namespace MuonR4{
                 Precision=0,         /// Precision hits (Mdt, NSW) on track
                 TriggerEta,          /// Trigger eta hits (Tgc, Rpc)
                 TriggerPhi,          /// Trigger phi hits (Tgc, Rpc)
+                sTgcPad,             /// sTgc pad hits
                 nCategories
+                
             };
             /** @brief  Contribution to the track fit */
             enum class Status {

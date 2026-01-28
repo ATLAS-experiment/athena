@@ -11,6 +11,7 @@
 #include "Acts/Utilities/StringHelpers.hpp"
 #include "TrkRIO_OnTrack/RIO_OnTrack.h"
 #include "TrkCompetingRIOsOnTrack/CompetingRIOsOnTrack.h"
+#include "xAODMuonPrepData/CombinedMuonStrip.h"
 
 using namespace ActsTrk::detail;
 using namespace Muon::MuonStationIndex;
@@ -37,7 +38,15 @@ namespace MuonR4 {
                 }
                 if (state.hasUncalibratedSourceLink()) {
                     const auto* meas = xAODUncalibMeasCalibrator::unpack(state.getUncalibratedSourceLink());
-                    incrementSummary(xAOD::identify(meas), status, meas->numDimensions(), summary);
+                    // for the combined sTgc space point we have to fill the primary and secodnray measuremment seperately to resolve the strip/pad/wire combinations
+                    if(meas->type() == xAOD::UncalibMeasType::sTgcStripType && meas->numDimensions() == 0){
+                        const auto* combinedMeas = static_cast<const xAOD::CombinedMuonStrip*>(meas);
+                        incrementSummary(xAOD::identify(combinedMeas->primaryStrip()), status, combinedMeas->primaryStrip()->numDimensions(), summary);
+                        incrementSummary(xAOD::identify(combinedMeas->secondaryStrip()), status, combinedMeas->secondaryStrip()->numDimensions(), summary);
+                        
+                    } else {
+                        incrementSummary(xAOD::identify(meas), status, meas->numDimensions(), summary);
+                    }
                 } else if (state.hasReferenceSurface()) {
                     const Acts::Surface& surf{state.referenceSurface()};
                     /// Surface is not active
@@ -88,8 +97,16 @@ namespace MuonR4 {
             } else {
                 cat1 = Cat_t::TriggerEta;
             }
+        } else if (techIdx == TechIdx::STGC) {
+            if(m_idHelperSvc->stgcIdHelper().channelType(hitId) == sTgcIdHelper::sTgcChannelTypes::Pad){
+                cat1 = Cat_t::sTgcPad;
+            } else if (m_idHelperSvc->stgcIdHelper().channelType(hitId) == sTgcIdHelper::sTgcChannelTypes::Wire){
+                cat1 = Cat_t::TriggerPhi;
+            } else if (m_idHelperSvc->stgcIdHelper().channelType(hitId) == sTgcIdHelper::sTgcChannelTypes::Strip){
+                cat1 = Cat_t::Precision;
+            }
         } else {
-            ATH_MSG_ALWAYS(__FILE__<<":"<<__LINE__<<" Implement sTGC!");
+            ATH_MSG_ERROR(__FILE__ << ":" << __LINE__ << "  Unkown technology index "<<static_cast<int>(techIdx));
             return;
         }
 
@@ -120,7 +137,15 @@ namespace MuonR4 {
                 for (std::size_t hit = 0; hit < nHits; ++hit) {
                     Stat_t state = isOutlierMeasurement(*seg, hit) ? Stat_t::Outlier : Stat_t::OnTrack;
                     const auto * meas = getMeasurement(*seg, hit);
-                    incrementSummary(xAOD::identify(meas), state, meas->numDimensions(), summary);
+                    // for the combined sTgc space point we have to fill the primary and secodnray measuremment seperately to resolve the strip/pad/wire combinations
+                    if(meas->type() == xAOD::UncalibMeasType::sTgcStripType && meas->numDimensions() == 0){
+                        const auto* combinedMeas = static_cast<const xAOD::CombinedMuonStrip*>(meas);
+                        incrementSummary(xAOD::identify(combinedMeas->primaryStrip()), state, combinedMeas->primaryStrip()->numDimensions(), summary);
+                        incrementSummary(xAOD::identify(combinedMeas->secondaryStrip()), state, combinedMeas->secondaryStrip()->numDimensions(), summary);
+                        
+                    } else {
+                        incrementSummary(xAOD::identify(meas), state, meas->numDimensions(), summary);
+                    }
                 }
             }
         }
