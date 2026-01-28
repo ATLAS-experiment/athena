@@ -19,6 +19,7 @@ namespace MuonR4{
             case Precision: return "Precision";
             case TriggerEta: return "TriggerEta";
             case TriggerPhi: return "TriggerPhi";
+            case sTgcPad: return "sTgcPad";
             case nCategories: return "nCategories";
         }
         return "Unknown";
@@ -66,7 +67,7 @@ namespace MuonR4{
                               LayerIndex::Outer}){            
             for (const bool small: {false, true}) {
                 for (const auto cat : {HitCategory::Precision, HitCategory::TriggerEta,
-                                       HitCategory::TriggerPhi}){
+                                       HitCategory::TriggerPhi, HitCategory::sTgcPad}){
                     const unsigned onTrk = value(cat, Status::OnTrack, lay, small);
                     const unsigned outlier = value(cat, Status::Outlier, lay, small);
                     const unsigned hole = value(cat, Status::Hole, lay, small);
