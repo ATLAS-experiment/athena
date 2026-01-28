@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ROOTCOLLECTION_ROOTCOLLECTION_H
@@ -16,13 +16,16 @@
 #include "Gaudi/PluginService.h"
 
 #include <string>
-#include <vector>
 #include <memory>
 
 class TTree;
 class TFile;
 class IFileMgr;
-
+namespace ROOT {
+   class RNTupleModel;
+   class RNTupleWriter;
+   class RNTupleReader;
+}
 
 namespace pool {
 
@@ -90,20 +93,13 @@ namespace pool {
      private:
     
         /// copying unimplemented in this class.
-        RootCollection(const RootCollection &);
-        /// copying unimplemented in this class.
-        RootCollection & operator = (const RootCollection &);
+        RootCollection(const RootCollection &) = delete;
+        RootCollection & operator = (const RootCollection &) = delete;
     
         void setupTree() const;
+	void addField(ROOT::RNTupleModel* model, const std::string& field_name, const std::string& field_type);
 
         void cleanup();
-        
-     public:
-        
-        static const char* const poolOptToRootOpt[];
-        static const Io::IoFlags poolOptToFileMgrOpt[];
-
-     private:
 
         CollectionDescription                m_description;
         
@@ -112,6 +108,9 @@ namespace pool {
         ICollection::OpenMode                m_mode;
         TTree*                               m_tree;
         TFile*                               m_file;
+	std::unique_ptr<ROOT::RNTupleReader> m_reader;
+	std::unique_ptr<ROOT::RNTupleWriter> m_rntupleWriter;
+
         ISession*                            m_session;
         bool                                 m_open;
 

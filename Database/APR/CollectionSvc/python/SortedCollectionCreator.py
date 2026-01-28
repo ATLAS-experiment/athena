@@ -1,12 +1,10 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 __author__ = "Marcin Nowak"
 __doc__ = """
 Create a sorted collection of Event references from a set of Athnea files containing EventInfoTags
 (or from other compatible APR Event collections)
 """
-
-from CollectionSvc.GetCollectionType import getCollectionType
 
 
 class SortedCollectionCreator:
@@ -42,12 +40,10 @@ class SortedCollectionCreator:
       self.tokenName = desc.eventReferenceColumnName()
       # make a local copy of the description
       self.collDescription = self.pool.CollectionDescription( desc )
-      # prevent overwriting input by accident
-      self.collDescription.setName("")
 
 
    def readInputCollections(self, inputCollections):
-      """read all input collections into memore"""
+      """read all input collections into memory"""
       self.collDescription = None
       self.allRows = []
       self.attrNames = []
@@ -55,7 +51,7 @@ class SortedCollectionCreator:
       self.tokenName = None
       for inFileName in inputCollections:
          self.debug("Opening {}".format(inFileName))
-         iColl = self.collSvc.open( "Input", getCollectionType(inFileName), inFileName)
+         iColl = self.collSvc.open( "Input", "RootCollection", inFileName)
          self.debug("{} opened".format(inFileName))
          if self.collDescription is None:
             self.readCollectionDescription(iColl)

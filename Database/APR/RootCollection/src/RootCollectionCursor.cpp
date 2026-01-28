@@ -7,7 +7,6 @@
 #include "CoralBase/Attribute.h"
 
 #include "TTree.h"
-#include "TEventList.h"
 
 #include <exception>
 
@@ -15,14 +14,13 @@ pool::RootCollection::RootCollectionCursor::
 RootCollectionCursor(
    const pool::ICollectionDescription& description,
    const pool::CollectionRowBuffer& collectionRowBuffer,
-   TTree *tree,
-   const TEventList *evl 
+   TTree *tree
    )
       :
       m_description( description ),
       m_collectionRowBuffer( collectionRowBuffer ),
       m_idx(-1),
-      m_entries( evl? evl->GetN() : tree->GetEntries() ),
+      m_entries( tree->GetEntries() ),
       m_dummyRef( false )
 {
    for( coral::AttributeList::iterator attrI = m_collectionRowBuffer.attributeList().begin();
