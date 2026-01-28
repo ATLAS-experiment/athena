@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // Author: Alberto Plebani <alberto.plebani@cern.ch>, based on earlier implementation by M. Leigh and Bill Balunas <balunas@cern.ch>
@@ -348,7 +348,7 @@ namespace met {
     xAOD::MissingET* blank_met;
     MissingETBase::Types::bitmask_t source;
 
-    for ( const auto& old_met : *old_container ) {
+    for ( const xAOD::MissingET* old_met : *old_container ) {
       blank_met = nullptr;                                                  // Resetting the null pointer
       name = acc_name(*old_met);                                            // Getting the name from the original container
       source = acc_source(*old_met);                                        // Getting the particle type from the original container
