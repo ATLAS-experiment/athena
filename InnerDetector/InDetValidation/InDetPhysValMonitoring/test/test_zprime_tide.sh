@@ -91,7 +91,7 @@ case $ArtProcess in
         --conditionsTag default:$conditionsTag \
         --digiSeedOffset1 100 --digiSeedOffset2 100 \
         --inputHITSFile=$x \
-        --maxEvents -1 \
+        --maxEvents 100 \
         --outputRDOFile $rdo \
         --preInclude 'HITtoRDO:Campaigns.MC23dNoPileUp' \
         --postInclude 'PyJobTransforms.UseFrontier'

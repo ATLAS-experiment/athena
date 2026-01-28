@@ -1,7 +1,7 @@
 // Emacs -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -369,7 +369,7 @@ bool HLT::NavigationCore::getRecentFeatureLink( const TriggerElement* te,
     if ( links.size() != 1 ) {
       ATH_MSG_WARNING("getRecentFeatureLink: problems while getting objects #" << objectIndex
                       << " from the holder: " << *holder << " links vector has size "
-                      << links.size() << " while shoudl have size == 1");
+                      << links.size() << " while should have size == 1");
       return false;
     } else {
       link = links.back();
@@ -491,7 +491,7 @@ namespace HLT{
   template<class T, class C>
   struct get< T, C, false, false>{
     static const T* do_it(const TrigFeatureLink&, const HLT::NavigationCore* ){
-      return 0; // here compile time error shoudl be generated
+      return 0; // here compile time error should be generated
     }
   };
 
@@ -501,8 +501,9 @@ namespace HLT{
       HLTNavDetails::Holder<T>* holder = nav->getHolder<T>(fl.subTypeIndex());
       //std::cerr << " Holder acquired " << __LINE__ << std::endl;
       const T* ptr(0);
-      holder->get(ptr, HLT::TriggerElement::ObjectIndex(fl.subTypeIndex(), fl.index(), fl.index()+1));
-      //      std::cerr << " object retrieved " << __LINE__ << std::endl;
+      if (not holder->get(ptr, HLT::TriggerElement::ObjectIndex(fl.subTypeIndex(), fl.index(), fl.index()+1))){
+        std::cerr<<"NavigationCore.icc:do_it: get failed\n";
+      };
       return ptr;
     }
 
@@ -514,7 +515,9 @@ namespace HLT{
       HLTNavDetails::Holder<C>* holder = const_cast<HLT::NavigationCore*>(nav)->getHolder<C>(fl.subTypeIndex());
       //std::cerr << " Holder acquired " << __LINE__ <<  " " << fl.clid() << " " << fl.subTypeIndex() << " " << holder << "  " <<  ClassID_traits<C>::ID() << std::endl;
       const C* ptr(0);
-      holder->get(ptr, HLT::TriggerElement::ObjectIndex(fl.subTypeIndex(), fl.index(), fl.index()+1));
+      if (not holder->get(ptr, HLT::TriggerElement::ObjectIndex(fl.subTypeIndex(), fl.index(), fl.index()+1))){
+        std::cerr<<"NavigationCore.icc:get: get failed\n";
+      }
       //std::cerr << " object retrieved " << __LINE__ << std::endl;
       if ( ptr and ptr->size() == 1) {
 	return ptr->at(0);
