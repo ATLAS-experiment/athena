@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  */
 
 /* Methods to perform post-processing on run_nnnnnn/HLT/JetMon* histograms
@@ -33,7 +33,7 @@
 
 namespace dqutils {
   void
-  MonitoringFile::HLTJetCalcEfficiencyAndRate(TFile* f, TString& run_dir) {
+  MonitoringFile::HLTJetCalcEfficiencyAndRate(TFile* f, std::string& run_dir) {
     //bool dbgLevel = false;
 
     //if (dbgLevel) std::cout << "--> HLTJetCalcEfficiencyAndRate: Calculate jet trigger efficiency and rate" << std::endl;
@@ -44,25 +44,25 @@ namespace dqutils {
     while ((key_run = dynamic_cast<TKey*> (next_run())) != 0) {
       if (!key_run->IsFolder()) continue;
       run_dir = key_run->GetName();
-      if (!run_dir.Contains("run")) {
+      if (run_dir.find("run") == std::string::npos) {
         continue;
       }
 
 
-      std::string run_dir2 = run_dir.Data();
+      std::string run_dir2 = run_dir;
       //int run_number = atoi( (run_dir2.substr(4, run_dir2.size()-4 )).c_str() );
       //run_number=run_number;
 
 
-      TString jetmon_dir = run_dir + "/HLT/JetMon";
+      std::string jetmon_dir = run_dir + "/HLT/JetMon";
 
       //===HLTJet efficiency histograms
-      TString akt4topo_dir = jetmon_dir + "/AntiKt4TopoJets/TrigEff";
-      //TString akt6topo_dir = jetmon_dir + "/AntiKt6TopoJets/TrigEff";
+      std::string akt4topo_dir = jetmon_dir + "/AntiKt4TopoJets/TrigEff";
+      //std::string akt6topo_dir = jetmon_dir + "/AntiKt6TopoJets/TrigEff";
 
       TDirectory* dir(0);
 
-      if (!(dir = f->GetDirectory(akt4topo_dir))) {
+      if (!(dir = f->GetDirectory(akt4topo_dir.c_str()))) {
         std::cerr << "--> HLTJetCalcEfficiencyAndRate: directory " << akt4topo_dir << " not found." << std::endl;
         return;
       }
@@ -72,54 +72,55 @@ namespace dqutils {
 
 
       //==Efficiency
-      std::vector<TString> effobs;
-      effobs.push_back("_Eff_vs_pt");
-      effobs.push_back("_Eff_vs_eta");
-      effobs.push_back("_Eff_vs_phi");
+      static const std::vector<std::string> effobs = {
+        "_Eff_vs_pt",
+        "_Eff_vs_eta",
+        "_Eff_vs_phi",
+      };
 
-      std::vector<TString> TrigItems;
+      static const std::vector<std::string> TrigItems = {
+        // EF_fj30(_a4_EFFS)  <-- L2_fj25 <-- L1_FJ10
+        // EF_j30(_a4_EFFS)   <-- L2_j25 <-- L1_J10
+        // EF_j240(_a4_EFFS)  <-- L2_j95 <-- L1_J75
 
-      // EF_fj30(_a4_EFFS)  <-- L2_fj25 <-- L1_FJ10
-      // EF_j30(_a4_EFFS)   <-- L2_j25 <-- L1_J10
-      // EF_j240(_a4_EFFS)  <-- L2_j95 <-- L1_J75
+        "EF_fj30",
+        "EF_j30",
+        "EF_j240",
+        //EF_fj50",
+        //EF_fj75",
 
-      TrigItems.push_back("EF_fj30");
-      TrigItems.push_back("EF_j30");
-      TrigItems.push_back("EF_j240");
-      //TrigItems.push_back("EF_fj50");
-      //TrigItems.push_back("EF_fj75");
+        //EF_j50",
+        //EF_j75",
+        //EF_j95",
 
-      //TrigItems.push_back("EF_j50");
-      //TrigItems.push_back("EF_j75");
-      //TrigItems.push_back("EF_j95");
+        "L1_FJ10",
+        "L1_J10",
+        "L1_J75",
+        //"L1_FJ55",
+        //"L1_FJ95",
 
-      TrigItems.push_back("L1_FJ10");
-      TrigItems.push_back("L1_J10");
-      TrigItems.push_back("L1_J75");
-      //TrigItems.push_back("L1_FJ55");
-      //TrigItems.push_back("L1_FJ95");
+        //"L1_J30",
+        //"L1_J55",
+        //"L1_J75",
 
-      //TrigItems.push_back("L1_J30");
-      //TrigItems.push_back("L1_J55");
-      //TrigItems.push_back("L1_J75");
+        //"L2_fj45",
+        //"L2_fj70",
 
-      //TrigItems.push_back("L2_fj45");
-      //TrigItems.push_back("L2_fj70");
+        "L2_fj25",
+        "L2_j25",
+        "L2_j95",
+        //"L2_j30",
+        //"L2_j45",
+        //"L2_j70",
+        //"L2_j90",
+      };
 
-      TrigItems.push_back("L2_fj25");
-      TrigItems.push_back("L2_j25");
-      TrigItems.push_back("L2_j95");
-      //TrigItems.push_back("L2_j30");
-      //TrigItems.push_back("L2_j45");
-      //TrigItems.push_back("L2_j70");
-      //TrigItems.push_back("L2_j90");
-
-      TString snum, sden, hnumname;
-      for (std::vector<TString>::iterator itT = TrigItems.begin(); itT != TrigItems.end(); ++itT) {
-        for (std::vector<TString>::iterator itO = effobs.begin(); itO != effobs.end(); ++itO) {
-          hnumname = (*itT) + (*itO) + "_num";
+      std::string snum, sden, hnumname;
+      for (const std::string& item : TrigItems) {
+        for (const std::string& eff : effobs) {
+          hnumname = item + eff + "_num";
           snum = akt4topo_dir + "/" + hnumname;
-          sden = akt4topo_dir + "/" + (*itT) + (*itO) + "_den";
+          sden = akt4topo_dir + "/" + item + eff + "_den";
 
           //if (!f->Get(snum)) {
           //  if (dbgLevel) std::cerr << "--> HLTJetPostProcess: no such histogram " << snum << std::endl;
@@ -128,14 +129,14 @@ namespace dqutils {
           //  if (dbgLevel) std::cerr << "--> HLTJetPostProcess: no such histogram " << sden << std::endl;
           //}
 
-          if (f->Get(snum) && f->Get(sden)) {
-            hnum = dynamic_cast<TH1F*>(f->Get(snum));
+          if (f->Get(snum.c_str()) && f->Get(sden.c_str())) {
+            hnum = dynamic_cast<TH1F*>(f->Get(snum.c_str()));
             if (not hnum){
               std::cerr<<"MonitoringFile::HLTJetCalcEfficiencyAndRate: Dynamic cast of hnum failed"<<std::endl;
               continue;
             }
             hnum->Sumw2();
-            hden = dynamic_cast<TH1F*>(f->Get(sden));
+            hden = dynamic_cast<TH1F*>(f->Get(sden.c_str()));
             if (not hden){
               std::cerr<<"MonitoringFile::HLTJetCalcEfficiencyAndRate: Dynamic cast of hden failed"<<std::endl;
               continue;
@@ -165,11 +166,11 @@ namespace dqutils {
          return;
          }
 
-         for( std::vector<TString>::iterator itT = TrigItems.begin(); itT != TrigItems.end(); ++itT ) {
-         for( std::vector<TString>::iterator itO = effobs.begin(); itO != effobs.end(); ++itO ) {
-          hnumname = (*itT) + (*itO) + "_num";
+         for( const std::string& item : TrigItems ) {
+         for( const std::string& eff : effobs ) {
+          hnumname = item + eff + "_num";
           snum   = akt6topo_dir + "/" + hnumname;
-          sden   = akt6topo_dir + "/" + (*itT) + (*itO) + "_den";
+          sden   = akt6topo_dir + "/" + item + eff + "_den";
 
           if( ! f->Get(snum) ){std::cerr <<"--> HLTJetPostProcess: no such histogram "<< snum   << std::endl; }
           if( ! f->Get(sden) ){std::cerr <<"--> HLTJetPostProcess: no such histogram "<< sden   << std::endl; }

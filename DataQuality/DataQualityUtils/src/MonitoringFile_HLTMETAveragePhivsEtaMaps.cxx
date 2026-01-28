@@ -35,7 +35,7 @@
 
 namespace dqutils {
   void
-  MonitoringFile::HLTMETAveragePhivsEtaMaps(TFile* f, TString& run_dir) {
+  MonitoringFile::HLTMETAveragePhivsEtaMaps(TFile* f, std::string& run_dir) {
     //bool dbgLevel = false;
 
     //if (dbgLevel) std::cout << "--> HLTMETAveragePhivsEtaMaps: <Quantity(eta,phi)>  = Quantity(eta,phi)/N(eta,phi) " << std::endl;
@@ -46,12 +46,12 @@ namespace dqutils {
     while ((key_run = dynamic_cast<TKey*> (next_run())) != 0) {
       if (!key_run->IsFolder()) continue;
       run_dir = key_run->GetName();
-      if (!run_dir.Contains("run")) {
+      if (run_dir.find("run") == std::string::npos) {
         continue;
       }
 
 
-      std::string run_dir2 = run_dir.Data();
+      std::string run_dir2 = run_dir;
 
       // all merged root files have the structure "rootfile.root:/run_NNNNNNN"
       // use that to extract run number
@@ -62,10 +62,10 @@ namespace dqutils {
       // note 1: prefix all dirs and hists with '/'
       // note 2: missing dir => return
       // note 3: missing hist => continue
-      TString hlt_top = run_dir + "/HLT"; // toplevel
-      TString met_efdir = "/EFMissingET_Fex"; // EF dir
+      std::string hlt_top = run_dir + "/HLT"; // toplevel
+      std::string met_efdir = "/EFMissingET_Fex"; // EF dir
 
-      std::vector<TString> met_fexs, hist_numr;
+      std::vector<std::string> met_fexs, hist_numr;
 
       // expect the following fex dirs
       met_fexs.push_back("/METMon");
@@ -73,16 +73,16 @@ namespace dqutils {
       //met_fexs.push_back("/METMon_allCells");
 
       // check if fex dirs are in hlt
-      for (std::vector<TString>::iterator it = met_fexs.begin(); it != met_fexs.end(); ++it) {
-        TString theHistDir = hlt_top + *it;
-        TDirectory* dir = f->GetDirectory(theHistDir);
+      for (std::vector<std::string>::iterator it = met_fexs.begin(); it != met_fexs.end(); ++it) {
+        std::string theHistDir = hlt_top + *it;
+        TDirectory* dir = f->GetDirectory(theHistDir.c_str());
         if (!dir) {
           std::cerr << "--> HLTMETAveragePhivsEtaMaps: directory " << theHistDir << " not found" << std::endl;
           return;
         }
         // expect the EF dir inside each fex dir
         theHistDir += met_efdir;
-        dir = f->GetDirectory(theHistDir);
+        dir = f->GetDirectory(theHistDir.c_str());
         if (!dir) {
           std::cerr << "--> HLTMETAveragePhivsEtaMaps: directory " << theHistDir << " not found" << std::endl;
           return;
@@ -96,48 +96,48 @@ namespace dqutils {
       hist_numr.push_back("/compSumE_lin_"); // need to plot SumE on linear scale (todo)
 
       // components N (denominator)
-      TString hist_denr = "/compN_";
+      std::string hist_denr = "/compN_";
 
       // type (eta,phi map)
-      TString hist_suffix = "EtaPhi_"; // phi vs. eta map
+      std::string hist_suffix = "EtaPhi_"; // phi vs. eta map
 
       // each component a 2d hist. get all components
       unsigned int comp_num = 25; // 25 components
 
       // we have all dirs, get the component histograms
-      for (std::vector<TString>::iterator itFex = met_fexs.begin(); itFex != met_fexs.end(); ++itFex) {
-        for (std::vector<TString>::iterator itNum = hist_numr.begin(); itNum != hist_numr.end(); ++itNum) {
+      for (std::vector<std::string>::iterator itFex = met_fexs.begin(); itFex != met_fexs.end(); ++itFex) {
+        for (std::vector<std::string>::iterator itNum = hist_numr.begin(); itNum != hist_numr.end(); ++itNum) {
           for (unsigned int icomp = 0; icomp < comp_num; icomp++) {
             TH2F* hnum(0), *hden(0);
 
             // prepend histogram name with path and append with suffix [_00 .., _24 for each component]
-            TString thePath = hlt_top + (*itFex) + met_efdir;
-            TString numHist = (*itNum) + hist_suffix + TString(Form("%02u", icomp));
-            TString denHist = hist_denr + hist_suffix + TString(Form("%02u", icomp));
-            TString numPath = thePath + numHist;
-            TString denPath = thePath + denHist;
+            std::string thePath = hlt_top + (*itFex) + met_efdir;
+            std::string numHist = (*itNum) + hist_suffix + std::string(Form("%02u", icomp));
+            std::string denHist = hist_denr + hist_suffix + std::string(Form("%02u", icomp));
+            std::string numPath = thePath + numHist;
+            std::string denPath = thePath + denHist;
 
             // test if histograms are present
-            if (!f->Get(numPath)) {
+            if (!f->Get(numPath.c_str())) {
               //if (dbgLevel) std::cerr << "--> HLTMETAveragePhivsEtaMaps: no histogram " << numPath << std::endl;
               continue;
             }
-            if (!f->Get(denPath)) {
+            if (!f->Get(denPath.c_str())) {
               //if (dbgLevel) std::cerr << "--> HLTMETAveragePhivsEtaMaps: no histogram " << denPath << std::endl;
               continue;
             }
 
             // get histograms
-            hnum = (TH2F*) (f->Get(numPath));
-            hden = (TH2F*) (f->Get(denPath));
+            hnum = (TH2F*) (f->Get(numPath.c_str()));
+            hden = (TH2F*) (f->Get(denPath.c_str()));
 
             // get directory of histograms
-            TDirectory* dir = f->GetDirectory(thePath);
+            TDirectory* dir = f->GetDirectory(thePath.c_str());
 
             // these are disabled, because we have to worry about updating metadata
             // clone numerator histogram in the same directory; prepend with "avg_"
             // use numerator to do the job
-            //TString avgHist = TString("avg_") + (*itNum) + hist_suffix + TString(Form("%02u",icomp));
+            //std::string avgHist = std::string("avg_") + (*itNum) + hist_suffix + std::string(Form("%02u",icomp));
             //havg = (TH2F *) (hnum->Clone(avgHist));
             //havg->SetDirectory(dir);
 
