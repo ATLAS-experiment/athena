@@ -89,6 +89,13 @@ def setBranchBasketSize( fileName = None, treeName = None, basketSize = None ):
                              attrName  = "BRANCH_BASKET_SIZE",
                              attrValue = basketSize )
 
+def setUnsplitFieldList( fileName = None, unsplitFieldList = None ):
+    """ Convenience method for setting the unsplit field list for RNTuples in a given file. """
+
+    return setPoolAttribute( fileName  = fileName,
+                             attrName  = "RNTUPLE_UNSPLIT_FIELD_LIST",
+                             attrValue = unsplitFieldList )
+
 # Main Function: Only to check the basic functionality
 # Can be run via python PoolAttributeHelper.py
 if "__main__" in __name__:

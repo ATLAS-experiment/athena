@@ -83,7 +83,7 @@ namespace pool  {
     /// Default policy mode for keyed objects
     int           m_defWritePolicy;
     /// Offset table length for branches
-    int		  m_branchOffsetTabLen;
+    int		        m_branchOffsetTabLen;
     /// Name of tree with cache
     std::string   m_treeNameWithCache;
     /// Default tree cache learn events
@@ -94,6 +94,8 @@ namespace pool  {
     int           m_rntReaderMetricsEnabled;
     /// Flag to enable/disable RNTupleWriter metrics
     int           m_rntWriterMetricsEnabled;
+    /// Comma separated list of unsplit field patterns for RNTupleWriter
+    std::string   m_rntUnsplitFieldList;
 
     /// name of the container with master index ('*' means use the biggest)
     std::string   m_indexMaster;
