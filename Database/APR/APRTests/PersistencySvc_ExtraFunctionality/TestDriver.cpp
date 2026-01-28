@@ -13,7 +13,6 @@
 #include "PersistentDataModel/Token.h"
 
 #include "StorageSvc/DbType.h"
-#include "FileCatalog/URIParser.h"
 #include "FileCatalog/IFileCatalog.h"
 
 #include "PersistencySvc/ISession.h"
@@ -36,9 +35,7 @@ pool::TestDriver::TestDriver( const std::string& catname ):
     throw std::runtime_error( "Could not create a file catalog" );
   }
   std::filesystem::remove( {catname} );
-  pool::URIParser p( std::string("file:") + catname );
-  p.parse();
-  m_fileCatalog->setWriteCatalog( p.contactstring() );
+  m_fileCatalog->setWriteCatalog( catname );
   m_fileCatalog->connect();
 }
 
