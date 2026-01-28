@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 This class is used to store the configuration for a ONNX output node.
 */
@@ -24,7 +24,7 @@ SaltModelOutput::SaltModelOutput(const std::string& name,
                          name_in_model(name),
                          type(getOutputType(type, 0)){}
 
-const std::string SaltModelOutput::getName(const std::string& name, const std::string& model_name) const {
+const std::string SaltModelOutput::getName(const std::string& name, const std::string& model_name) {
   // unfortunately, this is block is needed to support some taggers that we schedule that don't have
   // a well defined model name and rely on output remapping.
   if (model_name == "UnknownModelName") {
