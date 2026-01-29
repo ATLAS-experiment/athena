@@ -6,6 +6,7 @@
   <class name="CP::IsolationConditionFormula" />
   <class name="CP::IsolationConditionCombined" />
   <class name="CP::IsolationConditionHist" />
+  <class name="CP::IsolationConditionGraph" />
   <class name="Interp3D" />
   <class name="CP::IsolationCloseByCorrectionTool" />
   <class name="CP::IIsolationCloseByCorrectionTool" />
