@@ -25,11 +25,11 @@ config_dict = {
     },
     "L":{
         "object_cuts": "default",
-        "adScoreThres": 6.174, # 20 Hz est. w/ v2
+        "adScoreThres": 4.400, # for 2026 control trigger
     },
     "M":{
         "object_cuts": "default",
-        "adScoreThres": 6.929, # 10 Hz est. w/ v2
+        "adScoreThres": 5.776, # 20 Hz est. for 2026 physics
     },
     "T":{
         "object_cuts": "default",
