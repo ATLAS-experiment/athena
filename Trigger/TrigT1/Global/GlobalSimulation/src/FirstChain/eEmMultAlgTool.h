@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef GLOBALSIM_EEMMULTALGTOOL_H
@@ -8,7 +8,7 @@
 #include "AthenaBaseComps/AthAlgTool.h"
 
 #include "../GlobalSimComponents/ITIPwriterAlgTool.h"
-#include "../IO/eEmTOBContainer.h"
+#include "../IO/eEmTOB.h"
 
 #include "ICommonSelector.h"
 #include "IeEmSelector.h"
@@ -45,7 +45,7 @@ namespace GlobalSim {
     std::unique_ptr<ICommonSelector> m_c_selector{nullptr};
     std::unique_ptr<IeEmSelector> m_e_selector{nullptr};
   
-    SG::ReadHandleKey<GlobalSim::IOBitwise::eEmTOBContainer>
+    SG::ReadHandleKey<IOBitwise::eEmTOBContainer>
     m_eEmTOBContainerKey {
       this,
       "eEmTOBs",

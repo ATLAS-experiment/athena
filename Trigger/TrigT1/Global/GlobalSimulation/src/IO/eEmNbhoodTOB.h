@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -13,7 +13,9 @@
 #define GLOBALSIM_EEMNBHOODTOB_H
 
 #include "eEmTOB.h"
+
 #include "AthenaKernel/CLASS_DEF.h"
+#include "AthContainers/DataVector.h"
 
 #include "LArStripNeighborhood.h"
 
@@ -67,5 +69,19 @@ namespace GlobalSim::IOBitwise {
 } //End of namespace 
 
 CLASS_DEF( GlobalSim::IOBitwise::eEmNbhoodTOB , 229822253 , 1 )
+
+  
+DATAVECTOR_BASE(GlobalSim::IOBitwise::eEmNbhoodTOB,
+		GlobalSim::IOBitwise::eEmTOB); 
+
+namespace GlobalSim {
+  namespace IOBitwise {
+    using eEmNbhoodTOBContainer =
+      DataVector<GlobalSim::IOBitwise::eEmNbhoodTOB>;
+  }
+}
+
+CLASS_DEF( GlobalSim::IOBitwise::eEmNbhoodTOBContainer , 1103580971 , 1 )
+
 
 #endif //GLOBALSIM_EEMNBHOODTOB_H

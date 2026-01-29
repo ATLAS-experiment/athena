@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -13,7 +13,9 @@
 #define GLOBALSIM_EEMTOB_H
 
 #include "CommonTOB.h"
+
 #include "AthenaKernel/CLASS_DEF.h"
+#include "AthContainers/DataVector.h"
 
 #include <bitset>
 
@@ -104,5 +106,15 @@ namespace GlobalSim::IOBitwise {
 } //End of namespace
 
 CLASS_DEF( GlobalSim::IOBitwise::eEmTOB , 13709477 , 1 )
+
+DATAVECTOR_BASE(GlobalSim::IOBitwise::eEmTOB, GlobalSim::IOBitwise::CommonTOB); 
+
+namespace GlobalSim {
+  namespace IOBitwise {
+    using eEmTOBContainer = DataVector<GlobalSim::IOBitwise::eEmTOB>;
+  }
+}
+
+CLASS_DEF( GlobalSim::IOBitwise::eEmTOBContainer , 1271357431 , 1 )
 
 #endif //GLOBALSIM_EEMTOB_H

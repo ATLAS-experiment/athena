@@ -1,11 +1,11 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef GLOBALSIM_LARSTRIPNEIGHBORHOODDUMPER_H
 #define GLOBALSIM_LARSTRIPNEIGHBORHOODDUMPER_H
 
-#include "eEmNbhoodTOBContainer.h"
+#include "eEmNbhoodTOB.h"
 #include "LArStripNeighborhood.h"
 #include "xAODEventInfo/EventInfo.h"
 
