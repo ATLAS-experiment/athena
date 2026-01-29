@@ -425,7 +425,7 @@ class ConfigBlock(metaclass=BlockNameProcessorMeta):
 
 
     def __str__(self):
-        return self._blockName
+        return self._blockName if self._blockName else self.factoryName()
 
 
     @classmethod
