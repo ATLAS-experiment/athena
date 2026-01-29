@@ -269,7 +269,7 @@ def MMRDODecodeCfg(flags, name="MuonMmRdoToPrdConv", **kwargs):
     return acc
 
 
-def MdtRDODecodeCfg(flags, name="MuonMdtRpcToPrdConv", RDOContainer = None, **kwargs):
+def MdtRDODecodeCfg(flags, name="MuonMdtRdoToPrdConv", RDOContainer = None, **kwargs):
     acc = ComponentAccumulator()
     from MuonConfig.MuonCalibrationConfig import MdtCalibrationToolCfg
 
