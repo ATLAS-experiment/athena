@@ -20,32 +20,6 @@
 #include "xAODTracking/VertexContainer.h"
 
 namespace HI {
-constexpr unsigned int bit(int n) {
-  return 1 << n;
-}
-
-// never change bits assignment, feel free to add
-enum class SelectionMask : unsigned int {
-  NoEventError = bit(0),
-  PUFCalVsNTrackLoose = bit(1),
-  PUFCalVsNTrackNominal = bit(2),
-  PUFCalVsNTrackTight = bit(3),
-  PUFCalVsNTrackAny =
-      PUFCalVsNTrackLoose | PUFCalVsNTrackNominal | PUFCalVsNTrackTight,
-  PUFCalVsNZDCLoose = bit(4),
-  PUFCalVsNZDCNominal = bit(5),
-  PUFCalVsNZDCTight = bit(6),
-  PUFCalVsZDCAny = PUFCalVsNZDCLoose | PUFCalVsNZDCNominal | PUFCalVsNZDCTight,
-  PUOOVertexLoose = bit(7),
-  PUOOVertexNominal = bit(8),
-  PUOOVertexTight = bit(9),
-  PUOOVertexAny = PUOOVertexLoose | PUOOVertexNominal | PUOOVertexTight,
-
-  // default cuts for PB
-  PBDefault = NoEventError | PUFCalVsNTrackLoose | PUFCalVsNZDCLoose,
-  // default cuts for OO
-  OODefault = NoEventError | PUOOVertexLoose
-};
 
 class HIEventFilterAlgRun3 : public ::AthFilterAlgorithm {
 
@@ -88,7 +62,8 @@ class HIEventFilterAlgRun3 : public ::AthFilterAlgorithm {
 
   auto isRequested(HI::SelectionMask m) const {
     return (m_selectionMask & static_cast<mask_t>(m)) != 0;
-  };
+  }
+
   void store(HI::SelectionMask m, mask_t& mask) {
     mask |= static_cast<mask_t>(m);
   }

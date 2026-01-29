@@ -65,15 +65,22 @@ StatusCode HI::HIEventFilterAlgRun3::execute() {
 
   // go over required masks and ask tool if cut is passed
 
-  if (isRequested(HI::SelectionMask::PUFCalVsNTrackAny)) {
-    ATH_MSG_WARNING("Not implemented yet");
-    // obtain tracks & FCal
+  const HI::IonDataType period = m_tool->toDataType(eventInfoHandle.cptr());
 
-    // get the FCAL ET
+  if(isRequested(HI::SelectionMask::PUFCalVsZDCAny)) {
+    auto esHandle = SG::makeHandle(m_hiEventShapeKey);
+    auto zdcHandle = SG::makeHandle(m_zdcKey);
 
-    // ask tool for decisions
+    if ( m_tool->puZDCvsFCal(period, esHandle.cptr(), zdcHandle.cptr(), HI::PileupVariation::Tight) ) {
+      store(HI::SelectionMask::PUFCalVsZDCTight, mask ); 
+    } 
+    if ( m_tool->puZDCvsFCal(period, esHandle.cptr(), zdcHandle.cptr(), HI::PileupVariation::Nominal) ) {
+      store(HI::SelectionMask::PUFCalVsZDCNominal, mask ); 
+    } 
+    if ( m_tool->puZDCvsFCal(period, esHandle.cptr(), zdcHandle.cptr(), HI::PileupVariation::Loose) ) {
+      store(HI::SelectionMask::PUFCalVsZDCLoose, mask ); 
+    } 
 
-    // set mask
 
   }
 
