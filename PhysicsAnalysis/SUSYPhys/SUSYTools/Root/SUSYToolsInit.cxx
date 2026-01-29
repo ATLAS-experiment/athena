@@ -736,7 +736,7 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
       if (m_isRun3) ATH_CHECK( m_muonCalibTool.setProperty("IsRun3Geo", true ));
       ATH_CHECK( m_muonCalibTool.setProperty("calibMode", m_muCalibrationMode) );
       ATH_CHECK( m_muonCalibTool.setProperty("OutputLevel", this->msg().level()) );
-      ATH_CHECK( m_muonCalibTool.setProperty("release", "Recs2025_03_26_Run2Run3" ));
+      ATH_CHECK( m_muonCalibTool.setProperty("release", "Recs2025_12_11_Run2Run3" ));
       int IdBaselineInt = m_muIdBaseline;
       if (IdBaselineInt == 4) {
         ATH_CHECK( m_muonCalibTool.setProperty("do2StationsHighPt", true) );
@@ -836,7 +836,7 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
       toolName = "MuonEfficiencyScaleFactors_" + muQual;
       m_muonEfficiencySFTool.setTypeAndName("CP::MuonEfficiencyScaleFactors/"+toolName);
       ATH_CHECK( m_muonEfficiencySFTool.setProperty("WorkingPoint", muQual) );
-      ATH_CHECK( m_muonEfficiencySFTool.setProperty("CalibrationRelease", m_isRun3? "250418_Preliminary_r24run3":"230213_Preliminary_r22run2") );
+      ATH_CHECK( m_muonEfficiencySFTool.setProperty("CalibrationRelease", m_isRun3? "251211_Preliminary_r24run3":"230213_Preliminary_r22run2") );
       ATH_CHECK( m_muonEfficiencySFTool.setProperty("OutputLevel", this->msg().level()) );
       ATH_CHECK( m_muonEfficiencySFTool.retrieve() );
     } else if (m_muonEfficiencySFTool.isUserConfigured()) ATH_CHECK( m_muonEfficiencySFTool.retrieve() );
@@ -861,7 +861,7 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
       toolName = "MuonTTVAEfficiencyScaleFactors";
       m_muonTTVAEfficiencySFTool.setTypeAndName("CP::MuonEfficiencyScaleFactors/"+toolName);
       ATH_CHECK( m_muonTTVAEfficiencySFTool.setProperty("WorkingPoint", "TTVA") );
-      ATH_CHECK( m_muonTTVAEfficiencySFTool.setProperty("CalibrationRelease", m_isRun3? "250418_Preliminary_r24run3":"230213_Preliminary_r22run2") );
+      ATH_CHECK( m_muonTTVAEfficiencySFTool.setProperty("CalibrationRelease", m_isRun3? "251211_Preliminary_r24run3":"230213_Preliminary_r22run2") );
       ATH_CHECK( m_muonTTVAEfficiencySFTool.setProperty("OutputLevel", this->msg().level()) );
       ATH_CHECK( m_muonTTVAEfficiencySFTool.retrieve() );
     } else if (m_muonTTVAEfficiencySFTool.isUserConfigured()) ATH_CHECK( m_muonTTVAEfficiencySFTool.retrieve() );
@@ -893,7 +893,7 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
 
       m_muonIsolationSFTool.setTypeAndName("CP::MuonEfficiencyScaleFactors/"+toolName);
       ATH_CHECK( m_muonIsolationSFTool.setProperty("WorkingPoint", tmp_muIso_WP + "Iso") );
-      ATH_CHECK( m_muonIsolationSFTool.setProperty("CalibrationRelease", m_isRun3? "250418_Preliminary_r24run3":"230213_Preliminary_r22run2") );
+      ATH_CHECK( m_muonIsolationSFTool.setProperty("CalibrationRelease", m_isRun3? "251211_Preliminary_r24run3":"230213_Preliminary_r22run2") );
       ATH_CHECK( m_muonIsolationSFTool.setProperty("OutputLevel", this->msg().level()) );
       ATH_CHECK( m_muonIsolationSFTool.retrieve() );
 
@@ -924,7 +924,7 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
       m_muonHighPtIsolationSFTool.setTypeAndName("CP::MuonEfficiencyScaleFactors/"+toolName);
       // Use for the low-pt WP a dedicated set of isolation scale-factors having an extra uncertainty in place
       ATH_CHECK( m_muonHighPtIsolationSFTool.setProperty("WorkingPoint", tmp_muIsoHighPt_WP + "Iso") );
-      ATH_CHECK( m_muonHighPtIsolationSFTool.setProperty("CalibrationRelease", m_isRun3? "250418_Preliminary_r24run3":"230213_Preliminary_r22run2") );
+      ATH_CHECK( m_muonHighPtIsolationSFTool.setProperty("CalibrationRelease", m_isRun3? "251211_Preliminary_r24run3":"230213_Preliminary_r22run2") );
       ATH_CHECK( m_muonHighPtIsolationSFTool.setProperty("OutputLevel", this->msg().level()) );
       ATH_CHECK( m_muonHighPtIsolationSFTool.retrieve() );
 
@@ -2095,7 +2095,7 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
         ATH_CHECK( AAH::setProperty(m_metSignif.getHandle(), "calibTool.IsRun3Geo", true));
       ATH_CHECK( AAH::setProperty(m_metSignif.getHandle(), "calibTool.calibMode", m_muCalibrationMode));
       ATH_CHECK( AAH::setProperty(m_metSignif.getHandle(), "calibTool.OutputLevel",this->msg().level()));
-      ATH_CHECK( AAH::setProperty(m_metSignif.getHandle(), "calibTool.release", "Recs2025_03_26_Run2Run3"));
+      ATH_CHECK( AAH::setProperty(m_metSignif.getHandle(), "calibTool.release", "Recs2025_12_11_Run2Run3"));
       int IdBaselineInt = m_muIdBaseline;
       if (IdBaselineInt == 4)
         ATH_CHECK( AAH::setProperty(m_metSignif.getHandle(), "calibTool.do2StationsHighPt", true));
