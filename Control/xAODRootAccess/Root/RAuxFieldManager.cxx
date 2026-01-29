@@ -15,11 +15,10 @@
 
 namespace xAOD::Experimental {
 
-RAuxFieldManager::RAuxFieldManager( auxid_t auxid, std::unique_ptr<THolder> holder, bool isPrimitive )
+RAuxFieldManager::RAuxFieldManager( std::unique_ptr<THolder> holder, bool isPrimitive )
   : 
   IObjectManager(std::move(holder)),
   m_isSet( kTRUE ), 
-  m_auxId( auxid ), 
   m_isPrimitive( isPrimitive ) {}
 
 

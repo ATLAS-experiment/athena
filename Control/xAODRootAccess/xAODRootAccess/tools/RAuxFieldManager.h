@@ -32,11 +32,8 @@ namespace xAOD::Experimental {
 class RAuxFieldManager : public Details::IObjectManager {
 
 public:
-   /// Definition of the auxiliary ID type
-   typedef SG::auxid_t auxid_t;
-
    /// Constructor getting hold of a possible branch
-   RAuxFieldManager( auxid_t auxid, std::unique_ptr<THolder> holder, bool isPrimitive = false );
+   RAuxFieldManager( std::unique_ptr<THolder> holder, bool isPrimitive = false );
 
    /// Destructor
    ~RAuxFieldManager();
@@ -65,8 +62,6 @@ private:
 
    /// Was the object set for the current event?
    ::Bool_t m_isSet;
-   /// Auxiliary variable type
-   auxid_t  m_auxId;
    /// Is field of primitive type, e.g. int, float, bool
    ::Bool_t m_isPrimitive;
 
