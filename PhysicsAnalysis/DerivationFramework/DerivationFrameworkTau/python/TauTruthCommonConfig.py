@@ -29,20 +29,6 @@ def TauTruthMatchingWrapperCfg(flags, cont, **kwargs):
     return acc
 
 
-def TruthCollectionMakerTauCfg(flags, name= "DFCommonTauTruthCollectionMaker", **kwargs):
-    """Configure the tau truth collection maker"""
-    acc = ComponentAccumulator()
-    from TauAnalysisTools.TauAnalysisToolsConfig import BuildTruthTausCfg
-    kwargs.setdefault("BuildTruthTaus", acc.addPublicTool(acc.popToolsAndMerge(BuildTruthTausCfg(flags,
-                                                                                                 name = "DFCommonTauTruthBuilder",
-                                                                                                 WriteInvisibleFourMomentum = True,
-                                                                                                 WriteVisibleNeutralFourMomentum = True ))))
-    # TruthCollectionMakerTau from DerivationFrameworkMCTruth
-    acc.setPrivateTools(
-        CompFactory.DerivationFramework.TruthCollectionMakerTau(name, **kwargs))
-    return acc
-
-
 def TauTruthToolsCfg(flags):
     """Configure tau truth making and matching"""
 
@@ -54,13 +40,8 @@ def TauTruthToolsCfg(flags):
         return acc
 
     # truth tau building
-    TauTruthAugmentationTools1 = []
-    TauTruthAugmentationTools1.append(
-        acc.addPublicTool(acc.popToolsAndMerge(TruthCollectionMakerTauCfg(flags))))
-    CommonAugmentation = CompFactory.DerivationFramework.CommonAugmentation
-    acc.addEventAlgo(CommonAugmentation("TauTruthCommonKernel1",
-                                        AugmentationTools = TauTruthAugmentationTools1,
-                                        ExtraOutputs = {( 'xAOD::TruthParticleContainer' , 'StoreGateSvc+TruthTaus' )} ))
+    from TauAnalysisTools.TauAnalysisToolsConfig import BuildTruthTausAlgCfg
+    acc.merge(BuildTruthTausAlgCfg(flags))
 
     # tau truth matching, if reconstructed taus are present in the input
     # this should be dropped from derivations and deferred to analysis level (the only use case in derivations is PHYSLITE)
@@ -70,6 +51,7 @@ def TauTruthToolsCfg(flags):
             TauTruthAugmentationTools2.append(
                 acc.addPublicTool(acc.popToolsAndMerge(TauTruthMatchingWrapperCfg(flags, cont))))
 
+    CommonAugmentation = CompFactory.DerivationFramework.CommonAugmentation
     acc.addEventAlgo(CommonAugmentation( "TauTruthCommonKernel2",
                                          AugmentationTools = TauTruthAugmentationTools2,
                                          ExtraInputs = {( 'xAOD::TruthParticleContainer' , 'StoreGateSvc+TruthTaus' )} ))

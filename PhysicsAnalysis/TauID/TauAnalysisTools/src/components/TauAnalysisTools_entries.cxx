@@ -15,6 +15,7 @@
 
 #ifndef XAOD_STANDALONE
 #include "../TauAnalysisToolsExampleAthena.h"
+#include "../BuildTruthTausAlg.h"
 #endif
 
 // Project include(s).
@@ -37,5 +38,6 @@ DECLARE_COMPONENT( TauAnalysisTools::DiTauEfficiencyCorrectionsTool )
 
 #ifndef XAOD_STANDALONE
 DECLARE_COMPONENT( TauAnalysisTools::TauAnalysisToolsExampleAthena )
+DECLARE_COMPONENT( TauAnalysisTools::BuildTruthTausAlg )
 #endif
 

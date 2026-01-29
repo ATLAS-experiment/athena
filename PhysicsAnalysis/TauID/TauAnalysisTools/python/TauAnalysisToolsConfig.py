@@ -25,3 +25,20 @@ def BuildTruthTausCfg(flags, name, **kwargs):
     return acc
 
 
+def BuildTruthTausAlgCfg(flags):
+    """Configre an alg to build truth taus"""
+    acc = ComponentAccumulator()
+    acc.addEventAlgo(
+       CompFactory.TauAnalysisTools.BuildTruthTausAlg(
+          "BuildTruthTausAlg",
+          BuildTruthTaus=CompFactory.TauAnalysisTools.BuildTruthTaus(
+             "BuildTruthTaus",
+             WriteInvisibleFourMomentum=True,
+             WriteVisibleNeutralFourMomentum=True,
+          ),
+          ExtraOutputs={
+             ( 'xAOD::TruthParticleContainer' , 'StoreGateSvc+TruthTaus' )
+          },
+       )
+    )
+    return acc
