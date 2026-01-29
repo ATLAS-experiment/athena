@@ -526,6 +526,21 @@ def TrackParticleThinningCfg(flags, name, **kwargs):
         name, **kwargs), primary=True)
     return acc
 
+# Tool for thinning TrackParticle containers via string selection
+
+
+def TrackParticleThinningPHYSCfg(flags, name, **kwargs):
+    """Configure the TrackParticleThining tool"""
+    if flags.Detector.GeometryITk:
+        return ITkTrackParticleThinningPHYSCfg(flags, name, **kwargs)
+
+    # To produce SCT_DetectorElementCollection
+    from SCT_GeoModel.SCT_GeoModelConfig import SCT_ReadoutGeometryCfg
+    acc = SCT_ReadoutGeometryCfg(flags)
+    acc.addPublicTool(CompFactory.DerivationFramework.TrackParticleThinningPHYS(
+        name, **kwargs), primary=True)
+    return acc
+
 # Tool for thinning PixelClusters via string selection
 
 
@@ -575,6 +590,25 @@ def ITkTrackParticleThinningCfg(flags, name, **kwargs):
     kwargs.setdefault("SCTDetEleCollKey", "ITkStripDetectorElementCollection")
 
     acc.addPublicTool(CompFactory.DerivationFramework.TrackParticleThinning(
+        name, **kwargs), primary=True)
+    return acc
+
+def ITkTrackParticleThinningPHYSCfg(flags, name, **kwargs):
+    """Configure the TrackParticleThiningPHYS tool"""
+    # To produce ITkStripDetectorElementCollection
+    from StripGeoModelXml.ITkStripGeoModelConfig import (
+        ITkStripReadoutGeometryCfg)
+    acc = ITkStripReadoutGeometryCfg(flags)
+
+    kwargs.setdefault("InDetTrackStatesPixKey", "ITkPixelMSOSs")
+    kwargs.setdefault("InDetTrackMeasurementsPixKey", "ITkPixelMeasurements")
+    kwargs.setdefault("InDetTrackStatesSctKey", "ITkStripMSOSs")
+    kwargs.setdefault("InDetTrackMeasurementsSctKey", "ITkStripMeasurements")
+    kwargs.setdefault("InDetTrackStatesTrtKey", "")
+    kwargs.setdefault("InDetTrackMeasurementsTrtKey", "")
+    kwargs.setdefault("SCTDetEleCollKey", "ITkStripDetectorElementCollection")
+
+    acc.addPublicTool(CompFactory.DerivationFramework.TrackParticleThinningPHYS(
         name, **kwargs), primary=True)
     return acc
 

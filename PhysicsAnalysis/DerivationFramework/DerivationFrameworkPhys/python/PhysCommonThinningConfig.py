@@ -11,7 +11,7 @@ def PhysCommonThinningCfg(flags, StreamName = "StreamDAOD_PHYS", **kwargs):
     acc = ComponentAccumulator()
 
     # Thinning tools...
-    from DerivationFrameworkInDet.InDetToolsConfig import TrackParticleThinningCfg, MuonTrackParticleThinningCfg, DiTauTrackParticleThinningCfg
+    from DerivationFrameworkInDet.InDetToolsConfig import TrackParticleThinningPHYSCfg, MuonTrackParticleThinningCfg, DiTauTrackParticleThinningCfg
     from DerivationFrameworkTools.DerivationFrameworkToolsConfig import GenericObjectThinningCfg
     from DerivationFrameworkCalo.DerivationFrameworkCaloConfig import CaloClusterThinningCfg
     from DerivationFrameworkTau.TauCommonConfig import TauThinningCfg
@@ -19,14 +19,13 @@ def PhysCommonThinningCfg(flags, StreamName = "StreamDAOD_PHYS", **kwargs):
     # Inner detector group recommendations for indet tracks in analysis
     # https://twiki.cern.ch/twiki/bin/viewauth/AtlasProtected/DaodRecommendations
     if "TrackParticleThinningToolName" in kwargs:
-        tp_thinning_expression = "InDetTrackParticles.DFCommonTightPrimary && abs(DFCommonInDetTrackZ0AtPV)*sin(InDetTrackParticles.theta) < 3.0*mm && InDetTrackParticles.pt > 10*GeV"
-        acc.merge(TrackParticleThinningCfg(
+        acc.merge(TrackParticleThinningPHYSCfg(
             flags,
             name                    = kwargs['TrackParticleThinningToolName'],
-            StreamName              = StreamName, 
-            SelectionString         = tp_thinning_expression,
+            StreamName              = StreamName,
+            Z0SGEntryName           = "DFCommonInDetTrackZ0AtPV",
             InDetTrackParticlesKey  = "InDetTrackParticles"))
-        
+
     # Include inner detector tracks associated with muons
     if "MuonTPThinningToolName" in kwargs:
         acc.merge(MuonTrackParticleThinningCfg(
