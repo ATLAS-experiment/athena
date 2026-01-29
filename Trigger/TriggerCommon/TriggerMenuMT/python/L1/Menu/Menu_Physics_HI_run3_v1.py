@@ -185,6 +185,15 @@ def defineMenu():
         'L1_VZDC_A_VZDC_C_VjTE50', 'L1_ZDC_A_VjTE200', 'L1_ZDC_C_VjTE200',
         'L1_TRT_ZDC_A_VjTE50', 'L1_TRT_ZDC_C_VjTE50',
 
+        # ATR-32290                                                            
+        'L1_ZDC_LIS_E0',
+        'L1_ZDC_LIS_E0_EMPTY',
+        'L1_ZDC_LIS_E0_UNPAIRED_ISO',
+        'L1_ZDC_LIS_E0_UNPAIRED_NONISO',
+        'L1_ZDC_LIS_E1',
+        'L1_ZDC_LIS_E2',
+        'L1_RD0_UNPAIRED_NONISO',
+        
         # Run3 ZDC items for heavy ion runs 
         'L1_VZDC_A_VZDC_C', #comb0
         'L1_1ZDC_A_VZDC_C', #comb4
@@ -474,7 +483,6 @@ def defineMenu():
 
         #ATR-32300
         'L1_DY-BOX-2MU3VF', 'L1_DY-BOX-2MU5VF',
-
     ]
 
 
