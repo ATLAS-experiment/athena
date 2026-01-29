@@ -50,6 +50,12 @@ namespace MuonValR4{
            VectorBranch<float>& m_mass{parent().newVector<float>(m_collName+"_mass")};
            /** @brief Pointer to the Identifier branch */
            std::shared_ptr<MuonIdentifierBranch> m_identifier{};
+           /** @brief Identifier of the phi channel, if any **/
+           VectorBranch<int>& m_phiChannel{parent().newVector<int>(m_collName+"_phiChannel")};
+
+           PtEtaPhiEBranch m_truthParticleP4{parent(), m_collName+"_truthPart_"};
+           CartesFourVecBranch m_truthParticleProdVtx{parent(), m_collName+"_prodVertex_", CartesFourVecBranch::Type::Pos};
+           VectorBranch<int>& m_truthParticleBarcode{parent().newVector<int>(m_collName+"_truthPart_barcode")};
            
            /** @brief look up table of alrady dumped sim hits */
            std::unordered_map<const xAOD::MuonSimHit*, unsigned int> m_idxLookUp{};
