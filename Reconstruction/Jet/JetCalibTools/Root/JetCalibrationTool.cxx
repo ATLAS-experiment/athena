@@ -256,7 +256,7 @@ StatusCode JetCalibrationTool::getCalibClass(const TString& calibration) {
       } else if (dataYear >= 2022 && dataYear <= 2024) {
         mcCampaign = "MC23";
       } else {
-        ATH_MSG_WARNING("Data year " << dataYear << " not recognized from file metadata. The corresponding mcCampaign will not be known.");
+        ATH_MSG_VERBOSE("Data year " << dataYear << " not recognized from file metadata. The corresponding mcCampaign will not be known.");
       }
 
     } else { // is MC
