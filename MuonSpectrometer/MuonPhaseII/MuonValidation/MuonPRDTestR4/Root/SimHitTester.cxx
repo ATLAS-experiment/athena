@@ -4,6 +4,10 @@
 
 #include "MuonPRDTestR4/SimHitTester.h"
 #include "StoreGate/ReadHandle.h"
+namespace {
+    static const SG::ConstAccessor<std::int16_t> acc_phiChannel{"SDO_phiChannel"};
+}
+
 namespace MuonValR4{
     SimHitTester::SimHitTester(MuonTesterTree& tree,
                                const std::string& inContainer,
@@ -87,6 +91,29 @@ namespace MuonValR4{
         m_kinE.push_back(simHit.kineticEnergy());
         m_mass.push_back(simHit.mass());
         m_identifier->push_back(id);
+
+        if ( idHelperSvc()->isRpc(id) ) {
+            HepMC::FourVector fourVec(0.,0.,0.,0.);
+            HepMC::FourVector vertex(0.,0.,0.,0.);
+            int barcode = 0;
+            const HepMcParticleLink& link = simHit.genParticleLink();
+            HepMC::ConstGenParticlePtr genParticle = link.cptr();
+            if(genParticle) {
+                fourVec = link.cptr()->momentum();
+                vertex = link.cptr()->production_vertex()->position();
+                barcode = HepMC::barcode(link.cptr());
+            }
+            m_truthParticleP4.push_back(fourVec);
+            m_truthParticleProdVtx.push_back(vertex);
+            m_truthParticleBarcode.push_back(barcode);
+
+        }
+        int phiChannel = -9999;
+        if ( idHelperSvc()->isRpc(id) || idHelperSvc()->isTgc(id)) {
+           phiChannel = (acc_phiChannel.isAvailable(simHit)) ? acc_phiChannel(simHit) : phiChannel;
+        }
+        m_phiChannel.push_back(phiChannel);
+
 
         return insertItr.first->second;
     }
