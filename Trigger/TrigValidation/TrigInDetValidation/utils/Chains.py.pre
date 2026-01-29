@@ -131,6 +131,14 @@ class Chains:
             "menu": ''
         }
 
+        d["bphysfs"] = {
+            "chains": [
+#bphysfsChains
+            ],
+            "signature": ['Muon','Bphysics',],
+            "menu": 'Dev_pp_lowMu_run3_v1'
+        }
+
         return d
     
     def get_values(self, slice_names: list, prop: str) -> set:
