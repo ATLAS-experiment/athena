@@ -1,5 +1,7 @@
 #include "DerivationFrameworkInDet/TrackToVertexWrapper.h"
 #include "DerivationFrameworkInDet/TrackParticleThinning.h"
+#include "DerivationFrameworkInDet/TrackParticleThinningBase.h"
+#include "DerivationFrameworkInDet/TrackParticleThinningPHYS.h"
 #include "DerivationFrameworkInDet/MuonTrackParticleThinning.h"
 #include "DerivationFrameworkInDet/EgammaTrackParticleThinning.h"
 #include "DerivationFrameworkInDet/JetTrackParticleThinning.h"
@@ -29,6 +31,8 @@ using namespace DerivationFramework;
 
 DECLARE_COMPONENT( TrackToVertexWrapper )
 DECLARE_COMPONENT( TrackParticleThinning )
+DECLARE_COMPONENT( TrackParticleThinningBase )
+DECLARE_COMPONENT( TrackParticleThinningPHYS )
 DECLARE_COMPONENT( MuonTrackParticleThinning )
 DECLARE_COMPONENT( EgammaTrackParticleThinning )
 DECLARE_COMPONENT( TauTrackParticleThinning )
