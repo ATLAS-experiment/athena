@@ -24,14 +24,14 @@ references_map = {
     "d2029": "v8",
     "d2030": "v12",
     # Reco
-    "q442": "v18",
-    "q449": "v48",
-    "q452": "v18",
-    "q454": "v36",
+    "q442": "v19",
+    "q449": "v49",
+    "q452": "v19",
+    "q454": "v37",
     # Derivations
     "data_PHYS_Run2": "v3",
-    "data_PHYS_Run3": "v5",
-    "mc_PHYS_Run2": "v3",
-    "mc_PHYS_Run3": "v3",
-    "af3_PHYS_Run3": "v3",
+    "data_PHYS_Run3": "v6",
+    "mc_PHYS_Run2": "v4",
+    "mc_PHYS_Run3": "v4",
+    "af3_PHYS_Run3": "v4",
 }
