@@ -28,8 +28,8 @@ class ALFA_MDMultiple : public AthMessaging
 {
 	public:
 		ALFA_MDMultiple();
-		ALFA_MDMultiple(const ALFA_MDMultiple &obj) = default;
-		ALFA_MDMultiple& operator=(const ALFA_MDMultiple &obj) = default;
+		ALFA_MDMultiple(const ALFA_MDMultiple &obj) = delete;
+		ALFA_MDMultiple& operator=(const ALFA_MDMultiple &obj) = delete;
 		~ALFA_MDMultiple() = default;
 
 	private:
