@@ -1597,7 +1597,7 @@ StatusCode REvent::putAux( TVirtualManager& vmgr, ::Bool_t metadata ) {
         // Let's create an RAuxFieldManager for this property:
         static constexpr bool IS_OWNER = false;
         auto auxmgr = std::make_unique<RAuxFieldManager>( 
-          id, std::make_unique<THolder>(aux->getIOData( id ), *brType, IS_OWNER), isPrimitive );
+          std::make_unique<THolder>(aux->getIOData( id ), *brType, IS_OWNER), isPrimitive );
         outmgrPtr = auxmgr.get();
 
         objects[ dynKey ] = std::move(auxmgr);
@@ -1626,7 +1626,7 @@ StatusCode REvent::putAux( TVirtualManager& vmgr, ::Bool_t metadata ) {
         // Let's create an RAuxFieldManager for this property - not a primitive:
         static constexpr bool IS_OWNER = false;
         auto auxmgr = std::make_unique<RAuxFieldManager>( 
-          id, std::make_unique<THolder>(aux->getIOData( id ), cl, IS_OWNER), isPrimitive );
+          std::make_unique<THolder>(aux->getIOData( id ), cl, IS_OWNER), isPrimitive );
         outmgrPtr = auxmgr.get();
         objects[ dynKey ] = std::move(auxmgr);
       }

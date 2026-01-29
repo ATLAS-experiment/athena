@@ -58,8 +58,6 @@ private:
    std::string  m_key;
    /// Was the object set for the current event?
    ::Bool_t     m_isSet;
-   /// Should the object be recreated on each read?
-   ::Bool_t     m_renewOnRead;
 
 }; // class ROutObjManager
 
