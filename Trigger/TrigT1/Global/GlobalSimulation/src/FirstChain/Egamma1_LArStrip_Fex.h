@@ -1,5 +1,5 @@
 /*
- *   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+ *   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  */
 
 #ifndef GLOBALSIM_EGAMMA1_LARSTRIP_FEX_H
@@ -13,8 +13,8 @@
 #include "ICaloCellsProducer.h"
 #include "eFexRoIAlgTool.h"
 
-#include "../IO/LArStripNeighborhoodContainer.h"
-#include "../IO/eEmNbhoodTOBContainer.h"
+#include "../IO/LArStripNeighborhood.h"
+#include "../IO/eEmNbhoodTOB.h"
 
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "xAODEventInfo/EventInfo.h"

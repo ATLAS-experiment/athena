@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef GLOBALSIM_EFEXCVTRALGTOOL_H
@@ -10,7 +10,7 @@
 #include "../GlobalSimComponents/IGlobalSimAlgTool.h"
 #include "xAODTrigger/eFexEMRoIContainer.h"
 
-#include "../IO/eEmTOBContainer.h"
+#include "../IO/eEmTOB.h"
 
 namespace GlobalSim {
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef GLOBALSIM_EGAMMA1ERATIOALGTOOL_H
@@ -10,9 +10,9 @@
  */
 
 #include "../GlobalSimComponents/IGlobalSimAlgTool.h"
-#include "../IO/LArStripNeighborhoodContainer.h"
-#include "../IO/eEmNbhoodTOBContainer.h"
-#include "../IO/eEmEg1eRatioTOBContainer.h"
+#include "../IO/LArStripNeighborhood.h"
+#include "../IO/eEmNbhoodTOB.h"
+#include "../IO/eEmEg1eRatioTOB.h"
 
 #include "ap_int.h"
 #include "ap_fixed.h"

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "Egamma1BDTAlgTool.h"
@@ -11,9 +11,10 @@
 
 #include "../IO/eEmEg1BDTTOB.h"
 
+
 namespace GlobalSim {
 
-  using eEmEg1BDTTOB = IOBitwise::eEmEg1BDTTOB;
+  using eEmEg1BDTTOB = GlobalSim::IOBitwise::eEmEg1BDTTOB;
 
   Egamma1BDTAlgTool::Egamma1BDTAlgTool(const std::string& type,
 				       const std::string& name,
@@ -42,8 +43,8 @@ namespace GlobalSim {
 
     ATH_MSG_DEBUG("read in " << (*in).size() << " neighborhoods");
 
-    SG::WriteHandle<IOBitwise::eEmEg1BDTTOBContainer> h_BDTResult(m_BDTResultKey, ctx);
-    CHECK(h_BDTResult.record(std::make_unique<IOBitwise::eEmEg1BDTTOBContainer>()));
+    SG::WriteHandle<eEmEg1BDTTOBContainer> h_BDTResult(m_BDTResultKey, ctx);
+    CHECK(h_BDTResult.record(std::make_unique<eEmEg1BDTTOBContainer>()));
     
     for (const auto nbhdTOB : *in) {
       auto c_phi = combine_phi(nbhdTOB);

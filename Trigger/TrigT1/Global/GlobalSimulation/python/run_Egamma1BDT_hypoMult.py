@@ -44,6 +44,8 @@ if __name__ == '__main__':
     flags.Trigger.EDMVersion = 3
     flags.Trigger.enableL1CaloPhase1 = True
 
+    flags.Debug.DumpEvtStore = True
+
     flags.fillFromArgs(parser=parser)
     
     # Enable only calo for this test
@@ -86,11 +88,11 @@ if __name__ == '__main__':
                                       dumpTerse=True))
 
     # add in the EgammaBDT Algorithm to be run
-    from GlobalSimulation.GlobalSimAlgCfg_Egamma1BDT  import GlobalSimulationAlgCfg
+    from GlobalSimulation.GlobalSimAlgCfg_Egamma1BDT_hypoMult  import GlobalSimulationAlgCfg
     acc.merge(GlobalSimulationAlgCfg(flags,
                                      OutputLevel=DEBUG,
                                      dump=True))
-
+    
     if acc.run().isFailure():
         import sys
         sys.exit(1)

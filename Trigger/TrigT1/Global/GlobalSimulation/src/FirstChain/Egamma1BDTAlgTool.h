@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef GLOBALSIM_EGAMMA1BDTALGTOOL_H
@@ -10,10 +10,8 @@
  */
 
 #include "../GlobalSimComponents/IGlobalSimAlgTool.h"
-#include "../IO/LArStripNeighborhoodContainer.h"
-#include "../IO/eEmNbhoodTOBContainer.h"
+#include "../IO/LArStripNeighborhood.h"
 #include "../IO/eEmNbhoodTOB.h"
-#include "../IO/eEmEg1BDTTOBContainer.h"
 #include "../IO/eEmEg1BDTTOB.h"
 
 
@@ -29,8 +27,12 @@
 #include <vector>
 
 namespace GlobalSim {
+ 
   class Egamma1BDTAlgTool: public extends<AthAlgTool, IGlobalSimAlgTool> {
-    
+
+    using eEmEg1BDTTOBContainer = GlobalSim::IOBitwise::eEmEg1BDTTOBContainer;
+    using eEmNbhoodTOBContainer =  GlobalSim::IOBitwise::eEmNbhoodTOBContainer;
+ 
   public:
     Egamma1BDTAlgTool(const std::string& type,
 			    const std::string& name,
@@ -53,14 +55,14 @@ namespace GlobalSim {
 	     {false},
 	     "flag to enable dumps"};
 
-    SG::WriteHandleKey<IOBitwise::eEmEg1BDTTOBContainer>
+    SG::WriteHandleKey<eEmEg1BDTTOBContainer>
     m_BDTResultKey {
       this,
       "BDTResultKey",
       "BDTResult"};
     
     // input to the  BDT Algorithm
-    SG::ReadHandleKey<IOBitwise::eEmNbhoodTOBContainer>
+    SG::ReadHandleKey<eEmNbhoodTOBContainer>
     m_nbhdTOBContainerReadKey {
       this,
       "LArNeighborhoodTOBContainerReadKey",
