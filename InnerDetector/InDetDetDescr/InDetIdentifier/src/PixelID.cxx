@@ -311,8 +311,8 @@ PixelID::initialize_from_dictionary(const IdDictMgr& dict_mgr) {
 
   // Set the base identifier for Pixel
   m_baseIdentifier = ((Identifier::value_type) 0);
-  m_indet_impl.pack(indet_field_value(), m_baseIdentifier);
-  m_pixel_impl.pack(pixel_field_value(), m_baseIdentifier);
+  m_impl[kIndet].pack(indet_field_value(), m_baseIdentifier);
+  m_impl[kPixel].pack(pixel_field_value(), m_baseIdentifier);
 
   // Set the base expanded identifier for Pixel
   m_baseExpandedIdentifier << indet_field_value() << pixel_field_value();
@@ -665,70 +665,27 @@ PixelID::initLevelsFromDict() {
 
   const IdDictRegion& region = m_dict->region(m_pixel_region_index);
 
-  m_indet_impl = region.implementation(m_INDET_INDEX);
-  m_pixel_impl = region.implementation(m_PIXEL_INDEX);
-  m_bec_impl = region.implementation(m_BARREL_EC_INDEX);
-  m_lay_disk_impl = region.implementation(m_LAYER_DISK_INDEX);
-  m_phi_mod_impl = region.implementation(m_PHI_MODULE_INDEX);
-  m_eta_mod_impl = region.implementation(m_ETA_MODULE_INDEX);
-  m_phi_index_impl = region.implementation(m_PHI_INDEX_INDEX);
-  m_eta_index_impl = region.implementation(m_ETA_INDEX_INDEX);
+  m_impl[kIndet] = region.implementation(m_INDET_INDEX);
+  m_impl[kPixel] = region.implementation(m_PIXEL_INDEX);
+  m_impl[kBec] = region.implementation(m_BARREL_EC_INDEX);
+  m_impl[kLayDisk] = region.implementation(m_LAYER_DISK_INDEX);
+  m_impl[kPhiMod] = region.implementation(m_PHI_MODULE_INDEX);
+  m_impl[kEtaMod] = region.implementation(m_ETA_MODULE_INDEX);
+  m_impl[kPhiIndex] = region.implementation(m_PHI_INDEX_INDEX);
+  m_impl[kEtaIndex] = region.implementation(m_ETA_INDEX_INDEX);
 
 
   ATH_MSG_DEBUG("decode index and bit fields for each level:");
-  ATH_MSG_DEBUG("indet          " << m_indet_impl);
-  ATH_MSG_DEBUG("pixel          " << m_pixel_impl);
-  ATH_MSG_DEBUG("bec            " << m_bec_impl);
-  ATH_MSG_DEBUG("bec_shift      " << m_bec_shift_impl);
-  ATH_MSG_DEBUG("lay_disk       " << m_lay_disk_impl);
-  ATH_MSG_DEBUG("lay_disk_shift " << m_lay_disk_shift_impl);
-  ATH_MSG_DEBUG("phi_mod        " << m_phi_mod_impl);
-  ATH_MSG_DEBUG("phi_mod_shift  " << m_phi_mod_shift_impl);
-  ATH_MSG_DEBUG("eta_mod        " << m_eta_mod_impl);
-  ATH_MSG_DEBUG("eta_mod_shift  " << m_eta_mod_shift_impl);
-  ATH_MSG_DEBUG("phi_index      " << m_phi_index_impl);
-  ATH_MSG_DEBUG("eta_index      " << m_eta_index_impl);
-  ATH_MSG_DEBUG("bec_eta_mod    " << m_bec_eta_mod_impl);
+  for (int i{};i != nImplementations; ++i){
+    ATH_MSG_DEBUG( std::left << std::setw(14) << m_implNames[i] << m_impl[i]);
+  }
   
   if (msgLvl(MSG::INFO)){ 
-    std::cout<< formatOutput("indet", m_indet_impl);
-    m_indet_impl.ored_field().show();
-    //
-    std::cout<< formatOutput("pixel", m_pixel_impl);
-    m_pixel_impl.ored_field().show();
-    //
-    std::cout<< formatOutput("bec", m_bec_impl);
-    m_bec_impl.ored_field().show();
-    //
-    std::cout<< formatOutput("bec_shift", m_bec_shift_impl);
-    m_bec_shift_impl.ored_field().show();
-    //
-    std::cout<< formatOutput("lay_disk", m_lay_disk_impl);
-    m_lay_disk_impl.ored_field().show();
-    //
-    std::cout<< formatOutput("lay_disk_shift", m_lay_disk_shift_impl);
-    m_lay_disk_shift_impl.ored_field().show();
-    //
-    std::cout<< formatOutput("phi_mod", m_phi_mod_impl);
-    m_phi_mod_impl.ored_field().show();
-    //
-    std::cout<< formatOutput("phi_mod_shift", m_phi_mod_shift_impl);
-    m_phi_mod_shift_impl.ored_field().show();
-    //
-    std::cout<< formatOutput("eta_mod", m_eta_mod_impl);
-    m_eta_mod_impl.ored_field().show();
-    //
-    std::cout<< formatOutput("eta_mod_shift", m_eta_mod_shift_impl);
-    m_eta_mod_shift_impl.ored_field().show();
-    //
-    std::cout<< formatOutput("phi_index", m_phi_index_impl);
-    m_phi_index_impl.ored_field().show();
-    //
-    std::cout<< formatOutput("eta_index", m_eta_index_impl);
-    m_eta_index_impl.ored_field().show();
-    //
-    std::cout<< formatOutput("bec_eta_mod", m_bec_eta_mod_impl);
-    m_bec_eta_mod_impl.ored_field().show();
+    for (int i{};i != nImplementations; ++i){
+      std::cout<< formatOutput(m_implNames[i], m_impl[i]);
+      m_impl[i].ored_field().show();
+    }
+    
     //
     std::cout << "PixelID::initLevelsFromDict - found levels \n";
     std::cout << "subdet        " << m_INDET_INDEX << "\n";
