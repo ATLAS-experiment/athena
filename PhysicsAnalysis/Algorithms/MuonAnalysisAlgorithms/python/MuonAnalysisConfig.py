@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # AnaAlgorithm import(s):
 from AnalysisAlgorithmsConfig.ConfigBlock import ConfigBlock
@@ -488,15 +488,16 @@ class MuonTriggerAnalysisSFBlock (ConfigBlock):
                                 else:
                                     triggerConfigYears[leg_out] = [year]
 
+            # Make the public tool for this configuration
+            sfTool = config.createPublicTool("CP::MuonTriggerScaleFactors", f"{self.instanceName()}_SFTool")
+            # Reproduce config from TrigGlobalEfficiencyAlg
+            sfTool.MuonQuality = self.muonID
+            sfTool.AllowZeroSF = True
+
             for trig_short, trig in triggerConfigs.items():
                 alg = config.createAlgorithm('CP::MuonTriggerEfficiencyScaleFactorAlg',
                                              'MuonTrigEfficiencyCorrectionsAlg_' + trig_short)
-                config.addPrivateTool( 'efficiencyScaleFactorTool',
-                                       'CP::MuonTriggerScaleFactors' )
-
-                # Reproduce config from TrigGlobalEfficiencyAlg
-                alg.efficiencyScaleFactorTool.MuonQuality = self.muonID
-                alg.efficiencyScaleFactorTool.AllowZeroSF = True
+                alg.efficiencyScaleFactorTool = f"{sfTool.getType()}/{sfTool.getName()}"
 
                 # Avoid warnings for missing triggers
                 if self.includeAllYearsPerRun:
