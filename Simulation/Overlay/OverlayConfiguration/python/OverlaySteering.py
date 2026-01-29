@@ -58,6 +58,11 @@ def OverlayMainContentCfg(configFlags):
                 logOverlay.info('DigitizationMetaData: setting "%s" to be %s', key, value)
 
             acc.merge(writeParametersToMetaData(configFlags, folderName, params, runNumber, runNumberEnd))
+
+            # Also set up reading via MetaDataToCondAlg so ConditionStore is populated
+            # during event processing (for algorithms like LuminosityCondAlg that need it)
+            from IOVDbMetaDataTools.MetaDataToCondAlgConfig import MetaDataToCondAlgCfg
+            acc.merge(MetaDataToCondAlgCfg(configFlags, folderName))
         else:
             # Sqlite mode: create DigitParams.db first
             from OverlayConfiguration.OverlayMetadata import writeOverlayDigitizationMetadata

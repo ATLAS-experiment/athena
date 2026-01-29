@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 from AthenaCommon.Logging import logging
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
@@ -107,16 +107,15 @@ def writeDigitizationMetadata(flags):
 
 def readDigitizationParameters(flags):
     """Read digitization parameters metadata"""
-    from IOVDbSvc.IOVDbSvcConfig import addFolders, IOVDbSvcCfg
+    from IOVDbSvc.IOVDbSvcConfig import addFolders
 
-    # Direct in-file metadata mode: IOVDbMetaDataTool populates ConditionStore from file metadata or Payloads
-    # In overlay + direct metadata mode: OverlaySteering sets up IOVDbMetaDataTool.Payloads with pileup metadata,
-    # which will populate ConditionStore during job execution
-    # We still need to register the folder with CondInputLoader for multithreaded scheduling
+    # Direct in-file metadata mode: use MetaDataToCondAlg to read from MetaDataStore
+    # and populate ConditionStore during event processing.
+    # This is required because IOVDbMetaDataTool.Payloads cannot populate ConditionStore
+    # during initialize() (no valid EventContext at that time).
     if flags.IOVDb.WriteParametersAsMetaData:
-        result = IOVDbSvcCfg(flags)
-        result.getCondAlgo('CondInputLoader').Load |= {('AthenaAttributeList', folderName)}
-        return result
+        from IOVDbMetaDataTools.MetaDataToCondAlgConfig import MetaDataToCondAlgCfg
+        return MetaDataToCondAlgCfg(flags, folderName)
 
     # Sqlite mode: use IOVDbSvc to read and populate ConditionStore
     if flags.Digitization.ReadParametersFromDB:
