@@ -14,7 +14,6 @@
 #include "DerivationFrameworkMCTruth/TruthCollectionMakerNeutrino.h"
 #include "DerivationFrameworkMCTruth/TruthCollectionMakerPhoton.h"
 #include "DerivationFrameworkMCTruth/TruthCollectionMakerPhotonSim.h"
-#include "DerivationFrameworkMCTruth/TruthCollectionMakerTau.h"
 #include "DerivationFrameworkMCTruth/TruthCollectionMakerTop.h"
 #include "DerivationFrameworkMCTruth/TruthClassificationDecorator.h"
 #include "DerivationFrameworkMCTruth/CompactHardTruth.h"
@@ -54,7 +53,6 @@ DECLARE_COMPONENT( TruthCollectionMakerMuon )
 DECLARE_COMPONENT( TruthCollectionMakerNeutrino )
 DECLARE_COMPONENT( TruthCollectionMakerPhoton )
 DECLARE_COMPONENT( TruthCollectionMakerPhotonSim )
-DECLARE_COMPONENT( TruthCollectionMakerTau )
 DECLARE_COMPONENT( TruthCollectionMakerTop )
 DECLARE_COMPONENT( TruthClassificationDecorator )
 DECLARE_COMPONENT( CompactHardTruth )
