@@ -1,4 +1,7 @@
 <lcgdict>
   <enum pattern="HI::*"/>
+  <enum pattern="HI::PileupVariation*"/>
+  <enum pattern="HI::SelectionMask*"/>
+
   <class name="HI::HIPileupTool" />
 </lcgdict>

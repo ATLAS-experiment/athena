@@ -13,7 +13,7 @@ namespace HI {
 
 class HIEventSelectionToolRun3 : public virtual HI::IHIEventSelectionToolRun3,
                                  public virtual asg::AsgTool {
-  ASG_TOOL_CLASS( HIEventSelectionToolRun3, IHIEventSelectionToolRun3 )
+  ASG_TOOL_CLASS(HIEventSelectionToolRun3, IHIEventSelectionToolRun3)
 
  public:
   HIEventSelectionToolRun3(const std::string& name);
@@ -21,6 +21,11 @@ class HIEventSelectionToolRun3 : public virtual HI::IHIEventSelectionToolRun3,
   virtual ~HIEventSelectionToolRun3() = default;
   virtual StatusCode initialize() override;
   virtual bool noDetectorError(const xAOD::EventInfo* eventInfo) const override;
+
+  virtual bool puZDCvsFCal(HI::IonDataType when,
+                           const xAOD::HIEventShapeContainer* es,
+                           const xAOD::ZdcModuleContainer* zdcModules,
+                           HI::PileupVariation variation) const override;
 
   virtual bool puZDCvsFCal(
       IonDataType dataType, float fcalEt, float zdcE,
@@ -38,14 +43,13 @@ class HIEventSelectionToolRun3 : public virtual HI::IHIEventSelectionToolRun3,
       IonDataType dataType,
       const xAOD::VertexContainer* vertices) const override;
 
-  virtual IonDataType toDataType(const xAOD::EventInfo* eventInfo) const override;
-
+  virtual IonDataType toDataType(
+      const xAOD::EventInfo* eventInfo) const override;
 
  private:
   float zdcCutValue(IonDataType, float fcalEt, PileupVariation) const;
   float ntrkCutValue(IonDataType, float fcalEt, PileupVariation) const;
   IonDataType runNumberToDataType(uint32_t run) const;
-
 };
 
 }  // namespace HI

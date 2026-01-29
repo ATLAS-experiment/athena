@@ -5,6 +5,10 @@
 
 std::string HI::toString(HI::IonDataType when) {
   switch (when) {
+    case HI::IonDataType::PbPb2015:
+      return "PbPb2015";
+    case HI::IonDataType::PbPb2018:
+      return "PbPb2018";
     case HI::IonDataType::PbPb2023:
       return "PbPb2023";
     case HI::IonDataType::PbPb2024_Shadowing:
@@ -29,10 +33,10 @@ std::string HI::toString(HI::PileupVariation variation) {
   switch (variation) {
     case HI::PileupVariation::Nominal:
       return "Nominal";
-    case HI::PileupVariation::Up:
-      return "Up";
-    case HI::PileupVariation::Down:
-      return "Down";
+    case HI::PileupVariation::Tight:
+      return "Tight";
+    case HI::PileupVariation::Loose:
+      return "Loose";
     default:
       return std::string("UNKNOWN PU VARIATION ") +
              std::to_string(static_cast<uint8_t>(variation));
@@ -66,6 +70,31 @@ bool HI::HIEventSelectionToolRun3::noDetectorError(
   return true;
 }
 
+float calcFcalEt(const xAOD::HIEventShapeContainer* es) {
+  float et = 0;
+  for (auto slice : *es) {
+    const static std::set fcalLayers({21, 22, 23});
+    if (fcalLayers.contains(slice->layer()))
+      et += slice->et();
+  }
+  return et * 1e-6;  // we operate in TeV
+}
+float calcZDCE(const xAOD::ZdcModuleContainer* zdcModules) {
+  float e = 0;
+  static const SG::ConstAccessor<float> calibEnergyAccessor("CalibEnergy");
+  for (auto module : *zdcModules) {
+    e += calibEnergyAccessor(*module);
+  }
+  return e * 1e-3;  // we operate in GeV
+}
+
+bool HI::HIEventSelectionToolRun3::puZDCvsFCal(
+    HI::IonDataType when, const xAOD::HIEventShapeContainer* es,
+    const xAOD::ZdcModuleContainer* zdcModules,
+    HI::PileupVariation variation) const {
+  return puZDCvsFCal(when, calcFcalEt(es), calcZDCE(zdcModules), variation);
+}
+
 bool HI::HIEventSelectionToolRun3::puZDCvsFCal(
     HI::IonDataType when, float fcalEt, float zdcE,
     HI::PileupVariation variation) const {
@@ -81,9 +110,10 @@ bool HI::HIEventSelectionToolRun3::puNtrkvsFCal(
 }
 
 bool HI::HIEventSelectionToolRun3::puZDCPSvsFCal(
-    HI::IonDataType when, float /*fcalEt*/, float presamplerA, float presamplerC,
-    HI::PileupVariation variation) const {
-  // not sure if fcalEt will be involved i.e. apply this cut only above certain fcalEt
+    HI::IonDataType when, float /*fcalEt*/, float presamplerA,
+    float presamplerC, HI::PileupVariation variation) const {
+  // not sure if fcalEt will be involved i.e. apply this cut only above certain
+  // fcalEt
 
   if (when == HI::IonDataType::PbPb2023) {
     // from ATL-COM-PHYS-2025-033 + priv. communication F.Pauwels
@@ -92,10 +122,10 @@ bool HI::HIEventSelectionToolRun3::puZDCPSvsFCal(
     const float peakWidthA = 51.8;
     const float peakWidthC = 51.8;
     float sigma = 7;
-    if (variation == HI::PileupVariation::Up) {
+    if (variation == HI::PileupVariation::Tight) {
       sigma = 8;
     }
-    if (variation == HI::PileupVariation::Down) {
+    if (variation == HI::PileupVariation::Loose) {
       sigma = 6;
     }
     if (presamplerA > (peakPositionA + sigma * peakWidthA) and
@@ -125,18 +155,28 @@ float HI::HIEventSelectionToolRun3::zdcCutValue(
     HI::IonDataType when, float fcalEt, HI::PileupVariation variation) const {
   if (fcalEt > 100.0)
     throw std::runtime_error(
-        std::to_string(fcalEt) +  
+        std::to_string(fcalEt) +
         " the energy that is given to zdcCutValue is well above 100 TeV?, "
         "likely you call it not converting energy to TeV");
 
   if (when == HI::IonDataType::PbPb2023) {
-    const double a = 334.29, b = -20.39,
-                 c = -2.38;  // from ATL-COM-PHYS-2025-033
-    double cut = a + b * fcalEt + c * fcalEt * fcalEt;
-    if (variation == HI::PileupVariation::Up) {
+
+    auto cutFunction = [](float et) {
+      const static double a = 334.29, b = -20.39,
+                          c = -2.38;  // from ATL-COM-PHYS-2025-033
+      return a + b * et + c * et * et;
+    };
+
+    float cut = cutFunction(fcalEt);
+    if (fcalEt <= 1.0)  // below 1 TeV use flat
+      cut = cutFunction(1.0);
+    if (fcalEt >= 4.0)  // below 1 TeV use flat
+      cut = cutFunction(4.0);
+
+    if (variation == HI::PileupVariation::Tight) {
       cut *= 1.02;
     }
-    if (variation == HI::PileupVariation::Down) {
+    if (variation == HI::PileupVariation::Loose) {
       cut *= 0.98;
     }
     return cut;
@@ -158,8 +198,11 @@ HI::IonDataType HI::HIEventSelectionToolRun3::toDataType(
 
 HI::IonDataType HI::HIEventSelectionToolRun3::runNumberToDataType(
     uint32_t run) const {
-  if (run < 463427)
-    throw std::runtime_error(std::to_string(run) + " not a Run3 run");
+  if (run < 365498)
+    throw std::runtime_error(std::to_string(run) +
+                             " not handled by selection tool");
+  if (run <= 367384)
+    return HI::IonDataType::PbPb2018;
   if (run <= 461633)
     return HI::IonDataType::PbPb2023;
   if (run <= 489691)
@@ -173,6 +216,7 @@ HI::IonDataType HI::HIEventSelectionToolRun3::runNumberToDataType(
   if (run <= 512049)
     return HI::IonDataType::PbPb2025;
   // fill it up with 2026
-  throw std::runtime_error(std::to_string(run) + " not a Run3 run");
+  throw std::runtime_error(std::to_string(run) +
+                           " not handled by selection tool");
 }
 // }  // namespace HI

@@ -31,6 +31,11 @@ if __name__ == '__main__':
     acc.merge(HIEventSelectionRun3Cfg(flags))
     acc.foreach_component("**/AthAlgSeq/*Run3*").OutputLevel=DEBUG
 
+    # test if 
+    filterAlg = acc.getEventAlgo("HIEventFilterAlgRun3")
+    import ROOT
+    filterAlg.SelectionMask=ROOT.HI.SelectionMask.NoEventError & ROOT.HI.SelectionMask.PUFCalVsZDCAny
+    
     acc.printConfig(withDetails=True)
     # either
     status = acc.run()
