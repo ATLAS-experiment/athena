@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //  Convert TrkTrack parameters to internal VKalVrt parameters
@@ -83,7 +83,7 @@ namespace Trk{
     //
     //  Common reference frame is ready. Start extraction of parameters for fit.
     //
-    double fx = 0., fy = 0., BMAG_FIXED = 0.;
+    double fx = 0., fy = 0., fz = 0.;
     for (const auto& mPer : InpPerigee) {
       if(mPer == nullptr){ continue; }
       AmgVector(5) VectPerig = mPer->parameters();
@@ -98,14 +98,15 @@ namespace Trk{
       state.m_fitField.getMagFld(perGlobalPos.x(),
 				 perGlobalPos.y(),
 				 perGlobalPos.z(),
-				 fx, fy, BMAG_FIXED);
-      if(std::abs(BMAG_FIXED) < 0.01) BMAG_FIXED = 0.01;
+				 fx, fy, fz);
+      double effectiveBMAG=state.m_fitField.getEffField(fx, fy, fz, VectPerig[2], VectPerig[3]);
+      if(std::abs(effectiveBMAG) < 0.01) effectiveBMAG = 0.01;
 
       double CovVertTrk[15];
       std::fill(CovVertTrk,CovVertTrk+15,0.);
       // No good covariance matrix!
       if(!convertAmg5SymMtx(mPer->covariance(), CovVertTrk)) return StatusCode::FAILURE;
-      VKalTransform(BMAG_FIXED,
+      VKalTransform(effectiveBMAG,
                     static_cast<double>(VectPerig(0)),
                     static_cast<double>(VectPerig(1)),
                     static_cast<double>(VectPerig(2)),
@@ -176,12 +177,13 @@ namespace Trk{
   {
 
     // ------  Magnetic field access
-    double fx = 0., fy = 0., BMAG_CUR = 0.;
-    state.m_fitField.getMagFld(vX,vY,vZ,fx,fy,BMAG_CUR);
-    if(std::abs(BMAG_CUR) < 0.01) BMAG_CUR=0.01;  //safety
+    double fx = 0., fy = 0., fz = 0.;
+    state.m_fitField.getMagFld(vX,vY,vZ,fx,fy,fz);
+    double effectiveBMAG=state.m_fitField.getEffField(fx, fy, fz, VKPerigee[3], VKPerigee[2]);
+    if(std::abs(effectiveBMAG) < 0.01) effectiveBMAG=0.01;  //safety
 
     double TrkP3 = 0., TrkP4 = 0., TrkP5 = 0.;
-    VKalToTrkTrack(BMAG_CUR, VKPerigee[2], VKPerigee[3], VKPerigee[4],
+    VKalToTrkTrack(effectiveBMAG, VKPerigee[2], VKPerigee[3], VKPerigee[4],
 		   TrkP3, TrkP4, TrkP5);
     double TrkP1 = -VKPerigee[0];   /*!!!! Change of sign !!!!*/
     double TrkP2 = VKPerigee[1];
@@ -199,8 +201,8 @@ namespace Trk{
     Deriv[1][1] =  1.;
     Deriv[2][3] =  1.;
     Deriv[3][2] =  1.;
-    Deriv[4][2] =  (std::cos(VKPerigee[2])/(m_CNVMAG*BMAG_CUR)) * VKPerigee[4];
-    Deriv[4][4] = -(std::sin(VKPerigee[2])/(m_CNVMAG*BMAG_CUR));
+    Deriv[4][2] =  (std::cos(VKPerigee[2])/(m_CNVMAG*effectiveBMAG)) * VKPerigee[4];
+    Deriv[4][4] = -(std::sin(VKPerigee[2])/(m_CNVMAG*effectiveBMAG));
 
     CovMtxOld[0][0]                   = VKCov[0];
     CovMtxOld[0][1] = CovMtxOld[1][0] = VKCov[1];

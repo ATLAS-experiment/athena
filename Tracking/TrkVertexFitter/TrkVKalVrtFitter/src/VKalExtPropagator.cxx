@@ -110,8 +110,8 @@ namespace Trk {
 //
 // ----- Magnetic field is taken at target point (GLOBAL calculated from relative frame input)
 //
-      double fx,fy,BMAG_FIXED;
-      state.m_fitField.getMagFld(vX,vY,vZ,fx,fy,BMAG_FIXED);
+      double fx,fy,fz;
+      state.m_fitField.getMagFld(vX,vY,vZ,fx,fy,fz);
 //
 //-------------------- Extrapolation itself
 //
@@ -169,13 +169,15 @@ namespace Trk {
 //std::cout<<" extrapCov="<<(*CovMtx)(0,0)<<", "<<(*CovMtx)(1,1)<<", "<<(*CovMtx)(2,2)<<
 //                                          ", "<<(*CovMtx)(3,3)<<", "<<(*CovMtx)(4,4)<<'\n';
 
+      double effectiveBMAG=state.m_fitField.getEffField(fx, fy, fz, VectPerig[2], VectPerig[3]);
+      if(fabs(effectiveBMAG) < 0.01) effectiveBMAG=0.01;
       if(CovNew != nullptr) {
-         m_vkalFitSvc->VKalTransform( BMAG_FIXED, VectPerig(0), VectPerig(1),
+         m_vkalFitSvc->VKalTransform( effectiveBMAG, VectPerig(0), VectPerig(1),
             VectPerig(2), VectPerig(3), VectPerig(4), CovVertTrk,
                       locCharge,  &ParNew[0] , &CovNew[0]);
       }else{
          double CovVertTrkTmp[15];
-         m_vkalFitSvc->VKalTransform( BMAG_FIXED, VectPerig(0), VectPerig(1),
+         m_vkalFitSvc->VKalTransform( effectiveBMAG, VectPerig(0), VectPerig(1),
             VectPerig(2), VectPerig(3), VectPerig(4), CovVertTrk,
                       locCharge,  &ParNew[0] , CovVertTrkTmp);
       }

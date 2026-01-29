@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrkVKalVrtCore/CFit.h"
@@ -461,7 +461,7 @@ int CFit(VKalVrtControl *FitCONTROL, int ifCovV0, int NTRK,
         chi2   += trk->Chi2;
         chi2tr[tk] = trk->Chi2;
         cfdcopy( trk->fitP, &parfs[tk][0], 3);
-        std::array<double, 4> pp = getFitParticleMom( trk, MainVRT->vk_fitterControl->vk_forcft.localbmag );
+        std::array<double, 4> pp = getFitParticleMom( trk, MainVRT.get() );
         ptot[0]+=pp[0]; ptot[1]+=pp[1]; ptot[2]+=pp[2]; ptot[3]+=pp[3];
     }
     cfdcopy(MainVRT->fitVcov, covf  , 6);  //fitted vertex covariance
@@ -485,7 +485,7 @@ int CFit(VKalVrtControl *FitCONTROL, int ifCovV0, int NTRK,
         } }
         int activeTrk[vkalNTrkM]={0};  std::fill_n(activeTrk,NTRK,1);
         double vrtMass=0., vrtMassError=0.;
-        cfmasserr(MainVRT.get(), activeTrk,MainVRT->vk_fitterControl->vk_forcft.localbmag, &vrtMass, &vrtMassError);
+        cfmasserr(MainVRT.get(), activeTrk, &vrtMass, &vrtMassError);
         FitCONTROL->setVertexMass(vrtMass);
         FitCONTROL->setVrtMassError(vrtMassError);
       }

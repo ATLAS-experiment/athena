@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //  Convert TrackParticle parameters to internal VKalVrt parameters
@@ -34,7 +34,7 @@ namespace Trk {
     const Trk::Perigee*        mPer=nullptr;
     double CovVertTrk[15]; std::fill(CovVertTrk,CovVertTrk+15,0.);
     double tmp_refFrameX=0, tmp_refFrameY=0, tmp_refFrameZ=0;
-    double fx,fy,BMAG_FIXED;
+    double fx,fy,fz;
 //
 // ----- Set reference frame to (0.,0.,0.) == ATLAS frame
 // ----- Magnetic field is taken in reference point
@@ -89,17 +89,19 @@ namespace Trk {
        if( mPer==nullptr ) continue; // No perigee!!!
        perGlobalPos =  mPer->position();    //Global position of perigee point
        if( !convertAmg5SymMtx(mPer->covariance(), CovVertTrk) ) return StatusCode::FAILURE; //VK no good covariance matrix!;
-       state.m_fitField.getMagFld( perGlobalPos.x(), perGlobalPos.y(), perGlobalPos.z(),           // Magnetic field
-                                                                  fx, fy, BMAG_FIXED);      // at the track perigee point
-       if(fabs(BMAG_FIXED) < 0.01) BMAG_FIXED=0.01;
+       state.m_fitField.getMagFld( perGlobalPos.x(), perGlobalPos.y(), perGlobalPos.z(),    // Magnetic field
+                                                                  fx, fy, fz);              // at the track perigee point
 //
 //--- Move ref. frame to the track common point refGVertex
 //    Small beamline inclination doesn't change track covariance matrix
        AmgSymMatrix(5) tmpCov = AmgSymMatrix(5)(*(mPer->covariance()));
        const Perigee tmpPer(mPer->position(),mPer->momentum(),mPer->charge(),surfGRefPoint,std::move(tmpCov));
        VectPerig    =  tmpPer.parameters();
+       
+       double effectiveBMAG=state.m_fitField.getEffField(fx, fy, fz, VectPerig[2], VectPerig[3]);
+       if(fabs(effectiveBMAG) < 0.01) effectiveBMAG=0.01;
 //--- Transform to internal parametrisation
-       VKalTransform( BMAG_FIXED, (double)VectPerig[0], (double)VectPerig[1],
+       VKalTransform( effectiveBMAG, (double)VectPerig[0], (double)VectPerig[1],
               (double)VectPerig[2], (double)VectPerig[3], (double)VectPerig[4], CovVertTrk,
                      state.m_ich[ntrk],&state.m_apar[ntrk][0],&state.m_awgt[ntrk][0]);
 //
@@ -131,7 +133,7 @@ namespace Trk {
     const  NeutralPerigee*        mPer=nullptr;
     double CovVertTrk[15]; std::fill(CovVertTrk,CovVertTrk+15,0.);
     double tmp_refFrameX=0, tmp_refFrameY=0, tmp_refFrameZ=0;
-    double fx,fy,BMAG_FIXED;
+    double fx,fy,fz;
 //
 // ----- Set reference frame to (0.,0.,0.) == ATLAS frame
 // ----- Magnetic field is taken in reference point
@@ -187,10 +189,8 @@ namespace Trk {
        if( mPer==nullptr ) continue; // No perigee!!!
        perGlobalPos =  mPer->position();    //Global position of perigee point
        if( !convertAmg5SymMtx(mPer->covariance(), CovVertTrk) ) return StatusCode::FAILURE; //VK no good covariance matrix!;
-       state.m_fitField.getMagFld( perGlobalPos.x(), perGlobalPos.y(), perGlobalPos.z(),         // Magnetic field
-                                                                  fx, fy, BMAG_FIXED);      // at track perigee point
-       if(fabs(BMAG_FIXED) < 0.01) BMAG_FIXED=0.01;
-
+       state.m_fitField.getMagFld( perGlobalPos.x(), perGlobalPos.y(), perGlobalPos.z(),    // Magnetic field
+                                                                  fx, fy, fz);              // at track perigee point
 //
 //--- Move ref. frame to the track common point refGVertex
 //    Small beamline inclination doesn't change track covariance matrix
@@ -199,7 +199,9 @@ namespace Trk {
        const Perigee tmpPer(mPer->position(),mPer->momentum(),mPer->charge(),surfGRefPoint,std::move(tmpCov));
        VectPerig    =  tmpPer.parameters();
        //--- Transform to internal parametrisation
-       VKalTransform( BMAG_FIXED, (double)VectPerig[0], (double)VectPerig[1],
+       double effectiveBMAG=state.m_fitField.getEffField(fx, fy, fz, VectPerig[2], VectPerig[3]);
+       if(fabs(effectiveBMAG) < 0.01) effectiveBMAG=0.01;
+       VKalTransform( effectiveBMAG, (double)VectPerig[0], (double)VectPerig[1],
               (double)VectPerig[2], (double)VectPerig[3], (double)VectPerig[4], CovVertTrk,
                      state.m_ich[ntrk],&state.m_apar[ntrk][0],&state.m_awgt[ntrk][0]);
        state.m_ich[ntrk]=0;

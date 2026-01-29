@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // Header include
@@ -56,12 +56,12 @@ namespace Trk{
        return true;
  }
  
- void TrkVKalVrtFitter::VKalTransform(double BMAG_FIXED,
+ void TrkVKalVrtFitter::VKalTransform(double effectiveBMAG,
      double A0V,double ZV,double PhiV,double ThetaV,double  PInv,const double CovTrk[15],
      long int & Charge, double VTrkPar[5], double VTrkCov[15]) const
  {
      int i,j,ii,jj;
-     double CnvCst=m_CNVMAG*BMAG_FIXED;
+     double CnvCst=m_CNVMAG*effectiveBMAG;
      double  sinT = sin(ThetaV);
      double  cosT = cos(ThetaV);
  
