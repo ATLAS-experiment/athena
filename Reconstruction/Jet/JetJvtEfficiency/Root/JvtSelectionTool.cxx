@@ -14,7 +14,9 @@ namespace {
 namespace CP {
 
     StatusCode JvtSelectionTool::initialize() {
-        ATH_MSG_WARNING("Jvt is deprecated, please move to using NNJvt");
+        if(m_isPFlow.value()){
+	  ATH_MSG_WARNING("Jvt is deprecated, please move to using NNJvt");
+	}
 
         ATH_CHECK(JvtSelectionToolBase::initialize());
 

@@ -21,6 +21,7 @@ def getJvtSelToolCfg(flags, jetContainer):
     jvtSelTool.JetContainer = jetContainer
     jvtSelTool.JvtMomentName = "Jvt"
     jvtSelTool.PassFlagName = "passJvt"
+    jvtSelTool.IsPFlow = False
     acc.setPrivateTools(jvtSelTool)
     return acc
   # PFlow jets
