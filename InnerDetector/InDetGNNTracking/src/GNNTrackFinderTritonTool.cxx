@@ -35,10 +35,14 @@ StatusCode InDet::GNNTrackFinderTritonTool::getTracks(
     // may need to be updated.
     auto featureMap = m_spacepointFeatureTool->getFeatures(sp);
     for (int i = 0; i < spacepointFeatures; i++){
+      // if the feature is "hit_id", use sp_idx as its value
+      if (m_featureNamesVec[i] == "hit_id"){
+        inputValues.push_back((float)sp_idx);
+        continue;
+      }
       inputValues.push_back(featureMap[m_featureNamesVec[i]]);
     }
-
-    spacepointIDs.push_back(sp_idx++);
+    sp_idx++;
   }
 
   AthInfer::InputDataMap inputData;
