@@ -17,6 +17,7 @@
 // Forward declaration(s):
 class TFile;
 class TH1F;
+class TGraph;
 
 class Interp3D;
 
@@ -67,7 +68,6 @@ namespace CP {
         StatusCode addCutToWP(IsolationWP* wp, const std::string& key_in, const xAOD::Iso::IsolationType t, const std::string& expression,
                               const xAOD::Iso::IsolationType isoCutRemap);
         StatusCode addCutToWP(IsolationWP* wp, const std::string& key, const xAOD::Iso::IsolationType t, const std::string& expression);
-
       
     private:
         // same interface for xAOD::IParticle and StrObj -> use  template
@@ -92,6 +92,10 @@ namespace CP {
         /// input file
         Gaudi::Property<std::string> m_calibFileName{this, "CalibFileName", "", " The config to use"};
         std::unique_ptr<TFile> m_calibFile{nullptr};
+
+        /// cvfms path for files containing WP definitions (e.g. for TGraphs)
+        Gaudi::Property<std::string> m_filePathName{this, "filePathName", "ElectronIsolationSelection/2022_2025/", " The nominal file path to use"};
+        std::unique_ptr<TFile> m_WPdefinitionFile{nullptr};
 
         /// internal use
         std::vector<std::unique_ptr<IsolationWP>> m_muWPs{};
@@ -132,6 +136,8 @@ namespace CP {
         // parameters: {(p0_0, p1_0, p2_0, ...), (p0_1, p1_1, p2_1, ...), ...}: are the parameters of the polinomial functions
         // isOpen: if true, first and last segments are open, i.e. intervals are  (-inf, x0), [x0, x1), [x1, x2), ..., [xn-1, xn), [xn, +inf)
         // if isOpen==false, boundaries.size() == parameters.size()+1, else boundaries.size() == parameters.size()-1
+	//
+
     };
 }  // namespace CP
 
