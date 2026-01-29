@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  */
 
 #ifndef INDETIDENTIFIER_PIXELID_H
@@ -73,12 +73,9 @@ public:
   typedef MultiRange::const_identifier_factory const_expanded_id_iterator;
   //@}
 
-  /// @name strutors
-  //@{
   PixelID();
-  //@}
   
-  /// THis is a PixelID helper
+  /// This is a PixelID helper
   virtual AtlasDetectorID::HelperType helper() const override{ 
     return AtlasDetectorID::HelperType::Pixel;
   }
