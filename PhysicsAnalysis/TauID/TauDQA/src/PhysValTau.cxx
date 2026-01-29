@@ -87,8 +87,12 @@ StatusCode PhysValTau::fillHistograms()
   // Retrieve event info and beamSpotWeight
   const xAOD::EventInfo* eventInfo = nullptr;
   ATH_CHECK( evtStore()->retrieve(eventInfo, "EventInfo") );
-  
+
+
   float weight = eventInfo->beamSpotWeight();
+  float avg_mu = eventInfo->averageInteractionsPerCrossing();
+
+  m_oTauValidationPlotsNominal->m_oEventPlotsNom.fill(avg_mu,weight);
 
   // Loop through recoonstructed tau container
   for (auto tau : *taus) {
@@ -100,12 +104,12 @@ StatusCode PhysValTau::fillHistograms()
     if(m_TauJetContainerName=="TauJets"){
       m_oTauValidationPlotsNoCuts->m_oRecoTauAllProngsPlots.fill(*tau, weight);
       m_oTauValidationPlotsNoCuts->m_oNewCorePlots.fill(*tau, weight);
-      m_oTauValidationPlotsNoCuts->m_oRecTauEffPlots.fill(*tau, weight);
+      m_oTauValidationPlotsNoCuts->m_oRecTauEffPlots.fill(*tau, weight, avg_mu);
       m_oTauValidationPlotsNoCuts->m_oRecoGeneralTauAllProngsPlots.fill(*tau, weight);
     }
     if ( nominal ) {
       m_oTauValidationPlotsNominal->m_oRecoGeneralNom.fill(*tau, weight);
-      m_oTauValidationPlotsNominal->m_oRecTauEffPlotsNom.fill(*tau, weight);
+      m_oTauValidationPlotsNominal->m_oRecTauEffPlotsNom.fill(*tau, weight, avg_mu);
       m_oTauValidationPlotsNominal->m_oRecTauRecoTauPlotsNom.fill(*tau, weight);
       m_oTauValidationPlotsNominal->m_oNewCoreRecTauPlotsNom.fill(*tau, weight);
     }
@@ -113,21 +117,21 @@ StatusCode PhysValTau::fillHistograms()
     if ( recProng == 1 ) {
       if(m_TauJetContainerName=="TauJets"){
 	m_oTauValidationPlotsNoCuts->m_oRecoHad1ProngPlots.fill(*tau, weight);
-	m_oTauValidationPlotsNoCuts->m_oRecTauEff1PPlots.fill(*tau, weight);
+	m_oTauValidationPlotsNoCuts->m_oRecTauEff1PPlots.fill(*tau, weight, avg_mu);
       }
       if ( nominal ) {
 	m_oTauValidationPlotsNominal->m_oRecoHad1ProngNom.fill(*tau, weight);
-	m_oTauValidationPlotsNominal->m_oRecTauEff1PPlotsNom.fill(*tau, weight);
+	m_oTauValidationPlotsNominal->m_oRecTauEff1PPlotsNom.fill(*tau, weight, avg_mu);
       }
     }
     else if ( recProng == 3 ) {
       if(m_TauJetContainerName=="TauJets"){
 	m_oTauValidationPlotsNoCuts->m_oRecoHad3ProngPlots.fill(*tau, weight);
-	m_oTauValidationPlotsNoCuts->m_oRecTauEff3PPlots.fill(*tau, weight);
+	m_oTauValidationPlotsNoCuts->m_oRecTauEff3PPlots.fill(*tau, weight, avg_mu);
       }
       if ( nominal ) {
 	m_oTauValidationPlotsNominal->m_oRecoHad3ProngNom.fill(*tau, weight);
-	m_oTauValidationPlotsNominal->m_oRecTauEff3PPlotsNom.fill(*tau, weight);
+	m_oTauValidationPlotsNominal->m_oRecTauEff3PPlotsNom.fill(*tau, weight, avg_mu);
       }
     }
       
@@ -152,36 +156,36 @@ StatusCode PhysValTau::fillHistograms()
 	    
 	    // Substructure/PFO histograms 
 	    m_oTauValidationPlotsNoCuts->m_oMatchedTauAllProngsPlots.fill(*tau, weight);
-	    m_oTauValidationPlotsNoCuts->m_oMatchedTauEffPlots.fill(*tau, weight);
+	    m_oTauValidationPlotsNoCuts->m_oMatchedTauEffPlots.fill(*tau, weight, avg_mu);
 	  }
 	  if ( nominal ) {
 	    m_oTauValidationPlotsNominal->m_oMatchedGeneralNom.fill(*tau, weight);
 	    m_oTauValidationPlotsNominal->m_oMatchedResolutionPlotsNom.fill(*tau, *trueTau, weight);
-	    m_oTauValidationPlotsNominal->m_oMatchedTauEffPlotsNom.fill(*tau, weight);
+	    m_oTauValidationPlotsNominal->m_oMatchedTauEffPlotsNom.fill(*tau, weight, avg_mu);
 	    m_oTauValidationPlotsNominal->m_oMatchedTauRecoTauPlotsNom.fill(*tau, weight);
 	    m_oTauValidationPlotsNominal->m_oNewCoreMatchedPlotsNom.fill(*tau, weight);
 	  }
 	  if ( recProng == 1 ) {
 	    if(m_TauJetContainerName=="TauJets"){
 	      m_oTauValidationPlotsNoCuts->m_oHad1ProngPlots.fill(*tau, weight);
-	      m_oTauValidationPlotsNoCuts->m_oMatchedTauEff1PPlots.fill(*tau, weight);
+	      m_oTauValidationPlotsNoCuts->m_oMatchedTauEff1PPlots.fill(*tau, weight, avg_mu);
 	      m_oTauValidationPlotsNoCuts->m_oMatchedResolution1PPlots.fill(*tau, *trueTau, weight);
 	    }
 	    if ( nominal ) {
 	      m_oTauValidationPlotsNominal->m_oMatchedHad1ProngNom.fill(*tau, weight);
-	      m_oTauValidationPlotsNominal->m_oMatchedTauEff1PPlotsNom.fill(*tau, weight);
+	      m_oTauValidationPlotsNominal->m_oMatchedTauEff1PPlotsNom.fill(*tau, weight, avg_mu);
 	      m_oTauValidationPlotsNominal->m_oMatchedResolution1PPlotsNom.fill(*tau, *trueTau, weight);
 	    }
 	  }
 	  else if ( recProng == 3 ) {
 	    if(m_TauJetContainerName=="TauJets"){
 	      m_oTauValidationPlotsNoCuts->m_oHad3ProngPlots.fill(*tau, weight);
-	      m_oTauValidationPlotsNoCuts->m_oMatchedTauEff3PPlots.fill(*tau, weight);
+	      m_oTauValidationPlotsNoCuts->m_oMatchedTauEff3PPlots.fill(*tau, weight, avg_mu);
 	      m_oTauValidationPlotsNoCuts->m_oMatchedResolution3PPlots.fill(*tau, *trueTau, weight);
 	    }
 	    if ( nominal ) {
 	      m_oTauValidationPlotsNominal->m_oMatchedHad3ProngNom.fill(*tau, weight);
-	      m_oTauValidationPlotsNominal->m_oMatchedTauEff3PPlotsNom.fill(*tau, weight);
+	      m_oTauValidationPlotsNominal->m_oMatchedTauEff3PPlotsNom.fill(*tau, weight, avg_mu);
 	      m_oTauValidationPlotsNominal->m_oMatchedResolution3PPlotsNom.fill(*tau, *trueTau, weight);
 	    }
 	  }
@@ -201,7 +205,7 @@ StatusCode PhysValTau::fillHistograms()
         if ( nominal ) {
 	  m_oTauValidationPlotsNominal->m_oElMatchedParamPlotsNom.fill(*tau, weight);
 	  m_oTauValidationPlotsNominal->m_oElMatchedEVetoPlotsNom.fill(*tau, weight);
-	  if(recProng == 1) m_oTauValidationPlotsNominal->m_oElMatchedEff1PPlotsNom.fill(*tau, weight);
+	  if(recProng == 1) m_oTauValidationPlotsNominal->m_oElMatchedEff1PPlotsNom.fill(*tau, weight, avg_mu);
         }
       }	       
     }
@@ -212,32 +216,32 @@ StatusCode PhysValTau::fillHistograms()
 	// Substructure/PFO histograms
 	m_oTauValidationPlotsNoCuts->m_oFakeTauAllProngsPlots.fill(*tau, weight);
 	m_oTauValidationPlotsNoCuts->m_oNewCoreFakePlots.fill(*tau, weight);
-	m_oTauValidationPlotsNoCuts->m_oFakeTauEffPlots.fill(*tau, weight);
+	m_oTauValidationPlotsNoCuts->m_oFakeTauEffPlots.fill(*tau, weight, avg_mu);
       }
       if ( nominal ) {
 	m_oTauValidationPlotsNominal->m_oFakeGeneralNom.fill(*tau, weight);
-	m_oTauValidationPlotsNominal->m_oFakeTauEffPlotsNom.fill(*tau, weight);
+	m_oTauValidationPlotsNominal->m_oFakeTauEffPlotsNom.fill(*tau, weight, avg_mu);
 	m_oTauValidationPlotsNominal->m_oFakeTauRecoTauPlotsNom.fill(*tau, weight);
 	m_oTauValidationPlotsNominal->m_oNewCoreFakePlotsNom.fill(*tau, weight);
       }
       if ( recProng == 1 ) {
 	if(m_TauJetContainerName=="TauJets"){
 	  m_oTauValidationPlotsNoCuts->m_oFakeHad1ProngPlots.fill(*tau, weight);
-	  m_oTauValidationPlotsNoCuts->m_oFakeTauEff1PPlots.fill(*tau, weight);
+	  m_oTauValidationPlotsNoCuts->m_oFakeTauEff1PPlots.fill(*tau, weight, avg_mu);
 	}
 	if ( nominal ) {
 	  m_oTauValidationPlotsNominal->m_oFakeHad1ProngNom.fill(*tau, weight);
-	  m_oTauValidationPlotsNominal->m_oFakeTauEff1PPlotsNom.fill(*tau, weight);
+	  m_oTauValidationPlotsNominal->m_oFakeTauEff1PPlotsNom.fill(*tau, weight, avg_mu);
 	}
       }
       if ( recProng == 3 ) {
 	if(m_TauJetContainerName=="TauJets"){
-	  m_oTauValidationPlotsNoCuts->m_oFakeTauEff3PPlots.fill(*tau, weight);
+	  m_oTauValidationPlotsNoCuts->m_oFakeTauEff3PPlots.fill(*tau, weight, avg_mu);
 	  m_oTauValidationPlotsNoCuts->m_oFakeHad3ProngPlots.fill(*tau, weight);
 	}
 	if ( nominal ) {
 	  m_oTauValidationPlotsNominal->m_oFakeHad3ProngNom.fill(*tau, weight);
-	  m_oTauValidationPlotsNominal->m_oFakeTauEff3PPlotsNom.fill(*tau, weight);
+	  m_oTauValidationPlotsNominal->m_oFakeTauEff3PPlotsNom.fill(*tau, weight, avg_mu);
 	}
       }
     }
