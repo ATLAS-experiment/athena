@@ -51,9 +51,8 @@ private:
   /** @brief Apply preselection of the cells 
    *         Cells within dR < 0.4, in EM1, and pt > 100 MeV are selected
    */
-  StatusCode selectCells(const xAOD::TauJet& tau, const CaloCellContainer& cellContainer,
-                                           const CaloDetDescrManager* detMgr, 
-                                           std::vector<const CaloCell*>& cells) const;
+  StatusCode selectCells(const xAOD::TauJet& tau, 
+                         std::vector<const CaloCell*>& cells) const;
 
   /** @brief Select the seed cells used to construct the shot 
    *         Cells must sastisfy:
@@ -61,9 +60,9 @@ private:
    *         2. have largest pt among the neighbours in the eta direction 
    *         3. no other seed cells as neighbors in the eta direction
    */
-  StatusCode selectSeedCells(const xAOD::TauJet& tau, const CaloCellContainer& cellContainer,
-                                               const CaloDetDescrManager* detMgr,
-                                                std::vector<const CaloCell*>& seedCells) const;
+  StatusCode selectSeedCells(const xAOD::TauJet& tau, 
+		             const CaloCellContainer& cellContainer,
+                             std::vector<const CaloCell*>& seedCells) const;
 
   /** @brief Check whether two cells are neighbours in the phi direction */
   bool isPhiNeighbour(IdentifierHash cell1Hash, IdentifierHash cell2Hash) const;
@@ -101,9 +100,10 @@ private:
   Gaudi::Property<std::vector<float>> m_minPtCut {this, "MinPtCut"};
   Gaudi::Property<std::vector<float>> m_doubleShotCut {this, "AutoDoubleShotCut"};
   Gaudi::Property<bool> m_removeElectronCells {this, "RemoveElectronCells", false};
-
-  SG::ReadHandleKey<CaloCellContainer> m_caloCellInputContainer{this,"Key_caloCellInputContainer", "AllCalo", "input vertex container key"};
-  SG::ReadCondHandleKey<CaloDetDescrManager> m_caloMgrKey{this,"CaloDetDescrManager", "CaloDetDescrManager"};
+  Gaudi::Property<float> m_dRThreshold{this, "DRThreshold", 0.4, "dR(cell,tau) to select cells"};
+  Gaudi::Property<float> m_energyThreshold{this, "EnergyThreshold", 100., "energy threshold (in MeV) to select cells"};
+   
+  SG::ReadHandleKey<CaloCellContainer> m_caloCellInputContainer{this,"Key_caloCellInputContainer", "AllCalo", "input calo cell container key"};
   ToolHandle<IHadronicCalibrationTool> m_caloWeightTool {this, "CaloWeightTool", "H1WeightToolCSC12Generic"};
   SG::ReadHandleKey<xAOD::CaloClusterContainer> m_removedClusterInputContainer {this,"Key_RemovedClusterInputContainer", "", "input removed cluster key"};
   

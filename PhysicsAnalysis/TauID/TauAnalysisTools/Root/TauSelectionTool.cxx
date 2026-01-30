@@ -61,7 +61,7 @@ StatusCode TauSelectionTool::initialize()
   if (!bConfigViaProperties and !m_vGNTauSigTransRegion.empty())         bConfigViaProperties = true;
   if (!bConfigViaProperties and !std::isnan(m_dGNTauSigTransMin.value())) bConfigViaProperties = true;
   if (!bConfigViaProperties and !std::isnan(m_dGNTauSigTransMax.value())) bConfigViaProperties = true;
-  if (!bConfigViaProperties and m_iJetIDWP != 0)              bConfigViaProperties = true;
+  if (!bConfigViaProperties and m_iJetIDWP != TauAnalysisTools::JetID::JETIDNONE) bConfigViaProperties = true;
   if (!bConfigViaProperties and !m_vEleRNNSigTransRegion.empty())     bConfigViaProperties = true;
   if (!bConfigViaProperties and !std::isnan(m_dEleRNNSigTransMin.value())) bConfigViaProperties = true;
   if (!bConfigViaProperties and !std::isnan(m_dEleRNNSigTransMax.value())) bConfigViaProperties = true;
@@ -70,10 +70,8 @@ StatusCode TauSelectionTool::initialize()
 
   if (bConfigViaConfigFile and bConfigViaProperties)
   {
-    ATH_MSG_WARNING("Configured tool via setProperty and configuration file, which may lead to unexpected configuration.");
-    ATH_MSG_WARNING("In doubt check the configuration that is printed when the tool is initialized and the message level is set to debug");
-    ATH_MSG_WARNING("For further details please refer to the documentation:");
-    ATH_MSG_WARNING("https://gitlab.cern.ch/atlas/athena/blob/main/PhysicsAnalysis/TauID/TauAnalysisTools/doc/README-TauSelectionTool.rst");
+    ATH_MSG_ERROR("Configured tool via setProperty and configuration file, which may lead to unexpected configuration. Please setup the TauSelectionTool using only one of the two methods. For further details please refer to the documentation https://gitlab.cern.ch/atlas/athena/blob/main/PhysicsAnalysis/TauID/TauAnalysisTools/doc/README-TauSelectionTool.rst or contact the TauCP group.");
+    return StatusCode::FAILURE;
   }
   if (!bConfigViaConfigFile and !bConfigViaProperties)
   {
@@ -237,10 +235,9 @@ StatusCode TauSelectionTool::initialize()
       else if (sCut == "JetIDWP")
       {
         iSelectionCuts = iSelectionCuts | CutJetIDWP;
-        if (m_iJetIDWP == JETIDNONEUNCONFIGURED){
+        if (m_iJetIDWP == JETIDNONE){
           m_iJetIDWP = convertStrToJetIDWP(rEnv.GetValue("JetIDWP","JETIDNONE"));
-	} 
-	  
+        }	  
 	// check for possible mis-config in Tau selection
         for (const std::string& checkCut : vCuts){
 	   if (checkCut.find("SigTrans") != std::string::npos) {
@@ -594,8 +591,6 @@ std::string TauSelectionTool::convertJetIDWPToStr(int iJetIDWP) const
 {
   switch (iJetIDWP)
   {
-  case JETIDNONEUNCONFIGURED:
-    return "JETIDNONE";
   case JETIDNONE:
     return "JETIDNONE";
   case JETIDRNNVERYLOOSE:

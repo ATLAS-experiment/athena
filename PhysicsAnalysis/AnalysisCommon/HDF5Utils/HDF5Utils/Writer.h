@@ -1,6 +1,6 @@
 // this is -*- C++ -*-
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef HDF_TUPLE_HH
 #define HDF_TUPLE_HH
@@ -143,7 +143,7 @@ namespace H5Utils {
       >
     void add(const std::string& name, const F func, const T& def = T(),
              Compression comp = Compression::STANDARD) {
-      add<R>(name, std::function<R(I)>(func), R(def), comp);
+      add<R>(name, std::function<R(I)>(std::move(func)), R(def), comp);
     }
 
 
@@ -331,6 +331,7 @@ namespace H5Utils {
     std::array<hsize_t, N> uniform(size_t val) {
       std::array<hsize_t, N> ar;
       ar.fill(val);
+      //coverity[UNINIT:FALSE]
       return ar;
     }
 
@@ -385,11 +386,12 @@ namespace H5Utils {
                        hsize_t batch_size):
     Writer<N,I>(
       group, consumers, WriterConfiguration<N>{
-        name, // name
-        extent, // extent
-        batch_size, // batch_size
-        extent, // chunks
-        defaults::deflate // deflate
+        .name = name, // name
+        .extent = extent, // extent
+        .batch_size = batch_size, // batch_size
+        .chunks = extent, // chunks
+        .deflate = defaults::deflate, // deflate
+        .plist_callbacks = {} // plist_callbacks
       })
   {}
 
@@ -473,7 +475,7 @@ namespace H5Utils {
       " \n");
 
     internal::DataFlattener<N, decltype(m_consumers), T> buf(
-      m_consumers, arg, m_par.extent);
+      m_consumers, std::move(arg), m_par.extent);
     hsize_t n_el = buf.element_offsets.size();
     std::vector<hsize_t> elements;
     for (const auto& el_local: buf.element_offsets) {

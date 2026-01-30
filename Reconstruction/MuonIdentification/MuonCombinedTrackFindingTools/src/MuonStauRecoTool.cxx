@@ -383,10 +383,20 @@ namespace MuonCombined {
                     float beta = calculateBeta(time + tof, distance);
                     ATH_MSG_VERBOSE("  adding " << m_idHelperSvc->toString(id) << " distance " << distance << " time " << time << " beta"
                                                 << beta << " diff " << std::abs(beta - betaSeed));
-                    if (std::abs(beta - betaSeed) > m_mdttBetaAssociationCut) continue;
+                    if (std::abs(beta - betaSeed) > m_mdttBetaAssociationCut) {
+                        // write out hits that don't pass the beta association cut but don't use them 
+                        candidate.stauHits.emplace_back(MuGirlNS::StauHit(tech, time + tof, ix, iy, iz, id, ie, er, sh, isEta, propTime, false));
+                        if (m_addMDTExtrasMuGirlLowBeta) {
+                            float iadc = mdt->prepRawData()->adc();
+                            float irdrift = mdt->driftRadius();
+                            candidate.stauMDTHitExtras.emplace_back(MuGirlNS::StauMDTHitExtra(iadc, irdrift));
+                        }
+                        continue;
+                    }
 
+                    // only store hits for future use if they pass the beta association cut
                     hits.emplace_back(Muon::TimePointBetaFitter::Hit(distance, time, er));
-                    candidate.stauHits.emplace_back(MuGirlNS::StauHit(tech, time + tof, ix, iy, iz, id, ie, er, sh, isEta, propTime));
+		    candidate.stauHits.emplace_back(MuGirlNS::StauHit(tech, time + tof, ix, iy, iz, id, ie, er, sh, isEta, propTime, true));
                     
                     if (m_addMDTExtrasMuGirlLowBeta ) {
                         float iadc = mdt->prepRawData()->adc();
@@ -674,10 +684,20 @@ namespace MuonCombined {
                     msg(MSG::DEBUG) << std::setprecision(5) << endmsg;
                 }
 
-                if (!isSelected) continue;
+                if (!isSelected) {
+                    // write out hits that don't pass the beta association cut but still store them 
+                    candidate.stauHits.emplace_back(MuGirlNS::StauHit(MuGirlNS::MDTT_STAU_HIT, time + tof, ix, iy, iz, id, ie, er, sh, isEta, propTime, false));
+                    if (m_addMDTExtrasMuGirlLowBeta) {
+                        float iadc = mdt->prepRawData()->adc();
+                        float irdrift = mdt->driftRadius();
+                        candidate.stauMDTHitExtras.emplace_back(MuGirlNS::StauMDTHitExtra(iadc, irdrift));
+                    }
+                    continue;
+                }
 
+                // only store hits for future use if they pass the beta association cut
                 hits.emplace_back(distance, time, er);
-                candidate.stauHits.emplace_back(MuGirlNS::MDTT_STAU_HIT, time + tof, ix, iy, iz, id, ie, er, sh, isEta, propTime);
+                candidate.stauHits.emplace_back(MuGirlNS::MDTT_STAU_HIT, time + tof, ix, iy, iz, id, ie, er, sh, isEta, propTime, true);
                 if (m_addMDTExtrasMuGirlLowBeta) {
                     candidate.stauMDTHitExtras.emplace_back(MuGirlNS::StauMDTHitExtra(iadc, irdrift));
                 }

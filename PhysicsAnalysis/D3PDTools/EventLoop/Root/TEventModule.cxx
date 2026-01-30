@@ -79,9 +79,11 @@ namespace EL
           return StatusCode::FAILURE;
         }
         m_event.reset (new xAOD::TEvent (mode));
+        m_event->setOtherMetaDataTreeNamePattern( m_otherMetaDataTreeNamePattern );
       } else
       {
         m_event.reset (new xAOD::TEvent);
+        m_event->setOtherMetaDataTreeNamePattern( m_otherMetaDataTreeNamePattern );
       }
       if (!m_summaryReport.value())
         xAOD::TFileAccessTracer::enableDataSubmission (false);

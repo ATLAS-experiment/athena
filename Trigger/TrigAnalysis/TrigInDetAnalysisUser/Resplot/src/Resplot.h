@@ -40,7 +40,7 @@
 #include "StatVal.h"
 
 
-// stupid root dictionary BOLLOX!! just because we inherit from a 
+// Just because we inherit from a 
 // TH2D, but I bet it *still* won't work because I use the 
 // lovely "vector" class from the stl.
 #include "TObject.h"
@@ -204,10 +204,17 @@ public:
 
 
   // hmmmm, this constructor doesn't work for some 
-  // reason. Can't work out why, must be due to kak root directory
+  // reason. Can't work out why, must be due to root directory
   // object ownership, I shouldn't wonder
-  Resplot(const std::string& name) : 
-    m_name(name)
+  Resplot(const std::string& name) :
+    m_Set(false), 
+    m_name(name),
+    m_dir(NULL),
+    m_n_secondary(0),
+    m_a_secondary(0.0),
+    m_b_secondary(0.0),
+    m_xaxis(""), m_yaxis(""), m_fitname(""), m_finalised(true),
+    m_uniform(true)
     //   m_Nentries ( new TH1D(*(TH1D*)gDirectory->Get((name+"/fractional uncertainty").c_str())) ),
     //   m_mean     ( new TH1D(*(TH1D*)gDirectory->Get((name+"/1d").c_str()))    ),
     //   m_sigma    ( new TH1D(*(TH1D*)gDirectory->Get((name+"/sigma").c_str())) ),
@@ -219,7 +226,6 @@ public:
     m_Nentries = new TH1D(*(TH1D*)gDirectory->Get((name+"/fractional uncertainty").c_str()));
     m_mean     = new TH1D(*(TH1D*)gDirectory->Get((name+"/mean").c_str()));
     m_sigma    = new TH1D(*(TH1D*)gDirectory->Get((name+"/sigma").c_str()));
-    // m_sigma    = new TH1D(*(TH1D*)gDirectory->Get((name+"/RMS").c_str()));
     m_chi2     = new TH1D(*(TH1D*)gDirectory->Get((name+"/chi2").c_str()));
     m_h2d      = new TH2D(*(TH2D*)gDirectory->Get((name+"/2d").c_str()));
     m_h1d      = new TH1D(*(TH1D*)gDirectory->Get((name+"/1d").c_str()));
@@ -232,10 +238,6 @@ public:
     skip(m_Nentries);
     
     m_n_primary = m_h2d->GetNbinsX();
-
-    m_finalised = true;
-
-    m_uniform = true;
 
     //    std::cout << "Resplot(std::string)" << name << "\t m_n_primary " << m_n_primary << std::endl;
 
@@ -653,7 +655,6 @@ private:
   TDirectory* m_dir = 0;
 
   int     m_n_primary;
-  //  double  a_primary, b_primary;
 
   int    m_n_secondary;
   double m_a_secondary, m_b_secondary;

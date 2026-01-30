@@ -1,10 +1,7 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-///////////////////////////////////////////////////////////////////
-// EGSelectionToolWrapper.cxx, (c) ATLAS Detector software
-///////////////////////////////////////////////////////////////////
 // Author: Giovanni Marchiori (giovanni.marchiori@cern.ch)
 //
 
@@ -17,21 +14,9 @@
 
 namespace DerivationFramework {
 
-EGSelectionToolWrapper::EGSelectionToolWrapper(const std::string& t,
-                                               const std::string& n,
-                                               const IInterface* p)
-  : base_class(t, n, p)
-{
-}
-
 StatusCode
 EGSelectionToolWrapper::initialize()
 {
-  if (m_sgName.empty()) {
-    ATH_MSG_ERROR(
-      "No SG name provided for the output of EGElectronLikelihoodToolWrapper!");
-    return StatusCode::FAILURE;
-  }
   ATH_CHECK(m_tool.retrieve());
 
   if (!(m_fudgeMCTool.name().empty())) {
@@ -41,9 +26,6 @@ EGSelectionToolWrapper::initialize()
   }
 
   ATH_CHECK(m_ContainerName.initialize());
-  //
-  m_decoratorPass = m_ContainerName.key() + "." + m_sgName;
-  m_decoratorIsEM = m_ContainerName.key() + "." + m_sgName + "IsEMValue";
   ATH_CHECK(m_decoratorPass.initialize());
   ATH_CHECK(m_decoratorIsEM.initialize());
 

@@ -69,6 +69,7 @@ class L1TopoRatesCalculator: public ::RatesAnalysisAlg {
   std::vector<std::vector<double>> m_rates_matrix2;
   std::vector<std::vector<double>> m_rates_matrix_TDT;
   std::vector<std::vector<double>> m_rates_matrix2_TDT;
+  std::vector<std::vector<double>> m_counts_matrix_TDT;
   std::vector<std::vector<double>> m_count_matrix;
   std::vector<std::vector<double>> m_L1TopoScore_matrix;
   std::vector<std::vector<double>> m_L1TopoScore_errors;

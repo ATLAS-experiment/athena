@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //   ADCMTHistos.h
@@ -19,10 +19,7 @@
 
 // root
 #include "TH1.h"
-/*#include "TF1.h"
-#include "TDirectory.h"*/
-// class TH1F;
-class TF1;
+#include "TF1.h"
 class TDirectory;
 
 // this

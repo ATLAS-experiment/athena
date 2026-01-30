@@ -5,7 +5,7 @@
 #ifndef TRTSTRAWCONDALG_H
 #define TRTSTRAWCONDALG_H
 
-#include "AthenaBaseComps/AthReentrantAlgorithm.h"
+#include "AthenaBaseComps/AthCondAlgorithm.h"
 #include "StoreGate/WriteCondHandleKey.h"
 #include "StoreGate/ReadCondHandleKey.h"
 #include "GaudiKernel/ToolHandle.h"
@@ -16,7 +16,7 @@
 
 class TRT_ID;
 
-class TRTStrawCondAlg : public AthReentrantAlgorithm
+class TRTStrawCondAlg : public AthCondAlgorithm
 {
  public:
   typedef TRTCond::StrawStatusMultChanContainer StrawStatusContainer;

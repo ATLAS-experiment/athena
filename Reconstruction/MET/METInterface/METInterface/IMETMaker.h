@@ -107,6 +107,14 @@ public:
   virtual StatusCode markInvisible(const xAOD::IParticleContainer* collection,
 				   xAOD::MissingETAssociationHelper& helper,
 				   xAOD::MissingETContainer* metCont) const = 0;
+  
+  // NN-based implementations override this, it shouldn't be called with others.
+  // This does the actual running of the underlying neural net, adding a "term" (an xAOD::MissingET)
+  // containing the resulting MET vector to the given MissingETContainer.
+  // The string argument specifies the name given to this "term" for later lookup.
+  virtual StatusCode evaluateNNMET(const std::string& /*totalName*/, xAOD::MissingETContainer* /*metCont*/) const {
+    return StatusCode::FAILURE;
+  }
 };
 
 #endif

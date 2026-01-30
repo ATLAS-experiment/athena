@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //====================================================================
@@ -12,6 +12,7 @@
 #include "StorageSvc/DbType.h"
 #include "POOLCore/DbPrint.h"
 #include <cstdio>
+
 using namespace pool;
 
 DbType DbType::getType(const std::string& name)  {
@@ -101,13 +102,11 @@ const std::string DbType::storageName()  const {
 }
 
 /// Error message on missing back-end driver implementation
-void DbType::missingDriver( DbPrint& str) const  {
-  str << DbPrintLvl::Fatal 
-      << "The requested persistent backend implementation" << DbPrint::endmsg
-      << "for the storage type:" << storageName()
-      << " cannot be loaded.\n"
-      << "Are you sure you loaded you loaded the correct DLLs?" 
-      << DbPrint::endmsg;
+void DbType::missingDriver( MsgStream& log ) const  {
+  log << MSG::FATAL
+      << "The requested persistent technology implementation"
+      << " for the storage type:" << storageName()
+      << " cannot be loaded." << endmsg;
   debugBreak("POOL", "Missing driver DLL.", true);
 }
 
@@ -115,8 +114,7 @@ void DbType::missingDriver( DbPrint& str) const  {
 void DbType::badStorageType() const     {
   if ( doTrace() )    {
     DbPrint log( "DbType" );
-    log << DbPrintLvl::Error
-        << "--> Found bad or unknown storage TYPE [" 
-        << int(type()) << "] !!!!" << DbPrint::endmsg;
+    log << MSG::ERROR << "--> Found bad or unknown storage TYPE [" << int(type()) << "] !!!!" 
+        << endmsg;
   }
 }

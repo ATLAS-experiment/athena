@@ -9,7 +9,7 @@
 
 TRTPhaseCondAlg::TRTPhaseCondAlg(const std::string& name
 				 , ISvcLocator* pSvcLocator )
-  : ::AthAlgorithm(name,pSvcLocator),
+  : ::AthCondAlgorithm(name,pSvcLocator),
     m_caldbtool("TRT_CalDbTool",this),
     m_trtId(nullptr)
 { declareProperty("TRTCalDbTool",m_caldbtool); }
@@ -33,13 +33,13 @@ StatusCode TRTPhaseCondAlg::initialize()
   return StatusCode::SUCCESS;
 }
 
-StatusCode TRTPhaseCondAlg::execute() 
+StatusCode TRTPhaseCondAlg::execute(const EventContext& ctx) const 
 {
   ATH_MSG_DEBUG("execute " << name());
 
   // ____________ Construct Write Cond Handle and check its validity ____________
 
-  SG::WriteCondHandle<TRTCond::AverageT0> writeHandle{m_T0WriteKey};
+  SG::WriteCondHandle<TRTCond::AverageT0> writeHandle{m_T0WriteKey, ctx};
 
   // Do we have a valid Write Cond Handle for current time?
   if(writeHandle.isValid()) {
@@ -99,7 +99,7 @@ StatusCode TRTPhaseCondAlg::execute()
   //__________ Assign range of writeCdo to that of the ReadHandle___________ 
   EventIDRange rangeW;
 
-    SG::ReadCondHandle<StrawT0Container> T0ReadHandle{m_T0ReadKey};
+    SG::ReadCondHandle<StrawT0Container> T0ReadHandle{m_T0ReadKey, ctx};
     const StrawT0Container* T0Container{*T0ReadHandle};
     if(T0Container==nullptr) {
         ATH_MSG_ERROR("Null pointer to the straw T0 container");

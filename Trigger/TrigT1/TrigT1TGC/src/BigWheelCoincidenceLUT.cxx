@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigT1TGC/BigWheelCoincidenceLUT.h"
@@ -53,7 +53,10 @@ int8_t BigWheelCoincidenceLUT::test(int sideId, int octantId, int moduleId, int 
     std::unordered_map<uint32_t, char>::const_iterator it = m_lut.find(addr);
     if(it != m_lut.end()) {
       char pt_char = it->second;
-      content = m_pTdef.find(pt_char)->second;
+      auto pPair = m_pTdef.find(pt_char);
+      if (pPair != m_pTdef.end()){
+        content = pPair->second;
+      }
     }
   }
 

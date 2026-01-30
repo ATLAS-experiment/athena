@@ -192,6 +192,7 @@ def InDetTrackPerfMonToolCfg( flags, name="InDetTrackPerfMonTool", **kwargs ):
 
         from InDetTrackPerfMon.InDetAlgorithmConfig import TruthHitDecoratorAlgCfg, TruthDecoratorAlgCfg
         acc.merge( TruthHitDecoratorAlgCfg( flags ) )
+        # FIXME This algorithm should not be scheduled if the decorations already exist.
         acc.merge( TruthDecoratorAlgCfg( flags ) )
 
     ## Offline track-object decorator

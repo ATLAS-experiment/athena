@@ -82,15 +82,19 @@ def ZdcLEDMonitoringConfig(inputFlags, run_type):
                             path='zdcLEDAvgTime',
                             xbins=n_time_bins_default,xmin=0.0,xmax=time_max)
     rpdChanLEDMonToolArr.defineHistogram('rpdLEDADCSum', title=';LED ADC Sum [ADC Counts];Events',
+                            cutmask='rpdLEDPassFireCriteria',
                             path='rpdLEDADCSum',
                             xbins=n_adc_sum_fine_bins,xmin=0.0,xmax=adc_sum_max)
     rpdChanLEDMonToolArr.defineHistogram('rpdLEDMaxADC', title=';LED Max ADC [ADC Counts];Events',
+                            cutmask='rpdLEDPassFireCriteria',
                             path='rpdLEDMaxADC',
                             xbins=n_energy_bins_default,xmin=0.0,xmax=max_adc_max)
     rpdChanLEDMonToolArr.defineHistogram('rpdLEDMaxSample', title=';LED Max Sample [ADC Counts];Events',
+                            cutmask='rpdLEDPassFireCriteria',
                             path='rpdLEDMaxSample',
                             xbins=n_sample_bins_default,xmin=0.0,xmax=nsamples_max)
     rpdChanLEDMonToolArr.defineHistogram('rpdLEDAvgTime', title=';LED Average Time [ns];Events',
+                            cutmask='rpdLEDPassFireCriteria',
                             path='rpdLEDAvgTime',
                             xbins=n_time_bins_default,xmin=0.0,xmax=time_max)
 
@@ -113,18 +117,32 @@ def ZdcLEDMonitoringConfig(inputFlags, run_type):
                             xbins=lumi_block_max,xmin=0.0,xmax=lumi_block_max,
                             ybins=n_time_bins_default,ymin=0.0,ymax=time_max)
     rpdChanLEDMonToolArr.defineHistogram('lumiBlock, rpdLEDADCSum;rpdLEDADCSum_vs_lb', type='TH2F', title=';lumi block;LED ADC Sum [ADC Counts]',
+                            cutmask='rpdLEDPassFireCriteria',
                             path='rpdLEDADCSumLBdep',
                             xbins=lumi_block_max,xmin=0.0,xmax=lumi_block_max,
                             ybins=n_adc_sum_fine_bins,ymin=0.0,ymax=adc_sum_max)
     rpdChanLEDMonToolArr.defineHistogram('lumiBlock, rpdLEDMaxADC;rpdLEDMaxADC_vs_lb', type='TH2F', title=';lumi block;LED Max ADC [ADC Counts]',
+                            cutmask='rpdLEDPassFireCriteria',
+                            path='rpdLEDMaxADCLBdep',
+                            xbins=lumi_block_max,xmin=0.0,xmax=lumi_block_max,
+                            ybins=n_energy_bins_default,ymin=0.0,ymax=max_adc_max)
+    rpdChanLEDMonToolArr.defineHistogram('lumiBlock, rpdLEDADCSum;rpdLEDADCSum_vs_lb_profile', type='TProfile', title=';lumi block;LED ADC Sum [ADC Counts]',
+                            cutmask='rpdLEDPassFireCriteria',
+                            path='rpdLEDADCSumLBdep',
+                            xbins=lumi_block_max,xmin=0.0,xmax=lumi_block_max,
+                            ybins=n_adc_sum_fine_bins,ymin=0.0,ymax=adc_sum_max)
+    rpdChanLEDMonToolArr.defineHistogram('lumiBlock, rpdLEDMaxADC;rpdLEDMaxADC_vs_lb_profile', type='TProfile', title=';lumi block;LED Max ADC [ADC Counts]',
+                            cutmask='rpdLEDPassFireCriteria',
                             path='rpdLEDMaxADCLBdep',
                             xbins=lumi_block_max,xmin=0.0,xmax=lumi_block_max,
                             ybins=n_energy_bins_default,ymin=0.0,ymax=max_adc_max)
     rpdChanLEDMonToolArr.defineHistogram('lumiBlock, rpdLEDMaxSample;rpdLEDMaxSample_vs_lb', type='TH2F', title=';lumi block;LED Max Sample [ADC Counts]',
+                            cutmask='rpdLEDPassFireCriteria',
                             path='rpdLEDMaxSampleLBdep',
                             xbins=lumi_block_max,xmin=0.0,xmax=lumi_block_max,
                             ybins=n_sample_bins_default,ymin=0.0,ymax=nsamples_max)
     rpdChanLEDMonToolArr.defineHistogram('lumiBlock, rpdLEDAvgTime;rpdLEDAvgTime_vs_lb', type='TH2F', title=';lumi block;LED Average Time [ns]',
+                            cutmask='rpdLEDPassFireCriteria',
                             path='rpdLEDAvgTimeLBdep',
                             xbins=lumi_block_max,xmin=0.0,xmax=lumi_block_max,
                             ybins=n_time_bins_default,ymin=0.0,ymax=time_max)

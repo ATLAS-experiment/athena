@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArSamplesMon/AbsLArCells.h"
@@ -113,9 +113,8 @@ const History* AbsLArCells::pass(unsigned int i, const FilterParams& f) const
 
 void AbsLArCells::resetCellInfoCache()
 {
-  unsigned int i = 0;
   for (std::vector<CellInfo*>::iterator cellInfo = m_cellInfoCache.begin();
-       cellInfo != m_cellInfoCache.end(); ++cellInfo, i++)
+       cellInfo != m_cellInfoCache.end(); ++cellInfo)
     if (*cellInfo) {
       delete *cellInfo;
       *cellInfo = 0;

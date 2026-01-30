@@ -5,7 +5,7 @@
 #ifndef MUONGEOMODEL_MUONDETECTORCONDALG_H
 #define MUONGEOMODEL_MUONDETECTORCONDALG_H
 
-#include "AthenaBaseComps/AthReentrantAlgorithm.h"
+#include "AthenaBaseComps/AthCondAlgorithm.h"
 #include "GaudiKernel/ToolHandle.h"
 #include "MuonAlignmentData/CorrContainer.h"
 #include "MuonAlignmentData/NswAsBuiltDbData.h"
@@ -17,7 +17,7 @@
 #include "StoreGate/WriteCondHandleKey.h"
 #include "MuonIdHelpers/IMuonIdHelperSvc.h"
 
-class MuonDetectorCondAlg : public AthReentrantAlgorithm {
+class MuonDetectorCondAlg : public AthCondAlgorithm {
 
   public:
     // Standard Constructor
@@ -28,7 +28,6 @@ class MuonDetectorCondAlg : public AthReentrantAlgorithm {
 
     virtual StatusCode initialize() override final;
     virtual StatusCode execute(const EventContext& ctx) const override final;
-    virtual bool isReEntrant() const override final { return false; }
 
   private:
     StatusCode copyInertMaterial(MuonGM::MuonDetectorManager& detMgr) const;
@@ -37,7 +36,9 @@ class MuonDetectorCondAlg : public AthReentrantAlgorithm {
     Gaudi::Property<bool> m_applyNswAsBuilt{this, "applyNswAsBuilt", true, 
                                             "Toggles the application of the Nsw as-built parameters"};
     Gaudi::Property<bool> m_applysTGCAsBuilt{this, "applysTGCAsBuilt", false, 
-                                            "Toggles the application of the alternative sTGC as-built parameters"};
+                                            "Toggles the application of the sTGC as-built parameters"};
+    Gaudi::Property<bool> m_applyMmAsBuilt2{this, "applyMmAsBuilt2", false,
+                                            "Toggles the application of the alternative MM as-built parameters"};
 
     Gaudi::Property<bool> m_applyMdtAsBuilt{this, "applyMdtAsBuilt", true, 
                                             "Toggles the application of the Mdt as-built parameters"};
@@ -59,6 +60,7 @@ class MuonDetectorCondAlg : public AthReentrantAlgorithm {
     SG::ReadCondHandleKey<MdtAsBuiltContainer> m_readMdtAsBuiltKey{this, "ReadMdtAsBuiltKey", "MdtAsBuiltContainer", "Key of output muon alignment MDT/AsBuilt condition data"};
     SG::ReadCondHandleKey<NswAsBuiltDbData> m_readNswAsBuiltKey{this, "ReadNswAsBuiltKey", "NswAsBuiltDbData", "Key of NswAsBuiltDbData object containing conditions data for NSW as-built params!"};
     SG::ReadCondHandleKey<sTGCAsBuiltData> m_readsTGCAsBuiltKey{this, "ReadsTGCAsBuiltKey", "sTGCAsBuilt", "Key of sTGCAsBuiltData object containing conditions data for the sTGC as-built model!"};
+    SG::ReadCondHandleKey<sTGCAsBuiltData> m_readMmAsBuilt2Key{this, "ReadMmAsBuilt2Key", "", "Key of sTGCAsBuiltData object containing conditions data for the sTGC as-built model!"};
     SG::ReadCondHandleKey<NswPassivationDbData> m_condMmPassivKey {this, "condMmPassivKey", "NswPassivationDbData", "Key of NswPassivationDbData object containing passivation data for MMs"};
 
     // Write Handle

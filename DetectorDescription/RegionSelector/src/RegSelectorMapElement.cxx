@@ -162,7 +162,6 @@ double RegSelectorMapElement::phiminElem() const {
     return -M_PI;
   else
     return 0;
-  return m_phiminValue;
 }
 
 double RegSelectorMapElement::phimaxElem() const {
@@ -170,7 +169,6 @@ double RegSelectorMapElement::phimaxElem() const {
     return 2*M_PI;
   else
     return M_PI;
-  return m_phimaxValue;
 }
 
 

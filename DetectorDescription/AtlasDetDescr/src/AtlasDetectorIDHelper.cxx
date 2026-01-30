@@ -35,19 +35,19 @@ AtlasDetectorIDHelper::initialize_from_dictionary(const IdDictMgr& dict_mgr) {
   };
 
   auto assignRegionIdxFromGrp = [this, &dict](const std::string& grp, size_type& regionIdx) {
-    IdDictGroup* group = dict->find_group(grp);
-    if (!group || !group->regions().size()) {
+    const IdDictGroup* group = dict->find_group(grp);
+    if (!group || !group->n_regions()) {
         ATH_MSG_VERBOSE("The group "<<grp<<" is not present.");
         regionIdx = UNDEFINED;
         return;
     }
-    regionIdx = group->regions().front()->index();
+    regionIdx = group->region(0).index();
     ATH_MSG_VERBOSE("Region index for "<<grp<<" will be assigned to "<<regionIdx);
 
   };
 
   auto assignRegionIdxFromRegion = [this, &dict](const std::string& grp, size_type& regionIdx) {
-    IdDictRegion* region = dict->find_region(grp);
+    const IdDictRegion* region = dict->find_region(grp);
     if (!region) {
         ATH_MSG_VERBOSE("The group "<<grp<<" is not present.");
         regionIdx = UNDEFINED;

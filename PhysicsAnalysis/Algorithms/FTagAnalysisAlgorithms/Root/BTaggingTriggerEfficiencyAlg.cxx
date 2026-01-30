@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Thomas Strebler
@@ -81,40 +81,44 @@ namespace CP
           }
 
           else {
-            float trigEff_MC = 0;
-            float trigEff_data = 0;
-            valid = m_triggerEfficiencyTool->getMCEfficiency(*jet, trigEff_MC);
+            float trigSF = 0;
+            valid = m_triggerEfficiencyTool->getScaleFactor(*jet, trigSF);
             ANA_CHECK_CORRECTION (m_outOfValidity, *jet, valid);
-            valid = m_triggerEfficiencyTool->getScaleFactor(*jet, trigEff_data);
-            trigEff_data *= trigEff_MC;
-            ANA_CHECK_CORRECTION (m_outOfValidity, *jet, valid);
-
-            float condEff_MC = 0;
-            float condEff_data = 0;
-            valid = m_conditionalEfficiencyTool->getMCEfficiency(*jet, condEff_MC);
-            ANA_CHECK_CORRECTION (m_outOfValidity, *jet, valid);
-            valid = m_conditionalEfficiencyTool->getScaleFactor(*jet, condEff_data);
-            condEff_data *= condEff_MC;
+            float condSF = 0;
+            valid = m_conditionalEfficiencyTool->getScaleFactor(*jet, condSF);
             ANA_CHECK_CORRECTION (m_outOfValidity, *jet, valid);
 
             if(static_cast<bool>(m_matchingDecoration.get(*jet, sys))){
               if(static_cast<bool>(m_bTagMatchingDecoration.get(*jet,sys))){
-                sf = condEff_data * trigEff_data;
-                sf /= condEff_MC * trigEff_MC;
+                sf = condSF * trigSF;
               }
               else{
-                float offlEff_MC = 0;
+		float trigEff_data = 0;
+		valid = m_triggerEfficiencyTool->getEfficiency(*jet, trigEff_data);
+                ANA_CHECK_CORRECTION (m_outOfValidity, *jet, valid);
+                float trigEff_MC = trigEff_data / trigSF;
+
+                float condEff_data = 0;
+                valid = m_conditionalEfficiencyTool->getEfficiency(*jet, condEff_data);
+                ANA_CHECK_CORRECTION (m_outOfValidity, *jet, valid);
+                float condEff_MC = condEff_data / condSF;
+
                 float offlEff_data = 0;
-                valid = m_offlineEfficiencyTool->getMCEfficiency(*jet, offlEff_MC);
+                valid = m_offlineEfficiencyTool->getEfficiency(*jet, offlEff_data);
                 ANA_CHECK_CORRECTION (m_outOfValidity, *jet, valid);
-                valid = m_offlineEfficiencyTool->getScaleFactor(*jet, offlEff_data);
-                offlEff_data *= offlEff_MC;
+                float offlSF = 0;
+                valid = m_offlineEfficiencyTool->getScaleFactor(*jet, offlSF);
                 ANA_CHECK_CORRECTION (m_outOfValidity, *jet, valid);
+                float offlEff_MC = offlEff_data / offlSF;
 
                 float num = offlEff_data - condEff_data * trigEff_data;
                 float denom = offlEff_MC - condEff_MC * trigEff_MC;
                 if(num>0 && denom>0) sf = num / denom;
-                else sf = invalidScaleFactor();
+                else{
+		  sf = invalidScaleFactor();
+		  ANA_MSG_WARNING ("SF computed with negative efficiency num="<<num<<" denom="<<denom);
+		  ANA_MSG_WARNING ("Setting SF="<<sf);
+		}
               }
             } else {
               valid = m_offlineEfficiencyTool->getScaleFactor(*jet, sf);

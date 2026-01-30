@@ -12,7 +12,7 @@ namespace FlavorTagInference {
         m_max_cluster_dr(max_cluster_dr),
         m_doVertexCorrection(doVertexCorrection)
     {
-        for (auto input_var : cfg.inputs) {
+        for (const InputVariableConfig& input_var : cfg.inputs) {
             m_feature_extractors.push_back(getFeatureExtractor(input_var.name));
         }
     }

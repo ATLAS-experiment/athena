@@ -17,7 +17,7 @@
 #include "LumiBlockData/TrigLiveFractionCondData.h"
 #include "LumiBlockData/LuminosityCondData.h"
 #include "PersistentDataModel/AthenaAttributeList.h"
-#include "AthenaBaseComps/AthReentrantAlgorithm.h"
+#include "AthenaBaseComps/AthCondAlgorithm.h"
 #include "StoreGate/ReadCondHandleKey.h"
 #include "StoreGate/WriteCondHandleKey.h"
 #include "CoralBase/Blob.h"
@@ -27,11 +27,11 @@
  * @brief Conditions algorithm for trigger live fraction data.
  */
 class TrigLiveFractionCondAlg
-  : public AthReentrantAlgorithm
+  : public AthCondAlgorithm
 {
 public:
   /// Forward base class ctor.
-  using AthReentrantAlgorithm::AthReentrantAlgorithm;
+  using AthCondAlgorithm::AthCondAlgorithm;
 
 
   /// Gaudi initialize method.

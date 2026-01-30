@@ -49,9 +49,9 @@ class TH2D;
     virtual StatusCode initialize() override;
 
     //// called during event processing
-    //// input: list of roads
-    //// purpose: fill histograms/statistics based
-    void fillRoad(const std::vector<std::shared_ptr<const FPGATrackSimRoad>>& roads,
+   //// input: list of roads
+   //// purpose: fill histograms/statistics based
+   void fillRoad(const std::vector<FPGATrackSimRoad>& roads,
                   const std::vector<FPGATrackSimTruthTrack>& truthTracks,
                   size_t nLogicalLayers);
 

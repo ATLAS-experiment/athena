@@ -110,7 +110,7 @@ bool PMGCrossSectionTool::readInfosFromDir(const std::string& inputDir)
     {
       std::string myfile = inputDir + "/" + file;
       if (myfile.size() > 4 && myfile.substr (myfile.size() - 4) == ".txt")
-        inFiles.push_back(myfile);
+        inFiles.push_back(std::move(myfile));
     }
     gSystem->FreeDirectory (dirp);
   }

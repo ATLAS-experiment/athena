@@ -523,10 +523,11 @@ def CombinedMuonTrackTruthAlgsCfg(flags):
     result.merge(MuonDetailedTrackTruthMakerCfg(flags, name="MuonCombinedDetailedTrackTruthMaker",
                                                 TrackCollectionNames=trk_cols))
 
-    for i in range(len(trk_cols)):
-        from TrkConfig.TrkTruthAlgsConfig import TrackTruthSelectorCfg, TrackParticleTruthAlgCfg
-        result.merge(TrackTruthSelectorCfg(flags, tracks=trk_cols[i]))
-        result.merge(TrackParticleTruthAlgCfg(flags, tracks=trk_cols[i],
+    if(not flags.Muon.scheduleActsReco):
+        for i in range(len(trk_cols)):
+            from TrkConfig.TrkTruthAlgsConfig import TrackTruthSelectorCfg, TrackParticleTruthAlgCfg
+            result.merge(TrackTruthSelectorCfg(flags, tracks=trk_cols[i])) 
+            result.merge(TrackParticleTruthAlgCfg(flags, tracks=trk_cols[i],
                                               TrackParticleName=particle_cols[i]))
 
     return result
@@ -803,7 +804,7 @@ if __name__ == "__main__":
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
     flags = initConfigFlags()
     flags.Input.Files = [
-        '/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonCombinedConfig/myESD_q445_unslimmedTracks.pool.root']
+        '/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonCombinedConfig/myESD_q454_unslimmedTracks.pool.root']
     from MuonConfig.MuonConfigUtils import configureCondTag
     configureCondTag(flags)
    

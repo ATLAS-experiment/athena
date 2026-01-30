@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "NSWCalibTool.h"
@@ -74,35 +74,13 @@ StatusCode Muon::NSWCalibTool::initializeGasProperties() {
   m_lorentzAngleFunction =  map_lorentzAngleFunctionPars.find(m_gasMixture)->second;
   return StatusCode::SUCCESS;
 }
-
-const NswCalibDbTimeChargeData* Muon::NSWCalibTool::getCalibData(const EventContext& ctx) const {
-  // set up pointer to conditions object
-  SG::ReadCondHandle<NswCalibDbTimeChargeData> readTdoPdo{m_condTdoPdoKey, ctx};
-  if(!readTdoPdo.isValid()){
-    ATH_MSG_ERROR("Cannot find conditions data container for TDOs and PDOs!");
-    return nullptr;
-  } 
-  return readTdoPdo.cptr();
-}
-
-const Muon::mmCTPClusterCalibData* Muon::NSWCalibTool::getCTPClusterCalibData(const EventContext& ctx) const {
-  //Can we not get this somewhere above? Can this not be read just once? per run?
-  SG::ReadCondHandle<Muon::mmCTPClusterCalibData> ctpClusterCalibDB{m_ctpClusterCalibKey, ctx};
-  if (!ctpClusterCalibDB.isValid()) {
-      ATH_MSG_FATAL("Failed to retrieve the parameterized errors "<<ctpClusterCalibDB.fullKey());
-      return nullptr;
-  }
-  return ctpClusterCalibDB.cptr();
-}
-
-
 StatusCode Muon::NSWCalibTool::calibrateClus(const EventContext& ctx, const Muon::MMPrepData* prepData, const Amg::Vector3D& globalPos, std::vector<NSWCalib::CalibratedStrip>& calibClus) const {
 
   double lorentzAngle {0.};
   if(m_applyMmBFieldCalib){
     /// magnetic field
     MagField::AtlasFieldCache fieldCache;
-    if (!loadMagneticField(ctx, fieldCache)) return StatusCode::FAILURE;
+    ATH_CHECK(loadMagneticField(ctx, fieldCache));
     Amg::Vector3D magneticField{Amg::Vector3D::Zero()};
     fieldCache.getField(globalPos.data(), magneticField.data());
 
@@ -145,7 +123,7 @@ StatusCode Muon::NSWCalibTool::calibrateClus(const EventContext& ctx,
   if(m_applyMmBFieldCalib){
     /// magnetic field
     MagField::AtlasFieldCache fieldCache;
-    if (!loadMagneticField(ctx, fieldCache)) return StatusCode::FAILURE;
+    ATH_CHECK(loadMagneticField(ctx, fieldCache));
     Amg::Vector3D magneticField{Amg::Vector3D::Zero()};
     fieldCache.getField(globalPos.data(), magneticField.data());
 
@@ -168,7 +146,7 @@ StatusCode Muon::NSWCalibTool::calibrateClus(const EventContext& ctx,
     double time = prepData.stripTimes().at(i);
     double charge = prepData.stripCharges().at(i);
     //Retrieve pointing constraint
-    const Amg::Vector3D& globPos{prepData.readoutElement()->localToGlobalTrans(gctx, prepData.layerHash()) * (prepData.localPosition<1>()[0]*Amg::Vector3D::UnitX())};
+    const Amg::Vector3D& globPos{prepData.readoutElement()->localToGlobalTransform(gctx, prepData.layerHash()) * (prepData.localPosition<1>()[0]*Amg::Vector3D::UnitX())};
     NSWCalib::CalibratedStrip calibStrip;
     ATH_CHECK(calibrateStrip(ctx, id, time, charge, (globPos.theta() / toRad) , lorentzAngle, calibStrip));
 
@@ -179,12 +157,16 @@ StatusCode Muon::NSWCalibTool::calibrateClus(const EventContext& ctx,
 
 
 
-StatusCode Muon::NSWCalibTool::calibrateStrip(const EventContext& ctx, const Identifier& id, const double time, const double charge, const double theta, const double lorentzAngle, NSWCalib::CalibratedStrip& calibStrip) const {
-
-
+StatusCode Muon::NSWCalibTool::calibrateStrip(const EventContext& ctx, 
+                                              const Identifier& id, 
+                                              const double time, 
+                                              const double charge, 
+                                              const double theta, 
+                                              const double lorentzAngle, 
+                                              NSWCalib::CalibratedStrip& calibStrip) const {
   //get local positon
-  Amg::Vector2D locPos{Amg::Vector2D::Zero()};
-  if(!localStripPosition(id,locPos)) {
+  auto locPos = localStripPosition(ctx, id);
+  if(!locPos) {
     ATH_MSG_WARNING(__FILE__<<":"<<__LINE__<<" Failed to retrieve local strip position "<<m_idHelperSvc->toString(id));
     return StatusCode::FAILURE;
   }
@@ -193,22 +175,28 @@ StatusCode Muon::NSWCalibTool::calibrateStrip(const EventContext& ctx, const Ide
   calibStrip.charge = charge;
   calibStrip.time = time;
 
+  const MmIdHelper& idHelper{m_idHelperSvc->mmIdHelper()};
+
   //retrieve identifier for the gas gap, not necessarily for the channel
   //There is no pcb segmentation for these corrections, stored with pcb = 1 as default 
-  Identifier gasGapId = m_idHelperSvc->mmIdHelper().channelID(id,                                                          m_idHelperSvc->mmIdHelper().multilayer(id),
-m_idHelperSvc->mmIdHelper().gasGap(id), 1);
+  Identifier gasGapId = idHelper.channelID(id,
+                                          idHelper.multilayer(id),
+                                          idHelper.gasGap(id), 1);
 
   double vDrift = m_vDrift; //nominal value from Garfield simulation  
 
-  if(m_CalibDriftVelocityFromData){
-     vDrift = getCTPClusterCalibData(ctx)->getCTPCorrectedDriftVelocity(gasGapId, theta);
+  if(m_CalibDriftVelocityFromData) {
+     const MmCTPClusterCalibData* ctpCalibData{nullptr};
+     ATH_CHECK(SG::get(ctpCalibData, m_ctpClusterCalibKey, ctx));
+     vDrift = ctpCalibData->getCTPCorrectedDriftVelocity(gasGapId, theta);
 
      //Calculate the new half max possible time based on the new drift velocity
      float max_half_drifttime = (vDrift != 0 ) ? 2.5/vDrift : 50.;
 
      //Shift the mean of the time to account for different values of drift velocities
      calibStrip.time = time + (max_half_drifttime - m_mmT0TargetValue);
-     ATH_MSG_VERBOSE( "Original drift time: " << time << " new max half drift time: " << max_half_drifttime <<  " new time: " << calibStrip.time << " targett0 " << m_mmT0TargetValue );
+     ATH_MSG_VERBOSE( "Original drift time: " << time << " new max half drift time: " << max_half_drifttime 
+                  <<  " new time: " << calibStrip.time << " targett0 " << m_mmT0TargetValue );
   }
 
 
@@ -219,41 +207,41 @@ m_idHelperSvc->mmIdHelper().gasGap(id), 1);
   /// transversal and longitudinal components of the resolution
   calibStrip.resTransDistDrift = pitchErr + std::pow(m_transDiff * calibStrip.distDrift, 2);
   calibStrip.resLongDistDrift = std::pow(m_ionUncertainty * vDriftCorrected, 2)
-    + std::pow(m_longDiff * calibStrip.distDrift, 2);
+                              + std::pow(m_longDiff * calibStrip.distDrift, 2);
   calibStrip.dx = std::sin(lorentzAngle) * calibStrip.time * vDrift;  
-  calibStrip.locPos = Amg::Vector2D(locPos.x() + calibStrip.dx, locPos.y()); 
+  calibStrip.locPos = Amg::Vector2D{locPos->x() + calibStrip.dx, locPos->y()}; 
   return StatusCode::SUCCESS;
 }
 
 
-StatusCode Muon::NSWCalibTool::calibrateStrip(const EventContext& ctx, const Muon::MM_RawData* mmRawData, NSWCalib::CalibratedStrip& calibStrip) const {  
+StatusCode Muon::NSWCalibTool::calibrateStrip(const EventContext& ctx, 
+                                              const Muon::MM_RawData* mmRawData, 
+                                              NSWCalib::CalibratedStrip& calibStrip) const {  
  
-  const Identifier rdoId = mmRawData->identify();
-  //get local postion
-  Amg::Vector2D locPos{0,0};
-  if(!localStripPosition(rdoId,locPos)) {
-    ATH_MSG_WARNING(__FILE__<<":"<<__LINE__<<" Failed to retrieve local strip position "<<m_idHelperSvc->toString(rdoId));
-    return StatusCode::FAILURE;
-  }
+  const Identifier& rdoId = mmRawData->identify();
 
-  // MuonDetectorManager from the conditions store
-  SG::ReadCondHandle<MuonGM::MuonDetectorManager> muDetMgrHandle{m_muDetMgrKey, ctx};
-  const MuonGM::MuonDetectorManager* muDetMgr = muDetMgrHandle.cptr();
-
+  const MuonGM::MuonDetectorManager* muDetMgr{nullptr};
+  ATH_CHECK(SG::get(muDetMgr, m_muDetMgrKey, ctx));
+ 
   //get globalPos
   Amg::Vector3D globalPos{Amg::Vector3D::Zero()};
   const MuonGM::MMReadoutElement* detEl = muDetMgr->getMMReadoutElement(rdoId);
-  detEl->stripGlobalPosition(rdoId,globalPos);
+  if (!detEl->stripGlobalPosition(rdoId, globalPos)) {
+      ATH_MSG_WARNING(__func__<<"() "<<__LINE__<<" - Failed to fetch global position for "
+                    <<m_idHelperSvc->toString(rdoId));
+      return StatusCode::FAILURE;
+  }
 
   // RDO has values in counts for both simulation and data
-  float time{-FLT_MAX}, charge{-FLT_MAX};
-  tdoToTime  (ctx, mmRawData->timeAndChargeInCounts(), mmRawData->time  (), rdoId, time  , mmRawData->relBcid()); 
-  pdoToCharge(ctx, mmRawData->timeAndChargeInCounts(), mmRawData->charge(), rdoId, charge                      );
+  float time{-std::numeric_limits<float>::max()}, 
+        charge{-std::numeric_limits<float>::max()};
+  tdoToTime  (ctx, mmRawData->timeAndChargeInCounts(), mmRawData->time(), rdoId, time, mmRawData->relBcid()); 
+  pdoToCharge(ctx, mmRawData->timeAndChargeInCounts(), mmRawData->charge(), rdoId, charge);
 
-  calibStrip.charge     = charge;
+  calibStrip.charge = charge;
   // historically the peak time is included in the time determined by the MM digitization and therefore added back in the tdoToTime function
   // in order to not break the RDO to digit conversion needed for the trigger and the overlay
-  calibStrip.time       = time - globalPos.norm() * reciprocalSpeedOfLight - mmPeakTime();
+  calibStrip.time = time - globalPos.norm() * reciprocalSpeedOfLight - mmPeakTime();
   // applying T0 calibration, cannot be done inside the the tdo to time function since the tof correction was included when deriving the calibration constants
   if(m_applyMmT0Calib){
     calibStrip.time = applyT0Calibration(ctx, rdoId, calibStrip.time);
@@ -261,10 +249,12 @@ StatusCode Muon::NSWCalibTool::calibrateStrip(const EventContext& ctx, const Muo
 
   calibStrip.identifier = rdoId;
 
-  ATH_MSG_DEBUG("Calibrating RDO " << m_idHelperSvc->toString(rdoId) << "with pdo: " << mmRawData->charge() << " tdo: "<< mmRawData->time() << " relBCID "<< mmRawData->relBcid() << " charge and time in counts  " <<
-                         mmRawData->timeAndChargeInCounts() << " isData "<< m_isData  << " to charge: " << calibStrip.charge << " electrons  time after corrections " << calibStrip.time << " ns  time before corrections "<< time << "ns");
-
-
+  ATH_MSG_DEBUG(__func__<<"() "<<__LINE__<<" - Calibrating RDO " << m_idHelperSvc->toString(rdoId) 
+             << " with pdo: " << mmRawData->charge() << ", tdo: "<< mmRawData->time() 
+             << ", relBCID "<< mmRawData->relBcid() << ", charge and time in counts: "
+             << mmRawData->timeAndChargeInCounts() <<", "<< m_isData << " to charge: " 
+             << calibStrip.charge << " electrons  time after corrections " << calibStrip.time 
+             << " ns  time before corrections "<< time << "ns");
   //get stripWidth
   detEl->getDesign(rdoId)->channelWidth(); // positon is not used for strip width 
 
@@ -273,67 +263,69 @@ StatusCode Muon::NSWCalibTool::calibrateStrip(const EventContext& ctx, const Muo
   calibStrip.resLongDistDrift = std::pow(m_ionUncertainty * m_vDrift, 2)
                               + std::pow(m_longDiff * calibStrip.distDrift, 2);
 
-  calibStrip.locPos = locPos;
+  /// Hopefully this does not trigger the T0 reference test....
+  detEl->surface(rdoId).globalToLocal(globalPos, Amg::Vector3D::Zero(), calibStrip.locPos);
 
   return StatusCode::SUCCESS;
 }
 
-StatusCode Muon::NSWCalibTool::calibrateStrip(const EventContext& ctx, const Muon::STGC_RawData* sTGCRawData, NSWCalib::CalibratedStrip& calibStrip) const {
+StatusCode Muon::NSWCalibTool::calibrateStrip(const EventContext& ctx, 
+                                              const Muon::STGC_RawData* sTGCRawData, 
+                                              NSWCalib::CalibratedStrip& calibStrip) const {
 
-  Identifier rdoId = sTGCRawData->identify();
-  SG::ReadCondHandle<MuonGM::MuonDetectorManager> muDetMgrHandle{m_muDetMgrKey, ctx};
-  const MuonGM::MuonDetectorManager* muDetMgr = muDetMgrHandle.cptr();
+  const Identifier& rdoId = sTGCRawData->identify();
+  const MuonGM::MuonDetectorManager* muDetMgr{nullptr};
+  ATH_CHECK(SG::get(muDetMgr, m_muDetMgrKey, ctx));
 
   //get globalPos
   Amg::Vector3D globalPos{Amg::Vector3D::Zero()};
   const MuonGM::sTgcReadoutElement* detEl = muDetMgr->getsTgcReadoutElement(rdoId);
-  detEl->stripGlobalPosition(rdoId,globalPos);
-  
-  //get local postion
-  Amg::Vector2D locPos{Amg::Vector2D::Zero()};
-  if(!localStripPosition(rdoId,locPos)) {
-    ATH_MSG_WARNING(__FILE__<<":"<<__LINE__<<" Failed to retrieve local strip position "<<m_idHelperSvc->toString(rdoId));
-    return StatusCode::FAILURE;
+  if (!detEl->stripGlobalPosition(rdoId,globalPos)) {
+      ATH_MSG_WARNING(__func__<<"() "<<__LINE__<<" - Failed to retrieve a valid global position for "
+                  <<m_idHelperSvc->toString(rdoId));
+      return StatusCode::FAILURE;
   }
-
   // RDO has values in counts for both simulation and data
-  float time{-FLT_MAX}, charge{-FLT_MAX};
-  tdoToTime  (ctx, sTGCRawData->timeAndChargeInCounts(), sTGCRawData->time  (), rdoId, time  , sTGCRawData->bcTag()); 
-  pdoToCharge(ctx, sTGCRawData->timeAndChargeInCounts(), sTGCRawData->charge(), rdoId, charge                      );
+  float time{-std::numeric_limits<float>::max()}, charge{-std::numeric_limits<float>::max()};
+  tdoToTime(ctx, sTGCRawData->timeAndChargeInCounts(), sTGCRawData->time(), rdoId, time, sTGCRawData->bcTag()); 
+  pdoToCharge(ctx, sTGCRawData->timeAndChargeInCounts(), sTGCRawData->charge(), rdoId, charge);
   if(sTGCRawData->timeAndChargeInCounts()){
-    calibStrip.charge     = charge  * sTGC_pCPerfC;
+    calibStrip.charge = charge  * sTGC_pCPerfC;
   } else {
-    calibStrip.charge     = charge;
+    calibStrip.charge = charge;
   }
-  calibStrip.time       = time - stgcPeakTime();
+  calibStrip.time = time - stgcPeakTime();
 
   if(m_applysTgcT0Calib){
     calibStrip.time = applyT0Calibration(ctx, rdoId, calibStrip.time);
   }
 
   calibStrip.identifier = rdoId;
-  calibStrip.locPos = locPos;
+  /// Hopefully this does not trigger the T0 reference test....
+  detEl->surface(rdoId).globalToLocal(globalPos, Amg::Vector3D::Zero(), calibStrip.locPos);
+
   return StatusCode::SUCCESS;
   
 }
-bool Muon::NSWCalibTool::loadMagneticField(const EventContext& ctx, MagField::AtlasFieldCache& fieldCache) const {
-  SG::ReadCondHandle<AtlasFieldCacheCondObj> readHandle{m_fieldCondObjInputKey, ctx};
-  if (!readHandle.isValid()) {
-      ATH_MSG_ERROR("doDigitization: Failed to retrieve AtlasFieldCacheCondObj with key " << m_fieldCondObjInputKey.key());
-      return false;
-  }
-  readHandle.cptr()->getInitializedCache(fieldCache);
-  return true;
+StatusCode Muon::NSWCalibTool::loadMagneticField(const EventContext& ctx, MagField::AtlasFieldCache& fieldCache) const {
+  const AtlasFieldCacheCondObj* condObj{};
+  ATH_CHECK(SG::get(condObj, m_fieldCondObjInputKey, ctx));
+  condObj->getInitializedCache(fieldCache);
+  return StatusCode::SUCCESS;
 }
-StatusCode Muon::NSWCalibTool::distToTime(const EventContext& ctx, const Muon::MMPrepData* prepData, const Amg::Vector3D& globalPos, const std::vector<double>& driftDistances, std::vector<double>& driftTimes) const {
+StatusCode Muon::NSWCalibTool::distToTime(const EventContext& ctx, 
+                                          const Muon::MMPrepData* prepData, 
+                                          const Amg::Vector3D& globalPos, 
+                                          const std::vector<double>& driftDistances, 
+                                          std::vector<double>& driftTimes) const {
   /// retrieve the magnetic field
   MagField::AtlasFieldCache fieldCache;
-  if (!loadMagneticField(ctx, fieldCache)) return StatusCode::FAILURE;  
+  ATH_CHECK(loadMagneticField(ctx, fieldCache));
   Amg::Vector3D magneticField{Amg::Vector3D::Zero()};
   fieldCache.getField(globalPos.data(), magneticField.data());
 
   /// get the component parallel to to the eta strips (same used in digitization)
-  const double phi    = globalPos.phi();
+  const double phi = globalPos.phi();
   double bfield = (magneticField.x()*std::sin(phi)-magneticField.y()*std::cos(phi))*1000.;
 
   /// swap sign depending on the readout side  
@@ -352,8 +344,8 @@ StatusCode Muon::NSWCalibTool::distToTime(const EventContext& ctx, const Muon::M
 
 bool
 Muon::NSWCalibTool::chargeToPdo(const EventContext& ctx, const float charge, const Identifier& chnlId, int& pdo) const {
-  const NswCalibDbTimeChargeData* tdoPdoData = getCalibData(ctx);
-  if (!tdoPdoData) {
+  const NswCalibDbTimeChargeData* tdoPdoData{nullptr};
+  if (!SG::get(tdoPdoData, m_condTdoPdoKey, ctx)) {
     pdo = 0;
     return false;  
   }
@@ -375,14 +367,18 @@ Muon::NSWCalibTool::chargeToPdo(const EventContext& ctx, const float charge, con
 }
 
 bool
-Muon::NSWCalibTool::pdoToCharge(const EventContext& ctx, const bool inCounts, const int pdo, const Identifier& chnlId, float& charge) const {  
+Muon::NSWCalibTool::pdoToCharge(const EventContext& ctx,
+                                const bool inCounts,
+                                const int pdo,
+                                const Identifier& chnlId,
+                                float& charge) const {
   if(!inCounts){
     charge = pdo;
     return true;
   }
-  const NswCalibDbTimeChargeData* tdoPdoData = getCalibData(ctx);
-  if (!tdoPdoData) {
-    charge =0.;
+  const NswCalibDbTimeChargeData* tdoPdoData{nullptr};
+  if (!SG::get(tdoPdoData, m_condTdoPdoKey, ctx)) {
+    charge = 0.;
     return false;  
   }
   const TimeCalibConst* calib_ptr = tdoPdoData->getCalibForChannel(TimeCalibType::PDO, chnlId);
@@ -400,9 +396,9 @@ Muon::NSWCalibTool::pdoToCharge(const EventContext& ctx, const bool inCounts, co
 
 bool 
 Muon::NSWCalibTool::timeToTdo(const EventContext& ctx, const float time, const Identifier& chnlId, int& tdo, int& relBCID) const {
-  const NswCalibDbTimeChargeData* tdoPdoData = getCalibData(ctx);
-  if (!tdoPdoData) return false;
-  if     (m_idHelperSvc->isMM  (chnlId)) return timeToTdoMM  (tdoPdoData, time, chnlId, tdo, relBCID);
+  const NswCalibDbTimeChargeData* tdoPdoData{nullptr};
+  if (!SG::get(tdoPdoData, m_condTdoPdoKey, ctx)) return false;
+  if (m_idHelperSvc->isMM  (chnlId)) return timeToTdoMM  (tdoPdoData, time, chnlId, tdo, relBCID);
   else if(m_idHelperSvc->issTgc(chnlId)) return timeToTdoSTGC(tdoPdoData, time, chnlId, tdo, relBCID);
   return false;
 }
@@ -460,21 +456,21 @@ Muon::NSWCalibTool::timeToTdoSTGC(const NswCalibDbTimeChargeData* tdoPdoData, co
 }
 
 float Muon::NSWCalibTool::applyT0Calibration(const EventContext& ctx, const Identifier& id, float time) const {
-  SG::ReadCondHandle<NswT0Data> readT0{m_condT0Key, ctx};
-  if(!readT0.isValid()){
+  const NswT0Data* readT0{nullptr};
+  if(!SG::get(readT0, m_condT0Key, ctx).isSuccess()){
     ATH_MSG_ERROR("Cannot find conditions data container for T0s!");
   }
-  float t0 {0};
-  bool isGood = readT0->getT0(id, t0);
-  if(!isGood || t0==0){
+  std::optional<float> t0 = readT0->getT0(id);
+  if(!t0){
     ATH_MSG_DEBUG("failed to retrieve good t0 from database, skipping t0 calibration");
     return time;
-  } else {
-    float targetT0 = (m_idHelperSvc->isMM(id) ? m_mmT0TargetValue  : m_stgcT0TargetValue);
-    float newTime = time + (targetT0 - t0);
-    ATH_MSG_DEBUG("doing T0 calibration for RDO " << m_idHelperSvc->toString(id) << " time " << time <<" t0 from  database " <<  t0  << " t0 target " << targetT0  << " new time " <<  newTime);
-    return newTime;
-  }
+  }  
+  const auto& targetT0 = (m_idHelperSvc->isMM(id) ? m_mmT0TargetValue  : m_stgcT0TargetValue);
+  float newTime = time + (targetT0 - (*t0));
+  ATH_MSG_DEBUG("doing T0 calibration for RDO " << m_idHelperSvc->toString(id) << " time " << time 
+            <<" t0 from  database " <<  (*t0)  << " t0 target " << targetT0  << " new time " <<  newTime);
+  return newTime;
+  
 }
 
 
@@ -484,8 +480,8 @@ Muon::NSWCalibTool::tdoToTime(const EventContext& ctx, const bool inCounts, cons
     time = tdo;
     return true;
   }
-  const NswCalibDbTimeChargeData* tdoPdoData = getCalibData(ctx);
-  if (!tdoPdoData) {
+  const NswCalibDbTimeChargeData* tdoPdoData{nullptr};
+  if (!SG::get(tdoPdoData, m_condTdoPdoKey, ctx)){
     time = 0.;
     return false;  
   }
@@ -519,19 +515,25 @@ NSWCalib::MicroMegaGas  Muon::NSWCalibTool::mmGasProperties() const {
 }
 
 
-bool Muon::NSWCalibTool::localStripPosition(const Identifier& id, Amg::Vector2D &locPos) const {
-  // MuonDetectorManager from the conditions store
-  SG::ReadCondHandle<MuonGM::MuonDetectorManager> muDetMgrHandle{m_muDetMgrKey};
-  const MuonGM::MuonDetectorManager* muDetMgr = muDetMgrHandle.cptr();
-  if(m_idHelperSvc->isMM(id)){
-    const MuonGM::MMReadoutElement* detEl = muDetMgr->getMMReadoutElement(id);
-    return detEl->stripPosition(id,locPos);
-
-  } else if(m_idHelperSvc->issTgc(id)){
-    const MuonGM::sTgcReadoutElement* detEl = muDetMgr->getsTgcReadoutElement(id);
-    return detEl->stripPosition(id,locPos);
-
-  } else {
-    return false;
+std::optional<Amg::Vector2D> Muon::NSWCalibTool::localStripPosition(const EventContext& ctx,
+                                                                     const Identifier& id) const {
+  
+  const MuonGM::MuonDetectorManager* muDetMgr{nullptr};
+  if (!SG::get(muDetMgr, m_muDetMgrKey, ctx)) {
+    THROW_EXCEPTION("Failed to retrieve the detector manager");
   }
+  Amg::Vector2D locPos{Amg::Vector2D::Zero()};
+  if(m_idHelperSvc->isMM(id)){
+    if (!muDetMgr->getMMReadoutElement(id)->stripPosition(id,locPos)) {
+        return std::nullopt;
+    }
+  } else if(m_idHelperSvc->issTgc(id)){
+    if (!muDetMgr->getsTgcReadoutElement(id)->stripPosition(id,locPos)) {
+        return std::nullopt;
+    }
+  } else {
+    ATH_MSG_WARNING("Non NSW identifier "<<m_idHelperSvc->toString(id));
+    return std::nullopt;
+  }
+  return locPos;
 }

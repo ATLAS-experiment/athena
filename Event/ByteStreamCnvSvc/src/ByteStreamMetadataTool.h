@@ -2,8 +2,8 @@
   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef BYTESTREAMMETADATATOOL_H
-#define BYTESTREAMMETADATATOOL_H
+#ifndef BYTESTREAMCNVSVC_BYTESTREAMMETADATATOOL_H
+#define BYTESTREAMCNVSVC_BYTESTREAMMETADATATOOL_H
 
 /** @file ByteStreamMetadataTool.h
  *  @brief This file contains the class definition for the ByteStreamMetadataTool class.
@@ -51,4 +51,4 @@ private:
   std::set<std::string> keysFromInput() const;
 };
 
-#endif // BYTESTREAMMETADATATOOL_H
+#endif // BYTESTREAMCNVSVC_BYTESTREAMMETADATATOOL_H

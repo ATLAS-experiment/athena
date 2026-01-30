@@ -1,8 +1,6 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
-
-// $Id: ut_xaodtrigger_trigpassbits_test.cxx 704009 2015-10-28 08:32:05Z krasznaa $
 
 // System include(s):
 #include <iostream>
@@ -193,9 +191,15 @@ void helperFunctions() {
 int main() {
 
    // Run the tests:
-   simpleFunctions();
-   containerFunctions();
-   helperFunctions();
+   try {
+     simpleFunctions();
+     containerFunctions();
+     helperFunctions();
+   }
+   catch (const std::exception& e) {
+     std::cerr << e.what() << "\n";
+     return 1;
+   }
 
    // Return gracefully:
    return 0;

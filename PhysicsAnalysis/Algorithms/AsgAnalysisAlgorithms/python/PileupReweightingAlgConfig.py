@@ -1,6 +1,7 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
+
 
 # ATTENTION: This is a ComponentAccumulator-based configuration file
 # (not to be confused with ConfigAccumulator). If you are an analysis
@@ -19,6 +20,13 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 # configuration is covered by a unit test. Should it fail use your
 # best judgement whether to fix this configuration or to change it to
 # wrap the block configuration instead.
+
+
+def McEventWeightCfg(flags, name="MyWeights", **kwargs):
+    acc = ComponentAccumulator()
+    acc.setPrivateTools(CompFactory.McEventWeight(name, UseTruthEvents=True))
+    return acc
+
 
 def PileupReweightingToolCfg(flags, name="PileupReweightingTool", commonPRW=True, **kwargs):
     acc = ComponentAccumulator()
@@ -43,3 +51,15 @@ def PileupReweightingAlgCfg(flags, name="PileupReweightingAlg", **kwargs):
     acc.addEventAlgo(CompFactory.CP.PileupReweightingAlg(name, **kwargs))
     return acc
 
+
+def PileupReweightingProviderToolCfg(flags, name="auto", **kwargs):
+    acc = ComponentAccumulator()
+    kwargs.setdefault("WeightTool", acc.addPublicTool(acc.popToolsAndMerge(McEventWeightCfg(flags))))
+    kwargs.setdefault("ConfigFiles", [])
+    kwargs.setdefault("LumiCalcFiles", [])
+    kwargs.setdefault("DataScaleFactor", 1.0)
+    kwargs.setdefault("DataScaleFactorUP", 0.)
+    kwargs.setdefault("DataScaleFactorDOWN", 0.)
+    kwargs.setdefault("PeriodAssignments", [])
+    acc.setPrivateTools(acc.popToolsAndMerge(PileupReweightingToolCfg(flags, name, **kwargs)))
+    return acc

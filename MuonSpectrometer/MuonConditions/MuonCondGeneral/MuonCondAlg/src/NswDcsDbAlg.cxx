@@ -2,7 +2,7 @@
   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "MuonCondAlg/NswDcsDbAlg.h"
+#include "NswDcsDbAlg.h"
 
 #include "AthenaPoolUtilities/CondAttrListCollection.h"
 #include "AthenaKernel/IOVInfiniteRange.h"
@@ -12,13 +12,13 @@
 #include "MuonIdHelpers/IMuonIdHelperSvc.h"
 #include "GeoModelKernel/throwExcept.h"
 
+namespace Muon{
 // Initialize
 StatusCode
 NswDcsDbAlg::initialize(){
 
     // retrievals
     ATH_MSG_DEBUG( "initializing " << name() );                
-    ATH_CHECK(m_condSvc     .retrieve());
     ATH_CHECK(m_idHelperSvc.retrieve());
     
     // initialize read keys
@@ -46,7 +46,7 @@ NswDcsDbAlg::execute(const EventContext& ctx) const {
     ATH_MSG_DEBUG( "execute " << name() );   
 
     // set up write handles
-    SG::WriteCondHandle<NswDcsDbData> wrHdl{m_writeKey, ctx};
+    SG::WriteCondHandle wrHdl{m_writeKey, ctx};
     if (wrHdl.isValid()) {
         ATH_MSG_DEBUG("CondHandle " << wrHdl.fullKey() << " is already valid."
             << " In theory this should not be called, but may happen"
@@ -111,15 +111,14 @@ StatusCode
 NswDcsDbAlg::loadHvData(const EventContext& ctx, const readKey_t& readKey, const DcsTechType tech, writeHandleDcs_t& writeHandle, NswDcsDbData* writeCdo) const {
 
     // set up read handle
-    SG::ReadCondHandle<CondAttrListCollection> readHandle{readKey, ctx};
-    const CondAttrListCollection* readCdo{*readHandle}; 
-    if(!readCdo){
+    SG::ReadCondHandle readCdo{readKey, ctx};
+    if(!readCdo.isValid()){
         ATH_MSG_ERROR("Null pointer to the read conditions object");
         return StatusCode::FAILURE; 
     } 
-    writeHandle.addDependency(readHandle);
-    ATH_MSG_DEBUG("Size of CondAttrListCollection " << readHandle.fullKey() << " readCdo->size()= " << readCdo->size());
-    ATH_MSG_DEBUG("Range of input is " << readHandle.getRange() << ", range of output is " << writeHandle.getRange());
+    writeHandle.addDependency(readCdo);
+    ATH_MSG_DEBUG("Size of CondAttrListCollection " << readKey.fullKey() << " readCdo->size()= " << readCdo->size());
+    ATH_MSG_DEBUG("Range of input is " << readCdo.getRange() << ", range of output is " << writeHandle.getRange());
 
     // iterate through data
     CondAttrListCollection::const_iterator itr;
@@ -166,15 +165,14 @@ NswDcsDbAlg::loadHvData(const EventContext& ctx, const readKey_t& readKey, const
 StatusCode 
 NswDcsDbAlg::loadTDaqData(const EventContext& ctx, const readKey_t& readKey, const DcsTechType tech, writeHandleDcs_t& writeHandle, NswDcsDbData* writeCdo) const {
     // set up read handle
-    SG::ReadCondHandle<CondAttrListCollection> readHandle{readKey, ctx};
-    const CondAttrListCollection* readCdo{*readHandle}; 
-    if(!readCdo){
+    SG::ReadCondHandle readCdo{readKey, ctx};
+    if(!readCdo.isValid()){
         ATH_MSG_ERROR("Null pointer to the read conditions object");
         return StatusCode::FAILURE; 
     } 
-    writeHandle.addDependency(readHandle);
-    ATH_MSG_DEBUG("Size of CondAttrListCollection " << readHandle.fullKey() << " readCdo->size()= " << readCdo->size());
-    ATH_MSG_DEBUG("Range of input is " << readHandle.getRange() << ", range of output is " << writeHandle.getRange());
+    writeHandle.addDependency(readCdo);
+    ATH_MSG_DEBUG("Size of CondAttrListCollection " << readKey.fullKey() << " readCdo->size()= " << readCdo->size());
+    ATH_MSG_DEBUG("Range of input is " << readCdo.getRange() << ", range of output is " << writeHandle.getRange());
 
     // iterate through data
     CondAttrListCollection::const_iterator itr;
@@ -217,15 +215,14 @@ NswDcsDbAlg::loadTDaqData(const EventContext& ctx, const readKey_t& readKey, con
 StatusCode NswDcsDbAlg::loadELTXData(const EventContext& ctx, const readKey_t& readKey, const DcsTechType tech, writeHandleDcs_t& writeHandle, NswDcsDbData* writeCdo) const {
 
     // set up read handle
-    SG::ReadCondHandle<CondAttrListCollection> readHandle{readKey, ctx};
-    const CondAttrListCollection* readCdo{*readHandle}; 
-    if(!readCdo){
+    SG::ReadCondHandle readCdo{readKey, ctx};
+    if(!readCdo.isValid()){
         ATH_MSG_ERROR("Null pointer to the read conditions object");
         return StatusCode::FAILURE; 
     } 
-    writeHandle.addDependency(readHandle);
-    ATH_MSG_DEBUG("Size of CondAttrListCollection " << readHandle.fullKey() << " readCdo->size()= " << readCdo->size());
-    ATH_MSG_DEBUG("Range of input is " << readHandle.getRange() << ", range of output is " << writeHandle.getRange());
+    writeHandle.addDependency(readCdo);
+    ATH_MSG_DEBUG("Size of CondAttrListCollection " << readKey.fullKey() << " readCdo->size()= " << readCdo->size());
+    ATH_MSG_DEBUG("Range of input is " << readCdo.getRange() << ", range of output is " << writeHandle.getRange());
 
     // This code is under development so lets mute unused variable warnings for now
     (void) writeCdo;
@@ -569,4 +566,5 @@ NswDcsDbAlg::buildChannelIdForEltx(Identifier& channelId, const DcsTechType tech
         channelId = chnlId;
     }
     return true;
+}
 }

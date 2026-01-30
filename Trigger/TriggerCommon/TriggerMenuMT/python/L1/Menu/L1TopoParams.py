@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 # L1TopoParams.py
 #
 # *** IMPORTANT ***
@@ -83,6 +83,19 @@ L1TopoParams = {
                           'ScaleSqr2',
                           'ScaleSqr3',
                           'AnomalyScoreThresh']},
+ 'ARTEMIS_2A': {'comment': '',
+           'common_parameters' : ['MinET1',
+                                  'MinET2',
+                                  'MinET3',
+                                  'MinET4',
+                                  'MaxET1',
+                                  'MaxET2',
+                                  'MaxET3',
+                                  'MaxET4',
+                                  'MaxET5',
+                                  'MaxET6',
+                                  'MaxET7'],
+           'parameters': ['AnomalyScoreThresh']},
   'AnomalyDetectionBDT': {
      'comment': 'BDT-based muon anomaly trigger',
      'common_parameters' : ['MinET1',
@@ -255,6 +268,13 @@ L1TopoParams = {
                                        'parameters': ['MinET1',
                                                       'MinMSqr',
                                                       'MaxMSqr']},
+ 'InvariantMassInclusive1Disambiguation2': {'comment': '',
+                             'parameters': ['MinET1a',
+                                            'MinET1b',
+                                            'MinET2',
+                                            'MinMSqr',
+                                            'MaxMSqr',
+                                            'DisambDRSqrMin']},
  'JetHT': {'comment': 'All following pars are MinHt',
            'parameters': ['MinET', 'MinEta', 'MaxEta', 'MinHt']},
  'KalmanMETCorrection': {'comment': '', 'parameters': [f'weights{i}' for i in range(49)] + ['MinET'] + 4*['KFXE']},

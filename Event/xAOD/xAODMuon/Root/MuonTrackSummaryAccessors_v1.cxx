@@ -6,20 +6,20 @@
 #include <iostream>
 
 // Local include(s):
-#include "MuonTrackSummaryAccessors_v1.h"
+#include "xAODMuon/versions/MuonTrackSummaryAccessors_v1.h"
 
 /// Helper macro for Accessor objects
 #define DEFINE_ACCESSOR(TYPE, NAME )                               \
    case xAOD::NAME:                                                \
    {                                                               \
-      static const SG::AuxElement::Accessor< TYPE > a( #NAME );          \
-      return &a;                                                   \
+      static const SG::Accessor< TYPE > a( #NAME );                \
+      return a;                                                    \
    }                                                               \
    break;
 
 namespace xAOD {
 
-   const SG::AuxElement::Accessor< uint8_t >*
+   const SG::Accessor< uint8_t >&
    muonTrackSummaryAccessorV1( xAOD::MuonSummaryType type ) {
 
       switch( type ) {
@@ -120,21 +120,13 @@ namespace xAOD {
         // MM
         DEFINE_ACCESSOR( uint8_t, MMHits );
         DEFINE_ACCESSOR( uint8_t, MMHoles );
-        // Note: there is currently no MuonStationIndex for the two MM layers
-        // In the future it might be needed to add them in order to have 
-        // separate counters as follows
-        // DEFINE_ACCESSOR( uint8_t, Layer1MMHits );
-        // DEFINE_ACCESSOR( uint8_t, Layer2MMHits );
-        // DEFINE_ACCESSOR( uint8_t, Layer1MMHoles );
-        // DEFINE_ACCESSOR( uint8_t, Layer2MMHoles );
 
+        DEFINE_ACCESSOR( uint8_t, innerClosePrecisionHits );
+        DEFINE_ACCESSOR( uint8_t, middleClosePrecisionHits );
+        DEFINE_ACCESSOR( uint8_t, outerClosePrecisionHits );
+        DEFINE_ACCESSOR( uint8_t, extendedClosePrecisionHits );
 
-	DEFINE_ACCESSOR( uint8_t, innerClosePrecisionHits );
-	DEFINE_ACCESSOR( uint8_t, middleClosePrecisionHits );
-	DEFINE_ACCESSOR( uint8_t, outerClosePrecisionHits );
-	DEFINE_ACCESSOR( uint8_t, extendedClosePrecisionHits );
-
-	DEFINE_ACCESSOR( uint8_t, innerOutBoundsPrecisionHits );
+        DEFINE_ACCESSOR( uint8_t, innerOutBoundsPrecisionHits );
         DEFINE_ACCESSOR( uint8_t, middleOutBoundsPrecisionHits );
         DEFINE_ACCESSOR( uint8_t, outerOutBoundsPrecisionHits );
         DEFINE_ACCESSOR( uint8_t, extendedOutBoundsPrecisionHits );
@@ -147,10 +139,9 @@ namespace xAOD {
         DEFINE_ACCESSOR( uint8_t, cscEtaHits );
         DEFINE_ACCESSOR( uint8_t, cscUnspoiledEtaHits );
 
-      default:                  
-         std::cerr << "xAOD::MuonTrackParticle_v1 ERROR Unknown MuonSummaryType ("
-                   << type << ") requested" << std::endl;
-         return nullptr;
+      default:
+         throw std::runtime_error("xAOD::MuonTrackParticle_v1 ERROR Unknown MuonSummaryType "
+                              +std::to_string(type)+" requested");
       }
    }
    

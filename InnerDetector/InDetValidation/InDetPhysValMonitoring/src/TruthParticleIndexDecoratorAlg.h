@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRUTHPARTICLEINDEXDECORATORALG_H
@@ -26,6 +26,6 @@ private:
     {this, "TruthParticleContainerName",  "TruthParticles", ""};
 
   SG::WriteDecorHandleKey<xAOD::TruthParticleContainer> m_indexDecor
-    {this, "TruthParticleIndexDecoration", "origTruthIndex", "decoration name for the original truth particle index."};
+    {this, "TruthParticleIndexDecoration", m_truthParticleName, "origTruthIndex", "decoration name for the original truth particle index."};
 };
 #endif

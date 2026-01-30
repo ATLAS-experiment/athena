@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 if __name__ == '__main__':
     
@@ -91,9 +91,6 @@ if __name__ == '__main__':
                                      OutputLevel=DEBUG,
                                      dump=True))
 
-    from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
-    acc.merge(OutputStreamCfg(flags, 'AOD', ["IOBitwise::IeEmEg1BDTTOBContainer#BDTResult"]))
-    
     if acc.run().isFailure():
         import sys
         sys.exit(1)

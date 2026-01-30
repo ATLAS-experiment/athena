@@ -17,17 +17,17 @@ class TruthCollectionsFixerBlock(ConfigBlock):
             "truthParticleContainersToFix",
             None,
             type=list,
-            info="list of input DAOD truthParticle containers to fix",
+            info="list of input DAOD truthParticle containers to fix.",
         )
         self.addOption(
             "truthVertexContainersToFix",
             None,
             type=list,
-            info="list of input DAOD truthVertex containers to fix",
+            info="list of input DAOD truthVertex containers to fix.",
         )
-        self.addOption("fixDAODTruthRecord", True, type=bool,
+        self.addOption("fixDAODTruthRecord", False, type=bool,
                        info="older derivations have the old HepMC barcodes and need to be fixed, otherwise we get "
-                       "a crash on 'missing ::uid'. Schedules an instance of TruthCollectionsFixerBlock. "
+                       "a crash on 'missing `::uid`'. Schedules an instance of `TruthCollectionsFixerBlock`. "
                        "Not needed for recent derivations.")
 
     def makeAlgs(self, config):
@@ -38,7 +38,7 @@ class TruthCollectionsFixerBlock(ConfigBlock):
         if config.dataType() is DataType.Data: return
 
         partContainers = None
-        if self.truthParticleContainersToFix:
+        if self.truthParticleContainersToFix is not None:
             partContainers = self.truthParticleContainersToFix
         elif config.isPhyslite():
             partContainers = [
@@ -62,7 +62,7 @@ class TruthCollectionsFixerBlock(ConfigBlock):
             ]
             
         vertContainers = None
-        if self.truthVertexContainersToFix:
+        if self.truthVertexContainersToFix is not None:
             vertContainers = self.truthVertexContainersToFix
         elif config.isPhyslite():
             vertContainers = [
@@ -108,7 +108,12 @@ class TruthCollectionsFixerBlock(ConfigBlock):
             alg.OutputContainer = container
 
             # in Athena, we further need to remap relevant ElementLinks for containers that have them
-            containers_without_parent_child_links = ["TruthBosonsWithDecayParticles", "TruthTausWithDecayParticles", "BornLeptons", "TruthPileupParticles", "TruthForwardProtons"]
+            containers_without_parent_child_links = [
+                "TruthBosonsWithDecayParticles",
+                "TruthTausWithDecayParticles",
+                "BornLeptons", "TruthPileupParticles",
+                "TruthForwardProtons",
+                "TruthBSMWithDecayParticles"]
             if DualUseConfig.isAthena and container not in containers_without_parent_child_links:
                 alg.LinkPrefixToRemove = "InFile"
                 alg.ParticleLinks = ["parentLinks", "childLinks"]

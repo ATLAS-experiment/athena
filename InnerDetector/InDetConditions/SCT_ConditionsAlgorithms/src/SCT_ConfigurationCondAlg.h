@@ -7,7 +7,7 @@
 #ifndef SCT_CONFIGURATIONCONDALG
 #define SCT_CONFIGURATIONCONDALG
 
-#include "AthenaBaseComps/AthReentrantAlgorithm.h"
+#include "AthenaBaseComps/AthCondAlgorithm.h"
 
 #include "AthenaPoolUtilities/CondAttrListVec.h"
 #include "Identifier/Identifier.h"
@@ -27,7 +27,7 @@
 // Forward declarations
 class SCT_ID;
 
-class SCT_ConfigurationCondAlg : public AthReentrantAlgorithm 
+class SCT_ConfigurationCondAlg : public AthCondAlgorithm 
 {  
  public:
   SCT_ConfigurationCondAlg(const std::string& name, ISvcLocator* pSvcLocator);
@@ -35,7 +35,6 @@ class SCT_ConfigurationCondAlg : public AthReentrantAlgorithm
   virtual StatusCode initialize() override final;
   virtual StatusCode execute(const EventContext& ctx) const override final;
   virtual StatusCode finalize() override final;
-  virtual bool isReEntrant() const override final { return false; }
 
  private:
   /** enum for constants*/

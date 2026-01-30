@@ -1,7 +1,7 @@
 // Emacs -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <iterator>
@@ -162,7 +162,7 @@ void  HLTNavDetails::HolderImp<STORED, CONTAINER>::prepare(const asg::AsgMessagi
 
     if(H::m_readonly){
       ATH_MSG_INFO("HolderImp::prepare using a read-only proxy for aux store");
-      H::m_aux = new TypelessAuxProxy();
+      H::m_aux = std::make_unique<TypelessAuxProxy>();
     }
     else{
 
@@ -172,7 +172,7 @@ void  HLTNavDetails::HolderImp<STORED, CONTAINER>::prepare(const asg::AsgMessagi
         return;
       }
       
-      H::m_aux = itr->second->clone();
+      H::m_aux.reset (itr->second->clone());
       if ( H::m_aux == 0 ) {
         ATH_MSG_ERROR("HolderImp::prepare can not clone Aux store proxy " << *this);
       }
@@ -792,12 +792,12 @@ struct AuxDataObjectHelper{
 
 template<class STORED, class CONTAINER>
 DataObject* HLTNavDetails::HolderImp<STORED, CONTAINER>::getAuxDataObject() {
-  return AuxDataObjectHelper::get<CONTAINER>(this->m_aux);
+  return AuxDataObjectHelper::get<CONTAINER>(this->m_aux.get());
 }
 
 template<class STORED, class CONTAINER>
 bool HLTNavDetails::HolderImp<STORED, CONTAINER>::setAuxDataObject(DataObject* dobjaux) {
-  bool status =  AuxDataObjectHelper::set<CONTAINER>(this->m_aux,dobjaux);
+  bool status =  AuxDataObjectHelper::set<CONTAINER>(this->m_aux.get(),dobjaux);
   ATH_MSG_VERBOSE("container data is: " << m_containerProxy.data());
   SG::AuxVectorBase* container = m_containerProxy.castAuxVectorBase();
   if(!this->m_aux or !container){

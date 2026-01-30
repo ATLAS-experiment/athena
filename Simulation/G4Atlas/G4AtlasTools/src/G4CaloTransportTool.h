@@ -8,8 +8,8 @@
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "G4AtlasInterfaces/IG4CaloTransportTool.h"
 #include "G4PropagatorInField.hh"
-#include "G4AtlasTools/ThreadLocalHolder.h"
 
+#include <memory>
 #include <vector>
 
 class G4Track;
@@ -36,6 +36,11 @@ class G4CaloTransportTool : virtual public extends<AthAlgTool, IG4CaloTransportT
     virtual std::vector<G4FieldTrack> transport(const G4Track& G4InputTrack) override final;
 
   private:
+    // Deleter for the unique_ptr managing the G4PropagatorInField
+    struct Deleter {
+      void operator()(G4PropagatorInField*) const;
+    };
+
     // Get the world volume in which the particle transport is performed
     G4VPhysicalVolume* getWorldVolume();
     // Create and return a new propagator
@@ -53,8 +58,8 @@ class G4CaloTransportTool : virtual public extends<AthAlgTool, IG4CaloTransportT
     Gaudi::Property<std::string> m_transportLimitVolume{this, "TransportLimitVolume", "Name of the volume until which the particle is transported"};
     // Maximum number of steps in particle transport
     Gaudi::Property<unsigned int> m_maxSteps{this, "MaxSteps", 100, "Maximum number of steps in particle transport"};
-    // Thread local holder for propagators
-    thread_utils::ThreadLocalHolder<G4PropagatorInField> m_propagatorHolder;
+    // Thread local propagator
+    static thread_local std::unique_ptr<G4PropagatorInField, Deleter> s_propagator;
 
 
 }; // class G4CaloTransportTool

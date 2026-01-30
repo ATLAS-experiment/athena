@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -92,110 +92,52 @@ namespace InDetDD
         return iter->second;
     }
 
-    StatusCode InDetDetectorManager::align( IOVSVC_CALLBACK_ARGS_P(I,keys) )
+    StatusCode InDetDetectorManager::align()
     {
-
-        (void) I; // avoid warning about unused parameter
-
-        ATH_MSG_DEBUG("AlignmentCallback called ");
+        ATH_MSG_DEBUG("align() called ");
 
         if (!getIdHelper()) return StatusCode::SUCCESS;
 
         bool alignmentChange = false;
         const AlignInfo &aligninfo = AlignInfo(m_alignfoldertype);
 
-        // If dummy arguments
-        if (keys.empty()) {
+	// New global aligment folders should be processed first
+	for (const auto & globalFolder : m_globalFolders) {
 
+	  try {
+	    bool status = processGlobalAlignmentContainer(globalFolder);
+	    alignmentChange = (alignmentChange || status);
+	  } catch(std::runtime_error& err) {
+	    // keys are empty when running simualtion. It is normal for detector specific aligments not to exist.
+	    ATH_MSG_FATAL(err.what());
+	    return StatusCode::FAILURE;
+	  }
+	}
 
-            // New global aligment folders should be processed first
-            for (const auto & globalFolder : m_globalFolders) {
+	// Regular alignments. Loop through folder keys. Normally only one.
+	for (const auto & folder : m_folders) {
 
-                try {
-                    bool status = processGlobalAlignmentContainer(globalFolder);
-                    alignmentChange = (alignmentChange || status);
-                } catch(std::runtime_error& err) {
-                    // keys are empty when running simualtion. It is normal for detector specific aligments not to exist.
-                  ATH_MSG_FATAL(err.what());
-                  return StatusCode::FAILURE;
-                }
-            }
-
-            // Regular alignments. Loop through folder keys. Normally only one.
-            for (const auto & folder : m_folders) {
-
-                try {
-                    bool status = processAlignmentContainer(folder);
-                    alignmentChange = (alignmentChange || status);
-                }
-                catch(std::runtime_error& err) {
-                    // alignments should always exist so we return fatal if we could not process the alignment for this key
-                    ATH_MSG_FATAL(err.what());
-                    return StatusCode::FAILURE;
-                }
-            }
-            // Detector specific aligments
-            for (const auto & specialFolder : m_specialFolders) {
-                try {
-                    bool status = processSpecialAlignment(specialFolder, aligninfo.AlignFolder());
-                    alignmentChange = (alignmentChange || status);
-                } catch(std::runtime_error& err) {
-                    // keys are empty when running simualtion. It is normal for detector specific aligments not to exist.
-                    ATH_MSG_INFO(err.what());
-                    // We continue as detector specific aligments don't always exist.
-                }
-            }
-
-        } else {
-            // Loop over all the keys.
-            for (std::list<std::string>::const_iterator itr=keys.begin(); itr!=keys.end(); ++itr) {
-
-                const std::string & key = *itr;
-
-                ATH_MSG_DEBUG(" Processing call back key  " << key);
-
-                if ( m_globalFolders.find(key) != m_globalFolders.end() ) {
-
-                    try {
-                        // New global alignemnts
-                        bool status = processGlobalAlignmentContainer(key);
-                        alignmentChange = (alignmentChange || status);
-                    } catch(std::runtime_error& err) {
-                        // alignments should always exist so we return fatal if we could not process the alignment for this key
-                        ATH_MSG_FATAL(err.what());
-                        return StatusCode::FAILURE;
-                    }
-
-                } else if ( m_folders.find(key) != m_folders.end() ) {
-
-                    try {
-                        // Regular alignemnts
-                        bool status = processAlignmentContainer(key);
-                        alignmentChange = (alignmentChange || status);
-                    } catch(std::runtime_error& err) {
-                        // alignments should always exist so we return fatal if we could not process the alignment for this key
-                        ATH_MSG_FATAL(err.what());
-                        return StatusCode::FAILURE;
-                    }
-
-                } else if ( m_specialFolders.find(key) !=  m_specialFolders.end() ) {
-                    try {
-                        // Detector specific alignments
-                        bool status = processSpecialAlignment(key, aligninfo.AlignFolder());
-                        alignmentChange = (alignmentChange || status);
-                    }
-                    catch(std::runtime_error& err) {
-                        // Should always exist if the folder was requested so we return fatal if we could not process the alignment for this key
-                        ATH_MSG_FATAL(err.what());
-                        return StatusCode::FAILURE;
-                    }
-                } else {
-                    // Should not be any other keys specified in call back.
-                    ATH_MSG_ERROR("Unrecognized key in call back.");
-                    return  StatusCode::RECOVERABLE;
-                }
-            }
-        }
+	  try {
+	    bool status = processAlignmentContainer(folder);
+	    alignmentChange = (alignmentChange || status);
+	  }
+	  catch(std::runtime_error& err) {
+	    // alignments should always exist so we return fatal if we could not process the alignment for this key
+	    ATH_MSG_FATAL(err.what());
+	    return StatusCode::FAILURE;
+	  }
+	}
+	// Detector specific aligments
+	for (const auto & specialFolder : m_specialFolders) {
+	  try {
+	    bool status = processSpecialAlignment(specialFolder, aligninfo.AlignFolder());
+	    alignmentChange = (alignmentChange || status);
+	  } catch(std::runtime_error& err) {
+	    // keys are empty when running simualtion. It is normal for detector specific aligments not to exist.
+	    ATH_MSG_INFO(err.what());
+	    // We continue as detector specific aligments don't always exist.
+	  }
+	}
 
         // We invalidate all the elements if at least one alignment changed.
         if (alignmentChange) {

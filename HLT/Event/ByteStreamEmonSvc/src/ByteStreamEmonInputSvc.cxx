@@ -313,8 +313,8 @@ bool ByteStreamEmonInputSvc::getIterator()
     emon::L1TriggerType l1triggerType(static_cast<unsigned char>(m_trigger_type), m_trigger_type > 255);
 
     emon::SelectionCriteria criteria(l1triggerType,
-                                     l1pattern,
-                                     streamTags,
+                                     std::move(l1pattern),
+                                     std::move(streamTags),
                                      emon::StatusWord());
 
     while (true) {

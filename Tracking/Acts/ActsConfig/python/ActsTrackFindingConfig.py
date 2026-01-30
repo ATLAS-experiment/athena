@@ -74,13 +74,6 @@ def ActsMainTrackFindingAlgCfg(flags,
     
     acc.merge( ActsVolumeIdToDetectorCollectionMappingAlgCfg(flags) )
     kwargs.setdefault("ActsVolumeIdToDetectorElementCollectionMapKey", "VolumeIdToDetectorElementCollectionMap")
-    def filterCollections(flags, pixel_col, strip_col) :
-      ret=[]
-      if flags.Detector.GeometryITkPixel:
-        ret += [ pixel_col ]
-      if flags.Detector.GeometryITkStrip:
-        ret += [ strip_col ]
-      return ret
 
     if flags.Detector.EnableITkPixel:
         from PixelConditionsAlgorithms.ITkPixelConditionsConfig import ITkPixelDetectorElementStatusAlgCfg
@@ -88,7 +81,7 @@ def ActsMainTrackFindingAlgCfg(flags,
     if flags.Detector.EnableITkStrip:
         from SCT_ConditionsAlgorithms.ITkStripConditionsAlgorithmsConfig import ITkStripDetectorElementStatusAlgCfg
         acc.merge(ITkStripDetectorElementStatusAlgCfg(flags))
-    kwargs.setdefault("DetElStatus",filterCollections(flags,'ITkStripDetectorElementStatus','ITkPixelDetectorElementStatus'))
+    kwargs.setdefault("DetElStatus", seedOrder(flags, pixel=["ITkPixelDetectorElementStatus"], strip=["ITkStripDetectorElementStatus"]))
 
     # Seed labels and collections.
     # These 3 lists must match element for element, reversed if flags.Acts.useStripSeedsFirst is True.
@@ -128,13 +121,9 @@ def ActsMainTrackFindingAlgCfg(flags,
     if flags.Detector.GeometryITk:
         kwargs.setdefault("etaBins", flags.Tracking.ActiveConfig.etaBins)
     # new default chi2 cuts optimise efficiency vs speed. Set same value as Athena's Xi2maxNoAdd.
-    from InDetConfig.ITkActsHelpers import isFastPrimaryPass
-    if isFastPrimaryPass(flags):
-        kwargs.setdefault("chi2CutOff", [50])
-        kwargs.setdefault("chi2OutlierCutOff", [100])
-    else:
-        kwargs.setdefault("chi2CutOff", [25])
-        kwargs.setdefault("chi2OutlierCutOff", [25])
+    kwargs.setdefault("chi2CutOff", flags.Tracking.ActiveConfig.Xi2max)
+    kwargs.setdefault("chi2OutlierCutOff", flags.Tracking.ActiveConfig.Xi2maxNoAdd)
+
     kwargs.setdefault("branchStopperPtMinFactor", 0.9)
     kwargs.setdefault("branchStopperAbsEtaMaxExtra", 0.1)
 
@@ -183,7 +172,12 @@ def ActsMainTrackFindingAlgCfg(flags,
 
     if 'TrackParamsEstimationTool' not in kwargs:
         from ActsConfig.ActsTrackParamsEstimationConfig import ActsTrackParamsEstimationToolCfg
-        kwargs.setdefault('TrackParamsEstimationTool', acc.popToolsAndMerge(ActsTrackParamsEstimationToolCfg(flags)))
+
+        tpe_tool_kwargs = {}
+        if flags.Tracking.ActiveConfig.extension in ['ActsLargeRadius', 'ActsValidateLargeRadiusStandalone']:
+            tpe_tool_kwargs["allowPropagatorFailure"] = True
+
+        kwargs.setdefault('TrackParamsEstimationTool', acc.popToolsAndMerge(ActsTrackParamsEstimationToolCfg(flags, **tpe_tool_kwargs)))
         
     if 'ExtrapolationTool' not in kwargs:
         from ActsConfig.ActsGeometryConfig import ActsExtrapolationToolCfg
@@ -282,18 +276,27 @@ def ActsTrackFindingCfg(flags,
     stripSeedKeys = [f'{flags.Tracking.ActiveConfig.extension}StripSeeds']
     pixelDetElements = ['ITkPixelDetectorElementCollection']
     stripDetElements = ['ITkStripDetectorElementCollection']
+
+    pixelRefit = [False]
+    stripRefit = [False]
+    if flags.Tracking.ActiveConfig.extension in ['ActsLargeRadius', 'ActsValidateLargeRadiusStandalone']:
+        stripRefit = [True]
+
     if pixelSeedLabels is None:
         pixelSeedKeys = None
         pixelDetElements = None
+        pixelRefit = None
     if stripSeedLabels is None:
         stripSeedKeys = None
         stripDetElements = None
+        stripRefit = None
 
     kwargs.setdefault('ACTSTracksLocation', f"{flags.Tracking.ActiveConfig.extension}Tracks")
     kwargs.setdefault('UncalibratedMeasurementContainerKeys', isdet(flags, pixel=[pixelClusters], strip=[stripClusters], hgtd=[hgtdClusters]))
     kwargs.setdefault('SeedLabels', seedOrder(flags, pixel=pixelSeedLabels, strip=stripSeedLabels))
     kwargs.setdefault('SeedContainerKeys', seedOrder(flags, pixel=pixelSeedKeys, strip=stripSeedKeys))
     kwargs.setdefault('DetectorElementsKeys', seedOrder(flags, pixel=pixelDetElements, strip=stripDetElements))
+    kwargs.setdefault("refitSeeds", seedOrder(flags, pixel=pixelRefit, strip=stripRefit))
 
     acc.merge(ActsMainTrackFindingAlgCfg(flags,
                                          name=f"{flags.Tracking.ActiveConfig.extension}TrackFindingAlg",

@@ -714,9 +714,10 @@ Hijing::fillEvt(HepMC::GenEvent* evt)
       }
     }
 
-    // Convert CLHEP::cm->CLHEP::mm and CLHEP::GeV->CLHEP::MeV
-    //
-    GeVToMeV(evt);
+#ifdef HEPMC3
+    // Convert GeV ->  MeV to ensure correct units
+    evt->set_units(HepMC3::Units::MEV, HepMC3::Units::MM);
+#endif
 
     //BPK-> Loop over the particles in the event, if p needs to be mirrored:
     if( m_prand ){

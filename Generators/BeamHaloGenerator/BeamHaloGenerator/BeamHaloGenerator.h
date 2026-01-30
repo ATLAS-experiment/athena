@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef BEAMHALOGENERATOR_H
@@ -8,6 +8,7 @@
 #include "BeamHaloGenerator/BeamHaloParticle.h"
 #include <string>
 #include <vector>
+#include <memory>
 #include "AtlasHepMC/GenEvent.h"
 
 namespace HepPDT {
@@ -124,15 +125,15 @@ class BeamHaloGenerator {
   std::string m_bufferFileName;
 
   /** Binary particle buffer for caching converted events. */
-  BeamHaloParticleBuffer *m_beamHaloParticleBuffer;
+  std::unique_ptr<BeamHaloParticleBuffer> m_beamHaloParticleBuffer;
 
   /** A pointer to an AsciiInput object, used to read data from the
       Ascii input file. */
-  AsciiInput *m_asciiInput;
+  std::unique_ptr<AsciiInput> m_asciiInput;
 
   /** A pointer to a BeamHaloGeneratorSettings object used to filter
       particles. */
-  BeamHaloGeneratorSettings *m_beamHaloGeneratorSettings;
+  std::unique_ptr<BeamHaloGeneratorSettings> m_beamHaloGeneratorSettings;
 
   /** A data member to count the event number. */
   long m_eventNumber;

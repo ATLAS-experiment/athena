@@ -1,0 +1,2 @@
+LineNumber,VariableName,Type,Description
+1,adScore,vector<float>,"HLT anomaly detection score for AD trigger chain"

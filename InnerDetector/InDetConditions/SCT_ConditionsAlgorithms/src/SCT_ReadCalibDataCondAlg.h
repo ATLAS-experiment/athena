@@ -7,7 +7,7 @@
 #ifndef SCT_ReadCalibDataCondAlg_h
 #define SCT_ReadCalibDataCondAlg_h
 
-#include "AthenaBaseComps/AthReentrantAlgorithm.h"
+#include "AthenaBaseComps/AthCondAlgorithm.h"
 
 #include "StoreGate/ReadCondHandleKey.h"
 #include "AthenaPoolUtilities/CondAttrListCollection.h"
@@ -25,7 +25,7 @@
 // Forward declarations
 class SCT_ID;
 
-class SCT_ReadCalibDataCondAlg : public AthReentrantAlgorithm
+class SCT_ReadCalibDataCondAlg : public AthCondAlgorithm
 {  
  public:
   SCT_ReadCalibDataCondAlg(const std::string& name, ISvcLocator* pSvcLocator);
@@ -33,7 +33,6 @@ class SCT_ReadCalibDataCondAlg : public AthReentrantAlgorithm
   virtual StatusCode initialize() override final;
   virtual StatusCode execute(const EventContext& ctx) const override final;
   virtual StatusCode finalize() override final;
-  virtual bool isReEntrant() const override final { return false; }
 
  private:
   enum Feature {GAIN=0, NOISE=1, NFEATURES=2};

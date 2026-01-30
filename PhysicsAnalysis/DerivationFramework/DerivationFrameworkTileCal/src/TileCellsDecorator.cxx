@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // TileCellsDecorator.cxx
@@ -42,144 +42,53 @@ namespace DerivationFramework {
     ATH_CHECK( detStore()->retrieve(m_tileID) );
     ATH_CHECK( detStore()->retrieve(m_tileHWID) );
 
-    const std::string baseName = m_muonContainer + ".";
+    ATH_CHECK(m_muonContainer.initialize());
 
-    m_cellsEnergyKey = baseName + m_prefix + m_cellsEnergyKey.key();
     ATH_CHECK( m_cellsEnergyKey.initialize() );
-
-    m_cellsEtKey = baseName + m_prefix + m_cellsEtKey.key();
     ATH_CHECK( m_cellsEtKey.initialize() );
-
-    m_cellsEtaKey = baseName + m_prefix + m_cellsEtaKey.key();
     ATH_CHECK( m_cellsEtaKey.initialize() );
-
-    m_cellsPhiKey = baseName + m_prefix + m_cellsPhiKey.key();
     ATH_CHECK( m_cellsPhiKey.initialize() );
-
-    m_cellsGainKey = baseName + m_prefix + m_cellsGainKey.key();
     ATH_CHECK( m_cellsGainKey.initialize() );
-
-    m_cellsBadKey = baseName + m_prefix + m_cellsBadKey.key();
     ATH_CHECK( m_cellsBadKey.initialize() );
-
-    m_cellsSamplingKey = baseName + m_prefix + m_cellsSamplingKey.key();
     ATH_CHECK( m_cellsSamplingKey.initialize() );
-
-    m_cellsTimeKey = baseName + m_prefix + m_cellsTimeKey.key();
     ATH_CHECK( m_cellsTimeKey.initialize() );
-
-    m_cellsQualityKey = baseName + m_prefix + m_cellsQualityKey.key();
     ATH_CHECK( m_cellsQualityKey.initialize() );
-
-    m_cellsSinThKey = baseName + m_prefix + m_cellsSinThKey.key();
     ATH_CHECK( m_cellsSinThKey.initialize() );
-
-    m_cellsCosThKey = baseName + m_prefix + m_cellsCosThKey.key();
     ATH_CHECK( m_cellsCosThKey.initialize() );
-
-    m_cellsCotThKey = baseName + m_prefix + m_cellsCotThKey.key();
     ATH_CHECK( m_cellsCotThKey.initialize() );
-
-    m_cellsXKey = baseName + m_prefix + m_cellsXKey.key();
     ATH_CHECK( m_cellsXKey.initialize() );
-
-    m_cellsYKey = baseName + m_prefix + m_cellsYKey.key();
     ATH_CHECK( m_cellsYKey.initialize() );
-
-    m_cellsZKey = baseName + m_prefix + m_cellsZKey.key();
     ATH_CHECK( m_cellsZKey.initialize() );
-
-    m_cellsRKey = baseName + m_prefix + m_cellsRKey.key();
     ATH_CHECK( m_cellsRKey.initialize() );
-
-    m_cellsDxKey = baseName + m_prefix + m_cellsDxKey.key();
     ATH_CHECK( m_cellsDxKey.initialize() );
-
-    m_cellsDyKey = baseName + m_prefix + m_cellsDyKey.key();
     ATH_CHECK( m_cellsDyKey.initialize() );
-
-    m_cellsDzKey = baseName + m_prefix + m_cellsDzKey.key();
     ATH_CHECK( m_cellsDzKey.initialize() );
-
-    m_cellsDrKey = baseName + m_prefix + m_cellsDrKey.key();
     ATH_CHECK( m_cellsDrKey.initialize() );
-
-    m_cellsVolumeKey = baseName + m_prefix + m_cellsVolumeKey.key();
     ATH_CHECK( m_cellsVolumeKey.initialize() );
-
-    m_cellsDetaKey = baseName + m_prefix + m_cellsDetaKey.key();
     ATH_CHECK( m_cellsDetaKey.initialize() );
-
-    m_cellsDphiKey = baseName + m_prefix + m_cellsDphiKey.key();
     ATH_CHECK( m_cellsDphiKey.initialize() );
-
-    m_cellsSideKey = baseName + m_prefix + m_cellsSideKey.key();
     ATH_CHECK( m_cellsSideKey.initialize() );
-
-    m_cellsSectionKey = baseName + m_prefix + m_cellsSectionKey.key();
     ATH_CHECK( m_cellsSectionKey.initialize() );
-
-    m_cellsModuleKey = baseName + m_prefix + m_cellsModuleKey.key();
     ATH_CHECK( m_cellsModuleKey.initialize() );
-
-    m_cellsTowerKey = baseName + m_prefix + m_cellsTowerKey.key();
     ATH_CHECK( m_cellsTowerKey.initialize() );
-
-    m_cellsSampleKey = baseName + m_prefix + m_cellsSampleKey.key();
     ATH_CHECK( m_cellsSampleKey.initialize() );
-
-    m_cellsPmt1RosKey = baseName + m_prefix + m_cellsPmt1RosKey.key();
     ATH_CHECK( m_cellsPmt1RosKey.initialize() );
-
-    m_cellsPmt2RosKey = baseName + m_prefix + m_cellsPmt2RosKey.key();
     ATH_CHECK( m_cellsPmt2RosKey.initialize() );
-
-    m_cellsPmt1DrawerKey = baseName + m_prefix + m_cellsPmt1DrawerKey.key();
     ATH_CHECK( m_cellsPmt1DrawerKey.initialize() );
-
-    m_cellsPmt2DrawerKey = baseName + m_prefix + m_cellsPmt2DrawerKey.key();
     ATH_CHECK( m_cellsPmt2DrawerKey.initialize() );
-
-    m_cellsPmt1ChannelKey = baseName + m_prefix + m_cellsPmt1ChannelKey.key();
     ATH_CHECK( m_cellsPmt1ChannelKey.initialize() );
-
-    m_cellsPmt2ChannelKey = baseName + m_prefix + m_cellsPmt2ChannelKey.key();
     ATH_CHECK( m_cellsPmt2ChannelKey.initialize() );
-
-    m_cellsPmt1EnergyKey = baseName + m_prefix + m_cellsPmt1EnergyKey.key();
     ATH_CHECK( m_cellsPmt1EnergyKey.initialize() );
-
-    m_cellsPmt2EnergyKey = baseName + m_prefix + m_cellsPmt2EnergyKey.key();
     ATH_CHECK( m_cellsPmt2EnergyKey.initialize() );
-
-    m_cellsPmt1TimeKey = baseName + m_prefix + m_cellsPmt1TimeKey.key();
     ATH_CHECK( m_cellsPmt1TimeKey.initialize() );
-
-    m_cellsPmt2TimeKey = baseName + m_prefix + m_cellsPmt2TimeKey.key();
     ATH_CHECK( m_cellsPmt2TimeKey.initialize() );
-
-    m_cellsPmt1QualityKey = baseName + m_prefix + m_cellsPmt1QualityKey.key();
     ATH_CHECK( m_cellsPmt1QualityKey.initialize() );
-
-    m_cellsPmt2QualityKey = baseName + m_prefix + m_cellsPmt2QualityKey.key();
     ATH_CHECK( m_cellsPmt2QualityKey.initialize() );
-
-    m_cellsPmt1QbitKey = baseName + m_prefix + m_cellsPmt1QbitKey.key();
     ATH_CHECK( m_cellsPmt1QbitKey.initialize() );
-
-    m_cellsPmt2QbitKey = baseName + m_prefix + m_cellsPmt2QbitKey.key();
     ATH_CHECK( m_cellsPmt2QbitKey.initialize() );
-
-    m_cellsPmt1BadKey = baseName + m_prefix + m_cellsPmt1BadKey.key();
     ATH_CHECK( m_cellsPmt1BadKey.initialize() );
-
-    m_cellsPmt2BadKey = baseName + m_prefix + m_cellsPmt2BadKey.key();
     ATH_CHECK( m_cellsPmt2BadKey.initialize() );
-
-    m_cellsPmt1GainKey = baseName + m_prefix + m_cellsPmt1GainKey.key();
     ATH_CHECK( m_cellsPmt1GainKey.initialize() );
-
-    m_cellsPmt2GainKey = baseName + m_prefix + m_cellsPmt2GainKey.key();
     ATH_CHECK( m_cellsPmt2GainKey.initialize() );
 
     return StatusCode::SUCCESS;

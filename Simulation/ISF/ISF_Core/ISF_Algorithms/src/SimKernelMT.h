@@ -64,11 +64,8 @@ class SimKernelMT final : public AthAlgorithm {
   friend class ISFTesting::SimKernelMT_test;
 
 public:
-  /// Implements standard AthAlgorithm constructor
-  SimKernelMT( const std::string& name, ISvcLocator* pSvcLocator );
-
-  /// Implements empty destructor
-  virtual ~SimKernelMT();
+  // delegate Constructor
+  using AthAlgorithm::AthAlgorithm;
 
   /// Check user configuration and configure the algorithm state accordingly
   StatusCode initialize() override;
@@ -128,13 +125,20 @@ private:
   ToolHandle<IParticleOrderingTool> m_orderingTool{this, "ParticleOrderingTool", "", "Tool to set order of particles"};
 
   /// The simulation selectors defining the "routing chain"
-  std::array<ToolHandleArray<ISimulationSelector>, AtlasDetDescr::fNumAtlasRegions> m_simSelectors;
+  std::array<PublicToolHandleArray<ISimulationSelector>, AtlasDetDescr::fNumAtlasRegions> m_simSelectors{{
+    {}, // fUndefinedAtlasRegion
+    {this, "IDSimulationSelectors", {} }, // fAtlasID
+    {this, "BeamPipeSimulationSelectors", {} }, // fAtlasFoward
+    {this, "CaloSimulationSelectors", {} }, // fAtlasCalo
+    {this, "MSSimulationSelectors", {} }, // fAtlasMS
+    {this, "CavernSimulationSelectors", {} } // fAtlasCavern
+    }};
 
   /// Map of the simulation flavours used in this job to the corresponding Simulation Services
   std::map<ISF::SimulationFlavor, ISimulatorTool*> m_simToolMap;
 
   /// Number of particles simultaneously sent to simulator
-  size_t m_maxParticleVectorSize{10240};
+  Gaudi::Property<size_t> m_maxParticleVectorSize{this, "MaximumParticleVectorSize", 10240};
 };
 
 } // namespace ISF

@@ -5,6 +5,7 @@
 #include "JetRecTools/SoftKillerWeightTool.h"
 #include "JetRecTools/VoronoiWeightTool.h"
 #include "JetRecTools/ClusterAtEMScaleTool.h"
+#include "JetRecTools/ClusterAtMLScaleTool.h"
 #include "JetRecTools/ConstitTimeCutTool.h"
 #include "JetRecTools/ConstituentSubtractorTool.h"
 #include "JetRecTools/JetInputElRemovalTool.h"
@@ -27,6 +28,7 @@ DECLARE_COMPONENT( CaloClusterConstituentsOrigin )
 DECLARE_COMPONENT( SoftKillerWeightTool )
 DECLARE_COMPONENT( VoronoiWeightTool )
 DECLARE_COMPONENT( ClusterAtEMScaleTool )
+DECLARE_COMPONENT( ClusterAtMLScaleTool )
 DECLARE_COMPONENT( ConstitTimeCutTool )
 DECLARE_COMPONENT( ConstituentSubtractorTool )
 DECLARE_COMPONENT( JetInputElRemovalTool )

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //==================================================
@@ -12,8 +12,8 @@
 #include "GaudiKernel/ThreadLocalContext.h"
 #include "Gaudi/Property.h"
 
-#include "AsgDataHandles/ReadHandle.h"
-#include "AsgDataHandles/WriteDecorHandle.h"
+#include "StoreGate/ReadHandle.h"
+#include "StoreGate/WriteDecorHandle.h"
 
 namespace{
   static const SG::AuxElement::ConstAccessor<Char_t> flag_D0("passed_D0");

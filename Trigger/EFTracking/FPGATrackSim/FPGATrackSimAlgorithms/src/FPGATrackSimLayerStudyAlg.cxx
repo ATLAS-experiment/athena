@@ -126,9 +126,9 @@ StatusCode FPGATrackSimLayerStudyAlg::execute ATLAS_NOT_THREAD_SAFE()
     hits.reserve(FPGAHits->size());
 
     // For stage = 0, we'll run over all of them. Otherwise only look at first or second stage.
-    for (const FPGATrackSimHit& hit : *FPGAHits) {
+    for (const FPGATrackSimHit* hit : *FPGAHits) {
         // Acquire a non-constant copy of the hit, this is messy, but we have to map them.
-        FPGATrackSimHit hitCopy = hit;
+        FPGATrackSimHit hitCopy = *hit;
         pmap_2nd->map(hitCopy);
         hits.push_back(hitCopy);
 
@@ -139,10 +139,10 @@ StatusCode FPGATrackSimLayerStudyAlg::execute ATLAS_NOT_THREAD_SAFE()
             case 1:
                 // For first stage hits, require that they are also pixel hits. This is a safe assumption because
                 // the inside out algorithm will only ever run on pixels.
-                if (rmap_1st->getRegions(hit).size() > 0 && hit.isPixel()) phits.push_back(std::make_shared<FPGATrackSimHit>(hitCopy));
+                if (rmap_1st->getRegions(*hit).size() > 0 && hit->isPixel()) phits.push_back(std::make_shared<FPGATrackSimHit>(hitCopy));
                 break;
             case 2:
-                if (rmap_1st->getRegions(hit).size() == 0) phits.push_back(std::make_shared<FPGATrackSimHit>(hitCopy));
+                if (rmap_1st->getRegions(*hit).size() == 0) phits.push_back(std::make_shared<FPGATrackSimHit>(hitCopy));
                 break;
             default:
                 ATH_MSG_FATAL("Unrecognized stage: " << m_stage << ", will exit layer study");

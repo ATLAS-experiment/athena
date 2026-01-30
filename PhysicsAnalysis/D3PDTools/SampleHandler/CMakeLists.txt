@@ -4,7 +4,7 @@
 atlas_subdir( SampleHandler )
 
 # External dependencies:
-find_package( ROOT COMPONENTS Core Tree MathCore Hist RIO ROOTTPython Proof )
+find_package( ROOT COMPONENTS Core Tree MathCore Hist RIO ROOTTPython )
 find_package( GTest )
 find_package( Boost )
 

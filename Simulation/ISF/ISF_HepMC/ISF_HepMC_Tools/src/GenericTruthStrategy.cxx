@@ -1,10 +1,6 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
-
-///////////////////////////////////////////////////////////////////
-// GenericTruthStrategy.cxx, (c) ATLAS Detector software
-///////////////////////////////////////////////////////////////////
 
 // class header include
 #include "GenericTruthStrategy.h"
@@ -15,42 +11,7 @@
 
 /** Constructor **/
 ISF::GenericTruthStrategy::GenericTruthStrategy(const std::string& t, const std::string& n, const IInterface* p) :
-  base_class(t,n,p),
-  m_useParentPt(true),
-  m_parentPt2(-1.),
-  m_parentEkin(-1.),
-  m_useChildPt(true),
-  m_childPt2(-1.),
-  m_childEkin(-1.),
-  m_allowChildrenOrParentPass(false),
-  m_vertexTypesVector(0),
-  m_vertexTypes(),
-  m_doVertexRangeCheck(false),
-  m_vertexTypeRangeLow(0),
-  m_vertexTypeRangeHigh(0),
-  m_vertexTypeRangeLength(0),
-  m_parentPdgCodesVector(0),
-  m_parentPdgCodes()
-{
-    // provide either a pT or Ekin cut for the parent and child particles respectively.
-    // if none are given for either type, it will not use pT or Ekin cuts
-    // (the Pt2 variables get squared in the initialize() method)
-    declareProperty("ParentMinPt"               , m_parentPt2            );
-    declareProperty("ParentMinEkin"             , m_parentEkin           );
-    declareProperty("ChildMinPt"                , m_childPt2             );
-    declareProperty("ChildMinEkin"              , m_childEkin        );
-    // if set to true, kinetic cuts are passed even if only child particles pass them
-    // (used for special cases such as de-excitation)
-    declareProperty("AllowChildrenOrParentPassKineticCuts" , m_allowChildrenOrParentPass );
-    declareProperty("VertexTypes"                , m_vertexTypesVector   );
-    declareProperty("VertexTypeRangeLow"         , m_vertexTypeRangeLow  );
-    declareProperty("VertexTypeRangeHigh"        , m_vertexTypeRangeHigh );
-    declareProperty("ParentPDGCodes"            , m_parentPdgCodesVector  );
-    declareProperty("Regions"                   , m_regionListProperty );
-}
-
-/** Destructor **/
-ISF::GenericTruthStrategy::~GenericTruthStrategy()
+  base_class(t,n,p)
 {
 }
 
@@ -63,48 +24,48 @@ StatusCode  ISF::GenericTruthStrategy::initialize()
     // -----
     //     (compute and store the squared cut parameters (faster comparisons))
     // check whether the user input makes sense (error case)
-    if ( (m_parentPt2>=0.) && (m_parentEkin>=0.) ) {
+    if ( (m_parentPt>=0.) && (m_parentEkin>=0.) ) {
       ATH_MSG_ERROR("Both, pT and Ekin cuts are given for parent particles. Unclear which one to use! ABORT!");
       return StatusCode::FAILURE;
     }
     // neither pT nor Energy cuts were given (never being used so far)
     //   -> enable pT cut and set it to 0.
-    else if ( (m_parentPt2<0.) && (m_parentEkin<0.) ) {
+    else if ( (m_parentPt<0.) && (m_parentEkin<0.) ) {
       // we don't use a flag to disable energy/momentum checks, because
       // all relevant truth strategies up to now do use such cuts
       m_useParentPt = true;
-      m_parentPt2   = 0.;
-      m_parentEkin  = 0.;  // would not be needed actually
+      m_parentPt2 = 0.;
+      m_parentEkin = 0.;  // would not be needed actually
     }
     // either pT or Ekin cut is given (standard case)
     else {
       // enable pT cut if value given (greater than 0.):
-      m_useParentPt  = !(m_parentPt2<0.);
-      m_parentPt2   *= m_parentPt2;
+      m_useParentPt  = !(m_parentPt<0.);
+      m_parentPt2 = m_parentPt * m_parentPt;
     }
 
     // (*) setup child particle cuts
     // -----
     //     (compute and store the squared cut parameters (faster comparisons))
     // check whether the user input makes sense (error case)
-    if ( (m_childPt2>=0.) && (m_childEkin>=0.) ) {
+    if ( (m_childPt>=0.) && (m_childEkin>=0.) ) {
       ATH_MSG_ERROR("Both, pT and Ekin cuts are given for child particles. Unclear which one to use! ABORT!");
       return StatusCode::FAILURE;
     }
     // neither pT nor Energy cuts were given (never being used so far)
     //   -> enable pT cut and set it to 0.
-    else if ( (m_childPt2<0.) && (m_childEkin<0.) ) {
+    else if ( (m_childPt<0.) && (m_childEkin<0.) ) {
       // we don't use a flag to disable energy/momentum checks, because
       // all relevant truth strategies up to now do use such cuts
       m_useChildPt = true;
-      m_childPt2   = 0.;
-      m_childEkin  = 0.;  // would not be needed actually
+      m_childPt2 = 0.;
+      m_childEkin = 0.;  // would not be needed actually
     }
     // either pT or Ekin cut is given (standard case)
     else {
       // enable pT cut if value given (greater than 0.):
-      m_useChildPt = !(m_childPt2<0.);
-      m_childPt2  *= m_childPt2;
+      m_useChildPt = !(m_childPt<0.);
+      m_childPt2 = m_childPt * m_childPt;
     }
 
     // VertexTypeRanges:
@@ -132,12 +93,6 @@ StatusCode  ISF::GenericTruthStrategy::initialize()
         return StatusCode::FAILURE;
       }
     }
-    return StatusCode::SUCCESS;
-}
-
-StatusCode  ISF::GenericTruthStrategy::finalize()
-{
-    ATH_MSG_VERBOSE("Finalizing ...");
     return StatusCode::SUCCESS;
 }
 

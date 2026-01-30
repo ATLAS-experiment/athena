@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -69,7 +69,7 @@
 #include "MuonReadoutGeometry/MMReadoutElement.h"
 #include "MuonReadoutGeometry/sTgcReadoutElement.h"
 #include <cassert>
-
+#include <memory>
 
 
 //____________________________________________________________________
@@ -102,10 +102,9 @@ public:
     label_sep(nullptr),
     shownTSOSParts(TrackCommonFlags::TSOS_NoObjects),
     customColouredTSOSParts(TrackCommonFlags::TSOS_NoObjects),
-    tsos_ascobjs(nullptr),
     m_objBrowseTree(nullptr),
     tempMaxPropRadius(0.0){}
-  ~Imp() { delete tsos_ascobjs; }
+
   TrackHandleBase * theclass;
 
   bool chargeinit;
@@ -175,7 +174,7 @@ public:
 
   TrackCommonFlags::TSOSPartsFlags shownTSOSParts;
   TrackCommonFlags::TSOSPartsFlags customColouredTSOSParts;
-  std::vector<AssociatedObjectHandleBase*> * tsos_ascobjs;
+  std::unique_ptr<std::vector<AssociatedObjectHandleBase*>> tsos_ascobjs;
   AscObj_TSOS* addTSOS(const Trk::TrackStateOnSurface * tsos,unsigned index) const;
 
   QTreeWidgetItem* m_objBrowseTree;
@@ -377,13 +376,13 @@ void TrackHandleBase::setCustomColouredTSOSParts(TrackCommonFlags::TSOSPartsFlag
 }
 
 //____________________________________________________________________
-void TrackHandleBase::ensureInitTSOSs(std::vector<AssociatedObjectHandleBase*>*& tsos_ascobjs)
+void TrackHandleBase::ensureInitTSOSs(std::unique_ptr<std::vector<AssociatedObjectHandleBase*>>& tsos_ascobjs)
 {
   std::cout<<"TrackHandleBase::ensureInitTSOSs"<<std::endl;
   if (tsos_ascobjs)
     return;
 
-  tsos_ascobjs = new std::vector<AssociatedObjectHandleBase*>;
+  tsos_ascobjs = std::make_unique<std::vector<AssociatedObjectHandleBase*>>();
   m_d->ensureLoadPathInfo();
 
   if (!m_d->pathInfo_TrkTrack||!m_d->pathInfo_TrkTrack->trackParameters()||m_d->pathInfo_TrkTrack->trackParameters()->empty())

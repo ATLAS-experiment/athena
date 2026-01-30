@@ -77,6 +77,7 @@ namespace EL
       Gaudi::Property<bool> m_useStats {this, "useStats", false}; //!
 
       Gaudi::Property<std::string> m_modeStr {this, "accessMode", ""}; //!
+      Gaudi::Property<std::string> m_otherMetaDataTreeNamePattern {this, "otherMetaDataTreeNamePattern", ""}; //!
       Gaudi::Property<bool> m_summaryReport {this, "summaryReport", true}; //!
     };
   }

@@ -12,7 +12,7 @@
 
 
 Trk::TrackingGeometryCondAlgTest::TrackingGeometryCondAlgTest(const std::string& name, ISvcLocator* pSvcLocator)
-  : AthReentrantAlgorithm(name, pSvcLocator),
+  : AthCondAlgorithm(name, pSvcLocator),
   m_trackingGeometrySvc("AtlasTrackingGeometrySvc", name),
   m_trackingGeometryProcessors()
 {

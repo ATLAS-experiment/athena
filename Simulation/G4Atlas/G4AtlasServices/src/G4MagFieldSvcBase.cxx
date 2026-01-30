@@ -4,6 +4,8 @@
 
 #include "G4MagFieldSvcBase.h"
 
+#include <memory>
+
 // Geant4 includes
 #include "G4MagneticField.hh"
 
@@ -30,13 +32,8 @@ G4MagneticField* G4MagFieldSvcBase::getField()
 {
   ATH_MSG_DEBUG("G4MagFieldSvcBase::getField");
 
-  // Check if we already have a field setup for current thread
-  auto field = m_fieldHolder.get();
-  // If not, we create one
-  if(!field) {
-    field = makeField();
-    m_fieldHolder.set(field);
-  }
+  // create a thread-local magnetic field instance
+  static thread_local std::unique_ptr<G4MagneticField> field{makeField()};
 
-  return field;
+  return field.get();
 }

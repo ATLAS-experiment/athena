@@ -1,27 +1,13 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-///////////////////////////////////////////////////////////////////
-// TrackParametersAtPV.cxx, (c) ATLAS Detector software
-///////////////////////////////////////////////////////////////////
 // Author: Tomoe Kishimoto (Tomoe.Kishimoto@cern.ch)
 // Wrapper around the passSelection() method of xAOD egamma
 // Writes result to SG for later selection by string parser
 
 #include "DerivationFrameworkInDet/TrackParametersAtPV.h"
 #include <string>
-
-// Constructor
-DerivationFramework::TrackParametersAtPV::TrackParametersAtPV( const std::string& t,
-                                                 const std::string& n,
-                                                 const IInterface* p ) :
-  base_class(t,n,p)
-  {
-  }
-
-// Destructor
-DerivationFramework::TrackParametersAtPV::~TrackParametersAtPV() = default;
 
 // Athena initialize and finalize
 StatusCode DerivationFramework::TrackParametersAtPV::initialize()
@@ -40,12 +26,6 @@ StatusCode DerivationFramework::TrackParametersAtPV::initialize()
   ATH_CHECK( m_trackZ0PVKey.initialize() );
 
   ATH_MSG_VERBOSE("initialize() ...");
-  return StatusCode::SUCCESS;
-}
-
-StatusCode DerivationFramework::TrackParametersAtPV::finalize()
-{
-  ATH_MSG_VERBOSE("finalize() ...");
   return StatusCode::SUCCESS;
 }
 

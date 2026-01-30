@@ -31,6 +31,12 @@ def MSTrackFitterCfg(flags, name="MSTrackFitTool", **kwargs):
     result.setPrivateTools(fitTool)
     return result
 
+def TrackSummaryToolCfg(flags, name="MuonTrackSummaryTool", **kwargs) :
+    result = ComponentAccumulator()
+    theTool = CompFactory.MuonR4.TrackSummaryTool(name, **kwargs)
+    result.setPrivateTools(theTool)
+    return result
+
 def MSTrackFinderAlgCfg(flags, name="MSTrackFinderAlg", **kwargs):
     result = ComponentAccumulator()
     from MagFieldServices.MagFieldServicesConfig import AtlasFieldCacheCondAlgCfg

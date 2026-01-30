@@ -842,8 +842,6 @@ int MissingMassCalculator::DitauMassCalculatorV9walk() {
   m_totalProbSum = 0;
   m_mtautauSum = 0;
 
-  XYVector deltamet_vec;
-
   // initialize a spacewalker, which walks the parameter space according to some
   // algorithm
   SpaceWalkerInit();

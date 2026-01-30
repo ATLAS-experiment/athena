@@ -199,7 +199,8 @@ class IDPerfMonEoverP : public AthAlgorithm
   int                     m_nelectrons;
   int                     m_electronCounter;           //!< counter for electrons
 
-  float                   m_electronTheta[3][NOS_ELECTRONS]{};     //!< Track theta on Surface
+  float                   m_electronTheta[3][NOS_ELECTRONS]{};     //!< Track theta at perigee
+  float                   m_electronEta[3][NOS_ELECTRONS]{};     //!< Track Eta at perigee
   float                   m_electronPhi[3][NOS_ELECTRONS]{};       //!< Track Phi on electron
   float                   m_electronQoverP[3][NOS_ELECTRONS]{};    //!< Track q over p on electron
   float                   m_electrond0[3][NOS_ELECTRONS]{};       //!< Track Phi on electron

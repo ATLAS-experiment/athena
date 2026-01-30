@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONCONDDATA_NSWCALIBDBTIMECHARGEDATA_H
@@ -27,7 +27,8 @@ class NswCalibDbTimeChargeData: public AthMessaging {
 public:
     enum class CalibDataType{
         TDO,
-        PDO        
+        PDO,
+        nTypes        
     };
     /// Helper struct to cache all calibration constants 
     /// in a common place of the memory
@@ -62,7 +63,7 @@ private:
     const Muon::IMuonIdHelperSvc* m_idHelperSvc{};
     /// Segmentation of the elements is per NSW gasGap. Each wedge has 4 gasgaps
     const size_t m_nMmElements{m_idHelperSvc->hasMM() ?  
-                                   4* (m_idHelperSvc->mmIdHelper().detectorElement_hash_max() + 1) : 0};
+                                4* (m_idHelperSvc->mmIdHelper().detectorElement_hash_max() + 1) : 0};
     /// Additionally reserve space for the 3 channel types
     const size_t m_nStgcElements{m_idHelperSvc->hasSTGC() ? 
                                   3*4 *(m_idHelperSvc->stgcIdHelper().detectorElement_hash_max() +1): 0};
@@ -70,21 +71,21 @@ private:
     // containers
     struct CalibModule {
         std::vector<std::unique_ptr<CalibConstants>> channels{};
-        Identifier layer_id{0};
+        Identifier layer_id{};
     };
 
     using ChannelCalibMap = std::vector<CalibModule>; 
     ChannelCalibMap m_pdo_data{};
     ChannelCalibMap m_tdo_data{};
 
-    using ZeroCalibMap = std::map<CalibDataType, CalibConstants>;
-    std::map<MuonCond::CalibTechType, ZeroCalibMap> m_zero{};
+    using ZeroCalibMap = std::array<CalibConstants, Muon::MuonStationIndex::toInt(CalibDataType::nTypes)>;
+    std::array<ZeroCalibMap, Muon::MuonStationIndex::toInt(MuonCond::CalibTechType::nTypes)> m_zero{};
 
 };
 
 std::ostream& operator<<(std::ostream& ostr, const NswCalibDbTimeChargeData::CalibConstants& obj);
 
-CLASS_DEF( NswCalibDbTimeChargeData , 120842040 , 1 )
-CLASS_DEF( CondCont<NswCalibDbTimeChargeData> , 217895024 , 1 )
+CLASS_DEF( NswCalibDbTimeChargeData , 120842040 , 1 );
+CONDCONT_DEF( NswCalibDbTimeChargeData , 217895024 );
 
 #endif

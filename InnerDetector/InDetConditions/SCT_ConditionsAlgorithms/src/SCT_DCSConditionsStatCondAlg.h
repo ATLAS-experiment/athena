@@ -7,7 +7,7 @@
 #ifndef SCT_DCSCONDITIONSSTATCONDALG
 #define SCT_DCSCONDITIONSSTATCONDALG
 
-#include "AthenaBaseComps/AthReentrantAlgorithm.h"
+#include "AthenaBaseComps/AthCondAlgorithm.h"
 
 #include "StoreGate/ReadCondHandleKey.h"
 #include "AthenaPoolUtilities/CondAttrListCollection.h"
@@ -17,7 +17,7 @@
 
 #include "Gaudi/Property.h"
 
-class SCT_DCSConditionsStatCondAlg : public AthReentrantAlgorithm 
+class SCT_DCSConditionsStatCondAlg : public AthCondAlgorithm 
 {  
  public:
   SCT_DCSConditionsStatCondAlg(const std::string& name, ISvcLocator* pSvcLocator);
@@ -25,7 +25,6 @@ class SCT_DCSConditionsStatCondAlg : public AthReentrantAlgorithm
   virtual StatusCode initialize() override final;
   virtual StatusCode execute(const EventContext& ctx) const override final;
   virtual StatusCode finalize() override final;
-  virtual bool isReEntrant() const override final { return false; }
 
  private:
   // Meaning of state word is found at

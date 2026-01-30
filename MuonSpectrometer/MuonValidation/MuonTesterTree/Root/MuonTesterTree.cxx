@@ -55,7 +55,7 @@ bool MuonTesterTree::registerBranch(std::shared_ptr<IMuonTesterBranch> branch) {
         ATH_MSG_FATAL("Tree structure is already finalized");
         return false;
     }
-    m_branches.push_back(branch);
+    m_branches.push_back(std::move(branch));
     return true;
 }
 bool MuonTesterTree::addBranch(std::shared_ptr<IMuonTesterBranch> branch) { return registerBranch(branch) && addBranch(branch.get()); }
@@ -117,7 +117,7 @@ bool MuonTesterTree::fill(const EventContext& ctx) {
     m_filled = true;
     return true;
 }
-StatusCode MuonTesterTree::init(ServiceHandle<ITHistSvc> hist_svc) {
+StatusCode MuonTesterTree::init(const ServiceHandle<ITHistSvc> & hist_svc) {
     if (fileStream().empty()) {
         ATH_MSG_ERROR("The file stream of " << name() << " has not been set yet" );
         return StatusCode::FAILURE;

@@ -156,16 +156,16 @@ def MC23g(flags):
     # pile-up
     # These numbers are based upon a relative XS scaling of the high-pt slice
     # of 64%, which leads to a relative high-pt / low-pt sampling of
-    # 0.001953314389 / 0.9980466856. Those numbers are then multiplied by 98.5
+    # 0.001953314389 / 0.9980466856. Those numbers are then multiplied by 99.5
     # to follow pile-up profile. Only a relevant number of significant digits
     # are kept.
-    flags.Digitization.PU.NumberOfLowPtMinBias = 98.308
-    flags.Digitization.PU.NumberOfHighPtMinBias = 0.192
+    flags.Digitization.PU.NumberOfLowPtMinBias = 99.306
+    flags.Digitization.PU.NumberOfHighPtMinBias = 0.194
     # TODO new bunch structure?
     flags.Digitization.PU.BunchStructureConfig = 'RunDependentSimData.BunchStructure_Fill7314_BCMSPattern_Flat'
-    # TODO: replace with the actual mc23g profile - this is a validation PileupProfile file taken from the mc23e pileup profile
+    
     # NB: This is the pileup profile that is used in the Digi+Reco step
-    flags.Digitization.PU.ProfileConfig = 'RunDependentSimData.PileUpProfile_run495000_MC23g_MultiBeamspot_VALIDATION' 
+    flags.Digitization.PU.ProfileConfig = 'RunDependentSimData.PileUpProfile_run495000_MC23g_MultiBeamspot' 
 
 
 def MC23ppReferenceRun2024(flags): # FIXME This configuration is a placeholder
@@ -323,8 +323,7 @@ def MC23gSingleBeamspot(flags):
     MC23g(flags)
 
     # override only pile-up profile
-    # TODO: replace with the actual profile, this is a fake one taken from the mc23e one
-    flags.Digitization.PU.ProfileConfig = 'RunDependentSimData.PileUpProfile_run495000_MC23g_SingleBeamspot_VALIDATION'
+    flags.Digitization.PU.ProfileConfig = 'RunDependentSimData.PileUpProfile_run495000_MC23g_SingleBeamspot'
 
 
 def MC23LowMu(flags):
@@ -478,13 +477,6 @@ def BeamspotSplitMC23g():
     return substeps, event_fractions
 
 
-def BeamspotSplitMC23g_VALIDATION():
-    """MC23g beamspot splitting configuration for Validation purposes. The values are kept the same as BeamspotSplitMC23e"""
-    substeps = 4
-    event_fractions = [0.22, 0.22, 0.22, 0.34]
-
-    return substeps, event_fractions
-
 def MC23SimulationNoIoV(flags):
     """MC23 base flags for simulation without specifying conditions IoVs"""
     flags.Input.MCCampaign = Campaign.MC23a
@@ -634,10 +626,9 @@ def MC23gSimulationMultipleIoV(flags):
     flags.Input.OverrideRunNumber = True
 
     from RunDependentSimComps.PileUpUtils import generateRunAndLumiProfile
-    # TODO: replace with the actual profile, this is a fake profile copied from mc23e and used for validation purposed
     # NB: This is the pileup profile used in the Simulation step only
     generateRunAndLumiProfile(flags,
-                              profile='RunDependentSimData.PileUpProfile_run495000_MC23g_MultiBeamspot_VALIDATION')
+                              profile='RunDependentSimData.PileUpProfile_run495000_MC23g_MultiBeamspot')
 
 
 def MC23SimulationSingleIoVCalibrationHits(flags):

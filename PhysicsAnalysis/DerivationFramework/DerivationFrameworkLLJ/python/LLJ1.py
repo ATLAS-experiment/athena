@@ -1,10 +1,8 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 #====================================================================
-# DAOD_PHYS.py
-# This defines DAOD_PHYS, an unskimmed DAOD format for Run 3.
-# It contains the variables and objects needed for the large majority 
-# of physics analyses in ATLAS.
-# It requires the flag PHYS in Derivation_tf.py   
+# DAOD_LLJ1.py
+# Derivation format to store additional jet information, as UFO jets constituents
+# Includes jet trigger and loose kinematics (>=1 150 GeV pT jet) skimmings
 #====================================================================
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
@@ -64,33 +62,41 @@ def LLJ1SkimmingToolCfg(flags):
 
     ### do the job
     acc = ComponentAccumulator()
-    acc.addPublicTool(CompFactory.DerivationFramework.xAODStringSkimmingTool(name       = "LLJ1ObjectsSkimming",
-                                                                            expression = topology_selection_1jet,
-                                                                            ), 
-                        primary = True)
+    from DerivationFrameworkTools.DerivationFrameworkToolsConfig import (
+        xAODStringSkimmingToolCfg)
+    LLJ1ObjectsSkimming = acc.getPrimaryAndMerge(xAODStringSkimmingToolCfg(
+        flags, name       = "LLJ1ObjectsSkimming",
+        expression = topology_selection_1jet))
+    skimmingTools = [LLJ1ObjectsSkimming]
 
     ### trigger skimming
-    TriggersList = [
-        ### baseline run-2
-        'HLT_j360_a10_lcw_sub_L1J100',
-        'HLT_j420_a10_lcw_L1J100',
-        'HLT_j460_a10t_lcw_jes_L1J100',
-        ### new run-3
-        'HLT_j460_a10sd_cssk_pf_jes_ftf_preselj225_L1J100',
-        'HLT_j460_a10_lcw_subjes_L1J100',
-        'HLT_j460_a10r_L1J100',
-        ### new run-3 mass cut
-        'HLT_j420_35smcINF_a10sd_cssk_pf_jes_ftf_preselj225_L1J100',
-        'HLT_j420_35smcINF_a10t_lcw_jes_L1J100',
-    ]
-    print(TriggersList)
+    if flags.Trigger.EDMVersion >=0 :
+        TriggersList = [
+            ### baseline run-2
+            'HLT_j360_a10_lcw_sub_L1J100',
+            'HLT_j420_a10_lcw_L1J100',
+            'HLT_j460_a10t_lcw_jes_L1J100',
+            ### new run-3
+            'HLT_j460_a10sd_cssk_pf_jes_ftf_preselj225_L1J100',
+            'HLT_j460_a10_lcw_subjes_L1J100',
+            'HLT_j460_a10r_L1J100',
+            ### new run-3 mass cut
+            'HLT_j420_35smcINF_a10sd_cssk_pf_jes_ftf_preselj225_L1J100',
+            'HLT_j420_35smcINF_a10t_lcw_jes_L1J100',
+        ]
+        print(TriggersList)
 
-    ### do the job
-    acc.addPublicTool(CompFactory.DerivationFramework.TriggerSkimmingTool(name = "LLJ1TriggerSkimming", 
-                                                                            TriggerListOR = TriggersList), 
-                                                                            primary = True)
-    
-    return(acc)                          
+        ### do the job
+        LLJ1TriggerSkimming = CompFactory.DerivationFramework.TriggerSkimmingTool(
+            name = "LLJ1TriggerSkimming", TriggerListOR = TriggersList)
+        acc.addPublicTool(LLJ1TriggerSkimming)
+        skimmingTools += [LLJ1TriggerSkimming]
+
+    # do the AND of trigger-based and offline-based selection
+    LLJ1_SkimmingTool = CompFactory.DerivationFramework.FilterCombinationAND(
+        name="LLJ1_SkimmingTool", FilterList=skimmingTools)
+    acc.addPublicTool(LLJ1_SkimmingTool, primary=True)
+    return(acc)
 
 
 def LLJ1Cfg(flags):
@@ -123,8 +129,7 @@ def LLJ1Cfg(flags):
                                            "InDetTrackParticles",
                                            "AntiKt4EMTopoJets",
                                            "AntiKt4EMPFlowJets",
-                                           "BTagging_AntiKt4EMPFlow",
-                                           "BTagging_AntiKtVR30Rmax4Rmin02Track",
+
                                            "MET_Baseline_AntiKt4EMTopo",
                                            "MET_Baseline_AntiKt4EMPFlow",
                                            "TauJets",
@@ -133,8 +138,7 @@ def LLJ1Cfg(flags):
                                            "DiTauJetsLowPt",
                                            "AntiKt10LCTopoTrimmedPtFrac5SmallR20Jets",
                                            "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets",
-                                           "AntiKtVR30Rmax4Rmin02PV0TrackJets",
-                                          ]
+                                           ]
     
     excludedVertexAuxData = "-vxTrackAtVertex.-MvfFitInfo.-isInitialized.-VTAV"
     StaticContent = []

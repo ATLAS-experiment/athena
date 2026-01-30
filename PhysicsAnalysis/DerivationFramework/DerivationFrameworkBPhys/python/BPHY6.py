@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 #====================================================================
 # BPHY6.py
 #====================================================================
@@ -122,13 +122,22 @@ def BPHY6Cfg(flags):
                 MassMax               = dimuon_mass_max,
                 Chi2Max               = 20)
 
-    trigger_list = [r'HLT_\d?mu\d+']
+    skimmingTools = []
 
-    BPHY6TrigSkimmingTool = CompFactory.DerivationFramework.TriggerSkimmingTool(   name     = "BPHY6TrigSkimmingTool",
-                                                                TriggerListOR               = trigger_list )
+    if flags.Trigger.EDMVersion >= 0:
+        trigger_list = [r'HLT_\d?mu\d+']
+        BPHY6TrigSkimmingTool = CompFactory.DerivationFramework.TriggerSkimmingTool(
+            name     = "BPHY6TrigSkimmingTool",
+            TriggerListOR               = trigger_list )
+        skimmingTools += [BPHY6TrigSkimmingTool]
+
     expression = "count(BPHY6OniaCandidates.passed_Onia) > 0 "
-    BPHY6_SelectEvent = CompFactory.DerivationFramework.xAODStringSkimmingTool(name = "BPHY6_SelectEvent",
-                                                                expression = expression)
+    from DerivationFrameworkTools.DerivationFrameworkToolsConfig import (
+        xAODStringSkimmingToolCfg)
+    BPHY6_SelectEvent = acc.getPrimaryAndMerge(xAODStringSkimmingToolCfg(
+        flags, name = "BPHY6_SelectEvent", expression = expression))
+    skimmingTools += [BPHY6_SelectEvent]
+
     BPHY6Thin_vtxTrk = CompFactory.DerivationFramework.Thin_vtxTrk(
                 name                       = "BPHY6Thin_vtxTrk",
                 TrackParticleContainerName = "InDetTrackParticles",
@@ -150,12 +159,16 @@ def BPHY6Cfg(flags):
                          PreserveAncestors       = True)
        BPHY6ThinningTools.append(BPHY6TruthThinTool)
 
-    SkimmingORTool = CompFactory.DerivationFramework.FilterCombinationOR("BPHY6SkimmingOR",
-                                                        FilterList = [BPHY6_SelectEvent,BPHY6TrigSkimmingTool])
+    SkimmingORTool = CompFactory.DerivationFramework.FilterCombinationOR(
+        "BPHY6SkimmingOR",
+        FilterList = skimmingTools)
 
-    augTools = [BPHY6_Reco_mumu, BPHY6_Select_Jpsi2mumu, BPHY6_Select_Psi2mumu, BPHY6_Select_Upsi2mumu,BPHY6_Select_Bmumu2mumu,
-                                     BPHY6_Select_Zmumu2mumu,BPHY6_Select_Onia2mumu, BPHY6_Extrap_Tool]
-    for t in  augTools + BPHY6ThinningTools + [SkimmingORTool] + [BPHY6_SelectEvent,BPHY6TrigSkimmingTool]: acc.addPublicTool(t)
+    augTools = [BPHY6_Reco_mumu, BPHY6_Select_Jpsi2mumu, BPHY6_Select_Psi2mumu,
+                BPHY6_Select_Upsi2mumu, BPHY6_Select_Bmumu2mumu,
+                BPHY6_Select_Zmumu2mumu, BPHY6_Select_Onia2mumu, BPHY6_Extrap_Tool]
+    for t in  augTools + BPHY6ThinningTools + [SkimmingORTool] + skimmingTools:
+        acc.addPublicTool(t)
+
     acc.addEventAlgo(CompFactory.DerivationFramework.DerivationKernel("BPHY6Kernel",
                 AugmentationTools = augTools,
                 SkimmingTools     =  [SkimmingORTool],

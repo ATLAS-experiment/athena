@@ -159,6 +159,7 @@ StatusCode TrigConf::JobOptionsSvc::dumpOptions(const std::string& file)
     const size_t idot = name.rfind('.');
     const std::string client = name.substr(0, idot);
     const std::string propname = name.substr(idot+1);
+    //coverity[COPY_INSTEAD_OF_MOVE]
     json[client][propname] = value;
   }
 

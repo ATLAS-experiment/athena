@@ -293,32 +293,6 @@
       <graph name="efficiency_vs_prodZ" plotopts="" type="TEfficiency"/>
      </TDirectory>
     </TDirectory>
-    <TDirectory name="Vertices">
-     <TDirectory name="AllPrimaryVertices">
-      <hist2D name="vx_n_vs_truthMu" plotopts="" tests="KS" type="TH2F"/>
-      <hist2D name="vx_n_vs_actualMu" plotopts="" tests="KS" type="TH2F"/>
-     </TDirectory>
-     <TDirectory name="HardScatteringVertex">
-      <hist1D name="vx_x" plotopts="" tests="KS" type="TH1F"/>
-      <hist1D name="vx_y" plotopts="" tests="KS" type="TH1F"/>
-      <hist1D name="vx_z" plotopts="" tests="KS" type="TH1F"/>
-      <hist1D name="vx_err_x" plotopts="" tests="KS" type="TH1F"/>
-      <hist1D name="vx_err_y" plotopts="" tests="KS" type="TH1F"/>
-      <hist1D name="vx_err_z" plotopts="" tests="KS" type="TH1F"/>
-      <hist1D name="vx_chi2_over_ndf" plotopts="" tests="KS" type="TH1F"/>
-      <hist1D name="vx_type" plotopts="" tests="KS" type="TH1F"/>
-      <hist1D name="vx_nTracks" plotopts="" tests="KS" type="TH1F"/>
-      <hist1D name="vx_track_weights" plotopts="" tests="KS" type="TH1F"/>
-      <hist1D name="vx_track_pt" plotopts="" tests="KS" type="TH1F"/>
-      <hist1D name="vx_track_eta" plotopts="" tests="KS" type="TH1F"/>
-      <hist1D name="vx_track_nSiHits" plotopts="" tests="KS" type="TH1F"/>
-      <hist1D name="vx_track_nSiHoles" plotopts="" tests="KS" type="TH1F"/>
-      <hist1D name="vx_track_d0" plotopts="" tests="KS" type="TH1F"/>
-      <hist1D name="vx_track_err_d0" plotopts="" tests="KS" type="TH1F"/>
-      <hist1D name="vx_track_z0" plotopts="" tests="KS" type="TH1F"/>
-      <hist1D name="vx_track_err_z0" plotopts="" tests="KS" type="TH1F"/>
-     </TDirectory>
-    </TDirectory>
    </TDirectory>
   </TDirectory>
  </dcube>

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TestDriver.h"
@@ -13,7 +13,6 @@
 #include "PersistentDataModel/Token.h"
 
 #include "StorageSvc/DbType.h"
-#include "FileCatalog/URIParser.h"
 #include "FileCatalog/IFileCatalog.h"
 
 #include "PersistencySvc/ISession.h"
@@ -30,7 +29,8 @@ pool::TestDriver::TestDriver( const std::string& catname ):
   m_fileCatalog( 0 ),
   m_fileName1( "PersF.pool1.root" ),
   m_fileName2( "PersF.pool2.root" ),
-  m_events( 100 )
+  m_events( 100 ),
+  m_eventsToCommitAndHold( 10 )
 {
   std::cout << "[OVAL] Creating a file catalog" << std::endl;
   m_fileCatalog = new pool::IFileCatalog;
@@ -38,9 +38,7 @@ pool::TestDriver::TestDriver( const std::string& catname ):
     throw std::runtime_error( "Could not create a file catalog" );
   }
   std::filesystem::remove( {catname} );
-  pool::URIParser p( std::string("file:") + catname );
-  p.parse();
-  m_fileCatalog->setWriteCatalog( p.contactstring() );
+  m_fileCatalog->setWriteCatalog( catname );
   m_fileCatalog->connect();
 }
 
@@ -166,9 +164,11 @@ pool::TestDriver::write(pool::DbType storageType)
     m_tokens.push_back( token_TestClassVectors );
     m_testClassVectors.push_back( *object_TestClassVectors );
 
-    // Committing the transaction every row
-    if ( ! persistencySvc->session().transaction().commitAndHold() ) {
-      throw std::runtime_error( "Could not commitAndHold" );
+    // Commit and hold the transaction every few rows
+    if( (i+1) % m_eventsToCommitAndHold == 0 ) {
+      if( ! persistencySvc->session().transaction().commitAndHold() ) {
+        throw std::runtime_error( "Could not commit and hold the transaction." );
+      }
     }
   }
   if ( ! persistencySvc->session().transaction().commit() ) {

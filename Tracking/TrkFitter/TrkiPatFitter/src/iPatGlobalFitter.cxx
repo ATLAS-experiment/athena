@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  */
 
 //////////////////////////////////////////////////////////////////
@@ -35,24 +35,16 @@ Track* iPatGlobalFitter::alignmentFit(
     const ParticleHypothesis matEffects) const {
   //  @TODO ensure the number of iterations is passed through to the fitter
   // setMinIterations (alignCache.m_minIterations);
-  if (alignCache.m_derivMatrix != nullptr) {
-    delete alignCache.m_derivMatrix;
-  }
-  alignCache.m_derivMatrix = nullptr;
-
-  if (alignCache.m_fullCovarianceMatrix != nullptr) {
-    delete alignCache.m_fullCovarianceMatrix;
-  }
-  alignCache.m_fullCovarianceMatrix = nullptr;
+  alignCache.m_derivMatrix.reset();
+  alignCache.m_fullCovarianceMatrix.reset();
   alignCache.m_iterationsOfLastFit = 0;
 
   auto [refittedTrack, fitState] =
       fitWithState(Gaudi::Hive::currentContext(), trk, runOutlier, matEffects);
 
   if (refittedTrack) {
-    alignCache.m_derivMatrix = derivMatrix(*fitState).release();
-    alignCache.m_fullCovarianceMatrix =
-        fullCovarianceMatrix(*fitState).release();
+    alignCache.m_derivMatrix = derivMatrix(*fitState);
+    alignCache.m_fullCovarianceMatrix = fullCovarianceMatrix(*fitState);
     alignCache.m_iterationsOfLastFit = iterationsOfLastFit(*fitState);
   }
   return refittedTrack.release();

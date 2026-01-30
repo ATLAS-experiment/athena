@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CLHEP/Random/RandFlat.h"
@@ -72,9 +72,14 @@ void TFCSEnergyBinParametrization::set_pdgid_Ekin_bin_probability(
     return;
   }
   float ptot = 0;
-  for (int iEbin = 0; iEbin <= n_bins(); ++iEbin)
+  for (int iEbin = 0; iEbin <= n_bins(); ++iEbin){
     ptot += prob[iEbin];
+  }
   float p = 0;
+  if (ptot == 0.f)[[unlikely]]{
+    ATH_MSG_ERROR("TFCSEnergyBinParametrization::set_pdgid_Ekin_bin_probability: ptot is zero.");
+    return;
+  }
   for (int iEbin = 0; iEbin <= n_bins(); ++iEbin) {
     p += prob[iEbin] / ptot;
     m_pdgid_Ebin_probability[id][iEbin] = p;
@@ -117,9 +122,14 @@ bool TFCSEnergyBinParametrization::load_pdgid_Ekin_bin_probability_from_file(
   }
 
   float ptot{};
-  for (int iEbin = 0; iEbin <= n_bins(); ++iEbin)
+  for (int iEbin = 0; iEbin <= n_bins(); ++iEbin){
     ptot += prob[iEbin];
+  }
   float p{};
+  if (ptot ==0.0f)[[unlikely]]{
+    ATH_MSG_ERROR("TFCSEnergyBinParametrization::load_pdgid_Ekin_bin_probability_from_file: ptot is zero");
+    return false;
+  }
   for (int iEbin = 0; iEbin <= n_bins(); ++iEbin) {
     p += prob[iEbin] / ptot;
     m_pdgid_Ebin_probability[id][iEbin] = p;

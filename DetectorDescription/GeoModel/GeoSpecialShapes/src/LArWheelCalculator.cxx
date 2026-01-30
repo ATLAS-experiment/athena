@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // LArWheelCalculator 19-Apr-2001 Bill Seligman
@@ -122,9 +122,7 @@ LArWheelCalculator::LArWheelCalculator(const EMECData & emecData, LArG4::LArWhee
       << " (type " << LArWheelCalculatorTypeString(m_type)
       << "):" << endmsg;
 
-#ifdef LARWC_DTNF_NEW
   msg << MSG::VERBOSE << "compiled with new DTNF" << endmsg;
-#endif
 
   // Access source of detector parameters.
   msg << MSG::VERBOSE

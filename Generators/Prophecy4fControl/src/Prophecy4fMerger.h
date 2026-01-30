@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef PROPHECY4FCONTROL_DRM_H
 #define PROPHECY4FCONTROL_DRM_H
@@ -19,10 +19,8 @@
 /* --------------------------------------------------------- */
 
 /* Basic C++ */
-#include <iostream>
 #include <string>
-#include <algorithm>
-#include <cstring>
+
 /* ROOT */
 #include <TLorentzVector.h>
 #include "TRandom3.h"

@@ -107,9 +107,10 @@ namespace MuonR4::SegmentFit {
                 bool isValid{true};
                 /** @brief Outstream operator */
                 friend std::ostream& operator<<(std::ostream& ostr, const SeedSolution& sol) {
-                    return sol.print(ostr);
+                    sol.print(ostr);
+                    return ostr;
                 }
-                std::ostream& print(std::ostream& ostr) const;
+                void print(std::ostream& ostr) const;
             };
             /** @brief Checks whether the intercept and the angle are witihn the allowed ranges 
              *  @param solution: Reference to the tangent line solution to check */            

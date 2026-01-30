@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 /*
  *  SCT_OnlineId.cxx
@@ -85,7 +85,7 @@ SCT_OnlineId::is_valid() const{
 
   
 //
-bool SCT_OnlineId::fibreInRange(std::uint32_t f) const{
+bool SCT_OnlineId::fibreInRange(std::uint32_t f) {
   return (f<NUM_FIBRES);
 }
 

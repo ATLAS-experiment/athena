@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // $Id$
@@ -70,13 +70,13 @@ void test1(const std::vector<HepMC::GenParticlePtr> & genPartVector)
   for (int i=0; i<10; i++) {
     auto pGenParticle = genPartVector.at(i);
     HepMcParticleLink trkLink(HepMC::uniqueID(pGenParticle), pGenParticle->parent_event()->event_number(), HepMcParticleLink::IS_EVENTNUM, HepMcParticleLink::IS_ID);
-    trans1.push_back(trkLink);
+    trans1.push_back(std::move(trkLink));
   }
 
   testit (trans1);
 }
 
-
+//coverity[root_function]
 int main()
 {
   ISvcLocator* pSvcLoc = nullptr;

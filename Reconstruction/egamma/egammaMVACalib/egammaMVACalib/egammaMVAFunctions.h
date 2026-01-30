@@ -129,8 +129,74 @@ namespace egammaMVAFunctions
     return compute_calibHitsShowerDepth(cluster_array, compute_cl_eta(cl));
   }
 
+  // ------------------------------------------------------------------
+  // Forward-electron getters
+  // ------------------------------------------------------------------
 
+  inline float compute_et(const xAOD::CaloCluster& cl) {
+    const float e   = cl.e();
+    const float eta = cl.eta();
+    const float c   = std::cosh(eta);
+    return (c != 0.f) ? (e / c) : 0.f;
+  }
+  // be 100% sure what variables the FE BDT should use. For the run 2 
+  inline float cl_getMoment(const xAOD::CaloCluster& cl,
+                            xAOD::CaloCluster::MomentType m,
+                            const char* name) {
+    double tmp = 0.;
+    if (!cl.retrieveMoment(m, tmp)) {
+      throw std::runtime_error(std::string("Forward-electron missing moment: ") + name);
+    }
+    return static_cast<float>(tmp);
+  }
 
+  inline float compute_cl_significance (const xAOD::CaloCluster& cl){ return cl_getMoment(cl, xAOD::CaloCluster::SIGNIFICANCE  , "SIGNIFICANCE"); }
+  inline float compute_cl_secondLambda (const xAOD::CaloCluster& cl){ return cl_getMoment(cl, xAOD::CaloCluster::SECOND_LAMBDA , "SECOND_LAMBDA"); }
+  inline float compute_cl_lateral      (const xAOD::CaloCluster& cl){ return cl_getMoment(cl, xAOD::CaloCluster::LATERAL       , "LATERAL"); }
+  inline float compute_cl_longitudinal (const xAOD::CaloCluster& cl){ return cl_getMoment(cl, xAOD::CaloCluster::LONGITUDINAL  , "LONGITUDINAL"); }
+  inline float compute_cl_fracMax      (const xAOD::CaloCluster& cl){ return cl_getMoment(cl, xAOD::CaloCluster::ENG_FRAC_MAX  , "ENG_FRAC_MAX"); }
+  
+  inline float compute_cl_secondR      (const xAOD::CaloCluster& cl){ return cl_getMoment(cl, xAOD::CaloCluster::SECOND_R      , "SECOND_R"); }
+  inline float compute_cl_centerLambda (const xAOD::CaloCluster& cl){ return cl_getMoment(cl, xAOD::CaloCluster::CENTER_LAMBDA , "CENTER_LAMBDA"); }
+  inline float compute_cl_secondDensity(const xAOD::CaloCluster& cl){ return cl_getMoment(cl, xAOD::CaloCluster::SECOND_ENG_DENS,"SECOND_ENG_DENS"); }
+  inline float compute_cl_x            (const xAOD::CaloCluster& cl){ return cl_getMoment(cl, xAOD::CaloCluster::CENTER_X      , "CENTER_X"); }
+  inline float compute_cl_y            (const xAOD::CaloCluster& cl){ return cl_getMoment(cl, xAOD::CaloCluster::CENTER_Y      , "CENTER_Y"); }
+  inline float compute_cl_z            (const xAOD::CaloCluster& cl){ return cl_getMoment(cl, xAOD::CaloCluster::CENTER_Z      , "CENTER_Z"); }
+
+  inline float compute_cl_secondR_fudge(const xAOD::Egamma& eg) {
+    static const SG::AuxElement::Accessor<float> accR2("SECOND_R");
+    if (accR2.isAvailable(eg)) { return accR2(eg); }
+    return -1.;
+  }
+
+  inline float compute_eta_FCAL(const xAOD::CaloCluster& cl){
+    float x = compute_cl_x(cl);
+    float y = compute_cl_y(cl);
+    float z = compute_cl_z(cl);
+    float theta = std::acos(z/std::sqrt(x*x+y*y+z*z));
+    return -std::log(std::tan(theta/2.));
+  }
+  inline float compute_etaMod_FCAL(const xAOD::CaloCluster& cl){
+    return std::fmod(std::abs(compute_eta_FCAL(cl)),0.15);
+  }
+  inline float compute_cellIndex_FCAL(const xAOD::CaloCluster& cl){
+    return std::floor(std::abs(compute_eta_FCAL(cl))/0.15);
+  }
+  inline float compute_etaMod_EMEC(const xAOD::CaloCluster& cl){
+    return std::fmod(std::abs(cl.eta()),0.1);
+  }
+  inline float compute_cellIndex_EMEC(const xAOD::CaloCluster& cl){
+    return std::floor(std::abs(cl.eta())/0.1);
+  }
+  inline float compute_phiMod_EMEC(const xAOD::CaloCluster& cl){
+    static const float cz = std::numbers::pi/16.;
+    float phi_mod = std::fmod(cl.phi(), cz);
+    if (phi_mod < 0) phi_mod += cz;
+    return phi_mod;
+  }
+  inline float compute_R12_EMEC(const xAOD::CaloCluster& cl){
+    return float(cl.energy_max(CaloSampling::EME1)/cl.energy_max(CaloSampling::EME2));
+  }
 
   // electron functions
   inline float compute_el_charge(const xAOD::Electron& el) { return el.charge(); }
@@ -142,7 +208,6 @@ namespace egammaMVAFunctions
     static const SG::ConstAccessor<unsigned short int> acc ("author");
     return acc (el);
   }
-
 
   // photon functions
   inline int compute_ph_convFlag(const xAOD::Photon& ph) {
@@ -251,6 +316,8 @@ namespace egammaMVAFunctions
   /// A function to build the map for converted photons
   std::unique_ptr<funcMap_t> initializeConvertedPhotonFuncs(bool useLayerCorrected);
 
+  /// NEW: A function to build the map for forward electrons
+  std::unique_ptr<funcMap_t> initializeForwardElectronFuncs(bool useLayerCorrected);
 
   /// The ConversionHelper struct is stll used by egammaMVATree in PhysicsAnalysis
   /// but not the functions in the dictionaries above. We could deprecate them

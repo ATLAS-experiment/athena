@@ -189,6 +189,7 @@ class ATLAS_NOT_THREAD_SAFE JetUncertaintiesTool : virtual public ICPJetUncertai
         std::string m_path;
         std::string m_analysisFile;
         std::string m_analysisHistPattern;
+        std::string m_NJetAccessorName;
         std::vector<std::string> m_systFilters;
         std::string m_name_TagScaleFactor;
         std::string m_name_EffSF;

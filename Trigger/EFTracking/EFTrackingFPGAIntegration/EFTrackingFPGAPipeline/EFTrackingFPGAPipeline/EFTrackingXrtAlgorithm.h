@@ -103,6 +103,11 @@ class EFTrackingXrtAlgorithm : public AthReentrantAlgorithm
   // Buffer objects
   mutable std::vector<xrt::bo> m_inputBuffers ATLAS_THREAD_SAFE {};
   mutable std::vector<xrt::bo> m_outputBuffers ATLAS_THREAD_SAFE {};
+  
+  std::optional<xrt::bo::flags> determine_mem_flags(
+    const std::unique_ptr<xrt::kernel>& kernel,
+    const std::size_t index
+  ) const;
 
  public:
   EFTrackingXrtAlgorithm(const std::string& name, ISvcLocator* pSvcLocator);

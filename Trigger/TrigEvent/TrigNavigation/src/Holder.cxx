@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <sstream>
@@ -49,7 +49,6 @@ IHolder::IHolder(const std::string& prefix, const std::string& label, uint16_t i
 
 
 IHolder::~IHolder() {
-  if ( m_aux ) { delete m_aux; }
 }
 
 void IHolder::prepare(const asg::AsgMessaging& logger, HLT::AccessProxy* sg, IConversionSvc* objSerializer, bool readonly) {

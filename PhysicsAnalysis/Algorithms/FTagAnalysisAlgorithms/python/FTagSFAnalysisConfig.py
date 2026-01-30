@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # AnaAlgorithm import(s):
 from AnalysisAlgorithmsConfig.ConfigBlock import ConfigBlock
@@ -6,10 +6,30 @@ from AnalysisAlgorithmsConfig.ConfigSequence import groupBlocks
 from AnalysisAlgorithmsConfig.ConfigAccumulator import DataType
 from AthenaCommon.Logging import logging
 
-from FTagAnalysisAlgorithms.FTagHelpers import getRecommendedBTagCalib, getReadFromBTaggingObject
+from FTagAnalysisAlgorithms.FTagHelpers import getRecommendedBTagCalib, getRecommendedBTagTrigCalib, getReadFromBTaggingObject
 from CalibrationDataInterface.CDIHelpers import check_CDI_campaign
 from CalibrationDataInterface.MCMCGeneratorHelper import MCMC_dsid_map
-from FTagAnalysisAlgorithms.FTagTrigMatchAnalysisConfig import trigger_set
+from TriggerAnalysisAlgorithms.TriggerAnalysisSFConfig import trigger_set
+
+
+def getBTagOnlineWP(chain, onlineTagger):
+    # We have a chain with something like "..._bdl1d77_..."
+    # Get the substring after the tagger, e.g. bdl1d
+    after = chain.split(onlineTagger)[1]
+    # Get the two first characters, corresponding to the WP
+    wp = after[:2]
+    return 'FixedCutBEff_'+wp
+
+def getBTagOnlineTaggerWP(chain, log):
+    bTagOnlineTaggers = {
+        'bdl1d' : 'OnlineDL1d',
+        'bgn1' : 'OnlineGN1' }
+
+    for tag, bTagOnlineTag in bTagOnlineTaggers.items():
+        if tag in chain:
+            return (bTagOnlineTag, getBTagOnlineWP(chain, tag))
+
+    return ('', '')
 
 
 class FTagJetSFBlock(ConfigBlock):
@@ -23,65 +43,69 @@ class FTagJetSFBlock(ConfigBlock):
             noneAction='error',
             info="a postfix to apply to decorations and algorithm names. "
             "Typically not needed here as internally the string "
-            "f'{btagger}_{btagWP}' is used.")
+            "`f'{btagger}_{btagWP}'` is used.")
         self.addOption ('btagWP', "Continuous", type=str,
-            info="the flavour tagging WP. The default is Continuous.")
+            info="the flavour tagging WP.")
         self.addOption('btagger', "GN2v01", type=str,
-            info="the flavour tagging algorithm: DL1dv01, GN2v01. The default is GN2v01.")
+            info="the flavour tagging algorithm: `DL1dv01`, `GN2v01`.")
         self.addOption('useCTagging', False, type=bool,
-            info="whether the fixed WP refer to b-tagging or c-tagging. Set to 'True' "
-            "for referring to c-tagging")
+            info="whether the fixed WP refer to b-tagging or c-tagging. Set to `True` "
+            "to make it refer to c-tagging.")
         self.addOption ('bTagCalibFile', None, type=str,
-            info="calibration file for CDI")
+            info="path to a custom b-tagging CDI file. If left empty, uses the latest available recommendations.")
         self.addOption ('bTagCalibTriggerFile', None, type=str,
-            info="trigger calibration file for CDI")
+            info="path to a custom b-tagging CDI file. If left empty, uses the latest available recommendations.")
         self.addOption ('generator', "autoconfig", type=str,
-            info="MC generator setup, for MC/MC SFs. The default is 'autoconfig'"
+            info="MC generator setup, for MC/MC SFs. The default is `autoconfig`"
             " (relies on the sample metadata).")
         self.addOption ('systematicsStrategy', 'SFEigen', type=str,
-            info="name of systematics model; presently choose between 'SFEigen' "
-            "and 'Envelope'")
+            info="name of systematics model; presently choose between `SFEigen` "
+            "and `Envelope`.")
         self.addOption ('eigenvectorReductionB', 'Loose', type=str,
-            info="b-jet scale factor Eigenvector reduction strategy; choose between "
-            "'Loose', 'Medium', 'Tight'")
+            info="b-jet scale factor eigenvector reduction strategy; choose between "
+            "`Loose`, `Medium`, `Tight`.")
         self.addOption ('eigenvectorReductionC', 'Loose', type=str,
-            info="b-jet scale factor Eigenvector reduction strategy; choose between "
-            "'Loose', 'Medium', 'Tight'")
+            info="b-jet scale factor eigenvector reduction strategy; choose between "
+            "`Loose`, `Medium`, `Tight`.")
         self.addOption ('eigenvectorReductionLight', 'Loose', type=str,
-            info="b-jet scale factor Eigenvector reduction strategy; choose between "
-            "'Loose', 'Medium', 'Tight'")
+            info="b-jet scale factor eigenvector reduction strategy; choose between "
+            "`Loose`, `Medium`, `Tight`.")
         self.addOption ('excludeFromEigenVectorTreatment', '', type=str,
             info="(semicolon-separated) names of uncertainties to be excluded from "
-            "all eigenvector decompositions (if used)")
+            "all eigenvector decompositions (if used).")
         self.addOption ('excludeFromEigenVectorBTreatment', '', type=str,
             info="(semicolon-separated) names of uncertainties to be excluded from "
-            "b-jet eigenvector decompositions (if used)")
+            "b-jet eigenvector decompositions (if used).")
         self.addOption ('excludeFromEigenVectorCTreatment', '', type=str,
             info="(semicolon-separated) names of uncertainties to be excluded from "
-            "c-jet eigenvector decompositions (if used)")
+            "c-jet eigenvector decompositions (if used).")
         self.addOption ('excludeFromEigenVectorLightTreatment', '', type=str,
             info="(semicolon-separated) names of uncertainties to be excluded from "
-            "light-flavour-jet eigenvector decompositions (if used)")
+            "light-flavour-jet eigenvector decompositions (if used).")
         self.addOption ('excludeRecommendedFromEigenVectorTreatment', False, type=str,
             info="whether or not to add recommended lists to the user specified "
-            "eigenvector decomposition exclusion lists")
+            "eigenvector decomposition exclusion lists.")
         self.addOption ('savePerJetSF', False, type=bool,
-            info="whether or not to save the per jet FTAG SF as output variable")
+            info="whether or not to save the per-jet FTAG SF as output variable.")
         self.addOption ('triggerChainsPerYear', {}, type=None,
             info="a dictionary with key (string) the year and value (list of "
-            "strings) the trigger chains. The default is {} (empty dictionary).")
+            "strings) the trigger chains.")
         self.addOption ('includeAllYearsPerRun', False, type=bool,
-            info="if True, all configured years in the LHC run will be included in all jobs. "
-            "The default is False.")
+            info="if `True`, all configured years in the LHC run will be included in all jobs.")
         self.addOption ('removeHLTPrefix', True, type=bool,
-            info="remove the HLT prefix from trigger chain names, "
-            "The default is True.")
+            info="remove the HLT prefix from trigger chain names.")
+        self.addOption ('bTagOnlineTagger', None, type=str,
+            info="online tagger to use to configure the CDI access.",
+            expertMode=True)
+        self.addOption ('bTagOnlineWP', None, type=str,
+            info="online working point to use to configure the CDI access.",
+            expertMode=True)
         # Peculiar case default value set to None while type is bool 
         # A default value will be assigned by the getReadFromBTaggingObject function 
         # if this flag is not set 
         self.addOption('readFromBTaggingObject', None, type=bool,
-            info="whether to read the b-tagging information from the BTagging object "
-            "instead of the jet container. FTAG group has dropped BTagging object, all"
+            info="whether to read the b-tagging information from the `BTagging` object "
+            "instead of the jet container. FTAG group has dropped `BTagging` object, all"
             "b-tagging related variables are attached to jet container. This only serves"
             "as a compatibility option for analysis that use old derivations.")
 
@@ -125,10 +149,13 @@ class FTagJetSFBlock(ConfigBlock):
             tool.SelectionTaggerName = selectionTagger
 
     def makeAlgs(self, config):
+        log = logging.getLogger('FTagJetSFConfig')
 
         if config.dataType() is DataType.Data: return
 
-        log = logging.getLogger('FTagJetSFConfig')
+        if config.isPhyslite() and self.triggerChainsPerYear:
+            log.warning ('The b-jet trigger SF computation is currently not supported in PHYSLITE')
+            return
 
         if 'FixedCutBEff' in self.btagWP:
             raise ValueError('FTAG calibration is only available for Continuous WP. '
@@ -161,11 +188,8 @@ class FTagJetSFBlock(ConfigBlock):
 
         # b-jet trigger-aware SF
         if self.triggerChainsPerYear:
-            log.warning("The configuration of the FTAG trigger-aware SF is still "
-                        "under development. This is not ready yet for analysis usage!")
-
             triggers = trigger_set(config, self.triggerChainsPerYear,
-                                   self.includeAllYearsPerRun, log)
+                                   self.includeAllYearsPerRun)
             
             for chain in triggers:
                 chain_noHLT = chain.replace("HLT_", "")
@@ -175,15 +199,18 @@ class FTagJetSFBlock(ConfigBlock):
                 if self.bTagCalibTriggerFile is not None :
                     bTagCalibTriggerFile = self.bTagCalibTriggerFile
                 else:
-                    # Interface to retrieve b-jet trigger CDI + tagger-wp to be implemented when available
-                    # bTagCalibTriggerFile = getRecommendedBTagTrigCalib(config.geometry(), trigger)
-                    # Set nothing for now
-                    bTagCalibTriggerFile = ""
+                    bTagCalibTriggerFile = getRecommendedBTagTrigCalib(config.geometry())
 
-                # bTagOnlineTagger, bTagOnlineWP = getBTagOnlineTaggerWP(trigger)
-                # For now configure fixed WP
-                bTagOnlineTagger = "OnlineDL1d"
-                bTagOnlineWP = "FixedCutBEff_77"
+                bTagOnlineTagger, bTagOnlineWP = getBTagOnlineTaggerWP(chain, log)
+                if self.bTagOnlineTagger:
+                    bTagOnlineTagger = self.bTagOnlineTagger
+                if self.bTagOnlineWP:
+                    bTagOnlineWP = self.bTagOnlineWP
+
+                if not bTagOnlineTagger and not bTagOnlineWP:
+                    raise ValueError('Trigger chain ' + chain + ' does not include any of the supported online taggers. '
+                                     'Please make sure to configure manually bTagOnlineTagger and bTagOnlineWP')
+
                 bTagConditionalTagger = "ConditionalOffline" + self.btagger + "Given" + bTagOnlineTagger + "WP" + bTagOnlineWP.split("_")[-1]
                 bTagConditionalWP = self.btagWP
 
@@ -246,25 +273,27 @@ class FTagEventSFBlock(ConfigBlock):
         self.addDependency('OverlapRemoval', required=False)
         self.addOption('containerName', '', type=str,
             noneAction='error',
-            info="the name of the input container.")
+            info="the input jet container with a possible selection, in the format "
+            "`container` or `container.selection`. The default recommendation is to "
+            "pass `container.baselineJvt` selection, e.g. if the calibrated jets "
+            "container is `AnaJets`, the recommendation is to pass `AnaJet.baselineJvt`.")
         self.addOption('selectionName', '', type=str,
             noneAction='error',
             info="a postfix to apply to decorations and algorithm names. "
             "Typically not needed here as internally the string "
-            "f'{btagger}_{btagWP}' is used.")
+            "`f'{btagger}_{btagWP}'` is used.")
         self.addOption ('btagWP', "Continuous", type=str,
-            info="the flavour tagging WP. The default is Continuous.")
+            info="the flavour tagging WP.")
         self.addOption('btagger', "GN2v01", type=str,
-            info="the flavour tagging algorithm: DL1dv01, GN2v01. The default is GN2v01.")
+            info="the flavour tagging algorithm: `DL1dv01`, `GN2v01`.")
         self.addOption ('triggerChainsPerYear', {}, type=None,
             info="a dictionary with key (string) the year and value (list of "
-            "strings) the trigger chains. The default is {} (empty dictionary).")
+            "strings) the trigger chains.")
         self.addOption ('includeAllYearsPerRun', False, type=bool,
-            info="if True, all configured years in the LHC run will be included "
-            "in all jobs. The default is False.")
+            info="if `True`, all configured years in the LHC run will be included "
+            "in all jobs.")
         self.addOption ('removeHLTPrefix', True, type=bool,
-            info="remove the HLT prefix from trigger chain names, "
-            "The default is True.")
+            info="remove the HLT prefix from trigger chain names.")
 
     def instanceName (self) :
         """Return the instance name for this block"""
@@ -274,15 +303,18 @@ class FTagEventSFBlock(ConfigBlock):
         return self.containerName.replace('.', '_') + '_' + selectionName
 
     def makeAlgs(self, config):
+        log = logging.getLogger('FTagEventSFConfig')
 
         if config.dataType() is DataType.Data: return
+
+        if config.isPhyslite() and self.triggerChainsPerYear:
+            log.warning ('The b-jet trigger SF computation is currently not supported in PHYSLITE')
+            return
 
         if 'FixedCut' in self.btagWP:
             raise ValueError('FTAG calibration is only available for Continuous WP. '
                              'Please configure the Continuous btagWP to retrieve scale factors.')
 
-
-        log = logging.getLogger('FTagEventSFConfig')
 
         selectionName = self.selectionName
         if selectionName is None or selectionName == '':
@@ -295,7 +327,7 @@ class FTagEventSFBlock(ConfigBlock):
         triggers = set()
         if self.triggerChainsPerYear:
             triggers = trigger_set(config, self.triggerChainsPerYear,
-                                   self.includeAllYearsPerRun, log)
+                                   self.includeAllYearsPerRun)
         # Always add computation for non-trigger FTAG SF
         triggers.add("")
 
@@ -303,9 +335,13 @@ class FTagEventSFBlock(ConfigBlock):
 
         # Set up the per-event FTAG efficiency scale factor calculation algorithm
         for chain in triggers:
+            chain_noHLT = chain.replace("HLT_", "")
+            chain_out = chain_noHLT if self.removeHLTPrefix else chain
+            chain_out = chain_out.replace('-', '_').replace('.', 'p')
+
             postfix2 = postfix
             if chain:
-                postfix2 = postfix2 + '_' + chain
+                postfix2 = postfix2 + '_' + chain_out
             alg = config.createAlgorithm('CP::AsgEventScaleFactorAlg',
                                          'FTagEventScaleFactorAlg' + postfix2)
 

@@ -33,10 +33,6 @@ class TauCellVariables : public TauRecToolBase {
     /** @brief Check whether the CaloSample is a EM layer */ 
     bool isEMLayer(const CaloSampling::CaloSample& calo) const;
 
-    /** @brief Check whether the CaloSample is a Strip layer */
-    bool isStripLayer(const CaloSampling::CaloSample& calo) const;
-
-    Gaudi::Property<double> m_stripEthr {this, "StripEthreshold", 0.2 * Gaudi::Units::GeV, "energy threshould for strip cell"};
     Gaudi::Property<double> m_cellCone {this, "CellCone", 0.2, "outer cone for cells used in calculation"};
     Gaudi::Property<bool> m_doVertexCorrection {this, "VertexCorrection", true, "switch of vertex correction"};
 };
@@ -49,17 +45,6 @@ inline bool TauCellVariables::isEMLayer(const CaloSampling::CaloSample& calo) co
       (calo == CaloSampling::EME1) ||
       (calo == CaloSampling::EMB2) ||
       (calo == CaloSampling::EME2)) {
-    return true;
-  }
-  else {
-    return false;
-  }
-}
-
-//______________________________________________________________________________
-inline bool TauCellVariables::isStripLayer(const CaloSampling::CaloSample& calo) const {
-  if ((calo == CaloSampling::EMB1) ||
-      (calo == CaloSampling::EME1)) {
     return true;
   }
   else {

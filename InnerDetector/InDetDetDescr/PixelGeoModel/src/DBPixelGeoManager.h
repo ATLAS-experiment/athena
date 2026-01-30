@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef PIXELGEOMODEL_DBPIXELGEOMANAGER_H
@@ -11,6 +11,7 @@
 #include <string>
 #include <map>
 #include <vector>
+#include <memory>
 #include "RDBAccessSvc/IRDBAccessSvc.h"
 #include "CxxUtils/checker_macros.h"
 
@@ -129,39 +130,36 @@ class DBPixelGeoManager : public PixelGeometryManager {
   InDetDD::PixelDetectorManager *m_pDDmgr;
 
   //the material manager
-  InDetMaterialManager * m_pMatMgr = nullptr;
+  std::unique_ptr<InDetMaterialManager> m_pMatMgr;
 
   // Distorted material manager. Access to tables for distorting
   // the material. Extra volumes, modified volumes, etc
-  InDetDD::DistortedMaterialManager * m_distortedMatManager = nullptr;
+  std::unique_ptr<InDetDD::DistortedMaterialManager> m_distortedMatManager;
 
   // Legacy tables
-  PixelLegacyManager * m_legacyManager;
+  std::unique_ptr<PixelLegacyManager> m_legacyManager;
 
   // version tag
   std::string m_versionTag{};
 
   // top level placements
-  TopLevelPlacements * m_placements = nullptr;
+  std::unique_ptr<TopLevelPlacements> m_placements;
 
   // material map
-  PixelMaterialMap * m_materialMap = nullptr;
+  std::unique_ptr<PixelMaterialMap> m_materialMap;
 
   // Stave types
-  PixelStaveTypes * m_pixelStaveTypes = nullptr; 
+  std::unique_ptr<PixelStaveTypes> m_pixelStaveTypes;
 
   // ganged pixel index map 
-  std::map<int,std::vector<int> > * m_gangedIndexMap;
+  std::unique_ptr<std::map<int,std::vector<int> > > m_gangedIndexMap;
 
   // frame element index map 
-  std::map<int,std::vector<int> > * m_frameElementMap;
+  std::unique_ptr<std::map<int,std::vector<int> > > m_frameElementMap;
 
-
-  // Map between disk,ring and index in PixelDiskRing table
-  InDetDD::PairIndexMap * m_diskRingIndexMap;
 
   // Map between etaModule,type and index in PixelStaveZ table
-  InDetDD::PairIndexMap * m_zPositionMap;
+  std::unique_ptr<InDetDD::PairIndexMap> m_zPositionMap;
 
   // db version
   int m_dbVersion;

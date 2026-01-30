@@ -166,7 +166,7 @@ class ThresholdDef:
             jEMThreshold('jEMSPARE%i' % thrV, 'jEM').addThrValue(thrVal_SPARE)
 
         # eTAU
-        eTAU_cuts = [1, 2, 12, 20, 30, 35, 60, 70, 80, 140]
+        eTAU_cuts = [1, 2, 12, 20, 28, 30, 35, 60, 70, 80, 120, 140]
         # get ptMinToTopo value (different for pp and HI), then adjust threshold for lowest pT items based on this value
         ttconfig = tc.l1menu.thresholds.typeWideThresholdConfig('eTAU')
         ptMin = ttconfig["ptMinToTopo"]
@@ -176,7 +176,7 @@ class ThresholdDef:
         eTAU_cuts = [20]
         for thrV in eTAU_cuts:
             eTauThreshold('eTAU%iL' % thrV, 'eTAU').setEt(get_threshold_cut('eTAU', thrV)).setIsolation( rCore = "Loose" )
-        eTAU_cuts = [20, 30, 35]
+        eTAU_cuts = [20, 28, 30, 35]
         for thrV in eTAU_cuts:
             eTauThreshold('eTAU%iM' % thrV, 'eTAU').setEt(get_threshold_cut('eTAU', thrV)).setIsolation( rCore = "Medium" )
 
@@ -219,7 +219,7 @@ class ThresholdDef:
         # For correspondence to Run 2, see https://twiki.cern.ch/twiki/bin/viewauth/Atlas/TriggerNamingRun3#New_naming_for_Calo_items
         ttconfig = tc.l1menu.thresholds.typeWideThresholdConfig('jJ')
         ptMin = ttconfig["ptMinToTopo1"]
-        jJ_cuts = [5, 10, 20, 30, 40, 50, 55, 60, 80, 90, 125, 140, 160, 180, 500]
+        jJ_cuts = [5, 10, 20, 30, 40, 50, 55, 60, 70, 80, 90, 125, 140, 160, 180, 500]
         for thrV in jJ_cuts:
             ThresholdDef.addJetVaryingThrValues( jJetThreshold('jJ%i' % thrV, 'jJ'), pt=max(get_threshold_cut('jJ', thrV),ptMin), shift_set=0, rangemin=0, rangemax=32 )
 
@@ -263,13 +263,6 @@ class ThresholdDef:
             gLJetThreshold('gLJSPARE%i' % thrV, 'gLJ').addThrValue(thrVal_SPARE)
 
         # gXE
-        gXE_cuts = [70, 100]
-        for thrV in gXE_cuts:
-            XEThreshold('gXENC%i' % thrV, 'gXE').setXE(get_threshold_cut('gXENC', thrV))
-
-        #gXE_cuts = [70, 100]
-        #for thrV in gXE_cuts:
-        #    XEThreshold('gXERHO%i' % thrV, 'gXE').setXE(get_threshold_cut('gXERHO', thrV))
 
         gXE_cuts = [60, 70, 80, 100, 110, 120, 500]
         for thrV in gXE_cuts:
@@ -280,11 +273,11 @@ class ThresholdDef:
             XEThreshold('gMHT%i' % thrV, 'gXE').setXE(thrV)
         
         # gTE
-        for thrV in [3,5,10,200]:
+        for thrV in [5, 10, 200, 280]:
             TEThreshold('gTE%i' % thrV, 'gTE').setTE(thrV)
         
         #gTE from BC+2 (for HI anti-shadowing)
-        for thrV in [200]:
+        for thrV in [280]:
             TEThreshold('gESPRESSO%i' % thrV, 'gTE').setTE(thrV)
             
         # jXE
@@ -293,9 +286,9 @@ class ThresholdDef:
             XEThreshold('jXE%i' % thrV, 'jXE').setXE(get_threshold_cut('jXE', thrV))
         
         # cXE (linear combination of jFEX+gFEX MET)
-        cXE_cuts = []
+        cXE_cuts = [100,110]
         for thrV in cXE_cuts:
-            XEThreshold('cXE%i' % thrV, 'jXE').setXE(get_threshold_cut('jXE', thrV))
+            XEThreshold('cXE%i' % thrV, 'jXE').setXE(get_threshold_cut('cXE', thrV))
 
         # ENERGY SPARES
         # decrement jXE spares for addtional heavy ion jTE/gTE thresholds

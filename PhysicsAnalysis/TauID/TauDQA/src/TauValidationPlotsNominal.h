@@ -16,6 +16,7 @@
 #include "CorePlots.h"
 #include "DecayModeMigration.h"
 #include "EfficiencyPlots.h"
+#include "EventPlots.h"
 
 class TauValidationPlotsNominal:public PlotBase {
    public:
@@ -56,7 +57,8 @@ class TauValidationPlotsNominal:public PlotBase {
       Tau::TauParticleFlowPlots m_oMatchedTauRecoTauPlotsNom;
       Tau::DecayModeMigration m_oMigrationPlotsNom;
       Tau::CorePlots m_oNewCoreMatchedPlotsNom;
-
+ 
+      Tau::EventPlots m_oEventPlotsNom; 
 
 
 

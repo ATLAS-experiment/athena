@@ -51,7 +51,7 @@ namespace Trk
     double px = 0., py = 0., pz = 0., e = 0.;
     unsigned int NTrk = vxCandidate->vxTrackAtVertex().size();
     if (masses.size() != NTrk) {
-      ATH_MSG_DEBUG("The provided number of masses does not match the number of tracks in the vertex");
+      ATH_MSG_ERROR("The provided number of masses does not match the number of tracks in the vertex");
       return -999999.;
     }
     for( unsigned int it=0; it<NTrk; it++) {
@@ -78,7 +78,7 @@ namespace Trk
   {
     unsigned int NTrk = vxCandidate->vxTrackAtVertex().size();
     if (masses.size() != NTrk) {
-      ATH_MSG_DEBUG("The provided number of masses does not match the number of tracks in the vertex");
+      ATH_MSG_ERROR("The provided number of masses does not match the number of tracks in the vertex");
       return -999999.;
     }
     double error = -999999.;
@@ -110,12 +110,11 @@ namespace Trk
   {
     unsigned int NTrk = vxCandidate->vxTrackAtVertex().size();
     if (masses.size() != NTrk) {
-      ATH_MSG_DEBUG("The provided number of masses does not match the number of tracks in the vertex");
+      ATH_MSG_ERROR("The provided number of masses does not match the number of tracks in the vertex");
       return -999999.;
     }
     auto fullCov = convertCovMatrix(vxCandidate);
     if (fullCov.size() == 0) return -999999.;
-    unsigned int ndim = fullCov.rows();
     double E=0., Px=0., Py=0., Pz=0.;
     std::vector<double>phi(NTrk), theta(NTrk), qOverP(NTrk), charge(NTrk), e(NTrk);
     std::vector<double>dm2dphi(NTrk), dm2dtheta(NTrk), dm2dqOverP(NTrk);
@@ -156,7 +155,7 @@ namespace Trk
       D_vec(5*it+3,0)  = dm2dtheta[it];
       D_vec(5*it+4,0)  = dm2dqOverP[it];
     }
-    Amg::MatrixX V0_merr = D_vec.transpose() * fullCov.block(0,0,ndim-3,ndim-3) * D_vec;
+    Amg::MatrixX V0_merr = D_vec.transpose() * fullCov.block(0,0,5*NTrk,5*NTrk) * D_vec;
 
     double massVarsq = V0_merr(0,0);
     if (massVarsq <= 0.) ATH_MSG_DEBUG("massError: negative sqrt massVarsq " << massVarsq);
@@ -175,7 +174,7 @@ namespace Trk
   {
     unsigned int NTrk = vxCandidate->vxTrackAtVertex().size();
     if (masses.size() != NTrk) {
-      ATH_MSG_DEBUG("The provided number of masses does not match the number of tracks in the vertex");
+      ATH_MSG_ERROR("The provided number of masses does not match the number of tracks in the vertex");
       return -999999.;
     }
     std::vector<xAOD::TrackParticle::FourMom_t> particleMom(NTrk);
@@ -251,7 +250,7 @@ namespace Trk
   {
     unsigned int NTrk = vxCandidate->vxTrackAtVertex().size();
     if (masses.size() != NTrk) {
-      ATH_MSG_DEBUG("The provided number of masses does not match the number of tracks in the vertex");
+      ATH_MSG_ERROR("The provided number of masses does not match the number of tracks in the vertex");
       return -999999.;
     }
     double E=0., Px=0., Py=0., Pz=0.;
@@ -503,7 +502,7 @@ namespace Trk
     AmgMatrix(2, 1) D_vec; D_vec.setZero();
     D_vec(0,0)  = drdx;
     D_vec(1,0)  = drdy;
-    Amg::MatrixX rxy_err = D_vec.transpose() * cov.block(0,0,2,2) * D_vec;
+    Amg::MatrixX rxy_err = D_vec.transpose() * cov.block<2,2>(0,0) * D_vec;
     double rxyVar = rxy_err(0,0);
     return rxyVar;
   }
@@ -586,7 +585,7 @@ namespace Trk
       ndim = fullCov.rows();
     }
 
-    Amg::MatrixX PtErrSq(1,1);
+    Amg::MatrixX PtErrSq;
     if (ndim == 5*NTrk+3 || ndim == 5*NTrk+6) {
       Amg::MatrixX D_vec(5*NTrk,1); D_vec.setZero();
       for( unsigned int it=0; it<NTrk; it++) {
@@ -600,7 +599,7 @@ namespace Trk
         Amg::MatrixX V0_cov = makeV0Cov(vxCandidate);
         PtErrSq = D_vec.transpose() * V0_cov * D_vec;
       } else {
-        PtErrSq = D_vec.transpose() * fullCov.block(0,0,5*NTrk-1,5*NTrk-1) * D_vec;
+        PtErrSq = D_vec.transpose() * fullCov.block(0,0,5*NTrk, 5*NTrk) * D_vec;
       }
     } else if (ndim == 3*NTrk+3) {
       Amg::MatrixX D_vec(3*NTrk,1); D_vec.setZero();
@@ -609,7 +608,10 @@ namespace Trk
         D_vec(3*it+1,0)  = dPTdtheta[it];
         D_vec(3*it+2,0)  = dPTdqOverP[it];
       }
-      PtErrSq = D_vec.transpose() * fullCov.block(3,3,ndim-3,ndim-3) * D_vec;
+      PtErrSq = D_vec.transpose() * fullCov.block(3,3,3*NTrk,3*NTrk) * D_vec;
+    }else{
+        ATH_MSG_ERROR("This should not happen - returning zero.");
+        return 0;
     }
 
     double PtErrsq = PtErrSq(0,0);
@@ -770,9 +772,9 @@ namespace Trk
       } else {
         Amg::MatrixX V0_cov = makeV0Cov(vxCandidate);
         W_mat.block(0,0,V0_cov.rows(),V0_cov.rows()) = V0_cov;
-        W_mat.block(5*NTrk,5*NTrk,3,3) = vxCandidate->covariancePosition();
+        W_mat.block<3,3>(5*NTrk,5*NTrk) = vxCandidate->covariancePosition();
       }
-      W_mat.block(5*NTrk+3,5*NTrk+3,3,3) =  vertex->covariancePosition();
+      W_mat.block<3,3>(5*NTrk+3,5*NTrk+3) =  vertex->covariancePosition();
       V0_err = D_vec.transpose() * W_mat * D_vec;
     } else if (ndim == 3*NTrk+3) {
       Amg::MatrixX D_vec(3*NTrk+6,1); D_vec.setZero();
@@ -790,8 +792,11 @@ namespace Trk
 
       Amg::MatrixX W_mat(3*NTrk+6,3*NTrk+6); W_mat.setZero();
       W_mat.block(0,0,ndim,ndim) = fullCov;
-      W_mat.block(3*NTrk+3,3*NTrk+3,3,3) =  vertex->covariancePosition();
+      W_mat.block<3,3>(3*NTrk+3,3*NTrk+3) =  vertex->covariancePosition();
       V0_err = D_vec.transpose() * W_mat * D_vec;
+    }else{
+        ATH_MSG_ERROR("This should not happen - returning zero.");
+        return 0;
     }
 
     double a0Errsq = V0_err(0,0);
@@ -896,9 +901,9 @@ namespace Trk
       } else {
         Amg::MatrixX V0_cov = makeV0Cov(vxCandidate);
         W_mat.block(0,0,V0_cov.rows(),V0_cov.rows()) = V0_cov;
-        W_mat.block(5*NTrk,5*NTrk,3,3) = vxCandidate->covariancePosition();
+        W_mat.block<3,3>(5*NTrk,5*NTrk) = vxCandidate->covariancePosition();
       }
-      W_mat.block(5*NTrk+3,5*NTrk+3,3,3) = vertex->covariancePosition();
+      W_mat.block<3,3>(5*NTrk+3,5*NTrk+3) = vertex->covariancePosition();
       V0_err = D_vec.transpose() * W_mat * D_vec;
     } else if (ndim == 3*NTrk+3) {
       Amg::MatrixX D_vec(3*NTrk+6,1); D_vec.setZero();
@@ -916,8 +921,11 @@ namespace Trk
 
       Amg::MatrixX W_mat(3*NTrk+6,3*NTrk+6); W_mat.setZero();
       W_mat.block(0,0,ndim,ndim) = fullCov;
-      W_mat.block(3*NTrk+3,3*NTrk+3,3,3) =  vertex->covariancePosition();
+      W_mat.block<3,3>(3*NTrk+3,3*NTrk+3) =  vertex->covariancePosition();
       V0_err = D_vec.transpose() * W_mat * D_vec;
+    }else{
+      ATH_MSG_ERROR("This should not happen - returning zero.");
+      return 0;
     }
 
     double a0Errsq = V0_err(0,0);
@@ -1011,9 +1019,9 @@ namespace Trk
       } else {
         Amg::MatrixX V0_cov = makeV0Cov(vxCandidate);
         W_mat.block(0,0,V0_cov.rows(),V0_cov.rows()) = V0_cov;
-        W_mat.block(5*NTrk,5*NTrk,3,3) = vxCandidate->covariancePosition();
+        W_mat.block<3,3>(5*NTrk,5*NTrk) = vxCandidate->covariancePosition();
       }
-      W_mat.block(5*NTrk+3,5*NTrk+3,3,3) = vertex->covariancePosition();
+      W_mat.block<3,3>(5*NTrk+3,5*NTrk+3) = vertex->covariancePosition();
       V0_err = D_vec.transpose() * W_mat * D_vec;
     } else if (ndim == 3*NTrk+3) {
       Amg::MatrixX D_vec(3*NTrk+6,1); D_vec.setZero();
@@ -1031,8 +1039,11 @@ namespace Trk
 
       Amg::MatrixX W_mat(3*NTrk+6,3*NTrk+6); W_mat.setZero();
       W_mat.block(0,0,ndim,ndim) = fullCov;
-      W_mat.block(3*NTrk+3,3*NTrk+3,3,3) = vertex->covariancePosition();
+      W_mat.block<3,3>(3*NTrk+3,3*NTrk+3) = vertex->covariancePosition();
       V0_err = D_vec.transpose() * W_mat * D_vec;
+    }else{
+      ATH_MSG_ERROR("This should not happen - returning zero.");
+      return 0;
     }
 
     double LxyErrsq = V0_err(0,0);
@@ -1133,9 +1144,9 @@ namespace Trk
       } else {
         Amg::MatrixX V0_cov = makeV0Cov(vxCandidate);
         W_mat.block(0,0,V0_cov.rows(),V0_cov.rows()) = V0_cov;
-        W_mat.block(5*NTrk,5*NTrk,3,3) = vxCandidate->covariancePosition();
+        W_mat.block<3,3>(5*NTrk,5*NTrk) = vxCandidate->covariancePosition();
       }
-      W_mat.block(5*NTrk+3,5*NTrk+3,3,3) = vertex->covariancePosition();
+      W_mat.block<3,3>(5*NTrk+3,5*NTrk+3) = vertex->covariancePosition();
       V0_err = D_vec.transpose() * W_mat * D_vec;
     } else if (ndim == 3*NTrk+3) {
       Amg::MatrixX D_vec(3*NTrk+6,1); D_vec.setZero();
@@ -1153,8 +1164,11 @@ namespace Trk
 
       Amg::MatrixX W_mat(3*NTrk+6,3*NTrk+6); W_mat.setZero();
       W_mat.block(0,0,ndim,ndim) = fullCov;
-      W_mat.block(3*NTrk+3,3*NTrk+3,3,3) = vertex->covariancePosition();
+      W_mat.block<3,3>(3*NTrk+3,3*NTrk+3) = vertex->covariancePosition();
       V0_err = D_vec.transpose() * W_mat * D_vec;
+    }else{
+      ATH_MSG_ERROR("This should not happen - returning zero.");
+      return 0;
     }
 
     double LxyzErrsq = V0_err(0,0);
@@ -1173,7 +1187,7 @@ namespace Trk
   {
     unsigned int NTrk = vxCandidate->vxTrackAtVertex().size();
     if (masses.size() != NTrk) {
-      ATH_MSG_DEBUG("The provided number of masses does not match the number of tracks in the vertex");
+      ATH_MSG_ERROR("The provided number of masses does not match the number of tracks in the vertex");
       return -999999.;
     }
     //double CONST = 1000./CLHEP::c_light;
@@ -1195,7 +1209,7 @@ namespace Trk
   {
     unsigned int NTrk = vxCandidate->vxTrackAtVertex().size();
     if (masses.size() != NTrk) {
-      ATH_MSG_DEBUG("The provided number of masses does not match the number of tracks in the vertex");
+      ATH_MSG_ERROR("The provided number of masses does not match the number of tracks in the vertex");
       return -999999.;
     }
     Amg::MatrixX cov = tauMassCovariance(vxCandidate,vertex,masses);
@@ -1230,7 +1244,7 @@ namespace Trk
     // Tau = CONST*M*(Px*dx+Py*dy)/(PT*PT)
     unsigned int NTrk = vxCandidate->vxTrackAtVertex().size();
     if (masses.size() != NTrk) {
-      ATH_MSG_DEBUG("The provided number of masses does not match the number of tracks in the vertex");
+      ATH_MSG_ERROR("The provided number of masses does not match the number of tracks in the vertex");
       return -999999.;
     }
     //double CONST = 1000./CLHEP::c_light;
@@ -1321,9 +1335,9 @@ namespace Trk
       } else {
         Amg::MatrixX V0_cov = makeV0Cov(vxCandidate);
         W_mat.block(0,0,V0_cov.rows(),V0_cov.rows()) = V0_cov;
-        W_mat.block(5*NTrk,5*NTrk,3,3) =  vxCandidate->covariancePosition();
+        W_mat.block<3,3>(5*NTrk,5*NTrk) =  vxCandidate->covariancePosition();
       }
-      W_mat.block(5*NTrk+3,5*NTrk+3,3,3) = vertex->covariancePosition();
+      W_mat.block<3,3>(5*NTrk+3,5*NTrk+3) = vertex->covariancePosition();
       V0_err = D_vec.transpose() * W_mat * D_vec;
     } else if (ndim == 3*NTrk+3) {
       Amg::MatrixX D_vec(3*NTrk+6,1); D_vec.setZero();
@@ -1341,8 +1355,11 @@ namespace Trk
 
       Amg::MatrixX W_mat(3*NTrk+6,3*NTrk+6); W_mat.setZero();
       W_mat.block(0,0,ndim,ndim) = fullCov;
-      W_mat.block(3*NTrk+3,3*NTrk+3,3,3) =  vertex->covariancePosition();
+      W_mat.block<3,3>(3*NTrk+3,3*NTrk+3) =  vertex->covariancePosition();
       V0_err = D_vec.transpose() * W_mat * D_vec;
+    }else{
+      ATH_MSG_ERROR("This should not happen - returning zero.");
+      return 0;
     }
 
     double tauErrsq = V0_err(0,0);
@@ -1362,7 +1379,7 @@ namespace Trk
   {
     unsigned int NTrk = vxCandidate->vxTrackAtVertex().size();
     if (masses.size() != NTrk) {
-      ATH_MSG_DEBUG("The provided number of masses does not match the number of tracks in the vertex");
+      ATH_MSG_ERROR("The provided number of masses does not match the number of tracks in the vertex");
       return -999999.;
     }
     double error = -999999.;
@@ -1454,9 +1471,9 @@ namespace Trk
       } else {
         Amg::MatrixX V0_cov = makeV0Cov(vxCandidate);
         W_mat.block(0,0,V0_cov.rows(),V0_cov.rows()) = V0_cov;
-        W_mat.block(5*NTrk,5*NTrk,3,3) = vxCandidate->covariancePosition();
+        W_mat.block<3,3>(5*NTrk,5*NTrk) = vxCandidate->covariancePosition();
       }
-      W_mat.block(5*NTrk+3,5*NTrk+3,3,3) = vertex->covariancePosition();
+      W_mat.block<3,3>(5*NTrk+3,5*NTrk+3) = vertex->covariancePosition();
       V0_err = D_vec.transpose() * W_mat * D_vec;
     } else if (ndim == 3*NTrk+3) {
       Amg::MatrixX D_vec(3*NTrk+6,1); D_vec.setZero();
@@ -1474,8 +1491,11 @@ namespace Trk
 
       Amg::MatrixX W_mat(3*NTrk+6,3*NTrk+6); W_mat.setZero();
       W_mat.block(0,0,ndim,ndim) = fullCov;
-      W_mat.block(3*NTrk+3,3*NTrk+3,3,3) = vertex->covariancePosition();
+      W_mat.block<3,3>(3*NTrk+3,3*NTrk+3) = vertex->covariancePosition();
       V0_err = D_vec.transpose() * W_mat * D_vec;
+    }else{
+      ATH_MSG_ERROR("This should not happen - returning zero.");
+      return 0;
     }
 
     double tauErrsq = V0_err(0,0);
@@ -1513,7 +1533,7 @@ namespace Trk
     // Tau = CONST*M*(Px*dx+Py*dy+Pz*dz)/(P*P)
     unsigned int NTrk = vxCandidate->vxTrackAtVertex().size();
     if (masses.size() != NTrk) {
-      ATH_MSG_DEBUG("The provided number of masses does not match the number of tracks in the vertex");
+      ATH_MSG_ERROR("The provided number of masses does not match the number of tracks in the vertex");
       return -999999.;
     }
     //double CONST = 1000./CLHEP::c_light;
@@ -1607,9 +1627,9 @@ namespace Trk
       } else {
         Amg::MatrixX V0_cov = makeV0Cov(vxCandidate);
         W_mat.block(0,0,V0_cov.rows(),V0_cov.rows()) = V0_cov;
-        W_mat.block(5*NTrk,5*NTrk,3,3) =  vxCandidate->covariancePosition();
+        W_mat.block<3,3>(5*NTrk,5*NTrk) =  vxCandidate->covariancePosition();
       }
-      W_mat.block(5*NTrk+3,5*NTrk+3,3,3) = vertex->covariancePosition();
+      W_mat.block<3,3>(5*NTrk+3,5*NTrk+3) = vertex->covariancePosition();
       V0_err = D_vec.transpose() * W_mat * D_vec;
     } else if (ndim == 3*NTrk+3) {
       Amg::MatrixX D_vec(3*NTrk+6,1); D_vec.setZero();
@@ -1627,8 +1647,11 @@ namespace Trk
 
       Amg::MatrixX W_mat(3*NTrk+6,3*NTrk+6); W_mat.setZero();
       W_mat.block(0,0,ndim,ndim) = fullCov;
-      W_mat.block(3*NTrk+3,3*NTrk+3,3,3) =  vertex->covariancePosition();
+      W_mat.block<3,3>(3*NTrk+3,3*NTrk+3) =  vertex->covariancePosition();
       V0_err = D_vec.transpose() * W_mat * D_vec;
+    }else{
+      ATH_MSG_ERROR("This should not happen - returning zero.");
+      return 0;
     }
 
     double tauErrsq = V0_err(0,0);
@@ -1724,9 +1747,9 @@ namespace Trk
       } else {
         Amg::MatrixX V0_cov = makeV0Cov(vxCandidate);
         W_mat.block(0,0,V0_cov.rows(),V0_cov.rows()) = V0_cov;
-        W_mat.block(5*NTrk,5*NTrk,3,3) = vxCandidate->covariancePosition();
+        W_mat.block<3,3>(5*NTrk,5*NTrk) = vxCandidate->covariancePosition();
       }
-      W_mat.block(5*NTrk+3,5*NTrk+3,3,3) = vertex->covariancePosition();
+      W_mat.block<3,3>(5*NTrk+3,5*NTrk+3) = vertex->covariancePosition();
       V0_err = D_vec.transpose() * W_mat * D_vec;
     } else if (ndim == 3*NTrk+3) {
       Amg::MatrixX D_vec(3*NTrk+6,1); D_vec.setZero();
@@ -1744,8 +1767,11 @@ namespace Trk
 
       Amg::MatrixX W_mat(3*NTrk+6,3*NTrk+6); W_mat.setZero();
       W_mat.block(0,0,ndim,ndim) = fullCov;
-      W_mat.block(3*NTrk+3,3*NTrk+3,3,3) = vertex->covariancePosition();
+      W_mat.block<3,3>(3*NTrk+3,3*NTrk+3) = vertex->covariancePosition();
       V0_err = D_vec.transpose() * W_mat * D_vec;
+    }else{
+      ATH_MSG_ERROR("This should not happen - returning zero.");
+      return 0;
     }
 
     double tauErrsq = V0_err(0,0);
@@ -1896,253 +1922,12 @@ namespace Trk
     return origTrk;
   }
 
-  /* JRC - NOT POSSIBLE WITH NEW EDM
-  Rec::TrackParticle* V0Tools::createParticle(const ExtendedVxCandidate * vxCandidate) const
-  {
-    //if(charge(vxCandidate) != 0) {
-    //  ATH_MSG_DEBUG("sum of charges in vxCandidate is not 0. No Neutral Perigee created");
-    //  return NULL;
-    //}
-    Trk::V0Hypothesis* hypothesis = new Trk::V0Hypothesis(*vxCandidate,0,0,0);
-    Rec::TrackParticle* neutral = createParticle(hypothesis);
-    delete hypothesis;
-    return neutral;
-  }
-  */
-
-  /* JRC - NOT POSSIBLE WITH NEW EDM
-  Rec::TrackParticle* V0Tools::createParticle(const Trk::V0Hypothesis* v0Hypothesis) const
-  {
-    const std::vector<Trk::VxTrackAtVertex*> * myTrackVectorPtr=v0Hypothesis->vxTrackAtVertex();
-    if (myTrackVectorPtr==0) {
-      ATH_MSG_DEBUG("0 pointer for vector of Tracks in VxCandidate. No Neutral Perigee could be created");
-      return 0;
-    }
-
-    Amg::Vector3D gp(0.,0.,0.), gp0(0.,0.,0.);
-    Rec::TrackParticle* nTrkPrt;
-    unsigned int NTrk = v0Hypothesis->vxTrackAtVertex()->size();
-
-    double Px=0., Py=0., Pz=0., D0=0., Z0=0., T0=0.;
-    CLHEP::HepVector phi(NTrk,0), theta(NTrk,0), qOverP(NTrk,0);
-    CLHEP::HepVector dPxdphi(NTrk,0), dPxdtheta(NTrk,0), dPxdqOverP(NTrk,0);
-    CLHEP::HepVector dPydphi(NTrk,0), dPydtheta(NTrk,0), dPydqOverP(NTrk,0);
-    CLHEP::HepVector dPzdphi(NTrk,0), dPzdtheta(NTrk,0), dPzdqOverP(NTrk,0);
-    CLHEP::HepVector dPhidphi(NTrk,0), dPhidtheta(NTrk,0), dPhidqOverP(NTrk,0);
-    CLHEP::HepVector dThetadphi(NTrk,0), dThetadtheta(NTrk,0), dThetadqOverP(NTrk,0);
-    CLHEP::HepVector dinvPdphi(NTrk,0), dinvPdtheta(NTrk,0), dinvPdqOverP(NTrk,0);
-    CLHEP::HepVector dD0dphi(NTrk,0), dD0dtheta(NTrk,0), dD0dqOverP(NTrk,0);
-    CLHEP::HepVector dZ0dphi(NTrk,0), dZ0dtheta(NTrk,0), dZ0dqOverP(NTrk,0);
-
-    for( unsigned int it=0; it<NTrk; it++) {
-      const Trk::TrackParameters*  bPer = (*(v0Hypothesis->vxTrackAtVertex()))[it]->perigeeAtVertex();
-      phi[it]    = bPer->parameters()[Trk::phi];
-      theta[it]  = bPer->parameters()[Trk::theta];
-      qOverP[it] = bPer->parameters()[Trk::qOverP];
-      double px = bPer->momentum()[Trk::px];
-      double py = bPer->momentum()[Trk::py];
-      double pz = bPer->momentum()[Trk::pz];
-      Px += px;
-      Py += py;
-      Pz += pz;
-      dPxdphi[it] = -py;
-      dPydphi[it] =  px;
-      dPxdtheta[it] =  cos(phi[it])*pz;
-      dPydtheta[it] =  sin(phi[it])*pz;
-      dPzdtheta[it] = -sin(theta[it])/fabs(qOverP[it]);
-      dPxdqOverP[it] = -px/qOverP[it];
-      dPydqOverP[it] = -py/qOverP[it];
-      dPzdqOverP[it] = -pz/qOverP[it];
-    }
-
-    double Ptsq = Px*Px + Py*Py;
-    double Pt = (Ptsq>0.) ? sqrt(Ptsq) : 0.;
-    double Psq = Ptsq + Pz*Pz;
-    double P = (Psq>0.) ? sqrt(Psq) : 0.;
-    double invP = 1./P;
-    double Phi = atan2(Py,Px);
-    double Theta = acos(Pz/P);
-    while ( fabs(Phi) > M_PI ) Phi += ( Phi > 0. ) ? -2.*M_PI : 2.*M_PI;
-    while ( Theta > 2.*M_PI ) Theta -= 2.*M_PI;
-    while ( Theta < -M_PI ) Theta += M_PI;
-    if ( Theta > M_PI ) {
-      Theta = 2.*M_PI - Theta;
-      if ( Phi >= 0. ) Phi += ( Phi > 0. ) ? -M_PI : M_PI;
-    }
-    if ( Theta < 0. ) {
-      Theta = - Theta;
-      if ( Phi >= 0. ) Phi += ( Phi > 0. ) ? -M_PI : M_PI;
-    }
-
-    double dD0dx = -sin(Phi);
-    double dD0dy =  cos(Phi);
-    double dZ0dx = -cos(Phi)/tan(Theta);
-    double dZ0dy = -sin(Phi)/tan(Theta);
-    double dZ0dz = 1.;
-
-    double dPhidPx = -Py/(Pt*Pt); double dPhidPy = Px/(Pt*Pt);
-    double dThetadPx = Px*Pz/(P*P*Pt); double dThetadPy = Py*Pz/(P*P*Pt); double dThetadPz = -Pt/(P*P);
-
-    for( unsigned int it=0; it<NTrk; it++) {
-      dPhidphi[it]      = dPhidPx*dPxdphi[it]    + dPhidPy*dPydphi[it];
-      dPhidtheta[it]    = dPhidPx*dPxdtheta[it]  + dPhidPy*dPydtheta[it];
-      dPhidqOverP[it]   = dPhidPx*dPxdqOverP[it] + dPhidPy*dPydqOverP[it];
-      dThetadphi[it]    = dThetadPx*dPxdphi[it]    + dThetadPy*dPydphi[it]    + dThetadPz*dPzdphi[it];
-      dThetadtheta[it]  = dThetadPx*dPxdtheta[it]  + dThetadPy*dPydtheta[it]  + dThetadPz*dPzdtheta[it];
-      dThetadqOverP[it] = dThetadPx*dPxdqOverP[it] + dThetadPy*dPydqOverP[it] + dThetadPz*dPzdqOverP[it];
-      dinvPdphi[it]     = -(Px*dPxdphi[it]    + Py*dPydphi[it]    + Pz*dPzdphi[it]   )*invP/(P*P);
-      dinvPdtheta[it]   = -(Px*dPxdtheta[it]  + Py*dPydtheta[it]  + Pz*dPzdtheta[it] )*invP/(P*P);
-      dinvPdqOverP[it]  = -(Px*dPxdqOverP[it] + Py*dPydqOverP[it] + Pz*dPzdqOverP[it])*invP/(P*P);
-    }
-
-    unsigned int ndim = 0;
-    if (v0Hypothesis->fullCovariance() != 0) {
-      const Amg::MatrixX* fullCov = v0Hypothesis->fullCovariance();
-      ndim = fullCov->rows();
-    } else {
-      ATH_MSG_DEBUG("0 pointer for full covariance. Making-up one from the vertex and tracks covariances");
-    }
-
-    int mdim = 5*NTrk+3;
-    if (ndim == 3*NTrk+3) mdim = 3*NTrk+3;
-    Amg::MatrixX fullCov(mdim,mdim); fullCov.setZero();
-    if (ndim != 0) {
-      if (ndim == 5*NTrk+6) {
-        fullCov = v0Hypothesis->fullCovariance()->block(0,0,5*NTrk+2,5*NTrk+2);
-      } else {
-        fullCov = *(v0Hypothesis->fullCovariance());
-      }
-    } else {
-      const Amg::MatrixX& cov = v0Hypothesis->recVertex().covariancePosition();
-      // JRC who commented this?
-      //const Trk::TrackParameters*  bPer0 = (*(v0Hypothesis->vxTrackAtVertex()))[0]->perigeeAtVertex();
-      //const Trk::TrackParameters*  bPer1 = (*(v0Hypothesis->vxTrackAtVertex()))[1]->perigeeAtVertex();
-      //const Trk::MeasuredPerigee* mPer0 = dynamic_cast<const Trk::MeasuredPerigee*>(bPer0);
-      //const Trk::MeasuredPerigee* mPer1 = dynamic_cast<const Trk::MeasuredPerigee*>(bPer1);
-      //Trk::CovarianceMatrix cov0 = mPer0->localErrorMatrix().covariance();
-      //Trk::CovarianceMatrix cov1 = mPer1->localErrorMatrix().covariance();
-      //fullCov.sub(1, cov0);
-      //fullCov.sub(6, cov1);
-      //fullCov.sub(11, cov);
-      for( unsigned int it=0; it<NTrk; it++) {
-        const Trk::TrackParameters*  bPer_tmp = (*(v0Hypothesis->vxTrackAtVertex()))[it]->perigeeAtVertex();
-        if (bPer_tmp == 0) continue;
-        const AmgSymMatrix(5)* cov_tmp = bPer_tmp->covariance();
-        fullCov.block(5*it,5*it,5,5) = *cov_tmp;
-      }
-      fullCov.block(5*NTrk,5*NTrk,cov.rows(),cov.rows()) = cov;
-    }
-
-    Amg::MatrixX DerCovV0(5,5*NTrk+3); DerCovV0.setZero();
-    Amg::MatrixX DerCovVK(5,3*NTrk+3); DerCovVK.setZero();
-
-    if (ndim == 5*NTrk+3 || ndim == 5*NTrk+6 || ndim == 0) {
-      DerCovV0(0,5*NTrk+0) = dD0dx;
-      DerCovV0(0,5*NTrk+1) = dD0dy;
-      DerCovV0(1,5*NTrk+0) = dZ0dx;
-      DerCovV0(1,5*NTrk+1) = dZ0dy;
-      DerCovV0(1,5*NTrk+2) = dZ0dz;
-      for( unsigned int it=0; it<NTrk; it++) {
-        DerCovV0(2,2+5*it) = dPhidphi[it];
-        DerCovV0(2,3+5*it) = dPhidtheta[it];
-        DerCovV0(2,4+5*it) = dPhidqOverP[it];
-        DerCovV0(3,2+5*it) = dThetadphi[it];
-        DerCovV0(3,3+5*it) = dThetadtheta[it];
-        DerCovV0(3,4+5*it) = dThetadqOverP[it];
-        DerCovV0(4,2+5*it) = dinvPdphi[it];
-        DerCovV0(4,3+5*it) = dinvPdtheta[it];
-        DerCovV0(4,4+5*it) = dinvPdqOverP[it];
-      }
-    } else if (ndim == 3*NTrk+3) {
-      DerCovVK(0,0) = dD0dx;
-      DerCovVK(0,1) = dD0dy;
-      DerCovVK(1,0) = dZ0dx;
-      DerCovVK(1,1) = dZ0dy;
-      DerCovVK(1,2) = dZ0dz;
-      for( unsigned int it=0; it<NTrk; it++) {
-        DerCovVK(2,3+3*it) = dPhidphi[it];
-        DerCovVK(2,4+3*it) = dPhidtheta[it];
-        DerCovVK(2,5+3*it) = dPhidqOverP[it];
-        DerCovVK(3,3+3*it) = dThetadphi[it];
-        DerCovVK(3,4+3*it) = dThetadtheta[it];
-        DerCovVK(3,5+3*it) = dThetadqOverP[it];
-        DerCovVK(4,3+3*it) = dinvPdphi[it];
-        DerCovVK(4,4+3*it) = dinvPdtheta[it];
-        DerCovVK(4,5+3*it) = dinvPdqOverP[it];
-      }
-    }
-
-    AmgSymMatrix(5) SumCov; SumCov.setZero();
-    const Trk::NeutralParameters* perigee;
-    std::vector<const Trk::NeutralParameters*> tmpPar;
-
-// Perigee at fitted vertex
-    if (ndim == 5*NTrk+3 || ndim == 5*NTrk+6 || ndim == 0) SumCov = fullCov.similarity( DerCovV0 );
-    if (ndim == 3*NTrk+3) SumCov = fullCov.similarity( DerCovVK );
-
-    gp = v0Hypothesis->recVertex().position();
-    PerigeeSurface surface;
-
-    perigee = surface.createNeutralParameters( D0, Z0, Phi, Theta, invP, &SumCov );
-    tmpPar.push_back(perigee);
-
-// Perigee with respect to (0,0,0)
-    gp = gp0;
-    D0 = sin(Phi) * (gp.x() - v0Hypothesis->recVertex().position().x()) -
-         cos(Phi) * (gp.y() - v0Hypothesis->recVertex().position().y());
-    T0 = (gp.x() - v0Hypothesis->recVertex().position().x())*cos(Phi) +
-         (gp.y() - v0Hypothesis->recVertex().position().y())*sin(Phi);
-    Z0 = -gp.z() + v0Hypothesis->recVertex().position().z() + T0/tan(Theta);
-
-    for( unsigned int it=0; it<NTrk; it++) {
-      dD0dphi[it]    =  T0*dPhidphi[it];
-      dD0dtheta[it]  =  T0*dPhidtheta[it];
-      dD0dqOverP[it] =  T0*dPhidqOverP[it];
-      dZ0dphi[it]    = -D0*dPhidphi[it]/tan(Theta)    - T0*dThetadphi[it]/(sin(Theta)*sin(Theta));
-      dZ0dtheta[it]  = -D0*dPhidtheta[it]/tan(Theta)  - T0*dThetadtheta[it]/(sin(Theta)*sin(Theta));
-      dZ0dqOverP[it] = -D0*dPhidqOverP[it]/tan(Theta) - T0*dThetadqOverP[it]/(sin(Theta)*sin(Theta));
-    }
-
-    if (ndim == 5*NTrk+3 || ndim == 5*NTrk+6 || ndim == 0) {
-      for( unsigned int it=0; it<NTrk; it++) {
-        DerCovV0(0,2+5*it) = dD0dphi[it];
-        DerCovV0(0,3+5*it) = dD0dtheta[it];
-        DerCovV0(0,4+5*it) = dD0dqOverP[it];
-        DerCovV0(1,2+5*it) = dZ0dphi[it];
-        DerCovV0(1,3+5*it) = dZ0dtheta[it];
-        DerCovV0(1,4+5*it) = dZ0dqOverP[it];
-      }
-    } else if (ndim == 3*NTrk+3) {
-      for( unsigned int it=0; it<NTrk; it++) {
-        DerCovVK(0,3+3*it) = dD0dphi[it];
-        DerCovVK(0,4+3*it) = dD0dtheta[it];
-        DerCovVK(0,5+3*it) = dD0dqOverP[it];
-        DerCovVK(1,3+3*it) = dZ0dphi[it];
-        DerCovVK(1,4+3*it) = dZ0dtheta[it];
-        DerCovVK(1,5+3*it) = dZ0dqOverP[it];
-      }
-    }
-
-    if (ndim == 5*NTrk+3 || ndim == 5*NTrk+6 || ndim == 0) SumCov = fullCov.similarity( DerCovV0 );
-    if (ndim == 3*NTrk+3) SumCov = fullCov.similarity( DerCovVK );
-
-    perigee = surface.createNeutralParameters( D0, Z0, Phi, Theta, invP, &SumCov );
-
-    const Trk::FitQuality* fitQuality = new Trk::FitQuality(v0Hypothesis->recVertex().fitQuality().chiSquared(),
-                                                            v0Hypothesis->recVertex().fitQuality().numberDoF());
-
-    nTrkPrt = new Rec::TrackParticle(0, Trk::V0Vtx, v0Hypothesis, new Trk::TrackSummary(),
-                                     tmpPar, perigee, fitQuality);
-    return nTrkPrt;
-  }
-  */
-
   double V0Tools::invariantMassBeforeFitIP(const xAOD::Vertex * vxCandidate, std::span<const double> masses) const
   {
     double px = 0., py = 0., pz = 0., e = 0.;
     unsigned int NTrk = vxCandidate->vxTrackAtVertex().size();
     if (masses.size() != NTrk) {
-      ATH_MSG_DEBUG("The provided number of masses does not match the number of tracks in the vertex");
+      ATH_MSG_ERROR("The provided number of masses does not match the number of tracks in the vertex");
       return -999999.;
     }
     for( unsigned int it=0; it<NTrk; it++) {
@@ -2168,7 +1953,7 @@ namespace Trk
     double px = 0., py = 0., pz = 0., e = 0.;
     unsigned int NTrk = vxCandidate->vxTrackAtVertex().size();
     if (masses.size() != NTrk) {
-      ATH_MSG_DEBUG("The provided number of masses does not match the number of tracks in the vertex");
+      ATH_MSG_ERROR("The provided number of masses does not match the number of tracks in the vertex");
       return -999999.;
     }
     for( unsigned int it=0; it<NTrk; it++) {
@@ -2198,7 +1983,7 @@ namespace Trk
     double px = 0., py = 0., pz = 0., e = 0.;
     unsigned int NTrk = vxCandidate->vxTrackAtVertex().size();
     if (masses.size() != NTrk) {
-      ATH_MSG_DEBUG("The provided number of masses does not match the number of tracks in the vertex");
+      ATH_MSG_ERROR("The provided number of masses does not match the number of tracks in the vertex");
       return -999999.;
     }
     for( unsigned int it=0; it<NTrk; it++) {
@@ -2225,7 +2010,7 @@ namespace Trk
   {
     unsigned int NTrk = vxCandidate->vxTrackAtVertex().size();
     if (masses.size() != NTrk) {
-      ATH_MSG_DEBUG("The provided number of masses does not match the number of tracks in the vertex");
+      ATH_MSG_ERROR("The provided number of masses does not match the number of tracks in the vertex");
       return -999999.;
     }
     double mass = invariantMassBeforeFitIP(vxCandidate, masses);
@@ -2292,7 +2077,7 @@ namespace Trk
   {
     unsigned int NTrk = vxCandidate->vxTrackAtVertex().size();
     if (masses.size() != NTrk) {
-      ATH_MSG_DEBUG("The provided number of masses does not match the number of tracks in the vertex");
+      ATH_MSG_ERROR("The provided number of masses does not match the number of tracks in the vertex");
       return -999999.;
     }
     Amg::Vector3D vertex = vxCandidate->position();
@@ -2305,7 +2090,7 @@ namespace Trk
   {
     unsigned int NTrk = vxCandidate->vxTrackAtVertex().size();
     if (masses.size() != NTrk) {
-      ATH_MSG_DEBUG("The provided number of masses does not match the number of tracks in the vertex");
+      ATH_MSG_ERROR("The provided number of masses does not match the number of tracks in the vertex");
       return -999999.;
     }
     Trk::PerigeeSurface perigeeSurface(vertex);
@@ -2474,9 +2259,9 @@ namespace Trk
       } else {
         Amg::MatrixX V0_cov = makeV0Cov(vxCandidate);
         W_mat.block(0,0,V0_cov.rows(),V0_cov.rows()) = V0_cov;
-        W_mat.block(5*NTrk,5*NTrk,3,3) = vxCandidate->covariancePosition();
+        W_mat.block<3,3>(5*NTrk,5*NTrk) = vxCandidate->covariancePosition();
       }
-      W_mat.block(5*NTrk+3,5*NTrk+3,3,3) =  vertex->covariancePosition();
+      W_mat.block<3,3>(5*NTrk+3,5*NTrk+3) =  vertex->covariancePosition();
       V0_err = D_mat.transpose() * W_mat * D_mat;
     } else if (ndim == 3*NTrk+3) {
       Amg::MatrixX D_mat(3*NTrk+6,2); D_mat.setZero();
@@ -2496,8 +2281,11 @@ namespace Trk
       D_mat(3*NTrk+5,0) = 0.;
       Amg::MatrixX W_mat(3*NTrk+6,3*NTrk+6); W_mat.setZero();
       W_mat.block(0,0,ndim,ndim) = fullCov;
-      W_mat.block(3*NTrk+3,3*NTrk+3,3,3) = vertex->covariancePosition();
+      W_mat.block<3,3>(3*NTrk+3,3*NTrk+3) = vertex->covariancePosition();
       V0_err = D_mat.transpose() * W_mat * D_mat;
+    }else{
+      ATH_MSG_ERROR("This should not happen - returning zero.");
+      return 0;
     }
     return V0_err(0,1);
   }
@@ -2527,7 +2315,7 @@ namespace Trk
     Amg::MatrixX V0_err;
     unsigned int NTrk = vxCandidate->vxTrackAtVertex().size();
     if (masses.size() != NTrk) {
-      ATH_MSG_DEBUG("The provided number of masses does not match the number of tracks in the vertex");
+      ATH_MSG_ERROR("The provided number of masses does not match the number of tracks in the vertex");
       return V0_err;
     }
     //double CONST = 1000./CLHEP::c_light;
@@ -2622,9 +2410,9 @@ namespace Trk
       } else {
         Amg::MatrixX V0_cov = makeV0Cov(vxCandidate);
         W_mat.block(0,0,V0_cov.rows(),V0_cov.rows()) = V0_cov;
-        W_mat.block(5*NTrk,5*NTrk,3,3) = vxCandidate->covariancePosition();
+        W_mat.block<3,3>(5*NTrk,5*NTrk) = vxCandidate->covariancePosition();
       }
-      W_mat.block(5*NTrk+3,5*NTrk,3,3) = vertex->covariancePosition();
+      W_mat.block<3,3>(5*NTrk+3,5*NTrk) = vertex->covariancePosition();
       V0_err = D_mat.transpose() * W_mat * D_mat;
     } else if (ndim == 3*NTrk+3) {
       Amg::MatrixX D_mat(3*NTrk+6,2); D_mat.setZero();
@@ -2644,8 +2432,11 @@ namespace Trk
       D_mat(3*NTrk+5,0) = 0.;
       Amg::MatrixX W_mat(3*NTrk+6,3*NTrk+6); W_mat.setZero();
       W_mat.block(0,0,ndim,ndim) = fullCov;
-      W_mat.block(3*NTrk+3,3*NTrk+3,3,3) = vertex->covariancePosition();
+      W_mat.block<3,3>(3*NTrk+3,3*NTrk+3) = vertex->covariancePosition();
       V0_err = D_mat.transpose() * W_mat * D_mat;
+    }else{
+      ATH_MSG_ERROR("This should not happen - returning zero.");
+      return V0_err;
     }
     return V0_err;
   }

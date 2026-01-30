@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 // -*- C++ -*-
 //
@@ -559,7 +559,7 @@ void powhegLesHouchesFileReader::open() {
 	erase_substr(name, "<weightid='"+IdLabel+"'>");
 	name.erase(name.find('<'));
 	m_optionalWeightsLabel[IdLabel]=name;	
-	optionalWeightsNames.push_back(name);
+	optionalWeightsNames.push_back(std::move(name));
       }
       /*END MOD*/
     }
@@ -611,8 +611,8 @@ void powhegLesHouchesFileReader::open() {
       m_initComments += m_cfile.getline() + "\n";
     }
   }
-  string central = "central";
-  optionalWeightsNames.push_back(central);
+  
+  optionalWeightsNames.emplace_back("central");
 
   if ( !m_cfile ) {
     heprup.NPRUP = -42;
@@ -719,7 +719,7 @@ bool powhegLesHouchesFileReader::doReadEvent() {
       std::string IdLabel = hs.substr(0, hs.find(">", 0));
       IdLabel = std::regex_replace(IdLabel, std::regex(R"([\D])"), "");
       std::string weightName = m_optionalWeightsLabel[IdLabel];
-      std::string value=hs;
+      std::string value=std::move(hs);
       erase_substr(value, "<wgtid='"+IdLabel+"'>");
       erase_substr(value, "<wgtid=\""+IdLabel+"\">");
       erase_substr(value, "</wgt>");

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "PLRDetectorTool.h"
@@ -40,9 +40,9 @@ StatusCode PLRDetectorTool::create()
   std::string table{"PLRXDD"};
 
   //
-  // Check the availability
+  // Check the availability (if not running from SQLite)
   //
-  if(sqlreader){
+  if(!sqlreader){
       if (!isAvailable(node, table)) {
         ATH_MSG_ERROR("No PLR geometry found. PLR can not be built.");
         return StatusCode::FAILURE;
@@ -97,53 +97,6 @@ StatusCode PLRDetectorTool::clear()
   return StatusCode::SUCCESS;
 
 }
-
-
-StatusCode PLRDetectorTool::registerCallback ATLAS_NOT_THREAD_SAFE ()
-{
-  //
-  // Register call-back for software alignment
-  //
-  if (m_alignable) {
-    if (detStore()->contains<AlignableTransformContainer>(m_alignmentFolderName)) {
-      ATH_MSG_DEBUG("Registering callback on AlignableTransformContainer with folder " << m_alignmentFolderName);
-      const DataHandle<AlignableTransformContainer> atc;
-      StatusCode sc = detStore()->regFcn(&IGeoModelTool::align, dynamic_cast<IGeoModelTool *>(this), atc, m_alignmentFolderName);
-      if (sc.isFailure()) {
-        ATH_MSG_ERROR("Could not register callback on AlignableTransformContainer with folder "
-                      << m_alignmentFolderName);
-        return StatusCode::FAILURE;
-      }
-    } else {
-      ATH_MSG_WARNING("Unable to register callback on AlignableTransformContainer with folder "
-                      << m_alignmentFolderName << ", Alignment disabled (only if no Run2 scheme is loaded)!");
-    }
-  } else {
-    ATH_MSG_INFO("Alignment disabled. No callback registered");
-    // We return failure otherwise it will try and register a GeoModelSvc callback associated with this callback.
-  }
-  return StatusCode::SUCCESS;
-}
-
-
-StatusCode PLRDetectorTool::align ATLAS_NOT_THREAD_SAFE (IOVSVC_CALLBACK_ARGS_P(I, keys))
-//Not thread safe as the call m_manager->align will invalidateAllElements it holds
-{
-  //
-  // The call-back routine, which just calls the real call-back routine from the manager.
-  //
-  if (!m_detManager) {
-    ATH_MSG_WARNING("Manager does not exist");
-    return StatusCode::FAILURE;
-  }
-  if (m_alignable) {
-    return const_cast<InDetDD::PixelDetectorManager*>(m_detManager)->align(I, keys);
-  } else {
-    ATH_MSG_DEBUG("Alignment disabled. No alignments applied");
-    return StatusCode::SUCCESS;
-  }
-}
-
 
 void PLRDetectorTool::doNumerology()
 {

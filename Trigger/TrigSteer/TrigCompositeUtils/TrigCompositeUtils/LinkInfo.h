@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGCOMPOSITEUTILS_LINKINFO_H
@@ -8,20 +8,13 @@
 #include "xAODTrigger/TrigComposite.h"
 #include "AthLinks/ElementLink.h"
 #include "AsgMessaging/StatusCode.h"
+#include "ActiveState.h"
+#include "TypelessLinkInfo.h"
 
 #include <optional>
 #include <unordered_set>
 
 namespace TrigCompositeUtils {
-  /**
-   * @brief Additional information returned by the TrigerDecisionTool's feature retrieval, contained within the LinkInfo.
-   **/
-  enum ActiveState {
-    UNSET, //!< Default property of state. Indicates that the creator of the LinkInfo did not supply this information
-    ACTIVE, //!< The link was still active for one-or-more of the HLT Chains requested in the TDT
-    INACTIVE //!< The link was inactive for all of the HLT Chains requested in the TDT. I.e. the object was rejected by these chains.
-  };
-
   /**
    * @brief Helper to keep a Decision object, ElementLink and ActiveState (with respect to some requested ChainGroup) linked together (for convenience)
    **/
@@ -36,6 +29,9 @@ namespace TrigCompositeUtils {
     LinkInfo(const Decision* s, const ElementLink<T>& l, ActiveState as, const DecisionIDContainer &decisionIDs)
       : source{s}, link{l}, state{as} {
       decisions.emplace(decisionIDs.begin(), decisionIDs.end());
+    }
+
+    LinkInfo(const TypelessLinkInfo& li, const ElementLink<T>& l) : source{li.source}, link{l}, state{li.state}, decisions{li.decisions} {
     }
 
     bool isValid() const {

@@ -11,7 +11,7 @@
 #ifndef CALOCONDPHYSALGS_CaloNoiseCompCondAlg_H
 #define CALOCONDPHYSALGS_CaloNoiseCompCondAlg_H
 
-#include "AthenaBaseComps/AthAlgorithm.h"
+#include "AthenaBaseComps/AthCondAlgorithm.h"
 #include "CaloDetDescr/CaloDetDescrManager.h" //read handle
 #include "CaloIdentifier/CaloCell_ID.h" //use of enum in namespace
 #include "CaloConditions/CaloNoise.h" //write handle
@@ -57,7 +57,7 @@ enum CaloNumbers {
 
 namespace CLHEP { class HepRandomEngine; }
 
-class CaloNoiseCompCondAlg: public AthAlgorithm {
+class CaloNoiseCompCondAlg: public AthCondAlgorithm {
 
    public:
 
@@ -69,9 +69,12 @@ class CaloNoiseCompCondAlg: public AthAlgorithm {
     /** standard Athena-Algorithm method */
     virtual StatusCode          initialize() override final;
     /** standard Athena-Algorithm method */
-    virtual StatusCode          execute() override final;
+    virtual StatusCode          execute(const EventContext& /*ctx*/) const override final {return StatusCode::SUCCESS;};
     /** standard Athena-Algorithm method */
     virtual StatusCode          finalize() override final {return StatusCode::SUCCESS;};
+ 
+    // all the meat is here:
+    virtual StatusCode          stop() override final;
 
     //-------------- user interfaces ------------------------------------------
     // Note on NMinBias : if you use the interface without it or if you take -1, 
@@ -183,9 +186,8 @@ class CaloNoiseCompCondAlg: public AthAlgorithm {
     const LArEM_Base_ID*    m_lar_em_id{};
     const LArHEC_Base_ID*   m_lar_hec_id{};
     const LArFCAL_Base_ID*  m_lar_fcal_id{};
-     
- 
-    const CaloCell_ID* m_calocell_id{};
+
+    const CaloCell_Base_ID* m_calocell_id{};
     const CaloCell_SuperCell_ID* m_calosupercell_id{};
  
     IdentifierHash m_LArHashMax;
@@ -206,6 +208,7 @@ class CaloNoiseCompCondAlg: public AthAlgorithm {
     BooleanProperty  m_DumpDatabaseMG{this, "DumpDatabaseMG", false};
     BooleanProperty  m_DumpDatabaseLG{this, "DumpDatabaseLG", false};
     FloatProperty m_Nminbias{this, "NMinBias", -1};
+    BooleanProperty  m_isSC{this, "SuperCell", false};
   
  
     //Database  
@@ -223,7 +226,8 @@ class CaloNoiseCompCondAlg: public AthAlgorithm {
     float m_MinBiasRMS{};
 
     SG::ReadCondHandleKey<CaloDetDescrManager> m_caloMgrKey {this,"CaloDetDescrManager", "CaloDetDescrManager", "SG Key for CaloDetDescrManager in the Condition Store" };
-    const CaloDetDescrManager* m_calo_dd_man=nullptr; 
+    SG::ReadCondHandleKey<CaloSuperCellDetDescrManager> m_caloSCMgrKey {this,"CaloSuperCellDetDescrManager", "CaloSuperCellDetDescrManager", "SG Key for CaloSuperCellDetDescrManager in the Condition Store" };
+    const CaloDetDescrManager_Base* m_calo_dd_man=nullptr; 
 
     SG::ReadCondHandleKey<LArOnOffIdMapping> m_cablingKey{this,"CablingKey","LArOnOffIdMap","SG Key of LArOnOffIdMapping object"};
     const LArOnOffIdMapping *m_cabling=nullptr;
@@ -294,7 +298,7 @@ class CaloNoiseCompCondAlg: public AthAlgorithm {
       calculatePileUpNoise(const IdentifierHash &idCaloHash,
           		 const float &Nminbias);
  
-    using AthAlgorithm::index;
+    using AthCondAlgorithm::index;
     int  index(const IdentifierHash &idCaloHash);
 
     CaloCell_ID::SUBCALO caloNum(const IdentifierHash idCaloHash);  

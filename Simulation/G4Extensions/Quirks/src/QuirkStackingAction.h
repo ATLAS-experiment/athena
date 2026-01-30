@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef QUIRKSTACKINGACTION_H
@@ -15,6 +15,10 @@ public:
     virtual G4ClassificationOfNewTrack ClassifyNewTrack(const G4Track* aTrack);
     virtual void NewStage();
     virtual void PrepareNewEvent();
+
+    QuirkStackingAction(const QuirkStackingAction&) = delete;
+    QuirkStackingAction& operator=(const QuirkStackingAction&) = delete;
+
 private:
     G4bool m_firstTrack;
     G4UserStackingAction* m_defaultStackingAction;

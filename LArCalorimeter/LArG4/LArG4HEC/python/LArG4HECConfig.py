@@ -6,6 +6,7 @@ from LArG4HEC import HECGeometryType
 
 # Not used???
 def LArHECLocalCalculatorCfg(flags, name="LArHECLocalCalculator", **kwargs):
+    kwargs.setdefault("Birksk",0.0486) # this constant was not tuned for G4 10.6, so resetting back to the MC21 default value
     return CompFactory.LArHECLocalCalculator(name, **kwargs)
 
 
@@ -20,6 +21,7 @@ def LocalHECGeometry(name="LocalHECGeometry", **kwargs):
 def HECWheelCalculatorCfg(flags, name="HECWheelCalculator", **kwargs):
     result = ComponentAccumulator()
     kwargs.setdefault("GeometryCalculator", result.getPrimaryAndMerge(HECGeometryCfg(flags)))
+    kwargs.setdefault("Birksk",0.0486) # this constant was not tuned for G4 10.6, so resetting back to the MC21 default value
     result.addService(CompFactory.LArHECWheelCalculator(name, **kwargs), primary = True)
     return result
 

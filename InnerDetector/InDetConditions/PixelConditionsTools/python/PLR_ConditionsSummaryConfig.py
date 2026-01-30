@@ -7,16 +7,14 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 from PixelConditionsAlgorithms.ITkPixelConditionsConfig import (
     ITkPixelDCSCondStateAlgCfg, ITkPixelDCSCondStatusAlgCfg, ITkPixelDeadMapCondAlgCfg
 )
-from PixelReadoutGeometry.PixelReadoutGeometryConfig import PLR_ReadoutManagerCfg
 
 def PLR_ConditionsSummaryCfg(flags, name="PLR_ConditionsSummary", **kwargs):
     """Return configured ComponentAccumulator with tool for ITk Pixel Conditions"""
-    acc = PLR_ReadoutManagerCfg(flags)
-    acc.merge(ITkPixelDCSCondStateAlgCfg(flags))
+
+    acc = ITkPixelDCSCondStateAlgCfg(flags)
     acc.merge(ITkPixelDCSCondStatusAlgCfg(flags))
     acc.merge(ITkPixelDeadMapCondAlgCfg(flags))
 
-    kwargs.setdefault("PixelReadoutManager", acc.getPrimary())
     kwargs.setdefault("PixelDetEleCollKey", "PLR_DetectorElementCollection")
     kwargs.setdefault("PixelDCSStateCondData", "ITkPixelDCSStateCondData")
     kwargs.setdefault("PixelDCSStatusCondData", "ITkPixelDCSStatusCondData")

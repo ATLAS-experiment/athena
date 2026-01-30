@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
  */
 
 /* HLTMET Post Processing Method: In the HLT/MET[Mon/Mon_allCells/Mon_FEB]/DQPlots directory, there are
@@ -39,10 +39,10 @@ namespace dqutils {
   //---------------------------------------------------------------------------------------------------
   // Method to obtain summary DQFlags
   //---------------------------------------------------------------------------------------------------
-  void MonitoringFile::HLTMETDQFlagSummary(TFile* f, TString& run_dir) {
-    bool dbgLevel = false;
+  void MonitoringFile::HLTMETDQFlagSummary(TFile* f, std::string& run_dir) {
+    //bool dbgLevel = false;
 
-    if (dbgLevel) std::cout << "--> HLTMETDQFlagSummary: Updating histograms in HLT/METMon*/DQPlots  " << std::endl;
+    //if (dbgLevel) std::cout << "--> HLTMETDQFlagSummary: Updating histograms in HLT/METMon*/DQPlots  " << std::endl;
 
     f->cd("/");
     TIter next_run(f->GetListOfKeys());
@@ -50,13 +50,13 @@ namespace dqutils {
     while ((key_run = dynamic_cast<TKey*> (next_run())) != 0) {
       if (!key_run->IsFolder()) continue;
       run_dir = key_run->GetName();
-      if (!run_dir.Contains("run")) {
+      if (run_dir.find("run") == std::string::npos) {
         continue;
       }
 
       TDirectory* tdir_run = dynamic_cast<TDirectory*>(key_run);
 
-      std::string run_dir2 = run_dir.Data();
+      std::string run_dir2 = run_dir;
 
       // all merged root files have the structure "rootfile.root:/run_NNNNNNN"
       // use that to extract run number
@@ -67,12 +67,12 @@ namespace dqutils {
       // note 1: prefix all dirs and hists with '/'
       // note 2: missing dir => return
       // note 3: missing hist => continue
-      TString hlt_top = run_dir + "/HLT"; // toplevel
-      TString met_efdir = "/EFMissingET_Fex"; // EF dir
-      TString met_l2dir = "/L2MissingET_Fex"; // L2 dir
-      TString dqflag_dir = "/DQFlags"; // DQ flags dir
+      std::string hlt_top = run_dir + "/HLT"; // toplevel
+      std::string met_efdir = "/EFMissingET_Fex"; // EF dir
+      std::string met_l2dir = "/L2MissingET_Fex"; // L2 dir
+      std::string dqflag_dir = "/DQFlags"; // DQ flags dir
 
-      std::vector<TString> met_fexs, met_l2hists, met_efhists;
+      std::vector<std::string> met_fexs, met_l2hists, met_efhists;
       // expect the following fex dirs
       met_fexs.push_back("/METMon");
       //met_fexs.push_back("/METMon_FEB");
@@ -96,47 +96,47 @@ namespace dqutils {
       met_efhists.push_back("/compN_compSumEt_lin");
       met_efhists.push_back("/compN_EF_MET_status");
 
-      std::vector<TString> lbnDirs;
-      TString lbn_dqhist = "/trmet_lbn_flag";
+      std::vector<std::string> lbnDirs;
+      std::string lbn_dqhist = "/trmet_lbn_flag";
       size_t lbn_range = HLTMETGetDQLBNRange(tdir_run, lbnDirs);
 
       //std::cout << "lbn_range = " << lbn_range << std::endl;
 
       // Get EF/L2 status histograms for default Fex
-      for (std::vector<TString>::iterator itFex = met_fexs.begin(); itFex != met_fexs.end(); ++itFex) {
-        TString theL2Path = hlt_top + (*itFex) + met_l2dir;
-        TString theEFPath = hlt_top + (*itFex) + met_efdir;
-        TString theDQPath = hlt_top + (*itFex) + dqflag_dir;
+      for (std::vector<std::string>::iterator itFex = met_fexs.begin(); itFex != met_fexs.end(); ++itFex) {
+        std::string theL2Path = hlt_top + (*itFex) + met_l2dir;
+        std::string theEFPath = hlt_top + (*itFex) + met_efdir;
+        std::string theDQPath = hlt_top + (*itFex) + dqflag_dir;
 
-        TDirectory* dirl2 = f->GetDirectory(theL2Path);
+        TDirectory* dirl2 = f->GetDirectory(theL2Path.c_str());
         if (!dirl2) {
           std::cerr << "--> HLTMETDQFlagSummary: directory " << theL2Path << " not found" << std::endl;
           return;
         }
-        TDirectory* diref = f->GetDirectory(theEFPath);
+        TDirectory* diref = f->GetDirectory(theEFPath.c_str());
         if (!diref) {
           std::cerr << "--> HLTMETDQFlagSummary: directory " << theEFPath << " not found" << std::endl;
           return;
         }
-        TDirectory* dirdq = f->GetDirectory(theDQPath);
+        TDirectory* dirdq = f->GetDirectory(theDQPath.c_str());
         if (!dirdq) {
           std::cerr << "--> HLTMETDQFlagSummary: directory " << theDQPath << " not found" << std::endl;
           return;
         }
         // loop over L2 hists and copy to DQFlags
-        for (std::vector<TString>::iterator itHist = met_l2hists.begin(); itHist != met_l2hists.end(); ++itHist) {
-          TString histL2 = (theL2Path + *itHist);
-          TString histL2C = (theDQPath + *itHist);
+        for (std::vector<std::string>::iterator itHist = met_l2hists.begin(); itHist != met_l2hists.end(); ++itHist) {
+          std::string histL2 = (theL2Path + *itHist);
+          std::string histL2C = (theDQPath + *itHist);
           TH1* hl2(0), *hl2c(0);
-          if (!f->Get(histL2)) {
-            if (dbgLevel) std::cerr << "--> HLTMETDQFlagSummary: no histogram " << histL2 << std::endl;
+          if (!f->Get(histL2.c_str())) {
+            //if (dbgLevel) std::cerr << "--> HLTMETDQFlagSummary: no histogram " << histL2 << std::endl;
             continue;
           }
-          if (!f->Get(histL2C)) {
-            if (dbgLevel) std::cerr << "--> HLTMETDQFlagSummary: no histogram " << histL2C << std::endl;
+          if (!f->Get(histL2C.c_str())) {
+            //if (dbgLevel) std::cerr << "--> HLTMETDQFlagSummary: no histogram " << histL2C << std::endl;
             continue;
           }
-          hl2 = (TH1*) (f->Get(histL2));
+          hl2 = (TH1*) (f->Get(histL2.c_str()));
           // check if MET_status histogram is emtpy
           bool save_status_hist = false;
           if (*itHist == "/L2_MET_status") {
@@ -147,7 +147,7 @@ namespace dqutils {
               }
             }
           }
-          hl2c = (TH1*) (f->Get(histL2C));
+          hl2c = (TH1*) (f->Get(histL2C.c_str()));
           hl2c->Reset();
           hl2c->Add(hl2);
           //hl2c->Sumw2();
@@ -155,24 +155,24 @@ namespace dqutils {
           dirdq->cd();
           hl2c->Write("", TObject::kOverwrite);
           if (save_status_hist) {
-            if (f->cd(theL2Path)) hl2->Write("", TObject::kOverwrite);
+            if (f->cd(theL2Path.c_str())) hl2->Write("", TObject::kOverwrite);
           }
         } // end loop over l2 hists
 
         // loop over EF hists and copy to DQFlags
-        for (std::vector<TString>::iterator itHist = met_efhists.begin(); itHist != met_efhists.end(); ++itHist) {
-          TString histEF = (theEFPath + *itHist);
-          TString histEFC = (theDQPath + *itHist);
+        for (std::vector<std::string>::iterator itHist = met_efhists.begin(); itHist != met_efhists.end(); ++itHist) {
+          std::string histEF = (theEFPath + *itHist);
+          std::string histEFC = (theDQPath + *itHist);
           TH1* hef(0), *hefc(0);
-          if (!f->Get(histEF)) {
-            if (dbgLevel) std::cerr << "--> HLTMETDQFlagSummary: no histogram " << histEF << std::endl;
+          if (!f->Get(histEF.c_str())) {
+            //if (dbgLevel) std::cerr << "--> HLTMETDQFlagSummary: no histogram " << histEF << std::endl;
             continue;
           }
-          if (!f->Get(histEFC)) {
-            if (dbgLevel) std::cerr << "--> HLTMETDQFlagSummary: no histogram " << histEFC << std::endl;
+          if (!f->Get(histEFC.c_str())) {
+            //if (dbgLevel) std::cerr << "--> HLTMETDQFlagSummary: no histogram " << histEFC << std::endl;
             continue;
           }
-          hef = (TH1*) (f->Get(histEF));
+          hef = (TH1*) (f->Get(histEF.c_str()));
           bool save_status_hist = false;
           if (*itHist == "/EF_MET_status") {
             if (hef->GetMaximum() < 1.e-3) {
@@ -182,26 +182,26 @@ namespace dqutils {
               }
             }
           }
-          hefc = (TH1*) (f->Get(histEFC));
+          hefc = (TH1*) (f->Get(histEFC.c_str()));
           hefc->Reset();
           hefc->Add(hef);
           //hefc->Sumw2();
           dirdq->cd();
           if (save_status_hist) {
-            if (f->cd(theEFPath)) hef->Write("", TObject::kOverwrite);
+            if (f->cd(theEFPath.c_str())) hef->Write("", TObject::kOverwrite);
           }
           hefc->Write("", TObject::kOverwrite);
         } // end loop over ef hists
 
         // resize lbn based histogram
         if (lbn_range > 0) {
-          TString histLBN = theDQPath + lbn_dqhist;
+          std::string histLBN = theDQPath + lbn_dqhist;
           TH1* hlb(0);
-          if (!f->Get(histLBN)) {
-            if (dbgLevel) std::cerr << "--> HLTMETDQFlagSummary: no histogram " << histLBN << std::endl;
+          if (!f->Get(histLBN.c_str())) {
+            //if (dbgLevel) std::cerr << "--> HLTMETDQFlagSummary: no histogram " << histLBN << std::endl;
             continue;
           }
-          hlb = (TH1*) (f->Get(histLBN));
+          hlb = (TH1*) (f->Get(histLBN.c_str()));
           unsigned int nbinx = (unsigned int) hlb->GetNbinsX(), nbiny = (unsigned int) hlb->GetNbinsY(), k = 1;
           if (nbinx != nbiny) continue;
 
@@ -210,14 +210,14 @@ namespace dqutils {
             hlb->GetYaxis()->SetRangeUser(0, Double_t(lbn_range));
           }
           TH1I* hlbstat(0);
-          for (std::vector<TString>::iterator it = lbnDirs.begin(); it != lbnDirs.end(); ++it, ++k) {
+          for (std::vector<std::string>::iterator it = lbnDirs.begin(); it != lbnDirs.end(); ++it, ++k) {
             if (k > nbinx) continue;
-            TString histLBstat = run_dir + TString("/") + *it + TString("/HLT") + (*itFex) + "/lbnstatus/EF_MET_status";
-            if (!f->Get(histLBstat)) {
-              if (dbgLevel) std::cerr << "--> HLTMETDQFlagSummary: no histogram " << histLBstat << std::endl;
+            std::string histLBstat = run_dir + std::string("/") + *it + std::string("/HLT") + (*itFex) + "/lbnstatus/EF_MET_status";
+            if (!f->Get(histLBstat.c_str())) {
+              //if (dbgLevel) std::cerr << "--> HLTMETDQFlagSummary: no histogram " << histLBstat << std::endl;
               continue;
             }
-            hlbstat = (TH1I*) (f->Get(histLBstat));
+            hlbstat = (TH1I*) (f->Get(histLBstat.c_str()));
             int flag = HLTMETGetStatusPerBin(hlbstat, 17, 29, 32, 32);
             //std::cout << "--> HLTMETDQFlagSummary: " << *it << "\t: flag = " << flag << std::endl;
             TString label = *it;
@@ -237,23 +237,23 @@ namespace dqutils {
   //---------------------------------------------------------------------------------------------------
   // Method to get lowStat_* directories
   //---------------------------------------------------------------------------------------------------
-  size_t MonitoringFile::HLTMETGetDQLBNRange(TDirectory*& run_dir, std::vector<TString>& lbnDirs) {
+  size_t MonitoringFile::HLTMETGetDQLBNRange(TDirectory*& run_dir, std::vector<std::string>& lbnDirs) {
     if (!run_dir) return 0;
 
     lbnDirs.clear();
 
-    bool dbgLevel = false;
-    if (dbgLevel) std::cout << "--> HLTMETGetDQLBNRange: lowStat_* directories: ";
+    //bool dbgLevel = false;
+    //if (dbgLevel) std::cout << "--> HLTMETGetDQLBNRange: lowStat_* directories: ";
     run_dir->cd();
 
     TIter next_lbn(run_dir->GetListOfKeys());
     TKey* key_lbn(0);
-    TString lbn_dir = "";
+    std::string lbn_dir = "";
     // loop over all objects
     while ((key_lbn = dynamic_cast<TKey*> (next_lbn())) != 0) {
       if (!key_lbn->IsFolder()) continue;
       lbn_dir = key_lbn->GetName();
-      if (!lbn_dir.Contains("lowStat_")) {
+      if (lbn_dir.find("lowStat_") == std::string::npos) {
         continue;
       }
       lbnDirs.push_back(lbn_dir);
@@ -261,7 +261,7 @@ namespace dqutils {
       // std::endl;
     }
     unsigned int nLBNDirs = lbnDirs.size();
-    if (dbgLevel) std::cout << "found " << nLBNDirs << std::endl;
+    //if (dbgLevel) std::cout << "found " << nLBNDirs << std::endl;
     return nLBNDirs;
   } // end method MonitoringFile::HLTMETGetDQLBNRange
 
@@ -271,7 +271,7 @@ namespace dqutils {
   int MonitoringFile::HLTMETGetStatusPerBin(TH1I*& hist, int yellmin, int yellmax, int redmin, int redmax) {
     if (!hist) return 0;
 
-    TString hname = hist->GetName();
+    std::string hname = hist->GetName();
     int flag = 10; // 1 == GREEN, 2 == YELLOW, 3 == RED
     float epsilon = 1.e-3;
     int nbins = (int) hist->GetNbinsX();

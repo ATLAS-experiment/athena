@@ -1,19 +1,11 @@
 # Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
-################################################################################
-# Package: HitAnalysis
-################################################################################
-
 # Declare the package name:
 atlas_subdir( HitAnalysis )
 
 # External dependencies:
 find_package( CLHEP )
 find_package( ROOT COMPONENTS Core Tree Hist )
-
-# tag ROOTBasicLibs was not recognized in automatic conversion in cmt2cmake
-
-# tag ROOTSTLDictLibs was not recognized in automatic conversion in cmt2cmake
 
 # Component(s) in the package:
 atlas_add_component( HitAnalysis
@@ -28,4 +20,4 @@ atlas_add_component( HitAnalysis
 
 # Install files from the package:
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
-atlas_install_runtime( tools/RunHitAnalysis.py )
+atlas_install_scripts( tools/RunHitAnalysis.py POST_BUILD_CMD ${ATLAS_FLAKE8} )

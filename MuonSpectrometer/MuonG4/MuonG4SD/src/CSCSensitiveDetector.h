@@ -52,11 +52,13 @@ We describe in the following, how each field of the identifier is retrieved.
 #define CSCSENSITIVEDETECTOR_H
 
 #include "G4VSensitiveDetector.hh"
-#include "StoreGate/WriteHandle.h"
 
 #include "MuonSimEvent/CSCSimHitCollection.h"
 #include "MuonSimEvent/CscHitIdHelper.h"
+#include <string>
 #include <gtest/gtest_prod.h>
+
+class AtlasG4EventUserInfo;
 
 class CSCSensitiveDetector : public G4VSensitiveDetector {
 
@@ -65,7 +67,6 @@ FRIEND_TEST( CSCSensitiveDetectortest, ProcessHits );
 public:
     /** construction/destruction */
     CSCSensitiveDetector(const std::string& name, const std::string& hitCollectionName);
-    ~CSCSensitiveDetector() {}
 
     /** member functions */
     void   Initialize(G4HCofThisEvent* HCE) override final;
@@ -73,7 +74,9 @@ public:
     
 private:
     /** member data */
-    SG::WriteHandle<CSCSimHitCollection>  m_myCSCHitColl;
+    std::string m_hitCollectionName;
+    CSCSimHitCollection*  m_myCSCHitColl{nullptr};
+    AtlasG4EventUserInfo* m_g4UserEventInfo{nullptr};
     const CscHitIdHelper* m_muonHelper;
 };
 

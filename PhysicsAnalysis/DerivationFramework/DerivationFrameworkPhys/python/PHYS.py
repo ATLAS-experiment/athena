@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 #====================================================================
 # DAOD_PHYS.py
 # This defines DAOD_PHYS, an unskimmed DAOD format for Run 3.
@@ -103,8 +103,6 @@ def PHYSCoreCfg(flags, name_tag='PHYS', StreamName='StreamDAOD_PHYS', TriggerLis
                                            "InDetTrackParticles",
                                            "AntiKt4EMTopoJets",
                                            "AntiKt4EMPFlowJets",
-                                           "BTagging_AntiKt4EMPFlow",
-                                           "AntiKt4EMPFlowJets_FTAG",
                                            "MET_Baseline_AntiKt4EMTopo",
                                            "MET_Baseline_AntiKt4EMPFlow",
                                            "TauJets",
@@ -137,7 +135,8 @@ def PHYSCoreCfg(flags, name_tag='PHYS', StreamName='StreamDAOD_PHYS', TriggerLis
                                               "TauJets.dRmax.etOverPtLeadTrk",
                                               "TauJets_MuonRM.dRmax.etOverPtLeadTrk",
                                               "HLT_xAOD__TrigMissingETContainer_TrigEFMissingET.ex.ey",
-                                              "HLT_xAOD__TrigMissingETContainer_TrigEFMissingET_mht.ex.ey"]
+                                              "HLT_xAOD__TrigMissingETContainer_TrigEFMissingET_mht.ex.ey",
+                                              "HLT_AnomDet_ComboHypo.adScore"]
 
     if addExtraVariables:
         PHYSSlimmingHelper.ExtraVariables += addExtraVariables
@@ -150,24 +149,37 @@ def PHYSCoreCfg(flags, name_tag='PHYS', StreamName='StreamDAOD_PHYS', TriggerLis
     PHYSSlimmingHelper.ExtraVariables += GetExtraPLITVariablesForDxAOD()
 
     # boosted jet taggers
-    PHYSSlimmingHelper.ExtraVariables += ["AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets.TopTransformer_ConstScore", 
+    PHYSSlimmingHelper.ExtraVariables += ["AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets.TopTransformer_ConstScore",
                                           "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets.WTransformer_ConstScore", 
-                                          "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets.WTransformer_massdec_ConstScore"]
+                                          "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets.WTransformer_massdec_ConstScore",
+                                          "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets.R10TruthLabel_R22v1_TruthJetMass",
+                                          "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets.R10TruthLabel_R22v1_TruthJetPt",
+                                          "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets.R10TruthLabel_R22v1_TruthGroomedJetMass",
+                                          "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets.R10TruthLabel_R22v1_TruthGroomedJetPt",
+                                          "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets.R10WZTruthLabel_R22v1_TruthJetMass",
+                                          "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets.R10WZTruthLabel_R22v1_TruthJetPt",
+                                          "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets.R10WZTruthLabel_R22v1_TruthGroomedJetMass",
+                                          "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets.R10WZTruthLabel_R22v1_TruthGroomedJetPt"]
 
     # Truth extra content
     if flags.Input.isMC:
 
         from DerivationFrameworkMCTruth.MCTruthCommonConfig import addTruth3ContentToSlimmerTool
         addTruth3ContentToSlimmerTool(PHYSSlimmingHelper)
-        PHYSSlimmingHelper.AllVariables += ['TruthLHEParticles', 'TruthHFWithDecayParticles','TruthHFWithDecayVertices','TruthCharm','TruthPileupParticles','InTimeAntiKt4TruthJets','OutOfTimeAntiKt4TruthJets']
+        PHYSSlimmingHelper.AllVariables += ['TruthLHEParticles','InTimeAntiKt4TruthJets','OutOfTimeAntiKt4TruthJets']
         PHYSSlimmingHelper.ExtraVariables += ["Electrons.TruthLink",
                                               "Muons.TruthLink",
                                               "Photons.TruthLink",
-                                              "AntiKt4TruthDressedWZJets.IsoFixedCone5Pt.HFHadronOriginID"]
+                                              "AntiKt4TruthDressedWZJets.IsoFixedCone5Pt.HFHadronOriginID",
+                                              "TruthHFWithDecayParticles.prodVtxLink.prodVtxLink.prodVtxLink.decayVtxLink.decayVtxLink.decayVtxLink.parentLinks.childLinks.m.px.py.pz.e.pdgId.Classification.uid.classifierParticleOrigin.classifierParticleType.classifierParticleOutCome.status",
+                                              "TruthHFWithDecayVertices.incomingParticleLinks.outgoingParticleLinks.uid.status.x.y.z.t",
+                                              "TruthCharm.prodVtxLink.prodVtxLink.prodVtxLink.decayVtxLink.decayVtxLink.decayVtxLink.parentLinks.childLinks.m.px.py.pz.e.pdgId.Classification.uid.classifierParticleOrigin.classifierParticleType.classifierParticleOutCome.status.barcode.polarizationPhi.polarizationTheta",
+                                              "TruthPileupParticles.prodVtxLink.prodVtxLink.prodVtxLink.decayVtxLink.decayVtxLink.decayVtxLink.m.px.py.pz.e.pdgId.Classification.uid.classifierParticleOrigin.classifierParticleType.classifierParticleOutCome.status.barcode.PVz.pileupEventNumber.parentHadronID"]
 
         from DerivationFrameworkMCTruth.MCTruthCommonConfig import AddTauAndDownstreamParticlesCfg
         acc.merge(AddTauAndDownstreamParticlesCfg(flags))
-        PHYSSlimmingHelper.AllVariables += ['TruthTausWithDecayParticles','TruthTausWithDecayVertices']
+        PHYSSlimmingHelper.ExtraVariables += ["TruthTausWithDecayParticles.prodVtxLink.prodVtxLink.prodVtxLink.decayVtxLink.decayVtxLink.decayVtxLink.m.px.py.pz.e.pdgId.Classification.uid.classifierParticleOrigin.classifierParticleType.classifierParticleOutCome.status",
+                                              "TruthTausWithDecayVertices.incomingParticleLinks.outgoingParticleLinks.uid.status.x.y.z.t"]
 
     ## Higgs content - 4l vertex and Higgs STXS truth variables
     from DerivationFrameworkHiggs.HiggsPhysContent import  setupHiggsSlimmingVariables
@@ -175,7 +187,15 @@ def PHYSCoreCfg(flags, name_tag='PHYS', StreamName='StreamDAOD_PHYS', TriggerLis
 
     ## AFP content - SiT and ToF hits to then be used with AfpAnalysisToolbox reconstruction
     PHYSSlimmingHelper.AllVariables += [ 'AFPSiHitContainer', 'AFPToFHitContainer' ]
-    
+
+    ## Hadronic Recoil content
+    PHYSSlimmingHelper.AppendToDictionary.update({'MET_Core_AntiKt4EMPFlowHR':'xAOD::MissingETContainer', 'MET_Core_AntiKt4EMPFlowHRAux':'xAOD::MissingETAuxContainer',
+                                                   'METAssoc_AntiKt4EMPFlowHR':'xAOD::MissingETAssociationMap', 'METAssoc_AntiKt4EMPFlowHRAux':'xAOD::MissingETAuxAssociationMap'})
+
+    PHYSSlimmingHelper.AllVariables += ['METAssoc_AntiKt4EMPFlowHR']
+
+    PHYSSlimmingHelper.ExtraVariables += ['Muons.UEcorr_Pt','Electrons.UEcorr_Pt','MET_Core_AntiKt4EMPFlowHR.name.mpx.mpy.sumet.source']
+
     # Trigger content
     PHYSSlimmingHelper.IncludeTriggerNavigation = False
     PHYSSlimmingHelper.IncludeJetTriggerContent = False
@@ -205,7 +225,7 @@ def PHYSCoreCfg(flags, name_tag='PHYS', StreamName='StreamDAOD_PHYS', TriggerLis
         AddRun3TrigNavSlimmingCollectionsToSlimmingHelper(PHYSSlimmingHelper)
 
     # L1 trigger objects
-    from DerivationFrameworkPhys.TriggerMatchingCommonConfig import getDataYear
+    from Campaigns.Utils import getDataYear
     if getDataYear(flags) >= 2024:
         # Run 3 with Phase I jet RoIs.
         from DerivationFrameworkPhys.TriggerMatchingCommonConfig import AddjFexRoIsToSlimmingHelper

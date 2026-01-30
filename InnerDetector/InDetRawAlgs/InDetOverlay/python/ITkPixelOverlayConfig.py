@@ -1,6 +1,6 @@
 """Define methods to construct configured ITk Pixel overlay algorithms
 
-Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 """
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
@@ -16,11 +16,8 @@ def ITkPixelOverlayAlgCfg(flags, name="ITkPixelOverlay", **kwargs):
     kwargs.setdefault("OutputKey", "ITkPixelRDOs")
 
     # Input setup
-    if flags.Overlay.ByteStream:
-        pass
-    else:
-        from SGComps.SGInputLoaderConfig import SGInputLoaderCfg
-        acc.merge(SGInputLoaderCfg(flags, [f'PixelRDO_Container#{kwargs["BkgInputKey"]}']))
+    from SGComps.SGInputLoaderConfig import SGInputLoaderCfg
+    acc.merge(SGInputLoaderCfg(flags, [f'PixelRDO_Container#{kwargs["BkgInputKey"]}']))
 
     # Do Pixel overlay
     acc.addEventAlgo(CompFactory.PixelOverlay(name, **kwargs))

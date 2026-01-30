@@ -23,14 +23,15 @@ endif()
 # External dependencies:
 find_package( Boost )
 find_package( ROOT COMPONENTS Core Tree MathCore Hist RIO )
+find_package( onnxruntime )
 find_package( GTest )
 
 # Libraries in the package:
 atlas_add_library( METUtilitiesLib
    METUtilities/*.h Root/*.cxx
    PUBLIC_HEADERS METUtilities
-   INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS}  ${GTEST_INCLUDE_DIRS}
-   LINK_LIBRARIES ${Boost_LIBRARIES} ${ROOT_LIBRARIES} AsgTools xAODEgamma ColumnarJetLib xAODMissingET
+   INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS} ${ONNXRUNTIME_INCLUDE_DIRS} ${GTEST_INCLUDE_DIRS}
+   LINK_LIBRARIES ${Boost_LIBRARIES} ${ROOT_LIBRARIES} ${ONNXRUNTIME_LIBRARIES} AsgTools xAODEgamma ColumnarJetLib xAODMissingET
    xAODMuon xAODTau xAODTracking InDetTrackSelectionToolLib PATInterfaces
    EgammaAnalysisInterfacesLib MuonAnalysisInterfacesLib JetCalibToolsLib ElectronPhotonFourMomentumCorrectionLib tauRecToolsLib
    METInterface AsgDataHandlesLib JetAnalysisInterfacesLib ColumnarMetLib
@@ -56,7 +57,7 @@ atlas_add_dictionary( METUtilitiesDict
 
 #set readLib, used below to compile apps/tests
 set( readLib )
-if( XAOD_STANDALONE ) 
+if( XAOD_STANDALONE )
   set( readLib xAODRootAccess )
 else()
   set( readLib POOLRootAccessLib )
@@ -102,4 +103,3 @@ atlas_add_test( gt_ColumnarToolTests
 atlas_install_python_modules( python/*.py )
 
 atlas_install_data( data/* )
-

@@ -1,11 +1,14 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef MUONR4_MUONVISUALIZATIONHELPERS_H
 #define MUONR4_MUONVISUALIZATIONHELPERS_H
 
-#include <memory>
+
 #include <GeoPrimitives/GeoPrimitives.h>
+///
+#include <memory>
+#include <vector>
 #include <MuonPatternEvent/SegmentFitterEventData.h>
 
 
@@ -25,6 +28,8 @@ namespace MuonValR4 {
     constexpr int objViewEta = Acts::toUnderlying(MuonR4::SegmentFit::AxisDefs::etaCov);
     constexpr int objViewPhi = Acts::toUnderlying(MuonR4::SegmentFit::AxisDefs::phiCov);
     
+    
+    std::vector<std::unique_ptr<TObject>> clone(const std::vector<std::unique_ptr<TObject>>& cloneMe);
     /** @brief Create a TEllipse for drawing a drift circle
      *  @param center: Position of the drift cirle expressed in the chambers frame
      *                  y-coordinate corresponds to the tube layer
@@ -36,8 +41,6 @@ namespace MuonValR4 {
                                               const double radius,
                                               const int color = kViolet,
                                               const int fillStyle = hollowFilling);
-
-    
     /** @brief Creates a box for drawing, e.g strip measurements
      *  @param boxCenter: Center of the box to be placed expressed in chamber frame coordinates
      *  @param boxWidth: Width of the drawn box
@@ -77,7 +80,23 @@ namespace MuonValR4 {
                                     const int color = kRed +1,
                                     const int lineStyle = kDashed,
                                     const int view = objViewEta);
-    
+    /** @brief Draw a line between two endpoints in the y-z or the x-z plane 
+     *  @param lowEnd: Lower boundary in Canvas-y of the line
+     *  @param highEnd: Upper boundaty in Canbas-y of the line
+     *  @param color: Color of the line (Cf. TColor documentation)
+     *  @param lineStyle: Style of the drawn line (cf. TAttLine documentation)
+     *  @param view: Is the line placed in the y-z or in the x-z plane */
+    std::unique_ptr<TLine> drawLine(const Amg::Vector3D& lowEnd,
+                                    const Amg::Vector3D& highEnd,
+                                    const int color = kRed + 1,
+                                    const int lineStyle = kSolid,
+                                    const int view = objViewEta);
+    /** @brief Draw an arror between two endpoints  in the y-z or the x-z plane
+     *  @param start: Lower start point of the arrow
+     *  @param dir: Direction of the arrow
+     *  @param color: Color of the line (Cf. TColor documentation)
+     *  @param lineStyle: Style of the drawn line (cf. TAttLine documentation)
+     *  @param view: Is the line placed in the y-z or in the x-z plane */
     std::unique_ptr<TArrow> drawArrow(const Amg::Vector3D& start,
                                       const Amg::Vector3D& dir,
                                       const int color = kRed +1,
@@ -85,13 +104,15 @@ namespace MuonValR4 {
                                       const int view = objViewEta);
     /** @brief Create a TLatex label,
      *  @param text: Label text
-     *  @param xPos: x-position of the label on the Canvas
-     *  @param yPos: y-position of the label on the Canvas
-     *  @param fontSize: Size of the label font */
+     *  @param xPos: x-position of the label on the Canvas in relative coordinates
+     *  @param yPos: y-position of the label on the Canvas in relative coordinates
+     *  @param fontSize: Size of the label font 
+     *  @param useNDC: Whether to use Normalized Device Coordinates */
     std::unique_ptr<TLatex> drawLabel(const std::string& text, 
                                       const double xPos, 
                                       const double yPos,
-                                      const unsigned int fontSize = 18);
+                                      const unsigned int fontSize = 18,
+                                      const bool useNDC = true);
     /** @brief Create a ATLAS label
      *  @param xPos: x-position of the label on the Canvas
      *  @param yPos: y-position of the label on the Canvas

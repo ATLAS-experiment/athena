@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "GaudiKernel/MsgStream.h"
@@ -55,23 +55,16 @@ void FullEventAssembler<IDMAP>::fill(RawEventWrite* re,  MsgStream& log )
 } 
 
 
-template <class IDMAP> 
-typename FullEventAssembler<IDMAP>::RODDATA* 
-FullEventAssembler<IDMAP>::getRodData(uint32_t id) 
-{   
-  RODDATA* theROD = nullptr;
+template <class IDMAP>
+typename FullEventAssembler<IDMAP>::RODDATA*
+FullEventAssembler<IDMAP>::getRodData(uint32_t id)
+{
+  if (auto itr = m_rodMap.find(id); itr != m_rodMap.end()) {
+    return itr->second;
+  }
 
-  RODMAP::const_iterator itr = m_rodMap.find(id);
-  if(itr!=m_rodMap.end())
-    {
-      theROD = itr->second;
-    } 
-  else 
-    {
-      theROD = new RODDATA(); 	   
-      m_rodMap.emplace(id, theROD);
-    }
-  
+  auto* theROD = new RODDATA();
+  m_rodMap.emplace(id, theROD);
   return theROD;
 }
 
@@ -87,14 +80,13 @@ FullEventAssembler<IDMAP>::RodToRob(RODMAP& rodMap,
       if(log.level() <= MSG::DEBUG)
           log << MSG::DEBUG << " Rod id = " << std::format("{:x}", rodid) << endmsg;
 
-      // make an ROB id from an ROD id. 
+      // make an ROB id from an ROD id.
       const uint32_t robid = m_idmap.getRobID(rodid);
-      
+
       // find or make a ROS fragment
-      ROBMAP::const_iterator itr = robMap.find(robid);
-      if(itr!=robMap.end())
+      if (robMap.contains(robid))
         {
-          log << MSG::ERROR << " More than one ROD in ROB:" << std::format("{:x}", itr->first) << endmsg;
+          log << MSG::ERROR << " More than one ROD in ROB:" << std::format("{:x}", robid) << endmsg;
         }
       else 
         { // Make a new ROBFragment 

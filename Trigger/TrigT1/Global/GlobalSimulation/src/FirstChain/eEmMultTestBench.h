@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef GLOBALSIM_EMMULTTESTBENCH_H
@@ -15,19 +15,11 @@
 #include "AthenaBaseComps/AthAlgorithm.h"
 
 #include "../GlobalSimComponents/ITIPwriterAlgTool.h"
-#include "../IO/IeEmTOBContainer.h" 
+#include "../IO/eEmTOB.h" 
 
 #include <string>
 #include <memory>
-#include <bitset>
-#include <vector>
 #include <fstream>
-
-namespace GlobalSim {
-  namespace IOBitwise {
-    class IeEmTOB;
-  }
-}
 
 namespace GlobalSim {
 
@@ -51,7 +43,7 @@ namespace GlobalSim {
 
   private:
 
-    SG::WriteHandleKey<GlobalSim::IOBitwise::IeEmTOBContainer>
+    SG::WriteHandleKey<GlobalSim::IOBitwise::eEmTOBContainer>
     m_eEmTOBContainer_WriteKey {
       this,
       "eEmTOBs",
@@ -86,7 +78,7 @@ namespace GlobalSim {
     std::unique_ptr<std::ifstream> m_TIPword_stream{nullptr};
     
 
-    GlobalSim::IOBitwise::IeEmTOB* make_tob(const std::string& s) const;
+    GlobalSim::IOBitwise::eEmTOB* make_tob(const std::string& s) const;
 
   };
 

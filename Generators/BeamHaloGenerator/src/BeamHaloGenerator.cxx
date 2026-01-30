@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "BeamHaloGenerator/BeamHaloGenerator.h"
@@ -23,9 +23,6 @@ BeamHaloGenerator::BeamHaloGenerator(const HepPDT::ParticleDataTable* particleTa
   m_flipProbability(0.),
   m_enableSampling(false),
   m_bufferFileName("buffer.bin"),
-  m_beamHaloParticleBuffer(0),
-  m_asciiInput(0),
-  m_beamHaloGeneratorSettings(0),
   m_eventNumber(0),
   m_debug(false),
   m_generatorSettings(generatorSettings) {
@@ -38,16 +35,13 @@ BeamHaloGenerator::BeamHaloGenerator(const HepPDT::ParticleDataTable* particleTa
 //------------------------------------------------------------------
 
 BeamHaloGenerator::~BeamHaloGenerator() {
-  if(m_asciiInput) delete m_asciiInput;
-  if(m_beamHaloGeneratorSettings) delete m_beamHaloGeneratorSettings;
-  if(m_beamHaloParticleBuffer) delete m_beamHaloParticleBuffer;
 }
 
 //------------------------------------------------------------------
 
 int BeamHaloGenerator::genInitialize() {
-  m_asciiInput = new AsciiInput(m_inputFile);
-  m_beamHaloGeneratorSettings = new BeamHaloGeneratorSettings(m_generatorSettings);
+  m_asciiInput = std::make_unique<AsciiInput>(m_inputFile);
+  m_beamHaloGeneratorSettings = std::make_unique< BeamHaloGeneratorSettings>(m_generatorSettings);
 
   return 0;
 }

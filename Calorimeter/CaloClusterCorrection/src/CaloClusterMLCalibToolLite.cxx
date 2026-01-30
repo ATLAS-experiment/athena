@@ -2,8 +2,8 @@
   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "CaloClusterCorrection/CaloClusterMLCalibToolLite.h"
-#include "CaloClusterCorrection/CaloClusterMLGaussianMixture.h"
+#include "CaloClusterMLCalibToolLite.h"
+#include "CaloClusterMLGaussianMixture.h"
 #include "xAODCaloEvent/CaloCluster.h"
 #include "StoreGate/WriteDecorHandle.h"
 
@@ -43,7 +43,11 @@ StatusCode CaloClusterMLCalibToolLite::initialize()
     return StatusCode::SUCCESS;
 }
 
-StatusCode CaloClusterMLCalibToolLite::inference(const xAOD::CaloClusterContainer &clusters, const int &nPrimVtx, const double &avgMu, std::vector<double> &clusterE_ML_vec, std::vector<double> &clusterE_ML_Unc_vec) const
+StatusCode CaloClusterMLCalibToolLite::inference(const xAOD::CaloClusterContainer &clusters,
+                                                 int nPrimVtx,
+                                                 float avgMu,
+                                                 std::vector<double> &clusterE_ML_vec,
+                                                 std::vector<double> &clusterE_ML_Unc_vec) const
 {
     ATH_MSG_DEBUG("Executing " << name() << "...");
 
@@ -97,28 +101,28 @@ StatusCode CaloClusterMLCalibToolLite::inference(const xAOD::CaloClusterContaine
         }
         cluster_ENG_FRAC_EM_INCL = e_EM / cluster->rawE();
 
-        std::vector<float> rawValues;
-
-        rawValues.push_back(clusterE);
-        rawValues.push_back(clusterEta);
-        rawValues.push_back(cluster_SIGNIFICANCE);
-        rawValues.push_back(cluster_time);
-        rawValues.push_back(cluster_SECOND_TIME);
-        rawValues.push_back(cluster_CENTER_LAMBDA);
-        rawValues.push_back(cluster_CENTER_MAG);
-        rawValues.push_back(cluster_ENG_FRAC_EM_INCL);
-        rawValues.push_back(cluster_FIRST_ENG_DENS);
-        rawValues.push_back(cluster_LONGITUDINAL);
-        rawValues.push_back(cluster_LATERAL);
-        rawValues.push_back(cluster_PTD);
-        rawValues.push_back(cluster_ISOLATION);
-        rawValues.push_back(nPrimVtx);
-        rawValues.push_back(avgMu);
+        std::vector<float> rawValues = {
+	  static_cast<float>(clusterE),
+	  static_cast<float>(clusterEta),
+	  static_cast<float>(cluster_SIGNIFICANCE),
+	  static_cast<float>(cluster_time),
+	  static_cast<float>(cluster_SECOND_TIME),
+	  static_cast<float>(cluster_CENTER_LAMBDA),
+	  static_cast<float>(cluster_CENTER_MAG),
+	  static_cast<float>(cluster_ENG_FRAC_EM_INCL),
+	  static_cast<float>(cluster_FIRST_ENG_DENS),
+	  static_cast<float>(cluster_LONGITUDINAL),
+	  static_cast<float>(cluster_LATERAL),
+	  static_cast<float>(cluster_PTD),
+	  static_cast<float>(cluster_ISOLATION),
+	  static_cast<float>(nPrimVtx),
+	  avgMu
+	};
 
         for (int i = 0; i < m_numFeatures; i++)
         {
             const PreprocessTransform &transform = m_featurePreprocessingTransforms.at(i);
-            const float &raw = rawValues.at(i);
+            const float raw = rawValues.at(i);
             float transformed = transform.processor(raw, transform.parameters);
             transformedFeatures.push_back(transformed);
         }
@@ -146,30 +150,32 @@ StatusCode CaloClusterMLCalibToolLite::inference(const xAOD::CaloClusterContaine
     std::vector<float> &onnx_sigma2s = std::get<std::vector<float>>(outputData["sigmas"].second);
     std::vector<float> &onnx_alphas = std::get<std::vector<float>>(outputData["alphas"].second);
 
-    int nan_in_mus = 0;
-    int nan_in_sigma2s = 0;
-    int nan_in_alphas = 0;
+    if (msgLvl(MSG::DEBUG)) {
+      int nan_in_mus = 0;
+      int nan_in_sigma2s = 0;
+      int nan_in_alphas = 0;
 
-    for (float val : onnx_mus)
+      for (float val : onnx_mus)
         if (std::isnan(val))
-            nan_in_mus++;
+	  nan_in_mus++;
 
-    for (float val : onnx_sigma2s)
+      for (float val : onnx_sigma2s)
         if (std::isnan(val))
-            nan_in_sigma2s++;
+	  nan_in_sigma2s++;
 
-    for (float val : onnx_alphas)
+      for (float val : onnx_alphas)
         if (std::isnan(val))
             nan_in_alphas++;
 
-    if (nan_in_mus > 0)
-        ATH_MSG_WARNING(nan_in_mus << " NaN value found in `mus` output layer during ONNX inference");
+      if (nan_in_mus > 0)
+        ATH_MSG_DEBUG(nan_in_mus << " NaN value found in `mus` output layer during ONNX inference");
 
-    if (nan_in_sigma2s)
-        ATH_MSG_WARNING(nan_in_sigma2s << " NaN value found in `sigmas` output layer during ONNX inference");
+      if (nan_in_sigma2s)
+        ATH_MSG_DEBUG(nan_in_sigma2s << " NaN value found in `sigmas` output layer during ONNX inference");
 
-    if (nan_in_alphas)
-        ATH_MSG_WARNING(nan_in_alphas << " NaN value found in `alphas` output layer during ONNX inference");
+      if (nan_in_alphas)
+        ATH_MSG_DEBUG(nan_in_alphas << " NaN value found in `alphas` output layer during ONNX inference");
+    }
 
     clusterE_ML_vec.clear();
     clusterE_ML_Unc_vec.clear();
@@ -177,17 +183,36 @@ StatusCode CaloClusterMLCalibToolLite::inference(const xAOD::CaloClusterContaine
     clusterE_ML_Unc_vec.reserve(numClusters);
 
     for (int i = 0; i < numClusters; ++i)
-    {
-        std::vector<float> current_mus = {onnx_mus[i * 3], onnx_mus[i * 3 + 1], onnx_mus[i * 3 + 2]};
-        std::vector<float> current_sigma2s = {onnx_sigma2s[i * 3], onnx_sigma2s[i * 3 + 1], onnx_sigma2s[i * 3 + 2]};
-        std::vector<float> current_alphas = {onnx_alphas[i * 3], onnx_alphas[i * 3 + 1], onnx_alphas[i * 3 + 2]};
+      {
+	bool calibrateCluster = true;
+	for (size_t j=0; j<3; ++j) {
+	  if (std::isnan(onnx_mus[i*3+j]) || std::isnan(onnx_sigma2s[i*3+j]) || std::isnan(onnx_alphas[i*3+j])) {
+	    calibrateCluster = false;
+	    break;
+	  }
+	}
+	float r = 1.;
+	float s = 0.;
+	if (calibrateCluster) {
+	  std::vector<float> current_mus = {onnx_mus[i * 3], onnx_mus[i * 3 + 1], onnx_mus[i * 3 + 2]};
+	  std::vector<float> current_sigma2s = {onnx_sigma2s[i * 3], onnx_sigma2s[i * 3 + 1], onnx_sigma2s[i * 3 + 2]};
+	  std::vector<float> current_alphas = {onnx_alphas[i * 3], onnx_alphas[i * 3 + 1], onnx_alphas[i * 3 + 2]};
+	  
+	  float mode = CaloClusterMLCalib::modes(current_mus, current_sigma2s, current_alphas);
+	  r = std::pow(10, mode);
+	  float onnx_s = CaloClusterMLCalib::sigma_stoch(current_mus, current_sigma2s, current_alphas);
+	  s = std::abs(std::log(10) * r) * onnx_s;
 
-        float mode = CaloClusterMLCalib::modes(current_mus, current_sigma2s, current_alphas);
-        float r = std::pow(10, mode);
-        float onnx_s = CaloClusterMLCalib::sigma_stoch(current_mus, current_sigma2s, current_alphas);
-        float s = std::abs(std::log(10) * r) * onnx_s;
-
-        clusterE_ML_vec.push_back((clusters[i]->e(xAOD::CaloCluster::UNCALIBRATED) / static_cast<double>(r)));
+	  if (!std::isfinite(r) || std::abs(r) < 1e-6) {
+            ATH_MSG_WARNING("ML-correction factor to cluster energy (used as denominator) is " << r << "; The ML-correction factor is reset to 1. Uncertainty is set to 0.");
+            r = 1.0;
+            s = 0.0;
+	  }
+	}
+        
+        const double cluster_energy = clusters[i]->e(xAOD::CaloCluster::UNCALIBRATED) / static_cast<double>(r);
+        
+        clusterE_ML_vec.push_back(cluster_energy);
         clusterE_ML_Unc_vec.push_back(static_cast<double>(s));
     }
 

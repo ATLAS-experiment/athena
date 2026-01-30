@@ -910,9 +910,7 @@ namespace dqutils {
                   ss.str("");
                   ss << hprof->GetName() << " " << bin;
                   if (tgc_debug) std::cout << "TGC noisy channel : " << ss.str() << " " << occu << std::endl;
-
-                  std::pair<std::string, float> p(ss.str(), occu);
-                  noisychannels.push_back(p);
+                  noisychannels.emplace_back(ss.str(), occu);
                 }
               }//bin
             }//subsect

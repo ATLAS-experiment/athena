@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -13,15 +13,14 @@
 #include<algorithm>
 
 TrigFTF_GNN_EtaBin::TrigFTF_GNN_EtaBin(): m_minRadius(0), m_maxRadius(0) {
-
-  m_in.clear();
   m_vn.clear();
   m_params.clear();
   m_vn.reserve(1000);
+  m_vFirstEdge.reserve(1000);
+  m_vNumEdges.reserve(1000);
 }
 
 TrigFTF_GNN_EtaBin::~TrigFTF_GNN_EtaBin() {
-  m_in.clear();
   m_vn.clear();
   m_params.clear();
 }
@@ -56,9 +55,8 @@ void TrigFTF_GNN_EtaBin::initializeNodes() {
   if(m_vn.empty()) return;
   
   m_params.resize(m_vn.size());
-  
-  m_in.resize(m_vn.size());
-  for(auto& v : m_in) v.reserve(50);//reasonably high number of incoming edges per node
+  m_vFirstEdge.resize(m_vn.size(), 0);
+  m_vNumEdges.resize(m_vn.size(), 0);
   
   std::transform(m_vn.begin(), m_vn.end(), m_params.begin(),
                    [](const TrigFTF_GNN_Node* pN) { std::array<float,5> a = {-100.0, 100.0, pN->phi(), pN->r(), pN->z()}; return a;});

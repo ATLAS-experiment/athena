@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // $Id$
@@ -47,7 +47,7 @@ StatusCode nameToTypeinfo (const std::string& name,
 
   // Try to look it up using BaseInfo.  First need to convert to a CLID.
   CLID clid;
-  if (nameToCLID (name, clid, context, clidsvc).isSuccess()) {
+  if (nameToCLID (name, clid, context, std::move(clidsvc)).isSuccess()) {
     const SG::BaseInfoBase* bib = SG::BaseInfoBase::find (clid);
     if (bib) {
       ti = &bib->typeinfo();

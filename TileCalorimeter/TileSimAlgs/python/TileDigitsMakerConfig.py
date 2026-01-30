@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 """Define method to construct configured Tile digits maker algorithm"""
 
@@ -64,12 +64,8 @@ def TileDigitsMakerCfg(flags, **kwargs):
         kwargs['InputTileDigitContainer'] = f'{flags.Overlay.BkgPrefix}TileDigitsCnt'
         kwargs['TileDQstatus'] = 'TileDQstatus'
 
-        if flags.Overlay.ByteStream:
-            from TileByteStream.TileByteStreamConfig import TileRawDataReadingCfg
-            acc.merge(TileRawDataReadingCfg(flags, readMuRcv=False))
-        else:
-            from SGComps.SGInputLoaderConfig import SGInputLoaderCfg
-            acc.merge(SGInputLoaderCfg(flags, [f'TileDigitsContainer#{kwargs["InputTileDigitContainer"]}']))
+        from SGComps.SGInputLoaderConfig import SGInputLoaderCfg
+        acc.merge(SGInputLoaderCfg(flags, [f'TileDigitsContainer#{kwargs["InputTileDigitContainer"]}']))
 
         from TileRecUtils.TileDQstatusConfig import TileDQstatusAlgCfg
         acc.merge(TileDQstatusAlgCfg(flags))

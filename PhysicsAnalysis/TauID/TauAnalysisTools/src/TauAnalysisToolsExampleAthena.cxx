@@ -77,7 +77,7 @@ StatusCode TauAnalysisToolsExampleAthena::execute()
 
     ATH_CHECK (m_effTool->applyEfficiencyScaleFactor(*tau));
 
-    static const SG::ConstAccessor<double> accTauScaleFactorJetID ("TauScaleFactorJetID");
+    static const SG::ConstAccessor<double> accTauScaleFactorJetID ("TauScaleFactorJetIDHadTau");
     ATH_MSG_INFO( "  sf = " << accTauScaleFactorJetID (*tau) );
 
     ATH_CHECK (m_smearTool->applyCorrection(*tau));

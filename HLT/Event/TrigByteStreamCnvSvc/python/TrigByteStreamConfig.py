@@ -90,6 +90,17 @@ def getTrigByteStreamCnvSvc(flags, name='ByteStreamCnvSvc'):
                                 xbins=1000, xmin=0, xmax=1000)
     return svc
 
+def getEFInterfaceSvc(flags, name='EFInterfaceSvc'):
+    ef = flags.Trigger.Online.EFInterface
+    return CompFactory.EFInterfaceSvc(
+        name,
+        Files        = ef.Files,
+        LoopOverFiles= ef.LoopFiles,
+        NumEvents    = ef.NumEvents,
+        SkipEvents   = ef.SkipEvents,
+        RunNumber    = ef.RunNumber,
+        )
+
 def TrigByteStreamCfg(flags, type_names=[]):
     acc = ComponentAccumulator()
 
@@ -98,6 +109,12 @@ def TrigByteStreamCfg(flags, type_names=[]):
 
     bytestream_input = getTrigByteStreamInputSvc(flags)
     acc.addService(bytestream_input)
+
+    if flags.Trigger.Online.useEFByteStreamSvc:
+        ef_interface = getEFInterfaceSvc(flags)
+        acc.addService(ef_interface)
+        bytestream_conversion.EFInterfaceSvc = ef_interface.name
+        bytestream_input.EFInterfaceSvc = ef_interface.name
 
     event_selector = CompFactory.TrigEventSelectorByteStream(
         name='EventSelectorByteStream',

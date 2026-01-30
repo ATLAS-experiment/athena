@@ -98,6 +98,7 @@
 #endif
 
 #include "G4ChipsHyperonInelasticXS.hh"
+#include <memory>
 
 
 class G4AtlasHadronPhysicsFTFP_BERT_ATL_noDiffraction : public G4VPhysicsConstructor
@@ -116,11 +117,11 @@ class G4AtlasHadronPhysicsFTFP_BERT_ATL_noDiffraction : public G4VPhysicsConstru
 
     G4NeutronRadCapture * theNeutronCaptureModel;
 
-    G4PreCompoundModel * thePreEquilib;
-    G4GeneratorPrecompoundInterface * theCascade;
-    G4FTFModel2 * theStringModel;
-    G4ExcitedStringDecay * theStringDecay;
-    G4LundStringFragmentation * theLund;
+    std::unique_ptr<G4PreCompoundModel> thePreEquilib;
+    std::unique_ptr<G4GeneratorPrecompoundInterface> theCascade;
+    std::unique_ptr<G4FTFModel2> theStringModel;
+    std::unique_ptr<G4ExcitedStringDecay> theStringDecay;
+    std::unique_ptr<G4LundStringFragmentation> theLund;
     G4ExcitationHandler * theHandler;
 
     G4TheoFSGenerator * theModel1;

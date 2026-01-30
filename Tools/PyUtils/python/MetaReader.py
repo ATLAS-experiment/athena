@@ -841,7 +841,7 @@ def read_metadata(filenames, file_type = None, mode = 'lite', promote = None, me
                         bs_metadata[k] = v
 
                     elif '=' in md:
-                        k, v = md.split('=')
+                        k, v = md.split('=', 1)  # Split on first '=' only
                         bs_metadata[k] = v
 
                 bs_metadata['detectorMask'] = data_reader.detectorMask()
@@ -1060,7 +1060,6 @@ def _convert_value(value, aux = None):
                 return _extract_fields_iovmdc(value)
 
             elif cl.__cpp_name__ == 'IOVPayloadContainer_p1':
-                global _gbl_mode
                 if _gbl_mode == 'iov':
                     return _extract_iov_detailed(value)
                 else:

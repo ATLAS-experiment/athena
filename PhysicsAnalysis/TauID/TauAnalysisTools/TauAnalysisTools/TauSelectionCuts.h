@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TAUANALYSISTOOLS_TAUSELECTIONCUTS_H
@@ -19,6 +19,8 @@
 // ROOT include(s):
 #include "TH1F.h"
 
+#include <memory>
+
 namespace TauAnalysisTools
 {
 
@@ -37,7 +39,7 @@ public:
   virtual void setAcceptInfo (asg::AcceptInfo& info) const = 0;
   virtual bool accept(const xAOD::TauJet& xTau,
                       asg::AcceptData& accept) = 0;
-  TH1F* CreateControlPlot(const char* sName, const char* sTitle, int iBins, double dXLow, double dXUp);
+  std::unique_ptr<TH1F> CreateControlPlot(const char* sName, const char* sTitle, int iBins, double dXLow, double dXUp);
 
   const std::string& getName()
   {
@@ -49,8 +51,8 @@ public:
 protected:
   std::string m_sName;
 
-  TH1F* m_hHistCutPre;
-  TH1F* m_hHistCut;
+  std::unique_ptr<TH1F> m_hHistCutPre;
+  std::unique_ptr<TH1F> m_hHistCut;
 
   TauSelectionTool* m_tTST;
 

@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 ## @package PyJobTransforms.trfFileUtils
 # @brief Transform utilities to deal with files.
@@ -257,10 +257,7 @@ def PHYSVALEntries(fileName, integral=False):
 
     aipc = fname.Get("/EventInfo/EventInfo_actualInteractionsPerCrossing")
 
-    # ROOT returns an empty TObject, rather than explicit None, so this
-    # check has to be `== None` (is equivalent to None) rather than `is None`
-    # (is the same memory pointer as the object None)
-    if aipc == None: # noqa: E711
+    if not aipc:
         # Not PHYSVAL...
         return None
 

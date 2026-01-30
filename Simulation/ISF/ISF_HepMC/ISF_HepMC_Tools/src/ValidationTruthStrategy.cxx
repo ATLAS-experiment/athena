@@ -1,10 +1,6 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
-
-///////////////////////////////////////////////////////////////////
-// ValidationTruthStrategy.cxx, (c) ATLAS Detector software
-///////////////////////////////////////////////////////////////////
 
 // class header include
 #include "ValidationTruthStrategy.h"
@@ -15,16 +11,7 @@
 
 /** Constructor **/
 ISF::ValidationTruthStrategy::ValidationTruthStrategy(const std::string& t, const std::string& n, const IInterface* p) :
-  base_class(t,n,p),
-  m_minParentP2(0.)
-{
-    // parent particle minimum momentum
-    declareProperty("ParentMinP"        , m_minParentP2     );
-    declareProperty("Regions"                   , m_regionListProperty );
-}
-
-/** Destructor **/
-ISF::ValidationTruthStrategy::~ValidationTruthStrategy()
+  base_class(t,n,p)
 {
 }
 
@@ -35,7 +22,7 @@ StatusCode  ISF::ValidationTruthStrategy::initialize()
 
     // (*) setup parent particle cuts
     // -> compute p^2 for fast comparison
-    m_minParentP2 *= m_minParentP2;
+    m_minParentP2 = m_minParentP*m_minParentP;
 
     for(auto region : m_regionListProperty.value()) {
       if(region < AtlasDetDescr::fFirstAtlasRegion || region >= AtlasDetDescr::fNumAtlasRegions) {
@@ -44,12 +31,6 @@ StatusCode  ISF::ValidationTruthStrategy::initialize()
       }
     }
 
-    return StatusCode::SUCCESS;
-}
-
-StatusCode  ISF::ValidationTruthStrategy::finalize()
-{
-    ATH_MSG_VERBOSE("Finalizing ...");
     return StatusCode::SUCCESS;
 }
 

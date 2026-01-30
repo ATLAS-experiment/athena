@@ -9,6 +9,12 @@
  */
 
 
+#if __GNUC__==13
+// gcc13 produces a bogus warning for the atomic operations on DataObject.
+// This was fixed as of gcc14.
+# pragma GCC diagnostic ignored "-Wstringop-overflow"
+#endif
+
 #undef NDEBUG
 #include "AthenaKernel/DataObjectSharedPtr.h"
 #include <cassert>

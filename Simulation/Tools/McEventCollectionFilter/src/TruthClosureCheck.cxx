@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TruthClosureCheck.h"
@@ -18,16 +18,6 @@
 #include "CLHEP/Geometry/Point3D.h"
 #include "GeoPrimitives/GeoPrimitives.h"
 #include <climits>
-
-TruthClosureCheck::TruthClosureCheck(const std::string& name, ISvcLocator* pSvcLocator):
-  AthAlgorithm(name, pSvcLocator)
-{
-  declareProperty("OriginalMcEventCollection" , m_originalMcEventCollection  = "BeamTruthEvent");
-  declareProperty("ResetMcEventCollection" , m_resetMcEventCollection  = "NewTruthEvent");
-  declareProperty("CompareMomenta", m_compareMomenta);
-  declareProperty("PostSimulation", m_postSimulation);
-}
-
 
 //----------------------------------------------------
 StatusCode TruthClosureCheck::initialize() {
@@ -165,10 +155,10 @@ StatusCode TruthClosureCheck::compareGenVertex(const HepMC::ConstGenVertexPtr& o
   }
   std::vector<HepMC::ConstGenParticlePtr> OriginalListOfParticlesIn = origVertex->particles_in();
   std::vector<HepMC::ConstGenParticlePtr> ResetListOfParticlesIn = resetVertex->particles_in();
-  for ( std::vector<HepMC::ConstGenParticlePtr>::iterator originalPartInIter(OriginalListOfParticlesIn.begin()),resetPartInIter(ResetListOfParticlesIn.begin()); 
-        originalPartInIter != OriginalListOfParticlesIn.end() && resetPartInIter != ResetListOfParticlesIn.end(); 
+  for ( std::vector<HepMC::ConstGenParticlePtr>::iterator originalPartInIter(OriginalListOfParticlesIn.begin()),resetPartInIter(ResetListOfParticlesIn.begin());
+        originalPartInIter != OriginalListOfParticlesIn.end() && resetPartInIter != ResetListOfParticlesIn.end();
         ++originalPartInIter, ++resetPartInIter
-       ) {
+        ) {
     if (compareGenParticle(*originalPartInIter,*resetPartInIter).isFailure()) {
       ATH_MSG_ERROR ( "input particle properties differ!" );
       pass &= false;
@@ -179,14 +169,14 @@ StatusCode TruthClosureCheck::compareGenVertex(const HepMC::ConstGenVertexPtr& o
 
   std::vector<HepMC::ConstGenParticlePtr> OriginalListOfParticlesOut = origVertex->particles_out();
   std::vector<HepMC::ConstGenParticlePtr> ResetListOfParticlesOut = resetVertex->particles_out();
-//AV: please remember that the best quantities to compare particles are physical quantities.  
+  //AV: please remember that the best quantities to compare particles are physical quantities.
   std::sort(OriginalListOfParticlesOut.begin(), OriginalListOfParticlesOut.end(), [](auto& a, auto& b) -> bool{return a->momentum().pz() > b->momentum().pz(); });
   std::sort(ResetListOfParticlesOut.begin(), ResetListOfParticlesOut.end(), [](auto& a, auto& b) -> bool{return a->momentum().pz() > b->momentum().pz(); });
 
-  for ( std::vector<HepMC::ConstGenParticlePtr>::iterator originalPartOutIter(OriginalListOfParticlesOut.begin()), resetPartOutIter(ResetListOfParticlesOut.begin()); 
-        originalPartOutIter != OriginalListOfParticlesOut.end() && resetPartOutIter != ResetListOfParticlesOut.end(); 
+  for ( std::vector<HepMC::ConstGenParticlePtr>::iterator originalPartOutIter(OriginalListOfParticlesOut.begin()), resetPartOutIter(ResetListOfParticlesOut.begin());
+        originalPartOutIter != OriginalListOfParticlesOut.end() && resetPartOutIter != ResetListOfParticlesOut.end();
         ++originalPartOutIter, ++resetPartOutIter
-       ) {
+        ) {
     if (compareGenParticle(*originalPartOutIter,*resetPartOutIter).isFailure()) {
       ATH_MSG_ERROR ( "output particle properties differ!" );
       pass &= false;
@@ -299,7 +289,7 @@ StatusCode TruthClosureCheck::compareGenParticle(const HepMC::ConstGenParticlePt
 {
   if (!origParticle && !resetParticle) return StatusCode::SUCCESS;
   if (!origParticle || !resetParticle) return StatusCode::FAILURE;
-  
+
   bool pass{true};
   if (HepMC::barcode(origParticle) != HepMC::barcode(resetParticle)) { // FIXME barcode-based
     ATH_MSG_ERROR ("particle barcode differs! Original: "<<HepMC::barcode(origParticle)<<", Reset: "<<HepMC::barcode(resetParticle));
@@ -353,11 +343,11 @@ StatusCode TruthClosureCheck::compareGenParticle(const HepMC::GenParticle& origP
 
 #ifdef HEPMC3
 //-------------------------------------------------
-StatusCode TruthClosureCheck::execute() {
-//-------------------------------------------------
+StatusCode TruthClosureCheck::execute(const EventContext& ctx) const {
+  //-------------------------------------------------
 
   ATH_MSG_DEBUG( " execute..... " );
-  SG::ReadHandle<McEventCollection> originalMcEventCollection(m_originalMcEventCollection);
+  SG::ReadHandle<McEventCollection> originalMcEventCollection(m_originalMcEventCollection, ctx);
   if (!originalMcEventCollection.isValid()) {
     ATH_MSG_ERROR("Could not find original McEventCollection called " << originalMcEventCollection.name() << " in store " << originalMcEventCollection.store() << ".");
     return StatusCode::FAILURE;
@@ -369,7 +359,7 @@ StatusCode TruthClosureCheck::execute() {
     return StatusCode::FAILURE;
   }
 
-  SG::ReadHandle<McEventCollection> resetMcEventCollection(m_resetMcEventCollection);
+  SG::ReadHandle<McEventCollection> resetMcEventCollection(m_resetMcEventCollection,ctx);
   if (!resetMcEventCollection.isValid()) {
     ATH_MSG_ERROR("Could not find reset McEventCollection called " << resetMcEventCollection.name() << " in store " << resetMcEventCollection.store() << ".");
     return StatusCode::FAILURE;
@@ -388,18 +378,18 @@ StatusCode TruthClosureCheck::execute() {
   if (HepMC::signal_process_id(originalEvent) != HepMC::signal_process_id(resetEvent) ) {
     ATH_MSG_ERROR ("signal_process_id differs! Original: "<<HepMC::signal_process_id(originalEvent)<<", Reset: "<<HepMC::signal_process_id(resetEvent));
   }
-///->
+  ///->
   std::vector<HepMC::ConstGenParticlePtr> OriginalBeams = originalEvent.beams();
   std::vector<HepMC::ConstGenParticlePtr> ResetBeams = resetEvent.beams();
 
-  for ( std::vector<HepMC::ConstGenParticlePtr>::iterator originalBeamIter(OriginalBeams.begin()), resetBeamIter(ResetBeams.begin()); 
-        originalBeamIter != OriginalBeams.end() && resetBeamIter != ResetBeams.end(); 
+  for ( std::vector<HepMC::ConstGenParticlePtr>::iterator originalBeamIter(OriginalBeams.begin()), resetBeamIter(ResetBeams.begin());
+        originalBeamIter != OriginalBeams.end() && resetBeamIter != ResetBeams.end();
         ++originalBeamIter, ++resetBeamIter
-       ) {
+        ) {
     if (compareGenParticle(*originalBeamIter,*resetBeamIter).isFailure()) {
       ATH_MSG_ERROR ( "Beam particle properties differ!" );
     }
-///<=
+    ///<=
     if (originalEvent.particles().size() != resetEvent.particles().size() ) {
       ATH_MSG_ERROR ("particles_size differs! Original: "<<originalEvent.particles().size()<<", Reset: "<<resetEvent.particles().size());
     }
@@ -413,8 +403,8 @@ StatusCode TruthClosureCheck::execute() {
   std::vector<HepMC::ConstGenVertexPtr> OriginalListOfVertices = originalEvent.vertices();
   std::vector<HepMC::ConstGenVertexPtr> ResetListOfVertices = resetEvent.vertices();
 
-  for( std::vector<HepMC::ConstGenVertexPtr>::iterator origVertexIter(OriginalListOfVertices.begin()),resetVertexIter(ResetListOfVertices.begin()); 
-       origVertexIter != OriginalListOfVertices.end() && resetVertexIter != ResetListOfVertices.end(); 
+  for( std::vector<HepMC::ConstGenVertexPtr>::iterator origVertexIter(OriginalListOfVertices.begin()),resetVertexIter(ResetListOfVertices.begin());
+       origVertexIter != OriginalListOfVertices.end() && resetVertexIter != ResetListOfVertices.end();
        ++origVertexIter, ++resetVertexIter
        ) {
     if (compareGenVertex(*origVertexIter,*resetVertexIter).isFailure()) {
@@ -432,11 +422,11 @@ StatusCode TruthClosureCheck::execute() {
 
 
 //-------------------------------------------------
-StatusCode TruthClosureCheck::execute() {
+StatusCode TruthClosureCheck::execute(const EventContext& ctx) const {
   //-------------------------------------------------
 
   ATH_MSG_DEBUG( " execute..... " );
-  SG::ReadHandle<McEventCollection> originalMcEventCollection(m_originalMcEventCollection);
+  SG::ReadHandle<McEventCollection> originalMcEventCollection(m_originalMcEventCollection, ctx);
   if (!originalMcEventCollection.isValid()) {
     ATH_MSG_ERROR("Could not find original McEventCollection called " << originalMcEventCollection.name() << " in store " << originalMcEventCollection.store() << ".");
     return StatusCode::FAILURE;
@@ -448,7 +438,7 @@ StatusCode TruthClosureCheck::execute() {
     return StatusCode::FAILURE;
   }
 
-  SG::ReadHandle<McEventCollection> resetMcEventCollection(m_resetMcEventCollection);
+  SG::ReadHandle<McEventCollection> resetMcEventCollection(m_resetMcEventCollection, ctx);
   if (!resetMcEventCollection.isValid()) {
     ATH_MSG_ERROR("Could not find reset McEventCollection called " << resetMcEventCollection.name() << " in store " << resetMcEventCollection.store() << ".");
     return StatusCode::FAILURE;

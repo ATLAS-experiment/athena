@@ -8,12 +8,10 @@
 #include "IdDict/IdDictGroup.h"
 #include "IdDict/IdDictMgr.h"
 #include "IdDict/IdDictRegion.h"
-#include "GaudiKernel/MsgStream.h"
 #include "Identifier/IdentifierHash.h"
 #include "Identifier/RangeIterator.h"
 #include "LArIdentifier/LArOnlID_Exception.h"
 #include <cmath>
-#include <iostream>
 #include <set>
 #include <sstream>
 #include <string>
@@ -225,7 +223,6 @@ std::string LArOnlineID_Base::feedthrough_name( const HWIdentifier id )const{
 std::string LArOnlineID_Base::channel_name( const HWIdentifier id )const{
 //==================================================================
   std::ostringstream s1;
-  //std::string s2;
   int Nchan = channel(id);
   int Nslot = slot(id);
   int Nft   = feedthrough(id);
@@ -321,38 +318,22 @@ int LArOnlineID_Base::channelInSlotMax(const HWIdentifier channelId) const
 int  LArOnlineID_Base::initialize_from_dictionary (const IdDictMgr& dict_mgr)
 /* =================================================================== */
 {
-    MsgStream log(m_msgSvc, "LArOnlineID_Base" );
-    if (!m_quiet) {
-      std::string strg = "initialize_from_dictionary";
-      if(m_msgSvc) {
-        log << MSG::INFO << strg << endmsg;
-      }
-      else {
-        std::cout << strg << std::endl;
-      }
-    }
-  
+    ATH_MSG_INFO("initialize_from_dictionary");
+
     // Check whether this helper should be reinitialized
     if (!reinitialize(dict_mgr)) {
-        if(m_msgSvc)log << MSG::DEBUG << "Request to reinitialize not satisfied - tags have not changed" << endmsg;
+        ATH_MSG_DEBUG("Request to reinitialize not satisfied - tags have not changed");
         return (0);
     }
     else {
-        log << MSG::DEBUG << "(Re)initialize" << endmsg;
+        ATH_MSG_DEBUG("(Re)initialize");
     }
 
     // init base object
     if(AtlasDetectorID::initialize_from_dictionary(dict_mgr)) return (1);
     m_dict = dict_mgr.find_dictionary ("LArCalorimeter"); 
     if(!m_dict) {
-
-        std::string strg = " initialize_from_dictionary - cannot access LArCalorimeter dictionary ";
-        if(m_msgSvc) {
-            log << MSG::ERROR << strg << endmsg;
-        }
-        else {
-            std::cout << "LArOnlineID_Base::" << strg << std::endl;
-        }
+        ATH_MSG_ERROR("initialize_from_dictionary - cannot access LArCalorimeter dictionary");
         return 1;
     }
 
@@ -371,45 +352,24 @@ int  LArOnlineID_Base::initialize_from_dictionary (const IdDictMgr& dict_mgr)
     const IdDictDictionary* atlasDict = dict_mgr.find_dictionary ("ATLAS"); 
     int larField   = -1;
     if (atlasDict->get_label_value("subdet", "LArCalorimeter", larField)) {
-        std::stringstream strm;
-        strm << atlasDict->name();
-        std::string strg= " Could not get value for label 'LArCalorimeter' of field 'subdet' in dictionary "+strm.str();
-        if(m_msgSvc) {
-            log << MSG::ERROR << strg << endmsg;
-        }
-        else {
-            std::cout << "LArOnlineID_Base:" << strg << std::endl;
-        }
+        ATH_MSG_ERROR("Could not get value for label 'LArCalorimeter' of field 'subdet' in dictionary "
+                      << atlasDict->name());
         return (1);
     }
 
     /* Find value for the field LArOnline */
     int larOnlineField   = -4;
     if (m_dict->get_label_value("part", "LArOnline", larOnlineField)) {
-        std::stringstream strm;
-        strm <<  m_dict->name();
-        std::string strg = "Could not get value for label 'LArOnline' of field 'part' in dictionary "+strm.str(); 
-        if(m_msgSvc) {
-            log << MSG::ERROR << strg << endmsg;
-        }
-        else {
-            std::cout << strg << std::endl;
-        }
+        ATH_MSG_ERROR("Could not get value for label 'LArOnline' of field 'part' in dictionary "
+                      << m_dict->name());
         return (1);
     }
 
     /* Find value for the field calibLArOnline */
     int larOnlineCalibField   = -5;
     if (m_dict->get_label_value("part", "LArOnlineCalib", larOnlineCalibField)) {
-        std::stringstream strm;
-        strm <<  m_dict->name();
-        std::string strg = "Could not get value for label 'LArOnlineCalib' of field 'part' in dictionary "+strm.str();
-        if(m_msgSvc) {
-            log << MSG::ERROR << strg << endmsg;
-        }
-        else {
-            std::cout << strg << std::endl;
-        }
+        ATH_MSG_ERROR("Could not get value for label 'LArOnlineCalib' of field 'part' in dictionary "
+                      << m_dict->name());
         return (1);
     }
 
@@ -429,52 +389,22 @@ int  LArOnlineID_Base::initialize_from_dictionary (const IdDictMgr& dict_mgr)
     m_full_feb_range       = m_dict->build_multirange( region_id , group(), prefix, "slot");
     m_full_feedthrough_range = m_dict->build_multirange( region_id , group(), prefix, "feedthrough");
 
-    std::string strg0= " initialize_from_dictionary :";
-    std::string strg1= " feedthrough range -> " + (std::string)m_full_feedthrough_range;
-    std::string strg2= " feedthrough slot range -> " + (std::string)m_full_feb_range;  
-    std::string strg3= " channel range -> " + (std::string)m_full_laronline_range;
-    if(m_msgSvc) {
-        log << MSG::DEBUG << strg0 << endmsg;
-        log << MSG::DEBUG << strg1 << endmsg;
-        log << MSG::DEBUG << strg2 << endmsg;
-        log << MSG::DEBUG << strg3 << endmsg;
-    }
-    else {
-        std::cout << strg0 << std::endl;
-        std::cout << strg1 << std::endl;
-        std::cout << strg2 << std::endl;
-        std::cout << strg3 << std::endl;
-    }
+    ATH_MSG_DEBUG("initialize_from_dictionary :");
+    ATH_MSG_DEBUG("feedthrough range -> " << (std::string)m_full_feedthrough_range);
+    ATH_MSG_DEBUG("feedthrough slot range -> " << (std::string)m_full_feb_range);
+    ATH_MSG_DEBUG("channel range -> " << (std::string)m_full_laronline_range);
 
     /* calib */ 
     /* Full range for calib channels */
     m_full_calib_laronline_range = m_dict->build_multirange( region_id2 , group(), prefix2);
     m_full_calib_module_range    = m_dict->build_multirange( region_id2 , group(), prefix2, "slot");
 
-    if (!m_quiet) {
-      std::string strg0= "=> initialize_from_dictionary : ";
-      std::string strg2= "=> Calib module range -> " + (std::string)m_full_calib_module_range;  
-      std::string strg3= "=> Calib channel range -> " + (std::string)m_full_calib_laronline_range;
-      if(m_msgSvc) {
-        log << MSG::DEBUG << strg0 << endmsg;
-        log << MSG::DEBUG << strg2 << endmsg;
-        log << MSG::DEBUG << strg3 << endmsg;
-      }
-      else {
-        std::cout << strg0 << std::endl;
-        std::cout << strg2 << std::endl;
-        std::cout << strg3 << std::endl;
-      }
-    }
-  
+    ATH_MSG_DEBUG("=> initialize_from_dictionary : ");
+    ATH_MSG_DEBUG("=> Calib module range -> " << (std::string)m_full_calib_module_range);
+    ATH_MSG_DEBUG("=> Calib channel range -> " << (std::string)m_full_calib_laronline_range);
+
     /* Setup the hash tables */
-    std::string strg="[initialize_from_dictionary] version= " + dictionaryVersion();
-    if(m_msgSvc) {
-        log << MSG::DEBUG << strg << endmsg;
-    }
-    else {
-        std::cout << "LArOnlineID_Base: " << strg << std::endl;      
-    }
+    ATH_MSG_DEBUG("[initialize_from_dictionary] version= " << dictionaryVersion());
     if( dictionaryVersion() == "fullAtlas" ) {
         if(init_hashes()) return (1);
     }
@@ -518,19 +448,9 @@ int  LArOnlineID_Base::initialize_from_dictionary (const IdDictMgr& dict_mgr)
         m_chan_hash_calcs[m_bec_slot_impl.unpack(min)] = hc;
 
         if (m_bec_slot_impl.unpack(min) >= size) {
-            strg = "Min > "+std::to_string(size);
-            strg1= " "+ show_to_string(min);
-            strg2= " "+std::to_string(m_bec_slot_impl.unpack(min));
-            if(m_msgSvc) {
-                log << MSG::DEBUG << strg << endmsg;
-                log << MSG::DEBUG << strg1 << endmsg;
-                log << MSG::DEBUG << strg2 << endmsg;
-            }
-            else {
-                std::cout << strg << std::endl;
-                std::cout << strg1 << std::endl;
-                std::cout << strg2 << std::endl;
-            }     
+            ATH_MSG_DEBUG("Min > " << size);
+            ATH_MSG_DEBUG(" " << show_to_string(min));
+            ATH_MSG_DEBUG(" " << std::to_string(m_bec_slot_impl.unpack(min)));
         }
     }
 
@@ -538,19 +458,9 @@ int  LArOnlineID_Base::initialize_from_dictionary (const IdDictMgr& dict_mgr)
     for (unsigned int i = 0; i < m_channelHashMax; ++i) {
         HWIdentifier id = channel_Id(i);
         if (channel_Hash(id) != i) {
-            strg = " *****  Error channel ranges, id, hash, i = "+show_to_string(id);
-            strg1= " , "+std::to_string(channel_Hash(id));
-            strg2= " , "+std::to_string(i);
-            if(m_msgSvc) {
-                log << MSG::ERROR << strg << endmsg;
-                log << MSG::ERROR << strg1 << endmsg;
-                log << MSG::ERROR << strg2 << endmsg;
-            }
-            else {
-                std::cout << strg << std::endl;
-                std::cout << strg1 << std::endl;
-                std::cout << strg2 << std::endl;
-            }
+            ATH_MSG_ERROR(" *****  Error channel ranges, id, hash, i = " << show_to_string(id));
+            ATH_MSG_ERROR(" , " << std::to_string(channel_Hash(id)));
+            ATH_MSG_ERROR(" , " << i);
         }
     }
 
@@ -599,11 +509,7 @@ int  LArOnlineID_Base::initialize_from_dictionary (const IdDictMgr& dict_mgr)
         // values are enumerated or not. If they are enumerate we must
         // save the values in order to calculate the fed hash
         if (get_expanded_id(min, ftExpId, &ftContext)) {
-            if(m_msgSvc) {
-               log << MSG::WARNING  << " *****  Warning cannot get ft expanded id for " << show_to_string(min) << endmsg;
-            } else {
-               std::cout << " *****  Warning cannot get ft expanded id for " << show_to_string(min) << std::endl;
-            }
+          ATH_MSG_WARNING(" *****  Warning cannot get ft expanded id for " + show_to_string(min));
         }
         unsigned int nrangesFound = 0;
         for (unsigned int i = 0; i < m_full_feb_range.size(); ++i) {
@@ -632,15 +538,9 @@ int  LArOnlineID_Base::initialize_from_dictionary (const IdDictMgr& dict_mgr)
                             hc.m_slot_values.push_back(j + slotField.get_minimum());
                         }
                     }
-                    else {
-                        
-                        if(m_msgSvc) {
-                           log << MSG::WARNING  << " *****  Warning feb range slot field is NOT both_bounded - id, slot mode: " 
-                               << show_to_string(min) << " enumerated" << endmsg;
-                        } else {
-                           std::cout << " *****  Error feb range slot field is NOT both_bounded - id, slot mode: " 
-                                     << show_to_string(min) << " enumerated" << std::endl;
-                        }
+                    else {                        
+                        ATH_MSG_WARNING(" *****  Warning feb range slot field is NOT both_bounded - id, slot mode: " +
+                                        show_to_string(min) + " enumerated");
                     }
                 }
             }
@@ -652,14 +552,9 @@ int  LArOnlineID_Base::initialize_from_dictionary (const IdDictMgr& dict_mgr)
 
 
         if (m_bec_ft_impl.unpack(min) >= size) {
-            strg = "Min > " + std::to_string(size) + " " + show_to_string(min) +
-                   " " + std::to_string(m_bec_ft_impl.unpack(min)) + " " +
-                   std::to_string(min_hash);
-            if (m_msgSvc) {
-                log << MSG::DEBUG << strg << endmsg;
-            } else {
-                std::cout << strg << std::endl;
-            }
+	  ATH_MSG_DEBUG("Min > " << size << " " << show_to_string(min) <<
+			" " << m_bec_ft_impl.unpack(min) << " " <<
+			min_hash);
         }
     }
 
@@ -667,14 +562,8 @@ int  LArOnlineID_Base::initialize_from_dictionary (const IdDictMgr& dict_mgr)
     for (unsigned int i = 0; i < m_febHashMax; ++i) {
         HWIdentifier id = feb_Id(i);
         if (feb_Hash(id) != i) {
-            strg = " *****  Error feb ranges, id, hash, i = " + 
-                 show_to_string(id) + " , " + std::to_string(feb_Hash(id)) + " , "+std::to_string(i);
-            if(m_msgSvc) {
-                log << MSG::ERROR << strg << endmsg;
-            }
-            else {
-                std::cout << strg << std::endl;
-            }
+            ATH_MSG_ERROR(" *****  Error feb ranges, id, hash, i = " <<
+                          show_to_string(id) << " , " << feb_Hash(id) << " , " << i);
         }
     }
 
@@ -847,18 +736,10 @@ int  LArOnlineID_Base::get_expanded_calib_id  (const HWIdentifier& id, ExpandedI
 int LArOnlineID_Base::initLevelsFromDict(const std::string& group_name) 
 /*======================================*/
 {
-  MsgStream log(m_msgSvc, "LArOnlineID_Base" );
 
   if(!m_dict) 
     {
-    if(m_msgSvc) {
-      log << MSG::ERROR << "initLevelsFromDict - dictionary NOT initialized "
-          << endmsg;
-    }
-    else {
-      std::cout << "LArEM_ID::initLevelsFromDict - dictionary NOT initialized "
-                << std::endl ;
-    }
+      ATH_MSG_ERROR("initLevelsFromDict - dictionary NOT initialized");
       return (1);
     }
 
@@ -872,44 +753,27 @@ int LArOnlineID_Base::initLevelsFromDict(const std::string& group_name)
   m_slot_index            = 999 ;
   m_channel_in_slot_index = 999 ;
   m_slar_index            = 999 ;
-  std::string strg;
- 
+
   // Save index to a DictionaryRegion for unpacking
-  IdDictRegion* reg = m_dict->find_region("laronline-barrel");
+  const IdDictRegion* reg = m_dict->find_region("laronline-barrel");
   if (reg) 
     {
       m_laronlineRegion_index = reg->index();
     }
   else 
     {
-      strg = "initLevelsFromDict - unable to find laronline region ";
-      if(m_msgSvc)
-        {
-          log << MSG::ERROR << strg << endmsg;
-        }
-      else
-        {
-          std::cout << "LAronline_ID::" << strg << std::endl;
-        }
+      ATH_MSG_ERROR("initLevelsFromDict - unable to find laronline region ");
       return (1);
     }
   /* Find LAr field */
-  IdDictField* field = m_dict->find_field("subdet") ;
+  const IdDictField* field = m_dict->find_field("subdet") ;
   if (field) 
     {
       m_lar_index = field->index();
     }
   else 
     {
-      strg= "initLevelsFromDict - unable to find 'subdet' field ";
-      if(m_msgSvc)
-        {
-          log << MSG::ERROR << strg << endmsg;
-        }
-      else
-        {
-          std::cout << "LArOnlineID_Base::" << strg << std::endl;
-        }
+      ATH_MSG_ERROR("initLevelsFromDict - unable to find 'subdet' field ");
       return (1);
     }
   
@@ -921,15 +785,7 @@ int LArOnlineID_Base::initLevelsFromDict(const std::string& group_name)
     }
   else 
     {
-      strg= "initLevelsFromDict - unable to find 'part' field ";
-      if(m_msgSvc)
-        {
-          log << MSG::ERROR << strg << endmsg;
-        }
-      else
-        {
-          std::cout << "LArOnlineID_Base::" << strg << std::endl;
-        }
+      ATH_MSG_ERROR("initLevelsFromDict - unable to find 'part' field ");
       return (1);      
     }
   
@@ -941,15 +797,7 @@ int LArOnlineID_Base::initLevelsFromDict(const std::string& group_name)
     }
   else 
     {
-      strg= "initLevelsFromDict - unable to find 'barrel-endcap' field ";
-      if(m_msgSvc)
-        {
-          log << MSG::ERROR << strg << endmsg;
-        }
-      else
-        {
-          std::cout << "LArOnlineID_Base::" << strg << std::endl;
-        }
+      ATH_MSG_ERROR("initLevelsFromDict - unable to find 'barrel-endcap' field ");
       return (1);    
     }
   
@@ -961,15 +809,7 @@ int LArOnlineID_Base::initLevelsFromDict(const std::string& group_name)
     }
   else 
     {
-      strg=  "initLevelsFromDict - unable to find 'barrel-endcap' field ";
-      if(m_msgSvc)
-        {
-          log << MSG::ERROR << strg << endmsg;
-        }
-      else
-        {
-          std::cout << "LArOnlineID_Base::" << strg << std::endl;
-        }
+      ATH_MSG_ERROR("initLevelsFromDict - unable to find 'barrel-endcap' field ");
       return (1);  
     }
   
@@ -986,15 +826,7 @@ int LArOnlineID_Base::initLevelsFromDict(const std::string& group_name)
   }
   else 
     {
-      strg =  "initLevelsFromDict - unable to find 'feedthrough' field ";
-      if(m_msgSvc)
-        {
-          log << MSG::ERROR << strg << endmsg;
-        }
-      else
-        {
-          std::cout << "LArOnlineID_Base::" << strg << std::endl;
-        }
+      ATH_MSG_ERROR("initLevelsFromDict - unable to find 'feedthrough' field ");
       return (1);  
     }
   
@@ -1012,15 +844,7 @@ int LArOnlineID_Base::initLevelsFromDict(const std::string& group_name)
     }
   else 
     {
-      strg =  "initLevelsFromDict - unable to find 'slot' field ";
-      if(m_msgSvc)
-        {
-          log << MSG::ERROR << strg << endmsg;
-        }
-      else
-        {
-          std::cout << "LArOnlineID_Base::" << strg << std::endl;
-        }       
+      ATH_MSG_ERROR("initLevelsFromDict - unable to find 'slot' field ");
       return (1);
     }
   
@@ -1038,15 +862,7 @@ int LArOnlineID_Base::initLevelsFromDict(const std::string& group_name)
     }
   else 
     {
-      strg =  "initLevelsFromDict - unable to find 'channel_in_slot' field ";
-      if(m_msgSvc)
-        {
-          log << MSG::ERROR << strg << endmsg;
-        }
-      else
-        {
-          std::cout << "LArOnlineID_Base::" << strg << std::endl;
-        }       
+      ATH_MSG_ERROR("initLevelsFromDict - unable to find 'channel_in_slot' field ");
       return (1);
     }
 
@@ -1059,27 +875,18 @@ int LArOnlineID_Base::initLevelsFromDict(const std::string& group_name)
     }
   else
     {
-      strg =  "initLevelsFromDict - unable to find 'slar' field ";
-      if(m_msgSvc)
-        {
-          log << MSG::ERROR << strg << endmsg;
-        }
-      else
-        {
-          std::cout << "LArOnline_SuperCellID::" << strg << std::endl;
-        }
+      ATH_MSG_ERROR("initLevelsFromDict - unable to find 'slar' field ");
       return (1);
     }
   } // end of m_this_is_slar
   
   /* Set the field implementations */
 
-  IdDictGroup* group = m_dict->find_group(group_name);
+  const IdDictGroup* group = m_dict->find_group(group_name);
   if ( !group ) {
-        log << MSG::ERROR << "initLevelsFromDict - cannot find "
-                << group_name << endmsg;
+    ATH_MSG_ERROR("initLevelsFromDict - cannot find " << group_name);
   } else {
-        m_laronlineRegion_index = group->regions()[0]->index();
+        m_laronlineRegion_index = group->region(0).index();
   }
 
   const IdDictRegion& region = m_dict->region(m_laronlineRegion_index);
@@ -1094,32 +901,16 @@ int LArOnlineID_Base::initLevelsFromDict(const std::string& group_name)
   if ( m_this_is_slar ) 
    m_slar_impl           = region.implementation(m_slar_index);
 
-  if (!m_quiet) {
-    if(m_msgSvc) {
-      log << MSG::DEBUG << "decode index and bit fields for each level: " << endmsg;
-      log << MSG::DEBUG << "lar     " << m_lar_impl.show_to_string() << endmsg;
-      log << MSG::DEBUG << "online  " << m_laronline_impl.show_to_string() << endmsg;
-      log << MSG::DEBUG << "bec     " << m_bec_impl.show_to_string() << endmsg;
-      log << MSG::DEBUG << "side    " << m_side_impl.show_to_string() << endmsg;
-      log << MSG::DEBUG << "ft      " << m_feedthrough_impl.show_to_string() << endmsg;
-      log << MSG::DEBUG << "slot    " << m_slot_impl.show_to_string() << endmsg;
-      log << MSG::DEBUG << "channel " << m_channel_in_slot_impl.show_to_string() << endmsg;
-      if ( m_this_is_slar )
-        log << MSG::DEBUG << "is-slar " << m_slar_impl.show_to_string() << endmsg;
-    }
-    else {
-      std::cout << "decode index and bit fields for each level: " << std::endl;
-      std::cout << "lar     "  << m_lar_impl.show_to_string() << std::endl;
-      std::cout << "online  "  << m_laronline_impl.show_to_string() << std::endl;
-      std::cout << "bec     "  << m_bec_impl.show_to_string() << std::endl;
-      std::cout << "side    "  << m_side_impl.show_to_string() << std::endl;
-      std::cout << "ft      "  << m_feedthrough_impl.show_to_string() << std::endl;
-      std::cout << "solt    "  << m_slot_impl.show_to_string() << std::endl;
-      std::cout << "channel "  << m_channel_in_slot_impl.show_to_string() << std::endl;
-      if ( m_this_is_slar )
-        std::cout << "slar    "  << m_slar_impl.show_to_string() << std::endl;
-    }
-  }
+  ATH_MSG_DEBUG("decode index and bit fields for each level:");
+  ATH_MSG_DEBUG("lar     " << m_lar_impl.show_to_string());
+  ATH_MSG_DEBUG("online  " << m_laronline_impl.show_to_string());
+  ATH_MSG_DEBUG("bec     " << m_bec_impl.show_to_string());
+  ATH_MSG_DEBUG("side    " << m_side_impl.show_to_string());
+  ATH_MSG_DEBUG("ft      " << m_feedthrough_impl.show_to_string());
+  ATH_MSG_DEBUG("slot    " << m_slot_impl.show_to_string());
+  ATH_MSG_DEBUG("channel " << m_channel_in_slot_impl.show_to_string());
+  if ( m_this_is_slar )
+    ATH_MSG_DEBUG("is-slar " << m_slar_impl.show_to_string());
 
   return(0) ;
 }
@@ -1130,11 +921,6 @@ int LArOnlineID_Base::initLevelsFromDict(const std::string& group_name)
 int LArOnlineID_Base::init_hashes()
 /*======================================*/
 {
-  MsgStream log(m_msgSvc, "LArOnlineID_Base" );
-  std::string strg1;
-  std::string strg2;
-  std::string strg3;
-
   /* channel hash */
   m_channelHashMax = m_full_laronline_range.cardinality();
   m_channel_vec.resize(m_channelHashMax);
@@ -1153,41 +939,16 @@ int LArOnlineID_Base::init_hashes()
                                               exp_id[m_channel_in_slot_index]);
           if(!(ids.insert(id)).second)
             {
-              strg1 = " init_hashes: duplicated id for channel nb = "+std::to_string(nids);
-              strg3 = " expanded Id= "+show_to_string(id);
-              if(m_msgSvc)
-                {
-                  log  << MSG::ERROR << strg1 << endmsg;
-                  //log  << MSG::ERROR << strg2 << endmsg;
-                  log  << MSG::ERROR << strg3 << endmsg;
-                }
-              else
-                {
-                  std::cout << "LArOnlineID_Base::Error" << strg1 << std::endl;
-                  //std::cout << strg2 << std::endl;
-                  std::cout << strg3 << std::endl;
-                }
+              ATH_MSG_ERROR("init_hashes: duplicated id for channel nb = " + std::to_string(nids));
+              ATH_MSG_ERROR("expanded Id= " + show_to_string(id));
             }
           nids++;
         }
     }
   if(ids.size() != m_channelHashMax) 
     {
-      strg1 = " init_hashes ";
-      strg2 = " set size NOT EQUAL to hash max. size "+std::to_string(ids.size());
-      strg3 = " hash max "+std::to_string(m_channelHashMax);
-      if(m_msgSvc)
-        {
-          log << MSG::ERROR << strg1 << endmsg;
-          log << MSG::ERROR << strg2 << endmsg;
-          log << MSG::ERROR << strg3 << endmsg;
-        }
-      else
-        {
-          std::cout << "LArOnlineID_Base::" << strg1 << std::endl;
-          std::cout << "Error" << strg2 << std::endl;
-          std::cout << strg3 << std::endl;
-        }
+      ATH_MSG_ERROR("init_hashes: set size NOT EQUAL to hash max. size " + std::to_string(ids.size()));
+      ATH_MSG_ERROR("hash max " + std::to_string(m_channelHashMax));
       return (1);
     }
   nids=0;
@@ -1213,41 +974,16 @@ int LArOnlineID_Base::init_hashes()
                                                      exp_id[m_side_index],
                                                      exp_id[m_feedthrough_index] );
         if(!(ids.insert(feedthroughId)).second){
-              strg1 = " init_hashes: duplicated id for feedthrough nb = "+std::to_string(nids);
-              strg3 = " expanded Id= "+show_to_string(feedthroughId);
-              if(m_msgSvc)
-                {
-                  log  << MSG::ERROR << strg1 << endmsg;
-                  //log  << MSG::ERROR << strg2 << endmsg;
-                  log  << MSG::ERROR << strg3 << endmsg;
-                }
-              else
-                {
-                  std::cout << "LArOnlineID_Base:: Error" << strg1 << std::endl;
-                  //std::cout << strg2 << std::endl;
-                  std::cout << strg3 << std::endl;
-                }
+              ATH_MSG_ERROR("init_hashes: duplicated id for feedthrough nb = " + std::to_string(nids));
+              ATH_MSG_ERROR("expanded Id= " + show_to_string(feedthroughId));
         }
         nids++;
       }
     }
   if(ids.size() != m_feedthroughHashMax) 
     {
-      strg1 = " init_hashes ";
-      strg2 = " set size NOT EQUAL to feedthrough hash max. size "+std::to_string(ids.size());
-      strg3 = " hash max= "+std::to_string(m_feedthroughHashMax);
-      if(m_msgSvc)
-        {
-          log << MSG::ERROR << strg1 << endmsg;
-          log << MSG::ERROR << strg2 << endmsg;
-          log << MSG::ERROR << strg3 << endmsg;
-        }
-      else
-        {
-          std::cout << "LArOnlineID_Base::" << strg1 << std::endl;
-          std::cout << " Error:" << strg2 << std::endl;
-          std::cout << strg3 << std::endl;
-        }
+      ATH_MSG_ERROR("init_hashes: set size NOT EQUAL to feedthrough hash max. size " + std::to_string(ids.size()));
+      ATH_MSG_ERROR("hash max= " + std::to_string(m_feedthroughHashMax));
       return (1);
     }
   nids=0;
@@ -1277,41 +1013,16 @@ int LArOnlineID_Base::init_hashes()
                                        exp_id[m_slot_index] );
           if(!(ids.insert(febId)).second)
             {
-              strg1 = " init_hashes:  duplicated id for FEB nb = "+std::to_string(nids);
-              strg3 = " expanded Id= "+show_to_string(febId);
-              if(m_msgSvc)
-                {
-                  log  << MSG::ERROR << strg1 << endmsg;
-                  //log  << MSG::ERROR << strg2 << endmsg;
-                  log  << MSG::ERROR << strg3 << endmsg;
-                }
-              else
-                {
-                  std::cout << "LArOnlineID_Base::Error:" << strg1 << std::endl;
-                  //std::cout << strg2 << std::endl;
-                  std::cout << strg3 << std::endl;
-                }
+              ATH_MSG_ERROR("init_hashes: duplicated id for FEB nb = " + std::to_string(nids));
+              ATH_MSG_ERROR("expanded Id= " + show_to_string(febId));
             }
           nids++;
         }
     }
   if(ids.size() != m_febHashMax) 
     {
-      strg1 = " init_hashes ";
-      strg2 = " set size NOT EQUAL to FEB hash max. size "+std::to_string(ids.size());
-      strg3 = " hash max "+std::to_string(m_febHashMax);
-      if(m_msgSvc)
-        {
-          log << MSG::ERROR << strg1 << endmsg;
-          log << MSG::ERROR << strg2 << endmsg;
-          log << MSG::ERROR << strg3 << endmsg;
-        }
-      else
-        {
-          std::cout << "LArOnlineID_Base::" << strg1 << std::endl;
-          std::cout << "Error:" << strg2 << std::endl;
-          std::cout << strg3 << std::endl;
-        }
+      ATH_MSG_ERROR("init_hashes: set size NOT EQUAL to FEB hash max. size " + std::to_string(ids.size()));
+      ATH_MSG_ERROR("hash max " + std::to_string(m_febHashMax));
       return (1);
     }
   nids=0;
@@ -1529,12 +1240,7 @@ IdentifierHash LArOnlineID_Base::feb_Hash (HWIdentifier febId) const
         for (int i = 0; (unsigned int)i < hc.m_slot_values.size(); ++i) {
             if (slotValue == hc.m_slot_values[i]) return (hc.m_hash + i);
         }
-        MsgStream log(m_msgSvc, "LArOnlineID_Base" );
-        if(m_msgSvc) {
-          log << MSG::WARNING << "LArOnlineID_Base::feb_Hash - ***** WARNING: could not match slot value for has calculation " << endmsg;
-        } else {
-          std::cout << "LArOnlineID_Base::feb_Hash - ***** WARNING: could not match slot value for has calculation " << std::endl;
-        }
+        ATH_MSG_WARNING("LArOnlineID_Base::feb_Hash - ***** WARNING: could not match slot value for has calculation ");
     }
     size_type slotIndex = m_slot_impl.unpackToIndex(febId);
     return (hc.m_hash + slotIndex);
@@ -1981,7 +1687,6 @@ int LArOnlineID_Base::is_slar(const HWIdentifier id)const
 int LArOnlineID_Base::init_calib_hashes()
 /*========================================*/
 {
-  MsgStream log(m_msgSvc, "LArOnlineID_Base" );
   unsigned int nids=0;
   std::set<HWIdentifier> ids;
   for (unsigned int i = 0; i < m_full_calib_laronline_range.size(); ++i) {
@@ -1994,17 +1699,8 @@ int LArOnlineID_Base::init_calib_hashes()
                                                  exp_id[m_slot_index],
                                                  exp_id[m_channel_in_slot_index]);
         if(!(ids.insert(id)).second) {
-          if(m_msgSvc) {
-            log << MSG::WARNING << " LArOnlineID_Base::init_calib_Hashes "
-                      << " Error: duplicated id for channel id. nids= " << nids
-                      << " compact Id  " << std::string(exp_id) << " " << show_to_string(id) << endmsg;
-          } else {
-            std::cout << " LArOnlineID_Base::init_calib_Hashes "
-                      << " Error: duplicated id for channel id. nids= " << nids
-                      << " compact Id  " ;
-            exp_id.show();
-            std::cout << " " << show_to_string(id) << std::endl;
-          }
+          ATH_MSG_WARNING("LArOnlineID_Base::init_calib_Hashes: Error: duplicated id for channel id. nids= " 
+                          + std::to_string(nids) + " compact Id " + std::string(exp_id) + " " + show_to_string(id));
         }
         nids++;
       }
@@ -2031,19 +1727,8 @@ int LArOnlineID_Base::init_calib_hashes()
                                               exp_id[m_feedthrough_index],
                                               exp_id[m_slot_index] );
         if(!(ids.insert(febId)).second){
-          if(m_msgSvc) {
-            log << MSG::WARNING << " LArOnlineID_Base::init_calibhashes "
-                    << " Warning: duplicated id for feb id. nids= " << nids
-                    << " compact Id  " << std::string(exp_id) << " " << show_to_string(febId) << endmsg;
-          } else {
-             std::cout << " LArOnlineID_Base::init_calibhashes "
-                    << " Error: duplicated id for feb id. nids= " << nids
-                    << " compact Id  " ;
-                    exp_id.show();
-                    std::cout << " " << show_to_string(febId) << std::endl;
-                    std::cout << std::endl;
-
-          }
+          ATH_MSG_WARNING("LArOnlineID_Base::init_calibhashes: Warning: duplicated id for feb id. nids= " 
+                          + std::to_string(nids) + " compact Id " + std::string(exp_id) + " " + show_to_string(febId));
         }
         nids++;
       }

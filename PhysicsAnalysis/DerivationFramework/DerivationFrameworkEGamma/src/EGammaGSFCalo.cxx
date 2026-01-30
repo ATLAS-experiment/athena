@@ -11,20 +11,6 @@
 #include "xAODTruth/TruthParticleContainer.h"
 // ========================================================================
 namespace DerivationFramework {
-EGammaGSFCalo::EGammaGSFCalo(const std::string& t, const std::string& n,
-                             const IInterface* p)
-    : AthAlgTool(t, n, p) {
-  declareInterface<DerivationFramework::IAugmentationTool>(this);
-}
-
-EGammaGSFCalo::~EGammaGSFCalo() {
-  // destructor
-}
-
-// ========================================================================
-
-// ========================================================================
-
 StatusCode EGammaGSFCalo::initialize() {
   ATH_MSG_INFO("Initialize...");
 

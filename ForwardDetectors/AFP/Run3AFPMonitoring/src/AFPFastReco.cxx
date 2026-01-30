@@ -1,5 +1,5 @@
 /*
- *   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+ *   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
  *   *
  *   *
  *   *       AFPFastReco.cxx
@@ -48,7 +48,9 @@ void AFPFastReco::recoClusters()
 			sumCharge += charge;
 			sumToT_temp += h->timeOverThreshold();
 		}
-
+    if (sumCharge == 0.f){
+      continue;
+    }
 		const float xPlane = sumX / sumCharge;
 		const float yPlane = sumY / sumCharge;
 

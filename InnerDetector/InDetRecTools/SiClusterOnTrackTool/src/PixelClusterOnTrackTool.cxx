@@ -823,6 +823,9 @@ InDet::PixelClusterOnTrackTool::getErrorsTIDE_Ambi(const InDet::PixelCluster *pi
     }
   }
 
+  // Position NN expects 3 clusters at most
+  if(numberOfSubclusters>3) numberOfSubclusters = 3;
+  
   // now you have numberOfSubclusters and the vectorOfPositions (Amg::Vector2D)
   if (trackPar.surfaceType() != Trk::SurfaceType::Plane ||
       trackPar.type() != Trk::AtaSurface) {

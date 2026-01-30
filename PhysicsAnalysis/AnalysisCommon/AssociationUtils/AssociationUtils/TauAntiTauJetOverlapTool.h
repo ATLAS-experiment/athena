@@ -7,6 +7,7 @@
 
 // Framework includes
 #include "AsgTools/AsgTool.h"
+#include "AsgTools/PropertyWrapper.h"
 
 // EDM includes
 #include "AsgDataHandles/ReadHandleKey.h"
@@ -14,10 +15,15 @@
 #include "xAODTau/TauJetContainer.h"
 #include "xAODJet/JetContainer.h"
 
+// Columnar includes
+#include "ColumnarCore/ObjectColumn.h"
+#include "ColumnarEventInfo/EventInfoDef.h"
+#include "ColumnarTau/TauJetDef.h"
+#include "ColumnarJet/JetDef.h"
+
 // Local includes
 #include "AssociationUtils/IOverlapTool.h"
 #include "AssociationUtils/BaseOverlapTool.h"
-#include "AssociationUtils/BJetHelper.h"
 #include "AssociationUtils/IObjectAssociator.h"
 
 namespace ORUtils
@@ -65,14 +71,16 @@ namespace ORUtils
 
       /// @brief Identify overlapping taus and jets.
       virtual StatusCode
-      findOverlaps(const xAOD::IParticleContainer& cont1,
-                   const xAOD::IParticleContainer& cont2) const override;
+      findOverlaps(columnar::Particle1Range cont1,
+                   columnar::Particle2Range cont2,
+                   columnar::EventContextId eventContext) const override;
 
       /// @brief Identify overlapping taus and jets.
       /// The above method calls this one.
       virtual StatusCode
-      findOverlaps(const xAOD::JetContainer& jets,
-                   const xAOD::TauJetContainer& taus) const;
+      internalFindOverlaps(columnar::Particle1Range jets,
+                           columnar::Particle2Range taus,
+                           columnar::EventContextId eventContext) const;
 
     protected:
       /// @name Helper methods
@@ -85,15 +93,15 @@ namespace ORUtils
 
       /// Is this jet a b-jet? Returns false if bjet ID not configured.
       /// Does not check if the jet is "surviving" OR.
-      bool isBJet(const xAOD::Jet& jet) const;
+      bool isBJet(columnar::Particle1Id jet) const;
 
       /// Is this an ID tau? Returns false if tau ID not configured.
       /// This one does check if the tau is "surviving" OR.
-      bool isSurvivingTau(const xAOD::TauJet& tau) const;
+      bool isSurvivingTau(columnar::Particle2Id tau) const;
 
       /// Is this an anti-tau? Returns false if anti-tau ID not configured.
       /// This one does check if the tau is "surviving" OR.
-      bool isSurvivingAntiTau(const xAOD::TauJet& tau) const;
+      bool isSurvivingAntiTau(columnar::Particle2Id tau) const;
 
     private:
       /// @name Configurable properties
@@ -119,20 +127,34 @@ namespace ORUtils
       /// @name Utilities
       /// @{
 
-      /// BJet helper
-      std::unique_ptr<BJetHelper> m_bJetHelper;
+      /// Columnar accessors
+      struct Accessors final : columnar::ColumnarTool<>
+      {
+        columnar::EventInfoAccessor<std::uint64_t> m_eventNumberAcc {*this, "eventNumber"};
+        columnar::Particle2Accessor<int> m_categoryAcc;
+
+        /// Columnar accessors
+        columnar::EventInfoAccessor<columnar::ObjectColumn> m_evtAcc;
+
+        /// BJet helper
+        columnar::Particle1Accessor<char> m_bJetAcc;
+
+        using ColumnarTool::ColumnarTool;
+      };
+      std::unique_ptr<Accessors> m_accessors {std::make_unique<Accessors> (this)};
 
       /// Delta-R matcher
       std::unique_ptr<IParticleAssociator> m_dRMatcher;
 
       /// Decoration helper for the IDed taus
-      std::unique_ptr<OverlapDecorationHelper> m_tauDecHelper;
+      std::unique_ptr<OverlapDecorationHelper<columnar::ContainerId::particle2>> m_tauDecHelper;
 
       /// Decoration helper for the anti-taus
-      std::unique_ptr<OverlapDecorationHelper> m_antiTauDecHelper;
+      std::unique_ptr<OverlapDecorationHelper<columnar::ContainerId::particle2>> m_antiTauDecHelper;
 
       std::string m_antiTauEventCategoryDecorName;
-      SG::ReadHandleKey<xAOD::EventInfo> m_evtKey{this, "EventInfoKey", "EventInfo", "xAOD::EventInfo ReadHandleKey"};
+
+      Gaudi::Property<std::string> m_evtKeyName{this, "EventInfoKey", "EventInfo", "xAOD::EventInfo ReadHandleKey"};
 
       /// @}
 

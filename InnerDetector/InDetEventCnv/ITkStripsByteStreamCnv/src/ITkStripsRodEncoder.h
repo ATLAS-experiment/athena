@@ -71,7 +71,7 @@ ITkStripsRodEncoder : public extends<AthAlgTool, IITkStripsRodEncoder>{
   mutable std::atomic<uint8_t> m_l0tag = 0;
   
   void encodeData(const std::vector<uint16_t>& clusters, const uint16_t ichannel, std::vector<uint8_t>& data_encode,
-                                int typ, uint8_t l0tag, uint8_t bc_count) const;
+                  int typ, uint8_t l0tag, uint8_t bc_count, uint32_t hccKey, uint16_t& size) const;
   
   /**
    * @brief Method to pack vector of 8 bit words intto a vector of 32 bit words.
@@ -108,19 +108,19 @@ ITkStripsRodEncoder : public extends<AthAlgTool, IITkStripsRodEncoder>{
   int getBarrelEC(const SCT_RDORawData* rdo) const;
 
   /** Get disk/layer info from the RDO. */
-  int getDiskLayer(const SCT_RDORawData* rdo) const;
+  uint8_t getDiskLayer(const SCT_RDORawData* rdo) const;
 
   /** Get the phi value info from the RDO. */
-  int getPhiModule(const SCT_RDORawData* rdo) const;
+  uint8_t getPhiModule(const SCT_RDORawData* rdo) const;
 
   /** Get the eta value info from the RDO. */
   int getEtaModule(const SCT_RDORawData* rdo) const;
 
   /** Get the maxumum strip value info from the RDO. */
-  int getStripMax(const SCT_RDORawData* rdo) const;
+  uint16_t getStripMax(const SCT_RDORawData* rdo) const;
 
   /** Get the side info from the RDO. */
-  int side(const SCT_RDORawData* rdo) const;
+  int getSide(const SCT_RDORawData* rdo) const;
   
   /** Get the time bin info from the RDO. */
   int getTimeBin(const SCT_RDORawData* rdo) const;

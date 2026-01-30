@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -55,6 +55,7 @@ namespace CP
     // check an implicit char accessor
     std::unique_ptr<ISelectionWriteAccessor> accB;
     ASSERT_SUCCESS (makeSelectionWriteAccessor ("b", accB, true));
+    ASSERT_NE(accB, nullptr);
     accB->setBool (*jet, false);
     static const SG::ConstAccessor<char> bAcc("b");
     EXPECT_EQ (bAcc(*jet), 0);
@@ -64,6 +65,7 @@ namespace CP
     // check a basic bits accessor
     std::unique_ptr<ISelectionWriteAccessor> accC;
     ASSERT_SUCCESS (makeSelectionWriteAccessor ("c,as_bits", accC));
+    ASSERT_NE(accC, nullptr);
     // check that this is actually nothing but a simple bits accessor
     auto* selC = dynamic_cast<SelectionWriteAccessorBits*>(accC.get());
     EXPECT_NE(selC, nullptr);
@@ -89,6 +91,7 @@ namespace CP
     // check an and of two accessors
     std::unique_ptr<ISelectionReadAccessor> accAnd;
     ASSERT_SUCCESS (makeSelectionReadAccessor ("a,as_char&&b,as_char", accAnd));
+    ASSERT_NE(accAnd, nullptr);
     accA->setBool (*jet, true);
     accB->setBool (*jet, true);
     EXPECT_TRUE (accAnd->getBool (*jet));
@@ -162,6 +165,7 @@ namespace CP
     // check an OR of two accessors
     std::unique_ptr<ISelectionReadAccessor> accOr;
     ASSERT_SUCCESS (makeSelectionReadAccessor ("a,as_char||b,as_char", accOr));
+    ASSERT_NE(accOr, nullptr);
     accA->setBool (*jet, false);
     accB->setBool (*jet, true);
     EXPECT_TRUE (accOr->getBool (*jet));
@@ -177,6 +181,7 @@ namespace CP
 
     std::unique_ptr<ISelectionReadAccessor> accEx;
     ASSERT_SUCCESS (makeSelectionReadAccessor ("a,as_char||(b,as_char && c,as_bits)", accEx));
+    ASSERT_NE(accEx, nullptr);
     accA->setBool (*jet, true);
     accB->setBool (*jet, true);
     accC->setBool (*jet, true);
@@ -244,6 +249,7 @@ namespace CP
     // test that an empty string produces a SelectionAccessorNull(true)
     std::unique_ptr<ISelectionReadAccessor> accEmpty;
     ASSERT_SUCCESS (makeSelectionReadAccessor ("", accEmpty));
+    ASSERT_NE(accEmpty, nullptr);
     auto accNull = dynamic_cast<SelectionReadAccessorNull*>(accEmpty.get());
     EXPECT_NE (accNull, nullptr); // is in fact a null accessor
     // can either be true or false, let's test that it is true
@@ -422,7 +428,7 @@ namespace CP
       if(!p.build(acc).isSuccess()) {
         ADD_FAILURE() << "unable to parse expression";
       }
-      return acc->label();
+      return acc ? acc->label() : "";
     };
 
     std::string s;

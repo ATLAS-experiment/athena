@@ -53,9 +53,9 @@ void TrackFitter::resetCounters()
 ///////////////////////////////////////////////////////////////////////////////
 
 
-int TrackFitter::fitTracks(const std::vector<std::shared_ptr<const FPGATrackSimRoad>>& roads, std::vector<FPGATrackSimTrack>& tracks) {
+int TrackFitter::fitTracks(const std::vector<FPGATrackSimRoad>& roads, std::vector<FPGATrackSimTrack>& tracks) {
     resetCounters();
-    for (const std::shared_ptr<const FPGATrackSimRoad>& cur_road : roads) {
+    for (const FPGATrackSimRoad& cur_road : roads) {
       std::vector<FPGATrackSimTrack> t;
       int isOK = fitTracks(cur_road, t);
       if (isOK != FITTRACKS_OK) return isOK;
@@ -71,27 +71,22 @@ int TrackFitter::fitTracks(const std::vector<std::shared_ptr<const FPGATrackSimR
  * Takes all combinations of hits in the road to create track candidates,
  * fits them using the constant bank, and filters them based on the chi2 of the fit.
  */
- int TrackFitter::fitTracks(const std::shared_ptr<const FPGATrackSimRoad> &road, std::vector<FPGATrackSimTrack>& tracks)
+ int TrackFitter::fitTracks(const FPGATrackSimRoad &road, std::vector<FPGATrackSimTrack>& tracks)
 {
-    if (not road){
-      ATH_MSG_WARNING("road pointer is null in TrackFitter::fitTracks");
-      return FITTRACKS_BAD;
-    }
-    
     m_tracks_missinghits_track.clear();
 
     double y = 0.0;
     double x = 0.0;
     if (m_IdealCoordFitType != TrackCorrType::None ) {
-      y = road->getY();
-      x = road->getX();
-      ATH_MSG_DEBUG("Attempting to fit Hough road with y = " << y << ", x = " << x << ", sector = " << road->getSector() << "and nhits = " << road->getNHits());
+        y = road.getY();
+        x = road.getX();
+        ATH_MSG_DEBUG("Attempting to fit Hough road with y = " << y << ", x = " << x << ", sector = " << road.getSector() << "and nhits = " << road.getNHits());
     }
 
     int sector = 0;
     if (!m_fitFromRoad) {
       // Error checking
-      sector = road->getSector();
+      sector = road.getSector();
       if (sector < 0) {
         ATH_MSG_DEBUG("Bad sector " << sector);
         return FITTRACKS_OK;
@@ -112,20 +107,20 @@ int TrackFitter::fitTracks(const std::vector<std::shared_ptr<const FPGATrackSimR
     bool missStrip;
     layer_bitmask_t missing_mask;
     layer_bitmask_t norecovery_mask; // mask to prevent majority in planes with multiple hits
-    getMissingInfo(*road, nMissing, missPixel, missStrip, missing_mask, norecovery_mask);
+    getMissingInfo(road, nMissing, missPixel, missStrip, missing_mask, norecovery_mask);
     // Create a template track with common parameters filled already for initializing below
     FPGATrackSimTrack temp;
     if(!m_do2ndStage){
       temp.setTrackStage(TrackStage::FIRST);
-      if (!m_fitFromRoad) temp.setFirstSectorID(road->getSector());
+      if (!m_fitFromRoad) temp.setFirstSectorID(road.getSector());
     }
     else{
       temp.setTrackStage(TrackStage::SECOND);
-      if (!m_fitFromRoad) temp.setSecondSectorID(road->getSector());
+      if (!m_fitFromRoad) temp.setSecondSectorID(road.getSector());
     }
     temp.setNLayers(m_pmap->getNLogiLayers());
     temp.setBankID(-1); // TODO
-    temp.setPatternID(road->getPID());
+    temp.setPatternID(road.getPID());
     temp.setHitMap(missing_mask);
     temp.setNMissing(nMissing);
     temp.setHoughX(x);
@@ -134,21 +129,21 @@ int TrackFitter::fitTracks(const std::vector<std::shared_ptr<const FPGATrackSimR
     temp.setTrackCorrType(m_IdealCoordFitType);
     temp.setDoDeltaGPhis(m_doDeltaGPhis);
 
-    temp.setSubRegion(road->getSubRegion());
-    temp.setHoughXBin(road->getXBin());
-    temp.setHoughYBin(road->getYBin());
+    temp.setSubRegion(road.getSubRegion());
+    temp.setHoughXBin(road.getXBin());
+    temp.setHoughYBin(road.getYBin());
 
-    temp.setBinIdx(road->getBinIdx());
+    temp.setBinIdx(road.getBinIdx());
 
     // Create a list of track candidates by taking all possible combinations of hits in road.
     std::vector<FPGATrackSimTrack> track_cands;
 
     // This may not even need to be a class member. Create the vector of possible combinations.
-    std::vector<std::vector<int>> comboIndices = getComboIndices(road->getNHits_layer());
+    std::vector<std::vector<int>> comboIndices = getComboIndices(road.getNHits_layer());
     ATH_MSG_DEBUG("There are theoretically " << comboIndices.size() << " combinations to process for this road");
     size_t nFits = 0;
     for (size_t icomb = 0; icomb < comboIndices.size(); icomb++) {
-        FPGATrackSimTrack track_cand = makeTrackCandidate(*road, temp, comboIndices[icomb]);
+        FPGATrackSimTrack track_cand = makeTrackCandidate(road, temp, comboIndices[icomb]);
 
         // Before we start, make sure this track candidate has not been marked as invalid
         // due to combinatorics issues with spacepoints.
@@ -160,14 +155,18 @@ int TrackFitter::fitTracks(const std::vector<std::shared_ptr<const FPGATrackSimR
         // If the "fit from road" flag is set, then just assign track chi2 and parameters from that.
         if (!m_do2ndStage && m_fitFromRoad) {
             // Then actually do it using the road values.
-            track_cand.setChi2(road->getFitChi2());
-            track_cand.setPars(road->getFitParams());
+            track_cand.setChi2(road.getFitChi2());
+            track_cand.setChi2Phi(road.getFitChi2Phi());
+            track_cand.setChi2Eta(road.getFitChi2Eta());
+            track_cand.setPars(road.getFitParams());
             ATH_MSG_DEBUG("Assigned chi2 = " << track_cand.getChi2() << " and parameters from genscan tool");
             ATH_MSG_DEBUG("Set q/pt = " << track_cand.getQOverPt());
             ATH_MSG_DEBUG("Set d0 = " << track_cand.getD0());
             ATH_MSG_DEBUG("Set z0 = " << track_cand.getZ0());
             ATH_MSG_DEBUG("Set eta = " << track_cand.getEta());
             ATH_MSG_DEBUG("Set phi = " << track_cand.getPhi());
+            tracks.push_back(track_cand);
+            continue;
         } else {
 
         if (nMissing == 0 || m_guessinghits)
@@ -231,18 +230,18 @@ int TrackFitter::fitTracks(const std::vector<std::shared_ptr<const FPGATrackSimR
     }
 
     // Do recovery fits
-    if (nMissing == 0) {
+    if ((nMissing == 0) && (!m_fitFromRoad)) {
         // In the case of m_do_majority > 1, we only do majority fits if ALL full fits fail the chi2 cut
         if (m_do_majority == 1 || (m_do_majority > 1 && !hasGoodFit(tracks, m_Chi2Dof_recovery_min)))
         {
-            for (FPGATrackSimTrack & t : tracks)
-	      if (t.getChi2ndof() > m_Chi2Dof_recovery_min && t.getChi2ndof() < m_Chi2Dof_recovery_max){
-		double y(0);
-		if (road != nullptr && m_IdealCoordFitType != TrackCorrType::None)
-		  y = road->getY();
-		t = recoverTrack(t, norecovery_mask, sector, y);
+            for (FPGATrackSimTrack& t : tracks)
+                if (t.getChi2ndof() > m_Chi2Dof_recovery_min && t.getChi2ndof() < m_Chi2Dof_recovery_max) {
+                    double y(0);
+                    if (m_IdealCoordFitType != TrackCorrType::None)
+                        y = road.getY();
+                    t = recoverTrack(t, norecovery_mask, sector, y);
 
-	      }
+                }
         }
     }
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef WEBDAQHISTSVC_THISTSVC_H
@@ -20,6 +20,7 @@ class TTree;
 
 #include <vector>
 #include <string>
+#include <memory>
 #include <mutex>
 #include <atomic>
 #include <thread>
@@ -134,10 +135,9 @@ private:
   struct THistID {
     THistID(const std::string& s, TObject* o) : id(s), obj(o) {};
     THistID() : id(""), obj(nullptr) {}; 
-    ~THistID() { delete mutex; }
     std::string id;
     TObject* obj{nullptr};
-    std::mutex* mutex{nullptr};
+    std::unique_ptr<std::mutex> mutex;
   };
 
   /// Flag to stop the monitoring task

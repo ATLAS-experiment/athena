@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // $Id: testWrite.cxx 770805 2016-08-30 14:03:33Z ssnyder $
@@ -217,7 +217,7 @@ std::vector< std::vector<unsigned> > segmentationEntries =
 };
 
 // =============================================================================
-int main( /*int argc, char* argv[]*/){
+int main1( /*int argc, char* argv[]*/){
 
 #if !defined(XAOD_STANDALONE) && !defined(RINGER_STANDALONE)
   const float GeVf = GeV;
@@ -1439,4 +1439,17 @@ Discrimination::UniqueThresholdVarDep* createEtaEtDepThres(
   Discrimination::UniqueThresholdVarDep* thres = createThres(thresValue);
   thres->setEtaEtDep(etaMin, etaMax, etMin, etMax);
   return thres;
+}
+
+
+int main()
+{
+  int ret = 1;
+  try {
+    ret = main1();
+  }
+  catch (const std::exception& e) {
+    std::cerr << e.what() << "\n";
+  }
+  return ret;
 }

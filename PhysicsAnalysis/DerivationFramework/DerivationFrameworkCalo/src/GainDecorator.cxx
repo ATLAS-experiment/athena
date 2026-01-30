@@ -1,10 +1,7 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-/////////////////////////////////////////////////////////////////
-// GainDecorator.cxx, (c) ATLAS Detector software
-///////////////////////////////////////////////////////////////////
 // Author: Simone Mazza (simone.mazza@mi.infn.it),
 //         Bruno Lenzi,
 //         Giovanni Marchiori (giovanni.marchiori@cern.ch)
@@ -12,57 +9,9 @@
 // gain
 
 #include "DerivationFrameworkCalo/GainDecorator.h"
+#include "CaloEvent/CaloCell.h"
 
-#include <regex>
-#include <string>
-#include <vector>
-namespace {}
 
-// Constructor
-DerivationFramework::GainDecorator::GainDecorator(const std::string& t,
-                                                  const std::string& n,
-                                                  const IInterface* p)
-  : base_class(t, n, p)
-{
-  declareProperty("decoration_pattern",
-                  m_decorationPattern = "{info}_Lr{layer}_{gain}G");
-  declareProperty("gain_names",
-                  m_gainNames = { { CaloGain::LARHIGHGAIN, "Hi" },
-                                  { CaloGain::LARMEDIUMGAIN, "Med" },
-                                  { CaloGain::LARLOWGAIN, "Low" } });
-  declareProperty("layers", m_layers = { 0, 1, 2, 3 });
-
-  // Define the names for the decorations
-  for (const auto& kv : m_gainNames)
-    for (const auto layer : m_layers) {
-      std::string name = m_decorationPattern;
-      name.replace(name.find("{layer}"),
-                   std::string("{layer}").size(),
-                   std::to_string(layer));
-      name.replace(
-        name.find("{gain}"), std::string("{gain}").size(), kv.second);
-      std::string name_E(name), name_rnoW(name), name_nCells(name);
-      name_E.replace(name_E.find("{info}"), std::string("{info}").size(), "E");
-      name_rnoW.replace(name_rnoW.find("{info}"), std::string("{info}").size(), "rnoW");
-      name_nCells.replace(
-        name_nCells.find("{info}"), std::string("{info}").size(), "nCells");
-
-      std::pair<int, int> key(kv.first, layer);
-      m_names_E[key] = name_E;
-      m_names_rnoW[key] = name_rnoW;
-      m_names_nCells[key] = name_nCells;
-    }
-
-  for (const auto& kv : m_names_E) {
-    ATH_MSG_DEBUG("Decorating (layer, gain): " << kv.first << " " << kv.second);
-  }
-  for (const auto& kv : m_names_nCells) {
-    ATH_MSG_DEBUG("Decorating (layer, gain): " << kv.first << " " << kv.second);
-  }
-}
-
-// Destructor
-DerivationFramework::GainDecorator::~GainDecorator() = default;
 
 // Athena initialize and finalize
 StatusCode
@@ -76,50 +25,23 @@ DerivationFramework::GainDecorator::initialize()
     return StatusCode::FAILURE;
   }
 
+  for (const auto& kv : m_gainNames) {
+    for (const auto layer : m_layers) {
+      m_names_E.emplace_back(kv.first, layer);
+    }
+  }
+
+  ATH_CHECK(m_SGKey_electrons.initialize(SG::AllowEmpty));
   if (!m_SGKey_electrons.key().empty()) {
     ATH_MSG_DEBUG("Using " << m_SGKey_electrons << " for electrons");
-    ATH_CHECK(m_SGKey_electrons.initialize());
-
-    const std::string containerKey = m_SGKey_electrons.key();
-    for (const auto& kv : m_gainNames) {
-      for (const auto layer : m_layers) {
-        std::pair<int, int> key(kv.first, layer);
-        m_SGKey_electrons_decorations.emplace_back(containerKey + "." +
-                                                   m_names_E[key]);
-        m_SGKey_electrons_decorations.emplace_back(containerKey + "." +
-                                                   m_names_rnoW[key]);
-        m_SGKey_electrons_decorations.emplace_back(containerKey + "." +
-                                                   m_names_nCells[key]);
-      }
-    }
-    ATH_CHECK(m_SGKey_electrons_decorations.initialize());
   }
+  ATH_CHECK(m_SGKey_electrons_decorations.initialize(!m_SGKey_electrons.key().empty()));
 
+  ATH_CHECK(m_SGKey_photons.initialize(SG::AllowEmpty));
   if (!m_SGKey_photons.key().empty()) {
     ATH_MSG_DEBUG("Using " << m_SGKey_photons << " for photons");
-    ATH_CHECK(m_SGKey_photons.initialize());
-
-    const std::string containerKey = m_SGKey_photons.key();
-    for (const auto& kv : m_gainNames) {
-      for (const auto layer : m_layers) {
-        std::pair<int, int> key(kv.first, layer);
-        m_SGKey_photons_decorations.emplace_back(containerKey + "." +
-                                                 m_names_E[key]);
-        m_SGKey_photons_decorations.emplace_back(containerKey + "." +
-                                                 m_names_rnoW[key]);
-        m_SGKey_photons_decorations.emplace_back(containerKey + "." +
-                                                 m_names_nCells[key]);
-      }
-    }
-    ATH_CHECK(m_SGKey_photons_decorations.initialize());
   }
-
-  return StatusCode::SUCCESS;
-}
-
-StatusCode
-DerivationFramework::GainDecorator::finalize()
-{
+  ATH_CHECK(m_SGKey_photons_decorations.initialize(!m_SGKey_photons.key().empty()));
 
   return StatusCode::SUCCESS;
 }
@@ -128,7 +50,9 @@ DerivationFramework::GainDecorator::finalize()
 StatusCode
 DerivationFramework::GainDecorator::addBranches(const EventContext& ctx) const
 {
-
+  ATH_MSG_DEBUG("m_gainNames.size() = " << m_gainNames.size() << ", m_layers.size() = "<< m_layers.size() );
+  const size_t limit{m_gainNames.size()*m_layers.size()};
+  if (limit == 0) { return StatusCode::FAILURE; } // FIXME Add ERROR message here
   // Photon decorations
 
   if (!m_SGKey_photons.key().empty()) {
@@ -144,24 +68,16 @@ DerivationFramework::GainDecorator::addBranches(const EventContext& ctx) const
       decorations_rnoW;
     std::vector<SG::WriteDecorHandle<xAOD::EgammaContainer, char>>
       decorations_nCells;
-    int i(0);
-    for (const auto& kv : m_gainNames) {
-      for (const auto layer : m_layers) {
-        std::pair<int, int> key(kv.first, layer);
-        decorations_E.emplace_back(
-          
-            m_SGKey_photons_decorations[i * 3], ctx);
-        decorations_rnoW.emplace_back(
-          
-            m_SGKey_photons_decorations[i * 3 + 1], ctx);
-        decorations_nCells.emplace_back(
-          
-            m_SGKey_photons_decorations[i * 3 + 2], ctx);
-        i++;
-      }
+    for (unsigned int i = 0; i < limit; ++i) {
+      decorations_E.emplace_back(
+                                 m_SGKey_photons_decorations[i * 3], ctx);
+      decorations_rnoW.emplace_back(
+                                    m_SGKey_photons_decorations[i * 3 + 1], ctx);
+      decorations_nCells.emplace_back(
+                                      m_SGKey_photons_decorations[i * 3 + 2], ctx);
     }
-
     // Decorate photons
+    int i(0);
     for (const auto* photon : *importedPhotons) {
       DerivationFramework::GainDecorator::calculation res =
         decorateObject(photon);
@@ -171,7 +87,7 @@ DerivationFramework::GainDecorator::addBranches(const EventContext& ctx) const
           std::pair<int, int> key(kv.first, layer);
           decorations_E[i](*photon) = res.E[key];
           decorations_rnoW[i](*photon) =
-	    res.EnoW[key] != 0 ? res.E[key]/res.EnoW[key] : 1;
+            res.EnoW[key] != 0 ? res.E[key]/res.EnoW[key] : 1;
           decorations_nCells[i](*photon) = res.nCells[key];
           i++;
         }
@@ -195,24 +111,16 @@ DerivationFramework::GainDecorator::addBranches(const EventContext& ctx) const
       decorations_rnoW;
     std::vector<SG::WriteDecorHandle<xAOD::EgammaContainer, char>>
       decorations_nCells;
-    int i(0);
-    for (const auto& kv : m_gainNames) {
-      for (const auto layer : m_layers) {
-        std::pair<int, int> key(kv.first, layer);
-        decorations_E.emplace_back(
-          
-            m_SGKey_electrons_decorations[i * 3], ctx);
-        decorations_rnoW.emplace_back(
-          
-            m_SGKey_electrons_decorations[i * 3 + 1], ctx);
-        decorations_nCells.emplace_back(
-          
-            m_SGKey_electrons_decorations[i * 3 + 2], ctx);
-        i++;
-      }
+    for (unsigned int i = 0; i < limit; ++i) {
+      decorations_E.emplace_back(
+                                 m_SGKey_electrons_decorations[i * 3], ctx);
+      decorations_rnoW.emplace_back(
+                                    m_SGKey_electrons_decorations[i * 3 + 1], ctx);
+      decorations_nCells.emplace_back(
+                                      m_SGKey_electrons_decorations[i * 3 + 2], ctx);
     }
-
     // Decorate electrons
+    int i(0);
     for (const auto* electron : *importedElectrons) {
       DerivationFramework::GainDecorator::calculation res =
         decorateObject(electron);
@@ -222,7 +130,7 @@ DerivationFramework::GainDecorator::addBranches(const EventContext& ctx) const
           std::pair<int, int> key(kv.first, layer);
           decorations_E[i](*electron) = res.E[key];
           decorations_rnoW[i](*electron) =
-	    res.EnoW[key] != 0 ? res.E[key]/res.EnoW[key] : 1;
+            res.EnoW[key] != 0 ? res.E[key]/res.EnoW[key] : 1;
           decorations_nCells[i](*electron) = res.nCells[key];
           i++;
         }
@@ -235,16 +143,16 @@ DerivationFramework::GainDecorator::addBranches(const EventContext& ctx) const
 
 DerivationFramework::GainDecorator::calculation
 DerivationFramework::GainDecorator::decorateObject(
-  const xAOD::Egamma*& egamma) const
+                                                   const xAOD::Egamma*& egamma) const
 {
 
   // Compute energy and number of cells per gain per layer
   // Set the initial values to 0 (needed?)
   DerivationFramework::GainDecorator::calculation result;
   for (const auto& kv : m_names_E) {
-    result.E[kv.first] = 0.;
-    result.EnoW[kv.first] = 0.;
-    result.nCells[kv.first] = 0;
+    result.E[kv] = 0.;
+    result.EnoW[kv] = 0.;
+    result.nCells[kv] = 0;
   }
 
   // Skip the computation for missing cell links (like topo-seeded photons)

@@ -73,9 +73,13 @@ public: // Non-static members
    unsigned int getInputContext(const std::string& label,
                                 unsigned int maxFile = 0) override;
 
-   /// @return map of all labelled input contexts.
+   /// @return copy of the map of all labelled input contexts.
    virtual
-   const std::map<std::string, unsigned int>& getInputContextMap() const override;
+   std::map<std::string, unsigned int> getInputContextMap() const override;
+
+   /// @return size of the map of all labelled input contexts.
+   virtual
+   unsigned int getInputContextMapSize() const override;
 
    /// @return the context.
    virtual

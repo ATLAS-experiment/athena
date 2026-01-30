@@ -1,5 +1,5 @@
 /*
- *   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+ *   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
  *   */
 
 #ifndef POOL_ROOTTREEINDEXCONTAINER_H
@@ -10,6 +10,7 @@
 #include <cstdint>
 
 // Forward declarations
+class StatusCode;
 class TTree;
 class TBranch;
 
@@ -32,17 +33,14 @@ namespace pool {
 
    class RootTreeIndexContainer : public RootTreeContainer {
    public:
-      /// Standard constructor
-      RootTreeIndexContainer();
-
+      explicit RootTreeIndexContainer(const std::string& name);
       RootTreeIndexContainer (const RootTreeIndexContainer&) = delete;
       RootTreeIndexContainer& operator= (const RootTreeIndexContainer&) = delete;
 
-      /// Standard destructor
       virtual ~RootTreeIndexContainer() override {}
 
       /// Open the container
-      virtual DbStatus open(DbDatabase&, const std::string&, const DbTypeInfo*, DbAccessMode) override final;
+      virtual StatusCode open(DbDatabase&, const std::string&, const DbTypeInfo*, DbAccessMode) override final;
 
       /// Number of entries within the container
       virtual uint64_t nextRecordId() override final;
@@ -57,11 +55,11 @@ namespace pool {
         *
         * @return Status code indicating success or failure.
         */
-      virtual DbStatus loadObject( void** ptr, ShapeH shape, 
+      virtual StatusCode loadObject( void** ptr, ShapeH shape, 
                                    Token::OID_t& oid) override;
       
       /// Commit single entry to container
-      virtual DbStatus writeObject(ActionList::value_type&) override;
+      virtual StatusCode writeObject(ActionList::value_type&) override;
 
    private:
       /// Pointer to index branch

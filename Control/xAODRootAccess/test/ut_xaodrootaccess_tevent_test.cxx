@@ -21,6 +21,7 @@
 
 // Local include(s):
 #include "xAODRootAccess/Init.h"
+#include "xAODRootAccess/Event.h"
 #include "xAODRootAccess/TEvent.h"
 #include "xAODRootAccess/TStore.h"
 #include "xAODRootAccess/TAuxStore.h"
@@ -87,7 +88,6 @@ int main() {
    RETURN_CHECK( APP_NAME, xAOD::Init() );
 
    // Create the tested object(s):
-   xAOD::TEvent event;
    xAOD::TStore store;
 
    // Connect an input file to the event:
@@ -98,10 +98,10 @@ int main() {
                gSystem->Getenv( "ASG_TEST_FILE_DATA" ) );
       return 1;
    }
-   RETURN_CHECK( APP_NAME, event.readFrom( ifile.get() ) );
+   std::unique_ptr<xAOD::Event> event = xAOD::Event::createAndReadFrom(*ifile);
 
    // Read in the first event:
-   if( event.getEntry( 0 ) < 0 ) {
+   if( event->getEntry( 0 ) < 0 ) {
       ::Error( APP_NAME, XAOD_MESSAGE( "Couldn't load entry 0 from file %s" ),
                gSystem->Getenv( "ASG_TEST_FILE_DATA" ) );
       return 1;
@@ -109,8 +109,8 @@ int main() {
 
    // Try to retrieve some objects:
    const xAOD::AuxContainerBase* c = 0;
-   RETURN_CHECK( APP_NAME, event.retrieve( c, "ElectronsAux." ) );
-   RETURN_CHECK( APP_NAME, event.retrieve( c, "MuonsAux." ) );
+   RETURN_CHECK( APP_NAME, event->retrieve( c, "ElectronsAux." ) );
+   RETURN_CHECK( APP_NAME, event->retrieve( c, "MuonsAux." ) );
 
    // Check if the second one was assigned the correct type of internal store:
    const SG::IAuxStore* dynStore = c->getStore();
@@ -127,13 +127,13 @@ int main() {
    RETURN_CHECK( APP_NAME, store.record( objB, "MyObjB" ) );
 
    // Print what's in the event now:
-   Info( APP_NAME, "TEvent contents:\n\n%s\n\n", event.dump().c_str() );
+   Info( APP_NAME, "TEvent contents:\n\n%s\n\n", event->dump().c_str() );
 
    // They should now be accessible through TEvent:
    const ClassA* dummy1 = 0;
-   RETURN_CHECK( APP_NAME, event.retrieve( dummy1, "MyObjA" ) );
+   RETURN_CHECK( APP_NAME, event->retrieve( dummy1, "MyObjA" ) );
    const ClassB* dummy2 = 0;
-   RETURN_CHECK( APP_NAME, event.retrieve( dummy2, "MyObjB" ) );
+   RETURN_CHECK( APP_NAME, event->retrieve( dummy2, "MyObjB" ) );
 
    // Try to get them through the TVirtualEvent interface:
    xAOD::TVirtualEvent* vevent = xAOD::TActiveEvent::event();
@@ -145,31 +145,31 @@ int main() {
    SIMPLE_ASSERT( vevent->retrieve( dummy1, 0x1234 ) == false );
 
    // Test the functions used by the smart pointers:
-   if( event.getName( objA ) != "MyObjA" ) {
+   if( event->getName( objA ) != "MyObjA" ) {
       ::Error( APP_NAME,
                XAOD_MESSAGE( "getName(objA) = \"%s\" (!=\"MyObjA\")" ),
-               event.getName( objA ).c_str() );
+               event->getName( objA ).c_str() );
       return 1;
    }
-   if( event.getName( xAOD::Utils::hash( "MyObjB" ) ) != "MyObjB" ) {
+   if( event->getName( xAOD::Utils::hash( "MyObjB" ) ) != "MyObjB" ) {
       ::Error( APP_NAME,
                XAOD_MESSAGE( "Couldn't retrieve the name for hashed "
                              "\"MyObjB\"" ) );
       return 1;
    }
-   if( event.getName( ( void* ) 0x12345678 ) != "" ) {
+   if( event->getName( ( void* ) 0x12345678 ) != "" ) {
       ::Error( APP_NAME,
                XAOD_MESSAGE( "Found a name for an imaginary pointer?!?" ) );
       return 1;
    }
-   if( event.getName( 0x12345678 ) != "" ) {
+   if( event->getName( 0x12345678 ) != "" ) {
       ::Error( APP_NAME,
                XAOD_MESSAGE( "Found a name for an imaginary hash?!?" ) );
       return 1;
    }
 
    // This is not supposed to work:
-   if( event.retrieve( dummy1, "MyObjB" ).isSuccess() ) {
+   if( event->retrieve( dummy1, "MyObjB" ).isSuccess() ) {
       ::Error( APP_NAME, XAOD_MESSAGE( "Something strange happened" ) );
       return 1;
    }
@@ -178,7 +178,7 @@ int main() {
    store.clear();
 
    // Now this is not supposed to work either:
-   if( event.retrieve( dummy2, "MyObjB" ).isSuccess() ) {
+   if( event->retrieve( dummy2, "MyObjB" ).isSuccess() ) {
       ::Error( APP_NAME, XAOD_MESSAGE( "Something strange happened" ) );
       return 1;
    }
@@ -195,18 +195,18 @@ int main() {
 
    // Try to retrieve it in all possible ways:
    ConstDataVector< DataVector< ClassA > >* cdv1 = 0;
-   if ( event.retrieve( cdv1, "ConstDataVector" ).isSuccess() ) {
+   if ( event->retrieve( cdv1, "ConstDataVector" ).isSuccess() ) {
       ::Error( APP_NAME, XAOD_MESSAGE( "Non-const retrieval of ConstDataVector should not work" ) );
       return 1;
    }
    const ConstDataVector< DataVector< ClassA > >* cdv2 = 0;
-   RETURN_CHECK( APP_NAME, event.retrieve( cdv2, "ConstDataVector" ) );
+   RETURN_CHECK( APP_NAME, event->retrieve( cdv2, "ConstDataVector" ) );
    const DataVector< ClassA >* cdv3 = 0;
-   RETURN_CHECK( APP_NAME, event.retrieve( cdv3, "ConstDataVector" ) );
+   RETURN_CHECK( APP_NAME, event->retrieve( cdv3, "ConstDataVector" ) );
 
    // But this should not work:
    DataVector< ClassA >* cdv4 = 0;
-   if( event.retrieve( cdv4, "ConstDataVector" ).isSuccess() ) {
+   if( event->retrieve( cdv4, "ConstDataVector" ).isSuccess() ) {
       ::Error( APP_NAME, XAOD_MESSAGE( "Non-const retrieval of ConstDataVector should not work" ) );
       return 1;
    }
@@ -214,7 +214,7 @@ int main() {
    // test listing object keys
    {
       std::vector<std::string> keys;
-      RETURN_CHECK( APP_NAME, event.keys<xAOD::FileMetaData>(keys, true) );
+      RETURN_CHECK( APP_NAME, event->keys<xAOD::FileMetaData>(keys, true) );
       if (keys.size() != 1) {
          ::Error( APP_NAME,
                XAOD_MESSAGE( "keys<xAOD::FileMetaData>(true).size = %u (!=1)" ),
@@ -224,7 +224,7 @@ int main() {
 
       keys.clear();
       keys.reserve(6);
-      RETURN_CHECK( APP_NAME, event.keys<DataVector< xAOD::TrackParticle > >(keys, false) );
+      RETURN_CHECK( APP_NAME, event->keys<DataVector< xAOD::TrackParticle > >(keys, false) );
       if (keys.size() != 6) {
          ::Error( APP_NAME,
                XAOD_MESSAGE( "keys<xAOD::TrackParticle >().size = %u (!=6)" ),

@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 #
 # Script building all the externals necessary for AthGeneration.
 #
@@ -10,9 +10,9 @@ ATLAS_PROJECT_DIR=$(cd $(dirname ${BASH_SOURCE[0]}) && pwd)
 ATLAS_EXT_PROJECT_NAME="AthGenerationExternals"
 ATLAS_BUILDTYPE="Release"
 ATLAS_EXTRA_CMAKE_ARGS=(-DLCG_VERSION_NUMBER=108
-                        -DLCG_VERSION_POSTFIX="_ATLAS_7"
-                        -DATLAS_GAUDI_SOURCE="URL;https://gitlab.cern.ch/atlas/Gaudi/-/archive/v40r0.003/Gaudi-v40r0.003.tar.gz;URL_MD5;c24aec64b186d4a3aec3a1c87a3e5eef"
-                        -DATLAS_GEOMODEL_SOURCE="URL;https://gitlab.cern.ch/GeoModelDev/GeoModel/-/archive/6.20.0/GeoModel-6.20.0.tar.bz2;URL_MD5;73dddf4570b02917e7059e4d09612ae8")
+                        -DLCG_VERSION_POSTFIX="a_ATLAS_5"
+                        -DATLAS_GAUDI_SOURCE="URL;https://gitlab.cern.ch/atlas/Gaudi/-/archive/v40r2.001/Gaudi-v40r2.001.tar.gz;URL_MD5;e292ba3d71e4a88675d8632c2001cfb1"
+                        -DATLAS_GEOMODEL_SOURCE="URL;https://gitlab.cern.ch/GeoModelDev/GeoModel/-/archive/6.22.0/GeoModel-6.22.0.tar.bz2;URL_MD5;c7ec128777884387ed75ae4fcc95f42a")
 ATLAS_EXTRA_MAKE_ARGS=()
 
 # Let "the common script" do all the heavy lifting.

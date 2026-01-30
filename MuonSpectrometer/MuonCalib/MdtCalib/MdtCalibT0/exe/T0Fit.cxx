@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <TString.h>  // for Form
@@ -12,17 +12,17 @@
 #include "TKey.h"
 #include "TObject.h"
 #include "TROOT.h"
-#include "cstdlib"
-#include "iostream"
-#include "string"
+#include <cstdlib>
+#include <iostream>
+#include <string>
 
 using namespace MuonCalib;
 
 int main(int argc, char *argv[]) {
     // check command line arguments
     if (argc != 3) {
-        throw std::runtime_error(
-            Form("File: %s, Line: %d\nT0Fit::main() - Usage: %s <input file> <output file>!", __FILE__, __LINE__, argv[0]));
+      std::cerr << Form("File: %s, Line: %d\nT0Fit::main() - Usage: %s <input file> <output file>!", __FILE__, __LINE__, argv[0]);
+      return 1;
     }
 
     TROOT wurscht("wurscht", "wurscht");

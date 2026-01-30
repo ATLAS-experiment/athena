@@ -1860,14 +1860,28 @@ class argHepEvtAsciiFile(argFile):
         for fname in files:
             try:
                 eventCount = 0
-                import tarfile
-                tar = tarfile.open(fname, "r:gz")
-                for untar in tar.getmembers():
-                    fileTXT = tar.extractfile(untar)
-                    if fileTXT is not None:
-                        # Iterate line-by-line to avoid memory explosion
-                        for aline in fileTXT:
+
+                if '.tar.gz' in fname or '.tgz' in fname:
+                    import tarfile
+                    with tarfile.open(fname, "r:gz") as tar:
+                        for untar in tar.getmembers():
+                            fileTXT = tar.extractfile(untar)
+                            if fileTXT is not None:
+                                # Iterate line-by-line to avoid memory explosion
+                                for aline in fileTXT:
+                                    if aline.startswith(b'E '):
+                                        eventCount += 1
+                elif '.gz' in fname:
+                    import gzip
+                    with gzip.open(fname,'rb') as gzin:
+                        for aline in gzin:
                             if aline.startswith(b'E '):
+                                eventCount += 1
+                else:
+                    # Assume uncompressed
+                    with open(fname,'r') as infile:
+                        for aline in infile:
+                            if aline.startswith('E '):
                                 eventCount += 1
                 self._fileMetadata[fname]['nentries'] = eventCount
             except OSError as e:

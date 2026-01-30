@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 # ====================================================================
 # EGAM3.py
 # This defines DAOD_EGAM3, a skimmed DAOD format for Run 3.
@@ -28,7 +28,6 @@ from DerivationFrameworkEGamma.TriggerContent import (
 
 def EGAM3SkimmingToolCfg(flags):
     """Configure the EGAM3 skimming tool"""
-    acc = ComponentAccumulator()
 
     # eegamma or eee selection for photon efficiency studies, ee triggers
     expression1a = " && ".join(
@@ -79,13 +78,10 @@ def EGAM3SkimmingToolCfg(flags):
     )
     print("EGAM3 skimming expression: ", expression)
 
-    acc.setPrivateTools(
-        CompFactory.DerivationFramework.xAODStringSkimmingTool(
-            name="EGAM3SkimmingTool", expression=expression
-        )
-    )
-
-    return acc
+    from DerivationFrameworkTools.DerivationFrameworkToolsConfig import (
+        xAODStringSkimmingToolCfg)
+    return xAODStringSkimmingToolCfg(flags, name = "EGAM3SkimmingTool",
+                                     expression = expression)
 
 
 def EGAM3eeMassTool1Cfg(flags):
@@ -396,8 +392,7 @@ def EGAM3KernelCfg(flags, name="EGAM3Kernel", **kwargs):
             thinningTools.append(EGAM3TPThinningTool)
 
     # skimming
-    skimmingTool = acc.popToolsAndMerge(EGAM3SkimmingToolCfg(flags))
-    acc.addPublicTool(skimmingTool)
+    skimmingTool = acc.getPrimaryAndMerge(EGAM3SkimmingToolCfg(flags))
 
     # setup the kernel
     acc.addEventAlgo(
@@ -460,18 +455,18 @@ def EGAM3Cfg(flags):
     ]
 
     # for trigger studies we also add:
-    MenuType = None
+    MenuType = ""
     if flags.Trigger.EDMVersion == 2:
         MenuType = "Run2"
     elif flags.Trigger.EDMVersion == 3:
         MenuType = "Run3"
-    else:
-        MenuType = ""
-    EGAM3SlimmingHelper.AllVariables += ExtraContainersTrigger[MenuType]
-    EGAM3SlimmingHelper.AllVariables += ExtraContainersPhotonTrigger[MenuType]
-    EGAM3SlimmingHelper.AllVariables += ExtraContainersElectronTrigger[MenuType]
-    if not flags.Input.isMC:
-        EGAM3SlimmingHelper.AllVariables += ExtraContainersTriggerDataOnly[MenuType]
+
+    if MenuType:
+        EGAM3SlimmingHelper.AllVariables += ExtraContainersTrigger[MenuType]
+        EGAM3SlimmingHelper.AllVariables += ExtraContainersPhotonTrigger[MenuType]
+        EGAM3SlimmingHelper.AllVariables += ExtraContainersElectronTrigger[MenuType]
+        if not flags.Input.isMC:
+            EGAM3SlimmingHelper.AllVariables += ExtraContainersTriggerDataOnly[MenuType]
 
     # and on MC we also add:
     if flags.Input.isMC:
@@ -499,7 +494,7 @@ def EGAM3Cfg(flags):
         "PrimaryVertices",
         "InDetTrackParticles",
         "AntiKt4EMPFlowJets",
-        "BTagging_AntiKt4EMPFlow",
+
         "MET_Baseline_AntiKt4EMPFlow",
     ]
     if flags.Input.isMC:
@@ -578,12 +573,13 @@ def EGAM3Cfg(flags):
     EGAM3SlimmingHelper.ExtraVariables.extend(clusterEnergyDecorations)
 
     # photon HLT variables
-    EGAM3SlimmingHelper.ExtraVariables += ExtraVariablesHLTPhotons[MenuType]
+    if MenuType:
+        EGAM3SlimmingHelper.ExtraVariables += ExtraVariablesHLTPhotons[MenuType]
 
     # truth
     if flags.Input.isMC:
         EGAM3SlimmingHelper.ExtraVariables += [
-            "Electrons.truthOrigin.truthType.truthParticleLink"
+            "Electrons.truthClassification.truthOrigin.truthType.truthParticleLink"
         ]
 
     # Add event info

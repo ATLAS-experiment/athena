@@ -8,23 +8,22 @@ FPGATrackSimTrackingToolBase::FPGATrackSimTrackingToolBase(const std::string& ty
 {
 }
 
-StatusCode FPGATrackSimTrackingToolBase::setRoadSectors(std::vector<std::shared_ptr<const FPGATrackSimRoad>> & roads)
+StatusCode FPGATrackSimTrackingToolBase::setRoadSectors(std::vector<FPGATrackSimRoad> & roads)
 {
   for (auto& road: roads)
   {
-    std::shared_ptr<FPGATrackSimRoad> nonConstRoad = std::const_pointer_cast<FPGATrackSimRoad>(road);
     if (m_useSectors) {
       if(! m_do2ndStage)
-        nonConstRoad->setSector(m_FPGATrackSimBank->SectorBank_1st()->findSector(nonConstRoad->getAllHits()));
+        road.setSector(m_FPGATrackSimBank->SectorBank_1st()->findSector(road.getAllHits()));
       else
-        nonConstRoad->setSector(m_FPGATrackSimBank->SectorBank_2nd()->findSector(nonConstRoad->getAllHits()));
+        road.setSector(m_FPGATrackSimBank->SectorBank_2nd()->findSector(road.getAllHits()));
     }
-    else if (m_idealGeoRoads) matchIdealGeoSector(*nonConstRoad);
+    else if (m_idealGeoRoads) matchIdealGeoSector(road);
   }
   // Spacepoint road filter tool. Needed when fitting to spacepoints.
   if (m_useSpacePoints)
   {
-    std::vector<std::shared_ptr<const FPGATrackSimRoad>> postfilter_roads;
+    std::vector<FPGATrackSimRoad> postfilter_roads;
     ATH_CHECK(m_spRoadFilterTool->filterRoads(roads, postfilter_roads));
     roads = std::move(postfilter_roads);
   }

@@ -34,6 +34,8 @@ if __name__=="__main__":
     parser.add_argument("-m","--mc", action='store_true', help="data or MC?")
     parser.add_argument("-p", "--pileup", default=-1., type=float, help="if positive, calculate the noise for a fixed <mu> = specified value")
     parser.add_argument("--online", action='store_true', help="online noise calculation and conditions")
+    parser.add_argument("--mu",default=-1, type=int, help="Fixed mu to use (lumi from DB if -1)")
+
 
     (args,leftover)=parser.parse_known_args(sys.argv[1:])
 
@@ -50,6 +52,8 @@ if __name__=="__main__":
     flags.Input.MCCampaign=Campaign.Unknown
     flags.LAr.doAlign=False
     flags.LAr.doHVCorr=False
+    if args.mu >= 0:
+       flags.Calo.Noise.fixedLumiForNoise=args.mu*0.17241*50/25 # pileup noise lumi normalisation
     flags.Input.RunNumbers=[args.runnumber]
     from AthenaConfiguration.TestDefaults import defaultConditionsTags, defaultGeometryTags
     flags.IOVDb.GlobalTag=defaultConditionsTags.RUN3_MC if args.mc else defaultConditionsTags.RUN3_DATA

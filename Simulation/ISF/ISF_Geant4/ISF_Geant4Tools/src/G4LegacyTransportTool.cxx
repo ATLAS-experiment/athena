@@ -273,7 +273,7 @@ StatusCode iGeant4::G4LegacyTransportTool::simulateVector(
   /** Process ParticleState from particle stack */
   // Lambda prevents using the unique_ptr 
   bool abort = [&] ATLAS_NOT_THREAD_SAFE {
-    auto eventInfo = std::make_unique<AtlasG4EventUserInfo>();
+    auto eventInfo = std::make_unique<AtlasG4EventUserInfo>(ctx);
     eventInfo->SetHitCollectionMap(hitCollections);
 
     auto inputEvent = std::make_unique<G4Event>(ctx.eventID().event_number());
@@ -338,6 +338,7 @@ StatusCode iGeant4::G4LegacyTransportTool::setupEvent(
   rngWrapper->setSeed( m_randomStreamName, ctx );
   G4Random::setTheEngine(rngWrapper->getEngine(ctx));
   ATH_CHECK(m_senDetTool->BeginOfAthenaEvent(hitCollections));
+  ATH_CHECK(m_userActionSvc->BeginOfAthenaEvent(hitCollections));
 
   m_nrOfEntries++;
   if (m_doTiming) m_eventTimer->Start();
@@ -389,6 +390,7 @@ StatusCode iGeant4::G4LegacyTransportTool::releaseEvent(
   }
 
   ATH_CHECK(m_senDetTool->EndOfAthenaEvent(hitCollections));
+  ATH_CHECK(m_userActionSvc->EndOfAthenaEvent(hitCollections));
   ATH_CHECK(m_fastSimTool->EndOfAthenaEvent());
 
   return StatusCode::SUCCESS;

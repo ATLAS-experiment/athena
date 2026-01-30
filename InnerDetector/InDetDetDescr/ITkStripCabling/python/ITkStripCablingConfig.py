@@ -3,11 +3,10 @@
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 
-def ITkStripCablingCondAlgCfg(flags, name="ITkStripCablingCondAlg"):
+def ITkStripCablingCondAlgCfg(flags, name="ITkStripCablingCondAlg",**kwargs):
     cfg = ComponentAccumulator()
-    from PathResolver import PathResolver
-    ITkStripCablingCondAlg = CompFactory.ITkStripCablingAlg(name,DataSource=PathResolver.FindCalibFile("ITkStripCabling/ITkStripCabling.dat"))
-    cfg.addCondAlgo(ITkStripCablingCondAlg)
+    kwargs.setdefault("DataSource","ITkStripCabling/ITkStripCabling.dat")
+    cfg.addCondAlgo(CompFactory.ITkStripCablingAlg(name,**kwargs))
     return cfg
 
 def ITkStripCablingToolCfg(flags, name="ITkStripCablingTool"):

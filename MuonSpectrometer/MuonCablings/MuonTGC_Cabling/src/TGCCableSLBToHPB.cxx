@@ -13,7 +13,9 @@
 namespace MuonTGC_Cabling {
 
 TGCCableSLBToHPB::TGCCableSLBToHPB(const std::string& filename)
-  : TGCCable(TGCCable::SLBToHPB) {
+  : TGCCable(TGCCable::SLBToHPB),
+    m_database{{{nullptr}}}
+{
   m_database[TGCId::Endcap][TGCId::WT] = std::make_unique<TGCDatabasePPToSL>(filename,"SB EWT");
   m_database[TGCId::Endcap][TGCId::WD] = std::make_unique<TGCDatabasePPToSL>(filename,"SB EWD");
   m_database[TGCId::Endcap][TGCId::ST] = std::make_unique<TGCDatabasePPToSL>(filename,"SB EST");
@@ -23,6 +25,8 @@ TGCCableSLBToHPB::TGCCableSLBToHPB(const std::string& filename)
   m_database[TGCId::Forward][TGCId::ST] = std::make_unique<TGCDatabasePPToSL>(filename,"SB FST");
   m_database[TGCId::Forward][TGCId::SD] = std::make_unique<TGCDatabasePPToSL>(filename,"SB FSD");
 }
+
+TGCCableSLBToHPB::~TGCCableSLBToHPB() = default;
 
 TGCChannelId* TGCCableSLBToHPB::getChannel(const TGCChannelId* channelId,
 					   bool orChannel) const {

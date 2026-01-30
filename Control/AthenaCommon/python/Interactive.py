@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 """Utilities for the interactive athena prompt."""
 
@@ -27,8 +27,6 @@ class ShellEscapes:
       log.debug( 'shell short-cuts disabled' )
 
    def __call__( self, exctype, value, traceb ):
-      global _shellCommands
-
       cmd = None
 
     # catch name and syntax errors to perform shell escapes if known

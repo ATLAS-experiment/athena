@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "GaudiUtils/IFileCatalog.h"
@@ -11,7 +11,6 @@
 
 #include <algorithm>
 #include "POOLCore/SystemTools.h"
-#include "FileCatalog/URIParser.h"
 #include "FileCatalog/IFileCatalog.h"
 
 #include "AthenaBaseComps/AthMessaging.h"
@@ -118,35 +117,29 @@ addReplicaFID( const std::string& fid, const std::string& replica_pfn, const std
 
 // ------------------------- Catalog Manager interface
 
-
 /// Add new catalog identified by name to the existing ones
-void pool::IFileCatalog::addCatalog( const std::string& connect )
+void pool::IFileCatalog::addCatalog( const std::string& connect, bool forWriting )
 {
-   URIParser p(connect);
-   p.parse();
+   std::string url;
+   if( connect.empty() ) {
+      url = "file:PoolFileCatalog.xml";
+   } else {
+      auto pos = connect.find("file:");
+      url = (pos==std::string::npos)? "file:" + connect : connect.substr(pos);
+   }
    Catalogs& cats = m_mgr->catalogs();     
    auto i = std::find_if( cats.begin(), cats.end(),
                           [&]( const Gaudi::IFileCatalog* f )
-                          { return p.url() == f->connectInfo(); } );
+                          { return url == f->connectInfo(); } );
    if( i==cats.end() ) {
       // add a new catalog
-      const std::string checkstr = "file:";
-      std::string fullconnectstr = connect;
-      if( connect.compare(0, checkstr.size(), checkstr) == 0 ) {
-         fullconnectstr = "xmlcatalog_" + connect;
-      }
+      const std::string fullconnectstr = "xmlcatalog_" + url;
       ATH_MSG_DEBUG("addCatalog(\"" << fullconnectstr << "\")" );
       m_mgr->addCatalog( fullconnectstr );
    }
-}
-
-/// Define the writable catalog identified by name
-void pool::IFileCatalog::setWriteCatalog( const std::string& connect )
-{
-   URIParser p(connect);
-   p.parse();
-   addCatalog( connect );
-   m_mgr->setWriteCatalog( m_mgr->findCatalog( p.url(), true ) );
+   if( forWriting ) {
+      m_mgr->setWriteCatalog( m_mgr->findCatalog( url, true ) );
+   }
 }
      
 

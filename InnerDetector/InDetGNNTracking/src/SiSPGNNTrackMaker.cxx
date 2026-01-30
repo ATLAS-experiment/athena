@@ -187,9 +187,9 @@ int InDet::SiSPGNNTrackMaker::passEtaDepCuts(const Trk::Track& track) const
   int nStrips = track.trackSummary()->get(Trk::numberOfSCTHits);
   int nClusters = nPixels + nStrips;
 
-  ATH_MSG_DEBUG("track params: " << pt << " " << eta << " " << d0 << " " << z0
-                                 << " " << nClusters << nStrips
-                                 << " " << nPixels);
+  ATH_MSG_DEBUG("track params: (pt,eta,d0,z0)=(" << pt << "," << eta << "," << d0 << "," << z0
+                                 << ") Nclusters:" << nClusters << " pixel "<< nPixels
+                                 << " strips " << nStrips);
 
   // min Si hits
   if (nClusters < m_etaDependentCutsSvc->getMinSiHitsAtEta(eta))
@@ -239,8 +239,8 @@ std::vector<const Trk::SpacePoint*> InDet::SiSPGNNTrackMaker::getSpacePointsInEv
   }
   ATH_MSG_DEBUG("Event " << eventNumber << " has " << npixsp
                          << " pixel space points, " << nstrip 
-                         << " strips space points" << n_overlap
-                         << " overlapping spacepoints" << spacePoints.size()
+                         << " strips space points, " << n_overlap
+                         << " overlapping spacepoints, " << spacePoints.size()
                           << " space points");
 
   return spacePoints;

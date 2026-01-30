@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "AGDDControl/XercesParser.h"
@@ -25,19 +25,17 @@ using namespace xercesc;
 
 XercesParser::~XercesParser()
 {
-	delete m_parser;
-	m_parser=0;
 	Finalize();
 }
 
 XercesParser::XercesParser(XMLHandlerStore& xs)
-  : IAGDDParser(),m_doc(0),m_parser(0),m_initialized(false),
+  : IAGDDParser(),m_doc(0),m_initialized(false),
     m_xs(xs)
 {
 }
 
 XercesParser::XercesParser(XMLHandlerStore& xs, const std::string& s)
-  : IAGDDParser(s),m_doc(0),m_parser(0),m_initialized(false),
+  : IAGDDParser(s),m_doc(0),m_initialized(false),
     m_xs(xs)
 {
 }
@@ -55,40 +53,40 @@ bool XercesParser::ParseFile(const std::string& s_in)
 	else
 	{
 		if (!m_initialized) Initialize();
-        m_parser = new XercesDOMParser;
-    	try
-    	{
-        	m_parser->parse(s.c_str());
-    	}
-    	catch (const OutOfMemoryException&)
-    	{
-        	XERCES_STD_QUALIFIER cerr << "OutOfMemoryException" << XERCES_STD_QUALIFIER endl;
-        	errorsOccured = true;
-    	}
-    	catch (const XMLException& e)
-    	{
-        	XERCES_STD_QUALIFIER cerr << "An error occurred during parsing\n   Message: "
-             	<< XMLString::transcode(e.getMessage()) << XERCES_STD_QUALIFIER endl;
-        	errorsOccured = true;
-    	}
-        catch (const DOMException& e)
-        {
-            const unsigned int maxChars = 2047;
-        	XMLCh errText[maxChars + 1];
+                m_parser = std::make_unique<XercesDOMParser>();
+                try
+                {
+                  m_parser->parse(s.c_str());
+                }
+                catch (const OutOfMemoryException&)
+                {
+                  XERCES_STD_QUALIFIER cerr << "OutOfMemoryException" << XERCES_STD_QUALIFIER endl;
+                  errorsOccured = true;
+                }
+                catch (const XMLException& e)
+                {
+                  XERCES_STD_QUALIFIER cerr << "An error occurred during parsing\n   Message: "
+                                            << XMLString::transcode(e.getMessage()) << XERCES_STD_QUALIFIER endl;
+                  errorsOccured = true;
+                }
+                catch (const DOMException& e)
+                {
+                  const unsigned int maxChars = 2047;
+                  XMLCh errText[maxChars + 1];
 
-        	XERCES_STD_QUALIFIER cerr << "\nDOM Error during parsing: '" << s << "'\n"
-            	 << "DOMException code is:  " << e.code << XERCES_STD_QUALIFIER endl;
+                  XERCES_STD_QUALIFIER cerr << "\nDOM Error during parsing: '" << s << "'\n"
+                                            << "DOMException code is:  " << e.code << XERCES_STD_QUALIFIER endl;
 
-        	if (DOMImplementation::loadDOMExceptionMsg(e.code, errText, maxChars))
-             	XERCES_STD_QUALIFIER cerr << "Message is: " << XMLString::transcode(errText) << XERCES_STD_QUALIFIER endl;
+                  if (DOMImplementation::loadDOMExceptionMsg(e.code, errText, maxChars))
+                    XERCES_STD_QUALIFIER cerr << "Message is: " << XMLString::transcode(errText) << XERCES_STD_QUALIFIER endl;
 
-        	errorsOccured = true;
-    	}
-    	catch (...)
-    	{
-        	XERCES_STD_QUALIFIER cerr << "An error occurred during parsing\n " << XERCES_STD_QUALIFIER endl;
-        	errorsOccured = true;
-    	}  
+                  errorsOccured = true;
+                }
+                catch (...)
+                {
+                  XERCES_STD_QUALIFIER cerr << "An error occurred during parsing\n " << XERCES_STD_QUALIFIER endl;
+                  errorsOccured = true;
+                }
 		m_doc=m_parser->getDocument();
 		return errorsOccured;
 	}
@@ -104,11 +102,11 @@ bool XercesParser::ParseFileAndNavigate(AGDDController& c,
 }
 bool XercesParser::ParseString(const std::string& s)
 {
-	const char* str=s.c_str();
-	MemBufInputSource memBuf (reinterpret_cast<const XMLByte*>(str),strlen(str),"prodInfo",false);
-    m_parser = new XercesDOMParser;
+    const char* str=s.c_str();
+    MemBufInputSource memBuf (reinterpret_cast<const XMLByte*>(str),strlen(str),"prodInfo",false);
+    m_parser = std::make_unique<XercesDOMParser>();
     bool errorsOccured = false;
-	if (!m_initialized) Initialize();
+    if (!m_initialized) Initialize();
     try
     {
     	m_parser->parse(memBuf);

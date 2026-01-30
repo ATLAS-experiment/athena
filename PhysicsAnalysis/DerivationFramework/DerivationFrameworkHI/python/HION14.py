@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 #====================================================================
 # HION14.py
 # author: Mariana Vivas <mariana.vivas.albornoz@cern.ch>
@@ -12,20 +12,15 @@ from AthenaConfiguration.Enums import MetadataCategory
 #Skiming
 def HION14SkimmingToolCfg(flags):
     """Configure the example skimming tool"""
-    from TrigDecisionTool.TrigDecisionToolConfig import TrigDecisionToolCfg
-    acc = ComponentAccumulator()
-    
     #Building jet skimming triggers
     triggers  = ["HLT_mb_sptrk_ion_L1ZDC_A_C_VTE50","HLT_noalg_mb_L1TE50"]
     
     expression = ' ( ' +' || '.join(triggers) + ' )'
-    
-    tdt = acc.getPrimaryAndMerge(TrigDecisionToolCfg(flags))
-    acc.addPublicTool(CompFactory.DerivationFramework.xAODStringSkimmingTool(name       = "HION14StringSkimmingTool",
-                                                                             expression = expression,
-                                                                             TrigDecisionTool=tdt), 
-                                                                             primary = True) 
-    return(acc)
+
+    from DerivationFrameworkTools.DerivationFrameworkToolsConfig import (
+        xAODStringSkimmingToolCfg)
+    return xAODStringSkimmingToolCfg(flags, name = "HION14StringSkimmingTool",
+                                     expression = expression)
 
 def HION14GlobalAugmentationToolCfg(flags):
     """Configure the example augmentation tool"""

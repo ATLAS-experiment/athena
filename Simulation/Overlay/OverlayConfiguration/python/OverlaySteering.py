@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """Main steering for MC+MC and MC+data overlay
 
-Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 """
 
 from AthenaConfiguration.MainServicesConfig import MainServicesCfg
@@ -10,6 +10,7 @@ from AthenaConfiguration.Enums import LHCPeriod
 from AthenaKernel.EventIdOverrideConfig import IOVDbMetaDataToolWithRunNumberOverrideCfg
 from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
 from DigitizationConfig.DigitizationParametersConfig import writeDigitizationParameters
+from EventInfoMgt.TagInfoMgrConfig import TagInfoMgrCfg
 from OverlayCopyAlgs.OverlayCopyAlgsConfig import \
     CopyCaloCalibrationHitContainersCfg, CopyJetTruthInfoCfg, CopyPileupParticleTruthInfoCfg, CopyMcEventCollectionCfg, \
     CopyTrackRecordCollectionsCfg, CopyBackgroundVertexCfg
@@ -30,10 +31,50 @@ def OverlayMainCfg(configFlags):
 def OverlayMainContentCfg(configFlags):
     """Main overlay content"""
 
-    acc = writeDigitizationParameters(configFlags)
+    from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
+    acc = ComponentAccumulator()
 
-    if not configFlags.Overlay.ByteStream:
-        acc.merge(IOVDbMetaDataToolWithRunNumberOverrideCfg(configFlags))
+    # Handle overlay digitization metadata writing (must come before reading setup)
+    if hasattr(configFlags, '_Overlay_pileupDigitizationMetadata'):
+        if configFlags.IOVDb.WriteParametersAsMetaData:
+            # Direct metadata mode: use standard parameter writer
+            from IOVDbMetaDataTools.ParameterWriterConfig import writeParametersToMetaData
+            from DigitizationConfig.DigitizationParametersConfig import folderName
+            from AthenaCommon.Logging import logging
+            logOverlay = logging.getLogger('OverlayMetadataConfig')
+            logOverlay.info('Writing overlay digitization parameters directly to in-file metadata (bypassing DigitParams.db)')
+
+            pileupDict = configFlags._Overlay_pileupDigitizationMetadata
+            runNumber = configFlags.Input.RunNumbers[0]
+            runNumberEnd = configFlags.Input.RunNumbers[-1]
+            if runNumberEnd == runNumber:
+                runNumberEnd += 1
+
+            # Convert pileup dictionary to string parameters
+            params = {}
+            for key in pileupDict:
+                value = str(pileupDict[key])
+                params[key] = value
+                logOverlay.info('DigitizationMetaData: setting "%s" to be %s', key, value)
+
+            acc.merge(writeParametersToMetaData(configFlags, folderName, params, runNumber, runNumberEnd))
+
+            # Also set up reading via MetaDataToCondAlg so ConditionStore is populated
+            # during event processing (for algorithms like LuminosityCondAlg that need it)
+            from IOVDbMetaDataTools.MetaDataToCondAlgConfig import MetaDataToCondAlgCfg
+            acc.merge(MetaDataToCondAlgCfg(configFlags, folderName))
+        else:
+            # Sqlite mode: create DigitParams.db first
+            from OverlayConfiguration.OverlayMetadata import writeOverlayDigitizationMetadata
+            writeOverlayDigitizationMetadata(configFlags, configFlags._Overlay_pileupDigitizationMetadata)
+
+    # Setup reading digitization parameters (mode-dependent)
+    # In sqlite mode, this reads from DigitParams.db (created above if pileup metadata exists)
+    # Only needed if we actually have pileup metadata to read
+    if not configFlags.IOVDb.WriteParametersAsMetaData and hasattr(configFlags, '_Overlay_pileupDigitizationMetadata'):
+        acc.merge(writeDigitizationParameters(configFlags))
+
+    acc.merge(IOVDbMetaDataToolWithRunNumberOverrideCfg(configFlags))
 
     # Add event info overlay
     if not configFlags.Sim.DoFullChain:
@@ -123,12 +164,10 @@ def OverlayMainContentCfg(configFlags):
            acc.merge(CopyITkPixelClusterContainerCfg(configFlags))
            acc.merge(CopyITkStripClusterContainerCfg(configFlags))
         else:
-           from OverlayCopyAlgs.OverlayCopyAlgsConfig import CopyTrackCollectionsCfg,CopyPixelClusterContainerCfg, CopySCT_ClusterContainerCfg,\
-            CopyTRT_DriftCircleContainerCfg
+           from OverlayCopyAlgs.OverlayCopyAlgsConfig import CopyTrackCollectionsCfg,CopyPixelClusterContainerCfg, CopySCT_ClusterContainerCfg
            acc.merge(CopyTrackCollectionsCfg(configFlags))
            acc.merge(CopyPixelClusterContainerCfg(configFlags))
            acc.merge(CopySCT_ClusterContainerCfg(configFlags))
-           acc.merge(CopyTRT_DriftCircleContainerCfg(configFlags))
 
     if configFlags.Overlay.DataOverlay:
         # Copy background vertex collection
@@ -143,5 +182,10 @@ def OverlayMainContentCfg(configFlags):
         acc.merge(SetupMetaDataForStreamCfg(configFlags, "RDO"))
     if configFlags.Output.doWriteRDO_SGNL:
         acc.merge(SetupMetaDataForStreamCfg(configFlags, "RDO_SGNL"))
+
+    if not configFlags.Input.isMC and configFlags.Input.DataYear > 0:
+        acc.merge(TagInfoMgrCfg(configFlags, tagValuePairs={
+            "data_year": str(configFlags.Input.DataYear)
+        }))
 
     return acc

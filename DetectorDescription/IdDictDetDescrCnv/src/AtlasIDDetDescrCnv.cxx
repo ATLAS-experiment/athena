@@ -66,7 +66,6 @@ AtlasIDDetDescrCnv::createObj(IOpaqueAddress* /*pAddr*/, DataObject*& pObj)
 
     // create the helper
     auto atlas_id = std::make_unique<AtlasDetectorID>("IdDict", "");
-    atlas_id->setMessageSvc(msgSvc());
 
     ATH_CHECK( idDictMgr->initializeHelper(*atlas_id) == 0 );
 

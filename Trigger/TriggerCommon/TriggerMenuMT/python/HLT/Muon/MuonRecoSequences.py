@@ -7,7 +7,7 @@ log = logging.getLogger(__name__)
 
 ### Output data name ###
 from TrigEDMConfig.TriggerEDM import recordable
-from MuonConfig.MuonBytestreamDecodeConfig import RpcBytestreamDecodeCfg, TgcBytestreamDecodeCfg, MdtBytestreamDecodeCfg, CscBytestreamDecodeCfg, sTgcBytestreamDecodeCfg, MmBytestreamDecodeCfg
+from MuonConfig.MuonBytestreamDecodeConfig import RpcBytestreamDecodeCfg, NrpcBytestreamDecodeCfg, TgcBytestreamDecodeCfg, MdtBytestreamDecodeCfg, CscBytestreamDecodeCfg, sTgcBytestreamDecodeCfg, MmBytestreamDecodeCfg
 from MuonConfig.MuonRdoDecodeConfig import RpcRDODecodeCfg, TgcRDODecodeCfg, MdtRDODecodeCfg, CscRDODecodeCfg, CscClusterBuildCfg, StgcRDODecodeCfg, MMRDODecodeCfg
 from MuonConfig.MuonRdoDecodeConfig import MuonPrdCacheNames
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
@@ -90,6 +90,8 @@ def getIDTracks(flags, name='', muonIDreuse=False, precision=False, suffix=''):
 
 def MuDataPrepViewDataVerifierCfg(flags):
     result = ComponentAccumulator()
+
+    # Cache
     dataObjects=[( 'RpcPrepDataCollection_Cache' , 'StoreGateSvc+RpcPrdCache' ),
                  ( 'TgcRdo_Cache' , 'StoreGateSvc+TgcRdoCache' ),
                  ( 'MdtCsm_Cache' , 'StoreGateSvc+MdtCsmRdoCache' ),
@@ -104,24 +106,31 @@ def MuDataPrepViewDataVerifierCfg(flags):
                  ( 'TgcCoinDataCollection_Cache' , 'StoreGateSvc+' + MuonPrdCacheNames.TgcCoinCache + 'NextNextBC' ),
                  ( 'TgcCoinDataCollection_Cache' , 'StoreGateSvc+' + MuonPrdCacheNames.TgcCoinCache )
                ]
-    if flags.Input.isMC:
-      dataObjects += [( 'MdtCsmContainer' , 'StoreGateSvc+MDTCSM' ),
-                      ( 'RpcPadContainer' , 'StoreGateSvc+RPCPAD' ),
-                      ('TgcRdoContainer' , 'StoreGateSvc+TGCRDO' )]
+    
+    if flags.Detector.GeometrysTGC:
+      dataObjects += [( 'sTgcPrepDataCollection_Cache'  , 'StoreGateSvc+' + MuonPrdCacheNames.sTgcCache)]
+      if flags.Input.isMC:
+        dataObjects += [( 'Muon::STGC_RawDataContainer' , 'StoreGateSvc+sTGCRDO' )]
+    
+    if flags.Detector.GeometryMM:
+      dataObjects += [( 'MMPrepDataCollection_Cache'  , 'StoreGateSvc+' + MuonPrdCacheNames.MmCache)]
+      if flags.Input.isMC:
+        dataObjects += [( 'Muon::MM_RawDataContainer' , 'StoreGateSvc+MMRDO' )]
+
     if flags.Detector.GeometryCSC:
       dataObjects+=[( 'CscRawDataCollection_Cache' , 'StoreGateSvc+CscRdoCache' )]
       if flags.Input.isMC:
         dataObjects += [( 'CscRawDataContainer' , 'StoreGateSvc+CSCRDO' ),
                         ( 'CscRawDataCollection_Cache' , 'StoreGateSvc+CscRdoCache' )]
-    if flags.Detector.GeometrysTGC and flags.Detector.GeometryMM and flags.Input.isMC:
-      dataObjects += [( 'Muon::STGC_RawDataContainer' , 'StoreGateSvc+sTGCRDO' ),
-                      ( 'Muon::MM_RawDataContainer' , 'StoreGateSvc+MMRDO' )]
-    if flags.Detector.GeometrysTGC and flags.Detector.GeometryMM:
-      dataObjects += [( 'MMPrepDataCollection_Cache'  , 'StoreGateSvc+' + MuonPrdCacheNames.MmCache)]
-      dataObjects += [( 'sTgcPrepDataCollection_Cache'  , 'StoreGateSvc+' + MuonPrdCacheNames.sTgcCache)]
+    
+    if flags.Input.isMC:
+        dataObjects += [( 'MdtCsmContainer' , 'StoreGateSvc+MDTCSM' ),
+                        *( [( 'RpcPadContainer' , 'StoreGateSvc+RPCPAD' )] if "RPCPAD" in flags.Input.Collections else [] ),
+                        *( [( 'xAOD::NRPCRDOContainer' , 'StoreGateSvc+NRPCRDO' )] if flags.Muon.enableNRPC else [] ),
+                        ('TgcRdoContainer' , 'StoreGateSvc+TGCRDO' )]
     
     if flags.Muon.usePhaseIIGeoSetup:
-      dataObjects += [('ActsTrk::GeometryContext' , 'StoreGateSvc+ActsAlignment' )]
+        dataObjects += [('ActsTrk::GeometryContext' , 'StoreGateSvc+ActsAlignment' )]
       
     alg = CompFactory.AthViews.ViewDataVerifier( name = "VDVMuDataPrep",
                                                  DataObjects = dataObjects)
@@ -130,16 +139,19 @@ def MuDataPrepViewDataVerifierCfg(flags):
 
 
 def muonDecodeCfg(flags, RoIs):
-
     acc = ComponentAccumulator()
+
     doSeededDecoding =True
     if 'FSRoI' in RoIs:
       doSeededDecoding = False
     acc.merge(MuDataPrepViewDataVerifierCfg(flags))
+        
     # Get RPC BS decoder
     if not flags.Input.isMC:
       rpcAcc = RpcBytestreamDecodeCfg( flags, name = "RpcRawDataProvider_"+RoIs, RoIs = RoIs, DoSeededDecoding = doSeededDecoding )
       acc.merge( rpcAcc )
+      if flags.Muon.enableNRPC:
+        acc.merge(NrpcBytestreamDecodeCfg( flags, name="NRpcRawDataProvider_"+RoIs ))
     # Get RPC RDO convertor
     rpcAcc = RpcRDODecodeCfg( flags, name= "RpcRdoToRpcPrepData_"+RoIs, RoIs = RoIs, DoSeededDecoding = doSeededDecoding )
     acc.merge( rpcAcc )
@@ -182,11 +194,6 @@ def muonDecodeCfg(flags, RoIs):
       mmAcc = MMRDODecodeCfg( flags, name="MMRdoToMMPrepData_"+RoIs, RoIs =  RoIs, DoSeededDecoding = doSeededDecoding)
       acc.merge( mmAcc )
 
-    # add space point formation
-    if flags.Muon.usePhaseIIGeoSetup:
-      from MuonSpacePointFormation.SpacePointFormationConfig import MuonSpacePointFormationCfg
-      acc.merge( MuonSpacePointFormationCfg( flags ) )
-
     return acc
 
 def muFastVDVCfg(flags, RoIs, postFix, InsideOutMode, extraLoads):
@@ -198,7 +205,7 @@ def muFastVDVCfg(flags, RoIs, postFix, InsideOutMode, extraLoads):
                    ('TgcRdoContainer' , 'StoreGateSvc+TGCRDO'),
                    ('Muon::RpcPrepDataContainer','StoreGateSvc+RPC_Measurements'),
                    ('Muon::MdtPrepDataContainer','StoreGateSvc+MDT_DriftCircles'),
-                   ( 'RpcPadContainer' , 'StoreGateSvc+RPCPAD' )]
+                   *( [( 'RpcPadContainer' , 'StoreGateSvc+RPCPAD' )] if "RPCPAD" in flags.Input.Collections else [] )]
     if flags.Detector.GeometryCSC:
       dataObjects += [('Muon::CscPrepDataContainer','StoreGateSvc+CSC_Clusters')]
     if flags.Detector.GeometrysTGC:
@@ -208,9 +215,6 @@ def muFastVDVCfg(flags, RoIs, postFix, InsideOutMode, extraLoads):
     
     if flags.Muon.usePhaseIIGeoSetup:
       dataObjects += [('ActsTrk::GeometryContext' , 'StoreGateSvc+ActsAlignment' )]
-      dataObjects += [( 'MuonR4::SpacePointContainer' , 'StoreGateSvc+MuonSpacePoints' )]
-      if flags.Detector.GeometrysTGC or flags.Detector.GeometryMM:
-        dataObjects += [( 'MuonR4::SpacePointContainer' , 'StoreGateSvc+NswSpacePoints' )]
         
   else:
     dataObjects += [( 'TrigRoiDescriptorCollection' , 'StoreGateSvc+%s' % RoIs )]
@@ -322,65 +326,89 @@ def muCombRecoSequenceCfg( flags, RoIs, name, l2mtmode=False, l2CBname="" ):
   return acc
 
 def EFMuSADataPrepViewDataVerifierCfg(flags, RoIs, roiName):
-  result=ComponentAccumulator()
-  dataObjects=[( 'xAOD::EventInfo' , 'StoreGateSvc+EventInfo' ),
-               ( 'TrigRoiDescriptorCollection' , 'StoreGateSvc+%s' % RoIs )]
+    result=ComponentAccumulator()
+    dataObjects=[( 'xAOD::EventInfo' , 'StoreGateSvc+EventInfo' ),
+                ( 'TrigRoiDescriptorCollection' , 'StoreGateSvc+%s' % RoIs )]
 
-  alg = CompFactory.AthViews.ViewDataVerifier( name = "VDVMuEFSA_"+roiName,
-                                               DataObjects = dataObjects)
-  result.addEventAlgo(alg)
-  return result
+    if flags.Muon.usePhaseIIGeoSetup:
+        dataObjects += [( 'ActsGeometryContext' , 'StoreGateSvc+ActsAlignment' )]
 
+    if flags.Input.isMC and flags.Muon.scheduleActsReco:
+        dataObjects += [( 'xAOD::MuonSimHitContainer' , 'StoreGateSvc+MDT_SDO' ),
+                        ( 'xAOD::MuonSimHitContainer' , 'StoreGateSvc+MM_SDO' ),
+                        ( 'xAOD::MuonSimHitContainer' , 'StoreGateSvc+RPC_SDO' ),
+                        ( 'xAOD::MuonSimHitContainer' , 'StoreGateSvc+TGC_SDO' ),
+                        ( 'xAOD::MuonSimHitContainer' , 'StoreGateSvc+sTGC_SDO' ),
+                        ( 'McEventCollection' , 'StoreGateSvc+TruthEvent' )]
 
-def muEFSARecoSequenceCfg( flags, RoIs, name ):
-
-
-  from MuonCombinedAlgs.MuonCombinedAlgsMonitoring import MuonCreatorAlgMonitoring
-  from MuonConfig.MuonSegmentFindingConfig import MuonSegmentFinderAlgCfg, MuonLayerHoughAlgCfg, MuonSegmentFilterAlgCfg
-  from MuonConfig.MuonTrackBuildingConfig import MuPatTrackBuilderCfg, EMEO_MuPatTrackBuilderCfg
-  from xAODTrackingCnv.xAODTrackingCnvConfig import MuonStandaloneTrackParticleCnvAlgCfg
-  from MuonCombinedConfig.MuonCombinedReconstructionConfig import MuonCombinedMuonCandidateAlgCfg, MuonCreatorAlgCfg
-
-  acc = ComponentAccumulator()
-
-  acc.merge(EFMuSADataPrepViewDataVerifierCfg(flags, RoIs, name))
-
-  
-  acc.merge(MuonLayerHoughAlgCfg(flags, "TrigMuonLayerHoughAlg"))
-
-  # if NSW is excluded from reconstruction (during commissioning)
-  if flags.Muon.runCommissioningChain:
-    acc.merge(MuonSegmentFinderAlgCfg(flags, name="TrigMuonSegmentMaker_"+name,SegmentCollectionName="TrackMuonSegments_withNSW"))
-    acc.merge(MuonSegmentFilterAlgCfg(flags, name="TrigMuonSegmentFilter_"+name,SegmentCollectionName="TrackMuonSegments_withNSW",
-                                                FilteredCollectionName="TrackMuonSegments", TrashUnFiltered=False, ThinStations=()))
-  else:
-    acc.merge(MuonSegmentFinderAlgCfg(flags, "TrigMuonSegmentMaker_"+name))
-
-  from MuonSegmentTrackMaker.MuonTrackMakerAlgsMonitoring import MuPatTrackBuilderMonitoring
-
-  if flags.Muon.runCommissioningChain:
-    acc.merge(EMEO_MuPatTrackBuilderCfg(flags, name="TrigMuPatTrackBuilder_"+name ,MuonSegmentCollection = "TrackMuonSegments", MonTool = MuPatTrackBuilderMonitoring(flags, "MuPatTrackBuilderMonitoringSA_"+name), SpectrometerTrackOutputLocation="MuonSpectrometerTracks"))
-
-  else:
-    acc.merge(MuPatTrackBuilderCfg(flags, name="TrigMuPatTrackBuilder_"+name ,MuonSegmentCollection = "TrackMuonSegments", MonTool = MuPatTrackBuilderMonitoring(flags, "MuPatTrackBuilderMonitoringSA_"+name)))
-
-  acc.merge(MuonStandaloneTrackParticleCnvAlgCfg(flags, name = "TrigMuonStandaloneTrackParticleCnvAlg_"+name))
-  acc.merge(MuonCombinedMuonCandidateAlgCfg(flags, name="TrigMuonCandidateAlg_"+name))
-
-  msMuonName = muNames.EFSAName
-  if 'FS' in name:
-    msMuonName = muNamesFS.EFSAName
-
-  acc.merge(MuonCreatorAlgCfg(flags, name="TrigMuonCreatorAlg_"+name, CreateSAmuons=True, TagMaps=[], MuonContainerLocation=msMuonName,
-                              ExtrapolatedLocation = "HLT_MSExtrapolatedMuons_"+name, MSOnlyExtrapolatedLocation = "HLT_MSOnlyExtrapolatedMuons_"+name,
-                              MonTool = MuonCreatorAlgMonitoring(flags, "MuonCreatorAlgSA_"+name)))
+    alg = CompFactory.AthViews.ViewDataVerifier( name = "VDVMuEFSA_"+roiName,
+                                                DataObjects = dataObjects)
+    result.addEventAlgo(alg)
+    return result
 
 
+def muEFSARecoSequenceCfg( flags, RoIs, name):
+
+    from MuonCombinedAlgs.MuonCombinedAlgsMonitoring import MuonCreatorAlgMonitoring
+    from MuonConfig.MuonSegmentFindingConfig import MuonSegmentFinderAlgCfg, MuonLayerHoughAlgCfg, MuonSegmentFilterAlgCfg
+    from MuonConfig.MuonTrackBuildingConfig import MuPatTrackBuilderCfg, EMEO_MuPatTrackBuilderCfg
+    from xAODTrackingCnv.xAODTrackingCnvConfig import MuonStandaloneTrackParticleCnvAlgCfg
+    from MuonCombinedConfig.MuonCombinedReconstructionConfig import MuonCombinedMuonCandidateAlgCfg, MuonCreatorAlgCfg
+
+    acc = ComponentAccumulator()
+
+    acc.merge(EFMuSADataPrepViewDataVerifierCfg(flags, RoIs, name))
+
+    if flags.Muon.usePhaseIIGeoSetup and flags.Muon.scheduleActsReco:
+
+        # Schedule truth segment maker and truth hit association.
+        if flags.Input.isMC:
+            from xAODTruthCnv.xAODTruthCnvConfig import GEN_AOD2xAODCfg
+            acc.merge(GEN_AOD2xAODCfg(flags))
+            from MuonTruthAlgsR4.MuonTruthAlgsConfig import MuonTruthAlgsCfg
+            acc.merge(MuonTruthAlgsCfg(flags))
+            from MuonObjectMarker.ObjectMarkerConfig import TruthMeasMarkerAlgCfg
+            acc.merge(TruthMeasMarkerAlgCfg(flags))
+
+        # Schedule muon EF reco
+        from MuonSpacePointFormation.SpacePointFormationConfig import MuonSpacePointFormationCfg
+        acc.merge( MuonSpacePointFormationCfg( flags ) )
+    
+        from MuonPatternRecognitionAlgs.MuonPatternRecognitionConfig import MuonPatternRecognitionCfg
+        acc.merge(MuonPatternRecognitionCfg(flags))
+
+    else: 
+        acc.merge(MuonLayerHoughAlgCfg(flags, "TrigMuonLayerHoughAlg"))
+
+        # if NSW is excluded from reconstruction (during commissioning)
+        if flags.Muon.runCommissioningChain:
+            acc.merge(MuonSegmentFinderAlgCfg(flags, name="TrigMuonSegmentMaker_"+name,SegmentCollectionName="TrackMuonSegments_withNSW"))
+            acc.merge(MuonSegmentFilterAlgCfg(flags, name="TrigMuonSegmentFilter_"+name,SegmentCollectionName="TrackMuonSegments_withNSW",
+                                                        FilteredCollectionName="TrackMuonSegments", TrashUnFiltered=False, ThinStations=()))
+        else:
+            acc.merge(MuonSegmentFinderAlgCfg(flags, "TrigMuonSegmentMaker_"+name))
 
 
-  sequenceOut = msMuonName
+    from MuonSegmentTrackMaker.MuonTrackMakerAlgsMonitoring import MuPatTrackBuilderMonitoring
+    if flags.Muon.runCommissioningChain:
+        acc.merge(EMEO_MuPatTrackBuilderCfg(flags, name="TrigMuPatTrackBuilder_"+name ,MuonSegmentCollection = "TrackMuonSegments", MonTool = MuPatTrackBuilderMonitoring(flags, "MuPatTrackBuilderMonitoringSA_"+name), SpectrometerTrackOutputLocation="MuonSpectrometerTracks"))
+    else:
+        acc.merge(MuPatTrackBuilderCfg(flags, name="TrigMuPatTrackBuilder_"+name ,MuonSegmentCollection = "TrackMuonSegments", MonTool = MuPatTrackBuilderMonitoring(flags, "MuPatTrackBuilderMonitoringSA_"+name)))
 
-  return acc, sequenceOut
+    acc.merge(MuonStandaloneTrackParticleCnvAlgCfg(flags, name = "TrigMuonStandaloneTrackParticleCnvAlg_"+name))
+    acc.merge(MuonCombinedMuonCandidateAlgCfg(flags, name="TrigMuonCandidateAlg_"+name))
+
+    msMuonName = muNames.EFSAName
+    if 'FS' in name:
+        msMuonName = muNamesFS.EFSAName
+
+    acc.merge(MuonCreatorAlgCfg(flags, name="TrigMuonCreatorAlg_"+name, CreateSAmuons=True, TagMaps=[], MuonContainerLocation=msMuonName,
+                                ExtrapolatedLocation = "HLT_MSExtrapolatedMuons_"+name, MSOnlyExtrapolatedLocation = "HLT_MSOnlyExtrapolatedMuons_"+name,
+                                MonTool = MuonCreatorAlgMonitoring(flags, "MuonCreatorAlgSA_"+name)))
+
+    sequenceOut = msMuonName
+
+    return acc, sequenceOut
 
 
 
@@ -463,9 +491,6 @@ def muEFCBRecoSequenceCfg( flags, RoIs, name, suffix ):
   acc = ComponentAccumulator()
 
   acc.merge(VDVEFMuCBCfg(flags, RoIs, name, suffix))
-
-
-
 
   if "FS" in name:
     #Need to run tracking for full scan chains

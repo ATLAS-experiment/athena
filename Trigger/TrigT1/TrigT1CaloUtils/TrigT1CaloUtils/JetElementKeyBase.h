@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /***************************************************************************
                           JetElementKeyBase.h  -  description
@@ -103,13 +103,13 @@ public:
   /**return height of JE*/
   double dPhi() const;
   /**return height of JE*/
-  double dPhi(const Coordinate& coord) const;
+  virtual double dPhi(const Coordinate& coord) const override;
   /**return width of JE*/
   double dEta(const double phi, const double eta) const ;
   /**return width of JE*/
   double dEta() const ;
   /**return width of JE*/
-  double dEta(const Coordinate& coord) const;
+  virtual double dEta(const Coordinate& coord) const override;
   /** returns region number at eta, where region is:*/
   unsigned int region(double eta) const;
   /*
@@ -137,7 +137,7 @@ protected: // Methods we don't want accessed except through inheritance
 private: // Internal methods of the base class
   /** converts integer phi, eta
   coordinates to phi, eta trigger bins. */
-  BinAndCoord* calculateTriggerBin(ICoordinate* iCoord);
+  virtual BinAndCoord calculateTriggerBin(const ICoordinate& iCoord) override;
 
   /** this is a bit over the top, but it looks to see
   if the calculated coordinate matches a coordinate centre

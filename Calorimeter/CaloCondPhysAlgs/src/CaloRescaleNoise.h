@@ -26,7 +26,7 @@
 
 class CaloNoise;
 class TTree;
-class CaloCell_ID;
+class CaloCell_Base_ID;
 
 class CaloRescaleNoise : public AthAlgorithm {
 
@@ -53,7 +53,7 @@ class CaloRescaleNoise : public AthAlgorithm {
   //---------------------------------------------------
   ServiceHandle<ITHistSvc> m_thistSvc{this,"THistSvc","THistSvc"};
 
-  const CaloCell_ID*       m_calo_id{};
+  const CaloCell_Base_ID*       m_calo_id{};
 
   SG::ReadCondHandleKey<CaloNoise> m_elecNoiseKey
     { this, "ElecNoiseKey", "electronicNoise", "SG key for electronic noise" };
@@ -69,6 +69,9 @@ class CaloRescaleNoise : public AthAlgorithm {
 
   SG::ReadCondHandleKey<CaloDetDescrManager> m_caloMgrKey
     { this, "CaloDetDescrManager", "CaloDetDescrManager", "SG Key for CaloDetDescrManager in the Condition Store" };
+  SG::ReadCondHandleKey<CaloSuperCellDetDescrManager> m_caloSCMgrKey {this,"CaloSuperCellDetDescrManager", "CaloSuperCellDetDescrManager", "SG Key for CaloSuperCellDetDescrManager in the Condition Store" };
+
+  BooleanProperty  m_isSC{this, "SuperCell", false};
 
   int m_iCool{};
   int m_SubHash{};

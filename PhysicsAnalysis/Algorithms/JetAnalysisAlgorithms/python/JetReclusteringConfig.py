@@ -21,13 +21,13 @@ class JetReclusteringBlock(ConfigBlock):
         self.addOption ('clusteringAlgorithm', 'AntiKt', type=str,
                         info='algorithm to use to recluster the jets: `AntiKt`, `Kt`, `CamKt`.')
         self.addOption ('reclusteredJetsRadius', 1.0, type=float,
-                        info='radius parameter of the reclustering algorithm. The default is 1.0.')
+                        info='radius parameter of the reclustering algorithm.')
         self.addOption ('minPt', 200*GeV, type=float,
-                        info='minimum pT requirement (in MeV) on the reclustered jets, creating the selection `passed_sel`. The default is 200 GeV.')
+                        info=r'minimum $p_\mathrm{T}$ requirement (in MeV) on the reclustered jets, creating the selection `passed_sel`.')
         self.addOption ('maxEta', 0., type=float,
-                        info='maximum eta requirement on the reclustered jets, creating the selection `passed_sel`. The default is 0.')
+                        info=r'maximum $\vert\eta\vert$ requirement on the reclustered jets, creating the selection `passed_sel`.')
         self.addOption ('maxRapidity', 2.5, type=float,
-                        info='maximum rapidity requirement on the reclustered jets, creating the selection `passed_sel`. The default is 2.5')
+                        info='maximum rapidity requirement on the reclustered jets, creating the selection `passed_sel`.')
     def instanceName (self) :
         """Return the instance name for this block"""
         return self.containerName

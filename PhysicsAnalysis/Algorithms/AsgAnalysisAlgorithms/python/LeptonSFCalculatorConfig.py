@@ -23,9 +23,9 @@ class LeptonSFCalculatorBlock(ConfigBlock):
         self.addOption('photonSFs', None, type=list,
                        info='list of decorated photon SFs to use in the computation. If not set, will use ID x isolation.')
         self.addOption('taus', None, type=str,
-                       info='the input tau container, with a possible selection, in the format `container` or `container.selection`.')
+                       info='the input tau-jet container, with a possible selection, in the format `container` or `container.selection`.')
         self.addOption('tauSFs', None, type=list,
-                       info='list of decorated tau SFs to use in the computation. If not set, will use reconstruction x ID x eVeto.')
+                       info='list of decorated tau-jet SFs to use in the computation. If not set, will use reconstruction x ID x eVeto.')
         self.addOption('lepton_postfix', None, type=str,
                        info='the name of the common lepton SF, e.g. `tight`.')
         self.addOption('includeElectronChargeMisID', False, type=str,

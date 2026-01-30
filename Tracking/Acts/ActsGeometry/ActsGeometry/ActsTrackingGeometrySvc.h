@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ACTSGEOMETRY_ACTSTRACKINGGEOMETRYSVC_H
@@ -108,6 +108,8 @@ private:
   Gaudi::Property<std::string> m_materialMapInputFileBase{this, "MaterialMapInputFile", "", ""};
   Gaudi::Property<std::string> m_materialMapCalibFolder{this, "MaterialMapCalibFolder", ".", ""};
   Gaudi::Property<bool> m_buildBeamPipe{this, "BuildBeamPipe", false, ""};
+  /// @brief Print the assembled tracking geometry after building
+  Gaudi::Property<bool> m_printGeo{this, "printGeometry", false};
 
   Gaudi::Property<std::vector<size_t>> m_barrelMaterialBins{this, "BarrelMaterialBins", {10, 10}};
   Gaudi::Property<std::vector<size_t>> m_endcapMaterialBins{this, "EndcapMaterialBins", {5, 20}};
@@ -139,8 +141,6 @@ private:
     1000, "number of random points for consistency check"};
 
   ToolHandle<IActsTrackingVolumeBuilder> m_caloVolumeBuilder{this, "CaloVolumeBuilder", ""};
-
-  ToolHandle<IActsTrackingVolumeBuilder> m_msVolumeBuilder{this, "MSVolumeBuilder", ""};
   
   ToolHandleArray<ActsTrk::IBlueprintNodeBuilder> m_blueprintNodeBuilders{this, "BlueprintNodeBuilders", {}};
 

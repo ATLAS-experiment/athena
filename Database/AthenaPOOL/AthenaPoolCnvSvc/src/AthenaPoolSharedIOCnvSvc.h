@@ -84,6 +84,14 @@ public:
 		   const std::string& refAddress,
 		   IOpaqueAddress*& refpAddress) override;
 
+
+   /// Extract/deduce the DB technology from the connection
+   /// string/file specification
+   virtual StatusCode decodeOutputSpec(std::string& connectionSpec, int& outputTech) const override;
+
+   /// Implement cleanUp to call all registered IAthenaPoolCleanUp cleanUp() function.
+   virtual StatusCode cleanUp(const std::string& connection) override;
+
    /// Make this a server.
    virtual StatusCode makeServer(int num) override;
 
@@ -129,6 +137,9 @@ private: // properties
    Gaudi::Property<bool> m_parallelCompression{this,"ParallelCompression",true};
    /// Extension to use ROOT TMemFile for event data, "?pmerge=<host>:<port>"
    Gaudi::Property<std::string> m_streamPortString{this,"StreamPortString","?pmerge=localhost:0"};
+   /// Force SharedWriter to flush data to output file at given intervals, needed by parallel compression
+   std::map<std::string, int> m_fileCommitCounter;
+   Gaudi::Property<std::map<std::string, int>> m_fileFlushSetting{this,"FileFlushSetting",{}};
 };
 
 #endif

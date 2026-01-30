@@ -43,9 +43,9 @@ StatusCode TauSmearingTool::initialize()
       }
 
       if (m_sCampaign=="mc23") {
-        m_sInputFilePath = sDirectory+"TES_TrueHadTau_RNN_mc23_v1.root";
+        m_sInputFilePath = sDirectory+"TES_TrueHadTau_RNN_mc23_v3.root";
       } else {
-        m_sInputFilePath = sDirectory+"TES_TrueHadTau_RNN_mc20_v1.root";
+        m_sInputFilePath = sDirectory+"TES_TrueHadTau_RNN_mc20_v2.root";
       }
 
     } else if (m_sRecommendationTag == "2022-prerec") {

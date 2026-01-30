@@ -227,5 +227,5 @@ void LUCID_DigiSettings::DefNewParameterInt(std::string parDescription,
   parI.high           = high;
   parI.overwriteVal   = m_parValueNotSetByUserInt;
   
-  m_intMap[parname] = parI;
+  m_intMap[parname] = std::move(parI);
 }

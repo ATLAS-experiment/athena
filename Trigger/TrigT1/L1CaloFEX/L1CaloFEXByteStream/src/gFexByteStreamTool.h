@@ -28,9 +28,13 @@
 // Athena includes
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "AthenaMonitoringKernel/Monitored.h"
+#include "StoreGate/WriteDecorHandleKey.h"
 
 // Gaudi includes
 #include "Gaudi/Property.h"
+
+// STL includes
+#include <array>
 
 /** @class gFEXRoIByteStreamTool
  *  @brief Implementation of a tool for L1 RoI conversion from BS to xAOD and from xAOD to BS
@@ -86,6 +90,38 @@ class gFexByteStreamTool : public extends<AthAlgTool, IL1TriggerByteStreamTool> 
         SG::WriteHandleKey< xAOD::gFexGlobalRoIContainer > m_gScalarENoiseCutWriteKey       {this,"gScalarENoiseCutOutputContainerWriteKey","L1_gScalarENoiseCut","Write gFEX EDM Scalar MET and SumET (NoiseCut) container"};
         SG::WriteHandleKey< xAOD::gFexGlobalRoIContainer > m_gScalarERmsWriteKey            {this,"gScalarERmsOutputContainerWriteKey","L1_gScalarERms","Write gFEX EDM Scalar MET and SumET (RMS) container"};
 
+        // Multi-slice (out-of-time) write handle keys for Jet TOBs
+        SG::WriteHandleKey< xAOD::gFexJetRoIContainer    > m_gFexRhoSliceWriteKey           {this,"gFexRhoSliceContainerWriteKey","","Write gFEX EDM gFexRho out-of-time container"};
+        SG::WriteHandleKey< xAOD::gFexJetRoIContainer    > m_gFexBlockSliceWriteKey         {this,"gFexSRJetSliceContainerWriteKey","","Write gFEX EDM gFexBlock out-of-time container"};
+        SG::WriteHandleKey< xAOD::gFexJetRoIContainer    > m_gFexJetSliceWriteKey           {this,"gFexLRJetSliceContainerWriteKey","","Write gFEX EDM gFexJet out-of-time container"};
+        // Multi-slice (out-of-time) write handle keys for Global TOBs
+        SG::WriteHandleKey< xAOD::gFexGlobalRoIContainer > m_gScalarEJwojSliceWriteKey      {this,"gScalarEJwojSliceContainerWriteKey","","Write gFEX EDM Scalar (JwoJ) out-of-time container"};
+        SG::WriteHandleKey< xAOD::gFexGlobalRoIContainer > m_gMETComponentsJwojSliceWriteKey{this,"gMETComponentsJwojSliceContainerWriteKey","","Write gFEX EDM MET (JwoJ) out-of-time container"};
+        SG::WriteHandleKey< xAOD::gFexGlobalRoIContainer > m_gMHTComponentsJwojSliceWriteKey{this,"gMHTComponentsJwojSliceContainerWriteKey","","Write gFEX EDM MHT (JwoJ) out-of-time container"};
+        SG::WriteHandleKey< xAOD::gFexGlobalRoIContainer > m_gMSTComponentsJwojSliceWriteKey{this,"gMSTComponentsJwojSliceContainerWriteKey","","Write gFEX EDM MST (JwoJ) out-of-time container"};
+        SG::WriteHandleKey< xAOD::gFexGlobalRoIContainer > m_gEspressoSliceWriteKey         {this,"gEspressoSliceContainerWriteKey","","Write gFEX EDM gEspresso out-of-time container"};
+        SG::WriteHandleKey< xAOD::gFexGlobalRoIContainer > m_gMETComponentsNoiseCutSliceWriteKey{this,"gMETComponentsNoiseCutSliceContainerWriteKey","","Write gFEX EDM MET (NoiseCut) out-of-time container"};
+        SG::WriteHandleKey< xAOD::gFexGlobalRoIContainer > m_gScalarENoiseCutSliceWriteKey  {this,"gScalarENoiseCutSliceContainerWriteKey","","Write gFEX EDM Scalar (NoiseCut) out-of-time container"};
+        SG::WriteHandleKey< xAOD::gFexGlobalRoIContainer > m_gMETComponentsRmsSliceWriteKey {this,"gMETComponentsRmsSliceContainerWriteKey","","Write gFEX EDM MET (Rms) out-of-time container"};
+        SG::WriteHandleKey< xAOD::gFexGlobalRoIContainer > m_gScalarERmsSliceWriteKey       {this,"gScalarERmsSliceContainerWriteKey","","Write gFEX EDM Scalar (Rms) out-of-time container"};
+
+        // Slice number decoration keys for out-of-time containers only
+        // L1A containers always contain slice 0, so decoration is redundant there
+        // Out-of-time containers mix TOBs from slices 1,2,3,... so decoration is needed to identify which BC
+        // Jet TOB decorations (out-of-time containers)
+        SG::WriteDecorHandleKey<xAOD::gFexJetRoIContainer> m_gFexRhoOOTDecorKey   {this,"gFexRhoOOTDecorKey",m_gFexRhoSliceWriteKey,"sliceNumber","Slice number decoration for gFexRho out-of-time"};
+        SG::WriteDecorHandleKey<xAOD::gFexJetRoIContainer> m_gFexBlockOOTDecorKey {this,"gFexBlockOOTDecorKey",m_gFexBlockSliceWriteKey,"sliceNumber","Slice number decoration for gFexBlock out-of-time"};
+        SG::WriteDecorHandleKey<xAOD::gFexJetRoIContainer> m_gFexJetOOTDecorKey   {this,"gFexJetOOTDecorKey",m_gFexJetSliceWriteKey,"sliceNumber","Slice number decoration for gFexJet out-of-time"};
+        // Global TOB decorations (out-of-time containers)
+        SG::WriteDecorHandleKey<xAOD::gFexGlobalRoIContainer> m_gScalarEJwojOOTDecorKey        {this,"gScalarEJwojOOTDecorKey",m_gScalarEJwojSliceWriteKey,"sliceNumber","Slice number decoration for gScalarEJwoj out-of-time"};
+        SG::WriteDecorHandleKey<xAOD::gFexGlobalRoIContainer> m_gMETComponentsJwojOOTDecorKey  {this,"gMETComponentsJwojOOTDecorKey",m_gMETComponentsJwojSliceWriteKey,"sliceNumber","Slice number decoration for gMETComponentsJwoj out-of-time"};
+        SG::WriteDecorHandleKey<xAOD::gFexGlobalRoIContainer> m_gMHTComponentsJwojOOTDecorKey  {this,"gMHTComponentsJwojOOTDecorKey",m_gMHTComponentsJwojSliceWriteKey,"sliceNumber","Slice number decoration for gMHTComponentsJwoj out-of-time"};
+        SG::WriteDecorHandleKey<xAOD::gFexGlobalRoIContainer> m_gMSTComponentsJwojOOTDecorKey  {this,"gMSTComponentsJwojOOTDecorKey",m_gMSTComponentsJwojSliceWriteKey,"sliceNumber","Slice number decoration for gMSTComponentsJwoj out-of-time"};
+        SG::WriteDecorHandleKey<xAOD::gFexGlobalRoIContainer> m_gEspressoOOTDecorKey           {this,"gEspressoOOTDecorKey",m_gEspressoSliceWriteKey,"sliceNumber","Slice number decoration for gEspresso out-of-time"};
+        SG::WriteDecorHandleKey<xAOD::gFexGlobalRoIContainer> m_gMETComponentsNoiseCutOOTDecorKey{this,"gMETComponentsNoiseCutOOTDecorKey",m_gMETComponentsNoiseCutSliceWriteKey,"sliceNumber","Slice number decoration for gMETComponentsNoiseCut out-of-time"};
+        SG::WriteDecorHandleKey<xAOD::gFexGlobalRoIContainer> m_gScalarENoiseCutOOTDecorKey    {this,"gScalarENoiseCutOOTDecorKey",m_gScalarENoiseCutSliceWriteKey,"sliceNumber","Slice number decoration for gScalarENoiseCut out-of-time"};
+        SG::WriteDecorHandleKey<xAOD::gFexGlobalRoIContainer> m_gMETComponentsRmsOOTDecorKey   {this,"gMETComponentsRmsOOTDecorKey",m_gMETComponentsRmsSliceWriteKey,"sliceNumber","Slice number decoration for gMETComponentsRms out-of-time"};
+        SG::WriteDecorHandleKey<xAOD::gFexGlobalRoIContainer> m_gScalarERmsOOTDecorKey         {this,"gScalarERmsOOTDecorKey",m_gScalarERmsSliceWriteKey,"sliceNumber","Slice number decoration for gScalarERms out-of-time"};
 
         // Read handle keys for the L1Calo EDMs for xAOD->BS mode of operation
         SG::ReadHandleKey< xAOD::gFexJetRoIContainer    > m_gFexRhoReadKey                {this,"gFexRhoOutputContainerReadKey","L1_gFexRhoRoI","Read gFEX EDM gFexRho container"};
@@ -108,7 +144,7 @@ class gFexByteStreamTool : public extends<AthAlgTool, IL1TriggerByteStreamTool> 
         
         void printError(const std::string& location, const std::string& title, MSG::Level type, const std::string& detail) const;
         
-        int16_t fillGlobal(const std::vector<uint32_t> &tob, const int type, SG::WriteHandle<xAOD::gFexGlobalRoIContainer> &container, int16_t scalar = -1) const;
+        int16_t fillGlobal(const std::array<uint32_t, 3> &tob, const int type, SG::WriteHandle<xAOD::gFexGlobalRoIContainer> &container, uint32_t sliceNumber, int16_t scalar = -1) const;
         
         static constexpr uint8_t m_DEBUG=0;
         static constexpr uint8_t m_WARNING=1;

@@ -3,7 +3,7 @@
 */
 
 /////////////////////////////////////////////////////////////////
-// IsolationDecorator.cxx, (c) ATLAS Detector software
+// IsolationDecorator.cxx
 /////////////////////////////////////////////////////////////////
 
 #include "DerivationFrameworkInDet/IsolationTrackDecorator.h"
@@ -19,12 +19,6 @@
 #include "ExpressionEvaluation/MultipleProxyLoader.h"
 #include "ExpressionEvaluation/SGxAODProxyLoader.h"
 #include <StoreGate/WriteDecorHandle.h>
-
-// Constructor
-DerivationFramework::IsolationTrackDecorator::IsolationTrackDecorator(const std::string& t,
-								      const std::string& n,
-								      const IInterface* p):
-  base_class(t, n, p){}
 
 // Athena initialize and finalize
 StatusCode DerivationFramework::IsolationTrackDecorator::initialize()
@@ -133,9 +127,9 @@ StatusCode DerivationFramework::IsolationTrackDecorator::addBranches(const Event
   for(unsigned int i=0; i<m_topoetconeTypes.size(); i++){
     topoetconeNonCoreConeDecorators.emplace_back(m_topoetconeNonCoreConeDecoratorsKey[i], ctx);
   }
-  
+
   SG::WriteDecorHandle<xAOD::TrackParticleContainer, int> dec_trkFlag(m_dec_trkFlagKey, ctx);
-  
+
   /// Loop over tracks
   int ipar=0;
   for(auto particle : *toDecorate) {
@@ -152,73 +146,73 @@ StatusCode DerivationFramework::IsolationTrackDecorator::addBranches(const Event
     if(m_iso.size()>0){
       if(IsPassed){
         /// track isolation
-	xAOD::TrackIsolation resultTrack;
-	xAOD::TrackIsolation resultTrackVar;
-	xAOD::CaloIsolation resultCalo;
-	xAOD::CaloIsolation resultCaloNonCoreCone; 
-	if(m_ptconeTypes.size()) {
+        xAOD::TrackIsolation resultTrack;
+        xAOD::TrackIsolation resultTrackVar;
+        xAOD::CaloIsolation resultCalo;
+        xAOD::CaloIsolation resultCaloNonCoreCone;
+        if(m_ptconeTypes.size()) {
 
-	  if (m_trackIsolationTool->trackIsolation(resultTrack, *particle, m_ptconeTypes, m_trkCorrList)){
-	    for(unsigned int i=0; i<m_ptconeTypes.size(); i++){
-	      ptconeDecorators[i](*particle) = resultTrack.ptcones[i];
-	    }
-	  }else{
-	    ATH_MSG_WARNING("Failed to apply the track isolation for a particle");
-	  }
-	}
+          if (m_trackIsolationTool->trackIsolation(resultTrack, *particle, m_ptconeTypes, m_trkCorrList)){
+            for(unsigned int i=0; i<m_ptconeTypes.size(); i++){
+              ptconeDecorators[i](*particle) = resultTrack.ptcones[i];
+            }
+          }else{
+            ATH_MSG_WARNING("Failed to apply the track isolation for a particle");
+          }
+        }
 
-	if(m_ptvarconeTypes.size()) {
+        if(m_ptvarconeTypes.size()) {
 
-	  std::vector<xAOD::Iso::IsolationType> ptconeTypes = {};
-	  for(auto isoType : m_ptvarconeTypes) {
-	    int iso_tmp = static_cast<int>(isoType);
-	    iso_tmp -= m_diff_ptvarcone;
-	    ptconeTypes.push_back(static_cast<xAOD::Iso::IsolationType>(iso_tmp));
-	  }
+          std::vector<xAOD::Iso::IsolationType> ptconeTypes = {};
+          for(auto isoType : m_ptvarconeTypes) {
+            int iso_tmp = static_cast<int>(isoType);
+            iso_tmp -= m_diff_ptvarcone;
+            ptconeTypes.push_back(static_cast<xAOD::Iso::IsolationType>(iso_tmp));
+          }
 
-	  if (m_trackIsolationTool->trackIsolation(resultTrackVar, *particle, ptconeTypes, m_trkCorrList)){
-	    for(unsigned int i=0; i<m_ptvarconeTypes.size(); i++){
-	      ptvarconeDecorators[i](*particle) = resultTrackVar.ptvarcones_10GeVDivPt[i];
-	    }
-	  }else{
-	    ATH_MSG_WARNING("Failed to apply the track isolation for a particle");
-	  }
-	}
+          if (m_trackIsolationTool->trackIsolation(resultTrackVar, *particle, ptconeTypes, m_trkCorrList)){
+            for(unsigned int i=0; i<m_ptvarconeTypes.size(); i++){
+              ptvarconeDecorators[i](*particle) = resultTrackVar.ptvarcones_10GeVDivPt[i];
+            }
+          }else{
+            ATH_MSG_WARNING("Failed to apply the track isolation for a particle");
+          }
+        }
 
-	if(m_topoetconeTypes.size()) {
+        if(m_topoetconeTypes.size()) {
 
-	  if (m_caloIsolationTool->caloTopoClusterIsolation(resultCalo, *particle, m_topoetconeTypes, m_topoconeCorrList)){
-	    for(unsigned int i=0; i<m_topoetconeTypes.size(); i++){
-	      topoetconeDecorators[i](*particle) = resultCalo.etcones[i];
-	    }
-	  }else{
-	    ATH_MSG_WARNING("Failed to apply the track isolation for a particle");
-	  }
+          if (m_caloIsolationTool->caloTopoClusterIsolation(resultCalo, *particle, m_topoetconeTypes, m_topoconeCorrList)){
+            for(unsigned int i=0; i<m_topoetconeTypes.size(); i++){
+              topoetconeDecorators[i](*particle) = resultCalo.etcones[i];
+            }
+          }else{
+            ATH_MSG_WARNING("Failed to apply the track isolation for a particle");
+          }
 
-	  if (m_caloIsolationTool->caloTopoClusterIsolation(resultCaloNonCoreCone, *particle, m_topoetconeTypes, m_topoclusCorrList)){
-	    for(unsigned int i=0; i<m_topoetconeTypes.size(); i++){
-	      topoetconeNonCoreConeDecorators[i](*particle) = resultCaloNonCoreCone.etcones[i];
-	    }
-	  }else {
-	    ATH_MSG_WARNING("Failed to apply the topo calo isolation for a particle ( non CoreCone )");
-	  }
+          if (m_caloIsolationTool->caloTopoClusterIsolation(resultCaloNonCoreCone, *particle, m_topoetconeTypes, m_topoclusCorrList)){
+            for(unsigned int i=0; i<m_topoetconeTypes.size(); i++){
+              topoetconeNonCoreConeDecorators[i](*particle) = resultCaloNonCoreCone.etcones[i];
+            }
+          }else {
+            ATH_MSG_WARNING("Failed to apply the topo calo isolation for a particle ( non CoreCone )");
+          }
 
-	}
+        }
 
       }else{
-	for(unsigned int i=0; i<m_ptconeTypes.size(); i++){
-	  ptconeDecorators[i](*particle) = -999.e3;
-	}
-	for(unsigned int i=0; i<m_ptvarconeTypes.size(); i++){
-	  ptvarconeDecorators[i](*particle) = -999.e3;
-	}
-	for(unsigned int i=0; i<m_topoetconeTypes.size(); i++){
-	  topoetconeDecorators[i](*particle) = -999.e3;
-	  topoetconeNonCoreConeDecorators[i](*particle) = -999.e3;
-	}
+        for(unsigned int i=0; i<m_ptconeTypes.size(); i++){
+          ptconeDecorators[i](*particle) = -999.e3;
+        }
+        for(unsigned int i=0; i<m_ptvarconeTypes.size(); i++){
+          ptvarconeDecorators[i](*particle) = -999.e3;
+        }
+        for(unsigned int i=0; i<m_topoetconeTypes.size(); i++){
+          topoetconeDecorators[i](*particle) = -999.e3;
+          topoetconeNonCoreConeDecorators[i](*particle) = -999.e3;
+        }
       }
     }
-  } 
+  }
 
   return StatusCode::SUCCESS;
 }

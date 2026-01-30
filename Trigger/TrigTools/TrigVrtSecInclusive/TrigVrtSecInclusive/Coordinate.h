@@ -40,7 +40,7 @@ class Cartesian {
       };
 
       static inline TVector3 X123toXYZ( const KDPoint<double,3>& p ) {
-         return TVector3(p.at(0),p.at(1),p.at(2));;
+         return TVector3(p.at(0),p.at(1),p.at(2));
       };
 
       static inline KDPoint<double,3> XYZtoX123( const TVector3& v ) {

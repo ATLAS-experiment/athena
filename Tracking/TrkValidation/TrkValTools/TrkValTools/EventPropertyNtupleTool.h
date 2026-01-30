@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //////////////////////////////////////////////////////////////////
@@ -38,11 +38,11 @@ namespace Trk {
     StatusCode finalize();
 
     //! method not active in this tool
-    virtual void registerTrackCollections( std::vector<std::string>, bool);
+    virtual void registerTrackCollections( const std::vector<std::string>&, bool){};
     //! method not active in this tool
-    virtual void setTrackTreeIndices( unsigned int, int, int);
+    virtual void setTrackTreeIndices( unsigned int, int, int){};
     //! method not active in this tool
-    virtual void setGenParticleTreeIndices( int, int);
+    virtual void setGenParticleTreeIndices( int, int){};
 
     /** @brief add branches to the tree
       Should be called once dunring the initialisation phase by the calling algorithm
@@ -56,15 +56,15 @@ namespace Trk {
     virtual StatusCode  resetVariables ( );
 
    //! is True if instance is Tool which links events property to Trk::Tracks
-   inline  virtual bool isTrackLinkTool( ) const;
+   inline  virtual bool isTrackLinkTool( ) const{ return false;}
     //! is True if instance is Tool which links events property to Rec::TrkParticle
-   inline  virtual bool isTrkParticleLinkTool( ) const;
+   inline  virtual bool isTrkParticleLinkTool( ) const{return false;}
     //! is True if instance is Tool which links events property to Rec::TrkParticle recieved useing TrigDecTool
-   inline  virtual bool isTrkParticleTrigLinkTool( ) const;
+   inline  virtual bool isTrkParticleTrigLinkTool( ) const{return false;}
     //! is True if instance is Tool which links events property to Rec::TrkParticle recieved useing TrigDecTool
-   inline  virtual bool isInDetTrackTrigLinkTool( ) const;
+   inline  virtual bool isInDetTrackTrigLinkTool( ) const{return false;}
     //! is True if instance is EventPropertyTool
-   inline  virtual bool isEvtPropertyTool( ) const;
+   inline  virtual bool isEvtPropertyTool( ) const {return true;}
    
   private:    
     bool m_doTriggerInfo;     //<! job option toggling if to fill trigger bits
@@ -85,21 +85,5 @@ namespace Trk {
   };
 }
 
-inline void Trk::EventPropertyNtupleTool::registerTrackCollections
-( std::vector<std::string>, bool) { }
-
-inline void  Trk::EventPropertyNtupleTool::setTrackTreeIndices( unsigned int, int, int) { }
-
-inline void  Trk::EventPropertyNtupleTool::setGenParticleTreeIndices(int, int) { }
-
-inline bool  Trk::EventPropertyNtupleTool::isTrackLinkTool( ) const { return false; }
-   
-inline bool  Trk::EventPropertyNtupleTool::isTrkParticleLinkTool( ) const { return false; }
-    
-inline bool  Trk::EventPropertyNtupleTool::isTrkParticleTrigLinkTool( ) const{ return false; }
-
-inline bool  Trk::EventPropertyNtupleTool::isInDetTrackTrigLinkTool( ) const{ return false; }
-
-inline bool  Trk::EventPropertyNtupleTool::isEvtPropertyTool( ) const { return true; } 
 
 #endif // TRK_EVENTPROPERTYNTUPLETOOL_H

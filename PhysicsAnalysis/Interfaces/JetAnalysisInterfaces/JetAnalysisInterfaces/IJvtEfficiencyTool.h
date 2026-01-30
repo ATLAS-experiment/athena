@@ -9,9 +9,15 @@
 #include "PATInterfaces/ISystematicsTool.h"
 #include "xAODJet/JetContainer.h"
 
-// TODO: Right now the systematics are defined in the old IJetJvtEfficiency header
-
 namespace CP {
+
+    const static SystematicVariation NNJvtEfficiencyUp("JET_NNJvtEfficiency", 1);
+    const static SystematicVariation NNJvtEfficiencyDown("JET_NNJvtEfficiency", -1);
+    const static SystematicVariation fJvtEfficiencyUp("JET_fJvtEfficiency", 1);
+    const static SystematicVariation fJvtEfficiencyDown("JET_fJvtEfficiency", -1);
+    // for backwards compatibility
+    const static SystematicVariation JvtEfficiencyUp("JET_JvtEfficiency", 1);
+    const static SystematicVariation JvtEfficiencyDown("JET_JvtEfficiency", -1);
 
     class IJvtEfficiencyTool : public virtual CP::ISystematicsTool {
         ASG_TOOL_INTERFACE(CP::IJvtEfficiencyTool)

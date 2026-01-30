@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef TRUTHUTILS_HEPMCHELPERS_H
 #define TRUTHUTILS_HEPMCHELPERS_H
@@ -9,14 +9,32 @@
 #include <array>
 #include <cstdlib>
 #include <set>
+#include <memory>
 #include "TruthUtils/MagicNumbers.h"
 
 /// @file
 ///
 /// ATLAS-specific HepMC functions
 
+#if !defined(HEPMC3) && !defined(XAOD_ANALYSIS)
+#include "AtlasHepMC/GenVertex.h"
+#include <ranges>
+namespace MC {
+inline
+auto particles_in (const HepMC::GenVertex* p) {
+  return std::ranges::subrange (p->particles_in_const_begin(),
+                                p->particles_in_const_end());
+}
+}
+#endif
+
 namespace MC
 {
+ template <class VTX>
+ auto particles_in (const VTX* p) { return p->particles_in(); }
+ template <class VTX>
+ auto particles_in (const std::shared_ptr<VTX>& p) { return p->particles_in(); }
+
  namespace Pythia8
  {
    /// @brief  To be understood
@@ -96,8 +114,7 @@ namespace MC
     size_t itr = 0;
     do {
       if (itr != 0) partOriVert = MothOriVert;
-      auto incoming = partOriVert->particles_in();
-      for ( auto p: incoming) {
+      for ( const auto& p : particles_in(partOriVert) ) {
         theMoth = p;
         if (!theMoth) continue;
         MotherPDG = theMoth->pdg_id();
@@ -141,7 +158,7 @@ namespace MC
   template <class T> void findParticleAncestors(T thePart, std::set<T>& allancestors) {
     auto prodVtx = thePart->production_vertex();
     if (!prodVtx) return;
-    for (auto theMother: prodVtx->particles_in()) {
+    for (const auto& theMother: prodVtx->particles_in()) {
       if (!theMother) continue;
       allancestors.insert(theMother);
       findParticleAncestors(theMother, allancestors);
@@ -153,7 +170,7 @@ namespace MC
   template <class T> void findParticleStableDescendants(T thePart, std::set<T>& allstabledescendants) {
     auto endVtx = thePart->end_vertex();
     if (!endVtx) return;
-    for (auto theDaughter: endVtx->particles_out()) {
+    for (const auto& theDaughter: endVtx->particles_out()) {
       if (!theDaughter) continue;  
       if (isStable(theDaughter) && !HepMC::is_simulation_particle(theDaughter)) {
          allstabledescendants.insert(theDaughter);
@@ -192,13 +209,13 @@ namespace MC
   /// AV: This is MCtruthClassifier legacy.
   /// The function should be improved in the future.
   /** This can be used for HepMC3::GenVertexPtr, HepMC3::ConstGenVertexPtr or xAOD::TruthVertex* */  
-  template <class T> bool isFromHadron(T p, T hadron, bool &fromTau, bool &fromBSM) {
+    template <class T, class U>
+    bool isFromHadron(T p, U hadron, bool &fromTau, bool &fromBSM) {
     if (isHadron(p)&&!isBeam(p))  return true; // trivial case
     auto vtx = p->production_vertex();
     if (!vtx)  return false;
     bool fromHad = false;
-    auto incoming = vtx->particles_in();
-    for (auto parent: incoming) {
+    for ( const auto& parent : particles_in(vtx) ) {
       if (!parent) continue;
       // should this really go into parton-level territory?
       // probably depends where BSM particles are being decayed

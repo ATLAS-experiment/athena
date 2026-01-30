@@ -1,8 +1,6 @@
 /*
- * Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration.
  */
-
-// $Id$
 /**
  * @file  AthenaKernel/test/RCUUpdater_test.cxx
  * @author scott snyder
@@ -15,6 +13,7 @@
 #include <vector>
 #include <cassert>
 #include <iostream>
+#include <algorithm>
 
 
 static const int nslots = 2;

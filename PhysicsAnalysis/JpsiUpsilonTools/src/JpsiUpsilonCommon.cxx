@@ -14,49 +14,56 @@ namespace Analysis {
     // ---------------------------------------------------------------------------------
     // getPt: returns the pT of a track pair
     // ---------------------------------------------------------------------------------
-    double JpsiUpsilonCommon::getPt(const xAOD::TrackParticle* trk1, const xAOD::TrackParticle* trk2) {
-        
-        TLorentzVector momentum(trk1->p4() + trk2->p4() ); 
-        return momentum.Perp();
-        
+    double JpsiUpsilonCommon::getPt(std::span<const xAOD::TrackParticle* const> tracks)
+    {
+        if (tracks.empty()) {
+            return 0.0;
+        }
+    
+        // Start with the four-momentum of the first track
+        auto momentum = tracks[0]->genvecP4();
+    
+        // Add the rest
+        for (size_t i = 1; i < tracks.size(); ++i) {
+            momentum += tracks[i]->genvecP4();
+        }
+    
+        return std::sqrt(momentum.Perp2());
+    }
+
+    double JpsiUpsilonCommon::getInvariantMass(const xAOD::TrackParticle* trk1, double mass1, const xAOD::TrackParticle* trk2, double mass2)
+    {
+        auto mom1 = trk1->genvecP4();
+        mom1.SetM(mass1);
+        auto mom2 = trk2->genvecP4();
+        mom2.SetM(mass2);
+        return (mom1 + mom2).M();
     }
     
-
-
-    double JpsiUpsilonCommon::getPt(const xAOD::TrackParticle* trk1,
-                                  const xAOD::TrackParticle* trk2,
-                                  const xAOD::TrackParticle* trk3)
+    double JpsiUpsilonCommon::getInvariantMass(std::span<const xAOD::TrackParticle*> tracks,
+                                             std::span<const double> masses)
     {
-        TLorentzVector momentum( trk1->p4() );
-        momentum+= trk2->p4();
-        momentum+= trk3->p4();
-        return momentum.Perp();
+        assert(tracks.size() == masses.size());
+        // Start with the four-momentum of the first track
+        auto Totalmomentum = tracks[0]->genvecP4();
+        Totalmomentum.SetM(masses[0]);
+
+        for (size_t i = 1; i < tracks.size(); ++i) {
+           auto momentum = tracks[i]->genvecP4();
+           momentum.SetM(masses[i]);
+           Totalmomentum += momentum;
+        }
+        return Totalmomentum.M();
     }
 
 
-    // ---------------------------------------------------------------------------------
-    // getPt: returns the pT of a track quadruplet
-    // ---------------------------------------------------------------------------------
-    double JpsiUpsilonCommon::getPt(const xAOD::TrackParticle* trk1,
-                                  const xAOD::TrackParticle* trk2,
-                                  const xAOD::TrackParticle* trk3,
-                                  const xAOD::TrackParticle* trk4)
-    {
-        TLorentzVector momentum( trk1->p4() );
-        momentum += trk2->p4();
-        momentum += trk3->p4();
-        momentum += trk4->p4();
-        return momentum.Perp();
-    }
-
-    
     // -------------------------------------------------------------------------------------------------
     // isContainedIn: boolean function which checks if a track (1st argument) is also contained in a
     // vector (second argument)
     // -------------------------------------------------------------------------------------------------
     
-    bool JpsiUpsilonCommon::isContainedIn(const xAOD::TrackParticle* theTrack, const std::vector<const xAOD::TrackParticle*> &theColl) {
-        return std::find(theColl.cbegin(), theColl.cend(), theTrack) != theColl.cend();
+    bool JpsiUpsilonCommon::isContainedIn(const xAOD::TrackParticle* theTrack, std::span<const xAOD::TrackParticle* const> theColl) noexcept {
+        return std::find(theColl.begin(), theColl.end(), theTrack) != theColl.end();
     }
     
     bool JpsiUpsilonCommon::isContainedIn(const xAOD::TrackParticle* theTrack, const xAOD::MuonContainer* theColl) {
@@ -69,22 +76,22 @@ namespace Analysis {
         return isContained;
     }
 
-    bool JpsiUpsilonCommon::cutRange(double value, double min, double max){
+    bool JpsiUpsilonCommon::cutRange(double value, double min, double max) noexcept {
         return (min<=0.0 || value >= min) && (max <= 0.0 || value <= max);
     }
 
-    bool JpsiUpsilonCommon::cutRangeOR(const std::vector<double> &values, double min, double max){
+    bool JpsiUpsilonCommon::cutRangeOR(std::span<double const> values, double min, double max) noexcept {
         for(double m : values) {
            if( (min<=0.0 || m >= min) && (max <= 0.0 || m <= max)) return true;
         }
         return false;
     }
 
-    bool JpsiUpsilonCommon::cutAcceptGreater(double value, double min ){
+    bool JpsiUpsilonCommon::cutAcceptGreater(double value, double min ) noexcept {
         return (min <=0.0 || value >= min);
     }
 
-    bool JpsiUpsilonCommon::cutAcceptGreaterOR(const std::vector<double> &values, double min){
+    bool JpsiUpsilonCommon::cutAcceptGreaterOR(std::span<double const> values, double min) noexcept {
         for(double m : values) {
            if(min <=0.0 || m >= min) return true;
         }
@@ -123,7 +130,7 @@ namespace Analysis {
        return Analysis::CleanUpVertex(vtx_closest, vertexrefitted);
     }
 
-    void JpsiUpsilonCommon::RelinkVertexTracks(const std::vector<const xAOD::TrackParticleContainer*> &trkcols, xAOD::Vertex* vtx) {
+    void JpsiUpsilonCommon::RelinkVertexTracks(std::span<const xAOD::TrackParticleContainer* const> trkcols, xAOD::Vertex* vtx) {
       std::vector<ElementLink<DataVector<xAOD::TrackParticle> > > newLinkVector;
       auto size = vtx->trackParticleLinks().size();
       for(size_t i = 0; i<size; i++){
@@ -145,7 +152,7 @@ namespace Analysis {
       vtx->setTrackParticleLinks( newLinkVector );
     }
     
-    void JpsiUpsilonCommon::RelinkVertexMuons(const std::vector<const xAOD::MuonContainer*>& muoncols, xAOD::Vertex* vtx){
+    void JpsiUpsilonCommon::RelinkVertexMuons(std::span<const xAOD::MuonContainer* const> muoncols, xAOD::Vertex* vtx){
        using MuonLink = ElementLink<xAOD::MuonContainer>;
        using MuonLinkVector = std::vector<MuonLink>;
        static const SG::AuxElement::Decorator<MuonLinkVector> muonLinksDecor("MuonLinks");

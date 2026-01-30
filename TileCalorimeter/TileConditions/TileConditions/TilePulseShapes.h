@@ -1,11 +1,12 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TILECONDITIONS_TILEPULSESHAPES_H
 #define TILECONDITIONS_TILEPULSESHAPES_H
 
 #include <vector>
+#include <memory>
 #include "GaudiKernel/MsgStream.h"
 
 /** 48 pmts (channels) in one drawer */
@@ -127,7 +128,7 @@ friend class TileInfoLoader;
 
   void load(MsgStream &log);
 
-  const TilePulseShapesStruct * TilePSstruct () const { return m_shapes; }
+  const TilePulseShapesStruct * TilePSstruct () const { return m_shapes.get(); }
 
   bool loaded() { return m_loaded; }
 
@@ -170,7 +171,7 @@ friend class TileInfoLoader;
   std::string m_filenameNkNoise;
 
   bool m_loaded;
-  TilePulseShapesStruct * m_shapes;
+  std::unique_ptr<TilePulseShapesStruct> m_shapes;
 
   bool ReadFile(MsgStream &log, const std::string& fname, const char *xname, const char * yname,
                 std::vector<double> & x, std::vector<double> & y, int nskip=0);

@@ -14,7 +14,7 @@ namespace {
 }
 
 PixelDCSCondTempAlg::PixelDCSCondTempAlg(const std::string& name, ISvcLocator* pSvcLocator):
-  ::AthReentrantAlgorithm(name, pSvcLocator)
+  ::AthCondAlgorithm(name, pSvcLocator)
 {
 }
 

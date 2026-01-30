@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 /*********************************
  * L1TopoDataTypes.h
@@ -14,7 +14,7 @@
 #include <iostream>
 #include <stdint.h>
 
-/* Setting maximal number of bits to 32. */
+/* Setting maximal number of bits */
 #ifndef MAXBITS 
 #define MAXBITS 64
 #endif 
@@ -22,7 +22,7 @@
 
 /// Return a bit mask with the lower @a n bits set.
 template <class T>
-inline
+consteval
 T ones (unsigned int n)
 {
   if (n >= sizeof(T) * 8)
@@ -77,23 +77,23 @@ namespace TSU {
           return L1TopoDataTypes<P1,F1>(convert(m_tvalue,PREC,F,P1,F1));
        }
 
-       operator float(){
+       operator float() const {
           return this->to_float();
        }
 
-       operator int(){
+       operator int() const {
            return ones<T>(PREC-F)&((m_tvalue>>F));
        }
 
-       operator unsigned(){
+       operator unsigned() const {
            return ones<T>(PREC-F)&((m_tvalue>>F));
        }
 
-       operator int64_t(){
+       operator int64_t() const {
            return ones<T>(PREC-F)&((m_tvalue>>F));
        }
 
-       operator unsigned long long(){
+       operator unsigned long long() const {
            return ones<T>(PREC-F)&((m_tvalue>>F));
        }
 
@@ -150,32 +150,14 @@ namespace TSU {
        template<unsigned P,unsigned FF> friend L1TopoDataTypes<P,FF> operator*(L1TopoDataTypes<P,FF> d,const int& factor);
 
        // add two numbers with different representation
-       template<unsigned P1, unsigned F1, unsigned P2, unsigned F2> friend L1TopoDataTypes<((P1-F1) > (P2-F2) ? (P1-F1) : (P2-F2)) + ((F1 > F2) ? F1 : F2), (F1 > F2) ? F1 : F2> operator+(const L1TopoDataTypes<P1,F1>& lhs, const L1TopoDataTypes<P2,F2>& rhs);
+       template<unsigned P1, unsigned F1, unsigned P2, unsigned F2>  friend L1TopoDataTypes<((P1-F1) > (P2-F2) ? (P1-F1) : (P2-F2)) + ((F1 > F2) ? F1 : F2), (F1 > F2) ? F1 : F2> operator+(const L1TopoDataTypes<P1,F1>& lhs, const L1TopoDataTypes<P2,F2>& rhs);
     
        // subtract two numbers with different representation
-       template<unsigned P1, unsigned F1, unsigned P2, unsigned F2> friend L1TopoDataTypes<((P1-F1) > (P2-F2) ? (P1-F1) : (P2-F2)) + ((F1 > F2) ? F1 : F2), (F1 > F2) ? F1 : F2> operator-(const L1TopoDataTypes<P1,F1> lhs, const L1TopoDataTypes<P2,F2> rhs);
+       template<unsigned P1, unsigned F1, unsigned P2, unsigned F2> friend L1TopoDataTypes<((P1-F1) > (P2-F2) ? (P1-F1) : (P2-F2)) + ((F1 > F2) ? F1 : F2), (F1 > F2) ? F1 : F2> operator-(const L1TopoDataTypes<P1,F1>& lhs, const L1TopoDataTypes<P2,F2>& rhs);
     
-       // subtract L1TopoDataTypes from double
-       template<unsigned P1, unsigned F1> L1TopoDataTypes<P1+1,F1> friend operator-(const double& lhs, const L1TopoDataTypes<P1,F1>& rhs);
-
-       template<unsigned P1, unsigned F1> L1TopoDataTypes<P1+1,F1> friend operator-(const L1TopoDataTypes<P1,F1>& lhs, const double& rhs);
-
-       // subtract L1TopoDataTypes from int
-       template<unsigned P1, unsigned F1> L1TopoDataTypes<P1+1,F1> friend operator-(const int& lhs, const L1TopoDataTypes<P1,F1>& rhs);
-
-       template<unsigned P1, unsigned F1> L1TopoDataTypes<P1+1,F1> friend operator-(const L1TopoDataTypes<P1,F1>& lhs, const int& rhs);
        // product of two numbers with different representation
        template<unsigned P1, unsigned F1, unsigned P2, unsigned F2> friend L1TopoDataTypes<(P1+P2-1 > MAXBITS) ? MAXBITS : P1+P2-1, (P1+P2-1 > MAXBITS) ? (F2>F1 ? F2 - ((P1+P2-1) - MAXBITS) : F1 - ((P1+P2-1) - MAXBITS)) : ((F1 > F2) ? F1 : F2)> operator*(const L1TopoDataTypes<P1,F1> lhs, const L1TopoDataTypes<P2,F2> rhs);
-    
-       // add L1TopoDataTypes to double
-       template<unsigned P1, unsigned F1> L1TopoDataTypes<P1+1,F1> friend operator+(const double& lhs, const L1TopoDataTypes<P1,F1>& rhs);
-
-       template<unsigned P1, unsigned F1> L1TopoDataTypes<P1+1,F1> friend operator+(const L1TopoDataTypes<P1,F1>& lhs, const double& rhs);
-
-       // add L1TopoDataTypes to int
-       template<unsigned P1, unsigned F1> L1TopoDataTypes<P1+1,F1> friend operator+(const int& lhs, const L1TopoDataTypes<P1,F1>& rhs);
-
-       template<unsigned P1, unsigned F1> L1TopoDataTypes<P1+1,F1> friend operator+(const L1TopoDataTypes<P1,F1>& lhs, const int& rhs);
+      
        // product of two numbers with different representation
        template<unsigned P1, unsigned F1, unsigned P2, unsigned F2> friend L1TopoDataTypes<(P1+P2-1 > MAXBITS) ? MAXBITS : P1+P2-1, (P1+P2-1 > MAXBITS) ? (F2>F1 ? F2 - ((P1+P2-1) - MAXBITS) : F1 - ((P1+P2-1) - MAXBITS)) : ((F1 > F2) ? F1 : F2)> operator*(const L1TopoDataTypes<P1,F1> lhs, const L1TopoDataTypes<P2,F2> rhs);
     
@@ -203,8 +185,8 @@ namespace TSU {
           return res;
        }
 
-       unsigned int prec() const { return PREC; }
-       unsigned int frac() const { return F; }
+       constexpr unsigned int prec() const { return PREC; }
+       constexpr unsigned int frac() const { return F; }
     
     private:
        T m_tvalue{};
@@ -225,9 +207,9 @@ namespace TSU {
 
     // operator+ for L1TopoDataTypes
     template<unsigned P1, unsigned F1, unsigned P2, unsigned F2> L1TopoDataTypes<((P1-F1) > (P2-F2) ? (P1-F1) : (P2-F2)) + ((F1 > F2) ? F1 : F2), (F1 > F2) ? F1 : F2> operator+(const L1TopoDataTypes<P1,F1>& lhs, const L1TopoDataTypes<P2,F2>& rhs){
-       const unsigned int frac = (F1 > F2) ? F1 : F2;
-       const unsigned int digit = ((P1-F1) > (P2-F2)) ? (P1-F1) - 1 : (P2-F2) - 1;
-       const unsigned int prec = frac + digit + 1;
+       constexpr unsigned int frac = (F1 > F2) ? F1 : F2;
+       constexpr unsigned int digit = ((P1-F1) > (P2-F2)) ? (P1-F1) - 1 : (P2-F2) - 1;
+       constexpr unsigned int prec = frac + digit + 1;
        T lhsconvert = convert(lhs.m_tvalue,P1,F1,prec,frac);
        T rhsconvert = convert(rhs.m_tvalue,P2,F2,prec,frac);
        L1TopoDataTypes<prec,frac> res(lhsconvert+rhsconvert);
@@ -236,10 +218,10 @@ namespace TSU {
     }
 
     // operator- for L1TopoDataTypes
-    template<unsigned P1, unsigned F1, unsigned P2, unsigned F2> L1TopoDataTypes<((P1-F1) > (P2-F2) ? (P1-F1) : (P2-F2)) + ((F1 > F2) ? F1 : F2), (F1 > F2) ? F1 : F2> operator-(const L1TopoDataTypes<P1,F1> lhs, const L1TopoDataTypes<P2,F2> rhs){
-       const unsigned int frac = (F1 > F2) ? F1 : F2;
-       const unsigned int digit = ((P1-F1) > (P2-F2)) ? (P1-F1) - 1 : (P2-F2) - 1;
-       const unsigned int prec = frac + digit + 1;
+    template<unsigned P1, unsigned F1, unsigned P2, unsigned F2> L1TopoDataTypes<((P1-F1) > (P2-F2) ? (P1-F1) : (P2-F2)) + ((F1 > F2) ? F1 : F2), (F1 > F2) ? F1 : F2> operator-(const L1TopoDataTypes<P1,F1>& lhs, const L1TopoDataTypes<P2,F2>& rhs){
+       constexpr unsigned int frac = (F1 > F2) ? F1 : F2;
+       constexpr unsigned int digit = ((P1-F1) > (P2-F2)) ? (P1-F1) - 1 : (P2-F2) - 1;
+       constexpr unsigned int prec = frac + digit + 1;
        T lhsconvert = convert(lhs.m_tvalue,P1,F1,prec,frac);
        T rhsconvert = convert(rhs.m_tvalue,P2,F2,prec,frac);
        L1TopoDataTypes<prec,frac> res(lhsconvert+complement(rhsconvert,prec));
@@ -248,43 +230,43 @@ namespace TSU {
     }
 
     template<unsigned P1, unsigned F1> L1TopoDataTypes<P1+1,F1> operator-(const double& lhs, const L1TopoDataTypes<P1,F1>& rhs){
-        return L1TopoDataTypes<P1+1,F1>(lhs - rhs.to_float());
+        return L1TopoDataTypes<P1+1,F1>(lhs - static_cast<float>(rhs));
     }
 
     template<unsigned P1, unsigned F1> L1TopoDataTypes<P1+1,F1> operator-(const L1TopoDataTypes<P1,F1>& lhs, const double& rhs){
-        return L1TopoDataTypes<P1+1,F1>(lhs.to_float() - rhs);
+        return L1TopoDataTypes<P1+1,F1>(static_cast<float>(lhs) - rhs);
     }
 
     template<unsigned P1, unsigned F1> L1TopoDataTypes<P1+1,F1> operator-(const int& lhs, const L1TopoDataTypes<P1,F1>& rhs){
-        return L1TopoDataTypes<P1+1,F1>(lhs - rhs.to_float());
+        return L1TopoDataTypes<P1+1,F1>(lhs - static_cast<float>(rhs));
     }
 
     template<unsigned P1, unsigned F1> L1TopoDataTypes<P1+1,F1> operator-(const L1TopoDataTypes<P1,F1>& lhs, const int& rhs){
-        return L1TopoDataTypes<P1+1,F1>(lhs.to_float() - rhs);
+        return L1TopoDataTypes<P1+1,F1>(static_cast<float>(lhs) - rhs);
     }
 
     template<unsigned P1, unsigned F1> L1TopoDataTypes<P1+1,F1> operator+(const double& lhs, const L1TopoDataTypes<P1,F1>& rhs){
-        return L1TopoDataTypes<P1+1,F1>(lhs + rhs.to_float());
+        return L1TopoDataTypes<P1+1,F1>(lhs + static_cast<float>(rhs));
     }
 
     template<unsigned P1, unsigned F1> L1TopoDataTypes<P1+1,F1> operator+(const L1TopoDataTypes<P1,F1>& lhs, const double& rhs){
-        return L1TopoDataTypes<P1+1,F1>(lhs.to_float() + rhs);
+        return L1TopoDataTypes<P1+1,F1>(static_cast<float>(lhs) + rhs);
     }
 
     template<unsigned P1, unsigned F1> L1TopoDataTypes<P1+1,F1> operator+(const int& lhs, const L1TopoDataTypes<P1,F1>& rhs){
-        return L1TopoDataTypes<P1+1,F1>(lhs + rhs.to_float());
+        return L1TopoDataTypes<P1+1,F1>(lhs + static_cast<float>(rhs));
     }
 
     template<unsigned P1, unsigned F1> L1TopoDataTypes<P1+1,F1> operator+(const L1TopoDataTypes<P1,F1>& lhs, const int& rhs){
-        return L1TopoDataTypes<P1+1,F1>(lhs.to_float() + rhs);
+        return L1TopoDataTypes<P1+1,F1>(static_cast<float>(lhs) + rhs);
     }
 
 
     // operator* for L1TopoDataTypes
     template<unsigned P1, unsigned F1, unsigned P2, unsigned F2> L1TopoDataTypes<(P1+P2-1 > MAXBITS) ? MAXBITS : P1+P2-1, (P1+P2-1 > MAXBITS) ? (F2>F1 ? F2 - ((P1+P2-1) - MAXBITS) : F1 - ((P1+P2-1) - MAXBITS)) : ((F1 > F2) ? F1 : F2)> operator*(const L1TopoDataTypes<P1,F1> lhs, const L1TopoDataTypes<P2,F2> rhs){
-       const unsigned int frac = (P1+P2-1 > MAXBITS) ? (F2>F1 ? F2 - ((P1+P2-1) - MAXBITS) : F1 - ((P1+P2-1) - MAXBITS)) : ((F1 > F2) ? F1 : F2);
-       const unsigned int digit = ((P1+P2-1 > MAXBITS) ? (MAXBITS - frac) : (P1+P2-1 - frac)) - 1;
-       const unsigned int prec = frac + digit + 1;
+       constexpr unsigned int frac = (P1+P2-1 > MAXBITS) ? (F2>F1 ? F2 - ((P1+P2-1) - MAXBITS) : F1 - ((P1+P2-1) - MAXBITS)) : ((F1 > F2) ? F1 : F2);
+       constexpr unsigned int digit = ((P1+P2-1 > MAXBITS) ? (MAXBITS - frac) : (P1+P2-1 - frac)) - 1;
+       constexpr unsigned int prec = frac + digit + 1;
        T lhsconvert = lhs.m_tvalue;
        T rhsconvert = rhs.m_tvalue;
        // check if either value is negative and work with the absolute value

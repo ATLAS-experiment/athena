@@ -5,21 +5,21 @@
 #ifndef TRTHTCONDALG_H
 #define TRTHTCONDALG_H
 
-#include "AthenaBaseComps/AthAlgorithm.h"
+#include "AthenaBaseComps/AthCondAlgorithm.h"
 #include "StoreGate/WriteCondHandleKey.h"
 #include "TRT_ConditionsData/HTcalculator.h"
 #include "AthenaPoolUtilities/CondAttrListVec.h"
 #include "Gaudi/Property.h"
 
 
-class TRTHTCondAlg : public AthAlgorithm
+class TRTHTCondAlg : public AthCondAlgorithm
 {
  public:
   TRTHTCondAlg(const std::string& name, ISvcLocator* pSvcLocator);
   virtual ~TRTHTCondAlg() override;
 
   virtual StatusCode initialize() override;
-  virtual StatusCode execute() override;
+  virtual StatusCode execute(const EventContext& ctx) const override;
   virtual StatusCode finalize() override;
 
  private:

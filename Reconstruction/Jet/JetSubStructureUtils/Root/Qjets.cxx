@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "Qjets.h"
@@ -8,7 +8,7 @@ using namespace std;
 using namespace JetSubStructureUtils;
 
 Qjets::Qjets(double zcut, double dcut_fctr, double exp_min, double exp_max, double rigidity, double truncation_fctr)
-: m_rand_seed_set(false),
+: m_rand(),
   m_zcut(zcut), 
   m_dcut(-1.), 
   m_dcut_fctr(dcut_fctr),
@@ -20,8 +20,7 @@ Qjets::Qjets(double zcut, double dcut_fctr, double exp_min, double exp_max, doub
 }
 
 void Qjets::SetRandSeed(unsigned int seed){
-  m_rand_seed_set = true;
-  m_seed = seed;
+  m_rand.SetSeed(seed);
 }
 
 bool Qjets::JetUnmerged(int num) const{
@@ -60,7 +59,7 @@ jet_distance Qjets::GetNextDistance(){
 
   double rand(Rand()), tot_weight(0.);
   if (!popped_distances.empty()) {
-    const double inv_norm = 1. / norm;
+    const double inv_norm = norm == 0 ? 1 : 1. / norm;
     for(vector<pair<jet_distance, double> >::iterator it = popped_distances.begin(); it != popped_distances.end(); ++it){
       tot_weight += (*it).second * inv_norm;
       if(tot_weight >= rand){
@@ -178,10 +177,5 @@ double Qjets::d_ij(const fastjet::PseudoJet& v1,const  fastjet::PseudoJet& v2) c
 }
 
 double Qjets::Rand(){
-  double ret = 0.;
-  if(m_rand_seed_set)
-    ret = rand_r(&m_seed)/(double)RAND_MAX;
-  else 
-    ret = rand()/(double)RAND_MAX;
-  return ret;
+  return m_rand.Rndm();
 }

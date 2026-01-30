@@ -3,6 +3,9 @@
 */
 
 #include "StepHistogram.h"
+//ROOT
+#include "TH1.h"
+#include "TH2.h"
 
 #include "GaudiKernel/IDataProviderSvc.h"
 #include "GaudiKernel/INTupleSvc.h"
@@ -19,6 +22,7 @@
 #include "G4VProcess.hh"
 
 #include <cmath>
+#include <sstream> //ostringstream
 #include <iostream>
 
 namespace G4UA{
@@ -89,11 +93,11 @@ namespace G4UA{
 
     // step length
     InitializeFillHistogram(m_report.histoMapMap_vol_stepSize, "vol_stepLength", particleName, volumeName,
-                            1000, -12, 4, log10(aStep->GetStepLength()), 1.);
+                            1000, -12, 4, std::log10(aStep->GetStepLength()), 1.);
     InitializeFillHistogram(m_report.histoMapMap_mat_stepSize, "mat_stepLength", particleName, materialName,
-                            1000, -12, 4, log10(aStep->GetStepLength()), 1.);
+                            1000, -12, 4, std::log10(aStep->GetStepLength()), 1.);
     InitializeFillHistogram(m_report.histoMapMap_prc_stepSize, "prc_stepLength", particleName, processName,
-                            1000, -12, 4, log10(aStep->GetStepLength()), 1.);
+                            1000, -12, 4, std::log10(aStep->GetStepLength()), 1.);
 
     // step pseudorapidity    
     InitializeFillHistogram(m_report.histoMapMap_vol_stepPseudorapidity, "vol_stepPseudorapidity", particleName, volumeName,
@@ -105,49 +109,49 @@ namespace G4UA{
 
     // step kinetic energy
     InitializeFillHistogram(m_report.histoMapMap_vol_stepKineticEnergy, "vol_stepKineticEnergy", particleName, volumeName,
-                            1000, -9, 7, log10(stepKinetic), 1.);
+                            1000, -9, 7, std::log10(stepKinetic), 1.);
     InitializeFillHistogram(m_report.histoMapMap_mat_stepKineticEnergy, "mat_stepKineticEnergy", particleName, materialName,
-                            1000, -9, 7, log10(stepKinetic), 1.);
+                            1000, -9, 7, std::log10(stepKinetic), 1.);
     InitializeFillHistogram(m_report.histoMapMap_prc_stepKineticEnergy, "prc_stepKineticEnergy", particleName, processName,
-                            1000, -9, 7, log10(stepKinetic), 1.);
+                            1000, -9, 7, std::log10(stepKinetic), 1.);
     InitializeFillHistogram(m_report.histoMapMap_stepKinetic, "stepKineticEnergy", particleName, "AllATLAS",
-                            1000, -9, 7, log10(stepKinetic), 1.);
+                            1000, -9, 7, std::log10(stepKinetic), 1.);
 
     // post step kinetic energy
     InitializeFillHistogram(m_report.histoMapMap_vol_postStepKineticEnergy, "vol_postStepKineticEnergy", particleName, volumeName,
-                            1000, -9, 7, log10(postStepKinetic), 1.);
+                            1000, -9, 7, std::log10(postStepKinetic), 1.);
     InitializeFillHistogram(m_report.histoMapMap_mat_postStepKineticEnergy, "mat_postStepKineticEnergy", particleName, materialName,
-                            1000, -9, 7, log10(postStepKinetic), 1.);
+                            1000, -9, 7, std::log10(postStepKinetic), 1.);
     InitializeFillHistogram(m_report.histoMapMap_prc_postStepKineticEnergy, "prc_postStepKineticEnergy", particleName, processName,
-                            1000, -9, 7, log10(postStepKinetic), 1.);
+                            1000, -9, 7, std::log10(postStepKinetic), 1.);
     InitializeFillHistogram(m_report.histoMapMap_postStepKinetic, "postStepKineticEnergy", particleName, "AllATLAS",
-                            1000, -9, 7, log10(postStepKinetic), 1.);
+                            1000, -9, 7, std::log10(postStepKinetic), 1.);
 
     // step energy deposit
     InitializeFillHistogram(m_report.histoMapMap_vol_stepEnergyDeposit, "vol_stepEnergyDeposit", particleName, volumeName,
-                            1000, -11, 3, log10(aStep->GetTotalEnergyDeposit()), 1.);
+                            1000, -11, 3, std::log10(aStep->GetTotalEnergyDeposit()), 1.);
     InitializeFillHistogram(m_report.histoMapMap_mat_stepEnergyDeposit, "mat_stepEnergyDeposit", particleName, materialName,
-                            1000, -11, 3, log10(aStep->GetTotalEnergyDeposit()), 1.);
+                            1000, -11, 3, std::log10(aStep->GetTotalEnergyDeposit()), 1.);
     InitializeFillHistogram(m_report.histoMapMap_prc_stepEnergyDeposit, "prc_stepEnergyDeposit", particleName, processName,
-                            1000, -11, 3, log10(aStep->GetTotalEnergyDeposit()), 1.);
+                            1000, -11, 3, std::log10(aStep->GetTotalEnergyDeposit()), 1.);
 
     // step non-ionizing energy deposit
     InitializeFillHistogram(m_report.histoMapMap_vol_stepEnergyNonIonDeposit, "vol_stepEnergyNonIonDeposit", particleName, volumeName,
-                            1000, -11, 1, log10(aStep->GetNonIonizingEnergyDeposit()), 1.);
+                            1000, -11, 1, std::log10(aStep->GetNonIonizingEnergyDeposit()), 1.);
     InitializeFillHistogram(m_report.histoMapMap_mat_stepEnergyNonIonDeposit, "mat_stepEnergyNonIonDeposit", particleName, materialName,
-                            1000, -11, 1, log10(aStep->GetNonIonizingEnergyDeposit()), 1.);
+                            1000, -11, 1, std::log10(aStep->GetNonIonizingEnergyDeposit()), 1.);
     InitializeFillHistogram(m_report.histoMapMap_prc_stepEnergyNonIonDeposit, "prc_stepEnergyNonIonDeposit", particleName, processName,
-                            1000, -11, 1, log10(aStep->GetNonIonizingEnergyDeposit()), 1.);
+                            1000, -11, 1, std::log10(aStep->GetNonIonizingEnergyDeposit()), 1.);
 
     // secondary kinetic energy
     for (const auto &track : *secondaries) {
       G4String secondary_particleName = G4DebuggingHelpers::ClassifyParticle(track->GetParticleDefinition());
       InitializeFillHistogram(m_report.histoMapMap_vol_stepSecondaryKinetic, "vol_stepSecondaryKinetic", secondary_particleName, volumeName,
-                              1000, -7, 5, log10(track->GetKineticEnergy()), 1.);
+                              1000, -7, 5, std::log10(track->GetKineticEnergy()), 1.);
       InitializeFillHistogram(m_report.histoMapMap_mat_stepSecondaryKinetic, "mat_stepSecondaryKinetic", secondary_particleName, materialName,
-                              1000, -7, 5, log10(track->GetKineticEnergy()), 1.);
+                              1000, -7, 5, std::log10(track->GetKineticEnergy()), 1.);
       InitializeFillHistogram(m_report.histoMapMap_prc_stepSecondaryKinetic, "prc_stepSecondaryKinetic", secondary_particleName, processName,
-                              1000, -7, 5, log10(track->GetKineticEnergy()), 1.);
+                              1000, -7, 5, std::log10(track->GetKineticEnergy()), 1.);
     }
 
     // stop here if 'general' histograms not activated
@@ -161,9 +165,9 @@ namespace G4UA{
       m_initialKineticEnergyOfStep = stepKinetic;
       
       // initial volume/material/processes
-      m_initialVolume = volumeName;
-      m_initialMaterial = materialName;
-      m_initialProcess = processName;
+      m_initialVolume = std::move(volumeName);
+      m_initialMaterial = std::move(materialName);
+      m_initialProcess = std::move(processName);
 
       // save track ID for checking if we later have the same track
       m_trackID = tr->GetTrackID();
@@ -207,13 +211,13 @@ namespace G4UA{
                               1000, -9, 7, std::log10(m_initialKineticEnergyOfStep), nSteps);
       // track length vs initial energy
       InitializeFillHistogram(m_report.histoMapMap_trackLengthPerInitialE, "trackLengthPerInitialE", particleName, "AllATLAS",
-                              1000, -9, 7, log10(tr->GetTrackLength()), 1.);
+                              1000, -9, 7, std::log10(tr->GetTrackLength()), 1.);
       InitializeFillHistogram(m_report.histoMapMap_vol_trackLengthPerInitialE, "vol_trackLengthPerInitialE", particleName, m_initialVolume,
-                              1000, -9, 7, log10(tr->GetTrackLength()), 1.);
+                              1000, -9, 7, std::log10(tr->GetTrackLength()), 1.);
       InitializeFillHistogram(m_report.histoMapMap_mat_trackLengthPerInitialE, "mat_trackLengthPerInitialE", particleName, m_initialMaterial,
-                              1000, -9, 7, log10(tr->GetTrackLength()), 1.);
+                              1000, -9, 7, std::log10(tr->GetTrackLength()), 1.);
       InitializeFillHistogram(m_report.histoMapMap_prc_trackLengthPerInitialE, "prc_trackLengthPerInitialE", particleName, m_initialProcess,
-                              1000, -9, 7, log10(tr->GetTrackLength()), 1.);
+                              1000, -9, 7, std::log10(tr->GetTrackLength()), 1.);
     }
   }
 

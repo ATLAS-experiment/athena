@@ -15,11 +15,11 @@ from AthenaCommon.AppMgr import ServiceMgr
 inputs = ServiceMgr.EventSelector.InputCollections
 
 # set default sort parameters, read overrides from locals()
-tmpCollFile = locals().get("AthenaInputSortCollName", "sortedEventRefs" + str(os.getpid()) )
+tmpCollFile = locals().get("AthenaInputSortCollName", "sortedEventRefs" + str(os.getpid()) + ".root")
 sortTag     = locals().get("AthenaInputSortTag",      "LumiBlockN")
 sortOrd     = locals().get("AthenaInputSortOrder",    "Ascending")
 
-from CollectionUtilities.SortedCollectionCreator import SortedCollectionCreator
+from CollectionSvc.SortedCollectionCreator import SortedCollectionCreator
 sorter = SortedCollectionCreator(name="SortEvents")
 # Sort Inputs based on one of the EventInfoTag attributes
 # Store sorted event collection in a temporary file
@@ -30,6 +30,8 @@ sorter.execute(inputs, outputCollection=tmpCollFile, sortAttribute=sortTag, sort
 for inpfile in inputs:
     os.system('pool_insertFileToCatalog {}'.format(inpfile))
 
+ServiceMgr.PoolSvc.AttemptCatalogPatch = False
+
 # Tell Athena to use the sorted collection instead of the original inputs
-ServiceMgr.EventSelector.InputCollections = [tmpCollFile + ".root"]
+ServiceMgr.EventSelector.InputCollections = [tmpCollFile]
 ServiceMgr.EventSelector.CollectionType = "RootCollection"

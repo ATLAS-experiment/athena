@@ -50,7 +50,7 @@ public:
 
   virtual StatusCode initialize() override;
   virtual StatusCode finalize()   override;
-  virtual StatusCode readData(FPGATrackSimEventInputHeader* header, const EventContext& eventContext)  override;
+  virtual StatusCode readData(FPGATrackSimEventInputHeader* header, const EventContext& eventContext) const override;
 
 
 private:
@@ -93,17 +93,16 @@ private:
   const HepPDT::ParticleDataTable* m_particleDataTable = nullptr;
 
   typedef std::map<Identifier, int> HitIndexMap;
-  StatusCode readRawSilicon(HitIndexMap& hitIndexMap, const EventContext& eventContext); // dump raw silicon data to text file and populate hitIndexMap for rec. track processing
-  StatusCode readTruthTracks(std::vector<FPGATrackSimTruthTrack>& truth, const EventContext& eventContext);
-  StatusCode readOfflineTracks(std::vector<FPGATrackSimOfflineTrack>& Track, const EventContext& eventContext);
-  StatusCode readOfflineClusters(std::vector<FPGATrackSimCluster>& Clusters, const EventContext& eventContext);
-  StatusCode readPixelSimulation(HitIndexMap& hitIndexMap, unsigned int& hitIndex, const EventContext& eventContext);
-  StatusCode readStripSimulation(HitIndexMap& hitIndexMap, unsigned int& hitIndex, const EventContext& eventContext);
-  StatusCode dumpPixelClusters(HitIndexMap& pixelClusterIndexMap, const EventContext& eventContext);
+  StatusCode readRawSilicon(FPGATrackSimEventInputHeader* header, HitIndexMap& hitIndexMap, const EventContext& eventContext) const; // dump raw silicon data to text file and populate hitIndexMap for rec. track processing
+  StatusCode readTruthTracks(std::vector<FPGATrackSimTruthTrack>& truth, const EventContext& eventContext) const;
+  StatusCode readOfflineTracks(std::vector<FPGATrackSimOfflineTrack>& Track, const EventContext& eventContext) const;
+  StatusCode readOfflineClusters(std::vector<FPGATrackSimCluster>& Clusters, const EventContext& eventContext) const;
+  StatusCode readPixelSimulation(FPGATrackSimEventInputHeader* header, HitIndexMap& hitIndexMap, unsigned int& hitIndex, const EventContext& eventContext) const;
+  StatusCode readStripSimulation(FPGATrackSimEventInputHeader* header, HitIndexMap& hitIndexMap, unsigned int& hitIndex, const EventContext& eventContext) const;
+  StatusCode dumpPixelClusters(HitIndexMap& pixelClusterIndexMap, const EventContext& eventContext) const;
 
   // To get truth information from simulation
-  const HepMcParticleLink* getTruthInformation(InDetSimDataCollection::const_iterator& iter, FPGATrackSimInputUtils::ParentBitmask& parentMask);
-  FPGATrackSimEventInputHeader*        m_eventHeader = nullptr;
+  const HepMcParticleLink* getTruthInformation(InDetSimDataCollection::const_iterator& iter, FPGATrackSimInputUtils::ParentBitmask& parentMask) const;
 };
 
 

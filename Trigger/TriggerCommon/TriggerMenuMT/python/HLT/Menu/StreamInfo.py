@@ -81,6 +81,7 @@ _all_streams = [
     StreamInfo('IDCalib', 'calibration', True, False),
     StreamInfo('AFPCalib', 'calibration', False, False),
     StreamInfo('PixelBeam', 'calibration', True, False),
+    StreamInfo('IDScanPEB', 'calibration', True, False),
     StreamInfo('VdM', 'calibration', True, False),
     StreamInfo('L1CaloCalib', 'calibration', False, False),
     StreamInfo('NSWTriggerMonitor', 'calibration', False, True),

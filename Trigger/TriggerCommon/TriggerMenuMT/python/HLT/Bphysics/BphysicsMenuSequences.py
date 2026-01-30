@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 from AthenaCommon.Logging import logging
 log = logging.getLogger(__name__)
@@ -43,18 +43,50 @@ def bmumuxSequenceGenCfg(flags):
     return MenuSequence(flags, selAcc, HypoToolGen=TrigBphysStreamerHypoToolFromDict)
 
 
+@AccumulatorCache
+def bhhSequenceGenCfg(flags):
+
+    roiToolOptions = {
+        'isBhh' : True,
+        'RoIEtaWidth' : flags.Trigger.InDetTracking.bhh.etaHalfWidth,
+        'RoIPhiWidth' : flags.Trigger.InDetTracking.bhh.phiHalfWidth,
+        'RoIZedWidth' : flags.Trigger.InDetTracking.bhh.zedHalfWidth,
+        'RoisWriteHandleKey' : recordable(flags.Trigger.InDetTracking.bhh.roi) }
+
+    viewMakerOptions = {
+        'RoITool' : CompFactory.ViewCreatorMuonSuperROITool(name='RoiTool_Bhh', **roiToolOptions),
+        'mergeUsingFeature' : True,
+        'PlaceMuonInView' : True,
+        'InViewMuonCandidates' : 'BhhMuonCandidates',
+        'InViewMuons' : 'HLT_Muons_Bhh' }
+
+    reco = InViewRecoCA('Bhh', **viewMakerOptions)
+    from .BphysicsRecoSequences import bhhRecoSequenceCfg
+    reco.mergeReco(bhhRecoSequenceCfg(flags, reco.inputMaker().InViewRoIs))
+
+    selAcc = SelectionCA('bhhSequence')
+
+    from TrigGenericAlgs.TrigGenericAlgsConfig import ROBPrefetchingAlgCfg_Si
+    selAcc.mergeReco(reco, robPrefetchCA=ROBPrefetchingAlgCfg_Si(flags, nameSuffix=reco.name))
+
+    hypoAlg = CompFactory.TrigBphysStreamerHypo('BhhStreamerHypoAlg')
+    selAcc.addHypoAlgo(hypoAlg)
+
+    from TrigBphysHypo.TrigBphysStreamerHypoConfig import TrigBphysStreamerHypoToolFromDict
+    return MenuSequence(flags, selAcc, HypoToolGen=TrigBphysStreamerHypoToolFromDict)
+
+
 def dimuL2SequenceGenCfg(flags):
     from ..Muon.MuonMenuSequences import muCombAlgSequenceCfg
     from TrigBphysHypo.TrigBphysStreamerHypoConfig import TrigBphysStreamerHypoToolFromDict
 
     sequence, combinedMuonContainerName = muCombAlgSequenceCfg(flags, "Bphys")
-    hypo = CompFactory.TrigBphysStreamerHypo('DimuL2StreamerHypoAlg', 
+    hypo = CompFactory.TrigBphysStreamerHypo('DimuL2StreamerHypoAlg',
                                              triggerList = getNoL2CombChainNames(),
                                              triggerLevel = 'L2')
     sequence.addHypoAlgo(hypo)
 
-    return MenuSequence(flags, sequence,
-                                  HypoToolGen = TrigBphysStreamerHypoToolFromDict)
+    return MenuSequence(flags, sequence, HypoToolGen=TrigBphysStreamerHypoToolFromDict)
 
 
 @AccumulatorCache

@@ -9,8 +9,9 @@
 #include "FPGATrackSimObjects/FPGATrackSimLogicalEventInputHeader.h"
 #include "FPGATrackSimObjects/FPGATrackSimHit.h"
 #include "TH1.h"
+
+#include <cmath>
 #include <array>
-#include <vector>
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -160,7 +161,7 @@ StatusCode FPGATrackSimSpacePointsTool::makeSpacePoints(FPGATrackSimTowerInputHe
         for (const FPGATrackSimHit& hit_out : hits_outer) {
             bool foundPair=false;
             for (const FPGATrackSimHit& hit_in : hits_inner) {
-                if (abs(hit_in.getGPhi()-hit_out.getGPhi()) < m_phiwindow) {
+                if (std::abs(hit_in.getGPhi()-hit_out.getGPhi()) < m_phiwindow) {
                     foundPair=true;
                     break;
                 }
@@ -171,8 +172,8 @@ StatusCode FPGATrackSimSpacePointsTool::makeSpacePoints(FPGATrackSimTowerInputHe
             nextmod[3]-=1; // increment eta module counter
             auto entry2 = m_map.find(nextmod);
             if (entry2!=m_map.end()) {
-                for (auto hit_in : entry2->second.first) {
-                    if (abs(hit_in.getGPhi()-hit_out.getGPhi()) < m_phiwindow) {
+                for (const auto & hit_in : entry2->second.first) {
+                    if (std::abs(hit_in.getGPhi()-hit_out.getGPhi()) < m_phiwindow) {
                         foundPair=true;
                         m_adjacent_eta_sp++;
                         break;
@@ -188,7 +189,7 @@ StatusCode FPGATrackSimSpacePointsTool::makeSpacePoints(FPGATrackSimTowerInputHe
                 auto entry3 = m_map.find(nextphimod);
                 if (entry3!=m_map.end()) {
                     for (const auto & hit_in : entry3->second.first) {
-                        if (abs(hit_in.getGPhi()-hit_out.getGPhi()) < m_phiwindow) {
+                        if (std::abs(hit_in.getGPhi()-hit_out.getGPhi()) < m_phiwindow) {
                             foundPair=true;
                             m_adjacent_phi_sp++;
                             break;
@@ -205,8 +206,8 @@ StatusCode FPGATrackSimSpacePointsTool::makeSpacePoints(FPGATrackSimTowerInputHe
                 next2mod[2]-=1; // increment phi module counter
                 auto entry4 = m_map.find(next2mod);
                 if (entry4!=m_map.end()) {
-                    for (auto hit_in : entry4->second.first) {
-                        if (abs(hit_in.getGPhi()-hit_out.getGPhi()) < m_phiwindow) {
+                    for (const auto & hit_in : entry4->second.first) {
+                        if (std::abs(hit_in.getGPhi()-hit_out.getGPhi()) < m_phiwindow) {
                             foundPair=true;
                             m_diagonal_sp++;
                             break;

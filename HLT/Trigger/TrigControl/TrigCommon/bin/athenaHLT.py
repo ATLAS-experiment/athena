@@ -437,6 +437,8 @@ def main():
    g.add_argument('--cfgdict', metavar='DICT', type=arg_eval, default={},
                   help='HLTMPPy config dictionary with additional options, e.g.: '
                   '--cfgdict \'{"global": {"log_root" : "/tmp"}}\'')
+   g.add_argument('--use-ef-emulator', action='store_true', default=False,
+                  help='Enable EF ByteStream Services and EF emulator')
 
    (args, unparsed_args) = parser.parse_known_args()
    check_args(parser, args)
@@ -489,6 +491,17 @@ def main():
 
    # get HLTMPPY config dictionary
    cdict = HLTMPPy_cfgdict(args)
+
+   if args.use_ef_emulator:
+      flags.Trigger.Online.useEFByteStreamSvc = True
+
+   if flags.Trigger.Online.useEFByteStreamSvc:
+      ef = flags.Trigger.Online.EFInterface
+      ef.Files        = args.file or []
+      ef.LoopFiles    = args.loop_files
+      ef.NumEvents    = args.number_of_events
+      ef.SkipEvents   = args.skip_events
+      ef.RunNumber    = args.run_number or cdict['global']['run_number']
 
    # Apply any expert-level overrides
    update_nested_dict(cdict, args.cfgdict)

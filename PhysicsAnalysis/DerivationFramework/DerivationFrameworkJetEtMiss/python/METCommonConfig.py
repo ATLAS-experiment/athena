@@ -98,16 +98,15 @@ def HadRecoilMETCfg(ConfigFlags):
     from METReconstruction.METAssociatorCfg import getAssocCA
 
 
-    jettype='PFlowJetHR'
+    jettype='HadronicRecoil' # -> i.e. dont build assocs to jets at all
     assocname='AntiKt4EMPFlowHR'
     doPFlow=True
     doRecoil=True
 
+    #only mu, e and soft assocs are needed
     associators = [AssocConfig(jettype),
                     AssocConfig('Muon'),
                     AssocConfig('Ele'),
-                    AssocConfig('Gamma'),
-                    AssocConfig('Tau'),
                     AssocConfig('Soft')]
 
     cfg = METAssocConfig(assocname,

@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
  */
 
 // **********************************************************************
@@ -187,7 +187,6 @@ namespace dqutils {
 
     basePath += path + pathAppEff + "/";
     f->cd(basePath.Data());
-    TH1F* hEff[100][100];
     for (unsigned int iVar = 0; iVar < varN.size(); iVar++) {
       for (unsigned int iRatio = 0; iRatio < ratioIndex.size(); iRatio++) {
         TString hName;
@@ -203,12 +202,12 @@ namespace dqutils {
 
         if (!CheckHistogram(f, hName.Data())) return;
 
-        hEff[iRatio][iVar] = (TH1F*) (f->Get(hName.Data()));
-        hEff[iRatio][iVar]->Divide(hRoI[ ratioIndex[ iRatio ].first  ][iVar],
-                                   hRoI[ ratioIndex[ iRatio ].second ][iVar],
-                                   1.0, 1.0, "b");
+        TH1F* hEff = (TH1F*) (f->Get(hName.Data()));
+        hEff->Divide(hRoI[ ratioIndex[ iRatio ].first  ][iVar],
+                     hRoI[ ratioIndex[ iRatio ].second ][iVar],
+                     1.0, 1.0, "b");
 
-        hEff[iRatio][iVar]->Write("", TObject::kOverwrite);
+        hEff->Write("", TObject::kOverwrite);
       }
     }
 

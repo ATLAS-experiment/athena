@@ -2,9 +2,8 @@ from builtins import object
 from builtins import range
 #! /usr/bin/env python
 
-# Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 #
-# $Id: rhadd.py 677431 2015-06-23 08:09:12Z graemes $
 #
 # Recursive historgam adder, wrapping around hadd
 # Author: Graeme A Stewart <graeme.andrew.stewart@cern.ch>
@@ -64,14 +63,14 @@ class haddJob(object):
         mergeCmd.append(self._outputFile)
         mergeCmd.extend(self._inputFiles)
         
-        logging.info('Will now execute merge: %s' % ' '.join(mergeCmd))
+        logging.info('Will now execute merge: %s', ' '.join(mergeCmd))
         output = []
         job = Popen(mergeCmd, stdout=PIPE, stderr=STDOUT, bufsize=1, close_fds=True)
         while job.poll() is None:
             output.append(job.stdout.readline().strip())
         self._exitCode = job.returncode
         if self._exitCode != 0:
-            logging.warning('Non zero return code from hadd. STDOUT/ERR follows:\n%s' % os.linesep.join(output))
+            logging.warning('Non zero return code from hadd. STDOUT/ERR follows:\n%s', os.linesep.join(output))
 
     def __str__(self):
         return str(self._inputFiles) + ' -> ' + str(self._outputFile)
@@ -96,9 +95,9 @@ class haddStep(object):
     def _defineMergeJobs(self):
         # How many merges to do in this step?
         nMerges = (len(self._inputFiles)-1) // self._bunchNumber + 1
-        logging.debug('Need %d merges for level %d' % (nMerges, self._level))
+        logging.debug('Need %d merges for level %d', nMerges, self._level)
         if nMerges == 1:
-            logging.debug('Final merge job: %s -> %s' % (self._inputFiles, self._inputFiles))
+            logging.debug('Final merge job: %s -> %s', self._inputFiles, self._inputFiles)
             self._haddJobArray.append(haddJob(self._inputFiles, self._finalOutputFile))
             return
         
@@ -111,7 +110,7 @@ class haddStep(object):
             lastFile = int(fileCounter + 0.5)
             tempOutput = mkstemp(dir='.', prefix='tmp.')
             os.close(tempOutput[0])
-            logging.debug('Intermediate merge job %d: %s -> %s' % (job, self._inputFiles[nextFile:lastFile], tempOutput[1]))
+            logging.debug('Intermediate merge job %d: %s -> %s', job, self._inputFiles[nextFile:lastFile], tempOutput[1])
             self._haddJobArray.append(haddJob(self._inputFiles[nextFile:lastFile], tempOutput[1]))
             nextFile = lastFile
         
@@ -119,7 +118,7 @@ class haddStep(object):
     def executeAll(self, parallel = 1):
         if parallel > 1:
             # Funky parallel processing
-            logging.info('Starting merge using up to %d hadd processes in parallel' % parallel)
+            logging.info('Starting merge using up to %d hadd processes in parallel', parallel)
             logging.warning('Parallel merging is experimental')
             pool = Pool(processes = parallel)
             parallelResultsArray = []
@@ -137,14 +136,14 @@ class haddStep(object):
             
             for job in self._haddJobArray:
                 if job.exitCode != 0:
-                    logging.error('Merging job %s failed, exit code %s' % (job, job.exitCode))
+                    logging.error('Merging job %s failed, exit code %s', job, job.exitCode)
                     sys.exit(1)
         else:
             # Safe and slow serial processing
             for job in self._haddJobArray:
                 job.exe()
                 if job.exitCode != 0:
-                    logging.error('Merging job %s failed, exit code %s' % (job, job.exitCode))
+                    logging.error('Merging job %s failed, exit code %s', job, job.exitCode)
                     sys.exit(1)
 
 
@@ -206,7 +205,7 @@ def doRecursiveMerge(args):
 
     # Now execute each merge stage in turn
     for i, jobs in enumerate(jobGraph):
-        logging.info('Executing merge interation step %d' % i)
+        logging.info('Executing merge interation step %d', i)
         jobs.executeAll(args['parallelMerge'])
         
     logging.info('Final merge completed successfully.')

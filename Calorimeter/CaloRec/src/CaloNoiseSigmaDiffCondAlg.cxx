@@ -17,10 +17,6 @@
 #include "StoreGate/WriteCondHandle.h"
 #include "CaloIdentifier/CaloIdManager.h"
 
-CaloNoiseSigmaDiffCondAlg::CaloNoiseSigmaDiffCondAlg(const std::string& name, ISvcLocator* pSvcLocator) :
-AthReentrantAlgorithm(name,pSvcLocator)
-{
-}
 
 StatusCode CaloNoiseSigmaDiffCondAlg::initialize() {
 	ATH_CHECK( m_noiseCDOKey.initialize() );

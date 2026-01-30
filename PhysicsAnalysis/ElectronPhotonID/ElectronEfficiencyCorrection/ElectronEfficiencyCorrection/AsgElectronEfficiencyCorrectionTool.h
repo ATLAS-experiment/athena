@@ -237,7 +237,7 @@ public:
   {
     Accessors(AsgElectronEfficiencyCorrectionTool& tool) : columnar::ColumnarTool<>(&tool) {}
 
-    columnar::EventInfoAccessor<columnar::ObjectColumn> m_eventInfo {*this, "EventInfo"};
+    columnar::EventInfoAccessor<columnar::ObjectColumn> m_eventInfo {*this, "EventInfo", {.addMTDependency=true}};
     columnar::EventInfoAccessor<uint32_t> randomrunnumber;
   
     columnar::ElectronAccessor<columnar::ObjectColumn> m_electrons {*this, "Electrons"};

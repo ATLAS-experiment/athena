@@ -84,6 +84,28 @@ StatusCode TauTrackRNNClassifier::executeTrackClassifier(xAOD::TauJet& xTau, xAO
     }
   }
 
+  // With this options, RNN track classifier will only be applied to tracks passing the track quality 
+  // requirements currently settled in the TauTrack association step. This option is currently applied only 
+  // for Run4 sample production, since towards we might skip completely the track association step and just
+  // use the tracks passing the quality requirements without caring about if the track is in the core
+  // region or in the isolation region
+  if(m_skipBadTracks){
+    std::vector<xAOD::TauTrack*> excludedBadTracks;
+    std::vector<xAOD::TauTrack*>::iterator it = vTracks.begin();
+    while(it != vTracks.end()) { 
+      if(!((*it)->flag(xAOD::TauJetParameters::passTrkSelector))){
+        excludedBadTracks.push_back(*it);
+        it = vTracks.erase(it);
+      } else {
+        ++it;
+      }
+    }
+    // decorate excludedTracks with default RNN scores
+    for (auto classifier : m_vClassifier) {
+      ATH_CHECK(classifier->classifyTracks(excludedBadTracks, xTau, vertexContainer, tauTrackCon, true));
+    }
+  }  
+
   // With this options, RNN track classifier will only be applied to a unique set of tracks 
   // without any duplication between different taus (see the dedicated protection in the TauTrackFinder). 
   // This option is currently NOT applied as default, since this will change AODs in R22+ reconstruction

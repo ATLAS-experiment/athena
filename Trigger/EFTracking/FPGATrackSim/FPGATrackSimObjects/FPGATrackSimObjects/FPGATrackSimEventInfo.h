@@ -36,9 +36,6 @@ public:
     m_level1TriggerType(0)
   {};
 
-  ~FPGATrackSimEventInfo();
-  void reset();
-
   //event info
   //get
   unsigned long runNumber() const { return m_run_number; }
@@ -49,7 +46,6 @@ public:
   int BCID() const { return m_BCID; }
   unsigned int extendedLevel1ID() const { return m_extendedLevel1ID; }
   unsigned int level1TriggerType() const { return m_level1TriggerType; }
-  const std::vector<unsigned int>& level1TriggerInfo() const { return m_level1TriggerInfo; }
 
   //set
   void setRunNumber(const unsigned long& val) { m_run_number = val; }
@@ -60,7 +56,6 @@ public:
   void setBCID(const int& val) { m_BCID = val; }
   void setextendedLevel1ID(const unsigned int& val) { m_extendedLevel1ID = val; }
   void setlevel1TriggerType(const unsigned int& val) { m_level1TriggerType = val; }
-  void setlevel1TriggerInfo(const std::vector<unsigned int>& val) { m_level1TriggerInfo = val; }
 
 
 protected:
@@ -72,7 +67,6 @@ protected:
   int m_BCID;
   unsigned int m_extendedLevel1ID;
   unsigned int m_level1TriggerType;
-  std::vector<unsigned int> m_level1TriggerInfo;
 
   ClassDefNV(FPGATrackSimEventInfo, 2)
 };

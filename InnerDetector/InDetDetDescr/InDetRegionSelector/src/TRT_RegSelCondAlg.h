@@ -11,7 +11,7 @@
 #ifndef TRT_RegSelCondAlg_h
 #define TRT_RegSelCondAlg_h
 
-#include "AthenaBaseComps/AthReentrantAlgorithm.h"
+#include "AthenaBaseComps/AthCondAlgorithm.h"
 #include "AthenaBaseComps/AthAlgTool.h"
 
 #include "GaudiKernel/ISvcLocator.h"
@@ -34,7 +34,7 @@
 
 /////////////////////////////////////////////////////////////////////////////
 
-class TRT_RegSelCondAlg : public AthReentrantAlgorithm {
+class TRT_RegSelCondAlg : public AthCondAlgorithm {
 
 public:
 

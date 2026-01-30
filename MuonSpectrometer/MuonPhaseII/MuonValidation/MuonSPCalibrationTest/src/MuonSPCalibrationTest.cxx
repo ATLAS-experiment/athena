@@ -37,7 +37,7 @@ StatusCode MuonSPCalibrationTest::execute() {
 
                 // Get the seed position and direction in the chamber
                 Amg::Vector3D seedPosInChamb = sp->localPosition();
-                const Amg::Transform3D& locToGlob{sp->msSector()->localToGlobalTrans(*geoCtx)};
+                const Amg::Transform3D& locToGlob{sp->msSector()->localToGlobalTransform(*geoCtx)};
                 Amg::Vector3D seedDirInChamb = locToGlob*(sp->localPosition());
                 seedDirInChamb = seedDirInChamb.unit();
 

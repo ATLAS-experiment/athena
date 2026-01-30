@@ -1,7 +1,7 @@
 // emacs, this is -*- C++ -*-
 
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef JETEVENT_JET_H
@@ -749,6 +749,28 @@ protected:
 
   
 
+  /** @brief Check key validity */
+  template<typename STORE>
+  bool checkKeyStore(const mcat_t& cat,
+		     const mkey_t& key,
+		     const STORE*  store,
+		     size_t&       aInd) const
+  {
+    // invalid store pointer
+    if ( store == 0 )
+      {
+	return false;
+      }
+
+    // check index
+    aInd = keyDesc()->getIndex(cat,key,false);
+    if ( keyDesc()->isValid(aInd) && aInd < store->size() )
+      {
+        return true;
+      }
+    return false;
+  }
+
   /** @brief Check key validity with automatic store generation */
   template<typename STORE>
   bool checkKeyStore(const mcat_t& cat,
@@ -791,12 +813,11 @@ protected:
   /** @brief Get object from store with category and key */
   template<typename OBJ,class STORE>
   const OBJ* getObject(const mkey_t& key,
-		       STORE* store,// not very nice but can not be const if using checkKey (P.A.)
-		       const mcat_t& cat,
-		       bool createIfMissing ) const
+		       const STORE* store,
+		       const mcat_t& cat) const
   {
     size_t aInd(0);
-    return this->checkKeyStore(cat,key,store,aInd,createIfMissing)
+    return this->checkKeyStore(cat,key,store,aInd)
       ? dynamic_cast<const OBJ*>((store->operator[])(aInd))
       : (const OBJ*)0;
     }

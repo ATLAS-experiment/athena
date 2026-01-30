@@ -284,6 +284,7 @@ int processCascade(CascadeEvent & cascadeEvent_ )
        Chi2Cur += vk->Chi2;
 //std::cout<<iv<<"---Chi2="<<vk->Chi2<<", "<<vk->refIterV[0]+vk->fitV[0]<<", "<<vk->refIterV[1]+vk->fitV[1]<<", "<<vk->refIterV[2]+vk->fitV[2]<<'\n';
      }
+     if(Chi2Cur>1.e6) return -1;   //Too bad iteration. Drop fit
      if( Chi2Cur-Chi2Old > 1. && Iter){ IERR = translateToFittedPos(cascadeEvent_,0.8);}   //step limitation is case of divergence
      else                             { IERR = translateToFittedPos(cascadeEvent_,1.0);}   if(IERR)return IERR;
 
@@ -291,7 +292,6 @@ int processCascade(CascadeEvent & cascadeEvent_ )
      if(std::abs(Chi2Cur-Chi2Old)<0.01)break;       //stable cascade position
      if(Iter>10 && (Chi2Cur-Chi2Old)>0.)break;  //oscillations. Stop preliminary fit
      Chi2Old=Chi2Cur;
-     if(Chi2Cur>1.e6 && Iter>0) return -1;   //Too bad iteration. Drop fit
   }
 //  if(Chi2Cur>3000.) return -1;   // Initial solution is too bad!!!
 //-------------------------------- Check constraints status
@@ -311,6 +311,7 @@ int processCascade(CascadeEvent & cascadeEvent_ )
      }
   }
   long int fullNPar = getCascadeNPar(cascadeEvent_);
+  if (fullNPar<0) return -1;
   double * fullMatrix   = new double[fullNPar*fullNPar];
   double * iniCovMatrix = new double[fullNPar*fullNPar];for(int ss=0; ss<fullNPar*fullNPar; ss++) iniCovMatrix[ss]=0.;
   double * fullLSide  = new double[fullNPar];

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #include "xAODSegmentCnvAlg.h"
 
@@ -74,8 +74,6 @@ namespace MuonR4{
         SG::WriteDecorHandle<xAOD::MuonSegmentContainer, SegPars_t> dec_locPars{m_localSegParKey, ctx};
         SG::WriteDecorHandle<xAOD::MuonSegmentContainer, PrdLinkVec_t> dec_prdLinks{m_prdLinkKey, ctx};
         SG::WriteDecorHandle<xAOD::MuonSegmentContainer, std::vector<char>> dec_prdStates{m_prdStateKey, ctx};
-        static std::atomic<unsigned> sTgcWarnings{0};
-        bool printWarning{sTgcWarnings < 100};
         using State = CalibratedSpacePoint::State;
         std::vector<std::tuple<const xAOD::UncalibratedMeasurement*, State>> combineMap{};
         combineMap.reserve(10);
@@ -85,7 +83,7 @@ namespace MuonR4{
          *         Two assumptions are made for the linking
          *                - There's exclusivley one eta & one phi measurement @maximum on the segment
          *                - The measurements are sorted along the segment trajectory.  */
-        auto decorateLinks = [this, &dec_prdLinks, &prdCombContainer, &printWarning,
+        auto decorateLinks = [this, &dec_prdLinks, &prdCombContainer,
                               &combineMap, & dec_prdStates](const Segment& inSegment, xAOD::MuonSegment& outSegment) {
             PrdLinkVec_t& links = dec_prdLinks(outSegment);
             std::vector<char>& linkStates = dec_prdStates(outSegment);
@@ -134,9 +132,10 @@ namespace MuonR4{
                         appendLink(sp->primaryMeasurement(), meas->fitState());
                         break;
                     } case RpcStripType:
-                      case TgcStripType: {
+                      case TgcStripType:
+                      case sTgcStripType: {
                         if (sp->primaryMeasurement() && sp->secondaryMeasurement()) {
-                            if (sp->primaryMeasurement() != sp->primaryMeasurement()) {
+                            if (sp->primaryMeasurement() != sp->secondaryMeasurement()) {
                                 combine(sp->primaryMeasurement(), sp->secondaryMeasurement(), meas->fitState());
                             } else {  // BI - RPC measurements
                                 appendLink(sp->primaryMeasurement(), meas->fitState());
@@ -148,15 +147,6 @@ namespace MuonR4{
                             combineMap.emplace_back(sp->primaryMeasurement(), meas->fitState());
                         }
                         break;
-                    } case sTgcStripType:{
-                        /// @TODO Fix the combination of the three measurements
-                        appendLink(sp->primaryMeasurement(), meas->fitState());
-                        appendLink(sp->secondaryMeasurement(), meas->fitState());
-                        /// Remember the user once per event
-                        if (printWarning) {
-                            ATH_MSG_WARNING(__FILE__<<":"<<__LINE__<<" Please implement a stgc combination schema");
-                            printWarning = false;
-                        }
                     } default:
                         break;
                 }
@@ -224,7 +214,7 @@ namespace MuonR4{
                                          Amg::error(inSegment->covariance(), Acts::toUnderlying(t0)));
 
                 SegPars_t& localPars{dec_locPars(*convertedSeg)};
-                const Amg::Transform3D globToLoc{sector->globalToLocalTrans(*gctx)};            
+                const Amg::Transform3D globToLoc{sector->globalToLocalTransform(*gctx)};            
                 const Amg::Vector3D locPos{globToLoc * pos};
                 const Amg::Vector3D locDir{globToLoc.linear() * dir};
 
@@ -236,10 +226,6 @@ namespace MuonR4{
                 decorateLinks(*inSegment, *convertedSeg);
             }
         }  
-        
-        if (!printWarning) {
-            sTgcWarnings = sTgcWarnings + 1;
-        }
         return StatusCode::SUCCESS;
     }
 }

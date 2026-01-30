@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TRT_DetectorTool.h"
@@ -158,102 +158,6 @@ StatusCode TRT_DetectorTool::create()
   return StatusCode::SUCCESS;
 }
 
-
-
-StatusCode
-TRT_DetectorTool::registerCallback ATLAS_NOT_THREAD_SAFE () // Thread unsafe StoreGateSvc::regFcn method and DataHandle template are used.
-{
-  // This callback is kept because the folder never changes.
-
-  MsgStream log(msgSvc(), name());
-
-  // If we fail to register any callbacks we return FAILURE. This just tells GeoModelSvc that
-  // no callbacks were registered. It will continue normally but without any alignments.
-  StatusCode sc = StatusCode::FAILURE;
-
-  if (m_alignable) {
-
-
-    if (m_useDynamicAlignFolders){ // Regular alignment new schema
-      std::string folderName = "/TRT/AlignL1/TRT";
-      if (detStore()->contains<CondAttrListCollection>(folderName)) {
-        msg(MSG::DEBUG) << "Registering callback on global Container with folder " << folderName << endmsg;
-        const DataHandle<CondAttrListCollection> calc;
-        StatusCode trttmp = detStore()->regFcn(&IGeoModelTool::align, dynamic_cast<IGeoModelTool*>(this), calc, folderName);
-        // We don't expect this to fail as we have already checked that the detstore contains the object.
-        if (trttmp.isFailure()) {
-          msg(MSG::ERROR) << "Problem when register callback on global Container with folder " << folderName <<endmsg;
-        } else {
-          sc =  StatusCode::SUCCESS;
-        }
-      } else {
-	msg(MSG::WARNING) << "Unable to register callback on global Container with folder " << folderName <<endmsg;
-	return StatusCode::FAILURE;
-      }
-
-      folderName = "/TRT/AlignL2";
-      if (detStore()->contains<AlignableTransformContainer>(folderName)) {
-        if(msgLvl(MSG::DEBUG)) msg(MSG::DEBUG) << "Registering callback on AlignableTransformContainer with folder " << folderName << endmsg;
-        const DataHandle<AlignableTransformContainer> atc;
-        StatusCode sctmp = detStore()->regFcn(&IGeoModelTool::align, dynamic_cast<IGeoModelTool *>(this), atc, folderName);
-        if(sctmp.isFailure()) {
-          msg(MSG::ERROR) << "Problem when register callback on AlignableTransformContainer with folder " << folderName <<endmsg;
-        } else {
-          sc =  StatusCode::SUCCESS;
-        }
-      }
-      else {
-	msg(MSG::WARNING) << "Unable to register callback on AlignableTransformContainer with folder "
-			  << folderName <<  endmsg;
-	return StatusCode::FAILURE;
-      }
-    }
-    else {  // Regular alignment old schema
-      std::string folderName = "/TRT/Align";
-      if (detStore()->contains<AlignableTransformContainer>(folderName)) {
-	msg(MSG::DEBUG) << "Registering callback on AlignableTransformContainer with folder " << folderName << endmsg;
-	const DataHandle<AlignableTransformContainer> atc;
-	StatusCode sctmp = detStore()->regFcn(&IGeoModelTool::align, dynamic_cast<IGeoModelTool *>(this), atc, folderName);
-	// We don't expect this to fail as we have already checked that the detstore contains the object.
-	if (sctmp.isFailure()) {
-	  msg(MSG::ERROR) << "Problem when register callback on AlignableTransformContainer with folder " << folderName <<endmsg;
-	} else {
-	  sc =  StatusCode::SUCCESS;
-	}
-      } else {
-	msg(MSG::WARNING) << "Unable to register callback on AlignableTransformContainer with folder "
-			  << folderName << ", Alignments disabled! (Only if no Run2 schema is loaded)" << endmsg;
-      }
-    }
-
-
-    // Fine alignment
-    {
-      std::string folderName = "/TRT/Calib/DX";
-      if (detStore()->contains<TRTCond::StrawDxContainer>(folderName)) {
-        msg(MSG::DEBUG) << "Registering callback on StrawDxContainer with folder " << folderName << endmsg;
-        const DataHandle<TRTCond::StrawDxContainer> sdc;
-	StatusCode sctmp = detStore()->regFcn(&IGeoModelTool::align, dynamic_cast<IGeoModelTool*>(this), sdc, folderName);
-	// We don't expect this to fail as we have already checked that the detstore contains the object.
-	if (sctmp.isFailure()) {
-	  msg(MSG::ERROR) << "Problem when register callback on StrawDxContainer with folder " << folderName <<endmsg;
-	} else {
-	  sc =  StatusCode::SUCCESS;
-	}
-      } else {
-        msg(MSG::DEBUG) << "Unable to register callback on StrawDxContainer with folder " << folderName <<endmsg;
-      }
-    }
-
-  } else {
-    msg(MSG::INFO) << "Alignment disabled. No callback registered" << endmsg;
-    // We return failure otherwise it will try and register
-    // a GeoModelSvc callback associated with this callback.
-  }
-
-  return sc;
-}
-
 StatusCode TRT_DetectorTool::clear()
 {
   SG::DataProxy* proxy = detStore()->proxy(ClassID_traits<InDetDD::TRT_DetectorManager>::ID(),m_manager->getName());
@@ -264,9 +168,8 @@ StatusCode TRT_DetectorTool::clear()
   return StatusCode::SUCCESS;
 }
 
-
 StatusCode
-TRT_DetectorTool::align ATLAS_NOT_THREAD_SAFE (IOVSVC_CALLBACK_ARGS_P(I,keys))
+TRT_DetectorTool::align()
 //The manager align call invalidates all elements
 {
   MsgStream log(msgSvc(), name());
@@ -275,7 +178,7 @@ TRT_DetectorTool::align ATLAS_NOT_THREAD_SAFE (IOVSVC_CALLBACK_ARGS_P(I,keys))
     return StatusCode::FAILURE;
   }
   if (m_alignable) {
-    return const_cast<InDetDD::TRT_DetectorManager*>(m_manager)->align(I,keys);
+    return const_cast<InDetDD::TRT_DetectorManager*>(m_manager)->align();
   } else {
     msg(MSG::DEBUG) << "Alignment disabled. No alignments applied" << endmsg;
     return StatusCode::SUCCESS;

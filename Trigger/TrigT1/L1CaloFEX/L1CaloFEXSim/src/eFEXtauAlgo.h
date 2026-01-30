@@ -50,6 +50,8 @@ namespace LVL1 {
     virtual unsigned int getEt() const override;
     virtual unsigned int getBitwiseEt() const override;
 
+    virtual void setAlgoVersion(unsigned int ver) override;
+
   protected:
 
   private:
@@ -61,6 +63,7 @@ namespace LVL1 {
     unsigned int m_seed = 0;
     bool m_und = false;
     unsigned int m_offPhi = 0;
+    unsigned int m_AlgoVersion = 0;
 
   };
   

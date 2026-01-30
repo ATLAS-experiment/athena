@@ -53,8 +53,8 @@ std::unique_ptr<ActsTrk::DetectorElementToActsGeometryIdMap>
     auto detector_element_to_geoid = std::make_unique<DetectorElementToActsGeometryIdMap>();
 
     struct Counter{ 
+        unsigned n_sensitive_elements{0};
         unsigned n_detector_elements{0};
-        unsigned n_missing_detector_elements{0};
         unsigned n_wrong_type{0};
     };
     Counter counter {};
@@ -63,11 +63,12 @@ std::unique_ptr<ActsTrk::DetectorElementToActsGeometryIdMap>
             ++counter.n_wrong_type;
             return;
         }
+        ++counter.n_sensitive_elements;
         const auto* detEl = dynamic_cast<const IDetectorElementBase*>(surface->associatedDetectorElement());
-        if (!detEl) {
-            ++counter.n_missing_detector_elements;
+        if (!detEl) {           
             return;
         }
+
         auto insert_id = [&detector_element_to_geoid, &surface, &counter](const xAOD::UncalibMeasType type,
                                                                           const IdentifierHash& hash) {
             detector_element_to_geoid->insert(std::make_pair(makeDetectorElementKey(type, hash),
@@ -108,9 +109,10 @@ std::unique_ptr<ActsTrk::DetectorElementToActsGeometryIdMap>
                 return;
         }
     }, true /*sensitive surfaces*/);
-    ATH_MSG_INFO( "Surfaces without associated detector elements " << counter.n_missing_detector_elements
+    ATH_MSG_INFO( "Surfaces without associated detector elements " << (counter.n_sensitive_elements -counter.n_detector_elements)
                 << " (with " << counter.n_detector_elements << ")" );
-    if (counter.n_detector_elements==0) {
+    if (counter.n_sensitive_elements > 0 && 
+        counter.n_detector_elements==0) {
         ATH_MSG_ERROR( "No surface with associated detector element" );
         return nullptr;
     }

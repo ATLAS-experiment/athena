@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /********************************************************************
@@ -945,10 +945,127 @@ namespace LArG4 {
         result = this->CalculateECAMIdentifier( a_step , indECAM, inSTAC, zside) ;
       else
         ATH_MSG_ERROR("LArBarrel::Geometry::CalculateIdentifier  ECAM volume not found in hierarchy");
-
+      
       return result;
     }
 
+    LArG4Identifier Geometry::CalculateSuperResolutionIdentifier(const G4Step* a_step) const {
+
+      LArG4Identifier result;
+    
+      // Convert step to local half-barrel coordinates
+      const G4StepPoint *preStep = a_step->GetPreStepPoint();
+      const G4StepPoint *postStep = a_step->GetPostStepPoint();
+      G4ThreeVector midGlobal = (preStep->GetPosition() + postStep->GetPosition()) * 0.5;
+      
+      const G4NavigationHistory* g4nav = preStep->GetTouchable()->GetHistory();
+
+      G4int indECAM = -1;
+      const G4int ndep = g4nav->GetDepth();
+      
+      for (G4int ii = 0; ii <= ndep; ++ii) {
+          if (g4nav->GetVolume(ii)->GetName() == m_ecamName) {
+              indECAM = ii;
+              break;
+          }
+      }
+
+      if (indECAM == -1) {
+          ATH_MSG_ERROR("ECAM volume not found!");
+          return result;
+      }
+
+      G4AffineTransform localTrans = g4nav->GetTransform(indECAM);
+      G4ThreeVector midLocal = localTrans.TransformPoint(midGlobal);
+    
+      double x = midLocal.x(), y = midLocal.y(), z = midLocal.z();
+      double radius = sqrt(x*x + y*y);
+      double eta = midLocal.pseudoRapidity();
+      double phi = midLocal.phi() < 0 ? midLocal.phi() + 2*M_PI : midLocal.phi();
+    
+      // --- Find the standard (low-resolution) cell ---
+      CalcData currentCellData;
+      bool MapDetail = false;
+      findCell(currentCellData, x, y, z, radius, eta, phi, MapDetail);
+    
+      int etaBin = currentCellData.etaBin;
+      int phiBin = currentCellData.phiBin;
+      int sampling = currentCellData.sampling;
+      int region = currentCellData.region;
+    
+      // --- Compute minimum boundaries (low resolution cell) ---
+      double eta_min = 0.0;
+      double delta_eta = 0.025; // default
+      if (sampling == 1) {
+        if (region == 0) {
+          delta_eta = 0.003125;
+          eta_min = etaBin * delta_eta;
+        } else {
+          delta_eta = 0.025;
+          eta_min = 1.4 + etaBin * delta_eta;
+        }
+      } else if (sampling == 2) {
+        delta_eta = 0.025;
+        eta_min = etaBin * delta_eta;
+      } else if (sampling == 3) {
+        delta_eta = 0.05;
+        eta_min = etaBin * delta_eta;
+      }
+    
+      double phiGranularity = (sampling == 1 && region == 0) ? (2*M_PI/64) : (2*M_PI/256);
+      double phi_min = phiBin * phiGranularity;
+    
+      double radius_min = 0.0;
+      double radius_max = 0.0;
+    
+      if (sampling == 1) {
+        radius_min = (etaBin == 0) ? m_rMinAccordion : Rmax1[etaBin - 1];
+        radius_max = Rmax1[etaBin];
+      } else if (sampling == 2) {
+        radius_min = Rmax1[etaBin];
+        radius_max = Rmax2[etaBin];
+      } else if (sampling == 3) {
+        radius_min = Rmax2[etaBin];
+        radius_max = m_rMaxAccordion;
+      }
+    
+      // --- Super-Resolution granularity (bins within cell) ---
+      const int nBinsEtaSR = 16; // 3 bits
+      const int nBinsPhiSR = 16; // 2 bits
+      const int nBinsRadiusSR = 5; // 3 bits
+    
+      double delta_eta_SR = delta_eta / nBinsEtaSR;
+      double delta_phi_SR = phiGranularity / nBinsPhiSR;
+      double delta_r_SR = (radius_max - radius_min) / nBinsRadiusSR;
+    
+      auto computeBin = [](double val, double min_lr, double delta_sr, int maxBins) {
+        const int overflow = maxBins - 1;
+        if (delta_sr == 0.0) return overflow;
+        int bin = int((val - min_lr) / delta_sr);
+        return std::clamp(bin, 0, overflow);;
+      };
+    
+      // --- Compute SR bin numbers (local within the cell) ---
+      int etaBinSR = computeBin(eta, eta_min, delta_eta_SR, nBinsEtaSR);
+      int phiBinSR = computeBin(phi, phi_min, delta_phi_SR, nBinsPhiSR);
+      int rBinSR   = computeBin(radius, radius_min, delta_r_SR, nBinsRadiusSR);
+    
+      // Packing (16 bits):
+      // Bit 15: Marker bit (always 1)
+      // Bits 9-14 (6 bits): etaBinSR (shifted by 1)
+      // Bits 3-8 (6 bits): phiBinSR (shifted by 1)
+      // Bits 0-2 (3 bits): rBinSR (reduced by 1 bit)
+
+      unsigned short int packedID = ( 0x8000 )                  // Marker bit always set (bit 15)
+                                  | ( (etaBinSR & 0x3F) << 9 )  // 6 bits for eta (bits 9-14)
+                                  | ( (phiBinSR & 0x3F) << 3 )  // 6 bits for phi (bits 3-8)
+                                  | ( rBinSR & 0x07 );          // 3 bits for r (bits 0-2)
+    
+      // --- Store packedID into LArG4Identifier ---
+      result << packedID;
+        
+      return result;
+    }
     //======================================================================================
     //
     // The following method computes the identifiers in the ECAM volume:

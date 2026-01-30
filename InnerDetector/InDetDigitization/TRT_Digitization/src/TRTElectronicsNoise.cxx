@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TRTElectronicsNoise.h"
@@ -12,7 +12,7 @@
 #include "CLHEP/Random/RandomEngine.h"
 
 #include "TRTDigSettings.h"
-
+#include <stdexcept>
 #include <cmath>
 #include <cstdlib>
 
@@ -178,14 +178,16 @@ void TRTElectronicsNoise::tabulateNoiseSignalShape() {
     m_noiseSignalShape.push_back(this->NoiseShape(time));
     shapemax = std::max(shapemax,std::abs(m_noiseSignalShape.back()));
   }
-
+  if (shapemax ==0.)[[unlikely]]{
+    throw std::runtime_error("TRTElectronicsNoise::tabulateNoiseSignalShape(): shapemax is zero.");
+  }
   //Cut of trailing zeroes:
   unsigned int noiseshapebins(m_noiseSignalShape.size()-1);
   for ( ;noiseshapebins>0;--noiseshapebins) {
     if (m_noiseSignalShape.at(noiseshapebins-1)>0.001*shapemax) break;
   }
   m_noiseSignalShape.resize(noiseshapebins);
-
+  
   //Normalize:
   for (double & i : m_noiseSignalShape) {
     i /= shapemax;

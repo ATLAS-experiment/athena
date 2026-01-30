@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 //
 
 // Local include(s).
@@ -14,17 +14,19 @@
 #include <iostream>
 
 #ifdef __CUDACC__
+inline bool 
+cuda_check_bool(cudaError_t err, const char* expr, const char* file, int line){
+    if (err != cudaSuccess) {
+        std::cerr << "CUDA error at " << file << ":" << line << '\n'
+                  << "Expression: " << expr << '\n'
+                  << "Reason: " << cudaGetErrorString(err) << '\n';
+        return false;
+    }
+    return true;
+}
 
-/// Simple macro to run CUDA commands with
-#define CUDA_CHECK( EXP )                                                     \
-   do {                                                                       \
-      const cudaError_t ce = EXP;                                             \
-      if( ce != cudaSuccess ) {                                               \
-         std::cerr << "Failed to execute: " << #EXP << std::endl;             \
-         std::cerr << "Reason: " << cudaGetErrorString( ce ) << std::endl;    \
-         return;                                                              \
-      }                                                                       \
-   } while( false )
+#define CUDA_CHECK(EXPR) \
+    cuda_check_bool((EXPR), #EXPR, __FILE__, __LINE__)
 
 namespace AthCUDAExamples {
 
@@ -46,7 +48,7 @@ namespace AthCUDAExamples {
 
       // If no CUDA device is available, complain.
       int nCudaDevices = 0;
-      CUDA_CHECK( cudaGetDeviceCount( &nCudaDevices ) );
+      if (!CUDA_CHECK( cudaGetDeviceCount( &nCudaDevices ) )) return;
       if( nCudaDevices == 0 ) {
          return;
       }
@@ -54,10 +56,19 @@ namespace AthCUDAExamples {
       // Allocate the array on the/a device, and copy the host array's content
       // to the device.
       float* deviceArray = nullptr;
-      CUDA_CHECK( cudaMalloc( &deviceArray, sizeof( float ) * array.size() ) );
-      CUDA_CHECK( cudaMemcpy( deviceArray, array.data(),
+      bool ok{true};
+      ok = CUDA_CHECK( cudaMalloc( &deviceArray, sizeof( float ) * array.size() ) );
+      if (not ok){
+        cudaFree( deviceArray );
+        return;
+      }
+      ok = CUDA_CHECK( cudaMemcpy( deviceArray, array.data(),
                               sizeof( float ) * array.size(),
                               cudaMemcpyHostToDevice ) );
+      if (not ok){
+        cudaFree( deviceArray );
+        return;
+      }                        
 
       // Run the kernel.
       static const int blockSize = 256;
@@ -65,13 +76,18 @@ namespace AthCUDAExamples {
       cudaMultiplyKernel<<< numBlocks, blockSize >>>( array.size(),
                                                       deviceArray,
                                                       multiplier );
-      CUDA_CHECK( cudaDeviceSynchronize() );
+      ok = CUDA_CHECK( cudaDeviceSynchronize() );
+      if (not ok){
+        cudaFree( deviceArray );
+        return;
+      }                        
+
 
       // Copy the array back to the host's memory.
-      CUDA_CHECK( cudaMemcpy( array.data(), deviceArray,
+      ok = CUDA_CHECK( cudaMemcpy( array.data(), deviceArray,
                               sizeof( float ) * array.size(),
                               cudaMemcpyDeviceToHost ) );
-
+      
       // Free the memory on the device.
       CUDA_CHECK( cudaFree( deviceArray ) );
       return;

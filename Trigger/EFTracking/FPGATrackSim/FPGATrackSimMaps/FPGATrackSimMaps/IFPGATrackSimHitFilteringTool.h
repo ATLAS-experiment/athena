@@ -22,7 +22,7 @@ class IFPGATrackSimHitFilteringTool : virtual public ::IAlgTool {
   DeclareInterfaceID(IFPGATrackSimHitFilteringTool, 1, 0);
   virtual ~IFPGATrackSimHitFilteringTool() = default;
   
-  virtual StatusCode DoRandomRemoval(FPGATrackSimLogicalEventInputHeader &, bool) = 0;
+  virtual StatusCode DoRandomRemoval(FPGATrackSimLogicalEventInputHeader &, bool) const = 0;
   virtual StatusCode GetPairedStripPhysLayers(const FPGATrackSimPlaneMap*, std::vector<int> &) = 0;
   virtual StatusCode DoHitFiltering(FPGATrackSimLogicalEventInputHeader &,
                                     std::vector<int>, std::vector<int>,

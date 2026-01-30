@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -7,7 +7,6 @@
  * @author Marcin Nowak
  * @brief Test BranchContainer in Branch Fill Mode with Indexing
  */
-
 
 /*
   This test will write different number of objects (in this case DbStrings)
@@ -17,34 +16,31 @@
 
 #include "PersistentDataModel/Guid.h"
 #include "PersistentDataModel/Token.h"
+#include "GaudiKernel/StatusCode.h"
 
+#include "AthenaKernel/getMessageSvc.h"
 #include "StorageSvc/DbType.h"
 #include "StorageSvc/Shape.h"
 #include "StorageSvc/IStorageSvc.h"
-#include "StorageSvc/IStorageExplorer.h"
 #include "StorageSvc/FileDescriptor.h"
+#include "StorageSvc/DatabaseConnection.h"
+#include "StorageSvc/DbDatabase.h"
 #include "StorageSvc/DbReflex.h"
 #include "StorageSvc/DbString.h"
 #include "StorageSvc/DbOption.h"
+#include "StorageSvc/pool.h"
 #include <iostream>
 
 using namespace pool;
 using namespace std;
 
-const string            filename = "branchContIdx_testfile.root";    // test file name
-
-// use normal containers
-//const string            containerNameA = "ContainerA";               // container for objects A
-//const string            containerNameB = "ContainerB";               // container for objects B
-
-// use branch containes
-const string            containerNameA = "Containers(A)";            // branch container for objects A
-const string            containerNameB = "Containers(B)";            // branch container for objects B
-const string            containerNameC = "ContainerC";               // tree container for objects C
-
-
-//const pool::DbType      storageType = pool::ROOTTREE_StorageType;
-const pool::DbType      storageType = pool::ROOTTREEINDEX_StorageType;
+// branch containe names
+const string            c_gcontNameA = "Containers(A)";           // grouped container for objects A
+const string            c_gcontNameB = "Containers(B)";           // grouped container for objects B
+// standard container names
+const string            c_contNameA = "ContainerA";               // container for objects A
+const string            c_contNameB = "ContainerB";               // container for objects B
+const string            c_contNameC = "ContainerC";               // container for objects C
 
 pool::DbString       myStringA1("This is my string A1");
 pool::DbString       myStringA2("This is my string A2");
@@ -63,12 +59,23 @@ pool::DbString       myStringC2("This is my string C2");
 pool::DbString       myStringC3("This is my string C3");
 
 
-int main() {
-   cout << "Starting branchContIdx_test" << endl;
+void test(const DbType storageType, const std::string& filename) {
+   cout << endl << "Starting index test for " << storageType.storageName() << endl;
 
    // string tokens to written objects, for use when reading back
    string refA1, refA2, refA3, refA4, refA5, refA6, refA7;
    string refB1, refB2, refB3, refC1, refC2, refC3;
+
+   string containerNameA, containerNameB, containerNameC;
+   if( storageType.exactMatch(pool::ROOTRNTUPLE_StorageType) ) {
+      // RNTuple can not handle grouped containers with uneqal number of objects
+      containerNameA = c_contNameA;
+      containerNameB = c_contNameB;
+   } else {
+      containerNameA = c_gcontNameA;
+      containerNameB = c_gcontNameB;
+   }
+   containerNameC = c_contNameC;
 
    pool::IStorageSvc* storSvc = pool::createStorageSvc("StorageSvc");
    if ( ! storSvc ) {
@@ -95,27 +102,21 @@ int main() {
    }
    // Create shape for DbString
    Guid guid = pool::DbReflex::guid(class_String);
-   const pool::Shape* shape = 0;
-   if ( storSvc->getShape( fd, guid, shape ) == pool::IStorageSvc::SHAPE_NOT_AVAILIBLE ) {
+   const pool::Shape* shape = nullptr;
+   if( !storSvc->getShape( fd, guid, shape ).isSuccess() ) {
       cout << "need to create a Shape for DbString" << endl;
-      storSvc->createShape( fd, containerNameA, guid, shape );
-   }
-   if( ! shape ) {
-      throw std::runtime_error( "Could not create a persistent shape." );
+      shape = storSvc->createShape(guid);
+      if( !shape ) {
+         throw std::runtime_error( "Could not create a persistent shape." );
+      }
    }
 
-   // Get IStorageExplorer IFace to set options
-   void *p = nullptr;
-   storSvc->queryInterface( IStorageExplorer::interfaceID(), &p );
-   IStorageExplorer *storage = (IStorageExplorer*)p;
-   if( !storage ) {
-      throw std::runtime_error( "Failed to retrieve IStorageExplorer" );
-   }
    // Set container for master index (enables index synchronization between TTrees)
-   //DbOption masterIdxOpt("INDEX_MASTER", "", containerNameA.c_str());
    DbOption masterIdxOpt("INDEX_MASTER", "", "*");
-   storage->setDatabaseOption(fd, masterIdxOpt);
-
+   DbDatabase dbH(static_cast<DbDatabaseObj*>(connection->handle()));
+   if( !dbH.setOption(masterIdxOpt).isSuccess() ) {
+     throw std::runtime_error( "Could not set master index option" );
+   }
    // Commit here to test empty commits
    if( ! ( storSvc->endTransaction( connection, pool::Transaction::TRANSACT_COMMIT ).isSuccess() ) ) {
       throw std::runtime_error( "Empty commit FAILED" );
@@ -190,17 +191,17 @@ int main() {
    if( !storSvc->startSession( pool::READ, storageType.type(), sessionHandle ).isSuccess() ) {
       throw std::runtime_error( "Could not start the read session." );
    }
-   if( storSvc->connect( sessionHandle, pool::READ, fd ) != pool::DbStatus::Success ) {
+   if( !storSvc->connect( sessionHandle, pool::READ, fd ).isSuccess() ) {
       throw std::runtime_error( "Could not start a read connection." );
    }
    // get shape again
    shape = nullptr;
-   if ( storSvc->getShape( fd, guid, shape ) == pool::IStorageSvc::SHAPE_NOT_AVAILIBLE ) {
+   if( !storSvc->getShape( fd, guid, shape ).isSuccess() ) {
       cout << "need to create a Shape for DbString" << endl;
-      storSvc->createShape( fd, containerNameA, guid, shape );
-   }
-   if( ! shape ) {
-      throw std::runtime_error( "Could not create a persistent shape." );
+      shape = storSvc->createShape(guid);
+      if( !shape ) {
+         throw std::runtime_error( "Could not create a persistent shape." );
+      }
    }
 
    pool::DbString readString;
@@ -234,9 +235,18 @@ int main() {
    if( !storSvc->endSession( sessionHandle ).isSuccess() ) {
       throw std::runtime_error( "Could not end correctly the session." );
    }
-
    storSvc->release();
-
-   return 0;
 }
 
+int main() {
+   Athena::getMessageSvcQuiet = true;
+   try {
+     test(ROOTTREEINDEX_StorageType, "TTreeContIdx_testfile.root");
+     test(ROOTRNTUPLE_StorageType, "RNTupleContIdx_testfile.root");
+   }
+   catch (const std::exception& e) {
+     std::cout << e.what() << "\n";
+     return 1;
+   }
+   return 0;
+}

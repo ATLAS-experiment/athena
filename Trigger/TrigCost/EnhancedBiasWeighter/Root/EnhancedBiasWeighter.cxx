@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // EnhancedBiasWeighter includes
@@ -82,7 +82,7 @@ StatusCode EnhancedBiasWeighter::loadWeights()
 
   ATH_MSG_DEBUG("Using weighting file " << weightingFile);
 
-  if (weightingFile == "") {
+  if (weightingFile.empty()) {
     msg() << (m_errorOnMissingEBWeights ? MSG::ERROR : MSG::WARNING)  << "Could not retrieve " << fileName.str() << ", cannot perform enhanced bias weighting." << endmsg;
     return (m_errorOnMissingEBWeights ? StatusCode::FAILURE : StatusCode::SUCCESS);
   }
@@ -159,7 +159,7 @@ StatusCode EnhancedBiasWeighter::loadLumi()
   std::string runFile = (!m_weightsDirectory.empty()) ? findLocalFile(fileName.str()) : PathResolverFindCalibFile("TrigCostRootAnalysis/" + fileName.str() );  // Check standard area
   
   ATH_MSG_DEBUG("Using run file " << runFile);
-  if (runFile == "") {
+  if (runFile.empty()) {
     msg() << (m_errorOnMissingEBWeights ? MSG::ERROR : MSG::WARNING)  << "Could not retrieve " << fileName.str() << ", cannot perform enhanced bias weighting." << endmsg;
     return (m_errorOnMissingEBWeights ? StatusCode::FAILURE : StatusCode::SUCCESS);
   }
@@ -250,7 +250,7 @@ std::unordered_map<std::string, ChainDetail> EnhancedBiasWeighter::parsePrescale
   std::unordered_map<std::string, ChainDetail> result;
 
   std::string xmlFile = PathResolverFindDataFile( prescaleXML ); 
-  if (xmlFile == "") {
+  if (xmlFile.empty()) {
     ATH_MSG_ERROR ("Could not retrieve " << prescaleXML << ", place it somewhere PathResolver can find it (such as the current directory).");
     return result;
   }
@@ -406,7 +406,7 @@ double EnhancedBiasWeighter::getEBWeight(const xAOD::EventInfo* eventInfo) const
     }
 
     const std::vector<float> weights = eventInfo->mcEventWeights();
-    if (weights.size() > 0) {
+    if (!weights.empty()) {
       return weights[0];
     }
     return 1.;
@@ -504,7 +504,7 @@ double EnhancedBiasWeighter::getEBLiveTime(const xAOD::EventInfo* eventInfo) con
       const double lbLength = m_readLumiBlock.getLumiBlockLength(lumiBlock, msg());
       // This event is one in eventsInThisLB, so has an effective temporal contribution of:
       double eventLivetime = 0;
-      if (eventsInThisLB > 0 && fabs(lbLength) > 1e-10) eventLivetime = (1. / static_cast<double>(eventsInThisLB)) * lbLength;
+      if (eventsInThisLB > 0 && std::fabs(lbLength) > 1e-10) eventLivetime = (1. / static_cast<double>(eventsInThisLB)) * lbLength;
       // Cache this (mutable)
       m_eventLivetime[lumiBlock] = eventLivetime;
       return eventLivetime;
@@ -540,7 +540,7 @@ double EnhancedBiasWeighter::getEBLiveTime(const EventContext& context) const
       const double lbLength = m_readLumiBlock.getLumiBlockLength(lumiBlock, msg());
       // This event is one in eventsInThisLB, so has an effective temporal contribution of:
       double eventLivetime = 0;
-      if (eventsInThisLB > 0 && fabs(lbLength) > 1e-10) eventLivetime = (1. / static_cast<double>(eventsInThisLB)) * lbLength;
+      if (eventsInThisLB > 0 && std::fabs(lbLength) > 1e-10) eventLivetime = (1. / static_cast<double>(eventsInThisLB)) * lbLength;
       // Cache this (mutable)
       m_eventLivetime[lumiBlock] = eventLivetime;
       return eventLivetime;
@@ -722,13 +722,13 @@ double EnhancedBiasWeighter::getAverageMu() const
 StatusCode EnhancedBiasWeighter::addBranches(const EventContext& ctx) const
 {
   // Set up the decorator
-  SG::AuxElement::Decorator< double >   decoratorEBWeight("EnhancedBiasWeight"); 
-  SG::AuxElement::Decorator< double >   decoratorEBLivetime("EnhancedBiasLivetime"); 
-  SG::AuxElement::Decorator< double >   decoratorLBLumi("LBLumi"); 
-  SG::AuxElement::Decorator< double >   decoratorDeadtime("Deadtime"); 
-  SG::AuxElement::Decorator< uint32_t > decoratorBCIDDistanceFromFront("BCIDDistanceFromFront"); 
-  SG::AuxElement::Decorator< char >     decoratorUnbiasedFlag("IsUnbiasedEventFlag");
-  SG::AuxElement::Decorator< char >     decoratorGoodLBFlag("IsGoodLBFlag");  
+  static const SG::Decorator< double >   decoratorEBWeight("EnhancedBiasWeight"); 
+  static const SG::Decorator< double >   decoratorEBLivetime("EnhancedBiasLivetime"); 
+  static const SG::Decorator< double >   decoratorLBLumi("LBLumi"); 
+  static const SG::Decorator< double >   decoratorDeadtime("Deadtime"); 
+  static const SG::Decorator< uint32_t > decoratorBCIDDistanceFromFront("BCIDDistanceFromFront"); 
+  static const SG::Decorator< char >     decoratorUnbiasedFlag("IsUnbiasedEventFlag");
+  static const SG::Decorator< char >     decoratorGoodLBFlag("IsGoodLBFlag");  
 
   const xAOD::EventInfo* eventInfo(nullptr);
   uint32_t distance = 0;

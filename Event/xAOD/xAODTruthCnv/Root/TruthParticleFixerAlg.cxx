@@ -8,6 +8,8 @@
 // Framework include(s).
 #include "AsgDataHandles/ReadHandle.h"
 #include "AsgDataHandles/WriteHandle.h"
+#include "AsgDataHandles/WriteDecorHandle.h"
+
 #include "TruthUtils/MagicNumbers.h"
 
 // EDM include(s).
@@ -25,6 +27,8 @@ StatusCode TruthParticleFixerAlg::initialize() {
   ANA_CHECK(m_inputContainerKey.initialize());
   ANA_CHECK(m_outputContainerKey.initialize());
 
+  ATH_CHECK(m_uidKey.initialize());
+
   // Return gracefully.
   return StatusCode::SUCCESS;
 }
@@ -41,6 +45,14 @@ StatusCode TruthParticleFixerAlg::execute(const EventContext& ctx) const {
 
   // Variable specific to the old schema.
   static const SG::ConstAccessor<int> barcodeAcc("barcode");
+
+  // Decorate old input collection with UID in case
+  SG::WriteDecorHandle<xAOD::TruthParticleContainer, int> uid(m_uidKey, ctx);
+  if(!uid.isAvailable()){
+    for (const xAOD::TruthParticle* input : *inputContainer) {
+      uid(*input) = barcodeAcc(*input);
+    }
+  }
 
   // Deep-copy the objects in a relatively slow/inefficient way.
   bool warningPrinted = false;

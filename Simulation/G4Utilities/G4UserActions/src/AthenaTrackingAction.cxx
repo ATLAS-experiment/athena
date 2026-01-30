@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "AthenaTrackingAction.h"
@@ -49,7 +49,7 @@ namespace G4UA
       AtlasG4EventUserInfo* atlasG4EvtUserInfo = static_cast<AtlasG4EventUserInfo*>
         (G4EventManager::GetEventManager()->GetConstCurrentEvent()->GetUserInformation());
       if (trackHelper.IsPrimary()) atlasG4EvtUserInfo->SetCurrentPrimaryGenParticle(currentGenParticle);
-      atlasG4EvtUserInfo->SetCurrentGenParticle(currentGenParticle);
+      atlasG4EvtUserInfo->SetCurrentGenParticle(std::move(currentGenParticle));
     }
 
     // Condition for creating a trajectory object to store truth.

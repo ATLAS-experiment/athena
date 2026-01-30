@@ -26,3 +26,8 @@ atlas_add_test( tokenLegacyOID_test
                 SOURCES test/tokenLegacyOID_test.cxx
                 LINK_LIBRARIES PersistentDataModel
                 POST_EXEC_SCRIPT nopost.sh )
+
+atlas_add_test( guidFallback_test
+                SOURCES test/guidFallback_test.cxx
+                LINK_LIBRARIES PersistentDataModel
+                POST_EXEC_SCRIPT nopost.sh )

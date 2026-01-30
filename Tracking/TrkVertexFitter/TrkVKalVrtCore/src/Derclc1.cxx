@@ -12,6 +12,7 @@
 #include <algorithm>
 #include <cmath>
 #include <iostream>
+#include <cassert>
 
 namespace Trk {
 
@@ -34,7 +35,8 @@ void  calcMassConstraint( VKMassConstraint * cnst )
     noinit_vector< std::array<double, 4> > pp(usedNTRK);
     for( itc=0; itc<usedNTRK; itc++){
       it = usedParticles[itc];
-      trk = vk->TrackList.at(it).get();
+      assert(vk->TrackList.at(it).get());
+      trk = vk->TrackList[it].get();
       pp[itc]=getCnstParticleMom( trk , vk);
       ptot[0] += pp[itc][0];
       ptot[1] += pp[itc][1];
@@ -62,11 +64,15 @@ void  calcMassConstraint( VKMassConstraint * cnst )
 //
 //Difference
    base_cnst->aa[numCNST] = ( temp - cnst->getTargetMass() ) * ( temp + cnst->getTargetMass() );
+   /* -- Relative normalisation. Now it is target mass (squared?) to make performance uniform */
+   double Scale=0.025/(2.*cnst->getTargetMass()+1.); //28.03.2011 wrong idea for cascade. VK 06.05.2011 actually correct!
+   //Scale=0.01;
 //
 //Derivatives               Here pp[][3] - particle energy, pp[][4] - squared particle mom
     for( itc=0; itc<usedNTRK; itc++){
       it = usedParticles[itc];
-      trk  = vk->TrackList.at(it).get();
+      assert(vk->TrackList.at(it).get());
+      trk  = vk->TrackList[it].get();
       invR = trk->cnstP[2];
       cth  = 1. / tan( trk->cnstP[0] );
       pt   = sqrt(pp[itc][0]*pp[itc][0] + pp[itc][1]*pp[itc][1]);
@@ -84,9 +90,6 @@ void  calcMassConstraint( VKMassConstraint * cnst )
     base_cnst->h0t[numCNST].X = 0.;
     base_cnst->h0t[numCNST].Y = 0.;
     base_cnst->h0t[numCNST].Z = 0.;
-/* -- Relative normalisation. Now it is target mass (squared?) to make performance uniform */
-    double Scale=0.025/(2.*cnst->getTargetMass()+1.); //28.03.2011 wrong idea for cascade. VK 06.05.2011 actually correct!
-    //Scale=0.01;
     for (it = 0; it < (int)vk->TrackList.size(); ++it) {
 	base_cnst->f0t[it][numCNST].X *=  Scale * 2;
 	base_cnst->f0t[it][numCNST].Y *=  Scale * 2;

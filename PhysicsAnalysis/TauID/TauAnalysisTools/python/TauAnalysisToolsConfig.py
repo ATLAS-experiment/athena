@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -8,7 +8,8 @@ def TauSelectionToolCfg(flags, name, **kwargs):
    acc = ComponentAccumulator()
    TauSelectionTool = CompFactory.TauAnalysisTools.TauSelectionTool
    acc.setPrivateTools(TauSelectionTool(name, **kwargs))
-   return acc 
+   return acc
+
 
 def TauTruthMatchingToolCfg(flags, name, **kwargs):
    acc = ComponentAccumulator()
@@ -16,16 +17,28 @@ def TauTruthMatchingToolCfg(flags, name, **kwargs):
    acc.setPrivateTools(tool)
    return acc
 
-def TauHFVetoToolCfg(flags, name, **kwargs):
-   acc=ComponentAccumulator()
-   execution_provider = flags.AthOnnx.ExecutionProvider
-   pathToHFVetoModels = 'TauAnalysisTools/00-04-00/HFVeto'
-   from AthOnnxComps.OnnxRuntimeInferenceConfig import OnnxRuntimeInferenceToolCfg
-   for model in ("bveto1p", "bveto3p", "cveto1p", "cveto3p"):
-       kwargs.setdefault(model, acc.popToolsAndMerge(
-           OnnxRuntimeInferenceToolCfg(flags, f'{pathToHFVetoModels}/{model}.onnx', execution_provider, name=model)
-           ))
-   tool = CompFactory.TauAnalysisTools.TauHFVetoTool(name, **kwargs)
-   acc.setPrivateTools(tool)
-   return acc
 
+def BuildTruthTausCfg(flags, name, **kwargs):
+    """Configure the BuildTruthTaus tool"""
+    acc = ComponentAccumulator()
+    acc.setPrivateTools(CompFactory.TauAnalysisTools.BuildTruthTaus(name, **kwargs))
+    return acc
+
+
+def BuildTruthTausAlgCfg(flags):
+    """Configre an alg to build truth taus"""
+    acc = ComponentAccumulator()
+    acc.addEventAlgo(
+       CompFactory.TauAnalysisTools.BuildTruthTausAlg(
+          "BuildTruthTausAlg",
+          BuildTruthTaus=CompFactory.TauAnalysisTools.BuildTruthTaus(
+             "BuildTruthTaus",
+             WriteInvisibleFourMomentum=True,
+             WriteVisibleNeutralFourMomentum=True,
+          ),
+          ExtraOutputs={
+             ( 'xAOD::TruthParticleContainer' , 'StoreGateSvc+TruthTaus' )
+          },
+       )
+    )
+    return acc

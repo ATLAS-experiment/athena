@@ -53,26 +53,15 @@ namespace xAOD {
       /// Set the number of threads/slots that the data source should use
       virtual void SetNSlots( unsigned int slots ) override final;
       /// Initialize the data source, before the start of the event loop
-#if ROOT_VERSION_CODE < ROOT_VERSION(6,28,0)
-      virtual void Initialise() override final;
-#else
       virtual void Initialize() override final;
-#endif
       /// Initialize one of the slots/threads
       virtual void
       InitSlot( unsigned int slot, ULong64_t firstEntry ) override final;
 
-#if ROOT_VERSION_CODE < ROOT_VERSION(6,28,0)
-      /// Close the input file reading in one of the slots/threads
-      virtual void FinaliseSlot( unsigned int slot ) override final;
-      /// Finalise the data source, after the event loop
-      virtual void Finalise() override final;
-#else
       /// Close the input file reading in one of the slots/threads
       virtual void FinalizeSlot( unsigned int slot ) override final;
       /// Finalize the data source, after the event loop
       virtual void Finalize() override final;
-#endif
 
       /// Get the column/object names for the input file(s)
       virtual const std::vector< std::string >&
@@ -96,6 +85,11 @@ namespace xAOD {
       /// Check whether verbose output is set up to be printed
       Bool_t isVerboseOutput() const;
 
+      /// Set the auxiliary access mode
+      void setAuxMode( TEvent::EAuxMode mode );
+      /// Get the auxiliary access mode
+      TEvent::EAuxMode auxMode() const;
+
    private:
       /// Return the type-erased vector of pointers to pointers to column values
       virtual Record_t
@@ -112,7 +106,9 @@ namespace xAOD {
       /// Name of the event tree in the input files
       std::string m_treeName;
       /// Whether verbose output should be printed or not
-      Bool_t m_verboseOutput;
+      Bool_t m_verboseOutput = kFALSE;
+      /// Auxiliary access mode
+      TEvent::EAuxMode m_auxmode = TEvent::kClassAccess;
 
       /// @}
 

@@ -10,7 +10,7 @@
 #include <limits>
 
 RIO_OnTrackErrorScalingCondAlg::RIO_OnTrackErrorScalingCondAlg(const std::string& name, ISvcLocator* pSvcLocator)
-  : ::AthAlgorithm(name, pSvcLocator)
+  : ::AthCondAlgorithm(name, pSvcLocator)
 {
 }
 
@@ -91,8 +91,8 @@ public:
 };
 
 
-StatusCode RIO_OnTrackErrorScalingCondAlg::execute() {
-  SG::ReadCondHandle<CondAttrListCollection> readHandle(m_readKey);
+StatusCode RIO_OnTrackErrorScalingCondAlg::execute(const EventContext& ctx) const {
+  SG::ReadCondHandle<CondAttrListCollection> readHandle(m_readKey, ctx);
   if (!readHandle.isValid()) {
     return StatusCode::FAILURE;
   }
@@ -103,7 +103,7 @@ StatusCode RIO_OnTrackErrorScalingCondAlg::execute() {
     return StatusCode::FAILURE;
   }
 
-  std::vector<SG::WriteCondHandle<RIO_OnTrackErrorScaling> > write_handles(m_writeKey.makeHandles());
+  std::vector<SG::WriteCondHandle<RIO_OnTrackErrorScaling> > write_handles(m_writeKey.makeHandles(ctx));
   assert( write_handles.size() == m_kits.size() );
   std::vector< std::unique_ptr<RIO_OnTrackErrorScaling> > error_scaling;
   error_scaling.reserve( m_kits.size());

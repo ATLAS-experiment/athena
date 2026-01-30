@@ -14,7 +14,7 @@ atlas_add_component( InDetDetDescrExample
                      LINK_LIBRARIES ${CLHEP_LIBRARIES} AthenaBaseComps AthenaKernel StoreGateLib GeoModelInterfaces GeoPrimitives Identifier GaudiKernel InDetCondTools InDetConditionsSummaryService InDetIdentifier ReadoutGeometryBase InDetReadoutGeometry PixelReadoutGeometryLib SCT_ReadoutGeometry TRT_ReadoutGeometry)
 
 # Install files from the package:
-
-atlas_install_runtime( tools/RunPrintSiDetElements.py )
-atlas_install_scripts( tools/geometry_dat_to_json.py )
-atlas_install_scripts( tools/module_selector_from_json.py )
+atlas_install_scripts( tools/RunPrintSiDetElements.py
+                       tools/geometry_dat_to_json.py
+                       tools/module_selector_from_json.py
+                       POST_BUILD_CMD ${ATLAS_FLAKE8} )

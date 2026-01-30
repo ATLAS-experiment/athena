@@ -412,7 +412,7 @@ namespace TableUtils {
                            const std::vector<std::size_t> &stat);
 
    inline float computeRatio(std::size_t numerator, std::size_t denominator) {
-      return numerator!=0 ? static_cast<float>(numerator/static_cast<double>(denominator)) : 0.f;
+      return denominator!=0 ? static_cast<float>(numerator/static_cast<double>(denominator)) : 0.f;
    }
 
    // compute the ratio of two sums;

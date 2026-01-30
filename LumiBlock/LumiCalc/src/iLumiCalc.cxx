@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "iLumiCalc.h"
@@ -7,8 +7,8 @@
 #include "CxxUtils/checker_macros.h"
 ATLAS_NO_CHECK_FILE_THREAD_SAFETY;
 
-#include "CollectionBase/CollectionService.h"
-#include "CollectionBase/ICollection.h"
+#include "CollectionSvc/CollectionService.h"
+#include "CollectionSvc/ICollection.h"
 #include "DataModelRoot/RootType.h"
 
 #include "TTree.h"
@@ -43,6 +43,7 @@ void print_usage(){
 }
 
 //______________________________________________________________________________
+// coverity[uncaught_except]
 int main(int argc, char * argv[]){
 
   if (argc == 1)print_usage();
@@ -454,9 +455,7 @@ int main(int argc, char * argv[]){
     logger << Root::kINFO << "Being in TAG file mode..." << Root::GEndl;
 
     Root::TGoodRunsListReader reader;
-    std::string connection ="";
     std::string type = "RootCollection";
-    bool readOnly(true);
     for(std::vector<std::string>::iterator it = tagfile.begin(); it != tagfile.end(); ++it){
       logger << Root::kINFO << "Processing file: <" << (*it) << ">" <<  Root::GEndl;
       int n = (*it).find(".root");
@@ -464,7 +463,7 @@ int main(int argc, char * argv[]){
 
       // get Value for a Key
       pool::CollectionService collectionService;
-      pool::ICollection* collection = collectionService.handle(tagfilename, type, connection, readOnly);
+      pool::ICollection* collection = collectionService.open(tagfilename, type, tagfilename);
       if(collection == NULL) {
          logger << Root::kERROR << "ICollection is NULL, exiting... " << Root::GEndl;
          exit(-1);
@@ -537,7 +536,7 @@ int main(int argc, char * argv[]){
       TList * list = NULL;
       tree = dynamic_cast<TTree*>(file->Get(treename.c_str()));
       if(tree == 0){
-	logger << Root::kERROR << "Tree: " << treename << " doesn't exist in file " << filename << Root::GEndl;
+	logger << Root::kERROR << "Tree: " << treename << " doesn't exist in file " << std::move(filename) << Root::GEndl;
 	exit(-1);
       }else{
 	list = tree->GetUserInfo() ;
@@ -591,6 +590,7 @@ int main(int argc, char * argv[]){
       logger << Root::kINFO << "Using Directory name: " << d3pddirname.c_str() << Root::GEndl;
       dir = dynamic_cast<TDirectoryFile*>(file->GetDirectory(d3pddirname.c_str()));
       if(!dir){
+      //coverity[copy_constructor_call]
 	logger << Root::kERROR << "Directory [" << d3pddirname << "] doesn't exist in file " << filename << Root::GEndl;
 	exit(-1);
       }else{

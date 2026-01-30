@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <GaudiKernel/DataIncident.h>
@@ -659,7 +659,7 @@ StatusCode AthenaHiveEventLoopMgr::executeRun(int maxevt)
 StatusCode AthenaHiveEventLoopMgr::stopRun() {
   // Set the application return code
   SmartIF<IProperty> appmgr(serviceLocator());
-  if(Gaudi::setAppReturnCode(appmgr, Gaudi::ReturnCode::ScheduledStop).isFailure()) {
+  if(Gaudi::setAppReturnCode(appmgr, Gaudi::ReturnCode::ScheduledStop, true).isFailure()) {
     ATH_MSG_ERROR ( "Could not set return code of the application ("
             << Gaudi::ReturnCode::ScheduledStop << ")" );
   }

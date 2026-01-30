@@ -16,22 +16,24 @@
 
 #include "CoolLumiUtilities/FillParamsCondData.h"
 #include "LumiBlockData/BunchCrossingCondData.h"
-#include "AthenaBaseComps/AthReentrantAlgorithm.h"
+#include "AthenaBaseComps/AthCondAlgorithm.h"
 #include "StoreGate/ReadCondHandleKey.h"
 #include "StoreGate/WriteCondHandleKey.h"
 #include "TrigConfInterfaces/ILVL1ConfigSvc.h"
 #include "LumiBlockData/LuminosityCondData.h"
 #include "TrigConfData/L1BunchGroupSet.h"
 #include "PersistentDataModel/AthenaAttributeList.h"
+#include "ByteStreamData/ByteStreamMetadataContainer.h"
+#include "StoreGate/ReadHandleKey.h"
 
 /**
  * @brief Conditions algorithm to unpack fill parameters from COOL.
  */
-class BunchCrossingCondAlg : public AthReentrantAlgorithm {
+class BunchCrossingCondAlg : public AthCondAlgorithm {
 
 public:
   /// Forward base class ctor.
-  using AthReentrantAlgorithm::AthReentrantAlgorithm;
+  using AthCondAlgorithm::AthCondAlgorithm;
   typedef BunchCrossingCondData::bunchTrain_t bunchTrain_t;
 
 
@@ -41,7 +43,6 @@ public:
 
   /// Algorithm execute method.
   virtual StatusCode execute (const EventContext& ctx) const override;
-  virtual bool isReEntrant() const override final { return false; }
 
 
 
@@ -50,6 +51,11 @@ private:
   SG::ReadCondHandleKey<AthenaAttributeList> m_fillParamsFolderKey{ this, "FillParamsFolderKey", "/TDAQ/OLC/LHC/FILLPARAMS", "" };
   SG::ReadCondHandleKey<LuminosityCondData> m_lumiCondDataKey{this, "LumiCondData", "LuminosityCondData", "Lumi cond data key"};
   SG::ReadCondHandleKey<TrigConf::L1BunchGroupSet> m_bunchGroupCondDataKey{this, "L1BunchGroupCondData", "L1BunchGroup", "Bunch group cond data key"};
+
+  /// ByteStream metadata (for reading IOV metadata from BS files in MC mode)
+  SG::ReadHandleKey<ByteStreamMetadataContainer> m_byteStreamMetadataKey
+  { this, "ByteStreamMetadataKey", "",
+    "ByteStream metadata (for reading IOV metadata from BS files in MC mode)" };
   /// Output conditions object.
   SG::WriteCondHandleKey<BunchCrossingCondData> m_outputKey{this, "OutputKey", "BunchCrossingData", "Key of output CDO" };
 

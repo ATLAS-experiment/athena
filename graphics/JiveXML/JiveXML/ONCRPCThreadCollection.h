@@ -1,11 +1,12 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef JIVEXML_ONCRPCTHREADCOLLECTION_H
 #define JIVEXML_ONCRPCTHREADCOLLECTION_H
 
 #include <vector>
+#include <mutex>
 #include <pthread.h>
 #include <semaphore.h>
 
@@ -45,7 +46,7 @@ namespace JiveXML{
       
     private:
       //mutex to assure no conflicts when adding/removing threads
-      pthread_mutex_t m_mutex;
+      std::mutex m_mutex;
       //Semaphore to assure we add all threads
       sem_t  m_semaphore;
   };

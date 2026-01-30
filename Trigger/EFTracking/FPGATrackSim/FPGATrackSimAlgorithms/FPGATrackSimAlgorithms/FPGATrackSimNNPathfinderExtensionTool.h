@@ -20,7 +20,7 @@
 #include "FPGATrackSimObjects/FPGATrackSimFunctions.h"
 #include "FPGATrackSimObjects/FPGATrackSimHit.h"
 #include "FPGATrackSimObjects/FPGATrackSimRoad.h"
-#include "FPGATrackSimObjects/FPGATrackSimTrack.h"
+#include "FPGATrackSimObjects/FPGATrackSimTrackCollection.h"
 #include "FPGATrackSimMaps/IFPGATrackSimMappingSvc.h"
 #include "FPGATrackSimBanks/IFPGATrackSimBankSvc.h"
 #include "FPGATrackSimMaps/FPGATrackSimPlaneMap.h"
@@ -28,6 +28,8 @@
 #include "FPGATrackSimObjects/FPGATrackSimTowerInputHeader.h"
 #include "FPGATrackSimNNTrackTool.h"
 #include "GaudiKernel/ITHistSvc.h"
+
+#include "GaudiKernel/IChronoStatSvc.h"
 
 #include <vector>
 
@@ -131,8 +133,8 @@ class FPGATrackSimNNPathfinderExtensionTool   : public extends <AthAlgTool, IFPG
         virtual StatusCode initialize() override;
 
         virtual StatusCode extendTracks(const std::vector<std::shared_ptr<const FPGATrackSimHit>> & hits,
-                                        const std::vector<std::shared_ptr<const FPGATrackSimTrack>> & tracks,
-                                        std::vector<std::shared_ptr<const FPGATrackSimRoad>> & roads) override;
+                                        const FPGATrackSimTrackCollection & tracks,
+                                        std::vector<FPGATrackSimRoad> & roads) override;
 
         // We don't have a "union" tool that sits in front of the extension tool, so this is needed here.
         virtual StatusCode setupSlices(FPGATrackSimLogicalEventInputHeader *slicedHitHeader) override {
@@ -144,6 +146,7 @@ class FPGATrackSimNNPathfinderExtensionTool   : public extends <AthAlgTool, IFPG
     private:
         ServiceHandle<IFPGATrackSimMappingSvc> m_FPGATrackSimMapping {this, "FPGATrackSimMappingSvc", "FPGATrackSimMappingSvc"};
         ServiceHandle<ITHistSvc> m_tHistSvc {this, "THistSvc", "THistSvc"};
+        ServiceHandle<IChronoStatSvc> m_chronoSvc{this, "ChronoStatSvc", "ChronoStatSvc"};
 
         Gaudi::Property<unsigned> m_maxMiss { this, "threshold", 2, "Maximum number of missing hits to reject a road"};
         Gaudi::Property <std::string> m_region { this, "OutputRegion", "", "region ID"};

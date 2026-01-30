@@ -5,16 +5,14 @@
 #ifndef ALFAGEOMODEL_ALFADETECTORFACTORY_H
 #define ALFAGEOMODEL_ALFADETECTORFACTORY_H
 
-#include "ALFA_Geometry/ALFA_constants.h"
-#include "ALFA_Geometry/ALFA_GeometryReader.h"
-#include "GeoModelKernel/GeoAlignableTransform.h"
-
-#include "GeoModelKernel/GeoVDetectorFactory.h"
-#include "ALFA_GeoModel/ALFA_DetectorManager.h"
-#include "RDBAccessSvc/IRDBAccessSvc.h"
+#include "ALFA_Geometry/ALFA_GeometryReader.h" //unique_ptr template
+#include "GeoModelKernel/GeoVDetectorFactory.h" //inheritance
+#include "ALFA_GeoModel/ALFA_DetectorManager.h" //covariant return type
+#include "CLHEP/Geometry/Transform3D.h"
 
 #include <string>
 #include <vector>
+#include <map>
 
 class StoreGateSvc;
 class StoredMaterialManager;
@@ -22,6 +20,8 @@ class IRDBRecordset;
 class GeoShape;
 class GeoPhysVol;
 class GeoFullPhysVol;
+class IRDBAccessSvc;
+class GeoAlignableTransform;
 
 typedef struct _ALFAPHYSVOLUME {
 	GeoFullPhysVol* pPhysVolume{};

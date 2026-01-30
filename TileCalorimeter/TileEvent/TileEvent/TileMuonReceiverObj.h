@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //****************************************************************************
@@ -81,6 +81,11 @@ class TileMuonReceiverObj {
       m_TileMuRcvTime(std::move(time))
   {
   }
+
+  TileMuonReceiverObj(const TileMuonReceiverObj&) = default;
+  TileMuonReceiverObj& operator=(const TileMuonReceiverObj&) = default;
+  TileMuonReceiverObj(TileMuonReceiverObj&&) = default;
+  TileMuonReceiverObj& operator=(TileMuonReceiverObj&&) = default;
 
   // destructor
   //

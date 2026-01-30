@@ -8,7 +8,7 @@
 #include "CaloIdentifier/CaloIdManager.h"
 
 LArHVlineMapAlg::LArHVlineMapAlg(const std::string& name, ISvcLocator* pSvcLocator) :
-  AthReentrantAlgorithm(name,pSvcLocator),
+  AthCondAlgorithm(name,pSvcLocator),
   m_hvmapTool("LArHVMapTool",this)
 {}
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CaloConditions/CaloNoise.h"
@@ -28,13 +28,12 @@ CaloNoise::CaloNoise(const size_t nLArCells,
   m_tileHashOffset=h1;
 }
 
-void CaloNoise::setTileBlob(const CaloCondBlobFlt* flt, const float lumi) {
-  m_tileBlob=flt;
+void CaloNoise::setTileBlob(std::unique_ptr<const CaloCondBlobFlt> flt, const float lumi) {
+  m_tileBlob=std::move(flt);
   m_lumi=lumi;
 }
 
 CaloNoise::~CaloNoise() {
-  if ( m_tileBlob) delete m_tileBlob;
 }
 
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef JETSELECTORTOOLS_JETCLEANINGTOOL_H
@@ -110,8 +110,8 @@ public:
     bool containsHotCells( const xAOD::Jet& jet, const unsigned int runNumber) const;
 
     /** Helpers for cut names */
-    CleaningLevel getCutLevel( const std::string& ) const;
-    std::string   getCutName( const CleaningLevel ) const;
+    static CleaningLevel getCutLevel( const std::string& );
+    static std::string   getCutName( const CleaningLevel );
 
   private:
 

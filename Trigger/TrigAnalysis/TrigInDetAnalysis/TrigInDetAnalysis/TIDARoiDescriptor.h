@@ -5,7 +5,7 @@
  **     @author  mark sutton
  **     @date    Tue 10 Nov 2009 10:05:35 GMT 
  **
- **     Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+ **     Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
  **/
 
 /**
@@ -28,14 +28,12 @@
 #ifndef TIDA_ROIDESCRIPTOR_H
 #define TIDA_ROIDESCRIPTOR_H
 
-#include <iostream>
-#include <sstream>
+#include <ostream>
 #include <cmath>
 #include <vector>
 
 #include "TObject.h"
 
-// #include "TrigInDetAnalysis/IRoiDescriptor.h"
 #include "TrigInDetAnalysis/TIDARoiParameters.h"
 
 
@@ -199,15 +197,14 @@ public:
 
   bool operator==( const TIDARoiDescriptor& b ) const {
     if ( roiWord() != b.roiWord() ) return false;
-    double epsilon=0.001; // arbitrary , but seems to be reasnable
+    double epsilon=0.001; // arbitrary , but seems to be reasonable
     if ( std::fabs( phi() - b.phi()) > epsilon ) return false;
     if ( std::fabs( eta() - b.eta()) > epsilon ) return false;
     if ( std::fabs( zed() - b.zed()) > epsilon ) return false;
     return true;
   }
-
+  
   bool operator!=( const TIDARoiDescriptor& b ) const { return !((*this)==b); }
-
 
   void push_back( const TIDARoiDescriptor& roi ) { m_rois.push_back( roi ); }
   void push_back( const TIDARoiDescriptor* roi ) { m_rois.push_back( *roi ); }
@@ -247,7 +244,7 @@ protected:
   const TIDARoiParameters&  params() const { return m_params; };  //!< internal parameters
 
   /**
-   * @brief resets all varaibles of RoI
+   * @brief resets all variables of RoI
    */
   void reset() {
     m_params = TIDARoiParameters();

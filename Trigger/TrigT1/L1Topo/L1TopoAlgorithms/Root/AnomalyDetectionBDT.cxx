@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************
@@ -24,6 +24,7 @@
 #include <PathResolver/PathResolver.h>
 #endif
 #include <fstream>
+#include <iostream>
 
 REGISTER_ALG_TCS(AnomalyDetectionBDT)
 
@@ -440,8 +441,7 @@ TCS::AnomalyDetectionBDT::initialize() {
    m_mu2_phimax = bdt_config["variable_float_ranges"]["flat_dimu_mu2_phi_2pi"]["max"];
 
    for (auto& [treeName, tree] : bdt_config["trees"].items()) {
-      Tree t = Tree(tree, m_nVar);
-      m_trees.push_back(t);
+      m_trees.emplace_back(tree, m_nVar);
    }
 
    TRG_MSG_DEBUG("In initialize. There are " << m_trees.size() << " trees for AnomalyDetectionBDT.");

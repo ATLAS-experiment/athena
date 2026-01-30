@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  */
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -99,9 +99,9 @@ namespace dqutils_mdtdeadnoisy {
   void getAllBinsInRange(TH1F* h, std::vector<int>& v, int x1, int x2) {
     v.clear();
     if (x1 < 1 || x2 > h->GetNbinsX()) {
-      std::cout << "WARNING in " <<
-      ((TString) h->GetName())(0,
-                               7) << ": in getAllBinsInRange: (" << x1 << "," << x2 << ") outside histo range!" <<
+      std::cout << "WARNING in "
+                << std::string(h->GetName()).substr(0, 7)
+                << ": in getAllBinsInRange: (" << x1 << "," << x2 << ") outside histo range!" <<
         std::endl;
       return;
     }
@@ -112,9 +112,9 @@ namespace dqutils_mdtdeadnoisy {
   void getAllBinsInRangeBelowCrustCutoff(TH1F* h, std::vector<int>& v, int crustCutoff, int x1, int x2) {
     v.clear();
     if (x1 < 1 || x2 > h->GetNbinsX()) {
-      std::cout << "WARNING in " <<
-      ((TString) h->GetName())(0,
-                               7) << ": in getAllBinsInRangeBelowCrustCutoff: (" << x1 << "," << x2 <<
+      std::cout << "WARNING in "
+                << std::string(h->GetName()).substr(0, 7)
+                << ": in getAllBinsInRangeBelowCrustCutoff: (" << x1 << "," << x2 <<
         ") outside histo range!" << std::endl;
       return;
     }
@@ -128,9 +128,9 @@ namespace dqutils_mdtdeadnoisy {
     vector<int> maskedTubes = GetMaskedTubesForDead(h);
     v.clear();
     if (x1 < 1 || x2 > h->GetNbinsX()) {
-      std::cout << "WARNING in " <<
-      ((TString) h->GetName())(0,
-                               7) << ": in getAllUnmaskedBinsInRangeBelowCrustCutoff: (" << x1 << "," << x2 <<
+      std::cout << "WARNING in "
+                << std::string(h->GetName()).substr(0, 7)
+                << ": in getAllUnmaskedBinsInRangeBelowCrustCutoff: (" << x1 << "," << x2 <<
         ") outside histo range!" <<
         std::endl;
       return;
@@ -191,7 +191,7 @@ namespace dqutils_mdtdeadnoisy {
     v = std::move(tmp);
   }
 
-  void getNotInDeadMezz(std::vector<int>& v, std::vector<int>& deadMezz_v, const TString& hardware_name,
+void getNotInDeadMezz(std::vector<int>& v, std::vector<int>& deadMezz_v, const std::string& hardware_name,
                         int totalTubes) {
     if (deadMezz_v.empty()) return;
 
@@ -212,7 +212,7 @@ namespace dqutils_mdtdeadnoisy {
     v = std::move(tmp);
   }
 
-  void getNotInDeadLayer(std::vector<int>& v, std::vector<int>& deadLayer_v, const TString& hardware_name,
+void getNotInDeadLayer(std::vector<int>& v, std::vector<int>& deadLayer_v, const std::string& hardware_name,
                          int totalTubes) {
     if (deadLayer_v.empty()) return;
 
@@ -225,7 +225,7 @@ namespace dqutils_mdtdeadnoisy {
     v = std::move(tmp);
   }
 
-  void getNotInDeadML(std::vector<int>& v, std::vector<int>& deadML_v, const TString& hardware_name, int totalTubes) {
+  void getNotInDeadML(std::vector<int>& v, std::vector<int>& deadML_v, const std::string& hardware_name, int totalTubes) {
     if (deadML_v.empty()) return;
 
 //     std::cout << "ML dead! Trying to mask out...\n";
@@ -598,7 +598,7 @@ namespace dqutils_mdtdeadnoisy {
     return noisyTubes;
   }
 
-  std::vector<int> GetNoisyTubes(TH1F* h_tube_fornoise, TH1F* h_tube, TString chamber, int& validity) {
+  std::vector<int> GetNoisyTubes(TH1F* h_tube_fornoise, TH1F* h_tube, const std::string& chamber, int& validity) {
     validity = 1;
 
     //   std::cout << "In GetNoisyTubes" << std::endl;
@@ -630,11 +630,11 @@ namespace dqutils_mdtdeadnoisy {
       validity = 2;
       //     std::cout << " ... validity check failed for noisy, trying with h_tube" << std::endl;
       //    return GetNoisyTubes_WithoutForNoise( h_tube_fornoise, h_tube, chamber);
-      return GetNoisyTubes_WithoutForNoise(h_tube, validity, std::move(chamber));
+      return GetNoisyTubes_WithoutForNoise(h_tube, validity, chamber);
     }
   }
 
-  std::vector<int> GetNoisyTubes_WithoutForNoise(TH1F* h_tube, int& validity, TString chamber) {
+  std::vector<int> GetNoisyTubes_WithoutForNoise(TH1F* h_tube, int& validity, const std::string& chamber) {
     //   std::cout << "In GetNoisyTubes_withoutfornoise" << std::endl;
     if (chamber == "TEST") std::cout << chamber << std::endl;
 
@@ -682,7 +682,7 @@ namespace dqutils_mdtdeadnoisy {
   std::vector<int> GetDeadTubes(TH1F* h_tube, int& validity, std::vector<int>& deadML_v, std::vector<int>& deadLayer_v,
                                 std::vector<int>& deadMezz_v) {
     validity = 1;
-    TString chamber = ((TString) h_tube->GetName())(0, 7);
+    std::string chamber (h_tube->GetName(), 7);
     int totalTubes = h_tube->GetNbinsX();
 
     std::vector<int> non_empty, non_empty_non_noisy, no_betweens, no_betweens_middle, no_betweens_lowmiddle,
@@ -725,10 +725,10 @@ namespace dqutils_mdtdeadnoisy {
   std::vector<int> GetMaskedTubesForDead(TH1F* h_tube) {
     //   std::cout << "In GetMaskedTubesForDead" << std::endl;
 
-    TString hardware_name = ((TString) h_tube->GetName())(0, 7);
+    std::string hardware_name (h_tube->GetName(), 7);
     int numLayers = GetNumLayersPerML(hardware_name);
 
-    if (hardware_name(0, 4) == "BMS4" || hardware_name(0, 4) == "BMS6") {//layer 1-4 tubeId 41-48 cut out
+    if (hardware_name.starts_with("BMS4") || hardware_name.starts_with("BMS6")) {//layer 1-4 tubeId 41-48 cut out
       if (numLayers <= 3) {
         int cutouts[] = {
           41, 42, 43, 44, 45, 46, 47, 48, 89, 90, 91, 92, 93, 94, 95, 96, 137, 138, 139, 140, 141, 142, 143, 144
@@ -736,27 +736,27 @@ namespace dqutils_mdtdeadnoisy {
         return std::vector<int>(cutouts, cutouts + 24);
       }
     }
-    if (hardware_name(0, 3) == "BIR" && numLayers <= 4) {
-      if (hardware_name(5, 2) == "11" || hardware_name(5, 2) == "15") {
-        if (hardware_name(3, 1) == "1") { //layer 1-4 tube id 1-6 cut out
+    if (hardware_name.starts_with("BIR") && numLayers <= 4) {
+      if (hardware_name.substr(5, 2) == "11" || hardware_name.substr(5, 2) == "15") {
+        if (hardware_name[3] == '1') { //layer 1-4 tube id 1-6 cut out
           int cutouts[] = {
             1, 2, 3, 4, 5, 6, 31, 32, 33, 34, 35, 36, 61, 62, 63, 64, 65, 66, 91, 92, 93, 94, 95, 96
           };
           return std::vector<int>(cutouts, cutouts + 24);
         }
-        if (hardware_name(3, 1) == "2") { //layer 1-4 tube id 28-30 cut out
+        if (hardware_name[3] == '2') { //layer 1-4 tube id 28-30 cut out
           int cutouts[] = {
             28, 29, 30, 58, 59, 60, 88, 89, 90, 118, 119, 120
           };
           return std::vector<int>(cutouts, cutouts + 12);
         }
-        if (hardware_name(3, 1) == "4") { //layer 1-4 tube id 1-3 cut out
+        if (hardware_name[3] == '4') { //layer 1-4 tube id 1-3 cut out
           int cutouts[] = {
             1, 2, 3, 31, 32, 33, 61, 62, 63, 91, 92, 93
           };
           return std::vector<int>(cutouts, cutouts + 12);
         }
-        if (hardware_name(3, 1) == "5") {//layer 1-4 tube id 22-24 cut out
+        if (hardware_name[3] == '5') {//layer 1-4 tube id 22-24 cut out
           int cutouts[] = {
             22, 23, 24, 46, 47, 48, 70, 71, 72, 94, 95, 96
           };
@@ -764,7 +764,7 @@ namespace dqutils_mdtdeadnoisy {
         }
       }
     }
-    if (hardware_name(0, 3) == "BIR" && hardware_name(3, 1) == "3") { //cut out on both ML
+    if (hardware_name.starts_with("BIR") && hardware_name[3] =='3') { //cut out on both ML
       int cutouts[] = {
         34, 35, 36, 70, 71, 72, 106, 107, 108, 142, 143, 144, 178, 179, 180, 214, 215, 216, 250, 251, 252, 286, 287, 288
       };
@@ -820,15 +820,15 @@ namespace dqutils_mdtdeadnoisy {
     return getStandardDevFromMean(no_betweens_middle, mean);
   }
 
-  int GetNumLayersPerML(const TString& hardware_name) {
+  int GetNumLayersPerML(const std::string& hardware_name) {
     // Get Number of X
     int derived_NumLayerPerML = 1;
 
-    if (hardware_name(0, 4) == "BIS8" /*&& hardware_name(5,2) == "12"*/) {
+    if (hardware_name.starts_with("BIS8") /*&& hardware_name.substr(5,2) == "12"*/) {
       derived_NumLayerPerML = 3;
-    } else if (/*hardware_name(0,4) == "BIS8" ||*/ hardware_name(0, 3) == "BEE") {
+    } else if (/*hardware_name.starts_with("BIS8") ||*/ hardware_name.starts_with("BEE")) {
       derived_NumLayerPerML = 4;
-    } else if (hardware_name(0, 2) == "BI" || hardware_name(0, 2) == "EI") {
+    } else if (hardware_name.starts_with("BI") || hardware_name.starts_with("EI")) {
       derived_NumLayerPerML = 4;
     } else {
       derived_NumLayerPerML = 3;
@@ -837,64 +837,64 @@ namespace dqutils_mdtdeadnoisy {
     return derived_NumLayerPerML;
   }
 
-  int GetNumTubesPerMezz(const TString& hardware_name, int mezz) {
-    if (hardware_name(0, 3) == "BIR") {
-      if (hardware_name(3, 1) == "2" && mezz == 5) return 12;
-      else if (hardware_name(3, 1) == "3" && (mezz == 6 || mezz == 12)) return 12;
-      else if (hardware_name(3, 1) == "4" && mezz == 1) return 12;
-      else if (hardware_name(3, 1) == "5" && mezz == 4) return 12;
+  int GetNumTubesPerMezz(const std::string& hardware_name, int mezz) {
+    if (hardware_name.starts_with("BIR")) {
+      if (hardware_name[3] == '2' && mezz == 5) return 12;
+      else if (hardware_name[3] == '3' && (mezz == 6 || mezz == 12)) return 12;
+      else if (hardware_name[3] == '4' && mezz == 1) return 12;
+      else if (hardware_name[3] == '5' && mezz == 4) return 12;
     }
     return 24;
   }
 
-  int GetNumTubesPerML(const TString& hardware_name, int ML, int TotalTubes) {
-    if (hardware_name(0, 3) == "BIR" || hardware_name(0, 4) == "BMS4" || hardware_name(0, 4) == "BMS6") {
-      if (hardware_name(0, 4) == "BIR3") return 132;
+  int GetNumTubesPerML(const std::string& hardware_name, int ML, int TotalTubes) {
+    if (hardware_name.starts_with("BIR") || hardware_name.starts_with("BMS4") || hardware_name.starts_with("BMS6")) {
+      if (hardware_name.starts_with("BIR3")) return 132;
 
       if (ML == 1) {
-        if (hardware_name(0, 3) == "BMS") return 120;
+        if (hardware_name.starts_with("BMS")) return 120;
 
-        if (hardware_name(3, 1) == "1") return 120;
+        if (hardware_name[3] == '1') return 120;
 
-        if (hardware_name(3, 1) == "2") return 108;
+        if (hardware_name[3] == '2') return 108;
 
-        if (hardware_name(3, 1) == "4") return 108;
+        if (hardware_name[3] == '4') return 108;
 
-        if (hardware_name(3, 1) == "5") return 84;
+        if (hardware_name[3] == '5') return 84;
       }
       return (int) TotalTubes / GetNumML(hardware_name);
     }
     return (int) TotalTubes / GetNumML(hardware_name);
   }
 
-  int GetNumTubesPerLayer(const TString& hardware_name, int layer, int TotalTubes) {
-    if (hardware_name(0, 3) == "BIR" || hardware_name(0, 4) == "BMS4" || hardware_name(0, 4) == "BMS6") {
-      if (hardware_name(0, 4) == "BIR3") return 33;
+  int GetNumTubesPerLayer(const std::string& hardware_name, int layer, int TotalTubes) {
+    if (hardware_name.starts_with("BIR") || hardware_name.starts_with("BMS4") || hardware_name.starts_with("BMS6")) {
+      if (hardware_name.starts_with("BIR3")) return 33;
 
       if (layer <= 4) {
-        if (hardware_name(0, 3) == "BMS") return 40;
+        if (hardware_name.starts_with("BMS")) return 40;
 
-        if (hardware_name(3, 1) == "1") return 24;
+        if (hardware_name[3] == '1') return 24;
 
-        if (hardware_name(3, 1) == "2") return 27;
+        if (hardware_name[3] == '2') return 27;
 
-        if (hardware_name(3, 1) == "4") return 27;
+        if (hardware_name[3] == '4') return 27;
 
-        if (hardware_name(3, 1) == "5") return 21;
+        if (hardware_name[3] == '5') return 21;
       }
       return (int) TotalTubes / GetNumML(hardware_name) / GetNumLayersPerML(hardware_name);
     }
     return (int) TotalTubes / GetNumML(hardware_name) / GetNumLayersPerML(hardware_name);
   }
 
-  int GetNumML(const TString& hardware_name) {
+  int GetNumML(const std::string& hardware_name) {
     int derived_NumML = 1;
 
-    if (hardware_name(0, 4) == "BIS8" /*&& hardware_name(5,2) == "12"*/) {
+    if (hardware_name.starts_with("BIS8") /*&& hardware_name.substr(5,2) == "12"*/) {
       derived_NumML = 1;
-    } else if (/*hardware_name(0,4) == "BIS8" ||*/ hardware_name(0, 3) == "BEE") {
+    } else if (/*hardware_name.starts_with("BIS8") ||*/ hardware_name.starts_with("BEE")) {
       derived_NumML = 1;
-    } else if (hardware_name(0, 2) == "BI" || hardware_name(0, 2) == "EI") {
+    } else if (hardware_name.starts_with("BI") || hardware_name.starts_with("EI")) {
       derived_NumML = 2;
     } else {
       derived_NumML = 2;
@@ -903,7 +903,7 @@ namespace dqutils_mdtdeadnoisy {
     return derived_NumML;
   }
 
-  int getLastTubeInLayer(int& firstTubeInLayer, const TString& hardware_name, int totalTubes) {
+  int getLastTubeInLayer(int& firstTubeInLayer, const std::string& hardware_name, int totalTubes) {
     int tubeID = firstTubeInLayer;
 
     // int derived_tube = 1;
@@ -917,13 +917,13 @@ namespace dqutils_mdtdeadnoisy {
     int derived_NumLayerPerML = 1;
     int derived_NumML = 1;
 
-    if (hardware_name(0, 4) == "BIS8" /*&& hardware_name(5,2) == "12"*/) {
+    if (hardware_name.starts_with("BIS8") /*&& hardware_name.substr(5,2) == "12"*/) {
       derived_NumLayerPerML = 3;
       derived_NumML = 1;
-    } else if (/*hardware_name(0,4) == "BIS8" ||*/ hardware_name(0, 3) == "BEE") {
+    } else if (/*hardware_name.starts_with("BIS8") ||*/ hardware_name.starts_with("BEE")) {
       derived_NumLayerPerML = 4;
       derived_NumML = 1;
-    } else if (hardware_name(0, 2) == "BI" || hardware_name(0, 2) == "EI") {
+    } else if (hardware_name.starts_with("BI") || hardware_name.starts_with("EI")) {
       derived_NumLayerPerML = 4;
       derived_NumML = 2;
     } else {
@@ -936,15 +936,15 @@ namespace dqutils_mdtdeadnoisy {
     derived_NumTubePerLayer = totalTubes / derived_NumLayer;
 
     // Corrections for derived_NumTubePerLayer
-    if (hardware_name(0, 4) == "BMS4" || hardware_name(0, 4) == "BMS6") derived_NumTubePerLayer = 48;
-    if ((hardware_name(5, 2) == "11" || hardware_name(5, 2) == "15")) {
-      if (hardware_name(0, 4) == "BIR1") derived_NumTubePerLayer = 30;
-      if (hardware_name(0, 4) == "BIR2") derived_NumTubePerLayer = 30;
-      if (hardware_name(0, 4) == "BIR3") derived_NumTubePerLayer = 36;
-      if (hardware_name(0, 4) == "BIR4") derived_NumTubePerLayer = 30;
-      if (hardware_name(0, 4) == "BIR5") derived_NumTubePerLayer = 24;
+    if (hardware_name.starts_with("BMS4") || hardware_name.starts_with("BMS6")) derived_NumTubePerLayer = 48;
+    if ((hardware_name.substr(5, 2) == "11" || hardware_name.substr(5, 2) == "15")) {
+      if (hardware_name.starts_with("BIR1")) derived_NumTubePerLayer = 30;
+      if (hardware_name.starts_with("BIR2")) derived_NumTubePerLayer = 30;
+      if (hardware_name.starts_with("BIR3")) derived_NumTubePerLayer = 36;
+      if (hardware_name.starts_with("BIR4")) derived_NumTubePerLayer = 30;
+      if (hardware_name.starts_with("BIR5")) derived_NumTubePerLayer = 24;
     }
-//     if( hardware_name(0,4)=="EIL4" && ( hardware_name(5,2)=="09" || hardware_name(5,2)=="01" ) ) // possible
+//     if( hardware_name.starts_with("EIL4") && ( hardware_name.substr(5,2)=="09" || hardware_name.substr(5,2)=="01" ) ) // possible
 // MdtIdHelper problem
 //       derived_NumTubePerLayer = 54;
 
@@ -961,7 +961,7 @@ namespace dqutils_mdtdeadnoisy {
     return lastTubeInLayer;
   }
 
-  int Get_ML_of_Layer(int& layer, const TString& hardware_name) {
+  int Get_ML_of_Layer(int& layer, const std::string& hardware_name) {
     int derived_ML = 1;
 
     // Get Number of X
@@ -969,13 +969,13 @@ namespace dqutils_mdtdeadnoisy {
     int derived_NumLayerPerML = 1;
 
     // int derived_NumML = 1;
-    if (hardware_name(0, 4) == "BIS8" /*&& hardware_name(5,2) == "12"*/) {
+    if (hardware_name.starts_with("BIS8") /*&& hardware_name.substr(5,2) == "12"*/) {
       derived_NumLayerPerML = 3;
       // derived_NumML = 1;
-    } else if (/*hardware_name(0,4) == "BIS8" ||*/ hardware_name(0, 3) == "BEE") {
+    } else if (/*hardware_name.starts_with("BIS8") ||*/ hardware_name.starts_with("BEE")) {
       derived_NumLayerPerML = 4;
       // derived_NumML = 1;
-    } else if (hardware_name(0, 2) == "BI" || hardware_name(0, 2) == "EI") {
+    } else if (hardware_name.starts_with("BI") || hardware_name.starts_with("EI")) {
       derived_NumLayerPerML = 4;
       // derived_NumML = 2;
     } else {
@@ -990,7 +990,7 @@ namespace dqutils_mdtdeadnoisy {
     return derived_ML;
   }
 
-  int getLastTubeInML(int& firstTubeInML, const TString& hardware_name, int totalTubes) {
+  int getLastTubeInML(int& firstTubeInML, const std::string& hardware_name, int totalTubes) {
     int tubeID = firstTubeInML;
 
     // int derived_tube = 1;
@@ -1004,13 +1004,13 @@ namespace dqutils_mdtdeadnoisy {
     // int derived_NumLayerPerML = 1;
     int derived_NumML = 1;
 
-    if (hardware_name(0, 4) == "BIS8" /*&& hardware_name(5,2) == "12"*/) {
+    if (hardware_name.starts_with("BIS8") /*&& hardware_name.substr(5,2) == "12"*/) {
       //derived_NumLayerPerML = 3;
       derived_NumML = 1;
-    } else if (/*hardware_name(0,4) == "BIS8" ||*/ hardware_name(0, 3) == "BEE") {
+    } else if (/*hardware_name.starts_with("BIS8") ||*/ hardware_name.starts_with("BEE")) {
       //derived_NumLayerPerML = 4;
       derived_NumML = 1;
-    } else if (hardware_name(0, 2) == "BI" || hardware_name(0, 2) == "EI") {
+    } else if (hardware_name.starts_with("BI") || hardware_name.starts_with("EI")) {
       //derived_NumLayerPerML = 4;
       derived_NumML = 2;
     } else {
@@ -1024,15 +1024,15 @@ namespace dqutils_mdtdeadnoisy {
 
 #if 0
     // Corrections for derived_NumTubePerLayer
-    if (hardware_name(0, 4) == "BMS4" || hardware_name(0, 4) == "BMS6") derived_NumTubePerLayer = 48;
-    if ((hardware_name(5, 2) == "11" || hardware_name(5, 2) == "15")) {
-      if (hardware_name(0, 4) == "BIR1") derived_NumTubePerLayer = 30;
-      if (hardware_name(0, 4) == "BIR2") derived_NumTubePerLayer = 30;
-      if (hardware_name(0, 4) == "BIR3") derived_NumTubePerLayer = 36;
-      if (hardware_name(0, 4) == "BIR4") derived_NumTubePerLayer = 30;
-      if (hardware_name(0, 4) == "BIR5") derived_NumTubePerLayer = 24;
+    if (hardware_name.starts_with("BMS4") || hardware_name.starts_with("BMS6")) derived_NumTubePerLayer = 48;
+    if ((hardware_name.substr(5, 2) == "11" || hardware_name.substr(5, 2) == "15")) {
+      if (hardware_name.starts_with("BIR1")) derived_NumTubePerLayer = 30;
+      if (hardware_name.starts_with("BIR2")) derived_NumTubePerLayer = 30;
+      if (hardware_name.starts_with("BIR3")) derived_NumTubePerLayer = 36;
+      if (hardware_name.starts_with("BIR4")) derived_NumTubePerLayer = 30;
+      if (hardware_name.starts_with("BIR5")) derived_NumTubePerLayer = 24;
     }
-//     if( hardware_name(0,4)=="EIL4" && ( hardware_name(5,2)=="09" || hardware_name(5,2)=="01" ) ) // possible
+//     if( hardware_name.starts_with("EIL4") && ( hardware_name.substr(5,2)=="09" || hardware_name.substr(5,2)=="01" ) ) // possible
 // MdtIdHelper problem
 //       derived_NumTubePerLayer = 54;
 #endif
@@ -1052,14 +1052,14 @@ namespace dqutils_mdtdeadnoisy {
 
   int GetNumMezz(TH1F* h_tube) {
     int totalTubes = h_tube->GetNbinsX();
-    TString hardware_name = ((TString) h_tube->GetName())(0, 7);
+    std::string hardware_name (h_tube->GetName(), 7);
     int groupsPerLayer;
 
     std::vector<TubeRange> tubeRange = getMezzRanges(hardware_name, totalTubes, groupsPerLayer);
     return tubeRange.size();
   }
 
-  std::vector<TubeRange> getMezzRanges(const TString& hardware_name, int totalTubes, int& groupsPerLayer) {
+  std::vector<TubeRange> getMezzRanges(const std::string& hardware_name, int totalTubes, int& groupsPerLayer) {
     // Get Number of X
     int derived_NumTubePerLayer = 1;
     // int derived_NumTubePerML = 1;
@@ -1067,13 +1067,13 @@ namespace dqutils_mdtdeadnoisy {
     int derived_NumLayerPerML = 1;
     int derived_NumML = 1;
 
-    if (hardware_name(0, 4) == "BIS8" /*&& hardware_name(5,2) == "12"*/) {
+    if (hardware_name.starts_with("BIS8") /*&& hardware_name.substr(5,2) == "12"*/) {
       derived_NumLayerPerML = 3;
       derived_NumML = 1;
-    } else if (/*hardware_name(0,4) == "BIS8" ||*/ hardware_name(0, 3) == "BEE") {
+    } else if (/*hardware_name.starts_with("BIS8") ||*/ hardware_name.starts_with("BEE")) {
       derived_NumLayerPerML = 4;
       derived_NumML = 1;
-    } else if (hardware_name(0, 2) == "BI" || hardware_name(0, 2) == "EI") {
+    } else if (hardware_name.starts_with("BI") || hardware_name.starts_with("EI")) {
       derived_NumLayerPerML = 4;
       derived_NumML = 2;
     } else {
@@ -1108,7 +1108,7 @@ namespace dqutils_mdtdeadnoisy {
     return ranges;
   }
 
-  int Get_ML_of_Mezz_degenerate(int& mezz, const TString& hardware_name, int totalTubes) {
+  int Get_ML_of_Mezz_degenerate(int& mezz, const std::string& hardware_name, int totalTubes) {
     // Get Number of X
     int derived_NumTubePerLayer = 1;
     // int derived_NumTubePerML = 1;
@@ -1116,13 +1116,13 @@ namespace dqutils_mdtdeadnoisy {
     int derived_NumLayerPerML = 1;
     int derived_NumML = 1;
 
-    if (hardware_name(0, 4) == "BIS8" /*&& hardware_name(5,2) == "12"*/) {
+    if (hardware_name.starts_with("BIS8") /*&& hardware_name.substr(5,2) == "12"*/) {
       derived_NumLayerPerML = 3;
       derived_NumML = 1;
-    } else if (/*hardware_name(0,4) == "BIS8" ||*/ hardware_name(0, 3) == "BEE") {
+    } else if (/*hardware_name.starts_with("BIS8") ||*/ hardware_name.starts_with("BEE")) {
       derived_NumLayerPerML = 4;
       derived_NumML = 1;
-    } else if (hardware_name(0, 2) == "BI" || hardware_name(0, 2) == "EI") {
+    } else if (hardware_name.starts_with("BI") || hardware_name.starts_with("EI")) {
       derived_NumLayerPerML = 4;
       derived_NumML = 2;
     } else {
@@ -1149,7 +1149,7 @@ namespace dqutils_mdtdeadnoisy {
   }
 
   // This version does not account for multilayers (on purpose, so it is single-valued)
-  int Get_ML_of_Mezz(int& mezz, const TString& hardware_name, int totalTubes) {
+  int Get_ML_of_Mezz(int& mezz, const std::string& hardware_name, int totalTubes) {
     // Get Number of X
     int derived_NumTubePerLayer = 1;
     // int derived_NumTubePerML = 1;
@@ -1157,13 +1157,13 @@ namespace dqutils_mdtdeadnoisy {
     int derived_NumLayerPerML = 1;
     int derived_NumML = 1;
 
-    if (hardware_name(0, 4) == "BIS8" /*&& hardware_name(5,2) == "12"*/) {
+    if (hardware_name.starts_with("BIS8") /*&& hardware_name.substr(5,2) == "12"*/) {
       derived_NumLayerPerML = 3;
       derived_NumML = 1;
-    } else if (/*hardware_name(0,4) == "BIS8" ||*/ hardware_name(0, 3) == "BEE") {
+    } else if (/*hardware_name.starts_with("BIS8") ||*/ hardware_name.starts_with("BEE")) {
       derived_NumLayerPerML = 4;
       derived_NumML = 1;
-    } else if (hardware_name(0, 2) == "BI" || hardware_name(0, 2) == "EI") {
+    } else if (hardware_name.starts_with("BI") || hardware_name.starts_with("EI")) {
       derived_NumLayerPerML = 4;
       derived_NumML = 2;
     } else {
@@ -1189,7 +1189,7 @@ namespace dqutils_mdtdeadnoisy {
   }
 
   // This function does not account for multilayers (on purpose, so it is single-valued)
-  int Get_Mezz_of_Tube(int& tubeID, const TString& hardware_name /*, int totalTubes*/,
+  int Get_Mezz_of_Tube(int& tubeID, const std::string& hardware_name /*, int totalTubes*/,
                        std::vector<TubeRange>& tubeRanges, int groupsPerLayer) {
     unsigned int rangeIndexOfTube = 9999;
 
@@ -1214,7 +1214,7 @@ namespace dqutils_mdtdeadnoisy {
   }
 
   // This function does not account for multilayers (on purpose, so it is single-valued)
-  int Get_Layer_of_Tube(int& tubeID, const TString& hardware_name, int totalTubes) {
+  int Get_Layer_of_Tube(int& tubeID, const std::string& hardware_name, int totalTubes) {
     int derived_layer = 1;
 
     // Get Number of X
@@ -1223,13 +1223,13 @@ namespace dqutils_mdtdeadnoisy {
     int derived_NumLayerPerML = 1;
     int derived_NumML = 1;
 
-    if (hardware_name(0, 4) == "BIS8" /*&& hardware_name(5,2) == "12"*/) {
+    if (hardware_name.starts_with("BIS8") /*&& hardware_name.substr(5,2) == "12"*/) {
       derived_NumLayerPerML = 3;
       derived_NumML = 1;
-    } else if (/*hardware_name(0,4) == "BIS8" ||*/ hardware_name(0, 3) == "BEE") {
+    } else if (/*hardware_name.starts_with("BIS8") ||*/ hardware_name.starts_with("BEE")) {
       derived_NumLayerPerML = 4;
       derived_NumML = 1;
-    } else if (hardware_name(0, 2) == "BI" || hardware_name(0, 2) == "EI") {
+    } else if (hardware_name.starts_with("BI") || hardware_name.starts_with("EI")) {
       derived_NumLayerPerML = 4;
       derived_NumML = 2;
     } else {
@@ -1241,15 +1241,15 @@ namespace dqutils_mdtdeadnoisy {
     derived_NumTubePerLayer = totalTubes / derived_NumLayer;
 
     // Corrections for derived_NumTubePerLayer
-    if (hardware_name(0, 4) == "BMS4" || hardware_name(0, 4) == "BMS6") derived_NumTubePerLayer = 48;
-    if ((hardware_name(5, 2) == "11" || hardware_name(5, 2) == "15")) {
-      if (hardware_name(0, 4) == "BIR1") derived_NumTubePerLayer = 30;
-      if (hardware_name(0, 4) == "BIR2") derived_NumTubePerLayer = 30;
-      if (hardware_name(0, 4) == "BIR3") derived_NumTubePerLayer = 36;
-      if (hardware_name(0, 4) == "BIR4") derived_NumTubePerLayer = 30;
-      if (hardware_name(0, 4) == "BIR5") derived_NumTubePerLayer = 24;
+    if (hardware_name.starts_with("BMS4") || hardware_name.starts_with("BMS6")) derived_NumTubePerLayer = 48;
+    if ((hardware_name.substr(5, 2) == "11" || hardware_name.substr(5, 2) == "15")) {
+      if (hardware_name.starts_with("BIR1")) derived_NumTubePerLayer = 30;
+      if (hardware_name.starts_with("BIR2")) derived_NumTubePerLayer = 30;
+      if (hardware_name.starts_with("BIR3")) derived_NumTubePerLayer = 36;
+      if (hardware_name.starts_with("BIR4")) derived_NumTubePerLayer = 30;
+      if (hardware_name.starts_with("BIR5")) derived_NumTubePerLayer = 24;
     }
-//     if( hardware_name(0,4)=="EIL4" && ( hardware_name(5,2)=="09" || hardware_name(5,2)=="01" ) ) // possible
+//     if( hardware_name.starts_with("EIL4") && ( hardware_name.substr(5,2)=="09" || hardware_name.substr(5,2)=="01" ) ) // possible
 // MdtIdHelper problem
 //       derived_NumTubePerLayer = 54;
 
@@ -1259,18 +1259,18 @@ namespace dqutils_mdtdeadnoisy {
     return derived_layer;
   }
 
-  int Get_ML_of_Tube(int& tubeID, const TString& hardware_name, int totalTubes) {
+  int Get_ML_of_Tube(int& tubeID, const std::string& hardware_name, int totalTubes) {
     int derived_ML = 1;
 
     // Get Number of X
     int derived_NumTubePerML = 1;
     int derived_NumML = 1;
 
-    if (hardware_name(0, 4) == "BIS8" /*&& hardware_name(5,2) == "12"*/) {
+    if (hardware_name.starts_with("BIS8") /*&& hardware_name.substr(5,2) == "12"*/) {
       derived_NumML = 1;
-    } else if (/*hardware_name(0,4) == "BIS8" ||*/ hardware_name(0, 3) == "BEE") {
+    } else if (/*hardware_name.starts_with("BIS8") ||*/ hardware_name.starts_with("BEE")) {
       derived_NumML = 1;
-    } else if (hardware_name(0, 2) == "BI" || hardware_name(0, 2) == "EI") {
+    } else if (hardware_name.starts_with("BI") || hardware_name.starts_with("EI")) {
       derived_NumML = 2;
     } else {
       derived_NumML = 2;
@@ -1284,7 +1284,7 @@ namespace dqutils_mdtdeadnoisy {
     return derived_ML;
   }
 
-  std::vector<TubeRange> getLayerRanges(const TString& hardware_name, int totalTubes) {
+  std::vector<TubeRange> getLayerRanges(const std::string& hardware_name, int totalTubes) {
     int firstTubeID = 1;
     int lastTubeID;
 
@@ -1297,7 +1297,7 @@ namespace dqutils_mdtdeadnoisy {
     return ranges;
   }
 
-  std::vector<TubeRange> getMLRanges(const TString& hardware_name, int totalTubes) {
+  std::vector<TubeRange> getMLRanges(const std::string& hardware_name, int totalTubes) {
     int firstTubeID = 1;
     int lastTubeID;
 
@@ -1311,7 +1311,7 @@ namespace dqutils_mdtdeadnoisy {
   }
 
   std::vector<int>
-  /*void*/ FindDeadMezz(TH1F* h_tube, const TString& hardware_name, std::vector<int>& deadML_v) {
+  /*void*/ FindDeadMezz(TH1F* h_tube, const std::string& hardware_name, std::vector<int>& deadML_v) {
 //     std::cout << "In FindDeadMezz for " << hardware_name << std::endl;
 
     int totalTubes = h_tube->GetNbinsX();
@@ -1376,7 +1376,7 @@ namespace dqutils_mdtdeadnoisy {
   }
 
   std::vector<int>
-  /*void*/ FindDeadLayer(TH1F* h_tube, const TString& hardware_name, std::vector<int>& deadML_v) {
+  /*void*/ FindDeadLayer(TH1F* h_tube, const std::string& hardware_name, std::vector<int>& deadML_v) {
     //   std::cout << "In FindDeadLayer" << std::endl;
 
     int totalTubes = h_tube->GetNbinsX();
@@ -1432,7 +1432,7 @@ namespace dqutils_mdtdeadnoisy {
   }
 
   std::vector<int>
-  /*void*/ FindDeadML(TH1F* h_tube, const TString& hardware_name) {
+  /*void*/ FindDeadML(TH1F* h_tube, const std::string& hardware_name) {
     //   std::cout << "In FindDeadML" << std::endl;
 
     int totalTubes = h_tube->GetNbinsX();
@@ -1494,16 +1494,16 @@ namespace dqutils_mdtdeadnoisy {
 
     c->Clear();
     if (separate_dead_noisy_histos) c->Divide(2, 1);
-    TString chamberName = ((TString) hDead->GetName())(0, 7);
-    c->SetTitle(chamberName);
+    std::string chamberName (hDead->GetName(), 7);
+    c->SetTitle(chamberName.c_str());
 
     vector<int> maskedTubesForDead = GetMaskedTubesForDead(hDead);
     TH1F* hOnlyDead = new TH1F(hDead->GetName(), hDead->GetTitle(), hDead->GetNbinsX(), 1, hDead->GetNbinsX());
     TH1F* hOnlyNoise = new TH1F(hNoise->GetName(), hNoise->GetTitle(), hNoise->GetNbinsX(), 1, hNoise->GetNbinsX());
 
-    TString maskedStr = hDead->GetName();
+    std::string maskedStr = hDead->GetName();
     maskedStr += "_masked";
-    TH1F* hOnlyMaskedDead = new TH1F(maskedStr, hDead->GetTitle(), hDead->GetNbinsX(), 1, hDead->GetNbinsX());
+    TH1F* hOnlyMaskedDead = new TH1F(maskedStr.c_str(), hDead->GetTitle(), hDead->GetNbinsX(), 1, hDead->GetNbinsX());
 
     // fill the layer range histo
     std::vector<TLine> rangeLines;
@@ -1724,10 +1724,10 @@ namespace dqutils_mdtdeadnoisy {
 
     std::ostringstream Out;
 
-    TString ecapStr = "MDTBADead";
-    if (chamberName(0, 1) == "B" && chamberName(4, 1) == "C") ecapStr = "MDTBCDead";
-    else if (chamberName(0, 1) == "E" && chamberName(4, 1) == "A") ecapStr = "MDTEADead";
-    else if (chamberName(0, 1) == "E" && chamberName(4, 1) == "C") ecapStr = "MDTECDead";
+    std::string ecapStr = "MDTBADead";
+    if (chamberName[0] == 'B' && chamberName[4] == 'C') ecapStr = "MDTBCDead";
+    else if (chamberName[0] == 'E' && chamberName[4] == 'A') ecapStr = "MDTEADead";
+    else if (chamberName[0] == 'E' && chamberName[4] == 'C') ecapStr = "MDTECDead";
 
     Out << inFilename << "." << ecapStr << ".pdf";
 

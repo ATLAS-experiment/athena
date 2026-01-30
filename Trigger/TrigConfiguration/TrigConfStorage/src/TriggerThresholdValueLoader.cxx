@@ -17,8 +17,6 @@
 //
 //////////////////////////////////////////////////////////////////////
 
-#include "boost/lexical_cast.hpp"
-
 #include "./TriggerThresholdValueLoader.h"
 
 #include <CoralBase/Attribute.h>
@@ -123,13 +121,13 @@ TrigConf::TriggerThresholdValueLoader::load( TriggerThresholdValue& ttvTarget ) 
       name = row["L1TTV_NAME"].data<std::string>();
       version = row["L1TTV_VERSION"].data<int>();
       type = row["L1TTV_TYPE"].data<std::string>();
-      ptcut = boost::lexical_cast<float,std::string>(row["L1TTV_PT_CUT"].data<std::string>());
+      ptcut = std::stof(row["L1TTV_PT_CUT"].data<std::string>());
       etamin = row["L1TTV_ETA_MIN"].data<int>();
       etamax = row["L1TTV_ETA_MAX"].data<int>();
       phimin = row["L1TTV_PHI_MIN"].data<int>();
       phimax = row["L1TTV_PHI_MAX"].data<int>();
       window = row["L1TTV_WINDOW"].data<int>();
-      priority = boost::lexical_cast<float,std::string>(row["L1TTV_PRIORITY"].data<std::string>());
+      priority = std::stof(row["L1TTV_PRIORITY"].data<std::string>());
       emisolation = row["L1TTV_EM_ISOLATION"].data<std::string>();
       hadisolation = row["L1TTV_HAD_ISOLATION"].data<std::string>();
       hadveto = row["L1TTV_HAD_VETO"].data<std::string>();
@@ -173,13 +171,13 @@ TrigConf::TriggerThresholdValueLoader::load( TriggerThresholdValue& ttvTarget ) 
 
       cout << "ISO " << emisolation << "   " << hadisolation << "   " << hadveto << endl;
 
-      if(hadveto=="USEISOBITS" || boost::lexical_cast<int,std::string>(hadveto)==99 ) {
+      if(hadveto=="USEISOBITS" || std::stoi(hadveto)==99 ) {
          ctvTarget.setIsolationMask( TrigConf::bin2uint(emisolation) );
          ctvTarget.setUseIsolationMask();
       } else {
-         ctvTarget.setEmIsolation( boost::lexical_cast<float,std::string>(emisolation) );
-         ctvTarget.setHadIsolation( boost::lexical_cast<float,std::string>(hadisolation) );
-         ctvTarget.setHadVeto( boost::lexical_cast<float,std::string>(hadveto) );
+         ctvTarget.setEmIsolation( std::stof(emisolation) );
+         ctvTarget.setHadIsolation( std::stof(hadisolation) );
+         ctvTarget.setHadVeto( std::stof(hadveto) );
          ctvTarget.setUseIsolationMask( false );
       }
 

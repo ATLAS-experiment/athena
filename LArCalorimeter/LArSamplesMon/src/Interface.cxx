@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArSamplesMon/Interface.h"
@@ -32,58 +32,67 @@ using std::endl;
 using namespace LArSamples;
 
 
-Interface* Interface::open(const TString& fileName) 
+std::unique_ptr<Interface> Interface::open(const TString& fileName)
 {
-  TreeAccessor* accessor = TreeAccessor::open(fileName);
-  return (accessor ? new Interface(*accessor) : nullptr);
+  std::unique_ptr<TreeAccessor> accessor = TreeAccessor::open(fileName);
+  if (accessor) {
+    return std::make_unique<Interface> (std::move(accessor));
+  }
+  return nullptr;
+}
+
+std::unique_ptr<Interface> Interface::open(const std::vector<TString>& fileNames)
+{
+  std::unique_ptr<MultiTreeAccessor> accessor = MultiTreeAccessor::open(fileNames);
+  if (accessor) {
+    return std::make_unique<Interface> (std::move(accessor));
+  }
+  return nullptr;
 }
 
 
-Interface* Interface::open(const std::vector<TString>& fileNames) 
+std::unique_ptr<Interface> Interface::openList(const TString& fileList)
 {
-  MultiTreeAccessor* accessor = MultiTreeAccessor::open(fileNames);
-  return (accessor ? new Interface(*accessor) : nullptr);
+  std::unique_ptr<MultiTreeAccessor> accessor = MultiTreeAccessor::openList(fileList);
+  if (accessor) {
+    return std::make_unique<Interface> (std::move(accessor));
+  }
+  return nullptr;
 }
 
 
-Interface* Interface::openList(const TString& fileList) 
+std::unique_ptr<Interface> Interface::openWild(const TString& wcName)
 {
-  MultiTreeAccessor* accessor = MultiTreeAccessor::openList(fileList);
-  return (accessor ? new Interface(*accessor) : nullptr);
+  std::unique_ptr<MultiTreeAccessor> accessor = MultiTreeAccessor::openWild(wcName);
+  if (accessor) {
+    return std::make_unique<Interface> (std::move(accessor));
+  }
+  return nullptr;
 }
 
 
-Interface* Interface::openWild(const TString& wcName) 
+Interface::Interface(std::unique_ptr<const Accessor> accessor)
+  : m_accessor(std::move(accessor)), m_shapeErrorGetter(nullptr), m_neighborCache(nChannels())
 {
-  MultiTreeAccessor* accessor = MultiTreeAccessor::openWild(wcName);
-  return (accessor ? new Interface(*accessor) : nullptr);
 }
-
 
 Interface::~Interface() 
 { 
-  if (m_ownShapeErrorGetter) delete m_shapeErrorGetter;
-  delete m_accessor; 
-
-  for (std::vector<unsigned int>* neighbors : m_neighborCache)
-    delete neighbors;
 }
 
 
 void Interface::setShapeErrorGetter(const AbsShapeErrorGetter* err)
 {
-  if (m_ownShapeErrorGetter) delete m_shapeErrorGetter;
+  m_ownedShapeErrorGetter.reset();
   m_shapeErrorGetter = err;
-  m_ownShapeErrorGetter = false;
 }
 
 
 void Interface::setShapeError(double k)
 {
-  if (m_ownShapeErrorGetter) delete m_shapeErrorGetter;
-  if (k == 0) { m_shapeErrorGetter = nullptr; m_ownShapeErrorGetter = false; return; }
-  m_shapeErrorGetter = new UniformShapeErrorGetter(k);
-  m_ownShapeErrorGetter = true;
+  if (k == 0) { m_shapeErrorGetter = nullptr; m_ownedShapeErrorGetter.reset(); return; }
+  m_ownedShapeErrorGetter = std::make_unique<UniformShapeErrorGetter>(k);
+  m_shapeErrorGetter = m_ownedShapeErrorGetter.get();
 }
 
 
@@ -234,58 +243,52 @@ bool Interface::isValid() const
 }
 
 
-Interface* Interface::merge(const Interface& other, const TString& fileName) const
+std::unique_ptr<Interface> Interface::merge(const Interface& other, const TString& fileName) const
 {
-  std::vector<const Interface*> interfaces;
-  interfaces.push_back(this);
-  interfaces.push_back(&other);
+  std::vector<const Interface*> interfaces { this, &other };
   return merge(interfaces, fileName);
 }
 
 
-Interface* Interface::merge(const std::vector<const Interface*>& interfaces, const TString& fileName)
+std::unique_ptr<Interface> Interface::merge(const std::vector<const Interface*>& interfaces, const TString& fileName)
 {  
   std::vector<const Accessor*> accessors;
   for (unsigned int i = 0; i < interfaces.size(); i++)
     accessors.push_back(&interfaces[i]->accessor());
-  TreeAccessor* newAccessor = TreeAccessor::merge(accessors, fileName);
-  return new Interface(*newAccessor);
+  std::unique_ptr<TreeAccessor> newAccessor = TreeAccessor::merge(accessors, fileName);
+  return std::make_unique<Interface>(std::move(newAccessor));
 }
 
-Interface* Interface::merge(const Interface& other, const TString& fileName, const TString& LBFile) const
+std::unique_ptr<Interface> Interface::merge(const Interface& other, const TString& fileName, const TString& LBFile) const
 {
-  std::vector<const Interface*> interfaces;
-  interfaces.push_back(this);
-  interfaces.push_back(&other);
+  std::vector<const Interface*> interfaces { this, &other };
   return merge(interfaces, fileName, LBFile);
 }
 
 
-Interface* Interface::merge(const std::vector<const Interface*>& interfaces, const TString& fileName, const TString& LBFile)
+std::unique_ptr<Interface> Interface::merge(const std::vector<const Interface*>& interfaces, const TString& fileName, const TString& LBFile)
 {  
   std::vector<const Accessor*> accessors;
   for (unsigned int i = 0; i < interfaces.size(); i++)
     accessors.push_back(&interfaces[i]->accessor());
-  TreeAccessor* newAccessor = TreeAccessor::merge(accessors, fileName, LBFile);
-  return new Interface(*newAccessor);
+  std::unique_ptr<TreeAccessor> newAccessor = TreeAccessor::merge(accessors, fileName, LBFile);
+  return std::make_unique<Interface>(std::move(newAccessor));
 }
 
 
-Interface* Interface::merge(const TString& listFileName, const TString& fileName)
+std::unique_ptr<Interface> Interface::merge(const TString& listFileName, const TString& fileName)
 {
-  Interface* multi = openList(listFileName);
+  std::unique_ptr<const Interface> multi = openList(listFileName);
   if (!multi) return nullptr;
-  std::vector<const Interface*> justOne;
-  justOne.push_back(multi);
+  std::vector<const Interface*> justOne { multi.get() };
   return merge(justOne, fileName);
 }
 
-Interface* Interface::merge(const TString& listFileName, const TString& fileName, const TString& LBFile)
+std::unique_ptr<Interface> Interface::merge(const TString& listFileName, const TString& fileName, const TString& LBFile)
 {
-  Interface* multi = openList(listFileName);
+  std::unique_ptr<const Interface> multi = openList(listFileName);
   if (!multi) return nullptr;
-  std::vector<const Interface*> justOne;
-  justOne.push_back(multi);
+  std::vector<const Interface*> justOne { multi.get() };
   return merge(justOne, fileName, LBFile);
 }
 
@@ -294,20 +297,17 @@ bool Interface::filterAndMerge(const TString& listFileName, const TString& outFi
 {
   FilterList filterList;
   
-  TObjArray* list = filters.Tokenize(",;");
+  std::unique_ptr<TObjArray> list (filters.Tokenize(",;"));
   if (list->GetEntries() == 0) {
     cout << "No filtering specified, exiting.";
-    delete list;
     return 0;
   }
   
   for (int k = 0; k < list->GetEntries(); k++) {
     TObjString* tobs = (TObjString*)(list->At(k));
-    TObjArray* items = tobs->String().Tokenize(":");
+    std::unique_ptr<TObjArray> items (tobs->String().Tokenize(":"));
     if (items->GetEntries() != 2) {
       cout << "Invalid filter entry " << tobs->String() << ", exiting." << endl;
-      delete list;
-      delete items;
       return 0;
     }
     TString params = ((TObjString*)(items->At(0)))->String();
@@ -316,27 +316,22 @@ bool Interface::filterAndMerge(const TString& listFileName, const TString& outFi
     if (!f.set(params)) return 0;
     cout << "---" << endl;
     filterList.add(f, addSuffix(outFile, suffix));
-    delete items;
   }
-  delete list;
 
   
   DataTweaker tweak;
   if (!tweak.set(tweaks)) return 0;
 
-  Interface* multi = openList(listFileName);
+  std::unique_ptr<const Interface> multi = openList(listFileName);
   if (!multi) return 0;
   const MultiTreeAccessor* mt = dynamic_cast<const MultiTreeAccessor*>(&multi->accessor());
   if (!mt){
-    delete multi;
     return 0;
   } 
   std::vector<MultiTreeAccessor*> filtered_mts = mt->filterComponents(filterList, tweak);
   if (filtered_mts.size() != filterList.size()){
-    delete multi;
     return 0;
   } 
-  delete multi;
   cout << "Component filtering done!" << endl;
   // The following line should work, but doesn't... so the block of code below replaces it.
   //Interface* filtered_multi = new Interface(*filtered_mt);
@@ -348,19 +343,17 @@ bool Interface::filterAndMerge(const TString& listFileName, const TString& outFi
       cout << "Added " << files.back() << endl;
     }
     delete filtered_mts[f];
-    Interface* filtered_multi = open(files);
+    std::unique_ptr<const Interface> filtered_multi = open(files);
     //
-    std::vector<const Interface*> justOne;
-    justOne.push_back(filtered_multi);
-    Interface* interface = merge(justOne, filterList.fileName(f));
-    delete interface;
+    std::vector<const Interface*> justOne { filtered_multi.get() };
+    std::unique_ptr<Interface> interface = merge(justOne, filterList.fileName(f));
   }
   
   return true;
 }
 
 
-Interface* Interface::filter(const TString& sel, const TString& fileName, const TString& tweaks) const
+std::unique_ptr<Interface> Interface::filter(const TString& sel, const TString& fileName, const TString& tweaks) const
 {
   FilterParams f;
   if (!f.set(sel)) return nullptr;
@@ -388,21 +381,21 @@ TString Interface::addSuffix(const TString& fileName, const TString& suffix)
 }
 
 
-Interface* Interface::filter(const FilterParams& filterParams, const DataTweaker& tweaker, const TString& fileName) const
+std::unique_ptr<Interface> Interface::filter(const FilterParams& filterParams, const DataTweaker& tweaker, const TString& fileName) const
 {
-  TreeAccessor* newAcc = TreeAccessor::filter(accessor(), filterParams, fileName, tweaker);
-  return new Interface(*newAcc);
+  std::unique_ptr<TreeAccessor> newAcc = TreeAccessor::filter(accessor(), filterParams, fileName, tweaker);
+  return std::make_unique<Interface>(std::move(newAcc));
 }
 
 
-Interface* Interface::makeTemplate(const TString& fileName) const
+std::unique_ptr<Interface> Interface::makeTemplate(const TString& fileName) const
 {
-  TreeAccessor* newAcc = TreeAccessor::makeTemplate(accessor(), fileName);
-  return new Interface(*newAcc);
+  std::unique_ptr<TreeAccessor> newAcc = TreeAccessor::makeTemplate(accessor(), fileName);
+  return std::make_unique<Interface>(std::move(newAcc));
 }
 
 
-Interface* Interface::refit(const TString& newFileName, Chi2Params pars) const
+std::unique_ptr<Interface> Interface::refit(const TString& newFileName, Chi2Params pars) const
 {
   FilterParams f;
   DataTweaker tw;
@@ -599,9 +592,8 @@ bool Interface::Show(const TString& sel, unsigned int verbosity) const
   for (unsigned int i = 0; i < nChannels(); i++) {  
     const History* history = pass(i, f);
     if (!history) continue;
-    History* filtered = history->filter(sel);
+    std::unique_ptr<History> filtered = history->filter(sel);
     TString hDesc = filtered->description(verbosity);
-    delete filtered;
     if (hDesc == "") continue;
     cout << Form("Hash = %-5d : ", i) << hDesc
          << "-----------------------------------------------------------------------------" 
@@ -750,14 +742,12 @@ bool Interface::firstNeighbors(unsigned int hash, std::vector<unsigned int>& has
   if (!Id::matchCalo(cell->calo(), HEC)) return false; // for now!  
   if (layer < 0) return true;
   std::vector<unsigned int> allHashes;
-  const std::vector<unsigned int>* cache = m_neighborCache[hash];
-  if (cache) 
-    allHashes = *cache;
-  else {
-    if (!neighbors(*cell, 0.15, allHashes)) return false;
-    m_neighborCache[hash] = new std::vector<unsigned int>(allHashes);
+  CacheEntry_t& cache = m_neighborCache[hash];
+  if (!cache.first) {
+    if (!neighbors(*cell, 0.15, cache.second)) return false;
+    cache.first = true;
   }
-  for (unsigned int h : allHashes) {
+  for (unsigned int h : cache.second) {
     const CellInfo* info = cellInfo(h);
     if (!info) continue;
     if (info->layer() == layer) hashes.push_back(h);
@@ -770,18 +760,16 @@ bool Interface::firstNeighbors(unsigned int hash, std::vector<unsigned int>& has
 bool Interface::data(const std::vector<unsigned int>& hashes,const EventData& event, std::vector<const Data*>& data) const
 {
   if (hashes != m_neighborHistoryPos) {
-    for (const History* history : m_neighborHistories)
-      delete history;
     m_neighborHistories.clear();
     m_neighborHistoryPos.clear();
     for (std::vector<unsigned int>::const_iterator hash = hashes.begin(); hash != hashes.end(); ++hash) {
       const History* history = AbsLArCells::newCellHistory(*hash);// bypasses history caching in order not to invalidate cell
-      m_neighborHistories.push_back(history);
+      m_neighborHistories.emplace_back(history);
       m_neighborHistoryPos.push_back(*hash);
     }
   }
 
-  for (const History* history : m_neighborHistories) {
+  for (const std::unique_ptr<const History>& history : m_neighborHistories) {
     if (!history) continue;
     const Data* dataForEvent = history->data_for_event(event);
     if (dataForEvent) data.push_back(new Data(*dataForEvent));
@@ -792,10 +780,10 @@ bool Interface::data(const std::vector<unsigned int>& hashes,const EventData& ev
 
 bool Interface::dumpEventTuple(const TString& variables, const TString& fileName) const
 {
-  std::vector<float*> floatVars;
-  std::vector<int*> intVars;
-  std::vector<std::vector<float>*> floatVects;
-  std::vector<std::vector<int>*> intVects;
+  std::vector<float> floatVars;
+  std::vector<int> intVars;
+  std::vector<std::vector<float> > floatVects;
+  std::vector<std::vector<int> > intVects;
   std::map<TString, unsigned int> varIndex;
  
   std::vector<TString> vars;
@@ -805,32 +793,34 @@ bool Interface::dumpEventTuple(const TString& variables, const TString& fileName
 
   cout << "Making trees..." << endl;
 
-  TFile* flatFile = TFile::Open(fileName + "_tmpFlatFile.root", "RECREATE");
-  TTree* flatTree = new TTree("flatTree", "Flat tree");
+  std::unique_ptr<TFile> flatFile (TFile::Open(fileName + "_tmpFlatFile.root", "RECREATE"));
+  TTree flatTree = TTree("flatTree", "Flat tree");
   
-  TFile* eventFile = TFile::Open(fileName, "RECREATE");
-  TTree* eventTree = new TTree("eventTree", "Event tree");
-  
+  std::unique_ptr<TFile> eventFile (TFile::Open(fileName, "RECREATE"));
+  TTree eventTree ("eventTree", "Event tree");
+
+  // Ensure that the contents of the vectors won't move.
+  intVars.reserve (vars.size());
+  intVects.reserve (vars.size());
+  floatVars.reserve (vars.size());
+  floatVects.reserve (vars.size());
+
   for (unsigned int j = 0; j < vars.size(); j++) {
     unsigned int index = 0;
     if (funcs[j].isNull()) return false;
     if (funcs[j].isInt()) {
-      int* varCont = new int(0);
-      std::vector<int>* vectCont = new std::vector<int>();      
       index = intVars.size();
-      intVars.push_back(varCont);
-      intVects.push_back(vectCont);
-      flatTree->Branch(vars[j], varCont);
-      eventTree->Branch(vars[j], vectCont);
+      intVars.push_back(0);
+      intVects.push_back (std::vector<int>());
+      flatTree.Branch(vars[j], &intVars.back());
+      eventTree.Branch(vars[j], &intVects.back());
     }
     else {
-      float* varCont = new float(0);
-      std::vector<float>* vectCont = new std::vector<float>();      
       index = floatVars.size();
-      floatVars.push_back(varCont);
-      floatVects.push_back(vectCont);
-      flatTree->Branch(vars[j], varCont);
-      eventTree->Branch(vars[j], vectCont);
+      floatVars.push_back(0);
+      floatVects.push_back(std::vector<float>());
+      flatTree.Branch(vars[j], &floatVars.back());
+      eventTree.Branch(vars[j], &floatVects.back());
     }
     varIndex[vars[j]] = index;
     cout << vars[j] << " -> " << index << endl;
@@ -845,12 +835,12 @@ bool Interface::dumpEventTuple(const TString& variables, const TString& fileName
     for (unsigned int k = 0; k < hist->nData(); k++) {
       for (unsigned int j = 0; j < vars.size(); j++) {
         if (funcs[j].isInt())
-          *intVars[varIndex[vars[j]]] = int(funcs[j].intVal(*hist->data(k), args[j]));
+          intVars[varIndex[vars[j]]] = int(funcs[j].intVal(*hist->data(k), args[j]));
         else
-          *floatVars[varIndex[vars[j]]] = funcs[j].doubleVal(*hist->data(k), args[j]);
+          floatVars[varIndex[vars[j]]] = funcs[j].doubleVal(*hist->data(k), args[j]);
       }
-      runEventIndices[hist->data(k)->run()][hist->data(k)->event()].push_back(flatTree->GetEntries());
-      flatTree->Fill();
+      runEventIndices[hist->data(k)->run()][hist->data(k)->event()].push_back(flatTree.GetEntries());
+      flatTree.Fill();
     }
   }
   
@@ -864,37 +854,27 @@ bool Interface::dumpEventTuple(const TString& variables, const TString& fileName
       eventCount++;
       if (eventCount % 1000 == 0) 
         cout << "  processing event " << event.first << " (" << eventCount << " of " << run.second.size() << "), size = " << event.second.size() << endl;
-      for (unsigned int j = 0; j < intVects.size(); j++) intVects[j]->clear();
-      for (unsigned int j = 0; j < floatVects.size(); j++) floatVects[j]->clear();
+      for (std::vector<int>& v : intVects) v.clear();
+      for (std::vector<float>& v : floatVects) v.clear();
       for (long long index : event.second) {
-        flatTree->GetEntry(index);
+        flatTree.GetEntry(index);
        for (unsigned int j = 0; j < vars.size(); j++) {
+         size_t vi = varIndex[vars[j]];
          if (funcs[j].isInt())
-           intVects[varIndex[vars[j]]]->push_back(*intVars[varIndex[vars[j]]]);
+           intVects[vi].push_back(intVars[vi]);
          else
-           floatVects[varIndex[vars[j]]]->push_back(*floatVars[varIndex[vars[j]]]);
+           floatVects[vi].push_back(floatVars[vi]);
         }
       }
-      eventTree->Fill();
+      eventTree.Fill();
     }
   }
   
   cout << "Writing data..." << endl;  
   flatFile->cd();
-  flatTree->Write();
+  flatTree.Write();
   eventFile->cd();
-  eventTree->Write();  
-  
-  cout << "Cleaning up..." << endl;
-  delete eventTree;
-  delete eventFile;
-  
-  delete flatTree;
-  delete flatFile;
-  for (unsigned int j = 0; j < intVects.size(); j++) delete intVects[j];
-  for (unsigned int j = 0; j < floatVects.size(); j++) delete floatVects[j];      
-  for (unsigned int j = 0; j < intVars.size(); j++) delete intVars[j];
-  for (unsigned int j = 0; j < floatVars.size(); j++) delete floatVars[j];      
+  eventTree.Write();
   
   cout << "Done!" << endl;
   return true;

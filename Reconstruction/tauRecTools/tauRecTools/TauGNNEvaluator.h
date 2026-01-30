@@ -35,12 +35,6 @@ public:
 
     virtual StatusCode initialize() override;
     virtual StatusCode execute(xAOD::TauJet &tau) const override;
-    // Getter for the underlying RNN implementation
-    inline const TauGNN* get_gnn_inclusive() const { return m_net_inclusive.get(); }
-    inline const TauGNN* get_gnn_0p() const { return m_net_0p.get(); }
-    inline const TauGNN* get_gnn_1p() const { return m_net_1p.get(); }
-    inline const TauGNN* get_gnn_2p() const { return m_net_2p.get(); }
-    inline const TauGNN* get_gnn_3p() const { return m_net_3p.get(); }
 
     enum Discriminant {
         NegLogPJet = 0,

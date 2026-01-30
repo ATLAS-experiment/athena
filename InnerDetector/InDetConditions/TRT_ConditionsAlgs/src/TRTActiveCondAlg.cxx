@@ -12,7 +12,7 @@
 
 TRTActiveCondAlg::TRTActiveCondAlg(const std::string& name
                                    , ISvcLocator* pSvcLocator )
-  : ::AthReentrantAlgorithm(name,pSvcLocator)
+  : ::AthCondAlgorithm(name,pSvcLocator)
 { }
 TRTActiveCondAlg::~TRTActiveCondAlg()= default;
 

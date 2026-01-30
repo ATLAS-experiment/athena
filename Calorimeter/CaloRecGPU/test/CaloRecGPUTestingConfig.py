@@ -52,7 +52,15 @@ class PlotterConfigurator:
                                        'ymin':  -3.25,
                                        'ymax':   3.25,
                                        'path': "EXPERT"}
-                                    )
+                                     ),
+                                    ( (step + "_cluster_number_cells",),
+                                      {'type': 'TH1F',
+                                       'title': "Cluster Size; Size; Number of Events",
+                                       'xbins':  63,
+                                       'xmin':  -1,
+                                       'xmax':   1000,
+                                       'path': "EXPERT"}
+                                    ),
                                   ]
             for pair in PairsToPlot:
                 self.PlotsToDo += [
@@ -94,6 +102,28 @@ class PlotterConfigurator:
                                        'xbins':  21,
                                        'xmin':  -0.5,
                                        'xmax':   20.5,
+                                       'path': "EXPERT"}
+                                    ),
+                                    ( (pair + "_cluster_number_cells_ref," + pair + "_cluster_number_cells_test",),
+                                      {'type': 'TH2F',
+                                       'title': "Cluster Sizes Comparison; CPU Cluster Size; GPU Cluster Size",
+                                       'xbins':  63,
+                                       'xmin':  -1,
+                                       'xmax':   1000,
+                                       'ybins':  63,
+                                       'ymin':  -1,
+                                       'ymax':   1000,
+                                       'path': "EXPERT"}
+                                    ),                   
+                                    ( (pair + "_cluster_index_ref," + pair + "_cluster_index_test",),
+                                      {'type': 'TH2F',
+                                       'title': "Cluster Indices Comparison; CPU Index; GPU Index",
+                                       'xbins':  63,
+                                       'xmin':  -1,
+                                       'xmax':   1000,
+                                       'ybins':  63,
+                                       'ymin':  -1,
+                                       'ymax':   1000,
                                        'path': "EXPERT"}
                                     ),
                                     ( (pair + "_cluster_E_ref," + pair + "_cluster_E_test",),
@@ -353,7 +383,6 @@ name_to_moment_map =  {
    #"DM_WEIGHT"                   :  (("DMweight",            "DMweight",            ""),[]),
    #"TILE_CONFIDENCE_LEVEL"       :  (("tileConfidenceLevel", "tileConfidenceLevel", ""),[]),
     "SECOND_TIME"                 :  (("secondTime",          "secondTime",          ""),[(0., 1e7),(0., 100.)])
-   #"number_of_cells"             :  (("numCells",            "numCells",            ""),[]),
    #"VERTEX_FRACTION"             :  (("vertexFraction",      "vertexFraction",      ""),[]),
    #"NVERTEX_FRACTION"            :  (("nVertexFraction",     "nVertexFraction",     ""),[]),
    #"ETACALOFRAME"                :  (("etaCaloFrame",        "etaCaloFrame",        ""),[]),
@@ -505,12 +534,14 @@ class TestOptions:
     def __init__(self):
         self.OutputClusters = False
         self.OutputCounts = False
+        self.OutputEventPerfInfo = False
         self.TestType = TestTypes.RunAllGPU
         self.DoCPULocalCalib = False
         self.OutputCellInfo = False
         self.SkipSyncs = True
         self.UsePerfMon = False
         self.NumEvents = -1
+        self.ForceAlternativeIteration = False
 
 def TestPlotterConfiguration(flags, testoptions, plotter_configurator, cellsname):
     result=ComponentAccumulator()
@@ -541,7 +572,7 @@ def TestPlotterConfiguration(flags, testoptions, plotter_configurator, cellsname
     if plot_moments:
         Plotter.ToolsToPlot += [ SingleToolToPlot("DefaultMoments", "CPU_moments") ]
         Plotter.ToolsToPlot += [ SingleToolToPlot("AthenaClusterImporter", "GPU_moments") ]
-        Plotter.PairsToPlot += [ ComparedToolsToPlot("DefaultMoments", "AthenaClusterImporter", "moments", True, match_perfectly = True) ]
+        Plotter.PairsToPlot += [ ComparedToolsToPlot("DefaultMoments", "GPUTopoMoments", "moments", True, match_perfectly = not (plot_split or plot_grow)) ]
         
     if testoptions.TestType is TestTypes.PostGPUCalib:
         pass
@@ -577,12 +608,15 @@ def TestConstantConversionTool(flags, testoptions):
   
 def TestCPUtoGPUExporterTool(flags, testoptions, cellsname):
     #Return a component accumulator or None
+
+    export_list_not_tags = ( testoptions.TestType is TestTypes.Moments or
+                             False                                        )
     
     if testoptions.TestType is TestTypes.RunAllCPU:
         return None
     else:
         from CaloRecGPU.CaloRecGPUConfig import BasicEventDataExporterToolCfg
-        return BasicEventDataExporterToolCfg(flags, cellsname)
+        return BasicEventDataExporterToolCfg(flags, cellsname, OutputTags = not export_list_not_tags)
         
 def TestGPUtoCPUImporterTool(flags, testoptions, cellsname):
     #Return a component accumulator or None
@@ -650,7 +684,8 @@ def TestBeforeGPUToolsConfiguration(flags, testoptions, cellsname, clustersname)
                                               MomentsDumperToolCfg,
                                               CellsCounterCPUToolCfg,
                                               CPUOutputToolCfg,
-                                              DefaultTopoClusterLocalCalibToolsCfg )
+                                              DefaultTopoClusterLocalCalibToolsCfg,
+                                              PerformanceInformationOutputToolCfg)
     
     
     return_tools = []
@@ -668,6 +703,10 @@ def TestBeforeGPUToolsConfiguration(flags, testoptions, cellsname, clustersname)
         if testoptions.OutputClusters:
             CPUOut1 = result.popToolsAndMerge( CPUOutputToolCfg(flags,cellsname,"DefaultGrowOutput", SavePath = "./out_default_grow") )
             return_tools += [CPUOut1]
+        if testoptions.OutputEventPerfInfo:
+            GrowMon = result.popToolsAndMerge( PerformanceInformationOutputToolCfg(flags, cellsname, "GrowPerfInfo", FileName="post_grow_info.txt") )
+            return_tools += [GrowMon]
+            
     
     if do_splitting:
         DefaultSplitter = result.popToolsAndMerge( DefaultClusterSplittingToolCfg(flags,"DefaultSplitting") )
@@ -679,6 +718,9 @@ def TestBeforeGPUToolsConfiguration(flags, testoptions, cellsname, clustersname)
         if testoptions.OutputClusters:
             CPUOut2 = result.popToolsAndMerge( CPUOutputToolCfg(flags, cellsname,"DefaultGrowAndSplitOutput", SavePath = "./out_default_grow_split") )
             return_tools += [CPUOut2]
+        if testoptions.OutputEventPerfInfo:
+            SplitMon = result.popToolsAndMerge( PerformanceInformationOutputToolCfg(flags, cellsname, "SplitPerfInfo", FileName="post_split_info.txt") )
+            return_tools += [SplitMon]
         
     if do_moments:
         DefaultMoments = result.popToolsAndMerge( DefaultClusterMomentsCalculatorToolCfg(flags, False,"DefaultMoments") )
@@ -726,6 +768,7 @@ def TestGPUToolsConfiguration(flags, testoptions, cellsname, clustersname):
                                               ClusterInfoCalcToolCfg,
                                               CellsCounterGPUToolCfg,
                                               TopoAutomatonClusteringToolCfg,
+                                              ClusterSorterToolCfg,
                                               GPUClusterMomentsCalculatorToolCfg )
                             
     return_tools = []
@@ -793,11 +836,16 @@ def TestGPUToolsConfiguration(flags, testoptions, cellsname, clustersname):
         if testoptions.SkipSyncs:
             GPUClusterSplitting2.MeasureTimes = False
         return_tools += [GPUClusterSplitting2]
-        if not do_moments:
+        if do_moments:
+            SortTool = result.popToolsAndMerge( ClusterSorterToolCfg(flags, "GPUClusterSorting", False) )
+            if testoptions.SkipSyncs:
+                SortTool.MeasureTimes = False
+            return_tools += [SortTool]
+        else:
             PropCalc3 = result.popToolsAndMerge( ClusterInfoCalcToolCfg(flags,"PropCalcPostSplitting", False) )
             if testoptions.SkipSyncs:
                 PropCalc3.MeasureTimes = False
-            return_tools += [PropCalc3]
+            return_tools += [PropCalc3] 
         if testoptions.OutputCounts:
             GPUCount3 = result.popToolsAndMerge( CellsCounterGPUToolCfg(flags,"ModifiedGrowSplitCounter", SavePath = "./counts", FilePrefix = "modified_grow_split") )
             return_tools += [GPUCount3]
@@ -880,6 +928,10 @@ def MainTestConfiguration(flags, testoptions, plotter_configurator, cellsname, c
     result = PrevAlgorithmsConfigurationCfg(flags, testoptions, cellsname)
         
     GPUKernelSvc = CompFactory.GPUKernelSizeOptimizerSvc()
+    
+    if testoptions.ForceAlternativeIteration:
+        GPUKernelSvc.OverrideCooperativeGroups = True
+    
     result.addService(GPUKernelSvc)
     
     HybridClusterProcessor = CompFactory.CaloGPUHybridClusterProcessor("HybridClusterProcessor")
@@ -1024,41 +1076,45 @@ def PrepareTest(default_files = ["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-
     args = None
     rest = None
     
-    if parse_command_arguments:
-        parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser()
         
-        parser.add_argument('-events','--numevents', type=int, default = 10)
-        parser.add_argument('-threads','--numthreads', type=int, default = 1)
-        parser.add_argument('-f','--files', action = 'extend', nargs = '*')
-        parser.add_argument('-t','--measuretimes', action = 'store_true')
-        parser.add_argument('-o','--outputclusters', action = 'store_true')
-        parser.add_argument('-c','--outputcounts', action = 'store_true')
-        parser.add_argument('-nfc','--notfillcells', action = 'store_true')
-        
-        parser.add_argument('-uoc','--useoriginalcriteria', action = 'store_true')
-        
-        parser.add_argument('-ndgn','--nodoublegaussiannoise', action = 'store_true')
-        parser.add_argument('-s','--synchronize', action = 'store_true')
-       
-        parser.add_argument('-m','--perfmon', action = 'store_true')
-        parser.add_argument('-fm','--fullmon', action = 'store_true')
-                   
-        
-        (args, pre_rest) = parser.parse_known_args()
-                    
-        if pre_rest is None or len(pre_rest) == 0:
-            rest = ['--threads', '1']
-            #Crude workaround for a condition within ConfigFlags.fillFromArgs
-            #that would make it inspect the whole command-line when provided
-            #with an empty list of arguments.
-            #(I'd personally suggest changing the "listOfArgs or sys.argv[1:]"
-            # used there since empty arrays are falsy while being non-null,
-            # to a "sys.argv[1:] if listofArgs is None else listofArgs",
-            # but I'm not about to suggest potentially code-breaking behaviour changes
-            # when I can work around them easily, even if rather inelegantly...)
-        else:
-            rest = pre_rest
+    parser.add_argument('-events','--numevents', type=int, default = 10)
+    parser.add_argument('-threads','--numthreads', type=int, default = 1)
+    parser.add_argument('-f','--files', action = 'extend', nargs = '*')
+    parser.add_argument('-t','--measuretimes', action = 'store_true')
+    parser.add_argument('-o','--outputclusters', action = 'store_true')
+    parser.add_argument('-c','--outputcounts', action = 'store_true')
+    parser.add_argument('-nfc','--notfillcells', action = 'store_true')
     
+    parser.add_argument('-uoc','--useoriginalcriteria', action = 'store_true')
+        
+    parser.add_argument('-ndgn','--nodoublegaussiannoise', action = 'store_true')
+    parser.add_argument('-s','--synchronize', action = 'store_true')
+       
+    parser.add_argument('-m','--perfmon', action = 'store_true')
+    parser.add_argument('-fm','--fullmon', action = 'store_true')
+
+    parser.add_argument('-pi','--perfinfo', action = 'store_true')
+    parser.add_argument('-altit','--alternativeiteration', action = 'store_true')
+    
+    if parse_command_arguments:
+        (args, pre_rest) = parser.parse_known_args()
+    else:
+        (args, pre_rest) = parser.parse_known_args([])
+                    
+    if pre_rest is None or len(pre_rest) == 0:
+        rest = ['--threads', '1']
+        #Crude workaround for a condition within ConfigFlags.fillFromArgs
+        #that would make it inspect the whole command-line when provided
+        #with an empty list of arguments.
+        #(I'd personally suggest changing the "listOfArgs or sys.argv[1:]"
+        # used there since empty arrays are falsy while being non-null,
+        # to a "sys.argv[1:] if listofArgs is None else listofArgs",
+        # but I'm not about to suggest potentially code-breaking behaviour changes
+        # when I can work around them easily, even if rather inelegantly...)
+    else:
+        rest = pre_rest
+            
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
                     
     initflags = initConfigFlags()
@@ -1068,34 +1124,37 @@ def PrepareTest(default_files = ["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-
     
     flags.CaloRecGPU.GlobalFlags.UseCaloRecGPU = True 
         
-    if args is None:
+    if args is None or not parse_command_arguments:
         flags.Input.Files = GetRealInputFilePaths(default_argument_for_files, default_files)
     else:
         flags.Input.Files = GetRealInputFilePaths(args.files, default_files)
     
     if parse_command_arguments:
         flags.fillFromArgs(listOfArgs=rest)
-        #We could instead use our parser to overload here and so on, but...
-        flags.Concurrency.NumThreads = int(args.numthreads)
-        flags.Concurrency.NumConcurrentEvents = int(args.numthreads)
-        #This is to ensure the measurements are multi-threaded in the way we expect, I guess?
-        flags.PerfMon.doFastMonMT = args.perfmon
-        flags.PerfMon.doFullMonMT = args.fullmon
-        # configure GPU
-        flags.CaloRecGPU.ActiveConfig.MeasureTimes = args.measuretimes
-        testoptions.OutputClusters = args.outputclusters
-        testoptions.OutputCounts = args.outputcounts
-        flags.CaloRecGPU.ActiveConfig.FillMissingCells = not args.notfillcells
-        flags.CaloRecGPU.ActiveConfig.UseOriginalCriteria = args.useoriginalcriteria
-        flags.CaloRecGPU.ActiveConfig.doTwoGaussianNoise = not args.nodoublegaussiannoise
-        if allocate_as_many_as_threads:
-            flags.CaloRecGPU.ActiveConfig.NumPreAllocatedDataHolders = int(args.numthreads)
-        testoptions.UsePerfMon = args.perfmon or args.fullmon
-        testoptions.NumEvents = int(args.numevents)
-        testoptions.SkipSyncs = not args.synchronize
+        
+    #We could instead use our parser to overload here and so on, but...
+    flags.Concurrency.NumThreads = int(args.numthreads)
+    flags.Concurrency.NumConcurrentEvents = int(args.numthreads)
+    #This is to ensure the measurements are multi-threaded in the way we expect, I guess?
+    flags.PerfMon.doFastMonMT = args.perfmon
+    flags.PerfMon.doFullMonMT = args.fullmon
+    # configure GPU
+    flags.CaloRecGPU.ActiveConfig.MeasureTimes = args.measuretimes
+    testoptions.OutputClusters = args.outputclusters
+    testoptions.OutputCounts = args.outputcounts
+    flags.CaloRecGPU.ActiveConfig.FillMissingCells = not args.notfillcells
+    flags.CaloRecGPU.ActiveConfig.UseOriginalCriteria = args.useoriginalcriteria
+    flags.CaloRecGPU.ActiveConfig.doTwoGaussianNoise = not args.nodoublegaussiannoise
+    if allocate_as_many_as_threads:
+        flags.CaloRecGPU.ActiveConfig.NumPreAllocatedDataHolders = int(args.numthreads)
+    testoptions.UsePerfMon = args.perfmon or args.fullmon
+    testoptions.NumEvents = int(args.numevents)
+    testoptions.SkipSyncs = not args.synchronize
+    testoptions.OutputEventPerfInfo = args.perfinfo
+    testoptions.ForceAlternativeIteration = args.alternativeiteration
     
     flags.CaloRecGPU.GlobalFlags.UseCaloRecGPU = True
-    flags.CaloRecGPU.ActiveConfig.MissingCellsToFill = [186986, 187352]
+    flags.CaloRecGPU.ActiveConfig.MissingCellsToFill = [] #[186986, 187352]
     
     from AthenaConfiguration.TestDefaults import defaultGeometryTags, defaultConditionsTags
     

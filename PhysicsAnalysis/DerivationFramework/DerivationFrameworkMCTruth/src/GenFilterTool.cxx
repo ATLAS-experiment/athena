@@ -30,15 +30,6 @@ namespace DerivationFramework {
   }
 
 
-  GenFilterTool::GenFilterTool(const std::string& t, const std::string& n, const IInterface* p)
-    : base_class(t,n,p) {
-
-
-  }
-
-
-  GenFilterTool::~GenFilterTool() = default;
-
   bool GenFilterTool::isPrompt( const xAOD::TruthParticle* tp ) const
   {
     ParticleOrigin orig = m_classif->particleTruthClassifier( tp ).second;
@@ -74,7 +65,6 @@ namespace DerivationFramework {
     ATH_CHECK(m_mcKey.initialize());
     ATH_CHECK(m_truthJetsKey.initialize());
     ATH_CHECK(m_truthFatJetsKey.initialize());
-    ATH_CHECK(m_decorKeys.initialize());
     ATH_CHECK(m_dec_genFiltHTKey.initialize());
     ATH_CHECK(m_dec_genFiltHTinclNuKey.initialize());
     ATH_CHECK(m_dec_genFiltMETKey.initialize());
@@ -91,7 +81,7 @@ namespace DerivationFramework {
       return StatusCode::FAILURE;
     }
 
-   
+
     float genFiltHT{0.f}, genFiltHTinclNu{0.f}, genFiltMET{0.f}, genFiltPTZ{0.f}, genFiltFatJ{0.f};
     ATH_CHECK( getGenFiltVars(ctx, genFiltHT, genFiltHTinclNu, genFiltMET, genFiltPTZ, genFiltFatJ) );
 
@@ -108,7 +98,7 @@ namespace DerivationFramework {
 
   StatusCode GenFilterTool::getGenFiltVars(const EventContext& ctx, float& genFiltHT, float& genFiltHTinclNu, float& genFiltMET, float& genFiltPTZ, float& genFiltFatJ) const {
     // Get jet container out
-    
+
     SG::ReadDecorHandle<xAOD::TruthParticleContainer, unsigned int> mcParticleOrigin{m_mcReadDecor, ctx} ;
     if (!mcParticleOrigin.isValid()) {
       ATH_MSG_ERROR("WARNING could not retrieve TruthParticleContainer " <<m_mcKey.fullKey());

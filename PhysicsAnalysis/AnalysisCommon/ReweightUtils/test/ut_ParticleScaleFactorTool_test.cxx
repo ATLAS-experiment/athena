@@ -106,7 +106,7 @@ int main() {
    //a test electron
    xAOD::Electron* e = new xAOD::Electron;
    e->makePrivateStore();
-   e->setP4(25000.,2,3,4000.);
+   e->setPtEtaPhi(25000.,2,3);
    static const SG::Accessor<double> blahAcc ("blah");
    blahAcc (*e) = 4;
 

@@ -1,5 +1,5 @@
 /*   
-     Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration 
+     Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "InDetIdentifier/SCT_ID.h"
@@ -269,10 +269,9 @@ bool TrigInDetAccelerationSvc::exportITkGeometryInformation(const std::map<std::
     //3. iterating over phi sectors
 
     for(unsigned int iStops = 1; iStops<vStops.size();iStops++) {
-      int nPhiModules = 0;
       bool first = true;
 
-      for(std::vector<PhiEtaHash>::const_iterator hIt = vStops[iStops-1];hIt!=vStops[iStops];++hIt, nPhiModules++) {
+      for(std::vector<PhiEtaHash>::const_iterator hIt = vStops[iStops-1];hIt!=vStops[iStops];++hIt) {
 
         pArray->m_hashArray[pArray->m_nModules] = (*hIt).m_hash;
         const InDetDD::SiDetectorElement *p = pix_mgr->getDetectorElement((*hIt).m_hash);
@@ -474,11 +473,9 @@ bool TrigInDetAccelerationSvc::exportGeometryInformation(const std::map<std::tup
 
     for(unsigned int iStops = 1; iStops<vStops.size();iStops++) {
 
-      int nPhiModules = 0;
-
       bool first = true;
 
-      for(std::vector<PhiEtaHash>::const_iterator hIt = vStops[iStops-1];hIt!=vStops[iStops];++hIt, nPhiModules++) {
+      for(std::vector<PhiEtaHash>::const_iterator hIt = vStops[iStops-1];hIt!=vStops[iStops];++hIt) {
 
         pArray->m_hashArray[pArray->m_nModules] = (*hIt).m_hash;
 

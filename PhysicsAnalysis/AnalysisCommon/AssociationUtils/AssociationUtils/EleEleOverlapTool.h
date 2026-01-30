@@ -7,6 +7,14 @@
 
 // EDM includes
 #include "xAODEgamma/ElectronContainer.h"
+#include "ColumnarEgamma/EgammaDef.h"
+
+// Columnar includes
+#include "ColumnarCore/ColumnAccessor.h"
+#include "ColumnarCore/LinkColumn.h"
+#include "ColumnarCore/VectorColumn.h"
+#include "ColumnarCluster/ClusterHelpers.h"
+#include "ColumnarTracking/TrackDef.h"
 
 // Local includes
 #include "AssociationUtils/IOverlapTool.h"
@@ -46,13 +54,14 @@ namespace ORUtils
       /// @brief Identify overlapping electrons.
       /// Note that in this tool, the two containers should be the same.
       virtual StatusCode
-      findOverlaps(const xAOD::IParticleContainer& cont1,
-                   const xAOD::IParticleContainer& cont2) const override;
+      findOverlaps(columnar::Particle1Range cont1,
+                   columnar::Particle2Range cont2,
+                   columnar::EventContextId eventContext) const override;
 
       /// @brief Identify overlapping electrons and jets.
       /// The above method calls this one.
       virtual StatusCode
-      findOverlaps(const xAOD::ElectronContainer& electrons) const;
+      internalFindOverlaps(columnar::Particle1Range electrons) const;
 
     protected:
 
@@ -62,10 +71,10 @@ namespace ORUtils
     private:
 
       /// Helper method for matching electrons
-      bool electronsMatch(const xAOD::Electron& el1, const xAOD::Electron& el2) const;
+      bool electronsMatch(columnar::Particle1Id el1, columnar::Particle1Id el2) const;
 
       /// Helper method to decide which electron to reject
-      bool rejectFirst(const xAOD::Electron& el1, const xAOD::Electron& el2) const;
+      bool rejectFirst(columnar::Particle1Id el1, columnar::Particle1Id el2) const;
 
       /// @name Configurable properties
       /// @{
@@ -83,6 +92,22 @@ namespace ORUtils
       double m_clusterDeltaPhi;
 
       /// @}
+
+      /// Columnar accessors
+      using MyTrackDef = columnar::VariantContainerId<columnar::ContainerId::track0,columnar::ContainerId::track0>;
+      struct Accessors final : columnar::ColumnarTool<>
+      {
+        columnar::ClusterAccessor<columnar::ObjectColumn> m_clusterContainerAcc;
+        columnar::Track0Accessor<columnar::ObjectColumn> m_track0Acc;
+        columnar::Particle1Accessor<float> m_ptAcc {*this, "pt"};
+        columnar::Particle1Accessor<std::uint16_t> m_authorAcc {*this, "author"};
+        columnar::Particle1Accessor<std::vector<columnar::OptClusterId>> m_caloClusterAcc;
+        columnar::Particle1Accessor<std::vector<columnar::OptTrackId>> m_trackAcc;
+        std::optional<columnar::ClusterHelpers::EtaBEAccessor<>> m_etaBEAcc;
+        std::optional<columnar::ClusterHelpers::PhiBEAccessor<>> m_phiBEAcc;
+        using ColumnarTool::ColumnarTool;
+      };
+      std::unique_ptr<Accessors> m_accessors {std::make_unique<Accessors> (this)};
 
   }; // class EleEleOverlapTool
 

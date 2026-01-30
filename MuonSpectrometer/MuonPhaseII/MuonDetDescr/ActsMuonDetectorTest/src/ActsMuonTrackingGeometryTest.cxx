@@ -66,14 +66,14 @@ namespace ActsTrk {
         const MuonGMR4::MuonReadoutElement* reElement = m_r4DetMgr->getReadoutElement(hitId);    
         const IdentifierHash trfHash = reElement->detectorType() == ActsTrk::DetectorType::Mdt ?
                                     reElement->measurementHash(hitId) : reElement->layerHash(hitId);        
-        return reElement->globalToLocalTrans(gctx, trfHash);
+        return reElement->globalToLocalTransform(gctx, trfHash);
     }
 
     Amg::Transform3D ActsMuonTrackingGeometryTest::toGlobalTrf(const ActsTrk::GeometryContext& gctx, const Identifier& hitId) const {
     const MuonGMR4::MuonReadoutElement* reElement = m_r4DetMgr->getReadoutElement(hitId);
     const IdentifierHash trfHash = reElement->detectorType() == ActsTrk::DetectorType::Mdt ?
                                     reElement->measurementHash(hitId) : reElement->layerHash(hitId);            
-    return reElement->localToGlobalTrans(gctx, trfHash);
+    return reElement->localToGlobalTransform(gctx, trfHash);
     }
 
 

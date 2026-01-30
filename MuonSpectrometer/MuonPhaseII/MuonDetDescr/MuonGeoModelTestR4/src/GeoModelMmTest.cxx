@@ -104,8 +104,8 @@ StatusCode GeoModelMmTest::execute() {
                         <<". But got instead "<<m_idHelperSvc->toStringDetEl(reElement->identify()));
             return StatusCode::FAILURE;
         }      
-        const Amg::Transform3D globToLocal{reElement->globalToLocalTrans(gctx)};
-        const Amg::Transform3D& localToGlob{reElement->localToGlobalTrans(gctx)};
+        const Amg::Transform3D globToLocal{reElement->globalToLocalTransform(gctx)};
+        const Amg::Transform3D& localToGlob{reElement->localToGlobalTransform(gctx)};
         /// Closure test that the transformations actually close
         if (!Amg::doesNotDeform(globToLocal * localToGlob)) {
                 ATH_MSG_FATAL("Closure test failed for "<<m_idHelperSvc->toStringDetEl(test_me)
@@ -146,7 +146,7 @@ StatusCode GeoModelMmTest::execute() {
                 }
                 const MuonGMR4::StripDesign& design{reElement->stripLayer(layHash).design()};
                 const Amg::Vector3D stripPos = reElement->stripPosition(gctx, channelHash);
-                const Amg::Vector3D locStripPos = reElement->globalToLocalTrans(gctx, layHash) * stripPos;
+                const Amg::Vector3D locStripPos = reElement->globalToLocalTransform(gctx, layHash) * stripPos;
                 const Amg::Vector2D stripPos2D{locStripPos.block<2,1>(0,0)};
                 const double stripLen{design.stripLength(strip)};
                 if (stripLen && (design.stripNumber(stripPos2D) != strip ||
@@ -181,7 +181,7 @@ StatusCode GeoModelMmTest::dumpToTree(const EventContext& ctx,
     m_stStripPitch = reElement->stripLayer(MuonGMR4::MmReadoutElement::createHash(1,1)).design().stripPitch();
     ///
     /// Dump the local to global transformation of the readout element
-    const Amg::Transform3D& transform{reElement->localToGlobalTrans(gctx)};
+    const Amg::Transform3D& transform{reElement->localToGlobalTransform(gctx)};
     m_readoutTransform = transform;
     m_alignableNode  = reElement->alignableTransform()->getDefTransform();
 
@@ -213,7 +213,7 @@ StatusCode GeoModelMmTest::dumpToTree(const EventContext& ctx,
 
             const MuonGMR4::StripDesign& design{reElement->stripLayer(measHash).design()};
             if (strip == fStrip) {
-                const Amg::Transform3D stripLocalToGlob = reElement->localToGlobalTrans(gctx, chId);
+                const Amg::Transform3D stripLocalToGlob = reElement->localToGlobalTransform(gctx, chId);
                 ATH_MSG_VERBOSE(m_idHelperSvc->toStringGasGap(chId)<<" "<< "transform: " 
                             << Amg::toString(stripLocalToGlob)<<", perp: "<<stripLocalToGlob.translation().perp());
                 m_stripRot.push_back(stripLocalToGlob);

@@ -271,7 +271,7 @@ int MuonIdHelper::initLevelsFromDict() {
     }
 
     // Find a Muon region
-    IdDictField* field = m_dict->find_field("subdet");
+    const IdDictField* field = m_dict->find_field("subdet");
     if (field) {
         m_MUON_INDEX = field->index();
     } else {
@@ -333,7 +333,7 @@ int MuonIdHelper::initLevelsFromDict() {
                 int index = (int)field->get_label_value(name);
                 m_technologyIndexMax = std::max(m_technologyIndexMax, index);
                 m_technologyNameToIdxMap[name] = index;
-                m_technologyIdxToNameMap[index] = name;
+                m_technologyIdxToNameMap[index] = std::move(name);
             }
         }
 
@@ -784,28 +784,6 @@ bool MuonIdHelper::validTechnology(int technology) const {
 void MuonIdHelper::addStationID(ExpandedIdentifier& id, int stationName, int stationEta, int stationPhi, int technology) {
     id << stationName << stationEta << stationPhi << technology;
 }
-/*******************************************************************************/
-// Check if ID for muon system
-bool MuonIdHelper::is_muon(const Identifier& id) const { return AtlasDetectorID::is_muon(id); }
-/*******************************************************************************/
-// Check if ID for MDT
-bool MuonIdHelper::is_mdt(const Identifier& id) const { return AtlasDetectorID::is_mdt(id); }
-/*******************************************************************************/
-// Check if ID for CSC
-bool MuonIdHelper::is_csc(const Identifier& id) const { return AtlasDetectorID::is_csc(id); }
-/*******************************************************************************/
-// Check if ID for RPC
-bool MuonIdHelper::is_rpc(const Identifier& id) const { return AtlasDetectorID::is_rpc(id); }
-/*******************************************************************************/
-// Check if ID for TGC
-bool MuonIdHelper::is_tgc(const Identifier& id) const { return AtlasDetectorID::is_tgc(id); }
-/*******************************************************************************/
-// Check if ID for sTGC
-bool MuonIdHelper::is_stgc(const Identifier& id) const { return AtlasDetectorID::is_stgc(id); }
-/*******************************************************************************/
-// Check if ID for MicroMegas
-bool MuonIdHelper::is_mm(const Identifier& id) const { return AtlasDetectorID::is_mm(id); }
-/*******************************************************************************/
 // Access to components of the ID
 int MuonIdHelper::stationName(const Identifier& id) const {
     int result = m_sta_impl.unpack(id);
@@ -840,13 +818,13 @@ bool MuonIdHelper::isForward(const Identifier& id) const { return isForward(stat
 /*******************************************************************************/
 bool MuonIdHelper::isSmall(const Identifier& id) const { return isSmall(stationName(id)); }
 /*******************************************************************************/
-bool MuonIdHelper::isBarrel(const int& stationNameIndex) const { return (m_isBarrel.count(stationNameIndex) == 1); }
+bool MuonIdHelper::isBarrel(const int stationNameIndex) const { return (m_isBarrel.count(stationNameIndex) == 1); }
 /*******************************************************************************/
-bool MuonIdHelper::isEndcap(const int& stationNameIndex) const { return (m_isBarrel.count(stationNameIndex) == 0); }
+bool MuonIdHelper::isEndcap(const int stationNameIndex) const { return (m_isBarrel.count(stationNameIndex) == 0); }
 /*******************************************************************************/
-bool MuonIdHelper::isForward(const int& stationNameIndex) const { return (m_isForward.count(stationNameIndex) == 1); }
+bool MuonIdHelper::isForward(const int stationNameIndex) const { return (m_isForward.count(stationNameIndex) == 1); }
 /*******************************************************************************/
-bool MuonIdHelper::isSmall(const int& stationNameIndex) const { return (m_isSmall.count(stationNameIndex) == 1); }
+bool MuonIdHelper::isSmall(const int stationNameIndex) const { return (m_isSmall.count(stationNameIndex) == 1); }
 /*******************************************************************************/
 // Access to name and technology maps
 int MuonIdHelper::stationNameIndex(const std::string& name) const {
@@ -861,14 +839,17 @@ int MuonIdHelper::technologyIndex(const std::string& name) const {
     return -1;
 }
 /*******************************************************************************/
-const std::string& MuonIdHelper::stationNameString(const int& index) const {
+const std::string& MuonIdHelper::stationNameString(const Identifier& id) const {
+    return stationNameString(stationName(id));
+}
+const std::string& MuonIdHelper::stationNameString(const int index) const {
     assert(index >= 0 && index <= stationNameIndexMax());
     std::map<int, std::string>::const_iterator itr = m_stationIdxToNameMap.find(index);
     if (itr != m_stationIdxToNameMap.end()) return itr->second;
     return BAD_NAME;
 }
 /*******************************************************************************/
-const std::string& MuonIdHelper::technologyString(const int& index) const {
+const std::string& MuonIdHelper::technologyString(const int index) const {
     assert(index >= 0 && index <= technologyNameIndexMax());
     std::map<int, std::string>::const_iterator itr = m_technologyIdxToNameMap.find(index);
     if (itr != m_technologyIdxToNameMap.end()) return itr->second;

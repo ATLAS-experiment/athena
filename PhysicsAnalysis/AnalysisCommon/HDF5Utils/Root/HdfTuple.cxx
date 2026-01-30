@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #include "HDF5Utils/HdfTuple.h"
 #include "HDF5Utils/common.h"
@@ -57,7 +57,7 @@ namespace H5Utils {
     m_dim_stride(max_length),
     m_batch_size(batch_size),
     m_offset(0),
-    m_fillers(fillers)
+    m_fillers(std::move(fillers))
   {
     if (batch_size < 1) {
       throw std::logic_error("batch size must be > 0");
@@ -70,7 +70,7 @@ namespace H5Utils {
       max_length, batch_size);
 
     // calculate striding
-    m_dim_stride = internal::getStriding(max_length);
+    m_dim_stride = internal::getStriding(std::move(max_length));
 
     // create ds
     internal::throwIfExists(name, group);

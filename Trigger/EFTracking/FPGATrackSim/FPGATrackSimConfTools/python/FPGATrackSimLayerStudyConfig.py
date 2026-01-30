@@ -7,7 +7,6 @@ from AthenaCommon.Logging import logging
 import AthenaCommon.Utils.unixtools as unixtools
 import importlib
 import os
-from FPGATrackSimConfTools.FPGATrackSimAnalysisConfig import ConfigureMultiRegionFlags
 from FPGATrackSimConfTools.FPGATrackSimSecondStageConfig import getPadding
 
 log = logging.getLogger ('FPGATrackSim')
@@ -184,16 +183,12 @@ if __name__ == "__main__":
 
     # flags.Exec.DebugStage="exec" # useful option to debug the execution of the job - we want it commented out for production
     flags.fillFromArgs()
-    ConfigureMultiRegionFlags(flags)
 
 
     if isinstance(flags.Trigger.FPGATrackSim.wrapperFileName, str):
         log.info("wrapperFile is string, converting to list")
         flags.Trigger.FPGATrackSim.wrapperFileName = [flags.Trigger.FPGATrackSim.wrapperFileName]
         flags.Input.Files = lambda f: [f.Trigger.FPGATrackSim.wrapperFileName]
-
-    from FPGATrackSimConfTools.FPGATrackSimAnalysisConfig import ConfigureMultiRegionFlags
-    ConfigureMultiRegionFlags(flags)
 
     # The region map needs to not be loaded when running layer study; we set this here to
     # guarantee it propagates consistently to all code that tries to set up the mapping service.

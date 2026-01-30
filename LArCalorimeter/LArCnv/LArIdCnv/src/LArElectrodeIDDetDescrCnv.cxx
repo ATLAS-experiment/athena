@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -46,8 +46,6 @@ LArElectrodeIDDetDescrCnv::createObj(IOpaqueAddress* /*pAddr*/, DataObject*& pOb
 
     // create the helper
     LArElectrodeID* electrode_id = new LArElectrodeID;
-    // pass a pointer to IMessageSvc to the helper
-    electrode_id->setMessageSvc(msgSvc());
 
     ATH_CHECK( idDictMgr->initializeHelper(*electrode_id) == 0 );
 

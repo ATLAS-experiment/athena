@@ -21,11 +21,6 @@
 
 namespace xAOD {
 
-   RDataSourceEvent::RDataSourceEvent()
-      : TEvent( TEvent::kClassAccess ) {
-
-   }
-
    std::vector< std::pair< std::string, std::string > >
    RDataSourceEvent::columnAndTypeNames() {
 

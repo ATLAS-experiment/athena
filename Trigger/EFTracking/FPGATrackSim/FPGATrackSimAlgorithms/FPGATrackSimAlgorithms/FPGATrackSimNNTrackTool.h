@@ -46,9 +46,9 @@ class FPGATrackSimNNTrackTool : public FPGATrackSimTrackingToolBase, public Onnx
 	FPGATrackSimNNTrackTool(const std::string&, const std::string&, const IInterface*);
 
 	virtual StatusCode initialize() override;
-	StatusCode getTracks_1st(std::vector<std::shared_ptr<const FPGATrackSimRoad>> &roads, std::vector<FPGATrackSimTrack> &tracks);
-	StatusCode getTracks_2nd(std::vector<std::shared_ptr<const FPGATrackSimRoad>> &roads, std::vector<FPGATrackSimTrack> &tracks);
-	StatusCode getTracks_GNN(std::vector<std::shared_ptr<const FPGATrackSimRoad>> &roads, std::vector<FPGATrackSimTrack> &tracks);
+	StatusCode getTracks_1st(std::vector<FPGATrackSimRoad> &roads, std::vector<FPGATrackSimTrack> &tracks);
+	StatusCode getTracks_2nd(std::vector<FPGATrackSimRoad> &roads, std::vector<FPGATrackSimTrack> &tracks);
+	StatusCode getTracks_GNN(std::vector<FPGATrackSimRoad> &roads, std::vector<FPGATrackSimTrack> &tracks);
         StatusCode setTrackParameters(std::vector<FPGATrackSimTrack> &tracks, bool isFirst, const FPGATrackSimTrackPars& min, const FPGATrackSimTrackPars& max);
 
 	static float getXScale() { return 1015.;};

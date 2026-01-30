@@ -61,6 +61,7 @@ Trig::keyWrap(const std::vector< std::string >& triggerNames) {
 
 std::string Trig::getTEName(const HLT::TriggerElement& te)
 { 
-  std::string s; 
+  std::string s;
+  //coverity[copy_constructor_call]
   return (TrigConf::HLTTriggerElement::getLabel(te.getId(), s) ? s : ""); 
 }

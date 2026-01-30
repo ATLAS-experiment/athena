@@ -1,19 +1,25 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
-
-#include "GeoModelUtilities/GeoModelExperiment.h"
-#include "GaudiKernel/IService.h"
-#include "GaudiKernel/ISvcLocator.h"
-#include "GaudiKernel/MsgStream.h"
-#include "StoreGate/StoreGateSvc.h"
-#include "RDBAccessSvc/IRDBAccessSvc.h"
-#include "GeoModelKernel/GeoFullPhysVol.h"
-#include "GeoModelUtilities/StoredPhysVol.h"
-
 #include "ALFA_DetectorTool.h"
 #include "ALFA_DetectorFactory.h" 
 #include "ALFA_GeoModel/ALFA_DetectorManager.h" 
+
+#include "GeoModelUtilities/GeoModelExperiment.h"
+
+#include "GaudiKernel/IService.h"
+#include "GaudiKernel/ISvcLocator.h"
+#include "GaudiKernel/MsgStream.h"
+
+#include "GeoModelKernel/GeoFullPhysVol.h"
+#include "GeoModelUtilities/StoredPhysVol.h"
+
+#include "StoreGate/StoreGateSvc.h"
+#include "RDBAccessSvc/IRDBAccessSvc.h"
+#include "AthenaPoolUtilities/CondAttrListCollection.h"
+
+
+
 
 using namespace std;
 
@@ -157,28 +163,7 @@ StatusCode ALFA_DetectorTool::create()
   return StatusCode::SUCCESS;
 }
 
-StatusCode ALFA_DetectorTool::registerCallback()
-{
-  StatusCode sc=StatusCode::FAILURE;
-
-  if(((eMetrologyType)m_Config.GeometryConfig.eRPMetrologyGeoType)==EMT_SWCORRECTIONS) {
-    const DataHandle<CondAttrListCollection> DataPtr;
-    sc=detStore()->regFcn(&IGeoModelTool::align,dynamic_cast<IGeoModelTool*>(this), DataPtr, COOLFOLDER_DETSWCORR, true);
-    if(sc!=StatusCode::SUCCESS) {
-      ATH_MSG_ERROR("Cannot register COOL callback for folder '"<<COOLFOLDER_DETSWCORR <<"'");
-    }
-    else {
-      ATH_MSG_INFO("Call-back to ALFA_DetectorTool::align() against folder "<< COOLFOLDER_DETSWCORR <<" registered ");
-    }
-  }
-  else {
-    ATH_MSG_INFO("No callback registed");
-  }
-
-  return sc;
-}
-
-StatusCode ALFA_DetectorTool::align(IOVSVC_CALLBACK_ARGS)
+StatusCode ALFA_DetectorTool::align()
 {
 	int nChannel;
 	StatusCode sc=StatusCode::SUCCESS;

@@ -7,6 +7,7 @@
 
 #include "AthenaBaseComps/AthAlgorithm.h"
 #include "GaudiKernel/ToolHandle.h"
+#include <AsgTools/PropertyWrapper.h>
 
 #include "FTagAnalysisInterfaces/IBTaggingEfficiencyTool.h"
 
@@ -17,10 +18,8 @@
     StatusCode execute(); 
 
   private:
-    std::string m_sgKey; // StoreGate key for the jets
-
-    ToolHandle< IBTaggingEfficiencyTool > m_effTool;
-    
+    Gaudi::Property<std::string>  m_sgKey {this, "SGKey", "AntiKt4LCTopoJets", "Jet collection name"}; // StoreGate key for the jets
+    ToolHandle< IBTaggingEfficiencyTool > m_effTool {this, "BTaggingEfficiencyTool", "BTaggingEfficiencyTool/BTaggingEfficiencyTool", "Tagging efficiency tool"};
   };
 
 #endif

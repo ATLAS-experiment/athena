@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 #====================================================================
 # BPHY5.py
@@ -19,7 +19,10 @@ BpipiContainerName   = "BPHY5BJpsipipiXCandidates"
 BdJpsiKstContainerName = "BPHY5BdJpsiKstCandidates"
 
 def BPHY5Kernel(flags, Decays="BsB+BdKstBpipiX"):
-   from DerivationFrameworkBPhys.commonBPHYMethodsCfg import (BPHY_V0ToolCfg,  BPHY_InDetDetailedTrackSelectorToolCfg, BPHY_VertexPointEstimatorCfg, BPHY_TrkVKalVrtFitterCfg)
+   from DerivationFrameworkBPhys.commonBPHYMethodsCfg import (
+      BPHY_V0ToolCfg, BPHY_InDetDetailedTrackSelectorToolCfg,
+      BPHY_VertexPointEstimatorCfg, BPHY_TrkVKalVrtFitterCfg,
+      AugOriginalCountsCfg)
    from JpsiUpsilonTools.JpsiUpsilonToolsConfig import PrimaryVertexRefittingToolCfg
    acc = ComponentAccumulator()
    isSimulation = flags.Input.isMC
@@ -40,11 +43,6 @@ def BPHY5Kernel(flags, Decays="BsB+BdKstBpipiX"):
        from DerivationFrameworkInDet.InDetToolsConfig import InDetLRTMergeCfg
        acc.merge(InDetLRTMergeCfg(flags))
 
-   BPHY5_AugOriginalCounts = CompFactory.DerivationFramework.AugOriginalCounts(
-       name = "BPHY5_AugOriginalCounts",
-       VertexContainer = "PrimaryVertices",
-       TrackContainer = "InDetTrackParticles",
-       TrackLRTContainer = "InDetLargeD0TrackParticles" if doLRT else "")
    toRelink = ["InDetTrackParticles", "InDetLargeD0TrackParticles"] if doLRT else []
    MuonReLink = [ "Muons", "MuonsLRT" ] if doLRT else []
 
@@ -101,6 +99,9 @@ def BPHY5Kernel(flags, Decays="BsB+BdKstBpipiX"):
          MassMax               = 3600.0,
          Chi2Max               = 200, Do3d = False,
          DoVertexType =1)
+
+   BPHY5_AugOriginalCounts = acc.popToolsAndMerge(
+      AugOriginalCountsCfg(flags, name = "BPHY5_AugOriginalCounts"))
 
    BPHY5BsJpsiKK = CompFactory.Analysis.JpsiPlus2Tracks(name = "BPHY5BsJpsiKK",
          kaonkaonHypothesis          = True,
@@ -358,32 +359,40 @@ def BPHY5Kernel(flags, Decays="BsB+BdKstBpipiX"):
 
 
    if not isSimulation: #Only Skim Data
-        BPHY5_SelectBsJpsiKKEvent = CompFactory.DerivationFramework.xAODStringSkimmingTool(
-          name = "BPHY5_SelectBsJpsiKKEvent",
-          expression = f"count({BsJpsiPhiContainerName}.passed_Bs > 0) > 0")
+      from DerivationFrameworkTools.DerivationFrameworkToolsConfig import (
+         xAODStringSkimmingToolCfg)
 
-        BPHY5_SelectBplJpsiKplEvent = CompFactory.DerivationFramework.xAODStringSkimmingTool(name = "BPHY5_SelectBplJpsiKplEvent",
-                                       expression = f"count({BPlusContainerName}.passed_Bplus>0) > 0")
+      BPHY5_SelectBsJpsiKKEvent = acc.getPrimaryAndMerge(xAODStringSkimmingToolCfg(
+         flags, name = "BPHY5_SelectBsJpsiKKEvent",
+         expression = f"count({BsJpsiPhiContainerName}.passed_Bs > 0) > 0"))
+
+      BPHY5_SelectBplJpsiKplEvent = acc.getPrimaryAndMerge(xAODStringSkimmingToolCfg(
+         flags, name = "BPHY5_SelectBplJpsiKplEvent",
+         expression = f"count({BPlusContainerName}.passed_Bplus>0) > 0"))
      
-        BPHY5_SelectBplJpsiKplEventBc = CompFactory.DerivationFramework.xAODStringSkimmingTool(name = "BPHY5_SelectBplJpsiKplEventBc",
-                                       expression = f"count({BPlusContainerName}.passed_Bc>0) > 0")
+      BPHY5_SelectBplJpsiKplEventBc = acc.getPrimaryAndMerge(xAODStringSkimmingToolCfg(
+         flags, name = "BPHY5_SelectBplJpsiKplEventBc",
+         expression = f"count({BPlusContainerName}.passed_Bc>0) > 0"))
         
-        BPHY5_SelectBdKstarEventBd = CompFactory.DerivationFramework.xAODStringSkimmingTool(name = "BPHY5_SelectBdKstarEventBd",
-                                       expression = f"count({BdJpsiKstContainerName}.passed_Bd>0) > 0")
+      BPHY5_SelectBdKstarEventBd = acc.getPrimaryAndMerge(xAODStringSkimmingToolCfg(
+         flags, name = "BPHY5_SelectBdKstarEventBd",
+         expression = f"count({BdJpsiKstContainerName}.passed_Bd>0) > 0"))
      
-        BPHY5_SelectBdKstarEventBdBar = CompFactory.DerivationFramework.xAODStringSkimmingTool(name = "BPHY5_SelectBdKstarEventBdbar",
-                                       expression = f"count({BdJpsiKstContainerName}.passed_Bdbar>0) > 0")
-        #====================================================================
-        # Make event selection based on an OR of the input skimming tools
-        #====================================================================
-        filterlist = []
-        if "Bs" in Decays : filterlist.append(BPHY5_SelectBsJpsiKKEvent)
-        if "B+" in Decays : filterlist += [ BPHY5_SelectBplJpsiKplEvent,BPHY5_SelectBplJpsiKplEventBc]
-        if "BdKst" in Decays : filterlist += [BPHY5_SelectBdKstarEventBd, BPHY5_SelectBdKstarEventBdBar]
+      BPHY5_SelectBdKstarEventBdBar = acc.getPrimaryAndMerge(xAODStringSkimmingToolCfg(
+         flags, name = "BPHY5_SelectBdKstarEventBdbar",
+         expression = f"count({BdJpsiKstContainerName}.passed_Bdbar>0) > 0"))
+
+      #====================================================================
+      # Make event selection based on an OR of the input skimming tools
+      #====================================================================
+      filterlist = []
+      if "Bs" in Decays : filterlist.append(BPHY5_SelectBsJpsiKKEvent)
+      if "B+" in Decays : filterlist += [ BPHY5_SelectBplJpsiKplEvent,BPHY5_SelectBplJpsiKplEventBc]
+      if "BdKst" in Decays : filterlist += [BPHY5_SelectBdKstarEventBd, BPHY5_SelectBdKstarEventBdBar]
         
-        BPHY5SkimmingOR = CompFactory.DerivationFramework.FilterCombinationOR("BPHY5SkimmingOR",
-                                              FilterList = filterlist)
-        for t in filterlist +[BPHY5SkimmingOR]: acc.addPublicTool(t)
+      BPHY5SkimmingOR = CompFactory.DerivationFramework.FilterCombinationOR(
+         "BPHY5SkimmingOR", FilterList = filterlist)
+      acc.addPublicTool(BPHY5SkimmingOR)
 
    augTools =   [BPHY5JpsiSelectAndWrite,  BPHY5_Select_Jpsi2mumu, BPHY5_AugOriginalCounts]
    if "Bs" in Decays : augTools += [BPHY5BsKKSelectAndWrite,  BPHY5_Select_Bs2JpsiKK, BPHY5_Revertex_Bs_NoMassConst, BPHY5_Select_Bs2JpsiKKNoConstraint]
@@ -471,9 +480,7 @@ def BPHY5Cfg(flags):
    
    for jet_collection in tagJetCollections:
        AllVariables   += [jet_collection]
-       AllVariables   += ["BTagging_%s"       % (jet_collection[:-4]) ]
-       AllVariables   += ["BTagging_%sJFVtx"  % (jet_collection[:-4]) ]
-       AllVariables   += ["BTagging_%sSecVtx" % (jet_collection[:-4]) ]
+
    
    
    # Truth information for MC only

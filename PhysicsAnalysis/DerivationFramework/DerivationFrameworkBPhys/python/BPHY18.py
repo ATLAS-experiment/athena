@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 #====================================================================
 # BPHY18.py
 #====================================================================
@@ -30,32 +30,36 @@ def BPHY18Cfg(flags):
     vpest = acc.popToolsAndMerge(BPHY_VertexPointEstimatorCfg(flags, BPHYDerivationName))
     acc.addPublicTool(vpest)
 
-    BPHY18TriggerSkim = CompFactory.DerivationFramework.TriggerSkimmingTool(
-        name = "BPHY18TriggerSkim",
-        TriggerListOR = [
-            "HLT_e5_lhvloose_e3_lhvloose_bBeeM6000_L1BKeePrimary",
-            "HLT_2e5_bBeeM6000_L1BKeePrimary",
-            "HLT_e5_lhvloose_bBeeM6000_L1BKeePrimary",
-            "HLT_e5_lhvloose_e3_lhvloose_bBeeM6000_L1BKeePrescaled",
-            "HLT_2e5_bBeeM6000_L1BKeePrescaled",
-            "HLT_e5_lhvloose_bBeeM6000_L1BKeePrescaled"
-        ]
-    )
-    
-    ElectronLHSelectorLHvloose_nod0 = CompFactory.AsgElectronLikelihoodTool("ElectronLHSelectorLHvloosenod0", 
+    skimmingTools = []
+
+    if flags.Trigger.EDMVersion >= 0:
+        BPHY18TriggerSkim = CompFactory.DerivationFramework.TriggerSkimmingTool(
+            name = "BPHY18TriggerSkim",
+            TriggerListOR = [
+                "HLT_e5_lhvloose_e3_lhvloose_bBeeM6000_L1BKeePrimary",
+                "HLT_2e5_bBeeM6000_L1BKeePrimary",
+                "HLT_e5_lhvloose_bBeeM6000_L1BKeePrimary",
+                "HLT_e5_lhvloose_e3_lhvloose_bBeeM6000_L1BKeePrescaled",
+                "HLT_2e5_bBeeM6000_L1BKeePrescaled",
+                "HLT_e5_lhvloose_bBeeM6000_L1BKeePrescaled"
+            ]
+        )
+        skimmingTools += [BPHY18TriggerSkim]
+
+    ElectronLHSelectorLHvloose_nod0 = CompFactory.AsgElectronLikelihoodTool("ElectronLHSelectorLHvloosenod0",
             primaryVertexContainer = "PrimaryVertices",
             ConfigFile="ElectronPhotonSelectorTools/offline/mc20_20230321/ElectronLikelihoodVeryLooseOfflineConfig2017_Smooth_NoD0_NoPix.conf")
 
     # decorate electrons with the output of LH
-       
-    ElectronPassLHvloosenod0 = CompFactory.DerivationFramework.EGElectronLikelihoodToolWrapper(name = "ElectronPassLHvloosenod0",
+    from DerivationFrameworkEGamma.EGammaToolsConfig import EGElectronLikelihoodToolWrapperCfg
+    ElectronPassLHvloosenod0 = acc.addPublicTool(acc.popToolsAndMerge(EGElectronLikelihoodToolWrapperCfg(flags, name = "ElectronPassLHvloosenod0",
                                             EGammaElectronLikelihoodTool = ElectronLHSelectorLHvloose_nod0,
                                             EGammaFudgeMCTool = "",
                                             CutType = "",
                                             StoreGateEntryName = "DFCommonElectronsLHVeryLoosenod0",
                                             ContainerName = "Electrons",
-                                            StoreTResult=False)
-    
+                                            StoreTResult=False)))
+
     BPHY18DiElectronFinder = CompFactory.Analysis.JpsiFinder_ee(
                              name                        = "BPHY18DiElectronFinder",
                              elAndEl                     = True,
@@ -203,14 +207,16 @@ def BPHY18Cfg(flags):
                        Chi2Max               = 100.0
                        )
 
-    BPHY18_SelectBeeKstEvent = CompFactory.DerivationFramework.xAODStringSkimmingTool(
-                       name = "BPHY18_SelectBeeKstEvent",
-                       expression = "(count(BeeKstCandidates.passed_Bd > 0) + count(BeeKstCandidates.passed_Bdbar > 0)) > 0")
+    from DerivationFrameworkTools.DerivationFrameworkToolsConfig import (
+        xAODStringSkimmingToolCfg)
+    BPHY18_SelectBeeKstEvent = acc.getPrimaryAndMerge(xAODStringSkimmingToolCfg(
+        flags, name = "BPHY18_SelectBeeKstEvent",
+        expression = "(count(BeeKstCandidates.passed_Bd > 0) + count(BeeKstCandidates.passed_Bdbar > 0)) > 0"))
+    skimmingTools += [BPHY18_SelectBeeKstEvent]
 
     BPHY18SkimmingAND = CompFactory.DerivationFramework.FilterCombinationAND(
-        "BPHY18SkimmingAND",
-        FilterList = [BPHY18_SelectBeeKstEvent, BPHY18TriggerSkim])
-    extraTools += [BPHY18_SelectBeeKstEvent, BPHY18TriggerSkim, BPHY18SkimmingAND]
+        "BPHY18SkimmingAND", FilterList = skimmingTools)
+
     BPHY18_thinningTool_Tracks = CompFactory.DerivationFramework.Thin_vtxTrk(
                                 name                       = "BPHY18_thinningTool_Tracks",
                                 TrackParticleContainerName = "InDetTrackParticles",
@@ -257,35 +263,38 @@ def BPHY18Cfg(flags):
                                                            PreserveAncestors       = False)
 
     thinningCollection = [ BPHY18_thinningTool_Tracks,  BPHY18_thinningTool_GSFTracks,
-                       BPHY18_thinningTool_PV, #BPHY18_thinningTool_PV_GSF, 
+                       BPHY18_thinningTool_PV, #BPHY18_thinningTool_PV_GSF,
                        BPHY18EgammaTPThinningTool, BPHY18MuonTPThinningTool
                      ]
-    
+
 
     augTools = [ElectronPassLHvloosenod0,
                 BPHY18DiElectronSelectAndWrite, BPHY18_Select_DiElectrons,
                 BPHY18BeeKstSelectAndWrite, BPHY18_Select_BeeKst, BPHY18_Select_BeeKstbar,
                 BPHY18_diMeson_revertex, BPHY18_Select_Kpi, BPHY18_Select_piK]
     skimTools = [BPHY18SkimmingAND]
-    
-    if isSimulation:
-        thinningCollection += [BPHY18TruthThinTool,BPHY18TruthThinNoChainTool]        
 
-    for t in augTools + skimTools + thinningCollection + extraTools: acc.addPublicTool(t)
+    if isSimulation:
+        thinningCollection += [BPHY18TruthThinTool,BPHY18TruthThinNoChainTool]
+
+    for t in (augTools + skimTools + skimmingTools + thinningCollection +
+              extraTools):
+        acc.addPublicTool(t)
+
     acc.addEventAlgo(CompFactory.DerivationFramework.DerivationKernel("BPHY18Kernel",
                                                     AugmentationTools = augTools,
                                                     #Only skim if not MC
                                                     SkimmingTools     = skimTools,
                                                     ThinningTools     = thinningCollection))
-    
+
     from IsolationAlgs.DerivationTrackIsoConfig import DerivationTrackIsoCfg
     acc.merge(DerivationTrackIsoCfg(flags, object_types=("Electrons", "Muons")))
 
-    
+
     #====================================================================
-    # Slimming 
+    # Slimming
     #====================================================================
-    
+
     from DerivationFrameworkCore.SlimmingHelper import SlimmingHelper
     from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
     from xAODMetaDataCnv.InfileMetaDataConfig import SetupMetaDataForStreamCfg
@@ -294,8 +303,8 @@ def BPHY18Cfg(flags):
     AllVariables  = getDefaultAllVariables()
     StaticContent  = []
     ExtraVariables = []
-    BPHY18SlimmingHelper.SmartCollections = ["Electrons", "Muons", "InDetTrackParticles" ] 
-    
+    BPHY18SlimmingHelper.SmartCollections = ["Electrons", "Muons", "InDetTrackParticles" ]
+
     # Needed for trigger objects
     BPHY18SlimmingHelper.IncludeMuonTriggerContent   = False
     BPHY18SlimmingHelper.IncludeBPhysTriggerContent  = False
@@ -304,43 +313,43 @@ def BPHY18Cfg(flags):
     AllVariables  += ["PrimaryVertices"]
     StaticContent += ["xAOD::VertexContainer#BPHY18RefittedPrimaryVertices"]
     StaticContent += ["xAOD::VertexAuxContainer#BPHY18RefittedPrimaryVerticesAux."]
-    
+
     ExtraVariables += ["Muons.etaLayer1Hits.etaLayer2Hits.etaLayer3Hits.etaLayer4Hits.phiLayer1Hits.phiLayer2Hits.phiLayer3Hits.phiLayer4Hits",
                        "Muons.numberOfTriggerEtaLayers.numberOfPhiLayers",
                        "InDetTrackParticles.numberOfTRTHits.numberOfTRTHighThresholdHits.vx.vy.vz.pixeldEdx",
-                       "PrimaryVertices.chiSquared.covariance", 
+                       "PrimaryVertices.chiSquared.covariance",
                        "Electrons.deltaEta1.DFCommonElectronsLHVeryLoosenod0.ptvarcone30_Nonprompt_All_MaxWeightTTVA_pt1000.ptvarcone20_Nonprompt_All_MaxWeightTTVA_pt1000.ptvarcone30_Nonprompt_All_MaxWeightTTVA_pt500.ptvarcone40_Nonprompt_All_MaxWeightTTVALooseCone_pt1000.ptvarcone20_Nonprompt_All_MaxWeightTTVALooseCone_pt1000",
                        "egammaClusters.calE.calEta.calPhi.e_sampl.eta_sampl.etaCalo.phiCalo.ETACALOFRAME.PHICALOFRAME",
                        "HLT_xAOD__ElectronContainer_egamma_ElectronsAuxDyn.charge"]
-    
-    ## Jpsi candidates 
+
+    ## Jpsi candidates
     StaticContent += ["xAOD::VertexContainer#%s"        %                 BPHY18DiElectronSelectAndWrite.OutputVtxContainerName]
     StaticContent += ["xAOD::VertexAuxContainer#%sAux.-vxTrackAtVertex" % BPHY18DiElectronSelectAndWrite.OutputVtxContainerName]
-    
+
     StaticContent += ["xAOD::VertexContainer#%s"        %                 BPHY18BeeKstSelectAndWrite.OutputVtxContainerName]
     StaticContent += ["xAOD::VertexAuxContainer#%sAux.-vxTrackAtVertex" % BPHY18BeeKstSelectAndWrite.OutputVtxContainerName]
-    
+
     StaticContent += ["xAOD::VertexContainer#%s"        % BPHY18_diMeson_revertex.OutputVtxContainerName]
     StaticContent += ["xAOD::VertexAuxContainer#%sAux.-vxTrackAtVertex" % BPHY18_diMeson_revertex.OutputVtxContainerName]
-    
-    AllVariables += [ "GSFTrackParticles"] 
+
+    AllVariables += [ "GSFTrackParticles"]
 
 
     # Truth information for MC only
     if isSimulation:
         AllVariables += ["TruthEvents","TruthParticles","TruthVertices", "ElectronTruthParticles"]
-    
+
     AllVariables = list(set(AllVariables)) # remove duplicates
-    
+
     BPHY18SlimmingHelper.AllVariables = AllVariables
     BPHY18SlimmingHelper.ExtraVariables = ExtraVariables
-    
+
     BPHY18SlimmingHelper.StaticContent = StaticContent
-    
+
     from DerivationFrameworkEGamma.ElectronsCPDetailedContent import ElectronsCPDetailedContent, GSFTracksCPDetailedContent
     BPHY18SlimmingHelper.ExtraVariables += ElectronsCPDetailedContent
     BPHY18SlimmingHelper.ExtraVariables += GSFTracksCPDetailedContent
-    
+
     BPHY18ItemList = BPHY18SlimmingHelper.GetItemList()
     acc.merge(OutputStreamCfg(flags, "DAOD_BPHY18", ItemList=BPHY18ItemList, AcceptAlgs=["BPHY18Kernel"]))
     acc.merge(SetupMetaDataForStreamCfg(flags, "DAOD_BPHY18", AcceptAlgs=["BPHY18Kernel"], createMetadata=[MetadataCategory.CutFlowMetaData]))

@@ -26,24 +26,6 @@ namespace columnar
 
 
 
-    template<ContainerIdConcept CI = ContainerId::egamma,typename CM=ColumnarModeDefault>
-    class EnergyAccessor final
-    {
-      ColumnAccessor<CI,float,CM> m_ptAcc;
-      ColumnAccessor<CI,float,CM> m_etaAcc;
-
-    public:
-      
-      EnergyAccessor (ColumnarTool<CM>& columnarTool) : m_ptAcc (columnarTool, "pt"), m_etaAcc (columnarTool, "eta") {}
-
-      float operator () (ObjectId<CI,CM> object) const
-      {
-        return m_ptAcc(object) * std::cosh(m_etaAcc(object));
-      }
-    };
-
-
-
     // not sure if this should live here, since it draws in a dependency
     // on ColumnarTracking/xAODTracking, but let's keep it here for now
     template<ContainerIdConcept CI = ContainerId::egamma,typename CM=ColumnarModeDefault>

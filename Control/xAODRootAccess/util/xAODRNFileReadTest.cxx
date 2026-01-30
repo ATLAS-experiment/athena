@@ -125,7 +125,7 @@ int main( int argc, char* argv[] ) {
       // // Open the file:
       Info( APP_NAME, "Opening file: %s", fileName.c_str() );
 
-      // Give it to REvent:
+      // Give it to Event:
 
       // Call readFrom to setup REvent for reading
       R_CHECK( event.readFrom( fileName ) );

@@ -104,7 +104,7 @@ namespace MuonR4{
         const IdentifierHash trfHash{reEle->detectorType() == ActsTrk::DetectorType::Mdt ?
                                                     reEle->measurementHash(chanId) :
                                                     reEle->layerHash(chanId)};
-        return reEle->msSector()->globalToLocalTrans(gctx) * reEle->localToGlobalTrans(gctx, trfHash);
+        return reEle->msSector()->globalToLocalTransform(gctx) * reEle->localToGlobalTransform(gctx, trfHash);
 
     }
 
@@ -318,7 +318,7 @@ namespace MuonR4{
         WriteDecorHolder writerHolder{*writeHandle,*this, ctx};
 
         for (auto& [chamber, collectedParts] : hitCollector) {
-            const Amg::Transform3D& locToGlob{chamber->localToGlobalTrans(*gctx)};
+            const Amg::Transform3D& locToGlob{chamber->localToGlobalTransform(*gctx)};
             for (auto& [particle, simHits]: collectedParts) {                
                 /* Sort hits by local z */
                 std::ranges::stable_sort(simHits,[](const HitPosTuple_t& a, const HitPosTuple_t& b){

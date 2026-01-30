@@ -1,9 +1,10 @@
 #
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 #
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
+from AthenaConfiguration.Enums import ProductionStep
 from PixelConditionsAlgorithms.PixelConditionsConfig import PixelCablingCondAlgCfg, PixelHitDiscCnfgAlgCfg
 
 
@@ -19,7 +20,7 @@ def PixelRawDataProviderAlgCfg(flags, **kwargs):
     acc = PixelCablingCondAlgCfg(flags)
     acc.merge(PixelHitDiscCnfgAlgCfg(flags))
 
-    if flags.Overlay.ByteStream:
+    if flags.Common.ProductionStep is ProductionStep.MinbiasPreprocessing:
         kwargs.setdefault("RDOKey", f"{flags.Overlay.BkgPrefix}PixelRDOs")
     else:
         kwargs.setdefault("RDOKey", "PixelRDOs")

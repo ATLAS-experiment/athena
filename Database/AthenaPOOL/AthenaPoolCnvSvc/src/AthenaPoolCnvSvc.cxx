@@ -38,6 +38,11 @@ StatusCode AthenaPoolCnvSvc::initialize() {
    ATH_CHECK(dmcsvc.retrieve());
    // Retrieve PoolSvc
    ATH_CHECK(m_poolSvc.retrieve());
+   StringProperty defContainerType("DefaultContainerType", "ROOTTREEINDEX");
+   if(IProperty* propertyServer = dynamic_cast<IProperty*>(m_poolSvc.get())) {
+      propertyServer->getProperty(&defContainerType).ignore();
+   }
+   m_defContainerType = defContainerType.value();
    // Retrieve ClassIDSvc
    ATH_CHECK(m_clidSvc.retrieve());
    // Register this service for 'I/O' events
@@ -57,6 +62,7 @@ StatusCode AthenaPoolCnvSvc::initialize() {
             ATH_MSG_WARNING(std::format("Invalid MaxFileSize value: {}", std::string(start, end)));
          }
          std::string databaseName = maxFileSizeSpec.substr(0, maxFileSizeSpec.find_first_of(" 	="));
+         std::unique_lock<std::mutex> lock(m_mutex);
          m_databaseMaxFileSize.emplace(std::move(databaseName), maxFileSize);
       } else {
          if (auto [ptr, ec] = std::from_chars(maxFileSizeSpec.data(), maxFileSizeSpec.data() + maxFileSizeSpec.size(), m_domainMaxFileSize); ec != std::errc{}) {
@@ -109,7 +115,7 @@ StatusCode AthenaPoolCnvSvc::initialize() {
 //______________________________________________________________________________
 StatusCode AthenaPoolCnvSvc::io_reinit() {
    ATH_MSG_DEBUG("I/O reinitialization...");
-   m_contextAttr.clear();
+   m_processedContextIds.clear();
    return(StatusCode::SUCCESS);
 }
 //______________________________________________________________________________
@@ -176,14 +182,14 @@ StatusCode AthenaPoolCnvSvc::createObj(IOpaqueAddress* pAddress, DataObject*& re
    if (!m_persSvcPerInputType.empty()) { // Use separate PersistencySvc for each input data type
       TokenAddress* tokAddr = dynamic_cast<TokenAddress*>(pAddress);
       if (tokAddr != nullptr && tokAddr->getToken() != nullptr && (tokAddr->getToken()->contID().starts_with(m_persSvcPerInputType.value() + "(") || tokAddr->getToken()->contID().starts_with(m_persSvcPerInputType.value() + "_"))) {
-         const unsigned int maxContext = m_poolSvc->getInputContextMap().size();
+         const unsigned int maxContext = m_poolSvc->getInputContextMapSize();
          const unsigned int auxContext = m_poolSvc->getInputContext(tokAddr->getToken()->classID().toString() + tokAddr->getToken()->dbID().toString(), 1);
          char text[32];
          const std::string contextStr = std::format("[CTXT={:08X}]", auxContext);
          std::strncpy(text, contextStr.c_str(), sizeof(text) - 1);
          text[sizeof(text) - 1] = '\0';
-         if (m_poolSvc->getInputContextMap().size() > maxContext) {
-            if (m_poolSvc->setAttribute("TREE_CACHE", "0", pool::DbType(pool::ROOTTREE_StorageType).type(), "FID:" + tokAddr->getToken()->dbID().toString(), m_persSvcPerInputType.value(), auxContext).isSuccess()) {
+         if (m_poolSvc->getInputContextMapSize() > maxContext) {
+            if (!m_poolSvc->setAttribute("TREE_CACHE", "0", pool::DbType(pool::ROOTTREE_StorageType).type(), "FID:" + tokAddr->getToken()->dbID().toString(), m_persSvcPerInputType.value(), auxContext).isSuccess()) {
                ATH_MSG_DEBUG("setInputAttribute failed to switch off TTreeCache for id = " << auxContext << ".");
             }
          }
@@ -281,46 +287,10 @@ StatusCode AthenaPoolCnvSvc::connectOutput(const std::string& outputConnectionSp
       ATH_MSG_ERROR("connectOutput - caught exception: " << e.what());
       return(StatusCode::FAILURE);
    }
-
    std::unique_lock<std::mutex> lock(m_mutex);
-   if (std::find(m_contextAttr.begin(), m_contextAttr.end(), contextId) == m_contextAttr.end()) {
-      std::size_t merge = outputConnection.find("?pmerge="); // Used to remove trailing TMemFile
-      int flush = m_numberEventsPerWrite.value();
-      m_contextAttr.push_back(contextId);
-      // Setting default 'TREE_MAX_SIZE' for ROOT to 1024 GB to avoid file chains.
-      std::vector<std::string> maxFileSize;
-      maxFileSize.push_back("TREE_MAX_SIZE");
-      maxFileSize.push_back("1099511627776L");
-      m_domainAttr.emplace_back(std::move(maxFileSize));
+   if (m_processedContextIds.insert(contextId).second) {
       // Extracting OUTPUT POOL ItechnologySpecificAttributes for Domain, Database and Container.
       extractPoolAttributes(m_poolAttr, &m_containerAttr, &m_databaseAttr, &m_domainAttr);
-      //FIXME
-      for (auto& dbAttrEntry : m_databaseAttr) {
-         const std::string& opt = dbAttrEntry[0];
-         std::string& data = dbAttrEntry[1];
-         const std::string& file = dbAttrEntry[2];
-         const std::string& cont = dbAttrEntry[3];
-         std::size_t equal = cont.find('='); // Used to remove leading "TTree="
-         if (equal == std::string::npos) equal = 0;
-         else equal++;
-         std::size_t colon = m_containerPrefixProp.value().find(':');
-         if (colon == std::string::npos) colon = 0; // Used to remove leading technology
-         else colon++;
-         const auto& strProp = m_containerPrefixProp.value();
-         if (merge != std::string::npos && opt == "TREE_AUTO_FLUSH" && 0 == outputConnection.compare(0, merge, file) &&cont.compare(equal, std::string::npos, strProp, colon) == 0 && data != "int" && data != "DbLonglong" && data != "double" && data != "string") {
-            flush = atoi(data.c_str());
-            if (flush < 0 && m_numberEventsPerWrite.value() > 0) {
-               flush = m_numberEventsPerWrite.value();
-               data = std::to_string(flush);
-            } else if (flush > 0 && flush < m_numberEventsPerWrite.value()) {
-               flush = flush * (int(static_cast<float>(m_numberEventsPerWrite.value()) / flush - 0.5) + 1);
-            }
-         }
-      }
-      if (merge != std::string::npos) {
-         ATH_MSG_INFO("connectOutput setting auto write for: " << outputConnection << " to " << flush << " events");
-         m_fileFlushSetting[outputConnection.substr(0, merge)] = flush;
-      }
    }
    if (!processPoolAttributes(m_domainAttr, outputConnection, contextId).isSuccess()) {
       ATH_MSG_DEBUG("connectOutput failed process POOL domain attributes.");
@@ -354,13 +324,6 @@ StatusCode AthenaPoolCnvSvc::commitOutput(const std::string& outputConnectionSpe
    if (!processPoolAttributes(m_containerAttr, outputConnection, contextId).isSuccess()) {
       ATH_MSG_DEBUG("commitOutput failed process POOL container attributes.");
    }
-   std::size_t merge = outputConnection.find("?pmerge="); // Used to remove trailing TMemFile
-   const std::string baseOutputConnection = outputConnection.substr(0, merge);
-   m_fileCommitCounter[baseOutputConnection]++;
-   if (merge != std::string::npos && m_fileFlushSetting[baseOutputConnection] > 0 && m_fileCommitCounter[baseOutputConnection] % m_fileFlushSetting[baseOutputConnection] == 0) {
-      doCommit = true;
-      ATH_MSG_DEBUG("commitOutput sending data.");
-   }
 
    // lock.unlock();  //MN: first need to make commitCache slot-specific
    try {
@@ -379,7 +342,7 @@ StatusCode AthenaPoolCnvSvc::commitOutput(const std::string& outputConnectionSpe
       ATH_MSG_ERROR("commitOutput - caught exception: " << e.what());
       return(StatusCode::FAILURE);
    }
-   if (!this->cleanUp(baseOutputConnection).isSuccess()) {
+   if (!this->cleanUp(outputConnection).isSuccess()) {
       ATH_MSG_ERROR("commitOutput FAILED to cleanup converters.");
       return(StatusCode::FAILURE);
    }
@@ -509,22 +472,17 @@ StatusCode AthenaPoolCnvSvc::decodeOutputSpec(std::string& fileSpec, int& output
       outputTech = pool::ROOTRNTUPLE_StorageType.type();
       fileSpec.erase(0, 12);
    } else if (outputTech == 0) {
-      // Extract the file name
-      std::string fileName{fileSpec};
-      if (auto pos = fileSpec.find("?pmerge="); pos != std::string::npos) {
-         fileName = fileSpec.substr(0, pos);
-      }
       // Find the appropriate event data technology for this file
       // This will be used for event data and its data header
       // First we look for an exact file name match
       // If that fails, we look for a wildcard ("*") match
-      // If that also fails, we use the hardcoded default value
-      if (auto it = m_storageTechMap.find(fileName); it != m_storageTechMap.end()) {
+      // If that also fails, we use the default value from PoolSvc
+      if (auto it = m_storageTechMap.find(fileSpec); it != m_storageTechMap.end()) {
          outputTech = it->second;
       } else if (it = m_storageTechMap.find("*"); it != m_storageTechMap.end()) {
          outputTech = it->second;
       } else {
-         outputTech = pool::ROOTTREEINDEX_StorageType.type();
+         outputTech = pool::DbType::getType(m_defContainerType).type();
       }
    }
    return StatusCode::SUCCESS;
@@ -569,7 +527,7 @@ StatusCode AthenaPoolCnvSvc::setInputAttributes(const std::string& fileName) {
       // Loop over all extra event input contexts and switch off TTreeCache
       const auto& extraInputContextMap = m_poolSvc->getInputContextMap();
       for (const auto& [label, id]: extraInputContextMap) {
-         if (m_poolSvc->setAttribute("TREE_CACHE", "0", pool::DbType(pool::ROOTTREE_StorageType).type(), m_lastInputFileName, m_persSvcPerInputType.value(), id).isSuccess()) {
+         if (!m_poolSvc->setAttribute("TREE_CACHE", "0", pool::DbType(pool::ROOTTREE_StorageType).type(), m_lastInputFileName, m_persSvcPerInputType.value(), id).isSuccess()) {
             ATH_MSG_DEBUG("setInputAttribute failed to switch off TTreeCache for = " << label << ".");
          }
       }
@@ -604,18 +562,16 @@ void AthenaPoolCnvSvc::extractPoolAttributes(const StringArrayProperty& property
       valueString.clear();
       using Gaudi::Utils::AttribStringParser;
       for (const AttribStringParser::Attrib& attrib : AttribStringParser (propertyValue)) {
-         const std::string tag = attrib.tag;
-         const std::string val = attrib.value;
-         if (tag == "DatabaseName") {
-            databaseName = val;
-         } else if (tag == "ContainerName") {
+         if (attrib.tag == "DatabaseName") {
+            databaseName = attrib.value;
+         } else if (attrib.tag == "ContainerName") {
             if (databaseName.empty()) {
                databaseName = "*";
             }
-            containerName = std::move(val);
+            containerName = attrib.value;
          } else {
-            attributeName = std::move(tag);
-            valueString = std::move(val);
+            attributeName = attrib.tag;
+            valueString = attrib.value;
          }
       }
       if (!attributeName.empty() && !valueString.empty()) {

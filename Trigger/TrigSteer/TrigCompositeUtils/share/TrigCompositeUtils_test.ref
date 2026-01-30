@@ -9,7 +9,7 @@ Context: s: 0  e: 0
 Current context: s: 0  e: 0
 initialize SG::WriteHandleKey<DecisionContainer> whkT
 call createAndStore( whkT ) with default context, twice
-StoreGateSvc WARNING  setupProxy:: error setting up proxy for key arbitrary and clid 1333228823
+StoreGateSvc_Impl WARNING  setupProxy:: error setting up proxy for key arbitrary and clid 1333228823
 VarHandle(Store...  ERROR ../VarHandleBase.cxx (FUNC): code FAILURE: recordObject failed
                     ERROR ../WriteHandle.icc (FUNC): code FAILURE: this->record(std::move(data))
 handle name "arbitrary" isPresent 1 isValid 1
@@ -17,10 +17,10 @@ handle name "arbitrary" isPresent 1 isValid 0
 
 initialize SG::WriteHandleKey<DecisionContainer> whk1
 call createAndStore( whk1 ) with default context
-handle name myDecisions1 store StoreGateSvc
+handle name myDecisions1 store StoreGateSvc_Impl
 initialize SG::WriteHandleKey<DecisionContainer> whk2
 call createAndStore( whk2, ctx )
-handle name myDecisions2 store StoreGateSvc container size 0
+handle name myDecisions2 store StoreGateSvc_Impl container size 0
 testing insert decisions
 1 from d1
 2 from d1

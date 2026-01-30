@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 # ====================================================================
 # EGAM2.py
 # This defines DAOD_EGAM2, a skimmed DAOD format for Run 3.
@@ -27,6 +27,8 @@ def EGAM2SkimmingToolCfg(flags):
     """Configure the EGAM2 skimming tool"""
     acc = ComponentAccumulator()
 
+    skimmingTools = []
+
     # off-line based selection
     expression_calib = (
         "(count(EGAM2_DiElectronMass1 > 1.0*GeV && "
@@ -39,34 +41,36 @@ def EGAM2SkimmingToolCfg(flags):
     expression = expression_calib + " || " + expression_TP
     print("EGAM2 offline skimming expression: ", expression)
 
-    EGAM2_OfflineSkimmingTool = CompFactory.DerivationFramework.xAODStringSkimmingTool(
-        name="EGAM2_OfflineSkimmingTool", expression=expression
-    )
+    from DerivationFrameworkTools.DerivationFrameworkToolsConfig import (
+        xAODStringSkimmingToolCfg)
+    EGAM2_OfflineSkimmingTool = acc.getPrimaryAndMerge(xAODStringSkimmingToolCfg(
+        flags, name = "EGAM2_OfflineSkimmingTool", expression = expression))
+    skimmingTools += [EGAM2_OfflineSkimmingTool]
 
     # trigger-based selection
-    MenuType = None
+    MenuType = ""
     if flags.Trigger.EDMVersion == 2:
         MenuType = "Run2"
     elif flags.Trigger.EDMVersion == 3:
         MenuType = "Run3"
-    else:
-        MenuType = ""
-    triggers = JPsiTriggers[MenuType]
-    print("EGAM2 trigger skimming list (OR): ", triggers)
 
-    EGAM2_TriggerSkimmingTool = CompFactory.DerivationFramework.TriggerSkimmingTool(
-        name="EGAM2_TriggerSkimmingTool", TriggerListOR=triggers
-    )
+    if MenuType:
+        triggers = JPsiTriggers[MenuType]
+        print("EGAM2 trigger skimming list (OR): ", triggers)
+
+        EGAM2_TriggerSkimmingTool = CompFactory.DerivationFramework.TriggerSkimmingTool(
+            name="EGAM2_TriggerSkimmingTool", TriggerListOR=triggers
+        )
+        acc.addPublicTool(EGAM2_TriggerSkimmingTool)
+        skimmingTools += [EGAM2_TriggerSkimmingTool]
 
     # do the OR of trigger-based and offline-based selection
     print("EGAM2 skimming is logical OR of previous selections")
     EGAM2_SkimmingTool = CompFactory.DerivationFramework.FilterCombinationOR(
         name="EGAM2_SkimmingTool",
-        FilterList=[EGAM2_OfflineSkimmingTool, EGAM2_TriggerSkimmingTool],
+        FilterList=skimmingTools,
     )
 
-    acc.addPublicTool(EGAM2_OfflineSkimmingTool)
-    acc.addPublicTool(EGAM2_TriggerSkimmingTool)
     acc.addPublicTool(EGAM2_SkimmingTool, primary=True)
 
     return acc
@@ -382,15 +386,15 @@ def EGAM2Cfg(flags):
     ]
 
     # for trigger studies we also add:
-    MenuType = None
+    MenuType = ""
     if flags.Trigger.EDMVersion == 2:
         MenuType = "Run2"
     elif flags.Trigger.EDMVersion == 3:
         MenuType = "Run3"
-    else:
-        MenuType = ""
-    EGAM2SlimmingHelper.AllVariables += ExtraContainersTrigger[MenuType]
-    EGAM2SlimmingHelper.AllVariables += ExtraContainersElectronTrigger[MenuType]
+
+    if MenuType:
+        EGAM2SlimmingHelper.AllVariables += ExtraContainersTrigger[MenuType]
+        EGAM2SlimmingHelper.AllVariables += ExtraContainersElectronTrigger[MenuType]
 
     # and on MC we also add:
     if flags.Input.isMC:
@@ -420,7 +424,7 @@ def EGAM2Cfg(flags):
         "PrimaryVertices",
         "AntiKt4EMPFlowJets",
         "MET_Baseline_AntiKt4EMPFlow",
-        "BTagging_AntiKt4EMPFlow",
+
     ]
     if flags.Input.isMC:
         EGAM2SlimmingHelper.SmartCollections += [
@@ -471,11 +475,11 @@ def EGAM2Cfg(flags):
     # truth
     if flags.Input.isMC:
         EGAM2SlimmingHelper.ExtraVariables += [
-            "MuonTruthParticles.e.px.py.pz.status.pdgId.truthOrigin.truthType"
+            "MuonTruthParticles.e.px.py.pz.status.pdgId.truthClassification.truthOrigin.truthType"
         ]
 
         EGAM2SlimmingHelper.ExtraVariables += [
-            "Photons.truthOrigin.truthType.truthParticleLink"
+            "Photons.truthClassification.truthOrigin.truthType.truthParticleLink"
         ]
 
     # Add event info

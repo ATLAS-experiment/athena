@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 #include "TrigT1CaloCondSvc/L1CaloCondAlg.h"
 
@@ -10,7 +10,7 @@
 #include "StoreGate/WriteCondHandle.h"
 
 
-L1CaloCondAlg :: L1CaloCondAlg ( const std::string &name,ISvcLocator *pSvcLocator): AthAlgorithm( name, pSvcLocator )    
+L1CaloCondAlg :: L1CaloCondAlg ( const std::string &name,ISvcLocator *pSvcLocator): AthCondAlgorithm( name, pSvcLocator )    
 										    
 										    
 
@@ -86,14 +86,14 @@ StatusCode  L1CaloCondAlg:: initialize ()
 
 }
 
-template <typename T> StatusCode L1CaloCondAlg::updateCond(SG::WriteCondHandleKey<T>& wkey, const std::vector<std::reference_wrapper<const SG::ReadCondHandleKey<CondAttrListCollection>>>& rkeys, std::unique_ptr<T> obj) {
+template <typename T> StatusCode L1CaloCondAlg::updateCond(const EventContext& ctx, const SG::WriteCondHandleKey<T>& wkey, const std::vector<std::reference_wrapper<const SG::ReadCondHandleKey<CondAttrListCollection>>>& rkeys, std::unique_ptr<T> obj) const {
     if(wkey.empty()) return StatusCode::SUCCESS; // no creation to do
-    SG::WriteCondHandle<T> wh{wkey};
+    SG::WriteCondHandle<T> wh{wkey, ctx};
     if(wh.isValid()) return StatusCode::SUCCESS; // condition already valid, no update needed
     std::map<std::string, const CondAttrListCollection *> listMap;
     for(auto rkey : rkeys) { // note: rkey is a reference_wrapper round an actual sg key, hence the use of .get() below
         if(rkey.get().empty()) continue;
-        SG::ReadCondHandle <CondAttrListCollection> rh(rkey.get());
+        SG::ReadCondHandle <CondAttrListCollection> rh(rkey.get(), ctx);
         CHECK(rh.isValid());
         ATH_MSG_DEBUG("Size of CondAttrListCollection " << rh.fullKey() << " = " << rh->size());
         wh.addDependency(rh); // will become invalid when read handle validity ends
@@ -107,7 +107,7 @@ template <typename T> StatusCode L1CaloCondAlg::updateCond(SG::WriteCondHandleKe
     return StatusCode::SUCCESS;
 }
 
-StatusCode  L1CaloCondAlg:: execute ()
+StatusCode  L1CaloCondAlg::execute (const EventContext& ctx) const
 {
   
     ATH_MSG_DEBUG( "start execute " << name() );
@@ -117,9 +117,9 @@ StatusCode  L1CaloCondAlg:: execute ()
     std::string strategy = m_strategy;
 
     if(!m_derivedRunPars.empty()) {
-      SG::WriteCondHandle<L1CaloDerivedRunParsContainer> writeHandleDerRunPars{m_derivedRunParsContainer};
+      SG::WriteCondHandle<L1CaloDerivedRunParsContainer> writeHandleDerRunPars{m_derivedRunParsContainer, ctx};
       if(!writeHandleDerRunPars.isValid()) { // condition needs updating
-          SG::ReadCondHandle <CondAttrListCollection> readHandleDerRunPars(m_derivedRunPars);
+          SG::ReadCondHandle <CondAttrListCollection> readHandleDerRunPars(m_derivedRunPars, ctx);
           CHECK(readHandleDerRunPars.isValid());
           ATH_MSG_DEBUG("Size of CondAttrListCollection " << readHandleDerRunPars.fullKey() << " = " <<  readHandleDerRunPars->size());
           writeHandleDerRunPars.addDependency(readHandleDerRunPars); // will become invalid when read handle validity ends
@@ -140,9 +140,9 @@ StatusCode  L1CaloCondAlg:: execute ()
 
 
     if(!m_pprChanStrategy.empty()) {
-        SG::WriteCondHandle<L1CaloPprChanStrategyContainer> writeHandlePprChanStrategy{m_pprChanStrategyContainer};
+        SG::WriteCondHandle<L1CaloPprChanStrategyContainer> writeHandlePprChanStrategy{m_pprChanStrategyContainer, ctx};
         if(!writeHandlePprChanStrategy.isValid()) { // condition needs updating
-            SG::ReadCondHandle<CondAttrListCollection> readHandlePprChanStrategy(m_pprChanStrategy);
+            SG::ReadCondHandle<CondAttrListCollection> readHandlePprChanStrategy(m_pprChanStrategy, ctx);
             CHECK(readHandlePprChanStrategy.isValid());
             ATH_MSG_DEBUG("Size of CondAttrListCollection " << readHandlePprChanStrategy.fullKey() << " = " <<  readHandlePprChanStrategy->size());
             writeHandlePprChanStrategy.addDependency(readHandlePprChanStrategy); // will become invalid when read handle validity ends
@@ -168,17 +168,17 @@ StatusCode  L1CaloCondAlg:: execute ()
         }
     }
 
-    CHECK( updateCond(m_disabledTowersContainer,{m_disabledTowers}) );
-    CHECK( updateCond(m_pprChanDefaultsContainer,{m_pprChanDefaults}) );
-    CHECK( updateCond(m_ppmFineTimeRefsContainer,{m_ppmFineTimeRefs}) );
-    CHECK( updateCond(m_runParametersContainer,{m_runParameters}) );
-    CHECK( updateCond(m_ppmDeadChannelsContainer,{m_ppmDeadChannels}) );
-    CHECK( updateCond(m_readoutConfigContainer,{m_readoutConfig}) );
-    CHECK( updateCond(m_readoutConfigContainerJSON,{m_readoutConfigJSON}) );
+    CHECK( updateCond(ctx, m_disabledTowersContainer,{m_disabledTowers}) );
+    CHECK( updateCond(ctx, m_pprChanDefaultsContainer,{m_pprChanDefaults}) );
+    CHECK( updateCond(ctx, m_ppmFineTimeRefsContainer,{m_ppmFineTimeRefs}) );
+    CHECK( updateCond(ctx, m_runParametersContainer,{m_runParameters}) );
+    CHECK( updateCond(ctx, m_ppmDeadChannelsContainer,{m_ppmDeadChannels}) );
+    CHECK( updateCond(ctx, m_readoutConfigContainer,{m_readoutConfig}) );
+    CHECK( updateCond(ctx, m_readoutConfigContainerJSON,{m_readoutConfigJSON}) );
 
     if (timingRegime == "") timingRegime="Physics"; // default to physics
 
-    SG::ReadCondHandleKeyArray<CondAttrListCollection>* pprKeys = nullptr;
+    const SG::ReadCondHandleKeyArray<CondAttrListCollection>* pprKeys = nullptr;
     if (timingRegime == "Physics") {
         pprKeys = &m_physicsKeys;
     } else if (timingRegime == "Calib1") {
@@ -190,17 +190,17 @@ StatusCode  L1CaloCondAlg:: execute ()
         return StatusCode::FAILURE;
     }
 
-    CHECK( updateCond(m_pprChanCalibContainer,{pprKeys->at(PPRCHANCALIB)}) );
-    CHECK( updateCond(m_pprDisabledChannelContainer,{pprKeys->at(PPRCHANCALIB),m_disabledTowers,m_ppmDeadChannels}) );
+    CHECK( updateCond(ctx, m_pprChanCalibContainer,{pprKeys->at(PPRCHANCALIB)}) );
+    CHECK( updateCond(ctx, m_pprDisabledChannelContainer,{pprKeys->at(PPRCHANCALIB),m_disabledTowers,m_ppmDeadChannels}) );
 
     // only need this logic if the conditionscontainerrun2 has expired ...
-    if(!m_pprConditionsContainer.empty() && !SG::WriteCondHandle<L1CaloPprConditionsContainerRun2>{m_pprConditionsContainer}.isValid()) {
+    if(!m_pprConditionsContainer.empty() && !SG::WriteCondHandle<L1CaloPprConditionsContainerRun2>{m_pprConditionsContainer, ctx}.isValid()) {
         std::map <L1CaloPprConditionsContainerRun2::eCoolFolders, std::string> folderKeyMap;
         folderKeyMap[L1CaloPprConditionsContainerRun2::ePprChanDefaults] = m_pprChanDefaults.key();
         if (strategy.empty()) {
             folderKeyMap[L1CaloPprConditionsContainerRun2::ePprChanCalib] = pprKeys->at(PPRCHANCALIB).key();
             auto obj = std::make_unique<L1CaloPprConditionsContainerRun2>(folderKeyMap); // must construct here to pass map to constructor
-            CHECK(updateCond(m_pprConditionsContainer, {m_pprChanDefaults, pprKeys->at(PPRCHANCALIB)}, std::move(obj)));
+            CHECK(updateCond(ctx, m_pprConditionsContainer, {m_pprChanDefaults, pprKeys->at(PPRCHANCALIB)}, std::move(obj)));
         } else {
             if (strategy != "HighMu" && strategy != "LowMu") {
                 ATH_MSG_ERROR("Invalid strategy: " << strategy << " (must be HighMu or LowMu)");
@@ -212,7 +212,7 @@ StatusCode  L1CaloCondAlg:: execute ()
 
             auto obj = std::make_unique<L1CaloPprConditionsContainerRun2>(folderKeyMap);
 
-            CHECK(updateCond(m_pprConditionsContainer, {m_pprChanDefaults, pprKeys->at(PPRCHANCOMMON), pprKeys->at(
+            CHECK(updateCond(ctx, m_pprConditionsContainer, {m_pprChanDefaults, pprKeys->at(PPRCHANCOMMON), pprKeys->at(
                     strategy == "HighMu" ? PPRCHANHIGHMU : PPRCHANLOWMU)}, std::move(obj)));
         }
     }

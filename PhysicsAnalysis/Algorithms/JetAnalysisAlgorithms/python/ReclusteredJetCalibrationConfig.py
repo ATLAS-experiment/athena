@@ -14,7 +14,7 @@ class ReclusteredJetCalibrationBlock(ConfigBlock):
         self.addOption ('jetCollection', '', type=str,
             info="the reclustered Large-R jet container to run on.")
         self.addOption ('jetInput', '', type=str,
-            info='the input calibrated small-R jet collection to use')
+            info='the input calibrated small-R jet collection to use.')
 
     def instanceName (self) :
         """Return the instance name for this block"""

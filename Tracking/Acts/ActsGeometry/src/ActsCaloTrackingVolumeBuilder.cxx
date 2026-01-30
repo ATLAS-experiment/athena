@@ -18,7 +18,6 @@
 #include "Acts/Geometry/GenericCuboidVolumeBounds.hpp"
 #include "Acts/Geometry/CutoutCylinderVolumeBounds.hpp"
 #include "Acts/Geometry/CylinderVolumeBounds.hpp"
-//#include "Acts/Utilities/IVisualization.hpp"
 #include "Acts/Utilities/Helpers.hpp"
 #include "Acts/Geometry/TrackingVolumeArrayCreator.hpp"
 #include "Acts/Utilities/BinnedArrayXD.hpp"
@@ -82,7 +81,7 @@ ActsCaloTrackingVolumeBuilder::trackingVolume(
   ATH_MSG_VERBOSE("Figure out dimensions of wrapping volume");
 
   std::shared_ptr<Acts::CutoutCylinderVolumeBounds> caloVolBounds
-   = makeCaloVolumeBounds(boxStore, insideVolume);
+   = makeCaloVolumeBounds(boxStore, std::move(insideVolume));
 
   // build a BVH octree for the bounding boxes
   // but only AFTER we've built the calo volume bounds

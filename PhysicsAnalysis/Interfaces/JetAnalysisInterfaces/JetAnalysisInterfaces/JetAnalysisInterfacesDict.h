@@ -11,6 +11,5 @@
 
 // Includes for the dictionary generation:
 #include "JetAnalysisInterfaces/IJetQGTagger.h"
-#include "JetAnalysisInterfaces/IJetJvtEfficiency.h"
 
 #endif // JETANALYSISINTERFACES_JETANALYSISINTERFACESDICT_H

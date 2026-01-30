@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //  Table of connection between Patch Panel and Slave Board.
@@ -27,7 +27,7 @@ class TGCConnectionPPToSB : public TGCBoardConnection
 
  private:
   static constexpr int N_PP_PORTS = 2;
-  int* m_SBIdToPP[N_PP_PORTS][TGCSector::NumberOfPatchPanelType];
+  int* m_SBIdToPP[N_PP_PORTS][TGCSector::NumberOfPatchPanelType]{};
 };
 
 inline

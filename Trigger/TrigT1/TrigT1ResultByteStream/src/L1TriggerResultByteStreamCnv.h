@@ -7,6 +7,7 @@
 
 // Trigger includes
 #include "TrigT1ResultByteStream/IL1TriggerByteStreamTool.h"
+#include "xAODTrigger/CTPResult.h"
 
 // Athena includes
 #include "AthenaBaseComps/AthMessaging.h"
@@ -16,6 +17,9 @@
 
 // Gaudi includes
 #include "GaudiKernel/Converter.h"
+
+// StoreGate includes
+#include "StoreGate/ReadHandleKey.h"
 
 /** @class L1TriggerResultByteStreamCnv
  *  @brief ByteStream converter for L1TriggerResult
@@ -55,10 +59,15 @@ private:
   /// Encoder tools for L1Muon RoIs (one writing RoIB ROB, one writing DAQ ROB)
   ToolHandle<IL1TriggerByteStreamTool> m_muonEncoderTool{"MuonRoIByteStreamTool/L1MuonBSEncoderTool"};
   ToolHandle<IL1TriggerByteStreamTool> m_muonEncoderToolDaq{"MuonRoIByteStreamTool/L1MuonBSEncoderToolDAQ"};
+  /// Encoder tool for CTP result
+  ToolHandle<IL1TriggerByteStreamTool> m_ctpResultEncoderTool{"CTPResultByteStreamTool/CTPResultBSEncoderTool"};
   // Placeholder for other L1 xAOD outputs:
-  // - CTP result
   // - L1Topo result
   // - L1Calo (Run3) RoIs
+
+  // Read handle key needed for CTPResult to update the RawEventWrite with L1 trigger bits
+  SG::ReadHandleKey<xAOD::CTPResult> m_inKeyCTPResult { "CTPResult" };
+
 };
 
 #endif // TRIGT1RESULTBYTESTREAM_L1TRIGGERRESULTBYTESTREAMCNV_H

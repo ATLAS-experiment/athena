@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 from dataclasses import dataclass, field
 from functools import wraps
@@ -8,6 +8,30 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.Enums import Format, MetadataCategory, ProductionStep
 from OutputStreamAthenaPool.OutputStreamConfig import addToMetaData, outputStreamName
+
+
+defaultIOVFolders = [
+    "/Generation/Parameters",
+    "/GLOBAL/BField/Maps",
+    "/Simulation/Parameters",
+    "/Digitization/Parameters",
+    "/TagInfo",
+    "/TRIGGER/HLT/HltConfigKeys",
+    "/TRIGGER/HLT/Menu",
+    "/TRIGGER/HLT/PrescaleKey",
+    "/TRIGGER/HLT/Prescales",
+    "/TRIGGER/LVL1/ItemDef",
+    "/TRIGGER/LVL1/Lvl1ConfigKey",
+    "/TRIGGER/LVL1/Menu",
+    "/TRIGGER/LVL1/Prescales",
+    "/TRIGGER/LVL1/Thresholds",
+]
+
+excludeStreamToIOVFolders = {
+    "HITS": [
+        "/Digitization/Parameters",
+    ],
+}
 
 
 @dataclass
@@ -106,7 +130,15 @@ def createTruthMetaData(tools, result, flags, **kwargs):
 
 @metadata_creator
 def createIOVMetaData(tools, result, flags, **kwargs):
-    tools.mdItems += ["IOVMetaDataContainer#*"]
+    streamName = kwargs.get("streamName", "")
+    if streamName not in excludeStreamToIOVFolders:
+        tools.mdItems += ["IOVMetaDataContainer#*"]
+    else:
+        tools.mdItems += [
+            f"IOVMetaDataContainer#{folder}"
+            for folder in defaultIOVFolders
+            if folder not in excludeStreamToIOVFolders[streamName]
+        ]
     from IOVDbSvc.IOVDbSvcConfig import IOVDbSvcCfg
     result.merge(IOVDbSvcCfg(flags))
 
@@ -212,7 +244,14 @@ def propagateMetaData(flags, streamName="", category=None):
             ]
     elif category == MetadataCategory.IOVMetaData:
         if "IOVMetaDataContainer" in flags.Input.MetadataItems.values():
-            tools.mdItems += ["IOVMetaDataContainer#*"]
+            if streamName not in excludeStreamToIOVFolders:
+                tools.mdItems += ["IOVMetaDataContainer#*"]
+            else:
+                tools.mdItems += [
+                    f"IOVMetaDataContainer#{folder}"
+                    for folder, container in flags.Input.MetadataItems.items()
+                    if container == "IOVMetaDataContainer" and folder not in excludeStreamToIOVFolders[streamName]
+                ]
 
     else:
         log.warning(f"Requested metadata category: {category} could not be configured")

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // EDM includes
@@ -29,7 +29,7 @@ StatusCode EventCleaningTestAlg::initialize()
   ATH_CHECK( m_evtKey.initialize() );
   // Create the decorator
   // Use an if statement to leave a legacy 
-  auto labelString = m_cleaningLevel;
+  std::string labelString = m_cleaningLevel;
   if (m_jetKey.key() == "AntiKt4EMTopoJets") {
     labelString = m_cleaningLevel + "_EMTopo";
   }

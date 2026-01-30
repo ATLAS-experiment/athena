@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "BoostedJetTaggers/JetQGTaggerBDT.h"
@@ -9,6 +9,7 @@
 #include "InDetTrackSelectionTool/InDetTrackSelectionTool.h"
 
 #include "xAODTracking/VertexContainer.h"
+#include "xAODTracking/TrackParticle.h"
 
 namespace CP {
 
@@ -120,7 +121,7 @@ namespace CP {
     ATH_CHECK( checkKinRange( jet, acceptData ) );
 
     /// Create WriteDecorHandles
-    SG::WriteDecorHandle<xAOD::JetContainer, bool> decTagged(m_decTaggedKey);
+    SG::WriteDecorHandle<xAOD::JetContainer, char> decTagged(m_decTaggedKey);
     SG::WriteDecorHandle<xAOD::JetContainer, float> decScore(m_decScoreKey);
 
     /// TODO: Is this actually needed?

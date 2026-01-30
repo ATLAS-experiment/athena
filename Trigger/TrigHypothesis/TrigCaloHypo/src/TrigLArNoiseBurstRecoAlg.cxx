@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigLArNoiseBurstRecoAlg.h"
@@ -172,7 +172,7 @@ StatusCode TrigLArNoiseBurstRecoAlg::execute( const EventContext& context ) cons
      ATH_MSG_DEBUG("LAr Noise detected !");
      pass = true;
      if ( monitor ) {
-        auto bitWise = Monitored::Scalar<std::string>(bitWise_flags,"Output");
+        auto bitWise = Monitored::Scalar<std::string>(std::move(bitWise_flags),"Output");
         fill(m_monTool,bitWise);
      }
   }

@@ -17,67 +17,67 @@ class OutputAnalysisConfig (ConfigBlock):
             "Typically not needed here.")
         self.addOption ('vars', [], type=None,
             info="a list of mappings (list of strings) between containers and "
-            "decorations to output branches. The default is [] (empty list).")
+            "decorations to output branches.")
         self.addOption ('varsOnlyForMC', [], type=None,
-            info="same as vars, but for MC-only variables so as to avoid a "
-            "crash when running on data. The default is [] (empty list).")
+            info="same as `vars`, but for MC-only variables so as to avoid a "
+            "crash when running on data.")
         self.addOption ('metVars', [], type=None,
             info="a list of mappings (list of strings) between containers "
             "and decorations to output branches. Specficially for MET "
-            "variables, where only the final MET term is retained. "
-            "The default is [] (empty list).")
+            "variables, where only the final MET term is retained.")
         self.addOption ('truthMetVars', [], type=None,
             info="a list of mappings (list of strings) between containers "
-            "and decorations to output branches for truth MET. "
-            "The default is [] (empty list).")
+            "and decorations to output branches for truth MET.")
         self.addOption ('containers', {}, type=None,
             info="a dictionary mapping prefixes (key) to container names "
             "(values) to be used when saving to the output tree. Branches "
-            "are then of the form prefix_decoration.")
+            "are then of the form `prefix_decoration`.")
         self.addOption ('containersFullMET', {}, type=None,
-            info="same as containers, but for MET containers that should be "
+            info="same as `containers`, but for MET containers that should be "
             "saved with all terms (as opposed to just the final term). This "
-            "is useful for special studies.  A container can appear both here and "
+            "is useful for special studies. A container can appear both here and "
             "in containers (with different prefixes).")
         self.addOption ('containersOnlyForMC', {}, type=None,
-            info="same as containers, but for MC-only containers so as to avoid "
+            info="same as `containers`, but for MC-only containers so as to avoid "
             "a crash when running on data.")
         self.addOption ('containersOnlyForDSIDs', {}, type=None,
             info="specify which DSIDs are allowed to produce a given container. "
-            "This works like 'onlyForDSIDs': pass a list of DSIDs or regexps.")
+            "This works like `onlyForDSIDs`: pass a list of DSIDs or regexps.")
+        self.addOption ('nonContainers', ['EventInfo'], type=None,
+            info="a list of container names that are not actual containers but should be treated as non-containers.")
         self.addOption ('treeName', 'analysis', type=str,
-            info="name of the output TTree to save. The default is analysis.")
+            info="name of the output TTree to save.")
         self.addOption ('streamName', 'ANALYSIS', type=str,
-            info="name of the output stream to save the tree in. "
-            "The default is ANALYSIS.")
+            info="name of the output stream to save the tree in.")
         self.addOption ('metTermName', 'Final', type=str,
-            info="the name (string) of the MET term to save, turning the MET "
-            "container into a single object. The default is 'Final'.")
+            info="the name of the MET term to save, turning the MET "
+            "container into a single object.")
         self.addOption ('truthMetTermName', 'NonInt', type=str,
-            info="the name (string) of the truth MET term to save, turning the MET "
-            "container into a single object. The default is 'NonInt'.")
-        # TODO: add info strng
+            info="the name of the truth MET term to save, turning the MET "
+            "container into a single object.")
         self.addOption ('storeSelectionFlags', True, type=bool,
-            info="")
-        # TODO: add info strng
+            info="whether to store one branch for each object selection.")
         self.addOption ('selectionFlagPrefix', 'select', type=str,
-            info="")
+            info="the prefix used when naming selection branches")
         self.addOption ('commands', [], type=None,
             info="a list of strings containing commands (regexp strings "
-            "prefaced by the keywords enable or disable) to turn on/off the "
-            "writing of branches to the output ntuple. The default is None "
-            "(no modification to the scheduled output branches).")
+            "prefaced by the keywords `enable` or `disable`) to turn on/off the "
+            "writing of branches to the output ntuple. If left empty, do not modify "
+            "the scheduled output branches.")
         self.addOption ('commandsOnlyForDSIDs', {}, type=None,
             info="a dictionary with individual DSIDs as keys, and a list of strings "
-            "like for the 'commands' option as items. These 'commands' will only be run "
+            "like for the `commands` option as items. These `commands` will only be run "
             "for the corresponding DSID.")
         self.addOption ('alwaysAddNosys', False, type=bool,
-            info="If set to True, all branches will be given a systematics suffix, "
+            info="If set to `True`, all branches will be given a systematics suffix, "
             "even if they have no systematics (beyond the nominal).")
         self.addOption ('skipRedundantSelectionFlags', True, type=bool,
-            info="remove the redundant 'outputSelect' branches created by the Thinning step. "
-            "These could however be used to simplify downstream workflows, as in Easyjet. "
-            "The default is True.")
+            info="remove the redundant `outputSelect` branches created by the `Thinning` step. "
+            "These could however be used to simplify downstream workflows, as in Easyjet.")
+        self.addOption ('defaultBasketSize', None, type=int,
+            info="default basket size for all branches in the output tree. "
+            "If not set (the default), no basket size is configured and ROOT's "
+            "default will be used.")
         # helper to protect for second pass
         self.validated = False
 
@@ -91,16 +91,19 @@ class OutputAnalysisConfig (ConfigBlock):
     def branchSortOrder (rule):
         return rule.split('->')[1].strip()
 
-    def createOutputAlgs (self, config, name, vars, isMet=False):
+    def createOutputAlgs (self, config, name, vars):
         """A helper function to create output algorithm"""
-        alg = config.createAlgorithm('CP::AsgxAODMetNTupleMakerAlg' if isMet else 'CP::AsgxAODNTupleMakerAlg', name)
+        alg = config.createAlgorithm('CP::AsgxAODNTupleMakerAlg', name)
         alg.TreeName = self.treeName
         alg.RootStreamName = self.streamName
+        alg.NonContainers = list(self.nonContainers)
         branchList = list(vars)
         branchList.sort(key=self.branchSortOrder)
         branchList_nosys = [branch for branch in branchList if "%SYS%" not in branch]
         branchList_sys = [branch for branch in branchList if "%SYS%" in branch]
         alg.Branches = branchList_nosys + branchList_sys
+        if self.defaultBasketSize is not None:
+            alg.DefaultBasketSize = self.defaultBasketSize
         return alg
 
     def makeAlgs (self, config) :
@@ -255,7 +258,15 @@ class OutputAnalysisConfig (ConfigBlock):
                         outputName += "_NOSYS"
                 else :
                     outputName += '_%SYS%'
-                myVars.add(f"{outputConfig.outputContainerName}.{outputConfig.variableName} -> {outputName}")
+                branchDecl = f"{outputConfig.outputContainerName}.{outputConfig.variableName} -> {outputName}"
+                if outputConfig.auxType is not None :
+                    branchDecl += f" type={outputConfig.auxType}"
+                if config.isMetContainer (outputConfig.origContainerName) and outputConfig.prefix not in self.containersFullMET:
+                    if "Truth" in outputConfig.origContainerName:
+                        branchDecl += f" metTerm={self.truthMetTermName}"
+                    else:
+                        branchDecl += f" metTerm={self.metTermName}"
+                myVars.add(branchDecl)
 
         # Add an ntuple dumper algorithm:
         treeMaker = config.createAlgorithm( 'CP::TreeMakerAlg', 'TreeMaker' )
@@ -265,15 +276,21 @@ class OutputAnalysisConfig (ConfigBlock):
         #treeMaker.TreeAutoFlush = 0
 
         if self.vars or autoVars:
-            ntupleMaker = self.createOutputAlgs(config, 'NTupleMaker', self.vars | autoVars)
+            self.createOutputAlgs(config, 'NTupleMaker', self.vars | autoVars)
 
         if self.metVars or autoMetVars:
-            ntupleMaker = self.createOutputAlgs(config, 'MetNTupleMaker', self.metVars | autoMetVars, isMet=True)
-            ntupleMaker.termName = self.metTermName
+            userMetVars = set ()
+            if self.metVars :
+                for var in self.metVars:
+                    userMetVars.add(var + " metTerm=" + self.metTermName)
+            self.createOutputAlgs(config, 'MetNTupleMaker', userMetVars | autoMetVars)
 
         if config.dataType() is not DataType.Data and (self.truthMetVars or autoTruthMetVars):
-            ntupleMaker = self.createOutputAlgs(config, 'TruthMetNTupleMaker', self.truthMetVars | autoTruthMetVars, isMet=True)
-            ntupleMaker.termName = self.truthMetTermName
+            userTruthMetVars = set ()
+            if self.truthMetVars :
+                for var in self.truthMetVars:
+                    userTruthMetVars.add(var + " metTerm=" + self.truthMetTermName)
+            self.createOutputAlgs(config, 'TruthMetNTupleMaker', userTruthMetVars | autoTruthMetVars)
 
         treeFiller = config.createAlgorithm( 'CP::TreeFillerAlg', 'TreeFiller' )
         treeFiller.TreeName = self.treeName

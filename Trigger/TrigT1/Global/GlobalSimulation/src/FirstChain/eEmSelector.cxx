@@ -3,6 +3,7 @@
 */
 
 #include "./eEmSelector.h"
+#include "../IO/eEmTOB.h"
 #include <sstream>
 
 namespace GlobalSim {
@@ -115,7 +116,7 @@ namespace GlobalSim {
   }
 
 
-  bool eEmSelector::select(const IeEmTOB& tob) const {
+  bool eEmSelector::select(const eEmTOB& tob) const {
 
     if(!m_rhad_cutter->cut(tob.RHad_bits().to_ulong())) {return false;}
     if(!m_reta_cutter->cut(tob.REta_bits().to_ulong())) {return false;}

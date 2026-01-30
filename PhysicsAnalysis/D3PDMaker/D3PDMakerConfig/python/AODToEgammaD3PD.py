@@ -21,10 +21,9 @@ from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
 cfg.merge (PoolReadCfg (configFlags))
 
 # Remake jets.
-from DerivationFrameworkPhys.TriggerListsHelper import TriggerListsHelper
-trigger_lists_helper = TriggerListsHelper (configFlags)
-from DerivationFrameworkPhys.PhysCommonConfig import PhysCommonAugmentationsCfg
-cfg.merge (PhysCommonAugmentationsCfg (configFlags, TriggerListsHelper = trigger_lists_helper))
+from JetRecConfig.StandardSmallRJets import AntiKt4EMPFlow
+from JetRecConfig.JetRecConfig import JetRecCfg
+cfg.merge (JetRecCfg (configFlags, AntiKt4EMPFlow))
 
 from D3PDMakerConfig.egammaD3PDConfig import egammaD3PDCfg
 cfg.merge (egammaD3PDCfg (configFlags))

@@ -91,7 +91,7 @@ public:
       return StatusCode::SUCCESS;
    }
 }; // class TEventClass
-
+//coverity[root_function]
 int main( int argc, char* argv[] ) {
 
    // Initialise the environment:

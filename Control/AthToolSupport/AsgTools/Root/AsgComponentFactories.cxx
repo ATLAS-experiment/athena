@@ -14,7 +14,8 @@
 #include <AsgTools/IAsgTool.h>
 #include <AsgTools/MessageCheckAsgTools.h>
 #include <TSystem.h>
-#include <boost/algorithm/string.hpp>
+#include <ranges>
+#include <algorithm>
 #include <filesystem>
 #include <fstream>
 #include <mutex>
@@ -67,11 +68,10 @@ namespace asg
     std::call_once (flag, [&] () {
       const char *path = gSystem->Getenv ("LD_LIBRARY_PATH");
       if (!path) return;
-      std::vector<std::string> paths;
-      boost::split (paths, path, boost::is_any_of (":"));
       std::regex pathRegex ("\\.asgcomponents$");
-      for (const auto& p : paths)
+      for (auto&& part : std::views::split(std::string_view(path), ':'))
       {
+        std::string_view p(&*part.begin(), std::ranges::distance(part));
         if (p.empty()) continue;
         std::error_code ec;
         if (!std::filesystem::exists(p, ec))

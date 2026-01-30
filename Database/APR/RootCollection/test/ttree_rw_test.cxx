@@ -17,7 +17,7 @@ int main ATLAS_NOT_THREAD_SAFE ()
 {
    try {
       std::cout << "Read test starting..." << std::endl;
-      TestDriver driver( "test_collection",  "RootCollection", "" );
+      TestDriver driver( "test_collection",  "RootCollection", "test_collection.root" );
       driver.write();
       driver.read();
 

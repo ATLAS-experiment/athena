@@ -105,7 +105,7 @@ namespace columnar
 
 
 
-  template<ContainerIdConcept CI> class OptObjectId<CI,ColumnarModeArray> final
+  template<ContainerIdConcept CI,ColumnarArrayMode CM> class OptObjectId<CI,CM> final
   {
     /// Common Public Members
     /// =====================
@@ -117,7 +117,7 @@ namespace columnar
 
     OptObjectId (std::nullopt_t) noexcept {}
 
-    OptObjectId (ObjectId<CI,ColumnarModeArray> val_object) noexcept
+    OptObjectId (ObjectId<CI,CM> val_object) noexcept
       : m_data (val_object.getData()), m_index (val_object.getIndex())
     {}
 
@@ -130,9 +130,9 @@ namespace columnar
       throw std::logic_error ("can't call xAOD function in columnar mode");
     }
 
-    OptObjectId (const OptObjectId<CI,ColumnarModeArray>& that) noexcept = default;
+    OptObjectId (const OptObjectId<CI,CM>& that) noexcept = default;
 
-    OptObjectId& operator = (const OptObjectId<CI,ColumnarModeArray>& that) noexcept = default;
+    OptObjectId& operator = (const OptObjectId<CI,CM>& that) noexcept = default;
 
     // Whatever you do: Do not remove this function. Yes, it will always
     // throw. It is meant to throw in this template specialization, and
@@ -147,17 +147,17 @@ namespace columnar
     [[nodiscard]] bool has_value () const noexcept {
       return m_index != invalidObjectIndex;}
 
-    [[nodiscard]] ObjectId<CI,ColumnarModeArray> value () const {
+    [[nodiscard]] ObjectId<CI,CM> value () const {
       if (m_index == invalidObjectIndex)
         throw std::bad_optional_access();
-      return ObjectId<CI,ColumnarModeArray> (m_data, m_index);}
+      return ObjectId<CI,CM> (m_data, m_index);}
 
-    [[nodiscard]] ObjectId<CI,ColumnarModeArray> operator * () const {
+    [[nodiscard]] ObjectId<CI,CM> operator * () const {
       if (m_index == invalidObjectIndex)
         throw std::bad_optional_access();
-      return ObjectId<CI,ColumnarModeArray> (m_data, m_index);}
+      return ObjectId<CI,CM> (m_data, m_index);}
   
-    [[nodiscard]] bool operator == (const OptObjectId<CI,ColumnarModeArray>& that) const noexcept {
+    [[nodiscard]] bool operator == (const OptObjectId<CI,CM>& that) const noexcept {
       return m_index == that.m_index;}
 
 
@@ -194,14 +194,14 @@ namespace columnar
     std::size_t m_index = invalidObjectIndex;
   };
 
-  template<ContainerIdConcept CI>
-  bool operator== (const OptObjectId<CI,ColumnarModeArray>& lhs, const OptObjectId<CI,ColumnarModeArray>& rhs)
+  template<ContainerIdConcept CI, ColumnarArrayMode CM>
+  bool operator== (const OptObjectId<CI,CM>& lhs, const OptObjectId<CI,CM>& rhs)
   {
     return lhs.getIndex() == rhs.getIndex();
   }
 
-  template<ContainerIdConcept CI>
-  bool operator!= (const OptObjectId<CI,ColumnarModeArray>& lhs, const OptObjectId<CI,ColumnarModeArray>& rhs)
+  template<ContainerIdConcept CI, ColumnarArrayMode CM>
+  bool operator!= (const OptObjectId<CI,CM>& lhs, const OptObjectId<CI,CM>& rhs)
   {
     return lhs.getIndex() != rhs.getIndex();
   }

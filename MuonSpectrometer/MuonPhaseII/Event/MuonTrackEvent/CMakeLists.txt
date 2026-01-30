@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( MuonTrackEvent )
@@ -11,3 +11,13 @@ atlas_add_library(  MuonTrackEvent
                    PUBLIC_HEADERS  MuonTrackEvent
                    LINK_LIBRARIES Acts::Core Identifier MuonReadoutGeometryR4 MuonPatternEvent
                                   xAODMuon MuonSpacePoint MuonStationIndexLib )
+
+file(GLOB_RECURSE tests "test/*.cxx")
+
+foreach(_theTestSource ${tests})
+    get_filename_component(_theTest ${_theTestSource} NAME_WE)
+    atlas_add_test( ${_theTest} SOURCES ${_theTestSource}
+                    LINK_LIBRARIES MuonTrackEvent
+                    POST_EXEC_SCRIPT nopost.sh)
+endforeach()
+    

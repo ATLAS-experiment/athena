@@ -88,10 +88,9 @@ StatusCode MuSAVtxFitter::fillCollections(std::vector<MuSAVtxFitterTool::WrkVrt>
         // Place the new extrapolated tracks in the new container (we need the index for bookkeeping)
         for (size_t i = 0; i < workVertex.newExtrapolatedTracks.size(); i++) {
 
-            const xAOD::TrackParticle* newTrack = workVertex.newExtrapolatedTracks[i].get();
             // copy transfers ownership of the shared_ptr in wrkvrt to container
             xAOD::TrackParticle*  containerTrack  =  MuSAExtrapolatedTracksContainer->push_back(new xAOD::TrackParticle());
-            *containerTrack=*newTrack;
+            *containerTrack=*workVertex.newExtrapolatedTracks[i];
 
             // Link the new tracks to the vertex
             ElementLink<xAOD::TrackParticleContainer> link_trk(*MuSAExtrapolatedTracksContainer, MuSAExtrapolatedTracksContainer->size() - 1);

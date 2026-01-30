@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -35,16 +35,9 @@ namespace FlavorTagDiscriminants {
 
     // Initialise electron ID tool
     ATH_CHECK(m_electronID_tool.retrieve());
-    
+
     // Initialise muon ID tool
     ATH_CHECK(m_muonID_tool.retrieve());
-
-    // Prepare decorators
-    m_dec_lepton_id = m_TrackContainerKey.key() + "." + m_dec_lepton_id.key();
-    m_dec_muon_quality = m_TrackContainerKey.key() + "." + m_dec_muon_quality.key();
-    m_dec_muon_qOverPratio = m_TrackContainerKey.key() + "." + m_dec_muon_qOverPratio.key();
-    m_dec_muon_momentumBalanceSignificance = m_TrackContainerKey.key() + "." + m_dec_muon_momentumBalanceSignificance.key();
-    m_dec_muon_scatteringNeighbourSignificance = m_TrackContainerKey.key() + "." + m_dec_muon_scatteringNeighbourSignificance.key();
 
     // Initialize decorators
     ATH_MSG_DEBUG( "Inizializing decorators:"  );

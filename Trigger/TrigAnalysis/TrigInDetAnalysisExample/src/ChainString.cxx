@@ -62,7 +62,7 @@ void ChainString::parse( std::string s ) {
 	if ( postkeys ) { key += "-post"; m_postcount++; }
 	else keycount++;
 	m_keys.push_back( tolower(key) );
-	m_values.push_back( f );
+	m_values.push_back( std::move(f) );
       }
     }
 
@@ -117,7 +117,7 @@ void ChainString::parse( std::string s ) {
 
     if ( postcount() ) raw += ":post:" + m_post; 
 
-    m_raw = raw;
+    m_raw = std::move(raw);
 
 }
 

@@ -1,17 +1,14 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "MuonCondAlg/TgcDigitJitterCondAlg.h"
+#include "TgcDigitJitterCondAlg.h"
 #include <StoreGate/WriteCondHandle.h>
 #include <AthenaKernel/IOVInfiniteRange.h>
 #include <PathResolver/PathResolver.h>
 #include <fstream>
 
-// constructor
-TgcDigitJitterCondAlg::TgcDigitJitterCondAlg(const std::string& name, ISvcLocator* pSvcLocator) :
-    AthReentrantAlgorithm(name, pSvcLocator) {}
-
+namespace Muon{
 // Initialize
 StatusCode TgcDigitJitterCondAlg::initialize() {
     ATH_MSG_DEBUG("initializing " << name());
@@ -32,7 +29,7 @@ StatusCode TgcDigitJitterCondAlg::initialize() {
 StatusCode TgcDigitJitterCondAlg::execute(const EventContext& ctx) const {
     ATH_MSG_DEBUG("execute " << name());
     // launching Write Cond Handle
-    SG::WriteCondHandle<TgcDigitJitterData> writeHandle{m_writeKey, ctx};
+    SG::WriteCondHandle writeHandle{m_writeKey, ctx};
     if (writeHandle.isValid()) {
         ATH_MSG_DEBUG("CondHandle " << writeHandle.fullKey() << " is already valid."
                                     << " In theory this should not be called, but may happen"
@@ -40,9 +37,9 @@ StatusCode TgcDigitJitterCondAlg::execute(const EventContext& ctx) const {
         return StatusCode::SUCCESS;
     }
     writeHandle.addDependency(EventIDRange(IOVInfiniteRange::infiniteTime()));
-    std::unique_ptr<TgcDigitJitterData> writeCdo{std::make_unique<TgcDigitJitterData>()};
+    auto writeCdo{std::make_unique<TgcDigitJitterData>()};
     if (!m_readKeyDb.empty()) {
-        SG::ReadCondHandle<CondAttrListCollection> readHandle{m_readKeyDb, ctx};
+        SG::ReadCondHandle readHandle{m_readKeyDb, ctx};
         if (!readHandle.isValid()) {
             ATH_MSG_FATAL("Failed to initialize the COOL folder "<<m_readKeyDb.fullKey());
             return StatusCode::FAILURE;
@@ -79,4 +76,5 @@ StatusCode TgcDigitJitterCondAlg::parseDataFromJSON(const nlohmann::json& lines,
         jitterData.cacheAngleInterval(angle, std::move(values));
     }
     return StatusCode::SUCCESS;
+}
 }

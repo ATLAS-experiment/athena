@@ -1,7 +1,7 @@
 // emacs, this is -*- C++ -*-
 
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /**  
@@ -109,7 +109,7 @@ namespace JetTiledMap {
     double  m_etarange{} ;
     double  m_halfetarange{};
     double m_rmax{};
-    size_t m_ndivX{}, m_ndivY{};
+    size_t m_ndivX=1, m_ndivY=1;
     double m_sizeX{},m_sizeY{};
     
     unsigned int m_size{};
@@ -120,9 +120,9 @@ namespace JetTiledMap {
 
       int indx = int( (p.x()+m_halfetarange)/m_sizeX) ;
       if(indx<0) indx=0;
-      if(indx>=static_cast<int>(m_ndivX)) indx=m_ndivX-1;
+      if(indx>=static_cast<int>(m_ndivX)) indx=static_cast<int>(m_ndivX)-1;
       int indy = int((M_PI-p.y())/m_sizeY);      
-      if(indy>=static_cast<int>(m_ndivY)) indy=m_ndivY-1;
+      if(indy>=static_cast<int>(m_ndivY)) indy=static_cast<int>(m_ndivY)-1;
       
       return tileIndex_i(indx,indy);
     }

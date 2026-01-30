@@ -25,7 +25,7 @@
 #ifndef LAROFCCONDALG_H
 #define LAROFCCONDALG_H 
 
-#include "AthenaBaseComps/AthAlgorithm.h"
+#include "AthenaBaseComps/AthCondAlgorithm.h"
 #include "StoreGate/ReadCondHandleKey.h"
 #include "StoreGate/WriteCondHandleKey.h"
 
@@ -39,13 +39,13 @@
 
 #include "LArCabling/LArOnOffIdMapping.h"
 
-class LArOFCCondAlg : public AthAlgorithm {
+class LArOFCCondAlg : public AthCondAlgorithm {
 public:
   LArOFCCondAlg(const std::string &name, ISvcLocator *pSvcLocator);
   virtual ~LArOFCCondAlg() override;
 
   virtual StatusCode initialize() override;
-  virtual StatusCode execute() override;
+  virtual StatusCode execute(const EventContext& ctx) const override;
 
 private:
   SG::ReadCondHandleKey<LArOnOffIdMapping> m_LArOnOffIdMappingObjKey;

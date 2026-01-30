@@ -249,7 +249,7 @@ StatusCode TauTrackFinder::executeTrackFinder(xAOD::TauJet& pTau, xAOD::TauTrack
 
     track->setP4(trackParticle->pt(), trackParticle->eta(), trackParticle->phi(), trackParticle->m());
     float dR = track->p4().DeltaR(pTau.p4());
-    if(dR<=0.2) track->setFlag(xAOD::TauJetParameters::TauTrackFlag::coreTrack, true);
+    if(dR<=m_maxJetDr_tau) track->setFlag(xAOD::TauJetParameters::TauTrackFlag::coreTrack, true);
     else track->setFlag(xAOD::TauJetParameters::TauTrackFlag::wideTrack, true);
     track->setFlag(xAOD::TauJetParameters::TauTrackFlag::unclassified, true);
 
@@ -623,9 +623,7 @@ float TauTrackFinder::getZ0(const xAOD::TrackParticle* track, const xAOD::Vertex
     return MAX;
   }
 
-  float z0 = perigee->parameters()[Trk::z0];
-
-  return z0;
+  return static_cast<float>(perigee->parameters()[Trk::z0]);
 }
 
 bool TauTrackFinder::isLargeD0Track(const xAOD::TrackParticle* track) const

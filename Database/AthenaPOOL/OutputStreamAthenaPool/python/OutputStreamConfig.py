@@ -85,7 +85,7 @@ def OutputStreamCfg(
       # Fall back to EventData technology for this file
       eventDataTech = flags.Output.StorageTechnology.EventData.get(
          fileName,
-         flags.Output.StorageTechnology.EventData.get('*', 'ROOTTREEINDEX')
+         flags.Output.StorageTechnology.EventData.get('*', flags.PoolSvc.DefaultContainerType)
       )
       metaDataTech = eventDataTech
 

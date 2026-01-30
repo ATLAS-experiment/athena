@@ -40,7 +40,10 @@ TauValidationPlotsNominal::TauValidationPlotsNominal(PlotBase* pParent, const st
   m_oMatchedTauEff3PPlotsNom(this, "Nominal/Matched/Eff/3P/", sTauJetContainerName),
   m_oMatchedTauRecoTauPlotsNom(this, "Nominal/Matched/PFOs/", sTauJetContainerName),
   m_oMigrationPlotsNom(this, "Nominal/Matched/Migration/", sTauJetContainerName),
-  m_oNewCoreMatchedPlotsNom(this, "Nominal/Matched/All/", sTauJetContainerName)
+  m_oNewCoreMatchedPlotsNom(this, "Nominal/Matched/All/", sTauJetContainerName),
+  
+  m_oEventPlotsNom(this, "EventInfo") 
+
 {}	
 
 // no fill method implement in order to let filling logic stay in the ManagedMonitoringTool

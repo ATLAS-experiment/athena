@@ -12,18 +12,14 @@
 #include "PersistentDataModel/Token.h"
 
 // Pool
-#include "CoralBase/AttributeList.h"
-#include "CoralBase/Attribute.h"
-
-#include "CollectionBase/ICollection.h"
-#include "CollectionBase/ICollectionQuery.h"
-#include "CollectionBase/ICollectionCursor.h"
-#include "CollectionBase/ICollectionDescription.h"
+#include "CollectionSvc/ICollection.h"
+#include "CollectionSvc/ICollectionCursor.h"
+#include "CollectionSvc/ICollectionDescription.h"
+#include "RootUtils/APRDefaults.h"
 
 // Gaudi
 #include "GaudiKernel/StatusCode.h"
 
-#include <assert.h>
 #include <exception>
 #include <format>
 
@@ -38,57 +34,37 @@ PoolCollectionConverter::PoolCollectionConverter(const std::string& collectionTy
 	m_contextId(contextId),
 	m_poolSvc(svc),
 	m_poolCollection(nullptr),
-	m_collectionQuery(nullptr),
-	m_inputContainer() {
+	m_collectionCursor(nullptr) {
 }
 //______________________________________________________________________________
 PoolCollectionConverter::~PoolCollectionConverter() {
    if (m_poolCollection) {
       m_poolCollection->close();
-      delete m_collectionQuery; m_collectionQuery = nullptr;
+      delete m_collectionCursor; m_collectionCursor = nullptr;
       delete m_poolCollection; m_poolCollection = nullptr;
    }
 }
 //______________________________________________________________________________
 StatusCode PoolCollectionConverter::initialize() {
-   // Find out if the user specified a container
-   const std::string collectionType = m_collectionType;
-   std::string::size_type p_colon = collectionType.rfind(':');
-   if (p_colon != std::string::npos) {
-      m_inputContainer = collectionType.substr(p_colon + 1);
-      m_collectionType = collectionType.substr(0, p_colon);
-   }
-   if (m_collectionType == "ImplicitCollection") {
-      // Check if already prefixed
-      if (m_inputCollection.starts_with( "PFN:")
-	      || m_inputCollection.starts_with( "LFN:")
-	      || m_inputCollection.starts_with( "FID:")) {
-         // Already prefixed
-         m_connection = m_inputCollection;
-      } else {
-         // Prefix with PFN:
-         m_connection = std::format("PFN:{}", m_inputCollection);
-      }
-      try {
-         m_poolCollection = m_poolSvc->createCollection("RootCollection", m_connection, m_inputCollection, m_contextId);
-      } catch (std::exception &e) {
-         m_poolCollection = nullptr;
-      }
-      if (m_poolCollection == nullptr) {
-         // Now set where to look in the implicit file
-         m_inputCollection = std::format("{}(DataHeader)", m_inputContainer);
-      }
+   // Check if already prefixed
+   if (m_inputCollection.starts_with( "PFN:")
+           || m_inputCollection.starts_with( "LFN:")
+           || m_inputCollection.starts_with( "FID:")) {
+      // Already prefixed
+      m_connection = m_inputCollection;
+   } else {
+      // Prefix with PFN:
+      m_connection = std::format("PFN:{}", m_inputCollection);
    }
    try {
-      if (m_poolCollection == nullptr) {
-         m_poolCollection = m_poolSvc->createCollection(m_collectionType, m_connection, m_inputCollection, m_contextId);
+      if (m_collectionType == "RootCollection" || m_collectionType == "RNTCollection") {
+         m_poolCollection = m_poolSvc->createCollection(m_collectionType, m_connection, "Input", m_contextId);
       }
-      if (m_poolCollection == nullptr && m_collectionType == "ImplicitCollection") {
-         m_inputCollection = std::format("{}_DataHeader", m_inputContainer);
-         m_poolCollection = m_poolSvc->createCollection(m_collectionType, m_connection, m_inputCollection, m_contextId);
+      if (m_poolCollection == nullptr) { // Open as ImplicitCollection if technologies fail, or none was specified
+         m_poolCollection = m_poolSvc->createCollection("ImplicitCollection", m_connection, "Input", m_contextId);
       }
    } catch (std::exception &e) {
-      return StatusCode::RECOVERABLE;
+      if (m_poolCollection == nullptr) return StatusCode::RECOVERABLE;
    }
    return StatusCode::SUCCESS;
 }
@@ -108,8 +84,7 @@ StatusCode PoolCollectionConverter::isValid() const {
 }
 //______________________________________________________________________________
 pool::ICollectionCursor& PoolCollectionConverter::selectAll() {
-   delete m_collectionQuery; m_collectionQuery = nullptr;
-   m_collectionQuery = m_poolCollection->newQuery();
-   m_collectionQuery->selectAll();
-   return m_collectionQuery->execute();
+   delete m_collectionCursor; m_collectionCursor = nullptr;
+   m_collectionCursor = &m_poolCollection->cursor();
+   return *m_collectionCursor;
 }

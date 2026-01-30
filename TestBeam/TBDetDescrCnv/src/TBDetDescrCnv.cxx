@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -121,6 +121,7 @@ TBDetDescrCnv::createObj(IOpaqueAddress* pAddr, DataObject*& pObj)
         rotationEigen<<rotation.xx(),rotation.xy(),rotation.xz(),
                        rotation.yx(),rotation.yy(),rotation.yz(),
                        rotation.zx(),rotation.zy(),rotation.zz();
+        //coverity[UNINIT]
         TBmgr->setElement(TBElement(id,name,positionEigen,rotationEigen));
         log << MSG::DEBUG
             << (std::string)TBmgr->getElement(id)

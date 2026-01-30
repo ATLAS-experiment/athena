@@ -3117,7 +3117,7 @@ void TileROD_Decoder::fillCollectionL2(const ROBData * rob, TileL2Container & v)
     int frag = hid2re->getOfflineFragID(bs_frag_id);
     if (frag<0) frag = bs_frag_id;
     const std::vector<uint32_t> & drawer_info = hid2re->getDrawerInfo(frag);
-    int drawer_type = drawer_info.size()>2 ? drawer_info[2] : -1;
+    int drawer_type = drawer_info.size()>2 ? static_cast<int>(drawer_info[2]) : -1;
     if (frag < fragmin) fragmin = frag;
     if (frag > fragmax) fragmax = frag;
     DataType = (idAndType & 0x30000000) >> 28;
@@ -3420,8 +3420,8 @@ uint32_t TileROD_Decoder::fillCollectionHLT(const ROBData * rob,
   // figure out which fragment we want to unpack
   TileRawChannelCollection::ID frag_id = v.identify();
   const std::vector<uint32_t> & drawer_info = hid2reHLT->getDrawerInfo(frag_id);
-  int bs_frag_id = drawer_info.size()>1 ? drawer_info[1] : frag_id;
-  int drawer_type = drawer_info.size()>2 ? drawer_info[2] : -1;
+  int bs_frag_id = drawer_info.size()>1 ? static_cast<int>(drawer_info[1]) : frag_id;
+  int drawer_type = drawer_info.size()>2 ? static_cast<int>(drawer_info[2]) : -1;
 
   /*
    if (frag_id < 0x100) { // BEAM ROD frag - nothing to do
@@ -3529,8 +3529,7 @@ uint32_t TileROD_Decoder::fillCollectionHLT(const ROBData * rob,
               correctAmplitude = false;
               rChUnit = (TileRawChannelUnit::UNIT) (unit); // Offline units in simulated data
               if (!m_demoFragIDs.empty()) {
-                const_cast<Gaudi::Property<std::vector<int>> &> ( m_demoFragIDs ) = {}; // No demonstator cabling in MC
-                ATH_MSG_INFO("Disable channel remapping for demonstrator in MC");
+                ATH_MSG_WARNING("DemoFragIDs is not supported in MC"); // No demonstator cabling in MC
               }
             }
             
@@ -4548,8 +4547,8 @@ void TileROD_Decoder::fillCollection_FELIX_Digi(const ROBData* rob , TileDigitsC
 
   int frag_id = coll.identify();
   const std::vector<uint32_t> & drawer_info = hid2re->getDrawerInfo(frag_id);
-  int bs_frag_id = drawer_info.size()>1 ? drawer_info[1] : frag_id;
-  int drawer_type = drawer_info.size()>2 ? drawer_info[2] : -1;
+  int bs_frag_id = drawer_info.size()>1 ? static_cast<int>(drawer_info[1]) : frag_id;
+  int drawer_type = drawer_info.size()>2 ? static_cast<int>(drawer_info[2]) : -1;
 
   while (data < end_data) { // iterator over all words for a robid
     // first word is the start of the tile subfragment in v3format it is 0xff1234ff

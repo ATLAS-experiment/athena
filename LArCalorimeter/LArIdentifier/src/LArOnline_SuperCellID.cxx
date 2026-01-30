@@ -7,13 +7,10 @@
 #include "IdDict/IdDictField.h"
 #include "IdDict/IdDictMgr.h"
 #include "IdDict/IdDictRegion.h"
-#include "GaudiKernel/MsgStream.h"
 #include "Identifier/IdentifierHash.h"
 #include "LArIdentifier/LArOnlID_Exception.h"
 #include <cmath>
-#include <iostream>
 #include <set>
-#include <sstream>
 #include <string>
 
 /* See comments in Base class */
@@ -30,36 +27,22 @@ LArOnline_SuperCellID::~LArOnline_SuperCellID() = default;
 int  LArOnline_SuperCellID::initialize_from_dictionary (const IdDictMgr& dict_mgr)
 /* =================================================================== */
 {
-    MsgStream log(m_msgSvc, "LArOnline_SuperCellID" );
-    std::string strg = "initialize_from_dictionary";
-    if(m_msgSvc) {
-        log << MSG::INFO << strg << endmsg;
-    }
-    else {
-        std::cout << strg << std::endl;
-    }
+    ATH_MSG_INFO("initialize_from_dictionary");
   
     // Check whether this helper should be reinitialized
     if (!reinitialize(dict_mgr)) {
-        if(m_msgSvc) log << MSG::DEBUG << "Request to reinitialize not satisfied - tags have not changed" << endmsg;
+        ATH_MSG_DEBUG("Request to reinitialize not satisfied - tags have not changed");
         return (0);
     }
     else {
-        if(m_msgSvc) log << MSG::DEBUG << "(Re)initialize" << endmsg;
+        ATH_MSG_DEBUG("(Re)initialize");
     }
 
     // init base object
     if(AtlasDetectorID::initialize_from_dictionary(dict_mgr)) return (1);
     m_dict = dict_mgr.find_dictionary ("LArCalorimeter"); 
     if(!m_dict) {
-
-        strg = " initialize_from_dictionary - cannot access LArCalorimeter dictionary ";
-        if(m_msgSvc) {
-            log << MSG::ERROR << strg << endmsg;
-        }
-        else {
-            std::cout << "LArOnline_SuperCellID::" << strg << std::endl;
-        }
+        ATH_MSG_ERROR("initialize_from_dictionary - cannot access LArCalorimeter dictionary ");
         return 1;
     }
 
@@ -72,56 +55,31 @@ int  LArOnline_SuperCellID::initialize_from_dictionary (const IdDictMgr& dict_mg
     /* Initialize the field indices */
     if(LArOnlineID_Base::initLevelsFromDict(group())) return (1);
 
-    if(m_msgSvc) {
-       log << MSG::INFO << "Finished initLevelsFromDict" << endmsg;
-    } else {
-       std::cout << "Finished initLevelsFromDict" << std::endl;
-    }
+    ATH_MSG_INFO("Finished initLevelsFromDict");
 
 
     /* Find value for the field LAr Calorimeter */
     const IdDictDictionary* atlasDict = dict_mgr.find_dictionary ("ATLAS"); 
     int larField   = -1;
     if (atlasDict->get_label_value("subdet", "LArCalorimeter", larField)) {
-        std::stringstream strm;
-        strm << atlasDict->name();
-        strg= " Could not get value for label 'LArCalorimeter' of field 'subdet' in dictionary "+strm.str();
-        if(m_msgSvc) {
-            log << MSG::ERROR << strg << endmsg;
-        }
-        else {
-            std::cout << "LArOnline_SuperCellID:" << strg << std::endl;
-        }
+        ATH_MSG_ERROR("Could not get value for label 'LArCalorimeter' of field 'subdet' in dictionary "
+                      << atlasDict->name());
         return (1);
     }
 
     /* Find value for the field LArOnline */
     int larOnlineField   = -4;
     if (m_dict->get_label_value("part", "LArOnline", larOnlineField)) {
-        std::stringstream strm;
-        strm <<  m_dict->name();
-        strg = "Could not get value for label 'LArOnline' of field 'part' in dictionary "+strm.str(); 
-        if(m_msgSvc) {
-            log << MSG::ERROR << strg << endmsg;
-        }
-        else {
-            std::cout << strg << std::endl;
-        }
+        ATH_MSG_ERROR("Could not get value for label 'LArOnline' of field 'part' in dictionary "
+                      << m_dict->name());
         return (1);
     }
 
     /* Find value for the field calibLArOnline */
     int larOnlineCalibField   = -5;
     if (m_dict->get_label_value("part", "LArOnlineCalib", larOnlineCalibField)) {
-        std::stringstream strm;
-        strm <<  m_dict->name();
-        strg = "Could not get value for label 'LArOnlineCalib' of field 'part' in dictionary "+strm.str();
-        if(m_msgSvc) {
-            log << MSG::ERROR << strg << endmsg;
-        }
-        else {
-            std::cout << strg << std::endl;
-        }
+        ATH_MSG_ERROR("Could not get value for label 'LArOnlineCalib' of field 'part' in dictionary "
+                      << m_dict->name());
         return (1);
     }
 
@@ -136,33 +94,13 @@ int  LArOnline_SuperCellID::initialize_from_dictionary (const IdDictMgr& dict_mg
     m_full_feb_range       = m_dict->build_multirange( region_id, group(), prefix, "slar_slot");
     m_full_feedthrough_range = m_dict->build_multirange( region_id , group(), prefix, "slar_feedthrough");
 
-    std::string strg0= " initialize_from_dictionary :";
-    std::string strg1= " feedthrough range -> " + (std::string)m_full_feedthrough_range;
-    std::string strg2= " feedthrough slot range -> " + (std::string)m_full_feb_range;  
-    std::string strg3= " channel range -> " + (std::string)m_full_laronline_range;
-    if(m_msgSvc) {
-        log << MSG::DEBUG << strg0 << endmsg;
-        log << MSG::DEBUG << strg1 << endmsg;
-        log << MSG::DEBUG << strg2 << endmsg;
-        log << MSG::DEBUG << strg3 << endmsg;
-    }
-    else {
-        std::cout << strg0 << std::endl;
-        std::cout << strg1 << std::endl;
-        std::cout << strg2 << std::endl;
-        std::cout << strg3 << std::endl;
-    }
+    ATH_MSG_DEBUG(" initialize_from_dictionary :");
+    ATH_MSG_DEBUG(" feedthrough range -> " + (std::string)m_full_feedthrough_range);
+    ATH_MSG_DEBUG(" feedthrough slot range -> " + (std::string)m_full_feb_range);
+    ATH_MSG_DEBUG(" channel range -> " + (std::string)m_full_laronline_range);
   
     /* Setup the hash tables */
-    std::stringstream strm;
-    strm << dictionaryVersion();
-    strg="[initialize_from_dictionary] version= " + strm.str();      
-    if(m_msgSvc) {
-        log << MSG::DEBUG << strg << endmsg;
-    }
-    else {
-        std::cout << "LArOnline_SuperCellID: " << strg << std::endl;      
-    }
+    ATH_MSG_DEBUG("[initialize_from_dictionary] version= " << dictionaryVersion());
     if( dictionaryVersion() == "fullAtlas" ) {
         if(LArOnlineID_Base::init_hashes()) return (1);
     }
@@ -193,8 +131,6 @@ int  LArOnline_SuperCellID::initialize_from_dictionary (const IdDictMgr& dict_mg
     // Set up vector as lookup table for hash calculation. 
     m_chan_hash_calcs.resize(size);
 
-    std::stringstream strm1;
-    std::stringstream strm2;
     for (unsigned int i = 0; i < m_febHashMax; ++i) {
 
         HWIdentifier febId = feb_Id(i) ;
@@ -208,22 +144,9 @@ int  LArOnline_SuperCellID::initialize_from_dictionary (const IdDictMgr& dict_mg
         m_chan_hash_calcs[m_bec_slot_impl.unpack(min)] = hc;
 
         if (m_bec_slot_impl.unpack(min) >= size) {
-            strm << size;
-            strm1 << show_to_string(min);
-            strm2 << m_bec_slot_impl.unpack(min);
-            strg = "Min > "+strm.str();
-            strg1= " "+strm1.str();
-            strg2= " "+strm2.str();
-            if(m_msgSvc) {
-                log << MSG::DEBUG << strg << endmsg;
-                log << MSG::DEBUG << strg1 << endmsg;
-                log << MSG::DEBUG << strg2 << endmsg;
-            }
-            else {
-                std::cout << strg << std::endl;
-                std::cout << strg1 << std::endl;
-                std::cout << strg2 << std::endl;
-            }     
+            ATH_MSG_DEBUG("Min > " << size);
+            ATH_MSG_DEBUG(" " << show_to_string(min));
+            ATH_MSG_DEBUG(" " << m_bec_slot_impl.unpack(min));
         }
     }
 
@@ -231,22 +154,9 @@ int  LArOnline_SuperCellID::initialize_from_dictionary (const IdDictMgr& dict_mg
     for (unsigned int i = 0; i < m_channelHashMax; ++i) {
         HWIdentifier id = channel_Id(i);
         if (channel_Hash(id) != i) {
-            strm << show_to_string(id);
-            strm1 << channel_Hash(id);
-            strm2 << i;
-            strg = " *****  Error channel ranges, id, hash, i = "+strm.str();
-            strg1= " , "+strm1.str();
-            strg2= " , "+strm2.str();
-            if(m_msgSvc) {
-                log << MSG::ERROR << strg << endmsg;
-                log << MSG::ERROR << strg1 << endmsg;
-                log << MSG::ERROR << strg2 << endmsg;
-            }
-            else {
-                std::cout << strg << std::endl;
-                std::cout << strg1 << std::endl;
-                std::cout << strg2 << std::endl;
-            }
+            ATH_MSG_ERROR(" *****  Error channel ranges, id, hash, i = " << show_to_string(id));
+            ATH_MSG_ERROR(" , " << channel_Hash(id));
+            ATH_MSG_ERROR(" , " << i);
         }
     }
 
@@ -294,11 +204,7 @@ int  LArOnline_SuperCellID::initialize_from_dictionary (const IdDictMgr& dict_mg
         // For each feedthrough we save the possible slot values for
         // the hash calculation.
         if (get_expanded_id(min, ftExpId, &ftContext)) {
-            if(m_msgSvc) {
-               log << MSG::WARNING << " *****  Warning cannot get ft expanded id for " << show_to_string(min) << endmsg;
-            } else {
-               std::cout << " *****  Warning cannot get ft expanded id for " << show_to_string(min) << std::endl;
-            }
+            ATH_MSG_WARNING(" *****  Warning cannot get ft expanded id for " << show_to_string(min));
         }
 
         // Now and save values if we either have an
@@ -322,18 +228,8 @@ int  LArOnline_SuperCellID::initialize_from_dictionary (const IdDictMgr& dict_mg
 
 
         if (m_bec_ft_impl.unpack(min) >= size) {
-            std::stringstream strm, strm1, strm2, strm3;
-            strm << size;
-            strm1 << show_to_string(min);
-            strm2 << m_bec_ft_impl.unpack(min);
-            strm3 << min_hash;
-            strg = "Min > " + strm.str() + " " + strm1.str() + " " + strm2.str() + " " + strm3.str();
-            if(m_msgSvc) {
-                log << MSG::DEBUG << strg << endmsg;
-            }
-            else {
-                std::cout << strg << std::endl;
-            }     
+            ATH_MSG_DEBUG("Min > " << size << " " << show_to_string(min)
+                          << " " << m_bec_ft_impl.unpack(min) << " " << min_hash);
         }
     }
 
@@ -341,18 +237,8 @@ int  LArOnline_SuperCellID::initialize_from_dictionary (const IdDictMgr& dict_mg
     for (unsigned int i = 0; i < m_febHashMax; ++i) {
         HWIdentifier id = feb_Id(i);
         if (feb_Hash(id) != i) {
-            std::stringstream strm, strm1, strm2;
-            strm << show_to_string(id);
-            strm1 << feb_Hash(id);
-            strm2 << i;
-            strg = " *****  Error feb ranges, id, hash, i = " + 
-                strm.str() + " , " + strm1.str() + " , "+strm2.str();
-            if(m_msgSvc) {
-                log << MSG::ERROR << strg << endmsg;
-            }
-            else {
-                std::cout << strg << std::endl;
-            }
+          ATH_MSG_ERROR(" *****  Error feb ranges, id, hash, i = "
+                        << show_to_string(id) << " , " << feb_Hash(id) << " , " << i);
         }
     }
 

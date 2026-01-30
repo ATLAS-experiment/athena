@@ -1,7 +1,7 @@
 //Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TBEVENT_TBEVENTINFO_H
@@ -53,6 +53,11 @@ class TBEventInfo
 	      float cryoX,
 	      float cryoAngle,
 	      float tableY) :    m_ev_number(ev_number), m_ev_clock(ev_clock),   m_ev_type(ev_type),   m_run_num(run_num),  m_beam_moment(beam_moment),  m_beam_part(beam_part),  m_cryoX(cryoX),  m_cryoAngle(cryoAngle),  m_tableY(tableY) {};
+
+  TBEventInfo(const TBEventInfo&) = default;
+  TBEventInfo(TBEventInfo&&) = default;
+  TBEventInfo& operator=(const TBEventInfo&) = default;
+  TBEventInfo& operator=(TBEventInfo&&) = default;
 
   ~TBEventInfo();
   

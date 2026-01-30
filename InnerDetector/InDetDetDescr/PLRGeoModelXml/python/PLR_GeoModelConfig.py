@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 def PLR_GeometryCfg(flags):
     from AtlasGeoModel.GeoModelConfig import GeoModelCfg
@@ -7,8 +7,6 @@ def PLR_GeometryCfg(flags):
 
     from AthenaConfiguration.ComponentFactory import CompFactory
     plrDetectorTool = CompFactory.PLRDetectorTool()
-    # ITkPixelDetectorTool.useDynamicAlignFolders = flags.GeoModel.Align.Dynamic
-    plrDetectorTool.Alignable = False # make this a flag? Set true as soon as decided on folder structure
     plrDetectorTool.DetectorName = "PLR"
     if flags.Detector.GeometryITkPixel:
         # if pixel is present, PLR will be placed inside it, so it needs to know

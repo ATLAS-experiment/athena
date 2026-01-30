@@ -58,6 +58,7 @@ public:
   virtual void getSums(unsigned int seed, bool UnD,
                        std::vector<unsigned int> &RcoreSums,
                        std::vector<unsigned int> &Remums);
+  virtual void setAlgoVersion(unsigned int /*ver*/) {};
   virtual unsigned int getBDTScore() const { return 0; }
   virtual unsigned int getBDTCondition() const { return 0; }
   virtual unsigned int getBDTHadFracCondition() const { return 0; }
@@ -90,7 +91,7 @@ public:
   unsigned int m_em3cells[3][3]{};
   unsigned int m_hadcells[3][3]{};
   unsigned int m_twrcells[3][3]{};
-
+  
 };
 
 } // namespace LVL1

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONHISTUTILS_MUONTREE_H
@@ -14,6 +14,7 @@
 #include "TTree.h"
 
 #include <vector>
+#include <memory>
 
 namespace Muon{
 
@@ -33,7 +34,7 @@ namespace Muon{
 
   private:
 
-    TTree* m_tree;
+    std::unique_ptr<TTree> m_tree;
     
     //steering flag 
     bool m_isMC;

@@ -1,8 +1,12 @@
+/*
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+*/
+
 #include "ZdcAnalysis/ZDCJSONConfig.h"
 
-#include <iostream>
 
-std::pair<bool, std::string> ZDCJSONConfig::ParseConfig(const JSON& config, const JSONParamList& configParamList)
+std::pair<bool, std::string> 
+ZDCJSONConfig::ParseConfig(const JSON& config, const JSONParamList& configParamList)
 {
   bool result = true;
   std::string resultString = "success";
@@ -57,7 +61,7 @@ std::pair<bool, std::string> ZDCJSONConfig::ParseConfig(const JSON& config, cons
 	auto [ppcResult, ppcResultString] = ParsePerChannelParams(key, value, paramType, paramSize); 
 	if (!ppcResult) {
 	  result = ppcResult;
-	  resultString = ppcResultString;
+	  resultString = std::move(ppcResultString);
 	  break;
 	}
       }
@@ -80,7 +84,8 @@ std::pair<bool, std::string> ZDCJSONConfig::ParseConfig(const JSON& config, cons
   return {result, resultString};
 }
 
-template<typename T> std::pair<bool, std::string> ZDCJSONConfig::ParsePerChannelParams(const std::string& paramKey, const T& paramValue, JSON::value_t paramType, size_t paramSize)
+template<typename T> std::pair<bool, std::string> 
+ZDCJSONConfig::ParsePerChannelParams(const std::string& paramKey, const T& paramValue, JSON::value_t paramType, size_t paramSize)
 {
   bool result = true;
   std::string resultString = "success";

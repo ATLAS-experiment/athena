@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration.
  */
 
 /**
@@ -9,6 +9,8 @@
  * @brief Test AthMessaging (run with --perf to measure performance)
  */
 
+#undef NDEBUG
+
 #include "AthenaBaseComps/AthMessaging.h"
 #include "AthenaKernel/getMessageSvc.h"
 #include "GaudiKernel/ISvcLocator.h"
@@ -17,6 +19,7 @@
 
 #include <chrono>
 #include <iostream>
+#include <cstring> //for strcmp
 
 
 struct MyObj : public AthMessaging {
@@ -24,9 +27,14 @@ struct MyObj : public AthMessaging {
   MyObj()                    : AthMessaging("MyObj1")         {}
   /// Constructor with explicit MessageSvc
   MyObj(IMessageSvc* msgSvc) : AthMessaging(msgSvc, "MyObj2") {}
+  /// Constructor with explicit output level
+  MyObj(MSG::Level lvl)      : AthMessaging("MyObj3")         {
+    setLevel(lvl);
+  }
 
   void print()
   {
+    ATH_MSG_DEBUG("Good morning");
     ATH_MSG_WARNING("Hello");
     ATH_MSG_INFO("World");
   }
@@ -40,6 +48,19 @@ void test(IMessageSvc* msgSvc)
 
   MyObj obj2(msgSvc);
   obj2.print();
+
+  MyObj obj3(MSG::DEBUG);
+  obj3.print();
+
+  // Checking a level < OutputLevel should not result in getMessageSvc warning
+  MyObj obj4(MSG::WARNING);
+
+  // Typically used in "if (obj4.msgLvl(MSG::DEBUG)) { ... debug messages ... }"
+  assert( obj4.msgLvl(MSG::DEBUG) == false );
+
+  // Check that default message level is correctly set even before printing anything
+  MyObj obj5;
+  assert( obj5.msgLvl(MSG::DEBUG) == false );
 }
 
 
@@ -64,7 +85,7 @@ int main (int argc, char** argv)
 {
   const unsigned int ntry = 100000;
   bool doPerf = false;
-  if (argc >= 2 && strcmp (argv[1], "--perf") == 0) {
+  if (argc >= 2 && std::strcmp (argv[1], "--perf") == 0) {
     doPerf = true;
   }
 

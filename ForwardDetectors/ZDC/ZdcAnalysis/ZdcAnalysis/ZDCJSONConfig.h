@@ -1,8 +1,16 @@
+/*
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+*/
 #ifndef _ZDCJSONConfig_h
 #define _ZDCJSONConfig_h
 
 #include <nlohmann/json.hpp>
-#include <iostream> 
+#include <tuple>
+#include <map>
+#include <vector>
+#include <string>
+#include <cmath> //std::abs, std::floor
+
 
 class ZDCJSONConfig
 {
@@ -21,7 +29,8 @@ private:
   
   std::vector<JSON> m_channelConfig;
 
-  template<typename T> bool checkType(T value, JSON::value_t paramType, int paramSize = -1)
+  template<typename T> bool 
+  checkType(T value, JSON::value_t paramType, int paramSize = -1)
   {
     if (value.is_null()) return false;
     
@@ -48,7 +57,8 @@ private:
     return false;
   }
 
-  template<typename T> void setAllParameter(std::string key, T value)
+  template<typename T> void 
+  setAllParameter(const std::string & key, T value)
   {
     for (auto& chanConfig : m_channelConfig) {
       //
@@ -60,13 +70,15 @@ private:
     }
   }
 
-  template<typename T> void setChannelParameter(unsigned int side, unsigned int chanIndex, const std::string& key, T value)
+  template<typename T> void 
+  setChannelParameter(unsigned int side, unsigned int chanIndex, const std::string& key, T value)
   {
     unsigned int index = side*m_numChannelsPerSide + chanIndex;
     m_channelConfig[index][key] = value;
   }
 
-  template<typename T> void setPerSideParameter(unsigned int side, std::string key, T value)
+  template<typename T> void 
+  setPerSideParameter(unsigned int side, std::string key, T value)
   {
     for (unsigned int chan = 0; chan < m_numChannelsPerSide; chan++) {
       unsigned int index = side*m_numChannelsPerSide + chan;

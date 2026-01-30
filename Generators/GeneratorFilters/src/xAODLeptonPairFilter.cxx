@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // --------------------------------------------------
@@ -82,8 +82,9 @@ StatusCode xAODLeptonPairFilter::filterEvent() {
         vLeptonEta.push_back(pitr->eta());
 
         std::vector<size_t> parentPDG_tmp;
-        for(size_t thisParent_id=0; pitr->prodVtx()->nIncomingParticles()<thisParent_id;thisParent_id++) 
+        for(size_t thisParent_id=0; thisParent_id<pitr->prodVtx()->nIncomingParticles();thisParent_id++) {
           parentPDG_tmp.push_back(pitr->prodVtx()->incomingParticle(thisParent_id)->pdgId());
+        }
         vLeptonParentPDGIDs.push_back(std::move(parentPDG_tmp));
     } //loop over TruthParticles
 

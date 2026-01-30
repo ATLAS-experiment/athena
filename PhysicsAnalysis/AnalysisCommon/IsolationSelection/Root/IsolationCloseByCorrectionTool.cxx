@@ -267,9 +267,9 @@ namespace CP {
 
         loadAssociatedObjects(ctx, cache);
         CorrectionCode ret = performCloseByCorrection(ctx, cache);
-        lockDecorations(electrons);
-        lockDecorations(muons);
-        lockDecorations(photons);
+        lockDecorations(electrons, m_electron_isoTypes);
+        lockDecorations(muons, m_muon_isoTypes);
+        lockDecorations(photons, m_photon_isoTypes);
         return ret;
     }
     CorrectionCode IsolationCloseByCorrectionTool::performCloseByCorrection (const EventContext& ctx, ObjectCache& cache) const {
@@ -321,7 +321,8 @@ namespace CP {
         }
         return CorrectionCode::Ok;
     }
-    void IsolationCloseByCorrectionTool::lockDecorations (const xAOD::IParticleContainer* parts) const {
+    void IsolationCloseByCorrectionTool::lockDecorations (const xAOD::IParticleContainer* parts,
+                                                          const IsoVector& isoTypes) const {
         if (!parts) return;
 
         const FloatDecorator dec_assocEta{IsolationCloseByCorrectionTool::caloDecors()[0] + m_caloDecSuffix};
@@ -335,8 +336,10 @@ namespace CP {
           for (const xAOD::IParticle* part : *parts) {
             const SG::AuxVectorData* c = part->container();
             if (conts.insert(c).second) {
-              for (const auto& p : m_isohelpers) {
-                p.second->lockDecorations(*part->container());
+              for (const IsoType t : isoTypes) {
+                auto it = m_isohelpers.find (t);
+                if (it != m_isohelpers.end())
+                  it->second->lockDecorations(*part->container());
               }
               SG::AuxVectorData* c_nc ATLAS_THREAD_SAFE =
                 const_cast<SG::AuxVectorData*> (c);
@@ -348,8 +351,10 @@ namespace CP {
         }
 
         else {
-          for (const auto& p : m_isohelpers) {
-            p.second->lockDecorations(*parts);
+          for (const IsoType t : isoTypes) {
+            auto it = m_isohelpers.find (t);
+            if (it != m_isohelpers.end())
+              it->second->lockDecorations(*parts);
           }
           SG::AuxVectorData* c_nc ATLAS_THREAD_SAFE =
             const_cast<xAOD::IParticleContainer*> (parts);

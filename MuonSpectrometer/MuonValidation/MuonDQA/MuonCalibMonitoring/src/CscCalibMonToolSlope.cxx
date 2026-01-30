@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CscCalibMonToolSlope.h"
@@ -527,15 +527,15 @@ StatusCode CscCalibMonToolSlope::postProc()
   }
   
  //ampProfs 
-  const std::map <int,TProfile*> * ampProfs = slopeReport->getAmpProfs();
-  if(!ampProfs)
+  const std::map <int,TProfile*>& ampProfs = slopeReport->getAmpProfs();
+  if(ampProfs.empty())
   {
     ATH_MSG_ERROR( "There are no amplitude profiles in the slope report! Can't find dead chans." );
     return StatusCode::RECOVERABLE;
   }
 
   if(m_histAttenLevels){
-    for(const auto & [attenuationVal, pProfile] : *ampProfs){
+    for(const auto & [attenuationVal, pProfile] : ampProfs){
 
       const float atten = attenuationVal * 0.5f;
       const std::string attenStr = std::to_string(atten);
@@ -565,8 +565,8 @@ StatusCode CscCalibMonToolSlope::postProc()
   }
 
 
-  const std::vector<float> * fitResVec = slopeReport->getFitResults();
-  m_fitResColl->data = *fitResVec; 
+  const std::vector<float>& fitResVec = slopeReport->getFitResults();
+  m_fitResColl->data = fitResVec;
   ATH_CHECK( copyDataToHists(m_fitResColl) );
 
   //Generate fractional deviation histograms
@@ -586,9 +586,9 @@ StatusCode CscCalibMonToolSlope::postProc()
   ATH_MSG_DEBUG( "Picking detailed graphs to output to root file" );
   if(m_numBad >0 || m_maxDetailedChannels < 0 || m_doAllDetailed)
   { 
-    const DataVector<TGraphErrors> * calGraphs 
+    const std::vector<TGraphErrors*>& calGraphs
       = slopeReport->getCalGraphs();
-    if(!calGraphs)
+    if(calGraphs.empty())
     {
       ATH_MSG_ERROR( "No calGraph stored inside object with key " << m_histKey
                      << ". Aborting hist retrieval."  );
@@ -597,8 +597,8 @@ StatusCode CscCalibMonToolSlope::postProc()
     else
       ATH_MSG_INFO( "Got calGraphs"  );
 
-    const DataVector<TH1I> * bitHists = slopeReport->getBitHists();
-    if(!bitHists)
+    const std::vector<TH1I*>& bitHists = slopeReport->getBitHists();
+    if(bitHists.empty())
       ATH_MSG_INFO( "No bit histogram vector found from calibration. "
                     << " Won't be in monitoring output file. "  );
     else
@@ -608,7 +608,7 @@ StatusCode CscCalibMonToolSlope::postProc()
     //These are the channels we will get detailed forr.
     for(unsigned int idItr = 0; idItr < m_maxHashId; idItr++)
     {
-      ATH_MSG_ERROR("Calgraph Address: " <<  (*calGraphs)[idItr]);
+      ATH_MSG_ERROR("Calgraph Address: " <<  calGraphs[idItr]);
       if(m_expectedHashIdsPrec.count(idItr) && (m_detailedHashIds[idItr] || (m_doAllDetailed) ) )
       {
         ATH_MSG_ERROR("Doing detailed plots of hash " << idItr);
@@ -630,7 +630,7 @@ StatusCode CscCalibMonToolSlope::postProc()
 
         //Record calgraph
         TGraphErrors  * sourceGraph = 
-          const_cast<TGraphErrors*>((*calGraphs)[idItr]);
+          const_cast<TGraphErrors*>(calGraphs[idItr]);
         if(!sourceGraph)
         {
           ATH_MSG_ERROR( "The requested calgraph for hash "
@@ -678,9 +678,9 @@ StatusCode CscCalibMonToolSlope::postProc()
 
         //Bit map histograms
         //copy source histogram into new histogram, and store
-        if(bitHists)
+        if(!bitHists.empty())
         {
-          TH1I *  bitHist = const_cast<TH1I*>((*bitHists)[idItr]);
+          TH1I *  bitHist = const_cast<TH1I*>(bitHists[idItr]);
           if(!bitHist)
           {
             ATH_MSG_ERROR( "There is no bit histogram with hashId "
@@ -718,8 +718,8 @@ StatusCode CscCalibMonToolSlope::postProc()
 StatusCode CscCalibMonToolSlope::makeFracGraphs(const CscCalibReportSlope & slopeReport)
 {
   ATH_MSG_DEBUG( "CscCalibMonToolSlope : in makeFracGraphs()"  );
-  const DataVector<TGraphErrors> * calGraphs = slopeReport.getCalGraphs();
-  if(!calGraphs)
+  const std::vector<TGraphErrors*>& calGraphs = slopeReport.getCalGraphs();
+  if(calGraphs.empty())
   {
     ATH_MSG_ERROR( "No calGraphs in slopeReport. Not going to make fractional deviation"
                    << " plots."  );
@@ -749,7 +749,7 @@ StatusCode CscCalibMonToolSlope::makeFracGraphs(const CscCalibReportSlope & slop
       }
       ATH_MSG_VERBOSE( "strip hash " << stripHash  );
 
-      const TGraphErrors * graph = (*calGraphs)[stripHash];
+      const TGraphErrors * graph = calGraphs[stripHash];
       if(!graph)
       {
         ATH_MSG_VERBOSE( "SKipping graph"  );
@@ -875,21 +875,21 @@ StatusCode CscCalibMonToolSlope::findDeadChannels(const CscCalibReportSlope & sl
 
   std::set <int> newDead, newUndead;
 
-  const std::set <int> * pulsedChambers = slopeReport.getPulsedChambers();
-  if(!pulsedChambers)
+  const std::set <int>& pulsedChambers = slopeReport.getPulsedChambers();
+  if(pulsedChambers.empty())
   {
     ATH_MSG_ERROR( "No pulsed chambers stored in slopeReport! Skipping dead channel collecting!"  );
     return StatusCode::RECOVERABLE;
   }
 
-  const std::map <int,TProfile*> * ampProfs = slopeReport.getAmpProfs();
-  if(!ampProfs)
+  const std::map <int,TProfile*>& ampProfs = slopeReport.getAmpProfs();
+  if(ampProfs.empty())
   {
     ATH_MSG_ERROR( "There are no amplitude profiles in the slope report! Can't find dead chans." );
     return StatusCode::RECOVERABLE;
   }
 
-  std::map <int,TProfile*>::const_iterator profItr = ampProfs->begin();
+  std::map <int,TProfile*>::const_iterator profItr = ampProfs.begin();
 
   int pulserLevel = profItr->first;
   ATH_MSG_INFO( "Looking for dead channels. Lowest attenuation level is " 
@@ -906,7 +906,7 @@ StatusCode CscCalibMonToolSlope::findDeadChannels(const CscCalibReportSlope & sl
       return StatusCode::RECOVERABLE;
     }
 
-    ATH_MSG_DEBUG( "There were " << pulsedChambers->size()
+    ATH_MSG_DEBUG( "There were " << pulsedChambers.size()
                    << " chambers pulsed."  );
 
     //Prepare dead channel content
@@ -929,7 +929,7 @@ StatusCode CscCalibMonToolSlope::findDeadChannels(const CscCalibReportSlope & sl
       IdentifierHash chamberHash;
       m_idHelperSvc->cscIdHelper().get_module_hash(id, chamberHash);
 
-      if(chamberLayer == 2 && pulsedChambers->count((int)chamberHash))
+      if(chamberLayer == 2 && pulsedChambers.count((int)chamberHash))
       {//This is a good chamber layer and it is a pulsed chamber
 
         ATH_CHECK(readCdo->readChannelStatus(hashItr, statusWord));

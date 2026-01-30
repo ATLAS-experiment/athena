@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "H5Cpp.h"
@@ -144,7 +144,7 @@ namespace H5Utils::hist::detail {
         }
       }
       ax.name = axis.metadata();
-      edges.push_back(ax);
+      edges.push_back(std::move(ax));
     }
     return edges;
   }
@@ -214,12 +214,12 @@ namespace H5Utils::hist {
     // Generic dataset adder. We need to call this multiple times, for
     // each type of data that the histogram is saving.
     auto add_moment = [&hist, &type, &space, &props, &group, &axes_ds](
-      const std::string& name,
+      const std::string& thisname,
       const auto& func) {
       auto flat = get_flat_hist_array<T>(hist, func);
       assert(static_cast<std::size_t>(space.getSelectNpoints()) == flat.size());
       H5::DataSet dataset = group.createDataSet(
-        name,
+        thisname,
         type,
         space,
         props);

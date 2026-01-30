@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023  CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026  CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -31,7 +31,6 @@ Trk::TrackingGeometry::TrackingGeometry(TrackingVolume* highestVolume,
 }
 
 Trk::TrackingGeometry::~TrackingGeometry() {
-    if (m_world) delete m_world;
 }
 void Trk::TrackingGeometry::addToGarbage(std::vector<std::unique_ptr<DetachedTrackingVolume>>&& garbageVec) {
   m_detachedVolGarbage.insert(m_detachedVolGarbage.end(),
@@ -163,8 +162,7 @@ Trk::TrackingGeometry::synchronizeLayers(MsgStream& msg, TrackingVolume* vol)
 
 Trk::TrackingVolume*
 Trk::TrackingGeometry::checkoutHighestTrackingVolume() {
-  Trk::TrackingVolume* checkoutVolume{nullptr};
-  std::swap(m_world, checkoutVolume);
+  Trk::TrackingVolume* checkoutVolume = m_world.release();
   // clear the boundary layers they go with the highest volume
   m_boundaryLayers.clear();
   return checkoutVolume;

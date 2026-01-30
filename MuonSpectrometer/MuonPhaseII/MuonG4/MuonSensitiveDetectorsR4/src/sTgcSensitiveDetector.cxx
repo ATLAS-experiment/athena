@@ -49,7 +49,7 @@ G4bool sTgcSensitiveDetector::ProcessHits(G4Step* aStep,G4TouchableHistory*) {
       return true;
   }
   /// Fetch the local -> global transformation  
-  const Amg::Transform3D toGasGap{readOutEle->globalToLocalTrans(gctx, etaHitID)};
+  const Amg::Transform3D toGasGap{readOutEle->globalToLocalTransform(gctx, etaHitID)};
   propagateAndSaveStrip(etaHitID, toGasGap, aStep);
   return true;
 }
@@ -63,7 +63,7 @@ Identifier sTgcSensitiveDetector::getIdentifier(const ActsTrk::GeometryContext& 
   const Identifier firstChan = idHelper.channelID(readOutEle->identify(),
                                                   readOutEle->multilayer(), 1, chType, 1);
   
-  const Amg::Vector3D locHitPos{readOutEle->globalToLocalTrans(gctx, firstChan) * hitAtGapPlane};
+  const Amg::Vector3D locHitPos{readOutEle->globalToLocalTransform(gctx, firstChan) * hitAtGapPlane};
   ATH_MSG_VERBOSE("Detector element: "<<m_detMgr->idHelperSvc()->toStringDetEl(firstChan)
                 <<" locPos: "<<Amg::toString(locHitPos, 2)
                 <<" gap thickness "<<readOutEle->gasGapPitch()

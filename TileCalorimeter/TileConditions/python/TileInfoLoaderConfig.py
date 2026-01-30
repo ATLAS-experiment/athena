@@ -32,7 +32,7 @@ def TileInfoLoaderCfg(flags, **kwargs):
             msg.info("Adjusting TileInfo to return cell noise for Opt.Filter without iterations")
             kwargs['NoiseScaleIndex'] = 1 # Noise for Optimal Filter without iterations
 
-        kwargs.setdefault('TileNoise', flags.Digitization.DoCaloNoise)
+        kwargs.setdefault('TileNoise', hasattr (flags, 'Digitization') and flags.Digitization.DoCaloNoise)
         if kwargs['TileNoise']:
             msg.info("Switching ON noise in Tile Digitization" )
         else:

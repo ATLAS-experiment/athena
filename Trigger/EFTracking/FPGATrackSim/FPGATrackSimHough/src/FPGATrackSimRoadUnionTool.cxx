@@ -48,7 +48,7 @@ StatusCode FPGATrackSimRoadUnionTool::initialize()
     return StatusCode::SUCCESS;
 }
 
-StatusCode FPGATrackSimRoadUnionTool::getRoads(const std::vector<std::shared_ptr<const FPGATrackSimHit>> & hits, std::vector<std::shared_ptr<const FPGATrackSimRoad>> & roads) 
+StatusCode FPGATrackSimRoadUnionTool::getRoads(const std::vector<std::shared_ptr<const FPGATrackSimHit>> & hits, std::vector<FPGATrackSimRoad> & roads) 
 {
     ATH_CHECK(m_FPGATrackSimMapping.retrieve());
 
@@ -83,7 +83,7 @@ StatusCode FPGATrackSimRoadUnionTool::getRoads(const std::vector<std::shared_ptr
     roads.clear();
     for (auto & tool : m_tools)
     {
-        std::vector<std::shared_ptr<const FPGATrackSimRoad>> r;
+        std::vector<FPGATrackSimRoad> r;
         ATH_CHECK(tool->getRoads(sliceHits[tool->getSubRegion()], r, *getTruthTracks()));
         roads.insert(roads.end(), std::make_move_iterator(r.begin()), std::make_move_iterator(r.end()));
     }

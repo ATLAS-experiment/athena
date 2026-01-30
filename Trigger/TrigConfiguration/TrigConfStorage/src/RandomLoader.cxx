@@ -10,8 +10,6 @@
 #include <stdexcept>
 #include <typeinfo>
 
-#include <boost/lexical_cast.hpp>
-
 using namespace std;
 
 bool TrigConf::RandomLoader::load( Random& rdTarget ) {
@@ -70,10 +68,10 @@ bool TrigConf::RandomLoader::load( Random& rdTarget ) {
          string cut2        = row["L1R_CUT2"].data<string>();
          string cut3        = row["L1R_CUT3"].data<string>();
          // Fill the object with data
-         rdTarget.setCut( 0, boost::lexical_cast<uint32_t,string>( cut0 ) );
-         rdTarget.setCut( 1, boost::lexical_cast<uint32_t,string>( cut1 ) );
-         rdTarget.setCut( 2, boost::lexical_cast<uint32_t,string>( cut2 ) );
-         rdTarget.setCut( 3, boost::lexical_cast<uint32_t,string>( cut3 ) );
+         rdTarget.setCut(0, static_cast<uint32_t>(std::stoul(cut0)));
+         rdTarget.setCut(1, static_cast<uint32_t>(std::stoul(cut1)));
+         rdTarget.setCut(2, static_cast<uint32_t>(std::stoul(cut2)));
+         rdTarget.setCut(3, static_cast<uint32_t>(std::stoul(cut3)));
       }
 
       if ( cursor.next() ) {

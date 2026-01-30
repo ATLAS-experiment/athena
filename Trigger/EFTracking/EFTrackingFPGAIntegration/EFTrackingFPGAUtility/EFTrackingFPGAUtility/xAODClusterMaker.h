@@ -60,7 +60,7 @@ public:
    * @return StatusCode
    */
   StatusCode makeStripClusterContainer(
-      const uint64_t* stripClusters,
+      const uint32_t* stripClusters,
       const EFTrackingTransient::Metadata *metadata,
       const EventContext &ctx) const;
 
@@ -85,7 +85,7 @@ public:
    * @return StatusCode
    */
   StatusCode makePixelClusterContainer(
-      const uint64_t* pixelClusters,
+      const uint32_t* pixelClusters,
       const EFTrackingTransient::Metadata *metadata,
       const EventContext &ctx) const;
 

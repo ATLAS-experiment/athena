@@ -15,13 +15,13 @@ def VarToolCfg(flags, var, Tname="VarTool", **kwargs):
     else:
         raise TypeError('Unregonised type for VarTool block')
     # Guess if this is a jet variable if not explicitly set
-    if var in ["e", "et", "pt", "eta", "abseta", "|eta|", "rapidity", "y", "|y|", "absy", "absrapidity", "|rapidity|", "DetectorEta"]:
+    if var in ["e", "et", "pt", "eta", "abseta", "|eta|", "rapidity", "y", "|y|", "absy", "absrapidity", "|rapidity|", "DetectorEta", "absDetEta", "LOGmOe", "mass", "M", "m"]:
         kwargs.setdefault("isJetVar", True)
     else:
         kwargs.setdefault("isJetVar", False)
     kwargs.setdefault("Type","float")
     # Guess the scale if not explicitly set
-    if kwargs.get("isJetVar") and var in ["pt", "e", "et"]:
+    if kwargs.get("isJetVar") and var in ["pt", "e", "et", "mass", "M", "m"]:
         kwargs.setdefault("Scale", 1e-3)
     else:
         kwargs.setdefault("Scale",1.0)
@@ -37,15 +37,22 @@ def HistoInputCfg(flags, Tname, inputFile, histName, varX, **kwargs):
     
     varTool1 = VarToolCfg(flags, varX)
     kwargs.setdefault("varTool1",varTool1)
-    tname = Tname+"_"+varTool1.name
+    tname = Tname+"_"+varTool1.Name
 
-    # 2D histogram if varY provided, else 1D histogram
+    # 2D histogram if varY provided, 3D histogram if varZ provided, else 1D histogram
     varY = kwargs.pop('varY', None)
+    varZ = kwargs.pop('varZ', None)
     if varY:
         varTool2 = VarToolCfg(flags, varY)
-        tname+="_"+varTool2.name
+        tname+="_"+varTool2.Name
         kwargs.setdefault("varTool2",varTool2)
-        return CompFactory.JetHelper.HistoInput2D(tname, **kwargs)
+        if varZ:
+            varTool3 = VarToolCfg(flags, varZ)
+            tname+="_"+varTool3.Name
+            kwargs.setdefault("varTool3",varTool3)
+            return CompFactory.JetHelper.HistoInput3D(tname, **kwargs)
+        else:
+            return CompFactory.JetHelper.HistoInput2D(tname, **kwargs)
     else:
         return CompFactory.JetHelper.HistoInput1D(tname, **kwargs)
  

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // $Id: ut_xaodtrigger_trigcomposite_test.cxx 761887 2016-07-14 13:16:16Z tbold $
@@ -174,7 +174,7 @@ int testObject(const xAOD::TrigComposite* obj) {
    ret    |= testLinks(obj);
    return ret;
 }
-
+//coverity[root_function]
 int main() {
 
    xAOD::TrigComposite::s_throwOnCopyError = true;

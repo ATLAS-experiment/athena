@@ -19,6 +19,10 @@ def MainServicesMiniCfg(flags, loopMgr='AthenaEventLoopMgr', masterSequence='Ath
     cfg.setAppProperty('PrintAlgsSequence', flags.Exec.PrintAlgsSequence)
     if flags.Debug.NameAuditor:
         cfg.addAuditor(CompFactory.NameAuditor())
+    if flags.Exec.StopOnSignal:
+        cfg.setAppProperty("StopOnSignal", True) 
+        cfg.addService(CompFactory.Gaudi.Utils.StopSignalHandler(Signals=flags.Exec.StopOnSignal))
+
     return cfg
 
 

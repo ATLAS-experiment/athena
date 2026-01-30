@@ -3,7 +3,7 @@
 # Declare the package name:
 atlas_subdir( HIClusterGeoWeights )
 
-find_package( ROOT COMPONENTS Core Hist MathCore RIO )
+find_package( ROOT COMPONENTS Core Hist MathCore RIO Tree )
 
 atlas_add_library( HIClusterGeoWeightsLib
                    src/*.cxx

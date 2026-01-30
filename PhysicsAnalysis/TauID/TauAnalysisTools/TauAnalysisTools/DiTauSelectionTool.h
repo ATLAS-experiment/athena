@@ -39,6 +39,7 @@ class DiTauSelectionCutAbsEta;
 class DiTauSelectionCutNSubjets;
 class DiTauSelectionCutAbsCharge;
 class DiTauSelectionCutOmniScore;
+class DiTauSelectionCutOmniIDWP;
 
 class DiTauSelectionTool : public virtual IAsgSelectionTool,
   public virtual IDiTauSelectionTool,
@@ -52,6 +53,7 @@ class DiTauSelectionTool : public virtual IAsgSelectionTool,
   friend class DiTauSelectionCutNSubjets;
   friend class DiTauSelectionCutAbsCharge;
   friend class DiTauSelectionCutOmniScore;
+  friend class DiTauSelectionCutOmniIDWP;
 
   /// Create a proper constructor for Athena
   ASG_TOOL_CLASS2( DiTauSelectionTool,
@@ -108,6 +110,8 @@ private:
   std::vector<int> m_vAbsCharges;
   // vector of OmniScore cut regions
   std::vector<float> m_vOmniScoreRegion;
+  // OmniID working point
+  std::string m_sOmniIDWP;
 
   bool m_useOmniScore=false;
 
@@ -122,6 +126,7 @@ private:
   Gaudi::Property<float> m_iAbsCharge{this, "AbsCharge", NAN};
   Gaudi::Property<float> m_dOmniScoreMin{this, "OmniScoreMin", NAN};
   Gaudi::Property<float> m_dOmniScoreMax{this, "OmniScoreMax", NAN};
+  Gaudi::Property<int> m_iOmniIDWP{this, "OmniIDWP", 0};
 
   Gaudi::Property<std::vector<float>> m_vecPtRegion{this, "PtRegion", {}};
   Gaudi::Property<std::vector<float>> m_vecAbsEtaRegion{this, "AbsEtaRegion",{}};
@@ -138,6 +143,8 @@ private:
   std::map<DiTauSelectionCuts, std::unique_ptr<TauAnalysisTools::DiTauSelectionCut>> m_cMap;
 
   void setupCutFlowHistogram();
+  int  convertStrToOmniIDWP(const std::string& sOmniIDWP) const;
+  std::string convertOmniIDWPToStr(int iOmniIDWP) const;
 
 protected:
   

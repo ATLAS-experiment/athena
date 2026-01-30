@@ -10,9 +10,10 @@ find_package( APTypes )
 
 atlas_add_component (GlobalSimulation
    src/*.h src/*.cxx  
-   src/GlobalAlgs/*.h src/GlobalAlgs/*.cxx src/Utilities/*.cxx
+   # src/GlobalAlgs/*.h src/GlobalAlgs/*.cxx FIXME
+   src/Utilities/*.cxx
    src/GlobalSimComponents/*.h src/GlobalSimComponents/*.cxx
-   src/GlobalAlgs/BDT/*.h src/GlobalAlgs/Egamma1BDT/*.cpp
+   src/FirstChain/BDT/*.h src/FirstChain/Egamma1BDT/*.cpp
    src/FirstChain/*.h src/FirstChain/*.cxx 
    src/IO/*.h src/IO/*.cxx
    src/components/*.cxx
@@ -45,9 +46,8 @@ atlas_add_test(ap_fixed
    )
 
 atlas_add_test(testEgamma1BDT_tv
-               SOURCES src/GlobalAlgs/TestEgamma1/all_tests.cxx
-	       src/GlobalAlgs/TestEgamma1/egamma1BDT_Test.cxx
-	       src/GlobalAlgs/Egamma1BDT/*.cpp
+               SOURCES src/FirstChain/Egamma1BDT/TestEgamma1/all_tests.cxx
+	       src/FirstChain/Egamma1BDT/*.cpp
                INCLUDE_DIRS ${APTYPES_INCLUDE_DIRS} ${GTEST_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS}
                LINK_LIBRARIES ${APTYPES_LIBRARIES} ${GTEST_LIBRARIES} ${ROOT_LIBRARIES} CxxUtils
 	       		      PathResolver

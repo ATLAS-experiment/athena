@@ -121,7 +121,7 @@ namespace MuonR4{
             m_bucket_max      = bucket->coveredMax();
 
             /// Global bucket position
-            const Amg::Vector3D bucketPos = bucket->msSector()->localToGlobalTrans(*gctx) * 
+            const Amg::Vector3D bucketPos = bucket->msSector()->localToGlobalTransform(*gctx) * 
                                             (0.5*(bucket->coveredMin() + bucket->coveredMax()) * Amg::Vector3D::UnitY());
             m_bucket_posX = bucketPos.x();
             m_bucket_posY = bucketPos.y();
@@ -239,7 +239,7 @@ namespace MuonR4{
                     m_spoint_trueLabel.push_back(m_visionTool->isLabeled(*sp));
                 }
 
-                Amg::Vector3D globalPos = sp->msSector()->localToGlobalTrans(*gctx) * sp->localPosition();
+                Amg::Vector3D globalPos = sp->msSector()->localToGlobalTransform(*gctx) * sp->localPosition();
                 m_spoint_globalPosition.push_back( globalPos );
             }
 

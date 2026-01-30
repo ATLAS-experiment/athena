@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 #====================================================================
 # DAOD_FTAG4.py
 # This defines DAOD_FTAG4, an unskimmed DAOD format for Run 3.
@@ -28,20 +28,18 @@ def FTAG4KernelCfg(flags, name='FTAG4Kernel', **kwargs):
     # filter leptons
     lepton_skimming_expression = 'count( (Muons.pt > 25*GeV) && (0 == Muons.muonType || 1 == Muons.muonType || 4 == Muons.muonType) ) + count(( Electrons.pt > 25*GeV) && ((Electrons.Loose) || (Electrons.DFCommonElectronsLHLoose))) >= 1'
 
-    FTAG4LeptonSkimmingTool = CompFactory.DerivationFramework.xAODStringSkimmingTool(
-            name = "FTAG4LeptonSkimmingTool",
-            expression = lepton_skimming_expression )
-    acc.addPublicTool(FTAG4LeptonSkimmingTool)
+    from DerivationFrameworkTools.DerivationFrameworkToolsConfig import (
+        xAODStringSkimmingToolCfg)
+    FTAG4LeptonSkimmingTool = acc.getPrimaryAndMerge(
+        xAODStringSkimmingToolCfg(flags, name = "FTAG4LeptonSkimmingTool",
+                                  expression = lepton_skimming_expression))
     
     # thinning tools
     thinningTools = []
 
-    skimmingTools += [
-            FTAG4LeptonSkimmingTool,
-            ]
+    skimmingTools += [FTAG4LeptonSkimmingTool]
 
-    thinningTools = [
-            ]
+    thinningTools = []
 
     # Finally the kernel itself
     DerivationKernel = CompFactory.DerivationFramework.DerivationKernel

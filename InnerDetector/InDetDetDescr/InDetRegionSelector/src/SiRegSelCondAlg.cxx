@@ -29,7 +29,7 @@
 
 
 SiRegSelCondAlg::SiRegSelCondAlg(const std::string& name, ISvcLocator* pSvcLocator):
-  AthReentrantAlgorithm( name, pSvcLocator ),
+  AthCondAlgorithm( name, pSvcLocator ),
   m_managerName(""),
   m_printTable(false)
 { 

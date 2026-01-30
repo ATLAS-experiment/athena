@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef COOLQUERY_H
@@ -61,6 +61,11 @@ class IOVData {
   ~IOVData() {
     clear();
   }
+
+  IOVData (const IOVData&) = default;
+  IOVData (IOVData&&) = default;
+  IOVData& operator= (const IOVData&) = default;
+  IOVData& operator= (IOVData&&) = default;
 
   void clear() {
     data.clear();

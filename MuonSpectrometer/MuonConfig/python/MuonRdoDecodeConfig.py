@@ -137,7 +137,7 @@ def RpcRdoToPrepDataToolCfg(flags, suffix ="", RDOContainer = None, **kwargs):
 
     return result
 
-def RpcRDODecodeCfg(flags, name="RpcRdoToRpcPrepData", RDOContainer = None, **kwargs):
+def RpcRDODecodeCfg(flags, name="MuonRpcRdoToPrdConv", RDOContainer = None, **kwargs):
     acc = ComponentAccumulator()
     
     suffix = name[name.find("_") :] if name.find("_") != -1 else ""
@@ -163,7 +163,7 @@ def RpcRDODecodeCfg(flags, name="RpcRdoToRpcPrepData", RDOContainer = None, **kw
     return acc
 
 
-def TgcRDODecodeCfg(flags, name="TgcRdoToTgcPrepData", RDOContainer = None,  **kwargs):
+def TgcRDODecodeCfg(flags, name="MuonTgcRdoToPrdConv", RDOContainer = None,  **kwargs):
     acc = ComponentAccumulator()
 
     # We need the TGC cabling to be setup
@@ -221,7 +221,7 @@ def StgcRdoToPrepDataToolCfg(flags, name="STGC_PrepDataProviderTool", **kwargs):
     return result
 
 
-def StgcRDODecodeCfg(flags, name="StgcRdoToStgcPrepData", **kwargs):
+def StgcRDODecodeCfg(flags, name="MuonStgcRdoToPrdConv", **kwargs):
     acc = ComponentAccumulator()
     # Get the RDO -> PRD tool
     kwargs.setdefault("DecodingTool", acc.popToolsAndMerge(StgcRdoToPrepDataToolCfg(flags)))
@@ -250,13 +250,13 @@ def MMRdoToPrepDataToolCfg(flags, name="MmRdoToPrepDataTool", **kwargs):
     from MuonConfig.MuonCalibrationConfig import NSWCalibToolCfg
     kwargs.setdefault("NSWCalibTool", result.popToolsAndMerge(NSWCalibToolCfg(flags)))   
     kwargs["xAODKey"] =  "xAODMMClusters" if flags.Muon.writexAODPRD or flags.Muon.usePhaseIIGeoSetup else ""
- 
+    kwargs["UseR4DetMgr"] = flags.Muon.usePhaseIIGeoSetup
     the_tool = CompFactory.Muon.MmRdoToPrepDataToolMT(name, **kwargs)
     result.setPrivateTools(the_tool)
     return result
 
 
-def MMRDODecodeCfg(flags, name="MM_RdoToMM_PrepData", **kwargs):
+def MMRDODecodeCfg(flags, name="MuonMmRdoToPrdConv", **kwargs):
     acc = ComponentAccumulator()
     ## Get the RDO -> PRD tool
     kwargs.setdefault("DecodingTool", acc.popToolsAndMerge(MMRdoToPrepDataToolCfg(flags)))
@@ -269,7 +269,7 @@ def MMRDODecodeCfg(flags, name="MM_RdoToMM_PrepData", **kwargs):
     return acc
 
 
-def MdtRDODecodeCfg(flags, name="MdtRdoToMdtPrepData", RDOContainer = None, **kwargs):
+def MdtRDODecodeCfg(flags, name="MuonMdtRdoToPrdConv", RDOContainer = None, **kwargs):
     acc = ComponentAccumulator()
     from MuonConfig.MuonCalibrationConfig import MdtCalibrationToolCfg
 
@@ -290,7 +290,6 @@ def MdtRDODecodeCfg(flags, name="MdtRdoToMdtPrepData", RDOContainer = None, **kw
     tool_kwargs["xAODKey"] =  "xMdtDriftCircles" if writexAOD else ""
     tool_kwargs["xAODTwinKey"] =  "xMdtTwinDriftCircles" if writexAOD else ""
     
-    ### Disable the twin tubes in the Phase II geometry setup
     tool_kwargs["UseR4DetMgr"]  = flags.Muon.usePhaseIIGeoSetup
     tool_kwargs["CalibrationTool"] = acc.popToolsAndMerge(MdtCalibrationToolCfg(flags, TimeWindowSetting = 2, 
                                                                                 DoPropagationCorrection = False))

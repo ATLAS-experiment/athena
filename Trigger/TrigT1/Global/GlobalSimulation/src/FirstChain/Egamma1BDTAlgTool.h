@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef GLOBALSIM_EGAMMA1BDTALGTOOL_H
@@ -10,17 +10,16 @@
  */
 
 #include "../GlobalSimComponents/IGlobalSimAlgTool.h"
-#include "../IO/LArStripNeighborhoodContainer.h"
-#include "../IO/IeEmNbhoodTOBContainer.h"
-#include "../IO/IeEmNbhoodTOB.h"
-#include "../IO/IeEmEg1BDTTOBContainer.h"
-#include "../IO/IeEmEg1BDTTOB.h"
+#include "../IO/LArStripNeighborhood.h"
+#include "../IO/eEmNbhoodTOB.h"
+#include "../IO/eEmEg1BDTTOB.h"
+
 
 #include "ap_int.h"
 #include "ap_fixed.h"
 #include "Digitizer.h"
 
-#include "../GlobalAlgs/Egamma1BDT/BDT.h"
+#include "./Egamma1BDT/BDT.h"
 
 #include "AthenaBaseComps/AthAlgTool.h"
 
@@ -28,8 +27,12 @@
 #include <vector>
 
 namespace GlobalSim {
+ 
   class Egamma1BDTAlgTool: public extends<AthAlgTool, IGlobalSimAlgTool> {
-    
+
+    using eEmEg1BDTTOBContainer = GlobalSim::IOBitwise::eEmEg1BDTTOBContainer;
+    using eEmNbhoodTOBContainer =  GlobalSim::IOBitwise::eEmNbhoodTOBContainer;
+ 
   public:
     Egamma1BDTAlgTool(const std::string& type,
 			    const std::string& name,
@@ -52,21 +55,21 @@ namespace GlobalSim {
 	     {false},
 	     "flag to enable dumps"};
 
-    SG::WriteHandleKey<IOBitwise::IeEmEg1BDTTOBContainer>
+    SG::WriteHandleKey<eEmEg1BDTTOBContainer>
     m_BDTResultKey {
       this,
       "BDTResultKey",
       "BDTResult"};
     
     // input to the  BDT Algorithm
-    SG::ReadHandleKey<IOBitwise::IeEmNbhoodTOBContainer>
+    SG::ReadHandleKey<eEmNbhoodTOBContainer>
     m_nbhdTOBContainerReadKey {
       this,
       "LArNeighborhoodTOBContainerReadKey",
       "stripNeighborhoodTOBContainer",
       "key to read inLArNeighborhoodTOBsReadKeys"};
     
-    std::vector<double> combine_phi(const IOBitwise::IeEmNbhoodTOB*) const;
+    std::vector<double> combine_phi(const IOBitwise::eEmNbhoodTOB*) const;
 
     // a neighborhood has 3 vectors of strip energies (phi_low, phi_center.
     // phi_high). Provide the length thes vectors must have for the BDT to be

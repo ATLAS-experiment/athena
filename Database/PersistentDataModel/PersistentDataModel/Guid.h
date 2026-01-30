@@ -37,10 +37,15 @@ public:
        static constexpr int stringSize() { return StrLen; }
    };
 
+   //Remove FallBack code if there is no need for it is discovered
+   struct FallBack{};
    /// Standard constructor
    constexpr Guid() : m_data1(0U), m_data2(0U), m_data3(0U), m_data4() {}
    /// Standard constructor (With possible initialization)
    explicit Guid(bool assign) : Guid() { if (assign) create(*this); }
+
+   //Use this constructor if you find an old malformed Guid and can't correct it
+   Guid(const std::string& s, FallBack) { fromStringFallBack(s); }
    /// Constructor for Guid from string_view
    constexpr Guid(std::string_view s) { fromString(s); }
    //Constructor for const char* -- prevents trying to call bool version
@@ -70,6 +75,9 @@ public:
    static bool isGuid(std::string_view) noexcept;
    /// Automatic conversion from string representation 
    constexpr void fromString(std::string_view s);
+
+   void fromStringFallBack(const std::string&);
+
    /// NULL-Guid: static class method
    static const Guid& null() noexcept;
 

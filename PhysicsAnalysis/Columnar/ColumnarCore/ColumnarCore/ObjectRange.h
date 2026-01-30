@@ -216,29 +216,29 @@ namespace columnar
 
 
 
-  template<ContainerIdConcept CI,int stepSize> class ObjectRangeIteratorArray;
+  template<ContainerIdConcept CI,int stepSize,ColumnarArrayMode CM>
+  class ObjectRangeIteratorArray;
 
-  template<ContainerIdConcept CI> class ObjectRange<CI,ColumnarModeArray> final
+  template<ContainerIdConcept CI,ColumnarArrayMode CM> class ObjectRange<CI,CM> final
   {
     /// Common Public Members
     /// =====================
   public:
 
     using xAODContainer = typename CI::xAODObjectRangeType;
-    using CM = ColumnarModeArray;
 
-    ObjectRangeIteratorArray<CI,1> begin () const noexcept {
-      return ObjectRangeIteratorArray<CI,1> (m_data, m_beginIndex);}
-    ObjectRangeIteratorArray<CI,1> end () const noexcept {
-      return ObjectRangeIteratorArray<CI,1> (m_data, m_endIndex);}
-    ObjectRangeIteratorArray<CI,-1> rbegin () const noexcept {
+    ObjectRangeIteratorArray<CI,1,CM> begin () const noexcept {
+      return ObjectRangeIteratorArray<CI,1,CM> (m_data, m_beginIndex);}
+    ObjectRangeIteratorArray<CI,1,CM> end () const noexcept {
+      return ObjectRangeIteratorArray<CI,1,CM> (m_data, m_endIndex);}
+    ObjectRangeIteratorArray<CI,-1,CM> rbegin () const noexcept {
       // note that as a reverse iterator, the meaning of begin and end
       // is reversed, and the new "end" can be -1.
-      return ObjectRangeIteratorArray<CI,-1> (m_data, m_endIndex-1);}
-    ObjectRangeIteratorArray<CI,-1> rend () const noexcept {
+      return ObjectRangeIteratorArray<CI,-1,CM> (m_data, m_endIndex-1);}
+    ObjectRangeIteratorArray<CI,-1,CM> rend () const noexcept {
       // note that as a reverse iterator, the meaning of begin and end
       // is reversed, and the new "end" can be -1.
-      return ObjectRangeIteratorArray<CI,-1> (m_data, m_beginIndex-1);}
+      return ObjectRangeIteratorArray<CI,-1,CM> (m_data, m_beginIndex-1);}
 
     [[nodiscard]] std::size_t beginIndex () const noexcept {
       return m_beginIndex;}
@@ -272,7 +272,7 @@ namespace columnar
     }
 
     template<typename Acc,typename... Args>
-      requires std::invocable<Acc,ObjectRange<CI,ColumnarModeArray>,Args...>
+      requires std::invocable<Acc,ObjectRange<CI,CM>,Args...>
     [[nodiscard]] decltype(auto) operator() (Acc& acc, Args&&... args) const {
       return acc (*this, std::forward<Args> (args)...);}
 
@@ -309,11 +309,10 @@ namespace columnar
   ///
   /// This is primarily to allow the use of range-for for ObjectRange
 
-  template<ContainerIdConcept CI,int stepSize> class ObjectRangeIteratorArray final
+  template<ContainerIdConcept CI,int stepSize,ColumnarArrayMode CM>
+  class ObjectRangeIteratorArray final
   {
   public:
-
-    using CM = ColumnarModeArray;
 
     ObjectRangeIteratorArray (void **val_data, std::size_t val_index) noexcept
       : m_data (val_data), m_index (val_index) {}
@@ -322,12 +321,12 @@ namespace columnar
       return ObjectId<CI,CM> (m_data, m_index);
     }
 
-    ObjectRangeIteratorArray<CI,stepSize>& operator ++ () noexcept {
+    ObjectRangeIteratorArray<CI,stepSize,CM>& operator ++ () noexcept {
       m_index += stepSize; return *this;}
 
-    bool operator == (const ObjectRangeIteratorArray<CI,stepSize>& that) const noexcept {
+    bool operator == (const ObjectRangeIteratorArray<CI,stepSize,CM>& that) const noexcept {
       return m_index == that.m_index;}
-    bool operator != (const ObjectRangeIteratorArray<CI,stepSize>& that) const noexcept {
+    bool operator != (const ObjectRangeIteratorArray<CI,stepSize,CM>& that) const noexcept {
       return m_index != that.m_index;}
 
   private:

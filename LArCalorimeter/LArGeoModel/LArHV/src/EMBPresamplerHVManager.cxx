@@ -137,8 +137,8 @@ int EMBPresamplerHVManager::EMBPresamplerHVData::index
 
 
 EMBPresamplerHVManager::EMBPresamplerHVManager()
-  : m_c (std::make_unique<Clockwork> (this))
 {
+  m_c = std::make_unique<Clockwork> (this);
 }
 
 EMBPresamplerHVManager::~EMBPresamplerHVManager()

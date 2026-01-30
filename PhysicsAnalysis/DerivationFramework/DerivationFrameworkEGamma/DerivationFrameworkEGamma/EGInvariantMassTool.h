@@ -1,9 +1,9 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
-// EGInvariantMassTool.h, (c) ATLAS Detector software
+// EGInvariantMassTool.h
 // author: giovanni.marchiori@cern.ch
 ///////////////////////////////////////////////////////////////////
 
@@ -31,9 +31,8 @@ enum EEGInvariantMassToolParser
 class EGInvariantMassTool : public extends<ExpressionParserUser<AthAlgTool, kNumEGInvariantMassToolParser>, IAugmentationTool>
 {
 public:
-  EGInvariantMassTool(const std::string& t,
-                      const std::string& n,
-                      const IInterface* p);
+
+  using base_class::base_class;
 
   virtual StatusCode initialize() override final;
   virtual StatusCode addBranches(const EventContext& ctx) const override final;
@@ -42,7 +41,8 @@ private:
   StatusCode getInvariantMasses(const EventContext& ctx,
                                 std::vector<float>&) const;
 
-  std::string m_expression1, m_expression2;
+  Gaudi::Property<std::string> m_expression1{this, "Object1Requirements", "true"};
+  Gaudi::Property<std::string> m_expression2{this, "Object2Requirements", "true"};
   SG::WriteHandleKey<std::vector<float>> m_sgName{ this,
                                                    "StoreGateEntryName",
                                                    "",
@@ -103,10 +103,11 @@ private:
     "Phi2 if different than default"
   };
 
-  float m_mass1Hypothesis, m_mass2Hypothesis;
-  float m_mindR;
-  bool m_checkCharge;
-  bool m_doTransverseMass;
+  Gaudi::Property<float> m_mass1Hypothesis{this, "Mass1Hypothesis", 0.f};
+  Gaudi::Property<float> m_mass2Hypothesis{this, "Mass2Hypothesis", 0.f};
+  Gaudi::Property<float> m_mindR{this, "MinDeltaR", 0.f};
+  Gaudi::Property<bool> m_checkCharge{this, "CheckCharge", true};
+  Gaudi::Property<bool> m_doTransverseMass{this,"DoTransverseMass",  true};
 };
 }
 

@@ -5,6 +5,10 @@
 #include "GlobalCellTowerAlgTool.h"
 #include "GlobalLArCell.h"
 
+#include "../IO/CommonTOB.h"
+
+#include <bitset>
+
 
 namespace GlobalSim {
   
@@ -54,7 +58,7 @@ namespace GlobalSim {
     }
 
     auto h_towerTOBs = SG::makeHandle(m_gblCellTowers, ctx);
-    auto towers = std::make_unique<IOBitwise::ICommonTOBContainer>();
+    auto towers = std::make_unique<IOBitwise::CommonTOBContainer>();
     towers->reserve(nEta * nPhi);
 
     for (int etaBin = 0; etaBin < nEta; ++etaBin) {
@@ -63,9 +67,10 @@ namespace GlobalSim {
            if (towerEnergies[etaBin][phiBin] == 0) continue;
            int energyBits = std::clamp(static_cast<int>(towerEnergies[etaBin][phiBin]), 0, (1 << IOBitwise::CommonTOB::s_et_width) - 1);
 
-           towers->emplace_back(std::make_shared<IOBitwise::CommonTOB>(std::bitset<IOBitwise::CommonTOB::s_et_width>(energyBits),
-								       std::bitset<IOBitwise::CommonTOB::s_eta_width>(etaBin),
-								       std::bitset<IOBitwise::CommonTOB::s_phi_width>(phiBin)));
+
+	   towers->emplace_back(new IOBitwise::CommonTOB(std::bitset<IOBitwise::CommonTOB::s_et_width>(energyBits),
+							 std::bitset<IOBitwise::CommonTOB::s_eta_width>(etaBin),
+							 std::bitset<IOBitwise::CommonTOB::s_phi_width>(phiBin)));
         }
     }
 

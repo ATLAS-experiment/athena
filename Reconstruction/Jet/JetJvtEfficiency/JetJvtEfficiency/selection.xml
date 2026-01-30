@@ -1,6 +1,4 @@
 <lcgdict>
-   <class name="CP::IJetJvtEfficiency" />
-   <class name="CP::JetJvtEfficiency" />
    <class name="CP::FJvtSelectionTool" />
    <class name="CP::JvtSelectionTool" />
    <class name="CP::NNJvtSelectionTool"/>

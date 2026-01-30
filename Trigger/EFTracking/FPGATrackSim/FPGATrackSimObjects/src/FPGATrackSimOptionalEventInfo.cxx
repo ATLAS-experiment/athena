@@ -5,12 +5,11 @@
 #include "FPGATrackSimObjects/FPGATrackSimOptionalEventInfo.h"
 #include <iostream>
 
-
 FPGATrackSimOptionalEventInfo::~FPGATrackSimOptionalEventInfo() {
   reset();
 }
 
-void FPGATrackSimOptionalEventInfo::reset() {
+void FPGATrackSimOptionalEventInfo::reset() const {
   m_OfflineClusters.clear();
   m_OfflineTracks.clear();
   m_TruthTracks.clear();

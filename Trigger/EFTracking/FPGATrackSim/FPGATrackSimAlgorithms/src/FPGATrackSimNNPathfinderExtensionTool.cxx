@@ -10,15 +10,115 @@
  */
 #include "FPGATrackSimAlgorithms/FPGATrackSimNNPathfinderExtensionTool.h"
 #include "FPGATrackSimBanks/FPGATrackSimSectorBank.h"
-
-
 #include "FPGATrackSimHough/FPGATrackSimHoughFunctions.h"
+
+#include "AthenaKernel/Chrono.h"
 
 #include <cmath>
 #include <algorithm>
+#include <deque>
+#include <unordered_map>
 #include "CLHEP/Units/SystemOfUnits.h"
 
 using CLHEP::pi;
+
+namespace {
+    // Helper to wrap a raw pointer as a non-owning shared_ptr<const FPGATrackSimHit>
+    inline std::shared_ptr<const FPGATrackSimHit> makeNonOwningHitPtr(const FPGATrackSimHit* hit) {
+        return std::shared_ptr<const FPGATrackSimHit>(hit, [](const FPGATrackSimHit*){});
+    }
+
+    // Helper to create spatial hash key from coordinates for strip matching
+    inline long makeCoordinatesKey(float x, float y, float z, float gridSize = 1.0f) {
+        int ix = static_cast<int>(std::floor(x / gridSize));
+        int iy = static_cast<int>(std::floor(y / gridSize));
+        int iz = static_cast<int>(std::floor(z / gridSize));
+        return (static_cast<long>(ix + 10000) << 40) |
+                     (static_cast<long>(iy + 10000) << 20) |
+                     static_cast<long>(iz + 10000);
+    }
+
+    // Comparator for Cartesian sorting
+    template<typename HitVec>
+    bool cartesianComparator(const HitVec& a, const HitVec& b, double predr, double predz) {
+        const auto& hitA = *(a[0]);
+        const auto& hitB = *(b[0]);
+        double hitz_a = hitA.getZ();
+        double hitr_a = hitA.getR();
+        double hitz_b = hitB.getZ();
+        double hitr_b = hitB.getR();
+        float distance_a = (hitr_a - predr)*(hitr_a - predr) + (hitz_a - predz)*(hitz_a - predz);
+        float distance_b = (hitr_b - predr)*(hitr_b - predr) + (hitz_b - predz)*(hitz_b - predz);
+        return distance_a < distance_b;
+    }
+
+    // Comparator for polar sorting
+    template<typename HitVec>
+    bool polarComparator(const HitVec& a, const HitVec& b, double predr, double predphi, double predz, double zScale2, double phiScale2, double rScale2) {
+        const auto& hitA = *(a[0]);
+        const auto& hitB = *(b[0]);
+        
+        double hitr_a = hitA.getR();
+        double hitphi_a = hitA.getGPhi();
+        double hitz_a = hitA.getZ();
+        double dz_a = abs(hitz_a - predz);
+        double dr_a = abs(hitr_a - predr);
+        double dphi_a = abs(hitphi_a - predphi);
+        while (dphi_a > pi) dphi_a -= pi;
+        // scaled distance because z and phi and r are not in same units
+        float distance_a = dz_a*dz_a/zScale2 + dphi_a*dphi_a/phiScale2 + dr_a*dr_a/rScale2;
+
+        double hitr_b = hitB.getR();
+        double hitphi_b = hitB.getGPhi();
+        double hitz_b = hitB.getZ();
+        double dz_b = abs(hitz_b - predz);
+        double dr_b = abs(hitr_b - predr);
+        double dphi_b = abs(hitphi_b - predphi);
+        while (dphi_b > pi) dphi_b -= pi;
+        // scaled distance because z and phi and r are not in same units
+        float distance_b = dz_b*dz_b/zScale2 + dphi_b*dphi_b/phiScale2 + dr_b*dr_b/rScale2;
+
+        return distance_a < distance_b;
+    }
+
+    // Spatial index for fast hit lookup
+    struct HitSpatialIndex {
+        std::unordered_map<long, std::vector<const FPGATrackSimHit*>> fineIDToHits;
+        std::unordered_map<long, std::vector<const FPGATrackSimHit*>> coordToHits;
+
+        void build(const std::vector<std::shared_ptr<const FPGATrackSimHit>>& hits) {
+            fineIDToHits.clear();
+            coordToHits.clear();
+            fineIDToHits.reserve(50000);
+            coordToHits.reserve(hits.size());
+
+            for (const auto& hitPtr : hits) {
+                if (!hitPtr->isReal()) continue;
+                
+                // For fineID index we can just skip second half of strip SPs since they get added via the first half
+                if (!(hitPtr->getHitType() == HitType::spacepoint && (hitPtr->getPhysLayer(true) % 2 == 1))) {
+                    long fineID = getFineID(*hitPtr);
+                    fineIDToHits[fineID].push_back(hitPtr.get());
+                }
+
+                // For coordinate index we include all hits since we need to find strip SP pairs
+                long coordKey = makeCoordinatesKey(hitPtr->getX(), hitPtr->getY(), hitPtr->getZ());
+                coordToHits[coordKey].push_back(hitPtr.get());
+            }
+        }
+
+        const std::vector<const FPGATrackSimHit*>* getHits(long fineID) const {
+            auto it = fineIDToHits.find(fineID);
+            return (it != fineIDToHits.end()) ? &(it->second) : nullptr;
+        }
+
+        const std::vector<const FPGATrackSimHit*>* getHitsByCoord(float x, float y, float z) const {
+            long coordKey = makeCoordinatesKey(x, y, z);
+            auto it = coordToHits.find(coordKey);
+            return (it != coordToHits.end()) ? &(it->second) : nullptr;
+        }
+    };
+}
 
 StatusCode FPGATrackSimNNPathfinderExtensionTool::initialize() {
 
@@ -56,14 +156,15 @@ StatusCode FPGATrackSimNNPathfinderExtensionTool::initialize() {
     }
 
     ATH_CHECK(m_tHistSvc.retrieve());
+    ATH_CHECK(m_chronoSvc.retrieve());
 
     return StatusCode::SUCCESS;
 }
 
 
 StatusCode FPGATrackSimNNPathfinderExtensionTool::extendTracks(const std::vector<std::shared_ptr<const FPGATrackSimHit>> & hits,
-        const std::vector<std::shared_ptr<const FPGATrackSimTrack>> & tracks,
-        std::vector<std::shared_ptr<const FPGATrackSimRoad>> & roads) {
+        const FPGATrackSimTrackCollection & tracks,
+        std::vector<FPGATrackSimRoad> & roads) {
 
     // Reset the internal second stage roads storage.
     roads.clear();
@@ -78,40 +179,50 @@ StatusCode FPGATrackSimNNPathfinderExtensionTool::extendTracks(const std::vector
         m_slicedHitHeader->addTower(tower);
       }
     }
+    
+    // Build spatial index (maps) once per event
+    HitSpatialIndex hitIndex;
+    {
+        Athena::Chrono chronoBuildIndex("NNPathfinder:BuildSpatialIndex", m_chronoSvc.get());
+        hitIndex.build(hits);
+    }
+    
     if(m_debugEvent) ATH_MSG_DEBUG("Got: "<<tracks.size()<<" tracks to extrapolate");
     // Now, loop over the tracks.
-    for (std::shared_ptr<const FPGATrackSimTrack> track : tracks) {
+    for (const FPGATrackSimTrack& track : tracks) {
+        Athena::Chrono chronoTrackLoop("NNPathfinder:TrackLoop", m_chronoSvc.get());
         if(m_debugEvent) ATH_MSG_DEBUG("\033[1;31m-------------------------- extraploating Track ------------------ \033[0m");
-        if (track->passedOR() == 0) {
+        if (track.passedOR() == 0) {
             continue;
         }
-        const std::vector<FPGATrackSimHit> hitsOnTrack = track->getFPGATrackSimHits();
+        const std::vector<FPGATrackSimHit> hitsOnTrack = track.getFPGATrackSimHits();
         miniRoad road;
-        float pt = track->getPt();
+        float pt = track.getPt();
 
         for (const auto &thit : hitsOnTrack) {
             road.addHit(std::make_shared<const FPGATrackSimHit>(thit)); // add all hits, we check if WC later
         }
 
-        if(m_debugEvent) {
+        if (m_debugEvent) {
             ATH_MSG_DEBUG("-----------------Hits in event");
-            for (const std::shared_ptr<const FPGATrackSimHit>& hit: hits) {
-	      ATH_MSG_DEBUG("Hit " << " X: " << hit->getX() << " Y: " << hit->getY() << " Z: " << hit->getZ() << " R: " << hit->getR() << "phi = " << hit->getGPhi() << " hitType: " << hit->getHitType() << " getDetType: " << hit->getDetType());
+            for (const auto& hit : hits) {
+                ATH_MSG_DEBUG("Hit " << " X: " << hit->getX() << " Y: " << hit->getY() << " Z: " << hit->getZ() << " R: " << hit->getR() << "phi = " << hit->getGPhi() << " hitType: " << hit->getHitType() << " getDetType: " << hit->getDetType());
             }
         }
-        std::vector<miniRoad> roadsToExtrapolate;
-        roadsToExtrapolate.push_back(road);
+        // Using deque instead of vector for O(1) pop_front since we need operate only the first road each iteration
+        std::deque<miniRoad> roadsToExtrapolate;
+        roadsToExtrapolate.push_back(std::move(road));
 
         std::vector<miniRoad> completedRoads;
 
         int count = 0;
 	// FIXED: Add maximum iteration limit to prevent infinite loops
         const int MAX_ROADS = 10000;
-	while(roadsToExtrapolate.size() > 0 && count < MAX_ROADS ) {
-	  miniRoad currentRoad = *roadsToExtrapolate.begin();
+	while(!roadsToExtrapolate.empty() && count < MAX_ROADS ) {
+	  miniRoad currentRoad = std::move(roadsToExtrapolate.front());
 
-            // Erase this road from the vector
-            roadsToExtrapolate.erase(roadsToExtrapolate.begin());
+            // Erase this road from the deque
+            roadsToExtrapolate.pop_front();
             count ++;
             if(m_debugEvent) {
                 ATH_MSG_DEBUG("\033[1;31m-------------------------- extraploating road "<< count << "------------------ \033[0m");
@@ -120,20 +231,23 @@ StatusCode FPGATrackSimNNPathfinderExtensionTool::extendTracks(const std::vector
             // Check exit condition
             if (currentRoad.getNHits() >= (m_nLayers_1stStage+m_nLayers_2ndStage))
             {
-                completedRoads.push_back(currentRoad);
+                completedRoads.push_back(std::move(currentRoad));
                 continue; // this one is done
             }
             // Other try to find the next hit in this road
             std::vector<float> inputTensorValues;
-            if (!fillInputTensorForNN(currentRoad, inputTensorValues)) {
-                ATH_MSG_WARNING("Failed to create input tensor for this road");
-                continue;
-            }
             std::vector<float> predhit;
             long fineID;
-            if (!getPredictedHit(inputTensorValues, predhit, fineID)) {
-                ATH_MSG_WARNING("Failed to predict hit for this road");
-                continue;
+            {
+                Athena::Chrono chronoNN("NNPathfinder:NNInference", m_chronoSvc.get());
+                if (!fillInputTensorForNN(currentRoad, inputTensorValues)) {
+                    ATH_MSG_WARNING("Failed to create input tensor for this road");
+                    continue;
+                }
+                if (!getPredictedHit(inputTensorValues, predhit, fineID)) {
+                    ATH_MSG_WARNING("Failed to predict hit for this road");
+                    continue;
+                }
             }
             // Check if exist conditions are there
             if (m_doOutsideIn) {
@@ -152,7 +266,7 @@ StatusCode FPGATrackSimNNPathfinderExtensionTool::extendTracks(const std::vector
                 double radius = std::sqrt(predhit[0] * predhit[0] + predhit[1] * predhit[1]);
                 if ((m_useCartesian && (abs(predhit[0]) > 1024 || abs(predhit[1]) > 1024 || radius > 1024 || abs(predhit[2]) > 3000)) ||
 		    (!m_useCartesian && (abs(predhit[0]) > 1024 || abs(predhit[2]) > 3000))) {
-                    completedRoads.push_back(currentRoad);
+                    completedRoads.push_back(std::move(currentRoad));
                     continue;
                 }
             }
@@ -164,7 +278,7 @@ StatusCode FPGATrackSimNNPathfinderExtensionTool::extendTracks(const std::vector
             bool foundhitForRoad = false;
             if(fineID == 215){
                 ATH_MSG_DEBUG("Stopping condition reached");
-                completedRoads.push_back(currentRoad);
+                completedRoads.push_back(std::move(currentRoad));
                 continue;
             }
             // Get the last layer and hit in the road
@@ -178,94 +292,120 @@ StatusCode FPGATrackSimNNPathfinderExtensionTool::extendTracks(const std::vector
             bool lastHitWasReal = lastHit->isReal();
             float lastHitR = lastHit->getR();
             if(layer >= (m_nLayers_1stStage + m_nLayers_2ndStage)) {
-                completedRoads.push_back(currentRoad);
+                completedRoads.push_back(std::move(currentRoad));
                 continue;
             }
             unsigned int hitsInWindow = 0;
 
+            // Cache predicted values and window parameters once per road, not per hit
+            const double predr = (m_useCartesian ? sqrt(predhit[0] * predhit[0] + predhit[1] * predhit[1]) : predhit[0]);
+            const double predphi = predhit[1];
+            const double predz = predhit[2];
+            
+            // Calculate window parameters once
+            double windowR = m_windowR[0];
+            double windowPhi = m_windowPhi[0];
+            double windowZ = m_windowZ[0];
+            int fineID_index = 0;
+            
+            if (m_windowZ.size() > 1 || m_windowR.size() > 1 || m_windowPhi.size() > 1) {
+                auto fineID_it = std::find(m_windowFineID.begin(), m_windowFineID.end(), fineID);
+                if (fineID_it == m_windowFineID.end()){
+                    ATH_MSG_DEBUG("No windows for predicted fineID " << fineID << ", using maximum in provided list instead!");
+                    fineID_index = -1;
+                }
+                else {
+                    fineID_index = fineID_it - m_windowFineID.begin();
+                }
+            }
+            if (m_windowR.size() > 1) {
+                windowR = (fineID_index == -1) ? 
+                    *std::max_element(m_windowR.begin(), m_windowR.end()) : 
+                    m_windowR[fineID_index];
+            }
+            if (m_windowZ.size() > 1) {
+                windowZ = (fineID_index == -1) ? 
+                    *std::max_element(m_windowZ.begin(), m_windowZ.end()) : 
+                    m_windowZ[fineID_index];
+            }
+            if (m_windowPhi.size() > 1) {
+                windowPhi = (fineID_index == -1) ? 
+                    *std::max_element(m_windowPhi.begin(), m_windowPhi.end()) : 
+                    m_windowPhi[fineID_index];
+            }
+            
+            // Apply scaling factors
+            if (m_missedHitRScaling > 0 && !lastHitWasReal) windowR *= m_missedHitRScaling;
+            if (m_missedHitZScaling > 0 && !lastHitWasReal) windowZ *= m_missedHitZScaling;
+            if (m_missedHitPhiScaling > 0 && !lastHitWasReal) windowPhi *= m_missedHitPhiScaling;
+            if (pt < m_lowPtValueForWindowRScaling.value()) windowR *= m_lowPtWindowRScaling.value();
+            if (pt < m_lowPtValueForWindowZScaling.value()) windowZ *= m_lowPtWindowZScaling.value();
+            if (pt < m_lowPtValueForWindowPhiScaling.value()) windowPhi *= m_lowPtWindowPhiScaling.value();
+
             // List of all the hits, with their distances to the predicted point
             std::vector<std::vector<std::shared_ptr<const FPGATrackSimHit>>> listofHitsFound;
 
-            for (const std::shared_ptr<const FPGATrackSimHit>& hit: hits) {
-                if (m_doOutsideIn && (hit->getR() > lastHitR)) continue;
-                if (!m_doOutsideIn && (hit->getR() < lastHitR)) continue;
-                if ((hit->getHitType() == HitType::spacepoint) && ((hit->getPhysLayer(true)) %2 == 1)) continue; // ignore outer parts of SP, they get added separately
-                if(m_debugEvent) {
-		  ATH_MSG_DEBUG("In the hit loop hit at x: " << hit->getX() << " y " << hit->getY() << " z " << hit->getZ() << " phi " << hit->getGPhi());
-                }
-                // loop over hits in that layer
-                if (getFineID(*hit) == fineID && hit->isReal()) {
-                    // a hit is in the right fine ID == layer
-                    double hitz = hit->getZ();
-                    double hitr = hit->getR();
-                    double hitphi = hit->getGPhi();
-                    double predr = (m_useCartesian ? sqrt(predhit[0] * predhit[0] + predhit[1] * predhit[1]) : predhit[0]);
-		    double predphi = predhit[1]; // only for non cartesian, ie cylinndrical
-                    double predz = predhit[2];
-                    double windowR = m_windowR[0]; // default for all layers
-                    double windowPhi = m_windowPhi[0]; // default for all layers
-                    double windowZ = m_windowZ[0]; // default for all layers
-                    int fineID_index = 0;
-                    // But if available pick up per-window values
-                    if (m_windowZ.size() > 1 || m_windowR.size() > 1 || m_windowPhi.size() > 1) {
+            {
+            Athena::Chrono chronoHitSearch("NNPathfinder:HitSearchLoop", m_chronoSvc.get());
+            
+            // Use spatial index (HitSpatialIndex) to get only candidate hits with matching fineID
+            const auto* candidateHits = hitIndex.getHits(fineID);
+            if (candidateHits) {
+                listofHitsFound.reserve(candidateHits->size());
 
-                        auto fineID_it = std::find(m_windowFineID.begin(), m_windowFineID.end(), fineID);
-                        if (fineID_it == m_windowFineID.end()){
-                            ATH_MSG_DEBUG("No windows for predicted fineID " << fineID << ", using maximum in provided list instead!");
-                            fineID_index = -1;
-                        }
-                        else {
-                            fineID_index = fineID_it - m_windowFineID.begin();
-                        }
-                    }
-                    if (m_windowR.size() > 1) {
-                        if (fineID_index == -1) {
-                            windowR = *std::max_element(m_windowR.begin(), m_windowR.end());
-                        }
-                        else {
-                            windowR = m_windowR[fineID_index];
-                        }
-                    }
-                    if (m_windowZ.size() > 1) {
-                        if (fineID_index == -1) {
-                            windowZ = *std::max_element(m_windowZ.begin(), m_windowZ.end());
-                        }
-                        else {
-                            windowZ = m_windowZ[fineID_index];
-                        }
-                    }
-                    if (m_windowPhi.size() > 1) {
-                        if (fineID_index == -1) {
-                            windowPhi = *std::max_element(m_windowPhi.begin(), m_windowPhi.end());
-                        }
-                        else {
-                            windowPhi = m_windowPhi[fineID_index];
-                        }
+                for (const FPGATrackSimHit* hit : *candidateHits) {
+                    // Apply direction filter
+                    const float hitr = hit->getR();
+                    if (m_doOutsideIn && hitr > lastHitR) continue;
+                    if (!m_doOutsideIn && hitr < lastHitR) continue;
+
+                    if(m_debugEvent) {
+                        ATH_MSG_DEBUG("In the hit loop hit at x: " << hit->getX() << " y " << hit->getY() << " z " << hit->getZ() << " phi " << hit->getGPhi());
                     }
 
-                // If last hit was not real and we want to, scale the window
-                if (m_missedHitRScaling > 0 && !lastHitWasReal) windowR *= m_missedHitRScaling;
-                if (m_missedHitZScaling > 0 && !lastHitWasReal) windowZ *= m_missedHitZScaling;
-                if (m_missedHitPhiScaling > 0 && !lastHitWasReal) windowPhi *= m_missedHitPhiScaling;	      
-                // now scale windows for low pt, if desired
-                if (pt < m_lowPtValueForWindowRScaling.value()) windowR *= m_lowPtWindowRScaling.value();
-                if (pt < m_lowPtValueForWindowZScaling.value()) windowZ *= m_lowPtWindowZScaling.value();
-                if (pt < m_lowPtValueForWindowPhiScaling.value()) windowPhi *= m_lowPtWindowPhiScaling.value();		
+                    // Check if hit is within window
+                    const double hitz = hit->getZ();
+                    const double hitphi = hit->getGPhi();
 
-		double dr = abs(hitr - predr);
-		double dz = abs(hitz - predz);
-		double dphi = abs(hitphi - predphi);
-		while (dphi > pi) dphi -= pi;
-                if ((m_useCartesian && dr < windowR && dz < windowZ) ||
-		    (!m_useCartesian && dphi < windowPhi && dz < windowZ && dr < windowR))
-		  {
-                    std::vector<std::shared_ptr<const FPGATrackSimHit>> theseHits {hit};
+                    const double dr = abs(hitr - predr);
+                    const double dz = abs(hitz - predz);
+                    double dphi = abs(hitphi - predphi);
+                    while (dphi > pi) dphi -= pi;
+
+                    const bool inWindow = (m_useCartesian && dr < windowR && dz < windowZ) ||
+                                          (!m_useCartesian && dphi < windowPhi && dz < windowZ && dr < windowR);
+
+                    if (!inWindow) continue;
+
+                    // Only create shared_ptr when hit passes all filters
+                    std::vector<std::shared_ptr<const FPGATrackSimHit>> theseHits{ makeNonOwningHitPtr(hit) };
                     hitsInWindow = hitsInWindow + 1;
-                    // If the hit is a space point, skip the next layer, as it will be a duplicated space point and we have already taken care of that in the adding of the hits
+
+                    // Handle strip space points
                     if(hit->isStrip()) {
                         if (hit->getHitType() == HitType::spacepoint) {
-                            // find the hit in the next layer
-                            if(!findHitinNextStripLayer(hit,  hits, theseHits)) {
+                            // Use spatial index for strip matching
+                            const float EPSILON = 0.00001f;
+                            const float searchX = hit->getX();
+                            const float searchY = hit->getY();
+                            const float searchZ = hit->getZ();
+                            const auto searchHash = hit->getIdentifierHash();
+                            bool found = false;
+
+                            const auto* coordCandidates = hitIndex.getHitsByCoord(searchX, searchY, searchZ);
+                            if (coordCandidates) {
+                                for (const FPGATrackSimHit* candidateHit : *coordCandidates) {
+                                    if (candidateHit->getIdentifierHash() != searchHash &&
+                                        abs(candidateHit->getX() - searchX) < EPSILON &&
+                                        abs(candidateHit->getY() - searchY) < EPSILON &&
+                                        abs(candidateHit->getZ() - searchZ) < EPSILON) {
+                                        theseHits.push_back(makeNonOwningHitPtr(candidateHit));
+                                        found = true;
+                                        break;
+                                    }
+                                }
+                            }
+                            if (!found) {
                                 ATH_MSG_WARNING("For a SP in layer " << layer << " Couldn't find a matching strip SP");
                             }
                         }
@@ -284,61 +424,54 @@ StatusCode FPGATrackSimNNPathfinderExtensionTool::extendTracks(const std::vector
                     }
                     // Store the hits for now
                     listofHitsFound.push_back(std::move(theseHits));
-                    }
                 }
             }
-	    // Sort the hit by the distance
-	    if (m_useCartesian) {
-	      std::sort(listofHitsFound.begin(), listofHitsFound.end(), [&predhit](auto& a, auto& b){
-		double predr = sqrt(predhit[0] * predhit[0] + predhit[1] * predhit[1]);
-		double predz = predhit[2];
-		
-		// HitA
-		double hitz = a[0]->getZ();
-		double hitr = a[0]->getR();
-                float distance_a = (hitr - predr)*(hitr - predr) + (hitz - predz)*(hitz - predz);
-		
-                // HitB
-                hitz = b[0]->getZ();
-                hitr = b[0]->getR();
-                float distance_b = (hitr - predr)*(hitr - predr) + (hitz - predz)*(hitz - predz);
-		
-                return distance_a < distance_b;
-	      });
-	    }
-	    else {
-	      std::sort(listofHitsFound.begin(), listofHitsFound.end(), [&predhit](auto& a, auto& b){
-		
-		double predr = predhit[0];
-		double predphi = predhit[1];		
-		double predz = predhit[2];
-		// HitA
-		double hitr = a[0]->getR();		
-		double hitphi = a[0]->getGPhi();
-		double hitz = a[0]->getZ();
-                double dz = abs(hitz - predz);
-                double dr = abs(hitr - predr);		
-                double dphi = abs(hitphi - predphi);
-		while (dphi > pi) dphi -= pi;
+            } // end HitSearchLoop timing
 
-		// scaled distance because z and phi and r are not in same units
-                float distance_a = dz*dz/(getZScale()*getZScale()) + dphi*dphi/(getPhiScale()*getPhiScale()) + dr*dr/(getRScale()*getRScale());
-		
-                // HitB
-		hitr = b[0]->getR();
-		hitphi = b[0]->getGPhi();		
-		hitz = b[0]->getZ();
-                dz = abs(hitz - predz);
-                dr = abs(hitr - predr);		
-                dphi = abs(hitphi - predphi);
-		while (dphi > pi) dphi -= pi;
+            {
+            Athena::Chrono chronoSort("NNPathfinder:HitSorting", m_chronoSvc.get());
+            
+            // Use partial_sort instead of sort since we only need the top N hits
+            const size_t nToSort = (m_maxBranches.value() >= 0) ? 
+                std::min(static_cast<size_t>(m_maxBranches.value()), listofHitsFound.size()) : 
+                listofHitsFound.size();
+            
+            // Sort the hit by the distance
+            if (m_useCartesian) {
+                auto comparatorFunc = [&](const auto& a, const auto& b) {
+                    return cartesianComparator(a, b, predr, predz);
+                };
+                if (nToSort < listofHitsFound.size()) {
+                    std::partial_sort(listofHitsFound.begin(),
+                                      listofHitsFound.begin() + nToSort,
+                                      listofHitsFound.end(),
+                                      comparatorFunc);
+                } else {
+                    std::sort(listofHitsFound.begin(), listofHitsFound.end(), comparatorFunc);
+                }
+            }
+            else {
+                const double zScale = getZScale();
+                const double phiScale = getPhiScale();
+                const double rScale = getRScale();
+                const double zScale2 = zScale * zScale;
+                const double phiScale2 = phiScale * phiScale;
+                const double rScale2 = rScale * rScale;
 
-		// scaled distance because z and phi and r are not in same units
-		float distance_b = dz*dz/(getZScale()*getZScale()) + dphi*dphi/(getPhiScale()*getPhiScale()) + dr*dr/(getRScale()*getRScale());
+                auto comparatorFunc = [&](const auto& a, const auto& b) {
+                    return polarComparator(a, b, predr, predphi, predz, zScale2, phiScale2, rScale2);
+                };
+                if (nToSort < listofHitsFound.size()) {
+                    std::partial_sort(listofHitsFound.begin(),
+                                      listofHitsFound.begin() + nToSort,
+                                      listofHitsFound.end(),
+                                      comparatorFunc);
+                } else {
+                    std::sort(listofHitsFound.begin(), listofHitsFound.end(), comparatorFunc);
+                }
+            }
+            } // end HitSorting timing
 
-                return distance_a < distance_b;
-	      });
-	    }
             // Select the top N hits
             std::vector<std::vector<std::shared_ptr<const FPGATrackSimHit>>> cleanHitsToGrow;
 
@@ -352,6 +485,8 @@ StatusCode FPGATrackSimNNPathfinderExtensionTool::extendTracks(const std::vector
                 cleanHitsToGrow = std::move(listofHitsFound);
             }
 
+            {
+            Athena::Chrono chronoRoadBuilding("NNPathfinder:RoadBuilding", m_chronoSvc.get());
             for (auto& hitsFound: cleanHitsToGrow) {
 
                 // We got a hit, lets make a road
@@ -394,19 +529,22 @@ StatusCode FPGATrackSimNNPathfinderExtensionTool::extendTracks(const std::vector
                     roadsToExtrapolate.push_back(std::move(newroad));
                 }
             }
+            } // end RoadBuilding timing
         }
         // This track has been extrapolated, copy the completed tracks to the full list with full road objects
+        {
+        Athena::Chrono chronoRoadConversion("NNPathfinder:RoadConversion", m_chronoSvc.get());
         for (const auto &miniroad : completedRoads) {
             FPGATrackSimRoad road;
             road.setWCLayers(miniroad.getWCLayers());
             road.setHitLayers(miniroad.getHitLayers());
             road.setRoadID(m_roads.size() - 1);
             // Set the "Hough x" and "Hough y" using the track parameters.
-            road.setX(track->getPhi());
-            road.setY(track->getQOverPt());
-            road.setXBin(track->getHoughXBin());
-            road.setYBin(track->getHoughYBin());
-            road.setSubRegion(track->getSubRegion());
+            road.setX(track.getPhi());
+            road.setY(track.getQOverPt());
+            road.setXBin(track.getHoughXBin());
+            road.setYBin(track.getHoughYBin());
+            road.setSubRegion(track.getSubRegion());
 
             // just force the right number of layers now, in case we find fewer than expected (needed downstream)
             std::vector<std::vector<std::shared_ptr<const FPGATrackSimHit>>> roadhits = miniroad.getVecHits();
@@ -433,13 +571,14 @@ StatusCode FPGATrackSimNNPathfinderExtensionTool::extendTracks(const std::vector
 
             m_roads.push_back(std::move(road));
         }
+        } // end RoadConversion timing
     }
     // Copy the roads we found into the output argument and return success.
     roads.reserve(m_roads.size());
     for (FPGATrackSimRoad & r : m_roads)
     {
         if (r.getNWCLayers() >= m_maxMiss) continue; // extra check on this
-        roads.emplace_back(std::make_shared<const FPGATrackSimRoad>(r));
+        roads.emplace_back(r);
     }
     ATH_MSG_DEBUG("Found " << roads.size() << " new roads in second stage.");
 
@@ -465,9 +604,9 @@ StatusCode FPGATrackSimNNPathfinderExtensionTool::fillInputTensorForNN(miniRoad&
     });
 
     if(m_debugEvent) ATH_MSG_DEBUG("hitsR");
-    for (auto thit : hitsR)
+    for (const auto& thit : hitsR)
     {
-      if(m_debugEvent) ATH_MSG_DEBUG(thit->getX()<<" "<<thit->getY()<<" "<<thit->getZ() << " and phi = " << thit->getGPhi());
+        if (m_debugEvent) ATH_MSG_DEBUG(thit->getX() << " " << thit->getY() << " " << thit->getZ() << " and phi = " << thit->getGPhi());
     }
 
     // Remove all the duplicate space points
@@ -482,12 +621,12 @@ StatusCode FPGATrackSimNNPathfinderExtensionTool::fillInputTensorForNN(miniRoad&
         }
         if (thit->isPixel())
         {
-            cleanHits.push_back(thit);
+            cleanHits.push_back(std::move(thit));
         }
         else if (thit->isStrip() && (thit->getHitType() == HitType::spacepoint))
         {
             // This is a proper strips SP, push the first hit back and skip the next one since its a duplicate
-            cleanHits.push_back(thit);
+            cleanHits.push_back(std::move(thit));
             skipHit = true;
         }
         else if (thit->isStrip() && (thit->getHitType() == HitType::guessed))
@@ -524,29 +663,29 @@ StatusCode FPGATrackSimNNPathfinderExtensionTool::fillInputTensorForNN(miniRoad&
     std::copy(cleanHits.begin(), cleanHits.begin() + m_predictionWindowLength, std::back_inserter(hitsToEncode));
 
     if(m_debugEvent) ATH_MSG_DEBUG("Clean hits");
-    for (auto thit : cleanHits)
+    for (const auto& thit : cleanHits)
     {
-      if(m_debugEvent) ATH_MSG_DEBUG(thit->getX()<<" "<<thit->getY()<<" "<<thit->getZ()<<" "<<thit->isStrip() << " and gphi = " << thit->getGPhi());
+        if (m_debugEvent) ATH_MSG_DEBUG(thit->getX() << " " << thit->getY() << " " << thit->getZ() << " " << thit->isStrip() << " and gphi = " << thit->getGPhi());
     }
 
     // Reverse this vector so we can encode it the format as expected from the NN
     std::reverse(hitsToEncode.begin(), hitsToEncode.end());
 
-    if(m_debugEvent) ATH_MSG_DEBUG("Input for NN prediction");
-    for (auto thit : hitsToEncode)
+    if (m_debugEvent) ATH_MSG_DEBUG("Input for NN prediction");
+    for (const auto& thit : hitsToEncode)
     {
-      if (m_useCartesian) {
-        inputTensorValues.push_back(thit->getX()/ getXScale());
-        inputTensorValues.push_back(thit->getY()/ getYScale());
-        inputTensorValues.push_back(thit->getZ()/ getZScale());
-      }
-      else {
-        inputTensorValues.push_back(thit->getR()/ getRScale());
-        inputTensorValues.push_back(thit->getGPhi()/ getPhiScale());
-        inputTensorValues.push_back(thit->getZ()/ getZScale());
-      }
+        if (m_useCartesian) {
+            inputTensorValues.push_back(thit->getX() / getXScale());
+            inputTensorValues.push_back(thit->getY() / getYScale());
+            inputTensorValues.push_back(thit->getZ() / getZScale());
+        }
+        else {
+            inputTensorValues.push_back(thit->getR() / getRScale());
+            inputTensorValues.push_back(thit->getGPhi() / getPhiScale());
+            inputTensorValues.push_back(thit->getZ() / getZScale());
+        }
 
-      if(m_debugEvent) ATH_MSG_DEBUG(thit->getX()<<" "<<thit->getY()<<" "<<thit->getZ() << " and gphi = " << thit->getGPhi());
+        if (m_debugEvent) ATH_MSG_DEBUG(thit->getX() << " " << thit->getY() << " " << thit->getZ() << " and gphi = " << thit->getGPhi());
     }
 
     return StatusCode::SUCCESS;
@@ -652,54 +791,36 @@ StatusCode FPGATrackSimNNPathfinderExtensionTool::getFakeHit(miniRoad& currentRo
 
 }
 
-StatusCode FPGATrackSimNNPathfinderExtensionTool::findHitinNextStripLayer(std::shared_ptr<const FPGATrackSimHit> hitToSearch, const std::vector<std::shared_ptr<const FPGATrackSimHit>>& hitList, std::vector<std::shared_ptr<const FPGATrackSimHit>>& hits)
-{
-    float EPSILON = 0.00001;
-    for (const std::shared_ptr<const FPGATrackSimHit>& hit: hitList)
-    {
-      if (abs(hit->getX() - hitToSearch->getX()) < EPSILON && abs(hit->getY() - hitToSearch->getY()) < EPSILON && abs(hit->getZ() - hitToSearch->getZ()) < EPSILON && hit->getIdentifierHash() != hitToSearch->getIdentifierHash())
-        {
-            hits.push_back(hit);
-            return StatusCode::SUCCESS;
-        }
-
-    }
-
-    ATH_MSG_WARNING("Didn't find a matching space point");
-
-    return StatusCode::FAILURE;
-}
-
 void FPGATrackSimNNPathfinderExtensionTool::printRoad(miniRoad& currentRoad)
 {
-    if(!m_debugEvent) return;
+    if (!m_debugEvent) return;
 
     // print this road
-    if(m_debugEvent)
+    if (m_debugEvent)
     {
         std::vector<std::shared_ptr<const FPGATrackSimHit>> hitsR;
-        for (auto &hit : currentRoad.getHits()) {
+        for (const auto& hit : currentRoad.getHits()) {
             hitsR.push_back(hit);
         }
 
         // If outside in, sort in increasing R, otherwise, decreasing R
-        if(m_doOutsideIn)
+        if (m_doOutsideIn)
         {
-            std::sort(hitsR.begin(), hitsR.end(), [](auto& a, auto& b){
-                if(a->getR() == b->getR()) return a->getLayer() < b->getLayer();
+            std::sort(hitsR.begin(), hitsR.end(), [](const auto& a, const auto& b) {
+                if (a->getR() == b->getR()) return a->getLayer() < b->getLayer();
                 return a->getR() < b->getR();
-            });
+                });
         }
         else
         {
-            std::sort(hitsR.begin(), hitsR.end(), [](auto& a, auto& b){
+            std::sort(hitsR.begin(), hitsR.end(), [](const auto& a, const auto& b) {
                 return a->getR() > b->getR();
-            });
+                });
         }
 
         for (unsigned long i = 0; i < hitsR.size(); i++)
         {
-	  ATH_MSG_DEBUG("Hit i "<<i<<" X: "<<hitsR[i]->getX()<<" Y: "<<hitsR[i]->getY()<<" Z: "<<hitsR[i]->getZ()<<" R: "<<hitsR[i]->getR()<< " hitType: "<<hitsR[i]->getHitType()<<" getDetType: "<<hitsR[i]->getDetType() << "phi = " << hitsR[i]->getGPhi());
+            ATH_MSG_DEBUG("Hit i " << i << " X: " << hitsR[i]->getX() << " Y: " << hitsR[i]->getY() << " Z: " << hitsR[i]->getZ() << " R: " << hitsR[i]->getR() << " hitType: " << hitsR[i]->getHitType() << " getDetType: " << hitsR[i]->getDetType() << "phi = " << hitsR[i]->getGPhi());
         }
     }
 

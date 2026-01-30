@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrkEventCnvTools/EventCnvSuperTool.h"
@@ -41,7 +41,7 @@ Trk::EventCnvSuperTool::EventCnvSuperTool(const std::string& t,
 Trk::EventCnvSuperTool::~EventCnvSuperTool() {
   if (m_errCount > m_maxErrCount)
     ATH_MSG_WARNING("Suppressed " << (m_errCount - m_maxErrCount)
-                                  << " WARNING or ERROR messages");
+                                  << " warning or error messages");
 }
 
 StatusCode Trk::EventCnvSuperTool::initialize() {
@@ -103,7 +103,7 @@ StatusCode Trk::EventCnvSuperTool::finalize() {
   msg() << "Finalize().";
   if (m_errCount > 0)
     msg() << " Tried to print " << m_errCount
-          << " ERROR/WARNING messages (with maximum permissable = "
+          << " error/warning messages (with maximum permissable = "
           << m_maxErrCount << ")";
   msg() << endmsg;
   return StatusCode::SUCCESS;

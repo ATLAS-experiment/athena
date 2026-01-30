@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  */
 
 #ifndef dqutilsMonitoringFile_h
@@ -184,7 +184,7 @@ namespace dqutils {
 
     // For MuonTrackMonitoring
     static void MuonTrackPostProcess(const std::string& inFileName, bool isIncremental = false);
-    static void MuonTrack_Main(const std::string& inFileName, TString dirname);
+    static void MuonTrack_Main(const std::string& inFileName, const std::string& dirname_in);
 
     //For RPC
     static void RPCPostProcess(const std::string& inFilename, bool isIncremental = false);
@@ -255,10 +255,10 @@ namespace dqutils {
     //HLT Egamma
     static void HLTEgammaPostProcess(const std::string& inFilename, bool isIncremental = false);
 
-    static void HLTEgammaEfficiencyOff(TFile* f, TDirectory* trig_dir, TDirectory* off_dir, const TString& pathNum,
-                                       const TString& pathEff, const std::vector<TString>& varName);
-    static void HLTEgammaEfficiencyRel(TFile* f, TDirectory* trig_dir, const TString& pathPre, const TString& pathRej,
-                                       const std::vector<TString>& objStage, const std::vector<TString>& varName);
+    static void HLTEgammaEfficiencyOff(TFile* f, TDirectory* trig_dir, TDirectory* off_dir, const std::string& pathNum,
+                                       const std::string& pathEff, const std::vector<std::string>& varName);
+    static void HLTEgammaEfficiencyRel(TFile* f, TDirectory* trig_dir, const std::string& pathPre, const std::string& pathRej,
+                                       const std::vector<std::string>& objStage, const std::vector<std::string>& varName);
 
     //HLT tau
     static void HLTTauPostProcess(const std::string& inFilename, bool isIncremental = false);
@@ -273,18 +273,18 @@ namespace dqutils {
 
     // HLT MET
     static void HLTMETPostProcess(const std::string& inFileName, bool isIncremental = false);
-    static void HLTMETAveragePhivsEtaMaps(TFile* f, TString& run_dir);
-    static size_t HLTMETGetDQLBNRange(TDirectory*& run_dir, std::vector<TString>& lbnDirs);
+    static void HLTMETAveragePhivsEtaMaps(TFile* f, std::string& run_dir);
+    static size_t HLTMETGetDQLBNRange(TDirectory*& run_dir, std::vector<std::string>& lbnDirs);
     static int HLTMETGetStatusPerBin(TH1I*& hist, int ymin, int ymax, int rmin, int rmax);
-    static void HLTMETDQFlagSummary(TFile* f, TString& run_dir);
+    static void HLTMETDQFlagSummary(TFile* f, std::string& run_dir);
 
     // HLT Jet
     static void HLTCaloPostProcess(const std::string& inFileName, bool isIncremental = false);
-    static void HLTCaloAveragePtPhiEtaMaps(TFile* f, TString& run_dir);
+    static void HLTCaloAveragePtPhiEtaMaps(TFile* f, std::string& run_dir);
 
     // HLT Jet
     static void HLTJetPostProcess(const std::string& inFileName, bool isIncremental = false);
-    static void HLTJetCalcEfficiencyAndRate(TFile* f, TString& run_dir);
+    static void HLTJetCalcEfficiencyAndRate(TFile* f, std::string& run_dir);
 
     //JetTagging
     static void BJetTaggingPostProcess(const std::string& inFileName, bool isIncremental = false);
@@ -294,7 +294,7 @@ namespace dqutils {
     //HLT MinBiasMon
     static void HLTMinBiasMonPostProcess(const std::string& inFileName, bool isIncremental = false);
     static void HLTMinBiasMonGetTargetHistos(TDirectory* source,
-                                             std::vector< std::pair<TString, TString> >& targetNames);
+                                             std::vector< std::pair<std::string, std::string> >& targetNames);
 
     // primary vertex monitoring
     static void pv_PrimaryVertexMonitoring_calcResoAndEfficiency(const std::string& inFilename,

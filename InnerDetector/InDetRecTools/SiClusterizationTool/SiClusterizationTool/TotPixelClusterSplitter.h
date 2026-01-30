@@ -16,7 +16,6 @@
 #include "InDetPrepRawData/PixelClusterSplitProb.h"
 #include "InDetIdentifier/PixelID.h"
 #include "PixelConditionsData/PixelChargeCalibCondData.h"
-#include "PixelReadoutGeometry/IPixelReadoutManager.h"
 #include "StoreGate/ReadCondHandleKey.h"
 
 template <class T> class ServiceHandle;
@@ -77,9 +76,6 @@ namespace InDet
       static int pixelType(const int PhiIdx, const int EtaIdx) ;
 
       enum SplitType { PhiSplit = 0, EtaSplit = 1, NoSplit = 2 };
-
-      ServiceHandle<InDetDD::IPixelReadoutManager> m_pixelReadout
-      {this, "PixelReadoutManager", "PixelReadoutManager", "Pixel readout manager" };
 
       SG::ReadCondHandleKey<PixelChargeCalibCondData> m_chargeDataKey
          {this, "PixelChargeCalibCondData", "PixelChargeCalibCondData", "Pixel charge calibration data"};

@@ -16,7 +16,7 @@ atlas_add_library( HIEventUtilsLib
 
 if (NOT XAOD_STANDALONE)
   atlas_add_component( HIEventUtils
-                       src/components/*.cxx src/HITowerWeightTool.cxx
+                       src/components/*.cxx src/HITowerWeightTool.cxx src/HIEventFilterAlgRun3.cxx
                        LINK_LIBRARIES AthenaBaseComps GaudiKernel HIEventUtilsLib Navigation
                        PRIVATE_LINK_LIBRARIES PathResolver)
 endif ()
@@ -25,3 +25,12 @@ atlas_add_dictionary( HIEventUtilsDict
    HIEventUtils/HIEventUtilsDict.h
    HIEventUtils/selection.xml
    LINK_LIBRARIES HIEventUtilsLib )
+
+if (NOT XAOD_STANDALONE)
+atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
+
+
+atlas_add_test( HIEventSelectionRun3
+                SCRIPT python -m HIEventUtils.HIEventSelectionRun3Config
+                POST_EXEC_SCRIPT nopost.sh )
+endif()

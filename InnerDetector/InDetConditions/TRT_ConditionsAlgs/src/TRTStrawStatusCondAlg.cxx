@@ -7,7 +7,7 @@
 #include "InDetIdentifier/TRT_ID.h"
 
 TRTStrawStatusCondAlg::TRTStrawStatusCondAlg(const std::string &name, ISvcLocator *pSvcLocator)
-  : ::AthReentrantAlgorithm(name,pSvcLocator)
+  : ::AthCondAlgorithm(name,pSvcLocator)
 {
 }
 

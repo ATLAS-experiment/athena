@@ -6,7 +6,7 @@
 // TruthLinkRepointTool.cxx
 // Truth links on some objects point to the main truth particle
 // container, or to some other container that won't be saved in the
-// output derivation.  This re-points the links from the old 
+// output derivation.  This re-points the links from the old
 // container to the new container (and serves as a chance to clean
 // up / harmonize the names of the decorations).
 
@@ -20,26 +20,12 @@
 
 #include "TruthUtils/MagicNumbers.h"
 
-// Constructor
-DerivationFramework::TruthLinkRepointTool::TruthLinkRepointTool(const std::string& t,
-        const std::string& n,
-        const IInterface* p ) :
-    base_class(t,n,p) {
-}
 StatusCode DerivationFramework::TruthLinkRepointTool::initialize(){
   ATH_CHECK(m_recoKey.initialize());
-  if (m_decOutput.value().empty()) {
-     ATH_MSG_FATAL("Please enter a a valid output decorator");
-     return StatusCode::FAILURE;
-  }
   ATH_CHECK(m_targetKeys.initialize());
-  m_decorKey = m_recoKey.key() + "." + m_decOutput;
   ATH_CHECK(m_decorKey.initialize());
   return StatusCode::SUCCESS;
 }
-
-// Destructor
-DerivationFramework::TruthLinkRepointTool::~TruthLinkRepointTool() = default;
 
 // Function to do dressing, implements interface in IAugmentationTool
 StatusCode DerivationFramework::TruthLinkRepointTool::addBranches(const EventContext& ctx) const {
@@ -58,8 +44,8 @@ StatusCode DerivationFramework::TruthLinkRepointTool::addBranches(const EventCon
     }
     targets.emplace_back(readHandle.cptr());
   }
-  
-  
+
+
   SG::ReadHandle<xAOD::IParticleContainer> inputCont{m_recoKey, ctx};
   if (!inputCont.isValid()) {
     ATH_MSG_FATAL("Failed to retrieve "<<m_recoKey.fullKey());
@@ -70,12 +56,12 @@ StatusCode DerivationFramework::TruthLinkRepointTool::addBranches(const EventCon
     output_decorator(*input) = ElementLink<xAOD::TruthParticleContainer>{};
     for (const xAOD::TruthParticleContainer* target : targets) {
         int index = find_match(truthPart, target);
-        
+
         if (index >=0) output_decorator(*input) = ElementLink<xAOD::TruthParticleContainer>(*target, index);
-        
+
     }
   }
-  
+
   return StatusCode::SUCCESS;
 }
 

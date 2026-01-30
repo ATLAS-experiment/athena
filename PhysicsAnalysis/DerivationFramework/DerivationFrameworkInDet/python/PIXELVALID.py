@@ -306,18 +306,13 @@ def PixelVALIDCfg(flags):
             "AntiKt4EMTopoJets": "xAOD::JetContainer",
             "AntiKt4EMTopoJetsAux": "xAOD::JetAuxContainer",
             "AntiKt4EMPFlowJets": "xAOD::JetContainer",
-            "AntiKt4EMPFlowJetsAux": "xAOD::JetAuxContainer",
-            "BTagging_AntiKt4EMTopo": "xAOD::BTaggingContainer",
-            "BTagging_AntiKt4EMTopoAux": "xAOD::BTaggingAuxContainer",
-            "BTagging_AntiKt4EMPFlow": "xAOD::BTaggingContainer",
-            "BTagging_AntiKt4EMPFlowAux": "xAOD::BTaggingAuxContainer"})
+            "AntiKt4EMPFlowJetsAux": "xAOD::JetAuxContainer"})
 
-        ExtraVariables += ["TauJets.ABS_ETA_LEAD_TRACK.ClusterTotalEnergy.ClustersMeanCenterLambda.ClustersMeanEMProbability.ClustersMeanFirstEngDens.ClustersMeanPresamplerFrac.ClustersMeanSecondLambda.EMFracFixed.GhostMuonSegmentCount.LeadClusterFrac.NNDecayMode.NNDecayModeProb_1p0n.NNDecayModeProb_1p1n.NNDecayModeProb_1pXn.NNDecayModeProb_3p0n.NNDecayModeProb_3pXn.PFOEngRelDiff.PanTau_DecayModeExtended.UpsilonCluster.absipSigLeadTrk.chargedFELinks.etHotShotWin.etHotShotWinOverPtLeadTrk.etaCombined.hadLeakFracFixed.leadTrackProbHT.mCombined.mu.nConversionTracks.nFakeTracks.nModifiedIsolationTracks.nVtxPU.neutralFELinks.passThinning.phiCombined.ptCombined.ptIntermediateAxisEM.rho"]
+        ExtraVariables += ["TauJets.ABS_ETA_LEAD_TRACK.ClusterTotalEnergy.ClustersMeanCenterLambda.ClustersMeanEMProbability.ClustersMeanFirstEngDens.ClustersMeanPresamplerFrac.ClustersMeanSecondLambda.EMFracFixed.LeadClusterFrac.NNDecayMode.NNDecayModeProb_1p0n.NNDecayModeProb_1p1n.NNDecayModeProb_1pXn.NNDecayModeProb_3p0n.NNDecayModeProb_3pXn.PFOEngRelDiff.PanTau_DecayModeExtended.UpsilonCluster.absipSigLeadTrk.chargedFELinks.etHotShotWin.etHotShotWinOverPtLeadTrk.etaCombined.hadLeakFracFixed.leadTrackProbHT.mCombined.mu.nConversionTracks.nFakeTracks.nModifiedIsolationTracks.nVtxPU.neutralFELinks.passThinning.phiCombined.ptCombined.ptIntermediateAxisEM.rho"]
         ExtraVariables += ["PrimaryVertices.sumPt2.x.y.z"]
 
         AllVariables += ["Kt4EMPFlowEventShape",
-                         "AntiKt4EMTopoJets", "AntiKt4EMPFlowJets",
-                         "BTagging_AntiKt4EMTopo", "BTagging_AntiKt4EMPFlow"]
+                         "AntiKt4EMTopoJets", "AntiKt4EMPFlowJets"]
 
         if flags.Input.isMC:
             PIXELVALIDSlimmingHelper.AppendToDictionary.update({

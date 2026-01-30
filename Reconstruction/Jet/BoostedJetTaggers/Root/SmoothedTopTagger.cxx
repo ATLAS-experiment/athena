@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "BoostedJetTaggers/SmoothedTopTagger.h"
@@ -28,18 +28,18 @@ StatusCode SmoothedTopTagger::initialize() {
     /// Get configReader
     ATH_CHECK( getConfigReader() );
 
-    TString prefix = "";
+    std::string prefix = "";
     if ( ! m_wkpt.empty() ) prefix = m_wkpt+".";
 
     // read the number of variables for tagger from file
-    m_numTaggerVars = std::stoi(m_configReader.GetValue( prefix+"NumVars", ""));
+    m_numTaggerVars = std::stoi(m_configReader.GetValue( (prefix+"NumVars").c_str(), ""));
 
     ATH_MSG_DEBUG("Number of variables used by tagger is " << std::to_string(m_numTaggerVars));
 
     std::string varName, varCutExpr;
     for (int i = 1; i <= m_numTaggerVars; i++) {
       // read the cut name corresponding to this variable
-      varName = m_configReader.GetValue( prefix+"Var"+std::to_string(i), "");
+      varName = m_configReader.GetValue( (prefix+"Var"+std::to_string(i)).c_str(), "");
 
       if (varName.empty()) {
         ATH_MSG_ERROR("Config file does not specify Var" << std::to_string(i) << "!") ; 
@@ -54,7 +54,7 @@ StatusCode SmoothedTopTagger::initialize() {
       m_varCutNames.push_back(varName);
 
       // read cut expression
-      varCutExpr = m_configReader.GetValue( prefix+m_varCutNames.back()+"Cut", "");
+      varCutExpr = m_configReader.GetValue( (prefix+m_varCutNames.back()+"Cut").c_str(), "");
 
       if (varCutExpr.empty()) {
         ATH_MSG_ERROR("Config file does not specify Var" << std::to_string(i) << " cut!") ; 
@@ -173,8 +173,8 @@ StatusCode SmoothedTopTagger::tag( const xAOD::Jet& jet ) const {
   calculateJSSRatios(jet);
 
   // configure decorators from JSSTaggerBase class
-  SG::WriteDecorHandle<xAOD::JetContainer, bool> decValidJetContent(m_decValidJetContentKey);
-  SG::WriteDecorHandle<xAOD::JetContainer, bool> decTagged(m_decTaggedKey);
+  SG::WriteDecorHandle<xAOD::JetContainer, char> decValidJetContent(m_decValidJetContentKey);
+  SG::WriteDecorHandle<xAOD::JetContainer, char> decTagged(m_decTaggedKey);
 
   // initialize for use in other statements
   bool passCuts = true;
@@ -190,7 +190,7 @@ StatusCode SmoothedTopTagger::tag( const xAOD::Jet& jet ) const {
     if (m_varCutNames[i] == "Mass" || m_varCutNames[i] == "mass") {
       // decorators for jet after applying cuts
       SG::WriteDecorHandle<xAOD::JetContainer, float> decMCut(m_dec_mcut);
-      SG::WriteDecorHandle<xAOD::JetContainer, bool> decPassMass(m_decPassMassKey);
+      SG::WriteDecorHandle<xAOD::JetContainer, char> decPassMass(m_decPassMassKey);
 
       // decorate cut
       decMCut(jet) = cut_var;
@@ -208,7 +208,7 @@ StatusCode SmoothedTopTagger::tag( const xAOD::Jet& jet ) const {
       // setup read/write handles for sphericity cut decorations & reading variables
       SG::ReadDecorHandle<xAOD::JetContainer, float> readSphericity(m_readSphericityKey);
       SG::WriteDecorHandle<xAOD::JetContainer, float> decSphericityCut(m_dec_sphericitycut);
-      SG::WriteDecorHandle<xAOD::JetContainer, bool> decPassSphericity(m_decPassSphericityKey);
+      SG::WriteDecorHandle<xAOD::JetContainer, char> decPassSphericity(m_decPassSphericityKey);
 
       // decorate cut
       decSphericityCut(jet) = cut_var;

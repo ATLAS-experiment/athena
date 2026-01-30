@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "./CTPConfigLoader.h"
@@ -136,7 +136,7 @@ bool TrigConf::CTPConfigLoader::load(CTPConfig& ctpcTarget) {
 
          if(filesid > 0 && smxid > 0) {
 
-            CTPFiles* files = new CTPFiles();
+            auto files = std::make_unique<CTPFiles>();
             files->setId( filesid );
             files->setSmxId( smxid );
             files->setLoadCtpcoreFiles( ctpcTarget.loadCtpcoreFiles() );
@@ -148,11 +148,10 @@ bool TrigConf::CTPConfigLoader::load(CTPConfig& ctpcTarget) {
                ctpfilesldr.setLevel(outputLevel());
                if ( !ctpfilesldr.load( *files ) ) {
                   TRG_MSG_ERROR("Error loading CTP files id " << files->id() << " and smx id " << smxid );
-                  delete files;
                   commitSession();
                   throw std::runtime_error( "CTPConfigLoader: Error loading CTP files" );
                }
-               ctpcTarget.setCTPFiles( files );
+               ctpcTarget.setCTPFiles( std::move(files) );
             } 
             catch (std::bad_cast& ex) {
                TRG_MSG_ERROR("Caught exception in CTPConfigLoader : " << ex.what());

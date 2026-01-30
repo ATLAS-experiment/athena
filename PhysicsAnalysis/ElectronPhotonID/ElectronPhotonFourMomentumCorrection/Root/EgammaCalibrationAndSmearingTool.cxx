@@ -22,6 +22,7 @@
 #include "xAODTracking/TrackParticle.h"
 #include "xAODTracking/TrackingPrimitives.h"
 #include "xAODTracking/Vertex.h"
+#include "EgammaAnalysisInterfaces/GlobalEventInfo.h"
 
 #ifndef ROOTCORE
 #include "AthAnalysisBaseComps/AthAnalysisHelper.h"
@@ -608,7 +609,6 @@ StatusCode EgammaCalibrationAndSmearingTool::initialize() {
           "egammaMVACalibTool/tool_mva_electron");
       config_mva_electron.setPropertyFromString("folder", m_MVAfolder);
       ATH_CHECK(config_mva_electron.setProperty("use_layer_corrected", true));
-      ;
       ATH_CHECK(config_mva_electron.setProperty(
           "ParticleType", xAOD::EgammaParameters::electron));
 
@@ -620,6 +620,8 @@ StatusCode EgammaCalibrationAndSmearingTool::initialize() {
           config_mva_unconverted.setProperty("use_layer_corrected", true));
       ATH_CHECK(config_mva_unconverted.setProperty(
           "ParticleType", xAOD::EgammaParameters::unconvertedPhoton));
+      ATH_CHECK(config_mva_unconverted.setProperty("OutputLevel",
+						   this->msg().level()));
 
       // converted photon MVA tool
       asg::AsgToolConfig config_mva_converted(
@@ -628,6 +630,8 @@ StatusCode EgammaCalibrationAndSmearingTool::initialize() {
       ATH_CHECK(config_mva_converted.setProperty("use_layer_corrected", true));
       ATH_CHECK(config_mva_converted.setProperty(
           "ParticleType", xAOD::EgammaParameters::convertedPhoton));
+      ATH_CHECK(config_mva_converted.setProperty("OutputLevel",
+						 this->msg().level()));
 
       // initialize the ServiceHandler egammaMVASvc
       // make the name unique
@@ -641,6 +645,18 @@ StatusCode EgammaCalibrationAndSmearingTool::initialize() {
                                                   config_mva_unconverted));
       ATH_CHECK(config_mva_service.addPrivateTool("ConvertedPhotonTool",
                                                   config_mva_converted));
+      // fwd electron MVA tool
+      if (m_doFwdCalib) {
+	asg::AsgToolConfig config_mva_fwdelectron(
+	    "egammaMVACalibTool/tool_mva_fwdelectron");
+	config_mva_fwdelectron.setPropertyFromString("folder", m_MVAfolder);
+	ATH_CHECK(config_mva_fwdelectron.setProperty(
+	    "ParticleType", xAOD::EgammaParameters::AuthorFwdElectron));
+	ATH_CHECK(config_mva_fwdelectron.setProperty("ShiftType", 0));
+	ATH_CHECK(config_mva_fwdelectron.setProperty("OutputLevel", this->msg().level()));
+	ATH_CHECK(config_mva_service.addPrivateTool("FwdElectronTool",
+						    config_mva_fwdelectron));
+      }
       config_mva_service.setPropertyFromString("folder", m_MVAfolder);
       ATH_CHECK(
           config_mva_service.setProperty("OutputLevel", this->msg().level()));
@@ -839,11 +855,13 @@ StatusCode EgammaCalibrationAndSmearingTool::initialize() {
     return StatusCode::FAILURE;
   }
   if (m_onlyElectrons.value()) {
+    resetElectron (m_accessors->momAcc, *m_accessors);
     if (m_TESModel == egEnergyCorr::es2011c) {
       resetAccessor (m_accessors->electronTrackAcc, *this, "trackParticleLinks");
     }
   }
   if (m_onlyPhotons.value()) {
+    resetPhoton (m_accessors->momAcc, *m_accessors);
     resetAccessor (m_accessors->photonVertexAcc, *this, "vertexLinks");
   }
   if (m_decorateEmva)
@@ -977,7 +995,8 @@ CP::CorrectionCode EgammaCalibrationAndSmearingTool::applyCorrection(
 
   columnar::ClusterId inputCluster = acc.caloClusterAcc (input)[0].value();
 
-  if (m_layer_recalibration_tool) {
+  if (m_layer_recalibration_tool && acc.authorAcc (input) !=
+	xAOD::EgammaParameters::AuthorFwdElectron) {
     ATH_MSG_DEBUG("applying energy recalibration before E0|E1|E2|E3 = "
                   << acc.energyBEAcc (inputCluster, 0) << "|"
                   << acc.energyBEAcc (inputCluster, 1) << "|"
@@ -1002,25 +1021,46 @@ CP::CorrectionCode EgammaCalibrationAndSmearingTool::applyCorrection(
     }
   }
 
-  double energy = 0.;
+  double energy = acc.momAcc.e (input);
   // apply MVA calibration
   if (!m_MVACalibSvc.empty()) {
-    if (acc.authorAcc (input) !=
-        xAOD::EgammaParameters::AuthorFwdElectron) {  // do not apply MVA
-                                                      // calibration to fwd
-                                                      // electrons
-      m_MVACalibSvc->getEnergy(inputCluster.getXAODObject(), input.getXAODObject(), energy)
-          .ignore();  // TODO check StatusCode
-    } else {
-      energy = acc.eAcc (input);
+    egammaMVACalib::GlobalEventInfo gei;
+    if (acc.authorAcc (input) ==
+	xAOD::EgammaParameters::AuthorFwdElectron && m_doFwdCalib) {
+      const xAOD::VertexContainer* pVtxCont = nullptr;
+      if (evtStore()->retrieve(pVtxCont, m_pVtxKey).isFailure()) {
+	ATH_MSG_ERROR("No primary vertex container " << m_pVtxKey << " could be retrieved");
+	return CP::CorrectionCode::Error;
+      }
+      unsigned int npv(0);
+      for (const auto *vtx : *pVtxCont) {
+	if (vtx->vertexType() == xAOD::VxType::PriVtx ||
+	    vtx->vertexType() == xAOD::VxType::PileUp) { ++npv; }
+      }
+      gei.nPV = npv;
+      gei.acmu = acc.actIntPerXingAcc(event_info);
+      ATH_MSG_DEBUG("Retrieved nPV = " << gei.nPV << " and mu = " << gei.acmu);
     }
-    ATH_MSG_DEBUG("energy after MVA calibration = " << std::format("{:.2f}", energy));
-  } else {
-    energy = acc.eAcc (input);
+    if (acc.authorAcc (input) !=
+	xAOD::EgammaParameters::AuthorFwdElectron || m_doFwdCalib) {
+      if (m_MVACalibSvc->getEnergy(inputCluster.getXAODObject(), input.getXAODObject(), energy, gei)
+	  .isFailure()) {
+	ATH_MSG_ERROR("Failure in MVACalib service");
+	return CP::CorrectionCode::Error;
+      }
+      ATH_MSG_DEBUG("energy after MVA calibration = " << std::format("{:.2f}", energy));
+    }
   }
   if (m_decorateEmva)
   {
     acc.decEmva(input) = energy;
+  }
+
+  // For the time being, it is just the MVA calib
+  if (acc.authorAcc (input) ==
+	xAOD::EgammaParameters::AuthorFwdElectron) {
+    setPt(input, energy);
+    return CP::CorrectionCode::Ok;
   }
 
   if (m_TESModel == egEnergyCorr::es2011c) {
@@ -1184,12 +1224,17 @@ CP::CorrectionCode EgammaCalibrationAndSmearingTool::applyCorrection(
   ATH_MSG_DEBUG("energy after scale/systematic correction = " << std::format("{:.2f}", energy));
 
   // TODO: this check should be done before systematics variations
-  const double new_energy2 = energy * energy;
-  const double m2 = acc.mAcc (input) * acc.mAcc (input);
-  const double p2 = new_energy2 > m2 ? new_energy2 - m2 : 0.;
-  acc.ptOutDec (input) = sqrt(p2) / cosh(acc.etaAcc (input));
-  ATH_MSG_DEBUG("after setting pt, energy = " << acc.eAcc (input));
+  setPt(input, energy);
   return CP::CorrectionCode::Ok;
+}
+
+void EgammaCalibrationAndSmearingTool::setPt(columnar::MutableEgammaId input, double energy) const {
+  const double new_energy2 = energy * energy;
+  const double m = m_accessors->momAcc.m (input);
+  const double m2 = m * m;
+  const double p2 = new_energy2 > m2 ? new_energy2 - m2 : 0.;
+  m_accessors->ptOutDec (input) = sqrt(p2) / cosh(m_accessors->etaAcc (input));
+  ATH_MSG_DEBUG("after setting pt, energy = " << m_accessors->momAcc.e (input));
 }
 
 double EgammaCalibrationAndSmearingTool::getEnergy(

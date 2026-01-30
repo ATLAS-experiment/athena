@@ -22,7 +22,7 @@ class FPGATrackSimTrackingToolBase : public extends<AthAlgTool, IFPGATrackSimTra
 public:
   FPGATrackSimTrackingToolBase(const std::string& type, const std::string& name, const IInterface* parent);
 
-  StatusCode setRoadSectors(std::vector<std::shared_ptr<const FPGATrackSimRoad>> & roads);
+  StatusCode setRoadSectors(std::vector<FPGATrackSimRoad> & roads);
   void matchIdealGeoSector(FPGATrackSimRoad& r);
 
 protected:

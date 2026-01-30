@@ -2,7 +2,7 @@
   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "MuonCondAlg/sTGCAsBuiltCondAlg.h"
+#include "sTGCAsBuiltCondAlg.h"
 
 #include <StoreGate/WriteCondHandle.h>
 #include <AthenaKernel/IOVInfiniteRange.h>
@@ -10,6 +10,7 @@
 #include <fstream>
 
 
+namespace Muon{
 // Initialize
 StatusCode sTGCAsBuiltCondAlg::initialize() {
     ATH_MSG_DEBUG("initializing " << name());
@@ -31,7 +32,7 @@ StatusCode sTGCAsBuiltCondAlg::initialize() {
 StatusCode sTGCAsBuiltCondAlg::execute(const EventContext& ctx) const {
     ATH_MSG_DEBUG("execute " << name());
     // launching Write Cond Handle
-    SG::WriteCondHandle<sTGCAsBuiltData> writeHandle{m_writeKey, ctx};
+    SG::WriteCondHandle writeHandle{m_writeKey, ctx};
     if (writeHandle.isValid()) {
         ATH_MSG_DEBUG("CondHandle " << writeHandle.fullKey() << " is already valid."
                                     << " In theory this should not be called, but may happen"
@@ -39,9 +40,9 @@ StatusCode sTGCAsBuiltCondAlg::execute(const EventContext& ctx) const {
         return StatusCode::SUCCESS;
     }
     writeHandle.addDependency(EventIDRange(IOVInfiniteRange::infiniteTime()));
-    std::unique_ptr<sTGCAsBuiltData> writeCdo{std::make_unique<sTGCAsBuiltData>(m_idHelperSvc.get())};
+    auto writeCdo{std::make_unique<sTGCAsBuiltData>(m_idHelperSvc.get())};
     if (!m_readKeyDb.empty()) {
-        SG::ReadCondHandle<CondAttrListCollection> readHandle{m_readKeyDb, ctx};
+        SG::ReadCondHandle readHandle{m_readKeyDb, ctx};
         if (!readHandle.isValid()) {
             ATH_MSG_FATAL("Failed to initialize the COOL folder "<<m_readKeyDb.fullKey());
             return StatusCode::FAILURE;
@@ -68,9 +69,9 @@ StatusCode sTGCAsBuiltCondAlg::execute(const EventContext& ctx) const {
     return StatusCode::SUCCESS;
 }
 StatusCode sTGCAsBuiltCondAlg::parseDataFromJSON(const nlohmann::json& lines,
-                                                   sTGCAsBuiltData& effiData) const {
+                                                   sTGCAsBuiltData& asBuiltData) const {
     for (auto& corr : lines.items()) {
-        nlohmann::json line = corr.value();    
+        nlohmann::json line = corr.value(); 
          /// Station Component identification
         const std::string stationType = line["station"];
         const int stationPhi = line["phi"];
@@ -78,8 +79,18 @@ StatusCode sTGCAsBuiltCondAlg::parseDataFromJSON(const nlohmann::json& lines,
         const int multiLayer = line["multilayer"];
         const int gasGap = line["gasGap"];
         bool is_valid{false};
-        const Identifier id = m_idHelperSvc->stgcIdHelper().channelID(stationType, stationEta, stationPhi, 
+        Identifier id;
+        if(stationType.substr(0,2)=="ST"){
+        id  = m_idHelperSvc->stgcIdHelper().channelID(stationType, stationEta, stationPhi, 
                                                                       multiLayer, gasGap, sTgcIdHelper::Strip, 1, is_valid);
+        } else if(stationType.substr(0,2)=="MM"){
+        id  = m_idHelperSvc->mmIdHelper().channelID(stationType, stationEta, stationPhi, 
+                                                                      multiLayer, gasGap, 1, is_valid);
+        } else {
+            ATH_MSG_FATAL("Unknown station type "<<stationType);
+            return StatusCode::FAILURE;
+        }
+
         if (!is_valid) {
             ATH_MSG_FATAL("The Identifier identifier "<<stationType<<", "<<stationEta<<", "<<stationPhi
                         << ", "<<multiLayer<<", "<<gasGap<<" is invalid");
@@ -92,7 +103,8 @@ StatusCode sTGCAsBuiltCondAlg::parseDataFromJSON(const nlohmann::json& lines,
         pars.scale = line["scale"];
         pars.nonPara = line["nonPara"];
 
-        ATH_CHECK(effiData.setParameters(id, pars));
+        ATH_CHECK(asBuiltData.setParameters(id, pars));
     }
     return StatusCode::SUCCESS;
+}
 }

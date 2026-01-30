@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -13,7 +13,7 @@ namespace ByteStreamDataTest {
 
   void ROBDataT(OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment* robFrag) {
 
-    typedef ROBData::iterator IT;
+    using IT = ROBData::iterator;
 
     ROBData* robData = new ROBData(robFrag);
     ROBData robData2 = *robData;
@@ -27,7 +27,8 @@ namespace ByteStreamDataTest {
     robData->module_identifier();
     robData2.sub_detector();
 
-    delete robData; robData = 0;
+    delete robData;
+    robData = nullptr;
     return;
   }
 }

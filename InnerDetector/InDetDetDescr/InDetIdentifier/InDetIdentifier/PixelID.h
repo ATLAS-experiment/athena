@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  */
 
 #ifndef INDETIDENTIFIER_PIXELID_H
@@ -28,6 +28,8 @@
 #include <string>
 #include <cassert>
 #include <algorithm>
+#include <string_view>
+#include <array>
 
 
 class IdDictDictionary;
@@ -73,12 +75,9 @@ public:
   typedef MultiRange::const_identifier_factory const_expanded_id_iterator;
   //@}
 
-  /// @name strutors
-  //@{
   PixelID();
-  //@}
   
-  /// THis is a PixelID helper
+  /// This is a PixelID helper
   virtual AtlasDetectorID::HelperType helper() const override{ 
     return AtlasDetectorID::HelperType::Pixel;
   }
@@ -308,21 +307,17 @@ protected:
   hash_vec m_next_phi_wafer_vec;
   hash_vec m_prev_eta_wafer_vec;
   hash_vec m_next_eta_wafer_vec;
-
-  IdDictFieldImplementation m_indet_impl;
-  IdDictFieldImplementation m_pixel_impl;
-  IdDictFieldImplementation m_bec_impl;
-  IdDictFieldImplementation m_lay_disk_impl;
-  IdDictFieldImplementation m_phi_mod_impl;
-  IdDictFieldImplementation m_eta_mod_impl;
-  IdDictFieldImplementation m_bec_shift_impl;
-  IdDictFieldImplementation m_lay_disk_shift_impl;
-  IdDictFieldImplementation m_phi_mod_shift_impl;
-  IdDictFieldImplementation m_eta_mod_shift_impl;
-  IdDictFieldImplementation m_phi_index_impl;
-  IdDictFieldImplementation m_eta_index_impl;
-  IdDictFieldImplementation m_bec_eta_mod_impl; // bec to phi_module
-
+  
+  
+  enum Implementations{kIndet, kPixel, kBec, kBecShift, kLayDisk, kLayDiskShift,
+    kPhiMod, kPhiModShift, kEtaMod, kEtaModShift, kPhiIndex, kEtaIndex, kBecEtaMod, 
+    nImplementations };
+  static constexpr std::array<std::string_view, nImplementations> m_implNames{
+    "indet", "pixel", "bec", "bec_shift", "lay_disk", "lay_disk_shift", 
+    "phi_mod", "phi_mod_shift", "eta_mod", "eta_mod_shift", "phi_index",
+    "eta_index", "bec_eta_mod"
+  };
+  std::array<IdDictFieldImplementation, nImplementations> m_impl;
   Range::field m_dbm_field; //DBM
 };
 
@@ -343,10 +338,10 @@ PixelID::wafer_id(int barrel_ec,
   Identifier result = m_baseIdentifier;
 
   // Pack fields independently
-  m_bec_impl.pack(barrel_ec, result);
-  m_lay_disk_impl.pack(layer_disk, result);
-  m_phi_mod_impl.pack(phi_module, result);
-  m_eta_mod_impl.pack(eta_module, result);
+  m_impl[kBec].pack(barrel_ec, result);
+  m_impl[kLayDisk].pack(layer_disk, result);
+  m_impl[kPhiMod].pack(phi_module, result);
+  m_impl[kEtaMod].pack(eta_module, result);
 
   // Do checks
   if (checks) {
@@ -369,8 +364,8 @@ inline Identifier
 PixelID::wafer_id(const Identifier& pixel_id) const {
   Identifier result(pixel_id);
 
-  m_phi_index_impl.reset(result);
-  m_eta_index_impl.reset(result);
+  m_impl[kPhiIndex].reset(result);
+  m_impl[kEtaIndex].reset(result);
   return(result);
 }
 
@@ -405,12 +400,12 @@ PixelID::pixel_id(int barrel_ec,
   // Build identifier
   Identifier result = m_baseIdentifier;
 
-  m_bec_impl.pack(barrel_ec, result);
-  m_lay_disk_impl.pack(layer_disk, result);
-  m_phi_mod_impl.pack(phi_module, result);
-  m_eta_mod_impl.pack(eta_module, result);
-  m_phi_index_impl.pack(phi_index, result);
-  m_eta_index_impl.pack(eta_index, result);
+  m_impl[kBec].pack(barrel_ec, result);
+  m_impl[kLayDisk].pack(layer_disk, result);
+  m_impl[kPhiMod].pack(phi_module, result);
+  m_impl[kEtaMod].pack(eta_module, result);
+  m_impl[kPhiIndex].pack(phi_index, result);
+  m_impl[kEtaIndex].pack(eta_index, result);
 
   if (checks) {
     pixel_id_checks(barrel_ec,
@@ -474,10 +469,10 @@ PixelID::pixel_id(const Identifier& wafer_id,
                   int eta_index) const {
   Identifier result(wafer_id);
 
-  m_phi_index_impl.reset(result);
-  m_eta_index_impl.reset(result);
-  m_phi_index_impl.pack(phi_index, result);
-  m_eta_index_impl.pack(eta_index, result);
+  m_impl[kPhiIndex].reset(result);
+  m_impl[kEtaIndex].reset(result);
+  m_impl[kPhiIndex].pack(phi_index, result);
+  m_impl[kEtaIndex].pack(eta_index, result);
   return(result);
 }
 
@@ -574,7 +569,7 @@ PixelID::pixel_id_offset(const Identifier& base,
 //----------------------------------------------------------------------------
 inline int
 PixelID::base_bit() const {
-  int base = static_cast<int>(m_eta_index_impl.shift()); // lowest field base
+  int base = static_cast<int>(m_impl[kEtaIndex].shift()); // lowest field base
 
   return (base > 32) ? 32 : base;
   // max base is 32 so we can still read old strip id's and differences
@@ -585,28 +580,28 @@ PixelID::base_bit() const {
 inline bool
 PixelID::is_barrel(const Identifier& id) const {
   // Normal unshifted id
-  return(m_barrel_field.match(m_bec_impl.unpack(id)));
+  return(m_barrel_field.match(m_impl[kBec].unpack(id)));
 }
 
 //----------------------------------------------------------------------------
 inline bool
 PixelID::is_dbm(const Identifier& id) const {
   // Normal unshifted id
-  return(m_dbm_field.match(m_bec_impl.unpack(id)));
+  return(m_dbm_field.match(m_impl[kBec].unpack(id)));
 }
 
 //----------------------------------------------------------------------------
 inline int
 PixelID::barrel_ec(const Identifier& id) const {
   // Normal unshifted id
-  return(m_bec_impl.unpack(id));
+  return(m_impl[kBec].unpack(id));
 }
 
 //----------------------------------------------------------------------------
 inline int
 PixelID::layer_disk(const Identifier& id) const {
   // Normal unshifted id
-  return(m_lay_disk_impl.unpack(id));
+  return(m_impl[kLayDisk].unpack(id));
 }
 
 //----------------------------------------------------------------------------
@@ -624,26 +619,26 @@ PixelID::is_blayer(const Identifier& id) const {
 inline int
 PixelID::phi_module(const Identifier& id) const {
   // Normal unshifted id
-  return(m_phi_mod_impl.unpack(id));
+  return(m_impl[kPhiMod].unpack(id));
 }
 
 //----------------------------------------------------------------------------
 inline int
 PixelID::eta_module(const Identifier& id) const {
   // Normal unshifted id
-  return(m_eta_mod_impl.unpack(id));
+  return(m_impl[kEtaMod].unpack(id));
 }
 
 //----------------------------------------------------------------------------
 inline int
 PixelID::phi_index(const Identifier& id) const {
-  return(m_phi_index_impl.unpack(id));
+  return(m_impl[kPhiIndex].unpack(id));
 }
 
 //----------------------------------------------------------------------------
 inline int
 PixelID::eta_index(const Identifier& id) const {
-  return(m_eta_index_impl.unpack(id));
+  return(m_impl[kEtaIndex].unpack(id));
 }
 
 #endif // INDETIDENTIFIER_PIXELID_H

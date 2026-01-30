@@ -9,7 +9,7 @@ class PhotonExtraVariablesBlock(ConfigBlock):
 
     def __init__(self):
         super(PhotonExtraVariablesBlock, self).__init__()
-        self.addOption('containerName', None, type=str, info='the input photon container')
+        self.addOption('containerName', None, type=str, info='the input photon container.')
 
     def instanceName (self) :
         """Return the instance name for this block"""

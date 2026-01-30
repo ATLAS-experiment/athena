@@ -1,9 +1,8 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-// STL includes
-#include <sstream>
+
 
 // Base class
 #include "G4AtlasTools/SensitiveDetectorBase.h"
@@ -11,7 +10,8 @@
 #include "G4LogicalVolumeStore.hh"
 #include "G4MultiSensitiveDetector.hh"
 #include "G4SDManager.hh"
-
+// STL includes
+#include <sstream>
 
 
 SensitiveDetectorBase::SensitiveDetectorBase(const std::string& type,
@@ -43,16 +43,16 @@ StatusCode SensitiveDetectorBase::initializeSD()
     }
 
   // Make the SD stored by this tool
-  auto* sd = makeSD();
+  auto sd = std::unique_ptr<G4VSensitiveDetector>(makeSD());
   if(!sd)
     {
       ATH_MSG_ERROR("Failed to create SD!");
       return StatusCode::FAILURE;
     }
-  setSD(sd);
+  setSD(sd.get());
 
   // Assign the SD to our list of volumes
-  ATH_CHECK( assignSD( getSD(), m_volumeNames.value() ) );
+  ATH_CHECK( assignSD( std::move(sd), m_volumeNames.value() ) );
 
   ATH_MSG_DEBUG( "Initialized and added SD " << name() );
   return StatusCode::SUCCESS;
@@ -62,7 +62,7 @@ StatusCode SensitiveDetectorBase::initializeSD()
 // Assign an SD to a list of volumes
 //-----------------------------------------------------------------------------
 StatusCode SensitiveDetectorBase::
-assignSD(G4VSensitiveDetector* sd, const std::vector<std::string>& volumes) const
+assignSD(std::unique_ptr<G4VSensitiveDetector> sd, const std::vector<std::string>& volumes) const
 {
   // Propagate verbosity setting to the SD
   if(msgLvl(MSG::VERBOSE)) sd->SetVerboseLevel(10);
@@ -71,7 +71,11 @@ assignSD(G4VSensitiveDetector* sd, const std::vector<std::string>& volumes) cons
   // Add the sensitive detector to the SD manager in G4 for SDs,
   // even if it has no volumes associated to it.
   auto sdMgr = G4SDManager::GetSDMpointer();
-  sdMgr->AddNewDetector(sd);
+  auto sdPtr = sd.get();
+  // SDManager is now the SD owner
+  //for later use
+  auto sdName = sd->GetName();
+  sdMgr->AddNewDetector(sd.release());
 
   if(!volumes.empty()) {
     bool gotOne = false;
@@ -87,7 +91,7 @@ assignSD(G4VSensitiveDetector* sd, const std::vector<std::string>& volumes) cons
         ATH_MSG_VERBOSE("Check whether "<<logVol->GetName()<<" belongs to the set of sensitive detectors "<<volumeName);
         if( matchStrings( volumeName.data(), logVol->GetName() ) ){
           ++numFound;
-          SetSensitiveDetector(logVol, sd);
+          SetSensitiveDetector(logVol, sdPtr);
         }
         
       }
@@ -98,7 +102,7 @@ assignSD(G4VSensitiveDetector* sd, const std::vector<std::string>& volumes) cons
       }
       else {
         ATH_MSG_VERBOSE("Found " << numFound << " copies of LV " << volumeName <<
-                        "; SD " << sd->GetName() << " assigned.");
+                        "; SD " << sdName << " assigned.");
         gotOne = true;
       }
 
@@ -194,8 +198,7 @@ SetSensitiveDetector(G4LogicalVolume* logVol, G4VSensitiveDetector* aSD) const
           std::stringstream ss;
           ss << static_cast<const void*>(logVol);
           const G4String msdname = "/MultiSD_" + logVol->GetName() + ss.str();
-          //ATH_MSG_INFO("MultiSD name: " << msdname);
-          msd = new G4MultiSensitiveDetector(msdname);
+          msd = new G4MultiSensitiveDetector(std::move(msdname));
           // We need to register the proxy to have correct handling of IDs
           G4SDManager::GetSDMpointer()->AddNewDetector(msd);
           msd->AddSD(originalSD);

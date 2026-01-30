@@ -17,7 +17,7 @@ public:
   EfficiencyPlots(PlotBase *pParent, const std::string& sDir, std::string sTauJetContainerName);
   virtual ~EfficiencyPlots();
   
-  void fill(const xAOD::TauJet& tau, float weight);
+  void fill(const xAOD::TauJet& tau, float weight, float avg_mu);
   
   TProfile* m_eff_pt_jetRNNloose{};
   TProfile* m_eff_pt_jetRNNmed{};
@@ -37,6 +37,10 @@ public:
   TProfile* m_eff_pt_jetGNTaulooseHighPt{};
   TProfile* m_eff_pt_jetGNTaumedHighPt{};
   TProfile* m_eff_pt_jetGNTautightHighPt{};
+
+  TProfile* m_eff_mu_jetGNTauloose{};
+  TProfile* m_eff_mu_jetGNTaumed{};
+  TProfile* m_eff_mu_jetGNTautight{};
 
   TProfile* m_eff_jetGNTauloose{};
   TProfile* m_eff_jetGNTaumed{};

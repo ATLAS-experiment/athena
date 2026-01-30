@@ -10,8 +10,8 @@ def defineMenu():
 
     l1items = L1MenuFlags.items()
 
-    # remove AFP and MBTS items
-    discard_list = ["L1_AFP", "L1_MBTS"]
+    # remove AFP and MBTS items, plus any item which are being remapped and which are in the pp menu
+    discard_list = ["L1_AFP", "L1_MBTS", "L1_eTAU140", "L1_eTAU35", "L1_3jJ90", "L1_MU14FCH_jJ90", "L1_jJ90", "L1_2jJ90_jXE80", "L1_LATE-MU8F_jJ90"]
 
     def match_any(item):
         return any([item.startswith(pattern) for pattern in discard_list])
@@ -32,8 +32,16 @@ def defineMenu():
     try_add("L1_2eEM10L")
     try_add("L1_MU5VF_cTAU30M")
     try_add("L1_3jJ40")
-    try_add("L1_eEM20M")
-    try_add("L1_eEM24M")
+    try_add("L1_eEM20M")            # Remapped from eEM1 (HI menu only)
+    try_add("L1_eEM24M")            # Remapped from eEM2 (HI menu only)
+    try_add("L1_eEM10L_MU5VF")
+    try_add("L1_eTAU120")           # Remapped from eTAU140
+    try_add("L1_eTAU28M_2eTAU20M")  # Remapped from eTAU35_2eTAU20M
+    try_add("L1_jJ70")              # Remapped from jJ90
+    try_add("L1_3jJ70")             # Remapped from 3jJ90
+    try_add("L1_2jJ70_jXE80")
+    try_add("L1_HT150-jJ50s5pETA32")    
+    try_add("L1_MU8VF_2MU8F")
     
     # recover the ones removed by run3 MC
     try_recover("L1_eEM22M")

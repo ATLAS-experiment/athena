@@ -8,6 +8,9 @@
 #include "RootUtils/APRDefaults.h"
 #include "TFile.h"
 
+#include <algorithm>
+#include <ranges>
+
 namespace RootStorageSvc {
 
 RNTupleWriterHelper::RNTupleWriterHelper(TFile* file,
@@ -67,6 +70,30 @@ void RNTupleWriterHelper::addField(const std::string& field_name,
   ATH_MSG_DEBUG("Adding new object column, name=" << field_name << " of type "
                                                   << attr_type);
   auto field = ROOT::RFieldBase::Create(field_name, attr_type).Unwrap();
+  // Unsplit (i.e., don't byte shuffle) the data if field is in the unsplit list...
+  if (m_unsplitFields.find("*") != m_unsplitFields.end() ||
+      std::any_of(m_unsplitFields.begin(), m_unsplitFields.end(),
+                  [&field_name](const std::string& pattern) {
+                    return field_name.find(pattern) != std::string::npos;
+                  })) {
+    ATH_MSG_DEBUG("Setting field " << field_name << " to be UNSPLIT");
+    static const std::map<std::string, ROOT::ENTupleColumnType> typeMap{
+      {"float", ROOT::ENTupleColumnType::kReal32},
+      {"std::int32_t", ROOT::ENTupleColumnType::kInt32},
+      {"std::uint32_t", ROOT::ENTupleColumnType::kUInt32},
+      {"double", ROOT::ENTupleColumnType::kReal64},
+      {"std::int64_t", ROOT::ENTupleColumnType::kInt64},
+      {"std::uint64_t", ROOT::ENTupleColumnType::kUInt64},
+      {"std::int16_t", ROOT::ENTupleColumnType::kInt16},
+      {"std::uint16_t", ROOT::ENTupleColumnType::kUInt16}
+    };
+    for (auto& subfield : *field) {
+      auto it = typeMap.find(subfield.GetTypeName());
+      if (it != typeMap.end()) {
+        subfield.SetColumnRepresentatives({{it->second}});
+      }
+    }
+  }
   if (!m_model) {
     // first write was already done, need to update the model
     ATH_MSG_DEBUG("Adding late attribute " << field_name);
@@ -151,6 +178,21 @@ void RNTupleWriterHelper::close() {
   m_entry.reset();
   m_model.reset();
   m_rowN = 0;
+}
+
+void RNTupleWriterHelper::setUnsplitFieldsList(std::string_view unsplitFieldsList) {
+  m_unsplitFields.clear();
+  auto parts = unsplitFieldsList | std::views::split(',');
+  for (auto&& part : parts) {
+    std::string_view field{part.begin(), part.end()};
+    const auto start = field.find_first_not_of(" \t");
+    if (start == std::string_view::npos) {
+      continue; // Field is empty or only whitespace
+    }
+    const auto end = field.find_last_not_of(" \t");
+    const auto trimmed_field = field.substr(start, end - start + 1);
+    m_unsplitFields.emplace(trimmed_field);
+  }
 }
 
 }  // namespace RootStorageSvc

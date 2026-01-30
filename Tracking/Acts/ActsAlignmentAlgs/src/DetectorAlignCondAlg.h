@@ -6,7 +6,7 @@
 
 #include "ActsGeometryInterfaces/ITrackingGeometrySvc.h"
 #include "ActsGeometryInterfaces/DetectorAlignStore.h"
-#include "AthenaBaseComps/AthReentrantAlgorithm.h"
+#include "AthenaBaseComps/AthCondAlgorithm.h"
 #include "StoreGate/ReadCondHandleKey.h"
 #include "StoreGate/WriteCondHandleKey.h"
 
@@ -18,18 +18,16 @@
  * 
  */
 namespace ActsTrk{
-  class DetectorAlignCondAlg : public AthReentrantAlgorithm {
+  class DetectorAlignCondAlg : public AthCondAlgorithm {
   public:
       /// Standard constructor
-      using AthReentrantAlgorithm::AthReentrantAlgorithm;
+      using AthCondAlgorithm::AthCondAlgorithm;
  
       virtual ~DetectorAlignCondAlg();
 
       StatusCode initialize() override final;
 
       StatusCode execute(const EventContext& ctx) const override final;
-      /// Switch off reentrancy to avoid condition clashes
-      bool isReEntrant() const override final { return false; }
 
   private:
       /// Key to the alignment transformations for the detector volumes

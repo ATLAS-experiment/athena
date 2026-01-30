@@ -9,7 +9,7 @@
 
 TRTAlignCondAlg::TRTAlignCondAlg(const std::string& name
 				 , ISvcLocator* pSvcLocator )
-  : ::AthAlgorithm(name,pSvcLocator)
+  : ::AthCondAlgorithm(name,pSvcLocator)
 {
 }
 
@@ -35,11 +35,10 @@ StatusCode TRTAlignCondAlg::initialize()
   return StatusCode::SUCCESS;
 }
 
-StatusCode TRTAlignCondAlg::execute()
+StatusCode TRTAlignCondAlg::execute(const EventContext& ctx) const
 {
   ATH_MSG_DEBUG("execute " << name());
 
-  const EventContext& ctx = Gaudi::Hive::currentContext();
   // ____________ Construct Write Cond Handles and check their validity ____________
   SG::WriteCondHandle<InDetDD::TRT_DetElementContainer> writeHandleDetElCont{m_writeKeyDetElCont, ctx};
   if (writeHandleDetElCont.isValid()) {
@@ -117,11 +116,12 @@ StatusCode TRTAlignCondAlg::execute()
     writeHandleDetElCont.addDependency(readHandleRegular);
   }
 
+  const TRTCond::StrawDxContainer* readCdoSpecial = nullptr;
   {
     // Special folder
     SG::ReadCondHandle<TRTCond::StrawDxContainer> readHandleSpecial{m_readKeySpecial,ctx};
     // Get CDO and store it into container
-    const TRTCond::StrawDxContainer* readCdoSpecial{*readHandleSpecial};
+    readCdoSpecial = *readHandleSpecial;
     if(!readCdoSpecial) {
       ATH_MSG_ERROR("Null pointer to the read conditions object: Special");
       return StatusCode::FAILURE;
@@ -192,6 +192,7 @@ StatusCode TRTAlignCondAlg::execute()
 
   // Update all detector elements caches
   for (InDetDD::TRT_BaseElement* newEl : *(writeCdoDetElCont->getElements())) {
+    newEl->setDxContainer(readCdoSpecial);
     newEl->updateAllCaches(writeCdoAlignStore.get());
   }
 

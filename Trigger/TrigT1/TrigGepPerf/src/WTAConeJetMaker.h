@@ -1,21 +1,24 @@
 /*
- *   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+ *   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  */
 
 #ifndef TRIGGEPPERF_WTACONEJETMAKER_H
 #define TRIGGEPPERF_WTACONEJETMAKER_H
 
 #include "IJetMaker.h"
-#include "Jet.h"
-#include "Cluster.h"
+
 
 #include "WTAConeMaker.h" // WTAConeMaker is the core header
 #include "WTACone2PassMaker.h" // WTACone2PassMaker is the 2-Pass header
 
-#include <iostream>
 #include <string>
 #include <vector>
 #include <memory>
+
+namespace Gep{
+  struct Jet;
+  struct Cluster;
+}
 
  enum WTAConeMakerEnum{ // use WTAConeMakerEnum for algorithm variants
   Baseline = 0,
@@ -31,7 +34,6 @@
  
    WTAConeJetMaker(unsigned int block_n = 4, unsigned int rolloff_buffersize = 155) :
            m_GEPWTAParameters(),
-          //  m_WTAParallelHelper(block_n), 
            m_BlockN(block_n), m_SeedCleaningAlgo(0), m_RollOffBufferSize(rolloff_buffersize)
            {};
  
@@ -47,9 +49,9 @@
                 return std::make_unique<WTAConeMaker>();
             case TwoPass:
                 return std::make_unique<WTACone2PassMaker>();
-            std::cerr << "Invalid seed cleaning algorithm" << std::endl;
+            default:
+                return nullptr;
         }
-        return nullptr;
     }
 
      void SetBlockN(unsigned int block_n){m_BlockN = block_n; /* m_WTAParallelHelper.SetBlockN(m_BlockN);*/ };

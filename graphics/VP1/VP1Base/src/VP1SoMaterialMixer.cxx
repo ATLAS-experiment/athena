@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////
@@ -227,15 +227,15 @@ void VP1SoMaterialMixer::Imp::setMaterialFieldsAsAverageOfMatList(SoMaterial*mat
 //____________________________________________________________________
 void VP1SoMaterialMixer::Imp::setMaterialFieldsAsAverageOfMatList(SoMaterial*mat, const std::map<SoMaterial*,double>& matlist )
 {
-  float w, totweight(0.0f);
+  float w{}, totweight{};
   float ambient_r(0.0f), ambient_g(0.0f), ambient_b(0.0f);
   float diffuse_r(0.0f), diffuse_g(0.0f), diffuse_b(0.0f);
   float specular_r(0.0f), specular_g(0.0f), specular_b(0.0f);
   float emissive_r(0.0f), emissive_g(0.0f), emissive_b(0.0f);
   float shininess(0.0f), transparency(0.0f);
-  float r,g,b;
+  float r{},g{},b{};
   std::map<SoMaterial*,double>::const_iterator it(matlist.begin()), itE(matlist.end());
-  SoMaterial * m;
+  SoMaterial * m{};
   for (;it!=itE;++it) {
     m = it->first;
     w = it->second;
@@ -247,7 +247,10 @@ void VP1SoMaterialMixer::Imp::setMaterialFieldsAsAverageOfMatList(SoMaterial*mat
     shininess += m->shininess[0]*w;
     transparency += m->transparency[0]*w;
   }
-
+  if (totweight==0){
+    VP1Msg::message("ERROR: denominator is zero; setting to 1");
+    totweight = 1.f;
+  }
   float n = 1.0f/totweight;
   bool save = mat->enableNotify(false);
   mat->ambientColor.setValue(norm(n*ambient_r),norm(n*ambient_g),norm(n*ambient_b));

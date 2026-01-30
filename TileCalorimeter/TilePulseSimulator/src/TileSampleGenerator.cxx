@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TilePulseSimulator/TileSampleGenerator.h"
@@ -73,18 +73,19 @@ void TileSampleGenerator::fillNSamples(double t0, double pedestal, double amp_it
 	}
 	
 
+        double tin, amp_it_out;
+        int nAmp = amp_pu.size();
+        vector<int> t(nAmp);
+        vector<float> amp_pu_out(nAmp);
+        int x = (nAmp-1)/2 + nSamples;
+        double amp_total = pedestal;
+
 	for (int i = 0; i < nSamples; i++) { //Loop over output samples
-		double tin, amp_it_out;
-		int nPul = amp_pu.size();
-		vector<int> t(nPul);
-		vector<float> amp_pu_out(nPul);
-		int x = (nPul-1)/2 + nSamples;  
-		double amp_total = pedestal;
 
 		if (m_DEBUG)
 			cout << "sample to compute: " << i << "  " << amp_total << std::endl;
 
-		for (int j = 0; j < nPul ; j++) { //Loop over PU pulses
+		for (int j = 0; j < nAmp ; j++) { //Loop over PU pulses
 
 			t[j] = bufall->getTime(x + i - j) - t0;
 

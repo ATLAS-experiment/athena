@@ -1,32 +1,28 @@
-AtlasDetectorIDHelper::initialize_from_dictionary - Warning: unable to find mm region index: group, region size 0 0
-AtlasDetectorIDHelper::initialize_from_dictionary - Warning: unable to find stgc region index: group, region size 0 0
-decode index and bit fields for each level: 
-lar  decode 1 vals 2,4,5,7,10,11,12,13 mask/zero mask/shift/bits/offset 7   1fffffffffffffff 61 3  0  indexes 0 0 1 2 0 3 0 0 4 5 6 7 mode  enumerated  
-em   decode 1 vals -3,-2,-1,1,2,3,4,5 mask/zero mask/shift/bits/offset 7   e3ffffffffffffff 58 3  3  indexes 0 1 2 0 3 4 5 6 7   mode  enumerated  
-bec  decode 1 vals -3,-2,-1,1,2,3  mask/zero mask/shift/bits/offset 7   fc7fffffffffffff 55 3  6  indexes 0 1 2 0 3 4 5       mode  enumerated  
-samp decode 0 vals 0:3             mask/zero mask/shift/bits/offset 3   ff9fffffffffffff 53 2  9  indexes                     mode  both_bounded  
-reg  decode 0 vals 0:5             mask/zero mask/shift/bits/offset 7   ffe3ffffffffffff 50 3  11 indexes                     mode  both_bounded  
-eta  decode 0 vals 0:447           mask/zero mask/shift/bits/offset 1ff fffc01ffffffffff 41 9  14 indexes                     mode  both_bounded  
-phi  decode 0 vals 0:255           mask/zero mask/shift/bits/offset ff  fffffe01ffffffff 33 8  23 indexes                     mode  both_bounded  
-is-slar  decode 0 vals 0:1             mask/zero mask/shift/bits/offset 1   fffffffeffffffff 32 1  31 indexes                     mode  both_bounded  
- LArEM_Base_ID::initialize_from_dict : 
- region range -> 4/1/-1,1/0/0 | 4/1/-1,1/1/0 | 4/1/-1,1/1/1 | 4/1/-1,1/2/0 | 4/1/-1,1/2/1 | 4/1/-1,1/3/0 | 4/1/-2,2/0/0 | 4/1/-2,2/1/0 | 4/1/-2,2/1/2 | 4/1/-2,2/1/3 | 4/1/-2,2/1/4 | 4/1/-2,2/1/5 | 4/1/-2,2/2/0 | 4/1/-2,2/2/1 | 4/1/-2,2/3/0 | 4/1/-3,3/1/0 | 4/1/-3,3/1/1 | 4/1/-3,3/2/0 | 4/1/-3,3/2/1
- channel range -> 4/1/-1,1/0/0/0:14/0:63/1 | 4/1/-1,1/1/0/0:55/0:63/1 | 4/1/-1,1/1/1/0:2/0:63/1 | 4/1/-1,1/2/0/0:55/0:63/1 | 4/1/-1,1/2/1/0/0:63/1 | 4/1/-1,1/3/0/0:13/0:63/1 | 4/1/-2,2/0/0/0:2/0:63/1 | 4/1/-2,2/1/0/0/0:63/1 | 4/1/-2,2/1/2/0:11/0:63/1 | 4/1/-2,2/1/3/0:11/0:63/1 | 4/1/-2,2/1/4/0:15/0:63/1 | 4/1/-2,2/1/5/0/0:63/1 | 4/1/-2,2/2/0/0/0:63/1 | 4/1/-2,2/2/1/0:42/0:63/1 | 4/1/-2,2/3/0/0:9/0:63/1 | 4/1/-3,3/1/0/0:2/0:31/1 | 4/1/-3,3/1/1/0/0:31/1 | 4/1/-3,3/2/0/0:2/0:31/1 | 4/1/-3,3/2/1/0/0:31/1
-AtlasDetectorIDHelper::initialize_from_dictionary - Warning: unable to find mm region index: group, region size 0 0
-AtlasDetectorIDHelper::initialize_from_dictionary - Warning: unable to find stgc region index: group, region size 0 0
-decode index and bit fields for each level: 
-lar  decode 1 vals 2,4,5,7,10,11,12,13 mask/zero mask/shift/bits/offset 7   1fffffffffffffff 61 3  0  indexes 0 0 1 2 0 3 0 0 4 5 6 7 mode  enumerated  
-em   decode 1 vals -3,-2,-1,1,2,3,4,5 mask/zero mask/shift/bits/offset 7   e3ffffffffffffff 58 3  3  indexes 0 1 2 0 3 4 5 6 7   mode  enumerated  
-bec  decode 1 vals -3,-2,-1,1,2,3  mask/zero mask/shift/bits/offset 7   fc7fffffffffffff 55 3  6  indexes 0 1 2 0 3 4 5       mode  enumerated  
-samp decode 0 vals 0:3             mask/zero mask/shift/bits/offset 3   ff9fffffffffffff 53 2  9  indexes                     mode  both_bounded  
-reg  decode 0 vals 0:5             mask/zero mask/shift/bits/offset 7   ffe3ffffffffffff 50 3  11 indexes                     mode  both_bounded  
-eta  decode 0 vals 0:447           mask/zero mask/shift/bits/offset 1ff fffc01ffffffffff 41 9  14 indexes                     mode  both_bounded  
-phi  decode 0 vals 0:255           mask/zero mask/shift/bits/offset ff  fffffe01ffffffff 33 8  23 indexes                     mode  both_bounded  
-is-slar  decode 0 vals 0:1             mask/zero mask/shift/bits/offset 1   fffffffeffffffff 32 1  31 indexes                     mode  both_bounded  
- LArEM_Base_ID::initialize_from_dict : 
- region range -> 4/1/-1,1/0/0 | 4/1/-1,1/1/0 | 4/1/-1,1/1/1 | 4/1/-1,1/2/0 | 4/1/-1,1/2/1 | 4/1/-1,1/3/0 | 4/1/-2,2/0/0 | 4/1/-2,2/1/0 | 4/1/-2,2/1/2 | 4/1/-2,2/1/3 | 4/1/-2,2/1/4 | 4/1/-2,2/1/5 | 4/1/-2,2/2/0 | 4/1/-2,2/2/1 | 4/1/-2,2/3/0 | 4/1/-3,3/1/0 | 4/1/-3,3/1/1 | 4/1/-3,3/2/0 | 4/1/-3,3/2/1
- channel range -> 4/1/-1,1/0/0/0:14/0:63/1 | 4/1/-1,1/1/0/0:55/0:63/1 | 4/1/-1,1/1/1/0:2/0:63/1 | 4/1/-1,1/2/0/0:55/0:63/1 | 4/1/-1,1/2/1/0/0:63/1 | 4/1/-1,1/3/0/0:13/0:63/1 | 4/1/-2,2/0/0/0:2/0:63/1 | 4/1/-2,2/1/0/0/0:63/1 | 4/1/-2,2/1/2/0:11/0:63/1 | 4/1/-2,2/1/3/0:11/0:63/1 | 4/1/-2,2/1/4/0:15/0:63/1 | 4/1/-2,2/1/5/0/0:63/1 | 4/1/-2,2/2/0/0/0:63/1 | 4/1/-2,2/2/1/0:42/0:63/1 | 4/1/-2,2/3/0/0:9/0:63/1 | 4/1/-3,3/1/0/0:2/0:31/1 | 4/1/-3,3/1/1/0/0:31/1 | 4/1/-3,3/2/0/0:2/0:31/1 | 4/1/-3,3/2/1/0/0:31/1
- LArEM_Base_ID::init_neighbors 
+LArEM_SuperCell_ID  DEBUG initialize_from_dictionary
+LArEM_SuperCell_ID  DEBUG (Re)initialize
+LArEM_SuperCell_ID  DEBUG initialize_base_from_dictionary
+LArEM_SuperCell_ID  DEBUG (Re)initialize
+LArEM_SuperCell_ID  DEBUG initLevelsFromDict - unable to find 'STGC' label
+LArEM_SuperCell_ID  DEBUG initLevelsFromDict - unable to find 'MM' label
+LArEM_SuperCell_ID  DEBUG initLevelsFromDict -  Could not get value for label 'no_side' of field 'DetZside' in dictionary Calorimeter
+LArEM_SuperCell_ID  DEBUG initialize_from_dictionary - OK
+LArEM_SuperCell_ID  DEBUG decode index and bit fields for each level: 
+LArEM_SuperCell_ID  DEBUG  initialize_from_dict : 
+LArEM_SuperCell_ID  DEBUG  region range -> 4/1/-1,1/0/0 | 4/1/-1,1/1/0 | 4/1/-1,1/1/1 | 4/1/-1,1/2/0 | 4/1/-1,1/2/1 | 4/1/-1,1/3/0 | 4/1/-2,2/0/0 | 4/1/-2,2/1/0 | 4/1/-2,2/1/2 | 4/1/-2,2/1/3 | 4/1/-2,2/1/4 | 4/1/-2,2/1/5 | 4/1/-2,2/2/0 | 4/1/-2,2/2/1 | 4/1/-2,2/3/0 | 4/1/-3,3/1/0 | 4/1/-3,3/1/1 | 4/1/-3,3/2/0 | 4/1/-3,3/2/1
+LArEM_SuperCell_ID  DEBUG  channel range -> 4/1/-1,1/0/0/0:14/0:63/1 | 4/1/-1,1/1/0/0:55/0:63/1 | 4/1/-1,1/1/1/0:2/0:63/1 | 4/1/-1,1/2/0/0:55/0:63/1 | 4/1/-1,1/2/1/0/0:63/1 | 4/1/-1,1/3/0/0:13/0:63/1 | 4/1/-2,2/0/0/0:2/0:63/1 | 4/1/-2,2/1/0/0/0:63/1 | 4/1/-2,2/1/2/0:11/0:63/1 | 4/1/-2,2/1/3/0:11/0:63/1 | 4/1/-2,2/1/4/0:15/0:63/1 | 4/1/-2,2/1/5/0/0:63/1 | 4/1/-2,2/2/0/0/0:63/1 | 4/1/-2,2/2/1/0:42/0:63/1 | 4/1/-2,2/3/0/0:9/0:63/1 | 4/1/-3,3/1/0/0:2/0:31/1 | 4/1/-3,3/1/1/0/0:31/1 | 4/1/-3,3/2/0/0:2/0:31/1 | 4/1/-3,3/2/1/0/0:31/1
+LArEM_SuperCell_ID  DEBUG initialize_from_dictionary
+LArEM_SuperCell_ID  DEBUG (Re)initialize
+LArEM_SuperCell_ID  DEBUG initialize_base_from_dictionary
+LArEM_SuperCell_ID  DEBUG (Re)initialize
+LArEM_SuperCell_ID  DEBUG initLevelsFromDict - unable to find 'STGC' label
+LArEM_SuperCell_ID  DEBUG initLevelsFromDict - unable to find 'MM' label
+LArEM_SuperCell_ID  DEBUG initLevelsFromDict -  Could not get value for label 'no_side' of field 'DetZside' in dictionary Calorimeter
+LArEM_SuperCell_ID  DEBUG initialize_from_dictionary - OK
+LArEM_SuperCell_ID  DEBUG decode index and bit fields for each level: 
+LArEM_SuperCell_ID  DEBUG  initialize_from_dict : 
+LArEM_SuperCell_ID  DEBUG  region range -> 4/1/-1,1/0/0 | 4/1/-1,1/1/0 | 4/1/-1,1/1/1 | 4/1/-1,1/2/0 | 4/1/-1,1/2/1 | 4/1/-1,1/3/0 | 4/1/-2,2/0/0 | 4/1/-2,2/1/0 | 4/1/-2,2/1/2 | 4/1/-2,2/1/3 | 4/1/-2,2/1/4 | 4/1/-2,2/1/5 | 4/1/-2,2/2/0 | 4/1/-2,2/2/1 | 4/1/-2,2/3/0 | 4/1/-3,3/1/0 | 4/1/-3,3/1/1 | 4/1/-3,3/2/0 | 4/1/-3,3/2/1
+LArEM_SuperCell_ID  DEBUG  channel range -> 4/1/-1,1/0/0/0:14/0:63/1 | 4/1/-1,1/1/0/0:55/0:63/1 | 4/1/-1,1/1/1/0:2/0:63/1 | 4/1/-1,1/2/0/0:55/0:63/1 | 4/1/-1,1/2/1/0/0:63/1 | 4/1/-1,1/3/0/0:13/0:63/1 | 4/1/-2,2/0/0/0:2/0:63/1 | 4/1/-2,2/1/0/0/0:63/1 | 4/1/-2,2/1/2/0:11/0:63/1 | 4/1/-2,2/1/3/0:11/0:63/1 | 4/1/-2,2/1/4/0:15/0:63/1 | 4/1/-2,2/1/5/0/0:63/1 | 4/1/-2,2/2/0/0/0:63/1 | 4/1/-2,2/2/1/0:42/0:63/1 | 4/1/-2,2/3/0/0:9/0:63/1 | 4/1/-3,3/1/0/0:2/0:31/1 | 4/1/-3,3/1/1/0/0:31/1 | 4/1/-3,3/2/0/0:2/0:31/1 | 4/1/-3,3/2/1/0/0:31/1
+LArEM_SuperCell_ID  DEBUG init_neighbors
 test_basic
 [4.1.1.1.1.0.1.1] hex(2da4000300000000)
 [4.1.2.2.1.0.10.1] hex(2e44001500000000)

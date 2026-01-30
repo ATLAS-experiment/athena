@@ -109,7 +109,7 @@ namespace xAOD{
                         throw std::domain_error(std::format("Invalid index given {:}. size: {:}, requested:{:} ", 
                                                         typeid(const_ref).name(), size(), idx));
                     }
-                    return (*m_begin +idx);
+                    return *(m_begin +idx);
                 }
                 /** @brief Loads the hits from the next chamber. 
                  *         Returns false if all chambers have been traversed. */

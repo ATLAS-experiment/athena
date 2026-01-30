@@ -118,7 +118,7 @@ void EtaHoughTransformAlg::preProcess(const EventContext& ctx,
         }
         std::vector<HoughSetupForBucket>& buckets = data.houghSetups[bucket->front()->msSector()];        
         HoughSetupForBucket& hs{buckets.emplace_back(bucket)};
-        const Amg::Transform3D globToLoc{hs.bucket->msSector()->globalToLocalTrans(gctx)};
+        const Amg::Transform3D globToLoc{hs.bucket->msSector()->globalToLocalTransform(gctx)};
         Amg::Vector3D leftSide  = globToLoc.translation() - (hs.bucket->coveredMin() * Amg::Vector3D::UnitY());
         Amg::Vector3D rightSide = globToLoc.translation() - (hs.bucket->coveredMax() * Amg::Vector3D::UnitY());
 
@@ -187,8 +187,7 @@ bool EtaHoughTransformAlg::passSeedQuality (const HoughSetupForBucket& currentBu
 
     std::unordered_set<const MuonGMR4::MuonReadoutElement*> seenChambers{};
     std::set<std::pair<int,int>> seenLayers;
-    using enum Acts::TrapezoidVolumeBounds::BoundValues;
-    const double halfX = currentBucket.bucket->msSector()->bounds()->get(eHalfLengthXposY);
+    const double halfX = currentBucket.bucket->msSector()->halfXLong();
     /** Determine the minimal & maximal possible position along the tube / strip  */
     std::array<double, 2> tubeExtend{halfX, -halfX}; 
 
