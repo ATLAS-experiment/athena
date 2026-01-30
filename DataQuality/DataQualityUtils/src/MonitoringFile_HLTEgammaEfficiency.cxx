@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
  */
 
 // **********************************************************************
@@ -26,15 +26,15 @@ namespace dqutils {
   // function to calculate bootstrap efficiency w.r.t to offline
   // ------------------------------------------------------------
   void MonitoringFile::HLTEgammaEfficiencyOff(TFile* f, TDirectory* trig_dir,
-                                              TDirectory* off_dir, const TString& pathNum,
-                                              const TString& pathEff, const std::vector<TString>& varName) {
+                                              TDirectory* off_dir, const std::string& pathNum,
+                                              const std::string& pathEff, const std::vector<std::string>& varName) {
     //get the relevant paths
     std::string chain_path = getPath(trig_dir);
     std::string offline_path = getPath(off_dir);
 
     //establish base path (to save typing "/PassedChain/" over and over)
-    TString basePath = chain_path + "/PassedChain/";
-    if (f->cd(basePath.Data()) == 0) {
+    std::string basePath = chain_path + "/PassedChain/";
+    if (f->cd(basePath.c_str()) == 0) {
       std::cerr << "----> HLTEgammaPostProcess: basePath not found in "
                 << chain_path << ", skipping now!\n";
       return;
@@ -57,24 +57,24 @@ namespace dqutils {
 
     for (uint iVar = 0; iVar < varName.size(); ++iVar) {
       //form names for all variables
-      TString numName = basePath + pathNum + "eg" + varName[iVar];
-      TString denName = offline_path + "/" + "eg" + varName[iVar];
-      TString effName = basePath + pathEff + "eg" + varName[iVar];
+      std::string numName = basePath + pathNum + "eg" + varName[iVar];
+      std::string denName = offline_path + "/" + "eg" + varName[iVar];
+      std::string effName = basePath + pathEff + "eg" + varName[iVar];
 
       //check histogram existence
-      if (!CheckHistogram(f, numName.Data())) {
+      if (!CheckHistogram(f, numName.c_str())) {
         std::cerr << "----> HLTEgammaPostProcess: Histogram "
                   << numName << " does not exist in file "
                   << f->GetName() << " - skipping!\n";
         return;
       }
-      if (!CheckHistogram(f, denName.Data())) {
+      if (!CheckHistogram(f, denName.c_str())) {
         std::cerr << "----> HLTEgammaPostProcess: Histogram "
                   << denName << " does not exist in file "
                   << f->GetName() << " - skipping!\n";
         return;
       }
-      if (!CheckHistogram(f, effName.Data())) {
+      if (!CheckHistogram(f, effName.c_str())) {
         std::cerr << "----> HLTEgammaPostProcess: Histogram "
                   << effName << " does not exist in file "
                   << f->GetName() << " - skipping!\n";
@@ -86,13 +86,13 @@ namespace dqutils {
       //		<< denName << " to get " << effName << std::endl;
 
       //now get histograms
-      histo_matrix[iVar][0] = (TH1F*) (f->Get(numName.Data()));
-      histo_matrix[iVar][1] = (TH1F*) (f->Get(denName.Data()));
-      histo_matrix[iVar][2] = (TH1F*) (f->Get(effName.Data()));
+      histo_matrix[iVar][0] = (TH1F*) (f->Get(numName.c_str()));
+      histo_matrix[iVar][1] = (TH1F*) (f->Get(denName.c_str()));
+      histo_matrix[iVar][2] = (TH1F*) (f->Get(effName.c_str()));
 
       //hop into efficiency path
-      TString writePath = basePath + pathEff;
-      f->cd(writePath.Data());
+      std::string writePath = basePath + pathEff;
+      f->cd(writePath.c_str());
 
       //create efficiency histogram by division
       histo_matrix[iVar][2]->Divide(histo_matrix[iVar][0], histo_matrix[iVar][1],
@@ -114,9 +114,9 @@ namespace dqutils {
   // ---------------------------------------------------
 
   void MonitoringFile::HLTEgammaEfficiencyRel(TFile* f, TDirectory* trig_dir,
-                                              const TString& pathPre, const TString& pathRej,
-                                              const std::vector<TString>& objStage,
-                                              const std::vector<TString>& varName) {
+                                              const std::string& pathPre, const std::string& pathRej,
+                                              const std::vector<std::string>& objStage,
+                                              const std::vector<std::string>& varName) {
     std::string chain_path = getPath(trig_dir);
 
     //     std::cout << "----> HLTEgammaPostProcess in " << chain_path
@@ -124,8 +124,8 @@ namespace dqutils {
     //            << ", pathRej=" << chain_path + "/PassedChain/" + pathRej
 
     //establish base path (to save typing)
-    TString basePath = chain_path + "/PassedChain/";
-    if (f->cd(basePath.Data()) == 0) {
+    std::string basePath = chain_path + "/PassedChain/";
+    if (f->cd(basePath.c_str()) == 0) {
       std::cerr << "----> HLTEgammaPostProcess: basePath not found in "
                 << chain_path << ", skipping now!\n";
       return;
@@ -155,23 +155,23 @@ namespace dqutils {
       //iterate through stages
       for (uint iStg = 1; iStg < objStage.size(); ++iStg) {
         //form names for all variables
-        TString preName = basePath + pathPre + objStage[iStg - 1] + varName[iVar];
-        TString rejName = basePath + pathPre + objStage[iStg] + varName[iVar];
-        TString effName = basePath + pathRej + objStage[iStg] + varName[iVar];
+        std::string preName = basePath + pathPre + objStage[iStg - 1] + varName[iVar];
+        std::string rejName = basePath + pathPre + objStage[iStg] + varName[iVar];
+        std::string effName = basePath + pathRej + objStage[iStg] + varName[iVar];
         //check histogram existence
-        if (!CheckHistogram(f, rejName.Data())) {
+        if (!CheckHistogram(f, rejName.c_str())) {
           std::cerr << "----> HLTEgammaPostProcess: Histogram "
                     << rejName << " does not exist in file "
                     << f->GetName() << " - skipping it!\n";
           return;
         }
-        if (!CheckHistogram(f, preName.Data())) {
+        if (!CheckHistogram(f, preName.c_str())) {
           std::cerr << "----> HLTEgammaPostProcess: Histogram "
                     << preName << " does not exist in file "
                     << f->GetName() << " - skipping it!\n";
           return;
         }
-        if (!CheckHistogram(f, effName.Data())) {
+        if (!CheckHistogram(f, effName.c_str())) {
           std::cerr << "----> HLTEgammaPostProcess: Histogram "
                     << effName << " does not exist in file "
                     << f->GetName() << " - skipping it!\n";
@@ -183,13 +183,13 @@ namespace dqutils {
         //	            << preName << " to get " << effName << std::endl;
 
         //now get our histograms
-        histo_tensor[iStg][iVar][0] = (TH1F*) (f->Get(rejName.Data()));
-        histo_tensor[iStg][iVar][1] = (TH1F*) (f->Get(preName.Data()));
-        histo_tensor[iStg][iVar][2] = (TH1F*) (f->Get(effName.Data()));
+        histo_tensor[iStg][iVar][0] = (TH1F*) (f->Get(rejName.c_str()));
+        histo_tensor[iStg][iVar][1] = (TH1F*) (f->Get(preName.c_str()));
+        histo_tensor[iStg][iVar][2] = (TH1F*) (f->Get(effName.c_str()));
 
         //hop into rejection path
-        TString writePath = basePath + pathRej;
-        f->cd(writePath.Data());
+        std::string writePath = basePath + pathRej;
+        f->cd(writePath.c_str());
 
         //create rejection efficiency histograms by division
         histo_tensor[iStg][iVar][2]->Divide(histo_tensor[iStg][iVar][0], histo_tensor[iStg][iVar][1],

@@ -1,11 +1,11 @@
 /*
-   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef MUONGEOMETRYCNV_ReadoutGeomCnvAlg_H
 #define MUONGEOMETRYCNV_ReadoutGeomCnvAlg_H
 
 #include "TrkSurfaces/Surface.h" // Work around cppcheck false positive
-#include <AthenaBaseComps/AthReentrantAlgorithm.h>
+#include <AthenaBaseComps/AthCondAlgorithm.h>
 #include <StoreGate/WriteCondHandleKey.h>
 #include <StoreGate/ReadCondHandleKey.h>
 #include <StoreGate/CondHandleKeyArray.h>
@@ -29,16 +29,18 @@
 */
 
 namespace MuonGMR4{
-class ReadoutGeomCnvAlg : public AthReentrantAlgorithm {
+class ReadoutGeomCnvAlg : public AthCondAlgorithm {
     public:
-        using AthReentrantAlgorithm::AthReentrantAlgorithm;
+        using AthCondAlgorithm::AthCondAlgorithm;
         ~ReadoutGeomCnvAlg() = default;
 
         StatusCode execute(const EventContext& ctx) const override;
         StatusCode initialize() override;
-        bool isReEntrant() const override { return false; }
     
     private:
+        /** @brief Cache object holding the constructed detector manager,
+         *         and the intermediate GeoModel objects needed to build the
+         *         legacy readout geometry */
         struct ConstructionCache: public GeoDeDuplicator {
             public:
                 ConstructionCache() = default;
@@ -53,67 +55,123 @@ class ReadoutGeomCnvAlg : public AthReentrantAlgorithm {
                     return geoId(++m_id);
                 }
             private:
-                unsigned int m_id{0};
+                unsigned m_id{0};
         };
         
         /** @brief builds a station object from readout element. The parent PhysVol of the readoutElement
          *         is interpreted as embedding station volume and all children which are not fullPhysical 
          *         volumes are attached to the copied clone. 
-         * 
-         */
+         * @param gctx: Current geometry context carrying the current alignment
+         * @param stationId: Identifier of the station encoding stName, stEta, stPhi
+         * @param cacheObj: Mutable reference to the GeoModel constuction cache */
         StatusCode buildStation(const ActsTrk::GeometryContext& gctx,
                                 const Identifier& stationId,
                                 ConstructionCache& cacheObj) const;
         /** @brief Clones the fullPhysical volume of the readoutElement and embeds it into the associated station.
          *         If creations of the needed station fails, failure is returned. The references to the clonedPhysVol
          *         & to the station are set if the procedure was successful.
-         */
+         * @param gctx: Current geometry context carrying the current alignment
+         * @param stationId: Identifier of the station encoding stName, stEta, stPhi
+         * @param cacheObj: Mutable reference to the GeoModel constuction cache
+         * @param clonedPhysVol: Mutable reference into which the cloned physical volume is attached
+         * @param station: Mutable reference to the muon station pointer which is filled during the cloning */
         StatusCode cloneReadoutVolume(const ActsTrk::GeometryContext& gctx,
                                       const Identifier& stationId,
                                       ConstructionCache& cacheObj,
                                       GeoIntrusivePtr<GeoVFullPhysVol>& clonedPhysVol,
                                       MuonGM::MuonStation* & station) const;
-        /** @brief Clones the fullPhysicalVolume of the  */
+        /** @brief Clones the full phyical volume associated to the NSw readout element
+          * @param gctx: Current geometry context carrying the current alignment
+          * @param nswRE: Readout element from which the full PhysVol to clone is retrieved
+          * @param cacheObj: Mutable reference to the GeoModel constuction cache */
         GeoIntrusivePtr<GeoVFullPhysVol> cloneNswWedge(const ActsTrk::GeometryContext& gctx,
-                                                       const MuonGMR4::MuonReadoutElement* nswRE,
+                                                       const MuonGMR4::MuonReadoutElement& nswRE,
                                                        ConstructionCache& cacheObj) const;
-        
+        /** @brief Converts all Mdt readout elements from the R4 format into
+          *         the legacy Trk format
+          * @param gctx: Current geometry context carrying the current alignment
+          * @param cacheObj: Mutable reference to the GeoModel constuction cache */
         StatusCode buildMdt(const ActsTrk::GeometryContext& gctx,
                             ConstructionCache& cacheObj) const;
-
+        /** @brief Converts all Rpc readout elements from the R4 format into
+          *         the legacy Trk format
+          * @param gctx: Current geometry context carrying the current alignment
+          * @param cacheObj: Mutable reference to the GeoModel constuction cache */
         StatusCode buildRpc(const ActsTrk::GeometryContext& gctx,
                             ConstructionCache& cacheObj) const;
-
+        /** @brief Converts all sTgc readout elements from the R4 format into
+          *         the legacy Trk format
+          * @param gctx: Current geometry context carrying the current alignment
+          * @param cacheObj: Mutable reference to the GeoModel constuction cache */
         StatusCode buildSTGC(const ActsTrk::GeometryContext& gctx,
                              ConstructionCache& cacheObj) const;
-
+        /** @brief Converts all Mm readout elements from the R4 format into
+          *         the legacy Trk format
+          * @param gctx: Current geometry context carrying the current alignment
+          * @param cacheObj: Mutable reference to the GeoModel constuction cache */
         StatusCode buildMM(const ActsTrk::GeometryContext& gctx,
                            ConstructionCache& cacheObj) const;
-
+        /** @brief Converts all Tgc readout elements from the R4 format into
+          *         the legacy Trk format
+          * @param gctx: Current geometry context carrying the current alignment
+          * @param cacheObj: Mutable reference to the GeoModel constuction cache */
         StatusCode buildTgc(const ActsTrk::GeometryContext& gctx,
                             ConstructionCache& cacheObj) const;
-
-        
+        /** @brief Compares the R4 readout element with the constructed Trk
+         *         readout element. Transforms and position of the sensors
+         *         are required to be identical in both descriptions
+         * @param gctx: Current geometry context carrying the current alignment
+         * @param refEle: R4 readout element taken as blueprint to build the Trk
+         *                readout element.
+         * @param testEle: The constructed Trk readout element that is to be checked */
         StatusCode dumpAndCompare(const ActsTrk::GeometryContext& gctx,
                                   const MuonGMR4::RpcReadoutElement& refEle,
                                   const MuonGM::RpcReadoutElement& testEle) const;
-
+        /** @brief Compares the R4 readout element with the constructed Trk
+         *         readout element. Transforms and position of the sensors
+         *         are required to be identical in both descriptions
+         * @param gctx: Current geometry context carrying the current alignment
+         * @param refEle: R4 readout element taken as blueprint to build the Trk
+         *                readout element.
+         * @param testEle: The constructed Trk readout element that is to be checked */
         StatusCode dumpAndCompare(const ActsTrk::GeometryContext& gctx,
                                   const MuonGMR4::MdtReadoutElement& refEle,
                                   const MuonGM::MdtReadoutElement& testEle) const;
-
+        /** @brief Compares the R4 readout element with the constructed Trk
+         *         readout element. Transforms and position of the sensors
+         *         are required to be identical in both descriptions
+         * @param gctx: Current geometry context carrying the current alignment
+         * @param refEle: R4 readout element taken as blueprint to build the Trk
+         *                readout element.
+         * @param testEle: The constructed Trk readout element that is to be checked */
         StatusCode dumpAndCompare(const ActsTrk::GeometryContext& gctx,
                                   const MuonGMR4::MmReadoutElement& refEle,
                                   const MuonGM::MMReadoutElement& testEle) const;        
-
+        /** @brief Compares the R4 readout element with the constructed Trk
+         *         readout element. Transforms and position of the sensors
+         *         are required to be identical in both descriptions
+         * @param gctx: Current geometry context carrying the current alignment
+         * @param refEle: R4 readout element taken as blueprint to build the Trk
+         *                readout element.
+         * @param testEle: The constructed Trk readout element that is to be checked */
         StatusCode dumpAndCompare(const ActsTrk::GeometryContext& gctx,
                                   const MuonGMR4::TgcReadoutElement& refEle,
                                   const MuonGM::TgcReadoutElement& testEle) const;
-
+        /** @brief Compares the R4 readout element with the constructed Trk
+         *         readout element. Transforms and position of the sensors
+         *         are required to be identical in both descriptions
+         * @param gctx: Current geometry context carrying the current alignment
+         * @param refEle: R4 readout element taken as blueprint to build the Trk
+         *                readout element.
+         * @param testEle: The constructed Trk readout element that is to be checked */
         StatusCode dumpAndCompare(const ActsTrk::GeometryContext& gctx,
                                   const MuonGMR4::sTgcReadoutElement& refEle,
                                   const MuonGM::sTgcReadoutElement& testEle) const;
-
+        /** @brief Checks whether the Identifier fields of both readout elements are
+         *         identical
+         * @param refEle: R4 readout element taken as blueprint to build the Trk
+         *                readout element.
+         * @param testEle: The constructed Trk readout element that is to be checked */
         StatusCode checkIdCompability(const MuonGMR4::MuonReadoutElement& refEle,
                                       const MuonGM::MuonReadoutElement& testEle) const;
         
@@ -125,6 +183,8 @@ class ReadoutGeomCnvAlg : public AthReentrantAlgorithm {
         
         Gaudi::Property<bool> m_checkGeo{this, "checkGeo", false, "Checks the positions of the sensors"};
         Gaudi::Property<bool> m_dumpGeo{this, "dumpGeo", false, "Dumps the constructed geometry"};
+        /** @brief Instantiate a new transform cache to ensure lazy transform population in the event processing */
+        Gaudi::Property<bool> m_splitTrfCache{this, "splitTrfCache", false, ""};
         Gaudi::Property<std::string> m_geoDumpName{this,"geoDumpName", "ConvMuonGeoModel.db",};
         const MuonGMR4::MuonDetectorManager* m_detMgr{nullptr};
 

@@ -16,6 +16,7 @@ This is a good way to check that the proposed changes look rational before actua
 """
 
 from collections import defaultdict
+import html
 import os
 import sys
 import subprocess
@@ -28,7 +29,7 @@ except ImportError:
     print('FATAL: this script needs the gitlab and requests modules. Either install them yourself, or run "lsetup gitlab"')
 
 class CITest:
-    def __init__(self, name, tag, mr, date, existing_ref, existing_version, new_version, new_version_directory, copied_file_path, digest_old, digest_new, type):
+    def __init__(self, name, tag, mr, date, existing_ref, existing_version, new_version, new_version_directory, copied_file_path, diff, type):
         self.name = name
         self.tag = tag
         self.mr = mr
@@ -38,8 +39,7 @@ class CITest:
         self.new_version = new_version
         self.new_version_directory = new_version_directory
         self.copied_file_path = copied_file_path
-        self.digest_old = digest_old
-        self.digest_new = digest_new
+        self.diff = diff
         self.type = type
     
     def __repr__(self):
@@ -51,6 +51,8 @@ class CITest:
             extra = f' Data file change :  {self.existing_version} -> {self.new_version}'
         elif self.type == 'Digest':
             extra = f' Digest change: {self.existing_ref}'
+        elif self.type == 'Content':
+            extra = f' AOD content change: {self.existing_ref}'
         return f'{self.name}:{self.tag} MR: {self.mr}'+extra
 
 failing_tests = defaultdict(list) # Key is branch, value is list of CITest objects
@@ -98,7 +100,7 @@ def process_log_file(url, branch, test_name):
     date = mr_match.group('date')
     human_readable_date = ':'.join(date.split('-')[0:3]) + " at " + ':'.join(date.split('-')[3:])
 
-    if "Your change breaks the digest in test" in text:
+    if "Your change breaks the digest in test" in text or 'ERROR    Your change modifies the output in test' in text:
         # Okay, we have a digest change
         failing_tests[branch].append(process_digest_change(text, ami_tag, mr_number, human_readable_date, test_name))
 
@@ -145,7 +147,7 @@ def process_diffpool_change(text, ami_tag, mr_number, human_readable_date, test_
         sys.exit(1)
 
 
-    test = CITest(name=test_name, tag=ami_tag, mr=mr_number, date=human_readable_date, existing_ref = old_version_directory, existing_version = existing_version_number, new_version = new_version_number, new_version_directory = new_version_directory, copied_file_path = copied_file_path, digest_old=None, digest_new=None, type='DiffPool')
+    test = CITest(name=test_name, tag=ami_tag, mr=mr_number, date=human_readable_date, existing_ref = old_version_directory, existing_version = existing_version_number, new_version = new_version_number, new_version_directory = new_version_directory, copied_file_path = copied_file_path, diff=None, type='DiffPool')
     return test
 
 def process_digest_change(text, ami_tag, mr_number, human_readable_date, test_name):    
@@ -165,8 +167,7 @@ def process_digest_change(text, ami_tag, mr_number, human_readable_date, test_na
         sys.exit(1)
     ref_file_path = ref_file_match.group(1)
 
-    old_diff_lines = []
-    new_diff_lines = []
+    diff_lines = []
     diff_started = False # Once we hit the beginning of the diff, we start recording
     # Diff starts with e.g. 
     # ERROR    The output 'q449_AOD_digest.txt' (>) differs from the reference 'q449_AOD_digest.ref' (<):
@@ -177,19 +178,17 @@ def process_digest_change(text, ami_tag, mr_number, human_readable_date, test_na
             # Start of the diff
             diff_started = True
         elif diff_started:
-          if line.startswith('&lt;'):
-              old_diff_lines.append(line)
-          elif line.startswith('&gt;'):
-              new_diff_lines.append(line)
-          elif 'INFO' in line:
-            # End of the diff
-            break
+            if 'INFO' in line:
+                # End of the diff
+                break
+            elif len(line)>0:
+                diff_lines.append(html.unescape(line))
 
-    test = CITest(name=test_name, tag=ami_tag, mr=mr_number, date=human_readable_date, existing_ref = ref_file_path, existing_version = existing_version_number, new_version = new_version_number, new_version_directory = new_version_directory, copied_file_path = copied_file_path, digest_old=old_diff_lines, digest_new=new_diff_lines, type='Digest')
+    test = CITest(name=test_name, tag=ami_tag, mr=mr_number, date=human_readable_date, existing_ref = ref_file_path, existing_version = existing_version_number, new_version = new_version_number, new_version_directory = new_version_directory, copied_file_path = copied_file_path, diff=diff_lines, type='Content' if 'content.ref' in ref_file_path else 'Digest')
     return test
 
 def update_reference_files(actually_update=True, update_local_files=False):
-    print
+    print()
     print('Updating reference files')
     print('========================')
     commands = []
@@ -236,6 +235,9 @@ def update_reference_files(actually_update=True, update_local_files=False):
                 data = []
 
                 diff_line=0 # We will use this to keep track of which line in the diff we are on
+                digest_old = [line for line in test.diff if line.startswith('<')]
+                digest_new = [line for line in test.diff if line.startswith('>')]
+
                 with open('Tools/PROCTools/data/'+test.existing_ref, 'r') as f:
                     lines = f.readlines()
                     for current_line, line in enumerate(lines):
@@ -248,10 +250,10 @@ def update_reference_files(actually_update=True, update_local_files=False):
                         if (not split_curr_line[0].isnumeric()) or (not split_curr_line[1].isnumeric()):
                             print('FATAL: Found a line in current digest which does not start with run/event numbers: {}'.format(line))
                             sys.exit(1)
-                        
-                        split_old_diff_line = test.digest_old[diff_line].split()
+
+                        split_old_diff_line = digest_old[diff_line].split()
                         split_old_diff_line.pop(0) # Remove the < character
-                        split_new_diff_line = test.digest_new[diff_line].split()
+                        split_new_diff_line = digest_new[diff_line].split()
                         split_new_diff_line.pop(0) # Remove the > character
 
                         # Let's check to see if the run/event numbers match
@@ -267,7 +269,7 @@ def update_reference_files(actually_update=True, update_local_files=False):
                         if split_curr_line[0] == split_new_diff_line[0] and split_curr_line[1] == split_new_diff_line[1]:
                             #Replace the existing line with the new one, making sure we right align within 12 characters
                             data.append("".join(["{:>12}".format(x) for x in split_new_diff_line])+ '\n')
-                            if ((diff_line+1)<len(test.digest_old)):
+                            if ((diff_line+1)<len(digest_old)):
                                 diff_line+=1
                             continue
 
@@ -277,6 +279,12 @@ def update_reference_files(actually_update=True, update_local_files=False):
                 print(' -> Updating PROCTools digest file {}'.format(test.existing_ref))
                 with open('Tools/PROCTools/data/'+test.existing_ref, 'w') as f:
                     f.writelines(data)
+            elif test.type == 'Content' and update_local_files:
+                print(' * This is a Content test. Need to update reference file {}.'.format(test.existing_ref))
+                subprocess.run(f'patch --quiet Tools/PROCTools/data/{test.existing_ref}',
+                               input='\n'.join(test.diff)+'\n',
+                               text=True, shell=True, check=True)
+
     return commands
                 
 
@@ -422,9 +430,9 @@ if __name__ == '__main__':
 
     print("The next step is to update the MR with the new content i.e. the References.py file and the digest files.")
     print(" IMPORTANT: before you do this, you must first make sure that the local repository is on same branch as the MR by doing:")
-    print(f" $ git fetch --no-tags {remote} {mr.source_branch}:{local_branch}")
-    print(f" $ git switch {local_branch}")
-    print(" $ git rebase upstream/main") # In case there have been any changes since the MR was created
+    print(f"   git fetch --no-tags {remote} {mr.source_branch}:{local_branch}")
+    print(f"   git switch {local_branch}")
+    print("   git rebase upstream/main") # In case there have been any changes since the MR was created
     print()
 
     msg = 'Would you like to (locally) update digest ref files and/or versions in References.py?'
@@ -447,5 +455,5 @@ if __name__ == '__main__':
         print()
         print("Finished! Before pushing, you might want to manually trigger an EOS to cvmfs copy here: https://atlas-jenkins.cern.ch/view/all/job/ART_data_eos2cvmfs/")
         print("Then commit your changes and (force) push the updated branch to the author's remote:")
-        print(" $ git commit")
-        print(f" $ git push [-f] {remote} {local_branch}:{mr.source_branch}")
+        print("   git commit")
+        print(f"   git push {remote} {local_branch}:{mr.source_branch}")

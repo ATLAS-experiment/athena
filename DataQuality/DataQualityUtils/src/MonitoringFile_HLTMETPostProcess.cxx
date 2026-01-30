@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
  */
 
 
@@ -37,9 +37,9 @@
 namespace dqutils {
   void
   MonitoringFile::HLTMETPostProcess(const std::string& inFilename, bool /* isIncremental */) {
-    bool dbgLevel = false;
+    //bool dbgLevel = false;
 
-    if (dbgLevel) std::cout << "--> HLTMETPostProcess: Begin HLTMET post-processing" << std::endl;
+    //if (dbgLevel) std::cout << "--> HLTMETPostProcess: Begin HLTMET post-processing" << std::endl;
 
     //open root file
     TFile* f = TFile::Open(inFilename.c_str(), "UPDATE");
@@ -64,14 +64,14 @@ namespace dqutils {
     }
 
     //start postprocessing
-    TString run_dir;
+    std::string run_dir;
     HLTMETAveragePhivsEtaMaps(f, run_dir);
     HLTMETDQFlagSummary(f, run_dir);
     //close root file
     f->Close();
     delete f;
 
-    if (dbgLevel) std::cout << "--> HLTMETPostProcess: End HLTMET post-processing " << std::endl;
+    //if (dbgLevel) std::cout << "--> HLTMETPostProcess: End HLTMET post-processing " << std::endl;
 
     return;
   }
@@ -96,12 +96,12 @@ namespace dqutils {
      TKey* key_lbn(0);
 
      // loop over all objects
-     std::vector<TString> lbnDirs;
+     std::vector<std::string> lbnDirs;
      while ((key_lbn = dynamic_cast<TKey*> ( next_lbn() )) !=0 ) {
       TObject* obj_lbn = key_lbn->ReadObj();
       TDirectory* tdir_lbn = dynamic_cast<TDirectory*>( obj_lbn );
       if (tdir_lbn ==0 ){ delete obj_lbn; continue; }
-      TString lbn_dir = tdir_lbn->GetName();
+      std::string lbn_dir = tdir_lbn->GetName();
       if (!lbn_dir.Contains("lb_") )  {delete obj_lbn; continue;}
       std::cout << "--> HLTMETGetDQLBNRange: found lbn directory named " << lbn_dir << std::endl;
       lbnDirs.push_back(lbn_dir);

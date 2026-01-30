@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef STRINGVECTOR_H
@@ -10,10 +10,14 @@
 
 class StringVector {
 public:
-    StringVector();
+    StringVector() = default;
+    StringVector(StringVector &&) = default;
+    StringVector(const StringVector &) = default;
+    StringVector & operator = (StringVector &&) = default;
+    StringVector & operator = (const StringVector &) = default;
     StringVector(const G4ThreeVector& p, G4double m);
     StringVector(G4double x, G4double y, G4double z, G4double m);
-    ~StringVector();
+    ~StringVector() = default;
     G4ThreeVector vect() const;
     G4double mag() const;
     G4double x() const;
@@ -27,8 +31,8 @@ public:
     void operator *= (G4double a);
 
 private:
-    G4ThreeVector m_p;
-    G4double m_m;
+    G4ThreeVector m_p{0,0,0};
+    G4double m_m{};
 };
 
 inline StringVector operator * (G4double a, const StringVector& s) {

@@ -40,6 +40,7 @@ namespace ActsTrk {
 
     ATH_CHECK(detStore()->retrieve(m_hgtd_det_mgr, "HGTD"));
     ATH_CHECK(detStore()->retrieve(m_hgtd_id, "HGTD_ID"));
+    ATH_CHECK(m_hgtd_tdc_calib_tool.retrieve(EnableTool{m_use_altiroc_rdo.value()}));
 
     ATH_MSG_DEBUG(m_timeTollerance);
 
@@ -130,6 +131,52 @@ namespace ActsTrk {
 
     return StatusCode::SUCCESS;
   }
+
+StatusCode HgtdTimedClusteringTool::clusterize(const EventContext& ctx,
+    const HGTD_ALTIROC_RDO_Collection& RDOs,
+    ClusterContainer& container) const
+{
+  // Unpack RDOs (would need a proper function here)
+  CellCollection cells;
+  cells.reserve(RDOs.size());
+  for (const HGTD_ALTIROC_RDO* rdo : RDOs) {
+    Identifier id = rdo->identify();
+
+    const InDetDD::HGTD_DetectorElement* element = m_hgtd_det_mgr->getDetectorElement(id);
+    uint8_t time_of_flight = m_hgtd_tdc_calib_tool->TOA2Time(element, rdo->getToA());
+
+    ATH_MSG_DEBUG("Recovered Time of Arrival: " << time_of_flight);
+
+    cells.emplace_back(-1,
+      m_hgtd_id->phi_index(id),
+      m_hgtd_id->eta_index(id),
+      time_of_flight,
+      rdo->getToT(),
+      id);
+  }
+
+  ATH_MSG_DEBUG("Clustering on " << RDOs.size() << " RDOs using time information");
+  Acts::Ccl::ClusteringData data;
+  ClusterCollection clusters;
+  Acts::Ccl::createClusters<CellCollection, ClusterCollection, 2>
+    (data, cells, clusters, Acts::Ccl::TimedConnect<Cell, 2ul>(m_timeTollerance.value(), m_addCorners.value()));
+  ATH_MSG_DEBUG("   \\_ " << clusters.size() << " clusters reconstructed");
+  
+  // Fast insertion trick
+  std::size_t previousSizeContainer = container.size();
+  std::vector<xAOD::HGTDCluster*> toAdd;
+  toAdd.reserve(clusters.size());
+  for (std::size_t i(0), n(clusters.size()); i < n; ++i)
+    toAdd.push_back( new xAOD::HGTDCluster() );
+  container.insert(container.end(), toAdd.begin(), toAdd.end());
+
+  for (std::size_t i(0); i<clusters.size(); ++i) {
+    const typename HgtdTimedClusteringTool::Cluster& cluster = clusters[i];
+    ATH_CHECK(makeCluster(ctx, cluster, *container[previousSizeContainer+i]));
+  }
+
+  return StatusCode::SUCCESS;
+}
 
 } // namespace
 

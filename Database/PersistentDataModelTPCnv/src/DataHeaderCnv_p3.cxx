@@ -16,7 +16,6 @@
 #include <algorithm>
 
 DataHeaderElementCnv_p3::DataHeaderElementCnv_p3() {}
-DataHeaderElementCnv_p3::~DataHeaderElementCnv_p3() {}
 
 //______________________________________________________________________________
 void DataHeaderElementCnv_p3::persToTrans(const DataHeaderElement_p3* pers,
@@ -86,7 +85,6 @@ void DataHeaderElementCnv_p3::transToPers(const DataHeaderElement* /*trans*/,
 //______________________________________________________________________________
 //______________________________________________________________________________
 DataHeaderCnv_p3::DataHeaderCnv_p3() {}
-DataHeaderCnv_p3::~DataHeaderCnv_p3() {}
 //______________________________________________________________________________
 void DataHeaderCnv_p3::persToTrans(const DataHeader_p3* pers, DataHeader* trans) {
    trans->m_dataHeader.resize(pers->m_DataHeader.size());

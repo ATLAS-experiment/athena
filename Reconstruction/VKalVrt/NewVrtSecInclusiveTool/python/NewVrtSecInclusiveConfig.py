@@ -221,6 +221,59 @@ def MaterialSVFinderToolCfg(flags, name="MaterialSVFinderTool", **myargs):
     return acc
 
 #######################################################################
+# Configuration for Ks -> pi pi search using LRT 
+#------------------------------------
+def KsFinderToolCfg(flags, name="KsFinderTool", **myargs):
+
+    mlog.info("entering KsFinderTool configuration")
+    acc = ComponentAccumulator()
+    acc.merge(BeamSpotCondAlgCfg(flags))
+
+    #-- 2-track vertex initial selector
+    iniV2Targs = {}
+    iniV2Targs.setdefault("Vrt2TrPtMin" , 1000.)
+    iniV2Targs.setdefault("cosSVPVCut"  ,  0.)
+    iniV2Targs.setdefault("v2tBDTCut"   , -1.01)
+    iniV2Targs.setdefault("MaxSVRadiusCut", 350.)
+    iniV2Targs.setdefault("Vrt2TrMassLimit", 1000.)
+    iniV2Targs.setdefault("useVertexCleaning"  , False)
+    iniV2TSelector = CompFactory.Rec.TwoTrackVrtBDTSelector("IniV2TSelector",**iniV2Targs)
+
+    #-- NVSI track selection cuts
+    myargs.setdefault("CutPt"       , 1000.)
+    myargs.setdefault("CutBLayHits" , 0 )
+    myargs.setdefault("CutPixelHits", 0 )
+    myargs.setdefault("CutSiHits"   , 8 )
+    myargs.setdefault("CutTRTHits"  , 0 )
+    myargs.setdefault("AntiPileupSigRCut", 6.0)
+    myargs.setdefault("TrkSigCut"      ,  10.0)
+    myargs.setdefault("CutD0Max"       , 1000.)   # Maximal track impact parameter
+    myargs.setdefault("CutD0Min"       , 0.)      # Minimal track impact parameter
+    myargs.setdefault("MaxZVrt"        , 100.)
+    myargs.setdefault("MinZVrt"        , 0.)
+    #-- NVSI inclusive vertex selection
+    myargs.setdefault("FastZSVCut"     ,  30.0)        # Fast universal preselection of 2-track vertices 
+    myargs.setdefault("MultiWithOneTrkVrt" ,  False)
+    myargs.setdefault("removeTrkMatSignif" , -1.)     # No additional material rejection
+    myargs.setdefault("SelVrtSigCut"   , 8.0)
+    myargs.setdefault("VertexMergeCut" , 10.)
+    myargs.setdefault("VrtMassLimit"   , 800000.)
+    myargs.setdefault("MaxSVRadiusCut" , 350.)
+
+    #-- Tools
+    myargs.setdefault("TwoTrkVtxSelectorIni"  ,iniV2TSelector)
+    myargs.setdefault("TwoTrkVtxSelectorFinal",iniV2TSelector) #reuse the same tool for final selection
+    myargs.setdefault("VertexFitterTool",  acc.popToolsAndMerge(TrkVKalVrtFitterCfg(flags)))
+    myargs.setdefault("ExtrapolatorName",  acc.popToolsAndMerge(AtlasExtrapolatorCfg(flags)))
+    myargs.setdefault("TrackToVertexTool", acc.popToolsAndMerge(TrackToVertexCfg(flags)))
+
+    KsFinder = CompFactory.Rec.NewVrtSecInclusiveTool(name,**myargs)
+    acc.setPrivateTools(KsFinder)
+    mlog.info("KsFinderTool created")
+
+    return acc
+
+#######################################################################
 # Configuration for LLP search using LRT 
 #------------------------------------
 def DVFinderToolCfg(flags, name="DVFinderTool", **myargs):
@@ -234,6 +287,7 @@ def DVFinderToolCfg(flags, name="DVFinderTool", **myargs):
     iniV2Targs.setdefault("Vrt2TrPtMin" , 2000.)
     iniV2Targs.setdefault("cosSVPVCut"  ,  0.)
     iniV2Targs.setdefault("v2tBDTCut"   , -1.01)
+    iniV2Targs.setdefault("MaxSVRadiusCut", 350.)
     iniV2Targs.setdefault("Vrt2TrMassLimit", 1000000.)
     iniV2Targs.setdefault("useVertexCleaning"  , False)
     iniV2TSelector = CompFactory.Rec.TwoTrackVrtBDTSelector("IniV2TSelector",**iniV2Targs)
@@ -242,6 +296,7 @@ def DVFinderToolCfg(flags, name="DVFinderTool", **myargs):
     finV2Targs.setdefault("Vrt2TrPtMin" , 2000.)
     finV2Targs.setdefault("cosSVPVCut"  ,  0.)
     finV2Targs.setdefault("v2tBDTCut"   , -1.01)
+    finV2Targs.setdefault("MaxSVRadiusCut", 350.)
     finV2Targs.setdefault("Vrt2TrMassLimit", 1000000.)
     finV2Targs.setdefault("useVertexCleaning"  , False)
     finV2TSelector = CompFactory.Rec.TwoTrackVrtBDTSelector("FinV2TSelector",**finV2Targs)

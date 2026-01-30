@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ACTSTRACKRECONSTRUCTION_TRACKFINDINGBASEALG_H
@@ -104,6 +104,7 @@ namespace ActsTrk {
     Gaudi::Property<std::vector<double>> m_chi2CutOff{this, "chi2CutOff", {}, "MeasurementSelector: maximum local chi2 contribution"};
     Gaudi::Property<std::vector<double>> m_chi2OutlierCutOff{this, "chi2OutlierCutOff", {}, "MeasurementSelector: maximum local chi2 contribution for outlier"};
     Gaudi::Property<std::vector<size_t>> m_numMeasurementsCutOff{this, "numMeasurementsCutOff", {}, "MeasurementSelector: maximum number of associated measurements on a single surface"};
+    Gaudi::Property<double> m_edgeHoleBorderWidth{this,"EdgeHoleBorderWidth", 0. ,"Width of the border of surfaces (mm) within which holes are not counted as holes."};
     Gaudi::Property<std::vector<std::size_t>> m_ptMinMeasurements{this, "ptMinMeasurements", {}, "if specified for the given seed collection, applies ptMin cut in branch stopper once ptMinMinMeasurements have been encountered"};
     Gaudi::Property<std::vector<std::size_t>> m_absEtaMaxMeasurements{this, "absEtaMaxMeasurements", {}, "if specified for the given seed collection, applies absEtaMax cut in branch stopper once absEtaMaxMeasurements have been encountered"};
     Gaudi::Property<bool> m_doBranchStopper{this, "doBranchStopper", true, "use branch stopper"};

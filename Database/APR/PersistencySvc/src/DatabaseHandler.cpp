@@ -1,30 +1,30 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "DatabaseHandler.h"
 #include "Container.h"
 #include "PersistentDataModel/Token.h"
 #include "StorageSvc/IStorageSvc.h"
-#include "StorageSvc/IStorageExplorer.h"
 #include "StorageSvc/Transaction.h"
 #include "StorageSvc/Shape.h"
+#include "StorageSvc/DbDatabase.h"
 #include "StorageSvc/DbOption.h"
 #include "StorageSvc/DbReflex.h"
 #include "StorageSvc/DbTypeInfo.h"
+#include "StorageSvc/DbConnection.h"
+#include "POOLCore/DbPrint.h"
 
 #include <exception>
 #include <memory>
 
 pool::PersistencySvc::DatabaseHandler::DatabaseHandler( pool::IStorageSvc& storageSvc,
-                                                        pool::IStorageExplorer& storageExplorer,
                                                         pool::Session* session,
                                                         long technology,
                                                         const std::string& fid,
                                                         const std::string& pfn,
                                                         long accessmode ):
   m_storageSvc( storageSvc ),
-  m_storageExplorer( storageExplorer ),
   m_session( session ),
   m_fileDescriptor( fid, pfn ),
   m_technology( technology ),
@@ -40,10 +40,8 @@ pool::PersistencySvc::DatabaseHandler::DatabaseHandler( pool::IStorageSvc& stora
 pool::PersistencySvc::DatabaseHandler::~DatabaseHandler()
 {
    int mode = 0;
-   pool::DbStatus sc = m_storageSvc.openMode(m_fileDescriptor, mode);
-   if ( sc.isSuccess() ) {
-     rollBackTransaction();
-     m_storageSvc.disconnect( m_fileDescriptor );
+   if( m_storageSvc.openMode(m_fileDescriptor, mode).isSuccess() ) {
+     m_storageSvc.disconnect( m_fileDescriptor ).ignore();
    }
 }
 
@@ -66,18 +64,9 @@ pool::PersistencySvc::DatabaseHandler::commitAndHoldTransaction()
 }
 
 
-void
-pool::PersistencySvc::DatabaseHandler::rollBackTransaction()
-{
-   m_storageSvc.endTransaction( m_fileDescriptor.dbc(), Transaction::TRANSACT_ROLLBACK );
-}
-
-
-
 bool
 pool::PersistencySvc::DatabaseHandler::disconnectTransaction()
 {
-   rollBackTransaction();
    return ( m_storageSvc.disconnect( m_fileDescriptor ).isSuccess() );
 }
 
@@ -86,7 +75,12 @@ pool::PersistencySvc::DatabaseHandler::containers()
 {
    std::vector< std::string > result;
    std::vector<const Token*> containerTokens;
-   m_storageExplorer.containers( m_fileDescriptor, containerTokens );
+   pool::DatabaseConnection* connection = m_fileDescriptor.dbc();
+   DbDatabase dbH(static_cast<DbDatabaseObj*>(connection->handle()));
+   if( !dbH.containers(containerTokens, false).isSuccess() ) {
+      DbPrint log( m_fileDescriptor.PFN() );
+      log << MSG::ERROR << "Could not retrieve the list of containers." << endmsg;
+   }
    for ( std::vector<const Token*>::const_iterator iToken = containerTokens.begin();
          iToken != containerTokens.end(); ++iToken ) {
       Token tok (*iToken);
@@ -104,7 +98,6 @@ pool::PersistencySvc::DatabaseHandler::container( const std::string& containerNa
          iName != allContainers.end(); ++iName ) {
       if ( *iName == containerName ) {
          return new pool::PersistencySvc::Container( m_fileDescriptor,
-                                                     m_storageExplorer,
                                                      m_technology,
                                                      containerName );
       }
@@ -151,12 +144,11 @@ pool::PersistencySvc::DatabaseHandler::writeObject( const std::string& container
   if ( ! object ) return token;
 
   // Get the persistent shape.
-  const pool::Shape* shape = 0;
+  const pool::Shape* shape = nullptr;
   Guid guid = DbReflex::guid(type);
-  if ( m_storageSvc.getShape( m_fileDescriptor, guid, shape ) == pool::IStorageSvc::SHAPE_NOT_AVAILIBLE ) {
-    m_storageSvc.createShape( m_fileDescriptor, containerName, guid, shape );
+  if( !m_storageSvc.getShape( m_fileDescriptor, guid, shape ).isSuccess() ) {
+     shape = m_storageSvc.createShape( guid );
   }
-
   if ( shape )  {
     if ( m_storageSvc.allocate( m_fileDescriptor,
                                 containerName,
@@ -177,14 +169,14 @@ pool::PersistencySvc::DatabaseHandler::readObject( const Token& token, void* obj
   void* result( object );
 
   // Get the persistent shape
-  const pool::Shape* shape = 0;
-  if ( m_storageSvc.getShape( m_fileDescriptor, token.classID(), shape ) != pool::IStorageSvc::IS_PERSISTENT_SHAPE )
+  const pool::Shape* shape = nullptr;
+  if( !m_storageSvc.getShape( m_fileDescriptor, token.classID(), shape ).isSuccess() ) {
     return result;
-
-  if (! m_storageSvc.read( m_fileDescriptor, token, shape, &result ).isSuccess() ) {
-    result = 0;
   }
-
+  if( !m_storageSvc.read( m_fileDescriptor, token, shape, &result ).isSuccess() ) {
+    return nullptr;
+  }
+  
   return result;
 }
 
@@ -196,14 +188,10 @@ pool::PersistencySvc::DatabaseHandler::attribute( const std::string& attributeNa
                                                   const std::string& option )
 {
   pool::DbOption databaseOption( attributeName, option );
-  pool::DbStatus sc = m_storageExplorer.getDatabaseOption( m_fileDescriptor, databaseOption );
-  if ( !sc.isSuccess() ) return false;
-  if ( databaseOption.i_getValue( typeInfo, data ).isSuccess() ) {
-    return true;
-  }
-  else {
-    return false;
-  }
+  pool::DatabaseConnection* connection = m_fileDescriptor.dbc();
+  DbDatabase dbH(static_cast<DbDatabaseObj*>(connection->handle()));
+  if( !dbH.getOption(databaseOption).isSuccess() ) return false;
+  return databaseOption.i_getValue( typeInfo, data ).isSuccess();
 }
 
 
@@ -214,14 +202,8 @@ pool::PersistencySvc::DatabaseHandler::setAttribute( const std::string& attribut
                                                      const std::string& option )
 {
   pool::DbOption databaseOption( attributeName, option );
-  pool::DbStatus sc = databaseOption.i_setValue( typeInfo, const_cast<void*>( data ) );
-  if ( !sc.isSuccess() ) return false;
-  sc = m_storageExplorer.setDatabaseOption( m_fileDescriptor,
-                                            databaseOption );
-  if ( !sc.isSuccess() ) {
-    return false;
+  if( !databaseOption.i_setValue( typeInfo, const_cast<void*>( data ) ).isSuccess() ) return false;
+  pool::DatabaseConnection* connection = m_fileDescriptor.dbc();
+  DbDatabase dbH(static_cast<DbDatabaseObj*>(connection->handle()));
+  return dbH.setOption(databaseOption).isSuccess();
   }
-  else {
-    return true;
-  }
-}

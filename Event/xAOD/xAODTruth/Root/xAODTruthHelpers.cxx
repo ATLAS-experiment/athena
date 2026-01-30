@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // Core EDM include(s):
@@ -114,6 +114,30 @@ namespace xAOD {
          // Check if such a variable exists on the object:
          if( ! acc.isAvailable( p ) ) {
             return 0;
+         }
+
+         // Let's return the value:
+         return acc( p );
+      }
+
+      /// @param p The particle that we want to find the truth classification of
+      /// @returns 0 if the truth classification is not available, or the truth classification
+      ///          determined by MCTruthClassifier, if it is
+      ///
+      int getParticleTruthClassification( const xAOD::IParticle& p ) {
+
+         /// A static accessor for the information
+         static const SG::AuxElement::ConstAccessor< unsigned int > acc( "truthClassification" );
+         static const SG::AuxElement::ConstAccessor< unsigned int > accLegacy( "Classification" );
+
+         // Check if such a variable exists on the object:
+         if( ! acc.isAvailable( p ) ) {
+           if( ! accLegacy.isAvailable( p ) ) {
+             return 0;
+           }
+
+           // Let's return the value:
+           return accLegacy( p );
          }
 
          // Let's return the value:

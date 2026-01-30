@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //====================================================================
@@ -17,14 +17,13 @@
 
 // Framework include files
 #include <string>
+// Forward declarations
+class MsgStream;
 
 /*
  *   POOL namespace declaration
  */
-namespace pool    {
-
-  // Forward declarations
-  class DbPrint;
+namespace pool  {
 
   /** @class DbType DbType.h  StorageSvc/DbType.h
   */
@@ -76,7 +75,7 @@ namespace pool    {
     /// Human readable storage type
     const std::string storageName()  const;
     /// Error message on missing back-end driver implementation
-    void missingDriver( DbPrint& str) const;
+    void missingDriver( MsgStream& str) const;
     /// Error processing on bad storage type
     void badStorageType()  const;
     /// Access known storage type object by name

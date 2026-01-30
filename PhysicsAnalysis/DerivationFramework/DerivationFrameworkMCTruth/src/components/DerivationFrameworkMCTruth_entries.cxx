@@ -2,8 +2,19 @@
 #include "DerivationFrameworkMCTruth/TruthIsolationTool.h"
 #include "DerivationFrameworkMCTruth/MenuTruthThinning.h"
 #include "DerivationFrameworkMCTruth/GenericTruthThinning.h"
+#include "DerivationFrameworkMCTruth/TruthCollectionMakerBase.h"
+#include "DerivationFrameworkMCTruth/TruthCollectionMakerBoson.h"
+#include "DerivationFrameworkMCTruth/TruthCollectionMakerBottom.h"
+#include "DerivationFrameworkMCTruth/TruthCollectionMakerBSM.h"
+#include "DerivationFrameworkMCTruth/TruthCollectionMakerCharm.h"
+#include "DerivationFrameworkMCTruth/TruthCollectionMakerElectron.h"
+#include "DerivationFrameworkMCTruth/TruthCollectionMakerForwardProton.h"
 #include "DerivationFrameworkMCTruth/TruthCollectionMaker.h"
-#include "DerivationFrameworkMCTruth/TruthCollectionMakerTau.h"
+#include "DerivationFrameworkMCTruth/TruthCollectionMakerMuon.h"
+#include "DerivationFrameworkMCTruth/TruthCollectionMakerNeutrino.h"
+#include "DerivationFrameworkMCTruth/TruthCollectionMakerPhoton.h"
+#include "DerivationFrameworkMCTruth/TruthCollectionMakerPhotonSim.h"
+#include "DerivationFrameworkMCTruth/TruthCollectionMakerTop.h"
 #include "DerivationFrameworkMCTruth/TruthClassificationDecorator.h"
 #include "DerivationFrameworkMCTruth/CompactHardTruth.h"
 #include "DerivationFrameworkMCTruth/HardTruthThinning.h"
@@ -31,7 +42,18 @@ DECLARE_COMPONENT( TruthIsolationTool )
 DECLARE_COMPONENT( MenuTruthThinning )
 DECLARE_COMPONENT( GenericTruthThinning )
 DECLARE_COMPONENT( TruthCollectionMaker )
-DECLARE_COMPONENT( TruthCollectionMakerTau )
+DECLARE_COMPONENT( TruthCollectionMakerBase )
+DECLARE_COMPONENT( TruthCollectionMakerBoson )
+DECLARE_COMPONENT( TruthCollectionMakerBottom )
+DECLARE_COMPONENT( TruthCollectionMakerBSM )
+DECLARE_COMPONENT( TruthCollectionMakerCharm )
+DECLARE_COMPONENT( TruthCollectionMakerElectron )
+DECLARE_COMPONENT( TruthCollectionMakerForwardProton )
+DECLARE_COMPONENT( TruthCollectionMakerMuon )
+DECLARE_COMPONENT( TruthCollectionMakerNeutrino )
+DECLARE_COMPONENT( TruthCollectionMakerPhoton )
+DECLARE_COMPONENT( TruthCollectionMakerPhotonSim )
+DECLARE_COMPONENT( TruthCollectionMakerTop )
 DECLARE_COMPONENT( TruthClassificationDecorator )
 DECLARE_COMPONENT( CompactHardTruth )
 DECLARE_COMPONENT( HardTruthThinning )

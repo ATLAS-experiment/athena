@@ -4,8 +4,8 @@
   Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef ATHENAPOOLCNVSVC_ITPConverter_H
-#define ATHENAPOOLCNVSVC_ITPConverter_H 1
+#ifndef TPTOOLS_ITPConverter_H
+#define TPTOOLS_ITPConverter_H 1
 
 /** @file TPTools/ITPConverter.h
  *  @brief Defines the base ITPConverter class interface for all TP

@@ -25,7 +25,6 @@
 
 #include "GaudiKernel/IEventProcessor.h"
 
-
 constexpr bool enableBenchmark = 
 #ifdef BENCHMARK_FPGATRACKSIM
     true;
@@ -37,7 +36,7 @@ constexpr bool enableBenchmark =
 // Initialize
 
 FPGATrackSimDataPrepAlg::FPGATrackSimDataPrepAlg (const std::string& name, ISvcLocator* pSvcLocator) :
-    AthAlgorithm(name, pSvcLocator)
+    AthReentrantAlgorithm(name, pSvcLocator)
 {
 }
 
@@ -50,6 +49,14 @@ StatusCode FPGATrackSimDataPrepAlg::initialize()
     if (!m_description.empty()) {
         while (std::getline(ss, line, '\n')) {
             ATH_MSG_INFO('\t' << line);
+        }
+    }
+
+    // Dump the configuration to make sure it propagated through right
+    const std::vector<Gaudi::Details::PropertyBase*> props = this->getProperties();
+    for( Gaudi::Details::PropertyBase* prop : props ) {
+        if (prop->ownerTypeName()==this->type()) {      
+        ATH_MSG_DEBUG("Property:\t" << prop->name() << "\t : \t" << prop->toString());
         }
     }
 
@@ -96,13 +103,22 @@ StatusCode FPGATrackSimDataPrepAlg::initialize()
 //                          MAIN EXECUTE ROUTINE                             //
 ///////////////////////////////////////////////////////////////////////////////
 
-StatusCode FPGATrackSimDataPrepAlg::execute()
+StatusCode FPGATrackSimDataPrepAlg::execute(const EventContext& ctx) const
 {
-    const EventContext& ctx = getContext();
+    // Local event headers (thread-safe)
+    FPGATrackSimEventInputHeader eventHeader;
+    FPGATrackSimEventInputHeader firstInputHeader;
+    
+    FPGATrackSimLogicalEventInputHeader logicEventHeader_precluster;
+    FPGATrackSimLogicalEventInputHeader logicEventHeader;
+    
+    // Local storage for clusters and unmapped hits
+    FPGATrackSimClusterCollection clusters;
+    std::vector<std::unique_ptr<FPGATrackSimHit>> hits_miss;
 
     // Read inputs
     bool done = false;
-    ATH_CHECK(readInputs(done));
+    ATH_CHECK(readInputs(ctx, eventHeader, firstInputHeader, done));
 
     if (done) {
       SmartIF<IEventProcessor> appMgr{service("ApplicationMgr")};
@@ -122,13 +138,13 @@ StatusCode FPGATrackSimDataPrepAlg::execute()
     SG::WriteHandle<FPGATrackSimClusterCollection> FPGAClusters (m_FPGAClusterKey.at(0), ctx);
     ATH_CHECK( FPGAClusters.record (std::make_unique<FPGATrackSimClusterCollection>()));
 
-    SG::WriteHandle<xAODTruthParticleLinkVector> truthLinkVec(m_truthLinkContainerKey);
+    SG::WriteHandle<xAODTruthParticleLinkVector> truthLinkVec(m_truthLinkContainerKey, ctx);
     ATH_CHECK(truthLinkVec.record(std::make_unique<xAODTruthParticleLinkVector>()));
 
-    SG::WriteHandle<FPGATrackSimTruthTrackCollection> FPGATruthTracks (m_FPGATruthTrackKey);
+    SG::WriteHandle<FPGATrackSimTruthTrackCollection> FPGATruthTracks (m_FPGATruthTrackKey, ctx);
     ATH_CHECK(FPGATruthTracks.record(std::make_unique<FPGATrackSimTruthTrackCollection>()));
 
-    SG::WriteHandle<FPGATrackSimOfflineTrackCollection> FPGAOfflineTracks (m_FPGAOfflineTrackKey);
+    SG::WriteHandle<FPGATrackSimOfflineTrackCollection> FPGAOfflineTracks (m_FPGAOfflineTrackKey, ctx);
     ATH_CHECK(FPGAOfflineTracks.record(std::make_unique<FPGATrackSimOfflineTrackCollection>()));
     // Apply event selection based on truth tracks
     if (m_doEvtSel) {
@@ -136,9 +152,12 @@ StatusCode FPGATrackSimDataPrepAlg::execute()
         if constexpr (enableBenchmark) m_chrono->chronoStart("DataPrep: EventSelection");
         for (auto eventSelector : m_eventSelectionTools)
         {
-            if (eventSelector->selectEvent(m_eventHeader)) {
+            if (eventSelector->selectEvent(eventHeader)) {
                 ATH_MSG_DEBUG("Event accepted by: " << eventSelector->name());
                 acceptEvent = true;
+                if ((m_writeRegion>=0)&&(m_writeRegion==eventSelector->getRegionID())) {
+                    m_writeOutputTool->activateEventOutput();
+                }
             }
         }
         if constexpr (enableBenchmark) m_chrono->chronoStop("DataPrep: EventSelection");
@@ -156,7 +175,7 @@ StatusCode FPGATrackSimDataPrepAlg::execute()
                 truthParticlesMap.insert(std::make_pair(HepMC::uniqueID(truthParticle), std::make_pair(truthParticle,truthParticleIndex)));
                 truthParticleIndex++;
             }
-            const FPGATrackSimTruthTrackCollection& fpgaTruthTracks = m_eventHeader.optional().getTruthTracks();
+            const FPGATrackSimTruthTrackCollection& fpgaTruthTracks = eventHeader.optional().getTruthTracks();
             truthLinkVec->reserve(fpgaTruthTracks.size());
             ATH_MSG_DEBUG("begin truth matching for " << fpgaTruthTracks.size() << " FPGA truth tracks");
             for (const FPGATrackSimTruthTrack& fpgaTruthTrack : fpgaTruthTracks) {
@@ -188,16 +207,16 @@ StatusCode FPGATrackSimDataPrepAlg::execute()
     m_evt++;
     
     // Map, cluster, and filter hits
-    ATH_CHECK(processInputs(FPGAHitUnmapped, FPGAClusters));
+    ATH_CHECK(processInputs(eventHeader, logicEventHeader, logicEventHeader_precluster, 
+                           hits_miss, clusters, FPGAHitUnmapped, FPGAClusters));
 
     if constexpr (enableBenchmark) m_chrono->chronoStart("DataPrep: get truth/offline tracks");
-    // Now that this is done, push truth tracks back to storegate.
-    for (const auto& truthtrack : m_logicEventHeader->optional().getTruthTracks()) {
+    for (const auto& truthtrack : logicEventHeader.optional().getTruthTracks()) {
         FPGATruthTracks->push_back(truthtrack);
     }
-    
+
     // Need to do the same for offline tracks.
-    for (const auto& offlineTrack : m_logicEventHeader->optional().getOfflineTracks()) {
+    for (const auto& offlineTrack : logicEventHeader.optional().getOfflineTracks()) {
         FPGAOfflineTracks->push_back(offlineTrack);
     }
     
@@ -215,33 +234,39 @@ StatusCode FPGATrackSimDataPrepAlg::execute()
         Monitored::Group(m_monTool, mon_regionID);
     }
 
-    std::vector<FPGATrackSimHit> const& hits = m_logicEventHeader->towers().at(0).hits();
+    std::vector<FPGATrackSimHit> const& hits = logicEventHeader.towers().at(0).hits();
     if (m_recordHits) {
         if constexpr (enableBenchmark) m_chrono->chronoStart("DataPrep: record hits");
         // If and when we set up code to run over more than one region/tower at a time this will need to be updated
         FPGAHits->reserve(hits.size());
         for (const auto& hit : hits) {
-            if (hit.isReal()) FPGAHits->push_back(hit);
+            if (hit.isReal()) FPGAHits->push_back(new FPGATrackSimHit(hit));
         }
         if constexpr (enableBenchmark) m_chrono->chronoStop("DataPrep: record hits");
     }
 
     auto mon_nhits = Monitored::Scalar<unsigned>("nHits", hits.size());
-    auto mon_nhits_unmapped = Monitored::Scalar<unsigned>("nHits_unmapped", m_hits_miss.size());
+    auto mon_nhits_unmapped = Monitored::Scalar<unsigned>("nHits_unmapped", hits_miss.size());
     Monitored::Group(m_monTool, mon_nhits, mon_nhits_unmapped);
 
-    // Put the FPGATrackSim event info on storegate so later algorithms can access it easily.
-    SG::WriteHandle<FPGATrackSimEventInfo> FPGAEventInfo (m_FPGAEventInfoKey);
-    ATH_CHECK(FPGAEventInfo.record(std::make_unique<FPGATrackSimEventInfo>(m_eventHeader.event())));
+    if (!m_isDataPrepPipeline) {
+        // Put the FPGATrackSim event info on storegate so later algorithms can access it easily.
+        SG::WriteHandle<FPGATrackSimEventInfo> FPGAEventInfo(m_FPGAEventInfoKey, ctx);
+        ATH_CHECK(FPGAEventInfo.record(std::make_unique<FPGATrackSimEventInfo>(eventHeader.event())));
+    }
 
     // Write the output and reset
-    if (m_writeOutputData)
+    if (m_writeOutputData) {
+        // Lock and transfer to ROOT-managed pointers
+        std::lock_guard<std::mutex> lock(m_rootWriteMutex);
+    
+        *m_logicEventHeader = std::move(logicEventHeader);
+        if (m_writePreClusterBranch) {
+            *m_logicEventHeader_precluster = std::move(logicEventHeader_precluster);
+        }
+        
         ATH_CHECK(m_writeOutputTool->writeData());
-
-    // Reset data pointers
-    m_eventHeader.reset();
-    m_logicEventHeader->reset();
-    m_logicEventHeader_precluster->reset();
+    }
 
     return StatusCode::SUCCESS;
 }
@@ -251,33 +276,36 @@ StatusCode FPGATrackSimDataPrepAlg::execute()
 //                  INPUT PASSING, READING AND PROCESSING                    //
 ///////////////////////////////////////////////////////////////////////////////
 
-StatusCode FPGATrackSimDataPrepAlg::readInputs(bool & done)
+StatusCode FPGATrackSimDataPrepAlg::readInputs(
+    const EventContext& ctx,
+    FPGATrackSimEventInputHeader& eventHeader,
+    FPGATrackSimEventInputHeader& firstInputHeader,
+    bool& done) const
 {
 
-    if ( !m_hitSGInputTool.empty()) {
-        ATH_CHECK(m_hitSGInputTool->readData(&m_eventHeader, Gaudi::Hive::currentContext()));
-        ATH_MSG_DEBUG("Loaded " << m_eventHeader.nHits() << " hits in event header from SG");
-
+    if (!m_hitSGInputTool.empty()) {
+        ATH_CHECK(m_hitSGInputTool->readData(&eventHeader, ctx));
+        ATH_MSG_DEBUG("Loaded " << eventHeader.nHits() << " hits in event header from SG");
         return StatusCode::SUCCESS;
     }
 
     if (m_ev % m_firstInputToolN == 0)
     {
         // Read primary input
-        ATH_CHECK(m_hitInputTool->readData(&m_firstInputHeader, done));
+        ATH_CHECK(m_hitInputTool->readData(&firstInputHeader, done));
         if (done)
         {
             ATH_MSG_DEBUG("Cannot read more events from file, returning");
-            return StatusCode::SUCCESS; // end of loop over events
+            return StatusCode::SUCCESS;
         }
     }
 
-    m_eventHeader = m_firstInputHeader;
+    eventHeader = firstInputHeader;
 
     // Read secondary input
     for (int i = 0; i < m_secondInputToolN; i++)
     {
-        ATH_CHECK(m_hitInputTool2->readData(&m_eventHeader, done, false));
+        ATH_CHECK(m_hitInputTool2->readData(&eventHeader, done, false));
         if (done)
         {
             ATH_MSG_INFO("Cannot read more events from file, returning");
@@ -292,53 +320,83 @@ StatusCode FPGATrackSimDataPrepAlg::readInputs(bool & done)
 
 
 // Applies clustering, mapping, hit filtering, and space points
-StatusCode FPGATrackSimDataPrepAlg::processInputs(SG::WriteHandle<FPGATrackSimHitCollection> &FPGAHitUnmapped,
-                                                            SG::WriteHandle<FPGATrackSimClusterCollection> &FPGAClusters)
+StatusCode FPGATrackSimDataPrepAlg::processInputs(
+    const FPGATrackSimEventInputHeader& eventHeader,
+    FPGATrackSimLogicalEventInputHeader& logicEventHeader,
+    FPGATrackSimLogicalEventInputHeader& logicEventHeader_precluster,
+    std::vector<std::unique_ptr<FPGATrackSimHit>>& hits_miss,
+    FPGATrackSimClusterCollection& clusters,
+    SG::WriteHandle<FPGATrackSimHitCollection> &FPGAHitUnmapped,
+    SG::WriteHandle<FPGATrackSimClusterCollection> &FPGAClusters) const
 {
-    m_clusters->clear();
-    m_hits_miss.clear();
-
     // Map hits
     ATH_MSG_DEBUG("Running hits conversion");
-    m_logicEventHeader->reset();
-    m_logicEventHeader_precluster->reset();
+    logicEventHeader.reset();
+    logicEventHeader_precluster.reset();
+    
     if constexpr (enableBenchmark) m_chrono->chronoStart("DataPrep: RawToLogical");
     for (auto hitMapTool : m_hitMapTools){
-        ATH_CHECK(hitMapTool->convert(1, m_eventHeader, *m_logicEventHeader));
+        ATH_CHECK(hitMapTool->convert(1, eventHeader, logicEventHeader));
     }
     if constexpr (enableBenchmark) m_chrono->chronoStop("DataPrep: RawToLogical");
 
     
-    for (const FPGATrackSimHit& hit : m_hits_miss) FPGAHitUnmapped->push_back(hit);
+    for (auto& hit : hits_miss) FPGAHitUnmapped->push_back(std::move(hit));
+    hits_miss.clear();
 
 
-    ATH_MSG_DEBUG("Hits conversion done, #unmapped hists = " << m_hits_miss.size());
+    ATH_MSG_DEBUG("Hits conversion done, #unmapped hists = " << FPGAHitUnmapped->size());
 
     // At this stage, copy the logicEventHeader.
-    if(m_writeOutputData && m_writePreClusterBranch) *m_logicEventHeader_precluster = *m_logicEventHeader;
+    if(m_writeOutputData && m_writePreClusterBranch) {
+        logicEventHeader_precluster = logicEventHeader;
+    }
 
     if constexpr (enableBenchmark) m_chrono->chronoStart("DataPrep: Clustering");
     // Clustering
     for (int ic = 0; ic < m_clustering; ic++) {
         ATH_MSG_DEBUG("Running clustering");
-        ATH_CHECK(m_clusteringTool->DoClustering(*m_logicEventHeader, *m_clusters));
-        // I think I also want to pass m_clusters to random removal (but won't work currently)
-        if (m_doHitFiltering) ATH_CHECK(m_hitFilteringTool->DoRandomRemoval(*m_logicEventHeader, false));
+        ATH_CHECK(m_clusteringTool->DoClustering(logicEventHeader, clusters));
+        // I think I also want to pass clusters to random removal (but won't work currently)
+        if (m_doHitFiltering) ATH_CHECK(m_hitFilteringTool->DoRandomRemoval(logicEventHeader, false));
         unsigned npix(0), nstrip(0);
-        for (const FPGATrackSimCluster& cluster : *m_clusters) {
+        for (const FPGATrackSimCluster& cluster : clusters) {
             if (cluster.getClusterEquiv().isPixel()) npix++;
             else nstrip++;
         }
+        
         m_nPixClusters += npix;
         m_nStripClusters += nstrip;
-        if (npix > m_nMaxPixClusters) m_nMaxPixClusters = npix;
-        if (nstrip > m_nMaxStripClusters) m_nMaxStripClusters = nstrip;
-        if (m_clusters->size() > m_nMaxClusters) m_nMaxClusters = m_clusters->size();
+
+
+        // The following is hopefully a thread-safe approach to update nMaximum clusters
+        // using compare-exchange loop to prevent race conditions.
+        // Logic: Without atomics, two threads could both read e.g. max=100, calculate new values (150, 200),
+        // and the last write would win, potentially losing the true maximum (200 vs 150).
+        // compare_exchange_weak atomically checks if the value is unchanged before updating,
+        // and retries if another thread modified it concurrently, ensuring correctness.
+        
+        // max update for m_nMaxPixClusters
+        unsigned current_max_pix = m_nMaxPixClusters;
+        while (npix > current_max_pix && 
+               !m_nMaxPixClusters.compare_exchange_weak(current_max_pix, npix));
+
+        // max update for m_nMaxStripClusters
+        unsigned current_max_strip = m_nMaxStripClusters;
+        while (nstrip > current_max_strip && 
+               !m_nMaxStripClusters.compare_exchange_weak(current_max_strip, nstrip));
+
+        // max update for m_nMaxClusters
+        unsigned current_max_clusters = m_nMaxClusters;
+        unsigned clusters_size = clusters.size();
+        while (clusters_size > current_max_clusters && 
+               !m_nMaxClusters.compare_exchange_weak(current_max_clusters, clusters_size));
     }
+    // Record clusters
     FPGAClusters->insert(
         FPGAClusters->end(),
-        std::make_move_iterator(m_clusters->begin()),
-        std::make_move_iterator(m_clusters->end()));
+        std::make_move_iterator(clusters.begin()),
+        std::make_move_iterator(clusters.end()));
     
     if constexpr (enableBenchmark) m_chrono->chronoStop("DataPrep: Clustering");
 

@@ -20,6 +20,7 @@ StatusCode MSVtxValidationAlg::initialize() {
     ATH_CHECK(m_TrackParticleKey.initialize(m_computeVertexIso));
     ATH_CHECK(m_JetKey.initialize(m_fillJets || m_computeVertexIso || m_computeActiveVertices));
     ATH_CHECK(m_MetKey.initialize(m_fillMET));
+    ATH_CHECK(m_MuonKey.initialize());
     ATH_CHECK(m_MuonSegKey.initialize());
     ATH_CHECK(m_TrackletKey.initialize());
     ATH_CHECK(m_MSVtxKey.initialize());
@@ -56,6 +57,10 @@ StatusCode MSVtxValidationAlg::initialize() {
     // muon segments: dumps the entire muon segment container without needing an explicit fill call
     m_muonSeg = std::make_shared<MuonPRDTest::SegmentVariables>(m_tree, m_MuonSegKey.key(), "muonSeg", msgLevel());
     m_tree.addBranch(m_muonSeg);
+
+    // muons
+    m_muon = std::make_shared<MuonVal::IParticleFourMomBranch>(m_tree, "muon");
+    m_tree.addBranch(m_muon);
 
     // jets
     m_jet = std::make_shared<MuonVal::IParticleFourMomBranch>(m_tree, "jet");
@@ -396,6 +401,16 @@ StatusCode MSVtxValidationAlg::fillMet(const EventContext& ctx) {
 }
 
 
+StatusCode MSVtxValidationAlg::fillMuons(const EventContext& ctx) {
+    const xAOD::MuonContainer* muons{nullptr};
+    ATH_CHECK(SG::get(muons, m_MuonKey, ctx));
+
+    for (const xAOD::Muon* muon : *muons) m_muon->push_back(muon); 
+
+    return StatusCode::SUCCESS;
+}
+
+
 StatusCode MSVtxValidationAlg::fillTracklets(const EventContext& ctx) {
     
     const xAOD::TrackParticleContainer* msOnlyTracklets{nullptr};
@@ -516,6 +531,7 @@ StatusCode MSVtxValidationAlg::execute() {
     if(m_isMC) ATH_CHECK(fillTruth(ctx));
     if(m_fillJets) ATH_CHECK(fillJet(ctx));
     if(m_fillMET) ATH_CHECK(fillMet(ctx));
+    ATH_CHECK(fillMuons(ctx));
     ATH_CHECK(fillTracklets(ctx));
     ATH_CHECK(fillMSVtx(ctx));
 

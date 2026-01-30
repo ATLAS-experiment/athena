@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // Base class
@@ -14,13 +14,10 @@
 // Geant4 includes used in functions
 
 GDMLDetectorTool::GDMLDetectorTool(const std::string& type, const std::string& name, const IInterface* parent)
-  : DetectorGeometryBase(type,name,parent),m_GDMLFileName(""),m_blGetTopTransform(true),m_geoDetectorName("")
+  : DetectorGeometryBase(type,name,parent),m_blGetTopTransform(true)
 {
   m_topTransform.setIdentity();
   ATH_MSG_DEBUG( "GDMLDetectorTool constructor for " << name );
-  declareProperty("GeoDetectorName",m_geoDetectorName, "Name of the detector in GeoModel, if different from G4.");
-  declareProperty("GDMLFileName",m_GDMLFileName,"Name of the GDML file to be used as input.");
-
 }
 
 StatusCode GDMLDetectorTool::initialize()
@@ -61,7 +58,7 @@ void GDMLDetectorTool::BuildGeometry()
   ATH_MSG_VERBOSE( name() << " GDMLDetectorTool::BuildGeometry(): Starting" );
 
   G4GDMLParser parser;
-  parser.Read(m_GDMLFileName.c_str(),false);
+  parser.Read(m_GDMLFileName.value().c_str(),false);
   m_envelope.theEnvelope=parser.GetWorldVolume()->GetLogicalVolume();
 
   ATH_MSG_VERBOSE( name() << " GDMLDetectorTool::BuildGeometry(): Finished" );

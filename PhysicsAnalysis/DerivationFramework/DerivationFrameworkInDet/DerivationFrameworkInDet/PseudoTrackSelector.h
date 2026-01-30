@@ -1,9 +1,9 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
-// PseudoTrackSelector.h, (c) ATLAS Detector software
+// PseudoTrackSelector.h
 ///////////////////////////////////////////////////////////////////
 #ifndef DERIVATIONFRAMEWORK_PseudoTrackSelector_H
 #define DERIVATIONFRAMEWORK_PseudoTrackSelector_H
@@ -26,37 +26,35 @@
 #include "StoreGate/ReadHandleKeyArray.h"
 
 namespace DerivationFramework {
-  
+
   /** @brief Class-algorithm for pseudo track selection */
   class PseudoTrackSelector : public extends<AthAlgTool, IAugmentationTool>
     {
-    public:      
+    public:
       ///////////////////////////////////////////////////////////////////
       /** @brief Standard Algotithm methods:                           */
       ///////////////////////////////////////////////////////////////////
 
-      PseudoTrackSelector(const std::string& t, const std::string& n, const IInterface* p);
-      virtual ~PseudoTrackSelector() {}
-      StatusCode initialize();
-      StatusCode execute();
-      StatusCode finalize();
-      virtual StatusCode addBranches(const EventContext& ctx) const;
- 
+      using base_class::base_class;
+
+      virtual StatusCode initialize() override final;
+      virtual StatusCode addBranches(const EventContext& ctx) const override final;
+
     protected:
       ///////////////////////////////////////////////////////////////////
       /** @brief Protected data:                                       */
       ///////////////////////////////////////////////////////////////////
-      SG::ReadHandleKey<xAOD::TrackParticleContainer>  m_in_recoTrackParticleLocation;       /** Reco track collection.   */
-      SG::ReadHandleKey<xAOD::TrackParticleContainer>  m_in_pseudoTrackParticleLocation;     /** Pseudo track collection. */
-      SG::WriteHandleKey<xAOD::TrackParticleContainer> m_out_recoReplacedWithPseudo;         /** Output track collection. */
-      SG::WriteHandleKey<xAOD::TrackParticleContainer> m_out_recoReplacedWithPseudoFromB;    /** Output track collection. */
-      SG::WriteHandleKey<xAOD::TrackParticleContainer> m_out_recoReplacedWithPseudoNotFromB; /** Output track collection. */
-      SG::WriteHandleKey<xAOD::TrackParticleContainer> m_out_recoPlusPseudo;                 /** Output track collection. */
-      SG::WriteHandleKey<xAOD::TrackParticleContainer> m_out_recoPlusPseudoFromB;            /** Output track collection. */
-      SG::WriteHandleKey<xAOD::TrackParticleContainer> m_out_recoPlusPseudoNotFromB;         /** Output track collection. */
-      SG::WriteHandleKey<xAOD::TrackParticleContainer> m_out_recoNoFakes;                    /** Output track collection. */
-      SG::WriteHandleKey<xAOD::TrackParticleContainer> m_out_recoNoFakesFromB;               /** Output track collection. */
-      SG::WriteHandleKey<xAOD::TrackParticleContainer> m_out_recoNoFakesNotFromB;            /** Output track collection. */
+      SG::ReadHandleKey<xAOD::TrackParticleContainer>  m_in_recoTrackParticleLocation{this, "RecoTrackParticleLocation", ""};       /** Reco track collection.   */
+      SG::ReadHandleKey<xAOD::TrackParticleContainer>  m_in_pseudoTrackParticleLocation{this, "PseudoTrackParticleLocation", ""};     /** Pseudo track collection. */
+      SG::WriteHandleKey<xAOD::TrackParticleContainer> m_out_recoReplacedWithPseudo{this, "OutputRecoReplacedWithPseudo", ""};         /** Output track collection. */
+      SG::WriteHandleKey<xAOD::TrackParticleContainer> m_out_recoReplacedWithPseudoFromB{this, "OutputRecoReplacedWithPseudoFromB", ""};    /** Output track collection. */
+      SG::WriteHandleKey<xAOD::TrackParticleContainer> m_out_recoReplacedWithPseudoNotFromB{this, "OutputRecoReplacedWithPseudoNotFromB", ""}; /** Output track collection. */
+      SG::WriteHandleKey<xAOD::TrackParticleContainer> m_out_recoPlusPseudo{this, "OutputRecoPlusPseudo", ""};                 /** Output track collection. */
+      SG::WriteHandleKey<xAOD::TrackParticleContainer> m_out_recoPlusPseudoFromB{this, "OutputRecoPlusPseudoFromB", ""};            /** Output track collection. */
+      SG::WriteHandleKey<xAOD::TrackParticleContainer> m_out_recoPlusPseudoNotFromB{this, "OutputRecoPlusPseudoNotFromB", ""};         /** Output track collection. */
+      SG::WriteHandleKey<xAOD::TrackParticleContainer> m_out_recoNoFakes{this, "OutputRecoNoFakes", ""};                    /** Output track collection. */
+      SG::WriteHandleKey<xAOD::TrackParticleContainer> m_out_recoNoFakesFromB{this, "OutputRecoNoFakesFromB", ""};               /** Output track collection. */
+      SG::WriteHandleKey<xAOD::TrackParticleContainer> m_out_recoNoFakesNotFromB{this, "OutputRecoNoFakesNotFromB", ""};            /** Output track collection. */
 
       ///////////////////////////////////////////////////////////////////
       /** @brief Protected methods:                                    */

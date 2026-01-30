@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // Local include(s):
@@ -31,27 +31,17 @@ StatusCode InDet::InDetUsedInFitTrackDecoratorTool::initialize()
 {
   // Print configuration
   ATH_MSG_DEBUG("Initializing " << name() << "...");
-  ATH_MSG_DEBUG("Using AMVFVerticesDecoName: " << m_vtxDecoName);
-  ATH_MSG_DEBUG("Using AMVFWeightsDecoName: "  << m_wgtDecoName);
+  ATH_MSG_DEBUG("Using AMVFVerticesDecoName: " << m_vtxDecoKey);
+  ATH_MSG_DEBUG("Using AMVFWeightsDecoName: "  << m_wgtDecoKey);
   ATH_MSG_DEBUG("Using TrackContainer: "       << m_trkContKey);
   ATH_MSG_DEBUG("Using VertexContainer: "      << m_vtxContKey);
 
   // Instantiate and initialize our container reads
-  // For tracks:
   ATH_CHECK(m_trkContKey.initialize());
-  // For vertices:
   ATH_CHECK(m_vtxContKey.initialize());
 
   // Instantiate and initialize our decorator writes
-  // For vertices:
-  m_vtxDecoKey = SG::WriteDecorHandleKey<xAOD::TrackParticleContainer>(m_trkContKey.key() + "." + m_vtxDecoName);
-  this->declare(m_vtxDecoKey);
-  m_vtxDecoKey.setOwner(&(*this));
   ATH_CHECK(m_vtxDecoKey.initialize());
-  // For weights:
-  m_wgtDecoKey = SG::WriteDecorHandleKey<xAOD::TrackParticleContainer>(m_trkContKey.key() + "." + m_wgtDecoName);
-  this->declare(m_wgtDecoKey);
-  m_wgtDecoKey.setOwner(&(*this));
   ATH_CHECK(m_wgtDecoKey.initialize());
 
   return StatusCode::SUCCESS;
@@ -65,11 +55,9 @@ StatusCode InDet::InDetUsedInFitTrackDecoratorTool::finalize()
   return StatusCode::SUCCESS;
 }
 
-void InDet::InDetUsedInFitTrackDecoratorTool::decorate(const xAOD::TrackParticleContainer* trkCont, const xAOD::VertexContainer* vtxCont) const
+void InDet::InDetUsedInFitTrackDecoratorTool::decorate(const xAOD::TrackParticleContainer* trkCont, const xAOD::VertexContainer* vtxCont, const EventContext& ctx) const
 {
   ATH_MSG_DEBUG("In decorate(...) for " << name() <<  "...");
-
-  const EventContext& ctx = Gaudi::Hive::currentContext();
 
   // Decor handles for the AMVF vertices and weights
   SG::WriteDecorHandle<xAOD::TrackParticleContainer, std::vector<ElementLink<xAOD::VertexContainer>>> vtxDeco(m_vtxDecoKey, ctx);
@@ -83,7 +71,7 @@ void InDet::InDetUsedInFitTrackDecoratorTool::decorate(const xAOD::TrackParticle
   // Iterate over our tracks:
   for (const xAOD::TrackParticle*  trk : *trkCont) {
     if (!trk) continue;
-    
+
     vxWithWeight.clear();
 
     // Iterate over our vertices
@@ -100,13 +88,13 @@ void InDet::InDetUsedInFitTrackDecoratorTool::decorate(const xAOD::TrackParticle
         }
       }
     }//end loop over vertices
-    
+
     //sort by weight
     std::sort(vxWithWeight.begin(),vxWithWeight.end(),
         [](std::pair<const xAOD::Vertex*,float>& a, std::pair<const xAOD::Vertex*,float>& b){ return a.second > b.second; } );
-  
+
     //split vector of pairs into two vectors in sync:
-    
+
     std::vector<ElementLink<xAOD::VertexContainer>> AMVFVertices;
     std::vector<float> AMVFWeights;
     AMVFVertices.reserve(vxWithWeight.size());
@@ -125,10 +113,8 @@ void InDet::InDetUsedInFitTrackDecoratorTool::decorate(const xAOD::TrackParticle
 
 }
 
-void InDet::InDetUsedInFitTrackDecoratorTool::decorate() const
+void InDet::InDetUsedInFitTrackDecoratorTool::decorate(const EventContext& ctx) const
 {
-  const EventContext& ctx = Gaudi::Hive::currentContext();
-
   // Open our track container
   SG::ReadHandle<xAOD::TrackParticleContainer> trkCont(m_trkContKey, ctx);
   if (!trkCont.isValid()) {
@@ -144,6 +130,6 @@ void InDet::InDetUsedInFitTrackDecoratorTool::decorate() const
   }
 
   // Perform the decoration
-  decorate(trkCont.get(), vtxCont.get());
+  decorate(trkCont.get(), vtxCont.get(), ctx);
 
 }

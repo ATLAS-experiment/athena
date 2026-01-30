@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @file	 AFPSiDLinRegTool.cxx
@@ -144,7 +144,10 @@ std::pair<double, double> AFPSiDLinRegTool::linearRegression(const std::vector<s
 		numerator += dx * dy;
 		denominator += dx * dx;
 	}
-	
+	if (denominator == 0){
+	  ATH_MSG_WARNING("AFPSiDLinRegTool::linearRegression: denominator is zero");
+	  return {0.,0.};
+	}
 	const double slope = numerator / denominator;
 	const double position = meany - slope * meanx;
 

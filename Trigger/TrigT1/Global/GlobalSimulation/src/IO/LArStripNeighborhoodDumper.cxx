@@ -13,7 +13,7 @@ namespace GlobalSim {
   StatusCode
   LArStripNeighborhoodDumper::dump(const std::string& name,
 				   const xAOD::EventInfo& eventInfo,
-				   const IOBitwise::IeEmNbhoodTOBContainer& neighborhoodTOBs) const {
+				   const IOBitwise::eEmNbhoodTOBContainer& neighborhoodTOBs) const {
 
     std::ofstream out(name + "_" +
                       std::to_string(eventInfo.eventNumber()) +
@@ -64,7 +64,7 @@ namespace GlobalSim {
   StatusCode
   LArStripNeighborhoodDumper::dumpTerse(const std::string& name,
 					const xAOD::EventInfo& eventInfo,
-					const IOBitwise::IeEmNbhoodTOBContainer& neighborhoodTOBs) const {
+					const IOBitwise::eEmNbhoodTOBContainer& neighborhoodTOBs) const {
 
     std::ofstream out(name + "_" +
                       std::to_string(eventInfo.eventNumber()) +

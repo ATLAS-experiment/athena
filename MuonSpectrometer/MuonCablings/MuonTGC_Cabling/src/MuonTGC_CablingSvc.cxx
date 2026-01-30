@@ -396,7 +396,7 @@ bool MuonTGC_CablingSvc::getReadoutIDfromOfflineID(const Identifier & offlineID,
   
 
   if(!status) {
-    ATH_MSG_WARNING(" Fail to getOnlineIDfromOfflineID " << " for OfflineID=" << offlineID);
+    ATH_MSG_WARNING(" Fail to getOnlineIDfromOfflineID " << " for OfflineID=" <<  m_idHelperSvc->toString(offlineID));
   } 
   if(!status) return status;  
 

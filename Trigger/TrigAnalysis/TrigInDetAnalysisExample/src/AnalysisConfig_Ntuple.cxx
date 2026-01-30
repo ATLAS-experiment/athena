@@ -3,7 +3,7 @@
  **
  **     @author  mark sutton
  **
- **     Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+ **     Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  **/
 
 
@@ -151,7 +151,7 @@ size_t AnalysisConfig_Ntuple::get_jets( Trig::FeatureContainer::combination_cons
 
     xAOD::JetContainer::const_iterator jitr = jets->begin();
 
-    for ( int j=0 ; jitr!=jets->end() ; ++jitr, j++ ) { 
+    for ( ; jitr!=jets->end() ; ++jitr ) {
       
       const xAOD::Jet* ajet = (*jitr);
 
@@ -207,7 +207,7 @@ void AnalysisConfig_Ntuple::book() {
 		return;
 	}
 
-	m_provider->msg(MSG::INFO) << "[91;1m" << " Successfully retrived the TrigDecisionTool" << "[m" << endmsg;
+	m_provider->msg(MSG::INFO) << "[91;1m" << " Successfully retrieved the TrigDecisionTool" << "[m" << endmsg;
 	m_provider->msg(MSG::INFO) << "[91;1m" << " booking ntuple" << "[m" << endmsg;
 	m_provider->msg(MSG::INFO) << "[91;1m" << " trying to create new ntple file" << "[m" << endmsg;
 

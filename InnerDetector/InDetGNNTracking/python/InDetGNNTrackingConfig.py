@@ -81,9 +81,9 @@ def GNNTrackFinderTritonToolCfg(flags, name='GNNTrackFinderTritonTool', **kwargs
                       ))
     )
     kwargs.setdefault("SpacepointFeatureTool", acc.popToolsAndMerge(SpacepointFeatureToolCfg(flags)))
-    
+    kwargs.setdefault("FeatureNames", flags.Tracking.GNN.spacepointFeatures)
     acc.setPrivateTools(CompFactory.InDet.GNNTrackFinderTritonTool(name, **kwargs))
-    return acc  
+    return acc
 
 
 def SeedFitterToolCfg(flags, name="SeedFitterTool", **kwargs):

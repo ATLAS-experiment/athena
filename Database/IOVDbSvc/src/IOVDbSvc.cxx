@@ -331,11 +331,12 @@ StatusCode IOVDbSvc::preLoadAddresses(StoreID::type storeID,tadList& tlist) {
       const std::string& fname=cont->folderName();
       // check if this folder is in list requested by IOVDbSvc
       for (const auto & thisNamePtrPair : m_foldermap) {
+        IOVDbFolder* folder = thisNamePtrPair.second;
         // take data from FLMD only if tag override is NOT set
-        if (thisNamePtrPair.second->folderName()==fname && !(thisNamePtrPair.second->tagOverride())) {
+        if (folder->folderName()==fname && !(folder->tagOverride())) {
           ATH_MSG_INFO( "Folder " << fname << " will be taken from file metadata" );
-          thisNamePtrPair.second->useFileMetaData();
-          thisNamePtrPair.second->setFolderDescription( cont->folderDescription() );
+          folder->useFileMetaData();
+          folder->setFolderDescription( cont->folderDescription() );
           ++nused;
           break;
         }

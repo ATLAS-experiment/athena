@@ -271,7 +271,7 @@ inline Efficiency& Efficiency::subFromOne()
       kv.second.down = -kv.second.down;
     }
     /// Central value
-    nominal = 1.-nominal;;
+    nominal = 1.-nominal;
     return *this;
 }
 

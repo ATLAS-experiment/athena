@@ -54,12 +54,10 @@ class ComboHypo : public ::AthReentrantAlgorithm {
     "Require each Feature in each leg of the combination to come from a unique L1 seeding ROI."};
 
   Gaudi::Property< Combo::MultiplicityReqMap > m_multiplicitiesReqMap{this, "MultiplicitiesMap", {}, 
-    "Map from the chain name to multiplicities required at each input",
-    "mapMergeNoReplace<std::string, std::vector<int>>"};
+    "Map from the chain name to multiplicities required at each input"};
 
   Gaudi::Property< Combo::LegMap > m_legToInputCollectionMap{this, "LegToInputCollectionMap", {},
-    "Map from the chain name to the per-leg index in this algorithm's ReadHandleKeyArray which should be used as the source of incoming Decision Objects on the leg.",
-    "mapMergeNoReplace<std::string, std::vector<int>>"};
+    "Map from the chain name to the per-leg index in this algorithm's ReadHandleKeyArray which should be used as the source of incoming Decision Objects on the leg."};
 
   Gaudi::Property<bool> m_checkMultiplicityMap { this, "CheckMultiplicityMap", true,
     "Perform a consistency check of the MultiplicitiesMap"};

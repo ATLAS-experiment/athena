@@ -14,7 +14,7 @@ atlas_add_library( AthAnalysisToolsLib
                    INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
                    PRIVATE_INCLUDE_DIRS ${CORAL_INCLUDE_DIRS}
                    LINK_LIBRARIES ${ROOT_LIBRARIES} AnalysisUtilsLib AthenaBaseComps CxxUtils GaudiKernel
-                   PRIVATE_LINK_LIBRARIES ${CORAL_LIBRARIES} AthenaPoolUtilities EventInfo PersistentDataModel RootCollection SGTools StoreGateLib xAODEventInfo )
+                   PRIVATE_LINK_LIBRARIES ${CORAL_LIBRARIES} AthenaPoolUtilities EventInfo PersistentDataModel SGTools StoreGateLib xAODEventInfo )
 
 atlas_add_component( AthAnalysisTools
                      src/components/*.cxx

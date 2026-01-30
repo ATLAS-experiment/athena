@@ -17,32 +17,31 @@ class FTagConfig (ConfigBlock):
             noneAction='error',
             info="a postfix to apply to decorations and algorithm names. "
             "Typically not needed here as internally the string "
-            "f'{btagger}_{btagWP}' is used.")
+            "`f'{btagger}_{btagWP}'` is used.")
         self.addOption ('btagWP', "Continuous", type=str,
-            info="the flavour tagging WP. The default is Continuous.")
+            info="the flavour tagging WP.")
         self.addOption ('btagger', "GN2v01", type=str,
-            info="the flavour tagging algorithm: DL1dv01, GN2v01. The default "
-            "is GN2v01.")
+            info="the flavour tagging algorithm: `DL1dv01`, `GN2v01`.")
         self.addOption('useCTagging', False, type=bool,
-            info="whether the fixed WP refer to b-tagging or c-tagging. Set to 'True' "
-            "for referring to c-tagging")
+            info="whether the fixed WP refer to b-tagging or c-tagging. Set to `True` "
+            "to make it refer to c-tagging.")
         self.addOption ('bTagCalibFile', None, type=str,
-            info="calibration file for CDI")
+            info="path to a custom b-tagging CDI file. If left empty, uses the latest available recommendations.")
         # Peculiar case default value set to None while type is bool 
         # A default value will be assigned by the getReadFromBTaggingObject function 
         # if this flag is not set 
         self.addOption('readFromBTaggingObject', None, type=bool,
-            info="whether to read the b-tagging information from the BTagging object "
-            "instead of the jet container. FTAG group has dropped BTagging object, all"
+            info="whether to read the b-tagging information from the `BTagging` object "
+            "instead of the jet container. FTAG group has dropped `BTagging` object, all"
             "b-tagging related variables are attached to jet container. This only serves"
             "as a compatibility option for analysis that use old derivations.")
         self.addOption ('saveScores', '', type=str,
-            info="whether or not to save the scores from the tagger. Set to 'True' "
-            "to save only the overall score, or to 'All' to save also the per-flavour"
+            info="whether or not to save the scores from the tagger. Set to `True` "
+            "to save only the overall score, or to `All` to save also the per-flavour"
             "probabilities.")
         self.addOption ('saveCustomVariables', [], type=list,
-            info="[Expert mode] additional variables to save from the b-tagging object associated "
-            "to each jet. E.g. ['pb','pc','pu', 'ptau'] to replicate 'saveScores=All'.",
+            info="additional variables to save from the b-tagging object associated "
+            "to each jet. E.g. `['pb','pc','pu', 'ptau']` to replicate `saveScores=All`.",
             expertMode=True)
 
     def instanceName (self) :

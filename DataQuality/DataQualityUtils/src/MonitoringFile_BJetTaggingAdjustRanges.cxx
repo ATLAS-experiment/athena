@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
  */
 
 /* Methods to perform post-processing on run_nnnnnn/HLT/JetMon* histograms
@@ -62,8 +62,8 @@ namespace dqutils
           //continue;
           //delete obj_run;
 
-          TString run_dir = tdir_run->GetName();
-          if (!run_dir.Contains("run")) {
+          std::string run_dir = tdir_run->GetName();
+          if (run_dir.find("run") == std::string::npos) {
             std::cerr << "--> BJetTaggingAdjustRanges: no run found" << std::endl;
             return;
             //delete obj_run;
@@ -75,54 +75,53 @@ namespace dqutils
           }
 
           // Setting the branch for the impact parameters
-          TString jetmon_dir = run_dir + "/JetTagging";
+          std::string jetmon_dir = run_dir + "/JetTagging";
 
           TDirectory* dir(0);
           //std::cout << "--> BJetTaggingAdjustRanges: directory " << diag_dir
           //				<< std::endl;
 
-          if (!(dir = f->GetDirectory(jetmon_dir))) {
+          if (!(dir = f->GetDirectory(jetmon_dir.c_str()))) {
             if (debugLevel > 0) std::cerr << "--> BJetTaggingAdjustRanges: directory " << jetmon_dir
                                           << " not found." << std::endl;
             return;
           }
           // std::cout << "--> BJetTaggingAdjustRanges: Setting d0,z0,d0Sig,z0Sig vectors" << std::endl;
-          std::vector < TString > impactParameters;
-          impactParameters.push_back("d0Sig");
-          impactParameters.push_back("z0Sig");
+          static const std::vector<std::string> impactParameters = {
+            "d0Sig",
+            "z0Sig",
+            "d0",
+            "z0",
+          };
 
-          impactParameters.push_back("d0");
-          impactParameters.push_back("z0");
-
-          std::vector < TString > etaAndPtRanges;
-          etaAndPtRanges.push_back("_EtaRange_0_PtRange_0");
-          etaAndPtRanges.push_back("_EtaRange_0_PtRange_1");
-          etaAndPtRanges.push_back("_EtaRange_0_PtRange_2");
-          etaAndPtRanges.push_back("_EtaRange_1_PtRange_0");
-          etaAndPtRanges.push_back("_EtaRange_1_PtRange_1");
-          etaAndPtRanges.push_back("_EtaRange_1_PtRange_2");
-          etaAndPtRanges.push_back("_EtaRange_2_PtRange_0");
-          etaAndPtRanges.push_back("_EtaRange_2_PtRange_1");
-          etaAndPtRanges.push_back("_EtaRange_2_PtRange_2");
-          etaAndPtRanges.push_back("_EtaRange_3_PtRange_0");
-          etaAndPtRanges.push_back("_EtaRange_3_PtRange_1");
-          etaAndPtRanges.push_back("_EtaRange_3_PtRange_2");
-          etaAndPtRanges.push_back("_EtaRange_4_PtRange_0");
-          etaAndPtRanges.push_back("_EtaRange_4_PtRange_1");
-          etaAndPtRanges.push_back("_EtaRange_4_PtRange_2");
+          static const std::vector<std::string> etaAndPtRanges = {
+            "_EtaRange_0_PtRange_0",
+            "_EtaRange_0_PtRange_1",
+            "_EtaRange_0_PtRange_2",
+            "_EtaRange_1_PtRange_0",
+            "_EtaRange_1_PtRange_1",
+            "_EtaRange_1_PtRange_2",
+            "_EtaRange_2_PtRange_0",
+            "_EtaRange_2_PtRange_1",
+            "_EtaRange_2_PtRange_2",
+            "_EtaRange_3_PtRange_0",
+            "_EtaRange_3_PtRange_1",
+            "_EtaRange_3_PtRange_2",
+            "_EtaRange_4_PtRange_0",
+            "_EtaRange_4_PtRange_1",
+            "_EtaRange_4_PtRange_2",
+          };
 
           TH1F* workingHistogram(0);
 
-          TString impactParameterHistos, workingHistogramName;
+          std::string impactParameterHistos, workingHistogramName;
 
-          for (std::vector<TString>::iterator itT = impactParameters.begin(); itT
-               != impactParameters.end(); ++itT) {
-            for (std::vector<TString>::iterator itO = etaAndPtRanges.begin(); itO
-                 != etaAndPtRanges.end(); ++itO) {
-              workingHistogramName = (*itT) + (*itO);
+          for (const std::string& impact : impactParameters) {
+            for (const std::string& range : etaAndPtRanges) {
+              workingHistogramName = impact + range;
               impactParameterHistos = jetmon_dir + "/" + workingHistogramName;
 
-              workingHistogram = dynamic_cast<TH1F*> (f->Get(impactParameterHistos));
+              workingHistogram = dynamic_cast<TH1F*> (f->Get(impactParameterHistos.c_str()));
               if (workingHistogram != 0) {
                 if (debugLevel > 1) {
                   //std::cout << "--> BJetTaggingAdjustRanges: Really doing this stuff" <<

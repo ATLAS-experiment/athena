@@ -5,9 +5,12 @@
 
 #include "StoreGate/ReadHandle.h"
 #include "MuonTrackEvent/TrackingHelpers.h"
+#include "MuonTrackEvent/HitSummary.h"
 #include "MuonTruthHelpers/MuonSimHitHelpers.h"
 #include "MuonDetDescrUtils/MuonSectorMapping.h"
 #include "MuonPRDTestR4/TrackContainerModule.h"
+#include "MuonTesterTree/MuonTesterTreeDict.h"
+#include "xAODTruth/xAODTruthHelpers.h"
 
 #include "Acts/Definitions/Units.hpp"
 
@@ -101,6 +104,9 @@ namespace MuonValR4 {
         ATH_CHECK(m_segSelector.retrieve());
         ATH_CHECK(m_geoCtxKey.initialize());
         ATH_CHECK(m_fieldCacheKey.initialize());
+        ATH_CHECK(m_trackKey.initialize());
+        ATH_CHECK(m_summaryTool.retrieve());
+        ATH_CHECK(m_legacyTrackKey.initialize(!m_legacyTrackKey.empty()));
         ATH_CHECK(detStore()->retrieve(m_detMgr));
 
         MsTrackSeeder::Config seederCfg{};
@@ -192,14 +198,58 @@ namespace MuonValR4 {
 
         m_tree.addBranch(m_recoSegs);
         m_tree.addBranch(std::make_unique<EventInfoBranch>(m_tree, evOpts));
-        m_tree.addBranch(std::make_unique<TrackContainerModule>(m_tree, "MsTracks", msgLevel()));
+        m_tree.addBranch(std::make_unique<TrackContainerModule>(m_tree, m_trackKey.key(), msgLevel()));
 
+        if(!m_legacyTrackKey.empty()) {
+            m_legacyTrks = std::make_unique<IParticleFourMomBranch>(m_tree, "LegacyMSTrks");
+            m_legacyTrks->addVariable(std::make_unique<TrackChi2Branch>(*m_legacyTrks));
+            if (m_isMC) {
+                BilateralLinkerBranch::connectCollections(m_legacyTrks, m_truthTrks, [](const xAOD::IParticle* trk){ 
+                                                      return xAOD::TruthHelpers::getTruthParticle(*trk); }, "truth", "LegacyMS");
+            }
+            for (const auto& summary :{
+                 // Inner
+                "innerSmallHits", "innerLargeHits", "innerSmallHoles", "innerLargeHoles",
+                // Middle
+                "middleSmallHits", "middleLargeHits", "middleSmallHoles",
+                "middleLargeHoles",
+                // Outer
+                "outerSmallHits", "outerLargeHits", "outerSmallHoles", "outerLargeHoles",
+                // Extended
+                "extendedSmallHits", "extendedLargeHits", "extendedSmallHoles",
+                "extendedLargeHoles",
+                "etaLayer1Hits", "phiLayer1Hits", "etaLayer2Hits", "phiLayer2Hits",
+                "etaLayer3Hits", "phiLayer3Hits", "etaLayer4Hits", "phiLayer4Hits",
+                "etaLayer1Holes", "phiLayer1Holes", "etaLayer2Holes", "phiLayer2Holes",
+                "etaLayer3Holes", "phiLayer3Holes", "etaLayer4Holes", "phiLayer4Holes" }) {
+                m_legacyTrks->addVariable<uint8_t>(-1, summary); 
+            }
+
+            m_tree.addBranch(m_legacyTrks);
+        } 
+
+
+        m_seedSummary = std::make_shared<TrackSummaryModule>(m_tree, "MsTrkSeed", m_summaryTool.get());
+        m_trackSummary = std::make_shared<TrackSummaryModule>(m_tree, "ActsMsTracks", m_summaryTool.get());
+        m_tree.addBranch(m_seedSummary);
+        m_tree.addBranch(m_trackSummary);
+        
         ATH_CHECK(m_trkTruthLinks.initialize());
         ATH_CHECK(m_tree.init(this));
         return StatusCode::SUCCESS;
     }
     StatusCode MsTrackTester::execute() {
         const EventContext& ctx{Gaudi::Hive::currentContext()};
+
+        const xAOD::TrackParticleContainer* legacyTrks{nullptr};
+        ATH_CHECK(SG::get(legacyTrks, m_legacyTrackKey, ctx));
+        if (legacyTrks){
+            for (const xAOD::TrackParticle* track : *legacyTrks) {
+                m_summaryTool->copySummary(m_summaryTool->makeSummary(ctx, *track->track()),
+                                           *track);
+                m_legacyTrks->push_back(track);
+            }
+        }
         /** Fetch the containers from store gate */
         const xAOD::MuonSegmentContainer* recoSegments{nullptr};
         ATH_CHECK(SG::get(recoSegments, m_recoSegmentKey, ctx));
@@ -218,7 +268,7 @@ namespace MuonValR4 {
             unsigned int seedIdx = m_seedPos.size();
             m_seedPos += seed.position();
             m_seedType+= Acts::toUnderlying(seed.location());
-            
+            m_seedSummary->push_back(ctx, seed);
             ATH_MSG_VERBOSE(" Dump new seed: "<<seed);
             for (const xAOD::MuonSegment* seg : seed.segments()){
                 m_seedRecoSegMatch[seedIdx].push_back(m_recoSegs->push_back(*seg));
@@ -234,7 +284,7 @@ namespace MuonValR4 {
             const auto[seedLength, theta] = calcSeedLength(*gctx, seed);
             m_seedLength+= seedLength;
             m_seedThetaCone+=theta;
-            // m_seedQP +=  m_seeder->estimateQtimesP(*gctx, *magCache, seed) / Gaudi::Units::GeV; 
+            m_seedQP += m_seeder->estimateQtimesP(*gctx, *magCache, seed) / Gaudi::Units::GeV; 
         }
         for (const xAOD::MuonSegment* seg : *recoSegments) {
             m_recoSegs->push_back(*seg);
@@ -244,12 +294,9 @@ namespace MuonValR4 {
         ATH_CHECK(SG::get(truthSegs, m_truthSegmentKey, ctx));
         if (truthSegs) {
             for (const xAOD::MuonSegment* seg : *truthSegs) {
-                ATH_MSG_VERBOSE(std::format( "Dump truth segment: {:}{:}{:}{:}  @{:}, eta: {:.2f}, phi {:.2f}", 
-                    chName(seg->chamberIndex()), std::abs(seg->etaIndex()),
-                    seg->etaIndex() > 0 ? 'A' : 'C', seg->sector(),
-                    Amg::toString(seg->position()),
-                    seg->direction().eta(), seg->direction().phi() / 1._degree));
-
+                ATH_MSG_VERBOSE(std::format( "Dump truth segment {:}  @{:}, eta: {:.2f}, phi {:.2f}", 
+                                printID(*seg), Amg::toString(seg->position()),
+                                seg->direction().eta(), seg->direction().phi() / 1._degree));
                 m_truthSegs->push_back(*seg);
             }
             if (truthSegs->size()) {
@@ -302,6 +349,12 @@ namespace MuonValR4 {
                  
             }
         }
+        const ActsTrk::TrackContainer* msTracks{nullptr};
+        ATH_CHECK(SG::get(msTracks, m_trackKey, ctx));
+        for (const auto trk : *msTracks) {
+            m_trackSummary->push_back(ctx, trk);
+        }
+
         ATH_CHECK(m_tree.fill(ctx));
         return StatusCode::SUCCESS;
     }

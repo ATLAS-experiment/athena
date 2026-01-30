@@ -1,10 +1,6 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
-
-///////////////////////////////////////////////////////////////////
-// KeepChildrenTruthStrategy.h, (c) ATLAS Detector software
-///////////////////////////////////////////////////////////////////
 
 #ifndef ISF_TOOLS_KEEPCHILDRENTRUTHSTRATEGY_H
 #define ISF_TOOLS_KEEPCHILDRENTRUTHSTRATEGY_H 1
@@ -29,42 +25,42 @@ namespace ISF {
 
       A modifier for the purposes of truth strategies defining cases
       in which we should keep all the children of an interaction.
-  
+
       @author Zach.Marshall -at- cern.ch
-     */
+  */
   class KeepChildrenTruthStrategy final : public extends<AthAlgTool, ITruthStrategy> {
 
-    public: 
-     /** Constructor with parameters */
-     KeepChildrenTruthStrategy( const std::string& t, const std::string& n, const IInterface* p );
+  public:
+    /** Constructor with parameters */
+    KeepChildrenTruthStrategy( const std::string& t, const std::string& n, const IInterface* p );
 
-     /** Destructor */
-     ~KeepChildrenTruthStrategy();
+    /** Destructor */
+    ~KeepChildrenTruthStrategy() = default;
 
-     // Athena algtool's Hooks
-     StatusCode  initialize() override;
+    // Athena algtool's Hooks
+    virtual StatusCode  initialize() override final;
 
-     /** true if the ITruthStrategy implementation applies to the given ITruthIncident */
-     bool pass( ITruthIncident& incident) const override;
+    /** true if the ITruthStrategy implementation applies to the given ITruthIncident */
+    virtual bool pass( ITruthIncident& incident) const override final;
 
-     /** true if the strategy applies to this region */
-     virtual bool appliesToRegion(unsigned short) const override;
+    /** true if the strategy applies to this region */
+    virtual bool appliesToRegion(unsigned short) const override final;
 
-    private:
+  private:
 
-     /** vertex type (physics code) checks */
-     VertexTypesVector                      m_vertexTypesVector;  //!< Python property
-     VertexTypesSet                         m_vertexTypes;        //!< optimized for search
-     bool                                   m_doVertexRangeCheck;
-     int                                    m_vertexTypeRangeLow;
-     int                                    m_vertexTypeRangeHigh;
-     unsigned                               m_vertexTypeRangeLength;
-     int                                    m_passProcessCategory;
-     bool                                   m_bsmParent;             //!< Apply to BSM parents
-     /** PDG code checks */
-     PDGCodesVector                         m_parentPdgCodesVector;  //!< Python property
-     PDGCodesSet                            m_parentPdgCodes;        //!< optimized for search
-   }; 
+    /** vertex type (physics code) checks */
+    Gaudi::Property<VertexTypesVector> m_vertexTypesVector{this, "VertexTypes", 0};  //!< Python property
+    VertexTypesSet m_vertexTypes{};        //!< optimized for search
+    bool m_doVertexRangeCheck{false};
+    Gaudi::Property<int> m_vertexTypeRangeLow{this, "VertexTypeRangeLow", 0};
+    Gaudi::Property<int> m_vertexTypeRangeHigh{this, "VertexTypeRangeHigh", 0};
+    unsigned m_vertexTypeRangeLength{0};
+    Gaudi::Property<int>  m_passProcessCategory{this, "PassProcessCategory", 9};
+    Gaudi::Property<bool> m_bsmParent{this, "BSMParent", false};             //!< Apply to BSM parents
+    /** PDG code checks */
+    Gaudi::Property<PDGCodesVector> m_parentPdgCodesVector{this, "ParentPDGCodes", 0};  //!< Python property
+    PDGCodesSet m_parentPdgCodes{};        //!< optimized for search
+  };
 
 }
 

@@ -2,8 +2,8 @@
   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef BYTESTREAMRDP_OUTPUTSVC_H
-#define BYTESTREAMRDP_OUTPUTSVC_H
+#ifndef BYTESTREAMCNVSVC_BYTESTREAMRDP_OUTPUTSVC_H
+#define BYTESTREAMCNVSVC_BYTESTREAMRDP_OUTPUTSVC_H
 
 /**
   @class      ByteStreamRDP_OutputSvc
@@ -52,4 +52,4 @@ private: // data
       this, "BSOutputStreamName", "", "Stream name for multiple output"};
 };
 
-#endif  
+#endif // BYTESTREAMCNVSVC_BYTESTREAMRDP_OUTPUTSVC_H

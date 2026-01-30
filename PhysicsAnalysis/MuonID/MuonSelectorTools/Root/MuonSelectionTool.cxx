@@ -550,11 +550,6 @@ namespace CP {
         if (mu.author() == xAOD::Muon::MuidSA) {
             ATH_MSG_VERBOSE("Muon is stand-alone");
             
-            if(isRun3() && !m_developMode){
-                ATH_MSG_VERBOSE("Standalone muons currently only used when in expert mode for run3");
-                return xAOD::Muon::VeryLoose; //SA muons currently disabled for run3
-             }
-
             if (std::abs(mu.eta()) > 2.5) {
                 ATH_MSG_VERBOSE("number of precision layers = " << (int)summary.nprecisionLayers);
 
@@ -574,11 +569,6 @@ namespace CP {
         if (mu.muonType() == xAOD::Muon::SiliconAssociatedForwardMuon) {
             ATH_MSG_VERBOSE("Muon is silicon-associated forward muon");
             
-            if(isRun3() && !m_developMode){
-                ATH_MSG_VERBOSE("Silicon-associated forward muon muons currently only used when in expert mode for run3");
-                return xAOD::Muon::VeryLoose; //SAF muons currently disabled for run3
-            }
-
             const xAOD::TrackParticle* cbtrack = mu.trackParticle(xAOD::Muon::CombinedTrackParticle);
             const xAOD::TrackParticle* metrack = mu.trackParticle(xAOD::Muon::ExtrapolatedMuonSpectrometerTrackParticle);
 
@@ -1777,7 +1767,7 @@ namespace CP {
         );
 
         AthInfer::OutputDataMap outputData;
-        outputData["TightNNScore"] = std::make_pair(
+        outputData["sequential"] = std::make_pair(
             std::vector<int64_t>{1, 1}, std::vector<float>{}
         );
 
@@ -1785,7 +1775,7 @@ namespace CP {
             ATH_MSG_WARNING("ONNX inference failed!");
             return -999.;
         }
-        const auto& variant = outputData["TightNNScore"].second;
+        const auto& variant = outputData["sequential"].second;
         if (std::holds_alternative<std::vector<float>>(variant)) {
             const auto& vec = std::get<std::vector<float>>(variant);
             if (!vec.empty()) score = vec[0];

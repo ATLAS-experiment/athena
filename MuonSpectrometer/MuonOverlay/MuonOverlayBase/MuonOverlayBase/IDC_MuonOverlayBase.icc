@@ -51,6 +51,7 @@ StatusCode IDC_MuonOverlayBase::overlayContainerImpl(const IDC_Container *bkgCon
         ATH_MSG_ERROR("Adding signal Collection with hashId " << hashId << " failed");
         return StatusCode::FAILURE;
       } else {
+        //coverity[RESOURCE_LEAK]
         (void)signalCollection.release();
       }
     }
@@ -79,6 +80,7 @@ StatusCode IDC_MuonOverlayBase::overlayContainerImpl(const IDC_Container *bkgCon
         ATH_MSG_ERROR("Adding background Collection with hashId " << hashId << " failed");
         return StatusCode::FAILURE;
       } else {
+        //coverity[RESOURCE_LEAK]
         (void)bkgCollection.release();
       }
     } else {
@@ -110,13 +112,15 @@ StatusCode IDC_MuonOverlayBase::overlayContainerImpl(const IDC_Container *bkgCon
         ATH_MSG_ERROR("Adding overlaid Collection with hashId " << hashId << " failed");
         return StatusCode::FAILURE;
       } else {
-        outputCollection.release();
+        //coverity[RESOURCE_LEAK]
+        std::ignore = outputCollection.release();
       }
     } else { // Only write signal out
       if (outputContainer->addCollection(signalCollection.get(), hashId).isFailure()) {
         ATH_MSG_ERROR("Adding signal Collection with hashId " << hashId << " failed");
         return StatusCode::FAILURE;
       } else {
+        //coverity[RESOURCE_LEAK]
         (void)signalCollection.release();
       }
     }

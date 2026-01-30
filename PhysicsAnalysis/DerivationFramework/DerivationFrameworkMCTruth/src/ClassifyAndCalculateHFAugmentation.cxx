@@ -8,7 +8,7 @@
 // Implementation file for class ClassifyAndCalculateHFAugmentation     //
 // Author: Adrian Berrocal Guardia <adrian.berrocal.guardia@cern.ch>    //
 //                                                                      //
-////////////////////////////////////////////////////////////////////////// 
+//////////////////////////////////////////////////////////////////////////
 
 // Header of the class ClassifyAndCalculateHFAugmentation.
 
@@ -19,34 +19,9 @@
 namespace DerivationFramework {
 
   /*
-  ---------------------------------------------------------------------------------------------------------------------------------------
-  ------------------------------------------------------- Constructor/Destructor --------------------------------------------------------
-  ---------------------------------------------------------------------------------------------------------------------------------------
-  */
-
-  ClassifyAndCalculateHFAugmentation::ClassifyAndCalculateHFAugmentation(const std::string& t, const std::string& n, const IInterface* p) : 
-  base_class(t,n,p),                 // Athena tool.
-  m_JetMatchingTool_Tool(""),        // Hadron-jet matching tool.
-  m_HFClassification_tool(""),       // HF classifier tool.
-  m_HadronOriginClassifier_Tool("")  // HF hadron origin tool.
-  {
-    
-    // Declare a set of tool properties to set them exertanally:
-    //  -m_HFClassification_tool:       The tool to compute the HF classifier.
-    //  -m_HadronOriginClassifier_Tool: The tool to determine the origin of the HF hadrons.
-    //  -m_JetMatchingTool_Tool:        The tool to match the hadrons with the jets.
-
-    declareProperty("ClassifyAndComputeHFtool",   m_HFClassification_tool);
-    declareProperty("HadronOriginClassifierTool", m_HadronOriginClassifier_Tool);
-    declareProperty("JetMatchingTool",            m_JetMatchingTool_Tool);
-  }
-
-  ClassifyAndCalculateHFAugmentation::~ClassifyAndCalculateHFAugmentation(){}
-
-  /*
-  ---------------------------------------------------------------------------------------------------------------------------------------
-  --------------------------------------------------------- Initialize/Finalize ---------------------------------------------------------
-  ---------------------------------------------------------------------------------------------------------------------------------------
+    ---------------------------------------------------------------------------------------------------------------------------------------
+    ------------------------------------------------------------- Initialize -------------------------------------------------------------
+    ---------------------------------------------------------------------------------------------------------------------------------------
   */
 
   StatusCode ClassifyAndCalculateHFAugmentation::initialize(){
@@ -77,7 +52,7 @@ namespace DerivationFramework {
       ATH_MSG_ERROR("Unable to retrieve the tool " << m_HadronOriginClassifier_Tool);
       return StatusCode::FAILURE;
     }
-  
+
     if(m_JetMatchingTool_Tool.retrieve().isFailure()){
       ATH_MSG_ERROR("Unable to retrieve the tool " << m_JetMatchingTool_Tool);
       return StatusCode::FAILURE;
@@ -86,14 +61,10 @@ namespace DerivationFramework {
     return StatusCode::SUCCESS;
   }
 
-  StatusCode ClassifyAndCalculateHFAugmentation::finalize(){
-    return StatusCode::SUCCESS;
-  }
-
   /*
-  ---------------------------------------------------------------------------------------------------------------------------------------
-  ------------------------------------------------------------- AddBranches -------------------------------------------------------------
-  ---------------------------------------------------------------------------------------------------------------------------------------
+    ---------------------------------------------------------------------------------------------------------------------------------------
+    ------------------------------------------------------------- AddBranches -------------------------------------------------------------
+    ---------------------------------------------------------------------------------------------------------------------------------------
   */
 
   StatusCode ClassifyAndCalculateHFAugmentation::addBranches(const EventContext& ctx) const
@@ -117,7 +88,7 @@ namespace DerivationFramework {
     const xAOD::JetContainer* JetCollection = jetInputHandle.cptr();
 
     // Compute a map that associates the HF hadrons with their origin using the tool m_HadronOriginClassifier_Tool.
-    std::map<const xAOD::TruthParticle*, DerivationFramework::HadronOriginClassifier::HF_id> hadronMap = m_HadronOriginClassifier_Tool->GetOriginMap(); 
+    std::map<const xAOD::TruthParticle*, DerivationFramework::HadronOriginClassifier::HF_id> hadronMap = m_HadronOriginClassifier_Tool->GetOriginMap();
 
     // Create a map with a list of matched hadrons for each jet.
     std::map<const xAOD::Jet*, std::vector<xAOD::TruthParticleContainer::const_iterator>> particleMatch = m_JetMatchingTool_Tool->matchHadronsToJets(xTruthParticleContainer, JetCollection);

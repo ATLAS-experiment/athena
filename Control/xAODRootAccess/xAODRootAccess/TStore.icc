@@ -144,6 +144,9 @@ namespace xAOD {
                               const std::type_info& ti,
                               ::Bool_t /*isOwner*/, ::Bool_t /*isConst*/ ) {
 
+      // Make sure that we'll be able to destruct this type later on:
+      TDestructorRegistry::instance().add< T >();
+
       // We always store non-const pointers but check on retrieval:
       THolder* hldr = new TCDVHolderT< T >( obj, ti );
       return record( hldr, key );

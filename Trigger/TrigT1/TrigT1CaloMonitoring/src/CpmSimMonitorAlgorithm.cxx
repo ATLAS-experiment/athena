@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CpmSimMonitorAlgorithm.h"
@@ -805,15 +805,11 @@ bool CpmSimMonitorAlgorithm::compareHad(const TriggerTowerMapHad &ttMap,
 	fill(m_packageName,loc_PpmNoCpmFpga,loc_fpga_PpmNoCpmFpga);	
 
       } else { // no tt
-	if (overlap) {
-	  eta_had_OverlapNoPpm=eta;
-	  phi_had_OverlapNoPpm=phiMod;
-	  fill(m_packageName,eta_had_OverlapNoPpm,phi_had_OverlapNoPpm);
-	} else {
-	  eta_had_OverlapNoPpm=eta;
-	  phi_had_OverlapNoPpm=phiMod;
-	  fill(m_packageName,eta_had_OverlapNoPpm,phi_had_OverlapNoPpm);
-	}
+	
+  eta_had_OverlapNoPpm=eta;
+  phi_had_OverlapNoPpm=phiMod;
+  fill(m_packageName,eta_had_OverlapNoPpm,phi_had_OverlapNoPpm);
+	
 	loc_CpmNoPpmFpga=loc;
 	loc_fpga_CpmNoPpmFpga=loc2Mod;
 	fill(m_packageName,loc_CpmNoPpmFpga,loc_fpga_CpmNoPpmFpga);
@@ -1477,6 +1473,7 @@ void CpmSimMonitorAlgorithm::compare(const CmxCpHitsMap &cmxSimMap,
         continue;
       if (total && source != xAOD::CMXCPHits::TOTAL)
         continue;
+      //coverity[dead_error_line]
       if (topo && source != xAOD::CMXCPHits::TOPO_CHECKSUM &&
           source != xAOD::CMXCPHits::TOPO_OCCUPANCY_MAP &&
           source != xAOD::CMXCPHits::TOPO_OCCUPANCY_COUNTS)
@@ -1502,6 +1499,7 @@ void CpmSimMonitorAlgorithm::compare(const CmxCpHitsMap &cmxSimMap,
         continue;
       if (total && source != xAOD::CMXCPHits::TOTAL)
         continue;
+      //coverity[dead_error_line]
       if (topo && source != xAOD::CMXCPHits::TOPO_CHECKSUM &&
           source != xAOD::CMXCPHits::TOPO_OCCUPANCY_MAP &&
           source != xAOD::CMXCPHits::TOPO_OCCUPANCY_COUNTS)
@@ -1529,6 +1527,7 @@ void CpmSimMonitorAlgorithm::compare(const CmxCpHitsMap &cmxSimMap,
         continue;
       if (total && source != xAOD::CMXCPHits::TOTAL)
         continue;
+      //coverity[dead_error_line]
       if (topo && source != xAOD::CMXCPHits::TOPO_CHECKSUM &&
           source != xAOD::CMXCPHits::TOPO_OCCUPANCY_MAP &&
           source != xAOD::CMXCPHits::TOPO_OCCUPANCY_COUNTS)
@@ -1601,6 +1600,7 @@ void CpmSimMonitorAlgorithm::compare(const CmxCpHitsMap &cmxSimMap,
 	  fillXVsThresholds(cmx_x_leftsums_SimNeData,cmx_y_leftsums_SimNeData,cmx_w_leftsums_SimNeData,
 			    loc, diff1, nThresh, 1, offset);
       }
+    //coverity[dead_error_line]
     } else if (remote) {
       if (source == xAOD::CMXCPHits::LOCAL) {
         if (crate != m_crates - 1) {
@@ -1613,6 +1613,7 @@ void CpmSimMonitorAlgorithm::compare(const CmxCpHitsMap &cmxSimMap,
         hits1[remCrate * m_cmxs + cmx] = cmxHits1;
       }
     } else {
+      //coverity[dead_error_begin]
       const int locX = crate * m_cmxs + cmx;
       const int locY = source - xAOD::CMXCPHits::TOPO_CHECKSUM;
       const int cmxBins = m_crates * m_cmxs;

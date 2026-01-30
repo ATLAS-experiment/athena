@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 /* General magnetic field in any point access              */
 /* If external magnetic field handler is provided as       */
@@ -14,6 +14,7 @@
 #define TRKVKALVRTCORE_VKALVRTBMAG_H
 
 #include "TrkVKalVrtCore/CommonPars.h"
+#include <cmath>
 
 namespace Trk {
 
@@ -32,6 +33,15 @@ class baseMagFld {
   virtual ~baseMagFld() = default;
   virtual void getMagFld(const double, const double, const double, double&,
                          double&, double&) = 0;
+//
+//  Function returns effective field for Perigee track parameters.
+// Motion equation remains the same in any field.
+// Phi and Theta are particle momentum angles at Perigee 
+//
+  inline double getEffField(double bx, double by, double bz, double phi, double theta){
+    return bz-(by*std::sin(phi)+bx*std::cos(phi))/std::tan(theta);
+  };
+
 };
 
 //
@@ -42,11 +52,15 @@ class baseMagFld {
 class vkalMagFld {
  public:
   static void getMagFld(const double, const double, const double, double&,
-                        double&, double&, VKalVrtControlBase*);
+                        double&, double&, const VKalVrtControlBase*);
   static double getMagFld(const double xyz[3],
                           const VKalVrtControlBase* FitControl);
   /* Converstion for MeV and mm and Tesla*/
   inline static double getCnvCst() { return vkalMagCnvCst; }
+  inline static double getEffField(double bx, double by, double bz, double phi, double theta){
+    return bz-(by*std::sin(phi)+bx*std::cos(phi))/std::tan(theta);
+  };
+
 };
 
 }  // namespace Trk

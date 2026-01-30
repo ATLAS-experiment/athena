@@ -141,7 +141,7 @@ CaloCellNeighborsAverageCorr::process (CaloCellContainer* theCont,
         if (m_skipDeadLAr) {
           ATH_MSG_VERBOSE ( " skipping LAr hash " << m_calo_id->calo_cell_hash(aCell->ID()) );
           continue;
-        } else if (m_skipDeadFeb && LArProv::test(aCell->provenance(),LArProv::PATCHED)) {
+        } else if (m_skipDeadFeb && (LArProv::test(aCell->provenance(),LArProv::DEADFEB) ||  LArProv::test(aCell->provenance(),LArProv::PATCHED))) {
           ATH_MSG_VERBOSE ( " skipping already patched hash " << m_calo_id->calo_cell_hash(aCell->ID()) );
           continue;
         }

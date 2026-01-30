@@ -5,6 +5,14 @@
   <class name="BJetCorrectionTool" />
   <class name="MuonInJetCorrectionTool" />
 
+  <class name="Pileup1DResidualCalibStep" />
+  <class name="EtaJESCalibStep" />
+  <class name="JMSCalibStep" />
+  <class name="SmearingCalibStep" />
+  <class name="InSituCalibStep" />
+  <class name="GSCCalibStep" />
+
+  
 <!-- <class name="JetCalibratorAthena" /> -->
 <!-- <class name="MCNumInversionResponse" /> -->
 <!-- <class name="JetCellCalibTool" /> -->

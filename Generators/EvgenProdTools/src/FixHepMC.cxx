@@ -26,6 +26,9 @@ FixHepMC::FixHepMC(const std::string& name, ISvcLocator* pSvcLocator)
   declareProperty("PurgeUnstableWithoutEndVtx", m_purgeUnstableWithoutEndVtx = false, "Remove unstable particles without decay vertex?");
   declareProperty("IgnoreSemiDisconnected", m_ignoreSemiDisconnected = false, "Ignore semi-disconnected particles (normal in Sherpa)");
   declareProperty("PIDmap", m_pidmap = std::map<int,int>(), "Map of PDG IDs to replace");
+  declareProperty("forced_momentum", m_forced_momentum = "MEV", "Forced momentum unit");
+  declareProperty("forced_length", m_forced_length = "MM", "Forced length unit");
+  declareProperty("ApplyUnitsFix", m_unitsFix = true, "Attempt to identify momentum units problems and fix them");
 }
 #ifndef HEPMC3
 //---->//This is copied from MCUtils
@@ -102,6 +105,24 @@ StatusCode FixHepMC::execute() {
       ATH_MSG_DEBUG("Found " << m_looper.loop_particles().size() << " particles in loops");
       ATH_MSG_DEBUG("Please use MC::Loops::findLoops for this event to obtain all particles and vertices in the loops");
     }
+#ifdef HEPMC3
+    auto old_momentum = evt->momentum_unit();
+    auto old_length = evt->length_unit();
+    evt->set_units(
+        m_forced_momentum != "" ? HepMC3::Units::momentum_unit(m_forced_momentum): old_momentum,
+        m_forced_length != "" ? HepMC3::Units::length_unit(m_forced_length): old_length);
+    if ( m_forced_momentum != "" && m_forced_momentum != HepMC3::Units::name(old_momentum) ) ATH_MSG_WARNING("Updated momentum units " <<  HepMC3::Units::name(old_momentum) << "->" << m_forced_momentum);
+    if ( m_forced_length != "" && m_forced_length != HepMC3::Units::name(old_length) ) ATH_MSG_WARNING("Updated length units " <<  HepMC3::Units::name(old_length) << "->" << m_forced_length);
+#else
+    std::string old_momentum = (evt->momentum_unit() == HepMC::Units::MomentumUnit::MEV ? "MEV" : "GEV" );
+    std::string old_length = (evt->length_unit() == HepMC::Units::LengthUnit::MM ? "MM" : "CM" );
+    evt->define_units(
+        m_forced_momentum != "" ? m_forced_momentum: old_momentum,
+        m_forced_length != "" ? m_forced_length: old_length);
+    if ( m_forced_momentum != "" && m_forced_momentum != old_momentum ) ATH_MSG_WARNING("Updated momentum units " <<  old_momentum << "->" << m_forced_momentum);
+    if ( m_forced_length != "" && m_forced_length != old_length ) ATH_MSG_WARNING("Updated length units " <<  old_length << "->" << m_forced_length);
+#endif
+
     if (!m_pidmap.empty()) {
       for (auto ip: *evt) {
         // Skip this particle if (somehow) its pointer is null
@@ -109,6 +130,9 @@ StatusCode FixHepMC::execute() {
          auto newpid = m_pidmap.find(ip->pdg_id());
          if (newpid == m_pidmap.end()) continue;
          ip->set_pdg_id(newpid->second);
+         // Increment the counter for replaced PDG IDs
+         ++m_replacedPIDs;
+         m_replacedpid_counts[ip->pdg_id()]++;
       }
     }
 #ifdef HEPMC3
@@ -142,6 +166,28 @@ StatusCode FixHepMC::execute() {
       }
       for (auto bpart: bparttoremove) {
         bpart->production_vertex()->remove_particle_out(bpart);
+      }
+    }
+
+    // Some generators / samples have a mis-match between the units they report and the units used for momentum, usually because we have applied
+    // a correction to the momentum without also correcting the units. Here we're going to check for states that look particularly suspicious
+    // and apply a correction if required. We will try to identify those issues based on the beam particles.
+    if (m_unitsFix){ // Only if requested - allow folks to disable this if they know what they're doing
+      double units_problem = -1.;
+      // If we have beam particles, let's use them - it's much faster!
+      if (beams_t.size() > 0 ){
+        for (const HepMC::GenParticlePtr& p : beams_t){
+          if (p->momentum().pz() > 1e9) units_problem = p->momentum().pz();
+        }
+      // if we didn't have beam particles, we'll go through some of the main record
+      } else {
+        for (const HepMC::GenParticlePtr& p : evt->particles()) {
+          if (p && p->momentum().pz() > 1e9) units_problem = p->momentum().pz();
+        }
+      }
+      if (units_problem>0){ // No particles should have momenta above 1 PeV; this must be a units issue
+        ATH_MSG_INFO("Apparent units problem; beam particles have z-momentum " << units_problem << " in MeV. Will divide by 1000.");
+        MeVToGeV(evt);
       }
     }
 
@@ -274,7 +320,7 @@ StatusCode FixHepMC::execute() {
         if ( msgLvl( MSG::DEBUG ) ) HepMC::Print::line(ip);
       }
       // Only add to the toremove vector once, even if multiple tests match
-      if (bad_particle) toremove.push_back(ip);
+      if (bad_particle) toremove.push_back(std::move(ip));
     }
 
     // Properties before cleaning
@@ -283,7 +329,7 @@ StatusCode FixHepMC::execute() {
     // Do the cleaning
     if (!toremove.empty()) {
       ATH_MSG_DEBUG("Cleaning event record of " << toremove.size() << " bad particles");
-      for (auto part: toremove) evt->remove_particle(part);
+      for (auto part: toremove) evt->remove_particle(std::move(part));
     }
 
     if(m_purgeUnstableWithoutEndVtx) {
@@ -527,7 +573,8 @@ StatusCode FixHepMC::execute() {
         ATH_MSG_WARNING("Change in no-parent vertices: " << num_nochild_vtxs_orig << " -> " << num_nochild_vtxs_filt);
     }
 #endif
-  }
+
+  } // End of the loop over events in the MC event collection
   return StatusCode::SUCCESS;
 }
 
@@ -537,7 +584,10 @@ StatusCode FixHepMC::finalize() {
   if (m_killPDG0   ) ATH_MSG_INFO( "Removed " <<   m_pdg0Killed << " of " << m_totalSeen << " particles because of PDG ID 0." );
   if (m_cleanDecays) ATH_MSG_INFO( "Removed " << m_decayCleaned << " of " << m_totalSeen << " particles while cleaning decay chains." );
   if(m_purgeUnstableWithoutEndVtx) ATH_MSG_INFO( "Removed " << m_unstablePurged << " of " << m_totalSeen << " unstable particles because they had no decay vertex." );
-  if (!m_pidmap.empty()) ATH_MSG_INFO( "Replaced " << m_replacedPIDs << "PIDs of particles." );
+  if (!m_pidmap.empty()) {
+    ATH_MSG_INFO( "Replaced " << m_replacedPIDs << " PIDs of particles." );
+    for (const auto& p: m_replacedpid_counts) ATH_MSG_INFO( "Replaced " << p.first << " PIDs " << p.second << "times." );
+  }  
   return StatusCode::SUCCESS;
 }
 

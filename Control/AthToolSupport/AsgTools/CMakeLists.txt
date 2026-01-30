@@ -24,7 +24,7 @@ endif()
 atlas_add_library( AsgTools
    AsgTools/*.h AsgTools/*.icc ${sources}
    PUBLIC_HEADERS AsgTools
-   LINK_LIBRARIES AsgMessagingLib CxxUtils SGCoreLib ${libs} )
+   LINK_LIBRARIES AsgMessagingLib AthContainers CxxUtils SGCoreLib ${libs} )
 
 # Select which xml files to use for dictionary generation
 atlas_add_dictionary( AsgToolsDict

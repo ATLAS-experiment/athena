@@ -41,7 +41,7 @@ private:
 
   Gaudi::Property<bool> m_isMC{this,"isMC",false,"Data/MC flag"};
   const CaloCell_ID* m_cellId=nullptr;
-
+  IdentifierHash m_larHashMax=0;
 };
 
 #endif

@@ -21,22 +21,22 @@
 namespace DerivationFramework {
 
   class InDetTrackSelectionToolWrapper : public extends<AthAlgTool, IAugmentationTool> {
-    public: 
-      InDetTrackSelectionToolWrapper(const std::string& t, const std::string& n, const IInterface* p);
+  public:
 
-      StatusCode initialize();
-      StatusCode finalize();
-      virtual StatusCode addBranches(const EventContext& ctx) const;
+    using base_class::base_class;
 
-    private:
-      ToolHandle< InDet::IInDetTrackSelectionTool > m_tool
-         {this,"TrackSelectionTool","InDet::InDetTrackSelectionTool/TrackSelectionTool"}; // @TODO should not have a default value, since there is not generally correct default
+    virtual StatusCode initialize() override final ;
+    virtual StatusCode addBranches(const EventContext& ctx) const override final;
 
-      SG::ReadHandleKey<xAOD::TrackParticleContainer> m_tracksKey
-         {this, "ContainerName", "InDetTrackParticles", "The input TrackParticleCollection"};
+  private:
+    ToolHandle< InDet::IInDetTrackSelectionTool > m_tool
+    {this,"TrackSelectionTool",""};
 
-      SG::WriteDecorHandleKey<xAOD::TrackParticleContainer>               m_decorationKey
-         {this, "DecorationName", "","Name of the decoration which provides the track selection result."};
+    SG::ReadHandleKey<xAOD::TrackParticleContainer> m_tracksKey
+      {this, "ContainerName", "InDetTrackParticles", "The input TrackParticleCollection"};
+
+    SG::WriteDecorHandleKey<xAOD::TrackParticleContainer>               m_decorationKey
+      {this, "DecorationName", "","Name of the decoration which provides the track selection result."};
   };
 }
 

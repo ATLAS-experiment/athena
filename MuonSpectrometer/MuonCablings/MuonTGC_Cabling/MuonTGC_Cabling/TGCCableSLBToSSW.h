@@ -28,10 +28,10 @@ class TGCCableSLBToSSW : public TGCCable {
   virtual TGCModuleMap* getModule(const TGCModuleId* moduleId) const;
 
  private:
-  TGCCableSLBToSSW() {}
+  TGCCableSLBToSSW() = delete;
   virtual TGCModuleMap* getModuleIn(const TGCModuleId* ssw) const;
   virtual TGCModuleMap* getModuleOut(const TGCModuleId* slb) const;
-  std::array<std::array<std::unique_ptr<TGCDatabase>, MaxModuleType>, TGCId::MaxRegionType> m_database{{{nullptr}}};
+  std::array<std::array<std::unique_ptr<TGCDatabase>, MaxModuleType>, TGCId::MaxRegionType> m_database;
 };
   
 }  // end of namespace

@@ -24,23 +24,34 @@ egammaCopyTrackParticleInfo::copy(xAOD::TrackParticle& created,
                                   const egammaCopyTrackParticleInfo::ToCopy& toCopy) {
   // Add Truth decorations. Copy from the original.
   if (toCopy.doTruth) {
+    static const SG::AuxElement::ConstAccessor<
+        ElementLink<xAOD::TruthParticleContainer>>
+        ctPL("truthParticleLink");
     static const SG::AuxElement::Accessor<
         ElementLink<xAOD::TruthParticleContainer>>
         tPL("truthParticleLink");
-    if (tPL.isAvailable(original)) {
-      tPL(created) = tPL(original);
+    if (ctPL.isAvailable(original)) {
+      tPL(created) = ctPL(original);
     }
+    static const SG::AuxElement::ConstAccessor<float> ctMP("truthMatchProbability");
     static const SG::AuxElement::Accessor<float> tMP("truthMatchProbability");
-    if (tMP.isAvailable(original)) {
-      tMP(created) = tMP(original);
+    if (ctMP.isAvailable(original)) {
+      tMP(created) = ctMP(original);
     }
+    static const SG::AuxElement::ConstAccessor<int> ctT("truthType");
     static const SG::AuxElement::Accessor<int> tT("truthType");
-    if (tT.isAvailable(original)) {
-      tT(created) = tT(original);
+    if (ctT.isAvailable(original)) {
+      tT(created) = ctT(original);
     }
+    static const SG::AuxElement::ConstAccessor<int> ctO("truthOrigin");
     static const SG::AuxElement::Accessor<int> tO("truthOrigin");
-    if (tO.isAvailable(original)) {
-      tO(created) = tO(original);
+    if (ctO.isAvailable(original)) {
+      tO(created) = ctO(original);
+    }
+    static const SG::AuxElement::ConstAccessor<unsigned int> ctC("truthClassification");
+    static const SG::AuxElement::Accessor<unsigned int> tC("truthClassification");
+    if (ctC.isAvailable(original)) {
+      tC(created) = ctC(original);
     }
   }
 

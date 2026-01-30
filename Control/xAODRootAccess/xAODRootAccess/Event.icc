@@ -167,6 +167,7 @@ StatusCode Event::record(std::unique_ptr<T> obj, const std::string& key) {
 
   // If the record was successful, let's release the object from the unique
   // pointer.
+  //coverity[leaked_storage]
   std::ignore = obj.release();
   return StatusCode::SUCCESS;
 }
@@ -340,6 +341,7 @@ StatusCode Event::recordMeta(std::unique_ptr<T> obj, const std::string& key) {
 
   // If the record was successful, let's release the object from the unique
   // pointer.
+  //coverity[leaked_storage]
   std::ignore = obj.release();
   return StatusCode::SUCCESS;
 }

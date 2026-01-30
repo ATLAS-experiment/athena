@@ -10,7 +10,7 @@
 #include "TileConditions/TileCalibData.h"
 #include "TileConditions/ITileCondProxy.h"
 
-#include "AthenaBaseComps/AthAlgorithm.h"
+#include "AthenaBaseComps/AthCondAlgorithm.h"
 #include "StoreGate/ReadCondHandleKey.h"
 #include "StoreGate/WriteCondHandleKey.h"
 #include "AthenaPoolUtilities/CondAttrListCollection.h"
@@ -21,14 +21,14 @@
  *
  */
 template<class T>
-class TileCalibCondAlg: public AthAlgorithm {
+class TileCalibCondAlg: public AthCondAlgorithm {
   public:
 
     TileCalibCondAlg(const std::string& name, ISvcLocator* pSvcLocator);
     ~TileCalibCondAlg();
 
     virtual StatusCode initialize() override;
-    virtual StatusCode execute() override;
+    virtual StatusCode execute(const EventContext& ctx) const override;
     virtual StatusCode finalize() override;
 
   private:

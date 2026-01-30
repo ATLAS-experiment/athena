@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -27,7 +27,7 @@
 
 //Truth
 #include "GeneratorObjects/HepMcParticleLink.h"
-
+#include "TruthUtils/HepMCHelpers.h"
 #include "AthenaKernel/RNGWrapper.h"
 #include "CLHEP/Random/RandGaussZiggurat.h"
 
@@ -307,6 +307,10 @@ StatusCode sTgcDigitizationTool::doDigitization(const EventContext& ctx) {
       ++nhits;
       TimedHitPtr<sTGCSimHit> phit = *i++;
       const sTGCSimHit& hit = *phit;
+      if (m_digitizeMuonOnly && !MC::isMuon(hit.particleEncoding())) {
+        ATH_MSG_VERBOSE("Hit is not from a muon - skipping ");
+        continue;
+      }
       ATH_MSG_VERBOSE("Hit Particle ID : " << hit.particleEncoding() );
       double eventTime = phit.eventTime();
       if(eventTime < earliestEventTime) earliestEventTime = eventTime;
@@ -549,13 +553,13 @@ double sTgcDigitizationTool::getChannelThreshold(const EventContext& ctx,
                                                  const Identifier& channelID, 
                                                  const NswCalibDbThresholdData& thresholdData) const {
 
-  float threshold = m_chargeThreshold, elecThrsld{0.f};
+  float threshold = m_chargeThreshold;
+  std::optional<float> elecThrsld = thresholdData.getThreshold(channelID);
 
-  if(!thresholdData.getThreshold(channelID, elecThrsld))
-    ATH_MSG_ERROR("Cannot find retrieve VMM threshold from conditions data base!");
-  if(!m_calibTool->pdoToCharge(ctx, true, elecThrsld, channelID, threshold))
-    ATH_MSG_ERROR("Cannot convert VMM charge threshold via conditions data!");
-
+  if(!elecThrsld || !m_calibTool->pdoToCharge(ctx, true, *elecThrsld, channelID, threshold)) {
+    THROW_EXCEPTION("Cannot find retrieve VMM threshold from conditions data base!");
+  }
+  
   return threshold;
 }
 

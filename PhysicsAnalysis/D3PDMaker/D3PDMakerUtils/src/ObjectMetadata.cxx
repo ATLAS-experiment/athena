@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -143,7 +143,7 @@ namespace D3PD {
       var.setDoc( docstring );
 
       // Remember the variable:
-      m_variables.insert( var );
+      m_variables.insert( std::move(var) );
 
       return StatusCode::SUCCESS;
    }
@@ -343,7 +343,7 @@ namespace D3PD {
       for( ; itr != end; ++itr ) {
          Variable var;
          CHECK( var.read( *itr ) );
-         m_variables.insert( var );
+         m_variables.insert( std::move(var) );
       }
 
       return StatusCode::SUCCESS;

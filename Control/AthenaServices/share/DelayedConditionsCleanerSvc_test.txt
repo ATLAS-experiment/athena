@@ -1,7 +1,5 @@
 // job opts for DelayedConditionsCleanerSvc unit test
 
-MessageSvc.OutputLevel = 2;
-
 TestConditionsCleanerSvc.RingSize = 5;
 TestConditionsCleanerSvc.CleanDelay = 100;
 TestConditionsCleanerSvc.LookAhead = 10;

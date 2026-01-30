@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -32,6 +32,8 @@ namespace LArSamples {
     public:
       
       TreeShapeErrorGetter(const TString& fileName, bool recreate = false);
+      TreeShapeErrorGetter(const TreeShapeErrorGetter &) = delete;
+      TreeShapeErrorGetter& operator = (const TreeShapeErrorGetter &) = delete;
       virtual ~TreeShapeErrorGetter();
 
       ShapeErrorData* shapeErrorData(unsigned int hash, CaloGain::CaloGain gain, const Residual* toExclude = 0) const;

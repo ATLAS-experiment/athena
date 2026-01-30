@@ -42,6 +42,16 @@ private:
     Gaudi::Property<std::string> m_CalReq1{this, "CalReq1", "CALREQ_1"};
     Gaudi::Property<std::string> m_CalReq2{this, "CalReq2", "CALREQ_2"};
 
+    // pulse RPD LED in all channels if ch _GoodChannel_ satisfies: max ADC > _maxADCThreshold_ && sum ADC > _sumADCThreshold_
+    Gaudi::Property<int> m_rpdSideAgoodChannelNum {this,"RPDSideAgoodChannelNum",9};
+    Gaudi::Property<int> m_rpdSideAgoodChannelMaxADCFireThrsh {this,"RPDSideAGoodChannelMaxADCFireThreshold",400};
+    Gaudi::Property<int> m_rpdSideAgoodChannelSumADCFireThrsh {this,"RPDSideAGoodChannelSumADCFireThreshold",4000};
+
+    // pulse RPD LED in all channels if ch _GoodChannel_ satisfies: max ADC > _maxADCThreshold_ && sum ADC > _sumADCThreshold_
+    Gaudi::Property<int> m_rpdSideCgoodChannelNum {this,"RPDSideCgoodChannelNum",2};
+    Gaudi::Property<int> m_rpdSideCgoodChannelMaxADCFireThrsh {this,"RPDSideCGoodChannelMaxADCFireThreshold",1000};
+    Gaudi::Property<int> m_rpdSideCgoodChannelSumADCFireThrsh {this,"RPDSideCGoodChannelSumADCFireThreshold",10000};
+
     static const int m_nSides = 2;
     static const int m_nModules = 4;
     static const int m_nChannels = 16;

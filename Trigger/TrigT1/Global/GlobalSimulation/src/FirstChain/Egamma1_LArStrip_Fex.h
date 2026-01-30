@@ -1,5 +1,5 @@
 /*
- *   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+ *   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  */
 
 #ifndef GLOBALSIM_EGAMMA1_LARSTRIP_FEX_H
@@ -13,9 +13,8 @@
 #include "ICaloCellsProducer.h"
 #include "eFexRoIAlgTool.h"
 
-#include "../IO/LArStripNeighborhoodContainer.h"
-#include "../IO/IeEmNbhoodTOBContainer.h"
-#include "../IO/IeEmTOB.h"
+#include "../IO/LArStripNeighborhood.h"
+#include "../IO/eEmNbhoodTOB.h"
 
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "xAODEventInfo/EventInfo.h"
@@ -70,7 +69,7 @@ namespace GlobalSim {
       false,
       "flag to enable terse dumps"};
 
-    SG::WriteHandleKey<IOBitwise::IeEmNbhoodTOBContainer>
+    SG::WriteHandleKey<IOBitwise::eEmNbhoodTOBContainer>
     m_neighKey {
       this,
       "stripNeighborhoodTOBKey",
@@ -80,12 +79,12 @@ namespace GlobalSim {
     StatusCode
     findNeighborhoods(const std::vector<const xAOD::eFexEMRoI*>&,
 		      const std::vector<const CaloCell*>&,
-		      IOBitwise::IeEmNbhoodTOBContainer&) const;
+		      IOBitwise::eEmNbhoodTOBContainer&) const;
 
     StatusCode
     findNeighborhood(const xAOD::eFexEMRoI*,
 		     const std::vector<const CaloCell*>&,
-		     IOBitwise::IeEmNbhoodTOBContainer&) const;
+		     IOBitwise::eEmNbhoodTOBContainer&) const;
 
     StatusCode
     findClosestCellToRoI(const xAOD::eFexEMRoI*,

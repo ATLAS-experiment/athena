@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArHV/HECHVModule.h"
@@ -42,7 +42,7 @@ HECHVModule::HECHVModule(const HECHVManager *manager
 			 , unsigned int iSide
 			 , unsigned int iPhi
 			 , unsigned int iSampling)
-  :m_c(new Clockwork(manager,this,iSide,iPhi,iSampling))
+  : m_c (std::make_unique<Clockwork> (manager,this,iSide,iPhi,iSampling))
 {
 }
 
@@ -71,10 +71,7 @@ const HECHVSubgap& HECHVModule::getSubgap(unsigned int iElectrode) const
   return *(m_c->subgaps[iElectrode]);
 }
 
-HECHVModule::~HECHVModule()
-{
-  delete m_c;
-}
+HECHVModule::~HECHVModule() = default;
 
 double HECHVModule::getPhiMin() const
 {

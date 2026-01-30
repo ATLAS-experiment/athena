@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "BTaggingValidationPlots.h"
@@ -57,14 +57,11 @@ namespace JetTagDQA{
     m_truthMatchProbabilityCut = truthMatchProbabilityCut;
   }
 
-  void BTaggingValidationPlots::setTaggerNames(const std::string& dipsName,
-					       const std::string& DL1dv01Name,
-					       const std::string& GN2v01Name,
-					       const std::string& GN2Xv01Name){
-    m_dipsName = dipsName;
-    m_DL1dv01Name = DL1dv01Name;
+  void BTaggingValidationPlots::setTaggerNames(
+                 const std::string& GN2v01Name,
+					       const std::string& GN3XPV01Name){
     m_GN2v01Name = GN2v01Name;
-    m_GN2Xv01Name = GN2Xv01Name;
+    m_GN3XPV01Name = GN3XPV01Name;
   }
   
   // implement the bookHistogram function using the histogram definitions
@@ -103,6 +100,11 @@ namespace JetTagDQA{
 
   // util function to fill the tagger discriminant related histograms
   void BTaggingValidationPlots::fillDiscriminantHistograms(const std::string& tagger_name, const double& discriminant_value, const std::map<std::string, double>& working_points, const int& truth_label, std::map<std::string, TH1*>::const_iterator hist_iter, std::map<std::string, int>::const_iterator label_iter, const bool& pass_nTracksCut, const double& jet_pT, const double& jet_Lxy, const bool& onZprime, const xAOD::EventInfo* event){
+    // TODO: GN3XPV01 will not fill any WPs for now. This need to be adapted when WPs as a function of pT and mass are defined.
+    if (tagger_name == "GN3XPV01_") {
+      ATH_MSG_DEBUG("GN3XPV01 has no WPs defined. Not filling any WP-related histograms.");
+      return;
+    }
     // check if the current histogram is to be filled with this tagger discriminant
     if((hist_iter->first).find(tagger_name) < 1 && (hist_iter->first).find("matched") < (hist_iter->first).length()){                        
       // check if the current histograms is to be filled with the discrinimant and the current truth label
@@ -404,53 +406,6 @@ namespace JetTagDQA{
       m_SV1_fracTracks_OtherOrigin_muon = bookHistogram("SV1_fracTracks_OtherOrigin_muon", "SV1_fracTracks_from_OtherOrigin", m_sParticleType, "jets with muon -"); 
     }
 
-    // JetFitter related vars 
-    m_JetFitter_N2Tpair_incl = bookHistogram("JetFitter_N2Tpair_incl", "JetFitter_N2Tpair", m_sParticleType);
-    m_JetFitter_nVTX_incl = bookHistogram("JetFitter_nVTX_incl", "JetFitter_nVTX", m_sParticleType);
-    m_JetFitter_nSingleTracks_incl = bookHistogram("JetFitter_nSingleTracks_incl", "JetFitter_nSingleTracks", m_sParticleType);
-    m_JetFitter_nTracksAtVtx_incl = bookHistogram("JetFitter_nTracksAtVtx_incl", "JetFitter_nTracksAtVtx", m_sParticleType);
-    m_JetFitter_mass_incl = bookHistogram("JetFitter_mass_incl", "JetFitter_mass", m_sParticleType);
-    m_JetFitter_energyFraction_incl = bookHistogram("JetFitter_energyFraction_incl", "JetFitter_energyFraction", m_sParticleType);
-    m_JetFitter_significance3d_incl = bookHistogram("JetFitter_significance3d_incl", "JetFitter_significance3d", m_sParticleType);
-    m_JetFitter_purity_incl = bookHistogram("JetFitter_purity_incl", "JetFitter_purity", m_sParticleType);
-    
-    m_JetFitter_N2Tpair_b = bookHistogram("JetFitter_N2Tpair_b", "JetFitter_N2Tpair", m_sParticleType, "b-jets - ");
-    m_JetFitter_nVTX_b = bookHistogram("JetFitter_nVTX_b", "JetFitter_nVTX", m_sParticleType, "b-jets - ");
-    m_JetFitter_nSingleTracks_b = bookHistogram("JetFitter_nSingleTracks_b", "JetFitter_nSingleTracks", m_sParticleType, "b-jets - ");
-    m_JetFitter_nTracksAtVtx_b = bookHistogram("JetFitter_nTracksAtVtx_b", "JetFitter_nTracksAtVtx", m_sParticleType, "b-jets - ");
-    m_JetFitter_mass_b = bookHistogram("JetFitter_mass_b", "JetFitter_mass", m_sParticleType, "b-jets - ");
-    m_JetFitter_energyFraction_b = bookHistogram("JetFitter_energyFraction_b", "JetFitter_energyFraction", m_sParticleType, "b-jets - ");
-    m_JetFitter_significance3d_b = bookHistogram("JetFitter_significance3d_b", "JetFitter_significance3d", m_sParticleType, "b-jets - ");
-    m_JetFitter_purity_b = bookHistogram("JetFitter_purity_b", "JetFitter_purity", m_sParticleType, "b-jets - ");
-    
-    m_JetFitter_N2Tpair_c = bookHistogram("JetFitter_N2Tpair_c", "JetFitter_N2Tpair", m_sParticleType, "c-jets - ");
-    m_JetFitter_nVTX_c = bookHistogram("JetFitter_nVTX_c", "JetFitter_nVTX", m_sParticleType, "c-jets - ");
-    m_JetFitter_nSingleTracks_c = bookHistogram("JetFitter_nSingleTracks_c", "JetFitter_nSingleTracks", m_sParticleType, "c-jets - ");
-    m_JetFitter_nTracksAtVtx_c = bookHistogram("JetFitter_nTracksAtVtx_c", "JetFitter_nTracksAtVtx", m_sParticleType, "c-jets - ");
-    m_JetFitter_mass_c = bookHistogram("JetFitter_mass_c", "JetFitter_mass", m_sParticleType, "c-jets - ");
-    m_JetFitter_energyFraction_c = bookHistogram("JetFitter_energyFraction_c", "JetFitter_energyFraction", m_sParticleType, "c-jets - ");
-    m_JetFitter_significance3d_c = bookHistogram("JetFitter_significance3d_c", "JetFitter_significance3d", m_sParticleType, "c-jets - ");
-    m_JetFitter_purity_c = bookHistogram("JetFitter_purity_c", "JetFitter_purity", m_sParticleType, "c-jets - ");
-    
-    m_JetFitter_N2Tpair_l = bookHistogram("JetFitter_N2Tpair_l", "JetFitter_N2Tpair", m_sParticleType, "l-jets - ");
-    m_JetFitter_nVTX_l = bookHistogram("JetFitter_nVTX_l", "JetFitter_nVTX", m_sParticleType, "l-jets - ");
-    m_JetFitter_nSingleTracks_l = bookHistogram("JetFitter_nSingleTracks_l", "JetFitter_nSingleTracks", m_sParticleType, "l-jets - ");
-    m_JetFitter_nTracksAtVtx_l = bookHistogram("JetFitter_nTracksAtVtx_l", "JetFitter_nTracksAtVtx", m_sParticleType, "l-jets - ");
-    m_JetFitter_mass_l = bookHistogram("JetFitter_mass_l", "JetFitter_mass", m_sParticleType, "l-jets - ");
-    m_JetFitter_energyFraction_l = bookHistogram("JetFitter_energyFraction_l", "JetFitter_energyFraction", m_sParticleType, "l-jets - ");
-    m_JetFitter_significance3d_l = bookHistogram("JetFitter_significance3d_l", "JetFitter_significance3d", m_sParticleType, "l-jets - ");
-    m_JetFitter_purity_l = bookHistogram("JetFitter_purity_l", "JetFitter_purity", m_sParticleType, "l-jets - ");
-    
-    m_JetFitter_N2Tpair_muon = bookHistogram("JetFitter_N2Tpair_muon", "JetFitter_N2Tpair", m_sParticleType, "jets with muon - ");
-    m_JetFitter_nVTX_muon = bookHistogram("JetFitter_nVTX_muon", "JetFitter_nVTX", m_sParticleType, "jets with muon - ");
-    m_JetFitter_nSingleTracks_muon = bookHistogram("JetFitter_nSingleTracks_muon", "JetFitter_nSingleTracks", m_sParticleType, "jets with muon - ");
-    m_JetFitter_nTracksAtVtx_muon = bookHistogram("JetFitter_nTracksAtVtx_muon", "JetFitter_nTracksAtVtx", m_sParticleType, "jets with muon - ");
-    m_JetFitter_mass_muon = bookHistogram("JetFitter_mass_muon", "JetFitter_mass", m_sParticleType, "jets with muon - ");
-    m_JetFitter_energyFraction_muon = bookHistogram("JetFitter_energyFraction_muon", "JetFitter_energyFraction", m_sParticleType, "jets with muon - ");
-    m_JetFitter_significance3d_muon = bookHistogram("JetFitter_significance3d_muon", "JetFitter_significance3d", m_sParticleType, "jets with muon - ");
-    m_JetFitter_purity_muon = bookHistogram("JetFitter_purity_muon", "JetFitter_purity", m_sParticleType, "jets with muon - ");
-    
-
     // IPs and IP significances
     m_track_d0_incl = bookHistogram("d0_incl", "track_d0", m_sParticleType);
     m_track_z0_incl = bookHistogram("z0_incl", "track_z0", m_sParticleType); 
@@ -668,57 +623,21 @@ namespace JetTagDQA{
     m_nsharedSCTHits_top = bookHistogram("nsharedSCTHits_top", "nsharedSCTHits", m_sParticleType, "top-like jets -");
 
     // tagger
-    m_IP3D_pb = bookHistogram("IP3D_pb", "IP3D_pb", m_sParticleType);
-    m_IP3D_pc = bookHistogram("IP3D_pc", "IP3D_pc", m_sParticleType);
-    m_IP3D_pu = bookHistogram("IP3D_pu", "IP3D_pu", m_sParticleType);
-
-    m_DIPS_pb = bookHistogram("DIPS_pb", "DIPS_pb", m_sParticleType);
-    m_DIPS_pc = bookHistogram("DIPS_pc", "DIPS_pc", m_sParticleType);
-    m_DIPS_pu = bookHistogram("DIPS_pu", "DIPS_pu", m_sParticleType);
-
-    m_SV1_pb = bookHistogram("SV1_pb", "SV1_pb", m_sParticleType);
-    m_SV1_pc = bookHistogram("SV1_pc", "SV1_pc", m_sParticleType);
-    m_SV1_pu = bookHistogram("SV1_pu", "SV1_pu", m_sParticleType);
-    
-    m_IP3D_nTracks_incl = bookHistogram("IP3D_NTracks_incl", "IP3D_nTracks", m_sParticleType);
-    m_IP3D_nTracks_b = bookHistogram("IP3D_NTracks_b", "IP3D_nTracks", m_sParticleType, "b-jets -");
-    m_IP3D_nTracks_c = bookHistogram("IP3D_NTracks_c", "IP3D_nTracks", m_sParticleType, "c-jets -");
-    m_IP3D_nTracks_l = bookHistogram("IP3D_NTracks_l", "IP3D_nTracks", m_sParticleType, "l-jets -");
-    m_IP3D_nTracks_muon = bookHistogram("IP3D_NTracks_muon", "IP3D_nTracks", m_sParticleType, "jets with muon -");
-
-    m_nGTinSV1_incl = bookHistogram("SV1_nGoodTracks_incl", "SV1_nGoodTracks", m_sParticleType);
-    m_nGTinSV1_b = bookHistogram("SV1_nGoodTracks_b", "SV1_nGoodTracks", m_sParticleType, "b-jets -");
-    m_nGTinSV1_c = bookHistogram("SV1_nGoodTracks_c", "SV1_nGoodTracks", m_sParticleType, "c-jets -");
-    m_nGTinSV1_l = bookHistogram("SV1_nGoodTracks_l", "SV1_nGoodTracks", m_sParticleType, "l-jets -");
-    m_nGTinSV1_muon = bookHistogram("SV1_nGoodTracks_muon", "SV1_nGoodTracks", m_sParticleType, "jets with muon -");
-
-    m_DL1dv01_pb = bookHistogram("DL1dv01_pb", "DL1dv01_pb", m_sParticleType);
-    m_DL1dv01_pc = bookHistogram("DL1dv01_pc", "DL1dv01_pc", m_sParticleType);
-    m_DL1dv01_pu = bookHistogram("DL1dv01_pu", "DL1dv01_pu", m_sParticleType);
-
     m_GN2v01_pb = bookHistogram("GN2v01_pb", "GN2v01_pb", m_sParticleType);
     m_GN2v01_pc = bookHistogram("GN2v01_pc", "GN2v01_pc", m_sParticleType);
     m_GN2v01_pu = bookHistogram("GN2v01_pu", "GN2v01_pu", m_sParticleType);
     m_GN2v01_ptau = bookHistogram("GN2v01_ptau", "GN2v01_ptau", m_sParticleType);
     
-    m_GN2Xv01_phbb = bookHistogram("GN2Xv01_phbb", "GN2Xv01_phbb",m_sParticleType);
-    m_GN2Xv01_phcc = bookHistogram("GN2Xv01_phcc", "GN2Xv01_phcc",m_sParticleType);
-    m_GN2Xv01_ptop = bookHistogram("GN2Xv01_ptop", "GN2Xv01_ptop",m_sParticleType);
-    m_GN2Xv01_pqcd = bookHistogram("GN2Xv01_pqcd", "GN2Xv01_pqcd",m_sParticleType);
+    m_GN3XPV01_phtautauhad = bookHistogram("GN3XPV01_phtautauhad", "GN3XPV01_phtautauhad",m_sParticleType);
+    m_GN3XPV01_phbb = bookHistogram("GN3XPV01_phbb", "GN3XPV01_phbb",m_sParticleType);
+    m_GN3XPV01_phcc = bookHistogram("GN3XPV01_phcc", "GN3XPV01_phcc",m_sParticleType);
+    m_GN3XPV01_ptop = bookHistogram("GN3XPV01_ptop", "GN3XPV01_ptop",m_sParticleType);
+    m_GN3XPV01_pqcdbb = bookHistogram("GN3XPV01_pqcdbb", "GN3XPV01_pqcdbb",m_sParticleType);
+    m_GN3XPV01_pqcdbx = bookHistogram("GN3XPV01_pqcdbx", "GN3XPV01_pqcdbx",m_sParticleType);
+    m_GN3XPV01_pqcdcx = bookHistogram("GN3XPV01_pqcdcx", "GN3XPV01_pqcdcx",m_sParticleType);
+    m_GN3XPV01_pqcdll = bookHistogram("GN3XPV01_pqcdll", "GN3XPV01_pqcdll",m_sParticleType);
+    m_GN3XPV01_pwqq = bookHistogram("GN3XPV01_pwqq", "GN3XPV01_pwqq",m_sParticleType);
 
-    m_IP3D_gradeOfTracks_incl = bookHistogram("IP3D_gradeOfTracks_incl", "IP3D_gradeOfTracks", m_sParticleType);
-    m_IP3D_gradeOfTracks_b = bookHistogram("IP3D_gradeOfTracks_b", "IP3D_gradeOfTracks", m_sParticleType, "b-jets -");
-    m_IP3D_gradeOfTracks_c = bookHistogram("IP3D_gradeOfTracks_c", "IP3D_gradeOfTracks", m_sParticleType, "c-jets -");
-    m_IP3D_gradeOfTracks_l = bookHistogram("IP3D_gradeOfTracks_l", "IP3D_gradeOfTracks", m_sParticleType, "l-jets -");
-    m_IP3D_gradeOfTracks_muon = bookHistogram("IP3D_gradeOfTracks_muon", "IP3D_gradeOfTracks", m_sParticleType, "jets with muon -");
-
-    m_tmpD0 = bookHistogram("IP3D_valD0wrtPVofTracks", "IP3D_d0wrtPVOfTracks", m_sParticleType);
-    m_tmpZ0 = bookHistogram("IP3D_valZ0wrtPVofTracks", "IP3D_z0wrtPVOfTracks", m_sParticleType);
-    m_tmpD0sig = bookHistogram("IP3D_sigD0wrtPVofTracks", "IP3D_sigD0wrtPVOfTracks", m_sParticleType);
-    m_tmpZ0sig = bookHistogram("IP3D_sigZ0wrtPVofTracks", "IP3D_sigZ0wrtPVOfTracks", m_sParticleType);
-    m_IP3D_weightBofTracks = bookHistogram("IP3D_weightBofTracks", "IP3D_weightBOfTracks", m_sParticleType);
-    m_IP3D_weightCofTracks = bookHistogram("IP3D_weightCofTracks", "IP3D_weightCOfTracks", m_sParticleType);
-    m_IP3D_weightUofTracks = bookHistogram("IP3D_weightUofTracks", "IP3D_weightUOfTracks", m_sParticleType);
 
     // B hadron Lxy
     m_Truth_Lxy_b = bookHistogram("Truth_Lxy_b", "Truth_Lxy_b", m_sParticleType, "b-jets - ");
@@ -776,7 +695,7 @@ namespace JetTagDQA{
   }
 
   // a fill method for variables that have no other home
-  void BTaggingValidationPlots::fillOther(const xAOD::Jet* jet, const xAOD::BTagging* btag, bool& contains_muon, double& jet_Lxy, const int& truth_label, const xAOD::EventInfo* event){
+  void BTaggingValidationPlots::fillOther(const xAOD::Jet* jet, bool& contains_muon, double& jet_Lxy, const int& truth_label, const xAOD::EventInfo* event){
 
     // Lxy: take value of B hadron for b jets, of C hadron for c jets and the SV1 Lxy value for light jets
     double Lxy(-1);
@@ -831,7 +750,7 @@ namespace JetTagDQA{
       // SV1 Lxy for light jets
       else if(truth_label == 0){
         static const SG::ConstAccessor<float> SV1_LxyAcc("SV1_Lxy");
-        Lxy = SV1_LxyAcc(*btag);
+        if (SV1_LxyAcc.isAvailable(*jet)) Lxy = SV1_LxyAcc(*jet);
       }
     }
 
@@ -845,8 +764,8 @@ namespace JetTagDQA{
     ElementLink<xAOD::MuonContainer> muonLink;
     static const SG::ConstAccessor< ElementLink<xAOD::MuonContainer> >
       softMuon_linkAcc("softMuon_link");
-    if(softMuon_linkAcc.isAvailable(*btag)) {
-      muonLink = softMuon_linkAcc(*btag); 
+    if(softMuon_linkAcc.isAvailable(*jet)) {
+      muonLink = softMuon_linkAcc(*jet); 
     }
 
     // fill bool and pT frac if there is a muon
@@ -865,17 +784,17 @@ namespace JetTagDQA{
 
 
   // a fill method for track related vars
-  void BTaggingValidationPlots::fillTrackVariables(const xAOD::Jet* jet, const xAOD::BTagging* btag, const xAOD::Vertex *myVertex, const std::map<const xAOD::TrackParticle*, int> & track_truth_associations, const bool& has_muon, const int& truth_label, int& num_HF_tracks_in_jet, const xAOD::EventInfo* event){
+  void BTaggingValidationPlots::fillTrackVariables(const xAOD::Jet* jet, const xAOD::Vertex *myVertex, const std::map<const xAOD::TrackParticle*, int> & track_truth_associations, const bool& has_muon, const int& truth_label, int& num_HF_tracks_in_jet, const xAOD::EventInfo* event){
 
     // get the jet TLorentzVector
     TLorentzVector jet_tlv;
     jet_tlv.SetPtEtaPhiE(jet->pt(), jet->eta(), jet->phi(), jet->e());
 
     // get the assocated tracks
-    static const SG::ConstAccessor< std::vector<ElementLink<xAOD::TrackParticleContainer> > >
-      BTagTrackToJetAssociatorAcc("BTagTrackToJetAssociator");
-    std::vector< ElementLink< xAOD::TrackParticleContainer > > assocTracks =
-      BTagTrackToJetAssociatorAcc(*btag);
+    static const SG::ConstAccessor< std::vector<ElementLink<xAOD::IParticleContainer> > >
+      JetToTrackAssociatorAcc("TracksForBTagging");
+    std::vector< ElementLink< xAOD::IParticleContainer > > assocTracks =
+      JetToTrackAssociatorAcc(*jet);
 
     int numTracks_perJet = 0;
     int numTracks_fromB = 0;
@@ -903,7 +822,7 @@ namespace JetTagDQA{
       numTracks_perJet++;
 
       // get the curent track
-      const xAOD::TrackParticle* track = *(assocTrack);         
+      const xAOD::TrackParticle* track = static_cast<const xAOD::TrackParticle*>(*(assocTrack));       
 
       // get the track origin
       int track_origin = -1;
@@ -1099,43 +1018,39 @@ namespace JetTagDQA{
 
 
   // a fill method for SV related vars
-  void BTaggingValidationPlots::fillSVVariables(const xAOD::BTagging* btag, const std::map<const xAOD::TrackParticle*, int> & track_truth_associations, const bool& has_muon, const int& truth_label, const int& num_HF_tracks_in_jet, bool& contains_SV, const xAOD::EventInfo* event){
+  void BTaggingValidationPlots::fillSVVariables(const xAOD::Jet* jet, const std::map<const xAOD::TrackParticle*, int> & track_truth_associations, const bool& has_muon, const int& truth_label, const int& num_HF_tracks_in_jet, bool& contains_SV, const xAOD::EventInfo* event){
     // SV1
 
     // SV1 mass of the SV
-    float SV1_masssvx;
-    try{ btag->taggerInfo(SV1_masssvx, xAOD::SV1_masssvx); }
-    catch(std::exception& exception){ SV1_masssvx = -1; }
+    static const SG::ConstAccessor<float> SV1_masssvxAcc("SV1_masssvx");
+    float SV1_masssvx = SV1_masssvxAcc.isAvailable(*jet) ? SV1_masssvxAcc(*jet) : -1;
 
     // SV1 number of two-track vertices
-    int SV1_N2Tpair;
-    try{ btag->taggerInfo(SV1_N2Tpair, xAOD::SV1_N2Tpair); }
-    catch(std::exception& exception){ SV1_N2Tpair = -1; }
+    static const SG::ConstAccessor<int> SV1_N2TpairAcc("SV1_N2Tpair");
+    int SV1_N2Tpair = SV1_N2TpairAcc.isAvailable(*jet) ? SV1_N2TpairAcc(*jet) : -1;
 
     // SV1 energy fraction
-    float SV1_efracsvx;
-    try{ btag->taggerInfo(SV1_efracsvx, xAOD::SV1_efracsvx); }
-    catch(std::exception& exception){ SV1_efracsvx = -1; }
+    static const SG::ConstAccessor<float> SV1_efracsvxAcc("SV1_efracsvx");
+    float SV1_efracsvx = SV1_efracsvxAcc.isAvailable(*jet) ? SV1_efracsvxAcc(*jet) : -1;
 
     // SV1 deltaR jex axis - PV-SV
     static const SG::ConstAccessor<float> SV1_deltaRAcc("SV1_deltaR");
-    float SV1_deltaR = SV1_deltaRAcc(*btag);
+    float SV1_deltaR = SV1_deltaRAcc(*jet);
 
     // SV1 significance 3d
     static const SG::ConstAccessor<float> SV1_significance3dAcc("SV1_significance3d");
-    float SV1_significance3d = SV1_significance3dAcc(*btag);
+    float SV1_significance3d = SV1_significance3dAcc(*jet);
 
     // SV1 energyTrkInJet
     static const SG::ConstAccessor<float> SV1_energyTrkInJetAcc("SV1_energyTrkInJet");
-    float SV1_energyTrkInJet = SV1_energyTrkInJetAcc(*btag);
+    float SV1_energyTrkInJet = SV1_energyTrkInJetAcc(*jet);
 
     // SV1 NGTinSvx 
     static const SG::ConstAccessor<int> SV1_NGTinSvxAcc("SV1_NGTinSvx");
-    int SV1_NGTinSvx = SV1_NGTinSvxAcc(*btag);
-
+    int SV1_NGTinSvx = SV1_NGTinSvxAcc(*jet);
     // SV1 Lxy 
     static const SG::ConstAccessor<float> SV1_LxyAcc("SV1_Lxy");
-    float SV1_Lxy = SV1_LxyAcc(*btag);
+    float SV1_Lxy = SV1_LxyAcc(*jet);
 
     // SV1 track origing related variables (have them double such that taking a fraction doesn't result in an int)
     double SV1_numTracks = 0;
@@ -1159,7 +1074,7 @@ namespace JetTagDQA{
     static const SG::ConstAccessor<std::vector< ElementLink< xAOD::VertexContainer > > >
       SV1_verticesAcc("SV1_vertices");
     std::vector< ElementLink< xAOD::VertexContainer > > SV1_vertex =
-      SV1_verticesAcc(*btag);
+      SV1_verticesAcc(*jet);
 
     if(SV1_vertex.size() >= 1) contains_SV = true;
     else contains_SV = false;
@@ -1245,78 +1160,6 @@ namespace JetTagDQA{
       }
     }
 
-
-    // JetFitter
-
-    // JetFitter N2Tpair
-    static const SG::ConstAccessor<int> JetFitter_N2TpairAcc("JetFitter_N2Tpair");
-    int JetFitter_N2Tpair = JetFitter_N2TpairAcc(*btag);
-
-    // JetFitter nVTX
-    static const SG::ConstAccessor<int> JetFitter_nVTXAcc("JetFitter_nVTX");
-    int JetFitter_nVTX = JetFitter_nVTXAcc(*btag);
-
-    // JetFitter nSingleTracks
-    static const SG::ConstAccessor<int> JetFitter_nSingleTracksAcc("JetFitter_nSingleTracks");
-    int JetFitter_nSingleTracks = JetFitter_nSingleTracksAcc(*btag);
-
-    // JetFitter nTracksAtVtx
-    static const SG::ConstAccessor<int> JetFitter_nTracksAtVtxAcc("JetFitter_nTracksAtVtx");
-    int JetFitter_nTracksAtVtx = JetFitter_nTracksAtVtxAcc(*btag);
-
-    // JetFitter mass
-    static const SG::ConstAccessor<float> JetFitter_massAcc("JetFitter_mass");
-    float JetFitter_mass = JetFitter_massAcc(*btag);
-
-    // JetFitter energyFraction
-    static const SG::ConstAccessor<float> JetFitter_energyFractionAcc("JetFitter_energyFraction");
-    float JetFitter_energyFraction = JetFitter_energyFractionAcc(*btag);
-
-    // JetFitter significance3d
-    static const SG::ConstAccessor<float> JetFitter_significance3dAcc("JetFitter_significance3d");
-    float JetFitter_significance3d = JetFitter_significance3dAcc(*btag);
-
-    // get JetFitter vertices
-    static const SG::ConstAccessor<std::vector< ElementLink< xAOD::BTagVertexContainer > > >
-      JetFitter_JFverticesAcc("JetFitter_JFvertices");
-    std::vector< ElementLink< xAOD::BTagVertexContainer > > JetFitter_vertices =
-      JetFitter_JFverticesAcc(*btag);
-    std::vector<double> JetFitter_purity_perVertex;
-
-    // loop over the JetFitter vertices
-    for (unsigned int i = 0; i < JetFitter_vertices.size(); i++) {
-      if (!JetFitter_vertices.at(i).isValid()) continue;
-      const xAOD::BTagVertex* vtx = *(JetFitter_vertices.at(i));
-
-      double JetFitter_numTracks = 0;
-      double JetFitter_numTracks_fromHF = 0;
-
-      // get the track links
-      std::vector<ElementLink<DataVector<xAOD::TrackParticle> > > tpLinks = vtx->track_links();
-
-      // loop over the tracks
-      for (const ElementLink<DataVector<xAOD::TrackParticle> >& link : tpLinks) {
-        const xAOD::TrackParticle* track = (*link);
-      
-        // get the track origin
-        int track_origin = -1;
-        if(!m_isData){
-          track_origin = track_truth_associations.at(track);
-        }
-
-        // count the tracks from HF
-        if( (InDet::TrkOrigin::isFromB(track_origin)) || (InDet::TrkOrigin::isFromD(track_origin)) ) JetFitter_numTracks_fromHF++;
-        // and count all tracks
-        JetFitter_numTracks++;
-      }
-
-      // get the purity of the current vertex
-      JetFitter_purity_perVertex.push_back(JetFitter_numTracks_fromHF / JetFitter_numTracks);
-    }
-
-    // get the average purity
-    double JetFitter_purity = std::accumulate(JetFitter_purity_perVertex.begin(), JetFitter_purity_perVertex.end(), 0.) / JetFitter_purity_perVertex.size();
-
     BTaggingValidationPlots::fillHistoWithTruthCases(SV1_masssvx/GeV, m_SV1_masssvx_incl, m_SV1_masssvx_b, m_SV1_masssvx_c, m_SV1_masssvx_l, m_SV1_masssvx_muon, truth_label, has_muon, event);
     BTaggingValidationPlots::fillHistoWithTruthCases(SV1_N2Tpair, m_SV1_N2Tpair_incl, m_SV1_N2Tpair_b, m_SV1_N2Tpair_c, m_SV1_N2Tpair_l, m_SV1_N2Tpair_muon, truth_label, has_muon, event);
     BTaggingValidationPlots::fillHistoWithTruthCases(SV1_efracsvx, m_SV1_efracsvx_incl, m_SV1_efracsvx_b, m_SV1_efracsvx_c, m_SV1_efracsvx_l, m_SV1_efracsvx_muon, truth_label, has_muon, event);
@@ -1346,239 +1189,38 @@ namespace JetTagDQA{
         BTaggingValidationPlots::fillHistoWithTruthCases(SV1_fracTracks_OtherOrigin, m_SV1_fracTracks_OtherOrigin_incl, m_SV1_fracTracks_OtherOrigin_b, m_SV1_fracTracks_OtherOrigin_c, m_SV1_fracTracks_OtherOrigin_u, m_SV1_fracTracks_OtherOrigin_muon, truth_label, has_muon, event); 
       }
     }
-    BTaggingValidationPlots::fillHistoWithTruthCases(JetFitter_N2Tpair, m_JetFitter_N2Tpair_incl, m_JetFitter_N2Tpair_b, m_JetFitter_N2Tpair_c, m_JetFitter_N2Tpair_l, m_JetFitter_N2Tpair_muon, truth_label, has_muon, event);
-    BTaggingValidationPlots::fillHistoWithTruthCases(JetFitter_nVTX, m_JetFitter_nVTX_incl, m_JetFitter_nVTX_b, m_JetFitter_nVTX_c, m_JetFitter_nVTX_l, m_JetFitter_nVTX_muon, truth_label, has_muon, event);
-    BTaggingValidationPlots::fillHistoWithTruthCases(JetFitter_nSingleTracks, m_JetFitter_nSingleTracks_incl, m_JetFitter_nSingleTracks_b, m_JetFitter_nSingleTracks_c, m_JetFitter_nSingleTracks_l, m_JetFitter_nSingleTracks_muon, truth_label, has_muon, event);
-    BTaggingValidationPlots::fillHistoWithTruthCases(JetFitter_nTracksAtVtx, m_JetFitter_nTracksAtVtx_incl, m_JetFitter_nTracksAtVtx_b, m_JetFitter_nTracksAtVtx_c, m_JetFitter_nTracksAtVtx_l, m_JetFitter_nTracksAtVtx_muon, truth_label, has_muon, event);
-    BTaggingValidationPlots::fillHistoWithTruthCases(JetFitter_mass/GeV, m_JetFitter_mass_incl, m_JetFitter_mass_b, m_JetFitter_mass_c, m_JetFitter_mass_l, m_JetFitter_mass_muon, truth_label, has_muon, event);
-    BTaggingValidationPlots::fillHistoWithTruthCases(JetFitter_energyFraction, m_JetFitter_energyFraction_incl, m_JetFitter_energyFraction_b, m_JetFitter_energyFraction_c, m_JetFitter_energyFraction_l, m_JetFitter_energyFraction_muon, truth_label, has_muon, event);
-    BTaggingValidationPlots::fillHistoWithTruthCases(JetFitter_significance3d, m_JetFitter_significance3d_incl, m_JetFitter_significance3d_b, m_JetFitter_significance3d_c, m_JetFitter_significance3d_l, m_JetFitter_significance3d_muon, truth_label, has_muon, event);
-    if(!m_isData){
-      BTaggingValidationPlots::fillHistoWithTruthCases(JetFitter_purity, m_JetFitter_purity_incl, m_JetFitter_purity_b, m_JetFitter_purity_c, m_JetFitter_purity_l, m_JetFitter_purity_muon, truth_label, has_muon, event);
-    }
 
   }
 
   // a fill method for discriminant related vars
-  void BTaggingValidationPlots::fillDiscriminantVariables(const xAOD::BTagging* btag, const xAOD::Jet* jet, const double& jet_Lxy, const int& truth_label, const bool& has_muon, const bool& onZprime, std::map<std::string, int>& nJetsThatPassedWPCuts, const xAOD::EventInfo* event){
-
-    //// IPxD variables
-
-    // grade of tracks
-    static const SG::ConstAccessor<std::vector<int> > IP3D_gradeOfTracksAcc("IP3D_gradeOfTracks");
-    static const SG::ConstAccessor<std::vector<int> > IP2D_gradeOfTracksAcc("IP2D_gradeOfTracks");
-    std::vector<int> IP3D_gradeOfTracks = IP3D_gradeOfTracksAcc(*btag);
-    std::vector<int> IP2D_gradeOfTracks = IP2D_gradeOfTracksAcc(*btag);
-    // loop over the elements (i.e. tracks) and fill the histogram
-    for( unsigned int i=0; i<IP3D_gradeOfTracks.size(); i++){
-      BTaggingValidationPlots::fillHistoWithTruthCases(IP3D_gradeOfTracks.at(i), m_IP3D_gradeOfTracks_incl, m_IP3D_gradeOfTracks_b, m_IP3D_gradeOfTracks_c, m_IP3D_gradeOfTracks_l, m_IP3D_gradeOfTracks_muon, truth_label, has_muon, event);
-    }
-
-    // d0, z0 and significances
-    static const SG::ConstAccessor<std::vector<float> > IP3D_valD0wrtPVofTracksAcc("IP3D_valD0wrtPVofTracks");
-    static const SG::ConstAccessor<std::vector<float> > IP3D_valZ0wrtPVofTracksAcc("IP3D_valZ0wrtPVofTracks");
-    static const SG::ConstAccessor<std::vector<float> > IP3D_sigD0wrtPVofTracksAcc("IP3D_sigD0wrtPVofTracks");
-    static const SG::ConstAccessor<std::vector<float> > IP3D_sigZ0wrtPVofTracksAcc("IP3D_sigZ0wrtPVofTracks");
-
-    std::vector<float> tmpD0       = IP3D_valD0wrtPVofTracksAcc(*btag);
-    std::vector<float> tmpZ0       = IP3D_valZ0wrtPVofTracksAcc(*btag);
-    std::vector<float> tmpD0sig    = IP3D_sigD0wrtPVofTracksAcc(*btag);
-    std::vector<float> tmpZ0sig    = IP3D_sigZ0wrtPVofTracksAcc(*btag);
-
-    // loop over the elements (i.e. tracks) and fill the histogram
-    for( unsigned int i=0; i<tmpD0   .size(); i++) m_tmpD0   ->Fill(tmpD0.at(i), event->beamSpotWeight());
-    for( unsigned int i=0; i<tmpZ0   .size(); i++) m_tmpZ0   ->Fill(tmpZ0.at(i), event->beamSpotWeight());
-    for( unsigned int i=0; i<tmpD0sig.size(); i++) m_tmpD0sig->Fill(tmpD0sig.at(i), event->beamSpotWeight());
-    for( unsigned int i=0; i<tmpZ0sig.size(); i++) m_tmpZ0sig->Fill(tmpZ0sig.at(i), event->beamSpotWeight());
-  
-    // weight b and weight u of tracks
-    // IP3D
-    static const SG::ConstAccessor<std::vector<float> > IP3D_weightBofTracksAcc("IP3D_weightBofTracks");
-    static const SG::ConstAccessor<std::vector<float> > IP3D_weightCofTracksAcc("IP3D_weightCofTracks");
-    static const SG::ConstAccessor<std::vector<float> > IP3D_weightUofTracksAcc("IP3D_weightUofTracks");
-
-    std::vector<float> IP3D_weightBofTracks = IP3D_weightBofTracksAcc(*btag);
-    std::vector<float> IP3D_weightCofTracks = IP3D_weightCofTracksAcc(*btag);
-    std::vector<float> IP3D_weightUofTracks = IP3D_weightUofTracksAcc(*btag);
-
-    // IP2D
-    static const SG::ConstAccessor<std::vector<float> > IP2D_weightBofTracksAcc("IP2D_weightBofTracks");
-    static const SG::ConstAccessor<std::vector<float> > IP2D_weightCofTracksAcc("IP2D_weightCofTracks");
-    static const SG::ConstAccessor<std::vector<float> > IP2D_weightUofTracksAcc("IP2D_weightUofTracks");
-    std::vector<float> IP2D_weightBofTracks = IP2D_weightBofTracksAcc(*btag);
-    std::vector<float> IP2D_weightCofTracks = IP2D_weightCofTracksAcc(*btag);
-    std::vector<float> IP2D_weightUofTracks = IP2D_weightUofTracksAcc(*btag);
-
-    // loop over the elements (i.e. tracks) and fill the histogram
-    // IP3D
-    for( unsigned int i=0; i<IP3D_weightBofTracks.size(); i++) m_IP3D_weightBofTracks->Fill(IP3D_weightBofTracks.at(i), event->beamSpotWeight());
-    for( unsigned int i=0; i<IP3D_weightCofTracks.size(); i++) m_IP3D_weightCofTracks->Fill(IP3D_weightCofTracks.at(i), event->beamSpotWeight());
-    for( unsigned int i=0; i<IP3D_weightUofTracks.size(); i++) m_IP3D_weightUofTracks->Fill(IP3D_weightUofTracks.at(i), event->beamSpotWeight());
-
-
-    // number of IP2D & IP3D tracks
-    int nIP2DTracks(1000);
-    int nIP3DTracks(1000);
-    try{ nIP2DTracks = btag->nIP2D_TrackParticles(); }
-    catch(std::exception& exception){ nIP2DTracks = -1; }
-    try{ nIP3DTracks = btag->nIP3D_TrackParticles(); }
-    catch(std::exception& exception){ nIP3DTracks = -1; }
-
-    BTaggingValidationPlots::fillHistoWithTruthCases(nIP3DTracks, m_IP3D_nTracks_incl, m_IP3D_nTracks_b, m_IP3D_nTracks_c, m_IP3D_nTracks_l, m_IP3D_nTracks_muon, truth_label, has_muon, event);
-
-    // Get IP3D pb, pu, pc 
-    double IP3D_pb, IP3D_pc, IP3D_pu;
-    static const SG::ConstAccessor<float> IP3D_pbAcc("IP3D_pb");
-    IP3D_pb = IP3D_pbAcc.withDefault(*btag, -1);
-
-    static const SG::ConstAccessor<float> IP3D_puAcc("IP3D_pu");
-    IP3D_pu = IP3D_puAcc.withDefault(*btag, -1);
-
-    static const SG::ConstAccessor<float> IP3D_pcAcc("IP3D_pc");
-    IP3D_pc = IP3D_pcAcc.withDefault(*btag, -1);
-
-    m_IP3D_pb->Fill(IP3D_pb, event->beamSpotWeight());
-    m_IP3D_pc->Fill(IP3D_pc, event->beamSpotWeight());
-    m_IP3D_pu->Fill(IP3D_pu, event->beamSpotWeight());
-
-    
-    //// RNNIP variables
-    // pb, pu, pc 
-    double RNNIP_pb, RNNIP_pu, RNNIP_pc;
-    static const SG::ConstAccessor<float> rnnip_pbAcc("rnnip_pb");
-    RNNIP_pb = rnnip_pbAcc.withDefault(*btag, -1);
-
-    static const SG::ConstAccessor<float> rnnip_puAcc("rnnip_pu");
-    RNNIP_pu = rnnip_puAcc.withDefault(*btag, -1);
-
-    static const SG::ConstAccessor<float> rnnip_pcAcc("rnnip_pc");
-    RNNIP_pc = rnnip_pcAcc.withDefault(*btag, -1);
-
-    double weight_RNNIP = log( RNNIP_pb / ( RNNIP_pc * m_RNNIP_fc + RNNIP_pu * (1-m_RNNIP_fc) ) );
-
-    //// DIPS variables
-
-    // pb, pu, pc 
-    double DIPS_pb, DIPS_pu, DIPS_pc;
-    SG::ConstAccessor<float> DIPS_pbAcc(m_dipsName + "_pb");
-    DIPS_pb = DIPS_pbAcc.withDefault(*btag, -1);
-
-    SG::ConstAccessor<float> DIPS_puAcc(m_dipsName + "_pu");
-    DIPS_pu = DIPS_puAcc.withDefault(*btag, -1);
-
-    SG::ConstAccessor<float> DIPS_pcAcc(m_dipsName + "_pc");
-    DIPS_pc = DIPS_pcAcc.withDefault(*btag, -1);
-
-    m_DIPS_pb->Fill(DIPS_pb, event->beamSpotWeight());
-    m_DIPS_pu->Fill(DIPS_pu, event->beamSpotWeight());
-    m_DIPS_pc->Fill(DIPS_pc, event->beamSpotWeight());
-
-    double weight_DIPS = log( DIPS_pb / ( DIPS_pc * m_DIPS_fc + DIPS_pu * (1-m_DIPS_fc) ) );
-
-    //// SV1 variables
-
-    // number of good tracks
-    int nGTinSV1(1000);
-    try{ btag->taggerInfo(nGTinSV1, xAOD::SV1_NGTinSvx); }
-    catch(std::exception& exception){ nGTinSV1 = -1; }
-    BTaggingValidationPlots::fillHistoWithTruthCases(nGTinSV1, m_nGTinSV1_incl, m_nGTinSV1_b, m_nGTinSV1_c, m_nGTinSV1_l, m_nGTinSV1_muon, truth_label, has_muon, event);
-
-    /// Get SV1 scores
-    double SV1_pb, SV1_pc, SV1_pu;
-    static const SG::ConstAccessor<float> SV1_pbAcc("SV1_pb");
-    SV1_pb = SV1_pbAcc.withDefault(*btag, -1);
-
-    static const SG::ConstAccessor<float> SV1_puAcc("SV1_pu");
-    SV1_pu = SV1_puAcc.withDefault(*btag, -1);
-
-    static const SG::ConstAccessor<float> SV1_pcAcc("SV1_pc");
-    SV1_pc = SV1_pcAcc.withDefault(*btag, -1);
-
-    m_SV1_pb->Fill(SV1_pb, event->beamSpotWeight());
-    m_SV1_pc->Fill(SV1_pc, event->beamSpotWeight());
-    m_SV1_pu->Fill(SV1_pu, event->beamSpotWeight());
-
-
-    //// high level tagger variables
-    // get the DL1x vars
-    double DL1dv01_pb, DL1dv01_pu, DL1dv01_pc;
-    SG::ConstAccessor<float> DLpbAcc(m_DL1dv01Name +"_pb");
-    DL1dv01_pb = DLpbAcc.withDefault(*btag, -1);
-
-    SG::ConstAccessor<float> DLpuAcc(m_DL1dv01Name + "_pu");
-    DL1dv01_pu = DLpuAcc.withDefault(*btag, -1);
-
-    SG::ConstAccessor<float> DLpcAcc(m_DL1dv01Name +"_pc");
-    DL1dv01_pc = DLpcAcc.withDefault(*btag, -1);
-
-    m_DL1dv01_pb->Fill(DL1dv01_pb, event->beamSpotWeight());
-    m_DL1dv01_pu->Fill(DL1dv01_pu, event->beamSpotWeight());
-    m_DL1dv01_pc->Fill(DL1dv01_pc, event->beamSpotWeight());
-
-    double DL1r_pb, DL1r_pu, DL1r_pc;
-    static const SG::ConstAccessor<float> DL1r_pbAcc("DL1r_pb");
-    DL1r_pb = DL1r_pbAcc.withDefault(*btag, -1);
-
-    static const SG::ConstAccessor<float> DL1r_puAcc("DL1r_pu");
-    DL1r_pu = DL1r_puAcc.withDefault(*btag, -1);
-
-    static const SG::ConstAccessor<float> DL1r_pcAcc("DL1r_pc");
-    DL1r_pc = DL1r_pcAcc.withDefault(*btag, -1);
+  void BTaggingValidationPlots::fillDiscriminantVariables(const xAOD::Jet* jet, const double& jet_Lxy, const int& truth_label, const bool& onZprime, std::map<std::string, int>& nJetsThatPassedWPCuts, const xAOD::EventInfo* event){
 
     // get the GN2v01 vars
     double GN2v01_pb, GN2v01_pu, GN2v01_pc, GN2v01_ptau;
     SG::ConstAccessor<float> GN2pbAcc(m_GN2v01Name + "_pb");
-    GN2v01_pb = GN2pbAcc.withDefault(*btag, -1);
+    GN2v01_pb = GN2pbAcc.withDefault(*jet, -1);
 
     SG::ConstAccessor<float> GN2puAcc(m_GN2v01Name + "_pu");
-    GN2v01_pu = GN2puAcc.withDefault(*btag, -1);
+    GN2v01_pu = GN2puAcc.withDefault(*jet, -1);
 
     SG::ConstAccessor<float> GN2pcAcc(m_GN2v01Name + "_pc");
-    GN2v01_pc = GN2pcAcc.withDefault(*btag, -1);
+    GN2v01_pc = GN2pcAcc.withDefault(*jet, -1);
 
     SG::ConstAccessor<float> GN2ptauAcc(m_GN2v01Name + "_ptau");
-    GN2v01_ptau = GN2ptauAcc.withDefault(*btag, -1);
+    GN2v01_ptau = GN2ptauAcc.withDefault(*jet, -1);
 
     m_GN2v01_pb->Fill(GN2v01_pb, event->beamSpotWeight());
     m_GN2v01_pu->Fill(GN2v01_pu, event->beamSpotWeight());
     m_GN2v01_pc->Fill(GN2v01_pc, event->beamSpotWeight());
     m_GN2v01_ptau->Fill(GN2v01_ptau, event->beamSpotWeight());
-    // calculate the DL1 discriminant value
-    double weight_DL1dv01 = log( DL1dv01_pb / ( DL1dv01_pc * m_DL1dv01_fc + DL1dv01_pu * (1-m_DL1dv01_fc) ) );
-    double weight_DL1r = log( DL1r_pb / ( DL1r_pc * m_DL1r_fc + DL1r_pu * (1-m_DL1r_fc) ) );
     // calculate the GN2 discriminant value
     double weight_GN2v01 = log( GN2v01_pb / ( GN2v01_pc * m_GN2v01_fc + GN2v01_pu * (1-m_GN2v01_fc-m_GN2v01_ftau) + GN2v01_ptau * m_GN2v01_ftau ));
   
-    updateNJetsThatPassedWPCutsMap(nJetsThatPassedWPCuts, btag->IP3D_loglikelihoodratio(), btag->IP2D_loglikelihoodratio(), weight_RNNIP, weight_DIPS, btag->SV1_loglikelihoodratio(), weight_DL1dv01, weight_DL1r,  weight_GN2v01, -9999);
+    updateNJetsThatPassedWPCutsMap(nJetsThatPassedWPCuts,  weight_GN2v01, -9999);
 
     // fill the histograms with the tagger discriminants
     for(std::map<std::string, TH1*>::const_iterator hist_iter=m_weight_histos.begin(); hist_iter!=m_weight_histos.end(); ++hist_iter){
       for(std::map<std::string, int>::const_iterator label_iter = m_truthLabels.begin(); label_iter != m_truthLabels.end(); ++label_iter){
-
-        // IP3D
-        bool pass_nTracksCut_IP3D = nIP3DTracks > 0;
-        BTaggingValidationPlots::fillDiscriminantHistograms("IP3D_", btag->IP3D_loglikelihoodratio(), m_IP3D_workingPoints, truth_label, hist_iter, label_iter, pass_nTracksCut_IP3D, jet->pt(), jet_Lxy, onZprime, event);
-
-        // IP2D
-        bool pass_nTracksCut_IP2D = nIP2DTracks > 0;
-        BTaggingValidationPlots::fillDiscriminantHistograms("IP2D_", btag->IP2D_loglikelihoodratio(), m_IP2D_workingPoints, truth_label, hist_iter, label_iter, pass_nTracksCut_IP2D, jet->pt(), jet_Lxy, onZprime, event);
-
-        // RNNIP
-        bool pass_nTracksCut_RNNIP = nIP3DTracks > 0;
-        BTaggingValidationPlots::fillDiscriminantHistograms("RNNIP_", weight_RNNIP, m_RNNIP_workingPoints, truth_label, hist_iter, label_iter, pass_nTracksCut_RNNIP, jet->pt(), jet_Lxy, onZprime, event);
-
-        // DIPS
-        bool pass_nTracksCut_DIPS = nIP3DTracks > 0;
-        BTaggingValidationPlots::fillDiscriminantHistograms("DIPS_", weight_DIPS, m_DIPS_workingPoints, truth_label, hist_iter, label_iter, pass_nTracksCut_DIPS, jet->pt(), jet_Lxy, onZprime, event);
-
-        // SV1
-        bool pass_nTracksCut_SV1 = nGTinSV1 > 0;
-        BTaggingValidationPlots::fillDiscriminantHistograms("SV1_", btag->SV1_loglikelihoodratio(), m_SV1_workingPoints, truth_label, hist_iter, label_iter, pass_nTracksCut_SV1, jet->pt(), jet_Lxy, onZprime, event);
-
-        // DL1 taggers
-        bool pass_nTracksCut_DL1 = nGTinSV1 > 0 && nIP3DTracks > 0;
-        BTaggingValidationPlots::fillDiscriminantHistograms("DL1dv01_", weight_DL1dv01, m_DL1dv01_workingPoints, truth_label, hist_iter, label_iter, pass_nTracksCut_DL1, jet->pt(), jet_Lxy, onZprime, event);
-        BTaggingValidationPlots::fillDiscriminantHistograms("DL1r_", weight_DL1r, m_DL1r_workingPoints, truth_label, hist_iter, label_iter, pass_nTracksCut_DL1, jet->pt(), jet_Lxy, onZprime, event);
 
         // GN2v01 taggers
         bool pass_nTracksCut_GN2v01 = true;
@@ -1590,36 +1232,58 @@ namespace JetTagDQA{
 
   // a fill method for discriminant related vars
   void BTaggingValidationPlots::fillDiscriminantVariables_for_largeRjet(const xAOD::Jet* jet, const int& truth_label, const bool& onZprime, std::map<std::string, int>& nJetsThatPassedWPCuts, const xAOD::EventInfo* event){
-    // get the GN2Xv01 vars
-    double GN2Xv01_phbb, GN2Xv01_phcc, GN2Xv01_ptop, GN2Xv01_pqcd;
-    SG::ConstAccessor<float> GN2phbbAcc(m_GN2Xv01Name + "_phbb");
-    GN2Xv01_phbb = GN2phbbAcc.withDefault(*jet, -1);
+    // get the GN3XPV01 vars
+    double GN3XPV01_phtautauhad, GN3XPV01_phbb, GN3XPV01_phcc, GN3XPV01_ptop, GN3XPV01_pqcdbb, GN3XPV01_pqcdbx, GN3XPV01_pqcdcx, GN3XPV01_pqcdll, GN3XPV01_pwqq;
 
-    SG::ConstAccessor<float> GN2phccAcc(m_GN2Xv01Name + "_phcc");
-    GN2Xv01_phcc = GN2phccAcc.withDefault(*jet, -1);
+    SG::ConstAccessor<float> GN3XPV01_phtautauhadAcc(m_GN3XPV01Name + "_phtautauhad");
+    GN3XPV01_phtautauhad = GN3XPV01_phtautauhadAcc.withDefault(*jet, -1);
 
-    SG::ConstAccessor<float> GN2ptopAcc(m_GN2Xv01Name + "_ptop");
-    GN2Xv01_ptop = GN2ptopAcc.withDefault(*jet, -1);
+    SG::ConstAccessor<float> GN3XPV01phbbAcc(m_GN3XPV01Name + "_phbb");
+    GN3XPV01_phbb = GN3XPV01phbbAcc.withDefault(*jet, -1);
 
-    SG::ConstAccessor<float> GN2pqcdAcc(m_GN2Xv01Name + "_pqcd");
-    GN2Xv01_pqcd = GN2pqcdAcc.withDefault(*jet, -1);
+    SG::ConstAccessor<float> GN3XPV01phccAcc(m_GN3XPV01Name + "_phcc");
+    GN3XPV01_phcc = GN3XPV01phccAcc.withDefault(*jet, -1);
 
-    m_GN2Xv01_phbb->Fill(GN2Xv01_phbb, event->beamSpotWeight());
-    m_GN2Xv01_phcc->Fill(GN2Xv01_phcc, event->beamSpotWeight());
-    m_GN2Xv01_ptop->Fill(GN2Xv01_ptop, event->beamSpotWeight());
-    m_GN2Xv01_pqcd->Fill(GN2Xv01_pqcd, event->beamSpotWeight());
+    SG::ConstAccessor<float> GN3XPV01ptopAcc(m_GN3XPV01Name + "_ptop");
+    GN3XPV01_ptop = GN3XPV01ptopAcc.withDefault(*jet, -1);
+
+    SG::ConstAccessor<float> GN3XPV01pqcdbbAcc(m_GN3XPV01Name + "_pqcdbb");
+    GN3XPV01_pqcdbb = GN3XPV01pqcdbbAcc.withDefault(*jet, -1);
+
+    SG::ConstAccessor<float> GN3XPV01pqcdbxAcc(m_GN3XPV01Name + "_pqcdbx");
+    GN3XPV01_pqcdbx = GN3XPV01pqcdbxAcc.withDefault(*jet, -1);
+
+    SG::ConstAccessor<float> GN3XPV01pqcdcxAcc(m_GN3XPV01Name + "_pqcdcx");
+    GN3XPV01_pqcdcx = GN3XPV01pqcdcxAcc.withDefault(*jet, -1);
+
+    SG::ConstAccessor<float> GN3XPV01pqcdllAcc(m_GN3XPV01Name + "_pqcdll");
+    GN3XPV01_pqcdll = GN3XPV01pqcdllAcc.withDefault(*jet, -1);
+
+    SG::ConstAccessor<float> GN3XPV01pwqqAcc(m_GN3XPV01Name + "_pWqq");
+    GN3XPV01_pwqq = GN3XPV01pwqqAcc.withDefault(*jet, -1);
+
+    m_GN3XPV01_phtautauhad->Fill(GN3XPV01_phtautauhad, event->beamSpotWeight());
+    m_GN3XPV01_phbb->Fill(GN3XPV01_phbb, event->beamSpotWeight());
+    m_GN3XPV01_phcc->Fill(GN3XPV01_phcc, event->beamSpotWeight());
+    m_GN3XPV01_ptop->Fill(GN3XPV01_ptop, event->beamSpotWeight());
+    m_GN3XPV01_pqcdbb->Fill(GN3XPV01_pqcdbb, event->beamSpotWeight());
+    m_GN3XPV01_pqcdbx->Fill(GN3XPV01_pqcdbx, event->beamSpotWeight());
+    m_GN3XPV01_pqcdcx->Fill(GN3XPV01_pqcdcx, event->beamSpotWeight());
+    m_GN3XPV01_pqcdll->Fill(GN3XPV01_pqcdll, event->beamSpotWeight());
+    m_GN3XPV01_pwqq->Fill(GN3XPV01_pwqq, event->beamSpotWeight());
     
-    double weight_GN2Xv01 = log( GN2Xv01_phbb / ( ( GN2Xv01_phcc * m_GN2Xv01_hcc_fc ) + ( GN2Xv01_ptop * m_GN2Xv01_top_fc )  + GN2Xv01_pqcd * (1-m_GN2Xv01_top_fc - m_GN2Xv01_hcc_fc ) ) );
-  
-    updateNJetsThatPassedWPCutsMap(nJetsThatPassedWPCuts, -9999, -9999, -9999, -9999, -9999, -9999, -9999, -9999, weight_GN2Xv01);
+    // TODO: This is a dummy WP, need to define proper WPs for large-R jets as a function of pT and mass.
+    double weight_GN3XPV01 = log( GN3XPV01_phbb / ( ( GN3XPV01_phcc * m_GN3XPV01_hcc_fc ) + ( GN3XPV01_ptop * m_GN3XPV01_top_fc )  + GN3XPV01_pqcdbb * (1-m_GN3XPV01_top_fc - m_GN3XPV01_hcc_fc ) ) );
+    updateNJetsThatPassedWPCutsMap(nJetsThatPassedWPCuts, -9999, weight_GN3XPV01);
 
-    // fill the histograms with the tagger discriminants
+    // TODO: Fill the different WPs as a function of pT and mass.
+    // fill the histograms with the tagger discriminants 
     for(std::map<std::string, TH1*>::const_iterator hist_iter=m_weight_histos.begin(); hist_iter!=m_weight_histos.end(); ++hist_iter){
       for(std::map<std::string, int>::const_iterator label_iter = m_truthLabels.begin(); label_iter != m_truthLabels.end(); ++label_iter){
 
-        // GN2Xv01 taggers
-        bool pass_nTracksCut_GN2Xv01 = true;
-        BTaggingValidationPlots::fillDiscriminantHistograms("GN2Xv01_", weight_GN2Xv01, m_GN2Xv01_workingPoints, truth_label, hist_iter, label_iter, pass_nTracksCut_GN2Xv01, jet->pt(), -1, onZprime, event);
+        // GN3XPV01 taggers
+        bool pass_nTracksCut_GN3XPV01 = true;
+        BTaggingValidationPlots::fillDiscriminantHistograms("GN3XPV01_", weight_GN3XPV01, m_GN3XPV01_workingPoints, truth_label, hist_iter, label_iter, pass_nTracksCut_GN3XPV01, jet->pt(), -1, onZprime, event);
 
       }
     }
@@ -1637,15 +1301,8 @@ namespace JetTagDQA{
     for(std::vector<std::string>::const_iterator tag_iter = m_taggers.begin(); tag_iter != m_taggers.end(); ++tag_iter){
       // get the right working points
       std::map<std::string, double> workingPoints;
-      if(*tag_iter == "IP3D") workingPoints = m_IP3D_workingPoints;
-      else if(*tag_iter == "IP2D") workingPoints = m_IP2D_workingPoints;
-      else if(*tag_iter == "RNNIP") workingPoints = m_RNNIP_workingPoints;
-      else if(*tag_iter == "DIPS") workingPoints = m_DIPS_workingPoints;
-      else if(*tag_iter == "SV1") workingPoints = m_SV1_workingPoints;
-      else if(*tag_iter == "DL1dv01") workingPoints = m_DL1dv01_workingPoints;
-      else if(*tag_iter == "DL1r") workingPoints = m_DL1r_workingPoints;
-      else if(*tag_iter == "GN2v01") workingPoints = m_GN2v01_workingPoints;
-      else if(*tag_iter == "GN2Xv01") workingPoints = m_GN2Xv01_workingPoints;
+      if(*tag_iter == "GN2v01") workingPoints = m_GN2v01_workingPoints;
+      else if(*tag_iter == "GN3XPV01") workingPoints = m_GN3XPV01_workingPoints;
       // loop over the working points
       for(std::map<std::string, double>::const_iterator working_points_iter = workingPoints.begin(); working_points_iter != workingPoints.end(); ++working_points_iter){
         std::string name = "nJetsThatPassedWPCuts_" + *tag_iter + "_" + working_points_iter->first; 
@@ -1662,15 +1319,8 @@ namespace JetTagDQA{
     for(std::vector<std::string>::const_iterator tag_iter = m_taggers.begin(); tag_iter != m_taggers.end(); ++tag_iter){
       // get the right working points
       std::map<std::string, double> workingPoints;
-      if(*tag_iter == "IP3D") workingPoints = m_IP3D_workingPoints;
-      else if(*tag_iter == "IP2D") workingPoints = m_IP2D_workingPoints;
-      else if(*tag_iter == "RNNIP") workingPoints = m_RNNIP_workingPoints;
-      else if(*tag_iter == "DIPS") workingPoints = m_DIPS_workingPoints;
-      else if(*tag_iter == "SV1") workingPoints = m_SV1_workingPoints;
-      else if(*tag_iter == "DL1dv01") workingPoints = m_DL1dv01_workingPoints;
-      else if(*tag_iter == "DL1r") workingPoints = m_DL1r_workingPoints;
-      else if(*tag_iter == "GN2v01") workingPoints = m_GN2v01_workingPoints;
-      else if(*tag_iter == "GN2Xv01") workingPoints = m_GN2Xv01_workingPoints;
+      if(*tag_iter == "GN2v01") workingPoints = m_GN2v01_workingPoints;
+      else if(*tag_iter == "GN3XPV01") workingPoints = m_GN3XPV01_workingPoints;
       // loop over the working points
       for(std::map<std::string, double>::const_iterator working_points_iter = workingPoints.begin(); working_points_iter != workingPoints.end(); ++working_points_iter){
         std::string name = "nJetsThatPassedWPCuts_" + *tag_iter + "_" + working_points_iter->first; 
@@ -1680,21 +1330,14 @@ namespace JetTagDQA{
     }
   }
 
-  void BTaggingValidationPlots::updateNJetsThatPassedWPCutsMap(std::map<std::string, int>& nJetsThatPassedWPCuts, const double& discr_IP3D, const double& discr_IP2D, const double& discr_RNNIP, const double& discr_DIPS, const double& discr_SV1, const double& discr_DL1dv01, const double& discr_DL1r, const double& discr_GN2v01, const double& discr_GN2Xv01){
+  void BTaggingValidationPlots::updateNJetsThatPassedWPCutsMap(std::map<std::string, int>& nJetsThatPassedWPCuts, const double& discr_GN2v01, const double& discr_GN3XPV01){
     // loop over the taggers
     for(std::vector<std::string>::const_iterator tag_iter = m_taggers.begin(); tag_iter != m_taggers.end(); ++tag_iter){
       // get the right working points and discriminant values
       std::map<std::string, double> workingPoints;
       double discriminant_value = 0;
-      if(*tag_iter == "IP3D"){ workingPoints = m_IP3D_workingPoints; discriminant_value = discr_IP3D; }
-      else if(*tag_iter == "IP2D"){ workingPoints = m_IP2D_workingPoints; discriminant_value = discr_IP2D; }
-      else if(*tag_iter == "RNNIP"){ workingPoints = m_RNNIP_workingPoints; discriminant_value = discr_RNNIP; }
-      else if(*tag_iter == "DIPS"){ workingPoints = m_DIPS_workingPoints; discriminant_value = discr_DIPS; }
-      else if(*tag_iter == "SV1"){ workingPoints = m_SV1_workingPoints; discriminant_value = discr_SV1; }
-      else if(*tag_iter == "DL1dv01"){ workingPoints = m_DL1dv01_workingPoints; discriminant_value = discr_DL1dv01; }
-      else if(*tag_iter == "DL1r"){ workingPoints = m_DL1r_workingPoints; discriminant_value = discr_DL1r; }
-      else if(*tag_iter == "GN2v01"){ workingPoints = m_GN2v01_workingPoints; discriminant_value = discr_GN2v01; }
-      else if(*tag_iter == "GN2Xv01"){ workingPoints = m_GN2Xv01_workingPoints; discriminant_value = discr_GN2Xv01; }
+      if(*tag_iter == "GN2v01"){ workingPoints = m_GN2v01_workingPoints; discriminant_value = discr_GN2v01; }
+      else if(*tag_iter == "GN3XPV01"){ workingPoints = m_GN3XPV01_workingPoints; discriminant_value = discr_GN3XPV01; }
       // loop over the working points
       for(std::map<std::string, double>::const_iterator working_points_iter = workingPoints.begin(); working_points_iter != workingPoints.end(); ++working_points_iter){
         std::string name = "nJetsThatPassedWPCuts_" + *tag_iter + "_" + working_points_iter->first; 
@@ -1711,15 +1354,8 @@ namespace JetTagDQA{
     for(std::vector<std::string>::const_iterator tag_iter = m_taggers.begin(); tag_iter != m_taggers.end(); ++tag_iter){
       // get the right working points
       std::map<std::string, double> workingPoints;
-      if(*tag_iter == "IP3D") workingPoints = m_IP3D_workingPoints;
-      else if(*tag_iter == "IP2D") workingPoints = m_IP2D_workingPoints;
-      else if(*tag_iter == "RNNIP") workingPoints = m_RNNIP_workingPoints;
-      else if(*tag_iter == "DIPS") workingPoints = m_DIPS_workingPoints;
-      else if(*tag_iter == "SV1") workingPoints = m_SV1_workingPoints;
-      else if(*tag_iter == "DL1dv01") workingPoints = m_DL1dv01_workingPoints;
-      else if(*tag_iter == "DL1r") workingPoints = m_DL1r_workingPoints;
-      else if(*tag_iter == "GN2v01") workingPoints = m_GN2v01_workingPoints;
-      else if(*tag_iter == "GN2Xv01") workingPoints = m_GN2Xv01_workingPoints;
+      if(*tag_iter == "GN2v01") workingPoints = m_GN2v01_workingPoints;
+      else if(*tag_iter == "GN3XPV01") workingPoints = m_GN3XPV01_workingPoints;
       // loop over the working points
       for(std::map<std::string, double>::const_iterator working_points_iter = workingPoints.begin(); working_points_iter != workingPoints.end(); ++working_points_iter){
         std::string name = "nJetsThatPassedWPCuts_" + *tag_iter + "_" + working_points_iter->first; 
@@ -1734,98 +1370,31 @@ namespace JetTagDQA{
 
   void BTaggingValidationPlots::setTaggerInfos(){
     // list of all taggers
-    m_taggers.push_back("IP3D");
-    m_taggers.push_back("DIPS");
-    m_taggers.push_back("SV1");
-    m_taggers.push_back("DL1dv01");
     m_taggers.push_back("GN2v01");
-    m_taggers.push_back("GN2Xv01");
+    m_taggers.push_back("GN3XPV01");
 
     // list of all truth labels
     m_truthLabels.insert(std::make_pair("b", 5));
     m_truthLabels.insert(std::make_pair("c", 4));
     m_truthLabels.insert(std::make_pair("u", 0));
-    //m_truthLabels.insert(std::make_pair("tau", 15));
-
-    // -- all da WP definitions --
-    // IP3D (rel. 16 MC10 Dec. 10)
-    m_IP3D_workingPoints.insert(std::make_pair("70", 1.2));
-    if(m_detailLevel > 10){
-    m_IP3D_workingPoints.insert(std::make_pair("50", 3.75));
-    m_IP3D_workingPoints.insert(std::make_pair("80", -0.3));
-    }
-
-    // IP2D (rel. 16 MC10 Dec. 10)
-    m_IP2D_workingPoints.insert(std::make_pair("70", 0.7));
-    if(m_detailLevel > 10){
-    m_IP2D_workingPoints.insert(std::make_pair("50", 2.9));
-    m_IP2D_workingPoints.insert(std::make_pair("80", -0.5));
-    }
-    
-    // RNNIP (privately determined)
-    m_RNNIP_fc = 0.018;
-    m_RNNIP_workingPoints.insert(std::make_pair("70", 2.4996)); 
-    if(m_detailLevel > 10){
-    m_RNNIP_workingPoints.insert(std::make_pair("60", 3.8350)); 
-    m_RNNIP_workingPoints.insert(std::make_pair("77", 1.4370)); 
-    m_RNNIP_workingPoints.insert(std::make_pair("85", -0.0568)); 
-    }
-    
-    // DIPS (privately determined)
-    // TODO: cuts values copied from RNNIP, needs to be updated in future
-    m_DIPS_fc = 0.005;
-    m_DIPS_workingPoints.insert(std::make_pair("70", 2.4996)); 
-    if(m_detailLevel > 10){
-    m_DIPS_workingPoints.insert(std::make_pair("60", 3.8350)); 
-    m_DIPS_workingPoints.insert(std::make_pair("77", 1.4370)); 
-    m_DIPS_workingPoints.insert(std::make_pair("85", -0.0568)); 
-    }
-
-    // SV1 (rel 16 Mc10 Dec 10)
-    m_SV1_workingPoints.insert(std::make_pair("60", 1.6));
-    if(m_detailLevel > 10){
-    m_SV1_workingPoints.insert(std::make_pair("40", 5.5));
-    m_SV1_workingPoints.insert(std::make_pair("50", 3.9));
-    }
-
-    // DL1d   (WP cuts determined in Nov 2021)
-    m_DL1dv01_fc = 0.018;
-    m_DL1dv01_workingPoints.insert(std::make_pair("70", 3.493));
-    if(m_detailLevel > 10){
-      m_DL1dv01_workingPoints.insert(std::make_pair("60", 4.854));
-      m_DL1dv01_workingPoints.insert(std::make_pair("77", 2.456));
-      m_DL1dv01_workingPoints.insert(std::make_pair("85", 0.948));
-    }
-
-    // DL1r   (PFlow 2019_03)
-    m_DL1r_fc = 0.018;
-    m_DL1r_workingPoints.insert(std::make_pair("70", 3.245));
-    if(m_detailLevel > 10){
-      m_DL1r_workingPoints.insert(std::make_pair("60", 4.565));
-      m_DL1r_workingPoints.insert(std::make_pair("77", 2.195));
-      m_DL1r_workingPoints.insert(std::make_pair("85", 0.665));
-    }
+    m_truthLabels.insert(std::make_pair("tau", 15));
 
     // GN2v01   
-    m_GN2v01_fc = 0.1;
-    m_GN2v01_workingPoints.insert(std::make_pair("70", 3.875));
+    m_GN2v01_fc = 0.2;
+    m_GN2v01_ftau = 0.01;
+    m_GN2v01_workingPoints.insert(std::make_pair("70", 1.892));
     if(m_detailLevel > 10){
-      m_GN2v01_workingPoints.insert(std::make_pair("60", 5.394));
-      m_GN2v01_workingPoints.insert(std::make_pair("77", 2.893));
-      m_GN2v01_workingPoints.insert(std::make_pair("85", 1.638));
+      m_GN2v01_workingPoints.insert(std::make_pair("65", 2.669));
+      m_GN2v01_workingPoints.insert(std::make_pair("77", 0.844));
+      m_GN2v01_workingPoints.insert(std::make_pair("85", -0.378));
+      m_GN2v01_workingPoints.insert(std::make_pair("90", -1.34));
     }
-   // GN2Xv01
-   m_GN2Xv01_hcc_fc = 0.02;
-   m_GN2Xv01_top_fc = 0.25;
-   m_GN2Xv01_workingPoints.insert(std::make_pair("60", 3.818));
-   if(m_detailLevel > 10){
-     m_GN2Xv01_workingPoints.insert(std::make_pair("50", 4.335));
-     m_GN2Xv01_workingPoints.insert(std::make_pair("55", 4.087));
-     m_GN2Xv01_workingPoints.insert(std::make_pair("65", 3.518));
-     m_GN2Xv01_workingPoints.insert(std::make_pair("75", 2.735));
-     m_GN2Xv01_workingPoints.insert(std::make_pair("80", 2.211));
-     m_GN2Xv01_workingPoints.insert(std::make_pair("85", 1.560));
-   }
+
+    // GN3XPV01 // TODO: update WPs in the future as a function of pT and mass.
+    m_GN3XPV01_hcc_fc = 0.02;
+    m_GN3XPV01_top_fc = 0.25;
+    m_GN3XPV01_workingPoints.insert(std::make_pair("60", 3.818)); // Dummy WP
+    // if(m_detailLevel > 10) Add more WPs here in future. 
   }
  
  
@@ -1841,7 +1410,6 @@ namespace JetTagDQA{
         std::string histo_name_matched = *tag_iter+"_"+label_iter->first+"_matched_weight";
         std::string var_name_matched = "llr";
         if((*tag_iter).find("MV") < 1) var_name_matched += "_MV";
-        else if(*tag_iter == "IP2D") var_name_matched += "_old_taggers";
         TH1* histo_matched = bookHistogram(histo_name_matched, var_name_matched, m_sParticleType, label_iter->first + "-jets" + ", " + *tag_iter);    
         m_weight_histos.insert(std::make_pair(histo_name_matched, histo_matched));
 
@@ -1849,47 +1417,17 @@ namespace JetTagDQA{
         std::string histo_name_trackCuts = *tag_iter+"_"+label_iter->first+"_matched_weight_trackCuts";
         std::string var_name_trackCuts = "llr_nTracksCut";
         if((*tag_iter).find("MV") < 1) var_name_trackCuts += "_MV";
-        else if(*tag_iter == "IP2D") var_name_trackCuts += "_old_taggers";
         TH1* histo_trackCuts = bookHistogram(histo_name_trackCuts, var_name_trackCuts, m_sParticleType, label_iter->first + "-jets" + ", " + *tag_iter);    
         m_weight_histos.insert(std::make_pair(histo_name_trackCuts, histo_trackCuts));
         
 
         // book the vs pT histograms (the bool in the argument says if it is an old tagger (for sub-folder sorting later))
-        // IP3D
-        if(*tag_iter == "IP3D"){
-          bookDiscriminantVsPTAndLxyHistograms("IP3D", m_IP3D_workingPoints, false, label_iter, m_sParticleType);
-        }
-        // IP2D
-        else if(*tag_iter == "IP2D"){
-          bookDiscriminantVsPTAndLxyHistograms("IP2D", m_IP2D_workingPoints, true, label_iter, m_sParticleType);
-        }
-        // RNNIP
-        else if(*tag_iter == "RNNIP"){
-          bookDiscriminantVsPTAndLxyHistograms("RNNIP", m_RNNIP_workingPoints, false, label_iter, m_sParticleType);
-        }
-        // DIPS
-        else if(*tag_iter == "DIPS"){
-          bookDiscriminantVsPTAndLxyHistograms("DIPS", m_DIPS_workingPoints, false, label_iter, m_sParticleType);
-        }
-        // SV1
-        else if(*tag_iter == "SV1"){
-          bookDiscriminantVsPTAndLxyHistograms("SV1", m_SV1_workingPoints, false, label_iter, m_sParticleType);
-        }
-        //Dl1dv01
-        else if(*tag_iter == "DL1dv01"){
-          bookDiscriminantVsPTAndLxyHistograms("DL1dv01", m_DL1dv01_workingPoints, false, label_iter, m_sParticleType);
-        }
-        //Dl1r
-        else if(*tag_iter == "DL1r"){
-          bookDiscriminantVsPTAndLxyHistograms("DL1r", m_DL1r_workingPoints, false, label_iter, m_sParticleType);
-        }
-
         //GN2v01 
-        else if(*tag_iter == "GN2v01"){
+        if(*tag_iter == "GN2v01"){
           bookDiscriminantVsPTAndLxyHistograms("GN2v01", m_GN2v01_workingPoints, false, label_iter, m_sParticleType);
         }
-        else if(*tag_iter == "GN2Xv01"){
-          bookDiscriminantVsPTAndLxyHistograms("GN2Xv01", m_GN2Xv01_workingPoints, false, label_iter, m_sParticleType);
+        else if(*tag_iter == "GN3XPV01"){
+          bookDiscriminantVsPTAndLxyHistograms("GN3XPV01", m_GN3XPV01_workingPoints, false, label_iter, m_sParticleType);
         }
       }
     }

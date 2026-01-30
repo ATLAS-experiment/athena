@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TRTProcessingOfStraw.h"
@@ -18,6 +18,7 @@
 //TRT detector information:
 #include "TRT_ReadoutGeometry/TRT_DetectorManager.h"
 #include "TRT_ReadoutGeometry/TRT_Numerology.h"
+#include "TRT_ReadoutGeometry/TRT_DetElementContainer.h"
 
 //helpers for identifiers and hitids (only for debug methods):
 #include "InDetIdentifier/TRT_ID.h"
@@ -248,6 +249,7 @@ void TRTProcessingOfStraw::addClustersFromStep ( const double& scaledKineticEner
 
 //________________________________________________________________________________
 void TRTProcessingOfStraw::ProcessStraw ( MagField::AtlasFieldCache& fieldCache,
+					  const InDetDD::TRT_DetElementContainer* detElements,
                                           hitCollConstIter i,
                                           hitCollConstIter e,
                                           TRTDigit& outdigit,
@@ -289,7 +291,7 @@ void TRTProcessingOfStraw::ProcessStraw ( MagField::AtlasFieldCache& fieldCache,
   //======================================================//
   //////////////////////////////////////////////////////////
   // TimeShift is the same for all the simhits in the straw.
-  const double timeShift(m_pTimeCorrection->TimeShift(hitID)); // rename hitID to strawID
+  const double timeShift(m_pTimeCorrection->TimeShift(hitID, detElements)); // rename hitID to strawID
 
   m_clusterlist.clear();
 
@@ -302,7 +304,7 @@ void TRTProcessingOfStraw::ProcessStraw ( MagField::AtlasFieldCache& fieldCache,
       //Get the hit:
       const TimedHitPtr<TRTUncompressedHit> *theHit = &(*hit_iter);
 
-      TRThitGlobalPos = getGlobalPosition(hitID, theHit);
+      TRThitGlobalPos = getGlobalPosition(hitID, theHit, detElements);
 
       //Figure out the global time of the hit (all clusters from the hit
       //will get same timing).
@@ -707,10 +709,12 @@ void TRTProcessingOfStraw::ClustersToDeposits (MagField::AtlasFieldCache& fieldC
           // * distdirect is rarely negative (<0.2%) by ~ mm. In such cases there is
           //   no attenuation, which is equivalent to distdirect=0 and so is good.
           // * distreflect is always +ve and less than 1500, and so is good.
-          // The code is protected against out of bounds in anycase.
+          // The code is protected against out of bounds in any case.
+          // But need to explicitly make sure that the argument of the cast is
+          // positive; otherwise, we'll see FPEs on arm.
           const double distdirect  = timedirect *m_signalPropagationSpeed;
           const double distreflect = timereflect*m_signalPropagationSpeed;
-          const unsigned int kdirect  = static_cast<unsigned int>(distdirect/10);
+          const unsigned int kdirect  = static_cast<unsigned int>(std::max(distdirect,0.0)/10);
           const unsigned int kreflect = static_cast<unsigned int>(distreflect/10);
           if (kdirect<150) expdirect  = m_expattenuation[kdirect];    // otherwise there
           if (kreflect<150) expreflect = m_expattenuation[kreflect];  // is no attenuation.
@@ -727,7 +731,10 @@ void TRTProcessingOfStraw::ClustersToDeposits (MagField::AtlasFieldCache& fieldC
   }
 
 //________________________________________________________________________________
-Amg::Vector3D TRTProcessingOfStraw::getGlobalPosition (  int hitID, const TimedHitPtr<TRTUncompressedHit> *theHit ) {
+Amg::Vector3D TRTProcessingOfStraw::getGlobalPosition(int hitID
+						      , const TimedHitPtr<TRTUncompressedHit>* theHit
+						      , const InDetDD::TRT_DetElementContainer* detElements)
+{
 
   const int mask(0x0000001F);
   int word_shift(5);
@@ -748,7 +755,7 @@ Amg::Vector3D TRTProcessingOfStraw::getGlobalPosition (  int hitID, const TimedH
     ringID    = hitID & mask;
     trtID     = hitID >> word_shift;
 
-    barrelElement = m_detmgr->getBarrelElement(trtID, ringID, moduleID, layerID);
+    barrelElement = detElements->getBarrelDetElement(trtID, ringID, moduleID, layerID);
 
     if (barrelElement) {
       const Amg::Vector3D v( (*theHit)->GetPreStepX(),(*theHit)->GetPreStepY(),(*theHit)->GetPreStepZ());
@@ -770,7 +777,7 @@ Amg::Vector3D TRTProcessingOfStraw::getGlobalPosition (  int hitID, const TimedH
     if (trtID == 3) trtID = 0;
     else            trtID = 1;
 
-    endcapElement = m_detmgr->getEndcapElement(trtID, wheelID, planeID, sectorID);
+    endcapElement = detElements->getEndcapDetElement(trtID, wheelID, planeID, sectorID);
 
     if ( endcapElement ) {
       const Amg::Vector3D v( (*theHit)->GetPreStepX(),(*theHit)->GetPreStepY(),(*theHit)->GetPreStepZ());

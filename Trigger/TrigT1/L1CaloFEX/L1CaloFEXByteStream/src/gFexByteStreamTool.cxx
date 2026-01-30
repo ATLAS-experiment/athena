@@ -13,6 +13,7 @@
 #include "L1CaloFEXByteStream/gFexPos.h"
 #include "eformat/SourceIdentifier.h"
 #include "eformat/Status.h"
+#include "StoreGate/WriteDecorHandle.h"
 
 #include <span>
 
@@ -112,6 +113,37 @@ StatusCode gFexByteStreamTool::initialize() {
     ATH_CHECK(m_gScalarERmsWriteKey.initialize(gScalarERmsmode==ConversionMode::Decoding));
     ATH_CHECK(m_gScalarERmsReadKey.initialize(gScalarERmsmode==ConversionMode::Encoding));
     ATH_MSG_DEBUG((gScalarERmsmode==ConversionMode::Encoding ? "Encoding" : "Decoding") << " gScalarERms ");
+
+    // Initialize multi-slice write handle keys (only if configured with non-empty key)
+    ATH_CHECK(m_gFexRhoSliceWriteKey.initialize(!m_gFexRhoSliceWriteKey.empty()));
+    ATH_CHECK(m_gFexBlockSliceWriteKey.initialize(!m_gFexBlockSliceWriteKey.empty()));
+    ATH_CHECK(m_gFexJetSliceWriteKey.initialize(!m_gFexJetSliceWriteKey.empty()));
+    ATH_CHECK(m_gScalarEJwojSliceWriteKey.initialize(!m_gScalarEJwojSliceWriteKey.empty()));
+    ATH_CHECK(m_gMETComponentsJwojSliceWriteKey.initialize(!m_gMETComponentsJwojSliceWriteKey.empty()));
+    ATH_CHECK(m_gMHTComponentsJwojSliceWriteKey.initialize(!m_gMHTComponentsJwojSliceWriteKey.empty()));
+    ATH_CHECK(m_gMSTComponentsJwojSliceWriteKey.initialize(!m_gMSTComponentsJwojSliceWriteKey.empty()));
+    ATH_CHECK(m_gEspressoSliceWriteKey.initialize(!m_gEspressoSliceWriteKey.empty()));
+    ATH_CHECK(m_gMETComponentsNoiseCutSliceWriteKey.initialize(!m_gMETComponentsNoiseCutSliceWriteKey.empty()));
+    ATH_CHECK(m_gScalarENoiseCutSliceWriteKey.initialize(!m_gScalarENoiseCutSliceWriteKey.empty()));
+    ATH_CHECK(m_gMETComponentsRmsSliceWriteKey.initialize(!m_gMETComponentsRmsSliceWriteKey.empty()));
+    ATH_CHECK(m_gScalarERmsSliceWriteKey.initialize(!m_gScalarERmsSliceWriteKey.empty()));
+
+    // Initialize slice number decoration keys for out-of-time containers.
+    // Multi-slice mode is activated based on m_gFexJetSliceWriteKey being non-empty,
+    // so all decoration keys are initialized based on that same condition.
+    // When multi-slice mode is enabled, all OOT container keys must be configured together.
+    ATH_CHECK(m_gFexRhoOOTDecorKey.initialize(!m_gFexJetSliceWriteKey.empty()));
+    ATH_CHECK(m_gFexBlockOOTDecorKey.initialize(!m_gFexJetSliceWriteKey.empty()));
+    ATH_CHECK(m_gFexJetOOTDecorKey.initialize(!m_gFexJetSliceWriteKey.empty()));
+    ATH_CHECK(m_gScalarEJwojOOTDecorKey.initialize(!m_gFexJetSliceWriteKey.empty()));
+    ATH_CHECK(m_gMETComponentsJwojOOTDecorKey.initialize(!m_gFexJetSliceWriteKey.empty()));
+    ATH_CHECK(m_gMHTComponentsJwojOOTDecorKey.initialize(!m_gFexJetSliceWriteKey.empty()));
+    ATH_CHECK(m_gMSTComponentsJwojOOTDecorKey.initialize(!m_gFexJetSliceWriteKey.empty()));
+    ATH_CHECK(m_gEspressoOOTDecorKey.initialize(!m_gFexJetSliceWriteKey.empty()));
+    ATH_CHECK(m_gMETComponentsNoiseCutOOTDecorKey.initialize(!m_gFexJetSliceWriteKey.empty()));
+    ATH_CHECK(m_gScalarENoiseCutOOTDecorKey.initialize(!m_gFexJetSliceWriteKey.empty()));
+    ATH_CHECK(m_gMETComponentsRmsOOTDecorKey.initialize(!m_gFexJetSliceWriteKey.empty()));
+    ATH_CHECK(m_gScalarERmsOOTDecorKey.initialize(!m_gFexJetSliceWriteKey.empty()));
 
     //checking all Conversion modes.. avoid misconfigurations
     const std::array<ConversionMode,2> modes{gSJmode,gLJmode};
@@ -226,6 +258,74 @@ StatusCode gFexByteStreamTool::convertFromBS(const std::vector<const ROBF*>& vro
     ATH_CHECK(gScalarERmsContainer.record(std::make_unique<xAOD::gFexGlobalRoIContainer>(), std::make_unique<xAOD::gFexGlobalRoIAuxContainer>()));
     ATH_MSG_DEBUG("Recorded gFexJetGlobalContainer with key " << gScalarERmsContainer.key());
 
+    // Determine if multi-slice mode is enabled (slice 0 = L1A, slices 1,2 = out-of-time)
+    const bool multiSlice = !m_gFexJetSliceWriteKey.empty();
+
+    // Create out-of-time containers for jet TOBs if multi-slice enabled
+    SG::WriteHandle<xAOD::gFexJetRoIContainer> gRhoSliceContainer;
+    SG::WriteHandle<xAOD::gFexJetRoIContainer> gSJSliceContainer;
+    SG::WriteHandle<xAOD::gFexJetRoIContainer> gLJSliceContainer;
+    // Create out-of-time containers for global TOBs if multi-slice enabled
+    SG::WriteHandle<xAOD::gFexGlobalRoIContainer> gScalarEJwojSliceContainer;
+    SG::WriteHandle<xAOD::gFexGlobalRoIContainer> gMETComponentsJwojSliceContainer;
+    SG::WriteHandle<xAOD::gFexGlobalRoIContainer> gMHTComponentsJwojSliceContainer;
+    SG::WriteHandle<xAOD::gFexGlobalRoIContainer> gMSTComponentsJwojSliceContainer;
+    SG::WriteHandle<xAOD::gFexGlobalRoIContainer> gEspressoSliceContainer;
+    SG::WriteHandle<xAOD::gFexGlobalRoIContainer> gMETComponentsNoiseCutSliceContainer;
+    SG::WriteHandle<xAOD::gFexGlobalRoIContainer> gScalarENoiseCutSliceContainer;
+    SG::WriteHandle<xAOD::gFexGlobalRoIContainer> gMETComponentsRmsSliceContainer;
+    SG::WriteHandle<xAOD::gFexGlobalRoIContainer> gScalarERmsSliceContainer;
+
+    if (multiSlice) {
+        gRhoSliceContainer = SG::WriteHandle<xAOD::gFexJetRoIContainer>(m_gFexRhoSliceWriteKey, ctx);
+        ATH_CHECK(gRhoSliceContainer.record(std::make_unique<xAOD::gFexJetRoIContainer>(), std::make_unique<xAOD::gFexJetRoIAuxContainer>()));
+        ATH_MSG_DEBUG("Recorded gFexJetRoIContainer (out-of-time) with key " << gRhoSliceContainer.key());
+
+        gSJSliceContainer = SG::WriteHandle<xAOD::gFexJetRoIContainer>(m_gFexBlockSliceWriteKey, ctx);
+        ATH_CHECK(gSJSliceContainer.record(std::make_unique<xAOD::gFexJetRoIContainer>(), std::make_unique<xAOD::gFexJetRoIAuxContainer>()));
+        ATH_MSG_DEBUG("Recorded gFexJetRoIContainer (out-of-time) with key " << gSJSliceContainer.key());
+
+        gLJSliceContainer = SG::WriteHandle<xAOD::gFexJetRoIContainer>(m_gFexJetSliceWriteKey, ctx);
+        ATH_CHECK(gLJSliceContainer.record(std::make_unique<xAOD::gFexJetRoIContainer>(), std::make_unique<xAOD::gFexJetRoIAuxContainer>()));
+        ATH_MSG_DEBUG("Recorded gFexJetRoIContainer (out-of-time) with key " << gLJSliceContainer.key());
+
+        gScalarEJwojSliceContainer = SG::WriteHandle<xAOD::gFexGlobalRoIContainer>(m_gScalarEJwojSliceWriteKey, ctx);
+        ATH_CHECK(gScalarEJwojSliceContainer.record(std::make_unique<xAOD::gFexGlobalRoIContainer>(), std::make_unique<xAOD::gFexGlobalRoIAuxContainer>()));
+        ATH_MSG_DEBUG("Recorded gFexGlobalRoIContainer (out-of-time) with key " << gScalarEJwojSliceContainer.key());
+
+        gMETComponentsJwojSliceContainer = SG::WriteHandle<xAOD::gFexGlobalRoIContainer>(m_gMETComponentsJwojSliceWriteKey, ctx);
+        ATH_CHECK(gMETComponentsJwojSliceContainer.record(std::make_unique<xAOD::gFexGlobalRoIContainer>(), std::make_unique<xAOD::gFexGlobalRoIAuxContainer>()));
+        ATH_MSG_DEBUG("Recorded gFexGlobalRoIContainer (out-of-time) with key " << gMETComponentsJwojSliceContainer.key());
+
+        gMHTComponentsJwojSliceContainer = SG::WriteHandle<xAOD::gFexGlobalRoIContainer>(m_gMHTComponentsJwojSliceWriteKey, ctx);
+        ATH_CHECK(gMHTComponentsJwojSliceContainer.record(std::make_unique<xAOD::gFexGlobalRoIContainer>(), std::make_unique<xAOD::gFexGlobalRoIAuxContainer>()));
+        ATH_MSG_DEBUG("Recorded gFexGlobalRoIContainer (out-of-time) with key " << gMHTComponentsJwojSliceContainer.key());
+
+        gMSTComponentsJwojSliceContainer = SG::WriteHandle<xAOD::gFexGlobalRoIContainer>(m_gMSTComponentsJwojSliceWriteKey, ctx);
+        ATH_CHECK(gMSTComponentsJwojSliceContainer.record(std::make_unique<xAOD::gFexGlobalRoIContainer>(), std::make_unique<xAOD::gFexGlobalRoIAuxContainer>()));
+        ATH_MSG_DEBUG("Recorded gFexGlobalRoIContainer (out-of-time) with key " << gMSTComponentsJwojSliceContainer.key());
+
+        gEspressoSliceContainer = SG::WriteHandle<xAOD::gFexGlobalRoIContainer>(m_gEspressoSliceWriteKey, ctx);
+        ATH_CHECK(gEspressoSliceContainer.record(std::make_unique<xAOD::gFexGlobalRoIContainer>(), std::make_unique<xAOD::gFexGlobalRoIAuxContainer>()));
+        ATH_MSG_DEBUG("Recorded gFexGlobalRoIContainer (out-of-time) with key " << gEspressoSliceContainer.key());
+
+        gMETComponentsNoiseCutSliceContainer = SG::WriteHandle<xAOD::gFexGlobalRoIContainer>(m_gMETComponentsNoiseCutSliceWriteKey, ctx);
+        ATH_CHECK(gMETComponentsNoiseCutSliceContainer.record(std::make_unique<xAOD::gFexGlobalRoIContainer>(), std::make_unique<xAOD::gFexGlobalRoIAuxContainer>()));
+        ATH_MSG_DEBUG("Recorded gFexGlobalRoIContainer (out-of-time) with key " << gMETComponentsNoiseCutSliceContainer.key());
+
+        gScalarENoiseCutSliceContainer = SG::WriteHandle<xAOD::gFexGlobalRoIContainer>(m_gScalarENoiseCutSliceWriteKey, ctx);
+        ATH_CHECK(gScalarENoiseCutSliceContainer.record(std::make_unique<xAOD::gFexGlobalRoIContainer>(), std::make_unique<xAOD::gFexGlobalRoIAuxContainer>()));
+        ATH_MSG_DEBUG("Recorded gFexGlobalRoIContainer (out-of-time) with key " << gScalarENoiseCutSliceContainer.key());
+
+        gMETComponentsRmsSliceContainer = SG::WriteHandle<xAOD::gFexGlobalRoIContainer>(m_gMETComponentsRmsSliceWriteKey, ctx);
+        ATH_CHECK(gMETComponentsRmsSliceContainer.record(std::make_unique<xAOD::gFexGlobalRoIContainer>(), std::make_unique<xAOD::gFexGlobalRoIAuxContainer>()));
+        ATH_MSG_DEBUG("Recorded gFexGlobalRoIContainer (out-of-time) with key " << gMETComponentsRmsSliceContainer.key());
+
+        gScalarERmsSliceContainer = SG::WriteHandle<xAOD::gFexGlobalRoIContainer>(m_gScalarERmsSliceWriteKey, ctx);
+        ATH_CHECK(gScalarERmsSliceContainer.record(std::make_unique<xAOD::gFexGlobalRoIContainer>(), std::make_unique<xAOD::gFexGlobalRoIAuxContainer>()));
+        ATH_MSG_DEBUG("Recorded gFexGlobalRoIContainer (out-of-time) with key " << gScalarERmsSliceContainer.key());
+    }
+
 
     // Iterate over ROBFragments to decode
     for (const ROBF* rob : vrobf) {
@@ -251,17 +351,39 @@ StatusCode gFexByteStreamTool::convertFromBS(const std::vector<const ROBF*>& vro
             ATH_MSG_DEBUG("Raw word  0x" << std::hex << dataArray[iWord]  << "    " << std::bitset<32> (dataArray[iWord]));
         }
         
-        // Vectors to temporarily store global tob before their are summed together
-        int global_counter = 0;
-        std::vector<uint32_t> JWOJ_MHT(3, 0);
-        std::vector<uint32_t> JWOJ_MST(3, 0);
-        std::vector<uint32_t> JWOJ_MET(3, 0);
-        std::vector<uint32_t> JWOJ_SCALAR(3, 0);
-        std::vector<uint32_t> GESPRESSO(3, 0);
-        std::vector<uint32_t> NC_MET(3, 0);
-        std::vector<uint32_t> NC_SCALAR(3, 0);
-        std::vector<uint32_t> RMS_MET(3, 0);
-        std::vector<uint32_t> RMS_SCALAR(3, 0);
+        // Vectors to temporarily store global tob before they are summed together
+        // For multi-slice support, we use vectors of arrays: [sliceNumber][fpga]
+        // Vectors are dynamically resized based on the actual number of slices in the data
+        // Inner arrays are fixed size 3 (one element per FPGA)
+        std::vector<int> global_counter;
+        std::vector<std::array<uint32_t, 3>> JWOJ_MHT;
+        std::vector<std::array<uint32_t, 3>> JWOJ_MST;
+        std::vector<std::array<uint32_t, 3>> JWOJ_MET;
+        std::vector<std::array<uint32_t, 3>> JWOJ_SCALAR;
+        std::vector<std::array<uint32_t, 3>> GESPRESSO;
+        std::vector<std::array<uint32_t, 3>> NC_MET;
+        std::vector<std::array<uint32_t, 3>> NC_SCALAR;
+        std::vector<std::array<uint32_t, 3>> RMS_MET;
+        std::vector<std::array<uint32_t, 3>> RMS_SCALAR;
+        // Track slice numbers for global TOBs (to be assigned when fillGlobal is called)
+        std::vector<uint32_t> globalSliceNumbers;
+
+        // Helper lambda to ensure vectors are large enough for a given slice
+        auto ensureSliceCapacity = [&](size_t sliceNum) {
+            if (sliceNum >= global_counter.size()) {
+                size_t newSize = sliceNum + 1;
+                global_counter.resize(newSize, 0);
+                JWOJ_MHT.resize(newSize, {0, 0, 0});
+                JWOJ_MST.resize(newSize, {0, 0, 0});
+                JWOJ_MET.resize(newSize, {0, 0, 0});
+                JWOJ_SCALAR.resize(newSize, {0, 0, 0});
+                GESPRESSO.resize(newSize, {0, 0, 0});
+                NC_MET.resize(newSize, {0, 0, 0});
+                NC_SCALAR.resize(newSize, {0, 0, 0});
+                RMS_MET.resize(newSize, {0, 0, 0});
+                RMS_SCALAR.resize(newSize, {0, 0, 0});
+            }
+        };
 
         size_t index = 0;
         while ( index < n_words ) {
@@ -318,143 +440,181 @@ StatusCode gFexByteStreamTool::convertFromBS(const std::vector<const ROBF*>& vro
             bool isMet = (blockType >= 0x1 && blockType <= 0x3);
             bool isJet = (blockType >= 0xA && blockType <= 0xC);
 
-            
             for (uint32_t sliceNumber = 0; sliceNumber < numSlices; sliceNumber++) {
-                if (sliceNumber == 0){
-                    if ( !isJet && !isMet ) {
+
+                // Skip out-of-time slices (slice != 0) if multi-slice mode is disabled
+                if (sliceNumber != 0 && !multiSlice) {
+                    index += gPos::WORDS_PER_SLICE;
+                    continue;
+                }
+
+                if ( !isJet && !isMet ) {
+                    std::stringstream sdetail;
+                    sdetail  << "gFexByteStreamTool::decodeGfexTobSlice: Invalid block type " << blockType ;
+                    std::stringstream slocation;
+                    slocation  << "0x"<< std::hex << rob->rob_source_id();
+                    std::stringstream stitle;
+                    stitle  << "Invalid block type" ;
+                    printError(slocation.str(),stitle.str(),MSG::DEBUG,sdetail.str());
+                }
+
+                // Select target containers based on slice (slice 0 = L1A -> main containers, others -> out-of-time containers)
+                auto& targetRhoContainer = (sliceNumber == 0) ? gRhoContainer : gRhoSliceContainer;
+                auto& targetSJContainer  = (sliceNumber == 0) ? gSJContainer  : gSJSliceContainer;
+                auto& targetLJContainer  = (sliceNumber == 0) ? gLJContainer  : gLJSliceContainer;
+
+                for(unsigned int iWord=0; iWord<gPos::WORDS_PER_SLICE; iWord++) {
+
+                    if (isJet) {
+                        //Skipping the unused words
+                        if (std::find(gPos::JET_UNUSED_POSITION.begin(),gPos::JET_UNUSED_POSITION.end(),iWord)!=gPos::JET_UNUSED_POSITION.end()){
+                            continue;
+                        }
+                        //Skipping the trailer words
+                        if (std::find(gPos::TRAILER_POSITION.begin(),gPos::TRAILER_POSITION.end(),iWord)!=gPos::TRAILER_POSITION.end()){
+                            continue;
+                        }
+                        // Decorator for slice number - only needed for out-of-time containers
+                        // (L1A containers by definition only contain slice 0)
+                        static const SG::AuxElement::Decorator<uint32_t> sliceNumberDec("sliceNumber");
                         
-                        std::stringstream sdetail;
-                        sdetail  << "gFexByteStreamTool::decodeGfexTobSlice: Invalid block type " << blockType ;
-                        std::stringstream slocation;
-                        slocation  << "0x"<< std::hex << rob->rob_source_id();
-                        std::stringstream stitle;
-                        stitle  << "Invalid block type" ;
-                        printError(slocation.str(),stitle.str(),MSG::DEBUG,sdetail.str());                         
-                        
-                    }
-
-                    for(unsigned int iWord=0; iWord<gPos::WORDS_PER_SLICE; iWord++) {
-
-                        if (isJet) {
-                            //Skipping the unused words
-                            if (std::find(gPos::JET_UNUSED_POSITION.begin(),gPos::JET_UNUSED_POSITION.end(),iWord)!=gPos::JET_UNUSED_POSITION.end()){
-                                continue;
-                            }
-                            //Skipping the trailer words
-                            if (std::find(gPos::TRAILER_POSITION.begin(),gPos::TRAILER_POSITION.end(),iWord)!=gPos::TRAILER_POSITION.end()){
-                                continue;
-                            }
-                            //Saving gRho TOBs into the EDM container
-                            if (iWord == gPos::GRHO_POSITION){
-                                std::unique_ptr<xAOD::gFexJetRoI> myEDM (new xAOD::gFexJetRoI());
-                                gRhoContainer->push_back(std::move(myEDM));
-                                gRhoContainer->back()->initialize(dataArray[index+iWord], m_gJ_scale);
-                            }
-                            //Saving gBlock TOBs into the EDM container
-                            if (std::find(gPos::GBLOCK_POSITION.begin(),gPos::GBLOCK_POSITION.end(),iWord)!=gPos::GBLOCK_POSITION.end()){
-                                std::unique_ptr<xAOD::gFexJetRoI> myEDM (new xAOD::gFexJetRoI());
-                                gSJContainer->push_back(std::move(myEDM));
-                                gSJContainer->back()->initialize(dataArray[index+iWord], m_gJ_scale);
-                            }
-                            //Saving gJet TOBs into the EDM container
-                            if (std::find(gPos::GJET_POSITION.begin(),gPos::GJET_POSITION.end(),iWord)!=gPos::GJET_POSITION.end()){
-                                std::unique_ptr<xAOD::gFexJetRoI> myEDM (new xAOD::gFexJetRoI());
-                                gLJContainer->push_back(std::move(myEDM));
-                                gLJContainer->back()->initialize(dataArray[index+iWord], m_gLJ_scale);
-                            }
-
+                        //Saving gRho TOBs into the EDM container
+                        if (iWord == gPos::GRHO_POSITION){
+                            std::unique_ptr<xAOD::gFexJetRoI> myEDM (new xAOD::gFexJetRoI());
+                            targetRhoContainer->push_back(std::move(myEDM));
+                            targetRhoContainer->back()->initialize(dataArray[index+iWord], m_gJ_scale);
+                            if (sliceNumber != 0) sliceNumberDec(*targetRhoContainer->back()) = sliceNumber;
+                        }
+                        //Saving gBlock TOBs into the EDM container
+                        if (std::find(gPos::GBLOCK_POSITION.begin(),gPos::GBLOCK_POSITION.end(),iWord)!=gPos::GBLOCK_POSITION.end()){
+                            std::unique_ptr<xAOD::gFexJetRoI> myEDM (new xAOD::gFexJetRoI());
+                            targetSJContainer->push_back(std::move(myEDM));
+                            targetSJContainer->back()->initialize(dataArray[index+iWord], m_gJ_scale);
+                            if (sliceNumber != 0) sliceNumberDec(*targetSJContainer->back()) = sliceNumber;
+                        }
+                        //Saving gJet TOBs into the EDM container
+                        if (std::find(gPos::GJET_POSITION.begin(),gPos::GJET_POSITION.end(),iWord)!=gPos::GJET_POSITION.end()){
+                            std::unique_ptr<xAOD::gFexJetRoI> myEDM (new xAOD::gFexJetRoI());
+                            targetLJContainer->push_back(std::move(myEDM));
+                            targetLJContainer->back()->initialize(dataArray[index+iWord], m_gLJ_scale);
+                            if (sliceNumber != 0) sliceNumberDec(*targetLJContainer->back()) = sliceNumber;
                         }
 
-                        if (isMet){
-                            //Skipping the unused words
-                            if (std::find(gPos::GLOBAL_UNUSED_POSITION.begin(),gPos::GLOBAL_UNUSED_POSITION.end(),iWord)!=gPos::GLOBAL_UNUSED_POSITION.end()){
-                                continue;
-                            }
-                            //Skipping the trailer words
-                            if (std::find(gPos::TRAILER_POSITION.begin(),gPos::TRAILER_POSITION.end(),iWord)!=gPos::TRAILER_POSITION.end()){
-                                continue;
-                            }
-                            //Saving jwoj MHT TOBs into the EDM container
-                            if (iWord == gPos::JWOJ_MHT_POSITION){
-                                global_counter ++;
-                                if (blockType == 0x1) {JWOJ_MHT[0] = dataArray[index+iWord];}
-                                if (blockType == 0x2) {JWOJ_MHT[1] = dataArray[index+iWord];}
-                                if (blockType == 0x3) {JWOJ_MHT[2] = dataArray[index+iWord];}
-                            }
-                            //Saving jwoj MST TOBs into the EDM container
-                            if (iWord == gPos::JWOJ_MST_POSITION){
-                                if (blockType == 0x1) {JWOJ_MST[0] = dataArray[index+iWord];}
-                                if (blockType == 0x2) {JWOJ_MST[1] = dataArray[index+iWord];}
-                                if (blockType == 0x3) {JWOJ_MST[2] = dataArray[index+iWord];}
-                            }
-                            //Saving jwoj MET TOBs into the EDM container
-                            if (iWord == gPos::JWOJ_MET_POSITION){
-                                if (blockType == 0x1) {JWOJ_MET[0] = dataArray[index+iWord];}
-                                if (blockType == 0x2) {JWOJ_MET[1] = dataArray[index+iWord];}
-                                if (blockType == 0x3) {JWOJ_MET[2] = dataArray[index+iWord];}
-                            }
-                            //Saving jwoj Scalar TOBs into the EDM container
-                            if (iWord == gPos::JWOJ_SCALAR_POSITION){
-                                if (blockType == 0x1) {JWOJ_SCALAR[0] = dataArray[index+iWord];}
-                                if (blockType == 0x2) {JWOJ_SCALAR[1] = dataArray[index+iWord];}
-                                if (blockType == 0x3) {JWOJ_SCALAR[2] = dataArray[index+iWord];}
-                            }
-                            //Saving gEspresso TOBs into the EDM container
-                            if (iWord == gPos::GESPRESSO_POSITION){
-                                if (blockType == 0x1) {GESPRESSO[0] = dataArray[index+iWord];}
-                                if (blockType == 0x2) {GESPRESSO[1] = dataArray[index+iWord];}
-                                if (blockType == 0x3) {GESPRESSO[2] = dataArray[index+iWord];}
-                            }
-                            //Saving Noise Cut MET TOBs into the EDM container
-                            if (iWord == gPos::NC_MET_POSITION){
-                                if (blockType == 0x1) {NC_MET[0] = dataArray[index+iWord];}
-                                if (blockType == 0x2) {NC_MET[1] = dataArray[index+iWord];}
-                                if (blockType == 0x3) {NC_MET[2] = dataArray[index+iWord];}
-                            }
-                            //Saving Noise Cut Scalar TOBs into the EDM container
-                            if (iWord == gPos::NC_SCALAR_POSITION){
-                                if (blockType == 0x1) {NC_SCALAR[0] = dataArray[index+iWord];}
-                                if (blockType == 0x2) {NC_SCALAR[1] = dataArray[index+iWord];}
-                                if (blockType == 0x3) {NC_SCALAR[2] = dataArray[index+iWord];}
-                            }
-                            //Saving Rho+RMS MET TOBs into the EDM container
-                            if (iWord == gPos::RMS_MET_POSITION){
-                                if (blockType == 0x1) {RMS_MET[0] = dataArray[index+iWord];}
-                                if (blockType == 0x2) {RMS_MET[1] = dataArray[index+iWord];}
-                                if (blockType == 0x3) {RMS_MET[2] = dataArray[index+iWord];}
-                            }
-                            //Saving Rho+RMS Scalar TOBs into the EDM container
-                            if (iWord == gPos::RMS_SCALAR_POSITION){
-                                if (blockType == 0x1) {RMS_SCALAR[0] = dataArray[index+iWord];}
-                                if (blockType == 0x2) {RMS_SCALAR[1] = dataArray[index+iWord];}
-                                if (blockType == 0x3) {RMS_SCALAR[2] = dataArray[index+iWord];}
-                            }
+                    }
 
+                    // Global TOBs - decode for all slices, store per-slice data
+                    // They require data from all 3 FPGAs to be combined later
+                    if (isMet){
+                        // Ensure we have storage for this slice
+                        ensureSliceCapacity(sliceNumber);
+
+                        //Skipping the unused words
+                        if (std::find(gPos::GLOBAL_UNUSED_POSITION.begin(),gPos::GLOBAL_UNUSED_POSITION.end(),iWord)!=gPos::GLOBAL_UNUSED_POSITION.end()){
+                            continue;
+                        }
+                        //Skipping the trailer words
+                        if (std::find(gPos::TRAILER_POSITION.begin(),gPos::TRAILER_POSITION.end(),iWord)!=gPos::TRAILER_POSITION.end()){
+                            continue;
+                        }
+                        //Saving jwoj MHT TOBs into the EDM container
+                        if (iWord == gPos::JWOJ_MHT_POSITION){
+                            global_counter[sliceNumber]++;
+                            if (blockType == 0x1) {JWOJ_MHT[sliceNumber][0] = dataArray[index+iWord];}
+                            if (blockType == 0x2) {JWOJ_MHT[sliceNumber][1] = dataArray[index+iWord];}
+                            if (blockType == 0x3) {JWOJ_MHT[sliceNumber][2] = dataArray[index+iWord];}
+                        }
+                        //Saving jwoj MST TOBs into the EDM container
+                        if (iWord == gPos::JWOJ_MST_POSITION){
+                            if (blockType == 0x1) {JWOJ_MST[sliceNumber][0] = dataArray[index+iWord];}
+                            if (blockType == 0x2) {JWOJ_MST[sliceNumber][1] = dataArray[index+iWord];}
+                            if (blockType == 0x3) {JWOJ_MST[sliceNumber][2] = dataArray[index+iWord];}
+                        }
+                        //Saving jwoj MET TOBs into the EDM container
+                        if (iWord == gPos::JWOJ_MET_POSITION){
+                            if (blockType == 0x1) {JWOJ_MET[sliceNumber][0] = dataArray[index+iWord];}
+                            if (blockType == 0x2) {JWOJ_MET[sliceNumber][1] = dataArray[index+iWord];}
+                            if (blockType == 0x3) {JWOJ_MET[sliceNumber][2] = dataArray[index+iWord];}
+                        }
+                        //Saving jwoj Scalar TOBs into the EDM container
+                        if (iWord == gPos::JWOJ_SCALAR_POSITION){
+                            if (blockType == 0x1) {JWOJ_SCALAR[sliceNumber][0] = dataArray[index+iWord];}
+                            if (blockType == 0x2) {JWOJ_SCALAR[sliceNumber][1] = dataArray[index+iWord];}
+                            if (blockType == 0x3) {JWOJ_SCALAR[sliceNumber][2] = dataArray[index+iWord];}
+                        }
+                        //Saving gEspresso TOBs into the EDM container
+                        if (iWord == gPos::GESPRESSO_POSITION){
+                            if (blockType == 0x1) {GESPRESSO[sliceNumber][0] = dataArray[index+iWord];}
+                            if (blockType == 0x2) {GESPRESSO[sliceNumber][1] = dataArray[index+iWord];}
+                            if (blockType == 0x3) {GESPRESSO[sliceNumber][2] = dataArray[index+iWord];}
+                        }
+                        //Saving Noise Cut MET TOBs into the EDM container
+                        if (iWord == gPos::NC_MET_POSITION){
+                            if (blockType == 0x1) {NC_MET[sliceNumber][0] = dataArray[index+iWord];}
+                            if (blockType == 0x2) {NC_MET[sliceNumber][1] = dataArray[index+iWord];}
+                            if (blockType == 0x3) {NC_MET[sliceNumber][2] = dataArray[index+iWord];}
+                        }
+                        //Saving Noise Cut Scalar TOBs into the EDM container
+                        if (iWord == gPos::NC_SCALAR_POSITION){
+                            if (blockType == 0x1) {NC_SCALAR[sliceNumber][0] = dataArray[index+iWord];}
+                            if (blockType == 0x2) {NC_SCALAR[sliceNumber][1] = dataArray[index+iWord];}
+                            if (blockType == 0x3) {NC_SCALAR[sliceNumber][2] = dataArray[index+iWord];}
+                        }
+                        //Saving Rho+RMS MET TOBs into the EDM container
+                        if (iWord == gPos::RMS_MET_POSITION){
+                            if (blockType == 0x1) {RMS_MET[sliceNumber][0] = dataArray[index+iWord];}
+                            if (blockType == 0x2) {RMS_MET[sliceNumber][1] = dataArray[index+iWord];}
+                            if (blockType == 0x3) {RMS_MET[sliceNumber][2] = dataArray[index+iWord];}
+                        }
+                        //Saving Rho+RMS Scalar TOBs into the EDM container
+                        if (iWord == gPos::RMS_SCALAR_POSITION){
+                            if (blockType == 0x1) {RMS_SCALAR[sliceNumber][0] = dataArray[index+iWord];}
+                            if (blockType == 0x2) {RMS_SCALAR[sliceNumber][1] = dataArray[index+iWord];}
+                            if (blockType == 0x3) {RMS_SCALAR[sliceNumber][2] = dataArray[index+iWord];}
                         }
 
                     }
 
                 }
+
                 index += gPos::WORDS_PER_SLICE;
             }
 
-            ATH_MSG_DEBUG("global_counter is " << global_counter);
-            if (global_counter == 3) {
+            // Fill global TOBs for each slice that has complete data from all 3 FPGAs
+            for (size_t slice = 0; slice < global_counter.size(); slice++) {
+                ATH_MSG_DEBUG("global_counter[" << slice << "] is " << global_counter[slice]);
+                if (global_counter[slice] == 3) {
+                    // Skip out-of-time slices if multi-slice mode is disabled
+                    if (slice != 0 && !multiSlice) {
+                        global_counter[slice] = 0;
+                        continue;
+                    }
 
-                fillGlobal(JWOJ_MHT, 3, gMHTComponentsJwojContainer);
-                fillGlobal(JWOJ_MST, 4, gMSTComponentsJwojContainer);
-                int16_t scalar = fillGlobal(JWOJ_MET, 2, gMETComponentsJwojContainer);
-                fillGlobal(JWOJ_SCALAR, 1, gScalarEJwojContainer, scalar);
+                    // Select target containers based on slice (slice 0 = L1A, others = out-of-time)
+                    auto& targetMHTContainer = (slice == 0) ? gMHTComponentsJwojContainer : gMHTComponentsJwojSliceContainer;
+                    auto& targetMSTContainer = (slice == 0) ? gMSTComponentsJwojContainer : gMSTComponentsJwojSliceContainer;
+                    auto& targetMETContainer = (slice == 0) ? gMETComponentsJwojContainer : gMETComponentsJwojSliceContainer;
+                    auto& targetScalarContainer = (slice == 0) ? gScalarEJwojContainer : gScalarEJwojSliceContainer;
+                    auto& targetEspressoContainer = (slice == 0) ? gEspressoContainer : gEspressoSliceContainer;
+                    auto& targetNCMETContainer = (slice == 0) ? gMETComponentsNoiseCutContainer : gMETComponentsNoiseCutSliceContainer;
+                    auto& targetNCScalarContainer = (slice == 0) ? gScalarENoiseCutContainer : gScalarENoiseCutSliceContainer;
+                    auto& targetRMSMETContainer = (slice == 0) ? gMETComponentsRmsContainer : gMETComponentsRmsSliceContainer;
+                    auto& targetRMSScalarContainer = (slice == 0) ? gScalarERmsContainer : gScalarERmsSliceContainer;
 
-                fillGlobal(GESPRESSO, 1, gEspressoContainer, 0);
-                                
-                scalar = fillGlobal(NC_MET, 2, gMETComponentsNoiseCutContainer);
-                fillGlobal(NC_SCALAR, 1, gScalarENoiseCutContainer, scalar);
+                    fillGlobal(JWOJ_MHT[slice], 3, targetMHTContainer, slice);
+                    fillGlobal(JWOJ_MST[slice], 4, targetMSTContainer, slice);
+                    int16_t scalar = fillGlobal(JWOJ_MET[slice], 2, targetMETContainer, slice);
+                    fillGlobal(JWOJ_SCALAR[slice], 1, targetScalarContainer, slice, scalar);
 
-                scalar = fillGlobal(RMS_MET, 2, gMETComponentsRmsContainer);
-                fillGlobal(RMS_SCALAR, 1, gScalarERmsContainer, scalar);
+                    fillGlobal(GESPRESSO[slice], 1, targetEspressoContainer, slice, 0);
 
-                global_counter = 0;
+                    scalar = fillGlobal(NC_MET[slice], 2, targetNCMETContainer, slice);
+                    fillGlobal(NC_SCALAR[slice], 1, targetNCScalarContainer, slice, scalar);
+
+                    scalar = fillGlobal(RMS_MET[slice], 2, targetRMSMETContainer, slice);
+                    fillGlobal(RMS_SCALAR[slice], 1, targetRMSScalarContainer, slice, scalar);
+
+                    global_counter[slice] = 0;
+                }
             }
             
         }
@@ -466,11 +626,11 @@ StatusCode gFexByteStreamTool::convertFromBS(const std::vector<const ROBF*>& vro
 // the sum in quadrature (which is actually only used for MET, and discared for MHT and MST)
 // This function also accepts "scalar" as optional variable, which is used to fill the X
 // component of the SCALAR tob.
-int16_t gFexByteStreamTool::fillGlobal(const std::vector<uint32_t> &tob, const int type,
+int16_t gFexByteStreamTool::fillGlobal(const std::array<uint32_t, 3> &tob, const int type,
                                        SG::WriteHandle<xAOD::gFexGlobalRoIContainer> &container,
-                                       int16_t scalar/* = -1*/) const {
+                                       uint32_t sliceNumber, int16_t scalar/* = -1*/) const {
     
-    ATH_MSG_DEBUG("fillGlobal with type " << type);
+    ATH_MSG_DEBUG("fillGlobal with type " << type << " slice " << sliceNumber);
     
     // 32 bit integers to avoid interim overflows when summing 16b (signed) 
     // quantities from each pFPGA. Proper clamping and bit masking follows afterwards
@@ -531,6 +691,12 @@ int16_t gFexByteStreamTool::fillGlobal(const std::vector<uint32_t> &tob, const i
     container->back()->setSaturated(0);
     container->back()->setGlobalType(type);
     
+    // Add slice number decoration only for out-of-time TOBs
+    // (L1A containers by definition only contain slice 0)
+    if (sliceNumber != 0) {
+        static const SG::AuxElement::Decorator<uint32_t> sliceNumberDec("sliceNumber");
+        sliceNumberDec(*container->back()) = sliceNumber;
+    }
 
     int MET2 = sum_x * sum_x + sum_y * sum_y;
     int16_t MET = std::sqrt(MET2);

@@ -203,11 +203,12 @@ int main(int argc, char **argv) {
    // -- direction
    std::stringstream table_out;
    table_out << std::setprecision(5);
-   for (std::size_t stat_i=0; stat_i<kN; ++stat_i) {
-      std::size_t dest_idx_offset = stat_i * stat_stride;
-      table_out << makeTable(stat, dest_idx_offset, sub_cat_stride,
-                             sub_category_labels,
-                             category_labels)
+   try {
+     for (std::size_t stat_i=0; stat_i<kN; ++stat_i) {
+       std::size_t dest_idx_offset = stat_i * stat_stride;
+       table_out << makeTable(stat, dest_idx_offset, sub_cat_stride,
+                              sub_category_labels,
+                              category_labels)
          .columnWidth(10)
          // only dump the footer for the last eta bin i.e. total
          .dumpHeader(stat_i==0)
@@ -215,6 +216,11 @@ int main(int argc, char **argv) {
          .separateLastRow(true) // separate the sum of all eta bins
          .minLabelWidth(max_label_width)
          .labelPrefix(stat_labels.at(stat_i)+" ");
+     }
+   }
+   catch (const std::exception& e) {
+     std::cerr << e.what() << "\n";
+     return 1;
    }
 
    // expected output
@@ -258,13 +264,19 @@ int main(int argc, char **argv) {
    // compute index of the total
    std::size_t dest_idx_offset = n_sub_categories * sub_cat_stride;
    table_out.str("");
-   table_out << makeTable(stat, dest_idx_offset,stat_stride,
-                          stat_labels,
-                          category_labels,
-                          sub_category_labels.at(n_sub_categories))
+   try {
+     table_out << makeTable(stat, dest_idx_offset,stat_stride,
+                            stat_labels,
+                            category_labels,
+                            sub_category_labels.at(n_sub_categories))
                 .columnWidth(10)
                 // only dump the footer for the last eta bin i.e. total
                 .dumpFooter(true);
+   }
+   catch (const std::exception& e) {
+     std::cerr << e.what() << "\n";
+     return 1;
+   }
    if (verbose) {
       std::cout << "counter summary" << std::endl;
       std::cout << table_out.str() << std::endl;
@@ -313,12 +325,13 @@ int main(int argc, char **argv) {
    // -- dump one table per ratio splitted by category and sub-category, and ratios of the projections in the two
    // -- directions
    table_out.str("");
-   for (std::size_t ratio_i=0; ratio_i<ratio_labels.size(); ++ratio_i) {
-      table_out << makeTable(ratio,
-                             ratio_i*ratio_stride,
-                             ratio_sub_stride,
-                             sub_category_labels,
-                             category_labels)
+   try {
+     for (std::size_t ratio_i=0; ratio_i<ratio_labels.size(); ++ratio_i) {
+       table_out << makeTable(ratio,
+                              ratio_i*ratio_stride,
+                              ratio_sub_stride,
+                              sub_category_labels,
+                              category_labels)
          .columnWidth(10)
          // only dump the footer for the last eta bin i.e. total
          .dumpHeader(ratio_i==0)
@@ -326,6 +339,11 @@ int main(int argc, char **argv) {
          .separateLastRow(true) // separate the sum of las
          .minLabelWidth(max_label_width)
          .labelPrefix(ratio_labels.at(ratio_i)+" ");
+     }
+   }
+   catch (const std::exception& e) {
+     std::cerr << e.what() << "\n";
+     return 1;
    }
    if (verbose) {
       std::cout << "ratios detail" << std::endl;

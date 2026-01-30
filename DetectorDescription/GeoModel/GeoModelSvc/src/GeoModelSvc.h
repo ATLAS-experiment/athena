@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef GEOMODELSVC_GEOMODELSVC_H
@@ -17,7 +17,6 @@
 #include "GaudiKernel/ToolHandle.h" //member
 #include "Gaudi/Property.h" //member
 
-#include "CxxUtils/checker_macros.h" //ATLAS_NOT_THREAD_SAFE()
 #include "StoreGate/StoreGateSvc.h" //SvcHandle template
 #include <memory> //unique_ptr
 
@@ -31,7 +30,7 @@ public:
     // Standard Constructor
     GeoModelSvc(const std::string& name, ISvcLocator* svc);
 
-    virtual StatusCode initialize ATLAS_NOT_THREAD_SAFE() override;
+    virtual StatusCode initialize() override;
     virtual StatusCode finalize() override;
 
     /// Callback from TagInfoMgr on TagInfo change
@@ -66,10 +65,10 @@ private:
     Gaudi::Property<std::string> m_cavInfraVersionOverride{this,"CavernInfraVersionOverride","","Overrider for CavernInfra version"};
     Gaudi::Property<std::string> m_forDetVersionOverride{this,"ForwardDetectorsVersionOverride","","Overrider for Forward Detectors version"};
 
-    Gaudi::Property<bool> m_callBackON{this,"AlignCallbacks",true,"Read alignment in callbacks"};
+    Gaudi::Property<bool> m_useTagInfo{this,"UseTagInfo",true,"Use TagInfo"};
+    Gaudi::Property<bool> m_checkTagInfo{this,"CheckTagInfo",true,"Compare TagInfo from the job configuration with the one in the input file"};
     Gaudi::Property<bool> m_ignoreTagDifference{this,"IgnoreTagDifference",false,"Ignore TagInfo and configuration tag diffs"};
 
-    Gaudi::Property<bool> m_useTagInfo{this,"UseTagInfo",true,"Use TagInfo"};
     Gaudi::Property<bool> m_statisticsToFile{this,"StatisticsToFile",false,"Generate GeoModelStatistics file in the run directory"};
 
     Gaudi::Property<int>  m_supportedGeometry{this,"SupportedGeometry",0,"Supported geometry flag is set in jobOpt and is equal to major release version"};

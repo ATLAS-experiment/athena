@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -10,8 +10,8 @@
  *      Max Baak <mbaak@cern.ch> - CERN, Switzerland                              *
  **********************************************************************************/
 
-#ifndef __TGRLCollection__
-#define __TGRLCollection__
+#ifndef GOODRUNSLISTS_TGRLCOLLECTION_H
+#define GOODRUNSLISTS_TGRLCOLLECTION_H
 
 #include "GoodRunsLists/TGoodRunsList.h"
 #include "TObject.h"
@@ -28,8 +28,10 @@ namespace Root {
       TGRLCollection( Bool_t checkGRLInfo=kFALSE ) ;
       virtual ~TGRLCollection();
 
-      TGRLCollection(const Root::TGRLCollection& other) ;
-      TGRLCollection& operator=(const TGRLCollection& other) ;
+      TGRLCollection(const Root::TGRLCollection& other) = default;
+      TGRLCollection& operator=(const TGRLCollection& other) = default;
+      TGRLCollection(Root::TGRLCollection&&) = default;
+      TGRLCollection& operator=(TGRLCollection&& other) = default;
 
       void SetVersion( const TString& version );
       void SetMetaData( const std::map<TString,TString>& metadata );

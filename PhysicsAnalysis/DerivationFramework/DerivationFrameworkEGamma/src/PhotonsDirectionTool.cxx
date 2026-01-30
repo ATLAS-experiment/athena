@@ -1,9 +1,9 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////
-// PhotonsDirectionTool.cxx, (c) ATLAS Detector software
+// PhotonsDirectionTool
 // compute photon et = E(cluster)/cosh(eta of 2nd sampling)
 // eventually E will be after recalibration
 ///////////////////////////////////////////////////////////////////
@@ -15,13 +15,6 @@
 #include "xAODEgamma/PhotonContainer.h"
 
 namespace DerivationFramework {
-
-PhotonsDirectionTool::PhotonsDirectionTool(const std::string& t,
-                                           const std::string& n,
-                                           const IInterface* p)
-  : base_class(t, n, p)
-{
-}
 
 StatusCode
 PhotonsDirectionTool::initialize()

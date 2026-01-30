@@ -104,11 +104,6 @@ void TileROD_Encoder::setTypeAndUnit(TileFragHash::TYPE type, TileRawChannelUnit
   }
 
   unsigned int rChUnit = (unsigned int) unit % (unsigned int) TileRawChannelUnit::OnlineOffset;
-  if (rChUnit > 3) {
-    rChUnit = 0;
-    ATH_MSG_ERROR( "setTypeAndUnit Incorrect raw data unit =" << unit
-                  << " assuming ADC counts (0) " );
-  }
 
   // make sure that we use frag type 4 for units which are not ADC counts
   if (rChUnit != 0 && m_type < 4) m_type = 4;
@@ -229,6 +224,8 @@ void TileROD_Encoder::fillROD10(std::vector<uint32_t>& v) {
         v.push_back(l2->val(i));
 
       // re-write fragment size
+      // start should be >= 3 here, but coverity can't prove it.
+      //coverity[INTEGER_OVERFLOW]
       v[start - 2] = 5 + 2 * NMuons1 + 2 * NMuons2;
 
     }
@@ -279,6 +276,8 @@ void TileROD_Encoder::fillROD12(std::vector<uint32_t>& v) {
         v.push_back(l2->val(i));
 
       // re-write fragment size
+      // start should be >= 3 here, but coverity can't prove it.
+      //coverity[INTEGER_OVERFLOW]
       v[start - 2] += Ndata;
     }
   }

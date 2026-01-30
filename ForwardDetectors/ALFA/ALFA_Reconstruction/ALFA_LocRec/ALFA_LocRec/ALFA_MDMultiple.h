@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ALFA_MDMULTIPLE_H
@@ -28,9 +28,9 @@ class ALFA_MDMultiple : public AthMessaging
 {
 	public:
 		ALFA_MDMultiple();
-		ALFA_MDMultiple(const ALFA_MDMultiple &obj);
-		ALFA_MDMultiple& operator=(const ALFA_MDMultiple &obj);
-		~ALFA_MDMultiple();
+		ALFA_MDMultiple(const ALFA_MDMultiple &obj) = delete;
+		ALFA_MDMultiple& operator=(const ALFA_MDMultiple &obj) = delete;
+		~ALFA_MDMultiple() = default;
 
 	private:
 		Int_t m_iRPot;
@@ -46,21 +46,11 @@ class ALFA_MDMultiple : public AthMessaging
 		//number of hits in the layer [2*10]
 		Int_t m_iNumHitsLayer[ALFALAYERSCNT*ALFAPLATESCNT];
 
-//		Int_t m_iTrackMatch[MAXTRACKNUM][2];
-//		Int_t m_iNU[MAXTRACKNUM];
-//		Int_t m_iNV[MAXTRACKNUM];
-//		Int_t m_iFibSel[MAXTRACKNUM][ALFALAYERSCNT*ALFAPLATESCNT];
-
-//		Float_t m_fRecXPos[MAXTRACKNUM];
-//		Float_t m_fRecYPos[MAXTRACKNUM];
-//		Float_t m_fOvU[MAXTRACKNUM];
-//		Float_t m_fOvV[MAXTRACKNUM];
-
-		std::vector<Float_t> *m_fRecXPos, *m_fRecYPos;
-		std::vector<Float_t> *m_fOvU, *m_fOvV;
-		std::vector<Int_t>   *m_iNU, *m_iNV;
-		std::vector<Int_t>   *m_iFibSel[ALFALAYERSCNT*ALFAPLATESCNT];
-		std::vector<Int_t>   *m_iTrackMatch[2];
+		std::vector<Float_t> m_fRecXPos, m_fRecYPos;
+		std::vector<Float_t> m_fOvU, m_fOvV;
+		std::vector<Int_t>   m_iNU, m_iNV;
+		std::vector<Int_t>   m_iFibSel[ALFALAYERSCNT*ALFAPLATESCNT];
+		std::vector<Int_t>   m_iTrackMatch[2];
 
 	private:
 		std::map<int, FIBERS> m_MapLayers;
@@ -73,9 +63,9 @@ class ALFA_MDMultiple : public AthMessaging
 		void GetData(Int_t (&iNumU)[MAXTRACKNUM], Int_t (&iNumV)[MAXTRACKNUM], Float_t (&fOvU)[MAXTRACKNUM], Float_t (&fOvV)[MAXTRACKNUM], Int_t (&iFibSel)[MAXTRACKNUM][ALFALAYERSCNT*ALFAPLATESCNT]);
 
 	private:
-		void Proj_Store(Int_t iFiberSide, Int_t (&iOver)[72000], Float_t fbRef, Int_t iSideFlag);
-  void Proj_Store(const std::vector<Int_t> (&FiberHit)[ALFAPLATESCNT], Int_t (&iOver)[72000], Float_t fbRef, Int_t iSideFlag);
-		void Find_Proj(const Int_t iOver[72000], Float_t fbRef, Float_t &fb, Float_t &fOv, Int_t &fNum);
+		void Proj_Store(Int_t iFiberSide, std::span<Int_t> iOver, Float_t fbRef, Int_t iSideFlag);
+  void Proj_Store(const std::vector<Int_t> (&FiberHit)[ALFAPLATESCNT], std::span<Int_t> iOver, Float_t fbRef, Int_t iSideFlag);
+		void Find_Proj(const std::span<const Int_t>& iOver, Float_t fbRef, Float_t &fb, Float_t &fOv, Int_t &fNum);
 		void Finding_Fib(Int_t iFiberSide, Float_t fbRef, Float_t fbRec, Int_t (&iFSel)[ALFAPLATESCNT], Int_t iSideFlag);
 		void Reco_Track(std::vector<double> &b_p, std::vector<double> &b_n,
 						std::vector<double> &Ov_p, std::vector<double> &Ov_n,

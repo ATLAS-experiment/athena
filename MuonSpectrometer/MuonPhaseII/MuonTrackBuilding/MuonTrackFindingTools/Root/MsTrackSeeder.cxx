@@ -2,7 +2,6 @@
   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #include "MuonTrackFindingTools/MsTrackSeeder.h"
-#include "MuonPatternHelpers/MatrixUtils.h"
 #include "MuonTrackEvent/TrackingHelpers.h"
 #include "MuonDetDescrUtils/MuonSectorMapping.h"
 #include "MuonTruthHelpers/MuonSimHitHelpers.h"
@@ -33,7 +32,7 @@ namespace {
         if (!posSlot) {
             posSlot = segPos;
         } else {
-            posSlot = 0.5 * ((*posSlot) + segPos); 
+            *posSlot = 0.5 * (*posSlot + segPos);
         }
     }
     /** @brief return the segment theta */
@@ -53,16 +52,8 @@ namespace {
     float reducedChi2(const xAOD::MuonSegment& seg) {
         return seg.chiSquared() / std::max(1.f, seg.numberDoF());
     }
-
-    std::string printID(const xAOD::MuonSegment& seg) {
-        using namespace Muon::MuonStationIndex;
-        return std::format("{:}{:}{:}{:}", chName(seg.chamberIndex()),
-                                                  std::abs(seg.etaIndex()),
-                                                  seg.etaIndex() > 0 ? 'A' : 'C',
-                                                  seg.sector());
-    }
     std::string print(const xAOD::MuonSegment& seg) {
-        return std::format("{:}, nPrecHits: {:}, nPhiHits: {:}", printID(seg),
+        return std::format("{:}, nPrecHits: {:}, nPhiHits: {:}", MuonR4::printID(seg),
                            seg.nPrecisionHits(), seg.nPhiLayers());
     }
     static const Muon::MuonSectorMapping sectorMap{};
@@ -102,7 +93,7 @@ namespace MuonR4{
                                        const SectorProjector proj) {
         return sectorMap.sectorOverlapPhi(sector, ringSector(sector + Acts::toUnderlying(proj)));
     }
-    inline const MuonGMR4::SpectrometerSector* 
+    const MuonGMR4::SpectrometerSector* 
         MsTrackSeeder::envelope(const xAOD::MuonSegment& segment) const{
         return m_cfg.detMgr->getSectorEnvelope(segment.chamberIndex(), 
                                                segment.sector(), 
@@ -142,7 +133,7 @@ namespace MuonR4{
         const Amg::Vector3D segPos3D{segment.position()};
         /// Recall that the sector coordinate system is defined such that the x-axis 
         /// is aligned with the nominal wire direction
-        const Amg::Vector3D dirAlongTube{envelope(segment)->localToGlobalTrans(gctx).linear().col(0)};
+        const Amg::Vector3D dirAlongTube{envelope(segment)->localToGlobalTransform(gctx).linear().col(0)};
         ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - Project onto phi: "<<inDeg(projectPhi));
         const Amg::Vector3D radialDir = Amg::getRotateZ3D(projectPhi) * Amg::Vector3D::UnitX();
         using namespace Acts::detail::LineHelper;
@@ -173,7 +164,7 @@ namespace MuonR4{
                                         m_cfg.barrelRadius).value_or(10. * Gaudi::Units::km);
         } else {
             lambda = Amg::intersect<2>(projPos, projDir, Amg::Vector2D::UnitY(), 
-                                       sign(projPos[1])* m_cfg.endcapDiscZ).value_or(10. * Gaudi::Units::km);
+                                       Acts::copySign(m_cfg.endcapDiscZ, projPos[1])).value_or(10. * Gaudi::Units::km);
         }
         return projPos + lambda * projDir;  
     }
@@ -187,7 +178,7 @@ namespace MuonR4{
             return false;
         } else if (loc == Endcap && (0 > projPos[0] || projPos[0] > m_cfg.endcapDiscRadius)) {
             ATH_MSG_VERBOSE(__func__<<"()  "<<__LINE__<<" - Position "<<Amg::toString(projPos)<<
-            " exceeds endcap boundaries ("<<m_cfg.endcapDiscRadius<<", "<<(sign(projPos[1])*m_cfg.endcapDiscZ)<<")");
+            " exceeds endcap boundaries ("<<m_cfg.endcapDiscRadius<<", "<<Acts::copySign(m_cfg.endcapDiscZ, projPos[1])<<")");
             return false;
         }
         return true;
@@ -209,7 +200,7 @@ namespace MuonR4{
         }
         const Amg::Vector3D sagittaDir = leverL.cross(planeNorm).unit();
         std::optional<double> sagitta = Amg::intersect<3>(*pI, leverL.unit(), *pM, sagittaDir);
-        ATH_MSG_ALWAYS(__func__<<"() "<<__LINE__<<" - Estimated sagitta: "<<(sagitta ? 
+        ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - Estimated sagitta: "<<(sagitta ? 
                      std::to_string(sagitta.value_or(0.)) : "---")<<", lever arm: "
                     <<(leverL.mag() / Gaudi::Units::m)<<" [m]"  );
         if (!sagitta) {
@@ -338,16 +329,16 @@ namespace MuonR4{
         /// If no radius could be calculated return the straight line estimator
         if (!barrelR && !endcapR) {
             return 5.*Gaudi::Units::TeV;
-        } 
-        const double r = 0.5* (barrelR.value_or(*endcapR) +
-                               endcapR.value_or(*barrelR));
+        }
+        const double r = 0.5* ((barrelR ? *barrelR : *endcapR) +
+                               (endcapR ? *endcapR : *barrelR));
         ///
         const double P = 0.3* Gaudi::Units::GeV* avgBField * r / std::abs(std::sin(avgTheta)); 
 
         ATH_MSG_DEBUG(__func__<<"() "<<__LINE__<<" - Estimated radius "<<r / Gaudi::Units::m<<" [m] --> P: "<<
                         (P / Gaudi::Units::GeV)<<" [GeV]");        
 
-        if (truthMuon && sign(P) !=  truthMuon->charge() && truthMuon->abseta() < 2.5 && 
+        if (truthMuon && Acts::copySign(1.f, P) !=  truthMuon->charge() && truthMuon->abseta() < 2.5 && 
                 (truthMuon->abseta() < 1.3 || truthMuon->abseta() > 1.4) ) {
             ATH_MSG_WARNING("Invalid charge, pT: "<<(truthMuon->pt() / Gaudi::Units::GeV)<<" [GeV], eta: "
                     <<truthMuon->eta()<<", phi: "<<(truthMuon->phi() / 1._degree)<<", q: "<<truthMuon->charge());
@@ -382,7 +373,7 @@ namespace MuonR4{
             coords[Acts::toUnderlying(eSector)] = ringOverlap(treeSector); 
             /** Enumeration to indicate whether the segment is expressed on the negative endcap (-1),
              *  the barrel (0) or the positive endcap */
-            coords[Acts::toUnderlying(eDetSection)] =  Acts::toUnderlying(loc) * sign(refPoint[1]);
+            coords[Acts::toUnderlying(eDetSection)] =  Acts::copySign(Acts::toUnderlying(loc), refPoint[1]);
             /** Coordinate on the cylinder */
             coords[Acts::toUnderlying(ePosOnCylinder)] = refPoint[Location::Barrel == loc];
             ATH_MSG_VERBOSE("Add segment "<<print(*segment)<<", seed quality: "
@@ -431,7 +422,7 @@ namespace MuonR4{
             MsTrackSeed newSeed{static_cast<Location>(std::abs(coords[Acts::toUnderlying(eDetSection)])),
                                 static_cast<int>(coords[Acts::toUnderlying(eSector)])};
             /** Using the cube above, let the tree search for all compatible segments */
-            ATH_MSG_ALWAYS("Search for compatible segments to "<<print(*seedCandidate)<<".");
+            ATH_MSG_VERBOSE("Search for compatible segments to "<<print(*seedCandidate)<<".");
             orderedSegs.rangeSearchMapDiscard(selectRange, [&](
                     const SearchTree_t::coordinate_t& /*coords*/,
                     const xAOD::MuonSegment* extendWithMe) {
@@ -469,10 +460,10 @@ namespace MuonR4{
                               + z * Amg::Vector3D::UnitZ();
             
             newSeed.setPosition(std::move(pos));
-            ATH_MSG_ALWAYS("Add new seed "<<newSeed);
+            ATH_MSG_VERBOSE("Add new seed "<<newSeed);
             trackSeeds.emplace_back(std::move(newSeed));
         }
-        ATH_MSG_ALWAYS("Found in total "<<trackSeeds.size()<<" before overlap removal");
+        ATH_MSG_VERBOSE("Found in total "<<trackSeeds.size()<<" before overlap removal");
         return resolveOverlaps(std::move(trackSeeds));
     }
     std::unique_ptr<MsTrackSeedContainer> 
@@ -498,7 +489,7 @@ namespace MuonR4{
                     });
                 /** There is no segment which shares at least one segment with this candidate */
                 if (test_itr == outputSeeds->end()) {
-                    ATH_MSG_ALWAYS("Add new seed "<<testMe);
+                    ATH_MSG_VERBOSE("Add new seed "<<testMe);
                     return true;
                 }
                 /// Take the longer seed

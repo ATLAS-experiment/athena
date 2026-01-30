@@ -2,7 +2,7 @@
   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 #include "eflowRec/eflowTrackExtrapolatorBaseAlgTool.h"
-#include "eflowRec/PFTrackSelector.h"
+#include "PFTrackSelector.h"
 #include "StoreGate/ReadCondHandleKey.h"
 #include "xAODEgamma/ElectronxAODHelpers.h"
 #include "GaudiKernel/SystemOfUnits.h"

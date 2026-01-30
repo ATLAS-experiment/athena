@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //////////////////////////////////////////////////////////
@@ -429,6 +429,8 @@ public :
    TBranch        *b_lardigit_iter_index;   //!
 
    CaloD3PDClass(TTree *tree=0);
+   CaloD3PDClass(const CaloD3PDClass &) = delete;
+   CaloD3PDClass& operator = (const CaloD3PDClass &) = delete;
    virtual ~CaloD3PDClass();
    virtual Int_t    Cut(/*Long64_t entry*/);
    virtual Int_t    GetEntry(Long64_t entry);

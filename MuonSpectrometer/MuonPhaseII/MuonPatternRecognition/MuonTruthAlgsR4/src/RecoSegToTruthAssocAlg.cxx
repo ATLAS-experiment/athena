@@ -31,6 +31,16 @@ namespace MuonR4 {
         ATH_CHECK(m_segPrdLinkKey.initialize());
         ATH_CHECK(m_segTruthSegLinkKey.initialize());
         ATH_CHECK(m_segTruthLinkKey.initialize());
+
+        if (m_measKeys.empty()) {
+            ATH_MSG_FATAL("Please configure the input measurement container.");
+            return StatusCode::FAILURE;
+        }
+        for (const auto& key : m_measKeys){
+            m_prdLinkKeys.emplace_back(key, m_simLink);
+        }
+        ATH_CHECK(m_prdLinkKeys.initialize());
+        ATH_CHECK(m_measKeys.initialize());
         return StatusCode::SUCCESS;
     }
     StatusCode RecoSegToTruthAssocAlg::execute(const EventContext& ctx) const {

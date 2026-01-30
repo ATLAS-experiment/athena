@@ -4,7 +4,7 @@
  **     @author  mark sutton
  **     @date    $Id: AnalysisR3_Tier0.cxx   Thu 18 May 2017 15:35:34 CEST 
  **
- **     Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+ **     Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  **/
 
 
@@ -71,11 +71,8 @@ void AnalysisR3_Tier0::initialise_R3() {
   m_htrkpT  = TIDA::Histogram<float>( monTool(), "reftrk_pT" );
   m_htrkphi = TIDA::Histogram<float>( monTool(), "reftrk_phi" );
   m_htrketa = TIDA::Histogram<float>( monTool(), "reftrk_eta" );
-  if (name().find("LRT")!=std::string::npos || name().find("lrt")!=std::string::npos) { 
-    m_htrkd0  = TIDA::Histogram<float>( monTool(), "reftrk_d0" );
-  } else { 
-    m_htrkd0  = TIDA::Histogram<float>( monTool(), "reftrk_d0" );
-  }      
+  m_htrkd0  = TIDA::Histogram<float>( monTool(), "reftrk_d0" );
+      
   m_htrkz0  = TIDA::Histogram<float>( monTool(), "reftrk_z0" );
 
   /// the error estimates are always positive ...
@@ -97,11 +94,9 @@ void AnalysisR3_Tier0::initialise_R3() {
   m_htrkpT_rec  = TIDA::Histogram<float>( monTool(), "testtrk_pT" );
   m_htrkphi_rec = TIDA::Histogram<float>( monTool(), "testtrk_phi" );
   m_htrketa_rec = TIDA::Histogram<float>( monTool(), "testtrk_eta" );
-  if (name().find("LRT")!=std::string::npos || name().find("lrt")!=std::string::npos) { 
-    m_htrkd0_rec  = TIDA::Histogram<float>( monTool(), "testtrk_d0" );
-  } else { 
-    m_htrkd0_rec  = TIDA::Histogram<float>( monTool(), "testtrk_d0" );
-  }  
+  
+  m_htrkd0_rec  = TIDA::Histogram<float>( monTool(), "testtrk_d0" );
+ 
   m_htrkz0_rec  = TIDA::Histogram<float>( monTool(), "testtrk_z0" );
 
   m_htrkdd0_rec  = TIDA::Histogram<float>( monTool(), "testtrk_dd0" );
@@ -119,14 +114,13 @@ void AnalysisR3_Tier0::initialise_R3() {
   m_hpTeff    = TIDA::Histogram<float>( monTool(),  "Eff_pT" );
   m_hetaeff   = TIDA::Histogram<float>( monTool(),  "Eff_Eta" );
   m_hphieff   = TIDA::Histogram<float>( monTool(),  "Eff_Phi" );
-  if (name().find("LRT")!=std::string::npos || name().find("lrt")!=std::string::npos) { 
-    m_hd0eff    = TIDA::Histogram<float>( monTool(),  "Eff_d0" );
-  } else { 
-    m_hd0eff    = TIDA::Histogram<float>( monTool(),  "Eff_d0" );
-  } 
+  /// different binning for the histograms for the LRT instances now defined
+  /// in the python file 
+  m_hd0eff    = TIDA::Histogram<float>( monTool(),  "Eff_d0" );
   m_hz0eff    = TIDA::Histogram<float>( monTool(),  "Eff_z0" );
   m_hnVtxeff  = TIDA::Histogram<float>( monTool(),  "Eff_nVtx" );
-  
+  m_hntraxeff = TIDA::Histogram<float>( monTool(),  "Eff_ntrax" );
+
   
   m_hlbeff = TIDA::Histogram<float>( monTool(),  "Eff_lb" );
 
@@ -161,19 +155,12 @@ void AnalysisR3_Tier0::initialise_R3() {
   m_hntrtvsphi     = TIDA::Histogram<float>( monTool(), "ntrt_vs_phi" );
   m_hntrtvsphi_rec = TIDA::Histogram<float>( monTool(), "ntrt_vs_phi_rec" );
   
-  if (name().find("LRT")!=std::string::npos || name().find("lrt")!=std::string::npos) {
-    m_hnpixvsd0     = TIDA::Histogram<float>( monTool(), "npix_vs_d0" );
-    m_hnpixvsd0_rec = TIDA::Histogram<float>( monTool(), "npix_vs_d0_rec" );
-    
-    m_hnsctvsd0     = TIDA::Histogram<float>( monTool(), "nsct_vs_d0" );
-    m_hnsctvsd0_rec = TIDA::Histogram<float>( monTool(), "nsct_vs_d0_rec" );
-  } else {
-    m_hnpixvsd0     = TIDA::Histogram<float>( monTool(), "npix_vs_d0" );
-    m_hnpixvsd0_rec = TIDA::Histogram<float>( monTool(), "npix_vs_d0_rec" );
-    
-    m_hnsctvsd0     = TIDA::Histogram<float>( monTool(), "nsct_vs_d0" );
-    m_hnsctvsd0_rec = TIDA::Histogram<float>( monTool(), "nsct_vs_d0_rec" );
-  }  
+  m_hnpixvsd0     = TIDA::Histogram<float>( monTool(), "npix_vs_d0" );
+  m_hnpixvsd0_rec = TIDA::Histogram<float>( monTool(), "npix_vs_d0_rec" );
+  
+  m_hnsctvsd0     = TIDA::Histogram<float>( monTool(), "nsct_vs_d0" );
+  m_hnsctvsd0_rec = TIDA::Histogram<float>( monTool(), "nsct_vs_d0_rec" );
+
   
   m_hnpixvspT     = TIDA::Histogram<float>( monTool(), "npix_vs_pT" );
   m_hnpixvspT_rec = TIDA::Histogram<float>( monTool(), "npix_vs_pT_rec" );
@@ -339,6 +326,8 @@ void AnalysisR3_Tier0::execute(const std::vector<TIDA::Track*>& referenceTracks,
 
     if (tevt) m_hlbeff->Fill( tevt->lumi_block(), eff_weight );
 
+    m_hntraxeff->Fill( referenceTracks.size(), eff_weight );
+    
     m_htrkpT->Fill( std::fabs(referencePT)*0.001 );
     m_htrketa->Fill( referenceEta );
     m_htrkphi->Fill( referencePhi );

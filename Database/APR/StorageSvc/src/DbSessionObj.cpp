@@ -1,8 +1,7 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-// $Id: DbSessionObj.cpp 726071 2016-02-25 09:23:05Z krasznaa $
 //====================================================================
 //  DbSessionObj object implementation
 //--------------------------------------------------------------------
@@ -25,7 +24,8 @@ using namespace pool;
 
 // Standard Constructor
 DbSessionObj::DbSessionObj()
-: Base("DbSession", pool::READ, POOL_StorageType)
+: Base("DbSession", pool::READ, POOL_StorageType),
+  AthMessaging("DbSession")
 {
 }
 
@@ -36,30 +36,27 @@ DbSessionObj::~DbSessionObj()  {
 }
 
 // Open session
-DbStatus DbSessionObj::open()   {
-  DbPrint log( "DbSession");
-  log << DbPrintLvl::Info << "    Open     DbSession    " << DbPrint::endmsg;
-  return Success;
+StatusCode DbSessionObj::open()   {
+  ATH_MSG_INFO( "    Open     DbSession" );
+  return StatusCode::SUCCESS;
 }
 
 // close session
-DbStatus DbSessionObj::close()   {
-  DbPrint log( "DbSession");
-  log << DbPrintLvl::Info << "    Closed   DbSession    " << DbPrint::endmsg;
-  return Success;
+StatusCode DbSessionObj::close()   {
+  ATH_MSG_INFO( "    Closed   DbSession" );
+  return StatusCode::SUCCESS;
 }
 
 // Access different implementations
 IOODatabase* DbSessionObj::db(const DbType& typ) {
-   if( m_dbTypes[typ] == 0 ) {
-      const std::string nam = typ.storageName();
-      IOODatabase* imp = Gaudi::PluginService::Factory<IOODatabase*()>::create(nam).release();
-      if( imp )  {
-         m_dbTypes[typ] = imp;
-      } else {
-         DbPrint log( "DbSession");
-         log << DbPrintLvl::Fatal << "Failed to load plugin for " << nam << " storage type" << DbPrint::endmsg;
-      }
-   }
-   return m_dbTypes[typ] ;
+  if( m_dbTypes[typ] == 0 ) {
+    const std::string nam = typ.storageName();
+    IOODatabase* imp = Gaudi::PluginService::Factory<IOODatabase*()>::create(nam).release();
+    if( imp )  {
+      m_dbTypes[typ] = imp;
+    } else {
+      ATH_MSG_FATAL( "Failed to load plugin for " << nam << " storage type" );
+    }
+  }
+  return m_dbTypes[typ] ;
 }

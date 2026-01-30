@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // MatrixTool.cxx
@@ -59,136 +59,8 @@ namespace Trk {
                          const IInterface* parent)
     : IMatrixTool()
     , AthAlgTool(type,name,parent)
-    , m_alignModuleTool("Trk::AlignModuleTool/AlignModuleTool")
-    , m_bigmatrix(nullptr)
-    , m_bigvector(nullptr)
-    //m_useSparse
-    //m_diagonalize
-    //m_eigenvaluethreshold
-    //m_solveOption
-    //m_modcut
-    //m_minNumHits
-    //m_minNumTrks
-    //m_pullcut
-    //m_eigenvalueStep
-    //m_Align_db_step
-    //m_calDet
-    //m_wSqMatrix
-    //m_writeMat
-    //m_writeMatTxt
-    //m_writeEigenMat
-    //m_writeEigenMatTxt
-    //m_writeModuleNames
-    //m_writeHitmap
-    //m_writeHitmapTxt
-    //m_readHitmaps
-    //m_writeTFile
-    //m_readTFiles
-    //m_runLocal
-    , m_scale(-1.)
-    //m_scaleMatrix
-    //m_softEigenmodeCut
-    //m_removeSpurious
-    //m_calculateFullCovariance
-    //m_pathbin, m_pathtxt, m_prefixName, m_tfileName, m_scalaMatName, m_scalaVecName
-    //m_inputMatrixFiles, m_inputVectorFiles, m_inputHitmapFiles, m_inputTFiles
-    //m_activeIndices
-    , m_aNDoF(0)
-    //m_maxReadErrors
-    //m_AlignIBLbutNotPixel, m_AlignPixelbutNotIBL
-    //m_Remove_Pixel_Tx, m_Remove_Pixel_Ty, m_Remove_Pixel_Tz
-    //m_Remove_Pixel_Rx, m_Remove_Pixel_Ry, m_Remove_Pixel_Rz
-    //m_Remove_IBL_Tx, m_Remove_IBL_Ty, m_Remove_IBL_Tz
-    //m_Remove_IBL_Rx, m_Remove_IBL_Ry, m_Remove_IBL_Rz
   {
     declareInterface<IMatrixTool>(this);
-
-    declareProperty("UseSparse",          m_useSparse       = false);
-    declareProperty("SolveOption",        m_solveOption     = NONE);
-
-    declareProperty("Diagonalize",          m_diagonalize     = true);
-    declareProperty("EigenvalueThreshold",  m_eigenvaluethreshold   = 0.);
-
-    declareProperty("ModCut",             m_modcut        = 0);
-    declareProperty("PullCut",            m_pullcut       = 1.0);
-    declareProperty("EigenvalueStep",     m_eigenvalueStep    = 1e3);
-    declareProperty("AlignCorrDBStep",    m_Align_db_step     = 10);
-    declareProperty("MinNumHitsPerModule",  m_minNumHits      = 0);
-    declareProperty("MinNumTrksPerModule",  m_minNumTrks      = 0);
-    declareProperty("RunLocalMethod",     m_runLocal      = true);
-
-    declareProperty("MatrixDet",          m_calDet          = false);
-    declareProperty("WriteSquareMatrix",  m_wSqMatrix       = false);
-    declareProperty("WriteMat",           m_writeMat        = true);
-    declareProperty("WriteMatTxt",        m_writeMatTxt       = true);
-    declareProperty("WriteEigenMat",      m_writeEigenMat     = true);
-    declareProperty("WriteEigenMatTxt",   m_writeEigenMatTxt    = true);
-    declareProperty("WriteModuleNames",   m_writeModuleNames    = false);
-    
-    declareProperty("WriteTFile",     m_writeTFile      = false);
-    // if True then files will be read from TFiles instead of Binary files
-    declareProperty("ReadTFile",    m_readTFiles      = false);
-      
-
-    std::vector<std::string> defaultMatInput,defaultVecInput,defaultTFile;
-    defaultMatInput.emplace_back("matrix.bin");
-    defaultVecInput.emplace_back("vector.bin");
-    defaultTFile.emplace_back("AlignmentTFile.root");
-
-    declareProperty("InputMatrixFiles",   m_inputMatrixFiles    = defaultMatInput);
-    declareProperty("InputVectorFiles",   m_inputVectorFiles    = defaultVecInput);
-    declareProperty("InputTFiles",        m_inputTFiles     = defaultTFile);
-
-    declareProperty("AlignModuleTool",    m_alignModuleTool);
-
-    declareProperty("PathBinName",        m_pathbin               = "./");
-    declareProperty("PathTxtName",        m_pathtxt               = "./");
-    declareProperty("PrefixName",         m_prefixName            = "");
-    
-    declareProperty("TFileName",          m_tfileName       = "AlignmentTFile.root");
-
-    declareProperty("SoftEigenmodeCut",   m_softEigenmodeCut    = 0.);
-    declareProperty("RemoveSpurious",     m_removeSpurious    = false);
-    declareProperty("CalculateFullCovariance",  m_calculateFullCovariance = true);
-
-    // ScaLapack
-    declareProperty("ScalapackMatrixName",  m_scalaMatName      = "eigenvectors.bin");
-    declareProperty("ScalapackVectorName",  m_scalaVecName      = "eigenvalues.bin");
-
-    declareProperty("ScaleMatrix",        m_scaleMatrix       = false);
-
-    // Hitmap
-    declareProperty("WriteHitmap",        m_writeHitmap       = false);
-    declareProperty("WriteHitmapTxt",     m_writeHitmapTxt    = false);
-    declareProperty("ReadHitmaps",        m_readHitmaps       = false);
-    std::vector<std::string> defaultHitmapInput;
-    defaultMatInput.emplace_back("hitmap.bin");
-    declareProperty("InputHitmapFiles",   m_inputHitmapFiles    = defaultHitmapInput);
-  
-    declareProperty("MaxReadErrors",    m_maxReadErrors     = 10);
-    //To skip IBL or Pixel Alignment
-    declareProperty("AlignIBLbutNotPixel",    m_AlignIBLbutNotPixel = false);
-    declareProperty("AlignPixelbutNotIBL",    m_AlignPixelbutNotIBL = false);
-
-    //To Skip Solving of SCT ECA Last Disk
-    declareProperty("DeactivateSCT_ECA_LastDisk",    m_DeactivateSCT_ECA_LastDisk = false);
-    
-    //By Pixel DoF
-    declareProperty("Remove_Pixel_Tx",    m_Remove_Pixel_Tx = false);
-    declareProperty("Remove_Pixel_Ty",    m_Remove_Pixel_Ty = false);
-    declareProperty("Remove_Pixel_Tz",    m_Remove_Pixel_Tz = false);
-    declareProperty("Remove_Pixel_Rx",    m_Remove_Pixel_Rx = false);
-    declareProperty("Remove_Pixel_Ry",    m_Remove_Pixel_Ry = false);
-    declareProperty("Remove_Pixel_Rz",    m_Remove_Pixel_Rz = false);
-
-    //By IBL DoF
-    declareProperty("Remove_IBL_Tx",    m_Remove_IBL_Tx = false);
-    declareProperty("Remove_IBL_Ty",    m_Remove_IBL_Ty = false);
-    declareProperty("Remove_IBL_Tz",    m_Remove_IBL_Tz = false);
-    declareProperty("Remove_IBL_Rx",    m_Remove_IBL_Rx = false);
-    declareProperty("Remove_IBL_Ry",    m_Remove_IBL_Ry = false);
-    declareProperty("Remove_IBL_Rz",    m_Remove_IBL_Rz = false);
-
   }
 
   //_______________________________________________________________________
@@ -247,12 +119,12 @@ namespace Trk {
     ATH_MSG_INFO(" After Matrix and Vector allocation");
 
     // set paths for matrix and vector output
-    m_bigmatrix->SetPathBin(m_pathbin+m_prefixName);
-    m_bigmatrix->SetPathTxt(m_pathtxt+m_prefixName);
-    m_bigvector->SetPathBin(m_pathbin+m_prefixName);
-    m_bigvector->SetPathTxt(m_pathtxt+m_prefixName);
+    m_bigmatrix->SetPathBin(m_pathbin.value()+m_prefixName);
+    m_bigmatrix->SetPathTxt(m_pathtxt.value()+m_prefixName);
+    m_bigvector->SetPathBin(m_pathbin.value()+m_prefixName);
+    m_bigvector->SetPathTxt(m_pathtxt.value()+m_prefixName);
 
-    ATH_MSG_INFO("set path to "<<m_pathbin+m_prefixName);
+    ATH_MSG_INFO("set path to "<<m_pathbin.value()+m_prefixName.value());
     return StatusCode::SUCCESS;
   }
 
@@ -776,8 +648,8 @@ namespace Trk {
 
       AlVec newVector(nDoF);
       std::map<int,unsigned long long> newModIndexMap;
-      newVector.SetPathBin(m_pathbin+m_prefixName);
-      newVector.SetPathTxt(m_pathtxt+m_prefixName);
+      newVector.SetPathBin(m_pathbin.value()+m_prefixName.value());
+      newVector.SetPathTxt(m_pathtxt.value()+m_prefixName.value());
       double scale=0;
       StatusCode sc = newVector.ReadPartial(m_inputVectorFiles[ivec],scale,newModIndexMap,dummyVersion);
       totalscale += scale;
@@ -1066,8 +938,8 @@ namespace Trk {
       }
       
       AlVec* newVector = new AlVec(nDoF);
-      newVector->SetPathBin(m_pathbin+m_prefixName);
-      newVector->SetPathTxt(m_pathtxt+m_prefixName);
+      newVector->SetPathBin(m_pathbin.value()+m_prefixName.value());
+      newVector->SetPathTxt(m_pathtxt.value()+m_prefixName.value());
       
       if (newVector->size()  != m_bigvector->size() ) {
          msg(MSG::FATAL) << "vector wrong size!  newVector size " << newVector->size()
@@ -1315,7 +1187,7 @@ namespace Trk {
         }
       }
 
-      ATH_MSG_DEBUG("matrix and vector written to: "<<m_pathbin+m_prefixName<<"matrix.bin (.txt) and "<<m_pathbin+m_prefixName<<"vector.bin (.txt)");
+      ATH_MSG_DEBUG("matrix and vector written to: "<<m_pathbin.value()+m_prefixName.value()<<"matrix.bin (.txt) and "<<m_pathbin.value()+m_prefixName.value()<<"vector.bin (.txt)");
     }
 
     //-------------------------------------------------------
@@ -1324,7 +1196,7 @@ namespace Trk {
       writeHitmap();
 
     if(m_writeTFile)
-      storeInTFile(m_pathbin+m_prefixName+m_tfileName);
+      storeInTFile(m_pathbin.value()+m_prefixName.value()+m_tfileName.value());
 
 
     if(!m_runLocal && m_solveOption==0) {
@@ -1978,26 +1850,26 @@ namespace Trk {
       ATH_MSG_INFO("writing the eigenvectors in a matrix: "<< z.nrow() << "x" << z.ncol());
 
       // Set Path for the z matrix (eigenvector matrix)
-      z.SetPathBin(m_pathbin+m_prefixName);
-      z.SetPathTxt(m_pathtxt+m_prefixName);
+      z.SetPathBin(m_pathbin.value()+m_prefixName.value());
+      z.SetPathTxt(m_pathtxt.value()+m_prefixName.value());
 
       ATH_MSG_INFO("writing the eigenvector matrix: "<< m_scalaMatName);
-      ATH_MSG_DEBUG("matrix will be in: "<< m_pathbin+m_prefixName+m_scalaMatName);
+      ATH_MSG_DEBUG("matrix will be in: "<< m_pathbin.value()+m_prefixName.value()+m_scalaMatName.value());
 
-      StatusCode sc = z.Write("eigenvectors.bin",true); // write the eigenvector matrix
+      StatusCode sc = z.Write(m_scalaMatName, true); // write the eigenvector matrix
 
       if (sc!=StatusCode::SUCCESS)
         msg(MSG::ERROR)<<"Problem writing eigenvector matrix"<<endmsg;
 
       // Set Path for the w matrix (eigenvalues matrix - diagonal bigmatrix)
-      w.SetPathBin(m_pathbin+m_prefixName);
-      w.SetPathTxt(m_pathtxt+m_prefixName);
+      w.SetPathBin(m_pathbin.value()+m_prefixName.value());
+      w.SetPathTxt(m_pathtxt.value()+m_prefixName.value());
 
       ATH_MSG_INFO("writing the eigenvectors in a vector: "<< w.size());
       ATH_MSG_INFO("writing the eigenvalues vector (diagonal bigmatrix): "<< m_scalaVecName);
-      ATH_MSG_DEBUG("vector will be in: "<< m_pathbin+m_prefixName+m_scalaVecName);
+      ATH_MSG_DEBUG("vector will be in: "<< m_pathbin.value()+m_prefixName.value()+m_scalaVecName.value());
 
-      sc = w.WriteEigenvalueVec("eigenvalues.bin",true); // write the eigenvalues vecor
+      sc = w.WriteEigenvalueVec(m_scalaVecName, true); // write the eigenvalues vecor
 
       if (sc!=StatusCode::SUCCESS)
         msg(MSG::ERROR)<<"Problem writing eigenvector matrix"<<endmsg;
@@ -2434,8 +2306,8 @@ namespace Trk {
     }
 
     // Set Path for the hitmap matrix
-    hitmap.SetPathBin(m_pathbin+m_prefixName);
-    hitmap.SetPathTxt(m_pathtxt+m_prefixName);
+    hitmap.SetPathBin(m_pathbin.value()+m_prefixName.value());
+    hitmap.SetPathTxt(m_pathtxt.value()+m_prefixName.value());
 
     StatusCode sc = hitmap.Write("hitmap.bin",true); // write the hitmap matrix
 
@@ -2448,7 +2320,7 @@ namespace Trk {
         ATH_MSG_ERROR("Problem writing hitmap matrix to text file");
     }
 
-    ATH_MSG_DEBUG("hitmap written to: "<< m_pathbin+m_prefixName <<"hitmap.bin (.txt)");
+    ATH_MSG_DEBUG("hitmap written to: "<< m_pathbin.value()+m_prefixName.value() <<"hitmap.bin (.txt)");
   }
 
   //________________________________________________________________________

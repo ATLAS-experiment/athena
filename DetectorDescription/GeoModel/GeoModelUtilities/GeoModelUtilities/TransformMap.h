@@ -63,6 +63,8 @@ public:
     void lock();
     /** @brief: Returns a vector of all objects that have been parsed to the map */
     std::vector<const T*> getStoredKeys() const;
+    /** @brief Returns whether the map is locked */
+    bool isLocked() const;
 
 private:
     using ConCurrentMap_t = CxxUtils::ConcurrentToValMap<const T*, std::shared_ptr<const X>, CxxUtils::SimpleUpdater>;

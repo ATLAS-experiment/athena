@@ -281,7 +281,7 @@ StatusCode TileTBStat::execute() {
             if (m_beamFragMap[i].ROBid == ROBfrag.ROBid && m_beamFragMap[i].L1type == ROBfrag.L1type) break;
           }
           if (i==m_beamFragMap.size()) {
-            m_beamFragMap.push_back(ROBfrag);
+            m_beamFragMap.push_back(std::move(ROBfrag));
           }
         }
       }

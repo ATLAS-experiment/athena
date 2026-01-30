@@ -180,8 +180,8 @@ StatusCode JetMatcherAlg::GetTLV(const xAOD::gFexJetRoI* jet, TLorentzVector& tl
 template <typename T>
 StatusCode JetMatcherAlg::jetMatching(SG::ReadHandle<DataVector<T>> jets1,
 				SG::ReadHandle<xAOD::JetContainer> jets2,
-				SG::WriteDecorHandleKey<DataVector<T>> matchedHandleKey,
-				std::vector<std::reference_wrapper<SG::WriteDecorHandleKey<DataVector<T>>>> varHandleKeys,
+				const SG::WriteDecorHandleKey<DataVector<T>>& matchedHandleKey,
+				const std::vector<std::reference_wrapper<SG::WriteDecorHandleKey<DataVector<T>>>>& varHandleKeys,
 				const EventContext& ctx) const{
 
   SG::WriteDecorHandle<DataVector<T>, double> ptDiffHandle(varHandleKeys[0].get(), ctx);
@@ -281,7 +281,7 @@ StatusCode JetMatcherAlg::execute(const EventContext& ctx) const {
       ATH_MSG_ERROR("evtStore() does not contain jet Collection with name "<< m_jetContainerKey1);
       return StatusCode::FAILURE;
     }
-    return jetMatching(jets1, jets2, m_matchedKey, m_jetVarHandleKeys, ctx);
+    return jetMatching(std::move(jets1), std::move(jets2), m_matchedKey, m_jetVarHandleKeys, ctx);
 
   } else if(m_matchType == MatchType::JetRoI) { // perform jet matching for L1 JetRoI container
     SG::ReadHandle<xAOD::JetRoIContainer> jets1(m_l1jetContainerKey1, ctx);
@@ -289,7 +289,7 @@ StatusCode JetMatcherAlg::execute(const EventContext& ctx) const {
       ATH_MSG_ERROR("evtStore() does not contain L1 jet Collection with name "<< m_l1jetContainerKey1);
       return StatusCode::FAILURE;
     }
-    return jetMatching(jets1, jets2, m_l1matchedKey, m_l1JetVarHandleKeys, ctx);
+    return jetMatching(std::move(jets1), std::move(jets2), m_l1matchedKey, m_l1JetVarHandleKeys, ctx);
 
   } else if (m_matchType == MatchType::jFexSRJetRoI) { // perform jet matching for L1 jFexSRJetRoI container
     SG::ReadHandle<xAOD::jFexSRJetRoIContainer> jets1(m_jFexSRJetRoIKey, ctx);
@@ -297,7 +297,7 @@ StatusCode JetMatcherAlg::execute(const EventContext& ctx) const {
       ATH_MSG_ERROR("evtStore() does not contain L1 jet Collection with name "<< m_jFexSRJetRoIKey);
       return StatusCode::FAILURE;
     } 
-    return jetMatching(jets1, jets2, m_l1jFexSRmatchedKey, m_l1jFexSRJetVarHandleKeys, ctx);
+    return jetMatching(std::move(jets1), std::move(jets2), m_l1jFexSRmatchedKey, m_l1jFexSRJetVarHandleKeys, ctx);
 
     
   } else if (m_matchType == MatchType::jFexLRJetRoI) { // perform jet matching for L1 jFexLRJetRoI container
@@ -306,7 +306,7 @@ StatusCode JetMatcherAlg::execute(const EventContext& ctx) const {
       ATH_MSG_ERROR("evtStore() does not contain L1 jet Collection with name "<< m_jFexSRJetRoIKey);
       return StatusCode::FAILURE;
     } 
-    return jetMatching(jets1, jets2, m_l1jFexLRmatchedKey, m_l1jFexLRJetVarHandleKeys, ctx);
+    return jetMatching(std::move(jets1), std::move(jets2), m_l1jFexLRmatchedKey, m_l1jFexLRJetVarHandleKeys, ctx);
     
   } else if (m_matchType == MatchType::gFexJetRoI) { // perform jet matching for L1 gFexJetRoI container
     SG::ReadHandle<xAOD::gFexJetRoIContainer> jets1(m_gFexJetRoIKey, ctx);

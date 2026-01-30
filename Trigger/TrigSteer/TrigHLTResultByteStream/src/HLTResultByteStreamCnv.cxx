@@ -1,7 +1,7 @@
 // -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "HLTResultByteStreamCnv.h"
@@ -152,6 +152,7 @@ StatusCode HLT::HLTResultByteStreamCnv::createObj(IOpaqueAddress* pAddr, DataObj
   ByteStreamAddress *pBS_Addr = dynamic_cast<ByteStreamAddress*>(pAddr);
   if(pBS_Addr==nullptr) {
     (*m_log) << MSG::ERROR << " Can not cast to ByteStreamAddress " << endmsg ;
+    delete result;
     return StatusCode::FAILURE;
   }
 

@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # @file PyUtils.scripts.cmt_newanalysisalg
 # @purpose streamline and ease the creation of new athena algs
@@ -7,7 +7,6 @@
 
 #Note - this code could use a serious rewrite, I just hacked it together to get something working
 
-__version__ = "$Revision: 795362 $"
 __author__ = "Will Buttinger"
 __doc__ = "streamline and ease the creation of new AthAnalysisAlgorithm"
 
@@ -18,28 +17,6 @@ import subprocess
 import PyUtils.acmdlib as acmdlib
 
 class Templates:
-    jobo_template = """\
-#Skeleton joboption for a simple analysis job
-
-#---- Minimal job options -----
-
-jps.AthenaCommonFlags.AccessMode = "ClassAccess"              #Choose from TreeAccess,BranchAccess,ClassAccess,AthenaAccess,POOLAccess
-#jps.AthenaCommonFlags.TreeName = "MyTree"                    #when using TreeAccess, must specify the input tree name
-
-jps.AthenaCommonFlags.HistOutputs = ["MYSTREAM:myfile.root"]  #register output files like this. MYSTREAM is used in the code
-
-athAlgSeq += CfgMgr.%(klass)s()                               #adds an instance of your alg to the main alg sequence
-
-
-#---- Options you could specify on command line -----
-#jps.AthenaCommonFlags.EvtMax=-1                          #set on command-line with: --evtMax=-1
-#jps.AthenaCommonFlags.SkipEvents=0                       #set on command-line with: --skipEvents=0
-#jps.AthenaCommonFlags.FilesInput = ["%(inFile)s"]        #set on command-line with: --filesInput=...
-
-
-include("AthAnalysisBaseComps/SuppressLogging.py")              #Optional include to suppress as much athena output as possible. Keep at bottom of joboptions so that it doesn't suppress the logging of the things you have configured above
-
-"""
 
     script_template = """\
 #!/usr/bin/env python
@@ -253,19 +230,6 @@ StatusCode %(klass)s::beginInputFile() {
 
 %(namespace_end)s
 """
-    testxml_template = """\
-   <TEST name="%(namespace_klass)s" type="athena" suite="ASGTests">
-      <options_atn>%(pkg)s/%(namespace_klass)sJobOptions.py</options_atn>
-      <timelimit>5</timelimit>
-      <author> PLEASE ENTER A NAME </author>
-      <mailto> PLEASEENTER@cern.ch </mailto>
-      <expectations>
-         <errorMessage> Athena exited abnormally </errorMessage>
-         <errorMessage>FAILURE (ERROR)</errorMessage>
-         <returnValue>0</returnValue>
-      </expectations>
-   </TEST>
-"""
 
 
 ### functions -----------------------------------------------------------------
@@ -275,12 +239,6 @@ StatusCode %(klass)s::beginInputFile() {
 @acmdlib.argument(
     'algname',
     help="name of the new alg"
-    )
-@acmdlib.argument(
-    '--newJobo',
-    action='store_true',
-    default=False,
-    help='Create a skeleton joboption for execution of the new algorithm'
     )
 
 def main(args):
@@ -404,34 +362,13 @@ DECLARE_COMPONENT( %(klass)s )
               else:
                   f.write("""  DECLARE_COMPONENT( %(klass)s );"""%d)
    
-   
-    if args.newJobo:
-      #make the joboptions file too
-      full_jobo_name = namespace_klass + "JobOptions"
-      full_script_name = "run" + namespace_klass
-      full_alg_name = namespace_klass
-   
-      print(textwrap.dedent("""\
-      ::: create jobo [%(full_jobo_name)s] and script [%(full_script_name)s] for alg [%(full_alg_name)s]""" %locals()))
-   
-      #following code borrowed from gen_klass
-      jobo = Templates.jobo_template
-   
-      e = dict( klass=full_alg_name,
-               inFile=os.environ['ASG_TEST_FILE_MC'],
-               )
-      fname = 'share/%s.py' % full_jobo_name
-      #first check doesn't exist 
-      if os.path.isfile(fname):
-         print(":::  WARNING %s already exists .. will not overwrite" % fname)
-      else:
-         o_hdr = open(fname, 'w')
-         o_hdr.writelines(jobo%e)
-         o_hdr.flush()
-         o_hdr.close()
 
-    scripto = Templates.script_template
-
+    full_script_name = "run" + namespace_klass
+    full_alg_name = namespace_klass
+   
+    print(textwrap.dedent("""\
+    ::: create script [%(full_script_name)s] for alg [%(full_alg_name)s]""" %locals()))
+   
     e = dict( klass=full_alg_name,
               inFile=os.environ['ASG_TEST_FILE_MC'],
               )
@@ -441,7 +378,7 @@ DECLARE_COMPONENT( %(klass)s )
         print(":::  WARNING %s already exists .. will not overwrite" % fname)
     else:
         o_hdr = open(fname, 'w')
-        o_hdr.writelines(scripto%e)
+        o_hdr.writelines(Templates.script_template % e)
         o_hdr.flush()
         o_hdr.close()
         os.chmod(fname, 0o755)

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <fstream>
@@ -62,9 +62,9 @@ namespace HLTTest {
 	  object.push_back( std::make_pair( trim ( keyval[0] ), std::stof(keyval[1]) ) );	
 	}
 	if ( object.size() != 0 ) 
-	  event.push_back(object);
+	  event.push_back(std::move(object));
       }
-      m_data.push_back(event);
+      m_data.push_back(std::move(event));
     }
     ATH_MSG_DEBUG( "Loaded " << m_data.size() << " pseudo events" );
     if ( m_data.size() == 0 ) {

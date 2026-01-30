@@ -1,13 +1,9 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
-useComponentAccumulator = False
 isAthena = False
 
 try:
-    # If we are in an Athena release configuread with ComponentAccumulator
-    # then use the dedicated CA implementation
-    from AthenaConfiguration.ComponentFactory import isComponentAccumulatorCfg
-    useComponentAccumulator = isComponentAccumulatorCfg()
+    from AthenaConfiguration.ComponentFactory import CompFactory
     isAthena = True
 except ImportError:
     pass
@@ -27,15 +23,11 @@ def createComponent( typeName, instanceName, componentType ):
 
     """
 
-    global isAthena
-    global useComponentAccumulator
-
     if isAthena:
         # Try to get a configurable for this C++ class "from Athena".
         # If this succeeds, we're obviously in an Athena environment.
 
         # Look up the Athena configurable of this component:
-        from AthenaConfiguration.ComponentFactory import CompFactory
         componentClass = CompFactory.getComp(typeName)
 
         # Return the object:
@@ -95,28 +87,9 @@ def createPublicTool( typeName, toolName ):
                   the algorithm. Also the instance name of the tool.
     """
 
-    global isAthena
-    global useComponentAccumulator
-
     if isAthena:
         # Look up the Athena configurable of this tool:
-        from AthenaConfiguration.ComponentFactory import CompFactory
-        toolClass = CompFactory.getComp( typeName )
-
-        if useComponentAccumulator:
-            # ComponentAccumulator will add the tool to ToolSvc
-            # Avoid importing AthenaCommon.AppMgr in a CA Athena job
-            # as it modifies Gaudi behaviour
-            return toolClass( toolName )
-        else:
-            # Add an instance of the tool to the ToolSvc:
-            from AthenaCommon.AppMgr import ToolSvc
-            if not hasattr( ToolSvc, toolName ):
-                ToolSvc += toolClass( toolName )
-                pass
-
-            # Return the member on the ToolSvc:
-            return getattr( ToolSvc, toolName )
+        return CompFactory.getComp( typeName )( toolName )
 
     else:
         # If that didn't work, then apparently we're in an EventLoop
@@ -143,29 +116,9 @@ def createService( typeName, serviceName, sequence=None ):
 
     """
 
-    global isAthena
-    global useComponentAccumulator
-
     if isAthena:
-
-        # Look up the Athena configurable of this tool:
-        from AthenaConfiguration.ComponentFactory import CompFactory
-        serviceClass = CompFactory.getComp( typeName )
-
-        if useComponentAccumulator:
-            # ComponentAccumulator will add the tool to ToolSvc
-            # Avoid importing AthenaCommon.AppMgr in a CA Athena job
-            # as it modifies Gaudi behaviour
-            return serviceClass( serviceName )
-        else:
-            # Add an instance of the service to the ServiceMgr:
-            from AthenaCommon.AppMgr import ServiceMgr
-            if not hasattr( ServiceMgr, serviceName ):
-                ServiceMgr += serviceClass( serviceName )
-                pass
-
-            # Return the member on the ServiceMgr:
-            return getattr( ServiceMgr, serviceName )
+        # Look up the Athena configurable of this serivce:
+        return CompFactory.getComp( typeName )( serviceName )
 
     else:
         # If that didn't work, then apparently we're in an EventLoop
@@ -192,8 +145,6 @@ def addPrivateTool( alg, toolName, typeName ):
       typeName -- The C++ type name of the private tool
     """
 
-    global isAthena
-
     if isAthena:
 
         # First try to set up the private tool in an "Athena way".
@@ -209,8 +160,7 @@ def addPrivateTool( alg, toolName, typeName ):
             pass
 
         # Now look up the Athena configurable describing this tool:
-        from AthenaConfiguration.ComponentFactory import CompFactory
-        toolClass = CompFactory.getComp(typeName) 
+        toolClass = CompFactory.getComp(typeName)
 
         # Finally, set up the tool handle property:
         setattr( component, toolNames[ -1 ], toolClass( toolNames[ -1 ] ) )
@@ -243,8 +193,6 @@ def addPrivateToolInArray( alg, toolName, typeName ):
 
     """
 
-    global isAthena
-
     if isAthena:
 
         # First try to set up the private tool in an "Athena way".
@@ -260,7 +208,6 @@ def addPrivateToolInArray( alg, toolName, typeName ):
             pass
 
         # Now look up the Athena configurable describing this tool:
-        from AthenaConfiguration.ComponentFactory import CompFactory
         toolClass = CompFactory.getComp(typeName)
 
         # Finally, set up the tool handle property:

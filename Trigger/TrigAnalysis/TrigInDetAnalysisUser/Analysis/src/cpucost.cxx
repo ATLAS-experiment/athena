@@ -4,7 +4,7 @@
  **     @author  ben sowden
  **     @date    Mon 04 Aug 2014 10:45:00 BST
  **
- **     Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+ **     Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
  **/
 
 // cppcheck-suppress-file stlIfStrFind; cannot use C++20 starts_with in this standalone code
@@ -230,9 +230,9 @@ int main(int argc, char** argv) {
           return -2;
         }
       }
-      else if ( frefname=="" ) frefname = arg;
+      else if ( frefname=="" ) frefname = std::move(arg);
       else {
-        algorithms.push_back(arg);
+        algorithms.push_back(std::move(arg));
       }
     }
   }
@@ -403,7 +403,7 @@ int main(int argc, char** argv) {
 
       //      std::cout << "\n\nfound histname " << histname << std::endl;
 
-      std::string refhistname = histname;
+      std::string refhistname = std::move(histname);
 
 
       TH1F* refhist = (TH1F*)fref->Get(refhistname.c_str());
@@ -549,7 +549,7 @@ int main(int argc, char** argv) {
 
       plots.Draw( legend, true );
 
-      std::string dirtitle = dirname;
+      std::string dirtitle = std::move(dirname);
       if ( dirtitle.find("HLT_")==0 && dirtitle.find("__")!=std::string::npos ) dirtitle.erase( dirtitle.find("__"), dirtitle.size() ); 
 
       if ( show_directory ) DrawLabel( x1+0.02, y2+0.02, dirtitle, kBlack, legend.TextSize(), legend.TextFont() );

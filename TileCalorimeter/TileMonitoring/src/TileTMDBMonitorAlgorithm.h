@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TILEMONITORING_TILETMDBMONITORALGORITHM_H
@@ -16,7 +16,6 @@
 #include "StoreGate/ReadHandleKey.h"
 #include "StoreGate/ReadCondHandleKey.h"
 
-#include "TileTMDBMonitorAlgorithm.h"
 #include "TileIdentifier/TileHWID.h"
 #include "StoreGate/ReadHandle.h"
 #include "StoreGate/ReadCondHandle.h"

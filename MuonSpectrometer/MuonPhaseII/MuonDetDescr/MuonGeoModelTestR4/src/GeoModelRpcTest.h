@@ -9,6 +9,7 @@
 #include <StoreGate/ReadHandleKey.h>
 #include <MuonIdHelpers/IMuonIdHelperSvc.h>
 #include <ActsGeometryInterfaces/GeometryContext.h>
+#include <MuonRecToolInterfacesR4/IRootVisualizationService.h>
 #include <MuonTesterTree/MuonTesterTree.h>
 #include <MuonTesterTree/IdentifierBranch.h>
 #include <MuonTesterTree/ThreeVectorBranch.h>
@@ -31,6 +32,18 @@ class GeoModelRpcTest : public AthHistogramAlgorithm{
         unsigned int cardinality() const override final { return 1; }
 
     private:
+      /** @brief Draw the strips in the panel on a Canvas. The active gasgap
+       *         is drawn as a black hollow box. The contained strips are 
+       *         hatched red & blue rectangles.
+       *  @param ctx: EventContext needed to fetch a canvas from the 
+       *              visualization service.
+       *  @param design: Pointer to the strip design held by the readout element.
+       *  @param detId: Identifier of the associated readout element
+       *  @param measPhi: Flag indicating whether this is an eta or phi panel */
+      void visualizeStripPanel(const EventContext& ctx,
+                               const StripDesignPtr& design,
+                               const Identifier& detId,
+                               const bool measPhi) const;
       ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "IdHelperSvc", 
                                                 "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
 
@@ -68,7 +81,12 @@ class GeoModelRpcTest : public AthHistogramAlgorithm{
       MuonVal::ScalarBranch<float>& m_stripEtaWidth{m_tree.newScalar<float>("stripEtaWidth")};
       MuonVal::ScalarBranch<float>& m_stripPhiWidth{m_tree.newScalar<float>("stripPhiWidth")};
       MuonVal::ScalarBranch<float>& m_stripEtaLength{m_tree.newScalar<float>("stripEtaLength")};
-      MuonVal::ScalarBranch<float>& m_stripPhiLength{m_tree.newScalar<float>("stripPhiLength")};    
+      MuonVal::ScalarBranch<float>& m_stripPhiLength{m_tree.newScalar<float>("stripPhiLength")}; 
+      /// Box dimension
+      MuonVal::ScalarBranch<float>& m_envelopeHeight{m_tree.newScalar<float>("envelopeHeight")}; 
+      MuonVal::ScalarBranch<float>& m_envelopeWidth{m_tree.newScalar<float>("envelopeWidth")}; 
+      MuonVal::ScalarBranch<float>& m_envelopeLength{m_tree.newScalar<float>("envelopeLength")}; 
+         
       /// Number of eta & phi gas gaps
       
       MuonVal::ScalarBranch<uint8_t>& m_numRpcLayers{m_tree.newScalar<uint8_t>("numRpcLayers")};      
@@ -91,6 +109,13 @@ class GeoModelRpcTest : public AthHistogramAlgorithm{
       MuonVal::VectorBranch<uint8_t>& m_stripPosGasGap{m_tree.newVector<uint8_t>("stripPosGasGap")};
       MuonVal::VectorBranch<uint8_t>& m_stripPosNum{m_tree.newVector<uint8_t>("stripPosNum")};
       MuonVal::VectorBranch<uint8_t>& m_stripDblPhi{m_tree.newVector<uint8_t>("stripPosDoubletPhi")};
+
+      /** @brief Service handle of the visualization service */
+      ServiceHandle<MuonValR4::IRootVisualizationService> m_visualSvc{this, "VisualSvc", "MuonValR4::RootVisualizationService"};
+      /** @brief Token to be presented to the visualization service  */
+      MuonValR4::IRootVisualizationService::ClientToken m_clientToken{};
+      /** @brief Flag toggling whether the strip planes shall be printed */
+      Gaudi::Property<bool> m_visualStrips{this, "visualizePlanes", true};
   
 };
 }

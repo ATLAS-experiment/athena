@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef BOOSTEDJETSTAGGERS_SMOOTHEDWZTAGGER_H_
@@ -27,20 +27,27 @@ class SmoothedWZTagger :
       /// Flag to indicate if Ntrk is used
       bool m_useNtrk{};
 
+      /// Flag to indicate if a ML score is used
+      bool m_useScore{};
+
       /// Store functional form of cuts
       std::string m_strD2Cut;
       std::string m_strNtrkCut;
+      std::string m_strScoreCut;
 
       /// Functions that are configurable for specific cut values
       std::unique_ptr<TF1> m_funcD2Cut;
       std::unique_ptr<TF1> m_funcNtrkCut;
+      std::unique_ptr<TF1> m_funcScoreCut;
 
       /// WriteDecorHandle keys
       SG::WriteDecorHandleKey<xAOD::JetContainer> m_decPassD2Key{this, "PassD2Name", "PassD2", "SG key for PassD2"};
       SG::WriteDecorHandleKey<xAOD::JetContainer> m_decPassNtrkKey{this, "PassNtrkName", "PassNtrk", "SG key for PassNtrk"};
+      SG::WriteDecorHandleKey<xAOD::JetContainer> m_decPassScoreKey{this, "PassScoreName", "PassScore", "SG key for PassScore"};
 
       SG::WriteDecorHandleKey<xAOD::JetContainer> m_decCutD2Key{this, "CutD2Name", "Cut_D2", "SG key for Cut_D2"};
       SG::WriteDecorHandleKey<xAOD::JetContainer> m_decCutNtrkKey{this, "CutNtrkName", "Cut_Ntrk", "SG key for Cut_Ntrk"};
+      SG::WriteDecorHandleKey<xAOD::JetContainer> m_decCutScoreKey{this, "CutScoreName", "Cut_Score", "SG key for Cut_Score"};
       SG::WriteDecorHandleKey<xAOD::JetContainer> m_decAcceptKey{this, "acceptName", "accept", "SG key for accept"};
 
 

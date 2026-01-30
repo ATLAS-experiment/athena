@@ -28,14 +28,14 @@ namespace DerivationFramework {
   class HIGlobalAugmentationTool : public extends<AthAlgTool, IAugmentationTool> {
 
   public:
-    HIGlobalAugmentationTool(const std::string& t, const std::string& n, const IInterface* p);
-    ~HIGlobalAugmentationTool();
+
+    using base_class::base_class;
 
     // Athena algtool's Hooks
-    StatusCode  initialize();
-    StatusCode  finalize();
+    virtual StatusCode  initialize() override final;
+    virtual StatusCode  finalize() override final;
 
-    virtual StatusCode addBranches(const EventContext& ctx) const;
+    virtual StatusCode addBranches(const EventContext& ctx) const override final;
 
   private:
     Gaudi::Property<int> m_nHarmonic{this, "nHarmonic", 1, "Flow harmonic starting from v2"};

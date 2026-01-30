@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrkNeuralNetworkUtils/TTrainedNetwork.h"
@@ -184,7 +184,7 @@ std::vector<TTrainedNetwork::Input> TTrainedNetwork::getInputs() const {
     }
     the_input.offset = m_input_node_offset.at(input_n); 
     the_input.scale = m_input_node_scale.at(input_n);
-    inputs_vector.push_back(the_input); 
+    inputs_vector.push_back(std::move(the_input)); 
   }
   return inputs_vector; 
 }
@@ -351,7 +351,7 @@ TTrainedNetwork::calculateOutputValues(const std::vector<Double_t>& input)
     TTN::Buffer_t target=tmp_array[(nTargetLayers-1)];
     const double sumLastLayer = 
       std::accumulate(&target[0], &target[nTarget], 0.0 );
-    const double normFact = sumLastLayer ? 1.0/sumLastLayer : 0.0;
+    const double normFact = (sumLastLayer!=0.) ? 1.0/sumLastLayer : 0.0;
     for (unsigned i = 0; i < nTarget; ++i)
       norm_target[i] = normFact * target[i];
     // copy the half buffer to the front of the full buffer

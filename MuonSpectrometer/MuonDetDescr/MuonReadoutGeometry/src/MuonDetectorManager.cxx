@@ -156,17 +156,6 @@ namespace MuonGM {
             return nullptr;
     }
 
-    const std::vector<const MuonStation*> MuonDetectorManager::getMuonStations() const { 
-
-        std::vector<const MuonStation*> stationList;
-        stationList.reserve(m_MuonStationMap.size());
-        for (const auto & [name,ptr]: m_MuonStationMap){
-            stationList.push_back(ptr.get());
-        }    
-        return stationList;
-    } 
-
-
     void MuonDetectorManager::addRpcReadoutElement(std::unique_ptr<RpcReadoutElement>&& x) {
         const Identifier id = x->identify();        
         int idx = rpcIdentToArrayIdx(id);
@@ -604,6 +593,10 @@ namespace MuonGM {
     
     void MuonDetectorManager::setNswAsBuilt(const NswAsBuiltDbData* nswAsBuiltData) {
         m_nswAsBuilt = nswAsBuiltData;
+    }
+
+    void MuonDetectorManager::setMmAsBuilt2(const sTGCAsBuiltData* mmAsBuilt2) {
+        m_mmAsBuilt2 = mmAsBuilt2;
     }
 
     void MuonDetectorManager::setsTGCAsBuilt(const sTGCAsBuiltData* stgcAsBuilt) {

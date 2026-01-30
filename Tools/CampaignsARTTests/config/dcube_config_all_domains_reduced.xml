@@ -1295,81 +1295,28 @@
     </TDirectory>
    </TDirectory>
    <TDirectory name="BTag">
-    <!--
-    <TDirectory name="ROC_EMTopo">
-     <graph name="rejVsEff_BTag_AntiKt4EMTopoJets_tagger_IP3D_b_matched_weight" type="TGraphErrors" plotopts="logy" tests="KS"/>
-     <graph name="rejVsEff_BTag_AntiKt4EMTopoJets_tagger_IP3D_b_matched_weight_ctag" type="TGraphErrors" plotopts="logy" tests="KS"/>
-     <graph name="rejVsEff_BTag_AntiKt4EMTopoJets_tagger_SV1_b_matched_weight" type="TGraphErrors" plotopts="logy" tests="KS"/>
-     <graph name="rejVsEff_BTag_AntiKt4EMTopoJets_tagger_SV1_b_matched_weight_ctag" type="TGraphErrors" plotopts="logy" tests="KS"/>
-     <graph name="rejVsEff_BTag_AntiKt4EMTopoJets_tagger_DL1dv00_b_matched_weight" type="TGraphErrors" plotopts="logy" tests="KS"/>
-     <graph name="rejVsEff_BTag_AntiKt4EMTopoJets_tagger_DL1dv00_b_matched_weight_ctag" type="TGraphErrors" plotopts="logy" tests="KS"/>
-     <graph name="rejVsEff_BTag_AntiKt4EMTopoJets_tagger_GN1_b_matched_weight" type="TGraphErrors" plotopts="logy" tests="KS"/>
-     <graph name="rejVsEff_BTag_AntiKt4EMTopoJets_tagger_GN1_b_matched_weight_ctag" type="TGraphErrors" plotopts="logy" tests="KS"/>
-    </TDirectory>
-    -->
     <TDirectory name="AntiKt4EMTopoJets">
-     <TDirectory name="other_histograms">
-      <TDirectory name="histos">
-       <hist1D name="BTag_AntiKt4EMTopoJets_global_nTracks" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMTopoJets_global_nPrimVtx" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMTopoJets_global_nTracksPrimVtx" type="TH1F" plotopts="" tests="KS"/>
-      </TDirectory>
-     </TDirectory>
-     <TDirectory name="jet">
-      <TDirectory name="jet">
-       <hist1D name="BTag_AntiKt4EMTopoJets_jet_nJets" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMTopoJets_jet_jet_pt_ttbar" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMTopoJets_jet_jet_eta" type="TH1F" plotopts="" tests="KS"/>
-      </TDirectory>
-     </TDirectory>
-     <TDirectory name="tracks">
-      <TDirectory name="_incl">
-       <hist1D name="BTag_AntiKt4EMTopoJets_tracks_sigd0_incl" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMTopoJets_tracks_sigz0_incl" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMTopoJets_tracks_nBLHits_incl" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMTopoJets_tracks_nsharedBLHits_incl" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMTopoJets_tracks_nsplitBLHits_incl" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMTopoJets_tracks_nSCTHits_incl" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMTopoJets_tracks_nSCTHoles_incl" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMTopoJets_tracks_nsharedSCTHits_incl" type="TH1F" plotopts="" tests="KS"/>
-      </TDirectory>
-     </TDirectory>
-     <TDirectory name="SV">
-      <TDirectory name="_incl">
-       <hist1D name="BTag_AntiKt4EMTopoJets_SV_SV1_masssvx_incl" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMTopoJets_SV_SV1_efracsvx_incl" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMTopoJets_SV_SV1_Lxy_incl" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMTopoJets_SV_JetFitter_mass_incl" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMTopoJets_SV_JetFitter_energyFraction_incl" type="TH1F" plotopts="" tests="KS"/>
-      </TDirectory>
-     </TDirectory>
-     <TDirectory name="tagger_IP3D">
-      <TDirectory name="other">
-       <hist1D name="BTag_AntiKt4EMTopoJets_tagger_IP3D_pb" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMTopoJets_tagger_IP3D_pc" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMTopoJets_tagger_IP3D_pu" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMTopoJets_tagger_IP3D_NTracks_incl" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMTopoJets_tagger_IP3D_gradeOfTracks_incl" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMTopoJets_tagger_IP3D_valD0wrtPVofTracks" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMTopoJets_tagger_IP3D_valZ0wrtPVofTracks" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMTopoJets_tagger_IP3D_sigD0wrtPVofTracks" type="TH1F" plotopts="" tests="KS"/>
-      </TDirectory>
-     </TDirectory>
-     <TDirectory name="tagger_GN2v01">
-      <TDirectory name="other">
-       <hist1D name="BTag_AntiKt4EMTopoJets_tagger_GN2v01_pb" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMTopoJets_tagger_GN2v01_pc" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMTopoJets_tagger_GN2v01_pu" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMTopoJets_tagger_GN2v01_ptau" type="TH1F" plotopts="" tests="KS"/>
-      </TDirectory>
-     </TDirectory>
-     <TDirectory name="tagger_SV1">
-      <TDirectory name="other">
-       <hist1D name="BTag_AntiKt4EMTopoJets_tagger_SV1_pb" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMTopoJets_tagger_SV1_pc" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMTopoJets_tagger_SV1_pu" type="TH1F" plotopts="" tests="KS"/>
-      </TDirectory>
-     </TDirectory>
+     <hist1D name="BTag_AntiKt4EMTopoJets_global_nTracks" type="TH1F" plotopts="" tests="KS"/>
+     <hist1D name="BTag_AntiKt4EMTopoJets_global_nPrimVtx" type="TH1F" plotopts="" tests="KS"/>
+     <hist1D name="BTag_AntiKt4EMTopoJets_global_nTracksPrimVtx" type="TH1F" plotopts="" tests="KS"/>
+     <hist1D name="BTag_AntiKt4EMTopoJets_jet_nJets" type="TH1F" plotopts="" tests="KS"/>
+     <hist1D name="BTag_AntiKt4EMTopoJets_jet_jet_pt_ttbar" type="TH1F" plotopts="" tests="KS"/>
+     <hist1D name="BTag_AntiKt4EMTopoJets_jet_jet_eta" type="TH1F" plotopts="" tests="KS"/>
+     <hist1D name="BTag_AntiKt4EMTopoJets_tracks_sigd0_incl" type="TH1F" plotopts="" tests="KS"/>
+     <hist1D name="BTag_AntiKt4EMTopoJets_tracks_sigz0_incl" type="TH1F" plotopts="" tests="KS"/>
+     <hist1D name="BTag_AntiKt4EMTopoJets_tracks_nBLHits_incl" type="TH1F" plotopts="" tests="KS"/>
+     <hist1D name="BTag_AntiKt4EMTopoJets_tracks_nsharedBLHits_incl" type="TH1F" plotopts="" tests="KS"/>
+     <hist1D name="BTag_AntiKt4EMTopoJets_tracks_nsplitBLHits_incl" type="TH1F" plotopts="" tests="KS"/>
+     <hist1D name="BTag_AntiKt4EMTopoJets_tracks_nSCTHits_incl" type="TH1F" plotopts="" tests="KS"/>
+     <hist1D name="BTag_AntiKt4EMTopoJets_tracks_nSCTHoles_incl" type="TH1F" plotopts="" tests="KS"/>
+     <hist1D name="BTag_AntiKt4EMTopoJets_tracks_nsharedSCTHits_incl" type="TH1F" plotopts="" tests="KS"/>
+     <hist1D name="BTag_AntiKt4EMTopoJets_SV_SV1_masssvx_incl" type="TH1F" plotopts="" tests="KS"/>
+     <hist1D name="BTag_AntiKt4EMTopoJets_SV_SV1_efracsvx_incl" type="TH1F" plotopts="" tests="KS"/>
+     <hist1D name="BTag_AntiKt4EMTopoJets_SV_SV1_Lxy_incl" type="TH1F" plotopts="" tests="KS"/>
+     <hist1D name="BTag_AntiKt4EMTopoJets_tagger_GN2v01_pb" type="TH1F" plotopts="" tests="KS"/>
+     <hist1D name="BTag_AntiKt4EMTopoJets_tagger_GN2v01_pc" type="TH1F" plotopts="" tests="KS"/>
+     <hist1D name="BTag_AntiKt4EMTopoJets_tagger_GN2v01_pu" type="TH1F" plotopts="" tests="KS"/>
+     <hist1D name="BTag_AntiKt4EMTopoJets_tagger_GN2v01_ptau" type="TH1F" plotopts="" tests="KS"/>
     </TDirectory>
    </TDirectory>
   </TDirectory>

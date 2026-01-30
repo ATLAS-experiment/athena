@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // AthMessaging.cxx 
@@ -39,7 +39,10 @@ void AthMessaging::setLevel (MSG::Level lvl)
 void AthMessaging::initMessaging() const
 {
   m_imsg = Athena::getMessageSvc();
-  m_lvl = m_imsg ?
-    static_cast<MSG::Level>( m_imsg.load()->outputLevel(m_nm) ) :
-    MSG::INFO;
+  // If user did not set an explicit level, set a default
+  if (m_lvl == MSG::NIL) {
+    m_lvl = m_imsg ?
+      static_cast<MSG::Level>( m_imsg.load()->outputLevel(m_nm) ) :
+      MSG::INFO;
+  }
 }

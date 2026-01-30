@@ -31,9 +31,9 @@
 #include "AthenaKernel/IDataShare.h"
 
 // Pool
-#include "CollectionBase/ICollectionCursor.h"
-#include "CollectionBase/CollectionRowBuffer.h"
-#include "CollectionBase/TokenList.h"
+#include "CollectionSvc/ICollectionCursor.h"
+#include "CollectionSvc/CollectionRowBuffer.h"
+#include "CollectionSvc/TokenList.h"
 #include "StorageSvc/DbType.h"
 
 #include <boost/tokenizer.hpp>
@@ -128,11 +128,6 @@ StatusCode EventSelectorAthenaPool::initialize() {
       }
       if( !skip_ranges_str.empty() )
          ATH_MSG_DEBUG("Events to skip: " << skip_ranges_str);
-   }
-   // CollectionType must be one of:
-   if (m_collectionType.value() != "RootCollection" && m_collectionType.value() != "ImplicitCollection") {
-      ATH_MSG_FATAL("EventSelector.CollectionType must be one of: RootCollection, ImplicitCollection (default)");
-      return StatusCode::FAILURE;
    }
    // Get IncidentSvc
    ATH_CHECK(m_incidentSvc.retrieve());
@@ -438,7 +433,7 @@ StatusCode EventSelectorAthenaPool::next(IEvtSelector::Context& ctxt) const {
       std::unique_ptr<AthenaAttributeList> athAttrList(new AthenaAttributeList());
       athAttrList->extend("eventRef", "string");
       (*athAttrList)["eventRef"].data<std::string>() = std::string((char*)tokenStr);
-      SG::WriteHandle<AthenaAttributeList> wh(m_attrListKey.value(), eventStore()->name());
+      SG::WriteHandle<AthenaAttributeList> wh(m_attrListKey, eventStore()->name());
       if (!wh.record(std::move(athAttrList)).isSuccess()) {
          delete [] (char*)tokenStr; tokenStr = nullptr;
          ATH_MSG_ERROR("Cannot record AttributeList to StoreGate " << StoreID::storeName(eventStore()->storeID()));
@@ -705,7 +700,7 @@ StatusCode EventSelectorAthenaPool::rewind(IEvtSelector::Context& ctxt) const {
 StatusCode EventSelectorAthenaPool::createAddress(const IEvtSelector::Context& /*ctxt*/,
 		IOpaqueAddress*& iop) const {
    std::string tokenStr;
-   SG::ReadHandle<AthenaAttributeList> attrList(m_attrListKey.value(), eventStore()->name());
+   SG::ReadHandle<AthenaAttributeList> attrList(m_attrListKey, eventStore()->name());
    if (attrList.isValid()) {
       try {
          tokenStr = (*attrList)["eventRef"].data<std::string>();
@@ -715,7 +710,7 @@ StatusCode EventSelectorAthenaPool::createAddress(const IEvtSelector::Context& /
          return StatusCode::FAILURE;
       }
    } else {
-      ATH_MSG_WARNING("Cannot find AthenaAttribute, key = " << m_attrListKey.value());
+      ATH_MSG_WARNING("Cannot find AthenaAttribute, key = " << m_attrListKey);
       tokenStr = m_headerIterator->eventRef().toString();
    }
    auto token = std::make_unique<Token>();
@@ -763,7 +758,7 @@ StatusCode EventSelectorAthenaPool::seek(Context& /*ctxt*/, int evtNum) const {
          // Reset input collection iterator to the right place
          m_inputCollectionsIterator = m_inputCollectionsProp.value().begin();
          m_inputCollectionsIterator += m_curCollection;
-         m_poolCollectionConverter = std::make_unique<PoolCollectionConverter>(m_collectionType.value() + ":" + m_collectionTree.value(),
+         m_poolCollectionConverter = std::make_unique<PoolCollectionConverter>(m_collectionType.value(),
 	         m_inputCollectionsProp.value()[m_curCollection],
 	         IPoolSvc::kInputStream,
 	         m_athenaPoolCnvSvc->getPoolSvc());
@@ -806,7 +801,7 @@ int EventSelectorAthenaPool::curEvent (const Context& /*ctxt*/) const {
 int EventSelectorAthenaPool::findEvent(int evtNum) const {
    for (std::size_t i = 0, imax = m_numEvt.size(); i < imax; i++) {
       if (m_numEvt[i] == -1) {
-         PoolCollectionConverter pcc(m_collectionType.value() + ":" + m_collectionTree.value(),
+         PoolCollectionConverter pcc(m_collectionType.value(),
 	         m_inputCollectionsProp.value()[i],
 	         IPoolSvc::kInputStream,
 	         m_athenaPoolCnvSvc->getPoolSvc());
@@ -973,7 +968,7 @@ EventSelectorAthenaPool::getCollectionCnv(bool throwIncidents) const {
          m_firstEvt[m_curCollection] = m_evtCount;
       }
       ATH_MSG_DEBUG("Try item: \"" << *m_inputCollectionsIterator << "\" from the collection list.");
-      auto pCollCnv = std::make_unique<PoolCollectionConverter>(m_collectionType.value() + ":" + m_collectionTree.value(),
+      auto pCollCnv = std::make_unique<PoolCollectionConverter>(m_collectionType.value(),
 	      *m_inputCollectionsIterator,
 	      IPoolSvc::kInputStream,
 	      m_athenaPoolCnvSvc->getPoolSvc());
@@ -1018,7 +1013,7 @@ StatusCode EventSelectorAthenaPool::recordAttributeList() const {
    // Fill the new attribute list
    ATH_CHECK(fillAttributeList(athAttrList.get(), "", false));
    // Write the AttributeList
-   SG::WriteHandle<AthenaAttributeList> wh(m_attrListKey.value(), eventStore()->name());
+   SG::WriteHandle<AthenaAttributeList> wh(m_attrListKey, eventStore()->name());
    ATH_CHECK(wh.record(std::move(athAttrList)));
    return StatusCode::SUCCESS;
 }

@@ -17,6 +17,7 @@
 #include "TClass.h"
 
 #include <cmath>
+#include <format>
 
 #ifndef XAOD_ANALYSIS
 #include "GaudiKernel/SystemOfUnits.h"
@@ -63,7 +64,7 @@ StatusCode egammaMVACalibTool::initialize()
     ATH_MSG_FATAL("Unsupported shift: " << m_shiftType);
     return StatusCode::FAILURE;
   }
-
+  
   // get the BDTs and initialize functions
   ATH_MSG_DEBUG("get BDTs in folder: " << m_folder);
   switch (m_particleType) {
@@ -91,6 +92,15 @@ StatusCode egammaMVACalibTool::initialize()
                          PathResolverFindCalibFile(m_folder + "/MVACalib_convertedPhoton.weights.root")));
     }
     break;
+  case xAOD::EgammaParameters::forwardelectron:
+    {
+      std::unique_ptr<egammaMVAFunctions::funcMap_t> funcLibraryPtr =
+        egammaMVAFunctions::initializeForwardElectronFuncs(m_useLayerCorrected);
+      ATH_CHECK(setupBDT(*funcLibraryPtr,
+                         PathResolverFindCalibFile("egammaMVACalib/MVACalib_fwdelectron.weights.root")));
+    }
+    break;
+    
   default:
     ATH_MSG_FATAL("Particle type not set properly: " << m_particleType);
     return StatusCode::FAILURE;
@@ -195,6 +205,8 @@ StatusCode egammaMVACalibTool::setupBDT(const egammaMVAFunctions::funcMap_t& fun
     while ((str2 = (TObjString*) nextVar()))
     {
       const TString& varName = getString(str2);
+      if (varName.Contains("npv") || varName.Contains("actualIntPerXing"))
+	continue;
       if (!varName.Length()) {
         ATH_MSG_FATAL("There was an empty variable name!");
         return StatusCode::FAILURE;
@@ -228,15 +240,18 @@ const TString& egammaMVACalibTool::getString(TObject* obj)
 }
 
 float egammaMVACalibTool::getEnergy(const xAOD::CaloCluster& clus,
-                                    const xAOD::Egamma* eg) const
+                                    const xAOD::Egamma* eg,
+				    const egammaMVACalib::GlobalEventInfo& gei) const
 {
 
-  ATH_MSG_DEBUG("calling getEnergy with cluster index (" << clus.index());
+  ATH_MSG_DEBUG("calling getEnergy with cluster index " << clus.index());
 
   // find the bin of BDT and the shift
-  const auto initEnergy = (m_useLayerCorrected ?
-                           egammaMVAFunctions::compute_correctedcl_Eacc(clus) :
-                           egammaMVAFunctions::compute_rawcl_Eacc(clus));
+  const auto initEnergy =
+    m_particleType == xAOD::EgammaParameters::forwardelectron ?
+    float(clus.e()) : (m_useLayerCorrected ?
+		egammaMVAFunctions::compute_correctedcl_Eacc(clus) :
+		egammaMVAFunctions::compute_rawcl_Eacc(clus));
 
   const auto etVarGeV = (initEnergy / std::cosh(clus.eta())) / GeV;
   const auto etaVar = std::abs(clus.eta());
@@ -265,6 +280,7 @@ float egammaMVACalibTool::getEnergy(const xAOD::CaloCluster& clus,
     return clus.e();
   }
 
+
   // select the bdt and functions. (shifts are done later if needed)
   // if there is only one BDT just use that
   const int bin_BDT = m_BDTs.size() != 1 ? bin : 0;
@@ -278,10 +294,18 @@ float egammaMVACalibTool::getEnergy(const xAOD::CaloCluster& clus,
 
   for (size_t i = 0; i < sz; ++i) {
     vars[i] = funcs[i](eg, &clus);
+    ATH_MSG_DEBUG("Variable " << i << " = " << std::format("{:10.4f}", vars[i]));
+  }
+  
+  // Retrieve nPV and mu in case of forward electron;
+  // they are the last two variables in the input vars
+  if (m_particleType == xAOD::EgammaParameters::forwardelectron) {
+    vars.insert(vars.end(),{float(gei.nPV), gei.acmu});
   }
 
   // evaluate the BDT response
   const float mvaOutput = bdt.GetResponse(vars);
+  ATH_MSG_DEBUG("BDT response = " << std::format("{:10.6f}", mvaOutput));
 
   // what to do if the MVA response is 0;
   if (mvaOutput == 0.) {
@@ -295,7 +319,7 @@ float egammaMVACalibTool::getEnergy(const xAOD::CaloCluster& clus,
   const auto energy = (m_calibrationType == fullCalibration) ?
     mvaOutput : (initEnergy * mvaOutput);
 
-  ATH_MSG_DEBUG("energy after MVA = " << energy);
+  ATH_MSG_DEBUG("energy after MVA = " << std::format("{:.3f}", energy));
 
   if (m_shiftType == NOSHIFT) {
     // if no shift, just return the unshifted energy
@@ -309,6 +333,7 @@ float egammaMVACalibTool::getEnergy(const xAOD::CaloCluster& clus,
   const auto shift = m_shifts[bin].Eval(etGeV);
   ATH_MSG_DEBUG("shift = " << shift);
   if (shift > 0.5) {
+    ATH_MSG_DEBUG("energy after MVA and shift = " << std::format("{:.3f}", energy/shift));
     return energy / shift;
   }
     ATH_MSG_WARNING("Shift value too small: " << shift << "; not applying shift");

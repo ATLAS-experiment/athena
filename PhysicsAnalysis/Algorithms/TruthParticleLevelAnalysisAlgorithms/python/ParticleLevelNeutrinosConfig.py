@@ -9,10 +9,10 @@ class ParticleLevelNeutrinosBlock(ConfigBlock):
     def __init__(self):
         super(ParticleLevelNeutrinosBlock, self).__init__()
         self.addOption('containerName', 'TruthNeutrinos', type=str,
-                       info='the name of the input truth neutrinos container')
+                       info='the name of the input truth neutrinos container.')
         self.addOption('selectionName', '', type=str,
-                       info='the name of the selection to create. The default is "",'
-                       ' which applies the selection to all truth neutrinos.')
+                       info='the name of the selection to create. If left empty, '
+                       'applies the selection to all truth neutrinos.')
         self.addOption('isolated', True, type=bool,
                        info='select only truth neutrinos that are isolated.')
         self.addOption('notFromTau', True, type=bool,
@@ -51,10 +51,10 @@ class ParticleLevelNeutrinosBlock(ConfigBlock):
         # output branches to be scheduled only once
         if ParticleLevelNeutrinosBlock.get_instance_count() == 1 or 'pt' not in config.getOutputVars(self.containerName):
             outputVars = [
-                ['pt', 'pt'],
-                ['eta', 'eta'],
-                ['phi', 'phi'],
-                ['e', 'e'],
+                ['pt', 'pt', 'float'],
+                ['eta', 'eta', 'float'],
+                ['phi', 'phi', 'float'],
+                ['e', 'e', 'float'],
             ]
-            for decoration, branch in outputVars:
-                config.addOutputVar (self.containerName, decoration, branch, noSys=True)
+            for decoration, branch, auxType in outputVars:
+                config.addOutputVar (self.containerName, decoration, branch, noSys=True, auxType=auxType)

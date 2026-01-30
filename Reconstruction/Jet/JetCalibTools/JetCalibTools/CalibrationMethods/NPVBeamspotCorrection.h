@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
  /*
@@ -17,6 +17,7 @@
 #include <TMath.h>
 #include <TGraph.h>
 #include <vector>
+#include <memory>
 
 class NPVBeamspotCorrection {
 
@@ -33,15 +34,15 @@ class NPVBeamspotCorrection {
   void error(TString msg) 
   { printf("\nERROR - NPVBeamspotCorrection:\n\n  %s\n\n",msg.Data()); abort(); }
 
-  TGraph* NVtx_NReconstructible_bs66mm();
-  TGraph* NVtx_NReconstructible_bs47mm();
+  std::unique_ptr<TGraph> NVtx_NReconstructible_bs66mm();
+  std::unique_ptr<TGraph> NVtx_NReconstructible_bs47mm();
 
   //Graph which will be filled with expected number of reconstructed vertices for beamspot length = 66mm
-  TGraph *m_g_nvtx_nreco_bs66mm; 
+  std::unique_ptr<TGraph> m_g_nvtx_nreco_bs66mm; 
   //Graph which will be filled with expected number of reconstructed vertices for beamspot length = 47mm
-  TGraph *m_g_nvtx_nreco_bs47mm;
+  std::unique_ptr<TGraph> m_g_nvtx_nreco_bs47mm;
 
-  TGraph *m_invGraph;
+  std::unique_ptr<TGraph> m_invGraph;
 
   double m_NPVmin, m_NPVmax;
 

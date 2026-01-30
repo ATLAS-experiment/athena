@@ -273,15 +273,6 @@ public:
     virtual void        set_do_neighbours   (bool do_neighbours) override;
     //@}
 
-    /// @name setting pointer to the MessageService
-    //@{
-    virtual void setMessageSvc  (IMessageSvc* msgSvc) override;
-    //@}
-
-    /// Set flag for suppressing informational output.
-    void set_quiet (bool quiet);
-
-
 protected:
 
     friend class AtlasDetectorIDHelper;
@@ -365,13 +356,6 @@ protected:
     /// neighbour initialization
     bool        m_do_neighbours{true};
 
-    /// pointer to the message service
-    IMessageSvc*        m_msgSvc{};
-
-    /// If true, suppress DEBUG/INFO messages.
-    bool m_quiet{};
-
-
     /// List of dictionary names used by this helper
     std::vector<std::string>  m_dict_names;
 
@@ -433,14 +417,14 @@ private:
     Range::field        m_lvl1_onl_field;
     Range::field        m_lar_dm_field;
     Range::field        m_tile_dm_field;
-    IdDictDictionary*   m_atlas_dict{};
-    IdDictDictionary*   m_indet_dict{};
-    IdDictDictionary*   m_lar_dict{};
-    IdDictDictionary*   m_tile_dict{};
-    IdDictDictionary*   m_muon_dict{};
-    IdDictDictionary*   m_calo_dict{};
-    IdDictDictionary*   m_fwd_dict{};
-    AtlasDetectorIDHelper*    m_helper{};
+    const IdDictDictionary*   m_atlas_dict{};
+    const IdDictDictionary*   m_indet_dict{};
+    const IdDictDictionary*   m_lar_dict{};
+    const IdDictDictionary*   m_tile_dict{};
+    const IdDictDictionary*   m_muon_dict{};
+    const IdDictDictionary*   m_calo_dict{};
+    const IdDictDictionary*   m_fwd_dict{};
+    AtlasDetectorIDHelper* m_helper{};
     IdDictFieldImplementation m_det_impl;
     IdDictFieldImplementation m_indet_part_impl;
     IdDictFieldImplementation m_calo_side_impl;
@@ -475,132 +459,6 @@ private:
 //using the macros below we can assign an identifier (and a version)
 //This is required and checked at compile time when you try to record/retrieve
 CLASS_DEF(AtlasDetectorID, 164875623, 1)
-
-inline ExpandedIdentifier
-AtlasDetectorID::indet_exp           (void) const
-{
-    ExpandedIdentifier result;
-    return (result << m_INDET_ID);
-}
-
-inline ExpandedIdentifier
-AtlasDetectorID::lar_exp             (void) const
-{
-    ExpandedIdentifier result;
-    return (result << m_LAR_ID);
-}
-
-inline ExpandedIdentifier
-AtlasDetectorID::tile_exp            (void) const
-{
-    ExpandedIdentifier result;
-    return (result << m_TILE_ID);
-}
-
-inline ExpandedIdentifier
-AtlasDetectorID::muon_exp            (void) const
-{
-    ExpandedIdentifier result;
-    return (result << m_MUON_ID);
-}
-
-inline ExpandedIdentifier
-AtlasDetectorID::calo_exp(void) const
-{
-    ExpandedIdentifier result;
-    return (result << m_CALO_ID);
-}
-
-inline ExpandedIdentifier
-AtlasDetectorID::fwd_exp             (void) const
-{
-    ExpandedIdentifier result;
-    return (result << m_FWD_ID);
-}
-
-inline ExpandedIdentifier
-AtlasDetectorID::pixel_exp           (void) const
-{
-    ExpandedIdentifier result(indet_exp());
-    return (result << m_PIXEL_ID);
-}
-
-inline ExpandedIdentifier
-AtlasDetectorID::sct_exp             (void) const
-{
-    ExpandedIdentifier result(indet_exp());
-    return (result << m_SCT_ID);
-}
-
-inline ExpandedIdentifier
-AtlasDetectorID::trt_exp             (void) const
-{
-    ExpandedIdentifier result(indet_exp());
-    return (result << m_TRT_ID);
-}
-
-inline ExpandedIdentifier
-AtlasDetectorID::hgtd_exp           (void) const
-{
-    ExpandedIdentifier result(indet_exp());
-    return (result << m_HGTD_ID);
-}
-
-inline ExpandedIdentifier
-AtlasDetectorID::lumi_exp           (void) const
-{
-    ExpandedIdentifier result(indet_exp());
-    return (result << m_LUMI_ID);
-}
-
-inline ExpandedIdentifier
-AtlasDetectorID::lar_em_exp          (void) const
-{
-    ExpandedIdentifier result(lar_exp());
-    return (result << m_LAR_EM_ID);
-}
-
-inline ExpandedIdentifier
-AtlasDetectorID::lar_hec_exp         (void) const
-{
-    ExpandedIdentifier result(lar_exp());
-    return (result << m_LAR_HEC_ID);
-}
-
-inline ExpandedIdentifier
-AtlasDetectorID::lar_fcal_exp        (void) const
-{
-    ExpandedIdentifier result(lar_exp());
-    return (result << m_LAR_FCAL_ID);
-}
-
-inline ExpandedIdentifier
-AtlasDetectorID::alfa_exp             (void) const
-{
-    ExpandedIdentifier result(fwd_exp());
-    return (result << m_ALFA_ID);
-}
-
-inline ExpandedIdentifier
-AtlasDetectorID::bcm_exp             (void) const
-{
-    ExpandedIdentifier result(fwd_exp());
-    return (result << m_BCM_ID);
-}
-
-inline ExpandedIdentifier
-AtlasDetectorID::lucid_exp           (void) const
-{
-    ExpandedIdentifier result(fwd_exp());
-    return (result << m_LUCID_ID);
-}
-
-inline ExpandedIdentifier
-AtlasDetectorID::zdc_exp             (void) const
-{
-    ExpandedIdentifier result(fwd_exp());
-    return (result << m_ZDC_ID);
-}
 
 inline int
 AtlasDetectorID::indet_field_value        () const {return (m_INDET_ID);}

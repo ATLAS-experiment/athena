@@ -289,10 +289,9 @@ def fastFlavourTaggingCfg( flags, inputJets, inputVertex, inputTracks, isPFlow=F
 
 def OnlineBeamspotAugmenterCfg(flags,pfx='online'):
     ca = ComponentAccumulator()
-
     ca.merge(BeamSpotCondAlgCfg(flags))
     decnames = {
-        f'{n}Key':n.replace('beam',f'EventInfo.{pfx}Beam')
+        f'{n}Key':n.replace('beam',f'{pfx}Beam')
         for n in [
             'beamPosX','beamPosY','beamPosZ',
             'beamPosSigmaX','beamPosSigmaY','beamPosSigmaZ','beamPosSigmaXY',
@@ -300,11 +299,9 @@ def OnlineBeamspotAugmenterCfg(flags,pfx='online'):
             'beamStatus'
             ]
     }
-    ca.addEventAlgo(CompFactory.xAODMaker.EventInfoBeamSpotDecoratorAlg(
-        'EventInfoOnlineBeamSpotDecorator',
-        **decnames
-        )
-    )
+    from xAODEventInfoCnv.xAODEventInfoCnvConfig import EventInfoBeamSpotDecoratorAlgCfg
+    ca.merge(EventInfoBeamSpotDecoratorAlgCfg(flags, name='EventInfoOnlineBeamSpotDecorator',
+        **decnames))
 
     return ca
 

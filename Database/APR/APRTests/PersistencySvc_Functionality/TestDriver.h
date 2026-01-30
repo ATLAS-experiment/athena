@@ -37,6 +37,7 @@ namespace pool {
     std::string           m_fileName1;
     std::string           m_fileName2;
     int                   m_events;
+    int                   m_eventsToCommitAndHold;
     std::vector< Token* >                     m_tokens;
     std::vector< SimpleTestClass >            m_simpleTestClass;
     std::vector< TestClassPrimitives >        m_testClassPrimitives;

@@ -36,24 +36,11 @@ public:
 
 private:
     
-  Gaudi::Property<bool> m_addCalibrationResultVariables{this, "addCalibrationResultVariables", false};
   Gaudi::Property<std::string> m_calFileName{this, "WeightFileName", ""};
   Gaudi::Property<bool> m_useMvaResolution{this, "useMvaResolution", false};  
 
-  struct Variables
-  {
-    double pt_constituent{0.0};
-    double pt_tauRecCalibrated{0.0};
-    double pt_weighted{0.0};
-    double weight{-1111.0};
-    double sigma_compatibility{-1111.};
-    double sigma_tauRec{-1111.0};
-    double sigma_constituent{-1111.0};
-    double corrcoeff{-1111.0};
-  };
-
   /** Get the weighted four momentum of calo TES and PanTau */
-  TLorentzVector getCombinedP4(const xAOD::TauJet& tau, Variables& variables) const;
+  TLorentzVector getCombinedP4(const xAOD::TauJet& tau) const;
 
   /** Whether the tau candidate is valid for the calculation */
   bool isValid(const xAOD::TauJet& tau) const;
@@ -90,8 +77,7 @@ private:
 
   /** Get the combined Et of calo TES and PanTau */
   double getCombinedEt(double caloEt, double et_substructure,
-		       xAOD::TauJetParameters::DecayMode decayMode, float eta,
-                       Variables& variables) const;
+		       xAOD::TauJetParameters::DecayMode decayMode, float eta) const;
   
   /** Get the allowed difference between calo TES and PanTau */ 
   double getNsigmaCompatibility(double caloEt, int decayModeIndex) const;

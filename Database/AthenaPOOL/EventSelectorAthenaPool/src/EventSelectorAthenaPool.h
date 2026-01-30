@@ -169,7 +169,6 @@ private: // internal member functions
 private: // data
    EventContextAthenaPool*         m_endIter{};
 
-
    mutable std::unique_ptr<PoolCollectionConverter> m_poolCollectionConverter ATLAS_THREAD_SAFE {};
    mutable pool::ICollectionCursor* m_headerIterator ATLAS_THREAD_SAFE {};
    mutable Guid m_guid ATLAS_THREAD_SAFE {};
@@ -185,13 +184,9 @@ private: // properties
    Gaudi::Property<bool> m_processMetadata{this, "ProcessMetadata", true, ""};
    /// CollectionType, type of the collection: default = "ImplicitCollection".
    Gaudi::Property<std::string> m_collectionType{this, "CollectionType", "ImplicitCollection", ""};
-   /// CollectionTree, prefix of the collection TTree: default = "POOLContainer".
-   Gaudi::Property<std::string> m_collectionTree{this, "CollectionTree", APRDefaults::TTreeNames::DataHeader, ""};
-   /// Connection, connection string.
-   // TODO: check if really not used anywhere
-   Gaudi::Property<std::string> m_connection{this, "Connection", "", ""};
+
    /// AttributeList SG key
-   Gaudi::Property<std::string> m_attrListKey{this, "AttributeListKey", "Input", ""};
+   std::string m_attrListKey{"Input"};
 
    /// InputCollections, vector with names of the input collections.
    Gaudi::Property<std::vector<std::string>> m_inputCollectionsProp{this, "InputCollections", {}, ""};
@@ -209,7 +204,7 @@ private: // properties
    ToolHandle<IAthenaSelectorTool> m_counterTool{this, "CounterTool", "", ""};
    ToolHandle<IAthenaIPCTool> m_eventStreamingTool{this, "SharedMemoryTool", "", ""};
    /// Make this instance a Streaming Client during first iteration automatically
-   Gaudi::Property<int> m_makeStreamingToolClient{this,"MakeStreamingToolClient",0};
+   Gaudi::Property<int> m_makeStreamingToolClient{this, "MakeStreamingToolClient",0};
 
    /// The following are included for compatibility with McEventSelector and are not really used.
    /// However runNo, oldRunNo and overrideRunNumberFromInput are used to reset run number for

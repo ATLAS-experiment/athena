@@ -31,6 +31,8 @@ atlas_add_library( BoostedJetTaggersLib
   Root/JSSWTopTaggerANN.cxx
   Root/SmoothedWZTagger.cxx
   Root/SmoothedTopTagger.cxx
+  Root/qgTagger.cxx
+  Root/LundJetOnnxAlg.cxx
    PUBLIC_HEADERS BoostedJetTaggers
    INCLUDE_DIRS ${ROOT_INCLUDE_DIRS} ${LWTNN_INCLUDE_DIRS}
    LINK_LIBRARIES ${ROOT_LIBRARIES} ${FASTJET_LIBRARIES}
@@ -39,12 +41,18 @@ atlas_add_library( BoostedJetTaggersLib
    xAODBase xAODJet xAODTruth xAODTracking JetInterface JetRecLib JetEDM JetSelectorToolsLib JetCalibToolsLib  JetUncertaintiesLib ParticleJetToolsLib PathResolver
    MuonSelectorToolsLib MuonMomentumCorrectionsLib PATCoreLib PATInterfaces FlavorTagDiscriminants
    JetAnalysisInterfacesLib InDetTrackSelectionToolLib InDetTrackSystematicsToolsLib 
+   JetToolHelpersLib
    MuonAnalysisInterfacesLib  TruthUtils ${extra_libs} 
    PRIVATE_LINK_LIBRARIES JetEDM )
 
-if( NOT XAOD_STANDALONE )
+if( XAOD_STANDALONE )
    atlas_add_component( BoostedJetTaggers
       src/components/*.cxx
+      LINK_LIBRARIES BoostedJetTaggersLib JetCalibToolsLib)
+else()
+   atlas_add_component( BoostedJetTaggers
+      src/components/*.cxx
+      src/*.cxx
       LINK_LIBRARIES BoostedJetTaggersLib JetCalibToolsLib)
 endif()
 
@@ -52,7 +60,9 @@ atlas_add_dictionary( BoostedJetTaggersDict
    BoostedJetTaggers/BoostedJetTaggersDict.h
    BoostedJetTaggers/selection.xml 
    LINK_LIBRARIES BoostedJetTaggersLib )
-   
+
+atlas_install_python_modules( python/*.py )
+
 # Executable(s) in the package:
 if( XAOD_STANDALONE )
    atlas_add_executable( test_SmoothedWZTagger
@@ -98,4 +108,3 @@ if( XAOD_STANDALONE )
       BoostedJetTaggersLib
    )
 endif()
-

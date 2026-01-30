@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -13,7 +13,6 @@
 ISF::ParticleUserInformation::ParticleUserInformation() 
   : m_process(0)
   , m_generation(0)
-  , m_matInfo(nullptr)
 {
 }
 
@@ -28,7 +27,7 @@ bool ISF::ParticleUserInformation::operator==(const ISF::ParticleUserInformation
     if (m_matInfo && rhsMatPtr) {
       pass &= *m_matInfo == *rhsMatPtr;
     } else {
-      pass &= m_matInfo == rhsMatPtr; // must be both nullptr to pass
+      pass &= m_matInfo.get() == rhsMatPtr; // must be both nullptr to pass
     }
   }
   return pass;

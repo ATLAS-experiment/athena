@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 #====================================================================
 # DAOD_JETM7.py
 #====================================================================
@@ -11,16 +11,11 @@ from AthenaConfiguration.Enums import MetadataCategory
 # Main algorithm config
 def JETM7SkimmingToolCfg(flags):
     """Configure the skimming tool"""
-    acc = ComponentAccumulator()
-
-
     jetSelection = '(count(AntiKt4EMPFlowJets.pt > 10.*GeV && abs(AntiKt4EMPFlowJets.eta) < 2.5) >= 1)'
-    JETM7OfflineSkimmingTool = CompFactory.DerivationFramework.xAODStringSkimmingTool(name       = "JETM7OfflineSkimmingTool1",
-                                                                                        expression = jetSelection)
-
-    acc.addPublicTool(JETM7OfflineSkimmingTool, primary=True)
-
-    return(acc)
+    from DerivationFrameworkTools.DerivationFrameworkToolsConfig import (
+        xAODStringSkimmingToolCfg)
+    return xAODStringSkimmingToolCfg(flags, name = "JETM7OfflineSkimmingTool1",
+                                     expression = jetSelection)
 
 # Main algorithm config
 def JETM7KernelCfg(flags, name='JETM7Kernel', **kwargs):

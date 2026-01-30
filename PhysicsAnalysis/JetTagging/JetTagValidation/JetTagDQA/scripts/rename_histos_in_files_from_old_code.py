@@ -1,12 +1,10 @@
-###
-# Copyright (C) 2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 #
 # stand-alone script to rename histograms in FTag NTUP_PHYSVAL files produced before ~ April 2021 to the new scheme
 # author: judith.hoefer@cern.ch
 # Mar 2021
 ###
 
-import os
 import ROOT
 
 # run this on the unmerged files
@@ -20,11 +18,8 @@ production_process = 'ttbar'
 
 verbose = False
 
-jet_collections = [ 'AntiKt2PV0TrackJets',
-                    'AntiKt4EMPFlowJets',
-                    'AntiKt4EMTopoJets',
-                    'AntiKt4PV0TrackJets',
-                    'AntiKtVR30Rmax4Rmin02TrackJets']
+jet_collections = [ 'AntiKt4EMPFlowJets',
+                    'AntiKt4EMTopoJets']
 
 ## don't change here
 
@@ -202,9 +197,6 @@ def get_name_associations(list):
     if "AntiKt4EMPFlowJets" in new_name:
       new_name = new_name.replace("AntiKt4EMPFlowJets", "AntiKt4EMPFlowJets_")
 
-    if "AntiKtVR30Rmax4Rmin02TrackJets" in new_name:
-      new_name = new_name.replace("AntiKtVR30Rmax4Rmin02TrackJets", "AntiKtVR30Rmax4Rmin02TrackJets_")
-
     for key in oneToOne_associations:
       if key in new_name:
         new_name = new_name.replace(key, oneToOne_associations[key])
@@ -237,7 +229,7 @@ def get_name_associations(list):
 name_list = []
 for jet_col in jet_collections:
   for var_name in var_name_list:
-    if jet_col == "AntiKt4EMPFlowJets" or jet_col == "AntiKtVR30Rmax4Rmin02TrackJets":
+    if jet_col == "AntiKt4EMPFlowJets":
       name_list.append("BTag_" + jet_col + var_name)
     else:
       name_list.append("BTag_" + jet_col + "_" + var_name)

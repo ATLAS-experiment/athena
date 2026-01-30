@@ -51,7 +51,7 @@ StatusCode FPGATrackSimLLPDoubletHoughTransformTool::finalize() {
     return StatusCode::SUCCESS;
 }
 
-StatusCode FPGATrackSimLLPDoubletHoughTransformTool::getRoads(const std::vector<std::shared_ptr<const FPGATrackSimHit>> & hits, std::vector<std::shared_ptr<const FPGATrackSimRoad>> & roads) {
+StatusCode FPGATrackSimLLPDoubletHoughTransformTool::getRoads(const std::vector<std::shared_ptr<const FPGATrackSimHit>> & hits, std::vector<FPGATrackSimRoad> & roads) {
     roads.clear();
     m_roads.clear();
     m_eventsProcessed++;
@@ -84,8 +84,7 @@ StatusCode FPGATrackSimLLPDoubletHoughTransformTool::getRoads(const std::vector<
             }
         }
     }
-    roads.reserve(m_roads.size());
-    for (FPGATrackSimRoad & r : m_roads) roads.emplace_back(std::make_shared<const FPGATrackSimRoad>(r));
+    roads = std::move(m_roads);
     m_event++;
     return StatusCode::SUCCESS;   
 }

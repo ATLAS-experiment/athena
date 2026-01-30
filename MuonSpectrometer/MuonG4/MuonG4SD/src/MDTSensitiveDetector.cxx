@@ -4,7 +4,9 @@
 
 #include "MDTSensitiveDetector.h"
 #include "MuonSimEvent/MdtHitIdHelper.h"
+#include "MCTruth/AtlasG4EventUserInfo.h"
 #include "MCTruth/TrackHelper.h"
+#include "G4Exception.hh"
 #include "G4Geantino.hh"
 #include "G4ChargedGeantino.hh"
 #include "MuonIdHelpers/MdtIdHelper.h"
@@ -21,7 +23,7 @@ namespace {
 // construction/destruction
 MDTSensitiveDetector::MDTSensitiveDetector(const std::string& name, const std::string& hitCollectionName, const unsigned int nTubesMax)
   : G4VSensitiveDetector( name )
-  , m_MDTHitColl( hitCollectionName )
+  , m_hitCollectionName( hitCollectionName )
   , m_driftRadius(0.)
   , m_globalTime(0.)
   , m_DEFAULT_TUBE_RADIUS( std::numeric_limits<double>::max() )
@@ -32,11 +34,21 @@ MDTSensitiveDetector::MDTSensitiveDetector(const std::string& name, const std::s
 // Implemenation of memebr functions
 void MDTSensitiveDetector::Initialize(G4HCofThisEvent*)
 {
-  if (!m_MDTHitColl.isValid()) m_MDTHitColl = std::make_unique<MDTSimHitCollection>();
+  m_MDTHitColl = nullptr;
+  if (auto* eventInfo = AtlasG4EventUserInfo::GetEventUserInfo()) {
+    m_MDTHitColl = eventInfo->GetHitCollectionMap()->Find<MDTSimHitCollection>(m_hitCollectionName);
+    m_g4UserEventInfo = eventInfo;
+  }
   m_driftRadius = m_DEFAULT_TUBE_RADIUS;
 }
 
 G4bool MDTSensitiveDetector::ProcessHits(G4Step* aStep,G4TouchableHistory* /*ROHist*/) {
+
+  if (!m_MDTHitColl) {
+    G4Exception("MDTSensitiveDetector::ProcessHits", "MDTHitCollectionMissing", FatalException,
+                "Hit collection not initialized; did SetupEvent run?");
+    return false;
+  }
   G4Track* currentTrack = aStep->GetTrack();
 
   // MDTs sensitive to charged particle only
@@ -118,7 +130,8 @@ G4bool MDTSensitiveDetector::ProcessHits(G4Step* aStep,G4TouchableHistory* /*ROH
     TrackHelper trHelp(aStep->GetTrack());
 
     // construct new mdt hit
-    m_MDTHitColl->Emplace(MDTid, m_globalTime, m_driftRadius, m_localPosition, trHelp.GenerateParticleLink(),
+    m_MDTHitColl->Emplace(MDTid, m_globalTime, m_driftRadius, m_localPosition,
+                          trHelp.GenerateParticleLink(m_g4UserEventInfo ? m_g4UserEventInfo->GetEventStore() : nullptr),
                           aStep->GetStepLength(),
                           aStep->GetTotalEnergyDeposit(),
                           currentTrack->GetDefinition()->GetPDGEncoding(),

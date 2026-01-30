@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -107,6 +107,9 @@ Trk::CylinderSurface::CylinderSurface(std::shared_ptr<const Trk::CylinderBounds>
   , m_rotSymmetryAxis(nullptr)
 {
 }
+
+// Out-of-line dtor.
+Trk::CylinderSurface::~CylinderSurface() = default;
 
 Trk::CylinderSurface&
 Trk::CylinderSurface::operator=(const CylinderSurface& csf)

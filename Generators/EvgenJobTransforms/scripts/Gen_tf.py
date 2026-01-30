@@ -38,7 +38,7 @@ class EvgenExecutor(athenaExecutor):
 
         def expand_if_archive(filename):
             "Function to expand a file if it is a zip archive or tarball"
-            if ".tar" in filename:
+            if ".tar" in filename or ".tgz" in filename:
                 import tarfile
                 with tarfile.open(filename) as tf:
                     tf.extractall()
@@ -47,7 +47,12 @@ class EvgenExecutor(athenaExecutor):
                 zf = zipfile.ZipFile(filename)
                 zf.extractall()
                 zf.close()
-
+            elif ".gz" in filename:
+                import gzip
+                with gzip.open(filename, 'rb') as f_in:
+                    lfilename=os.path.basename(filename)
+                    with open(lfilename[:-3], 'wb') as f_out:
+                        shutil.copyfileobj(f_in, f_out)
         def get_immediate_subdirectories(a_dir):
             return [name for name in os.listdir(a_dir)
                     if os.path.isdir(os.path.join(a_dir, name))]
@@ -106,11 +111,11 @@ class EvgenExecutor(athenaExecutor):
                 os.environ["JOBOPTSEARCHPATH"] = dsidparam+":"+os.environ["JOBOPTSEARCHPATH"]
                 os.environ["DATAPATH"] = dsidparam+":"+os.environ["DATAPATH"]
             else:
-                msg.error("JOs not found, please check = '%s'" % dsidparam)
+                msg.error("JOs not found, please check = '%s'", dsidparam)
                 raise RuntimeError("JOs not found")
 
-        msg.info("Using JOBOPTSEARCHPATH = '%s'" % os.environ["JOBOPTSEARCHPATH"])
-        msg.info("Using DATAPATH = '%s'" % os.environ["DATAPATH"])
+        msg.info("Using JOBOPTSEARCHPATH = '%s'", os.environ["JOBOPTSEARCHPATH"])
+        msg.info("Using DATAPATH = '%s'", os.environ["DATAPATH"])
 
         if "evgenJobOpts" in self._trf.argdict: ## Use a specified JO tarball
             tarball = self._trf.argdict["evgenJobOpts"].value
@@ -127,7 +132,7 @@ class EvgenExecutor(athenaExecutor):
                 status, output = downloadUsingProxy(url)
                 if status != 0:
                     raise EnvironmentError('Error downloading tarball %s. Downloader reports: %s' % (tarball, output))
-                msg.info('Evgen tarball download success: %s' % output)
+                msg.info('Evgen tarball download success: %s', output)
             ## Expand tarball
             expand_if_archive(tarball)
             ## Source setup script (requires some shenanigans to update the Python env robustly)
@@ -158,7 +163,7 @@ class EvgenExecutor(athenaExecutor):
                  confFile = os.path.join(FIRST_DIR, x)
                  msg.info("using gridpack = "+confFile)
           if confFile is None:
-             msg.error("No *GRID* config files, for requested energy = '%s'  please check = '%s'" %(energy,dsidparam))
+             msg.error("No *GRID* config files, for requested energy = '%s'  please check = '%s'", energy, dsidparam)
              sys.exit(1)
 
         if confFile is not None:
@@ -196,7 +201,7 @@ def move_files(main_dir,tmp_dir,allowedlist):
 
 def getTransform():
     exeSet = set()
-    msg.info("Transform arguments %s" % sys.argv[1:])
+    msg.info("Transform arguments %s", sys.argv[1:])
     if "--outputEVNTFile" in str(sys.argv[1:]):
        exeSet.add(EvgenExecutor(name="generate", skeleton="EvgenJobTransforms/skel.GENtoEVGEN.py", skeletonCA="EvgenJobTransforms.GENtoEVGEN_Skeleton", inData=["inNULL"], outData=["YODA", "EVNT", "EVNT_Pre", "TXT"]))
        msg.info("Output EVNT file")
@@ -223,7 +228,7 @@ def getTransform():
 @stdTrfExceptionHandler
 @sigUsrStackTrace
 def main():
-    msg.info("This is %s" % sys.argv[0])
+    msg.info("This is %s", sys.argv[0])
 
     main_dir = os.getcwd()
     trf = getTransform()
@@ -241,7 +246,7 @@ def main():
 
     trf.execute()
     trf.generateReport()
-    msg.info("%s stopped at %s, trf exit code %d" % (sys.argv[0], time.asctime(), trf.exitCode))
+    msg.info("%s stopped at %s, trf exit code %d", sys.argv[0], time.asctime(), trf.exitCode)
 
 
 # read files/dirs that should be saved and if present in cwd - remove

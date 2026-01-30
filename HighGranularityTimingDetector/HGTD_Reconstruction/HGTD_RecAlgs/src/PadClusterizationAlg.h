@@ -16,6 +16,7 @@
 
 #include "HGTD_PrepRawData/HGTD_ClusterContainer.h"
 #include "HGTD_RawData/HGTD_RDO_Container.h"
+#include "HGTD_RawData/HGTD_ALTIROC_RDO_Container.h"
 #include "HGTD_RecToolInterfaces/IHGTD_PadClusterizationTool.h"
 #include "StoreGate/ReadHandleKey.h"
 #include "StoreGate/WriteHandleKey.h"
@@ -40,7 +41,10 @@ private:
   ToolHandle<GenericMonitoringTool> m_monTool {this, "MonTool", "", "Monitoring tool"};
 
   SG::ReadHandleKey<HGTD_RDO_Container> m_rdo_rh_key{this, "RDOContainerName", "HGTD_RDOs", "Name of the HGTD_RDO container"};
+  SG::ReadHandleKey<HGTD_ALTIROC_RDO_Container> m_altiroc_rdo_rh_key{this, "AltirocRDOContainerName", "HGTD_ALTIROC_RDOs", "Name of the HGTD_ALTIROC_RDO container"};
   SG::WriteHandleKey<HGTD_ClusterContainer> m_prd_wh_key{this, "PRDContainerName", "HGTD_Clusters", "Name of the HGTD_Cluster container"};
+
+  BooleanProperty m_use_altiroc_rdo{this, "useALTIROC_RDO", false, "Use Altiroc RDO instead of standard"};
 
   const HGTD_ID* m_hgtd_idhelper{nullptr};
 };

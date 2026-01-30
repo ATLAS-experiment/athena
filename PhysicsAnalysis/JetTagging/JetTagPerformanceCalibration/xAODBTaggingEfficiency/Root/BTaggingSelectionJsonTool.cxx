@@ -1,6 +1,7 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
+#include "PathResolver/PathResolver.h"
 #include "xAODBTaggingEfficiency/BTaggingToolUtil.h"
 #include "xAODBTaggingEfficiency/BTaggingSelectionJsonTool.h"
 #include <fstream>
@@ -9,41 +10,47 @@ BTaggingSelectionJsonTool::BTaggingSelectionJsonTool( const std::string & name)
   : asg::AsgTool( name )
 {
   m_initialised = false;
-  declareProperty( "MaxEta", m_maxEta = 2.5 );
-  declareProperty( "MinPt", m_minPt = -1 /*MeV*/);
-  declareProperty( "TaggerName",                    m_taggerName="",       "tagging algorithm name");
-  declareProperty( "JetAuthor",                     m_jetAuthor="",        "jet collection");
-  declareProperty( "OperatingPoint",                m_OP="",               "operating point");
-  declareProperty( "JsonConfigFile",                m_json_config_path="", "Path to JSON config file");
 }
 
 StatusCode BTaggingSelectionJsonTool::initialize() {
   m_initialised = true;
-  
-  std::ifstream jsonFile(m_json_config_path);
+
+  std::string pathToJsonConfigFile = PathResolverFindCalibFile(m_json_config_path);
+  std::ifstream jsonFile(pathToJsonConfigFile);
   if (!jsonFile.is_open()) {
-    ATH_MSG_ERROR( "JSON file " + m_json_config_path + " do not exist. Please put the correct path of the file." );
+    ATH_MSG_ERROR( "JSON file " + m_json_config_path + " does not exist. Please put the correct path of the file." );
     return StatusCode::FAILURE;
   }
   m_json_config = json::parse(jsonFile);
   jsonFile.close();
 
-  if (m_taggerName.empty() || !m_json_config.contains(m_taggerName)){
-    ATH_MSG_ERROR( "Tagger " + m_taggerName + " not found in JSON file: " + m_json_config_path );
+  if (m_outputName.empty()){
+    ATH_MSG_ERROR("Must specify the output name property for the tagger");
+    return StatusCode::FAILURE;
+  }
+  if (!m_json_config.contains(m_outputName)){
+    ATH_MSG_ERROR( " The output name " + m_outputName + " not found in JSON file: " + m_json_config_path );
+    return StatusCode::FAILURE;
+  }
+  if (m_jetAuthor.empty() || !m_json_config[m_outputName].contains(m_jetAuthor)){
+    ATH_MSG_ERROR( "Tagger: " +m_outputName+ " and Jet Collection: " +m_jetAuthor+ " not found in JSON file: " +m_json_config_path );
     return StatusCode::FAILURE;
   }
 
-  if (m_jetAuthor.empty() || !m_json_config[m_taggerName].contains(m_jetAuthor)){
-    ATH_MSG_ERROR( "Tagger: " +m_taggerName+ " and Jet Collection: " +m_jetAuthor+ " not found in JSON file: " +m_json_config_path );
+  if (m_OP.empty() || !m_json_config[m_outputName][m_jetAuthor].contains(m_OP)){
+    ATH_MSG_ERROR( "OP " +m_OP+ " not available for " +m_outputName+ " tagger.");
     return StatusCode::FAILURE;
   }
 
-  if (m_OP.empty() || !m_json_config[m_taggerName][m_jetAuthor].contains(m_OP)){
-    ATH_MSG_ERROR( "OP " +m_OP+ " not available for " +m_taggerName+ " tagger.");
-    return StatusCode::FAILURE;
+  const auto& meta = m_json_config[m_outputName][m_jetAuthor]["meta"];
+  if (meta.contains("TaggerName")){
+    m_taggerName = meta["TaggerName"];
+    
+  }else{
+    ATH_MSG_INFO( "No 'TaggerName' section found in the meta data for " +m_outputName+ " tagger. "
+    "Using " + m_outputName + " as the tagger name." );
+    m_taggerName = m_outputName;
   }
-
-  const auto& meta = m_json_config[m_taggerName][m_jetAuthor]["meta"];
   m_target = meta["TaggingTarget"];
 
   // pre-load fraction values
@@ -56,7 +63,7 @@ StatusCode BTaggingSelectionJsonTool::initialize() {
   }
 
   // pre-load cut values
-  auto& pT_mass_2d_cutvalue = m_json_config[m_taggerName][m_jetAuthor][m_OP]["pT_mass_2d_cutvalue"];
+  auto& pT_mass_2d_cutvalue = m_json_config[m_outputName][m_jetAuthor][m_OP]["pT_mass_2d_cutvalue"];
 
   // Loop over the pT bins values 
   // pTbins is a list of floats or "inf" for the highest bin value 

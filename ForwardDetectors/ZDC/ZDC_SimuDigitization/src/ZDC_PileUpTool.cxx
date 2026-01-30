@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -315,10 +315,10 @@ void ZDC_PileUpTool::addEmptyWaveforms(xAOD::ZdcModuleContainer *zdcModuleContai
 
 TimedHitCollection<ZDC_SimFiberHit> ZDC_PileUpTool::doZDClightGuideCuts(const ZDC_SimFiberHit_Collection* hitCollection){
 
-  ZDC_SimFiberHit* newHits[2][4] = {{nullptr}};
-  ZDC_SimFiberHit_Collection* newCollection = new ZDC_SimFiberHit_Collection("ZDC_SimFiberHit_Collection_Temp");
+  ZDC_SimFiberHit* newHits[2][4]{};
+  auto newCollection = std::make_unique<ZDC_SimFiberHit_Collection>("ZDC_SimFiberHit_Collection_Temp");
 
-  for(ZDC_SimFiberHit hit : *hitCollection){
+  for(const ZDC_SimFiberHit& hit : *hitCollection){
     Identifier id = hit.getID();
     //Translate side from -1,1 to 0,1 to index ZDC hits
     int side = (m_ZdcID->side( id ) < 0 ) ? 0 : 1;
@@ -357,8 +357,9 @@ TimedHitCollection<ZDC_SimFiberHit> ZDC_PileUpTool::doZDClightGuideCuts(const ZD
 
   //Now insert one hit per detector in the new collection
   TimedHitCollection<ZDC_SimFiberHit> newTimedCollection;
-  newTimedCollection.insert(0.0, newCollection);
-
+  //coverity[RESOURCE_LEAK]
+  newTimedCollection.insert(0.0, newCollection.release());
+  //coverity[RESOURCE_LEAK]
   return newTimedCollection;
 }
 
@@ -428,7 +429,7 @@ void ZDC_PileUpTool::createAndStoreWaveform(const ZDC_SimFiberHit &hit, CLHEP::H
   if(m_delayChannels){
     float timeBinWidth = 1000.0/m_freqMHz;
     zdc->setWaveform("g0d1data", generateWaveform(wfSampler, 10*amplitude, t0+timeBinWidth/2));
-    if(doHighGain) zdc->setWaveform("g1d1data", generateWaveform(wfSampler, 10*amplitude, t0+timeBinWidth/2));
+    if(doHighGain) zdc->setWaveform("g1d1data", generateWaveform(std::move(wfSampler), 10*amplitude, t0+timeBinWidth/2));
   }
 
 }

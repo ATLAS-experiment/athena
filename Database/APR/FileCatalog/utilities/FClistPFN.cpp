@@ -31,16 +31,13 @@ public:
   void getContacts(std::vector<std::string>& uris){
     std::string delim(" ");
     std::string::size_type begIdx,endIdx;
-    std::string elem;
     while( (begIdx=m_contact.find_first_not_of(delim))!= m_contact.npos ){
       endIdx=m_contact.find_first_of(delim);
       if(endIdx != m_contact.npos ){
-        elem=m_contact.substr(begIdx,endIdx-begIdx);
+        uris.push_back(m_contact.substr(begIdx,endIdx-begIdx));
         m_contact=m_contact.substr(endIdx+1);
-        uris.push_back(elem);
       }else{
-        elem=m_contact;
-        uris.push_back(elem);
+        uris.push_back(m_contact);
         break;
       }
     }

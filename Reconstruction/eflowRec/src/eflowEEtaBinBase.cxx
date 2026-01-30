@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /********************************************************************
@@ -31,7 +31,7 @@ int eflowEEtaBinBase::getEBinIndex(double e) const {
     if (e > m_eBinBounds[i] && e < m_eBinBounds[i + 1]) return i;
   } 
   //for the final bin we simply check if the track energy is greater than the lower bound
-  if ( e > m_eBinBounds.back() ) return nEBins-1;    
+  if ( !m_eBinBounds.empty() && e > m_eBinBounds.back() ) return nEBins-1;
   return 0;
 }
 

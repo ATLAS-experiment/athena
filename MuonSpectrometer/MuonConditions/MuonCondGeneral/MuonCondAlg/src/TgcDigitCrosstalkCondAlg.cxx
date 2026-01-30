@@ -1,18 +1,15 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "MuonCondAlg/TgcDigitCrosstalkCondAlg.h"
+#include "TgcDigitCrosstalkCondAlg.h"
 #include "CxxUtils/StringUtils.h"
 #include "StoreGate/ReadCondHandle.h"
 #include "StoreGate/WriteCondHandle.h"
 #include "CoralBase/Blob.h"
 #include <string_view>
 
-TgcDigitCrosstalkCondAlg::TgcDigitCrosstalkCondAlg(const std::string& name, ISvcLocator* pSvcLocator)
-: AthReentrantAlgorithm(name, pSvcLocator) {
-}
-
+namespace Muon{
 StatusCode TgcDigitCrosstalkCondAlg::initialize() {
   ATH_MSG_DEBUG("initialize " << name());
   ATH_CHECK(m_readKey.initialize());
@@ -21,14 +18,14 @@ StatusCode TgcDigitCrosstalkCondAlg::initialize() {
 }
 
 StatusCode TgcDigitCrosstalkCondAlg::execute(const EventContext& ctx) const {
-  SG::WriteCondHandle<TgcDigitCrosstalkData> writeHandle{m_writeKey, ctx};
+  SG::WriteCondHandle writeHandle{m_writeKey, ctx};
   if (writeHandle.isValid()) {
     ATH_MSG_DEBUG("CondHandle " << writeHandle.fullKey() << " is already valid."
 		  << ". In theory this should not be called, but may happen"
 		  << " if multiple concurrent events are being processed out of order.");
     return StatusCode::SUCCESS;
   }
-  SG::ReadCondHandle<CondAttrListCollection> readHandle_XTalk{m_readKey, ctx};
+  SG::ReadCondHandle readHandle_XTalk{m_readKey, ctx};
   if (readHandle_XTalk.cptr() == nullptr) {
     ATH_MSG_ERROR("Null pointer to the read conditions object");
     return StatusCode::FAILURE;
@@ -108,5 +105,6 @@ StatusCode TgcDigitCrosstalkCondAlg::execute(const EventContext& ctx) const {
   ATH_MSG_DEBUG("recorded new " << writeHandle.key() << " with range " << rangeIntersection << " into Conditions Store");
 
   return StatusCode::SUCCESS;
+}
 }
 

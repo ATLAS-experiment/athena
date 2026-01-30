@@ -11,7 +11,7 @@ FPGATrackSimOutputHeaderTool::FPGATrackSimOutputHeaderTool(std::string const & a
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-StatusCode FPGATrackSimOutputHeaderTool::openFile(std::string const & path)
+StatusCode FPGATrackSimOutputHeaderTool::openFile(std::string const & path) const
 {
   // close old file (I don't think we delete the pointer. Does ROOT handle that?)
   if (m_infile && m_infile->IsOpen()) m_infile->Close();
@@ -37,7 +37,8 @@ StatusCode FPGATrackSimOutputHeaderTool::openFile(std::string const & path)
   }
 
   m_infile->cd();
-  m_event = 0;
+  m_event = 0; // in file
+  m_totevent = 0;  // total counter
   return StatusCode::SUCCESS;
 }
 
@@ -48,7 +49,7 @@ StatusCode FPGATrackSimOutputHeaderTool::openFile(std::string const & path)
 // Also... the properties would have to be a vector because we can have an arbitrary number of input and output headers.
 // Perhaps we don't actually *need* an arbitrary number of input and output headers but I think it's best to allow for it.
 
-StatusCode FPGATrackSimOutputHeaderTool::configureReadBranches() {
+StatusCode FPGATrackSimOutputHeaderTool::configureReadBranches() const {
 
   // Don't do anything
   if (m_rwoption.value() != std::string("READ")) {
@@ -87,7 +88,14 @@ StatusCode FPGATrackSimOutputHeaderTool::configureReadBranches() {
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 StatusCode FPGATrackSimOutputHeaderTool::initialize()
 {
- 
+  // Dump the configuration to make sure it propagated through right
+  const std::vector<Gaudi::Details::PropertyBase*> props = this->getProperties();
+  for( Gaudi::Details::PropertyBase* prop : props ) {
+    if (prop->ownerTypeName()==this->type()) {      
+      ATH_MSG_DEBUG("Property:\t" << prop->name() << "\t : \t" << prop->toString());
+    }
+  }
+
   ATH_CHECK(m_tHistSvc.retrieve());
 
   if( m_rwoption.value()!=std::string("HEADER"))
@@ -117,8 +125,8 @@ StatusCode FPGATrackSimOutputHeaderTool::initialize()
     return StatusCode::FAILURE;
   }
 
-  m_event    = 0; // in file
-  m_totevent = 0; // total counter
+  m_event = 0; // in file
+  m_totevent = 0;  // total counter
   return StatusCode::SUCCESS;
 }
 
@@ -166,36 +174,50 @@ StatusCode FPGATrackSimOutputHeaderTool::finalize()
   return StatusCode::SUCCESS;
 }
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 // This version of writeData assumes that the header objects were created using addInputBranch and addOutputBranch
 // and so don't need to be passed back to the tool.
-StatusCode FPGATrackSimOutputHeaderTool::writeData() {
+StatusCode FPGATrackSimOutputHeaderTool::writeData() const {
 
   if (m_rwoption.value() == std::string("READ")) {
     ATH_MSG_WARNING ("Asked to write file in READ  mode");
     return StatusCode::SUCCESS;
   }
 
-  ATH_MSG_DEBUG ("Writing data in TTree");
+  ATH_MSG_DEBUG ("Writing data in TTree,  event cnt=" << m_event << " limit=" << m_eventLimit << " activated" <<  m_activated);
 
   // Interpret -1 as no limit.
-  if (m_event < static_cast<unsigned>(m_eventLimit) || m_eventLimit < 0) {
-    m_EventTree->Fill();
+  if ((m_event < static_cast<unsigned>(m_eventLimit) || m_eventLimit < 0) &&
+      (m_activated || !m_requireActivation)) {
+    
+    {
+      std::lock_guard<std::mutex> lock(m_writeMutex);
+      m_EventTree->Fill();  // Protected ROOT operation
+    }
+    
+    m_event++;
+    m_totevent++;
+    m_activated = false;
+
+    for (unsigned i = 0; i < m_eventInputHeaders.size(); i++) {
+      ATH_MSG_DEBUG("Wrote event " << m_event << " in input header (" << m_branchNameIns.at(i) << ") event " <<  m_eventInputHeaders.at(i)->event());
+    }
+    for (unsigned i = 0; i < m_eventOutputHeaders.size(); i++) {
+      ATH_MSG_DEBUG("Wrote event " << m_event << " in output header (" << m_branchNameOuts.at(i) << ")");
+      ATH_MSG_DEBUG("n.roads_1st = "  << m_eventOutputHeaders.at(i)->nFPGATrackSimRoads_1st());
+      ATH_MSG_DEBUG("n.roads_2nd = "  << m_eventOutputHeaders.at(i)->nFPGATrackSimRoads_2nd());
+      ATH_MSG_DEBUG("n.tracks_1st = " << m_eventOutputHeaders.at(i)->nFPGATrackSimTracks_1st());
+      ATH_MSG_DEBUG("n.tracks_2nd = " << m_eventOutputHeaders.at(i)->nFPGATrackSimTracks_2nd());
+    }
   }
 
   // Reset any input headers that we wrote out (with debugging prints).
   for (unsigned i = 0; i < m_eventInputHeaders.size(); i++) {
-    ATH_MSG_DEBUG("Wrote event " << m_event << " in input header (" << m_branchNameIns.at(i) << ") event " <<  m_eventInputHeaders.at(i)->event());
-    m_eventInputHeaders.at(i)->reset();
+    m_eventInputHeaders.at(i)->reset();    
   }
 
   // Reset any output headers that we wrote out (With debugging prints).
-  for (unsigned i = 0; i < m_eventOutputHeaders.size(); i++) {
-    ATH_MSG_DEBUG("Wrote event " << m_event << " in output header (" << m_branchNameOuts.at(i) << ")");
-    ATH_MSG_DEBUG("n.roads_1st = "  << m_eventOutputHeaders.at(i)->nFPGATrackSimRoads_1st());
-    ATH_MSG_DEBUG("n.roads_2nd = "  << m_eventOutputHeaders.at(i)->nFPGATrackSimRoads_2nd());
-    ATH_MSG_DEBUG("n.tracks_1st = " << m_eventOutputHeaders.at(i)->nFPGATrackSimTracks_1st());
-    ATH_MSG_DEBUG("n.tracks_2nd = " << m_eventOutputHeaders.at(i)->nFPGATrackSimTracks_2nd());
+  for (unsigned i = 0; i < m_eventOutputHeaders.size(); i++) {    
     m_eventOutputHeaders.at(i)->reset();
   }
 
@@ -205,15 +227,13 @@ StatusCode FPGATrackSimOutputHeaderTool::writeData() {
     return StatusCode::FAILURE;
   }
   
-  m_event++;
-
   return StatusCode::SUCCESS;
 }
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 // Since the branches are now created using the same set of functions the user already has a pointer to the object.
 // So in this function we just need to reset those objects, test last, and... call GetEntry I think.
-StatusCode FPGATrackSimOutputHeaderTool::readData(bool &last)
+StatusCode FPGATrackSimOutputHeaderTool::readData(bool &last) const
 {
   if (m_rwoption.value() != std::string("READ")) {
     ATH_MSG_WARNING ("Asked to read file that is not in READ mode");
@@ -230,32 +250,40 @@ StatusCode FPGATrackSimOutputHeaderTool::readData(bool &last)
   
   ATH_MSG_DEBUG ("Asked Event " << m_event << " in this file; current total is " << m_totevent);
   last = false;
-  if (m_event >= m_EventTree->GetEntries()) {
-    if (++m_file < m_inpath.value().size()) {
-      ATH_CHECK(openFile(m_inpath.value().at(m_file)));
-      // If opening a new file we need to update the branch addresses.
-      ATH_CHECK(configureReadBranches());
+  if (m_event >= static_cast<unsigned>(m_EventTree->GetEntries())) {
+    std::lock_guard<std::mutex> lock(m_writeMutex);
+    if (m_event >= static_cast<unsigned>(m_EventTree->GetEntries())) {
+      unsigned current_file = m_file++;
+      if (current_file < m_inpath.value().size()) {
+        ATH_CHECK(openFile(m_inpath.value().at(current_file)));
+        // If opening a new file we need to update the branch addresses.
+        ATH_CHECK(configureReadBranches());
+      }
+      else {
+        last = true;
+        return StatusCode::SUCCESS;
+      }
     }
-    else {
-      last = true;
-      return StatusCode::SUCCESS;
-    } 
   }
 
-  // Read the objects. I removed some of the debug messages here, they could be readded.
-  for (const std::string& branchName : m_branchNameIns) {
-    int statIn = m_EventTree->GetBranch(branchName.c_str())->GetEntry(m_event);
-    if (statIn <= 0) ATH_MSG_WARNING("Error in reading from branch " << branchName);
-  }
+  // Protect ROOT TTree reads with mutex
+  {
+    std::lock_guard<std::mutex> lock(m_writeMutex);
+    // Read the objects. I removed some of the debug messages here, they could be readded.
+    for (const std::string& branchName : m_branchNameIns) {
+      int statIn = m_EventTree->GetBranch(branchName.c_str())->GetEntry(m_event);
+      if (statIn <= 0) ATH_MSG_WARNING("Error in reading from branch " << branchName);
+    }
 
-  for (const std::string& branchName : m_branchNameOuts) {
-    int statOut = m_EventTree->GetBranch(branchName.c_str())->GetEntry(m_event);
-    if (statOut <= 0) ATH_MSG_WARNING("Error in reading from branch " << branchName);
+    for (const std::string& branchName : m_branchNameOuts) {
+      int statOut = m_EventTree->GetBranch(branchName.c_str())->GetEntry(m_event);
+      if (statOut <= 0) ATH_MSG_WARNING("Error in reading from branch " << branchName);
+    }
   }
   
+  // increase counters
   m_event++;
   m_totevent++;
-
 
   return StatusCode::SUCCESS;
 }

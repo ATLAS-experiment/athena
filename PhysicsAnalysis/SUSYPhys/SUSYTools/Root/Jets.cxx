@@ -17,7 +17,6 @@
 #include "JetInterface/IJetUpdateJvt.h"
 #include "JetInterface/IJetModifier.h"
 #include "JetInterface/IJetDecorator.h"
-#include "JetAnalysisInterfaces/IJetJvtEfficiency.h"
 
 #include "xAODBTagging/BTaggingUtilities.h"
 #include "FTagAnalysisInterfaces/IBTaggingEfficiencyTool.h"
@@ -386,12 +385,12 @@ namespace ST {
     ATH_MSG_VERBOSE( "Starting FillJet on jet with pt=" << input.pt() );
     ATH_MSG_VERBOSE(  "jet (pt,eta,phi) before calibration " << input.pt() << " " << input.eta() << " " << input.phi() );
 
-    static const SG::ConstAccessor<bool> acc_wValidKinRange(m_WDecorName+"_ValidKinRange");
-    static const SG::ConstAccessor<bool> acc_zValidKinRange(m_ZDecorName+"_ValidKinRange");
-    static const SG::ConstAccessor<bool> acc_topValidKinRange(m_TopDecorName+"_ValidKinRange");
-    static const SG::ConstAccessor<bool> acc_wtagged(m_WDecorName+"_Tagged");
-    static const SG::ConstAccessor<bool> acc_ztagged(m_ZDecorName+"_Tagged");
-    static const SG::ConstAccessor<bool> acc_toptagged(m_TopDecorName+"_Tagged");
+    static const SG::ConstAccessor<char> acc_wValidKinRange(m_WDecorName+"_ValidKinRange");
+    static const SG::ConstAccessor<char> acc_zValidKinRange(m_ZDecorName+"_ValidKinRange");
+    static const SG::ConstAccessor<char> acc_topValidKinRange(m_TopDecorName+"_ValidKinRange");
+    static const SG::ConstAccessor<char> acc_wtagged(m_WDecorName+"_Tagged");
+    static const SG::ConstAccessor<char> acc_ztagged(m_ZDecorName+"_Tagged");
+    static const SG::ConstAccessor<char> acc_toptagged(m_TopDecorName+"_Tagged");
 
     if (doCalib) {
       if(!isFat){

@@ -8,7 +8,7 @@ def SetupArgParser():
     parser.add_argument("-o", "--output", dest="output", default='', help="Text file containing each cabling channel", metavar="FILE")
     parser.add_argument("--inputFile", "-i", default=[], 
                         help="Input file to run on ", nargs="+")
-    parser.add_argument("--geoTag", default=defaultGeometryTags.RUN2, help="Geometry tag to use", choices=[defaultGeometryTags.RUN2_BEST_KNOWLEDGE ,
+    parser.add_argument("--geoTag", default=defaultGeometryTags.RUN3, help="Geometry tag to use", choices=[defaultGeometryTags.RUN2_BEST_KNOWLEDGE ,
                                                                                                            defaultGeometryTags.RUN3])
     parser.add_argument("--mezzMap", default="", help="External JSON file containing the internal mapping of the mezzanine cards")
     parser.add_argument("--cablingMap", default="", help="External JSON file containing the cabling map of each channel")

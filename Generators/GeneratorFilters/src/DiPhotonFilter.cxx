@@ -30,6 +30,8 @@ DiPhotonFilter::DiPhotonFilter(const std::string& name, ISvcLocator* pSvcLocator
   declareProperty("DeltaRCutTo",m_diphoton_deltaRmax = -1.);
   declareProperty("MassCutFrom",m_diphoton_massmin = -1.);
   declareProperty("MassCutTo",m_diphoton_massmax = -1.);
+  declareProperty("DiPhotonPtMin", m_diphoton_PtMin = -1.);
+  declareProperty("DiPhotonPtMax", m_diphoton_PtMax = -1.);
   declareProperty("Use1st2ndPhotons",m_use1st2ndPhotonsforMassAndDeltaRCuts = false);
 }
 
@@ -47,6 +49,8 @@ StatusCode DiPhotonFilter::filterInitialize() {
   ATH_MSG_INFO("DeltaRCut(max)            = " << m_diphoton_deltaRmax);
   ATH_MSG_INFO("MassCut(min)              = " << m_diphoton_massmin << " (CLHEP::MeV)");
   ATH_MSG_INFO("MassCut(max)              = " << m_diphoton_massmax << " (CLHEP::MeV)");
+  ATH_MSG_INFO("Diphoton Pt cut(min)      = " << m_diphoton_PtMin << " (CLHEP::MeV)");
+  ATH_MSG_INFO("Diphoton Pt cut(max)      = " << m_diphoton_PtMax << " (CLHEP::MeV)");
   ATH_MSG_INFO("   negative value on MassCut(min,max) -> no limit in the cut");
   ATH_MSG_INFO("Use only the 1st and the 2nd photons for mass and deltaR cuts, flag = " << m_use1st2ndPhotonsforMassAndDeltaRCuts);
   return StatusCode::SUCCESS;
@@ -121,6 +125,21 @@ StatusCode DiPhotonFilter::filterEvent() {
         double deltaR = std::sqrt(deltaEta*deltaEta+deltaPhi*deltaPhi);
         ATH_MSG_DEBUG("deltaR(gamgam) = " << deltaR);
         int testMassDeltaRCuts = 0;
+        
+        // compute diphoton pT
+        double diphotonPt = std::sqrt(sumPx*sumPx + sumPy*sumPy);
+        ATH_MSG_DEBUG("diphoton Pt = " << diphotonPt << " (MeV)");
+
+        // apply diphoton pT cut
+        if (m_diphoton_PtMin >= 0. && diphotonPt < m_diphoton_PtMin) {
+            setFilterPassed(false);
+            return StatusCode::SUCCESS;
+        }
+        if (m_diphoton_PtMax >= 0. && diphotonPt > m_diphoton_PtMax) {
+            setFilterPassed(false);
+            return StatusCode::SUCCESS;
+        }
+
         //check mass
         if (m_diphoton_massmin >= 0. && m_diphoton_massmax >= 0.) {
           if (mGamGam >= m_diphoton_massmin && mGamGam <= m_diphoton_massmax) ++testMassDeltaRCuts;
@@ -158,6 +177,15 @@ StatusCode DiPhotonFilter::filterEvent() {
             double deltaR = std::sqrt(deltaEta*deltaEta+deltaPhi*deltaPhi);
             ATH_MSG_DEBUG("deltaR(gamgam) = " << deltaR);
             int testMassDeltaRCuts = 0;
+            
+            // compute diphoton pT
+            double diphotonPt = std::sqrt(sumPx*sumPx + sumPy*sumPy);
+            ATH_MSG_DEBUG("diphoton Pt = " << diphotonPt << " (MeV)");
+
+            // apply diphoton pT cut
+            if (m_diphoton_PtMin >= 0. && diphotonPt < m_diphoton_PtMin) continue;
+            if (m_diphoton_PtMax >= 0. && diphotonPt > m_diphoton_PtMax) continue;
+
             // check mass
             if (m_diphoton_massmin >= 0. && m_diphoton_massmax >= 0.) {
               if (mGamGam >= m_diphoton_massmin && mGamGam <= m_diphoton_massmax) ++testMassDeltaRCuts;

@@ -9,6 +9,7 @@
 #include "AthenaMonitoringKernel/MonitoredCollection.h"
 
 #include "../IO/eEmEg1eRatioTOB.h"
+#include <sstream>
 
 namespace GlobalSim {
 
@@ -35,8 +36,8 @@ namespace GlobalSim {
   
     // read in LArStrip neighborhoods from the event store
     auto in =
-      SG::ReadHandle<IOBitwise::IeEmNbhoodTOBContainer>(m_nbhdTOBContainerReadKey,
-							ctx);
+      SG::ReadHandle<IOBitwise::eEmNbhoodTOBContainer>(m_nbhdTOBContainerReadKey,
+						       ctx);
     CHECK(in.isValid());
 
     ATH_MSG_DEBUG("read in " << (*in).size() << " neighborhoods");
@@ -44,8 +45,8 @@ namespace GlobalSim {
     ap_int<16> peak = 0;
     ap_int<16> secondMax = 0;
 
-    SG::WriteHandle<IOBitwise::IeEmEg1eRatioTOBContainer> h_eRatioResult(m_eRatioResultKey, ctx);
-    CHECK(h_eRatioResult.record(std::make_unique<IOBitwise::IeEmEg1eRatioTOBContainer>()));
+    SG::WriteHandle<IOBitwise::eEmEg1eRatioTOBContainer> h_eRatioResult(m_eRatioResultKey, ctx);
+    CHECK(h_eRatioResult.record(std::make_unique<IOBitwise::eEmEg1eRatioTOBContainer>()));
     SG::WriteHandle<std::vector<int> > h_eRatio(m_eRatioKey, ctx);
     CHECK(h_eRatio.record(std::make_unique<std::vector<int> >()));
     SG::WriteHandle<std::vector<float> > h_eRatioSimple(m_eRatioSimpleKey, ctx);
@@ -114,11 +115,11 @@ namespace GlobalSim {
 	ATH_MSG_DEBUG("eRatio (sp/p) is " << eRatio);
 
 	//Make a bitset to hold the result
-	std::bitset<IOBitwise::IeEmEg1eRatioTOB::s_eGamma1eRatio_width> result = 0;
+	std::bitset<IOBitwise::eEmEg1eRatioTOB::s_eGamma1eRatio_width> result = 0;
 	//Sanity check to make sure we are in range 0-1
 	if(eRatio >= 0. && eRatio <= 1.0){
 	  //Convert to 0-2047. If s_eGamma1eRatio_width changes this will change.
-	  int eRatioPower = (1 << IOBitwise::IeEmEg1eRatioTOB::s_eGamma1eRatio_width) -1;
+	  int eRatioPower = (1 << IOBitwise::eEmEg1eRatioTOB::s_eGamma1eRatio_width) -1;
 	  h_eRatio->push_back((int)(eRatio*eRatioPower));
 	  result = (int)(eRatio*eRatioPower);
 	} else {
@@ -175,7 +176,7 @@ namespace GlobalSim {
   }
   
   std::vector<double>
-  Egamma1eRatioAlgTool::combine_phi(const IOBitwise::IeEmNbhoodTOB* nbhdTOB) const  {
+  Egamma1eRatioAlgTool::combine_phi(const IOBitwise::eEmNbhoodTOB* nbhdTOB) const  {
     auto result = std::vector<double>();
 
     const auto& phi_low = nbhdTOB->Neighbourhood().phi_low();

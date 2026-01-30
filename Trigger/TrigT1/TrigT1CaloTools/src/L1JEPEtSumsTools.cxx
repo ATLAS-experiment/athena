@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 ///////////////////////////////////////////////////////////////////
 // L1JEPEtSumsTools.cxx,  
@@ -76,7 +76,7 @@ void L1JEPEtSumsTools::formJEMEtSums(
       break;
     }
     if ((*iter)->hadJetElementETVec().size() > nslices) {
-      nslices = (*iter)->emJetElementETVec().size();
+      nslices = (*iter)->hadJetElementETVec().size();
       peak = (*iter)->peak();
       break;
     }

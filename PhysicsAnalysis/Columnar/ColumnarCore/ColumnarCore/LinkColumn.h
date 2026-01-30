@@ -117,6 +117,68 @@ namespace columnar
   // container IDs, as e.g. VariantContainerId needs special handling.
   template<RegularContainerIdConcept LT,typename ELT>
   struct ColumnTypeTraits<LinkCastColumn<LT,ELT>,ColumnarModeArray> : ColumnTypeTraits<OptObjectId<LT>,ColumnarModeArray> {};
+
+
+
+
+  // in xAOD Array mode we get links as ElementLinks, but really just
+  // take the index from it and then treat it like Array mode
+  template<ContainerIdConcept LT>
+  struct ColumnTypeTraits<OptObjectId<LT>,ColumnarModeXAODArray>
+  {
+    using CM = ColumnarModeXAODArray;
+    using ColumnType = NativeColumn<ElementLink<typename LT::xAODElementLinkType>>;
+    using UserType = OptObjectId<LT>;
+    using DataType = void **;
+    static constexpr bool isNativeType = false;
+    static constexpr bool useConvertInput = false;
+    static constexpr bool useConvertWithDataInput = true;
+    static ColumnInfo& updateColumnInfo (ColumnarTool<CM>& /*columnarTool*/, ColumnInfo& info)
+    {
+      info.linkTargetNames = {std::string{LT::idName}};
+      return info;
+    }
+
+    static OptObjectId<LT> convertInput (void **data, const auto& link)
+    {
+      if (link.isValid())
+      {
+        return OptObjectId<LT,CM> (data, link.index());
+      } else
+      {
+        return OptObjectId<LT,CM> ();
+      }
+    }
+  };
+
+  // This is the same as the above, but for a different ElementLink type
+  template<RegularContainerIdConcept LT,typename ELT>
+  struct ColumnTypeTraits<LinkCastColumn<LT,ELT>,ColumnarModeXAODArray>
+  {
+    using CM = ColumnarModeXAODArray;
+    using ColumnType = NativeColumn<ElementLink<typename ELT::xAODElementLinkType>>;
+    using UserType = OptObjectId<LT>;
+    using DataType = void **;
+    static constexpr bool isNativeType = false;
+    static constexpr bool useConvertInput = false;
+    static constexpr bool useConvertWithDataInput = true;
+    static ColumnInfo& updateColumnInfo (ColumnarTool<CM>& /*columnarTool*/, ColumnInfo& info)
+    {
+      info.linkTargetNames = {std::string{LT::idName}};
+      return info;
+    }
+
+    static OptObjectId<LT> convertInput (void **data, const auto& link)
+    {
+      if (link.isValid())
+      {
+        return OptObjectId<LT,CM> (data, link.index());
+      } else
+      {
+        return OptObjectId<LT,CM> ();
+      }
+    }
+  };
 }
 
 #endif

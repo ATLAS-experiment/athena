@@ -8,8 +8,6 @@
 ***************************************************************************/
 
 
-#include "GaudiKernel/MsgStream.h"
-
 #include "InDetIdentifier/SCT_ID.h"
 #include "IdDict/IdDictDictionary.h"
 #include "IdDict/IdDictField.h"
@@ -22,14 +20,6 @@
 #include <algorithm>
 #include <iostream>
 
-namespace{
-  std::ostream & operator<<(std::ostream & out, const MSG::Level l){
-    constexpr std::array<std::string_view, MSG::Level::NUM_LEVELS> lvl{"NIL ", "VERBOSE ",
-     "DEBUG ", "INFO ", "WARNING ", "ERROR ", "FATAL ", "ALWAYS "};
-    out<<lvl[l];
-    return out;
-  }
-}
 
 namespace{
   const IdentifierHash invalidHash;
@@ -68,8 +58,7 @@ SCT_ID::wafer_id_checks(int barrel_ec,
      << barrel_ec << layer_disk << phi_module << eta_module << side;
 
   if (!m_full_wafer_range.match(id)) {  // module range check is sufficient
-    std::string errMsg = " result is NOT ok. ID, range " + std::string(id)+std::string(m_full_wafer_range);
-    localMessage(errMsg, __func__,  MSG::ERROR);
+    ATH_MSG_ERROR(" result is NOT ok. ID, range " + std::string(id)+std::string(m_full_wafer_range));
   }
 }
 
@@ -89,8 +78,7 @@ SCT_ID::strip_id_checks(int barrel_ec,
      << barrel_ec << layer_disk << phi_module << eta_module << side << strip;
 
   if (!m_full_strip_range.match(id)) {
-    std::string errMsg = " result is NOT ok. ID, range " + std::string(id)+std::string(m_full_strip_range);
-    localMessage(errMsg, __func__,  MSG::ERROR);
+    ATH_MSG_ERROR(" result is NOT ok. ID, range " + std::string(id)+std::string(m_full_strip_range));
   }
 }
 
@@ -132,8 +120,7 @@ SCT_ID::strip_id_checks(int barrel_ec,
 
 
   if (!m_full_strip_range.match(id)) {
-    std::string errMsg = " result is NOT ok. ID, range " + std::string(id)+std::string(m_full_strip_range);
-    localMessage(errMsg, __func__,  MSG::ERROR);
+    ATH_MSG_ERROR(" result is NOT ok. ID, range " + std::string(id)+std::string(m_full_strip_range));
   }
 }
 
@@ -227,14 +214,14 @@ SCT_ID::is_phi_module_max(const Identifier& id) const {
 
 int
 SCT_ID::initialize_from_dictionary(const IdDictMgr& dict_mgr) {
-  localMessage("", __func__,  MSG::INFO);
+  ATH_MSG_INFO("initialize_from_dictionary");
 
   // Check whether this helper should be reinitialized
   if (!reinitialize(dict_mgr)) {
-    localMessage("Request to reinitialize not satisfied - tags have not changed", __func__,  MSG::INFO);
+    ATH_MSG_INFO("Request to reinitialize not satisfied - tags have not changed");
     return(0);
   } else {
-    localMessage("(Re)initialize", __func__,  MSG::DEBUG);
+    ATH_MSG_DEBUG("(Re)initialize");
   }
 
   // init base object
@@ -245,7 +232,7 @@ SCT_ID::initialize_from_dictionary(const IdDictMgr& dict_mgr) {
 
   m_dict = dict_mgr.find_dictionary("InnerDetector");
   if (!m_dict) {
-    localMessage( " - cannot access InnerDetector dictionary ",__func__, MSG::ERROR);
+    ATH_MSG_ERROR(" - cannot access InnerDetector dictionary ");
     return 1;
   }
 
@@ -257,15 +244,12 @@ SCT_ID::initialize_from_dictionary(const IdDictMgr& dict_mgr) {
   //
   int barrel_value;
   if (m_dict->get_label_value("barrel_endcap", "barrel", barrel_value)) {
-    const std::string errMsg = "Could not get value for label 'barrel' of field 'barrel_endcap' in dictionary " + m_dict->name();
-    localMessage(errMsg, __func__, MSG::ERROR);
+    ATH_MSG_ERROR("Could not get value for label 'barrel' of field 'barrel_endcap' in dictionary " + m_dict->name());
     return(1);
   }
   m_barrel_field.clear();
   m_barrel_field.add_value(barrel_value);
-  std::string dbgMsg = "Set barrel field values: " + std::string(m_barrel_field);
-  localMessage(dbgMsg, __func__, MSG::DEBUG);
-  
+  ATH_MSG_DEBUG("Set barrel field values: " << std::string(m_barrel_field));
 
 
   //
@@ -277,20 +261,17 @@ SCT_ID::initialize_from_dictionary(const IdDictMgr& dict_mgr) {
   const IdDictDictionary* atlasDict = dict_mgr.find_dictionary("ATLAS");
   int inDetField = -1;
   if (atlasDict->get_label_value("subdet", "InnerDetector", inDetField)) {
-    const std::string errMsg = "Could not get value for label 'InnerDetector' of field 'subdet' in dictionary " + atlasDict->name();
-    localMessage(errMsg, __func__, MSG::ERROR);
+    ATH_MSG_ERROR("Could not get value for label 'InnerDetector' of field 'subdet' in dictionary " + atlasDict->name());
     return(1);
   }
 
   // Find value for the field SCT
   int sctField = -1;
   if (m_dict->get_label_value("part", "SCT", sctField)) {
-    const std::string errMsg= "Could not get value for label 'SCT' of field 'part' in dictionary " + m_dict->name();
-    localMessage(errMsg, __func__, MSG::ERROR);
+    ATH_MSG_ERROR("Could not get value for label 'SCT' of field 'part' in dictionary " + m_dict->name());
     return(1);
   }
-  dbgMsg = "Found field values: SCT " + std::to_string(sctField);
-  localMessage(dbgMsg, __func__, MSG::DEBUG);
+  ATH_MSG_DEBUG("Found field values: SCT " << std::to_string(sctField));
 
   // Set up id for region and range prefix
   ExpandedIdentifier region_id;
@@ -305,9 +286,9 @@ SCT_ID::initialize_from_dictionary(const IdDictMgr& dict_mgr) {
 
   // Setup hash tables for finding neighbors
   if (init_neighbors()) return(1);
-  dbgMsg = "Wafer range -> " + std::string( m_full_wafer_range) + "\n";
-  dbgMsg += "Strip range -> " + std::string(m_full_strip_range);
-  localMessage(dbgMsg, __func__, MSG::DEBUG);
+  ATH_MSG_DEBUG("Wafer range -> " << std::string( m_full_wafer_range) <<
+                "\nStrip range -> " << std::string(m_full_strip_range));
+
   ///insert now valid calls to the m_neighboursByEta
   m_neighboursByEta = {
     [this](const IdentifierHash & id){return this->get_other_side(id);},
@@ -338,16 +319,14 @@ SCT_ID::init_hashes() {
     for (const auto & exp_id : rit) {
       Identifier id = wafer_id(exp_id);
       if (!(ids.insert(id)).second) {
-        const std::string errMsg = "Error: duplicated id for wafer id. nid " + std::to_string(nids) + " compact id " + id.getString() + " id " + std::string(exp_id);
-        localMessage(errMsg, __func__, MSG::ERROR);
+        ATH_MSG_ERROR("duplicated id for wafer id. nid " + std::to_string(nids) + " compact id " + id.getString() + " id " + std::string(exp_id));
         return(1);
       }
       nids++;
     }
   }
   if (ids.size() != m_wafer_hash_max) {
-    const std::string errMsg = "Error: set size NOT EQUAL to hash max. size  " + std::to_string(ids.size()) + " hash max " +std::to_string( m_wafer_hash_max);
-    localMessage(errMsg, __func__, MSG::ERROR);
+    ATH_MSG_ERROR("set size NOT EQUAL to hash max. size  " + std::to_string(ids.size()) + " hash max " +std::to_string( m_wafer_hash_max));
     return(1);
   }
 
@@ -474,7 +453,7 @@ SCT_ID::init_neighbors() {
   // wafer neighbors.
   //
 
-  localMessage("", __func__, MSG::DEBUG);
+  ATH_MSG_DEBUG("init_neighbors");
   const IdentifierHash invalidHash;
   m_prev_phi_wafer_vec.resize(m_wafer_hash_max, invalidHash);
   m_next_phi_wafer_vec.resize(m_wafer_hash_max, invalidHash);
@@ -502,8 +481,7 @@ SCT_ID::init_neighbors() {
       IdentifierHash hash_id;
       Identifier id = wafer_id(exp_id);
       if (get_hash(id, hash_id, &wcontext)) {
-        const std::string errMsg = "- unable to get hash, exp/compact " + show_to_string(id, &wcontext) + std::string(m_full_wafer_range);
-        localMessage(errMsg, __func__, MSG::ERROR);
+        ATH_MSG_ERROR("- unable to get hash, exp/compact " + show_to_string(id, &wcontext) + std::string(m_full_wafer_range));
         return(1);
       }
 
@@ -520,8 +498,7 @@ SCT_ID::init_neighbors() {
         expId[m_indices[PHI]] = previous_phi;
         Identifier id = wafer_id(expId);
         if (get_hash(id, hash_id, &wcontext)) {        
-          const std::string errMsg = "- unable to get previous phi hash, exp/compact " + id.getString();
-          localMessage(errMsg, __func__, MSG::ERROR);
+          ATH_MSG_ERROR("- unable to get previous phi hash, exp/compact " + id.getString());
           return(1);
         }
         m_prev_phi_wafer_vec[index] = hash_id;
@@ -533,8 +510,7 @@ SCT_ID::init_neighbors() {
         expId[m_indices[PHI]] = next_phi;
         Identifier id = wafer_id(expId);
         if (get_hash(id, hash_id, &wcontext)) {
-          const std::string errMsg = "- unable to get next phi hash, exp/compact " + id.getString();
-          localMessage(errMsg, __func__, MSG::ERROR);
+          ATH_MSG_ERROR("- unable to get next phi hash, exp/compact " + id.getString());
           return(1);
         }
         m_next_phi_wafer_vec[index] = hash_id;
@@ -546,8 +522,7 @@ SCT_ID::init_neighbors() {
         expId[m_indices[ETA]] = previous_eta;
         Identifier id = wafer_id(expId);
         if (get_hash(id, hash_id, &wcontext)) {
-          const std::string errMsg = "- unable to get previous eta hash, exp/compact " + id.getString();
-          localMessage(errMsg, __func__, MSG::ERROR);
+          ATH_MSG_ERROR("- unable to get previous eta hash, exp/compact " + id.getString());
           return(1);
         }
         m_prev_eta_wafer_vec[index] = hash_id;
@@ -559,8 +534,7 @@ SCT_ID::init_neighbors() {
         expId[m_indices[ETA]] = next_eta;
         Identifier id = wafer_id(expId);
         if (get_hash(id, hash_id, &wcontext)) {
-          const std::string errMsg = "- unable to get next eta hash, exp/compact " + id.getString();
-          localMessage(errMsg, __func__, MSG::ERROR);
+          ATH_MSG_ERROR("- unable to get next eta hash, exp/compact " + id.getString());
           return(1);
         }
         m_next_eta_wafer_vec[index] = hash_id;
@@ -573,7 +547,7 @@ SCT_ID::init_neighbors() {
 int
 SCT_ID::initLevelsFromDict() {
   if (!m_dict) {
-    localMessage("- dictionary NOT initialized", __func__, MSG::ERROR);
+    ATH_MSG_ERROR("- dictionary NOT initialized");
     return(1);
   }
   // Find out which identifier field corresponds to each level. Use
@@ -586,19 +560,18 @@ SCT_ID::initLevelsFromDict() {
   
  
   if (m_dict->find_region(id, m_sct_region_index)) {
-    const std::string errMsg  = "- unable to find sct region index: id, reg " + std::string(id) + " " + std::to_string(m_sct_region_index);
-    localMessage(errMsg, __func__, MSG::ERROR);
+    ATH_MSG_ERROR("- unable to find sct region index: id, reg " + std::string(id) + " " + std::to_string(m_sct_region_index));
     return(1);
   }
   
   auto findField = [this](const std::string &name, const size_t indx){
-    IdDictField* pField = m_dict->find_field(name);
+    const IdDictField* pField = m_dict->find_field(name);
     if (pField) {
       m_indices[indx] = pField->index();
       return true;
     } 
     const auto lvl = (indx == ROW) ? MSG::DEBUG : MSG::ERROR;
-    localMessage("- unable to find '" + name +"' field ", __func__, lvl);
+    msg() << lvl << "- unable to find '" << name << "' field " << endmsg;
     return false;
   };
   
@@ -628,20 +601,18 @@ SCT_ID::initLevelsFromDict() {
     m_row_impl = region.implementation(m_indices[ROW]);
   }
   m_strip_impl = region.implementation(m_indices[STRIP]);
-  localMessage("decode index and bit fields for each level: ", __func__, MSG::DEBUG);
-  localMessage("indet    " + m_indet_impl.show_to_string(), __func__, MSG::DEBUG);
-  localMessage("sct      " + m_sct_impl.show_to_string(), __func__, MSG::DEBUG);
-  localMessage("bec      " + m_bec_impl.show_to_string(), __func__, MSG::DEBUG);
-  localMessage("lay_disk " + m_lay_disk_impl.show_to_string(), __func__, MSG::DEBUG);
-  localMessage("phi_mod  " + m_phi_mod_impl.show_to_string(), __func__, MSG::DEBUG);
-  localMessage("eta_mod  " + m_eta_mod_impl.show_to_string(), __func__, MSG::DEBUG);
-  localMessage("side     " + m_side_impl.show_to_string(), __func__, MSG::DEBUG);
+  ATH_MSG_DEBUG("decode index and bit fields for each level: ");
+  ATH_MSG_DEBUG("indet    " + m_indet_impl.show_to_string());
+  ATH_MSG_DEBUG("sct      " + m_sct_impl.show_to_string());
+  ATH_MSG_DEBUG("bec      " + m_bec_impl.show_to_string());
+  ATH_MSG_DEBUG("lay_disk " + m_lay_disk_impl.show_to_string());
+  ATH_MSG_DEBUG("phi_mod  " + m_phi_mod_impl.show_to_string());
+  ATH_MSG_DEBUG("eta_mod  " + m_eta_mod_impl.show_to_string());
+  ATH_MSG_DEBUG("side     " + m_side_impl.show_to_string());
   if (m_hasRows) {
-    localMessage("row     " + m_row_impl.show_to_string(), __func__, MSG::DEBUG);
+    ATH_MSG_DEBUG("row     " + m_row_impl.show_to_string());
   }
-  localMessage("strip    " + m_strip_impl.show_to_string(), __func__, MSG::DEBUG);
-
- 
+  ATH_MSG_DEBUG("strip    " + m_strip_impl.show_to_string());
 
   return(0);
 }
@@ -691,7 +662,7 @@ SCT_ID::get_id(const IdentifierHash& hash_id,
       }
     } else if (m_indices[STRIP] == end) {
       // Do not know how to calculate strip id from hash yet!!
-      localMessage( "Do not know how to calculate strip id from hash yet!!", __func__, MSG::ERROR );
+      ATH_MSG_ERROR( "Do not know how to calculate strip id from hash yet!!");
     }
   }
   return(result);
@@ -746,20 +717,6 @@ SCT_ID::get_hash(const Identifier& id,
     }
   }
   return(result);
-}
-void
-SCT_ID::localMessage(const std::string & msgTxt, const std::string &func, const MSG::Level & lvl) const{
-  if (m_msgSvc){
-    MsgStream log(m_msgSvc, "SCT_ID");
-    log << lvl << msgTxt << endmsg;
-  } else {
-    #ifdef NDEBUG
-    if (lvl > MSG::DEBUG) std::cout<<lvl<<"SCT_ID::"<<func<<" "<<msgTxt<<std::endl;
-    #else
-    std::cout<<lvl<<"SCT_ID::"<<func<<" "<<msgTxt<<std::endl;
-    #endif
-  }
-  
 }
 
 //all neighbours: opposite and then eta direction first

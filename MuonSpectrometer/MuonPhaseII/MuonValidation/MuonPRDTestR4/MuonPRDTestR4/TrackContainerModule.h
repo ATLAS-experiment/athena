@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef PRDTESTERR4_TRACKCONTAINERMODULE_H
@@ -28,6 +28,7 @@ namespace MuonValR4{
             MuonVal::VectorBranch<int>& m_trackQ{parent().newVector<int>(m_collName + "_q")};
             MuonVal::VectorBranch<float>& m_trackChi2{parent().newVector<float>(m_collName + "_chi2")};
             MuonVal::VectorBranch<unsigned>& m_trackNdoF{parent().newVector<unsigned>(m_collName + "_nDoF")};
+            MuonVal::VectorBranch<unsigned>& m_parentSeed{parent().newVector<unsigned>(m_collName + "_parentSeed")};
             
     };
 }

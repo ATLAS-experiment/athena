@@ -18,6 +18,7 @@ usage () {
     -s  |  --nStripCU       INT         nStripCU
     -b  |  --bdfid          STRING      bdfid of the FPGA to run on
     -f  |  --runF110                    run F110 Integration algo
+    -g  |  --useGBTS                    use GNN seeding strategy (Gbts2)
     -h  |  --help                       this help
     "
     [ $# -gt 0 ] && exit $1
@@ -38,6 +39,7 @@ outputAOD="AOD.root"
 nEvents="100"
 storeClusters=False
 runF110=False
+useGBTS=False
 threads=1
 nproc=0
 doCodeType="F1X0"
@@ -55,6 +57,7 @@ while [ $# -ge 1 ];do
         -r  | --procs )         if [ $# -lt 2 ] ; then usage ; fi ; nproc="$2" ; shift ;;
         -q  | --doCodeType )    if [ $# -lt 2 ] ; then usage ; fi ; doCodeType="$2" ; shift ;;
         -f  | --runF110 )       runF110=True ;;
+        -g  | --useGBTS )       useGBTS=True ;;
         -h  | --help )          usage 0 ;;
         *) shift ;;
         esac
@@ -83,14 +86,22 @@ fi
 ## running reconstruction
 echo "running local"
 
-ATHENA_CORE_NUMBER=${threads} Reco_tf.py --CA \
-    --maxEvents ${nEvents} \
-    --preInclude 'InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsValidateF100Flags,FPGATrackSimConfTools.FPGATrackSimDataPrepConfig.FPGATrackSimDataPrepFlagCfg,EFTrackingFPGAPipeline.F100IntegrationConfig.F100FlagsCfg' \
-    --preExec "flags.Tracking.doTruth=True;flags.Tracking.ITkActsValidateF100Pass.doFPGATrackSim=False;\
+# Build preExec flags
+preExecFlags="flags.Tracking.doTruth=True;flags.Tracking.ITkActsValidateF100Pass.doFPGATrackSim=False; flags.FPGADataPrep.ForTiming=True;\
                 flags.Tracking.doTruth=False; flags.Output.doGEN_AOD2xAOD=False; flags.Reco.PostProcessing.GeantTruthThinning=False; \
                 flags.Acts.EDM.PersistifyClusters=${storeClusters};flags.Acts.EDM.PersistifySpacePoints=${storeClusters};flags.Tracking.doVertexFinding=False;\
                 flags.Concurrency.NumProcs=${nproc}; flags.Concurrency.NumConcurrentEvents=${threads}; flags.Concurrency.NumThreads=${threads}; flags.Output.AODFileName=\"\"; flags.Output.doWriteAOD=False;\
-                flags.FPGADataPrep.doCodeType=\"${doCodeType}\";flags.FPGADataPrep.doF110=${runF110};flags.FPGADataPrep.bdfID=\"${bdfid}\";flags.FPGADataPrep.xclbin=\"${xclbinPath}\"" \
+                flags.FPGADataPrep.doCodeType=\"${doCodeType}\";flags.FPGADataPrep.doF110=${runF110};flags.FPGADataPrep.bdfID=\"${bdfid}\";flags.FPGADataPrep.xclbin=\"${xclbinPath}\""
+
+# In case of GBTS seeding strategy
+if [ "$useGBTS" == "True" ]; then
+    preExecFlags="${preExecFlags};from ActsConfig.ActsConfigFlags import SeedingStrategy;flags.Acts.SeedingStrategy=SeedingStrategy.Gbts2"
+fi
+
+ATHENA_CORE_NUMBER=${threads} Reco_tf.py --CA \
+    --maxEvents ${nEvents} \
+    --preInclude 'InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsValidateF100Flags,FPGATrackSimConfTools.FPGATrackSimDataPrepConfig.FPGATrackSimDataPrepFlagCfg,EFTrackingFPGAPipeline.F100IntegrationConfig.F100FlagsCfg' \
+    --preExec "${preExecFlags}" \
     --perfmon 'fullmonmt' \
     --autoConfiguration 'everything' \
     --multithreaded 'True' \

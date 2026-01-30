@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGMONTHISTSVC_THISTSVC_H
@@ -19,6 +19,7 @@ class TTree;
 #include <vector>
 #include <string>
 #include <unordered_map>
+#include <memory>
 #include <mutex>
 
 #include <boost/regex.hpp>
@@ -121,10 +122,9 @@ private:
   /// Helper struct that bundles the histogram, name and mutex
   struct THistID {
     THistID(const std::string& s, TObject* o) : id(s), obj(o) {};
-    ~THistID() { delete mutex; }
     std::string id;
     TObject* obj{nullptr};
-    std::mutex* mutex{nullptr};
+    std::unique_ptr<std::mutex> mutex;
   };
 
   /// Registered histograms

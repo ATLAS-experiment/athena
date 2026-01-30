@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigConfData/L1CTP.h"
@@ -22,7 +22,7 @@ TrigConf::L1CTP::load()
          m_ctpin[slot-7][conn] = inputs.get_optional<std::string>("ctpin.slot" + std::to_string(slot) + ".connector" + std::to_string(conn)).get_value_or("");
       }
    }
-   auto electrical = inputs.get_child("electrical");
+   const auto & electrical = inputs.get_child("electrical");
    for(size_t i=0; i<3; ++i) {
       m_electrical[i] = electrical.get_optional<std::string>("connector" + std::to_string(i)).get_value_or("");
    }

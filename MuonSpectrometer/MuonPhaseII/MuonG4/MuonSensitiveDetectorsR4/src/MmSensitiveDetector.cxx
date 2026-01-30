@@ -49,7 +49,7 @@ G4bool MmSensitiveDetector::ProcessHits(G4Step* aStep,G4TouchableHistory*) {
       return true;
   }
   /// Fetch the local -> global transformation  
-  const Amg::Transform3D toGasGap{readOutEle->globalToLocalTrans(gctx, hitID)};
+  const Amg::Transform3D toGasGap{readOutEle->globalToLocalTransform(gctx, hitID)};
   propagateAndSaveStrip(hitID, toGasGap, aStep);
   return true;
 }

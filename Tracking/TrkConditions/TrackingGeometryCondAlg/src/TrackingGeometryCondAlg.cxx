@@ -11,7 +11,7 @@
 
 Trk::TrackingGeometryCondAlg::TrackingGeometryCondAlg(const std::string& name,
                                                       ISvcLocator* pSvcLocator)
-  : AthAlgorithm(name, pSvcLocator)
+  : AthCondAlgorithm(name, pSvcLocator)
 {
 }
 
@@ -30,9 +30,8 @@ StatusCode Trk::TrackingGeometryCondAlg::initialize()
   return StatusCode::SUCCESS;
 }
 
-StatusCode Trk::TrackingGeometryCondAlg::execute(){
+StatusCode Trk::TrackingGeometryCondAlg::execute(const EventContext& ctx) const{
   //Set up write handle
-  const EventContext& ctx = Gaudi::Hive::currentContext();
   SG::WriteCondHandle<Trk::TrackingGeometry> writeHandle{m_trackingGeometryWriteKey, ctx};
   if (writeHandle.isValid()) {
     ATH_MSG_DEBUG("Found valid write handle");

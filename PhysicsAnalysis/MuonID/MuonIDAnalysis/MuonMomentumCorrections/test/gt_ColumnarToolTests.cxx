@@ -185,7 +185,7 @@ TEST_F (ColumnarPhysLiteTest, MuonCalibTool)
 
   XAODTestToolCaller callXAOD (*myToolHandle, "AnalysisMuons");
 
-  doCall (*myToolHandle, "MuonCalibTool", "AnalysisMuons", callXAOD, {{"Muons", "AnalysisMuons"}});
+  doCall ({.tool = &*myToolHandle, .name = "MuonCalibTool", .xAODToolCaller = &callXAOD, .containerRenames = {{"Muons", "AnalysisMuons"}}});
 }
 
 ATLAS_GOOGLE_TEST_MAIN

@@ -23,7 +23,7 @@
 #include "TObject.h"
 
 #include "FPGATrackSimObjects/FPGATrackSimTypes.h"
-#include "FPGATrackSimObjects/FPGATrackSimHit.h"
+#include "FPGATrackSimObjects/FPGATrackSimHitCollection.h"
 #include "FPGATrackSimObjects/FPGATrackSimMultiTruth.h"
 #include "FPGATrackSimObjects/FPGATrackSimTrackPars.h"
 
@@ -79,6 +79,7 @@ public:
 
     void setFitParams(const FPGATrackSimTrackPars& v) { m_fitTrackPars = v; }
     void setFitChi2(double v) { m_fitChi2 = v; }
+    void setFitChi2_2d(double chi2_phi, double chi2_eta) { m_fitChi2_phi = chi2_phi; m_fitChi2_eta = chi2_eta; }
 
     ///////////////////////////////////////////////////////////////////////
     // Getters
@@ -105,6 +106,8 @@ public:
 
     const FPGATrackSimTrackPars& getFitParams() const { return m_fitTrackPars; }
     double getFitChi2() const { return m_fitChi2; }
+    double getFitChi2Phi() const { return m_fitChi2_phi; }
+    double getFitChi2Eta() const { return m_fitChi2_eta; }
 
     ///////////////////////////////////////////////////////////////////////
     // Utility
@@ -146,8 +149,10 @@ private:
 
     FPGATrackSimTrackPars m_fitTrackPars;
     double m_fitChi2 = 0;
+    double m_fitChi2_phi = 0;
+    double m_fitChi2_eta = 0;
 
-    std::vector<std::vector<FPGATrackSimHit>> m_hits; // [layer, hit#] (used for ROOT storing)
+    std::vector<FPGATrackSimHitCollection> m_hits; // [layer, hit#] (used for ROOT storing)
     std::vector<std::vector<std::shared_ptr<const FPGATrackSimHit>>> m_hits_trans; //! (transient) [layer, hit#]
     // A list of hits in the road for each layer.
     // These pointers are not owned by the road.
@@ -158,7 +163,7 @@ private:
     ///////////////////////////////////////////////////////////////////////
     // Misc
     friend std::ostream& operator<<(std::ostream& os, const FPGATrackSimRoad& road);
-    ClassDefNV(FPGATrackSimRoad, 8);
+    ClassDefNV(FPGATrackSimRoad, 9);
 };
 
 #endif // FPGATrackSimROAD_H

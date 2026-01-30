@@ -69,7 +69,7 @@ StatusCode TrigBmumuxComboHypoTool::decideOnSingleObject(Decision* decision, con
   ATH_CHECK( trigBphysEL.isValid() );
 
   const std::vector<HLT::Identifier>& legDecisionIDs = legDecisionIds();
-  if (m_isBmux) {  // bBmux chain: only one previousDecision is available, in case of assymmetric chain it should match to one arbitrary leg
+  if (m_isBmux || m_isBhh) {  // bBmux or bBhh chain: only one previousDecision is available, in case of assymmetric chain it should match to one arbitrary leg
     ATH_CHECK( previousDecisionIDs.size() == 1 );
     bool passed = false;
     for (size_t i = 0; i < legDecisionIDs.size(); ++i) {
@@ -80,7 +80,7 @@ StatusCode TrigBmumuxComboHypoTool::decideOnSingleObject(Decision* decision, con
       }
     }
     if (!passed) {
-      ATH_MSG_DEBUG( "bBmux chain did not match to the previous decisions" );
+      ATH_MSG_DEBUG( (m_isBmux ? "bBmux" : "bBhh") << " chain did not match to the previous decisions" );
       return StatusCode::SUCCESS;
     }
   }

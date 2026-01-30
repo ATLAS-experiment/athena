@@ -1,8 +1,8 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "MuonCondAlg/TgcDigitASDposCondAlg.h"
+#include "TgcDigitASDposCondAlg.h"
 #include "CxxUtils/StringUtils.h"
 #include "StoreGate/ReadCondHandle.h"
 #include "StoreGate/WriteCondHandle.h"
@@ -10,10 +10,7 @@
 #include <string_view>
 
 
-TgcDigitASDposCondAlg::TgcDigitASDposCondAlg(const std::string& name, ISvcLocator* pSvcLocator) :
-  AthReentrantAlgorithm(name, pSvcLocator)
-{}
-
+namespace Muon{
 StatusCode TgcDigitASDposCondAlg::initialize()
 {
   ATH_MSG_DEBUG("initialize " << name());
@@ -26,7 +23,7 @@ StatusCode TgcDigitASDposCondAlg::initialize()
 
 StatusCode TgcDigitASDposCondAlg::execute(const EventContext& ctx) const
 {
-  SG::WriteCondHandle<TgcDigitASDposData> writeHandle{m_writeKey, ctx};
+  SG::WriteCondHandle writeHandle{m_writeKey, ctx};
   if (writeHandle.isValid()) {
     ATH_MSG_DEBUG("CondHandle " << writeHandle.fullKey() << " is already valid."
 		  << ". In theory this should not be called, but may happen"
@@ -34,7 +31,7 @@ StatusCode TgcDigitASDposCondAlg::execute(const EventContext& ctx) const
     return StatusCode::SUCCESS;
   }
 
-  SG::ReadCondHandle<CondAttrListCollection> readHandle_ASDpos{m_readKey_ASDpos, ctx};
+  SG::ReadCondHandle readHandle_ASDpos{m_readKey_ASDpos, ctx};
   if (!readHandle_ASDpos.isValid()) {
     ATH_MSG_ERROR("Null pointer to the read conditions object");
     return StatusCode::FAILURE;
@@ -78,4 +75,5 @@ StatusCode TgcDigitASDposCondAlg::execute(const EventContext& ctx) const
   ATH_MSG_DEBUG("recorded new " << writeHandle.key() << " with range " << writeHandle.getRange() << " into Conditions Store");
 
   return StatusCode::SUCCESS;
+}
 }

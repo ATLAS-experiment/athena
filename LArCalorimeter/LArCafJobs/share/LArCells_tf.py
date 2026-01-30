@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 __doc__ = """JobTransform to run LArReadCells jobs"""
 
@@ -28,6 +28,11 @@ if __name__ == '__main__':
     trf.parser.add_argument('--outputNTUP_LARCELLSFile', nargs='+',
                             type=trfArgClasses.argFactory(trfArgClasses.argNTUPFile, io='output', treeNames="events"),
                             help='Output LAr Cells file', group='Ntuple Files')
+    trf.parser.add_argument('--isSC', type=trfArgClasses.argFactory(trfArgClasses.argBool),
+                                           default=trfArgClasses.argBool(False))
+
+    trf.parser.add_argument('--doReco', type=trfArgClasses.argFactory(trfArgClasses.argBool),
+                                           default=trfArgClasses.argBool(False))
 
     trf.parseCmdLineArgs(sys.argv[1:])
     trf.execute()

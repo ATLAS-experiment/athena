@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MaterialMapperTree_h
@@ -195,6 +195,8 @@ public :
    TBranch        *b_TotalPath;   //!
 
    MaterialMapperTree(TTree *tree=0);
+   MaterialMapperTree(const MaterialMapperTree &) = delete;
+   MaterialMapperTree & operator = (const MaterialMapperTree &) = delete;
    virtual ~MaterialMapperTree();
    virtual Int_t    Cut(Long64_t entry);
    virtual Int_t    GetEntry(Long64_t entry);

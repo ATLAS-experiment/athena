@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -24,7 +24,6 @@
 #include "AthenaMonitoring/IMonitorToolBase.h"
 #include "AthenaMonitoringKernel/Monitored.h"
 
-#include "TrigDecisionTool/TrigDecisionTool.h"
 #include "StoreGate/ReadHandleKey.h"
 #include "StoreGate/ReadCondHandle.h"
 #include "StoreGate/ReadCondHandleKey.h"
@@ -32,6 +31,10 @@
 #include "LumiBlockData/LuminosityCondData.h"
 #include "LumiBlockData/LBDurationCondData.h"
 #include "LumiBlockData/TrigLiveFractionCondData.h"
+
+namespace Trig {
+class TrigDecisionTool;
+}
 
 class AthMonitorAlgorithm : public AthReentrantAlgorithm {
 public:
@@ -337,7 +340,9 @@ protected:
     // Using the new way to declare JO properties: Gaudi::Property<int> m_myProperty {this,"MyProperty",0};
     ToolHandleArray<GenericMonitoringTool> m_tools {this,"GMTools",{}}; ///< Array of Generic Monitoring Tools
     // Keep TDT public until final decision from trigger on interface
-    PublicToolHandle<Trig::TrigDecisionTool> m_trigDecTool {this, "TrigDecisionTool",""}; ///< Tool to tell whether a specific trigger is passed
+    // Initialization is in the ctor to avoid requiring a header
+    // dependency on TrigDecisionTool.h.
+    PublicToolHandle<Trig::TrigDecisionTool> m_trigDecTool; ///< Tool to tell whether a specific trigger is passed
     ToolHandleArray<IDQFilterTool> m_DQFilterTools {this,"FilterTools",{}}; ///< Array of Data Quality filter tools
 
     SG::ReadCondHandleKey<LuminosityCondData> m_lumiDataKey

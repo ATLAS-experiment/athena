@@ -9,17 +9,17 @@ class ParticleLevelMuonsBlock(ConfigBlock):
     def __init__(self):
         super(ParticleLevelMuonsBlock, self).__init__()
         self.addOption('containerName', 'TruthMuons', type=str,
-                       info='the name of the input truth muons container')
+                       info='the name of the input truth muons container.')
         self.addOption('selectionName', '', type=str,
-                       info='the name of the selection to create. The default is "",'
-                       ' which applies the selection to all truth muons.')
+                       info='the name of the selection to create. If left empty, '
+                       'applies the selection to all truth muons.')
         self.addOption('isolated', True, type=bool,
                        info='select only truth muons that are isolated.')
         self.addOption('notFromTau', True, type=bool,
                        info='select only truth muons that did not orginate '
-                       'from a tau decay.')
+                       'from a tau-lepton decay.')
         self.addOption('saveUID', False, type=bool,
-                       info='save unique ID in output')
+                       info='save unique ID in output.')
         # Always skip on data
         self.setOptionValue('skipOnData', True)
 

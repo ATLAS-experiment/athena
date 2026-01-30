@@ -142,12 +142,7 @@ StatusCode PixelDetectorTool::create()
 
   // BCM Tool.
   if (!m_bcmTool.empty()) {
-    if (!m_bcmTool.retrieve().isFailure()) {
-      ATH_MSG_INFO("BCM_GeoModel tool retrieved: " << m_bcmTool );
-    } else {
-      ATH_MSG_INFO("Could not retrieve " << m_bcmTool << " -  BCM will not be built" );
-    }
-    m_athenaComps->setBCM(&*m_bcmTool);
+    m_athenaComps->setBCM(m_bcmTool.get());
   }
   else {
     ATH_MSG_INFO("BCM not requested." );
@@ -155,13 +150,7 @@ StatusCode PixelDetectorTool::create()
 
   // BLM Tool.
   if (!m_blmTool.empty()) {
-    if (!m_blmTool.retrieve().isFailure()) {
-      ATH_MSG_INFO("BLM_GeoModel tool retrieved: " << m_blmTool );
-    }
-    else {
-      ATH_MSG_INFO("Could not retrieve " << m_blmTool << " -  BLM will not be built" );
-    }
-    m_athenaComps->setBLM(&*m_blmTool);
+    m_athenaComps->setBLM(m_blmTool.get());
   }
   else {
     ATH_MSG_INFO("BLM not requested." );
@@ -317,7 +306,7 @@ StatusCode PixelDetectorTool::clear()
 }
 
 StatusCode
-PixelDetectorTool::align ATLAS_NOT_THREAD_SAFE(IOVSVC_CALLBACK_ARGS_P(I,keys))
+PixelDetectorTool::align()
 //Not thread safe as the call m_manager->align will invalidateAllElements it holds
 {
   if (!m_manager) {
@@ -325,7 +314,7 @@ PixelDetectorTool::align ATLAS_NOT_THREAD_SAFE(IOVSVC_CALLBACK_ARGS_P(I,keys))
     return StatusCode::FAILURE;
   }
   if (m_alignable) {
-    return const_cast<InDetDD::PixelDetectorManager*>(m_manager)->align(I,keys);
+    return const_cast<InDetDD::PixelDetectorManager*>(m_manager)->align();
   } else{
     ATH_MSG_DEBUG("Alignment disabled. No alignments applied" );
     return StatusCode::SUCCESS;

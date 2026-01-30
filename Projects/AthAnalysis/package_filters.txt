@@ -15,7 +15,7 @@
 + Control/AthLinks
 + Control/AthToolSupport/.*
 + Control/CxxUtils
-+ Control/xAODRootAccess.*
++ Control/xAOD.*
 
 # EDM:
 + Event/EventPrimitives

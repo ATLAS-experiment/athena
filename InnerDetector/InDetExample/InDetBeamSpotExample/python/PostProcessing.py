@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 """
 This module defines the generic infrastructure for task postprocessing.
@@ -25,6 +25,7 @@ class PostProcessingError(Exception):
         self.message = message
         self.executedSteps = executedSteps
         self.newStatus = newStatus
+        super().__init__(message,executedSteps,newStatus)
     def __str__(self):
         return self.message
 
@@ -33,6 +34,7 @@ class PostponeProcessing(Exception):
     def __init__(self,message,executedSteps,newStatus=None):
         self.message = message
         self.newStatus = newStatus
+        super().__init__(message,executedSteps,newStatus)
     def __str__(self):
         return self.message
 

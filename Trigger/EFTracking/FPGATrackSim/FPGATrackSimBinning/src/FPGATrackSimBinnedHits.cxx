@@ -159,7 +159,7 @@ StatusCode FPGATrackSimBinnedHits::fill(
         }
         
         if (m_binnedHitsStep[stepnum - 1][step->convertToPrev(bin.idx())].hits.size()!=0)
-        ATH_MSG_DEBUG("Bin Hit Count: step " << step.name()
+        ATH_MSG_VERBOSE("Bin Hit Count: step " << step.name()
           << " binidx = " << bin.idx()
           << " input hits = "  << m_binnedHitsStep[stepnum - 1][step->convertToPrev(bin.idx())].hits.size()
           << " layers=" << m_binnedHitsStep[stepnum][bin.idx()].lyrCnt() 

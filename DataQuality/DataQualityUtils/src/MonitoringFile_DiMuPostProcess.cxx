@@ -228,7 +228,7 @@ namespace dqutils {
 
   void MonitoringFile::fitHistos(TH2F* hin, const std::vector<TH1F*>& hout, int mode, const std::string& triggerName,
                                  const std::string& resonName, TH1F* h_chi2) {
-    bool saveHistos = false;
+    const bool saveHistos = false;
 
     // a canvas may be needed when implmenting this into the post-processing file
     //std::cout<<"The fitHistos method is called"<<endl;
@@ -257,9 +257,9 @@ namespace dqutils {
             htemp->Fit("fn", "RQMN");
           } else {
             ctemp = new TCanvas("ctemp", "ctemp", 500, 500);
-            TString psName = num2str + triggerName + ".ps";
+            std::string psName = num2str + triggerName + ".ps";
             htemp->Fit("fn", "RQM");
-            ctemp->Print(psName);
+            ctemp->Print(psName.c_str());
             delete ctemp;
           }
           double frange = 2.4 * sigma;

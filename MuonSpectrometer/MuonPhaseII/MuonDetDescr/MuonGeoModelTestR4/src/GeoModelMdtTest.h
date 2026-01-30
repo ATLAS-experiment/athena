@@ -18,6 +18,8 @@
 #include <MuonReadoutGeometryR4/MuonDetectorManager.h>
 #include <MuonTesterTree/CoordTransformBranch.h>
 #include <MuonCablingData/MuonMDT_CablingMap.h>
+#include <MuonRecToolInterfacesR4/IRootVisualizationService.h>
+
 namespace MuonGMR4{
 
 class GeoModelMdtTest : public AthHistogramAlgorithm{
@@ -33,7 +35,30 @@ class GeoModelMdtTest : public AthHistogramAlgorithm{
         unsigned int cardinality() const override final { return 1; }
 
     private:
+      /** @brief Visualize the tube staggering on a canvas
+        *  @param ctx: EventContext to draw a new canvas from the VisualizationService
+        *  @param reEle: Reference to the readout element of which the tube staggering shall be visualized
+        */
+      StatusCode visualizeTubeStaggering(const EventContext& ctx,
+                                  const ActsTrk::GeometryContext& gctx) const;
+
+
+      /** @brief Visualize the tube layer on a Canvas
+       *  @param ctx: EventContext to draw a new canvas from the VisualizationService
+       *  @param reEle: Reference to the readout element of which the tube layer shall be visualized
+       *  @param layer: Actual tube layer to visualize */
+      void visualizeTubeLayer(const EventContext& ctx,
+                              const MuonGMR4::MdtReadoutElement& reEle,
+                              const unsigned layer) const;
+      /** @brief Create a xml indicating on which side of the chamber is the tube-readout card  */
       void dumpReadoutSideXML() const;
+
+      /** @brief Service handle of the visualization service */
+      ServiceHandle<MuonValR4::IRootVisualizationService> m_visualSvc{this, "VisualSvc", "MuonValR4::RootVisualizationService"};
+      /** @brief Token to be presented to the visualization service  */
+      MuonValR4::IRootVisualizationService::ClientToken m_clientTokenLayerVis{};
+      MuonValR4::IRootVisualizationService::ClientToken m_clientTokenStaggeringVis{};
+
       ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "IdHelperSvc", 
                                                 "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
 
@@ -97,6 +122,10 @@ class GeoModelMdtTest : public AthHistogramAlgorithm{
       MuonVal::ThreeVectorBranch m_roPos{m_tree, "readOutPos"};
       /// Position of the tube in the sector frame
       MuonVal::ThreeVectorBranch m_tubePosInCh{m_tree, "chamberTubePos"};
+      /** @brief Flag toggling whether the tubes shall be printed */
+      Gaudi::Property<bool> m_visualTubes{this, "visualizeTubes", true};
+      /** @briefGlag toggeling whether the tube staggering shall be visualized */
+      Gaudi::Property<bool> m_visualStaggering{this, "visualizeStaggering", true};
 };
 
 }

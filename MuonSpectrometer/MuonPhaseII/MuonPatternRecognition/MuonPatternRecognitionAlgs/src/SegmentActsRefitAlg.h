@@ -14,6 +14,7 @@
 #include "ActsGeometryInterfaces/IExtrapolationTool.h"
 #include "ActsGeometryInterfaces/ITrackingGeometryTool.h"
 #include "MuonRecToolInterfacesR4/ISegmentSelectionTool.h"
+#include "MuonRecToolInterfacesR4/ISpacePointCalibrator.h"
 #include "ActsToolInterfaces/IFitterTool.h"
 #include "xAODMuon/MuonSegmentContainer.h"
 #include "MuonIdHelpers/IMuonIdHelperSvc.h"
@@ -70,9 +71,13 @@ namespace MuonR4{
             Gaudi::Property<double> m_smearRange{this, "SmearRange", 1.};
             /** @brief Key to setup a surface container for the external constraints */
             SG::WriteHandleKey<xAOD::TrackSurfaceContainer> m_surfKey{this, "SurfaceKey", "RefitSegmentSurf"};
+            /// Handle to the space point calibrator
+            ToolHandle<ISpacePointCalibrator> m_calibTool{this, "Calibrator", "" };
+            /** @brief Dump the segment line in obj files */
+            Gaudi::Property<bool> m_drawEvent{this , "drawEvent", false };
               
             ActsTrk::AuxiliaryMeasurementHandler m_auxMeasProv{this};
-
+            /** @brief Detector manager to access the spectrometer sector surfaces */
             const MuonGMR4::MuonDetectorManager* m_detMgr{nullptr};
 
 

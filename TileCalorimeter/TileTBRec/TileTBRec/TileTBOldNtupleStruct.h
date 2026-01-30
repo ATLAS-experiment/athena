@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //////////////////////////////////////////////////////////
@@ -27,6 +27,9 @@ public :
 
   virtual ~TileTBOldNtupleStruct();
   virtual Int_t    GetEntry(Long64_t entry, int branch=-1);
+
+  TileTBOldNtupleStruct(const TileTBOldNtupleStruct&) = delete;
+  TileTBOldNtupleStruct& operator=(const TileTBOldNtupleStruct&) = delete;
 
    // Declaration of leave types
    Int_t           Evtime{};

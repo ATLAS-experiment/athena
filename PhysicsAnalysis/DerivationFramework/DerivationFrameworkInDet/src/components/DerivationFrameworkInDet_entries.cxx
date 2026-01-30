@@ -1,5 +1,7 @@
 #include "DerivationFrameworkInDet/TrackToVertexWrapper.h"
 #include "DerivationFrameworkInDet/TrackParticleThinning.h"
+#include "DerivationFrameworkInDet/TrackParticleThinningBase.h"
+#include "DerivationFrameworkInDet/TrackParticleThinningPHYS.h"
 #include "DerivationFrameworkInDet/MuonTrackParticleThinning.h"
 #include "DerivationFrameworkInDet/EgammaTrackParticleThinning.h"
 #include "DerivationFrameworkInDet/JetTrackParticleThinning.h"
@@ -20,6 +22,8 @@
 #include "DerivationFrameworkInDet/PseudoTrackSelector.h"
 #include "DerivationFrameworkInDet/TauJets_LepRMParticleThinning.h"
 #include "DerivationFrameworkInDet/UFOTrackParticleThinning.h"
+#include "DerivationFrameworkInDet/JetConstituentThinning.h"
+#include "DerivationFrameworkInDet/JetGhostThinning.h"
 #include "DerivationFrameworkInDet/IsolationTrackDecorator.h"
 #include "DerivationFrameworkInDet/TagAndProbeTrackParticleThinning.h"
 
@@ -27,6 +31,8 @@ using namespace DerivationFramework;
 
 DECLARE_COMPONENT( TrackToVertexWrapper )
 DECLARE_COMPONENT( TrackParticleThinning )
+DECLARE_COMPONENT( TrackParticleThinningBase )
+DECLARE_COMPONENT( TrackParticleThinningPHYS )
 DECLARE_COMPONENT( MuonTrackParticleThinning )
 DECLARE_COMPONENT( EgammaTrackParticleThinning )
 DECLARE_COMPONENT( TauTrackParticleThinning )
@@ -47,6 +53,8 @@ DECLARE_COMPONENT( EventInfoPixelModuleStatusMonitoring )
 DECLARE_COMPONENT( PseudoTrackSelector )
 DECLARE_COMPONENT( TauJets_LepRMParticleThinning )
 DECLARE_COMPONENT( UFOTrackParticleThinning )
+DECLARE_COMPONENT( JetConstituentThinning )
+DECLARE_COMPONENT( JetGhostThinning )
 DECLARE_COMPONENT( IsolationTrackDecorator )
 DECLARE_COMPONENT( TagAndProbeTrackParticleThinning )
 

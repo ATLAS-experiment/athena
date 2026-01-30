@@ -128,7 +128,7 @@ def MuonAlignmentCondAlgCfg(flags, name="MuonAlignmentCondAlg", **kwargs):
     kwargs.setdefault("LoadBLines", flags.Muon.Align.UseBLines)
     
     kwargs.setdefault("ParlineFolders", ParlineFolders)
-    MuonAlign = CompFactory.MuonAlignmentCondAlg(name, **kwargs)
+    MuonAlign = CompFactory.Muon.AlignmentCondAlg(name, **kwargs)
     acc.addCondAlgo(MuonAlign, primary = True)
     return acc
 
@@ -137,7 +137,7 @@ def MuonAlignmentErrorDbAlgCfg(flags):
     acc = ComponentAccumulator()
     from IOVDbSvc.IOVDbSvcConfig import addFolders
     acc.merge(addFolders(flags, "/MUONALIGN/ERRS", "MUONALIGN_OFL", className="CondAttrListCollection"))
-    acc.addCondAlgo(CompFactory.MuonAlignmentErrorDbAlg("MuonAlignmentErrorDbAlg"))
+    acc.addCondAlgo(CompFactory.Muon.AlignmentErrorDbAlg("MuonAlignmentErrorDbAlg"))
     return acc
 
 def NswAsBuiltCondAlgCfg(flags, name = "NswAsBuiltCondAlg", **kwargs):
@@ -153,7 +153,7 @@ def NswAsBuiltCondAlgCfg(flags, name = "NswAsBuiltCondAlg", **kwargs):
     from IOVDbSvc.IOVDbSvcConfig import addFolders
     if(not (kwargs["MicroMegaJSON"] or not kwargs["ReadMmAsBuiltParamsKey"]) ) : # no need to add the folder if we are reading a json file anyhow
         result.merge(addFolders( flags, kwargs["ReadMmAsBuiltParamsKey"]  , 'MUONALIGN_OFL', className='CondAttrListCollection'))
-    the_alg = CompFactory.NswAsBuiltCondAlg(name, **kwargs)
+    the_alg = CompFactory.Muon.NswAsBuiltCondAlg(name, **kwargs)
     result.addCondAlgo(the_alg, primary = True)     
     return result
 
@@ -167,19 +167,35 @@ def sTGCAsBuiltCondAlgCfg(flags, name = "sTGCAsBuiltCondAlg", **kwargs):
         kwargs.setdefault("ReadKey","/MUONALIGN/ASBUILTPARAMS/STGC")
         from IOVDbSvc.IOVDbSvcConfig import addFolders
         result.merge(addFolders( flags, kwargs["ReadKey"], 'MUONALIGN_OFL', className='CondAttrListCollection', tag = 'MUONALIGN_STG_IntAl_alCons_noQL3_v01'))
-    the_alg = CompFactory.sTGCAsBuiltCondAlg(name,**kwargs)
+    the_alg = CompFactory.Muon.sTGCAsBuiltCondAlg(name,**kwargs)
     result.addCondAlgo(the_alg, primary=True)
     return result
+
+# since the MM as built 2 corrections are not supossed to run in standart reco job just a fragment to activate them in a postExex is provided
+def activateMmAsBuilt2PostExec(flags, cfg, **kwargs):
+    #### Do not apply the as-built correction if not activated
+    name = "MmAsBuilt2CondAlg"
+    if flags.GeoModel.Run != LHCPeriod.Run3:
+        return
+    kwargs.setdefault("readFromJSON","")
+    kwargs.setdefault("WriteKey","MmAsBuilt2")
+    the_alg = CompFactory.Muon.sTGCAsBuiltCondAlg(name,**kwargs)
+    cfg.addCondAlgo(the_alg, primary=True)
+
+    cfg.getCondAlgo("MuonDetectorCondAlg").applyMmAsBuilt2=True
+    cfg.getCondAlgo("MuonDetectorCondAlg").ReadMmAsBuilt2Key = kwargs["WriteKey"] 
         
         
 
 
 def MdtAsBuiltCondAlgCfg(flags, name="MdtAsBuiltCondAlg", **kwargs):
     result = ComponentAccumulator()
+    if not flags.Detector.GeometryMDT:
+        return result
     from IOVDbSvc.IOVDbSvcConfig import addFolders
     if "readFromJSON" not in kwargs or not kwargs["readFromJSON"]:
         result.merge(addFolders( flags, '/MUONALIGN/MDT/ASBUILTPARAMS' , 'MUONALIGN_OFL', className='CondAttrListCollection'))
-    the_alg = CompFactory.MdtAsBuiltCondAlg(name = name, **kwargs)
+    the_alg = CompFactory.Muon.MdtAsBuiltCondAlg(name = name, **kwargs)
     result.addCondAlgo(the_alg, primary = True)    
     return result
 
@@ -193,7 +209,7 @@ def CscILineCondAlgCfg(flags, name="CscILinesCondAlg", **kwargs):
     else:
         result.merge(addFolders( flags, ['/MUONALIGN/CSC/ILINES'], 'MUONALIGN_OFL', className='CondAttrListCollection'))
     
-    the_alg = CompFactory.CscILinesCondAlg(name, **kwargs)
+    the_alg = CompFactory.Muon.CscILinesCondAlg(name, **kwargs)
     result.addCondAlgo(the_alg, primary = True)
     return result
 
@@ -229,4 +245,58 @@ def MuonGeoModelToolCfg(flags):
     result = ComponentAccumulator()
     geoModelSvc = result.getPrimaryAndMerge(GeoModelCfg(flags))
     geoModelSvc.DetectorTools+= [result.popToolsAndMerge(MuonDetectorToolCfg(flags))]
+    return result
+
+def RegionSelCondAlgCfg(flags, detector: str, **kwargs):
+    from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
+    from AthenaConfiguration.ComponentFactory import CompFactory
+    from MuonConfig.MuonCablingConfig import RPCCablingConfigCfg, MDTCablingConfigCfg, TGCCablingConfigCfg
+    from MuonConfig.MuonCondAlgConfig import MdtCondDbAlgCfg
+    result = ComponentAccumulator()
+    kwargs.setdefault("name", f"RegSelCondAlg_{detector}")
+    kwargs.setdefault("RegSelLUT", f"RegSelLUTCondData_{detector}")
+    kwargs.setdefault("PrintTable", flags.hasFlag("PrintLUT") and flags.PrintLUT)
+
+    result.merge(MuonGeoModelCfg(flags))
+    result.merge(RPCCablingConfigCfg(flags))
+    result.merge(MDTCablingConfigCfg(flags))
+    result.merge(TGCCablingConfigCfg(flags))
+
+    
+    result.merge(MdtCondDbAlgCfg(flags))
+
+    the_alg = None
+    if flags.Muon.usePhaseIIGeoSetup:
+        if not flags.Detector.GeometryMDT: 
+            kwargs.setdefault("MdtCablingKey", "")
+        if not flags.Detector.GeometryRPC:
+            kwargs.setdefault("RpcCablingKey", "")
+        alignDet = ""
+        if detector == "MDT":    alignDet = "Mdt"
+        elif detector == "RPC":  alignDet = "Rpc"
+        elif detector == "TGC":  alignDet = "Tgc"        
+        elif detector == "sTGC": alignDet = "sTgc"
+        elif detector == "MM":   alignDet = "Mm"
+        
+        kwargs.setdefault("AlignKey", f"{alignDet}ActsAlignContainer")
+        from MuonConfig.MuonConfigFlags import GeoTrfCacheMode
+        kwargs.setdefault("splitTrfCache", flags.Muon.AlignedGeoTrfCacheMode ==  GeoTrfCacheMode.SplitCache or
+                                           flags.Muon.AlignedGeoTrfCacheMode ==  GeoTrfCacheMode.SlopyCache)
+        the_alg = CompFactory.MuonR4.RegionSelectorCondAlg(**kwargs)
+       
+    elif detector == "MDT":
+        if not flags.Muon.useMdtDcsData:
+            kwargs.setdefault("Conditions", "")
+        the_alg = CompFactory.MDT_RegSelCondAlg(**kwargs)
+    elif detector == "RPC":
+        the_alg = CompFactory.RPC_RegSelCondAlg(**kwargs)
+    elif detector == "TGC":
+        the_alg = CompFactory.TGC_RegSelCondAlg(**kwargs)
+    elif detector == "sTGC":
+        the_alg = CompFactory.sTGC_RegSelCondAlg(**kwargs)
+    elif detector == "MM":
+        the_alg = CompFactory.MM_RegSelCondAlg(**kwargs)
+    else:
+        raise ValueError(f"The {detector} is an unknown detector flag")
+    result.addCondAlgo(the_alg, primary = True)
     return result

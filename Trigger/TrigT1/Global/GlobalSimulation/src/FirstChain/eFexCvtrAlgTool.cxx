@@ -28,7 +28,7 @@ namespace GlobalSim {
 
     ATH_MSG_DEBUG("Number of eFexROIs read in " << inContainer->size());
     
-    using OutContainer=GlobalSim::IOBitwise::IeEmTOBContainer;
+    using OutContainer=GlobalSim::IOBitwise::eEmTOBContainer;
 
     auto outContainer = std::make_unique<OutContainer>();
  

@@ -152,7 +152,6 @@ StatusCode LArSCvsRawChannelMonAlg::fillHistograms(const EventContext& ctx) cons
           break;
         }
 
-        bcHdl->status(rc.hardwareID()).deadReadout();
         eneSum += rc.energy();
         if (bcidavgshift)
           eneSum -= bcidavgshift->average(rc.hardwareID());

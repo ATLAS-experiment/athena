@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // PhysValBTag.h
@@ -59,7 +59,7 @@ namespace JetTagDQA {
     ///////////////////////////////////////////////////////////////////
     // Const methods:
     ///////////////////////////////////////////////////////////////////
-    std::map<const xAOD::TrackParticle*, int> getTrackTruthAssociations(const xAOD::BTagging* btag) const;
+    std::map<const xAOD::TrackParticle*, int> getTrackTruthAssociations(const xAOD::Jet* jet) const;
 
     ///////////////////////////////////////////////////////////////////
     // Non-const methods:
@@ -108,15 +108,12 @@ namespace JetTagDQA {
     float m_JVTCutAntiKt4EMPFlowJets;
     float m_truthMatchProbabilityCut;
 
-    std::string m_dipsName;
-    std::string m_DL1dv01Name;
     std::string m_GN2v01Name;
-    std::string m_GN2Xv01Name;
+    std::string m_GN3XPV01Name;
 
     JetTagDQA::BTaggingValidationPlots m_antiKt4EMTopoPlots;
     JetTagDQA::BTaggingValidationPlots m_antiKt4EMPFlowJetsPlots;
     JetTagDQA::BTaggingValidationPlots m_antiKt10UFOCSSKSoftDropBeta100Zcut10Jets;
-    JetTagDQA::BTaggingValidationPlots m_antiKtVR30Rmax4Rmin02PV0TrackJetsPlots;
 
     int m_nevents;
 

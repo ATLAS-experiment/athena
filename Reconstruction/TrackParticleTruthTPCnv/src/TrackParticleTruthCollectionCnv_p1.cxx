@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ParticleTruth/TrackParticleTruthCollection.h"
@@ -57,9 +57,8 @@ void TrackParticleTruthCollectionCnv_p1::transToPers( const TrackParticleTruthCo
     // For the map of EL keys and HepParticleLinks, we only write out
     // pairs which were not thinned away. RDS 02/2012
     pers->m_entries.reserve(trans->size());
-    Rec::TrackParticleTruthCollection_p1::CollectionType::size_type ipers(0);
     TrackParticleTruthCollection::const_iterator itrans = trans->begin(); 
-    for( ; itrans!=trans->end(); ++itrans, ++ipers) {
+    for( ; itrans!=trans->end(); ++itrans) {
         Rec::TrackParticleTruthCollection_p1::Entry entry;
         const TrackParticleTruth& truth = itrans->second;
         // We must first convert the element link to check whether or

@@ -71,7 +71,7 @@ public:
   DiscSurface& operator=(DiscSurface&& dsf) noexcept = default;
 
   /**Destructor*/
-  virtual ~DiscSurface() = default;
+  virtual ~DiscSurface();
 
   /**Constructor for Discs from HepGeom::Transform3D, \f$ r_{min}, r_{max} \f$
    */

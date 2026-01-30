@@ -89,6 +89,12 @@ private:
     Gaudi::Property<float> m_minVInjToImposeAmpRequirementHGInjectorPulse {this, "MinVInjToImposeAmpRequirementHGInjectorPulse", 0.002, "Minimum input voltage to impose HG minimum amplitude requirement in the injector pulse stream; set to negative value to cancel HG minimum-amplitude requirement"};
     Gaudi::Property<float> m_minVInjToImposeAmpRequirementLGInjectorPulse {this, "MinVInjToImposeAmpRequirementLGInjectorPulse", 0.002, "Minimum input voltage to impose LG minimum amplitude requirement in the injector pulse stream; set to negative value to cancel LG minimum-amplitude requirement"};
 
+    // impose a minimum input-voltage requirement for injected pulse ZDC module amplitude histograms
+    // crucial since ZDC module amplitude histogram has finite resolution, e.g, 100 ADC, to minimize memory usage
+    // the resolution gives the smallest ADC value usable as the [low amplitude] threshold for [low-amplitude-event percentage] DQ check
+    // need to impose a minimum input-voltage requirement whose corresponding amplitude peak exceeds this resolution for DQ check to be meaningful
+    Gaudi::Property<float> m_minVInjToEvaluateLowAmpPercentageDQInjectorPulse {this, "MinVInjToEvaluateLowAmpPercentageDQInjectorPulse", 0.04, "Minimum input voltage required for events to be plotted in "};
+
     Gaudi::Property<std::vector<std::string>> m_OOpOtriggerChains {this, "OOpOTriggers", {}, "List of trigger chains to monitor"};
     Gaudi::Property<std::map<int,std::string>> m_OOpOL1TriggerFromCTPIDMap {this, "OOpOL1TriggerFromCTPIDMap", {}, "Map of CTP ID to trigger name for ZdcCalib PEB stream pO/OO monitoring"};
 
@@ -137,7 +143,8 @@ private:
     Gaudi::Property<bool> m_enableRPD {this,"EnableRPD",true};
     Gaudi::Property<bool> m_enableRPDAmp {this,"EnableRPDAmp",true};
     Gaudi::Property<bool> m_enableCentroid {this,"EnableCentroid",true};
-    
+    Gaudi::Property<bool> m_isCommRun {this,"IsCommRun",false};
+
     Gaudi::Property<std::vector<float>> m_injPulseVoltageSteps {this, "InjPulseVoltageSteps", {0.}};
     Gaudi::Property<std::vector<std::string>> m_injPulseVoltageStepsStr {this, "InjPulseVoltageStepsStr", {""}};
 

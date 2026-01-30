@@ -2,6 +2,7 @@
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
+from HGTD_Calibration.HGTD_CalibrationConfig import HGTD_TdcCalibrationToolCfg
 
 def HGTD_ClusterMakerToolCfg(flags, name = "HGTD_ClusterMakerTool", **kwargs):
     """Configures a tool that forms HGTD clusters """
@@ -19,6 +20,11 @@ def SinglePadClusterToolCfg(flags, name = "SinglePadClusterTool", **kwargs):
     acc = HGTD_ReadoutGeometryCfg(flags)
 
     kwargs.setdefault("ClusterMakerTool", acc.popToolsAndMerge(HGTD_ClusterMakerToolCfg(flags)))
+
+    if flags.HGTD.useALTIROC_RDO:
+        kwargs.setdefault("useALTIROC_RDO", True)
+        kwargs.setdefault("HGTD_TdcCalibrationTool", acc.popToolsAndMerge(HGTD_TdcCalibrationToolCfg(flags)))
+
     acc.setPrivateTools(CompFactory.HGTD.SinglePadClusterTool(name, **kwargs))
     return acc
 
@@ -27,8 +33,14 @@ def PadClusterizationCfg(flags, name = "PadClusterizationAlg", **kwargs):
     acc = ComponentAccumulator()
 
     kwargs.setdefault("ClusterizationTool", acc.popToolsAndMerge(SinglePadClusterToolCfg(flags)))
-    kwargs.setdefault("RDOContainerName", "HGTD_RDOs")
     kwargs.setdefault("PRDContainerName", "HGTD_Clusters")
+
+    if flags.HGTD.useALTIROC_RDO:
+        kwargs.setdefault("useALTIROC_RDO", True)
+        kwargs.setdefault("AltirocRDOContainerName", "HGTD_ALTIROC_RDOs")
+    else:
+        kwargs.setdefault("useALTIROC_RDO", False)
+        kwargs.setdefault("RDOContainerName", "HGTD_RDOs")
 
     # Monitor Execution Time
     if flags.HGTD.doMonitoring and 'MonTool' not in kwargs:

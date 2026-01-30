@@ -24,7 +24,6 @@
 #include "SGTools/DataProxy.h"
 #include "PersistentDataModel/DataHeader.h"
 
-#include "RootCollection/AttributeListLayout.h"
 #include "CoralBase/AttributeList.h"
 #include "CoralBase/AttributeListSpecification.h"
 
@@ -324,15 +323,6 @@ void AANTupleStream::writeAttributeListSpecification()
   // go to the root dir of output file
   TDirectory::TContext save;
   gDirectory->cd((m_fileName+":/").c_str());
-
-  AttributeListLayout all;
-  // store schema in the schema object
-  for( coral::AttributeListSpecification::const_iterator iter = m_attribSpec->begin();
-       iter != m_attribSpec->end(); ++iter) {
-     all.m_layout.push_back( make_pair( iter->name(), iter->typeName() ) );
-  }
-  // write schema object
-  all.Write(c_attributeListLayoutName);
 }
 
 

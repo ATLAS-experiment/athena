@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef CPBTAGGINGSELECTIONTOOL_H
@@ -7,8 +7,10 @@
 
 #include "FTagAnalysisInterfaces/IBTaggingSelectionTool.h"
 #include "xAODBTagging/BTagging.h"
+#include "xAODBTaggingEfficiency/ToolDefaults.h"
 
 #include "AsgTools/AsgTool.h"
+#include <AsgTools/PropertyWrapper.h>
 #include "PATCore/IAsgSelectionTool.h"
 #include "CxxUtils/checker_macros.h"
 #include "TFile.h"
@@ -68,25 +70,27 @@ private:
   void InitializeTaggerVariables(std::string taggerName,std::string OP, TSpline3 *spline, TVector *constcut, double &fraction);
 
   bool m_initialised = false;
-  bool m_ErrorOnTagWeightFailure = true;
-  bool m_StoreNConstituents = false;
   bool m_continuous   = false; //Continuous1D
   bool m_continuous2D = false; //Continuous2D
-  bool m_useCTag = false; //use c-tagging or b-tagging in 1D
-  bool m_readFromBTaggingObject = true; //use xAOD::BTagging object or not
   /// Object used to store the last decision
-  asg::AcceptInfo m_acceptinfo;  
+  asg::AcceptInfo m_acceptinfo;
+  
+  Gaudi::Property<double> m_minPt {this, "MinPt", 0 /*MeV*/, "Minimum jet pT cut (in MeV)"};
+  Gaudi::Property<double> m_maxEta {this, "MaxEta", 2.5, "Maximum jet eta cut"};
+  Gaudi::Property<double> m_maxRangePt {this, "MaxRangePt", 3000000 /*MeV*/, "Max pT range (in MeV)"};
 
-  double m_maxEta{};
-  double m_minPt{};
-  double m_maxRangePt{};
-
-  std::string m_CutFileName;
-  std::string m_taggerName;
-  std::string m_OP;
-  std::string m_jetAuthor;
-  std::string m_ContinuousBenchmarks;
-  std::string m_wps_raw;
+  Gaudi::Property<std::string> m_CutFileName {this, "FlvTagCutDefinitionsFileName", ftag::defaults::cdi_path, "name of the files containing official cut definitions (uses PathResolver)"};
+  Gaudi::Property<std::string> m_taggerName {this, "TaggerName", ftag::defaults::tagger, "tagging algorithm name"};
+  Gaudi::Property<std::string> m_OP {this, "OperatingPoint", "", "operating point"};
+  Gaudi::Property<std::string> m_jetAuthor {this, "JetAuthor", ftag::defaults::jet_collection, "jet collection"};
+  Gaudi::Property<std::string> m_ContinuousBenchmarks {this, "CutBenchmarksContinuousWP", "", "comma separated list of tag bins that will be accepted as tagged: 1,2,3 etc.. "};
+  Gaudi::Property<std::string> m_wps_raw {this, "WorkingPointDefinitions", "FixedCutBEff_85,FixedCutBEff_77,FixedCutBEff_70,FixedCutBEff_60", "Comma-separated list of tagger working points (in decreasing order of efficiency!) - required for 1D tagging purposes"};
+  
+  Gaudi::Property<bool> m_ErrorOnTagWeightFailure{this, "ErrorOnTagWeightFailure", true, "optionally ignore cases where the tagweight cannot be retrieved. default behaviour is to give an error, switching to false will turn it into a warning"};
+  //use c-tagging or b-tagging in 1D
+  Gaudi::Property<bool> m_useCTag {this, "useCTagging", false, "Enabled only for FixedCut or Continuous WPs: define wether the cuts refer to b-tagging or c-tagging"};
+  //use xAOD::BTagging object or not
+  Gaudi::Property<bool> m_readFromBTaggingObject {this, "readFromBTaggingObject", false,       "Enabled to access btagging scores from xAOD::BTagging object; Can be disabled for GN2v01 to access the scores from the jet itself."};
 
   TFile *m_inf{};
   std::vector<double> m_continuouscuts;

@@ -1,7 +1,7 @@
 // -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef INDETTRACKSELECTIONTOOL_INDETTRACKSELECTIONTOOL_H
@@ -29,6 +29,7 @@
 #include <sstream>
 #include <algorithm>
 #include <iterator>
+#include <cstdint>
 
 namespace InDetAccessor {
 
@@ -101,7 +102,7 @@ namespace InDet {
     
     /// @}
 
-    virtual void setCutLevel( InDet::CutLevel level, Bool_t overwrite = true ) override
+    virtual void setCutLevel( InDet::CutLevel level, bool overwrite = true ) override
       __attribute__ ((deprecated("For consistency with the athena interface, the cut level is best set through the \"CutLevel\" property.")));
 
   private:
@@ -109,7 +110,7 @@ namespace InDet {
     mutable std::atomic_bool m_warnInit = false; // flag to keep track of whether we have warned about a lack of initialization
 
     // this is the setCutLevel function that actually does the work, so that it doesn't warn if called in athena.
-    void setCutLevelPrivate( InDet::CutLevel level, Bool_t overwrite = true );
+    void setCutLevelPrivate( InDet::CutLevel level, bool overwrite = true );
 
     // helper method to setup the cut functions for TrackParticles and Trk::Tracks
     template <int VERBOSE, class Trk_Helper>
@@ -128,223 +129,223 @@ namespace InDet {
            m_trkTrackCuts; //!< First element is the name of the cut family, second element is the set of cuts
 #endif
 
-    mutable std::atomic<ULong64_t> m_numTracksProcessed = 0; //!< a counter of the number of tracks proccessed
-    mutable std::atomic<ULong64_t> m_numTracksPassed = 0; //!< a counter of the number of tracks that passed all cuts
-    mutable std::vector<ULong64_t> m_numTracksPassedCuts ATLAS_THREAD_SAFE; //!< tracks the number of tracks that passed each cut family. Guarded by m_mutex
+    mutable std::atomic<uint64_t> m_numTracksProcessed = 0; //!< a counter of the number of tracks proccessed
+    mutable std::atomic<uint64_t> m_numTracksPassed = 0; //!< a counter of the number of tracks that passed all cuts
+    mutable std::vector<uint64_t> m_numTracksPassedCuts ATLAS_THREAD_SAFE; //!< tracks the number of tracks that passed each cut family. Guarded by m_mutex
     mutable std::mutex m_mutex;
 
-    static inline bool maxDoubleIsSet(Double_t cutValue) {return cutValue < InDet::InDetTrackSelectionTool::LOCAL_MAX_DOUBLE && cutValue >= 0.;}
-    static inline bool maxIntIsSet(Int_t cutValue){return cutValue < InDet::InDetTrackSelectionTool::LOCAL_MAX_INT && cutValue >= 0;}
-    constexpr static Double_t LOCAL_MAX_DOUBLE = 1.0e16;
-    constexpr static Int_t LOCAL_MAX_INT = std::numeric_limits<Int_t>::max();
+    static inline bool maxDoubleIsSet(double cutValue) {return cutValue < InDet::InDetTrackSelectionTool::LOCAL_MAX_DOUBLE && cutValue >= 0.;}
+    static inline bool maxIntIsSet(int cutValue){return cutValue < InDet::InDetTrackSelectionTool::LOCAL_MAX_INT && cutValue >= 0;}
+    constexpr static double LOCAL_MAX_DOUBLE = 1.0e16;
+    constexpr static int LOCAL_MAX_INT = std::numeric_limits<int>::max();
 
-    Gaudi::Property<Double_t> m_minPt{this, "minPt", -1., "Minimum transverse momentum"};
-    Gaudi::Property<Double_t> m_minP{this, "minP", -1., "Minimum momentum"};
+    Gaudi::Property<double> m_minPt{this, "minPt", -1., "Minimum transverse momentum"};
+    Gaudi::Property<double> m_minP{this, "minP", -1., "Minimum momentum"};
 
-    Gaudi::Property<Double_t> m_maxAbsEta
+    Gaudi::Property<double> m_maxAbsEta
       {this, "maxAbsEta", LOCAL_MAX_DOUBLE, "Maximum magnitude of pseudorapidity"};
-    Gaudi::Property<Double_t> m_maxZ0SinTheta
+    Gaudi::Property<double> m_maxZ0SinTheta
       {this, "maxZ0SinTheta", LOCAL_MAX_DOUBLE, "Maximum |z0|*sin(theta)"};
-    Gaudi::Property<Double_t> m_maxZ0
+    Gaudi::Property<double> m_maxZ0
       {this, "maxZ0", LOCAL_MAX_DOUBLE, "Maximum longitudinal separation"};
-    Gaudi::Property<Double_t> m_maxD0
+    Gaudi::Property<double> m_maxD0
       {this, "maxD0", LOCAL_MAX_DOUBLE, "Maximum transvers separation"};
-    Gaudi::Property<Double_t> m_maxSigmaD0
+    Gaudi::Property<double> m_maxSigmaD0
       {this, "maxSigmaD0", LOCAL_MAX_DOUBLE, "Maximum error on d0"};
-    Gaudi::Property<Double_t> m_maxSigmaZ0
+    Gaudi::Property<double> m_maxSigmaZ0
       {this, "maxSigmaZ0", LOCAL_MAX_DOUBLE, "Maximum error on z0"};
-    Gaudi::Property<Double_t> m_maxSigmaZ0SinTheta
+    Gaudi::Property<double> m_maxSigmaZ0SinTheta
       {this, "maxSigmaZ0SinTheta", LOCAL_MAX_DOUBLE, "Maximum error on z0*sin(theta)"};
-    Gaudi::Property<Double_t> m_maxD0overSigmaD0
+    Gaudi::Property<double> m_maxD0overSigmaD0
       {this, "maxD0overSigmaD0", LOCAL_MAX_DOUBLE, "Significance cut on |d0|"};
-    Gaudi::Property<Double_t> m_maxZ0overSigmaZ0
+    Gaudi::Property<double> m_maxZ0overSigmaZ0
       {this, "maxZ0overSigmaZ0", LOCAL_MAX_DOUBLE, "Significance cut on |z0|"};
-    Gaudi::Property<Double_t> m_maxZ0SinThetaoverSigmaZ0SinTheta
+    Gaudi::Property<double> m_maxZ0SinThetaoverSigmaZ0SinTheta
       {this, "maxZ0SinThetaoverSigmaZ0SinTheta", LOCAL_MAX_DOUBLE,
        "Significance cut on |z0*sin(theta)|"};
 
-    Gaudi::Property<Int_t> m_minNInnermostLayerHits
+    Gaudi::Property<int> m_minNInnermostLayerHits
       {this, "minNInnermostLayerHits", -1,
        "Required hits on the innermost pixel layer"};
-    Gaudi::Property<Int_t> m_minNNextToInnermostLayerHits
+    Gaudi::Property<int> m_minNNextToInnermostLayerHits
       {this, "minNNextToInnermostLayerHits", -1,
        "Required hits on the next to innermost pixel layer"};
-    Gaudi::Property<Int_t> m_minNBothInnermostLayersHits
+    Gaudi::Property<int> m_minNBothInnermostLayersHits
       {this, "minNBothInnermostLayersHits", -1,
        "Required hits on two innermost pixel layers"};
-    Gaudi::Property<Int_t> m_maxNInnermostLayerSharedHits
+    Gaudi::Property<int> m_maxNInnermostLayerSharedHits
       {this, "maxNInnermostLayerSharedHits", LOCAL_MAX_INT,
        "Maximum shared hits in innermost pixel layer"};
-    Gaudi::Property<Int_t> m_useMinBiasInnermostLayersCut
+    Gaudi::Property<int> m_useMinBiasInnermostLayersCut
       {this, "useMinBiasInnermostLayersCut", 0,
        "IBL hit if expected, otherwise next layer hit if expected"};
-    Gaudi::Property<Int_t> m_minNSiHits
+    Gaudi::Property<int> m_minNSiHits
       {this, "minNSiHits", -1, "Minimum silicon (pixel + SCT) hits"};
-    Gaudi::Property<Int_t> m_maxNSiSharedHits
+    Gaudi::Property<int> m_maxNSiSharedHits
       {this, "maxNSiSharedHits", LOCAL_MAX_INT,
        "Maximum silicon (pixel + SCT) sensors shared with other track"};
-    Gaudi::Property<Int_t> m_minNSiHitsIfSiSharedHits
+    Gaudi::Property<int> m_minNSiHitsIfSiSharedHits
       {this, "minNSiHitsIfSiSharedHits", -1,
        "Minimum number of silicon hits if there are any shared silicon hits"};
-    Gaudi::Property<Int_t> m_maxNSiHoles
+    Gaudi::Property<int> m_maxNSiHoles
       {this, "maxNSiHoles", LOCAL_MAX_INT, "Maximum silicon (pixel + SCT) holes"};
-    Gaudi::Property<Int_t> m_minNPixelHits
+    Gaudi::Property<int> m_minNPixelHits
       {this, "minNPixelHits", -1, "Required pixel hits"};
-    Gaudi::Property<Int_t> m_maxNPixelSharedHits
+    Gaudi::Property<int> m_maxNPixelSharedHits
       {this, "maxNPixelSharedHits", LOCAL_MAX_INT,
        "Maximum pixels shared with other tracks"};
-    Gaudi::Property<Int_t> m_maxNPixelHoles
+    Gaudi::Property<int> m_maxNPixelHoles
       {this, "maxNPixelHoles", LOCAL_MAX_INT,
        "Maximum number of missed layers in pixel"};
 
-    Gaudi::Property<Double_t> m_minEtaForStrictNSiHitsCut
+    Gaudi::Property<double> m_minEtaForStrictNSiHitsCut
       {this, "minEtaForStrictNSiHitsCut", LOCAL_MAX_DOUBLE,
        "Eta cutoff for strict silicon hits cut"};
-    Gaudi::Property<Int_t> m_minNSiHitsAboveEtaCutoff
+    Gaudi::Property<int> m_minNSiHitsAboveEtaCutoff
       {this, "minNSiHitsAboveEtaCutoff", -1,
        "Minimum silicon hits at large pseudorapidity"};
-    Gaudi::Property<Bool_t> m_maxOneSharedModule
+    Gaudi::Property<bool> m_maxOneSharedModule
       {this, "maxOneSharedModule", false,
        "Allow only 1 shared pixel hit or 2 shared SCT hits, not both"};
-    Gaudi::Property<Bool_t> m_useEtaDependentMaxChiSq
+    Gaudi::Property<bool> m_useEtaDependentMaxChiSq
       {this, "useEtaDependentMaxChiSq", false,
        "Whether or not to use the eta-dependent chi squared per degree of freedom cut"};
 
-    Gaudi::Property<Int_t> m_minNSiHitsPhysical
+    Gaudi::Property<int> m_minNSiHitsPhysical
       {this, "minNSiHitsPhysical", -1,
        "Minimum physical silicon hits (i.e. dead sensors do not count)"};
-    Gaudi::Property<Int_t> m_minNPixelHitsPhysical
+    Gaudi::Property<int> m_minNPixelHitsPhysical
       {this, "minNPixelHitsPhysical", -1, "Minimum physical pixel hits"};
-    Gaudi::Property<Int_t> m_minNSctHitsPhysical
+    Gaudi::Property<int> m_minNSctHitsPhysical
       {this, "minNSctHitsPhysical", -1, "Minimum physical SCT hits"};
-    Gaudi::Property<Int_t> m_minNSctHits
+    Gaudi::Property<int> m_minNSctHits
       {this, "minNSctHits", -1, "Minimum SCT hits"};
-    Gaudi::Property<Int_t> m_maxNSctSharedHits
+    Gaudi::Property<int> m_maxNSctSharedHits
       {this, "maxNSctSharedHits", LOCAL_MAX_INT,
        "Maximum SCT hits shared with other track"};
-    Gaudi::Property<Int_t> m_maxNSctHoles
+    Gaudi::Property<int> m_maxNSctHoles
       {this, "maxNSctHoles", LOCAL_MAX_INT, "Maximum SCT holes"};
-    Gaudi::Property<Int_t> m_maxNSctDoubleHoles
+    Gaudi::Property<int> m_maxNSctDoubleHoles
       {this, "maxNSctDoubleHoles", LOCAL_MAX_INT, "Maximum SCT double holes"};
 
-    Gaudi::Property<Double_t> m_maxTrtEtaAcceptance
+    Gaudi::Property<double> m_maxTrtEtaAcceptance
       {this, "maxTrtEtaAcceptance", LOCAL_MAX_DOUBLE,
        "Maximum eta that ignores TRT hit cuts"};
-    Gaudi::Property<Double_t> m_maxEtaForTrtHitCuts
+    Gaudi::Property<double> m_maxEtaForTrtHitCuts
       {this, "maxEtaForTrtHitCuts", -1.,
        "Eta above which TRT hit cuts are not applied."};
-    Gaudi::Property<Int_t> m_minNTrtHits{this, "minNTrtHits", -1, "Minimum TRT hits"};
-    Gaudi::Property<Int_t> m_minNTrtHitsPlusOutliers
+    Gaudi::Property<int> m_minNTrtHits{this, "minNTrtHits", -1, "Minimum TRT hits"};
+    Gaudi::Property<int> m_minNTrtHitsPlusOutliers
       {this, "minNTrtHitsPlusOutliers", -1, "Minimum TRT hits including outliers"};
-    Gaudi::Property<Int_t> m_minNTrtHighThresholdHits
+    Gaudi::Property<int> m_minNTrtHighThresholdHits
       {this, "minNTrtHighThresholdHits", -1, "Minimum high E TRT hits"};
-    Gaudi::Property<Int_t> m_minNTrtHighThresholdHitsPlusOutliers
+    Gaudi::Property<int> m_minNTrtHighThresholdHitsPlusOutliers
       {this, "minNTrtHighThresholdHitsPlusOutliers", -1,
        "Minimum high E TRT hits including outliers"};
-    Gaudi::Property<Double_t> m_maxTrtHighEFraction
+    Gaudi::Property<double> m_maxTrtHighEFraction
       {this, "maxTrtHighEFraction", LOCAL_MAX_DOUBLE,
        "Maximum TRT hits that are above high energy threshold"};
-    Gaudi::Property<Double_t> m_maxTrtHighEFractionWithOutliers
+    Gaudi::Property<double> m_maxTrtHighEFractionWithOutliers
       {this, "maxTrtHighEFractionWithOutliers", LOCAL_MAX_DOUBLE,
        "Maximum TRT hits that are above high energy threshold including outliers"};
-    Gaudi::Property<Double_t> m_maxTrtOutlierFraction
+    Gaudi::Property<double> m_maxTrtOutlierFraction
       {this, "maxTrtOutlierFraction", LOCAL_MAX_DOUBLE,
        "Maximum fraction of TRT outliers over TRT hits plus outliers"};
 
-    Gaudi::Property<Double_t> m_maxChiSq
+    Gaudi::Property<double> m_maxChiSq
       {this, "maxChiSq", LOCAL_MAX_DOUBLE, "Maximum chi squared"};
-    Gaudi::Property<Double_t> m_maxChiSqperNdf
+    Gaudi::Property<double> m_maxChiSqperNdf
       {this, "maxChiSqperNdf", LOCAL_MAX_DOUBLE,
        "Maximum chi squared per degree of freedom"};
-    Gaudi::Property<Double_t> m_minProb{this, "minProb", -1., "Minimum p(chi^2, Ndof)"};
-    Gaudi::Property<Double_t> m_minPtForProbCut
+    Gaudi::Property<double> m_minProb{this, "minProb", -1., "Minimum p(chi^2, Ndof)"};
+    Gaudi::Property<double> m_minPtForProbCut
       {this, "minPtForProbCut", LOCAL_MAX_DOUBLE,
        "Minimum pt for chi-sq probability cut"};
-    Gaudi::Property<Double_t> m_minProbAbovePtCutoff
+    Gaudi::Property<double> m_minProbAbovePtCutoff
       {this, "minProbAbovePtCutoff", -1.,
        "Minimum chi-sq probability above a pt cutoff"};
 
-    Gaudi::Property<Int_t> m_minNUsedHitsdEdx
+    Gaudi::Property<int> m_minNUsedHitsdEdx
       {this, "minNUsedHitsdEdx", -1, "Minimum hits used for dEdx"};
-    Gaudi::Property<Int_t> m_minNOverflowHitsdEdx
+    Gaudi::Property<int> m_minNOverflowHitsdEdx
       {this, "minNOverflowHitsdEdx", -1, "Minimum overflow hits in IBL for dEdx"};
-    Gaudi::Property<Bool_t> m_eProbHTonlyForXe
+    Gaudi::Property<bool> m_eProbHTonlyForXe
       {this, "eProbHTonlyForXe", false,
        "Flag whether to apply the eProbabilityHT cut only when all TRT hits are Xenon"};
-    Gaudi::Property<Double_t> m_minEProbabilityHT
+    Gaudi::Property<double> m_minEProbabilityHT
       {this, "minEProbabilityHT", -1.,
        "Minimum High Threshold electron probability"};
 
-    Gaudi::Property<Bool_t> m_useExperimentalInnermostLayersCut
+    Gaudi::Property<bool> m_useExperimentalInnermostLayersCut
       {this, "useExperimentalInnermostLayersCut", false,
        "Use the experimental cut on pixel holes"};
 
 #ifndef XAOD_ANALYSIS
-    Gaudi::Property<Int_t> m_minNSiHitsMod
+    Gaudi::Property<int> m_minNSiHitsMod
       {this, "minNSiHitsMod", -1,
        "Minimum number of Si hits, with pixel hits counting twice"};
-    Gaudi::Property<Int_t> m_minNSiHitsModTop
+    Gaudi::Property<int> m_minNSiHitsModTop
       {this, "minNSiHitsModTop", -1,
        "Min number of Si hits on top half (pixel counting twice)"};
-    Gaudi::Property<Int_t> m_minNSiHitsModBottom
+    Gaudi::Property<int> m_minNSiHitsModBottom
       {this, "minNSiHitsModBottom", -1,
        "Min number of Si hits on bottom half (pixel counting twice)"};
 #endif
 
-    Gaudi::Property<std::vector<Double_t>> m_vecEtaCutoffsForSiHitsCut
+    Gaudi::Property<std::vector<double>> m_vecEtaCutoffsForSiHitsCut
       {this, "vecEtaCutoffsForSiHitsCut", {},
        "Minimum eta cutoffs for each Silicon hit cut"};
-    Gaudi::Property<std::vector<Int_t>> m_vecMinNSiHitsAboveEta
+    Gaudi::Property<std::vector<int>> m_vecMinNSiHitsAboveEta
       {this, "vecMinNSiHitsAboveEta", {},
        "Minimum Silicon hits above each eta cutoff"};
-    Gaudi::Property<std::vector<Double_t>> m_vecEtaCutoffsForPtCut
+    Gaudi::Property<std::vector<double>> m_vecEtaCutoffsForPtCut
       {this, "vecEtaCutoffsForPtCut", {}, "Minimum eta cutoffs for each pT cut"};
-    Gaudi::Property<std::vector<Double_t>> m_vecMinPtAboveEta
+    Gaudi::Property<std::vector<double>> m_vecMinPtAboveEta
       {this, "vecMinPtAboveEta", {},
        "Minimum transverse momentum above each eta cutoff"};
 
-    Gaudi::Property<std::vector<Double_t>> m_vecPtCutoffsForSctHitsCut
+    Gaudi::Property<std::vector<double>> m_vecPtCutoffsForSctHitsCut
       {this, "vecPtCutoffsForSctHitsCut", {},
        "Minimum pt cutoffs for each SCT hits"};
-    Gaudi::Property<std::vector<Int_t>> m_vecMinNSctHitsAbovePt
+    Gaudi::Property<std::vector<int>> m_vecMinNSctHitsAbovePt
       {this, "vecMinNSctHitsAbovePt", {},
        "Minimum SCT hits above each pt cutoff"};
 
-    Gaudi::Property<std::vector<Double_t>> m_vecEtaCutoffsForZ0SinThetaCut
+    Gaudi::Property<std::vector<double>> m_vecEtaCutoffsForZ0SinThetaCut
       {this, "vecEtaCutoffsForZ0SinThetaCut", {},
        "Minimum eta cutoffs for each Z0SinTheta value"};
-    Gaudi::Property<std::vector<Double_t>> m_vecPtCutoffsForZ0SinThetaCut
+    Gaudi::Property<std::vector<double>> m_vecPtCutoffsForZ0SinThetaCut
       {this, "vecPtCutoffsForZ0SinThetaCut", {},
        "Minimum pt cutoffs for each Z0SinTheta value"};
-    Gaudi::Property<std::vector<std::vector<Double_t>>> m_vecvecMaxZ0SinThetaAboveEtaPt
+    Gaudi::Property<std::vector<std::vector<double>>> m_vecvecMaxZ0SinThetaAboveEtaPt
       {this, "vecvecMaxZ0SinThetaAboveEtaPt", {},
        "Maximum Z0SinTheta value above each eta and pT cutoff"};
 
-    Gaudi::Property<std::vector<Double_t>> m_vecEtaCutoffsForD0Cut
+    Gaudi::Property<std::vector<double>> m_vecEtaCutoffsForD0Cut
       {this, "vecEtaCutoffsForD0Cut", {}, "Minimum eta cutoffs for each D0 value"};
-    Gaudi::Property<std::vector<Double_t>> m_vecPtCutoffsForD0Cut
+    Gaudi::Property<std::vector<double>> m_vecPtCutoffsForD0Cut
       {this, "vecPtCutoffsForD0Cut", {}, "Minimum pt cutoffs for each D0 value"};
-    Gaudi::Property<std::vector<std::vector<Double_t>>> m_vecvecMaxD0AboveEtaPt
+    Gaudi::Property<std::vector<std::vector<double>>> m_vecvecMaxD0AboveEtaPt
       {this, "vecvecMaxD0AboveEtaPt", {},
        "Maximum D0 value above each eta and pT cutoff"};
 
-    Gaudi::Property<std::vector<Double_t>> m_vecEtaCutoffsForSctHolesCut
+    Gaudi::Property<std::vector<double>> m_vecEtaCutoffsForSctHolesCut
       {this, "vecEtaCutoffsForSctHolesCut", {},
        "Minimum eta cutoffs for each SctHoles value"};
-    Gaudi::Property<std::vector<Double_t>> m_vecPtCutoffsForSctHolesCut
+    Gaudi::Property<std::vector<double>> m_vecPtCutoffsForSctHolesCut
       {this, "vecPtCutoffsForSctHolesCut", {},
        "Minimum pt cutoffs for each SctHoles value"};
-    Gaudi::Property<std::vector<std::vector<Double_t>>> m_vecvecMaxSctHolesAboveEtaPt
+    Gaudi::Property<std::vector<std::vector<double>>> m_vecvecMaxSctHolesAboveEtaPt
       {this, "vecvecMaxSctHolesAboveEtaPt", {},
        "Maximum SctHoles value above each eta and pT cutoff"};
 
-    Gaudi::Property<std::vector<Double_t>> m_vecEtaCutoffsForSctHitsPlusDeadCut
+    Gaudi::Property<std::vector<double>> m_vecEtaCutoffsForSctHitsPlusDeadCut
       {this, "vecEtaCutoffsForSctHitsPlusDeadCut", {},
        "Minimum eta cutoffs for each SctHitsPlusDead value"};
-    Gaudi::Property<std::vector<Double_t>> m_vecPtCutoffsForSctHitsPlusDeadCut
+    Gaudi::Property<std::vector<double>> m_vecPtCutoffsForSctHitsPlusDeadCut
       {this, "vecPtCutoffsForSctHitsPlusDeadCut", {},
        "Minimum pt cutoffs for each SctHitsPlusDead value"};
-    Gaudi::Property<std::vector<std::vector<Double_t>>> m_vecvecMinSctHitsPlusDeadAboveEtaPt
+    Gaudi::Property<std::vector<std::vector<double>>> m_vecvecMinSctHitsPlusDeadAboveEtaPt
       {this, "vecvecMinSctHitsPlusDeadAboveEtaPt", {},
        "Minimum SctHitsPlusDead value above each eta and pT cutoff"};
     
@@ -359,8 +360,8 @@ namespace InDet {
     static const std::unordered_map<std::string, CutLevel> s_mapCutLevel;
 
 #ifndef XAOD_ANALYSIS
-    Gaudi::Property<Bool_t> m_initTrkTools{this, "UseTrkTrackTools", false, "Whether to initialize the Trk::Track tools"};
-    Bool_t m_trackSumToolAvailable = false; //!< Whether the summary tool is available
+    Gaudi::Property<bool> m_initTrkTools{this, "UseTrkTrackTools", false, "Whether to initialize the Trk::Track tools"};
+    bool m_trackSumToolAvailable = false; //!< Whether the summary tool is available
     ToolHandle<Trk::ITrackSummaryTool> m_trackSumTool
       {this, "TrackSummaryTool", "Trk::TrackSummaryTool/TrackSummaryTool"};
     ToolHandle<Trk::IExtrapolator> m_extrapolator

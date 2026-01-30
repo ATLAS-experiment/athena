@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -31,7 +31,7 @@ StatusCode IDTPM::TruthDecoratorAlg::initialize() {
   ATH_CHECK( m_truthClassifier.retrieve() );
 
   /// Create truth class decorations for all truth particles
-  IDTPM::createDecoratorKeysAndAccessor( 
+  IDTPM::createDecoratorKeysAndAccessor(
       *this, m_truthParticlesName,
       m_prefix.value(), m_decor_truth_names, m_decor_truth );
 
@@ -56,7 +56,7 @@ StatusCode IDTPM::TruthDecoratorAlg::execute( const EventContext& ctx ) const {
     return StatusCode::FAILURE;
   }
 
-  /// check if ALL required decorations exist already. If so return SUCCESS
+  /// check if ALL required decorations exist already. If so return SUCCESS // FIXME This should be handled in the configuration!!
   if( IDTPM::decorationsAllExist( *ptruths, m_decor_truth ) ) {
     ATH_MSG_DEBUG( "All decorations already exist. Exiting gracefully" );
     return StatusCode::SUCCESS;

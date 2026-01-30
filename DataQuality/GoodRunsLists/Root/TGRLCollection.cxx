@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -22,27 +22,6 @@ Root::TGRLCollection::TGRLCollection( Bool_t checkGRLInfo )
 Root::TGRLCollection::~TGRLCollection()
 {
   this->Reset();
-}
-
-
-Root::TGRLCollection::TGRLCollection(const Root::TGRLCollection& other)
- : std::vector<TGoodRunsList>(other)
- , TObject(other)
- , m_checkGRLInfo(other.m_checkGRLInfo)
-{
-}
-
-
-Root::TGRLCollection&
-Root::TGRLCollection::operator=(const Root::TGRLCollection& other)
-{
-  if (&other==this) {
-    return *this ;
-  } 
-  std::vector<TGoodRunsList>::operator=(other);
-  m_checkGRLInfo=other.m_checkGRLInfo;
-
-  return *this ;
 }
 
 
@@ -275,7 +254,7 @@ Root::TGRLCollection::GetOverlapWith( const TGoodRunsList& other ) const
     overlapgrl.SetVersion(itr->GetVersion());
     overlapgrl.SetMetaData(itr->GetMetaData());
     overlapgrl.Compress();
-    overlapvec.push_back(overlapgrl); // also push_back if empty!
+    overlapvec.push_back(std::move(overlapgrl)); // also push_back if empty!
   }
 
   return overlapvec;

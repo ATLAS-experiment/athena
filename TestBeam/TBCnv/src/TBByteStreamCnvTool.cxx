@@ -410,8 +410,8 @@ StatusCode TBByteStreamCnvTool::GetRODBlock(eformat::SubDetector subdet_id,
     }
   
   const size_t MAX_ROBFRAGMENTS = 2048*1024;
-  OFFLINE_FRAGMENTS_NAMESPACE::PointerType robF[MAX_ROBFRAGMENTS];
-  size_t robcount = re->children(robF,MAX_ROBFRAGMENTS);
+  std::vector<OFFLINE_FRAGMENTS_NAMESPACE::PointerType> robF(MAX_ROBFRAGMENTS);
+  size_t robcount = re->children(robF.data(),MAX_ROBFRAGMENTS);
   //  re->start(robF);
   if (robcount == MAX_ROBFRAGMENTS)
     {
@@ -1484,6 +1484,7 @@ StatusCode TBByteStreamCnvTool::H8BuildObjects(int unrec_code)
 	sTRTadc = new TBADCRaw(name+"0",false,m_rodBlock[pos] & 0xfff);
 	logstr << MSG::DEBUG << "sTRT:" << MSG::hex << (m_rodBlock[pos] & 0xfff) << " [0x" << m_rodBlock[pos] << "]"
 	       << MSG::dec << endmsg;
+	m_adcrawCont->push_back(sTRTadc);
 	pos++; //1
 	S2downadc = new TBADCRaw(name+"1",false,m_rodBlock[pos] & 0xfff);
 	logstr << MSG::DEBUG << "S2 :" << MSG::hex << (m_rodBlock[pos] & 0xfff) << " [0x" << m_rodBlock[pos] << "]"

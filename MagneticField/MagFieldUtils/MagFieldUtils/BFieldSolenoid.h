@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //
@@ -34,6 +34,10 @@ public:
     void getB( const double *xyz, double *B, double *deriv=nullptr ) const;
     // accessor
     const BFieldMesh<double> *tiltedMap() const { return m_tilt; }
+
+    BFieldSolenoid(const BFieldSolenoid&) = delete;
+    BFieldSolenoid& operator=(const BFieldSolenoid&) = delete;
+
 private:
     // data members
     BFieldMesh<double> *m_orig; // original map as it was read from file

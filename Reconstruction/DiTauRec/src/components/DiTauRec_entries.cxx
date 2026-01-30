@@ -8,6 +8,7 @@
 #include "DiTauRec/DiTauConstituentFinder.h"
 #include "DiTauRec/DiTauExtraVarDecorator.h"
 #include "DiTauRec/DiTauOnnxDiscriminantTool.h"
+#include "DiTauRec/DiTauWPDecorator.h"
 
 DECLARE_COMPONENT( DiTauBuilder )
 DECLARE_COMPONENT( SeedJetBuilder )
@@ -18,3 +19,5 @@ DECLARE_COMPONENT( CellFinder )
 DECLARE_COMPONENT( DiTauConstituentFinder )
 DECLARE_COMPONENT( DiTauExtraVarDecorator )
 DECLARE_COMPONENT( DiTauOnnxDiscriminantTool )
+DECLARE_COMPONENT( DiTauWPDecorator )	
+

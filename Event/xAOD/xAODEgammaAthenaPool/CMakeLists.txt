@@ -22,7 +22,7 @@ find_package( AthenaPoolUtilitiesTest )
 
 if( ATHENAPOOLUTILITIESTEST_FOUND )
   set( XAODEGAMMAATHENAPOOL_REFERENCE_TAG
-       xAODEgammaAthenaPoolReference-01-00-00 )
+       xAODEgammaAthenaPoolReference-01-01-00 )
   run_tpcnv_test( xAODEgammaAthenaPool_20.1.7.2   AOD-20.1.7.2-full
                    REQUIRED_LIBRARIES xAODEgammaAthenaPoolPoolCnv
                    REFERENCE_TAG ${XAODEGAMMAATHENAPOOL_REFERENCE_TAG} )

@@ -176,9 +176,8 @@ atlas_add_citest( DerivationRun3Data_Train
    SCRIPT RunWorkflowTests_Run3.py --CI -d -w Derivation --tag data_PHYS_PHYSLITE --threads 4 --no-output-checks
    PROPERTIES PROCESSORS 4 )
 
-# Explicitly set maxEvents so that the preExec doesn't get overwritten
 atlas_add_citest( DerivationRun3Data_Train_RNTuple
-   SCRIPT RunWorkflowTests_Run3.py --CI -d -w Derivation -e '--maxEvents=500 --preExec="flags.Output.StorageTechnology.EventData={\\"*\\":\\"ROOTRNTUPLE\\"}" --parallelCompression="False"' --tag data_PHYS_PHYSLITE --threads 4 --no-output-checks
+   SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/test/DerivationRun3Data_Train_RNTuple.sh
    PROPERTIES PROCESSORS 4 )
 
 # Explicitly set maxEvents so that the preExec doesn't get overwritten
@@ -194,9 +193,8 @@ atlas_add_citest( DerivationRun3MC_PHYSLITE
    SCRIPT RunWorkflowTests_Run3.py --CI -d -w Derivation --tag mc_PHYSLITE --threads 4
    PROPERTIES PROCESSORS 4 )
 
-# Explicitly set maxEvents so that the preExec doesn't get overwritten
 atlas_add_citest( DerivationRun3MC_Train_RNTuple
-   SCRIPT RunWorkflowTests_Run3.py --CI -d -w Derivation -e '--maxEvents=500 --preExec="flags.Output.StorageTechnology.EventData={\\"*\\":\\"ROOTRNTUPLE\\"}" --parallelCompression="False"' --tag mc_PHYS_PHYSLITE --threads 4 --no-output-checks
+   SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/test/DerivationRun3MC_Train_RNTuple.sh
    PROPERTIES PROCESSORS 4 )
 
 # Explicitly set maxEvents so that the preExec doesn't get overwritten
@@ -319,6 +317,12 @@ atlas_add_citest( ACTS_Propagation_ITk
 atlas_add_citest( ACTS_Propagation_ITk_Gen3
    SCRIPT ActsITkTest.py --gen3)
 
+atlas_add_citest( ACTS_Propagation_ITk_Calo_Gen3
+   SCRIPT ActsITkCaloTest.py --gen3)
+
+atlas_add_citest( ACTS_Propagation_ITk_Muon_Calo_Gen3
+   SCRIPT ActsITkMuonCaloTest.py --gen3)
+
 atlas_add_citest( ACTS_Propagation_ITk_Muon_Gen3
    SCRIPT ActsItkMuonTest.py --gen3)
 
@@ -326,14 +330,16 @@ atlas_add_citest( ACTS_Propagation_ID
    SCRIPT ActsExtrapolationAlgTest.py )
 
 atlas_add_citest( ACTS_Workflow
-   SCRIPT ActsWorkflow.sh )
+   SCRIPT ActsWorkflow.sh
+   LOG_IGNORE_PATTERN "ActsLargeRadiusTrackFindingAlg.*ERROR Propagation reached the step count limit|ActsLargeRadiusTrackFindingAlg.*ERROR Propagation failed: PropagatorError:.*" )
 
 atlas_add_citest( ACTS_Workflow_Legacy
    SCRIPT ActsWorkflowLegacy.sh
-   LOG_IGNORE_PATTERN "ActsLowPtTrackFindingAlg.*ERROR Propagation reached the step count limit|ActsLowPtTrackFindingAlg.*ERROR Propagation failed: PropagatorError:. Propagation reached the configured maximum number of steps with the initial parameters" )
+   LOG_IGNORE_PATTERN "ActsLowPtTrackFindingAlg.*ERROR Propagation reached the step count limit|ActsLowPtTrackFindingAlg.*ERROR Propagation failed: PropagatorError:. Propagation reached the configured maximum number of steps with the initial parameters|ActsLargeRadiusTrackFindingAlg.*ERROR Propagation reached the step count limit|ActsLargeRadiusTrackFindingAlg.*ERROR Propagation failed: PropagatorError:.*" )
 
 atlas_add_citest( ACTS_Workflow_Cached_Legacy
-   SCRIPT ActsWorkflowCachedLegacy.sh )
+   SCRIPT ActsWorkflowCachedLegacy.sh
+   LOG_IGNORE_PATTERN "ActsLargeRadiusTrackFindingAlg.*ERROR Propagation reached the step count limit|ActsLargeRadiusTrackFindingAlg.*ERROR Propagation failed: PropagatorError:.*" )
  
 atlas_add_citest( ACTS_Workflow_HeavyIons
    SCRIPT ActsWorkflowHeavyIons.sh )
@@ -418,19 +424,19 @@ atlas_add_citest( ACTS_ActsAnalogueClustering
 
 atlas_add_citest( ACTS_CheckObjectCounts_Workflow_Legacy
   SCRIPT CheckCountTest.sh ActsCheckObjectCountsLegacy
-  LOG_IGNORE_PATTERN "ActsLowPtTrackFindingAlg.*ERROR Propagation reached the step count limit|ActsLowPtTrackFindingAlg.*ERROR Propagation failed: PropagatorError:. Propagation reached the configured maximum number of steps with the initial parameters" )
+  LOG_IGNORE_PATTERN "ActsLowPtTrackFindingAlg.*ERROR Propagation reached the step count limit|ActsLowPtTrackFindingAlg.*ERROR Propagation failed: PropagatorError:. Propagation reached the configured maximum number of steps with the initial parameters|ActsLargeRadiusTrackFindingAlg.*ERROR Propagation reached the step count limit|ActsLargeRadiusTrackFindingAlg.*ERROR Propagation failed: PropagatorError:.*" )
 
 atlas_add_citest( ACTS_CheckObjectCounts_WorkflowCached_Legacy
   SCRIPT CheckCountTest.sh ActsCheckObjectCountsCachedLegacy
-  LOG_IGNORE_PATTERN "ActsLowPtTrackFindingAlg.*ERROR Propagation reached the step count limit|ActsLowPtTrackFindingAlg.*ERROR Propagation failed: PropagatorError:. Propagation reached the configured maximum number of steps with the initial parameters" )
+  LOG_IGNORE_PATTERN "ActsLowPtTrackFindingAlg.*ERROR Propagation reached the step count limit|ActsLowPtTrackFindingAlg.*ERROR Propagation failed: PropagatorError:. Propagation reached the configured maximum number of steps with the initial parameters|ActsLargeRadiusTrackFindingAlg.*ERROR Propagation reached the step count limit|ActsLargeRadiusTrackFindingAlg.*ERROR Propagation failed: PropagatorError:.*" )
 
 atlas_add_citest( ACTS_CheckObjectCounts_WorkflowHgtd_Legacy
   SCRIPT CheckCountTest.sh ActsCheckObjectCountsHgtdLegacy
-  LOG_IGNORE_PATTERN "ActsLowPtTrackFindingAlg.*ERROR Propagation reached the step count limit|ActsLowPtTrackFindingAlg.*ERROR Propagation failed: PropagatorError:. Propagation reached the configured maximum number of steps with the initial parameters" )
+  LOG_IGNORE_PATTERN "ActsLowPtTrackFindingAlg.*ERROR Propagation reached the step count limit|ActsLowPtTrackFindingAlg.*ERROR Propagation failed: PropagatorError:. Propagation reached the configured maximum number of steps with the initial parameters|ActsLargeRadiusTrackFindingAlg.*ERROR Propagation reached the step count limit|ActsLargeRadiusTrackFindingAlg.*ERROR Propagation failed: PropagatorError:.*" )
 
 atlas_add_citest( ACTS_CheckObjectCounts_Workflow
   SCRIPT CheckCountTest.sh ActsCheckObjectCounts
-  LOG_IGNORE_PATTERN "ActsLowPtTrackFindingAlg.*ERROR Propagation reached the step count limit|ActsLowPtTrackFindingAlg.*ERROR Propagation failed: PropagatorError:. Propagation reached the configured maximum number of steps with the initial parameters" )
+  LOG_IGNORE_PATTERN "ActsLowPtTrackFindingAlg.*ERROR Propagation reached the step count limit|ActsLowPtTrackFindingAlg.*ERROR Propagation failed: PropagatorError:. Propagation reached the configured maximum number of steps with the initial parameters|ActsLargeRadiusTrackFindingAlg.*ERROR Propagation reached the step count limit|ActsLargeRadiusTrackFindingAlg.*ERROR Propagation failed: PropagatorError:.*" )
 
 atlas_add_citest( ACTS_CheckObjectCounts_Workflow_Gbts
   SCRIPT CheckCountTest.sh ActsCheckObjectCountsGbts )
@@ -476,6 +482,9 @@ atlas_add_citest( Trigger_athenaHLT_v1PhysP1
 
 atlas_add_citest( Trigger_athenaHLT_v1Cosmic
    SCRIPT test_trigP1_v1Cosmic_build.py )
+
+atlas_add_citest( Trigger_athenaHLT_v1PhysP1_HI
+   SCRIPT test_trigP1_v1PhysP1_HI_run3_build.py )
 
 atlas_add_citest( TriggerConfigFlags
    SCRIPT python -m TriggerJobOpts.TriggerConfigFlags --verbose

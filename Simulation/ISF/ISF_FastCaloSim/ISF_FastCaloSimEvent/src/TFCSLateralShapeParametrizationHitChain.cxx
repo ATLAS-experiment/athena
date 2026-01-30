@@ -163,6 +163,11 @@ float TFCSLateralShapeParametrizationHitChain::get_E_hit(
     TFCSSimulationState &simulstate, const TFCSTruthState *truth,
     const TFCSExtrapolationState *extrapol) const {
   const int nhits = get_number_of_hits(simulstate, truth, extrapol);
+
+  // Store nhits in the simulation state as the get function may only be
+  // called once per event
+  simulstate.setAuxInfo<int>("FCSHitChainNHits"_FCShash, nhits);
+
   const int sample = calosample();
   if (sample < 0)
     return 0;
@@ -263,9 +268,11 @@ FCSReturnCode TFCSLateralShapeParametrizationHitChain::simulate(
 
   // Call get_number_of_hits() only once inside get_E_hit(...),
   // as it could contain a random number
-  int nhit = TMath::Nint(Elayer / Ehit);
-  if (nhit < 1)
-    nhit = 1;
+  //TODO: should read simulate value!
+  int nhit_signed = TMath::Nint(Elayer / Ehit);
+  if (nhit_signed < 1)
+    nhit_signed = 1;
+  unsigned int nhit = (unsigned int)nhit_signed;
 
   float sumEhit = 0;
 
@@ -362,17 +369,18 @@ FCSReturnCode TFCSLateralShapeParametrizationHitChain::simulate(
   {
 
     auto hitloopstart = m_chain.begin() + get_nr_of_init();
-    int ihit = 0;
+    hit.idx() = 0;
     int ifail = 0;
     int itotalfail = 0;
     int retry_warning = 1;
     int retry = 0;
+    bool failed = false;
     do {
       hit.reset();
       hit.E() = Ehit;
-      bool failed = false;
+      failed = false;
       if (debug)
-        if (ihit == 2)
+        if (hit.idx() == 2)
           if (!verbose) {
             // Switch debug output back to INFO to avoid huge logs, but keep
             // full log in verbose
@@ -403,18 +411,19 @@ FCSReturnCode TFCSLateralShapeParametrizationHitChain::simulate(
       if (!failed) {
         ifail = 0;
         sumEhit += hit.E();
-        ++ihit;
+        ++hit.idx();
 
-        if (((ihit == 20 * nhit) || (ihit == 100 * nhit)) && ihit >= 100) {
+        // TODO: Different signedness:
+        if (((hit.idx() == 20 * nhit) || (hit.idx() == 100 * nhit)) && hit.idx() >= 100) {
           ATH_MSG_DEBUG(
               "TFCSLateralShapeParametrizationHitChain::simulate(): Iterated "
-              << ihit << " times, expected " << nhit << " times. Deposited E("
+              << hit.idx() << " times, expected " << nhit << " times. Deposited E("
               << cs << ")=" << sumEhit << " expected E=" << Elayer);
         }
-        if (ihit >= 1000 * nhit && ihit >= 1000) {
+        if (hit.idx() >= 1000 * nhit && hit.idx() >= 1000) {
           ATH_MSG_DEBUG("TFCSLateralShapeParametrizationHitChain::simulate():"
                           " Aborting hit chain, iterated "
-                          << ihit << " times, expected " << nhit
+                          << hit.idx() << " times, expected " << nhit
                           << " times. Deposited E(" << cs << ")=" << sumEhit
                           << " expected E=" << Elayer << ", caused by:");
           if (debug) Print();
@@ -437,12 +446,38 @@ FCSReturnCode TFCSLateralShapeParametrizationHitChain::simulate(
                           << ", total fails=" << itotalfail);
         }
       }
-    } while (std::abs(sumEhit) < std::abs(Elayer));
+    } while (!check_all_hits_simulated(hit, simulstate, truth, extrapol, !failed));
   }
 
   if (debug)
     PropagateMSGLevel(old_level);
   return FCSSuccess;
+}
+
+bool TFCSLateralShapeParametrizationHitChain::check_all_hits_simulated(
+    TFCSLateralShapeParametrizationHitBase::Hit &hit,
+    TFCSSimulationState &simulstate, const TFCSTruthState *truth,
+    const TFCSExtrapolationState *extrapol, bool success) const {
+
+  (void)truth;     // unused parameter
+  (void)extrapol;  // unused parameter
+
+  if (!success) {
+    // The hit simulation failed => Nothing changed => Still not done
+    return false;
+  }
+
+  float sumEhit = 0;
+  if (simulstate.hasAuxInfo("FCSHitChainEnergySum"_FCShash) && hit.idx() > 1) {
+    sumEhit = simulstate.getAuxInfo<float>("FCSHitChainEnergySum"_FCShash);
+  }
+
+  sumEhit += hit.E();
+
+  simulstate.setAuxInfo<float>("FCSHitChainEnergySum"_FCShash, sumEhit);
+
+  float Elayer = simulstate.E(calosample());
+  return (std::abs(sumEhit) >= std::abs(Elayer));
 }
 
 void TFCSLateralShapeParametrizationHitChain::Print(Option_t *option) const {

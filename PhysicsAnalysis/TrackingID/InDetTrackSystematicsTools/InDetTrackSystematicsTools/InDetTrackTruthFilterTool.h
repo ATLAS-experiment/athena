@@ -1,6 +1,6 @@
 // -*- c++ -*-
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef INDETTRACKSYSTEMATICSTOOLS_INDETTRACKTRUTHFILTERTOOL_H
@@ -43,6 +43,8 @@ namespace InDet {
     // create constructor for standalone Root
     InDetTrackTruthFilterTool( const std::string& name );
 
+    virtual ~InDetTrackTruthFilterTool();
+
     //  static const InterfaceID& interfaceID();
     virtual StatusCode initialize() override;
     virtual void prepare() override {};
@@ -78,14 +80,14 @@ namespace InDet {
     Gaudi::Property<float> m_fFakeTight{this, "fFakeTight", -1.0, "Fake tight fraction"};
     Gaudi::Property<float> m_trkEffSystScale{this, "trkEffSystScale", 1.0, "Track efficiency systematic scale"};
 
-    std::unique_ptr<TH2> m_trkEffHistLooseGlobal = nullptr;
-    std::unique_ptr<TH2> m_trkEffHistLooseIBL = nullptr;
-    std::unique_ptr<TH2> m_trkEffHistLoosePP0 = nullptr;
-    std::unique_ptr<TH2> m_trkEffHistLoosePhysModel = nullptr;
-    std::unique_ptr<TH2> m_trkEffHistTightGlobal = nullptr;
-    std::unique_ptr<TH2> m_trkEffHistTightIBL = nullptr;
-    std::unique_ptr<TH2> m_trkEffHistTightPP0 = nullptr;
-    std::unique_ptr<TH2> m_trkEffHistTightPhysModel = nullptr;
+    std::unique_ptr<TH2> m_trkEffHistLooseGlobal;
+    std::unique_ptr<TH2> m_trkEffHistLooseIBL;
+    std::unique_ptr<TH2> m_trkEffHistLoosePP0;
+    std::unique_ptr<TH2> m_trkEffHistLoosePhysModel;
+    std::unique_ptr<TH2> m_trkEffHistTightGlobal;
+    std::unique_ptr<TH2> m_trkEffHistTightIBL;
+    std::unique_ptr<TH2> m_trkEffHistTightPP0;
+    std::unique_ptr<TH2> m_trkEffHistTightPhysModel;
 
     std::unordered_map<std::string, TH2*> m_histMap;
 

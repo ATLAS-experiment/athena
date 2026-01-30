@@ -71,7 +71,7 @@ public:
                      const MultiRange* full_range = nullptr)
   {
     return channels().init (name() + ".channels",
-                            ids, end_index, m_msgSvc, full_range);
+                            ids, end_index, full_range);
   }
 
   int init_regions (const std::set<Identifier>& ids,
@@ -79,7 +79,7 @@ public:
                     const MultiRange* full_range = nullptr)
   {
     return regions().init (name() + ".regions",
-                           ids, end_index, m_msgSvc, full_range);
+                           ids, end_index, full_range);
   }
 };
 
@@ -92,7 +92,7 @@ void test_hashgroup()
   for (unsigned int i = 100; i < 200; i += 10)
     ids.insert (Identifier (i));
   CaloIDHelper::HashGroup hg;
-  assert (hg.init ("hg", ids, 3, nullptr) == 0);
+  assert (hg.init ("hg", ids, 3) == 0);
   assert (hg.hash_max() == 10);
 
   std::vector<Identifier> vids (ids.begin(), ids.end());
@@ -135,7 +135,7 @@ void test_hashgroup()
   assert (mr.cardinality() == 10);
 
   CaloIDHelper::HashGroup hg2;
-  assert (hg2.init ("hg2", ids, 3, nullptr, &mr) == 0);
+  assert (hg2.init ("hg2", ids, 3, &mr) == 0);
 
   CaloIDHelperTest helper ("helper");
   CaloIDHelper::HashGroup hg3;
@@ -153,7 +153,6 @@ void test_helper()
 
   CaloIDHelperTest helper ("helper");
   assert (helper.name() == "helper");
-  assert (helper.msgSvc() == nullptr);
 
 
   IdDictParser parser;

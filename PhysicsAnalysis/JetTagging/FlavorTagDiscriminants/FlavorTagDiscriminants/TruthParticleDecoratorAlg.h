@@ -38,28 +38,28 @@ namespace FlavorTagDiscriminants {
 
     // Decorators for truth particles
     SG::WriteDecorHandleKey< xAOD::TruthParticleContainer > m_dec_origin_label {
-      this, "ftagTruthOriginLabel", "ftagTruthOriginLabel", 
+      this, "ftagTruthOriginLabel", m_TruthContainerKey, "ftagTruthOriginLabel",
         "Exclusive origin label of the truth particle"};
     SG::WriteDecorHandleKey< xAOD::TruthParticleContainer > m_dec_type_label {
-      this, "ftagTruthTypeLabel", "ftagTruthTypeLabel", 
+      this, "ftagTruthTypeLabel", m_TruthContainerKey, "ftagTruthTypeLabel",
         "Exclusive truth type label of the truth particle"};
     SG::WriteDecorHandleKey< xAOD::TruthParticleContainer > m_dec_source_label {
-      this, "ftagTruthSourceLabel", "ftagTruthSourceLabel", 
+      this, "ftagTruthSourceLabel", m_TruthContainerKey, "ftagTruthSourceLabel",
         "Exclusive truth label for the source of secondary particles"};
     SG::WriteDecorHandleKey< xAOD::TruthParticleContainer > m_dec_vertex_index {
-      this, "ftagTruthVertexIndex", "ftagTruthVertexIndex", 
+      this, "ftagTruthVertexIndex", m_TruthContainerKey, "ftagTruthVertexIndex",
         "ftagTruth vertex index of the truth particle"};
     SG::WriteDecorHandleKey< xAOD::TruthParticleContainer > m_dec_parent_uniqueID {
-      this, "ftagTruthParentBarcode", "ftagTruthParentBarcode",
+      this, "ftagTruthParentBarcode", m_TruthContainerKey, "ftagTruthParentBarcode",
         "UniqueID of parent of linked truth particle"};
 
     // truth origin tool
     ToolHandle<InDet::InDetTrackTruthOriginTool> m_truthOriginTool {
-      this, "trackTruthOriginTool", "InDet::InDetTrackTruthOriginTool", 
+      this, "trackTruthOriginTool", "InDet::InDetTrackTruthOriginTool",
         "track truth origin tool"};
 
     Gaudi::Property<float> m_truthVertexMergeDistance {
-      this, "truthVertexMergeDistance", 0.1, 
+      this, "truthVertexMergeDistance", 0.1,
         "Merge any truth vertices within this distance [mm]"};
 
     // ATLASRECTS-8290: this is for backward compatability, remove eventually

@@ -8,13 +8,10 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 def GenFilterToolCfg(flags):
     """Configure the generator filter tool"""
     acc = ComponentAccumulator()
-
     # Set up the MCTruthClassifier
     from MCTruthClassifier.MCTruthClassifierConfig import DFCommonMCTruthClassifierCfg
-    acc.merge(DFCommonMCTruthClassifierCfg(flags))
-
     #Save the post-shower HT and MET filter values that will make combining filtered samples easier (adds to the EventInfo)
-    GenFilterTool = CompFactory.DerivationFramework.GenFilterTool
-    acc.addPublicTool(GenFilterTool(name = "DFCommonTruthGenFilt"), primary = True)
-
+    acc.setPrivateTools(CompFactory.DerivationFramework.GenFilterTool(name = "DFCommonTruthGenFilt",
+                                                                      TruthClassifier=acc.addPublicTool(acc.popToolsAndMerge(DFCommonMCTruthClassifierCfg(flags)))
+                                                                      ))
     return acc

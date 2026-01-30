@@ -99,10 +99,5 @@ psHG.Draw("AP")
 can.cd(4)
 dsHG.Draw("AP")
 
-try:
-    from builtins import input
-except ImportError:
-    # old python 2 without builtins
-    input=raw_input
-
+from builtins import input
 c = input('please enter a character: ')

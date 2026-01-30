@@ -12,14 +12,18 @@
 
 
 #include "MuonRecToolInterfacesR4/ISegmentSelectionTool.h"
+#include "MuonRecToolInterfacesR4/ITrackSummaryTool.h"
 
+#include "ActsEvent/TrackContainer.h"
 #include "xAODTruth/TruthParticleContainer.h"
 #include "xAODMuonSimHit/MuonSimHitContainer.h"
+#include "xAODTracking/TrackParticleContainer.h"
 #include "xAODMuon/MuonSegmentContainer.h"
+#include "xAODMuon/MuonContainer.h"
 #include "MuonPRDTest/SegmentVariables.h"
 #include "MuonReadoutGeometryR4/MuonDetectorManager.h"
 #include "MuonTrackFindingTools/MsTrackSeeder.h"
-
+#include "MuonPRDTestR4/TrackSummaryModule.h"
 
 #include "MuonPatternEvent/MuonPatternContainer.h"
 #include "MuonTrackEvent/MsTrackSeed.h"
@@ -70,7 +74,15 @@ namespace MuonValR4{
         SG::ReadHandleKey<ActsTrk::GeometryContext> m_geoCtxKey{this, "AlignmentKey", "ActsAlignment", "cond handle key"};
         /** @brief Dependency on the magnetic field */
         SG::ReadCondHandleKey<AtlasFieldCacheCondObj> m_fieldCacheKey{this, "MagFieldKey", "fieldCondObj", "Name of the Magnetic Field conditions object key"};
-
+        /** @brief Segment selection tool to pick the good quality segments */
+        ToolHandle<MuonR4::ISegmentSelectionTool> m_segSelector{this, "SegmentSelectionTool" , "" };
+        /** @brief Dependency on the R4 MS track container  */
+        SG::ReadHandleKey<ActsTrk::TrackContainer> m_trackKey{this, "TrackKey", "MsTracks"};
+          
+        /** @brief Hit summary tool */
+        ToolHandle<MuonR4::ITrackSummaryTool> m_summaryTool{this, "SummaryTool" ,""};
+        /** @brief Legacy track reconstruction chain */
+        SG::ReadHandleKey<xAOD::TrackParticleContainer> m_legacyTrackKey{this,"LegacyTrackKey", "MuonSpectrometerTrackParticles"};
 
         std::unique_ptr<MuonR4::MsTrackSeeder> m_seeder{};
         using ParticleBranchPtr_t = std::shared_ptr<MuonVal::IParticleFourMomBranch>;
@@ -90,7 +102,10 @@ namespace MuonValR4{
         MuonVal::VectorBranch<float>& m_seedThetaCone{m_tree.newVector<float>("MsTrkSeed_thetaCone")};
         /** @brief Estimated momentum times charge from the track seed */
         MuonVal::VectorBranch<float>& m_seedQP{m_tree.newVector<float>("MsTrkSeed_qTimesP")};
-
+        /** @brief Hit summary on the track seed */
+        std::shared_ptr<TrackSummaryModule> m_seedSummary{};
+        /** @brief Hit summary on the reconstructed track */
+        std::shared_ptr<TrackSummaryModule> m_trackSummary{};
         /** @brief Link of the track seed to the building segment  */
         MuonVal::MatrixBranch<unsigned short>& m_seedRecoSegMatch{m_tree.newMatrix<unsigned short>("MsTrkSeed_segmentLinks")};
         /** @brief Link of the truth segments to the matchin reco segments */
@@ -111,8 +126,8 @@ namespace MuonValR4{
         MuonVal::VectorBranch<float>& m_truthMuonsSeedCone{m_tree.newVector<float>("TruthMuons_seedThetaCone")};
         /** @brief Estimated Q x P from the seeder algorithm class  */
         MuonVal::VectorBranch<float>& m_truthMuonQP{m_tree.newVector<float>("TruthMuons_qTimesP")};
-        /** @brief Segment selection tool to pick the good quality segments */
-        ToolHandle<MuonR4::ISegmentSelectionTool> m_segSelector{this, "SegmentSelectionTool" , "" };
+        /** @brief Output branches of the legacy MS tracks */
+        ParticleBranchPtr_t m_legacyTrks{};
     };
 }
 

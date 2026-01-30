@@ -21,6 +21,7 @@
 
 #include <numeric>
 #include <atomic>
+#include <mutex>
 
 class FPGATrackSimLogicalEventInputHeader;
 class FPGATrackSimLogicalEventOutputHeader;
@@ -40,17 +41,19 @@ public:
   FPGATrackSimLogicalEventOutputHeader* addOutputBranch(const std::string& branchName, bool write = true);
 
   // Helper function; part of initialize that actually sets up the branches for reading.
-  StatusCode configureReadBranches();
+  StatusCode configureReadBranches() const;
 
   // Actually read or write the corresponding objects.
-  StatusCode readData(bool &last);
-  StatusCode writeData();
+  StatusCode readData(bool &last) const;
+  StatusCode writeData() const;
 
   // Not sure I understand why this is done like this.
   std::string fileName() { return std::accumulate(m_inpath.value().begin(), m_inpath.value().end(), std::string{}); }
 
   // Not sure this is needed, but it was in the interface.
-  TTree* getEventTree() { return m_EventTree; };
+  TTree* getEventTree() { return m_EventTree; }
+  
+  void activateEventOutput() const {m_activated=true;}
 
 private:
   // JO configuration (Converted to Gaudi::Property).
@@ -71,23 +74,29 @@ private:
 
   // Max output events
   Gaudi::Property<int> m_eventLimit {this, "EventLimit", 10000 , "Maximum Number of Events to Output"};
+  
+  // For event level output control
+  Gaudi::Property<bool> m_requireActivation {this, "RequireActivation", false , "Only output if activated on event, good for doing a single region in a large file"};
 
   // internal counters  
-  std::atomic<unsigned> m_event = 0;
-  std::atomic<unsigned> m_totevent = 0;
-  std::atomic<unsigned> m_file = 0;
- 
-  // These were protected in the interface but I don't think they have to be.
-  std::vector<FPGATrackSimLogicalEventInputHeader*>  m_eventInputHeaders;
-  std::vector<FPGATrackSimLogicalEventOutputHeader*> m_eventOutputHeaders;
+  mutable std::atomic<unsigned> m_event = 0;
+  mutable std::atomic<unsigned> m_totevent = 0;
+  mutable std::atomic<unsigned> m_file = 0;
+  mutable std::atomic<bool> m_activated{false}; // static so if any instance is active they all are
+  mutable std::mutex m_writeMutex;  // Protect all ROOT I/O operations in const methods
+  
+  // ROOT I/O containers modified in const methods. Protected by m_writeMutex.
+  mutable std::vector<FPGATrackSimLogicalEventInputHeader*>  m_eventInputHeaders ATLAS_THREAD_SAFE;
+  mutable std::vector<FPGATrackSimLogicalEventOutputHeader*> m_eventOutputHeaders ATLAS_THREAD_SAFE;
 
   std::vector<std::string> m_branchNameIns;
   std::vector<std::string> m_branchNameOuts;
 
-  TFile *m_infile = nullptr;
-  TTree *m_EventTree = nullptr;
+  // ROOT file/tree pointers modified in const methods. Protected by m_writeMutex.
+  mutable TFile *m_infile ATLAS_THREAD_SAFE = nullptr;
+  mutable TTree *m_EventTree ATLAS_THREAD_SAFE = nullptr;
   
-  StatusCode openFile(std::string const & path);
+  StatusCode openFile(std::string const & path) const;
 
 };
 

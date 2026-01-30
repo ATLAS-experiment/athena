@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -19,9 +19,9 @@ def ActsGbts2SeedingTrigToolCfg(flags,name: str = "Gbts2ActsSeedingTool", **kwar
   kwargs.setdefault("DoPhiFiltering", False) #no phi-filtering for full-scan tracking
   kwargs.setdefault("UseBeamTilt", False)
 
-  isLRT=flags.Tracking.ActiveConfig.extension == "LargeD0"
+  isLRT = flags.Tracking.ActiveConfig.extension in ["LargeD0", "ActsLargeRadius"]
   
-  kwargs.setdefault("pTmin", 0.9 * GaudiUnits.GeV)
+  kwargs.setdefault("pTmin", flags.Tracking.ActiveConfig.minPTSeed)
   kwargs.setdefault("MaxGraphEdges", 3000000)
   kwargs.setdefault("ConnectionFileName",
                     "binTables_ITK_RUN4_LRT.txt" if isLRT else "binTables_ITK_RUN4.txt")
@@ -44,6 +44,7 @@ def ActsPixelSeedingToolCfg(flags,
     kwargs.setdefault("useVariableMiddleSPRange", False)
     kwargs.setdefault("rMax", 320. * ActsUnits.mm)
     kwargs.setdefault("minPt", flags.Tracking.ActiveConfig.minPTSeed / GaudiUnits.GeV * ActsUnits.GeV)
+    kwargs.setdefault("impactMax", flags.Tracking.ActiveConfig.maxPrimaryImpactSeed / GaudiUnits.mm * ActsUnits.mm)
     kwargs.setdefault("rBinEdges", [0, kwargs['rMax']])
     kwargs.setdefault("rRangeMiddleSP", [
         [0,0],
@@ -69,9 +70,7 @@ def ActsFastPixelSeedingToolCfg(flags,
                                 name: str = "ActsFastPixelSeedingTool",
                                 **kwargs) -> ComponentAccumulator:
     ## Additional cuts for fast seed configuration
-    kwargs.setdefault("minPt", 0.9 * ActsUnits.GeV)
     kwargs.setdefault("sigmaScattering", 2.)
-    kwargs.setdefault("maxPtScattering", float("inf"))
     kwargs.setdefault("maxSeedsPerSpM", 3)
     kwargs.setdefault("collisionRegionMin", -150 * ActsUnits.mm)
     kwargs.setdefault("collisionRegionMax", 150 * ActsUnits.mm)
@@ -107,7 +106,7 @@ def ActsFastPixelSeedingToolCfg(flags,
     ])
     kwargs.setdefault("zBinNeighborsBottom", [
       [0, 0], # -3000, -2000
-      [1, 1], # -2000, -1400      
+      [0, 1], # -2000, -1400      
       [0, 1], # -1400, -910
       [0, 1], # -910, -500
       [0, 1], # -500, -250
@@ -115,15 +114,12 @@ def ActsFastPixelSeedingToolCfg(flags,
       [-1, 0], # 250, 500
       [-1, 0], # 500, 910
       [-1, 0], # 910, 1400
-      [-1, -1], # 1400, 2000
+      [-1, 0], # 1400, 2000
       [0, 0] # 2000, 3000
     ])
     
     kwargs.setdefault("zBinEdges", [-3000., -2000, -1400., -910., -500., -250.,  250., 500., 910., 1400., 2000, 3000.])
-    kwargs.setdefault("useVariableMiddleSPRange", False)
     kwargs.setdefault("useExperimentCuts", True)
-    kwargs.setdefault("rMax", 320 * ActsUnits.mm)
-    kwargs.setdefault("rBinEdges", [0, kwargs['rMax']])
 
     kwargs.setdefault("deltaRMaxTopSP", 220 * ActsUnits.mm)
     kwargs.setdefault("deltaRMaxBottomSP", 135 * ActsUnits.mm)
@@ -137,9 +133,11 @@ def ActsStripSeedingToolCfg(flags,
 
     impactMax = 20. * ActsUnits.mm
     collisionRegionAbsMax = 200. * ActsUnits.mm
+    deltaRMiddleMaxSPRange = 150 * ActsUnits.mm
     if flags.Tracking.ActiveConfig.extension in ["ActsLargeRadius", "ActsValidateLargeRadiusSeeds", "ActsValidateLargeRadiusStandalone"]:
         impactMax = 300. * ActsUnits.mm
         collisionRegionAbsMax = 500. * ActsUnits.mm
+        deltaRMiddleMaxSPRange = 50 * ActsUnits.mm
 
     
     ## For ITkStrip, change properties that have to be modified w.r.t. the default values
@@ -158,7 +156,7 @@ def ActsStripSeedingToolCfg(flags,
     kwargs.setdefault("interactionPointCut" , False)
     kwargs.setdefault("zBinsCustomLooping" , [7, 8, 6, 9, 5, 10, 4, 11, 3, 12, 2])
     kwargs.setdefault("deltaRMiddleMinSPRange" , 30 * ActsUnits.mm)
-    kwargs.setdefault("deltaRMiddleMaxSPRange" , 150 * ActsUnits.mm)
+    kwargs.setdefault("deltaRMiddleMaxSPRange" , deltaRMiddleMaxSPRange)
     kwargs.setdefault("useDetailedDoubleMeasurementInfo" , True)
     kwargs.setdefault("maxPtScattering", float("inf"))
     # For SeedFilterConfig
@@ -238,10 +236,15 @@ def ActsPixelGbtsSeedingToolCfg(flags,
                                 name: str = "ActsPixelGbtsSeedingTool", 
                                 **kwargs) -> ComponentAccumulator:
     acc = ComponentAccumulator()
+    if "layerNumberTool" not in kwargs:
+        from TrigFastTrackFinder.TrigFastTrackFinderConfig import ITkTrigL2LayerNumberToolCfg
+        ntargs = {"UseNewLayerScheme": True}
+        kwargs.setdefault(
+            "layerNumberTool",
+            acc.popToolsAndMerge(ITkTrigL2LayerNumberToolCfg(flags, **ntargs))
+        )
     ## For ITkPixel, use default values for ActsTrk::GbtsSeedingTool
     kwargs.setdefault("ConnectorInputFile" , find_datafile("binTables_ITK_RUN4.txt"))
-
-    kwargs.setdefault('PixelDetectorElements', 'ITkPixelDetectorElementCollection')
 
     acc.setPrivateTools(CompFactory.ActsTrk.GbtsSeedingTool(name = name, **kwargs))
     return acc

@@ -109,9 +109,10 @@ if __name__ == "__main__":
     parser.add_argument('-t','--tagnum', dest='tagnum', default=0, help='Which tag to compute')
     parser.add_argument('-x','--tagstr', dest='tagstr', default='', help='Tag string to compute')
     parser.add_argument('-n','--noisetag', dest='noisetag', default="", help='Which noise tag to use')
+    parser.add_argument('-p','--pileuptag', dest='pileuptag', default="", help='Which pileup tag to use')
     parser.add_argument('--sqlite', dest='sql', default="", help='Sqlite file with noise folder')
     parser.add_argument('-a','--localnoise', dest='localnoise', default=False, action="store_true", help='read the noise from local sqlite')
-    parser.add_argument('-p','--localpileup', dest='localpileup', default=False, action="store_true", help='read the pileup from local sqlite')
+    parser.add_argument('-l','--localpileup', dest='localpileup', default=False, action="store_true", help='read the pileup from local sqlite')
 
     args = parser.parse_args()
     if help in args and args.help is not None and args.help:
@@ -179,6 +180,7 @@ if __name__ == "__main__":
     flags.Input.RunNumbers = [int(args.run),]
 
     flags.IOVDb.DBConnection  = "sqlite://;schema=DSPThresholdTemplates.db;dbname=CONDBR2"
+    flags.IOVDb.DatabaseInstance="CONDBR2"
 
     from AthenaConfiguration.TestDefaults import defaultGeometryTags
     flags.GeoModel.AtlasVersion = defaultGeometryTags.RUN3
@@ -195,12 +197,12 @@ if __name__ == "__main__":
 
     if args.sql != "":
        flags.IOVDb.SqliteInput=args.sql
-       fldrs=[]
+       fldrs=set()
        if args.localpileup:
-          fldrs += ["/CALO/Ofl/Noise/PileUpNoiseLumi"]
+          fldrs.add("/CALO/Ofl/Noise/PileUpNoiseLumi")
        if args.localpileup:
-          fldrs += ["/LAR/NoiseOfl/CellNoise"]
-       flags.IOVDb.SqliteFolders=fldrs
+          fldrs.add("/LAR/NoiseOfl/CellNoise")
+       flags.IOVDb.SqliteFolders=tuple(fldrs)
 
     flags.LAr.doHVCorr=False
 
@@ -213,7 +215,10 @@ if __name__ == "__main__":
                 Sampval=SampVal, Qtval=QtVal, Samppileup=SampPileup, Qtpileup=QtPileup))
 
     from IOVDbSvc.IOVDbSvcConfig import addOverride        
-    cfg.merge(addOverride(flags,"/CALO/Ofl/Noise/PileUpNoiseLumi","CALOOflNoisePileUpNoiseLumi-RUN2-UPD1-00"))
+    if args.pileuptag!="":
+       cfg.merge(addOverride(flags,"/CALO/Ofl/Noise/PileUpNoiseLumi",args.pileuptag))
+    else:   
+       cfg.merge(addOverride(flags,"/CALO/Ofl/Noise/PileUpNoiseLumi","CALOOflNoisePileUpNoiseLumi-RUN2-UPD1-00"))
     if args.noisetag!="":
        cfg.merge(addOverride(flags,"/LAR/NoiseOfl/CellNoise",args.noisetag))
 

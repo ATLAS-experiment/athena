@@ -35,9 +35,6 @@ namespace Muon {
             const MuonGMR4::MuonDetectorManager* m_detMgr{nullptr};
 
             Gaudi::Property<std::string> m_cablingJSON{this, "OutCablingJSON", "RpcCabling.json", "Cabling JSON"};
-
-            int m_BIL_stIdx{9999};
-            int m_BIS_stIdx{9999};
     };
 }
 #endif

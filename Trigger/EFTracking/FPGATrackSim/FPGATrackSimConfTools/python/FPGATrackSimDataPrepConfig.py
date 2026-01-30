@@ -166,12 +166,15 @@ def FPGATrackSimDataPrepOutputCfg(flags):
     FPGATrackSimWriteOutput = CompFactory.FPGATrackSimOutputHeaderTool("FPGATrackSimWriteOutputDataPrep")
     FPGATrackSimWriteOutput.InFileName = ["test.root"]
     FPGATrackSimWriteOutput.OutputTreeName = "FPGATrackSimDataPrepTree"    
-    writeThis=flags.Trigger.FPGATrackSim.writeAdditionalOutputData and ((flags.Trigger.FPGATrackSim.regionToWriteDPTree in flags.Trigger.FPGATrackSim.regionList) or (flags.Trigger.FPGATrackSim.regionToWriteDPTree < 0))
+    from FPGATrackSimConfTools.FPGATrackSimHelperFunctions import convertRegionsExpressionToArray
+    writeThis=flags.Trigger.FPGATrackSim.writeAdditionalOutputData and ((flags.Trigger.FPGATrackSim.regionToWriteDPTree in convertRegionsExpressionToArray(flags.Trigger.FPGATrackSim.regionList)) or (flags.Trigger.FPGATrackSim.regionToWriteDPTree < 0))
     
     if not writeThis:
         FPGATrackSimWriteOutput.EventLimit = 0
     else:
         FPGATrackSimWriteOutput.EventLimit = flags.Trigger.FPGATrackSim.writeOutputEventLimit
+    if flags.Trigger.FPGATrackSim.writeRegion>=0: # negative is off
+        FPGATrackSimWriteOutput.RequireActivation=True
     # RECREATE means that that this tool opens the file.
     # HEADER would mean that something else (e.g. THistSvc) opens it and we just add the object.
     FPGATrackSimWriteOutput.RWstatus = "HEADER"
@@ -388,10 +391,12 @@ def FPGATrackSimDataPrepAlgCfg(inputFlags):
     theFPGATrackSimDataPrepAlg.doEvtSel= False if flags.Trigger.FPGATrackSim.pipeline.startswith('F-1') or flags.Trigger.FPGATrackSim.sampleType == 'skipTruth' else True
     theFPGATrackSimDataPrepAlg.useInternalTruthTracks = flags.Trigger.FPGATrackSim.useFPGATruthTrackMatching
     theFPGATrackSimDataPrepAlg.recordHits = not flags.Trigger.FPGATrackSim.pipeline.startswith('F-1')
-    
+    theFPGATrackSimDataPrepAlg.writeRegion = flags.Trigger.FPGATrackSim.writeRegion
+    theFPGATrackSimDataPrepAlg.isDataPrepPipeline = True if flags.Tracking.ActiveConfig.extension == "ActsValidateF100" else False
 
     theFPGATrackSimDataPrepAlg.RawToLogicalHitsTools = []
-    for region in flags.Trigger.FPGATrackSim.regionList:
+    from FPGATrackSimConfTools.FPGATrackSimHelperFunctions import convertRegionsExpressionToArray
+    for region in convertRegionsExpressionToArray(flags.Trigger.FPGATrackSim.regionList):
         flagsForEachRegion = inputFlags.clone()
         flagsForEachRegion = flagsForEachRegion.cloneAndReplace("Trigger.FPGATrackSim.ActiveConfig", "Trigger.FPGATrackSim." + inputFlags.Trigger.FPGATrackSim.algoTag,keepOriginal=True)
         flagsForEachRegion.Trigger.FPGATrackSim.region = region
@@ -621,11 +626,12 @@ def FPGATrackSimClusteringCfg(flags): # to be used in the Reco_tf configuration
                                             'FPGAActsTracks' : [f'{flags.Tracking.ActiveConfig.extension}Tracks',f'SiSPTracksSeedSegments{flags.Tracking.ActiveConfig.extension}PixelTracks'],
                                             'isDataPrep': True} ))
     
+    if flags.Trigger.FPGATrackSim.writeAdditionalOutputData and flags.Tracking.ActiveConfig.extension in ["ActsValidateF100"]:
+        acc.addService(CompFactory.THistSvc(Output = [f"EXPERT DATAFILE='{flags.Trigger.FPGATrackSim.outputMonitorFile}', OPT='RECREATE'"]))
+        acc.addService(CompFactory.THistSvc(Output = ["FPGATRACKSIMOUTPUT DATAFILE='dataprep.root', OPT='RECREATE'"]))
     return acc
 
 def FPGATrackSimDataPrepFlagCfg(flags): # to be used in the Reco_tf configuration
-    flags.Scheduler.ShowDataDeps=True
-    flags.Scheduler.CheckDependencies=True
     
     flags.Trigger.FPGATrackSim.readOfflineObjects=False
     flags.Trigger.FPGATrackSim.doMultiTruth=False

@@ -2,19 +2,66 @@
 
 // Local include(s).
 #include "xAODRootAccess/Event.h"
+#include "xAODRootAccess/REvent.h"
 #include "xAODRootAccess/TActiveStore.h"
+#include "xAODRootAccess/TEvent.h"
 #include "xAODRootAccess/TStore.h"
 #include "xAODRootAccess/tools/IObjectManager.h"
 
 // Project include(s).
+#include "AsgMessaging/MessageCheck.h"
 #include "AthContainers/normalizedTypeinfoName.h"
+
+// ROOT include(s).
+#include <TFile.h>
+#include <TKey.h>
 
 // System include(s).
 #include <regex>
 #include <string>
 #include <vector>
 
+// Set up message printing functions for the static function(s).
+ANA_MSG_SOURCE(xAODEvent, "xAOD::Event")
+
 namespace xAOD {
+
+// Initialise some static data.
+/// Name of the event RNTuple
+const char* const Event::EVENT_RNTUPLE_NAME = "EventData";
+/// Name of the event TTree
+const char* const Event::EVENT_TREE_NAME = "CollectionTree";
+/// Name of the metadata tree or RNTuple
+const char* const Event::METADATA_OBJECT_NAME = "MetaData";
+
+/// static method to get Event object for reading either TTree (TEvent)
+/// or RNTuple (REvent). Here we access by TFile object
+std::unique_ptr<Event> Event::createAndReadFrom(TFile& inFile) {
+
+  // Make use of the messaging function(s) from the xAODEvent namespace.
+  using xAODEvent::msg;
+
+  if (inFile.FindKey(EVENT_RNTUPLE_NAME) != nullptr) {
+    // Create and set up an REvent object
+    auto event = std::make_unique<Experimental::REvent>();
+    if (event->readFrom(inFile).isFailure()) {
+      ANA_MSG_ERROR("Could not read RNTuple from: " << inFile.GetName());
+      return {};
+    }
+    return event;
+  } else if (inFile.FindKey(EVENT_TREE_NAME) != nullptr) {
+    // Create and set up a TEvent object
+    auto event = std::make_unique<TEvent>();
+    if (event->readFrom(inFile).isFailure()) {
+      ANA_MSG_ERROR("Could not read TTree from: " << inFile.GetName());
+      return {};
+    }
+    return event;
+  } else {
+    ANA_MSG_ERROR("Could not recognize file: " << inFile.GetName());
+    return {};
+  }
+}
 
 /// This function can be used to easily copy a given (set of)
 /// object/container(s) to the output, without modifying the contents of
@@ -47,17 +94,17 @@ StatusCode Event::copy(const std::string& pattern) {
     if (std::regex_match(key, re) == false) {
       continue;
     }
-    // Ignore objects that don't exist on the input.
-    static const bool SILENT = true;
-    if (connectObject(key, SILENT).isSuccess() == false) {
-      continue;
-    }
     // Skip all branches ending in "Aux.":
     if (key.ends_with("Aux.")) {
       continue;
     }
     // Also skip dynamic branches:
     if (efe.parentName() != "") {
+      continue;
+    }
+    // Ignore objects that don't exist on the input.
+    static const bool SILENT = true;
+    if (connectObject(key, SILENT).isSuccess() == false) {
       continue;
     }
     // Add the key to the list.

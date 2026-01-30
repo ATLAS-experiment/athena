@@ -40,6 +40,7 @@ void BLMSensorSD::Initialize(G4HCofThisEvent *)
   if(auto* eventManger = G4EventManager::GetEventManager()){
     if(auto* eventInfo = static_cast<AtlasG4EventUserInfo*>(eventManger->GetUserInformation())){
       m_HitColl = eventInfo->GetHitCollectionMap()->Find<SiHitCollection>(m_HitCollName);
+      m_g4UserEventInfo = eventInfo;
     }
   }
 }
@@ -106,7 +107,8 @@ G4bool BLMSensorSD::ProcessHits(G4Step* aStep, G4TouchableHistory* /*ROhist*/)
       else if(aStep->GetTrack()->GetLogicalVolumeAtVertex()->GetName() == "Pixel::blmWallLog")
         produced_in_diamond = 3;
 
-      m_HitColl->Emplace(lP1, lP2, edep, aStep->GetPreStepPoint()->GetGlobalTime(), trHelp.GenerateParticleLink(),
+      m_HitColl->Emplace(lP1, lP2, edep, aStep->GetPreStepPoint()->GetGlobalTime(),
+                         trHelp.GenerateParticleLink(m_g4UserEventInfo ? m_g4UserEventInfo->GetEventStore() : nullptr),
                          0, 0, myTouch->GetVolume(1)->GetCopyNo()-222, 0, primaren, produced_in_diamond);
     }
   return true;

@@ -345,7 +345,7 @@ def CaloRingerJetsInputReaderCfg(flags,name="CaloRingerJetsReader",**kwargs):
         builderTool = CaloRingsJetBuilderCfg(flags)
 
     kwargs.setdefault('crBuilder', builderTool)
-    kwargs.setdefault('inputKey', flags.Egamma.Keys.Output.Photons) # need to get the jet container name
+    kwargs.setdefault('inputKey', "AntiKt4EMTopoJets") # need to get the jet container name
     kwargs.setdefault('builderAvailable', True)
     inputReaderTool = CompFactory.Ringer.CaloRingerJetsReader(name, **kwargs)
 

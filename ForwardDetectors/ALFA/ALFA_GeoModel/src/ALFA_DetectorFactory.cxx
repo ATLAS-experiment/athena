@@ -1,46 +1,43 @@
 /*
   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
+#include "ALFA_DetectorTool.h"
+#include "ALFA_DetectorFactory.h"
+#include "ALFA_Geometry/ALFA_GeometryReader.h"
 
 #include "GeoModelKernel/GeoMaterial.h"  
-
 #include "GeoModelKernel/GeoBox.h"
 #include "GeoModelKernel/GeoTube.h"
 #include "GeoModelKernel/GeoTrd.h"
 #include "GeoModelKernel/GeoShape.h"
+
 #include "GeoModelKernel/GeoShapeUnion.h" 
 #include "GeoModelKernel/GeoShapeShift.h"
 #include "GeoModelKernel/GeoShapeSubtraction.h"
 #include "GeoModelKernel/GeoLogVol.h"  
-#include "GeoModelKernel/GeoNameTag.h"  
+#include "GeoModelKernel/GeoNameTag.h"
+ 
 #include "GeoModelKernel/GeoDefinitions.h"
-
+#include "GeoModelKernel/GeoAlignableTransform.h"
 #include "GeoModelKernel/GeoPhysVol.h" 
 #include "GeoModelKernel/GeoFullPhysVol.h"
 #include "GeoModelKernel/GeoTransform.h"
+
 #include "GeoModelUtilities/StoredAlignX.h"
 #include "GeoModelUtilities/StoredPhysVol.h"
 #include "GeoModelInterfaces/StoredMaterialManager.h"
-
 #include "GeoPrimitives/CLHEPtoEigenConverter.h"
 
 #include "StoreGate/StoreGateSvc.h"
 #include "GaudiKernel/MsgStream.h"
 #include "AthenaKernel/getMessageSvc.h"
 #include "AthenaPoolUtilities/CondAttrListCollection.h"
+#include "RDBAccessSvc/IRDBAccessSvc.h"
 
-//#include "RDBAccessSvc/IRDBAccessSvc.h"
 #include <math.h>
 #include <stdio.h>
-
 #include <list>
-#include <map>
-#include <string>
 #include <algorithm>
-
-#include "ALFA_DetectorTool.h"
-#include "ALFA_DetectorFactory.h"
-#include "ALFA_Geometry/ALFA_GeometryReader.h"
 
 using namespace std;
 
@@ -730,7 +727,7 @@ void ALFA_DetectorFactory::create(GeoPhysVol* pWorld)
 	map<int,GeoShape*>* pMapSolidTiPlates=CreateSolidTiPlates();
 	map<int,GeoShape*>* pMapSolidOdPlates=CreateSolidODPlates();
 	
-	char szLabel[32];
+	char szLabel[32]{};
 	RPPOSPARAMS RPosParams;
 	ASPOSPARAMS AStationParams;
 	GeoLogVol* pLogRPBox=NULL;
@@ -1159,7 +1156,7 @@ map<int,GeoShape*>* ALFA_DetectorFactory::CreateSolidODPlates()
 void ALFA_DetectorFactory::ConstructODFiberCladdings(const eRPotName eRPName, GeoFullPhysVol* pPhysMotherVolume, const HepGeom::Transform3D& MotherTransform, GeoAlignableTransform* pDetTransform)
 {
 	int i;
-	char szLabel[32];
+	char szLabel[32]{};
 	
 	GeoBox* OD_Cladbox1 = new GeoBox(4.*CLHEP::mm,3.75*CLHEP::mm,.25*CLHEP::mm);
 	GeoBox* OD_Cladbox2 = new GeoBox(3.75*CLHEP::mm,15*CLHEP::mm,.25*CLHEP::mm);
@@ -1247,8 +1244,8 @@ void ALFA_DetectorFactory::ConstructODFibers00(const eRPotName eRPName, const in
 {
 	MsgStream LogStream(Athena::getMessageSvc(), "ALFA_GeoModel::ALFA_DetectorFactory");
 	
-	int i;
-	char szLabel[180];
+	int i{};
+	char szLabel[180]{};
 	HepGeom::Transform3D TransODFiber;
 	
 	GeoBox* OD_Fiberbox1 = new GeoBox(4.*CLHEP::mm,.24*CLHEP::mm,.24*CLHEP::mm);
@@ -1354,7 +1351,7 @@ void ALFA_DetectorFactory::ConstructODFibers00(const eRPotName eRPName, const in
 void ALFA_DetectorFactory::ConstructODFibers01(const eRPotName eRPName, const int iODPlate, eFiberType eFType, GeoFullPhysVol* pMotherVolume, const HepGeom::Transform3D& MotherTransform, const HepGeom::Transform3D& TransODCladding)
 {
 	int i;
-	char szLabel[180];
+	char szLabel[180]{};
 	HepGeom::Transform3D TransODFiber;
 	
 	GeoBox* OD_Fiberbox1 = new GeoBox(4.*CLHEP::mm,.24*CLHEP::mm,.24*CLHEP::mm);
@@ -1447,7 +1444,7 @@ void ALFA_DetectorFactory::ConstructODFibers01(const eRPotName eRPName, const in
 //void ALFA_DetectorFactory::ConstructUFiberCladdings(const eRPotName eRPName, GeoFullPhysVol* pMotherVolume, const HepGeom::Transform3D& MotherTransform)
 void ALFA_DetectorFactory::ConstructUFiberCladdings(const eRPotName eRPName, GeoFullPhysVol* pMotherVolume, const HepGeom::Transform3D& MotherTransform, GeoAlignableTransform* pDetTransform)
 {
-	char strLabel[32];
+	char strLabel[32]{};
 	//const double ALFA_stagger[10] = {0.0, 0.283, -0.141, 0.141, -0.283, 0.354, -0.071, 0.212, -0.212, 0.071};
 	
 	MsgStream LogStream(Athena::getMessageSvc(), "ALFA_DetectorFactory::ConstructUFiberCladdings");
@@ -1468,10 +1465,7 @@ void ALFA_DetectorFactory::ConstructUFiberCladdings(const eRPotName eRPName, Geo
 	GeoFullPhysVol* physALFA_CladdingU[ALFAPLATESCNT];
 	HepGeom::Transform3D TransCladdingU[ALFAPLATESCNT];
 
-	//RPPOSPARAMS RPosParams;
-	//m_pGeoReader->GetRPPosParams(&RPosParams,eRPName);
-	//StoredPhysVol* pStPhysClad=NULL;
-	//char szLabel[32];
+
 		
 	for(int i=0; i<ALFAPLATESCNT; i++)
 	{
@@ -1498,13 +1492,7 @@ void ALFA_DetectorFactory::ConstructUFiberCladdings(const eRPotName eRPName, Geo
 		pMotherVolume->add(new GeoTransform(Amg::CLHEPTransformToEigen(TransCladdingU[i])));
 		pMotherVolume->add(physALFA_CladdingU[i]);
 
-		/*
-		if(eRPName==ERPN_A7L1U && i==0){
-			sprintf(szLabel,"StALFA_CladdingU[03][00]");
-			pStPhysClad=new StoredPhysVol(physALFA_CladdingU[i]);
-			StatusCode sc=m_pDetectorStore->record(pStPhysClad,szLabel);
-			if(!sc.isSuccess()) throw std::runtime_error("Cannot store alignable record");
-		}*/
+		
 
 	}
 	
@@ -1911,7 +1899,7 @@ void ALFA_DetectorFactory::UpdateTransforms(PALIGNPARAMETERS pAlignParams)
 {
 	int i;
 	StatusCode sc;
-	char szLabel[32];
+	char szLabel[32]{};
 	RPPOSPARAMS RPosParams;
 	StoredAlignX* pAlignX;
 	GeoAlignableTransform* pAlTrans;

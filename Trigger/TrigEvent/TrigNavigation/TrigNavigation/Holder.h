@@ -1,7 +1,7 @@
 // Emacs -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGNAVIGATION_HOLDER_H
@@ -9,6 +9,7 @@
 #include <string>
 #include <vector>
 #include <type_traits>
+#include <memory>
 
 #include "GaudiKernel/ClassID.h"
 
@@ -163,7 +164,7 @@ namespace HLTNavDetails {
     HLT::AccessProxy*               m_storeGate{0};               //!< pointer to SG
 
     bool         m_readonly{false};
-    ITypeProxy*  m_aux{0};
+    std::unique_ptr<ITypeProxy>  m_aux;
 
     // Adapters so we can use ATH_MSG macros
     MsgStream& msg() const { return m_logger->msg(); }

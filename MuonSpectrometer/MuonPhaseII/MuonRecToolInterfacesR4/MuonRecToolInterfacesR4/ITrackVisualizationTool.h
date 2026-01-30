@@ -11,11 +11,16 @@
 #include <MuonTrackEvent/MsTrackSeed.h>
 #include <memory>
 
+#include "Acts/EventData/TrackParameters.hpp"
 class EventContext;
 class TObject;
 
 namespace MuonR4{
    class MsTrackSeeder;
+}
+
+namespace ActsTrk{
+    class GeometryContext;
 }
 
 namespace MuonValR4{
@@ -35,13 +40,11 @@ namespace MuonValR4{
              *  @param seederObj: Configured instance of the track seeder which actually constructed 
              *                    the seeds.
              *  @param segments: Container of all MS segments in the event
-             *  @param seeds: The constructed track seeds from the event
-             *  @param extraLabel: Extra label to be put onto the top of the shown canvases */
+             *  @param seeds: The constructed track seeds from the event */
             virtual void displaySeeds(const EventContext& ctx,
                                       const MuonR4::MsTrackSeeder& seederObj,
                                       const xAOD::MuonSegmentContainer& segments,
-                                      const MuonR4::MsTrackSeedContainer& seeds,
-                                      const std::string& extraLabel) const = 0;
+                                      const MuonR4::MsTrackSeedContainer& seeds) const = 0;
             /** @brief Displays all segments on the representative cylinder in the R-Z & X-Y plane
              *         and draws the markers of the successfully built seeds & truth segments
              *  @param ctx: EventContext to access store gate & conditions
@@ -49,14 +52,26 @@ namespace MuonValR4{
              *                    the seeds.
              *  @param segments: Container of all MS segments in the event
              *  @param seeds: The constructed track seeds from the event
-             *  @param extraLabel: Extra label to be put onto the top of the shown canvases
              *  @param extPrimitives: Extra TObjects that should be additionally painted onto the Canvases */
             virtual void displaySeeds(const EventContext& ctx,
                                       const MuonR4::MsTrackSeeder& seederObj,
                                       const xAOD::MuonSegmentContainer& segments,
                                       const MuonR4::MsTrackSeedContainer& seeds,
-                                      const std::string& extraLabel,
                                       PrimitivesVec_t && extPrimitives) const = 0;
+ 
+            using OptBoundPars_t = Acts::Result<Acts::BoundTrackParameters>;
+            /** @brief Visualizes the measurements of the segments on the track seed together
+             *         with their predicted local line parameters as an obj file. If parameters
+             *         to extrapolate are parsed, then they're extrapolated to the end of the world
+             *         and the trajectory is added to the obj
+             * @param ctx: EventContext to fetch the conditions data & the event information
+             * @param seed: MsTrack to visualize
+             * @param parsToExt: Parameters to extrapolate on top
+             * @param objName: Extra token to be added to the file name */
+            virtual void displayTrackSeedObj(const EventContext& ctx,
+                                             const MuonR4::MsTrackSeed& seed,
+                                             const OptBoundPars_t& parsToExt,
+                                             const std::string& objName = "") const = 0;
   
     };
 }

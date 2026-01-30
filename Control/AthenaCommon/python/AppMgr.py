@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # File: AthenaCommon/share/AppMgr.py
 # Author: Wim Lavrijsen (WLavrijsen@lbl.gov)
@@ -94,7 +94,6 @@ class AthServiceManager( Configurable.Configurable ):
       super( AthServiceManager, self ).__iadd__( service )
 
     # make all names explicitly known
-      global theApp
       theApp.ExtSvc += [ service.getFullName() ]
 
       return self

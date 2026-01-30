@@ -72,7 +72,7 @@ namespace EFTrackingFPGAIntegration
 
                     auto Ghit_w2 = FPGADataFormatUtilities::get_bitfields_GHITZ_w2(trackOutput->at(++i));
                     auto identifierHashW2 = Ghit_w2.cluster1;
-                    
+
                     // find in the multimap the SP that matches this globalPosition
                     auto range = spacePointMap.equal_range(identifierHashW2);
                     for (auto it = range.first; it != range.second; ++it) {
@@ -90,7 +90,7 @@ namespace EFTrackingFPGAIntegration
 
                 if(hitsInTrack != spacePointsToStoreInSeed.size())
                 {
-                    ATH_MSG_ERROR("Track does not have the same number of hits in the output as the seed container");
+                    ATH_MSG_WARNING("Track does not have the same number of hits in the output as the seed container hitsInTrack: "<<hitsInTrack<<" spacePointsToStoreInSeed: "<<spacePointsToStoreInSeed.size());
                 }
                 // construct seed based on the space points stored in the vector
                 if (spacePointsToStoreInSeed.size() >= m_minSpacePointsPerSeed) { // check that seeds contains at least the minimum number of desired space points
@@ -108,7 +108,7 @@ namespace EFTrackingFPGAIntegration
 
         }
 
-        ATH_MSG_DEBUG("Recorded " << seeds->size() << " seeds");
+        ATH_MSG_INFO("HW Recorded " << seeds->size() << " seeds");
 
         return StatusCode::SUCCESS;
     }

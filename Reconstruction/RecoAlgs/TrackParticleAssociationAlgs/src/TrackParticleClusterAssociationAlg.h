@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRACKPARTICLEASSOCIATIONALGS_TRACKPARTICLECLUSTERASSOCIATIONALG_H
@@ -65,7 +65,7 @@ class TrackParticleClusterAssociationAlg : public AthReentrantAlgorithm
 
   // Whether or not to use the DetectorEta attribute of the clusters, which is important if the input cluster container has had the origin correction applied
   // Default assumes no origin correction, must be configured if desired
-  SG::ReadDecorHandleKey<xAOD::CaloClusterContainer> m_detectorEtaDecor { this, "DetectorEtaName", "", "Decoration for CaloCluster DetectorEta" };
+  SG::ReadDecorHandleKey<xAOD::CaloClusterContainer> m_detectorEtaDecor { this, "DetectorEtaName", m_caloClusters, "", "Decoration for CaloCluster DetectorEta" };
   bool m_doDetEta = false;
 
   // vertex handling
@@ -74,8 +74,8 @@ class TrackParticleClusterAssociationAlg : public AthReentrantAlgorithm
 
 
   // decorations 
-  SG::WriteDecorHandleKey<xAOD::TrackParticleContainer> m_assocClustersDecor {this, "AssociatedClusterDecorKey" , "", "Decoration key to store associated clusters. IMPORTANT  must be consistent with TrackParticleContainer" };
-  SG::WriteDecorHandleKey<xAOD::TrackParticleContainer> m_caloEntryParsDecor {this, "CaloEntryParsDecorKey" , "", "Decoration name to store trk parameters to calo entry (if non blank). IMPORTANT : must be consistent with TrackParticleContainer" };
+  SG::WriteDecorHandleKey<xAOD::TrackParticleContainer> m_assocClustersDecor {this, "AssociatedClusterDecorKey", m_trackParticleCollectionHandle, "", "Decoration key to store associated clusters. IMPORTANT  must be consistent with TrackParticleContainer" };
+  SG::WriteDecorHandleKey<xAOD::TrackParticleContainer> m_caloEntryParsDecor {this, "CaloEntryParsDecorKey", m_trackParticleCollectionHandle, "", "Decoration name to store trk parameters to calo entry (if non blank). IMPORTANT : must be consistent with TrackParticleContainer" };
   SG::WriteDecorHandleKey<xAOD::CaloClusterContainer> m_sigmaWidthKey
     { this, "SigmaWidthKey", m_caloClusters, "sigmaWidth", "sigmaWidth decoration" };
 };

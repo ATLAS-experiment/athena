@@ -14,7 +14,6 @@
 #define POOL_POOL_H 1
 
 // Framework include files
-#include "StorageSvc/DbStatus.h"
 
 // STL include files
 #include <string>
@@ -29,10 +28,8 @@
  *  @version 1.0
  */
 namespace pool   {
-  // Type defintions and forward declarations
-  class DbInstanceCount;
-
-  typedef void DbObject; 
+  // Type definitions
+  typedef void DbObject;
   typedef int  DbAccessMode;
   typedef std::pair< long long, long long > DbLink;
 
@@ -49,11 +46,6 @@ namespace pool   {
     WRITE       =  1<<3,
     DESTROY     =  1<<5
   };
-
-  static const DbStatus Success      (DbStatus::Success);
-  static const DbStatus Warning      (DbStatus::Warning);
-  static const DbStatus Error        (DbStatus::Error);
-  static const DbStatus ConnTimeout  (static_cast<unsigned int>(DbStatus::Error)+2);
 
   /// Issue a debug break
   void      debugBreak();
@@ -76,20 +68,18 @@ namespace pool   {
   const char* accessMode(pool::DbAccessMode access_mode);
 
   /// Delete a pointer
-  template<class T> inline DbStatus deletePtr(T*& p)  {
+  template<class T> inline void deletePtr(T*& p)  {
     if ( 0 != p )    {
       delete p;
       p = 0;
     }
-    return Success;
   }
   /// Release a pointer
-  template<class T> inline DbStatus releasePtr(T*& p)  {
+  template<class T> inline void releasePtr(T*& p)  {
     if ( 0 != p )    {
       p->release();
       p = 0;
     }
-    return Success;
   }
 
   /// Release Reference countable pointer

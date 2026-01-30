@@ -7,7 +7,7 @@
 #ifndef PIXELCONDITIONSALGORITHMS_SIDETECTORELEMENTINFOCONDALG_H
 #define PIXELCONDITIONSALGORITHMS_SIDETECTORELEMENTINFOCONDALG_H
 
-#include "AthenaBaseComps/AthReentrantAlgorithm.h"
+#include "AthenaBaseComps/AthCondAlgorithm.h"
 
 #include "StoreGate/WriteHandleKey.h"
 
@@ -16,7 +16,7 @@
 
 
 namespace InDet {
-   class SiDetectorElementStatusCondAlg : public AthReentrantAlgorithm
+   class SiDetectorElementStatusCondAlg : public AthCondAlgorithm
    {
    public:
       SiDetectorElementStatusCondAlg(const std::string& name, ISvcLocator* pSvcLocator);
@@ -25,7 +25,6 @@ namespace InDet {
       virtual StatusCode initialize() override final;
       virtual StatusCode execute(const EventContext& ctx) const override final;
       virtual StatusCode finalize() override final;
-      virtual bool isReEntrant() const override final { return false; }
 
    private:
       ToolHandle <IDetectorElementStatusTool> m_condSummaryTool

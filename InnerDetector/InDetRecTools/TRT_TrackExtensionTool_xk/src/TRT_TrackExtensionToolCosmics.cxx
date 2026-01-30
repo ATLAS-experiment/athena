@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -174,11 +174,11 @@ InDet::TRT_TrackExtensionToolCosmics::newEvent(const EventContext& ctx) const
 
   Amg::RotationMatrix3D r; r.setIdentity();
   Amg::Transform3D t = Amg::Transform3D(r * Amg::Translation3D(Amg::Vector3D::Zero()));
-  event_data->m_trtcylinder= new Trk::CylinderSurface(t,1150.,3000.);
+  event_data->m_trtcylinder = std::make_unique<Trk::CylinderSurface>(t,1150.,3000.);
   Amg::Transform3D transf = Amg::Transform3D(r * Amg::Translation3D(Amg::Vector3D(0.,0.,3000)));
-  event_data->m_trtdiscA   = new Trk::DiscSurface    (transf,1.,1200.);
+  event_data->m_trtdiscA   = std::make_unique<Trk::DiscSurface>    (transf,1.,1200.);
   transf = Amg::Transform3D(r * Amg::Translation3D(Amg::Vector3D(0.,0.,-3000)));
-  event_data->m_trtdiscC   = new Trk::DiscSurface    (transf,1.,1200.);
+  event_data->m_trtdiscC   = std::make_unique<Trk::DiscSurface>    (transf,1.,1200.);
 
   return std::unique_ptr<InDet::ITRT_TrackExtensionTool::IEventData>(event_data.release());
 
@@ -466,7 +466,7 @@ InDet::TRT_TrackExtensionToolCosmics::findBoundarySurface(const Trk::TrackParame
                                                                        dir,true,Trk::muon).release();
   if(test){
     delete test;
-    return event_data.m_trtcylinder;
+    return event_data.m_trtcylinder.get();
   }
 
   test=m_extrapolator->extrapolateDirectly(ctx,
@@ -474,7 +474,7 @@ InDet::TRT_TrackExtensionToolCosmics::findBoundarySurface(const Trk::TrackParame
                                            *event_data.m_trtdiscA,dir,true,Trk::muon).release();
   if(test){
     delete test;
-    return event_data.m_trtdiscA;
+    return event_data.m_trtdiscA.get();
   }
 
   test=m_extrapolator->extrapolateDirectly(ctx,
@@ -482,7 +482,7 @@ InDet::TRT_TrackExtensionToolCosmics::findBoundarySurface(const Trk::TrackParame
                                            *event_data.m_trtdiscC,dir,true,Trk::muon).release();
   if(test){
     delete test;
-    return event_data.m_trtdiscC;
+    return event_data.m_trtdiscC.get();
   }
 
   return nullptr;

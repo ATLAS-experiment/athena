@@ -61,10 +61,8 @@
 + Control/StoreGateBindings
 + Control/xAODRootAccess
 + Control/xAODRootAccessInterfaces
-+ Database/APR/CollectionBase
-+ Database/APR/CollectionUtilities
++ Database/APR/CollectionSvc
 + Database/APR/FileCatalog
-+ Database/APR/ImplicitCollection
 + Database/APR/POOLCore
 + Database/APR/PersistencySvc
 + Database/APR/RootCollection
@@ -258,7 +256,6 @@
 + MuonSpectrometer/MuonCnv/MuonSimEventAthenaPool
 + MuonSpectrometer/MuonCnv/MuonSimEventTPCnv
 + MuonSpectrometer/MuonConfig
-+ MuonSpectrometer/MuonConditions/MuonCondGeneral/MuonCondInterface
 + MuonSpectrometer/MuonDetDescr/MuonAGDD
 + MuonSpectrometer/MuonDetDescr/MuonAGDDBase
 + MuonSpectrometer/MuonDetDescr/MuonAGDDDescription
@@ -306,6 +303,7 @@
 + Simulation/G4Utilities/G4FastSimulation
 + Simulation/G4Utilities/G4PhysicsLists
 + Simulation/G4Utilities/G4ProfilingTools
++ Simulation/G4Utilities/G4RunManagement
 + Simulation/G4Utilities/G4StepLimitation
 + Simulation/G4Utilities/G4UserActions
 + Simulation/G4Utilities/Geo2G4

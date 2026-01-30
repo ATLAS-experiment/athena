@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 #
 # @author Joseph Lambert
 
@@ -14,6 +14,7 @@ from AnalysisAlgorithmsConfig.ConfigSequence import ConfigSequence
 from AnalysisAlgorithmsConfig.ConfigFactory import ConfigFactory
 from AnalysisAlgorithmsConfig.ConfigAccumulator import deprecationWarningCategory
 
+from AnaAlgorithm.DualUseConfig import isAthena
 from AnaAlgorithm.Logging import logging
 logCPAlgTextCfg = logging.getLogger('CPAlgTextCfg')
 
@@ -133,7 +134,7 @@ class TextConfig(ConfigFactory):
                     merge(subBlock, algs[subName].subAlgs, newPath)
             return
 
-        logCPAlgTextCfg.info(f'loading {yamlPath}')
+        logCPAlgTextCfg.debug(f'loading {yamlPath}')
         if configDict is not None:
             # if configDict is provided, use it directly
             config = configDict
@@ -259,7 +260,13 @@ class TextConfig(ConfigFactory):
 
     def _configureAlg(self, block, blockConfig, configSeq=None, containerName=None,
                       extraOptions=None):
-        if not isinstance(blockConfig, list):
+        # 'AddConfigBlocks' blocks can be passed as either a list or a dictionary.
+        # Dictionaries are allowed so that when merging YAML files duplicate entries get automatically removed.
+        # This turns the dictionary into a list for downstream use.
+        if block.algName == "AddConfigBlocks" and isinstance(blockConfig, dict):
+            blockConfig = [options | {'algName': algName} for algName, options in blockConfig.items()]
+
+        elif not isinstance(blockConfig, list):
             blockConfig = [blockConfig]
 
         for options in blockConfig:
@@ -269,7 +276,7 @@ class TextConfig(ConfigFactory):
             elif containerName is not None and 'containerName' not in options:
                 options['containerName'] = containerName
             # will check which options are associated alg and not options
-            logCPAlgTextCfg.info(f"Configuring {block.algName}")
+            logCPAlgTextCfg.debug(f"Configuring {block.algName}")
             seq, funcOpts = block.makeConfig(options)
             if not seq._blocks:
                 continue
@@ -359,11 +366,7 @@ def makeSequence(configPath, *, flags=None, algSeq=None, noSystematics=None, dat
     logCPAlgTextCfg.info("ConfigBlocks and their configuration:")
     configSeq.printOptions()
 
-    from AnaAlgorithm.DualUseConfig import isAthena, useComponentAccumulator
-    if isAthena and useComponentAccumulator:
-        return configAccumulator.CA
-    else:
-        return None
+    return configAccumulator.CA if isAthena else None
 
 
 # Combine configuration files

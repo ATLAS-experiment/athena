@@ -10,8 +10,8 @@
 #include "FPGATrackSimObjects/FPGATrackSimHit.h"
 
 
-typedef std::vector<FPGATrackSimHit> FPGATrackSimHitCollection;
-CLASS_DEF( FPGATrackSimHitCollection , 1205121526 , 1 )
+typedef DataVector<FPGATrackSimHit> FPGATrackSimHitCollection;
+CLASS_DEF( FPGATrackSimHitCollection , 1205121526 , 2 )
 
 
 

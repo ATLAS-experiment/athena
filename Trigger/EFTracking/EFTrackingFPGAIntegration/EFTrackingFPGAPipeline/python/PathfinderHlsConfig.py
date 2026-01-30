@@ -10,12 +10,12 @@ if __name__ == "__main__":
 
     argumentParser.add_argument(
         "--hitTestVectorPath",
-        default = "/eos/project/a/atlas-eftracking/TestVectors/FPGATrackSim_TVs/Test_Vectors_v0-6-3/F600_Region34_SingleMuon/pattern_reco_output.txt",
+        default = "/eos/project/a/atlas-eftracking/TestVectors/FPGATrackSim_TVs/Test_Vectors_v0-6-3d/F150_Region34_SingleMuon/stripL2G_output.txt",
     )
 
     argumentParser.add_argument(
         "--trackTestVectorPath",
-        default = "/eos/project/a/atlas-eftracking/TestVectors/FPGATrackSim_TVs/Test_Vectors_v0-6-3/F600_Region34_SingleMuon/spacepoint_strips_output.txt",
+        default = "/eos/project/a/atlas-eftracking/TestVectors/FPGATrackSim_TVs/Test_Vectors_v0-6-3d/F150_Region34_SingleMuon/pattern_reco_output.txt",
     )
 
     argumentParser.add_argument(
@@ -27,6 +27,12 @@ if __name__ == "__main__":
         "--bufferSize", 
         type = int, 
         default = 8192,
+    )
+
+    argumentParser.add_argument(
+        "--events", 
+        type = int, 
+        default = 2,
     )
 
     argumentParser.add_argument(
@@ -60,38 +66,52 @@ if __name__ == "__main__":
     from EFTrackingFPGAUtility.EFTrackingDataStreamLoaderAlgorithmConfig import EFTrackingDataStreamLoaderAlgorithmCfg
     acc.merge(EFTrackingDataStreamLoaderAlgorithmCfg(
         flags,
-        name = "trackDataStreamLoader",
+        name = "dataStreamLoader",
         bufferSize = arguments.bufferSize,
-        inputCsvPath = arguments.trackTestVectorPath,
-        inputDataStream = "inputTrackDataStream",
-    ))
-
-    acc.merge(EFTrackingDataStreamLoaderAlgorithmCfg(
-        flags,
-        name = "hitDataStreamLoader",
-        bufferSize = arguments.bufferSize,
-        inputCsvPath = arguments.hitTestVectorPath,
-        inputDataStream = "inputHitDataStream",
+        GHITZTxtInputPaths = [
+            arguments.trackTestVectorPath,
+            arguments.hitTestVectorPath,
+        ],
+        GHITZTxtInputKeys = [
+            "pattern_reco_output",
+            "stripL2G_output",
+        ],
     ))
 
     from EFTrackingFPGAPipeline.EFTrackingXrtAlgorithmConfig import EFTrackingXrtAlgorithmCfg
     acc.merge(EFTrackingXrtAlgorithmCfg(
         flags, 
         inputInterfaces = [
-            ["loader:{loader_1}", "inputTrackDataStream", 0],
-            ["loader:{loader_2}", "inputHitDataStream", 0],
+            ["configurableLengthWideLoader:{configurableLengthWideLoader_1}", "pattern_reco_output", 0],
+            ["configurableLengthWideLoader:{configurableLengthWideLoader_2}", "stripL2G_output", 0],
         ],
         outputInterfaces = [
-            ["unloader:{unloader_1}", "outputDataStream", 1],
+            ["dynamicLengthWideUnloader:{dynamicLengthWideUnloader_1}", "pathfinder_output", 1],
         ],
+        vSizeInterfaces = [
+            ["configurableLengthWideLoader:{configurableLengthWideLoader_1}", "pattern_reco_output", 2],
+            ["configurableLengthWideLoader:{configurableLengthWideLoader_2}", "stripL2G_output", 2],
+        ],
+        kernelOrder = [
+            [
+                "configurableLengthWideLoader:{configurableLengthWideLoader_1}",
+                "configurableLengthWideLoader:{configurableLengthWideLoader_2}",
+                "dynamicLengthWideUnloader:{dynamicLengthWideUnloader_1}",
+            ],
+        ]
     ))
 
     from EFTrackingFPGAUtility.EFTrackingDataStreamUnloaderAlgorithmConfig import EFTrackingDataStreamUnloaderAlgorithmCfg
     acc.merge(EFTrackingDataStreamUnloaderAlgorithmCfg(
         flags,
-        outputCsvPath = arguments.outputPath,
-        outputDataStream = "outputDataStream",
+        name = "dataStreamUnloader",
+        GHITZTxtInputPaths = [
+            arguments.outputPath,
+        ],
+        GHITZTxtInputKeys = [
+            "pathfinder_output",
+        ],
     ))
 
-    acc.run(2)
+    acc.run(arguments.events)
 

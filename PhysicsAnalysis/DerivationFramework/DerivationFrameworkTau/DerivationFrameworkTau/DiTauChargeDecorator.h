@@ -17,18 +17,18 @@
 
 namespace DerivationFramework {
 
-  class DiTauChargeDecorator : public extends<AthAlgTool, IAugmentationTool> {	
-    public:
-      DiTauChargeDecorator(const std::string& t, const std::string& n, const IInterface* p);
+  class DiTauChargeDecorator : public extends<AthAlgTool, IAugmentationTool> {
+  public:
 
-      virtual StatusCode initialize() override;
-      virtual StatusCode addBranches(const EventContext& ctx) const override;
+    using base_class::base_class;
 
-    private:
-      SG::ReadHandleKey<xAOD::DiTauJetContainer> m_ditauContainerKey { this, "DiTauContainerName", "DiTauJets", "Input ditau container key" };
-      SG::WriteDecorHandleKey<xAOD::DiTauJetContainer> m_chargeKey{ this, "chargeKey", m_ditauContainerKey, "charge", "Decoration name"};
+    virtual StatusCode initialize() override;
+    virtual StatusCode addBranches(const EventContext& ctx) const override;
+
+  private:
+    SG::ReadHandleKey<xAOD::DiTauJetContainer> m_ditauContainerKey { this, "DiTauContainerName", "DiTauJets", "Input ditau container key" };
+    SG::WriteDecorHandleKey<xAOD::DiTauJetContainer> m_chargeKey{ this, "chargeKey", m_ditauContainerKey, "charge", "Decoration name"};
   };
 }
 
 #endif // DERIVATIONFRAMEWORKTAU_DITAUCHARGEDECORATOR_H
-

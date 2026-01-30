@@ -34,3 +34,7 @@ DECLARE_COMPONENT(GepCellTowerAlg)
 
 #include "../GepTowersAlg.h"
 DECLARE_COMPONENT(GepTowersAlg)
+
+#include "../GepEratioAlg.h"
+DECLARE_COMPONENT(GepEMEratioAlg)
+DECLARE_COMPONENT(GepTauEratioAlg)

@@ -1,10 +1,12 @@
 #!/usr/bin/env python
 
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 import argparse
 from TrigConfMuctpi.XMLReader import MioctGeometryXMLReader
 import math
+
+from ROOT import gROOT, gStyle, TH2F, TCanvas, TBox, TLegend, TArc, TLatex
 
 global box, c, h, leg
 
@@ -121,7 +123,7 @@ def drawTopoGeometry(geometry, is2016):
 
     outfn = "TopoLayout%s.pdf" % ("2016" if is2016 else "2015")
 
-    global box, c, h, leg
+    global box, c, h
 
     gROOT.Reset()
     gStyle.SetOptStat(0)
@@ -358,7 +360,7 @@ def drawRoiDeltaR(geometry, is2016):
             mioctTCmap[mioctid] = d
         return mioctTCmap[mioctid][(etacode,phicode)]
 
-    global h,c,hB,hEC,hFW
+    global c,hB,hEC,hFW
 
     gROOT.Reset()
     gStyle.SetOptStat(0)
@@ -430,9 +432,6 @@ def main():
     print("Using input %s" % args.filename)
 
     geometry = readXML(args.filename)
-
-    from ROOT import gROOT, gStyle, TH2F, TCanvas, TBox, TLegend, TArc, TLatex
-    global gROOT, gStyle, TH2F, TCanvas, TBox, TLegend, TArc, TLatex
 
     drawROIGeometry(geometry, is2016 = is2016)
     

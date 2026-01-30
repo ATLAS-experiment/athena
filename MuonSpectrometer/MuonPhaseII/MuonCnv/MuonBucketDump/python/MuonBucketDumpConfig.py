@@ -34,3 +34,25 @@ def MuonBucketDumpCfg(flags, name="MuonBucketDumper", **kwargs):
     the_alg = CompFactory.MuonR4.BucketDumperAlg(name=name, **kwargs)
     result.addEventAlgo(the_alg, primary = True)
     return result
+
+def MuonSegmentDumpCfg(flags, name="MuonSegmentDumper", **kwargs):
+    result = ComponentAccumulator()
+    from MuonSpacePointFormation.SpacePointFormationConfig import MuonSpacePointFormationCfg
+    result.merge(MuonSpacePointFormationCfg(flags))
+    
+    spCont = []
+    if flags.Detector.GeometryMDT or flags.Detector.GeometryRPC or flags.Detector.GeometryTGC:
+        spCont+=["MuonSpacePoints"]
+    if flags.Detector.GeometryMM or flags.Detector.GeometrysTGC:
+        spCont+=["NswSpacePoints"]
+    
+    segCont = ""
+    if flags.Detector.GeometryMDT or flags.Detector.GeometryRPC or flags.Detector.GeometryTGC:
+        segCont = "MuonSegmentsFromR4"
+    
+    kwargs.setdefault("SpacePointKeys", spCont)
+    kwargs.setdefault("SegmentKeys", segCont)
+    
+    the_alg = CompFactory.MuonR4.SegmentDumperAlg(name=name, **kwargs)
+    result.addEventAlgo(the_alg, primary = True)
+    return result

@@ -1,50 +1,46 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
-
-///////////////////////////////////////////////////////////////////
-// IGenParticleFilter.h, (c) ATLAS Detector software
-///////////////////////////////////////////////////////////////////
 
 #ifndef ISF_HEPMC_INTERFACES_IGENPARTICLEFILTER_H
 #define ISF_HEPMC_INTERFACES_IGENPARTICLEFILTER_H 1
 
 // Gaudi
 #include "GaudiKernel/IAlgTool.h"
- 
+
 // Simulation includes
-#include "ISF_Event/SimSvcID.h" 
+#include "ISF_Event/SimSvcID.h"
 
 #include "AtlasHepMC/GenParticle_fwd.h"
- 
-namespace ISF {
- 
-  /**
-   @class IGenParticleFilter
-      
-   Interface definition for HepMC::GenParticle filter,
-   these filters should be primarily be used in the stack filling process      
-       
-   @author Andreas.Salzburger -at- cern.ch
-   */
-     
-  class IGenParticleFilter : virtual public IAlgTool {
-     public:
-     
-       /** Virtual destructor */
-       virtual ~IGenParticleFilter(){}
 
-       /// Creates the InterfaceID and interfaceID() method
-       DeclareInterfaceID(IGenParticleFilter, 1, 0);
-       
+namespace ISF {
+
+  /**
+     @class IGenParticleFilter
+
+     Interface definition for HepMC::GenParticle filter,
+     these filters should be primarily be used in the stack filling process
+
+     @author Andreas.Salzburger -at- cern.ch
+  */
+
+  class IGenParticleFilter : virtual public IAlgTool {
+  public:
+
+    /** Virtual destructor */
+    virtual ~IGenParticleFilter(){}
+
+    /// Creates the InterfaceID and interfaceID() method
+    DeclareInterfaceID(IGenParticleFilter, 1, 0);
+
 #ifdef HEPMC3
-       /** Returns a boolean if the particle has passed or not */
-       virtual bool pass(const HepMC::ConstGenParticlePtr& particle) const = 0;
+    /** Returns a boolean if the particle has passed or not */
+    virtual bool pass(const HepMC::ConstGenParticlePtr& particle) const = 0;
 #else
-       /** Returns a boolean if the particle has passed or not */
-       virtual bool pass(const HepMC::GenParticle& particle) const = 0;
+    /** Returns a boolean if the particle has passed or not */
+    virtual bool pass(const HepMC::GenParticle& particle) const = 0;
 #endif
-       
+
   };
 
 } // end of namespace

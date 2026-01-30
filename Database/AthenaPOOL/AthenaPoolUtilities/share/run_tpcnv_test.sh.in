@@ -1,4 +1,5 @@
 #!/bin/sh
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 for libroot in @ARG_REQUIRED_LIBRARIES@; do
   fullpath=""
@@ -10,12 +11,9 @@ for libroot in @ARG_REQUIRED_LIBRARIES@; do
   done
   if [ "$fullpath" = "" ]; then
     echo "WARNING: Library $libroot not found; skipping test @testName@"
-    # Signal post_tpcnvtest.sh to skip the reffile comparison.
-    touch @testName@-SKIPPED
     exit 0
   fi
 done
-rm -f @testName@-SKIPPED
 
 reffile=`echo @CMAKE_CURRENT_SOURCE_DIR@/share/@refName@.pool.root*.ref`
 if [ -f "$reffile" ] &&
@@ -25,10 +23,5 @@ if [ -f "$reffile" ] &&
     @CMAKE_COMMAND@ -E create_symlink \
      $reffile ../share/$refbase
 fi
-
-testdir=@testName@
-rm -rf $testdir
-mkdir $testdir
-cd $testdir
 
 @testName@_test.py

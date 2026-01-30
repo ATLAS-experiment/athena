@@ -11,7 +11,7 @@
 #ifndef gFEXCondAlgo_H
 #define gFEXCondAlgo_H
 
-#include "AthenaBaseComps/AthReentrantAlgorithm.h"
+#include "AthenaBaseComps/AthCondAlgorithm.h"
 #include "AthenaKernel/CLASS_DEF.h"
 #include "AthenaPoolUtilities/CondAttrListCollection.h"
 #include "StoreGate/WriteCondHandleKey.h"
@@ -21,7 +21,7 @@
 namespace LVL1
 {
 
-    class gFEXCondAlgo : public AthReentrantAlgorithm
+    class gFEXCondAlgo : public AthCondAlgorithm
     {
 
     public:
@@ -31,7 +31,6 @@ namespace LVL1
         virtual StatusCode initialize() override;
 
         virtual StatusCode execute(const EventContext &) const override;
-        virtual bool isReEntrant() const override final { return false; }
 
     private:
         // Default noise-cut parameters, in case DB values aren't valid

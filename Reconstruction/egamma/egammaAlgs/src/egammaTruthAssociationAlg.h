@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef EGAMMAALGS_EGAMMATRUTHASSOCIATIONALG_H
@@ -80,6 +80,7 @@ private:
     SG::WriteDecorHandle<T, ElementLink<xAOD::TruthParticleContainer>> el;
     SG::WriteDecorHandle<T, int> type;
     SG::WriteDecorHandle<T, int> origin;
+    SG::WriteDecorHandle<T, unsigned int> classification;
 
     // any of the handles should function as a read handle, choice is arbitrary
     SG::ReadHandle<T>& readHandle() { return type; };

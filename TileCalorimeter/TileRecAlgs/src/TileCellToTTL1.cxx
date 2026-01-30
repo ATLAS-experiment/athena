@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //*****************************************************************************
@@ -92,24 +92,27 @@ StatusCode TileCellToTTL1::execute() {
   ATH_CHECK( ttl1CellContainer.record(std::make_unique<TileTTL1CellContainer>()) );
   ATH_MSG_DEBUG( "TileTTL1Container registered successfully (" << m_ttl1CellContainerKey.key() << ")");
 
-  int ttNpmt[32][64];       // array of TT occupancy
-  Identifier ttId[32][64];  // array of TT identifiers
-  float ttAmp[32][64];      // array of all TT amplitudes
-  uint16_t ttStatusCells[32][64];   // array of TT status of cells
-  uint16_t ttStatusChans[32][64];   // array of TT status of channels
-  float ttTimeAve[32][64];      // array of TT time average
-  float ttCorrFact[32][64];     // array of TT correction factor
+  struct Arrays {
+    int ttNpmt[32][64];       // array of TT occupancy
+    Identifier ttId[32][64];  // array of TT identifiers
+    float ttAmp[32][64];      // array of all TT amplitudes
+    uint16_t ttStatusCells[32][64];   // array of TT status of cells
+    uint16_t ttStatusChans[32][64];   // array of TT status of channels
+    float ttTimeAve[32][64];      // array of TT time average
+    float ttCorrFact[32][64];     // array of TT correction factor
+  };
+  auto a = std::make_unique<Arrays>();
 
   // clear the arrays
   for (int i = 0; i < 32; i++) {
     for (int j = 0; j < 64; j++) {
-      ttNpmt[i][j] = 0;
-      ttId[i][j] = 0;
-      ttAmp[i][j] = 0.0;
-      ttStatusCells[i][j] = 0;
-      ttStatusChans[i][j] = 0;
-      ttTimeAve[i][j] = 0.0;
-      ttCorrFact[i][j] = 1.0; // this is a place holder for now, set to 1.0
+      a->ttNpmt[i][j] = 0;
+      a->ttId[i][j] = 0;
+      a->ttAmp[i][j] = 0.0;
+      a->ttStatusCells[i][j] = 0;
+      a->ttStatusChans[i][j] = 0;
+      a->ttTimeAve[i][j] = 0.0;
+      a->ttCorrFact[i][j] = 1.0; // this is a place holder for now, set to 1.0
     }
   }
 
@@ -162,21 +165,21 @@ StatusCode TileCellToTTL1::execute() {
       // Sum the tower energy
       // already exists - just add charge
       // reduce cell energy by 50% because we are loop over both pmts in cell
-      if (ttNpmt[ieta][iphi] > 0) {
-        ttAmp[ieta][iphi] += cell_ene * 0.5;
-        ttNpmt[ieta][iphi]++;
-        ttStatusCells[ieta][iphi] += (uint16_t) bad_cell;
-        ttStatusChans[ieta][iphi] += (uint16_t) bad_chan[ipmt];
-        ttTimeAve[ieta][iphi] += cell_time;
+      if (a->ttNpmt[ieta][iphi] > 0) {
+        a->ttAmp[ieta][iphi] += cell_ene * 0.5;
+        a->ttNpmt[ieta][iphi]++;
+        a->ttStatusCells[ieta][iphi] += (uint16_t) bad_cell;
+        a->ttStatusChans[ieta][iphi] += (uint16_t) bad_chan[ipmt];
+        a->ttTimeAve[ieta][iphi] += cell_time;
 
         // rawChannel in new TT
       } else {
-        ttId[ieta][iphi] = tt_id;
-        ttNpmt[ieta][iphi]++;
-        ttAmp[ieta][iphi] = cell_ene * 0.5;
-        ttStatusCells[ieta][iphi] = (uint16_t) bad_cell;
-        ttStatusChans[ieta][iphi] = (uint16_t) bad_chan[ipmt];
-        ttTimeAve[ieta][iphi] = cell_time;
+        a->ttId[ieta][iphi] = tt_id;
+        a->ttNpmt[ieta][iphi]++;
+        a->ttAmp[ieta][iphi] = cell_ene * 0.5;
+        a->ttStatusCells[ieta][iphi] = (uint16_t) bad_cell;
+        a->ttStatusChans[ieta][iphi] = (uint16_t) bad_chan[ipmt];
+        a->ttTimeAve[ieta][iphi] = cell_time;
       }
 
     } // end of loop over pmts in the cell
@@ -186,22 +189,22 @@ StatusCode TileCellToTTL1::execute() {
     for (int iphi = 0; iphi < 64; iphi++) {
 
       // don't load towers that are empty
-      if (ttNpmt[ieta][iphi] == 0) continue;
+      if (a->ttNpmt[ieta][iphi] == 0) continue;
 
-      float time_ave = ttTimeAve[ieta][iphi] / ((float) ttNpmt[ieta][iphi]);
+      float time_ave = a->ttTimeAve[ieta][iphi] / ((float) a->ttNpmt[ieta][iphi]);
 
       uint16_t qual = 0;
-      if (ttStatusChans[ieta][iphi] == ttNpmt[ieta][iphi])
+      if (a->ttStatusChans[ieta][iphi] == a->ttNpmt[ieta][iphi])
         qual += TileTTL1Cell::MASK_BADTOWER;
-      if (ttStatusCells[ieta][iphi] > 0)
+      if (a->ttStatusCells[ieta][iphi] > 0)
         qual += TileTTL1Cell::MASK_BADCELL;
-      if (ttStatusChans[ieta][iphi] > 0)
+      if (a->ttStatusChans[ieta][iphi] > 0)
         qual += TileTTL1Cell::MASK_BADCHAN;
 
-      ttl1CellContainer->push_back(std::make_unique<TileTTL1Cell>(ttId[ieta][iphi], 
-                                                                  ttAmp[ieta][iphi], 
+      ttl1CellContainer->push_back(std::make_unique<TileTTL1Cell>(a->ttId[ieta][iphi],
+                                                                  a->ttAmp[ieta][iphi],
                                                                   time_ave,
-                                                                  ttCorrFact[ieta][iphi], 
+                                                                  a->ttCorrFact[ieta][iphi],
                                                                   qual));
 
     }

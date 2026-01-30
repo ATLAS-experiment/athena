@@ -9,6 +9,7 @@
 #include "MuonPatternEvent/SegmentSeed.h"
 
 #include "MuonVisualizationHelpersR4/VisualizationHelpers.h"
+#include "MuonVisualizationHelpersR4/ObjVisualizationHelpers.h"
 #include "MuonTruthHelpers/MuonSimHitHelpers.h"
 
 #include "xAODMuonPrepData/MdtDriftCircle.h"
@@ -17,6 +18,12 @@
 #include "xAODMuonPrepData/MMCluster.h"
 
 #include "Acts/Utilities/Helpers.hpp"
+#include "Acts/Surfaces/RectangleBounds.hpp"
+#include "Acts/Surfaces/TrapezoidBounds.hpp"
+#include "Acts/Surfaces/PlaneSurface.hpp"
+#include "Acts/Surfaces/StrawSurface.hpp"
+#include "Acts/Visualization/GeometryView3D.hpp"
+
 
 #include <format>
 #include <sstream>
@@ -26,22 +33,11 @@
 #include "TH1F.h"
 #include "TH2F.h"
 #include "TMarker.h"
-#include "TROOT.h"
-#include "TStyle.h"
+#include "TColor.h"
 namespace {
-    std::string removeNonAlphaNum(std::string str) {
-        str.erase(std::remove_if(str.begin(),str.end(),
-                  [](const unsigned char c){
-                    return !std::isalnum(c);
-                   }), str.end());
-        return str;
-    }
     constexpr int truthColor = kOrange +2;
     constexpr int parLineColor = kRed;
     using SpacePointSet = std::unordered_set<const MuonR4::SpacePoint*>;
-    enum Edges {
-        yLow = 0, yHigh, zLow, zHigh
-    };
 }
 
 
@@ -49,27 +45,18 @@ namespace MuonValR4 {
     using namespace MuonR4;
     using namespace SegmentFit;
     using LabeledSegmentSet = PatternVisualizationTool::LabeledSegmentSet;
-    std::mutex PatternVisualizationTool::s_mutex{};
-
-    StatusCode PatternVisualizationTool::initialize(){        
+  
+    StatusCode PatternVisualizationTool::initialize(){      
         if (m_canvasLimit > 0) {
-            if (m_canvasPrefix.value().empty() || m_allCanName.value().empty()) {
-                ATH_MSG_FATAL("Please define "<<m_canvasPrefix<<" && "<<m_allCanName);
-                return StatusCode::FAILURE;
-            }
-            if (m_saveSummaryPDF) {
-                m_allCan = std::make_unique<TCanvas>("all", "all", m_canvasWidth, m_canvasHeight);        
-                m_allCan->SaveAs((m_allCanName +".pdf[").c_str());
-            }
-            m_outFile = std::make_unique<TFile>( (m_allCanName +".root").c_str(), "RECREATE");
-            if (m_saveSinglePDFs) {
-                std::filesystem::create_directories("Plots/" + m_canvasPrefix);
-            }            
-            gROOT->SetStyle("ATLAS");
-            TStyle* plotStyle = gROOT->GetStyle("ATLAS");
-            plotStyle->SetOptTitle(0);
-            plotStyle->SetHistLineWidth(1.);
-            plotStyle->SetPalette(kViridis);
+            m_clientToken.canvasLimit = m_canvasLimit;
+            m_clientToken.preFixName = m_canvasPrefix;
+            m_clientToken.saveSinglePlots = m_saveSinglePDFs;
+            m_clientToken.saveSummaryPlot = m_saveSummaryPDF;
+            m_clientToken.subDirectory = m_subDir;
+            ATH_CHECK(m_visualSvc.retrieve());
+            ATH_CHECK(m_visualSvc->registerClient(m_clientToken));
+        } else {
+            m_plotsDone = true;
         }
         ATH_CHECK(m_prepContainerKeys.initialize(!m_truthSegLinks.empty()));
         m_truthLinkDecorKeys.clear();
@@ -91,10 +78,6 @@ namespace MuonValR4 {
         ATH_CHECK(m_idHelperSvc.retrieve());
         ATH_CHECK(m_geoCtxKey.initialize());
         ATH_CHECK(detStore()->retrieve(m_detMgr));
-        return StatusCode::SUCCESS;
-    }
-    StatusCode PatternVisualizationTool::finalize(){
-        closeSummaryCanvas();
         return StatusCode::SUCCESS;
     }
     bool PatternVisualizationTool::isLabeled(const MuonR4::SpacePoint& hit) const {
@@ -130,27 +113,26 @@ namespace MuonValR4 {
         }
         return truthSegs;
     }
-    void PatternVisualizationTool::drawPrimitives(const TCanvas& can, PrimitiveVec& primitives) const {
-        const double yLow = can.GetPad(0)->GetUymin();
-        const double yHigh = can.GetPad(0)->GetUymax();
-        for (auto& prim : primitives) {
-            const TObject &primRef = *prim;
-            if (typeid(primRef) == typeid(TLine)){
-                TLine* line = static_cast<TLine*>(prim.get());
-                const Amg::Vector3D linePoint{line->GetX1(), line->GetY1(), 0.};
-                const Amg::Vector3D lineDir = Amg::Vector3D{(line->GetX2() - line->GetX1()) / (line->GetY2() - line->GetY1()), 1.,0.}.unit();
+    // void PatternVisualizationTool::drawPrimitives(const TCanvas& can, PrimitiveVec& primitives) const {
+    //     const double yLow = can.GetPad(0)->GetUymin();
+    //     const double yHigh = can.GetPad(0)->GetUymax();
+    //     for (auto& prim : primitives) {
+    //         const TObject &primRef = *prim;
+    //         if (typeid(primRef) == typeid(TLine)){
+    //             TLine* line = static_cast<TLine*>(prim.get());
+    //             const Amg::Vector3D linePoint{line->GetX1(), line->GetY1(), 0.};
+    //             const Amg::Vector3D lineDir = Amg::Vector3D{(line->GetX2() - line->GetX1()) / (line->GetY2() - line->GetY1()), 1.,0.}.unit();
                 
-                const Amg::Vector3D newHigh = linePoint + Amg::intersect<3>(linePoint, lineDir, Amg::Vector3D::UnitY(), yHigh).value_or(0.) * lineDir;
-                const Amg::Vector3D newLow = linePoint + Amg::intersect<3>(linePoint, lineDir, Amg::Vector3D::UnitY(), yLow).value_or(0.) * lineDir;
-                line->SetX1(newLow.x());
-                line->SetY1(newLow.y());
-                line->SetX2(newHigh.x());
-                line->SetY2(newHigh.y());
-            }
-            prim->Draw();
-        }
-
-    }
+    //             const Amg::Vector3D newHigh = linePoint + Amg::intersect<3>(linePoint, lineDir, Amg::Vector3D::UnitY(), yHigh).value_or(0.) * lineDir;
+    //             const Amg::Vector3D newLow = linePoint + Amg::intersect<3>(linePoint, lineDir, Amg::Vector3D::UnitY(), yLow).value_or(0.) * lineDir;
+    //             line->SetX1(newLow.x());
+    //             line->SetY1(newLow.y());
+    //             line->SetX2(newHigh.x());
+    //             line->SetY2(newHigh.y());
+    //         }
+    //         prim->Draw();
+    //     }
+    // }
     void PatternVisualizationTool::visualizeAccumulator(const EventContext& ctx,
                                                         const MuonR4::HoughPlane& accumulator,
                                                         const Acts::HoughTransformUtils::HoughAxisRanges& axisRanges,
@@ -167,14 +149,7 @@ namespace MuonValR4 {
                                                         PrimitiveVec&& primitives) const {
 
         /** Check whether the canvas limit has been reached */
-        if (m_canvCounter >= m_canvasLimit) {
-            return;
-        }
-        /** Enter the lock phase */
-        std::lock_guard guard{s_mutex};
-        /** Check again in case multiple threads are simultaneously in the lock phase */
-        //cppcheck-suppress identicalConditionAfterEarlyExit
-        if (m_canvCounter >= m_canvasLimit) {
+        if (m_plotsDone) {
             return;
         }
         if (accumulator.getNonEmptyBins().empty()) {
@@ -185,28 +160,31 @@ namespace MuonValR4 {
         auto accHisto = std::make_unique<TH2F>("AccumulatorHisto", "histo",
                                                 accumulator.nBinsX(), axisRanges.xMin, axisRanges.xMax,
                                                 accumulator.nBinsY(), axisRanges.yMin, axisRanges.yMax); 
-
         accHisto->SetDirectory(nullptr);
-        accHisto->GetXaxis()->SetTitle(std::format("tan#{}", m_accumlIsEta ? "theta" : "phi" ).c_str());
-        accHisto->GetYaxis()->SetTitle( std::string{m_accumlIsEta ? "y_{0}" : "x_{0}"}.c_str());
 
         std::vector<const SpacePoint*> spacePointsInAcc{};
         for (const std::size_t bin : accumulator.getNonEmptyBins()) {
             const auto [xBin, yBin] = accumulator.axisBins(bin);
-            /// TODO: After next ACTS update, the following three lines can become
-            /// const SpacePointSet& hitsInBin{accumulator.uniqueHitIds(xBin, yBin)};
-            SpacePointSet hitsInBin;
             auto hitIds = accumulator.hitIds(xBin, yBin); 
-            hitsInBin.insert(std::make_move_iterator(hitIds.begin()),std::make_move_iterator(hitIds.end()));
-    
-            spacePointsInAcc.insert(spacePointsInAcc.end(),hitsInBin.begin(), hitsInBin.end());
+            spacePointsInAcc.insert(spacePointsInAcc.end(),hitIds.begin(), hitIds.end());
             accHisto->SetBinContent(xBin+1, yBin+1, accumulator.nHits(bin));
         }
-
+     
         const LabeledSegmentSet truthSegs{getLabeledSegments(spacePointsInAcc)};
         if (truthSegs.empty() && m_displayOnlyTruth) {
             return;
         }
+        auto canvas = m_visualSvc->prepareCanvas(ctx, m_clientToken, extraLabel);
+        if (!canvas){
+            m_plotsDone = true;
+            return;
+        }
+        canvas->expandPad(axisRanges.xMin, axisRanges.yMin);
+        canvas->expandPad(axisRanges.xMax, axisRanges.yMax);
+        canvas->setAxisTitles(std::format("tan#{}", m_accumlIsEta ? "beta" : "#alpha"),
+                              std::format("{:}_{{0}} [mm]", m_accumlIsEta ? "y" : "x"));        
+        canvas->add(std::move(accHisto), "HIST SAME");
+ 
         for (const xAOD::MuonSegment* segment : truthSegs) {
             const auto [pos, dir] = makeLine(localSegmentPars(*segment));
             const double tan = m_accumlIsEta ? houghTanBeta(dir) : houghTanAlpha(dir);
@@ -214,39 +192,21 @@ namespace MuonValR4 {
             auto truthMarker = std::make_unique<TMarker>(tan, icept, kFullCrossX);
             truthMarker->SetMarkerColor(truthColor);
             truthMarker->SetMarkerSize(8);
-            primitives.push_back(std::move(truthMarker));
-            primitives.push_back(drawLabel(std::format("true parameters: {:}",makeLabel(localSegmentPars(*segment))),0.2, 0.9));
+            canvas->add(std::move(truthMarker));
+            canvas->add(drawLabel(std::format("true parameters: {:}",
+                                              makeLabel(localSegmentPars(*segment))),0.2, 0.9));
         }
         for (const auto& maximum : maxima) {
             auto maxMarker = std::make_unique<TMarker>(maximum.x, maximum.y, kFullTriangleUp);
             maxMarker->SetMarkerColor(parLineColor);
             maxMarker->SetMarkerSize(8);
-            primitives.push_back(std::move(maxMarker));
+            canvas->add(std::move(maxMarker));
         }
-        primitives.push_back(drawAtlasLabel(0.65, 0.26, m_AtlasLabel));
-        primitives.push_back(drawLumiSqrtS(0.65,0.21, m_sqrtSLabel, m_lumiLabel));
-        
-        std::stringstream canvasName{};
-        canvasName<<name()<<"_"<<ctx.eventID().event_number()<<"_"<<m_canvCounter;
-        auto canvas = std::make_unique<TCanvas>(canvasName.str().c_str(), 
-                                                 "can", m_canvasWidth, m_canvasHeight);
-        canvas->GetPad(0)->SetRightMargin(0.12);
-        canvas->GetPad(0)->SetTopMargin(0.12);
-        canvas->cd();
-        accHisto->Draw("COLZ");
-        drawPrimitives(*canvas, primitives);
-        primitives.push_back(std::move(accHisto));
-        saveCanvas(ctx, spacePointsInAcc.front()->identify(), *canvas, extraLabel);
-        primitives.push_back(std::move(canvas));
-
-        primitives.clear();        
-        if (m_canvasLimit <= m_canvCounter) {
-            closeSummaryCanvas();
-        }
+        canvas->add(std::move(primitives));
     }
     void PatternVisualizationTool::paintSimHits(const EventContext& ctx,
                                                 const xAOD::MuonSegment& truthSeg,
-                                                PrimitiveVec& primitives,
+                                                Canvas_t& canvas,
                                                 const int view) const {
         if (!m_paintTruthHits) {
             return;
@@ -261,11 +221,11 @@ namespace MuonValR4 {
             const IdentifierHash hash = re->detectorType() == ActsTrk::DetectorType::Mdt ?
                                         re->measurementHash(simHit->identify()) :
                                         re->layerHash(simHit->identify());
-            const Amg::Transform3D trf = re->msSector()->globalToLocalTrans(*geoCtx) *
-                                         re->localToGlobalTrans(*geoCtx, hash);
+            const Amg::Transform3D trf = re->msSector()->globalToLocalTransform(*geoCtx) *
+                                         re->localToGlobalTransform(*geoCtx, hash);
             const Amg::Vector3D locPos = trf * xAOD::toEigen(simHit->localPosition());
             const Amg::Vector3D locDir = trf.linear() * xAOD::toEigen(simHit->localDirection());
-            primitives.push_back(drawArrow(locPos, locDir, truthColor, kDashed, view));
+            canvas.add(drawArrow(locPos, locDir, truthColor, kDashed, view));
         }
     }
     void PatternVisualizationTool::visualizeSeed(const EventContext& ctx,
@@ -280,69 +240,50 @@ namespace MuonValR4 {
                                                  PrimitiveVec&& primitives) const {
         
         /** Check whether the canvas limit has been reached */
-        if (m_canvCounter >= m_canvasLimit) {
+        if (m_plotsDone) {
             return;
         }
-        /** Enter the lock phase */
-        std::lock_guard guard{s_mutex};
-        /** Check again in case multiple threads are simultaneously in the lock phase */
-        //cppcheck-suppress identicalConditionAfterEarlyExit
-        if (m_canvCounter >= m_canvasLimit) {
-            return;
-        }
-
         const LabeledSegmentSet truthSegs{getLabeledSegments(seed.getHitsInMax())};
         if (truthSegs.empty() && m_displayOnlyTruth) {
             return;
         }
 
-        std::array<double, 4> canvasDim{};
-        const std::size_t parsedPrimSize{primitives.size()};
+        auto canvas = m_visualSvc->prepareCanvas(ctx, m_clientToken, extraLabel);
+        if (!canvas) {
+            m_plotsDone = true;
+            return;
+        }
+        canvas->add(std::move(primitives));
+       
+
         for (const int view : {objViewEta, objViewPhi}) {
             if ((view == objViewEta && !m_doEtaBucketViews) ||
                 (view == objViewPhi && !m_doPhiBucketViews)){
                 continue;
             }
-            /** reset the primitives */
-            primitives.resize(parsedPrimSize);
+            canvas->setAxisTitles(std::format("{:} [mm]", view == objViewEta ? 'y' : 'x'), "z [mm]");
 
-            if (!drawHits(*seed.parentBucket(), seed.getHitsInMax(), primitives, canvasDim, view)) {
+            if (!drawHits(*seed.parentBucket(), seed.getHitsInMax(), *canvas, view)) {
                 continue;
             }
             for (const xAOD::MuonSegment* segment : truthSegs) {
-                primitives.push_back(drawLine(localSegmentPars(*segment), canvasDim[Edges::zLow], canvasDim[Edges::zHigh],
-                                               truthColor, kDotted, view));
-                paintSimHits(ctx,*segment, primitives, view);
+                canvas->add(drawLine(localSegmentPars(*segment), 
+                                              canvas->corner(Edges::yLow), canvas->corner(Edges::yHigh),
+                                              truthColor, kDotted, view));
+                paintSimHits(ctx,*segment, *canvas, view);
             }
-            primitives.push_back(drawLine(seed.parameters(), canvasDim[Edges::zLow], canvasDim[Edges::zHigh],
-                                         parLineColor, kDashed, view));
+            canvas->add(drawLine(seed.parameters(), canvas->corner(Edges::yLow), 
+                                 canvas->corner(Edges::yHigh), parLineColor, kDashed, view));
         
-            writeChi2(seed.parameters(), seed.getHitsInMax(), primitives);
+            writeChi2(seed.parameters(), seed.getHitsInMax(), *canvas);
         
-            std::stringstream legendLabel{};
-            double chi2{0.};
-            unsigned nDoF{0};
-            legendLabel<<"Event: "<<ctx.eventID().event_number()<<", chamber : "<<m_idHelperSvc->toStringChamber(seed.getHitsInMax().front()->identify())
-                       <<std::format(", #chi^{{2}} /nDoF: {:.2f} ({:})", chi2/std::max(1u, nDoF), std::max(1u,nDoF))
-                       <<", #"<<(view ==objViewEta ? "eta" : "phi")<<"-view";
-            
-            if (!extraLabel.empty()) {
-                legendLabel<<" ("<<extraLabel<<")";
-            }
-            primitives.push_back(drawLabel(legendLabel.str(), 0.1, 0.96));
-            primitives.push_back(drawLabel(makeLabel(seed.parameters()),0.25, 0.89));
-        
-            auto canvas = makeCanvas(ctx, canvasDim, view);
-            primitives.push_back(drawAtlasLabel(0.75, 0.26, m_AtlasLabel));
-            primitives.push_back(drawLumiSqrtS(0.75,0.21, m_sqrtSLabel, m_lumiLabel));
-
-            drawPrimitives(*canvas, primitives);
-
-            saveCanvas(ctx, seed.getHitsInMax().front()->identify(), *canvas, extraLabel);
-        }
-        if (m_canvasLimit <= m_canvCounter) {
-            primitives.clear();
-            closeSummaryCanvas();
+            std::string legendLabel = std::format("Event: {:}, chamber : {:}, #{:}-view ({:})",
+                                                  ctx.eventID().event_number(),
+                                                  m_idHelperSvc->toStringChamber(seed.getHitsInMax().front()->identify()),
+                                                  view ==objViewEta ? "eta" : "phi",
+                                                  extraLabel);
+            canvas->add(drawLabel(legendLabel, 0.1, 0.96));
+            canvas->add(drawLabel(makeLabel(seed.parameters()),0.25, 0.89));
         }
     }
 
@@ -357,65 +298,50 @@ namespace MuonValR4 {
                                                    const std::string& extraLabel,
                                                    PrimitiveVec&& primitives) const {
         /** Check whether the canvas limit has been reached */
-        if (m_canvCounter >= m_canvasLimit) {
+        if (m_plotsDone) {
             return;
         }
-        /** Enter the lock phase */
-        std::lock_guard guard{s_mutex};
-        /** Check again in case multiple threads are simultaneously in the lock phase */
-        //cppcheck-suppress identicalConditionAfterEarlyExit
-        if (m_canvCounter >= m_canvasLimit) {
-            return;
-        }
-        std::array<double, 4> canvasDim{};        
+
         LabeledSegmentSet truthSegs{getLabeledSegments(Acts::unpackConstSmartPointers(bucket))};
         if (truthSegs.empty() && m_displayOnlyTruth) {
             return;
         }
-        const std::size_t parsedPrimSize{primitives.size()};
+       auto canvas = m_visualSvc->prepareCanvas(ctx, m_clientToken, extraLabel);
+        if (!canvas){
+            m_plotsDone = true;
+            return;
+        }
+        canvas->add(std::move(primitives));
+       
         for (const int view : {objViewEta, objViewPhi}) {
             if ((view == objViewEta && !m_doEtaBucketViews) ||
                 (view == objViewPhi && !m_doPhiBucketViews)){
                 continue;
             }
+            canvas->setAxisTitles(std::format("{:} [mm]", view == objViewEta ? 'y' : 'x'), "z [mm]");
             /** reset the primitives */
-            primitives.resize(parsedPrimSize);
-            if (!drawHits(bucket, bucket, primitives, canvasDim, view)) {
+            if (!drawHits(bucket, bucket, *canvas, view)) {
                 continue;
             }
             bool drawnTrueLabel{false};
             for (const xAOD::MuonSegment* segment : truthSegs) {
-                primitives.push_back(drawLine(localSegmentPars(*segment), canvasDim[Edges::zLow], canvasDim[Edges::zHigh],
-                                           truthColor, kDotted, view));
+                canvas->add(drawLine(localSegmentPars(*segment), 
+                                     canvas->corner(Edges::yLow), canvas->corner(Edges::yHigh),
+                                     truthColor, kDotted, view));
                 if (!drawnTrueLabel) {
-                    primitives.push_back(drawLabel(std::format("true parameters: {:}",makeLabel(localSegmentPars(*segment))),0.2, 0.89));
+                    canvas->add(drawLabel(std::format("true parameters: {:}",makeLabel(localSegmentPars(*segment))),0.2, 0.89));
                     drawnTrueLabel = true;
                 }
-                paintSimHits(ctx,*segment, primitives, view);
+                paintSimHits(ctx,*segment, *canvas, view);
             }
             
-            std::stringstream legendLabel{};
-            legendLabel<<"Event: "<<ctx.eventID().event_number()
-                        <<", chamber : "<<m_idHelperSvc->toStringChamber(bucket.front()->identify())
-                        <<",#"<<(view ==objViewEta ? "eta" : "phi")<<"-view";
-            if (!extraLabel.empty()) {
-                legendLabel<<" ("<<extraLabel<<")";
-            }
-            primitives.push_back(drawLabel(legendLabel.str(), 0.2, 0.96));
-
-            primitives.push_back(drawAtlasLabel(0.75, 0.26, m_AtlasLabel));
-            primitives.push_back(drawLumiSqrtS(0.75,0.21, m_sqrtSLabel, m_lumiLabel));
-
-            auto can = makeCanvas(ctx , canvasDim, view);
-            drawPrimitives(*can, primitives);
-
-            saveCanvas(ctx, bucket.front()->identify(), *can, extraLabel);
+            std::string legendLabel = std::format("Event: {:}, chamber : {:}, #{:}-view ({:})",
+                                                  ctx.eventID().event_number(),
+                                                  bucket.msSector()->identString(),
+                                                  view ==objViewEta ? "eta" : "phi",
+                                                  extraLabel);
+            canvas->add(drawLabel(legendLabel, 0.15, 0.96));
         }
-        if (m_canvasLimit <= m_canvCounter) {
-            primitives.clear();
-            closeSummaryCanvas();
-        }
-
     }
 
     void PatternVisualizationTool::visualizeSegment(const EventContext& ctx,
@@ -430,91 +356,160 @@ namespace MuonValR4 {
                                                     const std::string& extraLabel,
                                                     PrimitiveVec&& primitives) const {
         /** Check whether the canvas limit has been reached */
-        if (m_canvCounter >= m_canvasLimit) {
+        if (m_plotsDone) {
             return;
         }
-        /** Enter the lock phase */
-        std::lock_guard guard{s_mutex};
-        /** Check again in case multiple threads are simultaneously in the lock phase */
-        //cppcheck-suppress identicalConditionAfterEarlyExit
-        if (m_canvCounter >= m_canvasLimit) {
-            return;
-        }
+
         const LabeledSegmentSet truthSegs{getLabeledSegments(segment.parent()->getHitsInMax())};
         if (truthSegs.empty() && m_displayOnlyTruth) {
             return;
         }
-        Parameters segPars{};
-        {
-            const ActsTrk::GeometryContext* geoCtx{nullptr};
-            if (!SG::get(geoCtx, m_geoCtxKey, ctx).isSuccess()) {
-                return;
-            }
-            const Amg::Transform3D trf{segment.msSector()->globalToLocalTrans(*geoCtx)};
-            const Amg::Vector3D locPos = trf * segment.position();
-            const Amg::Vector3D locDir = trf.linear() * segment.direction();
-            segPars[Acts::toUnderlying(ParamDefs::x0)] = locPos.x();
-            segPars[Acts::toUnderlying(ParamDefs::y0)] = locPos.y();
-            segPars[Acts::toUnderlying(ParamDefs::theta)] = locDir.theta();
-            segPars[Acts::toUnderlying(ParamDefs::phi)] = locDir.phi();
-            segPars[Acts::toUnderlying(ParamDefs::t0)] = segment.segementT0();
+        const ActsTrk::GeometryContext* geoCtx{nullptr};
+        if (!SG::get(geoCtx, m_geoCtxKey, ctx).isSuccess()) {
+            return;
         }
+        auto canvas = m_visualSvc->prepareCanvas(ctx, m_clientToken, extraLabel);
+        if (!canvas) {
+            m_plotsDone = true;
+            return;
+        }
+        canvas->add(std::move(primitives));
         
-        std::array<double, 4> canvasDim{};
-        const std::size_t parsedPrimSize{primitives.size()};
+
+        const Parameters segPars  = SegmentFit::localSegmentPars(*geoCtx, segment);
+        
         for (const int view : {objViewEta, objViewPhi}) {
             if ((view == objViewEta && !m_doEtaBucketViews) ||
                 (view == objViewPhi && !m_doPhiBucketViews)){
                 continue;
             }
-            /** reset the primitives */
-            primitives.resize(parsedPrimSize);
-
+            canvas->setAxisTitles(std::format("{:} [mm]", view == objViewEta ? 'y' : 'x'), "z [mm]");
             if (!drawHits(*segment.parent()->parentBucket(), segment.measurements(), 
-                          primitives, canvasDim, view)) {
+                          *canvas, view)) {
                 continue;
             }
             for (const xAOD::MuonSegment* segment : truthSegs) {
-                primitives.push_back(drawLine(localSegmentPars(*segment), canvasDim[Edges::zLow], canvasDim[Edges::zHigh],
+                canvas->add(drawLine(localSegmentPars(*segment), canvas->corner(Edges::yLow), canvas->corner(Edges::yHigh),
                                            truthColor, kDotted, view));
-                paintSimHits(ctx,*segment, primitives, view);
+                paintSimHits(ctx,*segment, *canvas, view);
             }
-            writeChi2(segPars, segment.measurements(), primitives);
+            writeChi2(segPars, segment.measurements(), *canvas);
 
-            primitives.push_back(drawAtlasLabel(0.75, 0.26, m_AtlasLabel));
-            primitives.push_back(drawLumiSqrtS(0.75,0.21, m_sqrtSLabel, m_lumiLabel));
-
-            primitives.push_back(drawLine(segPars, canvasDim[Edges::zLow], canvasDim[Edges::zHigh],
+            canvas->add(drawLine(segPars, canvas->corner(Edges::yLow), canvas->corner(Edges::yHigh),
                                           parLineColor, kDashed, view));
 
-
-            std::stringstream legendLabel{};
             const Identifier canvasId{segment.parent()->getHitsInMax().front()->identify()};
-            legendLabel<<"Event: "<<ctx.eventID().event_number() <<", chamber : "<<m_idHelperSvc->toStringChamber(canvasId)
-                        <<std::format(", #chi^{{2}} /nDoF: {:.2f} ({:d})", segment.chi2() /std::max(1u, segment.nDoF()), segment.nDoF())
-                        <<", #"<<(view ==objViewEta ? "eta" : "phi")<<"-view";
+            std::string legendLabel=std::format("Event: {:}, chamber: {:}, #chi^{{2}} / nDoF: {:.2f} ({:d}), #{:}-view (:)", 
+                                                ctx.eventID().event_number(), m_idHelperSvc->toStringChamber(canvasId),
+                                                segment.chi2() /std::max(1u, segment.nDoF()), segment.nDoF(),
+                                                view ==objViewEta ? "eta" : "phi", extraLabel);
 
-            if (!extraLabel.empty()) {
-                legendLabel<<" ("<<extraLabel<<")";
-            }
-            primitives.push_back(drawLabel(legendLabel.str(), 0.2, 0.96));
-            primitives.push_back(drawLabel(makeLabel(segPars),0.25, 0.91));
-
-            auto canvas = makeCanvas(ctx, canvasDim, view);
-            drawPrimitives(*canvas, primitives);
-
-            saveCanvas(ctx, canvasId, *canvas, extraLabel);
-        }
-        if (m_canvasLimit <= m_canvCounter) {
-            primitives.clear();
-            closeSummaryCanvas();
+            canvas->add(drawLabel(legendLabel, 0.2, 0.96));
+            canvas->add(drawLabel(makeLabel(segPars),0.25, 0.91));
         }
     }
 
+    void PatternVisualizationTool::visualizeSegmentsMeasurementsObj(const EventContext& ctx, 
+                                                                    const MuonR4::Segment& segment,
+                                                                    const std::string& extraLabel) const {
+                                                                      
+        const ActsTrk::GeometryContext* geoCtx{nullptr};
+        if (!SG::get(geoCtx, m_geoCtxKey, ctx).isSuccess()) {
+            return;
+        }
+        Acts::ObjVisualization3D visualHelper{};
+        const MuonR4::Segment::MeasVec& measurements{segment.measurements()};  
+        drawObjHits(*geoCtx, measurements, visualHelper);
+        const SpacePoint* sp = measurements.front()->type() != xAOD::UncalibMeasType::Other ? measurements.front()->spacePoint() : 
+                               measurements[1]->spacePoint();
+        auto chamberId = sp->identify();
+
+        //draw also the segment line in the same obj and in the end write the obj file with the visualHelper
+        double pathLength{1.*Gaudi::Units::m};      
+        Acts::GeometryView3D::drawSegment(visualHelper,
+                                         segment.position() + 0.5* pathLength * segment.direction(),
+                                         segment.position() - 0.5* pathLength  * segment.direction(),
+                                         Acts::s_viewLine);
+        std::string fileName = std::format("Event_{:}_chamber_{:}_{:}",  
+                           ctx.eventID().event_number(), m_idHelperSvc->toStringChamber(chamberId), extraLabel);
+        visualHelper.write(fileName + ".obj");   
+                                                                        
+    }
+
+    void PatternVisualizationTool::visualizeSegmentsMeasurementsObj(const EventContext& ctx,
+                                                                    const MuonR4::Segment::MeasVec& measVec,        
+                                                                    const std::string& extraLabel) const {
+        const ActsTrk::GeometryContext* geoCtx{nullptr};
+        if (!SG::get(geoCtx, m_geoCtxKey, ctx).isSuccess()) {
+            return;
+        }
+
+        Acts::ObjVisualization3D visualHelper{};
+        drawObjHits(*geoCtx, measVec, visualHelper);
+        const SpacePoint* sp = measVec.front()->type() != xAOD::UncalibMeasType::Other ? measVec.front()->spacePoint() : 
+                               measVec[1]->spacePoint();
+        auto chamberId = sp->identify();
+        std::string fileName = std::format("Event_{:}_chamber_{:}_{:}",  
+                           ctx.eventID().event_number(), m_idHelperSvc->toStringChamber(chamberId), extraLabel);
+        visualHelper.write(fileName + ".obj");        
+    }
+
+    void PatternVisualizationTool::drawObjHits(const ActsTrk::GeometryContext& geoCtx,
+                                               const MuonR4::Segment::MeasVec& measVec, 
+                                               Acts::ObjVisualization3D& visualHelper) const {
+
+
+        const SpacePoint* sp = measVec.front()->type() != xAOD::UncalibMeasType::Other ? measVec.front()->spacePoint() : 
+                               measVec[1]->spacePoint();
+      
+        const MuonGMR4::SpectrometerSector* msSector  = sp->msSector();  
+        const Amg::Transform3D& locToGlob = msSector->localToGlobalTransform(geoCtx); 
+        using CovIdx = SpacePoint::CovIdx;
+        double dX{0.}, dY{0.};
+
+        for(const auto& meas : measVec){
+          
+            //if this is a 2D measurement visualize it as the spacepoint
+                      
+            if(meas->dimension() == 2){
+                //handle straw surfaces
+                if(meas->isStraw()){                   
+                    const double dR = meas->type() == xAOD::UncalibMeasType::Other ? std::sqrt(meas->covariance()[Acts::toUnderlying(CovIdx::etaCov)]):
+                    meas->driftRadius();
+                    const double hZ = std::sqrt(meas->covariance()[Acts::toUnderlying(CovIdx::phiCov)]);
+                    auto bounds = std::make_unique<Acts::LineBounds>(dR, hZ);
+                    Amg::Vector3D globalPos = locToGlob* meas->localPosition();    
+                    const Acts::Transform3 trf = Acts::Transform3(
+                    Acts::Translation3(globalPos) *locToGlob.rotation());                    
+                    auto surface = Acts::Surface::makeShared<Acts::StrawSurface>(trf, std::move(bounds));    
+                    Acts::GeometryView3D::drawSurface(visualHelper, *surface, geoCtx.context());    
+                    continue;                
+                }
+                
+                dX = std::sqrt(meas->covariance()[Acts::toUnderlying(CovIdx::phiCov)]);
+                dY = std::sqrt(meas->covariance()[Acts::toUnderlying(CovIdx::etaCov)]);
+                auto bounds = std::make_unique<Acts::RectangleBounds>(dX, dY);               
+                Amg::Vector3D globalPos = locToGlob* meas->localPosition();    
+                const Acts::Transform3 trf = Acts::Transform3(
+                Acts::Translation3(globalPos) *locToGlob.rotation());   
+               
+                auto surf = Acts::Surface::makeShared<Acts::PlaneSurface>(trf,std::move(bounds));
+                Acts::GeometryView3D::drawSurface(visualHelper, *surf, geoCtx.context());          
+            }else{
+            if(meas->type() == xAOD::UncalibMeasType::Other){
+                continue;
+            }
+            const SpacePoint* underlyingSp{meas->spacePoint()};
+            MuonValR4::drawMeasurement(geoCtx, underlyingSp->primaryMeasurement(), visualHelper); 
+            } 
+        }
+    }
+   
+
     template<class SpacePointType>        
         const SpacePoint* 
-            PatternVisualizationTool::drawHit(const SpacePointType& hit, PrimitiveVec& primitives,
-                                              std::array<double, 4>& canvasDim, const unsigned int view,
+            PatternVisualizationTool::drawHit(const SpacePointType& hit, Canvas_t& canvas,
+                                              const unsigned int view,
                                               unsigned int fillStyle) const {
         
         /// Don't draw any hit which is not participating in the view
@@ -523,10 +518,10 @@ namespace MuonValR4 {
         }
         
         if (hit.type() != xAOD::UncalibMeasType::Other) {
-            canvasDim[Edges::yLow] = std::min(canvasDim[Edges::yLow], hit.localPosition()[view] - hit.driftRadius());
-            canvasDim[Edges::yHigh] = std::max(canvasDim[Edges::yHigh], hit.localPosition()[view] + hit.driftRadius());
-            canvasDim[Edges::zLow] = std::min(canvasDim[Edges::zLow], hit.localPosition().z() - hit.driftRadius());
-            canvasDim[Edges::zHigh] = std::max(canvasDim[Edges::zHigh], hit.localPosition().z() + hit.driftRadius());
+            canvas.expandPad(hit.localPosition()[view] - hit.driftRadius(), 
+                             hit.localPosition().z()   - hit.driftRadius());
+            canvas.expandPad(hit.localPosition()[view] + hit.driftRadius(), 
+                             hit.localPosition().z()   + hit.driftRadius());
         }
 
         const SpacePoint* underlyingSp{nullptr};
@@ -553,39 +548,37 @@ namespace MuonValR4 {
         switch(hit.type()) {
             case xAOD::UncalibMeasType::MdtDriftCircleType: {
                 const auto* dc = static_cast<const xAOD::MdtDriftCircle*>(underlyingSp->primaryMeasurement());
-                primitives.push_back(drawDriftCircle(hit.localPosition(), dc->readoutElement()->innerTubeRadius(), 
+                canvas.add(drawDriftCircle(hit.localPosition(), dc->readoutElement()->innerTubeRadius(), 
                                                      kBlack, hollowFilling));
 
                 const int circColor = isLabeled(*dc) ? truthColor : kBlue;                    
-                primitives.push_back(drawDriftCircle(hit.localPosition(), hit.driftRadius(), circColor, fillStyle));
+                canvas.add(drawDriftCircle(hit.localPosition(), hit.driftRadius(), circColor, fillStyle));
                 break;
             } case xAOD::UncalibMeasType::RpcStripType: {
                 const auto* meas{static_cast<const xAOD::RpcMeasurement*>(underlyingSp->primaryMeasurement())};
                 const int boxColor = isLabeled(*meas) ? truthColor : kGreen +2;
                 const double boxWidth = 0.5*std::sqrt(12)*std::sqrt(underlyingSp->covariance()[view]);
-                primitives.push_back(drawBox(hit.localPosition(), boxWidth, 0.5*meas->readoutElement()->gasGapPitch(),
-                                             boxColor, fillStyle));
+                canvas.add(drawBox(hit.localPosition(), boxWidth, 0.5*meas->readoutElement()->gasGapPitch(),
+                                   boxColor, fillStyle));
                 break; 
             } case xAOD::UncalibMeasType::TgcStripType: {
                 const auto* meas{static_cast<const xAOD::TgcStrip*>(underlyingSp->primaryMeasurement())};
                 const int boxColor = isLabeled(*meas) ? truthColor : kCyan + 2;
                 const double boxWidth = 0.5*std::sqrt(12)*std::sqrt(underlyingSp->covariance()[view]);
-                primitives.push_back(drawBox(hit.localPosition(), boxWidth, 0.5*meas->readoutElement()->gasGapPitch(),
-                                             boxColor, fillStyle));
+                canvas.add(drawBox(hit.localPosition(), boxWidth, 0.5*meas->readoutElement()->gasGapPitch(),
+                                   boxColor, fillStyle));
                 break; 
             } case xAOD::UncalibMeasType::MMClusterType: {
                 const int boxColor = isLabeled(*underlyingSp->primaryMeasurement()) ? truthColor : kAquamarine;
                 const double boxWidth = 5*Gaudi::Units::mm;
-                primitives.push_back(drawBox(hit.localPosition(), boxWidth, 10.*Gaudi::Units::mm,
-                                             boxColor, fillStyle));
+                canvas.add(drawBox(hit.localPosition(), boxWidth, 10.*Gaudi::Units::mm, boxColor, fillStyle));
                 break; 
             }  case xAOD::UncalibMeasType::Other: {
                 break;
             }  case xAOD::UncalibMeasType::sTgcStripType: {
                 const int boxColor = isLabeled(*underlyingSp->primaryMeasurement()) ? truthColor : kTeal;
                 const double boxWidth = 5*Gaudi::Units::mm;
-                primitives.push_back(drawBox(hit.localPosition(), boxWidth, 10.*Gaudi::Units::mm,
-                                             boxColor, fillStyle));
+                canvas.add(drawBox(hit.localPosition(), boxWidth, 10.*Gaudi::Units::mm, boxColor, fillStyle));
                 break;
             } default: {
                 ATH_MSG_WARNING("Please implement proper drawings of the new small wheel.. "<<__FILE__<<":"<<__LINE__);    
@@ -598,16 +591,12 @@ namespace MuonValR4 {
     template<class SpacePointType>      
         bool PatternVisualizationTool::drawHits(const SpacePointBucket& bucket,
                                                 const std::vector<SpacePointType>& hitsToDraw,
-                                                std::vector<PrimitivePtr>& primitives,
-                                                std::array<double, 4>& canvasDim,
+                                                Canvas_t& canvas,
                                                 unsigned int view) const {
 
-        canvasDim[Edges::yLow] = canvasDim[Edges::zLow] = 100. *Gaudi::Units::m;
-        canvasDim[Edges::yHigh] = canvasDim[Edges::zHigh] = -100. *Gaudi::Units::m;
-        
         SpacePointSet drawnPoints{};
         for (const SpacePointType& hit : hitsToDraw) {            
-            drawnPoints.insert(drawHit(*hit, primitives, canvasDim, view, fullFilling));
+            drawnPoints.insert(drawHit(*hit, canvas, view, fullFilling));
         }
         if (m_displayBucket) {
             for (const SpacePointBucket::value_type& hit : bucket) {
@@ -615,42 +604,17 @@ namespace MuonValR4 {
                 if (drawnPoints.count(hit.get())) {
                     continue;
                 }
-                drawHit(*hit, primitives, canvasDim, view, hollowFilling);
+                drawHit(*hit, canvas, view, hollowFilling);
             } 
         }
-
-        // adapt the draw range to make sure any detector elements we wish to display 
-        // are included 
-        for (auto & prim : primitives){
-            TBox* theBox = dynamic_cast<TBox*>(prim.get()); 
-            if (theBox){
-                canvasDim[Edges::zLow] = std::min(canvasDim[Edges::zLow], theBox->GetY1()); 
-                canvasDim[Edges::zHigh] = std::max(canvasDim[Edges::zHigh], theBox->GetY2()); 
-            }
-        }
-
-        double width =  (canvasDim[Edges::yHigh] - canvasDim[Edges::yLow])*m_canvasExtraScale;
-        double height = (canvasDim[Edges::zHigh] - canvasDim[Edges::zLow])*m_canvasExtraScale;
-        if (height > width) width = height; 
-        else height = width;
-
-        const double midPointX = 0.5 * (canvasDim[Edges::yHigh] + canvasDim[Edges::yLow]);
-        const double midPointY = 0.5 * (canvasDim[Edges::zHigh] + canvasDim[Edges::zLow]);
-        canvasDim[Edges::yLow] = midPointX - 0.5 * width;
-        canvasDim[Edges::zLow] = midPointY - 0.5 * height;
-        canvasDim[Edges::yHigh] = midPointX + 0.5 * width;
-        canvasDim[Edges::zHigh] = midPointY + 0.5 * height;        
         return drawnPoints.size() - drawnPoints.count(nullptr) > 1;
     }
     template<class SpacePointType>
         void PatternVisualizationTool::writeChi2(const MuonR4::SegmentFit::Parameters& pars,
                                                  const std::vector<SpacePointType>& hits,
-                                                 PrimitiveVec& primitives,
+                                                 Canvas_t& canvas,
                                                  const double legX, double startLegY, 
                                                  const double endLegY) const {
-        
-        
-        
         const auto [pos, dir] = makeLine(pars);
      
         for (const SpacePointType& hit : hits) { 
@@ -662,9 +626,6 @@ namespace MuonValR4 {
             } else {
                 underlyingSp = hit;
             }
-            
-
-
             const Identifier hitId =  underlyingSp ? underlyingSp->identify(): Identifier{};
             std::string legendstream{};
             switch(hit->type()) {
@@ -712,55 +673,11 @@ namespace MuonValR4 {
             } else {
                 legendstream+=", #chi^{2}: ---";
             }
-            primitives.push_back(drawLabel(legendstream, legX, startLegY, 14));
+            canvas.add(drawLabel(legendstream, legX, startLegY, 14));
             startLegY -= 0.05;
             if (startLegY<= endLegY) {
                 break;
             }
         }
-    }
-    void PatternVisualizationTool::closeSummaryCanvas() const {
-        if (!m_outFile) return;
-        ATH_MSG_INFO("Close summary pdf & root file "<<m_allCanName);
-        if (m_allCan) {
-            m_allCan->cd();
-            m_allCan->SaveAs((m_allCanName +".pdf]").c_str());
-            m_allCan.reset();
-        }
-        m_outFile.reset();
-    }
-    std::unique_ptr<TCanvas> PatternVisualizationTool::makeCanvas(const EventContext& ctx,
-                                                                  const std::array<double, 4>& canvasDim,
-                                                                  const int view) const {
-        std::stringstream canvasName{};
-        canvasName<<name()<<"_"<<ctx.eventID().event_number()<<"_"<<m_canvCounter;
-        ATH_MSG_VERBOSE("Create new canvas "<<canvasName.str()<<" "<<canvasDim);
-        auto canvas = std::make_unique<TCanvas>(canvasName.str().c_str(), "all", m_canvasWidth, m_canvasHeight);
-        canvas->cd();
-        TH1F* frame = canvas->DrawFrame(canvasDim[Edges::yLow],canvasDim[Edges::zLow], canvasDim[Edges::yHigh], canvasDim[Edges::zHigh]);
-        frame->GetXaxis()->SetTitle(std::format("{:} [mm]", view == objViewEta ? 'y' : 'x').c_str());
-        frame->GetYaxis()->SetTitle("z [mm]");
-        return canvas;
-    }
-    void PatternVisualizationTool::saveCanvas(const EventContext& ctx,
-                                              const Identifier& chambId,
-                                              TCanvas& canvas,
-                                              const std::string& extraLabel) const {
-        // If an eta view closes the summary canvas & a phi view is processed
-        std::stringstream canvasName{};
-        canvasName<<m_canvasPrefix.value()<<"_"<<ctx.eventID().event_number()<<"_"<<(m_canvCounter++)<<"_"
-                  <<m_idHelperSvc->stationNameString(chambId)
-                  <<std::abs(m_idHelperSvc->stationEta(chambId))
-                  <<(m_idHelperSvc->stationEta(chambId) >0 ? "A" : "C")
-                  <<m_idHelperSvc->stationPhi(chambId);
-        if (!extraLabel.empty()) canvasName<<"_"<<removeNonAlphaNum(extraLabel);
-        ATH_MSG_VERBOSE("Save new plot "<<canvasName.str());
-        if (m_saveSinglePDFs) {
-            canvas.SaveAs(("Plots/" + m_canvasPrefix+"/" + canvasName.str()+".pdf").c_str());
-        }
-        if (m_saveSummaryPDF) {
-            canvas.SaveAs((m_allCanName+".pdf").c_str());
-        }
-        m_outFile->WriteObject(&canvas, canvasName.str().c_str());
     }
 }

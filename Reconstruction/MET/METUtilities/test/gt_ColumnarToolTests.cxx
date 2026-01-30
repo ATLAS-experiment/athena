@@ -38,6 +38,7 @@ TEST_F (ColumnarMemoryTest, METMaker_muon)
     return;
 
   auto tool = std::make_unique<met::ColumnarMETMaker> (makeUniqueName());
+  ASSERT_SUCCESS (tool->setProperty ("JetContainer", "dummyjets"));
   ASSERT_SUCCESS (tool->setProperty ("skipSystematicJetSelection", false));
   ASSERT_SUCCESS (tool->setProperty ("JetSelection", "Tight"));
   ASSERT_SUCCESS (tool->setProperty ("DoPFlow", true));
@@ -204,6 +205,7 @@ TEST_F (ColumnarMemoryTest, METMaker_jet)
     return;
 
   auto tool = std::make_unique<met::ColumnarMETMaker> (makeUniqueName());
+  ASSERT_SUCCESS (tool->setProperty ("JetContainer", "dummyjets"));
   ASSERT_SUCCESS (tool->setProperty ("skipSystematicJetSelection", false));
   ASSERT_SUCCESS (tool->setProperty ("JetSelection", "Tight"));
   ASSERT_SUCCESS (tool->setProperty ("DoPFlow", true));
@@ -428,6 +430,7 @@ TEST_F (ColumnarPhysLiteTest, METMaker_muon)
     return;
 
   auto tool = std::make_unique<met::ColumnarMETMaker> (makeUniqueName());
+  ASSERT_SUCCESS (tool->setProperty ("JetContainer", "dummyjets"));
   ASSERT_SUCCESS (tool->setProperty ("skipSystematicJetSelection", false));
   ASSERT_SUCCESS (tool->setProperty ("JetSelection", "Tight"));
   ASSERT_SUCCESS (tool->setProperty ("DoPFlow", true));
@@ -440,7 +443,7 @@ TEST_F (ColumnarPhysLiteTest, METMaker_muon)
 
   XAODToolCallerMuon callXAODMuon (*tool, "AnalysisMuons");
 
-  doCall (*tool, "ColumnarMETMaker", "AnalysisMuons", callXAODMuon, {{"Particles", "AnalysisMuons"}, {"Photons", "AnalysisPhotons"}, {"Electrons", "AnalysisElectrons"}, {"Muons", "AnalysisMuons"}, {"MetAssoc", "METAssoc_AnalysisMET"}, {"Jets", "AnalysisJets"}, {"METCore", "MET_Core_AnalysisMET"}});
+  doCall ({.tool = tool.get(), .name = "ColumnarMETMaker", .xAODToolCaller = &callXAODMuon, .containerRenames = {{"Particles", "AnalysisMuons"}, {"Photons", "AnalysisPhotons"}, {"Electrons", "AnalysisElectrons"}, {"Muons", "AnalysisMuons"}, {"MetAssoc", "METAssoc_AnalysisMET"}, {"Jets", "AnalysisJets"}, {"METCore", "MET_Core_AnalysisMET"}}, .metTermNames = {"Muons", "MuonEloss"}});
 }
 
 class XAODToolCallerJet final : public IXAODToolCaller, public asg::AsgMessaging
@@ -491,6 +494,7 @@ TEST_F (ColumnarPhysLiteTest, METMaker_jet)
     return;
 
   auto tool = std::make_unique<met::ColumnarMETMaker> (makeUniqueName());
+  ASSERT_SUCCESS (tool->setProperty ("JetContainer", "dummyjets"));
   ASSERT_SUCCESS (tool->setProperty ("skipSystematicJetSelection", false));
   ASSERT_SUCCESS (tool->setProperty ("JetSelection", "Tight"));
   ASSERT_SUCCESS (tool->setProperty ("DoPFlow", true));
@@ -505,7 +509,7 @@ TEST_F (ColumnarPhysLiteTest, METMaker_jet)
 
   XAODToolCallerJet callXAODJet (*tool, "AnalysisJets");
 
-  doCall (*tool, "ColumnarMETMaker", "AnalysisJets", callXAODJet, {{"Particles", "AnalysisJets"}, {"Photons", "AnalysisPhotons"}, {"Electrons", "AnalysisElectrons"}, {"Muons", "AnalysisMuons"}, {"MetAssoc", "METAssoc_AnalysisMET"}, {"Jets", "AnalysisJets"}, {"METCore", "MET_Core_AnalysisMET"}});
+  doCall ({.tool = tool.get(), .name = "ColumnarMETMaker", .xAODToolCaller = &callXAODJet, .containerRenames = {{"Particles", "AnalysisJets"}, {"Photons", "AnalysisPhotons"}, {"Electrons", "AnalysisElectrons"}, {"Muons", "AnalysisMuons"}, {"MetAssoc", "METAssoc_AnalysisMET"}, {"Jets", "AnalysisJets"}, {"METCore", "MET_Core_AnalysisMET"}}, .metTermNames = {"RefJet", "MuonEloss", "PVSoftTrk"}});
 }
 
 ATLAS_GOOGLE_TEST_MAIN

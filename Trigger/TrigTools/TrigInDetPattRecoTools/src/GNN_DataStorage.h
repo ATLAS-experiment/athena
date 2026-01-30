@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGINDETPATTRECOTOOLS_GNN_DATA_STORAGE_H
@@ -10,7 +10,7 @@
 #include<algorithm>
 #include<array>
 #include<limits>
-#define MAX_SEG_PER_NODE 1000 //was 30
+
 #define N_SEG_CONNS  6 //was 6
 
 class TrigFTF_GNN_Geometry;
@@ -70,8 +70,10 @@ public:
   
   std::vector<const TrigFTF_GNN_Node*> m_vn;//nodes of the graph
   std::vector<std::pair<float, unsigned int> > m_vPhiNodes;
-  std::vector<std::vector<unsigned int> > m_in;//vectors of incoming edges, stores indicies of edges in the edge vector
+
   std::vector<std::array<float,5> > m_params;//node attributes: m_minCutOnTau, m_maxCutOnTau, m_phi, m_r, m_z;
+  std::vector<unsigned int> m_vFirstEdge;//the index of the first incoming graph edge attached to the node
+  std::vector<unsigned short> m_vNumEdges;//the total number of incoming graph edges attached to this node
 
   float m_minRadius, m_maxRadius;
   unsigned int m_layerKey{0};

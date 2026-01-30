@@ -1,12 +1,11 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ByteStreamDataWriter.h"
 
 #include <stdexcept>
 
-#include "ByteStreamDataWriterV5.h"
 #include "EventStorage/DataWriter.h"
 
 namespace {
@@ -48,7 +47,7 @@ public:
                                 EventStorage::CompressionType compression,
                                 unsigned int compLevel);
 
-    virtual ~ByteStreamDataWriterCurrent() {}
+    virtual ~ByteStreamDataWriterCurrent() = default;
 
     // abstract class cannot be copied
     ByteStreamDataWriterCurrent(const ByteStreamDataWriterCurrent&) = delete;
@@ -89,17 +88,6 @@ ByteStreamDataWriter::makeWriter(int version,
                                               startIndex,
                                               compression,
                                               compLevel);
-    } else if (version == 5) {
-        // Run1 version
-        res = new ByteStreamDataWriterV5(writingPath,
-                                         fileNameCore,
-                                         rPar,
-                                         fmdStrings,
-                                         maxFileNE,
-                                         maxFileMB,
-                                         startIndex,
-                                         compression,
-                                         compLevel);
     } else {
         // Unexpected something
         versionException(version);
@@ -142,22 +130,6 @@ ByteStreamDataWriter::makeWriter(int version,
                                               maxFileMB,
                                               compression,
                                               compLevel);
-    } else if (version == 5) {
-        // Run1 version
-        res = new ByteStreamDataWriterV5(writingPath,
-                                         theFNCB,
-                                         rPar,
-                                         project,
-                                         streamType,
-                                         streamName,
-                                         stream,
-                                         lumiBlockNumber,
-                                         applicationName,
-                                         fmdStrings,
-                                         maxFileNE,
-                                         maxFileMB,
-                                         compression,
-                                         compLevel);
     } else {
         // Unexpected something
         versionException(version);

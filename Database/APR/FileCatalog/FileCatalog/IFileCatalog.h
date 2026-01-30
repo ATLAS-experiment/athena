@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef APR_IFILECATALOG_H
@@ -12,7 +12,7 @@
 #include "AthenaBaseComps/AthMessaging.h"
 #include "GaudiKernel/IMessageSvc.h"
 
-#include <iostream>
+//#include <iostream>
 
 namespace pool {
 
@@ -112,30 +112,20 @@ namespace pool {
 
      // ------------------------- Catalog Manager interface
 
-     /// Add new catalog identified by name to the existing ones
-     void addReadCatalog( const std::string& connect ) { addCatalog(connect); }
-     void addCatalog( const std::string& connect );
-
-     /// Add new catalog identified by reference to the existing ones
-     //void addCatalog(  Gaudi::IFileCatalog* cat )  { m_mgr->addCatalog(cat); }
-
+     /// Add new catalog, identified by name, to the existing ones
+     void addReadCatalog( const std::string& connect ) { addCatalog(connect, false); }
+     void addCatalog( const std::string& connect, bool forWriting = false );
+     /// Establish the writable catalog, identified by name
+     void setWriteCatalog( const std::string& connect ) { addCatalog(connect, true); }
+     
      /// Remove catalog identified by name from the existing ones. * or '' removes all
      void removeCatalog( const std::string& connect )  { m_mgr->removeCatalog(connect); }
      
-     /// Remove catalog identified by reference from the existing ones
-     //void removeCatalog( const  Gaudi::IFileCatalog* cat )  { m_mgr->removeCatalog(cat); }
      /// Access catalog container
      Catalogs& catalogs() { return m_mgr->catalogs(); }
      /// Access catalog container (CONST)
      const Catalogs& catalogs() const  { return m_mgr->catalogs(); }
-     /// Access to the (first) writable file catalog
-     //Gaudi::IFileCatalog* writeCatalog( const std::string& fid = "" ) const  { return m_mgr->writeCatalog(fid); }
-     /// Define the writable catalog identified by reference
-     //void setWriteCatalog(  Gaudi::IFileCatalog* cat )  { m_mgr->setWriteCatalog(cat); }
-     /// Define the writable catalog identified by name
-     void setWriteCatalog( const std::string& connect );
      
-
   protected:
      SmartIF<Gaudi::IFileCatalogMgr>    m_mgr;
      SmartIF<Gaudi::IFileCatalog>       m_fc;

@@ -12,19 +12,21 @@ class DiTauCalibrationConfig (ConfigBlock):
         super (DiTauCalibrationConfig, self).__init__ ()
         self.setBlockName('DiTaus')
         self.addOption ('inputContainer', '', type=str,
-            info="select ditau input container, by default set to DiTauJets")
+            info="the name of the input ditau-jet container.")
         self.addOption ('containerName', '', type=str,
             noneAction='error',
             info="the name of the output container after calibration.")
         self.addOption ('postfix', '', type=str,
             info="a postfix to apply to decorations and algorithm names. "
             "Typically not needed here since the calibration is common to "
-            "all ditaus.")
+            "all ditau-jets.")
         self.addOption ('rerunTruthMatching', True, type=bool,
             info="whether to rerun truth matching (sets up an instance of "
-            "CP::DiTauTruthMatchingAlg). The default is True.")
+            "`CP::DiTauTruthMatchingAlg`).")
         self.addOption ('decorateTruth', False, type=bool,
-            info="decorate truth particle information on the reconstructed one")
+            info="decorate the truth particle information on the reconstructed one.")
+        self.addOption ('decorateExtraVariables', True, type=bool,
+            info="decorate extra variables for the reconstructed ditau-jet.")
 
     def instanceName (self) :
         """Return the instance name for this block"""
@@ -50,6 +52,7 @@ class DiTauCalibrationConfig (ConfigBlock):
             alg.taus = config.readName (self.containerName)
             alg.preselection = config.getPreselection (self.containerName, '')
 
+       
         # decorate truth tau information on the reconstructed object:
         if self.decorateTruth and self.rerunTruthMatching and config.dataType() is not DataType.Data:
             # in the case of the ditau, the DiTauTruthMatchingTool decorates directly the reco ditau with truth information.
@@ -69,12 +72,40 @@ class DiTauCalibrationConfig (ConfigBlock):
             config.addOutputVar (self.containerName, 'IsTruthMatched', 'IsTruthMatched', noSys=True)
             config.addOutputVar (self.containerName, 'IsTruthHadronic', 'IsTruthHadronic', noSys=True)
 
+        # Decorate extra variables
+        if self.decorateExtraVariables:
+           alg = config.createAlgorithm( 'CP::DiTauExtraVariablesAlg',
+                                         'DiTauExtraVariablesAlg',
+                                         reentrant=True )
+           alg.ditaus = config.readName (self.containerName)
+           config.addOutputVar (self.containerName, 'omniScore', 'omniScore', noSys=True)
+           config.addOutputVar (self.containerName, 'nSubjets', 'nSubjets', noSys=True) 
+           config.addOutputVar (self.containerName, 'leadSubjetPt', 'leadSubjetPt', noSys=True)
+           config.addOutputVar (self.containerName, 'leadSubjetEta', 'leadSubjetEta', noSys=True)
+           config.addOutputVar (self.containerName, 'leadSubjetPhi', 'leadSubjetPhi', noSys=True)
+           config.addOutputVar (self.containerName, 'leadSubjetE', 'leadSubjetE', noSys=True)
+           config.addOutputVar (self.containerName, 'leadSubjetNTracks', 'leadSubjetNTracks', noSys=True)
+           config.addOutputVar (self.containerName, 'leadSubjetCharge', 'leadSubjetCharge', noSys=True)
+           config.addOutputVar (self.containerName, 'subleadSubjetPt', 'subleadSubjetPt', noSys=True)
+           config.addOutputVar (self.containerName, 'subleadSubjetEta', 'subleadSubjetEta', noSys=True)
+           config.addOutputVar (self.containerName, 'subleadSubjetPhi', 'subleadSubjetPhi', noSys=True)
+           config.addOutputVar (self.containerName, 'subleadSubjetE', 'subleadSubjetE', noSys=True)
+           config.addOutputVar (self.containerName, 'subleadSubjetNTracks', 'subleadSubjetNTracks', noSys=True)
+           config.addOutputVar (self.containerName, 'subleadSubjetCharge', 'subleadSubjetCharge', noSys=True)
+
         # Set up the tau 4-momentum smearing algorithm:
         alg = config.createAlgorithm( 'CP::DiTauSmearingAlg', 'DiTauSmearingAlg' )
         config.addPrivateTool( 'smearingTool', 'TauAnalysisTools::DiTauSmearingTool' )
         alg.taus = config.readName (self.containerName)
         alg.tausOut = config.copyName (self.containerName)
         alg.preselection = config.getPreselection (self.containerName, '')
+
+        # Save base kinematic ditau variables in output
+        config.addOutputVar (self.containerName, 'pt', 'pt')
+        config.addOutputVar (self.containerName, 'eta', 'eta', noSys=True)
+        config.addOutputVar (self.containerName, 'phi', 'phi', noSys=True)
+        config.addOutputVar (self.containerName, 'm', 'm', noSys=True)
+
 
 
 class DiTauWorkingPointConfig (ConfigBlock) :
@@ -89,17 +120,17 @@ class DiTauWorkingPointConfig (ConfigBlock) :
             info="the name of the input container.")
         self.addOption ('selectionName', '', type=str,
             noneAction='error',
-            info="the name of the tau-jet selection to define (e.g. tight or "
-            "loose).")
+            info="the name of the ditau-jet selection to define (e.g. `tight` or "
+            "`loose`).")
         self.addOption ('postfix', None, type=str,
             info="a postfix to apply to decorations and algorithm names. "
-            "Typically not needed here as selectionName is used internally.")
+            "Typically not needed here as `selectionName` is used internally.")
         self.addOption ('quality', None, type=str,
-            info="the ID WP (string) to use. Supported ID WPs: Tight, Medium, "
-            "Loose, VeryLoose, Baseline, BaselineForFakes.")
+            info="the ID WP to use. Supported ID WPs: `Tight`, `Medium`, "
+            "`Loose`.")
         self.addOption ('addSelectionToPreselection', True, type=bool,
             info="whether to retain only ditau-jets satisfying the working point "
-            "requirements. The default is True.")
+            "requirements.")
 
     def instanceName (self) :
         """Return the instance name for this block"""

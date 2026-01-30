@@ -14,7 +14,7 @@
 #include "GaudiKernel/EventIDRange.h"
 #include "GaudiKernel/ISvcLocator.h"
 
-#include "AthenaBaseComps/AthReentrantAlgorithm.h"
+#include "AthenaBaseComps/AthCondAlgorithm.h"
 
 #include "MuonReadoutGeometry/MuonDetectorManager.h"
 
@@ -29,7 +29,7 @@
 
 /////////////////////////////////////////////////////////////////////////////
 
-class MuonRegSelCondAlg : public AthReentrantAlgorithm {
+class MuonRegSelCondAlg : public AthCondAlgorithm {
 
 public:
 
@@ -37,7 +37,6 @@ public:
 
   virtual StatusCode  initialize() override;
   virtual StatusCode execute(const EventContext& ctx) const override;
-  virtual bool isReEntrant() const override final { return false; }
 
   virtual std::unique_ptr<RegSelSiLUT> createTable( const EventContext& ctx, EventIDRange& id_range ) const = 0;   
 

@@ -61,28 +61,6 @@ GeoModelSvc::RD...WARNING  Getting PixTBMatComponents with default tag
 GeoModelSvc::RD...WARNING  Getting PixTBMaterials with default tag
 GeoModelSvc::RD...WARNING  Getting InDetMatComponents with default tag
 GeoModelSvc::RD...WARNING  Getting InDetMaterials with default tag
-indet 1 2,4,5,7,10,11,12,13 7 1fffffffffffffff 61 3 0 min/max 2 13 values  2 4 5 7 10 11 12 13 indexes  0 0 1 2 0 3 0 0 4 5 6 7 indices  8 prev  0 next  0 mode  enumerated  cont mode  none  
-pixel 1 1:3 3 e7ffffffffffffff 59 2 3 min/max 1 3 values  indexes  indices  3 prev  0 next  0 mode  both_bounded  cont mode  none  
-bec 1 -4,-2,0,2,4 7 f8ffffffffffffff 56 3 5 min/max -4 4 values  -4 -2 0 2 4 indexes  0 0 1 0 2 0 3 0 4 indices  5 prev  0 next  0 mode  enumerated  cont mode  none  
-bec_shift 0 0 0 0 0 0 0 min/max 0 0 values  indexes  indices  0 prev  0 next  0 mode  both_bounded  cont mode  none  
-lay_disk 0 0:3 3 ff3fffffffffffff 54 2 8 min/max 0 3 values  indexes  indices  4 prev  0 next  0 mode  both_bounded  cont mode  none  
-lay_disk_shift 0 0 0 0 0 0 0 min/max 0 0 values  indexes  indices  0 prev  0 next  0 mode  both_bounded  cont mode  none  
-phi_mod 0 0:63 3f ffc0ffffffffffff 48 6 10 min/max 0 63 values  indexes  indices  64 prev  0 next  0 mode  both_bounded  cont mode  none  
-phi_mod_shift 0 0 0 0 0 0 0 min/max 0 0 values  indexes  indices  0 prev  0 next  0 mode  both_bounded  cont mode  none  
-eta_mod 1 -10:9 1f ffff07ffffffffff 43 5 16 min/max -10 9 values  indexes  indices  20 prev  0 next  0 mode  both_bounded  cont mode  none  
-eta_mod_shift 0 0 0 0 0 0 0 min/max 0 0 values  indexes  indices  0 prev  0 next  0 mode  both_bounded  cont mode  none  
-phi_index 0 0:376 1ff fffff803ffffffff 34 9 21 min/max 0 376 values  indexes  indices  377 prev  0 next  0 mode  both_bounded  cont mode  none  
-eta_index 0 0:335 1ff fffffffc01ffffff 25 9 30 min/max 0 335 values  indexes  indices  336 prev  0 next  0 mode  both_bounded  cont mode  none  
-bec_eta_mod 0 0 0 0 0 0 0 min/max 0 0 values  indexes  indices  0 prev  0 next  0 mode  both_bounded  cont mode  none  
-PixelID::initLevelsFromDict - found levels 
-subdet        0
-part          1
-barrel_endcap 2
-layer or disk 3
-phi_module    4
-eta_module    5
-phi_index     6
-eta_index     7
 GEOPIXELSERVICES pixel : 28.995 245 //  3460
 GEOPIXELSERVICES barrel : 28.997 143 //  -460 460
 GEOPIXELSERVICES endcap : 82 175 //  484 670

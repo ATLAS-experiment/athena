@@ -6,6 +6,7 @@
 
 // EDM include(s):
 #include "xAODCore/AuxStoreAccessorMacros.h"
+#include "TruthUtils/ParticleConstants.h"
 
 // Local include(s):
 #include "xAODEgamma/versions/Photon_v1.h"
@@ -36,6 +37,20 @@ namespace xAOD {
    Type::ObjectType Photon_v1::type() const {
 
       return Type::Photon;
+   }
+
+   double Photon_v1::m() const {
+      return ParticleConstants::photonMassInMeV;
+   }
+
+   double Photon_v1::e() const {
+      // for a massless particle E = pT * cosh(eta)
+      return pt() * std::cosh(eta());
+   }
+
+   double Photon_v1::rapidity() const {
+      // massless rapidity is the same as pseudorapidity
+      return eta();
    }
 
    /////////////////////////////////////////////////////////////////////////////

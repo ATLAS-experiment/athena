@@ -16,7 +16,7 @@
 #include "TileCalibBlobObjs/TileBchDecoder.h"
 
 // Athena includes
-#include "AthenaBaseComps/AthAlgorithm.h"
+#include "AthenaBaseComps/AthCondAlgorithm.h"
 #include "StoreGate/ReadCondHandleKey.h"
 #include "StoreGate/WriteCondHandleKey.h"
 
@@ -28,14 +28,14 @@
  * @brief Condition algorithm to prepare TileBadChannels and put it into condition store
  */
 
-class TileBadChannelsCondAlg: public AthAlgorithm {
+class TileBadChannelsCondAlg: public AthCondAlgorithm {
   public:
 
     TileBadChannelsCondAlg(const std::string& name, ISvcLocator* pSvcLocator);
     ~TileBadChannelsCondAlg();
 
     virtual StatusCode initialize() override;
-    virtual StatusCode execute() override;
+    virtual StatusCode execute(const EventContext& ctx) const override;
     virtual StatusCode finalize() override {return StatusCode::SUCCESS;}
 
   private:

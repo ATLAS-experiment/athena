@@ -7,7 +7,7 @@
 #ifndef SCT_DCSCONDITIONSHVCONDALG
 #define SCT_DCSCONDITIONSHVCONDALG
 
-#include "AthenaBaseComps/AthReentrantAlgorithm.h"
+#include "AthenaBaseComps/AthCondAlgorithm.h"
 
 #include "AthenaPoolUtilities/CondAttrListCollection.h"
 #include "SCT_ConditionsData/SCT_DCSFloatCondData.h"
@@ -16,7 +16,7 @@
 
 #include "Gaudi/Property.h"
 
-class SCT_DCSConditionsHVCondAlg : public AthReentrantAlgorithm 
+class SCT_DCSConditionsHVCondAlg : public AthCondAlgorithm 
 {  
  public:
   SCT_DCSConditionsHVCondAlg(const std::string& name, ISvcLocator* pSvcLocator);
@@ -24,7 +24,6 @@ class SCT_DCSConditionsHVCondAlg : public AthReentrantAlgorithm
   virtual StatusCode initialize() override final;
   virtual StatusCode execute(const EventContext& ctx) const override final;
   virtual StatusCode finalize() override final;
-  virtual bool isReEntrant() const override final { return false; }
 
  private:
   SG::ReadCondHandleKey<CondAttrListCollection> m_readKey{this, "ReadKey", "/SCT/DCS/HV", "Key of input (raw) HV conditions folder"};

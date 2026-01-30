@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef SimpleMMClusterBuilderTool_h
@@ -16,9 +16,9 @@
 //
 namespace Muon {
 
-    class SimpleMMClusterBuilderTool : virtual public IMMClusterBuilderTool, public AthAlgTool {
+    class SimpleMMClusterBuilderTool : public extends<AthAlgTool, IMMClusterBuilderTool> {
     public:
-        SimpleMMClusterBuilderTool(const std::string&, const std::string&, const IInterface*);
+        using base_class::base_class;
         virtual ~SimpleMMClusterBuilderTool() = default;
         
         StatusCode initialize() override;

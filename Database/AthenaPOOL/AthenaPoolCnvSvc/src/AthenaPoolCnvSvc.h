@@ -201,9 +201,7 @@ private: // properties
    std::vector<std::vector<std::string> > m_domainAttr;
    std::vector<std::vector<std::string> > m_databaseAttr;
    std::vector<std::vector<std::string> > m_containerAttr;
-   std::vector<unsigned int> m_contextAttr;
-   std::map<std::string, int> m_fileCommitCounter;
-   std::map<std::string, int> m_fileFlushSetting;
+
    /// Input PoolAttributes, vector with names and values of technology specific attributes for POOL
    Gaudi::Property<std::vector<std::string>> m_inputPoolAttr{this,"InputPoolAttributes",{}};
    std::vector<std::vector<std::string> > m_inputAttr;
@@ -217,6 +215,9 @@ private: // properties
    long long m_domainMaxFileSize=std::numeric_limits<long long>::max();
    std::map<std::string, long long> m_databaseMaxFileSize;
 
+   /// Default container type (from PoolSvc)
+   std::string m_defContainerType{};
+
 protected: // properties
    /// PersSvcPerOutput, boolean property to use multiple persistency services, one per output stream.
    /// default = true.
@@ -228,14 +229,15 @@ protected: // properties
    Gaudi::Property<std::string> m_persSvcPerInputType{this,"PersSvcPerInputType",""};
    std::mutex  m_mutex;
 
-   /// To use MetadataSvc to merge data placed in a certain container
-   /// When using TMemFile call Write on number of Events, respecting CollectionTree auto_flush
-   Gaudi::Property<int> m_numberEventsPerWrite{this,"NumberEventsPerWrite",-1};
+   /// Track context IDs for which extractPoolAttributes has been called
+   std::set<unsigned int> m_processedContextIds;
 
    /// If true, use only one DataHeaderForm per Stream
    Gaudi::Property<bool> m_oneDataHeaderForm { this, "OneDataHeaderForm", false };
+
    /// Property for DataHeaderCnv input DHForm cache size
    Gaudi::Property<int> m_DHFormCacheSize { this, "maxDHFormCacheSize", 100 };
+
    /// Flag to control SG alias filtering when writing out DataHeader (see DataHeaderCnv_p6)
    Gaudi::Property<bool> m_DHFilterAliases { this, "doFilterDHAliases", true };
 

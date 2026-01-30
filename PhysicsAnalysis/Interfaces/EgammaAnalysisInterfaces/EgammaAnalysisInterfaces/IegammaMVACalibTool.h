@@ -10,6 +10,8 @@
 #include "xAODEgamma/EgammaFwd.h"
 #include "xAODCaloEvent/CaloClusterFwd.h"
 
+#include "GlobalEventInfo.h"
+
 /**
  * @class IegammaMVACalibTool
  * @brief A tool used by the egammaMVASvc to help manage the MVAs.
@@ -21,7 +23,8 @@ public:
 
   ///Return MVA energy for the given cluster, an eg object is optional
   virtual float getEnergy(const xAOD::CaloCluster& clus,
-                         const xAOD::Egamma* eg) const = 0;
+			  const xAOD::Egamma* eg,
+			  const egammaMVACalib::GlobalEventInfo& gei = egammaMVACalib::GlobalEventInfo()) const = 0;
 
 };
 

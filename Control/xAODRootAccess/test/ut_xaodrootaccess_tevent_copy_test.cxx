@@ -29,7 +29,7 @@
 
 /// Function testing the copying of a few objects
 StatusCode copyObjects( xAOD::TEvent::EAuxMode mode );
-
+//coverity[root_function]
 int main() {
 
    // The name of the application

@@ -30,6 +30,7 @@
 
 #include "StoreGate/ReadHandleKey.h"
 #include "StoreGate/WriteHandleKey.h"
+#include "CaloIdentifier/CaloCell_ID.h"
 
 class CaloCellContainer;
 
@@ -56,6 +57,10 @@ private:
   SG::WriteHandleKey<xAOD::CaloClusterContainer>  m_outputKey     { this, "OutputContainerKey"     , "PseudoJet"       , "Read version of output Container Key"};
   /// \brief For clusters w/ E less than this, set their eta/phi to tower eta/phi
   Gaudi::Property< float > m_EminMoment { this, "MinimumEnergyForMoments", 50., "> E, cluster given tower coordinates" };
+
+  const CaloCell_ID * m_calo_id {nullptr};
+  std::unique_ptr<const CaloCell> getMirroredCell(const CaloCell* pCell, const CaloCellContainer* ccc) const;
+
 
 };
 #endif

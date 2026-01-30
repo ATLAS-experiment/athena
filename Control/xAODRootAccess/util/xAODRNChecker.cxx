@@ -51,10 +51,6 @@ int main ATLAS_NOT_THREAD_SAFE ( int argc, char* argv[] ) {
       // // Open the file:
       ::Info( APP_NAME, "Opening file: %s", fname );
 
-      // Later on the code should find all the top level event trees in the
-      // input file. But for now let's just assume that only "CollectionTree" is
-      // in the file.
-
       // Set up reading from the file:
       xAOD::Experimental::REvent event;
       ANA_CHECK( event.readFrom( fname ) );

@@ -1,5 +1,5 @@
 /*
- Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+ Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
  */
 
 #include "TH1.h"
@@ -25,7 +25,7 @@ namespace CP{
         size_t ExpPos = str.find(exp);
         if (ExpPos == std::string::npos) return str;
         str.replace(ExpPos,exp.size(),rep);
-        if (str.find(exp) != std::string::npos) return ReplaceExpInString(str, exp, rep);
+        if (str.find(exp) != std::string::npos) return ReplaceExpInString(std::move(str), exp, rep);
         return str;
     }
    std::string EraseWhiteSpaces(std::string str) {

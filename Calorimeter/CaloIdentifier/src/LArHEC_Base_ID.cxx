@@ -21,10 +21,7 @@
 #include "CxxUtils/StrFormat.h"
 #include "CxxUtils/trapping_fp.h"
 
-#include "GaudiKernel/MsgStream.h"
-
 #include <cmath>
-#include <iostream>
 #include <set>
 #include <string>
 
@@ -173,18 +170,15 @@ int  LArHEC_Base_ID::initialize_base_from_dictionary (const IdDictMgr& dict_mgr,
                                                        const std::string& group_name)
 /*===================================================================*/
 {
-  MsgStream log(m_msgSvc, "LArHEC_Base_ID" );
-  
-  std::string strg = "initialize_base_from_dictionary";
-  log << MSG::DEBUG << strg << endmsg;
+  ATH_MSG_DEBUG("initialize_base_from_dictionary");
 
   // Check whether this helper should be reinitialized
   if (!reinitialize(dict_mgr)) {
-    log << MSG::DEBUG << "Request to reinitialize not satisfied - tags have not changed" << endmsg;
+    ATH_MSG_DEBUG("Request to reinitialize not satisfied - tags have not changed");
     return (0);
   }
   else {
-    if(m_msgSvc)log << MSG::DEBUG << "(Re)initialize" << endmsg;
+    ATH_MSG_DEBUG("(Re)initialize");
   }
 
   // init base object
@@ -197,13 +191,7 @@ int  LArHEC_Base_ID::initialize_base_from_dictionary (const IdDictMgr& dict_mgr,
 
   // Initialize the field indices
   if(initLevelsFromDict(group_name)) {
-    strg =  " initialize_base_from_dict - cannot initialize HEC part of LArCalorimeter dictionary ";
-    if(m_msgSvc) {
-      log << MSG::WARNING << strg << endmsg;
-    }
-    else {
-      std::cout << strg << std::endl;
-    }
+    ATH_MSG_WARNING(" initialize_base_from_dict - cannot initialize HEC part of LArCalorimeter dictionary ");
     //    return (1);   // to allow TB dictionary (no HEC in H8)
   }
   else  {
@@ -211,59 +199,28 @@ int  LArHEC_Base_ID::initialize_base_from_dictionary (const IdDictMgr& dict_mgr,
     const IdDictDictionary* atlasDict = dict_mgr.find_dictionary ("ATLAS"); 
     int larField   = -1;
     if (atlasDict->get_label_value("subdet", "LArCalorimeter", larField)) {
-      std::stringstream strm ;
-      strm <<  atlasDict->name();
-      strg = "Could not get value for label 'LArCalorimeter' of field 'subdet' in dictionary " 
-      + strm.str();
-      if(m_msgSvc) {
-	log << MSG::ERROR << strg << endmsg;
-      }
-      else {
-	std::cout << strg << std::endl;
-      }
+      ATH_MSG_ERROR("Could not get value for label 'LArCalorimeter' of field 'subdet' in dictionary " << atlasDict->name());
       return (1);
     }
 
     // Find value for the field LArHEC
     int larHecField   = -1;
     if (dict()->get_label_value("part", "LArHEC", larHecField)) {
-      std::stringstream strm ;
-      strm <<  atlasDict->name();
-      strg = "Could not get value for label 'LArHEC' of field 'part' in dictionary " 
-      + strm.str();
-      if(m_msgSvc) {
-	log << MSG::ERROR << strg << endmsg;
-      }
-      else {
-	std::cout << strg << std::endl;
-      }
+      ATH_MSG_ERROR("Could not get value for label 'LArHEC' of field 'part' in dictionary " << atlasDict->name());
       return (1);
     }
     
     // Set up id for region and range prefix
-      ExpandedIdentifier exp_region_id;
-      exp_region_id.add(larField);
-      exp_region_id.add(larHecField);
-      Range prefix;
-      m_full_channel_range = dict()->build_multirange(exp_region_id, group_name, prefix);
-      m_full_region_range = dict()->build_multirange(exp_region_id, group_name, prefix, "region");  
+    ExpandedIdentifier exp_region_id;
+    exp_region_id.add(larField);
+    exp_region_id.add(larHecField);
+    Range prefix;
+    m_full_channel_range = dict()->build_multirange(exp_region_id, group_name, prefix);
+    m_full_region_range = dict()->build_multirange(exp_region_id, group_name, prefix, "region");
 
-      if (!m_quiet) {
-        std::string strg0 = "initialize_from_dict : " ;
-        std::string strg1 = " channel range -> " + (std::string)m_full_channel_range;
-        std::string strg2 = " region range -> "  + (std::string)m_full_region_range;
-        if(m_msgSvc) {
-          log << MSG::DEBUG << strg0 << endmsg;
-          log << MSG::DEBUG << strg1 << endmsg;
-          log << MSG::DEBUG << strg2 << endmsg;
-        }
-        else {
-          std::cout << strg0 << std::endl;
-          std::cout << strg1 << std::endl;
-          std::cout << strg2 << std::endl;
-        }
-      }
-
+    ATH_MSG_DEBUG("initialize_from_dict : ");
+    ATH_MSG_DEBUG(" channel range -> " << (std::string)m_full_channel_range);
+    ATH_MSG_DEBUG(" region range -> "  << (std::string)m_full_region_range);
 
     // initilize m_two_sym_sides
     m_two_sym_sides = ( dictionaryVersion() == "fullAtlas" );
@@ -322,27 +279,13 @@ int  LArHEC_Base_ID::initialize_base_from_dictionary (const IdDictMgr& dict_mgr,
       int etamin = eta_min(regId);
       if(etamin < 0) {
 	etamin = 0;
-	std::string strg = "setting etamin to 0 because actual value not found for regId " 
-	  + show_to_string(regId);
-	if(m_msgSvc) {
-	  log << MSG::WARNING << strg << endmsg;
-	}
-	else {
-	  std::cout << strg << std::endl;
-	}
+	ATH_MSG_WARNING("setting etamin to 0 because actual value not found for regId " << show_to_string(regId));
       }
       int phimin = phi_min(regId);
       int phimax = phi_max(regId);
       if(phimin < 0 || phimax < 0) {
 	phimin = phimax = 0;
-	std::string strg = "setting phimin/phimax to 0 because actual value not found for regId " 
-	  + show_to_string(regId);
-	if(m_msgSvc) {
-	  log << MSG::WARNING << strg << endmsg;
-	}
-	else {
-	  std::cout << strg << std::endl;
-	}
+	ATH_MSG_WARNING("setting phimin/phimax to 0 because actual value not found for regId " << show_to_string(regId));
       }
       Identifier min = channel_id ( regId, etamin, phimin);
       IdentifierHash min_hash = channel_hash_binary_search(min);
@@ -353,17 +296,7 @@ int  LArHEC_Base_ID::initialize_base_from_dictionary (const IdDictMgr& dict_mgr,
       m_hash_calcs[m_pn_reg_impl.unpack(min)] = hc;
 	
       if (m_pn_reg_impl.unpack(min) > 15) {
-	std::stringstream strm ;
-	strm << i;
-	strm << m_pn_reg_impl.unpack(min);
-	std::string strg = "min > 15 " 
-	  + strm.str() + show_to_string(min) ;
-	if(m_msgSvc) {
-	  log << MSG::ERROR << strg << endmsg;
-	}
-	else {
-	  std::cout << strg << std::endl;
-	}
+	ATH_MSG_ERROR("min > 15 " << i << m_pn_reg_impl.unpack(min) << show_to_string(min));
       }
     }
     
@@ -371,17 +304,7 @@ int  LArHEC_Base_ID::initialize_base_from_dictionary (const IdDictMgr& dict_mgr,
     for (unsigned int i = 0; i < channel_hash_max(); ++i) {
       Identifier id = channel_id(i);
       if (channel_hash(id) != i) {
-	std::stringstream strm ;
-	strm << channel_hash(id);
-	strm << i;
-	std::string strg = "channel ranges, id, hash, i = " 
-	  + show_to_string(id) + strm.str();
-	if(m_msgSvc) {
-	  log << MSG::ERROR << strg << endmsg;
-	}
-	else {
-	  std::cout << strg << std::endl;
-	}
+	ATH_MSG_ERROR("channel ranges, id, hash, i = " << show_to_string(id) << channel_hash(id) << i);
       }
     }
   }
@@ -475,16 +398,8 @@ int  LArHEC_Base_ID::get_expanded_id  (const Identifier& id, ExpandedIdentifier&
 
 int LArHEC_Base_ID::initLevelsFromDict (const std::string& /*group_name*/) 
 {
-  MsgStream log(m_msgSvc, "LArHEC_Base_ID" );
-
   if(!dict()) {
-    std::string strg = "initLevelsFromDict - dictionary NOT initialized ";
-    if(m_msgSvc) {
-      log << MSG::ERROR << strg << endmsg;
-    }
-    else {
-      std::cout << strg << std::endl;
-    }
+    ATH_MSG_ERROR("initLevelsFromDict - dictionary NOT initialized");
     return (1);
   }
 
@@ -502,31 +417,16 @@ int LArHEC_Base_ID::initLevelsFromDict (const std::string& /*group_name*/)
   // Save index to a HEC region for unpacking
   ExpandedIdentifier expId(lar_hec_exp());
   if (dict()->find_region(expId,m_hec_region_index)){
-    std::stringstream strm ;
-    strm <<  m_hec_region_index ;
-    std::string strg = "initLevelsFromDict - unable to find hec region index: id, reg "  
-      +  (std::string)expId + strm.str();
-    if(m_msgSvc) {
-      log << MSG::ERROR << strg << endmsg;
-    }
-    else {
-      std::cout << strg << std::endl;
-    }
+    ATH_MSG_ERROR("initLevelsFromDict - unable to find hec region index: id, reg " << expId << m_hec_region_index);
     return (1);
   }
 
-  IdDictField* field = dict()->find_field("subdet") ;
+  const IdDictField* field = dict()->find_field("subdet") ;
   if (field) {
     m_LAR_INDEX = field->index();
   }
   else {
-    std::string strg = "initLevelsFromDict - unable to find 'subdet' field ";
-    if(m_msgSvc) {
-      log << MSG::ERROR << strg << endmsg;
-    }
-    else {
-      std::cout << strg << std::endl;
-    }
+    ATH_MSG_ERROR("initLevelsFromDict - unable to find 'subdet' field");
     return (1);
   }
 
@@ -535,13 +435,7 @@ int LArHEC_Base_ID::initLevelsFromDict (const std::string& /*group_name*/)
     m_HEC_INDEX = field->index();
   }
   else {
-    std::string strg = "initLevelsFromDict - unable to find 'part' field ";
-    if(m_msgSvc) {
-      log << MSG::ERROR << strg << endmsg;
-    }
-    else {
-      std::cout << strg << std::endl;
-    }
+    ATH_MSG_ERROR("initLevelsFromDict - unable to find 'part' field");
     return (1);
   }
 
@@ -550,13 +444,7 @@ int LArHEC_Base_ID::initLevelsFromDict (const std::string& /*group_name*/)
     m_POSNEG_INDEX = field->index();
   }
   else {
-    std::string strg = "initLevelsFromDict - unable to find 'barrel-endcap' field ";
-    if(m_msgSvc) {
-      log << MSG::ERROR << strg << endmsg;
-    }
-    else {
-      std::cout << strg << std::endl;
-    }
+    ATH_MSG_ERROR("initLevelsFromDict - unable to find 'barrel-endcap' field");
     return (1);
   }
 
@@ -565,13 +453,7 @@ int LArHEC_Base_ID::initLevelsFromDict (const std::string& /*group_name*/)
     m_SAMPLING_INDEX = field->index();
   }
   else {
-    std::string strg = "initLevelsFromDict - unable to find 'sampling' field ";
-    if(m_msgSvc) {
-      log << MSG::ERROR << strg << endmsg;
-    }
-    else {
-      std::cout << strg << std::endl;
-    }
+    ATH_MSG_ERROR("initLevelsFromDict - unable to find 'sampling' field");
     return (1);
   }
 
@@ -580,13 +462,7 @@ int LArHEC_Base_ID::initLevelsFromDict (const std::string& /*group_name*/)
     m_REGION_INDEX = field->index();
   }
   else {
-    std::string strg = "initLevelsFromDict - unable to find 'region' field ";
-    if(m_msgSvc) {
-      log << MSG::ERROR << strg << endmsg;
-    }
-    else {
-      std::cout << strg << std::endl;
-    }
+    ATH_MSG_ERROR("initLevelsFromDict - unable to find 'region' field");
     return (1);
   }
 
@@ -595,13 +471,7 @@ int LArHEC_Base_ID::initLevelsFromDict (const std::string& /*group_name*/)
     m_ETA_INDEX = field->index();
   }
   else {
-    std::string strg = "initLevelsFromDict - unable to find 'eta' field ";
-    if(m_msgSvc) {
-      log << MSG::ERROR << strg << endmsg;
-    }
-    else {
-      std::cout << strg << std::endl;
-    }
+    ATH_MSG_ERROR("initLevelsFromDict - unable to find 'eta' field");
     return (1);
   }
 
@@ -610,13 +480,7 @@ int LArHEC_Base_ID::initLevelsFromDict (const std::string& /*group_name*/)
     m_PHI_INDEX = field->index();
   }
   else {
-    std::string strg = "initLevelsFromDict - unable to find 'phi' field ";
-    if(m_msgSvc) {
-      log << MSG::ERROR << strg << endmsg;
-    }
-    else {
-      std::cout << strg << std::endl;
-    }
+    ATH_MSG_ERROR("initLevelsFromDict - unable to find 'phi' field");
     return (1);
   }
 
@@ -625,14 +489,7 @@ int LArHEC_Base_ID::initLevelsFromDict (const std::string& /*group_name*/)
     m_SLAR_INDEX = field->index();
   }
   else {
-    if(m_msgSvc) {
-      log << MSG::ERROR << "initLevelsFromDict - unable to find 'is-slar-hec' field "
-          << endmsg;
-    }
-    else {
-      std::cout << "LArEM_Base_ID::initLevelsFromDict - unable to find 'is-slar-hec' field "
-                << std::endl ;
-    }
+    ATH_MSG_ERROR("initLevelsFromDict - unable to find 'is-slar-hec' field");
     return (1);
   }
 
@@ -640,18 +497,6 @@ int LArHEC_Base_ID::initLevelsFromDict (const std::string& /*group_name*/)
   // Set the field implementations
 
   const IdDictRegion& region = dict()->region(m_hec_region_index);
-
-  /*
-  std::cout << "LArHEC_Base_ID::initLevelsFromDict - found levels " << std::endl ;
-  std::cout << "lar            " << m_LAR_INDEX      << std::endl ;
-  std::cout << "part           " << m_HEC_INDEX      << std::endl ;
-  std::cout << "pos-neg        " << m_POSNEG_INDEX   << std::endl ;
-  std::cout << "sampling       " << m_SAMPLING_INDEX << std::endl ;
-  std::cout << "region         " << m_REGION_INDEX   << std::endl ;
-  std::cout << "eta            " << m_ETA_INDEX      << std::endl ;
-  std::cout << "phi            " << m_PHI_INDEX      << std::endl ;
-  std::cout << "slar           " << m_SLAR_INDEX     << std::endl ;
-  */
 
   m_lar_impl      = region.implementation(m_LAR_INDEX);
   m_hec_impl      = region.implementation(m_HEC_INDEX);
@@ -662,32 +507,16 @@ int LArHEC_Base_ID::initLevelsFromDict (const std::string& /*group_name*/)
   m_phi_impl      = region.implementation(m_PHI_INDEX);
   m_slar_impl     = region.implementation(m_SLAR_INDEX);
 
+  ATH_MSG_DEBUG("decode index and bit fields for each level: ");
+  ATH_MSG_DEBUG("lar  "  << m_lar_impl.show_to_string());
+  ATH_MSG_DEBUG("hec  "  << m_hec_impl.show_to_string());
+  ATH_MSG_DEBUG("pn   "  << m_pn_impl.show_to_string());
+  ATH_MSG_DEBUG("samp "  << m_sampling_impl.show_to_string());
+  ATH_MSG_DEBUG("reg  "  << m_region_impl.show_to_string());
+  ATH_MSG_DEBUG("eta  "  << m_eta_impl.show_to_string());
+  ATH_MSG_DEBUG("phi  "  << m_phi_impl.show_to_string());
+  ATH_MSG_DEBUG("is-slar  " << m_slar_impl.show_to_string());
 
-  if (!m_quiet) {
-    if(m_msgSvc) {
-      log << MSG::DEBUG << "decode index and bit fields for each level: " << endmsg;
-      log << MSG::DEBUG << "lar  "  << m_lar_impl.show_to_string() << endmsg;
-      log << MSG::DEBUG << "hec  "  << m_hec_impl.show_to_string() << endmsg;
-      log << MSG::DEBUG << "pn   "  << m_pn_impl.show_to_string() << endmsg;
-      log << MSG::DEBUG << "samp "  << m_sampling_impl.show_to_string() << endmsg;
-      log << MSG::DEBUG << "reg  "  << m_region_impl.show_to_string() << endmsg;
-      log << MSG::DEBUG << "eta  "  << m_eta_impl.show_to_string() << endmsg;
-      log << MSG::DEBUG << "phi  "  << m_phi_impl.show_to_string() << endmsg;
-      log << MSG::DEBUG << "is-slar  " << m_slar_impl.show_to_string() << endmsg;
-    } 
-    else {
-      std::cout << "decode index and bit fields for each level: " << std::endl;
-      std::cout << "lar  "  << m_lar_impl.show_to_string() << std::endl;
-      std::cout << "hec  "  << m_hec_impl.show_to_string() << std::endl;
-      std::cout << "pn   "  << m_pn_impl.show_to_string() << std::endl;
-      std::cout << "samp "  << m_sampling_impl.show_to_string() << std::endl;
-      std::cout << "reg  "  << m_region_impl.show_to_string() << std::endl;
-      std::cout << "eta  "  << m_eta_impl.show_to_string() << std::endl;
-      std::cout << "phi  "  << m_phi_impl.show_to_string() << std::endl;
-      std::cout << "is-slar  " << m_slar_impl.show_to_string() << std::endl;
-    }
-  }
-    
   return(0) ;
 }
 
@@ -712,26 +541,12 @@ int   LArHEC_Base_ID::get_neighbours(const IdentifierHash id, const LArNeighbour
   neighbourList.clear();
 
   if(!m_do_neighbours) {
-    if(m_msgSvc) {
-      MsgStream log(m_msgSvc, "LArHEC_Base_ID" );
-      log << MSG::WARNING << "neighbours not initialized !!! returning empty list" << endmsg;
-    }
-    else {
-      std::cout << " LArHEC_Base_ID: neighbours not initialized !!! returning empty list " << std::endl;
-    }
+    ATH_MSG_WARNING("neighbours not initialized !!! returning empty list");
     return result;
   }
 
   if(id>=channel_hash_max()) {
-    if(m_msgSvc) {
-      MsgStream log(m_msgSvc, "LArHEC_Base_ID" );
-      log << MSG::WARNING << "neighbours requested for  non-existing channel -- id/max " << id << "/"
-          << channel_hash_max() << endmsg;
-    }
-    else {
-      std::cout << " neighbours requested for non-existing channel -- id/max " << id << "/"
-                << channel_hash_max() << std::endl;
-    }
+    ATH_MSG_WARNING("neighbours requested for  non-existing channel -- id/max " << id << "/" << channel_hash_max());
     return result;
   }
 
@@ -870,18 +685,8 @@ int   LArHEC_Base_ID::get_neighbours(const IdentifierHash id, const LArNeighbour
     std::copy (&neighbList[0], &neighbList[neighbourIndex],  neighbourList.begin());
     result = 0 ;
   } else {
-    std::stringstream strm ;
-    strm << neighbourIndex ;
-    std::string strg = "more than 20 neighbours for this cell, NONE will be retained " 
-      + strm.str();
-    if(m_msgSvc) {
-      MsgStream log(m_msgSvc, "LArHEC_Base_ID" );
-      log << MSG::WARNING << strg << endmsg;
-    }
-    else {
-      std::cout << "WARNING: " << strg << std::endl;
-    }
-  } 
+    ATH_MSG_WARNING("more than 20 neighbours for this cell, NONE will be retained " << neighbourIndex);
+  }
   return result;
 
 }
@@ -1141,18 +946,9 @@ int   LArHEC_Base_ID::get_nextInSamp(const LArHEC_region* hecRegion, const unsig
 
 int LArHEC_Base_ID::init_neighbors()
 {
-  MsgStream log(m_msgSvc, "LArHEC_Base_ID" );
-
   const std::vector<const IdDictRegion*>& vecOfDictRegions = dictRegions();
 
-  if (!m_quiet) {
-    if(m_msgSvc) {
-      log << MSG::DEBUG << "init_neighbors" << endmsg;
-    }
-    else {
-      std::cout << " LArHEC_Base_ID::init_neighbors " << std::endl;
-    }
-  }
+  ATH_MSG_DEBUG("init_neighbors");
 
   //
   // ..... loop on HEC regions -> store vector of LArHEC_region*
@@ -1178,33 +974,14 @@ int LArHEC_Base_ID::init_neighbors()
 	    id = channel_id (regId, etaMin, phiMin );
 	  }
 	  catch(LArID_Exception & except){
-	  if(m_msgSvc) {
-	    log << MSG::ERROR << " LArId exception " 
-		<< (std::string)except
-		<< endmsg;
-	  }
-	  else {
-	    std::cout 
-	      <<  " LArId exception " 
-	      << (std::string)except
-	      << std::endl;
-	  }
+	    ATH_MSG_ERROR(" LArId exception " << (std::string)except);
 	  }
 	  IdentifierHash 	hashId = channel_hash(id) ;
 	  index0=hashId;
 	}
       else 
 	{
-	  if(m_msgSvc) {
-	    log << MSG::WARNING << " could not find non negative etaMin and phiMin for region " 
-		<< show_to_string(regId)
-		<< endmsg;
-	  }
-	  else {
-	    std::cout << "WARNING !! could not find non negative etaMin and phiMin for region " 
-		      << show_to_string(regId)
-		      << std::endl;
-	  }
+	  ATH_MSG_WARNING(" could not find non negative etaMin and phiMin for region " << show_to_string(regId));
 	  index0 = 0;
 	}
 
@@ -1293,14 +1070,7 @@ int LArHEC_Base_ID::init_neighbors()
 	// for cross check only
 	IdentifierHash hashReg = region_hash(regId);
 	if ((short int)hashReg != reg) {
-	  if(m_msgSvc) {
-	    log << MSG::ERROR << " init_neighbors: problem reg, hashReg = " << reg << " " << hashReg 
-		<< endmsg;
-	  }
-	  else {
-	    std::cout << " init_neighbors: problem reg, hashReg = " << reg << " " << hashReg 
-		      << std::endl;
-	  }
+	  ATH_MSG_ERROR(" init_neighbors: problem reg, hashReg = " << reg << " " << hashReg);
 	}
       }
 

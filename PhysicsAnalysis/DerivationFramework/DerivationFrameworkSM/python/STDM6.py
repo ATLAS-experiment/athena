@@ -82,7 +82,7 @@ def JETM1ExtraContentCfg(flags):
 
     from JetRecConfig.JetRecConfig import JetRecCfg, getModifier
     from JetRecConfig.StandardJetMods import stdJetModifiers
-    from JetRecConfig.StandardSmallRJets import AntiKt4PV0Track, AntiKt4EMPFlow, AntiKt4EMPFlowNoPtCut, AntiKt4EMTopoNoPtCut
+    from JetRecConfig.StandardSmallRJets import AntiKt4PV0Track, AntiKt4EMPFlow, AntiKt4EMPFlowNoPtCut, AntiKt4EMPFlowML, AntiKt4EMTopoNoPtCut
 
     #=======================================
     # Schedule additional jet decorations
@@ -101,7 +101,7 @@ def JETM1ExtraContentCfg(flags):
     # SCHEDULE SMALL-R JETS WITH NO PT CUT
     #=======================================
     if flags.Input.isMC:
-        jetList += [AntiKt4EMPFlowNoPtCut, AntiKt4EMTopoNoPtCut]
+        jetList += [AntiKt4EMPFlowNoPtCut, AntiKt4EMPFlowML, AntiKt4EMTopoNoPtCut]
 
     #=======================================
     # CSSK R = 0.4 UFO jets
@@ -207,8 +207,6 @@ def STDM6CoreCfg(flags, name_tag='STDM6', StreamName='StreamDAOD_STDM6', Trigger
                                            "AntiKt4EMPFlowJets",
                                            "AntiKt10UFOCSSKJets",
                                            "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets",
-                                           "BTagging_AntiKt4EMPFlow",
-                                           "BTagging_AntiKtVR30Rmax4Rmin02Track",
                                            "MET_Baseline_AntiKt4EMTopo",
                                            "MET_Baseline_AntiKt4EMPFlow",
                                            "TauJets",
@@ -217,7 +215,6 @@ def STDM6CoreCfg(flags, name_tag='STDM6', StreamName='StreamDAOD_STDM6', Trigger
                                            "DiTauJetsLowPt",
                                            "AntiKt10LCTopoTrimmedPtFrac5SmallR20Jets",
                                            "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets",
-                                           "AntiKtVR30Rmax4Rmin02PV0TrackJets",
                                           ]
     if TauJets_EleRM_in_input:
         STDM6SlimmingHelper.SmartCollections.append("TauJets_EleRM")
@@ -362,7 +359,7 @@ def STDM6CoreCfg(flags, name_tag='STDM6', StreamName='StreamDAOD_STDM6', Trigger
 
     jetOutputList = ["AntiKt4PV0TrackJets", "AntiKt4UFOCSSKJets"]
     if flags.Input.isMC:
-        jetOutputList = ["AntiKt4PV0TrackJets","AntiKt4UFOCSSKNoPtCutJets","AntiKt4EMPFlowNoPtCutJets","AntiKt4EMTopoNoPtCutJets"]
+        jetOutputList = ["AntiKt4PV0TrackJets","AntiKt4UFOCSSKNoPtCutJets","AntiKt4EMPFlowNoPtCutJets","AntiKt4EMTopoNoPtCutJets","AntiKt4EMPFlowMLJets"]
     from DerivationFrameworkJetEtMiss.JetCommonConfig import addJetsToSlimmingTool
     addJetsToSlimmingTool(STDM6SlimmingHelper, jetOutputList, STDM6SlimmingHelper.SmartCollections)
 

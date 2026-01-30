@@ -4,6 +4,35 @@
 import re
 
 def convertRegionsExpressionToArray(expression, min_value=0, max_value=1279):
+    if not expression or str(expression).strip() == "":
+        raise ValueError("No region expression provided.")
+    
+    # Check if the expression is already a list or list-like string
+    if isinstance(expression, (list, tuple)):
+        result = [int(x) for x in expression if min_value <= int(x) <= max_value]
+        if not result:
+            raise ValueError("No valid regions after filtering by range.")
+        return result
+    
+    # Check if it's a string representation of a list
+    if isinstance(expression, str):
+        expression_stripped = expression.strip()
+        if expression_stripped.startswith('[') and expression_stripped.endswith(']'):
+            try:
+                # Parse the list string
+                list_content = expression_stripped[1:-1].strip()
+                if list_content:
+                    values = [int(x.strip()) for x in list_content.split(',')]
+                    if all(min_value <= x <= max_value for x in values):
+                        return values
+                    else:
+                        out_of_range = [x for x in values if x < min_value or x > max_value]
+                        raise ValueError(f"Values out of range [{min_value}-{max_value}]: {out_of_range}")
+                else:
+                    raise ValueError("Empty list provided.")
+            except ValueError:
+                raise ValueError(f"Invalid list format: {expression}")
+    
     # Check if the expression is a single integer
     if str(expression).isdigit():
         num = int(expression)
@@ -21,6 +50,10 @@ def convertRegionsExpressionToArray(expression, min_value=0, max_value=1279):
     print(f"Initial expression: {str(expression)}")
     if isinstance(expression, tuple) or isinstance(expression, list):
         expression = ",".join(map(str, expression))
+    
+    # Handle asterisk to return all values
+    if expression.strip() == "*":
+        return list(range(min_value, max_value + 1))
     
     parts = expression.split(",")  # Handle single-element expressions
     print(f"Parts after split: {parts}")  
@@ -40,6 +73,10 @@ def convertRegionsExpressionToArray(expression, min_value=0, max_value=1279):
 
     # Ensure final result stays within valid bounds
     result = {num for num in result if min_value <= num <= max_value}
+    
+    if not result:
+        raise ValueError(f"No valid regions after applying expression: {expression}")
+    
     return list(sorted(result))  # Always return a sorted list
 
 def parse_range_or_wildcard(expr, min_value, max_value):  
@@ -78,6 +115,7 @@ if __name__ == "__main__":
         ("5-10,!7-8", [5, 6, 9, 10]),  # Range with exclusion range
         ("1*", [num for num in range(1280) if re.match(r"^1.*$", str(num))]),  # Wildcard pattern
         ("!9*", [num for num in range(1280) if not re.match(r"^9.*$", str(num))]),  # Exclude wildcard pattern
+        ("[5,6,8,10]", [5, 6, 8, 10]),  # List format
     ]
 
     for expression, expected in test_cases:

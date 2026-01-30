@@ -1,7 +1,8 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
+from AthenaConfiguration.Enums import ProductionStep
 from TileConfiguration.TileConfigFlags import TileRunType
 
 def _createTileContByteStreamToolsConfig (name, TileContByteStreamTool, InitializeForWriting=False, stream=None, **kwargs):
@@ -109,7 +110,7 @@ def TileRawDataReadingCfg(flags, readDigits=True, readRawChannel=True,
 
     typeNames = kwargs.pop('type_names', [])
 
-    prefix = flags.Overlay.BkgPrefix if flags.Overlay.ByteStream else ''
+    prefix = flags.Overlay.BkgPrefix if flags.Common.ProductionStep is ProductionStep.MinbiasPreprocessing else ''
 
     cfg = ComponentAccumulator()
     from TileConditions.TileCablingSvcConfig import TileCablingSvcCfg

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -29,12 +29,11 @@ namespace LArSamples {
     public:
    
       /** @brief Constructor  */
-      MultiTreeAccessor(const std::vector<const TreeAccessor*>& accessors)
-        : m_accessors(accessors) { }
+      MultiTreeAccessor(std::vector<std::unique_ptr<const TreeAccessor> >&& accessors);
       
-      static MultiTreeAccessor* open(const std::vector<TString>& files);
-      static MultiTreeAccessor* openList(const TString& fileList);
-      static MultiTreeAccessor* openWild(const TString& wcName);
+      static std::unique_ptr<MultiTreeAccessor> open(const std::vector<TString>& files);
+      static std::unique_ptr<MultiTreeAccessor> openList(const TString& fileList);
+      static std::unique_ptr<MultiTreeAccessor> openWild(const TString& wcName);
 
       virtual ~MultiTreeAccessor();
 
@@ -62,7 +61,7 @@ namespace LArSamples {
 
     private:
       
-      std::vector<const TreeAccessor*> m_accessors;
+      std::vector<std::unique_ptr<const TreeAccessor> > m_accessors;
   };
 }
   

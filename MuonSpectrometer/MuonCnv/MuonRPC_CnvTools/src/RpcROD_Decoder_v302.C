@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 StatusCode Muon::RpcROD_Decoder::fillCollection_v302new(BS data, const uint32_t data_size, RpcPad& v, const uint32_t& sourceId,
@@ -117,16 +117,16 @@ StatusCode Muon::RpcROD_Decoder::fillCollectionsFromRob_v302(BS data, const uint
     MatrixReadOutStructure matrixROS;
     RPCRODStructure rodReadout;
 
-    char recField;
-    char recFieldROS;
-    char recFieldPAD;
-    char recFieldSL;
+    char recField{};
+    char recFieldROS{};
+    char recFieldPAD{};
+    char recFieldSL{};
     unsigned short int PadID = 99;
-    uint16_t slfel1id;
-    uint16_t slid;
-    uint16_t slbcid;
-    uint16_t slstatus;
-    uint16_t slcrc;
+    uint16_t slfel1id{};
+    uint16_t slid{};
+    uint16_t slbcid{};
+    uint16_t slstatus{};
+    uint16_t slcrc{};
     unsigned int SLBodyWords = 0;
     constexpr unsigned int SL_data_sise = 500;  // same value used for the size of SLBuff
     unsigned short int SLBuff[500];

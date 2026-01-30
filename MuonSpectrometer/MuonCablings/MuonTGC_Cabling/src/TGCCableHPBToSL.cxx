@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonTGC_Cabling/TGCCableHPBToSL.h"
@@ -11,12 +11,16 @@
 namespace MuonTGC_Cabling {
 
 TGCCableHPBToSL::TGCCableHPBToSL(const std::string& filename)
-  : TGCCable(TGCCable::HPBToSL) {
+  : TGCCable(TGCCable::HPBToSL),
+    m_database{{{nullptr}}}
+{
   m_database[TGCId::Endcap][TGCId::Wire]   = std::make_unique<TGCDatabasePPToSL>(filename,"HPB EW");
   m_database[TGCId::Endcap][TGCId::Strip]  = std::make_unique<TGCDatabasePPToSL>(filename,"HPB ES");
   m_database[TGCId::Forward][TGCId::Wire]  = std::make_unique<TGCDatabasePPToSL>(filename,"HPB FW");
   m_database[TGCId::Forward][TGCId::Strip] = std::make_unique<TGCDatabasePPToSL>(filename,"HPB FS");
 }
+
+TGCCableHPBToSL::~TGCCableHPBToSL() = default;
 
 TGCModuleMap* TGCCableHPBToSL::getModule(const TGCModuleId* moduleId) const {
   if(moduleId){

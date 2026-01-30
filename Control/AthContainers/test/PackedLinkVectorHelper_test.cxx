@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthContainers/test/PackedLinkVectorHeper_test.cxx
@@ -257,7 +257,7 @@ void test_applyThinning()
 #endif
 }
 
-
+//coverity[root_function]
 int main()
 {
   std::cout << "AthContainers/PackedLinkVectorHelper_test\n";

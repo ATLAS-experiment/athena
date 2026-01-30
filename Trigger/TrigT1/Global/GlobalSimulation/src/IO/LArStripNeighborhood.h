@@ -3,7 +3,7 @@
 */
 
 /**
- * @file GlobalSimulation/ICommonTOB.h
+ * @file GlobalSimulation/LArStripNeighborhood.h
  * @author Peter Sherwood, peter@cern.ch
  * @date July 2024
  * @brief Class to hold windows of LAr strip cells in a the neighbourhood of a eFexRoI

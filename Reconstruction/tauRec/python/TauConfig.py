@@ -30,38 +30,31 @@ def TauBuildAlgCfg(flags):
         tools.append( result.popToolsAndMerge(tauTools.TauVertexFinderCfg(flags)) )
 
     tools.append( result.popToolsAndMerge(tauTools.TauAxisCfg(flags)) )
-    tools.append( result.popToolsAndMerge(tauTools.TauTrackFinderCfg(flags)) )
 
+    # track classification + association 
+    tools.append( result.popToolsAndMerge(tauTools.TauTrackFinderCfg(flags)) )
+    if flags.Beam.Type is not BeamType.Cosmics and flags.Tau.doRNNTrackClass:
+        tools.append( result.popToolsAndMerge(tauTools.TauTrackRNNClassifierCfg(flags)) )
+
+    # cluster association + vertex correction
     tools.append( result.popToolsAndMerge(tauTools.TauClusterFinderCfg(flags)) )
     tools.append( result.popToolsAndMerge(tauTools.TauVertexedClusterDecoratorCfg(flags)) )
 
-    if flags.Beam.Type is not BeamType.Cosmics:
-        if flags.Tau.doRNNTrackClass:
-            tools.append( result.popToolsAndMerge(tauTools.TauTrackRNNClassifierCfg(flags)) )
-        tools.append( result.popToolsAndMerge(tauTools.EnergyCalibrationLCCfg(flags)) )
+    # this needs to go before the TauCaloAlgCfg
+    tools.append( result.popToolsAndMerge(tauTools.Pi0ClusterFinderCfg(flags)) )
 
-    tools.append( result.popToolsAndMerge(tauTools.CellVariablesCfg(flags)) )
-    tools.append( result.popToolsAndMerge(tauTools.ElectronVetoVarsCfg(flags)) )
-    tools.append( result.popToolsAndMerge(tauTools.TauShotFinderCfg(flags)) )
-
-    if flags.Tau.doPi0Clus:
-        tools.append( result.popToolsAndMerge(tauTools.Pi0ClusterFinderCfg(flags)) )
-
-    # TauBuildAlg AKA TauProcessorAlg
-    TauProcessorAlg = CompFactory.getComp("TauProcessorAlg")
-    BuildAlg = TauProcessorAlg(name                           = flags.Tau.ActiveConfig.prefix+"TauCoreBuilderAlg",
-                               Key_jetInputContainer          = flags.Tau.ActiveConfig.SeedJetCollection,
-                               Key_tauOutputContainer         = flags.Tau.ActiveConfig.TauJets_tmp,
-                               Key_tauTrackOutputContainer    = flags.Tau.ActiveConfig.TauTracks,
-                               Key_tauShotClusOutputContainer = flags.Tau.ActiveConfig.TauShotClusters,
-                               Key_tauShotClusLinkContainer   = flags.Tau.ActiveConfig.TauShotClustersLinks,
-                               Key_tauShotPFOOutputContainer  = flags.Tau.ActiveConfig.TauShotPFOs,
-                               Key_tauPi0CellOutputContainer  = flags.Tau.ActiveConfig.TauCommonPi0Cells,
-                               MaxEta                         = flags.Tau.SeedMaxEta,
-                               MinPt                          = flags.Tau.SeedMinPt,
-                               MaxNTracks                     = flags.Tau.MaxNTracks,
-                               Tools                          = tools,
-                               CellMakerTool                  = result.popToolsAndMerge(tauTools.TauCellFinalizerCfg(flags)))
+    # TauBuilderAlg
+    TauBuilderAlg = CompFactory.getComp("TauBuilderAlg")
+    BuildAlg = TauBuilderAlg(name                           = flags.Tau.ActiveConfig.prefix+"TauCoreBuilderAlg",
+                             Key_jetInputContainer          = flags.Tau.ActiveConfig.SeedJetCollection,
+                             Key_tauOutputContainer         = flags.Tau.ActiveConfig.TauJets_tmp,
+                             Key_tauTrackOutputContainer    = flags.Tau.ActiveConfig.TauTracks,
+                             Key_tauPi0CellOutputContainer  = flags.Tau.ActiveConfig.TauCommonPi0Cells,
+                             MaxEta                         = flags.Tau.SeedMaxEta,
+                             MinPt                          = flags.Tau.SeedMinPt,
+                             MaxNTracks                     = flags.Tau.MaxNTracks,
+                             Tools                          = tools,
+                             CellMakerTool                  = result.popToolsAndMerge(tauTools.TauCellFinalizerCfg(flags)))
 
     if flags.GeoModel.Run is LHCPeriod.Run4:
         BuildAlg.PixelDetEleCollKey="ITkPixelDetectorElementCollection"
@@ -128,17 +121,23 @@ def TauRunnerAlgCfg(flags):
     import tauRec.TauToolHolder as tauTools
 
     tools = []
-
+    tools.append( result.popToolsAndMerge(tauTools.TauShotFinderCfg(flags)) )
     tools.append( result.popToolsAndMerge(tauTools.Pi0ClusterCreatorCfg(flags)) )
     tools.append( result.popToolsAndMerge(tauTools.Pi0ClusterScalerCfg(flags)) )
     tools.append( result.popToolsAndMerge(tauTools.Pi0ScoreCalculatorCfg(flags)) )
     tools.append( result.popToolsAndMerge(tauTools.Pi0SelectorCfg(flags)) )
+
+    if flags.Beam.Type is not BeamType.Cosmics:
+        tools.append( result.popToolsAndMerge(tauTools.EnergyCalibrationLCCfg(flags)) )
 
     if flags.Tau.doPanTau:
         import PanTauAlgs.JobOptions_Main_PanTau as pantau
         tools.append( result.popToolsAndMerge(pantau.PanTauCfg(flags)) )
 
     tools.append(result.popToolsAndMerge(tauTools.TauCombinedTESCfg(flags)) )
+
+    # this is scheduled here because it provides variables used in the MVATES evaluation
+    tools.append( result.popToolsAndMerge(tauTools.CellVariablesCfg(flags)) )
     # these tools need pantau info
     if flags.Beam.Type is not BeamType.Cosmics:
         tools.append( result.popToolsAndMerge(tauTools.MvaTESVariableDecoratorCfg(flags)) )
@@ -150,15 +149,18 @@ def TauRunnerAlgCfg(flags):
     # do some extra variable calculation
     if flags.Tau.isStandalone or flags.Tracking.doVertexFinding:
         tools.append(result.popToolsAndMerge(tauTools.TauVertexVariablesCfg(flags)) )
+    tools.append( result.popToolsAndMerge(tauTools.ElectronVetoVarsCfg(flags)) )
     tools.append( result.popToolsAndMerge(tauTools.TauCommonCalcVarsCfg(flags)) )
     tools.append( result.popToolsAndMerge(tauTools.TauSubstructureCfg(flags)) )
   
     if flags.Tau.doTauDiscriminant:
         tools.append( result.popToolsAndMerge(tauTools.TauIDVarCalculatorCfg(flags)) )
-        tools.append( result.popToolsAndMerge(tauTools.TauJetRNNEvaluatorCfg(flags)) )
-        tools.append( result.popToolsAndMerge(tauTools.TauWPDecoratorJetRNNCfg(flags)) )
-        tools.append( result.popToolsAndMerge(tauTools.TauEleRNNEvaluatorCfg(flags)) )
-        tools.append( result.popToolsAndMerge(tauTools.TauWPDecoratorEleRNNCfg(flags)) )
+        # do not schedule RNNID and eVeto for Run4
+        if flags.GeoModel.Run <= LHCPeriod.Run3:
+            tools.append( result.popToolsAndMerge(tauTools.TauJetRNNEvaluatorCfg(flags)) )
+            tools.append( result.popToolsAndMerge(tauTools.TauWPDecoratorJetRNNCfg(flags)) )
+            tools.append( result.popToolsAndMerge(tauTools.TauEleRNNEvaluatorCfg(flags)) )
+            tools.append( result.popToolsAndMerge(tauTools.TauWPDecoratorEleRNNCfg(flags)) )
         tools.append( result.popToolsAndMerge(tauTools.TauDecayModeNNClassifierCfg(flags)) )
         # added for offline tau trigger monitoring at T0, not needed for TauJets_EleRM
         if not flags.Tau.ActiveConfig.inTauEleRM:
@@ -176,6 +178,9 @@ def TauRunnerAlgCfg(flags):
                              Key_chargedPFOOutputContainer  = flags.Tau.ActiveConfig.TauChargedPFOs,
                              Key_vertexOutputContainer      = flags.Tau.ActiveConfig.TauSecondaryVertices,
                              Key_pi0Container               = flags.Tau.ActiveConfig.TauFinalPi0s,
+                             Key_tauShotClusOutputContainer = flags.Tau.ActiveConfig.TauShotClusters,
+                             Key_tauShotClusLinkContainer   = flags.Tau.ActiveConfig.TauShotClustersLinks,
+                             Key_tauShotPFOOutputContainer  = flags.Tau.ActiveConfig.TauShotPFOs,
                              Tools                          = tools)
 
     result.addEventAlgo(RunnerAlg)
@@ -214,13 +219,13 @@ def TauOutputCfg(flags):
 
     # AOD specific
     # remove GlobalFELinks - these are links between FlowElement (FE) containers created in jet finding and taus. Since these transient FE containers are not in the AOD, we should not write out these links.
-    removeAODvars = "-VertexedClusters.-mu.-nVtxPU.-ABS_ETA_LEAD_TRACK.-TAU_ABSDELTAPHI.-TAU_ABSDELTAETA.-absipSigLeadTrk.-passThinning.-chargedGlobalFELinks.-neutralGlobalFELinks"
+    removeAODvars = "-VertexedClusters.-shotCells.-mu.-nVtxPU.-ABS_ETA_LEAD_TRACK.-TAU_ABSDELTAPHI.-TAU_ABSDELTAETA.-absipSigLeadTrk.-passThinning.-chargedGlobalFELinks.-neutralGlobalFELinks"
     if not flags.Tau.ActiveConfig.inTauEleRM:
         removeAODvars += f".-{flags.Tau.GNTauScoreName[0]}.-{flags.Tau.GNTauTransScoreName[0]}.-{flags.Tau.GNTauDecorWPNames[0][0]}.-{flags.Tau.GNTauDecorWPNames[0][1]}.-{flags.Tau.GNTauDecorWPNames[0][2]}.-{flags.Tau.GNTauDecorWPNames[0][3]}.-GNTauProbTau.-GNTauProbJet"
     TauAODList += [ "xAOD::TauJetAuxContainer#{}Aux.{}".format(flags.Tau.ActiveConfig.TauJets, removeAODvars) ]
 
     # ESD specific
-    removeESDvars = "-VertexedClusters.-chargedGlobalFELinks.-neutralGlobalFELinks"
+    removeESDvars = "-VertexedClusters.-shotCells.-chargedGlobalFELinks.-neutralGlobalFELinks"
     if not flags.Tau.ActiveConfig.inTauEleRM:
         removeESDvars += f".-{flags.Tau.GNTauScoreName[0]}.-{flags.Tau.GNTauTransScoreName[0]}.-{flags.Tau.GNTauDecorWPNames[0][0]}.-{flags.Tau.GNTauDecorWPNames[0][1]}.-{flags.Tau.GNTauDecorWPNames[0][2]}.-{flags.Tau.GNTauDecorWPNames[0][3]}.-GNTauProbTau.-GNTauProbJet"
     TauESDList += [ "xAOD::TauJetAuxContainer#{}Aux.{}".format(flags.Tau.ActiveConfig.TauJets, removeESDvars) ]
@@ -268,41 +273,17 @@ def TauxAODthinngCfg(flags):
 def TauReconstructionCfg(flags):
 
     result = ComponentAccumulator()
-
-    # Schedule the custom jets needed for tau seeding
-    from JetRecConfig.JetRecConfig import JetRecCfg
-    from JetRecConfig.StandardJetConstits import stdConstitDic as cst
-    from JetRecConfig.JetDefinition import  JetDefinition
-    from JetRecConfig.StandardSmallRJets import flavourghosts, calibmods_noCut, standardmods, truthmods
-    minimalghosts = ["Track","MuonSegment","Truth"]
-
+    
     #Check if the specific jet collection is needed based on flags
-    if flags.Tau.TauRec.SeedJetCollection == "AntiKt4EMPFlow10GeVCutTauSeedJets":
-        AntiKt4EMPFlow10GeVCutTauSeed = JetDefinition("AntiKt",0.4,cst.GPFlow,
-                                      infix = "10GeVCutTauSeed",
-                                      ghostdefs = minimalghosts+flavourghosts,
-                                      modifiers = calibmods_noCut+("Filter:1",)+truthmods+standardmods+("JetPtAssociation","CaloEnergiesClus"),
-                                      ptmin = 10000.,
-                                      lock = True)
-        result.merge(JetRecCfg(flags, AntiKt4EMPFlow10GeVCutTauSeed))
-    if flags.Tau.TauRec.SeedJetCollection == "AntiKt4EMPFlow5GeVCutTauSeedJets":
-        AntiKt4EMPFlow5GeVCutTauSeed = JetDefinition("AntiKt",0.4,cst.GPFlow,
-                                      infix = "5GeVCutTauSeed",
-                                      ghostdefs = minimalghosts+flavourghosts,
-                                      modifiers = calibmods_noCut+("Filter:1",)+truthmods+standardmods+("JetPtAssociation","CaloEnergiesClus"),
-                                      ptmin = 5000.,
-                                      lock = True)
-        result.merge(JetRecCfg(flags, AntiKt4EMPFlow5GeVCutTauSeed))
-    if flags.Tau.TauRec.SeedJetCollection == "AntiKt4EMPFlowNoPtCutTauSeedJets":
-        AntiKt4EMPFlowNoPtCutTauSeed = JetDefinition("AntiKt",0.4,cst.GPFlow,
-                                      infix = "NoPtCutTauSeed",
-                                      ghostdefs = minimalghosts+flavourghosts,
-                                      modifiers = calibmods_noCut+("Filter:1",)+truthmods+standardmods+("JetPtAssociation","CaloEnergiesClus"),
-                                      ptmin = 1,
-                                      lock = True)
-        result.merge(JetRecCfg(flags, AntiKt4EMPFlowNoPtCutTauSeed))
-    # --- > End of Schedule the custom jets needed for tau seeding < ---
-
+    if flags.Tau.TauRec.SeedJetCollection in ["AntiKt4MLTopoJets",
+                                              "AntiKt4EMPFlowMLJets",
+                                              "AntiKt4EMPFlow10GeVCutTauSeedJets",
+                                              "AntiKt4EMPFlow5GeVCutTauSeedJets",
+                                              "AntiKt4EMPFlowNoPtCutTauSeedJets"]:
+        from JetRecConfig.JetRecConfig import JetRecCfg
+        from tauRec.ConfigurationHelpers import GetSeedCollection
+        seedJet = GetSeedCollection(flags)
+        result.merge(JetRecCfg(flags, seedJet))
 
     # standard tau reconstruction
     flags_TauRec = flags.cloneAndReplace("Tau.ActiveConfig", "Tau.TauRec")
@@ -328,19 +309,9 @@ def TauReconstructionCfg(flags):
 
         # jet reclustering
         from JetRecConfig.JetRecConfig import JetRecCfg
-        if 'PFlow' in flags.Tau.TauRec.SeedJetCollection:
-           from JetRecConfig.JetRecConfig import JetRecCfg
-           from JetRecConfig.StandardSmallRJets import AntiKt4EMPFlow_tauSeedEleRM 
-           result.merge( JetRecCfg(flags_TauEleRM,AntiKt4EMPFlow_tauSeedEleRM ))  
-        else:
-           from JetRecConfig.StandardSmallRJets import AntiKt4LCTopo
-           AntiKt4LCTopo_EleRM = AntiKt4LCTopo.clone(suffix="_EleRM")
-           AntiKt4LCTopo_EleRM.inputdef.name = flags_TauEleRM.Tau.ActiveConfig.LCTopoOrigin_EleRM
-           AntiKt4LCTopo_EleRM.inputdef.inputname = flags_TauEleRM.Tau.ActiveConfig.CaloCalTopoClusters_EleRM
-           AntiKt4LCTopo_EleRM.inputdef.containername = flags_TauEleRM.Tau.ActiveConfig.LCOriginTopoClusters_EleRM
-           AntiKt4LCTopo_EleRM.standardRecoMode = True
-           AntiKt4LCTopo_EleRM.context = "EleRM"
-           result.merge(JetRecCfg(flags_TauEleRM, AntiKt4LCTopo_EleRM))
+        from tauRec.ConfigurationHelpers import GetEleRMSeedCollection
+        eleRMSeedJetCollection = GetEleRMSeedCollection(flags_TauEleRM)
+        result.merge( JetRecCfg(flags_TauEleRM, eleRMSeedJetCollection  ))  
 
         result.merge(TauBuildAlgCfg(flags_TauEleRM))
 

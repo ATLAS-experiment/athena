@@ -5,24 +5,6 @@ from GaudiKernel.DataHandle import DataHandle
 import re
 
 
-class MapMergeNoReplaceSemantics(GaudiConfig2.semantics.MappingSemantics):
-    '''
-    Extend the mapping-semantics with a merge-method that merges two mappings as long as they do not have different values for the same key
-    Use 'mapMergeNoReplace<T>' as fifth parameter of the Gaudi::Property<T> constructor
-    to invoke this merging method.
-    '''
-    __handled_types__ = (re.compile(r"^mapMergeNoReplace<.*>$"),)
-    def __init__(self, cpp_type):
-        super(MapMergeNoReplaceSemantics, self).__init__(cpp_type)
-
-    def merge(self,a,b):
-        for k in b.keys():
-            if k in a and b[k] != a[k]:
-                raise ValueError('conflicting values in map under key %r and %r %r' % (k, b[k], a[k]))
-            a[k] = b[k]
-        return a
-
-
 class VarHandleKeySemantics(GaudiConfig2.semantics.PropertySemantics):
     '''
     Semantics for all data handle keys (Read, Write, Decor, Cond).
@@ -57,7 +39,7 @@ class VarHandleArraySematics(GaudiConfig2.semantics.SequenceSemantics):
     '''
     Treat VarHandleKeyArrays like arrays of strings
     '''
-    __handled_types__ = ("SG::VarHandleKeyArray",)
+    __handled_types__ = (re.compile(r"SG::HandleKeyArray<.*>$"),)
 
     class _ItemSemantics(GaudiConfig2.semantics.StringSemantics):
         """Semantics for an item (DataHandle) in a VarHandleKeyArray converting to string"""
@@ -77,6 +59,20 @@ class VarHandleArraySematics(GaudiConfig2.semantics.SequenceSemantics):
     def __init__(self, cpp_type):
         super().__init__(cpp_type, valueSem = self._ItemSemantics())
 
+        # Example for cpp_type:
+        # SG::HandleKeyArray<SG::ReadHandle<HiveDataObj>, SG::ReadHandleKey<HiveDataObj>,
+        #                    (Gaudi::DataHandle::Mode)4>
+        handle_type = next(GaudiConfig2.semantics.extract_template_args(cpp_type))
+        self._type = next(GaudiConfig2.semantics.extract_template_args(handle_type))
+        self._isCond = 'CondHandle' in handle_type
+
+        if handle_type.startswith("SG::ReadHandle"):
+            self._mode = "R"
+        elif handle_type.startswith("SG::WriteHandle"):
+            self._mode = "W"
+        else:
+            raise TypeError(f"C++ type {cpp_type} not supported")
+
     def merge(self,bb,aa):
         for b in bb:
             if b not in aa:
@@ -88,5 +84,4 @@ from AthenaServices.ItemListSemantics import OutputStreamItemListSemantics
 
 GaudiConfig2.semantics.SEMANTICS.append(VarHandleKeySemantics)
 GaudiConfig2.semantics.SEMANTICS.append(VarHandleArraySematics)
-GaudiConfig2.semantics.SEMANTICS.append(MapMergeNoReplaceSemantics)
 GaudiConfig2.semantics.SEMANTICS.append(OutputStreamItemListSemantics)

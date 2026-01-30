@@ -322,13 +322,13 @@ void  LumiCalculator::IntegrateLumi ATLAS_NOT_THREAD_SAFE (const xAOD::LumiBlock
   // Peek at first run in iovc to check if we want Run1 or Run2 data
   xAOD::LumiBlockRangeContainer::const_iterator it = iovc->begin();
   //  const IOVRange * iovr = (*it);
-  const IOVRange* iovr = new IOVRange(IOVTime((*it)->startRunNumber(),(*it)->startLumiBlockNumber()), 
-                                      IOVTime((*it)->stopRunNumber(),(*it)->stopLumiBlockNumber()));
+  IOVRange iovr2 (IOVTime((*it)->startRunNumber(),(*it)->startLumiBlockNumber()), 
+                  IOVTime((*it)->stopRunNumber(),(*it)->stopLumiBlockNumber()));
 
   bool isrun2 = false;
   std::string onlfolder;
   std::string oflfolder;
-  if (iovr->start().run() > 222222) {
+  if (iovr2.start().run() > 222222) {
     isrun2 = true;
     m_data_db="CONDBR2";
     onlfolder = "/TRIGGER/LUMI/OnlPrefLumi";
@@ -522,8 +522,8 @@ void  LumiCalculator::IntegrateLumi ATLAS_NOT_THREAD_SAFE (const xAOD::LumiBlock
   std::map<cool::ValidityKey, CoolQuery::L1CountFolderData> L1accept_map;
 
   for(xAOD::LumiBlockRangeContainer::const_iterator it = iovc->begin(); it != iovc->end(); ++it){
-    const auto iovr = std::make_unique<IOVRange>(IOVTime((*it)->startRunNumber(),(*it)->startLumiBlockNumber()), 
-                                        IOVTime((*it)->stopRunNumber(),(*it)->stopLumiBlockNumber()));
+    IOVRange iovr(IOVTime((*it)->startRunNumber(),(*it)->startLumiBlockNumber()), 
+                  IOVTime((*it)->stopRunNumber(),(*it)->stopLumiBlockNumber()));
     
     // Bookkeeping temporary results
     m_t_totalDelL = 0.;
@@ -542,9 +542,9 @@ void  LumiCalculator::IntegrateLumi ATLAS_NOT_THREAD_SAFE (const xAOD::LumiBlock
     m_t_lumiWOPrescale = 0. ;
     m_t_lumiLAr = 0.;
   
-    m_runnbr = iovr->start().run();
-    m_lbstart = iovr->start().event();
-    m_lbstop = iovr->stop().event();
+    m_runnbr = iovr.start().run();
+    m_lbstart = iovr.start().event();
+    m_lbstop = iovr.stop().event();
 
     // Look for duplicate run/LB 
     if(m_lbstart_prev == m_lbstart && m_lbstop_prev == m_lbstop && m_runnbr_prev == m_runnbr){
@@ -697,7 +697,7 @@ void  LumiCalculator::IntegrateLumi ATLAS_NOT_THREAD_SAFE (const xAOD::LumiBlock
     m_runnbr_prev = m_runnbr;
     
     // Update DB for this specific IOV range
-    cq_trigger->setIOV(iovr->start().re_time(), iovr->stop().re_time());
+    cq_trigger->setIOV(iovr.start().re_time(), iovr.stop().re_time());
 
     // Print this here (will be output for each contiguous LB range in XML file)
     m_logger << Root::kINFO << std::left << "-----------------------------------" << Root::GEndl;
@@ -798,7 +798,7 @@ void  LumiCalculator::IntegrateLumi ATLAS_NOT_THREAD_SAFE (const xAOD::LumiBlock
 
     }
       
-    if(m_L2Valid) {
+    if(m_L2Valid && m_L2id != UINT_MAX) {
       if (isrun2) {
 	L2preObj = cq_trigger->getIOVData<cool::Float>("Prescale", m_parhltprescalesfolder, 20000 + m_L2id);
       }
@@ -818,7 +818,7 @@ void  LumiCalculator::IntegrateLumi ATLAS_NOT_THREAD_SAFE (const xAOD::LumiBlock
     L1endtime_map = cq_trigger->getObjMapFromFolderAtChan<cool::UInt63>("EndTime", m_parlvl1lblbfolder, 0);
 
     // Restrict lb range if necessary based on actual ATLAS run/lb values
-    if (L1starttime_map.begin()->first > iovr->start().re_time() || L1starttime_map.rbegin()->first < iovr->stop().re_time()) {
+    if (L1starttime_map.begin()->first > iovr.start().re_time() || L1starttime_map.rbegin()->first < iovr.stop().re_time()) {
       m_lbstart = (L1starttime_map.begin()->first & 0xFFFFFFFF);
       m_lbstop = (L1starttime_map.rbegin()->first & 0xFFFFFFFF);
       m_logger << Root::kINFO << "Restricting to valid ATLAS lumi block range [" << m_lbstart << "-" << m_lbstop << "]" << Root::GEndl;
@@ -975,7 +975,11 @@ void  LumiCalculator::IntegrateLumi ATLAS_NOT_THREAD_SAFE (const xAOD::LumiBlock
       
       //-------------------------------
       // Calculate livetime from a dedicated not rare trigger if user requested
-      CoolQuery::L1CountFolderData l1count = Livetime_map.find(currentVK)->second;
+      auto livetime_it = Livetime_map.find(currentVK);
+      if (livetime_it == Livetime_map.end()) {
+        throw std::runtime_error("LumiCalculator::IntegrateLumi Start or End times not found in map.");
+      }
+      CoolQuery::L1CountFolderData l1count = livetime_it->second;
 
       m_livetime_beforeprescale = l1count.BeforePrescale;
       m_livetime_afterprescale = l1count.AfterPrescale;
@@ -1063,7 +1067,13 @@ void  LumiCalculator::IntegrateLumi ATLAS_NOT_THREAD_SAFE (const xAOD::LumiBlock
 
       //-------------------------------
 
-      l1count = L1accept_map.find(currentVK)->second;
+      {
+        auto it = L1accept_map.find(currentVK);
+        if (it == L1accept_map.end()) {
+          throw std::runtime_error("LumiCalculator::IntegrateLumi Start or End times not found in map.");
+        }
+        l1count = it->second;
+      }
       m_beforeprescale = l1count.BeforePrescale;
       m_beforeprescaleof = false;
       m_afterprescale = l1count.AfterPrescale;

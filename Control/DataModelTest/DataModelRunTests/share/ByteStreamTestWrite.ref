@@ -12,8 +12,6 @@ AthDictLoaderSvc     INFO acquired Dso-registry
 DecisionSvc          INFO Inserting stream: BSOutputStreamAlg with no Algs
 BSOutp...amAlgTool   INFO Initializing BSOutputStreamAlg.BSOutputStreamAlgTool
 ByteSt...OutputSvc   INFO Initializing
-ByteSt...OutputSvc   INFO eformat version to use: " 'EformatVersion':'current'"
-ByteSt...OutputSvc   INFO event storage (BS) version to use: " 'EventStorageVersion':'current'"
 ByteSt...OutputSvc   INFO Reinitialization...
 BSOutputStreamAlg    INFO Data output: ByteStreamEventStorageOutputSvc
 BSOutputStreamAlg    INFO ../O reinitialization...

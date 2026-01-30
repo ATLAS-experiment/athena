@@ -17,41 +17,29 @@ IdDictAltRegions::IdDictAltRegions()
   m_selected_region(0) {
 }
 
-IdDictAltRegions::~IdDictAltRegions() {
-  std::map<std::string, IdDictRegion* >::iterator first = m_regions.begin();
-  std::map<std::string, IdDictRegion* >::iterator last = m_regions.end();
-  for (; first != last; ++first) {
-    delete (*first).second;
-  }
-}
+IdDictAltRegions::~IdDictAltRegions() = default;
 
 std::string
 IdDictAltRegions::group_name() const {
   std::string result;
-  if (1 <= m_regions.size()) result = (*m_regions.begin()).second->group_name();
+  if (!m_regions.empty()) result = m_regions.begin()->second->group_name();
   return(result);
 }
 
 void
 IdDictAltRegions::set_index(size_t index) {
-  map_iterator first = m_regions.begin();
-  map_iterator last = m_regions.end();
-
-  for (; first != last; ++first) {
-    (*first).second->set_index(index);
+  for (auto& p : m_regions) {
+    p.second->set_index(index);
   }
 }
 
 void
-IdDictAltRegions::resolve_references(const IdDictMgr& idd,
+IdDictAltRegions::resolve_references(IdDictMgr& idd,
                                      IdDictDictionary& dictionary) {
   // We assume that it is not necessary to select only those with
   // the correct tag -> send to all in map
-  map_iterator first = m_regions.begin();
-  map_iterator last = m_regions.end();
-
-  for (; first != last; ++first) {
-    (*first).second->resolve_references(idd, dictionary);
+  for (auto& p : m_regions) {
+    p.second->resolve_references(idd, dictionary);
   }
 }
 
@@ -65,18 +53,13 @@ IdDictAltRegions::generate_implementation(const IdDictMgr& idd,
   if (region_it == m_regions.end()) {
     std::cout << "IdDictAltRegions::generate_implementation could not find region for tag "
               << tag << " Keys in map " << std::endl;
-    map_iterator first = m_regions.begin();
-    map_iterator last = m_regions.end();
-    int i = 0;
-    for (; first != last; ++first, ++i) {
-      std::cout << " i " << i << " key " << (*first).first;
+    for (int i = 0; const auto& p : m_regions) {
+      std::cout << " i " << i++ << " key " << p.first;
     }
     std::cout << std::endl;
     return;
   }
-  m_selected_region = (*region_it).second;
-
-
+  m_selected_region = region_it->second.get();
   m_selected_region->generate_implementation(idd, dictionary, tag);
 }
 
@@ -92,13 +75,6 @@ IdDictAltRegions::verify() const {
 
 void
 IdDictAltRegions::clear() {
-  map_iterator first = m_regions.begin();
-  map_iterator last = m_regions.end();
-
-  for (; first != last; ++first) {
-    (*first).second->clear();
-    delete (*first).second;
-  }
   m_regions.clear();
 }
 
@@ -112,9 +88,9 @@ IdDictAltRegions::build_range() const {
 
 
 /// Add a new region, with key given by the tag.
-void IdDictAltRegions::add_region (IdDictRegion* region)
+void IdDictAltRegions::add_region (std::unique_ptr<IdDictRegion> region)
 {
-  m_regions[region->tag()] = region;
+  m_regions[region->tag()] = std::move(region);
 }
 
 
@@ -130,6 +106,6 @@ void IdDictAltRegions::select_region (const std::string& name)
     }
     std::cout << std::endl;
   } else {
-    m_selected_region = region_it->second;
+    m_selected_region = region_it->second.get();
   }
 }

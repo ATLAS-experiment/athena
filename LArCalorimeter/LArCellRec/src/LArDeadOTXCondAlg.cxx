@@ -25,8 +25,7 @@ StatusCode LArDeadOTXCondAlg::initialize() {
   return StatusCode::SUCCESS;
 }
 
-StatusCode LArDeadOTXCondAlg::execute() {
-  const EventContext& ctx = Gaudi::Hive::currentContext();
+StatusCode LArDeadOTXCondAlg::execute(const EventContext& ctx) const {
 
   ATH_MSG_DEBUG("executing");
 

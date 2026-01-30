@@ -1,11 +1,12 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef XercesParser_H
 #define XercesParser_H
 
 #include <string>
+#include <memory>
 #include "AGDDControl/ExpressionEvaluator.h"
 #include "AGDDControl/IAGDDParser.h"
 class XMLHandlerStore;
@@ -34,7 +35,7 @@ public:
     bool Finalize();
 private:
     xercesc::DOMDocument *m_doc;
-    xercesc::XercesDOMParser *m_parser;
+    std::unique_ptr<xercesc::XercesDOMParser> m_parser;
     bool m_initialized;
     XMLHandlerStore& m_xs;
 };

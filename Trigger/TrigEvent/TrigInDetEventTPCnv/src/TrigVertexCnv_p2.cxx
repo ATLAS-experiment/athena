@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigInDetEvent/TrigVertex.h"
@@ -52,8 +52,8 @@ void TrigVertexCnv_p2::persToTrans( const TrigVertex_p2 *persObj,
                                   m_trackInVertexVector.end());
     else
       transObj->m_tracks =
-        new TrackInVertexList (m_trackInVertexVector.begin(),
-                               m_trackInVertexVector.end());
+        std::make_unique<TrackInVertexList> (m_trackInVertexVector.begin(),
+                                             m_trackInVertexVector.end());
     transObj->m_ownTracks = true;
   }
 }

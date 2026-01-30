@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigConfData/L1CTPFiles.h"
@@ -12,7 +12,7 @@ const std::map<TrigConf::L1CTPFiles::MuctpiAccess, std::string> TrigConf::L1CTPF
 };
 
 TrigConf::L1CTPFiles::L1CTPFiles() {
-   for(auto x : s_keyMap) {
+   for(const auto & x : s_keyMap) {
       m_muctpi[x.second];
    }
    m_muctpi[s_keyMap.at(RoiMaskA)];
@@ -52,7 +52,7 @@ TrigConf::L1CTPFiles::print() const
    std::cout << "      pt Barrel: " << m_muctpi.at("pt_lut_BA").size() << std::endl;
    std::cout << "      pt EC/FW : " << m_muctpi.at("pt_lut_EF").size() << std::endl;
    std::cout << "   extra pt lut:" << std::endl;
-   for(auto x: m_muctpi_Extra_Ptlut) {
+   for(const auto & x: m_muctpi_Extra_Ptlut) {
       std::cout << "     " << x.first << ": " << x.second.size() << std::endl;
    }
    std::cout << "   nbits: " << m_muctpi_Nbits.size() << std::endl;

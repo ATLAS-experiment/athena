@@ -9,7 +9,7 @@ import time
 
 # Setup core logging here
 from PyJobTransforms.trfLogger import msg
-msg.info('logging set in %s' % sys.argv[0])
+msg.info('logging set in %s', sys.argv[0])
 
 from PyJobTransforms.transform import transform
 from PyJobTransforms.trfArgs import addExtraDPDTypes
@@ -19,16 +19,16 @@ from PATJobTransforms.PATTransformUtils import addNTUPMergeSubsteps, addPhysVali
 @stdTrfExceptionHandler
 @sigUsrStackTrace
 def main():
-    msg.info('This is %s' % sys.argv[0])
+    msg.info('This is %s', sys.argv[0])
     if sys.argv[1:] == []:
-        msg.info("%s stopped at %s, no input parameters given" % (sys.argv[0], time.asctime()))
+        msg.info("%s stopped at %s, no input parameters given", sys.argv[0], time.asctime())
     
     trf = getTransform()
     trf.parseCmdLineArgs(sys.argv[1:])
     trf.execute()
     trf.generateReport()
 
-    msg.info("%s stopped at %s, tf exit code %d" % (sys.argv[0], time.asctime(), trf.exitCode))
+    msg.info("%s stopped at %s, tf exit code %d", sys.argv[0], time.asctime(), trf.exitCode)
     sys.exit(trf.exitCode)
 
 def getTransform():

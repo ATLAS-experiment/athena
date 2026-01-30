@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigConfL1Data/DiffStruct.h"
@@ -18,7 +18,6 @@ using namespace TrigConf;
 TriggerItem::TriggerItem() : TrigConfData(),
                              m_ComplexDeadtime( 0 ),
                              m_Definition( "" ),
-                             m_TopNode( nullptr ),
                              m_CtpId( -1 ),
                              m_TriggerType( 0 ),
                              m_Partition( 0 ),
@@ -26,7 +25,6 @@ TriggerItem::TriggerItem() : TrigConfData(),
 {}
 
 TriggerItem::~TriggerItem() {
-   delete m_TopNode;
 }
 
 
@@ -124,7 +122,7 @@ TriggerItem::setCondition(const string& logic,
    m_Definition = "("+logic+")";
    
    try {
-      m_TopNode = TrigConf::parse(logic, conditions, thrs);
+      m_TopNode.reset (TrigConf::parse(logic, conditions, thrs));
    }
    catch(const exception& e) {
       cout << "WARNING: Could not set condition of triggeritem " << name() << " because: " << e.what() << endl;

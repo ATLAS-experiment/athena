@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "GeoModelUtilities/GeoAlignmentStore.h"
@@ -26,10 +26,15 @@ void GeoAlignmentStore::lockPosCache() {
 }
 
 
+bool GeoAlignmentStore::posCacheLocked() const { return m_deltas->isLocked(); }
+bool GeoAlignmentStore::deltaCacheLocked() const { return m_absPositions->isLocked(); }
+
+
 bool GeoAlignmentStore::append(const GeoAlignmentStore& other) {
-    return (other.m_absPositions == m_absPositions || m_absPositions->append(*other.m_absPositions)) && 
-           (m_defAbsPositions == other.m_defAbsPositions || m_defAbsPositions->append(*other.m_defAbsPositions)) &&
-           (other.m_deltas == m_deltas || m_deltas->append(*other.m_deltas));
+    bool allGood{m_deltas->append(*other.m_deltas)};
+    allGood = m_absPositions->append(*other.m_absPositions) && allGood;
+    allGood = m_defAbsPositions->append(*other.m_defAbsPositions) && allGood;
+    return allGood;
 }
 
 GeoAlignmentStore::DeltaMapPtr GeoAlignmentStore::getDeltas() const { 

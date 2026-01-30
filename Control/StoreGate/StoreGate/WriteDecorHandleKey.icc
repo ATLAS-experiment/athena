@@ -82,8 +82,7 @@ WriteDecorHandleKey<T>::WriteDecorHandleKey (const VarHandleKey& contKey,
  * the store named by @c storeName is used.
  */
 template <class T>
-template <class OWNER,
-          typename /*= typename std::enable_if<std::is_base_of<IProperty, OWNER>::value>::type*/>
+template <std::derived_from<IProperty> OWNER>
 inline
 WriteDecorHandleKey<T>::WriteDecorHandleKey( OWNER* owner,
                                              const std::string& name,
@@ -109,8 +108,7 @@ WriteDecorHandleKey<T>::WriteDecorHandleKey( OWNER* owner,
  * If @c decorKey is blank, then the overall key will be blank.
  */
 template <class T>
-template <class OWNER,
-          typename /*= typename std::enable_if<std::is_base_of<IProperty, OWNER>::value>::type*/>
+template <std::derived_from<IProperty> OWNER>
 inline
 WriteDecorHandleKey<T>::WriteDecorHandleKey( OWNER* owner,
                                              const std::string& name,
@@ -154,7 +152,7 @@ WriteDecorHandleKey<T>::operator= (const std::string& sgkey)
  * the store is not changed.  A key name that starts with a "+"
  * is interpreted as a hierarchical key name, not an empty store name.
  *
- * Returns failure the key string format is bad.
+ * Returns failure if the key string format is bad.
  */
 template <class T>
 StatusCode WriteDecorHandleKey<T>::assign (const std::string& sgkey)

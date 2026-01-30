@@ -24,9 +24,9 @@ def L0MuonTGCSimCfg(flags, name = "L0Muon.TGCSimulation", **kwargs):
 
 if __name__ == "__main__":
     
-    from MuonGeoModelTestR4.testGeoModel import setupGeoR4TestCfg, SetupArgParser, executeTest
+    from MuonGeoModelTestR4.testGeoModel import setupGeoR4TestCfg, SetupArgParser, executeTest, MuonPhaseIITestDefaults
     parser = SetupArgParser()
-    parser.set_defaults(inputFile= ["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonGeomRTT/myRDO.R3.pool.root"])
+    parser.set_defaults(inputFile= MuonPhaseIITestDefaults.RDO_ZMUMU_R3)
     parser.set_defaults(nEvents = 20)
 
     args = parser.parse_args()

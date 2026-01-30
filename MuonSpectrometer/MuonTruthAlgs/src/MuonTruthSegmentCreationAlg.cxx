@@ -45,6 +45,7 @@ namespace Muon {
         ATH_CHECK(m_idHelperSvc.retrieve());
 
         ATH_CHECK(m_truthOriginKey.initialize());
+        ATH_CHECK(m_truthClassificationKey.initialize());
         if(m_idHelperSvc->hasRPC()) {m_truthHitsKeyArray.emplace_back(m_muonTruth, "truthRpcHits");}
         if(m_idHelperSvc->hasTGC()) {m_truthHitsKeyArray.emplace_back(m_muonTruth, "truthTgcHits");}
         if(m_idHelperSvc->hasMDT()) {m_truthHitsKeyArray.emplace_back(m_muonTruth, "truthMdtHits");}
@@ -63,16 +64,18 @@ namespace Muon {
 
         SG::ReadDecorHandle<xAOD::TruthParticleContainer, int> truthOrigin(m_truthOriginKey, ctx);
         ATH_CHECK(truthOrigin.isPresent());
+        SG::ReadDecorHandle<xAOD::TruthParticleContainer, unsigned int> truthClassification(m_truthClassificationKey, ctx);
+        ATH_CHECK(truthClassification.isPresent()); // May need to comment this out initially
 
         // create output container
         SG::WriteHandle segmentContainer(m_muonTruthSegmentContainerName, ctx);
-        ATH_CHECK(segmentContainer.record(std::make_unique<xAOD::MuonSegmentContainer>(), 
+        ATH_CHECK(segmentContainer.record(std::make_unique<xAOD::MuonSegmentContainer>(),
                                           std::make_unique<xAOD::MuonSegmentAuxContainer>()));
         ATH_MSG_DEBUG("Recorded MuonSegmentContainer with key: " << segmentContainer.name());
-        
+
         size_t itr = 0;
         for (const xAOD::TruthParticle* truthParticle : *muonTruthContainer) {
-            
+            // TODO adapt the logic in this loop to use truthClassification rather than truthOrigin
             const int iOrigin = truthOrigin(*truthParticle);
             bool goodMuon = bad_origins.find(iOrigin) == bad_origins.end();
 
@@ -94,7 +97,7 @@ namespace Muon {
     }
 
     StatusCode MuonTruthSegmentCreationAlg::fillChamberIdMap(const EventContext& ctx,
-                                                             const xAOD::TruthParticle& truthParticle, 
+                                                             const xAOD::TruthParticle& truthParticle,
                                                              ChamberIdMap& ids) const{
 
         for (SG::ReadDecorHandle<xAOD::TruthParticleContainer, std::vector<unsigned long long>>& hitCollection : m_truthHitsKeyArray.makeHandles(ctx)){
@@ -123,7 +126,7 @@ namespace Muon {
 
         const MuonGM::MuonDetectorManager* detMgr{nullptr};
         ATH_CHECK(SG::get(detMgr, m_detMgrKey, ctx));
-        
+
         constexpr unsigned techMax = toInt(TechnologyIndex::TechnologyIndexMax);
         std::array<const MuonSimDataCollection*, techMax> sdoCollections{};
         bool useSDO = !m_CSC_SDO_TruthNames.empty();
@@ -246,7 +249,7 @@ namespace Muon {
                               << " associated reco muon " << index << " unique ID " << HepMC::uniqueID(*truthLink)
                               << " truthLink " << truthLink);
                 xAOD::MuonSegment* segment =  segmentContainer.push_back(std::make_unique<xAOD::MuonSegment>());
-               
+
                 segment->setNHits(nprecLayers, nphiLayers, ntrigEtaLayers);
                 static const SG::Accessor<ElementLink<xAOD::TruthParticleContainer> >
                   truthParticleLinkAcc("truthParticleLink");
@@ -271,6 +274,6 @@ namespace Muon {
         return StatusCode::SUCCESS;
     }
 
-    
+
 
 }  // namespace Muon

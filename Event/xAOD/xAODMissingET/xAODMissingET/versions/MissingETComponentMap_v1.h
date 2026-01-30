@@ -1,7 +1,7 @@
 // -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef XAODMISSINGET_VERSIONS_MISSINGETCOMPONENTMAP_V1_H
@@ -144,7 +144,7 @@ namespace xAOD
     bool checkUsage(const IParticle* pPart,MissingETBase::UsageHandler::Policy p=MissingETBase::UsageHandler::OnlyCluster) const;
     /*! @brief Check a list of objects for prior usage in MET reconstruction
      *
-     *  @return @c true if any of the objects in the list has already been used in another MET contribution. The iput object list contains 
+     *  @return @c true if any of the objects in the list has already been used in another MET contribution. The input object list contains
      *          pointer references to objects which have not yet been used.
      *
      *  @param[inout] sig reference to modifiable list of objects.

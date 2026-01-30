@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "RootCollectionCursor.h"
@@ -7,7 +7,6 @@
 #include "CoralBase/Attribute.h"
 
 #include "TTree.h"
-#include "TEventList.h"
 
 #include <exception>
 
@@ -15,15 +14,13 @@ pool::RootCollection::RootCollectionCursor::
 RootCollectionCursor(
    const pool::ICollectionDescription& description,
    const pool::CollectionRowBuffer& collectionRowBuffer,
-   TTree *tree,
-   const TEventList *evl 
+   TTree *tree
    )
       :
       m_description( description ),
       m_collectionRowBuffer( collectionRowBuffer ),
-      m_eventList(evl),
       m_idx(-1),
-      m_entries( evl? evl->GetN() : tree->GetEntries() ),
+      m_entries( tree->GetEntries() ),
       m_dummyRef( false )
 {
    for( coral::AttributeList::iterator attrI = m_collectionRowBuffer.attributeList().begin();
@@ -67,7 +64,6 @@ RootCollectionCursor(
 pool::RootCollection::RootCollectionCursor::~RootCollectionCursor()
 {
    RootCollectionCursor::close();
-   if(m_eventList) delete m_eventList;
 }
 
 
@@ -84,7 +80,7 @@ pool::RootCollection::RootCollectionCursor::next()
       return false;
    }
 
-   Long64_t entry( m_eventList? m_eventList->GetEntry(m_idx) : m_idx );
+   Long64_t entry = m_idx;
 
    // read attributes
    for( AttrBranchVector_t::const_iterator branchI = m_attrBranches.begin(); branchI != m_attrBranches.end(); ++branchI) {

@@ -22,19 +22,19 @@ class TGCCableInPP : public TGCCable
 {
  public:
   TGCCableInPP(const std::string& filename);
-  virtual ~TGCCableInPP() = default;
+  virtual ~TGCCableInPP();
   
   virtual TGCChannelId* getChannel(const TGCChannelId* channelId,
                                    const bool orChannel=false) const;
 
  private:
-  TGCCableInPP(void) {}
+  TGCCableInPP(void) = delete;
   virtual TGCChannelId* getChannelIn(const TGCChannelId* ppout, 
                                      const bool orChannel=false) const;
   virtual TGCChannelId* getChannelOut(const TGCChannelId* ppin,
                                       const bool orChannel=false) const;
 
-  std::array<std::array<std::unique_ptr<TGCDatabase>, TGCId::MaxModuleType>, TGCId::MaxRegionType> m_database{{{nullptr}}};
+  std::array<std::array<std::unique_ptr<TGCDatabase>, TGCId::MaxModuleType>, TGCId::MaxRegionType> m_database;
 };
   
 } // end of namespace

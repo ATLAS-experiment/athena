@@ -1,6 +1,6 @@
 // Dear emacs, this is -*- c++ -*-
 //
-// Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 //
 #ifndef XAODROOTACCESS_TEVENT_H
 #define XAODROOTACCESS_TEVENT_H
@@ -16,6 +16,8 @@
 
 // System include(s).
 #include <memory>
+#include <regex>
+#include <string>
 #include <string_view>
 
 // Forward declaration(s).
@@ -40,7 +42,7 @@ class TChainStateTracker;
 class TFileMerger;
 class TEvent;
 class TTreeMgr;
-::TTree* MakeTransientTree ATLAS_NOT_THREAD_SAFE(TEvent&, const char*);
+::TTree* MakeTransientTree ATLAS_NOT_THREAD_SAFE(TEvent &, const char* );
 
 /// @short Tool for accessing xAOD files outside of Athena
 ///
@@ -57,19 +59,19 @@ class TTreeMgr;
 class TEvent : public Event {
 
   // Declare the friend functions/classes:
-  friend ::TTree* MakeTransientTree(TEvent&, const char*);
+  friend ::TTree* MakeTransientTree(TEvent &, const char* );
   friend class ::xAODTEventBranch;
   friend class ::xAODTMetaBranch;
   friend class xAOD::TFileMerger;
   friend class xAOD::TTreeMgr;
   friend class CP::xAODWriterAlg;
 
- public:
+public:
   /// Auxiliary store "mode"
   enum EAuxMode {
-    kBranchAccess = 0,  ///< Access auxiliary data branch-by-branch
-    kClassAccess = 1,   ///< Access auxiliary data using the aux containers
-    kAthenaAccess = 2   ///< Access containers/objects like Athena does
+    kBranchAccess = 0, ///< Access auxiliary data branch-by-branch
+    kClassAccess = 1,  ///< Access auxiliary data using the aux containers
+    kAthenaAccess = 2  ///< Access containers/objects like Athena does
   };
 
   /// Default constructor
@@ -81,23 +83,37 @@ class TEvent : public Event {
   /// Destructor
   virtual ~TEvent();
 
+  /// Change the pattern used for collecting information from other MetaData
+  /// trees NB: Additional  MetaData trees are only expected for augmented files
+  /// This function also allows user to redefine MetaData tree pattern
+  /// to skip trees that would not be proper MetaData ones
+  /// i.e. trees not containing an EventFormat* branch
+  void setOtherMetaDataTreeNamePattern(const std::string &pattern);
+
   /// Get what auxiliary access mode the object was constructed with
   EAuxMode auxMode() const;
 
   /// @name Setup functions
   /// @{
 
-  /// Default name of the event tree
-  static const char* const EVENT_TREE_NAME;
 
-  /// Connect the object to a new input file
+  /// Set up the reading of an input file from TFile
+  /// This method implements the interface from Event
+  StatusCode readFrom(::TFile& inFile) override;
+
+  /// This is the 'native' interface for reading from a TFile, 
+  /// allowing the specification of TTree cache use and the event tree name
   StatusCode readFrom(::TFile* file, bool useTreeCache = true,
                       std::string_view treeName = EVENT_TREE_NAME);
   /// Connect the object to a new input tree/chain
   StatusCode readFrom(::TTree* tree, bool useTreeCache = true);
   /// Connect the object to an output file
+  StatusCode writeTo(TFile& file) override;
+  /// Connect the object to an output file
   StatusCode writeTo(::TFile* file, int autoFlush = 200,
                      std::string_view treeName = EVENT_TREE_NAME);
+  /// Finish writing to an output file
+  StatusCode finishWritingTo(TFile& file) override;
   /// Finish writing to an output file
   StatusCode finishWritingTo(::TFile* file);
 
@@ -106,7 +122,7 @@ class TEvent : public Event {
   /// @name Event data accessor/modifier functions
   /// @{
 
-  // Bring the definition of Event::record into scope
+  // Bring the definition of Event::record into scope to allow a TEvent object to record object
   using Event::record;
 
   /// Add an auxiliary store object to the output
@@ -120,9 +136,9 @@ class TEvent : public Event {
   /// @{
 
   /// Get how many entries are available from the current input file(s)
-  ::Long64_t getEntries() const;
+  ::Long64_t getEntries() const override;
   /// Function loading a given entry of the input TTree
-  ::Int_t getEntry(::Long64_t entry, ::Int_t getall = 0);
+  ::Int_t getEntry(::Long64_t entry, ::Int_t getall = 0) override;
 
   /// Get how many files are available on the currently defined input
   ::Long64_t getFiles() const;
@@ -130,11 +146,11 @@ class TEvent : public Event {
   ::Int_t getFile(::Long64_t file, ::Int_t getall = 0);
 
   /// Function filling one event into the output tree
-  ::Int_t fill();
+  ::Int_t fill() override;
 
   /// @}
 
- protected:
+protected:
   /// @name Functions implemented from @c xAOD::Event
   /// @{
 
@@ -208,8 +224,13 @@ class TEvent : public Event {
   /// The tree that we are writing to
   std::unique_ptr<::TTree> m_outTree;
 
-};  // class TEvent
+  // Regular expression to match other MetaData trees in augmented files
+  // Other MetaData trees should be called MetaData_* but not named
+  // MetaDataHdr_* Those additional trees are only expected for augmented files
+  std::regex m_otherMetaDataTreeNamePattern =
+      std::regex("^MetaData(?!Hdr)_.*$");
+}; // class TEvent
 
-}  // namespace xAOD
+} // namespace xAOD
 
-#endif  // XAODROOTACCESS_TEVENT_H
+#endif // XAODROOTACCESS_TEVENT_H

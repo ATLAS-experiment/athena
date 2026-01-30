@@ -6,7 +6,11 @@
 #define MCTRUTH_TRACKHELPER_H
 
 
+#include <tuple>
+
 #include "GeneratorObjects/HepMcParticleLink.h"
+
+class IProxyDict;
 
 class G4Track;
 class TrackInformation;
@@ -28,17 +32,43 @@ public:
    * at the first GenEvent in the McEventCollection.
    */
   inline HepMcParticleLink GenerateParticleLink();
+  inline HepMcParticleLink GenerateParticleLink(IProxyDict*);
  private:
+  inline std::tuple<int, HepMcParticleLink::UniqueIDFlag> particleIdentifierAndFlag() const;
+
   TrackInformation *m_trackInfo;
 };
 
-HepMcParticleLink TrackHelper::GenerateParticleLink()
+inline std::tuple<int, HepMcParticleLink::UniqueIDFlag>
+TrackHelper::particleIdentifierAndFlag() const
 {
 #if defined(HEPMC3)
-  return HepMcParticleLink(this->GetUniqueID(), 0, HepMcParticleLink::IS_POSITION, HepMcParticleLink::IS_ID);
+  return {GetUniqueID(), HepMcParticleLink::IS_ID};
 #else
-  return HepMcParticleLink(this->GetBarcode(), 0, HepMcParticleLink::IS_POSITION, HepMcParticleLink::IS_BARCODE);
+  return {GetBarcode(), HepMcParticleLink::IS_BARCODE};
 #endif
+}
+
+HepMcParticleLink TrackHelper::GenerateParticleLink()
+{
+  const auto [identifier, flag] = particleIdentifierAndFlag();
+  return HepMcParticleLink(identifier,
+                           0,
+                           HepMcParticleLink::IS_POSITION,
+                           flag);
+}
+
+HepMcParticleLink TrackHelper::GenerateParticleLink(IProxyDict* proxy)
+{
+  const auto [identifier, flag] = particleIdentifierAndFlag();
+  if(!proxy) {
+    return GenerateParticleLink();
+  }
+  return HepMcParticleLink(identifier,
+                           0,
+                           HepMcParticleLink::IS_POSITION,
+                           flag,
+                           proxy);
 }
 
 #endif // MCTRUTH_TRACKHELPER_H

@@ -8,12 +8,10 @@
 #include "MuonReadoutGeometryR4/SpectrometerSector.h"
 #include "GaudiKernel/SystemOfUnits.h"
 
-#include "MuonPatternHelpers/MatrixUtils.h"
 #include "MuonTruthHelpers/MuonSimHitHelpers.h"
 #include "MuonSegment/MuonSegment.h"
 
 #include <fstream>
-#include <TString.h>
 
 #include <unordered_map>
 
@@ -24,7 +22,7 @@ namespace {
       return (sector <<16 |stEta << 8| stName);
   }
   constexpr double precCutOff(const double value, const double cutOff = 1.e-15) {
-    return std::abs(value) > cutOff ? value : 0.;
+    return Acts::abs(value) > cutOff ? value : 0.;
   }
 
 }
@@ -55,7 +53,7 @@ const MuonGMR4::SpectrometerSector* TruthSegmentCsvDumperAlg::msSector(const xAO
 
 StatusCode TruthSegmentCsvDumperAlg::execute(){
   const EventContext & ctx = Gaudi::Hive::currentContext();
-  std::ofstream file{std::string(Form("event%09zu-",++m_event))+"MuonTruthSegment.csv"};
+  std::ofstream file{std::format("event-{:09}-MuonTruthSegment.csv", ++m_event)};
   constexpr std::string_view delim = ",";
   file<<"sectorId"<<delim;
   file<<"globalPositionX"<<delim;
@@ -95,7 +93,7 @@ StatusCode TruthSegmentCsvDumperAlg::execute(){
     if (!sector) {
       continue;
     }
-    const Amg::Transform3D globToLoc{sector->globalToLocalTrans(*gctxHandle)};
+    const Amg::Transform3D globToLoc{sector->globalToLocalTransform(*gctxHandle)};
     /// Segment information
     const Amg::Vector3D globPos = segment->position();
     const Amg::Vector3D globDir = segment->direction();

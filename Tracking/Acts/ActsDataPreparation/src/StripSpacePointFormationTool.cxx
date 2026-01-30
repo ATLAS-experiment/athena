@@ -14,8 +14,8 @@
 namespace ActsTrk {
 
     StripSpacePointFormationTool::StripSpacePointFormationTool(const std::string& type,
-							       const std::string& name,
-							       const IInterface* parent)
+                                                               const std::string& name,
+                                                               const IInterface* parent)
     : base_class(type, name, parent)
     {}
 
@@ -25,22 +25,22 @@ namespace ActsTrk {
 
         ATH_CHECK(m_lorentzAngleTool.retrieve());
 
-	if(m_useSCTLayerDep_OverlapCuts)
-	  ATH_MSG_INFO("Use SCT SP overlap cuts based on layer number parity");
-	
+        if(m_useSCTLayerDep_OverlapCuts)
+          ATH_MSG_INFO("Use SCT SP overlap cuts based on layer number parity");
+        
         return StatusCode::SUCCESS;
     }
 
   StatusCode StripSpacePointFormationTool::produceSpacePoints(const EventContext& ,
-							      const xAOD::StripClusterContainer& clusterContainer,
-							      const InDet::SiElementPropertiesTable& properties,
-							      const InDetDD::SiDetectorElementCollection& elements,
-							      const Amg::Vector3D& beamSpotVertex,
-							      std::vector<StripSP>& spacePoints,
-							      std::vector<StripSP>& overlapSpacePoints,
-							      bool processOverlaps,
-							      const std::vector<IdentifierHash>& hashesToProcess,
-							      const ContainerAccessor<xAOD::StripCluster, IdentifierHash, 1>& stripAccessor) const
+                                                              const xAOD::StripClusterContainer& clusterContainer,
+                                                              const InDet::SiElementPropertiesTable& properties,
+                                                              const InDetDD::SiDetectorElementCollection& elements,
+                                                              const Amg::Vector3D& beamSpotVertex,
+                                                              std::vector<StripSP>& spacePoints,
+                                                              std::vector<StripSP>& overlapSpacePoints,
+                                                              bool processOverlaps,
+                                                              const std::vector<IdentifierHash>& hashesToProcess,
+                                                              const ContainerAccessor<xAOD::StripCluster, IdentifierHash, 1>& stripAccessor) const
     {
         /// Production of StripSP from strip clusters
         /// Strip space points involves a more complex logic since
@@ -189,32 +189,32 @@ namespace ActsTrk {
                             break;
                         }
                         case EtaMinus: {
-			  overlapExtents[ 2] = overlapLimitEtaMin;
-			  overlapExtents[ 3] = overlapLimitEtaMax;
-			  if (m_useSCTLayerDep_OverlapCuts && (m_stripId->layer_disk(thisId) & 1) != 0) {
-			    overlapExtents[ 2] =-overlapLimitEtaMax;
-			    overlapExtents[ 3] =-overlapLimitEtaMin;
-			  }
-			  break;
+                          overlapExtents[ 2] = overlapLimitEtaMin;
+                          overlapExtents[ 3] = overlapLimitEtaMax;
+                          if (m_useSCTLayerDep_OverlapCuts && (m_stripId->layer_disk(thisId) & 1) != 0) {
+                            overlapExtents[ 2] =-overlapLimitEtaMax;
+                            overlapExtents[ 3] =-overlapLimitEtaMin;
+                          }
+                          break;
                         }
-		        default: {
-			  overlapExtents[ 4] = overlapLimitEtaMin;
-			  overlapExtents[ 5] = overlapLimitEtaMax;
-			  if (m_useSCTLayerDep_OverlapCuts && (m_stripId->layer_disk(thisId) & 1) == 0) {
-			    overlapExtents[ 4] = -overlapLimitEtaMax;
-			    overlapExtents[ 5] = -overlapLimitEtaMin;
-			  }
-			  break;
+                        default: {
+                          overlapExtents[ 4] = overlapLimitEtaMin;
+                          overlapExtents[ 5] = overlapLimitEtaMax;
+                          if (m_useSCTLayerDep_OverlapCuts && (m_stripId->layer_disk(thisId) & 1) == 0) {
+                            overlapExtents[ 4] = -overlapLimitEtaMax;
+                            overlapExtents[ 5] = -overlapLimitEtaMin;
+                          }
+                          break;
                         }
                     }
                 }
 
                 // producing and filling space points
                 ATH_CHECK( fillStripSpacePoints(neighbourElements, neighbourClusters, overlapExtents, beamSpotVertex,
-						spacePoints, overlapSpacePoints) );
+                                                spacePoints, overlapSpacePoints) );
             }
         }
-	return StatusCode::SUCCESS;
+        return StatusCode::SUCCESS;
     }
 
     StatusCode
@@ -223,8 +223,8 @@ namespace ActsTrk {
         const std::array<std::vector<std::pair<const xAOD::StripCluster*, size_t>>, nNeighbours>& clusters,
         const std::array<double, 14>& overlapExtents,
         const Amg::Vector3D& beamSpotVertex,
-	std::vector<StripSP>& spacePoints,
-	std::vector<StripSP>& overlapSpacePoints ) const
+        std::vector<StripSP>& spacePoints,
+        std::vector<StripSP>& overlapSpacePoints ) const
     {
 
         // This function is called once all the needed quantities are collected.
@@ -325,9 +325,9 @@ namespace ActsTrk {
 
                         // depending on the index you are processing, you save the space point in the correct container
                         if (currentIndex==otherSideIndex) {
-			  ATH_CHECK( makeStripSpacePoint(spacePoints, stripInfo, currentStripInfo, isEndcap, limit, slimit) );
+                          ATH_CHECK( makeStripSpacePoint(spacePoints, stripInfo, currentStripInfo, isEndcap, limit, slimit) );
                         } else {
-			  ATH_CHECK( makeStripSpacePoint(overlapSpacePoints, stripInfo, currentStripInfo, isEndcap, limit, slimit) );
+                          ATH_CHECK( makeStripSpacePoint(overlapSpacePoints, stripInfo, currentStripInfo, isEndcap, limit, slimit) );
                         }
                     }
                 }
@@ -398,7 +398,7 @@ namespace ActsTrk {
                         continue;
 
                     for(auto& stripInfo : stripPhiInfos) {
-		      ATH_CHECK( makeStripSpacePoint(overlapSpacePoints, *stripInfo, currentStripInfo, isEndcap, limit, slimit) );
+                      ATH_CHECK( makeStripSpacePoint(overlapSpacePoints, *stripInfo, currentStripInfo, isEndcap, limit, slimit) );
                     }
                 }
             }
@@ -406,7 +406,7 @@ namespace ActsTrk {
         }
 
         for(int n=0; n!=nElements; ++n) {
-	  
+          
             int currentIndex = elementIndex[n];
             const InDetDD::SiDetectorElement* currentElement = elements[currentIndex];
 
@@ -423,14 +423,14 @@ namespace ActsTrk {
                 for(auto& stripInfo : stripInfos) {
                     // depending on the index you are processing, you save the space point in the correct container
                     if (currentIndex==otherSideIndex) {
-		      ATH_CHECK( makeStripSpacePoint(spacePoints, stripInfo, currentStripInfo, isEndcap, limit, slimit) );
+                      ATH_CHECK( makeStripSpacePoint(spacePoints, stripInfo, currentStripInfo, isEndcap, limit, slimit) );
                     } else {
-		      ATH_CHECK( makeStripSpacePoint(overlapSpacePoints, stripInfo, currentStripInfo, isEndcap, limit, slimit) );
+                      ATH_CHECK( makeStripSpacePoint(overlapSpacePoints, stripInfo, currentStripInfo, isEndcap, limit, slimit) );
                     }
                 }
             }
         }
-	return StatusCode::SUCCESS;
+        return StatusCode::SUCCESS;
     }
 
     StatusCode StripSpacePointFormationTool::makeStripSpacePoint(
@@ -446,7 +446,10 @@ namespace ActsTrk {
         double l0 = firstInfo.oneOverStrip()*slimit+limit ;
 
         if(std::abs(a) > (std::abs(b)*l0)) {
-	  return StatusCode::SUCCESS;
+          ATH_MSG_DEBUG("SP fails geometric cuts (first)");
+          if(m_useBeamSpotConstraint) {
+            return StatusCode::SUCCESS;
+          }
         }
 
         double c  =-secondInfo.trajDirection().dot(firstInfo.normal());
@@ -454,7 +457,10 @@ namespace ActsTrk {
         double l1 = secondInfo.oneOverStrip()*slimit+limit ;
 
         if(std::abs(c) > (std::abs(d)*l1)) {
-	  return StatusCode::SUCCESS;
+          ATH_MSG_DEBUG("SP fails geometric cuts (second)");
+          if(m_useBeamSpotConstraint) {
+            return StatusCode::SUCCESS;
+          }
         }
 
         double m = a/b;
@@ -468,7 +474,10 @@ namespace ActsTrk {
                 if(dmn > dm) dm = dmn;
                 m-=dm; n-=(dm/cs);
                 if(std::abs(m) > limit || std::abs(n) > limit) {
-		  return StatusCode::SUCCESS;
+                  ATH_MSG_DEBUG("SP falls outside of limit");
+                  if(m_useBeamSpotConstraint) {
+                    return StatusCode::SUCCESS;
+                  }
                 }
             } else if (m < -limit || n < -limit) {
                 double cs  = firstInfo.stripDirection().dot(secondInfo.stripDirection())*(firstInfo.oneOverStrip()*firstInfo.oneOverStrip());
@@ -477,12 +486,15 @@ namespace ActsTrk {
                 if(dmn > dm) dm = dmn;
                 m+=dm; n+=(dm/cs);
                 if(std::abs(m) > limit || std::abs(n) > limit) {
-		  return StatusCode::SUCCESS;
+                  ATH_MSG_DEBUG("SP falls outside of limit");
+                  if(m_useBeamSpotConstraint) {
+                    return StatusCode::SUCCESS;
+                  }
                 }
             }
         }
 
-	Eigen::Matrix<double, 3, 1> globalPosition(m_useTopSp ? secondInfo.position(m) : firstInfo.position(m));
+        Eigen::Matrix<double, 3, 1> globalPosition(m_useTopSp ? secondInfo.position(m) : firstInfo.position(m));
 
         // evaluation of the local covariance
         // Lines taken from SCT_SpacePoint::setupLocalCovarianceSCT()
@@ -506,20 +518,20 @@ namespace ActsTrk {
 
 
 
-	StripSP toAdd;
-	toAdd.idHashes = {firstInfo.idHash(), secondInfo.idHash()};
-	toAdd.globPos = globalPosition.cast<float>();
-	toAdd.cov_r = variance(0,0);
-	toAdd.cov_z = variance(1,0);
-	toAdd.measurementIndexes = std::array<std::size_t,2> ({firstInfo.clusterIndex(), secondInfo.clusterIndex()});
-	toAdd.topHalfStripLength = static_cast<float>(topHalfStripLength);
-	toAdd.bottomHalfStripLength = static_cast<float>(bottomHalfStripLength);
-	toAdd.topStripDirection = topStripDirection.cast<float>();
-	toAdd.bottomStripDirection = bottomStripDirection.cast<float>();
-	toAdd.stripCenterDistance = stripCenterDistance.cast<float>();
-	toAdd.topStripCenter = topStripCenter.cast<float>();
+        StripSP toAdd;
+        toAdd.idHashes = {firstInfo.idHash(), secondInfo.idHash()};
+        toAdd.globPos = globalPosition.cast<float>();
+        toAdd.cov_r = variance(0,0);
+        toAdd.cov_z = variance(1,0);
+        toAdd.measurementIndexes = std::array<std::size_t,2> ({firstInfo.clusterIndex(), secondInfo.clusterIndex()});
+        toAdd.topHalfStripLength = static_cast<float>(topHalfStripLength);
+        toAdd.bottomHalfStripLength = static_cast<float>(bottomHalfStripLength);
+        toAdd.topStripDirection = topStripDirection.cast<float>();
+        toAdd.bottomStripDirection = bottomStripDirection.cast<float>();
+        toAdd.stripCenterDistance = stripCenterDistance.cast<float>();
+        toAdd.topStripCenter = topStripCenter.cast<float>();
 
-	collection.push_back(std::move(toAdd));
+        collection.push_back(std::move(toAdd));
 
         return StatusCode::SUCCESS;
     }
@@ -548,9 +560,9 @@ namespace ActsTrk {
     }
 
     void StripSpacePointFormationTool::updateRange(const InDetDD::SiDetectorElement* element1,
-						   const InDetDD::SiDetectorElement* element2,
-						   double& stripLengthGapTolerance,
-						   double& min, double& max) const
+                                                   const InDetDD::SiDetectorElement* element2,
+                                                   double& stripLengthGapTolerance,
+                                                   double& min, double& max) const
     {
         double dm = offset(element1, element2, stripLengthGapTolerance);
         min -= dm;
@@ -596,8 +608,8 @@ namespace ActsTrk {
         maxStrip = maxCellId.strip();
 
         // re-evaluate min and max in polar coordinate
-	min = std::atan2(min, radius);
-	max = std::atan2(max, radius);
+        min = std::atan2(min, radius);
+        max = std::atan2(max, radius);
     }
 
     std::pair<Amg::Vector3D, Amg::Vector3D >

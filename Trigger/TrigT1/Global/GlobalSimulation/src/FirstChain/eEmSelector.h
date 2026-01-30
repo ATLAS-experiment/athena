@@ -6,18 +6,18 @@
 #define GLOBALSIM_EEMSELECTOR_H
 
 #include "IeEmSelector.h"
-#include "../IO/IeEmTOB.h"  // bitset widths
 
 #include <climits>
+#include <memory>
 
 namespace  GlobalSim {
   /**
-   * @brief Implementaton of IeEmSelector. Selects IeEmTOBs following
+   * @brief Implementaton of IeEmSelector. Selects eEmTOBs following
    * hypo block VHDL code using window cuts on et, eta and phi.
    *
    */
 
-  using GlobalSim::IOBitwise::IeEmTOB;
+  using GlobalSim::IOBitwise::eEmTOB;
 
   
   class ICutter {
@@ -43,7 +43,7 @@ namespace  GlobalSim {
     
     virtual ~eEmSelector() = default;
     
-    virtual bool select(const IeEmTOB&) const override;
+    virtual bool select(const eEmTOB&) const override;
 
     virtual std::string to_string() const override;
 

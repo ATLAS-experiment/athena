@@ -1,7 +1,7 @@
 // emacs, this is -*- C++ -*-
 
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////                                                        /////////// 
@@ -264,7 +264,7 @@ inline const Jet::taginfo_t* Jet::tagInfo(const mkey_t& key) const
 template<typename TAGINFO>
 const TAGINFO* Jet::getTagInfo(const mkey_t& key,bool /*useLink*/) const
 {
-  return this->getObject<TAGINFO,tagstore_t>(key,m_tagInfoStore,JetKeyConstants::TagCat, false);
+  return this->getObject<TAGINFO,tagstore_t>(key,m_tagInfoStore,JetKeyConstants::TagCat);
 }
 
 template<class TAGINFO>
@@ -289,7 +289,7 @@ void Jet::addInfo(const TAGINFO* tag)
 template<typename ASSOC> const ASSOC* 
 Jet::getAssociation(const mkey_t& key, bool /*useLink*/ ) const
 {
-  return this->getObject<ASSOC,assostore_t>(key,m_assocStore,JetKeyConstants::AssoCat, false);
+  return this->getObject<ASSOC,assostore_t>(key,m_assocStore,JetKeyConstants::AssoCat);
 }
   
 template <class T>

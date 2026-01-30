@@ -1,12 +1,11 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef PERSISTENCYSVC_TOKENITERATOR_H
 #define PERSISTENCYSVC_TOKENITERATOR_H
 
 #include "PersistencySvc/ITokenIterator.h"
-#include "GaudiKernel/implements.h"
 
 #include <string>
 
@@ -14,8 +13,7 @@ namespace pool {
 
   // forward declarations
   class FileDescriptor;
-  class IStorageExplorer;
-  class DbSelect;
+  class DbContainer;
 
   namespace PersistencySvc {
 
@@ -28,12 +26,10 @@ namespace pool {
     class TokenIterator : virtual public ITokenIterator
       {
       public:
-	/** Constructor taking as argument a DbSelection object,
-	 *  the file descriptor, the container name
+	/** Constructor taking as argument the file descriptor, the container name
 	 */
 	TokenIterator( FileDescriptor& fileDescriptor,
-		       const std::string& containerName,
-		       IStorageExplorer& storageExplorer );
+		       const std::string& containerName );
 	/// Destructor
 	~TokenIterator();
 
@@ -60,10 +56,8 @@ namespace pool {
         virtual bool seek(std::size_t position);
 
       private:
-	/// Reference to the storage explorer
-	IStorageExplorer& m_storageExplorer;
-	/// Selection object
-	DbSelect* m_selection;
+	DbContainer* m_container;
+        Token* m_refToken;
       };
   }
 }

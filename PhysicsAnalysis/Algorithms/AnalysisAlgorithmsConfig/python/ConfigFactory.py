@@ -143,12 +143,12 @@ class ConfigFactory():
                     raise ValueError(f"{block} not added")
                 algs = self._algs[block].subAlgs
 
-            if alg in algs:
+            if algName in algs:
                 raise ValueError(f"{algName} has already been added.")
 
             if block != self.ROOTNAME:
                 factoryName = f"{block}.{algName}"
-            else :
+            else:
                 factoryName = algName
 
             # create FactoryBlock with alg information

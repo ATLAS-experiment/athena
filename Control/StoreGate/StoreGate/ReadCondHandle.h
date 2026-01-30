@@ -5,18 +5,14 @@
 #ifndef STOREGATE_READCONDHANDLE_H
 #define STOREGATE_READCONDHANDLE_H 1
 
-#include "AthenaKernel/getMessageSvc.h"
 #include "AthenaKernel/CondCont.h"
-#include "AthenaKernel/IOVEntryT.h"
 #include "AthenaKernel/ExtendedEventContext.h"
 
 #include "StoreGate/ReadHandle.h"
 #include "StoreGate/ReadCondHandleKey.h"
 #include "StoreGate/exceptions.h"
-#include "PersistentDataModel/AthenaAttributeList.h"
 #include "CxxUtils/AthUnlikelyMacros.h"
 
-#include "GaudiKernel/DataHandle.h"
 #include "GaudiKernel/DataObjID.h"
 #include "GaudiKernel/EventIDBase.h"
 #include "GaudiKernel/EventContext.h"

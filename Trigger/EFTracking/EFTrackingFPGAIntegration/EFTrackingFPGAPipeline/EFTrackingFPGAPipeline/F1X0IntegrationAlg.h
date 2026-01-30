@@ -46,8 +46,12 @@ namespace EFTrackingFPGAIntegration
         SG::ReadHandleKey<std::vector<uint64_t>> m_FPGAPixelRDO{this, "FPGAEncodedPixelKey", "FPGAEncodedPixelRDOs", "Pixel RDO converted to FPGA format"};
         SG::ReadHandleKey<std::vector<uint64_t>> m_FPGAStripRDO{this, "FPGAEncodedStripKey", "FPGAEncodedStripRDOs", "Strip RDO converted to FPGA format"};
 
-        SG::WriteHandleKey<std::vector<uint64_t>> m_FPGAPixelOutput{this, "FPGAOutputPixelKey", "FPGAPixelOutput", "Pixel output from FPGA format"};
-        SG::WriteHandleKey<std::vector<uint64_t>> m_FPGAStripOutput{this, "FPGAOutputStripKey", "FPGAStripOutput", "Strip output from FPGA format"};
+        SG::WriteHandleKey<std::vector<uint32_t>> m_FPGAPixelOutput{this, "FPGAOutputPixelKey", "FPGAPixelOutput", "Pixel output from FPGA format"};
+        SG::WriteHandleKey<std::vector<uint32_t>> m_FPGAStripOutput{this, "FPGAOutputStripKey", "FPGAStripOutput", "Strip output from FPGA format"};
+
+        SG::ReadHandleKey<int> m_FPGAPixelRDOSize{this, "FPGAEncodedPixelSizeKey", "FPGAEncodedPixelSizeRDOs", "Size of the Pixel RDO converted to FPGA format"};
+        SG::ReadHandleKey<int> m_FPGAStripRDOSize{this, "FPGAEncodedStripSizeKey", "FPGAEncodedStripSizeRDOs", "Size of the Strip RDO converted to FPGA format"};
+
 
         Gaudi::Property<int> m_FPGAThreads{this, "FPGAThreads", 1, "number of FPGA threads to initialize"}; 
         

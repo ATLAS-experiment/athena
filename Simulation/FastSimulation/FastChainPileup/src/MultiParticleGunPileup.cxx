@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // MultiPY8Pileup.cxx - extension of GenModule_i to generate multiple pileup
@@ -131,7 +131,7 @@ StatusCode MultiParticleGunPileup::callGenerator() {
 	gp->set_momentum(mom);
 	if (p.m_mass)
 	  gp->set_generated_mass(p.m_mass);
-	gv->add_particle_out(gp);
+	gv->add_particle_out(std::move(gp));
       }
 //-----------------------------------------
 

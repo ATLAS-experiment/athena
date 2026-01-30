@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 //
 // Dear emacs, this is -*- c++ -*-
 //
@@ -14,22 +14,15 @@
 
 namespace BasicClusterInfoCalculator
 {
-
-  struct ClusterInfoCalculatorTemporaries
-  {
-    float seedCellPhi[CaloRecGPU::NMaxClusters];
-  };
-
   void register_kernels(IGPUKernelSizeOptimizer & optimizer);
 
   void updateSeedCellProperties(CaloRecGPU::EventDataHolder & holder,
-                                CaloRecGPU::Helpers::CUDA_kernel_object<ClusterInfoCalculatorTemporaries> temps,
                                 const CaloRecGPU::ConstantDataHolder & instance_data,
                                 const IGPUKernelSizeOptimizer & optimizer,
                                 const bool synchronize = false,
                                 CaloRecGPU::CUDA_Helpers::CUDAStreamPtrHolder stream_to_use = {});
 
-  void calculateClusterProperties(CaloRecGPU::EventDataHolder & holder, CaloRecGPU::Helpers::CUDA_kernel_object<ClusterInfoCalculatorTemporaries> temps,
+  void calculateClusterProperties(CaloRecGPU::EventDataHolder & holder,
                                   const CaloRecGPU::ConstantDataHolder & instance_data,
                                   const IGPUKernelSizeOptimizer & optimizer,
                                   const bool synchronize = false,

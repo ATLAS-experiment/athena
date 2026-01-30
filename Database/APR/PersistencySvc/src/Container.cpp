@@ -1,20 +1,20 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "Container.h"
 #include "StorageSvc/FileDescriptor.h"
-#include "StorageSvc/IStorageExplorer.h"
 #include "StorageSvc/DbOption.h"
+#include "StorageSvc/DbDatabase.h"
+#include "StorageSvc/DbContainer.h"
+#include "StorageSvc/DbConnection.h"
 #include "TokenIterator.h"
 
 pool::PersistencySvc::Container::Container( FileDescriptor& fileDescriptor,
-                                            IStorageExplorer& storageExplorer,
                                             long technology,
                                             const std::string& name ):
   pool::IContainer( name ),
   m_fileDescriptor( fileDescriptor ),
-  m_storageExplorer( storageExplorer ),
   m_technology( technology )
 {}
 
@@ -25,8 +25,7 @@ pool::ITokenIterator*
 pool::PersistencySvc::Container::tokens()
 {
   return new pool::PersistencySvc::TokenIterator( m_fileDescriptor,
-                                                  this->name(),
-                                                  m_storageExplorer);
+                                                  this->name() );
 }
 
 const std::string&
@@ -60,16 +59,17 @@ pool::PersistencySvc::Container::attributeOfType( const std::string& attributeNa
                                                   const std::string& option )
 {
   pool::DbOption containerOption( attributeName, option );
-  pool::DbStatus sc = m_storageExplorer.getContainerOption( m_fileDescriptor,
-                                                            this->name(),
-                                                            containerOption );
-  if ( !sc.isSuccess() ) return false;
-  if ( containerOption.i_getValue( typeInfo, data ).isSuccess() ) {
-    return true;
+  DbConnection* dbc = dynamic_cast<DbConnection*>(m_fileDescriptor.dbc());
+  if ( !dbc ) {
+     return false;
   }
-  else {
+  DbDatabase  dbH( static_cast<DbDatabaseObj*>(dbc->handle()));
+  DbContainer cntH(dbH.find(this->name()));
+  if( !cntH.isValid() and !cntH.open(dbH, this->name(), 0, dbH.type(), pool::READ).isSuccess() ) {
     return false;
   }
+  if( !cntH.getOption(containerOption).isSuccess() ) return false;
+  return containerOption.i_getValue( typeInfo, data ).isSuccess();
 }
 
 
@@ -80,15 +80,15 @@ pool::PersistencySvc::Container::setAttributeOfType( const std::string& attribut
                                                      const std::string& option )
 {
   pool::DbOption containerOption( attributeName, option );
-  pool::DbStatus sc = containerOption.i_setValue( typeInfo, const_cast<void*>( data ) );
-  if ( !sc.isSuccess() ) return false;
-  sc = m_storageExplorer.setContainerOption( m_fileDescriptor,
-                                             this->name(),
-                                             containerOption );
-  if ( sc.isSuccess() ) {
-    return true;
+  if( !containerOption.i_setValue(typeInfo, const_cast<void*>( data )).isSuccess() ) return false;
+  DbConnection* dbc = dynamic_cast<DbConnection*>(m_fileDescriptor.dbc());
+  if ( !dbc ) {
+     return false;
   }
-  else {
+  DbDatabase  dbH( static_cast<DbDatabaseObj*>(dbc->handle()));
+  DbContainer cntH(dbH.find(this->name()));
+  if( !cntH.isValid() and !cntH.open(dbH, this->name(), 0, dbH.type(), pool::READ).isSuccess() ) {
     return false;
   }
+  return cntH.setOption(containerOption).isSuccess();
 }

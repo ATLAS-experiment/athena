@@ -245,7 +245,7 @@ namespace MuonR4 {
                 const Amg::Vector3D locPos{xAOD::toEigen(simHit->localPosition())};
                 const Amg::Vector3D locDir{xAOD::toEigen(simHit->localDirection())};
 
-                const Amg::Transform3D &locToGlobal{readOutEle->localToGlobalTrans(gctx, readOutEle->layerHash(hitId))};
+                const Amg::Transform3D &locToGlobal{readOutEle->localToGlobalTransform(gctx, readOutEle->layerHash(hitId))};
                 const Amg::Vector3D globalHitPosition{locToGlobal * locPos};
 
                 // We could use the MuonDigitizationTool::hitTime which returns the global time
@@ -476,11 +476,11 @@ namespace MuonR4 {
                     const Identifier id = idHelper.channelID(digitID,
                                                                 idHelper.multilayer(digitID),
                                                                 idHelper.gasGap(digitID), strip_id);
-                    float threshold = 0;
-                    if (!thresholdData->getThreshold(id, threshold)) {
+                    std::optional<float> threshold = thresholdData->getThreshold(id);
+                    if (!threshold) {
                         THROW_EXCEPTION("Cannot find retrieve VMM threshold from conditions data base!");
                     }
-                    v_stripThresholdResponseAllHits.push_back(threshold);
+                    v_stripThresholdResponseAllHits.push_back(*threshold);
                 } else if (m_useThresholdScaling) {
                     Identifier id = idHelper.channelID(digitID,
                                                         idHelper.multilayer(digitID),

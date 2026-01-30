@@ -115,13 +115,13 @@ BOOST_AUTO_TEST_SUITE(SqliteRecordsetTest)
     DummySqlite db("dummyDb");
     boost::test_tools::output_test_stream output;
     // accessing a non-existing table does not throw, but gives INFO level message
-    const std::string infoMsg("SqliteRecordset      INFO porky table is not found in the database\n");
+    const std::string infoMsg("INFO porky table is not found in the database\n");
     //capture 'cout' inside this scope
     {
       cout_redirect guard( output.rdbuf( ) );
       BOOST_CHECK_NO_THROW(s.getData(db.ptr(), "porky"));
     }
-    BOOST_CHECK_EQUAL( output.str(), infoMsg);
+    BOOST_CHECK( output.str().find(infoMsg) != std::string::npos);
   }
   
   BOOST_AUTO_TEST_CASE(dbNotInCorrectFormat){
@@ -130,13 +130,13 @@ BOOST_AUTO_TEST_SUITE(SqliteRecordsetTest)
     boost::test_tools::output_test_stream output;
     // accessing an existing table in db with incorrect format 
     // (ancillary table doesn't exist) generates an error message
-    const std::string errMsg("SqliteRecordset     ERROR Error occurred when preparing to fetch data for tbl1\nSqliteRecordset     ERROR SQLite Error: no such column: tbl1_data_id\n");
+    const std::string errMsg("SQLite Error: no such column: tbl1_data_id");
     //capture 'cout' inside this scope
     {
       cout_redirect guard( output.rdbuf( ) );
       BOOST_CHECK_NO_THROW(s.getData(db.ptr(), "tbl1"));
     }
-    BOOST_CHECK_EQUAL( output.str(), errMsg);
+    BOOST_CHECK(output.str().find(errMsg) != std::string::npos);
     BOOST_CHECK_EQUAL(s.size(), 0 );
   }
   

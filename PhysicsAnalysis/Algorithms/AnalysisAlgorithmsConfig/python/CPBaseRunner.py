@@ -90,6 +90,21 @@ class CPBaseRunner(ABC):
                             help='Skip the first N events in the run, not first N events for each file. This is meant for debugging only. \nIn Eventloop, this option disable the cutbookkeeper algorithms due to technical reasons, and can only be ran in direct-driver.')
         return parser
 
+    def _mergeYamlconfig(self, yaml_path):
+        with open(yaml_path, "r", encoding="utf-8") as cfg_file:
+            import yaml
+            config_data = yaml.safe_load(cfg_file)
+            from AnalysisAlgorithmsConfig.ConfigText import combineConfigFiles
+            combined = combineConfigFiles(
+                config_data,
+                os.path.dirname(os.path.dirname(yaml_path)),
+                fragment_key="include",
+            )
+            if combined:
+                with open("merged_config.yaml", "w") as cfg:
+                    cfg.write(yaml.dump(config_data))
+            return config_data, combined
+
     def _readYamlConfig(self):
         yamlconfig = self._findYamlConfig(local=True)
         if yamlconfig is None:
@@ -97,14 +112,16 @@ class CPBaseRunner(ABC):
                                     'Check if you have a typo in -t/--text-config argument or missing file in the analysis configuration sub-directory.')
         self.logger.info(f"Found YAML config at: {yamlconfig}")
         self.logger.info("Setting up configuration based on YAML config:")
+        config_data, merged = self._mergeYamlconfig(yamlconfig)
+        if merged:
+            self.logger.info("Merged included fragments into main config.")
         from AnalysisAlgorithmsConfig.ConfigText import TextConfig
-        config = TextConfig(yamlconfig)
+        config = TextConfig(config=config_data)
         return config
-    
-    
+
     def _findYamlConfig(self, local=True):
         # Find local and abs path first
-        if local and (yamlConfig := CPBaseRunner.findLocalPathYamlConfig(self.args.text_config) is not None):
+        if local and ((yamlConfig := CPBaseRunner.findLocalPathYamlConfig(self.args.text_config)) is not None):
             return yamlConfig
         # Then search in the analysis repository and warn for duplicates
         elif (yamlConfig := CPBaseRunner.findRepoPathYamlConfig(self.args.text_config)):

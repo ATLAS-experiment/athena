@@ -11,8 +11,6 @@
 #include <vector>
 #include <filesystem>
 
-#include "FPHelpers.h"
-
 using namespace CaloRecGPU;
 
 CaloCellsCounterGPU::CaloCellsCounterGPU(const std::string & type, const std::string & name, const IInterface * parent):
@@ -21,32 +19,31 @@ CaloCellsCounterGPU::CaloCellsCounterGPU(const std::string & type, const std::st
 }
 
 
-namespace {
-
-
-struct size_struct
+namespace
 {
-  unsigned int total = 0, seed = 0, grow = 0, term = 0, invalid = 0, shared = 0;
-  template <class Str>
-  friend Str & operator << (Str & s, const size_struct & sst)
+  struct size_struct
   {
-    s << sst.total << " " << sst.seed << " " << sst.grow << " " << sst.term << " " << sst.invalid << " " << sst.shared;
-    return s;
-  }
-};
+    unsigned int total = 0, seed = 0, grow = 0, term = 0, invalid = 0, shared = 0;
+    template <class Str>
+    friend Str & operator << (Str & s, const size_struct & sst)
+    {
+      s << sst.total << " " << sst.seed << " " << sst.grow << " " << sst.term << " " << sst.invalid << " " << sst.shared;
+      return s;
+    }
+  };
 
-struct cluster_info_struct
-{
-  size_struct size;
-  float seed_snr = -9e99;
-  float seed_energy = -9e99;
-  template <class Str>
-  friend Str & operator << (Str & s, const cluster_info_struct & cis)
+  struct cluster_info_struct
   {
-    s << cis.size << " (" << cis.seed_snr << " " << cis.seed_energy << ")";
-    return s;
-  }
-};
+    size_struct size;
+    float seed_snr = -9e99;
+    float seed_energy = -9e99;
+    template <class Str>
+    friend Str & operator << (Str & s, const cluster_info_struct & cis)
+    {
+      s << cis.size << " (" << cis.seed_snr << " " << cis.seed_energy << ")";
+      return s;
+    }
+  };
 
 } // anonymous namespace
 
@@ -58,7 +55,6 @@ StatusCode CaloCellsCounterGPU::execute(const EventContext & ctx, const Constant
   //since we're only debugging, let this be as generic as possible.
 
   Helpers::CPU_object<CellInfoArr> cell_info(event_data.m_cell_info_dev);
-  Helpers::CPU_object<CellStateArr> cell_state(event_data.m_cell_state_dev);
   Helpers::CPU_object<ClusterInfoArr> clusters(event_data.m_clusters_dev);
 
   unsigned int gain_counts[GainConversion::num_gain_values()] = {0};
@@ -71,89 +67,182 @@ StatusCode CaloCellsCounterGPU::execute(const EventContext & ctx, const Constant
 
   std::vector<size_struct> cluster_counts(clusters->number);
 
-  std::vector<int> shared_cells;
-
-  for (int i = 0; i < NCaloCells; ++i)
+  if (clusters->has_cells_per_cluster())
     {
-      if (!cell_info->is_valid(i))
+      for (int i = 0; i < cell_info->number; ++i)
         {
-          continue;
-        }
-
-      const int gain = cell_info->gain[i];
-      ++gain_counts[gain - GainConversion::min_gain_value()];
-
-      const float energy = cell_info->energy[i];
-
-      const float SNR = std::abs( energy / cell_noise->get_noise(i, gain) );
-
-      const ClusterTag tag = cell_state->clusterTag[i];
-
-      const bool is_cluster = tag.is_part_of_cluster();
-      
-      global_cluster_counts.total += is_cluster;
-
-      if (SNR > m_seedThreshold)
-        {
-          ++global_counts.seed;
-          global_cluster_counts.seed += is_cluster;
-        }
-      else if (SNR > m_growThreshold)
-        {
-          ++global_counts.grow;
-          global_cluster_counts.grow += is_cluster;
-        }
-      else if (SNR > m_cellThreshold)
-        {
-          ++global_counts.term;
-          global_cluster_counts.term += is_cluster;
-        }
-      else
-        {
-          ++global_counts.invalid;
-          global_cluster_counts.invalid += is_cluster;
-        }
-
-      if (is_cluster)
-        {
-          if (tag.is_shared_between_clusters())
+          if (!cell_info->is_valid(cell_info->hashID[i]))
             {
-              shared_cells.push_back(i);
+              continue;
             }
-          const int cluster = tag.cluster_index();
-          const int other_cluster = tag.is_shared_between_clusters() ? tag.secondary_cluster_index() : cluster;
-          if (!tag.is_shared_between_clusters() && (SNR > cluster_max_snr[cluster] || (SNR == cluster_max_snr[cluster] && i > cluster_max_cell[cluster])))
-            {
-              cluster_max_snr[cluster] = SNR;
-              cluster_max_cell[cluster] = i;
-              cluster_max_energy[cluster] = std::abs(energy);
-            }
-          ++cluster_counts[cluster].total;
-          cluster_counts[other_cluster].total += (cluster != other_cluster);
 
-          global_cluster_counts.shared += tag.is_shared_between_clusters();
-          cluster_counts[cluster].shared += tag.is_shared_between_clusters();
-          cluster_counts[other_cluster].shared += tag.is_shared_between_clusters();
+          const int gain = cell_info->gain[i];
+          ++gain_counts[gain - GainConversion::min_gain_value()];
+
+          const float energy = cell_info->energy[i];
+
+          const float SNR = std::abs( energy / cell_noise->get_noise(cell_info->hashID[i], gain) );
 
           if (SNR > m_seedThreshold)
             {
-              ++cluster_counts[cluster].seed;
-              cluster_counts[other_cluster].seed += (cluster != other_cluster);
+              ++global_counts.seed;
             }
           else if (SNR > m_growThreshold)
             {
-              ++cluster_counts[cluster].grow;
-              cluster_counts[other_cluster].grow += (cluster != other_cluster);
+              ++global_counts.grow;
             }
           else if (SNR > m_cellThreshold)
             {
-              ++cluster_counts[cluster].term;
-              cluster_counts[other_cluster].term += (cluster != other_cluster);
+              ++global_counts.term;
             }
           else
             {
-              ++cluster_counts[cluster].invalid;
-              cluster_counts[other_cluster].invalid += (cluster != other_cluster);
+              ++global_counts.invalid;
+            }
+        }
+
+      std::vector<char> counted_cells(NCaloCells, 0);
+
+      for (int i = 0; i < clusters->number_cells; ++i)
+        {
+          const int cell_index = clusters->cells.indices[i];
+          const int cell_hash_ID = cell_info->hashID[cell_index];
+
+
+          const int gain = cell_info->gain[cell_index];
+          ++gain_counts[gain - GainConversion::min_gain_value()];
+
+          const float energy = cell_info->energy[cell_index];
+
+          const float SNR = std::abs( energy / cell_noise->get_noise(cell_hash_ID, gain) );
+
+          const bool is_new_cell = !counted_cells[cell_index];
+
+          if (is_new_cell)
+            {
+              counted_cells[cell_index] = 1;
+              ++global_cluster_counts.total;
+            }
+
+          const int cluster_index = clusters->clusterIndices[i];
+
+          if (SNR > cluster_max_snr[cluster_index] || (SNR == cluster_max_snr[cluster_index] && cell_hash_ID > cluster_max_cell[cluster_index]))
+            {
+              cluster_max_snr[cluster_index] = SNR;
+              cluster_max_cell[cluster_index] = cell_hash_ID;
+              cluster_max_energy[cluster_index] = std::abs(energy);
+            }
+
+          if (SNR > m_seedThreshold)
+            {
+              global_cluster_counts.seed += is_new_cell;
+              ++cluster_counts[cluster_index].seed;
+            }
+          else if (SNR > m_growThreshold)
+            {
+              global_cluster_counts.grow += is_new_cell;
+              ++cluster_counts[cluster_index].grow;
+            }
+          else if (SNR > m_cellThreshold)
+            {
+              global_cluster_counts.term += is_new_cell;
+              ++cluster_counts[cluster_index].term;
+            }
+          else
+            {
+              global_cluster_counts.invalid += is_new_cell;
+              ++cluster_counts[cluster_index].invalid;
+            }
+
+
+          ++cluster_counts[cluster_index].total;
+
+          global_cluster_counts.shared += !is_new_cell;
+          cluster_counts[cluster_index].shared += !is_new_cell;
+
+        }
+
+    }
+  else
+    {
+      for (int i = 0; i < cell_info->number; ++i)
+        {
+          if (!cell_info->is_valid(cell_info->hashID[i]))
+            {
+              continue;
+            }
+
+          const int gain = cell_info->gain[i];
+          ++gain_counts[gain - GainConversion::min_gain_value()];
+
+          const float energy = cell_info->energy[i];
+
+          const float SNR = std::abs( energy / cell_noise->get_noise(cell_info->hashID[i], gain) );
+
+          const ClusterTag tag = clusters->cells.tags[i];
+
+          const bool is_cluster = tag.is_part_of_cluster();
+
+          global_cluster_counts.total += is_cluster;
+
+          if (SNR > m_seedThreshold)
+            {
+              ++global_counts.seed;
+              global_cluster_counts.seed += is_cluster;
+            }
+          else if (SNR > m_growThreshold)
+            {
+              ++global_counts.grow;
+              global_cluster_counts.grow += is_cluster;
+            }
+          else if (SNR > m_cellThreshold)
+            {
+              ++global_counts.term;
+              global_cluster_counts.term += is_cluster;
+            }
+          else
+            {
+              ++global_counts.invalid;
+              global_cluster_counts.invalid += is_cluster;
+            }
+
+          if (is_cluster)
+            {
+              const int cluster = tag.cluster_index();
+              const int other_cluster = tag.is_shared_between_clusters() ? tag.secondary_cluster_index() : cluster;
+              if (!tag.is_shared_between_clusters() && (SNR > cluster_max_snr[cluster] || (SNR == cluster_max_snr[cluster] && i > cluster_max_cell[cluster])))
+                {
+                  cluster_max_snr[cluster] = SNR;
+                  cluster_max_cell[cluster] = i;
+                  cluster_max_energy[cluster] = std::abs(energy);
+                }
+              ++cluster_counts[cluster].total;
+              cluster_counts[other_cluster].total += (cluster != other_cluster);
+
+              global_cluster_counts.shared += tag.is_shared_between_clusters();
+              cluster_counts[cluster].shared += tag.is_shared_between_clusters();
+              cluster_counts[other_cluster].shared += tag.is_shared_between_clusters();
+
+              if (SNR > m_seedThreshold)
+                {
+                  ++cluster_counts[cluster].seed;
+                  cluster_counts[other_cluster].seed += (cluster != other_cluster);
+                }
+              else if (SNR > m_growThreshold)
+                {
+                  ++cluster_counts[cluster].grow;
+                  cluster_counts[other_cluster].grow += (cluster != other_cluster);
+                }
+              else if (SNR > m_cellThreshold)
+                {
+                  ++cluster_counts[cluster].term;
+                  cluster_counts[other_cluster].term += (cluster != other_cluster);
+                }
+              else
+                {
+                  ++cluster_counts[cluster].invalid;
+                  cluster_counts[other_cluster].invalid += (cluster != other_cluster);
+                }
             }
         }
     }
@@ -168,9 +257,6 @@ StatusCode CaloCellsCounterGPU::execute(const EventContext & ctx, const Constant
         }
     }
 
-  std::sort(shared_cells.begin(), shared_cells.end());
-
-
   const auto err1 = StandaloneDataIO::prepare_folder_for_output(std::string(m_savePath));
   if (err1 != StandaloneDataIO::ErrorState::OK)
     {
@@ -178,7 +264,7 @@ StatusCode CaloCellsCounterGPU::execute(const EventContext & ctx, const Constant
     }
 
   const std::filesystem::path save_file = m_savePath + "/" +  StandaloneDataIO::build_filename((m_filePrefix.size() > 0 ? m_filePrefix + "_counts" : "counts"),
-                                                                                                 ctx.evt(), m_fileSuffix, "txt", m_numWidth);
+                                                                                               ctx.evt(), m_fileSuffix, "txt", m_numWidth);
 
   std::ofstream out_file(save_file);
 
@@ -188,8 +274,8 @@ StatusCode CaloCellsCounterGPU::execute(const EventContext & ctx, const Constant
     }
 
   out_file << "Cell counts: " << global_counts << "\n\n";
-  
-  out_file << "Cells in clusters count: "<< global_cluster_counts << "\n\n";
+
+  out_file << "Cells in clusters count: " << global_cluster_counts << "\n\n";
   out_file << "Clusters:\n\n";
 
   for (const auto & it : cluster_sizes)
@@ -209,4 +295,3 @@ StatusCode CaloCellsCounterGPU::execute(const EventContext & ctx, const Constant
   return StatusCode::SUCCESS;
 
 }
-

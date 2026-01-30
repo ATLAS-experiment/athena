@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #include "xAODTracking/TrackingPrimitives.h"
 #include "Utils.h"
@@ -22,6 +22,7 @@ StatusCode HLTMinBiasTrkMonAlg::initialize()
   ATH_CHECK(m_lvl1EnergySumROIKey.initialize());
   ATH_CHECK(m_zFinderDataKey.initialize(SG::AllowEmpty));
   ATH_CHECK(m_vertexKey.initialize());
+  ATH_CHECK(m_trackSelectionTool.retrieve());
 
   return AthMonitorAlgorithm::initialize();
 }
@@ -34,11 +35,10 @@ StatusCode HLTMinBiasTrkMonAlg::finalize()
 
 StatusCode HLTMinBiasTrkMonAlg::fillHistograms(const EventContext& context) const
 {
-
   ATH_CHECK(monitorPurities(context));
   ATH_CHECK(monitorSPCounts(context));
   ATH_CHECK(monitorTrkCounts(context));
-  ATH_CHECK(m_trackSelectionTool.retrieve());
+
   return StatusCode::SUCCESS;
 }
 
@@ -109,13 +109,13 @@ StatusCode HLTMinBiasTrkMonAlg::monitorTrkCounts(const EventContext& context) co
   }
   ATH_CHECK(trkCountsHandle->size() == 1); // if object is present then it should have size == 1
   auto nTrkOnline = Scalar("nTrkOnline", trkCountsHandle->at(0)->getDetail<int>("ntrks"));
-  std::vector<int> counts = trkCountsHandle->at(0)->getDetail<std::vector<int>>("counts");
+  const std::vector<int>& counts = trkCountsHandle->at(0)->getDetail<std::vector<int>>("counts");
 
   int countTrkVtxOnline = -1;
   auto countsOnline = Collection("countsOnline", counts);
-  const std::vector<float> ptCutValues = trkCountsHandle->at(0)->getDetail<std::vector<float>>("pTcuts");
-  const std::vector<float> z0CutValues = trkCountsHandle->at(0)->getDetail<std::vector<float>>("z0cuts");
-  const std::vector<float> vtxCutValues = trkCountsHandle->at(0)->getDetail<std::vector<float>>("vertexZcuts");
+  const std::vector<float>& ptCutValues = trkCountsHandle->at(0)->getDetail<std::vector<float>>("pTcuts");
+  const std::vector<float>& z0CutValues = trkCountsHandle->at(0)->getDetail<std::vector<float>>("z0cuts");
+  const std::vector<float>& vtxCutValues = trkCountsHandle->at(0)->getDetail<std::vector<float>>("vertexZcuts");
   std::vector<std::string> descriptions(counts.size());
 
   for (size_t i = 0; i < countsOnline.size(); ++i) {
@@ -202,8 +202,6 @@ StatusCode HLTMinBiasTrkMonAlg::monitorTrkCounts(const EventContext& context) co
   auto onlTrkZ0 = Collection("onlTrkZ0", *onlineTrkHandle, [](const auto& trk) { return trk->z0(); });
   auto onlTrkHits = Collection("onlTrkHits", *onlineTrkHandle, getNhits);
 
-
-
   auto nMBTrkTrkOfflineRatio = Scalar("trkSelOfflineRatio", (offlineTrkHandle->size() == 0 ? -1 : static_cast<double>(nTrkOffline) / offlineTrkHandle->size()));
 
   auto L1TEHandle = SG::makeHandle(m_lvl1EnergySumROIKey, context);
@@ -242,8 +240,7 @@ StatusCode HLTMinBiasTrkMonAlg::monitorTrkCounts(const EventContext& context) co
 
       ATH_MSG_DEBUG("::monitorTrkCounts Chain " << trig << "  " << (trigDecTool->isPassed(trig, TrigDefs::requireDecision) ? "passed" : "did not pass"));
 
-
-      double nTrkRatio = offlineTrkHandle->size() > 0 ? static_cast<double>(offlineTrkHandle->size()) / static_cast<double>(trkCountsHandle->at(0)->getDetail<int>("ntrks")) : -1.0;
+      double nTrkRatio = nTrkOnline > 0 ? static_cast<double>(offlineTrkHandle->size()) / static_cast<double>(nTrkOnline) : -1.0;
       auto trkRatio = Scalar("nTrkRatio", nTrkRatio);
       fill(trig + "_Tracking", nTrkOffline, nTrkOfflineVtx, nAllTrkOffline, nTrkOnline, trkRatio, nMBTrkTrkOfflineRatio, pixelCL,
         PixBarr_SP, PixECA_SP, PixECC_SP,

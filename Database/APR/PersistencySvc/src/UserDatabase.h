@@ -9,6 +9,7 @@
 #include "PersistencySvc/ISession.h"
 #include "PersistencySvc/DatabaseSpecification.h"
 #include "PersistencySvc/ITechnologySpecificAttributes.h"
+#include "POOLCore/DbPrint.h"
 
 namespace pool {
   // forward declarations
@@ -29,7 +30,8 @@ namespace pool {
      *
      */
     class UserDatabase : virtual public IDatabase,
-                         virtual public ITechnologySpecificAttributes
+                         virtual public ITechnologySpecificAttributes,
+                         public APRMessaging
     {
     public:
       /// Constructor

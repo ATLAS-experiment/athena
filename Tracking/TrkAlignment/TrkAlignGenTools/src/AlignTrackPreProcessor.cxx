@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrkAlignGenTools/AlignTrackPreProcessor.h"
@@ -162,8 +162,8 @@ namespace Trk {
 
         // store fit matrices
         if (m_storeFitMatricesAfterRefit) {
-          at->setFullCovarianceMatrix(alignCache.m_fullCovarianceMatrix);
-          at->setDerivativeMatrix(alignCache.m_derivMatrix);
+          at->setFullCovarianceMatrix(alignCache.m_fullCovarianceMatrix.get());
+          at->setDerivativeMatrix(alignCache.m_derivMatrix.get());
         }
         if (m_fixMomentum)
           {

@@ -13,7 +13,7 @@
 #include "TileConditions/TileCablingSvc.h"
 
 // Athena includes
-#include "AthenaBaseComps/AthReentrantAlgorithm.h"
+#include "AthenaBaseComps/AthCondAlgorithm.h"
 #include "StoreGate/ReadCondHandleKey.h"
 #include "StoreGate/WriteCondHandleKey.h"
 #include "AthenaPoolUtilities/CondAttrListCollection.h"
@@ -30,7 +30,7 @@ class TileCablingService;
  * if it is not negative otherwise reference HV is used from Cesium folder. Using this information
  * the algorithm prepares TileDCSState condition object and put it into condition store.
  */
-class TileDCSCondAlg: public AthReentrantAlgorithm {
+class TileDCSCondAlg: public AthCondAlgorithm {
   public:
 
     TileDCSCondAlg(const std::string& name, ISvcLocator* pSvcLocator);

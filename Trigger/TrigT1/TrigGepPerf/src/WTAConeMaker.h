@@ -256,7 +256,7 @@ inline void WTAConeMaker::SeedCleaning()
                             m_SeedList.erase(m_SeedList.begin() + j); // Then, erase jth jet
                         }
                     }
-                    m_SeedList.push_back(IncomingSeedAsJet); // Add this new incoming seed as Jet, well localized protojet
+                    m_SeedList.push_back(std::move(IncomingSeedAsJet)); // Add this new incoming seed as Jet, well localized protojet
                 }
                 else
                 { // Incoming Seed is not the highest et, add seed to the ConstituentList
@@ -266,7 +266,7 @@ inline void WTAConeMaker::SeedCleaning()
             else
             { // When there is no association
                 WTAJet IncomingSeedAsJet = WTATrigObjToWTAJet(seed);
-                m_SeedList.push_back(IncomingSeedAsJet); // Add seed to the SeedList
+                m_SeedList.push_back(std::move(IncomingSeedAsJet)); // Add seed to the SeedList
             }
         } // Main merging loop
         SortByPt(m_SeedList); // PtSort the SeedList. This is important for Baseline seed cleaning!

@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 #====================================================================
 # BPHY16.py
 #====================================================================
@@ -127,9 +127,11 @@ def BPHY16Cfg(flags):
                                   MassMax                    = 500000,
                                   Chi2Max                    = 90)
 
-    BPHY16_SelectEvent = CompFactory.DerivationFramework.xAODStringSkimmingTool(name = "BPHY16_SelectEvent",
-                                            expression = "count(BPHY16FourTrack.passed_FourTracks) > 0")
-
+    from DerivationFrameworkTools.DerivationFrameworkToolsConfig import (
+        xAODStringSkimmingToolCfg)
+    BPHY16_SelectEvent = acc.getPrimaryAndMerge(xAODStringSkimmingToolCfg(
+        flags, name = "BPHY16_SelectEvent",
+        expression = "count(BPHY16FourTrack.passed_FourTracks) > 0"))
 
     augTools = [BPHY16_Reco_mumu, BPHY16_Select_Upsi, BPHY16FourTrackSelectAndWrite, BPHY16_Select_FourTrack, BPHY16_Revertex, BPHY16_Select_TwoTrack]
     skimTools = [BPHY16_SelectEvent]

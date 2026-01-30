@@ -13,7 +13,6 @@ namespace pool {
 
   // forward declarations
   class FileDescriptor;
-  class IStorageExplorer;
 
   namespace PersistencySvc {
 
@@ -27,7 +26,6 @@ namespace pool {
                       virtual public ITechnologySpecificAttributes {
     public:
       Container( FileDescriptor& fileDescriptor,
-                 IStorageExplorer& storageExplorer,
                  long technology,
                  const std::string& name );
       
@@ -67,9 +65,6 @@ namespace pool {
     private:
       /// Reference to file descriptor of the parent database
       FileDescriptor& m_fileDescriptor;
-      
-      /// Reference to the storage explorer
-      IStorageExplorer& m_storageExplorer;
       
       /// The technology identifier
       long m_technology;

@@ -2,7 +2,6 @@
   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-// $Id: DbReflex.cpp 717955 2016-01-15 13:34:52Z mnowak $
 //====================================================================
 //  Package    : StorageSvc (The POOL project)
 //
@@ -140,9 +139,9 @@ const TypeH DbReflex::forGuid(const Guid& id)
         if( typ ) {
            Guid g( guid( typ ) );  // call this to update guid->type maps
            if( g != id ) {
-              // inconsistency with XML and hardcoded GUID??
-              log << DbPrintLvl::Error << "GUID query for " << id << " found GUID missmatch! "
-                  << el.second << " -> " << g << DbPrint::endmsg;
+               // inconsistency with XML and hardcoded GUID??
+               log << MSG::ERROR << "GUID query for " << id << " found GUID mismatch! "
+                   << el.second << " -> " << g << endmsg;
            }
         }
         return typ;
@@ -153,7 +152,7 @@ const TypeH DbReflex::forGuid(const Guid& id)
   std::lock_guard<std::mutex> lock (guidScanMutex);
 
   // GUID not in the map: scan all known types. refresh the map
-  log << DbPrintLvl::Warning << " doing GUID scan on ALL types for Class ID=" << id << DbPrint::endmsg;
+  log << MSG::WARNING << " doing GUID scan on ALL types for Class ID=" << id << endmsg;
 
   // disable TClass autoloading/parsing, restore settings on return
   class AutoloadGuard {
@@ -174,18 +173,18 @@ const TypeH DbReflex::forGuid(const Guid& id)
      TypeH t = TypeH::TypeAt(i); // This may change/increase TypeH::TypeSize(), can't optimize
      size_t sz_new = TypeH::TypeSize();
      if (sz_new > sz) {
-        log << DbPrintLvl::Debug << " ROOT gClassTable size increase for " << t.Name() << DbPrint::endmsg;
+        log << MSG::DEBUG << " ROOT gClassTable size increase for " << t.Name() << endmsg;
         sz = sz_new;
      }
      if( t.IsClass() || t.IsStruct() )  {
         Guid g = guid(t);
         if( ::memcmp(&g, &id, sizeof(Guid))==0 )  {
-           log << DbPrintLvl::Debug << "Resolved class ID " << id << " to " << t.Name() << DbPrint::endmsg;
+           log << MSG::DEBUG << "Resolved class ID " << id << " to " << t.Name() << endmsg;
            return t;
         }
      }
   }
 
-  log << DbPrintLvl::Warning << "Type lookup for class ID " << id << " failed" << DbPrint::endmsg; 
+  log << MSG::WARNING << "Type lookup for class ID " << id << " failed" << endmsg; 
   return TypeH();
 }

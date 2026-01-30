@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 #====================================================================
 # DAOD_FTAG5.py
 # This defines DAOD_FTAG5, an unskimmed DAOD format for Run 3.
@@ -30,10 +30,11 @@ def FTAG5KernelCfg(flags, name='FTAG5Kernel', **kwargs):
     # filter leptons
     lepton_skimming_expression = 'count( (Muons.pt > 18*GeV) && (0 == Muons.muonType || 1 == Muons.muonType || 4 == Muons.muonType) ) + count(( Electrons.pt > 18*GeV) && ((Electrons.Loose) || (Electrons.DFCommonElectronsLHLoose))) >= 2 && count( (Muons.pt > 25*GeV) && (0 == Muons.muonType || 1 == Muons.muonType || 4 == Muons.muonType) ) + count(( Electrons.pt > 25*GeV) && ((Electrons.Loose) || (Electrons.DFCommonElectronsLHLoose))) >= 1'
 
-    FTAG5LeptonSkimmingTool = CompFactory.DerivationFramework.xAODStringSkimmingTool(
-            name = "FTAG5LeptonSkimmingTool",
-            expression = lepton_skimming_expression )
-    acc.addPublicTool(FTAG5LeptonSkimmingTool)
+    from DerivationFrameworkTools.DerivationFrameworkToolsConfig import (
+        xAODStringSkimmingToolCfg)
+    FTAG5LeptonSkimmingTool = acc.getPrimaryAndMerge(
+        xAODStringSkimmingToolCfg(flags, name = "FTAG5LeptonSkimmingTool",
+                                  expression = lepton_skimming_expression))
 
     # Finally the kernel itself
     thinningTools = []

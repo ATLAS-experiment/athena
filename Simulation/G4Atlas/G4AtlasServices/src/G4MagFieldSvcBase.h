@@ -13,7 +13,6 @@
 
 // G4Atlas includes
 #include "G4AtlasInterfaces/IG4FieldSvc.h"
-#include "G4AtlasTools/ThreadLocalHolder.h"
 
 // Forward declarations
 class G4MagneticField;
@@ -43,10 +42,6 @@ class G4MagFieldSvcBase : public extends<AthService, IG4FieldSvc> {
 
   /// This method must be overridden by concrete tools to create a new field.
   virtual G4MagneticField* makeField() = 0;
-
-  /// Thread-local field object
-  thread_utils::ThreadLocalOwner<G4MagneticField> m_fieldHolder;
-
 };
 
 #endif // G4ATLASSERVICES_G4AtlasFieldTool_H

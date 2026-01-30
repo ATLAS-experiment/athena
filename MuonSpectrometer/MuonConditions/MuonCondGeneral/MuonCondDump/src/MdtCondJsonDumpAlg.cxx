@@ -110,7 +110,7 @@ void MdtCondJsonDumpAlg::dumpIdentifier(const Identifier& id,
     ostr<<"     \"tube:\": \""<<idHelper.tube(id);
     ostr<<(trailingComma ? "," : "")<<std::endl;
 }
-void MdtCondJsonDumpAlg::dumpDeadChannels(const std::set<Identifier>& channels, 
+void MdtCondJsonDumpAlg::dumpDeadChannels(const std::unordered_set<Identifier>& channels, 
                                           std::ostream& ostr, 
                                           bool dumpMultiLayer,
                                           bool dumpLayer, bool dumpTube) const {

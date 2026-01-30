@@ -124,7 +124,7 @@ StatusCode MuSAVtxFitterTool::doMuSAVtxFit(std::vector<MuSAVtxFitterTool::WrkVrt
     }
 
     // extrapolate SA muons only if we have enough candidates to form a vertex
-    std::vector<std::unique_ptr<xAOD::TrackParticle>> extrapolatedMuSATracks;
+    std::vector<std::shared_ptr<xAOD::TrackParticle>> extrapolatedMuSATracks;
     std::map<const xAOD::TrackParticle*, const xAOD::Muon*> muonToExtrapolatedTrackMap;
     for (const auto muon : candidateSAmuons) {
         const xAOD::TrackParticle* MuSAMSTP = muon->trackParticle(xAOD::Muon::MuonSpectrometerTrackParticle);
@@ -133,7 +133,8 @@ StatusCode MuSAVtxFitterTool::doMuSAVtxFit(std::vector<MuSAVtxFitterTool::WrkVrt
             ATH_MSG_DEBUG("Failed to extrapolate MuSA track, skipping!");
             continue;
         }
-        extrapolatedMuSATracks.push_back(std::move(extrapolatedMuSATrack));
+        //Convert unique_ptr to shared pointer to allow ownership complications later.
+        extrapolatedMuSATracks.emplace_back(extrapolatedMuSATrack.release());
         muonToExtrapolatedTrackMap[extrapolatedMuSATracks.back().get()] = muon;
         ATH_MSG_VERBOSE("Extrapolated MuSA track! Total extrapolated so far: " << extrapolatedMuSATracks.size());
     }
@@ -144,15 +145,14 @@ StatusCode MuSAVtxFitterTool::doMuSAVtxFit(std::vector<MuSAVtxFitterTool::WrkVrt
     }
 
     std::unique_ptr<Trk::IVKalState> state = m_vertexFitter->makeState(ctx);
+    std::vector<const xAOD::TrackParticle*> tracksToFit(2);
+    std::vector<const xAOD::NeutralParticle*> dummyNeutrals;
     // Loop over all unique pairs.
     for (unsigned int i = 0; i < extrapolatedMuSATracks.size(); i++) {
         for (unsigned int j = i+1; j < extrapolatedMuSATracks.size(); j++) {
             MuSAVtxFitterTool::WrkVrt MuSACandidate;
-            std::vector<const xAOD::TrackParticle*> tracksToFit = {
-                extrapolatedMuSATracks[i].get(),
-                extrapolatedMuSATracks[j].get()
-            };
-            std::vector<const xAOD::NeutralParticle*> dummyNeutrals;
+            tracksToFit[0] = extrapolatedMuSATracks[i].get();
+            tracksToFit[1] = extrapolatedMuSATracks[j].get();
             StatusCode res = m_vertexFitter->VKalVrtFit(tracksToFit, dummyNeutrals, 
                                                         MuSACandidate.pos, MuSACandidate.mom, 
                                                         MuSACandidate.charge, MuSACandidate.cov, 
@@ -160,19 +160,15 @@ StatusCode MuSAVtxFitterTool::doMuSAVtxFit(std::vector<MuSAVtxFitterTool::WrkVrt
                                                         MuSACandidate.chi2, *state);
             if (res.isSuccess()) {
                 ATH_MSG_DEBUG("MuSA vertex fit successful!");
-                // Transfer persistent ownership by converting the unique_ptr to a shared_ptr
-                // for both tracks used in this candidate (lets unused tracks go out of scope peacefully while keeping used ones)
-                auto sharedTrack1 = std::make_shared<const xAOD::TrackParticle>(*extrapolatedMuSATracks[i]);
-                auto sharedTrack2 = std::make_shared<const xAOD::TrackParticle>(*extrapolatedMuSATracks[j]);
-                MuSACandidate.newExtrapolatedTracks.push_back(sharedTrack1);
-                MuSACandidate.newExtrapolatedTracks.push_back(sharedTrack2);
+                MuSACandidate.newExtrapolatedTracks.push_back(extrapolatedMuSATracks[i]);
+                MuSACandidate.newExtrapolatedTracks.push_back(extrapolatedMuSATracks[j]);
                 MuSACandidate.muonCandidates = { 
                     muonToExtrapolatedTrackMap[tracksToFit[0]],
                     muonToExtrapolatedTrackMap[tracksToFit[1]]
                 };
                 MuSACandidate.minOpAng = muonToExtrapolatedTrackMap[tracksToFit[0]]->p4().DeltaR(
                                           muonToExtrapolatedTrackMap[tracksToFit[1]]->p4());
-                workVerticesContainer.emplace_back(MuSACandidate);
+                workVerticesContainer.emplace_back(std::move(MuSACandidate));
             } else {
                 ATH_MSG_DEBUG("MuSA vertex fit failed!");
             }
@@ -195,7 +191,7 @@ StatusCode MuSAVtxFitterTool::doPostFitSelections(std::vector<MuSAVtxFitterTool:
 
     //remove any vertices marked as bad
     workVerticesContainer.erase(std::remove_if(workVerticesContainer.begin(), workVerticesContainer.end(), 
-        [&](const MuSAVtxFitterTool::WrkVrt& vtx) { return !vtx.isGood; }), workVerticesContainer.end());
+        [](const MuSAVtxFitterTool::WrkVrt& vtx) { return !vtx.isGood; }), workVerticesContainer.end());
 
     return StatusCode::SUCCESS;
 }
@@ -238,7 +234,7 @@ StatusCode MuSAVtxFitterTool::selectBestVertices(std::vector<MuSAVtxFitterTool::
 
     //remove any vertices marked as bad
     workVerticesContainer.erase(std::remove_if(workVerticesContainer.begin(), workVerticesContainer.end(), 
-        [&](const MuSAVtxFitterTool::WrkVrt& vtx) { return !vtx.isGood; }), workVerticesContainer.end());
+        [](const MuSAVtxFitterTool::WrkVrt& vtx) { return !vtx.isGood; }), workVerticesContainer.end());
 
     return StatusCode::SUCCESS;
     

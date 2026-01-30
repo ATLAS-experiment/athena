@@ -21,7 +21,7 @@
 
 LArOFCCondAlg::LArOFCCondAlg(const std::string &name,
         ISvcLocator *pSvcLocator)
-    : ::AthAlgorithm(name, pSvcLocator),
+    : ::AthCondAlgorithm(name, pSvcLocator),
     m_LArOnOffIdMappingObjKey("LArOnOffIdMap"),
     m_LArShapeObjKey("LArShapeSym"),
     m_LArNoiseObjKey("LArNoiseSym"),
@@ -81,10 +81,10 @@ StatusCode LArOFCCondAlg::initialize() {
     return StatusCode::SUCCESS;
 }
 
-StatusCode LArOFCCondAlg::execute() {
+StatusCode LArOFCCondAlg::execute(const EventContext& ctx) const {
 
     // WriteHandle setup
-    SG::WriteCondHandle<LArOFC> writeHandle(m_LArOFCObjKey);
+    SG::WriteCondHandle<LArOFC> writeHandle(m_LArOFCObjKey, ctx);
     // So the following should not be called usually?!
     if (writeHandle.isValid()) {
         ATH_MSG_DEBUG(
@@ -109,7 +109,7 @@ StatusCode LArOFCCondAlg::execute() {
     // Mapping helper
     const LArOnOffIdMapping *larOnOffIdMapping = nullptr;
     SG::ReadCondHandle<LArOnOffIdMapping> larOnOffIdMappingHdl{
-        m_LArOnOffIdMappingObjKey
+        m_LArOnOffIdMappingObjKey, ctx
     };
     larOnOffIdMapping = *larOnOffIdMappingHdl;
     if (larOnOffIdMapping == nullptr) {
@@ -120,7 +120,7 @@ StatusCode LArOFCCondAlg::execute() {
 
     // Get pointers to inputs
     // Retrieve validity ranges and determine their intersection
-    SG::ReadCondHandle<ILArShape> ShapeHdl{ m_LArShapeObjKey };
+    SG::ReadCondHandle<ILArShape> ShapeHdl{ m_LArShapeObjKey, ctx };
     // FIXME: should check if handle is properly created and/or check if handle is
     // properly retrieved
     // operator star of a ReadCondHandle returns a const pointer to type T
@@ -131,7 +131,7 @@ StatusCode LArOFCCondAlg::execute() {
     }
     writeHandle.addDependency(ShapeHdl);
 
-    SG::ReadCondHandle<LArAutoCorrTotal> AutoCorrTotalHdl{ m_LArAutoCorrTotalObjKey };
+    SG::ReadCondHandle<LArAutoCorrTotal> AutoCorrTotalHdl{ m_LArAutoCorrTotalObjKey, ctx };
     const LArAutoCorrTotal *larAutoCorrTotal = nullptr;
     larAutoCorrTotal= *AutoCorrTotalHdl;
     if (larAutoCorrTotal == nullptr) {
@@ -145,7 +145,7 @@ StatusCode LArOFCCondAlg::execute() {
     const ILArPedestal *larPedestal = nullptr;
 
     if (m_isMC) {
-        SG::ReadCondHandle<ILArNoise> NoiseHdl{ m_LArNoiseObjKey };
+        SG::ReadCondHandle<ILArNoise> NoiseHdl{ m_LArNoiseObjKey, ctx };
         larNoise = *NoiseHdl;
         if (larNoise == nullptr) {
             ATH_MSG_ERROR("Failed to retrieve object LArNoise");
@@ -153,7 +153,7 @@ StatusCode LArOFCCondAlg::execute() {
         }
 	writeHandle.addDependency(NoiseHdl);
     } else {
-        SG::ReadCondHandle<ILArPedestal> PedestalHdl{ m_LArPedestalObjKey };
+        SG::ReadCondHandle<ILArPedestal> PedestalHdl{ m_LArPedestalObjKey, ctx };
         larPedestal = *PedestalHdl;
         if (larPedestal == nullptr) {
             ATH_MSG_ERROR("Failed to retrieve object LArPedestal");

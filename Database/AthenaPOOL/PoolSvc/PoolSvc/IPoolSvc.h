@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef POOLSVC_IPOOLSVC_H
@@ -11,7 +11,7 @@
  **/
 
 #include "GaudiKernel/IService.h"
-#include "CollectionBase/ICollection.h"
+#include "CollectionSvc/ICollection.h"
 #include "PersistencySvc/ITransaction.h"
 #include "DataModelRoot/RootType.h"
 
@@ -64,8 +64,11 @@ public: // Non-static members
    /// @param maxFile [IN] maximum number of open input files.
    virtual unsigned int getInputContext(const std::string& label, unsigned int maxFile = 0) = 0;
 
-   /// @return map of all labelled input contexts.
-   virtual const std::map<std::string, unsigned int>& getInputContextMap() const  = 0;
+   /// @return copy of the map of all labelled input contexts.
+   virtual std::map<std::string, unsigned int> getInputContextMap() const  = 0;
+
+   /// @return size of the map of all labelled input contexts.
+   virtual unsigned int getInputContextMapSize() const = 0;
 
    /// @return the context.
    virtual const coral::Context* context() const = 0;

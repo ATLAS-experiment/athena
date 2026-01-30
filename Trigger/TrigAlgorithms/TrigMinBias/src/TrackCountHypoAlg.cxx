@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrackCountHypoAlg.h"
@@ -31,6 +31,7 @@ StatusCode TrackCountHypoAlg::initialize()
   ATH_CHECK(m_trackCountKey.initialize());
   renounce(m_tracksKey);
   ATH_CHECK(m_minPt.size() == m_maxZ0.size());
+  ATH_CHECK(m_minPt.size() == m_vertexZ.size());
 
   if (m_tracksKey.key() == "Undefined" || m_trackCountKey.key() == "Undefined")
   {
@@ -79,8 +80,8 @@ StatusCode TrackCountHypoAlg::execute(const EventContext &context) const
   float maxWeight = -1;
   auto linkToVertex =  findLink<xAOD::TrigCompositeContainer>(previousDecisionsHandle->at(0), featureString());
   if ( linkToVertex.link.isValid() ) {
-    auto all_verties = linkToVertex.link.getDataPtr();
-    for ( auto vtxInfo: *all_verties) {
+    auto all_vertices = linkToVertex.link.getDataPtr();
+    for ( auto vtxInfo: *all_vertices) {
       const float weight = vtxInfo->getDetail<float>("zfinder_vtx_weight");
       if ( weight > maxWeight ) {
         maxWeight = weight;

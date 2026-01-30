@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRT_READOUTGEOMETRY_TRT_DETECTORMANAGER_H
@@ -165,14 +165,6 @@ namespace InDetDD {
     //                                                                             //
     //-----------------------------------------------------------------------------//
 
-    // Alignment stuff
-    // DEPRECATED - kept for compatibilty with Lisbon CondDB
-    void addKey ATLAS_NOT_THREAD_SAFE (const std::string & key, int level);
-    // DEPRECATED use addChannel
-    void addKey(const std::string & key, int level, FrameType frame);
-
-
-
     /** Add alignable transforms: GeoModel/CLHEP based */
     void addAlignableTransform (int level,
 				const Identifier &id,
@@ -212,7 +204,7 @@ namespace InDetDD {
     virtual bool identifierBelongs(const Identifier & id) const override;
 
     /** Call back for alignment updates, DEPRECATED. Now registered in tool. */
-    StatusCode alignmentCallback( IOVSVC_CALLBACK_ARGS );
+    StatusCode alignmentCallback();
 
     /** Process new global DB folders for L1 and L2 **/
     virtual

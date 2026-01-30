@@ -1,4 +1,4 @@
-# Copyright (C) 2002-20204 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 import os,glob
 #The Import line  is  temporary for backwards compatibility of clients.
@@ -63,6 +63,18 @@ def checkSettingExists(key_,mydict_):
         keys+=[totallyStripped(k)]
     return key in keys
 
+def get_mg5_version():
+    """Return MadGraph version string (e.g. '3.5.1')
+
+    Used to include MG version in gridpack names for better traceability.
+    Reads version from $MADPATH/VERSION file.
+    """
+    with open(os.environ['MADPATH']+'/VERSION','r') as version_file:
+        for line in version_file:
+            if 'version' in line:
+                return line.split('=')[1].strip()
+    raise RuntimeError('Failed to find MadGraph/MadGraph5_aMC@NLO version')
+
 def is_version_or_newer(args):
     # also need to find out the version (copied from generate)
     import os
@@ -117,7 +129,6 @@ def get_runArgs_info(runArgs):
 
 
 def error_check(errors_a, return_code):
-    global MADGRAPH_CATCH_ERRORS
     if not MADGRAPH_CATCH_ERRORS:
         return
     unmasked_error = False
@@ -220,7 +231,6 @@ def write_test_script():
     mglog.info('to reproduce the error locally. If you make additional')
     mglog.info('modifications by hand (not using MadGraphControl) in your JO,')
     mglog.info('make sure that you check and modify the script as needed.\n\n')
-    global MADGRAPH_COMMAND_STACK
     mglog.info('# Script start; trim off columns left of the "#"')
     # Write offline stand-alone reproduction script
     with open('standalone_script.sh','w') as standalone_script:

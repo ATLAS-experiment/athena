@@ -8,7 +8,6 @@
 #include "../FirstChain/Egamma1_LArStrip_Fex_RowAware.h"
 #include "../FirstChain/EMB1CellsFromCaloCells.h"
 #include "../FirstChain/eFexRoIAlgTool.h"
-#include "../GlobalAlgs/ERatioAlgTool.h"
 #include "../FirstChain/Egamma1BDTAlgTool.h"
 #include "../FirstChain/Egamma1eRatioAlgTool.h"
 
@@ -28,7 +27,6 @@ DECLARE_COMPONENT(GlobalSim::Egamma1_LArStrip_Fex)
 DECLARE_COMPONENT(GlobalSim::Egamma1_LArStrip_Fex_RowAware)
 DECLARE_COMPONENT(GlobalSim::EMB1CellsFromCaloCells)
 DECLARE_COMPONENT(GlobalSim::eFexRoIAlgTool)
-DECLARE_COMPONENT(GlobalSim::ERatioAlgTool)
 DECLARE_COMPONENT(GlobalSim::Egamma1BDTAlgTool)
 DECLARE_COMPONENT(GlobalSim::Egamma1eRatioAlgTool)
 

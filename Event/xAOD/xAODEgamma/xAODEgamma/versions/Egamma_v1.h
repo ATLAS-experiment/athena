@@ -94,14 +94,11 @@ namespace xAOD {
     /// @brief The azimuthal angle (\f$\phi\f$) of the particle
     virtual double           phi() const override final;
 
-    /// @brief The invariant mass of the particle
-    virtual double           m() const override final;
-
     /// The total energy of the particle
-    virtual double           e() const  override final;
+    virtual double           e() const  override;
 
     /// @brief The true rapidity (y) of the particle
-    virtual double           rapidity() const override final;
+    virtual double           rapidity() const override;
 
     /// @brief Definition of the 4-momentum type
     typedef IParticle::FourMom_t FourMom_t;
@@ -125,7 +122,7 @@ namespace xAOD {
     GenVecFourMom_t genvecP4() const;
 
     /// @brief set the 4-vec
-    void setP4(float pt, float eta, float phi, float m);
+    void setPtEtaPhi(float pt, float eta, float phi);
 
     /// @brief set the Pt
     void setPt(float pt);
@@ -135,9 +132,6 @@ namespace xAOD {
 
     /// @brief set the phi
     void setPhi(float phi);
-
-    /// @brief set the Mass
-    void setM(float m);
 
     /// @}
 

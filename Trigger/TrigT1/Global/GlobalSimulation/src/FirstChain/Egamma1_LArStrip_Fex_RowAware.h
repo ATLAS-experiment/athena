@@ -1,5 +1,5 @@
 /*
- *   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+ *   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  */
 
 #ifndef GLOBALSIM_EGAMMA1_LARSTRIP_FEX_ROWAWARE_H
@@ -15,9 +15,8 @@
 #include "Egamma1_LArStrip_Fex.h"
 #include "CaloEvent/CaloCellContainer.h"
 
-#include "../IO/LArStripNeighborhoodContainer.h"
-#include "../IO/IeEmNbhoodTOBContainer.h"
-#include "../IO/IeEmTOB.h"
+#include "../IO/LArStripNeighborhood.h"
+#include "../IO/eEmNbhoodTOB.h"
 
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "xAODEventInfo/EventInfo.h"
@@ -70,7 +69,7 @@ namespace GlobalSim {
       false,
       "flag to enable terse dumps"};
     
-    SG::WriteHandleKey<IOBitwise::IeEmNbhoodTOBContainer>
+    SG::WriteHandleKey<IOBitwise::eEmNbhoodTOBContainer>
     m_neighKey {
       this,
       "stripNeighborhoodTOBKey",
@@ -87,13 +86,13 @@ namespace GlobalSim {
     StatusCode
     findNeighborhoods_RowAware(const std::vector<const xAOD::eFexEMRoI*>&,
 			       const std::vector<const CaloCell*>&,
-			       IOBitwise::IeEmNbhoodTOBContainer&,
+			       IOBitwise::eEmNbhoodTOBContainer&,
 			       std::vector<int>&) const;
 
     StatusCode
     findNeighborhood_RowAware(const xAOD::eFexEMRoI*,
 			      const std::vector<const CaloCell*>&,
-			      IOBitwise::IeEmNbhoodTOBContainer&,
+			      IOBitwise::eEmNbhoodTOBContainer&,
 			      std::vector<int>&) const;
 
     StatusCode

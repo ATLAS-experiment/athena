@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRTHWMAPCONDALG_H
@@ -8,24 +8,24 @@
 #include <string>
 #include <vector>
 
-#include "AthenaBaseComps/AthAlgorithm.h"
+#include "AthenaBaseComps/AthCondAlgorithm.h"
 #include "StoreGate/WriteCondHandleKey.h"
 #include "AthenaPoolUtilities/CondAttrListCollection.h"
 #include "Gaudi/Property.h"
 #include "TRT_ConditionsData/HWMap.h"
 
-class TRTHWMapCondAlg : public AthAlgorithm
+class TRTHWMapCondAlg : public AthCondAlgorithm
 {
  public:
   TRTHWMapCondAlg(const std::string& name, ISvcLocator* pSvcLocator);
   virtual ~TRTHWMapCondAlg() override;
 
   virtual StatusCode initialize() override;
-  virtual StatusCode execute() override;
+  virtual StatusCode execute(const EventContext& ctx) const override;
   virtual StatusCode finalize() override;
 
-  StatusCode build_BarrelHVLinePadMaps(EventIDRange& range, TRTCond::HWMap* writeCdo) const;
-  StatusCode build_EndcapHVLinePadMaps(EventIDRange& range, TRTCond::HWMap* writeCdo) const;
+  StatusCode build_BarrelHVLinePadMaps(const EventContext& ctx, EventIDRange& range, TRTCond::HWMap* writeCdo) const;
+  StatusCode build_EndcapHVLinePadMaps(const EventContext& ctx, EventIDRange& range, TRTCond::HWMap* writeCdo) const;
   int hashThisBarrelPad( int sector, int module, int padNum ) const;
   int hashThisEndcapCell( int sector, int wheel, int layer, int cellNum ) const;
 

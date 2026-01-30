@@ -6,16 +6,17 @@ from TrackOverlayRec.TrackOverlayEventFilterConfig import TrackOverlayDecisionAl
 from InDetConfig.TrackRecoConfig import InDetTrackRecoCfg
 
 def TrackOverlayRecoCfg(flags):
-    acc = ComponentAccumulator()  
+    acc = ComponentAccumulator()
     acc.addSequence(seqAND("MOSequence"), parentName='AthAlgSeq')
     acc.merge(TrackOverlayDecisionAlgCfg(flags), sequenceName='MOSequence')
     acc.addSequence(parOR('WorkMOSequence'), parentName='MOSequence')
-    flagsMO = flags.cloneAndReplace("TrackOverlay.ActiveConfig","TrackOverlay.MCOverlayConfig")
-    acc.merge(InDetTrackRecoCfg(flagsMO), sequenceName='WorkMOSequence')
+    acc.merge(InDetTrackRecoCfg(flags), sequenceName='WorkMOSequence')
 
     acc.addSequence(seqAND("TOSequence"), parentName='AthAlgSeq')
     acc.merge(InvertedTrackOverlayDecisionAlgCfg(flags), sequenceName='TOSequence')
     acc.addSequence(parOR('WorkTOSequence'), parentName='TOSequence')
-    flagsTO = flags.cloneAndReplace("TrackOverlay.ActiveConfig","TrackOverlay.TrackOverlayConfig")
+    flagsTO = flags.clone() # gives an unlocked copy
+    flagsTO.TrackOverlay.isTrackOverlaySeq = True
+    flagsTO.lock()
     acc.merge(InDetTrackRecoCfg(flagsTO), sequenceName='WorkTOSequence')
     return acc

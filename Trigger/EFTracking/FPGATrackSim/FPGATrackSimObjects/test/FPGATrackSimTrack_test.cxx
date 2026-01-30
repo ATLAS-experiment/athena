@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /*
@@ -11,6 +11,7 @@
 #include <cassert>
 #include "FPGATrackSimObjects/FPGATrackSimTrack.h"
 
+//coverity[UNCAUGHT_EXCEPT]
 int main(int, char**)
 {
   const double qoverpt(-0.123456), chi2(3.41159);

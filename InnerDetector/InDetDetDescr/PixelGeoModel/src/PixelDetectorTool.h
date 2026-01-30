@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef PIXELGEOMODEL_PIXELDETECTORTOOL_H
@@ -36,7 +36,7 @@ class PixelDetectorTool final : public GeoModelTool {
   virtual StatusCode clear() override final;
 
   // Callback function itself
-  virtual StatusCode align ATLAS_NOT_THREAD_SAFE (IOVSVC_CALLBACK_ARGS) override;
+  virtual StatusCode align() override;
 
 private:
   //

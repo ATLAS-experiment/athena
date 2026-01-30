@@ -13,10 +13,6 @@
 namespace Muon{
 
 using RIO_Author = IMMClusterBuilderTool::RIO_Author;
-SimpleMMClusterBuilderTool::SimpleMMClusterBuilderTool(const std::string& t, const std::string& n, const IInterface* p) :
-    AthAlgTool(t, n, p) {
-    declareInterface<IMMClusterBuilderTool>(this);
-}
 
 StatusCode SimpleMMClusterBuilderTool::initialize() {
     ATH_CHECK(m_idHelperSvc.retrieve());
@@ -35,15 +31,20 @@ StatusCode SimpleMMClusterBuilderTool::getClusters(const EventContext& ctx,
         return StatusCode::SUCCESS;
     }
     const MmIdHelper& idHelper{m_idHelperSvc->mmIdHelper()};
-    std::sort(MMprds.begin(), MMprds.end(), 
+    std::ranges::sort(MMprds, 
       [&](const MMPrepData& a, const MMPrepData& b){
-        const Identifier ida = a.identify(), idb = b.identify();
+        const Identifier ida{a.identify()};
+        const Identifier idb{b.identify()};
         const int mla = idHelper.multilayer(ida);
         const int mlb = idHelper.multilayer(idb);
-        if (mla!=mlb) return mla<mlb;
+        if (mla!=mlb) {
+            return mla < mlb;
+        }
         const int gga = idHelper.gasGap(ida);
         const int ggb = idHelper.gasGap(idb);
-        if (gga!=ggb) return gga<ggb;
+        if (gga!=ggb) {
+            return gga < ggb;
+        }
         return idHelper.channel(ida) < idHelper.channel(idb);        
       });
 
@@ -174,10 +175,11 @@ StatusCode SimpleMMClusterBuilderTool::getClusterPosition(const EventContext& ct
         totalCharge += charge; 
         const Amg::Vector3D lDir{NswClustering::toLocal(strip)};
         clusDir+= charge * lDir;
-        const Amg::Vector3D& globPos{strip.globalPosition()};
         ATH_MSG_VERBOSE("Adding a strip to the centroid calculation "<<m_idHelperSvc->toString(strip.identify())
-                     <<", charge=" << charge<<" global position: "<<Amg::toString(globPos, 2)
-                     <<", theta: "<<globPos.theta()<<", eta: "<<globPos.eta()<<", phi: "<<globPos.phi()
+                     <<", charge=" << charge<<" global position: "<<Amg::toString(strip.globalPosition(), 2)
+                     <<", theta: "<<strip.globalPosition().theta()
+                     <<", eta: "<<strip.globalPosition().eta()
+                     <<", phi: "<<strip.globalPosition().phi()
                      <<" -- local direction  theta: "<<lDir.theta()<<", eta: "<<lDir.eta()
                      <<", phi: "<<lDir.phi());
     }

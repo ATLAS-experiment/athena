@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 #ifndef XAODROOTACCESS_EVENT_H
 #define XAODROOTACCESS_EVENT_H
 
@@ -23,6 +23,7 @@
 
 // Forward declaration(s).
 class TClass;
+class TFile;
 namespace xAODPrivate {
 class HolderBucket;
 class Loader;
@@ -71,6 +72,25 @@ class Event : public TVirtualEvent,
   /// @name Setup functions
   /// @{
 
+  /// Default name of the event TTree
+  static const char* const EVENT_TREE_NAME;
+  static const char* const EVENT_RNTUPLE_NAME;
+  static const char* const METADATA_OBJECT_NAME;
+
+  /// static method to create an Event object and readFrom a file, given by a TFile. 
+  /// The the reader technology, TTree read by TEvent or RNTuple read by REvent, 
+  /// is determined by the looking into the file, given as a TFile object.
+  static std::unique_ptr<Event> createAndReadFrom(TFile& file);
+
+  /// Read from a new file - only needed for the second+ files
+  virtual StatusCode  readFrom(TFile& inFile) = 0;
+
+  /// Connect the object to an output file
+  virtual StatusCode writeTo(TFile& file) = 0;
+
+  /// Finish writing to an output file
+  virtual StatusCode finishWritingTo(TFile& file) = 0;
+
   /// Set this event object as the currently active one
   void setActive() const;
 
@@ -100,6 +120,14 @@ class Event : public TVirtualEvent,
 
   /// @name Persistent data accessor/modifier functions
   /// @{
+
+  /// Get how many entries are available from the current input file(s)
+  virtual ::Long64_t getEntries() const = 0;
+  /// Function loading a given entry of the input TTree
+  virtual ::Int_t getEntry(::Long64_t entry, ::Int_t getall = 0) = 0;
+
+  /// Method filling one event into the output tree
+  virtual ::Int_t fill() = 0;
 
   /// Get information about the input objects
   const EventFormat* inputEventFormat() const;
@@ -195,6 +223,7 @@ class Event : public TVirtualEvent,
   const std::string& getName(SG::sgkey_t hash) const override;
 
  protected:
+
   /// Function for retrieving an output object in a non-template way
   void* getOutputObject(SG::sgkey_t key, const std::type_info& ti) override;
   /// Function for retrieving an input object in a non-template way

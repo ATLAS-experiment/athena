@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef MUONCONDDATA_DEFS_H
 #define MUONCONDDATA_DEFS_H
@@ -36,7 +36,8 @@ namespace MuonCond {
 
     enum class CalibTechType{
         MM,
-        STGC        
+        STGC,
+        nTypes        
     };
 
 

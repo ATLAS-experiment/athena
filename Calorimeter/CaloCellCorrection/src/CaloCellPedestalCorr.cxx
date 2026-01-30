@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // ****************************************************************************************
@@ -25,6 +25,8 @@
 
 #include "CaloIdentifier/CaloCell_ID.h"
 
+#include "LArElecCalib/LArProvenance.h"
+
 // ======================================================
 // Constructor
 
@@ -48,6 +50,9 @@ StatusCode CaloCellPedestalCorr::initialize()
   ATH_CHECK(m_pedShiftKey.initialize(!m_isMC));
   ATH_CHECK(m_caloBCIDAvg.initialize(SG::AllowEmpty));
   
+  IdentifierHash hashMin;
+  m_cellId->calo_cell_hash_range(CaloCell_ID::LARFCAL, hashMin,m_larHashMax);
+
   ATH_MSG_INFO( "CaloCellPedestalCorr initialize() end"  );
   return StatusCode::SUCCESS;
 }
@@ -72,6 +77,9 @@ StatusCode CaloCellPedestalCorr::process( CaloCellContainer * theCellContainer, 
 
   for (CaloCell* theCell : *theCellContainer) {
     const IdentifierHash cellHash=theCell->caloDDE()->calo_hash();
+     //Do not correct cells that are masked 
+    if (cellHash<m_larHashMax && LArProv::test(theCell->provenance(),LArProv::DEADFEB)) continue;
+
     float pedestal=0;
     if (!m_isMC) { 
       const unsigned int dbGain = CaloCondUtils::getDbCaloGain(theCell->gain()); 

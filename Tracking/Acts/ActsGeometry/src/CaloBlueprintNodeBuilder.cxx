@@ -103,7 +103,10 @@ void  ActsTrk::CaloBlueprintNodeBuilder::fillMaps(caloSampleSurfaceMap_t& caloSa
 
   //for each calo sampling collect all the DDE in a vector    
   for (const CaloDetDescrElement* theDDE : m_caloDetSecrMgr->element_range()){
-    if (!theDDE) ATH_MSG_ERROR("Null pointer to CaloDetDescrElement");
+    if (!theDDE){ 
+      ATH_MSG_ERROR("Null pointer to CaloDetDescrElement");
+      continue;
+    }
     CaloCell_ID::CaloSample currentSample=theDDE->getSampling();
     caloSampleDDEElementsMap[currentSample].push_back(theDDE);
   }
@@ -112,7 +115,7 @@ void  ActsTrk::CaloBlueprintNodeBuilder::fillMaps(caloSampleSurfaceMap_t& caloSa
     for (auto currentSample : caloSampleList) {
       std::vector<const CaloDetDescrElement*> currentElements = caloSampleDDEElementsMap[currentSample];
       std::sort(currentElements.begin(), currentElements.end(), [](const CaloDetDescrElement* a, const CaloDetDescrElement* b) {return a->z() < b->z();});
-      caloSampleDDEElementsMap[currentSample] = currentElements;
+      caloSampleDDEElementsMap[currentSample] = std::move(currentElements);
     }
   };
 
@@ -225,11 +228,7 @@ std::shared_ptr<CylinderSurface> ActsTrk::CaloBlueprintNodeBuilder::generateCyli
 
   ATH_MSG_DEBUG("Cylinder radius and length are " << LArBRadius << " and " << LArBLength);
 
-  //Now we need to transform the local cylinder centred on 0,0,0 into the global
-  //atlas coordinate system. To do this we shift the cylinder in Z away from zero
-  //to the midpoint in the Z coordinates used to build the cylinder.
-  auto transform = Transform3(Translation3(0.0,0.0,lowZLarB + (lowZLarB + highZLarB) / 2.0));
-  auto surface = Surface::makeShared<CylinderSurface>(transform,LArBRadius, LArBLength);
+  auto surface = Surface::makeShared<CylinderSurface>(Transform3::Identity(), LArBRadius, LArBLength);
     
   return surface;
 
@@ -335,7 +334,7 @@ void ActsTrk::CaloBlueprintNodeBuilder::addCylindricalTrackingVolumeToCaloNode(C
       std::make_shared<CylinderVolumeBounds>(caloDimensionMap[volumeName+"MinR"], caloDimensionMap[volumeName+"MaxR"], caloDimensionMap[volumeName+"HalfLengthZ"]),
       volumeName);
 
-  for (auto surface : surfaces) trackingVolume->addSurface(surface);
+  for (auto surface : surfaces) trackingVolume->addSurface(std::move(surface));
 
 
   cylinder.addStaticVolume(std::move(trackingVolume));

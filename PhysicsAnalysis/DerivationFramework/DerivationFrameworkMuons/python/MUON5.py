@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 #====================================================================
 # DAOD_MUON5.py
 # This defines the component accumulator version of DAOD_MUON5 
@@ -344,8 +344,6 @@ def MUON5Cfg(flags):
                                             "Photons",
                                             "Muons",
                                             "AntiKt4EMPFlowJets",
-                                            "AntiKtVR30Rmax4Rmin02PV0TrackJets",
-                                            "BTagging_AntiKt4EMPFlow",
                                             "MET_Baseline_AntiKt4EMPFlow",
                                           ]
     
@@ -359,7 +357,6 @@ def MUON5Cfg(flags):
                                         "GSFConversionVertices",
                                         "GSFTrackParticles"
                                         "PrimaryVertices",
-                                        "AntiKtVR30Rmax4Rmin02PV0TrackJets",
                                         ]
 
     excludedVertexAuxData = "-vxTrackAtVertex.-MvfFitInfo.-isInitialized.-VTAV"

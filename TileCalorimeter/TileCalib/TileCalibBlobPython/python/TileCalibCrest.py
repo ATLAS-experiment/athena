@@ -10,7 +10,7 @@
 Python helper module for managing CREST DB connections and TileCalibBlobs.
 """
 
-import os, cppyy, base64, json, time, datetime
+import os, re, cppyy, base64, json, time, datetime
 
 from PyCool import cool # noqa: F401
 Blob = cppyy.gbl.coral.Blob
@@ -96,21 +96,34 @@ class TileBlobReaderCrest(TileCalibLogger):
                 self.__getIov((run,lumi),True)
         else:
             self.log().info('File %s' , (self.__db))
+            self.__api_instance = None
+            self.__tag = 'unknown'
             self.__iovList.append(((MINRUN,MINLBK),(MAXRUN, MAXLBK)))
             self.__iov = self.__runlumi2iov(self.__iovList[-1])
-            try:
-                with open(self.__db, 'r') as the_file:
-                    jdata = json.load(the_file)
-                    for chan in range(self.__modmin,self.__modmax):
-                        self.__create_drawer(jdata[str(chan)][0],chan)
-                    self.__create_comment(jdata['1000'][0])
-            except Exception as e:
-                self.log().critical( e )
-                raise
+            with open(self.__db, 'r') as the_file:
+                jdata = json.load(the_file)
+                if self.__copyBlob:
+                    self.payload = jdata
+                    return
+                for chan in range(self.__modmin,self.__modmax):
+                    try:
+                        blob=jdata[str(chan)][0]
+                    except Exception:
+                        blob=None
+                    self.__create_drawer(blob,chan)
+                try:
+                    blob=jdata['1000'][0]
+                except Exception:
+                    blob=None
+                self.__create_comment(blob)
 
     #____________________________________________________________________
-    def getFolderTag(self, folder, prefix, globalTag):
-        if globalTag=='CURRENT' or globalTag=='UPD4' or globalTag=='':
+    def getTag(self):
+        return self.__tag
+
+    #____________________________________________________________________
+    def getFolderTag(self, folder, prefix, globalTag, api=None):
+        if globalTag=='CURRENT' or globalTag=='UPD4' or globalTag=='' or globalTag=='HEAD':
             globalTag=TileCalibTools.getAliasFromFile('Current')
             log.info("Resolved CURRENT globalTag to \'%s\'", globalTag)
         elif globalTag=='CURRENTES' or globalTag=='UPD1':
@@ -126,18 +139,24 @@ class TileBlobReaderCrest(TileCalibLogger):
         if prefix is None:
             prefix = ''
             for f in folder.split('/'):
-                prefix+=f.capitalize()
+                if re.findall('[a-z]+',f) != [] and f!='CellNoise':
+                    prefix+=f
+                else:
+                    prefix+=f.capitalize()
         else:
             prefix=prefix.strip('-').split('-')[0]
-        if prefix.startswith('Calo'):
+        if prefix.startswith('Calo') and 'NoiseCell' not in prefix:
             prefix='CALO'+prefix[4:]
         if 'UPD1' in globalTag or 'UPD4' in globalTag or 'COND' not in globalTag:
             if prefix != '':
-                tag=prefix+'-'+globalTag
+                if globalTag.startswith(prefix) or globalTag.startswith(prefix.upper()):
+                    tag=globalTag
+                else:
+                    tag=prefix+'-'+globalTag
                 self.log().info("Resolved localTag \'%s\' to folderTag \'%s\'", globalTag,tag)
-            elif folder!='' and not (globalTag.startswith('Tile') or globalTag.startswith('CALO')):
+            elif folder!='' and not (globalTag.upper().startswith('TILE') or globalTag.upper().startswith('CALO')):
                 tag = TileCalibUtils.getFullTag(folder, globalTag)
-                if tag.startswith('Calo'):
+                if tag.startswith('Calo') and 'NoiseCell' not in tag:
                     tag='CALO'+tag[4:]
                 self.log().info("Resolved localTag \'%s\' to folderTag \'%s\'", globalTag,tag)
             else:
@@ -145,13 +164,16 @@ class TileBlobReaderCrest(TileCalibLogger):
                 self.log().info("Use localTag \'%s\' as is", tag)
         else:
             tag=None
-            tags=self.__api_instance.find_global_tag_map(globalTag)
-            if tags['size']==0:
+            if api:
+                tags=api.find_global_tag_map(globalTag)
+            else:
+                tags=self.__api_instance.find_global_tag_map(globalTag)
+            if tags.size==0:
                 raise Exception( "globalTag %s not found" % (globalTag) )
             else:
-                for i in range(tags['size']):
-                    t=tags['resources'][i]['tag_name']
-                    l=tags['resources'][i]['label']
+                for i in range(tags.size):
+                    t=tags.resources[i].tag_name
+                    l=tags.resources[i].label
                     if (prefix!='' and t.startswith(prefix)) or l==folder:
                         tag=t
                         self.log().info("Resolved globalTag \'%s\' to folderTag \'%s\'", globalTag,tag)
@@ -160,70 +182,84 @@ class TileBlobReaderCrest(TileCalibLogger):
         return tag
 
     #____________________________________________________________________
-    def getIovs(self,since,until):
-        run_lumi1=str((since[0]<<32)+since[1]+1)
-        run_lumi2=str((until[0]<<32)+until[1]+1)
-        MAXRUNLUMI1=str(MAXRUNLUMI+1)
-        iovs1=self.__api_instance.select_iovs(self.__tag,"0",run_lumi1,sort='id.since:DESC,id.insertionTime:DESC',size=1,snapshot=0)
-        iovs2=self.__api_instance.select_iovs(self.__tag,run_lumi2,MAXRUNLUMI1,sort='id.since:ASC,id.insertionTime:DESC',size=1,snapshot=0)
-        since1=0 if iovs1['size']==0 else iovs1['resources'][0]['since']
-        until1=MAXRUNLUMI if iovs2['size']==0 else iovs2['resources'][0]['since']
-        iovs=self.__api_instance.select_iovs(self.__tag,str(since1),str(until1),sort='id.since:ASC,id.insertionTime:DESC',size=999999,snapshot=0)
-        iovList=[]
-        if iovs['size']==0:
-            raise Exception( "IOV for tag %s IOV [%s,%s] - (%s,%s) not found" % (self.__tag,since[0],since[1],until[0],until[1]) )
+    def getIovs(self,since=(MINRUN,MINLBK),until=(MAXRUN,MAXLBK)):
+        if self.__api_instance is None:
+            return [self.__iovList[0][0]]
         else:
-            for i in range(iovs['size']):
-                iov=iovs['resources'][i]
-                since=int(iov['since'])
-                runS=since>>32
-                lumiS=since&0xFFFFFFFF
-                iovList.append((runS,lumiS))
-        return iovList
+            run_lumi1=str((since[0]<<32)+since[1]+1)
+            run_lumi2=str((until[0]<<32)+until[1]+1)
+            MAXRUNLUMI1=str(MAXRUNLUMI+1)
+            iovs1=self.__api_instance.select_iovs(self.__tag,"0",run_lumi1,sort='id.since:DESC,id.insertionTime:DESC',size=1,snapshot=0)
+            iovs2=self.__api_instance.select_iovs(self.__tag,run_lumi2,MAXRUNLUMI1,sort='id.since:ASC,id.insertionTime:DESC',size=1,snapshot=0)
+            since1=0 if iovs1.size==0 else iovs1.resources[0].since
+            until1=MAXRUNLUMI if iovs2.size==0 else iovs2.resources[0].since
+            iovs=self.__api_instance.select_iovs(self.__tag,str(since1),str(until1),sort='id.since:ASC,id.insertionTime:DESC',size=999999,snapshot=0)
+            iovList=[]
+            if iovs.size==0:
+                raise Exception( "IOV for tag %s IOV [%s,%s] - (%s,%s) not found" % (self.__tag,since[0],since[1],until[0],until[1]) )
+            else:
+                for i in range(iovs.size):
+                    iov=iovs.resources[i]
+                    since=int(iov.since)
+                    runS=since>>32
+                    lumiS=since&0xFFFFFFFF
+                    if (runS,lumiS) not in iovList:
+                        iovList.append((runS,lumiS))
+            return iovList
+
+    #____________________________________________________________________
+    def getIov(self, option=0):
+        if option!=0:
+            return self.__iov
+        else:
+            return self.__iovList[-1]
 
     #____________________________________________________________________
     def __getIov(self,runlumi,dbg=False):
-        run_lumi1=str((runlumi[0]<<32)+runlumi[1]+1)
-        MAXRUNLUMI1=str(MAXRUNLUMI+1)
-        iovs1=self.__api_instance.select_iovs(self.__tag,"0",run_lumi1,sort='id.since:DESC,id.insertionTime:DESC',size=1,snapshot=0)
-        iovs2=self.__api_instance.select_iovs(self.__tag,run_lumi1,MAXRUNLUMI1,sort='id.since:ASC,id.insertionTime:DESC',size=1,snapshot=0)
-        if iovs1['size']==0:
-            raise Exception( "IOV for tag %s run,lumi (%s,%s) not found" % (self.__tag,runlumi[0],runlumi[1]) )
+        if self.__api_instance is None:
+            pass
         else:
-            iov=iovs1['resources'][0]
-            since=int(iov['since'])
-            runS=since>>32
-            lumiS=since&0xFFFFFFFF
-            until=MAXRUNLUMI if iovs2['size']==0 else iovs2['resources'][0]['since']
-            runU=until>>32
-            lumiU=until&0xFFFFFFFF
-            hash=iov['payload_hash']
-            if dbg:
-                #self.log().info('Run,Lumi (%d,%d)' , runlumi)
-                self.log().info('IOV [%d,%d] - (%d,%d)' , runS,lumiS,runU,lumiU)
-                self.log().info('Insertion time %s' , iov['insertion_time'])
-                self.log().info('Hash %s' , hash)
-            payload = self.__api_instance.get_payload(hash=hash).decode('utf-8')
-            jdata=json.loads(payload)
-            #with open("payload.json", 'w') as the_file:
-            #    the_file.write(payload)
-            #    the_file.write('\n')
-            if self.__copyBlob:
-                self.payload = jdata
-                return
-            self.__iovList.append(((runS,lumiS),(runU, lumiU)))
-            self.__iov = self.__runlumi2iov(self.__iovList[-1])
-            for chan in range(self.__modmin,self.__modmax):
+            run_lumi1=str((runlumi[0]<<32)+runlumi[1]+1)
+            MAXRUNLUMI1=str(MAXRUNLUMI+1)
+            iovs1=self.__api_instance.select_iovs(self.__tag,"0",run_lumi1,sort='id.since:DESC,id.insertionTime:DESC',size=1,snapshot=0)
+            iovs2=self.__api_instance.select_iovs(self.__tag,run_lumi1,MAXRUNLUMI1,sort='id.since:ASC,id.insertionTime:DESC',size=1,snapshot=0)
+            if iovs1.size==0:
+                raise Exception( "IOV for tag %s run,lumi (%s,%s) not found" % (self.__tag,runlumi[0],runlumi[1]) )
+            else:
+                iov=iovs1.resources[0]
+                since=int(iov.since)
+                runS=since>>32
+                lumiS=since&0xFFFFFFFF
+                until=MAXRUNLUMI if iovs2.size==0 else iovs2.resources[0].since
+                runU=until>>32
+                lumiU=until&0xFFFFFFFF
+                hash=iov.payload_hash
+                if dbg:
+                    #self.log().info('Run,Lumi (%d,%d)' , runlumi)
+                    self.log().info('IOV [%d,%d] - (%d,%d)' , runS,lumiS,runU,lumiU)
+                    self.log().info('Insertion time %s' , iov.insertion_time)
+                    self.log().info('Hash %s' , hash)
+                payload = self.__api_instance.get_payload(hash=hash).decode('utf-8')
+                jdata=json.loads(payload)
+                #with open("payload.json", 'w') as the_file:
+                #    the_file.write(payload)
+                #    the_file.write('\n')
+                self.__iovList.append(((runS,lumiS),(runU, lumiU)))
+                self.__iov = self.__runlumi2iov(self.__iovList[-1])
+                if self.__copyBlob:
+                    self.payload = jdata
+                    return
+                for chan in range(self.__modmin,self.__modmax):
+                    try:
+                        blob=jdata[str(chan)][0]
+                    except Exception:
+                        blob=None
+                    self.__create_drawer(blob,chan)
                 try:
-                    blob=jdata[str(chan)][0]
+                    blob=jdata['1000'][0]
                 except Exception:
                     blob=None
-                self.__create_drawer(blob,chan)
-            try:
-                blob=jdata['1000'][0]
-            except Exception:
-                blob=None
-            self.__create_comment(blob)
+                self.__create_comment(blob)
         return
 
     #____________________________________________________________________
@@ -248,7 +284,10 @@ class TileBlobReaderCrest(TileCalibLogger):
     #____________________________________________________________________
     def __create_comment(self,b64string):
         if b64string is None or len(b64string)==0:
-            self.__commentBlob = None
+            if b64string is None:
+                self.__commentBlob = None
+            else:
+                self.__commentBlob = 0
             self.__comment = None
         else:
             blob1 = base64.decodebytes(bytes(b64string,'ascii'))
@@ -258,8 +297,11 @@ class TileBlobReaderCrest(TileCalibLogger):
 
     #____________________________________________________________________
     def __create_drawer(self,b64string,chan):
-        if b64string is None or len(b64string)==0:
-            self.__drawerBlob[chan] = None
+        if b64string is None or isinstance(b64string, (int, float)) or len(b64string)==0:
+            if b64string is None:
+                self.__drawerBlob[chan] = None
+            else:
+                self.__drawerBlob[chan] = 0
             self.__drawer[chan] = None
             return
         blob1 = base64.decodebytes(bytes(b64string,'ascii'))
@@ -280,9 +322,34 @@ class TileBlobReaderCrest(TileCalibLogger):
         elif typeName=='TileCalibDrawerOfc':
             self.__drawer[chan] = TileCalibDrawerOfc.getInstance(self.__drawerBlob[chan])
             self.log().debug( "typeName = Ofc " )
+        elif typeName=='TileCalibDrawerCmt':
+            self.__drawer[chan] = cppyy.gbl.CaloCondBlobFlt.getInstance(self.__drawerBlob[chan])
+            self.log().debug( "typeName = CaloFlt " )
         else:
-            raise Exception( "Invalid blob type requested: %s" % typeName )
+            self.__drawer[chan] = None
+            self.log().warn("Unknown blob type for chan %d - ignoring", chan)
         return
+
+    #____________________________________________________________________
+    def getPayload(self, runlumi=None, dbg=False):
+
+        if self.__remote and runlumi is not None and not self.__checkIov(runlumi):
+            self.__getIov(runlumi,dbg)
+
+        return self.payload
+
+    #____________________________________________________________________
+    def getBlob(self,ros, mod, runlumi=None, dbg=False):
+
+        if self.__remote and runlumi is not None and not self.__checkIov(runlumi):
+            self.__getIov(runlumi,dbg)
+
+        chanNum = getDrawerIdx(ros,mod)
+
+        if (chanNum>=0 and chanNum<len(self.__drawer)):
+            return self.__drawerBlob[chanNum]
+        else:
+            raise Exception( "Invalid drawer requested: %s %s" % (ros,mod) )
 
     #____________________________________________________________________
     def getDrawer(self,ros, mod, runlumi=None, dbg=False, useDefault=True):
@@ -290,22 +357,22 @@ class TileBlobReaderCrest(TileCalibLogger):
         if self.__remote and runlumi is not None and not self.__checkIov(runlumi):
             self.__getIov(runlumi,dbg)
 
-        if ros<0:
-            chanNum = mod
-        else:
-            chanNum = TileCalibUtils.getDrawerIdx(ros,mod)
+        chanNum = getDrawerIdx(ros,mod)
 
         if (chanNum>=0 and chanNum<len(self.__drawer)):
             drawer=self.__drawer[chanNum]
             if not useDefault and drawer is None:
-                return 0
+                if self.__drawerBlob[chanNum] is None:
+                    return None
+                else:
+                    return 0
             while drawer is None:
                 #=== no default at all?
                 if ros==0 and drawer==0:
                     raise Exception('No default available')
                 #=== follow default policy
-                ros,drawer = self.getDefault(ros,drawer)
-                chanNum = TileCalibUtils.getDrawerIdx(ros,drawer)
+                ros,mod = self.getDefault(ros,mod)
+                chanNum = getDrawerIdx(ros,mod)
                 drawer=self.__drawer[chanNum]
             return drawer
         elif (chanNum == 1000):
@@ -314,12 +381,15 @@ class TileBlobReaderCrest(TileCalibLogger):
             raise Exception( "Invalid drawer requested: %s %s" % (ros,mod) )
 
     #____________________________________________________________________
-    def getComment(self,runlumi=None):
+    def getComment(self,runlumi=None,split=False):
 
         if self.__remote and runlumi is not None and not self.__checkIov(runlumi):
             self.__getIov(runlumi)
         if self.__comment is not None:
-            return self.__comment.getFullComment()
+            if split:
+                return (self.__comment.getAuthor(),self.__comment.getComment(),self.__comment.getDate())
+            else:
+                return self.__comment.getFullComment()
         else:
             return "<no comment found>"
 
@@ -362,6 +432,91 @@ class TileBlobReaderCrest(TileCalibLogger):
 
         return (0,drawer1)
 
+    #____________________________________________________________________
+    def dumpIovs(self, iovList, rosmin, rosmax, drawermin, drawermax, option=1, comment=False, usenames=True):
+        """
+        Dumps statistics - how many non-empty modules exists in different IOVs
+        """
+
+        if len(iovList)>0:
+            alliovs={}
+            allmods={}
+            zeroiovs={}
+            nmod=0
+            rosrange=list(range(rosmin,rosmax))
+            if comment:
+                rosrange+=[9999]
+            for since in iovList:
+                iov="(%s,%s)" % since
+                allmod=""
+                missmod=""
+                zeromod=""
+                zero=0
+                miss=0
+                for ros in rosrange:
+                    if ros<0:
+                        (dmin,dmax) = (drawermin,drawermax)
+                    elif ros>4:
+                        (dmin,dmax) = (TileCalibUtils.getCommentChannel(),TileCalibUtils.getCommentChannel()+1)
+                    else:
+                        (dmin,dmax) = (drawermin,min(drawermax,TileCalibUtils.getMaxDrawer(ros)))
+                    for drawer in range(dmin,dmax):
+                        flt = self.getDrawer(ros, drawer, since, False, False)
+                        if ros<0 or ros>4:
+                            if drawer==TileCalibUtils.getCommentChannel():
+                                mod = "Comment"
+                            else:
+                                mod = "CH_"+str(getDrawerIdx(ros,drawer))
+                        elif usenames:
+                            mod = TileCalibUtils.getDrawerString(ros,drawer)
+                        else:
+                            mod = str(getDrawerIdx(ros,drawer))
+                        if mod not in allmods:
+                            allmods[mod] = ""
+                            nmod += 1
+                        if flt is not None:
+                            if flt==0:
+                                zero += 1
+                                zeromod += " " + mod
+                                allmod += " " + mod + "_zero"
+                                allmods[mod] += " " + iov + "_zero"
+                            else:
+                                allmod += " " + mod
+                                allmods[mod] += " " + iov
+                        else:
+                            miss+=1
+                            missmod += " " + mod
+                word = 'module' if usenames else 'COOL channel'
+                if miss==0 and nmod>1:
+                    alliovs[iov] = " All %s" % plural(nmod,word)
+                elif miss>0 and miss<10:
+                    alliovs[iov] = " %s present, %s missing:%s" % (plural(nmod-miss,word),plural(miss,word),missmod)
+                else:
+                    alliovs[iov] = "%s ; %s present, %s missing" % (allmod,plural(nmod-miss,word),plural(miss,word))
+                zeroiovs[iov] = (zero,zeromod)
+
+            if (option&1)==1:
+                print("")
+                for key,value in allmods.items():
+                    if value=="":
+                        value=" None"
+                    print("%s\t%s" % (key,value))
+            if (option&2)==2:
+                print("")
+                for key,value in alliovs.items():
+                    if value=="":
+                        value=" None"
+                    if zeroiovs[key] and zeroiovs[key][0]>0:
+                        if "_zero" not in value:
+                            print("%s\t%s ; zero-sized blobs for %d modules:%s" % (key,value,zeroiovs[key][0],zeroiovs[key][1]))
+                        else:
+                            print("%s\t%s ; zero-sized blobs for %d modules" % (key,value,zeroiovs[key][0]))
+                    else:
+                        print("%s\t%s" % (key,value))
+        else:
+            print("\nNo IOVs found")
+
+
 class TileBlobWriterCrest(TileCalibLogger):
     """
     TileBlobWriterCrest is a helper class, managing the details of
@@ -369,7 +524,7 @@ class TileBlobWriterCrest(TileCalibLogger):
     """
 
     #____________________________________________________________________
-    def __init__(self, db, folderPath, calibDrawerType, isMultiVersionFolder=True):
+    def __init__(self, db, folderPath, calibDrawerType, payload=None):
         """
         Input:
         - db        : db should be a database connection
@@ -382,6 +537,9 @@ class TileBlobWriterCrest(TileCalibLogger):
         #=== store db
         self.__db = db
         self.__folderPath = folderPath
+        self.__payload = payload
+        if payload is not None:
+            return
 
         #=== create default vectors based on calibDrawerType
         self.__calibDrawerType = calibDrawerType
@@ -394,6 +552,9 @@ class TileBlobWriterCrest(TileCalibLogger):
         elif calibDrawerType in ['TileCalibDrawerInt', 'Int']:
             self.__TileCalibDrawer = TileCalibDrawerInt
             self.__defVec = cppyy.gbl.std.vector('std::vector<unsigned int>')()
+        elif calibDrawerType in ['CaloCondBlobFlt', 'CaloFlt']:
+            self.__TileCalibDrawer = cppyy.gbl.CaloCondBlobFlt
+            self.__defVec = cppyy.gbl.std.vector('std::vector<float>')()
         else:
             raise Exception("Unknown calibDrawerType: %s" % calibDrawerType)
 
@@ -401,27 +562,39 @@ class TileBlobWriterCrest(TileCalibLogger):
         self.__drawerBlob = {drawerIdx:Blob() for drawerIdx in range(0, TileCalibUtils.max_draweridx())}
         self.__drawer = {}
     #____________________________________________________________________
-    def register(self, since=(MINRUN,MINLBK), tag=""):
+    def register(self, since=(MINRUN,MINLBK), tag="", chan=-1, payload=None):
         """
         Registers the folder in the database.
         - since: lower limit of IOV
         - tag  : The tag to write to
+        - chan : COOL channel to write, if negative - all COOL channels are written
+                 Comment channel is always written
 
         The interpretation of the 'since' inputs depends on their type:
         - tuple(int,int) : run and lbk number
         """
 
-        jdata = {}
-        for drawerIdx,blob in self.__drawerBlob.items():
-            b64string = str(base64.b64encode(blob.read()), 'ascii')
-            jdata[drawerIdx] = [b64string]
+        if self.__payload is None and payload is None:
+            jdata = {}
+            for drawerIdx,blob in self.__drawerBlob.items():
+                if chan<0 or drawerIdx==chan or drawerIdx==1000:
+                    if blob is None or blob==0:
+                        b64string = ''
+                    else:
+                        blob.seek(0)
+                        b64string = str(base64.b64encode(blob.read()), 'ascii')
+                    jdata[drawerIdx] = [b64string]
+        else:
+            if payload is not None:
+                self.__payload = payload
+            jdata = self.__payload
 
         (sinceRun, sinceLumi) = since
 
         if not self.__db or (self.__db and self.__db.endswith('.json')):
             # Writting into the json file
             fullTag = tag
-            if self.__folderPath and not (tag.startswith('Tile') or tag.startswith('Calo')):
+            if self.__folderPath and not (tag.upper().startswith('TILE') or tag.upper().startswith('CALO')):
                 fullTag = TileCalibUtils.getFullTag(self.__folderPath, tag)
             fileName = f"{fullTag}.{sinceRun}.{sinceLumi}.json"
             if self.__db:
@@ -434,7 +607,8 @@ class TileBlobWriterCrest(TileCalibLogger):
         #=== print info
         self.log().info( 'Writting tag "%s"', fullTag)
         self.log().info( '... since             : [%s,%s]' , sinceRun, sinceLumi)
-        self.log().info( '... with comment field: "%s"', self.getComment())
+        if self.__payload is None:
+            self.log().info( '... with comment field: "%s"', self.getComment())
         self.log().info( '... into file         : %s' , fileName)
 
     #____________________________________________________________________
@@ -443,8 +617,10 @@ class TileBlobWriterCrest(TileCalibLogger):
         Sets a general comment in the comment channel.
         """
         drawerIdx = TileCalibUtils.getCommentChannel()
-        commentBlob = self.__drawer.get(drawerIdx, None)
-        if not commentBlob:
+        commentBlob = self.__drawerBlob.get(drawerIdx, None)
+        if commentBlob:
+            commentBlob.resize(0)
+        else:
             commentBlob = Blob()
             self.__drawerBlob[drawerIdx] = commentBlob
 
@@ -467,7 +643,7 @@ class TileBlobWriterCrest(TileCalibLogger):
             else:
                 return comment.getFullComment()
         else:
-            return "<No general comment!>"
+            return "<no comment found>"
 
     #____________________________________________________________________
     def getDrawer(self, ros, drawer, calibDrawerTemplate=None):
@@ -477,11 +653,14 @@ class TileBlobWriterCrest(TileCalibLogger):
         """
 
         try:
-            drawerIdx = TileCalibUtils.getDrawerIdx(ros, drawer)
+            drawerIdx = getDrawerIdx(ros, drawer)
             calibDrawer = self.__drawer.get(drawerIdx, None)
 
             if not calibDrawer:
-                calibDrawer = self.__TileCalibDrawer.getInstance(self.__drawerBlob[drawerIdx], self.__defVec,0,0)
+                if self.__calibDrawerType in ['CaloCondBlobFlt', 'CaloFlt']:
+                    calibDrawer = self.__TileCalibDrawer.getInstance(self.__drawerBlob[drawerIdx])
+                else:
+                    calibDrawer = self.__TileCalibDrawer.getInstance(self.__drawerBlob[drawerIdx], self.__defVec,0,0)
                 self.__drawer[drawerIdx] = calibDrawer
 
             #=== clone if requested
@@ -500,9 +679,37 @@ class TileBlobWriterCrest(TileCalibLogger):
         Resets blob size to zero
         """
         try:
-            drawerIdx = TileCalibUtils.getDrawerIdx(ros, drawer)
+            drawerIdx = getDrawerIdx(ros, drawer)
             blob = self.__drawerBlob[drawerIdx]
             blob.resize(0)
         except Exception as e:
             self.log().critical( e )
             return None
+
+
+#____________________________________________________________________
+def getDrawerIdx(ros, drawer):
+    """
+    Calculates TileCalibDrawer index
+    from ros number and drawer number
+    """
+
+    if ros<0 or ros>4:
+        drawerIdx = drawer
+    else:
+        drawerIdx = TileCalibUtils.getDrawerIdx(ros, drawer)
+
+    return drawerIdx
+
+#____________________________________________________________________
+def plural(n, txt):
+    """
+    merges integer number and text
+    and adds 's' at the end of text
+    if n is not equal 1
+    """
+
+    text = f'{n} {txt}'
+    if n!=1:
+        text += 's'
+    return text

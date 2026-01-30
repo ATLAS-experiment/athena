@@ -12,6 +12,7 @@
 #include <sys/time.h>
 #include <sys/resource.h>
 #include <sys/sysinfo.h>
+#include <unistd.h>
 #include <map>
 #include <vector>
 #include <TFile.h>

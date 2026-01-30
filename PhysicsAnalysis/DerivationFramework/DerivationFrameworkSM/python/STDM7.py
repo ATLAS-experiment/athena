@@ -10,6 +10,8 @@ def STDM7SkimmingToolCfg(flags):
     '''Configure the STDM7 skimming tool'''
     acc = ComponentAccumulator()
 
+    filterList = []
+
     # skim on two good leptons    
     muonsRequirements = '(Muons.pt >= 4*GeV) && (abs(Muons.eta) < 2.6)' \
                         '&& (Muons.DFCommonMuonPassPreselection) && (Muons.DFCommonMuonPassIDCuts)'
@@ -33,45 +35,46 @@ def STDM7SkimmingToolCfg(flags):
         offlineExpression = '(('+muonOnlySelection+' || '+electronOnlySelection+' || '+electronMuonSelection+') && ('+chargedParticleSelection+'))'
     else:
         offlineExpression = '(('+muonOnlySelection+' || '+electronOnlySelection+' || '+electronMuonSelection+'))'
-    
-    from TrigDecisionTool.TrigDecisionToolConfig import TrigDecisionToolCfg
-    tdt = acc.getPrimaryAndMerge(TrigDecisionToolCfg(flags))
-    STDM7StringSkimmingTool = CompFactory.DerivationFramework.xAODStringSkimmingTool(name = "STDM7StringSkimmingTool",
-                                                                                     expression = offlineExpression,
-                                                                                     TrigDecisionTool=tdt)
-    acc.addPublicTool(STDM7StringSkimmingTool)
+
+    from DerivationFrameworkTools.DerivationFrameworkToolsConfig import (
+        xAODStringSkimmingToolCfg)
+    STDM7StringSkimmingTool = acc.getPrimaryAndMerge(xAODStringSkimmingToolCfg(
+        flags, name = "STDM7StringSkimmingTool", expression = offlineExpression))
+    filterList += [STDM7StringSkimmingTool]
     
     # require an OR of el and mu triggers, in the past we had a dedicated SM list but this should do just fine
-    from TriggerMenuMT.TriggerAPI.TriggerAPI import TriggerAPI
-    from TriggerMenuMT.TriggerAPI.TriggerEnums import TriggerPeriod, TriggerType
-    allperiods = TriggerPeriod.y2015 | TriggerPeriod.y2016 | TriggerPeriod.y2017 | TriggerPeriod.y2018 | TriggerPeriod.future2e34
-    TriggerAPI.setConfigFlags(flags)
-    trig_el    = TriggerAPI.getLowestUnprescaledAnyPeriod(allperiods, triggerType=TriggerType.el,  livefraction=0.8)
-    trig_mu    = TriggerAPI.getLowestUnprescaledAnyPeriod(allperiods, triggerType=TriggerType.mu,  livefraction=0.8)
-    trig_em    = TriggerAPI.getLowestUnprescaledAnyPeriod(allperiods, triggerType=TriggerType.el, additionalTriggerType=TriggerType.mu,  livefraction=0.8)
+    if flags.Trigger.EDMVersion >= 0:
+        from TriggerMenuMT.TriggerAPI.TriggerAPI import TriggerAPI
+        from TriggerMenuMT.TriggerAPI.TriggerEnums import TriggerPeriod, TriggerType
+        allperiods = TriggerPeriod.y2015 | TriggerPeriod.y2016 | TriggerPeriod.y2017 | TriggerPeriod.y2018 | TriggerPeriod.future2e34
+        TriggerAPI.setConfigFlags(flags)
+        trig_el    = TriggerAPI.getLowestUnprescaledAnyPeriod(allperiods, triggerType=TriggerType.el,  livefraction=0.8)
+        trig_mu    = TriggerAPI.getLowestUnprescaledAnyPeriod(allperiods, triggerType=TriggerType.mu,  livefraction=0.8)
+        trig_em    = TriggerAPI.getLowestUnprescaledAnyPeriod(allperiods, triggerType=TriggerType.el, additionalTriggerType=TriggerType.mu,  livefraction=0.8)
 
-    # Read list of triggers from PHYS
-    extra_notau = []
-    from PathResolver import PathResolver
-    with open(PathResolver.FindCalibFile("DerivationFrameworkPhys/run2ExtraMatchingTriggers.txt")) as fp:
-        for line in fp:
-            line = line.strip()
-            if line == "" or line.startswith("#"):
-                continue
-            extra_notau.append(line)
+        # Read list of triggers from PHYS
+        extra_notau = []
+        from PathResolver import PathResolver
+        with open(PathResolver.FindCalibFile("DerivationFrameworkPhys/run2ExtraMatchingTriggers.txt")) as fp:
+            for line in fp:
+                line = line.strip()
+                if line == "" or line.startswith("#"):
+                    continue
+                extra_notau.append(line)
 
-    ## Merge and remove duplicates
-    trigger_names_full_notau = list(set(trig_el+trig_mu+trig_em+extra_notau))
-    STDM7TriggerSkimmingTool = CompFactory.DerivationFramework.TriggerSkimmingTool(name = "STDM7TriggerSkimmingTool",
-                                                                                   OutputLevel   = 0,
-                                                                                   TriggerListOR = trigger_names_full_notau,
-                                                                                   TriggerListAND = [] )
-    acc.addPublicTool(STDM7TriggerSkimmingTool)
+        ## Merge and remove duplicates
+        trigger_names_full_notau = list(set(trig_el+trig_mu+trig_em+extra_notau))
+        STDM7TriggerSkimmingTool = CompFactory.DerivationFramework.TriggerSkimmingTool(
+            name = "STDM7TriggerSkimmingTool",
+            OutputLevel   = 0,
+            TriggerListOR = trigger_names_full_notau,
+            TriggerListAND = [] )
+        acc.addPublicTool(STDM7TriggerSkimmingTool)
+        filterList += [STDM7TriggerSkimmingTool]
 
     # the two skimming tools go into an AND filter combination tool
-    acc.addPublicTool(CompFactory.DerivationFramework.FilterCombinationAND("STDM7SkimmingTool",
-                                                                           FilterList = [STDM7StringSkimmingTool,STDM7TriggerSkimmingTool]),
-                      primary = True)
+    acc.addPublicTool(CompFactory.DerivationFramework.FilterCombinationAND(
+        "STDM7SkimmingTool", FilterList = filterList), primary = True)
 
     return(acc)
 
@@ -128,8 +131,6 @@ def STDM7Cfg(flags):
                                             "InDetTrackParticles",
                                             "AntiKt4EMTopoJets",
                                             "AntiKt4EMPFlowJets",
-                                            "BTagging_AntiKt4EMPFlow",
-                                            "BTagging_AntiKtVR30Rmax4Rmin02Track",
                                             "MET_Baseline_AntiKt4EMTopo",
                                             "MET_Baseline_AntiKt4EMPFlow",
                                             "TauJets"

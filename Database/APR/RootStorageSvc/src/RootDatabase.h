@@ -15,6 +15,7 @@
 #include "GaudiKernel/SmartIF.h"
 #include "StorageSvc/IDbDatabase.h"
 #include "StorageSvc/DbDatabase.h"
+#include "POOLCore/DbPrint.h"
 
 #include <set>
 #include <map>
@@ -22,6 +23,7 @@
 #include <unordered_map>
 
 // Forward declarations
+class StatusCode;
 namespace ROOT { class RNTupleReader; }
 
 class TFile;
@@ -50,7 +52,7 @@ namespace pool  {
     * @date    1/8/2002
     * @version 1.0
     */
-   class RootDatabase : public IDbDatabase
+   class RootDatabase : public IDbDatabase, public APRMessaging
    {
   public:
     enum { READ_COUNTER = 0, WRITE_COUNTER = 1, OTHER_COUNTER = 2 };
@@ -81,7 +83,7 @@ namespace pool  {
     /// Default policy mode for keyed objects
     int           m_defWritePolicy;
     /// Offset table length for branches
-    int		  m_branchOffsetTabLen;
+    int		        m_branchOffsetTabLen;
     /// Name of tree with cache
     std::string   m_treeNameWithCache;
     /// Default tree cache learn events
@@ -92,6 +94,8 @@ namespace pool  {
     int           m_rntReaderMetricsEnabled;
     /// Flag to enable/disable RNTupleWriter metrics
     int           m_rntWriterMetricsEnabled;
+    /// Comma separated list of unsplit field patterns for RNTupleWriter
+    std::string   m_rntUnsplitFieldList;
 
     /// name of the container with master index ('*' means use the biggest)
     std::string   m_indexMaster;
@@ -136,6 +140,8 @@ namespace pool  {
 
     /// Access to the actual implemented file 
     TFile* file()                             { return m_file;    }
+    /// Get the DB name (here it is the TFile name)
+    std::string name() const;
 
     /// Get TTree by name from the TFile
     TTree* getTree(const std::string& name);
@@ -160,7 +166,7 @@ namespace pool  {
     long long int byteCount(int which) const;
 
 
-    DbStatus    markBranchContainerForFill(RootTreeContainer*);
+    StatusCode  markBranchContainerForFill(RootTreeContainer*);
     
     void        registerBranchContainer(RootTreeContainer*);
 
@@ -184,19 +190,19 @@ namespace pool  {
     /// Access options
     /** @param opt      [IN]  Reference to option object.
       *
-      * @return DbStatus code indicating success or failure.  
+      * @return StatusCode code indicating success or failure.  
       */
-    virtual DbStatus getOption(DbOption& opt);
+    virtual StatusCode   getOption(DbOption& opt);
 
     /// Set options
     /** @param opt      [IN]  Reference to option object.
       *
-      * @return DbStatus code indicating success or failure.  
+      * @return StatusCode code indicating success or failure.  
       */
-    virtual DbStatus setOption(const DbOption& opt);
+    virtual StatusCode   setOption(const DbOption& opt);
 
     /// implementation of TREE_AUTO_FLUSH option - called from setOption()
-    virtual DbStatus setAutoFlush(const DbOption& opt);
+    virtual StatusCode   setAutoFlush(const DbOption& opt);
 
     /// Open Database object
     /** @param domH     [IN]  Handle to valid domain object
@@ -204,42 +210,42 @@ namespace pool  {
       * @param nam      [IN]  Name of the database to be opened.
       * @param mode     [IN]  Desired session access mode.
       *
-      * @return DbStatus code indicating success or failure.  
+      * @return StatusCode code indicating success or failure.  
       */
-    virtual DbStatus open(const DbDomain&     domH, 
-                          const std::string&  nam, 
-                          DbAccessMode        mode);
+    virtual StatusCode   open(const DbDomain&     domH,
+                              const std::string&  nam,
+                              DbAccessMode        mode);
 
     /// Re-open database with changing access permissions
     /** @param mode     [IN]  Desired session access mode.
       *
-      * @return DbStatus code indicating success or failure.  
+      * @return StatusCode code indicating success or failure.  
       */
-    virtual DbStatus    reopen(DbAccessMode mode);
+    virtual StatusCode   reopen(DbAccessMode mode);
 
     /// Callback after successful open of a database object
     /** @param dbH      [IN]  Handle to valid database object
       * @param mode     [IN]  Desired session access mode.
       *
-      * @return DbStatus code indicating success or failure.  
+      * @return StatusCode code indicating success or failure.  
       */
-    virtual DbStatus    onOpen(DbDatabase& dbH, DbAccessMode      mode);
+    virtual StatusCode   onOpen(DbDatabase& dbH, DbAccessMode      mode);
 
     /// Close database access
     /** @param mode     [IN]  Desired session access mode.
       *
-      * @return DbStatus code indicating success or failure.  
+      * @return StatusCode code indicating success or failure.  
       */
-    virtual DbStatus    close(DbAccessMode mode);
+    virtual StatusCode   close(DbAccessMode mode);
 
     /// Execute Database Transaction action
-    virtual DbStatus    transAct(Transaction::Action action);
+    virtual StatusCode   transAct(Transaction::Action action);
 
     /// return RNTupleReader for a given ntuple_name
     ROOT::RNTupleReader* getNTupleReader(const std::string& ntuple_name);
 
     // translate index value to row# for a given RNTuple  
-    uint64_t            indexLookup(ROOT::RNTupleReader *ps, uint64_t idx_val);
+    uint64_t             indexLookup(ROOT::RNTupleReader *ps, uint64_t idx_val);
 
     /// Return RNTupleWriterHelper for a given ntuple_name
     /// create a new one if needed when create==true
@@ -247,14 +253,16 @@ namespace pool  {
 
   protected:
     // Execute any pending Fills before commit or flush
-    DbStatus            fillBranchContainerTrees();
+    StatusCode           fillBranchContainerTrees();
 
     // Reduce branches' baskets' size to m_maxBufferSize for a give TTree
-    void                reduceBasketsSize(TTree* tree);
+    void                 reduceBasketsSize(TTree* tree);
 
-    void                increaseBasketsSize(TTree* tree);
+    void                 increaseBasketsSize(TTree* tree);
 
-    DbStatus            close();
+    StatusCode           close();
+
+    void                 printErrno(const char* nam, int err);
    };
 
 }       // End namespace pool

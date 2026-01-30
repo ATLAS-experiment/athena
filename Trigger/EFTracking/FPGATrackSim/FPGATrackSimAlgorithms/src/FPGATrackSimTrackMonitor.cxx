@@ -48,7 +48,7 @@ StatusCode FPGATrackSimTrackMonitor::initialize()
 
 
 //// fill monitored roads
-void FPGATrackSimTrackMonitor::fillRoad(const std::vector<std::shared_ptr<const FPGATrackSimRoad>>& roads,
+void FPGATrackSimTrackMonitor::fillRoad(const std::vector<FPGATrackSimRoad>& roads,
                                         const std::vector<FPGATrackSimTruthTrack>& truthTracks,
                                         size_t nLogicalLayers)
 {
@@ -63,7 +63,7 @@ void FPGATrackSimTrackMonitor::fillRoad(const std::vector<std::shared_ptr<const 
   // loop over all roads in the event
   for (const auto& road : roads) {
     // layerIDs
-    unsigned bitmask = road->getHitLayers();
+    unsigned bitmask = road.getHitLayers();
     for (size_t l = 0; l < nLogicalLayers; l++) {
       if (bitmask & (1 << l)) {
           auto mon_layerIDs = Monitored::Scalar<unsigned>("layerIDs",l);
@@ -71,7 +71,7 @@ void FPGATrackSimTrackMonitor::fillRoad(const std::vector<std::shared_ptr<const 
       }
     }
     // number of layers represented in this road
-    auto nLayers = Monitored::Scalar<int>("nLayers", road->getNLayers());
+    auto nLayers = Monitored::Scalar<int>("nLayers", road.getNLayers());
     // push all of the above scalars into the monitoring tool
     Monitored::Group(m_monTool, nLayers);
   }

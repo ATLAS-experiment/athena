@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 #========================================================================
 # DAOD_SUSY20.py
 # This defines DAOD_SUSY20, a skimmed DAOD format for Run-2 and Run-3.
@@ -260,35 +260,30 @@ def SUSY20KernelCfg(flags, name = "SUSY20Kernel", **kwargs):
 	# Skimming
 	#
 	skimmingTools = []
+	filterList = []
 	
 	# DT-specific trigger skimming
-	from DerivationFrameworkSUSY.SUSYToolsConfig import SUSY20DTTriggerSkimmingToolCfg
-	SUSY20TriggerSkimmingTool_DT = acc.getPrimaryAndMerge(SUSY20DTTriggerSkimmingToolCfg(
-		flags,
-		name = "SUSY20TriggerSkimmingTool"
-	))
-	acc.addPublicTool(SUSY20TriggerSkimmingTool_DT)
+	if flags.Trigger.EDMVersion >= 0:
+		from DerivationFrameworkSUSY.SUSYToolsConfig import (
+			SUSY20DTTriggerSkimmingToolCfg)
+		SUSY20TriggerSkimmingTool_DT = acc.getPrimaryAndMerge(
+			SUSY20DTTriggerSkimmingToolCfg(flags, name = "SUSY20TriggerSkimmingTool"))
+		filterList += [SUSY20TriggerSkimmingTool_DT]
 
 	# DT-specific jet skimming
 	jetRequirements_DT = "AntiKt4EMPFlowJets.pt > 200*GeV && abs(AntiKt4EMPFlowJets.eta) < 2.8"
 	jetSelection_DT    = "(count(" + jetRequirements_DT + ") >= 1)"
 	
-	from DerivationFrameworkTools.DerivationFrameworkToolsConfig import xAODStringSkimmingToolCfg
+	from DerivationFrameworkTools.DerivationFrameworkToolsConfig import (
+		xAODStringSkimmingToolCfg)
 	SUSY20JetSkimmingTool_DT = acc.getPrimaryAndMerge(xAODStringSkimmingToolCfg(
-		flags,
-		name       = "SUSY20JetSkimmingTool_DT",
-		expression = jetSelection_DT
-	))
-	acc.addPublicTool(SUSY20JetSkimmingTool_DT)
+		flags, name = "SUSY20JetSkimmingTool_DT", expression = jetSelection_DT))
+	filterList += [SUSY20JetSkimmingTool_DT]
 
 	# DT-specific final skim selection, with trigger selection AND jet selection
 	from DerivationFrameworkTools.DerivationFrameworkToolsConfig import FilterCombinationANDCfg
 	SUSY20xAODSkimmingTool_DT = acc.getPrimaryAndMerge(FilterCombinationANDCfg(
-		flags,
-		name       = "SUSY20SkimmingTool_DT",
-		FilterList = [SUSY20JetSkimmingTool_DT, SUSY20TriggerSkimmingTool_DT]
-	))
-	acc.addPublicTool(SUSY20xAODSkimmingTool_DT)
+		flags, name = "SUSY20SkimmingTool_DT", FilterList = filterList))
 	skimmingTools.append(SUSY20xAODSkimmingTool_DT)
 
 	#
@@ -343,7 +338,7 @@ def SUSY20Cfg(flags):
 		"PrimaryVertices",
 		"TauJets",
 		"AntiKt4EMPFlowJets",
-		"BTagging_AntiKt4EMPFlow",
+		
 		"MET_Baseline_AntiKt4EMPFlow",
 	]
 	
@@ -401,7 +396,7 @@ def SUSY20Cfg(flags):
 			"Muons.TruthLink",
 			"Photons.TruthLink",
 			"TruthEvents.Q.XF1.XF2.PDGID1.PDGID2.PDFID1.PDFID2.X1.X2.crossSection",
-			"InDetTrackParticles.TruthLink.truthMatchProbability.truthOrigin.truthType.truthParticleLink"
+			"InDetTrackParticles.TruthLink.truthMatchProbability.truthClassification.truthOrigin.truthType.truthParticleLink"
 		]
 
 	StaticContent = []

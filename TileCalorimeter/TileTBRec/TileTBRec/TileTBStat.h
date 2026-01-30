@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //****************************************************************************
@@ -126,14 +126,14 @@ class TileTBStat: public AthAlgorithm {
     int m_Alarm, m_Error, m_ShOpen, m_ShClose;
 
     uint32_t m_runNo;
-    uint32_t m_evTime;
+    uint64_t m_evTime;
     uint32_t m_evtNo;
     int m_trigType;
     uint32_t m_prevTrig;
     uint32_t m_evtBegin;
-    uint32_t m_timeBegin;
-    uint32_t m_timeStart;
-    uint32_t m_timeLast;
+    uint64_t m_timeBegin;
+    uint64_t m_timeStart;
+    uint64_t m_timeLast;
     uint32_t m_evtMin;
     uint32_t m_evtMax;
     uint32_t m_calibMode;

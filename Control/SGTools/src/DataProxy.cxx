@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -516,6 +516,8 @@ DataObject* DataProxy::accessDataOol()
   //if (0 != m_dObject) return m_dObject;  // cached object
 
   objLock_t objLock (m_objMutex);
+  // Check again after acquiring the lock.
+  if (0 != m_dObject) return m_dObject;  // cached object
 
   if (isValidAddress()) {
     // An address provider called by isValidAddress may have set the object
@@ -542,9 +544,7 @@ DataObject* DataProxy::accessDataOol()
     return 0;   
   }
 
-  DataObject* obj = obju.release();
-  setObject(objLock, obj, true);
-  DataBucketBase* bucket = dynamic_cast<DataBucketBase*>(obj);
+  DataBucketBase* bucket = dynamic_cast<DataBucketBase*>(obju.get());
   if (m_t2p) {
     if (bucket) {
       void* payload = bucket->object();
@@ -556,7 +556,8 @@ DataObject* DataProxy::accessDataOol()
       if (bi) {
         std::vector<CLID> base_clids = bi->get_bases();
         for (unsigned i=0; i < base_clids.size(); ++i) {
-          void* bobj = SG::DataProxy_cast (this, base_clids[i]);
+          // nb. DataProxy_cast here will give an infinite recursion!
+          void* bobj = SG::Storable_cast (obju.get(), base_clids[i], nullptr, true);
           if (bobj && bobj != payload)
             m_t2p->t2pRegister (bobj, this);
         }
@@ -568,13 +569,21 @@ DataObject* DataProxy::accessDataOol()
            << "accessData: ERROR registering object in t2p map" 
            <<m_tAddress.clID() << '/' << m_tAddress.name() << '\n'
            <<" Returning NULL DataObject pointer  " << endmsg;
-      obj=0; 
-      setObject(objLock, 0, true);
+      obju.reset();
       m_errno=T2PREGFAILED;
     }
   }
 
-  return obj;
+  // Must get everything else set up before setting m_dObject, because
+  // once we set it, it's immediately visible to other threads.
+  // In particular, we were previously doing this before the t2p registration.
+  // This meant that another thread could retrieve the pointer from
+  // the proxy, but then fail trying to map the pointer back to the proxy.
+  // See ATEAM-1126.
+  std::atomic_thread_fence (std::memory_order_seq_cst);
+  setObject(objLock, obju.release(), true);
+
+  return m_dObject;
 }
 
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef MUONSPACEPOINTFORMATION_MUONSPACEPOINTMAKERALG_H
 #define MUONSPACEPOINTFORMATION_MUONSPACEPOINTMAKERALG_H
@@ -10,6 +10,7 @@
 #include "GeoPrimitives/GeoPrimitives.h"
 #include "MuonSpacePoint/SpacePoint.h"
 #include "StoreGate/WriteHandleKey.h"
+#include "Acts/Utilities/PointerTraits.hpp"
 
 
 
@@ -21,13 +22,25 @@
 #include "xAODMuonPrepData/TgcStripContainer.h"
 #include "xAODMuonPrepData/MMClusterContainer.h"
 #include "xAODMuonPrepData/sTgcMeasContainer.h"
+#include <xAODMuonViews/ChamberViewer.h>
 
 
 namespace MuonR4{
+    /** @brief Data preparation algorithm that transforms the uncalibrated measurements into muon space points. Mdt, Mm measurements
+     *         are directly transformed. The remaining three technologies provide eta & phi measurements, each 1D. The measurements are
+     *         sorted by gas gap and if the occupancy in the gas gap is low enough, then each eta measurement is combined with each phi 
+     *         measurement to a 2D space point. Otherwise, single 1D space points are produced. Space points in the same MS layer 
+     *         & phi-sector are expressed in the common sector frame. */
     class SpacePointMakerAlg: public AthReentrantAlgorithm {
         public:
-            using AthReentrantAlgorithm::AthReentrantAlgorithm; 
+            template <Acts::PointerConcept Prd_t>
+            using PrdVec_t = std::vector<Prd_t>;
+            template <typename T>
+            using EtaPhi2DHits = std::array<PrdVec_t<T>, 3>;
+            template <typename T>
+            using EtaPhi2DHitsVec = std::vector<EtaPhi2DHits<T>>;
 
+            using AthReentrantAlgorithm::AthReentrantAlgorithm; 
             ~SpacePointMakerAlg() = default;
 
             StatusCode execute(const EventContext& ctx) const override;
@@ -102,7 +115,7 @@ namespace MuonR4{
              *  @param ctx: Event context of the current event
              *  @param key: ReadHandleKey to access the container of data type <ContType>
              *  @param fillContainer: Global container into which all space points are filled. */
-            template <class ContType> 
+            template <typename ContType> 
                 StatusCode loadContainerAndSort(const EventContext& ctx,
                                                 const SG::ReadHandleKey<ContType>& key,
                                                 PreSortedSpacePointMap& fillContainer) const;
@@ -113,15 +126,28 @@ namespace MuonR4{
              *          points are built intsead of 2D ones
              * @param etaHits: List of all presorted eta measurements in a gas gap
              * @param phiHits: List of all presorted phi measurements in a gas gap */
-            template <class PrdType>
-                bool passOccupancy2D(const std::vector<const PrdType*>& etaHits,
-                                     const std::vector<const PrdType*>& phiHits) const;
-            /** @brief Fills all space points that are beloni */
-            template <class PrdType> 
+            template <typename PrdType>
+                bool passOccupancy2D(const PrdVec_t<PrdType>& etaHits,
+                                     const PrdVec_t<PrdType>& phiHits) const;
+            /** @brief Splits the chamber hits of the viewer per gas gap
+             *  @param viewer: Chamber viewer containing all hits in the chamber
+             *  @return Vector of gas gap hit collections. Each entry contains 3 vectors:
+             *          - eta hits
+             *          - phi hits
+             *          - 2D hits */
+            template <typename ContType>
+                EtaPhi2DHitsVec<typename ContType::const_value_type> splitHitsPerGasGap(xAOD::ChamberViewer<ContType>& viewer) const;
+            /** @brief Transform the uncombined space prd measurements to space points
+             *  @param gctx: Geometry context to fetch the transformation of the measurements
+             *  @param sectorTrans: Transformation to go from the global -> sector frame
+             *  @param prdsToFill: List of uncombined measurements to transform
+             *  @param outColl: Reference to the mutable output collection to which the 
+             *                  1D space points are appended. */
+            template <typename PrdType> 
                 void fillUncombinedSpacePoints(const ActsTrk::GeometryContext& gctx,
                                                const Amg::Transform3D& sectorTrans,
-                                               const std::vector<const PrdType*>& prdsToFill,
-                                               std::vector<SpacePoint>& outColl) const;          
+                                               const PrdVec_t<PrdType*>& prdsToFill,
+                                               std::vector<SpacePoint>& outColl) const; 
             /** @brief Distribute the premade spacepoints per chamber into their individual SpacePoint
              *         buckets. A new bucket is created everytime if the hit to fill is along the z-axis 
              *         farther away from the first point in the bucket than the <spacePointWindowSize>.
@@ -207,12 +233,6 @@ namespace MuonR4{
                                                    "Maximum occpancy of Tgc eta hits in a gasGap"};
             Gaudi::Property<double> m_maxOccTgcPhi{this, "maxTgcPhiOccupancy", 0.1, 
                                                    "Maximum occpancy of Tgc phi hits in a gasGap"};
-
-            Gaudi::Property<double> m_maxOccStgcEta{this, "maxSTGCEtaOccupancy", 0.1, 
-                                                   "Maximum occpancy of sTgc eta hits in a gasGap"};
-            Gaudi::Property<double> m_maxOccStgcPhi{this, "maxSTGCPhiOccupancy", 0.5, 
-                                                    "Maximum occpancy of sTgc phi hits in a gasGap"};
-
     };
 }
 

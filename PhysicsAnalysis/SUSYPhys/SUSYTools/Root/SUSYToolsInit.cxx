@@ -736,7 +736,7 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
       if (m_isRun3) ATH_CHECK( m_muonCalibTool.setProperty("IsRun3Geo", true ));
       ATH_CHECK( m_muonCalibTool.setProperty("calibMode", m_muCalibrationMode) );
       ATH_CHECK( m_muonCalibTool.setProperty("OutputLevel", this->msg().level()) );
-      ATH_CHECK( m_muonCalibTool.setProperty("release", "Recs2025_03_26_Run2Run3" ));
+      ATH_CHECK( m_muonCalibTool.setProperty("release", "Recs2025_12_11_Run2Run3" ));
       int IdBaselineInt = m_muIdBaseline;
       if (IdBaselineInt == 4) {
         ATH_CHECK( m_muonCalibTool.setProperty("do2StationsHighPt", true) );
@@ -836,7 +836,7 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
       toolName = "MuonEfficiencyScaleFactors_" + muQual;
       m_muonEfficiencySFTool.setTypeAndName("CP::MuonEfficiencyScaleFactors/"+toolName);
       ATH_CHECK( m_muonEfficiencySFTool.setProperty("WorkingPoint", muQual) );
-      ATH_CHECK( m_muonEfficiencySFTool.setProperty("CalibrationRelease", m_isRun3? "250418_Preliminary_r24run3":"230213_Preliminary_r22run2") );
+      ATH_CHECK( m_muonEfficiencySFTool.setProperty("CalibrationRelease", m_isRun3? "251211_Preliminary_r24run3":"230213_Preliminary_r22run2") );
       ATH_CHECK( m_muonEfficiencySFTool.setProperty("OutputLevel", this->msg().level()) );
       ATH_CHECK( m_muonEfficiencySFTool.retrieve() );
     } else if (m_muonEfficiencySFTool.isUserConfigured()) ATH_CHECK( m_muonEfficiencySFTool.retrieve() );
@@ -861,7 +861,7 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
       toolName = "MuonTTVAEfficiencyScaleFactors";
       m_muonTTVAEfficiencySFTool.setTypeAndName("CP::MuonEfficiencyScaleFactors/"+toolName);
       ATH_CHECK( m_muonTTVAEfficiencySFTool.setProperty("WorkingPoint", "TTVA") );
-      ATH_CHECK( m_muonTTVAEfficiencySFTool.setProperty("CalibrationRelease", m_isRun3? "250418_Preliminary_r24run3":"230213_Preliminary_r22run2") );
+      ATH_CHECK( m_muonTTVAEfficiencySFTool.setProperty("CalibrationRelease", m_isRun3? "251211_Preliminary_r24run3":"230213_Preliminary_r22run2") );
       ATH_CHECK( m_muonTTVAEfficiencySFTool.setProperty("OutputLevel", this->msg().level()) );
       ATH_CHECK( m_muonTTVAEfficiencySFTool.retrieve() );
     } else if (m_muonTTVAEfficiencySFTool.isUserConfigured()) ATH_CHECK( m_muonTTVAEfficiencySFTool.retrieve() );
@@ -893,7 +893,7 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
 
       m_muonIsolationSFTool.setTypeAndName("CP::MuonEfficiencyScaleFactors/"+toolName);
       ATH_CHECK( m_muonIsolationSFTool.setProperty("WorkingPoint", tmp_muIso_WP + "Iso") );
-      ATH_CHECK( m_muonIsolationSFTool.setProperty("CalibrationRelease", m_isRun3? "250418_Preliminary_r24run3":"230213_Preliminary_r22run2") );
+      ATH_CHECK( m_muonIsolationSFTool.setProperty("CalibrationRelease", m_isRun3? "251211_Preliminary_r24run3":"230213_Preliminary_r22run2") );
       ATH_CHECK( m_muonIsolationSFTool.setProperty("OutputLevel", this->msg().level()) );
       ATH_CHECK( m_muonIsolationSFTool.retrieve() );
 
@@ -924,7 +924,7 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
       m_muonHighPtIsolationSFTool.setTypeAndName("CP::MuonEfficiencyScaleFactors/"+toolName);
       // Use for the low-pt WP a dedicated set of isolation scale-factors having an extra uncertainty in place
       ATH_CHECK( m_muonHighPtIsolationSFTool.setProperty("WorkingPoint", tmp_muIsoHighPt_WP + "Iso") );
-      ATH_CHECK( m_muonHighPtIsolationSFTool.setProperty("CalibrationRelease", m_isRun3? "250418_Preliminary_r24run3":"230213_Preliminary_r22run2") );
+      ATH_CHECK( m_muonHighPtIsolationSFTool.setProperty("CalibrationRelease", m_isRun3? "251211_Preliminary_r24run3":"230213_Preliminary_r22run2") );
       ATH_CHECK( m_muonHighPtIsolationSFTool.setProperty("OutputLevel", this->msg().level()) );
       ATH_CHECK( m_muonHighPtIsolationSFTool.retrieve() );
 
@@ -1236,14 +1236,14 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
 
       if(m_isRun3 && m_eleAllowRun3TrigSFFallback){
         bool pass_isRun3TrigSFFallback = true;
-        if (triggerEleID.find("Medium") != std::string::npos && triggerEleIso.find("Loose") != std::string::npos)                {triggerEleID = "Loose";}
+        if (triggerEleID.find("Medium") != std::string::npos && triggerEleIso.find("Loose") != std::string::npos)                {triggerEleID = "LooseBLayer";}
         else if (triggerEleID.find("Medium") != std::string::npos && triggerEleIso.find("Tight") != std::string::npos)           {triggerEleID = "Tight"; triggerEleIso = "Tight_VarRad";}
         else if (triggerEleID.find("Medium") != std::string::npos && triggerEleIso.find("HighPtCaloOnly") != std::string::npos)  {triggerEleID = "Tight"; triggerEleIso = "Tight_VarRad";}
-        else if (triggerEleID.find("Tight")  != std::string::npos && triggerEleIso.find("Loose") != std::string::npos)           {triggerEleID = "Loose";}
+        else if (triggerEleID.find("Tight")  != std::string::npos && triggerEleIso.find("Loose") != std::string::npos)           {triggerEleID = "LooseBLayer";}
         else if (triggerEleID.find("Tight")  != std::string::npos && triggerEleIso.find("Tight") != std::string::npos)           {triggerEleIso= "Tight_VarRad";}
         else if (triggerEleID.find("Tight")  != std::string::npos && triggerEleIso.find("HighPtCaloOnly") != std::string::npos)  {triggerEleID = "Tight"; triggerEleIso = "Tight_VarRad";}
-        else if (triggerEleID.find("Loose")  != std::string::npos && triggerEleIso.find("Tight") != std::string::npos)           {triggerEleID = "Loose"; triggerEleIso = "Loose_VarRad";}
-        else if (triggerEleID.find("Loose")  != std::string::npos && triggerEleIso.find("HighPtCaloOnly") != std::string::npos)  {triggerEleID = "Loose"; triggerEleIso = "Loose_VarRad";}
+        else if (triggerEleID.find("Loose")  != std::string::npos && triggerEleIso.find("Tight") != std::string::npos)           {triggerEleID = "LooseBLayer"; triggerEleIso = "Loose_VarRad";}
+        else if (triggerEleID.find("Loose")  != std::string::npos && triggerEleIso.find("HighPtCaloOnly") != std::string::npos)  {triggerEleID = "LooseBLayer"; triggerEleIso = "Loose_VarRad";}
         else {pass_isRun3TrigSFFallback=false;}
         if(pass_isRun3TrigSFFallback){
           ATH_MSG_INFO(" ************** This is only for testing/studying purpose! ************** ");
@@ -1252,7 +1252,58 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
           ATH_MSG_INFO("Only for single-lepton trigger scale factor, fall back to Electron ID:  -> "<< triggerEleID << " with Isolation: " << triggerEleIso);
         }
       }
-      
+
+      // The L1 seed changed from 2023 and beyond, so we need to adjust the trigger key accordingly, the SF are now derived by year so we need to change the year in the key as well.
+
+      if(m_isRun3){
+        // Find year positions (or npos if not present)
+        size_t p22 = m_electronTriggerSFStringSingle.find("2022");
+        size_t p23 = m_electronTriggerSFStringSingle.find("2023");
+        size_t p24 = m_electronTriggerSFStringSingle.find("2024");
+
+        auto next_pos = [&](size_t self) {
+            size_t next = std::string::npos;
+
+            if (self == p22) {
+                if (p23 > self && p23 < next) next = p23;
+                if (p24 > self && p24 < next) next = p24;
+            }
+            else if (self == p23) {
+                if (p22 > self && p22 < next) next = p22;
+                if (p24 > self && p24 < next) next = p24;
+            }
+            else if (self == p24) {
+                if (p22 > self && p22 < next) next = p22;
+                if (p23 > self && p23 < next) next = p23;
+            }
+
+            return next;
+        };
+        std::string SFStringSingle22="";
+        std::string SFStringSingle23="";
+        std::string SFStringSingle24="";
+
+        // Extract 2022,2023,2025 block
+        if (p22 != std::string::npos) {size_t end = next_pos(p22); SFStringSingle22 = m_electronTriggerSFStringSingle.substr(p22, end - p22);}
+        if (p23 != std::string::npos) {size_t end = next_pos(p23); SFStringSingle23 = m_electronTriggerSFStringSingle.substr(p23, end - p23);}
+        if (p24 != std::string::npos) {size_t end = next_pos(p24); SFStringSingle24 = m_electronTriggerSFStringSingle.substr(p24, end - p24);}
+
+        // Remove trailing underscores from tokens if present
+        std::string* toks[] = { &SFStringSingle22, &SFStringSingle23, &SFStringSingle24 };
+        for (auto t : toks) {
+          while (!t->empty() && t->back() == '_') t->pop_back();
+        }
+
+        if(m_mcCampaign == "mc23a") m_electronTriggerSFStringSingle = SFStringSingle22;
+        else if(m_mcCampaign == "mc23d") m_electronTriggerSFStringSingle = SFStringSingle23;
+        else if(m_mcCampaign == "mc23e") m_electronTriggerSFStringSingle = SFStringSingle24;
+        else {
+          ATH_MSG_WARNING("Unknown or unsupported mcCampaign for Run 3: " << m_mcCampaign << ". Please contact the SUSY Bkg Forum for assistance.");
+          ATH_MSG_WARNING("Falling back to 2024 trigger SFs for single-electron triggers.");
+          m_electronTriggerSFStringSingle = SFStringSingle24;
+        }
+      }
+
       
       ATH_MSG_INFO("eSF_keys: " << m_electronTriggerSFStringSingle<< "_"<<triggerEleID<<"_"<<triggerEleIso);
 
@@ -1660,7 +1711,7 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
     // Initialise tau trigger efficiency tool(s)
 
     if (!isData()) {
-      int iTauID = (int) TauAnalysisTools::JETIDNONEUNCONFIGURED;
+      int iTauID = (int) TauAnalysisTools::JETIDNONE;
       if (m_tauId == "rnn001")   iTauID = (int) TauAnalysisTools::JETIDNONE;
       else if (m_tauId == "VeryLoose")   iTauID = (int) TauAnalysisTools::JETIDRNNVERYLOOSE;
       else if (m_tauId == "Loose")  iTauID = (int) TauAnalysisTools::JETIDRNNLOOSE;
@@ -1971,6 +2022,7 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
       toolName = m_doFwdJVT ? m_metJetSelection+"_fJVT" : m_metJetSelection+"_NOfJVT";
       m_metMaker.setTypeAndName("met::METMaker/METMaker_ST_"+toolName);
 
+      ATH_CHECK( m_metMaker.setProperty("JetContainer", jetcoll) );
       ATH_CHECK( m_metMaker.setProperty("ORCaloTaggedMuons", m_metRemoveOverlappingCaloTaggedMuons) );
       ATH_CHECK( m_metMaker.setProperty("DoSetMuonJetEMScale", m_metDoSetMuonJetEMScale) );
       ATH_CHECK( m_metMaker.setProperty("DoRemoveMuonJets", m_metDoRemoveMuonJets) );
@@ -2027,17 +2079,13 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
       ATH_CHECK( AAH::setProperty(m_metSignif.getHandle(), "SoftTermParam", m_softTermParam));
       ATH_CHECK( AAH::setProperty(m_metSignif.getHandle(), "TreatPUJets", m_treatPUJets));
       ATH_CHECK( AAH::setProperty(m_metSignif.getHandle(), "DoPhiReso", m_doPhiReso));
-      if(jetname =="AntiKt4EMPFlow")
+      if(jetname != "AntiKt4EMPFlow")
         ATH_MSG_WARNING("METSignificance recommendations only exist for AntiKt4EMPFlow jets, falling back to this.");
       ATH_CHECK( AAH::setProperty(m_metSignif.getHandle(), "JetCollection", "AntiKt4EMPFlow"));
-      std::string JESconfig = isAtlfast() ? m_jesConfigAFII : m_jesConfig;
-      if(isAtlfast() && m_isRun3) {
-        ATH_MSG_WARNING("Jet JES/JER recommendations currently not available for fast sim in Run 3, falling back to full sim version");
-        JESconfig = m_jesConfig;
-      }
-      ATH_CHECK( AAH::setProperty(m_metSignif.getHandle(), "JetCalibConfig", JESconfig) );
-      ATH_CHECK( AAH::setProperty(m_metSignif.getHandle(), "JetCalibSequence", "JetArea_Residual_EtaJES_GSC") );
-      ATH_CHECK( AAH::setProperty(m_metSignif.getHandle(), "JetCalibArea", m_jesCalibArea) );
+      // This is the only recommended set of jet resolutions for use with R22+ MET Significance until "Consolidated" recommendations are available
+      ATH_CHECK( AAH::setProperty(m_metSignif.getHandle(), "JetCalibConfig", "JES_data2017_2016_2015_Recommendation_PFlow_Aug2018_rel21.config") );
+      ATH_CHECK( AAH::setProperty(m_metSignif.getHandle(), "JetCalibSequence", "JetArea_Residual_EtaJES_GSC_Smear") );
+      ATH_CHECK( AAH::setProperty(m_metSignif.getHandle(), "JetCalibArea", "00-04-81") );
       ATH_CHECK( AAH::setProperty(m_metSignif.getHandle(), "EgammaESModel", m_isRun3 ? "es2024_Run3_v0" : "es2023_R22_Run2_v1") );
       ATH_CHECK( AAH::setProperty(m_metSignif.getHandle(), "EgammaDecorrelationModel", "1NP_v1") );
       ATH_CHECK( AAH::setProperty(m_metSignif.getHandle(), "EgammaUseFastsim", isAtlfast()) );
@@ -2047,7 +2095,7 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
         ATH_CHECK( AAH::setProperty(m_metSignif.getHandle(), "calibTool.IsRun3Geo", true));
       ATH_CHECK( AAH::setProperty(m_metSignif.getHandle(), "calibTool.calibMode", m_muCalibrationMode));
       ATH_CHECK( AAH::setProperty(m_metSignif.getHandle(), "calibTool.OutputLevel",this->msg().level()));
-      ATH_CHECK( AAH::setProperty(m_metSignif.getHandle(), "calibTool.release", "Recs2025_03_26_Run2Run3"));
+      ATH_CHECK( AAH::setProperty(m_metSignif.getHandle(), "calibTool.release", "Recs2025_12_11_Run2Run3"));
       int IdBaselineInt = m_muIdBaseline;
       if (IdBaselineInt == 4)
         ATH_CHECK( AAH::setProperty(m_metSignif.getHandle(), "calibTool.do2StationsHighPt", true));
@@ -2057,10 +2105,13 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
       ATH_CHECK( m_metSignif.setProperty("SoftTermParam", m_softTermParam) );
       ATH_CHECK( m_metSignif.setProperty("TreatPUJets", m_treatPUJets) );
       ATH_CHECK( m_metSignif.setProperty("DoPhiReso", m_doPhiReso) );
-      if(jetname =="AntiKt4EMPFlow")
+      if(jetname != "AntiKt4EMPFlow")
         ATH_MSG_WARNING("METSignificance recommendations only exist for AntiKt4EMPFlow jets, falling back to this.");
-      ATH_CHECK( m_metSignif.setProperty("JetCollection", "AntiKt4EMPFlow") );
-      ATH_CHECK( m_metSignif.setProperty("jetCalibTool", m_jetCalibTool.getHandle()) );
+      ATH_CHECK( m_metSignif.setProperty( "JetCollection", "AntiKt4EMPFlow"));
+      // This is the only recommended set of jet resolutions for use with R22+ MET Significance until "Consolidated" recommendations are available
+      ATH_CHECK( m_metSignif.setProperty( "JetCalibConfig", "JES_data2017_2016_2015_Recommendation_PFlow_Aug2018_rel21.config") );
+      ATH_CHECK( m_metSignif.setProperty( "JetCalibSequence", "JetArea_Residual_EtaJES_GSC_Smear") );
+      ATH_CHECK( m_metSignif.setProperty( "JetCalibArea", "00-04-81") );
       ATH_CHECK( m_metSignif.setProperty("egammaCalibTool", m_egammaCalibTool.getHandle()) );
       // just pass the muon calib tool
       ATH_CHECK( m_metSignif.setProperty("MuonCalibTool",m_muonCalibTool.getHandle()));
@@ -2225,6 +2276,7 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
       ATH_CHECK( m_isoCorrTool.setProperty( "IsMC", !isData()) );
       ATH_CHECK( m_isoCorrTool.setProperty( "AFII_corr", isAtlfast()) );
       ATH_CHECK( m_isoCorrTool.setProperty( "Apply_SC_leakcorr", false) );
+      ATH_CHECK( m_isoCorrTool.setProperty( "FixTimingIssueInCore", true) ); // Similar to https://gitlab.cern.ch/atlas/athena/-/merge_requests/83939
       ATH_CHECK( m_isoCorrTool.setProperty( "CorrFile", "IsolationCorrections/v6/isolation_ptcorrections_rel22_mc20.root") );
       ATH_CHECK( m_isoCorrTool.setProperty( "OutputLevel", this->msg().level()) );
       ATH_CHECK( m_isoCorrTool.retrieve() );

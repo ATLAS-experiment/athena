@@ -1,6 +1,8 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
+
+#include "PathResolver/PathResolver.h"
 #include "xAODBTaggingEfficiency/BTaggingToolUtil.h"
 #include "xAODBTaggingEfficiency/BTaggingEfficiencyJsonTool.h"
 #include <fstream>
@@ -9,12 +11,6 @@ BTaggingEfficiencyJsonTool::BTaggingEfficiencyJsonTool ( const std::string &name
   asg::AsgTool ( name )
 {
   m_initialised = false;
-  declareProperty( "MaxEta", m_maxEta = 2.5 );
-  declareProperty( "MinPt", m_minPt = -1 /*MeV*/);
-  declareProperty( "TaggerName",                    m_taggerName="",       "tagging algorithm name");
-  declareProperty( "JetAuthor",                     m_jetAuthor="",        "jet collection");
-  declareProperty( "OperatingPoint",                m_OP="",               "operating point");
-  declareProperty( "JsonConfigFile",                m_json_config_path="", "Path to JSON config file");
 }
 
 BTaggingEfficiencyJsonTool::~BTaggingEfficiencyJsonTool() {
@@ -24,9 +20,11 @@ StatusCode BTaggingEfficiencyJsonTool::initialize()
 {
   ATH_MSG_INFO("Initialize BTagging Efficiency Json Tool from: " + m_json_config_path);
 
-  std::ifstream jsonFile(m_json_config_path);
+  std::string pathToJsonConfigFile = PathResolverFindCalibFile(m_json_config_path);
+  std::ifstream jsonFile(pathToJsonConfigFile);
+
   if (!jsonFile.is_open()) {
-    ATH_MSG_ERROR( "JSON file " + m_json_config_path + " do not exist. Please put the correct path of the file." );
+    ATH_MSG_ERROR( "JSON file " + m_json_config_path + " does not exist. Please put the correct path of the file." );
     return StatusCode::FAILURE;
   }
   m_json_config = json::parse(jsonFile);

@@ -346,11 +346,12 @@ StatusCode G4AtlasAlg::execute()
 
   ATH_MSG_DEBUG("Calling SimulateG4Event");
 
-  auto eventInfo = std::make_unique<AtlasG4EventUserInfo>();
+  auto eventInfo = std::make_unique<AtlasG4EventUserInfo>(ctx);
   // get a shared pointer to the hit collection map because we will need it after the G4Event is destroyed
   std::shared_ptr<HitCollectionMap> hitCollections = eventInfo->GetHitCollectionMap();
 
   ATH_CHECK(m_senDetTool->BeginOfAthenaEvent(*hitCollections));
+  ATH_CHECK(m_userActionSvc->BeginOfAthenaEvent(*hitCollections));
   ATH_CHECK(m_fastSimTool->BeginOfAthenaEvent());
 
   SG::ReadHandle<McEventCollection> inputTruthCollection(m_inputTruthCollectionKey);
@@ -448,6 +449,7 @@ StatusCode G4AtlasAlg::execute()
     }
 
     ATH_CHECK(m_senDetTool->EndOfAthenaEvent(*hitCollections));
+    ATH_CHECK(m_userActionSvc->EndOfAthenaEvent(*hitCollections));
     ATH_CHECK(m_fastSimTool->EndOfAthenaEvent());
 
     ATH_CHECK(m_truthRecordSvc->releaseEvent());

@@ -66,7 +66,7 @@ private:
   std::uint32_t m_onlineId;
   
   /// Simple range check
-  bool fibreInRange(std::uint32_t f) const;
+  static bool fibreInRange(std::uint32_t f);
   
   /// Rough check on validity
   bool couldBeValid(std::uint32_t r);

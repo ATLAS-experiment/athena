@@ -23,6 +23,7 @@
 #include <functional>
 
 // Forward declarations
+class StatucCode;
 class TBranch;
 class TTree;
 class TLeaf;
@@ -117,21 +118,21 @@ namespace pool  {
   private:
 
     /// Add item branch
-    DbStatus addBranch( const DbColumn* col,
-                        BranchDesc& dsc,
-                        const std::string& desc);
+    StatusCode addBranch( const DbColumn* col,
+                          BranchDesc& dsc,
+                          const std::string& desc);
 
     /// Add BLOB
-    DbStatus addObject( DbDatabase& dbH,
-                        const DbColumn* col,
-                        BranchDesc& dsc,
-                        const std::string& desc,
-                        int splitLevel,
-                        int bufferSize,
-                        int branchOffsetTabLen);
+    StatusCode addObject( DbDatabase& dbH,
+                          const DbColumn* col,
+                          BranchDesc& dsc,
+                          const std::string& desc,
+                          int splitLevel,
+                          int bufferSize,
+                          int branchOffsetTabLen);
 
     // Routine needed for TRANSACT_FLUSH, if branch is specified by user.
-    DbStatus finishTransAct();
+    StatusCode finishTransAct();
 
     /// Access branch by name
     TBranch* branch(const std::string& nam)  const;
@@ -140,41 +141,35 @@ namespace pool  {
     void setBranchOffsetTabLen(TBranch* b, int offsettab_len);	
     
   public:
-    /// Standard constructor
-    RootTreeContainer();
-
-    /// Standard destructor
+    explicit RootTreeContainer(const std::string& name);
     virtual ~RootTreeContainer();
 
     /// Close the container and deallocate resources
-    virtual DbStatus close() override;
+    virtual StatusCode close() override;
 
     /// Open the container for object access
-    virtual DbStatus open(DbDatabase& dbH, 
-                          const std::string& nam, 
-                          const DbTypeInfo* info,
-                          DbAccessMode mod) override;
+    virtual StatusCode open(DbDatabase& dbH, 
+                            const std::string& nam, 
+                            const DbTypeInfo* info,
+                            DbAccessMode mod) override;
 
     /// Check if we can access the container for reading with the given type
-    virtual DbStatus checkAccess(DbDatabase& dbH,
-                                 const std::string& nam) const override final;
+    virtual StatusCode checkAccess(DbDatabase& dbH,
+                                   const std::string& nam) const override final;
 
     /// Access options
     /** @param opt      [IN]  Reference to option object.
       *
-      * @return DbStatus code indicating success or failure.  
+      * @return StatusCode code indicating success or failure.  
       */
-    virtual DbStatus getOption(DbOption& opt) override;
+    virtual StatusCode getOption(DbOption& opt) override;
 
     /// Set options
     /** @param opt      [IN]  Reference to option object.
       *
-      * @return DbStatus code indicating success or failure.  
+      * @return StatusCode code indicating success or failure.  
       */
-    virtual DbStatus setOption(const DbOption& opt) override;
-
-    /// Define selection
-    virtual DbStatus select(DbSelect& sel) override;
+    virtual StatusCode setOption(const DbOption& opt) override;
 
     /// Number of entries within the container
     virtual uint64_t size() override;
@@ -200,12 +195,6 @@ namespace pool  {
     /// clear the dirty status (used after containing TTree was Filled)
     void        clearDirty() { m_isDirty = false; }
 
-    /// Fetch next object address of the selection to set token
-    virtual DbStatus fetch(DbSelect& sel) override;
-
-    /// Fetch refined object address. Default implementation returns identity
-    virtual DbStatus fetch(const Token::OID_t& linkH, Token::OID_t& stmt) override;
-
     /// Find object by object identifier and load it into memory
     /** @param  ptr    [IN/OUT]  ROOT-style address of the pointer to object
       * @param  shape     [IN]   Object type
@@ -213,14 +202,14 @@ namespace pool  {
       *
       * @return Status code indicating success or failure.
       */
-    virtual DbStatus loadObject( void** ptr, ShapeH shape, 
+    virtual StatusCode loadObject( void** ptr, ShapeH shape, 
                                  Token::OID_t& oid) override;
 
     /// Commit single entry to container
-    virtual DbStatus writeObject(ActionList::value_type&) override;
+    virtual StatusCode writeObject(ActionList::value_type&) override;
 
     /// Execute Transaction action
-    virtual DbStatus transAct(Transaction::Action action) override;
+    virtual StatusCode transAct(Transaction::Action action) override;
   };
 }
 #endif //POOL_ROOTTREECONTAINER_H

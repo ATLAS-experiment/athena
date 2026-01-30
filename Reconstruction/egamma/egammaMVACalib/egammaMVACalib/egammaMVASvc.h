@@ -32,12 +32,14 @@ public:
   /** Compute the calibrated energy **/
   StatusCode getEnergy(const xAOD::CaloCluster& cluster,
                        const xAOD::Egamma& eg,
-                       double& mvaE) const override final;
+                       double& mvaE,
+		       const egammaMVACalib::GlobalEventInfo& gei = egammaMVACalib::GlobalEventInfo()) const override final;
 
   /** Compute the calibrated energy when the full egamma object is not available **/
   StatusCode getEnergy(const xAOD::CaloCluster& cluster,
                        const xAOD::EgammaParameters::EgammaType egType,
-                       double& mvaE) const override final;
+                       double& mvaE,
+		       const egammaMVACalib::GlobalEventInfo& gei = egammaMVACalib::GlobalEventInfo()) const override final;
 
   /** Main execute. We need to calibrate the cluster.
       Use full egamma object instead of Type
@@ -45,14 +47,16 @@ public:
       This method needs to be valid also for reconstruction
   */
   StatusCode execute(xAOD::CaloCluster& cluster,
-                     const xAOD::Egamma& eg) const override final;
+                     const xAOD::Egamma& eg,
+		     const egammaMVACalib::GlobalEventInfo& gei = egammaMVACalib::GlobalEventInfo()) const override final;
 
   /** Calibrate the cluster, when the full egamma object is not available.
    *  Only variables related to the cluster are used (e.g. no conversion are used here)
    *  If the full egamma object use the other version.
    */
   StatusCode execute(xAOD::CaloCluster& cluster,
-                     const xAOD::EgammaParameters::EgammaType egType) const override final;
+                     const xAOD::EgammaParameters::EgammaType egType,
+		     const egammaMVACalib::GlobalEventInfo& gei = egammaMVACalib::GlobalEventInfo()) const override final;
 
 
 private:
@@ -60,6 +64,10 @@ private:
   /// MVA tool for electron
   ToolHandle<IegammaMVACalibTool> m_mvaElectron {this,
       "ElectronTool", "", "Tool to handle MVA trees for electrons"};
+
+  /// MVA tool for forward electron
+  ToolHandle<IegammaMVACalibTool> m_mvaFwdElectron {this,
+      "FwdElectronTool", "", "Tool to handle MVA trees for forward electrons"};
 
   /// MVA tool for unconverted photon
   ToolHandle<IegammaMVACalibTool> m_mvaUnconvertedPhoton {this,

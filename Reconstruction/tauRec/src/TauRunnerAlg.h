@@ -55,7 +55,10 @@ class TauRunnerAlg: public AthReentrantAlgorithm
 	SG::WriteHandleKey<xAOD::VertexContainer> m_vertexOutputContainer{this,"Key_vertexOutputContainer", "TauSecondaryVertices", "input vertex container key"};
 	SG::WriteHandleKey<xAOD::PFOContainer> m_chargedPFOOutputContainer{this,"Key_chargedPFOOutputContainer", "TauChargedParticleFlowObjects", "tau charged pfo out key"};
 	SG::WriteHandleKey<xAOD::ParticleContainer> m_pi0Container{this,"Key_pi0Container", "TauFinalPi0s", "tau final pi0s output"};
-	
+        SG::WriteHandleKey<xAOD::CaloClusterContainer> m_tauShotClusOutputContainer{this,"Key_tauShotClusOutputContainer", "TauShotClusters", "tau shot clusters out key"};
+        SG::WriteHandleKey<CaloClusterCellLinkContainer> m_tauShotClusLinkContainer{this,"Key_tauShotClusLinkContainer", "TauShotClusters_links", "tau shot clusters out key"};
+        SG::WriteHandleKey<xAOD::PFOContainer> m_tauShotPFOOutputContainer{this,"Key_tauShotPFOOutputContainer", "TauShotParticleFlowObjects", "tau pfo out key"};
+
 };
 
 #endif // TAUREC_TAURUNNERALG_H

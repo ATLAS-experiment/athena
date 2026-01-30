@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <iostream>
@@ -7,6 +7,7 @@
 #include <stdio.h>
 
 #include "JetToolHelpers/HistoInputBase.h"
+#include "JetToolHelpers/RootHelpers.h"
 
 #include "TFile.h"
 
@@ -89,9 +90,8 @@ double HistoInputBase::readFromHisto(const double X, const double Y, const doubl
     else if (nDim == 2)
         return m_hist->Interpolate(X,Y);
     else if (nDim == 3)
-        return m_hist->Interpolate(X,Y,Z);
+      return RootHelpers::Interpolate(m_hist.get(),X,Y,Z);
     // Shouldn't reach here due to previous checks
     throw std::runtime_error("Unexpected number of dimensions of histogram: " + std::to_string(nDim));
-    return 0;
 }
 } // namespace JetHelper

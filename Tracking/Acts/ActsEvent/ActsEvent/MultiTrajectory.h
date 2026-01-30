@@ -308,9 +308,9 @@ class MutableMultiTrajectory final
                                const Eigen::DenseBase<val_t>& val,
                                const Eigen::DenseBase<cov_t>& cov)
     requires(Eigen::PlainObjectBase<val_t>::RowsAtCompileTime > 0 &&
-             Eigen::PlainObjectBase<val_t>::RowsAtCompileTime <= Acts::eBoundSize &&
-             Eigen::PlainObjectBase<val_t>::RowsAtCompileTime ==
-                 Eigen::PlainObjectBase<cov_t>::RowsAtCompileTime &&
+             static_cast<unsigned>(Eigen::PlainObjectBase<val_t>::RowsAtCompileTime) <= Acts::eBoundSize &&
+             static_cast<unsigned>(Eigen::PlainObjectBase<val_t>::RowsAtCompileTime) ==
+                 static_cast<unsigned>(Eigen::PlainObjectBase<cov_t>::RowsAtCompileTime) &&
              Eigen::PlainObjectBase<cov_t>::RowsAtCompileTime ==
                  Eigen::PlainObjectBase<cov_t>::ColsAtCompileTime);
 

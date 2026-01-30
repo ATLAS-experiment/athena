@@ -42,52 +42,44 @@ StatusCode GlobalFieldManagerTool::initializeField()
 
     // Retrieve the global field manager
     auto transpManager = G4TransportationManager::GetTransportationManager();
-    G4FieldManager* fieldMgr(nullptr);
-    if (m_useTightMuonStepping){
-      // In the case of tight stepping we need to make our own global field manager
-      // If field manager already exists for current thread, error.
-      // There is no foreseen use-case for this situation.
-      if(m_fieldMgrHolder.get()) {
-        ATH_MSG_ERROR("GlobalFieldManagerTool::initializeField() - " <<
-                      "Field manager already exists!");
-        return StatusCode::FAILURE;
+
+    auto* field_manager = [&] () -> G4FieldManager* {
+      if (m_useTightMuonStepping){
+        // In the case of tight stepping we need to make our own global field manager
+        // Create a new field manager
+        auto* stepping_field_manager = new TightMuonSteppingFieldManager();
+
+        // Assign it to the global field manager
+        transpManager->SetFieldManager(stepping_field_manager);
+        return stepping_field_manager;
+      } else {
+        // Otherwise get the default from the transportation manager
+        return transpManager->GetFieldManager();
       }
-      // Create a new field manager
-      fieldMgr = new TightMuonSteppingFieldManager();
-
-      // Save it in the TL holder
-      m_fieldMgrHolder.set(fieldMgr);
-
-      // Assign it to the global field manager
-      transpManager->SetFieldManager(fieldMgr);
-    } else {
-      // Otherwise get the default from the transportation manager
-      fieldMgr = transpManager->GetFieldManager();
-    }
+    }();
 
     // Configure the field manager
-    fieldMgr->SetDetectorField(field);
-    ATH_CHECK( setFieldParameters(fieldMgr) );
+    field_manager->SetDetectorField(field);
+    ATH_CHECK( setFieldParameters(field_manager) );
 
     // Create and configure the ChordFinder
-    fieldMgr->CreateChordFinder(field);
+    field_manager->CreateChordFinder(field);
 
 #if G4VERSION_NUMBER < 1040
     ATH_MSG_DEBUG("Old style stepper setting");
     G4MagIntegratorStepper* stepper = getStepper(m_integratorStepper, field);
-    G4MagInt_Driver* magDriver = fieldMgr->GetChordFinder()->GetIntegrationDriver();
+    G4MagInt_Driver* magDriver = field_manager->GetChordFinder()->GetIntegrationDriver();
     magDriver->RenewStepperAndAdjust(stepper);
 #else
     ATH_MSG_DEBUG("New style stepper setting");
     G4VIntegrationDriver* driver = createDriverAndStepper(m_integratorStepper, field);
-    G4ChordFinder* chordFinder = fieldMgr->GetChordFinder();
+    G4ChordFinder* chordFinder = field_manager->GetChordFinder();
     chordFinder->SetIntegrationDriver(driver);
 #endif
 
     // Configure the propagator
     G4PropagatorInField* propagator = transpManager->GetPropagatorInField();
     if (m_maxStep>0) propagator->SetLargestAcceptableStep(m_maxStep);
-
   }
 
   return StatusCode::SUCCESS;

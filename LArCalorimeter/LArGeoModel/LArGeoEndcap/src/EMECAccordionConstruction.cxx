@@ -26,7 +26,6 @@
 #include "GeoModelKernel/GeoNameTag.h"
 #include "GeoModelKernel/GeoTransform.h"
 #include "GeoModelKernel/GeoIdentifierTag.h"
-#include "GeoModelKernel/GeoPublisher.h"
 #include "GeoModelKernel/Units.h"
 
 #include "RDBAccessSvc/IRDBAccessSvc.h"

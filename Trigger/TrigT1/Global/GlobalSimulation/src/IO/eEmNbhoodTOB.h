@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -12,9 +12,10 @@
 #ifndef GLOBALSIM_EEMNBHOODTOB_H
 #define GLOBALSIM_EEMNBHOODTOB_H
 
-#include "IeEmNbhoodTOB.h"
 #include "eEmTOB.h"
+
 #include "AthenaKernel/CLASS_DEF.h"
+#include "AthContainers/DataVector.h"
 
 #include "LArStripNeighborhood.h"
 
@@ -25,7 +26,7 @@ namespace GlobalSim::IOBitwise {
   *
   * Additionally holds an LArStripNeighborhood alongside the eEmTOB information.
   */
-  class eEmNbhoodTOB : virtual public IeEmNbhoodTOB, private eEmTOB {
+  class eEmNbhoodTOB : public eEmTOB {
     
   public:
     /**
@@ -49,16 +50,17 @@ namespace GlobalSim::IOBitwise {
      * eFexRoI threshold bits are set here, the CommonTOB constructor is used
      * to initialise the common bits.
      */
-    eEmNbhoodTOB(const GlobalSim::IOBitwise::IeEmTOB& IeEmTOB, const GlobalSim::LArStripNeighborhood& nbhood);
+    eEmNbhoodTOB(const GlobalSim::IOBitwise::eEmTOB& tob,
+		 const GlobalSim::LArStripNeighborhood& nbhood);
 
     //! @copydoc IeEmNbhoodTOB::~IeEmNbhoodTOB()   
     virtual ~eEmNbhoodTOB(){};
 
     //! @copydoc IeEmNbhoodTOB::Neighbourhood()
-    virtual const LArStripNeighborhood& Neighbourhood() const override;
+    virtual const LArStripNeighborhood& Neighbourhood() const;
 
     //! @copydoc IeEmNbhoodTOB::to_string()  
-    virtual std::string to_string() const override;
+    virtual std::string to_string() const;
     
   private:
      /// Property: LArStripNeighborhood associated with this eEmTOB 
@@ -67,5 +69,19 @@ namespace GlobalSim::IOBitwise {
 } //End of namespace 
 
 CLASS_DEF( GlobalSim::IOBitwise::eEmNbhoodTOB , 229822253 , 1 )
+
+  
+DATAVECTOR_BASE(GlobalSim::IOBitwise::eEmNbhoodTOB,
+		GlobalSim::IOBitwise::eEmTOB); 
+
+namespace GlobalSim {
+  namespace IOBitwise {
+    using eEmNbhoodTOBContainer =
+      DataVector<GlobalSim::IOBitwise::eEmNbhoodTOB>;
+  }
+}
+
+CLASS_DEF( GlobalSim::IOBitwise::eEmNbhoodTOBContainer , 1103580971 , 1 )
+
 
 #endif //GLOBALSIM_EEMNBHOODTOB_H

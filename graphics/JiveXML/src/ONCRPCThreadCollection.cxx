@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -10,9 +10,6 @@ namespace JiveXML{
    //Constructor
   ThreadCollection::ThreadCollection(){
 
-    //intialize the mutex with default attributes
-    pthread_mutex_init(&m_mutex, NULL);
-
     //initialize the semaphore
     sem_init(&m_semaphore,0,0);
 
@@ -21,10 +18,7 @@ namespace JiveXML{
    //Constructor
   ThreadCollection::~ThreadCollection(){
 
-    //destroy the mutex
-    pthread_mutex_destroy(&m_mutex);
-
-    //and the semaphore
+    //Destroy the semaphore
     sem_destroy(&m_semaphore);
 
   }
@@ -33,14 +27,11 @@ namespace JiveXML{
   //If a thread is double added, joinAll will still remove it.
   void ThreadCollection::AddThread( const pthread_t& thread ){
     
-    //First get a mutex //RETVAL for all of them!
-    pthread_mutex_lock(&m_mutex);
-
     //Now add the thread to the list of vectors
-    push_back(thread);
-
-    //Then remove mutex again
-    pthread_mutex_unlock(&m_mutex);
+    {
+      std::lock_guard lock (m_mutex);
+      push_back(thread);
+    }
 
     //And signal any potentially waiting threads
     sem_post(&m_semaphore);
@@ -56,9 +47,9 @@ namespace JiveXML{
 
   //Remove a thread
   void ThreadCollection::RemoveThread( const pthread_t& thread ){
-    
+
     //First get a mutex
-    pthread_mutex_lock(&m_mutex);
+    std::lock_guard lock (m_mutex);
 
     //Loop over list and find that entry
     ThreadCollection::iterator threadItr = begin();
@@ -73,9 +64,6 @@ namespace JiveXML{
       //Go to next thread
       ++threadItr;
     }
-
-    //Then remove mutex again
-    pthread_mutex_unlock(&m_mutex);
 
     //Set this threads state to detached, so its
     //resources are reclaimed once it
@@ -95,15 +83,13 @@ namespace JiveXML{
     
     //Loop till all threads are gone
     while ( size() > 0 ){
-      
-      //First get a mutex //RETVAL for all of them!
-      pthread_mutex_lock(&m_mutex);
 
       //Order is not important - take the first element
-      pthread_t thread = *begin();
-
-      //Then remove mutex again
-      pthread_mutex_unlock(&m_mutex);
+      pthread_t thread;
+      {
+        std::lock_guard lock (m_mutex);
+        thread = *begin();
+      }
 
       //Wait for that thread to finish
       pthread_join(thread,NULL);
@@ -118,17 +104,9 @@ namespace JiveXML{
   //Return number of elements in the vector
   int ThreadCollection::NumberOfThreads() {
 
-    //First get a mutex
-    pthread_mutex_lock(&m_mutex);
-
-    //Get number of elements
-    int NThreads = size();
-
-    //Then remove mutex again
-    pthread_mutex_unlock(&m_mutex);
-    
-    //finally return size
-    return NThreads;
+    std::lock_guard lock (m_mutex);
+    //Return number of elements
+    return size();
   }
 
 }//namespace

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArSamplesMon/History.h"
@@ -279,7 +279,7 @@ History* History::adjust() const
 }
 
 
-History* History::filter(const TString& cuts) const
+std::unique_ptr<History> History::filter(const TString& cuts) const
 {
   FilterParams f;
   if (!f.set(cuts)) return nullptr;
@@ -295,7 +295,7 @@ History* History::filter(const TString& cuts) const
   for (const EventData* event : m_eventData)
     eventData.push_back(new EventData(*event));
 
-  return new History(datas, *cellInfo(), eventData, hash(), shapeErrorGetter());
+  return std::make_unique<History>(datas, *cellInfo(), eventData, hash(), shapeErrorGetter());
 }
 
 

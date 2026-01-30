@@ -43,6 +43,8 @@ def DigitizationMainServicesCfg(flags):
         acc = MainServicesCfg(flags)
 
     acc.merge(PoolReadCfg(flags))
+    evSel = acc.getService("EventSelector")
+    evSel.CollectionType = "RootCollection"
 
     return acc
 

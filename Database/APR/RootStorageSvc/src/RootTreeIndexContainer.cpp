@@ -1,5 +1,5 @@
 /*
- *   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+ *   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
  *   */
 
 // Local implementation files
@@ -13,16 +13,19 @@
 #include "TBranch.h"
 #include "TTreeIndex.h"
 
+#include "GaudiKernel/StatusCode.h"
+
 using namespace pool;
 
-RootTreeIndexContainer::RootTreeIndexContainer() :
+RootTreeIndexContainer::RootTreeIndexContainer(const std::string& name) :
+   RootTreeContainer(name),
    m_indexBranch(nullptr), m_index_entries(0),
    m_index_multi( getpid() ), m_index(0), m_indexBump(0),
    m_firstRead(true)
 { }
 
 
-DbStatus RootTreeIndexContainer::open( DbDatabase& dbH, 
+StatusCode RootTreeIndexContainer::open( DbDatabase& dbH, 
                                        const std::string& nam,
                                        const DbTypeInfo* info,
                                        DbAccessMode mod)
@@ -56,7 +59,7 @@ void RootTreeIndexContainer::useNextRecordId(uint64_t nextID)
 }
 
 
-DbStatus RootTreeIndexContainer::writeObject(ActionList::value_type& action)
+StatusCode RootTreeIndexContainer::writeObject(ActionList::value_type& action)
 {
    // Prepare for writing - grab/create the index branch
    if( !m_indexBranch ) {
@@ -78,7 +81,7 @@ DbStatus RootTreeIndexContainer::writeObject(ActionList::value_type& action)
 }
 
 
-DbStatus RootTreeIndexContainer::loadObject(void** ptr, ShapeH shape, Token::OID_t& oid)
+StatusCode RootTreeIndexContainer::loadObject(void** ptr, ShapeH shape, Token::OID_t& oid)
 {
    if( (oid.second >> 32) > 0 ) {
       if( m_firstRead ) {
@@ -86,7 +89,7 @@ DbStatus RootTreeIndexContainer::loadObject(void** ptr, ShapeH shape, Token::OID
          if( m_tree->GetEntries()>0 and m_tree->GetBranch(APRDefaults::IndexColName)
              and !m_rootDb->wasIndexRebuilt(m_tree->GetName()) ) {
             delete m_tree->GetTreeIndex();
-            m_tree->BuildIndex(APRDefaults::IndexColName);
+            m_tree->BuildIndex(APRDefaults::IndexColName, true);
             m_rootDb->markIndexRebuilt(m_tree->GetName());
          }
          m_firstRead = false;
@@ -94,7 +97,7 @@ DbStatus RootTreeIndexContainer::loadObject(void** ptr, ShapeH shape, Token::OID
       auto evt_id = m_tree->GetEntryNumberWithIndex(oid.second);
       if (evt_id == -1) {
          delete m_tree->GetTreeIndex();
-         m_tree->BuildIndex(APRDefaults::IndexColName);
+         m_tree->BuildIndex(APRDefaults::IndexColName, true);
          evt_id = m_tree->GetEntryNumberWithIndex(oid.second);
       }
       if (evt_id >= 0) {

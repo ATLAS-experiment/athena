@@ -7,7 +7,7 @@
 #ifndef SiSpacePointFormation_SI_POINT_FINDER_H
 #define SiSpacePointFormation_SI_POINT_FINDER_H
 
-#include "AthenaBaseComps/AthReentrantAlgorithm.h"
+#include "AthenaBaseComps/AthCondAlgorithm.h"
 #include "AthenaMonitoringKernel/GenericMonitoringTool.h"
 #include "AthContainers/DataVector.h"
 #include "GeoPrimitives/GeoPrimitives.h"
@@ -80,12 +80,12 @@ namespace InDet {
  and is stored in StoreGate using SG::WriteCondHandle(Key). 
 */
 
-  class SiTrackerSpacePointFinder:public AthReentrantAlgorithm {
+  class SiTrackerSpacePointFinder:public AthCondAlgorithm {
 
   public:
   
     /**
-     * @name AthReentrantAlgorithm methods
+     * @name AthCondAlgorithm methods
      */
     //@{
     SiTrackerSpacePointFinder(const std::string& name,
@@ -242,7 +242,7 @@ namespace InDet {
     /**
      * @name Counters
      * Use mutable to be updated in const methods.
-     * AthReentrantAlgorithm is const during event processing.
+     * AthCondAlgorithm is const during event processing.
      * Use std::atomic to be multi-thread safe.
      */
     //@{

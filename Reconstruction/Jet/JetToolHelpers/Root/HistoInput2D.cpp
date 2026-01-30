@@ -135,14 +135,14 @@ StatusCode HistoInput2D::cacheProjections()
     switch (m_interpNum)
     {
         case InterpType::OnlyX:
-            for (Long64_t binY = 0; binY < localHist->GetNbinsY()+1; ++binY)
+            for (Long64_t binY = 0; binY <= localHist->GetNbinsY()+1; ++binY)
             {
                 // Single bin of Y, interpolate across X
                 m_cachedProj.emplace_back(localHist->ProjectionX(Form("projx_%lld",binY),binY,binY));
             }
             break;
         case InterpType::OnlyY:
-            for (Long64_t binX = 0; binX < localHist->GetNbinsX()+1; ++binX)
+            for (Long64_t binX = 0; binX <= localHist->GetNbinsX()+1; ++binX)
             {
                 // Single bin of X, interpolate across Y
                 m_cachedProj.emplace_back(localHist->ProjectionY(Form("projy_%lld",binX),binX,binX));

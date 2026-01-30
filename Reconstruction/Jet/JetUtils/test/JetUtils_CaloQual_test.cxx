@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <iostream>
@@ -38,6 +38,9 @@ using namespace jet;
 
 int main ATLAS_NOT_THREAD_SAFE () {
 
+  xAOD::CaloClusterContainer* clusterCont = new xAOD::CaloClusterContainer;
+  xAOD::JetContainer* jetCont = new xAOD::JetContainer;
+
 #ifndef XAOD_STANDALONE
   // *********************** init in Athena
 # ifdef SGTOOLS_CURRENTEVENTSTORE_H
@@ -56,9 +59,9 @@ int main ATLAS_NOT_THREAD_SAFE () {
   xAOD::TStore tds;
 
   bool ret = false;
-  ret = tds.record(ClusterData::jetCont, "jetCont"); 
+  ret = tds.record(jetCont, "jetCont");
   assert ( ret == true);
-  ret = tds.record(ClusterData::clusterCont, "clustCont");
+  ret = tds.record(clusterCont, "clustCont");
   assert ( ret == true);
 
 #endif
@@ -82,14 +85,16 @@ int main ATLAS_NOT_THREAD_SAFE () {
   std::string refdir_mc = refdir_s ? refdir_s : "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/JetUtils";
   std::string refdir_data = refdir_s ? refdir_s : "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/JetUtils";
 
-  ClusterData::fillContainer(refdir_mc + "/mc12_8TeV.117050.PowhegPythia_P2011C_ttbar.simul.AOD.e1728_s1581.19_1_1_5.039772.pool.root.1");
-  ClusterData::fillContainer(refdir_data + "/data12_8TeV.00209109.physics_JetTauEtmiss.merge.AOD.19_1_1_5._lb0186._SFO-1._0001.pool.root.1");
+  ClusterData::fillContainer(refdir_mc + "/mc12_8TeV.117050.PowhegPythia_P2011C_ttbar.simul.AOD.e1728_s1581.19_1_1_5.039772.pool.root.1",
+                             *clusterCont, *jetCont);
+  ClusterData::fillContainer(refdir_data + "/data12_8TeV.00209109.physics_JetTauEtmiss.merge.AOD.19_1_1_5._lb0186._SFO-1._0001.pool.root.1",
+                             *clusterCont, *jetCont);
   //vector<JetCaloCalculator*> &vcalc = calculators.calculators();
 
 
   // loop over jet and test calculations
 #define TESTCALC( calc) valuesDirect.push_back(calc( jet )); TEST_MSG(calc.name() <<" = " <<  valuesDirect.back() ) 
-  for(auto jet : *ClusterData::jetCont){
+  for(auto jet : *jetCont){
 
     // calculate from JetCalculations    
     std::vector<double>  valuesFromC =calculators.process( jet );
@@ -115,6 +120,11 @@ int main ATLAS_NOT_THREAD_SAFE () {
     }
 
   } // end loop on jets
+
+#ifndef XAOD_STANDALONE
+  delete clusterCont;
+  delete jetCont;
+#endif
 
 } // main()
 

@@ -1,6 +1,6 @@
 """Define methods to construct configured overlay copy algorithms
 
-Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 """
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
@@ -423,8 +423,7 @@ def CopyCaloCalibrationHitContainersCfg(flags, **kwargs):
 
     # Detect the list of calibration hit containers
     for container in allowedContainers:
-        if (flags.Overlay.ByteStream and container in flags.Input.Collections) \
-                or (not flags.Overlay.ByteStream and container in flags.Input.SecondaryCollections):
+        if container in flags.Input.SecondaryCollections:
             availableContainers.append(container)
 
     for container in availableContainers:
@@ -508,9 +507,8 @@ def CopyTrackRecordCollectionsCfg(flags, **kwargs):
     if flags.Common.ProductionStep == ProductionStep.FastChain:
         availableContainers = allowedContainers
     else:
-        hardScatterInputCollections = flags.Input.Collections if flags.Overlay.ByteStream else flags.Input.SecondaryCollections
         for container in allowedContainers:
-            if container in hardScatterInputCollections:
+            if container in flags.Input.SecondaryCollections:
                 availableContainers.append(container)
 
     for container in availableContainers:

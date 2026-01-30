@@ -33,7 +33,7 @@ class PFTrackPreselAlg : public AthReentrantAlgorithm {
     SG::WriteHandleKey<xAOD::TrackParticleContainer> m_outputTracksKey{
       this, "OutputTracks", "", "The output preselected track collection"};
     SG::WriteDecorHandleKey<xAOD::TrackParticleContainer> m_outputDecorKey{
-      this, "OutputDecor" , "passPFTrackPresel", "Output decoration"};
+      this, "OutputDecor" , m_inputTracksKey, "passPFTrackPresel", "Output decoration"};
     ToolHandle<InDet::IInDetTrackSelectionTool> m_trackSelTool{
       this, "TrackSelTool", "", "The track selection tool"};
     Gaudi::Property<float> m_upperPtCut{

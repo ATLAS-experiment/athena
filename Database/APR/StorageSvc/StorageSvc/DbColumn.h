@@ -1,8 +1,7 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-// $Id: DbColumn.h 726071 2016-02-25 09:23:05Z krasznaa $
 //====================================================================
 //  DbColumn class definitions
 //--------------------------------------------------------------------
@@ -14,7 +13,7 @@
 #define POOL_DBCOLUMN_H 1
 
 // Framework include files
-#include "StorageSvc/DbStatus.h"
+#include "GaudiKernel/StatusCode.h"
 // STL include files
 #include <typeinfo>
 #include <string>
@@ -113,7 +112,7 @@ namespace pool  {
     /// Create string representation of the type information object
     const std::string toString() const;
     /// Load type information object from string representation
-    DbStatus fromString(const std::string& string_rep);
+    StatusCode fromString(const std::string& string_rep);
     /// Access type name by type identifier from RTTI
     static const std::string typeName(int typ);
   };

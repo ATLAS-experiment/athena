@@ -495,7 +495,7 @@ void ISF::InputConverter::ISF_to_G4Event(
   AtlasG4EventUserInfo* atlasG4EvtUserInfo =
       dynamic_cast<AtlasG4EventUserInfo*>(event.GetUserInformation());
   if (!atlasG4EvtUserInfo) {
-    atlasG4EvtUserInfo = new AtlasG4EventUserInfo;
+    atlasG4EvtUserInfo = new AtlasG4EventUserInfo(Gaudi::Hive::currentContext());
     event.SetUserInformation(atlasG4EvtUserInfo);
   }
   atlasG4EvtUserInfo->SetLastProcessedTrackID(0); // TODO Check if it is better to set this to -1 initially

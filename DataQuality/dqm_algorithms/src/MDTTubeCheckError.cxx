@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // **********************************************************************
@@ -170,7 +170,7 @@ MDTTubeCheckError::execute( const std::string& name, const TObject& object, cons
     }
   }
 
-  if ((EmptyTubes == range[1]) || ((LowStatTubes/range[1]) > LowStatThre)) {
+  if ((EmptyTubes == range[1]) || ((static_cast<double>(LowStatTubes)/range[1]) > LowStatThre)) {
     result->status_ = dqm_core::Result::Undefined; 
     ERS_DEBUG(1,"Undefined");
   } else if (count >= redTh) {

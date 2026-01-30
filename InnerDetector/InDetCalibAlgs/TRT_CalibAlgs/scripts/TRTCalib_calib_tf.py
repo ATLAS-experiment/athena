@@ -47,6 +47,9 @@ if __name__ == '__main__':
     trf.parser.add_argument('--stream', type=trfArgClasses.argFactory(trfArgClasses.argString), 
                             help='stream. E.g.: express_express',default=trfArgClasses.argString('') ,group='TRTCalib_calib_tf')
 
+    trf.parser.add_argument('--step', type=trfArgClasses.argFactory(trfArgClasses.argString), 
+                            help='stream step. E.g.: daq or merge',default=trfArgClasses.argString('*.RAW/') ,group='TRTCalib_calib_tf')
+
     trf.parser.add_argument('--rawfile', type=trfArgClasses.argFactory(trfArgClasses.argString), 
                             help='rawfile only used for testing purposes',default=trfArgClasses.argString('') ,group='TRTCalib_calib_tf')
         

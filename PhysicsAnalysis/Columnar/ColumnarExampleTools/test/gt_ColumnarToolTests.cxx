@@ -150,7 +150,7 @@ TEST_F (ColumnarPhysLiteTest, SimpleSelectorExampleTool)
 
   // this will call the tool in either mode, and also performs some
   // performance measurements of the tool in either mode
-  doCall (*tool, "SimpleSelectorExampleTool", "AnalysisJets", xAODToolCaller, {{"Particles", "AnalysisJets"}});
+  doCall ({.tool = tool.get(), .name = "SimpleSelectorExampleTool", .xAODToolCaller = &xAODToolCaller, .containerRenames = {{"Particles", "AnalysisJets"}}});
 }
 
 
@@ -359,7 +359,7 @@ TEST_F (ColumnarPhysLiteTest, MomentumAccessorExampleTool)
 
   // this will call the tool in either mode, and also performs some
   // performance measurements of the tool in either mode
-  doCall (*tool, "MomentumAccessorExampleTool", "AnalysisJets", xAODToolCaller, {{"Particles", "AnalysisJets"}});
+  doCall ({.tool = tool.get(), .name = "MomentumAccessorExampleTool", .xAODToolCaller = &xAODToolCaller, .containerRenames = {{"Particles", "AnalysisJets"}}});
 }
 
 
@@ -381,7 +381,7 @@ TEST_F (ColumnarPhysLiteTest, MomentumAccessorExampleTool_photons)
 
   // this will call the tool in either mode, and also performs some
   // performance measurements of the tool in either mode
-  doCall (*tool, "MomentumAccessorExampleTool", "AnalysisPhotons", xAODToolCaller, {{"Particles", "AnalysisPhotons"}});
+  doCall ({.tool = tool.get(), .name = "MomentumAccessorExampleTool", .xAODToolCaller = &xAODToolCaller, .containerRenames = {{"Particles", "AnalysisPhotons"}}});
 }
 
 
@@ -557,7 +557,7 @@ TEST_F (ColumnarPhysLiteTest, VariantExampleTool)
 
   // this will call the tool in either mode, and also performs some
   // performance measurements of the tool in either mode
-  doCall (*tool, "VariantExampleTool", "AnalysisElectrons", xAODToolCaller, {{}});
+  doCall ({.tool = tool.get(), .name = "VariantExampleTool", .xAODToolCaller = &xAODToolCaller, .containerRenames = {{{}}}});
 }
 
 ATLAS_GOOGLE_TEST_MAIN

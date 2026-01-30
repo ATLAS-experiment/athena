@@ -50,7 +50,6 @@ StatusCode PFSubtractionTool::initialize()
   if (!m_NNEnergyPredictorTool.empty()) ATH_CHECK(m_NNEnergyPredictorTool.retrieve());
 
   //Set the level of the helpers to the same as the tool here
-  m_pfCalc.msg().setLevel(this->msg().level());
   m_pfSubtractionStatusSetter.msg().setLevel(this->msg().level());
   m_pfSubtractionEnergyRatioCalculator.msg().setLevel(this->msg().level());
   m_subtractor.m_facilitator.msg().setLevel(this->msg().level());
@@ -92,9 +91,7 @@ void PFSubtractionTool::execute(eflowCaloObjectContainer *theEflowCaloObjectCont
     }
     else performTruthSubtraction(data);
   }
-  else{
-    m_pfCalc.calculate(data);
-  }
+  //eoverp mode calculation has been moved to a dedicated PFBaseTool.
 
 }
 

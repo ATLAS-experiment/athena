@@ -152,8 +152,8 @@ int  HECHVManager::HECHVData::index  (const HECHVSubgap& subgap)
 
 
 HECHVManager::HECHVManager()
-  : m_c (std::make_unique<Clockwork> (this))
 {
+  m_c = std::make_unique<Clockwork> (this);
 }
 
 const HECHVDescriptor& HECHVManager::getDescriptor() const

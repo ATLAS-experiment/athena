@@ -19,8 +19,8 @@
 #include "Identifier/IdentifierHash.h"
 #include "Identifier/MultiRange.h" //used in the icc file
 #include "Identifier/RangeIterator.h"
-#include "boost/range/iterator_range.hpp"
 #include <vector>
+#include <ranges>
 #include <set>
 class IMessageSvc;
 class IdDictRegion;
@@ -39,9 +39,9 @@ public:
   typedef Identifier::size_type  size_type ;
 
   /** Type for iterators over identifiers. */
-  typedef std::vector<Identifier>::const_iterator id_iterator;
+  using id_iterator = std::vector<Identifier>::const_iterator;
   /** Type for range over identifiers. */
-  typedef boost::iterator_range<id_iterator> id_range;
+  using id_range = std::ranges::subrange<id_iterator>;
 
 
 
@@ -89,8 +89,6 @@ public:
      * @param name Name of this group (only for error reporting).
      * @param ids Set of Identifiers comprising this group.
      * @param end_index The ending index for the context for this group.
-     * @parma msgSvc The global message service
-     *               (may be 0, only for error reporting).
      * @param full_range The @c MultiRange corresponding to this group.
      *                   If supplied, the side of the @c ids set is checked
      *                   against the range's cardinality.
@@ -99,7 +97,6 @@ public:
     int init (const std::string& name,
               const std::set<Identifier>& ids,
               size_type end_index,
-              IMessageSvc* msgSvc,
               const MultiRange* full_range = 0);
 
 
@@ -276,10 +273,6 @@ public:
 
   /// Return the name for this helper.
   const std::string& name() const;
-
-  /// Return the message service for this helper (may be null).
-  IMessageSvc* msgSvc();
-
 
 
 protected:

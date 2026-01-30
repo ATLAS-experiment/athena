@@ -12,13 +12,20 @@ def CaloCellDecoratorCfg(flags, **kwargs):
 
     acc.merge(LArOnOffIdMappingCfg(flags))
     return acc
-   
 
-def MaxCellDecoratorCfg(flags, **kwargs):
+
+def MaxCellDecoratorCfg(flags, name="MaxCellDecorator", **kwargs):
     acc = ComponentAccumulator()
     kwargs.setdefault("SGKey_electrons", flags.Egamma.Keys.Output.Electrons)
+    baseDecorations =["maxEcell_time", "maxEcell_energy", "maxEcell_gain",
+                      "maxEcell_onlId", "maxEcell_x", "maxEcell_y", "maxEcell_z"]
+    electronDecorations = baseDecorations
+    kwargs.setdefault("SGKey_egammaClusters", "")
+    if kwargs["SGKey_egammaClusters"] != '':
+        electronDecorations += ["dR"]
+    kwargs.setdefault("SGKey_electrons_decorations", electronDecorations)
     kwargs.setdefault("SGKey_photons", flags.Egamma.Keys.Output.Photons)
-    acc.setPrivateTools(CompFactory.DerivationFramework.MaxCellDecorator(**kwargs))
+    acc.setPrivateTools(CompFactory.DerivationFramework.MaxCellDecorator(name, **kwargs))
     from LArCabling.LArCablingConfig import LArOnOffIdMappingCfg
 
     acc.merge(LArOnOffIdMappingCfg(flags))
@@ -27,8 +34,19 @@ def MaxCellDecoratorCfg(flags, **kwargs):
 
 def GainDecoratorCfg(flags, **kwargs):
     acc = ComponentAccumulator()
+    decorationPattern = kwargs.pop("decoration_pattern", "{}_Lr{}_{}G")
+    kwargs.setdefault("gain_names", { 0 : "Hi", 1 : "Med", 2 : "Low" })
+    kwargs.setdefault("layers", [0, 1, 2, 3])
+    decorNames = []
+    for x, gain in kwargs["gain_names"].items():
+        for layer in kwargs["layers"]:
+            decorNames += [decorationPattern.format("E", layer, gain)]
+            decorNames += [decorationPattern.format("rnoW", layer, gain)]
+            decorNames += [decorationPattern.format("nCells", layer, gain)]
     kwargs.setdefault("SGKey_electrons", flags.Egamma.Keys.Output.Electrons)
+    kwargs.setdefault("SGKey_electrons_decorations", decorNames)
     kwargs.setdefault("SGKey_photons", flags.Egamma.Keys.Output.Photons)
+    kwargs.setdefault("SGKey_photons_decorations", decorNames)
     kwargs.setdefault("name", "GainDecor")
     acc.setPrivateTools(CompFactory.DerivationFramework.GainDecorator(**kwargs))
     return acc
@@ -61,11 +79,15 @@ def ClusterEnergyPerLayerDecoratorCfg(flags, **kwargs):
     kwargs.setdefault("SGKey_electrons", flags.Egamma.Keys.Output.Electrons)
     kwargs.setdefault("SGKey_photons", flags.Egamma.Keys.Output.Photons)
     kwargs.setdefault("SGKey_caloCells", flags.Egamma.Keys.Input.CaloCells)
-    kwargs.setdefault("neta", 5)
-    kwargs.setdefault("nphi", 5)
+    neta = kwargs.pop("neta", 5)
+    nphi = kwargs.pop("nphi", 5)
+    kwargs.setdefault("layers", [ 0, 1, 2, 3 ])
+    decorBase = "E{}x{}_Lr".format(neta, nphi)
+    kwargs.setdefault("SGKey_photons_decorations", [decorBase+str(layer) for layer in kwargs['layers']])
+    kwargs.setdefault("SGKey_electrons_decorations", [decorBase+str(layer) for layer in kwargs['layers']])
     toolArgs = {}
-    toolArgs.update({"eta_size": kwargs["neta"]})
-    toolArgs.update({"phi_size": kwargs["nphi"]})
+    toolArgs.update({"eta_size": neta})
+    toolArgs.update({"phi_size": nphi})
     kwargs.setdefault(
         "CaloFillRectangularClusterTool",
         acc.popToolsAndMerge(CaloFillRectangularClusterCfg(flags, **toolArgs)),
@@ -195,15 +217,6 @@ def getClusterEnergyPerLayerDecorations(acc, kernel):
     for tool in ClusterEnergyPerLayerDecorators:
         collections = filter(bool, (getattr(tool, x) for x in properties))
         for part in collections:
-            for layer in tool.layers:
-                decorations.extend(
-                    [
-                        "{part}.E{neta}x{nphi}_Lr{layer}".format(
-                            part=part,
-                            neta=tool.neta,
-                            nphi=tool.nphi,
-                            layer=layer,
-                        )
-                    ]
-                )
+            key = "SGKey_{}_decorations".format(str(part).lower())
+            decorations.extend(getattr(tool, key))
     return decorations

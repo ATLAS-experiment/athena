@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonCondData/NswCalibDbTimeChargeData.h"
@@ -26,10 +26,10 @@ int NswCalibDbTimeChargeData::identToModuleIdx(const Identifier& chan_id) const{
     const IdentifierHash hash = m_idHelperSvc->detElementHash(chan_id);
     if (m_idHelperSvc->isMM(chan_id)) {
         const MmIdHelper& idHelper{m_idHelperSvc->mmIdHelper()};
-        return static_cast<unsigned int>(hash)*(idHelper.gasGapMax()) + (idHelper.gasGap(chan_id) -1);
+        return static_cast<unsigned>(hash)*(idHelper.gasGapMax()) + (idHelper.gasGap(chan_id) -1);
     } else if (m_idHelperSvc->issTgc(chan_id)) {
         const sTgcIdHelper& idHelper{m_idHelperSvc->stgcIdHelper()};
-        return static_cast<unsigned int>(hash)*(idHelper.gasGapMax() * 3 /*3 channel types*/) +
+        return static_cast<unsigned>(hash)*(idHelper.gasGapMax() * 3 /*3 channel types*/) +
                (idHelper.gasGap(chan_id) -1  + idHelper.gasGapMax() * idHelper.channelType(chan_id)) + m_nMmElements;
     }
     return -1;
@@ -49,7 +49,7 @@ NswCalibDbTimeChargeData::setData(CalibDataType type,
     ATH_MSG_VERBOSE("Set "<<(type == CalibDataType::PDO  ? "PDO" : "TDO")<<" calibration constants for channel "
                 <<m_idHelperSvc->toString(chnlId)<<", slot: "<< array_idx<<", "<<constants);
     CalibModule& calib_mod = calibMap.at(array_idx);
-    const unsigned int channel = (m_idHelperSvc->isMM(chnlId) ?
+    const unsigned channel = (m_idHelperSvc->isMM(chnlId) ?
                                     m_idHelperSvc->mmIdHelper().channel(chnlId) :
                                     m_idHelperSvc->stgcIdHelper().channel(chnlId)) -1;
     if (calib_mod.channels.empty()) {
@@ -74,8 +74,8 @@ NswCalibDbTimeChargeData::setData(CalibDataType type,
 // setZeroData
 void
 NswCalibDbTimeChargeData::setZero(CalibDataType type, MuonCond::CalibTechType tech,  CalibConstants constants) {
-    ZeroCalibMap& calibMap = m_zero[tech];    
-    calibMap.insert(std::make_pair(type, std::move(constants)));
+    using namespace Muon::MuonStationIndex;
+    m_zero[toInt(tech)][toInt(type)] = std::move(constants);
 }
 
 
@@ -97,7 +97,7 @@ NswCalibDbTimeChargeData::getChannelIds(const CalibDataType type, const std::str
         if (m_idHelperSvc->isMM(module.layer_id)) {
             if (tech == "STGC") continue;
             const MmIdHelper& idHelper{m_idHelperSvc->mmIdHelper()};
-            for (unsigned int chn = 1 ; chn <= module.channels.size() ; ++chn) {
+            for (unsigned chn = 1 ; chn <= module.channels.size() ; ++chn) {
                 if (!module.channels[chn -1]) continue;
                 
                 chnls.push_back(idHelper.channelID(module.layer_id, 
@@ -107,7 +107,7 @@ NswCalibDbTimeChargeData::getChannelIds(const CalibDataType type, const std::str
         } else if (m_idHelperSvc->issTgc(module.layer_id)) {
             if (tech == "MM") break;
             const sTgcIdHelper& idHelper{m_idHelperSvc->stgcIdHelper()};
-            for (unsigned int chn = 1 ; chn <= module.channels.size() ; ++chn) {
+            for (unsigned chn = 1 ; chn <= module.channels.size() ; ++chn) {
                 if (!module.channels[chn -1]) continue;
                 chnls.push_back(idHelper.channelID(module.layer_id, 
                                                    idHelper.multilayer(module.layer_id), 
@@ -119,10 +119,15 @@ NswCalibDbTimeChargeData::getChannelIds(const CalibDataType type, const std::str
 
     return chnls;
 }
-const NswCalibDbTimeChargeData::CalibConstants* NswCalibDbTimeChargeData::getCalibForChannel(const CalibDataType type, const Identifier& channelId) const {
+const NswCalibDbTimeChargeData::CalibConstants* 
+NswCalibDbTimeChargeData::getCalibForChannel(const CalibDataType type, const Identifier& channelId) const {
     const ChannelCalibMap& calibMap =  type == CalibDataType::PDO ? m_pdo_data : m_tdo_data;    
     const int array_idx = identToModuleIdx(channelId);
-    const unsigned int channel = (m_idHelperSvc->isMM(channelId) ? 
+    if (array_idx < 0){
+      ATH_MSG_ERROR("NswCalibDbTimeChargeData::getCalibForChannel: array index is negative.");
+      return nullptr;
+    }
+    const unsigned channel = (m_idHelperSvc->isMM(channelId) ? 
                                   m_idHelperSvc->mmIdHelper().channel(channelId) : 
                                   m_idHelperSvc->stgcIdHelper().channel(channelId)) -1;
     if (calibMap.at(array_idx).channels.size() > channel && calibMap[array_idx].channels[channel]) {
@@ -133,14 +138,10 @@ const NswCalibDbTimeChargeData::CalibConstants* NswCalibDbTimeChargeData::getCal
     return getZeroCalibChannel(type, tech);        
 
 }
-const NswCalibDbTimeChargeData::CalibConstants* NswCalibDbTimeChargeData::getZeroCalibChannel(const CalibDataType type, const MuonCond::CalibTechType tech) const{   
-    std::map<MuonCond::CalibTechType, ZeroCalibMap>::const_iterator itr = m_zero.find(tech);
-    if(itr != m_zero.end()) {
-        const ZeroCalibMap& zeroMap = itr->second;
-        ZeroCalibMap::const_iterator type_itr = zeroMap.find(type);
-        if(type_itr != zeroMap.end()) return &type_itr->second;
-    }
-    return nullptr;
+const NswCalibDbTimeChargeData::CalibConstants* 
+    NswCalibDbTimeChargeData::getZeroCalibChannel(const CalibDataType type, const MuonCond::CalibTechType tech) const{   
+    using namespace Muon::MuonStationIndex;
+    return &m_zero[toInt(tech)][toInt(type)];
 }
 
 

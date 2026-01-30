@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "PPMSimBSMonitorAlgorithm.h"
@@ -342,12 +342,12 @@ StatusCode PPMSimBSMonitorAlgorithm::fillHistograms( const EventContext& ctx ) c
       std::lock_guard<std::mutex> lock(m_mutex);
       const int crate  = coolId.crate();
       const int module = coolId.module();
-      crateError[crate] = 1;
+      crateError.at(crate) = 1;
       if (!error_tt) {
         m_errorLB_tt_counter[lb]+=1;
         error_tt = true;
       }
-      if (!((moduleError[crate] >> module) & 0x1)) {
+      if (!((moduleError.at(crate) >> module) & 0x1)) {
 	const int y = module + 16 * (crate % 2);
 	auto y_2D = Monitored::Scalar<int>("y_2D", y);
 	if (m_errorLB_tt_counter[lb]<=maxErrorsPerLB) {
@@ -356,7 +356,7 @@ StatusCode PPMSimBSMonitorAlgorithm::fillHistograms( const EventContext& ctx ) c
 	  else if (crate == 2 || crate == 3) fill(groupName +  crate_map.at(1), eventMonitor, y_2D );
 	  else if (crate == 4 || crate == 5) fill(groupName +  crate_map.at(2), eventMonitor, y_2D ); 
 	  else if (crate == 6 || crate == 7) fill(groupName +  crate_map.at(3), eventMonitor, y_2D ); 
-	  moduleError[crate] |= (1 << module);
+	  moduleError.at(crate) |= (1 << module);
 	}
       }
     }
@@ -402,7 +402,7 @@ StatusCode PPMSimBSMonitorAlgorithm::makePPMTower( const xAOD::TriggerTower* tt,
   monTT.phi1d = 0;
   monTT.maxADC = 0;
   vecMonTT.push_back(monTT);
-   
+
   return StatusCode::SUCCESS; 
 }
 
@@ -426,12 +426,12 @@ StatusCode PPMSimBSMonitorAlgorithm::fillPPMEtaPhi( MonitorTT &monTT,
   if (absEta > 3.2) {
     // Fill four bins in phi
     phiMod = std::floor(phiMod/4)*4. + 2.;
-    offset = offset32;
+    offset = std::move(offset32);
   } 
   else if (absEta > 2.5) {
     // Fill two bins in phi
     phiMod = std::floor(phiMod/2)*2. + 1.;
-    offset = offset25;
+    offset = std::move(offset25);
   }     
   else {
     offset = {0.};

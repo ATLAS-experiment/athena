@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // Helper for MultiParticleGunPileup
@@ -195,7 +195,7 @@ class CyclicSeqSampler : public Sampler {
       token = s.substr(0, pos);
       m_sequence.push_back(std::stoi(token));
       s.erase(0, pos + 1);
-      std::cout << "  adding " << m_sequence[m_sequence.size()-1] << " from " << token.c_str() << std::endl;
+      std::cout << "  adding " << m_sequence[m_sequence.size()-1] << " from " << token << std::endl;
     }
     m_index = 0;
   };

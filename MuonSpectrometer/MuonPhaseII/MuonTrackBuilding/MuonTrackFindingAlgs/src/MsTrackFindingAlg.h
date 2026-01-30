@@ -45,6 +45,9 @@ namespace MuonR4{
             virtual StatusCode initialize() override final;
             /** @brief Standard algorithm execution hook */
             virtual StatusCode execute(const EventContext& ctx) const override final;
+
+            using OptBoundPars_t = Acts::Result<Acts::BoundTrackParameters>;
+            using MeasVec_t = std::vector<const xAOD::UncalibratedMeasurement*>;
         private:
             /** @brief Iterates over the search tree and combines close-by segments to a track seed.
              *         Seeds with the same segments as other seeds are deduplicated
@@ -53,13 +56,31 @@ namespace MuonR4{
             std::unique_ptr<MsTrackSeedContainer> findTrackSeeds(const EventContext& ctx,
                                                                  const xAOD::MuonSegmentContainer& segments) const;
 
-            
-            void fitSeedCandidate(const Acts::GeometryContext& gCtx,
+            /** @brief Attempts to fit the track seed candidate to a full track and returns whether the
+             *         fit succeeded.
+             *  @param gCtx: Geometry context to access the alignment of the surfaces
+             *  @param mCtxc: Magnetic field context to access the field map during the fit
+             *  @param cCtx: Calibration context to access the calibration constants from Store gate
+             *               during the track state filling
+             *  @param seed: The seed of interest to fit
+             *  @param outContainer: Mutable track container to which the output track is written */
+            bool fitSeedCandidate(const Acts::GeometryContext& gCtx,
                                   const Acts::MagneticFieldContext& mCtx,
                                   const Acts::CalibrationContext& cCtx,
                                   const MsTrackSeed& seed,
                                   ActsTrk::MutableTrackContainer& outContainer) const;
 
+            /** @brief Prepares the input by the fit by collecting the measurements on the segment & 
+             *  @param gCtx: Geometry context to access the alignment of the surfaces
+             *  @param mCtxc: Magnetic field context to access the field map during the fit
+             *  @param cCtx: Calibration context to access the calibration constants from Store gate
+             *               during the track state filling
+             *  @param seed: The seed of interest to fit */
+            std::pair<OptBoundPars_t, MeasVec_t> prepareFit(const Acts::GeometryContext& tgContext,
+                                                            const Acts::MagneticFieldContext& mfContext,
+                                                            const Acts::CalibrationContext& calContext,
+                                                            const MsTrackSeed& seed) const;
+            
             /** @brief Declare the data dependency on the standard Mdt+Rpc+Tgc segment container
              *         & on the NSW segment container */
             SG::ReadHandleKey<xAOD::MuonSegmentContainer> m_segmentKey{this, "SegmentContainer", "MuonSegmentsFromR4" };
@@ -73,7 +94,7 @@ namespace MuonR4{
             ToolHandle<ISegmentSelectionTool> m_segSelector{this, "SegmentSelectionTool" , "" };
             /** @brief Track fitting tool */
             ToolHandle<ActsTrk::IFitterTool> m_trackFitTool{this, "FittingTool", ""};
-
+            /** @brief Calibration tool to fill the track states */
             ToolHandle<ISpacePointCalibrator> m_calibTool{this, "Calibrator", ""};
             /** @brief Tracking geometry tool */
             PublicToolHandle<ActsTrk::ITrackingGeometryTool> m_trackingGeometryTool{this, "TrackingGeometryTool", ""};

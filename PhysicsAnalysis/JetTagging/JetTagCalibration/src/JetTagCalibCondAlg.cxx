@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 /*
  *   */
@@ -26,7 +26,7 @@ namespace Analysis {
 
 
   JetTagCalibCondAlg::JetTagCalibCondAlg (const std::string& name, ISvcLocator* pSvcLocator)
-    : ::AthAlgorithm( name, pSvcLocator ),
+    : ::AthCondAlgorithm( name, pSvcLocator ),
     m_poolsvc("PoolSvc", name),
     m_Likelihood_smoothNTimes(1),
     m_JetFitterNN_calibrationDirectory("JetFitter"),
@@ -72,8 +72,7 @@ namespace Analysis {
       ATH_MSG_DEBUG( "#BTAG# List of calibrated taggers");
       for(uint i=0;i<m_taggers.size();i++) {
         ATH_MSG_DEBUG("#BTAG# Tagger " << m_taggers[i] );
-        std::vector<std::string> hvect;
-        m_taggersHists.push_back(hvect);
+        m_taggersHists.emplace_back();
       }
     }
     else {
@@ -103,7 +102,7 @@ namespace Analysis {
           // (necessary because getJetAuthor used in taggers does not use
           //  jet collection name but standardised info)
           if (std::find(m_originalChannels.begin(), m_originalChannels.end(),jetc)
-                       == m_originalChannels.end()) m_originalChannels.push_back(jetc);
+                       == m_originalChannels.end()) m_originalChannels.push_back(std::move(jetc));
         }
       }
     }
@@ -417,21 +416,19 @@ namespace Analysis {
   }
 
 
-  StatusCode JetTagCalibCondAlg::execute() {
+  StatusCode JetTagCalibCondAlg::execute(const EventContext& ctx) const {
     ATH_MSG_DEBUG("execute " << name());
 
     // Write Cond Handle
-    SG::WriteCondHandle<JetTagCalibCondData > histoWriteHandle{m_writeKey};
+    SG::WriteCondHandle<JetTagCalibCondData > histoWriteHandle{m_writeKey, ctx};
     //For serial Athena. Execute() should not be called in AthenaMT
     if (histoWriteHandle.isValid()) {
       ATH_MSG_DEBUG("#BTAG# Write CondHandle "<< histoWriteHandle.fullKey() << " is already valid");
       return StatusCode::SUCCESS;
     }
 
-    m_mappedAlias.clear();
-
     // Read Cond Handle - GUID
-    SG::ReadCondHandle<CondAttrListCollection> readHandle{m_readKey};
+    SG::ReadCondHandle<CondAttrListCollection> readHandle{m_readKey, ctx};
     const CondAttrListCollection* atrcol{*readHandle};
     if(atrcol==nullptr) {
       ATH_MSG_ERROR("#BTAG# Cannot retrieve CondAttrListCollection for " << m_readKey.key());
@@ -471,10 +468,7 @@ namespace Analysis {
       return StatusCode::FAILURE;
     }
 
-    StatusCode sc = createHistoMap(pfile.get(), writeCdo.get());
-    if(sc != StatusCode::SUCCESS){
-    // do nothing for the moment
-    }
+    const std::vector<std::string>& mappedAlias = createHistoMap(pfile.get(), writeCdo.get());
 
     for(uint i=0;i<m_taggers.size();i++) {
       std::string tagger = m_taggers[i];
@@ -482,13 +476,13 @@ namespace Analysis {
       ATH_MSG_DEBUG( "#BTAG# registrating tagger "<< m_taggers[i]);
       std::vector<std::string> histnames = m_taggersHists[i];
       for(unsigned int h=0; h<histnames.size(); ++h){
-	std::string hname = histnames[h];
-	for(uint j=0;j<m_mappedAlias.size();j++) {
-          std::string fname = writeCdo->fullHistoName(m_mappedAlias[j],hname);
+	      std::string hname = histnames[h];
+	      for(uint j=0;j<mappedAlias.size();j++) {
+          std::string fname = writeCdo->fullHistoName(mappedAlias[j],hname);
           ATH_MSG_DEBUG( "#BTAG# Retrieving " << tagger <<":"<< fname );
           std::string channel = writeCdo->channelName(fname);
           std::string hname = writeCdo->histoName(fname);
-          std::string hFullName(m_directoryMap[tagger]);
+          std::string hFullName(m_directoryMap.at(tagger));
           hFullName+="/"; hFullName+=channel; 
           hFullName+="/"; hFullName+=hname;
           ATH_MSG_DEBUG( "#BTAG#     histo name in physical file= " << hFullName );
@@ -498,6 +492,10 @@ namespace Analysis {
             if (tagger.find("DL1")!=std::string::npos ) {
               ATH_MSG_DEBUG("#BTAG# Build DL1 NN config for tagger " << tagger << " and jet collection " << channel << " and write it in condition data");
               TObjString* cal_string = dynamic_cast<TObjString*>(hPointer.get());
+              if (not cal_string) {
+                ATH_MSG_WARNING("JetTagCalibCondAlg::execute: hPointer cannot be cast to TObjString");
+                continue;
+              }
               std::istringstream nn_config_sstream(cal_string->GetString().Data());
               lwt::JSONConfig nn_config = lwt::parse_json(nn_config_sstream);
               ATH_MSG_DEBUG("#BTAG# Layers size << " << nn_config.layers.size());
@@ -552,6 +550,7 @@ namespace Analysis {
                   continue;
                 }
                 h->SetDirectory(nullptr);
+                //coverity[RESOURCE_LEAK]
                 (void)hPointer.release();
                 if (tagger == "IP2D" || tagger == "IP3D" || tagger == "SV1") {
                   ATH_MSG_VERBOSE("#BTAG# Smoothing histogram " << hname << " ...");
@@ -581,109 +580,93 @@ namespace Analysis {
     return StatusCode::SUCCESS;
   }
  
-  StatusCode JetTagCalibCondAlg::createHistoMap(TFile* pfile, JetTagCalibCondData * histosCdo){
-
+std::vector<std::string> 
+JetTagCalibCondAlg::createHistoMap(TFile* pfile, JetTagCalibCondData * histosCdo) const {
     ATH_MSG_DEBUG("#BTAG# in createHistoMap" );
-    std::vector< std::string > channels;
-
-    for(unsigned int j=0; j<m_originalChannels.size(); ++j){
-      channels.push_back(m_originalChannels[j]);
-    }
-
+    std::vector< std::string > channels(m_originalChannels);
+    std::vector< std::string > mappedAlias;
     std::string folder(m_readKey.key());
-    
-
+    //coverity[unreachable:FALSE]
     for(uint i=0;i<m_taggers.size();++i) {
       std::string tagger = m_taggers[i];
-
       for(unsigned int j=0; j<m_originalChannels.size(); ++j){
         /// get all aliases
-        std::map<std::string, std::vector<std::string> >::iterator ialiaslist 
+        std::map<std::string, std::vector<std::string> >::const_iterator ialiaslist
           = m_channelAliasesMultiMap.find(m_originalChannels[j]);
-	if(ialiaslist == m_channelAliasesMultiMap.end()){
-	  ATH_MSG_DEBUG( "#BTAG#  no alias for original channel" << m_originalChannels[j] );
-	  if(!objectTDirExists(tagger+"/"+m_originalChannels[j], pfile)){
-	    ATH_MSG_WARNING( "#BTAG# no calibration for jet collection " << m_originalChannels[j]
-			   << " consider using aliases " );
-	  }
-	  continue;
-	}
-	std::vector<std::string> aliaslist = ialiaslist->second;
-	if(aliaslist.size() == 1){
-	  if("none" == aliaslist[0]){
-	    ATH_MSG_DEBUG("#BTAG#  no alias for original channel" << m_originalChannels[j]);
-				
+	      if(ialiaslist == m_channelAliasesMultiMap.end()){
+	        ATH_MSG_DEBUG( "#BTAG#  no alias for original channel" << m_originalChannels[j] );
+	        if(!objectTDirExists(tagger+"/"+m_originalChannels[j], pfile)){
+	          ATH_MSG_WARNING( "#BTAG# no calibration for jet collection " << m_originalChannels[j]
+			       << " consider using aliases " );
+	        }
+	        continue;
+	      }
+	      std::vector<std::string> aliaslist = ialiaslist->second;
+	      if(aliaslist.size() == 1){
+	        if("none" == aliaslist[0]){
+            ATH_MSG_DEBUG("#BTAG#  no alias for original channel" << m_originalChannels[j]);
             if(objectTDirExists(tagger+"/"+m_originalChannels[j], pfile)){
-	      ATH_MSG_WARNING( "#BTAG# no calibration for jet collection " << m_originalChannels[j]
-				     << " consider using aliases " );
+              ATH_MSG_WARNING( "#BTAG# no calibration for jet collection " << m_originalChannels[j]
+                 << " consider using aliases " );
             }
             continue;
-	  }
-	}
-
-	bool foundalias=false;
-
-	for(unsigned int k=0; k<aliaslist.size(); ++k){
-	  std::string aliasentry = aliaslist[k];
-	  if("none" == aliasentry){
-	    ATH_MSG_DEBUG("#BTAG# first alias entry is none - replace with original channel" 
-				<< m_originalChannels[j] );
-            aliasentry= m_originalChannels[j];
-	  }
-	  /// now see if the jet collection exists in db
-	  std::string hFullName(tagger); 
-	  hFullName+="/"; hFullName+=aliasentry; 
+	        }
+	      }
+	      bool foundalias=false;
+        for(unsigned int k=0; k<aliaslist.size(); ++k){
+          std::string aliasentry = aliaslist[k];
+          if("none" == aliasentry){
+            ATH_MSG_DEBUG("#BTAG# first alias entry is none - replace with original channel" 
+              << m_originalChannels[j] );
+                  aliasentry= m_originalChannels[j];
+          }
+          /// now see if the jet collection exists in db
+          std::string hFullName(tagger); 
+          hFullName+="/"; hFullName+=aliasentry; 
           // Check if jet collection already in channel alias map
-          if (std::count(m_mappedAlias.begin(), m_mappedAlias.end(), aliasentry) > 0) {
-	    ATH_MSG_DEBUG( "#BTAG# found alias entry in Map " << aliasentry );
+          if (std::count(mappedAlias.begin(), mappedAlias.end(), aliasentry) > 0) {
+            ATH_MSG_DEBUG( "#BTAG# found alias entry in Map " << aliasentry );
             histosCdo->addChannelAlias(m_originalChannels[j],aliasentry);
             foundalias=true;
             break;
-          }
-          else {
+          } else {
             if (objectTDirExists(hFullName, pfile)) {
-	      ATH_MSG_DEBUG( "#BTAG# found alias entry in DB " << aliasentry );
+	            ATH_MSG_DEBUG( "#BTAG# found alias entry in DB " << aliasentry );
               if("none"!=aliaslist[k]){
-		std::vector<std::string>::const_iterator pos = find(channels.begin(), 
+		            std::vector<std::string>::const_iterator pos = find(channels.begin(), 
 								channels.end(), aliasentry);
-		if(pos==channels.end()) {
-		  ATH_MSG_DEBUG("#BTAG# Alias is pointing to undefined channel: " <<  aliasentry
-				    << ". Adding it to channel list.");
-		  channels.push_back(aliasentry);
-	        }
+                if(pos==channels.end()) {
+                  ATH_MSG_DEBUG("#BTAG# Alias is pointing to undefined channel: " <<  aliasentry
+                          << ". Adding it to channel list.");
+                  channels.push_back(aliasentry);
+                }
                 histosCdo->addChannelAlias(m_originalChannels[j],aliasentry);
-                m_mappedAlias.push_back(aliasentry);
-	      }
-	      foundalias=true;
-	      break;
-	    }
-	    else{
-	      ATH_MSG_DEBUG( "#BTAG# no alias entry " << aliasentry 
-		       << " trying next alias ");
-	    }
-	  }
-	}
-	if(!foundalias){
-	  ATH_MSG_WARNING( "#BTAG# none of the aliases exist for jet collection " 
-			 << m_originalChannels[j]);
-	}
-
+                mappedAlias.push_back(std::move(aliasentry));
+	          }
+	          foundalias=true;
+	          break;
+	        } else {
+	          ATH_MSG_DEBUG( "#BTAG# no alias entry " << aliasentry 
+		         << " trying next alias ");
+          }
+        }
       }
-      break ; /// check alias for the first tagger. same jet collections for all taggers for now
-
+      if(!foundalias){
+        ATH_MSG_WARNING( "#BTAG# none of the aliases exist for jet collection " 
+           << m_originalChannels[j]);
+      }
     }
-
-    ATH_MSG_DEBUG( "#BTAG# final registered channels " );
-    for(uint i=0;i<channels.size();++i) {
-      ATH_MSG_DEBUG( "#BTAG# Channel " << channels[i] );
-    }
-
-    //print alias map
-    histosCdo->printAliasesStatus();
-
-    return StatusCode::SUCCESS;
-
+    break ; /// check alias for the first tagger. same jet collections for all taggers for now
   }
+
+  ATH_MSG_DEBUG( "#BTAG# final registered channels " );
+  for(uint i=0;i<channels.size();++i) {
+    ATH_MSG_DEBUG( "#BTAG# Channel " << channels[i] );
+  }
+    //print alias map
+  histosCdo->printAliasesStatus();
+  return mappedAlias;
+}
 
 
 
@@ -697,8 +680,7 @@ namespace Analysis {
       sEnd = str.find_first_of(delim, sPos);
       if(sEnd == std::string::npos) sEnd = str.length();
       sLen = sEnd - sPos;
-      std::string token = str.substr(sPos, sLen);
-      tokens.push_back(token);
+      tokens.emplace_back(str.substr(sPos, sLen));
       sPos = str.find_first_not_of(delim, sEnd);
     }
     return tokens;
@@ -725,7 +707,7 @@ namespace Analysis {
      return StatusCode::SUCCESS;
   }
 
-  void JetTagCalibCondAlg::smoothAndNormalizeHistogram(TH1* h, const std::string& hname) {
+  void JetTagCalibCondAlg::smoothAndNormalizeHistogram(TH1* h, const std::string& hname) const {
     //Select small part of NewLikelihoodTool to reproduce CalibrationBroker behaviour (smooth and normalize histogram)
     if(h) {
       double norm = h->Integral();
@@ -766,7 +748,7 @@ namespace Analysis {
     }
   }
 
-void JetTagCalibCondAlg::smoothASH2D(TH2* input2D, int m1, int m2) {
+void JetTagCalibCondAlg::smoothASH2D(TH2* input2D, int m1, int m2) const {
 
   ATH_MSG_DEBUG("Smoothing a two dimensional histogram "<< input2D->GetName()
               << " " << m1 << " " << m2);
@@ -789,7 +771,7 @@ void JetTagCalibCondAlg::smoothASH2D(TH2* input2D, int m1, int m2) {
   //
   const int lsup = 20;
   if (m1 > lsup || m2 > lsup) {
-    ATH_MSG_DEBUG("HistoHelperRoot::smoothASH2D: m1 or m2 too big !");
+    ATH_MSG_DEBUG("JetTagCalibCondAlg::smoothASH2D: m1 or m2 too big !");
     return;
   } else {
     int nx = input2D->GetNbinsX()+1;
@@ -808,8 +790,10 @@ void JetTagCalibCondAlg::smoothASH2D(TH2* input2D, int m1, int m2) {
     }
     //
     int i,j,k,l;
-    float wk1[41],wk2[41],wgt[100][100];
-    double wk[41][41],wks = 0.;
+    float wk1[41],wk2[41];
+    std::vector<std::vector<float>> wgt(100, std::vector<float>(100));//avoid large stack use
+    std::vector<std::vector<float>> wk(41, std::vector<float>(41));//avoid large stack use
+    double wks = 0.;
     float ai,am1 = float(m1), am2 = float(m2);
     const float am12 = am1*am1, am22 = am2*am2;
     const float inv_am1_am2 = 1. / (am1 * am2);
@@ -827,6 +811,17 @@ void JetTagCalibCondAlg::smoothASH2D(TH2* input2D, int m1, int m2) {
       wk1[i] = 15./16.*(1.-ai*inv_am12)*(1.-ai*inv_am12);
       wks = wks + wk1[i];
     }
+    if (wks == 0){
+      ATH_MSG_WARNING("JetTagCalibCondAlg::wks is zero !");
+      //cleanup
+      for (int i = 0; i < nx-1; ++i) {
+        delete[] h[i];
+        delete[] res[i];
+      }
+      delete[] h;
+      delete[] res;
+      return;
+    }
     const double fac1 = am1 / wks;
     for (i = lsup+1-m1;i<lsup+m1;i++) {
       wk1[i] =  wk1[i]*fac1;
@@ -836,6 +831,17 @@ void JetTagCalibCondAlg::smoothASH2D(TH2* input2D, int m1, int m2) {
       ai = float(i-lsup)*float(i-lsup);
       wk2[i] = 15./16.*(1.-ai*inv_am22)*(1.-ai*inv_am22);
       wks = wks + wk2[i];
+    }
+    if (wks == 0){
+      ATH_MSG_WARNING("JetTagCalibCondAlg::wks is zero !");
+      //cleanup
+      for (int i = 0; i < nx-1; ++i) {
+        delete[] h[i];
+        delete[] res[i];
+      }
+      delete[] h;
+      delete[] res;
+      return;
     }
     const double fac2 = am2 / wks;
     for (i = lsup+1-m2;i<lsup+m2;i++) {

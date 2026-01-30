@@ -5,6 +5,8 @@
 /// @author Nils Krumnack
 
 
+#include <AsgDataHandles/ReadHandleKey.h>
+#include <AsgDataHandles/ReadHandle.h>
 #include <ColumnarCore/ColumnarTool.h>
 #include <ColumnarCore/ObjectId.h>
 #include <ColumnarCore/ObjectRange.h>
@@ -14,6 +16,7 @@
 namespace columnar
 {
   template<ContainerIdConcept CI>
+    requires (!std::is_const_v<typename CI::xAODObjectRangeType>)
   class AccessorTemplate<CI,ObjectColumn,ColumnAccessMode::input,ColumnarModeXAOD> final
   {
     /// Common Public Members
@@ -28,9 +31,11 @@ namespace columnar
 
     AccessorTemplate (ColumnarTool<CM>& columnBase,
                       const std::string& name,
-                      ColumnInfo&& /*info*/ = {})
+                      ColumnInfo&& info = {})
       : m_columnBase (&columnBase), m_key (name)
     {
+      if (info.addMTDependency)
+        throw std::runtime_error ("adding MT dependencies not supported for non-const ObjectColumn");
     }
 
     ObjectRange<CI,CM> operator() (ObjectId<ContainerId::eventContext,CM> /*eventId*/) const
@@ -60,7 +65,7 @@ namespace columnar
     [[nodiscard]] bool isAvailable (ObjectId<ContainerId::eventContext,CM> /*eventId*/) const noexcept
     {
       return !m_key.empty() && m_columnBase && m_columnBase->eventStore().contains< std::remove_cv_t<typename CI::xAODObjectRangeType> >(m_key);
-    }      
+    }
 
 
 
@@ -71,12 +76,9 @@ namespace columnar
     ColumnarTool<CM> *m_columnBase = nullptr;
     std::string m_key;
 
-    // retrieve the object from the event store.  there is probably
-    // something clever that could be done with `SG::ReadHandleKey`, but
-    // in practice all CP tools converted so far (25 Feb 25) do not
-    // actually retrieve objects in XAOD mode.  so for simplicity and to
-    // avoid some of the bookkeeping issues with "subtool" objects
-    // holding accessors, I use this "non-tracking" version.
+    // Retrieve the object from the event store. This uses the
+    // `evtStore()` mechanism, which is not MT-safe, but so is the use
+    // of non-const containers.
     auto& retrieveObject () const
     {
       if (m_key.empty())
@@ -85,6 +87,83 @@ namespace columnar
       if (!m_columnBase->eventStore().retrieve (container, m_key).isSuccess())
         throw std::runtime_error ("failed to retrieve " + m_key);
       return *container;
+    }
+  };
+
+
+
+  template<ContainerIdConcept CI>
+    requires (std::is_const_v<typename CI::xAODObjectRangeType>)
+  class AccessorTemplate<CI,ObjectColumn,ColumnAccessMode::input,ColumnarModeXAOD> final
+  {
+    /// Common Public Members
+    /// =====================
+  public:
+
+    static_assert (CI::perEventRange || CI::perEventId, "ObjectColumn can only be used with per-event ranges or IDs");
+
+    using CM = ColumnarModeXAOD;
+    using KeyType = SG::ReadHandleKey<std::remove_const_t<typename CI::xAODObjectRangeType>>;
+
+    AccessorTemplate () = default;
+
+    AccessorTemplate (ColumnarTool<CM>& columnBase,
+                      const std::string& name,
+                      ColumnInfo&& info = {})
+      : m_columnBase (&columnBase), m_keyPtr(std::make_shared<KeyType>(name))
+    {
+      if (info.addMTDependency && info.isOptional)
+        throw std::runtime_error ("adding MT dependencies not supported for optional ObjectColumn");
+      columnBase.internalAddKey (m_keyPtr, info.addMTDependency);
+    }
+
+    ObjectRange<CI,CM> operator() (ObjectId<ContainerId::eventContext,CM> eventId) const
+      requires (CI::perEventRange)
+    {
+      return ObjectRange<CI,CM> (retrieveObject (eventId.getXAODObject()));
+    }
+
+    ObjectRange<CI,CM> operator() (ObjectRange<ContainerId::eventContext,CM> eventRange) const
+      requires (CI::perEventRange)
+    {
+      return ObjectRange<CI,CM> (retrieveObject (eventRange.getXAODObject()));
+    }
+
+    ObjectId<CI,CM> operator() (ObjectId<ContainerId::eventContext,CM> eventId) const
+      requires (CI::perEventId)
+    {
+      return ObjectId<CI,CM> (retrieveObject (eventId.getXAODObject()));
+    }
+
+    ObjectRange<CI,CM> operator() (ObjectRange<ContainerId::eventContext,CM> eventRange) const
+      requires (CI::perEventId)
+    {
+      return ObjectRange<CI,CM> (retrieveObject (eventRange.getXAODObject()));
+    }
+
+    [[nodiscard]] bool isAvailable (ObjectId<ContainerId::eventContext,CM> /*eventId*/) const noexcept
+    {
+      return m_keyPtr && m_columnBase && m_columnBase->eventStore().contains< std::remove_cv_t<typename CI::xAODObjectRangeType> >(m_keyPtr->key());
+    }
+
+
+
+    /// Private Members
+    /// ===============
+  private:
+
+    ColumnarTool<CM> *m_columnBase = nullptr;
+    std::shared_ptr<KeyType> m_keyPtr;
+
+    // retrieve the object from the event store
+    auto& retrieveObject (const EventContext& eventContext) const
+    {
+      if (!m_keyPtr)
+        throw std::runtime_error ("no container key set for type " + std::string (CI::idName));
+      auto handle = makeHandle (*m_keyPtr, eventContext);
+      if (!handle.isValid())
+        throw std::runtime_error ("failed to retrieve " + m_keyPtr->key());
+      return *handle;
     }
   };
 }

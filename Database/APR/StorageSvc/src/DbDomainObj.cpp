@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //====================================================================
@@ -13,17 +13,22 @@
 //  @author      M.Frank
 //====================================================================
 
+#include "DbDatabaseObj.h"
+#include "DbDomainObj.h"
+
 // Framework include files
 #include "StorageSvc/pool.h"
 #include "StorageSvc/DbSession.h"
 #include "StorageSvc/IDbDomain.h"
 #include "StorageSvc/IOODatabase.h"
 #include "POOLCore/DbPrint.h"
-#include "DbDatabaseObj.h"
-#include "DbDomainObj.h"
+
+#include "GaudiKernel/StatusCode.h"
+#include "AthenaKernel/errorcheck.h"
 
 // C++ include files
 #include <vector>
+#include <ranges>
 
 using namespace std;
 using namespace pool;
@@ -32,86 +37,71 @@ using namespace pool;
 DbDomainObj::DbDomainObj(DbSession& sessionH, 
                                const DbType& typ,
                                DbAccessMode mode)
-: Base("", mode, typ, sessionH.db(typ)), 
+: Base("Domain["+typ.storageName()+"]", mode, typ, sessionH.db(typ)),
+  APRMessaging(name()),
   m_session(sessionH),
   m_maxAge(2),
   m_info(0)
 {
-  setName("Domain["+type().storageName()+"]");
-  DbPrint log(name());    
   if ( 0 == db() )    {
-    log << DbPrintLvl::Error << ">   Access   DbDomain     "<<accessMode(mode)
-        << " " << name() << " (UNKNOWN)" 
-        << " impossible."
-        << " [" << typ.storageName() << "] " 
-        << DbPrint::endmsg;
-    type().missingDriver(log);
+    ATH_MSG_ERROR( ">   Access   DbDomain     " << accessMode(mode)
+        << " " << name() << " (UNKNOWN) impossible." << " [" << typ.storageName() << "]" );
+    type().missingDriver(msg());
     return;
   }
   m_info = db()->createDomain();
   if ( !m_session.add( this ).isSuccess() )    {
-    log << DbPrintLvl::Error << ">   Access   DbDomain     "<<accessMode(mode)
-        << " " << name() 
-        << " (" << db()->name() << ")" 
-        << " impossible. Error inserting domain!"
-        << DbPrint::endmsg;
+    ATH_MSG_ERROR( ">   Access   DbDomain     " 
+        << accessMode(mode) << " " << name() << " (" << db()->name() << ")"
+        << " impossible. Error inserting domain!" );
     return;
   }
-  log << DbPrintLvl::Info    << ">   Access   DbDomain     "
-      << accessMode(mode)
-      << " [" << type().storageName() << "] " 
-      << DbPrint::endmsg;
+  ATH_MSG_INFO( ">   Access   DbDomain     "
+        << accessMode(mode) << " [" << type().storageName() << "]" );
 }
 
 /// Destructor
 DbDomainObj::~DbDomainObj()  {
-  DbPrint log( name() );
-
   clearEntries();
   if ( m_session.isValid() )    {
-    m_session.remove (this);
+    m_session.remove(this).ignore();
   }
   deletePtr(m_info);
-  log << DbPrintLvl::Info    << ">   Deaccess DbDomain     "
+  ATH_MSG_INFO( ">   Deaccess DbDomain     "
       << accessMode(mode()) 
-      << " [" << type().storageName() << "] " 
-      << DbPrint::endmsg;
+      << " [" << type().storageName() << "]" );
 }
 
 bool DbDomainObj::existsDbase( const string& name)
 {  return (m_info) ? m_info->existsDbase( name ) : false;               }
 
-DbStatus DbDomainObj::open(DbAccessMode mod)   {
+StatusCode DbDomainObj::open(DbAccessMode mod) {
   setMode(mod);
-//  return m_info ? m_info->open(session(),name(),mode()) : Error;
-  return m_info ? Success : Error;
+  //  return m_info ? m_info->open(session(),name(),mode()) : FAILURE;
+  return m_info ? StatusCode::SUCCESS : StatusCode::FAILURE;
 }
 
-DbStatus DbDomainObj::open()
+StatusCode DbDomainObj::open()
 {  return open( mode() );                                               }
 
-DbStatus DbDomainObj::close()   {
-  if ( m_session.isValid() )    {
-    vector<DbDatabaseObj*> dbs;
-    for (const_iterator i = begin(); i != end(); ++i ) {
-      DbDatabaseObj* obj = (*i).second;
-      dbs.push_back(obj);
-    }
-    for (vector<DbDatabaseObj*>::iterator k=dbs.begin(); k!=dbs.end(); ++k)  {
-      DbDatabaseObj* curr = (*k);
-      curr->close();
-      this->remove(curr);
+StatusCode DbDomainObj::close()   {
+  if ( m_session.isValid() ) {
+    // temporary vector to avoid iterator invalidation by remove()
+    vector<DbDatabaseObj*> dbs { views::values(*this).begin(), views::values(*this).end() };
+    for( DbDatabaseObj* db : dbs )  {
+      CHECK( db->close() );
+      CHECK( remove(db) );
     }
     clearEntries();
-    m_session.remove(this);
+    CHECK( m_session.remove(this) );
     m_session = DbSession(0);
-    return Success;
+    return StatusCode::SUCCESS;
   }
-  return Error;
+  return StatusCode::FAILURE;
 }
 
 /// Increase the age of all open databases
-DbStatus DbDomainObj::ageOpenDbs() {
+StatusCode DbDomainObj::ageOpenDbs() {
   if ( m_session.isValid() )    {
     for (iterator i = begin(); i != end(); ++i ) {
       DbDatabaseObj* pDB = (*i).second;
@@ -120,13 +110,13 @@ DbStatus DbDomainObj::ageOpenDbs() {
         pDB->setAge(1);
       }
     }
-    return Success;
+    return StatusCode::SUCCESS;
   }
-  return Error;
+  return StatusCode::FAILURE;
 }
 
 /// Check if databases are present, which aged a lot and need to be closed
-DbStatus DbDomainObj::closeAgedDbs()  {
+StatusCode DbDomainObj::closeAgedDbs()  {
   if ( m_session.isValid() )    {
     vector<DbDatabaseObj*> aged_dbs;
     for (const_iterator i = begin(); i != end(); ++i ) {
@@ -140,16 +130,16 @@ DbStatus DbDomainObj::closeAgedDbs()  {
     }
     vector<DbDatabaseObj*>::const_iterator j;
     for (j=aged_dbs.begin(); j != aged_dbs.end(); ++j)
-      (*j)->retire();
-    return Success;
+      CHECK( (*j)->retire() );
+    return StatusCode::SUCCESS;
   }
-  return Error;
+  return StatusCode::FAILURE;
 }
 
 /// Set domain specific options
-DbStatus DbDomainObj::setOption(const DbOption& refOpt)  
-{  return m_info ? m_info->setOption(refOpt) : Error;                   }
+StatusCode DbDomainObj::setOption(const DbOption& refOpt)  
+{  return m_info ? m_info->setOption(refOpt) : StatusCode::FAILURE;                   }
 
 /// Access domain specific options
-DbStatus DbDomainObj::getOption(DbOption& refOpt) const
-{  return m_info ? m_info->getOption(refOpt) : Error;                   }
+StatusCode DbDomainObj::getOption(DbOption& refOpt) const
+{  return m_info ? m_info->getOption(refOpt) : StatusCode::FAILURE;                   }

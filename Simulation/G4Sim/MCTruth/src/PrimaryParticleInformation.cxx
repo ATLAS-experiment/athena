@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MCTruth/PrimaryParticleInformation.h"
@@ -10,7 +10,7 @@ PrimaryParticleInformation::PrimaryParticleInformation()
 }
 
 PrimaryParticleInformation::PrimaryParticleInformation(HepMC::GenParticlePtr p, ISF::ISFParticle* isp)
-  : m_theParticle(p)
+  : m_theParticle(std::move(p))
   , m_theISFParticle(isp)
 {
 }

@@ -1,9 +1,9 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
-// ZeeVertexRefittingTool.cxx, (c) ATLAS Detector software
+// ZeeVertexRefittingTool.cxx
 // Author: Ioannis Nomidis (ioannis.nomidis@cern.ch)
 ///////////////////////////////////////////////////////////////////
 
@@ -22,28 +22,16 @@
 
 namespace DerivationFramework {
 
-  static const SG::AuxElement::Decorator<float> sumPt2("sumPt2"); 
+  static const SG::AuxElement::Decorator<float> sumPt2("sumPt2");
   static const SG::AuxElement::Decorator<float> vertices_dPhi("vertices_dPhi");
   static const SG::AuxElement::Decorator<float> vertices_sumPt("vertices_sumPt");
-  static const SG::AuxElement::Decorator<float> vertices_sumPt2("vertices_sumPt2"); 
+  static const SG::AuxElement::Decorator<float> vertices_sumPt2("vertices_sumPt2");
   static const SG::AuxElement::Decorator<std::vector<ElementLink<xAOD::TrackParticleContainer> > > electronTrackLinksDecor("ElectronTrackLinks");
-
-  ZeeVertexRefittingTool::ZeeVertexRefittingTool(const std::string& t,
-					   const std::string& n,
-					   const IInterface* p) : 
-    base_class(t, n, p),
-    m_expression("true"),
-    m_massCut(0.0)
-  {
-    declareProperty("ObjectRequirements", m_expression);  
-    declareProperty("LowMassCut", m_massCut);
-    declareProperty("MCSamples",m_MCSamples);
-  }
 
   StatusCode ZeeVertexRefittingTool::initialize()
   {
 
-    CHECK( m_pvrefitter.retrieve() );
+    ATH_CHECK( m_pvrefitter.retrieve() );
 
     if (!m_expression.empty()) {
       ATH_CHECK(initializeParser(m_expression));
@@ -75,7 +63,7 @@ namespace DerivationFramework {
 
     if(eventInfo->eventType(xAOD::EventInfo::IS_SIMULATION)) {
       bool skipSample = true;
-      for (auto mcid : m_MCSamples) {        
+      for (auto mcid : m_MCSamples) {
         if (mcid==eventInfo->mcChannelNumber()) {
           skipSample = false;
           break;
@@ -96,7 +84,7 @@ namespace DerivationFramework {
     xAOD::VertexContainer* refittedPVContainer = new xAOD::VertexContainer;
     xAOD::VertexAuxContainer* refittedPVAuxContainer = new xAOD::VertexAuxContainer;
     refittedPVContainer->setStore( refittedPVAuxContainer );
-  
+
     SG::WriteHandle<xAOD::VertexContainer> vertexContainer(m_refitpvKey, ctx);
     ATH_CHECK(vertexContainer.recordNonConst(std::unique_ptr< xAOD::VertexContainer >(refittedPVContainer),
                                              std::unique_ptr< xAOD::VertexAuxContainer >(refittedPVAuxContainer)));
@@ -119,70 +107,70 @@ namespace DerivationFramework {
     // create the vector which will hold the Zee pairs
     std::vector< std::vector<unsigned int> > eepairs;
     CHECK( makeZeePairs( &*electrons, eepairs ) );
-  
-    ATH_MSG_DEBUG("ee pairs found: " << eepairs.size());    
+
+    ATH_MSG_DEBUG("ee pairs found: " << eepairs.size());
 
     for (auto pair : eepairs) {
-      std::vector<const xAOD::TrackParticle*> tps = { 
+      std::vector<const xAOD::TrackParticle*> tps = {
         xAOD::EgammaHelpers::getOriginalTrackParticle( electrons->at(pair[0]) ),
         xAOD::EgammaHelpers::getOriginalTrackParticle( electrons->at(pair[1]) )
       };
 
       TLorentzVector v0, v1, egamVec;
       if(electrons->at(pair[0])->caloCluster())
-      {
-           v0.SetPtEtaPhiM(electrons->at(pair[0])->e()/cosh(electrons->at(pair[0])->caloCluster()->etaBE(2)),
-           electrons->at(pair[0])->caloCluster()->etaBE(2),
-           electrons->at(pair[0])->caloCluster()->phiBE(2),
-           0.0);
-      }
+        {
+          v0.SetPtEtaPhiM(electrons->at(pair[0])->e()/cosh(electrons->at(pair[0])->caloCluster()->etaBE(2)),
+                          electrons->at(pair[0])->caloCluster()->etaBE(2),
+                          electrons->at(pair[0])->caloCluster()->phiBE(2),
+                          0.0);
+        }
 
       if(electrons->at(pair[1])->caloCluster())
-      {
-           v1.SetPtEtaPhiM(electrons->at(pair[1])->e()/cosh(electrons->at(pair[1])->caloCluster()->etaBE(2)),
-           electrons->at(pair[1])->caloCluster()->etaBE(2),
-           electrons->at(pair[1])->caloCluster()->phiBE(2),
-           0.0);
-      }
+        {
+          v1.SetPtEtaPhiM(electrons->at(pair[1])->e()/cosh(electrons->at(pair[1])->caloCluster()->etaBE(2)),
+                          electrons->at(pair[1])->caloCluster()->etaBE(2),
+                          electrons->at(pair[1])->caloCluster()->phiBE(2),
+                          0.0);
+        }
 
       egamVec = v0+v1;
 
-      ATH_MSG_DEBUG("Refitting PV for e tracks: " << tps[0] << " " << tps[1]);      
+      ATH_MSG_DEBUG("Refitting PV for e tracks: " << tps[0] << " " << tps[1]);
       xAOD::Vertex* pv_ref = m_pvrefitter->refitVertex(pv,tps);
-      if (pv_ref) {                
-      	refittedPVContainer->push_back(pv_ref);
-        
-	int ipv = 0;
+      if (pv_ref) {
+        refittedPVContainer->push_back(pv_ref);
+
+        int ipv = 0;
         for (const xAOD::Vertex* v : *pv_cont) {
-        	xAOD::Vertex * nv = new xAOD::Vertex();
-                nv->makePrivateStore(v);
-                if(ipv !=0 ) refittedPVContainer->push_back(nv);
-                ipv++;
-        }        
+          xAOD::Vertex * nv = new xAOD::Vertex();
+          nv->makePrivateStore(v);
+          if(ipv !=0 ) refittedPVContainer->push_back(nv);
+          ipv++;
+        }
 
         for ( xAOD::Vertex *v : *refittedPVContainer )
-        {
+          {
             float vert_sumpt = (log10(xAOD::PVHelpers::getVertexSumPt(v)));
             float vert_sumpt2 = (log10(xAOD::PVHelpers::getVertexSumPt(v,2, false)));
 
             TLorentzVector vtxmom = xAOD::PVHelpers::getVertexMomentum(v, true, "");
             float vert_dphi = (fabs(vtxmom.DeltaPhi(egamVec)));
-	    //fill vertex variables
+            //fill vertex variables
             vertices_sumPt(*v) = vert_sumpt;
             vertices_sumPt2(*v) = vert_sumpt2;
             vertices_dPhi(*v) = vert_dphi;
-        }
+          }
 
 
         ATH_MSG_DEBUG("refitted PV nTP: " << pv_ref->nTrackParticles() << " -- " << pv->nTrackParticles());
         ATH_MSG_DEBUG("refitted PV z: " << pv_ref->z() << " -- " << pv->z());
 
-	      if (pv_ref->nTrackParticles() < pv->nTrackParticles()) {          
+        if (pv_ref->nTrackParticles() < pv->nTrackParticles()) {
           sumPt2(*pv_ref) = xAOD::PVHelpers::getVertexSumPt(pv_ref, 2, false);
-      	  //set links to electrons, used only for matching, not for vertexing
+          //set links to electrons, used only for matching, not for vertexing
           std::vector<ElementLink<xAOD::TrackParticleContainer> > electronTrackLinks = {
             electrons->at(pair[0])->trackParticleLink(),
-            electrons->at(pair[1])->trackParticleLink() 
+            electrons->at(pair[1])->trackParticleLink()
           };
           electronTrackLinksDecor(*pv_ref) = electronTrackLinks;
         } else {
@@ -190,8 +178,8 @@ namespace DerivationFramework {
         }
       }
       else {
-        ATH_MSG_DEBUG("refitting failed");      
-      }   
+        ATH_MSG_DEBUG("refitting failed");
+      }
     }
 
     ATH_MSG_DEBUG("Vertex container size: " << refittedPVContainer->size());
@@ -200,29 +188,29 @@ namespace DerivationFramework {
   }
 
   StatusCode ZeeVertexRefittingTool::makeZeePairs( const xAOD::ElectronContainer *particles, std::vector<std::vector<unsigned int> > &ZeePairs) const
-  {     
+  {
     if (particles->size()<2) return StatusCode::SUCCESS;
 
-    // flags for the result of selection for each electron 
+    // flags for the result of selection for each electron
     std::vector<int> isSelected = m_parser->evaluateAsVector();
     unsigned int nEntries = isSelected.size();
 
     // if there are no particles in one of the two lists to combine, just leave function
-    if (nEntries==0) return StatusCode::SUCCESS; 
+    if (nEntries==0) return StatusCode::SUCCESS;
 
     // check the sizes are compatible
-    if (particles->size() != nEntries ) { 
+    if (particles->size() != nEntries ) {
       ATH_MSG_ERROR("Branch sizes incompatible - returning zero");
       return StatusCode::FAILURE;
-    }     
-    
+    }
+
     // Double loop to get the opposite-charge pairs with m>50 GeV
-    for (unsigned int i=0; i<nEntries-1; ++i) {    
-      if (isSelected[i]!=1) continue;     
+    for (unsigned int i=0; i<nEntries-1; ++i) {
+      if (isSelected[i]!=1) continue;
       float qi = particles->at(i)->charge();
 
       for (unsigned int j=i+1; j<nEntries; ++j) {
-        if (isSelected[j]!=1) continue; 
+        if (isSelected[j]!=1) continue;
         //std::vector<int> tmpPair; tmpPair.clear();
         float qj = particles->at(j)->charge();
         // opposite charge
@@ -235,6 +223,6 @@ namespace DerivationFramework {
         ZeePairs.push_back( {i, j} );
       }
     }
-    return StatusCode::SUCCESS; 
+    return StatusCode::SUCCESS;
   }
 }

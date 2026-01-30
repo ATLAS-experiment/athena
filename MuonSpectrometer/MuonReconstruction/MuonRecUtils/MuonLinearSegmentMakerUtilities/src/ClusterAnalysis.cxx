@@ -198,7 +198,8 @@ namespace ClusterSeg {
     Long64_t nentries = m_tree->GetEntries();
     m_ncalls = 0;
     for( Long64_t evt=0;evt<nentries;++evt ){
-      m_tree->LoadTree(evt);
+      auto retval = m_tree->LoadTree(evt);
+      if (retval < 0) continue;
       m_tree->GetEntry(evt);
     
 

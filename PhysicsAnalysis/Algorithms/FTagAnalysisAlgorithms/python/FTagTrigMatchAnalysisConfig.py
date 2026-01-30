@@ -5,34 +5,11 @@ from AnalysisAlgorithmsConfig.ConfigBlock import ConfigBlock
 from AthenaCommon.Logging import logging
 
 from AthenaConfiguration.Enums import LHCPeriod
-from Campaigns.Utils import Campaign
 
-from TriggerAnalysisAlgorithms.TriggerAnalysisConfig import TriggerAnalysisBlock, is_year_in_current_period
-from TriggerAnalysisAlgorithms.TriggerAnalysisSFConfig import get_year_data
+from TriggerAnalysisAlgorithms.TriggerAnalysisConfig import TriggerAnalysisBlock
+from TriggerAnalysisAlgorithms.TriggerAnalysisSFConfig import trigger_set
 
-
-def trigger_set(config, triggerChainsPerYear, includeAllYearsPerRun, log):
-    triggers = set()
-    if includeAllYearsPerRun:
-        for year in triggerChainsPerYear:
-            if not is_year_in_current_period(config, year):
-                continue
-            triggers.update(get_year_data(triggerChainsPerYear, year))
-    elif config.campaign() is Campaign.MC20a:
-        triggers.update(get_year_data(triggerChainsPerYear, 2015))
-        triggers.update(get_year_data(triggerChainsPerYear, 2016))
-    elif config.campaign() is Campaign.MC20d:
-        triggers.update(get_year_data(triggerChainsPerYear, 2017))
-    elif config.campaign() is Campaign.MC20e:
-        triggers.update(get_year_data(triggerChainsPerYear, 2018))
-    elif config.campaign() is Campaign.MC23a:
-        triggers.update(get_year_data(triggerChainsPerYear, 2022))
-    elif config.campaign() is Campaign.MC23d:
-        triggers.update(get_year_data(triggerChainsPerYear, 2023))
-    else:
-        log.warning("unknown campaign, skipping triggers: %s", str(config.campaign()))
-    return triggers
-
+from FTagAnalysisAlgorithms.BJetTriggerByYearContent import getDecoByTrigName
 
 class FTagJetTrigMatchingBlock(ConfigBlock):
     """the ConfigBlock for the FTAG jet trigger matching"""
@@ -70,7 +47,7 @@ class FTagJetTrigMatchingBlock(ConfigBlock):
 
         if self.triggerChainsPerYear:
             triggers = trigger_set(config, self.triggerChainsPerYear,
-                                   self.includeAllYearsPerRun, log)
+                                   self.includeAllYearsPerRun)
             decisionTool = TriggerAnalysisBlock.makeTriggerDecisionTool(config)
             
             for chain in triggers:
@@ -83,6 +60,11 @@ class FTagJetTrigMatchingBlock(ConfigBlock):
                 alg.TrigDecisionTool = f"{decisionTool.getType()}/{decisionTool.getName()}"
                 alg.trigger = chain
                 alg.useRun3TriggerEDM = config.geometry() is LHCPeriod.Run3
+                if alg.useRun3TriggerEDM:
+                    decors_to_check = [deco + '_pb' for deco in getDecoByTrigName(chain)]
+                    log.info(f'Configured b-tagging trigger decorations for trigger {chain}: {decors_to_check}')
+                alg.ftagRun3TriggerDecoNames = decors_to_check
+                # alg.OutputLevel = 1 # VERBOSE. for detailed debug
                 # Helper function to implement to provide cut for given trigger
                 # Only used for Run 2
                 #alg.btagThreshold = getBTagThreshold(chain)

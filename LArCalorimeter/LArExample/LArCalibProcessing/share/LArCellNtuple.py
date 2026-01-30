@@ -18,9 +18,10 @@ from ROOT import HWIdentifier, Identifier, IdentifierHash, TFile
 from AthenaPython import PyAthena
 
 class CellE(PyAthena.Alg):
-    def __init__(self,ofile):
+    def __init__(self,ofile,isSC):
         super(CellE,self).__init__()
         self.fout = ROOT.TFile(ofile,"RECREATE")
+        self.isSC = isSC
 
     def initialize (self):
         self.msg.debug("Doing CellE init")
@@ -36,7 +37,10 @@ class CellE(PyAthena.Alg):
                print("Failed to get DetectorStore")
                return 0
         if not self.has_offID:
-           self.offlineID = self.detStore['CaloCell_ID']       
+           if not self.isSC:
+              self.offlineID = self.detStore['CaloCell_ID']       
+           else:
+              self.offlineID = self.detStore['CaloCell_SuperCell_ID']       
         if self.offlineID is None:
                print("Failed to get CaloCell_ID")
                return 0
@@ -57,6 +61,7 @@ class CellE(PyAthena.Alg):
            self.abcid=array('I',[self.bcid])
            self.idvec = array('i',self.maxcells*[0]) # storing the identifiers
            self.calosamp = array('i',self.maxcells*[0]) # storing the calo sample
+           self.posneg = array('i',self.maxcells*[0]) # storing the side
            self.region = array('i',self.maxcells*[0]) # storing the region
            self.etaidx = array('i',self.maxcells*[0]) # storing the eta bin
            self.phiidx = array('i',self.maxcells*[0]) # storing the phi bin
@@ -72,6 +77,7 @@ class CellE(PyAthena.Alg):
            self.nt.Branch("BCID",self.abcid,"BCID/I")
            self.nt.Branch("OffID",self.idvec,"OffID[ncell]/i")
            self.nt.Branch("calosamp",self.calosamp,"calosamp[ncell]/I")
+           self.nt.Branch("pos_neg",self.posneg,"pos_neg[ncell]/I")
            self.nt.Branch("region",self.region,"region[ncell]/I")
            self.nt.Branch("eta",self.etaidx,"eta[ncell]/I")
            self.nt.Branch("phi",self.phiidx,"phi[ncell]/I")
@@ -82,7 +88,10 @@ class CellE(PyAthena.Alg):
            self.is_init=True
            self.msg.debug("CellE Ttree init done")
 
-        Cells = self.sg['AllCalo']
+        if not self.isSC:   
+           Cells = self.sg['AllCalo']
+        else:   
+           Cells = self.sg['SCell']
         nc = Cells.size()
         cellitr=0;
         for j in range(nc):
@@ -94,6 +103,7 @@ class CellE(PyAthena.Alg):
             self.calosamp[cellitr]=self.offlineID.calo_sample(id)
             self.region[cellitr]=self.offlineID.region(id)
             self.etaidx[cellitr]=self.offlineID.eta(id)
+            self.posneg[cellitr]=self.offlineID.pos_neg(id)
             self.phiidx[cellitr]=self.offlineID.phi(id)
             self.encell[cellitr]=c.energy()
             self.timecell[cellitr]=c.time()
@@ -102,7 +112,9 @@ class CellE(PyAthena.Alg):
             cellitr += 1
         self.aevtid[0]=self.evtid    
         self.abcid[0]=self.bcid
-        self.nt.Fill()
+        self.amaxcells[0]=cellitr
+        if self.amaxcells[0] > 0:
+           self.nt.Fill()
         return 1
 
     def finalize (self):
@@ -118,12 +130,13 @@ def usage():
     print("-i input file (default ESD.pool.root)")
     print("-o output file (default cells.root)")
     print("-n number of events to dump (default -1)")
-    print("-m MC pool file (default fals)")
+    print("-m MC pool file (default false)")
+    print("-s is SC (default false)")
     print("--detdescr <DetDescrVersion>")
     print("-h Print this help text and exit")
         
 try:
-    opts,args=getopt.getopt(sys.argv[1:],"i:o:n:mh",["help","detdescr="])
+    opts,args=getopt.getopt(sys.argv[1:],"i:o:n:msh",["help","detdescr="])
 except Exception as e:
     usage()
     print(e)
@@ -134,6 +147,7 @@ ifile='ESD.pool.root'
 ofile="cells.root"
 nev=-1
 mc=False
+sc=False
 from AthenaConfiguration.TestDefaults import defaultGeometryTags
 detdescrtag=defaultGeometryTags.RUN2
 
@@ -142,6 +156,7 @@ for o,a in opts:
     if (o=="-o"): ofile=a
     if (o=="-n"): nev=int(a)
     if (o=="-m"): mc=True
+    if (o=="-s"): sc=True
     if (o=="-h" or o=="--help"):
         usage()
         sys.exit(0)
@@ -153,7 +168,7 @@ sys.argv = sys.argv[:1] + ['-b']
 
 from AthenaConfiguration.AllConfigFlags import initConfigFlags 
 flags=initConfigFlags()
-flags.Input.Files = [ifile]
+flags.Input.Files = ifile.split(",")
 flags.Input.isMC=mc
 flags.IOVDb.DatabaseInstance="CONDBR2" 
 flags.GeoModel.AtlasVersion = detdescrtag 
@@ -181,7 +196,10 @@ from TileGeoModel.TileGMConfig import TileGMCfg
 cfg.merge( TileGMCfg(flags) )
 from LArGeoAlgsNV.LArGMConfig import LArGMCfg
 cfg.merge(LArGMCfg(flags))
+if sc:
+  from AthenaConfiguration.ComponentFactory import CompFactory
+  cfg.addCondAlgo(CompFactory.CaloSuperCellAlignCondAlg())
 
-cfg.addEventAlgo(CellE(ofile))
+cfg.addEventAlgo(CellE(ofile,sc))
 
 cfg.run(nev) 

@@ -22,7 +22,6 @@
 #include "AthenaKernel/CLASS_DEF.h"
 #include "AthenaKernel/BaseInfo.h"
 
-#include "boost/range/iterator_range.hpp"
 #include <string>
 #include <vector>
 #include <set>

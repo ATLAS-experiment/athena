@@ -24,114 +24,124 @@ def TruthCollectionMakerCfg(flags, name, **kwargs):
     return acc
 
 
-def DFCommonTruthMuonToolCfg(flags):
+def DFCommonTruthMuonToolCfg(flags, name = "DFCommonTruthMuonTool", **kwargs):
     """Muon truth collection maker"""
-    return TruthCollectionMakerCfg(flags,
-                                   name                    = "DFCommonTruthMuonTool",
-                                   OutputCollectionName = "TruthMuons",
-                                   KeepNavigationInfo      = False,
-                                   ParticleSelectionString = "(abs(TruthParticles.pdgId) == 13) && TruthParticles.isGenStable")
+    acc = ComponentAccumulator()
+    kwargs.setdefault("OutputCollectionName", "TruthMuons")
+    kwargs.setdefault("KeepNavigationInfo", False)
+    acc.addPublicTool(CompFactory.DerivationFramework.TruthCollectionMakerMuon(name = name,**kwargs),
+                      primary = True)
+    return acc
 
 
-def DFCommonTruthCharmToolCfg(flags, name):
+def DFCommonTruthCharmToolCfg(flags, name, **kwargs):
     """Charm truth collection maker"""
-    return TruthCollectionMakerCfg(
-        flags,
-        name = name,
-        OutputCollectionName = "TruthCharm",
-        KeepNavigationInfo = False,
-        ParticleSelectionString = "(abs(TruthParticles.pdgId) == 4)",
-        Do_Compress = True)
+    acc = ComponentAccumulator()
+    kwargs.setdefault("OutputCollectionName", "TruthCharm")
+    kwargs.setdefault("KeepNavigationInfo", False)
+    kwargs.setdefault("Do_Compress", True)
+    acc.addPublicTool(CompFactory.DerivationFramework.TruthCollectionMakerCharm(name = name,**kwargs),
+                      primary = True)
+    return acc
 
 
-def DFCommonTruthElectronToolCfg(flags):
+def DFCommonTruthElectronToolCfg(flags, name = "DFCommonTruthElectronTool", **kwargs):
     """Electron truth collection maker"""
-    return TruthCollectionMakerCfg(flags,
-                                   name                    = "DFCommonTruthElectronTool",
-                                   OutputCollectionName = "TruthElectrons",
-                                   KeepNavigationInfo      = False,
-                                   ParticleSelectionString = "(abs(TruthParticles.pdgId) == 11) && TruthParticles.isGenStable")
+    acc = ComponentAccumulator()
+    kwargs.setdefault("OutputCollectionName", "TruthElectrons")
+    kwargs.setdefault("KeepNavigationInfo", False)
+    acc.addPublicTool(CompFactory.DerivationFramework.TruthCollectionMakerElectron(name = name,**kwargs),
+                      primary = True)
+    return acc
 
 
-def DFCommonTruthPhotonToolCfg(flags):
+def DFCommonTruthPhotonToolCfg(flags, name = "DFCommonTruthPhotonTool", **kwargs):
     """Photon truth collection maker (Currently unused?)"""
-    return TruthCollectionMakerCfg(flags,
-                                   name                    = "DFCommonTruthPhotonTool",
-                                   OutputCollectionName = "TruthPhotons",
-                                   KeepNavigationInfo      = False,
-                                   ParticleSelectionString = "(abs(TruthParticles.pdgId) == 22) && TruthParticles.isGenStable")
+    acc = ComponentAccumulator()
+    kwargs.setdefault("OutputCollectionName", "TruthPhotons")
+    kwargs.setdefault("KeepNavigationInfo", False)
+    acc.addPublicTool(CompFactory.DerivationFramework.TruthCollectionMakerPhoton(name = name,**kwargs),
+                      primary = True)
+    return acc
 
 
 # this tool is needed for making TruthPhotons from sim samples, where extra cuts are needed. Origin 42 (pi0) and 23 (light meson) cut way down uninteresting photons
-def DFCommonTruthPhotonToolSimCfg(flags):
+def DFCommonTruthPhotonToolSimCfg(flags, name = "DFCommonTruthPhotonToolSim", **kwargs):
     """Tool for making TruthPhotons from sim samples"""
-    return TruthCollectionMakerCfg(flags,
-                                   name                    = "DFCommonTruthPhotonToolSim",
-                                   OutputCollectionName = "TruthPhotons",
-                                   KeepNavigationInfo      = False,
-                                   ParticleSelectionString = "(abs(TruthParticles.pdgId) == 22) && TruthParticles.isGenStable && ((TruthParticles.classifierParticleOrigin != 42 && TruthParticles.classifierParticleOrigin !=23) || (TruthParticles.pt > 20.0*GeV))")
+    acc = ComponentAccumulator()
+    kwargs.setdefault("OutputCollectionName", "TruthPhotons")
+    kwargs.setdefault("KeepNavigationInfo", False)
+    acc.addPublicTool(CompFactory.DerivationFramework.TruthCollectionMakerPhotonSim(name = name,**kwargs),
+                      primary = True)
+    return acc
 
 
-def DFCommonTruthNeutrinoToolCfg(flags):
+def DFCommonTruthNeutrinoToolCfg(flags, name = "DFCommonTruthNeutrinoTool", **kwargs):
     """Neutrino truth collection maker"""
-    neutrinoexpression = "(TruthParticles.isNeutrino && TruthParticles.isGenStable)"
-    return TruthCollectionMakerCfg(flags,
-                                   name = "DFCommonTruthNeutrinoTool",
-                                   OutputCollectionName = "TruthNeutrinos",
-                                   KeepNavigationInfo      = False,
-                                   ParticleSelectionString = neutrinoexpression)
+    acc = ComponentAccumulator()
+    kwargs.setdefault("OutputCollectionName", "TruthNeutrinos")
+    kwargs.setdefault("KeepNavigationInfo", False)
+    acc.addPublicTool(CompFactory.DerivationFramework.TruthCollectionMakerNeutrino(name = name,**kwargs),
+                      primary = True)
+    return acc
 
 
-def DFCommonTruthBottomToolCfg(flags):
+def DFCommonTruthBottomToolCfg(flags, name = "DFCommonTruthBottomTool", **kwargs):
     """B-quark truth collection maker"""
-    return TruthCollectionMakerCfg(flags,
-                                   name                    = "DFCommonTruthBottomTool",
-                                   OutputCollectionName = "TruthBottom",
-                                   KeepNavigationInfo      = False,
-                                   ParticleSelectionString = "(abs(TruthParticles.pdgId) == 5)",
-                                   Do_Compress             = True)
+    acc = ComponentAccumulator()
+    kwargs.setdefault("OutputCollectionName", "TruthBottom")
+    kwargs.setdefault("KeepNavigationInfo", False)
+    kwargs.setdefault("Do_Compress", True)
+    acc.addPublicTool(CompFactory.DerivationFramework.TruthCollectionMakerBottom(name = name,**kwargs),
+                      primary = True)
+    return acc
 
 
-def DFCommonTruthTopToolCfg(flags):
+def DFCommonTruthTopToolCfg(flags, name = "DFCommonTruthTopTool", **kwargs):
     """Top-quark truth collection maker"""
-    return TruthCollectionMakerCfg(flags,
-                                   name                    = "DFCommonTruthTopTool",
-                                   OutputCollectionName = "TruthTop",
-                                   KeepNavigationInfo      = False,
-                                   ParticleSelectionString = "(abs(TruthParticles.pdgId) == 6)",
-                                   Do_Compress             = True)
+    acc = ComponentAccumulator()
+    kwargs.setdefault("OutputCollectionName", "TruthTop")
+    kwargs.setdefault("KeepNavigationInfo", False)
+    kwargs.setdefault("Do_Compress", True)
+    acc.addPublicTool(CompFactory.DerivationFramework.TruthCollectionMakerTop(name = name,**kwargs),
+                      primary = True)
+    return acc
 
 
-def DFCommonTruthBosonToolCfg(flags):
+def DFCommonTruthBosonToolCfg(flags, name = "DFCommonTruthBosonTool", **kwargs):
     """Gauge bosons and Higgs truth collection maker"""
-    return TruthCollectionMakerCfg(flags,
-                                   name                    = "DFCommonTruthBosonTool",
-                                   OutputCollectionName = "TruthBoson",
-                                   KeepNavigationInfo      = False,
-                                   ParticleSelectionString = "(abs(TruthParticles.pdgId) == 23 || abs(TruthParticles.pdgId) == 24 || abs(TruthParticles.pdgId) == 25)",
-                                   Do_Compress             = True,
-                                   Do_Sherpa               = True)
+    acc = ComponentAccumulator()
+    kwargs.setdefault("OutputCollectionName", "TruthBoson")
+    kwargs.setdefault("KeepNavigationInfo", False)
+    kwargs.setdefault("BuildingW", True)
+    kwargs.setdefault("BuildingZ", True)
+    kwargs.setdefault("Do_Compress", True)
+    kwargs.setdefault("Do_Sherpa", True)
+    acc.addPublicTool(CompFactory.DerivationFramework.TruthCollectionMakerBoson(name = name,**kwargs),
+                      primary = True)
+    return acc
 
 
-def DFCommonTruthBSMToolCfg(flags):
+def DFCommonTruthBSMToolCfg(flags, name = "DFCommonTruthBSMTool", **kwargs):
     """BSM particles truth collection maker"""
-    return TruthCollectionMakerCfg(flags,
-                                   name                    = "DFCommonTruthBSMTool",
-                                   OutputCollectionName = "TruthBSM",
-                                   KeepNavigationInfo      = False,
-                                   ParticleSelectionString = "(TruthParticles.isBSM)",
-                                   Do_Compress             = True)
+    acc = ComponentAccumulator()
+    kwargs.setdefault("OutputCollectionName", "TruthBSM")
+    kwargs.setdefault("KeepNavigationInfo", False)
+    kwargs.setdefault("Do_Compress", True)
+    acc.addPublicTool(CompFactory.DerivationFramework.TruthCollectionMakerBSM(name = name,**kwargs),
+                      primary = True)
+    return acc
 
 
-def DFCommonTruthForwardProtonToolCfg(flags):
+def DFCommonTruthForwardProtonToolCfg(flags, name = "DFCommonTruthForwardProtonTool", **kwargs):
     """Forward proton truth collection maker"""
-    beam_energy = flags.Beam.Energy
-    return TruthCollectionMakerCfg(flags,
-                                   name                    = "DFCommonTruthForwardProtonTool",
-                                   OutputCollectionName = "TruthForwardProtons",
-                                   KeepNavigationInfo      = False,
-                                   ParticleSelectionString = "(TruthParticles.isStable) && (abs(TruthParticles.pdgId)==2212) && (TruthParticles.e>0.8*"+str(beam_energy)+")", # TODO Check whether isGenStable was intended here.
-                                   Do_Compress             = True)
+    acc = ComponentAccumulator()
+    kwargs.setdefault("BeamEnergy", flags.Beam.Energy)
+    kwargs.setdefault("OutputCollectionName", "TruthForwardProtons")
+    kwargs.setdefault("KeepNavigationInfo", False)
+    kwargs.setdefault("Do_Compress", True)
+    acc.addPublicTool(CompFactory.DerivationFramework.TruthCollectionMakerForwardProton(name, **kwargs), primary = True)
+    return acc
 
 #==============================================================================
 # Decoration tools
@@ -148,9 +158,10 @@ def TruthD2DecoratorCfg(flags, name, **kwargs):
 def TruthClassificationDecoratorCfg(flags, name, **kwargs):
     """Configure the TruthClassificationDecorator tool"""
     acc = ComponentAccumulator()
+    from MCTruthClassifier.MCTruthClassifierConfig import DFCommonMCTruthClassifierCfg
+    kwargs.setdefault("MCTruthClassifier", acc.addPublicTool(acc.popToolsAndMerge(DFCommonMCTruthClassifierCfg(flags))))
     TruthClassificationDecorator = CompFactory.DerivationFramework.TruthClassificationDecorator
-    acc.addPublicTool(TruthClassificationDecorator(name = name, **kwargs),
-                      primary = True)
+    acc.setPrivateTools(TruthClassificationDecorator(name = name, **kwargs))
     return acc
 
 
@@ -208,6 +219,9 @@ def TruthQGDecorationToolCfg(flags, name, **kwargs):
 def TruthNavigationDecoratorCfg(flags, name, **kwargs):
     """Congigure the truth navigation decorator tool"""
     acc = ComponentAccumulator()
+    kwargs.setdefault("InputCollections", [])
+    kwargs.setdefault("parentDecorKeys", [ key + ".parentLinks" for key in kwargs["InputCollections"] ])
+    kwargs.setdefault("childDecorKeys", [ key + ".childLinks" for key in kwargs["InputCollections"] ])
     TruthNavigationDecorator = CompFactory.DerivationFramework.TruthNavigationDecorator
     acc.addPublicTool(TruthNavigationDecorator(name = name, **kwargs),
                       primary = True)
@@ -241,15 +255,9 @@ def HardScatterCollectionMakerCfg(flags, name, **kwargs):
 #add the 'decoration' tool to dress the main truth collection with the classification
 def DFCommonTruthClassificationToolCfg(flags):
     """dress the main truth collection with the classification"""
-    from MCTruthClassifier.MCTruthClassifierConfig import DFCommonMCTruthClassifierCfg
-    accMCTC = DFCommonMCTruthClassifierCfg(flags)
-    DFCommonTruthClassifier = accMCTC.getPrimary()
-    acc = TruthClassificationDecoratorCfg(flags,
+    return TruthClassificationDecoratorCfg(flags,
                                           name = "DFCommonTruthClassificationTool",
-                                          ParticlesKey = "TruthParticles",
-                                          MCTruthClassifier = DFCommonTruthClassifier)
-    acc.merge(accMCTC)
-    return acc
+                                          ParticlesKey = "TruthParticles")
 
 
 # Hadron origin decoration tools
@@ -257,7 +265,7 @@ def HadronOriginClassifierCfg(flags, name, **kwargs):
     """get the hadron origin classification"""
     acc = ComponentAccumulator()
     HadronOriginClassifier = CompFactory.DerivationFramework.HadronOriginClassifier
-    kwargs.setdfault("DSID", flags.Input.MCChannelNumber)
+    kwargs.setdefault("DSID", flags.Input.MCChannelNumber)
     acc.addPublicTool(HadronOriginClassifier(name = name, **kwargs),
                       primary = True)
     return acc
@@ -266,7 +274,7 @@ def HadronOriginClassifierCfg(flags, name, **kwargs):
 def HadronOriginDecoratorCfg(flags, name, **kwargs):
     """decorate with the hadron origin classification"""
     acc = ComponentAccumulator()
-    if not hasattr(kwargs, "ToolName"):
+    if "ToolName" not in kwargs:
         kwargs.setdefault("ToolName", acc.getPrimaryAndMerge(HadronOriginClassifierCfg(flags,
                                                                                        name="DFCommonHadronOriginClassifier")))
     acc.addPublicTool(CompFactory.DerivationFramework.HadronOriginDecorator

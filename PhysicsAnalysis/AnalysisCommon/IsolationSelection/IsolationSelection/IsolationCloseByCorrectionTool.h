@@ -108,7 +108,8 @@ namespace CP {
         CorrectionCode performCloseByCorrection (const EventContext& ctx, ObjectCache& cache) const;
 
         // Lock decorations that we produced.
-        void lockDecorations (const xAOD::IParticleContainer* parts) const;
+        void lockDecorations (const xAOD::IParticleContainer* parts,
+                              const IsoVector& isoTypes) const;
 
         // Helper function to obtain the isolation cones to use for a given particle
         const IsoVector& getIsolationTypes(const xAOD::IParticle* particle) const;

@@ -39,7 +39,7 @@ namespace GlobalSim {
   }
 			    
 
-  bool CommonSelector::select(const ICommonTOB& tob) const {
+  bool CommonSelector::select(const CommonTOB& tob) const {
     {
       auto et = tob.et_bits().to_ulong();
       if (et < m_et_low  or et >= m_et_high) {return false;}

@@ -25,7 +25,6 @@ EGAMMA_AUX_VARIABLE( std::vector< std::vector< ElementLink< CaloClusterContainer
 EGAMMA_AUX_VARIABLE( std::vector< float >, pt );
 EGAMMA_AUX_VARIABLE( std::vector< float >, eta );
 EGAMMA_AUX_VARIABLE( std::vector< float >, phi );
-EGAMMA_AUX_VARIABLE( std::vector< float >, m );
 
 /// @}
 

@@ -5,10 +5,8 @@
 #include "MuonInferenceInterfaces/NodeFeatureFactory.h"
 #include "MuonInferenceInterfaces/GraphData.h"
 
-
 #include "AthenaBaseComps/AthMessaging.h"
 #include "Acts/Utilities/Enumerate.hpp"
-#include "MuonPatternHelpers/MatrixUtils.h"
 
 using namespace MuonR4;
 namespace MuonML {

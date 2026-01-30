@@ -111,13 +111,6 @@ G4mplEquationSetup::~G4mplEquationSetup()
 {
   if( fVerbose )   
     G4cout << "!!! G4mplEquationSetup destructor" << G4endl;
-
-  delete fMonopoleEquation;
-  delete fMonopoleStepper;
-  
-  delete fMonopoleChordFinder;
-  //  JA: Is protection below still needed ?
-  // WJT: Avoid segmentation violation in G4FieldManager destructor
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -191,11 +184,9 @@ G4mplEquationSetup::CreateStepperToChordFinder(G4MagneticField* magFieldNC)
      magFieldNC= &nullField;
   }
 
-  delete fMonopoleEquation;
-  fMonopoleEquation = new G4mplEqMagElectricField(magFieldNC);
+  fMonopoleEquation = std::make_unique<G4mplEqMagElectricField>(magFieldNC);
 
-  delete fMonopoleStepper;
-  fMonopoleStepper = new G4ClassicalRK4( fMonopoleEquation, 8 ); // for time information..
+  fMonopoleStepper = std::make_unique< G4ClassicalRK4>( fMonopoleEquation.get(), 8 ); // for time information..
   
   if ( !fMonopoleStepper )
   {
@@ -205,12 +196,10 @@ G4mplEquationSetup::CreateStepperToChordFinder(G4MagneticField* magFieldNC)
                   "FailureToCreateObject", FatalException, ermsg);
   }
   
-  delete fMonopoleChordFinder;
-
-  auto integrDriver = new G4MagInt_Driver( fMinStep, fMonopoleStepper,
+  auto integrDriver = new G4MagInt_Driver( fMinStep, fMonopoleStepper.get(),
                                            // cppcheck-suppress nullPointerRedundantCheck; false positive
                                            fMonopoleStepper->GetNumberOfVariables() );
-  fMonopoleChordFinder = new G4ChordFinder( integrDriver );
+  fMonopoleChordFinder = std::make_unique<G4ChordFinder>( integrDriver );
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -236,7 +225,7 @@ void G4mplEquationSetup::SwitchStepperAndChordFinder(G4bool useMonopoleEq,
      CheckAndUpdateField( magFieldNC );
      
      if (useMonopoleEq) {
-        fieldManager->SetChordFinder( fMonopoleChordFinder );
+        fieldManager->SetChordFinder( fMonopoleChordFinder.get() );
      } else {
         fieldManager->SetChordFinder( fOriginalChordFinder );
      }
@@ -270,9 +259,6 @@ void G4mplEquationSetup::ResetIntegration(G4FieldManager* fieldManager)
     fCurrentFieldManager = nullptr;
   }
   // Since these objects referred to the outgoing field manager, clean them up!  
-  delete fMonopoleEquation;    fMonopoleEquation= nullptr;
-  delete fMonopoleStepper;     fMonopoleStepper=  nullptr;
-  delete fMonopoleChordFinder; fMonopoleChordFinder= nullptr;
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

@@ -1,16 +1,16 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "RNTCollection.h"
-#include "RNTCollectionQuery.h"
+#include "RNTCollectionCursor.h"
 #include "CollectionCommon.h"
 
 #include "PersistentDataModel/Token.h"
 #include "RootUtils/APRDefaults.h"
 
-#include "CollectionBase/ICollectionColumn.h"
-#include "CollectionBase/CollectionBaseNames.h"
+#include "CollectionSvc/ICollectionColumn.h"
+#include "CollectionSvc/CollectionNames.h"
 #include "POOLCore/SystemTools.h"
 
 #include "GaudiKernel/Bootstrap.h"
@@ -34,7 +34,7 @@
 
 using namespace std;
 using namespace pool::RootCollection;
-using namespace pool::CollectionBaseNames;
+using namespace pool::CollectionNames;
 
 RNTCollection::RNTCollection(
    const pool::ICollectionDescription* description,
@@ -43,50 +43,17 @@ RNTCollection::RNTCollection(
    : APRMessaging("RNTCollection"),
      m_description( *description ),
      m_name( description->name() ),
-     m_fileName( description->name() + ".root" ),
+     m_fileName( description->connection() ),
      m_mode( mode ),
      m_file( 0 ),
      m_session( 0 ),
-     m_open( false ),
-     m_readOnly( mode == ICollection::READ ? true : false )
-{
+     m_open( false ) {
    RNTCollection::open();
 }
 
-     
-RNTCollection::~RNTCollection()
-{
-   if( m_open ) try {
-      RNTCollection::close();
-   } catch( std::exception& exception ) {
-      ATH_MSG_ERROR( exception.what() );
-      cleanup();
-   }
-   else cleanup();
-}
 
-
-void  RNTCollection::delayedFileOpen( const std::string& method )
-{
-   if( m_open && !m_file && m_session && m_mode != ICollection::READ ) {
-      m_file = TFile::Open(m_fileName.c_str(), poolOptToRootOpt[m_mode] );
-      if(!m_file || m_file->IsZombie()) {
-         throw std::runtime_error( string("ROOT cannot \"") + poolOptToRootOpt[m_mode] + "\" file " + m_fileName + " (APR: \" RNTCollection::" + method +" \" from \" RNTCollection \")");
-      }
-   ATH_MSG_INFO( "File " << m_fileName << " opened in " << method );
-// (Write Schema)
-   }
-}
-
-std::unique_ptr< ROOT::RNTupleReader > RNTCollection::getCollectionRNTuple()
-{
-   if( m_file ) {
-      auto reader = ROOT::RNTupleReader::Open( APRDefaults::RNTupleNames::EventTag, m_fileName );
-      if( reader )
-         ATH_MSG_DEBUG( "Retrieved Collection RNTuple  '" << reader->GetDescriptor().GetName() << "' from file " << m_fileName );
-      return reader;
-   }
-   return nullptr;
+RNTCollection::~RNTCollection() {
+   RNTCollection::close();
 }
 
 
@@ -115,41 +82,21 @@ void RNTCollection::insertRow( const pool::CollectionRowBuffer& inputRowBuffer )
 
 void RNTCollection::commit( bool )
 {
-   delayedFileOpen("commit");
-
    if( m_open ) {
-   ATH_MSG_DEBUG( "Commit: saving collection to file: " << "" );
+      ATH_MSG_DEBUG( "Commit: saving collection to file: " << "" );
    }
 }
 
-     
+
 void RNTCollection::close()
 {
    ATH_MSG_INFO( "Closing " << (m_open? "open":"not open") << " collection '" << m_fileName << "'" );
    if(m_open) {
-      delayedFileOpen("close");
-              
-      if( m_mode == ICollection::CREATE || m_mode == ICollection::CREATE_AND_OVERWRITE ) {
-         if( true )
-            m_mode = ICollection::UPDATE;
-         else {
-            // unregister if the collection was not created
-            m_mode = ICollection::CREATE_AND_OVERWRITE;
-            if(m_fileCatalog){
-               m_fileCatalog->start();
-               m_fileCatalog->deleteFID( m_fileCatalog->lookupPFN(m_fileName) );
-               m_fileCatalog->commit();
-            }
-         }
-      }
-      if( m_mode != ICollection::READ ) {
-         // Write Schema?  MN: not sure
-      }
       cleanup();
    }
 }
 
-     
+
 void RNTCollection::cleanup()
 {
    // delete RNTuple writer before closing the file (or else!)
@@ -161,215 +108,74 @@ void RNTCollection::cleanup()
       } else {
          m_file->Close();
       }
-      if( n==0 ) delete m_file; 
+      if( n==0 ) delete m_file;
       m_file = 0;
    }
    m_open = false;
-}       
-       
-     
+}
+
+
 void RNTCollection::open()  try
 {
-   const string myFileType = "RNTCollectionFile";
-
-   if( m_open ) close();
-
-   if( !m_fileCatalog
-       && m_fileName.starts_with( "PFN:")
-       && m_description.connection().empty() )
-   {
-      // special case with no catalog and PFN specified
-      // create the collection with exactly PFN file name
-      m_fileName = m_description.name().substr(4);   // remove the PFN: prefix
+   if (m_mode == ICollection::READ) {
+      throw std::runtime_error(  "Attempt to open RNTCollection, read via RootCollection. (APR: \" RNTCollection::open \" from \" RNTCollection \")");
    }
-   else if( fileCatalogRequired() ) {
-      m_fileName = "";
 
-      if(!m_fileCatalog)
-         m_fileCatalog = make_unique<pool::IFileCatalog>();
-        
-      if( m_mode == ICollection::CREATE ){
-         string fid = retrieveFID();
-         if(fid!="")
-            throw std::runtime_error( std::string("Cannot CREATE already registered collections") + " (APR: \" RNTCollection::open \" from \" RNTCollection \")");
-         else{
-            m_fileName = retrievePFN();
-            FileCatalog::FileID dummy;
-            m_fileCatalog->start();
-            m_fileCatalog->registerPFN( m_fileName, myFileType, dummy);
-            m_fileCatalog->commit();
-         }
-      }
-
-      else if(m_mode == ICollection::CREATE_AND_OVERWRITE){
-         string fid = retrieveFID();
-         if(fid!="")
-            m_fileName = retrieveUniquePFN(fid);
-         else{
-            m_fileName = retrievePFN();
-            FileCatalog::FileID dummy;
-            m_fileCatalog->start();
-            m_fileCatalog->registerPFN( m_fileName, myFileType, dummy);
-            m_fileCatalog->commit();
-         }
-      }
-
-      else if(m_mode == ICollection::UPDATE){
-         string fid = retrieveFID();
-         if(fid!="")
-            m_fileName = retrieveUniquePFN(fid);
-         else
-            throw std::runtime_error( std::string("Cannot CREATE non registered collections") + " (APR: \" RNTCollection::open \" from \" RNTCollection \")");
-      }
-
-      else if(m_mode == ICollection::READ) {
-         string fid = retrieveFID();
-         if(fid!="") {
-            string dummy;
-            m_fileCatalog->start();
-            m_fileCatalog->getFirstPFN(fid, dummy, dummy);
-            m_fileCatalog->commit();
-         }else
-            throw std::runtime_error( std::string("Cannot READ non registered collections") + " (APR: \" RNTCollection::open \" from \" RNTCollection \")");
-      }
+   if( m_fileName.starts_with( "PFN:") ) {
+      m_fileName = m_fileName.substr(4);   // remove the PFN: prefix
    }
 
    TDirectory::TContext dirctxt;
-   if( m_session == 0 || m_mode == ICollection::READ || m_mode == ICollection::UPDATE ) {
+   if( m_session == 0 ) {
       // first step: Try to open the file
-      ATH_MSG_INFO( "Opening Collection File '" << m_fileName << "' in mode: " << poolOptToRootOpt[m_mode] );
-      bool fileExists = !gSystem->AccessPathName( m_fileName.c_str() );
-       ATH_MSG_DEBUG( "File '" << m_fileName << "'" << (fileExists? " exists." : " does not exist." ) );
-      // open the file if it exists, or create if requested
-      if( !fileExists && m_mode != ICollection::CREATE && m_mode != ICollection::CREATE_AND_OVERWRITE )
-         m_file = 0;
-      else {
-         const char* root_mode = poolOptToRootOpt[m_mode];
-         Io::IoFlags io_mode = poolOptToFileMgrOpt[m_mode];
+      ATH_MSG_INFO( "Opening RNTCollection File '" << m_fileName << "' in mode: " << poolOptToRootOpt[m_mode] );
+      const char* root_mode = poolOptToRootOpt[m_mode];
+      Io::IoFlags io_mode = poolOptToFileMgrOpt[m_mode];
+      if( !m_fileMgr ) {
+         m_fileMgr = Gaudi::svcLocator()->service("FileMgr");
+         if ( !m_fileMgr ) {
+            ATH_MSG_ERROR( "unable to get the FileMgr, will not manage TFiles" );
+         }
+      }
+      if (m_fileMgr && m_fileMgr->hasHandler(Io::ROOT).isFailure()) {
+         ATH_MSG_INFO( "Unable to locate ROOT file handler via FileMgr. Will use default TFile::Open" );
+         m_fileMgr.reset();
+      }
 
-         if( fileExists && (m_mode == ICollection::CREATE
-                            || m_mode == ICollection::CREATE_AND_OVERWRITE ) ) {
-            // creating collection in an existing file
-            root_mode = "UPDATE";
-            io_mode = (Io::WRITE | Io::APPEND);
+      if (!m_fileMgr) {
+         m_file = TFile::Open(m_fileName.c_str(), root_mode);
+      } else {
+         void* vf(0);
+         // open in shared mode only for writing
+         bool SHARED(false);
+         if (io_mode.isWrite()) {
+            SHARED = true;
          }
-         if( !m_fileMgr ) {
-            m_fileMgr = Gaudi::svcLocator()->service("FileMgr");
-            if ( !m_fileMgr ) {
-               ATH_MSG_ERROR( "unable to get the FileMgr, will not manage TFiles" );
-            }
-         }
-         if (m_fileMgr && m_fileMgr->hasHandler(Io::ROOT).isFailure()) {
-            ATH_MSG_INFO( "Unable to locate ROOT file handler via FileMgr. Will use default TFile::Open" );
-            m_fileMgr.reset();
-         }
-
-         if (!m_fileMgr) {
-            m_file = TFile::Open(m_fileName.c_str(), root_mode);
+         int r = m_fileMgr->open(Io::ROOT, "RNTCollection", m_fileName,
+                                 io_mode, vf, "TAG", SHARED);
+         if (r < 0) {
+            ATH_MSG_ERROR( "unable to open '" << m_fileName << "' for " << root_mode );
          } else {
-            void* vf(0);
-            // open in shared mode only for writing
-            bool SHARED(false);
-            if (io_mode.isWrite()) {
-               SHARED = true;
-            }
-            int r = m_fileMgr->open(Io::ROOT, "RNTCollection", m_fileName,
-                                    io_mode, vf, "TAG", SHARED);
-            if (r < 0) {
-               ATH_MSG_ERROR( "unable to open '" << m_fileName << "' for " << root_mode );
-            } else {
-               m_file = (TFile*)vf;
-            }
+            m_file = (TFile*)vf;
          }
       }
       if (!m_file || m_file->IsZombie()) {
          throw std::runtime_error(  string("ROOT cannot \"") + poolOptToRootOpt[m_mode] + "\" file " + m_fileName + " (APR: \" RNTCollection::open \" from \" RNTCollection \")");
       }
-   ATH_MSG_INFO( "File " << m_fileName << " opened" );
+      ATH_MSG_INFO( "File " << m_fileName << " opened" );
    }
 
-   if (m_mode == ICollection::READ || m_mode == ICollection::UPDATE) {
-      // retrieve RNTuple from file
-      m_reader = getCollectionRNTuple();
-
-      if (!m_reader) {
-         int n(0);
-         if (!m_fileMgr) {
-            m_file->Close();
-         } else {
-            n = m_fileMgr->close(m_file, "RNTCollection");
-         }
-         if (n == 0)
-            delete m_file;
-         m_file = 0;
-         throw std::runtime_error(  string("RNTuple Collection not found in file ") + m_fileName + " (APR: \" RNTCollection::open \" from \" RNTCollection \")");
-      }
-      // Read Schema 
-      CollectionDescription desc( m_description.name(),
-                                  m_description.type(),
-                                  m_description.connection() );
-      // clear the description
-      m_description = std::move(desc);
-      bool      foundToken = false;
-   
-      const auto& rntdesc = m_reader->GetDescriptor();
-      for( const auto &f : rntdesc.GetTopLevelFields() ) {
-         const std::string field_name = f.GetFieldName();
-         // ignore the index column, it's not a user data
-         if( field_name == APRDefaults::IndexColName )
-            continue;
-         std::string field_type = f.GetTypeName();
-   
-         ATH_MSG_DEBUG( "  + field name: " << field_name );
-         ATH_MSG_DEBUG( "    field type: " << field_type );
-   
-         // MN: TODO : may need to fix coral::Attribute to recognize the "new" typenames
-         static const std::map< std::string, std::string > typenameConv = {
-            { "std::string", "string" },
-            { "std::uint64_t", "unsigned long" },
-            { "std::uint32_t", "unsigned int" },
-            { "std::uint16_t", "unsigned short" },
-            { "std::int64_t", "long" },
-            { "std::int32_t", "int" },
-            { "std::int16_t", "short" } };
-         auto it = typenameConv.find( field_type );
-         if( it != typenameConv.end() ) {
-            ATH_MSG_DEBUG( "Replaced type  " << field_type << " with " << it->second );
-            field_type = it->second;
-         }
-   
-         if( (field_name == defaultEventReferenceColumnName || field_name == m_description.eventReferenceColumnName())
-             and foundToken ) {
-           throw std::runtime_error(  "can't reconstruct Description if more than one Token column (APR: \" RNTCollection::open \" from \" RNTCollection \")");
-         }
-         if( field_name ==  m_description.eventReferenceColumnName() ) {
-            foundToken = true;
-            // do nothing more
-         } else if( field_name == defaultEventReferenceColumnName ) {
-            m_description.setEventReferenceColumnName( field_name );
-            foundToken = true;
-         } else {
-            m_description.insertColumn( field_name, field_type );
-         }
-      }
-      if( !foundToken ) {
-         m_description.setEventReferenceColumnName( "DummyRef" );
-      }
-   }
-
-   if( m_mode == ICollection::UPDATE || m_mode == ICollection::CREATE || m_mode == ICollection::CREATE_AND_OVERWRITE ) {
+   if( m_mode == ICollection::CREATE_AND_OVERWRITE ) {
       // create a new Collection
       std::string rntupleName = std::string(APRDefaults::RNTupleNames::EventTag);
-      if( m_mode == ICollection::CREATE_AND_OVERWRITE ) {
-         ATH_MSG_DEBUG( "Creating collection in overwrite mode..." );
-         m_file->Delete( (rntupleName+";*").c_str() );
-      }
+      ATH_MSG_DEBUG( "Creating collection in overwrite mode..." );
+      m_file->Delete( (rntupleName+";*").c_str() );
       // (Create Schema)
       auto model { ROOT::RNTupleModel::Create() };
       model->SetDescription( rntupleName );
       for( int col_id = 0; col_id < m_description.numberOfTokenColumns(); col_id++ ) {
          std::string columnName = m_description.tokenColumn(col_id).name();
-         addField( model.get(), columnName, CollectionBaseNames::tokenTypeName );
+         addField( model.get(), columnName, CollectionNames::tokenTypeName );
       }
       for( int col_id = 0; col_id < m_description.numberOfAttributeColumns(); col_id++ ) {
          const ICollectionColumn& column = m_description.attributeColumn(col_id);
@@ -379,27 +185,9 @@ void RNTCollection::open()  try
       ROOT::RNTupleWriteOptions opts;
       opts.SetCompression( m_file->GetCompressionSettings() );
       opts.SetUseBufferedWrite( true );
-      // MN: TODO : add support for OVERWRITE?
       m_rntupleWriter = ROOT::RNTupleWriter::Append(std::move(model), rntupleName, *m_file, opts);
-
-   ATH_MSG_DEBUG( "Created RNTCollection, collection file will be " << m_fileName );
-
-   ATH_MSG_INFO( "RNTuple Collection created" );
-   }
-   else {
-   ATH_MSG_INFO( "RNTuple Collection opened, size = " << m_reader->GetNEntries() );
-   }
-      
-   if (m_session && m_mode == ICollection::UPDATE) {
-      int n(0);
-      if (!m_fileMgr) {
-         m_file->Close();
-      } else {
-         n = m_fileMgr->close(m_file, "RNTCollection");
-      }
-
-      if(n == 0) delete m_file;
-      m_file = 0;
+      ATH_MSG_DEBUG( "Created RNTCollection, collection file will be " << m_fileName );
+      ATH_MSG_INFO( "RNTuple Collection created" );
    }
 
    m_open = true;
@@ -420,84 +208,10 @@ void RNTCollection::addField(ROOT::RNTupleModel* model, const std::string& field
 }
 
 
-bool RNTCollection::isOpen() const
-{
-   return m_open;
-}
-
-     
-pool::ICollection::OpenMode RNTCollection::openMode() const
-{
-   return m_mode;
-}
-
-     
-bool RNTCollection::fileCatalogRequired() const
-{
-   return m_name.find("PFN:")==0 || 
-      m_name.find("FID:")==0 || 
-      m_name.find("LFN:")==0; 
-}
-
-     
-string RNTCollection::retrievePFN() const
-{
-   if (m_name.substr (0, 4) != "PFN:")
-      throw std::runtime_error(  "In CREATE mode a PFN has to be provided (APR: \" RNTCollection::open \" from \" RNTCollection \")");
-   return m_name.substr(4,string::npos);
-}
-
-     
-string  RNTCollection::retrieveFID()
-{
-   FileCatalog::FileID fid="";
-   string fileType="";        
-
-   if (m_name.substr (0, 4) == "PFN:") {
-      string pfn = m_name.substr(4,string::npos);
-      m_fileCatalog->start();
-      m_fileCatalog->lookupFileByPFN(pfn,fid,fileType);
-      m_fileCatalog->commit();
-   }
-   else if (m_name.substr (0, 4) == "LFN:") {
-      string lfn = m_name.substr(4,string::npos);
-      m_fileCatalog->start();
-      m_fileCatalog->lookupFileByLFN(lfn,fid);
-      m_fileCatalog->commit();
-   }
-   else if (m_name.substr (0, 4) == "FID:") {
-      fid = m_name.substr(4,string::npos);
-   }else
-      throw std::runtime_error(  "A FID, PFN or and LFN has to be provided (APR: \" RNTCollection::retrieveFID \" from \" RNTCollection \")");
-   return fid;
-}
-
-
-string RNTCollection::retrieveUniquePFN(const FileCatalog::FileID& fid)
-{
-   IFileCatalog::Files       pfns;
-   m_fileCatalog->start();
-   m_fileCatalog->getPFNs(fid, pfns);
-   m_fileCatalog->commit();
-   if( pfns.empty() )
-      throw std::runtime_error(  "This exception should never have been thrown, please send a bug report (APR: \" RNTCollection::retrieveUniquePFN \" from \" RNTCollection \")");
-   if( pfns.size() > 1 )
-      throw std::runtime_error(  "Cannot UPDATE or CREATE_AND_OVERWRITE since there are replicas (APR: \" RNTCollection::retrieveUniquePFN \" from \" RNTCollection \")");
-   return pfns[0].first;
-}
-
-   
-const pool::ICollectionDescription& RNTCollection::description() const
-{
+const pool::ICollectionDescription& RNTCollection::description() const {
    return m_description;
 }
 
-     
-pool::ICollectionQuery* RNTCollection::newQuery()
-{
-   if( !isOpen() ) {
-      throw std::runtime_error(  "Attempt to query a closed collection. (APR: \" RNTCollection::newQuery \" from \" RNTCollection \")");
-   }
-   return new RNTCollectionQuery( m_description, m_reader.get() );
+pool::ICollectionCursor& RNTCollection::cursor() {
+   throw std::runtime_error(  "Attempt to get cursor for RNTCollection, read via RootCollection. (APR: \" RNTCollection::cursor \" from \" RNTCollection \")");
 }
-

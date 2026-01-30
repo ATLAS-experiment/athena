@@ -2,18 +2,22 @@
   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
+#include "TChain.h"
+#include "TChainElement.h"
 #include "TFile.h"
 #include "TH1I.h"
 #include "TH2F.h"
 #include "TH3F.h"
+#include "TObjArray.h"
 
 #include <algorithm>
+#include <cmath>
 #include <cstdio>
 #include <iostream>
 #include <memory>
 #include <unordered_map>
 #include <vector>
-#include <cmath>
+#include <string>
 
 /// @brief Reads the GRL .xml file and creates an unordered map of run numbers and associated LB ranges
 /// @param grl Path to the GRL .xml file
@@ -52,11 +56,24 @@ std::unordered_map<int, std::vector<std::pair<int, int>>> getGRLMap(char *grl) {
     }
   }
   int status = pclose(runList);
-  if (status == -1){
-    std::cout<<"Error in pclose\n";
+  if (status == -1) {
+    std::cout << "Error in pclose" << std::endl;
   }
   return grlMap;
 }
+
+/// @brief Gets a string with "%d" and replaces them with the same run number.
+/// It's effectively "Form(...)" that works for an unknown number of placeholders
+std::string getFileNamePattern(std::string name, int runNr) {
+    std::string runStr = Form("%d", runNr);
+    size_t position = 0;
+    while ((position = name.find("%d", position)) != std::string::npos) {
+        name.replace(position, 2, runStr);
+        position += runStr.length();
+    }
+    return name;
+}
+
 
 /// @brief This macro reads outputs from "HIClusterGeoFiller.py" and performs a linear regression with prepared values.
 /// The input file names shall contain the run number. There has to be one file per run; ideally, every run mentioned in
@@ -64,14 +81,13 @@ std::unordered_map<int, std::vector<std::pair<int, int>>> getGRLMap(char *grl) {
 /// The slope and intercept of the linear regression are written to an output files as response and offset. Response
 /// values are normalized to unity along the phi angle, i.e. in each eta slice. In the final root weight file, there are
 /// also histograms "h3_w", "h3_eta", "h3_phi", and "h3_R". These are produced by "HICaloGeoExtract.py".
-/// @param argv[0] Path to the GRL .xml file
-/// @param argv[1] Part of the path to the input files before the run number
-/// @param argv[2] Part of the path to the input files after the run number
+/// @param argv[1] Path to the GRL .xml file
+/// @param argv[2], argv[3], ... Parts of the path to the input files; blanks are filled with the run number
 /// @return Technically integer, practically "cluster.geo.RESPONSE_OFFSET_RUNINDEX.root" file with response, offset, and
 /// run index
 int main(int argc, char **argv) {
-  if (argc != 4) {
-    std::cout << "Syntax: " << argv[0] << " GoodRunList.xml /path/to/input/files/prefix. .suffix.root" << std::endl;
+  if (argc <= 2) {
+    std::cout << "Syntax: " << argv[0] << " GoodRunList.xml /path/to/input/files/first.part. [.second.part [...]]" << std::endl;
     return -1;
   }
 
@@ -101,62 +117,89 @@ int main(int argc, char **argv) {
   for (unsigned int r = 0; r < runs.size(); r++) {
     runIndex->SetBinContent(r + 1, runs.at(r));
   }
-  //runIndex cannot be nullptr here
 
-  std::string prefix = argv[2];
-  std::string suffix = argv[3];
+  // connect all the parts of the file name with a placeholder for a run number
+  std::string fileNameTemplate="";
+  for(int a = 2; a < argc; ++a) {
+    fileNameTemplate += std::string(argv[a]);
+    if (a != argc-1) {
+      // this will be replaced by a run number
+      fileNameTemplate += std::string("%d");
+    }
+  }
 
   std::unique_ptr<TH3F> response;
   std::unique_ptr<TH3F> offset;
   std::unique_ptr<TH3F> entries;
+  std::unique_ptr<TH2F> etaPhiMap;
 
   // loop over runs
   for (unsigned int r = 0; r < runs.size(); r++) {
     int run = runs.at(r);
+    // replace placeholders with the actual run number;
+    std::string fileNamePattern = getFileNamePattern(fileNameTemplate, run);
 
-    std::string fileName = Form("%s%d%s", prefix.c_str(), run, suffix.c_str());
-    std::unique_ptr<TFile> file(TFile::Open(fileName.c_str()));
-    if (!file) {
-      std::cout << "Could not open file " << fileName << ", skipping the run " << run << std::endl;
+    std::unique_ptr<TChain> filesChain = std::make_unique<TChain>("");
+    // "Add" also resolves wildcards, if present
+    filesChain->Add(fileNamePattern.c_str());
+    TObjArray * files = filesChain->GetListOfFiles();
+
+    if (files->IsEmpty()) {
+      std::cout << "Could not open any file with pattern " << fileNamePattern << ", skipping the run " << run << std::endl;
       continue;
     }
 
-    std::unique_ptr<TH2F> etaPhiMap(file->Get<TH2F>("h_etaPhiMapping"));
-
-    if (!response) {
-      // book response and offset once eta-phi mapping is known
-      response =
-          std::make_unique<TH3F>("h3_eta_phi_response", "h3_eta_phi_response", 
-                  etaPhiMap->GetNbinsX(), etaPhiMap->GetXaxis()->GetXmin(), etaPhiMap->GetXaxis()->GetXmax(),
-                  etaPhiMap->GetNbinsY(), etaPhiMap->GetYaxis()->GetXmin(), etaPhiMap->GetYaxis()->GetXmax(),
-                  runs.size(), 0, runs.size());
-      response->SetDirectory(nullptr);
-      offset = std::make_unique<TH3F>(*(TH3F*)response->Clone("h3_eta_phi_offset"));
-      offset->SetTitle("h3_eta_phi_offset");
-      offset->SetDirectory(nullptr);
-      entries = std::make_unique<TH3F>(*(TH3F*)response->Clone("h3_eta_phi_entries"));
-      entries->SetTitle("h3_eta_phi_entries");
-      entries->SetDirectory(nullptr);
-    }
+    int filesNum = files->GetEntries();
+    std::cout << "Opened " << filesNum << " file" << (filesNum > 1 ? "s" : "") << " with pattern " << fileNamePattern 
+    << ", processing the run " << run << std::endl;
 
     std::unique_ptr<TH2F> sums;
 
-    // for each range of LBs
-    for (auto &lbs : grlMap[run]) {
-      // for each LB in that range
-      for (int lb = lbs.first; lb <= lbs.second; lb++) {
-        std::unique_ptr<TH2F> tmp(file->Get<TH2F>(Form("h_clusterET_fcalET_%d_%d", run, lb)));
-        if (!tmp) {
-          std::cout << "Could not get h_clusterET_fcalET_" << run << "_" << lb << ", skipping this LB, r = "<<r << std::endl;
-          continue;
-        }
+    // for each file matching the pattern
+    TIter next(files);
+    TChainElement * fileEl = 0;
+    while (( fileEl = (TChainElement*)next() )) {
+      std::unique_ptr<TFile> file = std::make_unique<TFile>(fileEl->GetTitle());
+      std::cout << "Processing file " << file->GetName() << std::endl;
 
-        // merge into a single histogram
-        if (!sums) {
-          sums = std::make_unique<TH2F>(*(TH2F*)tmp->Clone("h_clusterET_fcalET_sum"));
-        }
-        else {
-          sums->Add(tmp.get());
+      if (!etaPhiMap) {
+        // when the first file in opened, get the eta-phi mapping
+        etaPhiMap = std::make_unique<TH2F>(*(TH2F*)file->Get<TH2F>("h_etaPhiMapping"));
+        etaPhiMap->SetDirectory(nullptr);
+
+        // book response and offset once eta-phi mapping is known
+        response =
+            std::make_unique<TH3F>("h3_eta_phi_response", "h3_eta_phi_response", 
+                    etaPhiMap->GetNbinsX(), etaPhiMap->GetXaxis()->GetXmin(), etaPhiMap->GetXaxis()->GetXmax(),
+                    etaPhiMap->GetNbinsY(), etaPhiMap->GetYaxis()->GetXmin(), etaPhiMap->GetYaxis()->GetXmax(),
+                    runs.size(), 0, runs.size());
+        response->SetDirectory(nullptr);
+        offset = std::make_unique<TH3F>(*(TH3F*)response->Clone("h3_eta_phi_offset"));
+        offset->SetTitle("h3_eta_phi_offset");
+        offset->SetDirectory(nullptr);
+        entries = std::make_unique<TH3F>(*(TH3F*)response->Clone("h3_eta_phi_entries"));
+        entries->SetTitle("h3_eta_phi_entries");
+        entries->SetDirectory(nullptr);
+      }
+
+      // for each range of LBs
+      for (auto &lbs : grlMap[run]) {
+        // for each LB in that range
+        for (int lb = lbs.first; lb <= lbs.second; lb++) {
+          std::unique_ptr<TH2F> tmp(file->Get<TH2F>(Form("h_clusterET_fcalET_%d_%d", run, lb)));
+          if (!tmp) {
+            std::cout << "Could not get h_clusterET_fcalET_" << run << "_" << lb << ", skipping this LB, r = "<<r << std::endl;
+            continue;
+          }
+
+          // merge into a single histogram
+          if (!sums) {
+            sums = std::make_unique<TH2F>(*(TH2F*)tmp->Clone("h_clusterET_fcalET_sum"));
+            sums->SetDirectory(nullptr);
+          }
+          else {
+            sums->Add(tmp.get());
+          }
         }
       }
     }

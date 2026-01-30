@@ -28,6 +28,10 @@ def StandaloneMuonOutputCfg(flags):
     aod_items += ["xAOD::MuonSegmentContainer#NCB_MuonSegments"]
     aod_items += ["xAOD::MuonSegmentAuxContainer#NCB_MuonSegmentsAux."]
 
+    if flags.Muon.scheduleActsReco:
+        aod_items += ["xAOD::MuonSegmentContainer#MuonSegmentsFromR4"]
+        aod_items += ["xAOD::MuonSegmentAuxContainer#MuonSegmentsFromR4Aux.-localSegPars.-parentSegment"]
+
     # TrackParticles
     aod_items += ["xAOD::TrackParticleContainer#MuonSpectrometerTrackParticles"]
     aod_items += ["xAOD::TrackParticleAuxContainer#MuonSpectrometerTrackParticlesAux."]
@@ -81,6 +85,7 @@ def StandaloneMuonOutputCfg(flags):
         esd_items += ["xAOD::RpcStrip2DContainer#xRpcBILStrips", "xAOD::RpcStrip2DAuxContainer#xRpcBILStripsAux." ]
 
 
+
     # trigger related info for offline DQA
     esd_items += ["Muon::TgcCoinDataContainer#TrigT1CoinDataCollection"]
     esd_items += ["Muon::TgcCoinDataContainer#TrigT1CoinDataCollectionPriorBC"]
@@ -95,6 +100,9 @@ def StandaloneMuonOutputCfg(flags):
 
     # Segments
     esd_items += ["Trk::SegmentCollection#NCB_TrackMuonSegments"]
+    ### Needs to be part of the output to fix the CombinedTest
+    ### Keep it here for now but fix it later in a follow up MR
+    ##esd_items += ["Trk::SegmentCollection#TrackMuonSegments"] 
 
     # Tracks
     esd_items += ["TrackCollection#MuonSpectrometerTracks"]
@@ -128,6 +136,10 @@ def StandaloneMuonOutputCfg(flags):
             esd_items+=["MuonSimDataCollection#TGC_SDO"]
             if flags.Detector.EnablesTGC: esd_items+=["MuonSimDataCollection#sTGC_SDO"]
             if flags.Detector.EnableMM: esd_items+=["MuonSimDataCollection#MM_SDO"]
+ 
+            if flags.Muon.writexAODPRD:
+                for item in ["MDT_SDO","RPC_SDO","TGC_SDO","MM_SDO","sTGC_SDO"]:
+                    esd_items += [f"xAOD::MuonSimHitContainer#{item}", f"xAOD::MuonSimHitAuxContainer#{item}Aux."] 
 
     if flags.Output.doWriteESD:
         result.merge(OutputStreamCfg(flags, "ESD", esd_items))
@@ -184,12 +196,12 @@ def MuonReconstructionCfg(flags):
         result.merge(MuonDetailedTrackTruthMakerCfg(flags, name="MuonStandaloneDetailedTrackTruthMaker",
                                                     TrackCollectionNames=track_cols))
 
-        for i in range(len(track_cols)):
-            from TrkConfig.TrkTruthAlgsConfig import TrackTruthSelectorCfg, TrackParticleTruthAlgCfg
-            result.merge(TrackTruthSelectorCfg(flags, tracks=track_cols[i]))
-
-            result.merge(TrackParticleTruthAlgCfg(flags, tracks=track_cols[i],
-                                                  TrackParticleName=track_colstp[i]))
+        if not flags.Muon.scheduleActsReco:
+            for i in range(len(track_cols)):
+                from TrkConfig.TrkTruthAlgsConfig import TrackTruthSelectorCfg, TrackParticleTruthAlgCfg
+                result.merge(TrackTruthSelectorCfg(flags, tracks=track_cols[i]))
+                result.merge(TrackParticleTruthAlgCfg(flags, tracks=track_cols[i],
+                                                    TrackParticleName=track_colstp[i]))
 
         # Check if we're making PRDs
         # FIXME - I think we can remove this flag if we shift this to where PRDs are being created. However, this will involve some refactoring, so temporary fix is this.

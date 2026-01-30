@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ElectronPhotonFourMomentumCorrection/get_MaterialResolutionEffect.h"
@@ -80,6 +80,8 @@ get_MaterialResolutionEffect::get_MaterialResolutionEffect()
 
   m_etBins = m_hSystResol.at(0).at(0).at(1)->GetXaxis()->GetXbins();
 }
+
+get_MaterialResolutionEffect::~get_MaterialResolutionEffect() = default;
 
 //============================================================================
 // inputs are particle_type (0=elec, 1=reco unconv photon, 2=reco conv photon,

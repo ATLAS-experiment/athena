@@ -1,10 +1,6 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
-
-///////////////////////////////////////////////////////////////////
-// GenParticleLifetimeFilter.h, (c) ATLAS Detector software
-///////////////////////////////////////////////////////////////////
 
 #ifndef ISF_HEPMC_GENPARTICLELIFETIMEFILTER_H
 #define ISF_HEPMC_GENPARTICLELIFETIMEFILTER_H 1
@@ -31,17 +27,17 @@ namespace ISF {
     GenParticleLifetimeFilter( const std::string& t, const std::string& n, const IInterface* p );
 
     /** Destructor */
-    ~GenParticleLifetimeFilter(){}
+    ~GenParticleLifetimeFilter() = default;
 
     /** does the given particle pass the filter? */
 #ifdef HEPMC3
-    bool pass(const HepMC::ConstGenParticlePtr& particle) const;
+    virtual bool pass(const HepMC::ConstGenParticlePtr& particle) const override final;
 #else
-    bool pass(const HepMC::GenParticle& particle) const;
+    virtual bool pass(const HepMC::GenParticle& particle) const override final;
 #endif
 
   private:
-    double m_minLifetime{0.000001}; //units of c*ns
+    Gaudi::Property<double> m_minLifetime{this, "MinimumLifetime", 0.000001}; //units of c*ns
   };
 
 }

@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -525,9 +525,30 @@ def CaloTopoClusterConfigTest(flags=None):
     )
     cfg.addEventAlgo(theNegativeEnergyCaloClustersThinner,"AthAlgSeq")
 
-    cfg.addEventAlgo(CompFactory.ClusterDumper("TopoDumper",ContainerName=topoAlg.ClustersOutputName,FileName="NewTopoClusters.txt"),sequenceName="AthAlgSeq")
+    cfg.addEventAlgo(CompFactory.ClusterDumper("TopoDumper",ContainerName=topoAlg.ClustersOutputName,FileName="TopoClusters.txt",
+                                               ReducedPrecision=True),sequenceName="AthAlgSeq")
 
-    cfg.run()
+    return cfg.run().isSuccess()
 
 if __name__=="__main__":
-    CaloTopoClusterConfigTest()
+    import sys, subprocess
+    stat=CaloTopoClusterConfigTest()
+    if stat==0: 
+        print ("Executing returned StatusCode FAILURE")
+        sys.exit(-1)
+    else:
+        from AthenaCommon.Utils.unixtools import find_datafile
+        import os
+        refFile=find_datafile("CaloRec/CaloRec-00-00-01/TopoClusters.txt.ref",pathlist=os.getenv("DATAPATH").split(":"))
+        if not refFile or refFile=="":
+            print ("Did not find reference file!")
+            sys.exit(-1) 
+        print ("Comparing output with reference file ", refFile)
+        stat=subprocess.check_call(["diff","TopoClusters.txt",refFile])
+        if stat!=0: 
+          print ("Output difference found")
+          sys.exit(-1)
+        else:
+          print("Output indentical to reference")
+    
+    sys.exit(0)

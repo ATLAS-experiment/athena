@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -19,8 +19,6 @@ using namespace TauAnalysisTools;
 //______________________________________________________________________________
 TauSelectionCut::TauSelectionCut(const std::string& sName, TauAnalysisTools::TauSelectionTool* tTST)
   : m_sName(sName)
-  , m_hHistCutPre(nullptr)
-  , m_hHistCut(nullptr)
   , m_tTST(tTST)
 {
 }
@@ -28,9 +26,6 @@ TauSelectionCut::TauSelectionCut(const std::string& sName, TauAnalysisTools::Tau
 //______________________________________________________________________________
 TauSelectionCut::~TauSelectionCut()
 {
-  // FIXME: could use unique_ptr
-  delete m_hHistCutPre;
-  delete m_hHistCut;
 }
 
 //______________________________________________________________________________
@@ -41,11 +36,11 @@ void TauSelectionCut::writeControlHistograms()
 }
 
 //______________________________________________________________________________
-TH1F* TauSelectionCut::CreateControlPlot(const char* sName, const char* sTitle, int iBins, double dXLow, double dXUp)
+std::unique_ptr<TH1F> TauSelectionCut::CreateControlPlot(const char* sName, const char* sTitle, int iBins, double dXLow, double dXUp)
 {
   if (m_tTST->m_bCreateControlPlots)
   {
-    TH1F* hHist = new TH1F(sName, sTitle, iBins, dXLow, dXUp);
+    auto hHist = std::make_unique<TH1F>(sName, sTitle, iBins, dXLow, dXUp);
     hHist->SetDirectory(0);
     return hHist;
   }
@@ -401,9 +396,6 @@ bool TauSelectionCutJetIDWP::accept(const xAOD::TauJet& xTau,
   case JETIDNONE:
     bPass = true;
     break;
-  case JETIDNONEUNCONFIGURED:
-    bPass = true;
-    break;
   case JETIDRNNVERYLOOSE:
     if (xTau.isTau(xAOD::TauJetParameters::JetRNNSigVeryLoose)) bPass = true;
     break;
@@ -644,9 +636,9 @@ bool TauSelectionCutMuonOLR::accept(const xAOD::TauJet& xTau,
   // MuonOLR : removing tau overlapped with muon satisfying pt>2GeV and not calo-tagged
   m_bTauMuonOLR = true;
 
-  static const SG::ConstAccessor<bool> acc_taumuonolr ("passTATTauMuonOLR");
+  static const SG::ConstAccessor<char> acc_taumuonolr ("passTATTauMuonOLR");
   if ( acc_taumuonolr.isAvailable(xTau) ) {
-    m_bTauMuonOLR = acc_taumuonolr(xTau);
+    m_bTauMuonOLR = static_cast<bool>(acc_taumuonolr(xTau));
   } else {
     // fallback to manual calculation 	  
     SG::ReadHandle<xAOD::MuonContainer> muonContainerHandle( m_tTST->m_muonContainerKey );

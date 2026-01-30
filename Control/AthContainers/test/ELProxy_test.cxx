@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthContainers/test/ELProxy_test.cxx
@@ -379,7 +379,7 @@ void test_ELSpanConverter()
   assert (el[3] == newlinks[3]);
 }
 
-
+//coverity[root_function]
 int main()
 {
   std::cout << "AthContainers/ELProxy_test\n";

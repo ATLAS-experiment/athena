@@ -1,9 +1,10 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( TrigConfStorage )
 
 # External dependencies:
+find_package( requests )
 find_package( Boost COMPONENTS regex )
 find_package( COOL COMPONENTS CoolKernel CoolApplication )
 find_package( CORAL COMPONENTS CoralBase CoralKernel RelationalAccess )

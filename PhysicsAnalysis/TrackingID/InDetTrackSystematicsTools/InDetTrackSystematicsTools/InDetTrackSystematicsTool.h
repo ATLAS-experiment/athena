@@ -1,6 +1,6 @@
 // -*- c++ -*-
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef INDETTRACKSYSTEMATICSTOOLS_INDETTRACKSYSTEMATICSTOOL_H
@@ -16,6 +16,7 @@
 #include "PATInterfaces/SystematicSet.h"
 
 #include <TFile.h>
+#include <TH2.h>
 
 namespace InDet {
 

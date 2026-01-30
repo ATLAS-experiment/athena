@@ -48,7 +48,7 @@ PL_OverlapRemoval:
 Output:
   treeName: analysis
   truthMetVars:
-    - TruthMET_NOSYS.met -> truth_met
+    - TruthMET_NOSYS.met -> truth_met type=float
   containersOnlyForMC:
     truth_mu_: TruthMuons
     truth_el_: TruthElectrons

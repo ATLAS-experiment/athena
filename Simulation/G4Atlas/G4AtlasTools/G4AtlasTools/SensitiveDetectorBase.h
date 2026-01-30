@@ -84,7 +84,7 @@ class SensitiveDetectorBase : public extends<AthAlgTool, ISensitiveDetector>
 
   /// @brief Assign SD to a list of volumes
   /** This method supports wild card matching */
-  StatusCode assignSD(G4VSensitiveDetector* sd,
+  StatusCode assignSD(std::unique_ptr<G4VSensitiveDetector> sd,
                       const std::vector<std::string>& volumes) const;
   
   /// @brief Retrieve the current SD.

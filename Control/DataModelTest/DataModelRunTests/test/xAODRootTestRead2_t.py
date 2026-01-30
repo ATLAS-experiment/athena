@@ -17,7 +17,7 @@ include('DataModelRunTests/xAODRootTest.py')
 
 xAODInit()
 ana = Analysis('xaodroot.root')
-ana.add (xAODTestRead())
-ana.add (xAODTestRead(readPrefix = 'copy_'))
+ana.add (xAODTestRead(False))
+ana.add (xAODTestRead(False, readPrefix = 'copy_'))
 ana.run()
 

@@ -12,21 +12,30 @@
 #include <ColumnarTestFixtures/ColumnarPhysliteTest.h>
 
 #include <AsgTesting/UnitTest.h>
+#include <ColumnarTestFixtures/PerformanceData.h>
 #include <ColumnarCore/ColumnarTool.h>
 #include <ColumnarInterfaces/ColumnInfo.h>
 #include <ColumnarInterfaces/IColumnarTool.h>
 #include <ColumnarToolWrapper/ColumnarToolHelpers.h>
+#include <ColumnarTestFixtures/Benchmark.h>
+#include <ColumnarTestFixtures/Configuration.h>
+#include <ColumnarTestFixtures/PhysliteTest.h>
 #include <ColumnarTestFixtures/ToolWrapper.h>
 #include <PATInterfaces/ISystematicsTool.h>
 #include <TruthUtils/ParticleConstants.h>
+#include <xAODEventInfo/EventInfo.h>
 #include <xAODJet/JetContainer.h>
+#include <xAODMuon/MuonContainer.h>
 #include <xAODMissingET/versions/MissingETAuxAssociationMap_v2.h>
 #include <xAODMissingET/versions/MissingETBase.h>
 #include <xAODCaloEvent/CaloClusterContainer.h>
+#include <xAODEgamma/ElectronContainer.h>
+#include <xAODEgamma/PhotonContainer.h>
 
 #include <xAODCaloEvent/CaloClusterContainer.h>
 #include <xAODTracking/TrackParticleContainer.h>
 #include <xAODTracking/VertexContainer.h>
+#include <xAODCore/ShallowCopy.h>
 
 #ifndef XAOD_STANDALONE
 #include <POOLRootAccess/TEvent.h>
@@ -35,6 +44,8 @@
 #include <TFile.h>
 #include <TLeaf.h>
 #include <TTree.h>
+
+#include <boost/core/demangle.hpp>
 
 #include <chrono>
 #include <cstdint>
@@ -50,73 +61,10 @@
 
 namespace columnar
 {
-  namespace
-  {
-    // the target time to run a given tool
-    const auto targetTime = std::chrono::seconds(5);
-
-    // the number of events per batch in columnar mode
-    const unsigned int batchSize = 1000;
-
-
-    class Benchmark final
-    {
-      std::string m_name;
-
-      std::chrono::time_point<std::chrono::high_resolution_clock> m_start;
-
-      /// accumulated time m_ticks
-      std::chrono::high_resolution_clock::duration m_ticks {};
-
-      /// the number of times the timer has been started
-      std::uint64_t m_count = 0;
-
-      /// the number of calls per batch
-      unsigned m_batchSize = 1;
-
-      /// whether to suppress output
-      bool m_silence = false;
-
-    public:
-      Benchmark (const std::string& val_name, unsigned val_batchSize = 1)
-        : m_name (val_name), m_batchSize (val_batchSize)
-      {}
-
-      ~Benchmark ()
-      {
-        if (m_count > 0 && !m_silence)
-          std::cout << m_name << ": " << std::chrono::duration<std::uint64_t,std::nano> (m_ticks) / (m_count * m_batchSize) << std::endl;
-      }
-
-      void setSilence ()
-      {
-        m_silence = true;
-      }
-
-      std::optional<float> getEntryTime (float emptyTime) const
-      {
-        if (m_count == 0)
-          return std::nullopt;
-        return static_cast<float>((std::chrono::duration<float,std::nano> (m_ticks) / (m_count * m_batchSize)) / std::chrono::duration<float,std::nano> (1))-emptyTime/m_batchSize;
-      }
-
-      auto getTotalTime () const
-      {
-        return m_ticks;
-      }
-
-      void startTimer ()
-      {
-        m_start = std::chrono::high_resolution_clock::now();
-      }
-
-      void stopTimer ()
-      {
-        m_ticks += std::chrono::high_resolution_clock::now() - m_start;
-        m_count += 1;
-      }
-    };
-  }
+  // I'm moving code to this namespace but some of the code in this file
+  // is still just in the columnar namespace. As I evolve the code I'll
+  // move more of it to TestUtils.
+  using namespace TestUtils;
 
   namespace TestUtils
   {
@@ -136,25 +84,6 @@ namespace columnar
       {"GSFTrackParticles", 0x2e42db0b},
       {"InDetForwardTrackParticles", 0x143c6846},
       {"MuonSpectrometerTrackParticles", 0x3993c8f3},
-    };
-
-    /// the performance data for reading a single branch
-    struct BranchPerfData final
-    {
-      std::string name;
-      std::optional<float> timeRead;
-      std::optional<float> timeUnpack;
-      std::optional<float> entrySize;
-      std::optional<float> uncompressedSize;
-      std::optional<unsigned> numBaskets;
-    };
-
-    /// the performance data for running a single tool
-    struct ToolPerfData final
-    {
-      std::string name;
-      std::optional<float> timeCheck;
-      std::optional<float> timeCall;
     };
 
     template<typename T>
@@ -379,6 +308,8 @@ namespace columnar
       virtual void setData (TestUtils::ToolWrapperData& tool) = 0;
 
       [[nodiscard]] virtual BranchPerfData getPerfData (float emptyTime) = 0;
+
+      virtual void collectColumnData () = 0;
     };
 
     struct ColumnDataEventCount final : public TestUtils::IColumnData
@@ -424,6 +355,9 @@ namespace columnar
         result.name = "EventCount(auto)";
         return result;
       }
+
+      virtual void collectColumnData () override
+      {}
     };
   
     template<typename T>
@@ -433,6 +367,7 @@ namespace columnar
       Benchmark benchmarkUnpack;
       Benchmark benchmark;
       std::vector<T> outData;
+      unsigned entries = 0;
 
       explicit ColumnDataScalar (const std::string& val_branchName)
         : branchReader (val_branchName), benchmarkUnpack (branchReader.columnName()+"(unpack)"), benchmark (branchReader.columnName())
@@ -485,7 +420,13 @@ namespace columnar
         result.entrySize = branchReader.entrySize();
         result.uncompressedSize = branchReader.uncompressedSize();
         result.numBaskets = branchReader.numBaskets();
+        result.entries = entries;
         return result;
+      }
+
+      virtual void collectColumnData () override
+      {
+        entries += outData.size();
       }
     };
 
@@ -498,6 +439,7 @@ namespace columnar
       std::vector<T> outData;
       Benchmark benchmarkUnpack;
       Benchmark benchmark;
+      unsigned entries = 0;
 
       explicit ColumnDataVector (const std::string& val_branchName)
         : branchReader (val_branchName), benchmarkUnpack (branchReader.columnName()+"(unpack)"), benchmark (branchReader.columnName())
@@ -579,7 +521,13 @@ namespace columnar
         result.entrySize = branchReader.entrySize();
         result.uncompressedSize = branchReader.uncompressedSize();
         result.numBaskets = branchReader.numBaskets();
+        result.entries = entries;
         return result;
+      }
+
+      virtual void collectColumnData () override
+      {
+        entries += outData.size();
       }
     };
 
@@ -589,6 +537,7 @@ namespace columnar
       T defaultValue;
       const std::vector<ColumnarOffsetType>* offsetColumn = nullptr;
       std::vector<T> outData;
+      unsigned entries = 0;
 
       ColumnDataOutVector (const std::string& val_columnName, const T& val_defaultValue)
         : defaultValue (val_defaultValue)
@@ -638,7 +587,13 @@ namespace columnar
       {
         BranchPerfData result;
         result.name = outputColumns.at(0).name + "(out)";
+        result.entries = entries;
         return result;
+      }
+
+      virtual void collectColumnData () override
+      {
+        entries += outData.size();
       }
     };
 
@@ -650,6 +605,7 @@ namespace columnar
       std::vector<T> columnData;
       Benchmark benchmarkUnpack;
       Benchmark benchmark;
+      unsigned entries = 0;
 
       explicit ColumnDataVectorVector (const std::string& val_branchName)
         : branchReader (val_branchName), benchmarkUnpack (branchReader.columnName()+"(unpack)"), benchmark (branchReader.columnName())
@@ -720,7 +676,13 @@ namespace columnar
         result.entrySize = branchReader.entrySize();
         result.uncompressedSize = branchReader.uncompressedSize();
         result.numBaskets = branchReader.numBaskets();
+        result.entries = entries;
         return result;
+      }
+
+      virtual void collectColumnData () override
+      {
+        entries += columnData.size();
       }
     };
 
@@ -736,6 +698,8 @@ namespace columnar
       std::string targetContainerName;
       Benchmark benchmarkUnpack;
       Benchmark benchmark;
+      unsigned entries = 0;
+      unsigned nullEntries = 0;
 
       explicit ColumnDataVectorVectorLink (const std::string& val_branchName)
         : branchReader (val_branchName), benchmarkUnpack (branchReader.columnName()+"(unpack)"), benchmark (branchReader.columnName())
@@ -840,7 +804,19 @@ namespace columnar
         result.entrySize = branchReader.entrySize();
         result.uncompressedSize = branchReader.uncompressedSize();
         result.numBaskets = branchReader.numBaskets();
+        result.entries = entries;
+        result.nullEntries = nullEntries;
         return result;
+      }
+
+      virtual void collectColumnData () override
+      {
+        entries += columnData.size();
+        for (const auto& index : columnData)
+        {
+          if (index == invalidObjectIndex)
+            nullEntries += 1;
+        }        
       }
     };
 
@@ -854,6 +830,7 @@ namespace columnar
       std::vector<T> columnData;
       Benchmark benchmarkUnpack;
       Benchmark benchmark;
+      unsigned entries = 0;
 
       explicit ColumnDataVectorVectorVector (const std::string& val_branchName)
         : branchReader (val_branchName), benchmarkUnpack (branchReader.columnName()+"(unpack)"), benchmark (branchReader.columnName())
@@ -943,7 +920,13 @@ namespace columnar
         result.entrySize = branchReader.entrySize();
         result.uncompressedSize = branchReader.uncompressedSize();
         result.numBaskets = branchReader.numBaskets();
+        result.entries = entries;
         return result;
+      }
+
+      virtual void collectColumnData () override
+      {
+        entries += columnData.size();
       }
     };
 
@@ -960,6 +943,8 @@ namespace columnar
       std::string targetContainerName;
       Benchmark benchmarkUnpack;
       Benchmark benchmark;
+      unsigned entries = 0;
+      unsigned nullEntries = 0;
 
       ColumnDataVectorLink (const std::string& val_branchName)
         : branchReader (val_branchName), benchmarkUnpack (branchReader.columnName()+"(unpack)"), benchmark (branchReader.columnName())
@@ -1024,7 +1009,7 @@ namespace columnar
           throw std::runtime_error ("target offset column not yet filled for: " + outputColumns.at(0).name);
         for (auto& element : branchData)
         {
-          if (element.isDefault())
+            if (element.isDefault() || (element.key() == 0 && element.index() == 0))
             columnData.push_back (invalidObjectIndex);
           else
           {
@@ -1072,7 +1057,19 @@ namespace columnar
         result.entrySize = branchReader.entrySize();
         result.uncompressedSize = branchReader.uncompressedSize();
         result.numBaskets = branchReader.numBaskets();
+        result.entries = entries;
+        result.nullEntries = nullEntries;
         return result;
+      }
+
+      virtual void collectColumnData () override
+      {
+        entries += columnData.size();
+        for (const auto& index : columnData)
+        {
+          if (index == invalidObjectIndex)
+            nullEntries += 1;
+        }
       }
     };
 
@@ -1091,6 +1088,8 @@ namespace columnar
       std::vector<typename CM::LinkKeyType> keyColumnData;
       Benchmark benchmarkUnpack;
       Benchmark benchmark;
+      unsigned entries = 0;
+      unsigned nullEntries = 0;
 
       ColumnDataVectorSplitLink (const std::string& val_branchName)
         : branchReaderSize (val_branchName), branchReaderKey (val_branchName + ".m_persKey"), branchReaderIndex (val_branchName + ".m_persIndex"), benchmarkUnpack (branchReaderSize.columnName()+"(unpack)"), benchmark (branchReaderSize.columnName())
@@ -1243,7 +1242,19 @@ namespace columnar
         result.entrySize = branchReaderSize.entrySize().value() + branchReaderKey.entrySize().value() + branchReaderIndex.entrySize().value();
         result.uncompressedSize = branchReaderSize.uncompressedSize().value() + branchReaderKey.uncompressedSize().value() + branchReaderIndex.uncompressedSize().value();
         result.numBaskets = branchReaderSize.numBaskets().value() + branchReaderKey.numBaskets().value() + branchReaderIndex.numBaskets().value();
+        result.entries = entries;
+        result.nullEntries = nullEntries;
         return result;
+      }
+
+      virtual void collectColumnData () override
+      {
+        entries += columnData.size();
+        for (const auto& index : columnData)
+        {
+          if (index == invalidObjectIndex)
+            nullEntries += 1;
+        }
       }
     };
 
@@ -1260,6 +1271,8 @@ namespace columnar
       std::vector<const std::vector<ColumnarOffsetType>*> containerOffsets;
       Benchmark benchmarkUnpack;
       Benchmark benchmark;
+      unsigned entries = 0;
+      unsigned nullEntries = 0;
 
       bool checkUnknownKeys = false;
       std::unordered_map<SG::sgkey_t,std::unordered_set<std::string>> unknownKeys;
@@ -1357,7 +1370,7 @@ namespace columnar
         {
           for (auto& element : data)
           {
-            if (element.isDefault())
+            if (element.isDefault() || (element.key() == 0 && element.index() == 0))
               columnData.push_back (invalidObjectIndex);
             else
             {
@@ -1417,7 +1430,19 @@ namespace columnar
         result.entrySize = branchReader.entrySize();
         result.uncompressedSize = branchReader.uncompressedSize();
         result.numBaskets = branchReader.numBaskets();
+        result.entries = entries;
+        result.nullEntries = nullEntries;
         return result;
+      }
+
+      virtual void collectColumnData () override
+      {
+        entries += columnData.size();
+        for (const auto& index : columnData)
+        {
+          if (index == invalidObjectIndex)
+            nullEntries += 1;
+        }
       }
     };
 
@@ -1515,6 +1540,9 @@ namespace columnar
         result.numBaskets = branchReader.numBaskets();
         return result;
       }
+
+      virtual void collectColumnData () override
+      {}
     };
 
     struct ColumnDataOutputMet final : public TestUtils::IColumnData
@@ -1611,6 +1639,9 @@ namespace columnar
         result.name = outputColumns.at(0).name + "(met-out)";
         return result;
       }
+
+      virtual void collectColumnData () override
+      {}
     };
 
     struct ColumnDataSamplingPattern final : public TestUtils::IColumnData
@@ -1620,6 +1651,7 @@ namespace columnar
       std::vector<std::uint32_t> columnData;
       Benchmark benchmarkUnpack;
       Benchmark benchmark;
+      unsigned entries = 0;
 
       ColumnDataSamplingPattern (const std::string& val_branchName)
         : branchReader (val_branchName), benchmarkUnpack (branchReader.columnName()+".samplingPattern(fallback)(unpack)"), benchmark (branchReader.columnName() + ".samplingPattern(fallback)")
@@ -1692,7 +1724,13 @@ namespace columnar
         result.entrySize = branchReader.entrySize();
         result.uncompressedSize = branchReader.uncompressedSize();
         result.numBaskets = branchReader.numBaskets();
+        result.entries = entries;
         return result;
+      }
+
+      virtual void collectColumnData () override
+      {
+        entries += columnData.size();
       }
     };
   }
@@ -1736,7 +1774,7 @@ namespace columnar
     return true;
   }
 
-  void ColumnarPhysLiteTest :: setupKnownColumns ()
+  void ColumnarPhysLiteTest :: setupKnownColumns (const TestDefinition& testDefinition)
   {
     using namespace TestUtils;
 
@@ -1875,8 +1913,9 @@ namespace columnar
     knownColumns.push_back (std::make_shared<ColumnDataVectorVectorVariantLink<xAOD::IParticleContainer>>("METAssoc_AnalysisMETAux.objectLinks"));
 
     // For METMaker we need to preplace all of the MET terms that we
-    // expect to be used, that's what this lined does.
-    knownColumns.push_back (std::make_shared<ColumnDataOutputMet> ("OutputMET", std::vector<std::string>{"Muons", "RefJet", "MuonEloss", "PVSoftTrk"}));
+    // expect to be used, that's what this line does.
+    if (!testDefinition.metTermNames.empty())
+      knownColumns.push_back (std::make_shared<ColumnDataOutputMet> ("OutputMET", testDefinition.metTermNames));
 
     // For METMaker we need various extra columns to run. This may need
     // some work to avoid, but would likey be worth it.
@@ -1966,45 +2005,37 @@ namespace columnar
     }
   }
 
-  void ColumnarPhysLiteTest :: doCall (asg::AsgTool& tool, const std::string& name, const std::string& container, TestUtils::IXAODToolCaller& xAODToolCaller, const std::vector<std::pair<std::string,std::string>>& containerRenames, const std::string& sysName)
+  void ColumnarPhysLiteTest :: doCall (const TestDefinition& testDefinition)
   {
     using namespace asg::msgUserCode;
+    auto userConfiguration = TestUtils::UserConfiguration::fromEnvironment();
 
-    if (!sysName.empty())
+    if (!testDefinition.sysName.empty())
     {
-      auto *sysTool = dynamic_cast<CP::ISystematicsTool*>(&tool);
+      auto *sysTool = dynamic_cast<CP::ISystematicsTool*>(testDefinition.tool);
       if (!sysTool)
         throw std::runtime_error ("tool does not support systematics");
-      std::cout << "applying systematic variation: " << sysName << std::endl;
-      if (sysTool->applySystematicVariation (CP::SystematicSet (sysName)).isFailure())
-        throw std::runtime_error ("failed to apply systematic variation: " + sysName);
+      std::cout << "applying systematic variation: " << testDefinition.sysName << std::endl;
+      if (sysTool->applySystematicVariation (CP::SystematicSet (testDefinition.sysName)).isFailure())
+        throw std::runtime_error ("failed to apply systematic variation: " + testDefinition.sysName);
     }
     if constexpr (columnarAccessMode == 2)
     {
-      auto *myTool = dynamic_cast<ColumnarTool<ColumnarModeArray>*>(&tool);
-      if (!containerRenames.empty())
-        renameContainers (*myTool, containerRenames);
+      auto *myTool = dynamic_cast<ColumnarTool<ColumnarModeArray>*>(testDefinition.tool);
+      if (!testDefinition.containerRenames.empty())
+        renameContainers (*myTool, testDefinition.containerRenames);
       ColumnVectorHeader columnHeader;
       ToolColumnVectorMap toolWrapper (columnHeader, *myTool);
 
-      setupKnownColumns ();
+      setupKnownColumns (testDefinition);
       setupColumns (toolWrapper);
 
-      Benchmark benchmark (name, batchSize);
-      Benchmark benchmarkCheck (name + "(column check)", batchSize);
+      Benchmark benchmarkCall (testDefinition.name, userConfiguration.batchSize);
+      Benchmark benchmarkCall2 (testDefinition.name + "(call2)", userConfiguration.batchSize);
+      Benchmark benchmarkCheck (testDefinition.name + "(column check)", userConfiguration.batchSize);
       Benchmark benchmarkEmpty ("empty");
 
-      const std::vector<ColumnarOffsetType>* offsetColumn = nullptr;
-      if (!container.empty())
-      {
-        auto iter = offsetColumns.find (container);
-        if (iter == offsetColumns.end())
-          throw std::runtime_error ("missing size column: " + container);
-        offsetColumn = iter->second;
-      }
-
       const auto numberOfEvents = tree->GetEntries();
-      std::uint64_t totalSize = 0;
       Long64_t entry = 0;
       const auto startTime = std::chrono::high_resolution_clock::now();
       bool endLoop = false;
@@ -2019,27 +2050,35 @@ namespace columnar
         TestUtils::ToolWrapperData toolColumnData (&columnData, &toolWrapper);
         for (auto& column : usedColumns)
           column->getEntry (entry % numberOfEvents);
-        if (offsetColumn)
+        if ((entry + 1) % userConfiguration.batchSize == 0)
         {
-          if (entry + 1 == numberOfEvents)
-            std::cout << "average size: " << float (totalSize + offsetColumn->back()) / numberOfEvents << std::endl;
-        }
-        if ((entry + 1) % batchSize == 0)
-        {
-          if (offsetColumn)
-            totalSize += offsetColumn->back();
+          if (entry < numberOfEvents)
+          {
+            for (auto& column : usedColumns)
+              column->collectColumnData ();
+          }
           for (auto& column : usedColumns)
             column->setData (toolColumnData);
           benchmarkCheck.startTimer ();
           columnData.checkData ();
           benchmarkCheck.stopTimer ();
-          benchmark.startTimer ();
+          benchmarkCall.startTimer ();
           columnData.callNoCheck (*myTool);
-          benchmark.stopTimer ();
+          benchmarkCall.stopTimer ();
+          if (userConfiguration.runToolTwice)
+          {
+            benchmarkCall2.startTimer ();
+            columnData.callNoCheck (*myTool);
+            benchmarkCall2.stopTimer ();
+          }
           for (auto& column : usedColumns)
             column->clearColumns ();
-          if ((std::chrono::high_resolution_clock::now() - startTime) > targetTime)
+          if ((std::chrono::high_resolution_clock::now() - startTime) > userConfiguration.targetTime)
             endLoop = true;
+        } else if (entry + 1 == numberOfEvents)
+        {
+          for (auto& column : usedColumns)
+            column->collectColumnData ();
         }
       }
       std::cout << "Entries in file: " << numberOfEvents << std::endl;
@@ -2049,20 +2088,24 @@ namespace columnar
       benchmarkEmpty.setSilence();
       {
         std::vector<TestUtils::BranchPerfData> branchPerfData;
-        TestUtils::BranchPerfData summary {.name = "total", .timeRead = 0, .timeUnpack = 0, .entrySize = 0, .uncompressedSize = 0, .numBaskets = 0};
+        TestUtils::BranchPerfData summary;
+        summary.name = "total";
+        summary.timeRead = 0;
+        summary.timeUnpack = 0;
+        summary.timeShallowCopy = 0;
+        summary.entries = std::nullopt; 
+        summary.nullEntries = std::nullopt;
         for (auto& column : usedColumns)
         {
           branchPerfData.push_back (column->getPerfData (emptyTime));
           summary.timeRead.value() += branchPerfData.back().timeRead.value_or(0);
           summary.timeUnpack.value() += branchPerfData.back().timeUnpack.value_or(0);
-          summary.entrySize.value() += branchPerfData.back().entrySize.value_or(0);
-          summary.uncompressedSize.value() += branchPerfData.back().uncompressedSize.value_or(0);
-          summary.numBaskets.value() += branchPerfData.back().numBaskets.value_or(0);
+          summary.timeShallowCopy.value() += branchPerfData.back().timeShallowCopy.value_or(0);
         }
         std::sort (branchPerfData.begin(), branchPerfData.end(), [] (const auto& a, const auto& b) {return a.name < b.name;});
         branchPerfData.insert (branchPerfData.end(), summary);
         const std::size_t nameWidth = std::max_element (branchPerfData.begin(), branchPerfData.end(), [] (const auto& a, const auto& b) {return a.name.size() < b.name.size();})->name.size();
-        std::string header = std::format ("{:{}} | read(ns) | unpack(ns) | size(B) | rate(MB/s) | compression | baskets", "branch name", nameWidth);
+        std::string header = std::format ("{:{}} | read(ns) | unpack(ns) | size(B) | rate(MB/s) | compression | baskets | entries | null", "branch name", nameWidth);
         std::cout << "\n" << header << std::endl;
         std::cout << std::string (header.size(), '-') << std::endl;
         for (auto& data : branchPerfData)
@@ -2091,20 +2134,31 @@ namespace columnar
           else
             std::cout << "             |";
           if (data.numBaskets)
-            std::cout << std::format ("{:>8}", data.numBaskets.value());
+            std::cout << std::format ("{:>8} |", data.numBaskets.value());
+          else
+            std::cout << "         |";
+          if (data.entries)
+            std::cout << std::format ("{:>8.2f} |", static_cast<float>(data.entries.value())/numberOfEvents);
+          else
+            std::cout << "         |";
+          if (data.nullEntries && data.entries)
+            std::cout << std::format ("{:>4.0f}%", static_cast<float>(data.nullEntries.value()) / data.entries.value() * 100.0f);
           std::cout << std::endl;
         }
       }
       {
         std::vector<TestUtils::ToolPerfData> toolPerfData;
         toolPerfData.emplace_back ();
-        toolPerfData.back().name = name;
-        toolPerfData.back().timeCall = benchmark.getEntryTime(emptyTime);
+        toolPerfData.back().name = testDefinition.name;
+        toolPerfData.back().timeCall = benchmarkCall.getEntryTime(emptyTime);
+        if (userConfiguration.runToolTwice)
+          toolPerfData.back().timeCall2 = benchmarkCall2.getEntryTime(emptyTime);
         toolPerfData.back().timeCheck = benchmarkCheck.getEntryTime(emptyTime);
-        benchmark.setSilence();
+        benchmarkCall.setSilence();
+        benchmarkCall2.setSilence();
         benchmarkCheck.setSilence();
         const std::size_t nameWidth = std::max_element (toolPerfData.begin(), toolPerfData.end(), [] (const auto& a, const auto& b) {return a.name.size() < b.name.size();})->name.size();
-        std::string header = std::format ("{:{}} | call(ns) | check(ns)", "tool name", nameWidth);
+        std::string header = std::format ("{:{}} | call(ns) | call2(ns) | check(ns)", "tool name", nameWidth);
         std::cout << "\n" << header << std::endl;
         std::cout << std::string (header.size(), '-') << std::endl;
         for (auto& data : toolPerfData)
@@ -2114,6 +2168,10 @@ namespace columnar
             std::cout << std::format ("{:>9.0f} |", data.timeCall.value());
           else
             std::cout << "          |";
+          if (data.timeCall2)
+            std::cout << std::format ("{:>10.0f} |", data.timeCall2.value());
+          else
+            std::cout << "           |";
           if (data.timeCheck)
             std::cout << std::format ("{:>10.1f}", data.timeCheck.value());
           std::cout << std::endl;
@@ -2131,17 +2189,18 @@ namespace columnar
       ANA_CHECK_THROW (event.readFrom (file.get()));
 
 #ifdef XAOD_STANDALONE
-      Benchmark benchmarkEmptyClear (name + " empty clear");
-      Benchmark benchmarkCallClear (name + " call clear");
-      Benchmark benchmarkPrepClear (name + " prep clear");
+      Benchmark benchmarkEmptyClear (testDefinition.name + " empty clear");
+      Benchmark benchmarkCallClear (testDefinition.name + " call clear");
+      Benchmark benchmarkPrepClear (testDefinition.name + " prep clear");
 #endif
-      Benchmark benchmarkCall (name + " call");
-      Benchmark benchmarkCallCopyRecord (name + " call copy-record");
-      Benchmark benchmarkCallRetrieve (name + " call retrieve");
-      Benchmark benchmarkPrep (name + " prep");
-      Benchmark benchmarkPrepCopyRecord (name + " prep copy-record");
-      Benchmark benchmarkPrepRetrieve (name + " prep retrieve");
-      Benchmark benchmarkGetEntry (name + " getEntry");
+      Benchmark benchmarkRepeatCall (testDefinition.name + " repeat-call");
+      Benchmark benchmarkCall (testDefinition.name + " call");
+      Benchmark benchmarkCallCopyRecord (testDefinition.name + " call copy-record");
+      Benchmark benchmarkCallRetrieve (testDefinition.name + " call retrieve");
+      Benchmark benchmarkPrep (testDefinition.name + " prep");
+      Benchmark benchmarkPrepCopyRecord (testDefinition.name + " prep copy-record");
+      Benchmark benchmarkPrepRetrieve (testDefinition.name + " prep retrieve");
+      Benchmark benchmarkGetEntry (testDefinition.name + " getEntry");
 
       const auto numberOfEvents = event.getEntries();
 #ifdef XAOD_STANDALONE
@@ -2162,20 +2221,20 @@ namespace columnar
       // make sure that we ran the tool enough to get a precise
       // performance estimate.
       const auto startTime = std::chrono::high_resolution_clock::now();
-      for (; (std::chrono::high_resolution_clock::now() - startTime) < targetTime; ++entry)
+      for (; (std::chrono::high_resolution_clock::now() - startTime) < userConfiguration.targetTime; ++entry)
       {
         benchmarkGetEntry.startTimer ();
         event.getEntry (entry % numberOfEvents);
         benchmarkGetEntry.stopTimer ();
         benchmarkPrepRetrieve.startTimer ();
-        ASSERT_SUCCESS (xAODToolCaller.retrieve (*tool.evtStore()));
+        ASSERT_SUCCESS (testDefinition.xAODToolCaller->retrieve (*testDefinition.tool->evtStore()));
         benchmarkPrepRetrieve.stopTimer ();
         benchmarkPrepCopyRecord.startTimer ();
         static const std::string prepPostfix = "Prep";
-        ASSERT_SUCCESS (xAODToolCaller.copyRecord (*tool.evtStore(), prepPostfix));
+        ASSERT_SUCCESS (testDefinition.xAODToolCaller->copyRecord (*testDefinition.tool->evtStore(), prepPostfix));
         benchmarkPrepCopyRecord.stopTimer ();
         benchmarkPrep.startTimer ();
-        ASSERT_SUCCESS (xAODToolCaller.call ());
+        ASSERT_SUCCESS (testDefinition.xAODToolCaller->call ());
         benchmarkPrep.stopTimer ();
 #ifdef XAOD_STANDALONE
         benchmarkPrepClear.startTimer ();
@@ -2183,15 +2242,21 @@ namespace columnar
         benchmarkPrepClear.stopTimer ();
 #endif
         benchmarkCallRetrieve.startTimer ();
-        ASSERT_SUCCESS (xAODToolCaller.retrieve (*tool.evtStore()));
+        ASSERT_SUCCESS (testDefinition.xAODToolCaller->retrieve (*testDefinition.tool->evtStore()));
         benchmarkCallRetrieve.stopTimer ();
         benchmarkCallCopyRecord.startTimer ();
         static const std::string callPostfix = "Call";
-        ASSERT_SUCCESS (xAODToolCaller.copyRecord (*tool.evtStore(), callPostfix));
+        ASSERT_SUCCESS (testDefinition.xAODToolCaller->copyRecord (*testDefinition.tool->evtStore(), callPostfix));
         benchmarkCallCopyRecord.stopTimer ();
         benchmarkCall.startTimer ();
-        ASSERT_SUCCESS (xAODToolCaller.call ());
+        ASSERT_SUCCESS (testDefinition.xAODToolCaller->call ());
         benchmarkCall.stopTimer ();
+        if (userConfiguration.runToolTwice)
+        {
+          benchmarkRepeatCall.startTimer ();
+          ASSERT_SUCCESS (testDefinition.xAODToolCaller->call ());
+          benchmarkRepeatCall.stopTimer ();
+        }
 #ifdef XAOD_STANDALONE
         benchmarkCallClear.startTimer ();
         store.clear ();
@@ -2202,6 +2267,9 @@ namespace columnar
 #endif
       }
       std::cout << "Total entries read: " << entry << std::endl;
+    } else if constexpr (columnarAccessMode == 100)
+    {
+      TestUtils::runXaodArrayTest (userConfiguration, testDefinition, file.get());
     }
   }
 }

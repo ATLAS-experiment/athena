@@ -10,6 +10,7 @@ def GepCellsHandlerAlgCfg(flags, name='GepCellsHandlerAlg',
                            HardwareStyleEnergyEncoding = True, 
                            TruncationOfOverflowingFEBs = True,
                            WriteAllCells = False,
+                           CleanOutputCells = False,
                            OutputLevel=None):
 
     cfg = ComponentAccumulator()

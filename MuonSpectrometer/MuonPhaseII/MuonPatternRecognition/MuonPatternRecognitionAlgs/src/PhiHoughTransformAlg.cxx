@@ -94,7 +94,7 @@ void PhiHoughTransformAlg::preProcessMaximum(const ActsTrk::GeometryContext& gct
             continue;
         }
         // find the direction of the IP viewed from the sector frame 
-        const Amg::Vector3D extrapDir = (hit->localPosition() - hit->msSector()->globalToLocalTrans(gctx).translation()).unit();
+        const Amg::Vector3D extrapDir = (hit->localPosition() - hit->msSector()->globalToLocalTransform(gctx).translation()).unit();
         ATH_MSG_VERBOSE("Direction "<<Amg::toString(extrapDir));
         // express the x location of our phi hits on the chamber plane (z = 0) when projecting from the beam spot
         std::optional<double> dummyIntercept = Amg::intersect<3>(hit->localPosition(), extrapDir, Amg::Vector3D::UnitZ(),0); 

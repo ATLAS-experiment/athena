@@ -103,7 +103,7 @@ def SCTHitsNoiseMonAlgConfig(inputFlags):
                                                     path= path[isub] + "/hits/mapsOfHitsOnTracks/",
                                                     xbins=sctMon.n_etabins[isub], xmin=sctMon.f_etabin[isub]-0.5, xmax=sctMon.l_etabin[isub]+0.5,
                                                     ybins=sctMon.n_phibins[isub], ymin=sctMon.f_phibin[isub]-0.5 , ymax=sctMon.l_phibin[isub]+0.5,
-                                                    opt='kAlwaysCreate')
+                                                    opt='kLBNHistoryDepth=30,kAlwaysCreate')
 
             occMap = "occupancymap" + abbreviations[isub] + "_" + str(i//2) + "_" + str(i%2)
             hitoccupancy = "hitoccupancymap" + abbreviations[isub] + "_" + str(i//2) + "_" + str(i%2)

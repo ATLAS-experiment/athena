@@ -18,5 +18,10 @@
 #include "JetCalibTools/JetCalibTool.h"
 #include "JetCalibTools/MuonInJetCorrectionTool.h"
 #include "JetCalibTools/BJetCorrectionTool.h"
+#include "JetCalibTools/Pileup1DResidualCalibStep.h"
+#include "JetCalibTools/EtaJESCalibStep.h"
+#include "JetCalibTools/SmearingCalibStep.h"
+#include "JetCalibTools/GSCCalibStep.h"
+#include "JetCalibTools/InSituCalibStep.h"
 
 #endif

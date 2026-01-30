@@ -52,9 +52,6 @@ public:
 
 public: // Constructor and Destructor
    DataHeaderForm_p6() {}
-   DataHeaderForm_p6(const DataHeaderForm_p6& rhs);
-   DataHeaderForm_p6& operator=(const DataHeaderForm_p6& rhs);
-   ~DataHeaderForm_p6();
 
    unsigned int insertDb(const DbRecord& rec);
    std::size_t sizeDb() const;

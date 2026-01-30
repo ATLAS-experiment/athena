@@ -541,6 +541,7 @@ namespace MuonCombined {
             slowMuon->setRpcInfo(stauExtras->rpcBetaAvg, stauExtras->rpcBetaRms, stauExtras->rpcBetaChi2, stauExtras->rpcBetaDof);
             slowMuon->setMdtInfo(stauExtras->mdtBetaAvg, stauExtras->mdtBetaRms, stauExtras->mdtBetaChi2, stauExtras->mdtBetaDof);
             slowMuon->setCaloInfo(stauExtras->caloBetaAvg, stauExtras->caloBetaRms, stauExtras->caloBetaChi2, stauExtras->caloBetaDof);
+
             static const SG::Accessor<std::vector<uint8_t> > eTechAcc ("hitTechnology");
             static const SG::Accessor<std::vector<unsigned int> > idAcc ("hitIdentifier");
             static const SG::Accessor<std::vector<float> > mToFAcc ("hitTOF");
@@ -551,6 +552,7 @@ namespace MuonCombined {
             static const SG::Accessor<std::vector<float> > errorAcc ("hitError");
             static const SG::Accessor<std::vector<float> > shiftAcc ("hitShift");
             static const SG::Accessor<std::vector<float> > propTimeAcc ("hitPropagationTime");
+            static const SG::Accessor<std::vector<uint8_t> > hitPassesMDTBetaCutAcc ("hitPassesMDTBetaCut");
 
             std::vector<uint8_t>& eTechVec = eTechAcc(*slowMuon);
             std::vector<unsigned int>& idVec = idAcc(*slowMuon);
@@ -562,6 +564,7 @@ namespace MuonCombined {
             std::vector<float>& errorVec = errorAcc(*slowMuon);
             std::vector<float>& shiftVec = shiftAcc(*slowMuon);
             std::vector<float>& propagationTimeVec = propTimeAcc(*slowMuon);
+	    std::vector<uint8_t>& passesMDTBetaCutVec = hitPassesMDTBetaCutAcc(*slowMuon);
 
             for (const auto& hit : stauExtras->hits) {
                 eTechVec.push_back(hit.eTech);
@@ -574,6 +577,7 @@ namespace MuonCombined {
                 errorVec.push_back(hit.error);
                 shiftVec.push_back(hit.shift);
                 propagationTimeVec.push_back(hit.propagationTime);
+                passesMDTBetaCutVec.push_back(hit.passesMDTBetaCut ? uint8_t{1} : uint8_t{0});
             }
 
              // additional MDT hit info (optional)

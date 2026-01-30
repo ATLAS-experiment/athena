@@ -30,6 +30,7 @@ def HIEventShapeFillerToolCfg(flags, name="HIEventShapeFillerTool", **kwargs):
         eventShapeMapTool = acc.popToolsAndMerge(HIEventShapeMapToolCfg(flags, name="HIEventShapeMapTool"))
         kwargs.setdefault("EventShapeMapTool", eventShapeMapTool)
     kwargs.setdefault("UseClusters", False)
+    kwargs.setdefault("CaloCellContainerKey", "AllCalo")
     if kwargs["UseClusters"]:
         #Add weight tool to filler tool
         TWTool=acc.popToolsAndMerge(HITowerWeightToolCfg(flags, name="WeightTool"))

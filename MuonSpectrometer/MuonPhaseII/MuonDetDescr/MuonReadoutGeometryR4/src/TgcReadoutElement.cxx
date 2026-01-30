@@ -94,7 +94,7 @@ Amg::Vector3D TgcReadoutElement::channelPosition(const ActsTrk::GeometryContext&
        ATH_MSG_WARNING("The gasGap "<<gasGapNumber(measHash)<<" & strip:"<<isStrip(measHash)<<" is unknown");
        return Amg::Vector3D::Zero();
    }
-   return localToGlobalTrans(ctx, layerHash(measHash)) * layDesign->localStripPosition(channelNumber(measHash),
+   return localToGlobalTransform(ctx, layerHash(measHash)) * layDesign->localStripPosition(channelNumber(measHash),
                                                                                        isStrip(measHash));
 }
 }

@@ -2,10 +2,6 @@
 #include "Surface.h"
 #include "SCT_Cluster.h"
 
-SCT_Cluster::SCT_Cluster(const Surface* pS) : SiCluster(pS)
-{
-}
-
-SCT_Cluster::~SCT_Cluster(void)
+SCT_Cluster::SCT_Cluster(std::unique_ptr<const Surface> pS) : SiCluster(std::move(pS))
 {
 }

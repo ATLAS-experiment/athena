@@ -29,7 +29,7 @@ class ITkPixelEncodingAlg : public AthReentrantAlgorithm
   
     SG::ReadHandleKey<PixelRDO_Container> m_pixelRDOKey{this, "PixelRDOKey", "ITkPixelRDOs", "StoreGate Key of Pixel RDOs"};
 
-    ToolHandle<ITkPixelCnvTool> m_cnvTool;
+    ToolHandle<ITkPixelCnvTool> m_cnvTool{this, "PixelConversionTool", "ITkPixelCnvTool", "The conversion tool"};
 
 };
 #endif

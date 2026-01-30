@@ -1,3 +1,6 @@
+/*
+   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
+*/
 #include "TrigConfData/LogicParser.h"
 
 #include <vector>
@@ -38,7 +41,7 @@ testPatterns(const std::vector<std::string> & patterns,
 }
 
 
-
+//coverity[root_function]
 int main() {
 
    cout << endl;
@@ -66,7 +69,14 @@ int main() {
    tests.emplace_back("!EM3 | MU6 | !MU20"); // false
    tests.emplace_back("((EM3&MU6)|(TAU6&J100))&BGRP0&BGRP1)"); // false
 
-   auto result1 = testPatterns(tests, state);
+   std::vector<bool> result1;
+   try {
+     result1 = testPatterns(tests, state);
+   }
+   catch (const std::exception& e) {
+     std::cerr << e.what() << "\n";
+     return 1;
+   }
 
    success = success && (result1 == std::vector<bool>{1,0,0,1,0,0,0});
 
@@ -98,7 +108,14 @@ int main() {
    multiplicityTests.emplace_back("EM18VHI[x1] & RNDM0");
 
 
-   auto result2 = testPatterns(multiplicityTests, multiplicity);
+   std::vector<bool> result2;
+   try {
+     result2 = testPatterns(multiplicityTests, multiplicity);
+   }
+   catch (const std::exception& e) {
+     std::cerr << e.what() << "\n";
+     return 1;
+   }
 
    success = success && (result2 == std::vector<bool>{1,0,1,1,1,1,0,1,1});
 

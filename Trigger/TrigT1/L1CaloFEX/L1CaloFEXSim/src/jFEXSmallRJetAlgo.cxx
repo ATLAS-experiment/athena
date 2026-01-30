@@ -154,7 +154,7 @@ unsigned int LVL1::jFEXSmallRJetAlgo::getSmallClusterET() const {
     int SRJetClusterET = 0;
     for(int nphi = -3; nphi< 4; nphi++) {
         for(int neta = -3; neta< 4; neta++) {
-            int DeltaRSquared = std::pow(nphi,2)+std::pow(neta,2);
+            int DeltaRSquared = (nphi * nphi) + (neta * neta);
             if(DeltaRSquared < 16) {
                 SRJetClusterET += getTTowerET(m_jFEXalgoTowerID[3+nphi][3+neta]);
             }
@@ -168,7 +168,7 @@ void LVL1::jFEXSmallRJetAlgo::calcSaturation() {
     m_JetSaturation = false;
     for(int nphi = -3; nphi< 4; nphi++) {
         for(int neta = -3; neta< 4; neta++) {
-            int DeltaRSquared = std::pow(nphi,2)+std::pow(neta,2);
+            int DeltaRSquared = (nphi * nphi) + (neta * neta);
             if(DeltaRSquared < 16) {
                 m_JetSaturation = m_JetSaturation || getTTowerSat(m_jFEXalgoTowerID[3+nphi][3+neta]);
             }

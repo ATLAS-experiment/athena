@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ALFA_LocRec/ALFA_MDMultiple.h"
@@ -15,126 +15,6 @@ ALFA_MDMultiple::ALFA_MDMultiple() :
 	m_iNumLayerCut     = 0;
 	m_iRPot            = 0;
 	m_iUVCut           = 0;
-
-
-	m_fRecXPos = nullptr;
-	m_fRecYPos = nullptr;
-	m_fOvU     = nullptr;
-	m_fOvV     = nullptr;
-	m_iNU      = nullptr;
-	m_iNV      = nullptr;
-	m_fRecXPos = new std::vector<Float_t>();
-	m_fRecYPos = new std::vector<Float_t>();
-	m_fOvU     = new std::vector<Float_t>();
-	m_fOvV     = new std::vector<Float_t>();
-	m_iNU      = new std::vector<Int_t>();
-	m_iNV      = new std::vector<Int_t>();
-
-	for (auto & iLayer : m_iFibSel)
-	{
-		iLayer = nullptr;
-		iLayer = new std::vector<Int_t>();
-	}
-
-	m_iTrackMatch[0] = nullptr;
-	m_iTrackMatch[1] = nullptr;
-	m_iTrackMatch[0] = new std::vector<Int_t>();
-	m_iTrackMatch[1] = new std::vector<Int_t>();
-}
-
-ALFA_MDMultiple::ALFA_MDMultiple(const ALFA_MDMultiple &obj) :
-    AthMessaging("ALFA_MDMultiple")
-{
-//	std::copy(obj.m_iNumHitsLayer, obj.m_iNumHitsLayer + sizeof(obj.m_iNumHitsLayer)/sizeof(Int_t), m_iNumHitsLayer);
-	std::copy(obj.m_iNumHitsLayer, obj.m_iNumHitsLayer + ALFALAYERSCNT*ALFAPLATESCNT, m_iNumHitsLayer);
-
-	m_fOverlapCut      = obj.m_fOverlapCut;
-	m_iMultiplicityCut = obj.m_iMultiplicityCut;
-	m_iNumLayerCut     = obj.m_iNumLayerCut;
-	m_iRPot            = obj.m_iRPot;
-	m_iUVCut           = obj.m_iUVCut;
-
-	m_fRecXPos = new std::vector<Float_t>(*obj.m_fRecXPos);
-	m_fRecYPos = new std::vector<Float_t>(*obj.m_fRecYPos);
-	m_fOvU     = new std::vector<Float_t>(*obj.m_fOvU);
-	m_fOvV     = new std::vector<Float_t>(*obj.m_fOvV);
-	m_iNU      = new std::vector<Int_t>(*obj.m_iNU);
-	m_iNV      = new std::vector<Int_t>(*obj.m_iNV);
-
-	for (int iLayer=0; iLayer<ALFALAYERSCNT*ALFAPLATESCNT; iLayer++)
-	{
-		m_iFibSel[iLayer] = new std::vector<Int_t>(*obj.m_iFibSel[iLayer]);
-	}
-
-	m_iTrackMatch[0] = new std::vector<Int_t>(*obj.m_iTrackMatch[0]);
-	m_iTrackMatch[1] = new std::vector<Int_t>(*obj.m_iTrackMatch[1]);
-}
-
-ALFA_MDMultiple& ALFA_MDMultiple::operator=(const ALFA_MDMultiple &obj)
-{
-	if (this != &obj)
-	{
-//		std::swap(m_iNumHitsLayer, obj.m_iNumHitsLayer);
-		Int_t nLayers = ALFALAYERSCNT*ALFAPLATESCNT;
-
-		for (int i = 0; i < nLayers; i++)
-			m_iNumHitsLayer[i] = obj.m_iNumHitsLayer[i];
-
-		m_fOverlapCut      = obj.m_fOverlapCut;
-		m_iMultiplicityCut = obj.m_iMultiplicityCut;
-		m_iNumLayerCut     = obj.m_iNumLayerCut;
-		m_iRPot            = obj.m_iRPot;
-		m_iUVCut           = obj.m_iUVCut;
-
-//		std::swap(m_fRecXPos, obj.m_fRecXPos);
-//		std::swap(m_fRecYPos, obj.m_fRecYPos);
-//		std::swap(m_fOvU    , obj.m_fOvU);
-//		std::swap(m_fOvV    , obj.m_fOvV);
-//		std::swap(m_iNU     , obj.m_iNU);
-//		std::swap(m_iNV     , obj.m_iNV);
-//		std::swap(m_iFibSel, obj.m_iFibSel);
-//		std::swap(m_iTrackMatch, obj.m_iTrackMatch);
-
-		std::copy(m_fRecXPos->begin(), m_fRecXPos->end(), obj.m_fRecXPos->begin());
-		std::copy(m_fRecYPos->begin(), m_fRecYPos->end(), obj.m_fRecYPos->begin());
-		std::copy(m_fOvU->begin(),     m_fOvU->end(),     obj.m_fOvU->begin());
-		std::copy(m_fOvV->begin(),     m_fOvV->end(),     obj.m_fOvV->begin());
-		std::copy(m_iNU->begin(),      m_iNU->end(),      obj.m_iNU->begin());
-		std::copy(m_iNV->begin(),      m_iNV->end(),      obj.m_iNV->begin());
-
-		for (int iLayer = 0; iLayer < nLayers; iLayer++)
-		{
-			m_iFibSel[iLayer] = nullptr;
-			m_iFibSel[iLayer] = new std::vector<Int_t>();
-			std::copy(m_iFibSel[iLayer]->begin(), m_iFibSel[iLayer]->end(), obj.m_iFibSel[iLayer]->begin());
-		}
-
-		m_iTrackMatch[0] = nullptr;
-		m_iTrackMatch[1] = nullptr;
-		m_iTrackMatch[0] = new std::vector<Int_t>();
-		m_iTrackMatch[1] = new std::vector<Int_t>();
-		std::copy(m_iTrackMatch[0]->begin(), m_iTrackMatch[0]->end(), obj.m_iTrackMatch[0]->begin());
-		std::copy(m_iTrackMatch[1]->begin(), m_iTrackMatch[1]->end(), obj.m_iTrackMatch[1]->begin());
-	}
-
-	return *this;
-}
-
-ALFA_MDMultiple::~ALFA_MDMultiple()
-{
-	if (m_fRecXPos!=nullptr) {delete m_fRecXPos; m_fRecXPos=nullptr;}
-	if (m_fRecYPos!=nullptr) {delete m_fRecYPos; m_fRecYPos=nullptr;}
-	if (m_fOvU!=nullptr) {delete m_fOvU; m_fOvU=nullptr;}
-	if (m_fOvV!=nullptr) {delete m_fOvV; m_fOvV=nullptr;}
-	if (m_iNU!=nullptr) {delete m_iNU; m_iNU=nullptr;}
-	if (m_iNV!=nullptr) {delete m_iNV; m_iNV=nullptr;}
-
-	for (auto & iLayer : m_iFibSel)
-	{
-		if (iLayer!=nullptr) {delete iLayer; iLayer=nullptr;}
-	}
-	if (m_iTrackMatch[0]!=nullptr) {delete m_iTrackMatch[0]; m_iTrackMatch[0]=nullptr;}
-	if (m_iTrackMatch[1]!=nullptr) {delete m_iTrackMatch[1]; m_iTrackMatch[1]=nullptr;}
 }
 
 StatusCode ALFA_MDMultiple::Initialize(Int_t iRPot, Float_t faMD[RPOTSCNT][ALFALAYERSCNT*ALFAPLATESCNT][ALFAFIBERSCNT], Float_t fbMD[RPOTSCNT][ALFALAYERSCNT*ALFAPLATESCNT][ALFAFIBERSCNT], Int_t iMultiplicityCut, Int_t iNumLayerCut, Int_t iUVCut, Float_t fOverlapCut)
@@ -196,21 +76,7 @@ StatusCode ALFA_MDMultiple::Execute(const std::list<MDHIT> &ListMDHits)
 
 	//Checking that the multiplicity cut conditions are satisfied
 	//At least more than UV_cut layers have a multiplicity lower than multi_cut
-// 	Int_t iNumUFiberHits=0, iNumVFiberHits=0;
-// 	for (Int_t iLayer=0; iLayer<ALFALAYERSCNT*ALFAPLATESCNT; iLayer++)
-// 	{
-// 		if ((Int_t)m_MapLayers[iLayer].ListFibers.size()<=m_iMultiplicityCut && (Int_t)m_MapLayers[iLayer].ListFibers.size()>0)
-// 		{
-// 			// prohozen U/V?
-//  //			if (fmod(double(iLayer),double(2)) == 1) iNumUFiberHits++;
-//  //			else iNumVFiberHits++;
-// 
-// 			if (fmod(double(iLayer),double(2)) == 0) iNumUFiberHits++;
-// 			else iNumVFiberHits++;
-// 		}
-// 	}
 
-// 	if (iNumUFiberHits>=m_iMultiplicityCut && iNumVFiberHits>=m_iMultiplicityCut)
 	{
 		Reco_Track(b_p, b_n, Ov_p, Ov_n, Num_p, Num_n, FSel_n, FSel_p, iTrackMatch);
 
@@ -244,80 +110,26 @@ StatusCode ALFA_MDMultiple::Execute(const std::list<MDHIT> &ListMDHits)
 			iCntSort++;
 		}
 
-//		std::cout << "MaxTrackID size = " << MaxTrackID.size() << std::endl;
 
-//		for (Int_t i=0; i<(Int_t)b_p.size();i++)
 		for (int i : MaxTrackID)
 		{
-//			std::cout << "   [" << i << "] = " << MaxTrackID[i] << std::endl;
-//			if (fabs((b_p[i]+b_n[i])/2.0) < 135.5)
-			{
-				m_fRecXPos->push_back((b_p[i]-b_n[i])/2.0);
-				m_fRecYPos->push_back((b_p[i]+b_n[i])/2.0);
+                  m_fRecXPos.push_back((b_p[i]-b_n[i])/2.0);
+                  m_fRecYPos.push_back((b_p[i]+b_n[i])/2.0);
 
-				m_fOvU->push_back(Ov_p[i]);
-				m_fOvV->push_back(Ov_n[i]);
-				m_iNU->push_back(Num_p[i]);
-				m_iNV->push_back(Num_n[i]);
+                  m_fOvU.push_back(Ov_p[i]);
+                  m_fOvV.push_back(Ov_n[i]);
+                  m_iNU.push_back(Num_p[i]);
+                  m_iNV.push_back(Num_n[i]);
 
-				//the U and V are somehow interchanged, therefore they are here interchanged back.
-//				m_fOvU->push_back(Ov_n[MaxTrackID[i]]);   //just for test
-//				m_fOvV->push_back(Ov_p[MaxTrackID[i]]);   //just for test
-//				m_iNU->push_back(Num_n[MaxTrackID[i]]);   //just for test
-//				m_iNV->push_back(Num_p[MaxTrackID[i]]);   //just for test
+                  m_iTrackMatch[0].push_back(iTrackMatch[0][i]);
+                  m_iTrackMatch[1].push_back(iTrackMatch[1][i]);
 
-				m_iTrackMatch[0]->push_back(iTrackMatch[0][i]);
-				m_iTrackMatch[1]->push_back(iTrackMatch[1][i]);
-
-//				std::cout << "iTrackMatch[0][" << MaxTrackID[i] << "] = " << iTrackMatch[0][MaxTrackID[i]] << std::endl;
-//				std::cout << "iTrackMatch[1][" << MaxTrackID[i] << "] = " << iTrackMatch[1][MaxTrackID[i]] << std::endl;
-//				std::cout << "x, y = " << (b_p[MaxTrackID[i]]-b_n[MaxTrackID[i]])/2.0 << ", " << (b_p[MaxTrackID[i]]+b_n[MaxTrackID[i]])/2.0 << std::endl;
-
-				for (Int_t iPlate=0; iPlate<ALFAPLATESCNT; iPlate++)
-				{
-					m_iFibSel[2*iPlate]->push_back(FSel_p[iPlate][i]);
-					m_iFibSel[2*iPlate+1]->push_back(FSel_n[iPlate][i]);
-//					m_iFibSel[2*iPlate+1]->push_back(FSel_p[iPlate][MaxTrackID[i]]);   //just for test
-//					m_iFibSel[2*iPlate]->push_back(FSel_n[iPlate][MaxTrackID[i]]);     //just for test
-				}
-			}
+                  for (Int_t iPlate=0; iPlate<ALFAPLATESCNT; iPlate++)
+                  {
+                    m_iFibSel[2*iPlate].push_back(FSel_p[iPlate][i]);
+                    m_iFibSel[2*iPlate+1].push_back(FSel_n[iPlate][i]);
+                  }
 		}
-//		{
-////			if (fabs((b_p[i]+b_n[i])/2.0) < 135.5)
-//			{
-//				m_fRecXPos->push_back((b_p[i]-b_n[i])/2.0);
-//				m_fRecYPos->push_back((b_p[i]+b_n[i])/2.0);
-
-////				m_fOvU->push_back(Ov_p[i]);
-////				m_fOvV->push_back(Ov_n[i]);
-////				m_iNU->push_back(Num_p[i]);
-////				m_iNV->push_back(Num_n[i]);
-
-//				//the U and V are somehow interchanged, therefore they are here interchanged back.
-//				m_fOvU->push_back(Ov_n[i]);
-//				m_fOvV->push_back(Ov_p[i]);
-//				m_iNU->push_back(Num_n[i]);
-//				m_iNV->push_back(Num_p[i]);
-
-//				m_iTrackMatch[0]->push_back(iTrackMatch[0][i]);
-//				m_iTrackMatch[1]->push_back(iTrackMatch[1][i]);
-
-//				std::cout << "iTrackMatch[0][" << i << "] = " << iTrackMatch[0][i] << std::endl;
-//				std::cout << "iTrackMatch[1][" << i << "] = " << iTrackMatch[1][i] << std::endl;
-//				std::cout << "x, y = " << (b_p[i]-b_n[i])/2.0 << ", " << (b_p[i]+b_n[i])/2.0 << std::endl;
-
-//				for (Int_t iPlate=0; iPlate<ALFAPLATESCNT; iPlate++)
-//				{
-////					m_iFibSel[2*iPlate]->push_back(FSel_p[iPlate][i]);
-////					m_iFibSel[2*iPlate+1]->push_back(FSel_n[iPlate][i]);
-//					m_iFibSel[2*iPlate+1]->push_back(FSel_p[iPlate][i]);
-//					m_iFibSel[2*iPlate]->push_back(FSel_n[iPlate][i]);
-//				}
-//			}
-
-//		}
-
-// 		std::cout << "------------------------------------------------------------------" << std::endl;
 	}
 
 
@@ -332,13 +144,13 @@ StatusCode ALFA_MDMultiple::Finalize(Float_t (&fRecXPos)[MAXTRACKNUM], Float_t (
 	std::fill_n(&fRecXPos[0], sizeof(fRecXPos)/sizeof(Float_t), -9999.0);
 	std::fill_n(&fRecYPos[0], sizeof(fRecYPos)/sizeof(Float_t), -9999.0);
 
-	iSize = (m_fRecXPos->size() <= m_fRecYPos->size())? m_fRecXPos->size() : m_fRecYPos->size();
+	iSize = std::min(m_fRecXPos.size(), m_fRecYPos.size());
 	iTrackNum = (iSize < MAXTRACKNUM)? iSize : MAXTRACKNUM;
 
 	for (Int_t i=0; i<iTrackNum; i++)
 	{
-		fRecXPos[i] = m_fRecXPos->at(i);
-		fRecYPos[i] = m_fRecYPos->at(i);
+		fRecXPos[i] = m_fRecXPos.at(i);
+		fRecYPos[i] = m_fRecYPos.at(i);
 	}
 
 	return StatusCode::SUCCESS;
@@ -347,7 +159,7 @@ StatusCode ALFA_MDMultiple::Finalize(Float_t (&fRecXPos)[MAXTRACKNUM], Float_t (
 /************************************************/
 /*  Making projection and storing in an array   */
 /************************************************/
-void ALFA_MDMultiple::Proj_Store(Int_t iFiberSide, Int_t (&iOver)[72000], Float_t fbRef, Int_t iSideFlag)
+void ALFA_MDMultiple::Proj_Store(Int_t iFiberSide, std::span<Int_t> iOver, Float_t fbRef, Int_t iSideFlag)
 {
 	ATH_MSG_DEBUG("ALFA_MDMultiple::Pro_Store()");
 
@@ -363,28 +175,6 @@ void ALFA_MDMultiple::Proj_Store(Int_t iFiberSide, Int_t (&iOver)[72000], Float_
 		iBin=0;
 	}
 
-	// coverity bug 13955 fixed bellow
-//	std::list<int>::iterator intIter;
-//	for (Int_t iLayer=0; iLayer<ALFAPLATESCNT; iLayer++)
-//	{
-//		for (intIter=m_MapLayers[2*iLayer+iFiberSide].ListFibers.begin(); intIter!=m_MapLayers[2*iLayer+iFiberSide].ListFibers.end(); intIter++)
-//		{
-//			if (*intIter!=9999)
-//			{
-//				//Depending on layer orientation, computing the projection of the hit fiber
-//				fXInter= fSign*(fbRef-m_fbMD[m_iRPot][iLayer*2+iSideFlag][*intIter])/(1+fSign*m_faMD[m_iRPot][iLayer*2+iSideFlag][*intIter]);
-//				fYInter= (fSign*m_faMD[m_iRPot][iLayer*2+iSideFlag][*intIter]*fbRef+m_fbMD[m_iRPot][iLayer*2+iSideFlag][*intIter])/(1+fSign*m_faMD[m_iRPot][iLayer*2+iSideFlag][*intIter])-fbRef;
-//				FibCen = (fYInter-fSign*fXInter)/sqrt(2.0);
-
-//				//Filling the table with the hit fiber
-//				for (Int_t iBin=0; iBin<480; iBin++)
-//				{
-//					iOver[(int)((FibCen-0.24)*1000)+iBin+36000]++;
-//				}
-//			}
-//		}
-//	}
-	
 	for (UInt_t iLayer=0; iLayer!=ALFAPLATESCNT; ++iLayer)
 	{
 		const unsigned int thisSideLayer = iLayer*2+iSideFlag;
@@ -412,7 +202,7 @@ void ALFA_MDMultiple::Proj_Store(Int_t iFiberSide, Int_t (&iOver)[72000], Float_
 /************************************************/
 /*  Making projection and storing in an array   */
 /************************************************/
-void ALFA_MDMultiple::Proj_Store(const std::vector<Int_t> (&FiberHit)[ALFAPLATESCNT], Int_t (&iOver)[72000], Float_t fbRef, Int_t iSideFlag)
+void ALFA_MDMultiple::Proj_Store(const std::vector<Int_t> (&FiberHit)[ALFAPLATESCNT], std::span<Int_t> iOver, Float_t fbRef, Int_t iSideFlag)
 {
 	ATH_MSG_DEBUG("ALFA_MDMultiple::Pro_Store()");
 
@@ -454,7 +244,7 @@ void ALFA_MDMultiple::Proj_Store(const std::vector<Int_t> (&FiberHit)[ALFAPLATES
 /************************************************/
 /*   Identifying plateau in projection array	*/
 /************************************************/
-void ALFA_MDMultiple::Find_Proj(const Int_t iOver[72000], Float_t fbRef, Float_t &fb, Float_t &fOv, Int_t &iNum)
+void ALFA_MDMultiple::Find_Proj(const std::span<const Int_t>& iOver, Float_t fbRef, Float_t &fb, Float_t &fOv, Int_t &iNum)
 {
 	ATH_MSG_DEBUG("ALFA_MDMultiple::Find_Proj()");
 
@@ -530,7 +320,6 @@ void ALFA_MDMultiple::Finding_Fib(Int_t iFiberSide, Float_t fbRef, Float_t fbRec
 	Float_t dist_x, dist_y;
 	Float_t dist_full;
 	Float_t fib_dist;
-//	Int_t gFib;
 
 	if (iSideFlag==0)
 	{
@@ -553,30 +342,6 @@ void ALFA_MDMultiple::Finding_Fib(Int_t iFiberSide, Float_t fbRef, Float_t fbRec
 	for (Int_t iLayer = 0; iLayer<ALFAPLATESCNT; iLayer++)
 	{
 		min_dist=0.24;
-//		gFib = 9999;
-
-		// coverity bug 13956 fixed
-//		for (intIter=m_MapLayers[2*iLayer+iFiberSide].ListFibers.begin(); intIter!=m_MapLayers[2*iLayer+iFiberSide].ListFibers.end(); intIter++)
-//		{
-//			if (*intIter!=9999)
-//			{
-//				x_tmp = (y-m_fbMD[m_iRPot][iLayer*2+iSideFlag][*intIter])/m_faMD[m_iRPot][iLayer*2+iSideFlag][*intIter];
-//				y_tmp = m_faMD[m_iRPot][iLayer*2+iSideFlag][*intIter]*x+m_fbMD[m_iRPot][iLayer*2+iSideFlag][*intIter];
-
-//				dist_x = TMath::Abs(x-x_tmp);
-//				dist_y = TMath::Abs(y-y_tmp);
-
-//				dist_full = sqrt(dist_x*dist_x+dist_y*dist_y);
-//				fib_dist = sqrt(TMath::Power((dist_x+dist_y)/2.0,2)-TMath::Power(dist_full/2.0,2));
-
-//				if (fib_dist <= min_dist)
-//				{
-//					min_dist = fib_dist;
-//					gFib = *intIter;
-//					iFSel[iLayer] = gFib;
-//				}
-//			}
-//		}
 
 		const unsigned int thisSideLayer = iLayer*2+iSideFlag;
 		const unsigned int thisLayer = 2*iLayer+iFiberSide;
@@ -602,35 +367,6 @@ void ALFA_MDMultiple::Finding_Fib(Int_t iFiberSide, Float_t fbRef, Float_t fbRec
 			}
 		}
 
-
-/*
-		std::list<int> listFibersTmp = m_MapLayers[2*iLayer+iFiberSide].ListFibers;
-		std::list<int>::const_iterator itBeg = listFibersTmp.begin();
-		std::list<int>::const_iterator itEnd = listFibersTmp.end();
-		for (; itBeg!=itEnd; ++itBeg)
-		{
-			if (*itBeg!=9999)
-			{
-				x_tmp = (y-m_fbMD[m_iRPot][iLayer*2+iSideFlag][*itBeg])/m_faMD[m_iRPot][iLayer*2+iSideFlag][*itBeg];
-				y_tmp = m_faMD[m_iRPot][iLayer*2+iSideFlag][*itBeg]*x+m_fbMD[m_iRPot][iLayer*2+iSideFlag][*itBeg];
-
-				dist_x = TMath::Abs(x-x_tmp);
-				dist_y = TMath::Abs(y-y_tmp);
-
-				dist_full = sqrt(dist_x*dist_x+dist_y*dist_y);
-				fib_dist = sqrt(TMath::Power((dist_x+dist_y)/2.0,2)-TMath::Power(dist_full/2.0,2));
-
-				if (fib_dist <= min_dist)
-				{
-					min_dist = fib_dist;
-					gFib = *itBeg;
-
-					iFSel[iLayer] = gFib;
-				}
-			}
-		}
-*/
-
 	}
 }
 
@@ -649,8 +385,8 @@ void ALFA_MDMultiple::Reco_Track(std::vector<double> &b_p, std::vector<double> &
 //	Int_t FSel_pos[ALFAPLATESCNT];
 	Int_t FSel_neg[ALFAPLATESCNT];
 	Int_t FSel_pos_tmp[ALFAPLATESCNT];
-	Int_t Over_p[72000];
-	Int_t Over_n[72000];
+	std::vector<Int_t> Over_p(72000);
+	std::vector<Int_t> Over_n(72000);
 	Int_t cnt_step_U=0;
 	Int_t cnt_step_V=0;
 	Int_t NumU=0;
@@ -683,18 +419,6 @@ void ALFA_MDMultiple::Reco_Track(std::vector<double> &b_p, std::vector<double> &
 
 	std::vector<Int_t> Fiber_MB_tmp[ALFAPLATESCNT];
 	std::vector<Int_t> Fiber_MB_n[ALFAPLATESCNT];
-
-	//fix coverity 13959 - following code replaced by next for loop
-//	std::list<int>::iterator it;
-//	for (UInt_t iLayer=0; iLayer<ALFAPLATESCNT; iLayer++)
-//	{
-//		Fiber_MB_n[iLayer].clear();
-//		for (it=m_MapLayers[2*iLayer+1].ListFibers.begin(); it!=m_MapLayers[2*iLayer+1].ListFibers.end(); it++)
-////		for (it=m_MapLayers[2*iLayer].ListFibers.begin(); it!=m_MapLayers[2*iLayer].ListFibers.end(); it++)   //just for test
-//		{
-//			Fiber_MB_n[iLayer].push_back(*it);
-//		}
-//	}
 
 	for (UInt_t iLayer=0; iLayer!=ALFAPLATESCNT; ++iLayer)
 	{
@@ -1005,34 +729,34 @@ void ALFA_MDMultiple::GetData(Int_t (&iNumU)[MAXTRACKNUM], Int_t (&iNumV)[MAXTRA
 	iSize=0;
 	for (auto & iLayer : m_iFibSel)
 	{
-		iSize = ((Int_t)iLayer->size() > iSize)? iLayer->size() : iSize;
+		iSize = std::max(static_cast<Int_t>(iLayer.size()), iSize);
 	}
 	iTrackNum = (iSize < MAXTRACKNUM)? iSize : MAXTRACKNUM;
 	for (Int_t iTrack=0; iTrack<iTrackNum; iTrack++)
 	{
 		for (Int_t iLayer=0; iLayer<ALFALAYERSCNT*ALFAPLATESCNT; iLayer++)
 		{
-			iFibSel[iTrack][iLayer] = m_iFibSel[iLayer]->at(iTrack);
+			iFibSel[iTrack][iLayer] = m_iFibSel[iLayer].at(iTrack);
 		}
 	}
 
 	iTrackNum=0;
 	iSize=0;
-	iSize = (m_fOvU->size() <= m_fOvV->size())? m_fOvU->size() : m_fOvV->size();
+	iSize = std::min(m_fOvU.size(), m_fOvV.size());
 	iTrackNum = (iSize < MAXTRACKNUM)? iSize : MAXTRACKNUM;
 	for (Int_t iTrack=0; iTrack<iTrackNum; iTrack++)
 	{
-		fOvU[iTrack] = m_fOvU->at(iTrack);
-		fOvV[iTrack] = m_fOvV->at(iTrack);
+		fOvU[iTrack] = m_fOvU.at(iTrack);
+		fOvV[iTrack] = m_fOvV.at(iTrack);
 	}
 
 	iTrackNum=0;
 	iSize=0;
-	iSize = (m_iNU->size() <= m_iNV->size())? m_iNU->size() : m_iNV->size();
+	iSize = std::min(m_iNU.size(),  m_iNV.size());
 	iTrackNum = (iSize < MAXTRACKNUM)? iSize : MAXTRACKNUM;
 	for (Int_t iTrack=0; iTrack<iTrackNum; iTrack++)
 	{
-		iNumU[iTrack] = m_iNU->at(iTrack);
-		iNumV[iTrack] = m_iNV->at(iTrack);
+		iNumU[iTrack] = m_iNU.at(iTrack);
+		iNumV[iTrack] = m_iNV.at(iTrack);
 	}
 }

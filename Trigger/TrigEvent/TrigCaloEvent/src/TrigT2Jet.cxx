@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigCaloEvent/TrigT2Jet.h"
@@ -7,11 +7,10 @@
 #include "GaudiKernel/MsgStream.h"
 
 TrigT2Jet::TrigT2Jet():
-  m_e(), m_ehad0(), m_eem0(), m_eta(), m_phi(), m_grid(0), m_roiWord(), m_nLeadingCells(), m_hecf(), m_jetQuality(), m_emf(), m_jetTimeCells() 
+  m_e(), m_ehad0(), m_eem0(), m_eta(), m_phi(), m_roiWord(), m_nLeadingCells(), m_hecf(), m_jetQuality(), m_emf(), m_jetTimeCells()
 {}
 
 TrigT2Jet::~TrigT2Jet(){
-  delete m_grid;
 }
 
 bool operator== ( const TrigT2Jet& a, const TrigT2Jet& b ) {
@@ -46,7 +45,7 @@ std::string str (const TrigT2Jet& a){
   std::sprintf(buff,"L2 Jet Eta   = %10.2f \n",    a.eta());   s += buff;
   std::sprintf(buff,"L2 Jet Phi   = %10.2f \n",    a.phi());   s += buff;
 
-  if(a.grid()) {
+  if(!a.grid()->empty()) {
     std::sprintf(buff,"Grid Members = %4d\n", (int)a.grid()->size());  s += buff;
   }
 

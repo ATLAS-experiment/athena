@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // system include:
@@ -77,7 +77,7 @@ namespace xAOD {
   //--------------------------------------------------------------------------
   void SimpleEncrypter::setPrivKey(std::string keystr) {
   
-    std::pair<ULLI_t, ULLI_t> keys = decodeKeyString(keystr);
+    std::pair<ULLI_t, ULLI_t> keys = decodeKeyString(std::move(keystr));
     
     if ( m_n > 0 && m_n != keys.first ) {
       ATH_MSG_WARNING("RSA module already set!");
@@ -90,9 +90,7 @@ namespace xAOD {
   // Set public key
   //--------------------------------------------------------------------------
   void SimpleEncrypter::setPubKey(std::string keystr) {
-  
-    std::pair<ULLI_t, ULLI_t> keys = decodeKeyString(keystr);
-    
+    std::pair<ULLI_t, ULLI_t> keys = decodeKeyString(std::move(keystr));
     if ( m_n > 0 && m_n != keys.second ) {
       ATH_MSG_WARNING("RSA module already set!");
     }
@@ -217,7 +215,7 @@ namespace xAOD {
   // Find a prime number
   //--------------------------------------------------------------------------
   SimpleEncrypter::ULLI_t SimpleEncrypter::genPrime() const {
-    
+    //coverity[dont_call]
     ULLI_t t = (m_MINRANGE + rand()) % (m_MAXRANGE-1);
     do {
       t++;
@@ -262,6 +260,7 @@ namespace xAOD {
   SimpleEncrypter::ULLI_t SimpleEncrypter::genCoprime(ULLI_t n) const {
     
     // make sure coprime is larger than 5th Fermat number (2^16+1 = 65537)
+    //coverity[dont_call]
     ULLI_t i = (65537 + rand()) % (m_MAXRANGE -1);
     do {
       ++i;
@@ -291,7 +290,9 @@ namespace xAOD {
     unsigned int rb = (unsigned int)(log(b)/log(16.))+1;
 
     // random numbers for padding
+    //coverity[dont_call]
     unsigned int r1 = rand() & ((1 << 4*(m_MAXHEXDIGITS-ra))-1);
+    //coverity[dont_call]
     unsigned int r2 = rand() & ((1 << 4*(m_MAXHEXDIGITS-rb))-1);
 
     // format string

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONMmRdoToPrepDataToolMT_H
@@ -16,6 +16,8 @@
 #include "NSWCalibTools/INSWCalibTool.h"
 #include "StoreGate/ReadCondHandleKey.h"
 #include "xAODMuonPrepData/MMClusterContainer.h"
+
+#include "MuonReadoutGeometryR4/MuonDetectorManager.h"
 
 #include <cfloat>
 namespace Muon {
@@ -89,6 +91,11 @@ class MmRdoToPrepDataToolMT
       this, "xAODKey", "",
       "If empty, do not produce xAOD, otherwise this is the key of the output "
       "xAOD MDT PRD container"};
+
+  Gaudi::Property<bool> m_useNewGeo{this, "UseR4DetMgr", false,
+                                    "Switch between the legacy and the new geometry"};
+
+  const MuonGMR4::MuonDetectorManager* m_detMgrR4{nullptr};
 };
 }  // namespace Muon
 

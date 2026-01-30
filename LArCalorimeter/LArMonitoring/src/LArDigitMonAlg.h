@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef LARMONITORING_LARDIGITMON_H
@@ -15,6 +15,7 @@
 
 //STL:
 #include <string>
+#include <atomic>
 
 #include "StoreGate/ReadCondHandleKey.h"
 #include "StoreGate/ReadHandleKey.h"
@@ -111,7 +112,7 @@ private:
 
   /** Private members*/
   /* set once, guarded by mutex */
-  mutable int m_Samplenbr ATLAS_THREAD_SAFE;
+  mutable std::atomic<int> m_Samplenbr ATLAS_THREAD_SAFE;
   mutable std::mutex m_lock;
   mutable int m_SampleRangeLow ATLAS_THREAD_SAFE = 0; 
   mutable int m_SampleRangeUp  ATLAS_THREAD_SAFE = 0; 

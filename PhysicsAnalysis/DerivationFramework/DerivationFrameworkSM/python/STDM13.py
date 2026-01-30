@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 #====================================================================
 # DAOD_STDM13.py for W+D analysises
 # * 1L skimming
@@ -33,13 +33,11 @@ def STDM13KernelCfg(flags, name='STDM13Kernel', **kwargs):
     # filter leptons
     lepton_skimming_expression = 'count( (Muons.pt > 25*GeV) && (0 == Muons.muonType || 1 == Muons.muonType || 4 == Muons.muonType) ) + count(( Electrons.pt > 25*GeV) && ((Electrons.Loose) || (Electrons.DFCommonElectronsLHLoose))) >= 1'
 
-    STDM13StringSkimmingTool = CompFactory.DerivationFramework.xAODStringSkimmingTool(
-            name = "STDM13StringSkimmingTool",
-            expression = lepton_skimming_expression )
-    acc.addPublicTool(STDM13StringSkimmingTool)
-    STDM13SkimmingTool = CompFactory.DerivationFramework.FilterCombinationAND("STDM13SkimmingTool", FilterList = [STDM13StringSkimmingTool])
-    
-    acc.addPublicTool(STDM13SkimmingTool, primary = True)
+    from DerivationFrameworkTools.DerivationFrameworkToolsConfig import (
+        xAODStringSkimmingToolCfg)
+    STDM13StringSkimmingTool = acc.getPrimaryAndMerge(xAODStringSkimmingToolCfg(
+        flags, name = "STDM13StringSkimmingTool", expression = lepton_skimming_expression))
+
     tp_thinning_expression = "abs(DFCommonInDetTrackZ0AtPV*sin(InDetTrackParticles.theta)) < 6.0*mm"
     STDM13TPThinningTool =  acc.getPrimaryAndMerge(TrackParticleThinningCfg(
         flags,
@@ -49,7 +47,7 @@ def STDM13KernelCfg(flags, name='STDM13Kernel', **kwargs):
         InDetTrackParticlesKey  = "InDetTrackParticles"))
 
     thinningTools = [ STDM13TPThinningTool ]
-    skimmingTools = [ STDM13SkimmingTool ]
+    skimmingTools = [ STDM13StringSkimmingTool ]
     
     DerivationKernel = CompFactory.DerivationFramework.DerivationKernel
     acc.addEventAlgo(DerivationKernel(name, SkimmingTools = skimmingTools, ThinningTools = thinningTools))       
@@ -88,18 +86,16 @@ def STDM13Cfg(flags):
         "MET_Baseline_AntiKt4EMPFlow",
         "PrimaryVertices",
         "InDetTrackParticles",
-        "BTagging_AntiKt4EMPFlow",
-        "AntiKt4EMPFlowJets_FTAG",
     ]
 
     STDM13SlimmingHelper.AllVariables = [
         "EventInfo",
         "PrimaryVertices",
         "InDetTrackParticles",
-        "BTagging_AntiKt4EMPFlow",
+
         "AntiKt4TruthDressedWZJets",
         "TruthEvents","TruthHFWithDecayParticles","TruthBoson","TruthBottom", "TruthCharm","TruthElectrons","TruthMuons","TruthTop","TruthTaus","MET_Truth",
-        "TruthPrimaryVertices","TruthHFWithDecayVertices","AntiKt4EMPFlowJets_FTAG",
+        "TruthPrimaryVertices","TruthHFWithDecayVertices",
 ##        "AntiKt4EMPFlowJets"
     ]
 

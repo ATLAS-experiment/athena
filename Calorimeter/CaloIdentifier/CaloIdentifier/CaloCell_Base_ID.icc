@@ -161,7 +161,7 @@ CaloCell_Base_ID::cell_id (const Identifier regionId,
 inline Identifier 
 CaloCell_Base_ID::region_id    (const IdentifierHash caloRegionHash) const
 {
-  return(m_region_vec[caloRegionHash]);
+  return(m_region_vec.at(caloRegionHash));
 }
 
 //----------------------------------------------------------------------------
@@ -169,21 +169,21 @@ inline Identifier
 CaloCell_Base_ID::region_id (const int subCalo,
                              const IdentifierHash subCaloRegionHash) const
 {
-    return(m_region_vec[subCaloRegionHash + m_reg_min[subCalo]]);
+  return(m_region_vec.at(subCaloRegionHash + m_reg_min.at(subCalo)));
 }
 
 //----------------------------------------------------------------------------
 inline Identifier 
 CaloCell_Base_ID::cell_id    (const IdentifierHash caloCellHash) const
 {
-    return(m_cell_vec[caloCellHash]);
+  return(m_cell_vec.at(caloCellHash));
 }
 
 //----------------------------------------------------------------------------
 inline Identifier 
 CaloCell_Base_ID::cell_id    (const int subCalo, const IdentifierHash subCaloCellHash) const
 {
-    return(m_cell_vec[subCaloCellHash + m_cell_min[subCalo]]);
+  return(m_cell_vec.at(subCaloCellHash + m_cell_min.at(subCalo)));
 }
 
 //----------------------------------------------------------------------------
@@ -217,7 +217,7 @@ CaloCell_Base_ID::subcalo_region_hash (const Identifier regionId, int& subCalo) 
   }
   std::vector<Identifier>::const_iterator it = std::lower_bound(m_region_vec.begin(),m_region_vec.end(),regionId);
   if ( it != m_region_vec.end() ){
-    return (it - m_region_vec.begin() - m_reg_min[subCalo]);
+    return (it - m_region_vec.begin() - m_reg_min.at(subCalo));
   }
   return (NOT_VALID);
 }
@@ -237,7 +237,7 @@ CaloCell_Base_ID::subcalo_cell_hash (const Identifier cellId, int& subCalo) cons
   case LARFCAL:
   case TILE:
   case LARMINIFCAL:
-    return m_helpers[subCalo]->channel_hash (cellId);
+    return m_helpers.at(subCalo)->channel_hash (cellId);
   default:
     return NOT_VALID;
   }
@@ -250,7 +250,7 @@ CaloCell_Base_ID::calo_cell_hash (const Identifier cellId) const
   int subcalo;
   IdentifierHash hash = subcalo_cell_hash (cellId, subcalo);
   if (hash != NOT_VALID)
-    return m_cell_min[subcalo] + hash;
+    return m_cell_min.at(subcalo) + hash;
   return NOT_VALID;
 }
 
@@ -329,15 +329,15 @@ inline  void CaloCell_Base_ID::calo_reg_hash_range (const Identifier id, Identif
 //----------------------------------------------------------------------------
 inline  void CaloCell_Base_ID::calo_cell_hash_range (const int subCalo, IdentifierHash& caloCellMin, IdentifierHash& caloCellMax) const
 {
-    caloCellMin = m_cell_min[subCalo];
-    caloCellMax = m_cell_max[subCalo];
+  caloCellMin = m_cell_min.at(subCalo);
+  caloCellMax = m_cell_max.at(subCalo);
 }
 
 //----------------------------------------------------------------------------
 inline  void CaloCell_Base_ID::calo_reg_hash_range (const int subCalo, IdentifierHash& caloRegMin, IdentifierHash& caloRegMax) const
 {
-    caloRegMin = m_reg_min[subCalo];
-    caloRegMax = m_reg_max[subCalo];
+  caloRegMin = m_reg_min.at(subCalo);
+  caloRegMax = m_reg_max.at(subCalo);
 }
 
 //----------------------------------------------------------------------------
@@ -362,7 +362,7 @@ inline IdentifierHash CaloCell_Base_ID::subcalo_cell_hash   ( const IdentifierHa
     subCalo = NOT_VALID;
     return(NOT_VALID);
   }
-  return( caloHash - m_cell_min[subCalo]) ;
+  return( caloHash - m_cell_min.at(subCalo)) ;
 }
 
 //----------------------------------------------------------------------------
@@ -387,20 +387,20 @@ inline IdentifierHash CaloCell_Base_ID::subcalo_region_hash   ( const Identifier
     subCalo = NOT_VALID;
     return(NOT_VALID);
   }
-  return( caloHash - m_reg_min[subCalo]) ;
+  return( caloHash - m_reg_min.at(subCalo)) ;
 }
 
 //----------------------------------------------------------------------------
 inline IdentifierHash CaloCell_Base_ID::calo_cell_hash   (const int subCalo, const IdentifierHash subCaloHash) const
 {
-  return( subCaloHash + m_cell_min[subCalo]) ;
+  return( subCaloHash + m_cell_min.at(subCalo)) ;
 }
 
 
 //----------------------------------------------------------------------------
 inline IdentifierHash CaloCell_Base_ID::calo_region_hash   (const int subCalo, const IdentifierHash subCaloHash) const
 {
-  return( subCaloHash + m_reg_min[subCalo]) ;
+  return( subCaloHash + m_reg_min.at(subCalo)) ;
 }
 
 //----------------------------------------------------------------------------
@@ -426,7 +426,7 @@ inline
 CaloCell_Base_ID::id_iterator
 CaloCell_Base_ID::cell_begin    (const int subCalo) const
 {
-  return m_helpers[subCalo]->channels().begin();
+  return m_helpers.at(subCalo)->channels().begin();
 }
 
 //----------------------------------------------------------------------------
@@ -434,7 +434,7 @@ inline
 CaloCell_Base_ID::id_iterator
 CaloCell_Base_ID::cell_end    (const int subCalo) const
 {
-  return m_helpers[subCalo]->channels().end();
+  return m_helpers.at(subCalo)->channels().end();
 }
 
 //----------------------------------------------------------------------------
@@ -442,7 +442,7 @@ inline
 CaloCell_Base_ID::id_range
 CaloCell_Base_ID::cell_range    (const int subCalo) const
 {
-  return m_helpers[subCalo]->channels().range();
+  return m_helpers.at(subCalo)->channels().range();
 }
 
 //----------------------------------------------------------------------------
@@ -474,7 +474,7 @@ inline
 CaloCell_Base_ID::id_iterator
 CaloCell_Base_ID::reg_begin    (const int subCalo) const
 {
-  return m_helpers[subCalo]->regions().begin();
+  return m_helpers.at(subCalo)->regions().begin();
 }
 
 //----------------------------------------------------------------------------
@@ -482,7 +482,7 @@ inline
 CaloCell_Base_ID::id_iterator
 CaloCell_Base_ID::reg_end    (const int subCalo) const
 {
-  return m_helpers[subCalo]->regions().end();
+  return m_helpers.at(subCalo)->regions().end();
 }
 
 //----------------------------------------------------------------------------
@@ -490,7 +490,7 @@ inline
 CaloCell_Base_ID::id_range
 CaloCell_Base_ID::reg_range    (const int subCalo) const
 {
-  return m_helpers[subCalo]->regions().range();
+  return m_helpers.at(subCalo)->regions().range();
 }
 
 //----------------------------------------------------------------------------
@@ -947,7 +947,7 @@ inline float CaloCell_Base_ID::etaGranularity(const Identifier regId) const
   int subcalo = 0;
   IdentifierHash regHash = subcalo_region_hash (regId, subcalo);
   if (regHash == NOT_VALID) return NOT_VALID;
-  return m_helpers[subcalo]->etaGranularity (regHash);
+  return m_helpers.at(subcalo)->etaGranularity (regHash);
 }
 
 //----------------------------------------------------------------------------
@@ -956,7 +956,7 @@ inline float CaloCell_Base_ID::phiGranularity(const Identifier regId) const
   int subcalo = 0;
   IdentifierHash regHash = subcalo_region_hash (regId, subcalo);
   if (regHash == NOT_VALID) return NOT_VALID;
-  return m_helpers[subcalo]->phiGranularity (regHash);
+  return m_helpers.at(subcalo)->phiGranularity (regHash);
 }
 
 //----------------------------------------------------------------------------
@@ -965,7 +965,7 @@ inline float CaloCell_Base_ID::eta0(const Identifier regId) const
   int subcalo = 0;
   IdentifierHash regHash = subcalo_region_hash (regId, subcalo);
   if (regHash == NOT_VALID) return NOT_VALID;
-  return m_helpers[subcalo]->eta0 (regHash);
+  return m_helpers.at(subcalo)->eta0 (regHash);
 }
 
 //----------------------------------------------------------------------------
@@ -974,7 +974,7 @@ inline float CaloCell_Base_ID::phi0(const Identifier regId) const
   int subcalo = 0;
   IdentifierHash regHash = subcalo_region_hash (regId, subcalo);
   if (regHash == NOT_VALID) return NOT_VALID;
-  return m_helpers[subcalo]->phi0 (regHash);
+  return m_helpers.at(subcalo)->phi0 (regHash);
 }
 
 //---------------------------------------------------------------------------

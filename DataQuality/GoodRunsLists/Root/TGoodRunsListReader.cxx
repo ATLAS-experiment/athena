@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -310,7 +310,7 @@ Root::TGoodRunsListReader::ReadNamedLumiRange( TXMLNode* dataNode )
     }
   }
 
-  if (!grl.IsEmpty()) m_grlvec.push_back(grl);
+  if (!grl.IsEmpty()) m_grlvec.push_back(std::move(grl));
 }
 
 

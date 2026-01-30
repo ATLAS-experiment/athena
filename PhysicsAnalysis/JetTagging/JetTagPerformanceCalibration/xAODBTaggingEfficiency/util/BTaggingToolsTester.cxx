@@ -16,12 +16,17 @@
 
 #include "AsgMessaging/MessageCheck.h"
 
+// Define alias for the TEvent class 
+// which is not the same for AnalysisBase and AthAnalysis
 #ifdef XAOD_STANDALONE
+// Those lines are only included if using AnalysisBase
+#include "xAODRootAccess/Init.h"
 #include "xAODRootAccess/TEvent.h"
-#define TEVENT xAOD::TEvent
+using TEVENT = xAOD::TEvent;
 #else
+// Those lines are only included if using AthAnalysis
 #include "POOLRootAccess/TEvent.h"
-#define TEVENT POOL::TEvent
+using TEVENT = POOL::TEvent;
 #endif
 
 #include <string>
@@ -43,7 +48,14 @@ int main ATLAS_NOT_THREAD_SAFE (int argc, char* argv[]) {
     return 1;
   }
 
+  // Important to do this first!
+  #ifdef XAOD_STANDALONE
+  // Those lines are only included if using AnalysisBase
+  ANA_CHECK (xAOD::Init()) ;
+  #else
+  // Those lines are only included if using AthAnalysis
   POOL::Init();
+  #endif
 
   std::string inputDAOD = argv[1];
   std::string CDIPath = argv[2];
