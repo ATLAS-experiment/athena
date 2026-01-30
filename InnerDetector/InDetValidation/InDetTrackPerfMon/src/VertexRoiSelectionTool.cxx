@@ -15,9 +15,9 @@
 #include "GaudiKernel/Service.h"
 
 /// Local include(s)
-#include "VertexRoiSelectionTool.h"
-#include "TrackAnalysisCollections.h"
-#include "TrackParametersHelper.h" // includes VertexParametersHelper.h
+#include "InDetTrackPerfMon/VertexRoiSelectionTool.h"
+#include "InDetTrackPerfMon/TrackAnalysisCollections.h"
+#include "InDetTrackPerfMon/TrackParametersHelper.h" // includes VertexParametersHelper.h
 
 /// STD includes
 #include <algorithm> // for std::find
@@ -41,7 +41,7 @@ StatusCode IDTPM::VertexRoiSelectionTool::initialize() {
   ATH_MSG_DEBUG( "Initializing " << name() );
 
   ATH_CHECK( m_triggerVertexContainerName.initialize( 
-      not m_triggerVertexContainerName.key().empty() ) );
+      ! m_triggerVertexContainerName.key().empty() ) );
 
   ATH_CHECK( m_trigDecTool.retrieve() );
 
@@ -70,7 +70,7 @@ bool IDTPM::VertexRoiSelectionTool::accept(
   } else {
     if( r->isFullscan() ) return true;
 
-    bool contained_zed = posZ(v) >= r->zedMinus() and 
+    bool contained_zed = posZ(v) >= r->zedMinus() && 
                          posZ(v) <= r->zedPlus();
 
     if( contained_zed ) return true;
@@ -143,7 +143,7 @@ IDTPM::VertexRoiSelectionTool::getTrigVertices(
     /// Check if in-RoI vertex is also in the selected (full-scan) trigger vertex vector
     /// i.e. if it passes the quality selection (if any)
     if( std::find( vvec.begin(), vvec.end(), *vtxItr ) == vvec.end() ) {
-      ATH_MSG_DEBUG( "Trigger vertex does not pass quality selection. Skipping." );
+      ATH_MSG_DEBUG( "Trigger vertex does ! pass quality selection. Skipping." );
       continue;
     }
     selectedTrigVertices.push_back( *vtxItr );
@@ -171,8 +171,8 @@ StatusCode IDTPM::VertexRoiSelectionTool::selectVerticesInRoI(
   const TrigRoiDescriptor* const* roi = roiLink.cptr();
 
   /// Trigger vertices RoI selection
-  /// Filled only if trigger vertex collection is not empty
-  if( not m_triggerVertexContainerName.key().empty() ) {
+  /// Filled only if trigger vertex collection is ! empty
+  if( ! m_triggerVertexContainerName.key().empty() ) {
     ATH_CHECK( trkAnaColls.fillTrigVertexVec(
         getTrigVertices(
             trkAnaColls.trigVertexVec( TrackAnalysisCollections::FS ),

@@ -8,7 +8,7 @@
  **/
 
 /// local include(s)
-#include "SummaryPlots.h"
+#include "InDetTrackPerfMon/SummaryPlots.h"
 
 
 /// -----------------------

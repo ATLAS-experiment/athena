@@ -8,11 +8,11 @@
  **/
 
 /// local includes
-#include "TrackTruthMatchingTool.h"
-#include "TrackAnalysisCollections.h"
-#include "TrackMatchingLookup.h"
-#include "OfflineObjectDecorHelper.h"
-#include "TrackParametersHelper.h"
+#include "InDetTrackPerfMon/TrackTruthMatchingTool.h"
+#include "InDetTrackPerfMon/TrackAnalysisCollections.h"
+#include "InDetTrackPerfMon/TrackMatchingLookup.h"
+#include "InDetTrackPerfMon/OfflineObjectDecorHelper.h"
+#include "InDetTrackPerfMon/TrackParametersHelper.h"
 
 /// STD include(s)
 #include <algorithm> // for std::find
@@ -50,7 +50,7 @@ StatusCode IDTPM::TrackTruthMatchingTool::match(
   bool doMatch = trkAnaColls.updateChainRois( chainRoIName, roiStr );
 
   /// checking if matching for chainRoIName has already been processed
-  if( not doMatch ) {
+  if( ! doMatch ) {
     ATH_MSG_WARNING( "Matching for " << chainRoIName <<
                      " was already done. Skipping" );
     return StatusCode::SUCCESS;
@@ -85,17 +85,17 @@ StatusCode IDTPM::TrackTruthMatchingTool::match(
                         *track_particle, m_truthProbCut.value() );
 
     /// Skip if no truth particle is found
-    if( not truth_particle ) continue;
+    if( ! truth_particle ) continue;
 
     ATH_MSG_DEBUG( "Found matched truth particle with pT = " <<
-                   pT( *truth_particle ) << " and prob = " <<
+                   pT( *truth_particle ) << " && prob = " <<
                    getTruthMatchProb( *track_particle ) );
 
     /// Check if linked truth particle is in the
-    /// selected (quality and in-RoI selection) reference truths
+    /// selected (quality && in-RoI selection) reference truths
     if( std::find( vRef.begin(), vRef.end(),
                    truth_particle ) == vRef.end() ) {
-      ATH_MSG_DEBUG( "Truth particle is not in selected reference. Skipping." );
+      ATH_MSG_DEBUG( "Truth particle is ! in selected reference. Skipping." );
       continue;
     }
 

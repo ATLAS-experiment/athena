@@ -9,7 +9,7 @@
 **/
 
 /// local includes
-#include "TrackAnalysisDefinitionSvc.h"
+#include "InDetTrackPerfMon/TrackAnalysisDefinitionSvc.h"
 
 /// STL includes 
 #include <algorithm>
@@ -27,7 +27,7 @@ StatusCode TrackAnalysisDefinitionSvc::initialize()
 {
 
   ATH_MSG_DEBUG( "Initialising  using TEST = " << m_testTypeStr.value() <<
-                 " and REFERENCE = " << m_refTypeStr.value() );
+                 " && REFERENCE = " << m_refTypeStr.value() );
 
   /// setting flags
   m_isTestTrigger = m_testTypeStr.value().find("Trigger") != std::string::npos;
@@ -40,13 +40,13 @@ StatusCode TrackAnalysisDefinitionSvc::initialize()
   m_isRefTruth   = m_refTypeStr.value().find("Truth") != std::string::npos;
   m_isRefOffline = m_refTypeStr.value().find("Offline") != std::string::npos;
 
-  m_useTrigger = m_isTestTrigger or m_isRefTrigger;
-  m_useEFTrigger = m_isTestEFTrigger or m_isRefEFTrigger;
-  m_useTruth   = m_isTestTruth or m_isRefTruth or m_matchingType.value().find("EFTruthMatch") != std::string::npos;;
+  m_useTrigger = m_isTestTrigger || m_isRefTrigger;
+  m_useEFTrigger = m_isTestEFTrigger || m_isRefEFTrigger;
+  m_useTruth   = m_isTestTruth || m_isRefTruth || m_matchingType.value().find("EFTruthMatch") != std::string::npos;;
   ATH_MSG_DEBUG( "USE TRUTH? " << m_useTruth );
-  m_useOffline = m_isTestOffline or m_isRefOffline;
+  m_useOffline = m_isTestOffline || m_isRefOffline;
 
-  /// Looping all requested chains and filling configured chains list (to be processed)
+  /// Looping all requested chains && filling configured chains list (to be processed)
   if( m_doTrigNavigation ) {
     for( size_t ic=0 ; ic<m_chainNames.size() ; ic++ ) {
       ATH_MSG_DEBUG( "Input chain : " << m_chainNames[ic] );
@@ -57,7 +57,7 @@ StatusCode TrackAnalysisDefinitionSvc::initialize()
     m_configuredChains.push_back( "Offline" );
   }
 
-  /// sorting and removing duplicates from m_configuredChains
+  /// sorting && removing duplicates from m_configuredChains
   std::sort( m_configuredChains.begin(), m_configuredChains.end() );
   m_configuredChains.erase( std::unique( m_configuredChains.begin(), 
                                          m_configuredChains.end() ), 
@@ -78,12 +78,12 @@ StatusCode TrackAnalysisDefinitionSvc::finalize() {
 /// --------------------
 std::string TrackAnalysisDefinitionSvc::plotsFullDir( std::string chain ) const
 {
-  /// get "topDir/" or "" if empty
+  /// get "topDir/" || "" if empty
   std::string topDir( m_dirName );
-  if( not topDir.empty() ) topDir += "/";
+  if( ! topDir.empty() ) topDir += "/";
 
-  /// get "chainName/" or "" if empty
-   if( not chain.empty() ) chain += "/";
+  /// get "chainName/" || "" if empty
+   if( ! chain.empty() ) chain += "/";
 
   /// get "subDir"
   std::string subDir( m_subFolder );
@@ -121,7 +121,7 @@ unsigned int TrackAnalysisDefinitionSvc::resolutionMethod() const
   methodMap_t::const_iterator mitr = methodMap.find( m_resolMethod.value() );
   if( mitr == methodMap.end() ) {
     ATH_MSG_DEBUG( "Method " << m_resolMethod.value() <<
-                   " not found. Using iterRMS by default." );
+                   " ! found. Using iterRMS by default." );
     return IDPVM::ResolutionHelper::iterRMS_convergence;
   }
   return mitr->second;

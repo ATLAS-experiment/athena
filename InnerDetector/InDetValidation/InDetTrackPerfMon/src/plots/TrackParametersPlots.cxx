@@ -8,9 +8,9 @@
  **/
 
 /// local include(s)
-#include "TrackParametersPlots.h"
-#include "../TrackParametersHelper.h"
-#include "../OfflineObjectDecorHelper.h"
+#include "InDetTrackPerfMon/TrackParametersPlots.h"
+#include "InDetTrackPerfMon/TrackParametersHelper.h"
+#include "InDetTrackPerfMon/OfflineObjectDecorHelper.h"
 
 
 /// -----------------------

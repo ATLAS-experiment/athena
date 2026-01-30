@@ -8,7 +8,7 @@
  **/
 
 /// local include
-#include "InDetTrackPerfMonTool.h"
+#include "InDetTrackPerfMon/InDetTrackPerfMonTool.h"
 
 /// gaudi includes
 #include "GaudiKernel/SystemOfUnits.h"
@@ -51,7 +51,7 @@ StatusCode InDetTrackPerfMonTool::initialize() {
   ATH_CHECK( ManagedMonitorToolBase::initialize() );
 
   /// Retrieving trkAnaDefSvc
-  if( not m_trkAnaDefSvc ) {
+  if( ! m_trkAnaDefSvc ) {
     ATH_MSG_DEBUG( "Retrieving TrkAnaDefSvc" << m_anaTag.value() );
     m_trkAnaDefSvc = Gaudi::svcLocator()->service( "TrkAnaDefSvc"+m_anaTag.value() );
     ATH_CHECK( m_trkAnaDefSvc.isValid() );
@@ -73,26 +73,26 @@ StatusCode InDetTrackPerfMonTool::initialize() {
   /// Events
   ATH_CHECK( m_eventInfoContainerName.initialize() );
   ATH_CHECK( m_truthEventName.initialize(
-      m_trkAnaDefSvc->useTruth() and not m_truthEventName.key().empty() ) );
+      m_trkAnaDefSvc->useTruth() && ! m_truthEventName.key().empty() ) );
   ATH_CHECK( m_truthPileUpEventName.initialize(
-      m_trkAnaDefSvc->useTruth() and not m_truthPileUpEventName.key().empty() and
+      m_trkAnaDefSvc->useTruth() && ! m_truthPileUpEventName.key().empty() and
       m_trkAnaDefSvc->hasFullPileupTruth() ) );
 
   /// Tracks
   ATH_CHECK( m_offlineTrkParticleName.initialize(
-      m_trkAnaDefSvc->useOffline() and not m_offlineTrkParticleName.key().empty() ) );
+      m_trkAnaDefSvc->useOffline() && ! m_offlineTrkParticleName.key().empty() ) );
   ATH_CHECK( m_triggerTrkParticleName.initialize(
-      m_trkAnaDefSvc->useTrigger() and not m_triggerTrkParticleName.key().empty() ) );
+      m_trkAnaDefSvc->useTrigger() && ! m_triggerTrkParticleName.key().empty() ) );
   ATH_CHECK( m_truthParticleName.initialize(
-      m_trkAnaDefSvc->useTruth() and not m_truthParticleName.key().empty() ) );
+      m_trkAnaDefSvc->useTruth() && ! m_truthParticleName.key().empty() ) );
 
   /// Vertex
   ATH_CHECK( m_offlineVertexContainerName.initialize( 
-      m_trkAnaDefSvc->useOffline() and not m_offlineVertexContainerName.key().empty() ) );
+      m_trkAnaDefSvc->useOffline() && ! m_offlineVertexContainerName.key().empty() ) );
   ATH_CHECK( m_triggerVertexContainerName.initialize(
-      m_trkAnaDefSvc->useTrigger() and not m_triggerVertexContainerName.key().empty() ) );
+      m_trkAnaDefSvc->useTrigger() && ! m_triggerVertexContainerName.key().empty() ) );
   ATH_CHECK( m_truthVertexContainerName.initialize(
-      m_trkAnaDefSvc->useTruth() and not m_truthVertexContainerName.key().empty() ) );
+      m_trkAnaDefSvc->useTruth() && ! m_truthVertexContainerName.key().empty() ) );
 
   /// TrkAnaInfo for AOD_IDTPM output
   ATH_CHECK( m_trkAnaInfoKey.initialize() );
@@ -131,7 +131,7 @@ StatusCode InDetTrackPerfMonTool::bookHistograms()
     ATH_CHECK( m_trkAnaPlotsMgrVec[iAna]->initialize() );
 
     /// Register booked histogram to corresponding monitoring group
-    /// Register "plain" histograms (including TH1/2/3 and TProfiles)
+    /// Register "plain" histograms (including TH1/2/3 && TProfiles)
     std::vector< HistData > hists = m_trkAnaPlotsMgrVec[iAna]->retrieveBookedHistograms();
     for ( size_t ih=0 ; ih<hists.size() ; ih++ ) {
       ATH_CHECK( regHist( hists[ih].first, hists[ih].second, all ) );
@@ -211,14 +211,14 @@ StatusCode InDetTrackPerfMonTool::fillHistograms() {
     /// --------- Chain selector ---------
     /// ----------------------------------
 
-    /// skipping TrkAnalysis if chain is not passed for this event
-    if( m_trkAnaDefSvc->doTrigNavigation() and 
-        not thisChain.empty() and thisChain != "Offline" ) {
+    /// skipping TrkAnalysis if chain is ! passed for this event
+    if( m_trkAnaDefSvc->doTrigNavigation() && 
+        ! thisChain.empty() && thisChain != "Offline" ) {
 
       unsigned decisionType = TrigDefs::Physics; // TrigDefs::includeFailedDecisions;
 
-      if( not m_trigDecTool->isPassed( thisChain, decisionType ) ) {
-        ATH_MSG_DEBUG( "Trigger chain " << thisChain << " is not fired. Skipping" );
+      if( ! m_trigDecTool->isPassed( thisChain, decisionType ) ) {
+        ATH_MSG_DEBUG( "Trigger chain " << thisChain << " is ! fired. Skipping" );
         continue;
       }
     }
@@ -250,7 +250,7 @@ StatusCode InDetTrackPerfMonTool::fillHistograms() {
         thisRoiLink = selectedRois.at(ir).link;
 
         /// skip non-valid RoI link
-        if( not thisRoiLink.isValid() ) {
+        if( ! thisRoiLink.isValid() ) {
           ATH_MSG_WARNING( "Found non-valid RoI ElementLink" );
           continue;
         }

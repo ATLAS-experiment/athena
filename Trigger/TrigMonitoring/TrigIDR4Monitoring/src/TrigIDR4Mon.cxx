@@ -191,14 +191,22 @@ StatusCode TrigIDR4Mon::bookHistograms() {
   
   /// in the tier 0 analysis the wildcard selection should always 
   /// return one and only one chain
-  
-  std::vector<ToolHandle<GenericMonitoringTool>*> monTools;
+
+  /// do these need to be tool handles ?? yes ! because they are being allocated
+  /// to by the tool handles retrieved from python created tools
+  //  std::vector<ToolHandle<GenericMonitoringTool>*> monTools; 
+  std::vector<IDTPM::TrackAnalysis*> monTools; 
+
   monTools.reserve(m_monTools.size());
   
-  ToolHandleArray<GenericMonitoringTool>::iterator toolitr = m_monTools.begin();;
+  //  ToolHandleArray<GenericMonitoringTool>::iterator toolitr = m_monTools.begin();;
+  ToolHandleArray<IDTPM::TrackAnalysis>::iterator toolitr = m_monTools.begin();;
 
-
+  std::vector<GenericMonitoringTool*> tools;  // not tool hanldes ?? no, because we are creating these on the fly
+  
   // sort out all the chain stuff
+
+  int chaincount = 0;
   
   while ( toolitr!=m_monTools.end() ) {
     
@@ -218,9 +226,15 @@ StatusCode TrigIDR4Mon::bookHistograms() {
 	/// maybe better to set here - leave this in p[lace until we have tried it
 	//     toolitr->setPath( m_sliceTag+"/"+chainName );
 
+	/// check this analysis, for this chain, hasn;t been used before ....
 	if (std::find(chains.begin(), chains.end(), selectChain) == chains.end()) { // deduplicate
-  	  chains.push_back( selectChain );
-	  monTools.push_back( &(*toolitr) );
+
+	  chains.push_back( selectChain );
+	  (*toolitr)->setTDT( m_tdt );
+	  monTools.push_back( toolitr->get() );
+	  //	  monTools.push_back( new TrackAnalysis( "TrackAnalysis", toolitr->name(), this ) );
+	  //	  monTools.back()->addHistograms( (*toolitr) );
+	  //monTools.push_back( &(*toolitr) );
 	}
       }
       else { 
@@ -230,7 +244,7 @@ StatusCode TrigIDR4Mon::bookHistograms() {
 	if ( chainName.head().find("HLT_")==std::string::npos ) {
 	  // with the O2 optimisation that ATLAS uses, unevaluated pre- and postfix operators produce identical code - I prefer the postfix
 	  //cppcheck-suppress postfixOperator 
-	  toolitr++;
+	  toolitr++;  //cppcheck-suppress postfixOperator 
 	  continue;
 	}
 	
@@ -244,10 +258,13 @@ StatusCode TrigIDR4Mon::bookHistograms() {
 	
 	if ( selectChain=="" ) { 
 	  msg(MSG::WARNING) << "^[[91;1m" << "No chain matched\tchain input " << chainName.head() << "  :  " << chainName.tail() << "^[[m"<< endmsg;
-	  ++toolitr;
+	  // with the O2 optimisation that ATLAS uses, unevaluated pre- and postfix operators produce identical code - I prefer the postfix
+	  //cppcheck-suppress postfixOperator^
+	  toolitr++;  //cppcheck-suppress postfixOperator 
 	  continue;
 	}
-	  
+
+#if 0	
 	std::string mchain = selectChain; //chainName.head();
 
 	if ( chainName.tail()!="" )     mchain += "/"+chainName.tail();
@@ -255,25 +272,46 @@ StatusCode TrigIDR4Mon::bookHistograms() {
 	if ( chainName.vtx()!="" )      mchain += "_"+chainName.vtx();
 	if ( chainName.element()!="" )  mchain += "_"+chainName.element();
 	if ( chainName.extra()!="" )    mchain += "_"+chainName.extra();
+#endif
+
+	/// check this analysis, with this chain hasn't been booked before ... 
 	
 	selectChain = chainName.subs( selectChain );
-
+	
 	if (  std::find(chains.begin(), chains.end(), selectChain) == chains.end() ) { // deduplicate
+
+	  std::cout << "select chain: " << selectChain << std::endl;
+	  
 	  chains.push_back( selectChain );
-	  monTools.push_back( &(*toolitr) );
+	  //	  monTools.push_back( &(*toolitr) );
+
+	  /// so now we have to decide whether to create the TrackAnalysis and give it to
+	  /// to (*toolitr), or give the *toolitr to the TrackAnalysis,
+	  /// or combine them so that there is only the one tool
+	  (*toolitr)->setTDT( m_tdt );
+	  monTools.push_back( toolitr->get() );
+	  //  monTools.push_back( new TrackAnalysis( "TrackAnalysis", toolitr->name(), this ) );
+	  //  monTools.back()->addHistograms( (*toolitr) );
+	  //	  monTools.back()->addHistograms( (*toolitr) );
+
+	  chaincount++;
+	  
 	}
-	     
-	++toolitr;
+
+	// with the O2 optimisation that ATLAS uses, unevaluated pre- and postfix operators produce identical code - I prefer the postfix
+	//cppcheck-suppress postfixOperator^
+	toolitr++; //cppcheck-suppress postfixOperator 
       }
 
   }
 	
   m_chainNames = chains;
 
+  m_tools = monTools;
   
-  //  ATH_MSG_DEBUG( " configured " << m_sequences.size() << " sequences" );
+  ATH_MSG_INFO( " configured " << chaincount << " (" << m_tools.size() << ") analyses" );
   
-  ATH_MSG_DEBUG(  " ----- exit book() ----- " );
+  ATH_MSG_INFO(  " ----- exit book() ----- " );
 
   return StatusCode::SUCCESS;
   
@@ -291,6 +329,29 @@ StatusCode TrigIDR4Mon::fillHistograms(const EventContext &/*context*/) const {
   const Trig::ChainGroup* chainGroup = m_tdt->getChainGroup( "HLT_e.*" );
   const std::vector<std::string> selectChains = chainGroup->getListOfTriggers();
 
+  /// three approaches:
+  ///   1. loop over all the analysis, get the trigger for that analysis, checke whether
+  ///      it has passed, and if so call the execute method for the analysis
+  ///   2. loop over the chains, if a chain has passed, get back the list of all analyses
+  ///      that use that chain, loop over those analyses, calling their execute method
+  ///   3. loop over all the analyses, calling the execute method - this will only work,
+  ///      if the analyses themselves perform the check on whether their trigger chain has passed
+  ///
+  /// So 1. and 3. are essentially the same, they have the same code, but the check that the trigger
+  /// chain has passed is moved into the analysis itself.
+
+#if 1
+  /// this is method 3.
+  for ( int itools=m_tools.size() ; itools-- ; ) {
+    m_tools[itools]->execute();
+  }
+#endif
+
+#if 0
+  /// part of mewthod 2.
+  
+  /// this tests all the chains ...
+  
   /// print out all the configured chains if need be
   static std::once_flag flag;
   std::call_once(flag, [&]() {
@@ -316,7 +377,8 @@ StatusCode TrigIDR4Mon::fillHistograms(const EventContext &/*context*/) const {
   //  for ( unsigned i=0 ; i<m_sequences.size() ; i++ ) { 
   //    m_sequences[i]->execute();
   //  }
-
+#endif
+  
   ATH_MSG_DEBUG(" ----- exit fill() ----- ");
 
   return StatusCode::SUCCESS;

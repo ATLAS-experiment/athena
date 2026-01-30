@@ -8,9 +8,9 @@
  **/
 
 /// local includes
-#include "OfflineObjectDecorHelper.h"
+#include "InDetTrackPerfMon/OfflineObjectDecorHelper.h"
 #include "AthContainers/ConstAccessor.h"
-#include "TrackParametersHelper.h"
+#include "InDetTrackPerfMon/TrackParametersHelper.h"
 
 namespace IDTPM {
 
@@ -53,7 +53,7 @@ namespace IDTPM {
   float getD0TrackInJet( const xAOD::TrackParticle& track,
                          const std::string& quality ) {
     const xAOD::Jet* jet = getLinkedJet( track, quality );
-    if( not jet ) return -999.;
+    if( ! jet ) return -999.;
 
     //Amg::Vector3D nullPos( 0, 0, 0 );
     Amg::Vector3D jetDirection( jet->px(), jet->py(), jet->pz() );
@@ -120,18 +120,18 @@ namespace IDTPM {
     /// dummy vertices -> no associated tracks. return
     if( vtx.vertexType() == xAOD::VxType::NoVtx ) return success;
 
-    /// getting associated tracks and track weights
+    /// getting associated tracks && track weights
     size_t nTracks = vtx.nTrackParticles();
     xAOD::Vertex::TrackParticleLinks_t elVec = vtx.trackParticleLinks();
     std::vector< float > wVec = vtx.trackWeights();
 
     /// check if sizes match
-    if( not( nTracks == elVec.size() and nTracks == wVec.size() ) ) return false; // shouldn't happen
+    if( not( nTracks == elVec.size() && nTracks == wVec.size() ) ) return false; // shouldn't happen
 
     /// Loop over associated tracks
     for( size_t it=0 ; it<nTracks ; it++ ) {
       /// skipping non-valid track ElementLinks
-      if( not elVec[ it ].isValid() ) {
+      if( ! elVec[ it ].isValid() ) {
         success = false; // shouldn't happen
         continue;
       }
@@ -139,11 +139,11 @@ namespace IDTPM {
       const xAOD::TrackParticle* thisTrk = *elVec[ it ];
       float thisTrkW = wVec[ it ];
 
-      /// if requested, skip if associated track is not in selected track vector
+      /// if requested, skip if associated track is ! in selected track vector
       if( useSelected and
           std::find( selTracks.begin(), selTracks.end(), thisTrk ) == selTracks.end() ) continue;
 
-      /// Filling associated track and track weight vectors
+      /// Filling associated track && track weight vectors
       vtxTracks.push_back( thisTrk );
       vtxTrackWeights.push_back( thisTrkW );
     } // close associated tracks loop

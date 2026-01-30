@@ -8,8 +8,8 @@
  **/
 
 /// local include(s)
-#include "HitsOnTracksPlots.h"
-#include "../TrackParametersHelper.h"
+#include "InDetTrackPerfMon/HitsOnTracksPlots.h"
+#include "InDetTrackPerfMon/TrackParametersHelper.h"
 
 
 /// -------------------------

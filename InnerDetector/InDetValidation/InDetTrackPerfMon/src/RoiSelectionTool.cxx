@@ -7,7 +7,7 @@
  * @author marco aparo
  **/
 
-#include "RoiSelectionTool.h"
+#include "InDetTrackPerfMon/RoiSelectionTool.h"
 
 
 ///----------------------------------------
@@ -73,7 +73,7 @@ std::vector< IDTPM::roiCollection_t > IDTPM::RoiSelectionTool::retrieveRois(
 
     const ElementLink< TrigRoiDescriptorCollection > thisRoiLink = rois[ir].link;
 
-    /// check this is not a spurious TDT match
+    /// check this is ! a spurious TDT match
     if( !roiKey.empty() && thisRoiLink.dataID() != roiKey ) continue;
 
     const TrigRoiDescriptor* const* thisRoi = thisRoiLink.cptr();

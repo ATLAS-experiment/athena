@@ -12,9 +12,9 @@
 #include "GaudiKernel/Service.h"
 
 /// Local includes
-#include "TrackAnalysisInfoWriteTool.h"
-#include "TrackAnalysisCollections.h"
-#include "TrackMatchingLookup.h"
+#include "InDetTrackPerfMon/TrackAnalysisInfoWriteTool.h"
+#include "InDetTrackPerfMon/TrackAnalysisCollections.h"
+#include "InDetTrackPerfMon/TrackMatchingLookup.h"
 
 /// STL includes
 #include <sstream>
@@ -57,7 +57,7 @@ StatusCode IDTPM::TrackAnalysisInfoWriteTool::write(
 {
   ATH_MSG_DEBUG( "Writing TrackAnalysisInfo to StoreGate" );
 
-  if( not wh.key().ends_with( m_anaTag.value() ) ) {
+  if( ! wh.key().ends_with( m_anaTag.value() ) ) {
     ATH_MSG_ERROR( "Invalid TrkAnaInfo container name: " << wh.key() );
     return StatusCode::FAILURE;
   }
@@ -136,7 +136,7 @@ StatusCode IDTPM::TrackAnalysisInfoWriteTool::write(
 std::string IDTPM::TrackAnalysisInfoWriteTool::printInfo(
     SG::WriteHandle< xAOD::BaseContainer >& wh ) const
 {
-  if( not wh.isValid() ) {
+  if( ! wh.isValid() ) {
     ATH_MSG_ERROR( "Invalid collection" ); return "";
   }
 

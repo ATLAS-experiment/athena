@@ -8,7 +8,7 @@
  **/
 
 /// Local includes
-#include "OfflineElectronDecoratorAlg.h"
+#include "InDetTrackPerfMon/OfflineElectronDecoratorAlg.h"
 
 /// xAOD includes
 #include "xAODEgamma/ElectronxAODHelpers.h" // xAOD::EgammaHelpers::getOriginalTrackParticle
@@ -29,9 +29,9 @@ IDTPM::OfflineElectronDecoratorAlg::OfflineElectronDecoratorAlg(
 StatusCode IDTPM::OfflineElectronDecoratorAlg::initialize() {
 
   ATH_CHECK( m_offlineTrkParticlesName.initialize(
-                not m_offlineTrkParticlesName.key().empty() ) );
+                ! m_offlineTrkParticlesName.key().empty() ) );
 
-  ATH_CHECK( m_electronsName.initialize( not m_electronsName.key().empty() ) );
+  ATH_CHECK( m_electronsName.initialize( ! m_electronsName.key().empty() ) );
 
   /// Create decorations for original (non GSF) ID tracks
   IDTPM::createDecoratorKeysAndAccessor( 
@@ -54,14 +54,14 @@ StatusCode IDTPM::OfflineElectronDecoratorAlg::execute( const EventContext& ctx 
 
   /// retrieve offline track particle container
   SG::ReadHandle< xAOD::TrackParticleContainer > ptracks( m_offlineTrkParticlesName, ctx );
-  if( not ptracks.isValid() ) {
+  if( ! ptracks.isValid() ) {
     ATH_MSG_ERROR( "Failed to retrieve track particles container" );
     return StatusCode::FAILURE;
   }
 
   /// retrieve electron container
   SG::ReadHandle< xAOD::ElectronContainer > pelectrons( m_electronsName, ctx );
-  if( not pelectrons.isValid() ) {
+  if( ! pelectrons.isValid() ) {
     ATH_MSG_ERROR( "Failed to retrieve electrons container" );
     return StatusCode::FAILURE;
   }
@@ -107,7 +107,7 @@ StatusCode IDTPM::OfflineElectronDecoratorAlg::decorateElectronTrack(
                         electron->trackParticle() : // with GSF
                         xAOD::EgammaHelpers::getOriginalTrackParticle( electron ); // no GSF
 
-    if( not eleTrack ) {
+    if( ! eleTrack ) {
       ATH_MSG_ERROR( "Corrupted matching electron ID track" );
       return StatusCode::FAILURE;
     }
