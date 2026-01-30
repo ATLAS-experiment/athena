@@ -25,6 +25,7 @@
 #include "InDetTrackPerfMon/JsonPlotsDefReadTool.h"
 #include "InDetTrackPerfMon/TrackAnalysisInfoWriteTool.h"
 #include "InDetTrackPerfMon/TrackAnalysis.h"
+#include "InDetTrackPerfMon/StableDeltaRMatchingTool.h"
 
 DECLARE_COMPONENT( IDTPM::TrackAnalysis )
 DECLARE_COMPONENT( InDetTrackPerfMonTool )

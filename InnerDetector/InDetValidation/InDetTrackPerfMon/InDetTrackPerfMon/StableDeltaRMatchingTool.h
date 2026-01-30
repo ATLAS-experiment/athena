@@ -14,10 +14,10 @@
 
 /// Athena include(s)
 #include "AsgTools/AsgTool.h"
-#include "StableMatchingBase.h"
 
 /// Local include(s)
-#include "ITrackMatchingTool.h"
+#include "InDetTrackPerfMon/StableMatchingBase.h"
+#include "InDetTrackPerfMon/ITrackMatchingTool.h"
 
 namespace IDTPM {
 

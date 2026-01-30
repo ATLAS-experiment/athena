@@ -16,9 +16,9 @@
 #include "AsgTools/AsgTool.h"
 
 /// Local include(s)
-#include "ITrackMatchingTool.h"
-#include "TrackAnalysisCollections.h"
-#include "TrackMatchingLookup.h"
+#include "InDetTrackPerfMon/ITrackMatchingTool.h"
+#include "InDetTrackPerfMon/TrackAnalysisCollections.h"
+#include "InDetTrackPerfMon/TrackMatchingLookup.h"
 
 #include <vector>
 #include <algorithm>
@@ -64,5 +64,5 @@ namespace IDTPM {
 
 } // namespace IDTPM
 
-#include "StableMatchingBase.icc"
+#include "InDetTrackPerfMon/StableMatchingBase.icc"
 #endif // > !INDETTRACKPERFMON_STABLEMATCHINGBASE_H
