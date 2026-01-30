@@ -81,11 +81,11 @@ private :
   //    SmartIF<ITrackAnalysisDefinitionSvc> m_trkAnaDefSvc;
 
   
-  /// retrieve all collections && load them into trkAnaCollections object
+  /// retrieve all collections and load them into trkAnaCollections object
   template<typename T, typename S=T>
   void loadCollections( TrackCollections<T,S>& trackCollections );
 
-  /// retrieve all collections && load them into trkAnaCollections object
+  /// retrieve all collections and load them into trkAnaCollections object
   StatusCode loadCollections( IDTPM::TrackAnalysisCollections& trkAnaColls );
 
 
@@ -98,13 +98,13 @@ private :
     "IDTPM::InDetTrackPerfMon/IVertexSelectionTool", "Wrapper-tool to perform general quality-based (truth) vertex selection" };
   
   ToolHandle< IDTPM::RoiSelectionTool > m_roiSelectionTool { this, "RoiSelectionTool",
-    "IDTPM::InDetTrackPerfMon/RoiSelectionTool", "Tool to retrieve && select RoIs" };
+    "IDTPM::InDetTrackPerfMon/RoiSelectionTool", "Tool to retrieve and select RoIs" };
   
   
   
     /// we can't have all these ReadHandles because we don't know how many we will
     /// actually need until we configure the class, ie if we use Trigger tracks,
-    /// && trigger vertices, this is ! how we access them - we have to do it through
+    /// and trigger vertices, this is ! how we access them - we have to do it through
     /// the TrigDecisionTool 
 
   
@@ -159,7 +159,7 @@ private :
   //    this, "VertexQualitySelectionTool", "IDTPM::InDetTrackPerfMon/IVertexSelectionTool", "Wrapper-tool to perform general quality-based (truth) vertex selection" };
 
   //    ToolHandle< IDTPM::RoiSelectionTool > m_roiSelectionTool {
-  //       this, "RoiSelectionTool", "IDTPM::InDetTrackPerfMon/RoiSelectionTool", "Tool to retrieve && select RoIs" };
+  //       this, "RoiSelectionTool", "IDTPM::InDetTrackPerfMon/RoiSelectionTool", "Tool to retrieve and select RoIs" };
 
   //  ToolHandle< IDTPM::TrackRoiSelectionTool > m_trackRoiSelectionTool {
   //       this, "TrackRoiSelectionTool", "IDTPM::InDetTrackPerfMon/TrackRoiSelectionTool", "Tool to select track within a RoI" };
@@ -168,7 +168,7 @@ private :
   //    this, "VertexRoiSelectionTool", "IDTPM::InDetTrackPerfMon/VertexRoiSelectionTool", "Tool to select vertices within a RoI" };
 
   //ToolHandle< IDTPM::ITrackMatchingTool > m_trackMatchingTool {
-  //    this, "TrackMatchingTool", "IDTPM::InDetTrackPerfMon/ITrackMatchingTool", "Tool to match test to reference tracks && viceversa" };
+  //    this, "TrackMatchingTool", "IDTPM::InDetTrackPerfMon/ITrackMatchingTool", "Tool to match test to reference tracks and viceversa" };
 
   //    ToolHandle< IDTPM::TrackAnalysisInfoWriteTool > m_trkAnaInfoWriteTool {
   //    this, "TrackAnalysisInfoWriteTool", "IDTPM::InDetTrackPerfMon/TrackAnalysisInfoWriteTool", "Tool to write TrackAnalysisInfo to StoreGate" };

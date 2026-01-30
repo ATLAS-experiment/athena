@@ -10,7 +10,7 @@
  * @author Marco Aparo <marco.aparo@cern.ch>, Thomas Strebler <thomas.strebler@cern.ch>
  * @date   30 March 2024
  * @brief  Tool to perform matching of tracks and/or truth particles
- *         based on their ditance in DeltaR || in their pT reslution
+ *         based on their ditance in DeltaR or in their pT reslution
  */
 
 /// Athena include(s)
@@ -42,7 +42,7 @@ namespace IDTPM {
       ATH_CHECK( asg::AsgTool::initialize() );
 
       if( m_dRmax<0 && m_pTResMax<0 ) {
-        ATH_MSG_ERROR( "No DeltaRMax || pTresMax criteria requested" ); 
+        ATH_MSG_ERROR( "No DeltaRMax or pTresMax criteria requested" ); 
         return StatusCode::FAILURE;
       } 
 

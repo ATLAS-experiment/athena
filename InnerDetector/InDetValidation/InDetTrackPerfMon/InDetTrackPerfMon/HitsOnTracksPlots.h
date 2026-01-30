@@ -194,11 +194,11 @@ namespace IDTPM {
     TProfile2D* m_hits_vs2D[ NHITPARAMSTOT ][ NPARAMS ][ NPARAMS ]{};
     TProfile2D* m_hitsRun3_vs2D[ NRUN3HITPARAMSTOT ][ NPARAMS ][ NPARAMS ]{};
 
-    /// TProfile plots vs mu (truth && actual)
+    /// TProfile plots vs mu (truth and actual)
     TProfile* m_hits_vsMu[ NHITPARAMSTOT ][ NPARAMSMU ]{};
     TProfile* m_hitsRun3_vsMu[ NRUN3HITPARAMSTOT ][ NPARAMSMU ]{};
 
-    /// TProfile2D plots vs mu (truth && actual) vs NPARAMS
+    /// TProfile2D plots vs mu (truth and actual) vs NPARAMS
     TProfile2D* m_hits_vsMu_vs[ NHITPARAMSTOT ][ NPARAMSMU ][ NPARAMS ]{};
     TProfile2D* m_hitsRun3_vsMu_vs[ NRUN3HITPARAMSTOT ][ NPARAMSMU ][ NPARAMS ]{};
 

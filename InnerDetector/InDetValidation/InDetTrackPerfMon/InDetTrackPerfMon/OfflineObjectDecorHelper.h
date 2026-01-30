@@ -136,8 +136,8 @@ namespace IDTPM {
                            const std::vector< float >& ,
                            const std::vector< float >& ) { return false; }; // dummy - to avoid compilation errors;
 
-  /// For vertices (truth && reco)
-  /// get vertex-associated tracks && their weights
+  /// For vertices (truth and reco)
+  /// get vertex-associated tracks and their weights
   bool getVertexTracksAndWeights( const xAOD::Vertex& vtx,
                                   std::vector< const xAOD::TrackParticle* >& vtxTracks,
                                   std::vector< float >& vtxTrackWeights,

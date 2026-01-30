@@ -69,7 +69,7 @@ protected:
   /// TrackAnalysis properties
   
   /// --- Collections class variables ---
-  /// EventInfo, TruthEvent, && TruthPUEvent
+  /// EventInfo, TruthEvent, and TruthPUEvent
   const xAOD::EventInfo* m_eventInfo{nullptr};
   
   /// vectors of track/truth particles at different stages of the selection/workflow

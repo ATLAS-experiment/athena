@@ -8,7 +8,7 @@
 /**
  * @file ITrackAnalysisDefinitionSvc.h
  * Service interface to hold (and propagate) the basic properties
- * of each defined TrackAnalysis && of their hisotgrams
+ * of each defined TrackAnalysis and of their hisotgrams
  * @author marco aparo
  * @date 19 June 2023
 **/
@@ -27,7 +27,7 @@ class ITrackAnalysisDefinitionSvc :
 
 public:
 
-  /// Creates the InterfaceID && interfaceID() method
+  /// Creates the InterfaceID and interfaceID() method
   DeclareInterfaceID( ITrackAnalysisDefinitionSvc, 1, 0 );
 
   virtual const std::vector< std::string >& configuredChains() const = 0;

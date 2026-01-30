@@ -47,7 +47,7 @@ namespace IDTPM {
       std::pair< SG::WriteDecorHandle<ContainerType, VariableType>, bool >;
 
   /// create a pair composed of a WriteDecorHandleKey to create a decorator handle
-  /// && an accessor to check the availablilty of a decoration
+  /// and an accessor to check the availablilty of a decoration
   template< class T_Parent, class T_Cont, class T >
   void createDecoratorKeysAndAccessor(
       T_Parent& parent,

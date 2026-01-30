@@ -93,7 +93,7 @@ namespace IDTPM {
     /// ------------------------
     /// ---- setter methods ----
     /// ------------------------
-    /// These need && are followed by the recomputing of the digest strings
+    /// These need and are followed by the recomputing of the digest strings
     void name( std::string_view name_s ) { m_name = name_s; digest(); }
     void type( std::string_view type_s ) { m_type = type_s; digest(); }
     void title( std::string_view title_s ) { m_title = title_s; digest(); }

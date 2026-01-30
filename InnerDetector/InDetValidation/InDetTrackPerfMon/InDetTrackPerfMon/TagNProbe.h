@@ -40,7 +40,7 @@ public:
 
   void construct();
   
-  /// getters && setters
+  /// getters and setters
 
   /// could be moved to the constructor now ...
   void   tag( const std::string& chainName ) { m_tagChainName   = chainName; }
@@ -57,7 +57,7 @@ public:
 
 public:
 
-  /// Fixme: This needs to be heavily modified to store && extract the relevant information
+  /// Fixme: This needs to be heavily modified to store and extract the relevant information
   /// from the athena event record, rather than the far simpler TrigInDetAnalysis record.
   /// In addition, this also fille histograms of the invariant mass, which may - || may not,
   /// end up being desired
@@ -105,7 +105,7 @@ public:
 	TIDA::Roi& troi = chain_tag->rois()[it];
 	TIDARoiDescriptor roi_tag( troi.roi() );
 
-	/// tag && probe are the same: skip this tag
+	/// tag and probe are the same: skip this tag
 	if ( roi_probe == roi_tag ) continue;
 	
 	if ( selection( troi, proi, selector_tag, filter_tag, selector_probe, filter_probe, 
@@ -184,7 +184,7 @@ protected:
       /// loop over probe ref tracks
       for ( size_t ip=0; ip<refp_probe.size() ; ip++ ) {
 
-	/// check compatibility of the track z && invariant mass ...
+	/// check compatibility of the track z and invariant mass ...
 	double invmass     = mass( refp_tag[it], refp_probe[ip] );
 	double invmass_obj = mass_obj( refp_tag[it], refp_probe[ip], tom_tag, tom_probe  );
 	double deltaz0     = std::fabs(refp_tag[it]->z0() - refp_probe[ip]->z0() );

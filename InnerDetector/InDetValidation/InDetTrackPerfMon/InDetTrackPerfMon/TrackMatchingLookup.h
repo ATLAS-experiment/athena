@@ -8,7 +8,7 @@
 /**
  * @file TrackMatchingLookup.h
  * @brief Look-up table (templated) class to store (internally to IDTPM)
- *        all the matches between test && reference tracks && vice versa 
+ *        all the matches between test and reference tracks && vice versa 
  * @author Marco Aparo <marco.aparo@cern.ch>
  * @date 21 March 2024
 **/

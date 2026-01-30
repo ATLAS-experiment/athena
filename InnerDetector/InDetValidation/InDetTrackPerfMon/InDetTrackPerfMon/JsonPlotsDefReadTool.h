@@ -39,7 +39,7 @@ namespace IDTPM {
     /// Initialize
     virtual StatusCode initialize() override;
 
-    /// Parse input pltos defnitions && returns
+    /// Parse input pltos defnitions and returns
     /// vector of SinglePlotDefinition
     virtual std::vector< SinglePlotDefinition > getPlotsDefinitions() const override;
 

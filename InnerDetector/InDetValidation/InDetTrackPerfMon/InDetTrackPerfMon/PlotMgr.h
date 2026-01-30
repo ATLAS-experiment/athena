@@ -8,7 +8,7 @@
 /**
  * @file    PlotMgr.h
  * @brief   Derived class to give extra capabilities to TrkValHistUtils/PlotBase.h
- *          such as ATH_MSG && an easier booking interface, as well
+ *          such as ATH_MSG and an easier booking interface, as well
  *          as access to the PlotsDefinitionSvc
  * @author  Marco Aparo <marco.aparo@cern.ch>, Shaun Roe <shaun.roe@cern.ch>
  * @date    26 April 2023
@@ -34,7 +34,7 @@ namespace IDTPM {
 
   public:
 
-    /// Constructor taking parent node && directory name for plots
+    /// Constructor taking parent node and directory name for plots
     /// pParent = nullptr by default to book plots in top directory
     PlotMgr( const std::string& dirName,
              const std::string& anaTag,
@@ -70,7 +70,7 @@ namespace IDTPM {
       const SinglePlotDefinition& def =
           retrieveDefinition( identifier, folderOverride, nameOverride );
       if( def.isEmpty() || ! def.isValid() ) {
-        ATH_MSG_WARNING( "Trying to book empty || non-valid plot : " << identifier );
+        ATH_MSG_WARNING( "Trying to book empty or non-valid plot : " << identifier );
         return StatusCode::RECOVERABLE;
       }
       ATH_CHECK( book( pHisto, def ) );
@@ -92,7 +92,7 @@ namespace IDTPM {
     /// Book a TProfile2D histogram
     StatusCode book( TProfile2D*& pHisto, const SinglePlotDefinition& def );
 
-    /// Book a (1D || 2D) TEfficiency histogram
+    /// Book a (1D or 2D) TEfficiency histogram
     StatusCode book( TEfficiency*& pHisto, const SinglePlotDefinition& def );
 
     /// --------------------------
@@ -191,7 +191,7 @@ namespace IDTPM {
         unsigned int nBins, float absMin, float absMax,
         bool symmetriseAroundZero = false );
 
-    /// SetBinLabels (for TH* && TProfile* only)
+    /// SetBinLabels (for TH* and TProfile* only)
     template < class P >
     StatusCode setBinLabels(
       P*& pHisto, const std::vector< std::string >& binLabels, char axis )

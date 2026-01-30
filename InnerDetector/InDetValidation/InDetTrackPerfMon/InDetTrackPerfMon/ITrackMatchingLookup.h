@@ -130,7 +130,7 @@ namespace IDTPM {
     /// clear lookup tables
     virtual void clear() = 0;
 
-    /// print info about matching && reverse matchings
+    /// print info about matching and reverse matchings
     /// Track -> Track
     virtual std::string printInfo(
         const std::vector< const xAOD::TrackParticle* >& testVec,

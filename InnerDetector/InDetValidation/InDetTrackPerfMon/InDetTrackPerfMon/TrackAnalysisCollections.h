@@ -76,7 +76,7 @@ namespace IDTPM {
         const SG::ReadHandleKey< xAOD::TruthEventContainer >& truthEventHandleKey,
         const SG::ReadHandleKey< xAOD::TruthPileupEventContainer >& truthPUEventHandleKey );
 
-    /// fill FULL track collections && vectors
+    /// fill FULL track collections and vectors
     StatusCode fillTruthPartContainer( const SG::ReadHandleKey< xAOD::TruthParticleContainer >& truthPartHandleKey );
 
     StatusCode fillOfflTrackContainer( const SG::ReadHandleKey<xAOD::TrackParticleContainer>& handleKey );
@@ -119,7 +119,7 @@ namespace IDTPM {
         const std::vector< const xAOD::TrackParticle* >& vec,
         Stage stage = FULL );
 
-    /// fill FULL vertex collections && vectors
+    /// fill FULL vertex collections and vectors
     StatusCode fillTruthVertexContainer(
         const SG::ReadHandleKey< xAOD::TruthVertexContainer >& truthVertexHandleKey );
 
@@ -292,7 +292,7 @@ namespace IDTPM {
     bool m_newChain, m_newRoi;
 
     /// --- Collections class variables ---
-    /// EventInfo, TruthEvent, && TruthPUEvent
+    /// EventInfo, TruthEvent, and TruthPUEvent
     const xAOD::EventInfo* m_eventInfo{nullptr};
     const xAOD::TruthEventContainer* m_truthEventContainer{nullptr};
     const xAOD::TruthPileupEventContainer* m_truthPUEventContainer{nullptr};

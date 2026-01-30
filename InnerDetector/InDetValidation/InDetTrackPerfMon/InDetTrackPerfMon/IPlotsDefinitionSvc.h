@@ -35,7 +35,7 @@ public:
   /// typedef for map definition
   typedef std::unordered_map< std::string, IDTPM::SinglePlotDefinition > plotsDefMap_t;
 
-  /// Creates the InterfaceID && interfaceID() method
+  /// Creates the InterfaceID andinterfaceID() method
   DeclareInterfaceID( IPlotsDefinitionSvc, 1, 0 );
 
   /// Destructor

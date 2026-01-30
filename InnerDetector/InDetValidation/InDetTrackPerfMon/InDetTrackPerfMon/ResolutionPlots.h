@@ -43,7 +43,7 @@ namespace IDTPM {
     void initializePlots(); // needed to override PlotBase
     StatusCode bookPlots();
 
-    /// Finalize resolution && bias histograms
+    /// Finalize resolution and bias histograms
     void finalizePlots();
 
   private:
@@ -54,7 +54,7 @@ namespace IDTPM {
     
     enum Param {
       INCLUSIVE, PT, ETA, D0, Z0, QOVERP, QOVERPT, THETA, PHI, Z0SIN, NPARAMS,
-      NPARAMSOUT = 3 // Plot only vs pt && eta && inclusive
+      NPARAMSOUT = 3 // Plot only vs pt and eta inclusive
     };
 
     /// get the track parameters

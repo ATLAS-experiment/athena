@@ -32,7 +32,7 @@ namespace IDTPM {
 
     ASG_TOOL_INTERFACE( IDTPM::IPlotsDefReadTool )
 
-    /// Parse input pltos defnitions && returns
+    /// Parse input pltos defnitions and returns
     /// vector of SinglePlotDefinition
     virtual std::vector< SinglePlotDefinition > getPlotsDefinitions() const = 0;
 

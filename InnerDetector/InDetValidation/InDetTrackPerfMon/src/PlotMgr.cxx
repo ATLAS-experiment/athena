@@ -58,7 +58,7 @@ IDTPM::SinglePlotDefinition IDTPM::PlotMgr::retrieveDefinition(
   /// retrieve a copy of the plot definition
   SinglePlotDefinition sDef = plotsDefSvc->definition( identifier );
 
-  /// Check if definition is empty || non-valid 
+  /// Check if definition is empty or non-valid 
   if( sDef.isEmpty() || ! sDef.isValid() )  return sDef;
 
   /// Override directory?
@@ -272,7 +272,7 @@ StatusCode IDTPM::PlotMgr::book(
 }
 
 
-/// Book a (1D || 2D) TEfficiency histogram
+/// Book a (1D or 2D) TEfficiency histogram
 StatusCode IDTPM::PlotMgr::book(
     TEfficiency*& pHisto, const IDTPM::SinglePlotDefinition& def )
 {
@@ -362,7 +362,7 @@ StatusCode IDTPM::PlotMgr::fill(
     return StatusCode::FAILURE;
   }
 
-  if( std::isnan( xval ) || std::isnan( yval ) or
+  if( std::isnan( xval ) || std::isnan( yval ) ||
       std::isnan( zval ) || std::isnan( weight ) ) {
     ATH_MSG_ERROR( "Non-valid fill arguments for TH3:" << pTh3->GetName() );
     return StatusCode::FAILURE;
@@ -404,7 +404,7 @@ StatusCode IDTPM::PlotMgr::fill(
     return StatusCode::FAILURE;
   }
 
-  if( std::isnan( xval ) || std::isnan( yval ) or
+  if( std::isnan( xval ) || std::isnan( yval ) ||
       std::isnan( zval ) || std::isnan( weight ) ) {
     ATH_MSG_ERROR( "Non-valid fill arguments for TProfile2D:" << pTprofile->GetName() );
     return StatusCode::FAILURE;
@@ -467,7 +467,7 @@ std::vector<float> IDTPM::PlotMgr::getLogLinearBins(
   std::vector<float> emptyVec;
   /// some checks to ensure the user is requesting something sensible 
   if( absMin<=0 || absMax<=0 ) {
-    ATH_MSG_WARNING( "absMin || absMax argument to getLogLinearBins is out of range" );
+    ATH_MSG_WARNING( "absMin or absMax argument to getLogLinearBins is out of range" );
     return emptyVec;
   } else if( nBins==0 ) {
     ATH_MSG_WARNING( "nBins argument to getLogLinearBins is zero" );
