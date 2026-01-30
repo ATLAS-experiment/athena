@@ -183,9 +183,9 @@ const History* MultiTreeAccessor::getCellHistory(unsigned int i) const
     std::map<const EventData*, const EventData*> eventMap;
     for (const EventData* event : thisEventData) {
       if (eventMap.find(event) != eventMap.end()) continue;
-      auto newED = std::make_unique<EventData>(*event);
-      eventMap[event] = newED.get();
-      allEventData.push_back(newED.release());
+      auto newED = new EventData(*event);
+      eventMap[event] = newED;
+      allEventData.push_back(newED);
     }
    
     for (unsigned int j = 0; j < thisHistory->nData(); j++) {

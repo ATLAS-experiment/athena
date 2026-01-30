@@ -153,13 +153,15 @@ std::unique_ptr<TreeAccessor> TreeAccessor::merge(const std::vector<const Access
         auto newDC = std::make_unique<DataContainer>(history->data(j)->container());
         std::map<std::pair<int, int>, int>::const_iterator newIndex 
           = evtMap.find(std::make_pair(history->data(j)->run(), history->data(j)->event()));
-        if (newIndex == evtMap.end()) cout << "Event not found for cell " << i << ", data " << j << "." << endl;
+        if (newIndex == evtMap.end()) std::cout << "Event not found for cell " << i << ", data " << j << ".\n";
         newDC->setEventIndex(newIndex != evtMap.end() ? newIndex->second : -1);
         historyContainer->add(newDC.release());
+        if (not info) continue;
         if (!info->shape(history->data(j)->gain())) {
           const ShapeInfo* shape = history->cellInfo()->shape(history->data(j)->gain());
-          if (!shape) 
+          if (!shape) {
             cout << "Shape not filled for hash = " << i << ", index = " << j << ", gain = " << Data::gainStr(history->data(j)->gain()) << endl;
+          }
           info->setShape(history->data(j)->gain(), (shape ? new ShapeInfo(*shape) : nullptr));
         }
       }
@@ -278,6 +280,7 @@ std::unique_ptr<TreeAccessor> TreeAccessor::merge(const std::vector<const Access
         //if (newIndex == evtMap.end()) cout << "Event not found for cell " << i << ", data " << j << "." << endl;
         newDC->setEventIndex(newIndex != evtMap.end() ? newIndex->second : -1);
         historyContainer->add(newDC.release());
+        if (not info) continue;
         if (!info->shape(history->data(j)->gain())) {
          const ShapeInfo* shape = history->cellInfo()->shape(history->data(j)->gain());
          if (!shape) 
@@ -314,6 +317,7 @@ std::unique_ptr<TreeAccessor> TreeAccessor::merge(const std::vector<const Access
         //if (newIndex == evtMap.end()) cout << "Event not found for cell " << i << ", data " << j << "." << endl;
         newDC->setEventIndex(newIndex != evtMap.end() ? newIndex->second : -1);
         historyContainer->add(newDC.release());
+        if (not info) continue;
         if (!info->shape(history->data(j)->gain())) {
          const ShapeInfo* shape = history->cellInfo()->shape(history->data(j)->gain());
          if (!shape) 
