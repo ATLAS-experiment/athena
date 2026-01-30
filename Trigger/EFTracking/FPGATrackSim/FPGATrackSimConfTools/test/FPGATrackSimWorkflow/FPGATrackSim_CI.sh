@@ -23,6 +23,7 @@ echo "LayerStudy test is done"
 
 # # Common variables
 OUTPUT_AOD_FILE="FPGATrackSim_CI_AOD.root"
+TVInputFile="TVInput_F610.root"
 
 #Broken for now
 #echo "Running FPGATrackSim F-410 for a few single-mu events"
@@ -34,6 +35,8 @@ echo "Running FPGATrackSim F-610 for a few single-mu events"
 FPGATrackSim_F610.sh -m -n 200 -c -o $OUTPUT_AOD_FILE
 echo "validating output AOD from F-610"
 python -m FPGATrackSimConfTools.FPGATrackSimValidateAODOutput $OUTPUT_AOD_FILE
+mv test.root $TVInputFile
+
 
 echo "Running F-150 in Reco_tf mode for a few single-mu events"
 FPGATrackSim_F150_RecoTf.sh -w -n 10
@@ -54,3 +57,7 @@ get_files -data FPGATrackSimConfTools/IDTPM_ttbar_allRegions.json
 runIDTPM.py --inputFileNames=$OUTPUT_AOD_FILE \
                 --outputFilePrefix="IDTPM.CI_TEST" \
                 --trkAnaCfgFile="FPGATrackSimConfTools/IDTPM_ttbar_allRegions.json"
+
+
+echo "Checking the integrity of the TVInput file $TVInputFile"
+python -m FPGATrackSimConfTools.FPGATrackSimReadTVInputFile "$TVInputFile"
