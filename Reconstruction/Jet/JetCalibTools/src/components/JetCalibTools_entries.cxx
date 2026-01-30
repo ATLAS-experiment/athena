@@ -6,6 +6,7 @@
 #include "JetCalibTools/JMSCalibStep.h"
 #include "JetCalibTools/SmearingCalibStep.h"
 #include "JetCalibTools/GSCCalibStep.h"
+#include "JetCalibTools/Generic4VecCorrectionStep.h"
 #include "JetCalibTools/InSituCalibStep.h"
 #include "JetCalibTools/InSituJMSCalibStep.h"
 #include "JetCalibTools/MuonInJetCorrectionTool.h"
@@ -21,6 +22,7 @@ DECLARE_COMPONENT( EtaJESCalibStep )
 DECLARE_COMPONENT( JMSCalibStep )
 DECLARE_COMPONENT( SmearingCalibStep )
 DECLARE_COMPONENT( GSCCalibStep )
+DECLARE_COMPONENT( Generic4VecCorrectionStep )
 DECLARE_COMPONENT( InSituCalibStep )
 DECLARE_COMPONENT( InSituJMSCalibStep )
 DECLARE_COMPONENT( MuonInJetCorrectionTool )
