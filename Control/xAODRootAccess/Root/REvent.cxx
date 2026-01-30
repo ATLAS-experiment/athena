@@ -422,65 +422,6 @@ StatusCode REvent::finishWritingTo(TFile& file) {
 
   model->AddField( ROOT::RFieldBase::Create( "EventFormat", efName ).Unwrap());
 
-  // //  Create RNTuple write for meta data with model
-  // auto metaDataWriter = ROOT::RNTupleWriter::Append(std::move(model), outRNTupleName, *m_outputFile);
-
-
-
-  // // RDS: loop over input meta data and record it for output - only for testing with Event::copy
-
-  // static const bool SILENT = false;
-
-  // // Loop over the known input containers.
-  // for (const auto& [key, vobjMgr] : m_inputMetaObjects) {
-
-  //   // // Make sure that the input object is properly updated.
-  //   // Object_t::const_iterator vobjMgr = m_inputMetaObjects.find(keyToUse);
-  //   // if (vobjMgr == m_inputMetaObjects.end()) {
-  //   //   ATH_MSG_FATAL("Internal logic error detected");
-  //   //   return StatusCode::FAILURE;
-  //   // }
-  //   Details::IObjectManager* objMgr =
-  //       dynamic_cast<Details::IObjectManager*>(vobjMgr.get());
-  //       // dynamic_cast<Details::IObjectManager*>(vobjMgr->second.get());
-  //   if (objMgr == nullptr) {
-  //     ATH_MSG_FATAL("Internal logic error detected");
-  //     return StatusCode::FAILURE;
-  //   }
-  //   static const bool METADATA = true;
-  //   if (getInputObject(key, *(objMgr->holder()->getClass()->GetTypeInfo()),
-  //                       SILENT, METADATA) == nullptr) {
-  //     ATH_MSG_FATAL("Internal logic error detected");
-  //     return StatusCode::FAILURE;
-  //   }
-
-  //   // Put the interface object into the output.
-  //   static const bool OVERWRITE = true;
-  //   static const bool IS_OWNER = true;
-  //   ATH_CHECK(record(objMgr->object(), objMgr->holder()->getClass()->GetName(),
-  //                     key, OVERWRITE, METADATA, IS_OWNER));
-
-  //   // If there is also an auxiliary store for this object/container, copy that
-  //   // as well.
-  //   const std::string auxKey = key + "Aux.";
-  //   if (m_inputMetaObjects.contains(auxKey)) {
-  //     ATH_CHECK(
-  //         recordAux(*(m_inputMetaObjects.at(auxKey)), key + "Aux.", METADATA));
-  //   }
-  // }
-
-
-
-
-
-
-
-
-
-
-
-
-
   // Loop over output meta data object managers and create the corresponding fields for the output model
 
   // Make sure that any dynamic auxiliary variables that
@@ -603,7 +544,7 @@ StatusCode REvent::finishWritingTo(TFile& file) {
 /// all input is force-read. This is necessary when writing out an event
 /// that was processed in a load-on-request manner.
 ///
-/// @param entry The entry from the input tree to load
+/// @param entry The entry from the input RNtuple to load
 /// @param getall Parameter deciding if partial reading should be used or
 ///               not.
 /// @returns The number of bytes read, or a negative number in case of an
@@ -798,12 +739,79 @@ bool REvent::hasOutput() const {
   return nbytes;
 }
 
-StatusCode REvent::getNames(const std::string& /*targetClassName*/,
-                            std::vector<std::string>& /*vkeys*/,
-                            bool /*metadata*/) const {
 
-  ATH_MSG_ERROR("xAOD::REvent::getNames not yet implemented");
-  return StatusCode::FAILURE;
+StatusCode REvent::getNames(const std::string& targetClassName,
+                         std::vector<std::string>& vkeys,
+                         bool metadata) const {
+
+  // The results go in here
+  std::set<std::string> keys;
+
+  // Get list of fields from
+  // the input metadata tree or input tree
+  
+  ROOT::RNTupleReader* reader = (metadata) ? m_metaReader.get() : m_eventReader.get();
+  if (reader == nullptr) {
+    ATH_MSG_ERROR("No input file is connected");
+    return StatusCode::FAILURE;
+  }
+  if (metadata) ATH_MSG_DEBUG("scanning input objects for metadata for type name " << targetClassName);
+  else          ATH_MSG_DEBUG("scanning input objects for event data for type name " << targetClassName);
+
+  // add in names for all top level fields
+  for (const auto &topLevelField : reader->GetDescriptor().GetTopLevelFields()) {
+      std::string objClassName = topLevelField.GetTypeName();
+      std::string key = topLevelField.GetFieldName();
+      if (objClassName == targetClassName) {
+        ATH_MSG_VERBOSE("Matched " << targetClassName << " to key " << key);
+        keys.insert(std::move(key));
+      }
+  }
+
+  // check output objects 
+  if (m_eventWriter && !metadata){
+      ATH_MSG_DEBUG("scanning output objects for type name " << targetClassName);
+      // add in names for all top level fields
+      for (const auto& topLevelFieldName : m_eventWriter->GetModel().GetRegisteredSubfieldNames()) {
+        auto& topLevelField = m_eventWriter->GetModel().GetConstField(topLevelFieldName);
+        std::string objClassName = topLevelField.GetTypeName();
+        std::string key = topLevelField.GetFieldName();
+        ATH_MSG_VERBOSE("Inspecting " << objClassName << "/" << key);
+      if (objClassName == targetClassName) {
+          ATH_MSG_VERBOSE("Matched " << targetClassName << " to key " << key);
+            keys.insert(std::move(key));
+        }
+      }
+  }
+
+  const Object_t& outAux = ( metadata ?
+                              m_outputMetaObjects : m_outputObjects );
+
+  // Search though EventFormat for entries where class matches the provided
+  // typeName
+  
+  ATH_MSG_DEBUG("scanning output Aux objects for type name " << targetClassName);
+
+  for( const auto& object : outAux ) {
+      // All metadata objects should be held by ROutObjManager objects.
+      // Anything else is an error.
+      std::string objClassName;
+      if ( metadata ) {
+        ROutObjManager* mgr = dynamic_cast< ROutObjManager* >( object.second.get() );
+        if ( ! mgr ) continue;
+        objClassName = mgr->holder()->getClass()->GetName();
+      }
+      const std::string& key = object.first;
+      ATH_MSG_VERBOSE("Inspecting " << objClassName << "/" << key);
+      if (objClassName == targetClassName) {
+        ATH_MSG_VERBOSE("Matched " << targetClassName << " to key " << key);
+        keys.insert(std::move(key));
+      }
+  }
+
+  vkeys.insert(vkeys.end(), keys.begin(), keys.end());
+
+  return StatusCode::SUCCESS;
 }
 
 /// This is one of the more important functions of the class. It connects the
@@ -847,15 +855,15 @@ StatusCode REvent::connectObject(const std::string& key, ::Bool_t silent) {
   }
 
   // Tell the user what's happening.
-  ATH_MSG_DEBUG("Connecting to branch \"" << key << "\"");
+  ATH_MSG_DEBUG("Connecting to field \"" << key << "\"");
 
   // Check if we have metadata about this branch.
   const xAOD::EventFormatElement* ef = nullptr;
 
   // RNTuples store fields with an "Aux:" postfix instead of "Aux.".
-  std::string key_to_read = key;
+  std::string fieldName = key;
   if (key.ends_with("Aux.")) {
-    key_to_read.replace(key_to_read.size() - 1, 1, ":");
+    fieldName.replace(fieldName.size() - 1, 1, ":");
   }
 
   if (m_inputEventFormat.exists(key) == false) {
@@ -867,23 +875,22 @@ StatusCode REvent::connectObject(const std::string& key, ::Bool_t silent) {
   }
 
   // Check if the field exists in our input RNTuple.
-  if (m_eventReader->GetDescriptor().FindFieldId(key_to_read.c_str()) ==
+  if (m_eventReader->GetDescriptor().FindFieldId(fieldName.c_str()) ==
       ROOT::kInvalidDescriptorId) {
     // Field doesn't exist
     if (!silent) {
-      ATH_MSG_WARNING("Field \"" << key_to_read << "\" not available on input");
+      ATH_MSG_WARNING("Field \"" << fieldName << "\" not available on input");
     }
     m_inputMissingObjects.insert(key);
     return StatusCode::RECOVERABLE;
   }
 
   // RDS: may need some logic here to get type from inputEventFormat rather than
-  // the view
-  //      to read in with automatic schema evolution
+  // the view to read in with automatic schema evolution
 
   // Get class name from the field
   ROOT::RNTupleView<void> view =
-      m_eventReader->GetView<void>(key_to_read.c_str(), nullptr);
+      m_eventReader->GetView<void>(fieldName.c_str(), nullptr);
   std::string className = view.GetField().GetTypeName();
   if (className == "") {
     if (ef) {
@@ -893,7 +900,7 @@ StatusCode REvent::connectObject(const std::string& key, ::Bool_t silent) {
     } else {
       ATH_MSG_ERROR(
           "Couldn't find an appropriate type with a dictionary for field \""
-          << key_to_read << "\"");
+          << fieldName << "\"");
       return StatusCode::FAILURE;
     }
   }
@@ -909,7 +916,7 @@ StatusCode REvent::connectObject(const std::string& key, ::Bool_t silent) {
     // Now we're in trouble...
     ATH_MSG_ERROR(
         "Couldn't find an appropriate type with a dictionary for field \""
-        << key_to_read << "\"");
+        << fieldName << "\"");
     return StatusCode::FAILURE;
   }
 
@@ -945,7 +952,7 @@ StatusCode REvent::connectObject(const std::string& key, ::Bool_t silent) {
 
   // Create the new manager object that will hold this EDM object.
   auto mgr = std::make_unique<RObjectManager>(
-      m_eventReader->GetView(key_to_read, ptr, className), m_entry,
+      m_eventReader->GetView(fieldName, ptr, className), m_entry,
       std::make_unique<THolder>(ptr, realClass));
   RObjectManager* mgrPtr = mgr.get();
   m_inputObjects[key] = std::move(mgr);
@@ -963,7 +970,7 @@ StatusCode REvent::connectObject(const std::string& key, ::Bool_t silent) {
 
   // Return gracefully.
   return StatusCode::SUCCESS;
-}
+} // connectObject
 
 /// This is the function doing the heavy lifting with creating metadata
 /// objects in memory out of the payload of the input file.
@@ -987,33 +994,32 @@ StatusCode REvent::connectMetaObject(const std::string& key, bool silent) {
   }
 
   // RNTuples store fields with an "Aux:" postfix instead of "Aux.".
-  std::string key_to_read = key;
+  std::string fieldName = key;
   if (key.ends_with("Aux.")) {
-    key_to_read.replace(key_to_read.size() - 1, 1, ":");
+    fieldName.replace(fieldName.size() - 1, 1, ":");
   }
 
   // Check if the field exists in our input RNTuple.
-  if (m_metaReader->GetDescriptor().FindFieldId(key_to_read.c_str()) ==
+  if (m_metaReader->GetDescriptor().FindFieldId(fieldName.c_str()) ==
       ROOT::kInvalidDescriptorId) {
     // Field doesn't exist
     if (!silent) {
-      ATH_MSG_WARNING("Field \"" << key_to_read << "\" not available on input");
+      ATH_MSG_WARNING("Field \"" << fieldName << "\" not available on input");
     }
     return StatusCode::RECOVERABLE;
   }
 
   // RDS: may need some logic here to get type from inputEventFormat rather than
-  // the view
-  //      to read in with automatic schema evolution
+  // the view to read in with automatic schema evolution
 
   // Get class name from the field
   ROOT::RNTupleView<void> view =
-      m_metaReader->GetView<void>(key_to_read.c_str(), nullptr);
+      m_metaReader->GetView<void>(fieldName.c_str(), nullptr);
   std::string className = view.GetField().GetTypeName();
   if (className == "") {
     ATH_MSG_ERROR(
         "Couldn't find an appropriate type with a dictionary for field \""
-        << key_to_read << "\"");
+        << fieldName << "\"");
     return StatusCode::FAILURE;
   }
   ::TClass* realClass = ::TClass::GetClass(className.c_str());
@@ -1021,7 +1027,7 @@ StatusCode REvent::connectMetaObject(const std::string& key, bool silent) {
     // Now we're in trouble...
     ATH_MSG_ERROR(
         "Couldn't find an appropriate type with a dictionary for field \""
-        << key_to_read << "\"");
+        << fieldName << "\"");
     return StatusCode::FAILURE;
   }
 
@@ -1029,7 +1035,7 @@ StatusCode REvent::connectMetaObject(const std::string& key, bool silent) {
   void* ptr = realClass->New();
   static const ::Long64_t FIRST_ENTRY = 0;
   auto mgr = std::make_unique<RObjectManager>(
-      m_metaReader->GetView(key_to_read, ptr, className), FIRST_ENTRY,
+      m_metaReader->GetView(fieldName, ptr, className), FIRST_ENTRY,
       std::make_unique<THolder>(ptr, realClass));
   // For metadata, we must read in the first entry - entry number already set by FIRST_ENTRY in constructor
   mgr->getEntry();
@@ -1052,11 +1058,10 @@ StatusCode REvent::connectMetaObject(const std::string& key, bool silent) {
 
   // Return gracefully.
   return StatusCode::SUCCESS;
-}
+} // connectMetaObject
 
 /// This function is used internally to connect an auxiliary object to
-/// the input. Based on the configuration of the object it will either
-/// use RAuxStore, or the EDM object that was used to write the auxiliary
+/// the input. This uses the EDM object that was used to write the auxiliary
 /// information in Athena.
 ///
 /// @param prefix The prefix (main branch name) of the auxiliary data
@@ -1095,8 +1100,7 @@ StatusCode REvent::connectAux(const std::string& prefix, ::Bool_t standalone) {
   }
 
   // Check if we can switch out the internal store of this object.
-  static const TClass* const holderClass =
-      TClass::GetClass(typeid(SG::IAuxStoreHolder));
+  static const TClass* const holderClass = TClass::GetClass(typeid(SG::IAuxStoreHolder));
   if (omgr->holder()->getClass()->InheritsFrom(holderClass) == false) {
     // Nope... So let's just end the journey here.
     return StatusCode::SUCCESS;
@@ -1128,8 +1132,7 @@ StatusCode REvent::connectAux(const std::string& prefix, ::Bool_t standalone) {
 }
 
 /// This function is used internally to connect an auxiliary metadata object
-/// to the input. Based on the configuration of the object it will either
-/// use TAuxStore, or the EDM object that was used to write the auxiliary
+/// to the input. This uses the EDM object that was used to write the auxiliary
 /// information in Athena.
 ///
 /// @param prefix The prefix (main branch name) of the auxiliary data
@@ -1344,8 +1347,8 @@ StatusCode REvent::record( void* obj,
                            bool isOwner ) {
 
 
-  // Check if we have an output tree when writing an event:
-  if ( !m_outputFile ) {
+  // Check if we have an output file when writing an event:
+  if ( !hasOutput() ) {
     ATH_MSG_FATAL("No output output file defined. Did you forget to call writeTo(...)?" );
     return StatusCode::FAILURE;
   }
