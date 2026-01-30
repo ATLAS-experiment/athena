@@ -123,6 +123,7 @@ if( NOT SIMULATIONBASE )
 	# Generation 5
 	ForwardTransportSvc
 	# Generation 6
+        ActsMaterial
         AFP_G4_SD
 	ALFA_G4_SD
 	ForwardRegionMgField
