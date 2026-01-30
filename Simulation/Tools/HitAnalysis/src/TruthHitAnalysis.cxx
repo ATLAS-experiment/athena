@@ -57,6 +57,38 @@ StatusCode TruthHitAnalysis::initialize() {
   m_h_vtx_r->StatOverflows();
   ATH_CHECK(histSvc()->regHist(m_path + m_h_vtx_r->GetName(), m_h_vtx_r));
 
+  m_h_vtx_proc_x = new TH1D("h_vtx_proc_x","vtx_proc_x", 100,-1300, 1300);
+  m_h_vtx_proc_x->StatOverflows();
+  ATH_CHECK(histSvc()->regHist(m_path + m_h_vtx_proc_x->GetName(), m_h_vtx_proc_x));
+
+  m_h_vtx_proc_y = new TH1D("h_vtx_proc_y","vtx_proc_y", 100,-1200, 1200);
+  m_h_vtx_proc_y->StatOverflows();
+  ATH_CHECK(histSvc()->regHist(m_path + m_h_vtx_proc_y->GetName(), m_h_vtx_proc_y));
+
+  m_h_vtx_proc_z = new TH1D("h_vtx_proc_z","vtx_proc_z", 100,-5000, 5000);
+  m_h_vtx_proc_z->StatOverflows();
+  ATH_CHECK(histSvc()->regHist(m_path + m_h_vtx_proc_z->GetName(), m_h_vtx_proc_z));
+
+  m_h_vtx_proc_r = new TH1D("h_vtx_proc_r","vtx_proc_r", 100,0, 1160);
+  m_h_vtx_proc_r->StatOverflows();
+  ATH_CHECK(histSvc()->regHist(m_path + m_h_vtx_proc_r->GetName(), m_h_vtx_proc_r));
+
+  m_h_vtx_prim_x = new TH1D("h_vtx_prim_x","vtx_prim_x", 100,-1300, 1300);
+  m_h_vtx_prim_x->StatOverflows();
+  ATH_CHECK(histSvc()->regHist(m_path + m_h_vtx_prim_x->GetName(), m_h_vtx_prim_x));
+
+  m_h_vtx_prim_y = new TH1D("h_vtx_prim_y","vtx_prim_y", 100,-1200, 1200);
+  m_h_vtx_prim_y->StatOverflows();
+  ATH_CHECK(histSvc()->regHist(m_path + m_h_vtx_prim_y->GetName(), m_h_vtx_prim_y));
+
+  m_h_vtx_prim_z = new TH1D("h_vtx_prim_z","vtx_prim_z", 100,-5000, 5000);
+  m_h_vtx_prim_z->StatOverflows();
+  ATH_CHECK(histSvc()->regHist(m_path + m_h_vtx_prim_z->GetName(), m_h_vtx_prim_z));
+
+  m_h_vtx_prim_r = new TH1D("h_vtx_prim_r","vtx_prim_r", 100,0, 1160);
+  m_h_vtx_prim_r->StatOverflows();
+  ATH_CHECK(histSvc()->regHist(m_path + m_h_vtx_prim_r->GetName(), m_h_vtx_prim_r));
+
   m_h_vtx_prim_xy = new TH2D("h_vtx_prim_xy","vtx_prim_xy", 100,-100, 100, 100,-100, 100);
   m_h_vtx_prim_xy->StatOverflows();
   ATH_CHECK(histSvc()->regHist(m_path + m_h_vtx_prim_xy->GetName(), m_h_vtx_prim_xy));
@@ -139,6 +171,16 @@ StatusCode TruthHitAnalysis::initialize() {
   m_tree->Branch("vtx_z", &m_vtx_z);
   m_tree->Branch("vtx_r", &m_vtx_r);
   m_tree->Branch("vtx_barcode", &m_vtx_barcode);
+  m_tree->Branch("vtx_proc_x", &m_vtx_proc_x);
+  m_tree->Branch("vtx_proc_y", &m_vtx_proc_y);
+  m_tree->Branch("vtx_proc_z", &m_vtx_proc_z);
+  m_tree->Branch("vtx_proc_r", &m_vtx_proc_r);
+  m_tree->Branch("vtx_proc_barcode", &m_vtx_proc_barcode);
+  m_tree->Branch("vtx_prim_x", &m_vtx_prim_x);
+  m_tree->Branch("vtx_prim_y", &m_vtx_prim_y);
+  m_tree->Branch("vtx_prim_z", &m_vtx_prim_z);
+  m_tree->Branch("vtx_prim_r", &m_vtx_prim_r);
+  m_tree->Branch("vtx_prim_barcode", &m_vtx_prim_barcode);
   m_tree->Branch("truth_px", &m_truth_px);
   m_tree->Branch("truth_py", &m_truth_py);
   m_tree->Branch("truth_pz", &m_truth_pz);
@@ -161,6 +203,16 @@ StatusCode TruthHitAnalysis::execute() {
   m_vtx_z->clear();
   m_vtx_r->clear();
   m_vtx_barcode->clear();
+  m_vtx_proc_x->clear();
+  m_vtx_proc_y->clear();
+  m_vtx_proc_z->clear();
+  m_vtx_proc_r->clear();
+  m_vtx_proc_barcode->clear();
+  m_vtx_prim_x->clear();
+  m_vtx_prim_y->clear();
+  m_vtx_prim_z->clear();
+  m_vtx_prim_r->clear();
+  m_vtx_prim_barcode->clear();
   m_truth_px->clear();
   m_truth_py->clear();
   m_truth_pz->clear();
@@ -180,6 +232,8 @@ StatusCode TruthHitAnalysis::execute() {
     if (currentGenEventIter != mcCollection->end()) {
       int nvtx = 0;
       int nvtx_sec=0;
+
+      const auto &procVtx = HepMC::signal_process_vertex(*currentGenEventIter);
 #ifdef HEPMC3
     const auto &barcodes = (*currentGenEventIter)->attribute<HepMC::GenEventBarcodes> ("barcodes");
     std::map<int,int> id_to_barcode_map;
@@ -206,9 +260,32 @@ StatusCode TruthHitAnalysis::execute() {
 	m_vtx_z->push_back(z);
 	m_vtx_barcode->push_back(bcode);
 
+  if (vtx == procVtx) {
+    m_h_vtx_proc_x->Fill(x);
+	  m_h_vtx_proc_y->Fill(y);
+	  m_h_vtx_proc_r->Fill(r);
+	  m_h_vtx_proc_z->Fill(z);
+
+    m_vtx_proc_x->push_back(x);
+    m_vtx_proc_y->push_back(y);
+    m_vtx_proc_r->push_back(r);
+    m_vtx_proc_z->push_back(z);
+    m_vtx_proc_barcode->push_back(bcode);
+  }
+
 	if (!HepMC::is_simulation_vertex(vtx)) {
+    m_h_vtx_prim_x->Fill(x);
+	  m_h_vtx_prim_y->Fill(y);
+	  m_h_vtx_prim_r->Fill(r);
+	  m_h_vtx_prim_z->Fill(z);
 	  m_h_vtx_prim_xy->Fill(x,y);
 	  m_h_vtx_prim_zr->Fill(z,r);
+
+    m_vtx_prim_x->push_back(x);
+    m_vtx_prim_y->push_back(y);
+    m_vtx_prim_r->push_back(r);
+    m_vtx_prim_z->push_back(z);
+    m_vtx_prim_barcode->push_back(bcode);
 	  ++nvtx;
 	}
 	else {
