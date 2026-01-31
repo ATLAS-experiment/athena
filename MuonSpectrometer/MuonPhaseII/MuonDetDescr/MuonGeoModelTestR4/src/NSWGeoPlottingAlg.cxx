@@ -62,7 +62,7 @@ StatusCode NswGeoPlottingAlg::execute() {
                     continue;                     
                 }
                 
-                const Amg::Vector3D globPos = plane.transform(gctx->context()) * locPos;
+                const Amg::Vector3D globPos = plane. localToGlobalTransform(gctx->context()) * locPos;
                 histo->Fill(globPos.x(), globPos.y());
             }
         }
@@ -97,7 +97,7 @@ StatusCode NswGeoPlottingAlg::execute() {
                          continue;                     
                       }
                   
-                      const Amg::Vector3D globPos = plane.transform(gctx->context()) * locPos;
+                      const Amg::Vector3D globPos = plane. localToGlobalTransform(gctx->context()) * locPos;
                       histo->Fill(globPos.x(), globPos.y());
                   }
               }
@@ -135,7 +135,7 @@ StatusCode NswGeoPlottingAlg::execute() {
                            continue;                     
                         }
                   
-                        const Amg::Vector3D globPos = plane.transform(gctx->context()) * locPos;
+                        const Amg::Vector3D globPos = plane. localToGlobalTransform(gctx->context()) * locPos;
                         histo->Fill(globPos.x(), globPos.y());
                     }
                 }

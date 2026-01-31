@@ -71,7 +71,7 @@ void ActsFatrasWriteHandler::createHits(const ISF::ISFParticle& isp,
       // get the ACTS surface
       try {
         auto acts_surface = trackingGeometry->findSurface(hit_geoid);
-        const ActsDetectorElement* acts_de = dynamic_cast<const ActsDetectorElement*>(acts_surface->associatedDetectorElement());
+        const ActsDetectorElement* acts_de = dynamic_cast<const ActsDetectorElement*>(acts_surface->surfacePlacement());
 
         const Trk::Surface& hitSurface = acts_de->atlasSurface();
         ATH_MSG_VERBOSE(name() << " Surface position global atlas: " << hitSurface.center());

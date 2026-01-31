@@ -244,7 +244,9 @@ def ActsPixelGbtsSeedingToolCfg(flags,
             acc.popToolsAndMerge(ITkTrigL2LayerNumberToolCfg(flags, **ntargs))
         )
     ## For ITkPixel, use default values for ActsTrk::GbtsSeedingTool
-    kwargs.setdefault("ConnectorInputFile" , find_datafile("binTables_ITK_RUN4.txt"))
+    kwargs.setdefault("connectorInputFile" , find_datafile("binTables_ITK_RUN4.txt"))
+    kwargs.setdefault("lutInputFile" , find_datafile("gbts_ml_pixel_barrel_loose.lut"))
+    kwargs.setdefault("minPt" , flags.Tracking.ActiveConfig.minPTSeed)
 
     acc.setPrivateTools(CompFactory.ActsTrk.GbtsSeedingTool(name = name, **kwargs))
     return acc

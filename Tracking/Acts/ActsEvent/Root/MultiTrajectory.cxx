@@ -22,7 +22,7 @@ constexpr std::optional<bool> has_impl(
     const xAOD::TrackStateAuxContainer* trackStates, Acts::HashedString key,
     ActsTrk::IndexType istate) {
   using namespace Acts::HashedStringLiteral;
-  using Acts::MultiTrajectoryTraits::kInvalid;
+  constexpr auto kInvalid = Acts::kTrackIndexInvalid;
   INSPECTCALL(key << " " << istate);
 
   switch (key) {
@@ -149,7 +149,7 @@ ActsTrk::IndexType ActsTrk::MutableMultiTrajectory::addTrackState_impl(
   m_surfaces.push_back(nullptr);
 
   // set kInvalid
-  using Acts::MultiTrajectoryTraits::kInvalid;
+  constexpr auto kInvalid = Acts::kTrackIndexInvalid;
 
   if (previous >= kInvalid - 1)
     previous = kInvalid;  // fix needed in Acts::MTJ
@@ -224,7 +224,7 @@ void ActsTrk::MutableMultiTrajectory::addTrackStateComponents_impl(
   assert(m_trackStatesAux && "Missing Track States backend");
 
   // set kInvalid
-  using Acts::MultiTrajectoryTraits::kInvalid;
+  constexpr auto kInvalid = Acts::kTrackIndexInvalid;
 
   using namespace Acts;
 
@@ -291,7 +291,7 @@ void ActsTrk::MutableMultiTrajectory::shareFrom_impl(
 
   using PM = Acts::TrackStatePropMask;
   // set kInvalid
-  using Acts::MultiTrajectoryTraits::kInvalid;
+  constexpr auto kInvalid = Acts::kTrackIndexInvalid;
 
   ActsTrk::IndexType sourceIndex{kInvalid};
   switch (shareSource) {
@@ -342,7 +342,7 @@ void ActsTrk::MutableMultiTrajectory::unset_impl(
 
   using PM = Acts::TrackStatePropMask;
   // set kInvalid
-  using Acts::MultiTrajectoryTraits::kInvalid;
+  constexpr auto kInvalid = Acts::kTrackIndexInvalid;
 
   switch (target) {
     case PM::Predicted:

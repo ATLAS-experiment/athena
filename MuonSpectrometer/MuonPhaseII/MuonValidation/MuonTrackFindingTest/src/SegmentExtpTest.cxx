@@ -62,7 +62,7 @@ namespace MuonValR4{
                                                             start.direction(), n,
                                                              n.dot(target.center(tgContext)));
 
-            const auto* detEl = static_cast<const ActsTrk::IDetectorElementBase*>(target.associatedDetectorElement());
+            const auto* detEl = static_cast<const ActsTrk::IDetectorElementBase*>(target.surfacePlacement());
             ATH_MSG_VERBOSE("Propagate "<<Amg::toString(start.position(tgContext))<<" + "
                   <<Amg::toString(start.direction())<<" onto surface: "<<target.toString(tgContext)
                   <<"\n, "<<m_idHelperSvc->toString(detEl->identify())
@@ -122,8 +122,8 @@ namespace MuonValR4{
                
                 const auto& bounds = targetSurf.bounds();
                 Amg::Vector2D lPos{Amg::Vector2D::Zero()};
-                const auto trf = targetSurf.transform(tgContext).inverse() *
-                                 sector->surface().transform(tgContext);
+                const auto trf = targetSurf.localToGlobalTransform(tgContext).inverse() *
+                                 sector->surface().localToGlobalTransform(tgContext);
                 if (targetSurf.type() == Acts::Surface::SurfaceType::Plane) {
                     lPos = (trf * SeedingAux::extrapolateToPlane(locPos, locDir, *meas)).block<2,1>(0,0);
                     if (!bounds.inside(lPos, Acts::BoundaryTolerance::AbsoluteEuclidean(-2._mm))){

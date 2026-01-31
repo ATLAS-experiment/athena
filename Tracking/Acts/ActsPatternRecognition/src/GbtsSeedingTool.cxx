@@ -2,6 +2,7 @@
   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
+#include <memory>
 #if defined(FLATTEN) && defined(__GNUC__)
 // Avoid warning in dbg build
 #pragma GCC optimize "-fno-var-tracking-assignments"
@@ -9,6 +10,7 @@
 
 #include "src/GbtsSeedingTool.h"
 #include "CxxUtils/inline_hints.h"
+
 
 namespace ActsTrk {
 
@@ -48,35 +50,23 @@ namespace ActsTrk {
     m_are_pixels.resize(m_layerNumberTool->maxNumberOfUniqueLayers(), true);
     for(const auto& l : *m_sct_h2l) m_are_pixels[l] = false;
     
-    //initiliase connection file 
-    std::ifstream input_ifstream(m_finderCfg.ConnectorInputFile.c_str(), std::ifstream::in); 
+    //parse connection 
 
-    //check to see if file exists and add custom eta binning (if needed)
-    // connector
-    if (input_ifstream.peek() == std::ifstream::traits_type::eof()) {
-
-    ATH_MSG_FATAL("Cannot find layer connections file ");
-    throw std::runtime_error("connection file not found"); //not sure if this is the right thing to do 
-    
-  }
-  
-  //create the connection objects
-  else {
-
-     m_connector =  std::make_unique<Acts::Experimental::GbtsConnector>(input_ifstream, m_finderCfg.LRTmode);
+    m_connector =  std::make_unique<Acts::Experimental::GbtsConnector>(m_finderCfg.connectorInputFile, m_finderCfg.LRTmode);
 
     // option that allows for adding custom eta binning (default is at 0.2)
     if (m_finderCfg.etaBinOverride != 0.0f) {
 
       m_connector->m_etaBin = m_finderCfg.etaBinOverride;
     }
-  }
-    
+  
     //create geoemtry object that holds allowed pairing of allowed eta regions in each layer 
     m_gbtsGeo = std::make_unique<Acts::Experimental::GbtsGeometry>( m_layerGeometry, m_connector);
 
+    m_finder = std::make_unique<Acts::Experimental::SeedFinderGbts>(m_finderCfg, std::move(m_gbtsGeo), &m_layerGeometry, logger().cloneWithSuffix("gbtsFinder"));
+    
     return StatusCode::SUCCESS;
-  }
+}
 
   //create seeds
   ATH_FLATTEN
@@ -103,6 +93,7 @@ namespace ActsTrk {
     //add new coloumn for layer ID and clusterwidth
     auto LayerColoumn = coreSpacePoints.createColumn<int>("LayerID");
     auto ClusterWidthColoumn = coreSpacePoints.createColumn<float>("Cluster_Width");
+    auto LocalPositionColoumn = coreSpacePoints.createColumn<float>("LocalPositionY");
     coreSpacePoints.reserve(spContainer.size());
 
     //add spacepoints to new container and seedContainer
@@ -118,32 +109,31 @@ namespace ActsTrk {
       if(isPixel == false) continue; //as currently strip hits are not used for seeding
     
 	    short layer = (isPixel ? m_pix_h2l : m_sct_h2l)->at(static_cast<int>(elementlist[0]));
-      //obtain coordinates
-      const auto& pos = extSP.globalPosition();	
+      //obtain coordinates	
 
       auto newSp = coreSpacePoints.createSpacePoint();
-
-      //assign link to original spacepoint (needed for seed container)
-      newSp.assignSourceLinks(
-          std::array<Acts::SourceLink, 1>{Acts::SourceLink(&extSP)}); 
 
       //apply beamspot corrections if needed
       if(m_finderCfg.BeamSpotCorrection){
         
-        newSp.x() = pos.x() - beamSpotPos[0];
-        newSp.y() = pos.y() - beamSpotPos[1];
-        newSp.z() = pos.z();
-        
+        float new_x = static_cast<float>(extSP.x() - beamSpotPos[0]);
+        float new_y = static_cast<float>(extSP.y() - beamSpotPos[1]);
+        newSp.x() = new_x;
+        newSp.y() = new_y;
+        newSp.z() = static_cast<float>(extSP.z());
+        newSp.r() = std::hypot(new_x, new_y);
+        newSp.phi() = std::atan2(new_y, new_x);
         
       }else{
-        
-        newSp.x() = pos.x();
-        newSp.y() = pos.y();
-        newSp.z() = pos.z();
-        
+        float new_x = static_cast<float>(extSP.x());
+        float new_y = static_cast<float>(extSP.y());
+        newSp.x() = static_cast<float>(extSP.x());
+        newSp.y() = static_cast<float>(extSP.y());
+        newSp.z() = static_cast<float>(extSP.z());
+        newSp.r() = std::hypot(new_x, new_y);
+        newSp.phi() = std::atan2(extSP.y(), extSP.x());
       }
-      newSp.r() = std::sqrt(std::pow(pos.x(), 2) + std::pow(pos.y(), 2));
-      newSp.phi() = std::atan2(pos.y(), pos.x());
+      
       newSp.extra(LayerColoumn) = layer;
       
       if(m_finderCfg.useML){
@@ -151,24 +141,23 @@ namespace ActsTrk {
           assert(dynamic_cast<const xAOD::PixelCluster*>(extSP.measurements().front())!=nullptr);
           const xAOD::PixelCluster* pCL = static_cast<const xAOD::PixelCluster*>(extSP.measurements().front());
           newSp.extra(ClusterWidthColoumn) = pCL->widthInEta();
+          newSp.extra(LocalPositionColoumn) = pCL->localPosition<2>().y();
           
         }else{
-          newSp.extra(ClusterWidthColoumn) = 0 ;
+          newSp.extra(ClusterWidthColoumn) = 0;
+          newSp.extra(LocalPositionColoumn) = 0;
           
         }
     }    
     ATH_MSG_VERBOSE("Spacepoints successfully added to new container");
     
     //collect all spacepoint containers objects so they can be passed into the seedfinder
-    auto SPContainerComponents = std::make_tuple(std::move(coreSpacePoints), LayerColoumn.asConst(), ClusterWidthColoumn.asConst());
-    
-    //define ACTS core algorithm
-    Acts::Experimental::SeedFinderGbts finder(m_finderCfg, m_gbtsGeo.get(), &m_layerGeometry);
+    auto SPContainerComponents = std::make_tuple(std::move(coreSpacePoints), LayerColoumn.asConst(), ClusterWidthColoumn.asConst(), LocalPositionColoumn.asConst());
 
     //compute seeds
     int max_layers = m_are_pixels.size(); 
     Acts::Experimental::RoiDescriptor internalRoi(0, -4.5, 4.5, 0, -std::numbers::pi, std::numbers::pi, 0, -150.0,150.0); //(eta,etaMinus,etaPlus,phi,phiMinus,Phiplus,z,zMinus,zPlus)
-    Acts::SeedContainer2 seeds = finder.CreateSeeds(internalRoi, SPContainerComponents, max_layers); 
+    Acts::SeedContainer2 seeds = m_finder->createSeeds(internalRoi, SPContainerComponents, max_layers); 
     
     
     //add seeds to the output container
@@ -184,6 +173,7 @@ namespace ActsTrk {
   
   //this is called in initialise
   //adds all veriables that may have been changed in the gaudi properties defined in headerfile 
+  //TO DO: ADD NEW VERIABLES, DELETE OLD ONES AND CHANGE CURRENT ONES TO NEW VALUES 
   StatusCode
   GbtsSeedingTool::prepareConfiguration()
   {
@@ -194,9 +184,8 @@ namespace ActsTrk {
     m_finderCfg.useOldTunings = m_useOldTunings;
     m_finderCfg.etaBinOverride = m_etaBinOverride;
     m_finderCfg.BeamSpotCorrection = m_BeamSpotCorrection;
-    m_finderCfg.sigma_t = m_sigma_t;
-    m_finderCfg.sigma_w = m_sigma_w;
     m_finderCfg.sigmaMS = m_sigmaMS;
+    m_finderCfg.radLen = m_radLen;
     m_finderCfg.sigma_x = m_sigma_x;
     m_finderCfg.sigma_y = m_sigma_y;
     m_finderCfg.weight_x = m_weight_x;
@@ -208,14 +197,22 @@ namespace ActsTrk {
     m_finderCfg.phiSliceWidth = m_phiSliceWidth ;
     m_finderCfg.nMaxPhiSlice = m_nMaxPhiSlice;
     m_finderCfg.useML = m_useML;
-    m_finderCfg.ConnectorInputFile = m_ConnectorInputFile;
+    m_finderCfg.connectorInputFile = m_connectorInputFile;
+    m_finderCfg.lutInputFile = m_lutFile;
     m_finderCfg.useEtaBinning = m_useEtaBinning;
     m_finderCfg.doubletFilterRZ = m_doubletFilterRZ ;
     m_finderCfg.minDeltaRadius = m_minDeltaRadius;
     m_finderCfg.nMaxEdges = m_nMaxEdges;
     m_finderCfg.tau_ratio_cut = m_tau_ratio_cut; 
+    m_finderCfg.tau_ratio_precut = m_tau_ratio_precut;
     m_finderCfg.ptCoeff = m_ptCoeff;
+    m_finderCfg.max_curvature = m_max_curvature;
+    m_finderCfg.max_z0 = m_max_z0;
+    m_finderCfg.edge_mask_min_eta = m_edge_mask_min_eta;
+    m_finderCfg.hit_share_threshold = m_hit_share_threshold;
+    m_finderCfg.max_endcap_clusterwidth = m_max_endcap_clusterwidth;
     m_finderCfg = m_finderCfg.toInternalUnits();
+
 
 
     return StatusCode::SUCCESS;
@@ -224,11 +221,13 @@ namespace ActsTrk {
   void GbtsSeedingTool::printSeedFinderGbtsConfig(const Acts::Experimental::SeedFinderGbtsConfig& cfg) {
   ATH_MSG_DEBUG("===== SeedFinderGbtsConfig =====");
   ATH_MSG_DEBUG( "BeamSpotCorrection: " << cfg.BeamSpotCorrection << " (default: false)");
-  ATH_MSG_DEBUG( "ConnectorInputFile: " << cfg.ConnectorInputFile << " (default: empty string)");
+  ATH_MSG_DEBUG( "connectorInputFile: " << cfg.connectorInputFile << " (default: empty string)");
+  ATH_MSG_DEBUG( "lutInputFile: " << cfg.lutInputFile << " (default: empty string)");
   ATH_MSG_DEBUG( "LRTmode: " << cfg.LRTmode << " (default: false)");
   ATH_MSG_DEBUG( "useML: " << cfg.useML << " (default: false)");
   ATH_MSG_DEBUG( "matchBeforeCreate: " << cfg.matchBeforeCreate << " (default: false)");
   ATH_MSG_DEBUG( "useOldTunings: " << cfg.useOldTunings << " (default: false)");
+  ATH_MSG_DEBUG( "tau_ratio_precut: " << cfg.tau_ratio_precut << " (default: 0.009f)");
   ATH_MSG_DEBUG( "tau_ratio_cut: " << cfg.tau_ratio_cut << " (default: 0.007)");
   ATH_MSG_DEBUG( "etaBinOverride: " << cfg.etaBinOverride << " (default: 0.0)");
   ATH_MSG_DEBUG( "nMaxPhiSlice: " << cfg.nMaxPhiSlice << " (default: 53)");
@@ -239,18 +238,21 @@ namespace ActsTrk {
   ATH_MSG_DEBUG( "doubletFilterRZ: " << cfg.doubletFilterRZ << " (default: true)");
   ATH_MSG_DEBUG( "nMaxEdges: " << cfg.nMaxEdges << " (default: 2000000)");
   ATH_MSG_DEBUG( "minDeltaRadius: " << cfg.minDeltaRadius << " (default: 2.0)");
-  ATH_MSG_DEBUG( "sigma_t: " << cfg.sigma_t << " (default: 0.0003)");
-  ATH_MSG_DEBUG( "sigma_w: " << cfg.sigma_w << " (default: 0.00009)");
   ATH_MSG_DEBUG( "sigmaMS: " << cfg.sigmaMS << " (default: 0.016)");
-  ATH_MSG_DEBUG( "sigma_x: " << cfg.sigma_x << " (default: 0.25)");
-  ATH_MSG_DEBUG( "sigma_y: " << cfg.sigma_y << " (default: 2.5)");
+  ATH_MSG_DEBUG( "radLen: " << cfg.radLen << " (default: 0.025)");
+  ATH_MSG_DEBUG( "sigma_x: " << cfg.sigma_x << " (default: 0.08)");
+  ATH_MSG_DEBUG( "sigma_y: " << cfg.sigma_y << " (default: 0.25)");
   ATH_MSG_DEBUG( "weight_x: " << cfg.weight_x << " (default: 0.5)");
   ATH_MSG_DEBUG( "weight_y: " << cfg.weight_y << " (default: 0.5)");
-  ATH_MSG_DEBUG( "maxDChi2_x: " << cfg.maxDChi2_x << " (default: 60.0)");
-  ATH_MSG_DEBUG( "maxDChi2_y: " << cfg.maxDChi2_y << " (default: 60.0)");
+  ATH_MSG_DEBUG( "maxDChi2_x: " << cfg.maxDChi2_x << " (default: 5.0)");
+  ATH_MSG_DEBUG( "maxDChi2_y: " << cfg.maxDChi2_y << " (default: 6.0)");
   ATH_MSG_DEBUG( "add_hit: " << cfg.add_hit << " (default: 14.0)");
+  ATH_MSG_DEBUG( "max_curvature: " << cfg.max_curvature << " (default: 1e-3f)");
+  ATH_MSG_DEBUG( "max_z0: " << cfg.max_z0 << " (default: 170.0)");
+  ATH_MSG_DEBUG( "edge_mask_min_eta: " << cfg.edge_mask_min_eta << " (default: 1.5)");
+  ATH_MSG_DEBUG( "hit_share_threshold: " << cfg.hit_share_threshold << " (default: 0.49)");
+  ATH_MSG_DEBUG( "max_endcap_clusterwidth: " << cfg.max_endcap_clusterwidth << " (default: 0.35)");
 
-  
 }
 
 } // namespace ActsTrk

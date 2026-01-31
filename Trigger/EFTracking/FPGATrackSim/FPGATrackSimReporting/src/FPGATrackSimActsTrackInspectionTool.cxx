@@ -40,11 +40,11 @@ FPGATrackSimActsEventTracks FPGATrackSim::ActsTrackInspectionTool::getActsTracks
                                 {   pixelCluster->globalPosition().x(),
                                     pixelCluster->globalPosition().y(),
                                     pixelCluster->globalPosition().z() },
-                                state.typeFlags().test(Acts::TrackStateFlag::MeasurementFlag),
-                                state.typeFlags().test(Acts::TrackStateFlag::OutlierFlag),
-                                state.typeFlags().test(Acts::TrackStateFlag::HoleFlag),
-                                state.typeFlags().test(Acts::TrackStateFlag::MaterialFlag),
-                                state.typeFlags().test(Acts::TrackStateFlag::SharedHitFlag) }));
+                                state.typeFlags().test(Acts::TrackStateFlag::HasMeasurement),
+                                state.typeFlags().test(Acts::TrackStateFlag::IsOutlier),
+                                state.typeFlags().test(Acts::TrackStateFlag::IsHole),
+                                state.typeFlags().test(Acts::TrackStateFlag::HasMaterial),
+                                state.typeFlags().test(Acts::TrackStateFlag::IsSharedHit) }));
                         }
                         else if (measurement.type() == xAOD::UncalibMeasType::StripClusterType) {
                             const xAOD::StripCluster* stripCluster = static_cast<const xAOD::StripCluster*>(&measurement);
@@ -54,11 +54,11 @@ FPGATrackSimActsEventTracks FPGATrackSim::ActsTrackInspectionTool::getActsTracks
                                 {   stripCluster->globalPosition().x(),
                                     stripCluster->globalPosition().y(),
                                     stripCluster->globalPosition().z()},
-                                state.typeFlags().test(Acts::TrackStateFlag::MeasurementFlag),
-                                state.typeFlags().test(Acts::TrackStateFlag::OutlierFlag),
-                                state.typeFlags().test(Acts::TrackStateFlag::HoleFlag),
-                                state.typeFlags().test(Acts::TrackStateFlag::MaterialFlag),
-                                state.typeFlags().test(Acts::TrackStateFlag::SharedHitFlag) }));
+                                state.typeFlags().test(Acts::TrackStateFlag::HasMeasurement),
+                                state.typeFlags().test(Acts::TrackStateFlag::IsOutlier),
+                                state.typeFlags().test(Acts::TrackStateFlag::IsHole),
+                                state.typeFlags().test(Acts::TrackStateFlag::HasMaterial),
+                                state.typeFlags().test(Acts::TrackStateFlag::IsSharedHit) }));
                         }
 
                     }
@@ -120,7 +120,7 @@ std::string FPGATrackSim::ActsTrackInspectionTool::getPrintoutActsEventTracks(
 
 
 std::string FPGATrackSim::ActsTrackInspectionTool::getPrintoutStatistics(
-    const std::map<std::string, std::map<uint32_t, std::vector<uint32_t>> >& tracksForAllEvents) const
+    const std::map<std::string, std::map<Acts::TrackStateFlag, std::vector<uint32_t>> >& tracksForAllEvents) const
 {
     std::ostringstream printoutTable;
     printoutTable << "Printing out ACTS statistics";
@@ -131,14 +131,14 @@ std::string FPGATrackSim::ActsTrackInspectionTool::getPrintoutStatistics(
     {
         printoutTable << std::format("\n| {:>33} | {:>14.2f} | {:>18.2f} | {:>11.2f} |",
             collection.first,
-            collection.second.at(Acts::TrackStateFlag::OutlierFlag).size() ?
-                    std::accumulate(collection.second.at(Acts::TrackStateFlag::OutlierFlag).begin(),
-                                    collection.second.at(Acts::TrackStateFlag::OutlierFlag).end(), 0.0)
-                    / collection.second.at(Acts::TrackStateFlag::OutlierFlag).size() : 0,
+            collection.second.at(Acts::TrackStateFlag::IsOutlier).size() ?
+                    std::accumulate(collection.second.at(Acts::TrackStateFlag::IsOutlier).begin(),
+                                    collection.second.at(Acts::TrackStateFlag::IsOutlier).end(), 0.0)
+                    / collection.second.at(Acts::TrackStateFlag::IsOutlier).size() : 0,
 
-            collection.second.at(Acts::TrackStateFlag::MeasurementFlag).size() ? std::accumulate(collection.second.at(Acts::TrackStateFlag::MeasurementFlag).begin(), collection.second.at(Acts::TrackStateFlag::MeasurementFlag).end(), 0.0) / collection.second.at(Acts::TrackStateFlag::MeasurementFlag).size() : 0,
+            collection.second.at(Acts::TrackStateFlag::HasMeasurement).size() ? std::accumulate(collection.second.at(Acts::TrackStateFlag::HasMeasurement).begin(), collection.second.at(Acts::TrackStateFlag::HasMeasurement).end(), 0.0) / collection.second.at(Acts::TrackStateFlag::HasMeasurement).size() : 0,
 
-            collection.second.at(Acts::TrackStateFlag::HoleFlag).size() ? std::accumulate(collection.second.at(Acts::TrackStateFlag::HoleFlag).begin(), collection.second.at(Acts::TrackStateFlag::HoleFlag).end(), 0.0) / collection.second.at(Acts::TrackStateFlag::HoleFlag).size() : 0);
+            collection.second.at(Acts::TrackStateFlag::IsHole).size() ? std::accumulate(collection.second.at(Acts::TrackStateFlag::IsHole).begin(), collection.second.at(Acts::TrackStateFlag::IsHole).end(), 0.0) / collection.second.at(Acts::TrackStateFlag::IsHole).size() : 0);
     }
     printoutTable << "\n|---------------------------------------------------------------------------------------|";
     return printoutTable.str();

@@ -67,10 +67,8 @@ private:
   ToolHandle<IActsVolumeMappingTool>              m_volumeMappingTool{this, "VolumeMappingTool", "ActsVolumeMappingTool"};
   ToolHandle<IActsMaterialJsonWriterTool>         m_materialJsonWriterTool{this, "MaterialJsonWriterTool", "ActsMaterialJsonWriterTool"};
 
-  Acts::MagneticFieldContext                      m_mctx{};
-  Acts::GeometryContext                           m_gctx{};
-  Acts::SurfaceMaterialMapper::State              m_mappingState{m_gctx, m_mctx};
-  Acts::VolumeMaterialMapper::State               m_mappingStateVol{m_gctx,m_mctx};
+  std::optional<Acts::SurfaceMaterialMapper::State> m_mappingState;
+  std::optional<Acts::VolumeMaterialMapper::State>  m_mappingStateVol;
 };
 
 #endif // ActsGeometry_ActsExtrapolation_h

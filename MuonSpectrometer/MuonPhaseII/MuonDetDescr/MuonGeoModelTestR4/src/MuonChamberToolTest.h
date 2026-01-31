@@ -38,9 +38,9 @@ class MuonChamberToolTest: public AthReentrantAlgorithm {
     
     private:
         /** @brief Returns the 8 edge points from a trapezoidal / cuboid volume */
-        std::array<Amg::Vector3D, 8> cornerPoints(const Acts::Volume& volume) const;
-        std::array<Amg::Vector3D, 8> cornerPoints(const Acts::GeometryContext& gctx, const Acts::StrawSurface& surface) const;
-        std::array<Amg::Vector3D, 4> cornerPoints(const Acts::GeometryContext& gctx, const Acts::PlaneSurface&) const;
+        std::array<Amg::Vector3D, 8> cornerPoints(const ActsTrk::GeometryContext& gctx, const Acts::Volume& volume) const;
+        std::array<Amg::Vector3D, 8> cornerPoints(const ActsTrk::GeometryContext& gctx, const Acts::StrawSurface& surface) const;
+        std::array<Amg::Vector3D, 4> cornerPoints(const ActsTrk::GeometryContext& gctx, const Acts::PlaneSurface&) const;
         
         
         void saveEnvelope(const ActsTrk::GeometryContext& gctx,
@@ -59,31 +59,38 @@ class MuonChamberToolTest: public AthReentrantAlgorithm {
         
         /** @brief Checks whether the point is inside of an envelope object, i.e.
          *         the spectrometer sector or the chamber
+         *  @param gctx: Geometry context carrying the aligned local -> global transfors
          *  @param envelope: Reference to the envelope to check
          *  @param boundVol: Reference to the bounding volume representing the envelope
          *  @param point: Point that needs to be inside the volume
          *  @param descr: Description of the point
          *  @param channelId: Identifier for more information if the point is outside */
         template <class EnvelopeType>        
-            StatusCode pointInside(const EnvelopeType& envelope,
+            StatusCode pointInside(const ActsTrk::GeometryContext& gctx,
+                                   const EnvelopeType& envelope,
                                    const Acts::Volume& boundVol,
                                    const Amg::Vector3D& point,
                                    const std::string& descr,
                                    const Identifier& channelId) const;
-
         /** @brief Checks whether the point is inside a tracking volume
+         *  @param gctx: Geometry context carrying the aligned local -> global transfors
          *  @param volume: Reference to the tracking volume to check
          *  @param point: Point that needs to be inside the volume
          *  @param descr: Description of the point
          *  @param chamberId: Identifier for more information if the point is outside */
-        StatusCode pointInside(const Acts::TrackingVolume& volume,
-                                  const Amg::Vector3D& point,
-                                  const std::string& descr,
-                                  const Identifier& chamberId) const;
-                          
-        bool hasOverlap(const std::array<Amg::Vector3D, 8>& chamberEdges,
+        StatusCode pointInside(const ActsTrk::GeometryContext& gctx,
+                               const Acts::TrackingVolume& volume,
+                               const Amg::Vector3D& point,
+                               const std::string& descr,
+                               const Identifier& chamberId) const;
+        /** @brief Checks whether the 8 edge point from a trapezoid/cuboid form a volume
+         *         overlapping with the given volume
+         *  @param gctx: Geometry context carrying all alignment & global transformations
+         *  @param chamberEdges: Edge points of the volume that might overlap
+         *  @param volume: Second volume used for the overlap checking */           
+        bool hasOverlap(const ActsTrk::GeometryContext& gctx,
+                        const std::array<Amg::Vector3D, 8>& chamberEdges,
                         const Acts::Volume& volume) const;
-
         /** @brief Checks whether all channels of a given readout element are fully covered by the
          *         envelope.
          *  @param gctx: Geometry context carrying all alignment & global transformations

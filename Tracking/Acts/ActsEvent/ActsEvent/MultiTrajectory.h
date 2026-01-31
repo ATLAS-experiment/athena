@@ -177,9 +177,9 @@ class MutableMultiTrajectory final
    * @return TrackStateProxy::Parameters
    */
 
-  typename ConstTrackStateProxy::Parameters parameters_impl(
+  typename ConstTrackStateProxy::ConstParameters parameters_impl(
       ActsTrk::IndexType index) const {
-    return typename ConstTrackStateProxy::Parameters{m_trackParametersAux->params[index].data()};
+    return typename ConstTrackStateProxy::ConstParameters{m_trackParametersAux->params[index].data()};
   }
 
   typename TrackStateProxy::Parameters parameters_impl(ActsTrk::IndexType index) {
@@ -192,9 +192,9 @@ class MutableMultiTrajectory final
    * @param index
    * @return TrackStateProxy::Covariance
    */
-  typename ConstTrackStateProxy::Covariance covariance_impl(
+  typename ConstTrackStateProxy::ConstCovariance covariance_impl(
       ActsTrk::IndexType index) const {
-    return typename ConstTrackStateProxy::Covariance{m_trackParametersAux->covMatrix[index].data()};
+    return typename ConstTrackStateProxy::ConstCovariance{m_trackParametersAux->covMatrix[index].data()};
   }
   typename TrackStateProxy::Covariance covariance_impl(ActsTrk::IndexType index) {
     return typename TrackStateProxy::Covariance{m_trackParametersAux->covMatrix[index].data()};
@@ -224,10 +224,10 @@ class MutableMultiTrajectory final
    * @return TrackStateProxy::Covariance
    */
 
-  inline typename ConstTrackStateProxy::Covariance jacobian_impl(
+  inline typename ConstTrackStateProxy::ConstCovariance jacobian_impl(
       ActsTrk::IndexType istate) const {
     xAOD::TrackStateIndexType jacIdx = m_trackStatesAux->jacobian[istate];
-    return typename ConstTrackStateProxy::Covariance{m_trackJacobiansAux->jac[jacIdx].data()};
+    return typename ConstTrackStateProxy::ConstCovariance{m_trackJacobiansAux->jac[jacIdx].data()};
   }
 
   typename TrackStateProxy::Covariance jacobian_impl(ActsTrk::IndexType istate) {
@@ -243,10 +243,10 @@ class MutableMultiTrajectory final
    */
 
   template <std::size_t measdim>
-  inline typename ConstTrackStateProxy::template Calibrated<measdim>
+  inline typename ConstTrackStateProxy::template ConstCalibrated<measdim>
   calibrated_impl(ActsTrk::IndexType index) const {
     xAOD::TrackStateIndexType measIdx = m_trackStatesAux->calibrated[index];
-    return typename ConstTrackStateProxy::template Calibrated<measdim>{m_trackMeasurementsAux->meas[measIdx].data()};
+    return typename ConstTrackStateProxy::template ConstCalibrated<measdim>{m_trackMeasurementsAux->meas[measIdx].data()};
   }
 
   template <std::size_t measdim, bool Enable = true>
@@ -265,10 +265,10 @@ class MutableMultiTrajectory final
    */
 
   template <std::size_t measdim>
-  inline typename ConstTrackStateProxy::template CalibratedCovariance<measdim>
+  inline typename ConstTrackStateProxy::template ConstCalibratedCovariance<measdim>
   calibratedCovariance_impl(ActsTrk::IndexType index) const {
     xAOD::TrackStateIndexType measIdx = m_trackStatesAux->calibrated[index];
-    return ConstTrackStateProxy::template CalibratedCovariance<measdim>{m_trackMeasurementsAux->covMatrix[measIdx].data()};
+    return ConstTrackStateProxy::template ConstCalibratedCovariance<measdim>{m_trackMeasurementsAux->covMatrix[measIdx].data()};
   }
   template <std::size_t measdim, bool Enable = true>
   std::enable_if_t<
@@ -437,34 +437,34 @@ class MultiTrajectory
 
   bool hasColumn_impl(Acts::HashedString key) const;
 
-  typename ConstTrackStateProxy::Parameters parameters_impl(
+  typename ConstTrackStateProxy::ConstParameters parameters_impl(
       ActsTrk::IndexType index) const {
-    return typename ConstTrackStateProxy::Parameters{m_trackParametersAux->params[index].data()};
+    return typename ConstTrackStateProxy::ConstParameters{m_trackParametersAux->params[index].data()};
   }
 
-  typename ConstTrackStateProxy::Covariance covariance_impl(
+  typename ConstTrackStateProxy::ConstCovariance covariance_impl(
       ActsTrk::IndexType index) const {
-    return  typename ConstTrackStateProxy::Covariance{m_trackParametersAux->covMatrix[index].data()};
+    return  typename ConstTrackStateProxy::ConstCovariance{m_trackParametersAux->covMatrix[index].data()};
   }
 
-  inline typename ConstTrackStateProxy::Covariance jacobian_impl(
+  inline typename ConstTrackStateProxy::ConstCovariance jacobian_impl(
       ActsTrk::IndexType istate) const {
     xAOD::TrackStateIndexType jacIdx = m_trackStatesAux->jacobian[istate];
-    return typename ConstTrackStateProxy::Covariance{m_trackJacobiansAux->jac[jacIdx].data()};
+    return typename ConstTrackStateProxy::ConstCovariance{m_trackJacobiansAux->jac[jacIdx].data()};
   }
 
   template <std::size_t measdim>
-  inline typename ConstTrackStateProxy::template Calibrated<measdim>
+  inline typename ConstTrackStateProxy::template ConstCalibrated<measdim>
   calibrated_impl(IndexType istate) const {
     xAOD::TrackStateIndexType measIdx = m_trackStatesAux->calibrated[istate];
-    return typename ConstTrackStateProxy::template Calibrated<measdim>{m_trackMeasurementsAux->meas[measIdx].data()};
+    return typename ConstTrackStateProxy::template ConstCalibrated<measdim>{m_trackMeasurementsAux->meas[measIdx].data()};
   }
 
   template <std::size_t measdim>
-  inline typename ConstTrackStateProxy::template CalibratedCovariance<measdim>
+  inline typename ConstTrackStateProxy::template ConstCalibratedCovariance<measdim>
   calibratedCovariance_impl(IndexType index) const {
     xAOD::TrackStateIndexType measIdx = m_trackStatesAux->calibrated[index];
-    return typename ConstTrackStateProxy::template CalibratedCovariance<measdim>{m_trackMeasurementsAux->covMatrix[measIdx].data()};
+    return typename ConstTrackStateProxy::template ConstCalibratedCovariance<measdim>{m_trackMeasurementsAux->covMatrix[measIdx].data()};
   }
   inline Acts::TrackIndexType size_impl() const { return m_trackStatesAux->size(); }
 

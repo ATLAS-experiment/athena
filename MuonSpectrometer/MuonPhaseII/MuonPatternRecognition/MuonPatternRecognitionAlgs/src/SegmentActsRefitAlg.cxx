@@ -157,12 +157,12 @@ namespace MuonR4{
 
             const auto* refMeas = startMeas.front();
 
-            const Amg::Vector3D firstSurfPos{surfAcc.get(refMeas)->transform(tgContext).translation()};
+            const Amg::Vector3D firstSurfPos{surfAcc.get(refMeas)->localToGlobalTransform(tgContext).translation()};
 
             if (reFitMe->nPhiLayers() < 1) {
                 const Amg::Vector3D planeNormal = sectorTrf.linear().col(2);
 
-                const Amg::Vector3D lastSurfPos = surfAcc.get(startMeas.back())->transform(tgContext).translation();
+                const Amg::Vector3D lastSurfPos = surfAcc.get(startMeas.back())->localToGlobalTransform(tgContext).translation();
                 /// We add two pseudo measurements above & beneath the segment to stabilize the  fit
                 
                 const Amg::Transform3D trfBeneath = GeoTrf::GeoTransformRT{sectorAngles, firstSurfPos - pseudoSurfDist * planeNormal}; 

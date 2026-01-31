@@ -79,7 +79,7 @@ namespace ActsTrk {
 						   (const auto state) -> bool
 						   {
 						     // only consider measurements
-						     if (not state.typeFlags().test(Acts::TrackStateFlag::MeasurementFlag)) return true;
+						     if (not state.typeFlags().isMeasurement()) return true;
 						     ++nMeasurements;
 						     // Check it has link to uncalibrated cluster
 						     if ( not state.hasUncalibratedSourceLink() ) {

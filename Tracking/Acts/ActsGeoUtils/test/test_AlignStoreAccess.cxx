@@ -42,8 +42,8 @@ class TestDetElement : public ActsTrk::IDetectorElement, public GeoVDetectorElem
             m_cache.getTransform(&store);
             return 1;
         }
-        const Amg::Transform3D& transform(const Acts::GeometryContext& gctx) const override final {
-            return m_cache.transform(gctx);
+        const Amg::Transform3D& localToGlobalTransform(const Acts::GeometryContext& gctx) const override final {
+            return m_cache.localToGlobalTransform(gctx);
         }
         const Acts::Surface& surface() const override final  {
             static const std::shared_ptr<Acts::Surface> surf{};
@@ -53,7 +53,7 @@ class TestDetElement : public ActsTrk::IDetectorElement, public GeoVDetectorElem
             static const std::shared_ptr<Acts::Surface> surf{};
             return *surf;
         }
-        double thickness() const override final { return 0.;}
+        bool isSensitive() const override final { return true; }
 
     private:
         ActsTrk::TransformCacheDetEle<TestDetElement> m_cache{IdentifierHash{1}, this};
@@ -105,7 +105,7 @@ class WorkerTask : public GeoThreading::ThreadPool::IThreadTask {
                 if (find_itr == m_trfMap.end()) {
                     THROW_EXCEPTION("Detector element not in reference transform map");
                 }
-                const Amg::Transform3D& trf{det->transform(gctx.context())};
+                const Amg::Transform3D& trf{det->localToGlobalTransform(gctx.context())};
                 if (!Amg::isIdentity(trf.inverse() * find_itr->second)){
                     THROW_EXCEPTION("Different alignment detected "<<std::endl
                         <<" ***    found: "<<Amg::toString(trf)<<std::endl
@@ -172,8 +172,8 @@ int main() {
                                                  Amg::getTranslateZ3D(d+6)* 
                                                  Amg::getRotateX3D(M_PI);
                 const auto* detEle = detElements[k*nDetPerAlign + d].get();
-                const Amg::Transform3D& uDetTrf{detEle->transform(uGctx.context())};
-                if (!Amg::isIdentity(uExpTrf *  detEle->transform(uGctx.context()).inverse())){
+                const Amg::Transform3D& uDetTrf{detEle->localToGlobalTransform(uGctx.context())};
+                if (!Amg::isIdentity(uExpTrf *  detEle->localToGlobalTransform(uGctx.context()).inverse())){
                     std::cerr<<"Detector element is not where it's expected: "<<std::endl
                              <<" ** expect: "<<Amg::toString(uExpTrf)<<std::endl
                              <<" **  found: "<<Amg::toString(uDetTrf)<<std::endl;
@@ -183,8 +183,8 @@ int main() {
                 const Amg::Transform3D aExpTrf = baseAlTrf * 
                                                  Amg::getTranslateZ3D(d+6)* 
                                                  Amg::getRotateX3D(M_PI);
-                const Amg::Transform3D& aDetTrf{detEle->transform(aGctx.context())};
-                if (!Amg::isIdentity(aExpTrf * detEle->transform(aGctx.context()).inverse())){
+                const Amg::Transform3D& aDetTrf{detEle->localToGlobalTransform(aGctx.context())};
+                if (!Amg::isIdentity(aExpTrf * detEle->localToGlobalTransform(aGctx.context()).inverse())){
                     std::cerr<<"Aligned detector  element is not where it's expected: "<<std::endl
                              <<" ** expect: "<<Amg::toString(aExpTrf)<<std::endl
                              <<" **  found: "<<Amg::toString(aDetTrf)<<std::endl;

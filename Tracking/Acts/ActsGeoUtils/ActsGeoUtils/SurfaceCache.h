@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONREADOUTGEOMETRY_SurfaceCache_H
@@ -28,14 +28,11 @@ namespace ActsTrk {
       SurfaceCache(const TransformCache* transformCache);
 
       /// Returns the transformation stored in the TransformCache.
-      const Acts::Transform3& transform(const Acts::GeometryContext& gctx) const override final;
+      const Acts::Transform3& localToGlobalTransform(const Acts::GeometryContext& gctx) const override final;
 
       /// Returns the dereferenced pointer cache.
       const Acts::Surface& surface() const override final;
       Acts::Surface& surface() override final;
-
-      /// Dummy override to satisfy the interface of the Acts::DetElementBase
-      double thickness() const override final;
 
       /// Cache the pointer to the surface that's constructed from this cache
       void setSurface(const std::shared_ptr<Acts::Surface> surface);
@@ -51,6 +48,8 @@ namespace ActsTrk {
       DetectorType detectorType() const override final;
       /// Returns the associated transform cache
       const TransformCache* transformCache() const;
+      /// @brief Returns whether the detector element is sensitive
+      bool isSensitive() const override final;
     private:
         const TransformCache* m_transformCache{nullptr};
         std::shared_ptr<Acts::Surface> m_surface{nullptr};

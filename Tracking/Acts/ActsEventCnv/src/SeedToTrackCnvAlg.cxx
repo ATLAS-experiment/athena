@@ -73,7 +73,7 @@ StatusCode SeedToTrackCnvAlg::execute(const EventContext& context) const {
       actsTrack.parameters() = paramsPointer->parameters();
       actsTrack.covariance() = (*paramsPointer->covariance());
       actsTrack.setReferenceSurface(paramsPointer->referenceSurface().getSharedPtr());
-      std::size_t tsosPreviousIndex = Acts::MultiTrajectoryTraits::kInvalid;
+      std::size_t tsosPreviousIndex = Acts::kTrackIndexInvalid;
       for (const xAOD::SpacePoint_v1* spacepoint: seed.sp()) {
           const auto& measurements = spacepoint->measurements();
           for (const xAOD::UncalibratedMeasurement *umeas : measurements) {

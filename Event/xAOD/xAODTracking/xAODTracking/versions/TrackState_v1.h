@@ -52,7 +52,7 @@ namespace xAOD {
 
         /**
          * @brief Get the type of this track state.
-         * Clients will actually see Acts::TrackStateType, but no need for this here. 
+         * Clients will actually see Acts::TrackStateTypeMap, but no need for this here. 
          */
         uint64_t typeFlags() const;
         

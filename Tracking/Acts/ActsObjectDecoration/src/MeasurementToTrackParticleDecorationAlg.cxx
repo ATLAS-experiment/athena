@@ -158,7 +158,7 @@ namespace ActsTrk {
 
                 auto flag = state.typeFlags();
 		// consider holes and measurements (also outliers)
-                bool anyHit = flag.test(Acts::TrackStateFlag::HoleFlag) or flag.test(Acts::TrackStateFlag::MeasurementFlag);
+                bool anyHit = flag.isHole() or flag.hasMeasurement();
 		if (not anyHit) {
                     ATH_MSG_DEBUG("--- This is not a hit measurement, skipping...");
                     continue;
@@ -189,10 +189,10 @@ namespace ActsTrk {
 		bool isAnnulusBound = false;
 		
 		// Get the measurement type
-		if (flag.test(Acts::TrackStateFlag::HoleFlag)) {
+		if (flag.isHole()) {
 		  type = MeasurementType::HOLE;
 		  ATH_MSG_DEBUG("--- This is a hole");
-                } else if (flag.test(Acts::TrackStateFlag::OutlierFlag)) {
+                } else if (flag.isOutlier()) {
 		  type = MeasurementType::OUTLIER;
 		  ATH_MSG_DEBUG("--- This is an outlier");
                 } else {
@@ -201,8 +201,8 @@ namespace ActsTrk {
                 }
 		
 		// Check the location of the state
-		if (state.hasReferenceSurface() and state.referenceSurface().associatedDetectorElement()) {
-		    const ActsDetectorElement * detectorElement = dynamic_cast<const ActsDetectorElement *>(state.referenceSurface().associatedDetectorElement());
+		if (state.hasReferenceSurface() and state.referenceSurface().isSensitive()) {
+		    const ActsDetectorElement * detectorElement = dynamic_cast<const ActsDetectorElement *>(state.referenceSurface().surfacePlacement());
 		    if (!detectorElement) {
 		      ATH_MSG_WARNING("--- TrackState reference surface returned an invalid associated detector element");
 		      continue;
@@ -268,7 +268,7 @@ namespace ActsTrk {
 		  // We evaluate the unbiased parameters for:
 		  // - measurements added to the fit. For outliers, the measurement is not part of the fit, hence track parameters are already unbiased
 		  // - if the filtered parameters and the projector exist.
-		  bool evaluateUnbiased = (!flag.test(Acts::TrackStateFlag::OutlierFlag));
+		  bool evaluateUnbiased = flag.isMeasurement();
 		  
 		  if (evaluateUnbiased) {
                     ATH_MSG_DEBUG("--- Good for unbiased parameters evaluation!");

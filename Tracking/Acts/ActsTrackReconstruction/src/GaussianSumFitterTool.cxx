@@ -75,7 +75,7 @@ StatusCode GaussianSumFitterTool::initialize() {
                      std::move(navigator),
                      logger().cloneWithSuffix("Prop"));
 
-  Acts::AtlasBetheHeitlerApprox<6, 5> bha = Acts::makeDefaultBetheHeitlerApprox();
+  auto bha = std::make_shared<Acts::AtlasBetheHeitlerApprox>(Acts::makeDefaultBetheHeitlerApprox());
   m_fitter = std::make_unique<Fitter>(std::move(propagator), std::move(bha),
               logger().cloneWithSuffix("GaussianSumFitter"));
   
@@ -86,7 +86,7 @@ StatusCode GaussianSumFitterTool::initialize() {
     Acts::Propagator<Acts::MultiEigenStepperLoop<>, Acts::DirectNavigator> directPropagator(std::move(stepperDirect),
 											    std::move(directNavigator),
 											    logger().cloneWithSuffix("DirectPropagator"));
-    Acts::AtlasBetheHeitlerApprox<6, 5> bhaDirect = Acts::makeDefaultBetheHeitlerApprox();
+    auto bhaDirect = std::make_shared<Acts::AtlasBetheHeitlerApprox>(Acts::makeDefaultBetheHeitlerApprox());
     m_directFitter = std::make_unique<DirectFitter>(std::move(directPropagator),std::move(bhaDirect),
 						    logger().cloneWithSuffix("DirectGaussianSumFitter"));
 
@@ -422,7 +422,7 @@ StatusCode GaussianSumFitterTool::fit(
       continue;
     }
     
-    if (ts.typeFlags().test(Acts::TrackStateFlag::MeasurementFlag)) {
+    if (ts.typeFlags().hasMeasurement()) {
       sourceLinks.push_back(Acts::SourceLink{detail::RefittingCalibrator::RefittingSourceLink(ts)});
     }
   }
@@ -485,7 +485,7 @@ GaussianSumFitterTool::makeTrack(const EventContext& ctx,
   {
     // First only concider state with an associated detector element not in the TRT
     auto flag = state.typeFlags();
-    const auto* associatedDetEl = state.referenceSurface().associatedDetectorElement();
+    const auto* associatedDetEl = state.referenceSurface().surfacePlacement();
     if (not associatedDetEl) 
       return;
     
@@ -518,7 +518,7 @@ GaussianSumFitterTool::makeTrack(const EventContext& ctx,
     std::unique_ptr<Trk::TrackParameters> parm;
 
     // State is a hole (no associated measurement), use predicted parameters      
-    if (flag.test(Acts::TrackStateFlag::HoleFlag)){
+    if (flag.isHole()){
       ATH_MSG_VERBOSE("State is a hole (no associated measurement), use predicted parameters");
       const Acts::BoundTrackParameters actsParam(state.referenceSurface().getSharedPtr(),
              state.predicted(),
@@ -544,7 +544,7 @@ GaussianSumFitterTool::makeTrack(const EventContext& ctx,
       typePattern.set(Trk::TrackStateOnSurface::Hole);
     }
     // The state was tagged as an outlier or was missed in the reverse filtering, use filtered parameters
-    else if (flag.test(Acts::TrackStateFlag::OutlierFlag) or not state.hasSmoothed()) {
+    else if (flag.isOutlier() or not state.hasSmoothed()) {
       ATH_MSG_VERBOSE("The state was tagged as an outlier or was missed in the reverse filtering, use filtered parameters");
       const Acts::BoundTrackParameters actsParam(state.referenceSurface().getSharedPtr(),
              state.filtered(),

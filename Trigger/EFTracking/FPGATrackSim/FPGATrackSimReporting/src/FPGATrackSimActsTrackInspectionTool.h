@@ -49,7 +49,7 @@ namespace FPGATrackSim {
 
     fpgaActsEventTracks getActsTracks (const ActsTrk::TrackContainer& tracksContainer) const;
     std::string getPrintoutActsEventTracks(const fpgaActsEventTracks& tracks) const;
-    std::string getPrintoutStatistics(const std::map<std::string, std::map<uint32_t,std::vector<uint32_t>> >& tracksForAllEvents) const;
+    std::string getPrintoutStatistics(const std::map<std::string, std::map<Acts::TrackStateFlag,std::vector<uint32_t>> >& tracksForAllEvents) const;
   private:
     mutable std::vector<std::unique_ptr<FpgaActsTrack>> m_actsTracks ATLAS_THREAD_SAFE;
   };

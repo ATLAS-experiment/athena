@@ -309,7 +309,7 @@ namespace ActsTrk {
     static void addCounts(detail::RecoTrackContainer &tracksContainer);
     static void initCounts(const detail::RecoTrackContainer::TrackProxy &track);
     static void updateCounts(const detail::RecoTrackContainer::TrackProxy &track,
-                             Acts::ConstTrackStateType typeFlags,
+                             Acts::ConstTrackStateTypeMap typeFlags,
                              xAOD::UncalibMeasType detType);
     void checkCounts(const detail::RecoTrackContainer::TrackProxy &track) const;
     std::array<bool, 3> selectCounts(const detail::RecoTrackContainer::TrackProxy &track, double eta) const;

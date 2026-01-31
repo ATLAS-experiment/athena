@@ -69,16 +69,14 @@ StatusCode ActsMaterialMapping::execute() {
     Acts::RecordedMaterialTrack mTrack = m_materialStepConverterTool->convertToMaterialTrack(*materialStepCollection);
 
     if(m_mapSurfaces){
-      auto context = m_trackingGeometryTool->getNominalGeometryContext().context();
-      std::reference_wrapper<const Acts::GeometryContext> geoContext(context);
-      m_mappingState.geoContext = geoContext;
-      m_surfaceMappingTool->mapper()->mapMaterialTrack(m_mappingState, mTrack);
+      auto context = m_trackingGeometryTool->getNominalGeometryContext().context();;
+      m_mappingState->geoContext = std::reference_wrapper<const Acts::GeometryContext>(context);
+      m_surfaceMappingTool->mapper()->mapMaterialTrack(*m_mappingState, mTrack);
     }
     if(m_mapVolumes){
       auto context = m_trackingGeometryTool->getNominalGeometryContext().context();
-      std::reference_wrapper<const Acts::GeometryContext> geoContext(context);
-      m_mappingStateVol.geoContext = geoContext;
-      m_volumeMappingTool->mapper()->mapMaterialTrack(m_mappingStateVol, mTrack);
+      m_mappingStateVol->geoContext = std::reference_wrapper<const Acts::GeometryContext>(context);
+      m_volumeMappingTool->mapper()->mapMaterialTrack(*m_mappingStateVol, mTrack);
     }
     m_materialTrackWriterSvc->write(mTrack);
   }
@@ -91,37 +89,37 @@ StatusCode ActsMaterialMapping::finalize() {
 
   // Finalize all the maps using the cached state
   if(m_mapSurfaces && m_mapVolumes){
-    m_surfaceMappingTool->mapper()->finalizeMaps(m_mappingState);
-    m_volumeMappingTool->mapper()->finalizeMaps(m_mappingStateVol);
+    m_surfaceMappingTool->mapper()->finalizeMaps(*m_mappingState);
+    m_volumeMappingTool->mapper()->finalizeMaps(*m_mappingStateVol);
     // Loop over the state, and collect the maps for surfaces
-    for (auto& [key, value] : m_mappingState.surfaceMaterial) {
+    for (auto& [key, value] : m_mappingState->surfaceMaterial) {
       detectorMaterial.first.insert({key, std::move(value)});
     }
     // Loop over the state, and collect the maps for volumes
-    for (auto& [key, value] : m_mappingStateVol.volumeMaterial) {
+    for (auto& [key, value] : m_mappingStateVol->volumeMaterial) {
       detectorMaterial.second.insert({key, std::move(value)});
     }
   }
   else{
     if(m_mapSurfaces){
-      m_surfaceMappingTool->mapper()->finalizeMaps(m_mappingState);
+      m_surfaceMappingTool->mapper()->finalizeMaps(*m_mappingState);
       // Loop over the state, and collect the maps for surfaces
-      for (auto& [key, value] : m_mappingState.surfaceMaterial) {
+      for (auto& [key, value] : m_mappingState->surfaceMaterial) {
         detectorMaterial.first.insert({key, std::move(value)});
       }
       // Loop over the state, and collect the maps for volumes
-      for (auto& [key, value] : m_mappingState.volumeMaterial) {
+      for (auto& [key, value] : m_mappingState->volumeMaterial) {
         detectorMaterial.second.insert({key, std::move(value)});
       }
     }
     if(m_mapVolumes){
-      m_volumeMappingTool->mapper()->finalizeMaps(m_mappingStateVol);
+      m_volumeMappingTool->mapper()->finalizeMaps(*m_mappingStateVol);
       // Loop over the state, and collect the maps for surfaces
-      for (auto& [key, value] : m_mappingStateVol.surfaceMaterial) {
+      for (auto& [key, value] : m_mappingStateVol->surfaceMaterial) {
         detectorMaterial.first.insert({key, std::move(value)});
       }
       // Loop over the state, and collect the maps for volumes
-      for (auto& [key, value] : m_mappingStateVol.volumeMaterial) {
+      for (auto& [key, value] : m_mappingStateVol->volumeMaterial) {
         detectorMaterial.second.insert({key, std::move(value)});
       }
     }

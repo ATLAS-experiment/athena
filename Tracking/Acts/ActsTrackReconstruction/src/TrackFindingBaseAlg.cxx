@@ -261,7 +261,7 @@ namespace ActsTrk {
 
   xAOD::UncalibMeasType TrackFindingBaseAlg::measurementType (const detail::RecoTrackContainer::TrackStateProxy &trackState) {
     if (trackState.hasReferenceSurface()) {
-      if (const auto *actsDetElem = dynamic_cast<const IDetectorElementBase *>(trackState.referenceSurface().associatedDetectorElement())) {
+      if (const auto *actsDetElem = dynamic_cast<const IDetectorElementBase *>(trackState.referenceSurface().surfacePlacement())) {
         switch (actsDetElem->detectorType()) {
         case DetectorType::Pixel:
           return xAOD::UncalibMeasType::PixelClusterType;
@@ -410,29 +410,29 @@ namespace ActsTrk {
 
   void TrackFindingBaseAlg::updateCounts(
       const detail::RecoTrackContainer::TrackProxy &track,
-      Acts::ConstTrackStateType typeFlags, xAOD::UncalibMeasType detType) {
+      Acts::ConstTrackStateTypeMap typeFlags, xAOD::UncalibMeasType detType) {
     if (detType == xAOD::UncalibMeasType::PixelClusterType) {
-      if (typeFlags.test(Acts::TrackStateFlag::HoleFlag)) {
+      if (typeFlags.isHole()) {
         s_branchState.nPixelHoles(track)++;
-      } else if (typeFlags.test(Acts::TrackStateFlag::OutlierFlag)) {
+      } else if (typeFlags.isOutlier()) {
         s_branchState.nPixelOutliers(track)++;
-      } else if (typeFlags.test(Acts::TrackStateFlag::MeasurementFlag)) {
+      } else if (typeFlags.isMeasurement()) {
         s_branchState.nPixelHits(track)++;
       }
     } else if (detType == xAOD::UncalibMeasType::StripClusterType) {
-      if (typeFlags.test(Acts::TrackStateFlag::HoleFlag)) {
+      if (typeFlags.isHole()) {
         s_branchState.nStripHoles(track)++;
-      } else if (typeFlags.test(Acts::TrackStateFlag::OutlierFlag)) {
+      } else if (typeFlags.isOutlier()) {
         s_branchState.nStripOutliers(track)++;
-      } else if (typeFlags.test(Acts::TrackStateFlag::MeasurementFlag)) {
+      } else if (typeFlags.isMeasurement()) {
         s_branchState.nStripHits(track)++;
       }
     } else if (detType == xAOD::UncalibMeasType::HGTDClusterType) {
-      if (typeFlags.test(Acts::TrackStateFlag::HoleFlag)) {
+      if (typeFlags.isHole()) {
         s_branchState.nHgtdHoles(track)++;
-      } else if (typeFlags.test(Acts::TrackStateFlag::OutlierFlag)) {
+      } else if (typeFlags.isOutlier()) {
         s_branchState.nHgtdOutliers(track)++;
-      } else if (typeFlags.test(Acts::TrackStateFlag::MeasurementFlag)) {
+      } else if (typeFlags.isMeasurement()) {
         s_branchState.nHgtdHits(track)++;
       }
     }
