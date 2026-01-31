@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "./CommonSelector.h"
@@ -18,24 +18,15 @@ namespace GlobalSim {
     m_et_low{std::stoul(et_low)},
     m_eta_low{std::stoul(eta_low)},
     m_phi_low{std::stoul(phi_low)} {
-
-    if(et_high == "inf") {
-      m_et_high = ULONG_MAX;
-    } else {
-      m_et_high = std::stoul(et_high);
-    }
-
-    if(eta_high == "inf") {
-      m_eta_high = ULONG_MAX;
-    } else {
-      m_eta_high = std::stoul(eta_high);
-    }
-
-    if(eta_high == "inf") {
-      m_phi_high = ULONG_MAX;
-    } else {			    
-      m_phi_high = std::stoul(phi_high);
-    }
+    //
+    auto unsignedLong = [](const std::string & txt)->unsigned long{
+      if (txt == "inf") return ULONG_MAX;
+      return std::stoul(txt);
+    };
+    //
+    m_et_high = unsignedLong(et_high);
+    m_eta_high = unsignedLong(eta_high);
+    m_phi_high = unsignedLong(phi_high);
   }
 			    
 
