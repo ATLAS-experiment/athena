@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 //  Artemis_2A.h
 //  Created by Paula Martinez Suarez, Ralf Gugel, Sagar Addepalli on 09/12/2025.

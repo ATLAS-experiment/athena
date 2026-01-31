@@ -2017,14 +2017,14 @@ class TopoAlgoDef:
               "MinET2" :   0, # eTaus
               "MinET3" :   0, # muons
               "MinET4" :   0, # jXE
-              "MaxET1" :   0, # jJet 1
-              "MaxET2" :   0, # jJet 2
-              "MaxET3" :   0, # jJet 3
-              "MaxET4" :   0, # jJet 4
-              "MaxET5" :   0, # eTau 1
-              "MaxET6" :   0, # mu 1
-              "MaxET7" :   0, # jXE 
-              "AnomalyScoreThresh" : [1521991, 1333204], # Tight and Loose WPs
+              "MaxET1" : 158, # jJet 1
+              "MaxET2" : 158, # jJet 2
+              "MaxET3" :  81, # jJet 3
+              "MaxET4" :  27, # jJet 4
+              "MaxET5" : 100, # eTau 1
+              "MaxET6" :  14, # mu 1
+              "MaxET7" :  48, # jXE 
+              "AnomalyScoreThresh" : [61440, 42908], # Preliminary values T=60, L=41.9, further calibration needed
         }
         class d:
             pass
