@@ -6,6 +6,7 @@
 
 #include "ActsFatrasSimTool.h"
 #include "Acts/ActsVersion.hpp"
+#include <Acts/Utilities/StringHelpers.hpp>
 
 #include "CLHEP/Random/RandFlat.h"
 #include "CLHEP/Random/RandomEngine.h"

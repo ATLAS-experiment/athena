@@ -43,29 +43,29 @@ struct MeasurementSelectorTraits
 {
    // the measurement type after the selection e.g. a Matrix<N,1>
    template <std::size_t N>
-   using CalibratedMeasurement = typename Acts::detail_lt::FixedSizeTypes<N>::Coefficients;
+   using CalibratedMeasurement = typename Acts::detail_tsp::FixedSizeTypes<N>::Coefficients;
 
    // the  measurement covariance type after the selection e.g. a Matrix<N,N>
    template <std::size_t N>
-   using CalibratedMeasurementCovariance = typename Acts::detail_lt::FixedSizeTypes<N>::Covariance;
+   using CalibratedMeasurementCovariance = typename Acts::detail_tsp::FixedSizeTypes<N>::Covariance;
 
    // the measurement type before the selection e.g. an Eigen::Map< Matrix<N,1> > if
    // the calibration is performed after the selection
    template <std::size_t N>
-   using PreSelectionMeasurement = typename Acts::detail_lt::FixedSizeTypes<N>::Coefficients;
+   using PreSelectionMeasurement = typename Acts::detail_tsp::FixedSizeTypes<N>::Coefficients;
 
    // the measurement covariance type before the selection e.g. an Eigen::Map<Matrix<N,N> > if
    // the calibration is performed after the selection
    template <std::size_t N>
-   using PreSelectionMeasurementCovariance = typename Acts::detail_lt::FixedSizeTypes<N>::Covariance;
+   using PreSelectionMeasurementCovariance = typename Acts::detail_tsp::FixedSizeTypes<N>::Covariance;
 
    // e.g. the same as CalibratedMeasurement
    template <std::size_t N>
-   using Predicted = typename Acts::detail_lt::FixedSizeTypes<N>::Coefficients;
+   using Predicted = typename Acts::detail_tsp::FixedSizeTypes<N>::Coefficients;
 
    // e.g. the same as CalibratedMeasurementCovariance
    template <std::size_t N>
-   using PredictedCovariance = typename Acts::detail_lt::FixedSizeTypes<N>::Covariance;
+   using PredictedCovariance = typename Acts::detail_tsp::FixedSizeTypes<N>::Covariance;
 
    // e.g. helper template to get the value_type from the container type
    // e.g. helper template to get the value_type from the measurement range iterator type
@@ -335,7 +335,7 @@ protected:
       template <std::size_t N>
       static
       Acts::ProjectorBitset create(const ParameterMapping::type<N> &parameter_map) {
-         constexpr std::size_t nrows = Acts::MultiTrajectoryTraits::MeasurementSizeMax;
+         constexpr std::size_t nrows = Acts::kMeasurementSizeMax;
          constexpr std::size_t ncols = Acts::eBoundSize;
 
          std::bitset<nrows * ncols> proj_bitset {};
@@ -408,11 +408,11 @@ protected:
 
          trackState.setProjectorSubspaceIndices(subspaceIndices);
 
-         Acts::TrackStateType typeFlags = trackState.typeFlags();
+         auto typeFlags = trackState.typeFlags();
          if (trackState.referenceSurface().surfaceMaterial() != nullptr) {
-            typeFlags.set(Acts::TrackStateFlag::MaterialFlag);
+            typeFlags.setHasMaterial();
          }
-         typeFlags.set(Acts::TrackStateFlag::ParameterFlag);
+         typeFlags.setHasParameters();
 
          // @TODO these track states still need some additional processing. Should there be a special
          //       flag for this ?
@@ -631,9 +631,11 @@ protected:
          TheMatchingMeasurement &a_selected_measurement = selected_measurements.getSlot(idx);
          trackState.setUncalibratedSourceLink(derived().makeSourceLink(std::move(a_selected_measurement.m_sourceLink.value())));
          // flag outliers accordingly, so that they are handled correctly by the post processing
-         trackState.typeFlags().set( a_selected_measurement.m_isOutLier
-                                     ? Acts::TrackStateFlag::OutlierFlag
-                                     : Acts::TrackStateFlag::MeasurementFlag );
+         if (a_selected_measurement.m_isOutLier) {
+            trackState.typeFlags().setIsOutlier();
+         } else {
+            trackState.typeFlags().setIsMeasurement();
+         }
          trackState.allocateCalibrated(DIM);
          if (use_calibrated_storage()) {
             // if the final clibration is performed after the selection then

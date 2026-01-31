@@ -338,8 +338,7 @@ namespace ActsTrk {
 					       &nConsideredMeasurements, &particleIds]
 					      (const auto& state) {
 						auto flags = state.typeFlags();
-						if (not flags.test(Acts::TrackStateFlag::MeasurementFlag) and
-						    not flags.test(Acts::TrackStateFlag::OutlierFlag)) return;
+						if (not flags.hasMeasurement()) return;
 						++nConsideredMeasurements;
 						
 						// get cluster

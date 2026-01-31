@@ -53,8 +53,6 @@ ActsVolumeMappingTool::initialize()
       std::move(propagator),
       makeActsAthenaLogger(this, "VolumeMaterialMapper"));
 
-  m_geoContext = m_trackingGeometryTool->getNominalGeometryContext().context();
-
   ATH_MSG_INFO("ACTS Surface Mapper successfully initialized");
   return StatusCode::SUCCESS;
 }
@@ -62,8 +60,10 @@ ActsVolumeMappingTool::initialize()
 Acts::VolumeMaterialMapper::State
 ActsVolumeMappingTool::mappingState() const
 {
-  auto mappingState = m_mapper->createState(
-    m_geoContext, m_magFieldContext, *m_trackingGeometry);
+  Acts::MagneticFieldContext magFieldContext;
+  Acts::GeometryContext geoContext = m_trackingGeometryTool->getNominalGeometryContext().context();
 
+  auto mappingState = m_mapper->createState(
+    geoContext, magFieldContext, *m_trackingGeometry);
   return mappingState;
 }

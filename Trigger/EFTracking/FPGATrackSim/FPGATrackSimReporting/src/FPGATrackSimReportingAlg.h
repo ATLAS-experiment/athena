@@ -41,7 +41,7 @@ namespace FPGATrackSim {
                 mutable std::vector<uint32_t> m_pixelClustersPerPrototrack ATLAS_THREAD_SAFE, m_stripClustersPerPrototrack ATLAS_THREAD_SAFE;
                 
                 mutable std::map<std::string, std::vector<FPGATrackSimActsEventTracks> > m_allActsTracks ATLAS_THREAD_SAFE;
-                mutable std::map<std::string, std::map<uint32_t,std::vector<uint32_t>> > m_actsTrackStats ATLAS_THREAD_SAFE;
+                mutable std::map<std::string, std::map<Acts::TrackStateFlag,std::vector<uint32_t>> > m_actsTrackStats ATLAS_THREAD_SAFE;
 
                 Gaudi::Property<bool> m_printoutForEveryEvent {this, "perEventReports", false, "A flag to enable per event printout"};
    	        Gaudi::Property<bool> m_isDataPrep {this, "isDataPrep", false, "If True, this is for data prep pipeline only"};

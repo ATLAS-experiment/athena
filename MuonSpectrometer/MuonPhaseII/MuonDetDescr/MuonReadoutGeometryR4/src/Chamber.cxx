@@ -93,7 +93,7 @@ namespace MuonGMR4{
         return *m_args.surface;
     }
     const Amg::Transform3D& Chamber::localToGlobalTransform(const ActsTrk::GeometryContext& gctx) const {
-        return surface().transform(gctx.context());
+        return surface().localToGlobalTransform(gctx.context());
     }
     Amg::Transform3D Chamber::globalToLocalTransform(const ActsTrk::GeometryContext& gctx) const {
         return localToGlobalTransform(gctx).inverse();

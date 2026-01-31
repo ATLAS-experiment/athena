@@ -98,7 +98,7 @@ namespace ActsTrk {
 			(const auto& state)
 			{
 			  auto flags = state.typeFlags();
-			  if (not flags.test(Acts::TrackStateFlag::SharedHitFlag)) return;
+			  if (not flags.isSharedHit()) return;
 			  ++nShared;
 			  // get measurement -> if barrel/endcap and layer number
 			  auto sl = state.getUncalibratedSourceLink().template get<ATLASUncalibSourceLink>();

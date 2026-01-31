@@ -97,7 +97,7 @@ namespace ActsTrk {
      }
      
      ActsTrk::TrackContainer::ConstTrackProxy track = optional_track.value();
-     std::array<uint8_t, Acts::NumTrackStateFlags+1> counts{};
+     std::array<uint8_t, Acts::toUnderlying(Acts::TrackStateFlag::NumFlags)+1> counts{};
      
      const ActsTrk::TrackContainer::ConstTrackProxy::IndexType
        lastMeasurementIndex = track.tipIndex();
@@ -105,26 +105,26 @@ namespace ActsTrk {
      track.container().trackStateContainer().visitBackwards(lastMeasurementIndex,
 							    [&counts] (const typename ActsTrk::TrackStateBackend::ConstTrackStateProxy &state) -> void
 							    {
-							      Acts::ConstTrackStateType flag = state.typeFlags();
-							      ++counts[Acts::NumTrackStateFlags];
+							      auto flags = state.typeFlags();
+							      ++counts[Acts::toUnderlying(Acts::TrackStateFlag::NumFlags)];
 							      
-							      for (unsigned int flag_i=0; flag_i<Acts::NumTrackStateFlags; ++flag_i) {
-								if (flag.test(flag_i)) {
-								  if (flag_i == Acts::TrackStateFlag::HoleFlag) {
-								    if (!state.hasReferenceSurface() || !state.referenceSurface().associatedDetectorElement()) continue;
+							      for (unsigned int flag_i=0; flag_i<Acts::toUnderlying(Acts::TrackStateFlag::NumFlags); ++flag_i) {
+								if (flags.test(flag_i)) {
+                  if (flag_i == Acts::toUnderlying(Acts::TrackStateFlag::IsHole)) {
+								    if (!state.hasReferenceSurface() || !state.referenceSurface().isSensitive()) continue;
 								  }
 								  ++counts[flag_i];
 								}
 							      }
 							    });
-     
-     auto monitor_states = Monitored::Scalar<int>("States",counts[Acts::TrackStateFlag::NumTrackStateFlags]);
-     auto monitor_measurement = Monitored::Scalar<int>("Measurements",counts[Acts::TrackStateFlag::MeasurementFlag]);
-     auto monitor_parameter = Monitored::Scalar<int>("Parameters",counts[Acts::TrackStateFlag::ParameterFlag]);
-     auto monitor_outlier = Monitored::Scalar<int>("Outliers",counts[Acts::TrackStateFlag::OutlierFlag]);
-     auto monitor_hole = Monitored::Scalar<int>("Holes",counts[Acts::TrackStateFlag::HoleFlag]);
-     auto monitor_material = Monitored::Scalar<int>("MaterialStates",counts[Acts::TrackStateFlag::MaterialFlag]);
-     auto monitor_sharedHit = Monitored::Scalar<int>("SharedHits",counts[Acts::TrackStateFlag::SharedHitFlag]);
+
+     auto monitor_states = Monitored::Scalar<int>("States",counts[Acts::toUnderlying(Acts::TrackStateFlag::NumFlags)]);
+     auto monitor_measurement = Monitored::Scalar<int>("Measurements",counts[Acts::toUnderlying(Acts::TrackStateFlag::HasMeasurement)]);
+     auto monitor_parameter = Monitored::Scalar<int>("Parameters",counts[Acts::toUnderlying(Acts::TrackStateFlag::HasParameters)]);
+     auto monitor_outlier = Monitored::Scalar<int>("Outliers",counts[Acts::toUnderlying(Acts::TrackStateFlag::IsOutlier)]);
+     auto monitor_hole = Monitored::Scalar<int>("Holes",counts[Acts::toUnderlying(Acts::TrackStateFlag::IsHole)]);
+     auto monitor_material = Monitored::Scalar<int>("MaterialStates",counts[Acts::toUnderlying(Acts::TrackStateFlag::HasMaterial)]);
+     auto monitor_sharedHit = Monitored::Scalar<int>("SharedHits",counts[Acts::toUnderlying(Acts::TrackStateFlag::IsSharedHit)]);
 
      fill(m_monGroupName.value(),
 	  monitor_states, monitor_measurement, monitor_parameter, monitor_outlier, monitor_hole,

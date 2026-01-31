@@ -557,7 +557,7 @@ bool ActsTrackingGeometrySvc::runConsistencyChecks() const {
   m_trackingGeometry->visitSurfaces([&](const Acts::Surface *surface) {
       nTotalSensors++;
 
-      const auto* actsDetElem = dynamic_cast<const ActsDetectorElement*>(surface->associatedDetectorElement());
+      const auto* actsDetElem = dynamic_cast<const ActsDetectorElement*>(surface->surfacePlacement());
       if(actsDetElem == nullptr) {
         ATH_MSG_ERROR("Invalid detector element found");
         result = false;
@@ -825,9 +825,9 @@ ActsLayerBuilder::Config ActsTrackingGeometrySvc::makeLayerBuilderConfig(
                     Acts::AxisDirection aDir, const Acts::Surface *aS,
                     const Acts::Surface *bS) -> bool {
     auto a = dynamic_cast<const ActsDetectorElement *>(
-        aS->associatedDetectorElement());
+        aS->surfacePlacement());
     auto b = dynamic_cast<const ActsDetectorElement *>(
-        bS->associatedDetectorElement());
+        bS->surfacePlacement());
     if ((not a) or (not b)) {
       throw std::runtime_error(
           "Cast of surface associated element to ActsDetectorElement failed "
@@ -1124,7 +1124,7 @@ unsigned int ActsTrackingGeometrySvc::populateAlignmentStore(DetectorAlignStore 
     ATH_MSG_DEBUG("Populate the alignment store with all detector elements");
     unsigned int nElements = 0;
     m_trackingGeometry->visitSurfaces([&store, &nElements](const Acts::Surface *srf) {
-        const auto *detElem = dynamic_cast<const IDetectorElement *>(srf->associatedDetectorElement());
+        const auto *detElem = dynamic_cast<const IDetectorElement *>(srf->surfacePlacement());
         if (!detElem) {
             return;
         }

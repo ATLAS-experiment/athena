@@ -20,7 +20,7 @@
 // get Athena SiDetectorElement from Acts surface
 static const InDetDD::SiDetectorElement *actsToDetElem(const Acts::Surface &surface)
 {
-  const auto *actsElement = dynamic_cast<const ActsDetectorElement *>(surface.associatedDetectorElement());
+  const auto *actsElement = dynamic_cast<const ActsDetectorElement *>(surface.surfacePlacement());
   if (!actsElement)
   {
     return nullptr;
@@ -95,7 +95,7 @@ namespace ActsTrk {
           [this, &tgContext, &track, &finalTrajectory, &actsSmoothedParam, &numberOfDeadPixel, &numberOfDeadSCT](const typename ActsTrk::TrackStateBackend::ConstTrackStateProxy &state) -> void
           {
             // First only consider states with an associated detector element
-            if (!state.hasReferenceSurface() || !state.referenceSurface().associatedDetectorElement())
+            if (!state.hasReferenceSurface() || !state.referenceSurface().surfacePlacement())
             {
               return;
             }
@@ -105,7 +105,7 @@ namespace ActsTrk {
             std::unique_ptr<Trk::TrackParameters> parm;
 
             // State is a hole (no associated measurement), use predicted parameters
-            if (flag.test(Acts::TrackStateFlag::HoleFlag))
+            if (flag.isHole())
             {
               const Acts::BoundTrackParameters actsParam = track.createParametersFromState(state);
               parm = m_ATLASConverterTool->actsTrackParametersToTrkParameters(actsParam, tgContext);
@@ -137,7 +137,7 @@ namespace ActsTrk {
               typePattern.set(Trk::TrackStateOnSurface::Hole);
             }
             // The state was tagged as an outlier or (TODO!) was missed in the reverse filtering, use filtered parameters
-            else if (flag.test(Acts::TrackStateFlag::OutlierFlag))
+            else if (flag.isOutlier())
             {
               const Acts::BoundTrackParameters actsParam = track.createParametersFromState(state);
               parm = m_ATLASConverterTool->actsTrackParametersToTrkParameters(actsParam, tgContext);

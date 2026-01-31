@@ -24,9 +24,9 @@ namespace ActsTrk::detail {
       // @TODO boundary check ?, does layer number match layer numbering in athena ?
       // @TODO filter out dead modules
       if (step.geoID.sensitive()) {
-        if (step.surface && step.surface->associatedDetectorElement()) {
+        if (step.surface && step.surface->surfacePlacement()) {
           const ActsDetectorElement *
-            actsDetEl = dynamic_cast<const ActsDetectorElement *>(step.surface->associatedDetectorElement());
+            actsDetEl = dynamic_cast<const ActsDetectorElement *>(step.surface->surfacePlacement());
           if (actsDetEl) {
             addToExpectedLayerPattern(expected_layer_pattern, *actsDetEl);
           }

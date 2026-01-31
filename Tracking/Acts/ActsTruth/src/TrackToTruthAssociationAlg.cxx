@@ -189,7 +189,7 @@ namespace ActsTrk
            &compatible_assoc_container_counts
            ](const typename ActsTrk::TrackStateBackend::ConstTrackStateProxy &state) -> void
           {
-            if (!state.typeFlags().test(Acts::TrackStateFlag::OutlierFlag) && state.hasUncalibratedSourceLink()) {
+            if (!state.typeFlags().isOutlier() && state.hasUncalibratedSourceLink()) {
               auto sl = state.getUncalibratedSourceLink().template get<ATLASUncalibSourceLink>();
               assert( sl != nullptr );
               const xAOD::UncalibratedMeasurement &uncalibMeas = getUncalibratedMeasurement(sl);

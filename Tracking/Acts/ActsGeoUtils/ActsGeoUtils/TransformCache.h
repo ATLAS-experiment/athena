@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef ActsGeoUtils_TransformCache_H
 #define ActsGeoUtils_TransformCache_H
@@ -45,7 +45,7 @@ namespace ActsTrk {
 
 #ifndef SIMULATIONBASE
           /** @brief returns the cached transform from the Acts Geometry context */
-          const Amg::Transform3D& transform(const Acts::GeometryContext& gctx) const;
+          const Amg::Transform3D& localToGlobalTransform(const Acts::GeometryContext& gctx) const;
 #endif
           /** @brief resets the nominal cache associated with the detector element*/
           void releaseNominalCache() const;

@@ -113,7 +113,7 @@ namespace ActsTrk
     {
       std::cout << ptype << std::setw(2) << state.calibratedSize() << 'D';
     }
-    else if (state.typeFlags().test(Acts::TrackStateFlag::HoleFlag))
+    else if (state.typeFlags().isHole())
     {
       std::cout << std::setw(4) << "hole";
     }
@@ -142,7 +142,7 @@ namespace ActsTrk
               << std::setw(6) << std::setprecision(1) << state.pathLength() << ' '
               << std::setw(7) << std::setprecision(1) << state.chi2() << ' '
               << std::defaultfloat << std::setprecision(-1)
-              << std::setw(Acts::TrackStateFlag::NumTrackStateFlags) << trackStateName(state.typeFlags());
+              << std::setw(Acts::toUnderlying(Acts::TrackStateFlag::NumFlags)) << trackStateName(state.typeFlags());
     if (newLine)
       std::cout << '\n';
     return true;

@@ -1,13 +1,13 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ACTSGEOMETRY_ACTSCALOTRACKINGVOLUMEBUILDER_H
 #define ACTSGEOMETRY_ACTSCALOTRACKINGVOLUMEBUILDER_H
 
-#include "GaudiKernel/ServiceHandle.h"
+#include "GeoPrimitives/GeoPrimitives.h"
+//
 #include "AthenaBaseComps/AthAlgTool.h"
-#include "AthenaBaseComps/AthService.h"
 #include "StoreGate/StoreGateSvc.h"
 #include "StoreGate/ReadHandleKey.h"
 
@@ -33,10 +33,7 @@ class ActsCaloTrackingVolumeBuilder : public extends<AthAlgTool, IActsTrackingVo
 {
 public:
   StatusCode initialize() override;
-  ActsCaloTrackingVolumeBuilder(const std::string& type,
-                                const std::string& name,
-                                const IInterface* parent);
-
+  using base_class::base_class;
   std::shared_ptr<Acts::TrackingVolume>
   trackingVolume(const Acts::GeometryContext& gctx,
                  std::shared_ptr<const Acts::TrackingVolume> insideVolume = nullptr,
@@ -57,7 +54,8 @@ private:
   cellFactory() const;
 
   std::shared_ptr<Acts::CutoutCylinderVolumeBounds>
-  makeCaloVolumeBounds(const std::vector<std::unique_ptr<Acts::Volume::BoundingBox>>& boxStore,
+  makeCaloVolumeBounds(const Acts::GeometryContext& gctx,
+                       const std::vector<std::unique_ptr<Acts::Volume::BoundingBox>>& boxStore,
                        std::shared_ptr<const Acts::TrackingVolume> insideVolume) const;
 
 

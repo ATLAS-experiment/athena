@@ -162,7 +162,7 @@ void fillTrackState(const TestTrackState &pc, TrackStatePropMask mask,
   // https://github.com/acts-project/acts/blob/d8cb0fac3a44e1d44595a481f977df9bd70195fb/Tests/UnitTests/Core/EventData/MultiTrajectoryTests.cpp#L139
 }
 
-const GeometryContext gctx;
+const GeometryContext gctx = GeometryContext::dangerouslyDefaultConstruct();
 // fixed seed for reproducible tests
 std::default_random_engine rng(31415);
 

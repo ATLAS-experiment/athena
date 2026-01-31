@@ -255,14 +255,13 @@ ATH_FLATTEN
     // Space Point Grid Options
     Acts::CylindricalSpacePointGridOptions gridOpts;
     gridOpts.bFieldInZ = bField[2];
-    gridOpts = gridOpts.toInternalUnits();
     
     // Seed Finder Options
     Acts::SeedFinderOptions finderOpts;
     finderOpts.beamPos = Acts::Vector2(beamSpotPos[Amg::x], 
     		       	               beamSpotPos[Amg::y]);
     finderOpts.bFieldInZ = bField[2];
-    finderOpts = finderOpts.toInternalUnits().calculateDerivedQuantities(m_finderCfg);
+    finderOpts = finderOpts.calculateDerivedQuantities(m_finderCfg);
 
 
 
@@ -466,9 +465,9 @@ ATH_FLATTEN
     filterCfg.seedWeightIncrement = m_seedWeightIncrement;
     filterCfg.numSeedIncrement = m_numSeedIncrement;
     filterCfg.deltaInvHelixDiameter = m_deltaInvHelixDiameter;
-    m_finderCfg.seedFilter = std::make_unique<Acts::SeedFilter< value_type > >(filterCfg.toInternalUnits(), logger().cloneWithSuffix("Filter"));    
+    m_finderCfg.seedFilter = std::make_unique<Acts::SeedFilter< value_type > >(filterCfg, logger().cloneWithSuffix("Filter"));    
 
-    m_finderCfg = m_finderCfg.toInternalUnits().calculateDerivedQuantities();
+    m_finderCfg = m_finderCfg.calculateDerivedQuantities();
 
     // Grid Configuration
     m_gridCfg.minPt = m_minPt;
@@ -484,7 +483,6 @@ ATH_FLATTEN
     m_gridCfg.rMax = m_gridRMax;
     m_gridCfg.phiBinDeflectionCoverage = m_phiBinDeflectionCoverage;
     m_gridCfg.maxPhiBins = m_maxPhiBins;
-    m_gridCfg = m_gridCfg.toInternalUnits();
 
     // Seed Finder
     m_finder = decltype(m_finder){m_finderCfg, logger().cloneWithSuffix("Finder")};

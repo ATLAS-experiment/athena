@@ -1,9 +1,10 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ActsGeometry/ActsCaloTrackingVolumeBuilder.h"
 #include "ActsInterop/Logger.h"
+#include "GeoPrimitives/GeoPrimitivesToStringConverter.h"
 
 #include "StoreGate/ReadHandle.h"
 #include "CaloDetDescr/CaloDetDescrManager.h"
@@ -30,13 +31,6 @@ using Box = Acts::Volume::BoundingBox; // shortcut
 using CVBBV = Acts::CylinderVolumeBounds::BoundValues;
 using CCVBBV = Acts::CutoutCylinderVolumeBounds::BoundValues;
 
-ActsCaloTrackingVolumeBuilder::ActsCaloTrackingVolumeBuilder(const std::string& type,
-                                                             const std::string& name,
-                                                             const IInterface* parent)
-: base_class(type, name, parent)
-{
-
-}
 
 StatusCode 
 ActsCaloTrackingVolumeBuilder::initialize()
@@ -81,7 +75,7 @@ ActsCaloTrackingVolumeBuilder::trackingVolume(
   ATH_MSG_VERBOSE("Figure out dimensions of wrapping volume");
 
   std::shared_ptr<Acts::CutoutCylinderVolumeBounds> caloVolBounds
-   = makeCaloVolumeBounds(boxStore, std::move(insideVolume));
+   = makeCaloVolumeBounds(gctx, boxStore, std::move(insideVolume));
 
   // build a BVH octree for the bounding boxes
   // but only AFTER we've built the calo volume bounds
@@ -349,7 +343,9 @@ ActsCaloTrackingVolumeBuilder::trackingVolume(
 }
 
 std::shared_ptr<Acts::CutoutCylinderVolumeBounds>
-ActsCaloTrackingVolumeBuilder::makeCaloVolumeBounds(const std::vector<std::unique_ptr<Box>>& boxStore,
+ActsCaloTrackingVolumeBuilder::makeCaloVolumeBounds(
+                     const Acts::GeometryContext& gctx,
+                     const std::vector<std::unique_ptr<Box>>& boxStore,
                      std::shared_ptr<const Acts::TrackingVolume> insideVolume) const
 {
   using namespace Acts::VectorHelpers; 
@@ -437,16 +433,16 @@ ActsCaloTrackingVolumeBuilder::makeCaloVolumeBounds(const std::vector<std::uniqu
 
   ATH_MSG_VERBOSE("ID volume bounds:\n" << *idCylBds);
 
-  ATH_MSG_VERBOSE("Inside volume transform: \n" << insideVolume->transform().matrix());
+  ATH_MSG_VERBOSE("Inside volume transform: \n" <<Amg::toString(insideVolume->localToGlobalTransform(gctx)));
 
-  if (!insideVolume->transform().isApprox(Acts::Transform3::Identity())) {
+  const auto& trf = insideVolume->localToGlobalTransform(gctx);
+  
+  if (!trf.isApprox(Acts::Transform3::Identity())) {
     ATH_MSG_VERBOSE("Inside volume transform is not unity.");
-    
     // transformation matrix is NOT unity. Let's check:
     // - Rotation is approximate unity
     // - Translation is only along z axis
-    const auto& trf = insideVolume->transform();
-  
+
     Acts::RotationMatrix3 rot = trf.rotation();
     bool unityRot = rot.isApprox(Acts::RotationMatrix3::Identity());
 
