@@ -39,12 +39,22 @@ def createTrackAnalysis( inflags, name="TrackAnalysis", chain="", mtool=None ):
     from TrigInDetAnalysisExample.chainString import chainString
     cs = chainString( chain )
 
+    # actual trigger to be monitored
     tool.trigger = cs.head
+
+    # test track collection ...
+    tool.TriggerTracks = cs.tail
+
+    # allocate the histograms ...
     tool.montool = mtool 
 
+    
     from InDetTrackPerfMon.InDetSelectionConfig import TrackQualitySelectionToolCfg
     from InDetTrackPerfMon.InDetSelectionConfig import VertexQualitySelectionToolCfg
     from InDetTrackPerfMon.InDetSelectionConfig import RoiSelectionToolCfg
+    from InDetTrackPerfMon.InDetSelectionConfig import TrackRoiSelectionToolCfg
+
+    from InDetTrackPerfMon.InDetMatchingConfig import TrackMatchingToolCfg
 
     from InDetTrackPerfMon.InDetSelectionConfig import sanitise
     
@@ -55,6 +65,16 @@ def createTrackAnalysis( inflags, name="TrackAnalysis", chain="", mtool=None ):
     tool.TrackQualitySelectionTool  = mktool( TrackQualitySelectionToolCfg( flags, name="TrackQualitySelectionTool_" + sanitise(name) ) )
     tool.VertexQualitySelectionTool = mktool( VertexQualitySelectionToolCfg( flags, name="VertexQualitySelectionTool_" + sanitise(name) ) )
     tool.RoiSelectionTool           = mktool( RoiSelectionToolCfg( flags, name="RoiSelectionTool_" + sanitise(name) ) )
+
+    tool.TrackRoiSelectionTool = mktool( TrackRoiSelectionToolCfg( flags, name="TrackRoiSelectionTool_" + sanitise(name) ) )
+
+
+    # Stable SeltaR matching                                                                                                                                                              
+    flags.addFlag("MatchingType", "StableDeltaRMatch")
+    flags.addFlag("RefType",  "Offline")
+    flags.addFlag("TestType", "Trigger")
+
+    tool.TrackMatchingTool     = mktool( TrackMatchingToolCfg( flags, name="TrackMatchingTool_" + sanitise(name) ) )
 
 
 #    # VertexQualitySelectionTool = name="VertexQualitySelectionTool"+flags.PhysVal.IDTPM.currentTrkAna.anaTag

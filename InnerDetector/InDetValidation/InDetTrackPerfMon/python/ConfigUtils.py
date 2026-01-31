@@ -4,6 +4,115 @@ import json, os
 from AthenaCommon.Utils.unixtools import find_datafile
 from AthenaCommon.Logging import logging
 
+
+
+# default useful setter function ....
+def get_opt(obj, name, default=None):
+    return getattr(obj, name, default)
+
+
+# set the default kswargs only if there is such a variable in the flags object
+def kwargs_setdefault_old( kwargs, key, obj, attr=None ):
+    if attr is None:
+        attr = key
+    if hasattr(obj, attr):
+        kwargs.setdefault(key, getattr(obj, attr))
+
+    
+def kwargs_setdefault_new( kwargs, key, obj, attr=None, default=None, skip_if_default=False):
+    if attr is None:
+        attr = key
+    val = getattr(obj, attr, default)
+    if skip_if_default and val == default:
+        return  # do not set
+    kwargs.setdefault(key, val)
+
+    
+# _MISSING=objuect()
+# def setdefault(kwargs, key, obj, attr=None, default=_MISSING, skip_if_default=False):
+def kwargs_setdefault(kwargs, key, obj, attr=None, default=..., skip_if_default=False):
+    if attr is None:
+        attr = key
+
+    try:
+        val = getattr(obj, attr)
+        attr_exists = True
+    except AttributeError:
+        val = ...
+        attr_exists = False
+
+    # what if we have no attribute ? only set if we
+    # provide a default
+    if not attr_exists:
+        if default is ...:
+            return
+        val = default
+
+    # Now, if we want to skip it if there is no attribute etc
+    if skip_if_default and default is not ... and val == default:
+        return
+
+
+
+# check whether the attribute has an entry wigth this value, but only if
+# the attribute is actually set
+def has_in( item, obj, attr, default=False):
+    if not hasattr(obj, attr):
+        return default
+    val = getattr(obj, attr)
+    if val is None:
+        return default
+    try:
+        return item in val
+    except TypeError:
+        return default
+
+
+
+def hasFlag(obj, name):
+    """
+    The athena config design is very poor *every* node should be the same, 
+    but only the top level has a hasFlag() method, so here is a helper 
+    function that can be called as if top level, or sub objects were the 
+    same 
+    """
+    # pythion complains if we have this directly ...
+    # if hasattr(obj, "hasFlag") and callable(getattr(obj, "hasFlag")):
+    f = getattr(obj, "hasFlag", None)
+    if callable(f):
+        # top-level ConfigFlags → use the real hasFlag
+        return obj.hasFlag(name)
+    
+    # Sub-container → walk the dotted path
+    parts = name.split(".")
+    current = obj
+    for part in parts:
+        if not hasattr(current, part):
+            return False
+        current = getattr(current, part)
+    return True
+
+
+def sanitise(s: str) -> str:
+    """
+    Replace all ':' and '=' characters in the string with '_'.
+    """
+    return s.replace(":", "_").replace("=", "_")
+
+
+def get_flags( flags, name ):
+    if hasFlag(flags,"PhysVal.IDTPM.currentTrkAna"):
+        iflags = flags.PhysVal.IDTPM.currentTrkAna
+        iname  = name+iflags.anaTag 
+    else:
+        iflags = flags
+        iname  = sanitise(name)
+    return iflags, iname
+
+
+        
+
+
 def custom_find_datafile( input_file_name ):
     '''
     wrapper around AthenaCommon.Utils.unixtools.find_datafile

@@ -45,7 +45,7 @@ StatusCode IDTPM::TrackAnalysisCollections::initialize()
   ATH_CHECK( m_trkAnaDefSvc.isValid() );
 
   /// construct track matching lookup table
-  /// based on the types of test and reference
+  /// based on the types of test && reference
   /// Truth->Track
   if( m_trkAnaDefSvc->isTestTruth() ) {
     m_matches = std::make_unique< TrackMatchingLookup_truthTrk >( m_anaTag );
@@ -228,8 +228,14 @@ StatusCode IDTPM::TrackAnalysisCollections::fillTrigTrackContainer(
 
 /// Offline track particles
 StatusCode IDTPM::TrackAnalysisCollections::fillOfflTrackContainer( const std::string& key )
-								   
 {
+
+  /// this isn't how to do it - there are a LOT of parameters
+  /// in the python, set from flags, set fro kwargs, and ALSO
+  /// from the trkAnalDefSvc class ???
+
+  /// all this FULL / stage stuff is horendous
+  
   if( m_trkAnaDefSvc->useOffline() ) {
     ATH_MSG_DEBUG( "Loading collection: " << key );
 
@@ -781,7 +787,7 @@ void IDTPM::TrackAnalysisCollections::copyFS()
   }
 
   /// Debug printout
-  ATH_MSG_DEBUG( "Tracks and vertices after in RoI copy: " << printInfo( InRoI ) );
+  ATH_MSG_DEBUG( "Tracks && vertices after in RoI copy: " << printInfo( InRoI ) );
 }
 
 /// ---------------------------------

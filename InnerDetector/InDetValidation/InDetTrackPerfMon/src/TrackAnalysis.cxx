@@ -74,6 +74,9 @@ StatusCode IDTPM::TrackAnalysis::initialize() {
   std::cout << "\tleg:     " << m_leg     << std::endl;
   std::cout << "\textra:   " << m_extra   << std::endl;
 
+  //// No, no, no, no, no, the TDT is configured in the algorithm, and the
+  ///  same instance is passed into all the tools
+  ///  ATH_CHECK( m_tdt.retrieve() );
   
   ATH_CHECK( m_trackQualitySelectionTool.retrieve() );
 
@@ -81,27 +84,13 @@ StatusCode IDTPM::TrackAnalysis::initialize() {
 
   ATH_CHECK( m_roiSelectionTool.retrieve() );
 
-  // ATH_CHECK( m_roiSelectionTool.retrieve( EnableTool{ m_trkAnaDefSvc->doTrigNavigation() } ) );
- 
+  ATH_CHECK( m_trackRoiSelectionTool.retrieve() );
+  ATH_CHECK( m_trackMatchingTool.retrieve() );
+
+
+
   
-  //  ATH_CHECK( AthAlgtool::initialize() );
- 
-  // /// Retrieving trkAnaDefSvc
-  // if( ! m_trkAnaDefSvc ) {
-  //   ATH_MSG_DEBUG( "Retrieving TrkAnaDefSvc" << m_anaTag.value() );
-  //   m_trkAnaDefSvc = Gaudi::svcLocator()->service( "TrkAnaDefSvc"+m_anaTag.value() );
-  //   ATH_CHECK( m_trkAnaDefSvc.isValid() );
-  // }
-
-  // ATH_MSG_DEBUG( "Initializing sub-tools" );
-
-  // ATH_CHECK( m_trigDecTool.retrieve( EnableTool{ m_trkAnaDefSvc->doTrigNavigation() } ) );
-  // ATH_CHECK( m_trackQualitySelectionTool.retrieve() );
-  // ATH_CHECK( m_vertexQualitySelectionTool.retrieve() );
-  // ATH_CHECK( m_roiSelectionTool.retrieve( EnableTool{ m_trkAnaDefSvc->doTrigNavigation() } ) );
-  // ATH_CHECK( m_trackRoiSelectionTool.retrieve( EnableTool{ m_trkAnaDefSvc->doTrigNavigation() } ) );
   // ATH_CHECK( m_vertexRoiSelectionTool.retrieve( EnableTool{ m_trkAnaDefSvc->doTrigNavigation() } ) );
-  // ATH_CHECK( m_trackMatchingTool.retrieve( EnableTool{ m_doMatch.value() } ) );
   // ATH_CHECK( m_trkAnaInfoWriteTool.retrieve( EnableTool{ m_writeOut.value() } ) );
 
   // ATH_MSG_DEBUG( "Initializing collections" );
