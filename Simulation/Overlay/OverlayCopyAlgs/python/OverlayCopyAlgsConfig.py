@@ -524,9 +524,6 @@ def CopyTrackCollectionsCfg(flags, **kwargs):
 
     allowedContainers = [
         "CombinedInDetTracks",
-        "DisappearingTracks",
-        "ResolvedForwardTracks",
-        "ExtendedLargeD0Tracks"
     ]
 
     availableContainers = []
