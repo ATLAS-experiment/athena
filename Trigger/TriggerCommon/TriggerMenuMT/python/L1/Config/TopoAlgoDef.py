@@ -1961,7 +1961,7 @@ class TopoAlgoDef:
               "ScaleSqr1" : [128, 128], #corresponds to Tight and Loose WPs
               "ScaleSqr2" : [128, 128], #corresponds to Tight and Loose WPs
               "ScaleSqr3" : [128, 128], #corresponds to Tight and Loose WPs
-              "AnomalyScoreThresh" : [1521991, 1333204], #corresponds to Tight and Loose WPs (500Hz,1kHz est.)
+              "AnomalyScoreThresh" : [1521991, 899489], #corresponds to Tight and Loose WPs (500Hz, 11kHz est.)
         }
         class d:
             pass
