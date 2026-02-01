@@ -1,9 +1,8 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "InDetServMatGeometryManager.h"
-#include "GeometryDBSvc/IGeometryDBSvc.h"
 #include "InDetGeoModelUtils/InDetMaterialManager.h"
 #include "GeoModelUtilities/DecodeVersionKey.h"
 #include "RDBAccessSvc/IRDBAccessSvc.h"
@@ -13,11 +12,10 @@
 #include "GaudiKernel/SystemOfUnits.h"
 
 InDetServMatGeometryManager::InDetServMatGeometryManager(InDetDD::AthenaComps * athenaComps)   
-  : m_athenaComps(athenaComps),
-    m_matMgr(nullptr)
+  : AthMessaging("InDetServMatGeometryManager")
+  , m_athenaComps(athenaComps)
 {
-  
-  if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG) << "Initializing InDetServMatGeometryManager" << endmsg;
+  ATH_MSG_DEBUG("Initializing InDetServMatGeometryManager");
    
   const IGeoDbTagSvc *geoDbTag = m_athenaComps->geoDbTagSvc();
   IRDBAccessSvc *rdbSvc = m_athenaComps->rdbAccessSvc();
@@ -43,12 +41,10 @@ InDetServMatGeometryManager::InDetServMatGeometryManager(InDetDD::AthenaComps * 
 //
 /////////////////////////////////////////////////////////
 
-  if(msgLvl(MSG::DEBUG)) {
-    msg(MSG::DEBUG) << "Retrieving Pixel Record Sets from database ..." << endmsg;
-    msg(MSG::DEBUG) << "Pixel: Key = " << pixelDetectorKey << " Node = " << pixelDetectorNode << endmsg;
-    msg(MSG::DEBUG) << "SCT:   Key = " << sctDetectorKey   << " Node = " << sctDetectorNode << endmsg;
-    msg(MSG::DEBUG) << "InDet: Key = " << indetDetectorKey << " Node = " << indetDetectorNode << endmsg;
-  }
+  ATH_MSG_DEBUG("Retrieving Pixel Record Sets from database ...");
+  ATH_MSG_DEBUG("Pixel: Key = " << pixelDetectorKey << " Node = " << pixelDetectorNode);
+  ATH_MSG_DEBUG("SCT:   Key = " << sctDetectorKey   << " Node = " << sctDetectorNode);
+  ATH_MSG_DEBUG("InDet: Key = " << indetDetectorKey << " Node = " << indetDetectorNode);
  
   m_InDetWeights       = rdbSvc->getRecordsetPtr("InDetWeights",       indetDetectorKey, indetDetectorNode);
 
@@ -96,20 +92,23 @@ InDetServMatGeometryManager::~InDetServMatGeometryManager()
 // flag for whether or not to build services
 bool InDetServMatGeometryManager::buildServices() const
 {
-  if (db()->testField("","BUILDSERVICES")) {
-    return db()->getInt("","BUILDSERVICES");
-  } 
-  if (db()->testField(m_switches,"BUILDSERVICES")) {
-    return db()->getInt(m_switches,"BUILDSERVICES");
-  } 
+  try {
+    if(!(*m_switches)[0]->isFieldNull("BUILDSERVICES")) {
+      return (*m_switches)[0]->getInt("BUILDSERVICES");
+    }
+  }
+  catch(std::runtime_error&) {
+    ATH_MSG_DEBUG("The switches table has no BUILDSERVICES column");
+  }
   return false;
 }
 
 int InDetServMatGeometryManager::SupportTubeIndex(const std::string& name) const 
 {
-  for (unsigned int i = 0; i < db()->getTableSize(m_InDetSimpleServices); i++) 
-  {
-    if (db()->getString(m_InDetSimpleServices,"NAME",i)  == name) return i;
+  int i=0;
+  for(const auto& rec : *m_InDetSimpleServices) {
+    if(rec->getString("NAME")==name) return i;
+    ++i;
   }
   return -1;
 }
@@ -117,28 +116,28 @@ int InDetServMatGeometryManager::SupportTubeIndex(const std::string& name) const
 double InDetServMatGeometryManager::SupportTubeRMin(const std::string& name) const 
 {
   int ind = SupportTubeIndex(name);
-  if (ind >= 0) return db()->getDouble(m_InDetSimpleServices, "RMIN", ind);
+  if (ind >= 0) return (*m_InDetSimpleServices)[ind]->getDouble("RMIN");
   return 0;
 }
 
 double InDetServMatGeometryManager::SupportTubeRMax(const std::string& name) const 
 {
   int ind = SupportTubeIndex(name);
-  if (ind >= 0) return db()->getDouble(m_InDetSimpleServices, "RMAX", ind);
+  if (ind >= 0) return (*m_InDetSimpleServices)[ind]->getDouble("RMAX");
   return 0;
 }
 
 double InDetServMatGeometryManager::SupportTubeZMin(const std::string& name) const 
 {
   int ind = SupportTubeIndex(name);
-  if (ind >= 0) return db()->getDouble(m_InDetSimpleServices, "ZMIN", ind);
+  if (ind >= 0) (*m_InDetSimpleServices)[ind]->getDouble("ZMIN");
   return 0;
 }
 
 double InDetServMatGeometryManager::SupportTubeZMax(const std::string& name) const 
 {
   int ind = SupportTubeIndex(name);
-  if (ind >= 0) return db()->getDouble(m_InDetSimpleServices, "ZMAX", ind);
+  if (ind >= 0) (*m_InDetSimpleServices)[ind]->getDouble("ZMAX");
   return 0;
 }
 
@@ -152,84 +151,92 @@ int InDetServMatGeometryManager::SupportTubeExists(const std::string& name) cons
 // number of layers
 int InDetServMatGeometryManager::pixelNumLayers() const
 {
-  return db()->getInt(m_PixelBarrelGeneral,"NLAYER");
+  return (*m_PixelBarrelGeneral)[0]->getInt("NLAYER");
 }
 
 // layer radius 
 double InDetServMatGeometryManager::pixelLayerRadius(int layer) const
 {
-  return db()->getDouble(m_PixelLayer,"RLAYER",layer) * Gaudi::Units::mm;
+  return (*m_PixelLayer)[layer]->getDouble("RLAYER") * Gaudi::Units::mm;
 }
 
 // layer length
 double InDetServMatGeometryManager::pixelLayerLength(int layer) const
 {
-  int staveIndex = db()->getInt(m_PixelLayer,"STAVEINDEX",layer);
-  return db()->getDouble(m_PixelStave,"ENVLENGTH",staveIndex) * Gaudi::Units::mm;
+  int staveIndex = (*m_PixelLayer)[layer]->getInt("STAVEINDEX");
+  return (*m_PixelStave)[staveIndex]->getDouble("ENVLENGTH") * Gaudi::Units::mm;
 }
 
 // Number of staves/sectors per barrel layer 
 int InDetServMatGeometryManager::pixelNumSectorsForLayer(int layer) const
 {
-  return db()->getInt(m_PixelLayer,"NSECTORS",layer);
+  return (*m_PixelLayer)[layer]->getInt("NSECTORS");
 }
 
 // Number of modules per stave
 int InDetServMatGeometryManager::pixelModulesPerStave(int layer) const
 {
-  //msg(MSG::INFO) << "Entering InDetServMatGeometryManager::pixelModulesPerStave for layer " << layer << endmsg;
-
-  int staveIndex = db()->getInt(m_PixelLayer,"STAVEINDEX",layer);
-
-  //msg(MSG::INFO) << "staveIndex for the layer is " << staveIndex << endmsg;
-  //msg(MSG::INFO) << "modules per stave is " << db()->getInt(m_PixelStave,"NMODULE",staveIndex) << endmsg;
-
-  return db()->getInt(m_PixelStave,"NMODULE",staveIndex);
+  int staveIndex = (*m_PixelLayer)[layer]->getInt("STAVEINDEX");
+  return (*m_PixelStave)[staveIndex]->getInt("NMODULE");
 }
-
 
 // Bent stave (conical layout) parameters
 double InDetServMatGeometryManager::pixelLadderBentStaveAngle(int layer)  const
 {
-  if (!db()->testFieldTxt(m_PixelStave, "BENTSTAVEANGLE")) return 0;
-  int staveIndex = db()->getInt(m_PixelLayer,"STAVEINDEX", layer);
-  return db()->getDouble(m_PixelStave,"BENTSTAVEANGLE", staveIndex);
+  int staveIndex = (*m_PixelLayer)[layer]->getInt("STAVEINDEX");
+  try {
+    if(!(*m_PixelStave)[staveIndex]->isFieldNull("BENTSTAVEANGLE")) {
+      return (*m_PixelStave)[staveIndex]->getDouble("BENTSTAVEANGLE");
+    }
+  }
+  catch(std::runtime_error&) {
+    ATH_MSG_DEBUG("No value for the BENTSTAVEANGLE column in the PixelStave table record " << staveIndex);
+  }
+  return 0.;
 }
 
 int InDetServMatGeometryManager::pixelBentStaveNModule(int layer) const
 {
-  if (!db()->testFieldTxt(m_PixelStave,"BENTSTAVENMODULE")) return 0;
-  int staveIndex = db()->getInt(m_PixelLayer, "STAVEINDEX", layer);
-  return db()->getInt(m_PixelStave, "BENTSTAVENMODULE", staveIndex);
+  int staveIndex = (*m_PixelLayer)[layer]->getInt("STAVEINDEX");
+  try {
+    if(!(*m_PixelStave)[staveIndex]->isFieldNull("BENTSTAVENMODULE")) {
+      return (*m_PixelStave)[staveIndex]->getDouble("BENTSTAVENMODULE");
+    }
+  }
+  catch(std::runtime_error&) {
+    ATH_MSG_DEBUG("No value for the BENTSTAVEMODULE column in the PixelStave table record " << staveIndex);
+  }
+  return 0.;  
 }
 
 double InDetServMatGeometryManager::pixelLadderModuleDeltaZ(int layer) const
 {
-  int staveIndex = db()->getInt(m_PixelLayer, "STAVEINDEX", layer);
-  return db()->getDouble(m_PixelStave, "MODULEDZ", staveIndex);
+  int staveIndex = (*m_PixelLayer)[layer]->getInt("STAVEINDEX");
+  return (*m_PixelStave)[staveIndex]->getDouble("MODULEDZ");
 }
-
 
 // Number of staves/sectors per endcap layer 
 int InDetServMatGeometryManager::pixelEndcapNumSectorsForLayer(int layer) const
 {
-  return db()->getInt(m_PixelDisk,"NSECTORS",layer);  // FIXME: not yet in DB?
+  if(!(*m_PixelDisk)[layer]->isFieldNull("NSECTORS")) {
+    return (*m_PixelDisk)[layer]->getInt("NSECTORS");
+  }
+  return 0;
 }
 
 int InDetServMatGeometryManager::pixelModulesPerRing( int ring) const
 {
-  return db()->getInt( m_PixelRing, "NMODULE", ring);
+  return (*m_PixelRing)[ring]->getInt("NMODULE");
 }
 
 int InDetServMatGeometryManager::pixelModulesPerEndcapSector( int layer) const
 {
   int nModulesDisk = 0;
-  for (unsigned int indexTmp = 0; indexTmp < db()->getTableSize(m_PixelDiskRing); ++indexTmp) {
-    int disk = db()->getInt(m_PixelDiskRing,"DISK",indexTmp);
-    if ( disk == layer) {
-      int ring = db()->getInt(m_PixelDiskRing,"RING",indexTmp);
+  for(const auto& diskRing : *m_PixelDiskRing) {
+    int disk = diskRing->getInt("DISK");
+    if (disk == layer) {
+      int ring = diskRing->getInt("RING");
       nModulesDisk += pixelModulesPerRing( ring);
-      //msg(MSG::INFO) << "Pixel Ring " << ring << " on disk " << disk << " has " << pixelModulesPerRing( ring) << " modules" << endmsg;
     }
   }
   if(pixelEndcapNumSectorsForLayer(layer)==0) return 0;
@@ -240,14 +247,14 @@ int InDetServMatGeometryManager::pixelChipsPerModuleForDisk( int layer) const
 {
   int sumChips = 0;
   int sumModules = 0;
-  for (unsigned int indexTmp = 0; indexTmp < db()->getTableSize(m_PixelDiskRing); ++indexTmp) {
-    int disk = db()->getInt(m_PixelDiskRing,"DISK",indexTmp);
-    if ( disk == layer) {
-      int ring = db()->getInt(m_PixelDiskRing,"RING",indexTmp);
-      int moduleType = db()->getInt(m_PixelRing,"MODULETYPE",ring);
-      int nModules = pixelModulesPerRing( ring);
+  for(const auto& diskRing : *m_PixelDiskRing) {
+    int	disk = diskRing->getInt("DISK");
+    if (disk == layer) {
+      int ring = diskRing->getInt("RING");
+      int moduleType = diskRing->getInt("MODULETYPE");
+      int nModules = pixelModulesPerRing(ring);
       sumModules += nModules;
-      sumChips += nModules * pixelChipsPerModule( moduleType);
+      sumChips += nModules * pixelChipsPerModule(moduleType);
     }
   }
   if(sumModules==0) return 0;
@@ -258,13 +265,13 @@ int InDetServMatGeometryManager::pixelChipsPerModuleForDisk( int layer) const
 // number of disks
 int InDetServMatGeometryManager::pixelNumDisks() const
 {
-  return db()->getInt(m_PixelEndcapGeneral,"NDISK");
+  return (*m_PixelEndcapGeneral)[0]->getInt("NDISK");
 }
 
 // disk Z position
 double InDetServMatGeometryManager::pixelDiskZ(int disk) const 
 {
-  return db()->getDouble(m_PixelDisk,"ZDISK",disk) * Gaudi::Units::mm;
+  return (*m_PixelDisk)[disk]->getDouble("ZDISK") * Gaudi::Units::mm;
 }
 
 // disk min radius
@@ -272,10 +279,10 @@ double InDetServMatGeometryManager::pixelDiskRMin(int disk) const
 {
   std::string route = pixelDiskServiceRoute(disk);   
   if(route=="StdRoute")
-    return db()->getDouble(m_PixelDisk,"RMIN",disk) * Gaudi::Units::mm - 11*Gaudi::Units::mm;
+    return (*m_PixelDisk)[disk]->getDouble("RMIN") * Gaudi::Units::mm - 11*Gaudi::Units::mm;
 
   // support structures - SUP1RMIN is always closest to centre
-  return db()->getDouble(m_PixelDisk,"SUP1RMIN",disk) * Gaudi::Units::mm;
+  return (*m_PixelDisk)[disk]->getDouble("SUP1RMIN") * Gaudi::Units::mm;
 
 }
 
@@ -284,128 +291,130 @@ double InDetServMatGeometryManager::pixelDiskRMax(int disk) const
 {
   std::string route = pixelDiskServiceRoute(disk);   
   if(route=="StdRoute")
-    return db()->getDouble(m_PixelDisk,"RMAX",disk) * Gaudi::Units::mm + 11*Gaudi::Units::mm;
+    return (*m_PixelDisk)[disk]->getDouble("RMAX") * Gaudi::Units::mm + 11*Gaudi::Units::mm;
 
   // support structures - SUP3RMAX is always furthest from centre
-  return db()->getDouble(m_PixelDisk,"SUP3RMAX",disk) * Gaudi::Units::mm;
+  return (*m_PixelDisk)[disk]->getDouble("SUP3RMAX") * Gaudi::Units::mm;
 
 }
 
 // EOS ZOffset
 double InDetServMatGeometryManager::pixelDiskEOSZOffset(int disk) const 
 {
-  if (!db()->testField(m_PixelSvcRoute, "EOSZOFFSET")) 
-    return 0.0;
-  else
-    return db()->getDouble(m_PixelSvcRoute,"EOSZOFFSET",disk) * Gaudi::Units::mm;
+  try {
+    if(disk >=0
+       && static_cast<unsigned>(disk) < m_PixelSvcRoute->size()
+       && !(*m_PixelSvcRoute)[disk]->isFieldNull("EOSZOFFSET")) {
+      return (*m_PixelSvcRoute)[disk]->getDouble("EOSZOFFSET");
+    }
+  }
+  catch(std::runtime_error&) {
+    ATH_MSG_DEBUG("No EOSZOFFSET value for the PixelSvcRoute table record " << disk);
+  }
+  return 0.0;
 }
 
 // return name of support tube where 
 std::string InDetServMatGeometryManager::pixelDiskServiceRoute(int disk) const 
 {
-  if(db()->testField(m_PixelSvcRoute,"SERVICEROUTE"))
-    return db()->getString(m_PixelSvcRoute,"SERVICEROUTE",disk);
+  try {
+    if(disk >=0
+       && static_cast<unsigned>(disk) < m_PixelSvcRoute->size()
+       && !(*m_PixelSvcRoute)[disk]->isFieldNull("SERVICEROUTE")) {
+      return (*m_PixelSvcRoute)[disk]->getString("SERVICEROUTE");
+    }
+  }
+  catch (std::runtime_error&) {
+    ATH_MSG_DEBUG("No SERVICEROUTE value for the PixelSvcRoute table record " << disk);
+  }
   return "StdRoute";
 }
 
 double InDetServMatGeometryManager::pixelEnvelopeRMax() const
 {
-  return db()->getDouble(m_PixelEnvelope,"RMAX") * Gaudi::Units::mm;
+  return (*m_PixelEnvelope)[0]->getDouble("RMAX") * Gaudi::Units::mm;
 }
 
 int InDetServMatGeometryManager::pixelBarrelModuleType( int layer) const 
 {
-  return db()->getInt( m_PixelLayer, "MODULETYPE", layer);
+  return (*m_PixelLayer)[layer]->getInt("MODULETYPE");
 }
-    /*
-  else {
-426	      // Not in DB yet.
-427	      int ringType = getDiskRingType(currentLD,m_eta);
-428	      if (ringType>=0) {
-429	        type = db()->getInt(PixelRing,"MODULETYPE",ringType);
-430	      }
-431	    }
-432
-    */
 
 int InDetServMatGeometryManager::pixelDesignType( int moduleType) const
 {
-  return db()->getInt( m_PixelModule, "DESIGNTYPE", moduleType);
+  return (*m_PixelModule)[moduleType]->getInt("DESIGNTYPE");
 }
 
 int InDetServMatGeometryManager::pixelChipsPerModule( int moduleType) const 
 {
-  int nChipsEta = db()->getInt( m_PixelReadout, "NCHIPSETA", moduleType);
-  int nChipsPhi = db()->getInt( m_PixelReadout, "NCHIPSPHI", moduleType);
+  int nChipsEta = (*m_PixelReadout)[moduleType]->getInt("NCHIPSETA");
+  int nChipsPhi = (*m_PixelReadout)[moduleType]->getInt("NCHIPSPHI");
   return nChipsEta*nChipsPhi;
 }
-
-
 
 // number of layers
 int InDetServMatGeometryManager::sctNumLayers() const
 {
-  return db()->getInt(m_SctBrlGeneral,"NUMLAYERS");
+  return (*m_SctBrlGeneral)[0]->getInt("NUMLAYERS");
 }
 
 // layer radius 
 double InDetServMatGeometryManager::sctLayerRadius(int layer) const
 {
-  return db()->getDouble(m_SctBrlLayer,"RADIUS",layer) * Gaudi::Units::mm;
+  return (*m_SctBrlLayer)[layer]->getDouble("RADIUS") * Gaudi::Units::mm;
 }
 
 // layer length
 double InDetServMatGeometryManager::sctLayerLength(int layer) const
 {
-  return db()->getDouble(m_SctBrlLayer,"CYLLENGTH",layer) * Gaudi::Units::mm;
+  return (*m_SctBrlLayer)[layer]->getDouble("CYLLENGTH") * Gaudi::Units::mm;
 }
 
 // layer type. Long(0) or Short (1) strips. NEEDS CHECKING
 int InDetServMatGeometryManager::sctLayerType(int layer) const
 {
-  int ladType =  db()->getInt(m_SctBrlLayer,"LADDERTYPE",layer);
-  return db()->getInt(m_SctBrlLadder,"MODTYPE",ladType);
+  int ladType = (*m_SctBrlLayer)[layer]->getInt("LADDERTYPE");
+  return (*m_SctBrlLadder)[ladType]->getInt("MODTYPE");
 }
 
 // Number of staves/sectors per barrel layer 
 int InDetServMatGeometryManager::sctNumSectorsForLayer(int layer) const
 {
-  return db()->getInt(m_SctBrlLayer,"SKISPERLAYER",layer);
+  return (*m_SctBrlLayer)[layer]->getInt("SKISPERLAYER");
 }
 
 int InDetServMatGeometryManager::sctModulesPerLadder(int layer) const
 {
-  int ladType =  db()->getInt(m_SctBrlLayer,"LADDERTYPE",layer);
-  return db()->getInt(m_SctBrlLadder,"NUMPERLADDER",ladType);
+  int ladType = (*m_SctBrlLayer)[layer]->getInt("LADDERTYPE");
+  return (*m_SctBrlLadder)[ladType]->getInt("NUMPERLADDER");
 }
 
 // Number of staves/sectors per endcap layer 
 int InDetServMatGeometryManager::sctEndcapNumSectorsForLayer(int /*layer*/) const
 {
   return 32; // FIXME: hardwired number, should go to text file and DB
-  //return db()->getInt(m_SctFwdWheel,"NSECTORS",layer); // FIXME: not yet in DB or text file
 }
 
 // number of disks
 int InDetServMatGeometryManager::sctNumDisks() const
 {
-  return db()->getInt(m_SctFwdGeneral,"NUMWHEELS");
+  return (*m_SctFwdGeneral)[0]->getInt("NUMWHEELS");
 }
 
 // disk Z position
 double InDetServMatGeometryManager::sctDiskZ(int disk) const 
 {
-  return db()->getDouble(m_SctFwdWheel,"ZPOSITION",disk) * Gaudi::Units::mm;
+  return (*m_SctFwdWheel)[disk]->getDouble("ZPOSITION") * Gaudi::Units::mm;
 }
 
 // disk Z position
 double InDetServMatGeometryManager::sctDiskRMax(int disk) const 
 {
-  return db()->getDouble(m_SctFwdDiscSupport,"OUTERRADIUS",disk) * Gaudi::Units::mm;
+  return (*m_SctFwdDiscSupport)[disk]->getDouble("OUTERRADIUS") * Gaudi::Units::mm;
 }
 
 double InDetServMatGeometryManager::sctInnerSupport() const 
 {
-  return db()->getDouble(m_SctBrlServPerLayer,"SUPPORTCYLINNERRAD",0) * Gaudi::Units::mm;
+  return (*m_SctBrlServPerLayer)[0]->getDouble("SUPPORTCYLINNERRAD") * Gaudi::Units::mm;
 }
 
