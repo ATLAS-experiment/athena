@@ -1595,7 +1595,7 @@ StatusCode REvent::putAux( TVirtualManager& vmgr, ::Bool_t metadata ) {
 
 
         // Making the "proper" type name is simple in this case:
-        brProperTypeName = brTypeName;
+        brProperTypeName = std::move(brTypeName);
 
         // Let's create an RAuxFieldManager for this property:
         static constexpr bool IS_OWNER = false;
