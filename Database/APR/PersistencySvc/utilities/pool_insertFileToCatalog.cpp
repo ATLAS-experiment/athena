@@ -6,9 +6,8 @@
 
 #include "CxxUtils/checker_macros.h"
 #include "PersistencySvc/SimpleUtilityBase.h"
-#include "FileCatalog/IFileCatalog.h"
+#include "PersistencySvc/IFileCatalog.h"
 #include "POOLCore/SystemTools.h"
-//#include "POOLCore/DbPrint.h"
 
 using namespace pool;
 
@@ -66,13 +65,11 @@ InsertFileToCatalogApplication::execute()
    startSession();
    readFileGUIDs();
   
-  // Open the file catalog and insert the pfn/fid/technology
+   // Open the file catalog and insert the pfn/fid/technology
    pool::IFileCatalog   catalog;
    catalog.setWriteCatalog( m_catalogFN );
-
-   catalog.connect();
    catalog.start();
-   
+
    for( const auto& fp : fidAndPfn ) {
       std::string fid = fp.first; // can't be const
       catalog.registerPFN(fp.second, technologyName, fid);
