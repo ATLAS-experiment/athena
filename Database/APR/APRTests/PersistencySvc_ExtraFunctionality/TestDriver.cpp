@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TestDriver.h"
@@ -12,15 +12,15 @@
 #include "PersistentDataModel/Placement.h"
 #include "PersistentDataModel/Token.h"
 
-#include "StorageSvc/DbType.h"
-#include "FileCatalog/IFileCatalog.h"
-
+#include "PersistencySvc/IFileCatalog.h"
 #include "PersistencySvc/ISession.h"
 #include "PersistencySvc/ITransaction.h"
 #include "PersistencySvc/DatabaseConnectionPolicy.h"
 #include "PersistencySvc/IDatabase.h"
 #include "PersistencySvc/ITechnologySpecificAttributes.h"
 #include "PersistencySvc/IPersistencySvc.h"
+
+#include "StorageSvc/DbType.h"
 
 
 pool::TestDriver::TestDriver( const std::string& catname ):
@@ -36,7 +36,6 @@ pool::TestDriver::TestDriver( const std::string& catname ):
   }
   std::filesystem::remove( {catname} );
   m_fileCatalog->setWriteCatalog( catname );
-  m_fileCatalog->connect();
 }
 
 pool::TestDriver::~TestDriver()

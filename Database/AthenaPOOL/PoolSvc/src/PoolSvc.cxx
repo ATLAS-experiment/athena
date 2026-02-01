@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /** @file PoolSvc.cxx
@@ -21,7 +21,6 @@
 
 #include "CollectionSvc/CollectionService.h"
 
-#include "FileCatalog/IFileCatalog.h"
 #include "POOLCore/DbPrint.h"
 #include "PersistencySvc/IPersistencySvc.h"
 #include "PersistencySvc/ISession.h"
@@ -30,6 +29,7 @@
 #include "PersistencySvc/ITechnologySpecificAttributes.h"
 #include "PersistencySvc/ITokenIterator.h"
 #include "PersistencySvc/DatabaseConnectionPolicy.h"
+#include "PersistencySvc/IFileCatalog.h"
 #include "StorageSvc/DbType.h"
 
 #include "RelationalAccess/ConnectionService.h"
@@ -943,7 +943,6 @@ pool::IFileCatalog* PoolSvc::createCatalog() {
    try {
       ATH_MSG_INFO("POOL WriteCatalog is " << m_writeCatalog.value());
       ctlg->setWriteCatalog(m_writeCatalog.value());
-      ctlg->connect();
    } catch(std::exception& e) {
       ATH_MSG_ERROR("setWriteCatalog - caught exception: " << e.what());
       return(nullptr); // This catalog is not setup properly!

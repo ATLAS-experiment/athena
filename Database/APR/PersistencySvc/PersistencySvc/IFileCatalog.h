@@ -10,9 +10,6 @@
 #include "GaudiKernel/SmartIF.h"
 
 #include "AthenaBaseComps/AthMessaging.h"
-#include "GaudiKernel/IMessageSvc.h"
-
-//#include <iostream>
 
 namespace pool {
 
@@ -32,12 +29,6 @@ namespace pool {
      ~IFileCatalog() {}
      
      // ------------------------------ Catalog interface  
-     
-     /// Create file identifier using UUID mechanism
-     std::string createFID() const;
-
-     void connect() { /* not doing anything in Gaudi FC */ }
-     void disconnect() { /* not doing anything in Gaudi FC */ }
      /// Get the connect string
      const std::string& connectInfo() const { return m_fc->connectInfo(); }
        
@@ -75,15 +66,9 @@ namespace pool {
      /// Lookup file identifier by physical file name
      std::string lookupPFN( const std::string& pfn ) const { return m_fc->lookupPFN(pfn); }
 
-     /// Return the status of a LFName
-     //    bool existsLFN( const std::string& lfn ) const = 0;
-
      /// Lookup file identified by logical file name
      void lookupFileByLFN( const std::string& lfn, std::string& fid ) const { fid = lookupLFN(lfn); }
      std::string lookupLFN( const std::string& lfn ) const { return m_fc->lookupLFN(lfn); }
-
-     /// Return the status of a FileID
-     //    bool existsFID( const std::string& fid ) const = 0;
 
      /// Delete FileID Node from the catalog
      void deleteFID( const std::string& FileID ) { m_fc->deleteFID(FileID); }
@@ -96,14 +81,6 @@ namespace pool {
 
      /// Rename PFN
      void renamePFN( const std::string& pfn, const std::string& newpfn ) { m_fc->renamePFN(pfn, newpfn); }
-
-     /// adding replica to an existing PFN
-     void addReplicaPFN( const std::string& pfn, const std::string& replica_pfn );
-     
-     /// adding replica to an existing FID
-     void addReplicaFID( const std::string& fid,
-                         const std::string& replica_pfn,
-                         const std::string& replica_tech = "ROOT_All" );
 
      /// Create a Node for a FileID and DOM Node of the LFN with all the attributes
      // NOTE!  this method requires FID! (and not PFN)

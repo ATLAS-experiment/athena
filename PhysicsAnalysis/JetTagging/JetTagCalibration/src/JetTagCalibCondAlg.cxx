@@ -8,7 +8,7 @@
 
 #include "AthenaPoolUtilities/CondAttrListCollection.h"
 #include "PoolSvc/IPoolSvc.h"
-#include "FileCatalog/IFileCatalog.h"
+#include "PersistencySvc/IFileCatalog.h"
 #include "TH1.h"
 #include "TH2.h"
 #include <TObjString.h>

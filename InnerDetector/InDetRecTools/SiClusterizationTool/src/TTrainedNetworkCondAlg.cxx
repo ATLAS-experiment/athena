@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /*
  *   */
@@ -7,7 +7,7 @@
 #include "TTrainedNetworkCondAlg.h"
 
 #include "AthenaPoolUtilities/CondAttrListCollection.h"
-#include "FileCatalog/IFileCatalog.h"
+#include "PersistencySvc/IFileCatalog.h"
 
 #include "TFile.h"
 #include "TH1.h"

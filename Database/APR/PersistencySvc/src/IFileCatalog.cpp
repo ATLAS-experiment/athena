@@ -11,10 +11,7 @@
 
 #include <algorithm>
 #include "POOLCore/SystemTools.h"
-#include "FileCatalog/IFileCatalog.h"
-
-#include "AthenaBaseComps/AthMessaging.h"
-#include "PersistentDataModel/Guid.h"
+#include "PersistencySvc/IFileCatalog.h"
 
 #include <exception>
 
@@ -30,15 +27,6 @@ pool::IFileCatalog::IFileCatalog()
    // set the output level of the XMLCatalog component - works only if the Gaudi AppMgr was initialized
    Gaudi::svcLocator()->service<IMessageSvc>("MessageSvc")
       ->setOutputLevel("XMLCatalog", SystemTools::GetOutputLvl() );
-}
-
-
-std::string pool::IFileCatalog::
-createFID() const
-{
-   Guid myuid;
-   Guid::create(myuid);
-   return myuid.toString();
 }
 
 
@@ -81,37 +69,9 @@ registerPFN( const std::string& pfn, const std::string& ftype, std::string& fid 
    if( existsPFN(pfn) ) {
       throw std::runtime_error("PFN '" + pfn + "' already registered (APR: \" registerPFN \" from \" FileCatalog \")");
    }
-   if( fid.empty() ) fid = createFID();
+   if( fid.empty() ) fid = m_fc->createFID();
    ATH_MSG_DEBUG("Registering PFN=" << pfn << " of type=" << ftype << " GUID=" << fid);
    m_fc->registerPFN(fid, pfn, ftype);
-}
-
-
-/// adding replica to a PFN
-void pool::IFileCatalog::
-addReplicaPFN( const std::string& pfn, const std::string& replica_pfn )
-{ 
-   std::string fid = m_fc->lookupPFN(pfn);
-   if( fid.empty() )
-      throw std::runtime_error("PFN '" + pfn + "' not found (APR: \" addReplicaPFN \" from \" FileCatalog \")");
-   // find the filetype for the PFN being replicated
-   Files   pfns;
-   getPFNs( fid, pfns );
-   for( const auto& pfns_entry: pfns ) {
-      if( pfns_entry.first == pfn ) {
-         m_fc->registerPFN(fid, replica_pfn, pfns_entry.second);
-         return;
-      }
-   }
-}
-     
-/// adding replica to a FID
-void pool::IFileCatalog::
-addReplicaFID( const std::string& fid, const std::string& replica_pfn, const std::string& replica_tech )
-{ 
-   if( fid.empty() )
-      throw std::runtime_error("FID not specified (APR: \" addReplicaFID \" from \" FileCatalog \")");
-   m_fc->registerPFN(fid, replica_pfn, replica_tech);
 }
 
 
