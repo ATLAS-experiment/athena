@@ -42,8 +42,6 @@ void split(TEnv& rEnv, const std::string& sIn, const char cDelim, std::vector<fl
 void split(TEnv& rEnv, const std::string& sIn, const char cDelim, std::vector<double>& vOut);
 /** return tau pt in GeV*/
 double tauPt(const xAOD::TauJet& xTau);
-/** return tau P in GeV*/
-double tauP(const xAOD::TauJet& xTau);
 /** return tau eta*/
 double tauEta(const xAOD::TauJet& xTau);
 /** return absolute tau eta*/
@@ -54,8 +52,6 @@ double finalTauPt(const xAOD::TauJet& xTau);
 double finalTauEta(const xAOD::TauJet& xTau);
 /** return MVA based absolute tau eta*/
 double finalTauAbsEta(const xAOD::TauJet& xTau);
-/** return MVA based tau P in GeV*/
-double finalTauP(const xAOD::TauJet& xTau);
 /** return leading charge tau track eta*/
 double tauLeadTrackEta(const xAOD::TauJet& xTau);
 /** return truth match tau pt in GeV (if hadronic truth tau match)*/
