@@ -245,7 +245,7 @@ namespace ActsTrk {
         const DetectorContextHolder &detContext,
         const bool paramsAtOutermostSurface) const;
 
-    using TrkProxy = Acts::TrackProxy<Acts::VectorTrackContainer, Acts::VectorMultiTrajectory, Acts::detail::RefHolder, false>;
+    using TrkProxy = detail::RecoTrackContainer::TrackProxy;
 
     /**
      * @brief Perform two-way track finding
