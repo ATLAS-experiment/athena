@@ -49,11 +49,7 @@ StatusCode TauEfficiencyCorrectionsTool::initialize()
   
   if(m_sRecommendationTag == "2025-prerec") {
     ATH_CHECK(initializeTools_2025_prerec());
-  } else if (m_sRecommendationTag == "2022-prerec") {
-    ATH_MSG_WARNING("2022-prerec tag are pre-recommendations superseeded by 2025-prerec");
-    ATH_CHECK(initializeTools_2022_prerec());
-  }
-  else {
+  } else {
     ATH_MSG_ERROR("Unknown RecommendationTag " << m_sRecommendationTag);
     return StatusCode::FAILURE;
   }
@@ -83,16 +79,6 @@ StatusCode TauEfficiencyCorrectionsTool::firstEvent()
   const xAOD::EventInfo* xEventInfo = nullptr;
   ATH_CHECK(evtStore()->retrieve(xEventInfo, "EventInfo"));
 
-  if(m_sRecommendationTag == "2022-prerec"){
-    if (xEventInfo->runNumber() != 284500 && xEventInfo->runNumber() != 300000 && xEventInfo->runNumber() != 310000)  // mc21/2022: 410000
-      {
-        ANA_MSG_WARNING( "Could not determine MC campaign from run number! The mu dependent systematic of the trigger scale factors should not be trusted. Current (" << xEventInfo->runNumber() << "). Will only print this warning once." );
-      }
-    if (xEventInfo->runNumber() < 410000)  // mc21/2022: 410000
-      {
-        ANA_MSG_WARNING( "TauEfficiency callibrations from 2022-prerec are not recommended for Run2 MC. Will only print this warning once." );
-      }
-  }
   return StatusCode::SUCCESS;
 }
 
@@ -383,155 +369,6 @@ StatusCode TauEfficiencyCorrectionsTool::initializeTools_2025_prerec()
       }
       m_sVarName = "TauScaleFactorTriggerHadTau";
 	 
-      asg::AnaToolHandle<ITauEfficiencyCorrectionsTool>* tTool = new asg::AnaToolHandle<ITauEfficiencyCorrectionsTool>("TauAnalysisTools::CommonEfficiencyTool/TriggerHadTauTool", this);
-      m_vCommonEfficiencyTools.push_back(tTool);
-      ATH_CHECK(tTool->setProperty("InputFilePath", m_sInputFilePathTriggerHadTau));
-      ATH_CHECK(tTool->setProperty("VarName", m_sVarName));
-      ATH_CHECK(tTool->setProperty("SkipTruthMatchCheck", m_bSkipTruthMatchCheck));
-      ATH_CHECK(tTool->setProperty("WP", ConvertTriggerIDToString(m_iJetIDLevel)));
-      ATH_CHECK(tTool->setProperty("DoTauTrig", true));
-    }
-    else {
-      ATH_MSG_WARNING("unsupported EfficiencyCorrectionsType with enum " << iEfficiencyCorrectionType);
-    }
-  }
-
-  return StatusCode::SUCCESS;
-}
-
-//_____________________________________________________________________________
-// this whole block is a place holder until we get R22 Run2 recommendations
-// none of these SFs are valid for R22 MC, except possibly RNN ID to very coarse approximation
-StatusCode TauEfficiencyCorrectionsTool::initializeTools_2022_prerec()
-{
-  std::string sDirectory = "TauAnalysisTools/" + std::string(sSharedFilesVersion) + "/EfficiencyCorrections/";
-
-  // initialise paths and SF names unless they have been configured by the user
-  for (auto iEfficiencyCorrectionType : m_vEfficiencyCorrectionTypes)
-  {
-    if (iEfficiencyCorrectionType == SFJetIDHadTau)
-    {
-      if (m_sInputFilePathJetIDHadTau.empty()) {
-        if(m_useFastSim) {
-          ATH_MSG_WARNING("No fast-sim recommendation for Tau RNN, using full sim");
-        }
-
-	m_sInputFilePathJetIDHadTau = sDirectory + "RNNID_TrueHadTau_2022-prerecommendation_v2.root";
-      }
-      m_sVarName = "TauScaleFactorJetIDHadTau";
-
-      std::string sJetIDWP = ConvertJetIDToString(m_iJetIDLevel);
-      if (sJetIDWP.empty()) {
-        ATH_MSG_WARNING("Could not find valid ID working point. Skip ID efficiency corrections.");
-        continue;
-      }
-
-      asg::AnaToolHandle<ITauEfficiencyCorrectionsTool>* tTool = new asg::AnaToolHandle<ITauEfficiencyCorrectionsTool>("TauAnalysisTools::CommonEfficiencyTool/JetIDHadTauTool", this);
-      m_vCommonEfficiencyTools.push_back(tTool);
-      ATH_CHECK(tTool->setProperty("InputFilePath", m_sInputFilePathJetIDHadTau));
-      ATH_CHECK(tTool->setProperty("VarName", m_sVarName));
-      //ATH_CHECK(tTool->setProperty("UseTauSubstructure", m_bUseTauSubstructure));
-      ATH_CHECK(tTool->setProperty("SkipTruthMatchCheck", m_bSkipTruthMatchCheck));
-      ATH_CHECK(tTool->setProperty("WP", sJetIDWP));
-    }
-    else if (iEfficiencyCorrectionType == SFEleIDHadTau)
-    {
-      // the path must be updated once RNN eVeto SFs are available
-      if (m_sInputFilePathEleIDHadTau.empty()) m_sInputFilePathEleIDHadTau = sDirectory + "EleOLR_TrueHadTau_2016-ichep.root";
-      m_sVarName = "TauScaleFactorEleIDHadTau";
-
-      asg::AnaToolHandle<ITauEfficiencyCorrectionsTool>* tTool = new asg::AnaToolHandle<ITauEfficiencyCorrectionsTool>("TauAnalysisTools::CommonEfficiencyTool/EleIDHadTauTool", this);
-      m_vCommonEfficiencyTools.push_back(tTool);
-      ATH_CHECK(tTool->setProperty("InputFilePath", m_sInputFilePathEleIDHadTau));
-      ATH_CHECK(tTool->setProperty("VarName", m_sVarName));
-      ATH_CHECK(tTool->setProperty("SkipTruthMatchCheck", m_bSkipTruthMatchCheck));
-    }
-    else if (iEfficiencyCorrectionType == SFEleIDElectron)
-    {
-      // the path must be updated once RNN eVeto SFs are available
-      if (m_sInputFilePathEleIDElectron.empty()) {
- 	if(m_useFastSim) {
-	  ATH_MSG_WARNING("No fast-sim recommendation for tau electron veto, using full sim");
-	}	
-
-	m_sInputFilePathEleIDElectron = sDirectory+ "EleRNN_TrueElectron_2022-mc20-prerec-v2.root";
-      }
-      m_sVarName = "TauScaleFactorEleIDElectron";
-
-      asg::AnaToolHandle<ITauEfficiencyCorrectionsTool>* tTool = new asg::AnaToolHandle<ITauEfficiencyCorrectionsTool>("TauAnalysisTools::CommonEfficiencyTool/EleIDElectronTool", this);
-      m_vCommonEfficiencyTools.push_back(tTool);
-      ATH_CHECK(tTool->setProperty("InputFilePath", m_sInputFilePathEleIDElectron));
-      ATH_CHECK(tTool->setProperty("VarName", m_sVarName));
-      ATH_CHECK(tTool->setProperty("SkipTruthMatchCheck", m_bSkipTruthMatchCheck));
-      ATH_CHECK(tTool->setProperty("WP", ConvertEleIDToString(m_iEleIDLevel)));
-      ATH_CHECK(tTool->setProperty("UseTauSubstructure", false));
-    }
-    else if (iEfficiencyCorrectionType == SFRecoHadTau)
-    {
-      if (m_sInputFilePathRecoHadTau.empty()) m_sInputFilePathRecoHadTau = sDirectory + "Reco_TrueHadTau_2019-summer_v2.root";
-      m_sVarName = "TauScaleFactorReconstructionHadTau";
-
-      asg::AnaToolHandle<ITauEfficiencyCorrectionsTool>* tTool = new asg::AnaToolHandle<ITauEfficiencyCorrectionsTool>("TauAnalysisTools::CommonEfficiencyTool/RecoHadTauTool", this);
-      m_vCommonEfficiencyTools.push_back(tTool);
-      ATH_CHECK(tTool->setProperty("InputFilePath", m_sInputFilePathRecoHadTau));
-      ATH_CHECK(tTool->setProperty("VarName", m_sVarName));
-      ATH_CHECK(tTool->setProperty("SkipTruthMatchCheck", m_bSkipTruthMatchCheck));
-    }
-    else if (iEfficiencyCorrectionType == SFDecayModeHadTau)
-    {
-      if (m_sInputFilePathDecayModeHadTau.empty()) m_sInputFilePathDecayModeHadTau = sDirectory + "DecayModeSubstructure_TrueHadTau_2019-summer.root";
-      m_sVarName = "TauScaleFactorDecayModeHadTau";
-
-      std::string sJetIDWP = ConvertJetIDToString(m_iJetIDLevel);
-      if (sJetIDWP.empty()) {
-        ATH_MSG_WARNING("Could not find valid ID working point. Skip ID efficiency corrections.");
-        continue;
-      }
-
-      asg::AnaToolHandle<ITauEfficiencyCorrectionsTool>* tTool = new asg::AnaToolHandle<ITauEfficiencyCorrectionsTool>("DecayModeHadTauTool", this);
-      m_vCommonEfficiencyTools.push_back(tTool);
-      ATH_CHECK(ASG_MAKE_ANA_TOOL(*tTool, TauAnalysisTools::CommonEfficiencyTool));
-      ATH_CHECK(tTool->setProperty("InputFilePath", m_sInputFilePathDecayModeHadTau));
-      ATH_CHECK(tTool->setProperty("VarName", m_sVarName));
-      ATH_CHECK(tTool->setProperty("UseTauSubstructure", true));
-      ATH_CHECK(tTool->setProperty("SkipTruthMatchCheck", m_bSkipTruthMatchCheck));
-      ATH_CHECK(tTool->setProperty("WP", sJetIDWP));
-    }
-    else if (iEfficiencyCorrectionType == SFTriggerHadTau)
-    {
-      if (m_sTriggerName.empty()) {
-	ATH_MSG_ERROR("Property \"Trigger\" was not set, please provide a trigger name.");
-	return StatusCode::FAILURE;  
-      }
-      if (m_sInputFilePathTriggerHadTau.empty()) {
-	// Determine the input file name from the given trigger name.
-	// Triggers having "mediumRNN_tracktwoMVA are only part of 2018aftTS1.
-	// Every other trigger having "tracktwoEF" is only part of 2018.
-	// Every other trigger having "tau160_medium1" is only part of 2016.
-	// Every other trigger having "tau160" is only part of 2017/2018.
-	// Lastly check for other possible triggers, if this is not fulfilled the passed trigger is not supported.
-	if (m_sTriggerName.value().find("mediumRNN_tracktwoMVA") != std::string::npos) {
-	  m_sInputFilePathTriggerHadTau = sDirectory+"Trigger/RNN/Trigger_TrueHadTau_2019-summer_data2018aftTS1"+GetTriggerSFMeasurementString()+m_sTriggerName+".root";
-	}
-	else if (m_sTriggerName.value().find("tracktwoEF") != std::string::npos) {
-	  m_sInputFilePathTriggerHadTau = sDirectory+"Trigger/RNN/Trigger_TrueHadTau_2019-summer_data2018"+GetTriggerSFMeasurementString()+m_sTriggerName+".root";
-	}
-	else if (m_sTriggerName.value().find("tau160_medium1") != std::string::npos) {
-	  m_sInputFilePathTriggerHadTau = sDirectory+"Trigger/RNN/Trigger_TrueHadTau_2019-summer_data2016"+GetTriggerSFMeasurementString()+m_sTriggerName+".root";
-	}
-	else if ((m_sTriggerName.value().find("tau160") != std::string::npos) || (m_sTriggerName.value().find("tau60") != std::string::npos)) {
-	  m_sInputFilePathTriggerHadTau = sDirectory+"Trigger/RNN/Trigger_TrueHadTau_2019-summer_data1718"+GetTriggerSFMeasurementString()+m_sTriggerName+".root";
-	}
-	else if ((m_sTriggerName.value().find("tau125") != std::string::npos) || (m_sTriggerName.value().find("tau25") != std::string::npos) || (m_sTriggerName.value().find("tau35") != std::string::npos) || (m_sTriggerName.value().find("tau50") != std::string::npos) || (m_sTriggerName.value().find("tau80") != std::string::npos) ) {
-	  m_sInputFilePathTriggerHadTau = sDirectory+"Trigger/RNN/Trigger_TrueHadTau_2019-summer_data161718"+GetTriggerSFMeasurementString()+m_sTriggerName+".root";
-	}
-	else {
-	  ATH_MSG_ERROR("Trigger " << m_sTriggerName << " is not supported. Please fix \"TriggerName\" property.");        
-	  return StatusCode::FAILURE;
-	}
-      }
-      m_sVarName = "TauScaleFactorTriggerHadTau";
-
       asg::AnaToolHandle<ITauEfficiencyCorrectionsTool>* tTool = new asg::AnaToolHandle<ITauEfficiencyCorrectionsTool>("TauAnalysisTools::CommonEfficiencyTool/TriggerHadTauTool", this);
       m_vCommonEfficiencyTools.push_back(tTool);
       ATH_CHECK(tTool->setProperty("InputFilePath", m_sInputFilePathTriggerHadTau));

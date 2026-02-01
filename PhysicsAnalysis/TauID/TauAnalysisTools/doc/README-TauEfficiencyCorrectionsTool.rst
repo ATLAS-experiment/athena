@@ -91,45 +91,7 @@ The tool can be used to retrieve scale factors for a specific
 
    * - ``RecommendationTag``
      - ``std::string``
-     - ``"2022-prerec"``
      - ``"2025-prerec"``
-
-For the default ``RecommendationTag`` "2022-prerec" the following properties
-are available for tool steering:
-
-.. list-table::
-   :header-rows: 1
-   :widths: 25 10 45 35
-
-   * - property name
-     - type
-     - default value
-     - other sensible values
-
-   * - ``EfficiencyCorrectionTypes``
-     - ``std::vector<int>``
-     - ``{SFRecoHadTau, SFJetIDHadTau}``
-     - ``std::vector<int>({SFEleIDHadTau, SFEleIDElectron, SFTriggerHadTau, SFDecayModeHadTau})``
-
-   * - ``JetIDLevel``
-     - ``int``
-     - ``JETIDNONE``
-     - ``JETIDRNNLOOSE``, ``JETIDRNNMEDIUM``, ``JETIDRNNTIGHT``
-
-   * - ``EleIDLevel``
-     - ``int``
-     - ``ELEIDNONE``
-     - ``ELEIDRNNLOOSE``, ``ELEIDRNNMEDIUM``, ``ELEIDRNNTIGHT``
-
-   * - ``TriggerName``
-     - ``std::string``
-     - ``""``
-     - ``"HLT_tau125_medium1_tracktwo"``, ``"HLT_tau160_medium1_tracktwo"``, ``"HLT_tau25_medium1_tracktwo"``, ``"HLT_tau35_medium1_tracktwo"``, ``"HLT_tau50_medium1_tracktwo_L1TAU12"``, ``"HLT_tau80_medium1_tracktwo"``, ``"HLT_tau80_medium1_tracktwo_L1TAU60"``
-
-   * - ``TriggerSFMeasurement``
-     - ``std::string``
-     - ``"combined"``
-     - ``"Ztautau"``, ``"ttbar"``, 
 
 For the ``RecommendationTag`` "2025-prerec" the following properties
 are available for tool steering:
