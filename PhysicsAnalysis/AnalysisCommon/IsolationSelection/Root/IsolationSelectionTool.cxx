@@ -695,7 +695,7 @@ StatusCode IsolationSelectionTool::addElectronWP(const std::string& elWPname) {
     while ((key = (TKey*)nextkey())) {
       TObject* obj = key->ReadObj();
       if (obj->InheritsFrom(TGraph::Class())) {
-        cutGraphUPtr.push_back((TGraph*)obj);
+        cutGraphUPtr.push_back(static_cast<TGraph*>(obj));
 
         // keep this as hint on how to read out RunNumber validity
         // TObjArray* tokens = Obj_name.Tokenize("_");
