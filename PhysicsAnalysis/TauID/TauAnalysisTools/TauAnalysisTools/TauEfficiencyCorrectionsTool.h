@@ -85,7 +85,6 @@ private:
 
   std::string GetTriggerSFMeasurementString() const;
 
-  StatusCode initializeTools_2022_prerec();
   StatusCode initializeTools_2025_prerec(); 
 
   StatusCode readRandomRunNumber();
