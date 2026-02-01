@@ -392,10 +392,10 @@ void CommonSmearingTool::ReadInputs(TFile* fFile, std::map<std::string, T>& mMap
       TNamed* tObj = (TNamed*)kKey->ReadObj();
       std::string sTitle = tObj->GetTitle();
       delete tObj;
-      if (sTitle == "P" || sTitle == "PFinalCalib")
+      if (sTitle == "pt")
       {
-        m_fX = &finalTauP;
-        ATH_MSG_DEBUG("using full momentum for x-axis");
+        m_fX = &finalTauPt;
+        ATH_MSG_DEBUG("using tau pt for x-axis");
       }
     }
     if (sKeyName == "Yaxis")
