@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TAURECTOOLS_TAUGNNUTILS_H
@@ -7,6 +7,7 @@
 
 #include "xAODTau/TauJet.h"
 #include "xAODCaloEvent/CaloVertexedTopoCluster.h"
+#include "xAODTracking/TrackMeasurementValidationContainer.h"
 #include "xAODEventInfo/EventInfo.h"
 #include "xAODTracking/VertexContainer.h"
 #include "AsgTools/AsgTool.h"
@@ -39,6 +40,9 @@ public:
     using ClusterCalc = bool (*)(const xAOD::TauJet &,
                                  const xAOD::CaloVertexedTopoCluster &, double &);
 
+    using HitCalc = bool (*)(const xAOD::TauJet &,
+                                 const xAOD::TrackMeasurementValidation &, double &);
+
 public:
     GNNVarCalc();
     ~GNNVarCalc() = default;
@@ -58,29 +62,39 @@ public:
                  const std::vector<xAOD::CaloVertexedTopoCluster> &clusters,
                  std::vector<double> &out) const;
 
+    // Computes hit variables
+    bool compute(const std::string &name, const xAOD::TauJet &tau,
+                 const std::vector<const xAOD::TrackMeasurementValidation*> &hits,
+                 std::vector<double> &out) const;
+
     // Methods to insert calculator functions into the lookup table
     void insert(const std::string &name, ScalarCalc func, const std::vector<std::string>& scalar_vars);
     void insert(const std::string &name, TrackCalc func, const std::vector<std::string>& track_vars);
     void insert(const std::string &name, ClusterCalc func, const std::vector<std::string>& cluster_vars);
+    void insert(const std::string &name, HitCalc func, const std::vector<std::string>& hit_vars);
 
 private:
     // Lookup tables
     std::unordered_map<std::string, ScalarCalc> m_scalar_map;
     std::unordered_map<std::string, TrackCalc> m_track_map;
     std::unordered_map<std::string, ClusterCalc> m_cluster_map;
+    std::unordered_map<std::string, HitCalc> m_hit_map;
 };
 
 // Factory function to create a variable calculator populated with default
 // variables
 std::unique_ptr<GNNVarCalc> get_calculator(const std::vector<std::string>& scalar_vars,
 					const std::vector<std::string>& track_vars,
-					const std::vector<std::string>& cluster_vars);
+					const std::vector<std::string>& cluster_vars,
+					const std::vector<std::string>& hit_vars);
 
 
 namespace Variables {
 
 // Functions to calculate (scalar) input variables
 // Returns a status code indicating success
+bool eta(const xAOD::TauJet &tau, double &out);
+
 bool absEta(const xAOD::TauJet &tau, double &out);
 
 bool centFrac(const xAOD::TauJet &tau, double &out);
@@ -116,6 +130,10 @@ bool pt_tau_log(const xAOD::TauJet &tau, double &out);
 bool ptDetectorAxis(const xAOD::TauJet &tau, double &out);
 
 bool ptIntermediateAxis(const xAOD::TauJet &tau, double &out);
+
+bool ptJetSeed(const xAOD::TauJet &tau, double &out);
+
+bool etaJetSeed(const xAOD::TauJet &tau, double &out);
 
 //functions to calculate input variables needed for the eVeto RNN
 bool ptJetSeed_log             (const xAOD::TauJet &tau, double &out);
@@ -311,6 +329,25 @@ bool EM_PROBABILITY(
 bool CENTER_MAG(
     const xAOD::TauJet &tau, const xAOD::CaloVertexedTopoCluster &cluster, double &out);
 } // namespace Cluster
+
+namespace Hit {
+
+// Functions to calculate input variables for each hit
+// Returns a status code indicating success
+
+bool j(
+    const xAOD::TauJet &tau, const xAOD::TrackMeasurementValidation &hit, double &out);
+
+bool a(
+    const xAOD::TauJet &tau, const xAOD::TrackMeasurementValidation &hit, double &out);
+
+bool b(
+    const xAOD::TauJet &tau, const xAOD::TrackMeasurementValidation &hit, double &out);
+
+bool layer(
+    const xAOD::TauJet &tau, const xAOD::TrackMeasurementValidation &hit, double &out);
+
+} // namespace Hit
 } // namespace Variables
 } // namespace TauJetGNNUtils
 
