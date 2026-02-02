@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TAURECTOOLS_TAUGNN_H
@@ -7,6 +7,7 @@
 
 #include "xAODTau/TauJet.h"
 #include "xAODCaloEvent/CaloVertexedTopoCluster.h"
+#include "xAODTracking/TrackMeasurementValidationContainer.h"
 
 #include "AsgMessaging/AsgMessaging.h"
 
@@ -40,6 +41,7 @@ public:
         std::string input_layer_scalar;
         std::string input_layer_tracks;
         std::string input_layer_clusters;
+        std::string input_layer_hits;
         std::string output_node_tau;
         std::string output_node_jet;
     };
@@ -57,10 +59,26 @@ public:
                   const std::vector<const xAOD::TauTrack *> &tracks,
                   const std::vector<xAOD::CaloVertexedTopoCluster> &clusters) const;
 
+    std::tuple<
+        std::map<std::string, float>,
+        std::map<std::string, std::vector<char>>,
+        std::map<std::string, std::vector<float>> > 
+    compute(const xAOD::TauJet &tau,
+                  const std::vector<const xAOD::TauTrack *> &tracks,
+                  const std::vector<xAOD::CaloVertexedTopoCluster> &clusters,
+                  const std::vector<const xAOD::TrackMeasurementValidation*> &hits) const;
+
     // Compute all input variables and store them in the maps that are passed by reference
     bool calculateInputVariables(const xAOD::TauJet &tau,
                   const std::vector<const xAOD::TauTrack *> &tracks,
                   const std::vector<xAOD::CaloVertexedTopoCluster> &clusters,
+                  std::map<std::string, std::map<std::string, double>>& scalarInputs,
+                  std::map<std::string, std::map<std::string, std::vector<double>>>& vectorInputs) const;
+
+    bool calculateInputVariables(const xAOD::TauJet &tau,
+                  const std::vector<const xAOD::TauTrack *> &tracks,
+                  const std::vector<xAOD::CaloVertexedTopoCluster> &clusters,
+                  const std::vector<const xAOD::TrackMeasurementValidation*> &hits,
                   std::map<std::string, std::map<std::string, double>>& scalarInputs,
                   std::map<std::string, std::map<std::string, std::vector<double>>>& vectorInputs) const;
 
@@ -88,10 +106,12 @@ private:
     std::vector<std::string> m_scalar_inputs;
     std::vector<std::string> m_track_inputs;
     std::vector<std::string> m_cluster_inputs;
+    std::vector<std::string> m_hit_inputs;
     // Names passed to the variable calculator
     std::vector<std::string> m_scalarCalc_inputs;
     std::vector<std::string> m_trackCalc_inputs;
     std::vector<std::string> m_clusterCalc_inputs;
+    std::vector<std::string> m_hitCalc_inputs;
 
     // Variable calculator to calculate input variables on the fly
     std::unique_ptr<TauGNNUtils::GNNVarCalc> m_var_calc;

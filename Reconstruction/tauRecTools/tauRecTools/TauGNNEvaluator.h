@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TAURECTOOLS_TAUGNNEVALUATOR_H
@@ -13,6 +13,7 @@
 #include "xAODCaloEvent/CaloVertexedTopoCluster.h"
 
 #include "AsgDataHandles/WriteDecorHandleKey.h"
+#include "AsgDataHandles/ReadDecorHandleKey.h"
 
 #include <memory>
 
@@ -49,7 +50,12 @@ public:
     StatusCode get_clusters(const xAOD::TauJet &tau,
                             std::vector<xAOD::CaloVertexedTopoCluster> &out) const;
 
+    // Selects hits to be used as input to the network
+    StatusCode get_hits(const xAOD::TauJet &tau,
+                            std::vector<const xAOD::TrackMeasurementValidation*> &out) const;
+
     enum Discriminant {
+        Disabled = -1,
         NegLogPJet = 0,
         PTau = 1
     };
@@ -58,11 +64,15 @@ private:
 
     Gaudi::Property<std::string> m_tauContainerName{this, "TauContainerName", "", "Name of TauJetContainer, must be set when using "};
     SG::WriteDecorHandleKey<xAOD::TauJetContainer> m_scoreHandleKey{this, "ScoreHandleKey","","Output Score"};
+    SG::WriteDecorHandleKey<xAOD::TauJetContainer> m_pTauHandleKey{this, "PTauHandleKey","","Output pTau"};
+    SG::WriteDecorHandleKey<xAOD::TauJetContainer> m_pJetHandleKey{this, "PJetHandleKey","","Output pJet"};
+
+    SG::ReadDecorHandleKey<xAOD::TauJetContainer> m_hitsHandleKey{this, "HitsHandleKey", "", "Hits decoration key"};
    
     std::string m_output_varname;
     std::string m_output_ptau;
     std::string m_output_pjet;
-    unsigned int m_output_discriminant;
+    int m_output_discriminant;
 
     std::string m_weightfile_inclusive;
     std::string m_weightfile_0p;
@@ -74,6 +84,7 @@ private:
     int m_max_tracks;
     int m_max_clusters;
     float m_max_cluster_dr;
+    int m_max_hits;
     float m_minTauPt;
     bool m_applyTrackSel;
     bool m_doVertexCorrection;
@@ -84,6 +95,7 @@ private:
     std::string m_input_layer_scalar;
     std::string m_input_layer_tracks;
     std::string m_input_layer_clusters;
+    std::string m_input_layer_hits;
     std::string m_outnode_tau;
     std::string m_outnode_jet;
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "tauRecTools/TauGNNUtils.h"
@@ -80,6 +80,32 @@ bool GNNVarCalc::compute(const std::string &name, const xAOD::TauJet &tau,
     return success;
 }
 
+bool GNNVarCalc::compute(const std::string &name, const xAOD::TauJet &tau,
+                      const std::vector<const xAOD::TrackMeasurementValidation*> &hits,
+                      std::vector<double> &out) const {
+    out.clear();
+    out.reserve(hits.size());
+
+    // Retrieve calculator function
+    HitCalc func = nullptr;
+    try {
+        func = m_hit_map.at(name);
+    } catch (const std::out_of_range &e) {
+        ATH_MSG_ERROR("Variable '" << name << "' not defined");
+        throw;
+    }
+
+    // Calculate variables for selected clusters
+    bool success = true;
+    double value;
+    for (const xAOD::TrackMeasurementValidation* hit : hits) {
+        success = success && func(tau, *hit, value);
+        out.push_back(value);
+    }
+
+    return success;
+}
+
 void GNNVarCalc::insert(const std::string &name, ScalarCalc func, const std::vector<std::string>& scalar_vars) {
     if (std::find(scalar_vars.begin(), scalar_vars.end(), name) == scalar_vars.end()) {
       return;
@@ -110,12 +136,24 @@ void GNNVarCalc::insert(const std::string &name, ClusterCalc func, const std::ve
     m_cluster_map[name] = func;
 }
 
+void GNNVarCalc::insert(const std::string &name, HitCalc func, const std::vector<std::string>& hit_vars) {
+    if (std::find(hit_vars.begin(), hit_vars.end(), name) == hit_vars.end()) {
+      return;
+    }
+    if (!func) {
+        throw std::invalid_argument("Nullptr passed to GNNVarCalc::insert");
+    }
+    m_hit_map[name] = func;
+}
+
 std::unique_ptr<GNNVarCalc> get_calculator(const std::vector<std::string>& scalar_vars,
 					const std::vector<std::string>& track_vars,
-					const std::vector<std::string>& cluster_vars) {
+					const std::vector<std::string>& cluster_vars,
+					const std::vector<std::string>& hit_vars) {
     auto calc = std::make_unique<GNNVarCalc>();
 
     // Scalar variable calculator functions
+    calc->insert("eta", Variables::eta, scalar_vars);
     calc->insert("absEta", Variables::absEta, scalar_vars);
     calc->insert("isolFrac", Variables::isolFrac, scalar_vars);
     calc->insert("centFrac", Variables::centFrac, scalar_vars);
@@ -134,6 +172,8 @@ std::unique_ptr<GNNVarCalc> get_calculator(const std::vector<std::string>& scala
     calc->insert("pt_tau_log", Variables::pt_tau_log, scalar_vars);
     calc->insert("ptDetectorAxis", Variables::ptDetectorAxis, scalar_vars);
     calc->insert("ptIntermediateAxis", Variables::ptIntermediateAxis, scalar_vars);
+    calc->insert("ptJetSeed", Variables::ptJetSeed, scalar_vars);
+    calc->insert("etaJetSeed", Variables::etaJetSeed, scalar_vars);
     //---added for the eVeto
     calc->insert("ptJetSeed_log",              Variables::ptJetSeed_log, scalar_vars);
     calc->insert("absleadTrackEta",            Variables::absleadTrackEta, scalar_vars);
@@ -224,12 +264,24 @@ std::unique_ptr<GNNVarCalc> get_calculator(const std::vector<std::string>& scala
     calc->insert("FIRST_ENG_DENS", Variables::Cluster::FIRST_ENG_DENS, cluster_vars);
     calc->insert("EM_PROBABILITY", Variables::Cluster::EM_PROBABILITY, cluster_vars);
     calc->insert("CENTER_MAG", Variables::Cluster::CENTER_MAG, cluster_vars);
+
+    // Hit variable calculator functions
+    calc->insert("j", Variables::Hit::j, hit_vars);
+    calc->insert("a", Variables::Hit::a, hit_vars);
+    calc->insert("b", Variables::Hit::b, hit_vars);
+    calc->insert("layer", Variables::Hit::layer, hit_vars);
+
     return calc;
 }
 
 
 namespace Variables {
 using TauDetail = xAOD::TauJetParameters::Detail;
+
+bool eta(const xAOD::TauJet &tau, double &out) {
+    out = tau.eta();
+    return true;
+}
 
 bool absEta(const xAOD::TauJet &tau, double &out) {
     out = std::abs(tau.eta());
@@ -350,10 +402,21 @@ bool ptIntermediateAxis(const xAOD::TauJet &tau, double &out) {
     return true;
 }
 
+bool ptJetSeed(const xAOD::TauJet &tau, double &out) {
+  out = tau.ptJetSeed();
+  return true;
+}
+
 bool ptJetSeed_log(const xAOD::TauJet &tau, double &out) {
   out = std::log10(std::max(tau.ptJetSeed(), 1e-3));
   return true;
 }
+
+bool etaJetSeed(const xAOD::TauJet &tau, double &out) {
+    out = tau.etaJetSeed();
+    return true;
+}
+
 
 bool absleadTrackEta(const xAOD::TauJet &tau, double &out){
   static const SG::AuxElement::ConstAccessor<float> acc_absEtaLeadTrack("ABS_ETA_LEAD_TRACK");
@@ -926,5 +989,54 @@ bool CENTER_MAG(const xAOD::TauJet& /*tau*/, const xAOD::CaloVertexedTopoCluster
 }
 
 } // namespace Cluster
+
+namespace Hit {
+
+bool j(const xAOD::TauJet& tau, const xAOD::TrackMeasurementValidation &hit, double &out) {
+    static const SG::AuxElement::ConstAccessor<std::vector<double>> acc_jabInv("jabInvMatrix");
+    const std::vector<double>& jabInv = acc_jabInv(tau);
+    if(jabInv.size() != 9) return false;
+
+    static const SG::AuxElement::ConstAccessor<float> acc_localX("HitsXRelToVertex");
+    static const SG::AuxElement::ConstAccessor<float> acc_localY("HitsYRelToVertex");
+    static const SG::AuxElement::ConstAccessor<float> acc_localZ("HitsZRelToVertex");
+
+    out = jabInv[0]*acc_localX(hit) + jabInv[1]*acc_localY(hit) + jabInv[2]*acc_localZ(hit);
+    return true;
+}
+
+bool a(const xAOD::TauJet& tau, const xAOD::TrackMeasurementValidation &hit, double &out) {
+    static const SG::AuxElement::ConstAccessor<std::vector<double>> acc_jabInv("jabInvMatrix");
+    const std::vector<double>& jabInv = acc_jabInv(tau);
+    if(jabInv.size() != 9) return false;
+
+    static const SG::AuxElement::ConstAccessor<float> acc_localX("HitsXRelToVertex");
+    static const SG::AuxElement::ConstAccessor<float> acc_localY("HitsYRelToVertex");
+    static const SG::AuxElement::ConstAccessor<float> acc_localZ("HitsZRelToVertex");
+
+    out = jabInv[3]*acc_localX(hit) + jabInv[4]*acc_localY(hit) + jabInv[5]*acc_localZ(hit);
+    return true;
+}
+
+bool b(const xAOD::TauJet& tau, const xAOD::TrackMeasurementValidation &hit, double &out) {
+    static const SG::AuxElement::ConstAccessor<std::vector<double>> acc_jabInv("jabInvMatrix");
+    const std::vector<double>& jabInv = acc_jabInv(tau);
+    if(jabInv.size() != 9) return false;
+
+    static const SG::AuxElement::ConstAccessor<float> acc_localX("HitsXRelToVertex");
+    static const SG::AuxElement::ConstAccessor<float> acc_localY("HitsYRelToVertex");
+    static const SG::AuxElement::ConstAccessor<float> acc_localZ("HitsZRelToVertex");
+
+    out = jabInv[6]*acc_localX(hit) + jabInv[7]*acc_localY(hit) + jabInv[8]*acc_localZ(hit);
+    return true;
+}
+
+bool layer(const xAOD::TauJet& /*tau*/, const xAOD::TrackMeasurementValidation &hit, double &out) {
+    static const SG::AuxElement::ConstAccessor<int> acc_layer("layer");
+    out = acc_layer(hit);
+    return true;
+}
+
+} // namespace Hit
 } // namespace Variables
 } // namespace TauGNNUtils

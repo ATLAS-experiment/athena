@@ -1,9 +1,11 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "tauRecTools/TauGNNEvaluator.h"
 #include "tauRecTools/HelperFunctions.h"
+
+#include "AsgDataHandles/ReadDecorHandle.h"
 
 #include "PathResolver/PathResolver.h"
 
@@ -25,11 +27,12 @@ TauGNNEvaluator::TauGNNEvaluator(const std::string &name):
   declareProperty("OutputPTau", m_output_ptau = "GNTauProbTau");
   declareProperty("OutputPJet", m_output_pjet = "GNTauProbJet");
   declareProperty("OutputDiscriminant", m_output_discriminant = Discriminant::NegLogPJet, 
-    "Discriminant used to calculate the output score: 0 -> -log(PJet), 1 -> PTau");
+    "Discriminant used to calculate the output score: -1 -> None, 0 -> -log(PJet), 1 -> PTau");
 
   declareProperty("MaxTracks", m_max_tracks = 30);
   declareProperty("MaxClusters", m_max_clusters = 20);
   declareProperty("MaxClusterDR", m_max_cluster_dr = 1.0f);
+  declareProperty("MaxHits", m_max_hits = 0);
 
   declareProperty("VertexCorrection", m_doVertexCorrection = true);
   declareProperty("DecorateTracks", m_decorateTracks = false);
@@ -44,6 +47,7 @@ TauGNNEvaluator::TauGNNEvaluator(const std::string &name):
   declareProperty("InputLayerScalar", m_input_layer_scalar = "tau_vars");
   declareProperty("InputLayerTracks", m_input_layer_tracks = "track_vars");
   declareProperty("InputLayerClusters", m_input_layer_clusters = "cluster_vars");
+  declareProperty("InputLayerHits", m_input_layer_hits = "hit_vars");
   declareProperty("NodeNameTau", m_outnode_tau = "GN2TauNoAux_pb");
   declareProperty("NodeNameJet", m_outnode_jet = "GN2TauNoAux_pu");
   }
@@ -51,13 +55,14 @@ TauGNNEvaluator::TauGNNEvaluator(const std::string &name):
 TauGNNEvaluator::~TauGNNEvaluator() {}
 
 StatusCode TauGNNEvaluator::initialize() {
-  ATH_MSG_INFO("Initializing TauGNNEvaluator with "<<m_max_tracks<<" tracks and "<<m_max_clusters<<" clusters...");
+  ATH_MSG_INFO("Initializing TauGNNEvaluator with "<<m_max_tracks<<" tracks, "<<m_max_clusters<<" clusters, and "<<m_max_hits<<" hits...");
 
   // Set the layer and node names in the weight file
   TauGNN::Config config;
   config.input_layer_scalar = m_input_layer_scalar;
   config.input_layer_tracks = m_input_layer_tracks;
   config.input_layer_clusters = m_input_layer_clusters;
+  config.input_layer_hits = m_input_layer_hits;
   config.output_node_tau = m_outnode_tau;
   config.output_node_jet = m_outnode_jet;
 
@@ -98,13 +103,29 @@ StatusCode TauGNNEvaluator::initialize() {
     if(!m_net_3p) return StatusCode::FAILURE;
   }
 
-  if(m_output_discriminant < Discriminant::NegLogPJet || m_output_discriminant > Discriminant::PTau) {
+  if(m_output_discriminant < Discriminant::Disabled || m_output_discriminant > Discriminant::PTau) {
     ATH_MSG_FATAL("Invalid TauGNNEvaluator discriminant setting: " << m_output_discriminant);
   }
 
-  if (!m_tauContainerName.empty()){
+  if (m_output_discriminant != Discriminant::Disabled && !m_tauContainerName.empty()){
     m_scoreHandleKey = m_tauContainerName + "." + m_output_varname;
     ATH_CHECK(m_scoreHandleKey.initialize());    
+  }
+
+  if (!m_tauContainerName.empty()){
+    m_pTauHandleKey = m_tauContainerName + "." + m_output_ptau;
+    ATH_CHECK(m_pTauHandleKey.initialize());
+
+    m_pJetHandleKey = m_tauContainerName + "." + m_output_pjet;
+    ATH_CHECK(m_pJetHandleKey.initialize());
+  }
+
+  if (!m_tauContainerName.empty() && !m_hitsHandleKey.empty()){
+    m_hitsHandleKey = m_tauContainerName + "." + m_hitsHandleKey.key();
+    ATH_CHECK(m_hitsHandleKey.initialize());
+  } else if (m_max_hits > 0) {
+    ATH_MSG_ERROR("TauContainerName and HitsHandleKey must be provided to read hits for GNN evaluation");
+    return StatusCode::FAILURE;
   }
 
   return StatusCode::SUCCESS;
@@ -136,7 +157,7 @@ StatusCode TauGNNEvaluator::execute(xAOD::TauJet &tau) const {
   const SG::AuxElement::Accessor<float> out_pjet(m_output_pjet);
   const SG::AuxElement::Decorator<char> out_trkclass("GNTau_TrackClass");
   // Set default score and overwrite later
-  output(tau) = -1111.0f;
+  if(m_output_discriminant != Discriminant::Disabled) output(tau) = -1111.0f;
   out_ptau(tau) = -1111.0f;
   out_pjet(tau) = -1111.0f;
 
@@ -150,16 +171,25 @@ StatusCode TauGNNEvaluator::execute(xAOD::TauJet &tau) const {
   }
 
   // Get input objects
-  ATH_MSG_DEBUG("Fetching Tracks");
   std::vector<const xAOD::TauTrack *> tracks;
-  ATH_CHECK(get_tracks(tau, tracks));
-  ATH_MSG_DEBUG("Fetching clusters");
   std::vector<xAOD::CaloVertexedTopoCluster> clusters;
-  ATH_CHECK(get_clusters(tau, clusters));
+  std::vector<const xAOD::TrackMeasurementValidation*> hits;
+  if(m_max_tracks) {
+    ATH_MSG_DEBUG("Fetching Tracks");
+    ATH_CHECK(get_tracks(tau, tracks));
+  }
+  if(m_max_clusters) {
+    ATH_MSG_DEBUG("Fetching clusters");
+    ATH_CHECK(get_clusters(tau, clusters));
+  }
+  if(m_max_hits) {
+    ATH_MSG_DEBUG("Fetching hits");
+    ATH_CHECK(get_hits(tau, hits));
+  }
   ATH_MSG_DEBUG("Constituent fetching done...");
 
   // Truncate tracks
-  int numTracksMax = std::min(m_max_tracks, static_cast<int>(tracks.size()));
+  const int numTracksMax = std::min(m_max_tracks, static_cast<int>(tracks.size()));
   std::vector<const xAOD::TauTrack *> trackVec(tracks.begin(), tracks.begin()+numTracksMax);
 
   // Network outputs
@@ -169,7 +199,7 @@ StatusCode TauGNNEvaluator::execute(xAOD::TauJet &tau) const {
 
   // Evaluate networks
   if(m_net_inclusive) {
-    std::tie(out_f, out_vc, out_vf) = m_net_inclusive->compute(tau, trackVec, clusters);
+    std::tie(out_f, out_vc, out_vf) = m_net_inclusive->compute(tau, trackVec, clusters, hits);
   } else {
     // First we calculate the tau prongness
     int n_tracks = tau.nTracksCharged();
@@ -181,12 +211,12 @@ StatusCode TauGNNEvaluator::execute(xAOD::TauJet &tau) const {
     }
     ATH_MSG_DEBUG("Tau prongness: " << n_tracks);
 
-    if(n_tracks == 0 && m_net_0p) std::tie(out_f, out_vc, out_vf) = m_net_0p->compute(tau, trackVec, clusters);
-    else if(n_tracks == 1) std::tie(out_f, out_vc, out_vf) = m_net_1p->compute(tau, trackVec, clusters);
+    if(n_tracks == 0 && m_net_0p) std::tie(out_f, out_vc, out_vf) = m_net_0p->compute(tau, trackVec, clusters, hits);
+    else if(n_tracks == 1) std::tie(out_f, out_vc, out_vf) = m_net_1p->compute(tau, trackVec, clusters, hits);
     else if(n_tracks == 2) {
-      if(m_net_2p) std::tie(out_f, out_vc, out_vf) = m_net_2p->compute(tau, trackVec, clusters);
-      else std::tie(out_f, out_vc, out_vf) = m_net_3p->compute(tau, trackVec, clusters);
-    } else if(n_tracks == 3) std::tie(out_f, out_vc, out_vf) = m_net_3p->compute(tau, trackVec, clusters);
+      if(m_net_2p) std::tie(out_f, out_vc, out_vf) = m_net_2p->compute(tau, trackVec, clusters, hits);
+      else std::tie(out_f, out_vc, out_vf) = m_net_3p->compute(tau, trackVec, clusters, hits);
+    } else if(n_tracks == 3) std::tie(out_f, out_vc, out_vf) = m_net_3p->compute(tau, trackVec, clusters, hits);
   }
 
   // Store scores only if the inferences actually ran
@@ -262,6 +292,28 @@ StatusCode TauGNNEvaluator::get_clusters(const xAOD::TauJet &tau, std::vector<xA
   // Truncate clusters
   if (static_cast<int>(clusters.size()) > m_max_clusters) {
     clusters.resize(m_max_clusters, clusters[0]);
+  }
+
+  return StatusCode::SUCCESS;
+}
+
+StatusCode TauGNNEvaluator::get_hits(const xAOD::TauJet &tau, std::vector<const xAOD::TrackMeasurementValidation*> &hits) const {
+  // Hits are already sorted by proximity if FlavorTagDiscriminants::JetHitAssociationAlg 
+  // was used to attach the hits to the xAOD::TauJet
+  SG::ReadDecorHandle<xAOD::TauJetContainer, std::vector<ElementLink<xAOD::TrackMeasurementValidationContainer>>> hitsHandle(m_hitsHandleKey);
+
+  if(!hitsHandle.isValid()) {
+    ATH_MSG_ERROR("No hits handle found with key " << m_hitsHandleKey.key());
+    return StatusCode::FAILURE;
+  }
+
+  for(const ElementLink<xAOD::TrackMeasurementValidationContainer>& el : hitsHandle(tau)) {
+    if(el.isValid()) hits.push_back(*el);
+  }
+
+  // Truncate hits
+  if (static_cast<int>(hits.size()) > m_max_hits) {
+    hits.resize(m_max_hits, hits[0]);
   }
 
   return StatusCode::SUCCESS;

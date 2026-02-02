@@ -66,7 +66,7 @@ StatusCode tauMonitorAlgorithm::fillHistograms(const EventContext &ctx) const {
   auto tauEt = Monitored::Scalar<float>("tauEt", 0.0);
 
   std::string tauid = "";
-  if(m_TauContainerKey.key().find("TMTauJets") != std::string::npos)
+  if(m_TauContainerKey.key().find("TauMonTauJets") != std::string::npos)
   {
     tauid = "GNTau";
   } else {
