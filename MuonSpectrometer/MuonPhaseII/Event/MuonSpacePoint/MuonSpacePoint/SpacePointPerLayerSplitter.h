@@ -1,10 +1,12 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef MUONR4_MUONSPACEPOINT_SPACEPOINTPERLAYERSPLITTER_H
 #define MUONR4_MUONSPACEPOINT_SPACEPOINTPERLAYERSPLITTER_H
 
 #include <MuonSpacePoint/SpacePointContainer.h>
+
+#include "Acts/Seeding/CompositeSpacePointLineSeeder.hpp"
 
 namespace MuonR4{
     /** @brief The SpacePointPerLayerSplitter takes a set of spacepoints already sorted 
@@ -25,8 +27,12 @@ namespace MuonR4{
             const HitLayVec& mdtHits() const {
               return m_mdtLayers;
             }
+            /** @brief Returns the sorted Mdt hits */
+            const HitLayVec& strawHits() const {
+              return m_mdtLayers;
+            }
             /** @brief Returns the number of all Mdt hits in the seed */
-            unsigned int nMdtHits() const {
+            std::size_t nMdtHits() const {
               return m_nMdtHits;
             }
             /** @brief Returns the sorted strip hits */
@@ -34,11 +40,11 @@ namespace MuonR4{
               return m_stripLayers;
             }
             /** @brief Returns the number of all strip hits in the seed */
-            unsigned int nStripHits() const {
+            std::size_t nStripHits() const {
               return m_nStripHits;
             }
             /** @brief Returns the layer index with hits from the second multilayer  */
-            unsigned int firstLayerFrom2ndMl() const {
+            std::size_t firstLayerFrom2ndMl() const {
               return m_tubeLaySwitch;
             }
         private:
@@ -47,14 +53,15 @@ namespace MuonR4{
             /** @brief Sorted Strip hits per  gasGap strip  */
             HitLayVec m_stripLayers{};
             /** @brief Number of all Mdt tube hits  */
-            unsigned int m_nMdtHits{0};
+            std::size_t m_nMdtHits{0};
             /** @brief Number of all strip hits */
-            unsigned int m_nStripHits{0};
+            std::size_t m_nStripHits{0};
             /** @brief Index of the first tube-layer from the second multilayer */
-            unsigned int m_tubeLaySwitch{0};
+            std::size_t m_tubeLaySwitch{std::numeric_limits<std::size_t>::max()};
     
-    };    
-
+    };
+    static_assert(Acts::Experimental::detail::CompositeSpacePointSorter<SpacePointPerLayerSplitter,
+                                                                        SpacePointPerLayerSplitter::HitVec>);
 }
 
 
