@@ -17,6 +17,7 @@ parser.add_argument("--simulate", default=True, action="store_true",
                     help="Run Simulation")
 parser.add_argument("--localgeo", default=False, action="store_true",
                     help="Use local geometry Xml files")
+parser.add_argument("--geoModelSqLiteFile", default = "", help="Read geometry from sqlite file")
 parser.add_argument("-V", "--verboseAccumulators", default=False,
                     action="store_true",
                     help="Print full details of the AlgSequence")
@@ -43,6 +44,8 @@ print()
 print("Using Geometry Tag: "+args.geometrytag)
 if args.localgeo:
     print("...overridden by local Geometry Xml files")
+if(args.geoModelSqLiteFile):
+   print("... overridden by Geometry Sqlite file: "+args.geoModelSqLiteFile)
 print("Input EVNT File:"+args.inputevntfile)
 if not args.detectors:
     print("Running complete detector")
@@ -62,24 +65,37 @@ flags.GeoModel.AtlasVersion = args.geometrytag
 flags.IOVDb.GlobalTag = "OFLCOND-SIM-00-00-00"
 flags.GeoModel.Align.Dynamic = False
 
+from AthenaConfiguration.DetectorConfigFlags import getEnabledDetectors ,setupDetectorFlags
+from AthenaConfiguration.AutoConfigFlags import getDefaultDetectors
+
+
+if args.geoModelSqLiteFile:
+     flags.GeoModel.SQLiteDB = True
+     flags.GeoModel.SQLiteDBFullPath = args.geoModelSqLiteFile
+     # hack to set Run4 for running on muon dead material geometry
+     from AthenaConfiguration.Enums import LHCPeriod
+     flags.GeoModel.Run = LHCPeriod.Run4
+else:
+    defaultDetectors = ['ITkPixel', 'ITkStrip']
+    detectors = args.detectors if 'detectors' in args and args.detectors else defaultDetectors
+    detectors.append('Bpipe')  # always run with beam pipe
+    setupDetectorFlags(flags, detectors, toggle_geometry=True)
+
 flags.Acts.TrackingGeometry.UseBlueprint = True
 
 flags.Exec.SkipEvents = args.skipEvents
 
-from AthenaConfiguration.DetectorConfigFlags import setupDetectorFlags
-detectors = args.detectors if 'detectors' in args and args.detectors else ['ITkPixel', 'ITkStrip', 'HGTD']
-detectors.append('Bpipe')  # always run with beam pipe
-setupDetectorFlags(flags, detectors, toggle_geometry=True)
+
 
 log.debug('Lock config flags now.')
 flags.lock()
+print (" ***\n".join(getEnabledDetectors(flags)))
+
+print(flags.dump(evaluate=True))
 
 # Construct our accumulator to run
 acc = MainServicesCfg(flags)
 
-### setup dumping of additional information
-if args.verboseAccumulators:
-  acc.printConfig(withDetails=True)
 if args.verboseStoreGate:
   acc.getService("StoreGateSvc").Dump = True
 
