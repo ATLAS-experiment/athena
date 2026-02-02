@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // AFP_ByteStream2RawCnv includes
@@ -120,9 +120,7 @@ StatusCode AFP_ByteStream2RawCnv::fillCollection(const OFFLINE_FRAGMENTS_NAMESPA
   AFP_SiRawCollection *collectionSi = nullptr;
   AFP_ToFRawCollection *collectionToF = nullptr;
 
-  std::vector<std::vector<uint16_t>> picoTDC1_channels, picoTDC2_channels;
-  std::vector<bool> picoTDC_hasTrigger;
-  std::vector<int> ToF_links;
+  std::array<uint32_t, 16> picoTDC_data = {};
 
   const uint32_t size = robFrag->rod_ndata();
   for (unsigned i = 0; i < size; i++) {
@@ -136,12 +134,6 @@ StatusCode AFP_ByteStream2RawCnv::fillCollection(const OFFLINE_FRAGMENTS_NAMESPA
         collectionToF = getCollectionToF(//m_wordReadout->link(), robFrag->rob_source_id(), 
                                            rawContainer);
         collectionHead = collectionToF;
-        
-        std::vector<uint16_t> helper;
-        picoTDC1_channels.push_back(helper);
-        picoTDC2_channels.push_back(helper);
-        picoTDC_hasTrigger.push_back(false);
-        ToF_links.push_back(the_link);
       }
       else if ( isLinkSi (the_link) ) {
         // prepare collection for silicon detector
@@ -190,7 +182,7 @@ StatusCode AFP_ByteStream2RawCnv::fillCollection(const OFFLINE_FRAGMENTS_NAMESPA
             ToFData.setEdge( m_wordReadout->getBits(the_word, 20, 20) );
             ToFData.setChannel( m_wordReadout->getBits(the_word, 19, 16) );
             ToFData.setPulseLength( m_wordReadout->getBits(the_word, 15, 10) );
-            ToFData.setTime( m_wordReadout->getBits(the_word, 9, 0) );
+            ToFData.setTime( m_wordReadout->getBits(the_word, 9, 0) << 3 );
 
             setDataHeader (the_word, &ToFData);
           }
@@ -201,87 +193,69 @@ StatusCode AFP_ByteStream2RawCnv::fillCollection(const OFFLINE_FRAGMENTS_NAMESPA
         }
         else
         {
-          // picoTDC
-          
-          uint32_t bits19_22=m_wordReadout->getBits(the_word, 22, 19);
-            
-          if(bits19_22==0 || bits19_22==1)
-          {
-            // picoTDC #1 (==0) or picoTDC #2 (==1)
-            uint16_t channel=m_wordReadout->getBits(the_word, 18, 13);
-              
-            // find entry with the same channel number
-            auto ToFData_itr=std::find_if( collectionToF->begin(), collectionToF->end(),
-                                           [&](const AFP_ToFRawData& entry){return entry.channel()==channel;});
+          uint32_t bits23_22=m_wordReadout->getBits(the_word, 23, 22);
+          if (bits23_22==0b10) {
+            // picoTDC
 
-            if(ToFData_itr==collectionToF->end())
-            {
-              // create a new entry if such channel number doesn't exist
-              auto& ToFData = collectionToF->newDataRecord();
-                  
-              ToFData.setHeader( bit23 );
-              ToFData.setEdge( 0 );
-              ToFData.setChannel( m_wordReadout->getBits(the_word, 18, 13) );
-              ToFData.setPulseLength( 0 );
-              ToFData.setTime( 0 );
-              setDataHeader (the_word, &ToFData);
-              
-              ToFData_itr = std::prev(collectionToF->end());
+            uint32_t bits21_20=m_wordReadout->getBits(the_word, 21, 20);
+            if (bits21_20==0b10) {
+              // ToF measurement
+              uint32_t channel=m_wordReadout->getBits(the_word, 17, 14);
+              uint32_t bit18=m_wordReadout->getBits(the_word, 18, 18);
+              if (bit18==0) {
+                // Fine 
+                if (picoTDC_data[channel] == 0) {
+                  picoTDC_data[channel] = the_word;
+                } else {
+                  if (m_wordReadout->getBits(picoTDC_data[channel], 18, 18) == 1) {
+                    uint32_t fine_word = the_word;
+                    uint32_t coarse_word = picoTDC_data[channel];
+
+                    AFP_ToFRawData& ToFData = collectionToF->newDataRecord();
+                    ToFData.setHeader( m_wordReadout->getBits(the_word, 23, 20) );
+                    ToFData.setEdge( m_wordReadout->getBits(fine_word, 13, 13) );
+                    ToFData.setChannel( channel );
+                    ToFData.setPulseLength( m_wordReadout->getBits(coarse_word, 7, 0) );
+                    ToFData.setTime( (m_wordReadout->getBits(coarse_word, 13, 8) << 13) | m_wordReadout->getBits(fine_word, 12, 0) );
+
+                    setDataHeader (the_word, &ToFData);
+
+                    picoTDC_data[channel] = 0;
+                  } else {
+                    ATH_MSG_WARNING("Fine time word for channel "<<channel<<" is already set to "<<picoTDC_data[channel]<<", cannot set it to "<<the_word<<", will not overwrite");
+                  }
+                }
+              } else {
+                // Coarse time + pulse length
+                if (picoTDC_data[channel] == 0) {
+                  picoTDC_data[channel] = the_word;
+                } else {
+                  if (m_wordReadout->getBits(picoTDC_data[channel], 18, 18) == 0) {
+                    uint32_t fine_word = picoTDC_data[channel];
+                    uint32_t coarse_word = the_word;
+
+                    AFP_ToFRawData& ToFData = collectionToF->newDataRecord();
+                    ToFData.setHeader( m_wordReadout->getBits(the_word, 23, 20) );
+                    ToFData.setEdge( m_wordReadout->getBits(fine_word, 13, 13) );
+                    ToFData.setChannel( channel );
+                    ToFData.setPulseLength( m_wordReadout->getBits(coarse_word, 7, 0) );
+                    ToFData.setTime( (m_wordReadout->getBits(coarse_word, 13, 8) << 13) | m_wordReadout->getBits(fine_word, 12, 0) );
+
+                    setDataHeader (the_word, &ToFData);
+
+                    picoTDC_data[channel] = 0;
+                  } else {
+                    ATH_MSG_WARNING("Coarse time word for channel "<<channel<<" is already set to "<<picoTDC_data[channel]<<", cannot set it to "<<the_word<<", will not overwrite");
+                  }
+                }
+              }
             }
-              
-            if(!bits19_22)
-            {
-              // picoTDC #1
-              if(ToFData_itr->time() !=0 )
-              {
-                ATH_MSG_WARNING("trying to set time to "<<m_wordReadout->getBits(the_word, 12, 0)<<", but it is already set to = "<<ToFData_itr->time()<<", will not overwrite");
-              }
-              else
-              {
-                ToFData_itr->setTime( m_wordReadout->getBits(the_word, 12, 0) );
-                picoTDC1_channels.back().push_back(channel);
-              }
-            }
-            else
-            {
-              // picoTDC #2
-              if(ToFData_itr->pulseLength() !=0 )
-              {
-                ATH_MSG_WARNING("trying to set pulseLength to "<<m_wordReadout->getBits(the_word, 12, 0)<<", but it is already set to = "<<ToFData_itr->pulseLength()<<", will not overwrite");
-              }
-              else
-              {
-                ToFData_itr->setPulseLength( m_wordReadout->getBits(the_word, 12, 0) );
-                picoTDC2_channels.back().push_back(channel);
-              }
+            else {
+              ATH_MSG_DEBUG("This is not a ToF measurement, bits23_22 = "<<bits23_22<<", bits21_20 "<<bits21_20<<", ignoring word = "<<the_word);
             }
           }
-          else if(bits19_22==4)
-          {              
-            // check if there's already some other trigger word
-            auto ToFData_itr=std::find_if( collectionToF->begin(), collectionToF->end(),
-                                           [&](const AFP_ToFRawData& e){return e.isTrigger();});
-            if(ToFData_itr!=collectionToF->end())
-            {
-              // there shouldn't be any other trigger word
-              ATH_MSG_WARNING("already found a trigger word with delayedTrigger = "<<ToFData_itr->delayedTrigger()<<" and triggerPattern = "<<ToFData_itr->triggerPattern()<<", will ignore new word with delayedTrigger = "<<m_wordReadout->getBits(the_word, 18,16)<<" and triggerPattern = "<<m_wordReadout->getBits(the_word, 15, 0));
-            }
-            else
-            {
-              // if there isn't any other trigger word, create a new entry
-              auto& ToFData = collectionToF->newDataRecord();
-            
-              ToFData.setHeader( bit23 );
-              ToFData.setEdge( 0 );
-              ToFData.setTrigger(); // mark this entry as a trigger entry; must be done before setting delayedTrigger or triggerPattern
-              ToFData.setDelayedTrigger( m_wordReadout->getBits(the_word, 18,16) );
-              ToFData.setTriggerPattern( m_wordReadout->getBits(the_word, 15, 0) );
-              picoTDC_hasTrigger.back()=true;
-            }
-          }
-          else
-          {
-            ATH_MSG_WARNING("unknown pattern in bits 19-22 = "<<bits19_22<<", ignoring word = "<<the_word);
+          else {
+            ATH_MSG_WARNING("Unexpected pattern in bits 22-23 = "<<bits23_22<<", ignoring word = "<<the_word);
           }
         }
       }
@@ -323,29 +297,14 @@ StatusCode AFP_ByteStream2RawCnv::fillCollection(const OFFLINE_FRAGMENTS_NAMESPA
   } // end of loop
   
   // in case of picoTDC, check we always have both words
-  for(unsigned int i=0;i<picoTDC1_channels.size();++i)
-  {
-    if(!picoTDC1_channels.at(i).empty() || !picoTDC2_channels.at(i).empty())
-    {
-      for(auto ch1 : picoTDC1_channels.at(i))
-      {
-        if(std::find(picoTDC2_channels.at(i).begin(),picoTDC2_channels.at(i).end(),ch1) == picoTDC2_channels.at(i).end())
-        {
-          ATH_MSG_WARNING("Cannot find channel "<<ch1<<" from picoTDC #1 in picoTDC #2 in ToF collections with link nr. "<<ToF_links.at(i)<<", pulseLength is very probably not set");
-        }
+  for (std::size_t channel=0;channel<picoTDC_data.size();++channel) {
+    uint32_t word = picoTDC_data[channel];
+    if (word != 0) {
+      if (m_wordReadout->getBits(word, 18, 18) == 0) {
+        ATH_MSG_WARNING("Incomplete picoTDC data for channel "<<channel<<", fine word "<<word<<" could not be paired");
+      } else {
+        ATH_MSG_WARNING("Incomplete picoTDC data for channel "<<channel<<", coarse word "<<word<<" could not be paired");
       }
-      for(auto ch2 : picoTDC2_channels.at(i))
-      {
-        if(std::find(picoTDC1_channels.at(i).begin(),picoTDC1_channels.at(i).end(),ch2) == picoTDC1_channels.at(i).end())
-        {
-          ATH_MSG_WARNING("Cannot find channel "<<ch2<<" from picoTDC #2 in picoTDC #1 in ToF collections with link nr. "<<ToF_links.at(i)<<", time is very probably not set");
-        }
-      }
-      
-      if(!picoTDC_hasTrigger.at(i))
-	  {
-	    ATH_MSG_WARNING("Cannot find trigger word in ToF collections with link nr. "<<ToF_links.at(i));
-	  }
     }
   }
   
