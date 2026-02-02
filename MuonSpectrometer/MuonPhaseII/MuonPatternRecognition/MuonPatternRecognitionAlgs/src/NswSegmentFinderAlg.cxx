@@ -375,6 +375,14 @@ std::unique_ptr<Segment> NswSegmentFinderAlg::fitSegmentSeed(const EventContext&
     }
 
     ATH_MSG_VERBOSE("Fit the SegmentSeed");
+    if (msgLvl(MSG::VERBOSE)) {          
+        std::stringstream hitStream{};
+        for (const auto& hit : patternSeed->getHitsInMax()) {
+            hitStream<<"**** "<< (*hit)<<std::endl;
+        }
+        ATH_MSG_VERBOSE(__func__<<"() - "<<__LINE__ <<": Uncalibrated space points for the segment fit: "<<std::endl
+                <<hitStream.str());
+    }
 
     //Calibration of the seed spacepoints
     CalibSpacePointVec calibratedHits = m_calibTool->calibrate(ctx, patternSeed->getHitsInMax(), 
@@ -502,15 +510,17 @@ NswSegmentFinderAlg::buildSegmentsFromSTGC(const EventContext& ctx,
                     auto extendedHits = extendHits(seedPosZ0, seedDir, extensionLayers, usedExtensionHits);
                     std::ranges::move(extendedHits, std::back_inserter(seedHits));
 
-                    if(seedHits.size() < minLayers){
-                        continue;                    
-                    }
-
                     //make seed 
                     auto seed = std::make_unique<SegmentSeed>(houghTanBeta(seedDir), seedPosZ0.y(),
                                                          houghTanAlpha(seedDir), seedPosZ0.x(),
                                                          seedHits.size(), std::move(seedHits),
                                                          max.parentBucket());
+            
+                    //skip segment fit with less than 5 hits    
+                    if(seed->getHitsInMax().size() < m_minSeedHits){
+                        seeds.push_back(std::move(seed));
+                        continue;
+                    }
                     //fit the segment seed
                     std::unique_ptr<Segment> segment = fitSegmentSeed(ctx, gctx, seed.get());  
                     processSegment(std::move(segment), seed->getHitsInMax(), hitLayers, usedHits, segments);
@@ -622,7 +632,11 @@ NswSegmentFinderAlg::buildSegmentsFromMM(const EventContext& ctx,
                     // start by 4 hits for the seed and try to build the extended seed for the combinatorics found
                     for (auto &combinatoricHits : preLimSeeds) {
                         auto seed = constructCombinatorialSeed(combinatoricHits, bMatrix, max, extensionLayers, usedExtensionHits);
-                        if (!seed) {                            
+                        if(!seed){
+                            continue;
+                        }
+                        if (seed->getHitsInMax().size() < m_minSeedHits) { 
+                            seeds.push_back(std::move(seed));                           
                             continue;
                         }
                                              

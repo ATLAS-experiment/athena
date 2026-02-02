@@ -225,7 +225,12 @@ StatusCode Muon::sTgcRdoToPrepDataToolMT::processCollection(const EventContext& 
             if (!m_xAODPadKey.empty() && chType == sTgcIdHelper::sTgcChannelTypes::Pad) {              
                 xAOD::MeasMatrix<2> lCov{xAOD::MeasMatrix<2>::Identity()};
                 lCov(1,1) = prd->localCovariance()(0,0);
-                /// Currently there's no 2D covariance yet
+                /// Calculate the eta covariance from the geometry for now for 
+                if(m_detMgrR4){
+                    const MuonGMR4::sTgcReadoutElement* readoutEle =  m_detMgrR4->getsTgcReadoutElement(prdId);
+                    lCov(0,0) = Acts::square(0.5* readoutEle->padHeight(readoutEle->measurementHash(prdId)));
+
+                }                
                 // lCov(1,1) = prd->localCovariance()(1,1); 
                 //skip for now measurements with zero covariance
                 if (lCov.determinant() == 0) {

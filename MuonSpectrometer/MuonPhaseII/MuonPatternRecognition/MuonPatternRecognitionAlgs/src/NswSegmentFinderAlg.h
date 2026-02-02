@@ -283,7 +283,7 @@ class NswSegmentFinderAlg : public AthReentrantAlgorithm {
         DoubleProperty m_minPullThreshold{this, "maxPull", 5.};
         
         //minimum number of hits required to form a seed after extension
-        UnsignedIntegerProperty m_minSeedHits{this, "minSeedHits", 4};
+        UnsignedIntegerProperty m_minSeedHits{this, "minSeedHits", 5};
 
         //maximum number of MM Clusters that are invalid in the seed
         UnsignedIntegerProperty m_maxInvalidClusters{this, "maxInvalidClusters", 4};
