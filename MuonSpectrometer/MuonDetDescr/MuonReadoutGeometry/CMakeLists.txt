@@ -7,12 +7,6 @@
 # Declare the package name:
 atlas_subdir( MuonReadoutGeometry )
 
-# Extra dependencies, based on the environment (no MuonCondSvc needed in AthSimulation):
-set( extra_libs )
-if( NOT SIMULATIONBASE )
-  set( extra_libs MuonCondSvcLib )
-endif()
-
 # External dependencies:
 find_package( GeoModel COMPONENTS GeoModelKernel )
 
@@ -22,7 +16,7 @@ atlas_add_library( MuonReadoutGeometry
                    PUBLIC_HEADERS MuonReadoutGeometry
                    INCLUDE_DIRS ${GEOMODEL_INCLUDE_DIRS}
                    LINK_LIBRARIES ${GEOMODEL_LIBRARIES} AthenaBaseComps AthenaKernel GeoPrimitives Identifier GaudiKernel 
-                   MuonAlignmentData TrkDetElementBase TrkSurfaces MuonIdHelpersLib StoreGateLib GeoModelUtilities CxxUtils ${extra_libs}
+                   MuonAlignmentData TrkDetElementBase TrkSurfaces MuonIdHelpersLib StoreGateLib GeoModelUtilities CxxUtils 
                    PRIVATE_LINK_LIBRARIES AGDDModel MuonAGDDDescription)
 
 
