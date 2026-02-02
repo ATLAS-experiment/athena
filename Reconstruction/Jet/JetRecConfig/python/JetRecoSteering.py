@@ -1,5 +1,6 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
+from AthenaConfiguration.Enums import BeamType
 from JetRecConfig.StandardSmallRJets import AntiKt4EMPFlow, AntiKt4LCTopo, AntiKt4EMTopo, AntiKt4Truth
 from JetRecConfig.StandardLargeRJets import AntiKt10LCTopo_noVR, AntiKt10UFOCSSKSoftDrop_trigger
 from JetRecConfig.JetRecConfig import JetRecCfg
@@ -82,6 +83,14 @@ def JetRecoSteeringCfg(flags):
     if flags.Output.doWriteESD:
         jetdefs.remove(AntiKt10UFOCSSKSoftDrop_trigger)
         result.merge(addJetsToOutputCfg(flags, jetdefs, toAOD=False, toESD=True))
+
+    # Schedule specific EventShape to use newer jet calibrations when running DQ in RAWtoALL
+    if flags.Beam.Type is not BeamType.Cosmics:
+        from JetRecConfig.JetRecConfig import getConstitPJGAlg
+        from JetRecConfig.StandardJetConstits import stdConstitDic as cst
+        from JetRecConfig.JetInputConfig import buildEventShapeAlg
+        result.addEventAlgo(getConstitPJGAlg(cst.GPFlow, suffix='Neut'))
+        result.addEventAlgo(buildEventShapeAlg(cst.GPFlow, '', suffix = 'Neut' ))
 
     return result
 
