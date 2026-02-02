@@ -56,7 +56,8 @@ void FPGATrackSimSlicingEngineTool::readLayerMap() {
 // second stage pixels and strips will probably be split.
 void FPGATrackSimSlicingEngineTool::sliceHits(const std::vector<std::shared_ptr<const FPGATrackSimHit>>& hits,
                    std::vector<std::shared_ptr<const FPGATrackSimHit>>& firstHits,
-                   std::vector<std::shared_ptr<const FPGATrackSimHit>>& secondHits) {
+                   std::vector<std::shared_ptr<const FPGATrackSimHit>>& secondHits,
+                   std::vector<const FPGATrackSimHit*>& stripHits) {
 
     const FPGATrackSimRegionMap* rmap_1st = m_FPGATrackSimMapping->SubRegionMap();
     const FPGATrackSimRegionMap* rmap_2nd = m_FPGATrackSimMapping->SubRegionMap_2nd();
@@ -98,6 +99,8 @@ void FPGATrackSimSlicingEngineTool::sliceHits(const std::vector<std::shared_ptr<
         } else {
             // Strip hits need to be post-processed in LogicalHitsProcessAlg, so we only put them in a header here.
             // Unfortunately this has to happen no matter what.
+            // Also populate stripHits vector with pointers to strip hits from the input collection
+            stripHits.push_back(hit.get());
             m_slicedStripHeader->getTower(0)->addHit(*hit);
         }
     }

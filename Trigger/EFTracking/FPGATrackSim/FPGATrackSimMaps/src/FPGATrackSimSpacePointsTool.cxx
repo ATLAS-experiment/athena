@@ -150,6 +150,11 @@ StatusCode FPGATrackSimSpacePointsTool::makeSpacePoints(FPGATrackSimTowerInputHe
                 if (m_filter) m_filteredhits++;
                 else {
                     tower.addHit(hit_in); // add unpaired hit_in
+                    // Also add unpaired hit as single-hit cluster for downstream propagation
+                    FPGATrackSimCluster unpairedCluster;
+                    unpairedCluster.setClusterEquiv(hit_in);
+                    unpairedCluster.push_backHitList(hit_in);
+                    spacepoints.push_back(std::move(unpairedCluster));
                     ATH_MSG_DEBUG("Unpaired hit z = " << hit_in.getZ() << ", r = " << hit_in.getR() << ", phi = " << hit_in.getGPhi() << ", phi module = " << hit_in.getPhiModule() << ", eta module = " << hit_in.getEtaModule());
                 }
             }
@@ -220,6 +225,11 @@ StatusCode FPGATrackSimSpacePointsTool::makeSpacePoints(FPGATrackSimTowerInputHe
                 if (m_filter) m_filteredhits++;
                 else {
                     tower.addHit(hit_out);
+                    // Also add unpaired hit as single-hit cluster for downstream propagation
+                    FPGATrackSimCluster unpairedCluster;
+                    unpairedCluster.setClusterEquiv(hit_out);
+                    unpairedCluster.push_backHitList(hit_out);
+                    spacepoints.push_back(std::move(unpairedCluster));
                     ATH_MSG_DEBUG("Unpaired hit z = " << hit_out.getZ() << ", r = " << hit_out.getR() << ", phi = " << hit_out.getGPhi() << ", phi module = " << hit_out.getPhiModule() << ", eta module = " << hit_out.getEtaModule());
                 }
             }
@@ -315,8 +325,8 @@ void FPGATrackSimSpacePointsTool::addSpacePoints(FPGATrackSimHit hit_in, FPGATra
     FPGATrackSimCluster sp;
     sp.setClusterEquiv(hit_in);
     sp.push_backHitList(hit_in);
-    sp.push_backHitList(hit_out);
-    spacepoints.push_back(sp);
+    if (m_duplicate) sp.push_backHitList(hit_out);
+    spacepoints.push_back(std::move(sp));
 
 }
 
