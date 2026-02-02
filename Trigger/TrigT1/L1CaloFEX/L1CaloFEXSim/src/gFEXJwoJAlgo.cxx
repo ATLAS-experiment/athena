@@ -28,6 +28,8 @@ gFEXJwoJAlgo::gFEXJwoJAlgo(const std::string& type, const std::string& name, con
 
 StatusCode gFEXJwoJAlgo::initialize(){
 
+  ATH_CHECK(m_DBToolKey.initialize());
+
   return StatusCode::SUCCESS;
 
 }
@@ -55,7 +57,15 @@ std::vector<std::unique_ptr<gFEXJwoJTOB>> gFEXJwoJAlgo::jwojAlgo(const gTowersTy
                                                                  std::array<uint32_t, 4> & outTOB) const {
 
 
-  // input towers have 200 MeV LSB
+  SG::ReadCondHandle<gFEXDBCondData> myDBTool = SG::ReadCondHandle<gFEXDBCondData>(m_DBToolKey);
+  if (!myDBTool.isValid()) {
+      ATH_MSG_ERROR("Could not retrieve DB tool " << m_DBToolKey);
+      throw std::runtime_error("Could not retrieve DB tool");
+  }
+
+  std::string fwVersion = myDBTool->get_FWVersion();
+  int major = std::stoi(fwVersion);
+  bool SumETfast = (major >= 1);
 
   // find gBlocks
   gTowersType AgBlk;

@@ -17,6 +17,7 @@
 #include "L1CaloFEXSim/gFEXJwoJTOB.h"
 #include "L1CaloFEXSim/gTowerContainer.h"
 #include "L1CaloFEXSim/FEXAlgoSpaceDefs.h"
+#include "L1CaloFEXCond/gFEXDBCondData.h"
 
 
 
@@ -43,6 +44,7 @@ namespace LVL1 {
 
 
   private:
+    SG::ReadCondHandleKey<gFEXDBCondData> m_DBToolKey{this, "DBToolKey", "gFEXDBParams", "Database tool key"};
 
     float m_aFPGA_A{};
     float m_bFPGA_A{};
@@ -53,6 +55,7 @@ namespace LVL1 {
     float m_gBlockthresholdA{};
     float m_gBlockthresholdB{};
     float m_gBlockthresholdC{};
+    std::string m_fwVersion;
  
 
     void gBlockAB(const gTowersType & twrs, gTowersType & gBlkSum, gTowersType & hasSeed, int seedThreshold) const;
