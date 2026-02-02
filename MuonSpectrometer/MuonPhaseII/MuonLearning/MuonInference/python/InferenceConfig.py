@@ -26,7 +26,8 @@ def GraphBucketFilterToolCfg(flags, name ="GraphBucketFilterTool", **kwargs):
     from AthOnnxComps.OnnxRuntimeSessionConfig import OnnxRuntimeSessionToolCfg
 
     result = ComponentAccumulator()
-    kwargs.setdefault("ModelSession", result.popToolsAndMerge(OnnxRuntimeSessionToolCfg(flags, model_fname="MuonInference/edgecnn_multi_bucket_sparse_meta.onnx")))
+    ### File will be moved to calibration area once the model is finalized
+    kwargs.setdefault("ModelSession", result.popToolsAndMerge(OnnxRuntimeSessionToolCfg(flags, model_fname="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonRecRTT/edgecnn_multi_bucket_sparse_meta.onnx")))
     kwargs.setdefault("BiasClass0", 1.0) # Working point selection bias for multi-class comparison
     kwargs.setdefault("OutputLevel", 3)  # DEBUG level (1=VERBOSE, 2=DEBUG, 3=INFO, 4=WARNING, 5=ERROR, 6=FATAL)
 
