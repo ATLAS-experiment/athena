@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( L1TopoAlgorithms )
@@ -9,6 +9,8 @@ find_package( nlohmann_json )
 
 # Build ADVAE2A as part of the package.
 include( "cmake/advae2a-build.cmake" )
+# Build ARTEMIS2A as part of the package.
+include( "cmake/artemis2a-build.cmake" )
 
 # Make sure that the executable of the package gets linked against all of its
 # dependencies:
@@ -23,10 +25,10 @@ endif()
 atlas_add_library( L1TopoAlgorithms
    L1TopoAlgorithms/*.h Root/*.cxx
    PUBLIC_HEADERS L1TopoAlgorithms
-   PRIVATE_INCLUDE_DIRS ${ADVAE2A_INCLUDE_DIRS}
+   PRIVATE_INCLUDE_DIRS ${ADVAE2A_INCLUDE_DIRS} ${ARTEMIS2A_INCLUDE_DIRS}
    LINK_LIBRARIES L1TopoEvent L1TopoInterfaces TrigConfBase TrigConfIO TrigConfData nlohmann_json::nlohmann_json ${extra_libs}
-   PRIVATE_LINK_LIBRARIES ${ROOT_LIBRARIES} ${ADVAE2A_LIBRARIES} L1TopoCommon L1TopoSimulationUtils)
-add_dependencies( L1TopoAlgorithms ADVAE2A )
+   PRIVATE_LINK_LIBRARIES ${ROOT_LIBRARIES} ${ADVAE2A_LIBRARIES} ${ARTEMIS2A_LIBRARIES} L1TopoCommon L1TopoSimulationUtils)
+add_dependencies( L1TopoAlgorithms ADVAE2A ARTEMIS2A )
 
 atlas_add_executable( TrigConfL1TopoGenPyAlg
    src/test/L1TopoGenPyAlg.cxx
