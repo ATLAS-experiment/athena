@@ -12,6 +12,9 @@
 
 namespace LVL1 {
 
+const std::string& gFEXDBCondData::get_FWVersion() const{
+    return m_FWVersion;
+}
 const std::array<int,12>& gFEXDBCondData::get_Aslopes() const{
     return m_Aslopes;
 }
@@ -32,7 +35,9 @@ const std::array<int,12>& gFEXDBCondData::get_CnoiseCuts() const{
     return m_CnoiseCuts;
 }
 
-
+void gFEXDBCondData::set_FWVersion(const std::string& fwVersion){
+    m_FWVersion = fwVersion;
+}
 void gFEXDBCondData::set_Aslopes(const std::array<int,12>& params) {
     m_Aslopes = params;
 }
